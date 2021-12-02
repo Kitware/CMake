@@ -16,11 +16,12 @@ static void cmVS10EscapeForMSBuild(std::string& ret)
 
 cmVisualStudioGeneratorOptions::cmVisualStudioGeneratorOptions(
   cmLocalVisualStudioGenerator* lg, Tool tool, cmVS7FlagTable const* table,
-  cmVS7FlagTable const* extraTable)
+  cmVS7FlagTable const* extraTable, bool buildAsX)
   : cmIDEOptions()
   , LocalGenerator(lg)
   , Version(lg->GetVersion())
   , CurrentTool(tool)
+  , BuildAsX(buildAsX)
 {
   // Store the given flag tables.
   this->AddTable(table);
@@ -381,7 +382,10 @@ void cmVisualStudioGeneratorOptions::StoreUnknownFlag(std::string const& flag)
     flag.c_str(),
     cmOutputConverter::Shell_Flag_AllowMakeVariables |
       cmOutputConverter::Shell_Flag_VSIDE);
-  this->AppendFlagString(this->UnknownFlagField, opts);
+  if (!(this->BuildAsX &&
+        opts.find("machine:") != std::string::npos)) {
+    this->AppendFlagString(this->UnknownFlagField, opts);
+  }
 }
 
 cmIDEOptions::FlagValue cmVisualStudioGeneratorOptions::TakeFlag(
@@ -408,11 +412,13 @@ const std::string& cmVisualStudioGeneratorOptions::GetConfiguration() const
 }
 
 void cmVisualStudioGeneratorOptions::OutputPreprocessorDefinitions(
-  std::ostream& fout, int indent, const std::string& lang)
+  std::ostream& fout, int indent, const std::string& lang, std::string const& platform)
 {
   if (this->Defines.empty()) {
     return;
   }
+  std::vector<std::string> arm64ecDefines = { "_AMD64_", "AMD64", "_ARM64EC_",
+                                              "ARM64EC" };
   std::string tag = "PreprocessorDefinitions";
   if (lang == "CUDA") {
     tag = "Defines";
@@ -439,8 +445,11 @@ void cmVisualStudioGeneratorOptions::OutputPreprocessorDefinitions(
         cmSystemTools::ReplaceString(define, "\"", "\\\"");
       }
     }
-    // Store the flag in the project file.
-    oss << ';' << define;
+    if (!(this->BuildAsX && platform == "ARM64" &&
+          std::find(arm64ecDefines.begin(), arm64ecDefines.end(), define) != arm64ecDefines.end())) {
+      // Store the flag in the project file.
+      oss << ';' << define;
+    }
   }
 
   this->OutputFlag(fout, indent, tag, oss.str());

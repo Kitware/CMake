@@ -227,9 +227,15 @@ void cmGlobalVisualStudio8Generator::WriteSolutionConfigurations(
   std::ostream& fout, std::vector<std::string> const& configs)
 {
   fout << "\tGlobalSection(SolutionConfigurationPlatforms) = preSolution\n";
-  for (std::string const& i : configs) {
-    fout << "\t\t" << i << "|" << this->GetPlatformName() << " = " << i << "|"
-         << this->GetPlatformName() << "\n";
+  std::vector<std::string> platforms = { this->GetPlatformName() };
+  if (this->GetBuildAsX()) {
+    platforms.push_back("ARM64");
+  }
+  for (std::string const& p : platforms) {
+    for (std::string const& i : configs) {
+      fout << "\t\t" << i << "|" << p << " = " << i << "|"
+          << p << "\n";
+    }
   }
   fout << "\tEndGlobalSection\n";
 }
@@ -241,38 +247,44 @@ void cmGlobalVisualStudio8Generator::WriteProjectConfigurations(
   std::string const& platformMapping)
 {
   std::string guid = this->GetGUID(name);
-  for (std::string const& i : configs) {
-    std::vector<std::string> mapConfig;
-    const char* dstConfig = i.c_str();
-    if (target.GetProperty("EXTERNAL_MSPROJECT")) {
-      if (cmProp m = target.GetProperty("MAP_IMPORTED_CONFIG_" +
-                                        cmSystemTools::UpperCase(i))) {
-        cmExpandList(*m, mapConfig);
-        if (!mapConfig.empty()) {
-          dstConfig = mapConfig[0].c_str();
+  std::vector<std::string> platforms = { this->GetPlatformName() };
+  if (this->GetBuildAsX()) {
+    platforms.push_back("ARM64");
+  }
+  for (std::string const& p : platforms) {
+    for (std::string const& i : configs) {
+      std::vector<std::string> mapConfig;
+      const char* dstConfig = i.c_str();
+      if (target.GetProperty("EXTERNAL_MSPROJECT")) {
+        if (cmProp m = target.GetProperty("MAP_IMPORTED_CONFIG_" +
+                                          cmSystemTools::UpperCase(i))) {
+          cmExpandList(*m, mapConfig);
+          if (!mapConfig.empty()) {
+            dstConfig = mapConfig[0].c_str();
+          }
         }
       }
-    }
-    fout << "\t\t{" << guid << "}." << i << "|" << this->GetPlatformName()
-         << ".ActiveCfg = " << dstConfig << "|"
-         << (!platformMapping.empty() ? platformMapping
-                                      : this->GetPlatformName())
-         << "\n";
-    std::set<std::string>::const_iterator ci =
-      configsPartOfDefaultBuild.find(i);
-    if (!(ci == configsPartOfDefaultBuild.end())) {
-      fout << "\t\t{" << guid << "}." << i << "|" << this->GetPlatformName()
-           << ".Build.0 = " << dstConfig << "|"
-           << (!platformMapping.empty() ? platformMapping
-                                        : this->GetPlatformName())
-           << "\n";
-    }
-    if (this->NeedsDeploy(target, dstConfig)) {
-      fout << "\t\t{" << guid << "}." << i << "|" << this->GetPlatformName()
-           << ".Deploy.0 = " << dstConfig << "|"
-           << (!platformMapping.empty() ? platformMapping
-                                        : this->GetPlatformName())
-           << "\n";
+      fout << "\t\t{" << guid << "}." << i << "|" << p
+          << ".ActiveCfg = " << dstConfig << "|"
+          << (!platformMapping.empty() ? platformMapping
+                                        : p)
+          << "\n";
+      std::set<std::string>::const_iterator ci =
+        configsPartOfDefaultBuild.find(i);
+      if (!(ci == configsPartOfDefaultBuild.end())) {
+        fout << "\t\t{" << guid << "}." << i << "|" << p
+            << ".Build.0 = " << dstConfig << "|"
+            << (!platformMapping.empty() ? platformMapping
+                                          : p)
+            << "\n";
+      }
+      if (this->NeedsDeploy(target, dstConfig)) {
+        fout << "\t\t{" << guid << "}." << i << "|" << p
+            << ".Deploy.0 = " << dstConfig << "|"
+            << (!platformMapping.empty() ? platformMapping
+                                          : p)
+            << "\n";
+      }
     }
   }
 }

@@ -61,6 +61,11 @@ public:
    */
   std::string const& GetPlatformName() const;
 
+   /**
+   * Get if the BuildAsX Variable is passed in.
+   */
+  bool cmGlobalVisualStudioGenerator::GetBuildAsX() const;
+
   /**
    * Configure CMake's Visual Studio macros file into the user's Visual
    * Studio macros directory.

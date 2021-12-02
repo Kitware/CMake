@@ -59,7 +59,7 @@ private:
   struct OptionsHelper;
 
   std::string ConvertPath(std::string const& path, bool forceRelative);
-  std::string CalcCondition(const std::string& config) const;
+  std::string CalcCondition(const std::string& config, const std::string& platform = "") const;
   void WriteProjectConfigurations(Elem& e0);
   void WriteProjectConfigurationValues(Elem& e0);
   void WriteMSToolConfigurationValues(Elem& e1, std::string const& config);
@@ -111,10 +111,10 @@ private:
 
   bool ComputeClOptions();
   bool ComputeClOptions(std::string const& configName);
-  void WriteClOptions(Elem& e1, std::string const& config);
+  void WriteClOptions(Elem& e1, std::string const& config, std::string const& platform = "");
   bool ComputeRcOptions();
   bool ComputeRcOptions(std::string const& config);
-  void WriteRCOptions(Elem& e1, std::string const& config);
+  void WriteRCOptions(Elem& e1, std::string const& config, std::string const& platform = "");
   bool ComputeCudaOptions();
   bool ComputeCudaOptions(std::string const& config);
   void WriteCudaOptions(Elem& e1, std::string const& config);
@@ -218,6 +218,7 @@ private:
   bool MSTools;
   bool Managed;
   bool NsightTegra;
+  bool BuildAsX;
   bool Android;
   bool HaveCustomCommandDepfile = false;
   unsigned int NsightTegraVersion[4];

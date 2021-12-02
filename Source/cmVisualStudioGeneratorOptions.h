@@ -33,7 +33,8 @@ public:
   };
   cmVisualStudioGeneratorOptions(cmLocalVisualStudioGenerator* lg, Tool tool,
                                  cmVS7FlagTable const* table = nullptr,
-                                 cmVS7FlagTable const* extraTable = nullptr);
+                                 cmVS7FlagTable const* extraTable = nullptr,
+                                 bool buildAsX = false);
 
   // Add a table of flags.
   void AddTable(cmVS7FlagTable const* table);
@@ -70,7 +71,8 @@ public:
   bool IsManaged() const;
   // Write options to output.
   void OutputPreprocessorDefinitions(std::ostream& fout, int indent,
-                                     const std::string& lang);
+                                     const std::string& lang, 
+                                     std::string const& platform = "");
   void OutputAdditionalIncludeDirectories(std::ostream& fout, int indent,
                                           const std::string& lang);
   void OutputFlagMap(std::ostream& fout, int indent);
@@ -89,6 +91,7 @@ private:
   std::string Configuration;
   Tool CurrentTool;
 
+  bool BuildAsX;
   bool FortranRuntimeDebug;
   bool FortranRuntimeDLL;
   bool FortranRuntimeMT;
