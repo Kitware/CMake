@@ -59,6 +59,7 @@ function(compiler_id_detection outvar lang)
       HP
       Compaq
       zOS
+      IBMClang
       XLClang
       XL
       VisualAge
