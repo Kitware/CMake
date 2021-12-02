@@ -209,7 +209,8 @@ private:
   OptionsMap NasmOptions;
   OptionsMap LinkOptions;
   std::string LangForClCompile;
-  enum VsProjectType
+
+  enum class VsProjectType
   {
     vcxproj,
     csproj
