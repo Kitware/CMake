@@ -179,6 +179,17 @@ std::vector<std::string> cmCPackIFWGenerator::BuildBinaryCreatorCommmand()
     }
   }
 
+  if (!this->IsVersionLess("3.0")) {
+#ifdef __APPLE__
+    // macOS only
+    std::string signingIdentity = this->Installer.SigningIdentity;
+    if (!signingIdentity.empty()) {
+      ifwCmd.emplace_back("--sign");
+      ifwCmd.emplace_back(signingIdentity);
+    }
+#endif
+  }
+
   ifwCmd.emplace_back("-c");
   ifwCmd.emplace_back(this->toplevel + "/config/config.xml");
 

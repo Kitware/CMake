@@ -306,6 +306,13 @@ void cmCPackIFWInstaller::ConfigureFromOptions()
         this->GetOption("CPACK_IFW_PACKAGE_RUN_PROGRAM_DESCRIPTION")) {
     this->RunProgramDescription = *description;
   }
+
+#ifdef __APPLE__
+  // Code signing identity for signing the generated app bundle
+  if (cmValue id = this->GetOption("CPACK_IFW_PACKAGE_SIGNING_IDENTITY")) {
+    this->SigningIdentity = *id;
+  }
+#endif
 }
 
 /** \class cmCPackIFWResourcesParser
