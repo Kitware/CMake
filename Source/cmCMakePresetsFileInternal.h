@@ -5,11 +5,11 @@
 #include "cmCMakePresetsFile.h"
 
 #define CHECK_OK(expr)                                                        \
-  {                                                                           \
+  do {                                                                        \
     auto _result = expr;                                                      \
     if (_result != ReadFileResult::READ_OK)                                   \
       return _result;                                                         \
-  }
+  } while (false)
 
 namespace cmCMakePresetsFileInternal {
 enum class ExpandMacroResult

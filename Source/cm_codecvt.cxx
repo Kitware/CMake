@@ -9,11 +9,8 @@
 #  include <windows.h>
 #  undef max
 #  include "cmsys/Encoding.hxx"
-#endif
 
-#if defined(_WIN32)
-/* Number of leading ones before a zero in the byte (see cm_utf8.c).  */
-extern "C" unsigned char const cm_utf8_ones[256];
+#  include "cm_utf8.h"
 #endif
 
 codecvt::codecvt(Encoding e)

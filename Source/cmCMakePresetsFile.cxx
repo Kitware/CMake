@@ -18,7 +18,7 @@
 #include "cmSystemTools.h"
 
 #define CHECK_EXPAND(out, field, expanders, version)                          \
-  {                                                                           \
+  do {                                                                        \
     switch (ExpandMacros(field, expanders, version)) {                        \
       case ExpandMacroResult::Error:                                          \
         return false;                                                         \
@@ -28,7 +28,7 @@
       case ExpandMacroResult::Ok:                                             \
         break;                                                                \
     }                                                                         \
-  }
+  } while (false)
 
 namespace {
 enum class CycleStatus
@@ -96,7 +96,7 @@ ReadFileResult VisitPreset(
     return ReadFileResult::INVALID_PRESET;
   }
 
-  CHECK_OK(preset.VisitPresetBeforeInherit())
+  CHECK_OK(preset.VisitPresetBeforeInherit());
 
   for (auto const& i : preset.Inherits) {
     auto parent = presets.find(i);
@@ -114,7 +114,7 @@ ReadFileResult VisitPreset(
       return result;
     }
 
-    CHECK_OK(preset.VisitPresetInherit(parentPreset))
+    CHECK_OK(preset.VisitPresetInherit(parentPreset));
 
     for (auto const& v : parentPreset.Environment) {
       preset.Environment.insert(v);
@@ -129,7 +129,7 @@ ReadFileResult VisitPreset(
     preset.ConditionEvaluator.reset();
   }
 
-  CHECK_OK(preset.VisitPresetAfterInherit(file.GetVersion(preset)))
+  CHECK_OK(preset.VisitPresetAfterInherit(file.GetVersion(preset)));
 
   cycleStatus[preset.Name] = CycleStatus::Verified;
   return ReadFileResult::READ_OK;
@@ -195,7 +195,7 @@ bool ExpandMacros(const cmCMakePresetsFile& file,
                   const std::vector<MacroExpander>& macroExpanders)
 {
   std::string binaryDir = preset.BinaryDir;
-  CHECK_EXPAND(out, binaryDir, macroExpanders, file.GetVersion(preset))
+  CHECK_EXPAND(out, binaryDir, macroExpanders, file.GetVersion(preset));
 
   if (!binaryDir.empty()) {
     if (!cmSystemTools::FileIsFullPath(binaryDir)) {
@@ -207,7 +207,7 @@ bool ExpandMacros(const cmCMakePresetsFile& file,
 
   if (!preset.InstallDir.empty()) {
     std::string installDir = preset.InstallDir;
-    CHECK_EXPAND(out, installDir, macroExpanders, file.GetVersion(preset))
+    CHECK_EXPAND(out, installDir, macroExpanders, file.GetVersion(preset));
 
     if (!cmSystemTools::FileIsFullPath(installDir)) {
       installDir = cmStrCat(file.SourceDir, '/', installDir);
@@ -218,14 +218,14 @@ bool ExpandMacros(const cmCMakePresetsFile& file,
 
   if (!preset.ToolchainFile.empty()) {
     std::string toolchain = preset.ToolchainFile;
-    CHECK_EXPAND(out, toolchain, macroExpanders, file.GetVersion(preset))
+    CHECK_EXPAND(out, toolchain, macroExpanders, file.GetVersion(preset));
     out->ToolchainFile = toolchain;
   }
 
   for (auto& variable : out->CacheVariables) {
     if (variable.second) {
       CHECK_EXPAND(out, variable.second->Value, macroExpanders,
-                   file.GetVersion(preset))
+                   file.GetVersion(preset));
     }
   }
 
@@ -237,12 +237,12 @@ bool ExpandMacros(const cmCMakePresetsFile& file, const BuildPreset& preset,
                   const std::vector<MacroExpander>& macroExpanders)
 {
   for (auto& target : out->Targets) {
-    CHECK_EXPAND(out, target, macroExpanders, file.GetVersion(preset))
+    CHECK_EXPAND(out, target, macroExpanders, file.GetVersion(preset));
   }
 
   for (auto& nativeToolOption : out->NativeToolOptions) {
     CHECK_EXPAND(out, nativeToolOption, macroExpanders,
-                 file.GetVersion(preset))
+                 file.GetVersion(preset));
   }
 
   return true;
@@ -258,15 +258,15 @@ bool ExpandMacros(const cmCMakePresetsFile& file, const TestPreset& preset,
 
   if (out->Output) {
     CHECK_EXPAND(out, out->Output->OutputLogFile, macroExpanders,
-                 file.GetVersion(preset))
+                 file.GetVersion(preset));
   }
 
   if (out->Filter) {
     if (out->Filter->Include) {
       CHECK_EXPAND(out, out->Filter->Include->Name, macroExpanders,
-                   file.GetVersion(preset))
+                   file.GetVersion(preset));
       CHECK_EXPAND(out, out->Filter->Include->Label, macroExpanders,
-                   file.GetVersion(preset))
+                   file.GetVersion(preset));
 
       if (out->Filter->Include->Index) {
         CHECK_EXPAND(out, out->Filter->Include->Index->IndexFile,
@@ -276,24 +276,24 @@ bool ExpandMacros(const cmCMakePresetsFile& file, const TestPreset& preset,
 
     if (out->Filter->Exclude) {
       CHECK_EXPAND(out, out->Filter->Exclude->Name, macroExpanders,
-                   file.GetVersion(preset))
+                   file.GetVersion(preset));
       CHECK_EXPAND(out, out->Filter->Exclude->Label, macroExpanders,
-                   file.GetVersion(preset))
+                   file.GetVersion(preset));
 
       if (out->Filter->Exclude->Fixtures) {
         CHECK_EXPAND(out, out->Filter->Exclude->Fixtures->Any, macroExpanders,
-                     file.GetVersion(preset))
+                     file.GetVersion(preset));
         CHECK_EXPAND(out, out->Filter->Exclude->Fixtures->Setup,
-                     macroExpanders, file.GetVersion(preset))
+                     macroExpanders, file.GetVersion(preset));
         CHECK_EXPAND(out, out->Filter->Exclude->Fixtures->Cleanup,
-                     macroExpanders, file.GetVersion(preset))
+                     macroExpanders, file.GetVersion(preset));
       }
     }
   }
 
   if (out->Execution) {
     CHECK_EXPAND(out, out->Execution->ResourceSpecFile, macroExpanders,
-                 file.GetVersion(preset))
+                 file.GetVersion(preset));
   }
 
   return true;
@@ -898,9 +898,9 @@ cmCMakePresetsFile::ReadProjectPresetsInternal(bool allowNoFiles)
                         : ReadFileResult::FILE_NOT_FOUND;
   }
 
-  CHECK_OK(ComputePresetInheritance(this->ConfigurePresets, *this))
-  CHECK_OK(ComputePresetInheritance(this->BuildPresets, *this))
-  CHECK_OK(ComputePresetInheritance(this->TestPresets, *this))
+  CHECK_OK(ComputePresetInheritance(this->ConfigurePresets, *this));
+  CHECK_OK(ComputePresetInheritance(this->BuildPresets, *this));
+  CHECK_OK(ComputePresetInheritance(this->TestPresets, *this));
 
   for (auto& it : this->ConfigurePresets) {
     if (!ExpandMacros(*this, it.second.Unexpanded, it.second.Expanded)) {
