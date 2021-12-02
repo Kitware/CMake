@@ -435,8 +435,7 @@ std::string cmExtraSublimeTextGenerator::ComputeIncludes(
   lg->GetIncludeDirectories(includes, target, language, config);
 
   std::string includesString =
-    lg->GetIncludeFlags(includes, target, language, config, false,
-                        cmLocalGenerator::IncludePathStyle::Absolute);
+    lg->GetIncludeFlags(includes, target, language, config, false);
 
   return includesString;
 }

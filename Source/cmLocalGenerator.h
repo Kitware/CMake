@@ -179,18 +179,12 @@ public:
   bool AppendLWYUFlags(std::string& flags, const cmGeneratorTarget* target,
                        const std::string& lang);
 
-  enum class IncludePathStyle
-  {
-    Default,
-    Absolute,
-  };
-
   //! Get the include flags for the current makefile and language
-  std::string GetIncludeFlags(
-    std::vector<std::string> const& includes, cmGeneratorTarget* target,
-    std::string const& lang, std::string const& config,
-    bool forResponseFile = false,
-    IncludePathStyle pathStyle = IncludePathStyle::Default);
+  std::string GetIncludeFlags(std::vector<std::string> const& includes,
+                              cmGeneratorTarget* target,
+                              std::string const& lang,
+                              std::string const& config,
+                              bool forResponseFile = false);
 
   using GeneratorTargetVector =
     std::vector<std::unique_ptr<cmGeneratorTarget>>;
@@ -526,12 +520,11 @@ public:
   cmValue GetRuleLauncher(cmGeneratorTarget* target, const std::string& prop);
 
 protected:
-  // The default implementation ignores the IncludePathStyle and always
-  // uses absolute paths.  A generator may override this to use relative
-  // paths in some cases.
+  // The default implementation converts to a Windows shortpath to
+  // help older toolchains handle spaces and such.  A generator may
+  // override this to avoid that conversion.
   virtual std::string ConvertToIncludeReference(
-    std::string const& path, IncludePathStyle pathStyle,
-    cmOutputConverter::OutputFormat format);
+    std::string const& path, cmOutputConverter::OutputFormat format);
 
   //! put all the libraries for a target on into the given stream
   void OutputLinkLibraries(cmComputeLinkInformation* pcli,
