@@ -405,6 +405,20 @@ void cmVisualStudio10TargetGenerator::Generate()
   // Write the encoding header into the file
   char magic[] = { char(0xEF), char(0xBB), char(0xBF) };
   BuildFileStream.write(magic, 3);
+
+  this->WriteClassicMsBuildProjectFile(BuildFileStream);
+
+  if (BuildFileStream.Close()) {
+    this->GlobalGenerator->FileReplacedDuringGenerate(PathToProjectFile);
+  }
+
+  // The groups are stored in a separate file for VS 10
+  this->WriteGroups();
+}
+
+void cmVisualStudio10TargetGenerator::WriteClassicMsBuildProjectFile(
+  cmGeneratedFileStream& BuildFileStream)
+{
   BuildFileStream << "<?xml version=\"1.0\" encoding=\""
                   << this->GlobalGenerator->Encoding() << "\"?>";
   {
@@ -453,23 +467,12 @@ void cmVisualStudio10TargetGenerator::Generate()
 
     {
       Elem e1(e0, "PropertyGroup");
-      e1.Attribute("Label", "Globals");
-      e1.Element("ProjectGuid", "{" + this->GUID + "}");
+      this->WriteCommonPropertyGroupGlobals(e1);
 
       if ((this->MSTools || this->Android) &&
           this->GeneratorTarget->IsInBuildSystem()) {
         this->WriteApplicationTypeSettings(e1);
         this->VerifyNecessaryFiles();
-      }
-
-      cmValue vsProjectTypes =
-        this->GeneratorTarget->GetProperty("VS_GLOBAL_PROJECT_TYPES");
-      if (vsProjectTypes) {
-        const char* tagName = "ProjectTypes";
-        if (this->ProjectType == VsProjectType::csproj) {
-          tagName = "ProjectTypeGuids";
-        }
-        e1.Element(tagName, *vsProjectTypes);
       }
 
       cmValue vsProjectName =
@@ -493,24 +496,6 @@ void cmVisualStudio10TargetGenerator::Generate()
 
       if (this->GeneratorTarget->GetPropertyAsBool("VS_WINRT_COMPONENT")) {
         e1.Element("WinMDAssembly", "true");
-      }
-
-      cmValue vsGlobalKeyword =
-        this->GeneratorTarget->GetProperty("VS_GLOBAL_KEYWORD");
-      if (!vsGlobalKeyword) {
-        if (this->GlobalGenerator->TargetsAndroid()) {
-          e1.Element("Keyword", "Android");
-        } else {
-          e1.Element("Keyword", "Win32Proj");
-        }
-      } else {
-        e1.Element("Keyword", *vsGlobalKeyword);
-      }
-
-      cmValue vsGlobalRootNamespace =
-        this->GeneratorTarget->GetProperty("VS_GLOBAL_ROOTNAMESPACE");
-      if (vsGlobalRootNamespace) {
-        e1.Element("RootNamespace", *vsGlobalRootNamespace);
       }
 
       e1.Element("Platform", this->Platform);
@@ -600,24 +585,6 @@ void cmVisualStudio10TargetGenerator::Generate()
       if (const char* vcTargetsPath =
             this->GlobalGenerator->GetCustomVCTargetsPath()) {
         e1.Element("VCTargetsPath", vcTargetsPath);
-      }
-
-      std::vector<std::string> keys = this->GeneratorTarget->GetPropertyKeys();
-      for (std::string const& keyIt : keys) {
-        static const cm::string_view prefix = "VS_GLOBAL_";
-        if (!cmHasPrefix(keyIt, prefix))
-          continue;
-        cm::string_view globalKey =
-          cm::string_view(keyIt).substr(prefix.length());
-        // Skip invalid or separately-handled properties.
-        if (globalKey.empty() || globalKey == "PROJECT_TYPES" ||
-            globalKey == "ROOTNAMESPACE" || globalKey == "KEYWORD") {
-          continue;
-        }
-        cmValue value = this->GeneratorTarget->GetProperty(keyIt);
-        if (!value)
-          continue;
-        e1.Element(globalKey, *value);
       }
 
       if (this->Managed) {
@@ -839,13 +806,57 @@ void cmVisualStudio10TargetGenerator::Generate()
       }
     }
   }
+}
 
-  if (BuildFileStream.Close()) {
-    this->GlobalGenerator->FileReplacedDuringGenerate(PathToProjectFile);
+void cmVisualStudio10TargetGenerator::WriteCommonPropertyGroupGlobals(Elem& e1)
+{
+  e1.Attribute("Label", "Globals");
+  e1.Element("ProjectGuid", "{" + this->GUID + "}");
+
+  cmValue vsProjectTypes =
+    this->GeneratorTarget->GetProperty("VS_GLOBAL_PROJECT_TYPES");
+  if (vsProjectTypes) {
+    const char* tagName = "ProjectTypes";
+    if (this->ProjectType == VsProjectType::csproj) {
+      tagName = "ProjectTypeGuids";
+    }
+    e1.Element(tagName, *vsProjectTypes);
   }
 
-  // The groups are stored in a separate file for VS 10
-  this->WriteGroups();
+  cmValue vsGlobalKeyword =
+    this->GeneratorTarget->GetProperty("VS_GLOBAL_KEYWORD");
+  if (!vsGlobalKeyword) {
+    if (this->GlobalGenerator->TargetsAndroid()) {
+      e1.Element("Keyword", "Android");
+    } else {
+      e1.Element("Keyword", "Win32Proj");
+    }
+  } else {
+    e1.Element("Keyword", *vsGlobalKeyword);
+  }
+
+  cmValue vsGlobalRootNamespace =
+    this->GeneratorTarget->GetProperty("VS_GLOBAL_ROOTNAMESPACE");
+  if (vsGlobalRootNamespace) {
+    e1.Element("RootNamespace", *vsGlobalRootNamespace);
+  }
+
+  std::vector<std::string> keys = this->GeneratorTarget->GetPropertyKeys();
+  for (std::string const& keyIt : keys) {
+    static const cm::string_view prefix = "VS_GLOBAL_";
+    if (!cmHasPrefix(keyIt, prefix))
+      continue;
+    cm::string_view globalKey = cm::string_view(keyIt).substr(prefix.length());
+    // Skip invalid or separately-handled properties.
+    if (globalKey.empty() || globalKey == "PROJECT_TYPES" ||
+        globalKey == "ROOTNAMESPACE" || globalKey == "KEYWORD") {
+      continue;
+    }
+    cmValue value = this->GeneratorTarget->GetProperty(keyIt);
+    if (!value)
+      continue;
+    e1.Element(globalKey, *value);
+  }
 }
 
 void cmVisualStudio10TargetGenerator::WritePackageReferences(Elem& e0)

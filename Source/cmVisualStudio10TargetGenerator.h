@@ -18,6 +18,7 @@
 class cmComputeLinkInformation;
 class cmCustomCommand;
 class cmCustomCommandGenerator;
+class cmGeneratedFileStream;
 class cmGlobalVisualStudio10Generator;
 class cmLocalVisualStudio10Generator;
 class cmMakefile;
@@ -259,6 +260,12 @@ private:
   std::vector<cmSourceFile const*> XamlObjs;
   void ClassifyAllConfigSources();
   void ClassifyAllConfigSource(cmGeneratorTarget::AllConfigSource const& acs);
+
+  // .Net SDK-stype project variable and helper functions
+  void WriteClassicMsBuildProjectFile(cmGeneratedFileStream& BuildFileStream);
+
+  void WriteCommonPropertyGroupGlobals(
+    cmVisualStudio10TargetGenerator::Elem& e1);
 
   std::unordered_map<std::string, ConfigToSettings> ParsedToolTargetSettings;
   bool PropertyIsSameInAllConfigs(const ConfigToSettings& toolSettings,
