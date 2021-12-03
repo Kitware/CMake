@@ -1488,10 +1488,7 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
     cmCustomCommandGenerator ccg(command, c, lg, true);
     std::string comment = lg->ConstructComment(ccg);
     comment = cmVS10EscapeComment(comment);
-    cmLocalVisualStudioGenerator::IsManaged isManaged = (this->Managed)
-      ? cmLocalVisualStudioGenerator::managed
-      : cmLocalVisualStudioGenerator::unmanaged;
-    std::string script = lg->ConstructScript(ccg, isManaged);
+    std::string script = lg->ConstructScript(ccg);
     bool symbolic = false;
     // input files for custom command
     std::stringstream additional_inputs;
@@ -4241,10 +4238,7 @@ void cmVisualStudio10TargetGenerator::WriteEvent(
       comment += lg->ConstructComment(ccg);
       script += pre;
       pre = "\n";
-      cmLocalVisualStudioGenerator::IsManaged isManaged = (this->Managed)
-        ? cmLocalVisualStudioGenerator::managed
-        : cmLocalVisualStudioGenerator::unmanaged;
-      script += lg->ConstructScript(ccg, isManaged);
+      script += lg->ConstructScript(ccg);
 
       stdPipesUTF8 = stdPipesUTF8 || cc.GetStdPipesUTF8();
     }
