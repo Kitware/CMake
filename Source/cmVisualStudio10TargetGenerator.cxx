@@ -2670,40 +2670,6 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions(
   for (std::string const& config : this->Configurations) {
     const std::string cond = this->CalcCondition(config);
 
-    if (ttype <= cmStateEnums::UTILITY) {
-      if (cmValue workingDir = this->GeneratorTarget->GetProperty(
-            "VS_DEBUGGER_WORKING_DIRECTORY")) {
-        std::string genWorkingDir = cmGeneratorExpression::Evaluate(
-          *workingDir, this->LocalGenerator, config);
-        e1.WritePlatformConfigTag("LocalDebuggerWorkingDirectory", cond,
-                                  genWorkingDir);
-      }
-
-      if (cmValue environment =
-            this->GeneratorTarget->GetProperty("VS_DEBUGGER_ENVIRONMENT")) {
-        std::string genEnvironment = cmGeneratorExpression::Evaluate(
-          *environment, this->LocalGenerator, config);
-        e1.WritePlatformConfigTag("LocalDebuggerEnvironment", cond,
-                                  genEnvironment);
-      }
-
-      if (cmValue debuggerCommand =
-            this->GeneratorTarget->GetProperty("VS_DEBUGGER_COMMAND")) {
-        std::string genDebuggerCommand = cmGeneratorExpression::Evaluate(
-          *debuggerCommand, this->LocalGenerator, config);
-        e1.WritePlatformConfigTag("LocalDebuggerCommand", cond,
-                                  genDebuggerCommand);
-      }
-
-      if (cmValue commandArguments = this->GeneratorTarget->GetProperty(
-            "VS_DEBUGGER_COMMAND_ARGUMENTS")) {
-        std::string genCommandArguments = cmGeneratorExpression::Evaluate(
-          *commandArguments, this->LocalGenerator, config);
-        e1.WritePlatformConfigTag("LocalDebuggerCommandArguments", cond,
-                                  genCommandArguments);
-      }
-    }
-
     if (ttype >= cmStateEnums::UTILITY) {
       e1.WritePlatformConfigTag(
         "IntDir", cond, "$(Platform)\\$(Configuration)\\$(ProjectName)\\");
@@ -2779,6 +2745,40 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions(
       e1.WritePlatformConfigTag("TargetExt", cond, ext);
 
       this->OutputLinkIncremental(e1, config);
+    }
+
+    if (ttype <= cmStateEnums::UTILITY) {
+      if (cmValue workingDir = this->GeneratorTarget->GetProperty(
+            "VS_DEBUGGER_WORKING_DIRECTORY")) {
+        std::string genWorkingDir = cmGeneratorExpression::Evaluate(
+          *workingDir, this->LocalGenerator, config);
+        e1.WritePlatformConfigTag("LocalDebuggerWorkingDirectory", cond,
+                                  genWorkingDir);
+      }
+
+      if (cmValue environment =
+            this->GeneratorTarget->GetProperty("VS_DEBUGGER_ENVIRONMENT")) {
+        std::string genEnvironment = cmGeneratorExpression::Evaluate(
+          *environment, this->LocalGenerator, config);
+        e1.WritePlatformConfigTag("LocalDebuggerEnvironment", cond,
+                                  genEnvironment);
+      }
+
+      if (cmValue debuggerCommand =
+            this->GeneratorTarget->GetProperty("VS_DEBUGGER_COMMAND")) {
+        std::string genDebuggerCommand = cmGeneratorExpression::Evaluate(
+          *debuggerCommand, this->LocalGenerator, config);
+        e1.WritePlatformConfigTag("LocalDebuggerCommand", cond,
+                                  genDebuggerCommand);
+      }
+
+      if (cmValue commandArguments = this->GeneratorTarget->GetProperty(
+            "VS_DEBUGGER_COMMAND_ARGUMENTS")) {
+        std::string genCommandArguments = cmGeneratorExpression::Evaluate(
+          *commandArguments, this->LocalGenerator, config);
+        e1.WritePlatformConfigTag("LocalDebuggerCommandArguments", cond,
+                                  genCommandArguments);
+      }
     }
   }
 }
