@@ -435,7 +435,7 @@ else()
       ${_OPENSSL_LIBDIR}
       ${_OPENSSL_LIBRARY_DIRS}
     PATH_SUFFIXES
-      lib
+      lib lib64
   )
 
   find_library(OPENSSL_CRYPTO_LIBRARY
@@ -447,7 +447,7 @@ else()
       ${_OPENSSL_LIBDIR}
       ${_OPENSSL_LIBRARY_DIRS}
     PATH_SUFFIXES
-      lib
+      lib lib64
   )
 
   mark_as_advanced(OPENSSL_CRYPTO_LIBRARY OPENSSL_SSL_LIBRARY)
