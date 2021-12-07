@@ -38,10 +38,23 @@ list(APPEND EQUALV "1a 1")
 list(APPEND EQUALV "1.1a 1.1")
 list(APPEND EQUALV "1.0a 1")
 list(APPEND EQUALV "1a 1.0")
+list(APPEND EQUALV "1a1 1")
+list(APPEND EQUALV "1.1a1 1.1")
+list(APPEND EQUALV "1.0a1 1")
+list(APPEND EQUALV "1a1 1.0")
+list(APPEND EQUALV "1-suffix 1")
+list(APPEND EQUALV "1.1-suffix 1.1")
+list(APPEND EQUALV "1.0-suffix 1")
+list(APPEND EQUALV "1-suffix 1.0")
+list(APPEND EQUALV "1-suffix.1 1")
+list(APPEND EQUALV "1.1-suffix.1 1.1")
+list(APPEND EQUALV "1.0-suffix.1 1")
+list(APPEND EQUALV "1-suffix.1 1.0")
 
 foreach(v IN LISTS EQUALV)
-  # check equal versions
   string(REGEX MATCH "(.*) (.*)" _dummy "${v}")
+
+  # check equal versions
   if(CMAKE_MATCH_1 VERSION_EQUAL CMAKE_MATCH_2)
     message(STATUS "${CMAKE_MATCH_1} is equal ${CMAKE_MATCH_2}")
   else()
@@ -49,17 +62,80 @@ foreach(v IN LISTS EQUALV)
   endif()
 
   # still equal, but inverted order of operands
-  string(REGEX MATCH "(.*) (.*)" _dummy "${v}")
   if(CMAKE_MATCH_2 VERSION_EQUAL CMAKE_MATCH_1)
     message(STATUS "${CMAKE_MATCH_2} is equal ${CMAKE_MATCH_1}")
   else()
     message(FATAL_ERROR "${CMAKE_MATCH_2} is not equal ${CMAKE_MATCH_1}?")
+  endif()
+
+  # check less or equal
+  if(CMAKE_MATCH_1 VERSION_LESS_EQUAL CMAKE_MATCH_2)
+    message(STATUS "${CMAKE_MATCH_1} is equal ${CMAKE_MATCH_2}")
+  else()
+    message(FATAL_ERROR "${CMAKE_MATCH_1} is not equal ${CMAKE_MATCH_2}")
+  endif()
+
+  # check less or equal, inverted order of operands
+  if(CMAKE_MATCH_2 VERSION_LESS_EQUAL CMAKE_MATCH_1)
+    message(STATUS "${CMAKE_MATCH_2} is equal ${CMAKE_MATCH_1}")
+  else()
+    message(FATAL_ERROR "${CMAKE_MATCH_2} is not equal ${CMAKE_MATCH_1}")
+  endif()
+
+  # check greater or equal
+  if(CMAKE_MATCH_1 VERSION_GREATER_EQUAL CMAKE_MATCH_2)
+    message(STATUS "${CMAKE_MATCH_1} is equal ${CMAKE_MATCH_2}")
+  else()
+    message(FATAL_ERROR "${CMAKE_MATCH_1} is not equal ${CMAKE_MATCH_2}")
+  endif()
+
+  # check greater or equal, inverted order of operands
+  if(CMAKE_MATCH_2 VERSION_GREATER_EQUAL CMAKE_MATCH_1)
+    message(STATUS "${CMAKE_MATCH_2} is equal ${CMAKE_MATCH_1}")
+  else()
+    message(FATAL_ERROR "${CMAKE_MATCH_2} is not equal ${CMAKE_MATCH_1}")
+  endif()
+
+  # check less
+  if(NOT CMAKE_MATCH_1 VERSION_LESS CMAKE_MATCH_2)
+    message(STATUS "${CMAKE_MATCH_1} is not less than ${CMAKE_MATCH_2}")
+  else()
+    message(FATAL_ERROR "${CMAKE_MATCH_1} is less than ${CMAKE_MATCH_2}")
+  endif()
+
+  # check less, inverted order of operands
+  if(NOT CMAKE_MATCH_2 VERSION_LESS CMAKE_MATCH_1)
+    message(STATUS "${CMAKE_MATCH_2} is not less than ${CMAKE_MATCH_1}")
+  else()
+    message(FATAL_ERROR "${CMAKE_MATCH_2} is less than ${CMAKE_MATCH_1}")
+  endif()
+
+  # check greater
+  if(NOT CMAKE_MATCH_1 VERSION_GREATER CMAKE_MATCH_2)
+    message(STATUS "${CMAKE_MATCH_1} is not greater than ${CMAKE_MATCH_2}")
+  else()
+    message(FATAL_ERROR "${CMAKE_MATCH_1} is greater than ${CMAKE_MATCH_2}")
+  endif()
+
+  # check greater, inverted order of operands
+  if(NOT CMAKE_MATCH_2 VERSION_GREATER CMAKE_MATCH_1)
+    message(STATUS "${CMAKE_MATCH_2} is not greater than ${CMAKE_MATCH_1}")
+  else()
+    message(FATAL_ERROR "${CMAKE_MATCH_2} is greater than ${CMAKE_MATCH_1}")
   endif()
 endforeach()
 
 set(LESSV "1.2.3.4.5.6.7.8 1.2.3.4.5.6.7.9")
 list(APPEND LESSV "1.2.3.4.5.6.7 1.2.3.4.5.6.7.9")
 list(APPEND LESSV "1 1.0.0.1")
+list(APPEND LESSV "1 2a")
+list(APPEND LESSV "1a 2")
+list(APPEND LESSV "1 2a1")
+list(APPEND LESSV "1a1 2")
+list(APPEND LESSV "1 2-suffix")
+list(APPEND LESSV "1-suffix 2")
+list(APPEND LESSV "1 2-suffix.1")
+list(APPEND LESSV "1-suffix.1 2")
 foreach(v IN LISTS LESSV)
   string(REGEX MATCH "(.*) (.*)" _dummy "${v}")
   # check less
