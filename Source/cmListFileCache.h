@@ -13,7 +13,6 @@
 
 #include <cm/optional>
 
-#include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
 
 /** \class cmListFileCache
@@ -164,23 +163,13 @@ private:
 class cmListFileBacktrace
 {
 public:
-  // Default-constructed backtrace may not be used until after
-  // set via assignment from a backtrace constructed with a
-  // valid snapshot.
+  // Default-constructed backtrace is empty.
   cmListFileBacktrace() = default;
 
-  // Construct an empty backtrace whose bottom sits in the directory
-  // indicated by the given valid snapshot.
-  cmListFileBacktrace(cmStateSnapshot const& snapshot);
-
-  cmStateSnapshot GetBottom() const;
-
   // Get a backtrace with the given file scope added to the top.
-  // May not be called until after construction with a valid snapshot.
   cmListFileBacktrace Push(std::string const& file) const;
 
   // Get a backtrace with the given call context added to the top.
-  // May not be called until after construction with a valid snapshot.
   cmListFileBacktrace Push(cmListFileContext const& lfc) const;
 
   // Get a backtrace with the top level removed.

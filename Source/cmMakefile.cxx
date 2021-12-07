@@ -79,7 +79,6 @@ cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,
                        cmStateSnapshot const& snapshot)
   : GlobalGenerator(globalGenerator)
   , StateSnapshot(snapshot)
-  , Backtrace(snapshot)
 {
   this->IsSourceFileTryCompile = false;
 

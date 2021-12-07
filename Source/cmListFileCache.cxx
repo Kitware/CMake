@@ -443,44 +443,18 @@ cm::optional<cmListFileContext> cmListFileParser::CheckNesting() const
   return cm::nullopt;
 }
 
-// We hold either the bottom scope of a directory or a call/file context.
-// Discriminate these cases via the parent pointer.
+// We hold a call/file context.
 struct cmListFileBacktrace::Entry
 {
-  Entry(cmStateSnapshot bottom)
-    : Bottom(bottom)
-  {
-  }
-
   Entry(std::shared_ptr<Entry const> parent, cmListFileContext lfc)
     : Context(std::move(lfc))
     , Parent(std::move(parent))
   {
   }
 
-  ~Entry()
-  {
-    if (this->Parent) {
-      this->Context.~cmListFileContext();
-    } else {
-      this->Bottom.~cmStateSnapshot();
-    }
-  }
-
-  bool IsBottom() const { return !this->Parent; }
-
-  union
-  {
-    cmStateSnapshot Bottom;
-    cmListFileContext Context;
-  };
+  cmListFileContext Context;
   std::shared_ptr<Entry const> Parent;
 };
-
-cmListFileBacktrace::cmListFileBacktrace(cmStateSnapshot const& snapshot)
-  : TopEntry(std::make_shared<Entry const>(snapshot.GetCallStackBottom()))
-{
-}
 
 /* NOLINTNEXTLINE(performance-unnecessary-value-param) */
 cmListFileBacktrace::cmListFileBacktrace(std::shared_ptr<Entry const> parent,
@@ -492,18 +466,6 @@ cmListFileBacktrace::cmListFileBacktrace(std::shared_ptr<Entry const> parent,
 cmListFileBacktrace::cmListFileBacktrace(std::shared_ptr<Entry const> top)
   : TopEntry(std::move(top))
 {
-}
-
-cmStateSnapshot cmListFileBacktrace::GetBottom() const
-{
-  cmStateSnapshot bottom;
-  if (Entry const* cur = this->TopEntry.get()) {
-    while (Entry const* parent = cur->Parent.get()) {
-      cur = parent;
-    }
-    bottom = cur->Bottom;
-  }
-  return bottom;
 }
 
 cmListFileBacktrace cmListFileBacktrace::Push(std::string const& file) const
@@ -520,22 +482,18 @@ cmListFileBacktrace cmListFileBacktrace::Push(std::string const& file) const
 cmListFileBacktrace cmListFileBacktrace::Push(
   cmListFileContext const& lfc) const
 {
-  assert(this->TopEntry);
-  assert(!this->TopEntry->IsBottom() || this->TopEntry->Bottom.IsValid());
   return cmListFileBacktrace(this->TopEntry, lfc);
 }
 
 cmListFileBacktrace cmListFileBacktrace::Pop() const
 {
   assert(this->TopEntry);
-  assert(!this->TopEntry->IsBottom());
   return cmListFileBacktrace(this->TopEntry->Parent);
 }
 
 cmListFileContext const& cmListFileBacktrace::Top() const
 {
   assert(this->TopEntry);
-  assert(!this->TopEntry->IsBottom());
   return this->TopEntry->Context;
 }
 
@@ -543,7 +501,7 @@ size_t cmListFileBacktrace::Depth() const
 {
   size_t depth = 0;
   if (Entry const* cur = this->TopEntry.get()) {
-    for (; !cur->IsBottom(); cur = cur->Parent.get()) {
+    for (; cur; cur = cur->Parent.get()) {
       ++depth;
     }
   }
@@ -552,7 +510,7 @@ size_t cmListFileBacktrace::Depth() const
 
 bool cmListFileBacktrace::Empty() const
 {
-  return !this->TopEntry || this->TopEntry->IsBottom();
+  return !this->TopEntry;
 }
 
 std::ostream& operator<<(std::ostream& os, cmListFileContext const& lfc)
