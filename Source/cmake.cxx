@@ -2155,7 +2155,8 @@ int cmake::ActualConfigure()
       "CMakeLists.txt ?");
   }
 
-  this->State->SaveVerificationScript(this->GetHomeOutputDirectory());
+  this->State->SaveVerificationScript(this->GetHomeOutputDirectory(),
+                                      this->Messenger.get());
   this->SaveCache(this->GetHomeOutputDirectory());
   if (cmSystemTools::GetErrorOccuredFlag()) {
     return -1;
@@ -2452,7 +2453,7 @@ void cmake::AddGlobCacheEntry(bool recurse, bool listDirectories,
 {
   this->State->AddGlobCacheEntry(recurse, listDirectories, followSymlinks,
                                  relative, expression, files, variable,
-                                 backtrace);
+                                 backtrace, this->Messenger.get());
 }
 
 std::vector<std::string> cmake::GetAllExtensions() const

@@ -4,6 +4,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <iosfwd>
 #include <string>
 
 #include "cmListFileCache.h"
@@ -46,6 +47,10 @@ public:
   {
     return this->DeprecatedWarningsAsErrors;
   }
+
+  // Print the top of a backtrace.
+  void PrintBacktraceTitle(std::ostream& out,
+                           cmListFileBacktrace const& bt) const;
 
 private:
   bool IsMessageTypeVisible(MessageType t) const;

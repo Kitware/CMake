@@ -228,22 +228,22 @@ std::string const& cmState::GetGlobVerifyStamp() const
   return this->GlobVerificationManager->GetVerifyStamp();
 }
 
-bool cmState::SaveVerificationScript(const std::string& path)
+bool cmState::SaveVerificationScript(const std::string& path,
+                                     cmMessenger* messenger)
 {
-  return this->GlobVerificationManager->SaveVerificationScript(path);
+  return this->GlobVerificationManager->SaveVerificationScript(path,
+                                                               messenger);
 }
 
-void cmState::AddGlobCacheEntry(bool recurse, bool listDirectories,
-                                bool followSymlinks,
-                                const std::string& relative,
-                                const std::string& expression,
-                                const std::vector<std::string>& files,
-                                const std::string& variable,
-                                cmListFileBacktrace const& backtrace)
+void cmState::AddGlobCacheEntry(
+  bool recurse, bool listDirectories, bool followSymlinks,
+  const std::string& relative, const std::string& expression,
+  const std::vector<std::string>& files, const std::string& variable,
+  cmListFileBacktrace const& backtrace, cmMessenger* messenger)
 {
   this->GlobVerificationManager->AddCacheEntry(
     recurse, listDirectories, followSymlinks, relative, expression, files,
-    variable, backtrace);
+    variable, backtrace, messenger);
 }
 
 void cmState::RemoveCacheEntry(std::string const& key)

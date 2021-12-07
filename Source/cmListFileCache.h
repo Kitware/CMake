@@ -191,12 +191,6 @@ public:
   // This may be called only if Empty() would return false.
   cmListFileContext const& Top() const;
 
-  // Print the top of the backtrace.
-  void PrintTitle(std::ostream& out) const;
-
-  // Print the call stack below the top of the backtrace.
-  void PrintCallStack(std::ostream& out) const;
-
   // Get the number of 'frames' in this backtrace
   size_t Depth() const;
 

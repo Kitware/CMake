@@ -14,7 +14,6 @@
 #include "cmListFileLexer.h"
 #include "cmMessageType.h"
 #include "cmMessenger.h"
-#include "cmState.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
@@ -538,53 +537,6 @@ cmListFileContext const& cmListFileBacktrace::Top() const
   assert(this->TopEntry);
   assert(!this->TopEntry->IsBottom());
   return this->TopEntry->Context;
-}
-
-void cmListFileBacktrace::PrintTitle(std::ostream& out) const
-{
-  // The title exists only if we have a call on top of the bottom.
-  if (!this->TopEntry || this->TopEntry->IsBottom()) {
-    return;
-  }
-  cmListFileContext lfc = this->TopEntry->Context;
-  cmStateSnapshot bottom = this->GetBottom();
-  if (bottom.GetState()->GetProjectKind() == cmState::ProjectKind::Normal) {
-    lfc.FilePath = cmSystemTools::RelativeIfUnder(
-      bottom.GetState()->GetSourceDirectory(), lfc.FilePath);
-  }
-  out << (lfc.Line ? " at " : " in ") << lfc;
-}
-
-void cmListFileBacktrace::PrintCallStack(std::ostream& out) const
-{
-  // The call stack exists only if we have at least two calls on top
-  // of the bottom.
-  if (!this->TopEntry || this->TopEntry->IsBottom() ||
-      this->TopEntry->Parent->IsBottom()) {
-    return;
-  }
-
-  bool first = true;
-  cmStateSnapshot bottom = this->GetBottom();
-  for (Entry const* cur = this->TopEntry->Parent.get(); !cur->IsBottom();
-       cur = cur->Parent.get()) {
-    if (cur->Context.Name.empty() &&
-        cur->Context.Line != cmListFileContext::DeferPlaceholderLine) {
-      // Skip this whole-file scope.  When we get here we already will
-      // have printed a more-specific context within the file.
-      continue;
-    }
-    if (first) {
-      first = false;
-      out << "Call Stack (most recent call first):\n";
-    }
-    cmListFileContext lfc = cur->Context;
-    if (bottom.GetState()->GetProjectKind() == cmState::ProjectKind::Normal) {
-      lfc.FilePath = cmSystemTools::RelativeIfUnder(
-        bottom.GetState()->GetSourceDirectory(), lfc.FilePath);
-    }
-    out << "  " << lfc << "\n";
-  }
 }
 
 size_t cmListFileBacktrace::Depth() const

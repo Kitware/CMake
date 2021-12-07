@@ -12,6 +12,8 @@
 
 #include "cmListFileCache.h"
 
+class cmMessenger;
+
 /** \class cmGlobVerificationManager
  * \brief Class for expressing build-time dependencies on glob expressions.
  *
@@ -23,7 +25,7 @@ class cmGlobVerificationManager
 protected:
   //! Save verification script for given makefile.
   //! Saves to output <path>/<CMakeFilesDirectory>/VerifyGlobs.cmake
-  bool SaveVerificationScript(const std::string& path);
+  bool SaveVerificationScript(const std::string& path, cmMessenger* messenger);
 
   //! Add an entry into the glob cache
   void AddCacheEntry(bool recurse, bool listDirectories, bool followSymlinks,
@@ -31,7 +33,7 @@ protected:
                      const std::string& expression,
                      const std::vector<std::string>& files,
                      const std::string& variable,
-                     const cmListFileBacktrace& bt);
+                     const cmListFileBacktrace& bt, cmMessenger* messenger);
 
   //! Clear the glob cache for state reset.
   void Reset();

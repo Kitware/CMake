@@ -238,13 +238,14 @@ private:
   bool DoWriteGlobVerifyTarget() const;
   std::string const& GetGlobVerifyScript() const;
   std::string const& GetGlobVerifyStamp() const;
-  bool SaveVerificationScript(const std::string& path);
+  bool SaveVerificationScript(const std::string& path, cmMessenger* messenger);
   void AddGlobCacheEntry(bool recurse, bool listDirectories,
                          bool followSymlinks, const std::string& relative,
                          const std::string& expression,
                          const std::vector<std::string>& files,
                          const std::string& variable,
-                         cmListFileBacktrace const& bt);
+                         cmListFileBacktrace const& bt,
+                         cmMessenger* messenger);
 
   cmPropertyDefinitionMap PropertyDefinitions;
   std::vector<std::string> EnabledLanguages;
