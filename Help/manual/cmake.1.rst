@@ -250,6 +250,20 @@ Options
  See also the :variable:`CMAKE_FIND_DEBUG_MODE` variable for debugging
  a more local part of the project.
 
+``--debug-find=<pkg>[,...]``
+ Put cmake find commands in a debug mode when running under calls
+ to ``find_package(<pkg>)``, where ``<pkg>`` is an entry in the given
+ comma-separated list of case-sensitive package names.
+
+ Like ``--debug-find``, but limiting scope to the specified packages.
+
+``--debug-find-var=<var>[,...]``
+ Put cmake find commands in a debug mode when called with ``<var>``
+ as the return variable, where ``<var>`` is an entry in the given
+ comma-separated list.
+
+ Like ``--debug-find``, but limiting scope to the specified variable names.
+
 ``--trace``
  Put cmake in trace mode.
 

@@ -177,13 +177,14 @@ cmFindProgramCommand::cmFindProgramCommand(cmExecutionStatus& status)
 // cmFindProgramCommand
 bool cmFindProgramCommand::InitialPass(std::vector<std::string> const& argsIn)
 {
-  this->DebugMode = this->ComputeIfDebugModeWanted();
+
   this->CMakePathName = "PROGRAM";
 
   // call cmFindBase::ParseArguments
   if (!this->ParseArguments(argsIn)) {
     return false;
   }
+  this->DebugMode = this->ComputeIfDebugModeWanted(this->VariableName);
 
   if (this->AlreadyDefined) {
     this->NormalizeFindResult();

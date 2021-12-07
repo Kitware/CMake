@@ -486,7 +486,11 @@ public:
 
   //! Do we want debug output from the find commands during the cmake run.
   bool GetDebugFindOutput() const { return this->DebugFindOutput; }
-  void SetDebugFindOutputOn(bool b) { this->DebugFindOutput = b; }
+  bool GetDebugFindOutput(std::string const& var) const;
+  bool GetDebugFindPkgOutput(std::string const& var) const;
+  void SetDebugFindOutput(bool b) { this->DebugFindOutput = b; }
+  void SetDebugFindOutputPkgs(std::string const& args);
+  void SetDebugFindOutputVars(std::string const& args);
 
   //! Do we want trace output during the cmake run.
   bool GetTrace() const { return this->Trace; }
@@ -703,6 +707,9 @@ private:
   std::unique_ptr<cmMessenger> Messenger;
 
   std::vector<std::string> TraceOnlyThisSources;
+
+  std::set<std::string> DebugFindPkgs;
+  std::set<std::string> DebugFindVars;
 
   LogLevel MessageLogLevel = LogLevel::LOG_STATUS;
   bool LogLevelWasSetViaCLI = false;
