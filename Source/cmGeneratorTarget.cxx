@@ -52,8 +52,6 @@
 #include "cmTargetPropertyComputer.h"
 #include "cmake.h"
 
-class cmMessenger;
-
 namespace {
 const cmsys::RegularExpression FrameworkRegularExpression(
   "^(.*/)?([^/]*)\\.framework/(.*)$");
@@ -61,8 +59,7 @@ const cmsys::RegularExpression FrameworkRegularExpression(
 
 template <>
 cmValue cmTargetPropertyComputer::GetSources<cmGeneratorTarget>(
-  cmGeneratorTarget const* tgt, cmMessenger* /* messenger */,
-  cmListFileBacktrace const& /* context */)
+  cmGeneratorTarget const* tgt, cmMakefile const& /* mf */)
 {
   return tgt->GetSourcesProperty();
 }
@@ -439,8 +436,8 @@ std::string cmGeneratorTarget::GetExportName() const
 
 cmValue cmGeneratorTarget::GetProperty(const std::string& prop) const
 {
-  if (cmValue result = cmTargetPropertyComputer::GetProperty(
-        this, prop, this->Makefile->GetMessenger(), this->GetBacktrace())) {
+  if (cmValue result =
+        cmTargetPropertyComputer::GetProperty(this, prop, *this->Makefile)) {
     return result;
   }
   if (cmSystemTools::GetFatalErrorOccured()) {

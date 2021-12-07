@@ -27,7 +27,6 @@
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
-#include "cmMessenger.h"
 #include "cmProperty.h"
 #include "cmPropertyMap.h"
 #include "cmRange.h"
@@ -82,9 +81,8 @@ const std::string& cmTargetPropertyComputer::ComputeLocation<cmTarget>(
 }
 
 template <>
-cmValue cmTargetPropertyComputer::GetSources<cmTarget>(
-  cmTarget const* tgt, cmMessenger* messenger,
-  cmListFileBacktrace const& context)
+cmValue cmTargetPropertyComputer::GetSources<cmTarget>(cmTarget const* tgt,
+                                                       cmMakefile const& mf)
 {
   cmBTStringRange entries = tgt->GetSourceEntries();
   if (entries.empty()) {
@@ -111,7 +109,7 @@ cmValue cmTargetPropertyComputer::GetSources<cmTarget>(
         bool noMessage = true;
         std::ostringstream e;
         MessageType messageType = MessageType::AUTHOR_WARNING;
-        switch (context.GetBottom().GetPolicy(cmPolicies::CMP0051)) {
+        switch (mf.GetPolicyStatus(cmPolicies::CMP0051)) {
           case cmPolicies::WARN:
             e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0051) << "\n";
             noMessage = false;
@@ -132,7 +130,7 @@ cmValue cmTargetPropertyComputer::GetSources<cmTarget>(
                "time.  Code reading that property needs to be adapted to "
                "ignore the generator expression using the string(GENEX_STRIP) "
                "command.";
-          messenger->IssueMessage(messageType, e.str(), context);
+          mf.IssueMessage(messageType, e.str());
         }
         if (addContent) {
           ss << sep;
@@ -1813,10 +1811,9 @@ void cmTarget::CheckProperty(const std::string& prop,
 }
 
 cmValue cmTarget::GetComputedProperty(const std::string& prop,
-                                      cmMessenger* messenger,
-                                      cmListFileBacktrace const& context) const
+                                      cmMakefile& mf) const
 {
-  return cmTargetPropertyComputer::GetProperty(this, prop, messenger, context);
+  return cmTargetPropertyComputer::GetProperty(this, prop, mf);
 }
 
 cmValue cmTarget::GetProperty(const std::string& prop) const
