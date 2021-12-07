@@ -497,17 +497,6 @@ cmListFileContext const& cmListFileBacktrace::Top() const
   return this->TopEntry->Context;
 }
 
-size_t cmListFileBacktrace::Depth() const
-{
-  size_t depth = 0;
-  if (Entry const* cur = this->TopEntry.get()) {
-    for (; cur; cur = cur->Parent.get()) {
-      ++depth;
-    }
-  }
-  return depth;
-}
-
 bool cmListFileBacktrace::Empty() const
 {
   return !this->TopEntry;

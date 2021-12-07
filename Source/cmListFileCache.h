@@ -4,7 +4,6 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <cstddef>
 #include <iosfwd>
 #include <memory>
 #include <string>
@@ -179,9 +178,6 @@ public:
   // Get the context at the top of the backtrace.
   // This may be called only if Empty() would return false.
   cmListFileContext const& Top() const;
-
-  // Get the number of 'frames' in this backtrace
-  size_t Depth() const;
 
   // Return true if this backtrace is empty.
   bool Empty() const;
