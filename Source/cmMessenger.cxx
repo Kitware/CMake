@@ -4,8 +4,6 @@
 
 #include "cmDocumentationFormatter.h"
 #include "cmMessageMetadata.h"
-#include "cmState.h"
-#include "cmStateSnapshot.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
@@ -14,6 +12,7 @@
 #endif
 
 #include <sstream>
+#include <utility>
 
 #include "cmsys/Terminal.h"
 
@@ -154,7 +153,8 @@ static void displayMessage(MessageType t, std::ostringstream& msg)
 }
 
 namespace {
-void PrintCallStack(std::ostream& out, cmListFileBacktrace bt)
+void PrintCallStack(std::ostream& out, cmListFileBacktrace bt,
+                    cm::optional<std::string> const& topSource)
 {
   // The call stack exists only if we have at least two calls on top
   // of the bottom.
@@ -167,7 +167,6 @@ void PrintCallStack(std::ostream& out, cmListFileBacktrace bt)
   }
 
   bool first = true;
-  cmStateSnapshot bottom = bt.GetBottom();
   for (; !bt.Empty(); bt = bt.Pop()) {
     cmListFileContext lfc = bt.Top();
     if (lfc.Name.empty() &&
@@ -180,9 +179,8 @@ void PrintCallStack(std::ostream& out, cmListFileBacktrace bt)
       first = false;
       out << "Call Stack (most recent call first):\n";
     }
-    if (bottom.GetState()->GetProjectKind() == cmState::ProjectKind::Normal) {
-      lfc.FilePath = cmSystemTools::RelativeIfUnder(
-        bottom.GetState()->GetSourceDirectory(), lfc.FilePath);
+    if (topSource) {
+      lfc.FilePath = cmSystemTools::RelativeIfUnder(*topSource, lfc.FilePath);
     }
     out << "  " << lfc << "\n";
   }
@@ -219,7 +217,7 @@ void cmMessenger::DisplayMessage(MessageType t, const std::string& text,
   printMessageText(msg, text);
 
   // Add the rest of the context.
-  PrintCallStack(msg, backtrace);
+  PrintCallStack(msg, backtrace, this->TopSource);
 
   displayMessage(t, msg);
 }
@@ -232,10 +230,14 @@ void cmMessenger::PrintBacktraceTitle(std::ostream& out,
     return;
   }
   cmListFileContext lfc = bt.Top();
-  cmStateSnapshot bottom = bt.GetBottom();
-  if (bottom.GetState()->GetProjectKind() == cmState::ProjectKind::Normal) {
-    lfc.FilePath = cmSystemTools::RelativeIfUnder(
-      bottom.GetState()->GetSourceDirectory(), lfc.FilePath);
+  if (this->TopSource) {
+    lfc.FilePath =
+      cmSystemTools::RelativeIfUnder(*this->TopSource, lfc.FilePath);
   }
   out << (lfc.Line ? " at " : " in ") << lfc;
+}
+
+void cmMessenger::SetTopSource(cm::optional<std::string> topSource)
+{
+  this->TopSource = std::move(topSource);
 }

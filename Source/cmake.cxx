@@ -1706,6 +1706,12 @@ void cmake::SetHomeDirectory(const std::string& dir)
   if (this->CurrentSnapshot.IsValid()) {
     this->CurrentSnapshot.SetDefinition("CMAKE_SOURCE_DIR", dir);
   }
+
+  if (this->State->GetProjectKind() == cmState::ProjectKind::Normal) {
+    this->Messenger->SetTopSource(this->GetHomeDirectory());
+  } else {
+    this->Messenger->SetTopSource(cm::nullopt);
+  }
 }
 
 std::string const& cmake::GetHomeDirectory() const

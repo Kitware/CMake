@@ -7,6 +7,8 @@
 #include <iosfwd>
 #include <string>
 
+#include <cm/optional>
+
 #include "cmListFileCache.h"
 #include "cmMessageType.h"
 
@@ -19,6 +21,8 @@ public:
 
   void DisplayMessage(MessageType t, std::string const& text,
                       cmListFileBacktrace const& backtrace) const;
+
+  void SetTopSource(cm::optional<std::string> topSource);
 
   void SetSuppressDevWarnings(bool suppress)
   {
@@ -55,6 +59,8 @@ public:
 private:
   bool IsMessageTypeVisible(MessageType t) const;
   MessageType ConvertMessageType(MessageType t) const;
+
+  cm::optional<std::string> TopSource;
 
   bool SuppressDevWarnings = false;
   bool SuppressDeprecatedWarnings = false;
