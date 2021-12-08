@@ -106,7 +106,8 @@ void cmExportBuildAndroidMKGenerator::GenerateInterfaceProperties(
         std::string sharedLibs;
         std::string ldlibs;
         cmLinkInterfaceLibraries const* linkIFace =
-          target->GetLinkInterfaceLibraries(config, target, false);
+          target->GetLinkInterfaceLibraries(
+            config, target, cmGeneratorTarget::LinkInterfaceFor::Link);
         for (cmLinkItem const& item : linkIFace->Libraries) {
           cmGeneratorTarget const* gt = item.Target;
           std::string const& lib = item.AsStr();
