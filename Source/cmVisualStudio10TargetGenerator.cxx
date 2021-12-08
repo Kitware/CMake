@@ -3228,6 +3228,8 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaOptions(
     this->LocalGenerator, Options::CudaCompiler, gg->GetCudaFlagTable());
   Options& cudaOptions = *pOptions;
 
+  auto cudaVersion = this->GlobalGenerator->GetPlatformToolsetCudaString();
+
   // Get compile flags for CUDA in this directory.
   std::string flags;
   this->LocalGenerator->AddLanguageFlags(flags, this->GeneratorTarget, "CUDA",
@@ -3263,7 +3265,22 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaOptions(
     // to not have the source file extension at all
     cudaOptions.AddFlag("CompileOut", "$(IntDir)%(Filename).ptx");
     notPtx = false;
+
+    if (cmSystemTools::VersionCompare(cmSystemTools::OP_GREATER_EQUAL,
+                                      cudaVersion, "9.0") &&
+        cmSystemTools::VersionCompare(cmSystemTools::OP_LESS, cudaVersion,
+                                      "11.5")) {
+      // The DriverApi flag before 11.5 ( verified back to 9.0 ) which controls
+      // PTX compilation doesn't propagate user defines causing
+      // target_compile_definitions to behave differently for VS +
+      // PTX compared to other generators so we patch the rules
+      // to normalize behavior
+      cudaOptions.AddFlag("DriverApiCommandLineTemplate",
+                          "%(BaseCommandLineTemplate) [CompileOut] [FastMath] "
+                          "[Defines] \"%(FullPath)\"");
+    }
   }
+
   if (notPtx &&
       cmSystemTools::VersionCompareGreaterEq(
         "8.0", this->GlobalGenerator->GetPlatformToolsetCudaString())) {
