@@ -678,6 +678,14 @@ public:
     this->Start = this->NormalizeIndex(this->Start, count);
     this->Stop = this->NormalizeIndex(this->Stop, count);
 
+    // Does stepping move us further from the end?
+    if (this->Start > this->Stop) {
+      throw transform_error(
+        cmStrCat("sub-command TRANSFORM, selector FOR "
+                 "expects <start> to be no greater than <stop> (",
+                 this->Start, " > ", this->Stop, ")"));
+    }
+
     // compute indexes
     auto size = (this->Stop - this->Start + 1) / this->Step;
     if ((this->Stop - this->Start + 1) % this->Step != 0) {
@@ -1026,9 +1034,10 @@ bool HandleTransformCommand(std::vector<std::string> const& args,
         }
       }
 
-      if (step < 0) {
+      if (step <= 0) {
         status.SetError("sub-command TRANSFORM, selector FOR expects "
-                        "non negative numeric value for <step>.");
+                        "positive numeric value for <step>.");
+        return false;
       }
 
       command.Selector =
