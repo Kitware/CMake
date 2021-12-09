@@ -12,7 +12,6 @@
 #include <vector>
 
 #include "cmAlgorithms.h"
-#include "cmListFileCache.h"
 #include "cmPolicies.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
@@ -23,11 +22,17 @@ class cmCustomCommand;
 class cmFileSet;
 class cmGlobalGenerator;
 class cmInstallTargetGenerator;
+class cmListFileBacktrace;
+class cmListFileContext;
 class cmMakefile;
-class cmMessenger;
 class cmPropertyMap;
 class cmSourceFile;
 class cmTargetInternals;
+
+template <typename T>
+class BT;
+template <typename T>
+class BTs;
 
 /** \class cmTarget
  * \brief Represent a library or executable target loaded from a makefile.
@@ -184,8 +189,7 @@ public:
   std::string const& GetSafeProperty(std::string const& prop) const;
   bool GetPropertyAsBool(const std::string& prop) const;
   void CheckProperty(const std::string& prop, cmMakefile* context) const;
-  cmValue GetComputedProperty(const std::string& prop, cmMessenger* messenger,
-                              cmListFileBacktrace const& context) const;
+  cmValue GetComputedProperty(const std::string& prop, cmMakefile& mf) const;
   //! Get all properties
   cmPropertyMap const& GetProperties() const;
 

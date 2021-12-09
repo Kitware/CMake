@@ -4,7 +4,6 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <cstddef>
 #include <iosfwd>
 #include <memory>
 #include <string>
@@ -13,7 +12,6 @@
 
 #include <cm/optional>
 
-#include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
 
 /** \class cmListFileCache
@@ -82,20 +80,24 @@ public:
   cm::optional<std::string> DeferId;
 
   cmListFileContext() = default;
+  cmListFileContext(cmListFileContext&& /*other*/) = default;
+  cmListFileContext(const cmListFileContext& /*other*/) = default;
+  cmListFileContext& operator=(const cmListFileContext& /*other*/) = default;
+#if __cplusplus >= 201703L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L)
+  cmListFileContext& operator=(cmListFileContext&& /*other*/) = default;
+#else
+  // The move assignment operators for several STL classes did not become
+  // noexcept until C++17, which causes some tools to warn about this move
+  // assignment operator throwing an exception when it shouldn't.
+  cmListFileContext& operator=(cmListFileContext&& /*other*/) = delete;
+#endif
+
   cmListFileContext(std::string name, std::string filePath, long line)
     : Name(std::move(name))
     , FilePath(std::move(filePath))
     , Line(line)
   {
   }
-
-#if __cplusplus < 201703L && (!defined(_MSVC_LANG) || _MSVC_LANG < 201703L)
-  cmListFileContext(const cmListFileContext& /*other*/) = default;
-  cmListFileContext(cmListFileContext&& /*other*/) = default;
-
-  cmListFileContext& operator=(const cmListFileContext& /*other*/) = default;
-  cmListFileContext& operator=(cmListFileContext&& /*other*/) = delete;
-#endif
 
   static cmListFileContext FromCommandContext(
     cmCommandContext const& lfcc, std::string const& fileName,
@@ -164,23 +166,13 @@ private:
 class cmListFileBacktrace
 {
 public:
-  // Default-constructed backtrace may not be used until after
-  // set via assignment from a backtrace constructed with a
-  // valid snapshot.
+  // Default-constructed backtrace is empty.
   cmListFileBacktrace() = default;
 
-  // Construct an empty backtrace whose bottom sits in the directory
-  // indicated by the given valid snapshot.
-  cmListFileBacktrace(cmStateSnapshot const& snapshot);
-
-  cmStateSnapshot GetBottom() const;
-
   // Get a backtrace with the given file scope added to the top.
-  // May not be called until after construction with a valid snapshot.
   cmListFileBacktrace Push(std::string const& file) const;
 
   // Get a backtrace with the given call context added to the top.
-  // May not be called until after construction with a valid snapshot.
   cmListFileBacktrace Push(cmListFileContext const& lfc) const;
 
   // Get a backtrace with the top level removed.
@@ -190,15 +182,6 @@ public:
   // Get the context at the top of the backtrace.
   // This may be called only if Empty() would return false.
   cmListFileContext const& Top() const;
-
-  // Print the top of the backtrace.
-  void PrintTitle(std::ostream& out) const;
-
-  // Print the call stack below the top of the backtrace.
-  void PrintCallStack(std::ostream& out) const;
-
-  // Get the number of 'frames' in this backtrace
-  size_t Depth() const;
 
   // Return true if this backtrace is empty.
   bool Empty() const;
