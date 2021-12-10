@@ -237,14 +237,20 @@ public:
                             cmOptionalLinkInterface& iface,
                             const cmGeneratorTarget* head) const;
 
+  enum class LinkInterfaceFor
+  {
+    Usage, // Interface for usage requirements excludes $<LINK_ONLY>.
+    Link,  // Interface for linking includes $<LINK_ONLY>.
+  };
+
   cmLinkInterfaceLibraries const* GetLinkInterfaceLibraries(
     const std::string& config, const cmGeneratorTarget* headTarget,
-    bool usage_requirements_only) const;
+    LinkInterfaceFor interfaceFor) const;
 
   void ComputeLinkInterfaceLibraries(const std::string& config,
                                      cmOptionalLinkInterface& iface,
                                      const cmGeneratorTarget* head,
-                                     bool usage_requirements_only) const;
+                                     LinkInterfaceFor interfaceFor) const;
 
   /** Get the library name for an imported interface library.  */
   std::string GetImportedLibName(std::string const& config) const;
@@ -781,7 +787,7 @@ public:
   std::string EvaluateInterfaceProperty(
     std::string const& prop, cmGeneratorExpressionContext* context,
     cmGeneratorExpressionDAGChecker* dagCheckerParent,
-    bool usage_requirements_only = true) const;
+    LinkInterfaceFor interfaceFor = LinkInterfaceFor::Usage) const;
 
   bool HaveInstallTreeRPATH(const std::string& config) const;
 
@@ -994,7 +1000,7 @@ private:
 
   cmLinkInterface const* GetImportLinkInterface(const std::string& config,
                                                 const cmGeneratorTarget* head,
-                                                bool usage_requirements_only,
+                                                LinkInterfaceFor interfaceFor,
                                                 bool secondPass = false) const;
 
   using KindedSourcesMapType = std::map<std::string, KindedSources>;
@@ -1008,7 +1014,7 @@ private:
   mutable std::unordered_map<std::string, bool> MaybeInterfacePropertyExists;
   bool MaybeHaveInterfaceProperty(std::string const& prop,
                                   cmGeneratorExpressionContext* context,
-                                  bool usage_requirements_only) const;
+                                  LinkInterfaceFor interfaceFor) const;
 
   using TargetPropertyEntryVector =
     std::vector<std::unique_ptr<TargetPropertyEntry>>;
@@ -1042,7 +1048,7 @@ private:
   void ExpandLinkItems(std::string const& prop, std::string const& value,
                        std::string const& config,
                        const cmGeneratorTarget* headTarget,
-                       bool usage_requirements_only,
+                       LinkInterfaceFor interfaceFor,
                        cmLinkInterface& iface) const;
 
   struct LookupLinkItemScope
