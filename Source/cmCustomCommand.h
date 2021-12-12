@@ -38,6 +38,10 @@ public:
   const std::vector<std::string>& GetDepends() const;
   void SetDepends(std::vector<std::string> depends);
 
+  bool HasMainDependency() const { return this->HasMainDependency_; }
+  const std::string& GetMainDependency() const;
+  void SetMainDependency(std::string main_dependency);
+
   /** Get the working directory.  */
   std::string const& GetWorkingDirectory() const
   {
@@ -130,5 +134,6 @@ private:
   bool UsesTerminal = false;
   bool CommandExpandLists = false;
   bool StdPipesUTF8 = false;
+  bool HasMainDependency_ = false;
   cmPolicies::PolicyStatus CMP0116Status = cmPolicies::WARN;
 };

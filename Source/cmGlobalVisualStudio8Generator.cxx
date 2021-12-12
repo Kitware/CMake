@@ -254,7 +254,6 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     // file as the main dependency because it would get
     // overwritten by the CreateVCProjBuildRule.
     // (this could be avoided with per-target source files)
-    std::string no_main_dependency;
     cc = cm::make_unique<cmCustomCommand>();
     cc->SetOutputs(stamps);
     cc->SetDepends(listFiles);
@@ -263,8 +262,8 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     cc->SetCMP0116Status(cmPolicies::NEW);
     cc->SetEscapeOldStyle(false);
     cc->SetStdPipesUTF8(stdPipesUTF8);
-    if (cmSourceFile* file = lg.AddCustomCommandToOutput(
-          no_main_dependency, std::move(cc), true)) {
+    if (cmSourceFile* file =
+          lg.AddCustomCommandToOutput(std::move(cc), true)) {
       gt->AddSource(file->ResolveFullPath());
     } else {
       cmSystemTools::Error("Error adding rule for " + stamps[0]);

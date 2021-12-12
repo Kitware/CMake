@@ -335,9 +335,10 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
   } else if (target.empty()) {
     // Target is empty, use the output.
     cc->SetOutputs(output);
+    cc->SetMainDependency(main_dependency);
     cc->SetDepends(depends);
     cc->SetImplicitDepends(implicit_depends);
-    mf.AddCustomCommandToOutput(main_dependency, std::move(cc));
+    mf.AddCustomCommandToOutput(std::move(cc));
   } else if (!byproducts.empty()) {
     status.SetError("BYPRODUCTS may not be specified with SOURCE signatures");
     return false;

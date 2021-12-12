@@ -129,7 +129,6 @@ void cmLocalVisualStudio7Generator::FixGlobalTargets()
     if (l->GetType() == cmStateEnums::GLOBAL_TARGET) {
       cmCustomCommandLines force_commands =
         cmMakeSingleCommandLine({ "cd", "." });
-      std::string no_main_dependency;
       std::string force = cmStrCat(this->GetCurrentBinaryDirectory(),
                                    "/CMakeFiles/", l->GetName(), "_force");
       if (cmSourceFile* sf =
@@ -141,8 +140,8 @@ void cmLocalVisualStudio7Generator::FixGlobalTargets()
       cc->SetCommandLines(force_commands);
       cc->SetComment(" ");
       cc->SetCMP0116Status(cmPolicies::NEW);
-      if (cmSourceFile* file = this->AddCustomCommandToOutput(
-            no_main_dependency, std::move(cc), true)) {
+      if (cmSourceFile* file =
+            this->AddCustomCommandToOutput(std::move(cc), true)) {
         l->AddSource(file->ResolveFullPath());
       }
     }
@@ -266,13 +265,14 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
   std::string comment = cmStrCat("Building Custom Rule ", makefileIn);
   auto cc = cm::make_unique<cmCustomCommand>();
   cc->SetOutputs(stampName);
+  cc->SetMainDependency(makefileIn);
   cc->SetDepends(listFiles);
   cc->SetCommandLines(commandLines);
   cc->SetComment(comment.c_str());
   cc->SetCMP0116Status(cmPolicies::NEW);
   cc->SetEscapeOldStyle(false);
   cc->SetStdPipesUTF8(true);
-  this->AddCustomCommandToOutput(makefileIn, std::move(cc), true);
+  this->AddCustomCommandToOutput(std::move(cc), true);
   if (cmSourceFile* file = this->Makefile->GetSource(makefileIn)) {
     // Finalize the source file path now since we're adding this after
     // the generator validated all project-named sources.

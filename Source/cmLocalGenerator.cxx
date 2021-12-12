@@ -1072,8 +1072,7 @@ cmTarget* cmLocalGenerator::AddCustomCommandToTarget(
 }
 
 cmSourceFile* cmLocalGenerator::AddCustomCommandToOutput(
-  const std::string& main_dependency, std::unique_ptr<cmCustomCommand> cc,
-  bool replace)
+  std::unique_ptr<cmCustomCommand> cc, bool replace)
 {
   // Make sure there is at least one output.
   if (cc->GetOutputs().empty()) {
@@ -1083,8 +1082,7 @@ cmSourceFile* cmLocalGenerator::AddCustomCommandToOutput(
 
   cc->SetBacktrace(this->DirectoryBacktrace);
   return detail::AddCustomCommandToOutput(*this, cmCommandOrigin::Generator,
-                                          main_dependency, std::move(cc),
-                                          replace);
+                                          std::move(cc), replace);
 }
 
 cmTarget* cmLocalGenerator::AddUtilityCommand(
@@ -2724,7 +2722,6 @@ void cmLocalGenerator::CopyPchCompilePdb(
       configGenex(cmStrCat("-DPDB_PREFIX=", pdb_prefix)), configGenex("-P"),
       configGenex(copy_script) });
 
-  const std::string no_main_dependency;
   const char* no_message = "";
 
   std::vector<std::string> outputs;
@@ -2744,8 +2741,7 @@ void cmLocalGenerator::CopyPchCompilePdb(
       cmObjectLibraryCommands::Accept);
   } else {
     cc->SetOutputs(outputs);
-    cmSourceFile* copy_rule =
-      this->AddCustomCommandToOutput(no_main_dependency, std::move(cc));
+    cmSourceFile* copy_rule = this->AddCustomCommandToOutput(std::move(cc));
 
     if (copy_rule) {
       target->AddSource(copy_rule->ResolveFullPath());
@@ -4011,7 +4007,6 @@ std::string ComputeCustomCommandRuleFileName(cmLocalGenerator& lg,
 }
 
 cmSourceFile* AddCustomCommand(cmLocalGenerator& lg, cmCommandOrigin origin,
-                               const std::string& main_dependency,
                                std::unique_ptr<cmCustomCommand> cc,
                                bool replace)
 {
@@ -4023,7 +4018,8 @@ cmSourceFile* AddCustomCommand(cmLocalGenerator& lg, cmCommandOrigin origin,
 
   // Choose a source file on which to store the custom command.
   cmSourceFile* file = nullptr;
-  if (!commandLines.empty() && !main_dependency.empty()) {
+  if (!commandLines.empty() && cc->HasMainDependency()) {
+    const auto& main_dependency = cc->GetMainDependency();
     // The main dependency was specified.  Use it unless a different
     // custom command already used it.
     file = mf->GetSource(main_dependency);
@@ -4073,11 +4069,6 @@ cmSourceFile* AddCustomCommand(cmLocalGenerator& lg, cmCommandOrigin origin,
 
   // Attach the custom command to the file.
   if (file) {
-    // Construct a complete list of dependencies.
-    if (!main_dependency.empty()) {
-      cc->AppendDepends({ main_dependency });
-    }
-
     cc->SetEscapeAllowMakeVars(true);
 
     lg.AddSourceOutputs(file, outputs, cmLocalGenerator::OutputRole::Primary,
@@ -4142,11 +4133,10 @@ void AddCustomCommandToTarget(cmLocalGenerator& lg, cmCommandOrigin origin,
 
 cmSourceFile* AddCustomCommandToOutput(cmLocalGenerator& lg,
                                        cmCommandOrigin origin,
-                                       const std::string& main_dependency,
                                        std::unique_ptr<cmCustomCommand> cc,
                                        bool replace)
 {
-  return AddCustomCommand(lg, origin, main_dependency, std::move(cc), replace);
+  return AddCustomCommand(lg, origin, std::move(cc), replace);
 }
 
 void AppendCustomCommandToOutput(cmLocalGenerator& lg,
@@ -4206,10 +4196,8 @@ void AddUtilityCommand(cmLocalGenerator& lg, cmCommandOrigin origin,
     lg.CreateUtilityOutput(target->GetName(), byproducts, lfbt);
   cc->SetOutputs(output);
 
-  std::string no_main_dependency;
-  cmSourceFile* rule =
-    AddCustomCommand(lg, origin, no_main_dependency, std::move(cc),
-                     /*replace=*/false);
+  cmSourceFile* rule = AddCustomCommand(lg, origin, std::move(cc),
+                                        /*replace=*/false);
   if (rule) {
     lg.AddTargetByproducts(target, byproducts, lfbt, origin);
   }

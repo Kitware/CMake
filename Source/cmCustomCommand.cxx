@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCustomCommand.h"
 
+#include <cassert>
 #include <utility>
 
 #include <cmext/algorithm>
@@ -38,7 +39,30 @@ const std::vector<std::string>& cmCustomCommand::GetDepends() const
 
 void cmCustomCommand::SetDepends(std::vector<std::string> depends)
 {
+  if (this->HasMainDependency_) {
+    depends.insert(depends.begin(), std::move(this->Depends[0]));
+  }
+
   Depends = std::move(depends);
+}
+
+const std::string& cmCustomCommand::GetMainDependency() const
+{
+  assert(this->HasMainDependency_);
+  return this->Depends[0];
+}
+
+void cmCustomCommand::SetMainDependency(std::string main_dependency)
+{
+  if (this->HasMainDependency_) {
+    assert(!main_dependency.empty());
+    this->Depends[0] = std::move(main_dependency);
+  } else if (main_dependency.empty()) {
+    // Do nothing.
+  } else {
+    this->Depends.insert(this->Depends.begin(), std::move(main_dependency));
+    this->HasMainDependency_ = true;
+  }
 }
 
 const cmCustomCommandLines& cmCustomCommand::GetCommandLines() const

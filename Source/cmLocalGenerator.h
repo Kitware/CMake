@@ -330,8 +330,7 @@ public:
   /**
    * Add a custom command to a source file.
    */
-  cmSourceFile* AddCustomCommandToOutput(const std::string& main_dependency,
-                                         std::unique_ptr<cmCustomCommand> cc,
+  cmSourceFile* AddCustomCommandToOutput(std::unique_ptr<cmCustomCommand> cc,
                                          bool replace = false);
 
   /**
@@ -683,7 +682,6 @@ void AddCustomCommandToTarget(cmLocalGenerator& lg, cmCommandOrigin origin,
 
 cmSourceFile* AddCustomCommandToOutput(cmLocalGenerator& lg,
                                        cmCommandOrigin origin,
-                                       const std::string& main_dependency,
                                        std::unique_ptr<cmCustomCommand> cc,
                                        bool replace);
 
