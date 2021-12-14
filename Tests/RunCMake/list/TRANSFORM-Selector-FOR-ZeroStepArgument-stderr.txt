@@ -1,0 +1,5 @@
+^CMake Error at TRANSFORM-Selector-FOR-ZeroStepArgument.cmake:2 \(list\):
+  list sub-command TRANSFORM, selector FOR expects positive numeric value for
+  <step>.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)$
