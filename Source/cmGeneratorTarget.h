@@ -16,6 +16,7 @@
 
 #include <cm/optional>
 
+#include "cmAlgorithms.h"
 #include "cmLinkItem.h"
 #include "cmListFileCache.h"
 #include "cmPolicies.h"
@@ -983,7 +984,7 @@ private:
     std::string ImportLibrary;
     std::string LibName;
     std::string Languages;
-    std::string Libraries;
+    std::vector<BT<std::string>> Libraries;
     std::string LibrariesProp;
     std::string SharedDeps;
   };
@@ -1045,7 +1046,7 @@ private:
   bool IsLinkLookupScope(std::string const& n,
                          cmLocalGenerator const*& lg) const;
 
-  void ExpandLinkItems(std::string const& prop, std::string const& value,
+  void ExpandLinkItems(std::string const& prop, cmBTStringRange entries,
                        std::string const& config,
                        const cmGeneratorTarget* headTarget,
                        LinkInterfaceFor interfaceFor,
