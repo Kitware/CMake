@@ -570,7 +570,17 @@ public:
     this->First = true;
     this->Stream << "\t\t\t<Tool\n\t\t\t\tName=\"" << tool << "\"";
   }
-  void Finish() { this->Stream << (this->First ? "" : "\"") << "/>\n"; }
+  void Finish()
+  {
+    // If any commands were generated, finish constructing them.
+    if (!this->First) {
+      std::string finishScript =
+        this->LG->FinishConstructScript(IsManaged::No);
+      this->Stream << this->LG->EscapeForXML(finishScript) << "\"";
+    }
+
+    this->Stream << "/>\n";
+  }
   void Write(std::vector<cmCustomCommand> const& ccs)
   {
     for (cmCustomCommand const& command : ccs) {
@@ -1808,6 +1818,7 @@ void cmLocalVisualStudio7Generator::WriteCustomRule(
     if (this->FortranProject) {
       cmSystemTools::ReplaceString(script, "$(Configuration)", config);
     }
+    script += this->FinishConstructScript(IsManaged::No);
     /* clang-format off */
     fout << "\t\t\t\t\t<Tool\n"
          << "\t\t\t\t\tName=\"" << customTool << "\"\n"

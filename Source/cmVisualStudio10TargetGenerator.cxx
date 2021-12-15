@@ -1571,6 +1571,10 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
         }
       }
     }
+    cmLocalVisualStudioGenerator::IsManaged isManaged = (this->Managed)
+      ? cmLocalVisualStudioGenerator::IsManaged::Yes
+      : cmLocalVisualStudioGenerator::IsManaged::No;
+    script += lg->FinishConstructScript(isManaged);
     if (this->ProjectType == VsProjectType::csproj) {
       std::string name = "CustomCommand_" + c + "_" +
         cmSystemTools::ComputeStringMD5(sourcePath);
@@ -4285,6 +4289,12 @@ void cmVisualStudio10TargetGenerator::WriteEvent(
 
       stdPipesUTF8 = stdPipesUTF8 || cc.GetStdPipesUTF8();
     }
+  }
+  if (!script.empty()) {
+    cmLocalVisualStudioGenerator::IsManaged isManaged = (this->Managed)
+      ? cmLocalVisualStudioGenerator::IsManaged::Yes
+      : cmLocalVisualStudioGenerator::IsManaged::No;
+    script += lg->FinishConstructScript(isManaged);
   }
   comment = cmVS10EscapeComment(comment);
   if (this->ProjectType != VsProjectType::csproj) {
