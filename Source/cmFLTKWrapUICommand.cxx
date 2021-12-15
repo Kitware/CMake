@@ -98,7 +98,6 @@ bool cmFLTKWrapUICommand(std::vector<std::string> const& args,
       });
 
       // Add command for generating the .h and .cxx files
-      std::string no_main_dependency;
 
       auto hcc = cm::make_unique<cmCustomCommand>();
       hcc->SetDepends(depends);
@@ -106,10 +105,10 @@ bool cmFLTKWrapUICommand(std::vector<std::string> const& args,
       auto ccc = cm::make_unique<cmCustomCommand>(*hcc);
 
       hcc->SetOutputs(cxxres);
-      mf.AddCustomCommandToOutput(no_main_dependency, std::move(hcc));
+      mf.AddCustomCommandToOutput(std::move(hcc));
 
       ccc->SetOutputs(hname);
-      mf.AddCustomCommandToOutput(no_main_dependency, std::move(ccc));
+      mf.AddCustomCommandToOutput(std::move(ccc));
 
       cmSourceFile* sf = mf.GetSource(cxxres);
       sf->AddDepend(hname);

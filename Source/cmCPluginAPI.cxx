@@ -302,9 +302,10 @@ static void CCONV cmAddCustomCommandToOutput(void* arg, const char* output,
   // Pass the call to the makefile instance.
   auto cc = cm::make_unique<cmCustomCommand>();
   cc->SetOutputs(output);
+  cc->SetMainDependency(main_dependency);
   cc->SetDepends(depends2);
   cc->SetCommandLines(commandLines);
-  mf->AddCustomCommandToOutput(main_dependency, std::move(cc));
+  mf->AddCustomCommandToOutput(std::move(cc));
 }
 
 static void CCONV cmAddCustomCommandToTarget(void* arg, const char* target,

@@ -88,19 +88,18 @@ bool cmQTWrapUICommand(std::vector<std::string> const& args,
 
       std::vector<std::string> depends;
       depends.push_back(uiName);
-      std::string no_main_dependency;
       auto cc = cm::make_unique<cmCustomCommand>();
       cc->SetOutputs(hName);
       cc->SetDepends(depends);
       cc->SetCommandLines(hCommandLines);
-      mf.AddCustomCommandToOutput(no_main_dependency, std::move(cc));
+      mf.AddCustomCommandToOutput(std::move(cc));
 
       depends.push_back(hName);
       cc = cm::make_unique<cmCustomCommand>();
       cc->SetOutputs(cxxName);
       cc->SetDepends(depends);
       cc->SetCommandLines(cxxCommandLines);
-      mf.AddCustomCommandToOutput(no_main_dependency, std::move(cc));
+      mf.AddCustomCommandToOutput(std::move(cc));
 
       depends.clear();
       depends.push_back(hName);
@@ -108,7 +107,7 @@ bool cmQTWrapUICommand(std::vector<std::string> const& args,
       cc->SetOutputs(mocName);
       cc->SetDepends(depends);
       cc->SetCommandLines(mocCommandLines);
-      mf.AddCustomCommandToOutput(no_main_dependency, std::move(cc));
+      mf.AddCustomCommandToOutput(std::move(cc));
     }
   }
 

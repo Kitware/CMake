@@ -1230,7 +1230,6 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
 
       // Add a rule file to cause the target to build if a dependency has
       // changed, which will trigger the pre-build command to run autogen
-      std::string no_main_dependency;
       auto cc = cm::make_unique<cmCustomCommand>();
       cc->SetOutputs(timestampFileGenex);
       cc->SetDepends(uicDependencies);
@@ -1239,8 +1238,7 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
       cc->SetCMP0116Status(cmPolicies::NEW);
       cc->SetEscapeOldStyle(false);
       cc->SetStdPipesUTF8(stdPipesUTF8);
-      this->LocalGen->AddCustomCommandToOutput(no_main_dependency,
-                                               std::move(cc));
+      this->LocalGen->AddCustomCommandToOutput(std::move(cc));
     }
 
     // Add the pre-build command directly to bypass the OBJECT_LIBRARY
@@ -1362,7 +1360,6 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
         { cmSystemTools::GetCMakeCommand(), "-E", "touch", outputFile }));
 
       this->AddGeneratedSource(outputFile, this->Moc);
-      const std::string no_main_dependency;
       cc = cm::make_unique<cmCustomCommand>();
       cc->SetOutputs(outputFile);
       cc->SetByproducts(timestampByproducts);
@@ -1374,8 +1371,7 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
       cc->SetEscapeOldStyle(false);
       cc->SetDepfile(this->AutogenTarget.DepFile);
       cc->SetStdPipesUTF8(stdPipesUTF8);
-      this->LocalGen->AddCustomCommandToOutput(no_main_dependency,
-                                               std::move(cc));
+      this->LocalGen->AddCustomCommandToOutput(std::move(cc));
 
       // Alter variables for the autogen target which now merely wraps the
       // custom command
@@ -1524,12 +1520,10 @@ bool cmQtAutoGenInitializer::InitRccTargets()
         if (!this->Rcc.ExecutableTargetName.empty()) {
           ccDepends.push_back(this->Rcc.ExecutableTargetName);
         }
-        std::string no_main_dependency;
         cc->SetOutputs(ccOutput);
         cc->SetByproducts(ccByproducts);
         cc->SetDepends(ccDepends);
-        this->LocalGen->AddCustomCommandToOutput(no_main_dependency,
-                                                 std::move(cc));
+        this->LocalGen->AddCustomCommandToOutput(std::move(cc));
       }
       // Reconfigure when .qrc file changes
       this->Makefile->AddCMakeDependFile(qrc.QrcFile);

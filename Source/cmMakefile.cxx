@@ -1087,8 +1087,8 @@ cmTarget* cmMakefile::AddCustomCommandToTarget(
 }
 
 void cmMakefile::AddCustomCommandToOutput(
-  const std::string& main_dependency, std::unique_ptr<cmCustomCommand> cc,
-  const CommandSourceCallback& callback, bool replace)
+  std::unique_ptr<cmCustomCommand> cc, const CommandSourceCallback& callback,
+  bool replace)
 {
   const auto& outputs = cc->GetOutputs();
   const auto& byproducts = cc->GetByproducts();
@@ -1119,8 +1119,7 @@ void cmMakefile::AddCustomCommandToOutput(
       BacktraceGuard guard(this->Backtrace, lfbt);
       tcc->SetBacktrace(lfbt);
       cmSourceFile* sf = detail::AddCustomCommandToOutput(
-        lg, cmCommandOrigin::Project, main_dependency, std::move(tcc),
-        replace);
+        lg, cmCommandOrigin::Project, std::move(tcc), replace);
       if (callback && sf) {
         callback(sf);
       }
@@ -1178,19 +1177,17 @@ void cmMakefile::AddCustomCommandOldStyle(
     for (std::string const& output : outputs) {
       auto cc1 = cm::make_unique<cmCustomCommand>(*cc);
       cc1->SetOutputs(output);
-      this->AddCustomCommandToOutput(source, std::move(cc1),
-                                     addRuleFileToTarget);
+      cc1->SetMainDependency(source);
+      this->AddCustomCommandToOutput(std::move(cc1), addRuleFileToTarget);
     }
   } else {
-    std::string no_main_dependency;
     cc->AppendDepends({ source });
 
     // The source may not be a real file.  Do not use a main dependency.
     for (std::string const& output : outputs) {
       auto cc1 = cm::make_unique<cmCustomCommand>(*cc);
       cc1->SetOutputs(output);
-      this->AddCustomCommandToOutput(no_main_dependency, std::move(cc1),
-                                     addRuleFileToTarget);
+      this->AddCustomCommandToOutput(std::move(cc1), addRuleFileToTarget);
     }
   }
 }

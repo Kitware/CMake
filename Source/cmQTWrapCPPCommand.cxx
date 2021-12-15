@@ -75,13 +75,12 @@ bool cmQTWrapCPPCommand(std::vector<std::string> const& args,
       depends.push_back(moc_exe);
       depends.push_back(hname);
 
-      std::string no_main_dependency;
       auto cc = cm::make_unique<cmCustomCommand>();
       cc->SetOutputs(newName);
       cc->SetDepends(depends);
       cc->SetCommandLines(commandLines);
       cc->SetComment("Qt Wrapped File");
-      mf.AddCustomCommandToOutput(no_main_dependency, std::move(cc));
+      mf.AddCustomCommandToOutput(std::move(cc));
     }
   }
 

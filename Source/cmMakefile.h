@@ -212,7 +212,7 @@ public:
    * Dispatch adding a custom command to a source file.
    */
   void AddCustomCommandToOutput(
-    const std::string& main_dependency, std::unique_ptr<cmCustomCommand> cc,
+    std::unique_ptr<cmCustomCommand> cc,
     const CommandSourceCallback& callback = nullptr, bool replace = false);
   void AddCustomCommandOldStyle(const std::string& target,
                                 const std::vector<std::string>& outputs,
