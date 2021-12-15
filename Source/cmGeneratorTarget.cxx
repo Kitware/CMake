@@ -7284,6 +7284,7 @@ const cmLinkInterface* cmGeneratorTarget::GetImportLinkInterface(
   cmOptionalLinkInterface& iface = hm[headTarget];
   if (!iface.AllDone) {
     iface.AllDone = true;
+    iface.LibrariesDone = true;
     iface.Multiplicity = info->Multiplicity;
     cmExpandList(info->Languages, iface.Languages);
     this->ExpandLinkItems(info->LibrariesProp, cmMakeRange(info->Libraries),
