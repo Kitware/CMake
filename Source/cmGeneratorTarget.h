@@ -431,6 +431,8 @@ public:
 
   bool IsCSharpOnly() const;
 
+  bool IsDotNetSdkTarget() const;
+
   void GetObjectLibrariesCMP0026(
     std::vector<cmGeneratorTarget*>& objlibs) const;
 

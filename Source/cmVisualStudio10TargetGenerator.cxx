@@ -406,7 +406,14 @@ void cmVisualStudio10TargetGenerator::Generate()
   char magic[] = { char(0xEF), char(0xBB), char(0xBF) };
   BuildFileStream.write(magic, 3);
 
-  this->WriteClassicMsBuildProjectFile(BuildFileStream);
+  if (this->Managed && this->ProjectType == VsProjectType::csproj &&
+      this->GeneratorTarget->IsDotNetSdkTarget() &&
+      this->GlobalGenerator->GetVersion() >=
+        cmGlobalVisualStudioGenerator::VS16) {
+    this->WriteSdkStyleProjectFile(BuildFileStream);
+  } else {
+    this->WriteClassicMsBuildProjectFile(BuildFileStream);
+  }
 
   if (BuildFileStream.Close()) {
     this->GlobalGenerator->FileReplacedDuringGenerate(PathToProjectFile);
@@ -468,7 +475,7 @@ void cmVisualStudio10TargetGenerator::WriteClassicMsBuildProjectFile(
     // build fails.
     // Setting ResolveNugetPackages to false skips this target and the build
     // succeeds.
-    std::string_view targetName{ this->GeneratorTarget->Target->GetName() };
+    cm::string_view targetName{ this->GeneratorTarget->GetName() };
     if (targetName == "ALL_BUILD" ||
         targetName == CMAKE_CHECK_BUILD_SYSTEM_TARGET) {
       Elem e1(e0, "PropertyGroup");
@@ -822,6 +829,96 @@ void cmVisualStudio10TargetGenerator::WriteClassicMsBuildProjectFile(
   }
 }
 
+void cmVisualStudio10TargetGenerator::WriteSdkStyleProjectFile(
+  cmGeneratedFileStream& BuildFileStream)
+{
+  if (!this->Managed || this->ProjectType != VsProjectType::csproj ||
+      !this->GeneratorTarget->IsDotNetSdkTarget()) {
+    std::string message = "The target \"" + this->GeneratorTarget->GetName() +
+      "\" is not eligible for .Net SDK style project.";
+    this->Makefile->IssueMessage(MessageType::INTERNAL_ERROR, message);
+    return;
+  }
+
+  if (this->HasCustomCommands()) {
+    std::string message = "The target \"" + this->GeneratorTarget->GetName() +
+      "\" does not currently support add_custom_command as the Visual Studio "
+      "generators have not yet learned how to generate custom commands in "
+      ".Net SDK-style projects.";
+    this->Makefile->IssueMessage(MessageType::FATAL_ERROR, message);
+    return;
+  }
+
+  Elem e0(BuildFileStream, "Project");
+  e0.Attribute("Sdk", *this->GeneratorTarget->GetProperty("DOTNET_SDK"));
+
+  {
+    Elem e1(e0, "PropertyGroup");
+    this->WriteCommonPropertyGroupGlobals(e1);
+
+    e1.Element("EnableDefaultItems", "false");
+    // Disable the project upgrade prompt that is displayed the first time a
+    // project using an older toolset version is opened in a newer version
+    // of the IDE.
+    e1.Element("VCProjectUpgraderObjectName", "NoUpgrade");
+    e1.Element("ManagedAssembly", "true");
+
+    cmValue targetFramework =
+      this->GeneratorTarget->GetProperty("DOTNET_TARGET_FRAMEWORK");
+    if (targetFramework) {
+      if (targetFramework->find(';') != std::string::npos) {
+        e1.Element("TargetFrameworks", *targetFramework);
+      } else {
+        e1.Element("TargetFramework", *targetFramework);
+      }
+    } else {
+      e1.Element("TargetFramework", "net5.0");
+    }
+
+    std::string outputType;
+    switch (this->GeneratorTarget->GetType()) {
+      case cmStateEnums::OBJECT_LIBRARY:
+      case cmStateEnums::STATIC_LIBRARY:
+      case cmStateEnums::MODULE_LIBRARY:
+        this->Makefile->IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmStrCat("Target \"", this->GeneratorTarget->GetName(),
+                   "\" is of a type not supported for managed binaries."));
+        return;
+      case cmStateEnums::SHARED_LIBRARY:
+        outputType = "Library";
+        break;
+      case cmStateEnums::EXECUTABLE: {
+        auto const win32 =
+          this->GeneratorTarget->GetSafeProperty("WIN32_EXECUTABLE");
+        if (win32.find("$<") != std::string::npos) {
+          this->Makefile->IssueMessage(
+            MessageType::FATAL_ERROR,
+            cmStrCat("Target \"", this->GeneratorTarget->GetName(),
+                     "\" has a generator expression in its WIN32_EXECUTABLE "
+                     "property. This is not supported on managed "
+                     "executables."));
+          return;
+        }
+        outputType = "Exe";
+      } break;
+      case cmStateEnums::UTILITY:
+      case cmStateEnums::INTERFACE_LIBRARY:
+      case cmStateEnums::GLOBAL_TARGET:
+        outputType = "Utility";
+        break;
+      case cmStateEnums::UNKNOWN_LIBRARY:
+        break;
+    }
+    e1.Element("OutputType", outputType);
+  }
+
+  this->WriteDotNetDocumentationFile(e0);
+  this->WriteAllSources(e0);
+  this->WritePackageReferences(e0);
+  this->WriteProjectReferences(e0);
+}
+
 void cmVisualStudio10TargetGenerator::WriteCommonPropertyGroupGlobals(Elem& e1)
 {
   e1.Attribute("Label", "Globals");
@@ -871,6 +968,24 @@ void cmVisualStudio10TargetGenerator::WriteCommonPropertyGroupGlobals(Elem& e1)
       continue;
     e1.Element(globalKey, *value);
   }
+}
+
+bool cmVisualStudio10TargetGenerator::HasCustomCommands() const
+{
+  if (!this->GeneratorTarget->GetPreBuildCommands().empty() ||
+      !this->GeneratorTarget->GetPreLinkCommands().empty() ||
+      !this->GeneratorTarget->GetPostBuildCommands().empty()) {
+    return true;
+  }
+
+  for (cmGeneratorTarget::AllConfigSource const& si :
+       this->GeneratorTarget->GetAllConfigSources()) {
+    if (si.Source->GetCustomCommand()) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 void cmVisualStudio10TargetGenerator::WritePackageReferences(Elem& e0)

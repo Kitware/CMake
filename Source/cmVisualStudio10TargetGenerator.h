@@ -263,9 +263,12 @@ private:
 
   // .Net SDK-stype project variable and helper functions
   void WriteClassicMsBuildProjectFile(cmGeneratedFileStream& BuildFileStream);
+  void WriteSdkStyleProjectFile(cmGeneratedFileStream& BuildFileStream);
 
   void WriteCommonPropertyGroupGlobals(
     cmVisualStudio10TargetGenerator::Elem& e1);
+
+  bool HasCustomCommands() const;
 
   std::unordered_map<std::string, ConfigToSettings> ParsedToolTargetSettings;
   bool PropertyIsSameInAllConfigs(const ConfigToSettings& toolSettings,

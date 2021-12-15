@@ -7719,6 +7719,11 @@ bool cmGeneratorTarget::IsCSharpOnly() const
   return languages.size() == 1 && languages.count("CSharp") > 0;
 }
 
+bool cmGeneratorTarget::IsDotNetSdkTarget() const
+{
+  return !this->GetProperty("DOTNET_SDK").IsEmpty();
+}
+
 void cmGeneratorTarget::ComputeLinkImplementationLanguages(
   const std::string& config, cmOptionalLinkImplementation& impl) const
 {

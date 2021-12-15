@@ -49,6 +49,7 @@ Variables that Provide Information
    /variable/CMAKE_DEBUG_TARGET_PROPERTIES
    /variable/CMAKE_DIRECTORY_LABELS
    /variable/CMAKE_DL_LIBS
+   /variable/CMAKE_DOTNET_SDK
    /variable/CMAKE_DOTNET_TARGET_FRAMEWORK
    /variable/CMAKE_DOTNET_TARGET_FRAMEWORK_VERSION
    /variable/CMAKE_EDIT_COMMAND

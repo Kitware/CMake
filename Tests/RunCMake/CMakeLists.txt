@@ -616,6 +616,10 @@ if("${CMAKE_GENERATOR}" MATCHES "Visual Studio ([^9]|9[0-9])")
   endif()
 endif()
 
+if(CMAKE_GENERATOR MATCHES "^Visual Studio (1[6-9]|[2-9][0-9])")
+  add_RunCMake_test(VsDotnetSdk)
+endif()
+
 if(XCODE_VERSION)
   add_RunCMake_test(XcodeProject -DXCODE_VERSION=${XCODE_VERSION})
   add_RunCMake_test(XcodeProject-Embed -DXCODE_VERSION=${XCODE_VERSION})
