@@ -107,10 +107,16 @@ void cmExportTryCompileFileGenerator::PopulateProperties(
   const cmGeneratorTarget* target, ImportPropertyMap& properties,
   std::set<cmGeneratorTarget const*>& emitted)
 {
+  // Look through all non-special properties.
   std::vector<std::string> props = target->GetPropertyKeys();
+  // Include special properties that might be relevant here.
+  props.emplace_back("INTERFACE_LINK_LIBRARIES");
   for (std::string const& p : props) {
-
-    properties[p] = *target->GetProperty(p);
+    cmValue v = target->GetProperty(p);
+    if (!v) {
+      continue;
+    }
+    properties[p] = *v;
 
     if (cmHasLiteralPrefix(p, "IMPORTED_LINK_INTERFACE_LIBRARIES") ||
         cmHasLiteralPrefix(p, "IMPORTED_LINK_DEPENDENT_LIBRARIES") ||
