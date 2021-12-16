@@ -43,7 +43,7 @@ dependencies and then ensuring they are populated with a separate call:
     URL_HASH MD5=5588a7b18261c20068beabfb4f530b87
   )
 
-  FetchContent_MakeAvailable(googletest secret_sauce)
+  FetchContent_MakeAvailable(googletest myCompanyIcons)
 
 The :command:`FetchContent_MakeAvailable` command ensures the named
 dependencies have been populated, either by an earlier call or by populating
