@@ -574,8 +574,7 @@ public:
   {
     // If any commands were generated, finish constructing them.
     if (!this->First) {
-      std::string finishScript =
-        this->LG->FinishConstructScript(IsManaged::No);
+      std::string finishScript = this->LG->FinishConstructScript(IsCSharp::No);
       this->Stream << this->LG->EscapeForXML(finishScript) << "\"";
     }
 
@@ -1818,7 +1817,7 @@ void cmLocalVisualStudio7Generator::WriteCustomRule(
     if (this->FortranProject) {
       cmSystemTools::ReplaceString(script, "$(Configuration)", config);
     }
-    script += this->FinishConstructScript(IsManaged::No);
+    script += this->FinishConstructScript(IsCSharp::No);
     /* clang-format off */
     fout << "\t\t\t\t\t<Tool\n"
          << "\t\t\t\t\tName=\"" << customTool << "\"\n"
