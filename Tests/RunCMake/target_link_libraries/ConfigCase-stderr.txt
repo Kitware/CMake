@@ -1,13 +1,25 @@
-^CMake Error at ConfigCase\.cmake:6 \(target_link_libraries\):
-  Target "impl" links to target "config::impl-Debug" but the target was not
-  found.  Perhaps a find_package\(\) call is missing for an IMPORTED target, or
-  an ALIAS target is missing\?
+^CMake Error at ConfigCase\.cmake:4 \(target_link_libraries\):
+  The link interface of target "iface" contains:
+
+    config::iface-Debug
+
+  but the target was not found.  Possible reasons include:
+(
+    \*[^
+]+)*
+
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 +
-CMake Error at ConfigCase\.cmake:4 \(target_link_libraries\):
-  Target "impl" links to target "config::iface-Debug" but the target was not
-  found.  Perhaps a find_package\(\) call is missing for an IMPORTED target, or
-  an ALIAS target is missing\?
+CMake Error at ConfigCase\.cmake:6 \(target_link_libraries\):
+  Target "impl" links to:
+
+    config::impl-Debug
+
+  but the target was not found.  Possible reasons include:
+(
+    \*[^
+]+)*
+
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)

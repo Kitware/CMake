@@ -84,6 +84,10 @@ public:
   cmComputeLinkInformation* GetLinkInformation(
     const std::string& config) const;
 
+  // Perform validation checks on memoized link structures.
+  // Call this after generation is complete.
+  void CheckLinkLibraries() const;
+
   cmStateEnums::TargetType GetType() const;
   const std::string& GetName() const;
   std::string GetExportName() const;
@@ -972,6 +976,13 @@ private:
                             bool secondPass) const;
   cmLinkImplementation const* GetLinkImplementation(const std::string& config,
                                                     bool secondPass) const;
+
+  enum class LinkItemRole
+  {
+    Implementation,
+    Interface,
+  };
+  bool VerifyLinkItemColons(LinkItemRole role, cmLinkItem const& item) const;
 
   // Cache import information from properties for each configuration.
   struct ImportInfo

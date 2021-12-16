@@ -193,6 +193,11 @@ public:
     return this->GeneratorTargets;
   }
 
+  const GeneratorTargetVector& GetOwnedImportedGeneratorTargets() const
+  {
+    return this->OwnedImportedGeneratorTargets;
+  }
+
   void AddGeneratorTarget(std::unique_ptr<cmGeneratorTarget> gt);
   void AddImportedGeneratorTarget(cmGeneratorTarget* gt);
   void AddOwnedImportedGeneratorTarget(std::unique_ptr<cmGeneratorTarget> gt);
