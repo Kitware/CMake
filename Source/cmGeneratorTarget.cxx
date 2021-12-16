@@ -2722,8 +2722,12 @@ public:
             << "\" but the target was not found.  Perhaps a find_package() "
                "call is missing for an IMPORTED target, or an ALIAS target is "
                "missing?";
+          cmListFileBacktrace backtrace = item.Backtrace;
+          if (backtrace.Empty()) {
+            backtrace = this->Target->GetBacktrace();
+          }
           this->Target->GetLocalGenerator()->GetCMakeInstance()->IssueMessage(
-            messageType, e.str(), this->Target->GetBacktrace());
+            messageType, e.str(), backtrace);
         }
       }
       return;
