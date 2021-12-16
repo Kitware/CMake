@@ -1,4 +1,4 @@
-CMake Error:
+^CMake Error at LinkImplementationCycle4.cmake:[0-9]+ \(target_link_libraries\):
   Error evaluating generator expression:
 
     \$<TARGET_PROPERTY:INTERFACE_INCLUDE_DIRECTORIES>
@@ -6,3 +6,5 @@ CMake Error:
   \$<TARGET_PROPERTY:...> expression in link libraries evaluation depends on
   target property which is transitive over the link libraries, creating a
   recursion.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

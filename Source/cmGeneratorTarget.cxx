@@ -6553,14 +6553,13 @@ cm::optional<cmLinkItem> cmGeneratorTarget::LookupLinkItem(
 }
 
 void cmGeneratorTarget::ExpandLinkItems(std::string const& prop,
-                                        std::string const& value,
+                                        cmBTStringRange entries,
                                         std::string const& config,
                                         cmGeneratorTarget const* headTarget,
                                         LinkInterfaceFor interfaceFor,
                                         cmLinkInterface& iface) const
 {
   // Keep this logic in sync with ComputeLinkImplementationLibraries.
-  cmGeneratorExpression ge;
   cmGeneratorExpressionDAGChecker dagChecker(this, prop, nullptr, nullptr);
   // The $<LINK_ONLY> expression may be in a link interface to specify
   // private link dependencies that are otherwise excluded from usage
@@ -6568,39 +6567,46 @@ void cmGeneratorTarget::ExpandLinkItems(std::string const& prop,
   if (interfaceFor == LinkInterfaceFor::Usage) {
     dagChecker.SetTransitivePropertiesOnly();
   }
-  std::vector<std::string> libs;
-  std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(value);
-  cge->SetEvaluateForBuildsystem(true);
-  cmExpandList(cge->Evaluate(this->LocalGenerator, config, headTarget,
-                             &dagChecker, this, headTarget->LinkerLanguage),
-               libs);
   cmMakefile const* mf = this->LocalGenerator->GetMakefile();
   LookupLinkItemScope scope{ this->LocalGenerator };
-  for (std::string const& lib : libs) {
-    if (cm::optional<cmLinkItem> maybeItem =
-          this->LookupLinkItem(lib, cge->GetBacktrace(), &scope)) {
-      cmLinkItem item = std::move(*maybeItem);
+  for (BT<std::string> const& entry : entries) {
+    cmGeneratorExpression ge(entry.Backtrace);
+    std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(entry.Value);
+    cge->SetEvaluateForBuildsystem(true);
+    std::vector<std::string> libs = cmExpandedList(
+      cge->Evaluate(this->LocalGenerator, config, headTarget, &dagChecker,
+                    this, headTarget->LinkerLanguage));
+    for (std::string const& lib : libs) {
+      if (cm::optional<cmLinkItem> maybeItem =
+            this->LookupLinkItem(lib, cge->GetBacktrace(), &scope)) {
+        cmLinkItem item = std::move(*maybeItem);
 
-      if (!item.Target) {
-        // Report explicitly linked object files separately.
-        std::string const& maybeObj = item.AsStr();
-        if (cmSystemTools::FileIsFullPath(maybeObj)) {
-          cmSourceFile const* sf =
-            mf->GetSource(maybeObj, cmSourceFileLocationKind::Known);
-          if (sf && sf->GetPropertyAsBool("EXTERNAL_OBJECT")) {
-            iface.Objects.emplace_back(std::move(item));
-            continue;
+        if (!item.Target) {
+          // Report explicitly linked object files separately.
+          std::string const& maybeObj = item.AsStr();
+          if (cmSystemTools::FileIsFullPath(maybeObj)) {
+            cmSourceFile const* sf =
+              mf->GetSource(maybeObj, cmSourceFileLocationKind::Known);
+            if (sf && sf->GetPropertyAsBool("EXTERNAL_OBJECT")) {
+              iface.Objects.emplace_back(std::move(item));
+              continue;
+            }
           }
         }
-      }
 
-      iface.Libraries.emplace_back(std::move(item));
+        iface.Libraries.emplace_back(std::move(item));
+      }
+    }
+    if (cge->GetHadHeadSensitiveCondition()) {
+      iface.HadHeadSensitiveCondition = true;
+    }
+    if (cge->GetHadContextSensitiveCondition()) {
+      iface.HadContextSensitiveCondition = true;
+    }
+    if (cge->GetHadLinkLanguageSensitiveCondition()) {
+      iface.HadLinkLanguageSensitiveCondition = true;
     }
   }
-  iface.HadHeadSensitiveCondition = cge->GetHadHeadSensitiveCondition();
-  iface.HadContextSensitiveCondition = cge->GetHadContextSensitiveCondition();
-  iface.HadLinkLanguageSensitiveCondition =
-    cge->GetHadLinkLanguageSensitiveCondition();
 }
 
 cmLinkInterface const* cmGeneratorTarget::GetLinkInterface(
@@ -7105,8 +7111,18 @@ void cmGeneratorTarget::ComputeLinkInterfaceLibraries(
 
   if (explicitLibraries) {
     // The interface libraries have been explicitly set.
-    this->ExpandLinkItems(linkIfaceProp, *explicitLibraries, config,
-                          headTarget, interfaceFor, iface);
+    if (cmp0022NEW) {
+      // The explicitLibraries came from INTERFACE_LINK_LIBRARIES.
+      // Use its special representation directly to get backtraces.
+      this->ExpandLinkItems(linkIfaceProp,
+                            this->Target->GetLinkInterfaceEntries(), config,
+                            headTarget, interfaceFor, iface);
+    } else {
+      std::vector<BT<std::string>> entries;
+      entries.emplace_back(*explicitLibraries);
+      this->ExpandLinkItems(linkIfaceProp, cmMakeRange(entries), config,
+                            headTarget, interfaceFor, iface);
+    }
   }
 
   // If the link interface is explicit, do not fall back to the link impl.
@@ -7126,7 +7142,9 @@ void cmGeneratorTarget::ComputeLinkInterfaceLibraries(
       cmLinkInterface ifaceNew;
       static const std::string newProp = "INTERFACE_LINK_LIBRARIES";
       if (cmValue newExplicitLibraries = this->GetProperty(newProp)) {
-        this->ExpandLinkItems(newProp, *newExplicitLibraries, config,
+        std::vector<BT<std::string>> entries;
+        entries.emplace_back(*newExplicitLibraries);
+        this->ExpandLinkItems(linkIfaceProp, cmMakeRange(entries), config,
                               headTarget, interfaceFor, ifaceNew);
       }
       if (ifaceNew.Libraries != iface.Libraries) {
@@ -7268,8 +7286,8 @@ const cmLinkInterface* cmGeneratorTarget::GetImportLinkInterface(
     iface.AllDone = true;
     iface.Multiplicity = info->Multiplicity;
     cmExpandList(info->Languages, iface.Languages);
-    this->ExpandLinkItems(info->LibrariesProp, info->Libraries, config,
-                          headTarget, interfaceFor, iface);
+    this->ExpandLinkItems(info->LibrariesProp, cmMakeRange(info->Libraries),
+                          config, headTarget, interfaceFor, iface);
     std::vector<std::string> deps = cmExpandedList(info->SharedDeps);
     LookupLinkItemScope scope{ this->LocalGenerator };
     for (std::string const& dep : deps) {
@@ -7340,23 +7358,26 @@ void cmGeneratorTarget::ComputeImportInfo(std::string const& desired_config,
 
   // Get the link interface.
   {
-    std::string linkProp = "INTERFACE_LINK_LIBRARIES";
-    cmValue propertyLibs = this->GetProperty(linkProp);
-
-    if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
-      if (!propertyLibs) {
-        linkProp = cmStrCat("IMPORTED_LINK_INTERFACE_LIBRARIES", suffix);
-        propertyLibs = this->GetProperty(linkProp);
+    // Use the INTERFACE_LINK_LIBRARIES special representation directly
+    // to get backtraces.
+    cmBTStringRange entries = this->Target->GetLinkInterfaceEntries();
+    if (!entries.empty()) {
+      info.LibrariesProp = "INTERFACE_LINK_LIBRARIES";
+      for (BT<std::string> const& entry : entries) {
+        info.Libraries.emplace_back(entry);
       }
-
+    } else if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
+      std::string linkProp =
+        cmStrCat("IMPORTED_LINK_INTERFACE_LIBRARIES", suffix);
+      cmValue propertyLibs = this->GetProperty(linkProp);
       if (!propertyLibs) {
         linkProp = "IMPORTED_LINK_INTERFACE_LIBRARIES";
         propertyLibs = this->GetProperty(linkProp);
       }
-    }
-    if (propertyLibs) {
-      info.LibrariesProp = linkProp;
-      info.Libraries = *propertyLibs;
+      if (propertyLibs) {
+        info.LibrariesProp = linkProp;
+        info.Libraries.emplace_back(*propertyLibs);
+      }
     }
   }
   if (this->GetType() == cmStateEnums::INTERFACE_LIBRARY) {

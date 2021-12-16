@@ -265,6 +265,8 @@ public:
 
   cmBTStringRange GetLinkImplementationEntries() const;
 
+  cmBTStringRange GetLinkInterfaceEntries() const;
+
   cmBTStringRange GetHeaderSetsEntries() const;
 
   cmBTStringRange GetInterfaceHeaderSetsEntries() const;
