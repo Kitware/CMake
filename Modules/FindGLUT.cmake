@@ -82,6 +82,7 @@ endif()
 if(WIN32)
   find_path( GLUT_INCLUDE_DIR NAMES GL/glut.h
     PATHS  ${GLUT_ROOT_PATH}/include )
+  mark_as_advanced(GLUT_INCLUDE_DIR)
   find_library( GLUT_glut_LIBRARY_RELEASE NAMES glut glut32 freeglut
     PATHS
     ${OPENGL_LIBRARY_DIR}
@@ -96,6 +97,7 @@ if(WIN32)
   select_library_configurations(GLUT_glut)
 elseif(APPLE)
   find_path(GLUT_INCLUDE_DIR glut.h ${OPENGL_LIBRARY_DIR})
+  mark_as_advanced(GLUT_INCLUDE_DIR)
   find_library(GLUT_glut_LIBRARY GLUT DOC "GLUT library for OSX")
   find_library(GLUT_cocoa_LIBRARY Cocoa DOC "Cocoa framework for OSX")
   mark_as_advanced(GLUT_glut_LIBRARY GLUT_cocoa_LIBRARY)
@@ -152,16 +154,17 @@ else()
     /opt/graphics/OpenGL/contrib/libglut
     ${_GLUT_INC_DIR}
     )
+  mark_as_advanced(GLUT_INCLUDE_DIR)
 
   find_library( GLUT_glut_LIBRARY glut
     /usr/openwin/lib
     ${_GLUT_glut_LIB_DIR}
     )
+  mark_as_advanced(GLUT_glut_LIBRARY)
 
   unset(_GLUT_INC_DIR)
   unset(_GLUT_glut_LIB_DIR)
 endif()
-mark_as_advanced(GLUT_glut_LIBRARY)
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(GLUT REQUIRED_VARS GLUT_glut_LIBRARY GLUT_INCLUDE_DIR)
 
@@ -229,5 +232,3 @@ if (GLUT_FOUND)
   set (GLUT_LIBRARY ${GLUT_LIBRARIES})
   set (GLUT_INCLUDE_PATH ${GLUT_INCLUDE_DIR})
 endif()
-
-mark_as_advanced(GLUT_INCLUDE_DIR)
