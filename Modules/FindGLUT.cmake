@@ -71,6 +71,8 @@ find_package(PkgConfig)
 if(PKG_CONFIG_FOUND)
   pkg_check_modules(GLUT glut)
   if(GLUT_FOUND)
+    # In the non-pkg-config code path we only provide GLUT_INCLUDE_DIR.
+    set(GLUT_INCLUDE_DIR "${GLUT_INCLUDE_DIRS}")
     _add_glut_target_simple()
     FIND_PACKAGE_HANDLE_STANDARD_ARGS(GLUT REQUIRED_VARS GLUT_FOUND)
     return()

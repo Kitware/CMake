@@ -9,7 +9,7 @@ target_link_libraries(testglut_tgt GLUT::GLUT)
 add_test(NAME testglut_tgt COMMAND testglut_tgt)
 
 add_executable(testglut_var main.c)
-target_include_directories(testglut_var PRIVATE ${GLUT_INCLUDE_DIRS})
+target_include_directories(testglut_var PRIVATE ${GLUT_INCLUDE_DIR})
 target_link_libraries(testglut_var PRIVATE ${GLUT_LIBRARIES})
 add_test(NAME testglut_var COMMAND testglut_var)
 
