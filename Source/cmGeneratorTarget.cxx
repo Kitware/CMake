@@ -6281,6 +6281,14 @@ void cmGeneratorTarget::CheckLinkLibraries() const
   }
 }
 
+namespace {
+cm::string_view missingTargetPossibleReasons =
+  "Possible reasons include:\n"
+  "  * There is a typo in the target name.\n"
+  "  * A find_package call is missing for an IMPORTED target.\n"
+  "  * An ALIAS target is missing.\n"_s;
+}
+
 bool cmGeneratorTarget::VerifyLinkItemColons(LinkItemRole role,
                                              cmLinkItem const& item) const
 {
@@ -6309,11 +6317,9 @@ bool cmGeneratorTarget::VerifyLinkItemColons(LinkItemRole role,
     e = cmStrCat(e, "The link interface of target \"", this->GetName(),
                  "\" contains");
   }
-  e = cmStrCat(e, ":\n  ", item.AsStr(), "\n",
-               "but the target was not found.  Possible reasons include:\n"
-               "  * There is a typo in the target name.\n"
-               "  * A find_package call is missing for an IMPORTED target.\n"
-               "  * An ALIAS target is missing.\n");
+  e =
+    cmStrCat(e, ":\n  ", item.AsStr(), "\n", "but the target was not found.  ",
+             missingTargetPossibleReasons);
   cmListFileBacktrace backtrace = item.Backtrace;
   if (backtrace.Empty()) {
     backtrace = this->GetBacktrace();
