@@ -99,8 +99,9 @@ protected:
   void SelectDefaultSearchModes();
 
   /** The `InitialPass` functions of the child classes should set
-      this->DebugMode to the result of this.  */
+      this->DebugMode to the result of these.  */
   bool ComputeIfDebugModeWanted();
+  bool ComputeIfDebugModeWanted(std::string const& var);
 
   // Path arguments prior to path manipulation routines
   std::vector<std::string> UserHintsArgs;

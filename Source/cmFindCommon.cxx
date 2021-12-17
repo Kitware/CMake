@@ -77,6 +77,12 @@ bool cmFindCommon::ComputeIfDebugModeWanted()
     this->Makefile->GetCMakeInstance()->GetDebugFindOutput();
 }
 
+bool cmFindCommon::ComputeIfDebugModeWanted(std::string const& var)
+{
+  return this->ComputeIfDebugModeWanted() ||
+    this->Makefile->GetCMakeInstance()->GetDebugFindOutput(var);
+}
+
 void cmFindCommon::InitializeSearchPathGroups()
 {
   std::vector<PathLabel>* labels;

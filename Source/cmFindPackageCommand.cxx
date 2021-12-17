@@ -33,6 +33,7 @@
 #include "cmSystemTools.h"
 #include "cmValue.h"
 #include "cmVersion.h"
+#include "cmake.h"
 
 #if defined(__HAIKU__)
 #  include <FindDirectory.h>
@@ -144,9 +145,6 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
     this->RequiredCMakeVersion = CMake_VERSION_ENCODE(v[0], v[1], v[2]);
   }
 
-  this->DebugMode = this->ComputeIfDebugModeWanted();
-  this->DebugBuffer.clear();
-
   // Lookup target architecture, if any.
   if (cmValue arch =
         this->Makefile->GetDefinition("CMAKE_LIBRARY_ARCHITECTURE")) {
@@ -235,6 +233,10 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
 
   // Always search directly in a generated path.
   this->SearchPathSuffixes.emplace_back();
+
+  // Process debug mode
+  this->DebugMode = this->ComputeIfDebugModeWanted(this->Name);
+  this->DebugBuffer.clear();
 
   // Parse the arguments.
   enum Doing
@@ -617,6 +619,12 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
   this->AppendSuccessInformation();
 
   return loadedPackage;
+}
+
+bool cmFindPackageCommand::ComputeIfDebugModeWanted(std::string const& var)
+{
+  return this->ComputeIfDebugModeWanted() ||
+    this->Makefile->GetCMakeInstance()->GetDebugFindPkgOutput(var);
 }
 
 bool cmFindPackageCommand::FindPackageUsingModuleMode()

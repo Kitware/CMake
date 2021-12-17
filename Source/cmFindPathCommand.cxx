@@ -29,12 +29,13 @@ cmFindPathCommand::cmFindPathCommand(cmExecutionStatus& status)
 // cmFindPathCommand
 bool cmFindPathCommand::InitialPass(std::vector<std::string> const& argsIn)
 {
-  this->DebugMode = this->ComputeIfDebugModeWanted();
   this->CMakePathName = "INCLUDE";
 
   if (!this->ParseArguments(argsIn)) {
     return false;
   }
+
+  this->DebugMode = this->ComputeIfDebugModeWanted(this->VariableName);
 
   if (this->AlreadyDefined) {
     this->NormalizeFindResult();
