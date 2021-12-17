@@ -390,7 +390,7 @@ cmake_policy(SET CMP0102 NEW) # if mark_as_advanced(non_cache_var)
 
 function(_boost_get_existing_target component target_var)
   set(names "${component}")
-  if(component MATCHES "^([a-z_]*)(python|numpy)([1-9])\\.?([0-9])?$")
+  if(component MATCHES "^([a-z_]*)(python|numpy)([1-9])\\.?([0-9]+)?$")
     # handle pythonXY and numpyXY versioned components and also python X.Y, mpi_python etc.
     list(APPEND names
       "${CMAKE_MATCH_1}${CMAKE_MATCH_2}" # python
@@ -407,7 +407,7 @@ function(_boost_get_existing_target component target_var)
       if(TARGET "${prefix}::${name}")
         # The target may be an INTERFACE library that wraps around a single other
         # target for compatibility.  Unwrap this layer so we can extract real info.
-        if("${name}" MATCHES "^(python|numpy|mpi_python)([1-9])([0-9])$")
+        if("${name}" MATCHES "^(python|numpy|mpi_python)([1-9])([0-9]+)$")
           set(name_nv "${CMAKE_MATCH_1}")
           if(TARGET "${prefix}::${name_nv}")
             get_property(type TARGET "${prefix}::${name}" PROPERTY TYPE)
@@ -430,7 +430,7 @@ endfunction()
 
 function(_boost_get_canonical_target_name component target_var)
   string(TOLOWER "${component}" component)
-  if(component MATCHES "^([a-z_]*)(python|numpy)([1-9])\\.?([0-9])?$")
+  if(component MATCHES "^([a-z_]*)(python|numpy)([1-9])\\.?([0-9]+)?$")
     # handle pythonXY and numpyXY versioned components and also python X.Y, mpi_python etc.
     set(${target_var} "Boost::${CMAKE_MATCH_1}${CMAKE_MATCH_2}" PARENT_SCOPE)
   else()
@@ -1004,7 +1004,7 @@ function(_Boost_COMPONENT_DEPENDENCIES component _ret)
   # against the new release.
 
   # Handle Python version suffixes
-  if(component MATCHES "^(python|mpi_python|numpy)([0-9][0-9]?|[0-9]\\.[0-9])\$")
+  if(component MATCHES "^(python|mpi_python|numpy)([0-9][0-9]?|[0-9]\\.[0-9]+)\$")
     set(component "${CMAKE_MATCH_1}")
     set(component_python_version "${CMAKE_MATCH_2}")
   endif()
@@ -1408,7 +1408,7 @@ endfunction()
 #
 function(_Boost_COMPONENT_HEADERS component _hdrs)
   # Handle Python version suffixes
-  if(component MATCHES "^(python|mpi_python|numpy)([0-9][0-9]?|[0-9]\\.[0-9])\$")
+  if(component MATCHES "^(python|mpi_python|numpy)([0-9]+|[0-9]\\.[0-9]+)\$")
     set(component "${CMAKE_MATCH_1}")
     set(component_python_version "${CMAKE_MATCH_2}")
   endif()
@@ -2165,7 +2165,7 @@ foreach(COMPONENT ${Boost_FIND_COMPONENTS})
   if(${COMPONENT} MATCHES "^(python|mpi_python|numpy)([0-9])\$")
     set(COMPONENT_UNVERSIONED "${CMAKE_MATCH_1}")
     set(COMPONENT_PYTHON_VERSION_MAJOR "${CMAKE_MATCH_2}")
-  elseif(${COMPONENT} MATCHES "^(python|mpi_python|numpy)([0-9])\\.?([0-9])\$")
+  elseif(${COMPONENT} MATCHES "^(python|mpi_python|numpy)([0-9])\\.?([0-9]+)\$")
     set(COMPONENT_UNVERSIONED "${CMAKE_MATCH_1}")
     set(COMPONENT_PYTHON_VERSION_MAJOR "${CMAKE_MATCH_2}")
     set(COMPONENT_PYTHON_VERSION_MINOR "${CMAKE_MATCH_3}")
