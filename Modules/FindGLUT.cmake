@@ -25,7 +25,9 @@ This module defines the following variables:
 ``GLUT_FOUND``
   True if ``glut`` was found.
 
-``GLUT_INCLUDE_DIR``
+``GLUT_INCLUDE_DIRS``
+  .. versionadded:: 3.23
+
   Where to find GL/glut.h, etc.
 
 ``GLUT_LIBRARIES``
@@ -38,6 +40,10 @@ This module may set the following variables depending on platform.
 These variables may optionally be set to help this module find the
 correct files, but clients should not use these as results:
 
+``GLUT_INCLUDE_DIR``
+  The full path to the directory containing ``GL/glut.h``,
+  not including ``GL/``.
+
 ``GLUT_glut_LIBRARY``
   The full path to the glut library.
 
@@ -46,6 +52,16 @@ correct files, but clients should not use these as results:
 
 ``GLUT_Xi_LIBRARY``
   The full path to the Xi Library.
+
+Obsolete Variables
+^^^^^^^^^^^^^^^^^^
+
+The following variables may also be provided, for backwards compatibility:
+
+``GLUT_INCLUDE_DIR``
+  This is one of above `Cache Variables`_, but prior to CMake 3.23 was
+  also a result variable.  Prefer to use ``GLUT_INCLUDE_DIRS`` instead
+  in CMake 3.23 and above.
 #]=======================================================================]
 
 include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
@@ -79,7 +95,8 @@ find_package(PkgConfig)
 if(PKG_CONFIG_FOUND)
   pkg_check_modules(GLUT glut)
   if(GLUT_FOUND)
-    # In the non-pkg-config code path we only provide GLUT_INCLUDE_DIR.
+    # GLUT_INCLUDE_DIRS is now the official result variable, but
+    # older versions of CMake only provided GLUT_INCLUDE_DIR.
     set(GLUT_INCLUDE_DIR "${GLUT_INCLUDE_DIRS}")
     _add_glut_target_simple()
     FIND_PACKAGE_HANDLE_STANDARD_ARGS(GLUT REQUIRED_VARS GLUT_FOUND)
@@ -182,6 +199,9 @@ if (GLUT_FOUND)
   set( GLUT_LIBRARIES
     ${GLUT_glut_LIBRARY}
     )
+  set(GLUT_INCLUDE_DIRS
+    ${GLUT_INCLUDE_DIR}
+    )
   foreach(v GLUT_Xmu_LIBRARY GLUT_Xi_LIBRARY GLUT_cocoa_LIBRARY)
     if(${v})
       list(APPEND GLUT_LIBRARIES ${${v}})
@@ -191,7 +211,7 @@ if (GLUT_FOUND)
   if(NOT TARGET GLUT::GLUT)
     add_library(GLUT::GLUT UNKNOWN IMPORTED)
     set_target_properties(GLUT::GLUT PROPERTIES
-      INTERFACE_INCLUDE_DIRECTORIES "${GLUT_INCLUDE_DIR}")
+      INTERFACE_INCLUDE_DIRECTORIES "${GLUT_INCLUDE_DIRS}")
     if(GLUT_glut_LIBRARY MATCHES "/([^/]+)\\.framework$")
       set(_glut_glut "${GLUT_glut_LIBRARY}/${CMAKE_MATCH_1}")
       if(EXISTS "${_glut_glut}.tbd")
@@ -238,5 +258,5 @@ if (GLUT_FOUND)
 
   #The following deprecated settings are for backwards compatibility with CMake1.4
   set (GLUT_LIBRARY ${GLUT_LIBRARIES})
-  set (GLUT_INCLUDE_PATH ${GLUT_INCLUDE_DIR})
+  set (GLUT_INCLUDE_PATH ${GLUT_INCLUDE_DIRS})
 endif()
