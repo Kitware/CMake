@@ -80,9 +80,14 @@ function(gtest_discover_tests_impl)
   )
   if(NOT ${result} EQUAL 0)
     string(REPLACE "\n" "\n    " output "${output}")
+    if(_TEST_EXECUTOR)
+      set(path "${_TEST_EXECUTOR} ${_TEST_EXECUTABLE}")
+    else()
+      set(path "${_TEST_EXECUTABLE}")
+    endif()
     message(FATAL_ERROR
       "Error running test executable.\n"
-      "  Path: '${_TEST_EXECUTABLE}'\n"
+      "  Path: '${path}'\n"
       "  Result: ${result}\n"
       "  Output:\n"
       "    ${output}\n"
