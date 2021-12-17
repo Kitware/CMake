@@ -1571,10 +1571,11 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
         }
       }
     }
-    cmLocalVisualStudioGenerator::IsManaged isManaged = (this->Managed)
-      ? cmLocalVisualStudioGenerator::IsManaged::Yes
-      : cmLocalVisualStudioGenerator::IsManaged::No;
-    script += lg->FinishConstructScript(isManaged);
+    cmLocalVisualStudioGenerator::IsCSharp isCSharp =
+      (this->ProjectType == VsProjectType::csproj)
+      ? cmLocalVisualStudioGenerator::IsCSharp::Yes
+      : cmLocalVisualStudioGenerator::IsCSharp::No;
+    script += lg->FinishConstructScript(isCSharp);
     if (this->ProjectType == VsProjectType::csproj) {
       std::string name = "CustomCommand_" + c + "_" +
         cmSystemTools::ComputeStringMD5(sourcePath);
@@ -4308,10 +4309,11 @@ void cmVisualStudio10TargetGenerator::WriteEvent(
     }
   }
   if (!script.empty()) {
-    cmLocalVisualStudioGenerator::IsManaged isManaged = (this->Managed)
-      ? cmLocalVisualStudioGenerator::IsManaged::Yes
-      : cmLocalVisualStudioGenerator::IsManaged::No;
-    script += lg->FinishConstructScript(isManaged);
+    cmLocalVisualStudioGenerator::IsCSharp isCSharp =
+      (this->ProjectType == VsProjectType::csproj)
+      ? cmLocalVisualStudioGenerator::IsCSharp::Yes
+      : cmLocalVisualStudioGenerator::IsCSharp::No;
+    script += lg->FinishConstructScript(isCSharp);
   }
   comment = cmVS10EscapeComment(comment);
   if (this->ProjectType != VsProjectType::csproj) {

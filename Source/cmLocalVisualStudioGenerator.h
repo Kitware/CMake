@@ -31,14 +31,14 @@ public:
   virtual ~cmLocalVisualStudioGenerator();
 
   /** Construct a script from the given list of command lines.  */
-  enum class IsManaged
+  enum class IsCSharp
   {
     No,
     Yes
   };
   std::string ConstructScript(cmCustomCommandGenerator const& ccg,
                               const std::string& newline = "\n");
-  std::string FinishConstructScript(IsManaged isManaged,
+  std::string FinishConstructScript(IsCSharp isCSharp,
                                     const std::string& newline = "\n");
 
   /** Label to which to jump in a batch file after a failed step in a
