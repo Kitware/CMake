@@ -20,24 +20,32 @@ This module defines the :prop_tgt:`IMPORTED` targets:
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module sets the following variables:
+This module defines the following variables:
 
-::
+``GLUT_FOUND``
+  True if ``glut`` was found.
 
-  GLUT_INCLUDE_DIR, where to find GL/glut.h, etc.
-  GLUT_LIBRARIES, the libraries to link against
-  GLUT_FOUND, If false, do not try to use GLUT.
+``GLUT_INCLUDE_DIR``
+  Where to find GL/glut.h, etc.
 
-Also defined, but not for general use are:
+``GLUT_LIBRARIES``
+  List of libraries for using ``glut``.
 
-::
+Cache Variables
+^^^^^^^^^^^^^^^
 
-  GLUT_glut_LIBRARY = the full path to the glut library.
-  GLUT_Xmu_LIBRARY  = the full path to the Xmu library.
-  GLUT_Xi_LIBRARY   = the full path to the Xi Library.
+This module may set the following variables depending on platform.
+These variables may optionally be set to help this module find the
+correct files, but clients should not use these as results:
 
-.. versionadded:: 3.13
-  Debug and Release variants are found separately.
+``GLUT_glut_LIBRARY``
+  The full path to the glut library.
+
+``GLUT_Xmu_LIBRARY``
+  The full path to the Xmu library.
+
+``GLUT_Xi_LIBRARY``
+  The full path to the Xi Library.
 #]=======================================================================]
 
 include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
