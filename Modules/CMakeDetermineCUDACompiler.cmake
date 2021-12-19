@@ -283,7 +283,7 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
     if(NOT CMAKE_CUDA_ARCHITECTURES)
       # Clang doesn't automatically select an architecture supported by the SDK.
       # Try in reverse order of deprecation with the most recent at front (i.e. the most likely to work for new setups).
-      foreach(arch "20" "30" "52")
+      foreach(arch "52" "30" "20")
         list(APPEND CMAKE_CUDA_COMPILER_ID_TEST_FLAGS_FIRST "${clang_test_flags} --cuda-gpu-arch=sm_${arch}")
       endforeach()
     endif()
