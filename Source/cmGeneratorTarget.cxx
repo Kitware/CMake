@@ -3415,7 +3415,7 @@ void cmGeneratorTarget::AddExplicitLanguageFlags(std::string& flags,
 
 void cmGeneratorTarget::AddCUDAArchitectureFlags(std::string& flags) const
 {
-  const std::string& property = this->GetSafeProperty("CUDA_ARCHITECTURES");
+  std::string property = this->GetSafeProperty("CUDA_ARCHITECTURES");
 
   if (property.empty()) {
     switch (this->GetPolicyStatusCMP0104()) {
@@ -3447,16 +3447,24 @@ void cmGeneratorTarget::AddCUDAArchitectureFlags(std::string& flags) const
     this->Makefile->GetSafeDefinition("CMAKE_CUDA_COMPILER_ID");
 
   // Check for special modes: `all`, `all-major`.
-  if (property == "all") {
-    if (compiler == "NVIDIA") {
+  if (compiler == "NVIDIA" &&
+      cmSystemTools::VersionCompare(
+        cmSystemTools::OP_GREATER_EQUAL,
+        this->Makefile->GetDefinition("CMAKE_CUDA_COMPILER_VERSION"),
+        "11.5")) {
+    if (property == "all") {
       flags += " -arch=all";
-      return;
-    }
-  } else if (property == "all-major") {
-    if (compiler == "NVIDIA") {
+    } else if (property == "all-major") {
       flags += " -arch=all-major";
-      return;
     }
+    return;
+  }
+
+  if (property == "all") {
+    property = *this->Makefile->GetDefinition("CMAKE_CUDA_ARCHITECTURES_ALL");
+  } else if (property == "all-major") {
+    property =
+      *this->Makefile->GetDefinition("CMAKE_CUDA_ARCHITECTURES_ALL_MAJOR");
   }
 
   struct CudaArchitecture
