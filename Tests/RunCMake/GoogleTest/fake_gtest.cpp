@@ -1,6 +1,8 @@
 #include <iostream>
 #include <string>
 
+#define ARRAY_SIZE(a) sizeof(a) / sizeof(*a)
+
 int main(int argc, char** argv)
 {
   // Note: GoogleTest.cmake doesn't actually depend on Google Test as such;
@@ -16,11 +18,14 @@ int main(int argc, char** argv)
 
   if (argc > 1 && std::string(argv[1]) == "--gtest_list_tests") {
     if (!is_typed_only) {
-      std::cout << "basic." << std::endl;
-      std::cout << "  case_foo" << std::endl;
-      std::cout << "  case_bar" << std::endl;
-      std::cout << "  DISABLED_disabled_case" << std::endl;
-      std::cout << "  DISABLEDnot_really_case" << std::endl;
+      const char* basic_suite_names[] = { "basic.", "ns.basic." };
+      for (size_t i = 0; i < ARRAY_SIZE(basic_suite_names); i++) {
+        std::cout << basic_suite_names[i] << std::endl;
+        std::cout << "  case_foo" << std::endl;
+        std::cout << "  case_bar" << std::endl;
+        std::cout << "  DISABLED_disabled_case" << std::endl;
+        std::cout << "  DISABLEDnot_really_case" << std::endl;
+      }
     }
     if (!is_basic_only && !is_typed_only) {
       std::cout << "DISABLED_disabled." << std::endl;
@@ -29,19 +34,30 @@ int main(int argc, char** argv)
       std::cout << "  case" << std::endl;
     }
     if (!is_basic_only) {
-      std::cout << "typed/0.  # TypeParam = short" << std::endl;
-      std::cout << "  case" << std::endl;
-      std::cout << "typed/1.  # TypeParam = float" << std::endl;
-      std::cout << "  case" << std::endl;
+      const char* typed_suite_names[] = { "typed", "ns.typed" };
+      for (size_t i = 0; i < ARRAY_SIZE(typed_suite_names); i++) {
+        std::cout << typed_suite_names[i] << "/0.  # TypeParam = short"
+                  << std::endl;
+        std::cout << "  case" << std::endl;
+        std::cout << typed_suite_names[i] << "/1.  # TypeParam = float"
+                  << std::endl;
+        std::cout << "  case" << std::endl;
+      }
     }
     if (!is_basic_only && !is_typed_only) {
-      std::cout << "value/test." << std::endl;
-      std::cout << "  case/0  # GetParam() = 1" << std::endl;
-      std::cout << "  case/1  # GetParam() = \"foo\"" << std::endl;
-      std::cout << "param/special." << std::endl;
-      std::cout << "  case/0  # GetParam() = \"semicolon;\"" << std::endl;
-      std::cout << "  case/1  # GetParam() = \"backslash\\\"" << std::endl;
-      std::cout << "  case/2  # GetParam() = \"${var}\"" << std::endl;
+      const char* value_suite_names[] = { "value", "ns.value" };
+      for (size_t i = 0; i < ARRAY_SIZE(value_suite_names); i++) {
+        std::cout << value_suite_names[i] << "/test." << std::endl;
+        std::cout << "  case/0  # GetParam() = 1" << std::endl;
+        std::cout << "  case/1  # GetParam() = \"foo\"" << std::endl;
+      }
+      const char* param_suite_names[] = { "param", "ns.param" };
+      for (size_t j = 0; j < ARRAY_SIZE(param_suite_names); j++) {
+        std::cout << param_suite_names[j] << "/special." << std::endl;
+        std::cout << "  case/0  # GetParam() = \"semicolon;\"" << std::endl;
+        std::cout << "  case/1  # GetParam() = \"backslash\\\"" << std::endl;
+        std::cout << "  case/2  # GetParam() = \"${var}\"" << std::endl;
+      }
     }
     return 0;
   }
