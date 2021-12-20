@@ -684,6 +684,7 @@ private:
 
   virtual void ForceLinkerLanguages();
 
+  void CheckTargetLinkLibraries() const;
   bool CheckTargetsForMissingSources() const;
   bool CheckTargetsForType() const;
   bool CheckTargetsForPchCompilePdb() const;

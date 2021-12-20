@@ -328,6 +328,18 @@ bool cmGlobalGenerator::CheckTargetsForMissingSources() const
   return failed;
 }
 
+void cmGlobalGenerator::CheckTargetLinkLibraries() const
+{
+  for (const auto& generator : this->LocalGenerators) {
+    for (const auto& gt : generator->GetGeneratorTargets()) {
+      gt->CheckLinkLibraries();
+    }
+    for (const auto& gt : generator->GetOwnedImportedGeneratorTargets()) {
+      gt->CheckLinkLibraries();
+    }
+  }
+}
+
 bool cmGlobalGenerator::CheckTargetsForType() const
 {
   if (!this->GetLanguageEnabled("Swift")) {
@@ -1605,6 +1617,9 @@ void cmGlobalGenerator::Generate()
   if (this->ExtraGenerator) {
     this->ExtraGenerator->Generate();
   }
+
+  // Perform validation checks on memoized link structures.
+  this->CheckTargetLinkLibraries();
 
   if (!this->CMP0042WarnTargets.empty()) {
     std::ostringstream w;
