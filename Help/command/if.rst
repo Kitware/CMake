@@ -126,7 +126,16 @@ Existence Checks
 ``if(DEFINED <name>|CACHE{<name>}|ENV{<name>})``
  True if a variable, cache variable or environment variable
  with given ``<name>`` is defined. The value of the variable
- does not matter. Note that macro arguments are not variables.
+ does not matter. Note the following caveats:
+
+ * Macro arguments are not variables.
+ * It is not possible to test directly whether a `<name>` is a non-cache
+   variable.  The expression ``if(DEFINED someName)`` will evaluate to true
+   if either a cache or non-cache variable ``someName`` exists.  In
+   comparison, the expression ``if(DEFINED CACHE{someName})`` will only
+   evaluate to true if a cache variable ``someName`` exists.  Both expressions
+   need to be tested if you need to know whether a non-cache variable exists:
+   ``if(DEFINED someName AND NOT DEFINED CACHE{someName})``.
 
  .. versionadded:: 3.14
   Added support for ``CACHE{<name>}`` variables.
