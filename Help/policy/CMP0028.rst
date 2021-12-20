@@ -13,6 +13,8 @@ on disk.  Previously, if a target was not found with a matching name, the name
 was considered to refer to a file on disk.  This can lead to confusing error
 messages if there is a typo in what should be a target name.
 
+See also the :prop_tgt:`LINK_LIBRARIES_ONLY_TARGETS` target property.
+
 The ``OLD`` behavior for this policy is to search for targets, then files on
 disk, even if the search term contains double-colons.  The ``NEW`` behavior
 for this policy is to issue a ``FATAL_ERROR`` if a link dependency contains

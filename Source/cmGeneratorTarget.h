@@ -982,6 +982,7 @@ private:
     Implementation,
     Interface,
   };
+  bool VerifyLinkItemIsTarget(LinkItemRole role, cmLinkItem const& item) const;
   bool VerifyLinkItemColons(LinkItemRole role, cmLinkItem const& item) const;
 
   // Cache import information from properties for each configuration.

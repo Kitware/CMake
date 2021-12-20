@@ -6247,6 +6247,18 @@ cmComputeLinkInformation* cmGeneratorTarget::GetLinkInformation(
 
 void cmGeneratorTarget::CheckLinkLibraries() const
 {
+  bool linkLibrariesOnlyTargets =
+    this->GetPropertyAsBool("LINK_LIBRARIES_ONLY_TARGETS");
+
+  // Evaluate the link interface of this target if needed for extra checks.
+  if (linkLibrariesOnlyTargets) {
+    std::vector<std::string> const& configs =
+      this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
+    for (std::string const& config : configs) {
+      this->GetLinkInterfaceLibraries(config, this, LinkInterfaceFor::Link);
+    }
+  }
+
   // Check link the implementation for each generated configuration.
   for (auto const& hmp : this->LinkImplMap) {
     HeadToLinkImplementationMap const& hm = hmp.second;
@@ -6258,6 +6270,10 @@ void cmGeneratorTarget::CheckLinkLibraries() const
     }
     for (cmLinkImplItem const& item : hmi->second.Libraries) {
       if (!this->VerifyLinkItemColons(LinkItemRole::Implementation, item)) {
+        return;
+      }
+      if (linkLibrariesOnlyTargets &&
+          !this->VerifyLinkItemIsTarget(LinkItemRole::Implementation, item)) {
         return;
       }
     }
@@ -6274,6 +6290,10 @@ void cmGeneratorTarget::CheckLinkLibraries() const
       }
       for (cmLinkItem const& item : hmi.second.Libraries) {
         if (!this->VerifyLinkItemColons(LinkItemRole::Interface, item)) {
+          return;
+        }
+        if (linkLibrariesOnlyTargets &&
+            !this->VerifyLinkItemIsTarget(LinkItemRole::Interface, item)) {
           return;
         }
       }
@@ -6326,6 +6346,35 @@ bool cmGeneratorTarget::VerifyLinkItemColons(LinkItemRole role,
   }
   this->GetLocalGenerator()->GetCMakeInstance()->IssueMessage(messageType, e,
                                                               backtrace);
+  return false;
+}
+
+bool cmGeneratorTarget::VerifyLinkItemIsTarget(LinkItemRole role,
+                                               cmLinkItem const& item) const
+{
+  if (item.Target) {
+    return true;
+  }
+  std::string const& str = item.AsStr();
+  if (!str.empty() &&
+      (str[0] == '-' || str[0] == '$' || str[0] == '`' ||
+       str.find_first_of("/\\") != std::string::npos)) {
+    return true;
+  }
+
+  std::string e = cmStrCat("Target \"", this->GetName(),
+                           "\" has LINK_LIBRARIES_ONLY_TARGETS enabled, but ",
+                           role == LinkItemRole::Implementation
+                             ? "it links to"
+                             : "its link interface contains",
+                           ":\n  ", item.AsStr(), "\nwhich is not a target.  ",
+                           missingTargetPossibleReasons);
+  cmListFileBacktrace backtrace = item.Backtrace;
+  if (backtrace.Empty()) {
+    backtrace = this->GetBacktrace();
+  }
+  this->LocalGenerator->GetCMakeInstance()->IssueMessage(
+    MessageType::FATAL_ERROR, e, backtrace);
   return false;
 }
 
