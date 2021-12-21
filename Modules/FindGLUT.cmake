@@ -20,24 +20,48 @@ This module defines the :prop_tgt:`IMPORTED` targets:
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module sets the following variables:
+This module defines the following variables:
 
-::
+``GLUT_FOUND``
+  True if ``glut`` was found.
 
-  GLUT_INCLUDE_DIR, where to find GL/glut.h, etc.
-  GLUT_LIBRARIES, the libraries to link against
-  GLUT_FOUND, If false, do not try to use GLUT.
+``GLUT_INCLUDE_DIRS``
+  .. versionadded:: 3.23
 
-Also defined, but not for general use are:
+  Where to find GL/glut.h, etc.
 
-::
+``GLUT_LIBRARIES``
+  List of libraries for using ``glut``.
 
-  GLUT_glut_LIBRARY = the full path to the glut library.
-  GLUT_Xmu_LIBRARY  = the full path to the Xmu library.
-  GLUT_Xi_LIBRARY   = the full path to the Xi Library.
+Cache Variables
+^^^^^^^^^^^^^^^
 
-.. versionadded:: 3.13
-  Debug and Release variants are found separately.
+This module may set the following variables depending on platform.
+These variables may optionally be set to help this module find the
+correct files, but clients should not use these as results:
+
+``GLUT_INCLUDE_DIR``
+  The full path to the directory containing ``GL/glut.h``,
+  not including ``GL/``.
+
+``GLUT_glut_LIBRARY``
+  The full path to the glut library.
+
+``GLUT_Xmu_LIBRARY``
+  The full path to the Xmu library.
+
+``GLUT_Xi_LIBRARY``
+  The full path to the Xi Library.
+
+Obsolete Variables
+^^^^^^^^^^^^^^^^^^
+
+The following variables may also be provided, for backwards compatibility:
+
+``GLUT_INCLUDE_DIR``
+  This is one of above `Cache Variables`_, but prior to CMake 3.23 was
+  also a result variable.  Prefer to use ``GLUT_INCLUDE_DIRS`` instead
+  in CMake 3.23 and above.
 #]=======================================================================]
 
 include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
@@ -71,7 +95,8 @@ find_package(PkgConfig)
 if(PKG_CONFIG_FOUND)
   pkg_check_modules(GLUT glut)
   if(GLUT_FOUND)
-    # In the non-pkg-config code path we only provide GLUT_INCLUDE_DIR.
+    # GLUT_INCLUDE_DIRS is now the official result variable, but
+    # older versions of CMake only provided GLUT_INCLUDE_DIR.
     set(GLUT_INCLUDE_DIR "${GLUT_INCLUDE_DIRS}")
     _add_glut_target_simple()
     FIND_PACKAGE_HANDLE_STANDARD_ARGS(GLUT REQUIRED_VARS GLUT_FOUND)
@@ -82,6 +107,7 @@ endif()
 if(WIN32)
   find_path( GLUT_INCLUDE_DIR NAMES GL/glut.h
     PATHS  ${GLUT_ROOT_PATH}/include )
+  mark_as_advanced(GLUT_INCLUDE_DIR)
   find_library( GLUT_glut_LIBRARY_RELEASE NAMES glut glut32 freeglut
     PATHS
     ${OPENGL_LIBRARY_DIR}
@@ -96,6 +122,7 @@ if(WIN32)
   select_library_configurations(GLUT_glut)
 elseif(APPLE)
   find_path(GLUT_INCLUDE_DIR glut.h ${OPENGL_LIBRARY_DIR})
+  mark_as_advanced(GLUT_INCLUDE_DIR)
   find_library(GLUT_glut_LIBRARY GLUT DOC "GLUT library for OSX")
   find_library(GLUT_cocoa_LIBRARY Cocoa DOC "Cocoa framework for OSX")
   mark_as_advanced(GLUT_glut_LIBRARY GLUT_cocoa_LIBRARY)
@@ -152,16 +179,17 @@ else()
     /opt/graphics/OpenGL/contrib/libglut
     ${_GLUT_INC_DIR}
     )
+  mark_as_advanced(GLUT_INCLUDE_DIR)
 
   find_library( GLUT_glut_LIBRARY glut
     /usr/openwin/lib
     ${_GLUT_glut_LIB_DIR}
     )
+  mark_as_advanced(GLUT_glut_LIBRARY)
 
   unset(_GLUT_INC_DIR)
   unset(_GLUT_glut_LIB_DIR)
 endif()
-mark_as_advanced(GLUT_glut_LIBRARY)
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(GLUT REQUIRED_VARS GLUT_glut_LIBRARY GLUT_INCLUDE_DIR)
 
@@ -170,6 +198,9 @@ if (GLUT_FOUND)
   # If not, we need some way to figure out what platform we are on.
   set( GLUT_LIBRARIES
     ${GLUT_glut_LIBRARY}
+    )
+  set(GLUT_INCLUDE_DIRS
+    ${GLUT_INCLUDE_DIR}
     )
   foreach(v GLUT_Xmu_LIBRARY GLUT_Xi_LIBRARY GLUT_cocoa_LIBRARY)
     if(${v})
@@ -180,7 +211,7 @@ if (GLUT_FOUND)
   if(NOT TARGET GLUT::GLUT)
     add_library(GLUT::GLUT UNKNOWN IMPORTED)
     set_target_properties(GLUT::GLUT PROPERTIES
-      INTERFACE_INCLUDE_DIRECTORIES "${GLUT_INCLUDE_DIR}")
+      INTERFACE_INCLUDE_DIRECTORIES "${GLUT_INCLUDE_DIRS}")
     if(GLUT_glut_LIBRARY MATCHES "/([^/]+)\\.framework$")
       set(_glut_glut "${GLUT_glut_LIBRARY}/${CMAKE_MATCH_1}")
       if(EXISTS "${_glut_glut}.tbd")
@@ -227,7 +258,5 @@ if (GLUT_FOUND)
 
   #The following deprecated settings are for backwards compatibility with CMake1.4
   set (GLUT_LIBRARY ${GLUT_LIBRARIES})
-  set (GLUT_INCLUDE_PATH ${GLUT_INCLUDE_DIR})
+  set (GLUT_INCLUDE_PATH ${GLUT_INCLUDE_DIRS})
 endif()
-
-mark_as_advanced(GLUT_INCLUDE_DIR)
