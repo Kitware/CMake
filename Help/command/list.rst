@@ -152,7 +152,7 @@ For more information on regular expressions look under
 
   list(INSERT <list> <element_index> <element> [<element> ...])
 
-Inserts elements to the list to the specified location.
+Inserts elements to the list to the specified index.
 
 .. _POP_BACK:
 
