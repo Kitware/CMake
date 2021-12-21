@@ -8,6 +8,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -32,7 +33,7 @@ public:
     INVALID_VARIABLE,
     DUPLICATE_PRESETS,
     CYCLIC_PRESET_INHERITANCE,
-    USER_PRESET_INHERITANCE,
+    PRESET_UNREACHABLE_FROM_FILE,
     INVALID_MACRO_EXPANSION,
     BUILD_TEST_PRESETS_UNSUPPORTED,
     INVALID_CONFIGURE_PRESET,
@@ -40,6 +41,7 @@ public:
     INVALID_CONDITION,
     CONDITION_UNSUPPORTED,
     TOOLCHAIN_FILE_UNSUPPORTED,
+    CYCLIC_INCLUDE,
   };
 
   enum class ArchToolsetStrategy
@@ -56,6 +58,15 @@ public:
   };
 
   class Condition;
+
+  class File
+  {
+  public:
+    std::string Filename;
+    int Version;
+
+    std::unordered_set<File*> ReachableFiles;
+  };
 
   class Preset
   {
@@ -77,7 +88,7 @@ public:
     std::string Name;
     std::vector<std::string> Inherits;
     bool Hidden;
-    bool User;
+    File* OriginFile;
     std::string DisplayName;
     std::string Description;
 
@@ -321,12 +332,11 @@ public:
   std::vector<std::string> TestPresetOrder;
 
   std::string SourceDir;
-  int Version;
-  int UserVersion;
+  std::vector<std::unique_ptr<File>> Files;
 
   int GetVersion(const Preset& preset) const
   {
-    return preset.User ? this->UserVersion : this->Version;
+    return preset.OriginFile->Version;
   }
 
   static std::string GetFilename(const std::string& sourceDir);
@@ -372,7 +382,22 @@ public:
   void PrintAllPresets() const;
 
 private:
+  enum class RootType
+  {
+    Project,
+    User,
+  };
+
+  enum class ReadReason
+  {
+    Root,
+    Included,
+  };
+
   ReadFileResult ReadProjectPresetsInternal(bool allowNoFiles);
-  ReadFileResult ReadJSONFile(const std::string& filename, bool user);
+  ReadFileResult ReadJSONFile(const std::string& filename, RootType rootType,
+                              ReadReason readReason,
+                              std::vector<File*>& inProgressFiles,
+                              File*& file);
   void ClearPresets();
 };

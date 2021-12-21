@@ -3,6 +3,7 @@
 #include "cmCMakePresetsGraph.h"
 
 #include <algorithm>
+#include <cassert>
 #include <cstdlib>
 #include <functional>
 #include <iostream>
@@ -106,8 +107,8 @@ ReadFileResult VisitPreset(
     }
 
     auto& parentPreset = parent->second.Unexpanded;
-    if (!preset.User && parentPreset.User) {
-      return ReadFileResult::USER_PRESET_INHERITANCE;
+    if (!preset.OriginFile->ReachableFiles.count(parentPreset.OriginFile)) {
+      return ReadFileResult::PRESET_UNREACHABLE_FROM_FILE;
     }
 
     auto result = VisitPreset(parentPreset, presets, cycleStatus, graph);
@@ -876,23 +877,28 @@ cmCMakePresetsGraph::ReadProjectPresetsInternal(bool allowNoFiles)
 {
   bool haveOneFile = false;
 
+  File* file;
   std::string filename = GetUserFilename(this->SourceDir);
+  std::vector<File*> inProgressFiles;
   if (cmSystemTools::FileExists(filename)) {
-    auto result = this->ReadJSONFile(filename, true);
+    auto result = this->ReadJSONFile(filename, RootType::User,
+                                     ReadReason::Root, inProgressFiles, file);
     if (result != ReadFileResult::READ_OK) {
       return result;
     }
     haveOneFile = true;
-  }
-
-  filename = GetFilename(this->SourceDir);
-  if (cmSystemTools::FileExists(filename)) {
-    auto result = this->ReadJSONFile(filename, false);
-    if (result != ReadFileResult::READ_OK) {
-      return result;
+  } else {
+    filename = GetFilename(this->SourceDir);
+    if (cmSystemTools::FileExists(filename)) {
+      auto result = this->ReadJSONFile(
+        filename, RootType::Project, ReadReason::Root, inProgressFiles, file);
+      if (result != ReadFileResult::READ_OK) {
+        return result;
+      }
+      haveOneFile = true;
     }
-    haveOneFile = true;
   }
+  assert(inProgressFiles.empty());
 
   if (!haveOneFile) {
     return allowNoFiles ? ReadFileResult::READ_OK
@@ -983,8 +989,8 @@ const char* cmCMakePresetsGraph::ResultToString(ReadFileResult result)
       return "Duplicate presets";
     case ReadFileResult::CYCLIC_PRESET_INHERITANCE:
       return "Cyclic preset inheritance";
-    case ReadFileResult::USER_PRESET_INHERITANCE:
-      return "Project preset inherits from user preset";
+    case ReadFileResult::PRESET_UNREACHABLE_FROM_FILE:
+      return "Inherited preset is unreachable from preset's file";
     case ReadFileResult::INVALID_MACRO_EXPANSION:
       return "Invalid macro expansion";
     case ReadFileResult::BUILD_TEST_PRESETS_UNSUPPORTED:
@@ -1002,6 +1008,8 @@ const char* cmCMakePresetsGraph::ResultToString(ReadFileResult result)
     case ReadFileResult::TOOLCHAIN_FILE_UNSUPPORTED:
       return "File version must be 3 or higher for toolchainFile preset "
              "support.";
+    case ReadFileResult::CYCLIC_INCLUDE:
+      return "Cyclic include among preset files";
   }
 
   return "Unknown error";
@@ -1016,6 +1024,8 @@ void cmCMakePresetsGraph::ClearPresets()
   this->ConfigurePresetOrder.clear();
   this->BuildPresetOrder.clear();
   this->TestPresetOrder.clear();
+
+  this->Files.clear();
 }
 
 void cmCMakePresetsGraph::PrintPresets(
