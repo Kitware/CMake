@@ -128,7 +128,9 @@ Modification
 
   list(APPEND <list> [<element> ...])
 
-Appends elements to the list.
+Appends elements to the list. If no variable named ``<list>`` exists in the
+current scope its value is treated as empty and the elements are appended to
+that empty list.
 
 .. _FILTER:
 
