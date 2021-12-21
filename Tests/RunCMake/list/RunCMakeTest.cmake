@@ -116,3 +116,6 @@ run_cmake(POP_FRONT-NoArgs)
 # Successful tests
 run_cmake(POP_BACK)
 run_cmake(POP_FRONT)
+
+# Nonexistent variables treated as empty
+run_cmake(LIST-nonexistent)
