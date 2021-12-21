@@ -193,7 +193,9 @@ to the given variables and then remove the first `N` values from
 
 .. versionadded:: 3.15
 
-Insert elements to the 0th position in the list.
+Insert elements to the 0th position in the list. If no variable named
+``<list>`` exists in the current scope its value is treated as empty and
+the elements are prepended to that empty list.
 
 .. _REMOVE_ITEM:
 
