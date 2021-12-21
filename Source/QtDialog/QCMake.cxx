@@ -32,7 +32,7 @@ QCMake::QCMake(QObject* p)
   qRegisterMetaType<QCMakePropertyList>();
   qRegisterMetaType<QProcessEnvironment>();
   qRegisterMetaType<QVector<QCMakePreset>>();
-  qRegisterMetaType<cmCMakePresetsFile::ReadFileResult>();
+  qRegisterMetaType<cmCMakePresetsGraph::ReadFileResult>();
 
   cmSystemTools::DisableRunCommandOutput();
   cmSystemTools::SetRunCommandHideConsole(true);
@@ -69,9 +69,9 @@ QCMake::QCMake(QObject* p)
   connect(&this->LoadPresetsTimer, &QTimer::timeout, this, [this]() {
     this->loadPresets();
     if (!this->PresetName.isEmpty() &&
-        this->CMakePresetsFile.ConfigurePresets.find(
+        this->CMakePresetsGraph.ConfigurePresets.find(
           std::string(this->PresetName.toLocal8Bit())) ==
-          this->CMakePresetsFile.ConfigurePresets.end()) {
+          this->CMakePresetsGraph.ConfigurePresets.end()) {
       this->setPreset(QString{});
     }
   });
@@ -159,7 +159,7 @@ void QCMake::setPreset(const QString& name, bool setBinary)
     if (!name.isNull()) {
       std::string presetName(name.toLocal8Bit());
       auto const& expandedPreset =
-        this->CMakePresetsFile.ConfigurePresets[presetName].Expanded;
+        this->CMakePresetsGraph.ConfigurePresets[presetName].Expanded;
       if (expandedPreset) {
         if (setBinary && !expandedPreset->BinaryDir.empty()) {
           QString binaryDir =
@@ -427,7 +427,7 @@ QCMakePropertyList QCMake::properties() const
   if (!this->PresetName.isNull()) {
     std::string presetName(this->PresetName.toLocal8Bit());
     auto const& p =
-      this->CMakePresetsFile.ConfigurePresets.at(presetName).Expanded;
+      this->CMakePresetsGraph.ConfigurePresets.at(presetName).Expanded;
     if (p) {
       for (auto const& v : p->CacheVariables) {
         if (!v.second) {
@@ -533,17 +533,17 @@ void QCMake::setUpEnvironment() const
 
 void QCMake::loadPresets()
 {
-  auto result = this->CMakePresetsFile.ReadProjectPresets(
+  auto result = this->CMakePresetsGraph.ReadProjectPresets(
     this->SourceDirectory.toLocal8Bit().data(), true);
   if (result != this->LastLoadPresetsResult &&
-      result != cmCMakePresetsFile::ReadFileResult::READ_OK) {
+      result != cmCMakePresetsGraph::ReadFileResult::READ_OK) {
     emit this->presetLoadError(this->SourceDirectory, result);
   }
   this->LastLoadPresetsResult = result;
 
   QVector<QCMakePreset> presets;
-  for (auto const& name : this->CMakePresetsFile.ConfigurePresetOrder) {
-    auto const& it = this->CMakePresetsFile.ConfigurePresets[name];
+  for (auto const& name : this->CMakePresetsGraph.ConfigurePresetOrder) {
+    auto const& it = this->CMakePresetsGraph.ConfigurePresets[name];
     auto const& p = it.Unexpanded;
     if (p.Hidden) {
       continue;
@@ -556,10 +556,10 @@ void QCMake::loadPresets()
     preset.generator = QString::fromLocal8Bit(p.Generator.data());
     preset.architecture = QString::fromLocal8Bit(p.Architecture.data());
     preset.setArchitecture = !p.ArchitectureStrategy ||
-      p.ArchitectureStrategy == cmCMakePresetsFile::ArchToolsetStrategy::Set;
+      p.ArchitectureStrategy == cmCMakePresetsGraph::ArchToolsetStrategy::Set;
     preset.toolset = QString::fromLocal8Bit(p.Toolset.data());
     preset.setToolset = !p.ToolsetStrategy ||
-      p.ToolsetStrategy == cmCMakePresetsFile::ArchToolsetStrategy::Set;
+      p.ToolsetStrategy == cmCMakePresetsGraph::ArchToolsetStrategy::Set;
     preset.enabled = it.Expanded && it.Expanded->ConditionResult &&
       std::find_if(this->AvailableGenerators.begin(),
                    this->AvailableGenerators.end(),

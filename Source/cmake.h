@@ -31,7 +31,7 @@
 
 #  include <cm3p/json/value.h>
 
-#  include "cmCMakePresetsFile.h"
+#  include "cmCMakePresetsGraph.h"
 #endif
 
 class cmExternalMakefileProjectGeneratorFactory;
@@ -248,7 +248,7 @@ public:
 
 #ifndef CMAKE_BOOTSTRAP
   //! Print list of configure presets
-  void PrintPresetList(const cmCMakePresetsFile& file) const;
+  void PrintPresetList(const cmCMakePresetsGraph& graph) const;
 #endif
 
   //! Return the global generator assigned to this instance of cmake
@@ -691,7 +691,7 @@ private:
   std::string GraphVizFile;
   InstalledFilesMap InstalledFiles;
 #ifndef CMAKE_BOOTSTRAP
-  std::map<std::string, cm::optional<cmCMakePresetsFile::CacheVariable>>
+  std::map<std::string, cm::optional<cmCMakePresetsGraph::CacheVariable>>
     UnprocessedPresetVariables;
   std::map<std::string, cm::optional<std::string>>
     UnprocessedPresetEnvironment;

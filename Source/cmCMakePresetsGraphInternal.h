@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include <memory>
 
-#include "cmCMakePresetsFile.h"
+#include "cmCMakePresetsGraph.h"
 
 #define CHECK_OK(expr)                                                        \
   do {                                                                        \
@@ -11,7 +11,7 @@
       return _result;                                                         \
   } while (false)
 
-namespace cmCMakePresetsFileInternal {
+namespace cmCMakePresetsGraphInternal {
 enum class ExpandMacroResult
 {
   Ok,
@@ -23,20 +23,20 @@ using MacroExpander = std::function<ExpandMacroResult(
   const std::string&, const std::string&, std::string&, int version)>;
 }
 
-class cmCMakePresetsFile::Condition
+class cmCMakePresetsGraph::Condition
 {
 public:
   virtual ~Condition() = default;
 
   virtual bool Evaluate(
-    const std::vector<cmCMakePresetsFileInternal::MacroExpander>& expanders,
+    const std::vector<cmCMakePresetsGraphInternal::MacroExpander>& expanders,
     int version, cm::optional<bool>& out) const = 0;
   virtual bool IsNull() const { return false; }
 };
 
-namespace cmCMakePresetsFileInternal {
+namespace cmCMakePresetsGraphInternal {
 
-class NullCondition : public cmCMakePresetsFile::Condition
+class NullCondition : public cmCMakePresetsGraph::Condition
 {
   bool Evaluate(const std::vector<MacroExpander>& /*expanders*/,
                 int /*version*/, cm::optional<bool>& out) const override
@@ -48,7 +48,7 @@ class NullCondition : public cmCMakePresetsFile::Condition
   bool IsNull() const override { return true; }
 };
 
-class ConstCondition : public cmCMakePresetsFile::Condition
+class ConstCondition : public cmCMakePresetsGraph::Condition
 {
 public:
   bool Evaluate(const std::vector<MacroExpander>& /*expanders*/,
@@ -61,7 +61,7 @@ public:
   bool Value;
 };
 
-class EqualsCondition : public cmCMakePresetsFile::Condition
+class EqualsCondition : public cmCMakePresetsGraph::Condition
 {
 public:
   bool Evaluate(const std::vector<MacroExpander>& expanders, int version,
@@ -71,7 +71,7 @@ public:
   std::string Rhs;
 };
 
-class InListCondition : public cmCMakePresetsFile::Condition
+class InListCondition : public cmCMakePresetsGraph::Condition
 {
 public:
   bool Evaluate(const std::vector<MacroExpander>& expanders, int version,
@@ -81,7 +81,7 @@ public:
   std::vector<std::string> List;
 };
 
-class MatchesCondition : public cmCMakePresetsFile::Condition
+class MatchesCondition : public cmCMakePresetsGraph::Condition
 {
 public:
   bool Evaluate(const std::vector<MacroExpander>& expanders, int version,
@@ -91,7 +91,7 @@ public:
   std::string Regex;
 };
 
-class AnyAllOfCondition : public cmCMakePresetsFile::Condition
+class AnyAllOfCondition : public cmCMakePresetsGraph::Condition
 {
 public:
   bool Evaluate(const std::vector<MacroExpander>& expanders, int version,
@@ -101,7 +101,7 @@ public:
   bool StopValue;
 };
 
-class NotCondition : public cmCMakePresetsFile::Condition
+class NotCondition : public cmCMakePresetsGraph::Condition
 {
 public:
   bool Evaluate(const std::vector<MacroExpander>& expanders, int version,

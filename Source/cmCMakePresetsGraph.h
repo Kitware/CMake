@@ -13,7 +13,7 @@
 
 #include <cm/optional>
 
-class cmCMakePresetsFile
+class cmCMakePresetsGraph
 {
 public:
   enum class ReadFileResult
@@ -363,7 +363,7 @@ public:
   }
 
   static void PrintPresets(
-    const std::vector<const cmCMakePresetsFile::Preset*>& presets);
+    const std::vector<const cmCMakePresetsGraph::Preset*>& presets);
   void PrintConfigurePresetList() const;
   void PrintConfigurePresetList(
     const std::function<bool(const ConfigurePreset&)>& filter) const;

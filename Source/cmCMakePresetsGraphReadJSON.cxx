@@ -15,18 +15,18 @@
 
 #include "cmsys/FStream.hxx"
 
-#include "cmCMakePresetsFile.h"
-#include "cmCMakePresetsFileInternal.h"
+#include "cmCMakePresetsGraph.h"
+#include "cmCMakePresetsGraphInternal.h"
 #include "cmJSONHelpers.h"
 #include "cmVersion.h"
 
 namespace {
-using ReadFileResult = cmCMakePresetsFile::ReadFileResult;
-using CacheVariable = cmCMakePresetsFile::CacheVariable;
-using ConfigurePreset = cmCMakePresetsFile::ConfigurePreset;
-using BuildPreset = cmCMakePresetsFile::BuildPreset;
-using TestPreset = cmCMakePresetsFile::TestPreset;
-using ArchToolsetStrategy = cmCMakePresetsFile::ArchToolsetStrategy;
+using ReadFileResult = cmCMakePresetsGraph::ReadFileResult;
+using CacheVariable = cmCMakePresetsGraph::CacheVariable;
+using ConfigurePreset = cmCMakePresetsGraph::ConfigurePreset;
+using BuildPreset = cmCMakePresetsGraph::BuildPreset;
+using TestPreset = cmCMakePresetsGraph::TestPreset;
+using ArchToolsetStrategy = cmCMakePresetsGraph::ArchToolsetStrategy;
 
 constexpr int MIN_VERSION = 1;
 constexpr int MAX_VERSION = 3;
@@ -41,15 +41,15 @@ struct CMakeVersion
 struct RootPresets
 {
   CMakeVersion CMakeMinimumRequired;
-  std::vector<cmCMakePresetsFile::ConfigurePreset> ConfigurePresets;
-  std::vector<cmCMakePresetsFile::BuildPreset> BuildPresets;
-  std::vector<cmCMakePresetsFile::TestPreset> TestPresets;
+  std::vector<cmCMakePresetsGraph::ConfigurePreset> ConfigurePresets;
+  std::vector<cmCMakePresetsGraph::BuildPreset> BuildPresets;
+  std::vector<cmCMakePresetsGraph::TestPreset> TestPresets;
 };
 
-std::unique_ptr<cmCMakePresetsFileInternal::NotCondition> InvertCondition(
-  std::unique_ptr<cmCMakePresetsFile::Condition> condition)
+std::unique_ptr<cmCMakePresetsGraphInternal::NotCondition> InvertCondition(
+  std::unique_ptr<cmCMakePresetsGraph::Condition> condition)
 {
-  auto retval = cm::make_unique<cmCMakePresetsFileInternal::NotCondition>();
+  auto retval = cm::make_unique<cmCMakePresetsGraphInternal::NotCondition>();
   retval->SubCondition = std::move(condition);
   return retval;
 }
@@ -66,71 +66,72 @@ auto const ConditionStringListHelper =
     ConditionStringHelper);
 
 auto const ConstConditionHelper =
-  cmJSONObjectHelper<cmCMakePresetsFileInternal::ConstCondition,
+  cmJSONObjectHelper<cmCMakePresetsGraphInternal::ConstCondition,
                      ReadFileResult>(ReadFileResult::READ_OK,
                                      ReadFileResult::INVALID_CONDITION, false)
     .Bind<std::string>("type"_s, nullptr, ConditionStringHelper, true)
-    .Bind("value"_s, &cmCMakePresetsFileInternal::ConstCondition::Value,
+    .Bind("value"_s, &cmCMakePresetsGraphInternal::ConstCondition::Value,
           ConditionBoolHelper, true);
 
 auto const EqualsConditionHelper =
-  cmJSONObjectHelper<cmCMakePresetsFileInternal::EqualsCondition,
+  cmJSONObjectHelper<cmCMakePresetsGraphInternal::EqualsCondition,
                      ReadFileResult>(ReadFileResult::READ_OK,
                                      ReadFileResult::INVALID_CONDITION, false)
     .Bind<std::string>("type"_s, nullptr, ConditionStringHelper, true)
-    .Bind("lhs"_s, &cmCMakePresetsFileInternal::EqualsCondition::Lhs,
+    .Bind("lhs"_s, &cmCMakePresetsGraphInternal::EqualsCondition::Lhs,
           ConditionStringHelper, true)
-    .Bind("rhs"_s, &cmCMakePresetsFileInternal::EqualsCondition::Rhs,
+    .Bind("rhs"_s, &cmCMakePresetsGraphInternal::EqualsCondition::Rhs,
           ConditionStringHelper, true);
 
 auto const InListConditionHelper =
-  cmJSONObjectHelper<cmCMakePresetsFileInternal::InListCondition,
+  cmJSONObjectHelper<cmCMakePresetsGraphInternal::InListCondition,
                      ReadFileResult>(ReadFileResult::READ_OK,
                                      ReadFileResult::INVALID_CONDITION, false)
     .Bind<std::string>("type"_s, nullptr, ConditionStringHelper, true)
-    .Bind("string"_s, &cmCMakePresetsFileInternal::InListCondition::String,
+    .Bind("string"_s, &cmCMakePresetsGraphInternal::InListCondition::String,
           ConditionStringHelper, true)
-    .Bind("list"_s, &cmCMakePresetsFileInternal::InListCondition::List,
+    .Bind("list"_s, &cmCMakePresetsGraphInternal::InListCondition::List,
           ConditionStringListHelper, true);
 
 auto const MatchesConditionHelper =
-  cmJSONObjectHelper<cmCMakePresetsFileInternal::MatchesCondition,
+  cmJSONObjectHelper<cmCMakePresetsGraphInternal::MatchesCondition,
                      ReadFileResult>(ReadFileResult::READ_OK,
                                      ReadFileResult::INVALID_CONDITION, false)
     .Bind<std::string>("type"_s, nullptr, ConditionStringHelper, true)
-    .Bind("string"_s, &cmCMakePresetsFileInternal::MatchesCondition::String,
+    .Bind("string"_s, &cmCMakePresetsGraphInternal::MatchesCondition::String,
           ConditionStringHelper, true)
-    .Bind("regex"_s, &cmCMakePresetsFileInternal::MatchesCondition::Regex,
+    .Bind("regex"_s, &cmCMakePresetsGraphInternal::MatchesCondition::Regex,
           ConditionStringHelper, true);
 
 ReadFileResult SubConditionHelper(
-  std::unique_ptr<cmCMakePresetsFile::Condition>& out,
+  std::unique_ptr<cmCMakePresetsGraph::Condition>& out,
   const Json::Value* value);
 
 auto const ListConditionVectorHelper =
-  cmJSONVectorHelper<std::unique_ptr<cmCMakePresetsFile::Condition>,
+  cmJSONVectorHelper<std::unique_ptr<cmCMakePresetsGraph::Condition>,
                      ReadFileResult>(ReadFileResult::READ_OK,
                                      ReadFileResult::INVALID_CONDITION,
                                      SubConditionHelper);
 auto const AnyAllOfConditionHelper =
-  cmJSONObjectHelper<cmCMakePresetsFileInternal::AnyAllOfCondition,
+  cmJSONObjectHelper<cmCMakePresetsGraphInternal::AnyAllOfCondition,
                      ReadFileResult>(ReadFileResult::READ_OK,
                                      ReadFileResult::INVALID_CONDITION, false)
     .Bind<std::string>("type"_s, nullptr, ConditionStringHelper, true)
     .Bind("conditions"_s,
-          &cmCMakePresetsFileInternal::AnyAllOfCondition::Conditions,
+          &cmCMakePresetsGraphInternal::AnyAllOfCondition::Conditions,
           ListConditionVectorHelper);
 
 auto const NotConditionHelper =
-  cmJSONObjectHelper<cmCMakePresetsFileInternal::NotCondition, ReadFileResult>(
-    ReadFileResult::READ_OK, ReadFileResult::INVALID_CONDITION, false)
+  cmJSONObjectHelper<cmCMakePresetsGraphInternal::NotCondition,
+                     ReadFileResult>(ReadFileResult::READ_OK,
+                                     ReadFileResult::INVALID_CONDITION, false)
     .Bind<std::string>("type"_s, nullptr, ConditionStringHelper, true)
     .Bind("condition"_s,
-          &cmCMakePresetsFileInternal::NotCondition::SubCondition,
+          &cmCMakePresetsGraphInternal::NotCondition::SubCondition,
           SubConditionHelper);
 
 ReadFileResult ConditionHelper(
-  std::unique_ptr<cmCMakePresetsFile::Condition>& out,
+  std::unique_ptr<cmCMakePresetsGraph::Condition>& out,
   const Json::Value* value)
 {
   if (!value) {
@@ -139,14 +140,14 @@ ReadFileResult ConditionHelper(
   }
 
   if (value->isBool()) {
-    auto c = cm::make_unique<cmCMakePresetsFileInternal::ConstCondition>();
+    auto c = cm::make_unique<cmCMakePresetsGraphInternal::ConstCondition>();
     c->Value = value->asBool();
     out = std::move(c);
     return ReadFileResult::READ_OK;
   }
 
   if (value->isNull()) {
-    out = cm::make_unique<cmCMakePresetsFileInternal::NullCondition>();
+    out = cm::make_unique<cmCMakePresetsGraphInternal::NullCondition>();
     return ReadFileResult::READ_OK;
   }
 
@@ -161,14 +162,14 @@ ReadFileResult ConditionHelper(
     auto type = (*value)["type"].asString();
 
     if (type == "const") {
-      auto c = cm::make_unique<cmCMakePresetsFileInternal::ConstCondition>();
+      auto c = cm::make_unique<cmCMakePresetsGraphInternal::ConstCondition>();
       CHECK_OK(ConstConditionHelper(*c, value));
       out = std::move(c);
       return ReadFileResult::READ_OK;
     }
 
     if (type == "equals" || type == "notEquals") {
-      auto c = cm::make_unique<cmCMakePresetsFileInternal::EqualsCondition>();
+      auto c = cm::make_unique<cmCMakePresetsGraphInternal::EqualsCondition>();
       CHECK_OK(EqualsConditionHelper(*c, value));
       out = std::move(c);
       if (type == "notEquals") {
@@ -178,7 +179,7 @@ ReadFileResult ConditionHelper(
     }
 
     if (type == "inList" || type == "notInList") {
-      auto c = cm::make_unique<cmCMakePresetsFileInternal::InListCondition>();
+      auto c = cm::make_unique<cmCMakePresetsGraphInternal::InListCondition>();
       CHECK_OK(InListConditionHelper(*c, value));
       out = std::move(c);
       if (type == "notInList") {
@@ -188,7 +189,8 @@ ReadFileResult ConditionHelper(
     }
 
     if (type == "matches" || type == "notMatches") {
-      auto c = cm::make_unique<cmCMakePresetsFileInternal::MatchesCondition>();
+      auto c =
+        cm::make_unique<cmCMakePresetsGraphInternal::MatchesCondition>();
       CHECK_OK(MatchesConditionHelper(*c, value));
       out = std::move(c);
       if (type == "notMatches") {
@@ -199,7 +201,7 @@ ReadFileResult ConditionHelper(
 
     if (type == "anyOf" || type == "allOf") {
       auto c =
-        cm::make_unique<cmCMakePresetsFileInternal::AnyAllOfCondition>();
+        cm::make_unique<cmCMakePresetsGraphInternal::AnyAllOfCondition>();
       c->StopValue = (type == "anyOf");
       CHECK_OK(AnyAllOfConditionHelper(*c, value));
       out = std::move(c);
@@ -207,7 +209,7 @@ ReadFileResult ConditionHelper(
     }
 
     if (type == "not") {
-      auto c = cm::make_unique<cmCMakePresetsFileInternal::NotCondition>();
+      auto c = cm::make_unique<cmCMakePresetsGraphInternal::NotCondition>();
       CHECK_OK(NotConditionHelper(*c, value));
       out = std::move(c);
       return ReadFileResult::READ_OK;
@@ -218,20 +220,20 @@ ReadFileResult ConditionHelper(
 }
 
 ReadFileResult PresetConditionHelper(
-  std::shared_ptr<cmCMakePresetsFile::Condition>& out,
+  std::shared_ptr<cmCMakePresetsGraph::Condition>& out,
   const Json::Value* value)
 {
-  std::unique_ptr<cmCMakePresetsFile::Condition> ptr;
+  std::unique_ptr<cmCMakePresetsGraph::Condition> ptr;
   auto result = ConditionHelper(ptr, value);
   out = std::move(ptr);
   return result;
 }
 
 ReadFileResult SubConditionHelper(
-  std::unique_ptr<cmCMakePresetsFile::Condition>& out,
+  std::unique_ptr<cmCMakePresetsGraph::Condition>& out,
   const Json::Value* value)
 {
-  std::unique_ptr<cmCMakePresetsFile::Condition> ptr;
+  std::unique_ptr<cmCMakePresetsGraph::Condition> ptr;
   auto result = ConditionHelper(ptr, value);
   if (ptr && ptr->IsNull()) {
     return ReadFileResult::INVALID_CONDITION;
@@ -898,7 +900,7 @@ auto const RootPresetsHelper =
                           VendorHelper(ReadFileResult::INVALID_ROOT), false);
 }
 
-cmCMakePresetsFile::ReadFileResult cmCMakePresetsFile::ReadJSONFile(
+cmCMakePresetsGraph::ReadFileResult cmCMakePresetsGraph::ReadJSONFile(
   const std::string& filename, bool user)
 {
   cmsys::ifstream fin(filename.c_str());

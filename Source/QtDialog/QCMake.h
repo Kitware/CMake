@@ -4,7 +4,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmCMakePresetsFile.h"
+#include "cmCMakePresetsGraph.h"
 #include "cmake.h"
 
 #ifdef _MSC_VER
@@ -60,7 +60,7 @@ using QCMakePropertyList = QList<QCMakeProperty>;
 Q_DECLARE_METATYPE(QCMakeProperty)
 Q_DECLARE_METATYPE(QCMakePropertyList)
 Q_DECLARE_METATYPE(QProcessEnvironment)
-Q_DECLARE_METATYPE(cmCMakePresetsFile::ReadFileResult)
+Q_DECLARE_METATYPE(cmCMakePresetsGraph::ReadFileResult)
 
 /// Qt API for CMake library.
 /// Wrapper like class allows for easier integration with
@@ -159,7 +159,7 @@ signals:
   void presetChanged(const QString& name);
   /// signal when there's an error reading the presets files
   void presetLoadError(const QString& dir,
-                       cmCMakePresetsFile::ReadFileResult error);
+                       cmCMakePresetsGraph::ReadFileResult error);
   /// signal when uninitialized warning changes
   void warnUninitializedModeChanged(bool value);
   /// signal for progress events
@@ -202,9 +202,9 @@ protected:
   QString Platform;
   QString Toolset;
   std::vector<cmake::GeneratorInfo> AvailableGenerators;
-  cmCMakePresetsFile CMakePresetsFile;
-  cmCMakePresetsFile::ReadFileResult LastLoadPresetsResult =
-    cmCMakePresetsFile::ReadFileResult::READ_OK;
+  cmCMakePresetsGraph CMakePresetsGraph;
+  cmCMakePresetsGraph::ReadFileResult LastLoadPresetsResult =
+    cmCMakePresetsGraph::ReadFileResult::READ_OK;
   QString PresetName;
   QString CMakeExecutable;
   QAtomicInt InterruptFlag;

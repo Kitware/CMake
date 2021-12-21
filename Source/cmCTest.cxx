@@ -38,7 +38,7 @@
 #  include <unistd.h> // IWYU pragma: keep
 #endif
 
-#include "cmCMakePresetsFile.h"
+#include "cmCMakePresetsGraph.h"
 #include "cmCTestBuildAndTestHandler.h"
 #include "cmCTestBuildHandler.h"
 #include "cmCTestConfigureHandler.h"
@@ -2327,12 +2327,12 @@ bool cmCTest::SetArgsFromPreset(const std::string& presetName,
 {
   const auto workingDirectory = cmSystemTools::GetCurrentWorkingDirectory();
 
-  cmCMakePresetsFile settingsFile;
+  cmCMakePresetsGraph settingsFile;
   auto result = settingsFile.ReadProjectPresets(workingDirectory);
-  if (result != cmCMakePresetsFile::ReadFileResult::READ_OK) {
-    cmSystemTools::Error(cmStrCat("Could not read presets from ",
-                                  workingDirectory, ": ",
-                                  cmCMakePresetsFile::ResultToString(result)));
+  if (result != cmCMakePresetsGraph::ReadFileResult::READ_OK) {
+    cmSystemTools::Error(
+      cmStrCat("Could not read presets from ", workingDirectory, ": ",
+               cmCMakePresetsGraph::ResultToString(result)));
     return false;
   }
 
@@ -2422,15 +2422,15 @@ bool cmCTest::SetArgsFromPreset(const std::string& presetName,
     if (expandedPreset->Output->Verbosity) {
       const auto& verbosity = *expandedPreset->Output->Verbosity;
       switch (verbosity) {
-        case cmCMakePresetsFile::TestPreset::OutputOptions::VerbosityEnum::
+        case cmCMakePresetsGraph::TestPreset::OutputOptions::VerbosityEnum::
           Extra:
           this->Impl->ExtraVerbose = true;
           CM_FALLTHROUGH;
-        case cmCMakePresetsFile::TestPreset::OutputOptions::VerbosityEnum::
+        case cmCMakePresetsGraph::TestPreset::OutputOptions::VerbosityEnum::
           Verbose:
           this->Impl->Verbose = true;
           break;
-        case cmCMakePresetsFile::TestPreset::OutputOptions::VerbosityEnum::
+        case cmCMakePresetsGraph::TestPreset::OutputOptions::VerbosityEnum::
           Default:
         default:
           // leave default settings
@@ -2548,13 +2548,13 @@ bool cmCTest::SetArgsFromPreset(const std::string& presetName,
       this->Impl->ShowOnly = true;
 
       switch (*expandedPreset->Execution->ShowOnly) {
-        case cmCMakePresetsFile::TestPreset::ExecutionOptions::ShowOnlyEnum::
+        case cmCMakePresetsGraph::TestPreset::ExecutionOptions::ShowOnlyEnum::
           JsonV1:
           this->Impl->Quiet = true;
           this->Impl->OutputAsJson = true;
           this->Impl->OutputAsJsonVersion = 1;
           break;
-        case cmCMakePresetsFile::TestPreset::ExecutionOptions::ShowOnlyEnum::
+        case cmCMakePresetsGraph::TestPreset::ExecutionOptions::ShowOnlyEnum::
           Human:
           // intentional fallthrough (human is the default)
         default:
@@ -2565,15 +2565,15 @@ bool cmCTest::SetArgsFromPreset(const std::string& presetName,
     if (expandedPreset->Execution->Repeat) {
       this->Impl->RepeatCount = expandedPreset->Execution->Repeat->Count;
       switch (expandedPreset->Execution->Repeat->Mode) {
-        case cmCMakePresetsFile::TestPreset::ExecutionOptions::RepeatOptions::
+        case cmCMakePresetsGraph::TestPreset::ExecutionOptions::RepeatOptions::
           ModeEnum::UntilFail:
           this->Impl->RepeatMode = cmCTest::Repeat::UntilFail;
           break;
-        case cmCMakePresetsFile::TestPreset::ExecutionOptions::RepeatOptions::
+        case cmCMakePresetsGraph::TestPreset::ExecutionOptions::RepeatOptions::
           ModeEnum::UntilPass:
           this->Impl->RepeatMode = cmCTest::Repeat::UntilPass;
           break;
-        case cmCMakePresetsFile::TestPreset::ExecutionOptions::RepeatOptions::
+        case cmCMakePresetsGraph::TestPreset::ExecutionOptions::RepeatOptions::
           ModeEnum::AfterTimeout:
           this->Impl->RepeatMode = cmCTest::Repeat::AfterTimeout;
           break;
@@ -2599,15 +2599,15 @@ bool cmCTest::SetArgsFromPreset(const std::string& presetName,
 
     if (expandedPreset->Execution->NoTestsAction) {
       switch (*expandedPreset->Execution->NoTestsAction) {
-        case cmCMakePresetsFile::TestPreset::ExecutionOptions::
+        case cmCMakePresetsGraph::TestPreset::ExecutionOptions::
           NoTestsActionEnum::Error:
           this->Impl->NoTestsMode = cmCTest::NoTests::Error;
           break;
-        case cmCMakePresetsFile::TestPreset::ExecutionOptions::
+        case cmCMakePresetsGraph::TestPreset::ExecutionOptions::
           NoTestsActionEnum::Ignore:
           this->Impl->NoTestsMode = cmCTest::NoTests::Ignore;
           break;
-        case cmCMakePresetsFile::TestPreset::ExecutionOptions::
+        case cmCMakePresetsGraph::TestPreset::ExecutionOptions::
           NoTestsActionEnum::Default:
           break;
         default:
