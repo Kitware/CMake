@@ -28,7 +28,8 @@ static const char FreeBSDPackageSuffix_10[] = ".txz";
 static const char FreeBSDPackageSuffix_17[] = ".pkg";
 
 cmCPackFreeBSDGenerator::cmCPackFreeBSDGenerator()
-  : cmCPackArchiveGenerator(cmArchiveWrite::CompressXZ, "paxr", FreeBSDPackageSuffix_17 /* old-style, updated if an old-style package is created */)
+  : cmCPackArchiveGenerator(cmArchiveWrite::CompressXZ, "paxr",
+                            FreeBSDPackageSuffix_17)
 {
 }
 
@@ -63,7 +64,7 @@ public:
 
   {
     if (d) {
-      pkg_create_set_format(d, FreeBSDPackageCompression); // Skip over the '.'
+      pkg_create_set_format(d, FreeBSDPackageCompression);
       pkg_create_set_compression_level(d, 0); // Explicitly set default
       pkg_create_set_overwrite(d, false);
       pkg_create_set_rootdir(d, toplevel_dir.c_str());
@@ -378,7 +379,7 @@ int cmCPackFreeBSDGenerator::PackageFiles()
   // so update the single filename to what we know will be right.
   if (this->packageFileNames.size() == 1) {
     std::string currentPackage = this->packageFileNames[0];
-    int lastSlash = currentPackage.rfind('/');
+    auto lastSlash = currentPackage.rfind('/');
 
     // If there is a pathname, preserve that; libpkg will write out
     // a file with the package name and version as specified in the
@@ -393,9 +394,6 @@ int cmCPackFreeBSDGenerator::PackageFiles()
 
     this->packageFileNames.clear();
     this->packageFileNames.emplace_back(actualPackage);
-
-    cmCPackLogger(cmCPackLog::LOG_DEBUG,
-                  "Real filename:" << this->packageFileNames[0] << std::endl);
   }
 
   if (!pkg_initialized() && pkg_init(NULL, NULL) != EPKG_OK) {
@@ -442,8 +440,16 @@ int cmCPackFreeBSDGenerator::PackageFiles()
   for (std::string& name : packageFileNames) {
     if (cmHasSuffix(name, FreeBSDPackageSuffix_17) &&
         !cmSystemTools::FileExists(name)) {
-      const std::string suffix(FreeBSDPackageSuffix_17);
-      name.replace(name.size() - suffix.size(), std::string::npos, suffix);
+      const std::string badSuffix(FreeBSDPackageSuffix_17);
+      const std::string goodSuffix(FreeBSDPackageSuffix_10);
+      std::string repairedName(name);
+      repairedName.replace(repairedName.size() - badSuffix.size(),
+                           std::string::npos, goodSuffix);
+      if (cmSystemTools::FileExists(repairedName)) {
+        name = repairedName;
+        cmCPackLogger(cmCPackLog::LOG_DEBUG,
+                      "Repaired packagefile " << name << std::endl);
+      }
     }
   }
 
