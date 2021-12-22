@@ -4,5 +4,6 @@ set(CMake_TEST_FindOpenMP "ON" CACHE BOOL "")
 set(CMake_TEST_FindOpenMP_C "ON" CACHE BOOL "")
 set(CMake_TEST_FindOpenMP_CXX "ON" CACHE BOOL "")
 set(CMake_TEST_FindOpenMP_Fortran "OFF" CACHE BOOL "")
+set(CMake_TEST_Java OFF CACHE BOOL "")
 
 include("${CMAKE_CURRENT_LIST_DIR}/configure_external_test.cmake")
