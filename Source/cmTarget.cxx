@@ -471,6 +471,9 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
         initProp(property);
       }
     }
+    if (!this->IsImported()) {
+      initProp("LINK_LIBRARIES_ONLY_TARGETS");
+    }
   }
 
   // Save the backtrace of target construction.
