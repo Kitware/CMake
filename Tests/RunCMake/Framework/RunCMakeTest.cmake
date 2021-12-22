@@ -93,3 +93,15 @@ function(imported_framework_test)
 endfunction()
 
 imported_framework_test()
+
+function(framework_system_include_test)
+  set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/FrameworkSystemIncludeTest-build")
+  set(RunCMake_TEST_NO_CLEAN 1)
+
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  run_cmake(FrameworkSystemIncludeTest)
+  run_cmake_command(FrameworkSystemIncludeTest-build ${CMAKE_COMMAND} --build .)
+endfunction()
+
+framework_system_include_test()
