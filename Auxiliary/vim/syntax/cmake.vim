@@ -152,6 +152,7 @@ syn keyword cmakeProperty contained
             \ DISABLED
             \ DISABLED_FEATURES
             \ DISABLE_PRECOMPILE_HEADERS
+            \ DOTNET_SDK
             \ DOTNET_TARGET_FRAMEWORK
             \ DOTNET_TARGET_FRAMEWORK_VERSION
             \ ECLIPSE_EXTRA_CPROJECT_CONTENTS
@@ -1001,6 +1002,7 @@ syn keyword cmakeVariable contained
             \ CMAKE_DIRECTORY_LABELS
             \ CMAKE_DISABLE_PRECOMPILE_HEADERS
             \ CMAKE_DL_LIBS
+            \ CMAKE_DOTNET_SDK
             \ CMAKE_DOTNET_TARGET_FRAMEWORK
             \ CMAKE_DOTNET_TARGET_FRAMEWORK_VERSION
             \ CMAKE_ECLIPSE_GENERATE_LINKED_RESOURCES

@@ -405,6 +405,27 @@ void cmVisualStudio10TargetGenerator::Generate()
   // Write the encoding header into the file
   char magic[] = { char(0xEF), char(0xBB), char(0xBF) };
   BuildFileStream.write(magic, 3);
+
+  if (this->Managed && this->ProjectType == VsProjectType::csproj &&
+      this->GeneratorTarget->IsDotNetSdkTarget() &&
+      this->GlobalGenerator->GetVersion() >=
+        cmGlobalVisualStudioGenerator::VS16) {
+    this->WriteSdkStyleProjectFile(BuildFileStream);
+  } else {
+    this->WriteClassicMsBuildProjectFile(BuildFileStream);
+  }
+
+  if (BuildFileStream.Close()) {
+    this->GlobalGenerator->FileReplacedDuringGenerate(PathToProjectFile);
+  }
+
+  // The groups are stored in a separate file for VS 10
+  this->WriteGroups();
+}
+
+void cmVisualStudio10TargetGenerator::WriteClassicMsBuildProjectFile(
+  cmGeneratedFileStream& BuildFileStream)
+{
   BuildFileStream << "<?xml version=\"1.0\" encoding=\""
                   << this->GlobalGenerator->Encoding() << "\"?>";
   {
@@ -447,29 +468,32 @@ void cmVisualStudio10TargetGenerator::Generate()
       e1.Element("PreferredToolArchitecture", hostArch);
     }
 
+    // ALL_BUILD and ZERO_CHECK projects transitively include
+    // Microsoft.Common.CurrentVersion.targets which triggers Target
+    // ResolveNugetPackageAssets when SDK-style targets are in the project.
+    // However, these projects have no nuget packages to reference and the
+    // build fails.
+    // Setting ResolveNugetPackages to false skips this target and the build
+    // succeeds.
+    cm::string_view targetName{ this->GeneratorTarget->GetName() };
+    if (targetName == "ALL_BUILD" ||
+        targetName == CMAKE_CHECK_BUILD_SYSTEM_TARGET) {
+      Elem e1(e0, "PropertyGroup");
+      e1.Element("ResolveNugetPackages", "false");
+    }
+
     if (this->ProjectType != VsProjectType::csproj) {
       this->WriteProjectConfigurations(e0);
     }
 
     {
       Elem e1(e0, "PropertyGroup");
-      e1.Attribute("Label", "Globals");
-      e1.Element("ProjectGuid", "{" + this->GUID + "}");
+      this->WriteCommonPropertyGroupGlobals(e1);
 
       if ((this->MSTools || this->Android) &&
           this->GeneratorTarget->IsInBuildSystem()) {
         this->WriteApplicationTypeSettings(e1);
         this->VerifyNecessaryFiles();
-      }
-
-      cmValue vsProjectTypes =
-        this->GeneratorTarget->GetProperty("VS_GLOBAL_PROJECT_TYPES");
-      if (vsProjectTypes) {
-        const char* tagName = "ProjectTypes";
-        if (this->ProjectType == VsProjectType::csproj) {
-          tagName = "ProjectTypeGuids";
-        }
-        e1.Element(tagName, *vsProjectTypes);
       }
 
       cmValue vsProjectName =
@@ -493,24 +517,6 @@ void cmVisualStudio10TargetGenerator::Generate()
 
       if (this->GeneratorTarget->GetPropertyAsBool("VS_WINRT_COMPONENT")) {
         e1.Element("WinMDAssembly", "true");
-      }
-
-      cmValue vsGlobalKeyword =
-        this->GeneratorTarget->GetProperty("VS_GLOBAL_KEYWORD");
-      if (!vsGlobalKeyword) {
-        if (this->GlobalGenerator->TargetsAndroid()) {
-          e1.Element("Keyword", "Android");
-        } else {
-          e1.Element("Keyword", "Win32Proj");
-        }
-      } else {
-        e1.Element("Keyword", *vsGlobalKeyword);
-      }
-
-      cmValue vsGlobalRootNamespace =
-        this->GeneratorTarget->GetProperty("VS_GLOBAL_ROOTNAMESPACE");
-      if (vsGlobalRootNamespace) {
-        e1.Element("RootNamespace", *vsGlobalRootNamespace);
       }
 
       e1.Element("Platform", this->Platform);
@@ -600,24 +606,6 @@ void cmVisualStudio10TargetGenerator::Generate()
       if (const char* vcTargetsPath =
             this->GlobalGenerator->GetCustomVCTargetsPath()) {
         e1.Element("VCTargetsPath", vcTargetsPath);
-      }
-
-      std::vector<std::string> keys = this->GeneratorTarget->GetPropertyKeys();
-      for (std::string const& keyIt : keys) {
-        static const cm::string_view prefix = "VS_GLOBAL_";
-        if (!cmHasPrefix(keyIt, prefix))
-          continue;
-        cm::string_view globalKey =
-          cm::string_view(keyIt).substr(prefix.length());
-        // Skip invalid or separately-handled properties.
-        if (globalKey.empty() || globalKey == "PROJECT_TYPES" ||
-            globalKey == "ROOTNAMESPACE" || globalKey == "KEYWORD") {
-          continue;
-        }
-        cmValue value = this->GeneratorTarget->GetProperty(keyIt);
-        if (!value)
-          continue;
-        e1.Element(globalKey, *value);
       }
 
       if (this->Managed) {
@@ -839,13 +827,165 @@ void cmVisualStudio10TargetGenerator::Generate()
       }
     }
   }
+}
 
-  if (BuildFileStream.Close()) {
-    this->GlobalGenerator->FileReplacedDuringGenerate(PathToProjectFile);
+void cmVisualStudio10TargetGenerator::WriteSdkStyleProjectFile(
+  cmGeneratedFileStream& BuildFileStream)
+{
+  if (!this->Managed || this->ProjectType != VsProjectType::csproj ||
+      !this->GeneratorTarget->IsDotNetSdkTarget()) {
+    std::string message = "The target \"" + this->GeneratorTarget->GetName() +
+      "\" is not eligible for .Net SDK style project.";
+    this->Makefile->IssueMessage(MessageType::INTERNAL_ERROR, message);
+    return;
   }
 
-  // The groups are stored in a separate file for VS 10
-  this->WriteGroups();
+  if (this->HasCustomCommands()) {
+    std::string message = "The target \"" + this->GeneratorTarget->GetName() +
+      "\" does not currently support add_custom_command as the Visual Studio "
+      "generators have not yet learned how to generate custom commands in "
+      ".Net SDK-style projects.";
+    this->Makefile->IssueMessage(MessageType::FATAL_ERROR, message);
+    return;
+  }
+
+  Elem e0(BuildFileStream, "Project");
+  e0.Attribute("Sdk", *this->GeneratorTarget->GetProperty("DOTNET_SDK"));
+
+  {
+    Elem e1(e0, "PropertyGroup");
+    this->WriteCommonPropertyGroupGlobals(e1);
+
+    e1.Element("EnableDefaultItems", "false");
+    // Disable the project upgrade prompt that is displayed the first time a
+    // project using an older toolset version is opened in a newer version
+    // of the IDE.
+    e1.Element("VCProjectUpgraderObjectName", "NoUpgrade");
+    e1.Element("ManagedAssembly", "true");
+
+    cmValue targetFramework =
+      this->GeneratorTarget->GetProperty("DOTNET_TARGET_FRAMEWORK");
+    if (targetFramework) {
+      if (targetFramework->find(';') != std::string::npos) {
+        e1.Element("TargetFrameworks", *targetFramework);
+      } else {
+        e1.Element("TargetFramework", *targetFramework);
+      }
+    } else {
+      e1.Element("TargetFramework", "net5.0");
+    }
+
+    std::string outputType;
+    switch (this->GeneratorTarget->GetType()) {
+      case cmStateEnums::OBJECT_LIBRARY:
+      case cmStateEnums::STATIC_LIBRARY:
+      case cmStateEnums::MODULE_LIBRARY:
+        this->Makefile->IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmStrCat("Target \"", this->GeneratorTarget->GetName(),
+                   "\" is of a type not supported for managed binaries."));
+        return;
+      case cmStateEnums::SHARED_LIBRARY:
+        outputType = "Library";
+        break;
+      case cmStateEnums::EXECUTABLE: {
+        auto const win32 =
+          this->GeneratorTarget->GetSafeProperty("WIN32_EXECUTABLE");
+        if (win32.find("$<") != std::string::npos) {
+          this->Makefile->IssueMessage(
+            MessageType::FATAL_ERROR,
+            cmStrCat("Target \"", this->GeneratorTarget->GetName(),
+                     "\" has a generator expression in its WIN32_EXECUTABLE "
+                     "property. This is not supported on managed "
+                     "executables."));
+          return;
+        }
+        outputType = "Exe";
+      } break;
+      case cmStateEnums::UTILITY:
+      case cmStateEnums::INTERFACE_LIBRARY:
+      case cmStateEnums::GLOBAL_TARGET:
+        outputType = "Utility";
+        break;
+      case cmStateEnums::UNKNOWN_LIBRARY:
+        break;
+    }
+    e1.Element("OutputType", outputType);
+  }
+
+  this->WriteDotNetDocumentationFile(e0);
+  this->WriteAllSources(e0);
+  this->WritePackageReferences(e0);
+  this->WriteProjectReferences(e0);
+}
+
+void cmVisualStudio10TargetGenerator::WriteCommonPropertyGroupGlobals(Elem& e1)
+{
+  e1.Attribute("Label", "Globals");
+  e1.Element("ProjectGuid", "{" + this->GUID + "}");
+
+  cmValue vsProjectTypes =
+    this->GeneratorTarget->GetProperty("VS_GLOBAL_PROJECT_TYPES");
+  if (vsProjectTypes) {
+    const char* tagName = "ProjectTypes";
+    if (this->ProjectType == VsProjectType::csproj) {
+      tagName = "ProjectTypeGuids";
+    }
+    e1.Element(tagName, *vsProjectTypes);
+  }
+
+  cmValue vsGlobalKeyword =
+    this->GeneratorTarget->GetProperty("VS_GLOBAL_KEYWORD");
+  if (!vsGlobalKeyword) {
+    if (this->GlobalGenerator->TargetsAndroid()) {
+      e1.Element("Keyword", "Android");
+    } else {
+      e1.Element("Keyword", "Win32Proj");
+    }
+  } else {
+    e1.Element("Keyword", *vsGlobalKeyword);
+  }
+
+  cmValue vsGlobalRootNamespace =
+    this->GeneratorTarget->GetProperty("VS_GLOBAL_ROOTNAMESPACE");
+  if (vsGlobalRootNamespace) {
+    e1.Element("RootNamespace", *vsGlobalRootNamespace);
+  }
+
+  std::vector<std::string> keys = this->GeneratorTarget->GetPropertyKeys();
+  for (std::string const& keyIt : keys) {
+    static const cm::string_view prefix = "VS_GLOBAL_";
+    if (!cmHasPrefix(keyIt, prefix))
+      continue;
+    cm::string_view globalKey = cm::string_view(keyIt).substr(prefix.length());
+    // Skip invalid or separately-handled properties.
+    if (globalKey.empty() || globalKey == "PROJECT_TYPES" ||
+        globalKey == "ROOTNAMESPACE" || globalKey == "KEYWORD") {
+      continue;
+    }
+    cmValue value = this->GeneratorTarget->GetProperty(keyIt);
+    if (!value)
+      continue;
+    e1.Element(globalKey, *value);
+  }
+}
+
+bool cmVisualStudio10TargetGenerator::HasCustomCommands() const
+{
+  if (!this->GeneratorTarget->GetPreBuildCommands().empty() ||
+      !this->GeneratorTarget->GetPreLinkCommands().empty() ||
+      !this->GeneratorTarget->GetPostBuildCommands().empty()) {
+    return true;
+  }
+
+  for (cmGeneratorTarget::AllConfigSource const& si :
+       this->GeneratorTarget->GetAllConfigSources()) {
+    if (si.Source->GetCustomCommand()) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 void cmVisualStudio10TargetGenerator::WritePackageReferences(Elem& e0)
