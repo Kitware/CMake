@@ -86,6 +86,46 @@ macOS using ProductBuild:
  :variable:`CPACK_RESOURCE_FILE_README`, and
  :variable:`CPACK_RESOURCE_FILE_LICENSE` files are copied.
 
+.. variable:: CPACK_PRODUCTBUILD_DOMAINS
+
+ .. versionadded:: 3.23
+
+ Adds a domains element to Distribution XML if specified. When set to true,
+ the productbuild generator creates the following XML element:
+
+ .. code-block:: xml
+
+    <domains enable_anywhere="true" enable_currentUserHome="false" enable_localSystem="true"/>
+
+ The default values used for the attributes can be overridden with
+ :variable:`CPACK_PRODUCTBUILD_DOMAINS_ANYWHERE`,
+ :variable:`CPACK_PRODUCTBUILD_DOMAINS_USER`, and
+ :variable:`CPACK_PRODUCTBUILD_DOMAINS_ROOT`.
+
+.. variable:: CPACK_PRODUCTBUILD_DOMAINS_ANYWHERE
+
+ .. versionadded:: 3.23
+
+ May be used to override the ``enable_anywhere`` attribute in the domains
+ element in the Distribution XML when :variable:`CPACK_PRODUCTBUILD_DOMAINS`
+ is set to ``TRUE``.
+
+.. variable:: CPACK_PRODUCTBUILD_DOMAINS_USER
+
+ .. versionadded:: 3.23
+
+ May be used to override the ``enable_currentUserHome`` attribute in the domains
+ element in the Distribution XML when :variable:`CPACK_PRODUCTBUILD_DOMAINS`
+ is set to ``TRUE``.
+
+.. variable:: CPACK_PRODUCTBUILD_DOMAINS_ROOT
+
+ .. versionadded:: 3.23
+
+ May be used to override the ``enable_localSystem`` attribute in the domains
+ element in the Distribution XML when :variable:`CPACK_PRODUCTBUILD_DOMAINS`
+ is set to ``TRUE``.
+
 Background Image
 """"""""""""""""
 

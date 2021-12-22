@@ -91,6 +91,10 @@ protected:
   void CreateBackground(const char* themeName, const char* metapackageFile,
                         cm::string_view genName, cmXMLWriter& xout);
 
+  /// Create the "domains" XML element to indicate where the product can
+  /// be installed
+  void CreateDomains(cmXMLWriter& xout);
+
   // The PostFlight component when creating a metapackage
   cmCPackComponent PostFlightComponent;
 };

@@ -162,6 +162,8 @@ void cmCPackPKGGenerator::WriteDistributionFile(const char* metapackageFile,
     CreateChoice(PostFlightComponent, xout);
   }
 
+  this->CreateDomains(xout);
+
   // default background
   this->CreateBackground(nullptr, metapackageFile, genName, xout);
   // Dark Aqua
@@ -273,7 +275,10 @@ void cmCPackPKGGenerator::CreateChoice(const cmCPackComponent& component,
   xout.Attribute("id", packageId);
   xout.Attribute("version", this->GetOption("CPACK_PACKAGE_VERSION"));
   xout.Attribute("installKBytes", installedSize);
-  xout.Attribute("auth", "Admin");
+  // The auth attribute is deprecated in favor of the domains element
+  if (cmIsOff(this->GetOption("CPACK_PRODUCTBUILD_DOMAINS"))) {
+    xout.Attribute("auth", "Admin");
+  }
   xout.Attribute("onConclusion", "None");
   if (component.IsDownloaded) {
     xout.Content(this->GetOption("CPACK_DOWNLOAD_SITE"));
@@ -284,6 +289,36 @@ void cmCPackPKGGenerator::CreateChoice(const cmCPackComponent& component,
                                           /*escapeSlashes=*/false));
   }
   xout.EndElement(); // pkg-ref
+}
+
+void cmCPackPKGGenerator::CreateDomains(cmXMLWriter& xout)
+{
+  std::string opt = "CPACK_PRODUCTBUILD_DOMAINS";
+  if (cmIsOff(this->GetOption(opt))) {
+    return;
+  }
+
+  xout.StartElement("domains");
+
+  // Product can be installed at the root of any volume by default
+  // unless specified
+  cmValue param = this->GetOption(cmStrCat(opt, "_ANYWHERE"));
+  xout.Attribute("enable_anywhere",
+                 (param && cmIsOff(param)) ? "false" : "true");
+
+  // Product cannot be installed into the current user's home directory
+  // by default unless specified
+  param = this->GetOption(cmStrCat(opt, "_USER"));
+  xout.Attribute("enable_currentUserHome",
+                 (param && cmIsOn(param)) ? "true" : "false");
+
+  // Product can be installed into the root directory by default
+  // unless specified
+  param = this->GetOption(cmStrCat(opt, "_ROOT"));
+  xout.Attribute("enable_localSystem",
+                 (param && cmIsOff(param)) ? "false" : "true");
+
+  xout.EndElement();
 }
 
 void cmCPackPKGGenerator::AddDependencyAttributes(
