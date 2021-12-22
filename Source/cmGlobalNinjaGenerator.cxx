@@ -401,7 +401,7 @@ void cmGlobalNinjaGenerator::WriteCustomCommandBuild(
 void cmGlobalNinjaGenerator::AddMacOSXContentRule()
 {
   cmNinjaRule rule("COPY_OSX_CONTENT");
-  rule.Command = cmStrCat(this->CMakeCmd(), " -E copy $in $out");
+  rule.Command = cmStrCat("if [ -f $in ]; then ", this->CMakeCmd(), " -E copy $in $out ; else ", this->CMakeCmd()," -E copy_directory $in $out ; fi");
   rule.Description = "Copying OS X Content $out";
   rule.Comment = "Rule for copying OS X bundle content file.";
   this->AddRule(rule);
