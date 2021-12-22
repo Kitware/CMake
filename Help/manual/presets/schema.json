@@ -42,6 +42,21 @@
         "testPresets": { "$ref": "#/definitions/testPresetsV3"}
       },
       "additionalProperties": false
+    },
+    {
+      "properties": {
+        "version": {
+          "const": 4,
+          "description": "A required integer representing the version of the JSON schema."
+        },
+        "cmakeMinimumRequired": { "$ref": "#/definitions/cmakeMinimumRequired"},
+        "vendor": { "$ref": "#/definitions/vendor" },
+        "configurePresets": { "$ref": "#/definitions/configurePresetsV3"},
+        "buildPresets": { "$ref": "#/definitions/buildPresetsV3"},
+        "testPresets": { "$ref": "#/definitions/testPresetsV3"},
+        "include": { "$ref": "#/definitions/include"}
+      },
+      "additionalProperties": false
     }
   ],
   "required": [
@@ -1235,6 +1250,13 @@
           "description": "Null indicates that the condition always evaluates to true and is not inherited."
         }
       ]
+    },
+    "include": {
+      "type": "array",
+      "description": "An optional array of strings representing files to include. If the filenames are not absolute, they are considered relative to the current file.",
+      "items": {
+        "type": "string"
+      }
     }
   }
 }

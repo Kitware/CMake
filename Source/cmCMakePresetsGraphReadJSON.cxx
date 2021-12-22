@@ -33,7 +33,7 @@ using TestPreset = cmCMakePresetsGraph::TestPreset;
 using ArchToolsetStrategy = cmCMakePresetsGraph::ArchToolsetStrategy;
 
 constexpr int MIN_VERSION = 1;
-constexpr int MAX_VERSION = 3;
+constexpr int MAX_VERSION = 4;
 
 struct CMakeVersion
 {
@@ -48,6 +48,7 @@ struct RootPresets
   std::vector<cmCMakePresetsGraph::ConfigurePreset> ConfigurePresets;
   std::vector<cmCMakePresetsGraph::BuildPreset> BuildPresets;
   std::vector<cmCMakePresetsGraph::TestPreset> TestPresets;
+  std::vector<std::string> Include;
 };
 
 std::unique_ptr<cmCMakePresetsGraphInternal::NotCondition> InvertCondition(
@@ -271,6 +272,13 @@ auto const CMakeVersionHelper =
     .Bind("minor"_s, &CMakeVersion::Minor, CMakeVersionUIntHelper, false)
     .Bind("patch"_s, &CMakeVersion::Patch, CMakeVersionUIntHelper, false);
 
+auto const IncludeHelper = cmJSONStringHelper<ReadFileResult>(
+  ReadFileResult::READ_OK, ReadFileResult::INVALID_INCLUDE);
+
+auto const IncludeVectorHelper =
+  cmJSONVectorHelper<std::string, ReadFileResult>(
+    ReadFileResult::READ_OK, ReadFileResult::INVALID_INCLUDE, IncludeHelper);
+
 auto const RootPresetsHelper =
   cmJSONObjectHelper<RootPresets, ReadFileResult>(
     ReadFileResult::READ_OK, ReadFileResult::INVALID_ROOT, false)
@@ -283,6 +291,7 @@ auto const RootPresetsHelper =
           cmCMakePresetsGraphInternal::TestPresetsHelper, false)
     .Bind("cmakeMinimumRequired"_s, &RootPresets::CMakeMinimumRequired,
           CMakeVersionHelper, false)
+    .Bind("include"_s, &RootPresets::Include, IncludeVectorHelper, false)
     .Bind<std::nullptr_t>(
       "vendor"_s, nullptr,
       cmCMakePresetsGraphInternal::VendorHelper(ReadFileResult::INVALID_ROOT),
@@ -413,6 +422,19 @@ cmCMakePresetsGraph::ReadFileResult cmCMakePresetsGraph::ReadJSONFile(
   const std::string& filename, RootType rootType, ReadReason readReason,
   std::vector<File*>& inProgressFiles, File*& file)
 {
+  ReadFileResult result;
+
+  if (rootType == RootType::Project) {
+    auto normalizedFilename = cmSystemTools::CollapseFullPath(filename);
+
+    auto normalizedProjectDir =
+      cmSystemTools::CollapseFullPath(this->SourceDir);
+    if (!cmSystemTools::IsSubDirectory(normalizedFilename,
+                                       normalizedProjectDir)) {
+      return ReadFileResult::INCLUDE_OUTSIDE_PROJECT;
+    }
+  }
+
   for (auto const& f : this->Files) {
     if (cmSystemTools::SameFile(filename, f->Filename)) {
       file = f.get();
@@ -421,6 +443,22 @@ cmCMakePresetsGraph::ReadFileResult cmCMakePresetsGraph::ReadJSONFile(
       if (fileIt != inProgressFiles.end()) {
         return cmCMakePresetsGraph::ReadFileResult::CYCLIC_INCLUDE;
       }
+
+      // Check files included by this file again to make sure they're in the
+      // project directory.
+      if (rootType == RootType::Project) {
+        for (auto* f2 : file->ReachableFiles) {
+          if (!cmSystemTools::SameFile(filename, f2->Filename)) {
+            File* file2;
+            if ((result = this->ReadJSONFile(
+                   f2->Filename, rootType, ReadReason::Included,
+                   inProgressFiles, file2)) != ReadFileResult::READ_OK) {
+              return result;
+            }
+          }
+        }
+      }
+
       return cmCMakePresetsGraph::ReadFileResult::READ_OK;
     }
   }
@@ -440,8 +478,7 @@ cmCMakePresetsGraph::ReadFileResult cmCMakePresetsGraph::ReadJSONFile(
   }
 
   int v = 0;
-  auto result = RootVersionHelper(v, &root);
-  if (result != ReadFileResult::READ_OK) {
+  if ((result = RootVersionHelper(v, &root)) != ReadFileResult::READ_OK) {
     return result;
   }
   if (v < MIN_VERSION || v > MAX_VERSION) {
@@ -452,6 +489,11 @@ cmCMakePresetsGraph::ReadFileResult cmCMakePresetsGraph::ReadJSONFile(
   if (v < 2 &&
       (root.isMember("buildPresets") || root.isMember("testPresets"))) {
     return ReadFileResult::BUILD_TEST_PRESETS_UNSUPPORTED;
+  }
+
+  // Support for include added in version 4.
+  if (v < 4 && root.isMember("include")) {
+    return ReadFileResult::INCLUDE_UNSUPPORTED;
   }
 
   RootPresets presets;
@@ -570,6 +612,18 @@ cmCMakePresetsGraph::ReadFileResult cmCMakePresetsGraph::ReadJSONFile(
                                 includedFile->ReachableFiles.end());
     return ReadFileResult::READ_OK;
   };
+
+  for (auto include : presets.Include) {
+    if (!cmSystemTools::FileIsFullPath(include)) {
+      auto directory = cmSystemTools::GetFilenamePath(filename);
+      include = cmStrCat(directory, '/', include);
+    }
+
+    if ((result = includeFile(include, rootType, ReadReason::Included)) !=
+        ReadFileResult::READ_OK) {
+      return result;
+    }
+  }
 
   if (rootType == RootType::User && readReason == ReadReason::Root) {
     auto cmakePresetsFilename = GetFilename(this->SourceDir);

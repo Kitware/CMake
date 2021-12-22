@@ -1,0 +1,15 @@
+{
+  "version": 4,
+  "include": [
+    "IncludeUserCommon.json"
+  ],
+  "configurePresets": [
+    {
+      "name": "IncludeUser",
+      "inherits": [
+        "Include",
+        "IncludeUserCommon"
+      ]
+    }
+  ]
+}

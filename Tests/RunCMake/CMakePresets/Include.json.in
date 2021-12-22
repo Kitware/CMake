@@ -1,0 +1,16 @@
+{
+  "version": 4,
+  "include": [
+    "subdir/CMakePresets.json",
+    "@RunCMake_TEST_SOURCE_DIR@/IncludeCommon.json"
+  ],
+  "configurePresets": [
+    {
+      "name": "Include",
+      "inherits": [
+        "IncludeCommon",
+        "Subdir"
+      ]
+    }
+  ]
+}
