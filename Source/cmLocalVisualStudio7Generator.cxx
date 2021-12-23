@@ -40,6 +40,7 @@
 #include "cmTarget.h"
 #include "cmTargetDepend.h"
 #include "cmValue.h"
+#include "cmVsProjectType.h"
 #include "cmXMLParser.h"
 #include "cmake.h"
 
@@ -574,7 +575,8 @@ public:
   {
     // If any commands were generated, finish constructing them.
     if (!this->First) {
-      std::string finishScript = this->LG->FinishConstructScript(IsCSharp::No);
+      std::string finishScript =
+        this->LG->FinishConstructScript(VsProjectType::vcxproj);
       this->Stream << this->LG->EscapeForXML(finishScript) << "\"";
     }
 
@@ -1817,7 +1819,7 @@ void cmLocalVisualStudio7Generator::WriteCustomRule(
     if (this->FortranProject) {
       cmSystemTools::ReplaceString(script, "$(Configuration)", config);
     }
-    script += this->FinishConstructScript(IsCSharp::No);
+    script += this->FinishConstructScript(VsProjectType::vcxproj);
     /* clang-format off */
     fout << "\t\t\t\t\t<Tool\n"
          << "\t\t\t\t\tName=\"" << customTool << "\"\n"
