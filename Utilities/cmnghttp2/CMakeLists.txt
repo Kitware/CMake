@@ -7,10 +7,10 @@ elseif(CMAKE_C_COMPILER_ID STREQUAL "PathScale")
 endif()
 
 # Re-use some check result cache entries from cmcurl:
-# * HAVE_ARPA_INET_H
-# * HAVE_NETINET_IN_H
-# * HAVE_SSIZE_T
-if(NOT HAVE_SSIZE_T)
+# * HAVE_ARPA_INET_H    (referenced in cmakeconfig.h.in)
+# * HAVE_NETINET_IN_H   (referenced in cmakeconfig.h.in)
+# * HAVE_SIZEOF_SSIZE_T (referenced here)
+if(NOT HAVE_SIZEOF_SSIZE_T)
   set(ssize_t KWIML_INT_intptr_t)
 endif()
 configure_file(cmakeconfig.h.in config.h)
