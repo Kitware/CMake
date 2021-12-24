@@ -353,18 +353,12 @@ if(${CMAKE_GENERATOR} MATCHES "Visual Studio")
   set(_SET_CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT
     "set(CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT \"${CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT}\")")
 elseif(CMAKE_CUDA_COMPILER_ID STREQUAL "Clang")
-  if(NOT CMAKE_CUDA_ARCHITECTURES)
-    # Find the architecture that we successfully compiled using and set it as the default.
-    string(REGEX MATCH "-target-cpu sm_([0-9]+)" dont_care "${CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT}")
-    set(detected_architecture "${CMAKE_MATCH_1}")
-  else()
-    string(REGEX MATCHALL "-target-cpu sm_([0-9]+)" target_cpus "${CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT}")
+  string(REGEX MATCHALL "-target-cpu sm_([0-9]+)" target_cpus "${CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT}")
 
-    foreach(cpu ${target_cpus})
-      string(REGEX MATCH "-target-cpu sm_([0-9]+)" dont_care "${cpu}")
-      list(APPEND architectures "${CMAKE_MATCH_1}")
-    endforeach()
-  endif()
+  foreach(cpu ${target_cpus})
+    string(REGEX MATCH "-target-cpu sm_([0-9]+)" dont_care "${cpu}")
+    list(APPEND architectures_detected "${CMAKE_MATCH_1}")
+  endforeach()
 
   # Find target directory when crosscompiling.
   if(CMAKE_CROSSCOMPILING)
@@ -590,28 +584,25 @@ if(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA")
       "Failed to detect CUDA nvcc include information:\n${_nvcc_log}\n\n")
   endif()
 
-  # Parse default CUDA architecture.
-  cmake_policy(GET CMP0104 _CUDA_CMP0104)
-  if(NOT CMAKE_CUDA_ARCHITECTURES AND _CUDA_CMP0104 STREQUAL "NEW")
-    string(REGEX MATCH "arch[ =]compute_([0-9]+)" dont_care "${CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT}")
-    set(detected_architecture "${CMAKE_MATCH_1}")
-  elseif(CMAKE_CUDA_ARCHITECTURES)
-    string(REGEX MATCHALL "-arch compute_([0-9]+)" target_cpus "${CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT}")
+  string(REGEX MATCHALL "-arch compute_([0-9]+)" target_cpus "${CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT}")
 
-    foreach(cpu ${target_cpus})
-      string(REGEX MATCH "-arch compute_([0-9]+)" dont_care "${cpu}")
-      list(APPEND architectures "${CMAKE_MATCH_1}")
-    endforeach()
-  endif()
+  foreach(cpu ${target_cpus})
+    string(REGEX MATCH "-arch compute_([0-9]+)" dont_care "${cpu}")
+    list(APPEND architectures_detected "${CMAKE_MATCH_1}")
+  endforeach()
 endif()
 
 # If the user didn't set the architectures, then set them to a default.
 # If the user did, then make sure those architectures worked.
-if(DEFINED detected_architecture AND "${CMAKE_CUDA_ARCHITECTURES}" STREQUAL "")
-  set(CMAKE_CUDA_ARCHITECTURES "${detected_architecture}" CACHE STRING "CUDA architectures")
+if("${CMAKE_CUDA_ARCHITECTURES}" STREQUAL "")
+  cmake_policy(GET CMP0104 _CUDA_CMP0104)
 
-  if(NOT CMAKE_CUDA_ARCHITECTURES)
-    message(FATAL_ERROR "Failed to find a working CUDA architecture.")
+  if(NOT CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA" OR _CUDA_CMP0104 STREQUAL "NEW")
+    set(CMAKE_CUDA_ARCHITECTURES "${architectures_detected}" CACHE STRING "CUDA architectures")
+
+    if(NOT CMAKE_CUDA_ARCHITECTURES)
+      message(FATAL_ERROR "Failed to detect a default CUDA architecture.\n\nCompiler output:\n${CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT}")
+    endif()
   endif()
 elseif(architectures AND (architectures_mode STREQUAL "xall" OR
                           architectures_mode STREQUAL "xall-major"))
@@ -624,9 +615,9 @@ elseif(architectures AND (architectures_mode STREQUAL "xall" OR
       "instead.")
   endif()
 
-elseif(architectures AND architectures_mode STREQUAL "xexplicit")
+elseif(architectures_mode STREQUAL "xexplicit")
   # Sort since order mustn't matter.
-  list(SORT architectures)
+  list(SORT architectures_detected)
   list(SORT tested_architectures)
 
   # We don't distinguish real/virtual architectures during testing.
@@ -634,12 +625,19 @@ elseif(architectures AND architectures_mode STREQUAL "xexplicit")
   # Thus we need to remove duplicates before checking if they're equal.
   list(REMOVE_DUPLICATES tested_architectures)
 
-  if(NOT "${architectures}" STREQUAL "${tested_architectures}")
+  # Print the actual architectures for generic values (all and all-major).
+  if(NOT DEFINED architectures_explicit)
+    set(architectures_error "${CMAKE_CUDA_ARCHITECTURES} (${tested_architectures})")
+  else()
+    set(architectures_error "${tested_architectures}")
+  endif()
+
+  if(NOT "${architectures_detected}" STREQUAL "${tested_architectures}")
     message(FATAL_ERROR
       "The CMAKE_CUDA_ARCHITECTURES:\n"
       "  ${CMAKE_CUDA_ARCHITECTURES}\n"
       "do not all work with this compiler.  Try:\n"
-      "  ${architectures}\n"
+      "  ${architectures_detected}\n"
       "instead.")
   endif()
 endif()
