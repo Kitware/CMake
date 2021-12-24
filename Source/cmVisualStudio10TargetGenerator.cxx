@@ -248,6 +248,8 @@ static std::string computeProjectFileExtension(VsProjectType projectType)
   switch (projectType) {
     case VsProjectType::csproj:
       return ".csproj";
+    case VsProjectType::proj:
+      return ".proj";
     default:
       return ".vcxproj";
   }
@@ -681,6 +683,8 @@ void cmVisualStudio10TargetGenerator::WriteClassicMsBuildProjectFile(
           .Attribute("Project", VS10_CSharp_DEFAULT_PROPS)
           .Attribute("Condition", "Exists('" VS10_CSharp_DEFAULT_PROPS "')");
         break;
+      default:
+        break;
     }
 
     this->WriteProjectConfigurationValues(e0);
@@ -737,6 +741,8 @@ void cmVisualStudio10TargetGenerator::WriteClassicMsBuildProjectFile(
         case VsProjectType::csproj:
           props = VS10_CSharp_USER_PROPS;
           break;
+        default:
+          break;
       }
       if (cmValue p = this->GeneratorTarget->GetProperty("VS_USER_PROPS")) {
         props = *p;
@@ -778,6 +784,8 @@ void cmVisualStudio10TargetGenerator::WriteClassicMsBuildProjectFile(
         } else {
           Elem(e0, "Import").Attribute("Project", VS10_CSharp_TARGETS);
         }
+        break;
+      default:
         break;
     }
 
@@ -3057,6 +3065,8 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
         cm::make_unique<Options>(this->LocalGenerator, Options::CSharpCompiler,
                                  gg->GetCSharpFlagTable());
       break;
+    default:
+      break;
   }
   Options& clOptions = *pOptions;
 
@@ -3181,6 +3191,8 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
       cm::erase_if(targetDefines, [](std::string const& def) {
         return def.find('=') != std::string::npos;
       });
+      break;
+    default:
       break;
   }
   clOptions.AddDefines(targetDefines);
@@ -4307,6 +4319,9 @@ void cmVisualStudio10TargetGenerator::AddLibraries(
               // code.
               this->AdditionalUsingDirectories[config].insert(
                 cmSystemTools::GetFilenamePath(location));
+              break;
+            default:
+              // In .proj files, we wouldn't be referencing libraries.
               break;
           }
         }
