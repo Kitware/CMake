@@ -534,6 +534,10 @@ add_RunCMake_test(no_install_prefix)
 add_RunCMake_test(configure_file)
 add_RunCMake_test(CTestTimeout -DTIMEOUT=${CTestTestTimeout_TIME})
 add_RunCMake_test(CTestTimeoutAfterMatch)
+if(CMake_TEST_CUDA)
+  add_RunCMake_test(CUDA_architectures)
+  set_property(TEST RunCMake.CUDA_architectures APPEND PROPERTY LABELS "CUDA")
+endif()
 add_RunCMake_test(DependencyGraph -DCMAKE_Fortran_COMPILER=${CMAKE_Fortran_COMPILER})
 
 # ctresalloc links against CMakeLib and CTestLib, which means it can't be built

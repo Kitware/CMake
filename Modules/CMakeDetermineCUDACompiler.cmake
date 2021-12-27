@@ -257,7 +257,7 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
   endif()
 
   # Append user-specified architectures.
-  if(CMAKE_CUDA_ARCHITECTURES)
+  if(DEFINED CMAKE_CUDA_ARCHITECTURES)
     if("x${CMAKE_CUDA_ARCHITECTURES}" STREQUAL "xall")
       string(APPEND nvcc_test_flags " -arch=all")
       set(architectures_mode all)
@@ -277,6 +277,13 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
 
     # If the user has specified architectures we'll want to fail during compiler detection if they don't work.
     set(CMAKE_CUDA_COMPILER_ID_REQUIRE_SUCCESS ON)
+  endif()
+
+  # Rest of the code treats an empty value as equivalent to "use the defaults".
+  # Error out early to prevent confusing errors as a result of this.
+  # Note that this also catches invalid non-numerical values such as "a".
+  if(architectures_mode STREQUAL "explicit" AND "${tested_architectures}" STREQUAL "")
+    message(FATAL_ERROR "CMAKE_CUDA_ARCHITECTURES must be valid if set.")
   endif()
 
   if(CMAKE_CUDA_COMPILER_ID STREQUAL "Clang")
