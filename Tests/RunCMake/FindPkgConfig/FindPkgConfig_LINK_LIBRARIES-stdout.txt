@@ -1,0 +1,6 @@
+-- IMM_LIBRARIES='imm'
+-- IMM_LINK_LIBRARIES='[^']*/Tests/RunCMake/FindPkgConfig/FindPkgConfig_LINK_LIBRARIES-build/root/lib/dyprefix-imm-dysuffix'
+-- IMM_LDFLAGS='-L[^']*/Tests/RunCMake/FindPkgConfig/FindPkgConfig_LINK_LIBRARIES-build/root/lib;-limm'
+-- IMM_STATIC_LIBRARIES='imm;trns'
+-- IMM_STATIC_LINK_LIBRARIES='[^']*/Tests/RunCMake/FindPkgConfig/FindPkgConfig_LINK_LIBRARIES-build/root/lib/stprefix-imm-stsuffix;[^']*/Tests/RunCMake/FindPkgConfig/FindPkgConfig_LINK_LIBRARIES-build/root/lib/stprefix-trns-stsuffix'
+-- IMM_STATIC_LDFLAGS='-L[^']*/Tests/RunCMake/FindPkgConfig/FindPkgConfig_LINK_LIBRARIES-build/root/lib;-limm;-ltrns'
