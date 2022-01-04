@@ -62,6 +62,7 @@ The following individuals and institutions are among the Contributors:
 * Helio Chissini de Castro <helio@kde.org>
 * Ilya Lavrenov <ilya.lavrenov@itseez.com>
 * Insight Software Consortium <insightsoftwareconsortium.org>
+* Intel Corporation <www.intel.com>
 * Jan Woetzel
 * Jordan Williams <jordan@jwillikers.com>
 * Julien Schueller
