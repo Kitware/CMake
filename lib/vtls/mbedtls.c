@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2010 - 2011, Hoi-Ho Chan, <hoiho.chan@gmail.com>
  *
  * This software is licensed as described in the file COPYING, which
@@ -270,7 +270,10 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
-  const char * const ssl_cafile = SSL_CONN_CONFIG(CAfile);
+  const struct curl_blob *ca_info_blob = SSL_CONN_CONFIG(ca_info_blob);
+  const char * const ssl_cafile =
+    /* CURLOPT_CAINFO_BLOB overrides CURLOPT_CAINFO */
+    (ca_info_blob ? NULL : SSL_CONN_CONFIG(CAfile));
   const bool verifypeer = SSL_CONN_CONFIG(verifypeer);
   const char * const ssl_capath = SSL_CONN_CONFIG(CApath);
   char * const ssl_cert = SSL_SET_OPTION(primary.clientcert);
@@ -316,16 +319,34 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
   /* Load the trusted CA */
   mbedtls_x509_crt_init(&backend->cacert);
 
-  if(ssl_cafile) {
+  if(ca_info_blob && verifypeer) {
+    /* Unfortunately, mbedtls_x509_crt_parse() requires the data to be null
+       terminated even when provided the exact length, forcing us to waste
+       extra memory here. */
+    unsigned char *newblob = malloc(ca_info_blob->len + 1);
+    if(!newblob)
+      return CURLE_OUT_OF_MEMORY;
+    memcpy(newblob, ca_info_blob->data, ca_info_blob->len);
+    newblob[ca_info_blob->len] = 0; /* null terminate */
+    ret = mbedtls_x509_crt_parse(&backend->cacert, newblob,
+                                 ca_info_blob->len + 1);
+    free(newblob);
+    if(ret<0) {
+      mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
+      failf(data, "Error importing ca cert blob - mbedTLS: (-0x%04X) %s",
+            -ret, errorbuf);
+      return ret;
+    }
+  }
+
+  if(ssl_cafile && verifypeer) {
     ret = mbedtls_x509_crt_parse_file(&backend->cacert, ssl_cafile);
 
     if(ret<0) {
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
       failf(data, "Error reading ca cert file %s - mbedTLS: (-0x%04X) %s",
             ssl_cafile, -ret, errorbuf);
-
-      if(verifypeer)
-        return CURLE_SSL_CACERT_BADFILE;
+      return CURLE_SSL_CACERT_BADFILE;
     }
   }
 
@@ -358,10 +379,17 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
   }
 
   if(ssl_cert_blob) {
-    const unsigned char *blob_data =
-      (const unsigned char *)ssl_cert_blob->data;
-    ret = mbedtls_x509_crt_parse(&backend->clicert, blob_data,
+    /* Unfortunately, mbedtls_x509_crt_parse() requires the data to be null
+       terminated even when provided the exact length, forcing us to waste
+       extra memory here. */
+    unsigned char *newblob = malloc(ssl_cert_blob->len + 1);
+    if(!newblob)
+      return CURLE_OUT_OF_MEMORY;
+    memcpy(newblob, ssl_cert_blob->data, ssl_cert_blob->len);
+    newblob[ssl_cert_blob->len] = 0; /* null terminate */
+    ret = mbedtls_x509_crt_parse(&backend->clicert, newblob,
                                  ssl_cert_blob->len);
+    free(newblob);
 
     if(ret) {
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
@@ -671,7 +699,7 @@ mbed_connect_step2(struct Curl_easy *data, struct connectdata *conn,
     mbedtls_x509_crt *p = NULL;
     unsigned char *pubkey = NULL;
 
-#if MBEDTLS_VERSION_NUMBER >= 0x03000000
+#if MBEDTLS_VERSION_NUMBER == 0x03000000
     if(!peercert || !peercert->MBEDTLS_PRIVATE(raw).MBEDTLS_PRIVATE(p) ||
        !peercert->MBEDTLS_PRIVATE(raw).MBEDTLS_PRIVATE(len)) {
 #else
@@ -698,7 +726,7 @@ mbed_connect_step2(struct Curl_easy *data, struct connectdata *conn,
     /* Make a copy of our const peercert because mbedtls_pk_write_pubkey_der
        needs a non-const key, for now.
        https://github.com/ARMmbed/mbedtls/issues/396 */
-#if MBEDTLS_VERSION_NUMBER >= 0x03000000
+#if MBEDTLS_VERSION_NUMBER == 0x03000000
     if(mbedtls_x509_crt_parse_der(p,
                         peercert->MBEDTLS_PRIVATE(raw).MBEDTLS_PRIVATE(p),
                         peercert->MBEDTLS_PRIVATE(raw).MBEDTLS_PRIVATE(len))) {
@@ -710,7 +738,7 @@ mbed_connect_step2(struct Curl_easy *data, struct connectdata *conn,
       goto pinnedpubkey_error;
     }
 
-#if MBEDTLS_VERSION_NUMBER >= 0x03000000
+#if MBEDTLS_VERSION_NUMBER == 0x03000000
     size = mbedtls_pk_write_pubkey_der(&p->MBEDTLS_PRIVATE(pk), pubkey,
                                        PUB_DER_MAX_BYTES);
 #else
@@ -784,6 +812,7 @@ mbed_connect_step3(struct Curl_easy *data, struct connectdata *conn,
     mbedtls_ssl_session *our_ssl_sessionid;
     void *old_ssl_sessionid = NULL;
     bool isproxy = SSL_IS_PROXY() ? TRUE : FALSE;
+    bool added = FALSE;
 
     our_ssl_sessionid = malloc(sizeof(mbedtls_ssl_session));
     if(!our_ssl_sessionid)
@@ -807,11 +836,13 @@ mbed_connect_step3(struct Curl_easy *data, struct connectdata *conn,
       Curl_ssl_delsessionid(data, old_ssl_sessionid);
 
     retcode = Curl_ssl_addsessionid(data, conn, isproxy, our_ssl_sessionid,
-                                    0, sockindex);
+                                    0, sockindex, &added);
     Curl_ssl_sessionid_unlock(data);
-    if(retcode) {
+    if(!added) {
       mbedtls_ssl_session_free(our_ssl_sessionid);
       free(our_ssl_sessionid);
+    }
+    if(retcode) {
       failf(data, "failed to store ssl session");
       return retcode;
     }
@@ -1151,6 +1182,7 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
   { CURLSSLBACKEND_MBEDTLS, "mbedtls" }, /* info */
 
   SSLSUPP_CA_PATH |
+  SSLSUPP_CAINFO_BLOB |
   SSLSUPP_PINNEDPUBKEY |
   SSLSUPP_SSL_CTX,
 

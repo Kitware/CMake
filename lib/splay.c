@@ -107,7 +107,7 @@ struct Curl_tree *Curl_splayinsert(struct curltime i,
   if(!node)
     return t;
 
-  if(t != NULL) {
+  if(t) {
     t = Curl_splay(i, t);
     if(compare(i, t->key) == 0) {
       /* There already exists a node in the tree with the very same key. Build
@@ -154,7 +154,7 @@ struct Curl_tree *Curl_splaygetbest(struct curltime i,
                                     struct Curl_tree *t,
                                     struct Curl_tree **removed)
 {
-  static struct curltime tv_zero = {0, 0};
+  static const struct curltime tv_zero = {0, 0};
   struct Curl_tree *x;
 
   if(!t) {

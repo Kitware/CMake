@@ -374,7 +374,7 @@ static void krb5_end(void *app_data)
     }
 }
 
-static struct Curl_sec_client_mech Curl_krb5_client_mech = {
+static const struct Curl_sec_client_mech Curl_krb5_client_mech = {
   "GSSAPI",
   sizeof(gss_ctx_id_t),
   krb5_init,
@@ -684,7 +684,7 @@ int Curl_sec_read_msg(struct Curl_easy *data, struct connectdata *conn,
   (void) data;
 
   if(!conn->mech)
-    /* not inititalized, return error */
+    /* not initialized, return error */
     return -1;
 
   DEBUGASSERT(level > PROT_NONE && level < PROT_LAST);
@@ -768,7 +768,7 @@ static int sec_set_protection_level(struct Curl_easy *data)
     }
   }
 
-  /* Now try to negiociate the protection level. */
+  /* Now try to negotiate the protection level. */
   code = ftp_send_command(data, "PROT %c", level_to_char(level));
 
   if(code < 0)
@@ -880,7 +880,7 @@ Curl_sec_login(struct Curl_easy *data, struct connectdata *conn)
 void
 Curl_sec_end(struct connectdata *conn)
 {
-  if(conn->mech != NULL && conn->mech->end)
+  if(conn->mech && conn->mech->end)
     conn->mech->end(conn->app_data);
   free(conn->app_data);
   conn->app_data = NULL;
