@@ -1,8 +1,13 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include <memory>
+#include <string>
+#include <vector>
+
+#include <cm3p/json/value.h>
 
 #include "cmCMakePresetsGraph.h"
+#include "cmJSONHelpers.h"
 
 #define CHECK_OK(expr)                                                        \
   do {                                                                        \
@@ -109,4 +114,50 @@ public:
 
   std::unique_ptr<Condition> SubCondition;
 };
+
+cmCMakePresetsGraph::ReadFileResult PresetStringHelper(
+  std::string& out, const Json::Value* value);
+
+cmCMakePresetsGraph::ReadFileResult PresetVectorStringHelper(
+  std::vector<std::string>& out, const Json::Value* value);
+
+cmCMakePresetsGraph::ReadFileResult PresetBoolHelper(bool& out,
+                                                     const Json::Value* value);
+
+cmCMakePresetsGraph::ReadFileResult PresetOptionalBoolHelper(
+  cm::optional<bool>& out, const Json::Value* value);
+
+cmCMakePresetsGraph::ReadFileResult PresetIntHelper(int& out,
+                                                    const Json::Value* value);
+
+cmCMakePresetsGraph::ReadFileResult PresetOptionalIntHelper(
+  cm::optional<int>& out, const Json::Value* value);
+
+cmCMakePresetsGraph::ReadFileResult PresetVectorIntHelper(
+  std::vector<int>& out, const Json::Value* value);
+
+cmCMakePresetsGraph::ReadFileResult ConfigurePresetsHelper(
+  std::vector<cmCMakePresetsGraph::ConfigurePreset>& out,
+  const Json::Value* value);
+
+cmCMakePresetsGraph::ReadFileResult BuildPresetsHelper(
+  std::vector<cmCMakePresetsGraph::BuildPreset>& out,
+  const Json::Value* value);
+
+cmCMakePresetsGraph::ReadFileResult TestPresetsHelper(
+  std::vector<cmCMakePresetsGraph::TestPreset>& out, const Json::Value* value);
+
+cmJSONHelper<std::nullptr_t, cmCMakePresetsGraph::ReadFileResult> VendorHelper(
+  cmCMakePresetsGraph::ReadFileResult error);
+
+cmCMakePresetsGraph::ReadFileResult PresetConditionHelper(
+  std::shared_ptr<cmCMakePresetsGraph::Condition>& out,
+  const Json::Value* value);
+
+cmCMakePresetsGraph::ReadFileResult PresetVectorOneOrMoreStringHelper(
+  std::vector<std::string>& out, const Json::Value* value);
+
+cmCMakePresetsGraph::ReadFileResult EnvironmentMapHelper(
+  std::map<std::string, cm::optional<std::string>>& out,
+  const Json::Value* value);
 }

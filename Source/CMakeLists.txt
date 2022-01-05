@@ -165,6 +165,9 @@ set(SRCS
   cmCMakePresetsGraph.h
   cmCMakePresetsGraphInternal.h
   cmCMakePresetsGraphReadJSON.cxx
+  cmCMakePresetsGraphReadJSONBuildPresets.cxx
+  cmCMakePresetsGraphReadJSONConfigurePresets.cxx
+  cmCMakePresetsGraphReadJSONTestPresets.cxx
   cmCommandArgumentParserHelper.cxx
   cmCommonTargetGenerator.cxx
   cmCommonTargetGenerator.h
