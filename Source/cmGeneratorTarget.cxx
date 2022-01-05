@@ -7156,59 +7156,64 @@ void cmGeneratorTarget::ComputeLinkInterfaceLibraries(
 
   // An explicit list of interface libraries may be set for shared
   // libraries and executables that export symbols.
-  cmValue explicitLibraries = nullptr;
-  std::string linkIfaceProp;
+  bool haveExplicitLibraries = false;
+  cmValue explicitLibrariesCMP0022OLD;
+  std::string linkIfacePropCMP0022OLD;
   bool const cmp0022NEW = (this->GetPolicyStatusCMP0022() != cmPolicies::OLD &&
                            this->GetPolicyStatusCMP0022() != cmPolicies::WARN);
   if (cmp0022NEW) {
     // CMP0022 NEW behavior is to use INTERFACE_LINK_LIBRARIES.
-    linkIfaceProp = "INTERFACE_LINK_LIBRARIES";
-    explicitLibraries = this->GetProperty(linkIfaceProp);
-  } else if (this->GetType() == cmStateEnums::SHARED_LIBRARY ||
-             this->IsExecutableWithExports()) {
+    haveExplicitLibraries = !this->Target->GetLinkInterfaceEntries().empty();
+  } else {
     // CMP0022 OLD behavior is to use LINK_INTERFACE_LIBRARIES if set on a
     // shared lib or executable.
+    if (this->GetType() == cmStateEnums::SHARED_LIBRARY ||
+        this->IsExecutableWithExports()) {
+      // Lookup the per-configuration property.
+      linkIfacePropCMP0022OLD = cmStrCat("LINK_INTERFACE_LIBRARIES", suffix);
+      explicitLibrariesCMP0022OLD = this->GetProperty(linkIfacePropCMP0022OLD);
 
-    // Lookup the per-configuration property.
-    linkIfaceProp = cmStrCat("LINK_INTERFACE_LIBRARIES", suffix);
-    explicitLibraries = this->GetProperty(linkIfaceProp);
-
-    // If not set, try the generic property.
-    if (!explicitLibraries) {
-      linkIfaceProp = "LINK_INTERFACE_LIBRARIES";
-      explicitLibraries = this->GetProperty(linkIfaceProp);
+      // If not set, try the generic property.
+      if (!explicitLibrariesCMP0022OLD) {
+        linkIfacePropCMP0022OLD = "LINK_INTERFACE_LIBRARIES";
+        explicitLibrariesCMP0022OLD =
+          this->GetProperty(linkIfacePropCMP0022OLD);
+      }
     }
-  }
 
-  if (explicitLibraries &&
-      this->GetPolicyStatusCMP0022() == cmPolicies::WARN &&
-      !this->PolicyWarnedCMP0022) {
-    // Compare the explicitly set old link interface properties to the
-    // preferred new link interface property one and warn if different.
-    cmValue newExplicitLibraries =
-      this->GetProperty("INTERFACE_LINK_LIBRARIES");
-    if (newExplicitLibraries &&
-        (*newExplicitLibraries != *explicitLibraries)) {
-      std::ostringstream w;
-      /* clang-format off */
-      w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0022) << "\n"
-        "Target \"" << this->GetName() << "\" has an "
-        "INTERFACE_LINK_LIBRARIES property which differs from its " <<
-        linkIfaceProp << " properties."
-        "\n"
-        "INTERFACE_LINK_LIBRARIES:\n"
-        "  " << *newExplicitLibraries << "\n" <<
-        linkIfaceProp << ":\n"
-        "  " << *explicitLibraries << "\n";
-      /* clang-format on */
-      this->LocalGenerator->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
-      this->PolicyWarnedCMP0022 = true;
+    if (explicitLibrariesCMP0022OLD &&
+        this->GetPolicyStatusCMP0022() == cmPolicies::WARN &&
+        !this->PolicyWarnedCMP0022) {
+      // Compare the explicitly set old link interface properties to the
+      // preferred new link interface property one and warn if different.
+      cmValue newExplicitLibraries =
+        this->GetProperty("INTERFACE_LINK_LIBRARIES");
+      if (newExplicitLibraries &&
+          (*newExplicitLibraries != *explicitLibrariesCMP0022OLD)) {
+        std::ostringstream w;
+        /* clang-format off */
+        w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0022) << "\n"
+          "Target \"" << this->GetName() << "\" has an "
+          "INTERFACE_LINK_LIBRARIES property which differs from its " <<
+          linkIfacePropCMP0022OLD << " properties."
+          "\n"
+          "INTERFACE_LINK_LIBRARIES:\n"
+          "  " << *newExplicitLibraries << "\n" <<
+          linkIfacePropCMP0022OLD << ":\n"
+          "  " << *explicitLibrariesCMP0022OLD << "\n";
+        /* clang-format on */
+        this->LocalGenerator->IssueMessage(MessageType::AUTHOR_WARNING,
+                                           w.str());
+        this->PolicyWarnedCMP0022 = true;
+      }
     }
+
+    haveExplicitLibraries = static_cast<bool>(explicitLibrariesCMP0022OLD);
   }
 
   // There is no implicit link interface for executables or modules
   // so if none was explicitly set then there is no link interface.
-  if (!explicitLibraries &&
+  if (!haveExplicitLibraries &&
       (this->GetType() == cmStateEnums::EXECUTABLE ||
        (this->GetType() == cmStateEnums::MODULE_LIBRARY))) {
     return;
@@ -7218,22 +7223,20 @@ void cmGeneratorTarget::ComputeLinkInterfaceLibraries(
   // If CMP0022 is NEW then the plain tll signature sets the
   // INTERFACE_LINK_LIBRARIES property.  Even if the project
   // clears it, the link interface is still explicit.
-  iface.Explicit = cmp0022NEW || explicitLibraries;
+  iface.Explicit = cmp0022NEW || explicitLibrariesCMP0022OLD;
 
-  if (explicitLibraries) {
-    // The interface libraries have been explicitly set.
-    if (cmp0022NEW) {
-      // The explicitLibraries came from INTERFACE_LINK_LIBRARIES.
-      // Use its special representation directly to get backtraces.
-      this->ExpandLinkItems(linkIfaceProp,
-                            this->Target->GetLinkInterfaceEntries(), config,
-                            headTarget, interfaceFor, iface);
-    } else {
-      std::vector<BT<std::string>> entries;
-      entries.emplace_back(*explicitLibraries);
-      this->ExpandLinkItems(linkIfaceProp, cmMakeRange(entries), config,
-                            headTarget, interfaceFor, iface);
-    }
+  if (cmp0022NEW) {
+    // The interface libraries are specified by INTERFACE_LINK_LIBRARIES.
+    // Use its special representation directly to get backtraces.
+    this->ExpandLinkItems(kINTERFACE_LINK_LIBRARIES,
+                          this->Target->GetLinkInterfaceEntries(), config,
+                          headTarget, interfaceFor, iface);
+  } else if (explicitLibrariesCMP0022OLD) {
+    // The interface libraries have been explicitly set in pre-CMP0022 style.
+    std::vector<BT<std::string>> entries;
+    entries.emplace_back(*explicitLibrariesCMP0022OLD);
+    this->ExpandLinkItems(linkIfacePropCMP0022OLD, cmMakeRange(entries),
+                          config, headTarget, interfaceFor, iface);
   }
 
   // If the link interface is explicit, do not fall back to the link impl.
