@@ -57,6 +57,10 @@ int main(int argc, char** argv)
         std::cout << "  case/0  # GetParam() = \"semicolon;\"" << std::endl;
         std::cout << "  case/1  # GetParam() = \"backslash\\\"" << std::endl;
         std::cout << "  case/2  # GetParam() = \"${var}\"" << std::endl;
+        std::cout << "  case/3  # GetParam() = '['" << std::endl;
+        std::cout << "  case/4  # GetParam() = \"]]=]\"" << std::endl;
+        std::cout << "  case/5  # GetParam() = \"__osbtext\"" << std::endl;
+        std::cout << "  case/6  # GetParam() = \"__csb___text\"" << std::endl;
       }
     }
     return 0;

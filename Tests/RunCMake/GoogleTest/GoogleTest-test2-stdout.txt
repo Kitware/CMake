@@ -41,18 +41,34 @@ Test project .*
  *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:param/special\.case/"backslash\\"!2 \.+ +Passed +[0-9.]+ sec
  *Start +[0-9]+: TEST:param/special\.case/"\${var}"!2
  *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:param/special\.case/"\${var}"!2 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:param/special\.case/'\['!2
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:param/special\.case/'\['!2 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:param/special\.case/"\]\]=\]"!2
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:param/special\.case/"\]\]=\]"!2 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:param/special\.case/"__osbtext"!2
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:param/special\.case/"__osbtext"!2 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:param/special\.case/"__csb___text"!2
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:param/special\.case/"__csb___text"!2 \.+ +Passed +[0-9.]+ sec
  *Start +[0-9]+: TEST:ns\.param/special\.case/"semicolon;"!2
  *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.param/special\.case/"semicolon;"!2 \.+ +Passed +[0-9.]+ sec
  *Start +[0-9]+: TEST:ns\.param/special\.case/"backslash\\"!2
  *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.param/special\.case/"backslash\\"!2 \.+ +Passed +[0-9.]+ sec
  *Start +[0-9]+: TEST:ns\.param/special\.case/"\${var}"!2
  *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.param/special\.case/"\${var}"!2 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:ns\.param/special\.case/'\['!2
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.param/special\.case/'\['!2 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:ns\.param/special\.case/"\]\]=\]"!2
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.param/special\.case/"\]\]=\]"!2 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:ns\.param/special\.case/"__osbtext"!2
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.param/special\.case/"__osbtext"!2 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:ns\.param/special\.case/"__csb___text"!2
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.param/special\.case/"__csb___text"!2 \.+ +Passed +[0-9.]+ sec
 
 100% tests passed, 0 tests failed out of [0-9]+
 
 Total Test time \(real\) = +[0-9.]+ sec
 
 The following tests did not run:
-[ 	0-9]+ - TEST:basic\.disabled_case!2 \(Disabled\)
-[ 	0-9]+ - TEST:ns\.basic\.disabled_case!2 \(Disabled\)
-[ 	0-9]+ - TEST:disabled\.case!2 \(Disabled\)
+[ 	0-9]+- TEST:basic\.disabled_case!2 \(Disabled\)
+[ 	0-9]+- TEST:ns\.basic\.disabled_case!2 \(Disabled\)
+[ 	0-9]+- TEST:disabled\.case!2 \(Disabled\)
