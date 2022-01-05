@@ -6666,6 +6666,9 @@ void cmGeneratorTarget::ExpandLinkItems(std::string const& prop,
                                         LinkInterfaceFor interfaceFor,
                                         cmLinkInterface& iface) const
 {
+  if (entries.empty()) {
+    return;
+  }
   // Keep this logic in sync with ComputeLinkImplementationLibraries.
   cmGeneratorExpressionDAGChecker dagChecker(this, prop, nullptr, nullptr);
   // The $<LINK_ONLY> expression may be in a link interface to specify
