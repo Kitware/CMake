@@ -2683,7 +2683,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       if (emitted.insert(frameworkDir).second) {
         std::string incpath = this->XCodeEscapePath(frameworkDir);
         if (emitSystemIncludes &&
-            gtgt->IsSystemIncludeDirectory(frameworkDir, configName,
+            gtgt->IsSystemIncludeDirectory(include, configName,
                                            langForPreprocessor)) {
           sysfdirs.Add(incpath);
         } else {
