@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "cmGeneratorTarget.h"
+#include "cmVsProjectType.h"
 
 class cmComputeLinkInformation;
 class cmCustomCommand;
@@ -211,11 +212,7 @@ private:
   OptionsMap LinkOptions;
   std::string LangForClCompile;
 
-  enum class VsProjectType
-  {
-    vcxproj,
-    csproj
-  } ProjectType;
+  VsProjectType ProjectType;
   bool InSourceBuild;
   std::vector<std::string> Configurations;
   std::vector<TargetsFileAndConfigs> TargetsFileAndConfigsVec;

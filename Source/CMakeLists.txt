@@ -766,6 +766,7 @@ if (WIN32)
       cmGlobalVisualStudio9Generator.h
       cmVisualStudioGeneratorOptions.h
       cmVisualStudioGeneratorOptions.cxx
+      cmVsProjectType.h
       cmVisualStudio10TargetGenerator.h
       cmVisualStudio10TargetGenerator.cxx
       cmLocalVisualStudio10Generator.cxx
