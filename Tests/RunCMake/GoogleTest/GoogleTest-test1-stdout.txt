@@ -1,35 +1,58 @@
 Test project .*
       Start  1: TEST:basic\.case_foo!1
- 1/13 Test  #1: TEST:basic\.case_foo!1 \.+ +Passed +[0-9.]+ sec
+ 1/24 Test  #1: TEST:basic\.case_foo!1 \.+ +Passed +[0-9.]+ sec
       Start  2: TEST:basic\.case_bar!1
- 2/13 Test  #2: TEST:basic\.case_bar!1 \.+ +Passed +[0-9.]+ sec
+ 2/24 Test  #2: TEST:basic\.case_bar!1 \.+ +Passed +[0-9.]+ sec
       Start  3: TEST:basic\.disabled_case!1
- 3/13 Test  #3: TEST:basic\.disabled_case!1 \.+\*+Not Run \(Disabled\) +[0-9.]+ sec
+ 3/24 Test  #3: TEST:basic\.disabled_case!1 \.+\*+Not Run \(Disabled\) +[0-9.]+ sec
       Start  4: TEST:basic\.DISABLEDnot_really_case!1
- 4/13 Test  #4: TEST:basic\.DISABLEDnot_really_case!1 \.+ +Passed +[0-9.]+ sec
-      Start  5: TEST:disabled\.case!1
- 5/13 Test  #5: TEST:disabled\.case!1 \.+\*+Not Run \(Disabled\) +[0-9.]+ sec
-      Start  6: TEST:DISABLEDnotreally\.case!1
- 6/13 Test  #6: TEST:DISABLEDnotreally\.case!1 \.+ +Passed +[0-9.]+ sec
-      Start  7: TEST:typed/short\.case!1
- 7/13 Test  #7: TEST:typed/short\.case!1 \.+ +Passed +[0-9.]+ sec
-      Start  8: TEST:typed/float\.case!1
- 8/13 Test  #8: TEST:typed/float\.case!1 \.+ +Passed +[0-9.]+ sec
-      Start  9: TEST:value/test\.case/1!1
- 9/13 Test  #9: TEST:value/test\.case/1!1 \.+ +Passed +[0-9.]+ sec
-      Start 10: TEST:value/test\.case/"foo"!1
-10/13 Test #10: TEST:value/test\.case/"foo"!1 \.+ +Passed +[0-9.]+ sec
-      Start 11: TEST:param/special\.case/"semicolon;"!1
-11/13 Test #11: TEST:param/special\.case/"semicolon;"!1 \.+ +Passed +[0-9.]+ sec
-      Start 12: TEST:param/special\.case/"backslash\\"!1
-12/13 Test #12: TEST:param/special\.case/"backslash\\"!1 \.+ +Passed +[0-9.]+ sec
-      Start 13: TEST:param/special\.case/"\$\{var\}"!1
-13/13 Test #13: TEST:param/special\.case/"\$\{var\}"!1 \.+ +Passed +[0-9.]+ sec
+ 4/24 Test  #4: TEST:basic\.DISABLEDnot_really_case!1 \.+ +Passed +[0-9.]+ sec
+      Start  5: TEST:ns\.basic\.case_foo!1
+ 5/24 Test  #5: TEST:ns\.basic\.case_foo!1 \.+ +Passed +[0-9.]+ sec
+      Start  6: TEST:ns\.basic\.case_bar!1
+ 6/24 Test  #6: TEST:ns\.basic\.case_bar!1 \.+ +Passed +[0-9.]+ sec
+      Start  7: TEST:ns\.basic\.disabled_case!1
+ 7/24 Test  #7: TEST:ns\.basic\.disabled_case!1 \.+\*+Not Run \(Disabled\) +[0-9.]+ sec
+      Start  8: TEST:ns\.basic\.DISABLEDnot_really_case!1
+ 8/24 Test  #8: TEST:ns\.basic\.DISABLEDnot_really_case!1 \.+ +Passed +[0-9.]+ sec
+      Start  9: TEST:disabled\.case!1
+ 9/24 Test  #9: TEST:disabled\.case!1 \.+\*+Not Run \(Disabled\) +[0-9.]+ sec
+      Start 10: TEST:DISABLEDnotreally\.case!1
+10/24 Test #10: TEST:DISABLEDnotreally\.case!1 \.+ +Passed +[0-9.]+ sec
+      Start 11: TEST:typed/short\.case!1
+11/24 Test #11: TEST:typed/short\.case!1 \.+ +Passed +[0-9.]+ sec
+      Start 12: TEST:typed/float\.case!1
+12/24 Test #12: TEST:typed/float\.case!1 \.+ +Passed +[0-9.]+ sec
+      Start 13: TEST:ns\.typed/short\.case!1
+13/24 Test #13: TEST:ns\.typed/short\.case!1 \.+ +Passed +[0-9.]+ sec
+      Start 14: TEST:ns\.typed/float\.case!1
+14/24 Test #14: TEST:ns\.typed/float\.case!1 \.+ +Passed +[0-9.]+ sec
+      Start 15: TEST:value/test\.case/1!1
+15/24 Test #15: TEST:value/test\.case/1!1 \.+ +Passed +[0-9.]+ sec
+      Start 16: TEST:value/test\.case/"foo"!1
+16/24 Test #16: TEST:value/test\.case/"foo"!1 \.+ +Passed +[0-9.]+ sec
+      Start 17: TEST:ns\.value/test\.case/1!1
+17/24 Test #17: TEST:ns\.value/test\.case/1!1 \.+ +Passed +[0-9.]+ sec
+      Start 18: TEST:ns\.value/test\.case/"foo"!1
+18/24 Test #18: TEST:ns\.value/test\.case/"foo"!1 \.+ +Passed +[0-9.]+ sec
+      Start 19: TEST:param/special\.case/"semicolon;"!1
+19/24 Test #19: TEST:param/special\.case/"semicolon;"!1 \.+ +Passed +[0-9.]+ sec
+      Start 20: TEST:param/special\.case/"backslash\\"!1
+20/24 Test #20: TEST:param/special\.case/"backslash\\"!1 \.+ +Passed +[0-9.]+ sec
+      Start 21: TEST:param/special\.case/"\${var}"!1
+21/24 Test #21: TEST:param/special\.case/"\${var}"!1 \.+ +Passed +[0-9.]+ sec
+      Start 22: TEST:ns\.param/special\.case/"semicolon;"!1
+22/24 Test #22: TEST:ns\.param/special\.case/"semicolon;"!1 \.+ +Passed +[0-9.]+ sec
+      Start 23: TEST:ns\.param/special\.case/"backslash\\"!1
+23/24 Test #23: TEST:ns\.param/special\.case/"backslash\\"!1 \.+ +Passed +[0-9.]+ sec
+      Start 24: TEST:ns\.param/special\.case/"\${var}"!1
+24/24 Test #24: TEST:ns\.param/special\.case/"\${var}"!1 \.+ +Passed +[0-9.]+ sec
 
-100% tests passed, 0 tests failed out of 11
+100% tests passed, 0 tests failed out of 21
 
 Total Test time \(real\) = +[0-9.]+ sec
 
 The following tests did not run:
 .*3 - TEST:basic\.disabled_case!1 \(Disabled\)
-.*5 - TEST:disabled\.case!1 \(Disabled\)
+.*7 - TEST:ns\.basic\.disabled_case!1 \(Disabled\)
+.*9 - TEST:disabled\.case!1 \(Disabled\)

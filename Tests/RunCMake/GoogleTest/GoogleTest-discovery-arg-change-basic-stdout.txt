@@ -3,5 +3,9 @@ Test project .*/Tests/RunCMake/GoogleTest/GoogleTest-discovery-arg-change
   Test #2: basic\.case_bar
   Test #3: basic\.disabled_case \(Disabled\)
   Test #4: basic\.DISABLEDnot_really_case
+  Test #5: ns\.basic\.case_foo
+  Test #6: ns\.basic\.case_bar
+  Test #7: ns\.basic\.disabled_case \(Disabled\)
+  Test #8: ns\.basic\.DISABLEDnot_really_case
 
-Total Tests: 4
+Total Tests: 8

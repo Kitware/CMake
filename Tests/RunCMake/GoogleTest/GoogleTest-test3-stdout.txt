@@ -1,16 +1,25 @@
 Test project .*
-    Start 27: TEST:basic\.case_foo!3
-1/4 Test #27: TEST:basic\.case_foo!3 \.+ +Passed +[0-9.]+ sec
-    Start 28: TEST:basic\.case_bar!3
-2/4 Test #28: TEST:basic\.case_bar!3 \.+ +Passed +[0-9.]+ sec
-    Start 29: TEST:basic\.disabled_case!3
-3/4 Test #29: TEST:basic\.disabled_case!3 \.+\*+Not Run \(Disabled\) +[0-9.]+ sec
-    Start 30: TEST:basic\.DISABLEDnot_really_case!3
-4/4 Test #30: TEST:basic\.DISABLEDnot_really_case!3 \.+ +Passed +[0-9.]+ sec
+    Start 49: TEST:basic\.case_foo!3
+1/8 Test #49: TEST:basic\.case_foo!3 \.+ +Passed +[0-9.]+ sec
+    Start 50: TEST:basic\.case_bar!3
+2/8 Test #50: TEST:basic\.case_bar!3 \.+ +Passed +[0-9.]+ sec
+    Start 51: TEST:basic\.disabled_case!3
+3/8 Test #51: TEST:basic\.disabled_case!3 \.+\*+Not Run \(Disabled\) +[0-9.]+ sec
+    Start 52: TEST:basic\.DISABLEDnot_really_case!3
+4/8 Test #52: TEST:basic\.DISABLEDnot_really_case!3 \.+ +Passed +[0-9.]+ sec
+    Start 53: TEST:ns\.basic\.case_foo!3
+5/8 Test #53: TEST:ns\.basic\.case_foo!3 \.+ +Passed +[0-9.]+ sec
+    Start 54: TEST:ns\.basic\.case_bar!3
+6/8 Test #54: TEST:ns\.basic\.case_bar!3 \.+ +Passed +[0-9.]+ sec
+    Start 55: TEST:ns\.basic\.disabled_case!3
+7/8 Test #55: TEST:ns\.basic\.disabled_case!3 \.+\*+Not Run \(Disabled\) +[0-9.]+ sec
+    Start 56: TEST:ns\.basic\.DISABLEDnot_really_case!3
+8/8 Test #56: TEST:ns\.basic\.DISABLEDnot_really_case!3 \.+ +Passed +[0-9.]+ sec
 
-100% tests passed, 0 tests failed out of 3
+100% tests passed, 0 tests failed out of 6
 
 Total Test time \(real\) = +[0-9.]+ sec
 
 The following tests did not run:
-.*29 - TEST:basic.disabled_case!3 \(Disabled\)
+.*51 - TEST:basic\.disabled_case!3 \(Disabled\)
+.*55 - TEST:ns\.basic\.disabled_case!3 \(Disabled\)

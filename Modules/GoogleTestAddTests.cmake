@@ -105,7 +105,7 @@ function(gtest_discover_tests_impl)
       # Do we have a module name or a test name?
       if(NOT line MATCHES "^  ")
         # Module; remove trailing '.' to get just the name...
-        string(REGEX REPLACE "\\.( *#.*)?" "" suite "${line}")
+        string(REGEX REPLACE "\\.( *#.*)?$" "" suite "${line}")
         if(line MATCHES "#" AND NOT _NO_PRETTY_TYPES)
           string(REGEX REPLACE "/[0-9]\\.+ +#.*= +" "/" pretty_suite "${line}")
         else()
