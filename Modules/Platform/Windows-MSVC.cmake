@@ -482,7 +482,7 @@ macro(__windows_compiler_msvc_enable_rc flags)
   endif()
 
   enable_language(RC)
-  if(NOT DEFINED CMAKE_NINJA_CMCLDEPS_RC)
+  if(NOT DEFINED CMAKE_NINJA_CMCLDEPS_RC AND CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
     set(CMAKE_NINJA_CMCLDEPS_RC 1)
   endif()
 endmacro()
