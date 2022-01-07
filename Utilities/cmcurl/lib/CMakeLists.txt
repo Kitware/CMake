@@ -82,7 +82,7 @@ endif()
 # For windows we want to install OPENSSL_LIBRARIES dlls
 # and also copy them into the build tree so that testing
 # can find them.
-if(CMAKE_USE_OPENSSL AND OPENSSL_FOUND AND WIN32)
+if(CURL_USE_OPENSSL AND OPENSSL_FOUND AND WIN32)
   find_file(CMAKE_EAY_DLL NAME libeay32.dll HINTS ${OPENSSL_INCLUDE_DIR}/..)
   find_file(CMAKE_SSL_DLL NAME ssleay32.dll HINTS ${OPENSSL_INCLUDE_DIR}/..)
   mark_as_advanced(CMAKE_EAY_DLL CMAKE_SSL_DLL)
