@@ -120,12 +120,6 @@ endif()
 
 target_link_libraries(${LIB_NAME} PRIVATE ${CURL_LIBS})
 
-if(0) # This code not needed for building within CMake.
-if(WIN32)
-  add_definitions(-D_USRDLL)
-endif()
-endif()
-
 set_target_properties(${LIB_NAME} PROPERTIES
   COMPILE_DEFINITIONS BUILDING_LIBCURL
   OUTPUT_NAME ${LIBCURL_OUTPUT_NAME}
@@ -149,6 +143,7 @@ endif()
 
 if(WIN32)
   if(BUILD_SHARED_LIBS)
+    set_property(TARGET ${LIB_NAME} APPEND PROPERTY COMPILE_DEFINITIONS "_USRDLL")
     if(MSVC)
       # Add "_imp" as a suffix before the extension to avoid conflicting with
       # the statically linked "libcurl.lib"

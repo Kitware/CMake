@@ -464,6 +464,11 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 #endif
 #endif /* CURL_LDAP_USE_SSL */
   }
+  else if(data->set.use_ssl > CURLUSESSL_TRY) {
+    failf(data, "LDAP local: explicit TLS not supported");
+    result = CURLE_NOT_BUILT_IN;
+    goto quit;
+  }
   else {
     server = ldap_init(host, (int)conn->port);
     if(!server) {
@@ -590,7 +595,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
       attr_len = strlen(attr);
 
       vals = ldap_get_values_len(server, entryIterator, attribute);
-      if(vals != NULL) {
+      if(vals) {
         for(i = 0; (vals[i] != NULL); i++) {
           result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\t", 1);
           if(result) {
