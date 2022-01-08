@@ -1302,7 +1302,8 @@ function(_ep_write_gitclone_script script_filename source_dir git_EXECUTABLE git
 
   file(WRITE ${script_filename}
 "
-if(NOT \"${gitclone_infofile}\" IS_NEWER_THAN \"${gitclone_stampfile}\")
+if(EXISTS \"${gitclone_stampfile}\" AND EXISTS \"${gitclone_infofile}\" AND
+  \"${gitclone_stampfile}\" IS_NEWER_THAN \"${gitclone_infofile}\")
   message(STATUS \"Avoiding repeated git clone, stamp file is up to date: '${gitclone_stampfile}'\")
   return()
 endif()
@@ -1378,7 +1379,8 @@ function(_ep_write_hgclone_script script_filename source_dir hg_EXECUTABLE hg_re
   endif()
   file(WRITE ${script_filename}
 "
-if(NOT \"${hgclone_infofile}\" IS_NEWER_THAN \"${hgclone_stampfile}\")
+if(EXISTS \"${hgclone_stampfile}\" AND EXISTS \"${hgclone_infofile}\" AND
+  \"${hgclone_stampfile}\" IS_NEWER_THAN \"${hgclone_infofile}\")
   message(STATUS \"Avoiding repeated hg clone, stamp file is up to date: '${hgclone_stampfile}'\")
   return()
 endif()
