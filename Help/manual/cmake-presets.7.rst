@@ -12,9 +12,10 @@ Introduction
 
 One problem that CMake users often face is sharing settings with other people
 for common ways to configure a project. This may be done to support CI builds,
-or for users who frequently use the same build. CMake supports two files,
+or for users who frequently use the same build. CMake supports two main files,
 ``CMakePresets.json`` and ``CMakeUserPresets.json``, that allow users to
-specify common configure options and share them with others.
+specify common configure options and share them with others. CMake also
+supports files included with the ``include`` field.
 
 ``CMakePresets.json`` and ``CMakeUserPresets.json`` live in the project's root
 directory. They both have exactly the same format, and both are optional
@@ -25,6 +26,21 @@ builds. ``CMakePresets.json`` may be checked into a version control system, and
 ``CMakeUserPresets.json`` should NOT be checked in. For example, if a project
 is using Git, ``CMakePresets.json`` may be tracked, and
 ``CMakeUserPresets.json`` should be added to the ``.gitignore``.
+
+``CMakePresets.json`` and ``CMakeUserPresets.json`` can include other files
+with the ``include`` field in file version ``4`` and later. Files included by
+these files can also include other files. If a preset file contains presets
+that inherit from presets in another file, the file must include the other file
+either directly or indirectly. Include cycles are not allowed among files (if
+``a.json`` includes ``b.json``, ``b.json`` cannot include ``a.json``). However,
+a file may be included multiple times from the same file or from different
+files. If ``CMakePresets.json`` and ``CMakeUserPresets.json`` are both present,
+``CMakeUserPresets.json`` implicitly includes ``CMakePresets.json``, even with
+no ``include`` field, in all versions of the format. Files directly or
+indirectly included from ``CMakePresets.json`` must be inside the project
+directory. This restriction does not apply to ``CMakeUserPresets.json`` and
+files that it includes, unless those files are also included by
+``CMakePresets.json``.
 
 Format
 ======
@@ -39,7 +55,7 @@ The root object recognizes the following fields:
 ``version``
 
   A required integer representing the version of the JSON schema.
-  The supported versions are ``1``, ``2``, and ``3``.
+  The supported versions are ``1``, ``2``, ``3``, and ``4``.
 
 ``cmakeMinimumRequired``
 
@@ -81,6 +97,12 @@ The root object recognizes the following fields:
 
   An optional array of `Test Preset`_ objects.
   This is allowed in preset files specifying version ``2`` or above.
+
+``include``
+
+  An optional array of strings representing files to include. If the filenames
+  are not absolute, they are considered relative to the current file.
+  This is allowed in preset files specifying version ``4`` or above.
 
 Configure Preset
 ^^^^^^^^^^^^^^^^

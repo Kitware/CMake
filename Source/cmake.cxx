@@ -29,7 +29,7 @@
 #include "cm_sys_stat.h"
 
 #include "cmCMakePath.h"
-#include "cmCMakePresetsFile.h"
+#include "cmCMakePresetsGraph.h"
 #include "cmCommandLineArgument.h"
 #include "cmCommands.h"
 #include "cmDocumentation.h"
@@ -1239,43 +1239,43 @@ void cmake::SetArgs(const std::vector<std::string>& args)
 
 #if !defined(CMAKE_BOOTSTRAP)
   if (listPresets != ListPresets::None || !presetName.empty()) {
-    cmCMakePresetsFile settingsFile;
-    auto result = settingsFile.ReadProjectPresets(this->GetHomeDirectory());
-    if (result != cmCMakePresetsFile::ReadFileResult::READ_OK) {
+    cmCMakePresetsGraph presetsGraph;
+    auto result = presetsGraph.ReadProjectPresets(this->GetHomeDirectory());
+    if (result != cmCMakePresetsGraph::ReadFileResult::READ_OK) {
       cmSystemTools::Error(
         cmStrCat("Could not read presets from ", this->GetHomeDirectory(),
-                 ": ", cmCMakePresetsFile::ResultToString(result)));
+                 ": ", cmCMakePresetsGraph::ResultToString(result)));
       return;
     }
 
     if (listPresets != ListPresets::None) {
       if (listPresets == ListPresets::Configure) {
-        this->PrintPresetList(settingsFile);
+        this->PrintPresetList(presetsGraph);
       } else if (listPresets == ListPresets::Build) {
-        settingsFile.PrintBuildPresetList();
+        presetsGraph.PrintBuildPresetList();
       } else if (listPresets == ListPresets::Test) {
-        settingsFile.PrintTestPresetList();
+        presetsGraph.PrintTestPresetList();
       } else if (listPresets == ListPresets::All) {
-        settingsFile.PrintAllPresets();
+        presetsGraph.PrintAllPresets();
       }
 
       this->SetWorkingMode(WorkingMode::HELP_MODE);
       return;
     }
 
-    auto preset = settingsFile.ConfigurePresets.find(presetName);
-    if (preset == settingsFile.ConfigurePresets.end()) {
+    auto preset = presetsGraph.ConfigurePresets.find(presetName);
+    if (preset == presetsGraph.ConfigurePresets.end()) {
       cmSystemTools::Error(cmStrCat("No such preset in ",
                                     this->GetHomeDirectory(), ": \"",
                                     presetName, '"'));
-      this->PrintPresetList(settingsFile);
+      this->PrintPresetList(presetsGraph);
       return;
     }
     if (preset->second.Unexpanded.Hidden) {
       cmSystemTools::Error(cmStrCat("Cannot use hidden preset in ",
                                     this->GetHomeDirectory(), ": \"",
                                     presetName, '"'));
-      this->PrintPresetList(settingsFile);
+      this->PrintPresetList(presetsGraph);
       return;
     }
     auto const& expandedPreset = preset->second.Expanded;
@@ -1319,14 +1319,14 @@ void cmake::SetArgs(const std::vector<std::string>& args)
 
     if (!expandedPreset->ArchitectureStrategy ||
         expandedPreset->ArchitectureStrategy ==
-          cmCMakePresetsFile::ArchToolsetStrategy::Set) {
+          cmCMakePresetsGraph::ArchToolsetStrategy::Set) {
       if (!this->GeneratorPlatformSet) {
         this->SetGeneratorPlatform(expandedPreset->Architecture);
       }
     }
     if (!expandedPreset->ToolsetStrategy ||
         expandedPreset->ToolsetStrategy ==
-          cmCMakePresetsFile::ArchToolsetStrategy::Set) {
+          cmCMakePresetsGraph::ArchToolsetStrategy::Set) {
       if (!this->GeneratorToolsetSet) {
         this->SetGeneratorToolset(expandedPreset->Toolset);
       }
@@ -1707,12 +1707,12 @@ bool cmake::CreateAndSetGlobalGenerator(const std::string& name,
 }
 
 #ifndef CMAKE_BOOTSTRAP
-void cmake::PrintPresetList(const cmCMakePresetsFile& file) const
+void cmake::PrintPresetList(const cmCMakePresetsGraph& graph) const
 {
   std::vector<GeneratorInfo> generators;
   this->GetRegisteredGenerators(generators, false);
   auto filter =
-    [&generators](const cmCMakePresetsFile::ConfigurePreset& preset) -> bool {
+    [&generators](const cmCMakePresetsGraph::ConfigurePreset& preset) -> bool {
     if (preset.Generator.empty()) {
       return true;
     }
@@ -1723,7 +1723,7 @@ void cmake::PrintPresetList(const cmCMakePresetsFile& file) const
     return it != generators.end();
   };
 
-  file.PrintConfigurePresetList(filter);
+  graph.PrintConfigurePresetList(filter);
 }
 #endif
 
@@ -3230,12 +3230,12 @@ int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
     this->SetHomeDirectory(cmSystemTools::GetCurrentWorkingDirectory());
     this->SetHomeOutputDirectory(cmSystemTools::GetCurrentWorkingDirectory());
 
-    cmCMakePresetsFile settingsFile;
+    cmCMakePresetsGraph settingsFile;
     auto result = settingsFile.ReadProjectPresets(this->GetHomeDirectory());
-    if (result != cmCMakePresetsFile::ReadFileResult::READ_OK) {
+    if (result != cmCMakePresetsGraph::ReadFileResult::READ_OK) {
       cmSystemTools::Error(
         cmStrCat("Could not read presets from ", this->GetHomeDirectory(),
-                 ": ", cmCMakePresetsFile::ResultToString(result)));
+                 ": ", cmCMakePresetsGraph::ResultToString(result)));
       return 1;
     }
 

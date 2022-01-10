@@ -1,0 +1,11 @@
+{
+  "version": 4,
+  "include": [
+    "NotFound.json"
+  ],
+  "configurePresets": [
+    {
+      "name": "IncludeNotFound"
+    }
+  ]
+}

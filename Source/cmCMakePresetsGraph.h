@@ -8,12 +8,13 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
 #include <cm/optional>
 
-class cmCMakePresetsFile
+class cmCMakePresetsGraph
 {
 public:
   enum class ReadFileResult
@@ -32,14 +33,18 @@ public:
     INVALID_VARIABLE,
     DUPLICATE_PRESETS,
     CYCLIC_PRESET_INHERITANCE,
-    USER_PRESET_INHERITANCE,
+    PRESET_UNREACHABLE_FROM_FILE,
     INVALID_MACRO_EXPANSION,
     BUILD_TEST_PRESETS_UNSUPPORTED,
+    INCLUDE_UNSUPPORTED,
+    INVALID_INCLUDE,
     INVALID_CONFIGURE_PRESET,
     INSTALL_PREFIX_UNSUPPORTED,
     INVALID_CONDITION,
     CONDITION_UNSUPPORTED,
     TOOLCHAIN_FILE_UNSUPPORTED,
+    CYCLIC_INCLUDE,
+    INCLUDE_OUTSIDE_PROJECT,
   };
 
   enum class ArchToolsetStrategy
@@ -56,6 +61,15 @@ public:
   };
 
   class Condition;
+
+  class File
+  {
+  public:
+    std::string Filename;
+    int Version;
+
+    std::unordered_set<File*> ReachableFiles;
+  };
 
   class Preset
   {
@@ -77,7 +91,7 @@ public:
     std::string Name;
     std::vector<std::string> Inherits;
     bool Hidden;
-    bool User;
+    File* OriginFile;
     std::string DisplayName;
     std::string Description;
 
@@ -321,12 +335,11 @@ public:
   std::vector<std::string> TestPresetOrder;
 
   std::string SourceDir;
-  int Version;
-  int UserVersion;
+  std::vector<std::unique_ptr<File>> Files;
 
   int GetVersion(const Preset& preset) const
   {
-    return preset.User ? this->UserVersion : this->Version;
+    return preset.OriginFile->Version;
   }
 
   static std::string GetFilename(const std::string& sourceDir);
@@ -363,7 +376,7 @@ public:
   }
 
   static void PrintPresets(
-    const std::vector<const cmCMakePresetsFile::Preset*>& presets);
+    const std::vector<const cmCMakePresetsGraph::Preset*>& presets);
   void PrintConfigurePresetList() const;
   void PrintConfigurePresetList(
     const std::function<bool(const ConfigurePreset&)>& filter) const;
@@ -372,7 +385,22 @@ public:
   void PrintAllPresets() const;
 
 private:
+  enum class RootType
+  {
+    Project,
+    User,
+  };
+
+  enum class ReadReason
+  {
+    Root,
+    Included,
+  };
+
   ReadFileResult ReadProjectPresetsInternal(bool allowNoFiles);
-  ReadFileResult ReadJSONFile(const std::string& filename, bool user);
+  ReadFileResult ReadJSONFile(const std::string& filename, RootType rootType,
+                              ReadReason readReason,
+                              std::vector<File*>& inProgressFiles,
+                              File*& file);
   void ClearPresets();
 };

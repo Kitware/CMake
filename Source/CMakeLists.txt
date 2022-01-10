@@ -161,10 +161,13 @@ set(SRCS
   cmCLocaleEnvironmentScope.cxx
   cmCMakePath.h
   cmCMakePath.cxx
-  cmCMakePresetsFile.cxx
-  cmCMakePresetsFile.h
-  cmCMakePresetsFileInternal.h
-  cmCMakePresetsFileReadJSON.cxx
+  cmCMakePresetsGraph.cxx
+  cmCMakePresetsGraph.h
+  cmCMakePresetsGraphInternal.h
+  cmCMakePresetsGraphReadJSON.cxx
+  cmCMakePresetsGraphReadJSONBuildPresets.cxx
+  cmCMakePresetsGraphReadJSONConfigurePresets.cxx
+  cmCMakePresetsGraphReadJSONTestPresets.cxx
   cmCommandArgumentParserHelper.cxx
   cmCommonTargetGenerator.cxx
   cmCommonTargetGenerator.h
