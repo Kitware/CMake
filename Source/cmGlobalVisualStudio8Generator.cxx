@@ -305,6 +305,7 @@ void cmGlobalVisualStudio8Generator::WriteProjectConfigurations(
           cmExpandList(*m, mapConfig);
           if (!mapConfig.empty()) {
             dstConfig = mapConfig[0].c_str();
+          }
         }
       }
       fout << "\t\t{" << guid << "}." << i << "|" << p

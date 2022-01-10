@@ -1180,7 +1180,7 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues(Elem& e0)
 
       if (this->ProjectType != csproj) {
         std::string configType;
-        if (cmProp vsConfigurationType =
+        if (cmValue vsConfigurationType =
               this->GeneratorTarget->GetProperty("VS_CONFIGURATION_TYPE")) {
           configType = cmGeneratorExpression::Evaluate(*vsConfigurationType,
                                                       this->LocalGenerator, c);
