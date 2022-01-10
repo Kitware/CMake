@@ -157,6 +157,15 @@ if(NOT CMAKE_INCLUDE_FLAG_Fortran)
   set(CMAKE_INCLUDE_FLAG_Fortran ${CMAKE_INCLUDE_FLAG_C})
 endif()
 
+if(CMAKE_EXECUTABLE_FORMAT STREQUAL "ELF")
+  if(NOT DEFINED CMAKE_Fortran_LINK_WHAT_YOU_USE_FLAG)
+    set(CMAKE_Fortran_LINK_WHAT_YOU_USE_FLAG "LINKER:--no-as-needed")
+  endif()
+  if(NOT DEFINED CMAKE_LINK_WHAT_YOU_USE_CHECK)
+    set(CMAKE_LINK_WHAT_YOU_USE_CHECK ldd -u -r)
+  endif()
+endif()
+
 set(CMAKE_VERBOSE_MAKEFILE FALSE CACHE BOOL "If this value is on, makefiles will be generated without the .SILENT directive, and all commands will be echoed to the console during the make.  This is useful for debugging only. With Visual Studio IDE projects all commands are done without /nologo.")
 
 set(CMAKE_Fortran_FLAGS_INIT "$ENV{FFLAGS} ${CMAKE_Fortran_FLAGS_INIT}")

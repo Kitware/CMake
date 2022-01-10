@@ -401,6 +401,12 @@ cmGlobalVisualStudioVersionedGenerator::cmGlobalVisualStudioVersionedGenerator(
     this->DefaultPlatformName = VSHostPlatformName();
     this->DefaultPlatformToolsetHostArchitecture = VSHostArchitecture();
   }
+  if (this->Version >= cmGlobalVisualStudioGenerator::VS17) {
+    // FIXME: Search for an existing framework?  Under '%ProgramFiles(x86)%',
+    // see 'Reference Assemblies\Microsoft\Framework\.NETFramework'.
+    // Use a version installed by VS 2022 without a separate component.
+    this->DefaultTargetFrameworkVersion = "v4.7.2";
+  }
 }
 
 bool cmGlobalVisualStudioVersionedGenerator::MatchesGeneratorName(
@@ -436,6 +442,11 @@ bool cmGlobalVisualStudioVersionedGenerator::MatchesGeneratorName(
 bool cmGlobalVisualStudioVersionedGenerator::SetGeneratorInstance(
   std::string const& i, cmMakefile* mf)
 {
+  if (this->LastGeneratorInstanceString &&
+      i == *(this->LastGeneratorInstanceString)) {
+    return true;
+  }
+
   if (!i.empty()) {
     if (!this->vsSetupAPIHelper.SetVSInstance(i)) {
       std::ostringstream e;
@@ -467,10 +478,15 @@ bool cmGlobalVisualStudioVersionedGenerator::SetGeneratorInstance(
   // Save the selected instance persistently.
   std::string genInstance = mf->GetSafeDefinition("CMAKE_GENERATOR_INSTANCE");
   if (vsInstance != genInstance) {
-    this->CMakeInstance->AddCacheEntry(
-      "CMAKE_GENERATOR_INSTANCE", vsInstance.c_str(),
-      "Generator instance identifier.", cmStateEnums::INTERNAL);
+    this->CMakeInstance->AddCacheEntry("CMAKE_GENERATOR_INSTANCE", vsInstance,
+                                       "Generator instance identifier.",
+                                       cmStateEnums::INTERNAL);
   }
+
+  // The selected instance may have a different MSBuild than previously found.
+  this->MSBuildCommandInitialized = false;
+
+  this->LastGeneratorInstanceString = i;
 
   return true;
 }
@@ -618,6 +634,9 @@ cmGlobalVisualStudioVersionedGenerator::FindAuxToolset(
     if (version == "14.29.16.10" && vcToolsetVersion == "14.29.30037") {
       return AuxToolset::Default;
     }
+    if (version == "14.29.16.11" && vcToolsetVersion == "14.29.30133") {
+      return AuxToolset::Default;
+    }
 
     // The first two components of the default toolset version typically
     // match the name used by later VS versions for the SxS props files.
@@ -707,6 +726,17 @@ cmGlobalVisualStudioVersionedGenerator::GetWindows10SDKMaxVersionDefault(
   cmMakefile*) const
 {
   return std::string();
+}
+
+cm::optional<std::string>
+cmGlobalVisualStudioVersionedGenerator::FindMSBuildCommandEarly(cmMakefile* mf)
+{
+  std::string instance = mf->GetSafeDefinition("CMAKE_GENERATOR_INSTANCE");
+  if (!this->SetGeneratorInstance(instance, mf)) {
+    cmSystemTools::SetFatalErrorOccured();
+    return {};
+  }
+  return this->cmGlobalVisualStudio14Generator::FindMSBuildCommandEarly(mf);
 }
 
 std::string cmGlobalVisualStudioVersionedGenerator::FindMSBuildCommand()

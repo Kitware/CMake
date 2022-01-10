@@ -12,6 +12,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 cmCPackOSXX11Generator::cmCPackOSXX11Generator() = default;
 
@@ -22,7 +23,7 @@ int cmCPackOSXX11Generator::PackageFiles()
   // TODO: Use toplevel ?
   //       It is used! Is this an obsolete comment?
 
-  const char* cpackPackageExecutables =
+  cmValue cpackPackageExecutables =
     this->GetOption("CPACK_PACKAGE_EXECUTABLES");
   if (cpackPackageExecutables) {
     cmCPackLogger(cmCPackLog::LOG_DEBUG,
@@ -45,8 +46,7 @@ int cmCPackOSXX11Generator::PackageFiles()
          it != cpackPackageExecutablesVector.end(); ++it) {
       std::string cpackExecutableName = *it;
       ++it;
-      this->SetOptionIfNotSet("CPACK_EXECUTABLE_NAME",
-                              cpackExecutableName.c_str());
+      this->SetOptionIfNotSet("CPACK_EXECUTABLE_NAME", cpackExecutableName);
     }
   }
 
@@ -70,7 +70,7 @@ int cmCPackOSXX11Generator::PackageFiles()
   const char* scrDir = scriptDirectory.c_str();
   const char* contDir = contentsDirectory.c_str();
   const char* rsrcFile = resourceFileName.c_str();
-  const char* iconFile = this->GetOption("CPACK_PACKAGE_ICON");
+  cmValue iconFile = this->GetOption("CPACK_PACKAGE_ICON");
   if (iconFile) {
     std::string iconFileName = cmsys::SystemTools::GetFilenameName(iconFile);
     if (!cmSystemTools::FileExists(iconFile)) {
@@ -83,7 +83,7 @@ int cmCPackOSXX11Generator::PackageFiles()
     }
     std::string destFileName = resourcesDirectory + "/" + iconFileName;
     this->ConfigureFile(iconFile, destFileName, true);
-    this->SetOptionIfNotSet("CPACK_APPLE_GUI_ICON", iconFileName.c_str());
+    this->SetOptionIfNotSet("CPACK_APPLE_GUI_ICON", iconFileName);
   }
 
   std::string applicationsLinkName = diskImageDirectory + "/Applications";
@@ -103,9 +103,9 @@ int cmCPackOSXX11Generator::PackageFiles()
                                    true) ||
       !this->CopyResourcePlistFile("OSXScriptLauncher.rsrc", dir, rsrcFile,
                                    true) ||
-      !this->CopyResourcePlistFile("OSXScriptLauncher", appdir,
-                                   this->GetOption("CPACK_PACKAGE_FILE_NAME"),
-                                   true)) {
+      !this->CopyResourcePlistFile(
+        "OSXScriptLauncher", appdir,
+        this->GetOption("CPACK_PACKAGE_FILE_NAME").GetCStr(), true)) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Problem copying the resource files" << std::endl);
     return 0;
@@ -190,8 +190,7 @@ int cmCPackOSXX11Generator::InitializeInternal()
                   "Cannot find hdiutil compiler" << std::endl);
     return 0;
   }
-  this->SetOptionIfNotSet("CPACK_INSTALLER_PROGRAM_DISK_IMAGE",
-                          pkgPath.c_str());
+  this->SetOptionIfNotSet("CPACK_INSTALLER_PROGRAM_DISK_IMAGE", pkgPath);
 
   return this->Superclass::InitializeInternal();
 }

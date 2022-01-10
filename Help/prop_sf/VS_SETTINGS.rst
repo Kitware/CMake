@@ -3,7 +3,12 @@ VS_SETTINGS
 
 .. versionadded:: 3.18
 
-Set any item metadata on a non-built file.
+Set any item metadata on a file.
+
+.. versionadded:: 3.22
+
+  This property is honored for all source file types.
+  Previously it worked only for non-built files.
 
 Takes a list of ``Key=Value`` pairs. Tells the Visual Studio generator to set
 ``Key`` to ``Value`` as item metadata on the file.

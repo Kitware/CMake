@@ -68,6 +68,15 @@ if(NOT CMAKE_MODULE_EXISTS)
   set(CMAKE_SHARED_MODULE_CREATE_HIP_FLAGS ${CMAKE_SHARED_LIBRARY_CREATE_HIP_FLAGS})
 endif()
 
+if(CMAKE_EXECUTABLE_FORMAT STREQUAL "ELF")
+  if(NOT DEFINED CMAKE_HIP_LINK_WHAT_YOU_USE_FLAG)
+    set(CMAKE_HIP_LINK_WHAT_YOU_USE_FLAG "LINKER:--no-as-needed")
+  endif()
+  if(NOT DEFINED CMAKE_LINK_WHAT_YOU_USE_CHECK)
+    set(CMAKE_LINK_WHAT_YOU_USE_CHECK ldd -u -r)
+  endif()
+endif()
+
 # add the flags to the cache based
 # on the initial values computed in the platform/*.cmake files
 # use _INIT variables so that this only happens the first time
@@ -132,8 +141,11 @@ endif()
 set(CMAKE_HIP_INFORMATION_LOADED 1)
 
 # Load the file and find the relevant HIP runtime.
-# This file will only exist after all compiler detection has finished
-include(${CMAKE_PLATFORM_INFO_DIR}/CMakeHIPRuntime.cmake OPTIONAL)
-if(COMMAND _CMAKE_FIND_HIP_RUNTIME)
-  _CMAKE_FIND_HIP_RUNTIME()
+if(NOT DEFINED _CMAKE_HIP_DEVICE_RUNTIME_TARGET)
+  set(hip-lang_DIR "${CMAKE_HIP_COMPILER_ROCM_ROOT}/lib/cmake/hip-lang")
+  find_package(hip-lang CONFIG QUIET NO_DEFAULT_PATH)
+endif()
+if(DEFINED _CMAKE_HIP_DEVICE_RUNTIME_TARGET)
+  list(APPEND CMAKE_HIP_RUNTIME_LIBRARIES_STATIC ${_CMAKE_HIP_DEVICE_RUNTIME_TARGET})
+  list(APPEND CMAKE_HIP_RUNTIME_LIBRARIES_SHARED ${_CMAKE_HIP_DEVICE_RUNTIME_TARGET})
 endif()

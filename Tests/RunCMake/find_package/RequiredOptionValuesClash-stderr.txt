@@ -1,0 +1,11 @@
+CMake Error at RequiredOptionValuesClash.cmake:4 \(find_package\):
+  find_package for module Foo was made REQUIRED with
+  CMAKE_REQUIRE_FIND_PACKAGE_Foo but CMAKE_DISABLE_FIND_PACKAGE_Foo is
+  enabled.  A REQUIRED package cannot be disabled.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
++
+CMake Error at RequiredOptionValuesClash.cmake:5 \(message\):
+  This error must not be reachable\.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)

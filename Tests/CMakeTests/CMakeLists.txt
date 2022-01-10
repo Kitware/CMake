@@ -31,7 +31,6 @@ AddCMakeTest(CompilerIdVendor "")
 AddCMakeTest(ProcessorCount "-DKWSYS_TEST_EXE=$<TARGET_FILE:cmsysTestsCxx>")
 AddCMakeTest(PushCheckState "")
 AddCMakeTest(While "")
-AddCMakeTest(CMakeHostSystemInformation "")
 
 AddCMakeTest(FileDownload "")
 set_tests_properties(CMake.FileDownload PROPERTIES

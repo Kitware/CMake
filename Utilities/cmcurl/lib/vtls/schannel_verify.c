@@ -80,7 +80,7 @@ static int is_cr_or_lf(char c)
 /* Search the substring needle,needlelen into string haystack,haystacklen
  * Strings don't need to be terminated by a '\0'.
  * Similar of OSX/Linux memmem (not available on Visual Studio).
- * Return position of beginning of first occurence or NULL if not found
+ * Return position of beginning of first occurrence or NULL if not found
  */
 static const char *c_memmem(const void *haystack, size_t haystacklen,
                             const void *needle, size_t needlelen)
@@ -204,12 +204,12 @@ static CURLcode add_certs_data_to_store(HCERTSTORE trust_store,
   if(result == CURLE_OK) {
     if(!num_certs) {
       infof(data,
-            "schannel: did not add any certificates from CA file '%s'\n",
+            "schannel: did not add any certificates from CA file '%s'",
             ca_file_text);
     }
     else {
       infof(data,
-            "schannel: added %d certificate(s) from CA file '%s'\n",
+            "schannel: added %d certificate(s) from CA file '%s'",
             num_certs, ca_file_text);
     }
   }
@@ -526,7 +526,7 @@ static CURLcode verify_host(struct Curl_easy *data,
       if(match_result == CURL_HOST_MATCH) {
         infof(data,
               "schannel: connection hostname (%s) validated "
-              "against certificate name (%s)\n",
+              "against certificate name (%s)",
               conn_hostname, cert_hostname);
         result = CURLE_OK;
       }
@@ -535,7 +535,7 @@ static CURLcode verify_host(struct Curl_easy *data,
 
         infof(data,
               "schannel: connection hostname (%s) did not match "
-              "against certificate name (%s)\n",
+              "against certificate name (%s)",
               conn_hostname, cert_hostname);
 
         cert_hostname_len =

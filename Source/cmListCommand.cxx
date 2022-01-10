@@ -25,12 +25,12 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
-#include "cmProperty.h"
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
 #include "cmStringReplaceHelper.h"
 #include "cmSubcommandTable.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 namespace {
 
@@ -46,7 +46,7 @@ bool GetIndexArg(const std::string& arg, int* idx, cmMakefile& mf)
           cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0121),
                    " Invalid list index \"", arg, "\".");
         mf.IssueMessage(MessageType::AUTHOR_WARNING, warn);
-        break;
+        CM_FALLTHROUGH;
       }
       case cmPolicies::OLD:
         // OLD behavior is to allow compatibility, so just ignore the
@@ -79,7 +79,7 @@ bool GetListString(std::string& listString, const std::string& var,
                    const cmMakefile& makefile)
 {
   // get the old value
-  cmProp cacheValue = makefile.GetDefinition(var);
+  cmValue cacheValue = makefile.GetDefinition(var);
   if (!cacheValue) {
     return false;
   }

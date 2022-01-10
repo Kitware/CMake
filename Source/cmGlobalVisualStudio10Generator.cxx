@@ -88,7 +88,7 @@ public:
   void GetDocumentation(cmDocumentationEntry& entry) const override
   {
     entry.Name = std::string(vs10generatorName) + " [arch]";
-    entry.Brief = "Generates Visual Studio 2010 project files.  "
+    entry.Brief = "Deprecated.  Generates Visual Studio 2010 project files.  "
                   "Optional [arch] can be \"Win64\" or \"IA64\".";
   }
 
@@ -139,7 +139,6 @@ cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(
     "ProductDir",
     vc10Express, cmSystemTools::KeyWOW64_32);
   this->CudaEnabled = false;
-  this->MSBuildCommandInitialized = false;
   {
     std::string envPlatformToolset;
     if (cmSystemTools::GetEnv("PlatformToolset", envPlatformToolset) &&
@@ -581,6 +580,13 @@ bool cmGlobalVisualStudio10Generator::InitializeWindowsCE(cmMakefile* mf)
 
   this->DefaultPlatformToolset = this->SelectWindowsCEToolset();
 
+  if (this->GetVersion() == cmGlobalVisualStudioGenerator::VS12) {
+    // VS 12 .NET CF defaults to .NET framework 3.9 for Windows CE.
+    this->DefaultTargetFrameworkVersion = "v3.9";
+    this->DefaultTargetFrameworkIdentifier = "WindowsEmbeddedCompact";
+    this->DefaultTargetFrameworkTargetsVersion = "v8.0";
+  }
+
   return true;
 }
 
@@ -855,6 +861,12 @@ std::string const& cmGlobalVisualStudio10Generator::GetMSBuildCommand()
     this->MSBuildCommand = this->FindMSBuildCommand();
   }
   return this->MSBuildCommand;
+}
+
+cm::optional<std::string>
+cmGlobalVisualStudio10Generator::FindMSBuildCommandEarly(cmMakefile*)
+{
+  return this->GetMSBuildCommand();
 }
 
 std::string cmGlobalVisualStudio10Generator::FindMSBuildCommand()

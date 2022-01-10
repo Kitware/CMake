@@ -26,7 +26,9 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
-cmState::cmState()
+cmState::cmState(Mode mode, ProjectKind projectKind)
+  : StateMode(mode)
+  , StateProjectKind(projectKind)
 {
   this->CacheManager = cm::make_unique<cmCacheManager>();
   this->GlobVerificationManager = cm::make_unique<cmGlobVerificationManager>();
@@ -142,20 +144,20 @@ std::vector<std::string> cmState::GetCacheEntryKeys() const
   return this->CacheManager->GetCacheEntryKeys();
 }
 
-cmProp cmState::GetCacheEntryValue(std::string const& key) const
+cmValue cmState::GetCacheEntryValue(std::string const& key) const
 {
   return this->CacheManager->GetCacheEntryValue(key);
 }
 
 std::string cmState::GetSafeCacheEntryValue(std::string const& key) const
 {
-  if (cmProp val = this->GetCacheEntryValue(key)) {
+  if (cmValue val = this->GetCacheEntryValue(key)) {
     return *val;
   }
   return std::string();
 }
 
-cmProp cmState::GetInitializedCacheValue(std::string const& key) const
+cmValue cmState::GetInitializedCacheValue(std::string const& key) const
 {
   return this->CacheManager->GetInitializedCacheValue(key);
 }
@@ -192,8 +194,8 @@ std::vector<std::string> cmState::GetCacheEntryPropertyList(
   return this->CacheManager->GetCacheEntryPropertyList(key);
 }
 
-cmProp cmState::GetCacheEntryProperty(std::string const& key,
-                                      std::string const& propertyName)
+cmValue cmState::GetCacheEntryProperty(std::string const& key,
+                                       std::string const& propertyName)
 {
   return this->CacheManager->GetCacheEntryProperty(key, propertyName);
 }
@@ -204,7 +206,7 @@ bool cmState::GetCacheEntryPropertyAsBool(std::string const& key,
   return this->CacheManager->GetCacheEntryPropertyAsBool(key, propertyName);
 }
 
-void cmState::AddCacheEntry(const std::string& key, const char* value,
+void cmState::AddCacheEntry(const std::string& key, cmValue value,
                             const char* helpString,
                             cmStateEnums::CacheEntryType type)
 {
@@ -275,15 +277,10 @@ cmStateSnapshot cmState::Reset()
     cmLinkedTree<cmStateDetail::BuildsystemDirectoryStateType>::iterator it =
       this->BuildsystemDirectory.Truncate();
     it->IncludeDirectories.clear();
-    it->IncludeDirectoryBacktraces.clear();
     it->CompileDefinitions.clear();
-    it->CompileDefinitionsBacktraces.clear();
     it->CompileOptions.clear();
-    it->CompileOptionsBacktraces.clear();
     it->LinkOptions.clear();
-    it->LinkOptionsBacktraces.clear();
     it->LinkDirectories.clear();
-    it->LinkDirectoriesBacktraces.clear();
     it->DirectoryEnd = pos;
     it->NormalTargetNames.clear();
     it->ImportedTargetNames.clear();
@@ -381,16 +378,6 @@ void cmState::ClearEnabledLanguages()
   this->EnabledLanguages.clear();
 }
 
-bool cmState::GetIsInTryCompile() const
-{
-  return this->IsInTryCompile;
-}
-
-void cmState::SetIsInTryCompile(bool b)
-{
-  this->IsInTryCompile = b;
-}
-
 bool cmState::GetIsGeneratorMultiConfig() const
 {
   return this->IsGeneratorMultiConfig;
@@ -466,7 +453,7 @@ void cmState::AddDisallowedCommand(std::string const& name,
         case cmPolicies::WARN:
           mf.IssueMessage(MessageType::AUTHOR_WARNING,
                           cmPolicies::GetPolicyWarning(policy));
-          break;
+          CM_FALLTHROUGH;
         case cmPolicies::OLD:
           break;
         case cmPolicies::REQUIRED_IF_USED:
@@ -485,7 +472,7 @@ void cmState::AddUnexpectedCommand(std::string const& name, const char* error)
     name,
     [name, error](std::vector<cmListFileArgument> const&,
                   cmExecutionStatus& status) -> bool {
-      cmProp versionValue =
+      cmValue versionValue =
         status.GetMakefile().GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION");
       if (name == "endif" &&
           (!versionValue || atof(versionValue->c_str()) <= 1.4)) {
@@ -577,6 +564,10 @@ void cmState::SetGlobalProperty(const std::string& prop, const char* value)
 {
   this->GlobalProperties.SetProperty(prop, value);
 }
+void cmState::SetGlobalProperty(const std::string& prop, cmValue value)
+{
+  this->GlobalProperties.SetProperty(prop, value);
+}
 
 void cmState::AppendGlobalProperty(const std::string& prop,
                                    const std::string& value, bool asString)
@@ -584,7 +575,7 @@ void cmState::AppendGlobalProperty(const std::string& prop,
   this->GlobalProperties.AppendProperty(prop, value, asString);
 }
 
-cmProp cmState::GetGlobalProperty(const std::string& prop)
+cmValue cmState::GetGlobalProperty(const std::string& prop)
 {
   if (prop == "CACHE_VARIABLES") {
     std::vector<std::string> cacheKeys = this->GetCacheEntryKeys();
@@ -593,8 +584,9 @@ cmProp cmState::GetGlobalProperty(const std::string& prop)
     std::vector<std::string> commands = this->GetCommandNames();
     this->SetGlobalProperty("COMMANDS", cmJoin(commands, ";").c_str());
   } else if (prop == "IN_TRY_COMPILE") {
-    this->SetGlobalProperty("IN_TRY_COMPILE",
-                            this->IsInTryCompile ? "1" : "0");
+    this->SetGlobalProperty(
+      "IN_TRY_COMPILE",
+      this->StateProjectKind == ProjectKind::TryCompile ? "1" : "0");
   } else if (prop == "GENERATOR_IS_MULTI_CONFIG") {
     this->SetGlobalProperty("GENERATOR_IS_MULTI_CONFIG",
                             this->IsGeneratorMultiConfig ? "1" : "0");
@@ -610,47 +602,47 @@ cmProp cmState::GetGlobalProperty(const std::string& prop)
   if (prop == "CMAKE_C_KNOWN_FEATURES") {
     static const std::string s_out(
       &FOR_EACH_C_FEATURE(STRING_LIST_ELEMENT)[1]);
-    return &s_out;
+    return cmValue(s_out);
   }
   if (prop == "CMAKE_C90_KNOWN_FEATURES") {
     static const std::string s_out(
       &FOR_EACH_C90_FEATURE(STRING_LIST_ELEMENT)[1]);
-    return &s_out;
+    return cmValue(s_out);
   }
   if (prop == "CMAKE_C99_KNOWN_FEATURES") {
     static const std::string s_out(
       &FOR_EACH_C99_FEATURE(STRING_LIST_ELEMENT)[1]);
-    return &s_out;
+    return cmValue(s_out);
   }
   if (prop == "CMAKE_C11_KNOWN_FEATURES") {
     static const std::string s_out(
       &FOR_EACH_C11_FEATURE(STRING_LIST_ELEMENT)[1]);
-    return &s_out;
+    return cmValue(s_out);
   }
   if (prop == "CMAKE_CXX_KNOWN_FEATURES") {
     static const std::string s_out(
       &FOR_EACH_CXX_FEATURE(STRING_LIST_ELEMENT)[1]);
-    return &s_out;
+    return cmValue(s_out);
   }
   if (prop == "CMAKE_CXX98_KNOWN_FEATURES") {
     static const std::string s_out(
       &FOR_EACH_CXX98_FEATURE(STRING_LIST_ELEMENT)[1]);
-    return &s_out;
+    return cmValue(s_out);
   }
   if (prop == "CMAKE_CXX11_KNOWN_FEATURES") {
     static const std::string s_out(
       &FOR_EACH_CXX11_FEATURE(STRING_LIST_ELEMENT)[1]);
-    return &s_out;
+    return cmValue(s_out);
   }
   if (prop == "CMAKE_CXX14_KNOWN_FEATURES") {
     static const std::string s_out(
       &FOR_EACH_CXX14_FEATURE(STRING_LIST_ELEMENT)[1]);
-    return &s_out;
+    return cmValue(s_out);
   }
   if (prop == "CMAKE_CUDA_KNOWN_FEATURES") {
     static const std::string s_out(
       &FOR_EACH_CUDA_FEATURE(STRING_LIST_ELEMENT)[1]);
-    return &s_out;
+    return cmValue(s_out);
   }
 
 #undef STRING_LIST_ELEMENT
@@ -771,17 +763,12 @@ unsigned int cmState::GetCacheMinorVersion() const
 
 cmState::Mode cmState::GetMode() const
 {
-  return this->CurrentMode;
+  return this->StateMode;
 }
 
 std::string cmState::GetModeString() const
 {
-  return ModeToString(this->CurrentMode);
-}
-
-void cmState::SetMode(cmState::Mode mode)
-{
-  this->CurrentMode = mode;
+  return ModeToString(this->StateMode);
 }
 
 std::string cmState::ModeToString(cmState::Mode mode)
@@ -801,6 +788,11 @@ std::string cmState::ModeToString(cmState::Mode mode)
       return "UNKNOWN";
   }
   return "UNKNOWN";
+}
+
+cmState::ProjectKind cmState::GetProjectKind() const
+{
+  return this->StateProjectKind;
 }
 
 std::string const& cmState::GetBinaryDirectory() const

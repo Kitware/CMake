@@ -64,8 +64,13 @@ will be stored in the cache so that the user does not need to set the value
 each time they run CMake on a build directory.
 
 The next change is to make building and linking the ``MathFunctions`` library
-conditional. To do this we change the end of the top-level ``CMakeLists.txt``
-file to look like the following:
+conditional. To do this,  we will create an ``if`` statement which checks the
+value of the option.  Inside the ``if`` block, put the
+:command:`add_subdirectory` command from above with some additional list
+commands to store information needed to link to the library and add the
+subdirectory as an include directory in the ``Tutorial`` target.
+The end of the top-level ``CMakeLists.txt`` file will now look like the
+following:
 
 .. literalinclude:: Step3/CMakeLists.txt
   :caption: CMakeLists.txt

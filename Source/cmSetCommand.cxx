@@ -5,12 +5,12 @@
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
-#include "cmProperty.h"
 #include "cmRange.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 // cmSetCommand
 bool cmSetCommand(std::vector<std::string> const& args,
@@ -136,7 +136,7 @@ bool cmSetCommand(std::vector<std::string> const& args,
 
   // see if this is already in the cache
   cmState* state = status.GetMakefile().GetState();
-  cmProp existingValue = state->GetCacheEntryValue(variable);
+  cmValue existingValue = state->GetCacheEntryValue(variable);
   if (existingValue &&
       (state->GetCacheEntryType(variable) != cmStateEnums::UNINITIALIZED)) {
     // if the set is trying to CACHE the value but the value

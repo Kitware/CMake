@@ -1,7 +1,7 @@
 /*
  * xxHash - Extremely Fast Hash algorithm
  * Header File
- * Copyright (c) 2012-2020, Yann Collet, Facebook, Inc.
+ * Copyright (c) Yann Collet, Facebook, Inc.
  *
  * You can contact the author at :
  * - xxHash source repository : https://github.com/Cyan4973/xxHash
@@ -55,7 +55,7 @@ extern "C" {
 /* ****************************
 *  Definitions
 ******************************/
-#include <stddef.h>   /* size_t */
+#include "zstd_deps.h"
 typedef enum { XXH_OK=0, XXH_ERROR } XXH_errorcode;
 
 

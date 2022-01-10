@@ -98,6 +98,7 @@ macro (_PYTHON_FIND_FRAMEWORKS)
                          ${_pff_CMAKE_FRAMEWORK_PATH}
                          ~/Library/Frameworks
                          /usr/local/Frameworks
+                         /opt/homebrew/Frameworks
                          ${CMAKE_SYSTEM_FRAMEWORK_PATH})
     list (REMOVE_DUPLICATES _pff_frameworks)
     foreach (_pff_implementation IN LISTS _${_PYTHON_PREFIX}_FIND_IMPLEMENTATIONS)

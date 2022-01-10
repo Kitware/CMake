@@ -228,7 +228,6 @@ protected:
   {
     return "package_source";
   }
-  const char* GetEditCacheTargetName() const override { return "edit_cache"; }
   const char* GetRebuildCacheTargetName() const override
   {
     return "rebuild_cache";
@@ -278,7 +277,6 @@ protected:
 
 private:
   const char* GetBuildIgnoreErrorsFlag() const override { return "-i"; }
-  std::string GetEditCacheCommand() const override;
 
   std::map<cmStateSnapshot, std::set<cmGeneratorTarget const*>,
            cmStateSnapshot::StrictWeakOrder>

@@ -1214,7 +1214,7 @@
     "comment": "Additional Module Dependencies",
     "value": "",
     "flags": [
-      "UserValue",
+      "UserFollowing",
       "SemicolonAppendable"
     ]
   },
@@ -1224,7 +1224,7 @@
     "comment": "Additional Header Unit Dependencies",
     "value": "",
     "flags": [
-      "UserValue",
+      "UserFollowing",
       "SemicolonAppendable"
     ]
   },

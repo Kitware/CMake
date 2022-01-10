@@ -53,6 +53,16 @@ Would be replaced with:
   :start-after: project(Tutorial VERSION 1.0)
   :end-before: # add compiler warning flags just when building this project via
 
+**Note**:  This upcoming section will require a change to the
+:command:`cmake_minimum_required` usage in the code.  The Generator Expression
+that is about to be used was introduced in `3.15`.  Update the call to require
+that more recent version:
+
+.. code-block:: cmake
+  :caption: CMakeLists.txt
+  :name: CMakeLists.txt-version-update
+
+  cmake_minimum_required(VERSION 3.15)
 
 Next we add the desired compiler warning flags that we want for our project. As
 warning flags vary based on the compiler we use the ``COMPILE_LANG_AND_ID``

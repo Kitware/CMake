@@ -14,11 +14,14 @@ these functions using the :module:`CheckSymbolExists` module in
 the ``m`` library. If ``log`` and ``exp`` are not initially found, require the
 ``m`` library and try again.
 
+Add the checks for ``log`` and ``exp`` to ``MathFunctions/CMakeLists.txt``,
+after the call to :command:`target_include_directories`:
+
 .. literalinclude:: Step6/MathFunctions/CMakeLists.txt
   :caption: MathFunctions/CMakeLists.txt
   :name: MathFunctions/CMakeLists.txt-check_symbol_exists
   :language: cmake
-  :start-after: # does this system provide the log and exp functions?
+  :start-after: # to find MathFunctions.h, while we don't.
   :end-before: # add compile definitions
 
 If available, use :command:`target_compile_definitions` to specify

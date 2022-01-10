@@ -2,8 +2,9 @@ CMAKE_POLICY_WARNING_CMP<NNNN>
 ------------------------------
 
 Explicitly enable or disable the warning when CMake Policy ``CMP<NNNN>``
-is not set.  This is meaningful only for the few policies that do not
-warn by default:
+has not been set explicitly by :command:`cmake_policy` or implicitly
+by :command:`cmake_minimum_required`. This is meaningful
+only for the policies that do not warn by default:
 
 * ``CMAKE_POLICY_WARNING_CMP0025`` controls the warning for
   policy :policy:`CMP0025`.
@@ -31,6 +32,8 @@ warn by default:
   policy :policy:`CMP0116`.
 * ``CMAKE_POLICY_WARNING_CMP0126`` controls the warning for
   policy :policy:`CMP0126`.
+* ``CMAKE_POLICY_WARNING_CMP0128`` controls the warning for
+  policy :policy:`CMP0128`.
 
 This variable should not be set by a project in CMake code.  Project
 developers running CMake may set this variable in their cache to

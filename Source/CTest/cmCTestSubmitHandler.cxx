@@ -21,10 +21,10 @@
 #include "cmCurl.h"
 #include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
-#include "cmProperty.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 #include "cmXMLParser.h"
 #include "cmake.h"
 
@@ -261,7 +261,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
         cmCTestScriptHandler* ch = this->CTest->GetScriptHandler();
         cmake* cm = ch->GetCMake();
         if (cm) {
-          cmProp subproject = cm->GetState()->GetGlobalProperty("SubProject");
+          cmValue subproject = cm->GetState()->GetGlobalProperty("SubProject");
           if (subproject) {
             upload_as += "&subproject=";
             upload_as += ctest_curl.Escape(*subproject);
@@ -357,12 +357,8 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
       // If curl failed for any reason, or checksum fails, wait and retry
       //
       if (res != CURLE_OK || this->HasErrors) {
-        std::string retryDelay = this->GetOption("RetryDelay") == nullptr
-          ? ""
-          : this->GetOption("RetryDelay");
-        std::string retryCount = this->GetOption("RetryCount") == nullptr
-          ? ""
-          : this->GetOption("RetryCount");
+        std::string retryDelay = *this->GetOption("RetryDelay");
+        std::string retryCount = *this->GetOption("RetryCount");
 
         auto delay = cmDuration(
           retryDelay.empty()
@@ -522,12 +518,8 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
   bool internalTest = cmIsOn(this->GetOption("InternalTest"));
 
   // Get RETRY_COUNT and RETRY_DELAY values if they were set.
-  std::string retryDelayString = this->GetOption("RetryDelay") == nullptr
-    ? ""
-    : this->GetOption("RetryDelay");
-  std::string retryCountString = this->GetOption("RetryCount") == nullptr
-    ? ""
-    : this->GetOption("RetryCount");
+  std::string retryDelayString = *this->GetOption("RetryDelay");
+  std::string retryCountString = *this->GetOption("RetryCount");
   auto retryDelay = std::chrono::seconds(0);
   if (!retryDelayString.empty()) {
     unsigned long retryDelayValue = 0;
@@ -556,7 +548,7 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
   // a "&subproject=subprojectname" to the first POST.
   cmCTestScriptHandler* ch = this->CTest->GetScriptHandler();
   cmake* cm = ch->GetCMake();
-  cmProp subproject = cm->GetState()->GetGlobalProperty("SubProject");
+  cmValue subproject = cm->GetState()->GetGlobalProperty("SubProject");
   // TODO: Encode values for a URL instead of trusting caller.
   std::ostringstream str;
   if (subproject) {
@@ -716,8 +708,8 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
 
 int cmCTestSubmitHandler::ProcessHandler()
 {
-  const char* cdashUploadFile = this->GetOption("CDashUploadFile");
-  const char* cdashUploadType = this->GetOption("CDashUploadType");
+  cmValue cdashUploadFile = this->GetOption("CDashUploadFile");
+  cmValue cdashUploadType = this->GetOption("CDashUploadType");
   if (cdashUploadFile && cdashUploadType) {
     return this->HandleCDashUploadFile(cdashUploadFile, cdashUploadType);
   }
@@ -804,6 +796,7 @@ int cmCTestSubmitHandler::ProcessHandler()
     }
   }
   this->CTest->AddIfExists(cmCTest::PartMemCheck, "DynamicAnalysis.xml");
+  this->CTest->AddIfExists(cmCTest::PartMemCheck, "DynamicAnalysis-Test.xml");
   this->CTest->AddIfExists(cmCTest::PartMemCheck, "Purify.xml");
   this->CTest->AddIfExists(cmCTest::PartNotes, "Notes.xml");
   this->CTest->AddIfExists(cmCTest::PartUpload, "Upload.xml");

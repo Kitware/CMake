@@ -27,7 +27,6 @@
 #include "cmMessageType.h"
 #include "cmNinjaTargetGenerator.h"
 #include "cmPolicies.h"
-#include "cmProperty.h"
 #include "cmRulePlaceholderExpander.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
@@ -35,6 +34,7 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
+#include "cmValue.h"
 #include "cmake.h"
 
 cmLocalNinjaGenerator::cmLocalNinjaGenerator(cmGlobalGenerator* gg,
@@ -88,7 +88,7 @@ void cmLocalNinjaGenerator::Generate()
       cmGlobalNinjaGenerator::WriteComment(this->GetRulesFileStream(),
                                            "localized /showIncludes string");
       this->GetRulesFileStream() << "msvc_deps_prefix = ";
-#ifdef WIN32
+#ifdef _WIN32
       // Ninja uses the ANSI Windows APIs, so strings in the rules file
       // typically need to be ANSI encoded. However, in this case the compiler
       // is being invoked using the UTF-8 codepage so the /showIncludes prefix
@@ -279,7 +279,7 @@ void cmLocalNinjaGenerator::WriteNinjaRequiredVersion(std::ostream& os)
   std::string requiredVersion = cmGlobalNinjaGenerator::RequiredNinjaVersion();
 
   // Ninja generator uses the 'console' pool if available (>= 1.5)
-  if (this->GetGlobalNinjaGenerator()->SupportsConsolePool()) {
+  if (this->GetGlobalNinjaGenerator()->SupportsDirectConsole()) {
     requiredVersion =
       cmGlobalNinjaGenerator::RequiredNinjaVersionForConsolePool();
   }
@@ -311,7 +311,7 @@ void cmLocalNinjaGenerator::WritePools(std::ostream& os)
 {
   cmGlobalNinjaGenerator::WriteDivider(os);
 
-  cmProp jobpools =
+  cmValue jobpools =
     this->GetCMakeInstance()->GetState()->GetGlobalProperty("JOB_POOLS");
   if (!jobpools) {
     jobpools = this->GetMakefile()->GetDefinition("CMAKE_JOB_POOLS");
@@ -796,8 +796,9 @@ cmLocalNinjaGenerator::MakeCustomCommandGenerators(
 
   bool transformDepfile = false;
   switch (cc.GetCMP0116Status()) {
-    case cmPolicies::OLD:
     case cmPolicies::WARN:
+      CM_FALLTHROUGH;
+    case cmPolicies::OLD:
       break;
     case cmPolicies::REQUIRED_IF_USED:
     case cmPolicies::REQUIRED_ALWAYS:
@@ -869,7 +870,7 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatements(
 std::string cmLocalNinjaGenerator::MakeCustomLauncher(
   cmCustomCommandGenerator const& ccg)
 {
-  cmProp property_value = this->Makefile->GetProperty("RULE_LAUNCH_CUSTOM");
+  cmValue property_value = this->Makefile->GetProperty("RULE_LAUNCH_CUSTOM");
 
   if (!cmNonempty(property_value)) {
     return std::string();
@@ -903,7 +904,7 @@ std::string cmLocalNinjaGenerator::MakeCustomLauncher(
 
 void cmLocalNinjaGenerator::AdditionalCleanFiles(const std::string& config)
 {
-  if (cmProp prop_value =
+  if (cmValue prop_value =
         this->Makefile->GetProperty("ADDITIONAL_CLEAN_FILES")) {
     std::vector<std::string> cleanFiles;
     {

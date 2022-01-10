@@ -9,7 +9,7 @@ Get a property.
                <GLOBAL             |
                 DIRECTORY [<dir>]  |
                 TARGET    <target> |
-                SOURCE    <source> |
+                SOURCE    <source>
                           [DIRECTORY <dir> | TARGET_DIRECTORY <target>] |
                 INSTALL   <file>   |
                 TEST      <test>   |

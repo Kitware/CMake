@@ -449,38 +449,73 @@ be in Coordinated Universal Time (UTC) rather than local time.
 The optional ``<format_string>`` may contain the following format
 specifiers:
 
-::
+``%%``
+  .. versionadded:: 3.8
 
-   %%        A literal percent sign (%).
-   %d        The day of the current month (01-31).
-   %H        The hour on a 24-hour clock (00-23).
-   %I        The hour on a 12-hour clock (01-12).
-   %j        The day of the current year (001-366).
-   %m        The month of the current year (01-12).
-   %b        Abbreviated month name (e.g. Oct).
-   %B        Full month name (e.g. October).
-   %M        The minute of the current hour (00-59).
-   %s        Seconds since midnight (UTC) 1-Jan-1970 (UNIX time).
-   %S        The second of the current minute.
-             60 represents a leap second. (00-60)
-   %U        The week number of the current year (00-53).
-   %w        The day of the current week. 0 is Sunday. (0-6)
-   %a        Abbreviated weekday name (e.g. Fri).
-   %A        Full weekday name (e.g. Friday).
-   %y        The last two digits of the current year (00-99)
-   %Y        The current year.
+  A literal percent sign (%).
 
-.. versionadded:: 3.6
-  ``%s`` format specifier (UNIX time).
+``%d``
+  The day of the current month (01-31).
 
-.. versionadded:: 3.7
-  ``%a`` and ``%b`` format specifiers (abbreviated month and weekday names).
+``%H``
+  The hour on a 24-hour clock (00-23).
 
-.. versionadded:: 3.8
-  ``%%`` specifier (literal ``%``).
+``%I``
+  The hour on a 12-hour clock (01-12).
 
-.. versionadded:: 3.7
-  ``%A`` and ``%B`` format specifiers (full month and weekday names).
+``%j``
+  The day of the current year (001-366).
+
+``%m``
+  The month of the current year (01-12).
+
+``%b``
+  .. versionadded:: 3.7
+
+  Abbreviated month name (e.g. Oct).
+
+``%B``
+  .. versionadded:: 3.10
+
+  Full month name (e.g. October).
+
+``%M``
+  The minute of the current hour (00-59).
+
+``%s``
+  .. versionadded:: 3.6
+
+  Seconds since midnight (UTC) 1-Jan-1970 (UNIX time).
+
+``%S``
+  The second of the current minute.  60 represents a leap second. (00-60)
+
+``%U``
+  The week number of the current year (00-53).
+
+``%V``
+  .. versionadded:: 3.22
+
+  The ISO 8601 week number of the current year (01-53).
+
+``%w``
+  The day of the current week. 0 is Sunday. (0-6)
+
+``%a``
+  .. versionadded:: 3.7
+
+  Abbreviated weekday name (e.g. Fri).
+
+``%A``
+  .. versionadded:: 3.10
+
+  Full weekday name (e.g. Friday).
+
+``%y``
+  The last two digits of the current year (00-99).
+
+``%Y``
+  The current year.
 
 Unknown format specifiers will be ignored and copied to the output
 as-is.

@@ -16,10 +16,10 @@
 #include "cmCommand.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
-#include "cmProperty.h"
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 class cmExecutionStatus;
 
@@ -36,8 +36,8 @@ std::unique_ptr<cmCommand> cmCTestSubmitCommand::Clone()
 
 cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
 {
-  const std::string* submitURL = !this->SubmitURL.empty()
-    ? &this->SubmitURL
+  cmValue submitURL = !this->SubmitURL.empty()
+    ? cmValue(this->SubmitURL)
     : this->Makefile->GetDefinition("CTEST_SUBMIT_URL");
 
   if (submitURL) {
@@ -59,14 +59,14 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
   this->CTest->SetCTestConfigurationFromCMakeVariable(
     this->Makefile, "CurlOptions", "CTEST_CURL_OPTIONS", this->Quiet);
 
-  cmProp notesFilesVariable =
+  cmValue notesFilesVariable =
     this->Makefile->GetDefinition("CTEST_NOTES_FILES");
   if (notesFilesVariable) {
     std::vector<std::string> notesFiles = cmExpandedList(*notesFilesVariable);
     this->CTest->GenerateNotesFile(notesFiles);
   }
 
-  cmProp extraFilesVariable =
+  cmValue extraFilesVariable =
     this->Makefile->GetDefinition("CTEST_EXTRA_SUBMIT_FILES");
   if (extraFilesVariable) {
     std::vector<std::string> extraFiles = cmExpandedList(*extraFilesVariable);
@@ -119,15 +119,15 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
     handler->SetHttpHeaders(this->HttpHeaders);
   }
 
-  handler->SetOption("RetryDelay", this->RetryDelay.c_str());
-  handler->SetOption("RetryCount", this->RetryCount.c_str());
+  handler->SetOption("RetryDelay", this->RetryDelay);
+  handler->SetOption("RetryCount", this->RetryCount);
   handler->SetOption("InternalTest", this->InternalTest ? "ON" : "OFF");
 
   handler->SetQuiet(this->Quiet);
 
   if (this->CDashUpload) {
-    handler->SetOption("CDashUploadFile", this->CDashUploadFile.c_str());
-    handler->SetOption("CDashUploadType", this->CDashUploadType.c_str());
+    handler->SetOption("CDashUploadFile", this->CDashUploadFile);
+    handler->SetOption("CDashUploadType", this->CDashUploadType);
   }
   return handler;
 }

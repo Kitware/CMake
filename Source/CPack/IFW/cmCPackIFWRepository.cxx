@@ -7,6 +7,7 @@
 #include "cmCPackIFWGenerator.h"
 #include "cmGeneratedFileStream.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 #include "cmXMLParser.h"
 #include "cmXMLWriter.h"
 
@@ -55,22 +56,22 @@ bool cmCPackIFWRepository::ConfigureFromOptions()
   }
 
   // Url
-  if (const char* url = this->GetOption(prefix + "URL")) {
-    this->Url = url;
+  if (cmValue url = this->GetOption(prefix + "URL")) {
+    this->Url = *url;
   } else {
     this->Url.clear();
   }
 
   // Old url
-  if (const char* oldUrl = this->GetOption(prefix + "OLD_URL")) {
-    this->OldUrl = oldUrl;
+  if (cmValue oldUrl = this->GetOption(prefix + "OLD_URL")) {
+    this->OldUrl = *oldUrl;
   } else {
     this->OldUrl.clear();
   }
 
   // New url
-  if (const char* newUrl = this->GetOption(prefix + "NEW_URL")) {
-    this->NewUrl = newUrl;
+  if (cmValue newUrl = this->GetOption(prefix + "NEW_URL")) {
+    this->NewUrl = *newUrl;
   } else {
     this->NewUrl.clear();
   }
@@ -83,22 +84,22 @@ bool cmCPackIFWRepository::ConfigureFromOptions()
   }
 
   // Username
-  if (const char* username = this->GetOption(prefix + "USERNAME")) {
-    this->Username = username;
+  if (cmValue username = this->GetOption(prefix + "USERNAME")) {
+    this->Username = *username;
   } else {
     this->Username.clear();
   }
 
   // Password
-  if (const char* password = this->GetOption(prefix + "PASSWORD")) {
-    this->Password = password;
+  if (cmValue password = this->GetOption(prefix + "PASSWORD")) {
+    this->Password = *password;
   } else {
     this->Password.clear();
   }
 
   // DisplayName
-  if (const char* displayName = this->GetOption(prefix + "DISPLAY_NAME")) {
-    this->DisplayName = displayName;
+  if (cmValue displayName = this->GetOption(prefix + "DISPLAY_NAME")) {
+    this->DisplayName = *displayName;
   } else {
     this->DisplayName.clear();
   }

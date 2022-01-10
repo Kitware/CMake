@@ -140,7 +140,7 @@ const char* CCONV cmGetCurrentOutputDirectory(void* arg)
 const char* CCONV cmGetDefinition(void* arg, const char* def)
 {
   cmMakefile* mf = static_cast<cmMakefile*>(arg);
-  return cmToCStr(mf->GetDefinition(def));
+  return mf->GetDefinition(def).GetCStr();
 }
 
 int CCONV cmIsOn(void* arg, const char* name)
@@ -173,7 +173,7 @@ void CCONV cmAddLinkDirectoryForTarget(void* arg, const char* tgt,
       std::string(tgt) + " for directory " + std::string(d));
     return;
   }
-  t->InsertLinkDirectory(d, mf->GetBacktrace());
+  t->InsertLinkDirectory(BT<std::string>(d, mf->GetBacktrace()));
 }
 
 void CCONV cmAddExecutable(void* arg, const char* exename, int numSrcs,
@@ -592,12 +592,12 @@ const char* CCONV cmSourceFileGetProperty(void* arg, const char* prop)
 {
   cmCPluginAPISourceFile* sf = static_cast<cmCPluginAPISourceFile*>(arg);
   if (cmSourceFile* rsf = sf->RealSourceFile) {
-    return cmToCStr(rsf->GetProperty(prop));
+    return rsf->GetProperty(prop).GetCStr();
   }
   if (!strcmp(prop, "LOCATION")) {
     return sf->FullPath.c_str();
   }
-  return cmToCStr(sf->Properties.GetPropertyValue(prop));
+  return sf->Properties.GetPropertyValue(prop).GetCStr();
 }
 
 int CCONV cmSourceFileGetPropertyAsBool(void* arg, const char* prop)

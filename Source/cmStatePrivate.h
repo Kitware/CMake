@@ -67,20 +67,15 @@ struct cmStateDetail::BuildsystemDirectoryStateType
   std::string Location;
   std::string OutputLocation;
 
-  std::vector<std::string> IncludeDirectories;
-  std::vector<cmListFileBacktrace> IncludeDirectoryBacktraces;
+  std::vector<BT<std::string>> IncludeDirectories;
 
-  std::vector<std::string> CompileDefinitions;
-  std::vector<cmListFileBacktrace> CompileDefinitionsBacktraces;
+  std::vector<BT<std::string>> CompileDefinitions;
 
-  std::vector<std::string> CompileOptions;
-  std::vector<cmListFileBacktrace> CompileOptionsBacktraces;
+  std::vector<BT<std::string>> CompileOptions;
 
-  std::vector<std::string> LinkOptions;
-  std::vector<cmListFileBacktrace> LinkOptionsBacktraces;
+  std::vector<BT<std::string>> LinkOptions;
 
-  std::vector<std::string> LinkDirectories;
-  std::vector<cmListFileBacktrace> LinkDirectoriesBacktraces;
+  std::vector<BT<std::string>> LinkDirectories;
 
   std::vector<std::string> NormalTargetNames;
   std::vector<std::string> ImportedTargetNames;

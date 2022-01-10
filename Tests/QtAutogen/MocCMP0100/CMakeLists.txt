@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.16)
 project(MocCMP0100)
 include("../AutogenCoreTest.cmake")
 

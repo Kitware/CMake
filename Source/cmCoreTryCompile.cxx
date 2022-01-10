@@ -19,11 +19,11 @@
 #include "cmMessageType.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
-#include "cmProperty.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
+#include "cmValue.h"
 #include "cmVersion.h"
 #include "cmake.h"
 
@@ -246,7 +246,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
   this->SrcFileSignature = true;
 
   cmStateEnums::TargetType targetType = cmStateEnums::EXECUTABLE;
-  cmProp tt = this->Makefile->GetDefinition("CMAKE_TRY_COMPILE_TARGET_TYPE");
+  cmValue tt = this->Makefile->GetDefinition("CMAKE_TRY_COMPILE_TARGET_TYPE");
   if (!isTryRun && cmNonempty(tt)) {
     if (*tt == cmState::GetTargetTypeName(cmStateEnums::EXECUTABLE)) {
       targetType = cmStateEnums::EXECUTABLE;
@@ -540,7 +540,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       return -1;
     }
 
-    cmProp def = this->Makefile->GetDefinition("CMAKE_MODULE_PATH");
+    cmValue def = this->Makefile->GetDefinition("CMAKE_MODULE_PATH");
     fprintf(fout, "cmake_minimum_required(VERSION %u.%u.%u.%u)\n",
             cmVersion::GetMajorVersion(), cmVersion::GetMinorVersion(),
             cmVersion::GetPatchVersion(), cmVersion::GetTweakVersion());
@@ -549,7 +549,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     }
 
     /* Set MSVC runtime library policy to match our selection.  */
-    if (cmProp msvcRuntimeLibraryDefault =
+    if (cmValue msvcRuntimeLibraryDefault =
           this->Makefile->GetDefinition(kCMAKE_MSVC_RUNTIME_LIBRARY_DEFAULT)) {
       fprintf(fout, "cmake_policy(SET CMP0091 %s)\n",
               !msvcRuntimeLibraryDefault->empty() ? "NEW" : "OLD");
@@ -564,7 +564,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     }
 
     /* Set ARMClang cpu/arch policy to match outer project.  */
-    if (cmProp cmp0123 =
+    if (cmValue cmp0123 =
           this->Makefile->GetDefinition(kCMAKE_ARMClang_CMP0123)) {
       fprintf(fout, "cmake_policy(SET CMP0123 %s)\n",
               *cmp0123 == "NEW"_s ? "NEW" : "OLD");
@@ -582,11 +582,11 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       projectLangs += " " + li;
       std::string rulesOverrideBase = "CMAKE_USER_MAKE_RULES_OVERRIDE";
       std::string rulesOverrideLang = cmStrCat(rulesOverrideBase, "_", li);
-      if (cmProp rulesOverridePath =
+      if (cmValue rulesOverridePath =
             this->Makefile->GetDefinition(rulesOverrideLang)) {
         fprintf(fout, "set(%s \"%s\")\n", rulesOverrideLang.c_str(),
                 rulesOverridePath->c_str());
-      } else if (cmProp rulesOverridePath2 =
+      } else if (cmValue rulesOverridePath2 =
                    this->Makefile->GetDefinition(rulesOverrideBase)) {
         fprintf(fout, "set(%s \"%s\")\n", rulesOverrideBase.c_str(),
                 rulesOverridePath2->c_str());
@@ -604,9 +604,9 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     fprintf(fout, "set(CMAKE_VERBOSE_MAKEFILE 1)\n");
     for (std::string const& li : testLangs) {
       std::string langFlags = "CMAKE_" + li + "_FLAGS";
-      cmProp flags = this->Makefile->GetDefinition(langFlags);
+      cmValue flags = this->Makefile->GetDefinition(langFlags);
       fprintf(fout, "set(CMAKE_%s_FLAGS %s)\n", li.c_str(),
-              cmOutputConverter::EscapeForCMake(cmToCStrSafe(flags)).c_str());
+              cmOutputConverter::EscapeForCMake(*flags).c_str());
       fprintf(fout,
               "set(CMAKE_%s_FLAGS \"${CMAKE_%s_FLAGS}"
               " ${COMPILE_DEFINITIONS}\")\n",
@@ -626,6 +626,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
           /* clang-format on */
           this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
         }
+        CM_FALLTHROUGH;
       case cmPolicies::OLD:
         // OLD behavior is to do nothing.
         break;
@@ -643,10 +644,9 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
         for (std::string const& li : testLangs) {
           std::string const langFlagsCfg =
             cmStrCat("CMAKE_", li, "_FLAGS_", cfg);
-          cmProp flagsCfg = this->Makefile->GetDefinition(langFlagsCfg);
-          fprintf(
-            fout, "set(%s %s)\n", langFlagsCfg.c_str(),
-            cmOutputConverter::EscapeForCMake(cmToCStrSafe(flagsCfg)).c_str());
+          cmValue flagsCfg = this->Makefile->GetDefinition(langFlagsCfg);
+          fprintf(fout, "set(%s %s)\n", langFlagsCfg.c_str(),
+                  cmOutputConverter::EscapeForCMake(*flagsCfg).c_str());
         }
       } break;
     }
@@ -664,6 +664,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
           /* clang-format on */
           this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
         }
+        CM_FALLTHROUGH;
       case cmPolicies::OLD:
         // OLD behavior is to do nothing.
         break;
@@ -676,11 +677,10 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       case cmPolicies::NEW:
         // NEW behavior is to pass linker flags.
         {
-          cmProp exeLinkFlags =
+          cmValue exeLinkFlags =
             this->Makefile->GetDefinition("CMAKE_EXE_LINKER_FLAGS");
           fprintf(fout, "set(CMAKE_EXE_LINKER_FLAGS %s)\n",
-                  cmOutputConverter::EscapeForCMake(cmToCStrSafe(exeLinkFlags))
-                    .c_str());
+                  cmOutputConverter::EscapeForCMake(*exeLinkFlags).c_str());
         }
         break;
     }
@@ -762,7 +762,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       vars.insert(kCMAKE_WARN_DEPRECATED);
       vars.emplace("CMAKE_MSVC_RUNTIME_LIBRARY"_s);
 
-      if (cmProp varListStr = this->Makefile->GetDefinition(
+      if (cmValue varListStr = this->Makefile->GetDefinition(
             kCMAKE_TRY_COMPILE_PLATFORM_VARIABLES)) {
         std::vector<std::string> varList = cmExpandedList(*varListStr);
         vars.insert(varList.begin(), varList.end());
@@ -801,7 +801,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
          cmLocalGenerator doesn't allow building for "the other"
          architecture only via CMAKE_OSX_ARCHITECTURES.
          */
-      if (cmProp tcArchs = this->Makefile->GetDefinition(
+      if (cmValue tcArchs = this->Makefile->GetDefinition(
             kCMAKE_TRY_COMPILE_OSX_ARCHITECTURES)) {
         vars.erase(kCMAKE_OSX_ARCHITECTURES);
         std::string flag = "-DCMAKE_OSX_ARCHITECTURES=" + *tcArchs;
@@ -809,7 +809,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       }
 
       for (std::string const& var : vars) {
-        if (cmProp val = this->Makefile->GetDefinition(var)) {
+        if (cmValue val = this->Makefile->GetDefinition(var)) {
           std::string flag = "-D" + var + "=" + *val;
           cmakeFlags.push_back(std::move(flag));
         }
@@ -880,6 +880,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
           this->Makefile->IssueMessage(
             MessageType::FATAL_ERROR,
             cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0067));
+          break;
         case cmPolicies::NEW:
           // NEW behavior is to honor the language standard variables.
           // We already initialized honorStandard to true.
@@ -954,7 +955,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
   if (this->Makefile->GetState()->UseGhsMultiIDE()) {
     // Forward the GHS variables to the inner project cache.
     for (std::string const& var : ghs_platform_vars) {
-      if (cmProp val = this->Makefile->GetDefinition(var)) {
+      if (cmValue val = this->Makefile->GetDefinition(var)) {
         std::string flag = "-D" + var + "=" + "'" + *val + "'";
         cmakeFlags.push_back(std::move(flag));
       }
@@ -1096,7 +1097,7 @@ void cmCoreTryCompile::FindOutputFile(const std::string& targetName,
   std::vector<std::string> searchDirs;
   searchDirs.emplace_back();
 
-  cmProp config =
+  cmValue config =
     this->Makefile->GetDefinition("CMAKE_TRY_COMPILE_CONFIGURATION");
   // if a config was specified try that first
   if (cmNonempty(config)) {

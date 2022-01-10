@@ -9,12 +9,12 @@
 #include "cmDuration.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
-#include "cmProperty.h"
 #include "cmRange.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 #include "cmake.h"
 
 class cmExecutionStatus;
@@ -162,7 +162,7 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv,
       if (!this->OutputVariable.empty()) {
         // if the TryCompileCore saved output in this outputVariable then
         // prepend that output to this output
-        cmProp compileOutput =
+        cmValue compileOutput =
           this->Makefile->GetDefinition(this->OutputVariable);
         if (compileOutput) {
           runOutputContents = *compileOutput + runOutputContents;
@@ -260,7 +260,7 @@ void cmTryRunCommand::DoNotRunExecutable(const std::string& runArgs,
                                        comment.c_str(), cmStateEnums::STRING);
 
     cmState* state = this->Makefile->GetState();
-    cmProp existingValue = state->GetCacheEntryValue(this->RunResultVariable);
+    cmValue existingValue = state->GetCacheEntryValue(this->RunResultVariable);
     if (existingValue) {
       state->SetCacheEntryProperty(this->RunResultVariable, "ADVANCED", "1");
     }
@@ -282,7 +282,7 @@ void cmTryRunCommand::DoNotRunExecutable(const std::string& runArgs,
         internalRunOutputName, "PLEASE_FILL_OUT-NOTFOUND", comment.c_str(),
         cmStateEnums::STRING);
       cmState* state = this->Makefile->GetState();
-      cmProp existing = state->GetCacheEntryValue(internalRunOutputName);
+      cmValue existing = state->GetCacheEntryValue(internalRunOutputName);
       if (existing) {
         state->SetCacheEntryProperty(internalRunOutputName, "ADVANCED", "1");
       }

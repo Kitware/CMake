@@ -19,7 +19,9 @@
 #include "cmState.h"
 #include "cmStatePrivate.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 static std::string const kBINARY_DIR = "BINARY_DIR";
 static std::string const kBUILDSYSTEM_TARGETS = "BUILDSYSTEM_TARGETS";
@@ -63,7 +65,7 @@ cmStateDirectory::cmStateDirectory(
 }
 
 template <typename T, typename U>
-cmStringRange GetPropertyContent(T const& content, U contentEndPosition)
+cmBTStringRange GetPropertyContent(T const& content, U contentEndPosition)
 {
   auto end = content.begin() + contentEndPosition;
 
@@ -73,88 +75,59 @@ cmStringRange GetPropertyContent(T const& content, U contentEndPosition)
   return cmMakeRange(rbegin.base(), end);
 }
 
-template <typename T, typename U, typename V>
-cmBacktraceRange GetPropertyBacktraces(T const& content, U const& backtraces,
-                                       V contentEndPosition)
+template <typename T, typename U>
+void AppendEntry(T& content, U& endContentPosition,
+                 const BT<std::string>& value)
 {
-  auto entryEnd = content.begin() + contentEndPosition;
-
-  auto rbegin = cm::make_reverse_iterator(entryEnd);
-  rbegin = std::find(rbegin, content.rend(), cmPropertySentinal);
-
-  auto it = backtraces.begin() + std::distance(content.begin(), rbegin.base());
-
-  auto end = backtraces.end();
-  return cmMakeRange(it, end);
-}
-
-template <typename T, typename U, typename V>
-void AppendEntry(T& content, U& backtraces, V& endContentPosition,
-                 const std::string& value, const cmListFileBacktrace& lfbt)
-{
-  if (value.empty()) {
+  if (value.Value.empty()) {
     return;
   }
 
   assert(endContentPosition == content.size());
 
   content.push_back(value);
-  backtraces.push_back(lfbt);
 
   endContentPosition = content.size();
 }
 
-template <typename T, typename U, typename V>
-void SetContent(T& content, U& backtraces, V& endContentPosition,
-                const std::string& vec, const cmListFileBacktrace& lfbt)
+template <typename T, typename U>
+void SetContent(T& content, U& endContentPosition, const BT<std::string>& vec)
 {
   assert(endContentPosition == content.size());
 
   content.resize(content.size() + 2);
-  backtraces.resize(backtraces.size() + 2);
 
   content.back() = vec;
-  backtraces.back() = lfbt;
 
   endContentPosition = content.size();
 }
 
-template <typename T, typename U, typename V>
-void ClearContent(T& content, U& backtraces, V& endContentPosition)
+template <typename T, typename U>
+void ClearContent(T& content, U& endContentPosition)
 {
   assert(endContentPosition == content.size());
 
   content.resize(content.size() + 1);
-  backtraces.resize(backtraces.size() + 1);
 
   endContentPosition = content.size();
 }
 
-cmStringRange cmStateDirectory::GetIncludeDirectoriesEntries() const
+cmBTStringRange cmStateDirectory::GetIncludeDirectoriesEntries() const
 {
   return GetPropertyContent(
     this->DirectoryState->IncludeDirectories,
     this->Snapshot_.Position->IncludeDirectoryPosition);
 }
 
-cmBacktraceRange cmStateDirectory::GetIncludeDirectoriesEntryBacktraces() const
-{
-  return GetPropertyBacktraces(
-    this->DirectoryState->IncludeDirectories,
-    this->DirectoryState->IncludeDirectoryBacktraces,
-    this->Snapshot_.Position->IncludeDirectoryPosition);
-}
-
 void cmStateDirectory::AppendIncludeDirectoriesEntry(
-  const std::string& vec, const cmListFileBacktrace& lfbt)
+  const BT<std::string>& vec)
 {
   AppendEntry(this->DirectoryState->IncludeDirectories,
-              this->DirectoryState->IncludeDirectoryBacktraces,
-              this->Snapshot_.Position->IncludeDirectoryPosition, vec, lfbt);
+              this->Snapshot_.Position->IncludeDirectoryPosition, vec);
 }
 
 void cmStateDirectory::PrependIncludeDirectoriesEntry(
-  const std::string& vec, const cmListFileBacktrace& lfbt)
+  const BT<std::string>& vec)
 {
   auto entryEnd = this->DirectoryState->IncludeDirectories.begin() +
     this->Snapshot_.Position->IncludeDirectoryPosition;
@@ -164,167 +137,111 @@ void cmStateDirectory::PrependIncludeDirectoriesEntry(
   rbegin = std::find(rbegin, rend, cmPropertySentinal);
 
   auto entryIt = rbegin.base();
-  auto entryBegin = this->DirectoryState->IncludeDirectories.begin();
-
-  auto btIt = this->DirectoryState->IncludeDirectoryBacktraces.begin() +
-    std::distance(entryBegin, entryIt);
 
   this->DirectoryState->IncludeDirectories.insert(entryIt, vec);
-  this->DirectoryState->IncludeDirectoryBacktraces.insert(btIt, lfbt);
 
   this->Snapshot_.Position->IncludeDirectoryPosition =
     this->DirectoryState->IncludeDirectories.size();
 }
 
-void cmStateDirectory::SetIncludeDirectories(const std::string& vec,
-                                             const cmListFileBacktrace& lfbt)
+void cmStateDirectory::SetIncludeDirectories(const BT<std::string>& vec)
 {
   SetContent(this->DirectoryState->IncludeDirectories,
-             this->DirectoryState->IncludeDirectoryBacktraces,
-             this->Snapshot_.Position->IncludeDirectoryPosition, vec, lfbt);
+             this->Snapshot_.Position->IncludeDirectoryPosition, vec);
 }
 
 void cmStateDirectory::ClearIncludeDirectories()
 {
   ClearContent(this->DirectoryState->IncludeDirectories,
-               this->DirectoryState->IncludeDirectoryBacktraces,
                this->Snapshot_.Position->IncludeDirectoryPosition);
 }
 
-cmStringRange cmStateDirectory::GetCompileDefinitionsEntries() const
+cmBTStringRange cmStateDirectory::GetCompileDefinitionsEntries() const
 {
   return GetPropertyContent(
     this->DirectoryState->CompileDefinitions,
     this->Snapshot_.Position->CompileDefinitionsPosition);
 }
 
-cmBacktraceRange cmStateDirectory::GetCompileDefinitionsEntryBacktraces() const
-{
-  return GetPropertyBacktraces(
-    this->DirectoryState->CompileDefinitions,
-    this->DirectoryState->CompileDefinitionsBacktraces,
-    this->Snapshot_.Position->CompileDefinitionsPosition);
-}
-
 void cmStateDirectory::AppendCompileDefinitionsEntry(
-  const std::string& vec, const cmListFileBacktrace& lfbt)
+  const BT<std::string>& vec)
 {
   AppendEntry(this->DirectoryState->CompileDefinitions,
-              this->DirectoryState->CompileDefinitionsBacktraces,
-              this->Snapshot_.Position->CompileDefinitionsPosition, vec, lfbt);
+              this->Snapshot_.Position->CompileDefinitionsPosition, vec);
 }
 
-void cmStateDirectory::SetCompileDefinitions(const std::string& vec,
-                                             const cmListFileBacktrace& lfbt)
+void cmStateDirectory::SetCompileDefinitions(const BT<std::string>& vec)
 {
   SetContent(this->DirectoryState->CompileDefinitions,
-             this->DirectoryState->CompileDefinitionsBacktraces,
-             this->Snapshot_.Position->CompileDefinitionsPosition, vec, lfbt);
+             this->Snapshot_.Position->CompileDefinitionsPosition, vec);
 }
 
 void cmStateDirectory::ClearCompileDefinitions()
 {
   ClearContent(this->DirectoryState->CompileDefinitions,
-               this->DirectoryState->CompileDefinitionsBacktraces,
                this->Snapshot_.Position->CompileDefinitionsPosition);
 }
 
-cmStringRange cmStateDirectory::GetCompileOptionsEntries() const
+cmBTStringRange cmStateDirectory::GetCompileOptionsEntries() const
 {
   return GetPropertyContent(this->DirectoryState->CompileOptions,
                             this->Snapshot_.Position->CompileOptionsPosition);
 }
 
-cmBacktraceRange cmStateDirectory::GetCompileOptionsEntryBacktraces() const
-{
-  return GetPropertyBacktraces(
-    this->DirectoryState->CompileOptions,
-    this->DirectoryState->CompileOptionsBacktraces,
-    this->Snapshot_.Position->CompileOptionsPosition);
-}
-
-void cmStateDirectory::AppendCompileOptionsEntry(
-  const std::string& vec, const cmListFileBacktrace& lfbt)
+void cmStateDirectory::AppendCompileOptionsEntry(const BT<std::string>& vec)
 {
   AppendEntry(this->DirectoryState->CompileOptions,
-              this->DirectoryState->CompileOptionsBacktraces,
-              this->Snapshot_.Position->CompileOptionsPosition, vec, lfbt);
+              this->Snapshot_.Position->CompileOptionsPosition, vec);
 }
 
-void cmStateDirectory::SetCompileOptions(const std::string& vec,
-                                         const cmListFileBacktrace& lfbt)
+void cmStateDirectory::SetCompileOptions(const BT<std::string>& vec)
 {
   SetContent(this->DirectoryState->CompileOptions,
-             this->DirectoryState->CompileOptionsBacktraces,
-             this->Snapshot_.Position->CompileOptionsPosition, vec, lfbt);
+             this->Snapshot_.Position->CompileOptionsPosition, vec);
 }
 
 void cmStateDirectory::ClearCompileOptions()
 {
   ClearContent(this->DirectoryState->CompileOptions,
-               this->DirectoryState->CompileOptionsBacktraces,
                this->Snapshot_.Position->CompileOptionsPosition);
 }
 
-cmStringRange cmStateDirectory::GetLinkOptionsEntries() const
+cmBTStringRange cmStateDirectory::GetLinkOptionsEntries() const
 {
   return GetPropertyContent(this->DirectoryState->LinkOptions,
                             this->Snapshot_.Position->LinkOptionsPosition);
 }
 
-cmBacktraceRange cmStateDirectory::GetLinkOptionsEntryBacktraces() const
-{
-  return GetPropertyBacktraces(this->DirectoryState->LinkOptions,
-                               this->DirectoryState->LinkOptionsBacktraces,
-                               this->Snapshot_.Position->LinkOptionsPosition);
-}
-
-void cmStateDirectory::AppendLinkOptionsEntry(const std::string& vec,
-                                              const cmListFileBacktrace& lfbt)
+void cmStateDirectory::AppendLinkOptionsEntry(const BT<std::string>& vec)
 {
   AppendEntry(this->DirectoryState->LinkOptions,
-              this->DirectoryState->LinkOptionsBacktraces,
-              this->Snapshot_.Position->LinkOptionsPosition, vec, lfbt);
+              this->Snapshot_.Position->LinkOptionsPosition, vec);
 }
 
-void cmStateDirectory::SetLinkOptions(const std::string& vec,
-                                      const cmListFileBacktrace& lfbt)
+void cmStateDirectory::SetLinkOptions(const BT<std::string>& vec)
 {
   SetContent(this->DirectoryState->LinkOptions,
-             this->DirectoryState->LinkOptionsBacktraces,
-             this->Snapshot_.Position->LinkOptionsPosition, vec, lfbt);
+             this->Snapshot_.Position->LinkOptionsPosition, vec);
 }
 
 void cmStateDirectory::ClearLinkOptions()
 {
   ClearContent(this->DirectoryState->LinkOptions,
-               this->DirectoryState->LinkOptionsBacktraces,
                this->Snapshot_.Position->LinkOptionsPosition);
 }
 
-cmStringRange cmStateDirectory::GetLinkDirectoriesEntries() const
+cmBTStringRange cmStateDirectory::GetLinkDirectoriesEntries() const
 {
   return GetPropertyContent(this->DirectoryState->LinkDirectories,
                             this->Snapshot_.Position->LinkDirectoriesPosition);
 }
 
-cmBacktraceRange cmStateDirectory::GetLinkDirectoriesEntryBacktraces() const
-{
-  return GetPropertyBacktraces(
-    this->DirectoryState->LinkDirectories,
-    this->DirectoryState->LinkDirectoriesBacktraces,
-    this->Snapshot_.Position->LinkDirectoriesPosition);
-}
-
-void cmStateDirectory::AppendLinkDirectoriesEntry(
-  const std::string& vec, const cmListFileBacktrace& lfbt)
+void cmStateDirectory::AppendLinkDirectoriesEntry(const BT<std::string>& vec)
 {
   AppendEntry(this->DirectoryState->LinkDirectories,
-              this->DirectoryState->LinkDirectoriesBacktraces,
-              this->Snapshot_.Position->LinkDirectoriesPosition, vec, lfbt);
+              this->Snapshot_.Position->LinkDirectoriesPosition, vec);
 }
-void cmStateDirectory::PrependLinkDirectoriesEntry(
-  const std::string& vec, const cmListFileBacktrace& lfbt)
+void cmStateDirectory::PrependLinkDirectoriesEntry(const BT<std::string>& vec)
 {
   auto entryEnd = this->DirectoryState->LinkDirectories.begin() +
     this->Snapshot_.Position->LinkDirectoriesPosition;
@@ -334,42 +251,35 @@ void cmStateDirectory::PrependLinkDirectoriesEntry(
   rbegin = std::find(rbegin, rend, cmPropertySentinal);
 
   auto entryIt = rbegin.base();
-  auto entryBegin = this->DirectoryState->LinkDirectories.begin();
-
-  auto btIt = this->DirectoryState->LinkDirectoriesBacktraces.begin() +
-    std::distance(entryBegin, entryIt);
 
   this->DirectoryState->LinkDirectories.insert(entryIt, vec);
-  this->DirectoryState->LinkDirectoriesBacktraces.insert(btIt, lfbt);
 
   this->Snapshot_.Position->LinkDirectoriesPosition =
     this->DirectoryState->LinkDirectories.size();
 }
 
-void cmStateDirectory::SetLinkDirectories(const std::string& vec,
-                                          const cmListFileBacktrace& lfbt)
+void cmStateDirectory::SetLinkDirectories(const BT<std::string>& vec)
 {
   SetContent(this->DirectoryState->LinkDirectories,
-             this->DirectoryState->LinkDirectoriesBacktraces,
-             this->Snapshot_.Position->LinkDirectoriesPosition, vec, lfbt);
+             this->Snapshot_.Position->LinkDirectoriesPosition, vec);
 }
 
 void cmStateDirectory::ClearLinkDirectories()
 {
   ClearContent(this->DirectoryState->LinkDirectories,
-               this->DirectoryState->LinkDirectoriesBacktraces,
                this->Snapshot_.Position->LinkDirectoriesPosition);
 }
 
-void cmStateDirectory::SetProperty(const std::string& prop, const char* value,
-                                   cmListFileBacktrace const& lfbt)
+template <typename ValueType>
+void cmStateDirectory::StoreProperty(const std::string& prop, ValueType value,
+                                     cmListFileBacktrace const& lfbt)
 {
   if (prop == "INCLUDE_DIRECTORIES") {
     if (!value) {
       this->ClearIncludeDirectories();
       return;
     }
-    this->SetIncludeDirectories(value, lfbt);
+    this->SetIncludeDirectories(BT<std::string>(value, lfbt));
     return;
   }
   if (prop == "COMPILE_OPTIONS") {
@@ -377,7 +287,7 @@ void cmStateDirectory::SetProperty(const std::string& prop, const char* value,
       this->ClearCompileOptions();
       return;
     }
-    this->SetCompileOptions(value, lfbt);
+    this->SetCompileOptions(BT<std::string>(value, lfbt));
     return;
   }
   if (prop == "COMPILE_DEFINITIONS") {
@@ -385,7 +295,7 @@ void cmStateDirectory::SetProperty(const std::string& prop, const char* value,
       this->ClearCompileDefinitions();
       return;
     }
-    this->SetCompileDefinitions(value, lfbt);
+    this->SetCompileDefinitions(BT<std::string>(value, lfbt));
     return;
   }
   if (prop == "LINK_OPTIONS") {
@@ -393,7 +303,7 @@ void cmStateDirectory::SetProperty(const std::string& prop, const char* value,
       this->ClearLinkOptions();
       return;
     }
-    this->SetLinkOptions(value, lfbt);
+    this->SetLinkOptions(BT<std::string>(value, lfbt));
     return;
   }
   if (prop == "LINK_DIRECTORIES") {
@@ -401,11 +311,22 @@ void cmStateDirectory::SetProperty(const std::string& prop, const char* value,
       this->ClearLinkDirectories();
       return;
     }
-    this->SetLinkDirectories(value, lfbt);
+    this->SetLinkDirectories(BT<std::string>(value, lfbt));
     return;
   }
 
   this->DirectoryState->Properties.SetProperty(prop, value);
+}
+
+void cmStateDirectory::SetProperty(const std::string& prop, const char* value,
+                                   cmListFileBacktrace const& lfbt)
+{
+  this->StoreProperty(prop, value, lfbt);
+}
+void cmStateDirectory::SetProperty(const std::string& prop, cmValue value,
+                                   cmListFileBacktrace const& lfbt)
+{
+  this->StoreProperty(prop, value, lfbt);
 }
 
 void cmStateDirectory::AppendProperty(const std::string& prop,
@@ -413,54 +334,55 @@ void cmStateDirectory::AppendProperty(const std::string& prop,
                                       cmListFileBacktrace const& lfbt)
 {
   if (prop == "INCLUDE_DIRECTORIES") {
-    this->AppendIncludeDirectoriesEntry(value, lfbt);
+    this->AppendIncludeDirectoriesEntry(BT<std::string>(value, lfbt));
     return;
   }
   if (prop == "COMPILE_OPTIONS") {
-    this->AppendCompileOptionsEntry(value, lfbt);
+    this->AppendCompileOptionsEntry(BT<std::string>(value, lfbt));
     return;
   }
   if (prop == "COMPILE_DEFINITIONS") {
-    this->AppendCompileDefinitionsEntry(value, lfbt);
+    this->AppendCompileDefinitionsEntry(BT<std::string>(value, lfbt));
     return;
   }
   if (prop == "LINK_OPTIONS") {
-    this->AppendLinkOptionsEntry(value, lfbt);
+    this->AppendLinkOptionsEntry(BT<std::string>(value, lfbt));
     return;
   }
   if (prop == "LINK_DIRECTORIES") {
-    this->AppendLinkDirectoriesEntry(value, lfbt);
+    this->AppendLinkDirectoriesEntry(BT<std::string>(value, lfbt));
     return;
   }
 
   this->DirectoryState->Properties.AppendProperty(prop, value, asString);
 }
 
-cmProp cmStateDirectory::GetProperty(const std::string& prop) const
+cmValue cmStateDirectory::GetProperty(const std::string& prop) const
 {
   const bool chain =
     this->Snapshot_.State->IsPropertyChained(prop, cmProperty::DIRECTORY);
   return this->GetProperty(prop, chain);
 }
 
-cmProp cmStateDirectory::GetProperty(const std::string& prop, bool chain) const
+cmValue cmStateDirectory::GetProperty(const std::string& prop,
+                                      bool chain) const
 {
   static std::string output;
   output.clear();
   if (prop == "PARENT_DIRECTORY") {
     cmStateSnapshot parent = this->Snapshot_.GetBuildsystemDirectoryParent();
     if (parent.IsValid()) {
-      return &parent.GetDirectory().GetCurrentSource();
+      return cmValue(parent.GetDirectory().GetCurrentSource());
     }
-    return &output;
+    return cmValue(output);
   }
   if (prop == kBINARY_DIR) {
     output = this->GetCurrentBinary();
-    return &output;
+    return cmValue(output);
   }
   if (prop == kSOURCE_DIR) {
     output = this->GetCurrentSource();
-    return &output;
+    return cmValue(output);
   }
   if (prop == kSUBDIRECTORIES) {
     std::vector<std::string> child_dirs;
@@ -471,15 +393,15 @@ cmProp cmStateDirectory::GetProperty(const std::string& prop, bool chain) const
       child_dirs.push_back(ci.GetDirectory().GetCurrentSource());
     }
     output = cmJoin(child_dirs, ";");
-    return &output;
+    return cmValue(output);
   }
   if (prop == kBUILDSYSTEM_TARGETS) {
     output = cmJoin(this->DirectoryState->NormalTargetNames, ";");
-    return &output;
+    return cmValue(output);
   }
   if (prop == "IMPORTED_TARGETS"_s) {
     output = cmJoin(this->DirectoryState->ImportedTargetNames, ";");
-    return &output;
+    return cmValue(output);
   }
 
   if (prop == "LISTFILE_STACK") {
@@ -491,41 +413,41 @@ cmProp cmStateDirectory::GetProperty(const std::string& prop, bool chain) const
     }
     std::reverse(listFiles.begin(), listFiles.end());
     output = cmJoin(listFiles, ";");
-    return &output;
+    return cmValue(output);
   }
   if (prop == "CACHE_VARIABLES") {
     output = cmJoin(this->Snapshot_.State->GetCacheEntryKeys(), ";");
-    return &output;
+    return cmValue(output);
   }
   if (prop == "VARIABLES") {
     std::vector<std::string> res = this->Snapshot_.ClosureKeys();
     cm::append(res, this->Snapshot_.State->GetCacheEntryKeys());
     std::sort(res.begin(), res.end());
     output = cmJoin(res, ";");
-    return &output;
+    return cmValue(output);
   }
   if (prop == "INCLUDE_DIRECTORIES") {
     output = cmJoin(this->GetIncludeDirectoriesEntries(), ";");
-    return &output;
+    return cmValue(output);
   }
   if (prop == "COMPILE_OPTIONS") {
     output = cmJoin(this->GetCompileOptionsEntries(), ";");
-    return &output;
+    return cmValue(output);
   }
   if (prop == "COMPILE_DEFINITIONS") {
     output = cmJoin(this->GetCompileDefinitionsEntries(), ";");
-    return &output;
+    return cmValue(output);
   }
   if (prop == "LINK_OPTIONS") {
     output = cmJoin(this->GetLinkOptionsEntries(), ";");
-    return &output;
+    return cmValue(output);
   }
   if (prop == "LINK_DIRECTORIES") {
     output = cmJoin(this->GetLinkDirectoriesEntries(), ";");
-    return &output;
+    return cmValue(output);
   }
 
-  cmProp retVal = this->DirectoryState->Properties.GetPropertyValue(prop);
+  cmValue retVal = this->DirectoryState->Properties.GetPropertyValue(prop);
   if (!retVal && chain) {
     cmStateSnapshot parentSnapshot =
       this->Snapshot_.GetBuildsystemDirectoryParent();

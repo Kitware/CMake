@@ -14,10 +14,10 @@
 #include "cmCommandArgumentLexer.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
-#include "cmProperty.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 int cmCommandArgument_yyparse(yyscan_t yyscanner);
 //
@@ -73,7 +73,8 @@ const char* cmCommandArgumentParserHelper::ExpandSpecialVariable(
     return "";
   }
   if (strcmp(key, "CACHE") == 0) {
-    if (cmProp c = this->Makefile->GetState()->GetInitializedCacheValue(var)) {
+    if (cmValue c =
+          this->Makefile->GetState()->GetInitializedCacheValue(var)) {
       if (this->EscapeQuotes) {
         return this->AddString(cmEscapeQuotes(*c));
       }
@@ -103,7 +104,7 @@ const char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
     }
     return this->AddString(line);
   }
-  cmProp value = this->Makefile->GetDefinition(var);
+  cmValue value = this->Makefile->GetDefinition(var);
   if (!value) {
     this->Makefile->MaybeWarnUninitialized(var, this->FileName);
     if (!this->RemoveEmpty) {
@@ -113,7 +114,7 @@ const char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
   if (this->EscapeQuotes && value) {
     return this->AddString(cmEscapeQuotes(*value));
   }
-  return this->AddString(cmToCStrSafe(value));
+  return this->AddString(value);
 }
 
 const char* cmCommandArgumentParserHelper::ExpandVariableForAt(const char* var)

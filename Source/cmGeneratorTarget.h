@@ -19,8 +19,8 @@
 #include "cmLinkItem.h"
 #include "cmListFileCache.h"
 #include "cmPolicies.h"
-#include "cmProperty.h"
 #include "cmStateTypes.h"
+#include "cmValue.h"
 
 class cmComputeLinkInformation;
 class cmCustomCommand;
@@ -89,7 +89,7 @@ public:
 
   std::vector<std::string> GetPropertyKeys() const;
   //! Might return a nullptr if the property is not set or invalid
-  cmProp GetProperty(const std::string& prop) const;
+  cmValue GetProperty(const std::string& prop) const;
   //! Always returns a valid pointer
   std::string const& GetSafeProperty(std::string const& prop) const;
   bool GetPropertyAsBool(const std::string& prop) const;
@@ -163,10 +163,10 @@ public:
   BTs<std::string> const* GetLanguageStandardProperty(
     std::string const& lang, std::string const& config) const;
 
-  cmProp GetLanguageStandard(std::string const& lang,
-                             std::string const& config) const;
+  cmValue GetLanguageStandard(std::string const& lang,
+                              std::string const& config) const;
 
-  cmProp GetLanguageExtensions(std::string const& lang) const;
+  cmValue GetLanguageExtensions(std::string const& lang) const;
 
   bool GetLanguageStandardRequired(std::string const& lang) const;
 
@@ -187,8 +187,8 @@ public:
 
   void ComputeObjectMapping();
 
-  cmProp GetFeature(const std::string& feature,
-                    const std::string& config) const;
+  cmValue GetFeature(const std::string& feature,
+                     const std::string& config) const;
 
   const char* GetLinkPIEProperty(const std::string& config) const;
 
@@ -221,7 +221,7 @@ public:
     {
       this->PreviousState = target.SetDeviceLink(true);
     }
-    ~DeviceLinkSetter() { this->Target.SetDeviceLink(this->PreviousState); };
+    ~DeviceLinkSetter() { this->Target.SetDeviceLink(this->PreviousState); }
 
   private:
     cmGeneratorTarget& Target;
@@ -409,10 +409,8 @@ public:
   TargetOrString ResolveTargetReference(std::string const& name,
                                         cmLocalGenerator const* lg) const;
 
-  cmLinkItem ResolveLinkItem(std::string const& name,
-                             cmListFileBacktrace const& bt) const;
-  cmLinkItem ResolveLinkItem(std::string const& name,
-                             cmListFileBacktrace const& bt,
+  cmLinkItem ResolveLinkItem(BT<std::string> const& name) const;
+  cmLinkItem ResolveLinkItem(BT<std::string> const& name,
                              cmLocalGenerator const* lg) const;
 
   // Compute the set of languages compiled by the target.  This is
@@ -497,6 +495,9 @@ public:
                       const std::string& language) const;
   std::vector<BT<std::string>> GetLinkOptions(
     std::string const& config, std::string const& language) const;
+
+  std::vector<BT<std::string>>& ResolveLinkerWrapper(
+    std::vector<BT<std::string>>& result, const std::string& language) const;
 
   void GetStaticLibraryLinkOptions(std::vector<std::string>& result,
                                    const std::string& config,
@@ -832,8 +833,9 @@ public:
                                     std::string const& config) const;
 
   std::string GetFortranModuleDirectory(std::string const& working_dir) const;
+  bool IsFortranBuildingInstrinsicModules() const;
 
-  const std::string& GetSourcesProperty() const;
+  cmValue GetSourcesProperty() const;
 
   void AddISPCGeneratedHeader(std::string const& header,
                               std::string const& config);
@@ -864,6 +866,11 @@ private:
   mutable std::map<cmSourceFile const*, std::string> Objects;
   std::set<cmSourceFile const*> ExplicitObjectName;
 
+  using TargetPtrToBoolMap = std::unordered_map<cmTarget*, bool>;
+  mutable std::unordered_map<std::string, TargetPtrToBoolMap>
+    MacOSXRpathInstallNameDirCache;
+  bool DetermineHasMacOSXRpathInstallNameDir(const std::string& config) const;
+
   // "config/language" is the key
   mutable std::map<std::string, std::vector<std::string>> SystemIncludesCache;
 
@@ -877,12 +884,12 @@ private:
 
   bool NeedImportLibraryName(std::string const& config) const;
 
-  cmProp GetFilePrefixInternal(std::string const& config,
-                               cmStateEnums::ArtifactType artifact,
-                               const std::string& language = "") const;
-  cmProp GetFileSuffixInternal(std::string const& config,
-                               cmStateEnums::ArtifactType artifact,
-                               const std::string& language = "") const;
+  cmValue GetFilePrefixInternal(std::string const& config,
+                                cmStateEnums::ArtifactType artifact,
+                                const std::string& language = "") const;
+  cmValue GetFileSuffixInternal(std::string const& config,
+                                cmStateEnums::ArtifactType artifact,
+                                const std::string& language = "") const;
 
   std::string GetFullNameInternal(const std::string& config,
                                   cmStateEnums::ArtifactType artifact) const;
@@ -901,8 +908,7 @@ private:
 
   void ComputeVersionedName(std::string& vName, std::string const& prefix,
                             std::string const& base, std::string const& suffix,
-                            std::string const& name,
-                            const char* version) const;
+                            std::string const& name, cmValue version) const;
 
   struct CompatibleInterfacesBase
   {
@@ -1037,11 +1043,8 @@ private:
                        std::string const& config,
                        const cmGeneratorTarget* headTarget,
                        bool usage_requirements_only,
-                       std::vector<cmLinkItem>& items,
-                       std::vector<cmLinkItem>& objects,
-                       bool& hadHeadSensitiveCondition,
-                       bool& hadContextSensitiveCondition,
-                       bool& hadLinkLanguageSensitiveCondition) const;
+                       cmLinkInterface& iface) const;
+
   struct LookupLinkItemScope
   {
     cmLocalGenerator const* LG;
@@ -1113,8 +1116,8 @@ private:
 
   mutable std::map<std::string, BTs<std::string>> LanguageStandardMap;
 
-  cmProp GetPropertyWithPairedLanguageSupport(std::string const& lang,
-                                              const char* suffix) const;
+  cmValue GetPropertyWithPairedLanguageSupport(std::string const& lang,
+                                               const char* suffix) const;
 
   void ComputeLinkImplementationRuntimeLibraries(
     const std::string& config, cmOptionalLinkImplementation& impl) const;

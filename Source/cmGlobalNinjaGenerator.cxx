@@ -35,7 +35,6 @@
 #include "cmMessageType.h"
 #include "cmNinjaLinkLineComputer.h"
 #include "cmOutputConverter.h"
-#include "cmProperty.h"
 #include "cmRange.h"
 #include "cmScanDepFormat.h"
 #include "cmState.h"
@@ -46,6 +45,7 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetDepend.h"
+#include "cmValue.h"
 #include "cmVersion.h"
 #include "cmake.h"
 
@@ -382,7 +382,7 @@ void cmGlobalNinjaGenerator::WriteCustomCommandBuild(
     if (restat) {
       vars["restat"] = "1";
     }
-    if (uses_terminal && this->SupportsConsolePool()) {
+    if (uses_terminal && this->SupportsDirectConsole()) {
       vars["pool"] = "console";
     } else if (!job_pool.empty()) {
       vars["pool"] = job_pool;
@@ -558,18 +558,14 @@ void cmGlobalNinjaGenerator::GetDocumentation(cmDocumentationEntry& entry)
 void cmGlobalNinjaGenerator::Generate()
 {
   // Check minimum Ninja version.
-  if (cmSystemTools::VersionCompare(cmSystemTools::OP_LESS,
-                                    this->NinjaVersion.c_str(),
-                                    RequiredNinjaVersion().c_str())) {
+  if (cmSystemTools::VersionCompare(cmSystemTools::OP_LESS, this->NinjaVersion,
+                                    RequiredNinjaVersion())) {
     std::ostringstream msg;
     msg << "The detected version of Ninja (" << this->NinjaVersion;
     msg << ") is less than the version of Ninja required by CMake (";
     msg << cmGlobalNinjaGenerator::RequiredNinjaVersion() << ").";
     this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
                                            msg.str());
-    return;
-  }
-  if (!this->InspectConfigTypeVariables()) {
     return;
   }
   if (!this->OpenBuildFileStreams()) {
@@ -695,7 +691,7 @@ bool cmGlobalNinjaGenerator::FindMakeProgram(cmMakefile* mf)
   if (!this->cmGlobalGenerator::FindMakeProgram(mf)) {
     return false;
   }
-  if (cmProp ninjaCommand = mf->GetDefinition("CMAKE_MAKE_PROGRAM")) {
+  if (cmValue ninjaCommand = mf->GetDefinition("CMAKE_MAKE_PROGRAM")) {
     this->NinjaCommand = *ninjaCommand;
     std::vector<std::string> command;
     command.push_back(this->NinjaCommand);
@@ -721,21 +717,21 @@ bool cmGlobalNinjaGenerator::FindMakeProgram(cmMakefile* mf)
 
 void cmGlobalNinjaGenerator::CheckNinjaFeatures()
 {
-  this->NinjaSupportsConsolePool = !cmSystemTools::VersionCompare(
-    cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
-    RequiredNinjaVersionForConsolePool().c_str());
+  this->NinjaSupportsConsolePool =
+    !cmSystemTools::VersionCompare(cmSystemTools::OP_LESS, this->NinjaVersion,
+                                   RequiredNinjaVersionForConsolePool());
   this->NinjaSupportsImplicitOuts = !cmSystemTools::VersionCompare(
-    cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
-    cmGlobalNinjaGenerator::RequiredNinjaVersionForImplicitOuts().c_str());
-  this->NinjaSupportsManifestRestat = !cmSystemTools::VersionCompare(
-    cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
-    RequiredNinjaVersionForManifestRestat().c_str());
-  this->NinjaSupportsMultilineDepfile = !cmSystemTools::VersionCompare(
-    cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
-    RequiredNinjaVersionForMultilineDepfile().c_str());
-  this->NinjaSupportsDyndeps = !cmSystemTools::VersionCompare(
-    cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
-    RequiredNinjaVersionForDyndeps().c_str());
+    cmSystemTools::OP_LESS, this->NinjaVersion,
+    cmGlobalNinjaGenerator::RequiredNinjaVersionForImplicitOuts());
+  this->NinjaSupportsManifestRestat =
+    !cmSystemTools::VersionCompare(cmSystemTools::OP_LESS, this->NinjaVersion,
+                                   RequiredNinjaVersionForManifestRestat());
+  this->NinjaSupportsMultilineDepfile =
+    !cmSystemTools::VersionCompare(cmSystemTools::OP_LESS, this->NinjaVersion,
+                                   RequiredNinjaVersionForMultilineDepfile());
+  this->NinjaSupportsDyndeps =
+    !cmSystemTools::VersionCompare(cmSystemTools::OP_LESS, this->NinjaVersion,
+                                   RequiredNinjaVersionForDyndeps());
   if (!this->NinjaSupportsDyndeps) {
     // The ninja version number is not new enough to have upstream support.
     // Our ninja branch adds ".dyndep-#" to its version number,
@@ -753,21 +749,21 @@ void cmGlobalNinjaGenerator::CheckNinjaFeatures()
   }
   this->NinjaSupportsUnconditionalRecompactTool =
     !cmSystemTools::VersionCompare(
-      cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
-      RequiredNinjaVersionForUnconditionalRecompactTool().c_str());
-  this->NinjaSupportsRestatTool = !cmSystemTools::VersionCompare(
-    cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
-    RequiredNinjaVersionForRestatTool().c_str());
-  this->NinjaSupportsMultipleOutputs = !cmSystemTools::VersionCompare(
-    cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
-    RequiredNinjaVersionForMultipleOutputs().c_str());
+      cmSystemTools::OP_LESS, this->NinjaVersion,
+      RequiredNinjaVersionForUnconditionalRecompactTool());
+  this->NinjaSupportsRestatTool =
+    !cmSystemTools::VersionCompare(cmSystemTools::OP_LESS, this->NinjaVersion,
+                                   RequiredNinjaVersionForRestatTool());
+  this->NinjaSupportsMultipleOutputs =
+    !cmSystemTools::VersionCompare(cmSystemTools::OP_LESS, this->NinjaVersion,
+                                   RequiredNinjaVersionForMultipleOutputs());
   this->NinjaSupportsMetadataOnRegeneration = !cmSystemTools::VersionCompare(
-    cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
-    RequiredNinjaVersionForMetadataOnRegeneration().c_str());
+    cmSystemTools::OP_LESS, this->NinjaVersion,
+    RequiredNinjaVersionForMetadataOnRegeneration());
 #ifdef _WIN32
-  this->NinjaSupportsCodePage = !cmSystemTools::VersionCompare(
-    cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
-    RequiredNinjaVersionForCodePage().c_str());
+  this->NinjaSupportsCodePage =
+    !cmSystemTools::VersionCompare(cmSystemTools::OP_LESS, this->NinjaVersion,
+                                   RequiredNinjaVersionForCodePage());
   if (this->NinjaSupportsCodePage) {
     this->CheckNinjaCodePage();
   } else {
@@ -920,14 +916,7 @@ void cmGlobalNinjaGenerator::EnableLanguage(
   std::vector<std::string> const& langs, cmMakefile* mf, bool optional)
 {
   if (this->IsMultiConfig()) {
-    if (!mf->GetDefinition("CMAKE_CONFIGURATION_TYPES")) {
-      mf->AddCacheDefinition(
-        "CMAKE_CONFIGURATION_TYPES", "Debug;Release;RelWithDebInfo",
-        "Semicolon separated list of supported configuration types, only "
-        "supports Debug, Release, MinSizeRel, and RelWithDebInfo, anything "
-        "else will be ignored",
-        cmStateEnums::STRING);
-    }
+    mf->InitCMAKE_CONFIGURATION_TYPES("Debug;Release;RelWithDebInfo");
   }
 
   this->cmGlobalGenerator::EnableLanguage(langs, mf, optional);
@@ -936,27 +925,21 @@ void cmGlobalNinjaGenerator::EnableLanguage(
       continue;
     }
     this->ResolveLanguageCompiler(l, mf, optional);
-  }
 #ifdef _WIN32
-  const bool clangGnuMode =
-    ((mf->GetSafeDefinition("CMAKE_C_COMPILER_ID") == "Clang") &&
-     (mf->GetSafeDefinition("CMAKE_C_COMPILER_FRONTEND_VARIANT") == "GNU")) ||
-    ((mf->GetSafeDefinition("CMAKE_CXX_COMPILER_ID") == "Clang") &&
-     (mf->GetSafeDefinition("CMAKE_CXX_COMPILER_FRONTEND_VARIANT") == "GNU"));
-
-  if (clangGnuMode ||
-      ((mf->GetSafeDefinition("CMAKE_C_SIMULATE_ID") != "MSVC") &&
-       (mf->GetSafeDefinition("CMAKE_CXX_SIMULATE_ID") != "MSVC") &&
-       (mf->IsOn("CMAKE_COMPILER_IS_MINGW") ||
-        (mf->GetSafeDefinition("CMAKE_C_COMPILER_ID") == "GNU") ||
-        (mf->GetSafeDefinition("CMAKE_CXX_COMPILER_ID") == "GNU") ||
-        (mf->GetSafeDefinition("CMAKE_C_COMPILER_ID") == "Clang") ||
-        (mf->GetSafeDefinition("CMAKE_CXX_COMPILER_ID") == "Clang") ||
-        (mf->GetSafeDefinition("CMAKE_C_COMPILER_ID") == "QCC") ||
-        (mf->GetSafeDefinition("CMAKE_CXX_COMPILER_ID") == "QCC")))) {
-    this->UsingGCCOnWindows = true;
-  }
+    std::string const& compilerId =
+      mf->GetSafeDefinition(cmStrCat("CMAKE_", l, "_COMPILER_ID"));
+    std::string const& simulateId =
+      mf->GetSafeDefinition(cmStrCat("CMAKE_", l, "_SIMULATE_ID"));
+    std::string const& compilerFrontendVariant = mf->GetSafeDefinition(
+      cmStrCat("CMAKE_", l, "_COMPILER_FRONTEND_VARIANT"));
+    if ((compilerId == "Clang" && compilerFrontendVariant == "GNU") ||
+        (simulateId != "MSVC" &&
+         (compilerId == "GNU" || compilerId == "QCC" ||
+          cmHasLiteralSuffix(compilerId, "Clang")))) {
+      this->UsingGCCOnWindows = true;
+    }
 #endif
+  }
 }
 
 // Implemented by:
@@ -1018,13 +1001,6 @@ bool cmGlobalNinjaGenerator::HasRule(const std::string& name)
 }
 
 // Private virtual overrides
-
-std::string cmGlobalNinjaGenerator::GetEditCacheCommand() const
-{
-  // Ninja by design does not run interactive tools in the terminal,
-  // so our only choice is cmake-gui.
-  return cmSystemTools::GetCMakeGUICommand();
-}
 
 void cmGlobalNinjaGenerator::ComputeTargetObjectDirectory(
   cmGeneratorTarget* gt) const
@@ -1284,7 +1260,7 @@ void cmGlobalNinjaGenerator::AppendTargetOutputs(
         break;
       }
     }
-    // FALLTHROUGH
+      CM_FALLTHROUGH;
     case cmStateEnums::EXECUTABLE: {
       outputs.push_back(this->ConvertToNinjaPath(target->GetFullPath(
         config, cmStateEnums::RuntimeBinaryArtifact, realname)));
@@ -1296,7 +1272,7 @@ void cmGlobalNinjaGenerator::AppendTargetOutputs(
         break;
       }
     }
-    // FALLTHROUGH
+      CM_FALLTHROUGH;
     case cmStateEnums::GLOBAL_TARGET:
     case cmStateEnums::INTERFACE_LIBRARY:
     case cmStateEnums::UTILITY: {
@@ -1847,7 +1823,7 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
 
   // Use 'console' pool to get non buffered output of the CMake re-run call
   // Available since Ninja 1.5
-  if (this->SupportsConsolePool()) {
+  if (this->SupportsDirectConsole()) {
     reBuild.Variables["pool"] = "console";
   }
 
@@ -1941,7 +1917,7 @@ std::string cmGlobalNinjaGenerator::NinjaCmd() const
   return "ninja";
 }
 
-bool cmGlobalNinjaGenerator::SupportsConsolePool() const
+bool cmGlobalNinjaGenerator::SupportsDirectConsole() const
 {
   return this->NinjaSupportsConsolePool;
 }

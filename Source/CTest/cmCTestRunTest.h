@@ -109,10 +109,11 @@ public:
 
 private:
   bool NeedsToRepeat();
-  void DartProcessing();
+  void ParseOutputForMeasurements();
   void ExeNotFound(std::string exe);
   bool ForkProcess(cmDuration testTimeOut, bool explicitTimeout,
                    std::vector<std::string>* environment,
+                   std::vector<std::string>* environment_modification,
                    std::vector<size_t>* affinity);
   void WriteLogOutputTop(size_t completed, size_t total);
   // Run post processing of the process output for MemCheck

@@ -56,7 +56,7 @@
             # Test directories.
             - build/Tests/CTest*
             - build/Tests/Find*
-            - build/Tests/Qt5*
+            - build/Tests/Qt*
             - build/Tests/RunCMake/
             - build/Tests/CMakeOnly/
             - build/Tests/CMakeTests/

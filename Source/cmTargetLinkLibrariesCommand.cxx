@@ -14,13 +14,13 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
-#include "cmProperty.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetLinkLibraryType.h"
+#include "cmValue.h"
 #include "cmake.h"
 
 namespace {
@@ -143,6 +143,7 @@ bool cmTargetLinkLibrariesCommand(std::vector<std::string> const& args,
       case cmPolicies::WARN:
         e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0039) << "\n";
         modal = "should";
+        CM_FALLTHROUGH;
       case cmPolicies::OLD:
         break;
       case cmPolicies::REQUIRED_ALWAYS:
@@ -150,6 +151,7 @@ bool cmTargetLinkLibrariesCommand(std::vector<std::string> const& args,
       case cmPolicies::NEW:
         modal = "must";
         messageType = MessageType::FATAL_ERROR;
+        break;
     }
     if (modal) {
       e << "Utility target \"" << target->GetName() << "\" " << modal
@@ -278,7 +280,7 @@ bool cmTargetLinkLibrariesCommand(std::vector<std::string> const& args,
       // with old versions of CMake and new)
       llt = GENERAL_LibraryType;
       std::string linkType = cmStrCat(args[0], "_LINK_TYPE");
-      cmProp linkTypeString = mf.GetDefinition(linkType);
+      cmValue linkTypeString = mf.GetDefinition(linkType);
       if (linkTypeString) {
         if (*linkTypeString == "debug") {
           llt = DEBUG_LibraryType;
@@ -395,6 +397,7 @@ bool TLL::HandleLibrary(ProcessingState currentProcessingState,
       case cmPolicies::WARN:
         e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0023) << "\n";
         modal = "should";
+        CM_FALLTHROUGH;
       case cmPolicies::OLD:
         break;
       case cmPolicies::REQUIRED_ALWAYS:
@@ -402,6 +405,7 @@ bool TLL::HandleLibrary(ProcessingState currentProcessingState,
       case cmPolicies::NEW:
         modal = "must";
         messageType = MessageType::FATAL_ERROR;
+        break;
     }
 
     if (modal) {

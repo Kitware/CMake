@@ -16,6 +16,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 cmCPackIFWGenerator::cmCPackIFWGenerator()
 {
@@ -248,9 +249,9 @@ const char* cmCPackIFWGenerator::GetPackagingInstallPrefix()
     tmpPref += "packages/" + this->GetRootPackageName() + "/data";
   }
 
-  this->SetOption("CPACK_IFW_PACKAGING_INSTALL_PREFIX", tmpPref.c_str());
+  this->SetOption("CPACK_IFW_PACKAGING_INSTALL_PREFIX", tmpPref);
 
-  return this->GetOption("CPACK_IFW_PACKAGING_INSTALL_PREFIX");
+  return this->GetOption("CPACK_IFW_PACKAGING_INSTALL_PREFIX")->c_str();
 }
 
 const char* cmCPackIFWGenerator::GetOutputExtension()
@@ -273,11 +274,11 @@ int cmCPackIFWGenerator::InitializeInternal()
 
   // Look 'binarycreator' executable (needs)
 
-  const char* BinCreatorStr = this->GetOption(BinCreatorOpt);
+  cmValue BinCreatorStr = this->GetOption(BinCreatorOpt);
   if (!BinCreatorStr || cmIsNOTFOUND(BinCreatorStr)) {
     this->BinCreator.clear();
   } else {
-    this->BinCreator = BinCreatorStr;
+    this->BinCreator = *BinCreatorStr;
   }
 
   if (this->BinCreator.empty()) {
@@ -290,16 +291,16 @@ int cmCPackIFWGenerator::InitializeInternal()
 
   // Look 'repogen' executable (optional)
 
-  const char* RepoGenStr = this->GetOption(RepoGenOpt);
-  if (!RepoGenStr || cmIsNOTFOUND(RepoGenStr)) {
+  cmValue repoGen = this->GetOption(RepoGenOpt);
+  if (!repoGen || cmIsNOTFOUND(repoGen)) {
     this->RepoGen.clear();
   } else {
-    this->RepoGen = RepoGenStr;
+    this->RepoGen = *repoGen;
   }
 
   // Framework version
-  if (const char* FrameworkVersionSrt = this->GetOption(FrameworkVersionOpt)) {
-    this->FrameworkVersion = FrameworkVersionSrt;
+  if (cmValue frameworkVersion = this->GetOption(FrameworkVersionOpt)) {
+    this->FrameworkVersion = *frameworkVersion;
   } else {
     this->FrameworkVersion = "1.9.9";
   }
@@ -312,14 +313,13 @@ int cmCPackIFWGenerator::InitializeInternal()
 
   // Additional packages dirs
   this->PkgsDirsVector.clear();
-  if (const char* dirs = this->GetOption("CPACK_IFW_PACKAGES_DIRECTORIES")) {
+  if (cmValue dirs = this->GetOption("CPACK_IFW_PACKAGES_DIRECTORIES")) {
     cmExpandList(dirs, this->PkgsDirsVector);
   }
 
   // Additional repositories dirs
   this->RepoDirsVector.clear();
-  if (const char* dirs =
-        this->GetOption("CPACK_IFW_REPOSITORIES_DIRECTORIES")) {
+  if (cmValue dirs = this->GetOption("CPACK_IFW_REPOSITORIES_DIRECTORIES")) {
     cmExpandList(dirs, this->RepoDirsVector);
   }
 
@@ -330,22 +330,22 @@ int cmCPackIFWGenerator::InitializeInternal()
   // Repository
   this->Repository.Generator = this;
   this->Repository.Name = "Unspecified";
-  if (const char* site = this->GetOption("CPACK_DOWNLOAD_SITE")) {
-    this->Repository.Url = site;
+  if (cmValue site = this->GetOption("CPACK_DOWNLOAD_SITE")) {
+    this->Repository.Url = *site;
     this->Installer.RemoteRepositories.push_back(&this->Repository);
   }
 
   // Repositories
-  if (const char* RepoAllStr = this->GetOption("CPACK_IFW_REPOSITORIES_ALL")) {
+  if (cmValue RepoAllStr = this->GetOption("CPACK_IFW_REPOSITORIES_ALL")) {
     std::vector<std::string> RepoAllVector = cmExpandedList(RepoAllStr);
     for (std::string const& r : RepoAllVector) {
       this->GetRepository(r);
     }
   }
 
-  if (const char* ifwDownloadAll = this->GetOption("CPACK_IFW_DOWNLOAD_ALL")) {
+  if (cmValue ifwDownloadAll = this->GetOption("CPACK_IFW_DOWNLOAD_ALL")) {
     this->OnlineOnly = cmIsOn(ifwDownloadAll);
-  } else if (const char* cpackDownloadAll =
+  } else if (cmValue cpackDownloadAll =
                this->GetOption("CPACK_DOWNLOAD_ALL")) {
     this->OnlineOnly = cmIsOn(cpackDownloadAll);
   } else {
@@ -374,9 +374,9 @@ int cmCPackIFWGenerator::InitializeInternal()
   }
 
   // Output extension
-  if (const char* optOutExt =
+  if (cmValue optOutExt =
         this->GetOption("CPACK_IFW_PACKAGE_FILE_EXTENSION")) {
-    this->OutputExtension = optOutExt;
+    this->OutputExtension = *optOutExt;
   } else if (sysName == "Darwin") {
     this->OutputExtension = ".dmg";
   } else {
@@ -508,21 +508,20 @@ std::string cmCPackIFWGenerator::GetRootPackageName()
 {
   // Default value
   std::string name = "root";
-  if (const char* optIFW_PACKAGE_GROUP =
+  if (cmValue optIFW_PACKAGE_GROUP =
         this->GetOption("CPACK_IFW_PACKAGE_GROUP")) {
     // Configure from root group
     cmCPackIFWPackage package;
     package.Generator = this;
     package.ConfigureFromGroup(optIFW_PACKAGE_GROUP);
     name = package.Name;
-  } else if (const char* optIFW_PACKAGE_NAME =
+  } else if (cmValue optIFW_PACKAGE_NAME =
                this->GetOption("CPACK_IFW_PACKAGE_NAME")) {
     // Configure from root package name
-    name = optIFW_PACKAGE_NAME;
-  } else if (const char* optPACKAGE_NAME =
-               this->GetOption("CPACK_PACKAGE_NAME")) {
+    name = *optIFW_PACKAGE_NAME;
+  } else if (cmValue optPACKAGE_NAME = this->GetOption("CPACK_PACKAGE_NAME")) {
     // Configure from package name
-    name = optPACKAGE_NAME;
+    name = *optPACKAGE_NAME;
   }
   return name;
 }
@@ -537,10 +536,10 @@ std::string cmCPackIFWGenerator::GetGroupPackageName(
   if (cmCPackIFWPackage* package = this->GetGroupPackage(group)) {
     return package->Name;
   }
-  const char* option =
+  cmValue option =
     this->GetOption("CPACK_IFW_COMPONENT_GROUP_" +
                     cmsys::SystemTools::UpperCase(group->Name) + "_NAME");
-  name = option ? option : group->Name;
+  name = option ? *option : group->Name;
   if (group->ParentGroup) {
     cmCPackIFWPackage* package = this->GetGroupPackage(group->ParentGroup);
     bool dot = !this->ResolveDuplicateNames;
@@ -563,8 +562,8 @@ std::string cmCPackIFWGenerator::GetComponentPackageName(
   }
   std::string prefix = "CPACK_IFW_COMPONENT_" +
     cmsys::SystemTools::UpperCase(component->Name) + "_";
-  const char* option = this->GetOption(prefix + "NAME");
-  name = option ? option : component->Name;
+  cmValue option = this->GetOption(prefix + "NAME");
+  name = option ? *option : component->Name;
   if (component->Group) {
     cmCPackIFWPackage* package = this->GetGroupPackage(component->Group);
     if ((this->componentPackageMethod ==

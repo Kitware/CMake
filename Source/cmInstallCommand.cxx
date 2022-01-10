@@ -35,7 +35,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
-#include "cmProperty.h"
+#include "cmRange.h"
 #include "cmRuntimeDependencyArchive.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
@@ -43,6 +43,7 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetExport.h"
+#include "cmValue.h"
 
 namespace {
 
@@ -681,8 +682,8 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
         te->LibraryGenerator = libraryGenerator.get();
         te->RuntimeGenerator = runtimeGenerator.get();
         te->ObjectsGenerator = objectGenerator.get();
-        te->InterfaceIncludeDirectories =
-          cmJoin(includesArgs.GetIncludeDirs(), ";");
+        target.AddInstallIncludeDirectories(
+          cmMakeRange(includesArgs.GetIncludeDirs()));
         te->NamelinkOnly = namelinkOnly;
         helper.Makefile->GetGlobalGenerator()
           ->GetExportSets()[exports]
@@ -925,7 +926,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
     }
 
     if (createInstallGeneratorsForTargetFileSets && !namelinkOnly) {
-      cmProp files = target.GetProperty("PRIVATE_HEADER");
+      cmValue files = target.GetProperty("PRIVATE_HEADER");
       if (cmNonempty(files)) {
         std::vector<std::string> relFiles = cmExpandedList(*files);
         std::vector<std::string> absFiles;
@@ -1390,6 +1391,7 @@ bool HandleFilesMode(std::vector<std::string> const& args,
         case cmPolicies::WARN:
           e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0062) << "\n";
           modal = "should";
+          CM_FALLTHROUGH;
         case cmPolicies::OLD:
           break;
         case cmPolicies::REQUIRED_IF_USED:
@@ -1397,6 +1399,7 @@ bool HandleFilesMode(std::vector<std::string> const& args,
         case cmPolicies::NEW:
           modal = "may";
           messageType = MessageType::FATAL_ERROR;
+          break;
       }
       if (modal) {
         e << "The file\n  " << file

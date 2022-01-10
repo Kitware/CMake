@@ -8,11 +8,11 @@
 #include "cmGeneratorTarget.h"
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
-#include "cmProperty.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
 #include "cmStringAlgorithms.h"
+#include "cmValue.h"
 
 class cmGlobalGenerator;
 
@@ -82,7 +82,7 @@ std::string cmLocalCommonGenerator::GetTargetFortranFlags(
   // If there is a separate module path flag then duplicate the
   // include path with it.  This compiler does not search the include
   // path for modules.
-  if (cmProp modpath_flag =
+  if (cmValue modpath_flag =
         this->Makefile->GetDefinition("CMAKE_Fortran_MODPATH_FLAG")) {
     std::vector<std::string> includes;
     this->GetIncludeDirectories(includes, target, "C", config);

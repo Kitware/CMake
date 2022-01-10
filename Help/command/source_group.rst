@@ -22,7 +22,8 @@ The options are:
  CMake will automatically detect, from ``<src>`` files paths, source groups
  it needs to create, to keep structure of source groups analogically to the
  actual files and directories structure in the project. Paths of ``<src>``
- files will be cut to be relative to ``<root>``.
+ files will be cut to be relative to ``<root>``. The command fails if the
+ paths within ``src`` do not start with ``root``.
 
 ``PREFIX``
  .. versionadded:: 3.8

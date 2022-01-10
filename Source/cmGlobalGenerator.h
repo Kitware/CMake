@@ -29,6 +29,7 @@
 #include "cmTarget.h"
 #include "cmTargetDepend.h"
 #include "cmTransformDepfile.h"
+#include "cmValue.h"
 
 #if !defined(CMAKE_BOOTSTRAP)
 #  include <cm3p/json/value.h>
@@ -151,6 +152,8 @@ public:
    * actually produce any makefiles, DSPs, etc.
    */
   virtual void Configure();
+
+  virtual bool InspectConfigTypeVariables() { return true; }
 
   bool Compute();
   virtual void AddExtraIDETargets() {}
@@ -308,7 +311,7 @@ public:
 
   cmExportSetMap& GetExportSets() { return this->ExportSets; }
 
-  const char* GetGlobalSetting(std::string const& name) const;
+  cmValue GetGlobalSetting(std::string const& name) const;
   bool GlobalSettingIsOn(std::string const& name) const;
   std::string GetSafeGlobalSetting(std::string const& name) const;
 
@@ -443,6 +446,8 @@ public:
 
   virtual bool IsVisualStudio() const { return false; }
 
+  virtual bool IsVisualStudioAtLeast10() const { return false; }
+
   virtual bool IsNinja() const { return false; }
 
   /** Return true if we know the exact location of object files.
@@ -549,7 +554,7 @@ protected:
   virtual bool CheckLanguages(std::vector<std::string> const& languages,
                               cmMakefile* mf) const;
   virtual void PrintCompilerAdvice(std::ostream& os, std::string const& lang,
-                                   const char* envVar) const;
+                                   cmValue envVar) const;
 
   virtual bool ComputeTargetDepends();
 
@@ -596,7 +601,7 @@ protected:
   void AddGlobalTarget_RebuildCache(
     std::vector<GlobalTargetInfo>& targets) const;
   void AddGlobalTarget_Install(std::vector<GlobalTargetInfo>& targets);
-  cmTarget CreateGlobalTarget(GlobalTargetInfo const& gti, cmMakefile* mf);
+  void CreateGlobalTarget(GlobalTargetInfo const& gti, cmMakefile* mf);
 
   std::string FindMakeProgramFile;
   std::string ConfiguredFilesPath;
@@ -621,17 +626,6 @@ protected:
   cmGeneratorTarget* FindGeneratorTargetImpl(std::string const& name) const;
 
   std::string GetPredefinedTargetsFolder() const;
-
-  enum class FindMakeProgramStage
-  {
-    Early,
-    Late,
-  };
-
-  virtual FindMakeProgramStage GetFindMakeProgramStage() const
-  {
-    return FindMakeProgramStage::Late;
-  }
 
 private:
   using TargetMap = std::unordered_map<std::string, cmTarget*>;

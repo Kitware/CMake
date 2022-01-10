@@ -21,6 +21,7 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetExport.h"
+#include "cmValue.h"
 
 cmExportInstallFileGenerator::cmExportInstallFileGenerator(
   cmInstallExportGenerator* iegen)
@@ -85,8 +86,8 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
     ImportPropertyMap properties;
 
     this->PopulateIncludeDirectoriesInterface(
-      te, cmGeneratorExpression::InstallInterface, properties, missingTargets);
-    this->PopulateSourcesInterface(te, cmGeneratorExpression::InstallInterface,
+      gt, cmGeneratorExpression::InstallInterface, properties, missingTargets);
+    this->PopulateSourcesInterface(gt, cmGeneratorExpression::InstallInterface,
                                    properties, missingTargets);
     this->PopulateInterfaceProperty("INTERFACE_SYSTEM_INCLUDE_DIRECTORIES", gt,
                                     cmGeneratorExpression::InstallInterface,
@@ -110,9 +111,9 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
                                     cmGeneratorExpression::InstallInterface,
                                     properties, missingTargets);
     this->PopulateLinkDirectoriesInterface(
-      te, cmGeneratorExpression::InstallInterface, properties, missingTargets);
+      gt, cmGeneratorExpression::InstallInterface, properties, missingTargets);
     this->PopulateLinkDependsInterface(
-      te, cmGeneratorExpression::InstallInterface, properties, missingTargets);
+      gt, cmGeneratorExpression::InstallInterface, properties, missingTargets);
 
     std::string errorMessage;
     if (!this->PopulateExportProperties(gt, properties, errorMessage)) {
@@ -447,7 +448,7 @@ cmStateEnums::TargetType cmExportInstallFileGenerator::GetExportTargetType(
 
 void cmExportInstallFileGenerator::HandleMissingTarget(
   std::string& link_libs, std::vector<std::string>& missingTargets,
-  cmGeneratorTarget* depender, cmGeneratorTarget* dependee)
+  cmGeneratorTarget const* depender, cmGeneratorTarget* dependee)
 {
   const std::string name = dependee->GetName();
   cmGlobalGenerator* gg = dependee->GetLocalGenerator()->GetGlobalGenerator();
@@ -499,7 +500,7 @@ cmExportInstallFileGenerator::FindNamespaces(cmGlobalGenerator* gg,
 }
 
 void cmExportInstallFileGenerator::ComplainAboutMissingTarget(
-  cmGeneratorTarget* depender, cmGeneratorTarget* dependee,
+  cmGeneratorTarget const* depender, cmGeneratorTarget const* dependee,
   std::vector<std::string> const& exportFiles)
 {
   std::ostringstream e;
@@ -521,7 +522,7 @@ void cmExportInstallFileGenerator::ComplainAboutMissingTarget(
 }
 
 std::string cmExportInstallFileGenerator::InstallNameDir(
-  cmGeneratorTarget* target, const std::string& config)
+  cmGeneratorTarget const* target, const std::string& config)
 {
   std::string install_name_dir;
 

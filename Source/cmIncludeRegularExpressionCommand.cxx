@@ -14,7 +14,7 @@ bool cmIncludeRegularExpressionCommand(std::vector<std::string> const& args,
   }
 
   cmMakefile& mf = status.GetMakefile();
-  mf.SetIncludeRegularExpression(args[0].c_str());
+  mf.SetIncludeRegularExpression(args[0]);
 
   if (args.size() > 1) {
     mf.SetComplainRegularExpression(args[1]);

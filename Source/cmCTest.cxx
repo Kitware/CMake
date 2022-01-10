@@ -56,12 +56,12 @@
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmProcessOutput.h"
-#include "cmProperty.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 #include "cmVersion.h"
 #include "cmVersionConfig.h"
 #include "cmXMLWriter.h"
@@ -1457,11 +1457,11 @@ void cmCTest::AddSiteProperties(cmXMLWriter& xml)
     return;
   }
   // This code should go when cdash is changed to use labels only
-  cmProp subproject = cm->GetState()->GetGlobalProperty("SubProject");
+  cmValue subproject = cm->GetState()->GetGlobalProperty("SubProject");
   if (subproject) {
     xml.StartElement("Subproject");
     xml.Attribute("name", *subproject);
-    cmProp labels =
+    cmValue labels =
       ch->GetCMake()->GetState()->GetGlobalProperty("SubProjectLabels");
     if (labels) {
       xml.StartElement("Labels");
@@ -1475,7 +1475,7 @@ void cmCTest::AddSiteProperties(cmXMLWriter& xml)
   }
 
   // This code should stay when cdash only does label based sub-projects
-  cmProp label = cm->GetState()->GetGlobalProperty("Label");
+  cmValue label = cm->GetState()->GetGlobalProperty("Label");
   if (label) {
     xml.StartElement("Labels");
     xml.Element("Label", *label);
@@ -2425,7 +2425,7 @@ bool cmCTest::SetArgsFromPreset(const std::string& presetName,
         case cmCMakePresetsFile::TestPreset::OutputOptions::VerbosityEnum::
           Extra:
           this->Impl->ExtraVerbose = true;
-          // intentional fallthrough
+          CM_FALLTHROUGH;
         case cmCMakePresetsFile::TestPreset::OutputOptions::VerbosityEnum::
           Verbose:
           this->Impl->Verbose = true;
@@ -3056,7 +3056,7 @@ int cmCTest::ReadCustomConfigurationFileTree(const std::string& dir,
 void cmCTest::PopulateCustomVector(cmMakefile* mf, const std::string& def,
                                    std::vector<std::string>& vec)
 {
-  cmProp dval = mf->GetDefinition(def);
+  cmValue dval = mf->GetDefinition(def);
   if (!dval) {
     return;
   }
@@ -3073,7 +3073,7 @@ void cmCTest::PopulateCustomVector(cmMakefile* mf, const std::string& def,
 void cmCTest::PopulateCustomInteger(cmMakefile* mf, const std::string& def,
                                     int& val)
 {
-  cmProp dval = mf->GetDefinition(def);
+  cmValue dval = mf->GetDefinition(def);
   if (!dval) {
     return;
   }
@@ -3407,7 +3407,7 @@ bool cmCTest::SetCTestConfigurationFromCMakeVariable(
   cmMakefile* mf, const char* dconfig, const std::string& cmake_var,
   bool suppress)
 {
-  cmProp ctvar = mf->GetDefinition(cmake_var);
+  cmValue ctvar = mf->GetDefinition(cmake_var);
   if (!ctvar) {
     return false;
   }

@@ -62,7 +62,7 @@ static void AddLinkDir(cmMakefile& mf, std::string const& dir,
       case cmPolicies::WARN:
         e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0015);
         mf.IssueMessage(MessageType::AUTHOR_WARNING, e.str());
-        break;
+        CM_FALLTHROUGH;
       case cmPolicies::OLD:
         // OLD behavior does not convert
         break;

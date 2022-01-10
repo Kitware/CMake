@@ -67,12 +67,55 @@ void cmGlobalVisualStudio8Generator::AddPlatformDefinitions(cmMakefile* mf)
 bool cmGlobalVisualStudio8Generator::SetGeneratorPlatform(std::string const& p,
                                                           cmMakefile* mf)
 {
-  if (!this->PlatformInGeneratorName) {
-    this->GeneratorPlatform = p;
-    return this->cmGlobalVisualStudio7Generator::SetGeneratorPlatform("", mf);
-  } else {
+  if (this->PlatformInGeneratorName) {
+    // This is an old-style generator name that contains the platform name.
+    // No explicit platform specification is supported, so pass it through
+    // to our base class implementation, which errors on non-empty platforms.
     return this->cmGlobalVisualStudio7Generator::SetGeneratorPlatform(p, mf);
   }
+
+  this->GeneratorPlatform = p;
+
+  // FIXME: Add CMAKE_GENERATOR_PLATFORM field to set the framework.
+  // For now, just report the generator's default, if any.
+  if (cm::optional<std::string> const& targetFrameworkVersion =
+        this->GetTargetFrameworkVersion()) {
+    mf->AddDefinition("CMAKE_VS_TARGET_FRAMEWORK_VERSION",
+                      *targetFrameworkVersion);
+  }
+  if (cm::optional<std::string> const& targetFrameworkIdentifier =
+        this->GetTargetFrameworkIdentifier()) {
+    mf->AddDefinition("CMAKE_VS_TARGET_FRAMEWORK_IDENTIFIER",
+                      *targetFrameworkIdentifier);
+  }
+  if (cm::optional<std::string> const& targetFrameworkTargetsVersion =
+        this->GetTargetFrameworkTargetsVersion()) {
+    mf->AddDefinition("CMAKE_VS_TARGET_FRAMEWORK_TARGETS_VERSION",
+                      *targetFrameworkTargetsVersion);
+  }
+
+  // The generator name does not contain the platform name, and so supports
+  // explicit platform specification.  We handled that above, so pass an
+  // empty platform name to our base class implementation so it does not error.
+  return this->cmGlobalVisualStudio7Generator::SetGeneratorPlatform("", mf);
+}
+
+cm::optional<std::string> const&
+cmGlobalVisualStudio8Generator::GetTargetFrameworkVersion() const
+{
+  return this->DefaultTargetFrameworkVersion;
+}
+
+cm::optional<std::string> const&
+cmGlobalVisualStudio8Generator::GetTargetFrameworkIdentifier() const
+{
+  return this->DefaultTargetFrameworkIdentifier;
+}
+
+cm::optional<std::string> const&
+cmGlobalVisualStudio8Generator::GetTargetFrameworkTargetsVersion() const
+{
+  return this->DefaultTargetFrameworkTargetsVersion;
 }
 
 std::string cmGlobalVisualStudio8Generator::GetGenerateStampList()
@@ -251,12 +294,13 @@ void cmGlobalVisualStudio8Generator::WriteProjectConfigurations(
   if (this->GetBuildAsX()) {
     platforms.push_back("ARM64");
   }
+
   for (std::string const& p : platforms) {
     for (std::string const& i : configs) {
       std::vector<std::string> mapConfig;
       const char* dstConfig = i.c_str();
       if (target.GetProperty("EXTERNAL_MSPROJECT")) {
-        if (cmProp m = target.GetProperty("MAP_IMPORTED_CONFIG_" +
+        if (cmValue m = target.GetProperty("MAP_IMPORTED_CONFIG_" +
                                           cmSystemTools::UpperCase(i))) {
           cmExpandList(*m, mapConfig);
           if (!mapConfig.empty()) {
@@ -299,14 +343,14 @@ bool cmGlobalVisualStudio8Generator::NeedsDeploy(
     return false;
   }
 
-  if (cmProp prop = target.GetProperty("VS_SOLUTION_DEPLOY")) {
+  if (cmValue prop = target.GetProperty("VS_SOLUTION_DEPLOY")) {
     // If set, it dictates behavior
     return cmIsOn(
       cmGeneratorExpression::Evaluate(*prop, target.LocalGenerator, config));
   }
 
   // To be deprecated, disable deployment even if target supports it.
-  if (cmProp prop = target.GetProperty("VS_NO_SOLUTION_DEPLOY")) {
+  if (cmValue prop = target.GetProperty("VS_NO_SOLUTION_DEPLOY")) {
     if (cmIsOn(cmGeneratorExpression::Evaluate(*prop, target.LocalGenerator,
                                                config))) {
       // If true, always disable deployment
@@ -382,6 +426,7 @@ static cmVS7FlagTable cmVS8ExtraFlagTable[] = {
     cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue },
   { "PrecompiledHeaderThrough", "Yu", "Precompiled Header Name", "",
     cmVS7FlagTable::UserValueRequired },
+  { "UsePrecompiledHeader", "Y-", "Don't use precompiled header", "0", 0 },
   // There is no YX option in the VS8 IDE.
 
   // Exception handling mode.  If no entries match, it will be FALSE.

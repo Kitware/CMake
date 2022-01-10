@@ -15,9 +15,10 @@
           when: never
         - if: '$CI_MERGE_REQUEST_ID'
           when: manual
+        - if: '$CI_PROJECT_PATH == "cmake/cmake" && $CI_PIPELINE_SOURCE == "schedule"'
+          when: on_success
         - if: '$CI_PROJECT_PATH == "cmake/cmake"'
-          when: delayed
-          start_in: 5 minutes
+          when: manual
         - when: never
 
 .run_automatically:
@@ -33,6 +34,8 @@
         - if: '($CMAKE_CI_NO_MR == "true" && $CI_MERGE_REQUEST_ID)'
           when: never
         - if: '$CI_MERGE_REQUEST_ID'
+          when: on_success
+        - if: '$CI_PROJECT_PATH == "cmake/cmake" && $CI_PIPELINE_SOURCE == "schedule"'
           when: on_success
         - if: '$CI_PROJECT_PATH == "cmake/cmake"'
           when: delayed

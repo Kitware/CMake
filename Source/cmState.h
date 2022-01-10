@@ -21,6 +21,7 @@
 #include "cmPropertyMap.h"
 #include "cmStatePrivate.h"
 #include "cmStateTypes.h"
+#include "cmValue.h"
 
 class cmCacheManager;
 class cmCommand;
@@ -35,12 +36,6 @@ class cmState
   friend class cmStateSnapshot;
 
 public:
-  cmState();
-  ~cmState();
-
-  cmState(const cmState&) = delete;
-  cmState& operator=(const cmState&) = delete;
-
   enum Mode
   {
     Unknown,
@@ -50,6 +45,18 @@ public:
     CTest,
     CPack,
   };
+
+  enum class ProjectKind
+  {
+    Normal,
+    TryCompile,
+  };
+
+  cmState(Mode mode, ProjectKind projectKind = ProjectKind::Normal);
+  ~cmState();
+
+  cmState(const cmState&) = delete;
+  cmState& operator=(const cmState&) = delete;
 
   static const std::string& GetTargetTypeName(
     cmStateEnums::TargetType targetType);
@@ -92,9 +99,9 @@ public:
   bool IsCacheLoaded() const;
 
   std::vector<std::string> GetCacheEntryKeys() const;
-  cmProp GetCacheEntryValue(std::string const& key) const;
+  cmValue GetCacheEntryValue(std::string const& key) const;
   std::string GetSafeCacheEntryValue(std::string const& key) const;
-  cmProp GetInitializedCacheValue(std::string const& key) const;
+  cmValue GetInitializedCacheValue(std::string const& key) const;
   cmStateEnums::CacheEntryType GetCacheEntryType(std::string const& key) const;
   void SetCacheEntryValue(std::string const& key, std::string const& value);
 
@@ -106,8 +113,8 @@ public:
   void SetCacheEntryBoolProperty(std::string const& key,
                                  std::string const& propertyName, bool value);
   std::vector<std::string> GetCacheEntryPropertyList(std::string const& key);
-  cmProp GetCacheEntryProperty(std::string const& key,
-                               std::string const& propertyName);
+  cmValue GetCacheEntryProperty(std::string const& key,
+                                std::string const& propertyName);
   bool GetCacheEntryPropertyAsBool(std::string const& key,
                                    std::string const& propertyName);
   void AppendCacheEntryProperty(std::string const& key,
@@ -141,9 +148,6 @@ public:
   void SetEnabledLanguages(std::vector<std::string> const& langs);
   void ClearEnabledLanguages();
 
-  bool GetIsInTryCompile() const;
-  void SetIsInTryCompile(bool b);
-
   bool GetIsGeneratorMultiConfig() const;
   void SetIsGeneratorMultiConfig(bool b);
 
@@ -175,9 +179,10 @@ public:
   std::vector<std::string> GetCommandNames() const;
 
   void SetGlobalProperty(const std::string& prop, const char* value);
+  void SetGlobalProperty(const std::string& prop, cmValue value);
   void AppendGlobalProperty(const std::string& prop, const std::string& value,
                             bool asString = false);
-  cmProp GetGlobalProperty(const std::string& prop);
+  cmValue GetGlobalProperty(const std::string& prop);
   bool GetGlobalPropertyAsBool(const std::string& prop);
 
   std::string const& GetSourceDirectory() const;
@@ -207,13 +212,26 @@ public:
 
   Mode GetMode() const;
   std::string GetModeString() const;
-  void SetMode(Mode mode);
 
   static std::string ModeToString(Mode mode);
+
+  ProjectKind GetProjectKind() const;
 
 private:
   friend class cmake;
   void AddCacheEntry(const std::string& key, const char* value,
+                     const char* helpString, cmStateEnums::CacheEntryType type)
+  {
+    this->AddCacheEntry(key,
+                        value ? cmValue(std::string(value)) : cmValue(nullptr),
+                        helpString, type);
+  }
+  void AddCacheEntry(const std::string& key, const std::string& value,
+                     const char* helpString, cmStateEnums::CacheEntryType type)
+  {
+    this->AddCacheEntry(key, cmValue(value), helpString, type);
+  }
+  void AddCacheEntry(const std::string& key, cmValue value,
                      const char* helpString,
                      cmStateEnums::CacheEntryType type);
 
@@ -248,7 +266,6 @@ private:
 
   std::string SourceDirectory;
   std::string BinaryDirectory;
-  bool IsInTryCompile = false;
   bool IsGeneratorMultiConfig = false;
   bool WindowsShell = false;
   bool WindowsVSIDE = false;
@@ -258,5 +275,6 @@ private:
   bool NMake = false;
   bool MSYSShell = false;
   bool NinjaMulti = false;
-  Mode CurrentMode = Unknown;
+  Mode StateMode = Unknown;
+  ProjectKind StateProjectKind = ProjectKind::Normal;
 };

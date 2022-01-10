@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.11.2)
+cmake_minimum_required(VERSION 3.16)
 project(RccConfigChange)
 include("../../AutogenCoreTest.cmake")
 

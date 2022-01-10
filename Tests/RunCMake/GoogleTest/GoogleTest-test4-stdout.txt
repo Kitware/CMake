@@ -1,0 +1,9 @@
+Test project .*
+    Start 31: TEST:typed/short\.case!4
+1/2 Test #31: TEST:typed/short\.case!4 \.+ +Passed +[0-9.]+ sec
+    Start 32: TEST:typed/float\.case!4
+2/2 Test #32: TEST:typed/float\.case!4 \.+ +Passed +[0-9.]+ sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time \(real\) = +[0-9.]+ sec

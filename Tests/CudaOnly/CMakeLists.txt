@@ -15,7 +15,7 @@ add_cuda_test_macro(CudaOnly.ToolkitBeforeLang CudaOnlyToolkitBeforeLang)
 add_cuda_test_macro(CudaOnly.WithDefs CudaOnlyWithDefs)
 add_cuda_test_macro(CudaOnly.CircularLinkLine CudaOnlyCircularLinkLine)
 add_cuda_test_macro(CudaOnly.ResolveDeviceSymbols CudaOnlyResolveDeviceSymbols)
-add_cuda_test_macro(CudaOnly.SeparateCompilation CudaOnlySeparateCompilation)
+add_cuda_test_macro(CudaOnly.SeparateCompilation main/CudaOnlySeparateCompilation)
 
 if(CMake_TEST_CUDA AND NOT CMake_TEST_CUDA STREQUAL "Clang")
   # Clang doesn't have flags for selecting the runtime.

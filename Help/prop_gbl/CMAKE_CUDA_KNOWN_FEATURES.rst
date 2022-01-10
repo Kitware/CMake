@@ -32,4 +32,6 @@ The features known to this version of CMake are:
   Compiler mode is at least CUDA/C++ 20.
 
 ``cuda_std_23``
+  .. versionadded:: 3.20
+
   Compiler mode is at least CUDA/C++ 23.

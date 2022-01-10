@@ -150,41 +150,6 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
     endif()
   endif()
 
-  # When invoked with HIPCC we need to extract the path to the underlying
-  # clang compiler when possible. This fixes the following issues:
-  #   env variables can change how hipcc behaves
-  #   allows us to properly find the binutils bundled with hip
-  if(CMAKE_${lang}_COMPILER_ID STREQUAL "ROCMClang"
-     AND CMAKE_${lang}_COMPILER MATCHES ".*hipcc")
-    get_filename_component(_hipcc_dir "${CMAKE_${lang}_COMPILER}" DIRECTORY)
-    execute_process(
-      COMMAND "${_hipcc_dir}/hipconfig"
-      --hipclangpath
-      OUTPUT_VARIABLE output
-      RESULT_VARIABLE result
-    )
-    if(result EQUAL 0 AND EXISTS "${output}")
-      if(lang STREQUAL "C")
-        set_property(CACHE CMAKE_${lang}_COMPILER PROPERTY VALUE "${output}/clang")
-        set(CMAKE_${lang}_COMPILER "${output}/clang" PARENT_SCOPE)
-      else()
-        set_property(CACHE CMAKE_${lang}_COMPILER PROPERTY VALUE "${output}/clang++")
-        set(CMAKE_${lang}_COMPILER "${output}/clang++" PARENT_SCOPE)
-      endif()
-    endif()
-    if(lang STREQUAL "HIP")
-      execute_process(
-        COMMAND "${_hipcc_dir}/hipconfig"
-        --rocmpath
-        OUTPUT_VARIABLE output
-        RESULT_VARIABLE result
-      )
-      if(result EQUAL 0)
-        set(_CMAKE_HIP_COMPILER_ROCM_ROOT "${output}" PARENT_SCOPE)
-      endif()
-    endif()
-  endif()
-
   if (COMPILER_QNXNTO AND CMAKE_${lang}_COMPILER_ID STREQUAL "GNU")
     execute_process(
       COMMAND "${CMAKE_${lang}_COMPILER}"
@@ -302,6 +267,7 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
   set(CMAKE_${lang}_SIMULATE_ID "${CMAKE_${lang}_SIMULATE_ID}" PARENT_SCOPE)
   set(CMAKE_${lang}_SIMULATE_VERSION "${CMAKE_${lang}_SIMULATE_VERSION}" PARENT_SCOPE)
   set(CMAKE_${lang}_STANDARD_COMPUTED_DEFAULT "${CMAKE_${lang}_STANDARD_COMPUTED_DEFAULT}" PARENT_SCOPE)
+  set(CMAKE_${lang}_EXTENSIONS_COMPUTED_DEFAULT "${CMAKE_${lang}_EXTENSIONS_COMPUTED_DEFAULT}" PARENT_SCOPE)
   set(CMAKE_${lang}_COMPILER_PRODUCED_OUTPUT "${COMPILER_${lang}_PRODUCED_OUTPUT}" PARENT_SCOPE)
   set(CMAKE_${lang}_COMPILER_PRODUCED_FILES "${COMPILER_${lang}_PRODUCED_FILES}" PARENT_SCOPE)
 endfunction()
@@ -455,6 +421,15 @@ Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
     if(CMAKE_VS_PLATFORM_TOOLSET_VCTARGETS_CUSTOM_DIR)
       set(id_ToolsetVCTargetsDir "<VCTargetsPath>${CMAKE_VS_PLATFORM_TOOLSET_VCTARGETS_CUSTOM_DIR}</VCTargetsPath>")
     endif()
+    if(CMAKE_VS_TARGET_FRAMEWORK_VERSION)
+      set(id_TargetFrameworkVersion "<TargetFrameworkVersion>${CMAKE_VS_TARGET_FRAMEWORK_VERSION}</TargetFrameworkVersion>")
+    endif()
+    if(CMAKE_VS_TARGET_FRAMEWORK_IDENTIFIER)
+      set(id_TargetFrameworkIdentifier "<TargetFrameworkIdentifier>${CMAKE_VS_TARGET_FRAMEWORK_IDENTIFIER}</TargetFrameworkIdentifier>")
+    endif()
+    if(CMAKE_VS_TARGET_FRAMEWORK_TARGETS_VERSION)
+      set(id_TargetFrameworkTargetsVersion "<TargetFrameworkTargetsVersion>${CMAKE_VS_TARGET_FRAMEWORK_TARGETS_VERSION}</TargetFrameworkTargetsVersion>")
+    endif()
     set(id_CustomGlobals "")
     foreach(pair IN LISTS CMAKE_VS_GLOBALS)
       if("${pair}" MATCHES "([^=]+)=(.*)$")
@@ -573,7 +548,8 @@ Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
     else()
       set(id_toolset "")
     endif()
-    if("${lang}" STREQUAL "Swift")
+    set(id_lang_version "")
+    if("x${lang}" STREQUAL "xSwift")
       if(CMAKE_Swift_LANGUAGE_VERSION)
         set(id_lang_version "SWIFT_VERSION = ${CMAKE_Swift_LANGUAGE_VERSION};")
       elseif(XCODE_VERSION VERSION_GREATER_EQUAL 10.2)
@@ -583,8 +559,14 @@ Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
       else()
         set(id_lang_version "SWIFT_VERSION = 2.3;")
       endif()
-    else()
-      set(id_lang_version "")
+    elseif("x${lang}" STREQUAL "xC" OR "x${lang}" STREQUAL "xOBJC")
+      if(CMAKE_${lang}_COMPILER_ID_FLAGS MATCHES "(^| )(-std=[^ ]+)( |$)")
+        set(id_lang_version "OTHER_CFLAGS = \"${CMAKE_MATCH_2}\";")
+      endif()
+    elseif("x${lang}" STREQUAL "xCXX" OR "x${lang}" STREQUAL "xOBJCXX")
+      if(CMAKE_${lang}_COMPILER_ID_FLAGS MATCHES "(^| )(-std=[^ ]+)( |$)")
+        set(id_lang_version "OTHER_CPLUSPLUSFLAGS = \"${CMAKE_MATCH_2}\";")
+      endif()
     endif()
     if(CMAKE_OSX_DEPLOYMENT_TARGET)
       set(id_deployment_target
@@ -722,7 +704,7 @@ Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
   # Check the result of compilation.
   if(CMAKE_${lang}_COMPILER_ID_RESULT
      # Intel Fortran warns and ignores preprocessor lines without /fpp
-     OR CMAKE_${lang}_COMPILER_ID_OUTPUT MATCHES "Bad # preprocessor line"
+     OR CMAKE_${lang}_COMPILER_ID_OUTPUT MATCHES "warning #5117: Bad # preprocessor line"
      )
     # Compilation failed.
     set(MSG
@@ -733,7 +715,10 @@ ${CMAKE_${lang}_COMPILER_ID_RESULT}
 ${CMAKE_${lang}_COMPILER_ID_OUTPUT}
 
 ")
-    file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log "${MSG}")
+    # Log the output unless we recognize it as a known-bad case.
+    if(NOT CMAKE_${lang}_COMPILER_ID_OUTPUT MATCHES "warning #5117: Bad # preprocessor line")
+      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log "${MSG}")
+    endif()
 
     # Some languages may know the correct/desired set of flags and want to fail right away if they don't work.
     # This is currently only used by CUDA.
@@ -913,8 +898,11 @@ function(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
       if("${info}" MATCHES "INFO:qnxnto\\[\\]")
         set(COMPILER_QNXNTO 1)
       endif()
-      if("${info}" MATCHES "INFO:dialect_default\\[([^]\"]*)\\]")
+      if("${info}" MATCHES "INFO:standard_default\\[([^]\"]*)\\]")
         set(CMAKE_${lang}_STANDARD_COMPUTED_DEFAULT "${CMAKE_MATCH_1}")
+      endif()
+      if("${info}" MATCHES "INFO:extensions_default\\[([^]\"]*)\\]")
+        set(CMAKE_${lang}_EXTENSIONS_COMPUTED_DEFAULT "${CMAKE_MATCH_1}")
       endif()
     endforeach()
 
@@ -1025,6 +1013,7 @@ function(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
   set(CMAKE_${lang}_SIMULATE_VERSION "${CMAKE_${lang}_SIMULATE_VERSION}" PARENT_SCOPE)
   set(COMPILER_QNXNTO "${COMPILER_QNXNTO}" PARENT_SCOPE)
   set(CMAKE_${lang}_STANDARD_COMPUTED_DEFAULT "${CMAKE_${lang}_STANDARD_COMPUTED_DEFAULT}" PARENT_SCOPE)
+  set(CMAKE_${lang}_EXTENSIONS_COMPUTED_DEFAULT "${CMAKE_${lang}_EXTENSIONS_COMPUTED_DEFAULT}" PARENT_SCOPE)
 endfunction()
 
 #-----------------------------------------------------------------------------

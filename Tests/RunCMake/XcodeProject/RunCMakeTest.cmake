@@ -91,7 +91,12 @@ function(XcodeSchemaGeneration)
   file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
 
   run_cmake(XcodeSchemaGeneration)
-  run_cmake_command(XcodeSchemaGeneration-build xcodebuild -scheme foo build)
+  if (XCODE_VERSION VERSION_GREATER_EQUAL 13)
+    set(maybe_destination -destination platform=macOS)
+  else()
+    set(maybe_destination "")
+  endif()
+  run_cmake_command(XcodeSchemaGeneration-build xcodebuild -scheme foo ${maybe_destination} build)
 endfunction()
 
 if(NOT XCODE_VERSION VERSION_LESS 7)

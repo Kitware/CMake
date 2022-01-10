@@ -102,7 +102,11 @@ public:
   }
 
   //! Return true if the path is a framework
-  static bool IsPathToFramework(const std::string& value);
+  static bool IsPathToFramework(const std::string& path);
+
+  //! Return true if the path is a macOS non-framework shared library (aka
+  //! .dylib)
+  static bool IsPathToMacOSSharedLibrary(const std::string& path);
 
   static bool DoesFileExistWithExtensions(
     const std::string& name, const std::vector<std::string>& sourceExts);
@@ -280,7 +284,10 @@ public:
   /**
    * Compare versions
    */
-  static bool VersionCompare(CompareOp op, const char* lhs, const char* rhs);
+  static bool VersionCompare(CompareOp op, const std::string& lhs,
+                             const std::string& rhs);
+  static bool VersionCompare(CompareOp op, const std::string& lhs,
+                             const char rhs[]);
   static bool VersionCompareEqual(std::string const& lhs,
                                   std::string const& rhs);
   static bool VersionCompareGreater(std::string const& lhs,

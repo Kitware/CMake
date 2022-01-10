@@ -37,7 +37,6 @@
 #include "cmMessageType.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
-#include "cmProperty.h"
 #include "cmRange.h"
 #include "cmStandardLevelResolver.h"
 #include "cmState.h"
@@ -46,6 +45,7 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
+#include "cmValue.h"
 #include "cmake.h"
 
 std::string cmGeneratorExpressionNode::EvaluateDependentExpression(
@@ -771,8 +771,7 @@ struct CompilerVersionNode : public cmGeneratorExpressionNode
     }
 
     return cmSystemTools::VersionCompare(cmSystemTools::OP_EQUAL,
-                                         parameters.front().c_str(),
-                                         compilerVersion.c_str())
+                                         parameters.front(), compilerVersion)
       ? "1"
       : "0";
   }
@@ -830,8 +829,7 @@ struct VersionNode : public cmGeneratorExpressionNode
     const GeneratorExpressionContent* /*content*/,
     cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
   {
-    return cmSystemTools::VersionCompare(Op, parameters.front().c_str(),
-                                         parameters[1].c_str())
+    return cmSystemTools::VersionCompare(Op, parameters.front(), parameters[1])
       ? "1"
       : "0";
   }
@@ -916,8 +914,8 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
     }
 
     if (context->CurrentTarget && context->CurrentTarget->IsImported()) {
-      cmProp loc = nullptr;
-      cmProp imp = nullptr;
+      cmValue loc = nullptr;
+      cmValue imp = nullptr;
       std::string suffix;
       if (context->CurrentTarget->Target->GetMappedConfig(context->Config, loc,
                                                           imp, suffix)) {
@@ -927,7 +925,7 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
         std::vector<std::string> mappedConfigs;
         std::string mapProp = cmStrCat(
           "MAP_IMPORTED_CONFIG_", cmSystemTools::UpperCase(context->Config));
-        if (cmProp mapValue = context->CurrentTarget->GetProperty(mapProp)) {
+        if (cmValue mapValue = context->CurrentTarget->GetProperty(mapProp)) {
           cmExpandList(cmSystemTools::UpperCase(*mapValue), mappedConfigs);
 
           for (auto const& param : parameters) {
@@ -1504,7 +1502,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 
     std::string result;
     bool haveProp = false;
-    if (cmProp p = target->GetProperty(propertyName)) {
+    if (cmValue p = target->GetProperty(propertyName)) {
       result = *p;
       haveProp = true;
     } else if (evaluatingLinkLibraries) {
@@ -1654,8 +1652,8 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
     std::vector<std::string> objects;
 
     if (gt->IsImported()) {
-      cmProp loc = nullptr;
-      cmProp imp = nullptr;
+      cmValue loc = nullptr;
+      cmValue imp = nullptr;
       std::string suffix;
       if (gt->Target->GetMappedConfig(context->Config, loc, imp, suffix)) {
         cmExpandList(*loc, objects);
@@ -1777,7 +1775,7 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
       testedFeatures[lang].push_back(p);
 
       if (availableFeatures.find(lang) == availableFeatures.end()) {
-        const char* featuresKnown =
+        cmValue featuresKnown =
           standardResolver.CompileFeaturesAvailable(lang, &error);
         if (!featuresKnown) {
           reportError(context, content->GetOriginalExpression(), error);
@@ -1792,7 +1790,7 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
     for (auto const& lit : testedFeatures) {
       std::vector<std::string> const& langAvailable =
         availableFeatures[lit.first];
-      cmProp standardDefault = context->LG->GetMakefile()->GetDefinition(
+      cmValue standardDefault = context->LG->GetMakefile()->GetDefinition(
         "CMAKE_" + lit.first + "_STANDARD_DEFAULT");
       for (std::string const& it : lit.second) {
         if (!cm::contains(langAvailable, it)) {
@@ -1806,7 +1804,8 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
         if (!standardResolver.HaveStandardAvailable(target, lit.first,
                                                     context->Config, it)) {
           if (evalLL) {
-            cmProp l = target->GetLanguageStandard(lit.first, context->Config);
+            cmValue l =
+              target->GetLanguageStandard(lit.first, context->Config);
             if (!l) {
               l = standardDefault;
             }

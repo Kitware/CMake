@@ -59,6 +59,6 @@ private:
   std::string UpdateCommand;
   int UpdateType;
 
-  int DetectVCS(const char* dir);
+  int DetectVCS(const std::string& dir);
   bool SelectVCS();
 };

@@ -5,6 +5,7 @@
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmTest.h"
+#include "cmValue.h"
 
 bool cmGetTestPropertyCommand(std::vector<std::string> const& args,
                               cmExecutionStatus& status)
@@ -19,12 +20,12 @@ bool cmGetTestPropertyCommand(std::vector<std::string> const& args,
   cmMakefile& mf = status.GetMakefile();
   cmTest* test = mf.GetTest(testName);
   if (test) {
-    const char* prop = nullptr;
+    cmValue prop;
     if (!args[1].empty()) {
       prop = test->GetProperty(args[1]);
     }
     if (prop) {
-      mf.AddDefinition(var, prop);
+      mf.AddDefinition(var, prop->c_str());
       return true;
     }
   }

@@ -32,20 +32,20 @@
 
 .needs_centos6_x86_64:
     dependencies:
-        - build:centos6-x86_64
+        - b:centos6-x86_64
     needs:
-        - build:centos6-x86_64
+        - b:centos6-x86_64
 
 .needs_centos7_aarch64:
     dependencies:
-        - build:centos7-aarch64
+        - b:centos7-aarch64
     needs:
-        - build:centos7-aarch64
+        - b:centos7-aarch64
 
 ### Debian
 
 .debian10:
-    image: "kitware/cmake:ci-debian10-x86_64-2021-06-28"
+    image: "kitware/cmake:ci-debian10-x86_64-2021-11-18"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
@@ -60,7 +60,7 @@
         CMake_SKIP_INSTALL: 1
 
 .debian10_aarch64:
-    image: "kitware/cmake:ci-debian10-aarch64-2021-06-28"
+    image: "kitware/cmake:ci-debian10-aarch64-2021-11-18"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
@@ -69,7 +69,7 @@
 ### Fedora
 
 .fedora34:
-    image: "kitware/cmake:ci-fedora34-x86_64-2021-06-28"
+    image: "kitware/cmake:ci-fedora34-x86_64-2021-10-05"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci/long file name for testing purposes"
@@ -208,6 +208,21 @@
 
 ### CUDA builds
 
+.cuda9.2:
+    image: "kitware/cmake:ci-cuda9.2-x86_64-2021-10-01"
+
+    variables:
+        GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
+        CMAKE_ARCH: x86_64
+        CTEST_LABELS: "CUDA"
+
+.cuda9.2_nvidia:
+    extends: .cuda9.2
+
+    variables:
+        CMAKE_CONFIGURATION: cuda9.2_nvidia
+        CMAKE_GENERATOR: "Ninja Multi-Config"
+
 .cuda10.2:
     image: "kitware/cmake:ci-cuda10.2-x86_64-2021-06-16"
 
@@ -229,6 +244,23 @@
     variables:
         CMAKE_CONFIGURATION: cuda10.2_clang
         CTEST_NO_WARNINGS_ALLOWED: 1
+
+### HIP builds
+
+.hip4.2:
+    image: "kitware/cmake:ci-hip4.2-x86_64-2021-07-09"
+
+    variables:
+        GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
+        CMAKE_ARCH: x86_64
+        CTEST_LABELS: "HIP"
+
+.hip4.2_radeon:
+    extends: .hip4.2
+
+    variables:
+        CMAKE_CONFIGURATION: hip4.2_radeon
+        CMAKE_GENERATOR: "Ninja Multi-Config"
 
 ## Tags
 
@@ -262,6 +294,13 @@
         - docker
         - linux
 
+.linux_builder_tags_radeon:
+    tags:
+        - cmake
+        - radeon
+        - docker
+        - linux
+
 .linux_builder_tags_aarch64:
     tags:
         - cmake
@@ -282,8 +321,9 @@
 .before_script_linux: &before_script_linux
     - source .gitlab/ci/env.sh
     - .gitlab/ci/cmake.sh
+    - export PATH=$PWD/.gitlab/cmake/bin:$PATH
     - .gitlab/ci/ninja.sh
-    - export PATH=$PWD/.gitlab:$PWD/.gitlab/cmake/bin:$PATH
+    - export PATH=$PWD/.gitlab:$PATH
     - cmake --version
     - ninja --version
 

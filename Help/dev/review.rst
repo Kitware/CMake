@@ -324,6 +324,19 @@ Heavier jobs require a manual trigger to run:
     * ``failed``: Restart jobs which have completed, but without success.
     * ``completed``: Restart all completed jobs.
 
+
+In order to keep job names shorter and keep as much information visible on the
+GitLab web interface as possible, jobs have a short prefix which indicates
+what its main purpose is:
+
+  * ``b:`` jobs build CMake for the purposes of running the
+    test suite.
+  * ``l:`` jobs perform "linting" on the CMake source tree such as static
+    analysis.
+  * ``p:`` jobs perform preparatory tasks for use in other jobs.
+  * ``t:`` jobs perform testing of CMake.
+  * ``u:`` jobs upload other job results to permanent locations.
+
 If the merge request topic branch is updated by a push, a new manual trigger
 using one of the above methods is needed to start CI again.
 

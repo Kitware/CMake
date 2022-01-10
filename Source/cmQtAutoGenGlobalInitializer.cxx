@@ -15,7 +15,6 @@
 #include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmProcessOutput.h"
-#include "cmProperty.h"
 #include "cmQtAutoGen.h"
 #include "cmQtAutoGenInitializer.h"
 #include "cmState.h"
@@ -23,6 +22,7 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
+#include "cmValue.h"
 
 cmQtAutoGenGlobalInitializer::Keywords::Keywords()
   : AUTOMOC("AUTOMOC")
@@ -183,10 +183,10 @@ void cmQtAutoGenGlobalInitializer::GetOrCreateGlobalTarget(
 
     // Set FOLDER property in the target
     {
-      cmProp folder =
+      cmValue folder =
         makefile->GetState()->GetGlobalProperty("AUTOGEN_TARGETS_FOLDER");
       if (folder) {
-        target->SetProperty("FOLDER", *folder);
+        target->SetProperty("FOLDER", folder);
       }
     }
   }

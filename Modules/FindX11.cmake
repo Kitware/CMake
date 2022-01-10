@@ -828,6 +828,12 @@ if (UNIX)
     X11_Xau_INCLUDE_PATH
     X11_xcb_LIB
     X11_xcb_INCLUDE_PATH
+    X11_xcb_icccm_LIB
+    X11_xcb_icccm_INCLUDE_PATH
+    X11_xcb_util_LIB
+    X11_xcb_util_INCLUDE_PATH
+    X11_xcb_xfixes_LIB
+    X11_xcb_xfixes_INCLUDE_PATH
     X11_xcb_xkb_LIB
     X11_X11_xcb_LIB
     X11_X11_xcb_INCLUDE_PATH

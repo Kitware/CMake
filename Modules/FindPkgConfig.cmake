@@ -12,11 +12,24 @@ Finds the ``pkg-config`` executable and adds the :command:`pkg_get_variable`,
 following variables will also be set:
 
 ``PKG_CONFIG_FOUND``
-  if pkg-config executable was found
-``PKG_CONFIG_EXECUTABLE``
-  pathname of the pkg-config program
+  True if a pkg-config executable was found.
+
 ``PKG_CONFIG_VERSION_STRING``
-  version of pkg-config (since CMake 2.8.8)
+  .. versionadded:: 2.8.8
+
+  The version of pkg-config that was found.
+
+``PKG_CONFIG_EXECUTABLE``
+  The pathname of the pkg-config program.
+
+``PKG_CONFIG_ARGN``
+  .. versionadded:: 3.22
+
+  A list of arguments to pass to pkg-config.
+
+Both ``PKG_CONFIG_EXECUTABLE`` and ``PKG_CONFIG_ARGN`` are initialized by the
+module, but may be overridden by the user.  See `Variables Affecting Behavior`_
+for how these variables are initialized.
 
 #]========================================]
 
@@ -29,13 +42,22 @@ set(PKG_CONFIG_VERSION 1)
 
 # find pkg-config, use PKG_CONFIG if set
 if((NOT PKG_CONFIG_EXECUTABLE) AND (NOT "$ENV{PKG_CONFIG}" STREQUAL ""))
-  set(PKG_CONFIG_EXECUTABLE "$ENV{PKG_CONFIG}" CACHE FILEPATH "pkg-config executable")
+  separate_arguments(PKG_CONFIG_FROM_ENV_SPLIT NATIVE_COMMAND PROGRAM SEPARATE_ARGS "$ENV{PKG_CONFIG}")
+  list(LENGTH PKG_CONFIG_FROM_ENV_SPLIT PKG_CONFIG_FROM_ENV_SPLIT_ARGC)
+  if(PKG_CONFIG_FROM_ENV_SPLIT_ARGC GREATER 0)
+    list(GET PKG_CONFIG_FROM_ENV_SPLIT 0 PKG_CONFIG_FROM_ENV_ARGV0)
+    if(PKG_CONFIG_FROM_ENV_SPLIT_ARGC GREATER 1)
+      list(SUBLIST PKG_CONFIG_FROM_ENV_SPLIT 1 -1 PKG_CONFIG_ARGN)
+    endif()
+    set(PKG_CONFIG_EXECUTABLE "${PKG_CONFIG_FROM_ENV_ARGV0}" CACHE FILEPATH "pkg-config executable")
+  endif()
 endif()
 
 set(PKG_CONFIG_NAMES "pkg-config")
 if(CMAKE_HOST_WIN32)
   list(PREPEND PKG_CONFIG_NAMES "pkg-config.bat")
 endif()
+list(APPEND PKG_CONFIG_NAMES "pkgconf")
 
 find_program(PKG_CONFIG_EXECUTABLE
   NAMES ${PKG_CONFIG_NAMES}
@@ -43,9 +65,12 @@ find_program(PKG_CONFIG_EXECUTABLE
   DOC "pkg-config executable")
 mark_as_advanced(PKG_CONFIG_EXECUTABLE)
 
+set(PKG_CONFIG_ARGN "${PKG_CONFIG_ARGN}" CACHE STRING "Arguments to supply to pkg-config")
+mark_as_advanced(PKG_CONFIG_ARGN)
+
 set(_PKG_CONFIG_FAILURE_MESSAGE "")
 if (PKG_CONFIG_EXECUTABLE)
-  execute_process(COMMAND ${PKG_CONFIG_EXECUTABLE} --version
+  execute_process(COMMAND ${PKG_CONFIG_EXECUTABLE} ${PKG_CONFIG_ARGN} --version
     OUTPUT_VARIABLE PKG_CONFIG_VERSION_STRING OUTPUT_STRIP_TRAILING_WHITESPACE
     ERROR_VARIABLE _PKG_CONFIG_VERSION_ERROR ERROR_STRIP_TRAILING_WHITESPACE
     RESULT_VARIABLE _PKG_CONFIG_VERSION_RESULT
@@ -53,14 +78,18 @@ if (PKG_CONFIG_EXECUTABLE)
 
   if (NOT _PKG_CONFIG_VERSION_RESULT EQUAL 0)
     string(REPLACE "\n" "\n    " _PKG_CONFIG_VERSION_ERROR "      ${_PKG_CONFIG_VERSION_ERROR}")
+    if(PKG_CONFIG_ARGN)
+      string(REPLACE ";" " " PKG_CONFIG_ARGN " ${PKG_CONFIG_ARGN}")
+    endif()
     string(APPEND _PKG_CONFIG_FAILURE_MESSAGE
       "The command\n"
-      "      \"${PKG_CONFIG_EXECUTABLE}\" --version\n"
+      "      \"${PKG_CONFIG_EXECUTABLE}\"${PKG_CONFIG_ARGN} --version\n"
       "    failed with output:\n${PKG_CONFIG_VERSION_STRING}\n"
       "    stderr: \n${_PKG_CONFIG_VERSION_ERROR}\n"
       "    result: \n${_PKG_CONFIG_VERSION_RESULT}"
       )
     set(PKG_CONFIG_EXECUTABLE "")
+    set(PKG_CONFIG_ARGN "")
     unset(PKG_CONFIG_VERSION_STRING)
   endif ()
   unset(_PKG_CONFIG_VERSION_RESULT)
@@ -79,10 +108,18 @@ set(PKG_CONFIG_FOUND "${PKGCONFIG_FOUND}")
 
 # Unsets the given variables
 macro(_pkgconfig_unset var)
+  # Clear normal variable (possibly set by project code).
+  unset(${var})
+  # Store as cache variable.
+  # FIXME: Add a policy to switch to a normal variable.
   set(${var} "" CACHE INTERNAL "")
 endmacro()
 
 macro(_pkgconfig_set var value)
+  # Clear normal variable (possibly set by project code).
+  unset(${var})
+  # Store as cache variable.
+  # FIXME: Add a policy to switch to a normal variable.
   set(${var} ${value} CACHE INTERNAL "")
 endmacro()
 
@@ -91,7 +128,7 @@ macro(_pkgconfig_invoke _pkglist _prefix _varname _regexp)
   set(_pkgconfig_invoke_result)
 
   execute_process(
-    COMMAND ${PKG_CONFIG_EXECUTABLE} ${ARGN} ${_pkglist}
+    COMMAND ${PKG_CONFIG_EXECUTABLE} ${PKG_CONFIG_ARGN} ${ARGN} ${_pkglist}
     OUTPUT_VARIABLE _pkgconfig_invoke_result
     RESULT_VARIABLE _pkgconfig_failed
     OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -385,12 +422,24 @@ macro(_pkg_set_path_internal)
     unset(_lib_dirs)
     unset(_pkgconfig_path)
   endif()
+
+  # Tell pkg-config not to strip any -L paths so we can search them all.
+  if(DEFINED ENV{PKG_CONFIG_ALLOW_SYSTEM_LIBS})
+    set(_pkgconfig_allow_system_libs_old "$ENV{PKG_CONFIG_ALLOW_SYSTEM_LIBS}")
+  else()
+    unset(_pkgconfig_allow_system_libs_old)
+  endif()
+  set(ENV{PKG_CONFIG_ALLOW_SYSTEM_LIBS} 0)
 endmacro()
 
 macro(_pkg_restore_path_internal)
   if(NOT _extra_paths STREQUAL "")
     # Restore the environment variable
     set(ENV{PKG_CONFIG_PATH} "${_pkgconfig_path_old}")
+  endif()
+  if(DEFINED _pkgconfig_allow_system_libs_old)
+    set(ENV{PKG_CONFIG_ALLOW_SYSTEM_LIBS} "${_pkgconfig_allow_system_libs_old}")
+    unset(_pkgconfig_allow_system_libs_old)
   endif()
 
   unset(_extra_paths)
@@ -533,7 +582,7 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
 
       # execute the query
       execute_process(
-        COMMAND ${PKG_CONFIG_EXECUTABLE} ${_pkg_check_modules_exist_query}
+        COMMAND ${PKG_CONFIG_EXECUTABLE} ${PKG_CONFIG_ARGN} ${_pkg_check_modules_exist_query}
         RESULT_VARIABLE _pkgconfig_retval
         ERROR_VARIABLE _pkgconfig_error
         ERROR_STRIP_TRAILING_WHITESPACE)
@@ -885,12 +934,30 @@ Variables Affecting Behavior
 
 .. variable:: PKG_CONFIG_EXECUTABLE
 
-  This can be set to the path of the pkg-config executable.  If not provided,
-  it will be set by the module as a result of calling :command:`find_program`
-  internally.
+  This cache variable can be set to the path of the pkg-config executable.
+  :command:`find_program` is called internally by the module with this
+  variable.
 
   .. versionadded:: 3.1
-    The ``PKG_CONFIG`` environment variable can be used as a hint.
+    The ``PKG_CONFIG`` environment variable can be used as a hint if
+    ``PKG_CONFIG_EXECUTABLE`` has not yet been set.
+
+  .. versionchanged:: 3.22
+    If the ``PKG_CONFIG`` environment variable is set, only the first
+    argument is taken from it when using it as a hint.
+
+.. variable:: PKG_CONFIG_ARGN
+
+  .. versionadded:: 3.22
+
+  This cache variable can be set to a list of arguments to additionally pass
+  to pkg-config if needed. If not provided, it will be initialized from the
+  ``PKG_CONFIG`` environment variable, if set. The first argument in that
+  environment variable is assumed to be the pkg-config program, while all
+  remaining arguments after that are used to initialize ``PKG_CONFIG_ARGN``.
+  If no such environment variable is defined, ``PKG_CONFIG_ARGN`` is
+  initialized to an empty string. The module does not update the variable once
+  it has been set in the cache.
 
 .. variable:: PKG_CONFIG_USE_CMAKE_PREFIX_PATH
 

@@ -4,8 +4,6 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <string>
-
 class cmProperty
 {
 public:
@@ -22,15 +20,3 @@ public:
     INSTALL
   };
 };
-
-using cmProp = const std::string*;
-
-inline const char* cmToCStr(cmProp p)
-{
-  return p ? p->c_str() : nullptr;
-}
-
-inline const char* cmToCStrSafe(cmProp p)
-{
-  return p ? p->c_str() : "";
-}

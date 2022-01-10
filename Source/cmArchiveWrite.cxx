@@ -250,6 +250,9 @@ cmArchiveWrite::cmArchiveWrite(std::ostream& os, Compress c,
 
 bool cmArchiveWrite::Open()
 {
+  if (!this->Error.empty()) {
+    return false;
+  }
   if (archive_write_open(
         this->Archive, this, nullptr,
         reinterpret_cast<archive_write_callback*>(&Callback::Write),

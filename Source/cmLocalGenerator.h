@@ -20,8 +20,8 @@
 #include "cmMessageType.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
-#include "cmProperty.h"
 #include "cmStateSnapshot.h"
+#include "cmValue.h"
 
 class cmCompiledGeneratorExpression;
 class cmComputeLinkInformation;
@@ -171,6 +171,8 @@ public:
                                             cmGeneratorTarget* target,
                                             const std::string& config,
                                             const std::string& lang);
+  bool AppendLWYUFlags(std::string& flags, const cmGeneratorTarget* target,
+                       const std::string& lang);
 
   enum class IncludePathStyle
   {
@@ -245,7 +247,7 @@ public:
   void AppendFeatureOptions(std::string& flags, const std::string& lang,
                             const char* feature);
 
-  cmProp GetFeature(const std::string& feature, const std::string& config);
+  cmValue GetFeature(const std::string& feature, const std::string& config);
 
   /** \brief Get absolute path to dependency \a name
    *
@@ -545,7 +547,7 @@ public:
   void CreateEvaluationFileOutputs(const std::string& config);
   void ProcessEvaluationFiles(std::vector<std::string>& generatedFiles);
 
-  cmProp GetRuleLauncher(cmGeneratorTarget* target, const std::string& prop);
+  cmValue GetRuleLauncher(cmGeneratorTarget* target, const std::string& prop);
 
 protected:
   // The default implementation ignores the IncludePathStyle and always
@@ -587,7 +589,7 @@ protected:
   std::string::size_type ObjectPathMax;
   std::set<std::string> ObjectMaxPathViolations;
 
-  std::set<std::string> EnvCPATH;
+  std::vector<std::string> EnvCPATH;
 
   using GeneratorTargetMap =
     std::unordered_map<std::string, cmGeneratorTarget*>;
@@ -649,7 +651,7 @@ private:
 
   void ComputeObjectMaxPath();
   bool AllAppleArchSysrootsAreTheSame(const std::vector<std::string>& archs,
-                                      const char* sysroot);
+                                      cmValue sysroot);
 
   void CopyPchCompilePdb(const std::string& config, cmGeneratorTarget* target,
                          const std::string& ReuseFrom,
@@ -657,16 +659,16 @@ private:
                          std::vector<std::string> const& extensions);
   void IncludeFileInUnitySources(cmGeneratedFileStream& unity_file,
                                  std::string const& sf_full_path,
-                                 cmProp beforeInclude, cmProp afterInclude,
-                                 cmProp uniqueIdName) const;
+                                 cmValue beforeInclude, cmValue afterInclude,
+                                 cmValue uniqueIdName) const;
   std::vector<std::string> AddUnityFilesModeAuto(
     cmGeneratorTarget* target, std::string const& lang,
-    std::vector<cmSourceFile*> const& filtered_sources, cmProp beforeInclude,
-    cmProp afterInclude, std::string const& filename_base, size_t batchSize);
+    std::vector<cmSourceFile*> const& filtered_sources, cmValue beforeInclude,
+    cmValue afterInclude, std::string const& filename_base, size_t batchSize);
   std::vector<std::string> AddUnityFilesModeGroup(
     cmGeneratorTarget* target, std::string const& lang,
-    std::vector<cmSourceFile*> const& filtered_sources, cmProp beforeInclude,
-    cmProp afterInclude, std::string const& filename_base);
+    std::vector<cmSourceFile*> const& filtered_sources, cmValue beforeInclude,
+    cmValue afterInclude, std::string const& filename_base);
 };
 
 #if !defined(CMAKE_BOOTSTRAP)

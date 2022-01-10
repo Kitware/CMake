@@ -151,6 +151,7 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
                          [WORKING_DIRECTORY dir]
                          [TEST_PREFIX prefix]
                          [TEST_SUFFIX suffix]
+                         [TEST_FILTER expr]
                          [NO_PRETTY_TYPES] [NO_PRETTY_VALUES]
                          [PROPERTIES name1 value1...]
                          [TEST_LIST var]
@@ -203,6 +204,15 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
     Similar to ``TEST_PREFIX`` except the ``suffix`` is appended to the name of
     every discovered test case.  Both ``TEST_PREFIX`` and ``TEST_SUFFIX`` may
     be specified.
+
+  ``TEST_FILTER expr``
+    .. versionadded:: 3.22
+
+    Filter expression to pass as a ``--gtest_filter`` argument during test
+    discovery.  Note that the expression is a wildcard-based format that
+    matches against the original test names as used by gtest.  For type or
+    value-parameterized tests, these names may be different to the potentially
+    pretty-printed test names that ``ctest`` uses.
 
   ``NO_PRETTY_TYPES``
     By default, the type index of type-parameterized tests is replaced by the
@@ -411,7 +421,7 @@ function(gtest_discover_tests TARGET)
     ""
     "NO_PRETTY_TYPES;NO_PRETTY_VALUES"
     "TEST_PREFIX;TEST_SUFFIX;WORKING_DIRECTORY;TEST_LIST;DISCOVERY_TIMEOUT;XML_OUTPUT_DIR;DISCOVERY_MODE"
-    "EXTRA_ARGS;PROPERTIES"
+    "EXTRA_ARGS;PROPERTIES;TEST_FILTER"
     ${ARGN}
   )
 
@@ -475,6 +485,7 @@ function(gtest_discover_tests TARGET)
               -D "TEST_PROPERTIES=${_PROPERTIES}"
               -D "TEST_PREFIX=${_TEST_PREFIX}"
               -D "TEST_SUFFIX=${_TEST_SUFFIX}"
+              -D "TEST_FILTER=${_TEST_FILTER}"
               -D "NO_PRETTY_TYPES=${_NO_PRETTY_TYPES}"
               -D "NO_PRETTY_VALUES=${_NO_PRETTY_VALUES}"
               -D "TEST_LIST=${_TEST_LIST}"
@@ -505,7 +516,8 @@ function(gtest_discover_tests TARGET)
     string(CONCAT ctest_include_content
       "if(EXISTS \"$<TARGET_FILE:${TARGET}>\")"                                    "\n"
       "  if(NOT EXISTS \"${ctest_tests_file}\" OR"                                 "\n"
-      "     NOT \"${ctest_tests_file}\" IS_NEWER_THAN \"$<TARGET_FILE:${TARGET}>\")" "\n"
+      "     NOT \"${ctest_tests_file}\" IS_NEWER_THAN \"$<TARGET_FILE:${TARGET}>\" OR\n"
+      "     NOT \"${ctest_tests_file}\" IS_NEWER_THAN \"\${CMAKE_CURRENT_LIST_FILE}\")\n"
       "    include(\"${_GOOGLETEST_DISCOVER_TESTS_SCRIPT}\")"                      "\n"
       "    gtest_discover_tests_impl("                                             "\n"
       "      TEST_EXECUTABLE"        " [==[" "$<TARGET_FILE:${TARGET}>"   "]==]"   "\n"
@@ -515,6 +527,7 @@ function(gtest_discover_tests TARGET)
       "      TEST_PROPERTIES"        " [==[" "${_PROPERTIES}"             "]==]"   "\n"
       "      TEST_PREFIX"            " [==[" "${_TEST_PREFIX}"            "]==]"   "\n"
       "      TEST_SUFFIX"            " [==[" "${_TEST_SUFFIX}"            "]==]"   "\n"
+      "      TEST_FILTER"            " [==[" "${_TEST_FILTER}"            "]==]"   "\n"
       "      NO_PRETTY_TYPES"        " [==[" "${_NO_PRETTY_TYPES}"        "]==]"   "\n"
       "      NO_PRETTY_VALUES"       " [==[" "${_NO_PRETTY_VALUES}"       "]==]"   "\n"
       "      TEST_LIST"              " [==[" "${_TEST_LIST}"              "]==]"   "\n"

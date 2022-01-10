@@ -344,6 +344,26 @@ if(RunCMake_GENERATOR MATCHES "Unix Makefiles" OR RunCMake_GENERATOR MATCHES "Ni
   run_EnvironmentExportCompileCommands()
 endif()
 
+function(run_EnvironmentBuildType)
+  set(ENV{CMAKE_BUILD_TYPE} "BuildTypeEnv")
+  run_cmake(EnvBuildType)
+  run_cmake_with_options(EnvBuildTypeIgnore -DCMAKE_BUILD_TYPE=BuildTypeOpt)
+  unset(ENV{CMAKE_BUILD_TYPE})
+endfunction()
+
+function(run_EnvironmentConfigTypes)
+  set(ENV{CMAKE_CONFIGURATION_TYPES} "ConfigTypesEnv")
+  run_cmake(EnvConfigTypes)
+  run_cmake_with_options(EnvConfigTypesIgnore -DCMAKE_CONFIGURATION_TYPES=ConfigTypesOpt)
+  unset(ENV{CMAKE_CONFIGURATION_TYPES})
+endfunction()
+
+if(RunCMake_GENERATOR MATCHES "Make|^Ninja$")
+  run_EnvironmentBuildType()
+elseif(RunCMake_GENERATOR MATCHES "Ninja Multi-Config|Visual Studio|Xcode")
+  run_EnvironmentConfigTypes()
+endif()
+
 function(run_EnvironmentToolchain)
   set(ENV{CMAKE_TOOLCHAIN_FILE} "${RunCMake_SOURCE_DIR}/EnvToolchain-toolchain.cmake")
   run_cmake(EnvToolchainAbsolute)
@@ -627,9 +647,10 @@ run_cmake_command(E_cat_directory
 
 file(WRITE "${out}/first_file.txt" "first file to append\n")
 file(WRITE "${out}/second_file.txt" "second file to append\n")
+file(WRITE "${out}/empty_file.txt" "")
 file(WRITE "${out}/unicode_file.txt" "àéùç - 한국어") # Korean in Korean
 run_cmake_command(E_cat_good_cat
-  ${CMAKE_COMMAND} -E cat "${out}/first_file.txt" "${out}/second_file.txt" "${out}/unicode_file.txt")
+  ${CMAKE_COMMAND} -E cat "${out}/first_file.txt" "${out}/second_file.txt" "${out}/empty_file.txt" "${out}/unicode_file.txt")
 unset(out)
 
 run_cmake_command(E_cat_good_binary_cat
@@ -898,3 +919,10 @@ set(ProfilingTestOutput ${RunCMake_TEST_BINARY_DIR}/output.json)
 set(RunCMake_TEST_OPTIONS --profiling-format=google-trace --profiling-output=${ProfilingTestOutput})
 run_cmake(ProfilingTest)
 unset(RunCMake_TEST_OPTIONS)
+
+if(RunCMake_GENERATOR MATCHES "^Visual Studio 10 2010")
+  run_cmake_with_options(DeprecateVS10-WARN-ON -DCMAKE_WARN_VS10=ON)
+  unset(ENV{CMAKE_WARN_VS10})
+  run_cmake(DeprecateVS10-WARN-ON)
+  run_cmake_with_options(DeprecateVS10-WARN-OFF -DCMAKE_WARN_VS10=OFF)
+endif()

@@ -9,6 +9,7 @@
 #include "cmCPackLog.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 #include "cmXMLWriter.h"
 
 cmCPackPKGGenerator::cmCPackPKGGenerator()
@@ -56,7 +57,7 @@ void cmCPackPKGGenerator::CreateBackground(const char* themeName,
   std::string opt = (themeName == nullptr)
     ? cmStrCat("CPACK_", genName, "_BACKGROUND")
     : cmStrCat("CPACK_", genName, "_BACKGROUND_", paramSuffix);
-  const char* bgFileName = this->GetOption(opt);
+  cmValue bgFileName = this->GetOption(opt);
   if (bgFileName == nullptr) {
     return;
   }
@@ -78,7 +79,7 @@ void cmCPackPKGGenerator::CreateBackground(const char* themeName,
 
   xout.Attribute("file", bgFileName);
 
-  const char* param = this->GetOption(cmStrCat(opt, "_ALIGNMENT"));
+  cmValue param = this->GetOption(cmStrCat(opt, "_ALIGNMENT"));
   if (param != nullptr) {
     xout.Attribute("alignment", param);
   }
@@ -166,7 +167,7 @@ void cmCPackPKGGenerator::WriteDistributionFile(const char* metapackageFile,
   // Dark Aqua
   this->CreateBackground("darkAqua", metapackageFile, genName, xout);
 
-  this->SetOption("CPACK_PACKAGEMAKER_CHOICES", choiceOut.str().c_str());
+  this->SetOption("CPACK_PACKAGEMAKER_CHOICES", choiceOut.str());
 
   // Create the distribution.dist file in the metapackage to turn it
   // into a distribution package.
@@ -315,7 +316,7 @@ bool cmCPackPKGGenerator::CopyCreateResourceFile(const std::string& name,
 {
   std::string uname = cmSystemTools::UpperCase(name);
   std::string cpackVar = "CPACK_RESOURCE_FILE_" + uname;
-  const char* inFileName = this->GetOption(cpackVar);
+  cmValue inFileName = this->GetOption(cpackVar);
   if (!inFileName) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "CPack option: " << cpackVar.c_str()
@@ -347,11 +348,10 @@ bool cmCPackPKGGenerator::CopyCreateResourceFile(const std::string& name,
 
   // Set this so that distribution.dist gets the right name (without
   // the path).
-  this->SetOption("CPACK_RESOURCE_FILE_" + uname + "_NOPATH",
-                  (name + ext).c_str());
+  this->SetOption("CPACK_RESOURCE_FILE_" + uname + "_NOPATH", (name + ext));
 
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,
-                "Configure file: " << (inFileName ? inFileName : "(NULL)")
+                "Configure file: " << (inFileName ? *inFileName : "(NULL)")
                                    << " to " << destFileName << std::endl);
   this->ConfigureFile(inFileName, destFileName);
   return true;

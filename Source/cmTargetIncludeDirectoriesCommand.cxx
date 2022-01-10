@@ -63,7 +63,7 @@ bool TargetIncludeDirectoriesImpl::HandleDirectContent(
   bool system)
 {
   cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-  tgt->InsertInclude(this->Join(content), lfbt, prepend);
+  tgt->InsertInclude(BT<std::string>(this->Join(content), lfbt), prepend);
   if (system) {
     std::string prefix = this->Makefile->GetCurrentSourceDirectory() + "/";
     std::set<std::string> sdirs;

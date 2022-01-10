@@ -14,10 +14,10 @@
 #include "cmAlgorithms.h"
 #include "cmListFileCache.h"
 #include "cmPolicies.h"
-#include "cmProperty.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmTargetLinkLibraryType.h"
+#include "cmValue.h"
 
 class cmCustomCommand;
 class cmGlobalGenerator;
@@ -170,20 +170,21 @@ public:
 
   //! Set/Get a property of this target file
   void SetProperty(const std::string& prop, const char* value);
+  void SetProperty(const std::string& prop, cmValue value);
   void SetProperty(const std::string& prop, const std::string& value)
   {
-    this->SetProperty(prop, value.c_str());
+    this->SetProperty(prop, cmValue(value));
   }
   void AppendProperty(const std::string& prop, const std::string& value,
                       bool asString = false);
   //! Might return a nullptr if the property is not set or invalid
-  cmProp GetProperty(const std::string& prop) const;
+  cmValue GetProperty(const std::string& prop) const;
   //! Always returns a valid pointer
   std::string const& GetSafeProperty(std::string const& prop) const;
   bool GetPropertyAsBool(const std::string& prop) const;
   void CheckProperty(const std::string& prop, cmMakefile* context) const;
-  cmProp GetComputedProperty(const std::string& prop, cmMessenger* messenger,
-                             cmListFileBacktrace const& context) const;
+  cmValue GetComputedProperty(const std::string& prop, cmMessenger* messenger,
+                              cmListFileBacktrace const& context) const;
   //! Get all properties
   cmPropertyMap const& GetProperties() const;
 
@@ -198,8 +199,8 @@ public:
   bool IsPerConfig() const;
   bool CanCompileSources() const;
 
-  bool GetMappedConfig(std::string const& desired_config, cmProp& loc,
-                       cmProp& imp, std::string& suffix) const;
+  bool GetMappedConfig(std::string const& desired_config, cmValue& loc,
+                       cmValue& imp, std::string& suffix) const;
 
   //! Return whether this target is an executable with symbol exports enabled.
   bool IsExecutableWithExports() const;
@@ -216,18 +217,12 @@ public:
   //! Get a backtrace from the creation of the target.
   cmListFileBacktrace const& GetBacktrace() const;
 
-  void InsertInclude(std::string const& entry, cmListFileBacktrace const& bt,
-                     bool before = false);
-  void InsertCompileOption(std::string const& entry,
-                           cmListFileBacktrace const& bt, bool before = false);
-  void InsertCompileDefinition(std::string const& entry,
-                               cmListFileBacktrace const& bt);
-  void InsertLinkOption(std::string const& entry,
-                        cmListFileBacktrace const& bt, bool before = false);
-  void InsertLinkDirectory(std::string const& entry,
-                           cmListFileBacktrace const& bt, bool before = false);
-  void InsertPrecompileHeader(std::string const& entry,
-                              cmListFileBacktrace const& bt);
+  void InsertInclude(BT<std::string> const& entry, bool before = false);
+  void InsertCompileOption(BT<std::string> const& entry, bool before = false);
+  void InsertCompileDefinition(BT<std::string> const& entry);
+  void InsertLinkOption(BT<std::string> const& entry, bool before = false);
+  void InsertLinkDirectory(BT<std::string> const& entry, bool before = false);
+  void InsertPrecompileHeader(BT<std::string> const& entry);
 
   void AppendBuildInterfaceIncludes();
 
@@ -237,6 +232,9 @@ public:
   void AddSystemIncludeDirectories(std::set<std::string> const& incs);
   std::set<std::string> const& GetSystemIncludeDirectories() const;
 
+  void AddInstallIncludeDirectories(cmStringRange const& incs);
+  cmStringRange GetInstallIncludeDirectoriesEntries() const;
+
   BTs<std::string> const* GetLanguageStandardProperty(
     const std::string& propertyName) const;
 
@@ -244,32 +242,23 @@ public:
                                    std::string const& value,
                                    const std::string& feature);
 
-  cmStringRange GetIncludeDirectoriesEntries() const;
-  cmBacktraceRange GetIncludeDirectoriesBacktraces() const;
+  cmBTStringRange GetIncludeDirectoriesEntries() const;
 
-  cmStringRange GetCompileOptionsEntries() const;
-  cmBacktraceRange GetCompileOptionsBacktraces() const;
+  cmBTStringRange GetCompileOptionsEntries() const;
 
-  cmStringRange GetCompileFeaturesEntries() const;
-  cmBacktraceRange GetCompileFeaturesBacktraces() const;
+  cmBTStringRange GetCompileFeaturesEntries() const;
 
-  cmStringRange GetCompileDefinitionsEntries() const;
-  cmBacktraceRange GetCompileDefinitionsBacktraces() const;
+  cmBTStringRange GetCompileDefinitionsEntries() const;
 
-  cmStringRange GetPrecompileHeadersEntries() const;
-  cmBacktraceRange GetPrecompileHeadersBacktraces() const;
+  cmBTStringRange GetPrecompileHeadersEntries() const;
 
-  cmStringRange GetSourceEntries() const;
-  cmBacktraceRange GetSourceBacktraces() const;
+  cmBTStringRange GetSourceEntries() const;
 
-  cmStringRange GetLinkOptionsEntries() const;
-  cmBacktraceRange GetLinkOptionsBacktraces() const;
+  cmBTStringRange GetLinkOptionsEntries() const;
 
-  cmStringRange GetLinkDirectoriesEntries() const;
-  cmBacktraceRange GetLinkDirectoriesBacktraces() const;
+  cmBTStringRange GetLinkDirectoriesEntries() const;
 
-  cmStringRange GetLinkImplementationEntries() const;
-  cmBacktraceRange GetLinkImplementationBacktraces() const;
+  cmBTStringRange GetLinkImplementationEntries() const;
 
   std::string ImportedGetFullPath(const std::string& config,
                                   cmStateEnums::ArtifactType artifact) const;
@@ -280,6 +269,9 @@ public:
   };
 
 private:
+  template <typename ValueType>
+  void StoreProperty(const std::string& prop, ValueType value);
+
   // Internal representation details.
   friend class cmGeneratorTarget;
 
