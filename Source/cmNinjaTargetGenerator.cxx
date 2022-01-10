@@ -31,7 +31,6 @@
 #include "cmNinjaNormalTargetGenerator.h"
 #include "cmNinjaUtilityTargetGenerator.h"
 #include "cmOutputConverter.h"
-#include "cmProperty.h"
 #include "cmRange.h"
 #include "cmRulePlaceholderExpander.h"
 #include "cmSourceFile.h"
@@ -40,6 +39,7 @@
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 #include "cmake.h"
 
 std::unique_ptr<cmNinjaTargetGenerator> cmNinjaTargetGenerator::New(
@@ -224,13 +224,13 @@ std::string cmNinjaTargetGenerator::ComputeFlagsForObject(
     this->LocalGenerator, config, this->GeneratorTarget, language);
 
   const std::string COMPILE_FLAGS("COMPILE_FLAGS");
-  if (cmProp cflags = source->GetProperty(COMPILE_FLAGS)) {
+  if (cmValue cflags = source->GetProperty(COMPILE_FLAGS)) {
     this->LocalGenerator->AppendFlags(
       flags, genexInterpreter.Evaluate(*cflags, COMPILE_FLAGS));
   }
 
   const std::string COMPILE_OPTIONS("COMPILE_OPTIONS");
-  if (cmProp coptions = source->GetProperty(COMPILE_OPTIONS)) {
+  if (cmValue coptions = source->GetProperty(COMPILE_OPTIONS)) {
     this->LocalGenerator->AppendCompileOptions(
       flags, genexInterpreter.Evaluate(*coptions, COMPILE_OPTIONS));
   }
@@ -290,14 +290,14 @@ std::string cmNinjaTargetGenerator::ComputeDefines(cmSourceFile const* source,
   }
 
   const std::string COMPILE_DEFINITIONS("COMPILE_DEFINITIONS");
-  if (cmProp compile_defs = source->GetProperty(COMPILE_DEFINITIONS)) {
+  if (cmValue compile_defs = source->GetProperty(COMPILE_DEFINITIONS)) {
     this->LocalGenerator->AppendDefines(
       defines, genexInterpreter.Evaluate(*compile_defs, COMPILE_DEFINITIONS));
   }
 
   std::string defPropName =
     cmStrCat("COMPILE_DEFINITIONS_", cmSystemTools::UpperCase(config));
-  if (cmProp config_compile_defs = source->GetProperty(defPropName)) {
+  if (cmValue config_compile_defs = source->GetProperty(defPropName)) {
     this->LocalGenerator->AppendDefines(
       defines,
       genexInterpreter.Evaluate(*config_compile_defs, COMPILE_DEFINITIONS));
@@ -318,7 +318,7 @@ std::string cmNinjaTargetGenerator::ComputeIncludes(
     this->LocalGenerator, config, this->GeneratorTarget, language);
 
   const std::string INCLUDE_DIRECTORIES("INCLUDE_DIRECTORIES");
-  if (cmProp cincludes = source->GetProperty(INCLUDE_DIRECTORIES)) {
+  if (cmValue cincludes = source->GetProperty(INCLUDE_DIRECTORIES)) {
     this->LocalGenerator->AppendIncludeDirectories(
       includes, genexInterpreter.Evaluate(*cincludes, INCLUDE_DIRECTORIES),
       *source);
@@ -638,7 +638,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
     cmLocalGenerator::SHELL);
 
   std::string launcher;
-  cmProp val = this->GetLocalGenerator()->GetRuleLauncher(
+  cmValue val = this->GetLocalGenerator()->GetRuleLauncher(
     this->GetGeneratorTarget(), "RULE_LAUNCH_COMPILE");
   if (cmNonempty(val)) {
     launcher = cmStrCat(*val, ' ');
@@ -771,11 +771,14 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
     if (!mf->GetIsSourceFileTryCompile()) {
       rule.DepType = "gcc";
       rule.DepFile = "$DEP_FILE";
-      cmProp d = mf->GetDefinition("CMAKE_C_COMPILER");
+      cmValue d = mf->GetDefinition("CMAKE_C_COMPILER");
       const std::string cl =
         d ? *d : mf->GetSafeDefinition("CMAKE_CXX_COMPILER");
-      cldeps = cmStrCat('"', cmSystemTools::GetCMClDepsCommand(), "\" ", lang,
-                        ' ', vars.Source, " $DEP_FILE $out \"",
+      std::string cmcldepsPath;
+      cmSystemTools::GetShortPath(cmSystemTools::GetCMClDepsCommand(),
+                                  cmcldepsPath);
+      cldeps = cmStrCat(cmcldepsPath, ' ', lang, ' ', vars.Source,
+                        " $DEP_FILE $out \"",
                         mf->GetSafeDefinition("CMAKE_CL_SHOWINCLUDES_PREFIX"),
                         "\" \"", cl, "\" ");
     }
@@ -840,7 +843,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
        lang == "HIP" || lang == "ISPC" || lang == "OBJC" ||
        lang == "OBJCXX")) {
     std::string const clauncher_prop = cmStrCat(lang, "_COMPILER_LAUNCHER");
-    cmProp clauncher = this->GeneratorTarget->GetProperty(clauncher_prop);
+    cmValue clauncher = this->GeneratorTarget->GetProperty(clauncher_prop);
     if (cmNonempty(clauncher)) {
       compilerLauncher = *clauncher;
     }
@@ -850,10 +853,10 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
   if (!compileCmds.empty() &&
       (lang == "C" || lang == "CXX" || lang == "OBJC" || lang == "OBJCXX")) {
     std::string const tidy_prop = cmStrCat(lang, "_CLANG_TIDY");
-    cmProp tidy = this->GeneratorTarget->GetProperty(tidy_prop);
-    cmProp iwyu = nullptr;
-    cmProp cpplint = nullptr;
-    cmProp cppcheck = nullptr;
+    cmValue tidy = this->GeneratorTarget->GetProperty(tidy_prop);
+    cmValue iwyu = nullptr;
+    cmValue cpplint = nullptr;
+    cmValue cppcheck = nullptr;
     if (lang == "C" || lang == "CXX") {
       std::string const iwyu_prop = cmStrCat(lang, "_INCLUDE_WHAT_YOU_USE");
       iwyu = this->GeneratorTarget->GetProperty(iwyu_prop);
@@ -874,12 +877,30 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
         compilerLauncher.clear();
       }
       if (cmNonempty(iwyu)) {
-        run_iwyu += cmStrCat(" --iwyu=",
-                             this->GetLocalGenerator()->EscapeForShell(*iwyu));
+        run_iwyu += " --iwyu=";
+
+        // Only add --driver-mode if it is not already specified, as adding
+        // it unconditionally might override a user-specified driver-mode
+        if (iwyu.Get()->find("--driver-mode=") == std::string::npos) {
+          cmValue p = this->Makefile->GetDefinition(
+            cmStrCat("CMAKE_", lang, "_INCLUDE_WHAT_YOU_USE_DRIVER_MODE"));
+          std::string driverMode;
+
+          if (cmNonempty(p)) {
+            driverMode = *p;
+          } else {
+            driverMode = lang == "C" ? "gcc" : "g++";
+          }
+
+          run_iwyu += this->LocalGenerator->EscapeForShell(
+            cmStrCat(*iwyu, ";--driver-mode=", driverMode));
+        } else {
+          run_iwyu += this->LocalGenerator->EscapeForShell(*iwyu);
+        }
       }
       if (cmNonempty(tidy)) {
         run_iwyu += " --tidy=";
-        cmProp p = this->Makefile->GetDefinition(
+        cmValue p = this->Makefile->GetDefinition(
           cmStrCat("CMAKE_", lang, "_CLANG_TIDY_DRIVER_MODE"));
         std::string driverMode;
         if (cmNonempty(p)) {
@@ -986,7 +1007,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
       config);
   }
   if (firstForConfig) {
-    cmProp pchExtension =
+    cmValue pchExtension =
       this->GetMakefile()->GetDefinition("CMAKE_PCH_EXTENSION");
 
     std::vector<cmSourceFile const*> externalObjects;
@@ -994,8 +1015,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
     for (cmSourceFile const* sf : externalObjects) {
       auto objectFileName = this->GetGlobalGenerator()->ExpandCFGIntDir(
         this->ConvertToNinjaPath(sf->GetFullPath()), config);
-      if (!cmSystemTools::StringEndsWith(objectFileName,
-                                         cmToCStr(pchExtension))) {
+      if (!cmHasSuffix(objectFileName, pchExtension)) {
         this->Configs[config].Objects.push_back(objectFileName);
       }
     }
@@ -1092,7 +1112,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
                "output-file-map.json");
     std::string const targetSwiftDepsPath = [this, config]() -> std::string {
       cmGeneratorTarget const* target = this->GeneratorTarget;
-      if (cmProp name = target->GetProperty("Swift_DEPENDENCIES_FILE")) {
+      if (cmValue name = target->GetProperty("Swift_DEPENDENCIES_FILE")) {
         return *name;
       }
       return this->ConvertToNinjaPath(
@@ -1216,7 +1236,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   // build response file name
   std::string cmakeLinkVar = cmStrCat(cmakeVarLang, "_RESPONSE_FILE_FLAG");
 
-  cmProp flag = this->GetMakefile()->GetDefinition(cmakeLinkVar);
+  cmValue flag = this->GetMakefile()->GetDefinition(cmakeLinkVar);
 
   bool const lang_supports_response =
     !(language == "RC" || (language == "CUDA" && !flag));
@@ -1258,10 +1278,9 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
 
   objBuild.Outputs.push_back(objectFileName);
   if (firstForConfig) {
-    cmProp pchExtension =
+    cmValue pchExtension =
       this->GetMakefile()->GetDefinition("CMAKE_PCH_EXTENSION");
-    if (!cmSystemTools::StringEndsWith(objectFileName,
-                                       cmToCStr(pchExtension))) {
+    if (!cmHasSuffix(objectFileName, pchExtension)) {
       // Add this object to the list of object files.
       this->Configs[config].Objects.push_back(objectFileName);
     }
@@ -1299,7 +1318,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     }
   }
 
-  if (cmProp objectDeps = source->GetProperty("OBJECT_DEPENDS")) {
+  if (cmValue objectDeps = source->GetProperty("OBJECT_DEPENDS")) {
     std::vector<std::string> objDepList = cmExpandedList(*objectDeps);
     std::copy(objDepList.begin(), objDepList.end(),
               std::back_inserter(depList));
@@ -1445,13 +1464,13 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
       cmSystemTools::GetFilenameWithoutLastExtension(objectName);
     ispcSource = cmSystemTools::GetFilenameWithoutLastExtension(ispcSource);
 
-    cmProp ispcSuffixProp =
+    cmValue ispcSuffixProp =
       this->GeneratorTarget->GetProperty("ISPC_HEADER_SUFFIX");
     assert(ispcSuffixProp);
 
     std::string ispcHeaderDirectory =
       this->GeneratorTarget->GetObjectDirectory(config);
-    if (cmProp prop =
+    if (cmValue prop =
           this->GeneratorTarget->GetProperty("ISPC_HEADER_DIRECTORY")) {
       ispcHeaderDirectory =
         cmStrCat(this->LocalGenerator->GetBinaryDirectory(), '/', *prop);
@@ -1502,7 +1521,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
                                            objBuild, commandLineLengthLimit);
   }
 
-  if (cmProp objectOutputs = source->GetProperty("OBJECT_OUTPUTS")) {
+  if (cmValue objectOutputs = source->GetProperty("OBJECT_OUTPUTS")) {
     std::string evaluatedObjectOutputs = cmGeneratorExpression::Evaluate(
       *objectOutputs, this->LocalGenerator, config);
 
@@ -1582,13 +1601,13 @@ void cmNinjaTargetGenerator::EmitSwiftDependencyInfo(
   std::string const objectFilePath =
     this->ConvertToNinjaPath(this->GetObjectFilePath(source, config));
   std::string const swiftDepsPath = [source, objectFilePath]() -> std::string {
-    if (cmProp name = source->GetProperty("Swift_DEPENDENCIES_FILE")) {
+    if (cmValue name = source->GetProperty("Swift_DEPENDENCIES_FILE")) {
       return *name;
     }
     return cmStrCat(objectFilePath, ".swiftdeps");
   }();
   std::string const swiftDiaPath = [source, objectFilePath]() -> std::string {
-    if (cmProp name = source->GetProperty("Swift_DIAGNOSTICS_FILE")) {
+    if (cmValue name = source->GetProperty("Swift_DIAGNOSTICS_FILE")) {
       return *name;
     }
     return cmStrCat(objectFilePath, ".dia");
@@ -1696,7 +1715,7 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
 
 void cmNinjaTargetGenerator::AdditionalCleanFiles(const std::string& config)
 {
-  if (cmProp prop_value =
+  if (cmValue prop_value =
         this->GeneratorTarget->GetProperty("ADDITIONAL_CLEAN_FILES")) {
     cmLocalNinjaGenerator* lg = this->LocalGenerator;
     std::vector<std::string> cleanFiles;
@@ -1730,7 +1749,7 @@ void cmNinjaTargetGenerator::EnsureDirectoryExists(
   } else {
     cmGlobalNinjaGenerator* gg = this->GetGlobalGenerator();
     std::string fullPath = gg->GetCMakeInstance()->GetHomeOutputDirectory();
-    // Also ensures their is a trailing slash.
+    // Also ensures there is a trailing slash.
     gg->StripNinjaOutputPathPrefixAsSuffix(fullPath);
     fullPath += path;
     cmSystemTools::MakeDirectory(fullPath);
@@ -1786,7 +1805,7 @@ void cmNinjaTargetGenerator::addPoolNinjaVariable(
   const std::string& pool_property, cmGeneratorTarget* target,
   cmNinjaVars& vars)
 {
-  cmProp pool = target->GetProperty(pool_property);
+  cmValue pool = target->GetProperty(pool_property);
   if (pool) {
     vars["pool"] = *pool;
   }

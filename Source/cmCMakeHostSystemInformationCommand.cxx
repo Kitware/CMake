@@ -2,214 +2,517 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCMakeHostSystemInformationCommand.h"
 
-#include <cstddef>
+#include <algorithm>
+#include <cassert>
+#include <cctype>
+#include <initializer_list>
+#include <map>
+#include <string>
+#include <type_traits>
+#include <utility>
 
+#include <cm/optional>
+#include <cm/string_view>
+#include <cmext/string_view>
+
+#include "cmsys/FStream.hxx"
+#include "cmsys/Glob.hxx"
 #include "cmsys/SystemInformation.hxx"
 
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 
-#if defined(_WIN32)
+#ifdef _WIN32
 #  include "cmAlgorithms.h"
 #  include "cmGlobalGenerator.h"
+#  include "cmGlobalVisualStudio10Generator.h"
 #  include "cmGlobalVisualStudioVersionedGenerator.h"
-#  include "cmSystemTools.h"
 #  include "cmVSSetupHelper.h"
 #  define HAVE_VS_SETUP_HELPER
 #endif
 
 namespace {
-bool GetValue(cmExecutionStatus& status, cmsys::SystemInformation& info,
-              std::string const& key, std::string& value);
-std::string ValueToString(size_t value);
-std::string ValueToString(const char* value);
-std::string ValueToString(std::string const& value);
-}
+std::string const DELIM[2] = { {}, ";" };
 
-// cmCMakeHostSystemInformation
-bool cmCMakeHostSystemInformationCommand(std::vector<std::string> const& args,
-                                         cmExecutionStatus& status)
-{
-  size_t current_index = 0;
-
-  if (args.size() < (current_index + 2) || args[current_index] != "RESULT") {
-    status.SetError("missing RESULT specification.");
-    return false;
-  }
-
-  std::string const& variable = args[current_index + 1];
-  current_index += 2;
-
-  if (args.size() < (current_index + 2) || args[current_index] != "QUERY") {
-    status.SetError("missing QUERY specification");
-    return false;
-  }
-
-  cmsys::SystemInformation info;
-  info.RunCPUCheck();
-  info.RunOSCheck();
-  info.RunMemoryCheck();
-
-  std::string result_list;
-  for (size_t i = current_index + 1; i < args.size(); ++i) {
-    std::string const& key = args[i];
-    if (i != current_index + 1) {
-      result_list += ";";
-    }
-    std::string value;
-    if (!GetValue(status, info, key, value)) {
-      return false;
-    }
-    result_list += value;
-  }
-
-  status.GetMakefile().AddDefinition(variable, result_list);
-
-  return true;
-}
-
-namespace {
-
-bool GetValue(cmExecutionStatus& status, cmsys::SystemInformation& info,
-              std::string const& key, std::string& value)
-{
-  if (key == "NUMBER_OF_LOGICAL_CORES") {
-    value = ValueToString(info.GetNumberOfLogicalCPU());
-  } else if (key == "NUMBER_OF_PHYSICAL_CORES") {
-    value = ValueToString(info.GetNumberOfPhysicalCPU());
-  } else if (key == "HOSTNAME") {
-    value = ValueToString(info.GetHostname());
-  } else if (key == "FQDN") {
-    value = ValueToString(info.GetFullyQualifiedDomainName());
-  } else if (key == "TOTAL_VIRTUAL_MEMORY") {
-    value = ValueToString(info.GetTotalVirtualMemory());
-  } else if (key == "AVAILABLE_VIRTUAL_MEMORY") {
-    value = ValueToString(info.GetAvailableVirtualMemory());
-  } else if (key == "TOTAL_PHYSICAL_MEMORY") {
-    value = ValueToString(info.GetTotalPhysicalMemory());
-  } else if (key == "AVAILABLE_PHYSICAL_MEMORY") {
-    value = ValueToString(info.GetAvailablePhysicalMemory());
-  } else if (key == "IS_64BIT") {
-    value = ValueToString(info.Is64Bits());
-  } else if (key == "HAS_FPU") {
-    value = ValueToString(
-      info.DoesCPUSupportFeature(cmsys::SystemInformation::CPU_FEATURE_FPU));
-  } else if (key == "HAS_MMX") {
-    value = ValueToString(
-      info.DoesCPUSupportFeature(cmsys::SystemInformation::CPU_FEATURE_MMX));
-  } else if (key == "HAS_MMX_PLUS") {
-    value = ValueToString(info.DoesCPUSupportFeature(
-      cmsys::SystemInformation::CPU_FEATURE_MMX_PLUS));
-  } else if (key == "HAS_SSE") {
-    value = ValueToString(
-      info.DoesCPUSupportFeature(cmsys::SystemInformation::CPU_FEATURE_SSE));
-  } else if (key == "HAS_SSE2") {
-    value = ValueToString(
-      info.DoesCPUSupportFeature(cmsys::SystemInformation::CPU_FEATURE_SSE2));
-  } else if (key == "HAS_SSE_FP") {
-    value = ValueToString(info.DoesCPUSupportFeature(
-      cmsys::SystemInformation::CPU_FEATURE_SSE_FP));
-  } else if (key == "HAS_SSE_MMX") {
-    value = ValueToString(info.DoesCPUSupportFeature(
-      cmsys::SystemInformation::CPU_FEATURE_SSE_MMX));
-  } else if (key == "HAS_AMD_3DNOW") {
-    value = ValueToString(info.DoesCPUSupportFeature(
-      cmsys::SystemInformation::CPU_FEATURE_AMD_3DNOW));
-  } else if (key == "HAS_AMD_3DNOW_PLUS") {
-    value = ValueToString(info.DoesCPUSupportFeature(
-      cmsys::SystemInformation::CPU_FEATURE_AMD_3DNOW_PLUS));
-  } else if (key == "HAS_IA64") {
-    value = ValueToString(
-      info.DoesCPUSupportFeature(cmsys::SystemInformation::CPU_FEATURE_IA64));
-  } else if (key == "HAS_SERIAL_NUMBER") {
-    value = ValueToString(info.DoesCPUSupportFeature(
-      cmsys::SystemInformation::CPU_FEATURE_SERIALNUMBER));
-  } else if (key == "PROCESSOR_NAME") {
-    value = ValueToString(info.GetExtendedProcessorName());
-  } else if (key == "PROCESSOR_DESCRIPTION") {
-    value = info.GetCPUDescription();
-  } else if (key == "PROCESSOR_SERIAL_NUMBER") {
-    value = ValueToString(info.GetProcessorSerialNumber());
-  } else if (key == "OS_NAME") {
-    value = ValueToString(info.GetOSName());
-  } else if (key == "OS_RELEASE") {
-    value = ValueToString(info.GetOSRelease());
-  } else if (key == "OS_VERSION") {
-    value = ValueToString(info.GetOSVersion());
-  } else if (key == "OS_PLATFORM") {
-    value = ValueToString(info.GetOSPlatform());
-#ifdef HAVE_VS_SETUP_HELPER
-  } else if (key == "VS_15_DIR") {
-    // If generating for the VS 15 IDE, use the same instance.
-    cmGlobalGenerator* gg = status.GetMakefile().GetGlobalGenerator();
-    if (cmHasLiteralPrefix(gg->GetName(), "Visual Studio 15 ")) {
-      cmGlobalVisualStudioVersionedGenerator* vs15gen =
-        static_cast<cmGlobalVisualStudioVersionedGenerator*>(gg);
-      if (vs15gen->GetVSInstance(value)) {
-        return true;
-      }
-    }
-
-    // Otherwise, find a VS 15 instance ourselves.
-    cmVSSetupAPIHelper vsSetupAPIHelper(15);
-    if (vsSetupAPIHelper.GetVSInstanceInfo(value)) {
-      cmSystemTools::ConvertToUnixSlashes(value);
-    }
-  } else if (key == "VS_16_DIR") {
-    // If generating for the VS 16 IDE, use the same instance.
-    cmGlobalGenerator* gg = status.GetMakefile().GetGlobalGenerator();
-    if (cmHasLiteralPrefix(gg->GetName(), "Visual Studio 16 ")) {
-      cmGlobalVisualStudioVersionedGenerator* vs16gen =
-        static_cast<cmGlobalVisualStudioVersionedGenerator*>(gg);
-      if (vs16gen->GetVSInstance(value)) {
-        return true;
-      }
-    }
-
-    // Otherwise, find a VS 16 instance ourselves.
-    cmVSSetupAPIHelper vsSetupAPIHelper(16);
-    if (vsSetupAPIHelper.GetVSInstanceInfo(value)) {
-      cmSystemTools::ConvertToUnixSlashes(value);
-    }
-  } else if (key == "VS_17_DIR") {
-    // If generating for the VS 17 IDE, use the same instance.
-    cmGlobalGenerator* gg = status.GetMakefile().GetGlobalGenerator();
-    if (cmHasLiteralPrefix(gg->GetName(), "Visual Studio 17 ")) {
-      cmGlobalVisualStudioVersionedGenerator* vs17gen =
-        static_cast<cmGlobalVisualStudioVersionedGenerator*>(gg);
-      if (vs17gen->GetVSInstance(value)) {
-        return true;
-      }
-    }
-
-    // Otherwise, find a VS 17 instance ourselves.
-    cmVSSetupAPIHelper vsSetupAPIHelper(17);
-    if (vsSetupAPIHelper.GetVSInstanceInfo(value)) {
-      cmSystemTools::ConvertToUnixSlashes(value);
-    }
-#endif
-  } else {
-    std::string e = "does not recognize <key> " + key;
-    status.SetError(e);
-    return false;
-  }
-
-  return true;
-}
-
-std::string ValueToString(size_t value)
+// BEGIN Private functions
+std::string ValueToString(std::size_t const value)
 {
   return std::to_string(value);
 }
 
-std::string ValueToString(const char* value)
+std::string ValueToString(const char* const value)
 {
-  std::string safe_string = value ? value : "";
-  return safe_string;
+  return value ? value : std::string{};
 }
 
 std::string ValueToString(std::string const& value)
 {
   return value;
 }
+
+cm::optional<std::string> GetValue(cmsys::SystemInformation& info,
+                                   std::string const& key)
+{
+  if (key == "NUMBER_OF_LOGICAL_CORES"_s) {
+    return ValueToString(info.GetNumberOfLogicalCPU());
+  }
+  if (key == "NUMBER_OF_PHYSICAL_CORES"_s) {
+    return ValueToString(info.GetNumberOfPhysicalCPU());
+  }
+  if (key == "HOSTNAME"_s) {
+    return ValueToString(info.GetHostname());
+  }
+  if (key == "FQDN"_s) {
+    return ValueToString(info.GetFullyQualifiedDomainName());
+  }
+  if (key == "TOTAL_VIRTUAL_MEMORY"_s) {
+    return ValueToString(info.GetTotalVirtualMemory());
+  }
+  if (key == "AVAILABLE_VIRTUAL_MEMORY"_s) {
+    return ValueToString(info.GetAvailableVirtualMemory());
+  }
+  if (key == "TOTAL_PHYSICAL_MEMORY"_s) {
+    return ValueToString(info.GetTotalPhysicalMemory());
+  }
+  if (key == "AVAILABLE_PHYSICAL_MEMORY"_s) {
+    return ValueToString(info.GetAvailablePhysicalMemory());
+  }
+  if (key == "IS_64BIT"_s) {
+    return ValueToString(info.Is64Bits());
+  }
+  if (key == "HAS_FPU"_s) {
+    return ValueToString(
+      info.DoesCPUSupportFeature(cmsys::SystemInformation::CPU_FEATURE_FPU));
+  }
+  if (key == "HAS_MMX"_s) {
+    return ValueToString(
+      info.DoesCPUSupportFeature(cmsys::SystemInformation::CPU_FEATURE_MMX));
+  }
+  if (key == "HAS_MMX_PLUS"_s) {
+    return ValueToString(info.DoesCPUSupportFeature(
+      cmsys::SystemInformation::CPU_FEATURE_MMX_PLUS));
+  }
+  if (key == "HAS_SSE"_s) {
+    return ValueToString(
+      info.DoesCPUSupportFeature(cmsys::SystemInformation::CPU_FEATURE_SSE));
+  }
+  if (key == "HAS_SSE2"_s) {
+    return ValueToString(
+      info.DoesCPUSupportFeature(cmsys::SystemInformation::CPU_FEATURE_SSE2));
+  }
+  if (key == "HAS_SSE_FP"_s) {
+    return ValueToString(info.DoesCPUSupportFeature(
+      cmsys::SystemInformation::CPU_FEATURE_SSE_FP));
+  }
+  if (key == "HAS_SSE_MMX"_s) {
+    return ValueToString(info.DoesCPUSupportFeature(
+      cmsys::SystemInformation::CPU_FEATURE_SSE_MMX));
+  }
+  if (key == "HAS_AMD_3DNOW"_s) {
+    return ValueToString(info.DoesCPUSupportFeature(
+      cmsys::SystemInformation::CPU_FEATURE_AMD_3DNOW));
+  }
+  if (key == "HAS_AMD_3DNOW_PLUS"_s) {
+    return ValueToString(info.DoesCPUSupportFeature(
+      cmsys::SystemInformation::CPU_FEATURE_AMD_3DNOW_PLUS));
+  }
+  if (key == "HAS_IA64"_s) {
+    return ValueToString(
+      info.DoesCPUSupportFeature(cmsys::SystemInformation::CPU_FEATURE_IA64));
+  }
+  if (key == "HAS_SERIAL_NUMBER"_s) {
+    return ValueToString(info.DoesCPUSupportFeature(
+      cmsys::SystemInformation::CPU_FEATURE_SERIALNUMBER));
+  }
+  if (key == "PROCESSOR_NAME"_s) {
+    return ValueToString(info.GetExtendedProcessorName());
+  }
+  if (key == "PROCESSOR_DESCRIPTION"_s) {
+    return info.GetCPUDescription();
+  }
+  if (key == "PROCESSOR_SERIAL_NUMBER"_s) {
+    return ValueToString(info.GetProcessorSerialNumber());
+  }
+  if (key == "OS_NAME"_s) {
+    return ValueToString(info.GetOSName());
+  }
+  if (key == "OS_RELEASE"_s) {
+    return ValueToString(info.GetOSRelease());
+  }
+  if (key == "OS_VERSION"_s) {
+    return ValueToString(info.GetOSVersion());
+  }
+  if (key == "OS_PLATFORM"_s) {
+    return ValueToString(info.GetOSPlatform());
+  }
+  return {};
+}
+
+cm::optional<std::pair<std::string, std::string>> ParseOSReleaseLine(
+  std::string const& line)
+{
+  std::string key;
+  std::string value;
+
+  char prev = 0;
+  enum ParserState
+  {
+    PARSE_KEY_1ST,
+    PARSE_KEY,
+    FOUND_EQ,
+    PARSE_SINGLE_QUOTE_VALUE,
+    PARSE_DBL_QUOTE_VALUE,
+    PARSE_VALUE,
+    IGNORE_REST
+  } state = PARSE_KEY_1ST;
+
+  for (auto ch : line) {
+    switch (state) {
+      case PARSE_KEY_1ST:
+        if (std::isalpha(ch) || ch == '_') {
+          key += ch;
+          state = PARSE_KEY;
+        } else if (!std::isspace(ch)) {
+          state = IGNORE_REST;
+        }
+        break;
+
+      case PARSE_KEY:
+        if (ch == '=') {
+          state = FOUND_EQ;
+        } else if (std::isalnum(ch) || ch == '_') {
+          key += ch;
+        } else {
+          state = IGNORE_REST;
+        }
+        break;
+
+      case FOUND_EQ:
+        switch (ch) {
+          case '\'':
+            state = PARSE_SINGLE_QUOTE_VALUE;
+            break;
+          case '"':
+            state = PARSE_DBL_QUOTE_VALUE;
+            break;
+          case '#':
+          case '\\':
+            state = IGNORE_REST;
+            break;
+          default:
+            value += ch;
+            state = PARSE_VALUE;
+        }
+        break;
+
+      case PARSE_SINGLE_QUOTE_VALUE:
+        if (ch == '\'') {
+          if (prev != '\\') {
+            state = IGNORE_REST;
+          } else {
+            assert(!value.empty());
+            value[value.size() - 1] = ch;
+          }
+        } else {
+          value += ch;
+        }
+        break;
+
+      case PARSE_DBL_QUOTE_VALUE:
+        if (ch == '"') {
+          if (prev != '\\') {
+            state = IGNORE_REST;
+          } else {
+            assert(!value.empty());
+            value[value.size() - 1] = ch;
+          }
+        } else {
+          value += ch;
+        }
+        break;
+
+      case PARSE_VALUE:
+        if (ch == '#' || std::isspace(ch)) {
+          state = IGNORE_REST;
+        } else {
+          value += ch;
+        }
+        break;
+
+      default:
+        // Unexpected os-release parser state!
+        state = IGNORE_REST;
+        break;
+    }
+
+    if (state == IGNORE_REST) {
+      break;
+    }
+    prev = ch;
+  }
+  if (!(key.empty() || value.empty())) {
+    return std::make_pair(key, value);
+  }
+  return {};
+}
+
+std::map<std::string, std::string> GetOSReleaseVariables(
+  cmExecutionStatus& status)
+{
+  auto& makefile = status.GetMakefile();
+  const auto& sysroot = makefile.GetSafeDefinition("CMAKE_SYSROOT");
+
+  std::map<std::string, std::string> data;
+  // Based on
+  // https://www.freedesktop.org/software/systemd/man/os-release.html
+  for (auto name : { "/etc/os-release"_s, "/usr/lib/os-release"_s }) {
+    const auto& filename = cmStrCat(sysroot, name);
+    if (cmSystemTools::FileExists(filename)) {
+      cmsys::ifstream fin(filename.c_str());
+      for (std::string line; !std::getline(fin, line).fail();) {
+        auto kv = ParseOSReleaseLine(line);
+        if (kv.has_value()) {
+          data.emplace(kv.value());
+        }
+      }
+      break;
+    }
+  }
+  // Got smth?
+  if (!data.empty()) {
+    return data;
+  }
+
+  // Ugh, it could be some pre-os-release distro.
+  // Lets try some fallback getters.
+  // See also:
+  //  - http://linuxmafia.com/faq/Admin/release-files.html
+
+  // 1. CMake provided
+  cmsys::Glob gl;
+  std::vector<std::string> scripts;
+  auto const findExpr = cmStrCat(cmSystemTools::GetCMakeRoot(),
+                                 "/Modules/Internal/OSRelease/*.cmake");
+  if (gl.FindFiles(findExpr)) {
+    scripts = gl.GetFiles();
+  }
+
+  // 2. User provided (append to the CMake prvided)
+  makefile.GetDefExpandList("CMAKE_GET_OS_RELEASE_FALLBACK_SCRIPTS", scripts);
+
+  // Filter out files that are not in format `NNN-name.cmake`
+  auto checkName = [](std::string const& filepath) -> bool {
+    auto const& filename = cmSystemTools::GetFilenameName(filepath);
+    // NOTE Minimum filename length expected:
+    //   NNN-<at-least-one-char-name>.cmake  --> 11
+    return (filename.size() < 11) || !std::isdigit(filename[0]) ||
+      !std::isdigit(filename[1]) || !std::isdigit(filename[2]) ||
+      filename[3] != '-';
+  };
+  scripts.erase(std::remove_if(scripts.begin(), scripts.end(), checkName),
+                scripts.end());
+
+  // Make sure scripts are running in desired order
+  std::sort(scripts.begin(), scripts.end(),
+            [](std::string const& lhs, std::string const& rhs) -> bool {
+              long lhs_order;
+              cmStrToLong(cmSystemTools::GetFilenameName(lhs).substr(0u, 3u),
+                          &lhs_order);
+              long rhs_order;
+              cmStrToLong(cmSystemTools::GetFilenameName(rhs).substr(0u, 3u),
+                          &rhs_order);
+              return lhs_order < rhs_order;
+            });
+
+  // Name of the variable to put the results
+  auto const result_variable = "CMAKE_GET_OS_RELEASE_FALLBACK_RESULT"_s;
+
+  for (auto const& script : scripts) {
+    // Unset the result variable
+    makefile.RemoveDefinition(result_variable.data());
+
+    // include FATAL_ERROR and ERROR in the return status
+    if (!makefile.ReadListFile(script) ||
+        cmSystemTools::GetErrorOccuredFlag()) {
+      // Ok, no worries... go try the next script.
+      continue;
+    }
+
+    std::vector<std::string> variables;
+    if (!makefile.GetDefExpandList(result_variable.data(), variables)) {
+      // Heh, this script didn't found anything... go try the next one.
+      continue;
+    }
+
+    for (auto const& variable : variables) {
+      auto value = makefile.GetSafeDefinition(variable);
+      makefile.RemoveDefinition(variable);
+
+      if (!cmHasPrefix(variable, cmStrCat(result_variable, '_'))) {
+        // Ignore unknown variable set by the script
+        continue;
+      }
+
+      auto key = variable.substr(result_variable.size() + 1,
+                                 variable.size() - result_variable.size() - 1);
+      data.emplace(std::move(key), std::move(value));
+    }
+
+    // Try 'till some script can get anything
+    if (!data.empty()) {
+      data.emplace("USED_FALLBACK_SCRIPT", script);
+      break;
+    }
+  }
+
+  makefile.RemoveDefinition(result_variable.data());
+
+  return data;
+}
+
+cm::optional<std::string> GetValue(cmExecutionStatus& status,
+                                   std::string const& key,
+                                   std::string const& variable)
+{
+  const auto prefix = "DISTRIB_"_s;
+  if (!cmHasPrefix(key, prefix)) {
+    return {};
+  }
+
+  static const std::map<std::string, std::string> s_os_release =
+    GetOSReleaseVariables(status);
+
+  auto& makefile = status.GetMakefile();
+
+  const std::string subkey =
+    key.substr(prefix.size(), key.size() - prefix.size());
+  if (subkey == "INFO"_s) {
+    std::string vars;
+    for (const auto& kv : s_os_release) {
+      auto cmake_var_name = cmStrCat(variable, '_', kv.first);
+      vars += DELIM[!vars.empty()] + cmake_var_name;
+      makefile.AddDefinition(cmake_var_name, kv.second);
+    }
+    return cm::optional<std::string>(std::move(vars));
+  }
+
+  // Query individual variable
+  const auto it = s_os_release.find(subkey);
+  if (it != s_os_release.cend()) {
+    return it->second;
+  }
+
+  // NOTE Empty string means requested variable not set
+  return std::string{};
+}
+
+#ifdef HAVE_VS_SETUP_HELPER
+cm::optional<std::string> GetValue(cmExecutionStatus& status,
+                                   std::string const& key)
+{
+  auto* const gg = status.GetMakefile().GetGlobalGenerator();
+  for (auto vs : { 15, 16, 17 }) {
+    if (key == cmStrCat("VS_"_s, vs, "_DIR"_s)) {
+      std::string value;
+      // If generating for the VS nn IDE, use the same instance.
+
+      if (cmHasPrefix(gg->GetName(), cmStrCat("Visual Studio "_s, vs, ' '))) {
+        cmGlobalVisualStudioVersionedGenerator* vsNNgen =
+          static_cast<cmGlobalVisualStudioVersionedGenerator*>(gg);
+        if (vsNNgen->GetVSInstance(value)) {
+          return value;
+        }
+      }
+
+      // Otherwise, find a VS nn instance ourselves.
+      cmVSSetupAPIHelper vsSetupAPIHelper(vs);
+      if (vsSetupAPIHelper.GetVSInstanceInfo(value)) {
+        cmSystemTools::ConvertToUnixSlashes(value);
+      }
+      return value;
+    }
+  }
+
+  if (key == "VS_MSBUILD_COMMAND"_s && gg->IsVisualStudioAtLeast10()) {
+    cmGlobalVisualStudio10Generator* vs10gen =
+      static_cast<cmGlobalVisualStudio10Generator*>(gg);
+    return vs10gen->FindMSBuildCommandEarly(&status.GetMakefile());
+  }
+
+  return {};
+}
+#endif
+
+cm::optional<std::string> GetValueChained()
+{
+  return {};
+}
+
+template <typename GetterFn, typename... Next>
+cm::optional<std::string> GetValueChained(GetterFn current, Next... chain)
+{
+  auto value = current();
+  if (value.has_value()) {
+    return value;
+  }
+  return GetValueChained(chain...);
+}
+// END Private functions
+} // anonymous namespace
+
+// cmCMakeHostSystemInformation
+bool cmCMakeHostSystemInformationCommand(std::vector<std::string> const& args,
+                                         cmExecutionStatus& status)
+{
+  std::size_t current_index = 0;
+
+  if (args.size() < (current_index + 2) || args[current_index] != "RESULT"_s) {
+    status.SetError("missing RESULT specification.");
+    return false;
+  }
+
+  auto const& variable = args[current_index + 1];
+  current_index += 2;
+
+  if (args.size() < (current_index + 2) || args[current_index] != "QUERY"_s) {
+    status.SetError("missing QUERY specification");
+    return false;
+  }
+
+  static cmsys::SystemInformation info;
+  static auto initialized = false;
+  if (!initialized) {
+    info.RunCPUCheck();
+    info.RunOSCheck();
+    info.RunMemoryCheck();
+    initialized = true;
+  }
+
+  std::string result_list;
+  for (auto i = current_index + 1; i < args.size(); ++i) {
+    result_list += DELIM[!result_list.empty()];
+
+    auto const& key = args[i];
+    // clang-format off
+    auto value =
+      GetValueChained(
+          [&]() { return GetValue(info, key); }
+        , [&]() { return GetValue(status, key, variable); }
+#ifdef HAVE_VS_SETUP_HELPER
+        , [&]() { return GetValue(status, key); }
+#endif
+        );
+    // clang-format on
+    if (!value) {
+      status.SetError("does not recognize <key> " + key);
+      return false;
+    }
+    result_list += value.value();
+  }
+
+  status.GetMakefile().AddDefinition(variable, result_list);
+
+  return true;
 }

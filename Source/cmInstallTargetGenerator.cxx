@@ -2,11 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmInstallTargetGenerator.h"
 
+#include <algorithm>
 #include <cassert>
 #include <map>
 #include <set>
 #include <sstream>
 #include <utility>
+#include <vector>
 
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratorExpression.h"
@@ -18,11 +20,11 @@
 #include "cmMessageType.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
-#include "cmProperty.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
+#include "cmValue.h"
 #include "cmake.h"
 
 namespace {
@@ -208,7 +210,7 @@ cmInstallTargetGenerator::Files cmInstallTargetGenerator::GetFiles(
 
         // Get App Bundle Extension
         std::string ext;
-        if (cmProp p = this->Target->GetProperty("BUNDLE_EXTENSION")) {
+        if (cmValue p = this->Target->GetProperty("BUNDLE_EXTENSION")) {
           ext = *p;
         } else {
           ext = "app";
@@ -680,33 +682,52 @@ void cmInstallTargetGenerator::AddChrpathPatchRule(
            " this limitation.";
       mf->IssueMessage(MessageType::WARNING, msg.str());
     } else {
-      // Note: These paths are kept unique to avoid
-      // install_name_tool corruption.
-      std::set<std::string> runpaths;
-      for (std::string const& i : oldRuntimeDirs) {
-        std::string runpath =
-          mf->GetGlobalGenerator()->ExpandCFGIntDir(i, config);
-
-        if (runpaths.find(runpath) == runpaths.end()) {
-          runpaths.insert(runpath);
-          os << indent << "execute_process(COMMAND " << installNameTool
-             << "\n";
-          os << indent << "  -delete_rpath \"" << runpath << "\"\n";
-          os << indent << "  \"" << toDestDirPath << "\")\n";
+      // To be consistent with older versions, runpath changes must be ordered,
+      // deleted first, then added, *and* the same path must only appear once.
+      std::map<std::string, std::string> runpath_change;
+      std::vector<std::string> ordered;
+      for (std::string const& dir : oldRuntimeDirs) {
+        // Normalize path and add to map of changes to make
+        auto iter_inserted = runpath_change.insert(
+          { mf->GetGlobalGenerator()->ExpandCFGIntDir(dir, config),
+            "delete" });
+        if (iter_inserted.second) {
+          // Add path to ordered list of changes
+          ordered.push_back(iter_inserted.first->first);
         }
       }
 
-      runpaths.clear();
-      for (std::string const& i : newRuntimeDirs) {
-        std::string runpath =
-          mf->GetGlobalGenerator()->ExpandCFGIntDir(i, config);
-
-        if (runpaths.find(runpath) == runpaths.end()) {
-          os << indent << "execute_process(COMMAND " << installNameTool
-             << "\n";
-          os << indent << "  -add_rpath \"" << runpath << "\"\n";
-          os << indent << "  \"" << toDestDirPath << "\")\n";
+      for (std::string const& dir : newRuntimeDirs) {
+        // Normalize path and add to map of changes to make
+        auto iter_inserted = runpath_change.insert(
+          { mf->GetGlobalGenerator()->ExpandCFGIntDir(dir, config), "add" });
+        if (iter_inserted.second) {
+          // Add path to ordered list of changes
+          ordered.push_back(iter_inserted.first->first);
+        } else if (iter_inserted.first->second != "add") {
+          // Rpath was requested to be deleted and then later re-added. Drop it
+          // from the list by marking as an empty value.
+          iter_inserted.first->second.clear();
         }
+      }
+
+      // Remove rpaths that are unchanged (value was set to empty)
+      ordered.erase(
+        std::remove_if(ordered.begin(), ordered.end(),
+                       [&runpath_change](const std::string& runpath) {
+                         return runpath_change.find(runpath)->second.empty();
+                       }),
+        ordered.end());
+
+      if (!ordered.empty()) {
+        os << indent << "execute_process(COMMAND " << installNameTool << "\n";
+        for (std::string const& runpath : ordered) {
+          // Either 'add_rpath' or 'delete_rpath' since we've removed empty
+          // entries
+          os << indent << "  -" << runpath_change.find(runpath)->second
+             << "_rpath \"" << runpath << "\"\n";
+        }
+        os << indent << "  \"" << toDestDirPath << "\")\n";
       }
     }
   } else {
@@ -825,7 +846,7 @@ void cmInstallTargetGenerator::AddUniversalInstallRule(
     return;
   }
 
-  cmProp xcodeVersion = mf->GetDefinition("XCODE_VERSION");
+  cmValue xcodeVersion = mf->GetDefinition("XCODE_VERSION");
   if (!xcodeVersion ||
       cmSystemTools::VersionCompareGreater("6", *xcodeVersion)) {
     return;

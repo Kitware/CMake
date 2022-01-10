@@ -3,7 +3,7 @@ get_filename_component
 
 Get a specific component of a full filename.
 
-.. versionchanged:: 3.19
+.. versionchanged:: 3.20
   This command been superseded by :command:`cmake_path` command, except
   ``REALPATH`` now offered by :ref:`file(REAL_PATH) <REAL_PATH>` command and
   ``PROGRAM`` now available in :command:`separate_arguments(PROGRAM)` command.

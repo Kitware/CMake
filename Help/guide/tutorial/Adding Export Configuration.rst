@@ -12,10 +12,10 @@ packaged.
 
 The first step is to update our :command:`install(TARGETS)` commands to not
 only specify a ``DESTINATION`` but also an ``EXPORT``. The ``EXPORT`` keyword
-generates and installs a CMake file containing code to import all targets
-listed in the install command from the installation tree. So let's go ahead and
-explicitly ``EXPORT`` the ``MathFunctions`` library by updating the ``install``
-command in ``MathFunctions/CMakeLists.txt`` to look like:
+generates a CMake file containing code to import all targets listed in the
+install command from the installation tree. So let's go ahead and explicitly
+``EXPORT`` the ``MathFunctions`` library by updating the ``install`` command
+in ``MathFunctions/CMakeLists.txt`` to look like:
 
 .. literalinclude:: Complete/MathFunctions/CMakeLists.txt
   :caption: MathFunctions/CMakeLists.txt
@@ -82,6 +82,46 @@ bottom of the top-level ``CMakeLists.txt``:
   :name: CMakeLists.txt-install-Config.cmake
   :language: cmake
   :start-after: # install the configuration targets
+  :end-before: # generate the config file
+
+
+Next, we execute the :command:`configure_package_config_file`.  This command
+will configure a provided file but with a few specific differences from the
+standard :command:`configure_file` way.
+To properly utilize this function, the input file should have a single line
+with the text ``@PACKAGE_INIT@`` in addition to the content that is desired.
+That variable will be replaced with a block of code which turns set values into
+relative paths.  These values which are new can be referenced by the same name
+but prepended with a ``PACKAGE_`` prefix.
+
+.. literalinclude:: Step12/CMakeLists.txt
+  :caption: CMakeLists.txt
+  :name: CMakeLists.txt-configure-package-config.cmake
+  :language: cmake
+  :start-after: # install the configuration targets
+  :end-before: # generate the version file
+
+The :command:`write_basic_package_version_file` is next.  This command writes
+a file which is used by the "find_package" document the version and
+compatibility of the desired package.  Here, we use the ``Tutorial_VERSION_*``
+variables and say that it is compatible with ``AnyNewerVersion``, which
+denotes that this version or any higher one are compatible with the requested
+version.
+
+.. literalinclude:: Step12/CMakeLists.txt
+  :caption: CMakeLists.txt
+  :name: CMakeLists.txt-basic-version-file.cmake
+  :language: cmake
+  :start-after: # generate the version file
+  :end-before: # install the generated configuration files
+
+Finally, set both generated files to be installed:
+
+.. literalinclude:: Step12/CMakeLists.txt
+  :caption: CMakeLists.txt
+  :name: CMakeLists.txt-install-configured-files.cmake
+  :language: cmake
+  :start-after: # install the generated configuration files
   :end-before: # generate the export
 
 At this point, we have generated a relocatable CMake Configuration for our

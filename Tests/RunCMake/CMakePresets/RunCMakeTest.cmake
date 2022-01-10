@@ -260,6 +260,7 @@ unset(CMakePresets_FILE)
 run_cmake_presets(GoodUserOnly)
 run_cmake_presets(GoodUserFromMain)
 run_cmake_presets(GoodUserFromUser)
+run_cmake_presets(V2InheritV3Optional)
 
 # Test CMakeUserPresets.json errors
 run_cmake_presets(UserDuplicateInUser)

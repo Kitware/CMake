@@ -23,6 +23,12 @@ apt-get install -y \
 apt-get install -y \
     jq
 
+# Packages needed to test CTest.
+apt-get install -y \
+    cvs \
+    subversion \
+    mercurial
+
 # Packages needed to test find modules.
 apt-get install -y \
     alsa-utils \
@@ -46,6 +52,7 @@ apt-get install -y \
     libgif-dev \
     libgl1-mesa-dev \
     libglew-dev \
+    libgmock-dev \
     libgrpc++-dev libgrpc-dev \
     libgsl-dev \
     libgtest-dev \

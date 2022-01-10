@@ -20,6 +20,9 @@
 
 # on UNIX, cygwin and mingw
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0057 NEW) # if IN_LIST
+
 # Resolve full path of CMAKE_TOOL from user-defined name and SEARCH_PATH.
 function(__resolve_tool_path CMAKE_TOOL SEARCH_PATH DOCSTRING)
 
@@ -33,7 +36,7 @@ function(__resolve_tool_path CMAKE_TOOL SEARCH_PATH DOCSTRING)
     if(NOT _CMAKE_USER_TOOL_PATH)
 
       # Find CMAKE_TOOL in the SEARCH_PATH directory by user-defined name.
-      find_program(_CMAKE_TOOL_WITH_PATH NAMES ${${CMAKE_TOOL}} HINTS ${SEARCH_PATH})
+      find_program(_CMAKE_TOOL_WITH_PATH NAMES ${${CMAKE_TOOL}} HINTS ${SEARCH_PATH} NO_CMAKE_PATH NO_CMAKE_ENVIRONMENT_PATH)
       if(_CMAKE_TOOL_WITH_PATH)
 
         # Overwrite CMAKE_TOOL with full path found in SEARCH_PATH.
@@ -82,7 +85,7 @@ if(("x${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_SIMULATE_ID}" STREQUAL "xMSVC" AND
     list(PREPEND _CMAKE_MT_NAMES "llvm-mt")
     list(PREPEND _CMAKE_LINKER_NAMES "lld-link")
     list(APPEND _CMAKE_TOOL_VARS NM)
-  elseif("x${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ID}" MATCHES "^xIntel")
+  elseif("x${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ID}" STREQUAL "xIntel")
     list(PREPEND _CMAKE_AR_NAMES "xilib")
     list(PREPEND _CMAKE_LINKER_NAMES "xilink")
   endif()
@@ -114,7 +117,7 @@ elseif("x${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ID}" MATCHES "^xIAR$")
   endfunction()
 
   __resolve_IAR_hints("${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER}" _CMAKE_TOOLCHAIN_LOCATION)
-  set(_CMAKE_IAR_ITOOLS "ARM" "RX" "RH850" "RL78" "RISCV" "STM8")
+  set(_CMAKE_IAR_ITOOLS "ARM" "RX" "RH850" "RL78" "RISCV" "RISC-V" "STM8")
   set(_CMAKE_IAR_XTOOLS "AVR" "MSP430" "V850" "8051")
 
   if("${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ARCHITECTURE_ID}" IN_LIST _CMAKE_IAR_ITOOLS)
@@ -165,13 +168,16 @@ else()
   # Prepend toolchain-specific names.
   if("${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ID}" STREQUAL Clang)
     if("x${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_SIMULATE_ID}" STREQUAL "xMSVC")
-      set(_CMAKE_LINKER_NAMES "lld-link")
+      list(PREPEND _CMAKE_LINKER_NAMES "lld-link")
     else()
-      set(_CMAKE_LINKER_NAMES "ld.lld")
+      list(PREPEND _CMAKE_LINKER_NAMES "ld.lld")
     endif()
     list(PREPEND _CMAKE_AR_NAMES "llvm-ar")
     list(PREPEND _CMAKE_RANLIB_NAMES "llvm-ranlib")
-    list(PREPEND _CMAKE_STRIP_NAMES "llvm-strip")
+    if("${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_VERSION}" VERSION_GREATER_EQUAL 11)
+      # llvm-strip versions prior to 11 require additional flags we do not yet add.
+      list(PREPEND _CMAKE_STRIP_NAMES "llvm-strip")
+    endif()
     list(PREPEND _CMAKE_NM_NAMES "llvm-nm")
     if("${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_VERSION}" VERSION_GREATER_EQUAL 9)
       # llvm-objdump versions prior to 9 did not support everything we need.
@@ -202,7 +208,7 @@ foreach(_CMAKE_TOOL IN LISTS _CMAKE_TOOL_VARS)
   endforeach()
   list(REMOVE_DUPLICATES _CMAKE_${_CMAKE_TOOL}_FIND_NAMES)
 
-  find_program(CMAKE_${_CMAKE_TOOL} NAMES ${_CMAKE_${_CMAKE_TOOL}_FIND_NAMES} HINTS ${_CMAKE_TOOLCHAIN_LOCATION})
+  find_program(CMAKE_${_CMAKE_TOOL} NAMES ${_CMAKE_${_CMAKE_TOOL}_FIND_NAMES} HINTS ${_CMAKE_TOOLCHAIN_LOCATION} NO_CMAKE_PATH NO_CMAKE_ENVIRONMENT_PATH)
   unset(_CMAKE_${_CMAKE_TOOL}_FIND_NAMES)
 endforeach()
 
@@ -212,7 +218,7 @@ endif()
 
 
 if(CMAKE_PLATFORM_HAS_INSTALLNAME)
-  find_program(CMAKE_INSTALL_NAME_TOOL NAMES ${_CMAKE_TOOLCHAIN_PREFIX}install_name_tool HINTS ${_CMAKE_TOOLCHAIN_LOCATION})
+  find_program(CMAKE_INSTALL_NAME_TOOL NAMES ${_CMAKE_TOOLCHAIN_PREFIX}install_name_tool HINTS ${_CMAKE_TOOLCHAIN_LOCATION} NO_CMAKE_PATH NO_CMAKE_ENVIRONMENT_PATH)
 
   if(NOT CMAKE_INSTALL_NAME_TOOL)
     message(FATAL_ERROR "Could not find install_name_tool, please check your installation.")
@@ -240,3 +246,5 @@ if("x${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ID}" MATCHES "^xIAR$")
   set(CMAKE_IAR_LINKER "${CMAKE_LINKER}" CACHE FILEPATH "The IAR ILINK linker")
   mark_as_advanced(CMAKE_IAR_LINKER CMAKE_IAR_AR)
 endif()
+
+cmake_policy(POP)

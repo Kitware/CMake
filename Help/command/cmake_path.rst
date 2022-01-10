@@ -69,8 +69,8 @@ Synopsis
 
   `Native Conversion`_
     cmake_path(`NATIVE_PATH`_ <path-var> [NORMALIZE] <out-var>)
-    cmake_path(`CONVERT`_ <input> `TO_CMAKE_PATH_LIST`_ <out-var>)
-    cmake_path(`CONVERT`_ <input> `TO_NATIVE_PATH_LIST`_ <out-var>)
+    cmake_path(`CONVERT`_ <input> `TO_CMAKE_PATH_LIST`_ <out-var> [NORMALIZE])
+    cmake_path(`CONVERT`_ <input> `TO_NATIVE_PATH_LIST`_ <out-var> [NORMALIZE])
 
   `Hashing`_
     cmake_path(`HASH`_ <path-var> <out-var>)

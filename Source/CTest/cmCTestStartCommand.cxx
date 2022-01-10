@@ -9,8 +9,8 @@
 #include "cmCTestVC.h"
 #include "cmGeneratedFileStream.h"
 #include "cmMakefile.h"
-#include "cmProperty.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 class cmExecutionStatus;
 
@@ -30,8 +30,8 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
 
   size_t cnt = 0;
   const char* smodel = nullptr;
-  const std::string* src_dir = nullptr;
-  const std::string* bld_dir = nullptr;
+  cmValue src_dir;
+  cmValue bld_dir;
 
   while (cnt < args.size()) {
     if (args[cnt] == "GROUP" || args[cnt] == "TRACK") {
@@ -55,10 +55,10 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
       smodel = args[cnt].c_str();
       cnt++;
     } else if (!src_dir) {
-      src_dir = &args[cnt];
+      src_dir = cmValue(args[cnt]);
       cnt++;
     } else if (!bld_dir) {
-      bld_dir = &args[cnt];
+      bld_dir = cmValue(args[cnt]);
       cnt++;
     } else {
       this->SetError("Too many arguments");
@@ -162,7 +162,7 @@ bool cmCTestStartCommand::InitialCheckout(std::ostream& ofs,
                                           std::string const& sourceDir)
 {
   // Use the user-provided command to create the source tree.
-  cmProp initialCheckoutCommand =
+  cmValue initialCheckoutCommand =
     this->Makefile->GetDefinition("CTEST_CHECKOUT_COMMAND");
   if (!initialCheckoutCommand) {
     initialCheckoutCommand =

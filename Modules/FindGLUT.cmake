@@ -41,8 +41,43 @@ Also defined, but not for general use are:
 #]=======================================================================]
 
 include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 
-if (WIN32)
+function(_add_glut_target_simple)
+  if(TARGET GLUT::GLUT)
+    return()
+  endif()
+  add_library(GLUT::GLUT INTERFACE IMPORTED)
+  if(GLUT_INCLUDE_DIRS)
+    target_include_directories(GLUT::GLUT SYSTEM
+      INTERFACE "${GLUT_INCLUDE_DIRS}")
+  endif()
+  if(GLUT_LIBRARIES)
+    target_link_libraries(GLUT::GLUT INTERFACE ${GLUT_LIBRARIES})
+  endif()
+  if(GLUT_LDFLAGS)
+    target_link_options(GLUT::GLUT INTERFACE ${GLUT_LDFLAGS})
+  endif()
+  if(GLUT_CFLAGS)
+    separate_arguments(GLUT_CFLAGS_SPLIT UNIX_COMMAND "${GLUT_CFLAGS}")
+    target_compile_options(GLUT::GLUT INTERFACE ${GLUT_CFLAGS_SPLIT})
+  endif()
+
+  set_property(TARGET GLUT::GLUT APPEND PROPERTY
+    IMPORTED_LOCATION "${GLUT_glut_LIBRARY}")
+endfunction()
+
+find_package(PkgConfig)
+if(PKG_CONFIG_FOUND)
+  pkg_check_modules(GLUT glut)
+  if(GLUT_FOUND)
+    _add_glut_target_simple()
+    FIND_PACKAGE_HANDLE_STANDARD_ARGS(GLUT REQUIRED_VARS GLUT_FOUND)
+    return()
+  endif()
+endif()
+
+if(WIN32)
   find_path( GLUT_INCLUDE_DIR NAMES GL/glut.h
     PATHS  ${GLUT_ROOT_PATH}/include )
   find_library( GLUT_glut_LIBRARY_RELEASE NAMES glut glut32 freeglut
@@ -57,85 +92,75 @@ if (WIN32)
     )
   mark_as_advanced(GLUT_glut_LIBRARY_RELEASE GLUT_glut_LIBRARY_DEBUG)
   select_library_configurations(GLUT_glut)
-else ()
+elseif(APPLE)
+  find_path(GLUT_INCLUDE_DIR glut.h ${OPENGL_LIBRARY_DIR})
+  find_library(GLUT_glut_LIBRARY GLUT DOC "GLUT library for OSX")
+  find_library(GLUT_cocoa_LIBRARY Cocoa DOC "Cocoa framework for OSX")
+  mark_as_advanced(GLUT_glut_LIBRARY GLUT_cocoa_LIBRARY)
 
-  if (APPLE)
-    find_path(GLUT_INCLUDE_DIR glut.h ${OPENGL_LIBRARY_DIR})
-    find_library(GLUT_glut_LIBRARY GLUT DOC "GLUT library for OSX")
-    find_library(GLUT_cocoa_LIBRARY Cocoa DOC "Cocoa framework for OSX")
-    mark_as_advanced(GLUT_glut_LIBRARY GLUT_cocoa_LIBRARY)
-
-    if(GLUT_cocoa_LIBRARY AND NOT TARGET GLUT::Cocoa)
-      add_library(GLUT::Cocoa UNKNOWN IMPORTED)
-      # Cocoa should always be a Framework, but we check to make sure.
-      if(GLUT_cocoa_LIBRARY MATCHES "/([^/]+)\\.framework$")
-        set(_glut_cocoa "${GLUT_cocoa_LIBRARY}/${CMAKE_MATCH_1}")
-        if(EXISTS "${_glut_cocoa}.tbd")
-          string(APPEND _glut_cocoa ".tbd")
-        endif()
-        set_target_properties(GLUT::Cocoa PROPERTIES
-          IMPORTED_LOCATION "${_glut_cocoa}")
-      else()
-        set_target_properties(GLUT::Cocoa PROPERTIES
-          IMPORTED_LOCATION "${GLUT_cocoa_LIBRARY}")
+  if(GLUT_cocoa_LIBRARY AND NOT TARGET GLUT::Cocoa)
+    add_library(GLUT::Cocoa UNKNOWN IMPORTED)
+    # Cocoa should always be a Framework, but we check to make sure.
+    if(GLUT_cocoa_LIBRARY MATCHES "/([^/]+)\\.framework$")
+      set(_glut_cocoa "${GLUT_cocoa_LIBRARY}/${CMAKE_MATCH_1}")
+      if(EXISTS "${_glut_cocoa}.tbd")
+        string(APPEND _glut_cocoa ".tbd")
       endif()
-    endif()
-  else ()
-
-    if (BEOS)
-
-      set(_GLUT_INC_DIR /boot/develop/headers/os/opengl)
-      set(_GLUT_glut_LIB_DIR /boot/develop/lib/x86)
-
+      set_target_properties(GLUT::Cocoa PROPERTIES
+        IMPORTED_LOCATION "${_glut_cocoa}")
     else()
-
-      find_library( GLUT_Xi_LIBRARY Xi
-        /usr/openwin/lib
-        )
-      mark_as_advanced(GLUT_Xi_LIBRARY)
-
-      find_library( GLUT_Xmu_LIBRARY Xmu
-        /usr/openwin/lib
-        )
-      mark_as_advanced(GLUT_Xmu_LIBRARY)
-
-      if(GLUT_Xi_LIBRARY AND NOT TARGET GLUT::Xi)
-        add_library(GLUT::Xi UNKNOWN IMPORTED)
-        set_target_properties(GLUT::Xi PROPERTIES
-          IMPORTED_LOCATION "${GLUT_Xi_LIBRARY}")
-      endif()
-
-      if(GLUT_Xmu_LIBRARY AND NOT TARGET GLUT::Xmu)
-        add_library(GLUT::Xmu UNKNOWN IMPORTED)
-        set_target_properties(GLUT::Xmu PROPERTIES
-          IMPORTED_LOCATION "${GLUT_Xmu_LIBRARY}")
-      endif()
-
-    endif ()
-
-    find_path( GLUT_INCLUDE_DIR GL/glut.h
-      /usr/include/GL
-      /usr/openwin/share/include
-      /usr/openwin/include
-      /opt/graphics/OpenGL/include
-      /opt/graphics/OpenGL/contrib/libglut
-      ${_GLUT_INC_DIR}
-      )
-
-    find_library( GLUT_glut_LIBRARY glut
+      set_target_properties(GLUT::Cocoa PROPERTIES
+        IMPORTED_LOCATION "${GLUT_cocoa_LIBRARY}")
+    endif()
+  endif()
+else()
+  if(BEOS)
+    set(_GLUT_INC_DIR /boot/develop/headers/os/opengl)
+    set(_GLUT_glut_LIB_DIR /boot/develop/lib/x86)
+  else()
+    find_library( GLUT_Xi_LIBRARY Xi
       /usr/openwin/lib
-      ${_GLUT_glut_LIB_DIR}
       )
-    mark_as_advanced(GLUT_glut_LIBRARY)
+    mark_as_advanced(GLUT_Xi_LIBRARY)
 
-    unset(_GLUT_INC_DIR)
-    unset(_GLUT_glut_LIB_DIR)
+    find_library( GLUT_Xmu_LIBRARY Xmu
+      /usr/openwin/lib
+      )
+    mark_as_advanced(GLUT_Xmu_LIBRARY)
+
+    if(GLUT_Xi_LIBRARY AND NOT TARGET GLUT::Xi)
+      add_library(GLUT::Xi UNKNOWN IMPORTED)
+      set_target_properties(GLUT::Xi PROPERTIES
+        IMPORTED_LOCATION "${GLUT_Xi_LIBRARY}")
+    endif()
+
+    if(GLUT_Xmu_LIBRARY AND NOT TARGET GLUT::Xmu)
+      add_library(GLUT::Xmu UNKNOWN IMPORTED)
+      set_target_properties(GLUT::Xmu PROPERTIES
+        IMPORTED_LOCATION "${GLUT_Xmu_LIBRARY}")
+    endif()
 
   endif ()
 
-endif ()
+  find_path( GLUT_INCLUDE_DIR GL/glut.h
+    /usr/include/GL
+    /usr/openwin/share/include
+    /usr/openwin/include
+    /opt/graphics/OpenGL/include
+    /opt/graphics/OpenGL/contrib/libglut
+    ${_GLUT_INC_DIR}
+    )
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+  find_library( GLUT_glut_LIBRARY glut
+    /usr/openwin/lib
+    ${_GLUT_glut_LIB_DIR}
+    )
+
+  unset(_GLUT_INC_DIR)
+  unset(_GLUT_glut_LIB_DIR)
+endif()
+mark_as_advanced(GLUT_glut_LIBRARY)
+
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(GLUT REQUIRED_VARS GLUT_glut_LIBRARY GLUT_INCLUDE_DIR)
 
 if (GLUT_FOUND)

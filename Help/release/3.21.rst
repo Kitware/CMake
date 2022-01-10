@@ -26,9 +26,7 @@ Presets
 Generators
 ----------
 
-* The :generator:`Visual Studio 17 2022` generator was added.  This is
-  experimental and based on "Visual Studio 2022 Preview 2" because this
-  version of VS has not been released.
+* The :generator:`Visual Studio 17 2022` generator was added.
 
 * The :ref:`Makefile Generators` and the :generator:`Ninja` generator
   learned to add linker launcher tools along with the linker for ``C``,
@@ -304,3 +302,35 @@ Changes made since CMake 3.21.0 include the following.
 
 * The :generator:`Visual Studio 17 2022` generator is now based on
   "Visual Studio 2022 Preview 2".  Previously it was based on "Preview 1.1".
+
+3.21.2
+------
+
+* ``CUDA`` targets with :prop_tgt:`CUDA_SEPARABLE_COMPILATION` enabled are now
+  correctly generated in non-root directories.
+
+* The :generator:`Visual Studio 17 2022` generator is now based on
+  "Visual Studio 2022 Preview 3.1".  Previously it was based on "Preview 2".
+
+3.21.3
+------
+
+* The :generator:`Visual Studio 17 2022` generator is now based on
+  "Visual Studio 2022 Preview 4".  Previously it was based on "Preview 3.1".
+
+* The AMD ROCm Platform ``hipcc`` compiler was identifed by CMake 3.21.0
+  through 3.21.2 as a distinct compiler with id ``ROCMClang``.  This has
+  been removed because it caused regressions.  Instead:
+
+  * ``hipcc`` may no longer be used as a ``HIP`` compiler because it
+    interferes with flags CMake needs to pass to Clang.  Use Clang directly.
+
+  * ``hipcc`` may once again be used as a ``CXX`` compiler, and is treated as
+    whatever compiler it selects underneath, as CMake 3.20 and below did.
+
+3.21.4
+------
+
+* The :generator:`Visual Studio 17 2022` generator is now based on the
+  "Visual Studio 2022" release candidates.  Previously it was based on
+  preview versions.

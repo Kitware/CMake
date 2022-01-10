@@ -10,36 +10,6 @@ if (NOT CMAKE_SYSTEM_NAME STREQUAL "QNX")
 endif()
 
 include(CheckIncludeFile)
-# Check if we can build support for ELF parsing.
-if(WIN32)
-  set(HAVE_ELF_H 0)
-elseif(CMAKE_CXX_PLATFORM_ID MATCHES "OpenBSD")
-  CHECK_INCLUDE_FILES("stdint.h;elf_abi.h" HAVE_ELF_H)
-else()
-  CHECK_INCLUDE_FILE("elf.h" HAVE_ELF_H)
-endif()
-if(HAVE_ELF_H)
-  set(CMake_USE_ELF_PARSER 1)
-elseif(HAIKU)
-  # On Haiku, we need to include elf32.h from the private headers
-  set(CMake_HAIKU_INCLUDE_DIRS
-    /boot/system/develop/headers/private/system
-    /boot/system/develop/headers/private/system/arch/x86
-    )
-
-  set(CMAKE_REQUIRED_INCLUDES ${CMake_HAIKU_INCLUDE_DIRS})
-  CHECK_INCLUDE_FILE("elf32.h" HAVE_ELF32_H)
-  unset(CMAKE_REQUIRED_INCLUDES)
-
-  if(HAVE_ELF32_H)
-    set(CMake_USE_ELF_PARSER 1)
-  else()
-    unset(CMake_HAIKU_INCLUDE_DIRS)
-    set(CMake_USE_ELF_PARSER)
-  endif()
-else()
-  set(CMake_USE_ELF_PARSER)
-endif()
 
 if(NOT CMake_DEFAULT_RECURSION_LIMIT)
   if(DEFINED ENV{DASHBOARD_TEST_FROM_CTEST})
@@ -110,11 +80,6 @@ include_directories(
   ${CMAKE_TAR_INCLUDES}
   ${CMake_HAIKU_INCLUDE_DIRS}
   )
-
-# Check if we can build the ELF parser.
-if(CMake_USE_ELF_PARSER)
-  set(ELF_SRCS cmELF.h cmELF.cxx)
-endif()
 
 # Check if we can build the Mach-O parser.
 if(CMake_USE_MACH_PARSER)
@@ -245,7 +210,8 @@ set(SRCS
   cmDocumentationSection.cxx
   cmDynamicLoader.cxx
   cmDynamicLoader.h
-  ${ELF_SRCS}
+  cmELF.h
+  cmELF.cxx
   cmExprParserHelper.cxx
   cmExportBuildAndroidMKGenerator.h
   cmExportBuildAndroidMKGenerator.cxx
@@ -415,6 +381,8 @@ set(SRCS
   cmProcessOutput.h
   cmProcessTools.cxx
   cmProcessTools.h
+  cmValue.cxx
+  cmValue.h
   cmProperty.h
   cmPropertyDefinition.cxx
   cmPropertyDefinition.h
@@ -432,8 +400,6 @@ set(SRCS
   cmQtAutoMocUic.h
   cmQtAutoRcc.cxx
   cmQtAutoRcc.h
-  cmQtAutoUicHelpers.cxx
-  cmQtAutoUicHelpers.h
   cmRST.cxx
   cmRST.h
   cmRuntimeDependencyArchive.cxx
@@ -836,7 +802,7 @@ if (WIN32)
 endif ()
 
 # Watcom support
-if(WIN32 OR CMAKE_SYSTEM_NAME STREQUAL "Linux")
+if(WIN32 OR CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
   set_property(SOURCE cmake.cxx APPEND PROPERTY COMPILE_DEFINITIONS CMAKE_USE_WMAKE)
   list(APPEND SRCS
     cmGlobalWatcomWMakeGenerator.cxx
@@ -996,6 +962,7 @@ set(CTEST_SRCS cmCTest.cxx
   CTest/cmCTestSubmitHandler.cxx
   CTest/cmCTestTestCommand.cxx
   CTest/cmCTestTestHandler.cxx
+  CTest/cmCTestTestMeasurementXMLParser.cxx
   CTest/cmCTestUpdateCommand.cxx
   CTest/cmCTestUpdateHandler.cxx
   CTest/cmCTestUploadCommand.cxx

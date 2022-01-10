@@ -208,7 +208,7 @@ std::string cmExtraCodeLiteGenerator::CollectSourceFiles(
     case cmStateEnums::MODULE_LIBRARY: {
       projectType = "Dynamic Library";
     } break;
-    default: // intended fallthrough
+    default:
       break;
   }
 
@@ -233,8 +233,8 @@ std::string cmExtraCodeLiteGenerator::CollectSourceFiles(
           otherFiles.insert(fullPath);
         }
       }
-    }
-    default: // intended fallthrough
+    } break;
+    default:
       break;
   }
   return projectType;
@@ -556,7 +556,8 @@ void cmExtraCodeLiteGenerator::CreateNewProjectFile(
     case cmStateEnums::SHARED_LIBRARY:
     case cmStateEnums::MODULE_LIBRARY:
       visualname = "lib" + targetName;
-    default: // intended fallthrough
+      break;
+    default:
       break;
   }
   xml.Attribute("Name", visualname);

@@ -4,9 +4,9 @@ AUTOMOC
 Should the target be processed with auto-moc (for Qt projects).
 
 :prop_tgt:`AUTOMOC` is a boolean specifying whether CMake will handle the Qt
-``moc`` preprocessor automatically, i.e.  without having to use the
-:module:`QT4_WRAP_CPP() <FindQt4>` or ``QT5_WRAP_CPP()`` macro.
-Currently Qt4 and Qt5 are supported.
+``moc`` preprocessor automatically, i.e.  without having to use commands like
+:module:`QT4_WRAP_CPP() <FindQt4>`, ``QT5_WRAP_CPP()``, etc.
+Currently, Qt versions 4 to 6 are supported.
 
 This property is initialized by the value of the :variable:`CMAKE_AUTOMOC`
 variable if it is set when a target is created.
@@ -148,10 +148,13 @@ Qt version detection
 
 :prop_tgt:`AUTOMOC` enabled targets need to know the Qt major and minor
 version they're working with.  The major version usually is provided by the
-``INTERFACE_QT_MAJOR_VERSION`` property of the ``Qt[45]Core`` library,
+``INTERFACE_QT_MAJOR_VERSION`` property of the ``Qt[456]Core`` library,
 that the target links to.  To find the minor version, CMake builds a list of
 available Qt versions from
 
+- ``Qt6Core_VERSION_MAJOR`` and ``Qt6Core_VERSION_MINOR`` variables
+  (usually set by ``find_package(Qt6...)``)
+- ``Qt6Core_VERSION_MAJOR`` and ``Qt6Core_VERSION_MINOR`` directory properties
 - ``Qt5Core_VERSION_MAJOR`` and ``Qt5Core_VERSION_MINOR`` variables
   (usually set by ``find_package(Qt5...)``)
 - ``Qt5Core_VERSION_MAJOR`` and ``Qt5Core_VERSION_MINOR`` directory properties
@@ -167,13 +170,13 @@ version was found, an error is generated.
 If  ``INTERFACE_QT_MAJOR_VERSION`` is not a valid number, the first
 entry in the list is taken.
 
-A ``find_package(Qt[45]...)`` call sets the ``QT/Qt5Core_VERSION_MAJOR/MINOR``
+A ``find_package(Qt[456]...)`` call sets the ``QT/Qt[56]Core_VERSION_MAJOR/MINOR``
 variables.  If the call is in a different context than the
 :command:`add_executable` or :command:`add_library` call, e.g. in a function,
 then the version variables might not be available to the :prop_tgt:`AUTOMOC`
 enabled target.
 In that case the version variables can be forwarded from the
-``find_package(Qt[45]...)`` calling context to the :command:`add_executable`
+``find_package(Qt[456]...)`` calling context to the :command:`add_executable`
 or :command:`add_library` calling context as directory properties.
 The following Qt5 example demonstrates the procedure.
 

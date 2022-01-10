@@ -13,6 +13,7 @@
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 #include "cmake.h"
 
 cmSourceFile::cmSourceFile(cmMakefile* mf, const std::string& name,
@@ -53,7 +54,7 @@ std::string cmSourceFile::GetObjectLibrary() const
 std::string const& cmSourceFile::GetOrDetermineLanguage()
 {
   // If the language was set explicitly by the user then use it.
-  if (cmProp lang = this->GetProperty(propLANGUAGE)) {
+  if (cmValue lang = this->GetProperty(propLANGUAGE)) {
     // Assign to member in order to return a reference.
     this->Language = *lang;
     return this->Language;
@@ -84,7 +85,7 @@ std::string const& cmSourceFile::GetOrDetermineLanguage()
 std::string cmSourceFile::GetLanguage() const
 {
   // If the language was set explicitly by the user then use it.
-  if (cmProp lang = this->GetProperty(propLANGUAGE)) {
+  if (cmValue lang = this->GetProperty(propLANGUAGE)) {
     return *lang;
   }
 
@@ -269,7 +270,8 @@ bool cmSourceFile::Matches(cmSourceFileLocation const& loc)
   return this->Location.Matches(loc);
 }
 
-void cmSourceFile::SetProperty(const std::string& prop, const char* value)
+template <typename ValueType>
+void cmSourceFile::StoreProperty(const std::string& prop, ValueType value)
 {
   if (prop == propINCLUDE_DIRECTORIES) {
     this->IncludeDirectories.clear();
@@ -292,6 +294,15 @@ void cmSourceFile::SetProperty(const std::string& prop, const char* value)
   } else {
     this->Properties.SetProperty(prop, value);
   }
+}
+
+void cmSourceFile::SetProperty(const std::string& prop, const char* value)
+{
+  this->StoreProperty(prop, value);
+}
+void cmSourceFile::SetProperty(const std::string& prop, cmValue value)
+{
+  this->StoreProperty(prop, value);
 }
 
 void cmSourceFile::AppendProperty(const std::string& prop,
@@ -317,7 +328,7 @@ void cmSourceFile::AppendProperty(const std::string& prop,
   }
 }
 
-cmProp cmSourceFile::GetPropertyForUser(const std::string& prop)
+cmValue cmSourceFile::GetPropertyForUser(const std::string& prop)
 {
   // This method is a consequence of design history and backwards
   // compatibility.  GetProperty is (and should be) a const method.
@@ -342,7 +353,7 @@ cmProp cmSourceFile::GetPropertyForUser(const std::string& prop)
   // if it is requested by the user.
   if (prop == propLANGUAGE) {
     // The pointer is valid until `this->Language` is modified.
-    return &this->GetOrDetermineLanguage();
+    return cmValue(this->GetOrDetermineLanguage());
   }
 
   // Special handling for GENERATED property.
@@ -355,23 +366,23 @@ cmProp cmSourceFile::GetPropertyForUser(const std::string& prop)
           (policyStatus == cmPolicies::WARN || policyStatus == cmPolicies::OLD)
             ? CheckScope::GlobalAndLocal
             : CheckScope::Global)) {
-      return &propTRUE;
+      return cmValue(propTRUE);
     }
-    return &propFALSE;
+    return cmValue(propFALSE);
   }
 
   // Perform the normal property lookup.
   return this->GetProperty(prop);
 }
 
-cmProp cmSourceFile::GetProperty(const std::string& prop) const
+cmValue cmSourceFile::GetProperty(const std::string& prop) const
 {
   // Check for computed properties.
   if (prop == propLOCATION) {
     if (this->FullPath.empty()) {
       return nullptr;
     }
-    return &this->FullPath;
+    return cmValue(this->FullPath);
   }
 
   // Check for the properties with backtraces.
@@ -382,7 +393,7 @@ cmProp cmSourceFile::GetProperty(const std::string& prop) const
 
     static std::string output;
     output = cmJoin(this->IncludeDirectories, ";");
-    return &output;
+    return cmValue(output);
   }
 
   if (prop == propCOMPILE_OPTIONS) {
@@ -392,7 +403,7 @@ cmProp cmSourceFile::GetProperty(const std::string& prop) const
 
     static std::string output;
     output = cmJoin(this->CompileOptions, ";");
-    return &output;
+    return cmValue(output);
   }
 
   if (prop == propCOMPILE_DEFINITIONS) {
@@ -402,10 +413,10 @@ cmProp cmSourceFile::GetProperty(const std::string& prop) const
 
     static std::string output;
     output = cmJoin(this->CompileDefinitions, ";");
-    return &output;
+    return cmValue(output);
   }
 
-  cmProp retVal = this->Properties.GetPropertyValue(prop);
+  cmValue retVal = this->Properties.GetPropertyValue(prop);
   if (!retVal) {
     cmMakefile const* mf = this->Location.GetMakefile();
     const bool chain =
@@ -421,7 +432,7 @@ cmProp cmSourceFile::GetProperty(const std::string& prop) const
 
 const std::string& cmSourceFile::GetSafeProperty(const std::string& prop) const
 {
-  cmProp ret = this->GetProperty(prop);
+  cmValue ret = this->GetProperty(prop);
   if (ret) {
     return *ret;
   }

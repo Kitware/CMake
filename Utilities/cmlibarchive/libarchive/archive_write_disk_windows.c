@@ -549,6 +549,8 @@ la_mktemp(struct archive_write_disk *a)
 	a->tmpname = a->_tmpname_data.s;
 
 	fd = __archive_mkstemp(a->tmpname);
+	if (fd == -1)
+		return -1;
 
 	mode = a->mode & 0777 & ~a->user_umask;
 	if (la_chmod(a->tmpname, mode) == -1) {
@@ -1281,9 +1283,11 @@ _archive_write_disk_finish_entry(struct archive *_a)
 			/* Windows does not support atomic rename */
 			disk_unlink(a->name);
 			if (_wrename(a->tmpname, a->name) != 0) {
+				la_dosmaperr(GetLastError());
 				archive_set_error(&a->archive, errno,
-				    "rename failed");
-				ret = ARCHIVE_FATAL;
+				    "Failed to rename temporary file");
+				ret = ARCHIVE_FAILED;
+				disk_unlink(a->tmpname);
 			}
 			a->tmpname = NULL;
 		}
@@ -1573,12 +1577,17 @@ restore_entry(struct archive_write_disk *a)
 				S_ISREG(st_mode)) {
 				int fd = la_mktemp(a);
 
-				if (fd == -1)
+				if (fd == -1) {
+					la_dosmaperr(GetLastError());
+					archive_set_error(&a->archive, errno,
+					    "Can't create temporary file");
 					return (ARCHIVE_FAILED);
+				}
 				a->fh = (HANDLE)_get_osfhandle(fd);
-				if (a->fh == INVALID_HANDLE_VALUE)
+				if (a->fh == INVALID_HANDLE_VALUE) {
+					la_dosmaperr(GetLastError());
 					return (ARCHIVE_FAILED);
-
+				}
 				a->pst = NULL;
 				en = 0;
 			} else {

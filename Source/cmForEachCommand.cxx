@@ -30,6 +30,7 @@
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 namespace {
 class cmForEachFunctionBlocker : public cmFunctionBlocker

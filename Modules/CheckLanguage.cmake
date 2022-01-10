@@ -36,6 +36,9 @@ Example:
 
 include_guard(GLOBAL)
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0126 NEW)
+
 macro(check_language lang)
   if(NOT DEFINED CMAKE_${lang}_COMPILER)
     set(_desc "Looking for a ${lang} compiler")
@@ -43,7 +46,7 @@ macro(check_language lang)
     file(REMOVE_RECURSE ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/Check${lang})
 
     set(extra_compiler_variables)
-    if(${lang} STREQUAL CUDA)
+    if(${lang} STREQUAL CUDA AND NOT CMAKE_GENERATOR MATCHES "Visual Studio")
       set(extra_compiler_variables "set(CMAKE_CUDA_HOST_COMPILER \\\"\${CMAKE_CUDA_HOST_COMPILER}\\\")")
     endif()
 
@@ -110,3 +113,5 @@ file(WRITE \"\${CMAKE_CURRENT_BINARY_DIR}/result.cmake\"
 
   endif()
 endmacro()
+
+cmake_policy(POP)

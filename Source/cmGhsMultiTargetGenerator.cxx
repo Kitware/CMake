@@ -19,7 +19,6 @@
 #include "cmLocalGhsMultiGenerator.h"
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
-#include "cmProperty.h"
 #include "cmSourceFile.h"
 #include "cmSourceFileLocation.h"
 #include "cmSourceGroup.h"
@@ -29,6 +28,7 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
+#include "cmValue.h"
 
 cmGhsMultiTargetGenerator::cmGhsMultiTargetGenerator(cmGeneratorTarget* target)
   : GeneratorTarget(target)
@@ -43,7 +43,7 @@ cmGhsMultiTargetGenerator::cmGhsMultiTargetGenerator(cmGeneratorTarget* target)
 #endif
 {
   // Store the configuration name that is being used
-  if (cmProp config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE")) {
+  if (cmValue config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE")) {
     // Use the build type given by the user.
     this->ConfigName = *config;
   } else {
@@ -376,7 +376,7 @@ void cmGhsMultiTargetGenerator::WriteCustomCommandsHelper(
 #ifdef _WIN32
   std::string check_error = "if %errorlevel% neq 0 exit /b %errorlevel%";
 #else
-  std::string check_error = "if [[ $? -ne 0 ]]; then exit 1; fi";
+  std::string check_error = "if [ $? -ne 0 ]; then exit 1; fi";
 #endif
 
 #ifdef _WIN32
@@ -453,7 +453,7 @@ void cmGhsMultiTargetGenerator::WriteSourceProperty(
   std::ostream& fout, const cmSourceFile* sf, std::string const& propName,
   std::string const& propFlag)
 {
-  cmProp prop = sf->GetProperty(propName);
+  cmValue prop = sf->GetProperty(propName);
   if (prop) {
     std::vector<std::string> list = cmExpandedList(*prop);
     for (const std::string& p : list) {
@@ -705,7 +705,7 @@ void cmGhsMultiTargetGenerator::WriteCustomCommandLine(
 void cmGhsMultiTargetGenerator::WriteObjectLangOverride(
   std::ostream& fout, const cmSourceFile* sourceFile)
 {
-  cmProp rawLangProp = sourceFile->GetProperty("LANGUAGE");
+  cmValue rawLangProp = sourceFile->GetProperty("LANGUAGE");
   if (rawLangProp) {
     std::string sourceLangProp(*rawLangProp);
     std::string const& extension = sourceFile->GetExtension();
@@ -717,7 +717,7 @@ void cmGhsMultiTargetGenerator::WriteObjectLangOverride(
 
 bool cmGhsMultiTargetGenerator::DetermineIfIntegrityApp()
 {
-  if (cmProp p = this->GeneratorTarget->GetProperty("ghs_integrity_app")) {
+  if (cmValue p = this->GeneratorTarget->GetProperty("ghs_integrity_app")) {
     return cmIsOn(*p);
   }
   std::vector<cmSourceFile*> sources;

@@ -8,9 +8,9 @@
 
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
-#include "cmProperty.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 bool cmBuildNameCommand(std::vector<std::string> const& args,
                         cmExecutionStatus& status)
@@ -20,7 +20,7 @@ bool cmBuildNameCommand(std::vector<std::string> const& args,
     return false;
   }
   cmMakefile& mf = status.GetMakefile();
-  cmProp cacheValue = mf.GetDefinition(args[0]);
+  cmValue cacheValue = mf.GetDefinition(args[0]);
   if (cacheValue) {
     // do we need to correct the value?
     cmsys::RegularExpression reg("[()/]");

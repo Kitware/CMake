@@ -1,0 +1,2 @@
+This file should always be installed into CMAKE_INSTALL_PREFIX
+as a symbolic link to the original file.

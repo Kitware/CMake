@@ -23,6 +23,7 @@
 #include "cmTransformDepfile.h"
 #include "cmUVProcessChain.h"
 #include "cmUtils.hxx"
+#include "cmValue.h"
 #include "cmVersion.h"
 #include "cmake.h"
 
@@ -385,18 +386,15 @@ int HandleTidy(const std::string& runCmd, const std::string& sourceFile,
   return ret;
 }
 
-int HandleLWYU(const std::string& runCmd, const std::string& /* sourceFile */,
+int HandleLWYU(const std::string& runCmd, const std::string& sourceFile,
                const std::vector<std::string>&)
 {
   // Construct the ldd -r -u (link what you use lwyu) command line
   // ldd -u -r lwuy target
-  std::vector<std::string> lwyu_cmd;
-  lwyu_cmd.emplace_back("ldd");
-  lwyu_cmd.emplace_back("-u");
-  lwyu_cmd.emplace_back("-r");
-  lwyu_cmd.push_back(runCmd);
+  std::vector<std::string> lwyu_cmd = cmExpandedList(runCmd, true);
+  lwyu_cmd.push_back(sourceFile);
 
-  // Run the ldd -u -r command line.
+  // Run the lwyu check command line,  currently ldd is expected.
   // Capture its stdout and hide its stderr.
   // Ignore its return code because the tool always returns non-zero
   // if there are any warnings, but we just want to warn.
@@ -1071,6 +1069,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
         } else if (!cmSystemTools::FileExists(arg)) {
           cmSystemTools::Error(arg + ": no such file or directory (ignoring)");
           return_value = 1;
+        } else if (cmSystemTools::FileLength(arg) == 0) {
+          // Ignore empty files, this is not an error
         } else {
           // Destroy console buffers to drop cout/cerr encoding transform.
           consoleBuf.reset();
@@ -1461,7 +1461,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
           cmSystemTools::Error("Problem extracting tar: " + outFile);
           return 1;
         }
-#ifdef WIN32
+#ifdef _WIN32
         // OK, on windows 7 after we untar some files,
         // sometimes we can not rename the directory after
         // the untar is done. This breaks the external project

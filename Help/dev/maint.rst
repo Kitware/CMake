@@ -245,12 +245,12 @@ Commit with a message such as::
   Release versions do not have the development topic section of
   the CMake Release Notes index page.
 
-Update ``.gitlab-ci.yml`` to drop the ``upload:`` jobs from the
+Update ``.gitlab-ci.yml`` to drop the upload jobs from the
 packaging pipeline by renaming them to start in ``.``:
 
 .. code-block:: shell
 
-  sed -i 's/^upload:/.upload:/' .gitlab-ci.yml
+  sed -i 's/^u:/.u:/' .gitlab-ci.yml
 
 Commit with a message such as::
 
@@ -298,7 +298,7 @@ the version date from ``origin/master``:
   git checkout origin/master -- \
     Source/CMakeVersion.cmake Help/release/dev/0-sample-topic.rst
   sed -i $'/^Releases/ i\\\n.. include:: dev.txt\\\n' Help/release/index.rst
-  sed -i 's/^\.upload:/upload:/' .gitlab-ci.yml
+  sed -i 's/^\.u:/u:/' .gitlab-ci.yml
 
 Update ``Source/CMakeVersion.cmake`` to set the version to
 ``$major.$minor.$date``:

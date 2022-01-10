@@ -78,7 +78,8 @@ void InheritVector(std::vector<T>& child, const std::vector<T>& parent)
 template <class T>
 ReadFileResult VisitPreset(
   T& preset, std::map<std::string, cmCMakePresetsFile::PresetPair<T>>& presets,
-  std::map<std::string, CycleStatus> cycleStatus, int version)
+  std::map<std::string, CycleStatus> cycleStatus,
+  const cmCMakePresetsFile& file)
 {
   switch (cycleStatus[preset.Name]) {
     case CycleStatus::InProgress:
@@ -108,7 +109,7 @@ ReadFileResult VisitPreset(
       return ReadFileResult::USER_PRESET_INHERITANCE;
     }
 
-    auto result = VisitPreset(parentPreset, presets, cycleStatus, version);
+    auto result = VisitPreset(parentPreset, presets, cycleStatus, file);
     if (result != ReadFileResult::READ_OK) {
       return result;
     }
@@ -128,7 +129,7 @@ ReadFileResult VisitPreset(
     preset.ConditionEvaluator.reset();
   }
 
-  CHECK_OK(preset.VisitPresetAfterInherit(version))
+  CHECK_OK(preset.VisitPresetAfterInherit(file.GetVersion(preset)))
 
   cycleStatus[preset.Name] = CycleStatus::Verified;
   return ReadFileResult::READ_OK;
@@ -146,8 +147,7 @@ ReadFileResult ComputePresetInheritance(
 
   for (auto& it : presets) {
     auto& preset = it.second.Unexpanded;
-    auto result =
-      VisitPreset<T>(preset, presets, cycleStatus, file.GetVersion(preset));
+    auto result = VisitPreset<T>(preset, presets, cycleStatus, file);
     if (result != ReadFileResult::READ_OK) {
       return result;
     }

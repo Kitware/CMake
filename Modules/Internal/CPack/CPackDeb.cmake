@@ -662,10 +662,12 @@ function(cpack_deb_prepare_package_vars)
 
   # add ldconfig call in default postrm and postint
   set(CPACK_ADD_LDCONFIG_CALL 0)
+  # all files in CPACK_DEB_SHARED_OBJECT_FILES have dot at the beginning
+  set(_LDCONF_DEFAULTS "./lib" "./usr/lib")
   foreach(_FILE IN LISTS CPACK_DEB_SHARED_OBJECT_FILES)
     get_filename_component(_DIR ${_FILE} DIRECTORY)
-    # all files in CPACK_DEB_SHARED_OBJECT_FILES have dot at the beginning
-    if(_DIR STREQUAL "./lib" OR _DIR STREQUAL "./usr/lib")
+    get_filename_component(_PARENT_DIR ${_DIR} DIRECTORY)
+    if(_DIR IN_LIST _LDCONF_DEFAULTS OR _PARENT_DIR IN_LIST _LDCONF_DEFAULTS)
       set(CPACK_ADD_LDCONFIG_CALL 1)
     endif()
   endforeach()

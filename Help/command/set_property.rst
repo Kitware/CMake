@@ -9,8 +9,8 @@ Set a named property in a given scope.
                 DIRECTORY [<dir>]           |
                 TARGET    [<target1> ...]   |
                 SOURCE    [<src1> ...]
-                          [DIRECTORY <dirs> ...] |
-                          [TARGET_DIRECTORY <targets> ...]
+                          [DIRECTORY <dirs> ...]
+                          [TARGET_DIRECTORY <targets> ...] |
                 INSTALL   [<file1> ...]     |
                 TEST      [<test1> ...]     |
                 CACHE     [<entry1> ...]    >

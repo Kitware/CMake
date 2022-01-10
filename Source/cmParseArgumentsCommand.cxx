@@ -13,10 +13,10 @@
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
-#include "cmProperty.h"
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 static std::string EscapeArg(const std::string& arg)
 {
@@ -196,7 +196,7 @@ bool cmParseArgumentsCommand(std::vector<std::string> const& args,
     for (unsigned long i = argvStart; i < count; ++i) {
       std::ostringstream argName;
       argName << "ARGV" << i;
-      cmProp arg = status.GetMakefile().GetDefinition(argName.str());
+      cmValue arg = status.GetMakefile().GetDefinition(argName.str());
       if (!arg) {
         status.GetMakefile().IssueMessage(MessageType::FATAL_ERROR,
                                           "PARSE_ARGV called with " +

@@ -4,6 +4,7 @@
 include(Compiler/CMakeCommonCompilerMacros)
 
 set(CMAKE_CXX_CLANG_TIDY_DRIVER_MODE "cl")
+set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE_DRIVER_MODE "cl")
 
 if ((CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.0.24215.1 AND
      CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19.10) OR
@@ -70,6 +71,7 @@ elseif (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 16.0)
       cxx_std_14
       cxx_std_17
       cxx_std_20
+      cxx_std_23
       )
     _record_compiler_features(CXX "" CMAKE_CXX_COMPILE_FEATURES)
   endmacro()
@@ -79,3 +81,9 @@ endif()
 if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.05)
   set(CMAKE_CXX_COMPILE_OPTIONS_JMC "-JMC")
 endif()
+
+# The `/external:I` flag was made non-experimental in 19.29.30036.3.
+if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.29.30036.3)
+  set(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-external:I ")
+  set(_CMAKE_INCLUDE_SYSTEM_FLAG_CXX_WARNING "-external:W0 ")
+endif ()

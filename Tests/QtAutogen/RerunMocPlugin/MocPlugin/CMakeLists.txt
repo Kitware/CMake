@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.16)
 project(MocPlugin)
 include("../../AutogenGuiTest.cmake")
 
@@ -22,7 +22,7 @@ configure_file(jsonIn/StyleE.json jsonFiles/StyleE_Custom.json)
 set(CMAKE_AUTOMOC TRUE)
 
 include_directories("${CMAKE_CURRENT_BINARY_DIR}/jsonFiles")
-link_libraries(Qt5::Widgets)
+link_libraries(Qt${QT_TEST_VERSION}::Widgets)
 
 add_library(PlugA STATIC StyleA.cpp)
 add_library(PlugB STATIC StyleB.cpp)

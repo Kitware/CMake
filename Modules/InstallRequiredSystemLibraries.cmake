@@ -73,6 +73,8 @@ set(_IRSL_HAVE_MSVC FALSE)
 foreach(LANG IN ITEMS C CXX Fortran)
   if("${CMAKE_${LANG}_COMPILER_ID}" MATCHES "Intel")
     if(NOT _IRSL_HAVE_Intel)
+      # The oneAPI icx/ifx compilers are under ${os}/bin.
+      # The classic icc/icpc/icl/ifort compilers may be under ${os}/bin/intel64.
       get_filename_component(_Intel_basedir "${CMAKE_${LANG}_COMPILER}" PATH)
       if(CMAKE_SIZEOF_VOID_P EQUAL 8)
         set(_Intel_archdir intel64)
@@ -80,19 +82,36 @@ foreach(LANG IN ITEMS C CXX Fortran)
         set(_Intel_archdir ia32)
       endif()
       set(_Intel_compiler_ver ${CMAKE_${LANG}_COMPILER_VERSION})
-      if(WIN32 AND EXISTS "${_Intel_basedir}/../redist/${_Intel_archdir}_win/compiler")
-        get_filename_component(_Intel_redistdir "${_Intel_basedir}/../redist/${_Intel_archdir}_win/compiler" ABSOLUTE)
-      elseif(WIN32)
-        get_filename_component(_Intel_redistdir "${_Intel_basedir}/../../redist/${_Intel_archdir}/compiler" ABSOLUTE)
+      if(WIN32)
+        set(_Intel_possible_redistdirs
+          "${_Intel_basedir}/../redist/${_Intel_archdir}_win/compiler"
+          "${_Intel_basedir}/../redist/${_Intel_archdir}/compiler"
+          "${_Intel_basedir}/../../redist/${_Intel_archdir}_win/compiler"
+          "${_Intel_basedir}/../../redist/${_Intel_archdir}/compiler"
+          )
       elseif(APPLE)
-        get_filename_component(_Intel_redistdir "${_Intel_basedir}/../../compiler/lib" ABSOLUTE)
+        set(_Intel_possible_redistdirs
+          "${_Intel_basedir}/../../compiler/lib"
+          )
       else()
-        if(EXISTS "${_Intel_basedir}/../lib/${_Intel_archdir}_lin")
-          get_filename_component(_Intel_redistdir "${_Intel_basedir}/../lib/${_Intel_archdir}" ABSOLUTE)
-        else()
-          get_filename_component(_Intel_redistdir "${_Intel_basedir}/../../compiler/lib/${_Intel_archdir}_lin" ABSOLUTE)
-        endif()
+        set(_Intel_possible_redistdirs
+          "${_Intel_basedir}/../lib/${_Intel_archdir}"
+          "${_Intel_basedir}/../../compiler/lib/${_Intel_archdir}_lin"
+          )
       endif()
+
+      set(_Intel_redistdir NOT-FOUND)
+      foreach(dir IN LISTS _Intel_possible_redistdirs)
+        if(EXISTS "${dir}")
+          set(_Intel_redistdir "${dir}")
+          break()
+        endif()
+      endforeach()
+      # Fall back to last dir
+      if(NOT _Intel_redistdir)
+        list(POP_BACK _Intel_possible_redistdirs _Intel_redistdir)
+      endif()
+      unset(_Intel_possible_redistdirs)
       set(_IRSL_HAVE_Intel TRUE)
     endif()
   elseif("${CMAKE_${LANG}_COMPILER_ID}" STREQUAL "MSVC")
@@ -222,8 +241,12 @@ if(MSVC)
   set(_MSVC_IDE_VERSION "")
   if(MSVC_VERSION GREATER_EQUAL 2000)
     message(WARNING "MSVC ${MSVC_VERSION} not yet supported.")
-  elseif(MSVC_TOOLSET_VERSION GREATER_EQUAL 143)
+  elseif(MSVC_TOOLSET_VERSION GREATER_EQUAL 144)
     message(WARNING "MSVC toolset v${MSVC_TOOLSET_VERSION} not yet supported.")
+  elseif(MSVC_TOOLSET_VERSION EQUAL 143)
+    set(MSVC_REDIST_NAME VC143)
+    set(_MSVC_DLL_VERSION 140)
+    set(_MSVC_IDE_VERSION 17)
   elseif(MSVC_TOOLSET_VERSION EQUAL 142)
     set(MSVC_REDIST_NAME VC142)
     set(_MSVC_DLL_VERSION 140)
@@ -264,7 +287,7 @@ if(MSVC)
     if(NOT vs VERSION_LESS 15)
       set(_vs_redist_paths "")
       # The toolset and its redistributables may come with any VS version 15 or newer.
-      set(_MSVC_IDE_VERSIONS 16 15)
+      set(_MSVC_IDE_VERSIONS 17 16 15)
       foreach(_vs_ver ${_MSVC_IDE_VERSIONS})
         set(_vs_glob_redist_paths "")
         cmake_host_system_information(RESULT _vs_dir QUERY VS_${_vs_ver}_DIR) # undocumented query

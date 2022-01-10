@@ -92,6 +92,11 @@ literal block after ``::``
  the referenced documents inline as part of the referencing
  document.
 
+``versionadded``, ``versionchanged`` directives
+ Specify that something was added or changed by a named CMake version.
+ The command-line help processor prints the block content as if the lines
+ were normal paragraph text with interpretation.
+
 Inline markup constructs not listed above are printed literally in the
 command-line help output.  We prefer to use inline markup constructs that
 look correct in source form, so avoid use of \\-escapes in favor of inline

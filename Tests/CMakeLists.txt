@@ -39,6 +39,13 @@ set(ENV{HOME} \"${TEST_HOME}\")
 ")
 endif()
 
+# Suppress generator deprecation warnings in test suite.
+if(CMAKE_GENERATOR MATCHES "^Visual Studio 10 2010")
+  set(TEST_WARN_VS10_CODE "set(ENV{CMAKE_WARN_VS10} OFF)")
+else()
+  set(TEST_WARN_VS10_CODE "")
+endif()
+
 # 3.9 or later provides a definitive answer to whether we are multi-config
 # through a global property. Prior to 3.9, CMAKE_CONFIGURATION_TYPES being set
 # is assumed to mean multi-config, but developers might modify it so it is
@@ -249,6 +256,13 @@ if(BUILD_TESTING)
 
   #---------------------------------------------------------------------------
   # Add tests below here.
+
+  if(NOT DEFINED CMake_TEST_Qt6)
+    set(CMake_TEST_Qt6 1)
+  endif()
+  if(CMake_TEST_Qt6)
+    find_package(Qt6 COMPONENTS Core Widgets QUIET NO_MODULE)
+  endif()
 
   if(NOT DEFINED CMake_TEST_Qt5)
     set(CMake_TEST_Qt5 1)
@@ -1365,6 +1379,13 @@ if(BUILD_TESTING)
     --test-command ${CMAKE_CTEST_COMMAND} -V
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Environment")
+  set_property(TEST Environment APPEND
+    PROPERTY ENVIRONMENT
+      "SET_FROM_AMBIENT_unset=base"
+      "SET_FROM_AMBIENT_replace=base"
+      "SET_FROM_AMBIENT_string=base"
+      "SET_FROM_AMBIENT_path=base"
+      "SET_FROM_AMBIENT_list=base")
 
   add_test(QtAutomocNoQt  ${CMAKE_CTEST_COMMAND}
     --build-and-test
@@ -1377,6 +1398,9 @@ if(BUILD_TESTING)
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/QtAutomocNoQt")
 
+  if(CMake_TEST_Qt6 AND Qt6Widgets_FOUND)
+    add_subdirectory(Qt6Autogen)
+  endif()
   if(CMake_TEST_Qt5 AND Qt5Widgets_FOUND)
     add_subdirectory(Qt5Autogen)
   endif()
@@ -1442,12 +1466,14 @@ if(BUILD_TESTING)
             GIF
             Git
             GLEW
+            GLUT
             GnuTLS
             GSL
             GTK2
             Iconv
             ICU
             Intl
+            Jasper
             JPEG
             JsonCpp
             LAPACK
@@ -1543,6 +1569,8 @@ if(BUILD_TESTING)
     ADD_TEST_MACRO(FindMatlab.failure_reports   ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>)
     set(FindMatlab.r2018a_check_BUILD_OPTIONS ${FindMatlab_additional_test_options})
     ADD_TEST_MACRO(FindMatlab.r2018a_check   ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>)
+    set(FindMatlab.targets_checks_BUILD_OPTIONS ${FindMatlab_additional_test_options})
+    ADD_TEST_MACRO(FindMatlab.targets_checks      ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>)
   endif()
 
   add_test(ExternalProject ${CMAKE_CTEST_COMMAND}
@@ -1639,6 +1667,55 @@ if(BUILD_TESTING)
     TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT}
     WORKING_DIRECTORY ${CMake_SOURCE_DIR}/Tests/ExternalProjectUpdate
     DEPENDS ExternalProjectUpdateSetup )
+
+  execute_process(
+    COMMAND ${CMAKE_COMMAND}
+    "-E" create_symlink
+    "${CMake_SOURCE_DIR}/Tests/CMakeLists.txt"        # random source file that exists
+    "${CMake_BINARY_DIR}/Tests/try_to_create_symlink" # random target file in existing directory
+    RESULT_VARIABLE _symlink_result
+    OUTPUT_VARIABLE _symlink_stdout
+    ERROR_VARIABLE _symlink_stderr
+    )
+  if(_symlink_result EQUAL 0)
+    file(REMOVE "${CMake_BINARY_DIR}/Tests/try_to_create_symlink")
+    function(add_installmode_test _mode)
+      set(ENV{CMAKE_INSTALL_MODE} _mode)
+      set(_maybe_InstallMode_CTEST_OPTIONS)
+      set(_maybe_BUILD_OPTIONS)
+      if(_isMultiConfig)
+        set(_maybe_CTEST_OPTIONS -C $<CONFIGURATION>)
+      else()
+        set(_maybe_BUILD_OPTIONS "-DCMAKE_BUILD_TYPE=$<CONFIGURATION>")
+      endif()
+      add_test(
+        NAME "InstallMode-${_mode}"
+        COMMAND
+          ${CMAKE_CTEST_COMMAND} -V ${_maybe_CTEST_OPTIONS}
+        --build-and-test
+          "${CMake_SOURCE_DIR}/Tests/InstallMode"
+          "${CMake_BINARY_DIR}/Tests/InstallMode-${_mode}"
+        ${build_generator_args}
+        --build-project superpro
+        --build-exe-dir "${CMake_BINARY_DIR}/Tests/InstallMode-${_mode}"
+        --force-new-ctest-process
+        --build-options
+          ${_maybe_BUILD_OPTIONS}
+          "-DCMAKE_INSTALL_PREFIX:PATH=${CMake_BINARY_DIR}/Tests/InstallMode-${_mode}/install"
+        )
+      list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/InstallMode-${_mode}")
+      unset(ENV{CMAKE_INSTALL_MODE})
+    endfunction()
+
+    add_installmode_test(COPY)
+    add_installmode_test(REL_SYMLINK)
+    add_installmode_test(REL_SYMLINK_OR_COPY)
+    add_installmode_test(ABS_SYMLINK)
+    add_installmode_test(ABS_SYMLINK_OR_COPY)
+    add_installmode_test(SYMLINK)
+    add_installmode_test(SYMLINK_OR_COPY)
+  endif()
+
 
   # do each of the tutorial steps
   function(add_tutorial_test step_name use_mymath tutorial_arg pass_regex)
@@ -2157,8 +2234,9 @@ if(BUILD_TESTING)
     endif()
 
     if(NOT "${CMAKE_GENERATOR}" MATCHES "Visual Studio 9 "
-        AND NOT CMAKE_GENERATOR_TOOLSET)
+        AND NOT CMAKE_GENERATOR_TOOLSET STREQUAL "v90")
       ADD_TEST_MACRO(VSWindowsFormsResx VSWindowsFormsResx)
+      ADD_TEST_MACRO(VSManagedCustomCommand)
     endif()
 
     add_test(VSExternalInclude ${CMAKE_CTEST_COMMAND}

@@ -8,6 +8,8 @@
 #include <memory>
 #include <string>
 
+#include <cm/optional>
+
 #include "cmGlobalVisualStudio14Generator.h"
 #include "cmVSSetupHelper.h"
 
@@ -28,6 +30,8 @@ public:
   bool SetGeneratorInstance(std::string const& i, cmMakefile* mf) override;
 
   bool GetVSInstance(std::string& dir) const;
+
+  cm::optional<std::string> FindMSBuildCommandEarly(cmMakefile* mf) override;
 
   cm::optional<std::string> GetVSInstanceVersion() const override;
 
@@ -72,4 +76,5 @@ private:
   class Factory17;
   friend class Factory17;
   mutable cmVSSetupAPIHelper vsSetupAPIHelper;
+  cm::optional<std::string> LastGeneratorInstanceString;
 };

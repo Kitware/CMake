@@ -138,11 +138,6 @@ protected:
   void AddExtraIDETargets() override;
   void Generate() override;
 
-  FindMakeProgramStage GetFindMakeProgramStage() const override
-  {
-    return FindMakeProgramStage::Early;
-  }
-
 private:
   enum EmbedActionFlags
   {
@@ -327,7 +322,7 @@ private:
   bool XcodeBuildCommandInitialized;
 
   void PrintCompilerAdvice(std::ostream&, std::string const&,
-                           const char*) const override
+                           cmValue) const override
   {
   }
 

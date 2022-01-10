@@ -8,6 +8,7 @@
 
 #include "cmCPackGenerator.h"
 #include "cmCPackPKGGenerator.h"
+#include "cmValue.h"
 
 class cmCPackComponent;
 
@@ -45,6 +46,5 @@ protected:
                                 const std::string& packageDir,
                                 const cmCPackComponent* component);
 
-  const char* GetComponentScript(const char* script,
-                                 const char* script_component);
+  cmValue GetComponentScript(const char* script, const char* script_component);
 };

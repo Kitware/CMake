@@ -70,6 +70,8 @@ public:
 
   // -- File system methods
   static bool MakeParentDirectory(std::string const& filename);
+  static bool FileRead(std::string& content, std::string const& filename,
+                       std::string* error = nullptr);
   static bool FileWrite(std::string const& filename,
                         std::string const& content,
                         std::string* error = nullptr);

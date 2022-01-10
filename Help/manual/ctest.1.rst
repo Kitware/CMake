@@ -464,6 +464,10 @@ CTest prints timing summary information for each ``LABEL`` and subproject
 associated with the tests run. The label time summary will not include labels
 that are mapped to subprojects.
 
+.. versionadded:: 3.22
+  Labels added dynamically during test execution are also reported in the
+  timing summary.  See :ref:`Additional Labels`.
+
 When the :prop_test:`PROCESSORS` test property is set, CTest will display a
 weighted test timing result in label and subproject summaries. The time is
 reported with `sec*proc` instead of just `sec`.

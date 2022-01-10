@@ -439,6 +439,8 @@ set(_CPACK_IFW_PREFIXES
   "QtIFW-")
 
 set(_CPACK_IFW_VERSIONS
+  "4.2"
+  "4.1"
   "4.0"
   "3.2"
   "3.2.0"

@@ -24,7 +24,8 @@
 /// @arg valueOpts list of options that accept a value
 void MergeOptions(std::vector<std::string>& baseOpts,
                   std::vector<std::string> const& newOpts,
-                  std::initializer_list<cm::string_view> valueOpts, bool isQt5)
+                  std::initializer_list<cm::string_view> valueOpts,
+                  bool isQt5OrLater)
 {
   if (newOpts.empty()) {
     return;
@@ -47,7 +48,7 @@ void MergeOptions(std::vector<std::string>& baseOpts,
           auto oit = newOpt.begin();
           if (*oit == '-') {
             ++oit;
-            if (isQt5 && (*oit == '-')) {
+            if (isQt5OrLater && (*oit == '-')) {
               ++oit;
             }
             optName.assign(oit, newOpt.end());
@@ -204,24 +205,24 @@ std::string cmQtAutoGen::AppendFilenameSuffix(cm::string_view filename,
 
 void cmQtAutoGen::UicMergeOptions(std::vector<std::string>& baseOpts,
                                   std::vector<std::string> const& newOpts,
-                                  bool isQt5)
+                                  bool isQt5OrLater)
 {
   static std::initializer_list<cm::string_view> const valueOpts = {
     "tr",      "translate", "postfix", "generator",
     "include", // Since Qt 5.3
     "g"
   };
-  MergeOptions(baseOpts, newOpts, valueOpts, isQt5);
+  MergeOptions(baseOpts, newOpts, valueOpts, isQt5OrLater);
 }
 
 void cmQtAutoGen::RccMergeOptions(std::vector<std::string>& baseOpts,
                                   std::vector<std::string> const& newOpts,
-                                  bool isQt5)
+                                  bool isQt5OrLater)
 {
   static std::initializer_list<cm::string_view> const valueOpts = {
     "name", "root", "compress", "threshold"
   };
-  MergeOptions(baseOpts, newOpts, valueOpts, isQt5);
+  MergeOptions(baseOpts, newOpts, valueOpts, isQt5OrLater);
 }
 
 static void RccListParseContent(std::string const& content,
@@ -383,40 +384,4 @@ bool cmQtAutoGen::RccLister::list(std::string const& qrcFile,
     entry = cmSystemTools::CollapseFullPath(entry, fileDir);
   }
   return true;
-}
-
-bool cmQtAutoGen::FileRead(std::string& content, std::string const& filename,
-                           std::string* error)
-{
-  content.clear();
-  if (!cmSystemTools::FileExists(filename, true)) {
-    if (error != nullptr) {
-      *error = "Not a file.";
-    }
-    return false;
-  }
-
-  unsigned long const length = cmSystemTools::FileLength(filename);
-  cmsys::ifstream ifs(filename.c_str(), (std::ios::in | std::ios::binary));
-
-  // Use lambda to save destructor calls of ifs
-  return [&ifs, length, &content, error]() -> bool {
-    if (!ifs) {
-      if (error != nullptr) {
-        *error = "Opening the file for reading failed.";
-      }
-      return false;
-    }
-    content.reserve(length);
-    using IsIt = std::istreambuf_iterator<char>;
-    content.assign(IsIt{ ifs }, IsIt{});
-    if (!ifs) {
-      content.clear();
-      if (error != nullptr) {
-        *error = "Reading from the file failed.";
-      }
-      return false;
-    }
-    return true;
-  }();
 }

@@ -1,0 +1,5 @@
+CMake Warning at 000-FirstFallbackScript\.cmake:[0-9]+ \(message\):
+  The warning text to match just to make sure the script get executed
+Call Stack \(most recent call first\):
+  UserFallbackScript\.cmake:[0-9]+ \(cmake_host_system_information\)
+  CMakeLists\.txt:[0-9]+ \(include\)

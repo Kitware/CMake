@@ -172,11 +172,6 @@ protected:
 
   void WriteSLNHeader(std::ostream& fout);
 
-  FindMakeProgramStage GetFindMakeProgramStage() const override
-  {
-    return FindMakeProgramStage::Early;
-  }
-
   bool ComputeTargetDepends() override;
   class VSDependSet : public std::set<std::string>
   {
@@ -206,7 +201,7 @@ protected:
 private:
   virtual std::string GetVSMakeProgram() = 0;
   void PrintCompilerAdvice(std::ostream&, std::string const&,
-                           const char*) const override
+                           cmValue) const override
   {
   }
 

@@ -5,9 +5,17 @@
 #if !defined(CMAKE_USE_SYSTEM_CURL) && !defined(_WIN32) &&                    \
   !defined(__APPLE__) && !defined(CURL_CA_BUNDLE) && !defined(CURL_CA_PATH)
 #  define CMAKE_FIND_CAFILE
-#  include "cmSystemTools.h"
 #endif
 #include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
+
+#if defined(_WIN32)
+#  include <vector>
+
+#  include <windows.h>
+
+#  include "cmsys/Encoding.hxx"
+#endif
 
 // curl versions before 7.21.5 did not provide this error code
 #if defined(LIBCURL_VERSION_NUM) && LIBCURL_VERSION_NUM < 0x071505
@@ -23,11 +31,11 @@
     }                                                                         \
   } while (false)
 
-std::string cmCurlSetCAInfo(::CURL* curl, const char* cafile)
+std::string cmCurlSetCAInfo(::CURL* curl, const std::string& cafile)
 {
   std::string e;
-  if (cafile && *cafile) {
-    ::CURLcode res = ::curl_easy_setopt(curl, CURLOPT_CAINFO, cafile);
+  if (!cafile.empty()) {
+    ::CURLcode res = ::curl_easy_setopt(curl, CURLOPT_CAINFO, cafile.c_str());
     check_curl_result(res, "Unable to set TLS/SSL Verify CAINFO: ");
   }
 #ifdef CMAKE_FIND_CAFILE
@@ -94,4 +102,36 @@ std::string cmCurlSetNETRCOption(::CURL* curl, const std::string& netrc_level,
     }
   }
   return e;
+}
+
+std::string cmCurlFixFileURL(std::string url)
+{
+  if (!cmHasLiteralPrefix(url, "file://")) {
+    return url;
+  }
+
+  // libcurl 7.77 and below accidentally allowed spaces in URLs in some cases.
+  // One such case was file:// URLs, which CMake has long accepted as a result.
+  // Explicitly encode spaces for a URL.
+  cmSystemTools::ReplaceString(url, " ", "%20");
+
+#if defined(_WIN32)
+  // libcurl doesn't support file:// urls for unicode filenames on Windows.
+  // Convert string from UTF-8 to ACP if this is a file:// URL.
+  std::wstring wurl = cmsys::Encoding::ToWide(url);
+  if (!wurl.empty()) {
+    int mblen =
+      WideCharToMultiByte(CP_ACP, 0, wurl.c_str(), -1, NULL, 0, NULL, NULL);
+    if (mblen > 0) {
+      std::vector<char> chars(mblen);
+      mblen = WideCharToMultiByte(CP_ACP, 0, wurl.c_str(), -1, &chars[0],
+                                  mblen, NULL, NULL);
+      if (mblen > 0) {
+        url = &chars[0];
+      }
+    }
+  }
+#endif
+
+  return url;
 }

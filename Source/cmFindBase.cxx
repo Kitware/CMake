@@ -13,13 +13,13 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
-#include "cmProperty.h"
 #include "cmRange.h"
 #include "cmSearchPath.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 #include "cmake.h"
 
 class cmExecutionStatus;
@@ -301,9 +301,9 @@ void cmFindBase::FillUserGuessPath()
 
 bool cmFindBase::CheckForVariableDefined()
 {
-  if (cmProp value = this->Makefile->GetDefinition(this->VariableName)) {
+  if (cmValue value = this->Makefile->GetDefinition(this->VariableName)) {
     cmState* state = this->Makefile->GetState();
-    cmProp cacheEntry = state->GetCacheEntryValue(this->VariableName);
+    cmValue cacheEntry = state->GetCacheEntryValue(this->VariableName);
     bool found = !cmIsNOTFOUND(*value);
     bool cached = cacheEntry != nullptr;
     auto cacheType = cached ? state->GetCacheEntryType(this->VariableName)
@@ -311,7 +311,7 @@ bool cmFindBase::CheckForVariableDefined()
 
     if (cached && cacheType != cmStateEnums::UNINITIALIZED) {
       this->VariableType = cacheType;
-      if (const auto* hs =
+      if (const auto& hs =
             state->GetCacheEntryProperty(this->VariableName, "HELPSTRING")) {
         this->VariableDocumentation = *hs;
       }
@@ -336,7 +336,7 @@ void cmFindBase::NormalizeFindResult()
   if (this->Makefile->GetPolicyStatus(cmPolicies::CMP0125) ==
       cmPolicies::NEW) {
     // ensure the path returned by find_* command is absolute
-    const auto* existingValue =
+    const auto& existingValue =
       this->Makefile->GetDefinition(this->VariableName);
     std::string value;
     if (!existingValue->empty()) {
@@ -358,8 +358,8 @@ void cmFindBase::NormalizeFindResult()
       // value.
       if (value != *existingValue || this->AlreadyInCacheWithoutMetaInfo) {
         this->Makefile->GetCMakeInstance()->AddCacheEntry(
-          this->VariableName, value.c_str(),
-          this->VariableDocumentation.c_str(), this->VariableType);
+          this->VariableName, value, this->VariableDocumentation.c_str(),
+          this->VariableType);
         if (this->Makefile->GetPolicyStatus(cmPolicies::CMP0126) ==
             cmPolicies::NEW) {
           if (this->Makefile->IsNormalDefinitionSet(this->VariableName)) {

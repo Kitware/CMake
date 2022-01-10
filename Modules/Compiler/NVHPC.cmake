@@ -12,4 +12,5 @@ include(Compiler/PGI)
 
 macro(__compiler_nvhpc lang)
   # Logic specific to NVHPC.
+  set(CMAKE_INCLUDE_SYSTEM_FLAG_${lang} "-isystem ")
 endmacro()

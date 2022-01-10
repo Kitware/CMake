@@ -93,15 +93,12 @@ public:
   /// @brief Merges newOpts into baseOpts
   static void UicMergeOptions(std::vector<std::string>& baseOpts,
                               std::vector<std::string> const& newOpts,
-                              bool isQt5);
+                              bool isQt5OrLater);
 
   /// @brief Merges newOpts into baseOpts
   static void RccMergeOptions(std::vector<std::string>& baseOpts,
                               std::vector<std::string> const& newOpts,
-                              bool isQt5);
-
-  static bool FileRead(std::string& content, std::string const& filename,
-                       std::string* error = nullptr);
+                              bool isQt5OrLater);
 
   /** @class RccLister
    * @brief Lists files in qrc resource files

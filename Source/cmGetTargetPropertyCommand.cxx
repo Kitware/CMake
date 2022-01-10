@@ -10,8 +10,8 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
-#include "cmProperty.h"
 #include "cmTarget.h"
+#include "cmValue.h"
 
 class cmMessenger;
 
@@ -42,7 +42,7 @@ bool cmGetTargetPropertyCommand(std::vector<std::string> const& args,
         }
       }
     } else if (!args[2].empty()) {
-      cmProp prop_cstr = nullptr;
+      cmValue prop_cstr = nullptr;
       cmListFileBacktrace bt = mf.GetBacktrace();
       cmMessenger* messenger = mf.GetMessenger();
       prop_cstr = tgt->GetComputedProperty(args[2], messenger, bt);
@@ -62,6 +62,7 @@ bool cmGetTargetPropertyCommand(std::vector<std::string> const& args,
       case cmPolicies::WARN:
         issueMessage = true;
         e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0045) << "\n";
+        CM_FALLTHROUGH;
       case cmPolicies::OLD:
         break;
       case cmPolicies::REQUIRED_IF_USED:
@@ -69,6 +70,7 @@ bool cmGetTargetPropertyCommand(std::vector<std::string> const& args,
       case cmPolicies::NEW:
         issueMessage = true;
         messageType = MessageType::FATAL_ERROR;
+        break;
     }
     if (issueMessage) {
       e << "get_target_property() called with non-existent target \""

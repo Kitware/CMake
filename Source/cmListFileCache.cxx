@@ -548,7 +548,7 @@ void cmListFileBacktrace::PrintTitle(std::ostream& out) const
   }
   cmListFileContext lfc = this->TopEntry->Context;
   cmStateSnapshot bottom = this->GetBottom();
-  if (!bottom.GetState()->GetIsInTryCompile()) {
+  if (bottom.GetState()->GetProjectKind() == cmState::ProjectKind::Normal) {
     lfc.FilePath = cmSystemTools::RelativeIfUnder(
       bottom.GetState()->GetSourceDirectory(), lfc.FilePath);
   }
@@ -579,7 +579,7 @@ void cmListFileBacktrace::PrintCallStack(std::ostream& out) const
       out << "Call Stack (most recent call first):\n";
     }
     cmListFileContext lfc = cur->Context;
-    if (!bottom.GetState()->GetIsInTryCompile()) {
+    if (bottom.GetState()->GetProjectKind() == cmState::ProjectKind::Normal) {
       lfc.FilePath = cmSystemTools::RelativeIfUnder(
         bottom.GetState()->GetSourceDirectory(), lfc.FilePath);
     }

@@ -305,7 +305,7 @@ int cmCTestMemCheckHandler::GetDefectCount() const
   return this->DefectCount;
 }
 
-void cmCTestMemCheckHandler::GenerateDartOutput(cmXMLWriter& xml)
+void cmCTestMemCheckHandler::GenerateCTestXML(cmXMLWriter& xml)
 {
   if (!this->CTest->GetProduceXML()) {
     return;

@@ -17,16 +17,15 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
-#include "cmProperty.h"
 #include "cmRange.h"
 #include "cmSourceFile.h"
 #include "cmSourceFileLocationKind.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
-#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetDepend.h"
+#include "cmValue.h"
 #include "cmake.h"
 
 /*
@@ -323,7 +322,7 @@ void cmComputeTargetDepends::AddObjectDepends(int depender_index,
   }
   cmGeneratorTarget const* depender = this->Targets[depender_index];
   cmLinkItem const& objItem =
-    depender->ResolveLinkItem(objLib, cmListFileBacktrace());
+    depender->ResolveLinkItem(BT<std::string>(objLib));
   if (emitted.insert(objItem).second) {
     if (depender->GetType() != cmStateEnums::EXECUTABLE &&
         depender->GetType() != cmStateEnums::STATIC_LIBRARY &&
@@ -360,6 +359,7 @@ void cmComputeTargetDepends::AddTargetDepend(int depender_index,
       case cmPolicies::WARN:
         e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0046) << "\n";
         issueMessage = true;
+        CM_FALLTHROUGH;
       case cmPolicies::OLD:
         break;
       case cmPolicies::NEW:
@@ -367,6 +367,7 @@ void cmComputeTargetDepends::AddTargetDepend(int depender_index,
       case cmPolicies::REQUIRED_ALWAYS:
         issueMessage = true;
         messageType = MessageType::FATAL_ERROR;
+        break;
     }
     if (issueMessage) {
       cmake* cm = this->GlobalGenerator->GetCMakeInstance();
@@ -469,7 +470,7 @@ void cmComputeTargetDepends::ComputeIntermediateGraph()
         gt->GetType() != cmStateEnums::OBJECT_LIBRARY) {
       intermediateEdges = initialEdges;
     } else {
-      if (cmProp optimizeDependencies =
+      if (cmValue optimizeDependencies =
             gt->GetProperty("OPTIMIZE_DEPENDENCIES")) {
         if (cmIsOn(optimizeDependencies)) {
           this->OptimizeLinkDependencies(gt, intermediateEdges, initialEdges);

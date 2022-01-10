@@ -35,6 +35,19 @@ The following variables may be set to influence this module's behavior:
   if set ``pkg-config`` will be used to search for a BLAS library first
   and if one is found that is preferred
 
+``BLA_SIZEOF_INTEGER``
+  .. versionadded:: 3.22
+
+  Specify the BLAS/LAPACK library integer size:
+
+  ``4``
+    Search for a BLAS/LAPACK with 32-bit integer interfaces.
+  ``8``
+    Search for a BLAS/LAPACK with 64-bit integer interfaces.
+  ``ANY``
+    Search for any BLAS/LAPACK.
+    Most likely, a BLAS/LAPACK with 32-bit integer interfaces will be found.
+
 Imported targets
 ^^^^^^^^^^^^^^^^
 
@@ -101,15 +114,16 @@ BLAS/LAPACK Vendors
 ``FlexiBLAS``
   .. versionadded:: 3.19
 
-``Fujitsu_SSL2``, ``Fujitsu_SSL2BLAMP``
+``Fujitsu_SSL2``, ``Fujitsu_SSL2BLAMP``, ``Fujitsu_SSL2SVE``, ``Fujitsu_SSL2BLAMPSVE``
   .. versionadded:: 3.20
 
-  Fujitsu SSL2 serial and parallel blas/lapack
+  Fujitsu SSL2 serial and parallel blas/lapack with SVE instructions
 
 ``Goto``
   GotoBLAS
 
-``IBMESSL``
+``IBMESSL``, ``IBMESSL_SMP``
+
   IBM Engineering and Scientific Subroutine Library
 
 ``Intel``
@@ -150,7 +164,7 @@ BLAS/LAPACK Vendors
 ``PhiPACK``
   Portable High Performance ANSI C (PHiPAC)
 
-``SCSL``
+``SCSL``, ``SCSL_mp``
   Scientific Computing Software Library
 
 ``SGIMATH``
@@ -312,9 +326,9 @@ function(CHECK_BLAS_LIBRARIES LIBRARIES _prefix _name _flags _list _deps _addlib
       list(APPEND _libraries "${_library}")
     else()
       string(REGEX REPLACE "[^A-Za-z0-9]" "_" _lib_var "${_library}")
-      set(_combined_name ${_combined_name}_${_lib_var})
+      string(APPEND _combined_name "_${_lib_var}")
       if(NOT "${_deps}" STREQUAL "")
-        set(_combined_name ${_combined_name}_deps)
+        string(APPEND _combined_name "_deps")
       endif()
       if(_libraries_work)
         find_library(${_prefix}_${_lib_var}_LIBRARY
@@ -332,7 +346,7 @@ function(CHECK_BLAS_LIBRARIES LIBRARIES _prefix _name _flags _list _deps _addlib
 
   foreach(_flag ${_flags})
     string(REGEX REPLACE "[^A-Za-z0-9]" "_" _flag_var "${_flag}")
-    set(_combined_name ${_combined_name}_${_flag_var})
+    string(APPEND _combined_name "_${_flag_var}")
   endforeach()
   if(_libraries_work)
     # Test this combination of libraries.
@@ -371,6 +385,17 @@ else()
   endif()
 endif()
 
+if(NOT BLA_SIZEOF_INTEGER)
+  # in the reality we do not know which API of BLAS/LAPACK is masked in library
+  set(_blas_sizeof_integer "ANY")
+elseif((BLA_SIZEOF_INTEGER STREQUAL "ANY") OR
+       (BLA_SIZEOF_INTEGER STREQUAL "4") OR
+       (BLA_SIZEOF_INTEGER STREQUAL "8"))
+  set(_blas_sizeof_integer ${BLA_SIZEOF_INTEGER})
+else()
+  message(FATAL_ERROR "BLA_SIZEOF_INTEGER can have only <no value>, ANY, 4, or 8 values")
+endif()
+
 # Implicitly linked BLAS libraries?
 if(BLA_VENDOR STREQUAL "All")
   if(NOT BLAS_LIBRARIES)
@@ -386,6 +411,8 @@ if(BLA_VENDOR STREQUAL "All")
       )
   endif()
   if(BLAS_WORKS)
+    # Give a more helpful "found" message
+    set(BLAS_WORKS "implicitly linked")
     set(_blas_fphsa_req_var BLAS_WORKS)
   endif()
 endif()
@@ -429,17 +456,23 @@ if(BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
         find_package(Threads REQUIRED)
       endif()
 
-      if(BLA_VENDOR MATCHES "_64ilp")
+      if(_blas_sizeof_integer EQUAL 8)
         set(BLAS_mkl_ILP_MODE "ilp64")
-      else()
+      elseif(_blas_sizeof_integer EQUAL 4)
         set(BLAS_mkl_ILP_MODE "lp64")
+      else()
+        if(BLA_VENDOR MATCHES "_64ilp")
+          set(BLAS_mkl_ILP_MODE "ilp64")
+        else()
+          set(BLAS_mkl_ILP_MODE "lp64")
+        endif()
       endif()
 
       set(BLAS_SEARCH_LIBS "")
 
       if(BLA_F95)
         set(BLAS_mkl_SEARCH_SYMBOL "sgemm_f95")
-        set(_LIBRARIES BLAS95_LIBRARIES)
+        set(_BLAS_LIBRARIES BLAS95_LIBRARIES)
         if(WIN32)
           # Find the main file (32-bit or 64-bit)
           set(BLAS_SEARCH_LIBS_WIN_MAIN "")
@@ -501,7 +534,7 @@ if(BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
         endif()
       else()
         set(BLAS_mkl_SEARCH_SYMBOL sgemm)
-        set(_LIBRARIES BLAS_LIBRARIES)
+        set(_BLAS_LIBRARIES BLAS_LIBRARIES)
         if(WIN32)
           # Find the main file (32-bit or 64-bit)
           set(BLAS_SEARCH_LIBS_WIN_MAIN "")
@@ -613,15 +646,15 @@ if(BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
           "lib/${BLAS_mkl_ARCH_NAME}"
           )
 
-      foreach(IT ${BLAS_SEARCH_LIBS})
-        string(REPLACE " " ";" SEARCH_LIBS ${IT})
-        if(NOT ${_LIBRARIES})
+      foreach(_search ${BLAS_SEARCH_LIBS})
+        string(REPLACE " " ";" _search ${_search})
+        if(NOT ${_BLAS_LIBRARIES})
           check_blas_libraries(
-            ${_LIBRARIES}
+            ${_BLAS_LIBRARIES}
             BLAS
             ${BLAS_mkl_SEARCH_SYMBOL}
             ""
-            "${SEARCH_LIBS}"
+            "${_search}"
             "${CMAKE_THREAD_LIBS_INIT};${BLAS_mkl_LM};${BLAS_mkl_LDL}"
             "${BLAS_mkl_MKLROOT}"
             "${BLAS_mkl_LIB_PATH_SUFFIXES}"
@@ -629,6 +662,7 @@ if(BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
         endif()
       endforeach()
 
+      unset(_search)
       unset(BLAS_mkl_ILP_MODE)
       unset(BLAS_mkl_INTFACE)
       unset(BLAS_mkl_THREADING)
@@ -671,29 +705,43 @@ endif()
 
 # FlexiBLAS? (http://www.mpi-magdeburg.mpg.de/mpcsc/software/FlexiBLAS/)
 if(BLA_VENDOR STREQUAL "FlexiBLAS" OR BLA_VENDOR STREQUAL "All")
+  set(_blas_flexiblas_lib "flexiblas")
+
+  if(_blas_sizeof_integer EQUAL 8)
+    string(APPEND _blas_flexiblas_lib "64")
+  endif()
+
   if(NOT BLAS_LIBRARIES)
     check_blas_libraries(
       BLAS_LIBRARIES
       BLAS
       sgemm
       ""
-      "flexiblas"
+      "${_blas_flexiblas_lib}"
       ""
       ""
       ""
       )
   endif()
+
+  unset(_blas_flexiblas_lib)
 endif()
 
 # OpenBLAS? (http://www.openblas.net)
 if(BLA_VENDOR STREQUAL "OpenBLAS" OR BLA_VENDOR STREQUAL "All")
+  set(_blas_openblas_lib "openblas")
+
+  if(_blas_sizeof_integer EQUAL 8)
+    string(APPEND _blas_openblas_lib "64")
+  endif()
+
   if(NOT BLAS_LIBRARIES)
     check_blas_libraries(
       BLAS_LIBRARIES
       BLAS
       sgemm
       ""
-      "openblas"
+      "${_blas_openblas_lib}"
       ""
       ""
       ""
@@ -720,59 +768,75 @@ if(BLA_VENDOR STREQUAL "OpenBLAS" OR BLA_VENDOR STREQUAL "All")
       BLAS
       sgemm
       ""
-      "openblas"
+      "${_blas_openblas_lib}"
       "${_threadlibs}"
       ""
       ""
       )
     unset(_threadlibs)
   endif()
+
+  unset(_blas_openblas_lib)
 endif()
 
 # ArmPL blas library? (https://developer.arm.com/tools-and-software/server-and-hpc/compile/arm-compiler-for-linux/arm-performance-libraries)
 if(BLA_VENDOR MATCHES "Arm" OR BLA_VENDOR STREQUAL "All")
 
    # Check for 64bit Integer support
-   if(BLA_VENDOR MATCHES "_ilp64")
-     set(BLAS_armpl_LIB "armpl_ilp64")
-   else()
-     set(BLAS_armpl_LIB "armpl_lp64")
-   endif()
+  if(_blas_sizeof_integer EQUAL 8)
+    set(_blas_armpl_lib "armpl_ilp64")
+  elseif(_blas_sizeof_integer EQUAL 4)
+    set(_blas_armpl_lib "armpl_lp64")
+  else()
+    if(BLA_VENDOR MATCHES "_ilp64")
+      set(_blas_armpl_lib "armpl_ilp64")
+    else()
+      set(_blas_armpl_lib "armpl_lp64")
+    endif()
+  endif()
 
    # Check for OpenMP support, VIA BLA_VENDOR of Arm_mp or Arm_ipl64_mp
    if(BLA_VENDOR MATCHES "_mp")
-     set(BLAS_armpl_LIB "${BLAS_armpl_LIB}_mp")
+     string(APPEND _blas_armpl_lib "_mp")
    endif()
 
    if(NOT BLAS_LIBRARIES)
-    check_blas_libraries(
-      BLAS_LIBRARIES
-      BLAS
-      sgemm
-      ""
-      "${BLAS_armpl_LIB}"
-      ""
-      ""
-      ""
-      )
+     check_blas_libraries(
+       BLAS_LIBRARIES
+       BLAS
+       sgemm
+       ""
+       "${_blas_armpl_lib}"
+       ""
+       ""
+       ""
+       )
   endif()
-
+  unset(_blas_armpl_lib)
 endif()
 
 # FLAME's blis library? (https://github.com/flame/blis)
 if(BLA_VENDOR STREQUAL "FLAME" OR BLA_VENDOR STREQUAL "All")
+  set(_blas_flame_lib "blis")
+
+  if(_blas_sizeof_integer EQUAL 8)
+    string(APPEND _blas_flame_lib "64")
+  endif()
+
   if(NOT BLAS_LIBRARIES)
     check_blas_libraries(
       BLAS_LIBRARIES
       BLAS
       sgemm
       ""
-      "blis"
+      "${_blas_flame_lib}"
       ""
       ""
       ""
       )
   endif()
+
+  unset(_blas_flame_lib)
 endif()
 
 # BLAS in the ATLAS library? (http://math-atlas.sourceforge.net/)
@@ -809,33 +873,45 @@ endif()
 
 # BLAS in Alpha CXML library?
 if(BLA_VENDOR STREQUAL "CXML" OR BLA_VENDOR STREQUAL "All")
-  if(NOT BLAS_LIBRARIES)
-    check_blas_libraries(
-      BLAS_LIBRARIES
-      BLAS
-      sgemm
-      ""
-      "cxml"
-      ""
-      ""
-      ""
-      )
+  if(_blas_sizeof_integer EQUAL 8)
+    if(BLA_VENDOR STREQUAL "CXML")
+      message(FATAL_ERROR "CXML does not support Int64 type")
+    endif()
+  else()
+    if(NOT BLAS_LIBRARIES)
+      check_blas_libraries(
+        BLAS_LIBRARIES
+        BLAS
+        sgemm
+        ""
+        "cxml"
+        ""
+        ""
+        ""
+        )
+    endif()
   endif()
 endif()
 
 # BLAS in Alpha DXML library? (now called CXML, see above)
 if(BLA_VENDOR STREQUAL "DXML" OR BLA_VENDOR STREQUAL "All")
-  if(NOT BLAS_LIBRARIES)
-    check_blas_libraries(
-      BLAS_LIBRARIES
-      BLAS
-      sgemm
-      ""
-      "dxml"
-      ""
-      ""
-      ""
-      )
+  if(_blas_sizeof_integer EQUAL 8)
+    if(BLA_VENDOR STREQUAL "DXML")
+      message(FATAL_ERROR "DXML does not support Int64 type")
+    endif()
+  else()
+    if(NOT BLAS_LIBRARIES)
+      check_blas_libraries(
+        BLAS_LIBRARIES
+        BLAS
+        sgemm
+        ""
+        "dxml"
+        ""
+        ""
+        ""
+        )
+    endif()
   endif()
 endif()
 
@@ -859,19 +935,30 @@ if(BLA_VENDOR STREQUAL "SunPerf" OR BLA_VENDOR STREQUAL "All")
 endif()
 
 # BLAS in SCSL library?  (SGI/Cray Scientific Library)
-if(BLA_VENDOR STREQUAL "SCSL" OR BLA_VENDOR STREQUAL "All")
+if(BLA_VENDOR MATCHES "SCSL" OR BLA_VENDOR STREQUAL "All")
+  set(_blas_scsl_lib "scs")
+
+  if(_blas_sizeof_integer EQUAL 8)
+    string(APPEND _blas_scsl_lib "_i8")
+  endif()
+  if(BLA_VENDOR MATCHES "_mp")
+    string(APPEND _blas_scsl_lib "_mp")
+  endif()
+
   if(NOT BLAS_LIBRARIES)
     check_blas_libraries(
       BLAS_LIBRARIES
       BLAS
       sgemm
       ""
-      "scsl"
+      "${_blas_scsl_lib}"
       ""
       ""
       ""
       )
   endif()
+
+  unset(_blas_scsl_lib)
 endif()
 
 # BLAS in SGIMATH library?
@@ -890,20 +977,31 @@ if(BLA_VENDOR STREQUAL "SGIMATH" OR BLA_VENDOR STREQUAL "All")
   endif()
 endif()
 
-# BLAS in IBM ESSL library? (requires generic BLAS lib, too)
-if(BLA_VENDOR STREQUAL "IBMESSL" OR BLA_VENDOR STREQUAL "All")
+# BLAS in IBM ESSL library?
+if(BLA_VENDOR MATCHES "IBMESSL" OR BLA_VENDOR STREQUAL "All")
+  set(_blas_essl_lib "essl")
+
+  if(BLA_VENDOR MATCHES "_SMP")
+    string(APPEND _blas_essl_lib "smp")
+  endif()
+  if(_blas_sizeof_integer EQUAL 8)
+    string(APPEND _blas_essl_lib "6464")
+  endif()
+
   if(NOT BLAS_LIBRARIES)
     check_blas_libraries(
       BLAS_LIBRARIES
       BLAS
       sgemm
       ""
-      "essl;blas"
+      "${_blas_essl_lib}"
       ""
       ""
       ""
       )
   endif()
+
+  unset(_blas_essl_lib)
 endif()
 
 # BLAS in acml library?
@@ -927,7 +1025,7 @@ if(BLA_VENDOR MATCHES "ACML" OR BLA_VENDOR STREQUAL "All")
   list(GET _ACML_GPU_ROOT 0 _ACML_GPU_ROOT)
   if(_ACML_ROOT)
     get_filename_component(_ACML_ROOT ${_ACML_ROOT} PATH)
-    if(SIZEOF_INTEGER EQUAL 8)
+    if(_blas_sizeof_integer EQUAL 8)
       set(_ACML_PATH_SUFFIX "_int64")
     else()
       set(_ACML_PATH_SUFFIX "")
@@ -1054,102 +1152,179 @@ endif() # ACML
 
 # Apple BLAS library?
 if(BLA_VENDOR STREQUAL "Apple" OR BLA_VENDOR STREQUAL "All")
-  if(NOT BLAS_LIBRARIES)
-    check_blas_libraries(
-      BLAS_LIBRARIES
-      BLAS
-      dgemm
-      ""
-      "Accelerate"
-      ""
-      ""
-      ""
-      )
+  if(_blas_sizeof_integer EQUAL 8)
+    if(BLA_VENDOR STREQUAL "Apple")
+      message(FATAL_ERROR "Accelerate Framework does not support Int64 type")
+    endif()
+  else()
+    if(NOT BLAS_LIBRARIES)
+      check_blas_libraries(
+        BLAS_LIBRARIES
+        BLAS
+        dgemm
+        ""
+        "Accelerate"
+        ""
+        ""
+        ""
+        )
+    endif()
   endif()
 endif()
 
 # Apple NAS (vecLib) library?
 if(BLA_VENDOR STREQUAL "NAS" OR BLA_VENDOR STREQUAL "All")
-  if(NOT BLAS_LIBRARIES)
-    check_blas_libraries(
-      BLAS_LIBRARIES
-      BLAS
-      dgemm
-      ""
-      "vecLib"
-      ""
-      ""
-      ""
-      )
+  if(_blas_sizeof_integer EQUAL 8)
+    if(BLA_VENDOR STREQUAL "NAS")
+      message(FATAL_ERROR "Accelerate Framework does not support Int64 type")
+    endif()
+  else()
+    if(NOT BLAS_LIBRARIES)
+      check_blas_libraries(
+        BLAS_LIBRARIES
+        BLAS
+        dgemm
+        ""
+        "vecLib"
+        ""
+        ""
+        ""
+        )
+    endif()
   endif()
 endif()
 
 # Elbrus Math Library?
 if(BLA_VENDOR MATCHES "EML" OR BLA_VENDOR STREQUAL "All")
 
-   set(BLAS_EML_LIB "eml")
+  set(_blas_eml_lib "eml")
 
-   # Check for OpenMP support, VIA BLA_VENDOR of eml_mt
-   if(BLA_VENDOR MATCHES "_mt")
-     set(BLAS_EML_LIB "${BLAS_EML_LIB}_mt")
-   endif()
-
-   if(NOT BLAS_LIBRARIES)
-    check_blas_libraries(
-      BLAS_LIBRARIES
-      BLAS
-      sgemm
-      ""
-      "${BLAS_EML_LIB}"
-      ""
-      ""
-      ""
-      )
+  if(_blas_sizeof_integer EQUAL 8)
+    string(APPEND _blas_eml_lib "_ilp64")
+  endif()
+  # Check for OpenMP support, VIA BLA_VENDOR of eml_mt
+  if(BLA_VENDOR MATCHES "_mt")
+    string(APPEND _blas_eml_lib "_mt")
   endif()
 
-endif()
-
-# Fujitsu SSL2 Library?
-if(NOT BLAS_LIBRARIES
-    AND (BLA_VENDOR MATCHES "Fujitsu_SSL2" OR BLA_VENDOR STREQUAL "All"))
-  if(BLA_VENDOR STREQUAL "Fujitsu_SSL2BLAMP")
-    set(_ssl2_suffix BLAMP)
-  else()
-    set(_ssl2_suffix)
-  endif()
-  check_blas_libraries(
-    BLAS_LIBRARIES
-    BLAS
-    sgemm
-    "-SSL2${_ssl2_suffix}"
-    ""
-    ""
-    ""
-    ""
-    )
-  if(BLAS_LIBRARIES)
-    set(BLAS_LINKER_FLAGS "-SSL2${_ssl2_suffix}")
-    set(_blas_fphsa_req_var BLAS_LINKER_FLAGS)
-  endif()
-  unset(_ssl2_suffix)
-endif()
-
-# Generic BLAS library?
-if(BLA_VENDOR STREQUAL "Generic" OR
-   BLA_VENDOR STREQUAL "NVHPC" OR
-   BLA_VENDOR STREQUAL "All")
   if(NOT BLAS_LIBRARIES)
     check_blas_libraries(
       BLAS_LIBRARIES
       BLAS
       sgemm
       ""
-      "blas"
+      "${_blas_eml_lib}"
       ""
       ""
       ""
       )
   endif()
+  unset(_blas_eml_lib)
+endif()
+
+# Fujitsu SSL2 Library?
+if(NOT BLAS_LIBRARIES
+    AND (BLA_VENDOR MATCHES "^Fujitsu_SSL2" OR BLA_VENDOR STREQUAL "All"))
+  set(_blas_fjlapack_lib "fjlapack")
+  set(_blas_fjlapack_flags "-Kopenmp")
+
+  if(BLA_VENDOR MATCHES "BLAMP")
+    string(APPEND _blas_fjlapack_lib "ex")
+  endif()
+  if(BLA_VENDOR MATCHES "SVE")
+    string(APPEND _blas_fjlapack_lib "sve")
+  endif()
+  if(_blas_sizeof_integer EQUAL 8)
+    string(APPEND _blas_fjlapack_lib "_ilp64")
+  endif()
+
+  if(NOT BLAS_LIBRARIES)
+    check_blas_libraries(
+      BLAS_LIBRARIES
+      BLAS
+      sgemm
+      "${_blas_fjlapack_flags}"
+      "${_blas_fjlapack_lib}"
+      ""
+      ""
+      ""
+      )
+    if(BLAS_LIBRARIES)
+      set(BLAS_LINKER_FLAGS ${_blas_fjlapack_flags})
+    endif()
+  endif()
+
+  unset(_blas_fjlapack_flags)
+  unset(_blas_fjlapack_lib)
+endif()
+
+# BLAS in nVidia HPC SDK? (https://developer.nvidia.com/hpc-sdk)
+if(BLA_VENDOR STREQUAL "NVHPC" OR BLA_VENDOR STREQUAL "All")
+  set(_blas_nvhpc_lib "blas")
+
+  if(_blas_sizeof_integer EQUAL 8)
+    string(APPEND _blas_nvhpc_lib "_ilp64")
+  elseif(_blas_sizeof_integer EQUAL 4)
+    string(APPEND _blas_nvhpc_lib "_lp64")
+  endif()
+
+  if(NOT BLAS_LIBRARIES)
+    check_blas_libraries(
+      BLAS_LIBRARIES
+      BLAS
+      sgemm
+      ""
+      "${_blas_nvhpc_lib}"
+      ""
+      ""
+      ""
+      )
+  endif()
+
+  # an additional check for NVHPC 2020
+  # which does not have differentiation
+  # between lp64 and ilp64 modes
+  if(NOT BLAS_LIBRARIES AND NOT _blas_sizeof_integer EQUAL 8)
+    set(_blas_nvhpc_lib "blas")
+
+    check_blas_libraries(
+      BLAS_LIBRARIES
+      BLAS
+      sgemm
+      ""
+      "${_blas_nvhpc_lib}"
+      ""
+      ""
+      ""
+      )
+  endif()
+
+  unset(_blas_nvhpc_lib)
+endif()
+
+# Generic BLAS library?
+if(BLA_VENDOR STREQUAL "Generic" OR
+   BLA_VENDOR STREQUAL "All")
+  set(_blas_generic_lib "blas")
+
+  if(_blas_sizeof_integer EQUAL 8)
+    string(APPEND _blas_generic_lib "64")
+  endif()
+
+  if(NOT BLAS_LIBRARIES)
+    check_blas_libraries(
+      BLAS_LIBRARIES
+      BLAS
+      sgemm
+      ""
+      "${_blas_generic_lib}"
+      ""
+      ""
+      ""
+      )
+  endif()
+
+  unset(_blas_generic_lib)
 endif()
 
 # On compilers that implicitly link BLAS (i.e. CrayPrgEnv) we used a
@@ -1163,3 +1338,6 @@ if(NOT BLA_F95)
 endif()
 
 _add_blas_target()
+unset(_blas_fphsa_req_var)
+unset(_blas_sizeof_integer)
+unset(_BLAS_LIBRARIES)
