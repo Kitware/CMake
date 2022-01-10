@@ -92,6 +92,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   char *signed_headers = NULL;
   Curl_HttpReq httpreq;
   const char *method;
+  size_t post_data_len;
   const char *post_data = data->set.postfields ? data->set.postfields : "";
   unsigned char sha_hash[32];
   char sha_hex[65];
@@ -281,8 +282,15 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
     goto fail;
   }
 
-  Curl_sha256it(sha_hash,
-                (const unsigned char *) post_data, strlen(post_data));
+  if(data->set.postfieldsize < 0)
+    post_data_len = strlen(post_data);
+  else
+    post_data_len = (size_t)data->set.postfieldsize;
+  if(Curl_sha256it(sha_hash, (const unsigned char *) post_data,
+                   post_data_len)) {
+    goto fail;
+  }
+
   sha256_to_hex(sha_hex, sha_hash, sizeof(sha_hex));
 
   Curl_http_method(data, conn, &method, &httpreq);
@@ -315,13 +323,16 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
     goto fail;
   }
 
-  Curl_sha256it(sha_hash, (unsigned char *) canonical_request,
-                strlen(canonical_request));
+  if(Curl_sha256it(sha_hash, (unsigned char *) canonical_request,
+                   strlen(canonical_request))) {
+    goto fail;
+  }
+
   sha256_to_hex(sha_hex, sha_hash, sizeof(sha_hex));
 
   /*
    * Google allow to use rsa key instead of HMAC, so this code might change
-   * In the furure, but for now we support only HMAC version
+   * In the future, but for now we support only HMAC version
    */
   str_to_sign = curl_maprintf("%s4-HMAC-SHA256\n" /* Algorithm */
                               "%s\n" /* RequestDateTime */

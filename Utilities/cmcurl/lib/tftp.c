@@ -186,7 +186,7 @@ const struct Curl_handler Curl_handler_tftp = {
   PORT_TFTP,                            /* defport */
   CURLPROTO_TFTP,                       /* protocol */
   CURLPROTO_TFTP,                       /* family */
-  PROTOPT_NONE | PROTOPT_NOURLQUERY     /* flags */
+  PROTOPT_NOTCPPROXY | PROTOPT_NOURLQUERY /* flags */
 };
 
 /**********************************************************
@@ -1304,9 +1304,9 @@ static CURLcode tftp_doing(struct Curl_easy *data, bool *dophase_done)
 
 /**********************************************************
  *
- * tftp_peform
+ * tftp_perform
  *
- * Entry point for transfer from tftp_do, sarts state mach
+ * Entry point for transfer from tftp_do, starts state mach
  *
  **********************************************************/
 static CURLcode tftp_perform(struct Curl_easy *data, bool *dophase_done)

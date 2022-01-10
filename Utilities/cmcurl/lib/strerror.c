@@ -404,6 +404,9 @@ curl_multi_strerror(CURLMcode error)
   case CURLM_BAD_FUNCTION_ARGUMENT:
     return "A libcurl function was given a bad argument";
 
+  case CURLM_ABORTED_BY_CALLBACK:
+    return "Operation was aborted by an application callback";
+
   case CURLM_LAST:
     break;
   }
@@ -447,6 +450,114 @@ curl_share_strerror(CURLSHcode error)
   return "CURLSHcode unknown";
 #else
   if(error == CURLSHE_OK)
+    return "No error";
+  else
+    return "Error";
+#endif
+}
+
+const char *
+curl_url_strerror(CURLUcode error)
+{
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+  switch(error) {
+  case CURLUE_OK:
+    return "No error";
+
+  case CURLUE_BAD_HANDLE:
+    return "An invalid CURLU pointer was passed as argument";
+
+  case CURLUE_BAD_PARTPOINTER:
+    return "An invalid 'part' argument was passed as argument";
+
+  case CURLUE_MALFORMED_INPUT:
+    return "Malformed input to a URL function";
+
+  case CURLUE_BAD_PORT_NUMBER:
+    return "Port number was not a decimal number between 0 and 65535";
+
+  case CURLUE_UNSUPPORTED_SCHEME:
+    return "This libcurl build doesn't support the given URL scheme";
+
+  case CURLUE_URLDECODE:
+    return "URL decode error, most likely because of rubbish in the input";
+
+  case CURLUE_OUT_OF_MEMORY:
+    return "A memory function failed";
+
+  case CURLUE_USER_NOT_ALLOWED:
+    return "Credentials was passed in the URL when prohibited";
+
+  case CURLUE_UNKNOWN_PART:
+    return "An unknown part ID was passed to a URL API function";
+
+  case CURLUE_NO_SCHEME:
+    return "No scheme part in the URL";
+
+  case CURLUE_NO_USER:
+    return "No user part in the URL";
+
+  case CURLUE_NO_PASSWORD:
+    return "No password part in the URL";
+
+  case CURLUE_NO_OPTIONS:
+    return "No options part in the URL";
+
+  case CURLUE_NO_HOST:
+    return "No host part in the URL";
+
+  case CURLUE_NO_PORT:
+    return "No port part in the URL";
+
+  case CURLUE_NO_QUERY:
+    return "No query part in the URL";
+
+  case CURLUE_NO_FRAGMENT:
+    return "No fragment part in the URL";
+
+  case CURLUE_NO_ZONEID:
+    return "No zoneid part in the URL";
+
+  case CURLUE_BAD_LOGIN:
+    return "Bad login part";
+
+  case CURLUE_BAD_IPV6:
+    return "Bad IPv6 address";
+
+  case CURLUE_BAD_HOSTNAME:
+    return "Bad hostname";
+
+  case CURLUE_BAD_FILE_URL:
+    return "Bad file:// URL";
+
+  case CURLUE_BAD_SLASHES:
+    return "Unsupported number of slashes";
+
+  case CURLUE_BAD_SCHEME:
+    return "Bad scheme";
+
+  case CURLUE_BAD_PATH:
+    return "Bad path";
+
+  case CURLUE_BAD_FRAGMENT:
+    return "Bad fragment";
+
+  case CURLUE_BAD_QUERY:
+    return "Bad query";
+
+  case CURLUE_BAD_PASSWORD:
+    return "Bad password";
+
+  case CURLUE_BAD_USER:
+    return "Bad user";
+
+  case CURLUE_LAST:
+    break;
+  }
+
+  return "CURLUcode unknown";
+#else
+  if(error == CURLUE_OK)
     return "No error";
   else
     return "Error";
