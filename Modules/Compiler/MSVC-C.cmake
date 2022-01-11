@@ -77,6 +77,6 @@ endif()
 
 # The `/external:I` flag was made non-experimental in 19.29.30036.3.
 if (CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 19.29.30036.3)
-  set(CMAKE_INCLUDE_SYSTEM_FLAG_C "-external:I ")
+  set(CMAKE_INCLUDE_SYSTEM_FLAG_C "-external:I")
   set(_CMAKE_INCLUDE_SYSTEM_FLAG_C_WARNING "-external:W0 ")
 endif ()
