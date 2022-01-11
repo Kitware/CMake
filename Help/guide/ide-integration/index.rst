@@ -124,3 +124,31 @@ obtain this information and use it to present the user with a list of tests.
 
 IDEs should not invoke the ``test`` target of the generated buildsystem.
 Instead, they should invoke :manual:`ctest(1)` directly.
+
+IDEs with CMake integration
+===========================
+
+The following IDEs support CMake natively:
+
+* `CLion`_
+* `KDevelop`_
+* `QtCreator`_
+* `Vim`_ (via a plugin)
+* `Visual Studio`_
+* `VSCode`_ (via a plugin)
+
+.. _CLion: https://www.jetbrains.com/clion/
+.. _KDevelop: https://www.kdevelop.org/
+.. _QtCreator: https://www.qt.io/product/development-tools
+.. _Vim: https://www.vim.org/
+.. _Visual Studio: https://visualstudio.microsoft.com/
+.. _VSCode: https://code.visualstudio.com/
+
+Additionally, CMake has builtin support for some IDEs:
+
+* :ref:`IDE Build Tool Generators`:
+  Generate IDE native build systems such as Visual Studio or Xcode.
+* :ref:`Extra Generators`:
+  Extend :ref:`Command-Line Build Tool Generators` to generate IDE
+  project files that hook into the command-line build system.
+  Superseded by the :manual:`File API <cmake-file-api(7)>`.
