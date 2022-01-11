@@ -1,2 +1,19 @@
-.*file READ_ELF must be called with at least three additional arguments\.
-.*file READ_ELF given FILE "XXX" that does not exist\.
+^CMake Error at READ_ELF.cmake:1 \(file\):
+  file READ_ELF must be called with at least three additional arguments\.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
++
+CMake Error at READ_ELF.cmake:2 \(file\):
+  file READ_ELF given FILE "XXX" that does not exist\.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
++
+CMake Error at READ_ELF.cmake:4 \(file\):
+  file READ_ELF given FILE:
+
+    [^
+]*/Tests/RunCMake/file/READ_ELF.cmake
+
+  that is not a valid ELF file\.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)$

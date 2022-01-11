@@ -1213,9 +1213,14 @@ bool HandleReadElfCommand(std::vector<std::string> const& args,
 
   cmELF elf(fileNameArg.c_str());
   if (!elf) {
-    status.SetError(cmStrCat("READ_ELF given FILE \"", fileNameArg,
-                             "\" that is not a valid ELF file."));
-    return false;
+    if (arguments.Error.empty()) {
+      status.SetError(cmStrCat("READ_ELF given FILE:\n  ", fileNameArg,
+                               "\nthat is not a valid ELF file."));
+      return false;
+    }
+    status.GetMakefile().AddDefinition(arguments.Error,
+                                       "not a valid ELF file");
+    return true;
   }
 
   if (!arguments.RPath.empty()) {
