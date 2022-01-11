@@ -152,8 +152,12 @@ struct StandardLevelComputer
              "dialect \""
           << this->Language << *standardProp << "\" "
           << (ext ? "(with compiler extensions)" : "")
-          << ", but CMake "
-             "does not know the compile flags to use to enable it.";
+          << ". But the current compiler \""
+          << makefile->GetSafeDefinition("CMAKE_" + this->Language +
+                                         "_COMPILER_ID")
+          << "\" does not support this, or "
+             "CMake does not know the flags to enable it.";
+
         makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
       }
       return option_flag;
