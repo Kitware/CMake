@@ -936,7 +936,8 @@ static bool CheckGetLineFromStream()
   bool result;
 
   file.seekg(0, std::ios::beg);
-  result = kwsys::SystemTools::GetLineFromStream(file, line, &has_newline, -1);
+  result = kwsys::SystemTools::GetLineFromStream(file, line, &has_newline,
+                                                 std::string::npos);
   if (!result || line.size() != 5) {
     std::cerr << "First line does not have five characters: " << line.size()
               << std::endl;
@@ -944,7 +945,8 @@ static bool CheckGetLineFromStream()
   }
 
   file.seekg(0, std::ios::beg);
-  result = kwsys::SystemTools::GetLineFromStream(file, line, &has_newline, -1);
+  result = kwsys::SystemTools::GetLineFromStream(file, line, &has_newline,
+                                                 std::string::npos);
   if (!result || line.size() != 5) {
     std::cerr << "First line does not have five characters after rewind: "
               << line.size() << std::endl;
@@ -953,10 +955,10 @@ static bool CheckGetLineFromStream()
 
   bool ret = true;
 
-  for (size_t size = 1; size <= 5; ++size) {
+  for (std::string::size_type size = 1; size <= 5; ++size) {
     file.seekg(0, std::ios::beg);
-    result = kwsys::SystemTools::GetLineFromStream(file, line, &has_newline,
-                                                   static_cast<long>(size));
+    result =
+      kwsys::SystemTools::GetLineFromStream(file, line, &has_newline, size);
     if (!result || line.size() != size) {
       std::cerr << "Should have read " << size << " characters but got "
                 << line.size() << std::endl;
@@ -999,7 +1001,8 @@ static bool CheckGetLineFromStreamLongLine()
   bool result;
 
   // Read first line.
-  result = kwsys::SystemTools::GetLineFromStream(file, line, &has_newline, -1);
+  result = kwsys::SystemTools::GetLineFromStream(file, line, &has_newline,
+                                                 std::string::npos);
   if (!result || line != firstLine) {
     std::cerr << "First line does not match, expected " << firstLine.size()
               << " characters, got " << line.size() << std::endl;
@@ -1012,7 +1015,8 @@ static bool CheckGetLineFromStreamLongLine()
 
   // Read empty line.
   has_newline = false;
-  result = kwsys::SystemTools::GetLineFromStream(file, line, &has_newline, -1);
+  result = kwsys::SystemTools::GetLineFromStream(file, line, &has_newline,
+                                                 std::string::npos);
   if (!result || !line.empty()) {
     std::cerr << "Expected successful read with an empty line, got "
               << line.size() << " characters" << std::endl;
@@ -1025,7 +1029,8 @@ static bool CheckGetLineFromStreamLongLine()
 
   // Read second line.
   has_newline = false;
-  result = kwsys::SystemTools::GetLineFromStream(file, line, &has_newline, -1);
+  result = kwsys::SystemTools::GetLineFromStream(file, line, &has_newline,
+                                                 std::string::npos);
   if (!result || line != secondLine) {
     std::cerr << "Second line does not match, expected " << secondLine.size()
               << " characters, got " << line.size() << std::endl;
