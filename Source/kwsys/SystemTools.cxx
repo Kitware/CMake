@@ -4250,9 +4250,9 @@ std::string SystemTools::MakeCidentifier(const std::string& s)
 // Convenience function around std::getline which removes a trailing carriage
 // return and can truncate the buffer as needed.  Returns true
 // if any data were read before the end-of-file was reached.
-bool SystemTools::GetLineFromStream(std::istream& is, std::string& line,
-                                    bool* has_newline /* = 0 */,
-                                    long sizeLimit /* = -1 */)
+bool SystemTools::GetLineFromStream(
+  std::istream& is, std::string& line, bool* has_newline /* = 0 */,
+  std::string::size_type sizeLimit /* = std::string::npos */)
 {
   // Start with an empty line.
   line = "";
@@ -4277,7 +4277,7 @@ bool SystemTools::GetLineFromStream(std::istream& is, std::string& line,
     }
 
     // if we read too much then truncate the buffer
-    if (sizeLimit >= 0 && line.size() >= static_cast<size_t>(sizeLimit)) {
+    if (sizeLimit != std::string::npos && line.size() > sizeLimit) {
       line.resize(sizeLimit);
     }
   }
