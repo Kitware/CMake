@@ -177,6 +177,7 @@ Targets Created:
 - ``CUDA::cufft``
 - ``CUDA::cufftw``
 - ``CUDA::cufft_static``
+- ``CUDA::cufft_static_nocallback`` starting in CUDA 9.2, requires CMake 3.23+
 - ``CUDA::cufftw_static``
 
 cuRAND
@@ -928,6 +929,9 @@ if(CUDAToolkit_FOUND)
   # cuFFTW depends on cuFFT
   _CUDAToolkit_find_and_add_import_lib(cufftw DEPS cufft)
   _CUDAToolkit_find_and_add_import_lib(cufftw DEPS cufft_static)
+  if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 9.2)
+    _CUDAToolkit_find_and_add_import_lib(cufft_static_nocallback DEPS culibos)
+  endif()
 
   # cuSOLVER depends on cuBLAS, and cuSPARSE
   _CUDAToolkit_find_and_add_import_lib(cusolver DEPS cublas cusparse)
