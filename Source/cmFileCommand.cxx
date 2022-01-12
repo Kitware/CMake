@@ -197,9 +197,10 @@ bool HandleReadCommand(std::vector<std::string> const& args,
   }
 
   // is there a limit?
-  long sizeLimit = -1;
+  std::string::size_type sizeLimit = std::string::npos;
   if (!arguments.Limit.empty()) {
-    sizeLimit = atoi(arguments.Limit.c_str());
+    sizeLimit =
+      static_cast<std::string::size_type>(atoi(arguments.Limit.c_str()));
   }
 
   // is there an offset?
@@ -231,11 +232,8 @@ bool HandleReadCommand(std::vector<std::string> const& args,
       cmSystemTools::GetLineFromStream(file, line, &has_newline, sizeLimit)) {
       if (sizeLimit > 0) {
         sizeLimit = sizeLimit - static_cast<long>(line.size());
-        if (has_newline) {
+        if (has_newline && sizeLimit > 0) {
           sizeLimit--;
-        }
-        if (sizeLimit < 0) {
-          sizeLimit = 0;
         }
       }
       output += line;

@@ -523,9 +523,9 @@ public:
    * end-of-file was reached. If the has_newline argument is specified, it will
    * be true when the line read had a newline character.
    */
-  static bool GetLineFromStream(std::istream& istr, std::string& line,
-                                bool* has_newline = nullptr,
-                                long sizeLimit = -1);
+  static bool GetLineFromStream(
+    std::istream& istr, std::string& line, bool* has_newline = nullptr,
+    std::string::size_type sizeLimit = std::string::npos);
 
   /**
    * Get the parent directory of the directory or file

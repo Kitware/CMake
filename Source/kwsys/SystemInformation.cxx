@@ -1265,11 +1265,10 @@ public:
   }
 
 private:
-  void* GetRealAddress() const
+  size_t GetRealAddress() const
   {
-    return reinterpret_cast<void*>(
-      static_cast<char*>(this->Address) -
-      static_cast<char*>(this->BinaryBaseAddress));
+    return static_cast<size_t>(static_cast<char*>(this->Address) -
+                               static_cast<char*>(this->BinaryBaseAddress));
   }
 
   std::string GetFileName(const std::string& path) const;
