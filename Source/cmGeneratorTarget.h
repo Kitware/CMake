@@ -1073,9 +1073,15 @@ private:
   {
     cmLocalGenerator const* LG;
   };
+  enum class LookupSelf
+  {
+    No,
+    Yes,
+  };
   cm::optional<cmLinkItem> LookupLinkItem(std::string const& n,
                                           cmListFileBacktrace const& bt,
-                                          LookupLinkItemScope* scope) const;
+                                          LookupLinkItemScope* scope,
+                                          LookupSelf lookupSelf) const;
 
   std::vector<BT<std::string>> GetSourceFilePaths(
     std::string const& config) const;

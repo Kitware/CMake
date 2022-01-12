@@ -6645,7 +6645,7 @@ bool cmGeneratorTarget::IsLinkLookupScope(std::string const& n,
 
 cm::optional<cmLinkItem> cmGeneratorTarget::LookupLinkItem(
   std::string const& n, cmListFileBacktrace const& bt,
-  LookupLinkItemScope* scope) const
+  LookupLinkItemScope* scope, LookupSelf lookupSelf) const
 {
   cm::optional<cmLinkItem> maybeItem;
   if (this->IsLinkLookupScope(n, scope->LG)) {
@@ -6653,7 +6653,8 @@ cm::optional<cmLinkItem> cmGeneratorTarget::LookupLinkItem(
   }
 
   std::string name = this->CheckCMP0004(n);
-  if (name == this->GetName() || name.empty()) {
+  if (name.empty() ||
+      (lookupSelf == LookupSelf::No && name == this->GetName())) {
     return maybeItem;
   }
   maybeItem = this->ResolveLinkItem(BT<std::string>(name, bt), scope->LG);
@@ -6688,8 +6689,8 @@ void cmGeneratorTarget::ExpandLinkItems(std::string const& prop,
       cge->Evaluate(this->LocalGenerator, config, headTarget, &dagChecker,
                     this, headTarget->LinkerLanguage));
     for (std::string const& lib : libs) {
-      if (cm::optional<cmLinkItem> maybeItem =
-            this->LookupLinkItem(lib, cge->GetBacktrace(), &scope)) {
+      if (cm::optional<cmLinkItem> maybeItem = this->LookupLinkItem(
+            lib, cge->GetBacktrace(), &scope, LookupSelf::No)) {
         cmLinkItem item = std::move(*maybeItem);
 
         if (!item.Target) {
@@ -7400,8 +7401,8 @@ const cmLinkInterface* cmGeneratorTarget::GetImportLinkInterface(
     std::vector<std::string> deps = cmExpandedList(info->SharedDeps);
     LookupLinkItemScope scope{ this->LocalGenerator };
     for (std::string const& dep : deps) {
-      if (cm::optional<cmLinkItem> maybeItem =
-            this->LookupLinkItem(dep, cmListFileBacktrace(), &scope)) {
+      if (cm::optional<cmLinkItem> maybeItem = this->LookupLinkItem(
+            dep, cmListFileBacktrace(), &scope, LookupSelf::No)) {
         iface.SharedDeps.emplace_back(std::move(*maybeItem));
       }
     }
