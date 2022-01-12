@@ -1,13 +1,13 @@
 Test project .*
-    Start 57: TEST:typed/short\.case!4
-1/4 Test #57: TEST:typed/short\.case!4 \.+ +Passed +[0-9.]+ sec
-    Start 58: TEST:typed/float\.case!4
-2/4 Test #58: TEST:typed/float\.case!4 \.+ +Passed +[0-9.]+ sec
-    Start 59: TEST:ns\.typed/short\.case!4
-3/4 Test #59: TEST:ns\.typed/short\.case!4 \.+ +Passed +[0-9.]+ sec
-    Start 60: TEST:ns\.typed/float\.case!4
-4/4 Test #60: TEST:ns\.typed/float\.case!4 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:typed/short\.case!4
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:typed/short\.case!4 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:typed/float\.case!4
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:typed/float\.case!4 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:ns\.typed/short\.case!4
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.typed/short\.case!4 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:ns\.typed/float\.case!4
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.typed/float\.case!4 \.+ +Passed +[0-9.]+ sec
 
-100% tests passed, 0 tests failed out of 4
+100% tests passed, 0 tests failed out of [0-9]+
 
 Total Test time \(real\) = +[0-9.]+ sec
