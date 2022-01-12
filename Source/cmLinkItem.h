@@ -70,6 +70,12 @@ struct cmLinkInterfaceLibraries
   // Object files listed in the interface.
   std::vector<cmLinkItem> Objects;
 
+  // Items to be included as if directly linked by the head target.
+  std::vector<cmLinkItem> HeadInclude;
+
+  // Items to be excluded from direct linking by the head target.
+  std::vector<cmLinkItem> HeadExclude;
+
   // Whether the list depends on a genex referencing the head target.
   bool HadHeadSensitiveCondition = false;
 

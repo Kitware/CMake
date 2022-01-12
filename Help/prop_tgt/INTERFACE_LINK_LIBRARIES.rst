@@ -26,6 +26,12 @@ manual for more on defining buildsystem properties.
 
 .. include:: LINK_LIBRARIES_INDIRECTION.txt
 
+``INTERFACE_LINK_LIBRARIES`` adds transitive link dependencies for a
+target's dependents.  In advanced use cases, one may update the
+direct link dependencies of a target's dependents by using the
+:prop_tgt:`INTERFACE_LINK_LIBRARIES_DIRECT` and
+:prop_tgt:`INTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE` target properties.
+
 Creating Relocatable Packages
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

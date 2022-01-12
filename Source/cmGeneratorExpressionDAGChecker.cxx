@@ -189,6 +189,8 @@ bool cmGeneratorExpressionDAGChecker::EvaluatingLinkLibraries(
   }
 
   return prop == "LINK_LIBRARIES"_s || prop == "INTERFACE_LINK_LIBRARIES"_s ||
+    prop == "INTERFACE_LINK_LIBRARIES_DIRECT"_s ||
+    prop == "INTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE"_s ||
     prop == "LINK_INTERFACE_LIBRARIES"_s ||
     prop == "IMPORTED_LINK_INTERFACE_LIBRARIES"_s ||
     cmHasLiteralPrefix(prop, "LINK_INTERFACE_LIBRARIES_") ||
