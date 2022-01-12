@@ -11,7 +11,8 @@
 #endif // if !defined(JSON_IS_AMALGAMATION)
 
 #if !defined(__SUNPRO_CC)
-#pragma pack(push, 8)
+#pragma pack(push)
+#pragma pack()
 #endif
 
 namespace Json {
