@@ -48,8 +48,15 @@ NEWLINE \r?\n
                          // A newline ends the current file name and the current rule.
                          yyextra->newEntry();
                        }
-:{WSPACE}+             {
-                         // A colon followed by space ends the rules and starts a new dependency.
+:{NEWLINE}             {
+                         // A colon ends the rules
+                         yyextra->newDependency();
+                         // A newline after colon terminates current rule.
+                         yyextra->newEntry();
+                       }
+:({WSPACE}+|\\{NEWLINE}) {
+                         // A colon followed by space or line continuation ends the rules
+                         // and starts a new dependency.
                          yyextra->newDependency();
                        }
 {WSPACE}+              {
