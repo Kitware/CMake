@@ -978,13 +978,6 @@
     "flags": []
   },
   {
-    "name": "LinkControlFlowGuard",
-    "switch": "guard:cf",
-    "comment": "Control Flow Guard",
-    "value": "true",
-    "flags": []
-  },
-  {
     "name": "LinkGuardEHContMetadata",
     "switch": "guard:ehcont",
     "comment": "Enable EH Continuation Metadata",
