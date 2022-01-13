@@ -102,6 +102,8 @@ Other Generators
    /generator/Green Hills MULTI
    /generator/Xcode
 
+.. _`Extra Generators`:
+
 Extra Generators
 ================
 
