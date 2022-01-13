@@ -133,11 +133,17 @@ public:
   // Define a property
   void DefineProperty(const std::string& name, cmProperty::ScopeType scope,
                       const std::string& ShortDescription,
-                      const std::string& FullDescription, bool chain = false);
+                      const std::string& FullDescription, bool chain = false,
+                      const std::string& initializeFromVariable = "");
 
   // get property definition
   cmPropertyDefinition const* GetPropertyDefinition(
     const std::string& name, cmProperty::ScopeType scope) const;
+
+  const cmPropertyDefinitionMap& GetPropertyDefinitions() const
+  {
+    return this->PropertyDefinitions;
+  }
 
   bool IsPropertyChained(const std::string& name,
                          cmProperty::ScopeType scope) const;
