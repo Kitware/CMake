@@ -55,6 +55,10 @@ public:
 
   static cmCursesForm* CurrentForm;
 
+  // Description:
+  // Handle resizing the form with curses.
+  void HandleResize();
+
 protected:
   static cmsys::ofstream DebugFile;
   static bool Debug;
