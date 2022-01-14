@@ -199,14 +199,13 @@ bool HandleReadCommand(std::vector<std::string> const& args,
   // is there a limit?
   std::string::size_type sizeLimit = std::string::npos;
   if (!arguments.Limit.empty()) {
-    sizeLimit =
-      static_cast<std::string::size_type>(atoi(arguments.Limit.c_str()));
+    std::istringstream(arguments.Limit) >> sizeLimit;
   }
 
   // is there an offset?
-  long offset = 0;
+  cmsys::ifstream::off_type offset = 0;
   if (!arguments.Offset.empty()) {
-    offset = atoi(arguments.Offset.c_str());
+    std::istringstream(arguments.Offset) >> offset;
   }
 
   file.seekg(offset, std::ios::beg); // explicit ios::beg for IBM VisualAge 6
@@ -216,25 +215,21 @@ bool HandleReadCommand(std::vector<std::string> const& args,
   if (arguments.Hex) {
     // Convert part of the file into hex code
     char c;
-    while ((sizeLimit != 0) && (file.get(c))) {
+    while ((sizeLimit > 0) && (file.get(c))) {
       char hex[4];
       snprintf(hex, sizeof(hex), "%.2x", c & 0xff);
       output += hex;
-      if (sizeLimit > 0) {
-        sizeLimit--;
-      }
+      sizeLimit--;
     }
   } else {
     std::string line;
     bool has_newline = false;
     while (
-      sizeLimit != 0 &&
+      sizeLimit > 0 &&
       cmSystemTools::GetLineFromStream(file, line, &has_newline, sizeLimit)) {
-      if (sizeLimit > 0) {
-        sizeLimit = sizeLimit - static_cast<long>(line.size());
-        if (has_newline && sizeLimit > 0) {
-          sizeLimit--;
-        }
+      sizeLimit = sizeLimit - line.size();
+      if (has_newline && sizeLimit > 0) {
+        sizeLimit--;
       }
       output += line;
       if (has_newline) {
