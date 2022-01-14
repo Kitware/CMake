@@ -51,6 +51,7 @@ static const char* cmDocumentationOptions[][2] = {
 
 cmCursesForm* cmCursesForm::CurrentForm = nullptr;
 
+#ifndef _WIN32
 extern "C" {
 
 static void onsig(int /*unused*/)
@@ -61,6 +62,7 @@ static void onsig(int /*unused*/)
   signal(SIGWINCH, onsig);
 }
 }
+#endif // _WIN32
 
 int main(int argc, char const* const* argv)
 {
@@ -126,7 +128,9 @@ int main(int argc, char const* const* argv)
   keypad(stdscr, true); /* Use key symbols as KEY_DOWN */
   cmCursesColor::InitColors();
 
+#ifndef _WIN32
   signal(SIGWINCH, onsig);
+#endif // _WIN32
 
   int x;
   int y;

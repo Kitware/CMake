@@ -177,6 +177,12 @@ void cmCursesLongMessageForm::HandleInput()
     this->PrintKeys();
     int key = getch();
 
+#ifdef _WIN32
+    if (key == KEY_RESIZE) {
+      HandleResize();
+    }
+#endif // _WIN32
+
     snprintf(debugMessage, sizeof(debugMessage),
              "Message widget handling input, key: %d", key);
     cmCursesForm::LogMessage(debugMessage);

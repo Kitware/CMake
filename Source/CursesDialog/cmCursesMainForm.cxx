@@ -686,6 +686,12 @@ void cmCursesMainForm::HandleInput()
     }
     int key = getch();
 
+#ifdef _WIN32
+    if (key == KEY_RESIZE) {
+      HandleResize();
+    }
+#endif // _WIN32
+
     getmaxyx(stdscr, y, x);
     // If window too small, handle 'q' only
     if (x < cmCursesMainForm::MIN_WIDTH || y < cmCursesMainForm::MIN_HEIGHT) {

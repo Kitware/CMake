@@ -2,7 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCursesForm.h"
 
-#include <unistd.h>
+#include <cstdlib>
+#ifndef _WIN32
+#  include <unistd.h>
+#endif // _WIN32
 
 cmsys::ofstream cmCursesForm::DebugFile;
 bool cmCursesForm::Debug = false;
@@ -51,8 +54,12 @@ void cmCursesForm::HandleResize()
   endwin();
   if (initscr() == nullptr) {
     static const char errmsg[] = "Error: ncurses initialization failed\n";
+#ifdef _WIN32
+    fprintf(stderr, "%s", errmsg);
+#else
     auto r = write(STDERR_FILENO, errmsg, sizeof(errmsg) - 1);
     static_cast<void>(r);
+#endif // _WIN32
     exit(1);
   }
   noecho();             /* Echo off */
