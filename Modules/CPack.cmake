@@ -805,6 +805,11 @@ _cpack_set_default(CPACK_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 _cpack_set_default(CPACK_NSIS_INSTALLER_ICON_CODE "")
 _cpack_set_default(CPACK_NSIS_INSTALLER_MUI_ICON_CODE "")
 
+# DragNDrop specific variables
+if(CPACK_RESOURCE_FILE_LICENSE AND NOT CPACK_RESOURCE_FILE_LICENSE STREQUAL "${CMAKE_ROOT}/Templates/CPack.GenericLicense.txt")
+  _cpack_set_default(CPACK_DMG_SLA_USE_RESOURCE_FILE_LICENSE ON)
+endif()
+
 # WiX specific variables
 _cpack_set_default(CPACK_WIX_SIZEOF_VOID_P "${CMAKE_SIZEOF_VOID_P}")
 
