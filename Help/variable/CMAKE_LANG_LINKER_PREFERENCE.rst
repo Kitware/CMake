@@ -1,6 +1,8 @@
 CMAKE_<LANG>_LINKER_PREFERENCE
 ------------------------------
 
+An internal variable subject to change.
+
 Preference value for linker language selection.
 
 The "linker language" for executable, shared library, and module
