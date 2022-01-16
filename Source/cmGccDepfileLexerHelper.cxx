@@ -113,6 +113,24 @@ void cmGccDepfileLexerHelper::addToCurrentPath(const char* s)
 void cmGccDepfileLexerHelper::sanitizeContent()
 {
   for (auto it = this->Content.begin(); it != this->Content.end();) {
+    // Remove empty paths and normalize windows paths
+    for (auto pit = it->paths.begin(); pit != it->paths.end();) {
+      if (pit->empty()) {
+        pit = it->paths.erase(pit);
+      } else {
+#if defined(_WIN32)
+        // Unescape the colon following the drive letter.
+        // Some versions of GNU compilers can escape this character.
+        // c\:\path must be transformed to c:\path
+        if (pit->size() >= 3 && std::toupper((*pit)[0]) >= 'A' &&
+            std::toupper((*pit)[0]) <= 'Z' && (*pit)[1] == '\\' &&
+            (*pit)[2] == ':') {
+          pit->erase(1, 1);
+        }
+#endif
+        ++pit;
+      }
+    }
     // Remove empty rules
     for (auto rit = it->rules.begin(); rit != it->rules.end();) {
       if (rit->empty()) {
@@ -121,28 +139,10 @@ void cmGccDepfileLexerHelper::sanitizeContent()
         ++rit;
       }
     }
-    // Remove the entry if rules are empty
-    if (it->rules.empty()) {
+    // Remove the entry if rules are empty or do not have any paths
+    if (it->rules.empty() || it->paths.empty()) {
       it = this->Content.erase(it);
     } else {
-      // Remove empty paths and normalize windows paths
-      for (auto pit = it->paths.begin(); pit != it->paths.end();) {
-        if (pit->empty()) {
-          pit = it->paths.erase(pit);
-        } else {
-#if defined(_WIN32)
-          // Unescape the colon following the drive letter.
-          // Some versions of GNU compilers can escape this character.
-          // c\:\path must be transformed to c:\path
-          if (pit->size() >= 3 && std::toupper((*pit)[0]) >= 'A' &&
-              std::toupper((*pit)[0]) <= 'Z' && (*pit)[1] == '\\' &&
-              (*pit)[2] == ':') {
-            pit->erase(1, 1);
-          }
-#endif
-          ++pit;
-        }
-      }
       ++it;
     }
   }
