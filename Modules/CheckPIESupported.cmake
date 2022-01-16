@@ -25,7 +25,8 @@ property for executables will be honored at link time.
     Set ``<output>`` variable with details about any error.
   ``LANGUAGES <lang>...``
     Check the linkers used for each of the specified languages.
-    Supported languages are ``C``, ``CXX``, and ``Fortran``.
+    Supported languages are ``C``, ``CXX``, ``OBJC``, ``OBJCXX``, ``Fortran``,
+    ``CUDA``, and ``HIP``.
 
 It makes no sense to use this module when :policy:`CMP0083` is set to ``OLD``,
 so the command will return an error in this case.  See policy :policy:`CMP0083`
@@ -62,7 +63,7 @@ Examples
 #]=======================================================================]
 
 
-include (Internal/CMakeTryCompilerOrLinkerFlag)
+include (Internal/CheckLinkerFlag)
 
 function (check_pie_supported)
   cmake_policy(GET CMP0083 cmp0083)
@@ -86,7 +87,7 @@ function (check_pie_supported)
 
   if (CHECK_PIE_LANGUAGES)
     set (unsupported_languages "${CHECK_PIE_LANGUAGES}")
-    list (REMOVE_ITEM unsupported_languages "C" "CXX" "Fortran")
+    list (REMOVE_ITEM unsupported_languages "C" "CXX" "OBJC" "OBJCXX" "Fortran" "CUDA" "HIP")
     if(unsupported_languages)
       message(FATAL_ERROR "check_pie_supported: language(s) '${unsupported_languages}' not supported")
     endif()
@@ -97,7 +98,7 @@ function (check_pie_supported)
       return()
     endif()
 
-    list (FILTER enabled_languages INCLUDE REGEX "^(C|CXX|Fortran)$")
+    list (FILTER enabled_languages INCLUDE REGEX "^(C|CXX|OBJC|OBJCXX|Fortran|CUDA|HIP)$")
     if (NOT enabled_languages)
       return()
     endif()
@@ -105,24 +106,29 @@ function (check_pie_supported)
     set (CHECK_PIE_LANGUAGES ${enabled_languages})
   endif()
 
+  set(CMAKE_REQUIRED_QUIET TRUE)
   set (outputs)
 
   foreach(lang IN LISTS CHECK_PIE_LANGUAGES)
     if(_CMAKE_${lang}_PIE_MAY_BE_SUPPORTED_BY_LINKER)
-      cmake_try_compiler_or_linker_flag(${lang}
+      if(NOT DEFINED CMAKE_${lang}_LINK_PIE_SUPPORTED)
+        cmake_check_linker_flag(${lang}
                                 "${CMAKE_${lang}_LINK_OPTIONS_PIE}"
                                 CMAKE_${lang}_LINK_PIE_SUPPORTED
                                 OUTPUT_VARIABLE output)
-      if (NOT CMAKE_${lang}_LINK_PIE_SUPPORTED)
-        string (APPEND outputs "PIE (${lang}): ${output}\n")
+        if (NOT CMAKE_${lang}_LINK_PIE_SUPPORTED)
+          string (APPEND outputs "PIE (${lang}): ${output}\n")
+        endif()
       endif()
 
-      cmake_try_compiler_or_linker_flag(${lang}
+      if(NOT DEFINED CMAKE_${lang}_LINK_NO_PIE_SUPPORTED)
+        cmake_check_linker_flag(${lang}
                                 "${CMAKE_${lang}_LINK_OPTIONS_NO_PIE}"
                                 CMAKE_${lang}_LINK_NO_PIE_SUPPORTED
                                 OUTPUT_VARIABLE output)
-      if (NOT CMAKE_${lang}_LINK_NO_PIE_SUPPORTED)
-        string (APPEND outputs "NO_PIE (${lang}): ${output}\n")
+        if (NOT CMAKE_${lang}_LINK_NO_PIE_SUPPORTED)
+          string (APPEND outputs "NO_PIE (${lang}): ${output}\n")
+        endif()
       endif()
     else()
       # no support at link time. Set cache variables to NO
