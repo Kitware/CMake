@@ -2,13 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmDefinePropertyCommand.h"
 
-#include <cm/string_view>
 #include <cmext/string_view>
 
 #include "cmArgumentParser.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmProperty.h"
+#include "cmRange.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
 
@@ -68,16 +68,6 @@ bool cmDefinePropertyCommand(std::vector<std::string> const& args,
   // Make sure a property name was found.
   if (PropertyName.empty()) {
     status.SetError("not given a PROPERTY <name> argument.");
-    return false;
-  }
-
-  // Make sure documentation was given.
-  if (BriefDocs.empty()) {
-    status.SetError("not given a BRIEF_DOCS <brief-doc> argument.");
-    return false;
-  }
-  if (FullDocs.empty()) {
-    status.SetError("not given a FULL_DOCS <full-doc> argument.");
     return false;
   }
 
