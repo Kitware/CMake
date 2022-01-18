@@ -6,8 +6,7 @@ CUDAARCHS
 .. include:: ENV_VAR.txt
 
 Value used to initialize :variable:`CMAKE_CUDA_ARCHITECTURES` on the first
-configuration if it's not already defined. Subsequent runs will use the value
-stored in the cache.
+configuration. Subsequent runs will use the value stored in the cache.
 
 This is a semicolon-separated list of architectures as described in
 :prop_tgt:`CUDA_ARCHITECTURES`.

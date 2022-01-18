@@ -18,16 +18,16 @@ else()
   if(NOT CMAKE_CUDA_COMPILER)
     set(CMAKE_CUDA_COMPILER_INIT NOTFOUND)
 
-      # prefer the environment variable CUDACXX
-      if(NOT $ENV{CUDACXX} STREQUAL "")
-        get_filename_component(CMAKE_CUDA_COMPILER_INIT $ENV{CUDACXX} PROGRAM PROGRAM_ARGS CMAKE_CUDA_FLAGS_ENV_INIT)
-        if(CMAKE_CUDA_FLAGS_ENV_INIT)
-          set(CMAKE_CUDA_COMPILER_ARG1 "${CMAKE_CUDA_FLAGS_ENV_INIT}" CACHE STRING "Arguments to CXX compiler")
-        endif()
-        if(NOT EXISTS ${CMAKE_CUDA_COMPILER_INIT})
-          message(FATAL_ERROR "Could not find compiler set in environment variable CUDACXX:\n$ENV{CUDACXX}.\n${CMAKE_CUDA_COMPILER_INIT}")
-        endif()
+    # prefer the environment variable CUDACXX
+    if(NOT $ENV{CUDACXX} STREQUAL "")
+      get_filename_component(CMAKE_CUDA_COMPILER_INIT $ENV{CUDACXX} PROGRAM PROGRAM_ARGS CMAKE_CUDA_FLAGS_ENV_INIT)
+      if(CMAKE_CUDA_FLAGS_ENV_INIT)
+        set(CMAKE_CUDA_COMPILER_ARG1 "${CMAKE_CUDA_FLAGS_ENV_INIT}" CACHE STRING "Arguments to CUDA compiler")
       endif()
+      if(NOT EXISTS ${CMAKE_CUDA_COMPILER_INIT})
+        message(FATAL_ERROR "Could not find compiler set in environment variable CUDACXX:\n$ENV{CUDACXX}.\n${CMAKE_CUDA_COMPILER_INIT}")
+      endif()
+    endif()
 
     # finally list compilers to try
     if(NOT CMAKE_CUDA_COMPILER_INIT)
