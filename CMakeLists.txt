@@ -670,23 +670,26 @@ macro (CMAKE_BUILD_UTILITIES)
 
   #---------------------------------------------------------------------
   # Use curses?
-  if (UNIX)
-    if(NOT DEFINED BUILD_CursesDialog)
+  if(NOT DEFINED BUILD_CursesDialog)
+    if (UNIX)
       include(${CMake_SOURCE_DIR}/Source/Checks/Curses.cmake)
-      option(BUILD_CursesDialog "Build the CMake Curses Dialog ccmake" "${CMakeCheckCurses_COMPILED}")
+      set(BUILD_CursesDialog_DEFAULT "${CMakeCheckCurses_COMPILED}")
+      option(BUILD_CursesDialog "Build the CMake Curses Dialog ccmake" "${BUILD_CursesDialog_DEFAULT}")
+    else()
+      set(BUILD_CursesDialog 0)
     endif()
-  else ()
-    set(BUILD_CursesDialog 0)
   endif ()
   if(BUILD_CursesDialog)
-    set(CURSES_NEED_NCURSES TRUE)
-    find_package(Curses)
-    if(NOT CURSES_FOUND)
-      message(WARNING
-        "'ccmake' will not be built because Curses was not found.\n"
-        "Turn off BUILD_CursesDialog to suppress this message."
-        )
-      set(BUILD_CursesDialog 0)
+    if(UNIX)
+      set(CURSES_NEED_NCURSES TRUE)
+      find_package(Curses)
+      if(NOT CURSES_FOUND)
+        message(WARNING
+          "'ccmake' will not be built because Curses was not found.\n"
+          "Turn off BUILD_CursesDialog to suppress this message."
+          )
+        set(BUILD_CursesDialog 0)
+      endif()
     endif()
   endif()
   if(BUILD_CursesDialog)
