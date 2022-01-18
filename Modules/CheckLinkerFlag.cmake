@@ -38,53 +38,8 @@ effect or even a specific one is beyond the scope of this module.
 #]=======================================================================]
 
 include_guard(GLOBAL)
-
-include(CMakeCheckCompilerFlagCommonPatterns)
-
-cmake_policy(PUSH)
-cmake_policy(SET CMP0054 NEW) # if() quoted variables not dereferenced
-cmake_policy(SET CMP0057 NEW) # if() supports IN_LIST
+include(Internal/CheckLinkerFlag)
 
 function(CHECK_LINKER_FLAG _lang _flag _var)
-  get_property (_supported_languages GLOBAL PROPERTY ENABLED_LANGUAGES)
-  if (NOT _lang IN_LIST _supported_languages)
-    message (SEND_ERROR "check_linker_flag: ${_lang}: unknown language.")
-    return()
-  endif()
-
-  include (CheckSourceCompiles)
-
-  set(CMAKE_REQUIRED_LINK_OPTIONS "${_flag}")
-
-  # Normalize locale during test compilation.
-  set(_locale_vars LC_ALL LC_MESSAGES LANG)
-  foreach(v IN LISTS _locale_vars)
-    set(_locale_vars_saved_${v} "$ENV{${v}}")
-    set(ENV{${v}} C)
-  endforeach()
-
-  if (_lang MATCHES "^(C|CXX)$")
-    set (_source "int main() { return 0; }")
-  elseif (_lang STREQUAL "Fortran")
-    set (_source "       program test\n       stop\n       end program")
-  elseif (_lang MATCHES "CUDA")
-    set (_source "__host__ int main() { return 0; }")
-  elseif (_lang MATCHES "HIP")
-    set (_source "__host__ int main() { return 0; }")
-  elseif (_lang MATCHES "^(OBJC|OBJCXX)$")
-    set (_source "#ifndef __OBJC__\n#  error \"Not an Objective-C++ compiler\"\n#endif\nint main(void) { return 0; }")
-  else()
-    message (SEND_ERROR "check_linker_flag: ${_lang}: unsupported language.")
-    return()
-  endif()
-  check_compiler_flag_common_patterns(_common_patterns)
-
-  check_source_compiles(${_lang} "${_source}" ${_var} ${_common_patterns})
-
-  foreach(v IN LISTS _locale_vars)
-    set(ENV{${v}} ${_locale_vars_saved_${v}})
-  endforeach()
-  set(${_var} "${${_var}}" PARENT_SCOPE)
+  cmake_check_linker_flag(${_lang} "${_flag}" ${_var})
 endfunction()
-
-cmake_policy(POP)
