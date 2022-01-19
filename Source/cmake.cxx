@@ -1456,7 +1456,6 @@ void cmake::SetDirectoriesFromFile(const std::string& arg)
   // CMakeLists.txt file.
   std::string listPath;
   std::string cachePath;
-  bool argIsFile = false;
   if (cmSystemTools::FileIsDirectory(arg)) {
     std::string path = cmSystemTools::CollapseFullPath(arg);
     cmSystemTools::ConvertToUnixSlashes(path);
@@ -1469,7 +1468,6 @@ void cmake::SetDirectoriesFromFile(const std::string& arg)
       listPath = path;
     }
   } else if (cmSystemTools::FileExists(arg)) {
-    argIsFile = true;
     std::string fullPath = cmSystemTools::CollapseFullPath(arg);
     std::string name = cmSystemTools::GetFilenameName(fullPath);
     name = cmSystemTools::LowerCase(name);
@@ -1485,7 +1483,6 @@ void cmake::SetDirectoriesFromFile(const std::string& arg)
     std::string name = cmSystemTools::GetFilenameName(fullPath);
     name = cmSystemTools::LowerCase(name);
     if (name == "cmakecache.txt"_s || name == "cmakelists.txt"_s) {
-      argIsFile = true;
       listPath = cmSystemTools::GetFilenamePath(fullPath);
     } else {
       listPath = fullPath;
@@ -1505,36 +1502,37 @@ void cmake::SetDirectoriesFromFile(const std::string& arg)
     }
   }
 
+  bool no_source_tree = this->GetHomeDirectory().empty();
+  bool no_build_tree = this->GetHomeOutputDirectory().empty();
+
   // If there is a CMakeLists.txt file, use it as the source tree.
   if (!listPath.empty()) {
-    this->SetHomeDirectory(listPath);
 
-    if (argIsFile) {
-      // Source CMakeLists.txt file given.  It was probably dropped
-      // onto the executable in a GUI.  Default to an in-source build.
+    // When invoked with a path that points to an existing CMakeCache
+    // This function is called multiple times with the same path
+    if (no_source_tree && no_build_tree) {
+      this->SetHomeDirectory(listPath);
+
+      std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
+      this->SetHomeOutputDirectory(cwd);
+    } else if (no_source_tree) {
+      this->SetHomeDirectory(listPath);
+    } else if (no_build_tree) {
       this->SetHomeOutputDirectory(listPath);
-    } else {
-      // Source directory given on command line.  Use current working
-      // directory as build tree if -B hasn't been given already
-      if (this->GetHomeOutputDirectory().empty()) {
-        std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-        this->SetHomeOutputDirectory(cwd);
-      }
     }
-    return;
-  }
-
-  if (this->GetHomeDirectory().empty()) {
-    // We didn't find a CMakeLists.txt and it wasn't specified
-    // with -S. Assume it is the path to the source tree
-    std::string full = cmSystemTools::CollapseFullPath(arg);
-    this->SetHomeDirectory(full);
-  }
-  if (this->GetHomeOutputDirectory().empty()) {
-    // We didn't find a CMakeCache.txt and it wasn't specified
-    // with -B. Assume the current working directory as the build tree.
-    std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-    this->SetHomeOutputDirectory(cwd);
+  } else {
+    if (no_source_tree) {
+      // We didn't find a CMakeLists.txt and it wasn't specified
+      // with -S. Assume it is the path to the source tree
+      std::string full = cmSystemTools::CollapseFullPath(arg);
+      this->SetHomeDirectory(full);
+    }
+    if (no_build_tree) {
+      // We didn't find a CMakeCache.txt and it wasn't specified
+      // with -B. Assume the current working directory as the build tree.
+      std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
+      this->SetHomeOutputDirectory(cwd);
+    }
   }
 }
 
