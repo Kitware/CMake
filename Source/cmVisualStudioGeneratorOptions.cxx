@@ -382,8 +382,9 @@ void cmVisualStudioGeneratorOptions::StoreUnknownFlag(std::string const& flag)
     flag.c_str(),
     cmOutputConverter::Shell_Flag_AllowMakeVariables |
       cmOutputConverter::Shell_Flag_VSIDE);
-  if (!(this->BuildAsX &&
-        opts.find("machine:") != std::string::npos)) {
+  if (!((this->BuildAsX && opts.find("machine:") != std::string::npos) ||
+      (opts.find("machine:ARM64X") != std::string::npos)))
+  {
     this->AppendFlagString(this->UnknownFlagField, opts);
   }
 }
