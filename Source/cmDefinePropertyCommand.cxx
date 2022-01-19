@@ -2,9 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmDefinePropertyCommand.h"
 
+#include <cmext/string_view>
+
+#include "cmArgumentParser.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmProperty.h"
+#include "cmRange.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
 
@@ -44,37 +48,21 @@ bool cmDefinePropertyCommand(std::vector<std::string> const& args,
   // Parse remaining arguments.
   bool inherited = false;
   std::string PropertyName;
-  std::string BriefDocs;
-  std::string FullDocs;
-  enum Doing
-  {
-    DoingNone,
-    DoingProperty,
-    DoingBrief,
-    DoingFull
-  };
-  Doing doing = DoingNone;
-  for (unsigned int i = 1; i < args.size(); ++i) {
-    if (args[i] == "PROPERTY") {
-      doing = DoingProperty;
-    } else if (args[i] == "BRIEF_DOCS") {
-      doing = DoingBrief;
-    } else if (args[i] == "FULL_DOCS") {
-      doing = DoingFull;
-    } else if (args[i] == "INHERITED") {
-      doing = DoingNone;
-      inherited = true;
-    } else if (doing == DoingProperty) {
-      doing = DoingNone;
-      PropertyName = args[i];
-    } else if (doing == DoingBrief) {
-      BriefDocs += args[i];
-    } else if (doing == DoingFull) {
-      FullDocs += args[i];
-    } else {
-      status.SetError(cmStrCat("given invalid argument \"", args[i], "\"."));
-      return false;
-    }
+  std::vector<std::string> BriefDocs;
+  std::vector<std::string> FullDocs;
+
+  cmArgumentParser<void> parser;
+  parser.Bind("PROPERTY"_s, PropertyName);
+  parser.Bind("BRIEF_DOCS"_s, BriefDocs);
+  parser.Bind("FULL_DOCS"_s, FullDocs);
+  parser.Bind("INHERITED"_s, inherited);
+  std::vector<std::string> invalidArgs;
+
+  parser.Parse(cmMakeRange(args).advance(1), &invalidArgs);
+  if (!invalidArgs.empty()) {
+    status.SetError(
+      cmStrCat("given invalid argument \"", invalidArgs.front(), "\"."));
+    return false;
   }
 
   // Make sure a property name was found.
@@ -83,19 +71,10 @@ bool cmDefinePropertyCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  // Make sure documentation was given.
-  if (BriefDocs.empty()) {
-    status.SetError("not given a BRIEF_DOCS <brief-doc> argument.");
-    return false;
-  }
-  if (FullDocs.empty()) {
-    status.SetError("not given a FULL_DOCS <full-doc> argument.");
-    return false;
-  }
-
   // Actually define the property.
   status.GetMakefile().GetState()->DefineProperty(
-    PropertyName, scope, BriefDocs, FullDocs, inherited);
+    PropertyName, scope, cmJoin(BriefDocs, ""), cmJoin(FullDocs, ""),
+    inherited);
 
   return true;
 }

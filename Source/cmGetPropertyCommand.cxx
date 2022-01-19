@@ -184,7 +184,8 @@ bool cmGetPropertyCommand(std::vector<std::string> const& args,
           status.GetMakefile().GetState()->GetPropertyDefinition(propertyName,
                                                                  scope)) {
       output = def->GetShortDescription();
-    } else {
+    }
+    if (output.empty()) {
       output = "NOTFOUND";
     }
     status.GetMakefile().AddDefinition(variable, output);
@@ -195,7 +196,8 @@ bool cmGetPropertyCommand(std::vector<std::string> const& args,
           status.GetMakefile().GetState()->GetPropertyDefinition(propertyName,
                                                                  scope)) {
       output = def->GetFullDescription();
-    } else {
+    }
+    if (output.empty()) {
       output = "NOTFOUND";
     }
     status.GetMakefile().AddDefinition(variable, output);
