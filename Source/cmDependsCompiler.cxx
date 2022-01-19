@@ -4,6 +4,7 @@
 #include "cmDependsCompiler.h"
 
 #include <algorithm>
+#include <iterator>
 #include <map>
 #include <memory>
 #include <string>
@@ -111,9 +112,13 @@ bool cmDependsCompiler::CheckDependencies(
           // copy depends for each target, except first one, which can be
           // moved
           for (auto index = entry.rules.size() - 1; index > 0; --index) {
-            dependencies[entry.rules[index]] = depends;
+            auto& rule_deps = dependencies[entry.rules[index]];
+            rule_deps.insert(rule_deps.end(), depends.cbegin(),
+                             depends.cend());
           }
-          dependencies[entry.rules.front()] = std::move(depends);
+          auto& rule_deps = dependencies[entry.rules.front()];
+          std::move(depends.cbegin(), depends.cend(),
+                    std::back_inserter(rule_deps));
         }
       } else {
         if (format == "msvc"_s) {
