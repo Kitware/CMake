@@ -102,6 +102,19 @@ set_property(TARGET symbols PROPERTY POSITION_INDEPENDENT_CODE 1)
 add_executable(FortranCInterface main.F call_sub.f ${call_mod})
 target_link_libraries(FortranCInterface PUBLIC symbols)
 
+# If IPO is enabled here, GCC gfortran >= 12.0 will obfuscate
+# the strings of the return values in the compiled executable,
+# which we use to regex match against later.
+# The static libraries must be build with IPO and non-IPO objects,
+# as that will ensure the verify step will operate on IPO objects,
+# if requested by the system compiler flags.
+if(CMAKE_Fortran_COMPILER_ID STREQUAL "GNU" AND
+  CMAKE_Fortran_COMPILER_VERSION VERSION_GREATER_EQUAL 12)
+  target_compile_options(FortranCInterface PRIVATE "-fno-lto")
+  target_compile_options(myfort PRIVATE "-flto=auto" "-ffat-lto-objects")
+  target_compile_options(symbols PRIVATE "-flto=auto" "-ffat-lto-objects")
+endif()
+
 file(GENERATE OUTPUT exe-$<CONFIG>.cmake CONTENT [[
 set(FortranCInterface_EXE "$<TARGET_FILE:FortranCInterface>")
 ]])
