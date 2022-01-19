@@ -98,7 +98,9 @@ int cmCPackDragNDropGenerator::InitializeInternal()
 
   if (this->IsSet("CPACK_DMG_SLA_DIR")) {
     slaDirectory = this->GetOption("CPACK_DMG_SLA_DIR");
-    if (!slaDirectory.empty() && this->IsSet("CPACK_RESOURCE_FILE_LICENSE")) {
+    if (!slaDirectory.empty() &&
+        this->IsOn("CPACK_DMG_SLA_USE_RESOURCE_FILE_LICENSE") &&
+        this->IsSet("CPACK_RESOURCE_FILE_LICENSE")) {
       std::string license_file =
         this->GetOption("CPACK_RESOURCE_FILE_LICENSE");
       if (!license_file.empty() &&
@@ -278,8 +280,10 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
     : "HFS+";
 
   // Get optional arguments ...
-  std::string cpack_license_file =
-    *this->GetOption("CPACK_RESOURCE_FILE_LICENSE");
+  std::string cpack_license_file;
+  if (this->IsOn("CPACK_DMG_SLA_USE_RESOURCE_FILE_LICENSE")) {
+    cpack_license_file = *this->GetOption("CPACK_RESOURCE_FILE_LICENSE");
+  }
 
   cmValue cpack_dmg_background_image =
     this->GetOption("CPACK_DMG_BACKGROUND_IMAGE");

@@ -54,6 +54,27 @@ on macOS:
  Default behavior is to include a symlink to ``/Applications`` in the DMG.
  Set this option to ``ON`` to avoid adding the symlink.
 
+.. variable:: CPACK_DMG_SLA_USE_RESOURCE_FILE_LICENSE
+
+ .. versionadded:: 3.23
+
+ Control whether :variable:`CPACK_RESOURCE_FILE_LICENSE`, if set to a
+ non-default value, is used as the license agreement provided when
+ mounting the DMG.  If ``CPACK_DMG_SLA_USE_RESOURCE_FILE_LICENSE`` is
+ not set, :manual:`cpack(1)` defaults to off.
+
+ In a CMake project that uses the :module:`CPack` module to generate
+ ``CPackConfig.cmake``, ``CPACK_DMG_SLA_USE_RESOURCE_FILE_LICENSE``
+ is automatically enabled by default if it is not set and
+ :variable:`CPACK_RESOURCE_FILE_LICENSE` is set to a non-default value.
+
+ .. note::
+
+  This option was added in response to macOS 12.0's deprecation of
+  the ``hdiutil udifrez`` command to make its use optional.
+  CPack 3.22 and below always use :variable:`CPACK_RESOURCE_FILE_LICENSE`,
+  if set to a non-default value, as the DMG license.
+
 .. variable:: CPACK_DMG_SLA_DIR
 
   .. versionadded:: 3.5
