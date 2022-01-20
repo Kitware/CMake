@@ -59,6 +59,10 @@ associated with the property as its brief and full documentation.
 Corresponding options to the :command:`get_property` command will retrieve
 the documentation.
 
+.. versionchanged:: 3.23
+
+  The ``BRIEF_DOCS`` and ``FULL_DOCS`` options are optional.
+
 The ``INITIALIZE_FROM_VARIABLE`` option is followed by the name of a variable
 from which to initialize the property. The variable name must end with the
 property name, must have a prefix before the property name, and must not begin
