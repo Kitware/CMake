@@ -12,6 +12,13 @@ other target also.  This property is overridden by the
 :prop_tgt:`LINK_INTERFACE_LIBRARIES_<CONFIG>` property if policy
 :policy:`CMP0022` is ``OLD`` or unset.
 
+The value of this property is used by the generators when constructing
+the link rule for a dependent target.  A dependent target's direct
+link dependencies, specified by its :prop_tgt:`LINK_LIBRARIES` target
+property, are linked first, followed by indirect dependencies from the
+transitive closure of the direct dependencies'
+``INTERFACE_LINK_LIBRARIES`` properties.  See policy :policy:`CMP0022`.
+
 Contents of ``INTERFACE_LINK_LIBRARIES`` may use "generator expressions"
 with the syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)`
 manual for available expressions.  See the :manual:`cmake-buildsystem(7)`
