@@ -37,10 +37,9 @@ a file may be included multiple times from the same file or from different
 files. If ``CMakePresets.json`` and ``CMakeUserPresets.json`` are both present,
 ``CMakeUserPresets.json`` implicitly includes ``CMakePresets.json``, even with
 no ``include`` field, in all versions of the format. Files directly or
-indirectly included from ``CMakePresets.json`` must be inside the project
-directory. This restriction does not apply to ``CMakeUserPresets.json`` and
-files that it includes, unless those files are also included by
-``CMakePresets.json``.
+indirectly included from ``CMakePresets.json`` should be guaranteed to be
+provided by the project. ``CMakeUserPresets.json`` may include files from
+anywhere.
 
 Format
 ======

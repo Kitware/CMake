@@ -424,17 +424,6 @@ cmCMakePresetsGraph::ReadFileResult cmCMakePresetsGraph::ReadJSONFile(
 {
   ReadFileResult result;
 
-  if (rootType == RootType::Project) {
-    auto normalizedFilename = cmSystemTools::CollapseFullPath(filename);
-
-    auto normalizedProjectDir =
-      cmSystemTools::CollapseFullPath(this->SourceDir);
-    if (!cmSystemTools::IsSubDirectory(normalizedFilename,
-                                       normalizedProjectDir)) {
-      return ReadFileResult::INCLUDE_OUTSIDE_PROJECT;
-    }
-  }
-
   for (auto const& f : this->Files) {
     if (cmSystemTools::SameFile(filename, f->Filename)) {
       file = f.get();
@@ -442,21 +431,6 @@ cmCMakePresetsGraph::ReadFileResult cmCMakePresetsGraph::ReadJSONFile(
         std::find(inProgressFiles.begin(), inProgressFiles.end(), file);
       if (fileIt != inProgressFiles.end()) {
         return cmCMakePresetsGraph::ReadFileResult::CYCLIC_INCLUDE;
-      }
-
-      // Check files included by this file again to make sure they're in the
-      // project directory.
-      if (rootType == RootType::Project) {
-        for (auto* f2 : file->ReachableFiles) {
-          if (!cmSystemTools::SameFile(filename, f2->Filename)) {
-            File* file2;
-            if ((result = this->ReadJSONFile(
-                   f2->Filename, rootType, ReadReason::Included,
-                   inProgressFiles, file2)) != ReadFileResult::READ_OK) {
-              return result;
-            }
-          }
-        }
       }
 
       return cmCMakePresetsGraph::ReadFileResult::READ_OK;

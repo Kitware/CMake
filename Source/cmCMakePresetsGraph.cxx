@@ -1014,8 +1014,6 @@ const char* cmCMakePresetsGraph::ResultToString(ReadFileResult result)
              "support.";
     case ReadFileResult::CYCLIC_INCLUDE:
       return "Cyclic include among preset files";
-    case ReadFileResult::INCLUDE_OUTSIDE_PROJECT:
-      return "File included from outside project directory";
   }
 
   return "Unknown error";

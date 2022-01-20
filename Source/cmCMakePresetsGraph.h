@@ -44,7 +44,6 @@ public:
     CONDITION_UNSUPPORTED,
     TOOLCHAIN_FILE_UNSUPPORTED,
     CYCLIC_INCLUDE,
-    INCLUDE_OUTSIDE_PROJECT,
   };
 
   enum class ArchToolsetStrategy

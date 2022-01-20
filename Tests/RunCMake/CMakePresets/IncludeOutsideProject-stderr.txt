@@ -1,2 +1,0 @@
-^CMake Error: Could not read presets from [^
-]*/Tests/RunCMake/CMakePresets/IncludeOutsideProject: File included from outside project directory$
