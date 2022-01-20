@@ -790,6 +790,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
   bool haveBArg = false;
   bool scriptMode = false;
   std::string possibleUnknownArg;
+  std::string extraProvidedPath;
 #if !defined(CMAKE_BOOTSTRAP)
   std::string profilingFormat;
   std::string profilingOutput;
@@ -1168,10 +1169,18 @@ void cmake::SetArgs(const std::vector<std::string>& args)
     } else if (!matched && cmHasLiteralPrefix(arg, "-")) {
       possibleUnknownArg = arg;
     } else if (!matched) {
-      this->SetDirectoriesFromFile(arg);
+      bool parsedDirectory = this->SetDirectoriesFromFile(arg);
+      if (!parsedDirectory) {
+        extraProvidedPath = arg;
+      }
     }
   }
 
+  if (!extraProvidedPath.empty() && !scriptMode) {
+    this->IssueMessage(MessageType::WARNING,
+                       cmStrCat("Ignoring extra path from command line:\n ",
+                                extraProvidedPath));
+  }
   if (!possibleUnknownArg.empty() && !scriptMode) {
     cmSystemTools::Error(cmStrCat("Unknown argument ", possibleUnknownArg));
     cmSystemTools::Error("Run 'cmake --help' for all supported options.");
@@ -1450,22 +1459,27 @@ void cmake::PrintTraceFormatVersion()
   }
 }
 
-void cmake::SetDirectoriesFromFile(const std::string& arg)
+bool cmake::SetDirectoriesFromFile(const std::string& arg)
 {
   // Check if the argument refers to a CMakeCache.txt or
   // CMakeLists.txt file.
   std::string listPath;
   std::string cachePath;
+  bool is_empty_directory = false;
   if (cmSystemTools::FileIsDirectory(arg)) {
     std::string path = cmSystemTools::CollapseFullPath(arg);
     cmSystemTools::ConvertToUnixSlashes(path);
     std::string cacheFile = cmStrCat(path, "/CMakeCache.txt");
     std::string listFile = cmStrCat(path, "/CMakeLists.txt");
+
+    is_empty_directory = true;
     if (cmSystemTools::FileExists(cacheFile)) {
       cachePath = path;
+      is_empty_directory = false;
     }
     if (cmSystemTools::FileExists(listFile)) {
       listPath = path;
+      is_empty_directory = false;
     }
   } else if (cmSystemTools::FileExists(arg)) {
     std::string fullPath = cmSystemTools::CollapseFullPath(arg);
@@ -1497,7 +1511,7 @@ void cmake::SetDirectoriesFromFile(const std::string& arg)
       if (existingValue) {
         this->SetHomeOutputDirectory(cachePath);
         this->SetHomeDirectory(*existingValue);
-        return;
+        return true;
       }
     }
   }
@@ -1505,9 +1519,15 @@ void cmake::SetDirectoriesFromFile(const std::string& arg)
   bool no_source_tree = this->GetHomeDirectory().empty();
   bool no_build_tree = this->GetHomeOutputDirectory().empty();
 
+  // When invoked with a path that points to an existing CMakeCache
+  // This function is called multiple times with the same path
+  const bool passed_same_path = (listPath == this->GetHomeDirectory()) ||
+    (listPath == this->GetHomeOutputDirectory());
+  bool used_provided_path =
+    (passed_same_path || no_source_tree || no_build_tree);
+
   // If there is a CMakeLists.txt file, use it as the source tree.
   if (!listPath.empty()) {
-
     // When invoked with a path that points to an existing CMakeCache
     // This function is called multiple times with the same path
     if (no_source_tree && no_build_tree) {
@@ -1527,13 +1547,20 @@ void cmake::SetDirectoriesFromFile(const std::string& arg)
       std::string full = cmSystemTools::CollapseFullPath(arg);
       this->SetHomeDirectory(full);
     }
-    if (no_build_tree) {
+    if (no_build_tree && !no_source_tree && is_empty_directory) {
+      // passed `-S <path> <build_dir> when build_dir is an empty directory
+      std::string full = cmSystemTools::CollapseFullPath(arg);
+      this->SetHomeOutputDirectory(full);
+    } else if (no_build_tree) {
       // We didn't find a CMakeCache.txt and it wasn't specified
       // with -B. Assume the current working directory as the build tree.
       std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
       this->SetHomeOutputDirectory(cwd);
+      used_provided_path = false;
     }
   }
+
+  return used_provided_path;
 }
 
 // at the end of this CMAKE_ROOT and CMAKE_COMMAND should be added to the
