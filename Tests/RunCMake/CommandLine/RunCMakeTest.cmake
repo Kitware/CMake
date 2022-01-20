@@ -196,7 +196,7 @@ function(run_Toolchain)
 set(CMAKE_SYSTEM_NAME Linux)
 set(toolchain_file binary_dir)
 ]=])
-  run_cmake_with_options(toolchain-valid-rel-build-path ${CMAKE_COMMAND} -S ${source_dir} -B ${binary_dir} --toolchain toolchain.cmake)
+  run_cmake_with_options(toolchain-valid-rel-build-path -S ${source_dir} -B ${binary_dir} --toolchain toolchain.cmake)
 endfunction()
 run_Toolchain()
 
