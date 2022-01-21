@@ -1468,6 +1468,10 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValues(
   if (this->IPOEnabledConfigurations.count(config) > 0) {
     e1.Element("WholeProgramOptimization", "true");
   }
+  if (this->ASanEnabledConfigurations.find(config) !=
+      this->ASanEnabledConfigurations.end()) {
+    e1.Element("EnableAsan", "true");
+  }
   {
     auto s = this->SpectreMitigation.find(config);
     if (s != this->SpectreMitigation.end()) {
@@ -3073,6 +3077,11 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   // Put the IPO enabled configurations into a set.
   if (this->GeneratorTarget->IsIPOEnabled(linkLanguage, configName)) {
     this->IPOEnabledConfigurations.insert(configName);
+  }
+
+  // Check if ASan is enabled.
+  if (flags.find("/fsanitize=address") != std::string::npos) {
+    this->ASanEnabledConfigurations.insert(configName);
   }
 
   // Precompile Headers
