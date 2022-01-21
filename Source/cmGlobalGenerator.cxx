@@ -1994,16 +1994,19 @@ int cmGlobalGenerator::TryCompile(int jobs, const std::string& srcdir,
   }
   std::string config =
     mf->GetSafeDefinition("CMAKE_TRY_COMPILE_CONFIGURATION");
+  cmBuildOptions defaultBuildOptions(false, fast);
+
   return this->Build(jobs, srcdir, bindir, projectName, newTarget, output, "",
-                     config, false, fast, false, this->TryCompileTimeout);
+                     config, defaultBuildOptions, false,
+                     this->TryCompileTimeout);
 }
 
 std::vector<cmGlobalGenerator::GeneratedMakeCommand>
 cmGlobalGenerator::GenerateBuildCommand(
   const std::string& /*unused*/, const std::string& /*unused*/,
   const std::string& /*unused*/, std::vector<std::string> const& /*unused*/,
-  const std::string& /*unused*/, bool /*unused*/, int /*unused*/,
-  bool /*unused*/, std::vector<std::string> const& /*unused*/)
+  const std::string& /*unused*/, int /*unused*/, bool /*unused*/,
+  const cmBuildOptions& /*unused*/, std::vector<std::string> const& /*unused*/)
 {
   GeneratedMakeCommand makeCommand;
   makeCommand.Add("cmGlobalGenerator::GenerateBuildCommand not implemented");
@@ -2021,7 +2024,7 @@ int cmGlobalGenerator::Build(
   int jobs, const std::string& /*unused*/, const std::string& bindir,
   const std::string& projectName, const std::vector<std::string>& targets,
   std::string& output, const std::string& makeCommandCSTR,
-  const std::string& config, bool clean, bool fast, bool verbose,
+  const std::string& config, const cmBuildOptions& buildOptions, bool verbose,
   cmDuration timeout, cmSystemTools::OutputOption outputflag,
   std::vector<std::string> const& nativeOptions)
 {
@@ -2053,9 +2056,9 @@ int cmGlobalGenerator::Build(
   std::string outputBuffer;
   std::string* outputPtr = &outputBuffer;
 
-  std::vector<GeneratedMakeCommand> makeCommand =
-    this->GenerateBuildCommand(makeCommandCSTR, projectName, bindir, targets,
-                               realConfig, fast, jobs, verbose, nativeOptions);
+  std::vector<GeneratedMakeCommand> makeCommand = this->GenerateBuildCommand(
+    makeCommandCSTR, projectName, bindir, targets, realConfig, jobs, verbose,
+    buildOptions, nativeOptions);
 
   // Workaround to convince some commands to produce output.
   if (outputflag == cmSystemTools::OUTPUT_PASSTHROUGH &&
@@ -2064,10 +2067,11 @@ int cmGlobalGenerator::Build(
   }
 
   // should we do a clean first?
-  if (clean) {
+  if (buildOptions.Clean) {
     std::vector<GeneratedMakeCommand> cleanCommand =
       this->GenerateBuildCommand(makeCommandCSTR, projectName, bindir,
-                                 { "clean" }, realConfig, fast, jobs, verbose);
+                                 { "clean" }, realConfig, jobs, verbose,
+                                 buildOptions);
     output += "\nRun Clean Command:";
     output += cleanCommand.front().Printable();
     output += "\n";

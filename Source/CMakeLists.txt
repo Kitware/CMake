@@ -155,6 +155,7 @@ set(SRCS
   cmBinUtilsWindowsPELinker.h
   cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool.cxx
   cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool.h
+  cmBuildOptions.h
   cmCacheManager.cxx
   cmCacheManager.h
   cmCLocaleEnvironmentScope.h

@@ -1099,7 +1099,8 @@ std::vector<cmGlobalGenerator::GeneratedMakeCommand>
 cmGlobalVisualStudio10Generator::GenerateBuildCommand(
   const std::string& makeProgram, const std::string& projectName,
   const std::string& projectDir, std::vector<std::string> const& targetNames,
-  const std::string& config, bool fast, int jobs, bool verbose,
+  const std::string& config, int jobs, bool verbose,
+  const cmBuildOptions& buildOptions,
   std::vector<std::string> const& makeOptions)
 {
   std::vector<GeneratedMakeCommand> makeCommands;
@@ -1145,8 +1146,8 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
   if (useDevEnv) {
     // Use devenv to build solutions containing Intel Fortran projects.
     return cmGlobalVisualStudio7Generator::GenerateBuildCommand(
-      makeProgram, projectName, projectDir, targetNames, config, fast, jobs,
-      verbose, makeOptions);
+      makeProgram, projectName, projectDir, targetNames, config, jobs, verbose,
+      buildOptions, makeOptions);
   }
 
   std::vector<std::string> realTargetNames = targetNames;
@@ -1178,8 +1179,9 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
           cmSystemTools::ConvertToUnixSlashes(targetProject);
         }
       }
-      makeCommand.Add(std::move(targetProject));
+      makeCommand.Add(targetProject);
     }
+
     std::string configArg = "/p:Configuration=";
     if (!config.empty()) {
       configArg += config;
