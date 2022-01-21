@@ -648,7 +648,7 @@ protected:
    */
   int CheckBuildSystem();
 
-  void SetDirectoriesFromFile(const std::string& arg);
+  bool SetDirectoriesFromFile(const std::string& arg);
 
   //! Make sure all commands are what they say they are and there is no
   /// macros.

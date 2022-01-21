@@ -143,6 +143,10 @@ endif()
   run_cmake_with_options(S-arg-build-dir-not-created -S ${source_dir} build/)
   run_cmake_with_options(S-arg-reverse-build-dir-not-created build/ -S${source_dir} )
 
+  file(REMOVE_RECURSE "${source_dir}/build")
+  file(MAKE_DIRECTORY "${source_dir}/build")
+  run_cmake_with_options(S-arg-build-dir-empty -S ${source_dir} build/)
+
   set(source_dir ${RunCMake_SOURCE_DIR}/ExplicitDirs)
   set(binary_dir ${RunCMake_BINARY_DIR}/ExplicitDirs-build)
 
@@ -155,6 +159,7 @@ endif()
   run_cmake_with_options(S-no-arg -S )
   run_cmake_with_options(S-no-arg2 -S -T)
   run_cmake_with_options(S-B -S ${source_dir} -B ${binary_dir})
+  run_cmake_with_options(S-B-extra-path -S ${source_dir} -B ${binary_dir} /extra/path/)
 
   # make sure that -B can explicitly construct build directories
   file(REMOVE_RECURSE "${binary_dir}")
@@ -165,6 +170,7 @@ endif()
   run_cmake_with_options(B-no-arg2 -B -T)
   file(REMOVE_RECURSE "${binary_dir}")
   run_cmake_with_options(B-S -B${binary_dir} -S${source_dir})
+  run_cmake_with_options(B-S-extra-path -B${binary_dir} -S${source_dir} /extra/path/)
 
   message("copied to ${RunCMake_TEST_BINARY_DIR}/initial-cache.txt")
   file(COPY ${RunCMake_SOURCE_DIR}/C_buildsrcdir/initial-cache.txt DESTINATION ${RunCMake_TEST_BINARY_DIR})
@@ -196,7 +202,7 @@ function(run_Toolchain)
 set(CMAKE_SYSTEM_NAME Linux)
 set(toolchain_file binary_dir)
 ]=])
-  run_cmake_with_options(toolchain-valid-rel-build-path ${CMAKE_COMMAND} -S ${source_dir} -B ${binary_dir} --toolchain toolchain.cmake)
+  run_cmake_with_options(toolchain-valid-rel-build-path -S ${source_dir} -B ${binary_dir} --toolchain toolchain.cmake)
 endfunction()
 run_Toolchain()
 
