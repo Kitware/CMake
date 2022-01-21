@@ -1,0 +1,5 @@
+^CMake Error at define_property-INITIALIZE_FROM_VARIABLE-no_prefix\.cmake:[0-9]+ \(define_property\):
+  define_property Variable name must have a non-empty prefix before property
+  name "PROP1"
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$

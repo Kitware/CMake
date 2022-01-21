@@ -2,6 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmDefinePropertyCommand.h"
 
+#include <algorithm>
+#include <iterator>
+
 #include <cmext/string_view>
 
 #include "cmArgumentParser.h"
@@ -50,12 +53,14 @@ bool cmDefinePropertyCommand(std::vector<std::string> const& args,
   std::string PropertyName;
   std::vector<std::string> BriefDocs;
   std::vector<std::string> FullDocs;
+  std::string initializeFromVariable;
 
   cmArgumentParser<void> parser;
   parser.Bind("PROPERTY"_s, PropertyName);
   parser.Bind("BRIEF_DOCS"_s, BriefDocs);
   parser.Bind("FULL_DOCS"_s, FullDocs);
   parser.Bind("INHERITED"_s, inherited);
+  parser.Bind("INITIALIZE_FROM_VARIABLE"_s, initializeFromVariable);
   std::vector<std::string> invalidArgs;
 
   parser.Parse(cmMakeRange(args).advance(1), &invalidArgs);
@@ -71,10 +76,47 @@ bool cmDefinePropertyCommand(std::vector<std::string> const& args,
     return false;
   }
 
+  if (!initializeFromVariable.empty()) {
+    // Make sure property scope is TARGET.
+    if (scope != cmProperty::TARGET) {
+      status.SetError(
+        "Scope must be TARGET if INITIALIZE_FROM_VARIABLE is specified");
+      return false;
+    }
+
+    // Make sure the variable has the property name as a suffix.
+    if (!cmHasSuffix(initializeFromVariable, PropertyName)) {
+      status.SetError(cmStrCat("Variable name \"", initializeFromVariable,
+                               "\" does not end with property name \"",
+                               PropertyName, "\""));
+      return false;
+    }
+    if (initializeFromVariable == PropertyName) {
+      status.SetError(cmStrCat(
+        "Variable name must have a non-empty prefix before property name \"",
+        PropertyName, "\""));
+      return false;
+    }
+  }
+
+  // Make sure the variable is not reserved.
+  static constexpr const char* reservedPrefixes[] = {
+    "CMAKE_",
+    "_CMAKE_",
+  };
+  if (std::any_of(std::begin(reservedPrefixes), std::end(reservedPrefixes),
+                  [&initializeFromVariable](const char* prefix) {
+                    return cmHasPrefix(initializeFromVariable, prefix);
+                  })) {
+    status.SetError(
+      cmStrCat("variable name \"", initializeFromVariable, "\" is reserved"));
+    return false;
+  }
+
   // Actually define the property.
   status.GetMakefile().GetState()->DefineProperty(
     PropertyName, scope, cmJoin(BriefDocs, ""), cmJoin(FullDocs, ""),
-    inherited);
+    inherited, initializeFromVariable);
 
   return true;
 }

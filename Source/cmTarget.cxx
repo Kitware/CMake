@@ -28,6 +28,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmProperty.h"
+#include "cmPropertyDefinition.h"
 #include "cmPropertyMap.h"
 #include "cmRange.h"
 #include "cmSourceFile.h"
@@ -554,6 +555,16 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
           const std::string propValue = i.substr(assignment + 1);
           initPropValue(propName, propValue.c_str());
         }
+      }
+    }
+  }
+
+  for (auto const& prop : mf->GetState()->GetPropertyDefinitions().GetMap()) {
+    if (prop.first.second == cmProperty::TARGET &&
+        !prop.second.GetInitializeFromVariable().empty()) {
+      if (auto value =
+            mf->GetDefinition(prop.second.GetInitializeFromVariable())) {
+        this->SetProperty(prop.first.first, value);
       }
     }
   }
