@@ -1994,7 +1994,7 @@ int cmGlobalGenerator::TryCompile(int jobs, const std::string& srcdir,
   }
   std::string config =
     mf->GetSafeDefinition("CMAKE_TRY_COMPILE_CONFIGURATION");
-  cmBuildOptions defaultBuildOptions(false, fast);
+  cmBuildOptions defaultBuildOptions(false, fast, PackageResolveMode::Disable);
 
   return this->Build(jobs, srcdir, bindir, projectName, newTarget, output, "",
                      config, defaultBuildOptions, false,

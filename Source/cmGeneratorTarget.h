@@ -424,6 +424,9 @@ public:
   cmLinkItem ResolveLinkItem(BT<std::string> const& name,
                              cmLocalGenerator const* lg) const;
 
+  bool HasPackageReferences() const;
+  std::vector<std::string> GetPackageReferences() const;
+
   // Compute the set of languages compiled by the target.  This is
   // computed every time it is called because the languages can change
   // when source file properties are changed and we do not have enough

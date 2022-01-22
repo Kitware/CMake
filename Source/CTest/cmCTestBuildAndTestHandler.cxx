@@ -265,7 +265,8 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
       config = "Debug";
     }
 
-    cmBuildOptions buildOptions(!this->BuildNoClean, false);
+    cmBuildOptions buildOptions(!this->BuildNoClean, false,
+                                PackageResolveMode::Disable);
     int retVal = cm.GetGlobalGenerator()->Build(
       cmake::NO_BUILD_PARALLEL_LEVEL, this->SourceDir, this->BinaryDir,
       this->BuildProject, { tar }, output, this->BuildMakeProgram, config,

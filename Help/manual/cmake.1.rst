@@ -463,6 +463,17 @@ following options:
   Build target ``clean`` first, then build.
   (To clean only, use ``--target clean``.)
 
+``--resolve-package-references=<on|off|only>``
+  .. versionadded:: 3.23
+
+  Resolve remote package references (e.g. NuGet packages) before build.
+  When set to ``on`` (default), packages will be restored before building a
+  target. When set to ``only``, the packages will be restored, but no build
+  will be performed. When set to ``off``, no packages will be restored.
+
+  If the target does not define any package references, this option does
+  nothing.
+
 ``--use-stderr``
   Ignored.  Behavior is default in CMake >= 3.0.
 

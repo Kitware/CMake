@@ -1180,6 +1180,63 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
         }
       }
       makeCommand.Add(targetProject);
+
+      // Check if we do need a restore at all (i.e. if there are package
+      // references and restore has not been disabled by a command line option.
+      PackageResolveMode restoreMode = buildOptions.ResolveMode;
+      bool requiresRestore = true;
+
+      if (restoreMode == PackageResolveMode::Disable) {
+        requiresRestore = false;
+      } else if (cmValue cached =
+                   this->CMakeInstance->GetState()->GetCacheEntryValue(
+                     tname + "_REQUIRES_VS_PACKAGE_RESTORE")) {
+        requiresRestore = cached.IsOn();
+      } else {
+        // There are no package references defined.
+        requiresRestore = false;
+      }
+
+      // If a restore is required, evaluate the restore mode.
+      if (requiresRestore) {
+        if (restoreMode == PackageResolveMode::OnlyResolve) {
+          // Only invoke the restore target on the project.
+          makeCommand.Add("/t:Restore");
+        } else {
+          // Invoke restore target, unless it has been explicitly disabled.
+          bool restorePackages = true;
+
+          if (this->Version < VS15) {
+            // Package restore is only supported starting from Visual Studio
+            // 2017. Package restore must be executed manually using NuGet
+            // shell for older versions.
+            this->CMakeInstance->IssueMessage(
+              MessageType::WARNING,
+              "Restoring package references is only supported for Visual "
+              "Studio 2017 and later. You have to manually restore the "
+              "packages using NuGet before building the project.");
+            restorePackages = false;
+          } else if (restoreMode == PackageResolveMode::FromCacheVariable) {
+            // Decide if a restore is performed, based on a cache variable.
+            if (cmValue cached =
+                  this->CMakeInstance->GetState()->GetCacheEntryValue(
+                    "CMAKE_VS_NUGET_PACKAGE_RESTORE"))
+              restorePackages = cached.IsOn();
+          }
+
+          if (restorePackages) {
+            if (this->IsMsBuildRestoreSupported()) {
+              makeCommand.Add("/restore");
+            } else {
+              GeneratedMakeCommand restoreCommand;
+              restoreCommand.Add(makeProgramSelected);
+              restoreCommand.Add(targetProject);
+              restoreCommand.Add("/t:Restore");
+              makeCommands.emplace_back(restoreCommand);
+            }
+          }
+        }
+      }
     }
 
     std::string configArg = "/p:Configuration=";
@@ -1559,6 +1616,18 @@ cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetMasmFlagTable() const
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetNasmFlagTable() const
 {
   return LoadFlagTable(std::string(), this->DefaultNasmFlagTableName, "NASM");
+}
+
+bool cmGlobalVisualStudio10Generator::IsMsBuildRestoreSupported() const
+{
+  if (this->Version >= VS16) {
+    return true;
+  }
+
+  static std::string const vsVer15_7_5 = "15.7.27703.2042";
+  cm::optional<std::string> vsVer = this->GetVSInstanceVersion();
+  return (vsVer &&
+          cmSystemTools::VersionCompareGreaterEq(*vsVer, vsVer15_7_5));
 }
 
 std::string cmGlobalVisualStudio10Generator::GetClFlagTableName() const

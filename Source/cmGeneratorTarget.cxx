@@ -8102,6 +8102,26 @@ cmLinkItem cmGeneratorTarget::ResolveLinkItem(BT<std::string> const& name,
   return cmLinkItem(resolved.Target, false, bt);
 }
 
+bool cmGeneratorTarget::HasPackageReferences() const
+{
+  return this->IsInBuildSystem() &&
+    !this->GetProperty("VS_PACKAGE_REFERENCES")->empty();
+}
+
+std::vector<std::string> cmGeneratorTarget::GetPackageReferences() const
+{
+  std::vector<std::string> packageReferences;
+
+  if (this->IsInBuildSystem()) {
+    if (cmValue vsPackageReferences =
+          this->GetProperty("VS_PACKAGE_REFERENCES")) {
+      cmExpandList(*vsPackageReferences, packageReferences);
+    }
+  }
+
+  return packageReferences;
+}
+
 std::string cmGeneratorTarget::GetPDBDirectory(const std::string& config) const
 {
   if (OutputInfo const* info = this->GetOutputInfo(config)) {

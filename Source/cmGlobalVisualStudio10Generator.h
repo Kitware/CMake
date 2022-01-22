@@ -173,6 +173,8 @@ public:
   cmIDEFlagTable const* GetMasmFlagTable() const;
   cmIDEFlagTable const* GetNasmFlagTable() const;
 
+  bool IsMsBuildRestoreSupported() const;
+
 protected:
   cmGlobalVisualStudio10Generator(cmake* cm, const std::string& name,
                                   std::string const& platformInGeneratorName);

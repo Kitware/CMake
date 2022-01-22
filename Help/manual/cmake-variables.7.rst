@@ -119,6 +119,7 @@ Variables that Provide Information
    /variable/CMAKE_VS_DEVENV_COMMAND
    /variable/CMAKE_VS_MSBUILD_COMMAND
    /variable/CMAKE_VS_NsightTegra_VERSION
+   /variable/CMAKE_VS_NUGET_PACKAGE_RESTORE
    /variable/CMAKE_VS_PLATFORM_NAME
    /variable/CMAKE_VS_PLATFORM_NAME_DEFAULT
    /variable/CMAKE_VS_PLATFORM_TOOLSET
