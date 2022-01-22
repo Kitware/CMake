@@ -35,11 +35,13 @@ elseif (cxx_std_98 IN_LIST CXX_FEATURES AND cxx_std_11 IN_LIST CXX_FEATURES)
 endif()
 
 configure_file("${RunCMake_SOURCE_DIR}/CMakeLists.txt" "${RunCMake_BINARY_DIR}/CMakeLists.txt" COPYONLY)
+file(READ "${RunCMake_SOURCE_DIR}/CMP0128Common.cmake" cmp0128_common)
 
 function(test_build)
   set(test ${name}-${lang})
 
-  configure_file("${RunCMake_SOURCE_DIR}/${name}.cmake" "${RunCMake_BINARY_DIR}/${test}.cmake" @ONLY)
+  file(READ "${RunCMake_SOURCE_DIR}/${name}.cmake" cmake)
+  file(CONFIGURE OUTPUT "${RunCMake_BINARY_DIR}/${test}.cmake" CONTENT "${cmake}${cmp0128_common}" @ONLY)
   if(EXISTS "${RunCMake_SOURCE_DIR}/${name}-build-check.cmake")
     configure_file("${RunCMake_SOURCE_DIR}/${name}-build-check.cmake" "${RunCMake_BINARY_DIR}/${test}-build-check.cmake" @ONLY)
   endif()
