@@ -8,6 +8,11 @@
 #include <set>
 #include <vector>
 
+#ifdef _WIN32
+#  include <unordered_map>
+#  include <utility>
+#endif
+
 #include "cmState.h"
 #include "cmStateDirectory.h"
 #include "cmStringAlgorithms.h"
@@ -117,17 +122,34 @@ std::string cmOutputConverter::MaybeRelativeToCurBinDir(
 std::string cmOutputConverter::ConvertToOutputForExisting(
   const std::string& remote, OutputFormat format) const
 {
+#ifdef _WIN32
+  // Cache the Short Paths since we only convert the same few paths anyway and
+  // calling `GetShortPathNameW` is really expensive.
+  static std::unordered_map<std::string, std::string> shortPathCache{};
+
   // If this is a windows shell, the result has a space, and the path
   // already exists, we can use a short-path to reference it without a
   // space.
   if (this->GetState()->UseWindowsShell() &&
       remote.find_first_of(" #") != std::string::npos &&
       cmSystemTools::FileExists(remote)) {
-    std::string tmp;
-    if (cmSystemTools::GetShortPath(remote, tmp)) {
-      return this->ConvertToOutputFormat(tmp, format);
-    }
+
+    std::string shortPath = [&]() {
+      auto cachedShortPathIt = shortPathCache.find(remote);
+
+      if (cachedShortPathIt != shortPathCache.end()) {
+        return cachedShortPathIt->second;
+      }
+
+      std::string tmp{};
+      cmSystemTools::GetShortPath(remote, tmp);
+      shortPathCache[remote] = tmp;
+      return tmp;
+    }();
+
+    return this->ConvertToOutputFormat(shortPath, format);
   }
+#endif
 
   // Otherwise, perform standard conversion.
   return this->ConvertToOutputFormat(remote, format);
