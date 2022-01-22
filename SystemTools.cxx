@@ -2287,7 +2287,7 @@ bool SystemTools::FilesDiffer(const std::string& source,
   if (statSource.nFileSizeHigh == 0 && statSource.nFileSizeLow == 0) {
     return false;
   }
-  off_t nleft =
+  auto nleft =
     ((__int64)statSource.nFileSizeHigh << 32) + statSource.nFileSizeLow;
 
 #else
@@ -3085,11 +3085,10 @@ bool SystemTools::FileIsExecutable(const std::string& name)
   return !FileIsDirectory(name) && TestFileAccess(name, TEST_FILE_EXECUTE);
 }
 
-bool SystemTools::FileIsSymlink(const std::string& name)
-{
 #if defined(_WIN32)
-  std::wstring path = Encoding::ToWindowsExtendedPath(name);
-  DWORD attr = GetFileAttributesW(path.c_str());
+bool SystemTools::FileIsSymlinkWithAttr(const std::wstring& path,
+                                        unsigned long attr)
+{
   if (attr != INVALID_FILE_ATTRIBUTES) {
     if ((attr & FILE_ATTRIBUTE_REPARSE_POINT) != 0) {
       // FILE_ATTRIBUTE_REPARSE_POINT means:
@@ -3118,9 +3117,17 @@ bool SystemTools::FileIsSymlink(const std::string& name)
         (reparseTag == IO_REPARSE_TAG_MOUNT_POINT);
     }
     return false;
-  } else {
-    return false;
   }
+
+  return false;
+}
+#endif
+
+bool SystemTools::FileIsSymlink(const std::string& name)
+{
+#if defined(_WIN32)
+  std::wstring path = Encoding::ToWindowsExtendedPath(name);
+  return FileIsSymlinkWithAttr(path, GetFileAttributesW(path.c_str()));
 #else
   struct stat fs;
   if (lstat(name.c_str(), &fs) == 0) {
