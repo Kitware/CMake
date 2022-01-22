@@ -68,7 +68,7 @@ macro(mangle_flags variable)
   list(APPEND flags "${result}")
 endmacro()
 
-function(test_extensions_opposite)
+function(test_cmp0128_new_extensions_opposite)
   if(extensions_opposite)
     set(flag_ext "_EXT")
   endif()
@@ -83,16 +83,16 @@ function(test_extensions_opposite)
 
   # Make sure we enable/disable extensions when:
   # 1. LANG_STANDARD is unset.
-  set(name ExtensionsStandardUnset)
+  set(name CMP0128NewExtensionsStandardUnset)
   set(RunCMake_TEST_OPTIONS -DCMAKE_POLICY_DEFAULT_CMP0128=NEW)
   test_build(--verbose)
 
   # 2. LANG_STANDARD matches CMAKE_LANG_STANDARD_DEFAULT.
-  set(name ExtensionsStandardDefault)
+  set(name CMP0128NewExtensionsStandardDefault)
   test_build(--verbose)
 endfunction()
 
-function(test_no_unnecessary_flag)
+function(test_cmp0128_new_no_unnecessary_flag)
   set(standard_flag "${${lang}${${lang}_STANDARD_DEFAULT}_FLAG}")
   set(extension_flag "${${lang}${${lang}_STANDARD_DEFAULT}_EXT_FLAG}")
 
@@ -103,7 +103,7 @@ function(test_no_unnecessary_flag)
   mangle_flags(standard_flag)
   mangle_flags(extension_flag)
 
-  set(name NoUnnecessaryFlag)
+  set(name CMP0128NewNoUnnecessaryFlag)
   set(RunCMake_TEST_OPTIONS -DCMAKE_POLICY_DEFAULT_CMP0128=NEW)
   test_build(--verbose)
 endfunction()
@@ -144,8 +144,8 @@ function(test_lang lang ext)
     set(extensions_opposite ON)
   endif()
 
-  test_extensions_opposite()
-  test_no_unnecessary_flag()
+  test_cmp0128_new_extensions_opposite()
+  test_cmp0128_new_no_unnecessary_flag()
   test_cmp0128_warn_match()
   test_cmp0128_warn_unset()
 endfunction()
