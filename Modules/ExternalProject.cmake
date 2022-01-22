@@ -1443,7 +1443,7 @@ function(_ep_write_gitupdate_script script_filename git_EXECUTABLE git_tag git_r
   endif()
 
   configure_file(
-      "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject-gitupdate.cmake.in"
+      "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/gitupdate.cmake.in"
       "${script_filename}"
       @ONLY
   )
@@ -1553,7 +1553,7 @@ function(_ep_write_downloadfile_script script_filename REMOTE LOCAL timeout inac
   # * USERPWD_ARGS
   # * HTTP_HEADERS_ARGS
   configure_file(
-      "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject-download.cmake.in"
+      "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/download.cmake.in"
       "${script_filename}"
       @ONLY
   )
@@ -1574,7 +1574,7 @@ function(_ep_write_verifyfile_script script_filename LOCAL hash)
   # * EXPECT_VALUE
   # * LOCAL
   configure_file(
-      "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject-verify.cmake.in"
+      "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/verify.cmake.in"
       "${script_filename}"
       @ONLY
   )
@@ -2613,7 +2613,7 @@ function(_ep_add_download_command name)
     set(module ${cvs_module})
     set(tag ${cvs_tag})
     configure_file(
-      "${CMAKE_ROOT}/Modules/RepositoryInfo.txt.in"
+      "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/RepositoryInfo.txt.in"
       "${stamp_dir}/${name}-cvsinfo.txt"
       @ONLY
       )
@@ -2638,7 +2638,7 @@ function(_ep_add_download_command name)
     set(module)
     set(tag ${svn_revision})
     configure_file(
-      "${CMAKE_ROOT}/Modules/RepositoryInfo.txt.in"
+      "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/RepositoryInfo.txt.in"
       "${stamp_dir}/${name}-svninfo.txt"
       @ONLY
       )
@@ -2714,7 +2714,7 @@ function(_ep_add_download_command name)
     set(module)
     set(tag ${git_remote_name})
     configure_file(
-      "${CMAKE_ROOT}/Modules/RepositoryInfo.txt.in"
+      "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/RepositoryInfo.txt.in"
       "${stamp_dir}/${name}-gitinfo.txt"
       @ONLY
       )
@@ -2754,7 +2754,7 @@ function(_ep_add_download_command name)
     set(module)
     set(tag)
     configure_file(
-      "${CMAKE_ROOT}/Modules/RepositoryInfo.txt.in"
+      "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/RepositoryInfo.txt.in"
       "${stamp_dir}/${name}-hginfo.txt"
       @ONLY
       )
@@ -2795,7 +2795,7 @@ function(_ep_add_download_command name)
     set(module "${url}")
     set(tag "${hash}")
     configure_file(
-      "${CMAKE_ROOT}/Modules/RepositoryInfo.txt.in"
+      "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/RepositoryInfo.txt.in"
       "${stamp_dir}/${name}-urlinfo.txt"
       @ONLY
       )
