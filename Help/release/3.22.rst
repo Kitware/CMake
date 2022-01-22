@@ -142,3 +142,9 @@ Other Changes
   This became available as of VS 16.10 (toolchain version 14.29.30037).
 
 * The :cpack_gen:`CPack NSIS Generator` now requires NSIS 3.03 or later.
+
+3.22.2
+------
+
+* The ``OLD`` behavior of :policy:`CMP0128` was fixed to add flags even when
+  the specified standard matches the compiler default.

@@ -70,6 +70,23 @@ macro(mangle_flags variable)
   list(APPEND flags "${result}")
 endmacro()
 
+function(test_cmp0128_old_same_standard)
+  if(extensions_default)
+    set(flag_ext "_EXT")
+  endif()
+
+  set(flag "${${lang}${${lang}_STANDARD_DEFAULT}${flag_ext}_FLAG}")
+
+  if(NOT flag)
+    return()
+  endif()
+
+  mangle_flags(flag)
+
+  set(name CMP0128OldSameStandard)
+  test_build(--verbose)
+endfunction()
+
 function(test_cmp0128_new_extensions_opposite)
   if(extensions_opposite)
     set(flag_ext "_EXT")
@@ -148,6 +165,7 @@ function(test_lang lang ext)
 
   test_cmp0128_new_extensions_opposite()
   test_cmp0128_new_no_unnecessary_flag()
+  test_cmp0128_old_same_standard()
   test_cmp0128_warn_match()
   test_cmp0128_warn_unset()
 endfunction()
