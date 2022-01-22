@@ -688,6 +688,16 @@ public:
    */
   static bool FileIsExecutable(const std::string& name);
 
+#if defined(_WIN32)
+  /**
+   * Return true if the file with FileAttributes `attr` is a symlink
+   * Only available on Windows. This avoids an expensive `GetFileAttributesW`
+   * call.
+   */
+  static bool FileIsSymlinkWithAttr(const std::wstring& path,
+                                    unsigned long attr);
+#endif
+
   /**
    * Return true if the file is a symlink
    */

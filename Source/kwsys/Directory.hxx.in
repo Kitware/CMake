@@ -6,6 +6,7 @@
 #include <@KWSYS_NAMESPACE@/Configure.h>
 #include <@KWSYS_NAMESPACE@/Status.hxx>
 
+#include <cstddef>
 #include <string>
 
 namespace @KWSYS_NAMESPACE@ {
@@ -53,6 +54,26 @@ public:
    * Return the file at the given index, the indexing is 0 based
    */
   const char* GetFile(unsigned long) const;
+
+  /**
+   * Return the name of the file at the given 0-based index.
+   */
+  std::string const& GetFileName(std::size_t i) const;
+
+  /**
+   * Return the absolute path to the file at the given 0-based index.
+   */
+  std::string GetFilePath(std::size_t i) const;
+
+  /**
+   * Return whether the file at the given 0-based index is a directory.
+   */
+  bool FileIsDirectory(std::size_t i) const;
+
+  /**
+   * Return whether the file at the given 0-based index is a symlink.
+   */
+  bool FileIsSymlink(std::size_t i) const;
 
   /**
    * Return the path to Open'ed directory
