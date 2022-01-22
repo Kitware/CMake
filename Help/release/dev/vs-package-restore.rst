@@ -8,3 +8,6 @@ vs-package-restore
 
 * :manual:`cmake(1)` gained the ``--resolve-package-references=<on|off|only>``
   command-line option to control automatic package restoration.
+
+* :manual:`cmake-presets(7)` gained support for specifying the
+  ``resolvePackageReferences`` command line option in a build preset.

@@ -3331,6 +3331,10 @@ int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
       buildOptions.Clean = *expandedPreset->CleanFirst;
     }
 
+    if (expandedPreset->ResolvePackageReferences) {
+      buildOptions.ResolveMode = *expandedPreset->ResolvePackageReferences;
+    }
+
     if (!verbose && expandedPreset->Verbose) {
       verbose = *expandedPreset->Verbose;
     }

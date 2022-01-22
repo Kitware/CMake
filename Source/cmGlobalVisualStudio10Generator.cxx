@@ -724,6 +724,10 @@ void cmGlobalVisualStudio10Generator::Generate()
     /* clang-format on */
     lg->IssueMessage(MessageType::WARNING, e.str());
   }
+  if (cmValue cached = this->CMakeInstance->GetState()->GetCacheEntryValue(
+        "CMAKE_VS_NUGET_PACKAGE_RESTORE")) {
+    this->CMakeInstance->MarkCliAsUsed("CMAKE_VS_NUGET_PACKAGE_RESTORE");
+  }
 }
 
 void cmGlobalVisualStudio10Generator::EnableLanguage(

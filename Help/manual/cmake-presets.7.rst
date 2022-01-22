@@ -475,6 +475,42 @@ that may contain the following fields:
   An optional bool. If true, equivalent to passing ``--clean-first`` on
   the command line.
 
+``resolvePackageReferences``
+
+  An optional string that specifies the package resolve mode. This is
+  allowed in preset files specifying version ``4`` or above.
+
+  This field overwrites the ``--resolve-package-references`` command line
+  parameter. If there are no targets that define package references, this
+  option does nothing. Valid values are:
+
+  ``on``
+
+    Causes package references to be resolved before attempting a build.
+
+  ``off``
+
+    Package references will not be resolved. Note that this may cause
+    errors in some build environments, such as .NET SDK style projects.
+
+  ``only``
+
+    Only resolve package references, but do not perform a build.
+
+  .. note::
+
+    If this setting is not specified in a preset, CMake will instead
+    use the setting specified by the ``--resolve-package-references``
+    command line parameter. If the command line parameter is not
+    provided either, an environment-specific cache variable will be
+    evaluated to decide, if package restoration should be performed.
+
+    When using the Visual Studio generator, package references are
+    defined using the :prop_tgt:`VS_PACKAGE_REFERENCES` property.
+    Package references are restored using NuGet. It can be disabled
+    by setting the ``CMAKE_VS_NUGET_PACKAGE_RESTORE`` variable to
+    ``OFF``. This can also be done from within a configure preset.
+
 ``verbose``
 
   An optional bool. If true, equivalent to passing ``--verbose`` on the

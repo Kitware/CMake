@@ -474,6 +474,19 @@ following options:
   If the target does not define any package references, this option does
   nothing.
 
+  This setting can be specified in a build preset (using
+  ``resolvePackageReferences``). In this case, the command line option will
+  be ignored.
+
+  If the no command line parameter or preset option is not provided, an
+  environment-specific cache variable will be evaluated to decide, if package
+  restoration should be performed.
+
+  When using the Visual Studio generator, package references are defined
+  using the :prop_tgt:`VS_PACKAGE_REFERENCES` property. Package references
+  are restored using NuGet. It can be disabled by setting the
+  ``CMAKE_VS_NUGET_PACKAGE_RESTORE`` variable to ``OFF``.
+
 ``--use-stderr``
   Ignored.  Behavior is default in CMake >= 3.0.
 
