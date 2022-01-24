@@ -112,7 +112,7 @@ function(__ep_test_with_build_with_server testName)
 
   file(READ ${URL_FILE} SERVER_URL)
   message(STATUS "URL : ${URL_FILE} - ${SERVER_URL}")
-  run_cmake_with_options(${testName} ${CMAKE_COMMAND} -DSERVER_URL=${SERVER_URL} )
+  run_cmake_with_options(${testName} -DSERVER_URL=${SERVER_URL})
   run_cmake_command(${testName}-clean ${CMAKE_COMMAND} --build . --target clean)
   run_cmake_command(${testName}-build ${CMAKE_COMMAND} --build .)
 endfunction()
