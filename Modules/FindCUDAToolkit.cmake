@@ -143,12 +143,10 @@ CUDA Driver Library
 """"""""""""""""""""
 
 The CUDA Driver library (cuda) are used by applications that use calls
-such as `cuMemAlloc`, and `cuMemFree`. This is generally used by advanced
-
+such as `cuMemAlloc`, and `cuMemFree`.
 
 Targets Created:
 
-- ``CUDA::cuda_driver``
 - ``CUDA::cuda_driver``
 
 .. _`cuda_toolkit_cuBLAS`:
