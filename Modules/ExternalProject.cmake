@@ -1254,7 +1254,25 @@ define_property(DIRECTORY PROPERTY "EP_UPDATE_DISCONNECTED" INHERITED
   "ExternalProject module."
   )
 
-function(_ep_write_gitclone_script script_filename source_dir git_EXECUTABLE git_repository git_tag git_remote_name init_submodules git_submodules_recurse git_submodules git_shallow git_progress git_config src_name work_dir gitclone_infofile gitclone_stampfile tls_verify)
+function(_ep_write_gitclone_script
+         script_filename
+         source_dir
+         git_EXECUTABLE
+         git_repository
+         git_tag
+         git_remote_name
+         init_submodules
+         git_submodules_recurse
+         git_submodules
+         git_shallow
+         git_progress
+         git_config
+         src_name
+         work_dir
+         gitclone_infofile
+         gitclone_stampfile
+         tls_verify)
+
   if(NOT GIT_VERSION_STRING VERSION_LESS 1.8.5)
     # Use `git checkout <tree-ish> --` to avoid ambiguity with a local path.
     set(git_checkout_explicit-- "--")
@@ -1300,136 +1318,48 @@ function(_ep_write_gitclone_script script_filename source_dir git_EXECUTABLE git
   endif()
   string (REPLACE ";" " " git_options "${git_options}")
 
-  file(WRITE ${script_filename}
-"
-if(EXISTS \"${gitclone_stampfile}\" AND EXISTS \"${gitclone_infofile}\" AND
-  \"${gitclone_stampfile}\" IS_NEWER_THAN \"${gitclone_infofile}\")
-  message(STATUS \"Avoiding repeated git clone, stamp file is up to date: '${gitclone_stampfile}'\")
-  return()
-endif()
-
-execute_process(
-  COMMAND \${CMAKE_COMMAND} -E rm -rf \"${source_dir}\"
-  RESULT_VARIABLE error_code
+  configure_file(
+    ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/gitclone.cmake.in
+    ${script_filename}
+    @ONLY
   )
-if(error_code)
-  message(FATAL_ERROR \"Failed to remove directory: '${source_dir}'\")
-endif()
-
-# try the clone 3 times in case there is an odd git clone issue
-set(error_code 1)
-set(number_of_tries 0)
-while(error_code AND number_of_tries LESS 3)
-  execute_process(
-    COMMAND \"${git_EXECUTABLE}\" ${git_options} clone ${git_clone_options} \"${git_repository}\" \"${src_name}\"
-    WORKING_DIRECTORY \"${work_dir}\"
-    RESULT_VARIABLE error_code
-    )
-  math(EXPR number_of_tries \"\${number_of_tries} + 1\")
-endwhile()
-if(number_of_tries GREATER 1)
-  message(STATUS \"Had to git clone more than once:
-          \${number_of_tries} times.\")
-endif()
-if(error_code)
-  message(FATAL_ERROR \"Failed to clone repository: '${git_repository}'\")
-endif()
-
-execute_process(
-  COMMAND \"${git_EXECUTABLE}\" ${git_options} checkout ${git_tag} ${git_checkout_explicit--}
-  WORKING_DIRECTORY \"${work_dir}/${src_name}\"
-  RESULT_VARIABLE error_code
-  )
-if(error_code)
-  message(FATAL_ERROR \"Failed to checkout tag: '${git_tag}'\")
-endif()
-
-set(init_submodules ${init_submodules})
-if(init_submodules)
-  execute_process(
-    COMMAND \"${git_EXECUTABLE}\" ${git_options} submodule update ${git_submodules_recurse} --init ${git_submodules}
-    WORKING_DIRECTORY \"${work_dir}/${src_name}\"
-    RESULT_VARIABLE error_code
-    )
-endif()
-if(error_code)
-  message(FATAL_ERROR \"Failed to update submodules in: '${work_dir}/${src_name}'\")
-endif()
-
-# Complete success, update the script-last-run stamp file:
-#
-execute_process(
-  COMMAND \${CMAKE_COMMAND} -E copy
-    \"${gitclone_infofile}\"
-    \"${gitclone_stampfile}\"
-  RESULT_VARIABLE error_code
-  )
-if(error_code)
-  message(FATAL_ERROR \"Failed to copy script-last-run stamp file: '${gitclone_stampfile}'\")
-endif()
-
-"
-)
-
 endfunction()
 
-function(_ep_write_hgclone_script script_filename source_dir hg_EXECUTABLE hg_repository hg_tag src_name work_dir hgclone_infofile hgclone_stampfile)
+function(_ep_write_hgclone_script
+         script_filename
+         source_dir
+         hg_EXECUTABLE
+         hg_repository
+         hg_tag
+         src_name
+         work_dir
+         hgclone_infofile
+         hgclone_stampfile)
+
   if("${hg_tag}" STREQUAL "")
     message(FATAL_ERROR "Tag for hg checkout should not be empty.")
   endif()
-  file(WRITE ${script_filename}
-"
-if(EXISTS \"${hgclone_stampfile}\" AND EXISTS \"${hgclone_infofile}\" AND
-  \"${hgclone_stampfile}\" IS_NEWER_THAN \"${hgclone_infofile}\")
-  message(STATUS \"Avoiding repeated hg clone, stamp file is up to date: '${hgclone_stampfile}'\")
-  return()
-endif()
 
-execute_process(
-  COMMAND \${CMAKE_COMMAND} -E rm -rf \"${source_dir}\"
-  RESULT_VARIABLE error_code
+  configure_file(
+    ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/hgclone.cmake.in
+    ${script_filename}
+    @ONLY
   )
-if(error_code)
-  message(FATAL_ERROR \"Failed to remove directory: '${source_dir}'\")
-endif()
-
-execute_process(
-  COMMAND \"${hg_EXECUTABLE}\" clone -U \"${hg_repository}\" \"${src_name}\"
-  WORKING_DIRECTORY \"${work_dir}\"
-  RESULT_VARIABLE error_code
-  )
-if(error_code)
-  message(FATAL_ERROR \"Failed to clone repository: '${hg_repository}'\")
-endif()
-
-execute_process(
-  COMMAND \"${hg_EXECUTABLE}\" update ${hg_tag}
-  WORKING_DIRECTORY \"${work_dir}/${src_name}\"
-  RESULT_VARIABLE error_code
-  )
-if(error_code)
-  message(FATAL_ERROR \"Failed to checkout tag: '${hg_tag}'\")
-endif()
-
-# Complete success, update the script-last-run stamp file:
-#
-execute_process(
-  COMMAND \${CMAKE_COMMAND} -E copy
-    \"${hgclone_infofile}\"
-    \"${hgclone_stampfile}\"
-  RESULT_VARIABLE error_code
-  )
-if(error_code)
-  message(FATAL_ERROR \"Failed to copy script-last-run stamp file: '${hgclone_stampfile}'\")
-endif()
-
-"
-)
-
 endfunction()
 
 
-function(_ep_write_gitupdate_script script_filename git_EXECUTABLE git_tag git_remote_name init_submodules git_submodules_recurse git_submodules git_repository work_dir git_update_strategy)
+function(_ep_write_gitupdate_script
+         script_filename
+         git_EXECUTABLE
+         git_tag
+         git_remote_name
+         init_submodules
+         git_submodules_recurse
+         git_submodules
+         git_repository
+         work_dir
+         git_update_strategy)
+
   if("${git_tag}" STREQUAL "")
     message(FATAL_ERROR "Tag for git checkout should not be empty.")
   endif()
@@ -1443,13 +1373,27 @@ function(_ep_write_gitupdate_script script_filename git_EXECUTABLE git_tag git_r
   endif()
 
   configure_file(
-      "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject-gitupdate.cmake.in"
+      "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/gitupdate.cmake.in"
       "${script_filename}"
       @ONLY
   )
 endfunction()
 
-function(_ep_write_downloadfile_script script_filename REMOTE LOCAL timeout inactivity_timeout no_progress hash tls_verify tls_cainfo userpwd http_headers netrc netrc_file)
+function(_ep_write_downloadfile_script
+         script_filename
+         REMOTE
+         LOCAL
+         timeout
+         inactivity_timeout
+         no_progress
+         hash
+         tls_verify
+         tls_cainfo
+         userpwd
+         http_headers
+         netrc
+         netrc_file)
+
   if(timeout)
     set(TIMEOUT_ARGS TIMEOUT ${timeout})
     set(TIMEOUT_MSG "${timeout} seconds")
@@ -1464,7 +1408,6 @@ function(_ep_write_downloadfile_script script_filename REMOTE LOCAL timeout inac
     set(INACTIVITY_TIMEOUT_ARGS "# no INACTIVITY_TIMEOUT")
     set(INACTIVITY_TIMEOUT_MSG "none")
   endif()
-
 
   if(no_progress)
     set(SHOW_PROGRESS "")
@@ -1553,7 +1496,7 @@ function(_ep_write_downloadfile_script script_filename REMOTE LOCAL timeout inac
   # * USERPWD_ARGS
   # * HTTP_HEADERS_ARGS
   configure_file(
-      "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject-download.cmake.in"
+      "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/download.cmake.in"
       "${script_filename}"
       @ONLY
   )
@@ -1574,7 +1517,7 @@ function(_ep_write_verifyfile_script script_filename LOCAL hash)
   # * EXPECT_VALUE
   # * LOCAL
   configure_file(
-      "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject-verify.cmake.in"
+      "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/verify.cmake.in"
       "${script_filename}"
       @ONLY
   )
@@ -1597,68 +1540,11 @@ function(_ep_write_extractfile_script script_filename name filename directory)
     return()
   endif()
 
-  file(WRITE ${script_filename}
-"# Make file names absolute:
-#
-get_filename_component(filename \"${filename}\" ABSOLUTE)
-get_filename_component(directory \"${directory}\" ABSOLUTE)
-
-message(STATUS \"extracting...
-     src='\${filename}'
-     dst='\${directory}'\")
-
-if(NOT EXISTS \"\${filename}\")
-  message(FATAL_ERROR \"error: file to extract does not exist: '\${filename}'\")
-endif()
-
-# Prepare a space for extracting:
-#
-set(i 1234)
-while(EXISTS \"\${directory}/../ex-${name}\${i}\")
-  math(EXPR i \"\${i} + 1\")
-endwhile()
-set(ut_dir \"\${directory}/../ex-${name}\${i}\")
-file(MAKE_DIRECTORY \"\${ut_dir}\")
-
-# Extract it:
-#
-message(STATUS \"extracting... [tar ${args}]\")
-execute_process(COMMAND \${CMAKE_COMMAND} -E tar ${args} \${filename}
-  WORKING_DIRECTORY \${ut_dir}
-  RESULT_VARIABLE rv)
-
-if(NOT rv EQUAL 0)
-  message(STATUS \"extracting... [error clean up]\")
-  file(REMOVE_RECURSE \"\${ut_dir}\")
-  message(FATAL_ERROR \"error: extract of '\${filename}' failed\")
-endif()
-
-# Analyze what came out of the tar file:
-#
-message(STATUS \"extracting... [analysis]\")
-file(GLOB contents \"\${ut_dir}/*\")
-list(REMOVE_ITEM contents \"\${ut_dir}/.DS_Store\")
-list(LENGTH contents n)
-if(NOT n EQUAL 1 OR NOT IS_DIRECTORY \"\${contents}\")
-  set(contents \"\${ut_dir}\")
-endif()
-
-# Move \"the one\" directory to the final directory:
-#
-message(STATUS \"extracting... [rename]\")
-file(REMOVE_RECURSE \${directory})
-get_filename_component(contents \${contents} ABSOLUTE)
-file(RENAME \${contents} \${directory})
-
-# Clean up:
-#
-message(STATUS \"extracting... [clean up]\")
-file(REMOVE_RECURSE \"\${ut_dir}\")
-
-message(STATUS \"extracting... done\")
-"
-)
-
+  configure_file(
+    "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/extractfile.cmake.in"
+    "${script_filename}"
+    @ONLY
+  )
 endfunction()
 
 
@@ -1674,6 +1560,7 @@ function(_ep_set_directories name)
     endif()
   endif()
   if(prefix)
+    file(TO_CMAKE_PATH "${prefix}" prefix)
     set(tmp_default "${prefix}/tmp")
     set(download_default "${prefix}/src")
     set(source_default "${prefix}/src/${name}")
@@ -1681,6 +1568,7 @@ function(_ep_set_directories name)
     set(stamp_default "${prefix}/src/${name}-stamp")
     set(install_default "${prefix}")
   else()
+    file(TO_CMAKE_PATH "${base}" base)
     set(tmp_default "${base}/tmp/${name}")
     set(download_default "${base}/Download/${name}")
     set(source_default "${base}/Source/${name}")
@@ -1709,6 +1597,7 @@ function(_ep_set_directories name)
     if(NOT IS_ABSOLUTE "${${var}_dir}")
       get_filename_component(${var}_dir "${top}/${${var}_dir}" ABSOLUTE)
     endif()
+    file(TO_CMAKE_PATH "${${var}_dir}" ${var}_dir)
     set_property(TARGET ${name} PROPERTY _EP_${VAR}_DIR "${${var}_dir}")
   endforeach()
 
@@ -1720,6 +1609,7 @@ function(_ep_set_directories name)
   if(NOT IS_ABSOLUTE "${log_dir}")
     get_filename_component(log_dir "${top}/${log_dir}" ABSOLUTE)
   endif()
+  file(TO_CMAKE_PATH "${log_dir}" log_dir)
   set_property(TARGET ${name} PROPERTY _EP_LOG_DIR "${log_dir}")
 
   get_property(source_subdir TARGET ${name} PROPERTY _EP_SOURCE_SUBDIR)
@@ -1731,6 +1621,7 @@ function(_ep_set_directories name)
   else()
     # Prefix with a slash so that when appended to the source directory, it
     # behaves as expected.
+    file(TO_CMAKE_PATH "${source_subdir}" source_subdir)
     set_property(TARGET ${name} PROPERTY _EP_SOURCE_SUBDIR "/${source_subdir}")
   endif()
   if(build_in_source)
@@ -1742,22 +1633,19 @@ function(_ep_set_directories name)
     endif()
   endif()
 
-  # Make the directories at CMake configure time *and* add a custom command
-  # to make them at build time. They need to exist at makefile generation
-  # time for Borland make and wmake so that CMake may generate makefiles
-  # with "cd C:\short\paths\with\no\spaces" commands in them.
-  #
-  # Additionally, the add_custom_command is still used in case somebody
-  # removes one of the necessary directories and tries to rebuild without
-  # re-running cmake.
-  foreach(var ${places})
-    string(TOUPPER "${var}" VAR)
-    get_property(dir TARGET ${name} PROPERTY _EP_${VAR}_DIR)
-    file(MAKE_DIRECTORY "${dir}")
-    if(NOT EXISTS "${dir}")
-      message(FATAL_ERROR "dir '${dir}' does not exist after file(MAKE_DIRECTORY)")
-    endif()
-  endforeach()
+  # This script will be used both here and by the mkdir step. We create the
+  # directories now at configure time and ensure they exist again at build
+  # time (since somebody might remove one of the required directories and try
+  # to rebuild without re-running cmake). They need to exist now at makefile
+  # generation time for Borland make and wmake so that CMake may generate
+  # makefiles with "cd C:\short\paths\with\no\spaces" commands in them.
+  set(script_filename "${tmp_dir}/${name}-mkdirs.cmake")
+  configure_file(
+    ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/mkdirs.cmake.in
+    ${script_filename}
+    @ONLY
+  )
+  include(${script_filename})
 endfunction()
 
 
@@ -2523,22 +2411,14 @@ endfunction()
 
 
 function(_ep_add_mkdir_command name)
-  ExternalProject_Get_Property(${name}
-    source_dir binary_dir install_dir stamp_dir download_dir tmp_dir log_dir)
-
-  _ep_get_configuration_subdir_suffix(cfgdir)
+  ExternalProject_Get_Property(${name} tmp_dir)
+  set(script_filename "${tmp_dir}/${name}-mkdirs.cmake")
 
   ExternalProject_Add_Step(${name} mkdir
     INDEPENDENT TRUE
     COMMENT "Creating directories for '${name}'"
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${source_dir}
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${binary_dir}
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${install_dir}
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${tmp_dir}
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${stamp_dir}${cfgdir}
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${download_dir}
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${log_dir}
-    )
+    COMMAND ${CMAKE_COMMAND} -P ${script_filename}
+  )
 endfunction()
 
 
@@ -2613,7 +2493,7 @@ function(_ep_add_download_command name)
     set(module ${cvs_module})
     set(tag ${cvs_tag})
     configure_file(
-      "${CMAKE_ROOT}/Modules/RepositoryInfo.txt.in"
+      "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/RepositoryInfo.txt.in"
       "${stamp_dir}/${name}-cvsinfo.txt"
       @ONLY
       )
@@ -2638,7 +2518,7 @@ function(_ep_add_download_command name)
     set(module)
     set(tag ${svn_revision})
     configure_file(
-      "${CMAKE_ROOT}/Modules/RepositoryInfo.txt.in"
+      "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/RepositoryInfo.txt.in"
       "${stamp_dir}/${name}-svninfo.txt"
       @ONLY
       )
@@ -2714,7 +2594,7 @@ function(_ep_add_download_command name)
     set(module)
     set(tag ${git_remote_name})
     configure_file(
-      "${CMAKE_ROOT}/Modules/RepositoryInfo.txt.in"
+      "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/RepositoryInfo.txt.in"
       "${stamp_dir}/${name}-gitinfo.txt"
       @ONLY
       )
@@ -2754,7 +2634,7 @@ function(_ep_add_download_command name)
     set(module)
     set(tag)
     configure_file(
-      "${CMAKE_ROOT}/Modules/RepositoryInfo.txt.in"
+      "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/RepositoryInfo.txt.in"
       "${stamp_dir}/${name}-hginfo.txt"
       @ONLY
       )
@@ -2795,7 +2675,7 @@ function(_ep_add_download_command name)
     set(module "${url}")
     set(tag "${hash}")
     configure_file(
-      "${CMAKE_ROOT}/Modules/RepositoryInfo.txt.in"
+      "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/RepositoryInfo.txt.in"
       "${stamp_dir}/${name}-urlinfo.txt"
       @ONLY
       )
@@ -2850,7 +2730,21 @@ function(_ep_add_download_command name)
         get_property(http_password TARGET ${name} PROPERTY _EP_HTTP_PASSWORD)
         get_property(http_headers TARGET ${name} PROPERTY _EP_HTTP_HEADER)
         set(download_script "${stamp_dir}/download-${name}.cmake")
-        _ep_write_downloadfile_script("${download_script}" "${url}" "${file}" "${timeout}" "${inactivity_timeout}" "${no_progress}" "${hash}" "${tls_verify}" "${tls_cainfo}" "${http_username}:${http_password}" "${http_headers}" "${netrc}" "${netrc_file}")
+        _ep_write_downloadfile_script(
+          "${download_script}"
+          "${url}"
+          "${file}"
+          "${timeout}"
+          "${inactivity_timeout}"
+          "${no_progress}"
+          "${hash}"
+          "${tls_verify}"
+          "${tls_cainfo}"
+          "${http_username}:${http_password}"
+          "${http_headers}"
+          "${netrc}"
+          "${netrc_file}"
+        )
         set(cmd ${CMAKE_COMMAND} -P "${download_script}"
           COMMAND)
         if (no_extract)
@@ -2868,11 +2762,20 @@ function(_ep_add_download_command name)
           set(steps "verify and extract")
         endif ()
         set(comment "Performing download step (${steps}) for '${name}'")
-        _ep_write_verifyfile_script("${stamp_dir}/verify-${name}.cmake" "${file}" "${hash}")
+        _ep_write_verifyfile_script(
+          "${stamp_dir}/verify-${name}.cmake"
+          "${file}"
+          "${hash}"
+        )
       endif()
       list(APPEND cmd ${CMAKE_COMMAND} -P ${stamp_dir}/verify-${name}.cmake)
       if (NOT no_extract)
-        _ep_write_extractfile_script("${stamp_dir}/extract-${name}.cmake" "${name}" "${file}" "${source_dir}")
+        _ep_write_extractfile_script(
+          "${stamp_dir}/extract-${name}.cmake"
+          "${name}"
+          "${file}"
+          "${source_dir}"
+        )
         list(APPEND cmd COMMAND ${CMAKE_COMMAND} -P ${stamp_dir}/extract-${name}.cmake)
       else ()
         set_property(TARGET ${name} PROPERTY _EP_DOWNLOADED_FILE ${file})
@@ -3035,9 +2938,18 @@ function(_ep_add_update_command name)
 
     _ep_get_git_submodules_recurse(git_submodules_recurse)
 
-    _ep_write_gitupdate_script(${tmp_dir}/${name}-gitupdate.cmake
-      ${GIT_EXECUTABLE} ${git_tag} ${git_remote_name} ${git_init_submodules} "${git_submodules_recurse}" "${git_submodules}" ${git_repository} ${work_dir} ${git_update_strategy}
-      )
+    _ep_write_gitupdate_script(
+      "${tmp_dir}/${name}-gitupdate.cmake"
+      "${GIT_EXECUTABLE}"
+      "${git_tag}"
+      "${git_remote_name}"
+      "${git_init_submodules}"
+      "${git_submodules_recurse}"
+      "${git_submodules}"
+      "${git_repository}"
+      "${work_dir}"
+      "${git_update_strategy}"
+    )
     set(cmd ${CMAKE_COMMAND} -P ${tmp_dir}/${name}-gitupdate.cmake)
     set(always 1)
   elseif(hg_repository)
@@ -3279,10 +3191,11 @@ function(_ep_add_configure_command name)
   # used, cmake args or cmake generator) then re-run the configure step.
   # Fixes issue https://gitlab.kitware.com/cmake/cmake/-/issues/10258
   #
-  if(NOT EXISTS ${tmp_dir}/${name}-cfgcmd.txt.in)
-    file(WRITE ${tmp_dir}/${name}-cfgcmd.txt.in "cmd='\@cmd\@'\n")
-  endif()
-  configure_file(${tmp_dir}/${name}-cfgcmd.txt.in ${tmp_dir}/${name}-cfgcmd.txt)
+  configure_file(
+    ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/cfgcmd.txt.in
+    ${tmp_dir}/${name}-cfgcmd.txt
+    @ONLY
+  )
   list(APPEND file_deps ${tmp_dir}/${name}-cfgcmd.txt)
   list(APPEND file_deps ${_ep_cache_args_script})
 
