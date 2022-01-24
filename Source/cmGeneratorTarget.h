@@ -664,6 +664,9 @@ public:
    */
   void ClearSourcesCache();
 
+  // Do not use.  This is only for a specific call site with a FIXME comment.
+  void ClearLinkInterfaceCache();
+
   void AddSource(const std::string& src, bool before = false);
   void AddTracedSources(std::vector<std::string> const& srcs);
 

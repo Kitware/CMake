@@ -749,6 +749,12 @@ void cmGeneratorTarget::ClearSourcesCache()
   this->LinkImplMap.clear();
 }
 
+void cmGeneratorTarget::ClearLinkInterfaceCache()
+{
+  this->LinkInterfaceMap.clear();
+  this->LinkInterfaceUsageRequirementsOnlyMap.clear();
+}
+
 void cmGeneratorTarget::AddSourceCommon(const std::string& src, bool before)
 {
   this->SourceEntries.insert(
