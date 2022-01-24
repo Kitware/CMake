@@ -143,6 +143,13 @@ Other Changes
 
 * The :cpack_gen:`CPack NSIS Generator` now requires NSIS 3.03 or later.
 
+3.22.1
+------
+
+This version made no changes to documented features or interfaces.
+Some implementation updates were made to support ecosystem changes
+and/or fix regressions.
+
 3.22.2
 ------
 
