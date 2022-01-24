@@ -12,6 +12,7 @@
 
 #include <cm3p/json/value.h>
 
+#include "cmBuildOptions.h"
 #include "cmCMakePresetsGraph.h"
 #include "cmCMakePresetsGraphInternal.h"
 #include "cmJSONHelpers.h"
@@ -19,6 +20,37 @@
 namespace {
 using ReadFileResult = cmCMakePresetsGraph::ReadFileResult;
 using BuildPreset = cmCMakePresetsGraph::BuildPreset;
+
+ReadFileResult PackageResolveModeHelper(cm::optional<PackageResolveMode>& out,
+                                        const Json::Value* value)
+{
+  if (!value) {
+    out = cm::nullopt;
+    return ReadFileResult::READ_OK;
+  }
+
+  if (!value->isString()) {
+    return ReadFileResult::INVALID_PRESET;
+  }
+
+  if (value->asString() == "on") {
+    out = PackageResolveMode::Force;
+  } else if (value->asString() == "off") {
+    out = PackageResolveMode::Disable;
+  } else if (value->asString() == "only") {
+    out = PackageResolveMode::OnlyResolve;
+  } else {
+    return ReadFileResult::INVALID_PRESET;
+  }
+
+  return ReadFileResult::READ_OK;
+}
+
+std::function<ReadFileResult(BuildPreset&, const Json::Value*)> const
+  ResolvePackageReferencesHelper =
+    [](BuildPreset& out, const Json::Value* value) -> ReadFileResult {
+  return PackageResolveModeHelper(out.ResolvePackageReferences, value);
+};
 
 auto const BuildPresetHelper =
   cmJSONObjectHelper<BuildPreset, ReadFileResult>(
@@ -59,7 +91,8 @@ auto const BuildPresetHelper =
     .Bind("nativeToolOptions"_s, &BuildPreset::NativeToolOptions,
           cmCMakePresetsGraphInternal::PresetVectorStringHelper, false)
     .Bind("condition"_s, &BuildPreset::ConditionEvaluator,
-          cmCMakePresetsGraphInternal::PresetConditionHelper, false);
+          cmCMakePresetsGraphInternal::PresetConditionHelper, false)
+    .Bind("resolvePackageReferences"_s, ResolvePackageReferencesHelper, false);
 }
 
 namespace cmCMakePresetsGraphInternal {

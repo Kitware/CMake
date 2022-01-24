@@ -14,6 +14,8 @@
 
 #include <cm/optional>
 
+enum class PackageResolveMode;
+
 class cmCMakePresetsGraph
 {
 public:
@@ -181,6 +183,7 @@ public:
     cm::optional<bool> CleanFirst;
     cm::optional<bool> Verbose;
     std::vector<std::string> NativeToolOptions;
+    cm::optional<PackageResolveMode> ResolvePackageReferences;
 
     ReadFileResult VisitPresetInherit(const Preset& parent) override;
     ReadFileResult VisitPresetAfterInherit(int /* version */) override;

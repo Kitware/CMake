@@ -45,6 +45,7 @@ class cmMakefileProfilingData;
 #endif
 class cmMessenger;
 class cmVariableWatch;
+struct cmBuildOptions;
 struct cmDocumentationEntry;
 
 /** \brief Represents a cmake invocation.
@@ -587,8 +588,8 @@ public:
   //! run the --build option
   int Build(int jobs, std::string dir, std::vector<std::string> targets,
             std::string config, std::vector<std::string> nativeOptions,
-            bool clean, bool verbose, const std::string& presetName,
-            bool listPresets);
+            cmBuildOptions& buildOptions, bool verbose,
+            const std::string& presetName, bool listPresets);
 
   //! run the --open option
   bool Open(const std::string& dir, bool dryRun);

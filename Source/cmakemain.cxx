@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cctype>
 #include <climits>
 #include <cstdio>
 #include <cstring>
@@ -19,6 +20,7 @@
 
 #include <cm3p/uv.h>
 
+#include "cmBuildOptions.h"
 #include "cmCommandLineArgument.h"
 #include "cmConsoleBuf.h"
 #include "cmDocumentationEntry.h" // IWYU pragma: keep
@@ -445,6 +447,7 @@ int do_build(int ac, char const* const* av)
   bool cleanFirst = false;
   bool foundClean = false;
   bool foundNonClean = false;
+  PackageResolveMode resolveMode = PackageResolveMode::FromCacheVariable;
   bool verbose = cmSystemTools::HasEnv("VERBOSE");
   std::string presetName;
   bool listPresets = false;
@@ -477,6 +480,22 @@ int do_build(int ac, char const* const* av)
       return true;
     }
     return false;
+  };
+  auto resolvePackagesLambda = [&](std::string const& value) -> bool {
+    std::string v = value;
+    std::transform(v.begin(), v.end(), v.begin(), ::tolower);
+
+    if (v == "on") {
+      resolveMode = PackageResolveMode::Force;
+    } else if (v == "only") {
+      resolveMode = PackageResolveMode::OnlyResolve;
+    } else if (v == "off") {
+      resolveMode = PackageResolveMode::Disable;
+    } else {
+      return false;
+    }
+
+    return true;
   };
   auto verboseLambda = [&](std::string const&) -> bool {
     verbose = true;
@@ -514,6 +533,8 @@ int do_build(int ac, char const* const* av)
                        cleanFirst = true;
                        return true;
                      } },
+    CommandArgument{ "--resolve-package-references",
+                     CommandArgument::Values::One, resolvePackagesLambda },
     CommandArgument{ "-v", CommandArgument::Values::Zero, verboseLambda },
     CommandArgument{ "--verbose", CommandArgument::Values::Zero,
                      verboseLambda },
@@ -639,6 +660,8 @@ int do_build(int ac, char const* const* av)
       "  --config <cfg> = For multi-configuration tools, choose <cfg>.\n"
       "  --clean-first  = Build target 'clean' first, then build.\n"
       "                   (To clean only, use --target 'clean'.)\n"
+      "  --resolve-package-references={on|only|off}\n"
+      "                 = Restore/resolve package references during build.\n"
       "  --verbose, -v  = Enable verbose output - if supported - including\n"
       "                   the build commands to be executed. \n"
       "  --             = Pass remaining options to the native tool.\n"
@@ -656,8 +679,10 @@ int do_build(int ac, char const* const* av)
     cmakemainProgressCallback(msg, prog, &cm);
   });
 
+  cmBuildOptions buildOptions(cleanFirst, false, resolveMode);
+
   return cm.Build(jobs, std::move(dir), std::move(targets), std::move(config),
-                  std::move(nativeOptions), cleanFirst, verbose, presetName,
+                  std::move(nativeOptions), buildOptions, verbose, presetName,
                   listPresets);
 #endif
 }

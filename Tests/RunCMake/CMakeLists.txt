@@ -619,6 +619,7 @@ endif()
 
 if(CMAKE_GENERATOR MATCHES "^Visual Studio (1[6-9]|[2-9][0-9])")
   add_RunCMake_test(VsDotnetSdk)
+  add_RunCMake_test(VsNugetPackageRestore)
 endif()
 
 if(XCODE_VERSION)

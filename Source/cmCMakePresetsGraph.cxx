@@ -724,6 +724,9 @@ cmCMakePresetsGraph::BuildPreset::VisitPresetInherit(
   InheritOptionalValue(preset.CleanFirst, parent.CleanFirst);
   InheritOptionalValue(preset.Verbose, parent.Verbose);
   InheritVector(preset.NativeToolOptions, parent.NativeToolOptions);
+  if (!preset.ResolvePackageReferences) {
+    preset.ResolvePackageReferences = parent.ResolvePackageReferences;
+  }
 
   return ReadFileResult::READ_OK;
 }

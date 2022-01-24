@@ -52,7 +52,7 @@
         "cmakeMinimumRequired": { "$ref": "#/definitions/cmakeMinimumRequired"},
         "vendor": { "$ref": "#/definitions/vendor" },
         "configurePresets": { "$ref": "#/definitions/configurePresetsV3"},
-        "buildPresets": { "$ref": "#/definitions/buildPresetsV3"},
+        "buildPresets": { "$ref": "#/definitions/buildPresetsV4"},
         "testPresets": { "$ref": "#/definitions/testPresetsV3"},
         "include": { "$ref": "#/definitions/include"}
       },
@@ -427,9 +427,25 @@
         "additionalProperties": false
       }
     },
+    "buildPresetsItemsV4": {
+      "type": "array",
+      "description": "An optional array of build preset objects. Used to specify arguments to cmake --build. Available in version 4 and higher.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "resolvePackageReferences": {
+            "type": "string",
+            "description": "An optional string specifying the package resolve behavior. Valid values are \"on\" (packages are resolved prior to the build), \"off\" (packages are not resolved prior to the build), and \"only\" (packages are resolved, but no build will be performed).",
+            "enum": [
+              "on", "off", "only"
+            ]
+          }
+        }
+      }
+    },
     "buildPresetsItemsV3": {
       "type": "array",
-      "description": "An optional array of build preset objects. Used to specify arguments to cmake --build. Available in version 2 and higher.",
+      "description": "An optional array of build preset objects. Used to specify arguments to cmake --build. Available in version 3 and higher.",
       "items": {
         "type": "object",
         "properties": {
@@ -558,9 +574,44 @@
         ]
       }
     },
+    "buildPresetsV4": {
+      "type": "array",
+      "description": "An optional array of build preset objects. Used to specify arguments to cmake --build. Available in version 4 and higher.",
+      "allOf": [
+        { "$ref": "#/definitions/buildPresetsItemsV4" },
+        { "$ref": "#/definitions/buildPresetsItemsV3" },
+        { "$ref": "#/definitions/buildPresetsItemsV2" }
+      ],
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {},
+          "hidden": {},
+          "inherits": {},
+          "configurePreset": {},
+          "vendor": {},
+          "displayName": {},
+          "description": {},
+          "inheritConfigureEnvironment": {},
+          "environment": {},
+          "jobs": {},
+          "targets": {},
+          "configuration": {},
+          "cleanFirst": {},
+          "resolvePackageReferences": {},
+          "verbose": {},
+          "nativeToolOptions": {},
+          "condition": {}
+        },
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false
+      }
+    },
     "buildPresetsV3": {
       "type": "array",
-      "description": "An optional array of build preset objects. Used to specify arguments to cmake --build. Available in version 2 and higher.",
+      "description": "An optional array of build preset objects. Used to specify arguments to cmake --build. Available in version 3 and higher.",
       "allOf": [
         { "$ref": "#/definitions/buildPresetsItemsV3" },
         { "$ref": "#/definitions/buildPresetsItemsV2" }
@@ -624,7 +675,7 @@
     },
     "testPresetsItemsV3": {
       "type": "array",
-      "description": "An optional array of test preset objects. Used to specify arguments to ctest. Available in version 2 and higher.",
+      "description": "An optional array of test preset objects. Used to specify arguments to ctest. Available in version 3 and higher.",
       "items": {
         "type": "object",
         "properties": {
@@ -949,7 +1000,7 @@
     },
     "testPresetsV3": {
       "type": "array",
-      "description": "An optional array of test preset objects. Used to specify arguments to ctest. Available in version 2 and higher.",
+      "description": "An optional array of test preset objects. Used to specify arguments to ctest. Available in version 3 and higher.",
       "allOf": [
         { "$ref": "#/definitions/testPresetsItemsV2" },
         { "$ref": "#/definitions/testPresetsItemsV3" }

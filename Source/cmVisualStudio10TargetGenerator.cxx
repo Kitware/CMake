@@ -431,6 +431,9 @@ void cmVisualStudio10TargetGenerator::Generate()
 
   // The groups are stored in a separate file for VS 10
   this->WriteGroups();
+
+  // Update cache with project-specific entries.
+  this->UpdateCache();
 }
 
 void cmVisualStudio10TargetGenerator::WriteClassicMsBuildProjectFile(
@@ -1000,11 +1003,9 @@ bool cmVisualStudio10TargetGenerator::HasCustomCommands() const
 
 void cmVisualStudio10TargetGenerator::WritePackageReferences(Elem& e0)
 {
-  std::vector<std::string> packageReferences;
-  if (cmValue vsPackageReferences =
-        this->GeneratorTarget->GetProperty("VS_PACKAGE_REFERENCES")) {
-    cmExpandList(*vsPackageReferences, packageReferences);
-  }
+  std::vector<std::string> packageReferences =
+    this->GeneratorTarget->GetPackageReferences();
+
   if (!packageReferences.empty()) {
     Elem e1(e0, "ItemGroup");
     for (std::string const& ri : packageReferences) {
@@ -5373,5 +5374,34 @@ void cmVisualStudio10TargetGenerator::WriteStdOutEncodingUtf8(Elem& e1)
     e1.Element("UseUtf8Encoding", "Always");
   } else if (this->GlobalGenerator->IsStdOutEncodingSupported()) {
     e1.Element("StdOutEncoding", "UTF-8");
+  }
+}
+
+void cmVisualStudio10TargetGenerator::UpdateCache()
+{
+  std::vector<std::string> packageReferences;
+
+  if (this->GeneratorTarget->HasPackageReferences()) {
+    // Store a cache entry that later determines, if a package restore is
+    // required.
+    this->GeneratorTarget->Makefile->AddCacheDefinition(
+      this->GeneratorTarget->GetName() + "_REQUIRES_VS_PACKAGE_RESTORE", "ON",
+      "Value Computed by CMake", cmStateEnums::STATIC);
+  } else {
+    // If there are any dependencies that require package restore, inherit the
+    // cache variable.
+    cmGlobalGenerator::TargetDependSet const& unordered =
+      this->GlobalGenerator->GetTargetDirectDepends(this->GeneratorTarget);
+    using OrderedTargetDependSet =
+      cmGlobalVisualStudioGenerator::OrderedTargetDependSet;
+    OrderedTargetDependSet depends(unordered, CMAKE_CHECK_BUILD_SYSTEM_TARGET);
+
+    for (cmGeneratorTarget const* dt : depends) {
+      if (dt->HasPackageReferences()) {
+        this->GeneratorTarget->Makefile->AddCacheDefinition(
+          this->GeneratorTarget->GetName() + "_REQUIRES_VS_PACKAGE_RESTORE",
+          "ON", "Value Computed by CMake", cmStateEnums::STATIC);
+      }
+    }
   }
 }

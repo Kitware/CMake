@@ -28,6 +28,7 @@
 
 #include "cm_sys_stat.h"
 
+#include "cmBuildOptions.h"
 #include "cmCMakePath.h"
 #include "cmCMakePresetsGraph.h"
 #include "cmCommandLineArgument.h"
@@ -3244,8 +3245,8 @@ std::vector<std::string> cmake::GetDebugConfigs()
 
 int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
                  std::string config, std::vector<std::string> nativeOptions,
-                 bool clean, bool verbose, const std::string& presetName,
-                 bool listPresets)
+                 cmBuildOptions& buildOptions, bool verbose,
+                 const std::string& presetName, bool listPresets)
 {
   this->SetHomeDirectory("");
   this->SetHomeOutputDirectory("");
@@ -3351,8 +3352,12 @@ int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
       config = expandedPreset->Configuration;
     }
 
-    if (!clean && expandedPreset->CleanFirst) {
-      clean = *expandedPreset->CleanFirst;
+    if (!buildOptions.Clean && expandedPreset->CleanFirst) {
+      buildOptions.Clean = *expandedPreset->CleanFirst;
+    }
+
+    if (expandedPreset->ResolvePackageReferences) {
+      buildOptions.ResolveMode = *expandedPreset->ResolvePackageReferences;
     }
 
     if (!verbose && expandedPreset->Verbose) {
@@ -3491,7 +3496,7 @@ int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
 
   this->GlobalGenerator->PrintBuildCommandAdvice(std::cerr, jobs);
   return this->GlobalGenerator->Build(
-    jobs, "", dir, projName, targets, output, "", config, clean, false,
+    jobs, "", dir, projName, targets, output, "", config, buildOptions,
     verbose, cmDuration::zero(), cmSystemTools::OUTPUT_PASSTHROUGH,
     nativeOptions);
 }

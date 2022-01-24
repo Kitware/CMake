@@ -463,6 +463,30 @@ following options:
   Build target ``clean`` first, then build.
   (To clean only, use ``--target clean``.)
 
+``--resolve-package-references=<on|off|only>``
+  .. versionadded:: 3.23
+
+  Resolve remote package references (e.g. NuGet packages) before build.
+  When set to ``on`` (default), packages will be restored before building a
+  target. When set to ``only``, the packages will be restored, but no build
+  will be performed. When set to ``off``, no packages will be restored.
+
+  If the target does not define any package references, this option does
+  nothing.
+
+  This setting can be specified in a build preset (using
+  ``resolvePackageReferences``). In this case, the command line option will
+  be ignored.
+
+  If the no command line parameter or preset option is not provided, an
+  environment-specific cache variable will be evaluated to decide, if package
+  restoration should be performed.
+
+  When using the Visual Studio generator, package references are defined
+  using the :prop_tgt:`VS_PACKAGE_REFERENCES` property. Package references
+  are restored using NuGet. It can be disabled by setting the
+  ``CMAKE_VS_NUGET_PACKAGE_RESTORE`` variable to ``OFF``.
+
 ``--use-stderr``
   Ignored.  Behavior is default in CMake >= 3.0.
 
