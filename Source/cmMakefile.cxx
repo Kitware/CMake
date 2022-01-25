@@ -339,7 +339,7 @@ public:
                  cm::optional<std::string> deferId, cmExecutionStatus& status)
     : Makefile(mf)
   {
-    cmListFileContext const& lfc = cmListFileContext::FromCommandContext(
+    cmListFileContext const& lfc = cmListFileContext::FromListFileFunction(
       lff, this->Makefile->StateSnapshot.GetExecutionListFile(),
       std::move(deferId));
     this->Makefile->Backtrace = this->Makefile->Backtrace.Push(lfc);

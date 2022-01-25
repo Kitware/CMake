@@ -369,68 +369,68 @@ cm::optional<cmListFileContext> cmListFileParser::CheckNesting() const
     if (name == "if") {
       stack.push_back({
         NestingStateEnum::If,
-        cmListFileContext::FromCommandContext(func, this->FileName),
+        cmListFileContext::FromListFileFunction(func, this->FileName),
       });
     } else if (name == "elseif") {
       if (!TopIs(stack, NestingStateEnum::If)) {
-        return cmListFileContext::FromCommandContext(func, this->FileName);
+        return cmListFileContext::FromListFileFunction(func, this->FileName);
       }
       stack.back() = {
         NestingStateEnum::If,
-        cmListFileContext::FromCommandContext(func, this->FileName),
+        cmListFileContext::FromListFileFunction(func, this->FileName),
       };
     } else if (name == "else") {
       if (!TopIs(stack, NestingStateEnum::If)) {
-        return cmListFileContext::FromCommandContext(func, this->FileName);
+        return cmListFileContext::FromListFileFunction(func, this->FileName);
       }
       stack.back() = {
         NestingStateEnum::Else,
-        cmListFileContext::FromCommandContext(func, this->FileName),
+        cmListFileContext::FromListFileFunction(func, this->FileName),
       };
     } else if (name == "endif") {
       if (!TopIs(stack, NestingStateEnum::If) &&
           !TopIs(stack, NestingStateEnum::Else)) {
-        return cmListFileContext::FromCommandContext(func, this->FileName);
+        return cmListFileContext::FromListFileFunction(func, this->FileName);
       }
       stack.pop_back();
     } else if (name == "while") {
       stack.push_back({
         NestingStateEnum::While,
-        cmListFileContext::FromCommandContext(func, this->FileName),
+        cmListFileContext::FromListFileFunction(func, this->FileName),
       });
     } else if (name == "endwhile") {
       if (!TopIs(stack, NestingStateEnum::While)) {
-        return cmListFileContext::FromCommandContext(func, this->FileName);
+        return cmListFileContext::FromListFileFunction(func, this->FileName);
       }
       stack.pop_back();
     } else if (name == "foreach") {
       stack.push_back({
         NestingStateEnum::Foreach,
-        cmListFileContext::FromCommandContext(func, this->FileName),
+        cmListFileContext::FromListFileFunction(func, this->FileName),
       });
     } else if (name == "endforeach") {
       if (!TopIs(stack, NestingStateEnum::Foreach)) {
-        return cmListFileContext::FromCommandContext(func, this->FileName);
+        return cmListFileContext::FromListFileFunction(func, this->FileName);
       }
       stack.pop_back();
     } else if (name == "function") {
       stack.push_back({
         NestingStateEnum::Function,
-        cmListFileContext::FromCommandContext(func, this->FileName),
+        cmListFileContext::FromListFileFunction(func, this->FileName),
       });
     } else if (name == "endfunction") {
       if (!TopIs(stack, NestingStateEnum::Function)) {
-        return cmListFileContext::FromCommandContext(func, this->FileName);
+        return cmListFileContext::FromListFileFunction(func, this->FileName);
       }
       stack.pop_back();
     } else if (name == "macro") {
       stack.push_back({
         NestingStateEnum::Macro,
-        cmListFileContext::FromCommandContext(func, this->FileName),
+        cmListFileContext::FromListFileFunction(func, this->FileName),
       });
     } else if (name == "endmacro") {
       if (!TopIs(stack, NestingStateEnum::Macro)) {
-        return cmListFileContext::FromCommandContext(func, this->FileName);
+        return cmListFileContext::FromListFileFunction(func, this->FileName);
       }
       stack.pop_back();
     }

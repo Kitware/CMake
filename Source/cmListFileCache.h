@@ -143,10 +143,11 @@ public:
   {
   }
 
-  static cmListFileContext FromCommandContext(
-    cmCommandContext const& lfcc, std::string const& fileName,
+  static cmListFileContext FromListFileFunction(
+    cmListFileFunction const& lff, std::string const& fileName,
     cm::optional<std::string> deferId = {})
   {
+    cmCommandContext const& lfcc = lff;
     cmListFileContext lfc;
     lfc.FilePath = fileName;
     lfc.Line = lfcc.Line;
