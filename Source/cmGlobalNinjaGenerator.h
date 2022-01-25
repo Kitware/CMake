@@ -526,6 +526,7 @@ private:
   /// The file containing the build statement. (the relationship of the
   /// compilation DAG).
   std::unique_ptr<cmGeneratedFileStream> BuildFileStream;
+  std::unique_ptr<char[]> BuildFileStreamBuffer;
   /// The file containing the rule statements. (The action attached to each
   /// edge of the compilation DAG).
   std::unique_ptr<cmGeneratedFileStream> RulesFileStream;
