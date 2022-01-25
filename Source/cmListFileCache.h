@@ -23,28 +23,6 @@
 
 class cmMessenger;
 
-struct cmCommandContext
-{
-  struct cmCommandName
-  {
-    std::string Original;
-    std::string Lower;
-    cmCommandName() = default;
-    cmCommandName(std::string name)
-      : Original(std::move(name))
-      , Lower(cmSystemTools::LowerCase(this->Original))
-    {
-    }
-  } Name;
-  long Line = 0;
-  cmCommandContext() = default;
-  cmCommandContext(std::string name, long line)
-    : Name(std::move(name))
-    , Line(line)
-  {
-  }
-};
-
 struct cmListFileArgument
 {
   enum Delimiter
@@ -82,12 +60,12 @@ public:
 
   std::string const& OriginalName() const noexcept
   {
-    return this->Impl->Name.Original;
+    return this->Impl->OriginalName;
   }
 
   std::string const& LowerCaseName() const noexcept
   {
-    return this->Impl->Name.Lower;
+    return this->Impl->LowerCaseName;
   }
 
   long Line() const noexcept { return this->Impl->Line; }
@@ -97,17 +75,21 @@ public:
     return this->Impl->Arguments;
   }
 
-  operator cmCommandContext const&() const noexcept { return *this->Impl; }
-
 private:
-  struct Implementation : public cmCommandContext
+  struct Implementation
   {
     Implementation(std::string name, long line,
                    std::vector<cmListFileArgument> args)
-      : cmCommandContext{ std::move(name), line }
+      : OriginalName{ std::move(name) }
+      , LowerCaseName{ cmSystemTools::LowerCase(this->OriginalName) }
+      , Line{ line }
       , Arguments{ std::move(args) }
     {
     }
+
+    std::string OriginalName;
+    std::string LowerCaseName;
+    long Line = 0;
     std::vector<cmListFileArgument> Arguments;
   };
 
@@ -147,11 +129,10 @@ public:
     cmListFileFunction const& lff, std::string const& fileName,
     cm::optional<std::string> deferId = {})
   {
-    cmCommandContext const& lfcc = lff;
     cmListFileContext lfc;
     lfc.FilePath = fileName;
-    lfc.Line = lfcc.Line;
-    lfc.Name = lfcc.Name.Original;
+    lfc.Line = lff.Line();
+    lfc.Name = lff.OriginalName();
     lfc.DeferId = std::move(deferId);
     return lfc;
   }
