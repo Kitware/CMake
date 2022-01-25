@@ -77,6 +77,7 @@ public:
 
   static std::string EncodeRuleName(std::string const& name);
   std::string EncodeLiteral(const std::string& lit);
+  void EncodeLiteralInplace(std::string& lit);
   std::string EncodePath(const std::string& path);
 
   std::unique_ptr<cmLinkLineComputer> CreateLinkLineComputer(
