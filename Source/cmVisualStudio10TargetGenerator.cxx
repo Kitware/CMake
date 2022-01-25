@@ -419,7 +419,7 @@ void cmVisualStudio10TargetGenerator::Generate()
   if (this->ProjectType == VsProjectType::csproj &&
       this->GeneratorTarget->IsDotNetSdkTarget() &&
       this->GlobalGenerator->GetVersion() >=
-        cmGlobalVisualStudioGenerator::VS16) {
+        cmGlobalVisualStudioGenerator::VSVersion::VS16) {
     this->WriteSdkStyleProjectFile(BuildFileStream);
   } else {
     this->WriteClassicMsBuildProjectFile(BuildFileStream);
@@ -446,7 +446,7 @@ void cmVisualStudio10TargetGenerator::WriteClassicMsBuildProjectFile(
     e0.Attribute("DefaultTargets", "Build");
     const char* toolsVersion = this->GlobalGenerator->GetToolsVersion();
     if (this->GlobalGenerator->GetVersion() ==
-          cmGlobalVisualStudioGenerator::VS12 &&
+          cmGlobalVisualStudioGenerator::VSVersion::VS12 &&
         this->GlobalGenerator->TargetsWindowsCE()) {
       toolsVersion = "4.0";
     }
@@ -612,7 +612,7 @@ void cmVisualStudio10TargetGenerator::WriteClassicMsBuildProjectFile(
       // project using an older toolset version is opened in a newer version of
       // the IDE (respected by VS 2013 and above).
       if (this->GlobalGenerator->GetVersion() >=
-          cmGlobalVisualStudioGenerator::VS12) {
+          cmGlobalVisualStudioGenerator::VSVersion::VS12) {
         e1.Element("VCProjectUpgraderObjectName", "NoUpgrade");
       }
 
@@ -623,7 +623,7 @@ void cmVisualStudio10TargetGenerator::WriteClassicMsBuildProjectFile(
 
       if (this->Managed) {
         if (this->LocalGenerator->GetVersion() >=
-            cmGlobalVisualStudioGenerator::VS17) {
+            cmGlobalVisualStudioGenerator::VSVersion::VS17) {
           e1.Element("ManagedAssembly", "true");
         }
         std::string outputType;
@@ -1751,13 +1751,13 @@ void cmVisualStudio10TargetGenerator::WriteCustomRuleCpp(
   e2.WritePlatformConfigTag("AdditionalInputs", cond, additional_inputs);
   e2.WritePlatformConfigTag("Outputs", cond, outputs);
   if (this->LocalGenerator->GetVersion() >
-      cmGlobalVisualStudioGenerator::VS10) {
+      cmGlobalVisualStudioGenerator::VSVersion::VS10) {
     // VS >= 11 let us turn off linking of custom command outputs.
     e2.WritePlatformConfigTag("LinkObjects", cond, "false");
   }
   if (symbolic &&
       this->LocalGenerator->GetVersion() >=
-        cmGlobalVisualStudioGenerator::VS16) {
+        cmGlobalVisualStudioGenerator::VSVersion::VS16) {
     // VS >= 16.4 warn if outputs are not created, but one of our
     // outputs is marked SYMBOLIC and not expected to be created.
     e2.WritePlatformConfigTag("VerifyInputsAndOutputsExist", cond, "false");
@@ -2320,7 +2320,7 @@ void cmVisualStudio10TargetGenerator::WriteSource(Elem& e2,
   bool forceRelative = sf->GetLanguage() == "CUDA";
   std::string sourceFile = this->ConvertPath(sf->GetFullPath(), forceRelative);
   if (this->LocalGenerator->GetVersion() ==
-        cmGlobalVisualStudioGenerator::VS10 &&
+        cmGlobalVisualStudioGenerator::VSVersion::VS10 &&
       cmSystemTools::FileIsFullPath(sourceFile)) {
     // Normal path conversion resulted in a full path.  VS 10 (but not 11)
     // refuses to show the property page in the IDE for a source file with a
@@ -2418,7 +2418,7 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
       case cmGeneratorTarget::SourceKindExternalObject:
         tool = "Object";
         if (this->LocalGenerator->GetVersion() <
-            cmGlobalVisualStudioGenerator::VS11) {
+            cmGlobalVisualStudioGenerator::VSVersion::VS11) {
           // For VS == 10 we cannot use LinkObjects to avoid linking custom
           // command outputs.  If an object file is generated in this target,
           // then vs10 will use it in the build, and we have to list it as
@@ -3106,7 +3106,7 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
     if (this->ProjectType == VsProjectType::vcxproj) {
       clOptions.FixExceptionHandlingDefault();
       if (this->GlobalGenerator->GetVersion() >=
-          cmGlobalVisualStudioGenerator::VS15) {
+          cmGlobalVisualStudioGenerator::VSVersion::VS15) {
         // Toolsets that come with VS 2017 may now enable UseFullPaths
         // by default and there is no negative /FC option that projects
         // can use to switch it back.  Older toolsets disable this by

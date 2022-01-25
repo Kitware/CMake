@@ -304,7 +304,8 @@ void cmGlobalVisualStudio7Generator::Generate()
                                 GetSLNFile(this->LocalGenerators[0].get()));
   }
 
-  if (this->Version == VS10 && !this->CMakeInstance->GetIsInTryCompile()) {
+  if (this->Version == VSVersion::VS10 &&
+      !this->CMakeInstance->GetIsInTryCompile()) {
     std::string cmakeWarnVS10;
     if (cmValue cached = this->CMakeInstance->GetState()->GetCacheEntryValue(
           "CMAKE_WARN_VS10")) {

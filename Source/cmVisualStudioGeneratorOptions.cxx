@@ -75,13 +75,13 @@ void cmVisualStudioGeneratorOptions::FixExceptionHandlingDefault()
   // the flag to disable exception handling.  When the user does
   // remove the flag we need to override the IDE default of on.
   switch (this->Version) {
-    case cmGlobalVisualStudioGenerator::VS10:
-    case cmGlobalVisualStudioGenerator::VS11:
-    case cmGlobalVisualStudioGenerator::VS12:
-    case cmGlobalVisualStudioGenerator::VS14:
-    case cmGlobalVisualStudioGenerator::VS15:
-    case cmGlobalVisualStudioGenerator::VS16:
-    case cmGlobalVisualStudioGenerator::VS17:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS10:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS11:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS12:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS14:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS15:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS16:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS17:
       // by default VS puts <ExceptionHandling></ExceptionHandling> empty
       // for a project, to make our projects look the same put a new line
       // and space over for the closing </ExceptionHandling> as the default
@@ -108,7 +108,8 @@ void cmVisualStudioGeneratorOptions::SetVerboseMakefile(bool verbose)
   if (verbose &&
       this->FlagMap.find("SuppressStartupBanner") == this->FlagMap.end()) {
     this->FlagMap["SuppressStartupBanner"] =
-      this->Version < cmGlobalVisualStudioGenerator::VS10 ? "FALSE" : "";
+      this->Version < cmGlobalVisualStudioGenerator::VSVersion::VS10 ? "FALSE"
+                                                                     : "";
   }
 }
 
@@ -425,7 +426,7 @@ void cmVisualStudioGeneratorOptions::OutputPreprocessorDefinitions(
   }
 
   std::ostringstream oss;
-  if (this->Version >= cmGlobalVisualStudioGenerator::VS10) {
+  if (this->Version >= cmGlobalVisualStudioGenerator::VSVersion::VS10) {
     oss << "%(" << tag << ")";
   }
   std::vector<std::string>::const_iterator de =
@@ -433,13 +434,13 @@ void cmVisualStudioGeneratorOptions::OutputPreprocessorDefinitions(
   for (std::string const& di : cmMakeRange(this->Defines.cbegin(), de)) {
     // Escape the definition for the compiler.
     std::string define;
-    if (this->Version < cmGlobalVisualStudioGenerator::VS10) {
+    if (this->Version < cmGlobalVisualStudioGenerator::VSVersion::VS10) {
       define = this->LocalGenerator->EscapeForShell(di, true);
     } else {
       define = di;
     }
     // Escape this flag for the MSBuild.
-    if (this->Version >= cmGlobalVisualStudioGenerator::VS10) {
+    if (this->Version >= cmGlobalVisualStudioGenerator::VSVersion::VS10) {
       cmVS10EscapeForMSBuild(define);
       if (lang == "RC") {
         cmSystemTools::ReplaceString(define, "\"", "\\\"");
@@ -481,7 +482,7 @@ void cmVisualStudioGeneratorOptions::OutputAdditionalIncludeDirectories(
     }
 
     // Escape this include for the MSBuild.
-    if (this->Version >= cmGlobalVisualStudioGenerator::VS10) {
+    if (this->Version >= cmGlobalVisualStudioGenerator::VSVersion::VS10) {
       cmVS10EscapeForMSBuild(include);
     }
     oss << sep << include;
@@ -493,7 +494,7 @@ void cmVisualStudioGeneratorOptions::OutputAdditionalIncludeDirectories(
     }
   }
 
-  if (this->Version >= cmGlobalVisualStudioGenerator::VS10) {
+  if (this->Version >= cmGlobalVisualStudioGenerator::VSVersion::VS10) {
     oss << sep << "%(" << tag << ")";
   }
 
@@ -507,7 +508,7 @@ void cmVisualStudioGeneratorOptions::OutputFlagMap(std::ostream& fout,
     std::ostringstream oss;
     const char* sep = "";
     for (std::string i : m.second) {
-      if (this->Version >= cmGlobalVisualStudioGenerator::VS10) {
+      if (this->Version >= cmGlobalVisualStudioGenerator::VSVersion::VS10) {
         cmVS10EscapeForMSBuild(i);
       }
       oss << sep << i;

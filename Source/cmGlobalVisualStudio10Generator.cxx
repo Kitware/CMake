@@ -170,7 +170,7 @@ cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(
   this->DefaultNasmFlagTableName = "v10";
   this->DefaultRCFlagTableName = "v10";
 
-  this->Version = VS10;
+  this->Version = VSVersion::VS10;
   this->PlatformToolsetNeedsDebugEnum = false;
 }
 
@@ -277,8 +277,8 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
   }
 
   this->SupportsUnityBuilds =
-    this->Version >= cmGlobalVisualStudioGenerator::VS16 ||
-    (this->Version == cmGlobalVisualStudioGenerator::VS15 &&
+    this->Version >= cmGlobalVisualStudioGenerator::VSVersion::VS16 ||
+    (this->Version == cmGlobalVisualStudioGenerator::VSVersion::VS15 &&
      cmSystemTools::PathExists(this->VCTargetsPath +
                                "/Microsoft.Cpp.Unity.targets"));
 
@@ -591,7 +591,7 @@ bool cmGlobalVisualStudio10Generator::InitializeWindowsCE(cmMakefile* mf)
 
   this->DefaultPlatformToolset = this->SelectWindowsCEToolset();
 
-  if (this->GetVersion() == cmGlobalVisualStudioGenerator::VS12) {
+  if (this->GetVersion() == cmGlobalVisualStudioGenerator::VSVersion::VS12) {
     // VS 12 .NET CF defaults to .NET framework 3.9 for Windows CE.
     this->DefaultTargetFrameworkVersion = "v3.9";
     this->DefaultTargetFrameworkIdentifier = "WindowsEmbeddedCompact";
@@ -1210,7 +1210,7 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
           // Invoke restore target, unless it has been explicitly disabled.
           bool restorePackages = true;
 
-          if (this->Version < VS15) {
+          if (this->Version < VSVersion::VS15) {
             // Package restore is only supported starting from Visual Studio
             // 2017. Package restore must be executed manually using NuGet
             // shell for older versions.
@@ -1347,23 +1347,23 @@ std::string cmGlobalVisualStudio10Generator::Encoding()
 const char* cmGlobalVisualStudio10Generator::GetToolsVersion() const
 {
   switch (this->Version) {
-    case cmGlobalVisualStudioGenerator::VS9:
-    case cmGlobalVisualStudioGenerator::VS10:
-    case cmGlobalVisualStudioGenerator::VS11:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS9:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS10:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS11:
       return "4.0";
 
       // in Visual Studio 2013 they detached the MSBuild tools version
       // from the .Net Framework version and instead made it have it's own
       // version number
-    case cmGlobalVisualStudioGenerator::VS12:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS12:
       return "12.0";
-    case cmGlobalVisualStudioGenerator::VS14:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS14:
       return "14.0";
-    case cmGlobalVisualStudioGenerator::VS15:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS15:
       return "15.0";
-    case cmGlobalVisualStudioGenerator::VS16:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS16:
       return "16.0";
-    case cmGlobalVisualStudioGenerator::VS17:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS17:
       return "17.0";
   }
   return "";
@@ -1624,7 +1624,7 @@ cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetNasmFlagTable() const
 
 bool cmGlobalVisualStudio10Generator::IsMsBuildRestoreSupported() const
 {
-  if (this->Version >= VS16) {
+  if (this->Version >= VSVersion::VS16) {
     return true;
   }
 

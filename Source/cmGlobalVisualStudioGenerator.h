@@ -32,7 +32,7 @@ class cmGlobalVisualStudioGenerator : public cmGlobalGenerator
 {
 public:
   /** Known versions of Visual Studio.  */
-  enum VSVersion
+  enum class VSVersion : uint16_t
   {
     VS9 = 90,
     VS10 = 100,

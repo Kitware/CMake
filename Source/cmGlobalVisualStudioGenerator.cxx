@@ -97,21 +97,21 @@ std::string const& cmGlobalVisualStudioGenerator::GetPlatformName() const
 const char* cmGlobalVisualStudioGenerator::GetIDEVersion() const
 {
   switch (this->Version) {
-    case cmGlobalVisualStudioGenerator::VS9:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS9:
       return "9.0";
-    case cmGlobalVisualStudioGenerator::VS10:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS10:
       return "10.0";
-    case cmGlobalVisualStudioGenerator::VS11:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS11:
       return "11.0";
-    case cmGlobalVisualStudioGenerator::VS12:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS12:
       return "12.0";
-    case cmGlobalVisualStudioGenerator::VS14:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS14:
       return "14.0";
-    case cmGlobalVisualStudioGenerator::VS15:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS15:
       return "15.0";
-    case cmGlobalVisualStudioGenerator::VS16:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS16:
       return "16.0";
-    case cmGlobalVisualStudioGenerator::VS17:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS17:
       return "17.0";
   }
   return "";
@@ -124,11 +124,11 @@ void cmGlobalVisualStudioGenerator::WriteSLNHeader(std::ostream& fout)
   fout << '\n';
 
   switch (this->Version) {
-    case cmGlobalVisualStudioGenerator::VS9:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS9:
       fout << "Microsoft Visual Studio Solution File, Format Version 10.00\n";
       fout << "# Visual Studio 2008\n";
       break;
-    case cmGlobalVisualStudioGenerator::VS10:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS10:
       fout << "Microsoft Visual Studio Solution File, Format Version 11.00\n";
       if (this->ExpressEdition) {
         fout << "# Visual C++ Express 2010\n";
@@ -136,7 +136,7 @@ void cmGlobalVisualStudioGenerator::WriteSLNHeader(std::ostream& fout)
         fout << "# Visual Studio 2010\n";
       }
       break;
-    case cmGlobalVisualStudioGenerator::VS11:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS11:
       fout << "Microsoft Visual Studio Solution File, Format Version 12.00\n";
       if (this->ExpressEdition) {
         fout << "# Visual Studio Express 2012 for Windows Desktop\n";
@@ -144,7 +144,7 @@ void cmGlobalVisualStudioGenerator::WriteSLNHeader(std::ostream& fout)
         fout << "# Visual Studio 2012\n";
       }
       break;
-    case cmGlobalVisualStudioGenerator::VS12:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS12:
       fout << "Microsoft Visual Studio Solution File, Format Version 12.00\n";
       if (this->ExpressEdition) {
         fout << "# Visual Studio Express 2013 for Windows Desktop\n";
@@ -152,7 +152,7 @@ void cmGlobalVisualStudioGenerator::WriteSLNHeader(std::ostream& fout)
         fout << "# Visual Studio 2013\n";
       }
       break;
-    case cmGlobalVisualStudioGenerator::VS14:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS14:
       // Visual Studio 14 writes .sln format 12.00
       fout << "Microsoft Visual Studio Solution File, Format Version 12.00\n";
       if (this->ExpressEdition) {
@@ -161,7 +161,7 @@ void cmGlobalVisualStudioGenerator::WriteSLNHeader(std::ostream& fout)
         fout << "# Visual Studio 14\n";
       }
       break;
-    case cmGlobalVisualStudioGenerator::VS15:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS15:
       // Visual Studio 15 writes .sln format 12.00
       fout << "Microsoft Visual Studio Solution File, Format Version 12.00\n";
       if (this->ExpressEdition) {
@@ -170,7 +170,7 @@ void cmGlobalVisualStudioGenerator::WriteSLNHeader(std::ostream& fout)
         fout << "# Visual Studio 15\n";
       }
       break;
-    case cmGlobalVisualStudioGenerator::VS16:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS16:
       // Visual Studio 16 writes .sln format 12.00
       fout << "Microsoft Visual Studio Solution File, Format Version 12.00\n";
       if (this->ExpressEdition) {
@@ -179,7 +179,7 @@ void cmGlobalVisualStudioGenerator::WriteSLNHeader(std::ostream& fout)
         fout << "# Visual Studio Version 16\n";
       }
       break;
-    case cmGlobalVisualStudioGenerator::VS17:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS17:
       // Visual Studio 17 writes .sln format 12.00
       fout << "Microsoft Visual Studio Solution File, Format Version 12.00\n";
       if (this->ExpressEdition) {

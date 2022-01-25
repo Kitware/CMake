@@ -125,7 +125,7 @@ cmGlobalVisualStudio14Generator::cmGlobalVisualStudio14Generator(
   this->DefaultLinkFlagTableName = "v140";
   this->DefaultMasmFlagTableName = "v14";
   this->DefaultRCFlagTableName = "v14";
-  this->Version = VS14;
+  this->Version = VSVersion::VS14;
 }
 
 bool cmGlobalVisualStudio14Generator::MatchesGeneratorName(

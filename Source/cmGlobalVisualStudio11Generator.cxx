@@ -148,7 +148,7 @@ cmGlobalVisualStudio11Generator::cmGlobalVisualStudio11Generator(
   this->DefaultLinkFlagTableName = "v11";
   this->DefaultMasmFlagTableName = "v11";
   this->DefaultRCFlagTableName = "v11";
-  this->Version = VS11;
+  this->Version = VSVersion::VS11;
 }
 
 bool cmGlobalVisualStudio11Generator::MatchesGeneratorName(

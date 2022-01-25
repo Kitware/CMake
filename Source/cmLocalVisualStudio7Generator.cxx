@@ -198,8 +198,8 @@ void cmLocalVisualStudio7Generator::GenerateTarget(cmGeneratorTarget* target)
   // Intel Fortran for VS10 uses VS9 format ".vfproj" files.
   cmGlobalVisualStudioGenerator::VSVersion realVersion = gg->GetVersion();
   if (this->FortranProject &&
-      gg->GetVersion() >= cmGlobalVisualStudioGenerator::VS10) {
-    gg->SetVersion(cmGlobalVisualStudioGenerator::VS9);
+      gg->GetVersion() >= cmGlobalVisualStudioGenerator::VSVersion::VS10) {
+    gg->SetVersion(cmGlobalVisualStudioGenerator::VSVersion::VS9);
   }
 
   // add to the list of projects
@@ -1106,7 +1106,8 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
         fout << "\t\t\t\tGenerateDebugInformation=\"true\"\n";
       }
       if (this->WindowsCEProject) {
-        if (this->GetVersion() < cmGlobalVisualStudioGenerator::VS9) {
+        if (this->GetVersion() <
+            cmGlobalVisualStudioGenerator::VSVersion::VS9) {
           fout << "\t\t\t\tSubSystem=\"9\"\n";
         } else {
           fout << "\t\t\t\tSubSystem=\"8\"\n";
@@ -1183,7 +1184,8 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
         fout << "\t\t\t\tGenerateDebugInformation=\"true\"\n";
       }
       if (this->WindowsCEProject) {
-        if (this->GetVersion() < cmGlobalVisualStudioGenerator::VS9) {
+        if (this->GetVersion() <
+            cmGlobalVisualStudioGenerator::VSVersion::VS9) {
           fout << "\t\t\t\tSubSystem=\"9\"\n";
         } else {
           fout << "\t\t\t\tSubSystem=\"8\"\n";
@@ -2026,7 +2028,8 @@ void cmLocalVisualStudio7Generator::WriteProjectStart(
        << "<VisualStudioProject\n"
        << "\tProjectType=\"Visual C++\"\n";
   /* clang-format on */
-  fout << "\tVersion=\"" << (gg->GetVersion() / 10) << ".00\"\n";
+  fout << "\tVersion=\"" << (static_cast<uint16_t>(gg->GetVersion()) / 10)
+       << ".00\"\n";
   cmValue p = target->GetProperty("PROJECT_LABEL");
   const std::string projLabel = p ? *p : libName;
   p = target->GetProperty("VS_KEYWORD");
