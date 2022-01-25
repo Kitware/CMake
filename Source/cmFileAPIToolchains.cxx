@@ -30,10 +30,6 @@ class Toolchains
   cmFileAPI& FileAPI;
   unsigned long Version;
 
-  static const std::vector<ToolchainVariable> CompilerVariables;
-  static const std::vector<ToolchainVariable> CompilerImplicitVariables;
-  static const ToolchainVariable SourceFileExtensionsVariable;
-
   Json::Value DumpToolchains();
   Json::Value DumpToolchain(std::string const& lang);
   Json::Value DumpToolchainVariables(
@@ -46,24 +42,6 @@ class Toolchains
 public:
   Toolchains(cmFileAPI& fileAPI, unsigned long version);
   Json::Value Dump();
-};
-
-const std::vector<ToolchainVariable> Toolchains::CompilerVariables{
-  { "path", "COMPILER", false },
-  { "id", "COMPILER_ID", false },
-  { "version", "COMPILER_VERSION", false },
-  { "target", "COMPILER_TARGET", false },
-};
-
-const std::vector<ToolchainVariable> Toolchains::CompilerImplicitVariables{
-  { "includeDirectories", "IMPLICIT_INCLUDE_DIRECTORIES", true },
-  { "linkDirectories", "IMPLICIT_LINK_DIRECTORIES", true },
-  { "linkFrameworkDirectories", "IMPLICIT_LINK_FRAMEWORK_DIRECTORIES", true },
-  { "linkLibraries", "IMPLICIT_LINK_LIBRARIES", true },
-};
-
-const ToolchainVariable Toolchains::SourceFileExtensionsVariable{
-  "sourceFileExtensions", "SOURCE_FILE_EXTENSIONS", true
 };
 
 Toolchains::Toolchains(cmFileAPI& fileAPI, unsigned long version)
@@ -94,6 +72,25 @@ Json::Value Toolchains::DumpToolchains()
 
 Json::Value Toolchains::DumpToolchain(std::string const& lang)
 {
+  static const std::vector<ToolchainVariable> CompilerVariables{
+    { "path", "COMPILER", false },
+    { "id", "COMPILER_ID", false },
+    { "version", "COMPILER_VERSION", false },
+    { "target", "COMPILER_TARGET", false },
+  };
+
+  static const std::vector<ToolchainVariable> CompilerImplicitVariables{
+    { "includeDirectories", "IMPLICIT_INCLUDE_DIRECTORIES", true },
+    { "linkDirectories", "IMPLICIT_LINK_DIRECTORIES", true },
+    { "linkFrameworkDirectories", "IMPLICIT_LINK_FRAMEWORK_DIRECTORIES",
+      true },
+    { "linkLibraries", "IMPLICIT_LINK_LIBRARIES", true },
+  };
+
+  static const ToolchainVariable SourceFileExtensionsVariable{
+    "sourceFileExtensions", "SOURCE_FILE_EXTENSIONS", true
+  };
+
   const auto& mf =
     this->FileAPI.GetCMakeInstance()->GetGlobalGenerator()->GetMakefiles()[0];
   Json::Value toolchain = Json::objectValue;
