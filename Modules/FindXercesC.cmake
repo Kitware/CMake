@@ -91,11 +91,13 @@ if(NOT XercesC_LIBRARY)
                NAMES "xerces-c"
                      "xerces-c_${XercesC_VERSION_MAJOR}"
                      "xerces-c-${XercesC_VERSION_MAJOR}.${XercesC_VERSION_MINOR}"
+               NAMES_PER_DIR
                DOC "Xerces-C++ libraries (release)")
   find_library(XercesC_LIBRARY_DEBUG
                NAMES "xerces-cd"
                      "xerces-c_${XercesC_VERSION_MAJOR}D"
                      "xerces-c_${XercesC_VERSION_MAJOR}_${XercesC_VERSION_MINOR}D"
+               NAMES_PER_DIR
                DOC "Xerces-C++ libraries (debug)")
   include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
   select_library_configurations(XercesC)
