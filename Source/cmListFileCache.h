@@ -23,28 +23,6 @@
 
 class cmMessenger;
 
-struct cmCommandContext
-{
-  struct cmCommandName
-  {
-    std::string Original;
-    std::string Lower;
-    cmCommandName() = default;
-    cmCommandName(std::string name)
-      : Original(std::move(name))
-      , Lower(cmSystemTools::LowerCase(this->Original))
-    {
-    }
-  } Name;
-  long Line = 0;
-  cmCommandContext() = default;
-  cmCommandContext(std::string name, long line)
-    : Name(std::move(name))
-    , Line(line)
-  {
-  }
-};
-
 struct cmListFileArgument
 {
   enum Delimiter
@@ -68,6 +46,54 @@ struct cmListFileArgument
   std::string Value;
   Delimiter Delim = Unquoted;
   long Line = 0;
+};
+
+class cmListFileFunction
+{
+public:
+  cmListFileFunction(std::string name, long line,
+                     std::vector<cmListFileArgument> args)
+    : Impl{ std::make_shared<Implementation>(std::move(name), line,
+                                             std::move(args)) }
+  {
+  }
+
+  std::string const& OriginalName() const noexcept
+  {
+    return this->Impl->OriginalName;
+  }
+
+  std::string const& LowerCaseName() const noexcept
+  {
+    return this->Impl->LowerCaseName;
+  }
+
+  long Line() const noexcept { return this->Impl->Line; }
+
+  std::vector<cmListFileArgument> const& Arguments() const noexcept
+  {
+    return this->Impl->Arguments;
+  }
+
+private:
+  struct Implementation
+  {
+    Implementation(std::string name, long line,
+                   std::vector<cmListFileArgument> args)
+      : OriginalName{ std::move(name) }
+      , LowerCaseName{ cmSystemTools::LowerCase(this->OriginalName) }
+      , Line{ line }
+      , Arguments{ std::move(args) }
+    {
+    }
+
+    std::string OriginalName;
+    std::string LowerCaseName;
+    long Line = 0;
+    std::vector<cmListFileArgument> Arguments;
+  };
+
+  std::shared_ptr<Implementation const> Impl;
 };
 
 class cmListFileContext
@@ -99,14 +125,14 @@ public:
   {
   }
 
-  static cmListFileContext FromCommandContext(
-    cmCommandContext const& lfcc, std::string const& fileName,
+  static cmListFileContext FromListFileFunction(
+    cmListFileFunction const& lff, std::string const& fileName,
     cm::optional<std::string> deferId = {})
   {
     cmListFileContext lfc;
     lfc.FilePath = fileName;
-    lfc.Line = lfcc.Line;
-    lfc.Name = lfcc.Name.Original;
+    lfc.Line = lff.Line();
+    lfc.Name = lff.OriginalName();
     lfc.DeferId = std::move(deferId);
     return lfc;
   }
@@ -116,50 +142,6 @@ std::ostream& operator<<(std::ostream&, cmListFileContext const&);
 bool operator<(const cmListFileContext& lhs, const cmListFileContext& rhs);
 bool operator==(cmListFileContext const& lhs, cmListFileContext const& rhs);
 bool operator!=(cmListFileContext const& lhs, cmListFileContext const& rhs);
-
-class cmListFileFunction
-{
-public:
-  cmListFileFunction(std::string name, long line,
-                     std::vector<cmListFileArgument> args)
-    : Impl{ std::make_shared<Implementation>(std::move(name), line,
-                                             std::move(args)) }
-  {
-  }
-
-  std::string const& OriginalName() const noexcept
-  {
-    return this->Impl->Name.Original;
-  }
-
-  std::string const& LowerCaseName() const noexcept
-  {
-    return this->Impl->Name.Lower;
-  }
-
-  long Line() const noexcept { return this->Impl->Line; }
-
-  std::vector<cmListFileArgument> const& Arguments() const noexcept
-  {
-    return this->Impl->Arguments;
-  }
-
-  operator cmCommandContext const&() const noexcept { return *this->Impl; }
-
-private:
-  struct Implementation : public cmCommandContext
-  {
-    Implementation(std::string name, long line,
-                   std::vector<cmListFileArgument> args)
-      : cmCommandContext{ std::move(name), line }
-      , Arguments{ std::move(args) }
-    {
-    }
-    std::vector<cmListFileArgument> Arguments;
-  };
-
-  std::shared_ptr<Implementation const> Impl;
-};
 
 // Represent a backtrace (call stack).  Provide value semantics
 // but use efficient reference-counting underneath to avoid copies.
