@@ -2053,6 +2053,11 @@ std::string cmMakefileTargetGenerator::CreateResponseFile(
   // For now, use the makefile encoding as a heuristic.
   codecvt::Encoding responseEncoding =
     this->GlobalGenerator->GetMakefileEncoding();
+  // Non-MSVC tooling may not understand a BOM.
+  if (responseEncoding == codecvt::UTF8_WITH_BOM &&
+      !this->Makefile->IsOn("MSVC")) {
+    responseEncoding = codecvt::UTF8;
+  }
 
   // Create the response file.
   std::string responseFileNameFull =
