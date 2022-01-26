@@ -86,6 +86,10 @@ protected:
   void GetIgnoredPaths(std::vector<std::string>& ignore);
   void GetIgnoredPaths(std::set<std::string>& ignore);
 
+  /** Get ignored paths from CMAKE_[SYSTEM_]IGNORE_PREFIX_PATH variables.  */
+  void GetIgnoredPrefixPaths(std::vector<std::string>& ignore);
+  void GetIgnoredPrefixPaths(std::set<std::string>& ignore);
+
   /** Compute final search path list (reroot + trailing slash).  */
   enum class IgnorePaths
   {

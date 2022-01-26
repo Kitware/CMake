@@ -43,7 +43,8 @@ public:
   const std::vector<PathWithPrefix>& GetPaths() const { return this->Paths; }
   std::size_t size() const { return this->Paths.size(); }
 
-  void ExtractWithout(const std::set<std::string>& ignore,
+  void ExtractWithout(const std::set<std::string>& ignorePaths,
+                      const std::set<std::string>& ignorePrefixes,
                       std::vector<std::string>& outPaths,
                       bool clear = false) const;
 

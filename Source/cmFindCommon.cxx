@@ -262,11 +262,13 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths)
           (stagePrefix && isSameDirectoryOrSubDirectory(up, *stagePrefix))) {
         rootedDir = up;
       } else if (!up.empty() && up[0] != '~') {
-        // Start with the new root.
-        rootedDir = cmStrCat(r, '/');
-
-        // Append the original path with its old root removed.
-        rootedDir += cmSystemTools::SplitPathRootComponent(up);
+        auto const* split = cmSystemTools::SplitPathRootComponent(up);
+        if (split && *split) {
+          // Start with the new root.
+          rootedDir = cmStrCat(r, '/', split);
+        } else {
+          rootedDir = r;
+        }
       }
 
       // Store the new path.
@@ -303,6 +305,31 @@ void cmFindCommon::GetIgnoredPaths(std::set<std::string>& ignore)
 {
   std::vector<std::string> ignoreVec;
   this->GetIgnoredPaths(ignoreVec);
+  ignore.insert(ignoreVec.begin(), ignoreVec.end());
+}
+
+void cmFindCommon::GetIgnoredPrefixPaths(std::vector<std::string>& ignore)
+{
+  static constexpr const char* paths[] = {
+    "CMAKE_SYSTEM_IGNORE_PREFIX_PATH",
+    "CMAKE_IGNORE_PREFIX_PATH",
+  };
+
+  // Construct the list of path roots with no trailing slashes.
+  for (const char* pathName : paths) {
+    // Get the list of paths to ignore from the variable.
+    this->Makefile->GetDefExpandList(pathName, ignore);
+  }
+
+  for (std::string& i : ignore) {
+    cmSystemTools::ConvertToUnixSlashes(i);
+  }
+}
+
+void cmFindCommon::GetIgnoredPrefixPaths(std::set<std::string>& ignore)
+{
+  std::vector<std::string> ignoreVec;
+  this->GetIgnoredPrefixPaths(ignoreVec);
   ignore.insert(ignoreVec.begin(), ignoreVec.end());
 }
 
@@ -369,16 +396,19 @@ static void AddTrailingSlash(std::string& s)
 void cmFindCommon::ComputeFinalPaths(IgnorePaths ignorePaths)
 {
   // Filter out ignored paths from the prefix list
-  std::set<std::string> ignored;
+  std::set<std::string> ignoredPaths;
+  std::set<std::string> ignoredPrefixes;
   if (ignorePaths == IgnorePaths::Yes) {
-    this->GetIgnoredPaths(ignored);
+    this->GetIgnoredPaths(ignoredPaths);
+    this->GetIgnoredPrefixPaths(ignoredPrefixes);
   }
 
   // Combine the separate path types, filtering out ignores
   this->SearchPaths.clear();
   std::vector<PathLabel>& allLabels = this->PathGroupLabelMap[PathGroup::All];
   for (PathLabel const& l : allLabels) {
-    this->LabeledPaths[l].ExtractWithout(ignored, this->SearchPaths);
+    this->LabeledPaths[l].ExtractWithout(ignoredPaths, ignoredPrefixes,
+                                         this->SearchPaths);
   }
 
   // Expand list of paths inside all search roots.

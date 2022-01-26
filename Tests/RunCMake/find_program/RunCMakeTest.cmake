@@ -6,6 +6,7 @@ run_cmake(NamesPerDir)
 run_cmake(RelAndAbsPath)
 run_cmake(Required)
 run_cmake(NO_CACHE)
+run_cmake(IgnorePrefixPath)
 
 if(CMAKE_SYSTEM_NAME MATCHES "^(Windows|CYGWIN|MSYS)$")
   run_cmake(WindowsCom)

@@ -19,7 +19,8 @@ cmSearchPath::cmSearchPath(cmFindCommon* findCmd)
 
 cmSearchPath::~cmSearchPath() = default;
 
-void cmSearchPath::ExtractWithout(const std::set<std::string>& ignore,
+void cmSearchPath::ExtractWithout(const std::set<std::string>& ignorePaths,
+                                  const std::set<std::string>& ignorePrefixes,
                                   std::vector<std::string>& outPaths,
                                   bool clear) const
 {
@@ -27,7 +28,8 @@ void cmSearchPath::ExtractWithout(const std::set<std::string>& ignore,
     outPaths.clear();
   }
   for (auto const& path : this->Paths) {
-    if (ignore.count(path.Path) == 0) {
+    if (ignorePaths.count(path.Path) == 0 &&
+        ignorePrefixes.count(path.Prefix) == 0) {
       outPaths.push_back(path.Path);
     }
   }
