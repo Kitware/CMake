@@ -3645,7 +3645,7 @@ void processIncludeDirectories(cmGeneratorTarget const* tgt,
     cmLinkImplItem const& item = entry.LinkImplItem;
     std::string const& targetName = item.AsStr();
     bool const fromImported = item.Target && item.Target->IsImported();
-    bool const checkCMP0027 = item.FromGenex;
+    bool const checkCMP0027 = item.CheckCMP0027;
 
     std::string usedIncludes;
     for (std::string& entryInclude : entry.Values) {
@@ -7935,7 +7935,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
     std::string const& evaluated =
       cge->Evaluate(this->LocalGenerator, config, head, &dagChecker, nullptr,
                     this->LinkerLanguage);
-    bool const fromGenex = evaluated != entry.Value;
+    bool const checkCMP0027 = evaluated != entry.Value;
     cmExpandList(evaluated, llibs);
     if (cge->GetHadHeadSensitiveCondition()) {
       impl.HadHeadSensitiveCondition = true;
@@ -8009,7 +8009,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
         }
       }
 
-      impl.Libraries.emplace_back(std::move(item), fromGenex);
+      impl.Libraries.emplace_back(std::move(item), checkCMP0027);
     }
 
     std::set<std::string> const& seenProps = cge->GetSeenTargetProperties();
