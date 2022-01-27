@@ -16,6 +16,8 @@
 #include <cmext/algorithm>
 #include <cmext/string_view>
 
+#include "cm_codecvt.hxx"
+
 #include "cmComputeLinkInformation.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
@@ -2077,11 +2079,22 @@ std::string cmMakefileTargetGenerator::CreateResponseFile(
   const char* name, std::string const& options,
   std::vector<std::string>& makefile_depends)
 {
+  // FIXME: Find a better way to determine the response file encoding,
+  // perhaps using tool-specific platform information variables.
+  // For now, use the makefile encoding as a heuristic.
+  codecvt::Encoding responseEncoding =
+    this->GlobalGenerator->GetMakefileEncoding();
+  // Non-MSVC tooling may not understand a BOM.
+  if (responseEncoding == codecvt::UTF8_WITH_BOM &&
+      !this->Makefile->IsOn("MSVC")) {
+    responseEncoding = codecvt::UTF8;
+  }
+
   // Create the response file.
   std::string responseFileNameFull =
     cmStrCat(this->TargetBuildDirectoryFull, '/', name);
-  cmGeneratedFileStream responseStream(
-    responseFileNameFull, false, this->GlobalGenerator->GetMakefileEncoding());
+  cmGeneratedFileStream responseStream(responseFileNameFull, false,
+                                       responseEncoding);
   responseStream.SetCopyIfDifferent(true);
   responseStream << options << "\n";
 
