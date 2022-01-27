@@ -3430,21 +3430,27 @@ void cmLocalGenerator::GenerateTargetInstallRules(
 static bool cmLocalGeneratorShortenObjectName(std::string& objName,
                                               std::string::size_type max_len)
 {
+  // Check if the path can be shortened using an md5 sum replacement for
+  // a portion of the path.
+  std::string::size_type md5Len = 32;
+  std::string::size_type numExtraChars = objName.size() - max_len + md5Len;
+  std::string::size_type pos = objName.find('/', numExtraChars);
+  if (pos == std::string::npos) {
+    pos = objName.rfind('/', numExtraChars);
+    if (pos == std::string::npos || pos <= md5Len) {
+      return false;
+    }
+  }
+
   // Replace the beginning of the path portion of the object name with
   // its own md5 sum.
-  std::string::size_type pos =
-    objName.find('/', objName.size() - max_len + 32);
-  if (pos != std::string::npos) {
-    cmCryptoHash md5(cmCryptoHash::AlgoMD5);
-    std::string md5name = cmStrCat(md5.HashString(objName.substr(0, pos)),
-                                   cm::string_view(objName).substr(pos));
-    objName = md5name;
+  cmCryptoHash md5(cmCryptoHash::AlgoMD5);
+  std::string md5name = cmStrCat(md5.HashString(objName.substr(0, pos)),
+                                 cm::string_view(objName).substr(pos));
+  objName = md5name;
 
-    // The object name is now short enough.
-    return true;
-  }
-  // The object name could not be shortened enough.
-  return false;
+  // The object name is now shorter, check if it is short enough.
+  return pos >= numExtraChars;
 }
 
 bool cmLocalGeneratorCheckObjectName(std::string& objName,
