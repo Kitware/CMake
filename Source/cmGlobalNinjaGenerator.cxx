@@ -166,14 +166,18 @@ std::string cmGlobalNinjaGenerator::EncodeRuleName(std::string const& name)
 std::string cmGlobalNinjaGenerator::EncodeLiteral(const std::string& lit)
 {
   std::string result = lit;
-  cmSystemTools::ReplaceString(result, "$", "$$");
-  cmSystemTools::ReplaceString(result, "\n", "$\n");
+  EncodeLiteralInplace(result);
+  return result;
+}
+
+void cmGlobalNinjaGenerator::EncodeLiteralInplace(std::string& lit)
+{
+  cmSystemTools::ReplaceString(lit, "$", "$$");
+  cmSystemTools::ReplaceString(lit, "\n", "$\n");
   if (this->IsMultiConfig()) {
-    cmSystemTools::ReplaceString(result,
-                                 cmStrCat('$', this->GetCMakeCFGIntDir()),
+    cmSystemTools::ReplaceString(lit, cmStrCat('$', this->GetCMakeCFGIntDir()),
                                  this->GetCMakeCFGIntDir());
   }
-  return result;
 }
 
 std::string cmGlobalNinjaGenerator::EncodePath(const std::string& path)
@@ -185,7 +189,7 @@ std::string cmGlobalNinjaGenerator::EncodePath(const std::string& path)
   else
     std::replace(result.begin(), result.end(), '/', '\\');
 #endif
-  result = this->EncodeLiteral(result);
+  this->EncodeLiteralInplace(result);
   cmSystemTools::ReplaceString(result, " ", "$ ");
   cmSystemTools::ReplaceString(result, ":", "$:");
   return result;
