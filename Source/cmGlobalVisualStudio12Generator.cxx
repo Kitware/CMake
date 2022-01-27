@@ -122,7 +122,7 @@ cmGlobalVisualStudio12Generator::cmGlobalVisualStudio12Generator(
   this->DefaultLinkFlagTableName = "v12";
   this->DefaultMasmFlagTableName = "v12";
   this->DefaultRCFlagTableName = "v12";
-  this->Version = VS12;
+  this->Version = VSVersion::VS12;
 }
 
 bool cmGlobalVisualStudio12Generator::MatchesGeneratorName(
