@@ -655,7 +655,7 @@ macro (CMAKE_BUILD_UTILITIES)
     if(WIN32)
       find_package(LibUV 1.38.0)
     else()
-      find_package(LibUV 1.10.0)
+      find_package(LibUV 1.28.0)
     endif()
     if(NOT LIBUV_FOUND)
       message(FATAL_ERROR

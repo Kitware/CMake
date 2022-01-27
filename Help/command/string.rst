@@ -490,6 +490,9 @@ specifiers:
 ``%S``
   The second of the current minute.  60 represents a leap second. (00-60)
 
+``%f``
+  The microsecond of the current second (000000-999999).
+
 ``%U``
   The week number of the current year (00-53).
 
