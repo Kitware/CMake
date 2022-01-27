@@ -162,7 +162,7 @@ if echo "${cmake_system}" | grep Linux >/dev/null 2>&1; then
   cmake_system_linux=true
 else
   cmake_system_linux=false
- fi
+fi
 
 # Determine whether this is a PA-RISC machine
 # This only works for Linux or HP-UX, not other PA-RISC OSs (BSD maybe?). Also
