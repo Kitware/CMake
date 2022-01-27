@@ -157,6 +157,13 @@ else
   cmake_system_hpux=false
 fi
 
+# Determine whether this is AIX
+if echo "${cmake_system}" | grep AIX >/dev/null 2>&1; then
+  cmake_system_aix=true
+else
+  cmake_system_aix=false
+fi
+
 # Determine whether this is Linux
 if echo "${cmake_system}" | grep Linux >/dev/null 2>&1; then
   cmake_system_linux=true
@@ -1107,6 +1114,13 @@ fi
 # Add Haiku toolkits...
 if ${cmake_system_haiku}; then
   cmake_ld_flags="${LDFLAGS} -lroot -lbe"
+fi
+
+# Add AIX arch-specific link flags.
+if ${cmake_system_aix}; then
+  if uname -p | grep powerpc >/dev/null 2>&1; then
+    cmake_ld_flags="${LDFLAGS} -Wl,-bbigtoc"
+  fi
 fi
 
 #-----------------------------------------------------------------------------
