@@ -1274,7 +1274,7 @@ std::string cmLocalUnixMakefileGenerator3::CreateMakeVariable(
     cmSystemTools::ReplaceString(ret, "-", "__");
     cmSystemTools::ReplaceString(ret, "+", "___");
     int ni = 0;
-    char buffer[5];
+    char buffer[12];
     // make sure the _ version is not already used, if
     // it is used then add number to the end of the variable
     while (this->ShortMakeVariableMap.count(ret) && ni < 1000) {
@@ -1302,7 +1302,7 @@ std::string cmLocalUnixMakefileGenerator3::CreateMakeVariable(
     if (static_cast<int>(str1.size()) + static_cast<int>(str2.size()) > size) {
       str1 = str1.substr(0, size - str2.size());
     }
-    char buffer[5];
+    char buffer[12];
     int ni = 0;
     snprintf(buffer, sizeof(buffer), "%04d", ni);
     ret = str1 + str2 + buffer;
