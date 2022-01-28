@@ -283,14 +283,15 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths)
 
 void cmFindCommon::GetIgnoredPaths(std::vector<std::string>& ignore)
 {
-  // null-terminated list of paths.
-  static const char* paths[] = { "CMAKE_SYSTEM_IGNORE_PATH",
-                                 "CMAKE_IGNORE_PATH", nullptr };
+  static constexpr const char* paths[] = {
+    "CMAKE_SYSTEM_IGNORE_PATH",
+    "CMAKE_IGNORE_PATH",
+  };
 
   // Construct the list of path roots with no trailing slashes.
-  for (const char** pathName = paths; *pathName; ++pathName) {
+  for (const char* pathName : paths) {
     // Get the list of paths to ignore from the variable.
-    this->Makefile->GetDefExpandList(*pathName, ignore);
+    this->Makefile->GetDefExpandList(pathName, ignore);
   }
 
   for (std::string& i : ignore) {
@@ -365,11 +366,13 @@ static void AddTrailingSlash(std::string& s)
     s += '/';
   }
 }
-void cmFindCommon::ComputeFinalPaths()
+void cmFindCommon::ComputeFinalPaths(IgnorePaths ignorePaths)
 {
   // Filter out ignored paths from the prefix list
   std::set<std::string> ignored;
-  this->GetIgnoredPaths(ignored);
+  if (ignorePaths == IgnorePaths::Yes) {
+    this->GetIgnoredPaths(ignored);
+  }
 
   // Combine the separate path types, filtering out ignores
   this->SearchPaths.clear();

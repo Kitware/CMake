@@ -1346,7 +1346,7 @@ void cmFindPackageCommand::ComputePrefixes()
   }
   this->FillPrefixesUserGuess();
 
-  this->ComputeFinalPaths();
+  this->ComputeFinalPaths(IgnorePaths::No);
 }
 
 void cmFindPackageCommand::FillPrefixesPackageRoot()
@@ -2283,6 +2283,15 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
 
   // Skip this if the prefix does not exist.
   if (!cmSystemTools::FileIsDirectory(prefix_in)) {
+    return false;
+  }
+
+  // Skip this if it's in ignored paths.
+  std::string prefixWithoutSlash = prefix_in;
+  if (prefixWithoutSlash != "/" && prefixWithoutSlash.back() == '/') {
+    prefixWithoutSlash.erase(prefixWithoutSlash.length() - 1);
+  }
+  if (this->IgnoredPaths.count(prefixWithoutSlash)) {
     return false;
   }
 
