@@ -41,6 +41,7 @@ include:
   TinyCC = Tiny C Compiler (tinycc.org)
   XL, VisualAge, zOS = IBM XL (ibm.com)
   XLClang = IBM Clang-based XL (ibm.com)
+  IBMClang = IBM LLVM-based Compiler (ibm.com)
 
 This variable is not guaranteed to be defined for all compilers or
 languages.
