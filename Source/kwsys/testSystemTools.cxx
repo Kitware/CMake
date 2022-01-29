@@ -295,12 +295,15 @@ static bool CheckFileOperations()
 // Reset umask
 #ifdef __MSYS__
   mode_t fullMask = S_IWRITE;
+  mode_t testPerm = S_IREAD;
 #elif defined(_WIN32) && !defined(__CYGWIN__)
   // NOTE:  Windows doesn't support toggling _S_IREAD.
   mode_t fullMask = _S_IWRITE;
+  mode_t testPerm = 0;
 #else
   // On a normal POSIX platform, we can toggle all permissions.
   mode_t fullMask = S_IRWXU | S_IRWXG | S_IRWXO;
+  mode_t testPerm = S_IRUSR;
 #endif
 
   // Test file permissions without umask
@@ -311,7 +314,7 @@ static bool CheckFileOperations()
     res = false;
   }
 
-  if (!kwsys::SystemTools::SetPermissions(testNewFile, 0)) {
+  if (!kwsys::SystemTools::SetPermissions(testNewFile, testPerm)) {
     std::cerr << "Problem with SetPermissions (1) for: " << testNewFile
               << std::endl;
     res = false;
@@ -323,10 +326,10 @@ static bool CheckFileOperations()
     res = false;
   }
 
-  if ((thisPerm & fullMask) != 0) {
+  if ((thisPerm & fullMask) != testPerm) {
     std::cerr << "SetPermissions failed to set permissions (1) for: "
               << testNewFile << ": actual = " << thisPerm
-              << "; expected = " << 0 << std::endl;
+              << "; expected = " << testPerm << std::endl;
     res = false;
   }
 
