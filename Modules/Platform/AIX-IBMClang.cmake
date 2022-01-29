@@ -12,4 +12,5 @@ include(Platform/AIX-GNU)
 
 macro(__aix_compiler_ibmclang lang)
   __aix_compiler_gnu(${lang})
+  unset(CMAKE_${lang}_COMPILE_OPTIONS_VISIBILITY)
 endmacro()
