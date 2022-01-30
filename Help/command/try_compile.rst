@@ -19,10 +19,6 @@ Try Compiling Whole Projects
 Try building a project.  The success or failure of the ``try_compile``,
 i.e. ``TRUE`` or ``FALSE`` respectively, is returned in ``<resultVar>``.
 
-.. versionadded:: 3.14
-  The name of the ``<resultVar>`` is defined by the user.  Previously, it had
-  a fixed name ``RESULT_VAR``.
-
 In this form, ``<srcdir>`` should contain a complete CMake project with a
 ``CMakeLists.txt`` file and all sources.  The ``<bindir>`` and ``<srcdir>``
 will not be deleted after this command is run.  Specify ``<targetName>`` to
@@ -50,10 +46,6 @@ Try building an executable or static library from one or more source files
 (which one is determined by the :variable:`CMAKE_TRY_COMPILE_TARGET_TYPE`
 variable).  The success or failure of the ``try_compile``, i.e. ``TRUE`` or
 ``FALSE`` respectively, is returned in ``<resultVar>``.
-
-.. versionadded:: 3.14
-  The name of the ``<resultVar>`` is defined by the user.  Previously, it had
-  a fixed name ``RESULT_VAR``.
 
 In this form, one or more source files must be provided.  If
 :variable:`CMAKE_TRY_COMPILE_TARGET_TYPE` is unset or is set to ``EXECUTABLE``,
