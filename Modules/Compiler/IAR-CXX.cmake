@@ -16,14 +16,17 @@ endif()
 
 # Whenever needed, override this default behavior using CMAKE_IAR_CXX_FLAG in your toolchain file.
 if(NOT CMAKE_IAR_CXX_FLAG)
-  set(_CMAKE_IAR_MODERNCXX_LIST 14 17)
-  if(${CMAKE_CXX_STANDARD_COMPUTED_DEFAULT} IN_LIST _CMAKE_IAR_MODERNCXX_LIST OR
+  cmake_policy(PUSH)
+  cmake_policy(SET CMP0057 NEW) # if IN_LIST
+
+  if(${CMAKE_CXX_STANDARD_COMPUTED_DEFAULT} IN_LIST "14;17" OR
      ("${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}" STREQUAL "ARM" AND ${CMAKE_CXX_STANDARD_COMPUTED_DEFAULT} EQUAL 98))
     string(PREPEND CMAKE_CXX_FLAGS "--c++ ")
   else()
     string(PREPEND CMAKE_CXX_FLAGS "--eec++ ")
   endif()
-  unset(_CMAKE_IAR_MODERNCXX_LIST)
+
+  cmake_policy(POP)
 endif()
 
 set(CMAKE_CXX_STANDARD_COMPILE_OPTION "")
