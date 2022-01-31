@@ -30,11 +30,6 @@ executable was built, but failed to run, then ``<runResultVar>`` will be
 set to ``FAILED_TO_RUN``.  See the :command:`try_compile` command for
 information on how the test project is constructed to build the source file.
 
-.. versionadded:: 3.14
-  The names of the result variables ``<runResultVar>`` and
-  ``<compileResultVar>`` are defined by the user.  Previously, they had
-  fixed names ``RUN_RESULT_VAR`` and ``COMPILE_RESULT_VAR``.
-
 The options are:
 
 ``CMAKE_FLAGS <flags>...``
