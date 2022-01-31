@@ -1067,7 +1067,6 @@ if (HDF5_FOUND)
         endif ()
         set_target_properties("hdf5::${hdf5_target_name}" PROPERTIES
           IMPORTED_LOCATION "${_hdf5_location}"
-          IMPORTED_IMPLIB "${_hdf5_location}"
           INTERFACE_INCLUDE_DIRECTORIES "${HDF5_${hdf5_lang}_INCLUDE_DIRS}"
           INTERFACE_COMPILE_DEFINITIONS "${_hdf5_definitions}")
         if (_hdf5_libtype STREQUAL "SHARED")
@@ -1127,7 +1126,6 @@ if (HDF5_FOUND)
         string(REPLACE "-D" "" _hdf5_definitions "${HDF5_${hdf5_lang}_HL_DEFINITIONS}")
         set_target_properties("hdf5::${hdf5_target_name}" PROPERTIES
           IMPORTED_LOCATION "${_hdf5_location}"
-          IMPORTED_IMPLIB "${_hdf5_location}"
           INTERFACE_INCLUDE_DIRECTORIES "${HDF5_${hdf5_lang}_HL_INCLUDE_DIRS}"
           INTERFACE_COMPILE_DEFINITIONS "${_hdf5_definitions}")
         if (_hdf5_libtype STREQUAL "SHARED")
