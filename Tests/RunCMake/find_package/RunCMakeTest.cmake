@@ -44,6 +44,7 @@ run_cmake(VersionRangeConfig2)
 run_cmake(VersionRangeConfig02)
 run_cmake(VersionRangeConfigStd)
 run_cmake(VersionRangeConfigStd2)
+run_cmake(IgnorePath)
 if(UNIX
     AND NOT MSYS # FIXME: This works on CYGWIN but not on MSYS
     )
