@@ -163,6 +163,16 @@ install(
 
 cmake_policy(PUSH)
 cmake_policy(SET CMP0022 NEW)
+
+# Test control over direct linking.
+include(../../InterfaceLinkLibrariesDirect/testStaticLibPlugin.cmake)
+include(../../InterfaceLinkLibrariesDirect/testSharedLibWithHelper.cmake)
+include(../../InterfaceLinkLibrariesDirect/testExeWithPluginHelper.cmake)
+if(NOT maybe_OBJECTS_DESTINATION)
+  target_compile_definitions(testSharedLibHelperObj INTERFACE testSharedLibHelperObj_NO_OBJECT)
+  target_compile_definitions(testExePluginHelperObj INTERFACE testExePluginHelperObj_NO_OBJECT)
+endif()
+
 # Test exporting dependent libraries into different exports
 add_library(testLibRequired testLibRequired.c)
 add_library(testLibDepends testLibDepends.c)
@@ -544,6 +554,9 @@ install(
   testLibDeprecation
   testLibCycleA testLibCycleB
   testLibNoSONAME
+  testStaticLibWithPlugin testStaticLibPluginExtra testStaticLibPlugin
+  testSharedLibWithHelper testSharedLibHelperObj
+  testExeWithPluginHelper testExePluginHelperObj
   testMod1 testMod2
   cmp0022NEW cmp0022OLD
   TopDirLib SubDirLinkA
@@ -619,6 +632,9 @@ export(TARGETS testExe2 testLib4 testLib5 testLib6 testLib7 testExe3 testExe4 te
   testLib4lib testLib4libdbg testLib4libopt
   testLibCycleA testLibCycleB
   testLibNoSONAME
+  testStaticLibWithPlugin testStaticLibPluginExtra testStaticLibPlugin
+  testSharedLibWithHelper testSharedLibHelperObj
+  testExeWithPluginHelper testExePluginHelperObj
   testMod1 testMod2
   testLibPerConfigDest
   NAMESPACE bld_

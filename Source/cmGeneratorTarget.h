@@ -667,6 +667,9 @@ public:
    */
   void ClearSourcesCache();
 
+  // Do not use.  This is only for a specific call site with a FIXME comment.
+  void ClearLinkInterfaceCache();
+
   void AddSource(const std::string& src, bool before = false);
   void AddTracedSources(std::vector<std::string> const& srcs);
 
@@ -1001,8 +1004,10 @@ private:
     std::string ImportLibrary;
     std::string LibName;
     std::string Languages;
-    std::vector<BT<std::string>> Libraries;
     std::string LibrariesProp;
+    std::vector<BT<std::string>> Libraries;
+    std::vector<BT<std::string>> LibrariesHeadInclude;
+    std::vector<BT<std::string>> LibrariesHeadExclude;
     std::string SharedDeps;
   };
 
@@ -1063,19 +1068,31 @@ private:
   bool IsLinkLookupScope(std::string const& n,
                          cmLocalGenerator const*& lg) const;
 
+  enum class LinkInterfaceField
+  {
+    Libraries,
+    HeadExclude,
+    HeadInclude,
+  };
   void ExpandLinkItems(std::string const& prop, cmBTStringRange entries,
                        std::string const& config,
                        const cmGeneratorTarget* headTarget,
-                       LinkInterfaceFor interfaceFor,
+                       LinkInterfaceFor interfaceFor, LinkInterfaceField field,
                        cmLinkInterface& iface) const;
 
   struct LookupLinkItemScope
   {
     cmLocalGenerator const* LG;
   };
+  enum class LookupSelf
+  {
+    No,
+    Yes,
+  };
   cm::optional<cmLinkItem> LookupLinkItem(std::string const& n,
                                           cmListFileBacktrace const& bt,
-                                          LookupLinkItemScope* scope) const;
+                                          LookupLinkItemScope* scope,
+                                          LookupSelf lookupSelf) const;
 
   std::vector<BT<std::string>> GetSourceFilePaths(
     std::string const& config) const;

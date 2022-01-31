@@ -188,11 +188,13 @@ bool cmGeneratorExpressionDAGChecker::EvaluatingLinkLibraries(
     return top->Target == tgt && prop == "LINK_LIBRARIES"_s;
   }
 
-  return prop == "LINK_LIBRARIES"_s || prop == "LINK_INTERFACE_LIBRARIES"_s ||
+  return prop == "LINK_LIBRARIES"_s || prop == "INTERFACE_LINK_LIBRARIES"_s ||
+    prop == "INTERFACE_LINK_LIBRARIES_DIRECT"_s ||
+    prop == "INTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE"_s ||
+    prop == "LINK_INTERFACE_LIBRARIES"_s ||
     prop == "IMPORTED_LINK_INTERFACE_LIBRARIES"_s ||
     cmHasLiteralPrefix(prop, "LINK_INTERFACE_LIBRARIES_") ||
-    cmHasLiteralPrefix(prop, "IMPORTED_LINK_INTERFACE_LIBRARIES_") ||
-    prop == "INTERFACE_LINK_LIBRARIES"_s;
+    cmHasLiteralPrefix(prop, "IMPORTED_LINK_INTERFACE_LIBRARIES_");
 }
 
 cmGeneratorExpressionDAGChecker const* cmGeneratorExpressionDAGChecker::Top()
