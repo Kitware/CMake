@@ -41,6 +41,12 @@ do.
 /* Increase the file descriptor limit for select() before including
    related system headers. (Default: 64) */
 #  define FD_SETSIZE 16384
+#elif defined(__APPLE__)
+/* Increase the file descriptor limit for select() before including
+   related system headers. (Default: 1024) */
+#  define _DARWIN_UNLIMITED_SELECT
+#  include <limits.h> /* OPEN_MAX */
+#  define FD_SETSIZE OPEN_MAX
 #endif
 
 #include <assert.h>    /* assert */
