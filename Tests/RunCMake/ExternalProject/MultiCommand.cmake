@@ -1,5 +1,12 @@
 include(ExternalProject)
 
+# Force all steps to be re-run by removing timestamps from any previous run.
+# This has to happen before we call ExternalProject_Add() because that command
+# writes some files to the stamp directory for recording repository details.
+set(STAMP_DIR ${CMAKE_BINARY_DIR}/multiCommand-prefix/src/multiCommand-stamp)
+file(REMOVE_RECURSE "${STAMP_DIR}")
+file(MAKE_DIRECTORY "${STAMP_DIR}")
+
 # Verify COMMAND keyword is recognized after various *_COMMAND options
 ExternalProject_Add(multiCommand
   DOWNLOAD_COMMAND  "${CMAKE_COMMAND}" -E echo "download 1"
@@ -17,8 +24,3 @@ ExternalProject_Add(multiCommand
   INSTALL_COMMAND   "${CMAKE_COMMAND}" -E echo "install 1"
           COMMAND   "${CMAKE_COMMAND}" -E echo "install 2"
 )
-
-# Force all steps to be re-run by removing timestamps from any previous run
-ExternalProject_Get_Property(multiCommand STAMP_DIR)
-file(REMOVE_RECURSE "${STAMP_DIR}")
-file(MAKE_DIRECTORY "${STAMP_DIR}")

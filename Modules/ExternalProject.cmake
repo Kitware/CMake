@@ -2473,10 +2473,13 @@ function(_ep_add_download_command name)
   set(depends)
   set(comment)
   set(work_dir)
+  set(extra_repo_info)
 
   if(cmd_set)
     set(work_dir ${download_dir})
+    set(method custom)
   elseif(cvs_repository)
+    set(method cvs)
     find_package(CVS QUIET)
     if(NOT CVS_EXECUTABLE)
       message(FATAL_ERROR "error: could not find cvs for checkout of ${name}")
@@ -2488,22 +2491,13 @@ function(_ep_add_download_command name)
     endif()
 
     get_property(cvs_tag TARGET ${name} PROPERTY _EP_CVS_TAG)
-
-    set(repository ${cvs_repository})
-    set(module ${cvs_module})
-    set(tag ${cvs_tag})
-    configure_file(
-      "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/RepositoryInfo.txt.in"
-      "${stamp_dir}/${name}-cvsinfo.txt"
-      @ONLY
-      )
-
     get_filename_component(src_name "${source_dir}" NAME)
     get_filename_component(work_dir "${source_dir}" PATH)
     set(comment "Performing download step (CVS checkout) for '${name}'")
     set(cmd ${CVS_EXECUTABLE} -d ${cvs_repository} -q co ${cvs_tag} -d ${src_name} ${cvs_module})
-    list(APPEND depends ${stamp_dir}/${name}-cvsinfo.txt)
+
   elseif(svn_repository)
+    set(method svn)
     find_package(Subversion QUIET)
     if(NOT Subversion_SVN_EXECUTABLE)
       message(FATAL_ERROR "error: could not find svn for checkout of ${name}")
@@ -2513,15 +2507,6 @@ function(_ep_add_download_command name)
     get_property(svn_username TARGET ${name} PROPERTY _EP_SVN_USERNAME)
     get_property(svn_password TARGET ${name} PROPERTY _EP_SVN_PASSWORD)
     get_property(svn_trust_cert TARGET ${name} PROPERTY _EP_SVN_TRUST_CERT)
-
-    set(repository "${svn_repository} user=${svn_username} password=${svn_password}")
-    set(module)
-    set(tag ${svn_revision})
-    configure_file(
-      "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/RepositoryInfo.txt.in"
-      "${stamp_dir}/${name}-svninfo.txt"
-      @ONLY
-      )
 
     get_filename_component(src_name "${source_dir}" NAME)
     get_filename_component(work_dir "${source_dir}" PATH)
@@ -2538,8 +2523,9 @@ function(_ep_add_download_command name)
     endif()
     set(cmd ${Subversion_SVN_EXECUTABLE} co ${svn_repository} ${svn_revision}
       --non-interactive ${svn_trust_cert_args} ${svn_user_pw_args} ${src_name})
-    list(APPEND depends ${stamp_dir}/${name}-svninfo.txt)
+
   elseif(git_repository)
+    set(method git)
     # FetchContent gives us these directly, so don't try to recompute them
     if(NOT GIT_EXECUTABLE OR NOT GIT_VERSION_STRING)
       unset(CMAKE_MODULE_PATH) # Use CMake builtin find module
@@ -2584,21 +2570,21 @@ function(_ep_add_download_command name)
       list(PREPEND git_config advice.detachedHead=false)
     endif()
 
-    # For the download step, and the git clone operation, only the repository
-    # should be recorded in a configured RepositoryInfo file. If the repo
-    # changes, the clone script should be run again. But if only the tag
-    # changes, avoid running the clone script again. Let the 'always' running
-    # update step checkout the new tag.
+    # The command doesn't expose any details, so we need to record additional
+    # information in the RepositoryInfo.txt file. For the download step, only
+    # the things specifically affecting the clone operation should be recorded.
+    # If the repo changes, the clone script should be run again.
+    # But if only the tag changes, avoid running the clone script again.
+    # Let the 'always' running update step checkout the new tag.
     #
-    set(repository ${git_repository})
-    set(module)
-    set(tag ${git_remote_name})
-    configure_file(
-      "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/RepositoryInfo.txt.in"
-      "${stamp_dir}/${name}-gitinfo.txt"
-      @ONLY
-      )
-
+    set(extra_repo_info
+"repository=${git_repository}
+remote=${git_remote_name}
+init_submodules=${git_init_submodules}
+recurse_submodules=${git_submodules_recurse}
+submodules=${git_submodules}
+CMP0097=${_EP_CMP0097}
+")
     get_filename_component(src_name "${source_dir}" NAME)
     get_filename_component(work_dir "${source_dir}" PATH)
 
@@ -2612,8 +2598,9 @@ function(_ep_add_download_command name)
       )
     set(comment "Performing download step (git clone) for '${name}'")
     set(cmd ${CMAKE_COMMAND} -P ${tmp_dir}/${name}-gitclone.cmake)
-    list(APPEND depends ${stamp_dir}/${name}-gitinfo.txt)
+
   elseif(hg_repository)
+    set(method hg)
     find_package(Hg QUIET)
     if(NOT HG_EXECUTABLE)
       message(FATAL_ERROR "error: could not find hg for clone of ${name}")
@@ -2624,21 +2611,14 @@ function(_ep_add_download_command name)
       set(hg_tag "tip")
     endif()
 
-    # For the download step, and the hg clone operation, only the repository
-    # should be recorded in a configured RepositoryInfo file. If the repo
-    # changes, the clone script should be run again. But if only the tag
-    # changes, avoid running the clone script again. Let the 'always' running
-    # update step checkout the new tag.
+    # The command doesn't expose any details, so we need to record additional
+    # information in the RepositoryInfo.txt file. For the download step, only
+    # the things specifically affecting the clone operation should be recorded.
+    # If the repo changes, the clone script should be run again.
+    # But if only the tag changes, avoid running the clone script again.
+    # Let the 'always' running update step checkout the new tag.
     #
-    set(repository ${hg_repository})
-    set(module)
-    set(tag)
-    configure_file(
-      "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/RepositoryInfo.txt.in"
-      "${stamp_dir}/${name}-hginfo.txt"
-      @ONLY
-      )
-
+    set(extra_repo_info "repository=${hg_repository}")
     get_filename_component(src_name "${source_dir}" NAME)
     get_filename_component(work_dir "${source_dir}" PATH)
 
@@ -2652,8 +2632,9 @@ function(_ep_add_download_command name)
       )
     set(comment "Performing download step (hg clone) for '${name}'")
     set(cmd ${CMAKE_COMMAND} -P ${tmp_dir}/${name}-hgclone.cmake)
-    list(APPEND depends ${stamp_dir}/${name}-hginfo.txt)
+
   elseif(url)
+    set(method url)
     get_filename_component(work_dir "${source_dir}" PATH)
     get_property(hash TARGET ${name} PROPERTY _EP_URL_HASH)
     _ep_get_hash_regex(_ep_hash_regex)
@@ -2671,15 +2652,10 @@ function(_ep_add_download_command name)
     if(md5 AND NOT hash)
       set(hash "MD5=${md5}")
     endif()
-    set(repository "external project URL")
-    set(module "${url}")
-    set(tag "${hash}")
-    configure_file(
-      "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/RepositoryInfo.txt.in"
-      "${stamp_dir}/${name}-urlinfo.txt"
-      @ONLY
-      )
-    list(APPEND depends ${stamp_dir}/${name}-urlinfo.txt)
+    set(extra_repo_info
+"url(s)=${url}
+hash=${hash}
+")
 
     list(LENGTH url url_list_length)
     if(NOT "${url_list_length}" STREQUAL "1")
@@ -2700,6 +2676,7 @@ function(_ep_add_download_command name)
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${abs_dir} ${source_dir})
     else()
       get_property(no_extract TARGET "${name}" PROPERTY _EP_DOWNLOAD_NO_EXTRACT)
+      string(APPEND extra_repo_info "no_extract=${no_extract}\n")
       if("${url}" MATCHES "^[a-z]+://")
         # TODO: Should download and extraction be different steps?
         if("x${fname}" STREQUAL "x")
@@ -2754,6 +2731,11 @@ function(_ep_add_download_command name)
         endif ()
         set(comment "Performing download step (${steps}) for '${name}'")
         file(WRITE "${stamp_dir}/verify-${name}.cmake" "") # already verified by 'download_script'
+
+        # Rather than adding everything to the RepositoryInfo.txt file, it is
+        # more robust to just depend on the download script. That way, we will
+        # re-download if any aspect of the download changes.
+        list(APPEND depends "${download_script}")
       else()
         set(file "${url}")
         if (no_extract)
@@ -2782,6 +2764,7 @@ function(_ep_add_download_command name)
       endif ()
     endif()
   else()
+    set(method source_dir)
     _ep_is_dir_empty("${source_dir}" empty)
     if(${empty})
       message(SEND_ERROR
@@ -2798,6 +2781,17 @@ function(_ep_add_download_command name)
         )
     endif()
   endif()
+
+  # We use configure_file() to write the repo_info_file so that the file's
+  # timestamp is not updated if we don't change the contents
+
+  set(repo_info_file ${stamp_dir}/${name}-${method}info.txt)
+  list(APPEND depends ${repo_info_file})
+  configure_file(
+    "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/RepositoryInfo.txt.in"
+    "${repo_info_file}"
+    @ONLY
+  )
 
   get_property(log TARGET ${name} PROPERTY _EP_LOG_DOWNLOAD)
   if(log)
