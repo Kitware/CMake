@@ -266,9 +266,20 @@ while(1)
   _RUBY_VALIDATE_INTERPRETER (${Ruby_FIND_VERSION})
   if (Ruby_EXECUTABLE)
     break()
+  else()
+    # Remove first entry from names list.
+    LIST(REMOVE_AT _Ruby_POSSIBLE_EXECUTABLE_NAMES 0)
+
+    # If the list is now empty, abort.
+    if (NOT _Ruby_POSSIBLE_EXECUTABLE_NAMES)
+      break()
+    else()
+      # Otherwise, continue with the remaining list. Make sure that we clear
+      # the cached variable.
+      unset(Ruby_EXECUTABLE CACHE)
+    endif()
   endif()
 
-  break()
 endwhile()
 
 if(Ruby_EXECUTABLE AND NOT Ruby_VERSION_MAJOR)
