@@ -1050,8 +1050,12 @@ if (HDF5_FOUND)
       else()
         if (DEFINED "HDF5_${hdf5_target_name}_LIBRARY")
           set(_hdf5_location "${HDF5_${hdf5_target_name}_LIBRARY}")
+          set(_hdf5_location_release "${HDF5_${hdf5_target_name}_LIBRARY_RELEASE}")
+          set(_hdf5_location_debug "${HDF5_${hdf5_target_name}_LIBRARY_DEBUG}")
         elseif (DEFINED "HDF5_${hdf5_lang}_LIBRARY")
           set(_hdf5_location "${HDF5_${hdf5_lang}_LIBRARY}")
+          set(_hdf5_location_release "${HDF5_${hdf5_lang}_LIBRARY_RELEASE}")
+          set(_hdf5_location_debug "${HDF5_${hdf5_lang}_LIBRARY_DEBUG}")
         elseif (DEFINED "HDF5_${hdf5_lang}_LIBRARY_${hdf5_target_name}")
           set(_hdf5_location "${HDF5_${hdf5_lang}_LIBRARY_${hdf5_target_name}}")
         else ()
@@ -1066,9 +1070,24 @@ if (HDF5_FOUND)
          set(HDF5_${hdf5_lang}_INCLUDE_DIRS ${HDF5_INCLUDE_DIRS})
         endif ()
         set_target_properties("hdf5::${hdf5_target_name}" PROPERTIES
-          IMPORTED_LOCATION "${_hdf5_location}"
           INTERFACE_INCLUDE_DIRECTORIES "${HDF5_${hdf5_lang}_INCLUDE_DIRS}"
           INTERFACE_COMPILE_DEFINITIONS "${_hdf5_definitions}")
+        if (_hdf5_location_release)
+          set_property(TARGET "hdf5::${hdf5_target_name}" APPEND PROPERTY
+            IMPORTED_CONFIGURATIONS RELEASE)
+          set_property(TARGET "hdf5::${hdf5_target_name}" PROPERTY
+            IMPORTED_LOCATION_RELEASE "${_hdf5_location_release}")
+        endif()
+        if (_hdf5_location_debug)
+          set_property(TARGET "hdf5::${hdf5_target_name}" APPEND PROPERTY
+            IMPORTED_CONFIGURATIONS DEBUG)
+          set_property(TARGET "hdf5::${hdf5_target_name}" PROPERTY
+            IMPORTED_LOCATION_DEBUG "${_hdf5_location_debug}")
+        endif()
+        if (NOT _hdf5_location_release AND NOT _hdf5_location_debug)
+          set_property(TARGET "hdf5::${hdf5_target_name}" PROPERTY
+            IMPORTED_LOCATION "${_hdf5_location}")
+        endif()
         if (_hdf5_libtype STREQUAL "SHARED")
           set_property(TARGET "hdf5::${hdf5_target_name}" APPEND
             PROPERTY
@@ -1081,6 +1100,8 @@ if (HDF5_FOUND)
         unset(_hdf5_definitions)
         unset(_hdf5_libtype)
         unset(_hdf5_location)
+        unset(_hdf5_location_release)
+        unset(_hdf5_location_debug)
       endif ()
     endif ()
 
@@ -1110,8 +1131,12 @@ if (HDF5_FOUND)
       else()
         if (DEFINED "HDF5_${hdf5_target_name}_LIBRARY")
           set(_hdf5_location "${HDF5_${hdf5_target_name}_LIBRARY}")
+          set(_hdf5_location_release "${HDF5_${hdf5_target_name}_LIBRARY_RELEASE}")
+          set(_hdf5_location_debug "${HDF5_${hdf5_target_name}_LIBRARY_DEBUG}")
         elseif (DEFINED "HDF5_${hdf5_lang}_HL_LIBRARY")
           set(_hdf5_location "${HDF5_${hdf5_lang}_HL_LIBRARY}")
+          set(_hdf5_location_release "${HDF5_${hdf5_lang}_HL_LIBRARY_RELEASE}")
+          set(_hdf5_location_debug "${HDF5_${hdf5_lang}_HL_LIBRARY_DEBUG}")
         elseif (DEFINED "HDF5_${hdf5_lang}_LIBRARY_${hdf5_target_name}")
           set(_hdf5_location "${HDF5_${hdf5_lang}_LIBRARY_${hdf5_target_name}}")
         elseif (hdf5_alt_target_name AND DEFINED "HDF5_${hdf5_lang}_LIBRARY_${hdf5_alt_target_name}")
@@ -1125,9 +1150,24 @@ if (HDF5_FOUND)
         add_library("hdf5::${hdf5_target_name}" UNKNOWN IMPORTED)
         string(REPLACE "-D" "" _hdf5_definitions "${HDF5_${hdf5_lang}_HL_DEFINITIONS}")
         set_target_properties("hdf5::${hdf5_target_name}" PROPERTIES
-          IMPORTED_LOCATION "${_hdf5_location}"
           INTERFACE_INCLUDE_DIRECTORIES "${HDF5_${hdf5_lang}_HL_INCLUDE_DIRS}"
           INTERFACE_COMPILE_DEFINITIONS "${_hdf5_definitions}")
+        if (_hdf5_location_release)
+          set_property(TARGET "hdf5::${hdf5_target_name}" APPEND PROPERTY
+            IMPORTED_CONFIGURATIONS RELEASE)
+          set_property(TARGET "hdf5::${hdf5_target_name}" PROPERTY
+            IMPORTED_LOCATION_RELEASE "${_hdf5_location_release}")
+        endif()
+        if (_hdf5_location_debug)
+          set_property(TARGET "hdf5::${hdf5_target_name}" APPEND PROPERTY
+            IMPORTED_CONFIGURATIONS DEBUG)
+          set_property(TARGET "hdf5::${hdf5_target_name}" PROPERTY
+            IMPORTED_LOCATION_DEBUG "${_hdf5_location_debug}")
+        endif()
+        if (NOT _hdf5_location_release AND NOT _hdf5_location_debug)
+          set_property(TARGET "hdf5::${hdf5_target_name}" PROPERTY
+            IMPORTED_LOCATION "${_hdf5_location}")
+        endif()
         if (_hdf5_libtype STREQUAL "SHARED")
           set_property(TARGET "hdf5::${hdf5_target_name}" APPEND
             PROPERTY
