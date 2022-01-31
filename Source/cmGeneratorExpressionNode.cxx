@@ -1231,7 +1231,15 @@ static const struct LinkLibraryNode : public cmGeneratorExpressionNode
       return std::string();
     }
 
+    static cmsys::RegularExpression featureNameValidator("^[A-Za-z0-9_]+$");
     auto const& feature = list.front();
+    if (!featureNameValidator.find(feature)) {
+      reportError(context, content->GetOriginalExpression(),
+                  cmStrCat("The feature name '", feature,
+                           "' contains invalid characters."));
+      return std::string();
+    }
+
     const auto LL_BEGIN = cmStrCat("<LINK_LIBRARY:", feature, '>');
     const auto LL_END = cmStrCat("</LINK_LIBRARY:", feature, '>');
 
@@ -1252,6 +1260,17 @@ static const struct LinkLibraryNode : public cmGeneratorExpressionNode
         "$<LINK_LIBRARY:...> with different features cannot be nested.");
       return std::string();
     }
+    // $<LINK_GROUP:...> must not appear as part of $<LINK_LIBRARY:...>
+    it = std::find_if(list.cbegin() + 1, list.cend(),
+                      [](const std::string& item) -> bool {
+                        return cmHasPrefix(item, "<LINK_GROUP:"_s);
+                      });
+    if (it != list.cend()) {
+      reportError(context, content->GetOriginalExpression(),
+                  "$<LINK_GROUP:...> cannot be nested inside a "
+                  "$<LINK_LIBRARY:...> expression.");
+      return std::string();
+    }
 
     list.front() = LL_BEGIN;
     list.push_back(LL_END);
@@ -1259,6 +1278,71 @@ static const struct LinkLibraryNode : public cmGeneratorExpressionNode
     return cmJoin(list, ";"_s);
   }
 } linkLibraryNode;
+
+static const struct LinkGroupNode : public cmGeneratorExpressionNode
+{
+  LinkGroupNode() {} // NOLINT(modernize-use-equals-default)
+
+  int NumExpectedParameters() const override { return OneOrMoreParameters; }
+
+  std::string Evaluate(
+    const std::vector<std::string>& parameters,
+    cmGeneratorExpressionContext* context,
+    const GeneratorExpressionContent* content,
+    cmGeneratorExpressionDAGChecker* dagChecker) const override
+  {
+    if (!context->HeadTarget || !dagChecker ||
+        !dagChecker->EvaluatingLinkLibraries()) {
+      reportError(context, content->GetOriginalExpression(),
+                  "$<LINK_GROUP:...> may only be used with binary targets "
+                  "to specify group of link libraries.");
+      return std::string();
+    }
+
+    std::vector<std::string> list;
+    cmExpandLists(parameters.begin(), parameters.end(), list);
+    if (list.empty()) {
+      reportError(
+        context, content->GetOriginalExpression(),
+        "$<LINK_GROUP:...> expects a feature name as first argument.");
+      return std::string();
+    }
+    // $<LINK_GROUP:..> cannot be nested
+    if (std::find_if(list.cbegin(), list.cend(),
+                     [](const std::string& item) -> bool {
+                       return cmHasPrefix(item, "<LINK_GROUP"_s);
+                     }) != list.cend()) {
+      reportError(context, content->GetOriginalExpression(),
+                  "$<LINK_GROUP:...> cannot be nested.");
+      return std::string();
+    }
+    if (list.size() == 1) {
+      // no libraries specified, ignore this genex
+      return std::string();
+    }
+
+    static cmsys::RegularExpression featureNameValidator("^[A-Za-z0-9_]+$");
+    auto const& feature = list.front();
+    if (!featureNameValidator.find(feature)) {
+      reportError(context, content->GetOriginalExpression(),
+                  cmStrCat("The feature name '", feature,
+                           "' contains invalid characters."));
+      return std::string();
+    }
+
+    const auto LG_BEGIN = cmStrCat(
+      "<LINK_GROUP:", feature, ':',
+      cmJoin(cmRange<decltype(list.cbegin())>(list.cbegin() + 1, list.cend()),
+             "|"_s),
+      '>');
+    const auto LG_END = cmStrCat("</LINK_GROUP:", feature, '>');
+
+    list.front() = LG_BEGIN;
+    list.push_back(LG_END);
+
+    return cmJoin(list, ";"_s);
+  }
+} linkGroupNode;
 
 static const struct HostLinkNode : public cmGeneratorExpressionNode
 {
@@ -2731,6 +2815,7 @@ const cmGeneratorExpressionNode* cmGeneratorExpressionNode::GetNode(
     { "LINK_LANG_AND_ID", &linkLanguageAndIdNode },
     { "LINK_LANGUAGE", &linkLanguageNode },
     { "LINK_LIBRARY", &linkLibraryNode },
+    { "LINK_GROUP", &linkGroupNode },
     { "HOST_LINK", &hostLinkNode },
     { "DEVICE_LINK", &deviceLinkNode },
     { "SHELL_PATH", &shellPathNode }

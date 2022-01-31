@@ -1,0 +1,13 @@
+CMake Warning \(dev\) at library-ignored.cmake:[0-9]+ \(add_library\):
+  The feature 'feat', specified as part of a generator-expression
+  '\$<LINK_GROUP:feat>', will not be applied to the INTERFACE library 'front'.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+CMake Warning \(dev\) at library-ignored.cmake:[0-9]+ \(add_library\):
+  The feature 'feat', specified as part of a generator-expression
+  '\$<LINK_GROUP:feat>', will not be applied to the OBJECT library 'dep'.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.

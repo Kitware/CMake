@@ -6341,7 +6341,8 @@ cm::string_view missingTargetPossibleReasons =
 bool cmGeneratorTarget::VerifyLinkItemColons(LinkItemRole role,
                                              cmLinkItem const& item) const
 {
-  if (item.Target || item.AsStr().find("::") == std::string::npos) {
+  if (item.Target || cmHasPrefix(item.AsStr(), "<LINK_GROUP:"_s) ||
+      item.AsStr().find("::") == std::string::npos) {
     return true;
   }
   MessageType messageType = MessageType::FATAL_ERROR;
@@ -6388,7 +6389,8 @@ bool cmGeneratorTarget::VerifyLinkItemIsTarget(LinkItemRole role,
   if (!str.empty() &&
       (str[0] == '-' || str[0] == '$' || str[0] == '`' ||
        str.find_first_of("/\\") != std::string::npos ||
-       cmHasPrefix(str, "<LINK_LIBRARY:"_s))) {
+       cmHasPrefix(str, "<LINK_LIBRARY:"_s) ||
+       cmHasPrefix(str, "<LINK_GROUP:"_s))) {
     return true;
   }
 

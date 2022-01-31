@@ -255,12 +255,6 @@ private:
   {
   public:
     FeatureDescriptor() = default;
-    FeatureDescriptor(std::string name, std::string itemFormat);
-    FeatureDescriptor(std::string name, std::string itemPathFormat,
-                      std::string itemNameFormat);
-    FeatureDescriptor(std::string name, std::string prefix,
-                      std::string itemPathFormat, std::string itemNameFormat,
-                      std::string suffix);
 
     const std::string Name;
     const bool Supported = false;
@@ -273,13 +267,44 @@ private:
                                  std::string const& defaultValue,
                                  ItemIsPath isPath) const;
 
+  protected:
+    FeatureDescriptor(std::string name, std::string itemFormat);
+    FeatureDescriptor(std::string name, std::string itemPathFormat,
+                      std::string itemNameFormat);
+    FeatureDescriptor(std::string name, std::string prefix,
+                      std::string itemPathFormat, std::string itemNameFormat,
+                      std::string suffix);
+
+    FeatureDescriptor(std::string name, std::string prefix, std::string suffix,
+                      bool isGroup);
+
   private:
     std::string ItemPathFormat;
     std::string ItemNameFormat;
+  };
+
+  class LibraryFeatureDescriptor : public FeatureDescriptor
+  {
+  public:
+    LibraryFeatureDescriptor(std::string name, std::string itemFormat);
+    LibraryFeatureDescriptor(std::string name, std::string itemPathFormat,
+                             std::string itemNameFormat);
+    LibraryFeatureDescriptor(std::string name, std::string prefix,
+                             std::string itemPathFormat,
+                             std::string itemNameFormat, std::string suffix);
   };
   std::map<std::string, FeatureDescriptor> LibraryFeatureDescriptors;
   bool AddLibraryFeature(std::string const& feature);
   FeatureDescriptor const& GetLibraryFeature(std::string const& feature) const;
   FeatureDescriptor const* FindLibraryFeature(
     std::string const& feature) const;
+
+  class GroupFeatureDescriptor : public FeatureDescriptor
+  {
+  public:
+    GroupFeatureDescriptor(std::string name, std::string prefix,
+                           std::string suffix);
+  };
+  std::map<std::string, FeatureDescriptor> GroupFeatureDescriptors;
+  FeatureDescriptor const& GetGroupFeature(std::string const& feature);
 };

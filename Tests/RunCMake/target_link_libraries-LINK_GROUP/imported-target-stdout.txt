@@ -1,0 +1,16 @@
+CMake Warning \(dev\) at imported-target.cmake:[0-9]+ \(add_library\):
+  The 'IMPORTED' target 'NS::lib2' uses the generator-expression
+  '\$<LINK_GROUP>' with the feature 'feat', which is undefined or unsupported.
+
+  Did you miss to define it by setting variables
+  "CMAKE_C_LINK_GROUP_USING_feat" and
+  "CMAKE_C_LINK_GROUP_USING_feat_SUPPORTED"\?
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+CMake Error at imported-target.cmake:[0-9]+ \(add_library\):
+  Feature 'feat', specified through generator-expression '\$<LINK_GROUP>' to
+  link target 'lib', is not supported for the 'C' link language.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

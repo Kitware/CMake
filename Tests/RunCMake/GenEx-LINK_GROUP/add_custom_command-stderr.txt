@@ -1,0 +1,9 @@
+CMake Error at add_custom_command.cmake:[0-9]+ \(add_custom_command\):
+  Error evaluating generator expression:
+
+    \$<LINK_GROUP:feat>
+
+  \$<LINK_GROUP:...> may only be used with binary targets to specify group of
+  link libraries.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

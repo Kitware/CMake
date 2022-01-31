@@ -1,0 +1,54 @@
+
+It must contain two elements.
+
+::
+
+  <PREFIX> <SUFFIX>
+
+``<PREFIX>`` and ``<SUFFIX>`` will be used to encapsulate the list of
+libraries.
+
+For the elements of this variable, the ``LINKER:`` prefix can be used:
+
+  .. include:: ../command/LINK_OPTIONS_LINKER.txt
+    :start-line: 3
+
+Examples
+^^^^^^^^
+
+Solving cross-references between two static libraries
+"""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+A common need is the capability to search repeatedly in a group of static
+libraries until no new undefined references are created. This capability is
+offered by different environments but with a specific syntax:
+
+.. code-block:: cmake
+
+  set(CMAKE_C_LINK_GROUP_USING_cross_refs_SUPPORTED TRUE)
+  if(CMAKE_C_COMPILER_ID STREQUAL "GNU"
+     AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    set(CMAKE_C_LINK_GROUP_USING_cross_refs "LINKER:--start-group"
+                                            "LINKER:--end-group")
+  elseif(CMAKE_C_COMPILER_ID STREQUAL "SunPro"
+         AND CMAKE_SYSTEM_NAME STREQUAL "SunOS")
+    set(CMAKE_C_LINK_GROUP_USING_cross_refs "LINKER:-z,rescan-start"
+                                            "LINKER:-z,rescan-end")
+  else()
+    # feature not yet supported for the other environments
+    set(CMAKE_C_LINK_GROUP_USING_cross_refs_SUPPORTED FALSE)
+  endif()
+
+  add_library(lib1 STATIC ...)
+
+  add_library(lib3 SHARED ...)
+  if(CMAKE_C_LINK_GROUP_USING_cross_refs_SUPPORTED)
+    target_link_libraries(lib3 PRIVATE "$<LINK_GROUP:cross_refs,lib1,external>")
+  else()
+    target_link_libraries(lib3 PRIVATE lib1 external)
+  endif()
+
+CMake will generate the following link expressions:
+
+* ``GNU``: ``-Wl,--start-group /path/to/lib1.a -lexternal -Wl,--end-group``
+* ``SunPro``: ``-Wl,-z,rescan-start /path/to/lib1.a -lexternal -Wl,-z,rescan-end``

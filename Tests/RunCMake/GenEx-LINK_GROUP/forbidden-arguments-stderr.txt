@@ -1,0 +1,16 @@
+CMake Error at forbidden-arguments.cmake:[0-9]+ \(link_libraries\):
+  Property LINK_LIBRARIES contains the invalid item "<LINK_GROUP:feat>".  The
+  LINK_LIBRARIES property may contain the generator-expression
+  "\$<LINK_GROUP:...>" which may be used to specify how the libraries are
+  linked.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Error at forbidden-arguments.cmake:[0-9]+ \(target_link_libraries\):
+  Property LINK_LIBRARIES contains the invalid item "<LINK_GROUP:feat>".  The
+  LINK_LIBRARIES property may contain the generator-expression
+  "\$<LINK_GROUP:...>" which may be used to specify how the libraries are
+  linked.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
