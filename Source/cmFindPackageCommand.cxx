@@ -1309,7 +1309,7 @@ inline std::size_t collectPathsForDebug(std::string& buffer,
     return 0;
   }
   for (std::size_t i = startIndex; i < paths.size(); i++) {
-    buffer += "  " + paths[i] + "\n";
+    buffer += "  " + paths[i].Path + "\n";
   }
   return paths.size();
 }

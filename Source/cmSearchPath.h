@@ -29,7 +29,18 @@ public:
   cmSearchPath(const cmSearchPath&) = default;
   cmSearchPath& operator=(const cmSearchPath&) = default;
 
-  const std::vector<std::string>& GetPaths() const { return this->Paths; }
+  struct PathWithPrefix
+  {
+    std::string Path;
+    std::string Prefix;
+
+    bool operator<(const PathWithPrefix& other) const
+    {
+      return this->Path < other.Path ||
+        (this->Path == other.Path && this->Prefix < other.Prefix);
+    }
+  };
+  const std::vector<PathWithPrefix>& GetPaths() const { return this->Paths; }
   std::size_t size() const { return this->Paths.size(); }
 
   void ExtractWithout(const std::set<std::string>& ignore,
@@ -47,8 +58,9 @@ public:
                       const char* base = nullptr);
 
 protected:
-  void AddPathInternal(const std::string& path, const char* base = nullptr);
+  void AddPathInternal(const std::string& path, const std::string& prefix,
+                       const char* base = nullptr);
 
   cmFindCommon* FC;
-  std::vector<std::string> Paths;
+  std::vector<PathWithPrefix> Paths;
 };

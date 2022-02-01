@@ -135,7 +135,7 @@ protected:
   std::map<PathLabel, cmSearchPath> LabeledPaths;
 
   std::vector<std::string> SearchPaths;
-  std::set<std::string> SearchPathsEmitted;
+  std::set<cmSearchPath::PathWithPrefix> SearchPathsEmitted;
 
   bool SearchFrameworkFirst;
   bool SearchFrameworkOnly;
