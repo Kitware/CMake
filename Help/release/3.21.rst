@@ -334,3 +334,10 @@ Changes made since CMake 3.21.0 include the following.
 * The :generator:`Visual Studio 17 2022` generator is now based on the
   "Visual Studio 2022" release candidates.  Previously it was based on
   preview versions.
+
+3.21.5
+------
+
+This version made no changes to documented features or interfaces.
+Some implementation updates were made to support ecosystem changes
+and/or fix regressions.
