@@ -53,7 +53,7 @@ p:source-package:
 
 p:doc-package:
     extends:
-        - .fedora34_sphinx_package
+        - .fedora35_sphinx_package
         - .cmake_prep_doc_linux
         - .linux_builder_tags_qt
         - .cmake_doc_artifacts
@@ -119,16 +119,16 @@ l:iwyu-debian10:
         - .linux_builder_tags
         - .run_automatically
 
-l:tidy-fedora34:
+l:tidy-fedora35:
     extends:
-        - .fedora34_tidy
+        - .fedora35_tidy
         - .cmake_build_linux
         - .linux_builder_tags_qt
         - .run_automatically
 
-l:sphinx-fedora34:
+l:sphinx-fedora35:
     extends:
-        - .fedora34_sphinx
+        - .fedora35_sphinx
         - .cmake_build_linux
         - .linux_builder_tags_qt
         - .run_automatically
@@ -136,9 +136,9 @@ l:sphinx-fedora34:
         CMAKE_CI_JOB_CONTINUOUS: "true"
         CMAKE_CI_JOB_HELP: "true"
 
-l:clang-analyzer-fedora34:
+l:clang-analyzer-fedora35:
     extends:
-        - .fedora34_clang_analyzer
+        - .fedora35_clang_analyzer
         - .cmake_build_linux
         - .linux_builder_tags_qt
         - .run_automatically
@@ -207,17 +207,17 @@ t:debian10-makefiles-clang:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora34-makefiles:
+t:fedora35-makefiles:
     extends:
-        - .fedora34_makefiles
+        - .fedora35_makefiles
         - .cmake_test_linux_release
         - .linux_builder_tags_qt
         - .run_dependent
         - .needs_centos6_x86_64
 
-t:fedora34-makefiles-nospace:
+t:fedora35-makefiles-nospace:
     extends:
-        - .fedora34_makefiles
+        - .fedora35_makefiles
         - .cmake_test_linux_release
         - .linux_builder_tags_qt
         - .cmake_junit_artifacts
@@ -225,7 +225,7 @@ t:fedora34-makefiles-nospace:
         - .needs_centos6_x86_64
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake-ci"
-        CMAKE_CI_BUILD_NAME: fedora34_makefiles_nospace
+        CMAKE_CI_BUILD_NAME: fedora35_makefiles_nospace
         CMAKE_CI_JOB_NIGHTLY: "true"
 
 t:cuda9.2-nvidia:
@@ -267,37 +267,37 @@ t:hip4.2-radeon:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-b:fedora34-ninja:
+b:fedora35-ninja:
     extends:
-        - .fedora34_ninja
+        - .fedora35_ninja
         - .cmake_build_linux
         - .cmake_build_artifacts
         - .linux_builder_tags_qt
         - .run_manually
 
-t:fedora34-ninja:
+t:fedora35-ninja:
     extends:
-        - .fedora34_ninja
+        - .fedora35_ninja
         - .cmake_test_linux
         - .linux_builder_tags_x11
         - .cmake_test_artifacts
         - .run_dependent
     dependencies:
-        - b:fedora34-ninja
+        - b:fedora35-ninja
     needs:
-        - b:fedora34-ninja
+        - b:fedora35-ninja
 
-t:fedora34-ninja-multi:
+t:fedora35-ninja-multi:
     extends:
-        - .fedora34_ninja_multi
+        - .fedora35_ninja_multi
         - .cmake_test_linux_external
         - .linux_builder_tags_qt
         - .cmake_junit_artifacts
         - .run_dependent
     dependencies:
-        - t:fedora34-ninja
+        - t:fedora35-ninja
     needs:
-        - t:fedora34-ninja
+        - t:fedora35-ninja
 
 t:intel2016-makefiles:
     extends:
@@ -566,9 +566,9 @@ u:linux-aarch64-package:
 
 ## Sanitizer builds
 
-b:fedora34-asan:
+b:fedora35-asan:
     extends:
-        - .fedora34_asan
+        - .fedora35_asan
         - .cmake_build_linux
         - .cmake_build_artifacts
         - .linux_builder_tags_qt
@@ -576,16 +576,16 @@ b:fedora34-asan:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora34-asan:
+t:fedora35-asan:
     extends:
-        - .fedora34_asan
+        - .fedora35_asan
         - .cmake_memcheck_linux
         - .linux_builder_tags_qt
         - .run_dependent
     dependencies:
-        - b:fedora34-asan
+        - b:fedora35-asan
     needs:
-        - b:fedora34-asan
+        - b:fedora35-asan
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 

@@ -5,7 +5,7 @@
 ### Release
 
 .linux_prep_source:
-    image: "fedora:34"
+    image: "fedora:35"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
@@ -68,8 +68,8 @@
 
 ### Fedora
 
-.fedora34:
-    image: "kitware/cmake:ci-fedora34-x86_64-2021-10-05"
+.fedora35:
+    image: "kitware/cmake:ci-fedora35-x86_64-2022-02-01"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci/long file name for testing purposes"
@@ -77,37 +77,37 @@
 
 #### Lint builds
 
-.fedora34_tidy:
-    extends: .fedora34
+.fedora35_tidy:
+    extends: .fedora35
 
     variables:
-        CMAKE_CONFIGURATION: fedora34_tidy
+        CMAKE_CONFIGURATION: fedora35_tidy
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMake_SKIP_INSTALL: 1
 
-.fedora34_clang_analyzer:
-    extends: .fedora34
+.fedora35_clang_analyzer:
+    extends: .fedora35
 
     variables:
-        CMAKE_CONFIGURATION: fedora34_clang_analyzer
+        CMAKE_CONFIGURATION: fedora35_clang_analyzer
         CMAKE_CI_BUILD_TYPE: Debug
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMake_SKIP_INSTALL: 1
 
-.fedora34_sphinx:
-    extends: .fedora34
+.fedora35_sphinx:
+    extends: .fedora35
 
     variables:
-        CMAKE_CONFIGURATION: fedora34_sphinx
+        CMAKE_CONFIGURATION: fedora35_sphinx
         CTEST_NO_WARNINGS_ALLOWED: 1
         CTEST_SOURCE_SUBDIRECTORY: "Utilities/Sphinx"
         CMake_SKIP_INSTALL: 1
 
-.fedora34_sphinx_package:
-    extends: .fedora34
+.fedora35_sphinx_package:
+    extends: .fedora35
 
     variables:
-        CMAKE_CONFIGURATION: fedora34_sphinx_package
+        CMAKE_CONFIGURATION: fedora35_sphinx_package
         CTEST_SOURCE_SUBDIRECTORY: "Utilities/Sphinx"
 
 #### Build and test
@@ -126,27 +126,27 @@
         CMAKE_CONFIGURATION: debian10_aarch64_ninja
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.fedora34_ninja:
-    extends: .fedora34
+.fedora35_ninja:
+    extends: .fedora35
 
     variables:
-        CMAKE_CONFIGURATION: fedora34_ninja
+        CMAKE_CONFIGURATION: fedora35_ninja
         CMAKE_CI_BUILD_TYPE: Release
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.fedora34_ninja_multi:
-    extends: .fedora34
+.fedora35_ninja_multi:
+    extends: .fedora35
 
     variables:
-        CMAKE_CONFIGURATION: fedora34_ninja_multi
+        CMAKE_CONFIGURATION: fedora35_ninja_multi
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_GENERATOR: "Ninja Multi-Config"
 
-.fedora34_makefiles:
-    extends: .fedora34
+.fedora35_makefiles:
+    extends: .fedora35
 
     variables:
-        CMAKE_CONFIGURATION: fedora34_makefiles
+        CMAKE_CONFIGURATION: fedora35_makefiles
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_GENERATOR: "Unix Makefiles"
 
@@ -178,13 +178,13 @@
         CTEST_MEMORYCHECK_TYPE: AddressSanitizer
         CTEST_MEMORYCHECK_SANITIZER_OPTIONS: ""
 
-.fedora34_asan:
+.fedora35_asan:
     extends:
-        - .fedora34
+        - .fedora35
         - .fedora_asan_addon
 
     variables:
-        CMAKE_CONFIGURATION: fedora34_asan
+        CMAKE_CONFIGURATION: fedora35_asan
 
 ### Intel Compiler
 
@@ -353,7 +353,7 @@
 
 .cmake_codespell_linux:
     stage: build
-    extends: .fedora34
+    extends: .fedora35
     script:
         - codespell
     interruptible: true
@@ -483,7 +483,7 @@
 .cmake_org_help:
     stage: build
     extends:
-        - .fedora34
+        - .fedora35
         - .linux_builder_tags
         - .cmake_org_help_artifacts
     script:
