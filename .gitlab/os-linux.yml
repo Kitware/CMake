@@ -131,6 +131,7 @@
 
     variables:
         CMAKE_CONFIGURATION: fedora34_ninja
+        CMAKE_CI_BUILD_TYPE: Release
         CTEST_NO_WARNINGS_ALLOWED: 1
 
 .fedora34_ninja_multi:
