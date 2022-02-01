@@ -646,10 +646,16 @@ Available commands are:
     ``true`` if cmake supports server-mode and ``false`` otherwise.
     Always false since CMake 3.20.
 
-``cat <files>...``
+``cat [--] <files>...``
   .. versionadded:: 3.18
 
   Concatenate files and print on the standard output.
+
+  .. versionadded:: 3.24
+    Added support for the double dash argument ``--``. This basic implementation
+    of ``cat`` does not support any options, so using a option starting with
+    ``-`` will result in an error. Use ``--`` to indicate the end of options, in
+    case a file starts with ``-``.
 
 ``chdir <dir> <cmd> [<arg>...]``
   Change the current working directory and run a command.
@@ -719,10 +725,15 @@ Available commands are:
 ``echo_append [<string>...]``
   Displays arguments as text but no new line.
 
-``env [--unset=NAME]... [NAME=VALUE]... COMMAND [ARG]...``
+``env [--unset=NAME ...] [NAME=VALUE ...] [--] <command> [<arg>...]``
   .. versionadded:: 3.1
 
   Run command in a modified environment.
+
+  .. versionadded:: 3.24
+    Added support for the double dash argument ``--``. Use ``--`` to stop
+    interpreting options/environment variables and treat the next argument as
+    the command, even if it start with ``-`` or contains a ``=``.
 
 ``environment``
   Display the current environment variables.
@@ -816,16 +827,16 @@ Available commands are:
   Rename a file or directory (on one volume). If file with the ``<newname>`` name
   already exists, then it will be silently replaced.
 
-``rm [-rRf] <file> <dir>...``
+``rm [-rRf] [--] <file|dir>...``
   .. versionadded:: 3.17
 
   Remove the files ``<file>`` or directories ``<dir>``.
-
   Use ``-r`` or ``-R`` to remove directories and their contents recursively.
   If any of the listed files/directories do not exist, the command returns a
   non-zero exit code, but no message is logged. The ``-f`` option changes
   the behavior to return a zero exit code (i.e. success) in such
-  situations instead.
+  situations instead. Use ``--`` to stop interpreting options and treat all
+  remaining arguments as paths, even if they start with ``-``.
 
 ``server``
   Launch :manual:`cmake-server(7)` mode.

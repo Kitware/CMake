@@ -97,7 +97,8 @@ void CMakeCommandUsage(std::string const& program)
     << "Available commands: \n"
     << "  capabilities              - Report capabilities built into cmake "
        "in JSON format\n"
-    << "  cat <files>...            - concat the files and print them to the standard output\n"
+    << "  cat [--] <files>...       - concat the files and print them to the "
+       "standard output\n"
     << "  chdir dir cmd [args...]   - run command in a given directory\n"
     << "  compare_files [--ignore-eol] file1 file2\n"
     << "                              - check if file1 is same as file2\n"
@@ -110,7 +111,7 @@ void CMakeCommandUsage(std::string const& program)
     << "  echo [<string>...]        - displays arguments as text\n"
     << "  echo_append [<string>...] - displays arguments as text but no new "
        "line\n"
-    << "  env [--unset=NAME]... [NAME=VALUE]... COMMAND [ARG]...\n"
+    << "  env [--unset=NAME ...] [NAME=VALUE ...] [--] <command> [<arg>...]\n"
     << "                            - run command in a modified environment\n"
     << "  environment               - display the current environment\n"
     << "  make_directory <dir>...   - create parent and <dir> directories\n"
@@ -125,8 +126,9 @@ void CMakeCommandUsage(std::string const& program)
     << "  remove_directory <dir>... - remove directories and their contents (deprecated: use rm instead)\n"
     << "  rename oldname newname    - rename a file or directory "
        "(on one volume)\n"
-    << "  rm [-rRf] <file/dir>...    - remove files or directories, use -f to "
-       "force it, r or R to remove directories and their contents recursively\n"
+    << "  rm [-rRf] [--] <file/dir>... - remove files or directories, use -f "
+       "to force it, r or R to remove directories and their contents "
+       "recursively\n"
     << "  sleep <number>...         - sleep for given number of seconds\n"
     << "  tar [cxt][vf][zjJ] file.tar [file/dir1 file/dir2 ...]\n"
     << "                            - create or extract a tar or zip archive\n"
@@ -793,6 +795,12 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
       auto ae = args.cend();
       for (; ai != ae; ++ai) {
         std::string const& a = *ai;
+        if (a == "--") {
+          // Stop parsing options/environment variables; the next argument
+          // should be the command.
+          ++ai;
+          break;
+        }
         if (cmHasLiteralPrefix(a, "--unset=")) {
           // Unset environment variable.
           cmSystemTools::UnPutEnv(a.substr(8));
@@ -1051,9 +1059,12 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
     // Command to concat files into one
     if (args[1] == "cat" && args.size() >= 3) {
       int return_value = 0;
+      bool doing_options = true;
       for (auto const& arg : cmMakeRange(args).advance(2)) {
-        if (cmHasLiteralPrefix(arg, "-")) {
-          if (arg != "--") {
+        if (doing_options && cmHasLiteralPrefix(arg, "-")) {
+          if (arg == "--") {
+            doing_options = false;
+          } else {
             cmSystemTools::Error(arg + ": option not handled");
             return_value = 1;
           }

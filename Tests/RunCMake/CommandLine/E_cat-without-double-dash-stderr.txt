@@ -1,0 +1,1 @@
+^CMake Error: -file-starting-with-dash.txt: option not handled$
