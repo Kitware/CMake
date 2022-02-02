@@ -147,6 +147,10 @@ cmCMakePresetsGraph::ReadFileResult BuildPresetsHelper(
 cmCMakePresetsGraph::ReadFileResult TestPresetsHelper(
   std::vector<cmCMakePresetsGraph::TestPreset>& out, const Json::Value* value);
 
+cmCMakePresetsGraph::ReadFileResult PackagePresetsHelper(
+  std::vector<cmCMakePresetsGraph::PackagePreset>& out,
+  const Json::Value* value);
+
 cmJSONHelper<std::nullptr_t, cmCMakePresetsGraph::ReadFileResult> VendorHelper(
   cmCMakePresetsGraph::ReadFileResult error);
 
