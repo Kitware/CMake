@@ -87,6 +87,14 @@
     variables:
         CMAKE_CONFIGURATION: windows_borland5.8
 
+.windows_ninja:
+    extends: .windows
+
+    variables:
+        CMAKE_GENERATOR: "Ninja"
+        CMAKE_CI_BUILD_TYPE: Release
+        CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
+
 .windows_nmake:
     extends: .windows
 
@@ -118,6 +126,22 @@
 
     variables:
         CMAKE_CONFIGURATION: windows_vs2022_x64_jom
+
+.windows_clang_ninja:
+    extends:
+        - .windows_ninja
+        - .windows_vcvarsall_vs2022_x64
+
+    variables:
+        CMAKE_CONFIGURATION: windows_clang_ninja
+
+.windows_clang_nmake:
+    extends:
+        - .windows_nmake
+        - .windows_vcvarsall_vs2022_x64
+
+    variables:
+        CMAKE_CONFIGURATION: windows_clang_nmake
 
 .windows_msvc_v71_nmake:
     extends: .windows_nmake
@@ -258,6 +282,20 @@
         - Invoke-Expression -Command .gitlab/ci/borland.ps1
         - $pwdpath = $pwd.Path
         - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab\bcc\bin;$env:PATH"
+        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_test_external.cmake
+
+    interruptible: true
+
+.cmake_test_windows_clang:
+    stage: test-ext
+
+    script:
+        - $pwdpath = $pwd.Path
+        - powershell -File ".gitlab/ci/ninja.ps1"
+        - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab;$env:PATH"
+        - Invoke-Expression -Command .gitlab/ci/clang.ps1
+        - Invoke-Expression -Command .gitlab/ci/vcvarsall.ps1
+        - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab\llvm\bin;$env:PATH"
         - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_test_external.cmake
 
     interruptible: true
