@@ -1,6 +1,8 @@
 IMPORTED_NO_SYSTEM
 ------------------
 
+.. versionadded:: 3.23
+
 Specifies that an :ref:`Imported Target <Imported Targets>` is not
 a ``SYSTEM`` library.  This has the following effects:
 

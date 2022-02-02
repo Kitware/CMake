@@ -1,6 +1,8 @@
 CMAKE_IGNORE_PREFIX_PATH
 ------------------------
 
+.. versionadded:: 3.23
+
 :ref:`Semicolon-separated list <CMake Language Lists>` of prefixes to be
 *ignored* by the :command:`find_program`, :command:`find_library`,
 :command:`find_file`, :command:`find_path`, and :command:`find_package`

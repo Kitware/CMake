@@ -1,6 +1,8 @@
 INTERFACE_LINK_LIBRARIES_DIRECT
 -------------------------------
 
+.. versionadded:: 3.23
+
 List of libraries that consumers of this library should treat
 as direct link dependencies.
 
