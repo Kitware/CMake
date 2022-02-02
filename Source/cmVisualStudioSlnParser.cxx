@@ -11,6 +11,7 @@
 #include "cmsys/FStream.hxx"
 
 #include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 #include "cmVisualStudioSlnData.h"
 
 namespace {
@@ -294,10 +295,9 @@ bool cmVisualStudioSlnParser::State::Process(
     case FileStateSolutionConfigurations:
       if (line.GetTag().compare("EndGlobalSection") == 0)
         this->Stack.pop();
-      else if (line.IsKeyValuePair())
-        // implement configuration storing here, once needed
-        ;
-      else {
+      else if (line.IsKeyValuePair()) {
+        output.AddConfiguration(line.GetValue(0));
+      } else {
         result.SetError(ResultErrorInputStructure, this->GetCurrentLine());
         return false;
       }
@@ -305,10 +305,30 @@ bool cmVisualStudioSlnParser::State::Process(
     case FileStateProjectConfigurations:
       if (line.GetTag().compare("EndGlobalSection") == 0)
         this->Stack.pop();
-      else if (line.IsKeyValuePair())
-        // implement configuration storing here, once needed
-        ;
-      else {
+      else if (line.IsKeyValuePair()) {
+        std::vector<std::string> tagElements =
+          cmSystemTools::SplitString(line.GetTag(), '.');
+        if (tagElements.size() != 3 && tagElements.size() != 4) {
+          result.SetError(ResultErrorInputStructure, this->GetCurrentLine());
+          return false;
+        }
+
+        std::string guid = tagElements[0];
+        std::string solutionConfiguration = tagElements[1];
+        std::string activeBuild = tagElements[2];
+        cm::optional<cmSlnProjectEntry> projectEntry =
+          output.GetProjectByGUID(guid);
+
+        if (!projectEntry) {
+          result.SetError(ResultErrorInputStructure, this->GetCurrentLine());
+          return false;
+        }
+
+        if (activeBuild.compare("ActiveCfg") == 0) {
+          projectEntry->AddProjectConfiguration(solutionConfiguration,
+                                                line.GetValue(0));
+        }
+      } else {
         result.SetError(ResultErrorInputStructure, this->GetCurrentLine());
         return false;
       }
@@ -459,8 +479,7 @@ bool cmVisualStudioSlnParser::GetParseHadBOM() const
 bool cmVisualStudioSlnParser::IsDataGroupSetSupported(
   DataGroupSet dataGroups) const
 {
-  return (dataGroups & DataGroupProjects) == dataGroups;
-  // only supporting DataGroupProjects for now
+  return (dataGroups & DataGroupProjects) != 0;
 }
 
 bool cmVisualStudioSlnParser::ParseImpl(std::istream& input, cmSlnData& output,
