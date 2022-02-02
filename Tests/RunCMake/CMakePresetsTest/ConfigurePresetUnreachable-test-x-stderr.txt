@@ -1,0 +1,2 @@
+^CMake Error: Could not read presets from [^
+]*/Tests/RunCMake/CMakePresetsTest/ConfigurePresetUnreachable: Configure preset is unreachable from preset's file$

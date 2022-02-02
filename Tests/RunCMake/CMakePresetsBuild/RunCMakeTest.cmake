@@ -83,4 +83,6 @@ set(CMakePresets_SCHEMA_EXPECTED_RESULT 1)
 run_cmake_build_presets(PresetsUnsupported "x" "x")
 run_cmake_build_presets(ConditionFuture "x" "conditionFuture")
 set(CMakePresets_SCHEMA_EXPECTED_RESULT 0)
+
+run_cmake_build_presets(ConfigurePresetUnreachable "x" "x")
 set(CMakePresetsBuild_BUILD_ONLY 0)

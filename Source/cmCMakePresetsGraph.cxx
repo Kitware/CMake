@@ -108,7 +108,7 @@ ReadFileResult VisitPreset(
 
     auto& parentPreset = parent->second.Unexpanded;
     if (!preset.OriginFile->ReachableFiles.count(parentPreset.OriginFile)) {
-      return ReadFileResult::PRESET_UNREACHABLE_FROM_FILE;
+      return ReadFileResult::INHERITED_PRESET_UNREACHABLE_FROM_FILE;
     }
 
     auto result = VisitPreset(parentPreset, presets, cycleStatus, graph);
@@ -925,6 +925,10 @@ cmCMakePresetsGraph::ReadProjectPresetsInternal(bool allowNoFiles)
       if (configurePreset == this->ConfigurePresets.end()) {
         return ReadFileResult::INVALID_CONFIGURE_PRESET;
       }
+      if (!it.second.Unexpanded.OriginFile->ReachableFiles.count(
+            configurePreset->second.Unexpanded.OriginFile)) {
+        return ReadFileResult::CONFIGURE_PRESET_UNREACHABLE_FROM_FILE;
+      }
 
       if (it.second.Unexpanded.InheritConfigureEnvironment.value_or(true)) {
         it.second.Unexpanded.Environment.insert(
@@ -944,6 +948,10 @@ cmCMakePresetsGraph::ReadProjectPresetsInternal(bool allowNoFiles)
         this->ConfigurePresets.find(it.second.Unexpanded.ConfigurePreset);
       if (configurePreset == this->ConfigurePresets.end()) {
         return ReadFileResult::INVALID_CONFIGURE_PRESET;
+      }
+      if (!it.second.Unexpanded.OriginFile->ReachableFiles.count(
+            configurePreset->second.Unexpanded.OriginFile)) {
+        return ReadFileResult::CONFIGURE_PRESET_UNREACHABLE_FROM_FILE;
       }
 
       if (it.second.Unexpanded.InheritConfigureEnvironment.value_or(true)) {
@@ -992,8 +1000,10 @@ const char* cmCMakePresetsGraph::ResultToString(ReadFileResult result)
       return "Duplicate presets";
     case ReadFileResult::CYCLIC_PRESET_INHERITANCE:
       return "Cyclic preset inheritance";
-    case ReadFileResult::PRESET_UNREACHABLE_FROM_FILE:
+    case ReadFileResult::INHERITED_PRESET_UNREACHABLE_FROM_FILE:
       return "Inherited preset is unreachable from preset's file";
+    case ReadFileResult::CONFIGURE_PRESET_UNREACHABLE_FROM_FILE:
+      return "Configure preset is unreachable from preset's file";
     case ReadFileResult::INVALID_MACRO_EXPANSION:
       return "Invalid macro expansion";
     case ReadFileResult::BUILD_TEST_PRESETS_UNSUPPORTED:
