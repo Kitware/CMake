@@ -15,4 +15,7 @@ add_executable(DotNetSdk csharponly.cs)
 target_link_libraries(DotNetSdk dotNetSdkLib1)
 set_target_properties(DotNetSdk
     PROPERTIES
-        VS_GLOBAL_RuntimeIdentifier win10-x64)
+        VS_GLOBAL_RuntimeIdentifier win10-x64
+
+        VS_DOTNET_REFERENCE_SomeDll
+            ${PROJECT_SOURCE_DIR}/SomeDll.dll)
