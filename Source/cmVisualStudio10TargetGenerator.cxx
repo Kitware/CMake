@@ -2736,11 +2736,15 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
 
       if (needsPCHFlags) {
         // Add precompile headers compile options.
-        std::string expandedOptions;
-        std::string pchOptions;
         if (makePCH) {
-          pchOptions =
-            this->GeneratorTarget->GetPchCreateCompileOptions(config, lang);
+          clOptions.AddFlag("PrecompiledHeader", "Create");
+          std::string pchHeader =
+            this->GeneratorTarget->GetPchHeader(config, lang);
+          clOptions.AddFlag("PrecompiledHeaderFile", pchHeader);
+          std::string pchFile =
+            this->GeneratorTarget->GetPchFile(config, lang);
+          clOptions.AddFlag("PrecompiledHeaderOutputFile", pchFile);
+          clOptions.AddFlag("ForcedIncludeFiles", pchHeader);
         } else if (useNoPCH) {
           clOptions.AddFlag("PrecompiledHeader", "NotUsing");
         } else if (useSharedPCH) {
@@ -2748,12 +2752,15 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
             this->GeneratorTarget->GetPchHeader(config, lang);
           clOptions.AddFlag("ForcedIncludeFiles", pchHeader);
         } else if (useDifferentLangPCH) {
-          pchOptions =
-            this->GeneratorTarget->GetPchUseCompileOptions(config, lang);
+          clOptions.AddFlag("PrecompiledHeader", "Use");
+          std::string pchHeader =
+            this->GeneratorTarget->GetPchHeader(config, lang);
+          clOptions.AddFlag("PrecompiledHeaderFile", pchHeader);
+          std::string pchFile =
+            this->GeneratorTarget->GetPchFile(config, lang);
+          clOptions.AddFlag("PrecompiledHeaderOutputFile", pchFile);
+          clOptions.AddFlag("ForcedIncludeFiles", pchHeader);
         }
-        this->LocalGenerator->AppendCompileOptions(expandedOptions,
-                                                   pchOptions);
-        clOptions.Parse(expandedOptions);
       }
 
       if (!options.empty()) {
