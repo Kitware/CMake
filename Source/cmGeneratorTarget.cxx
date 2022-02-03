@@ -2047,7 +2047,11 @@ void cmGeneratorTarget::ComputeKindedSources(KindedSources& files,
     } else if (ext == "appxmanifest") {
       kind = SourceKindAppManifest;
     } else if (ext == "manifest") {
-      kind = SourceKindManifest;
+      if (sf->GetPropertyAsBool("VS_DEPLOYMENT_CONTENT")) {
+        kind = SourceKindExtra;
+      } else {
+        kind = SourceKindManifest;
+      }
     } else if (ext == "pfx") {
       kind = SourceKindCertificate;
     } else if (ext == "xaml") {
