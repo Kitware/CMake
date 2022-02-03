@@ -21,7 +21,7 @@
         # could run at the same time, so we drop it.
         GIT_CLONE_PATH: "$CI_BUILDS_DIR\\cmake ci"
 
-.windows_ninja:
+.windows_build_ninja:
     extends: .windows_build
 
     variables:
@@ -39,7 +39,7 @@
 
 .windows_vs2022_x64_ninja:
     extends:
-        - .windows_ninja
+        - .windows_build_ninja
         - .windows_vcvarsall_vs2022_x64
 
     variables:
