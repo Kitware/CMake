@@ -585,6 +585,8 @@ Run ``cmake -E`` or ``cmake -E help`` for a summary of commands.
 Available commands are:
 
 ``capabilities``
+  .. versionadded:: 3.7
+
   Report cmake capabilities in JSON format. The output is a JSON object
   with the following keys:
 
@@ -645,6 +647,8 @@ Available commands are:
     Always false since CMake 3.20.
 
 ``cat <files>...``
+  .. versionadded:: 3.18
+
   Concatenate files and print on the standard output.
 
 ``chdir <dir> <cmd> [<arg>...]``
@@ -653,8 +657,11 @@ Available commands are:
 ``compare_files [--ignore-eol] <file1> <file2>``
   Check if ``<file1>`` is same as ``<file2>``. If files are the same,
   then returns ``0``, if not it returns ``1``.  In case of invalid
-  arguments, it returns 2. The ``--ignore-eol`` option
-  implies line-wise comparison and ignores LF/CRLF differences.
+  arguments, it returns 2.
+
+  .. versionadded:: 3.14
+    The ``--ignore-eol`` option implies line-wise comparison and ignores
+    LF/CRLF differences.
 
 ``copy <file>... <destination>``
   Copy files to ``<destination>`` (either file or directory).
@@ -663,10 +670,20 @@ Available commands are:
   ``copy`` does follow symlinks. That means it does not copy symlinks,
   but the files or directories it point to.
 
+  .. versionadded:: 3.5
+    Support for multiple input files.
+
 ``copy_directory <dir>... <destination>``
   Copy content of ``<dir>...`` directories to ``<destination>`` directory.
   If ``<destination>`` directory does not exist it will be created.
   ``copy_directory`` does follow symlinks.
+
+  .. versionadded:: 3.5
+    Support for multiple input directories.
+
+  .. versionadded:: 3.15
+    The command now fails when the source directory does not exist.
+    Previously it succeeded by creating an empty destination directory.
 
 ``copy_if_different <file>... <destination>``
   Copy files to ``<destination>`` (either file or directory) if
@@ -675,13 +692,21 @@ Available commands are:
   directory and it must exist.
   ``copy_if_different`` does follow symlinks.
 
+  .. versionadded:: 3.5
+    Support for multiple input files.
+
 ``create_symlink <old> <new>``
   Create a symbolic link ``<new>`` naming ``<old>``.
+
+  .. versionadded:: 3.13
+    Support for creating symlinks on Windows.
 
   .. note::
     Path to where ``<new>`` symbolic link will be created has to exist beforehand.
 
 ``create_hardlink <old> <new>``
+  .. versionadded:: 3.19
+
   Create a hard link ``<new>`` naming ``<old>``.
 
   .. note::
@@ -695,18 +720,25 @@ Available commands are:
   Displays arguments as text but no new line.
 
 ``env [--unset=NAME]... [NAME=VALUE]... COMMAND [ARG]...``
+  .. versionadded:: 3.1
+
   Run command in a modified environment.
 
 ``environment``
   Display the current environment variables.
 
 ``false``
+  .. versionadded:: 3.16
+
   Do nothing, with an exit code of 1.
 
 ``make_directory <dir>...``
   Create ``<dir>`` directories.  If necessary, create parent
   directories too.  If a directory already exists it will be
   silently ignored.
+
+  .. versionadded:: 3.5
+    Support for multiple input directories.
 
 ``md5sum <file>...``
   Create MD5 checksum of files in ``md5sum`` compatible format::
@@ -715,30 +747,40 @@ Available commands are:
      052f86c15bbde68af55c7f7b340ab639  file2.txt
 
 ``sha1sum <file>...``
+  .. versionadded:: 3.10
+
   Create SHA1 checksum of files in ``sha1sum`` compatible format::
 
      4bb7932a29e6f73c97bb9272f2bdc393122f86e0  file1.txt
      1df4c8f318665f9a5f2ed38f55adadb7ef9f559c  file2.txt
 
 ``sha224sum <file>...``
+  .. versionadded:: 3.10
+
   Create SHA224 checksum of files in ``sha224sum`` compatible format::
 
      b9b9346bc8437bbda630b0b7ddfc5ea9ca157546dbbf4c613192f930  file1.txt
      6dfbe55f4d2edc5fe5c9197bca51ceaaf824e48eba0cc453088aee24  file2.txt
 
 ``sha256sum <file>...``
+  .. versionadded:: 3.10
+
   Create SHA256 checksum of files in ``sha256sum`` compatible format::
 
      76713b23615d31680afeb0e9efe94d47d3d4229191198bb46d7485f9cb191acc  file1.txt
      15b682ead6c12dedb1baf91231e1e89cfc7974b3787c1e2e01b986bffadae0ea  file2.txt
 
 ``sha384sum <file>...``
+  .. versionadded:: 3.10
+
   Create SHA384 checksum of files in ``sha384sum`` compatible format::
 
      acc049fedc091a22f5f2ce39a43b9057fd93c910e9afd76a6411a28a8f2b8a12c73d7129e292f94fc0329c309df49434  file1.txt
      668ddeb108710d271ee21c0f3acbd6a7517e2b78f9181c6a2ff3b8943af92b0195dcb7cce48aa3e17893173c0a39e23d  file2.txt
 
 ``sha512sum <file>...``
+  .. versionadded:: 3.10
+
   Create SHA512 checksum of files in ``sha512sum`` compatible format::
 
      2a78d7a6c5328cfb1467c63beac8ff21794213901eaadafd48e7800289afbc08e5fb3e86aa31116c945ee3d7bf2a6194489ec6101051083d1108defc8e1dba89  file1.txt
@@ -761,16 +803,24 @@ Available commands are:
   .. deprecated:: 3.17
 
   Remove ``<dir>`` directories and their contents. If a directory does
-  not exist it will be silently ignored.  If ``<dir>`` is a symlink to
-  a directory, just the symlink will be removed.
+  not exist it will be silently ignored.
   Use ``rm`` instead.
+
+  .. versionadded:: 3.15
+    Support for multiple directories.
+
+  .. versionadded:: 3.16
+    If ``<dir>`` is a symlink to a directory, just the symlink will be removed.
 
 ``rename <oldname> <newname>``
   Rename a file or directory (on one volume). If file with the ``<newname>`` name
   already exists, then it will be silently replaced.
 
 ``rm [-rRf] <file> <dir>...``
-  Remove the files ``<file>`` or directories ``dir``.
+  .. versionadded:: 3.17
+
+  Remove the files ``<file>`` or directories ``<dir>``.
+
   Use ``-r`` or ``-R`` to remove directories and their contents recursively.
   If any of the listed files/directories do not exist, the command returns a
   non-zero exit code, but no message is logged. The ``-f`` option changes
@@ -781,6 +831,8 @@ Available commands are:
   Launch :manual:`cmake-server(7)` mode.
 
 ``sleep <number>...``
+  .. versionadded:: 3.0
+
   Sleep for given number of seconds.
 
 ``tar [cxt][vf][zjJ] file.tar [<options>] [--] [<pathname>...]``
@@ -789,44 +841,84 @@ Available commands are:
   ``c``
     Create a new archive containing the specified files.
     If used, the ``<pathname>...`` argument is mandatory.
+
   ``x``
     Extract to disk from the archive.
-    The ``<pathname>...`` argument could be used to extract only selected files
-    or directories.
-    When extracting selected files or directories, you must provide their exact
-    names including the path, as printed by list (``-t``).
+
+    .. versionadded:: 3.15
+      The ``<pathname>...`` argument could be used to extract only selected files
+      or directories.
+      When extracting selected files or directories, you must provide their exact
+      names including the path, as printed by list (``-t``).
+
   ``t``
     List archive contents.
-    The ``<pathname>...`` argument could be used to list only selected files
-    or directories.
+
+    .. versionadded:: 3.15
+      The ``<pathname>...`` argument could be used to list only selected files
+      or directories.
+
   ``v``
     Produce verbose output.
+
   ``z``
     Compress the resulting archive with gzip.
+
   ``j``
     Compress the resulting archive with bzip2.
+
   ``J``
+    .. versionadded:: 3.1
+
     Compress the resulting archive with XZ.
+
   ``--zstd``
+    .. versionadded:: 3.15
+
     Compress the resulting archive with Zstandard.
+
   ``--files-from=<file>``
+    .. versionadded:: 3.1
+
     Read file names from the given file, one per line.
     Blank lines are ignored.  Lines may not start in ``-``
     except for ``--add-file=<name>`` to add files whose
     names start in ``-``.
+
   ``--format=<format>``
+    .. versionadded:: 3.3
+
     Specify the format of the archive to be created.
     Supported formats are: ``7zip``, ``gnutar``, ``pax``,
     ``paxr`` (restricted pax, default), and ``zip``.
+
   ``--mtime=<date>``
+    .. versionadded:: 3.1
+
     Specify modification time recorded in tarball entries.
+
   ``--``
+    .. versionadded:: 3.1
+
     Stop interpreting options and treat all remaining arguments
     as file names, even if they start with ``-``.
 
+  .. versionadded:: 3.1
+    LZMA (7zip) support.
+
+  .. versionadded:: 3.15
+    The command now continues adding files to an archive even if some of the
+    files are not readable.  This behavior is more consistent with the classic
+    ``tar`` tool. The command now also parses all flags, and if an invalid flag
+    was provided, a warning is issued.
 
 ``time <command> [<args>...]``
   Run command and display elapsed time.
+
+  .. versionadded:: 3.5
+    The command now properly passes arguments with spaces or special characters
+    through to the child process. This may break scripts that worked around the
+    bug with their own extra quoting or escaping.
 
 ``touch <file>...``
   Creates ``<file>`` if file do not exist.
@@ -837,6 +929,8 @@ Available commands are:
   not exist it will be silently ignored.
 
 ``true``
+  .. versionadded:: 3.16
+
   Do nothing, with an exit code of 0.
 
 Windows-specific Command-Line Tools
@@ -848,10 +942,14 @@ The following ``cmake -E`` commands are available only on Windows:
   Delete Windows registry value.
 
 ``env_vs8_wince <sdkname>``
+  .. versionadded:: 3.2
+
   Displays a batch file which sets the environment for the provided
   Windows CE SDK installed in VS2005.
 
 ``env_vs9_wince <sdkname>``
+  .. versionadded:: 3.2
+
   Displays a batch file which sets the environment for the provided
   Windows CE SDK installed in VS2008.
 
