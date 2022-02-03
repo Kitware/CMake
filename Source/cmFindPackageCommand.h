@@ -205,6 +205,7 @@ private:
   std::vector<std::string> Names;
   std::vector<std::string> Configs;
   std::set<std::string> IgnoredPaths;
+  std::set<std::string> IgnoredPrefixPaths;
   std::string DebugBuffer;
 
   /*! the selected sortOrder (None by default)*/
