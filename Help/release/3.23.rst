@@ -145,6 +145,10 @@ Modules
   ``OBJCXX``, ``CUDA``, and ``HIP`` languages.  It also now honors
   :variable:`CMAKE_SYSROOT` and :variable:`CMAKE_OSX_SYSROOT`.
 
+* The :module:`ExternalProject` module's :command:`ExternalProject_Add`
+  command gained support for a ``USES_TERMINAL_PATCH`` option to give
+  the patch step exclusive terminal access.
+
 * The :module:`FindCUDAToolkit` module now provides a target for
   ``libcufft_static_nocallback``, if found.
 
