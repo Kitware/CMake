@@ -675,7 +675,9 @@ listed in the :prop_tgt:`INTERFACE_SYSTEM_INCLUDE_DIRECTORIES` of the
 dependency. This can result in omission of compiler warnings for headers
 found in those directories.  This behavior for :ref:`imported targets` may
 be controlled by setting the :prop_tgt:`NO_SYSTEM_FROM_IMPORTED` target
-property on the *consumers* of imported targets.
+property on the *consumers* of imported targets, or by setting the
+:prop_tgt:`IMPORTED_NO_SYSTEM` target property on the imported targets
+themselves.
 
 If a binary target is linked transitively to a macOS :prop_tgt:`FRAMEWORK`, the
 ``Headers`` directory of the framework is also treated as a usage requirement.

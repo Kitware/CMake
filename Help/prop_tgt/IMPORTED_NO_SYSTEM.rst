@@ -6,7 +6,9 @@ a ``SYSTEM`` library.  This has the following effects:
 
 * Entries of :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` are not treated
   as ``SYSTEM`` include directories when compiling consumers, as they
-  would be by default.
+  would be by default.   Entries of
+  :prop_tgt:`INTERFACE_SYSTEM_INCLUDE_DIRECTORIES` are not affected,
+  and will always be treated as ``SYSTEM`` include directories.
 
 This property can also be enabled on a non-imported target.  Doing so does
 not affect the build system, but does tell the :command:`install(EXPORT)` and

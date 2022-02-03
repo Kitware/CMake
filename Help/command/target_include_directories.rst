@@ -28,12 +28,15 @@ The following arguments specify include directories.
   Allow setting ``INTERFACE`` items on :ref:`IMPORTED targets <Imported Targets>`.
 
 Repeated calls for the same ``<target>`` append items in the order called.
-If ``SYSTEM`` is specified, the compiler will be told the
-directories are meant as system include directories on some platforms
-(signalling this setting might achieve effects such as the compiler
-skipping warnings, or these fixed-install system files not being
-considered in dependency calculations - see compiler docs).  If ``SYSTEM``
-is used together with ``PUBLIC`` or ``INTERFACE``, the
+
+If ``SYSTEM`` is specified, the compiler will be told the directories
+are meant as system include directories on some platforms.  This may
+have effects such as suppressing warnings or skipping the contained
+headers in dependency calculations (see compiler documentation).
+Additionally, system include directories are searched after normal
+include directories regardless of the order specified.
+
+If ``SYSTEM`` is used together with ``PUBLIC`` or ``INTERFACE``, the
 :prop_tgt:`INTERFACE_SYSTEM_INCLUDE_DIRECTORIES` target property will be
 populated with the specified directories.
 
