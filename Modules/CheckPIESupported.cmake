@@ -23,10 +23,15 @@ property for executables will be honored at link time.
 
   ``OUTPUT_VARIABLE <output>``
     Set ``<output>`` variable with details about any error.
+
   ``LANGUAGES <lang>...``
     Check the linkers used for each of the specified languages.
-    Supported languages are ``C``, ``CXX``, ``OBJC``, ``OBJCXX``, ``Fortran``,
-    ``CUDA``, and ``HIP``.
+
+    ``C``, ``CXX``, ``Fortran`` are supported.
+
+    .. versionadded:: 3.23
+
+      ``OBJC``, ``OBJCXX``, ``CUDA``, and ``HIP`` are supported.
 
 It makes no sense to use this module when :policy:`CMP0083` is set to ``OLD``,
 so the command will return an error in this case.  See policy :policy:`CMP0083`
