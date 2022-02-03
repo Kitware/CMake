@@ -29,9 +29,6 @@ QCOLLECTIONGENERATOR_EXECUTABLE:PATH=C:/qt-x86_64/bin/qhelpgenerator.exe
 # No bootstrap with MSVC tools.
 CMAKE_SKIP_BOOTSTRAP_TEST:STRING=TRUE
 
-# No MFC in base image.
-CTEST_RUN_MFC:BOOL=OFF
-
 # No Fortran compiler.
 CMAKE_Fortran_COMPILER:FILEPATH=FALSE
 
