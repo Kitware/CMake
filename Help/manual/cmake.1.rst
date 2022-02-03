@@ -500,9 +500,9 @@ Options
 .. option:: --list-presets[=<type>]
 
  Lists the available presets of the specified ``<type>``.  Valid values for
- ``<type>`` are ``configure``, ``build``, ``test``, or ``all``.  If ``<type>``
- is omitted, ``configure`` is assumed.  The current working directory must
- contain CMake preset files.
+ ``<type>`` are ``configure``, ``build``, ``test``, ``package``, or ``all``.
+ If ``<type>`` is omitted, ``configure`` is assumed.  The current working
+ directory must contain CMake preset files.
 
 .. _`Build Tool Mode`:
 

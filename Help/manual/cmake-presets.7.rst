@@ -58,6 +58,9 @@ The root object recognizes the following fields:
   ``5``
     .. versionadded:: 3.24
 
+  ``6``
+    .. versionadded:: 3.25
+
 ``cmakeMinimumRequired``
   An optional object representing the minimum version of CMake needed to
   build this project. This object consists of the following fields:
@@ -128,7 +131,8 @@ that may contain the following fields:
   This identifier is used in the :ref:`cmake --preset <CMake Options>` option.
   There must not be two configure presets in the union of ``CMakePresets.json``
   and ``CMakeUserPresets.json`` in the same directory with the same name.
-  However, a configure preset may have the same name as a build or test preset.
+  However, a configure preset may have the same name as a build, test, or
+  package preset.
 
 ``hidden``
   An optional boolean specifying whether or not a preset should be hidden.
@@ -350,7 +354,8 @@ that may contain the following fields:
   :ref:`cmake --build --preset <Build Tool Mode>` option.
   There must not be two build presets in the union of ``CMakePresets.json``
   and ``CMakeUserPresets.json`` in the same directory with the same name.
-  However, a build preset may have the same name as a configure or test preset.
+  However, a build preset may have the same name as a configure, test, or
+  package preset.
 
 ``hidden``
   An optional boolean specifying whether or not a preset should be hidden.
@@ -510,7 +515,8 @@ that may contain the following fields:
   This identifier is used in the :option:`ctest --preset` option.
   There must not be two test presets in the union of ``CMakePresets.json``
   and ``CMakeUserPresets.json`` in the same directory with the same name.
-  However, a test preset may have the same name as a configure or build preset.
+  However, a test preset may have the same name as a configure, build, or
+  package preset.
 
 ``hidden``
   An optional boolean specifying whether or not a preset should be hidden.
@@ -832,6 +838,134 @@ that may contain the following fields:
     ``ignore``
       Equivalent to passing :option:`--no-tests=ignore <ctest --no-tests>`
       on the command line.
+
+Package Preset
+^^^^^^^^^^^^^^
+
+Package presets may be used in schema version ``6`` or above. Each entry of
+the ``packagePresets`` array is a JSON object that may contain the following
+fields:
+
+``name``
+  A required string representing the machine-friendly name of the preset.
+  This identifier is used in the :option:`cpack --preset` option.
+  There must not be two package presets in the union of ``CMakePresets.json``
+  and ``CMakeUserPresets.json`` in the same directory with the same name.
+  However, a package preset may have the same name as a configure, build, or
+  test preset.
+
+``hidden``
+  An optional boolean specifying whether or not a preset should be hidden.
+  If a preset is hidden, it cannot be used in the
+  :option:`--preset <cpack --preset>` argument
+  and does not have to have a valid ``configurePreset``, even from
+  inheritance. ``hidden`` presets are intended to be used as a base for
+  other presets to inherit via the ``inherits`` field.
+
+``inherits``
+  An optional array of strings representing the names of presets to inherit
+  from. This field can also be a string, which is equivalent to an array
+  containing one string.
+
+  The preset will inherit all of the fields from the
+  ``inherits`` presets by default (except ``name``, ``hidden``,
+  ``inherits``, ``description``, and ``displayName``), but can override
+  them as desired. If multiple ``inherits`` presets provide conflicting
+  values for the same field, the earlier preset in the ``inherits`` list
+  will be preferred.
+
+  A preset can only inherit from another preset that is defined in the
+  same file or in one of the files it includes (directly or indirectly).
+  Presets in ``CMakePresets.json`` may not inherit from presets in
+  ``CMakeUserPresets.json``.
+
+``condition``
+  An optional `Condition`_ object.
+
+``vendor``
+  An optional map containing vendor-specific information. CMake does not
+  interpret the contents of this field except to verify that it is a map
+  if it does exist. However, it should follow the same conventions as the
+  root-level ``vendor`` field. If vendors use their own per-preset
+  ``vendor`` field, they should implement inheritance in a sensible manner
+  when appropriate.
+
+``displayName``
+  An optional string with a human-friendly name of the preset.
+
+``description``
+  An optional string with a human-friendly description of the preset.
+
+``environment``
+  An optional map of environment variables. The key is the variable name
+  (which may not be an empty string), and the value is either ``null`` or
+  a string representing the value of the variable. Each variable is set
+  regardless of whether or not a value was given to it by the process's
+  environment. This field supports macro expansion, and environment
+  variables in this map may reference each other, and may be listed in any
+  order, as long as such references do not cause a cycle (for example, if
+  ``ENV_1`` is ``$env{ENV_2}``, ``ENV_2`` may not be ``$env{ENV_1}``.)
+
+  Environment variables are inherited through the ``inherits`` field, and
+  the preset's environment will be the union of its own ``environment``
+  and the ``environment`` from all its parents. If multiple presets in
+  this union define the same variable, the standard rules of ``inherits``
+  are applied. Setting a variable to ``null`` causes it to not be set,
+  even if a value was inherited from another preset.
+
+``configurePreset``
+  An optional string specifying the name of a configure preset to
+  associate with this package preset. If ``configurePreset`` is not
+  specified, it must be inherited from the inherits preset (unless this
+  preset is hidden). The build directory is inferred from the configure
+  preset, so packaging will run in the same ``binaryDir`` that the
+  configuration did and build did.
+
+``inheritConfigureEnvironment``
+  An optional boolean that defaults to true. If true, the environment
+  variables from the associated configure preset are inherited after all
+  inherited package preset environments, but before environment variables
+  explicitly specified in this package preset.
+
+``generators``
+  An optional list of strings representing generators for CPack to use.
+
+``configurations``
+  An optional list of strings representing build configurations for CPack to
+  package.
+
+``variables``
+  An optional map of variables to pass to CPack, equivalent to
+  :option:`-D <cpack -D>` arguments. Each key is the name of a variable, and
+  the value is the string to assign to that variable.
+
+``configFile``
+  An optional string representing the config file for CPack to use.
+
+``output``
+  An optional object specifying output options. Valid keys are:
+
+  ``debug``
+    An optional boolean specifying whether or not to print debug information.
+    A value of ``true`` is equivalent to passing
+    :option:`--debug <cpack --debug>` on the command line.
+
+  ``verbose``
+    An optional boolean specifying whether or not to print verbosely. A value
+    of ``true`` is equivalent to passing :option:`--verbose <cpack --verbose>`
+    on the command line.
+
+``packageName``
+  An optional string representing the package name.
+
+``packageVersion``
+  An optional string representing the package version.
+
+``packageDirectory``
+  An optional string representing the directory in which to place the package.
+
+``vendorName``
+  An optional string representing the vendor name.
 
 Condition
 ^^^^^^^^^
