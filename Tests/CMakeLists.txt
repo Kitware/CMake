@@ -2595,26 +2595,21 @@ if(BUILD_TESTING)
     endif()
   endif()
   if(CTEST_TEST_UPDATE_BZR)
-    # Check if xmloutput plugin is there
-    execute_process(COMMAND ${BZR_EXECUTABLE} xmlplugins RESULT_VARIABLE xmlplugres
-      OUTPUT_QUIET ERROR_QUIET)
-    if( NOT ${xmlplugres} )
-      set(CTestUpdateBZR_DIR "CTest UpdateBZR")
-      configure_file("${CMake_SOURCE_DIR}/Tests/CTestUpdateBZR.cmake.in"
-        "${CMake_BINARY_DIR}/Tests/CTestUpdateBZR.cmake" @ONLY)
-      add_test(CTest.UpdateBZR ${CMAKE_CMAKE_COMMAND}
-        -P "${CMake_BINARY_DIR}/Tests/CTestUpdateBZR.cmake"
-        )
-      list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${CTestUpdateBZR_DIR}")
-      set(CTestUpdateBZR_DIR "CTest UpdateBZR_CLocale")
-      configure_file("${CMake_SOURCE_DIR}/Tests/CTestUpdateBZR.cmake.in"
-        "${CMake_BINARY_DIR}/Tests/CTestUpdateBZR_CLocale.cmake" @ONLY)
-      add_test(CTest.UpdateBZR.CLocale ${CMAKE_CMAKE_COMMAND}
-        -P "${CMake_BINARY_DIR}/Tests/CTestUpdateBZR_CLocale.cmake"
-        )
-      set_tests_properties(CTest.UpdateBZR.CLocale PROPERTIES ENVIRONMENT LC_ALL=C)
-      list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${CTestUpdateBZR_DIR}")
-    endif()
+    set(CTestUpdateBZR_DIR "CTest UpdateBZR")
+    configure_file("${CMake_SOURCE_DIR}/Tests/CTestUpdateBZR.cmake.in"
+      "${CMake_BINARY_DIR}/Tests/CTestUpdateBZR.cmake" @ONLY)
+    add_test(CTest.UpdateBZR ${CMAKE_CMAKE_COMMAND}
+      -P "${CMake_BINARY_DIR}/Tests/CTestUpdateBZR.cmake"
+      )
+    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${CTestUpdateBZR_DIR}")
+    set(CTestUpdateBZR_DIR "CTest UpdateBZR_CLocale")
+    configure_file("${CMake_SOURCE_DIR}/Tests/CTestUpdateBZR.cmake.in"
+      "${CMake_BINARY_DIR}/Tests/CTestUpdateBZR_CLocale.cmake" @ONLY)
+    add_test(CTest.UpdateBZR.CLocale ${CMAKE_CMAKE_COMMAND}
+      -P "${CMake_BINARY_DIR}/Tests/CTestUpdateBZR_CLocale.cmake"
+      )
+    set_tests_properties(CTest.UpdateBZR.CLocale PROPERTIES ENVIRONMENT LC_ALL=C)
+    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${CTestUpdateBZR_DIR}")
   endif()
 
   # Test CTest Update with GIT
