@@ -837,6 +837,12 @@ bool cmGlobalVisualStudioGenerator::TargetIsFortranOnly(
   return languages.size() == 1 && *languages.begin() == "Fortran";
 }
 
+bool cmGlobalVisualStudioGenerator::IsInSolution(
+  const cmGeneratorTarget* gt) const
+{
+  return gt->IsInBuildSystem();
+}
+
 bool cmGlobalVisualStudioGenerator::TargetCompare::operator()(
   cmGeneratorTarget const* l, cmGeneratorTarget const* r) const
 {
