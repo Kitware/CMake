@@ -5,17 +5,26 @@ DESTDIR
 
 On UNIX one can use the ``DESTDIR`` mechanism in order to relocate the
 whole installation.  ``DESTDIR`` means DESTination DIRectory.  It is
-commonly used by makefile users in order to install software at
-non-default location.  It is usually invoked like this:
+commonly used by packagers to install software in a staging directory.
 
-::
+For example, running
 
- make DESTDIR=/home/john install
+.. code-block:: shell
 
-which will install the concerned software using the installation
-prefix, e.g.  ``/usr/local`` prepended with the ``DESTDIR`` value which
-finally gives ``/home/john/usr/local``.
+  make DESTDIR=/package/stage install
 
-WARNING: ``DESTDIR`` may not be used on Windows because installation
-prefix usually contains a drive letter like in ``C:/Program Files``
-which cannot be prepended with some other prefix.
+will install the software using the installation prefix, e.g. ``/usr/local``,
+prepended with the ``DESTDIR`` value which gives ``/package/stage/usr/local``.
+The packaging tool may then construct the package from the content of the
+``/package/stage`` directory.
+
+See the :variable:`CMAKE_INSTALL_PREFIX` variable to control the
+installation prefix when configuring a build tree.  Or, when using
+the :manual:`cmake(1)` command-line tool's ``--install`` mode,
+one may specify a different prefix using the ``--prefix`` option.
+
+.. note::
+
+  ``DESTDIR`` may not be used on Windows because installation
+  prefix usually contains a drive letter like in ``C:/Program Files``
+  which cannot be prepended with some other prefix.
