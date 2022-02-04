@@ -407,7 +407,7 @@ External Project Definition
       ``CVS_TAG <tag>``
         Tag to checkout from the CVS repository.
 
-  **Update/Patch Step Options:**
+  **Update Step Options:**
     Whenever CMake is re-run, by default the external project's sources will be
     updated if the download method supports updates (e.g. a git repository
     would be checked if the ``GIT_TAG`` does not refer to a specific commit).
@@ -442,6 +442,7 @@ External Project Definition
       This may cause a step target to be created automatically for the
       ``download`` step.  See policy :policy:`CMP0114`.
 
+  **Patch Step Options:**
     ``PATCH_COMMAND <cmd>...``
       Specifies a custom command to patch the sources after an update. By
       default, no patch command is defined. Note that it can be quite difficult
@@ -749,6 +750,11 @@ External Project Definition
 
     ``USES_TERMINAL_UPDATE <bool>``
       Give the update step access to the terminal.
+
+    ``USES_TERMINAL_PATCH <bool>``
+      .. versionadded:: 3.23
+
+      Give the patch step access to the terminal.
 
     ``USES_TERMINAL_CONFIGURE <bool>``
       Give the configure step access to the terminal.
@@ -3024,6 +3030,13 @@ function(_ep_add_patch_command name)
     set(log "")
   endif()
 
+  get_property(uses_terminal TARGET ${name} PROPERTY _EP_USES_TERMINAL_PATCH)
+  if(uses_terminal)
+    set(uses_terminal USES_TERMINAL 1)
+  else()
+    set(uses_terminal "")
+  endif()
+
   _ep_get_update_disconnected(update_disconnected ${name})
   if(update_disconnected)
     set(patch_dep download)
@@ -3042,6 +3055,7 @@ function(_ep_add_patch_command name)
       WORKING_DIRECTORY \${work_dir}
       DEPENDEES \${patch_dep}
       ${log}
+      ${uses_terminal}
       )"
   )
 endfunction()
@@ -3557,6 +3571,7 @@ function(ExternalProject_Add name)
     #
     USES_TERMINAL_DOWNLOAD
     USES_TERMINAL_UPDATE
+    USES_TERMINAL_PATCH
     USES_TERMINAL_CONFIGURE
     USES_TERMINAL_BUILD
     USES_TERMINAL_INSTALL
