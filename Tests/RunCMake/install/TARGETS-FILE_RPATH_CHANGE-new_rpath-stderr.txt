@@ -1,3 +1,15 @@
+^CMake Deprecation Warning at TARGETS-FILE_RPATH_CHANGE-new_rpath.cmake:[0-9]+ \(cmake_policy\):
+  The OLD behavior for policy CMP0095 will be removed from a future version
+  of CMake.
+
+  The cmake-policies\(7\) manual explains that the OLD behaviors of all
+  policies are deprecated and that a policy should be set to OLD only under
+  specific short-term circumstances.  Projects should be ported to the NEW
+  behavior and not rely on setting a policy to OLD.
+Call Stack \(most recent call first\):
+  TARGETS-FILE_RPATH_CHANGE-new_rpath.cmake:[0-9]+ \(A_CMP0095\)
+  CMakeLists.txt:[0-9]+ \(include\)(
++
 CMake Warning \(dev\) at TARGETS-FILE_RPATH_CHANGE-new_rpath\.cmake:[0-9]+ \(install\):
   Policy CMP0095 is not set: RPATH entries are properly escaped in the
   intermediary CMake install script\.  Run "cmake --help-policy CMP0095" for
@@ -8,8 +20,8 @@ CMake Warning \(dev\) at TARGETS-FILE_RPATH_CHANGE-new_rpath\.cmake:[0-9]+ \(ins
   intermediary cmake_install\.cmake script\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers\.  Use -Wno-dev to suppress it\.
-
+This warning is for project developers\.  Use -Wno-dev to suppress it\.)+(
++
 CMake Warning \(dev\) at TARGETS-FILE_RPATH_CHANGE-new_rpath\.cmake:[0-9]+ \(install\):
   Policy CMP0095 is not set: RPATH entries are properly escaped in the
   intermediary CMake install script\.  Run "cmake --help-policy CMP0095" for
@@ -20,4 +32,4 @@ CMake Warning \(dev\) at TARGETS-FILE_RPATH_CHANGE-new_rpath\.cmake:[0-9]+ \(ins
   intermediary cmake_install\.cmake script\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers\.  Use -Wno-dev to suppress it\.
+This warning is for project developers\.  Use -Wno-dev to suppress it\.)+$

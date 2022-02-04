@@ -933,13 +933,13 @@ void cmExportFileGenerator::GeneratePolicyHeaderCode(std::ostream& os)
 
   // Isolate the file policy level.
   // Support CMake versions as far back as 2.6 but also support using NEW
-  // policy settings for up to CMake 3.21 (this upper limit may be reviewed
+  // policy settings for up to CMake 3.22 (this upper limit may be reviewed
   // and increased from time to time). This reduces the opportunity for CMake
   // warnings when an older export file is later used with newer CMake
   // versions.
   /* clang-format off */
   os << "cmake_policy(PUSH)\n"
-     << "cmake_policy(VERSION 2.6...3.21)\n";
+     << "cmake_policy(VERSION 2.6...3.22)\n";
   /* clang-format on */
 }
 
