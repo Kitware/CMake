@@ -3,10 +3,14 @@ Test project .*
  *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:typed/short\.case!4 \.+ +Passed +[0-9.]+ sec
  *Start +[0-9]+: TEST:typed/float\.case!4
  *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:typed/float\.case!4 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:typed/char\.case!4
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:typed/char\.case!4 \.+ +Passed +[0-9.]+ sec
  *Start +[0-9]+: TEST:ns\.typed/short\.case!4
  *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.typed/short\.case!4 \.+ +Passed +[0-9.]+ sec
  *Start +[0-9]+: TEST:ns\.typed/float\.case!4
  *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.typed/float\.case!4 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:ns\.typed/char\.case!4
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.typed/char\.case!4 \.+ +Passed +[0-9.]+ sec
 
 100% tests passed, 0 tests failed out of [0-9]+
 

@@ -136,7 +136,7 @@ function(gtest_discover_tests_impl)
         # Module; remove trailing '.' to get just the name...
         string(REGEX REPLACE "\\.( *#.*)?$" "" suite "${line}")
         if(line MATCHES "#" AND NOT _NO_PRETTY_TYPES)
-          string(REGEX REPLACE "/[0-9]\\.+ +#.*= +" "/" pretty_suite "${line}")
+          string(REGEX REPLACE "/[0-9]+\\.+ +#.*= +" "/" pretty_suite "${line}")
         else()
           set(pretty_suite "${suite}")
         endif()
