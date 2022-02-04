@@ -298,7 +298,8 @@ Options
          "cmd": "add_executable",
          "args": ["foo", "bar"],
          "time": 1579512535.9687231,
-         "frame": 2
+         "frame": 2,
+         "global_frame": 4
        }
 
      The members are:
@@ -325,7 +326,13 @@ Options
        Timestamp (seconds since epoch) of the function call.
 
      ``frame``
-       Stack frame depth of the function that was called.
+       Stack frame depth of the function that was called, within the
+       context of the  ``CMakeLists.txt`` being processed currently.
+
+     ``global_frame``
+       Stack frame depth of the function that was called, tracked globally
+       across all ``CMakeLists.txt`` files involved in the trace. This field
+       was added in minor version 2 of the ``json-v1`` format.
 
      Additionally, the first JSON document outputted contains the
      ``version`` key for the current major and minor version of the
@@ -337,7 +344,7 @@ Options
        {
          "version": {
            "major": 1,
-           "minor": 1
+           "minor": 2
          }
        }
 
