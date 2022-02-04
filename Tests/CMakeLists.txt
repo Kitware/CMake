@@ -2542,144 +2542,141 @@ if(BUILD_TESTING)
 #        -S "${CMake_BINARY_DIR}/Tests/CTestScriptMode/CTestTestScriptMode.cmake"
 #        )
 
-  set(CTEST_TEST_UPDATE 1)
-  if(CTEST_TEST_UPDATE)
-    # Test CTest Update with Subversion
-    find_package(Subversion QUIET)
-    if(Subversion_FOUND)
-      get_filename_component(_Subversion_BIN_DIR
-        ${Subversion_SVN_EXECUTABLE} PATH)
-      find_program(Subversion_SVNADMIN_EXECUTABLE svnadmin
-        HINTS ${_Subversion_BIN_DIR}
-        )
-      mark_as_advanced(Subversion_SVNADMIN_EXECUTABLE)
-      if(NOT Subversion_SVNADMIN_EXECUTABLE)
-        set(Subversion_FOUND FALSE)
-      endif()
+  # Test CTest Update with Subversion
+  find_package(Subversion QUIET)
+  if(Subversion_FOUND)
+    get_filename_component(_Subversion_BIN_DIR
+      ${Subversion_SVN_EXECUTABLE} PATH)
+    find_program(Subversion_SVNADMIN_EXECUTABLE svnadmin
+      HINTS ${_Subversion_BIN_DIR}
+      )
+    mark_as_advanced(Subversion_SVNADMIN_EXECUTABLE)
+    if(NOT Subversion_SVNADMIN_EXECUTABLE)
+      set(Subversion_FOUND FALSE)
     endif()
-    if(Subversion_FOUND)
-      set(CTestUpdateSVN_DIR "CTest UpdateSVN")
-      configure_file("${CMake_SOURCE_DIR}/Tests/CTestUpdateSVN.cmake.in"
-        "${CMake_BINARY_DIR}/Tests/CTestUpdateSVN.cmake" @ONLY)
-      add_test(CTest.UpdateSVN ${CMAKE_CMAKE_COMMAND}
-        -P "${CMake_BINARY_DIR}/Tests/CTestUpdateSVN.cmake"
-        )
-      list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${CTestUpdateSVN_DIR}")
-    endif()
+  endif()
+  if(Subversion_FOUND)
+    set(CTestUpdateSVN_DIR "CTest UpdateSVN")
+    configure_file("${CMake_SOURCE_DIR}/Tests/CTestUpdateSVN.cmake.in"
+      "${CMake_BINARY_DIR}/Tests/CTestUpdateSVN.cmake" @ONLY)
+    add_test(CTest.UpdateSVN ${CMAKE_CMAKE_COMMAND}
+      -P "${CMake_BINARY_DIR}/Tests/CTestUpdateSVN.cmake"
+      )
+    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${CTestUpdateSVN_DIR}")
+  endif()
 
-    # Test CTest Update with CVS
-    if(EXISTS ${CMAKE_ROOT}/Modules/FindCVS.cmake)
-      find_package(CVS QUIET)
-    else()
-      find_program(CVS_EXECUTABLE NAMES cvs)
-      set(CVS_FOUND ${CVS_EXECUTABLE})
+  # Test CTest Update with CVS
+  if(EXISTS ${CMAKE_ROOT}/Modules/FindCVS.cmake)
+    find_package(CVS QUIET)
+  else()
+    find_program(CVS_EXECUTABLE NAMES cvs)
+    set(CVS_FOUND ${CVS_EXECUTABLE})
+  endif()
+  set(CTEST_TEST_UPDATE_CVS ${CVS_FOUND})
+  if(CTEST_TEST_UPDATE_CVS AND NOT UNIX)
+    if("${CVS_EXECUTABLE}" MATCHES "cygwin")
+      message(STATUS "No CTest.UpdateCVS test with cygwin cvs.exe outside cygwin!")
+      set(CTEST_TEST_UPDATE_CVS 0)
     endif()
-    set(CTEST_TEST_UPDATE_CVS ${CVS_FOUND})
-    if(CTEST_TEST_UPDATE_CVS AND NOT UNIX)
-      if("${CVS_EXECUTABLE}" MATCHES "cygwin")
-        message(STATUS "No CTest.UpdateCVS test with cygwin cvs.exe outside cygwin!")
-        set(CTEST_TEST_UPDATE_CVS 0)
-      endif()
-    endif()
-    if(CTEST_TEST_UPDATE_CVS)
-      set(CTestUpdateCVS_DIR "CTest UpdateCVS")
-      configure_file("${CMake_SOURCE_DIR}/Tests/CTestUpdateCVS.cmake.in"
-        "${CMake_BINARY_DIR}/Tests/CTestUpdateCVS.cmake" @ONLY)
-      add_test(CTest.UpdateCVS ${CMAKE_CMAKE_COMMAND}
-        -P "${CMake_BINARY_DIR}/Tests/CTestUpdateCVS.cmake"
-        )
-      list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${CTestUpdateCVS_DIR}")
-    endif()
+  endif()
+  if(CTEST_TEST_UPDATE_CVS)
+    set(CTestUpdateCVS_DIR "CTest UpdateCVS")
+    configure_file("${CMake_SOURCE_DIR}/Tests/CTestUpdateCVS.cmake.in"
+      "${CMake_BINARY_DIR}/Tests/CTestUpdateCVS.cmake" @ONLY)
+    add_test(CTest.UpdateCVS ${CMAKE_CMAKE_COMMAND}
+      -P "${CMake_BINARY_DIR}/Tests/CTestUpdateCVS.cmake"
+      )
+    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${CTestUpdateCVS_DIR}")
+  endif()
 
-    # Test CTest Update with BZR
-    find_program(BZR_EXECUTABLE NAMES bzr)
-    mark_as_advanced(BZR_EXECUTABLE)
-    set(CTEST_TEST_UPDATE_BZR 0)
-    if(BZR_EXECUTABLE)
-      if(NOT "${BZR_EXECUTABLE}" MATCHES "cygwin" OR UNIX)
-        set(CTEST_TEST_UPDATE_BZR 1)
-      endif()
+  # Test CTest Update with BZR
+  find_program(BZR_EXECUTABLE NAMES bzr)
+  mark_as_advanced(BZR_EXECUTABLE)
+  set(CTEST_TEST_UPDATE_BZR 0)
+  if(BZR_EXECUTABLE)
+    if(NOT "${BZR_EXECUTABLE}" MATCHES "cygwin" OR UNIX)
+      set(CTEST_TEST_UPDATE_BZR 1)
     endif()
-    if(CTEST_TEST_UPDATE_BZR)
-      # Check if xmloutput plugin is there
-      execute_process(COMMAND ${BZR_EXECUTABLE} xmlplugins RESULT_VARIABLE xmlplugres
-        OUTPUT_QUIET ERROR_QUIET)
-      if( NOT ${xmlplugres} )
-        set(CTestUpdateBZR_DIR "CTest UpdateBZR")
-        configure_file("${CMake_SOURCE_DIR}/Tests/CTestUpdateBZR.cmake.in"
-          "${CMake_BINARY_DIR}/Tests/CTestUpdateBZR.cmake" @ONLY)
-        add_test(CTest.UpdateBZR ${CMAKE_CMAKE_COMMAND}
-          -P "${CMake_BINARY_DIR}/Tests/CTestUpdateBZR.cmake"
-          )
-        list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${CTestUpdateBZR_DIR}")
-        set(CTestUpdateBZR_DIR "CTest UpdateBZR_CLocale")
-        configure_file("${CMake_SOURCE_DIR}/Tests/CTestUpdateBZR.cmake.in"
-          "${CMake_BINARY_DIR}/Tests/CTestUpdateBZR_CLocale.cmake" @ONLY)
-        add_test(CTest.UpdateBZR.CLocale ${CMAKE_CMAKE_COMMAND}
-          -P "${CMake_BINARY_DIR}/Tests/CTestUpdateBZR_CLocale.cmake"
-          )
-        set_tests_properties(CTest.UpdateBZR.CLocale PROPERTIES ENVIRONMENT LC_ALL=C)
-        list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${CTestUpdateBZR_DIR}")
-      endif()
-    endif()
-
-    # Test CTest Update with GIT
-    find_program(GIT_EXECUTABLE NAMES git)
-    mark_as_advanced(GIT_EXECUTABLE)
-    set(CTEST_TEST_UPDATE_GIT 0)
-    if(GIT_EXECUTABLE)
-      if(NOT "${GIT_EXECUTABLE}" MATCHES "cygwin" OR UNIX)
-        set(CTEST_TEST_UPDATE_GIT 1)
-      endif()
-    endif()
-    if(CTEST_TEST_UPDATE_GIT)
-      set(CTestUpdateGIT_DIR "CTest UpdateGIT")
-      configure_file("${CMake_SOURCE_DIR}/Tests/CTestUpdateGIT.cmake.in"
-        "${CMake_BINARY_DIR}/Tests/CTestUpdateGIT.cmake" @ONLY)
-      add_test(CTest.UpdateGIT ${CMAKE_CMAKE_COMMAND}
-        -P "${CMake_BINARY_DIR}/Tests/CTestUpdateGIT.cmake"
+  endif()
+  if(CTEST_TEST_UPDATE_BZR)
+    # Check if xmloutput plugin is there
+    execute_process(COMMAND ${BZR_EXECUTABLE} xmlplugins RESULT_VARIABLE xmlplugres
+      OUTPUT_QUIET ERROR_QUIET)
+    if( NOT ${xmlplugres} )
+      set(CTestUpdateBZR_DIR "CTest UpdateBZR")
+      configure_file("${CMake_SOURCE_DIR}/Tests/CTestUpdateBZR.cmake.in"
+        "${CMake_BINARY_DIR}/Tests/CTestUpdateBZR.cmake" @ONLY)
+      add_test(CTest.UpdateBZR ${CMAKE_CMAKE_COMMAND}
+        -P "${CMake_BINARY_DIR}/Tests/CTestUpdateBZR.cmake"
         )
-      list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${CTestUpdateGIT_DIR}")
-    endif()
-
-    # Test CTest Update with HG
-    find_program(HG_EXECUTABLE NAMES hg)
-    mark_as_advanced(HG_EXECUTABLE)
-    set(CTEST_TEST_UPDATE_HG 0)
-    if(HG_EXECUTABLE)
-      if(NOT "${HG_EXECUTABLE}" MATCHES "cygwin" OR UNIX)
-        set(CTEST_TEST_UPDATE_HG 1)
-      endif()
-    endif()
-    if(CTEST_TEST_UPDATE_HG)
-      set(CTestUpdateHG_DIR "CTest UpdateHG")
-      configure_file("${CMake_SOURCE_DIR}/Tests/CTestUpdateHG.cmake.in"
-        "${CMake_BINARY_DIR}/Tests/CTestUpdateHG.cmake" @ONLY)
-      add_test(CTest.UpdateHG ${CMAKE_CMAKE_COMMAND}
-        -P "${CMake_BINARY_DIR}/Tests/CTestUpdateHG.cmake"
+      list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${CTestUpdateBZR_DIR}")
+      set(CTestUpdateBZR_DIR "CTest UpdateBZR_CLocale")
+      configure_file("${CMake_SOURCE_DIR}/Tests/CTestUpdateBZR.cmake.in"
+        "${CMake_BINARY_DIR}/Tests/CTestUpdateBZR_CLocale.cmake" @ONLY)
+      add_test(CTest.UpdateBZR.CLocale ${CMAKE_CMAKE_COMMAND}
+        -P "${CMake_BINARY_DIR}/Tests/CTestUpdateBZR_CLocale.cmake"
         )
-      list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${CTestUpdateHG_DIR}")
+      set_tests_properties(CTest.UpdateBZR.CLocale PROPERTIES ENVIRONMENT LC_ALL=C)
+      list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${CTestUpdateBZR_DIR}")
     endif()
+  endif()
 
-    # Test CTest Update with P4
-    find_program(P4_EXECUTABLE NAMES p4)
-    find_program(P4D_EXECUTABLE NAMES p4d)
-    mark_as_advanced(P4_EXECUTABLE P4D_EXECUTABLE)
-    set(CTEST_TEST_UPDATE_P4 0)
-    if(P4_EXECUTABLE AND P4D_EXECUTABLE)
-      if(NOT "${P4_EXECUTABLE};${P4D_EXECUTABLE}" MATCHES "cygwin" OR UNIX)
-        set(CTEST_TEST_UPDATE_P4 1)
-      endif()
+  # Test CTest Update with GIT
+  find_program(GIT_EXECUTABLE NAMES git)
+  mark_as_advanced(GIT_EXECUTABLE)
+  set(CTEST_TEST_UPDATE_GIT 0)
+  if(GIT_EXECUTABLE)
+    if(NOT "${GIT_EXECUTABLE}" MATCHES "cygwin" OR UNIX)
+      set(CTEST_TEST_UPDATE_GIT 1)
     endif()
-    if(CTEST_TEST_UPDATE_P4)
-      set(CTestUpdateP4_DIR "CTest UpdateP4")
-      configure_file("${CMake_SOURCE_DIR}/Tests/CTestUpdateP4.cmake.in"
-        "${CMake_BINARY_DIR}/Tests/CTestUpdateP4.cmake" @ONLY)
-      add_test(CTest.UpdateP4 ${CMAKE_CMAKE_COMMAND}
-        -P "${CMake_BINARY_DIR}/Tests/CTestUpdateP4.cmake"
-        )
-      list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${CTestUpdateP4_DIR}")
+  endif()
+  if(CTEST_TEST_UPDATE_GIT)
+    set(CTestUpdateGIT_DIR "CTest UpdateGIT")
+    configure_file("${CMake_SOURCE_DIR}/Tests/CTestUpdateGIT.cmake.in"
+      "${CMake_BINARY_DIR}/Tests/CTestUpdateGIT.cmake" @ONLY)
+    add_test(CTest.UpdateGIT ${CMAKE_CMAKE_COMMAND}
+      -P "${CMake_BINARY_DIR}/Tests/CTestUpdateGIT.cmake"
+      )
+    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${CTestUpdateGIT_DIR}")
+  endif()
+
+  # Test CTest Update with HG
+  find_program(HG_EXECUTABLE NAMES hg)
+  mark_as_advanced(HG_EXECUTABLE)
+  set(CTEST_TEST_UPDATE_HG 0)
+  if(HG_EXECUTABLE)
+    if(NOT "${HG_EXECUTABLE}" MATCHES "cygwin" OR UNIX)
+      set(CTEST_TEST_UPDATE_HG 1)
     endif()
+  endif()
+  if(CTEST_TEST_UPDATE_HG)
+    set(CTestUpdateHG_DIR "CTest UpdateHG")
+    configure_file("${CMake_SOURCE_DIR}/Tests/CTestUpdateHG.cmake.in"
+      "${CMake_BINARY_DIR}/Tests/CTestUpdateHG.cmake" @ONLY)
+    add_test(CTest.UpdateHG ${CMAKE_CMAKE_COMMAND}
+      -P "${CMake_BINARY_DIR}/Tests/CTestUpdateHG.cmake"
+      )
+    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${CTestUpdateHG_DIR}")
+  endif()
+
+  # Test CTest Update with P4
+  find_program(P4_EXECUTABLE NAMES p4)
+  find_program(P4D_EXECUTABLE NAMES p4d)
+  mark_as_advanced(P4_EXECUTABLE P4D_EXECUTABLE)
+  set(CTEST_TEST_UPDATE_P4 0)
+  if(P4_EXECUTABLE AND P4D_EXECUTABLE)
+    if(NOT "${P4_EXECUTABLE};${P4D_EXECUTABLE}" MATCHES "cygwin" OR UNIX)
+      set(CTEST_TEST_UPDATE_P4 1)
+    endif()
+  endif()
+  if(CTEST_TEST_UPDATE_P4)
+    set(CTestUpdateP4_DIR "CTest UpdateP4")
+    configure_file("${CMake_SOURCE_DIR}/Tests/CTestUpdateP4.cmake.in"
+      "${CMake_BINARY_DIR}/Tests/CTestUpdateP4.cmake" @ONLY)
+    add_test(CTest.UpdateP4 ${CMAKE_CMAKE_COMMAND}
+      -P "${CMake_BINARY_DIR}/Tests/CTestUpdateP4.cmake"
+      )
+    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${CTestUpdateP4_DIR}")
   endif()
 
   configure_file(
