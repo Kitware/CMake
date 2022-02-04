@@ -294,26 +294,6 @@ if(BUILD_TESTING)
     mark_as_advanced(CTEST_TEST_CTEST)
   endif ()
 
-  # Should tests that use CVS be run?
-  #
-  set(do_cvs_tests 0)
-
-  if(EXISTS ${CMAKE_ROOT}/Modules/FindCVS.cmake)
-    find_package(CVS QUIET)
-  else()
-    find_program(CVS_EXECUTABLE NAMES cvs)
-  endif()
-
-  if(CVS_EXECUTABLE)
-    set(do_cvs_tests 1)
-  endif()
-
-  if(do_cvs_tests AND NOT UNIX)
-    if("${CVS_EXECUTABLE}" MATCHES "cygwin")
-      set(do_cvs_tests 0)
-    endif()
-  endif()
-
   # Should CPack tests be run? By default, yes, but...
   #
   # Disable packaging test on Apple 10.3 and below. PackageMaker starts
