@@ -2056,6 +2056,7 @@ syn keyword cmakeKWExternalProject contained
             \ USES_TERMINAL_CONFIGURE
             \ USES_TERMINAL_DOWNLOAD
             \ USES_TERMINAL_INSTALL
+            \ USES_TERMINAL_PATCH
             \ USES_TERMINAL_TEST
             \ USES_TERMINAL_UPDATE
             \ WORKING_DIRECTORY
