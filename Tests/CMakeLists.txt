@@ -1554,6 +1554,12 @@ if(BUILD_TESTING)
     ADD_TEST_MACRO(FindMatlab.targets_checks      ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>)
   endif()
 
+  set(ExternalProject_BUILD_OPTIONS "")
+  foreach(vcs CVS SVN GIT HG)
+    if(DEFINED CMake_TEST_ExternalProject_${vcs})
+      list(APPEND ExternalProject_BUILD_OPTIONS -DEP_TEST_${vcs}=${CMake_TEST_ExternalProject_${vcs}})
+    endif()
+  endforeach()
   add_test(ExternalProject ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/ExternalProject"
@@ -1562,6 +1568,7 @@ if(BUILD_TESTING)
     --build-project ExternalProjectTest
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/ExternalProject"
     --force-new-ctest-process
+    --build-options ${ExternalProject_BUILD_OPTIONS}
     --test-command ${CMAKE_CTEST_COMMAND} -V
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ExternalProject")
