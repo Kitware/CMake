@@ -61,6 +61,7 @@ int main(int argc, char** argv)
         std::cout << "  case/4  # GetParam() = \"]]=]\"" << std::endl;
         std::cout << "  case/5  # GetParam() = \"__osbtext\"" << std::endl;
         std::cout << "  case/6  # GetParam() = \"__csb___text\"" << std::endl;
+        std::cout << "  case/7  # GetParam() = \"S o m  e   \"" << std::endl;
       }
     }
     return 0;
