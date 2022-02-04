@@ -1272,8 +1272,7 @@ void cmExportFileGenerator::GenerateTargetFileSets(cmGeneratorTarget* gte,
   auto interfaceFileSets = gte->Target->GetAllInterfaceFileSets();
   if (!interfaceFileSets.empty()) {
     std::string targetName = cmStrCat(this->Namespace, gte->GetExportName());
-    os << "if(NOT CMAKE_VERSION VERSION_LESS \"" << DEVEL_CMAKE_VERSION(3, 23)
-       << "\")\n"
+    os << "if(NOT CMAKE_VERSION VERSION_LESS \"3.23.0\")\n"
           "  target_sources("
        << targetName << "\n";
 
