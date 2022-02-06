@@ -571,7 +571,7 @@ bool cmComputeLinkInformation::Compute()
       }
     }
 
-    if (linkEntry.IsSharedDep) {
+    if (linkEntry.Kind == cmComputeLinkDepends::LinkEntry::SharedDep) {
       this->AddSharedDepItem(linkEntry);
     } else {
       this->AddItem(linkEntry);
@@ -1521,7 +1521,9 @@ void cmComputeLinkInformation::AddFullItem(LinkEntry const& entry)
     item, ItemIsPath::Yes, nullptr,
     this->FindLibraryFeature(
       entry.Feature == DEFAULT
-        ? (entry.IsObject ? "__CMAKE_LINK_OBJECT" : "__CMAKE_LINK_LIBRARY")
+        ? (entry.Kind == cmComputeLinkDepends::LinkEntry::Object
+             ? "__CMAKE_LINK_OBJECT"
+             : "__CMAKE_LINK_LIBRARY")
         : entry.Feature));
 }
 

@@ -49,11 +49,17 @@ public:
 
     static const std::string DEFAULT;
 
+    enum EntryKind
+    {
+      Library,
+      Object,
+      SharedDep,
+      Flag
+    };
+
     BT<std::string> Item;
     cmGeneratorTarget const* Target = nullptr;
-    bool IsSharedDep = false;
-    bool IsFlag = false;
-    bool IsObject = false;
+    EntryKind Kind = Library;
     // The following member is for the management of items specified
     // through genex $<LINK_LIBRARY:...>
     std::string Feature = std::string(DEFAULT);

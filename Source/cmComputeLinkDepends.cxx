@@ -395,9 +395,11 @@ std::pair<int, bool> cmComputeLinkDepends::AddLinkEntry(cmLinkItem const& item)
   LinkEntry& entry = this->EntryList[index];
   entry.Item = BT<std::string>(item.AsStr(), item.Backtrace);
   entry.Target = item.Target;
-  entry.IsFlag = (!entry.Target && entry.Item.Value[0] == '-' &&
-                  entry.Item.Value[1] != 'l' &&
-                  entry.Item.Value.substr(0, 10) != "-framework");
+  if (!entry.Target && entry.Item.Value[0] == '-' &&
+      entry.Item.Value[1] != 'l' &&
+      entry.Item.Value.substr(0, 10) != "-framework") {
+    entry.Kind = LinkEntry::Flag;
+  }
 
   // If the item has dependencies queue it to follow them.
   if (entry.Target) {
@@ -411,7 +413,7 @@ std::pair<int, bool> cmComputeLinkDepends::AddLinkEntry(cmLinkItem const& item)
       // The item dependencies are known.  Follow them.
       BFSEntry qe = { index, val->c_str() };
       this->BFSQueue.push(qe);
-    } else if (!entry.IsFlag) {
+    } else if (entry.Kind != LinkEntry::Flag) {
       // The item dependencies are not known.  We need to infer them.
       this->InferredDependSets[index].Initialized = true;
     }
@@ -434,7 +436,7 @@ void cmComputeLinkDepends::AddLinkObject(cmLinkItem const& item)
   int index = lei.first->second;
   LinkEntry& entry = this->EntryList[index];
   entry.Item = BT<std::string>(item.AsStr(), item.Backtrace);
-  entry.IsObject = true;
+  entry.Kind = LinkEntry::Object;
 
   // Record explicitly linked object files separately.
   this->ObjectEntries.emplace_back(index);
@@ -521,7 +523,7 @@ void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
     // This item was added specifically because it is a dependent
     // shared library.  It may get special treatment
     // in cmComputeLinkInformation.
-    entry.IsSharedDep = true;
+    entry.Kind = LinkEntry::SharedDep;
   }
 
   // Get the link entry for this target.
@@ -734,7 +736,7 @@ void cmComputeLinkDepends::AddLinkEntries(int depender_index,
       // items are outside libraries that should not be depending on
       // targets.
       if (!this->EntryList[dependee_index].Target &&
-          !this->EntryList[dependee_index].IsFlag &&
+          this->EntryList[dependee_index].Kind != LinkEntry::Flag &&
           dependee_index != dependSet.first) {
         dependSet.second.insert(dependee_index);
       }
