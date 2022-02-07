@@ -1,9 +1,9 @@
 Test project .*/Tests/RunCMake/GoogleTest/GoogleTest-discovery-arg-change
-  Test #[0-9]+: typed/short\.case
-  Test #[0-9]+: typed/float\.case
-  Test #[0-9]+: typed/char\.case
-  Test #[0-9]+: ns\.typed/short\.case
-  Test #[0-9]+: ns\.typed/float\.case
-  Test #[0-9]+: ns\.typed/char\.case
+  Test #[0-9]+: typed\.case<short>
+  Test #[0-9]+: typed\.case<float>
+  Test #[0-9]+: typed\.case<char>
+  Test #[0-9]+: ns\.typed\.case<short>
+  Test #[0-9]+: ns\.typed\.case<float>
+  Test #[0-9]+: ns\.typed\.case<char>
 
 Total Tests: [0-9]+
