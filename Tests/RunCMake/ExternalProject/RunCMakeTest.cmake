@@ -105,12 +105,15 @@ function(__ep_test_with_build_with_server testName)
   if(EXISTS "${URL_FILE}")
     file(REMOVE "${URL_FILE}")
   endif()
+  if(NOT DOWNLOAD_SERVER_TIMEOUT)
+    set(DOWNLOAD_SERVER_TIMEOUT 30)
+  endif()
   execute_process(
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_LIST_DIR}/DownloadServer.py --file "${URL_FILE}" ${ARGN}
     OUTPUT_FILE ${RunCMake_BINARY_DIR}/${testName}-python.txt
     ERROR_FILE ${RunCMake_BINARY_DIR}/${testName}-python.txt
     RESULT_VARIABLE result
-    TIMEOUT 30
+    TIMEOUT "${DOWNLOAD_SERVER_TIMEOUT}"
     )
   if(NOT result EQUAL 0)
     message(FATAL_ERROR "Failed to start download server:\n  ${result}")
