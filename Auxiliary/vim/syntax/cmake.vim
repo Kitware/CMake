@@ -381,6 +381,7 @@ syn keyword cmakeProperty contained
             \ VS_JUST_MY_CODE_DEBUGGING
             \ VS_KEYWORD
             \ VS_MOBILE_EXTENSIONS_VERSION
+            \ VS_NO_COMPILE_BATCHING
             \ VS_NO_SOLUTION_DEPLOY
             \ VS_PACKAGE_REFERENCES
             \ VS_PLATFORM_TOOLSET

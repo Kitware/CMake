@@ -402,6 +402,7 @@ Properties on Targets
    /prop_tgt/VS_JUST_MY_CODE_DEBUGGING
    /prop_tgt/VS_KEYWORD
    /prop_tgt/VS_MOBILE_EXTENSIONS_VERSION
+   /prop_tgt/VS_NO_COMPILE_BATCHING
    /prop_tgt/VS_NO_SOLUTION_DEPLOY
    /prop_tgt/VS_PACKAGE_REFERENCES
    /prop_tgt/VS_PLATFORM_TOOLSET
