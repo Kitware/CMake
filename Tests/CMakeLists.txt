@@ -2562,24 +2562,6 @@ if(BUILD_TESTING)
 #        -S "${CMake_BINARY_DIR}/Tests/CTestScriptMode/CTestTestScriptMode.cmake"
 #        )
 
-  # A test for ctest_build() with targets in subdirectories
-  set(ctest_configure_options)
-  if(CMAKE_GENERATOR_PLATFORM)
-    list(APPEND ctest_configure_options -A ${CMAKE_GENERATOR_PLATFORM})
-  endif()
-  if(CMAKE_GENERATOR_TOOLSET)
-    list(APPEND ctest_configure_options -T ${CMAKE_GENERATOR_TOOLSET})
-  endif()
-  if(CMake_TEST_EXPLICIT_MAKE_PROGRAM)
-    list(APPEND ctest_configure_options -DCMAKE_MAKE_PROGRAM:FILEPATH=${CMake_TEST_EXPLICIT_MAKE_PROGRAM})
-  endif()
-  configure_file("${CMake_SOURCE_DIR}/Tests/CTestBuildCommandProjectInSubdir/CTestBuildCommandProjectInSubdir.cmake.in"
-                 "${CMake_BINARY_DIR}/Tests/CTestBuildCommandProjectInSubdir/CTestBuildCommandProjectInSubdir.cmake" @ONLY)
-  unset(ctest_configure_options)
-  add_test(CTest.BuildCommand.ProjectInSubdir
-    ${CMAKE_CTEST_COMMAND} -S "${CMake_BINARY_DIR}/Tests/CTestBuildCommandProjectInSubdir/CTestBuildCommandProjectInSubdir.cmake")
-  list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CTestBuildCommandProjectInSubdir/Nested")
-
   set(CTEST_TEST_UPDATE 1)
   if(CTEST_TEST_UPDATE)
     # Test CTest Update with Subversion
