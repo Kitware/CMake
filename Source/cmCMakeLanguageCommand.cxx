@@ -84,7 +84,8 @@ bool cmCMakeLanguageCommandCALL(std::vector<cmListFileArgument> const& args,
   for (size_t i = startArg; i < args.size(); ++i) {
     funcArgs.emplace_back(args[i].Value, args[i].Delim, context.Line);
   }
-  cmListFileFunction func{ callCommand, context.Line, std::move(funcArgs) };
+  cmListFileFunction func{ callCommand, context.Line, context.Line,
+                           std::move(funcArgs) };
 
   if (defer) {
     if (defer->Id.empty()) {

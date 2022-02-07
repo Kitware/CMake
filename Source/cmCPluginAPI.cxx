@@ -432,7 +432,7 @@ static int CCONV cmExecuteCommand(void* arg, const char* name, int numArgs,
     lffArgs.emplace_back(args[i], cmListFileArgument::Quoted, 0);
   }
 
-  cmListFileFunction lff{ name, 0, std::move(lffArgs) };
+  cmListFileFunction lff{ name, 0, 0, std::move(lffArgs) };
   cmExecutionStatus status(*mf);
   return mf->ExecuteCommand(lff, status);
 }

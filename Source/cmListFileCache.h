@@ -51,9 +51,9 @@ struct cmListFileArgument
 class cmListFileFunction
 {
 public:
-  cmListFileFunction(std::string name, long line,
+  cmListFileFunction(std::string name, long line, long lineEnd,
                      std::vector<cmListFileArgument> args)
-    : Impl{ std::make_shared<Implementation>(std::move(name), line,
+    : Impl{ std::make_shared<Implementation>(std::move(name), line, lineEnd,
                                              std::move(args)) }
   {
   }
@@ -69,6 +69,7 @@ public:
   }
 
   long Line() const noexcept { return this->Impl->Line; }
+  long LineEnd() const noexcept { return this->Impl->LineEnd; }
 
   std::vector<cmListFileArgument> const& Arguments() const noexcept
   {
@@ -78,11 +79,12 @@ public:
 private:
   struct Implementation
   {
-    Implementation(std::string name, long line,
+    Implementation(std::string name, long line, long lineEnd,
                    std::vector<cmListFileArgument> args)
       : OriginalName{ std::move(name) }
       , LowerCaseName{ cmSystemTools::LowerCase(this->OriginalName) }
       , Line{ line }
+      , LineEnd{ lineEnd }
       , Arguments{ std::move(args) }
     {
     }
@@ -90,6 +92,7 @@ private:
     std::string OriginalName;
     std::string LowerCaseName;
     long Line = 0;
+    long LineEnd = 0;
     std::vector<cmListFileArgument> Arguments;
   };
 
