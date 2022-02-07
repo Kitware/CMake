@@ -219,9 +219,14 @@ bool cmVisualStudioSlnParser::State::Process(
           this->Stack.push(FileStateProject);
         } else
           this->IgnoreUntilTag("EndProject");
-      } else if (line.GetTag().compare("Global") == 0)
+      } else if (line.GetTag().compare("Global") == 0) {
+
         this->Stack.push(FileStateGlobal);
-      else {
+      } else if (line.GetTag().compare("VisualStudioVersion") == 0) {
+        output.SetVisualStudioVersion(line.GetValue(0));
+      } else if (line.GetTag().compare("MinimumVisualStudioVersion") == 0) {
+        output.SetMinimumVisualStudioVersion(line.GetValue(0));
+      } else {
         result.SetError(ResultErrorInputStructure, this->GetCurrentLine());
         return false;
       }

@@ -31,6 +31,22 @@ private:
 class cmSlnData
 {
 public:
+  std::string GetVisualStudioVersion() const { return visualStudioVersion; }
+  void SetVisualStudioVersion(const std::string& version)
+  {
+    visualStudioVersion = version;
+  }
+
+  std::string GetMinimumVisualStudioVersion() const
+  {
+    return minimumVisualStudioVersion;
+  }
+
+  void SetMinimumVisualStudioVersion(const std::string& version)
+  {
+    minimumVisualStudioVersion = version;
+  }
+
   const cmSlnProjectEntry* GetProjectByGUID(
     const std::string& projectGUID) const;
 
@@ -44,6 +60,7 @@ public:
                                 const std::string& projectRelativePath);
 
 private:
+  std::string visualStudioVersion, minimumVisualStudioVersion;
   using ProjectStorage = std::map<std::string, cmSlnProjectEntry>;
   ProjectStorage ProjectsByGUID;
   using ProjectStringIndex = std::map<std::string, ProjectStorage::iterator>;
