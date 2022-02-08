@@ -36,11 +36,11 @@ int main(int argc, char** argv)
     if (!is_basic_only) {
       const char* typed_suite_names[] = { "typed", "ns.typed" };
       for (size_t i = 0; i < ARRAY_SIZE(typed_suite_names); i++) {
-        std::cout << typed_suite_names[i] << "/0.  # TypeParam = short"
-                  << std::endl;
+        std::cout << typed_suite_names[i] << "/0.  # TypeParam = short\n";
         std::cout << "  case" << std::endl;
-        std::cout << typed_suite_names[i] << "/1.  # TypeParam = float"
-                  << std::endl;
+        std::cout << typed_suite_names[i] << "/1.  # TypeParam = float\n";
+        std::cout << "  case" << std::endl;
+        std::cout << typed_suite_names[i] << "/42.  # TypeParam = char\n";
         std::cout << "  case" << std::endl;
       }
     }

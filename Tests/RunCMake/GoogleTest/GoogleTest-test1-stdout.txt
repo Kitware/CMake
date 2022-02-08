@@ -19,14 +19,18 @@ Test project .*
  *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:disabled\.case!1 \.+\*+Not Run \(Disabled\) +[0-9.]+ sec
  *Start +[0-9]+: TEST:DISABLEDnotreally\.case!1
  *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:DISABLEDnotreally\.case!1 \.+ +Passed +[0-9.]+ sec
- *Start +[0-9]+: TEST:typed/short\.case!1
- *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:typed/short\.case!1 \.+ +Passed +[0-9.]+ sec
- *Start +[0-9]+: TEST:typed/float\.case!1
- *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:typed/float\.case!1 \.+ +Passed +[0-9.]+ sec
- *Start +[0-9]+: TEST:ns\.typed/short\.case!1
- *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.typed/short\.case!1 \.+ +Passed +[0-9.]+ sec
- *Start +[0-9]+: TEST:ns\.typed/float\.case!1
- *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.typed/float\.case!1 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:typed\.case<short>!1
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:typed\.case<short>!1 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:typed\.case<float>!1
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:typed\.case<float>!1 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:typed\.case<char>!1
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:typed\.case<char>!1 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:ns\.typed\.case<short>!1
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.typed\.case<short>!1 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:ns\.typed\.case<float>!1
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.typed\.case<float>!1 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:ns\.typed\.case<char>!1
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.typed\.case<char>!1 \.+ +Passed +[0-9.]+ sec
  *Start +[0-9]+: TEST:value/test\.case/1!1
  *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:value/test\.case/1!1 \.+ +Passed +[0-9.]+ sec
  *Start +[0-9]+: TEST:value/test\.case/"foo"!1
