@@ -1134,7 +1134,7 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
     slnFile += ".sln";
     cmVisualStudioSlnParser parser;
     if (parser.ParseFile(slnFile, slnData,
-                         cmVisualStudioSlnParser::DataGroupProjects)) {
+                         cmVisualStudioSlnParser::DataGroupAll)) {
       std::vector<cmSlnProjectEntry> slnProjects = slnData.GetProjects();
       for (cmSlnProjectEntry const& project : slnProjects) {
         if (useDevEnv) {
@@ -1170,15 +1170,17 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
     GeneratedMakeCommand makeCommand;
     makeCommand.RequiresOutputForward = requiresOutputForward;
     makeCommand.Add(makeProgramSelected);
+    cm::optional<cmSlnProjectEntry> proj = cm::nullopt;
 
     if (tname == "clean") {
-      makeCommand.Add(std::string(projectName) + ".sln");
+      makeCommand.Add(cmStrCat(projectName, ".sln"));
       makeCommand.Add("/t:Clean");
     } else {
       std::string targetProject = cmStrCat(tname, ".vcxproj");
+      proj = slnData.GetProjectByName(tname);
       if (targetProject.find('/') == std::string::npos) {
         // it might be in a subdir
-        if (cmSlnProjectEntry const* proj = slnData.GetProjectByName(tname)) {
+        if (proj) {
           targetProject = proj->GetRelativePath();
           cmSystemTools::ConvertToUnixSlashes(targetProject);
         }
@@ -1243,22 +1245,33 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
       }
     }
 
-    std::string configArg = "/p:Configuration=";
-    if (!config.empty()) {
-      configArg += config;
-    } else {
-      configArg += "Debug";
+    std::string plainConfig = config;
+    if (config.empty()) {
+      plainConfig = "Debug";
     }
-    makeCommand.Add(configArg);
-    makeCommand.Add(std::string("/p:Platform=") + this->GetPlatformName());
-    makeCommand.Add(std::string("/p:VisualStudioVersion=") +
-                    this->GetIDEVersion());
+
+    std::string platform = GetPlatformName();
+    if (proj) {
+      std::string extension =
+        cmSystemTools::GetFilenameLastExtension(proj->GetRelativePath());
+      extension = cmSystemTools::LowerCase(extension);
+      if (extension.compare(".csproj") == 0) {
+        // Use correct platform name
+        platform =
+          slnData.GetConfigurationTarget(tname, plainConfig, platform);
+      }
+    }
+
+    makeCommand.Add(cmStrCat("/p:Configuration=", plainConfig));
+    makeCommand.Add(cmStrCat("/p:Platform=", platform));
+    makeCommand.Add(
+      cmStrCat("/p:VisualStudioVersion=", this->GetIDEVersion()));
 
     if (jobs != cmake::NO_BUILD_PARALLEL_LEVEL) {
       if (jobs == cmake::DEFAULT_BUILD_PARALLEL_LEVEL) {
         makeCommand.Add("/m");
       } else {
-        makeCommand.Add(std::string("/m:") + std::to_string(jobs));
+        makeCommand.Add(cmStrCat("/m:", std::to_string(jobs)));
       }
       // Having msbuild.exe and cl.exe using multiple jobs is discouraged
       makeCommand.Add("/p:CL_MPCount=1");
@@ -1266,7 +1279,7 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
 
     // Respect the verbosity: 'n' normal will show build commands
     //                        'm' minimal only the build step's title
-    makeCommand.Add(std::string("/v:") + ((verbose) ? "n" : "m"));
+    makeCommand.Add(cmStrCat("/v:", ((verbose) ? "n" : "m")));
     makeCommand.Add(makeOptions.begin(), makeOptions.end());
     makeCommands.emplace_back(std::move(makeCommand));
   }

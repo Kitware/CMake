@@ -926,6 +926,17 @@ void cmVisualStudio10TargetGenerator::WriteSdkStyleProjectFile(
     e1.Element("OutputType", outputType);
   }
 
+  for (const std::string& config : this->Configurations) {
+    Elem e1(e0, "PropertyGroup");
+    e1.Attribute("Condition", "'$(Configuration)' == '" + config + "'");
+    e1.SetHasElements();
+    this->WriteEvents(e1, config);
+
+    std::string outDir = this->GeneratorTarget->GetDirectory(config) + "/";
+    ConvertToWindowsSlash(outDir);
+    e1.Element("OutputPath", outDir);
+  }
+
   this->WriteDotNetDocumentationFile(e0);
   this->WriteAllSources(e0);
   this->WriteDotNetReferences(e0);
