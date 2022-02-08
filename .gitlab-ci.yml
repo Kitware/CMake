@@ -879,6 +879,21 @@ t:windows-clang13.0-gnu-ninja:
         CMAKE_CI_BUILD_NAME: windows_clang13.0_gnu_ninja
         CMAKE_CI_JOB_NIGHTLY: "true"
 
+t:windows-clang13.0-gnu-nmake:
+    extends:
+        - .windows_clang_nmake
+        - .cmake_test_windows_clang
+        - .windows_tags_concurrent
+        - .cmake_junit_artifacts
+        - .run_dependent
+    dependencies:
+        - t:windows-vs2022-x64-ninja
+    needs:
+        - t:windows-vs2022-x64-ninja
+    variables:
+        CMAKE_CI_BUILD_NAME: windows_clang13.0_gnu_nmake
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
 t:windows-msvc-v71-nmake:
     extends:
         - .windows_msvc_v71_nmake
