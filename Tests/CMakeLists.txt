@@ -2603,15 +2603,9 @@ if(BUILD_TESTING)
   endif()
 
   # Test CTest Update with BZR
-  if(NOT DEFINED CMake_TEST_CTestUpdate_BZR OR CMake_TEST_CTestUpdate_BZR)
+  if(CMake_TEST_CTestUpdate_BZR)
     find_program(BZR_EXECUTABLE NAMES bzr)
     mark_as_advanced(BZR_EXECUTABLE)
-  endif()
-  if(NOT DEFINED CMake_TEST_CTestUpdate_BZR AND BZR_EXECUTABLE
-      AND (UNIX OR NOT "${BZR_EXECUTABLE}" MATCHES "cygwin"))
-    set(CMake_TEST_CTestUpdate_BZR 1)
-  endif()
-  if(CMake_TEST_CTestUpdate_BZR)
     if(NOT BZR_EXECUTABLE)
       message(FATAL_ERROR "CMake_TEST_CTestUpdate_BZR enabled but BZR_EXECUTABLE is not found.")
     endif()
