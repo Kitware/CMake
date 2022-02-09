@@ -3309,7 +3309,9 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
   } else if (this->MSTools) {
     cmsys::RegularExpression clangToolset("v[0-9]+_clang_.*");
     const char* toolset = this->GlobalGenerator->GetPlatformToolset();
-    if (toolset && clangToolset.find(toolset)) {
+    cmValue noCompileBatching =
+      this->GeneratorTarget->GetProperty("VS_NO_COMPILE_BATCHING");
+    if (noCompileBatching.IsOn() || (toolset && clangToolset.find(toolset))) {
       e2.Element("ObjectFileName", "$(IntDir)%(filename).obj");
     } else {
       e2.Element("ObjectFileName", "$(IntDir)");

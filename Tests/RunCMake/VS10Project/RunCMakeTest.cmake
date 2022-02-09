@@ -84,3 +84,4 @@ endif()
 
 run_cmake(VsDotnetTargetFramework)
 run_cmake(VsDotnetTargetFrameworkVersion)
+run_cmake(VsNoCompileBatching)
