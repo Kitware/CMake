@@ -302,6 +302,8 @@ void cmMakefile::PrintCommandTrace(
       val["time"] = cmSystemTools::GetTime();
       val["frame"] =
         static_cast<Json::Value::UInt64>(this->ExecutionStatusStack.size());
+      val["global_frame"] =
+        static_cast<Json::Value::UInt64>(this->RecursionDepth);
       msg << Json::writeString(builder, val);
 #endif
       break;
