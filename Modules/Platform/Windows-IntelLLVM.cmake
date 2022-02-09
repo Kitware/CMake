@@ -25,6 +25,6 @@ macro(__windows_compiler_intel lang)
       "<CMAKE_${lang}_COMPILER> ${CMAKE_CL_NOLOGO} <CMAKE_${lang}_LINK_FLAGS> <OBJECTS> ${CMAKE_START_TEMP_FILE} -fuse-ld=llvm-lib -o <TARGET> -link <LINK_FLAGS> <LINK_LIBRARIES> ${CMAKE_END_TEMP_FILE}")
   endif()
 
-  set(CMAKE_DEPFILE_FLAGS_${lang} "-QMMD -QMT <DEP_TARGET> -QMF <DEP_FILE>")
+  set(CMAKE_DEPFILE_FLAGS_${lang} "-QMD -QMT <DEP_TARGET> -QMF <DEP_FILE>")
   set(CMAKE_${lang}_DEPFILE_FORMAT gcc)
 endmacro()
