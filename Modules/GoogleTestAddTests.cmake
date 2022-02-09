@@ -9,7 +9,7 @@ set(flush_tests_MODE WRITE)
 # Flushes script to ${_CTEST_FILE}
 macro(flush_script)
   file(${flush_tests_MODE} "${_CTEST_FILE}" "${script}")
-  set(flush_tests_MODE APPEND)
+  set(flush_tests_MODE APPEND PARENT_SCOPE)
 
   set(script "")
 endmacro()
@@ -20,24 +20,22 @@ macro(flush_tests_buffer)
   set(tests_buffer "")
 endmacro()
 
-macro(add_command NAME TEST_NAME)
-  set(_args "")
-  foreach(_arg ${ARGN})
-    if(_arg MATCHES "[^-./:a-zA-Z0-9_]")
-      string(APPEND _args " [==[${_arg}]==]")
+function(add_command NAME TEST_NAME)
+  set(args "")
+  foreach(arg ${ARGN})
+    if(arg MATCHES "[^-./:a-zA-Z0-9_]")
+      string(APPEND args " [==[${arg}]==]")
     else()
-      string(APPEND _args " ${_arg}")
+      string(APPEND args " ${arg}")
     endif()
   endforeach()
-  string(APPEND script "${NAME}(${TEST_NAME} ${_args})\n")
-  string(LENGTH "${script}" _script_len)
-  if(${_script_len} GREATER "50000")
+  string(APPEND script "${NAME}(${TEST_NAME} ${args})\n")
+  string(LENGTH "${script}" script_len)
+  if(${script_len} GREATER "50000")
     flush_script()
   endif()
-  # Unsets macro local variables to prevent leakage outside of this macro.
-  unset(_args)
-  unset(_script_len)
-endmacro()
+  set(script "${script}" PARENT_SCOPE)
+endfunction()
 
 function(generate_testname_guards OUTPUT OPEN_GUARD_VAR CLOSE_GUARD_VAR)
   set(open_guard "[=[")
@@ -164,7 +162,6 @@ function(gtest_discover_tests_impl)
         endif()
 
         string(CONFIGURE "${test_name_template}" testname)
-        # sanitize test name for further processing downstream
         # unescape []
         if(open_sb)
           string(REPLACE "${open_sb}" "[" testname "${testname}")
@@ -172,13 +169,9 @@ function(gtest_discover_tests_impl)
         if(close_sb)
           string(REPLACE "${close_sb}" "]" testname "${testname}")
         endif()
-        # escape \
-        string(REPLACE [[\]] [[\\]] testname "${testname}")
-        # escape $
-        string(REPLACE [[$]] [[\$]] testname "${testname}")
         set(guarded_testname "${open_guard}${testname}${close_guard}")
 
-        # ...and add to script
+        # add to script
         add_command(add_test
           "${guarded_testname}"
           ${_TEST_EXECUTOR}
@@ -199,14 +192,14 @@ function(gtest_discover_tests_impl)
           "${guarded_testname}"
           PROPERTIES
           WORKING_DIRECTORY "${_TEST_WORKING_DIR}"
-          SKIP_REGULAR_EXPRESSION "\\\\[  SKIPPED \\\\]"
+          SKIP_REGULAR_EXPRESSION "\\[  SKIPPED \\]"
           ${properties}
         )
 
-        # possibly unbalanced square brackets render lists invalid so skip such tests in _TEST_LIST
+        # possibly unbalanced square brackets render lists invalid so skip such tests in ${_TEST_LIST}
         if(NOT "${testname}" MATCHES [=[(\[|\])]=])
           # escape ;
-          string(REPLACE [[;]] [[\;]] testname "${testname}")
+          string(REPLACE [[;]] [[\\;]] testname "${testname}")
           list(APPEND tests_buffer "${testname}")
           list(LENGTH tests_buffer tests_buffer_length)
           if(${tests_buffer_length} GREATER "250")
@@ -221,7 +214,7 @@ function(gtest_discover_tests_impl)
   # Create a list of all discovered tests, which users may use to e.g. set
   # properties on the tests
   flush_tests_buffer()
-  add_command(set "" ${_TEST_LIST} ${tests})
+  add_command(set "" ${_TEST_LIST} "${tests}")
 
   # Write CTest script
   flush_script()

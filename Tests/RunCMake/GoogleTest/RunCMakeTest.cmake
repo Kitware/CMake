@@ -236,6 +236,58 @@ function(run_GoogleTest_discovery_multi_config)
 
 endfunction()
 
+function(run_GoogleTest_discovery_test_list DISCOVERY_MODE)
+  # Use a single build tree for a few tests without cleaning.
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/GoogleTest-discovery-test-list-build)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  if(NOT RunCMake_GENERATOR_IS_MULTI_CONFIG)
+    set(RunCMake_TEST_OPTIONS -DCMAKE_BUILD_TYPE=Debug)
+  endif()
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+
+  run_cmake_with_options(GoogleTestDiscoveryTestList -DCMAKE_GTEST_DISCOVER_TESTS_DISCOVERY_MODE=${DISCOVERY_MODE})
+
+  run_cmake_command(GoogleTest-discovery-test-list-build
+    ${CMAKE_COMMAND}
+    --build .
+    --config Debug
+    --target test_list_test
+  )
+
+  run_cmake_command(GoogleTest-discovery-test-list-test
+    ${CMAKE_CTEST_COMMAND}
+    -C Debug
+    --no-label-summary
+  )
+endfunction()
+
+function(run_GoogleTest_discovery_flush_script DISCOVERY_MODE)
+  # Use a single build tree for a few tests without cleaning.
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/GoogleTest-discovery-flush-script-build)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  if(NOT RunCMake_GENERATOR_IS_MULTI_CONFIG)
+    set(RunCMake_TEST_OPTIONS -DCMAKE_BUILD_TYPE=Debug)
+  endif()
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+
+  run_cmake_with_options(GoogleTestDiscoveryFlushScript -DCMAKE_GTEST_DISCOVER_TESTS_DISCOVERY_MODE=${DISCOVERY_MODE})
+
+  run_cmake_command(GoogleTest-discovery-flush-script-build
+    ${CMAKE_COMMAND}
+    --build .
+    --config Debug
+    --target flush_script_test
+  )
+
+  run_cmake_command(GoogleTest-discovery-flush-script-test
+    ${CMAKE_CTEST_COMMAND}
+    -C Debug
+    --no-label-summary
+  )
+endfunction()
+
 foreach(DISCOVERY_MODE POST_BUILD PRE_TEST)
   message("Testing ${DISCOVERY_MODE} discovery mode via CMAKE_GTEST_DISCOVER_TESTS_DISCOVERY_MODE global override...")
   run_GoogleTest(${DISCOVERY_MODE})
@@ -246,6 +298,8 @@ foreach(DISCOVERY_MODE POST_BUILD PRE_TEST)
       NOT "${DISCOVERY_MODE};${RunCMake_GENERATOR}" MATCHES "^POST_BUILD;Visual Studio 9")
     run_GoogleTest_discovery_arg_change(${DISCOVERY_MODE})
   endif()
+  run_GoogleTest_discovery_test_list(${DISCOVERY_MODE})
+  run_GoogleTest_discovery_flush_script(${DISCOVERY_MODE})
 endforeach()
 
 if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
