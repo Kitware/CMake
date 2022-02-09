@@ -1,0 +1,13 @@
+CMake Error at only-targets.cmake:[0-9]+ \(target_link_libraries\):
+  Target "lib2" has LINK_LIBRARIES_ONLY_TARGETS enabled, but it links to:
+
+    external
+
+  which is not a target.  Possible reasons include:
+
+    \* There is a typo in the target name.
+    \* A find_package call is missing for an IMPORTED target.
+    \* An ALIAS target is missing.
+
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

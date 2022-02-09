@@ -1779,69 +1779,93 @@ void cmTarget::InsertPrecompileHeader(BT<std::string> const& entry)
   this->impl->PrecompileHeadersEntries.push_back(entry);
 }
 
-static void cmTargetCheckLINK_INTERFACE_LIBRARIES(const std::string& prop,
-                                                  const std::string& value,
-                                                  cmMakefile* context,
-                                                  bool imported)
+namespace {
+void CheckLinkLibraryPattern(const std::string& property,
+                             const std::string& value, cmMakefile* context)
 {
-  // Look for link-type keywords in the value.
-  static cmsys::RegularExpression keys("(^|;)(debug|optimized|general)(;|$)");
-  if (!keys.find(value)) {
+  // Look for <LINK_LIBRARY:> and </LINK_LIBRARY:> internal tags
+  static cmsys::RegularExpression linkLibrary(
+    "(^|;)(</?LINK_LIBRARY:[^;>]*>)(;|$)");
+  if (!linkLibrary.find(value)) {
     return;
   }
 
+  // Report an error.
+  context->IssueMessage(
+    MessageType::FATAL_ERROR,
+    cmStrCat("Property ", property, " contains the invalid item \"",
+             linkLibrary.match(2), "\". The ", property,
+             " property may contain the generator-expression "
+             "\"$<LINK_LIBRARY:...>\" "
+             "which may be used to specify how the libraries are linked."));
+}
+
+void CheckLINK_INTERFACE_LIBRARIES(const std::string& prop,
+                                   const std::string& value,
+                                   cmMakefile* context, bool imported)
+{
   // Support imported and non-imported versions of the property.
   const char* base = (imported ? "IMPORTED_LINK_INTERFACE_LIBRARIES"
                                : "LINK_INTERFACE_LIBRARIES");
 
-  // Report an error.
-  std::ostringstream e;
-  e << "Property " << prop << " may not contain link-type keyword \""
-    << keys.match(2) << "\".  "
-    << "The " << base << " property has a per-configuration "
-    << "version called " << base << "_<CONFIG> which may be "
-    << "used to specify per-configuration rules.";
-  if (!imported) {
-    e << "  "
-      << "Alternatively, an IMPORTED library may be created, configured "
-      << "with a per-configuration location, and then named in the "
-      << "property value.  "
-      << "See the add_library command's IMPORTED mode for details."
-      << "\n"
-      << "If you have a list of libraries that already contains the "
-      << "keyword, use the target_link_libraries command with its "
-      << "LINK_INTERFACE_LIBRARIES mode to set the property.  "
-      << "The command automatically recognizes link-type keywords and sets "
-      << "the LINK_INTERFACE_LIBRARIES and LINK_INTERFACE_LIBRARIES_DEBUG "
-      << "properties accordingly.";
+  // Look for link-type keywords in the value.
+  static cmsys::RegularExpression keys("(^|;)(debug|optimized|general)(;|$)");
+  if (keys.find(value)) {
+    // Report an error.
+    std::ostringstream e;
+    e << "Property " << prop << " may not contain link-type keyword \""
+      << keys.match(2) << "\".  "
+      << "The " << base << " property has a per-configuration "
+      << "version called " << base << "_<CONFIG> which may be "
+      << "used to specify per-configuration rules.";
+    if (!imported) {
+      e << "  "
+        << "Alternatively, an IMPORTED library may be created, configured "
+        << "with a per-configuration location, and then named in the "
+        << "property value.  "
+        << "See the add_library command's IMPORTED mode for details."
+        << "\n"
+        << "If you have a list of libraries that already contains the "
+        << "keyword, use the target_link_libraries command with its "
+        << "LINK_INTERFACE_LIBRARIES mode to set the property.  "
+        << "The command automatically recognizes link-type keywords and sets "
+        << "the LINK_INTERFACE_LIBRARIES and LINK_INTERFACE_LIBRARIES_DEBUG "
+        << "properties accordingly.";
+    }
+    context->IssueMessage(MessageType::FATAL_ERROR, e.str());
   }
-  context->IssueMessage(MessageType::FATAL_ERROR, e.str());
+
+  CheckLinkLibraryPattern(base, value, context);
 }
 
-static void cmTargetCheckINTERFACE_LINK_LIBRARIES(const std::string& value,
-                                                  cmMakefile* context)
+void CheckLINK_LIBRARIES(const std::string& value, cmMakefile* context)
+{
+  CheckLinkLibraryPattern("LINK_LIBRARIES", value, context);
+}
+
+void CheckINTERFACE_LINK_LIBRARIES(const std::string& value,
+                                   cmMakefile* context)
 {
   // Look for link-type keywords in the value.
   static cmsys::RegularExpression keys("(^|;)(debug|optimized|general)(;|$)");
-  if (!keys.find(value)) {
-    return;
+  if (keys.find(value)) {
+    // Report an error.
+    std::ostringstream e;
+
+    e << "Property INTERFACE_LINK_LIBRARIES may not contain link-type "
+         "keyword \""
+      << keys.match(2)
+      << "\".  The INTERFACE_LINK_LIBRARIES "
+         "property may contain configuration-sensitive generator-expressions "
+         "which may be used to specify per-configuration rules.";
+
+    context->IssueMessage(MessageType::FATAL_ERROR, e.str());
   }
 
-  // Report an error.
-  std::ostringstream e;
-
-  e << "Property INTERFACE_LINK_LIBRARIES may not contain link-type "
-       "keyword \""
-    << keys.match(2)
-    << "\".  The INTERFACE_LINK_LIBRARIES "
-       "property may contain configuration-sensitive generator-expressions "
-       "which may be used to specify per-configuration rules.";
-
-  context->IssueMessage(MessageType::FATAL_ERROR, e.str());
+  CheckLinkLibraryPattern("INTERFACE_LINK_LIBRARIES", value, context);
 }
 
-static void cmTargetCheckIMPORTED_GLOBAL(const cmTarget* target,
-                                         cmMakefile* context)
+void CheckIMPORTED_GLOBAL(const cmTarget* target, cmMakefile* context)
 {
   const auto& targets = context->GetOwnedImportedTargets();
   auto it =
@@ -1857,6 +1881,7 @@ static void cmTargetCheckIMPORTED_GLOBAL(const cmTarget* target,
     context->IssueMessage(MessageType::FATAL_ERROR, e.str());
   }
 }
+}
 
 void cmTarget::CheckProperty(const std::string& prop,
                              cmMakefile* context) const
@@ -1864,22 +1889,23 @@ void cmTarget::CheckProperty(const std::string& prop,
   // Certain properties need checking.
   if (cmHasLiteralPrefix(prop, "LINK_INTERFACE_LIBRARIES")) {
     if (cmValue value = this->GetProperty(prop)) {
-      cmTargetCheckLINK_INTERFACE_LIBRARIES(prop, *value, context, false);
+      CheckLINK_INTERFACE_LIBRARIES(prop, *value, context, false);
     }
-  }
-  if (cmHasLiteralPrefix(prop, "IMPORTED_LINK_INTERFACE_LIBRARIES")) {
+  } else if (cmHasLiteralPrefix(prop, "IMPORTED_LINK_INTERFACE_LIBRARIES")) {
     if (cmValue value = this->GetProperty(prop)) {
-      cmTargetCheckLINK_INTERFACE_LIBRARIES(prop, *value, context, true);
+      CheckLINK_INTERFACE_LIBRARIES(prop, *value, context, true);
     }
-  }
-  if (prop == "INTERFACE_LINK_LIBRARIES") {
+  } else if (prop == "LINK_LIBRARIES") {
     if (cmValue value = this->GetProperty(prop)) {
-      cmTargetCheckINTERFACE_LINK_LIBRARIES(*value, context);
+      CheckLINK_LIBRARIES(*value, context);
     }
-  }
-  if (prop == "IMPORTED_GLOBAL") {
+  } else if (prop == "INTERFACE_LINK_LIBRARIES") {
+    if (cmValue value = this->GetProperty(prop)) {
+      CheckINTERFACE_LINK_LIBRARIES(*value, context);
+    }
+  } else if (prop == "IMPORTED_GLOBAL") {
     if (this->IsImported()) {
-      cmTargetCheckIMPORTED_GLOBAL(this, context);
+      CheckIMPORTED_GLOBAL(this, context);
     }
   }
 }

@@ -1113,6 +1113,83 @@ Output-Related Expressions
   property, perhaps via the :command:`target_link_libraries` command,
   to specify private link dependencies without other usage requirements.
 
+.. genex:: $<LINK_LIBRARY:feature,library-list>
+
+  .. versionadded:: 3.24
+
+  Manage how libraries are specified during the link step.
+  This expression may be used to specify how to link libraries in a target.
+  For example:
+
+  .. code-block:: cmake
+
+    add_library(lib1 STATIC ...)
+    add_library(lib2 ...)
+    target_link_libraries(lib2 PRIVATE $<LINK_LIBRARY:whole_archive,lib1>)
+
+  This specify to use the ``lib1`` target with feature ``whole_archive`` for
+  linking target ``lib2``. The feature must have be defined by
+  :variable:`CMAKE_<LANG>_LINK_USING_<FEATURE>` variable or, if
+  :variable:`CMAKE_<LANG>_LINK_USING_<FEATURE>_SUPPORTED` is false,
+  by :variable:`CMAKE_LINK_USING_<FEATURE>` variable.
+
+  .. note::
+
+    The evaluation of this generator expression will use, for the following
+    variables, the values defined at the level of the creation of the target:
+
+    * :variable:`CMAKE_<LANG>_LINK_USING_<FEATURE>_SUPPORTED`
+    * :variable:`CMAKE_<LANG>_LINK_USING_<FEATURE>`
+    * :variable:`CMAKE_LINK_USING_<FEATURE>_SUPPORTED`
+    * :variable:`CMAKE_LINK_USING_<FEATURE>`
+
+  This expression can only be used to specify link libraries (i.e. part of
+  :command:`link_libraries` or :command:`target_link_libraries` commands and
+  :prop_tgt:`LINK_LIBRARIES` or :prop_tgt:`INTERFACE_LINK_LIBRARIES` target
+  properties).
+
+  .. note::
+
+    If this expression appears in the :prop_tgt:`INTERFACE_LINK_LIBRARIES`
+    property of a target, it will be included in the imported target generated
+    by :command:`install(EXPORT)` command. It is the responsibility of the
+    environment consuming this import to define the link feature used by this
+    expression.
+
+  The ``library-list`` argument can hold CMake targets or external libraries.
+  Any ``CMake`` target of type :ref:`OBJECT <Object Libraries>` or
+  :ref:`INTERFACE <Interface Libraries>` will be ignored by this expression and
+  will be handled in the standard way.
+
+  Each target or external library involved in the link step must have only one
+  kind of feature (the absence of feature is also incompatible with any
+  feature). For example:
+
+  .. code-block:: cmake
+
+    add_library(lib1 ...)
+
+    add_library(lib2 ...)
+    target_link_libraries(lib2 PUBLIC $<LINK_LIBRARY:feature1,lib1>)
+
+    add_library(lib3 ...)
+    target_link_libraries(lib3 PRIVATE lib1 lib2)
+    # an error will be raised here because lib1 has two different features
+
+  To resolve such incompatibilities, the :prop_tgt:`LINK_LIBRARY_OVERRIDE`
+  and  :prop_tgt:`LINK_LIBRARY_OVERRIDE_<LIBRARY>` target properties can be
+  used.
+
+  .. note::
+
+    This expression does not guarantee that the list of specified libraries
+    will be kept grouped. So, constructs like ``start-group`` and
+    ``end-group``, as supported by ``GNU ld``, cannot be used.
+
+  ``CMake`` pre-defines some features of general interest:
+
+  .. include:: ../variable/LINK_LIBRARY_PREDEFINED_FEATURES.txt
+
 .. genex:: $<INSTALL_INTERFACE:...>
 
   Content of ``...`` when the property is exported using :command:`install(EXPORT)`,

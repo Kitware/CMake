@@ -118,8 +118,10 @@ void cmLinkLineDeviceComputer::ComputeLinkLibraries(
       // can tolerate '.so' or '.dylib' it cannot tolerate '.so.1'.
       if (cmHasLiteralSuffix(item.Value.Value, ".a") ||
           cmHasLiteralSuffix(item.Value.Value, ".lib")) {
-        linkLib.Value += this->ConvertToOutputFormat(
-          this->ConvertToLinkReference(item.Value.Value));
+        linkLib.Value = item
+                          .GetFormattedItem(this->ConvertToOutputFormat(
+                            this->ConvertToLinkReference(item.Value.Value)))
+                          .Value;
       }
     } else if (item.Value == "-framework") {
       // This is the first part of '-framework Name' where the framework
@@ -127,7 +129,7 @@ void cmLinkLineDeviceComputer::ComputeLinkLibraries(
       skipItemAfterFramework = true;
       continue;
     } else if (cmLinkItemValidForDevice(item.Value.Value)) {
-      linkLib.Value += item.Value.Value;
+      linkLib.Value = item.Value.Value;
     }
 
     if (emitted.insert(linkLib.Value).second) {

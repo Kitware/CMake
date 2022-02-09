@@ -1,0 +1,8 @@
+CMake Error at nested-incompatible-features.cmake:[0-9]+ \(target_link_libraries\):
+  Error evaluating generator expression:
+
+    \$<LINK_LIBRARY:feat2,dep1,\$<LINK_LIBRARY:feat1,dep2>>
+
+  \$<LINK_LIBRARY:...> with different features cannot be nested.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

@@ -19,6 +19,7 @@
 #include "cmMessageType.h"
 #include "cmOrderDirectories.h"
 #include "cmOutputConverter.h"
+#include "cmPlaceholderExpander.h"
 #include "cmPolicies.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
@@ -344,6 +345,27 @@ cmComputeLinkInformation::cmComputeLinkInformation(
     this->LinkWithRuntimePath = this->Makefile->IsOn(var);
   }
 
+  // Define some Feature descriptors to handle standard library and object link
+  if (!this->GetLibLinkFileFlag().empty()) {
+    this->LibraryFeatureDescriptors.emplace(
+      "__CMAKE_LINK_LIBRARY",
+      FeatureDescriptor{ "__CMAKE_LINK_LIBRARY",
+                         cmStrCat(this->GetLibLinkFileFlag(), "<LIBRARY>") });
+  }
+  if (!this->GetObjLinkFileFlag().empty()) {
+    this->LibraryFeatureDescriptors.emplace(
+      "__CMAKE_LINK_OBJECT",
+      FeatureDescriptor{ "__CMAKE_LINK_OBJECT",
+                         cmStrCat(this->GetObjLinkFileFlag(), "<LIBRARY>") });
+  }
+  if (!this->LoaderFlag->empty()) {
+    // Define a Feature descriptor for the link of an executable with exports
+    this->LibraryFeatureDescriptors.emplace(
+      "__CMAKE_LINK_EXECUTABLE",
+      FeatureDescriptor{ "__CMAKE_LINK_EXECUTABLE",
+                         cmStrCat(this->LoaderFlag, "<LIBRARY>") });
+  }
+
   // Check the platform policy for missing soname case.
   this->NoSONameUsesPath =
     this->Makefile->IsOn("CMAKE_PLATFORM_USES_PATH_WHEN_NO_SONAME");
@@ -408,6 +430,10 @@ cmComputeLinkInformation::cmComputeLinkInformation(
 }
 
 cmComputeLinkInformation::~cmComputeLinkInformation() = default;
+
+namespace {
+const std::string& DEFAULT = cmComputeLinkDepends::LinkEntry::DEFAULT;
+}
 
 void cmComputeLinkInformation::AppendValues(
   std::string& result, std::vector<BT<std::string>>& values)
@@ -510,17 +536,54 @@ bool cmComputeLinkInformation::Compute()
   }
 
   // Compute the ordered link line items.
-  cmComputeLinkDepends cld(this->Target, this->Config);
+  cmComputeLinkDepends cld(this->Target, this->Config, this->LinkLanguage);
   cld.SetOldLinkDirMode(this->OldLinkDirMode);
   cmComputeLinkDepends::EntryVector const& linkEntries = cld.Compute();
+  FeatureDescriptor const* currentFeature = nullptr;
 
   // Add the link line items.
   for (cmComputeLinkDepends::LinkEntry const& linkEntry : linkEntries) {
+    if (currentFeature != nullptr &&
+        linkEntry.Feature != currentFeature->Name) {
+      // emit feature suffix, if any
+      if (!currentFeature->Suffix.empty()) {
+        this->Items.emplace_back(
+          BT<std::string>{ currentFeature->Suffix,
+                           this->Items.back().Value.Backtrace },
+          ItemIsPath::No);
+      }
+      currentFeature = nullptr;
+    }
+
+    if (linkEntry.Feature != DEFAULT &&
+        (currentFeature == nullptr ||
+         linkEntry.Feature != currentFeature->Name)) {
+      if (!this->AddLibraryFeature(linkEntry.Feature)) {
+        continue;
+      }
+      currentFeature = this->FindLibraryFeature(linkEntry.Feature);
+      // emit feature prefix, if any
+      if (!currentFeature->Prefix.empty()) {
+        this->Items.emplace_back(
+          BT<std::string>{ currentFeature->Prefix, linkEntry.Item.Backtrace },
+          ItemIsPath::No);
+      }
+    }
+
     if (linkEntry.IsSharedDep) {
-      this->AddSharedDepItem(linkEntry.Item, linkEntry.Target);
+      this->AddSharedDepItem(linkEntry);
     } else {
-      this->AddItem(linkEntry.Item, linkEntry.Target,
-                    linkEntry.IsObject ? ItemIsObject::Yes : ItemIsObject::No);
+      this->AddItem(linkEntry);
+    }
+  }
+
+  if (currentFeature != nullptr) {
+    // emit feature suffix, if any
+    if (!currentFeature->Suffix.empty()) {
+      this->Items.emplace_back(
+        BT<std::string>{ currentFeature->Suffix,
+                         this->Items.back().Value.Backtrace },
+        ItemIsPath::No);
     }
   }
 
@@ -576,6 +639,270 @@ bool cmComputeLinkInformation::Compute()
   return true;
 }
 
+namespace {
+void FinalizeFeatureFormat(std::string& format, const std::string& activeTag,
+                           const std::string& otherTag)
+{
+  auto pos = format.find(otherTag);
+  if (pos != std::string::npos) {
+    format.erase(pos, format.find('}', pos) - pos + 1);
+  }
+  pos = format.find(activeTag);
+  if (pos != std::string::npos) {
+    format.erase(pos, activeTag.length());
+    pos = format.find('}', pos);
+    if (pos != std::string::npos) {
+      format.erase(pos, 1);
+    }
+  }
+}
+
+bool IsValidFeatureFormat(const std::string& format)
+{
+  return format.find("<LIBRARY>") != std::string::npos ||
+    format.find("<LIB_ITEM>") != std::string::npos ||
+    format.find("<LINK_ITEM>") != std::string::npos;
+}
+}
+
+bool cmComputeLinkInformation::AddLibraryFeature(std::string const& feature)
+{
+  auto it = this->LibraryFeatureDescriptors.find(feature);
+  if (it != this->LibraryFeatureDescriptors.end()) {
+    return it->second.Supported;
+  }
+
+  auto featureName =
+    cmStrCat("CMAKE_", this->LinkLanguage, "_LINK_USING_", feature);
+  cmValue featureSupported =
+    this->Makefile->GetDefinition(cmStrCat(featureName, "_SUPPORTED"));
+  if (!featureSupported.IsOn()) {
+    featureName = cmStrCat("CMAKE_LINK_USING_", feature);
+    featureSupported =
+      this->Makefile->GetDefinition(cmStrCat(featureName, "_SUPPORTED"));
+  }
+  if (!featureSupported.IsOn()) {
+    this->LibraryFeatureDescriptors.emplace(feature, FeatureDescriptor{});
+
+    this->CMakeInstance->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat(
+        "Feature '", feature,
+        "', specified through generator-expression '$<LINK_LIBRARY>' to "
+        "link target '",
+        this->Target->GetName(), "', is not supported for the '",
+        this->LinkLanguage, "' link language."),
+      this->Target->GetBacktrace());
+
+    return false;
+  }
+
+  cmValue langFeature = this->Makefile->GetDefinition(featureName);
+  if (!langFeature) {
+    this->LibraryFeatureDescriptors.emplace(feature, FeatureDescriptor{});
+
+    this->CMakeInstance->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat(
+        "Feature '", feature,
+        "', specified through generator-expression '$<LINK_LIBRARY>' to "
+        "link target '",
+        this->Target->GetName(), "', is not defined for the '",
+        this->LinkLanguage, "' link language."),
+      this->Target->GetBacktrace());
+
+    return false;
+  }
+
+  auto items =
+    cmExpandListWithBacktrace(langFeature, this->Target->GetBacktrace(), true);
+
+  if ((items.size() == 1 && !IsValidFeatureFormat(items.front().Value)) ||
+      (items.size() == 3 && !IsValidFeatureFormat(items[1].Value))) {
+    this->LibraryFeatureDescriptors.emplace(feature, FeatureDescriptor{});
+    this->CMakeInstance->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("Feature '", feature, "', specified by variable '", featureName,
+               "', is malformed (\"<LIBRARY>\", \"<LIB_ITEM>\", or "
+               "\"<LINK_ITEM>\" patterns "
+               "are missing) and cannot be used to link target '",
+               this->Target->GetName(), "'."),
+      this->Target->GetBacktrace());
+
+    return false;
+  }
+
+  // now, handle possible "PATH{}" and "NAME{}" patterns
+  if (items.size() == 1) {
+    items.push_back(items.front());
+    FinalizeFeatureFormat(items[0].Value, "PATH{", "NAME{");
+    FinalizeFeatureFormat(items[1].Value, "NAME{", "PATH{");
+  } else if (items.size() == 3) {
+    items.insert(items.begin() + 1, items[1]);
+    FinalizeFeatureFormat(items[1].Value, "PATH{", "NAME{");
+    FinalizeFeatureFormat(items[2].Value, "NAME{", "PATH{");
+  } else {
+    this->LibraryFeatureDescriptors.emplace(feature, FeatureDescriptor{});
+    this->CMakeInstance->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("Feature '", feature, "', specified by variable '", featureName,
+               "', is malformed (wrong number of elements) and cannot be used "
+               "to link target '",
+               this->Target->GetName(), "'."),
+      this->Target->GetBacktrace());
+
+    return false;
+  }
+  if ((items.size() == 2 && !IsValidFeatureFormat(items[0].Value)) ||
+      (items.size() == 4 && !IsValidFeatureFormat(items[1].Value))) {
+    // PATH{} has wrong format
+    this->LibraryFeatureDescriptors.emplace(feature, FeatureDescriptor{});
+    this->CMakeInstance->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("Feature '", feature, "', specified by variable '", featureName,
+               "', is malformed (\"<LIBRARY>\", \"<LIB_ITEM>\", or "
+               "\"<LINK_ITEM>\" patterns "
+               "are missing for \"PATH{}\" alternative) and cannot be used to "
+               "link target '",
+               this->Target->GetName(), "'."),
+      this->Target->GetBacktrace());
+
+    return false;
+  }
+  if ((items.size() == 2 && !IsValidFeatureFormat(items[1].Value)) ||
+      (items.size() == 4 && !IsValidFeatureFormat(items[2].Value))) {
+    // NAME{} has wrong format
+    this->LibraryFeatureDescriptors.emplace(feature, FeatureDescriptor{});
+    this->CMakeInstance->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("Feature '", feature, "', specified by variable '", featureName,
+               "', is malformed (\"<LIBRARY>\", \"<LIB_ITEM>\", or "
+               "\"<LINK_ITEM>\" patterns "
+               "are missing for \"NAME{}\" alternative) and cannot be used to "
+               "link target '",
+               this->Target->GetName(), "'."),
+      this->Target->GetBacktrace());
+
+    return false;
+  }
+
+  // replace LINKER: pattern
+  this->Target->ResolveLinkerWrapper(items, this->LinkLanguage, true);
+
+  if (items.size() == 2) {
+    this->LibraryFeatureDescriptors.emplace(
+      feature, FeatureDescriptor{ feature, items[0].Value, items[1].Value });
+  } else {
+    this->LibraryFeatureDescriptors.emplace(
+      feature,
+      FeatureDescriptor{ feature, items[0].Value, items[1].Value,
+                         items[2].Value, items[3].Value });
+  }
+
+  return true;
+}
+
+cmComputeLinkInformation::FeatureDescriptor const&
+cmComputeLinkInformation::GetLibraryFeature(std::string const& feature) const
+{
+  return this->LibraryFeatureDescriptors.find(feature)->second;
+}
+cmComputeLinkInformation::FeatureDescriptor const*
+cmComputeLinkInformation::FindLibraryFeature(std::string const& feature) const
+{
+  auto it = this->LibraryFeatureDescriptors.find(feature);
+  if (it == this->LibraryFeatureDescriptors.end()) {
+    return nullptr;
+  }
+
+  return &it->second;
+}
+
+namespace {
+class FeaturePlaceHolderExpander : public cmPlaceholderExpander
+{
+public:
+  FeaturePlaceHolderExpander(const std::string* library,
+                             const std::string* libItem = nullptr,
+                             const std::string* linkItem = nullptr)
+    : Library(library)
+    , LibItem(libItem)
+    , LinkItem(linkItem)
+  {
+  }
+
+private:
+  std::string ExpandVariable(std::string const& variable) override
+  {
+    if (this->Library != nullptr && variable == "LIBRARY") {
+      return *this->Library;
+    }
+    if (this->LibItem != nullptr && variable == "LIB_ITEM") {
+      return *this->LibItem;
+    }
+    if (this->LinkItem != nullptr && variable == "LINK_ITEM") {
+      return *this->LinkItem;
+    }
+
+    return variable;
+  }
+
+  const std::string* Library = nullptr;
+  const std::string* LibItem = nullptr;
+  const std::string* LinkItem = nullptr;
+};
+}
+
+cmComputeLinkInformation::FeatureDescriptor::FeatureDescriptor(
+  std::string name, std::string itemFormat)
+  : Name(std::move(name))
+  , Supported(true)
+  , ItemPathFormat(std::move(itemFormat))
+  , ItemNameFormat(this->ItemPathFormat)
+{
+}
+cmComputeLinkInformation::FeatureDescriptor::FeatureDescriptor(
+  std::string name, std::string itemPathFormat, std::string itemNameFormat)
+  : Name(std::move(name))
+  , Supported(true)
+  , ItemPathFormat(std::move(itemPathFormat))
+  , ItemNameFormat(std::move(itemNameFormat))
+{
+}
+cmComputeLinkInformation::FeatureDescriptor::FeatureDescriptor(
+  std::string name, std::string prefix, std::string itemPathFormat,
+  std::string itemNameFormat, std::string suffix)
+  : Name(std::move(name))
+  , Supported(true)
+  , Prefix(std::move(prefix))
+  , Suffix(std::move(suffix))
+  , ItemPathFormat(std::move(itemPathFormat))
+  , ItemNameFormat(std::move(itemNameFormat))
+{
+}
+
+std::string cmComputeLinkInformation::FeatureDescriptor::GetDecoratedItem(
+  std::string const& library, ItemIsPath isPath) const
+{
+  auto format =
+    isPath == ItemIsPath::Yes ? this->ItemPathFormat : this->ItemNameFormat;
+
+  // replace <LIBRARY>, <LIB_ITEM> and <LINK_ITEM> patterns with library path
+  FeaturePlaceHolderExpander expander(&library, &library, &library);
+  return expander.ExpandVariables(format);
+}
+std::string cmComputeLinkInformation::FeatureDescriptor::GetDecoratedItem(
+  std::string const& library, std::string const& libItem,
+  std::string const& linkItem, ItemIsPath isPath) const
+{
+  auto format =
+    isPath == ItemIsPath::Yes ? this->ItemPathFormat : this->ItemNameFormat;
+
+  // replace <LIBRARY>, <LIB_ITEM> and <LINK_ITEM> patterns
+  FeaturePlaceHolderExpander expander(&library, &libItem, &linkItem);
+  return expander.ExpandVariables(format);
+}
+
 void cmComputeLinkInformation::AddImplicitLinkInfo()
 {
   // The link closure lists all languages whose implicit info is needed.
@@ -610,7 +937,7 @@ void cmComputeLinkInformation::AddRuntimeLinkLibrary(std::string const& lang)
     std::vector<std::string> libsVec = cmExpandedList(*runtimeLinkOptions);
     for (std::string const& i : libsVec) {
       if (!cm::contains(this->ImplicitLinkLibs, i)) {
-        this->AddItem(i, nullptr);
+        this->AddItem({ i });
       }
     }
   }
@@ -625,7 +952,7 @@ void cmComputeLinkInformation::AddImplicitLinkInfo(std::string const& lang)
     std::vector<std::string> libsVec = cmExpandedList(*libs);
     for (std::string const& i : libsVec) {
       if (!cm::contains(this->ImplicitLinkLibs, i)) {
-        this->AddItem(i, nullptr);
+        this->AddItem({ i });
       }
     }
   }
@@ -639,10 +966,11 @@ void cmComputeLinkInformation::AddImplicitLinkInfo(std::string const& lang)
   }
 }
 
-void cmComputeLinkInformation::AddItem(BT<std::string> const& item,
-                                       cmGeneratorTarget const* tgt,
-                                       ItemIsObject isObject)
+void cmComputeLinkInformation::AddItem(LinkEntry const& entry)
 {
+  cmGeneratorTarget const* tgt = entry.Target;
+  BT<std::string> const& item = entry.Item;
+
   // Compute the proper name to use to link this library.
   const std::string& config = this->Config;
   bool impexe = (tgt && tgt->IsExecutableWithExports());
@@ -657,28 +985,27 @@ void cmComputeLinkInformation::AddItem(BT<std::string> const& item,
     if (impexe && this->LoaderFlag) {
       // This link item is an executable that may provide symbols
       // used by this target.  A special flag is needed on this
-      // platform.  Add it now.
-      std::string linkItem = this->LoaderFlag;
+      // platform.  Add it now using a special feature.
       cmStateEnums::ArtifactType artifact = tgt->HasImportLibrary(config)
         ? cmStateEnums::ImportLibraryArtifact
         : cmStateEnums::RuntimeBinaryArtifact;
-
       std::string exe = tgt->GetFullPath(config, artifact, true);
-      linkItem += exe;
-      this->Items.emplace_back(BT<std::string>(linkItem, item.Backtrace),
-                               ItemIsPath::Yes, ItemIsObject::No, tgt);
+      this->Items.emplace_back(
+        BT<std::string>(exe, item.Backtrace), ItemIsPath::Yes, tgt,
+        this->FindLibraryFeature(entry.Feature == DEFAULT
+                                   ? "__CMAKE_LINK_EXECUTABLE"
+                                   : entry.Feature));
       this->Depends.push_back(std::move(exe));
     } else if (tgt->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       // Add the interface library as an item so it can be considered as part
       // of COMPATIBLE_INTERFACE_ enforcement.  The generators will ignore
       // this for the actual link line.
-      this->Items.emplace_back(std::string(), ItemIsPath::No, ItemIsObject::No,
-                               tgt);
+      this->Items.emplace_back(std::string(), ItemIsPath::No, tgt);
 
       // Also add the item the interface specifies to be used in its place.
       std::string const& libName = tgt->GetImportedLibName(config);
       if (!libName.empty()) {
-        this->AddItem(BT<std::string>(libName, item.Backtrace), nullptr);
+        this->AddItem(BT<std::string>(libName, item.Backtrace));
       }
     } else if (tgt->GetType() == cmStateEnums::OBJECT_LIBRARY) {
       // Ignore object library!
@@ -706,7 +1033,9 @@ void cmComputeLinkInformation::AddItem(BT<std::string> const& item,
         this->Depends.push_back(lib.Value);
       }
 
-      this->AddTargetItem(lib, tgt);
+      LinkEntry libEntry{ entry };
+      libEntry.Item = lib;
+      this->AddTargetItem(libEntry);
       this->AddLibraryRuntimeInfo(lib.Value, tgt);
       if (tgt && tgt->GetType() == cmStateEnums::SHARED_LIBRARY &&
           this->Target->IsDLLPlatform()) {
@@ -719,26 +1048,28 @@ void cmComputeLinkInformation::AddItem(BT<std::string> const& item,
       if (cmSystemTools::IsPathToFramework(item.Value) &&
           this->Makefile->IsOn("APPLE")) {
         // This is a framework.
-        this->AddFrameworkItem(item.Value);
+        this->AddFrameworkItem(entry);
       } else if (cmSystemTools::FileIsDirectory(item.Value)) {
         // This is a directory.
         this->DropDirectoryItem(item);
       } else {
         // Use the full path given to the library file.
         this->Depends.push_back(item.Value);
-        this->AddFullItem(item, isObject);
+        this->AddFullItem(entry);
         this->AddLibraryRuntimeInfo(item.Value);
       }
     } else {
       // This is a library or option specified by the user.
-      this->AddUserItem(item, true);
+      this->AddUserItem(entry, true);
     }
   }
 }
 
-void cmComputeLinkInformation::AddSharedDepItem(BT<std::string> const& item,
-                                                const cmGeneratorTarget* tgt)
+void cmComputeLinkInformation::AddSharedDepItem(LinkEntry const& entry)
 {
+  BT<std::string> const& item = entry.Item;
+  const cmGeneratorTarget* tgt = entry.Target;
+
   // Record dependencies on DLLs.
   if (tgt && tgt->GetType() == cmStateEnums::SHARED_LIBRARY &&
       this->Target->IsDLLPlatform() &&
@@ -776,7 +1107,7 @@ void cmComputeLinkInformation::AddSharedDepItem(BT<std::string> const& item,
 
   // If in linking mode, just link to the shared library.
   if (this->SharedDependencyMode == SharedDepModeLink) {
-    this->AddItem(item, tgt);
+    this->AddItem(entry);
     return;
   }
 
@@ -1058,8 +1389,7 @@ void cmComputeLinkInformation::SetCurrentLinkType(LinkType lt)
   }
 }
 
-void cmComputeLinkInformation::AddTargetItem(BT<std::string> const& item,
-                                             cmGeneratorTarget const* target)
+void cmComputeLinkInformation::AddTargetItem(LinkEntry const& entry)
 {
   // This is called to handle a link item that is a full path to a target.
   // If the target is not a static library make sure the link type is
@@ -1067,6 +1397,9 @@ void cmComputeLinkInformation::AddTargetItem(BT<std::string> const& item,
   // shared and static libraries but static-mode can handle only
   // static libraries.  If a previous user item changed the link type
   // to static we need to make sure it is back to shared.
+  BT<std::string> const& item = entry.Item;
+  cmGeneratorTarget const* target = entry.Target;
+
   if (target->GetType() != cmStateEnums::STATIC_LIBRARY) {
     this->SetCurrentLinkType(LinkShared);
   }
@@ -1079,7 +1412,7 @@ void cmComputeLinkInformation::AddTargetItem(BT<std::string> const& item,
   // Handle case of an imported shared library with no soname.
   if (this->NoSONameUsesPath &&
       target->IsImportedSharedLibWithoutSOName(this->Config)) {
-    this->AddSharedLibNoSOName(item.Value);
+    this->AddSharedLibNoSOName(entry);
     return;
   }
 
@@ -1092,19 +1425,23 @@ void cmComputeLinkInformation::AddTargetItem(BT<std::string> const& item,
   }
 
   // Now add the full path to the library.
-  this->Items.emplace_back(item, ItemIsPath::Yes, ItemIsObject::No, target);
+  this->Items.emplace_back(item, ItemIsPath::Yes, target,
+                           this->FindLibraryFeature(entry.Feature == DEFAULT
+                                                      ? "__CMAKE_LINK_LIBRARY"
+                                                      : entry.Feature));
 }
 
-void cmComputeLinkInformation::AddFullItem(BT<std::string> const& item,
-                                           ItemIsObject isObject)
+void cmComputeLinkInformation::AddFullItem(LinkEntry const& entry)
 {
+  BT<std::string> const& item = entry.Item;
+
   // Check for the implicit link directory special case.
-  if (this->CheckImplicitDirItem(item.Value)) {
+  if (this->CheckImplicitDirItem(entry)) {
     return;
   }
 
   // Check for case of shared library with no builtin soname.
-  if (this->NoSONameUsesPath && this->CheckSharedLibNoSOName(item.Value)) {
+  if (this->NoSONameUsesPath && this->CheckSharedLibNoSOName(entry)) {
     return;
   }
 
@@ -1116,7 +1453,7 @@ void cmComputeLinkInformation::AddFullItem(BT<std::string> const& item,
        generator.find("Xcode") != std::string::npos)) {
     std::string file = cmSystemTools::GetFilenameName(item.Value);
     if (!this->ExtractAnyLibraryName.find(file)) {
-      this->HandleBadFullItem(item.Value, file);
+      this->HandleBadFullItem(entry, file);
       return;
     }
   }
@@ -1147,11 +1484,18 @@ void cmComputeLinkInformation::AddFullItem(BT<std::string> const& item,
   }
 
   // Now add the full path to the library.
-  this->Items.emplace_back(item, ItemIsPath::Yes, isObject);
+  this->Items.emplace_back(
+    item, ItemIsPath::Yes, nullptr,
+    this->FindLibraryFeature(
+      entry.Feature == DEFAULT
+        ? (entry.IsObject ? "__CMAKE_LINK_OBJECT" : "__CMAKE_LINK_LIBRARY")
+        : entry.Feature));
 }
 
-bool cmComputeLinkInformation::CheckImplicitDirItem(std::string const& item)
+bool cmComputeLinkInformation::CheckImplicitDirItem(LinkEntry const& entry)
 {
+  BT<std::string> const& item = entry.Item;
+
   // We only switch to a pathless item if the link type may be
   // enforced.  Fortunately only platforms that support link types
   // seem to have magic per-architecture implicit link directories.
@@ -1160,7 +1504,7 @@ bool cmComputeLinkInformation::CheckImplicitDirItem(std::string const& item)
   }
 
   // Check if this item is in an implicit link directory.
-  std::string dir = cmSystemTools::GetFilenamePath(item);
+  std::string dir = cmSystemTools::GetFilenamePath(item.Value);
   if (!cm::contains(this->ImplicitLinkDirs, dir)) {
     // Only libraries in implicit link directories are converted to
     // pathless items.
@@ -1169,7 +1513,7 @@ bool cmComputeLinkInformation::CheckImplicitDirItem(std::string const& item)
 
   // Only apply the policy below if the library file is one that can
   // be found by the linker.
-  std::string file = cmSystemTools::GetFilenameName(item);
+  std::string file = cmSystemTools::GetFilenameName(item.Value);
   if (!this->ExtractAnyLibraryName.find(file)) {
     return false;
   }
@@ -1179,10 +1523,10 @@ bool cmComputeLinkInformation::CheckImplicitDirItem(std::string const& item)
     case cmPolicies::WARN:
       if (this->CMP0060Warn) {
         // Print the warning at most once for this item.
-        std::string const& wid = "CMP0060-WARNING-GIVEN-" + item;
+        std::string const& wid = "CMP0060-WARNING-GIVEN-" + item.Value;
         if (!this->CMakeInstance->GetPropertyAsBool(wid)) {
           this->CMakeInstance->SetProperty(wid, "1");
-          this->CMP0060WarnItems.insert(item);
+          this->CMP0060WarnItems.insert(item.Value);
         }
       }
       CM_FALLTHROUGH;
@@ -1200,15 +1544,17 @@ bool cmComputeLinkInformation::CheckImplicitDirItem(std::string const& item)
   // directory then just report the file name without the directory
   // portion.  This will allow the system linker to locate the proper
   // library for the architecture at link time.
-  this->AddUserItem(file, false);
+  LinkEntry fileEntry{ entry };
+  fileEntry.Item = file;
+  this->AddUserItem(fileEntry, false);
 
   // Make sure the link directory ordering will find the library.
-  this->OrderLinkerSearchPath->AddLinkLibrary(item);
+  this->OrderLinkerSearchPath->AddLinkLibrary(item.Value);
 
   return true;
 }
 
-void cmComputeLinkInformation::AddUserItem(BT<std::string> const& item,
+void cmComputeLinkInformation::AddUserItem(LinkEntry const& entry,
                                            bool pathNotKnown)
 {
   // This is called to handle a link item that does not match a CMake
@@ -1219,8 +1565,10 @@ void cmComputeLinkInformation::AddUserItem(BT<std::string> const& item,
   //   foo       ==>  -lfoo
   //   libfoo.a  ==>  -Wl,-Bstatic -lfoo
 
-  // Pass flags through untouched.
+  BT<std::string> const& item = entry.Item;
+
   if (item.Value[0] == '-' || item.Value[0] == '$' || item.Value[0] == '`') {
+    // Pass flags through untouched.
     // if this is a -l option then we might need to warn about
     // CMP0003 so put it in OldUserFlagItems, if it is not a -l
     // or -Wl,-l (-framework -pthread), then allow it without a
@@ -1305,9 +1653,20 @@ void cmComputeLinkInformation::AddUserItem(BT<std::string> const& item,
   }
 
   // Create an option to ask the linker to search for the library.
-  std::string out = cmStrCat(this->LibLinkFlag, lib, this->LibLinkSuffix);
-  this->Items.emplace_back(BT<std::string>(out, item.Backtrace),
-                           ItemIsPath::No);
+  auto out = cmStrCat(this->LibLinkFlag, lib, this->LibLinkSuffix);
+
+  if (entry.Feature != DEFAULT) {
+    auto const& feature = this->GetLibraryFeature(entry.Feature);
+    this->Items.emplace_back(
+      BT<std::string>(
+        feature.GetDecoratedItem(cmStrCat(lib, this->LibLinkSuffix),
+                                 item.Value, out, ItemIsPath::No),
+        item.Backtrace),
+      ItemIsPath::No);
+  } else {
+    this->Items.emplace_back(BT<std::string>(out, item.Backtrace),
+                             ItemIsPath::No);
+  }
 
   // Here we could try to find the library the linker will find and
   // add a runtime information entry for it.  It would probably not be
@@ -1315,8 +1674,10 @@ void cmComputeLinkInformation::AddUserItem(BT<std::string> const& item,
   // specification.
 }
 
-void cmComputeLinkInformation::AddFrameworkItem(std::string const& item)
+void cmComputeLinkInformation::AddFrameworkItem(LinkEntry const& entry)
 {
+  std::string const& item = entry.Item.Value;
+
   // Try to separate the framework name and path.
   if (!this->SplitFramework.find(item)) {
     std::ostringstream e;
@@ -1355,10 +1716,10 @@ void cmComputeLinkInformation::DropDirectoryItem(BT<std::string> const& item)
   // user.
   this->CMakeInstance->IssueMessage(
     MessageType::WARNING,
-    cmStrCat(
-      "Target \"", this->Target->GetName(),
-      "\" requests linking to directory \"", item.Value,
-      "\".  Targets may link only to libraries.  CMake is dropping the item."),
+    cmStrCat("Target \"", this->Target->GetName(),
+             "\" requests linking to directory \"", item.Value,
+             "\".  Targets may link only to libraries.  CMake is dropping "
+             "the item."),
     item.Backtrace);
 }
 
@@ -1390,42 +1751,44 @@ void cmComputeLinkInformation::AddFrameworkPath(std::string const& p)
   }
 }
 
-bool cmComputeLinkInformation::CheckSharedLibNoSOName(std::string const& item)
+bool cmComputeLinkInformation::CheckSharedLibNoSOName(LinkEntry const& entry)
 {
   // This platform will use the path to a library as its soname if the
   // library is given via path and was not built with an soname.  If
   // this is a shared library that might be the case.
-  std::string file = cmSystemTools::GetFilenameName(item);
+  std::string file = cmSystemTools::GetFilenameName(entry.Item.Value);
   if (this->ExtractSharedLibraryName.find(file)) {
     // If we can guess the soname fairly reliably then assume the
     // library has one.  Otherwise assume the library has no builtin
     // soname.
     std::string soname;
-    if (!cmSystemTools::GuessLibrarySOName(item, soname)) {
-      this->AddSharedLibNoSOName(item);
+    if (!cmSystemTools::GuessLibrarySOName(entry.Item.Value, soname)) {
+      this->AddSharedLibNoSOName(entry);
       return true;
     }
   }
   return false;
 }
 
-void cmComputeLinkInformation::AddSharedLibNoSOName(std::string const& item)
+void cmComputeLinkInformation::AddSharedLibNoSOName(LinkEntry const& entry)
 {
   // We have a full path to a shared library with no soname.  We need
   // to ask the linker to locate the item because otherwise the path
   // we give to it will be embedded in the target linked.  Then at
   // runtime the dynamic linker will search for the library using the
   // path instead of just the name.
-  std::string file = cmSystemTools::GetFilenameName(item);
-  this->AddUserItem(file, false);
+  LinkEntry fileEntry{ entry };
+  fileEntry.Item = cmSystemTools::GetFilenameName(entry.Item.Value);
+  this->AddUserItem(fileEntry, false);
 
   // Make sure the link directory ordering will find the library.
-  this->OrderLinkerSearchPath->AddLinkLibrary(item);
+  this->OrderLinkerSearchPath->AddLinkLibrary(entry.Item.Value);
 }
 
-void cmComputeLinkInformation::HandleBadFullItem(std::string const& item,
+void cmComputeLinkInformation::HandleBadFullItem(LinkEntry const& entry,
                                                  std::string const& file)
 {
+  std::string const& item = entry.Item.Value;
   // Do not depend on things that do not exist.
   auto i = std::find(this->Depends.begin(), this->Depends.end(), item);
   if (i != this->Depends.end()) {
@@ -1435,7 +1798,9 @@ void cmComputeLinkInformation::HandleBadFullItem(std::string const& item,
   // Tell the linker to search for the item and provide the proper
   // path for it.  Do not contribute to any CMP0003 warning (do not
   // put in OldLinkDirItems or OldUserFlagItems).
-  this->AddUserItem(file, false);
+  LinkEntry fileEntry{ entry };
+  fileEntry.Item = file;
+  this->AddUserItem(fileEntry, false);
   this->OrderLinkerSearchPath->AddLinkLibrary(item);
 
   // Produce any needed message.
@@ -1781,8 +2146,8 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
     // Add directories explicitly specified by user
     std::string build_rpath;
     if (this->Target->GetBuildRPATH(this->Config, build_rpath)) {
-      // This will not resolve entries to use $ORIGIN, the user is expected to
-      // do that if necessary.
+      // This will not resolve entries to use $ORIGIN, the user is expected
+      // to do that if necessary.
       cmCLI_ExpandListUnique(build_rpath, runtimeDirs, emitted);
     }
   }

@@ -3690,7 +3690,8 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaLinkOptions(
           this->LocalGenerator->MaybeRelativeToCurBinDir(l.Value.Value);
         ConvertToWindowsSlash(path);
         if (!cmVS10IsTargetsFile(l.Value.Value)) {
-          libVec.push_back(path);
+          libVec.push_back(l.HasFeature() ? l.GetFormattedItem(path).Value
+                                          : path);
         }
       } else {
         libVec.push_back(l.Value.Value);
@@ -4328,7 +4329,8 @@ void cmVisualStudio10TargetGenerator::AddLibraries(
       if (cmVS10IsTargetsFile(l.Value.Value)) {
         vsTargetVec.push_back(path);
       } else {
-        libVec.push_back(path);
+        libVec.push_back(l.HasFeature() ? l.GetFormattedItem(path).Value
+                                        : path);
       }
     } else if (!l.Target ||
                l.Target->GetType() != cmStateEnums::INTERFACE_LIBRARY) {

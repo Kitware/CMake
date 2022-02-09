@@ -1294,7 +1294,9 @@ void cmLocalVisualStudio7GeneratorInternals::OutputLibraries(
   for (auto const& lib : libs) {
     if (lib.IsPath == cmComputeLinkInformation::ItemIsPath::Yes) {
       std::string rel = lg->MaybeRelativeToCurBinDir(lib.Value.Value);
-      fout << lg->ConvertToXMLOutputPath(rel) << " ";
+      rel = lg->ConvertToXMLOutputPath(rel);
+      fout << (lib.HasFeature() ? lib.GetFormattedItem(rel).Value : rel)
+           << " ";
     } else if (!lib.Target ||
                lib.Target->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
       fout << lib.Value.Value << " ";

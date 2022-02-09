@@ -312,6 +312,7 @@ add_RunCMake_test(GenEx-LINK_LANGUAGE)
 add_RunCMake_test(GenEx-LINK_LANG_AND_ID)
 add_RunCMake_test(GenEx-HOST_LINK)
 add_RunCMake_test(GenEx-DEVICE_LINK)
+add_RunCMake_test(GenEx-LINK_LIBRARY)
 add_RunCMake_test(GenEx-TARGET_FILE -DLINKER_SUPPORTS_PDB=${LINKER_SUPPORTS_PDB})
 add_RunCMake_test(GenEx-GENEX_EVAL)
 add_RunCMake_test(GenEx-TARGET_RUNTIME_DLLS)
@@ -652,6 +653,17 @@ add_RunCMake_test(target_link_libraries)
 add_RunCMake_test(target_link_libraries-ALIAS)
 add_RunCMake_test(target_link_libraries-LINK_LANGUAGE)
 add_RunCMake_test(target_link_libraries-LINK_LANG_AND_ID)
+add_RunCMake_test(target_link_libraries-LINK_LIBRARY -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
+                                                     -DMINGW=${MINGW}
+                                                     -DMSYS=${MSYS}
+                                                     -DCYGWIN=${CYGWIN}
+                                                     -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
+                                                     -DMSVC_VERSION=${MSVC_VERSION}
+                                                     -DCMAKE_SHARED_LIBRARY_PREFIX=${CMAKE_SHARED_LIBRARY_PREFIX}
+                                                     -DCMAKE_SHARED_LIBRARY_SUFFIX=${CMAKE_SHARED_LIBRARY_SUFFIX}
+                                                     -DCMAKE_IMPORT_LIBRARY_PREFIX=${CMAKE_IMPORT_LIBRARY_PREFIX}
+                                                     -DCMAKE_IMPORT_LIBRARY_SUFFIX=${CMAKE_IMPORT_LIBRARY_SUFFIX}
+                                                     -DCMAKE_LINK_LIBRARY_FLAG=${CMAKE_LINK_LIBRARY_FLAG})
 add_RunCMake_test(add_link_options -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID})
 add_RunCMake_test(target_link_options -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
                                       -DCMake_TEST_CUDA=${CMake_TEST_CUDA})
