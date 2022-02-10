@@ -1,5 +1,5 @@
 ^CMake Debug Log at FromPATHEnv.cmake:[0-9]+ \(find_package\):
-  find_package considered the following paths for Resolved.cmake
+  find_package considered the following paths for FindResolved.cmake:
 
     [^
 ]*/Modules/FindResolved.cmake

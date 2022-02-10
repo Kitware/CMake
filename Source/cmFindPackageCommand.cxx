@@ -789,14 +789,13 @@ void cmFindPackageCommand::RestoreFindDefinitions()
 
 bool cmFindPackageCommand::FindModule(bool& found)
 {
-  std::string module = cmStrCat("Find", this->Name, ".cmake");
+  std::string moduleFileName = cmStrCat("Find", this->Name, ".cmake");
 
   bool system = false;
-  std::string debugBuffer =
-    cmStrCat("find_package considered the following paths for ", this->Name,
-             ".cmake\n");
+  std::string debugBuffer = cmStrCat(
+    "find_package considered the following paths for ", moduleFileName, ":\n");
   std::string mfile = this->Makefile->GetModulesFile(
-    module, system, this->DebugMode, debugBuffer);
+    moduleFileName, system, this->DebugMode, debugBuffer);
   if (this->DebugMode) {
     if (mfile.empty()) {
       debugBuffer = cmStrCat(debugBuffer, "The file was not found.\n");
