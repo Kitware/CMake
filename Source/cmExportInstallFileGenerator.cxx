@@ -90,7 +90,8 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
     ImportPropertyMap properties;
 
     this->PopulateIncludeDirectoriesInterface(
-      gt, cmGeneratorExpression::InstallInterface, properties, missingTargets);
+      gt, cmGeneratorExpression::InstallInterface, properties, missingTargets,
+      *te);
     this->PopulateSourcesInterface(gt, cmGeneratorExpression::InstallInterface,
                                    properties, missingTargets);
     this->PopulateInterfaceProperty("INTERFACE_SYSTEM_INCLUDE_DIRECTORIES", gt,

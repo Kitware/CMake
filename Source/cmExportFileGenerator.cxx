@@ -375,7 +375,8 @@ void cmExportFileGenerator::PopulateSourcesInterface(
 void cmExportFileGenerator::PopulateIncludeDirectoriesInterface(
   cmGeneratorTarget const* target,
   cmGeneratorExpression::PreprocessContext preprocessRule,
-  ImportPropertyMap& properties, std::vector<std::string>& missingTargets)
+  ImportPropertyMap& properties, std::vector<std::string>& missingTargets,
+  cmTargetExport const& te)
 {
   assert(preprocessRule == cmGeneratorExpression::InstallInterface);
 
@@ -385,7 +386,7 @@ void cmExportFileGenerator::PopulateIncludeDirectoriesInterface(
   cmGeneratorExpression ge;
 
   std::string dirs = cmGeneratorExpression::Preprocess(
-    cmJoin(target->Target->GetInstallIncludeDirectoriesEntries(), ";"),
+    cmJoin(target->Target->GetInstallIncludeDirectoriesEntries(te), ";"),
     preprocessRule, true);
   this->ReplaceInstallPrefix(dirs);
   std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(dirs);
