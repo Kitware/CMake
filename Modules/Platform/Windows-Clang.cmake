@@ -101,6 +101,7 @@ macro(__windows_compiler_clang_gnu lang)
     string(APPEND CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT " -O2 -g -DNDEBUG -Xclang -gcodeview ${__ADDED_FLAGS}")
   endif()
   set(CMAKE_INCLUDE_SYSTEM_FLAG_${lang} "-isystem ")
+  set(CMAKE_${lang}_LINKER_SUPPORTS_PDB ON)
 
   set(CMAKE_PCH_EXTENSION .pch)
   set(CMAKE_PCH_PROLOGUE "#pragma clang system_header")
