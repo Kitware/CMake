@@ -65,7 +65,8 @@
 
     none
 
-  find_package considered the following locations for the Config module:
+  find_package considered the following locations for Resolved's Config
+  module:
 
     [^
 ]*/Tests/RunCMake/find_package/PackageRoot/ResolvedConfig.cmake

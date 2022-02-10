@@ -1117,7 +1117,8 @@ bool cmFindPackageCommand::FindConfig()
   if (this->DebugMode) {
     this->DebugBuffer = cmStrCat(this->DebugBuffer,
                                  "find_package considered the following "
-                                 "locations for the Config module:\n");
+                                 "locations for ",
+                                 this->Name, "'s Config module:\n");
   }
 
   // Search for frameworks.
