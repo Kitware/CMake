@@ -799,12 +799,12 @@ bool cmFindPackageCommand::FindModule(bool& found)
     module, system, this->DebugMode, debugBuffer);
   if (this->DebugMode) {
     if (mfile.empty()) {
-      debugBuffer = cmStrCat(debugBuffer, "The file was not found.");
+      debugBuffer = cmStrCat(debugBuffer, "The file was not found.\n");
     } else {
       debugBuffer =
         cmStrCat(debugBuffer, "The file was found at\n  ", mfile, "\n");
     }
-    this->DebugBuffer = cmStrCat(this->DebugBuffer, debugBuffer, "\n");
+    this->DebugBuffer = cmStrCat(this->DebugBuffer, debugBuffer);
   }
 
   if (!mfile.empty()) {
@@ -1310,7 +1310,7 @@ inline std::size_t collectPathsForDebug(std::string& buffer,
 {
   const auto& paths = searchPath.GetPaths();
   if (paths.empty()) {
-    buffer += "  none";
+    buffer += "  none\n";
     return 0;
   }
   for (std::size_t i = startIndex; i < paths.size(); i++) {
@@ -1370,7 +1370,7 @@ void cmFindPackageCommand::FillPrefixesPackageRoot()
     std::string debugBuffer = "<PackageName>_ROOT CMake variable "
                               "[CMAKE_FIND_USE_PACKAGE_ROOT_PATH].\n";
     collectPathsForDebug(debugBuffer, paths);
-    this->DebugBuffer = cmStrCat(this->DebugBuffer, debugBuffer, "\n");
+    this->DebugBuffer = cmStrCat(this->DebugBuffer, debugBuffer);
   }
 }
 
@@ -1393,7 +1393,7 @@ void cmFindPackageCommand::FillPrefixesCMakeEnvironment()
   paths.AddEnvPath("CMAKE_PREFIX_PATH");
   if (this->DebugMode) {
     debugBuffer = cmStrCat(debugBuffer,
-                           "\nCMAKE_PREFIX_PATH env variable "
+                           "CMAKE_PREFIX_PATH env variable "
                            "[CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH].\n");
     debugOffset = collectPathsForDebug(debugBuffer, paths, debugOffset);
   }
@@ -1403,10 +1403,10 @@ void cmFindPackageCommand::FillPrefixesCMakeEnvironment()
   if (this->DebugMode) {
     debugBuffer =
       cmStrCat(debugBuffer,
-               "\nCMAKE_FRAMEWORK_PATH and CMAKE_APPBUNDLE_PATH env "
+               "CMAKE_FRAMEWORK_PATH and CMAKE_APPBUNDLE_PATH env "
                "variables [CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH].\n");
     collectPathsForDebug(debugBuffer, paths, debugOffset);
-    this->DebugBuffer = cmStrCat(this->DebugBuffer, debugBuffer, "\n");
+    this->DebugBuffer = cmStrCat(this->DebugBuffer, debugBuffer);
   }
 }
 
@@ -1427,10 +1427,10 @@ void cmFindPackageCommand::FillPrefixesCMakeVariable()
   if (this->DebugMode) {
     debugBuffer =
       cmStrCat(debugBuffer,
-               "\nCMAKE_FRAMEWORK_PATH and CMAKE_APPBUNDLE_PATH variables "
+               "CMAKE_FRAMEWORK_PATH and CMAKE_APPBUNDLE_PATH variables "
                "[CMAKE_FIND_USE_CMAKE_PATH].\n");
     collectPathsForDebug(debugBuffer, paths, debugOffset);
-    this->DebugBuffer = cmStrCat(this->DebugBuffer, debugBuffer, "\n");
+    this->DebugBuffer = cmStrCat(this->DebugBuffer, debugBuffer);
   }
 }
 
@@ -1455,7 +1455,7 @@ void cmFindPackageCommand::FillPrefixesSystemEnvironment()
     std::string debugBuffer = "Standard system environment variables "
                               "[CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH].\n";
     collectPathsForDebug(debugBuffer, paths);
-    this->DebugBuffer = cmStrCat(this->DebugBuffer, debugBuffer, "\n");
+    this->DebugBuffer = cmStrCat(this->DebugBuffer, debugBuffer);
   }
 }
 
@@ -1485,7 +1485,7 @@ void cmFindPackageCommand::FillPrefixesUserRegistry()
       "CMake User Package Registry [CMAKE_FIND_USE_PACKAGE_REGISTRY].\n";
     collectPathsForDebug(debugBuffer,
                          this->LabeledPaths[PathLabel::UserRegistry]);
-    this->DebugBuffer = cmStrCat(this->DebugBuffer, debugBuffer, "\n");
+    this->DebugBuffer = cmStrCat(this->DebugBuffer, debugBuffer);
   }
 }
 
@@ -1505,7 +1505,7 @@ void cmFindPackageCommand::FillPrefixesSystemRegistry()
       "[CMAKE_FIND_PACKAGE_NO_SYSTEM_PACKAGE_REGISTRY].\n";
     collectPathsForDebug(debugBuffer,
                          this->LabeledPaths[PathLabel::SystemRegistry]);
-    this->DebugBuffer = cmStrCat(this->DebugBuffer, debugBuffer, "\n");
+    this->DebugBuffer = cmStrCat(this->DebugBuffer, debugBuffer);
   }
 }
 
@@ -1684,7 +1684,7 @@ void cmFindPackageCommand::FillPrefixesCMakeSystemVariable()
     std::string debugBuffer = "CMake variables defined in the Platform file "
                               "[CMAKE_FIND_USE_CMAKE_SYSTEM_PATH].\n";
     collectPathsForDebug(debugBuffer, paths);
-    this->DebugBuffer = cmStrCat(this->DebugBuffer, debugBuffer, "\n");
+    this->DebugBuffer = cmStrCat(this->DebugBuffer, debugBuffer);
   }
 }
 
@@ -1699,7 +1699,7 @@ void cmFindPackageCommand::FillPrefixesUserGuess()
     std::string debugBuffer =
       "Paths specified by the find_package PATHS option.\n";
     collectPathsForDebug(debugBuffer, paths);
-    this->DebugBuffer = cmStrCat(this->DebugBuffer, debugBuffer, "\n");
+    this->DebugBuffer = cmStrCat(this->DebugBuffer, debugBuffer);
   }
 }
 
@@ -1714,7 +1714,7 @@ void cmFindPackageCommand::FillPrefixesUserHints()
     std::string debugBuffer =
       "Paths specified by the find_package HINTS option.\n";
     collectPathsForDebug(debugBuffer, paths);
-    this->DebugBuffer = cmStrCat(this->DebugBuffer, debugBuffer, "\n");
+    this->DebugBuffer = cmStrCat(this->DebugBuffer, debugBuffer);
   }
 }
 
