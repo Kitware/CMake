@@ -367,6 +367,10 @@ public:
   /** Determine if a name resolves to a framework on disk or a built target
       that is a framework. */
   bool NameResolvesToFramework(const std::string& libname) const;
+  /** Split a framework path to the directory and name of the framework
+   * returns std::nullopt if the path does not match with framework format */
+  cm::optional<std::pair<std::string, std::string>> SplitFrameworkPath(
+    const std::string& path) const;
 
   cmMakefile* FindMakefile(const std::string& start_dir) const;
   cmLocalGenerator* FindLocalGenerator(cmDirectoryId const& id) const;

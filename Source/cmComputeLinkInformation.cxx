@@ -8,6 +8,7 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cm/optional>
 #include <cmext/algorithm>
 
 #include "cmComputeLinkDepends.h"
@@ -1679,7 +1680,8 @@ void cmComputeLinkInformation::AddFrameworkItem(LinkEntry const& entry)
   std::string const& item = entry.Item.Value;
 
   // Try to separate the framework name and path.
-  if (!this->SplitFramework.find(item)) {
+  auto fwItems = this->GlobalGenerator->SplitFrameworkPath(item);
+  if (!fwItems) {
     std::ostringstream e;
     e << "Could not parse framework path \"" << item << "\" "
       << "linked by target " << this->Target->GetName() << ".";
@@ -1687,8 +1689,8 @@ void cmComputeLinkInformation::AddFrameworkItem(LinkEntry const& entry)
     return;
   }
 
-  std::string fw_path = this->SplitFramework.match(1);
-  std::string fw = this->SplitFramework.match(2);
+  std::string fw_path = std::move(fwItems->first);
+  std::string fw = std::move(fwItems->second);
   std::string full_fw = cmStrCat(fw_path, '/', fw, ".framework/", fw);
 
   // Add the directory portion to the framework search path.
@@ -1739,9 +1741,6 @@ void cmComputeLinkInformation::ComputeFrameworkInfo()
 
   this->FrameworkPathsEmitted.insert(implicitDirVec.begin(),
                                      implicitDirVec.end());
-
-  // Regular expression to extract a framework path and name.
-  this->SplitFramework.compile("(.*)/(.*)\\.framework$");
 }
 
 void cmComputeLinkInformation::AddFrameworkPath(std::string const& p)

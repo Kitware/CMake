@@ -205,7 +205,6 @@ private:
   void ComputeFrameworkInfo();
   void AddFrameworkPath(std::string const& p);
   std::set<std::string> FrameworkPathsEmitted;
-  cmsys::RegularExpression SplitFramework;
 
   // Linker search path computation.
   std::unique_ptr<cmOrderDirectories> OrderLinkerSearchPath;

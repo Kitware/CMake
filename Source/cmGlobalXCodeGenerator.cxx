@@ -1154,46 +1154,24 @@ std::string GetSourcecodeValueFromFileExtension(
   return sourcecode;
 }
 
-// If the file has no extension it's either a raw executable or might
-// be a direct reference to a binary within a framework (bad practice!).
-// This is where we change the path to point to the framework directory.
-// .tbd files also can be located in SDK frameworks (they are
-// placeholders for actual libraries shipped with the OS)
-std::string GetLibraryOrFrameworkPath(const std::string& path)
+} // anonymous
+
+// Extracts the framework directory, if path matches the framework syntax
+// otherwise returns the path untouched
+std::string cmGlobalXCodeGenerator::GetLibraryOrFrameworkPath(
+  const std::string& path) const
 {
-  auto ext = cmSystemTools::GetFilenameLastExtension(path);
-  if (ext.empty() || ext == ".tbd") {
-    auto name = cmSystemTools::GetFilenameWithoutExtension(path);
-    // Check for iOS framework structure:
-    //    FwName.framework/FwName (and also on macOS where FwName lib is a
-    //    symlink)
-    auto parentDir = cmSystemTools::GetParentDirectory(path);
-    auto parentName = cmSystemTools::GetFilenameWithoutExtension(parentDir);
-    ext = cmSystemTools::GetFilenameLastExtension(parentDir);
-    if (ext == ".framework" && name == parentName) {
-      return parentDir;
-    }
-    // Check for macOS framework structure:
-    //    FwName.framework/Versions/*/FwName
-    std::vector<std::string> components;
-    cmSystemTools::SplitPath(path, components);
-    if (components.size() > 3 &&
-        components[components.size() - 3] == "Versions") {
-      ext = cmSystemTools::GetFilenameLastExtension(
-        components[components.size() - 4]);
-      parentName = cmSystemTools::GetFilenameWithoutExtension(
-        components[components.size() - 4]);
-      if (ext == ".framework" && name == parentName) {
-        components.erase(components.begin() + components.size() - 3,
-                         components.end());
-        return cmSystemTools::JoinPath(components);
-      }
+  auto fwItems = this->SplitFrameworkPath(path);
+  if (fwItems) {
+    if (fwItems->first.empty()) {
+      return cmStrCat(fwItems->second, ".framework");
+    } else {
+      return cmStrCat(fwItems->first, '/', fwItems->second, ".framework");
     }
   }
+
   return path;
 }
-
-} // anonymous
 
 cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeFileReferenceFromPath(
   const std::string& fullpath, cmGeneratorTarget* target,
@@ -1217,7 +1195,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeFileReferenceFromPath(
     ext = ext.substr(1);
   }
   if (fileType.empty()) {
-    path = GetLibraryOrFrameworkPath(path);
+    path = this->GetLibraryOrFrameworkPath(path);
     ext = cmSystemTools::GetFilenameLastExtension(path);
     if (!ext.empty()) {
       ext = ext.substr(1);
@@ -3541,7 +3519,7 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
     } else {
       linkDir = libItem->Value.Value;
     }
-    linkDir = GetLibraryOrFrameworkPath(linkDir);
+    linkDir = this->GetLibraryOrFrameworkPath(linkDir);
     bool isFramework = cmSystemTools::IsPathToFramework(linkDir);
     linkDir = cmSystemTools::GetParentDirectory(linkDir);
     if (isFramework) {
@@ -3729,7 +3707,7 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
           if (cmSystemTools::FileIsFullPath(cleanPath)) {
             cleanPath = cmSystemTools::CollapseFullPath(cleanPath);
           }
-          const auto libPath = GetLibraryOrFrameworkPath(cleanPath);
+          const auto libPath = this->GetLibraryOrFrameworkPath(cleanPath);
           if (cmSystemTools::StringEndsWith(libPath.c_str(), ".framework")) {
             const auto fwName =
               cmSystemTools::GetFilenameWithoutExtension(libPath);
