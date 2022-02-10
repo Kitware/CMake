@@ -38,14 +38,21 @@ The following syntax applies to the ``condition`` argument of
 the ``if``, ``elseif`` and :command:`while` clauses.
 
 Compound conditions are evaluated in the following order of precedence:
-Innermost parentheses are evaluated first. Next come unary tests such
-as `EXISTS`_, `COMMAND`_, and `DEFINED`_.  Then binary tests such as
-`EQUAL`_, `LESS`_, `LESS_EQUAL`_, `GREATER`_, `GREATER_EQUAL`_,
-`STREQUAL`_, `STRLESS`_, `STRLESS_EQUAL`_, `STRGREATER`_,
-`STRGREATER_EQUAL`_, `VERSION_EQUAL`_, `VERSION_LESS`_,
-`VERSION_LESS_EQUAL`_, `VERSION_GREATER`_, `VERSION_GREATER_EQUAL`_,
-and `MATCHES`_.  Then the boolean operators in the order `NOT`_,  `AND`_,
-and finally `OR`_.
+
+1. Parentheses.
+
+2. Unary tests such as `EXISTS`_, `COMMAND`_, and `DEFINED`_.
+
+3. Binary tests such as `EQUAL`_, `LESS`_, `LESS_EQUAL`_, `GREATER`_,
+   `GREATER_EQUAL`_, `STREQUAL`_, `STRLESS`_, `STRLESS_EQUAL`_,
+   `STRGREATER`_, `STRGREATER_EQUAL`_, `VERSION_EQUAL`_, `VERSION_LESS`_,
+   `VERSION_LESS_EQUAL`_, `VERSION_GREATER`_, `VERSION_GREATER_EQUAL`_,
+   and `MATCHES`_.
+
+4. Unary logical operator `NOT`_.
+
+5. Binary logical operators `AND`_ and `OR`_, from left to right,
+   without any short-circuit.
 
 Basic Expressions
 """""""""""""""""
