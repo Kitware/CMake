@@ -931,6 +931,18 @@ public:
   // searches
   std::deque<std::vector<std::string>> FindPackageRootPathStack;
 
+  class DebugFindPkgRAII
+  {
+    cmMakefile* Makefile;
+    bool OldValue;
+
+  public:
+    DebugFindPkgRAII(cmMakefile* mf, std::string const& pkg);
+    ~DebugFindPkgRAII();
+  };
+
+  bool GetDebugFindPkgMode() const;
+
   void MaybeWarnCMP0074(std::string const& pkg);
   void MaybeWarnUninitialized(std::string const& variable,
                               const char* sourceFilename) const;
@@ -1103,6 +1115,8 @@ private:
 
   std::vector<BT<GeneratorAction>> GeneratorActions;
   bool GeneratorActionsInvoked = false;
+
+  bool DebugFindPkg = false;
 
   bool CheckSystemVars;
   bool CheckCMP0000;

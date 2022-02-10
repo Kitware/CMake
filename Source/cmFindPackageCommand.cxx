@@ -33,7 +33,6 @@
 #include "cmSystemTools.h"
 #include "cmValue.h"
 #include "cmVersion.h"
-#include "cmake.h"
 
 #if defined(__HAIKU__)
 #  include <FindDirectory.h>
@@ -235,8 +234,8 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
   this->SearchPathSuffixes.emplace_back();
 
   // Process debug mode
-  this->DebugMode = this->ComputeIfDebugModeWanted() ||
-    this->Makefile->GetCMakeInstance()->GetDebugFindPkgOutput(this->Name);
+  cmMakefile::DebugFindPkgRAII debugFindPkgRAII(this->Makefile, this->Name);
+  this->DebugMode = this->ComputeIfDebugModeWanted();
 
   // Parse the arguments.
   enum Doing

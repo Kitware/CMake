@@ -1,0 +1,128 @@
+^CMake Debug Log at ModuleModeDebugPkg/FindFoo.cmake:[0-9]+ \(find_program\):
+  find_program called with the following settings:
+
+    VAR: FOO_EXE
+    NAMES: "ModuleModeDebugPkgFooExe"
+    Documentation: Path to a program.
+    Framework
+      Only Search Frameworks: 0
+      Search Frameworks Last: 0
+      Search Frameworks First: [01]
+    AppBundle
+      Only Search AppBundle: 0
+      Search AppBundle Last: 0
+      Search AppBundle First: [01]
+    NO_DEFAULT_PATH Enabled
+
+  find_program considered the following locations:
+
+  The item was not found.
+
+Call Stack \(most recent call first\):
+  ModuleModeDebugPkg.cmake:[0-9]+ \(find_package\)
+  CMakeLists.txt:[0-9]+ \(include\)
++
+CMake Debug Log at ModuleModeDebugPkg/FindFoo.cmake:[0-9]+ \(find_library\):
+  find_library called with the following settings:
+
+    VAR: FOO_LIB
+    NAMES: "ModuleModeDebugPkgFooLib"
+    Documentation: Path to a library.
+    Framework
+      Only Search Frameworks: 0
+      Search Frameworks Last: 0
+      Search Frameworks First: [01]
+    AppBundle
+      Only Search AppBundle: 0
+      Search AppBundle Last: 0
+      Search AppBundle First: [01]
+    NO_DEFAULT_PATH Enabled
+
+  find_library considered the following locations:
+
+  The item was not found.
+
+Call Stack \(most recent call first\):
+  ModuleModeDebugPkg.cmake:[0-9]+ \(find_package\)
+  CMakeLists.txt:[0-9]+ \(include\)
++
+CMake Debug Log at ModuleModeDebugPkg/FindFoo.cmake:[0-9]+ \(find_path\):
+  find_path called with the following settings:
+
+    VAR: FOO_PATH
+    NAMES: "ModuleModeDebugPkgFoo.h"
+    Documentation: Path to a file.
+    Framework
+      Only Search Frameworks: 0
+      Search Frameworks Last: 0
+      Search Frameworks First: [01]
+    AppBundle
+      Only Search AppBundle: 0
+      Search AppBundle Last: 0
+      Search AppBundle First: [01]
+    NO_DEFAULT_PATH Enabled
+
+  find_path considered the following locations:
+
+  The item was not found.
+
+Call Stack \(most recent call first\):
+  ModuleModeDebugPkg.cmake:[0-9]+ \(find_package\)
+  CMakeLists.txt:[0-9]+ \(include\)
++
+CMake Debug Log at ModuleModeDebugPkg/FindFoo.cmake:[0-9]+ \(find_file\):
+  find_file called with the following settings:
+
+    VAR: FOO_FILE
+    NAMES: "ModuleModeDebugPkgFoo.h"
+    Documentation: Path to a file.
+    Framework
+      Only Search Frameworks: 0
+      Search Frameworks Last: 0
+      Search Frameworks First: [01]
+    AppBundle
+      Only Search AppBundle: 0
+      Search AppBundle Last: 0
+      Search AppBundle First: [01]
+    NO_DEFAULT_PATH Enabled
+
+  find_file considered the following locations:
+
+  The item was not found.
+
+Call Stack \(most recent call first\):
+  ModuleModeDebugPkg.cmake:[0-9]+ \(find_package\)
+  CMakeLists.txt:[0-9]+ \(include\)
++
+FindBar processed here.
++
+CMake Debug Log at ModuleModeDebugPkg/FindFoo.cmake:[0-9]+ \(find_package\):
+  Paths specified by the find_package HINTS option.
+
+    none
+
+  Paths specified by the find_package PATHS option.
+
+    none
+
+  find_package considered the following locations for Zot's Config module:
+
+  The file was not found.
+
+Call Stack \(most recent call first\):
+  ModuleModeDebugPkg.cmake:[0-9]+ \(find_package\)
+  CMakeLists.txt:[0-9]+ \(include\)
++
+CMake Debug Log at ModuleModeDebugPkg.cmake:[0-9]+ \(find_package\):
+  find_package considered the following paths for FindFoo.cmake:
+
+    [^
+]*/Modules/FindFoo.cmake
+
+  The file was found at
+
+    [^
+]*/Tests/RunCMake/find_package/ModuleModeDebugPkg/FindFoo.cmake
+
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)$
