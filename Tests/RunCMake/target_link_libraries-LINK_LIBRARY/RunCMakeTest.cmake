@@ -79,3 +79,21 @@ if ((RunCMake_GENERATOR MATCHES "Makefiles|Ninja|Xcode"
   unset(RunCMake_TEST_OUTPUT_MERGE)
 
 endif()
+
+# Apple framework features
+if(APPLE AND (CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID MATCHES "Clang"))
+  run_cmake(apple_framework)
+  run_cmake_target(apple_framework framework main-framework)
+  run_cmake_target(apple_framework reexport_framework main-reexport_framework)
+  run_cmake_target(apple_framework weak_framework main-weak_framework)
+
+  run_cmake_target(apple_framework target-framework main-target-framework)
+  run_cmake_target(apple_framework target-reexport_framework main-target-reexport_framework)
+  run_cmake_target(apple_framework target-weak_framework main-target-weak_framework)
+endif()
+
+if (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION GREATER_EQUAL "12")
+  run_cmake_target(apple_framework needed_framework main-needed_framework)
+
+  run_cmake_target(apple_framework target-needed_framework main-target-needed_framework)
+endif()

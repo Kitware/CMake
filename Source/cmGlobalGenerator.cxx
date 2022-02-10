@@ -2529,7 +2529,8 @@ bool cmGlobalGenerator::NameResolvesToFramework(
 // .tbd files also can be located in SDK frameworks (they are
 // placeholders for actual libraries shipped with the OS)
 cm::optional<std::pair<std::string, std::string>>
-cmGlobalGenerator::SplitFrameworkPath(const std::string& path) const
+cmGlobalGenerator::SplitFrameworkPath(const std::string& path,
+                                      bool extendedFormat) const
 {
   // Check for framework structure:
   //    (/path/to/)?FwName.framework
@@ -2548,6 +2549,16 @@ cmGlobalGenerator::SplitFrameworkPath(const std::string& path) const
       return cm::nullopt;
     }
     return std::pair<std::string, std::string>{ frameworkPath.match(2), name };
+  }
+
+  if (extendedFormat) {
+    // path format can be more flexible: (/path/to/)?fwName(.framework)?
+    auto fwDir = cmSystemTools::GetParentDirectory(path);
+    auto name = cmSystemTools::GetFilenameLastExtension(path) == ".framework"
+      ? cmSystemTools::GetFilenameWithoutExtension(path)
+      : cmSystemTools::GetFilenameName(path);
+
+    return std::pair<std::string, std::string>{ fwDir, name };
   }
 
   return cm::nullopt;

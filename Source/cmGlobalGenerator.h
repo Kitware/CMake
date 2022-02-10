@@ -368,9 +368,12 @@ public:
       that is a framework. */
   bool NameResolvesToFramework(const std::string& libname) const;
   /** Split a framework path to the directory and name of the framework
-   * returns std::nullopt if the path does not match with framework format */
+   * returns std::nullopt if the path does not match with framework format
+   * when extendedFormat is true, required format is relaxed (i.e. extension
+   * `.framework' is optional). Used when FRAMEWORK link feature is
+   * specified */
   cm::optional<std::pair<std::string, std::string>> SplitFrameworkPath(
-    const std::string& path) const;
+    const std::string& path, bool extendedFormat = false) const;
 
   cmMakefile* FindMakefile(const std::string& start_dir) const;
   cmLocalGenerator* FindLocalGenerator(cmDirectoryId const& id) const;

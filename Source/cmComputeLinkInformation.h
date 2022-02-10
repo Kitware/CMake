@@ -63,6 +63,11 @@ public:
     cmGeneratorTarget const* Target = nullptr;
 
     bool HasFeature() const { return this->Feature != nullptr; }
+    const std::string& GetFeatureName() const
+    {
+      return HasFeature() ? this->Feature->Name
+                          : cmComputeLinkDepends::LinkEntry::DEFAULT;
+    }
 
     BT<std::string> GetFormattedItem(std::string const& path) const
     {
