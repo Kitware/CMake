@@ -237,7 +237,6 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
   // Process debug mode
   this->DebugMode = this->ComputeIfDebugModeWanted() ||
     this->Makefile->GetCMakeInstance()->GetDebugFindPkgOutput(this->Name);
-  this->DebugBuffer.clear();
 
   // Parse the arguments.
   enum Doing
@@ -610,14 +609,13 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
         loadedPackage = true;
       }
     }
-
-    if (this->DebugMode) {
-      this->DebugMessage(this->DebugBuffer);
-      this->DebugBuffer.clear();
-    }
   }
 
   this->AppendSuccessInformation();
+
+  if (!this->DebugBuffer.empty()) {
+    this->DebugMessage(this->DebugBuffer);
+  }
 
   return loadedPackage;
 }
@@ -945,11 +943,6 @@ bool cmFindPackageCommand::HandlePackageMode(
       this->Makefile->IsOn("CMAKE_FIND_PACKAGE_PREFER_CONFIG")) {
     // Config mode failed. Allow Module case.
     result = false;
-  }
-
-  if (this->DebugMode) {
-    this->DebugMessage(this->DebugBuffer);
-    this->DebugBuffer.clear();
   }
 
   // package not found

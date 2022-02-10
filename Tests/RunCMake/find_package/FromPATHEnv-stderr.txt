@@ -77,8 +77,4 @@
 ]*/Tests/RunCMake/find_package/PackageRoot/ResolvedConfig.cmake
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
-+
-CMake Debug Log at FromPATHEnv.cmake:[0-9]+ \(find_package\):
-Call Stack \(most recent call first\):
   CMakeLists.txt:[0-9]+ \(include\)$
