@@ -235,7 +235,8 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
   this->SearchPathSuffixes.emplace_back();
 
   // Process debug mode
-  this->DebugMode = this->ComputeIfDebugModeWanted(this->Name);
+  this->DebugMode = this->ComputeIfDebugModeWanted() ||
+    this->Makefile->GetCMakeInstance()->GetDebugFindPkgOutput(this->Name);
   this->DebugBuffer.clear();
 
   // Parse the arguments.
@@ -619,12 +620,6 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
   this->AppendSuccessInformation();
 
   return loadedPackage;
-}
-
-bool cmFindPackageCommand::ComputeIfDebugModeWanted(std::string const& var)
-{
-  return this->ComputeIfDebugModeWanted() ||
-    this->Makefile->GetCMakeInstance()->GetDebugFindPkgOutput(var);
 }
 
 bool cmFindPackageCommand::FindPackageUsingModuleMode()
