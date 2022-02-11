@@ -4519,3 +4519,22 @@ cmMakefile::MacroPushPop::~MacroPushPop()
 {
   this->Makefile->PopMacroScope(this->ReportError);
 }
+
+cmMakefile::DebugFindPkgRAII::DebugFindPkgRAII(cmMakefile* mf,
+                                               std::string const& pkg)
+  : Makefile(mf)
+  , OldValue(this->Makefile->DebugFindPkg)
+{
+  this->Makefile->DebugFindPkg =
+    this->Makefile->GetCMakeInstance()->GetDebugFindPkgOutput(pkg);
+}
+
+cmMakefile::DebugFindPkgRAII::~DebugFindPkgRAII()
+{
+  this->Makefile->DebugFindPkg = this->OldValue;
+}
+
+bool cmMakefile::GetDebugFindPkgMode() const
+{
+  return this->DebugFindPkg;
+}
