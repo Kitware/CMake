@@ -116,7 +116,7 @@ bool cmMacroHelperCommand::operator()(
       newLFFArgs.push_back(std::move(arg));
     }
     cmListFileFunction newLFF{ func.OriginalName(), func.Line(),
-                               std::move(newLFFArgs) };
+                               func.LineEnd(), std::move(newLFFArgs) };
     cmExecutionStatus status(makefile);
     if (!makefile.ExecuteCommand(newLFF, status) || status.GetNestedError()) {
       // The error message should have already included the call stack

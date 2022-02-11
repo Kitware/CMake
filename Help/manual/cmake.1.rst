@@ -309,7 +309,13 @@ Options
        was called.
 
      ``line``
-       The line in ``file`` of the function call.
+       The line in ``file`` where the function call begins.
+
+     ``line_end``
+       If the function call spans multiple lines, this field will
+       be set to the line where the function call ends. If the function
+       calls spans a single line, this field will be unset. This field
+       was added in minor version 2 of the ``json-v1`` format.
 
      ``defer``
        Optional member that is present when the function call was deferred

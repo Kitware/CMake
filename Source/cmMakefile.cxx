@@ -291,6 +291,9 @@ void cmMakefile::PrintCommandTrace(
       builder["indentation"] = "";
       val["file"] = full_path;
       val["line"] = static_cast<Json::Value::Int64>(lff.Line());
+      if (lff.Line() != lff.LineEnd()) {
+        val["line_end"] = static_cast<Json::Value::Int64>(lff.LineEnd());
+      }
       if (deferId) {
         val["defer"] = *deferId;
       }
@@ -1664,6 +1667,7 @@ void cmMakefile::Configure()
         "the first line.",
         this->Backtrace);
       cmListFileFunction project{ "project",
+                                  0,
                                   0,
                                   { { "Project", cmListFileArgument::Unquoted,
                                       0 },

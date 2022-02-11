@@ -40,6 +40,7 @@ struct cmListFileParser
   cmListFileLexer* Lexer;
   std::string FunctionName;
   long FunctionLine;
+  long FunctionLineEnd;
   std::vector<cmListFileArgument> FunctionArguments;
   enum
   {
@@ -146,7 +147,7 @@ bool cmListFileParser::Parse()
         if (this->ParseFunction(token->text, token->line)) {
           this->ListFile->Functions.emplace_back(
             std::move(this->FunctionName), this->FunctionLine,
-            std::move(this->FunctionArguments));
+            this->FunctionLineEnd, std::move(this->FunctionArguments));
         } else {
           return false;
         }
@@ -259,6 +260,7 @@ bool cmListFileParser::ParseFunction(const char* name, long line)
       }
     } else if (token->type == cmListFileLexer_Token_ParenRight) {
       if (parenDepth == 0) {
+        this->FunctionLineEnd = token->line;
         return true;
       }
       parenDepth--;

@@ -30,6 +30,8 @@ required_traces = [
     {
         'args': ['STATUS', 'JSON-V1 str', 'spaces'],
         'cmd': 'message',
+        'line': 1,
+        'line_end': 5
     },
     {
         'args': ['ASDF', 'fff', 'sss', '  SPACES !!!  '],
@@ -57,6 +59,24 @@ required_traces = [
     }
 ]
 
+def assert_fields_look_good(line):
+    expected_fields = {'args', 'cmd', 'file', 'frame', 'global_frame','line', 'time'}
+    if "line_end" in line:
+        assert isinstance(line['line_end'], int)
+        assert line['line'] != line['line_end']
+        expected_fields.add("line_end")
+
+    assert set(line.keys()) == expected_fields
+
+    assert isinstance(line['args'], list)
+    assert isinstance(line['cmd'], unicode)
+    assert isinstance(line['file'], unicode)
+    assert isinstance(line['frame'], int)
+    assert isinstance(line['global_frame'], int)
+    assert isinstance(line['line'], int)
+    assert isinstance(line['time'], float)
+
+
 with open(trace_file, 'r') as fp:
     # Check for version (must be the first document)
     vers = json.loads(fp.readline())
@@ -67,18 +87,15 @@ with open(trace_file, 'r') as fp:
 
     for i in fp.readlines():
         line = json.loads(i)
-        assert sorted(line.keys()) == ['args', 'cmd', 'file', 'frame', 'global_frame','line', 'time']
-        assert isinstance(line['args'], list)
-        assert isinstance(line['cmd'], unicode)
-        assert isinstance(line['file'], unicode)
-        assert isinstance(line['frame'], int)
-        assert isinstance(line['global_frame'], int)
-        assert isinstance(line['line'], int)
-        assert isinstance(line['time'], float)
-
+        assert_fields_look_good(line)
         for j in required_traces:
             # Compare the subset of required keys with line
-            if {k: line[k] for k in j} == j:
+            subset = {
+                k: line[k]
+                for k in j
+                if k in line
+            }
+            if subset == j:
                 required_traces.remove(j)
 
 assert not required_traces
