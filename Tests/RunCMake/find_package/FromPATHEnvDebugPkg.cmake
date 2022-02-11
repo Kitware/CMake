@@ -1,4 +1,7 @@
 set(ENV_PATH "$ENV{PATH}")
+set(ENV_CMAKE_PREFIX_PATH "$ENV{CMAKE_PREFIX_PATH}")
+
+set(ENV{CMAKE_PREFIX_PATH} "")
 
 set(ENV{PATH} "${CMAKE_CURRENT_SOURCE_DIR}/PackageRoot")
 find_package(Resolved QUIET)
@@ -28,4 +31,6 @@ foreach(path "/does_not_exist" "/PackageRoot" "")
   find_package(ResolvedC NO_SYSTEM_ENVIRONMENT_PATH QUIET)
   message(STATUS "Resolved_FOUND='${ResolvedC_FOUND}'")
 endforeach()
+
+set(ENV{CMAKE_PREFIX_PATH} "${ENV_CMAKE_PREFIX_PATH}")
 set(ENV{PATH} "${ENV_PATH}")

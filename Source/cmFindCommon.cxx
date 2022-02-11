@@ -73,7 +73,8 @@ void cmFindCommon::DebugMessage(std::string const& msg) const
 
 bool cmFindCommon::ComputeIfDebugModeWanted()
 {
-  return this->Makefile->IsOn("CMAKE_FIND_DEBUG_MODE") ||
+  return this->Makefile->GetDebugFindPkgMode() ||
+    this->Makefile->IsOn("CMAKE_FIND_DEBUG_MODE") ||
     this->Makefile->GetCMakeInstance()->GetDebugFindOutput();
 }
 
