@@ -458,22 +458,6 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
   }
 }
 
-void cmGlobalVisualStudio7Generator::WriteTargetDepends(
-  std::ostream& fout, OrderedTargetDependSet const& projectTargets)
-{
-  for (cmGeneratorTarget const* target : projectTargets) {
-    if (!target->IsInBuildSystem()) {
-      continue;
-    }
-    cmValue vcprojName = target->GetProperty("GENERATOR_FILE_NAME");
-    if (vcprojName) {
-      std::string dir =
-        target->GetLocalGenerator()->GetCurrentSourceDirectory();
-      this->WriteProjectDepends(fout, *vcprojName, dir, target);
-    }
-  }
-}
-
 void cmGlobalVisualStudio7Generator::WriteFolders(std::ostream& fout)
 {
   cm::string_view const prefix = "CMAKE_FOLDER_GUID_";
