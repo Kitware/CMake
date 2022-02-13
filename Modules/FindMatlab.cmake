@@ -1353,7 +1353,7 @@ function(_Matlab_get_version_from_root matlab_root matlab_or_mcr matlab_known_ve
              ${versioninfo_string}
             )
 
-      if(CMAKE_MATCH_1 MATCHES "(([0-9])\\.([0-9]))[\\.0-9]*")
+      if(CMAKE_MATCH_1 MATCHES "(([0-9]+)\\.([0-9]+))[\\.0-9]*")
         set(_matlab_version_tmp "${CMAKE_MATCH_1}")
       endif()
     endif()
