@@ -28,6 +28,14 @@ unset(FortranCInterface_VERIFIED_CXX CACHE)
 
 set(_result)
 
+# Perform detection with only one architecture so that
+# the info strings are not repeated.
+if(CMAKE_OSX_ARCHITECTURES MATCHES "^([^;]+)(;|$)")
+  set(_FortranCInterface_OSX_ARCH "-DCMAKE_OSX_ARCHITECTURES=${CMAKE_MATCH_1}")
+else()
+  set(_FortranCInterface_OSX_ARCH "")
+endif()
+
 cmake_policy(GET CMP0056 _FortranCInterface_CMP0056)
 if(_FortranCInterface_CMP0056 STREQUAL "NEW")
   set(_FortranCInterface_EXE_LINKER_FLAGS "-DCMAKE_EXE_LINKER_FLAGS:STRING=${CMAKE_EXE_LINKER_FLAGS}")
@@ -48,11 +56,13 @@ try_compile(FortranCInterface_COMPILED
     "-DCMAKE_Fortran_FLAGS:STRING=${CMAKE_Fortran_FLAGS}"
     "-DCMAKE_C_FLAGS_RELEASE:STRING=${CMAKE_C_FLAGS_RELEASE}"
     "-DCMAKE_Fortran_FLAGS_RELEASE:STRING=${CMAKE_Fortran_FLAGS_RELEASE}"
+    ${_FortranCInterface_OSX_ARCH}
     ${_FortranCInterface_EXE_LINKER_FLAGS}
   OUTPUT_VARIABLE FortranCInterface_OUTPUT)
 set(FortranCInterface_COMPILED ${FortranCInterface_COMPILED})
 unset(FortranCInterface_COMPILED CACHE)
 unset(_FortranCInterface_EXE_LINKER_FLAGS)
+unset(_FortranCInterface_OSX_ARCH)
 
 # Locate the sample project executable.
 set(FortranCInterface_EXE)

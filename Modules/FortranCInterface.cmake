@@ -343,6 +343,14 @@ function(FortranCInterface_VERIFY)
     set(_desc "Verifying Fortran/${lang} Compiler Compatibility")
     message(CHECK_START "${_desc}")
 
+    # Perform verification with only one architecture.
+    # FIXME: Add try_compile whole-project option to forward architectures.
+    if(CMAKE_OSX_ARCHITECTURES MATCHES "^([^;]+)(;|$)")
+      set(_FortranCInterface_OSX_ARCH "-DCMAKE_OSX_ARCHITECTURES=${CMAKE_MATCH_1}")
+    else()
+      set(_FortranCInterface_OSX_ARCH "")
+    endif()
+
     cmake_policy(GET CMP0056 _FortranCInterface_CMP0056)
     if(_FortranCInterface_CMP0056 STREQUAL "NEW")
       set(_FortranCInterface_EXE_LINKER_FLAGS "-DCMAKE_EXE_LINKER_FLAGS:STRING=${CMAKE_EXE_LINKER_FLAGS}")
@@ -365,6 +373,7 @@ function(FortranCInterface_VERIFY)
                  "-DCMAKE_C_FLAGS_RELEASE:STRING=${CMAKE_C_FLAGS_RELEASE}"
                  "-DCMAKE_CXX_FLAGS_RELEASE:STRING=${CMAKE_CXX_FLAGS_RELEASE}"
                  "-DCMAKE_Fortran_FLAGS_RELEASE:STRING=${CMAKE_Fortran_FLAGS_RELEASE}"
+                 ${_FortranCInterface_OSX_ARCH}
                  ${_FortranCInterface_EXE_LINKER_FLAGS}
       OUTPUT_VARIABLE _output)
     file(WRITE "${FortranCInterface_BINARY_DIR}/Verify${lang}/output.txt" "${_output}")
