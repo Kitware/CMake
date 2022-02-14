@@ -683,7 +683,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
         te->RuntimeGenerator = runtimeGenerator.get();
         te->ObjectsGenerator = objectGenerator.get();
         target.AddInstallIncludeDirectories(
-          cmMakeRange(includesArgs.GetIncludeDirs()));
+          *te, cmMakeRange(includesArgs.GetIncludeDirs()));
         te->NamelinkOnly = namelinkOnly;
         helper.Makefile->GetGlobalGenerator()
           ->GetExportSets()[exports]

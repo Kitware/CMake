@@ -1,0 +1,5 @@
+.+
+set_target_properties\(pkg2::foo PROPERTIES
+.+INTERFACE_INCLUDE_DIRECTORIES "\${_IMPORT_PREFIX}/pkg2/inc"
+\)
+.+

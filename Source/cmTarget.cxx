@@ -191,7 +191,8 @@ public:
   cmTarget::LinkLibraryVectorType OriginalLinkLibraries;
   std::map<std::string, BTs<std::string>> LanguageStandardProperties;
   std::vector<BT<std::string>> IncludeDirectoriesEntries;
-  std::vector<std::string> InstallIncludeDirectoriesEntries;
+  std::map<cmTargetExport const*, std::vector<std::string>>
+    InstallIncludeDirectoriesEntries;
   std::vector<BT<std::string>> CompileOptionsEntries;
   std::vector<BT<std::string>> CompileFeaturesEntries;
   std::vector<BT<std::string>> CompileDefinitionsEntries;
@@ -1054,15 +1055,18 @@ std::set<std::string> const& cmTarget::GetSystemIncludeDirectories() const
   return this->impl->SystemIncludeDirectories;
 }
 
-void cmTarget::AddInstallIncludeDirectories(cmStringRange const& incs)
+void cmTarget::AddInstallIncludeDirectories(cmTargetExport const& te,
+                                            cmStringRange const& incs)
 {
-  std::copy(incs.begin(), incs.end(),
-            std::back_inserter(this->impl->InstallIncludeDirectoriesEntries));
+  std::copy(
+    incs.begin(), incs.end(),
+    std::back_inserter(this->impl->InstallIncludeDirectoriesEntries[&te]));
 }
 
-cmStringRange cmTarget::GetInstallIncludeDirectoriesEntries() const
+cmStringRange cmTarget::GetInstallIncludeDirectoriesEntries(
+  cmTargetExport const& te) const
 {
-  return cmMakeRange(this->impl->InstallIncludeDirectoriesEntries);
+  return cmMakeRange(this->impl->InstallIncludeDirectoriesEntries[&te]);
 }
 
 cmBTStringRange cmTarget::GetIncludeDirectoriesEntries() const

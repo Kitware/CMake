@@ -26,6 +26,7 @@ class cmMakefile;
 class cmMessenger;
 class cmPropertyMap;
 class cmSourceFile;
+class cmTargetExport;
 class cmTargetInternals;
 
 /** \class cmTarget
@@ -232,8 +233,10 @@ public:
   void AddSystemIncludeDirectories(std::set<std::string> const& incs);
   std::set<std::string> const& GetSystemIncludeDirectories() const;
 
-  void AddInstallIncludeDirectories(cmStringRange const& incs);
-  cmStringRange GetInstallIncludeDirectoriesEntries() const;
+  void AddInstallIncludeDirectories(cmTargetExport const& te,
+                                    cmStringRange const& incs);
+  cmStringRange GetInstallIncludeDirectoriesEntries(
+    cmTargetExport const& te) const;
 
   BTs<std::string> const* GetLanguageStandardProperty(
     const std::string& propertyName) const;
