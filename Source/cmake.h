@@ -488,7 +488,7 @@ public:
   //! Do we want debug output from the find commands during the cmake run.
   bool GetDebugFindOutput() const { return this->DebugFindOutput; }
   bool GetDebugFindOutput(std::string const& var) const;
-  bool GetDebugFindPkgOutput(std::string const& var) const;
+  bool GetDebugFindPkgOutput(std::string const& pkg) const;
   void SetDebugFindOutput(bool b) { this->DebugFindOutput = b; }
   void SetDebugFindOutputPkgs(std::string const& args);
   void SetDebugFindOutputVars(std::string const& args);
