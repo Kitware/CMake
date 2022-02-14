@@ -118,6 +118,8 @@ public:
     return this->WindowsTargetPlatformVersion;
   }
 
+  bool IsInSolution(const cmGeneratorTarget* gt) const override;
+
   /** Return true if building for WindowsCE */
   bool TargetsWindowsCE() const override { return this->SystemIsWindowsCE; }
 

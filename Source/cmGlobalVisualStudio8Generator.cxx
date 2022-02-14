@@ -392,7 +392,7 @@ void cmGlobalVisualStudio8Generator::WriteProjectDepends(
   TargetDependSet const& unordered = this->GetTargetDirectDepends(gt);
   OrderedTargetDependSet depends(unordered, std::string());
   for (cmTargetDepend const& i : depends) {
-    if (!i->IsInBuildSystem()) {
+    if (!this->IsInSolution(i)) {
       continue;
     }
     std::string guid = this->GetGUID(i->GetName());

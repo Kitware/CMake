@@ -7,5 +7,6 @@
 enum class VsProjectType
 {
   vcxproj,
-  csproj
+  csproj,
+  proj,
 };

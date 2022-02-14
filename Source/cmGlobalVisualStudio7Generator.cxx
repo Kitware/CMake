@@ -359,7 +359,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
   // loop over again and write out configurations for each target
   // in the solution
   for (cmGeneratorTarget const* target : projectTargets) {
-    if (!target->IsInBuildSystem()) {
+    if (!this->IsInSolution(target)) {
       continue;
     }
     cmValue expath = target->GetProperty("EXTERNAL_MSPROJECT");
@@ -396,7 +396,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
   VisualStudioFolders.clear();
 
   for (cmGeneratorTarget const* target : projectTargets) {
-    if (!target->IsInBuildSystem()) {
+    if (!this->IsInSolution(target)) {
       continue;
     }
     bool written = false;
@@ -454,22 +454,6 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
           VisualStudioFolders[cumulativePath].insert(target->GetName());
         }
       }
-    }
-  }
-}
-
-void cmGlobalVisualStudio7Generator::WriteTargetDepends(
-  std::ostream& fout, OrderedTargetDependSet const& projectTargets)
-{
-  for (cmGeneratorTarget const* target : projectTargets) {
-    if (!target->IsInBuildSystem()) {
-      continue;
-    }
-    cmValue vcprojName = target->GetProperty("GENERATOR_FILE_NAME");
-    if (vcprojName) {
-      std::string dir =
-        target->GetLocalGenerator()->GetCurrentSourceDirectory();
-      this->WriteProjectDepends(fout, *vcprojName, dir, target);
     }
   }
 }

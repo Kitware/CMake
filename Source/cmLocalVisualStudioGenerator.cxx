@@ -252,7 +252,7 @@ std::string cmLocalVisualStudioGenerator::FinishConstructScript(
   // Store the script in a string.
   std::string script;
 
-  if (useLocal && projectType == VsProjectType::csproj) {
+  if (useLocal && projectType != VsProjectType::vcxproj) {
     // This label is not provided by MSBuild for C# projects.
     script += newline;
     script += this->GetReportErrorLabel();
