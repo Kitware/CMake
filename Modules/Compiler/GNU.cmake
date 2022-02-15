@@ -119,4 +119,11 @@ macro(__compiler_gnu lang)
     set(CMAKE_${lang}_COMPILE_OPTIONS_USE_PCH -include <PCH_HEADER>)
     set(CMAKE_${lang}_COMPILE_OPTIONS_CREATE_PCH -x ${__pch_header_${lang}} -include <PCH_HEADER>)
   endif()
+
+  # '-fdiagnostics-color=always' introduced since GCC 4.9
+  # https://gcc.gnu.org/gcc-4.9/changes.html
+  if(CMAKE_${lang}_COMPILER_VERSION VERSION_GREATER_EQUAL 4.9)
+    set(CMAKE_${lang}_COMPILE_OPTIONS_COLOR_DIAGNOSTICS "-fdiagnostics-color=always")
+    set(CMAKE_${lang}_COMPILE_OPTIONS_COLOR_DIAGNOSTICS_OFF "-fno-diagnostics-color")
+  endif()
 endmacro()

@@ -133,7 +133,11 @@ void cmLocalUnixMakefileGenerator3::Generate()
   // Record whether some options are enabled to avoid checking many
   // times later.
   if (!this->GetGlobalGenerator()->GetCMakeInstance()->GetIsInTryCompile()) {
-    this->ColorMakefile = this->Makefile->IsOn("CMAKE_COLOR_MAKEFILE");
+    if (this->Makefile->IsSet("CMAKE_COLOR_MAKEFILE")) {
+      this->ColorMakefile = this->Makefile->IsOn("CMAKE_COLOR_MAKEFILE");
+    } else {
+      this->ColorMakefile = this->Makefile->IsOn("CMAKE_COLOR_DIAGNOSTICS");
+    }
   }
   this->SkipPreprocessedSourceRules =
     this->Makefile->IsOn("CMAKE_SKIP_PREPROCESSED_SOURCE_RULES");

@@ -114,6 +114,12 @@ else()
     endif()
     set(CMAKE_${lang}_COMPILE_OPTIONS_USE_PCH -Xclang -include-pch -Xclang <PCH_FILE> -Xclang -include -Xclang <PCH_HEADER>)
     set(CMAKE_${lang}_COMPILE_OPTIONS_CREATE_PCH -Xclang -emit-pch -Xclang -include -Xclang <PCH_HEADER> -x ${__pch_header_${lang}})
+
+    # '-fcolor-diagnostics' introduced since Clang 2.6
+    if(CMAKE_${lang}_COMPILER_VERSION VERSION_GREATER_EQUAL 2.6)
+      set(CMAKE_${lang}_COMPILE_OPTIONS_COLOR_DIAGNOSTICS "-fcolor-diagnostics")
+      set(CMAKE_${lang}_COMPILE_OPTIONS_COLOR_DIAGNOSTICS_OFF "-fno-color-diagnostics")
+    endif()
   endmacro()
 endif()
 

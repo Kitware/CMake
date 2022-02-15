@@ -705,6 +705,7 @@ syn keyword cmakeVariable contained
             \ CMAKE_CODEBLOCKS_COMPILER_ID
             \ CMAKE_CODEBLOCKS_EXCLUDE_EXTERNAL_FILES
             \ CMAKE_CODELITE_USE_TARGETS
+            \ CMAKE_COLOR_DIAGNOSTICS
             \ CMAKE_COLOR_MAKEFILE
             \ CMAKE_COMMAND
             \ CMAKE_COMPILER_2005
