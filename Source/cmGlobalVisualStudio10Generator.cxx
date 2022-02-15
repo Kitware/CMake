@@ -1222,7 +1222,7 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
               "Studio 2017 and later. You have to manually restore the "
               "packages using NuGet before building the project.");
             restorePackages = false;
-          } else if (restoreMode == PackageResolveMode::FromCacheVariable) {
+          } else if (restoreMode == PackageResolveMode::Default) {
             // Decide if a restore is performed, based on a cache variable.
             if (cmValue cached =
                   this->CMakeInstance->GetState()->GetCacheEntryValue(

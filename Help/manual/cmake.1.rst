@@ -472,16 +472,15 @@ following options:
   target. When set to ``only``, the packages will be restored, but no build
   will be performed. When set to ``off``, no packages will be restored.
 
-  If the target does not define any package references, this option does
-  nothing.
+  If the target does not define any package references, this option does nothing.
 
   This setting can be specified in a build preset (using
-  ``resolvePackageReferences``). In this case, the command line option will
-  be ignored.
+  ``resolvePackageReferences``). The preset setting will be ignored, if this
+  command line option is specified.
 
-  If the no command line parameter or preset option is not provided, an
-  environment-specific cache variable will be evaluated to decide, if package
-  restoration should be performed.
+  If no command line parameter or preset option are provided, an environment-
+  specific cache variable will be evaluated to decide, if package restoration
+  should be performed.
 
   When using the Visual Studio generator, package references are defined
   using the :prop_tgt:`VS_PACKAGE_REFERENCES` property. Package references

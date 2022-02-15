@@ -3356,7 +3356,8 @@ int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
       buildOptions.Clean = *expandedPreset->CleanFirst;
     }
 
-    if (expandedPreset->ResolvePackageReferences) {
+    if (buildOptions.ResolveMode == PackageResolveMode::Default &&
+        expandedPreset->ResolvePackageReferences) {
       buildOptions.ResolveMode = *expandedPreset->ResolvePackageReferences;
     }
 
