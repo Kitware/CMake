@@ -1128,6 +1128,18 @@ Additional options to ``DOWNLOAD`` are:
   Historical short-hand for ``EXPECTED_HASH MD5=<value>``. It is an error to
   specify this if ``DOWNLOAD`` is not given a ``<file>``.
 
+``RANGE_START <value>``
+  .. versionadded:: 3.24
+
+  Offset of the start of the range in file in bytes. Could be omitted to
+  download up to the specified ``RANGE_END``.
+
+``RANGE_END <value>``
+  .. versionadded:: 3.24
+
+  Offset of the end of the range in file in bytes. Could be omitted to
+  download everything from the specified ``RANGE_START`` to the end of file.
+
 Locking
 ^^^^^^^
 

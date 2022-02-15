@@ -15,6 +15,7 @@
 #include <vector>
 
 #include <cm/memory>
+#include <cm/optional>
 #include <cm/string_view>
 #include <cmext/algorithm>
 #include <cmext/string_view>
@@ -1778,6 +1779,7 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
   std::string userpwd;
 
   std::vector<std::string> curl_headers;
+  std::vector<std::pair<std::string, cm::optional<std::string>>> curl_ranges;
 
   while (i != args.end()) {
     if (*i == "TIMEOUT") {
@@ -1890,6 +1892,27 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
         return false;
       }
       curl_headers.push_back(*i);
+    } else if (*i == "RANGE_START") {
+      ++i;
+      if (i == args.end()) {
+        status.SetError("DOWNLOAD missing value for RANGE_START.");
+        return false;
+      }
+      curl_ranges.emplace_back(*i, cm::nullopt);
+    } else if (*i == "RANGE_END") {
+      ++i;
+      if (curl_ranges.empty()) {
+        curl_ranges.emplace_back("0", *i);
+      } else {
+        auto& last_range = curl_ranges.back();
+        if (!last_range.second.has_value()) {
+          last_range.second = *i;
+        } else {
+          status.SetError("Multiple RANGE_END values is provided without "
+                          "the corresponding RANGE_START.");
+          return false;
+        }
+      }
     } else if (file.empty()) {
       file = *i;
     } else {
@@ -1899,6 +1922,7 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
     }
     ++i;
   }
+
   // Can't calculate hash if we don't save the file.
   // TODO Incrementally calculate hash in the write callback as the file is
   // being downloaded so this check can be relaxed.
@@ -1982,6 +2006,13 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
   } else {
     res = ::curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
     check_curl_result(res, "DOWNLOAD cannot set TLS/SSL Verify off: ");
+  }
+
+  for (const auto& range : curl_ranges) {
+    std::string curl_range = range.first + '-' +
+      (range.second.has_value() ? range.second.value() : "");
+    res = ::curl_easy_setopt(curl, CURLOPT_RANGE, curl_range.c_str());
+    check_curl_result(res, "DOWNLOAD cannot set range: ");
   }
 
   // check to see if a CAINFO file has been specified
