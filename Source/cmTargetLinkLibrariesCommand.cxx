@@ -271,25 +271,10 @@ bool cmTargetLinkLibrariesCommand(std::vector<std::string> const& args,
       if (!tll.HandleLibrary(currentProcessingState, args[i], llt)) {
         return false;
       }
-    } else {
-      // Lookup old-style cache entry if type is unspecified.  So if you
-      // do a target_link_libraries(foo optimized bar) it will stay optimized
-      // and not use the lookup.  As there may be the case where someone has
-      // specified that a library is both debug and optimized.  (this check is
-      // only there for backwards compatibility when mixing projects built
-      // with old versions of CMake and new)
       llt = GENERAL_LibraryType;
-      std::string linkType = cmStrCat(args[0], "_LINK_TYPE");
-      cmValue linkTypeString = mf.GetDefinition(linkType);
-      if (linkTypeString) {
-        if (*linkTypeString == "debug") {
-          llt = DEBUG_LibraryType;
-        }
-        if (*linkTypeString == "optimized") {
-          llt = OPTIMIZED_LibraryType;
-        }
-      }
-      if (!tll.HandleLibrary(currentProcessingState, args[i], llt)) {
+    } else {
+      if (!tll.HandleLibrary(currentProcessingState, args[i],
+                             GENERAL_LibraryType)) {
         return false;
       }
     }
