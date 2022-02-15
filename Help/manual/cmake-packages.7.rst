@@ -446,10 +446,10 @@ be true. This can be tested with logic in the package configuration file:
   include("${CMAKE_CURRENT_LIST_DIR}/ClimbingStatsTargets.cmake")
   include("${CMAKE_CURRENT_LIST_DIR}/ClimbingStatsMacros.cmake")
 
-  set(_supported_components Plot Table)
+  set(_ClimbingStats_supported_components Plot Table)
 
   foreach(_comp ${ClimbingStats_FIND_COMPONENTS})
-    if (NOT ";${_supported_components};" MATCHES ";${_comp};")
+    if (NOT ";${_ClimbingStats_supported_components};" MATCHES ";${_comp};")
       set(ClimbingStats_FOUND False)
       set(ClimbingStats_NOT_FOUND_MESSAGE "Unsupported component: ${_comp}")
     endif()
