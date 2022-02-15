@@ -178,93 +178,110 @@ bool cmTargetLinkLibrariesCommand(std::vector<std::string> const& args,
   // specification if the keyword is encountered as the first argument.
   ProcessingState currentProcessingState = ProcessingLinkLibraries;
 
+  // Keep this list in sync with the keyword dispatch below.
+  static std::unordered_set<std::string> const keywords{
+    "LINK_INTERFACE_LIBRARIES",
+    "INTERFACE",
+    "LINK_PUBLIC",
+    "PUBLIC",
+    "LINK_PRIVATE",
+    "PRIVATE",
+    "debug",
+    "optimized",
+    "general",
+  };
+
   // Add libraries, note that there is an optional prefix
   // of debug and optimized that can be used.
   for (unsigned int i = 1; i < args.size(); ++i) {
-    if (args[i] == "LINK_INTERFACE_LIBRARIES") {
-      currentProcessingState = ProcessingPlainLinkInterface;
-      if (i != 1) {
-        mf.IssueMessage(
-          MessageType::FATAL_ERROR,
-          "The LINK_INTERFACE_LIBRARIES option must appear as the second "
-          "argument, just after the target name.");
-        return true;
+    if (keywords.count(args[i])) {
+      // Process this keyword argument.
+      if (args[i] == "LINK_INTERFACE_LIBRARIES") {
+        currentProcessingState = ProcessingPlainLinkInterface;
+        if (i != 1) {
+          mf.IssueMessage(
+            MessageType::FATAL_ERROR,
+            "The LINK_INTERFACE_LIBRARIES option must appear as the "
+            "second argument, just after the target name.");
+          return true;
+        }
+      } else if (args[i] == "INTERFACE") {
+        if (i != 1 &&
+            currentProcessingState != ProcessingKeywordPrivateInterface &&
+            currentProcessingState != ProcessingKeywordPublicInterface &&
+            currentProcessingState != ProcessingKeywordLinkInterface) {
+          mf.IssueMessage(MessageType::FATAL_ERROR,
+                          "The INTERFACE, PUBLIC or PRIVATE option must "
+                          "appear as the second argument, just after the "
+                          "target name.");
+          return true;
+        }
+        currentProcessingState = ProcessingKeywordLinkInterface;
+      } else if (args[i] == "LINK_PUBLIC") {
+        if (i != 1 &&
+            currentProcessingState != ProcessingPlainPrivateInterface &&
+            currentProcessingState != ProcessingPlainPublicInterface) {
+          mf.IssueMessage(
+            MessageType::FATAL_ERROR,
+            "The LINK_PUBLIC or LINK_PRIVATE option must appear as the "
+            "second argument, just after the target name.");
+          return true;
+        }
+        currentProcessingState = ProcessingPlainPublicInterface;
+      } else if (args[i] == "PUBLIC") {
+        if (i != 1 &&
+            currentProcessingState != ProcessingKeywordPrivateInterface &&
+            currentProcessingState != ProcessingKeywordPublicInterface &&
+            currentProcessingState != ProcessingKeywordLinkInterface) {
+          mf.IssueMessage(MessageType::FATAL_ERROR,
+                          "The INTERFACE, PUBLIC or PRIVATE option must "
+                          "appear as the second argument, just after the "
+                          "target name.");
+          return true;
+        }
+        currentProcessingState = ProcessingKeywordPublicInterface;
+      } else if (args[i] == "LINK_PRIVATE") {
+        if (i != 1 &&
+            currentProcessingState != ProcessingPlainPublicInterface &&
+            currentProcessingState != ProcessingPlainPrivateInterface) {
+          mf.IssueMessage(
+            MessageType::FATAL_ERROR,
+            "The LINK_PUBLIC or LINK_PRIVATE option must appear as the "
+            "second argument, just after the target name.");
+          return true;
+        }
+        currentProcessingState = ProcessingPlainPrivateInterface;
+      } else if (args[i] == "PRIVATE") {
+        if (i != 1 &&
+            currentProcessingState != ProcessingKeywordPrivateInterface &&
+            currentProcessingState != ProcessingKeywordPublicInterface &&
+            currentProcessingState != ProcessingKeywordLinkInterface) {
+          mf.IssueMessage(MessageType::FATAL_ERROR,
+                          "The INTERFACE, PUBLIC or PRIVATE option must "
+                          "appear as the second argument, just after the "
+                          "target name.");
+          return true;
+        }
+        currentProcessingState = ProcessingKeywordPrivateInterface;
+      } else if (args[i] == "debug") {
+        if (haveLLT) {
+          LinkLibraryTypeSpecifierWarning(mf, llt, DEBUG_LibraryType);
+        }
+        llt = DEBUG_LibraryType;
+        haveLLT = true;
+      } else if (args[i] == "optimized") {
+        if (haveLLT) {
+          LinkLibraryTypeSpecifierWarning(mf, llt, OPTIMIZED_LibraryType);
+        }
+        llt = OPTIMIZED_LibraryType;
+        haveLLT = true;
+      } else if (args[i] == "general") {
+        if (haveLLT) {
+          LinkLibraryTypeSpecifierWarning(mf, llt, GENERAL_LibraryType);
+        }
+        llt = GENERAL_LibraryType;
+        haveLLT = true;
       }
-    } else if (args[i] == "INTERFACE") {
-      if (i != 1 &&
-          currentProcessingState != ProcessingKeywordPrivateInterface &&
-          currentProcessingState != ProcessingKeywordPublicInterface &&
-          currentProcessingState != ProcessingKeywordLinkInterface) {
-        mf.IssueMessage(
-          MessageType::FATAL_ERROR,
-          "The INTERFACE, PUBLIC or PRIVATE option must appear as the second "
-          "argument, just after the target name.");
-        return true;
-      }
-      currentProcessingState = ProcessingKeywordLinkInterface;
-    } else if (args[i] == "LINK_PUBLIC") {
-      if (i != 1 &&
-          currentProcessingState != ProcessingPlainPrivateInterface &&
-          currentProcessingState != ProcessingPlainPublicInterface) {
-        mf.IssueMessage(
-          MessageType::FATAL_ERROR,
-          "The LINK_PUBLIC or LINK_PRIVATE option must appear as the second "
-          "argument, just after the target name.");
-        return true;
-      }
-      currentProcessingState = ProcessingPlainPublicInterface;
-    } else if (args[i] == "PUBLIC") {
-      if (i != 1 &&
-          currentProcessingState != ProcessingKeywordPrivateInterface &&
-          currentProcessingState != ProcessingKeywordPublicInterface &&
-          currentProcessingState != ProcessingKeywordLinkInterface) {
-        mf.IssueMessage(
-          MessageType::FATAL_ERROR,
-          "The INTERFACE, PUBLIC or PRIVATE option must appear as the second "
-          "argument, just after the target name.");
-        return true;
-      }
-      currentProcessingState = ProcessingKeywordPublicInterface;
-    } else if (args[i] == "LINK_PRIVATE") {
-      if (i != 1 && currentProcessingState != ProcessingPlainPublicInterface &&
-          currentProcessingState != ProcessingPlainPrivateInterface) {
-        mf.IssueMessage(
-          MessageType::FATAL_ERROR,
-          "The LINK_PUBLIC or LINK_PRIVATE option must appear as the second "
-          "argument, just after the target name.");
-        return true;
-      }
-      currentProcessingState = ProcessingPlainPrivateInterface;
-    } else if (args[i] == "PRIVATE") {
-      if (i != 1 &&
-          currentProcessingState != ProcessingKeywordPrivateInterface &&
-          currentProcessingState != ProcessingKeywordPublicInterface &&
-          currentProcessingState != ProcessingKeywordLinkInterface) {
-        mf.IssueMessage(
-          MessageType::FATAL_ERROR,
-          "The INTERFACE, PUBLIC or PRIVATE option must appear as the second "
-          "argument, just after the target name.");
-        return true;
-      }
-      currentProcessingState = ProcessingKeywordPrivateInterface;
-    } else if (args[i] == "debug") {
-      if (haveLLT) {
-        LinkLibraryTypeSpecifierWarning(mf, llt, DEBUG_LibraryType);
-      }
-      llt = DEBUG_LibraryType;
-      haveLLT = true;
-    } else if (args[i] == "optimized") {
-      if (haveLLT) {
-        LinkLibraryTypeSpecifierWarning(mf, llt, OPTIMIZED_LibraryType);
-      }
-      llt = OPTIMIZED_LibraryType;
-      haveLLT = true;
-    } else if (args[i] == "general") {
-      if (haveLLT) {
-        LinkLibraryTypeSpecifierWarning(mf, llt, GENERAL_LibraryType);
-      }
-      llt = GENERAL_LibraryType;
-      haveLLT = true;
     } else if (haveLLT) {
       // The link type was specified by the previous argument.
       haveLLT = false;
