@@ -479,9 +479,10 @@ that may contain the following fields:
   An optional string that specifies the package resolve mode. This is
   allowed in preset files specifying version ``4`` or above.
 
-  This field overwrites the ``--resolve-package-references`` command line
-  parameter. If there are no targets that define package references, this
-  option does nothing. Valid values are:
+  Package references are used to define dependencies to packages from
+  external package managers. Currently only NuGet in combination with the
+  Visual Studio generator is supported. If there are no targets that define
+  package references, this option does nothing. Valid values are:
 
   ``on``
 

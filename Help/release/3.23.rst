@@ -19,7 +19,10 @@ Presets
   which allows the files to include other files.
 
 * :manual:`cmake-presets(7)` gained support for specifying the
-  ``resolvePackageReferences`` command line option in a build preset.
+  ``resolvePackageReferences`` command line option in a build preset to control
+  restoration behavior of package references from external package managers.
+  Currently this is only supported by the Visual Studio generator to support
+  restoring packages from NuGet. Other generators ignore this option.
 
 Generators
 ----------
