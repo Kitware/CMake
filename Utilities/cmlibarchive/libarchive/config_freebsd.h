@@ -138,6 +138,7 @@
 #define HAVE_LIBZ 1
 #define HAVE_LIMITS_H 1
 #define HAVE_LINK 1
+#define HAVE_LINKAT 1
 #define HAVE_LOCALE_H 1
 #define HAVE_LOCALTIME_R 1
 #define HAVE_LONG_LONG_INT 1
@@ -234,6 +235,14 @@
 #define HAVE_WMEMMOVE 1
 #define HAVE_ZLIB_H 1
 #define TIME_WITH_SYS_TIME 1
+
+#if __FreeBSD_version >= 800505
+#define HAVE_LIBLZMA 1
+#define HAVE_LZMA_H 1
+#if __FreeBSD_version >= 1002504
+#define HAVE_LZMA_STREAM_ENCODER_MT 1
+#endif
+#endif
 
 #if __FreeBSD_version >= 1100056
 #define HAVE_FUTIMENS 1
