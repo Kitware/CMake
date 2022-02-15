@@ -2,10 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmTargetLinkLibrariesCommand.h"
 
+#include <cassert>
 #include <memory>
 #include <sstream>
 #include <unordered_set>
 #include <utility>
+
+#include <cm/optional>
 
 #include "cmExecutionStatus.h"
 #include "cmGeneratorExpression.h"
@@ -178,6 +181,28 @@ bool cmTargetLinkLibrariesCommand(std::vector<std::string> const& args,
   // specification if the keyword is encountered as the first argument.
   ProcessingState currentProcessingState = ProcessingLinkLibraries;
 
+  // Accumulate consectuive non-keyword arguments into one entry in
+  // order to handle unquoted generator expressions containing ';'.
+  cm::optional<std::string> currentEntry;
+  auto processCurrentEntry = [&]() -> bool {
+    if (currentEntry) {
+      assert(!haveLLT);
+      if (!tll.HandleLibrary(currentProcessingState, *currentEntry,
+                             GENERAL_LibraryType)) {
+        return false;
+      }
+      currentEntry = cm::nullopt;
+    }
+    return true;
+  };
+  auto extendCurrentEntry = [&currentEntry](std::string const& arg) {
+    if (currentEntry) {
+      currentEntry = cmStrCat(*currentEntry, ';', arg);
+    } else {
+      currentEntry = arg;
+    }
+  };
+
   // Keep this list in sync with the keyword dispatch below.
   static std::unordered_set<std::string> const keywords{
     "LINK_INTERFACE_LIBRARIES",
@@ -195,6 +220,11 @@ bool cmTargetLinkLibrariesCommand(std::vector<std::string> const& args,
   // of debug and optimized that can be used.
   for (unsigned int i = 1; i < args.size(); ++i) {
     if (keywords.count(args[i])) {
+      // A keyword argument terminates any preceding accumulated entry.
+      if (!processCurrentEntry()) {
+        return false;
+      }
+
       // Process this keyword argument.
       if (args[i] == "LINK_INTERFACE_LIBRARIES") {
         currentProcessingState = ProcessingPlainLinkInterface;
@@ -285,16 +315,20 @@ bool cmTargetLinkLibrariesCommand(std::vector<std::string> const& args,
     } else if (haveLLT) {
       // The link type was specified by the previous argument.
       haveLLT = false;
+      assert(!currentEntry);
       if (!tll.HandleLibrary(currentProcessingState, args[i], llt)) {
         return false;
       }
       llt = GENERAL_LibraryType;
     } else {
-      if (!tll.HandleLibrary(currentProcessingState, args[i],
-                             GENERAL_LibraryType)) {
-        return false;
-      }
+      // Accumulate this argument in the current entry.
+      extendCurrentEntry(args[i]);
     }
+  }
+
+  // Process the last accumulated entry, if any.
+  if (!processCurrentEntry()) {
+    return false;
   }
 
   // Make sure the last argument was not a library type specifier.
