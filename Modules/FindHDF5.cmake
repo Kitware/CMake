@@ -242,7 +242,7 @@ function(_HDF5_test_regular_compiler_C success version is_parallel)
       COPY_FILE ${scratch_directory}/compiler_has_h5_c
     )
   endif()
-  if(${success})
+  if(${success} AND EXISTS ${scratch_directory}/compiler_has_h5_c)
     file(STRINGS ${scratch_directory}/compiler_has_h5_c INFO_STRINGS
       REGEX "^INFO:"
     )
@@ -290,7 +290,7 @@ function(_HDF5_test_regular_compiler_CXX success version is_parallel)
       COPY_FILE ${scratch_directory}/compiler_has_h5_cxx
     )
   endif()
-  if(${success})
+  if(${success} AND EXISTS ${scratch_directory}/compiler_has_h5_cxx)
     file(STRINGS ${scratch_directory}/compiler_has_h5_cxx INFO_STRINGS
       REGEX "^INFO:"
     )
