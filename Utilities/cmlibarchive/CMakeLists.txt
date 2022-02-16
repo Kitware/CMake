@@ -114,7 +114,6 @@ endif ()
 # aggressive about diagnosing build problems; this can get
 # relaxed somewhat in final shipping versions.
 IF (CMAKE_C_COMPILER_ID MATCHES "^GNU$" OR
-    CMAKE_C_COMPILER_ID MATCHES "^LCC$" OR
     CMAKE_C_COMPILER_ID MATCHES "^Clang$")
   SET(CMAKE_REQUIRED_FLAGS "-Wall -Wformat -Wformat-security")
   #################################################################
@@ -233,18 +232,15 @@ OPTION(ENABLE_LibGCC "Enable the use of the system LibGCC library if found" ON)
 # CNG is used for encrypt/decrypt Zip archives on Windows.
 OPTION(ENABLE_CNG "Enable the use of CNG(Crypto Next Generation)" ON)
 
-IF(0) # CMake does not build libarchive's command-line tools.
 OPTION(ENABLE_TAR "Enable tar building" ON)
 OPTION(ENABLE_TAR_SHARED "Enable dynamic build of tar" FALSE)
 OPTION(ENABLE_CPIO "Enable cpio building" ON)
 OPTION(ENABLE_CPIO_SHARED "Enable dynamic build of cpio" FALSE)
 OPTION(ENABLE_CAT "Enable cat building" ON)
 OPTION(ENABLE_CAT_SHARED "Enable dynamic build of cat" FALSE)
-ENDIF()
 OPTION(ENABLE_XATTR "Enable extended attribute support" ON)
 OPTION(ENABLE_ACL "Enable ACL support" ON)
 OPTION(ENABLE_ICONV "Enable iconv support" ON)
-IF(0) # CMake does not build libarchive's tests.
 OPTION(ENABLE_TEST "Enable unit and regression tests" ON)
 OPTION(ENABLE_COVERAGE "Enable code coverage (GCC only, automatically sets ENABLE_TEST to ON)" FALSE)
 OPTION(ENABLE_INSTALL "Enable installing of libraries" ON)
@@ -260,15 +256,7 @@ ENDIF(ENABLE_COVERAGE)
 IF(ENABLE_TEST)
        ENABLE_TESTING()
 ENDIF(ENABLE_TEST)
-ENDIF()
 
-IF(WIN32)
-  SET(NTDDI_VERSION 0x05010000)
-  SET(_WIN32_WINNT 0x0501)
-  SET(WINVER 0x0501)
-ENDIF(WIN32)
-
-IF(0) # CMake hard-codes its own supported version of Windows.
 IF(WIN32)
   IF(WINDOWS_VERSION STREQUAL "WIN8")
     SET(NTDDI_VERSION 0x06020000)
@@ -315,7 +303,6 @@ IF(MSVC)
     SET(ENV{LDFLAGS} "$ENV{LDFLAGS} /SAFESEH:NO")
   ENDIF(ENABLE_SAFESEH STREQUAL "YES")
 ENDIF(MSVC)
-ENDIF()
 
 IF("${CMAKE_C_PLATFORM_ID}" MATCHES "^(HP-UX)$")
   ADD_DEFINITIONS(-D_XOPEN_SOURCE=500) # Ask wchar.h for mbstate_t
@@ -2036,11 +2023,9 @@ IF(APPLE)
   ADD_DEFINITIONS(-Wno-deprecated-declarations)
 ENDIF(APPLE)
 
-IF(0) # CMake does not build libarchive's tests.
 IF(ENABLE_TEST)
   ADD_CUSTOM_TARGET(run_all_tests)
 ENDIF(ENABLE_TEST)
-ENDIF()
 
 # We need CoreServices on Mac OS.
 IF(APPLE)
