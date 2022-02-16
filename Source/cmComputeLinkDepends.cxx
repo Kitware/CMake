@@ -192,13 +192,14 @@ inline std::string ExtractFeature(std::string const& item)
 bool IsFeatureSupported(cmMakefile* makefile, std::string const& linkLanguage,
                         std::string const& feature)
 {
-  auto featureSupported =
-    cmStrCat("CMAKE_", linkLanguage, "_LINK_USING_", feature, "_SUPPORTED");
+  auto featureSupported = cmStrCat(
+    "CMAKE_", linkLanguage, "_LINK_LIBRARY_USING_", feature, "_SUPPORTED");
   if (makefile->GetDefinition(featureSupported).IsOn()) {
     return true;
   }
 
-  featureSupported = cmStrCat("CMAKE_LINK_USING_", feature, "_SUPPORTED");
+  featureSupported =
+    cmStrCat("CMAKE_LINK_LIBRARY_USING_", feature, "_SUPPORTED");
   return makefile->GetDefinition(featureSupported).IsOn();
 }
 }
@@ -650,9 +651,9 @@ void cmComputeLinkDepends::AddLinkEntries(int depender_index,
                      feature,
                      "', which is undefined or unsupported.\nDid you miss to "
                      "define it by setting variables \"CMAKE_",
-                     this->LinkLanguage, "_LINK_USING_", feature,
-                     "\" and \"CMAKE_", this->LinkLanguage, "_LINK_USING_",
-                     feature, "_SUPPORTED\"?"),
+                     this->LinkLanguage, "_LINK_LIBRARY_USING_", feature,
+                     "\" and \"CMAKE_", this->LinkLanguage,
+                     "_LINK_LIBRARY_USING_", feature, "_SUPPORTED\"?"),
             this->Target->GetBacktrace());
         }
       }

@@ -1,7 +1,7 @@
 enable_language(C)
 
-set(CMAKE_C_LINK_USING_feat1_SUPPORTED TRUE)
-set(CMAKE_C_LINK_USING_feat1 "<LIBRARY>")
+set(CMAKE_C_LINK_LIBRARY_USING_feat1_SUPPORTED TRUE)
+set(CMAKE_C_LINK_LIBRARY_USING_feat1 "<LIBRARY>")
 
 add_library(dep1 SHARED empty.c)
 

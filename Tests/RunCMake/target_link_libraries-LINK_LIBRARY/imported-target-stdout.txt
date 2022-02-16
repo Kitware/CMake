@@ -4,8 +4,8 @@ CMake Warning \(dev\) at imported-target.cmake:[0-9]+ \(add_library\):
   unsupported.
 
   Did you miss to define it by setting variables
-  "CMAKE_C_LINK_USING_whole_archive" and
-  "CMAKE_C_LINK_USING_whole_archive_SUPPORTED"\?
+  "CMAKE_C_LINK_LIBRARY_USING_whole_archive" and
+  "CMAKE_C_LINK_LIBRARY_USING_whole_archive_SUPPORTED"\?
 Call Stack \(most recent call first\):
   CMakeLists.txt:[0-9]+ \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.

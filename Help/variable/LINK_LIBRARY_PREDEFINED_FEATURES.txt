@@ -23,9 +23,11 @@ compatible with it.
   linker option ``-weak_framework``).
 
 Features for framework linking have a special handling in ``CMake``: the
-framework can be specified as a ``CMake`` framework target or file path. In
-the later case, if the path includes a directory part, this one will be
-specified as framework search path at link step.
+framework can be specified as a ``CMake`` framework target or file path. In the
+first case, the target must have the :prop_tgt:`FRAMEWORK` target property set
+as ``TRUE`` to enable framework handling. In the later case, if the path
+includes a directory part, this one will be specified as framework search path
+at link step.
 
 .. code-block:: cmake
 
