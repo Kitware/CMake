@@ -32,4 +32,6 @@ When ``OFF``:
 * GNU/Clang compilers are invoked with a flag disabling color diagnostics
   (``-fno-color-diagnostics``).
 
-``CMAKE_COLOR_DIAGNOSTICS`` is not defined by default.
+If the :envvar:`CMAKE_COLOR_DIAGNOSTICS` environment variable is set, its
+value is used.  Otherwise, ``CMAKE_COLOR_DIAGNOSTICS`` is not defined by
+default.
