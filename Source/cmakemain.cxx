@@ -447,7 +447,7 @@ int do_build(int ac, char const* const* av)
   bool cleanFirst = false;
   bool foundClean = false;
   bool foundNonClean = false;
-  PackageResolveMode resolveMode = PackageResolveMode::FromCacheVariable;
+  PackageResolveMode resolveMode = PackageResolveMode::Default;
   bool verbose = cmSystemTools::HasEnv("VERBOSE");
   std::string presetName;
   bool listPresets = false;

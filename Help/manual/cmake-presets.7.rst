@@ -479,9 +479,10 @@ that may contain the following fields:
   An optional string that specifies the package resolve mode. This is
   allowed in preset files specifying version ``4`` or above.
 
-  This field overwrites the ``--resolve-package-references`` command line
-  parameter. If there are no targets that define package references, this
-  option does nothing. Valid values are:
+  Package references are used to define dependencies to packages from
+  external package managers. Currently only NuGet in combination with the
+  Visual Studio generator is supported. If there are no targets that define
+  package references, this option does nothing. Valid values are:
 
   ``on``
 
@@ -498,17 +499,16 @@ that may contain the following fields:
 
   .. note::
 
-    If this setting is not specified in a preset, CMake will instead
-    use the setting specified by the ``--resolve-package-references``
-    command line parameter. If the command line parameter is not
-    provided either, an environment-specific cache variable will be
-    evaluated to decide, if package restoration should be performed.
+    The command line parameter ``--resolve-package-references`` will take
+    priority over this setting. If the command line parameter is not provided
+    and this setting is not specified, an environment-specific cache variable
+    will be evaluated to decide, if package restoration should be performed.
 
-    When using the Visual Studio generator, package references are
-    defined using the :prop_tgt:`VS_PACKAGE_REFERENCES` property.
-    Package references are restored using NuGet. It can be disabled
-    by setting the ``CMAKE_VS_NUGET_PACKAGE_RESTORE`` variable to
-    ``OFF``. This can also be done from within a configure preset.
+    When using the Visual Studio generator, package references are defined
+    using the :prop_tgt:`VS_PACKAGE_REFERENCES` property. Package references
+    are restored using NuGet. It can be disabled by setting the
+    ``CMAKE_VS_NUGET_PACKAGE_RESTORE`` variable to ``OFF``. This can also be
+    done from within a configure preset.
 
 ``verbose``
 

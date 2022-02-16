@@ -7,20 +7,20 @@
 /** \brief Defines how to resolve packages **/
 enum class PackageResolveMode
 {
-  /** \brief Defines behavior based on cache variable (e.g.
+  /** \brief Behavior is defined by preset or cache variable (e.g.
      CMAKE_VS_NUGET_PACKAGE_RESTORE). This is the default. **/
-  FromCacheVariable,
+  Default,
 
-  /** \brief Ignore behavior defined by cache variable and forces packages to
-     be resolved prior to build. **/
+  /** \brief Ignore behavior defined by preset or cache variable and forces
+     packages to be resolved prior to build. **/
   Force,
 
-  /** \brief Ignore behavior defined by cache variable and forces packages to
-     be resolved, but skip the actual build. **/
+  /** \brief Ignore behavior defined by preset or cache variable and forces
+     packages to be resolved, but skip the actual build. **/
   OnlyResolve,
 
-  /** \brief Ignore behavior defined by cache variable and dont resolve any
-     packages **/
+  /** \brief Ignore behavior defined by preset or cache variable and don't
+     resolve any packages **/
   Disable
 };
 
@@ -40,5 +40,5 @@ public:
 
   bool Clean = false;
   bool Fast = false;
-  PackageResolveMode ResolveMode = PackageResolveMode::FromCacheVariable;
+  PackageResolveMode ResolveMode = PackageResolveMode::Default;
 };
