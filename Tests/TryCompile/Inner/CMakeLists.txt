@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.12)
 project(TryCompileInner C)
 
 try_compile(SHOULD_PASS
-    ${TryCompileInner_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
+    ${TryCompileInner_BINARY_DIR}
     ${TryCompileInner_SOURCE_DIR}/../pass.c
     OUTPUT_VARIABLE TRY_OUT
     )

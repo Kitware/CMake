@@ -32,7 +32,7 @@ endmacro()
 # try to compile a file that should compile
 # also check that COPY_FILE works
 try_compile(SHOULD_PASS
-    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
+    ${TryCompile_BINARY_DIR}
     ${TryCompile_SOURCE_DIR}/pass.c
     OUTPUT_VARIABLE TRY_OUT
     COPY_FILE ${TryCompile_BINARY_DIR}/CopyOfPass
@@ -51,7 +51,7 @@ endif()
 # also check that COPY_FILE_ERROR works
 file(WRITE ${TryCompile_BINARY_DIR}/invalid "")
 try_compile(SHOULD_PASS
-    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
+    ${TryCompile_BINARY_DIR}
     ${TryCompile_SOURCE_DIR}/pass.c
     OUTPUT_VARIABLE TRY_OUT
     COPY_FILE ${TryCompile_BINARY_DIR}/invalid/path
@@ -66,7 +66,7 @@ endif()
 
 # try to compile a file that should not compile
 try_compile(SHOULD_FAIL
-    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
+    ${TryCompile_BINARY_DIR}
     ${TryCompile_SOURCE_DIR}/fail.c
     OUTPUT_VARIABLE TRY_OUT)
 if(SHOULD_FAIL)
@@ -75,7 +75,7 @@ endif()
 
 # try to compile a file that should compile
 try_compile(SHOULD_PASS
-    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
+    ${TryCompile_BINARY_DIR}
     ${TryCompile_SOURCE_DIR}/pass.c
     OUTPUT_VARIABLE TRY_OUT)
 if(NOT SHOULD_PASS)
@@ -84,7 +84,7 @@ endif()
 
 # try to compile a file that should not compile
 try_compile(SHOULD_FAIL
-    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
+    ${TryCompile_BINARY_DIR}
     ${TryCompile_SOURCE_DIR}/fail.c
     OUTPUT_VARIABLE TRY_OUT)
 if(SHOULD_FAIL)
@@ -93,7 +93,7 @@ endif()
 
 # try to compile two files that should compile
 try_compile(SHOULD_PASS
-    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
+    ${TryCompile_BINARY_DIR}
     SOURCES ${TryCompile_SOURCE_DIR}/pass2a.c ${TryCompile_SOURCE_DIR}/pass2b.cxx
     OUTPUT_VARIABLE TRY_OUT)
 if(NOT SHOULD_PASS)
@@ -102,7 +102,7 @@ endif()
 
 # try to compile two files that should not compile
 try_compile(SHOULD_FAIL
-    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
+    ${TryCompile_BINARY_DIR}
     SOURCES ${TryCompile_SOURCE_DIR}/fail2a.c ${TryCompile_SOURCE_DIR}/fail2b.c
     OUTPUT_VARIABLE TRY_OUT)
 if(SHOULD_FAIL)
@@ -117,7 +117,7 @@ else()
   string(APPEND CMAKE_C_FLAGS " \"-DTESTDEF\"")
 endif()
 try_compile(SHOULD_PASS
-    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
+    ${TryCompile_BINARY_DIR}
     ${TryCompile_SOURCE_DIR}/testdef.c
     OUTPUT_VARIABLE TRY_OUT)
 if(NOT SHOULD_PASS)
@@ -135,7 +135,7 @@ else()
   message("Test failed")
 endif()
 try_compile(CMAKE_ANSI_FOR_SCOPE
-  ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
+  ${TryCompile_BINARY_DIR}
     ${CMAKE_ROOT}/Modules/TestForAnsiForScope.cxx OUTPUT_VARIABLE OUT)
 if (CMAKE_ANSI_FOR_SCOPE)
    message("Compiler supports ansi for")
@@ -144,7 +144,7 @@ else()
 endif()
 
 try_compile(CMAKE_ANSI_FOR_SCOPE
-  ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
+  ${TryCompile_BINARY_DIR}
     ${CMAKE_ROOT}/Modules/TestForAnsiForScope.cxx OUTPUT_VARIABLE OUT)
 if (CMAKE_ANSI_FOR_SCOPE)
    message("Compiler supports ansi for")
@@ -169,7 +169,7 @@ try_compile(TEST_INNER
 TEST_ASSERT(TEST_INNER "try_compile project mode failed:\n${output}")
 
 try_compile(COMPILE_DEFINITIONS_LIST_EXPANDED
-    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
+    ${TryCompile_BINARY_DIR}
     ${TryCompile_SOURCE_DIR}/check_a_b.c
     OUTPUT_VARIABLE output
     COMPILE_DEFINITIONS "-DDEF_A;-DDEF_B"
@@ -182,7 +182,7 @@ else()
 endif()
 
 try_compile(SHOULD_FAIL_DUE_TO_BAD_SOURCE
-    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
+    ${TryCompile_BINARY_DIR}
     ${TryCompile_SOURCE_DIR}/pass.c
     OUTPUT_VARIABLE output
     COMPILE_DEFINITIONS "bad#source.c"
@@ -207,7 +207,7 @@ add_executable(TryCompile pass.c)
 # also check that OUTPUT_VARIABLE contains both the compile output
 # and the run output
 try_run(SHOULD_RUN SHOULD_COMPILE
-    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
+    ${TryCompile_BINARY_DIR}
     ${TryCompile_SOURCE_DIR}/exit_success.c
     OUTPUT_VARIABLE TRY_OUT)
 if(NOT SHOULD_COMPILE)
@@ -226,7 +226,7 @@ if(NOT "${TRY_OUT}" MATCHES "hello world")
 endif()
 
 try_run(ARG_TEST_RUN ARG_TEST_COMPILE
-    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
+    ${TryCompile_BINARY_DIR}
     ${TryCompile_SOURCE_DIR}/expect_arg.c
     OUTPUT_VARIABLE TRY_OUT
     ARGS arg1 arg2)
@@ -239,7 +239,7 @@ endif()
 
 # try to run a file that should compile and run, but return an error
 try_run(SHOULD_EXIT_WITH_ERROR SHOULD_COMPILE
-    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
+    ${TryCompile_BINARY_DIR}
     ${TryCompile_SOURCE_DIR}/exit_with_error.c
     COMPILE_OUTPUT_VARIABLE COMPILE_OUTPUT
     RUN_OUTPUT_VARIABLE RUN_OUTPUT)
@@ -385,7 +385,7 @@ if (APPLE)
 
     # try to compile a file that should compile
     try_compile(SHOULD_PASS
-      ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
+      ${TryCompile_BINARY_DIR}
       ${TryCompile_SOURCE_DIR}/pass.m
       OUTPUT_VARIABLE TRY_OUT)
     if(NOT SHOULD_PASS)
@@ -394,7 +394,7 @@ if (APPLE)
 
     # try to compile a file that should not compile
     try_compile(SHOULD_FAIL
-      ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
+      ${TryCompile_BINARY_DIR}
       ${TryCompile_SOURCE_DIR}/fail.m
       OUTPUT_VARIABLE TRY_OUT)
     if(SHOULD_FAIL)
