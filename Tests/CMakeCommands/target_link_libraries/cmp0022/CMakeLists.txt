@@ -1,3 +1,4 @@
+cmake_policy(SET CMP0028 NEW)
 
 include(GenerateExportHeader)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -16,6 +17,15 @@ assert_property(cmp0022ifacelib INTERFACE_LINK_LIBRARIES "")
 
 add_executable(cmp0022exe cmp0022exe.cpp)
 target_link_libraries(cmp0022exe cmp0022lib)
+
+# Test adding unquoted genex with ';' to LINK_LIBRARIES and INTERFACE_LINK_LIBRARIES.
+target_link_libraries(cmp0022lib
+  PUBLIC $<0:imp::missing1;imp::missing2>
+  PRIVATE $<0:imp::missing3;imp::missing4>
+  INTERFACE $<0:imp::missing5;imp::missing6>
+  )
+assert_property(cmp0022lib INTERFACE_LINK_LIBRARIES "cmp0022ifacelib;$<0:imp::missing1;imp::missing2>;$<0:imp::missing5;imp::missing6>")
+assert_property(cmp0022lib LINK_LIBRARIES "cmp0022ifacelib;$<0:imp::missing1;imp::missing2>;$<0:imp::missing3;imp::missing4>")
 
 add_library(staticlib1 STATIC staticlib1.cpp)
 generate_export_header(staticlib1)
