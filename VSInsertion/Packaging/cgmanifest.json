@@ -1,12 +1,11 @@
 {
-    "Registrations":[
+    "Registrations": [
         {
             "Component": {
-                "Type": "other",
-                "Other": {
-                    "Name": "cmake",
-                    "Version": "3.20.0",
-                    "DownloadUrl": "https://github.com/Kitware/CMake/releases/download/v3.20.0/cmake-3.20.0.tar.gz"
+                "Type": "git",
+                "Git": {
+                    "RepositoryUrl": "https://gitlab.kitware.com/cmake/cmake.git",
+                    "CommitHash": "aa6a33fe54918967f6ffcad30773e01664e8a2b2"
                 }
             }
         }
