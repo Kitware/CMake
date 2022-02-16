@@ -1154,46 +1154,24 @@ std::string GetSourcecodeValueFromFileExtension(
   return sourcecode;
 }
 
-// If the file has no extension it's either a raw executable or might
-// be a direct reference to a binary within a framework (bad practice!).
-// This is where we change the path to point to the framework directory.
-// .tbd files also can be located in SDK frameworks (they are
-// placeholders for actual libraries shipped with the OS)
-std::string GetLibraryOrFrameworkPath(const std::string& path)
+} // anonymous
+
+// Extracts the framework directory, if path matches the framework syntax
+// otherwise returns the path untouched
+std::string cmGlobalXCodeGenerator::GetLibraryOrFrameworkPath(
+  const std::string& path) const
 {
-  auto ext = cmSystemTools::GetFilenameLastExtension(path);
-  if (ext.empty() || ext == ".tbd") {
-    auto name = cmSystemTools::GetFilenameWithoutExtension(path);
-    // Check for iOS framework structure:
-    //    FwName.framework/FwName (and also on macOS where FwName lib is a
-    //    symlink)
-    auto parentDir = cmSystemTools::GetParentDirectory(path);
-    auto parentName = cmSystemTools::GetFilenameWithoutExtension(parentDir);
-    ext = cmSystemTools::GetFilenameLastExtension(parentDir);
-    if (ext == ".framework" && name == parentName) {
-      return parentDir;
-    }
-    // Check for macOS framework structure:
-    //    FwName.framework/Versions/*/FwName
-    std::vector<std::string> components;
-    cmSystemTools::SplitPath(path, components);
-    if (components.size() > 3 &&
-        components[components.size() - 3] == "Versions") {
-      ext = cmSystemTools::GetFilenameLastExtension(
-        components[components.size() - 4]);
-      parentName = cmSystemTools::GetFilenameWithoutExtension(
-        components[components.size() - 4]);
-      if (ext == ".framework" && name == parentName) {
-        components.erase(components.begin() + components.size() - 3,
-                         components.end());
-        return cmSystemTools::JoinPath(components);
-      }
+  auto fwItems = this->SplitFrameworkPath(path);
+  if (fwItems) {
+    if (fwItems->first.empty()) {
+      return cmStrCat(fwItems->second, ".framework");
+    } else {
+      return cmStrCat(fwItems->first, '/', fwItems->second, ".framework");
     }
   }
+
   return path;
 }
-
-} // anonymous
 
 cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeFileReferenceFromPath(
   const std::string& fullpath, cmGeneratorTarget* target,
@@ -1217,7 +1195,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeFileReferenceFromPath(
     ext = ext.substr(1);
   }
   if (fileType.empty()) {
-    path = GetLibraryOrFrameworkPath(path);
+    path = this->GetLibraryOrFrameworkPath(path);
     ext = cmSystemTools::GetFilenameLastExtension(path);
     if (!ext.empty()) {
       ext = ext.substr(1);
@@ -3541,13 +3519,14 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
     } else {
       linkDir = libItem->Value.Value;
     }
-    linkDir = GetLibraryOrFrameworkPath(linkDir);
-    bool isFramework = cmSystemTools::IsPathToFramework(linkDir);
-    linkDir = cmSystemTools::GetParentDirectory(linkDir);
-    if (isFramework) {
-      if (std::find(frameworkSearchPaths.begin(), frameworkSearchPaths.end(),
-                    linkDir) == frameworkSearchPaths.end()) {
-        frameworkSearchPaths.push_back(linkDir);
+    if (cmHasSuffix(libItem->GetFeatureName(), "FRAMEWORK"_s)) {
+      auto fwItems = this->SplitFrameworkPath(linkDir, true);
+      if (fwItems && !fwItems->first.empty()) {
+        linkDir = std::move(fwItems->first);
+        if (std::find(frameworkSearchPaths.begin(), frameworkSearchPaths.end(),
+                      linkDir) == frameworkSearchPaths.end()) {
+          frameworkSearchPaths.push_back(linkDir);
+        }
       }
     } else {
       if (std::find(linkSearchPaths.begin(), linkSearchPaths.end(), linkDir) ==
@@ -3555,7 +3534,7 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
         linkSearchPaths.push_back(linkDir);
       }
     }
-    // Add target dependency
+
     if (libItem->Target && !libItem->Target->IsImported()) {
       for (auto const& configName : this->CurrentConfigurationTypes) {
         target->AddDependTarget(configName, libItem->Target->GetName());
@@ -3729,24 +3708,27 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
           if (cmSystemTools::FileIsFullPath(cleanPath)) {
             cleanPath = cmSystemTools::CollapseFullPath(cleanPath);
           }
-          const auto libPath = GetLibraryOrFrameworkPath(cleanPath);
-          if (cmSystemTools::StringEndsWith(libPath.c_str(), ".framework")) {
-            const auto fwName =
-              cmSystemTools::GetFilenameWithoutExtension(libPath);
-            const auto fwDir = cmSystemTools::GetParentDirectory(libPath);
-            if (emitted.insert(fwDir).second) {
-              // This is a search path we had not added before and it isn't an
-              // implicit search path, so we need it
-              libPaths.Add("-F " + this->XCodeEscapePath(fwDir));
+          bool isFramework =
+            cmHasSuffix(libName.GetFeatureName(), "FRAMEWORK"_s);
+          if (isFramework) {
+            const auto fwItems =
+              this->SplitFrameworkPath(cleanPath, isFramework);
+            if (!fwItems->first.empty() &&
+                emitted.insert(fwItems->first).second) {
+              // This is a search path we had not added before and it isn't
+              // an implicit search path, so we need it
+              libPaths.Add("-F " + this->XCodeEscapePath(fwItems->first));
             }
-            libPaths.Add("-framework " + this->XCodeEscapePath(fwName));
+            libPaths.Add(
+              libName.GetFormattedItem(this->XCodeEscapePath(fwItems->second))
+                .Value);
           } else {
             libPaths.Add(
               libName.GetFormattedItem(this->XCodeEscapePath(cleanPath))
                 .Value);
           }
           if ((!libName.Target || libName.Target->IsImported()) &&
-              IsLinkPhaseLibraryExtension(libPath)) {
+              (isFramework || IsLinkPhaseLibraryExtension(cleanPath))) {
             // Create file reference for embedding
             auto it = this->ExternalLibRefs.find(cleanPath);
             if (it == this->ExternalLibRefs.end()) {
@@ -3914,8 +3896,8 @@ void cmGlobalXCodeGenerator::AddEmbeddedFrameworks(cmXCodeObject* target)
 {
   static const auto dstSubfolderSpec = "10";
 
-  // Despite the name, by default Xcode uses "Embed Frameworks" build phase for
-  // both frameworks and dynamic libraries
+  // Despite the name, by default Xcode uses "Embed Frameworks" build phase
+  // for both frameworks and dynamic libraries
   this->AddEmbeddedObjects(target, "Embed Frameworks",
                            "XCODE_EMBED_FRAMEWORKS", dstSubfolderSpec,
                            NoActionOnCopyByDefault);

@@ -659,6 +659,7 @@ add_RunCMake_test(target_link_libraries-LINK_LIBRARY -DCMAKE_SYSTEM_NAME=${CMAKE
                                                      -DMSYS=${MSYS}
                                                      -DCYGWIN=${CYGWIN}
                                                      -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
+                                                     -DCMAKE_C_COMPILER_VERSION=${CMAKE_C_COMPILER_VERSION}
                                                      -DMSVC_VERSION=${MSVC_VERSION}
                                                      -DCMAKE_SHARED_LIBRARY_PREFIX=${CMAKE_SHARED_LIBRARY_PREFIX}
                                                      -DCMAKE_SHARED_LIBRARY_SUFFIX=${CMAKE_SHARED_LIBRARY_SUFFIX}

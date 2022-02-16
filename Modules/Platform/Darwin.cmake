@@ -106,6 +106,19 @@ foreach(lang C CXX Fortran OBJC OBJCXX)
   # Set default framework search path flag for languages known to use a
   # preprocessor that may find headers in frameworks.
   set(CMAKE_${lang}_FRAMEWORK_SEARCH_FLAG -F)
+
+  # Defines link features for frameworks
+  set(CMAKE_${lang}_LINK_USING_FRAMEWORK "LINKER:-framework,<LIBRARY>")
+  set(CMAKE_${lang}_LINK_USING_FRAMEWORK_SUPPORTED TRUE)
+
+  set(CMAKE_${lang}_LINK_USING_NEEDED_FRAMEWORK "LINKER:-needed_framework,<LIBRARY>")
+  set(CMAKE_${lang}_LINK_USING_NEEDED_FRAMEWORK_SUPPORTED TRUE)
+
+  set(CMAKE_${lang}_LINK_USING_REEXPORT_FRAMEWORK "LINKER:-reexport_framework,<LIBRARY>")
+  set(CMAKE_${lang}_LINK_USING_REEXPORT_FRAMEWORK_SUPPORTED TRUE)
+
+  set(CMAKE_${lang}_LINK_USING_WEAK_FRAMEWORK "LINKER:-weak_framework,<LIBRARY>")
+  set(CMAKE_${lang}_LINK_USING_WEAK_FRAMEWORK_SUPPORTED TRUE)
 endforeach()
 
 # default to searching for frameworks first
