@@ -164,6 +164,7 @@ function(run_cmake test)
 
     "|[^\n]*install_name_tool: warning: changes being made to the file will invalidate the code signature in:"
     "|[^\n]*xcodebuild[^\n]*DVTPlugInManager"
+    "|[^\n]*xcodebuild[^\n]*Requested but did not find extension point with identifier"
     "|[^\n]*xcodebuild[^\n]*warning: file type[^\n]*is based on missing file type"
     "|[^\n]*objc[^\n]*: Class AMSupportURL[^\n]* One of the two will be used. Which one is undefined."
     "|[^\n]*is a member of multiple groups"
