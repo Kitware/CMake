@@ -36,11 +36,6 @@ cmGhsMultiTargetGenerator::cmGhsMultiTargetGenerator(cmGeneratorTarget* target)
       static_cast<cmLocalGhsMultiGenerator*>(target->GetLocalGenerator()))
   , Makefile(target->Target->GetMakefile())
   , Name(target->GetName())
-#ifdef _WIN32
-  , CmdWindowsShell(true)
-#else
-  , CmdWindowsShell(false)
-#endif
 {
   // Store the configuration name that is being used
   if (cmValue config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE")) {
@@ -316,19 +311,37 @@ void cmGhsMultiTargetGenerator::WriteTargetLinkLine(std::ostream& fout,
 
 void cmGhsMultiTargetGenerator::WriteBuildEvents(std::ostream& fout)
 {
-  this->WriteBuildEventsHelper(
-    fout, this->GeneratorTarget->GetPreBuildCommands(),
-    std::string("prebuild"), std::string("preexecShell"));
+  this->WriteBuildEventsHelper(fout,
+                               this->GeneratorTarget->GetPreBuildCommands(),
+                               std::string("prebuild"),
+#ifdef _WIN32
+                               std::string("preexecShell")
+#else
+                               std::string("preexec")
+#endif
+  );
 
   if (this->TagType != GhsMultiGpj::CUSTOM_TARGET) {
-    this->WriteBuildEventsHelper(
-      fout, this->GeneratorTarget->GetPreLinkCommands(),
-      std::string("prelink"), std::string("preexecShell"));
+    this->WriteBuildEventsHelper(fout,
+                                 this->GeneratorTarget->GetPreLinkCommands(),
+                                 std::string("prelink"),
+#ifdef _WIN32
+                                 std::string("preexecShell")
+#else
+                                 std::string("preexec")
+#endif
+    );
   }
 
-  this->WriteBuildEventsHelper(
-    fout, this->GeneratorTarget->GetPostBuildCommands(),
-    std::string("postbuild"), std::string("postexecShell"));
+  this->WriteBuildEventsHelper(fout,
+                               this->GeneratorTarget->GetPostBuildCommands(),
+                               std::string("postbuild"),
+#ifdef _WIN32
+                               std::string("postexecShell")
+#else
+                               std::string("postexec")
+#endif
+  );
 }
 
 void cmGhsMultiTargetGenerator::WriteBuildEventsHelper(
@@ -336,6 +349,13 @@ void cmGhsMultiTargetGenerator::WriteBuildEventsHelper(
   std::string const& name, std::string const& cmd)
 {
   int cmdcount = 0;
+#ifdef _WIN32
+  std::string fext = ".bat";
+  std::string shell;
+#else
+  std::string fext = ".sh";
+  std::string shell = "/bin/sh ";
+#endif
 
   for (cmCustomCommand const& cc : ccv) {
     cmCustomCommandGenerator ccg(cc, this->ConfigName, this->LocalGenerator);
@@ -343,14 +363,14 @@ void cmGhsMultiTargetGenerator::WriteBuildEventsHelper(
     std::string fname =
       cmStrCat(this->LocalGenerator->GetCurrentBinaryDirectory(), '/',
                this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget),
-               '/', this->Name, '_', name, cmdcount++,
-               this->CmdWindowsShell ? ".bat" : ".sh");
+               '/', this->Name, '_', name, cmdcount++, fext);
+
     cmGeneratedFileStream f(fname);
     f.SetCopyIfDifferent(true);
     this->WriteCustomCommandsHelper(f, ccg);
     f.Close();
     if (this->TagType != GhsMultiGpj::CUSTOM_TARGET) {
-      fout << "    :" << cmd << "=\"" << fname << "\"\n";
+      fout << "    :" << cmd << "=\"" << shell << fname << "\"\n";
     } else {
       fout << fname << "\n    :outputName=\"" << fname << ".rule\"\n";
     }
@@ -409,15 +429,15 @@ void cmGhsMultiTargetGenerator::WriteCustomCommandsHelper(
       //
       bool useCall = false;
 
-      if (this->CmdWindowsShell) {
-        std::string suffix;
-        if (cmd.size() > 4) {
-          suffix = cmSystemTools::LowerCase(cmd.substr(cmd.size() - 4));
-          if (suffix == ".bat" || suffix == ".cmd") {
-            useCall = true;
-          }
+#ifdef _WIN32
+      std::string suffix;
+      if (cmd.size() > 4) {
+        suffix = cmSystemTools::LowerCase(cmd.substr(cmd.size() - 4));
+        if (suffix == ".bat" || suffix == ".cmd") {
+          useCall = true;
         }
       }
+#endif
 
       cmSystemTools::ReplaceString(cmd, "/./", "/");
       // Convert the command to a relative path only if the current
@@ -645,6 +665,11 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
           }
         }
         int cmdcount = 0;
+#ifdef _WIN32
+        std::string fext = ".bat";
+#else
+        std::string fext = ".sh";
+#endif
         for (auto& sf : customCommands) {
           const cmCustomCommand* cc = sf->GetCustomCommand();
           cmCustomCommandGenerator ccg(*cc, this->ConfigName,
@@ -655,8 +680,8 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
             this->LocalGenerator->GetCurrentBinaryDirectory(), '/',
             this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget),
             '/', this->Name, "_cc", cmdcount++, '_',
-            (sf->GetLocation()).GetName(),
-            this->CmdWindowsShell ? ".bat" : ".sh");
+            (sf->GetLocation()).GetName(), fext);
+
           cmGeneratedFileStream f(fname);
           f.SetCopyIfDifferent(true);
           this->WriteCustomCommandsHelper(f, ccg);
