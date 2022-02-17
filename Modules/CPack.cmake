@@ -316,6 +316,12 @@ installers.  The most commonly-used variables are:
       with a ``liblzma`` that supports parallel compression.
       Older versions did not.
 
+  ``zstd``
+    .. versionadded:: 3.24
+
+    Supported if CMake is built with libarchive 3.6 or higher.
+    Official CMake binaries available on ``cmake.org`` support it.
+
   Other compression methods ignore this value and use only one thread.
 
 Variables for Source Package Generators

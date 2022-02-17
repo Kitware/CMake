@@ -188,6 +188,15 @@ cmArchiveWrite::cmArchiveWrite(std::ostream& os, Compress c,
                                cm_archive_error_string(this->Archive));
         return;
       }
+
+#if ARCHIVE_VERSION_NUMBER >= 3006000
+      if (archive_write_set_filter_option(this->Archive, "zstd", "threads",
+                                          sNumThreads.c_str()) != ARCHIVE_OK) {
+        this->Error = cmStrCat("archive_compressor_zstd_options: ",
+                               cm_archive_error_string(this->Archive));
+        return;
+      }
+#endif
       break;
   }
 
