@@ -1077,29 +1077,30 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
 
     if (!namelinkOnly) {
       for (std::size_t i = 0; i < fileSetArgs.size(); i++) {
-        auto* fileSet = target.GetFileSet(fileSetArgs[i].GetFileSet());
-        auto interfaceFileSetEntries = cmExpandedList(target.GetSafeProperty(
-          cmTarget::GetInterfaceFileSetsPropertyName(fileSet->GetType())));
-        if (fileSet &&
-            std::find(
-              interfaceFileSetEntries.begin(), interfaceFileSetEntries.end(),
-              fileSetArgs[i].GetFileSet()) != interfaceFileSetEntries.end()) {
-          std::string destination;
-          if (fileSet->GetType() == "HEADERS"_s) {
-            destination = helper.GetIncludeDestination(&fileSetArgs[i]);
-          } else {
-            destination = fileSetArgs[i].GetDestination();
-            if (destination.empty()) {
-              status.SetError(
-                cmStrCat("TARGETS given no FILE_SET DESTINATION for target \"",
-                         target.GetName(), "\" file set \"",
-                         fileSet->GetName(), "\"."));
-              return false;
+        if (auto* fileSet = target.GetFileSet(fileSetArgs[i].GetFileSet())) {
+          auto interfaceFileSetEntries = cmExpandedList(target.GetSafeProperty(
+            cmTarget::GetInterfaceFileSetsPropertyName(fileSet->GetType())));
+          if (std::find(interfaceFileSetEntries.begin(),
+                        interfaceFileSetEntries.end(),
+                        fileSetArgs[i].GetFileSet()) !=
+              interfaceFileSetEntries.end()) {
+            std::string destination;
+            if (fileSet->GetType() == "HEADERS"_s) {
+              destination = helper.GetIncludeDestination(&fileSetArgs[i]);
+            } else {
+              destination = fileSetArgs[i].GetDestination();
+              if (destination.empty()) {
+                status.SetError(cmStrCat(
+                  "TARGETS given no FILE_SET DESTINATION for target \"",
+                  target.GetName(), "\" file set \"", fileSet->GetName(),
+                  "\"."));
+                return false;
+              }
             }
+            fileSetGenerators.push_back(CreateInstallFileSetGenerator(
+              helper, target, fileSet, destination, fileSetArgs[i]));
+            installsFileSet[i] = true;
           }
-          fileSetGenerators.push_back(CreateInstallFileSetGenerator(
-            helper, target, fileSet, destination, fileSetArgs[i]));
-          installsFileSet[i] = true;
         }
       }
     }

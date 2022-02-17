@@ -36,6 +36,7 @@ run_cmake(FileSetInstallMissingSetsInterface)
 run_cmake(FileSetNoScope)
 run_cmake(FileSetNoExistPrivate)
 run_cmake(FileSetNoExistInterface)
+run_cmake(FileSetNoExistInstall)
 run_cmake(FileSetDirectories)
 
 set(RunCMake_TEST_OPTIONS -DCMAKE_POLICY_DEFAULT_CMP0115=NEW)
