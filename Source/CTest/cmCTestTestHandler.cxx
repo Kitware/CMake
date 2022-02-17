@@ -2101,24 +2101,31 @@ void cmCTestTestHandler::CleanTestOutput(std::string& output, size_t length)
     return;
   }
 
-  // Truncate at given length but do not break in the middle of a multi-byte
-  // UTF-8 encoding.
+  // Advance n bytes in string delimited by begin/end but do not break in the
+  // middle of a multi-byte UTF-8 encoding.
+  auto utf8_advance = [](char const* const begin, char const* const end,
+                         size_t n) -> const char* {
+    char const* const stop = begin + n;
+    char const* current = begin;
+    while (current < stop) {
+      unsigned int ch;
+      if (const char* next = cm_utf8_decode_character(current, end, &ch)) {
+        if (next > stop) {
+          break;
+        }
+        current = next;
+      } else // Bad byte will be handled by cmXMLWriter.
+      {
+        ++current;
+      }
+    }
+    return current;
+  };
+
+  // Truncate at given length respecting UTF-8 words
   char const* const begin = output.c_str();
   char const* const end = begin + output.size();
-  char const* const truncate = begin + length;
-  char const* current = begin;
-  while (current < truncate) {
-    unsigned int ch;
-    if (const char* next = cm_utf8_decode_character(current, end, &ch)) {
-      if (next > truncate) {
-        break;
-      }
-      current = next;
-    } else // Bad byte will be handled by cmXMLWriter.
-    {
-      ++current;
-    }
-  }
+  char const* current = utf8_advance(begin, end, length);
   output.erase(current - begin);
 
   // Append truncation message.
