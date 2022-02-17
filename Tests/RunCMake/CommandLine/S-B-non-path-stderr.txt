@@ -1,0 +1,2 @@
+^CMake Warning:
+  Ignoring empty string \(""\) provided on the command line\.$
