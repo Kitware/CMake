@@ -674,11 +674,11 @@ bool cmComputeLinkInformation::AddLibraryFeature(std::string const& feature)
   }
 
   auto featureName =
-    cmStrCat("CMAKE_", this->LinkLanguage, "_LINK_USING_", feature);
+    cmStrCat("CMAKE_", this->LinkLanguage, "_LINK_LIBRARY_USING_", feature);
   cmValue featureSupported =
     this->Makefile->GetDefinition(cmStrCat(featureName, "_SUPPORTED"));
   if (!featureSupported.IsOn()) {
-    featureName = cmStrCat("CMAKE_LINK_USING_", feature);
+    featureName = cmStrCat("CMAKE_LINK_LIBRARY_USING_", feature);
     featureSupported =
       this->Makefile->GetDefinition(cmStrCat(featureName, "_SUPPORTED"));
   }

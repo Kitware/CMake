@@ -14,10 +14,10 @@ This property takes a ``feature`` name which will be applied to the
 .. code-block:: cmake
 
   add_library(lib1 ...)
-  target_link_libraries(lib1 PUBLIC $<LINK_LIBRARY:feature1,external>)
+  target_link_libraries(lib1 PUBLIC "$<LINK_LIBRARY:feature1,external>")
 
   add_library(lib2 ...)
-  target_link_libraries(lib2 PUBLIC $<LINK_LIBRARY:feature2,lib1>)
+  target_link_libraries(lib2 PUBLIC "$<LINK_LIBRARY:feature2,lib1>")
 
   add_library(lib3 ...)
   target_link_libraries(lib3 PRIVATE lib1 lib2)
@@ -41,5 +41,5 @@ This property takes precedence over :prop_tgt:`LINK_LIBRARY_OVERRIDE`
 target property.
 
 For more information about features, see
-:variable:`CMAKE_<LANG>_LINK_USING_<FEATURE>`
-and :variable:`CMAKE_LINK_USING_<FEATURE>` variables.
+:variable:`CMAKE_<LANG>_LINK_LIBRARY_USING_<FEATURE>`
+and :variable:`CMAKE_LINK_LIBRARY_USING_<FEATURE>` variables.

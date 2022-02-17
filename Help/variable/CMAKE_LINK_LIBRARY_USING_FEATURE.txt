@@ -46,27 +46,27 @@ is offered by various environments but with a specific syntax:
 
 .. code-block:: cmake
 
-  set(CMAKE_C_LINK_USING_whole_archive_SUPPORTED TRUE)
+  set(CMAKE_C_LINK_LIBRARY_USING_whole_archive_SUPPORTED TRUE)
   if(CMAKE_C_COMPILER_ID STREQUAL "AppleClang")
-    set(CMAKE_C_LINK_USING_whole_archive "-force_load <LIB_ITEM>")
+    set(CMAKE_C_LINK_LIBRARY_USING_whole_archive "-force_load <LIB_ITEM>")
   elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU"
          AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    set(CMAKE_C_LINK_USING_whole_archive "LINKER:--push-state,--whole-archive"
-                                         "<LINK_ITEM>"
-                                         "LINKER:--pop-state")
+    set(CMAKE_C_LINK_LIBRARY_USING_whole_archive "LINKER:--push-state,--whole-archive"
+                                                 "<LINK_ITEM>"
+                                                 "LINKER:--pop-state")
   elseif(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
-    set(CMAKE_C_LINK_USING_whole_archive "/WHOLEARCHIVE:<LIBRARY>")
+    set(CMAKE_C_LINK_LIBRARY_USING_whole_archive "/WHOLEARCHIVE:<LIBRARY>")
   else()
     # feature not yet supported for the other environments
-    set(CMAKE_C_LINK_USING_whole_archive_SUPPORTED FALSE)
+    set(CMAKE_C_LINK_LIBRARY_USING_whole_archive_SUPPORTED FALSE)
   endif()
 
   add_library(lib1 STATIC ...)
 
   add_library(lib2 SHARED ...)
-  if(CMAKE_C_LINK_USING_whole_archive_SUPPORTED)
+  if(CMAKE_C_LINK_LIBRARY_USING_whole_archive_SUPPORTED)
     target_link_libraries(lib2 PRIVATE
-      $<LINK_LIBRARY:whole_archive,lib1,$<IF:$<LINK_LANG_AND_ID:C,Clang>,libexternal.a,external>>)
+      "$<LINK_LIBRARY:whole_archive,lib1,$<IF:$<LINK_LANG_AND_ID:C,Clang>,libexternal.a,external>>")
   else()
     target_link_libraries(lib2 PRIVATE lib1 external)
   endif()
@@ -95,14 +95,15 @@ library specified by path and by name. This constraint by be solved by using
 .. code-block:: cmake
 
   if (CMAKE_C_COMPILER_ID STREQUAL "AppleClang")
-    set(CMAKE_LINK_USING_weak_library "PATH{-weak_library <LIBRARY>}NAME{LINKER:-weak-l<LIB_ITEM>}")
-    set(CMAKE_LINK_USING_weak_library_SUPPORTED TRUE)
+    set(CMAKE_LINK_LIBRARY_USING_weak_library
+        "PATH{-weak_library <LIBRARY>}NAME{LINKER:-weak-l<LIB_ITEM>}")
+    set(CMAKE_LINK_LIBRARY_USING_weak_library_SUPPORTED TRUE)
   endif()
 
   add_library(lib SHARED ...)
   add_executable(main ...)
-  if(CMAKE_LINK_USING_weak_library_SUPPORTED)
-    target_link_libraries(main PRIVATE $<LINK_LIBRARY:weak_library,lib,external>)
+  if(CMAKE_LINK_LIBRARY_USING_weak_library_SUPPORTED)
+    target_link_libraries(main PRIVATE "$<LINK_LIBRARY:weak_library,lib,external>")
   else()
     target_link_libraries(main PRIVATE lib external)
   endif()

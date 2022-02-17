@@ -1125,23 +1125,23 @@ Output-Related Expressions
 
     add_library(lib1 STATIC ...)
     add_library(lib2 ...)
-    target_link_libraries(lib2 PRIVATE $<LINK_LIBRARY:whole_archive,lib1>)
+    target_link_libraries(lib2 PRIVATE "$<LINK_LIBRARY:whole_archive,lib1>")
 
   This specify to use the ``lib1`` target with feature ``whole_archive`` for
   linking target ``lib2``. The feature must have be defined by
-  :variable:`CMAKE_<LANG>_LINK_USING_<FEATURE>` variable or, if
-  :variable:`CMAKE_<LANG>_LINK_USING_<FEATURE>_SUPPORTED` is false,
-  by :variable:`CMAKE_LINK_USING_<FEATURE>` variable.
+  :variable:`CMAKE_<LANG>_LINK_LIBRARY_USING_<FEATURE>` variable or, if
+  :variable:`CMAKE_<LANG>_LINK_LIBRARY_USING_<FEATURE>_SUPPORTED` is false,
+  by :variable:`CMAKE_LINK_LIBRARY_USING_<FEATURE>` variable.
 
   .. note::
 
     The evaluation of this generator expression will use, for the following
     variables, the values defined at the level of the creation of the target:
 
-    * :variable:`CMAKE_<LANG>_LINK_USING_<FEATURE>_SUPPORTED`
-    * :variable:`CMAKE_<LANG>_LINK_USING_<FEATURE>`
-    * :variable:`CMAKE_LINK_USING_<FEATURE>_SUPPORTED`
-    * :variable:`CMAKE_LINK_USING_<FEATURE>`
+    * :variable:`CMAKE_<LANG>_LINK_LIBRARY_USING_<FEATURE>_SUPPORTED`
+    * :variable:`CMAKE_<LANG>_LINK_LIBRARY_USING_<FEATURE>`
+    * :variable:`CMAKE_LINK_LIBRARY_USING_<FEATURE>_SUPPORTED`
+    * :variable:`CMAKE_LINK_LIBRARY_USING_<FEATURE>`
 
   This expression can only be used to specify link libraries (i.e. part of
   :command:`link_libraries` or :command:`target_link_libraries` commands and
@@ -1170,7 +1170,7 @@ Output-Related Expressions
     add_library(lib1 ...)
 
     add_library(lib2 ...)
-    target_link_libraries(lib2 PUBLIC $<LINK_LIBRARY:feature1,lib1>)
+    target_link_libraries(lib2 PUBLIC "$<LINK_LIBRARY:feature1,lib1>")
 
     add_library(lib3 ...)
     target_link_libraries(lib3 PRIVATE lib1 lib2)
