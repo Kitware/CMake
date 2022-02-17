@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.19)
-project (SeparateCompPTX CUDA)
+project (SeparateCompilationPTX CUDA)
 
 #Goal for this example:
 # How to generate PTX files with RDC enabled
