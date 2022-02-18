@@ -95,6 +95,19 @@ cmArchiveWrite::cmArchiveWrite(std::ostream& os, Compress c,
   , Verbose(false)
   , Format(format)
 {
+  // Upstream fixed an issue with their integer parsing in 3.4.0
+  // which would cause spurious errors to be raised from `strtoull`.
+
+  if (numThreads < 1) {
+    int upperLimit = (numThreads == 0) ? std::numeric_limits<int>::max()
+                                       : std::abs(numThreads);
+
+    numThreads =
+      cm::clamp<int>(std::thread::hardware_concurrency(), 1, upperLimit);
+  }
+
+  std::string sNumThreads = std::to_string(numThreads);
+
   switch (c) {
     case CompressNone:
       if (archive_write_add_filter_none(this->Archive) != ARCHIVE_OK) {
@@ -150,36 +163,23 @@ cmArchiveWrite::cmArchiveWrite(std::ostream& os, Compress c,
         return;
       }
 
-      {
 #if ARCHIVE_VERSION_NUMBER >= 3004000
-        // Upstream fixed an issue with their integer parsing in 3.4.0
-        // which would cause spurious errors to be raised from `strtoull`.
-
-        if (numThreads < 1) {
-          int upperLimit = (numThreads == 0) ? std::numeric_limits<int>::max()
-                                             : std::abs(numThreads);
-
-          numThreads =
-            cm::clamp<int>(std::thread::hardware_concurrency(), 1, upperLimit);
-        }
 
 #  ifdef _AIX
-        // FIXME: Using more than 2 threads creates an empty archive.
-        // Enforce this limit pending further investigation.
-        numThreads = std::min(numThreads, 2);
-#  endif
-
-        std::string sNumThreads = std::to_string(numThreads);
-
-        if (archive_write_set_filter_option(this->Archive, "xz", "threads",
-                                            sNumThreads.c_str()) !=
-            ARCHIVE_OK) {
-          this->Error = cmStrCat("archive_compressor_xz_options: ",
-                                 cm_archive_error_string(this->Archive));
-          return;
-        }
-#endif
+      // FIXME: Using more than 2 threads creates an empty archive.
+      // Enforce this limit pending further investigation.
+      if (numThreads > 2) {
+        numThreads = 2;
+        sNumThreads = std::to_string(numThreads);
       }
+#  endif
+      if (archive_write_set_filter_option(this->Archive, "xz", "threads",
+                                          sNumThreads.c_str()) != ARCHIVE_OK) {
+        this->Error = cmStrCat("archive_compressor_xz_options: ",
+                               cm_archive_error_string(this->Archive));
+        return;
+      }
+#endif
 
       break;
     case CompressZstd:
