@@ -1456,7 +1456,7 @@ static int IFN_Beginning_Of_Field(FORM * form)
 |   
 |   Description   :  Place the cursor after the last non-pad character in
 |                    the field. If the field occupies the last position in
-|                    the buffer, the cursos is positioned on the last 
+|                    the buffer, the cursor is positioned on the last
 |                    character.
 |
 |   Return Values :  E_OK              - success
