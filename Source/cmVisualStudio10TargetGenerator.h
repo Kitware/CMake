@@ -264,13 +264,6 @@ private:
   void WriteClassicMsBuildProjectFile(cmGeneratedFileStream& BuildFileStream);
   void WriteSdkStyleProjectFile(cmGeneratedFileStream& BuildFileStream);
 
-  void WriteZeroCheckProj(cmGeneratedFileStream& BuildFileStream);
-  void WriteZeroCheckBuildTarget(cmVisualStudio10TargetGenerator::Elem& e0,
-                                 const cmCustomCommand& command,
-                                 const cmSourceFile* source);
-  void WriteZeroCheckBeforeBuildTarget(
-    cmVisualStudio10TargetGenerator::Elem& e0);
-
   void WriteCommonPropertyGroupGlobals(
     cmVisualStudio10TargetGenerator::Elem& e1);
 

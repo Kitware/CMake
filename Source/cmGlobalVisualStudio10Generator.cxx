@@ -1286,13 +1286,6 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
   return makeCommands;
 }
 
-bool cmGlobalVisualStudio10Generator::IsInSolution(
-  const cmGeneratorTarget* gt) const
-{
-  return gt->IsInBuildSystem() &&
-    gt->GetName() != CMAKE_CHECK_BUILD_SYSTEM_TARGET;
-}
-
 bool cmGlobalVisualStudio10Generator::Find64BitTools(cmMakefile* mf)
 {
   if (this->DefaultPlatformToolset == "v100") {
