@@ -2119,7 +2119,7 @@ static void kwsysProcessSetExitExceptionByIndex(kwsysProcess* cp, int code,
       KWSYSPE_CASE(Fault, "In-page error");
       break;
     case STATUS_INVALID_HANDLE:
-      KWSYSPE_CASE(Fault, "Invalid hanlde");
+      KWSYSPE_CASE(Fault, "Invalid handle");
       break;
     case STATUS_NONCONTINUABLE_EXCEPTION:
       KWSYSPE_CASE(Fault, "Noncontinuable exception");

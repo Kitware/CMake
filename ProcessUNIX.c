@@ -1906,7 +1906,7 @@ static void kwsysProcessDestroy(kwsysProcess* cp)
              (errno == EINTR)) {
       }
       if (result > 0) {
-        /* This child has termianted.  */
+        /* This child has terminated.  */
         cp->ForkPIDs[i] = 0;
         if (--cp->CommandsLeft == 0) {
           /* All children have terminated.  Close the signal pipe
