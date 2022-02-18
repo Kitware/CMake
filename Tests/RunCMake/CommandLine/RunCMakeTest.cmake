@@ -168,6 +168,18 @@ endif()
   run_cmake_with_raw_args(S-B-non-path "-S \"${source_dir}\" -B \"${binary_dir}\" \"\"")
   run_cmake_with_raw_args(S-B-non-path2 "-S \"${source_dir}\" \"\" -B \"${binary_dir}\"")
 
+  file(REMOVE_RECURSE "${binary_dir}/other_dir")
+  file(MAKE_DIRECTORY "${binary_dir}/other_dir")
+  file(WRITE "${binary_dir}/other_dir/CMakeLists.txt" [=[ ]=])
+  run_cmake_with_options(S-S-same -S ${source_dir} -S ${source_dir} -B ${binary_dir})
+  run_cmake_with_options(S-S-differs -S ${binary_dir}/other_dir -S ${source_dir} -B ${binary_dir})
+  run_cmake_with_options(S-implicit-same -S ${source_dir} ${source_dir} -B ${binary_dir})
+  run_cmake_with_options(S-implicit-differs -S ${source_dir} ${binary_dir}/other_dir -B ${binary_dir})
+  run_cmake_with_options(S-implicit-differs2 ${binary_dir}/other_dir -S ${source_dir} -B ${binary_dir})
+  run_cmake_with_options(S-implicit-differs3 ${binary_dir}/other_dir ${source_dir} -B ${binary_dir})
+  run_cmake_with_options(S-S-Sdiffers -S ${binary_dir}/other_dir1 -S ${binary_dir}/other_dir2 -S ${source_dir} -B ${binary_dir})
+  run_cmake_with_options(S-S-Simplicit ${binary_dir}/other_dir1 ${binary_dir}/other_dir2 ${source_dir} -B ${binary_dir})
+
   # make sure that -B can explicitly construct build directories
   file(REMOVE_RECURSE "${binary_dir}")
   run_cmake_with_options(B-arg -B ${binary_dir} ${source_dir})
