@@ -103,23 +103,23 @@ foreach(lang C CXX Fortran OBJC OBJCXX)
   set(CMAKE_${lang}_CREATE_MACOSX_FRAMEWORK
       "<CMAKE_${lang}_COMPILER> <LANGUAGE_COMPILE_FLAGS> <CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS> <LINK_FLAGS> -o <TARGET> <SONAME_FLAG> <TARGET_INSTALLNAME_DIR><TARGET_SONAME> <OBJECTS> <LINK_LIBRARIES>")
 
-  # Set default framework search path flag for languages known to use a
-  # preprocessor that may find headers in frameworks.
-  set(CMAKE_${lang}_FRAMEWORK_SEARCH_FLAG -F)
-
-  # Defines link features for frameworks
-  set(CMAKE_${lang}_LINK_LIBRARY_USING_FRAMEWORK "LINKER:-framework,<LIBRARY>")
-  set(CMAKE_${lang}_LINK_LIBRARY_USING_FRAMEWORK_SUPPORTED TRUE)
-
-  set(CMAKE_${lang}_LINK_LIBRARY_USING_NEEDED_FRAMEWORK "LINKER:-needed_framework,<LIBRARY>")
-  set(CMAKE_${lang}_LINK_LIBRARY_USING_NEEDED_FRAMEWORK_SUPPORTED TRUE)
-
-  set(CMAKE_${lang}_LINK_LIBRARY_USING_REEXPORT_FRAMEWORK "LINKER:-reexport_framework,<LIBRARY>")
-  set(CMAKE_${lang}_LINK_LIBRARY_USING_REEXPORT_FRAMEWORK_SUPPORTED TRUE)
-
-  set(CMAKE_${lang}_LINK_LIBRARY_USING_WEAK_FRAMEWORK "LINKER:-weak_framework,<LIBRARY>")
-  set(CMAKE_${lang}_LINK_LIBRARY_USING_WEAK_FRAMEWORK_SUPPORTED TRUE)
+# Set default framework search path flag for languages known to use a
+# preprocessor that may find headers in frameworks.
+set(CMAKE_${lang}_FRAMEWORK_SEARCH_FLAG -F)
 endforeach()
+
+# Defines link features for frameworks
+set(CMAKE_LINK_LIBRARY_USING_FRAMEWORK "LINKER:-framework,<LIBRARY>")
+set(CMAKE_LINK_LIBRARY_USING_FRAMEWORK_SUPPORTED TRUE)
+
+set(CMAKE_LINK_LIBRARY_USING_NEEDED_FRAMEWORK "LINKER:-needed_framework,<LIBRARY>")
+set(CMAKE_LINK_LIBRARY_USING_NEEDED_FRAMEWORK_SUPPORTED TRUE)
+
+set(CMAKE_LINK_LIBRARY_USING_REEXPORT_FRAMEWORK "LINKER:-reexport_framework,<LIBRARY>")
+set(CMAKE_LINK_LIBRARY_USING_REEXPORT_FRAMEWORK_SUPPORTED TRUE)
+
+set(CMAKE_LINK_LIBRARY_USING_WEAK_FRAMEWORK "LINKER:-weak_framework,<LIBRARY>")
+set(CMAKE_LINK_LIBRARY_USING_WEAK_FRAMEWORK_SUPPORTED TRUE)
 
 # default to searching for frameworks first
 if(NOT DEFINED CMAKE_FIND_FRAMEWORK)
