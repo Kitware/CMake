@@ -1,0 +1,38 @@
+# LexerParser regeneration
+34b7dbbfc37180989b57a0fb25ca4e0010cf992b
+
+# CMAKE_BOOTSTRAP rename
+54e9d38c28d0073f2cc5d690adb5c993e7793c97
+
+# CMake code reindentation
+2c807b75f3283d30ecde55be5b434be65d0ea141
+932dcce1e63b98739ab547f2146a39310c2d0e1e
+
+# `#pragma once`
+bdca8b01d2d96d63e685e7eca03e0f51f5410fdf
+
+# clang-format-6
+ed98209ddc8d5e9f5b20cd010c69a25d553b2654
+d7204e649ed4ebb19bb341b4e49eb51514364922
+# Initial clang-format
+d9fd2f5402eeaa345691313658e02b51038f570b
+
+# Fortran parser renaming
+98b9645bcebf009643cff4e265cfcd31b56d80f5
+
+# Sphinx conversion, reformattings
+496ec6036fb2b4ebbae000ee362cdfb7704d08de
+df4ed1e9ffcdb6b99ccff9e6f44808fdd2abda56
+3442f2bcc47ccce86124144423b416b98d589b20
+28f08ba25cc60de3fc7cb9eb4b3297ed6fe1dee0
+baaab068f2fa9e736ed85f3ba9b75d96e9339f89
+a77e3086938d46c56f62901531245711dbd55cc4
+f051814ed0e63badbfd68049354f36259dbf4b49
+81759c77af28f367c71e71973d985dc1d7a7c87c
+
+# Removal of `end*` command arguments
+9db3116226cb99fcf54e936c833953abcde9b729
+# Lowercasing command names
+77543bde41b0e52c3959016698b529835945d62d
+# Removal of trailing whitespace
+7bbaa4283de26864b2e55e819db0884771585467
