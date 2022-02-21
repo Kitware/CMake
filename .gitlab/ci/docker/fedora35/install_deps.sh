@@ -38,6 +38,7 @@ dnf install --setopt=install_weak_deps=False -y \
 
 # Packages needed to test CTest.
 dnf install --setopt=install_weak_deps=False -y \
+    breezy \
     subversion \
     mercurial
 
@@ -106,3 +107,10 @@ curl https://bootstrap.pypa.io/pip/2.7/get-pip.py -o get-pip.py
 python2 get-pip.py
 rm get-pip.py
 pip2.7 install numpy
+
+# Perforce
+curl -L -O https://www.perforce.com/downloads/perforce/r21.2/bin.linux26x86_64/helix-core-server.tgz
+echo '72620c55e9389705582506d6f3388005fb4f674888a00a12a51edc2ae37823b3  helix-core-server.tgz' > helix.sha256sum
+sha256sum --check helix.sha256sum
+tar -C /usr/local/bin -xvzf helix-core-server.tgz -- p4 p4d
+rm helix-core-server.tgz
