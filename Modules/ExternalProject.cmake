@@ -353,6 +353,10 @@ External Project Definition
           When ``GIT_REMOTE_UPDATE_STRATEGY`` is not present, this is the
           default strategy unless the default has been overridden with
           ``CMAKE_EP_GIT_REMOTE_UPDATE_STRATEGY`` (see below).
+          Note that if the branch specified in ``GIT_TAG`` is different to
+          the upstream branch currently being tracked, it is not safe to
+          perform a rebase. In that situation, ``REBASE`` will silently be
+          treated as ``CHECKOUT`` instead.
 
         ``REBASE_CHECKOUT``
           Same as ``REBASE`` except if the rebase fails, an annotated tag will
