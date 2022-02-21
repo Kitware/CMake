@@ -128,7 +128,7 @@ if(git_update_strategy MATCHES "^REBASE(_CHECKOUT)?$")
 
   else()
     execute_process(
-      COMMAND "@git_EXECUTABLE@" for-each-ref "--format='%(upstream:short)'" "${current_branch}"
+      COMMAND "@git_EXECUTABLE@" for-each-ref "--format=%(upstream:short)" "${current_branch}"
       WORKING_DIRECTORY "@work_dir@"
       OUTPUT_VARIABLE upstream_branch
       OUTPUT_STRIP_TRAILING_WHITESPACE
