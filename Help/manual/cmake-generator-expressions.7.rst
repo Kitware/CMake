@@ -1157,7 +1157,7 @@ Output-Related Expressions
     expression.
 
   The ``library-list`` argument can hold CMake targets or external libraries.
-  Any ``CMake`` target of type :ref:`OBJECT <Object Libraries>` or
+  Any CMake target of type :ref:`OBJECT <Object Libraries>` or
   :ref:`INTERFACE <Interface Libraries>` will be ignored by this expression and
   will be handled in the standard way.
 
@@ -1187,7 +1187,7 @@ Output-Related Expressions
     ``end-group``, as supported by ``GNU ld``, the :genex:`LINK_GROUP`
     generator expression can be used.
 
-  ``CMake`` pre-defines some features of general interest:
+  CMake pre-defines some features of general interest:
 
   .. include:: ../variable/LINK_LIBRARY_PREDEFINED_FEATURES.txt
 

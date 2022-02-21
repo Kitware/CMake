@@ -22,6 +22,6 @@ features independent from the link language.
 Predefined Features
 ^^^^^^^^^^^^^^^^^^^
 
-``CMake`` pre-defines some features of general interest:
+CMake pre-defines some features of general interest:
 
 .. include:: LINK_LIBRARY_PREDEFINED_FEATURES.txt

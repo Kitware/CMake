@@ -4,6 +4,6 @@
 __declspec(dllexport)
 #  endif
 #endif
-  void base()
+  void base(void)
 {
 }
