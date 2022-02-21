@@ -2604,6 +2604,9 @@ if(BUILD_TESTING)
 
   # Test CTest Update with BZR
   if(CMake_TEST_CTestUpdate_BZR)
+    if(TEST_HOME)
+      file(MAKE_DIRECTORY "${TEST_HOME}/.bazaar")
+    endif()
     find_program(BZR_EXECUTABLE NAMES bzr)
     mark_as_advanced(BZR_EXECUTABLE)
     if(NOT BZR_EXECUTABLE)
