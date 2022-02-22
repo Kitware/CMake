@@ -3314,12 +3314,22 @@ cmsys::Status cmSystemTools::CreateSymlink(std::string const& origName,
   uv_fs_t req;
   int flags = 0;
 #if defined(_WIN32)
-  if (cmsys::SystemTools::FileIsDirectory(origName)) {
-    flags |= UV_FS_SYMLINK_DIR;
+  bool const isDir = cmsys::SystemTools::FileIsDirectory(origName);
+  if (isDir) {
+    flags |= UV_FS_SYMLINK_JUNCTION;
   }
 #endif
   int err = uv_fs_symlink(nullptr, &req, origName.c_str(), newName.c_str(),
                           flags, nullptr);
+#if defined(_WIN32)
+  if (err && uv_fs_get_system_error(&req) == ERROR_NOT_SUPPORTED && isDir) {
+    // Try fallback to symlink for network (requires additional permissions).
+    flags ^= UV_FS_SYMLINK_JUNCTION | UV_FS_SYMLINK_DIR;
+    err = uv_fs_symlink(nullptr, &req, origName.c_str(), newName.c_str(),
+                        flags, nullptr);
+  }
+#endif
+
   cmsys::Status status;
   if (err) {
 #if defined(_WIN32)
