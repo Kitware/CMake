@@ -3456,12 +3456,10 @@ void cmGeneratorTarget::AddCUDAArchitectureFlags(std::string& flags) const
         cmSystemTools::OP_GREATER_EQUAL,
         this->Makefile->GetDefinition("CMAKE_CUDA_COMPILER_VERSION"),
         "11.5")) {
-    if (property == "all") {
-      flags += " -arch=all";
-    } else if (property == "all-major") {
-      flags += " -arch=all-major";
+    if (property == "all" || property == "all-major") {
+      flags = cmStrCat(flags, " -arch=", property);
+      return;
     }
-    return;
   }
 
   if (property == "all") {
