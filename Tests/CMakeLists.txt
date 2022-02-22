@@ -2674,16 +2674,10 @@ if(BUILD_TESTING)
   endif()
 
   # Test CTest Update with P4
-  if(NOT DEFINED CMake_TEST_CTestUpdate_P4 OR CMake_TEST_CTestUpdate_P4)
+  if(CMake_TEST_CTestUpdate_P4)
     find_program(P4_EXECUTABLE NAMES p4)
     find_program(P4D_EXECUTABLE NAMES p4d)
     mark_as_advanced(P4_EXECUTABLE P4D_EXECUTABLE)
-  endif()
-  if(NOT DEFINED CMake_TEST_CTestUpdate_P4 AND P4_EXECUTABLE AND P4D_EXECUTABLE
-      AND (UNIX OR NOT "${P4_EXECUTABLE};${P4D_EXECUTABLE}" MATCHES "cygwin"))
-    set(CMake_TEST_CTestUpdate_P4 1)
-  endif()
-  if(CMake_TEST_CTestUpdate_P4)
     if(NOT P4_EXECUTABLE OR NOT P4D_EXECUTABLE)
       message(FATAL_ERROR "CMake_TEST_CTestUpdate_HG enabled but P4_EXECUTABLE and P4D_EXECUTABLE are not both not found.")
     endif()
