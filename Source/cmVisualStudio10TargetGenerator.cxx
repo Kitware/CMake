@@ -1586,33 +1586,31 @@ void cmVisualStudio10TargetGenerator::WriteCustomRuleCpp(
     platforms.push_back("ARM64");
   }
   for (std::string const& p : platforms) {
-    for (std::string const& config : this->Configurations) {
-      const std::string cond = this->CalcCondition(config, p);
-      e2.WritePlatformConfigTag("Message", cond, comment);
-      e2.WritePlatformConfigTag("Command", cond, script);
-      e2.WritePlatformConfigTag("AdditionalInputs", cond, additional_inputs);
-      e2.WritePlatformConfigTag("Outputs", cond, outputs);
-      if (this->LocalGenerator->GetVersion() >
-          cmGlobalVisualStudioGenerator::VS10) {
-        // VS >= 11 let us turn off linking of custom command outputs.
-        e2.WritePlatformConfigTag("LinkObjects", cond, "false");
-      }
-      if (symbolic &&
-          this->LocalGenerator->GetVersion() >=
-            cmGlobalVisualStudioGenerator::VS16) {
-        // VS >= 16.4 warn if outputs are not created, but one of our
-        // outputs is marked SYMBOLIC and not expected to be created.
-        e2.WritePlatformConfigTag("VerifyInputsAndOutputsExist", cond, "false");
-      }
+    const std::string cond = this->CalcCondition(config, p);
+    e2.WritePlatformConfigTag("Message", cond, comment);
+    e2.WritePlatformConfigTag("Command", cond, script);
+    e2.WritePlatformConfigTag("AdditionalInputs", cond, additional_inputs);
+    e2.WritePlatformConfigTag("Outputs", cond, outputs);
+    if (this->LocalGenerator->GetVersion() >
+        cmGlobalVisualStudioGenerator::VS10) {
+      // VS >= 11 let us turn off linking of custom command outputs.
+      e2.WritePlatformConfigTag("LinkObjects", cond, "false");
+    }
+    if (symbolic &&
+        this->LocalGenerator->GetVersion() >=
+          cmGlobalVisualStudioGenerator::VS16) {
+      // VS >= 16.4 warn if outputs are not created, but one of our
+      // outputs is marked SYMBOLIC and not expected to be created.
+      e2.WritePlatformConfigTag("VerifyInputsAndOutputsExist", cond, "false");
+    }
 
-      std::string depfile = ccg.GetFullDepfile();
-      if (!depfile.empty()) {
-        this->HaveCustomCommandDepfile = true;
-        std::string internal_depfile = ccg.GetInternalDepfile();
-        ConvertToWindowsSlash(internal_depfile);
-        e2.WritePlatformConfigTag("DepFileAdditionalInputsFile", cond,
-                                  internal_depfile);
-      }
+    std::string depfile = ccg.GetFullDepfile();
+    if (!depfile.empty()) {
+      this->HaveCustomCommandDepfile = true;
+      std::string internal_depfile = ccg.GetInternalDepfile();
+      ConvertToWindowsSlash(internal_depfile);
+      e2.WritePlatformConfigTag("DepFileAdditionalInputsFile", cond,
+                                internal_depfile);
     }
   }
 }
