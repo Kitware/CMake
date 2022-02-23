@@ -13,8 +13,6 @@ function (run_symlink_test name)
   set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/${name}/binary")
   # Emulate a shell using this directory.
   set(ENV{PWD} "${RunCMake_TEST_BINARY_DIR}")
-  set(RunCMake_TEST_OPTIONS
-    "-Dinclude_dir:PATH=${CMAKE_CURRENT_LIST_DIR}")
   run_cmake("${name}_symlinks")
 endfunction ()
 
