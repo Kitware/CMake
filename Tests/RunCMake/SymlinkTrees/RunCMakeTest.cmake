@@ -74,6 +74,16 @@ function (run_symlink_test case src bin src_from_bin bin_from_src)
   # Pass relative paths to the source and binary trees.
   set(RunCMake_TEST_VARIANT_DESCRIPTION " -S ../${name}/${src} -B ../${name}/${bin}")
   run_symlink_test_case("${case}" -S "../${name}/${src}" -B "../${name}/${bin}")
+
+  # Verify paths passed to compiler.
+  unset(RunCMake_TEST_VARIANT_DESCRIPTION)
+  run_symlink_test_case("${case}-exe" -S "${src}" -B "${bin}")
+  if (RunCMake_GENERATOR MATCHES "Xcode")
+    # The native build system may pass the real paths.
+    set(RunCMake-stdout-file "generic-exe-build-stdout.txt")
+  endif()
+  set(RunCMake_TEST_OUTPUT_MERGE 1)
+  run_cmake_command("${case}-exe-build" ${CMAKE_COMMAND} --build "${bin}")
 endfunction ()
 
 # Create the following structure:
