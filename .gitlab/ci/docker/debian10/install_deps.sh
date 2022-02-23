@@ -25,6 +25,7 @@ apt-get install -y \
 
 # Packages needed to test CTest.
 apt-get install -y \
+    bzr bzr-xmloutput \
     cvs \
     subversion \
     mercurial
@@ -88,5 +89,12 @@ apt-get install -y \
 curl -L -O https://github.com/IronLanguages/ironpython2/releases/download/ipy-2.7.10/ironpython_2.7.10.deb
 dpkg -i ironpython_2.7.10.deb
 rm ironpython_2.7.10.deb
+
+# Perforce
+curl -L -O https://www.perforce.com/downloads/perforce/r21.2/bin.linux26x86_64/helix-core-server.tgz
+echo '72620c55e9389705582506d6f3388005fb4f674888a00a12a51edc2ae37823b3  helix-core-server.tgz' > helix.sha256sum
+sha256sum --check helix.sha256sum
+tar -C /usr/local/bin -xvzf helix-core-server.tgz -- p4 p4d
+rm helix-core-server.tgz
 
 apt-get clean

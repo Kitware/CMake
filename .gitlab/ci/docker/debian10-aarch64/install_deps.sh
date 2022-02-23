@@ -25,6 +25,7 @@ apt-get install -y \
 
 # Packages needed to test CTest.
 apt-get install -y \
+    bzr bzr-xmloutput \
     cvs \
     subversion \
     mercurial

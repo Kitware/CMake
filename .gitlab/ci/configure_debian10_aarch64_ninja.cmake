@@ -1,3 +1,8 @@
+set(CMake_TEST_CTestUpdate_BZR "ON" CACHE BOOL "")
+set(CMake_TEST_CTestUpdate_CVS "ON" CACHE BOOL "")
+set(CMake_TEST_CTestUpdate_GIT "ON" CACHE BOOL "")
+set(CMake_TEST_CTestUpdate_HG "ON" CACHE BOOL "")
+set(CMake_TEST_CTestUpdate_SVN "ON" CACHE BOOL "")
 set(CMake_TEST_FindALSA "ON" CACHE BOOL "")
 set(CMake_TEST_FindBLAS "All;static=1;Generic" CACHE STRING "")
 set(CMake_TEST_FindBoost "ON" CACHE BOOL "")
