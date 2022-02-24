@@ -304,14 +304,25 @@ installers.  The most commonly-used variables are:
 
   By default ``CPACK_THREADS`` is set to ``1``.
 
-  Currently only ``xz`` compression *may* take advantage of multiple cores.
+  The following compression methods may take advantage of multiple cores:
+
+  ``xz``
+    Supported if CMake is built with a ``liblzma`` that supports
+    parallel compression.
+
+    .. versionadded:: 3.21
+
+      Official CMake binaries available on ``cmake.org`` now ship
+      with a ``liblzma`` that supports parallel compression.
+      Older versions did not.
+
+  ``zstd``
+    .. versionadded:: 3.24
+
+    Supported if CMake is built with libarchive 3.6 or higher.
+    Official CMake binaries available on ``cmake.org`` support it.
+
   Other compression methods ignore this value and use only one thread.
-
-  .. versionadded:: 3.21
-
-    Official CMake binaries available on ``cmake.org`` now ship
-    with a ``liblzma`` that supports parallel compression.
-    Older versions did not.
 
 Variables for Source Package Generators
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
