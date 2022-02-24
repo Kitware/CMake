@@ -1,0 +1,4 @@
+-- source: '[^']*/Tests/RunCMake/SymlinkTrees/different/source'
+-- binary: '[^']*/Tests/RunCMake/SymlinkTrees/different/binary'
+-- real source: '[^']*/Tests/RunCMake/SymlinkTrees/different_src/source_real'
+-- real binary: '[^']*/Tests/RunCMake/SymlinkTrees/different_bin/binary_real'
