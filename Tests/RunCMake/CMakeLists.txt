@@ -970,6 +970,8 @@ add_RunCMake_test(CMakePresetsTest
   -DCMake_TEST_JSON_SCHEMA=${CMake_TEST_JSON_SCHEMA}
   )
 
+add_RunCMake_test(VerifyHeaderSets)
+
 if(${CMAKE_GENERATOR} MATCHES "Make|Ninja")
   add_RunCMake_test(TransformDepfile)
 endif()

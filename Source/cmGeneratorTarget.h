@@ -868,6 +868,11 @@ public:
   std::vector<std::string> GetGeneratedISPCObjects(
     std::string const& config) const;
 
+  bool AddHeaderSetVerification();
+  std::string GenerateHeaderSetVerificationFile(
+    cmSourceFile& source, const std::string& dir,
+    cm::optional<std::set<std::string>>& languages) const;
+
 private:
   void AddSourceCommon(const std::string& src, bool before = false);
 
