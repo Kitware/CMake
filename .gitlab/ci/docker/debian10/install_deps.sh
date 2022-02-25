@@ -30,6 +30,10 @@ apt-get install -y \
     subversion \
     mercurial
 
+# Install swift runtime deps.
+apt-get install -y \
+    libncurses5
+
 # Packages needed to test find modules.
 apt-get install -y \
     alsa-utils \
