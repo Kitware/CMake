@@ -76,12 +76,6 @@ function (run_symlink_test case src bin src_from_bin bin_from_src)
   run_symlink_test_case("${case}" -S "../${name}/${src}" -B "../${name}/${bin}")
 
   # Verify paths passed to compiler.
-  if(case MATCHES "^(different|asymmetric)-bin_in_src$")
-    # FIXME: Some generators compute incorrect relative paths.
-    message(STATUS "${case}-exe - SKIPPED")
-    message(STATUS "${case}-exe-build - SKIPPED")
-    return()
-  endif()
   unset(RunCMake_TEST_VARIANT_DESCRIPTION)
   run_symlink_test_case("${case}-exe" -S "${src}" -B "${bin}")
   if (RunCMake_GENERATOR MATCHES "Xcode")
