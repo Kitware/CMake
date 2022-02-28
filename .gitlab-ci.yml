@@ -257,6 +257,25 @@ t:cuda10.2-clang:
     variables:
         CMAKE_CI_NO_MR: "true"
 
+t:cuda11.6-nvidia:
+    extends:
+        - .cuda11.6_nvidia
+        - .cmake_test_linux_release
+        - .linux_builder_tags_cuda
+        - .cmake_junit_artifacts
+        - .run_dependent
+        - .needs_centos6_x86_64
+
+t:cuda11.6-clang:
+    extends:
+        - .cuda11.6_clang
+        - .cmake_test_linux_release
+        - .linux_builder_tags_cuda
+        - .run_dependent
+        - .needs_centos6_x86_64
+    variables:
+        CMAKE_CI_NO_MR: "true"
+
 t:hip4.2-radeon:
     extends:
         - .hip4.2_radeon
