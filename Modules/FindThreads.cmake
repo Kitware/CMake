@@ -164,21 +164,18 @@ if(CMAKE_HAVE_PTHREAD_H)
     elseif(CMAKE_CXX_COMPILER_LOADED)
       CHECK_CXX_SOURCE_COMPILES("${PTHREAD_C_CXX_TEST_SOURCE}" CMAKE_HAVE_LIBC_PTHREAD)
     endif()
-
-    # Check for -pthread first if enabled. This is the recommended
-    # way, but not backwards compatible as one must also pass -pthread
-    # as compiler flag then.
-    if(THREADS_PREFER_PTHREAD_FLAG)
-      _check_pthreads_flag()
-    endif()
-
-    if(Threads_FOUND)
-      # do nothing, we are done
-    elseif(CMAKE_HAVE_LIBC_PTHREAD)
+    if(CMAKE_HAVE_LIBC_PTHREAD)
       set(CMAKE_THREAD_LIBS_INIT "")
       set(CMAKE_HAVE_THREADS_LIBRARY 1)
       set(Threads_FOUND TRUE)
     else()
+      # Check for -pthread first if enabled. This is the recommended
+      # way, but not backwards compatible as one must also pass -pthread
+      # as compiler flag then.
+      if (THREADS_PREFER_PTHREAD_FLAG)
+         _check_pthreads_flag()
+      endif ()
+
       if(CMAKE_SYSTEM MATCHES "GHS-MULTI")
         _check_threads_lib(posix pthread_create CMAKE_HAVE_PTHREADS_CREATE)
       endif()
