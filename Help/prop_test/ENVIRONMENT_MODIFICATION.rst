@@ -18,17 +18,19 @@ order specified in the property's value. The ``OP`` may be one of:
     to its state from the rest of the CTest execution.
   - ``set``: Replaces the current value of ``MYVAR`` with ``VALUE``.
   - ``unset``: Unsets the current value of ``MYVAR``.
-  - ``string_append``: Appends ``VALUE`` to the current value of ``MYVAR``.
-  - ``string_prepend``: Prepends ``VALUE`` to the current value of ``MYVAR``.
-  - ``path_list_append``: Appends ``VALUE`` to the current value of ``MYVAR``
-    using the host platform's path list separator (``;`` on Windows and ``:``
-    elsewhere).
-  - ``path_list_prepend``: Prepends ``VALUE`` to the current value of
+  - ``string_append``: Appends singular ``VALUE`` to the current value of
+    ``MYVAR``.
+  - ``string_prepend``: Prepends singular ``VALUE`` to the current value of
+    ``MYVAR``.
+  - ``path_list_append``: Appends singular ``VALUE`` to the current value of
     ``MYVAR`` using the host platform's path list separator (``;`` on Windows
     and ``:`` elsewhere).
-  - ``cmake_list_append``: Appends ``VALUE`` to the current value of ``MYVAR``
-    using ``;`` as the separator.
-  - ``cmake_list_prepend``: Prepends ``VALUE`` to the current value of
+  - ``path_list_prepend``: Prepends singular ``VALUE`` to the current value of
+    ``MYVAR`` using the host platform's path list separator (``;`` on Windows
+    and ``:`` elsewhere).
+  - ``cmake_list_append``: Appends singular ``VALUE`` to the current value of
+    ``MYVAR`` using ``;`` as the separator.
+  - ``cmake_list_prepend``: Prepends singular ``VALUE`` to the current value of
     ``MYVAR`` using ``;`` as the separator.
 
 Unrecognized ``OP`` values will result in the test failing before it is
