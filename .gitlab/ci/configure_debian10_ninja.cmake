@@ -77,4 +77,8 @@ set(CMake_TEST_JQ "/usr/bin/jq" CACHE PATH "")
 set(CMake_TEST_Qt5 "ON" CACHE BOOL "")
 set(CMake_TEST_UseSWIG "ON" CACHE BOOL "")
 
+if (NOT "$ENV{SWIFTC}" STREQUAL "")
+  set(CMAKE_Swift_COMPILER "$ENV{SWIFTC}" CACHE FILEPATH "")
+endif()
+
 include("${CMAKE_CURRENT_LIST_DIR}/configure_external_test.cmake")
