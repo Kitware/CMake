@@ -33,7 +33,7 @@ using TestPreset = cmCMakePresetsGraph::TestPreset;
 using ArchToolsetStrategy = cmCMakePresetsGraph::ArchToolsetStrategy;
 
 constexpr int MIN_VERSION = 1;
-constexpr int MAX_VERSION = 4;
+constexpr int MAX_VERSION = 5;
 
 struct CMakeVersion
 {

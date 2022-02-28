@@ -54,7 +54,7 @@ The root object recognizes the following fields:
 ``version``
 
   A required integer representing the version of the JSON schema.
-  The supported versions are ``1``, ``2``, ``3``, and ``4``.
+  The supported versions are ``1``, ``2``, ``3``, ``4``, and ``5``.
 
 ``cmakeMinimumRequired``
 

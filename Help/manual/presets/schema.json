@@ -57,6 +57,21 @@
         "include": { "$ref": "#/definitions/include"}
       },
       "additionalProperties": false
+    },
+    {
+      "properties": {
+        "version": {
+          "const": 5,
+          "description": "A required integer representing the version of the JSON schema."
+        },
+        "cmakeMinimumRequired": { "$ref": "#/definitions/cmakeMinimumRequired"},
+        "vendor": { "$ref": "#/definitions/vendor" },
+        "configurePresets": { "$ref": "#/definitions/configurePresetsV3"},
+        "buildPresets": { "$ref": "#/definitions/buildPresetsV4"},
+        "testPresets": { "$ref": "#/definitions/testPresetsV5"},
+        "include": { "$ref": "#/definitions/include"}
+      },
+      "additionalProperties": false
     }
   ],
   "required": [
@@ -821,8 +836,7 @@
                 "type": "integer",
                 "description": "An optional integer specifying the maximum width of a test name to output. Equivalent to passing --max-width on the command line."
               }
-            },
-            "additionalProperties": false
+            }
           },
           "filter": {
             "type": "object",
@@ -996,6 +1010,38 @@
         "required": [
           "name"
         ]
+      }
+    },
+    "testPresetsV5": {
+      "type": "array",
+      "description": "An optional array of test preset objects. Used to specify arguments to ctest. Available in version 5 and higher.",
+      "allOf": [
+        { "$ref": "#/definitions/testPresetsItemsV2" },
+        { "$ref": "#/definitions/testPresetsItemsV3" }
+      ],
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {},
+          "hidden": {},
+          "inherits": {},
+          "configurePreset": {},
+          "vendor": {},
+          "displayName": {},
+          "description": {},
+          "inheritConfigureEnvironment": {},
+          "environment": {},
+          "configuration": {},
+          "overwriteConfigurationFile": {},
+          "output": {},
+          "filter": {},
+          "execution": {},
+          "condition": {}
+        },
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false
       }
     },
     "testPresetsV3": {
