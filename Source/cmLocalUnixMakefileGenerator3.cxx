@@ -1508,13 +1508,12 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(
     }
 
     // Setup relative path top directories.
-    if (cmValue relativePathTopSource =
-          mf->GetDefinition("CMAKE_RELATIVE_PATH_TOP_SOURCE")) {
-      this->SetRelativePathTopSource(*relativePathTopSource);
-    }
-    if (cmValue relativePathTopBinary =
-          mf->GetDefinition("CMAKE_RELATIVE_PATH_TOP_BINARY")) {
-      this->SetRelativePathTopBinary(*relativePathTopBinary);
+    cmValue relativePathTopSource =
+      mf->GetDefinition("CMAKE_RELATIVE_PATH_TOP_SOURCE");
+    cmValue relativePathTopBinary =
+      mf->GetDefinition("CMAKE_RELATIVE_PATH_TOP_BINARY");
+    if (relativePathTopSource && relativePathTopBinary) {
+      this->SetRelativePathTop(*relativePathTopSource, *relativePathTopBinary);
     }
   } else {
     cmSystemTools::Error("Directory Information file not found");

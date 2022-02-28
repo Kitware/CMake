@@ -79,14 +79,11 @@ std::string const& cmOutputConverter::GetRelativePathTopBinary() const
   return this->RelativePathTopBinary;
 }
 
-void cmOutputConverter::SetRelativePathTopSource(std::string const& top)
+void cmOutputConverter::SetRelativePathTop(std::string const& topSource,
+                                           std::string const& topBinary)
 {
-  this->RelativePathTopSource = top;
-}
-
-void cmOutputConverter::SetRelativePathTopBinary(std::string const& top)
-{
-  this->RelativePathTopBinary = top;
+  this->RelativePathTopSource = topSource;
+  this->RelativePathTopBinary = topBinary;
 }
 
 std::string cmOutputConverter::MaybeRelativeTo(

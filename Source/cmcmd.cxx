@@ -1286,8 +1286,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
         // FIXME: With advanced add_subdirectory usage, these are
         // not necessarily the same as the generator originally used.
         // We should pass all these directories through an info file.
-        lgd->SetRelativePathTopSource(homeDir);
-        lgd->SetRelativePathTopBinary(homeOutDir);
+        lgd->SetRelativePathTop(homeDir, homeOutDir);
 
         // Actually scan dependencies.
         return lgd->UpdateDependencies(depInfo, verbose, color) ? 0 : 2;
@@ -1569,8 +1568,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
         // FIXME: With advanced add_subdirectory usage, these are
         // not necessarily the same as the generator originally used.
         // We should pass all these directories through an info file.
-        lgd->SetRelativePathTopSource(homeDir);
-        lgd->SetRelativePathTopBinary(homeOutDir);
+        lgd->SetRelativePathTop(homeDir, homeOutDir);
 
         return cmTransformDepfile(format, *lgd, args[8], args[9]) ? 0 : 2;
       }

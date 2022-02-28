@@ -29,8 +29,8 @@ public:
 
   std::string const& GetRelativePathTopSource() const;
   std::string const& GetRelativePathTopBinary() const;
-  void SetRelativePathTopSource(std::string const& top);
-  void SetRelativePathTopBinary(std::string const& top);
+  void SetRelativePathTop(std::string const& topSource,
+                          std::string const& topBinary);
 
   enum OutputFormat
   {
