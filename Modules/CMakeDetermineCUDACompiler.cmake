@@ -272,26 +272,24 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
     endif()
   endif()
 
-  # Detect explicit architectures and add them during detection.
-  if(DEFINED CMAKE_CUDA_ARCHITECTURES AND NOT "${CMAKE_CUDA_ARCHITECTURES}" STREQUAL "all" AND NOT "${CMAKE_CUDA_ARCHITECTURES}" STREQUAL "all-major")
-    set(architectures_explicit TRUE)
-    set(architectures_test ${CMAKE_CUDA_ARCHITECTURES})
-  endif()
-
-  # For sufficiently new NVCC we can just use the all and all-major flags.
-  # For VS we don't test since we can't figure out the version this early (see #23161).
-  # For others select based on version.
-  if(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA" AND CMAKE_CUDA_COMPILER_TOOLKIT_VERSION VERSION_GREATER_EQUAL 11.5)
-    if("${CMAKE_CUDA_ARCHITECTURES}" STREQUAL "all")
-      string(APPEND nvcc_test_flags " -arch=all")
-    elseif("${CMAKE_CUDA_ARCHITECTURES}" STREQUAL "all-major")
-      string(APPEND nvcc_test_flags " -arch=all-major")
-    endif()
-  elseif(NOT CMAKE_GENERATOR MATCHES "Visual Studio")
-    if("${CMAKE_CUDA_ARCHITECTURES}" STREQUAL "all")
-      set(architectures_test ${CMAKE_CUDA_ARCHITECTURES_ALL})
-    elseif("${CMAKE_CUDA_ARCHITECTURES}" STREQUAL "all-major")
-      set(architectures_test ${CMAKE_CUDA_ARCHITECTURES_ALL_MAJOR})
+  if(DEFINED CMAKE_CUDA_ARCHITECTURES)
+    if(CMAKE_CUDA_ARCHITECTURES MATCHES "^(all|all-major)$")
+      # For sufficiently new NVCC we can just use the all and all-major flags.
+      # For VS we don't test since we can't figure out the version this early (see #23161).
+      # For others select based on version.
+      if(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA" AND CMAKE_CUDA_COMPILER_TOOLKIT_VERSION VERSION_GREATER_EQUAL 11.5)
+        string(APPEND nvcc_test_flags " -arch=${CMAKE_CUDA_ARCHITECTURES}")
+      elseif(NOT CMAKE_GENERATOR MATCHES "Visual Studio")
+        if(CMAKE_CUDA_ARCHITECTURES STREQUAL "all")
+          set(architectures_test ${CMAKE_CUDA_ARCHITECTURES_ALL})
+        elseif(CMAKE_CUDA_ARCHITECTURES STREQUAL "all-major")
+          set(architectures_test ${CMAKE_CUDA_ARCHITECTURES_ALL_MAJOR})
+        endif()
+      endif()
+    else()
+      # Explicit architectures.  Test them during detection.
+      set(architectures_explicit TRUE)
+      set(architectures_test ${CMAKE_CUDA_ARCHITECTURES})
     endif()
   endif()
 
