@@ -9,7 +9,8 @@ using :genex:`LINK_LIBRARY` generator expression.
 
 .. note::
 
-  Feature names defined in all uppercase are reserved to CMake.
+  * Feature names can contain Latin letters, digits and undercores.
+  * Feature names defined in all uppercase are reserved to CMake.
 
 See also the associated variable
 :variable:`CMAKE_<LANG>_LINK_LIBRARY_USING_<FEATURE>_SUPPORTED` and

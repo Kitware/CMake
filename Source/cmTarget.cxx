@@ -1788,20 +1788,21 @@ void CheckLinkLibraryPattern(const std::string& property,
                              const std::string& value, cmMakefile* context)
 {
   // Look for <LINK_LIBRARY:> and </LINK_LIBRARY:> internal tags
-  static cmsys::RegularExpression linkLibrary(
-    "(^|;)(</?LINK_LIBRARY:[^;>]*>)(;|$)");
-  if (!linkLibrary.find(value)) {
+  static cmsys::RegularExpression linkPattern(
+    "(^|;)(</?LINK_(LIBRARY|GROUP):[^;>]*>)(;|$)");
+  if (!linkPattern.find(value)) {
     return;
   }
 
   // Report an error.
   context->IssueMessage(
     MessageType::FATAL_ERROR,
-    cmStrCat("Property ", property, " contains the invalid item \"",
-             linkLibrary.match(2), "\". The ", property,
-             " property may contain the generator-expression "
-             "\"$<LINK_LIBRARY:...>\" "
-             "which may be used to specify how the libraries are linked."));
+    cmStrCat(
+      "Property ", property, " contains the invalid item \"",
+      linkPattern.match(2), "\". The ", property,
+      " property may contain the generator-expression \"$<LINK_",
+      linkPattern.match(3),
+      ":...>\" which may be used to specify how the libraries are linked."));
 }
 
 void CheckLINK_INTERFACE_LIBRARIES(const std::string& prop,

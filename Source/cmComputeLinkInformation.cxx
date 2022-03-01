@@ -350,21 +350,23 @@ cmComputeLinkInformation::cmComputeLinkInformation(
   if (!this->GetLibLinkFileFlag().empty()) {
     this->LibraryFeatureDescriptors.emplace(
       "__CMAKE_LINK_LIBRARY",
-      FeatureDescriptor{ "__CMAKE_LINK_LIBRARY",
-                         cmStrCat(this->GetLibLinkFileFlag(), "<LIBRARY>") });
+      LibraryFeatureDescriptor{
+        "__CMAKE_LINK_LIBRARY",
+        cmStrCat(this->GetLibLinkFileFlag(), "<LIBRARY>") });
   }
   if (!this->GetObjLinkFileFlag().empty()) {
     this->LibraryFeatureDescriptors.emplace(
       "__CMAKE_LINK_OBJECT",
-      FeatureDescriptor{ "__CMAKE_LINK_OBJECT",
-                         cmStrCat(this->GetObjLinkFileFlag(), "<LIBRARY>") });
+      LibraryFeatureDescriptor{
+        "__CMAKE_LINK_OBJECT",
+        cmStrCat(this->GetObjLinkFileFlag(), "<LIBRARY>") });
   }
   if (!this->LoaderFlag->empty()) {
     // Define a Feature descriptor for the link of an executable with exports
     this->LibraryFeatureDescriptors.emplace(
       "__CMAKE_LINK_EXECUTABLE",
-      FeatureDescriptor{ "__CMAKE_LINK_EXECUTABLE",
-                         cmStrCat(this->LoaderFlag, "<LIBRARY>") });
+      LibraryFeatureDescriptor{ "__CMAKE_LINK_EXECUTABLE",
+                                cmStrCat(this->LoaderFlag, "<LIBRARY>") });
   }
 
   // Check the platform policy for missing soname case.
@@ -544,6 +546,19 @@ bool cmComputeLinkInformation::Compute()
 
   // Add the link line items.
   for (cmComputeLinkDepends::LinkEntry const& linkEntry : linkEntries) {
+    if (linkEntry.Kind == cmComputeLinkDepends::LinkEntry::Group) {
+      const auto& groupFeature = this->GetGroupFeature(linkEntry.Feature);
+      if (groupFeature.Supported) {
+        this->Items.emplace_back(
+          BT<std::string>{ linkEntry.Item.Value == "<LINK_GROUP>"
+                             ? groupFeature.Prefix
+                             : groupFeature.Suffix,
+                           linkEntry.Item.Backtrace },
+          ItemIsPath::No);
+      }
+      continue;
+    }
+
     if (currentFeature != nullptr &&
         linkEntry.Feature != currentFeature->Name) {
       // emit feature suffix, if any
@@ -571,7 +586,7 @@ bool cmComputeLinkInformation::Compute()
       }
     }
 
-    if (linkEntry.IsSharedDep) {
+    if (linkEntry.Kind == cmComputeLinkDepends::LinkEntry::SharedDep) {
       this->AddSharedDepItem(linkEntry);
     } else {
       this->AddItem(linkEntry);
@@ -664,6 +679,117 @@ bool IsValidFeatureFormat(const std::string& format)
     format.find("<LIB_ITEM>") != std::string::npos ||
     format.find("<LINK_ITEM>") != std::string::npos;
 }
+
+class FeaturePlaceHolderExpander : public cmPlaceholderExpander
+{
+public:
+  FeaturePlaceHolderExpander(const std::string* library,
+                             const std::string* libItem = nullptr,
+                             const std::string* linkItem = nullptr)
+    : Library(library)
+    , LibItem(libItem)
+    , LinkItem(linkItem)
+  {
+  }
+
+private:
+  std::string ExpandVariable(std::string const& variable) override
+  {
+    if (this->Library != nullptr && variable == "LIBRARY") {
+      return *this->Library;
+    }
+    if (this->LibItem != nullptr && variable == "LIB_ITEM") {
+      return *this->LibItem;
+    }
+    if (this->LinkItem != nullptr && variable == "LINK_ITEM") {
+      return *this->LinkItem;
+    }
+
+    return variable;
+  }
+
+  const std::string* Library = nullptr;
+  const std::string* LibItem = nullptr;
+  const std::string* LinkItem = nullptr;
+};
+}
+
+cmComputeLinkInformation::FeatureDescriptor::FeatureDescriptor(
+  std::string name, std::string itemFormat)
+  : Name(std::move(name))
+  , Supported(true)
+  , ItemPathFormat(std::move(itemFormat))
+  , ItemNameFormat(this->ItemPathFormat)
+{
+}
+cmComputeLinkInformation::FeatureDescriptor::FeatureDescriptor(
+  std::string name, std::string itemPathFormat, std::string itemNameFormat)
+  : Name(std::move(name))
+  , Supported(true)
+  , ItemPathFormat(std::move(itemPathFormat))
+  , ItemNameFormat(std::move(itemNameFormat))
+{
+}
+cmComputeLinkInformation::FeatureDescriptor::FeatureDescriptor(
+  std::string name, std::string prefix, std::string itemPathFormat,
+  std::string itemNameFormat, std::string suffix)
+  : Name(std::move(name))
+  , Supported(true)
+  , Prefix(std::move(prefix))
+  , Suffix(std::move(suffix))
+  , ItemPathFormat(std::move(itemPathFormat))
+  , ItemNameFormat(std::move(itemNameFormat))
+{
+}
+cmComputeLinkInformation::FeatureDescriptor::FeatureDescriptor(
+  std::string name, std::string prefix, std::string suffix, bool)
+  : Name(std::move(name))
+  , Supported(true)
+  , Prefix(std::move(prefix))
+  , Suffix(std::move(suffix))
+{
+}
+
+std::string cmComputeLinkInformation::FeatureDescriptor::GetDecoratedItem(
+  std::string const& library, ItemIsPath isPath) const
+{
+  auto format =
+    isPath == ItemIsPath::Yes ? this->ItemPathFormat : this->ItemNameFormat;
+
+  // replace <LIBRARY>, <LIB_ITEM> and <LINK_ITEM> patterns with library path
+  FeaturePlaceHolderExpander expander(&library, &library, &library);
+  return expander.ExpandVariables(format);
+}
+std::string cmComputeLinkInformation::FeatureDescriptor::GetDecoratedItem(
+  std::string const& library, std::string const& libItem,
+  std::string const& linkItem, ItemIsPath isPath) const
+{
+  auto format =
+    isPath == ItemIsPath::Yes ? this->ItemPathFormat : this->ItemNameFormat;
+
+  // replace <LIBRARY>, <LIB_ITEM> and <LINK_ITEM> patterns
+  FeaturePlaceHolderExpander expander(&library, &libItem, &linkItem);
+  return expander.ExpandVariables(format);
+}
+
+cmComputeLinkInformation::LibraryFeatureDescriptor::LibraryFeatureDescriptor(
+  std::string name, std::string itemFormat)
+  : FeatureDescriptor(std::move(name), std::move(itemFormat))
+{
+}
+cmComputeLinkInformation::LibraryFeatureDescriptor::LibraryFeatureDescriptor(
+  std::string name, std::string itemPathFormat, std::string itemNameFormat)
+  : FeatureDescriptor(std::move(name), std::move(itemPathFormat),
+                      std::move(itemNameFormat))
+{
+}
+cmComputeLinkInformation::LibraryFeatureDescriptor::LibraryFeatureDescriptor(
+  std::string name, std::string prefix, std::string itemPathFormat,
+  std::string itemNameFormat, std::string suffix)
+  : FeatureDescriptor(std::move(name), std::move(prefix),
+                      std::move(itemPathFormat), std::move(itemNameFormat),
+                      std::move(suffix))
+{
 }
 
 bool cmComputeLinkInformation::AddLibraryFeature(std::string const& feature)
@@ -792,12 +918,13 @@ bool cmComputeLinkInformation::AddLibraryFeature(std::string const& feature)
 
   if (items.size() == 2) {
     this->LibraryFeatureDescriptors.emplace(
-      feature, FeatureDescriptor{ feature, items[0].Value, items[1].Value });
+      feature,
+      LibraryFeatureDescriptor{ feature, items[0].Value, items[1].Value });
   } else {
     this->LibraryFeatureDescriptors.emplace(
       feature,
-      FeatureDescriptor{ feature, items[0].Value, items[1].Value,
-                         items[2].Value, items[3].Value });
+      LibraryFeatureDescriptor{ feature, items[0].Value, items[1].Value,
+                                items[2].Value, items[3].Value });
   }
 
   return true;
@@ -819,89 +946,80 @@ cmComputeLinkInformation::FindLibraryFeature(std::string const& feature) const
   return &it->second;
 }
 
-namespace {
-class FeaturePlaceHolderExpander : public cmPlaceholderExpander
+cmComputeLinkInformation::GroupFeatureDescriptor::GroupFeatureDescriptor(
+  std::string name, std::string prefix, std::string suffix)
+  : FeatureDescriptor(std::move(name), std::move(prefix), std::move(suffix),
+                      true)
 {
-public:
-  FeaturePlaceHolderExpander(const std::string* library,
-                             const std::string* libItem = nullptr,
-                             const std::string* linkItem = nullptr)
-    : Library(library)
-    , LibItem(libItem)
-    , LinkItem(linkItem)
-  {
+}
+
+cmComputeLinkInformation::FeatureDescriptor const&
+cmComputeLinkInformation::GetGroupFeature(std::string const& feature)
+{
+  auto it = this->GroupFeatureDescriptors.find(feature);
+  if (it != this->GroupFeatureDescriptors.end()) {
+    return it->second;
   }
 
-private:
-  std::string ExpandVariable(std::string const& variable) override
-  {
-    if (this->Library != nullptr && variable == "LIBRARY") {
-      return *this->Library;
-    }
-    if (this->LibItem != nullptr && variable == "LIB_ITEM") {
-      return *this->LibItem;
-    }
-    if (this->LinkItem != nullptr && variable == "LINK_ITEM") {
-      return *this->LinkItem;
-    }
-
-    return variable;
+  auto featureName =
+    cmStrCat("CMAKE_", this->LinkLanguage, "_LINK_GROUP_USING_", feature);
+  cmValue featureSupported =
+    this->Makefile->GetDefinition(cmStrCat(featureName, "_SUPPORTED"));
+  if (!featureSupported.IsOn()) {
+    featureName = cmStrCat("CMAKE_LINK_GROUP_USING_", feature);
+    featureSupported =
+      this->Makefile->GetDefinition(cmStrCat(featureName, "_SUPPORTED"));
+  }
+  if (!featureSupported.IsOn()) {
+    this->CMakeInstance->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("Feature '", feature,
+               "', specified through generator-expression '$<LINK_GROUP>' to "
+               "link target '",
+               this->Target->GetName(), "', is not supported for the '",
+               this->LinkLanguage, "' link language."),
+      this->Target->GetBacktrace());
+    return this->GroupFeatureDescriptors.emplace(feature, FeatureDescriptor{})
+      .first->second;
   }
 
-  const std::string* Library = nullptr;
-  const std::string* LibItem = nullptr;
-  const std::string* LinkItem = nullptr;
-};
-}
+  cmValue langFeature = this->Makefile->GetDefinition(featureName);
+  if (!langFeature) {
+    this->CMakeInstance->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("Feature '", feature,
+               "', specified through generator-expression '$<LINK_GROUP>' to "
+               "link target '",
+               this->Target->GetName(), "', is not defined for the '",
+               this->LinkLanguage, "' link language."),
+      this->Target->GetBacktrace());
+    return this->GroupFeatureDescriptors.emplace(feature, FeatureDescriptor{})
+      .first->second;
+  }
 
-cmComputeLinkInformation::FeatureDescriptor::FeatureDescriptor(
-  std::string name, std::string itemFormat)
-  : Name(std::move(name))
-  , Supported(true)
-  , ItemPathFormat(std::move(itemFormat))
-  , ItemNameFormat(this->ItemPathFormat)
-{
-}
-cmComputeLinkInformation::FeatureDescriptor::FeatureDescriptor(
-  std::string name, std::string itemPathFormat, std::string itemNameFormat)
-  : Name(std::move(name))
-  , Supported(true)
-  , ItemPathFormat(std::move(itemPathFormat))
-  , ItemNameFormat(std::move(itemNameFormat))
-{
-}
-cmComputeLinkInformation::FeatureDescriptor::FeatureDescriptor(
-  std::string name, std::string prefix, std::string itemPathFormat,
-  std::string itemNameFormat, std::string suffix)
-  : Name(std::move(name))
-  , Supported(true)
-  , Prefix(std::move(prefix))
-  , Suffix(std::move(suffix))
-  , ItemPathFormat(std::move(itemPathFormat))
-  , ItemNameFormat(std::move(itemNameFormat))
-{
-}
+  auto items =
+    cmExpandListWithBacktrace(langFeature, this->Target->GetBacktrace(), true);
 
-std::string cmComputeLinkInformation::FeatureDescriptor::GetDecoratedItem(
-  std::string const& library, ItemIsPath isPath) const
-{
-  auto format =
-    isPath == ItemIsPath::Yes ? this->ItemPathFormat : this->ItemNameFormat;
+  // replace LINKER: pattern
+  this->Target->ResolveLinkerWrapper(items, this->LinkLanguage, true);
 
-  // replace <LIBRARY>, <LIB_ITEM> and <LINK_ITEM> patterns with library path
-  FeaturePlaceHolderExpander expander(&library, &library, &library);
-  return expander.ExpandVariables(format);
-}
-std::string cmComputeLinkInformation::FeatureDescriptor::GetDecoratedItem(
-  std::string const& library, std::string const& libItem,
-  std::string const& linkItem, ItemIsPath isPath) const
-{
-  auto format =
-    isPath == ItemIsPath::Yes ? this->ItemPathFormat : this->ItemNameFormat;
+  if (items.size() == 2) {
+    return this->GroupFeatureDescriptors
+      .emplace(
+        feature,
+        GroupFeatureDescriptor{ feature, items[0].Value, items[1].Value })
+      .first->second;
+  }
 
-  // replace <LIBRARY>, <LIB_ITEM> and <LINK_ITEM> patterns
-  FeaturePlaceHolderExpander expander(&library, &libItem, &linkItem);
-  return expander.ExpandVariables(format);
+  this->CMakeInstance->IssueMessage(
+    MessageType::FATAL_ERROR,
+    cmStrCat("Feature '", feature, "', specified by variable '", featureName,
+             "', is malformed (wrong number of elements) and cannot be used "
+             "to link target '",
+             this->Target->GetName(), "'."),
+    this->Target->GetBacktrace());
+  return this->GroupFeatureDescriptors.emplace(feature, FeatureDescriptor{})
+    .first->second;
 }
 
 void cmComputeLinkInformation::AddImplicitLinkInfo()
@@ -1521,7 +1639,9 @@ void cmComputeLinkInformation::AddFullItem(LinkEntry const& entry)
     item, ItemIsPath::Yes, nullptr,
     this->FindLibraryFeature(
       entry.Feature == DEFAULT
-        ? (entry.IsObject ? "__CMAKE_LINK_OBJECT" : "__CMAKE_LINK_LIBRARY")
+        ? (entry.Kind == cmComputeLinkDepends::LinkEntry::Object
+             ? "__CMAKE_LINK_OBJECT"
+             : "__CMAKE_LINK_LIBRARY")
         : entry.Feature));
 }
 

@@ -49,11 +49,20 @@ public:
 
     static const std::string DEFAULT;
 
+    enum EntryKind
+    {
+      Library,
+      Object,
+      SharedDep,
+      Flag,
+      // The following member is for the management of items specified
+      // through genex $<LINK_GROUP:...>
+      Group
+    };
+
     BT<std::string> Item;
     cmGeneratorTarget const* Target = nullptr;
-    bool IsSharedDep = false;
-    bool IsFlag = false;
-    bool IsObject = false;
+    EntryKind Kind = Library;
     // The following member is for the management of items specified
     // through genex $<LINK_LIBRARY:...>
     std::string Feature = std::string(DEFAULT);
@@ -84,7 +93,8 @@ private:
 
   std::pair<std::map<cmLinkItem, int>::iterator, bool> AllocateLinkEntry(
     cmLinkItem const& item);
-  std::pair<int, bool> AddLinkEntry(cmLinkItem const& item);
+  std::pair<int, bool> AddLinkEntry(cmLinkItem const& item,
+                                    int groupIndex = -1);
   void AddLinkObject(cmLinkItem const& item);
   void AddVarLinkEntries(int depender_index, const char* value);
   void AddDirectLinkEntries();
@@ -97,10 +107,14 @@ private:
   std::vector<LinkEntry> EntryList;
   std::map<cmLinkItem, int> LinkEntryIndex;
 
+  // map storing, for each group, the list of items
+  std::map<int, std::vector<int>> GroupItems;
+
   // BFS of initial dependencies.
   struct BFSEntry
   {
     int Index;
+    int GroupIndex;
     const char* LibDepends;
   };
   std::queue<BFSEntry> BFSQueue;
@@ -133,12 +147,16 @@ private:
   std::vector<DependSetList> InferredDependSets;
   void InferDependencies();
 
+  // To finalize dependencies over groups in place of raw items
+  void UpdateGroupDependencies();
+
   // Ordering constraint graph adjacency list.
   using NodeList = cmGraphNodeList;
   using EdgeList = cmGraphEdgeList;
   using Graph = cmGraphAdjacencyList;
   Graph EntryConstraintGraph;
   void CleanConstraintGraph();
+  bool CheckCircularDependencies() const;
   void DisplayConstraintGraph();
 
   // Ordering algorithm.

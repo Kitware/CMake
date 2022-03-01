@@ -3,6 +3,8 @@
 
 int main()
 {
+  return 1;
+
   std::filesystem::path p0(L"/a/b/c");
 
   std::filesystem::path p1("/a/b/c");

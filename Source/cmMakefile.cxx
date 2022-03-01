@@ -3988,21 +3988,21 @@ void cmMakefile::CheckProperty(const std::string& prop) const
   if (prop == "LINK_LIBRARIES") {
     if (cmValue value = this->GetProperty(prop)) {
       // Look for <LINK_LIBRARY:> internal pattern
-      static cmsys::RegularExpression linkLibrary(
-        "(^|;)(</?LINK_LIBRARY:[^;>]*>)(;|$)");
-      if (!linkLibrary.find(value)) {
+      static cmsys::RegularExpression linkPattern(
+        "(^|;)(</?LINK_(LIBRARY|GROUP):[^;>]*>)(;|$)");
+      if (!linkPattern.find(value)) {
         return;
       }
 
       // Report an error.
       this->IssueMessage(
         MessageType::FATAL_ERROR,
-        cmStrCat(
-          "Property ", prop, " contains the invalid item \"",
-          linkLibrary.match(2), "\". The ", prop,
-          " property may contain the generator-expression "
-          "\"$<LINK_LIBRARY:...>\" "
-          "which may be used to specify how the libraries are linked."));
+        cmStrCat("Property ", prop, " contains the invalid item \"",
+                 linkPattern.match(2), "\". The ", prop,
+                 " property may contain the generator-expression \"$<LINK_",
+                 linkPattern.match(3),
+                 ":...>\" which may be used to specify how the libraries are "
+                 "linked."));
     }
   }
 }
