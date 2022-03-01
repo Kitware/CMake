@@ -4695,10 +4695,12 @@ std::string cmGlobalXCodeGenerator::ConvertToRelativeForMake(
 
 std::string cmGlobalXCodeGenerator::RelativeToSource(const std::string& p)
 {
-  // We force conversion because Xcode breakpoints do not work unless
-  // they are in a file named relative to the source tree.
-  return cmSystemTools::ForceToRelativePath(
-    this->CurrentRootGenerator->GetCurrentSourceDirectory(), p);
+  std::string const& rootSrc =
+    this->CurrentRootGenerator->GetCurrentSourceDirectory();
+  if (cmSystemTools::IsSubDirectory(p, rootSrc)) {
+    return cmSystemTools::ForceToRelativePath(rootSrc, p);
+  }
+  return p;
 }
 
 std::string cmGlobalXCodeGenerator::RelativeToBinary(const std::string& p)

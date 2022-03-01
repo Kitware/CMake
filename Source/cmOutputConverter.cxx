@@ -34,6 +34,7 @@ cmOutputConverter::cmOutputConverter(cmStateSnapshot const& snapshot)
   assert(this->StateSnapshot.IsValid());
   this->ComputeRelativePathTopSource();
   this->ComputeRelativePathTopBinary();
+  this->ComputeRelativePathTopRelation();
 }
 
 void cmOutputConverter::ComputeRelativePathTopSource()
@@ -69,6 +70,22 @@ void cmOutputConverter::ComputeRelativePathTopBinary()
   this->RelativePathTopBinary = snapshot.GetDirectory().GetCurrentBinary();
 }
 
+void cmOutputConverter::ComputeRelativePathTopRelation()
+{
+  if (cmSystemTools::ComparePath(this->RelativePathTopSource,
+                                 this->RelativePathTopBinary)) {
+    this->RelativePathTopRelation = TopRelation::InSource;
+  } else if (cmSystemTools::IsSubDirectory(this->RelativePathTopBinary,
+                                           this->RelativePathTopSource)) {
+    this->RelativePathTopRelation = TopRelation::BinInSrc;
+  } else if (cmSystemTools::IsSubDirectory(this->RelativePathTopSource,
+                                           this->RelativePathTopBinary)) {
+    this->RelativePathTopRelation = TopRelation::SrcInBin;
+  } else {
+    this->RelativePathTopRelation = TopRelation::Separate;
+  }
+}
+
 std::string const& cmOutputConverter::GetRelativePathTopSource() const
 {
   return this->RelativePathTopSource;
@@ -79,26 +96,44 @@ std::string const& cmOutputConverter::GetRelativePathTopBinary() const
   return this->RelativePathTopBinary;
 }
 
-void cmOutputConverter::SetRelativePathTopSource(std::string const& top)
+void cmOutputConverter::SetRelativePathTop(std::string const& topSource,
+                                           std::string const& topBinary)
 {
-  this->RelativePathTopSource = top;
-}
-
-void cmOutputConverter::SetRelativePathTopBinary(std::string const& top)
-{
-  this->RelativePathTopBinary = top;
+  this->RelativePathTopSource = topSource;
+  this->RelativePathTopBinary = topBinary;
+  this->ComputeRelativePathTopRelation();
 }
 
 std::string cmOutputConverter::MaybeRelativeTo(
   std::string const& local_path, std::string const& remote_path) const
 {
-  bool bothInBinary =
-    PathEqOrSubDir(local_path, this->RelativePathTopBinary) &&
+  bool localInBinary = PathEqOrSubDir(local_path, this->RelativePathTopBinary);
+  bool remoteInBinary =
     PathEqOrSubDir(remote_path, this->RelativePathTopBinary);
 
-  bool bothInSource =
-    PathEqOrSubDir(local_path, this->RelativePathTopSource) &&
+  bool localInSource = PathEqOrSubDir(local_path, this->RelativePathTopSource);
+  bool remoteInSource =
     PathEqOrSubDir(remote_path, this->RelativePathTopSource);
+
+  switch (this->RelativePathTopRelation) {
+    case TopRelation::Separate:
+      // Checks are independent.
+      break;
+    case TopRelation::BinInSrc:
+      localInSource = localInSource && !localInBinary;
+      remoteInSource = remoteInSource && !remoteInBinary;
+      break;
+    case TopRelation::SrcInBin:
+      localInBinary = localInBinary && !localInSource;
+      remoteInBinary = remoteInBinary && !remoteInSource;
+      break;
+    case TopRelation::InSource:
+      // Checks are identical.
+      break;
+  };
+
+  bool const bothInBinary = localInBinary && remoteInBinary;
+  bool const bothInSource = localInSource && remoteInSource;
 
   if (bothInBinary || bothInSource) {
     return cmSystemTools::ForceToRelativePath(local_path, remote_path);
