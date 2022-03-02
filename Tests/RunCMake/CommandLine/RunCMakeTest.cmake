@@ -155,9 +155,13 @@ message(STATUS "CMAKE_BINARY_DIR='${CMAKE_BINARY_DIR}'")
 
   set(source_dir ${RunCMake_SOURCE_DIR}/ExplicitDirs)
   set(binary_dir ${RunCMake_BINARY_DIR}/ExplicitDirs-build)
+  set(working_dir ${RunCMake_BINARY_DIR}/ExplicitDirs-cwd)
 
   set(RunCMake_TEST_SOURCE_DIR "${source_dir}")
   set(RunCMake_TEST_BINARY_DIR "${binary_dir}")
+
+  file(MAKE_DIRECTORY "${working_dir}")
+  set(RunCMake_TEST_COMMAND_WORKING_DIRECTORY "${working_dir}")
 
   file(REMOVE_RECURSE "${binary_dir}")
   run_cmake_with_options(ExplicitDirs-S-arg -S ${source_dir} ${binary_dir})
@@ -193,6 +197,8 @@ message(STATUS "CMAKE_BINARY_DIR='${CMAKE_BINARY_DIR}'")
   file(REMOVE_RECURSE "${binary_dir}")
   run_cmake_with_options(ExplicitDirs-B-S -B${binary_dir} -S${source_dir})
   run_cmake_with_options(ExplicitDirs-B-S-extra-path -B${binary_dir} -S${source_dir} /extra/path/)
+
+  unset(RunCMake_TEST_COMMAND_WORKING_DIRECTORY)
 
   message("copied to ${RunCMake_TEST_BINARY_DIR}/initial-cache.txt")
   file(COPY ${RunCMake_SOURCE_DIR}/C_buildsrcdir/initial-cache.txt DESTINATION ${RunCMake_TEST_BINARY_DIR})
