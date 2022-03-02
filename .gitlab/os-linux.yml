@@ -440,7 +440,7 @@
         - .gitlab/ci/sccache.sh
         - sccache --start-server
         - sccache --show-stats
-        - "$LAUNCHER build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_test_external.cmake"
+        - "$LAUNCHER build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake"
         - sccache --show-stats
 
     interruptible: true
@@ -453,7 +453,7 @@
         - .gitlab/ci/sccache.sh
         - sccache --start-server
         - sccache --show-stats
-        - "$LAUNCHER build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_test_external.cmake"
+        - "$LAUNCHER build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake"
         - sccache --show-stats
 
     interruptible: true

@@ -182,7 +182,7 @@
         # Allow the server to already be running.
         - "sccache --start-server || :"
         - sccache --show-stats
-        - "$LAUNCHER build/install/CMake.app/Contents/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_test_external.cmake"
+        - "$LAUNCHER build/install/CMake.app/Contents/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake"
         - sccache --show-stats
 
     interruptible: true
