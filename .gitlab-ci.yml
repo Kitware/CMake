@@ -275,6 +275,15 @@ b:fedora35-ninja:
         - .linux_builder_tags_qt
         - .run_manually
 
+b:debian10-makefiles-inplace:
+    extends:
+        - .debian10_makefiles_inplace
+        - .cmake_build_linux_standalone
+        - .linux_builder_tags
+        - .run_manually
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
 t:fedora35-ninja:
     extends:
         - .fedora35_ninja

@@ -126,6 +126,17 @@
         CMAKE_CONFIGURATION: debian10_aarch64_ninja
         CTEST_NO_WARNINGS_ALLOWED: 1
 
+.debian10_makefiles_inplace:
+    extends: .debian10
+
+    variables:
+        CMAKE_CONFIGURATION: debian10_makefiles_inplace
+        CMAKE_GENERATOR: "Unix Makefiles"
+        CMAKE_CI_BOOTSTRAP: 1
+        CMAKE_CI_INPLACE: 1
+        CMAKE_CI_NO_INSTALL: 1
+        CTEST_NO_WARNINGS_ALLOWED: 1
+
 .fedora35_ninja:
     extends: .fedora35
 
@@ -425,6 +436,19 @@
         # Make a package.
         - bin/cpack -G TGZ
         - bin/cpack -G STGZ
+        - sccache --show-stats
+
+    interruptible: true
+
+.cmake_build_linux_standalone:
+    stage: build
+
+    script:
+        - *before_script_linux
+        - .gitlab/ci/sccache.sh
+        - sccache --start-server
+        - sccache --show-stats
+        - "$LAUNCHER ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake"
         - sccache --show-stats
 
     interruptible: true

@@ -23,6 +23,10 @@ set(CTEST_UPDATE_VERSION_ONLY ON)
 set(CTEST_UPDATE_COMMAND "${GIT_EXECUTABLE}")
 ctest_update()
 
+if("$ENV{CMAKE_CI_BOOTSTRAP}")
+  set(CTEST_CONFIGURE_COMMAND "\"${CTEST_SOURCE_DIRECTORY}/bootstrap\" --parallel=${nproc}")
+endif()
+
 # Configure the project.
 ctest_configure(
   OPTIONS "${cmake_args}"
