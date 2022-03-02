@@ -57,7 +57,7 @@
     variables:
         CMAKE_CONFIGURATION: debian10_iwyu
         CTEST_NO_WARNINGS_ALLOWED: 1
-        CMake_SKIP_INSTALL: 1
+        CMAKE_CI_NO_INSTALL: 1
 
 .debian10_aarch64:
     image: "kitware/cmake:ci-debian10-aarch64-2022-02-21"
@@ -83,7 +83,7 @@
     variables:
         CMAKE_CONFIGURATION: fedora35_tidy
         CTEST_NO_WARNINGS_ALLOWED: 1
-        CMake_SKIP_INSTALL: 1
+        CMAKE_CI_NO_INSTALL: 1
 
 .fedora35_clang_analyzer:
     extends: .fedora35
@@ -92,7 +92,7 @@
         CMAKE_CONFIGURATION: fedora35_clang_analyzer
         CMAKE_CI_BUILD_TYPE: Debug
         CTEST_NO_WARNINGS_ALLOWED: 1
-        CMake_SKIP_INSTALL: 1
+        CMAKE_CI_NO_INSTALL: 1
 
 .fedora35_sphinx:
     extends: .fedora35
@@ -101,7 +101,7 @@
         CMAKE_CONFIGURATION: fedora35_sphinx
         CTEST_NO_WARNINGS_ALLOWED: 1
         CTEST_SOURCE_SUBDIRECTORY: "Utilities/Sphinx"
-        CMake_SKIP_INSTALL: 1
+        CMAKE_CI_NO_INSTALL: 1
 
 .fedora35_sphinx_package:
     extends: .fedora35
