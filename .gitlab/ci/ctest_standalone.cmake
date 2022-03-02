@@ -6,6 +6,14 @@ include("${CMAKE_CURRENT_LIST_DIR}/env_$ENV{CMAKE_CONFIGURATION}.cmake" OPTIONAL
 set(cmake_args
   -C "${CMAKE_CURRENT_LIST_DIR}/configure_$ENV{CMAKE_CONFIGURATION}.cmake")
 
+include(ProcessorCount)
+ProcessorCount(nproc)
+if (NOT "$ENV{CTEST_MAX_PARALLELISM}" STREQUAL "")
+  if (nproc GREATER "$ENV{CTEST_MAX_PARALLELISM}")
+    set(nproc "$ENV{CTEST_MAX_PARALLELISM}")
+  endif ()
+endif ()
+
 # Create an entry in CDash.
 ctest_start("${ctest_model}" GROUP "${ctest_group}")
 
@@ -31,14 +39,6 @@ if (configure_result)
   ctest_submit(PARTS Done)
   message(FATAL_ERROR
     "Failed to configure")
-endif ()
-
-include(ProcessorCount)
-ProcessorCount(nproc)
-if (NOT "$ENV{CTEST_MAX_PARALLELISM}" STREQUAL "")
-  if (nproc GREATER "$ENV{CTEST_MAX_PARALLELISM}")
-    set(nproc "$ENV{CTEST_MAX_PARALLELISM}")
-  endif ()
 endif ()
 
 if (CTEST_CMAKE_GENERATOR STREQUAL "Unix Makefiles")
