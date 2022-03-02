@@ -372,4 +372,9 @@ if(CMAKE_HOST_WIN32)
 endif()
 file(WRITE "${RunCMake_BINARY_DIR}/example.json.in" "${_example}")
 set(CMakePresets_FILE "${RunCMake_BINARY_DIR}/example.json.in")
+set(CMakePresets_EXTRA_FILES
+  "${RunCMake_SOURCE_DIR}/otherThings.json.in"
+  "${RunCMake_SOURCE_DIR}/moreThings.json.in"
+)
 run_cmake_presets(DocumentationExample --preset=default)
+unset(CMakePresets_EXTRA_FILES)
