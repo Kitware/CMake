@@ -1,7 +1,7 @@
 
 enable_language(C)
 
-  set(CMAKE_C_LINK_GROUP_USING_cross_refs_SUPPORTED TRUE)
+set(CMAKE_C_LINK_GROUP_USING_cross_refs_SUPPORTED TRUE)
 if(CMAKE_C_COMPILER_ID STREQUAL "GNU"
   AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
 set(CMAKE_C_LINK_GROUP_USING_cross_refs "LINKER:--start-group"

@@ -61,3 +61,11 @@ if ((RunCMake_GENERATOR MATCHES "Makefiles|Ninja|Xcode"
   unset(RunCMake_TEST_OUTPUT_MERGE)
 
 endif()
+
+# Feature RESCAN
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux"
+    OR (CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND (NOT CMAKE_C_COMPILER_ID STREQUAL "SunPro" OR CMAKE_C_COMPILER_VERSION VERSION_GREATER "5.9"))
+    OR (WIN32 AND CMAKE_C_COMPILER_ID STREQUAL "GNU"))
+  run_cmake(rescan)
+  run_cmake_target(rescan link main)
+endif()
