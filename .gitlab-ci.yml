@@ -274,6 +274,8 @@ b:fedora35-ninja:
         - .cmake_build_artifacts
         - .linux_builder_tags_qt
         - .run_manually
+    variables:
+        CMAKE_CI_JOB_CONTINUOUS: "true"
 
 t:fedora35-ninja:
     extends:
@@ -286,6 +288,8 @@ t:fedora35-ninja:
         - b:fedora35-ninja
     needs:
         - b:fedora35-ninja
+    variables:
+        CMAKE_CI_JOB_CONTINUOUS: "true"
 
 t:fedora35-ninja-multi:
     extends:
