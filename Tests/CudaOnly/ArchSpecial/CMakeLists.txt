@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(CudaOnlyAll CUDA)
+project(ArchSpecial CUDA)
 
 if(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA" AND
    CMAKE_CUDA_COMPILER_VERSION VERSION_GREATER_EQUAL 8.0)
@@ -51,6 +51,6 @@ try_compile(all_major_archs_compiles
 verify_output(all-major)
 
 if(all_archs_compiles AND all_major_archs_compiles)
-  add_executable(CudaOnlyAll main.cu)
-  target_compile_options(CudaOnlyAll PRIVATE ${compile_options})
+  add_executable(CudaOnlyArchSpecial main.cu)
+  target_compile_options(CudaOnlyArchSpecial PRIVATE ${compile_options})
 endif()

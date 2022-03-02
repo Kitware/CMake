@@ -4,8 +4,8 @@ macro (add_cuda_test_macro name)
     PROPERTY LABELS "CUDA")
 endmacro ()
 
-add_cuda_test_macro(CudaOnly.All CudaOnlyAll)
 add_cuda_test_macro(CudaOnly.Architecture Architecture)
+add_cuda_test_macro(CudaOnly.ArchSpecial CudaOnlyArchSpecial)
 add_cuda_test_macro(CudaOnly.CompileFlags CudaOnlyCompileFlags)
 
 add_cuda_test_macro(CudaOnly.EnableStandard CudaOnlyEnableStandard)
