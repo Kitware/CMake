@@ -140,6 +140,8 @@ project(ExplicitDirsMissing LANGUAGES NONE)
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
   message(FATAL_ERROR "CWD used as binary dir")
 endif()
+message(STATUS "CMAKE_SOURCE_DIR='${CMAKE_SOURCE_DIR}'")
+message(STATUS "CMAKE_BINARY_DIR='${CMAKE_BINARY_DIR}'")
 ]=])
 
   file(REMOVE_RECURSE "${source_dir}/build")
