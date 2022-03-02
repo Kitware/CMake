@@ -16,6 +16,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
+#include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
@@ -199,6 +200,11 @@ bool TargetSourcesImpl::HandleFileSetMode(
 
   if (args.FileSet.empty()) {
     this->SetError("FILE_SET must not be empty");
+    return false;
+  }
+
+  if (this->Target->GetType() == cmStateEnums::UTILITY) {
+    this->SetError("FILE_SETs may not be added to custom targets");
     return false;
   }
 
