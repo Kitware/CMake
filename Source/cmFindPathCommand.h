@@ -30,7 +30,8 @@ public:
 
 private:
   std::string FindHeaderInFramework(std::string const& file,
-                                    std::string const& dir) const;
+                                    std::string const& dir,
+                                    cmFindBaseDebugState& debug) const;
   std::string FindHeader();
   std::string FindNormalHeader(cmFindBaseDebugState& debug);
   std::string FindFrameworkHeader(cmFindBaseDebugState& debug);
