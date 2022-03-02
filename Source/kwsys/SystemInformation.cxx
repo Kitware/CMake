@@ -3262,6 +3262,9 @@ bool SystemInformationImplementation::RetrieveClassicalCPUIdentity()
             case 0x3b:
               this->ChipID.ProcessorName = "Zhaoxin kx6000";
               break;
+            case 0x5b:
+              this->ChipID.ProcessorName = "Zhaoxin kh40000";
+              break;
             default:
               this->ChipID.ProcessorName =
                 "Unknown IDT\\Centaur\\VIA\\Zhaoxin family";
@@ -3294,6 +3297,9 @@ bool SystemInformationImplementation::RetrieveClassicalCPUIdentity()
               break;
             case 0x3b:
               this->ChipID.ProcessorName = "Zhaoxin kx6000";
+              break;
+            case 0x5b:
+              this->ChipID.ProcessorName = "Zhaoxin kh40000";
               break;
             default:
               this->ChipID.ProcessorName = "Unknown Zhaoxin family";
