@@ -1,8 +1,6 @@
-set(var_with_paren "(")
-set(some_list "")
-
-while(NOT ${var_with_paren} IN_LIST some_list)
-  message(STATUS "Never prints")
+set(paren "(")
+while(${paren})
+  message(STATUS "Condition incorrectly true")
+  break()
 endwhile()
-
-message(STATUS "Never prints")
+message(STATUS "Code incorrectly accepted")
