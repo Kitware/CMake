@@ -1556,7 +1556,7 @@ bool cmake::SetDirectoriesFromFile(const std::string& arg)
     // This function is called multiple times with the same path
     if (is_source_dir) {
       this->SetHomeDirectoryViaCommandLine(listPath, HomeDirArgStyle::Plain);
-      if (!no_build_tree) {
+      if (no_build_tree) {
         std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
         this->SetHomeOutputDirectory(cwd);
       }

@@ -1,0 +1,2 @@
+-- CMAKE_SOURCE_DIR='[^']*/Tests/RunCMake/CommandLine/ExplicitDirs'
+-- CMAKE_BINARY_DIR='[^']*/Tests/RunCMake/CommandLine/ExplicitDirs-build'
