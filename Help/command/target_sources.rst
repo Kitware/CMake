@@ -91,7 +91,8 @@ Each ``target_sources(FILE_SET)`` entry starts with ``INTERFACE``, ``PUBLIC``, o
 ``FILE_SET <set>``
 
   A string representing the name of the file set to create or add to. This must
-  not start with a capital letter, unless its name is ``HEADERS``.
+  contain only numbers, letters, and underscores, and must not start with a
+  capital letter or underscore, unless its name is ``HEADERS``.
 
 ``TYPE <type>``
 

@@ -1,0 +1,6 @@
+^CMake Error at FileSetBadName\.cmake:[0-9]+ \(target_sources\):
+  target_sources Non-default file set name must contain only letters,
+  numbers, and underscores, and must not start with a capital letter or
+  underscore
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$

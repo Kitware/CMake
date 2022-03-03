@@ -56,6 +56,8 @@ public:
     const cmGeneratorTarget* target,
     cmGeneratorExpressionDAGChecker* dagChecker = nullptr) const;
 
+  static bool IsValidName(const std::string& name);
+
 private:
   std::string Name;
   std::string Type;
