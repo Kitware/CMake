@@ -250,7 +250,7 @@
     stage: test-ext
 
     script:
-        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_test_external.cmake
+        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake
 
     interruptible: true
 
@@ -259,7 +259,7 @@
 
     script:
         - Invoke-Expression -Command .gitlab/ci/vcvarsall.ps1
-        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_test_external.cmake
+        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake
 
     interruptible: true
 
@@ -271,7 +271,7 @@
         - $pwdpath = $pwd.Path
         - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab\jom;$env:PATH"
         - Invoke-Expression -Command .gitlab/ci/vcvarsall.ps1
-        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_test_external.cmake
+        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake
 
     interruptible: true
 
@@ -282,7 +282,7 @@
         - Invoke-Expression -Command .gitlab/ci/borland.ps1
         - $pwdpath = $pwd.Path
         - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab\bcc\bin;$env:PATH"
-        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_test_external.cmake
+        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake
 
     interruptible: true
 
@@ -296,7 +296,7 @@
         - Invoke-Expression -Command .gitlab/ci/clang.ps1
         - Invoke-Expression -Command .gitlab/ci/vcvarsall.ps1
         - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab\llvm\bin;$env:PATH"
-        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_test_external.cmake
+        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake
 
     interruptible: true
 
@@ -306,7 +306,7 @@
     script:
         - Invoke-Expression -Command .gitlab/ci/msvc.ps1
         - Invoke-Expression -Command .gitlab/ci/vcvarsall.ps1
-        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_test_external.cmake
+        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake
 
     interruptible: true
 
@@ -321,6 +321,6 @@
         - Set-Item -Force -Path "env:EDPATH" -Value "$pwdpath\.gitlab\watcom\eddat"
         - Set-Item -Force -Path "env:WATCOM" -Value "$pwdpath\.gitlab\watcom"
         - Set-Item -Force -Path "env:WLINKTMP" -Value "."
-        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_test_external.cmake
+        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake
 
     interruptible: true

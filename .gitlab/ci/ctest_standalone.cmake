@@ -6,6 +6,14 @@ include("${CMAKE_CURRENT_LIST_DIR}/env_$ENV{CMAKE_CONFIGURATION}.cmake" OPTIONAL
 set(cmake_args
   -C "${CMAKE_CURRENT_LIST_DIR}/configure_$ENV{CMAKE_CONFIGURATION}.cmake")
 
+include(ProcessorCount)
+ProcessorCount(nproc)
+if (NOT "$ENV{CTEST_MAX_PARALLELISM}" STREQUAL "")
+  if (nproc GREATER "$ENV{CTEST_MAX_PARALLELISM}")
+    set(nproc "$ENV{CTEST_MAX_PARALLELISM}")
+  endif ()
+endif ()
+
 # Create an entry in CDash.
 ctest_start("${ctest_model}" GROUP "${ctest_group}")
 
@@ -14,6 +22,10 @@ find_package(Git)
 set(CTEST_UPDATE_VERSION_ONLY ON)
 set(CTEST_UPDATE_COMMAND "${GIT_EXECUTABLE}")
 ctest_update()
+
+if("$ENV{CMAKE_CI_BOOTSTRAP}")
+  set(CTEST_CONFIGURE_COMMAND "\"${CTEST_SOURCE_DIRECTORY}/bootstrap\" --parallel=${nproc}")
+endif()
 
 # Configure the project.
 ctest_configure(
@@ -31,14 +43,6 @@ if (configure_result)
   ctest_submit(PARTS Done)
   message(FATAL_ERROR
     "Failed to configure")
-endif ()
-
-include(ProcessorCount)
-ProcessorCount(nproc)
-if (NOT "$ENV{CTEST_MAX_PARALLELISM}" STREQUAL "")
-  if (nproc GREATER "$ENV{CTEST_MAX_PARALLELISM}")
-    set(nproc "$ENV{CTEST_MAX_PARALLELISM}")
-  endif ()
 endif ()
 
 if (CTEST_CMAKE_GENERATOR STREQUAL "Unix Makefiles")
