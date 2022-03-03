@@ -1,8 +1,5 @@
-set(var_with_paren "(")
-set(some_list "")
-
-if(NOT ${var_with_paren} IN_LIST some_list)
-  message(STATUS "Never prints")
-else()
-  message(STATUS "Never prints")
+set(paren "(")
+if(${paren})
+  message(STATUS "Condition incorrectly true")
 endif()
+message(STATUS "Code incorrectly accepted")
