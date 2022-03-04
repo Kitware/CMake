@@ -238,9 +238,10 @@ bool TargetSourcesImpl::HandleOneFileSet(
   auto fileSet = this->Target->GetOrCreateFileSet(args.FileSet, type);
   if (fileSet.second) {
     if (!isDefault) {
-      if (args.FileSet[0] >= 'A' && args.FileSet[0] <= 'Z') {
-        this->SetError(
-          "Non-default file set name must not start with a capital letter");
+      if (!cmFileSet::IsValidName(args.FileSet)) {
+        this->SetError("Non-default file set name must contain only letters, "
+                       "numbers, and underscores, and must not start with a "
+                       "capital letter or underscore");
         return false;
       }
     }
