@@ -3467,6 +3467,23 @@ void cmGeneratorTarget::AddCUDAArchitectureFlags(std::string& flags) const
       property =
         *this->Makefile->GetDefinition("CMAKE_CUDA_ARCHITECTURES_ALL_MAJOR");
     }
+  } else if (property == "native") {
+    cmValue native =
+      this->Makefile->GetDefinition("CMAKE_CUDA_ARCHITECTURES_NATIVE");
+    if (native.IsEmpty()) {
+      this->Makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        "CUDA_ARCHITECTURES is set to \"native\", but no GPU was detected.");
+    }
+    if (compiler == "NVIDIA" &&
+        cmSystemTools::VersionCompare(
+          cmSystemTools::OP_GREATER_EQUAL,
+          this->Makefile->GetDefinition("CMAKE_CUDA_COMPILER_VERSION"),
+          "11.6")) {
+      flags = cmStrCat(flags, " -arch=", property);
+      return;
+    }
+    property = *native;
   }
 
   struct CudaArchitecture

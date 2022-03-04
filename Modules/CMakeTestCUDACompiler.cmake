@@ -21,6 +21,31 @@ if(CMAKE_CUDA_ABI_COMPILED)
   # The compiler worked so skip dedicated test below.
   set(CMAKE_CUDA_COMPILER_WORKS TRUE)
   message(STATUS "Check for working CUDA compiler: ${CMAKE_CUDA_COMPILER} - skipped")
+
+  # Run the test binary to detect the native architectures.
+  execute_process(COMMAND "${CMAKE_PLATFORM_INFO_DIR}/CMakeDetermineCompilerABI_CUDA.bin"
+    RESULT_VARIABLE _CUDA_ARCHS_RESULT
+    OUTPUT_VARIABLE _CUDA_ARCHS_OUTPUT
+    ERROR_VARIABLE  _CUDA_ARCHS_OUTPUT
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+  if(_CUDA_ARCHS_RESULT EQUAL 0)
+    set(CMAKE_CUDA_ARCHITECTURES_NATIVE "${_CUDA_ARCHS_OUTPUT}")
+    list(REMOVE_DUPLICATES CMAKE_CUDA_ARCHITECTURES_NATIVE)
+  else()
+    if(NOT _CUDA_ARCHS_RESULT MATCHES "[0-9]+")
+      set(_CUDA_ARCHS_STATUS " (${_CUDA_ARCHS_RESULT})")
+    else()
+      set(_CUDA_ARCHS_STATUS "")
+    endif()
+    string(REPLACE "\n" "\n  " _CUDA_ARCHS_OUTPUT "  ${_CUDA_ARCHS_OUTPUT}")
+    file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+      "Detecting the CUDA native architecture(s) failed with "
+      "the following output:\n${_CUDA_ARCHS_OUTPUT}\n\n")
+  endif()
+  unset(_CUDA_ARCHS_EXE)
+  unset(_CUDA_ARCHS_RESULT)
+  unset(_CUDA_ARCHS_OUTPUT)
 endif()
 
 # This file is used by EnableLanguage in cmGlobalGenerator to

@@ -182,7 +182,8 @@ void cmVisualStudioGeneratorOptions::FixCudaCodeGeneration()
   // First entries for the -arch=<arch> [-code=<code>,...] pair.
   if (!arch.empty()) {
     std::string arch_name = arch[0];
-    if (arch_name == "all" || arch_name == "all-major") {
+    if (arch_name == "all" || arch_name == "all-major" ||
+        arch_name == "native") {
       AppendFlagString("AdditionalOptions", "-arch=" + arch_name);
       return;
     }

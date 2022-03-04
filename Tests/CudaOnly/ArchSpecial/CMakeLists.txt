@@ -25,6 +25,7 @@ function(verify_output flag)
   endforeach()
 
   list(SORT command_archs)
+  list(REMOVE_DUPLICATES command_archs)
   if(NOT "${command_archs}" STREQUAL "${architectures}")
     message(FATAL_ERROR "Architectures used for \"${flag}\" don't match the reference (\"${command_archs}\" != \"${architectures}\").")
   endif()
@@ -50,7 +51,17 @@ try_compile(all_major_archs_compiles
   )
 verify_output(all-major)
 
-if(all_archs_compiles AND all_major_archs_compiles)
+set(CMAKE_CUDA_ARCHITECTURES native)
+try_compile(native_archs_compiles
+  ${CMAKE_CURRENT_BINARY_DIR}/try_compile/native_archs_compiles
+  ${CMAKE_CURRENT_SOURCE_DIR}/main.cu
+  COMPILE_DEFINITIONS ${try_compile_flags}
+  OUTPUT_VARIABLE output
+  )
+verify_output(native)
+
+if(all_archs_compiles AND all_major_archs_compiles AND native_archs_compiles)
+  set(CMAKE_CUDA_ARCHITECTURES all)
   add_executable(CudaOnlyArchSpecial main.cu)
   target_compile_options(CudaOnlyArchSpecial PRIVATE ${compile_options})
 endif()
