@@ -7,6 +7,8 @@
 #include <utility>
 #include <vector>
 
+#include "cmsys/RegularExpression.hxx"
+
 #include "cmGeneratorExpression.h"
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
@@ -148,4 +150,12 @@ void cmFileSet::EvaluateFileEntry(
 
     filesPerDir[relDir].push_back(file);
   }
+}
+
+bool cmFileSet::IsValidName(const std::string& name)
+{
+  static const cmsys::RegularExpression regex("^[a-z0-9][a-zA-Z0-9_]*$");
+
+  cmsys::RegularExpressionMatch match;
+  return regex.find(name.c_str(), match);
 }
