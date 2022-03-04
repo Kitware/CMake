@@ -155,3 +155,12 @@ and/or fix regressions.
 
 * The ``OLD`` behavior of :policy:`CMP0128` was fixed to add flags even when
   the specified standard matches the compiler default.
+
+3.22.3
+------
+
+* The :command:`while` command again ignores errors in condition evaluation
+  as CMake 3.21 and below did.  This bug was fixed in 3.22.0, but exposed
+  errors in existing projects.  The fix has been reverted to restore
+  compatibility.  The fix may be restored in a future version of CMake
+  via a policy.
