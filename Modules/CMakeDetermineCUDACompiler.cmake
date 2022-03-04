@@ -250,6 +250,7 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
     endif()
 
     # Make the all and all-major architecture information available.
+    # FIXME(#23161): Defer architecture detection until compiler testing.
     include(${CMAKE_ROOT}/Modules/CUDA/architectures.cmake)
   endif()
 
@@ -272,6 +273,7 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
     endif()
   endif()
 
+  # FIXME(#23161): Defer architecture testing until compiler testing.
   if(DEFINED CMAKE_CUDA_ARCHITECTURES)
     if(CMAKE_CUDA_ARCHITECTURES MATCHES "^(all|all-major)$")
       # For sufficiently new NVCC we can just use the all and all-major flags.
@@ -346,6 +348,7 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
 
     # We now know the version, so make the architecture variables available.
     set(CMAKE_CUDA_COMPILER_TOOLKIT_VERSION ${CMAKE_CUDA_COMPILER_VERSION})
+    # FIXME(#23161): Defer architecture detection until compiler testing.
     include(${CMAKE_ROOT}/Modules/CUDA/architectures.cmake)
   endif()
 
