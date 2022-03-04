@@ -172,7 +172,10 @@ else()
     else()
       list(PREPEND _CMAKE_LINKER_NAMES "ld.lld")
     endif()
-    list(PREPEND _CMAKE_AR_NAMES "llvm-ar")
+    if(NOT APPLE)
+      # llvm-ar does not generate a symbol table that the Apple ld64 linker accepts.
+      list(PREPEND _CMAKE_AR_NAMES "llvm-ar")
+    endif()
     list(PREPEND _CMAKE_RANLIB_NAMES "llvm-ranlib")
     if("${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_VERSION}" VERSION_GREATER_EQUAL 11)
       # llvm-strip versions prior to 11 require additional flags we do not yet add.
