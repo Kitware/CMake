@@ -38,6 +38,14 @@ auto const FileSetArgsParser = cmArgumentParser<FileSetArgs>()
                                  .Bind("BASE_DIRS"_s, &FileSetArgs::BaseDirs)
                                  .Bind("FILES"_s, &FileSetArgs::Files);
 
+struct FileSetsArgs
+{
+  std::vector<std::vector<std::string>> FileSets;
+};
+
+auto const FileSetsArgsParser =
+  cmArgumentParser<FileSetsArgs>().Bind("FILE_SET"_s, &FileSetsArgs::FileSets);
+
 class TargetSourcesImpl : public cmTargetPropCommandBase
 {
 public:
@@ -79,7 +87,7 @@ private:
                                 bool prepend, bool system) override
   {
     if (!content.empty() && content.front() == "FILE_SET"_s) {
-      return this->HandleFileSetMode(scope, content, prepend, system);
+      return this->HandleFileSetMode(scope, content);
     }
     return this->cmTargetPropCommandBase::PopulateTargetProperties(
       scope, content, prepend, system);
@@ -105,8 +113,9 @@ private:
     IsInterface isInterfaceContent, CheckCMP0076 checkCmp0076);
 
   bool HandleFileSetMode(const std::string& scope,
-                         const std::vector<std::string>& content, bool prepend,
-                         bool system);
+                         const std::vector<std::string>& content);
+  bool HandleOneFileSet(const std::string& scope,
+                        const std::vector<std::string>& content);
 };
 
 std::vector<std::string> TargetSourcesImpl::ConvertToAbsoluteContent(
@@ -186,8 +195,22 @@ std::vector<std::string> TargetSourcesImpl::ConvertToAbsoluteContent(
 }
 
 bool TargetSourcesImpl::HandleFileSetMode(
-  const std::string& scope, const std::vector<std::string>& content,
-  bool /*prepend*/, bool /*system*/)
+  const std::string& scope, const std::vector<std::string>& content)
+{
+  auto args = FileSetsArgsParser.Parse(content);
+
+  for (auto& argList : args.FileSets) {
+    argList.emplace(argList.begin(), "FILE_SET"_s);
+    if (!this->HandleOneFileSet(scope, argList)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+bool TargetSourcesImpl::HandleOneFileSet(
+  const std::string& scope, const std::vector<std::string>& content)
 {
   std::vector<std::string> unparsed;
   auto args = FileSetArgsParser.Parse(content, &unparsed);
