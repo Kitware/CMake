@@ -39,6 +39,8 @@ High level meta features indicating C standard support
 
   Compiler mode is at least C 23.
 
+.. include:: CMAKE_LANG_STD_FLAGS.txt
+
 Low level individual compile features
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
