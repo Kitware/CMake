@@ -91,72 +91,58 @@ Each ``target_sources(FILE_SET)`` entry starts with ``INTERFACE``, ``PUBLIC``, o
 
 ``FILE_SET <set>``
 
-  A string representing the name of the file set to create or add to. This must
-  contain only numbers, letters, and underscores, and must not start with a
-  capital letter or underscore, unless its name is ``HEADERS``.
+  The name of the file set to create or add to. It must contain only letters,
+  numbers and underscores. Names starting with a capital letter are reserved
+  for built-in file sets predefined by CMake. The only predefined set name is
+  ``HEADERS``. All other set names must not start with a capital letter or
+  underscore.
 
 ``TYPE <type>``
 
-  A string representing the type of the file set. The only acceptable value is
-  ``HEADERS``. This may be omitted if the name of the file set is ``HEADERS``.
+  Every file set is associated with a particular type of file. ``HEADERS``
+  is currently the only defined type and it is an error to specify anything
+  else. As a special case, if the name of the file set is ``HEADERS``, the
+  type does not need to be specified and the ``TYPE <type>`` arguments can be
+  omitted. For all other file set names, ``TYPE`` is required.
 
-``BASE_DIRS <dirs>``
+``BASE_DIRS <dirs>...``
 
-  An optional list of strings representing the base directories of the file
-  set. This argument supports
-  :manual:`generator expressions <cmake-generator-expressions(7)>`. No two
-  ``BASE_DIRS`` may be sub-directories of each other. If no ``BASE_DIRS`` are
+  An optional list of base directories of the file set. Any relative path
+  is treated as relative to the current source directory
+  (i.e. :variable:`CMAKE_CURRENT_SOURCE_DIR`). If no ``BASE_DIRS`` are
   specified when the file set is first created, the value of
-  :variable:`CMAKE_CURRENT_SOURCE_DIR` is added.
+  :variable:`CMAKE_CURRENT_SOURCE_DIR` is added. This argument supports
+  :manual:`generator expressions <cmake-generator-expressions(7)>`.
 
-``FILES <files>``
+  No two base directories for a file set may be sub-directories of each other.
+  This requirement must be met across all base directories added to a file set,
+  not just those within a single call to ``target_sources()``.
 
-  An optional list of strings representing files in the file set. Each file
-  must be in one of the ``BASE_DIRS``. This argument supports
-  :manual:`generator expressions <cmake-generator-expressions(7)>`. If relative
-  paths are specified, they are considered relative to
+``FILES <files>...``
+
+  An optional list of files to add to the file set. Each file must be in
+  one of the base directories, or a subdirectory of one of the base
+  directories. This argument supports
+  :manual:`generator expressions <cmake-generator-expressions(7)>`.
+
+  If relative paths are specified, they are considered relative to
   :variable:`CMAKE_CURRENT_SOURCE_DIR` at the time ``target_sources()`` is
-  called, unless they start with ``$<``, in which case they are computed
-  relative to the target's source directory after genex evaluation.
+  called. An exception to this is a path starting with ``$<``. Such paths
+  are treated as relative to the target's source directory after evaluation
+  of generator expressions.
 
-The following target properties are set by ``target_sources(FILE_SET)``:
+The following target properties are set by ``target_sources(FILE_SET)``,
+but they should not generally be manipulated directly:
 
-:prop_tgt:`HEADER_SETS`
+* :prop_tgt:`HEADER_SETS`
+* :prop_tgt:`INTERFACE_HEADER_SETS`
+* :prop_tgt:`HEADER_SET`
+* :prop_tgt:`HEADER_SET_<NAME>`
+* :prop_tgt:`HEADER_DIRS`
+* :prop_tgt:`HEADER_DIRS_<NAME>`
 
-  List of ``PRIVATE`` and ``PUBLIC`` header sets associated with a target.
-  Headers listed in these header sets are treated as source files for the
-  purposes of IDE integration, and have their :prop_sf:`HEADER_FILE_ONLY`
-  property set to ``TRUE``.
-
-:prop_tgt:`INTERFACE_HEADER_SETS`
-
-  List of ``INTERFACE`` and ``PUBLIC`` header sets associated with a target.
-  Headers listed in these header sets can be installed with
-  :command:`install(TARGETS)` and exported with :command:`install(EXPORT)` and
-  :command:`export`.
-
-:prop_tgt:`HEADER_SET`
-
-  Headers in the default header set associated with a target. This property
-  supports :manual:`generator expressions <cmake-generator-expressions(7)>`.
-
-:prop_tgt:`HEADER_SET_<NAME>`
-
-  Headers in the named header set ``<NAME>`` associated with a target. This
-  property supports
-  :manual:`generator expressions <cmake-generator-expressions(7)>`.
-
-:prop_tgt:`HEADER_DIRS`
-
-  Base directories of the default header set associated with a target. This
-  property supports
-  :manual:`generator expressions <cmake-generator-expressions(7)>`.
-
-:prop_tgt:`HEADER_DIRS_<NAME>`
-
-  Base directories of the header set ``<NAME>`` associated with a target. This
-  property supports
-  :manual:`generator expressions <cmake-generator-expressions(7)>`.
+Target properties related to include directories are also modified by
+``target_sources(FILE_SET)`` as follows:
 
 :prop_tgt:`INCLUDE_DIRECTORIES`
 
