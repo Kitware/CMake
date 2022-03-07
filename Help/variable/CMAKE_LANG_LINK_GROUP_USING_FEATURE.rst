@@ -18,3 +18,10 @@ See also the associated variable
 features independent from the link language.
 
 .. include:: CMAKE_LINK_GROUP_USING_FEATURE.txt
+
+Predefined Features
+^^^^^^^^^^^^^^^^^^^
+
+CMake pre-defines some features of general interest:
+
+.. include:: LINK_GROUP_PREDEFINED_FEATURES.txt

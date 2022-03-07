@@ -19,6 +19,14 @@ foreach(type SHARED_LIBRARY SHARED_MODULE EXE)
   set(CMAKE_${type}_LINK_DYNAMIC_C_FLAGS "-Wl,-Bdynamic")
 endforeach()
 
+
+# Features for LINK_GROUP generator expression
+## RESCAN: request the linker to rescan static libraries until there is
+## no pending undefined symbols
+set(CMAKE_LINK_GROUP_USING_RESCAN "LINKER:--start-group" "LINKER:--end-group")
+set(CMAKE_LINK_GROUP_USING_RESCAN_SUPPORTED TRUE)
+
+
 # Debian policy requires that shared libraries be installed without
 # executable permission.  Fedora policy requires that shared libraries
 # be installed with the executable permission.  Since the native tools

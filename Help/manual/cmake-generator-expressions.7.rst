@@ -1236,7 +1236,7 @@ Output-Related Expressions
     expression.
 
   The ``library-list`` argument can hold CMake targets or external libraries.
-  Any ``CMake`` target of type :ref:`OBJECT <Object Libraries>` or
+  Any CMake target of type :ref:`OBJECT <Object Libraries>` or
   :ref:`INTERFACE <Interface Libraries>` will be ignored by this expression and
   will be handled in the standard way.
 
@@ -1284,7 +1284,7 @@ Output-Related Expressions
     target_link_libraries(lib4 PRIVATE lib3 "$<LINK_GROUP:feature1,lib1,lib2>")
     # lib4 will only be linked with lib3 and the group {lib1,lib2}
 
-  This example will be "re-written" by ``CMake`` in the following form:
+  This example will be "re-written" by CMake in the following form:
 
   .. code-block:: cmake
 
@@ -1317,7 +1317,7 @@ Output-Related Expressions
     target_link_libraries(lib3 PRIVATE "$<LINK_GROUP:feat,lib1A,lib1B>"
                                        "$<LINK_GROUP:feat,lib2A,lib2B>")
 
-  This example will be "re-written" by ``CMake`` in the following form:
+  This example will be "re-written" by CMake in the following form:
 
   .. code-block:: cmake
 
@@ -1336,6 +1336,10 @@ Output-Related Expressions
 
   So, we have a circular dependency between groups ``{lib1A,lib1B}`` and
   ``{lib2A,lib2B}``.
+
+  CMake pre-defines some features of general interest:
+
+  .. include:: ../variable/LINK_GROUP_PREDEFINED_FEATURES.txt
 
 .. genex:: $<INSTALL_INTERFACE:...>
 
