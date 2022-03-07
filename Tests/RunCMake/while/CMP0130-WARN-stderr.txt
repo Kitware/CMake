@@ -1,0 +1,14 @@
+^CMake Warning \(dev\) at CMP0130-common.cmake:[0-9]+ \(while\):
+  Policy CMP0130 is not set: while\(\) diagnoses condition evaluation errors.
+  Run "cmake --help-policy CMP0130" for policy details.  Use the cmake_policy
+  command to set the policy and suppress this warning.
+
+  while\(\) given incorrect arguments:
+
+    "\("
+
+  mismatched parenthesis in condition
+Call Stack \(most recent call first\):
+  CMP0130-WARN.cmake:[0-9]+ \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.$

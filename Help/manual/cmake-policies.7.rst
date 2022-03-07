@@ -52,6 +52,14 @@ to determine whether to report an error on use of deprecated macros or
 functions.
 
 
+Policies Introduced by CMake 3.24
+=================================
+
+.. toctree::
+   :maxdepth: 1
+
+   CMP0130: while() diagnoses condition evaluation errors. </policy/CMP0130>
+
 Policies Introduced by CMake 3.23
 =================================
 

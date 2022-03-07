@@ -17,6 +17,8 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmOutputConverter.h"
+#include "cmPolicies.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 
@@ -79,9 +81,8 @@ bool cmWhileFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
     return out;
   };
 
-  // FIXME(#23296): For compatibility with older versions of CMake, we
-  // tolerate condition errors that evaluate to false.  We should add
-  // a policy to enforce such errors.
+  // For compatibility with projects that do not set CMP0130 to NEW,
+  // we tolerate condition errors that evaluate to false.
   bool enforceError = true;
   std::string errorString;
   MessageType messageType;
@@ -110,14 +111,38 @@ bool cmWhileFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
     }
   }
 
+  if (!errorString.empty() && !enforceError) {
+    // This error should only be enforced if CMP0130 is NEW.
+    switch (mf.GetPolicyStatus(cmPolicies::CMP0130)) {
+      case cmPolicies::WARN:
+        // Convert the error to a warning and enforce it.
+        messageType = MessageType::AUTHOR_WARNING;
+        enforceError = true;
+        break;
+      case cmPolicies::OLD:
+        // OLD behavior is to silently ignore the error.
+        break;
+      case cmPolicies::REQUIRED_ALWAYS:
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::NEW:
+        // NEW behavior is to enforce the error.
+        enforceError = true;
+        break;
+    }
+  }
+
   if (!errorString.empty() && enforceError) {
-    std::string err = "had incorrect arguments:\n ";
+    std::string err = "while() given incorrect arguments:\n ";
     for (auto const& i : expandedArguments) {
       err += " ";
       err += cmOutputConverter::EscapeForCMake(i.GetValue());
     }
     err += "\n";
     err += errorString;
+    if (mf.GetPolicyStatus(cmPolicies::CMP0130) == cmPolicies::WARN) {
+      err =
+        cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0130), '\n', err);
+    }
     mf.GetCMakeInstance()->IssueMessage(messageType, err, whileBT);
     if (messageType == MessageType::FATAL_ERROR) {
       cmSystemTools::SetFatalErrorOccured();
