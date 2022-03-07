@@ -277,7 +277,8 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
       static_cast<size_t>(
         this->TestResult.Status == cmCTestTestHandler::COMPLETED
           ? this->TestHandler->CustomMaximumPassedTestOutputSize
-          : this->TestHandler->CustomMaximumFailedTestOutputSize));
+          : this->TestHandler->CustomMaximumFailedTestOutputSize),
+      this->TestHandler->TestOutputTruncation);
   }
   this->TestResult.Reason = reason;
   if (this->TestHandler->LogFile) {

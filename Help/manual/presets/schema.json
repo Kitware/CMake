@@ -688,6 +688,28 @@
         "additionalProperties": false
       }
     },
+    "testPresetsItemsV5": {
+      "type": "array",
+      "description": "An optional array of test preset objects. Used to specify arguments to ctest. Available in version 5 and higher.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "output": {
+            "type": "object",
+            "description": "An optional object specifying output options.",
+            "properties": {
+              "testOutputTruncation": {
+                "type": "string",
+                "description": "An optional string specifying the test output truncation mode. Equivalent to passing --test-output-truncation on the command line. Must be one of the following values: \"tail\", \"middle\", or \"head\".",
+                "enum": [
+                  "tail", "middle", "head"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
     "testPresetsItemsV3": {
       "type": "array",
       "description": "An optional array of test preset objects. Used to specify arguments to ctest. Available in version 3 and higher.",
@@ -1017,7 +1039,8 @@
       "description": "An optional array of test preset objects. Used to specify arguments to ctest. Available in version 5 and higher.",
       "allOf": [
         { "$ref": "#/definitions/testPresetsItemsV2" },
-        { "$ref": "#/definitions/testPresetsItemsV3" }
+        { "$ref": "#/definitions/testPresetsItemsV3" },
+        { "$ref": "#/definitions/testPresetsItemsV5" }
       ],
       "items": {
         "type": "object",

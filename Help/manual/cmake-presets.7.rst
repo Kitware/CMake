@@ -694,6 +694,12 @@ that may contain the following fields:
     bytes. Equivalent to passing ``--test-output-size-failed`` on the
     command line.
 
+  ``testOutputTruncation``
+
+    An optional string specifying the test output truncation mode. Equivalent
+    to passing ``--test-output-truncation`` on the command line."
+    This is allowed in preset files specifying version ``5`` or above.
+
   ``maxTestNameWidth``
 
     An optional integer specifying the maximum width of a test name to

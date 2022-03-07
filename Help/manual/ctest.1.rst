@@ -362,6 +362,10 @@ Specify the directory in which to look for tests.
 ``--test-output-size-failed <size>``
  Limit the output for failed tests to ``<size>`` bytes.
 
+``--test-output-truncation <mode>``
+ Truncate 'tail' (default), 'middle' or 'head' of test output once maximum
+ output size is reached.
+
 ``--overwrite``
  Overwrite CTest configuration option.
 

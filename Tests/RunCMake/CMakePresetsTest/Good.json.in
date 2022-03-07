@@ -48,7 +48,8 @@
                 "quiet": false,
                 "outputLogFile": "",
                 "labelSummary": true,
-                "subprojectSummary": true
+                "subprojectSummary": true,
+                "testOutputTruncation": "tail"
             },
             "filter": {
                 "include": {

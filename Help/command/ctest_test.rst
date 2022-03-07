@@ -172,8 +172,9 @@ The options are:
   affected.  Summary info detailing the percentage of passing tests is also
   unaffected by the ``QUIET`` option.
 
-See also the :variable:`CTEST_CUSTOM_MAXIMUM_PASSED_TEST_OUTPUT_SIZE`
-and :variable:`CTEST_CUSTOM_MAXIMUM_FAILED_TEST_OUTPUT_SIZE` variables.
+See also the :variable:`CTEST_CUSTOM_MAXIMUM_PASSED_TEST_OUTPUT_SIZE`,
+:variable:`CTEST_CUSTOM_MAXIMUM_FAILED_TEST_OUTPUT_SIZE` and
+:variable:`CTEST_CUSTOM_TEST_OUTPUT_TRUNCATION` variables.
 
 .. _`Additional Test Measurements`:
 

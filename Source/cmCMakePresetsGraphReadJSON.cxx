@@ -568,6 +568,11 @@ cmCMakePresetsGraph::ReadFileResult cmCMakePresetsGraph::ReadJSONFile(
       return ReadFileResult::CONDITION_UNSUPPORTED;
     }
 
+    // Support for TestOutputTruncation added in version 5.
+    if (v < 5 && preset.Output) {
+      return ReadFileResult::TEST_OUTPUT_TRUNCATION_UNSUPPORTED;
+    }
+
     this->TestPresetOrder.push_back(preset.Name);
   }
 
