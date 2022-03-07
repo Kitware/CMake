@@ -353,6 +353,14 @@ bool ExpandMacros(const cmCMakePresetsGraph& graph, const T& preset,
         macroOut += cmSystemTools::GetSystemName();
         return ExpandMacroResult::Ok;
       }
+      if (macroName == "fileDir") {
+        if (version < 4) {
+          return ExpandMacroResult::Error;
+        }
+        macroOut +=
+          cmSystemTools::GetParentDirectory(preset.OriginFile->Filename);
+        return ExpandMacroResult::Ok;
+      }
     }
 
     return ExpandMacroResult::Ignore;

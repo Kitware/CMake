@@ -53,7 +53,7 @@ function(run_cmake_presets name)
       )
     string(REGEX REPLACE "\\.in$" "" _extra_file_out_relative "${_extra_file_relative}")
     set(_extra_file_out "${RunCMake_TEST_SOURCE_DIR}/${_extra_file_out_relative}")
-    configure_file("${_extra_file}" "${_extra_file_out}")
+    configure_file("${_extra_file}" "${_extra_file_out}" @ONLY)
     list(APPEND _CMakePresets_EXTRA_FILES_OUT "${_extra_file_out}")
     list(APPEND _CMakePresets_EXTRA_FILES_SCHEMA_EXPECTED_RESULTS 0)
   endforeach()
@@ -316,6 +316,16 @@ set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/HostSystemName.json.in")
 run_cmake_presets(HostSystemName)
 set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/HostSystemNameFuture.json.in")
 run_cmake_presets(HostSystemNameFuture)
+
+# Test ${fileDir} macro
+set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/FileDir.json.in")
+set(CMakePresets_EXTRA_FILES
+  "${RunCMake_SOURCE_DIR}/subdir/FileDir.json.in"
+  )
+run_cmake_presets(FileDir)
+unset(CMakePresets_EXTRA_FILES)
+set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/FileDirFuture.json.in")
+run_cmake_presets(FileDirFuture)
 
 # Test conditions
 set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/Conditions.json.in")
