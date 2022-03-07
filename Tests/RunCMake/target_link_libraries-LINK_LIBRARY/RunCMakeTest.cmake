@@ -97,3 +97,16 @@ if (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION GREAT
 
   run_cmake_target(apple_framework target-needed_framework main-target-needed_framework)
 endif()
+
+# Apple library features
+if(APPLE AND (CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID MATCHES "Clang"))
+  run_cmake(apple_library_external)
+  run_cmake_target(apple_library_external build external)
+  run_cmake_with_options(apple_library "-DRunCMake_BINARY_DIR=${RunCMake_BINARY_DIR}")
+  run_cmake_target(apple_library reexport_library main-reexport_library)
+  run_cmake_target(apple_library weak_library main-weak_library)
+endif()
+
+if (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION GREATER_EQUAL "12")
+  run_cmake_target(apple_library needed_library main-needed_library)
+endif()

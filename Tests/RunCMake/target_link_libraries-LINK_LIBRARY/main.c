@@ -2,14 +2,14 @@
 #if defined(_WIN32)
 __declspec(dllimport)
 #endif
-  void lib();
+  void lib(void);
 
 #if defined(_WIN32)
 __declspec(dllimport)
 #endif
-  void unref();
+  void unref(void);
 
-int main()
+int main(void)
 {
   lib();
   unref();
