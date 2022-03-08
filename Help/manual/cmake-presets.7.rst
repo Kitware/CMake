@@ -1053,6 +1053,11 @@ Recognized macros include:
   :variable:`CMAKE_HOST_SYSTEM_NAME`. This is allowed in preset files
   specifying version ``3`` or above.
 
+``${fileDir}``
+
+  Path to the directory containing the preset file which contains the macro.
+  This is allowed in preset files specifying version ``4`` or above.
+
 ``${dollar}``
 
   A literal dollar sign (``$``).
