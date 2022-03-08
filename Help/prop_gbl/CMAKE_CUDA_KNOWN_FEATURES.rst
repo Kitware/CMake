@@ -35,3 +35,5 @@ The features known to this version of CMake are:
   .. versionadded:: 3.20
 
   Compiler mode is at least CUDA/C++ 23.
+
+.. include:: CMAKE_LANG_STD_FLAGS.txt
