@@ -376,6 +376,34 @@ static void test_xcb_xfixes(void)
 
 #  endif
 
+#  ifdef HAVE_xcb_xtest
+#    include <xcb/xtest.h>
+
+static void test_xcb_xtest(void)
+{
+  int screen_nbr;
+  xcb_connection_t* connection = xcb_connect(NULL, &screen_nbr);
+  xcb_test_get_version_unchecked(connection, 1, 0);
+  xcb_disconnect(connection);
+}
+
+#  endif
+
+#  ifdef HAVE_xcb_keysyms
+#    include <xcb/xcb_keysyms.h>
+
+static void test_xcb_keysyms(void)
+{
+  int screen_nbr;
+  xcb_connection_t* connection = xcb_connect(NULL, &screen_nbr);
+  xcb_key_symbols_t* symbols = xcb_key_symbols_alloc(connection);
+  if (symbols != NULL)
+    xcb_key_symbols_free(symbols);
+  xcb_disconnect(connection);
+}
+
+#  endif
+
 #endif
 
 #include <stddef.h>
