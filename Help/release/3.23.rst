@@ -18,6 +18,9 @@ Presets
 * :manual:`cmake-presets(7)` files now have an optional ``include`` field,
   which allows the files to include other files.
 
+* :manual:`cmake-presets(7)` files now support a ``${fileDir}`` macro, which
+  contains the directory containing the preset file.
+
 * :manual:`cmake-presets(7)` gained support for specifying the
   ``resolvePackageReferences`` command line option in a build preset to control
   restoration behavior of package references from external package managers.
