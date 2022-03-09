@@ -182,6 +182,7 @@ void cmGhsMultiTargetGenerator::SetCompilerFlags(std::string const& config,
                                           language, config);
     this->LocalGenerator->AddVisibilityPresetFlags(
       flags, this->GeneratorTarget, language);
+    this->LocalGenerator->AddColorDiagnosticsFlags(flags, language);
 
     // Append old-style preprocessor definition flags.
     if (this->Makefile->GetDefineFlags() != " ") {

@@ -445,6 +445,14 @@ function(run_EnvironmentToolchain)
 endfunction()
 run_EnvironmentToolchain()
 
+function(run_EnvironmentColor)
+  set(ENV{CMAKE_COLOR_DIAGNOSTICS} "ON")
+  run_cmake(EnvColorOn)
+  unset(ENV{CMAKE_COLOR_DIAGNOSTICS})
+  run_cmake(EnvColorDefault)
+endfunction()
+run_EnvironmentColor()
+
 if(RunCMake_GENERATOR STREQUAL "Ninja")
   # Use a single build tree for a few tests without cleaning.
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/Build-build)

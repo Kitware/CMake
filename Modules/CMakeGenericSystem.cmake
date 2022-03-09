@@ -47,11 +47,16 @@ set (CMAKE_SKIP_INSTALL_RPATH "NO" CACHE BOOL
 
 set(CMAKE_VERBOSE_MAKEFILE FALSE CACHE BOOL "If this value is on, makefiles will be generated without the .SILENT directive, and all commands will be echoed to the console during the make.  This is useful for debugging only. With Visual Studio IDE projects all commands are done without /nologo.")
 
+if(DEFINED ENV{CMAKE_COLOR_DIAGNOSTICS} AND NOT DEFINED CACHE{CMAKE_COLOR_DIAGNOSTICS})
+  set(CMAKE_COLOR_DIAGNOSTICS $ENV{CMAKE_COLOR_DIAGNOSTICS} CACHE BOOL "Enable colored diagnostics throughout.")
+endif()
+
 if(CMAKE_GENERATOR MATCHES "Make")
-  set(CMAKE_COLOR_MAKEFILE ON CACHE BOOL
-    "Enable/Disable color output during build."
-    )
+  if(NOT DEFINED CMAKE_COLOR_DIAGNOSTICS)
+    set(CMAKE_COLOR_MAKEFILE ON CACHE BOOL "Enable/Disable color output during build.")
+  endif()
   mark_as_advanced(CMAKE_COLOR_MAKEFILE)
+
   if(DEFINED CMAKE_RULE_MESSAGES)
     set_property(GLOBAL PROPERTY RULE_MESSAGES ${CMAKE_RULE_MESSAGES})
   endif()
