@@ -33,7 +33,7 @@ using TestPreset = cmCMakePresetsGraph::TestPreset;
 using ArchToolsetStrategy = cmCMakePresetsGraph::ArchToolsetStrategy;
 
 constexpr int MIN_VERSION = 1;
-constexpr int MAX_VERSION = 4;
+constexpr int MAX_VERSION = 5;
 
 struct CMakeVersion
 {
@@ -566,6 +566,11 @@ cmCMakePresetsGraph::ReadFileResult cmCMakePresetsGraph::ReadJSONFile(
     // Support for conditions added in version 3.
     if (v < 3 && preset.ConditionEvaluator) {
       return ReadFileResult::CONDITION_UNSUPPORTED;
+    }
+
+    // Support for TestOutputTruncation added in version 5.
+    if (v < 5 && preset.Output) {
+      return ReadFileResult::TEST_OUTPUT_TRUNCATION_UNSUPPORTED;
     }
 
     this->TestPresetOrder.push_back(preset.Name);

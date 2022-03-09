@@ -16,6 +16,8 @@
 #include "cmCMakePresetsGraphInternal.h"
 #include "cmJSONHelpers.h"
 
+#include "CTest/cmCTestTypes.h"
+
 namespace {
 using ReadFileResult = cmCMakePresetsGraph::ReadFileResult;
 using TestPreset = cmCMakePresetsGraph::TestPreset;
@@ -55,6 +57,40 @@ auto const TestPresetOptionalOutputVerbosityHelper =
                        ReadFileResult>(ReadFileResult::READ_OK,
                                        TestPresetOutputVerbosityHelper);
 
+ReadFileResult TestPresetOutputTruncationHelper(
+  cmCTestTypes::TruncationMode& out, const Json::Value* value)
+{
+  if (!value) {
+    out = cmCTestTypes::TruncationMode::Tail;
+    return ReadFileResult::READ_OK;
+  }
+
+  if (!value->isString()) {
+    return ReadFileResult::INVALID_PRESET;
+  }
+
+  if (value->asString() == "tail") {
+    out = cmCTestTypes::TruncationMode::Tail;
+    return ReadFileResult::READ_OK;
+  }
+
+  if (value->asString() == "middle") {
+    out = cmCTestTypes::TruncationMode::Middle;
+    return ReadFileResult::READ_OK;
+  }
+
+  if (value->asString() == "head") {
+    out = cmCTestTypes::TruncationMode::Head;
+    return ReadFileResult::READ_OK;
+  }
+
+  return ReadFileResult::INVALID_PRESET;
+}
+
+auto const TestPresetOptionalTruncationHelper =
+  cmJSONOptionalHelper<cmCTestTypes::TruncationMode, ReadFileResult>(
+    ReadFileResult::READ_OK, TestPresetOutputTruncationHelper);
+
 auto const TestPresetOptionalOutputHelper =
   cmJSONOptionalHelper<TestPreset::OutputOptions, ReadFileResult>(
     ReadFileResult::READ_OK,
@@ -83,6 +119,9 @@ auto const TestPresetOptionalOutputHelper =
       .Bind("maxFailedTestOutputSize"_s,
             &TestPreset::OutputOptions::MaxFailedTestOutputSize,
             cmCMakePresetsGraphInternal::PresetOptionalIntHelper, false)
+      .Bind("testOutputTruncation"_s,
+            &TestPreset::OutputOptions::TestOutputTruncation,
+            TestPresetOptionalTruncationHelper, false)
       .Bind("maxTestNameWidth"_s, &TestPreset::OutputOptions::MaxTestNameWidth,
             cmCMakePresetsGraphInternal::PresetOptionalIntHelper, false));
 

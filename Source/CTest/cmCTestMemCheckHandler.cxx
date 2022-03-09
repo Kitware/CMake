@@ -371,7 +371,8 @@ void cmCTestMemCheckHandler::GenerateCTestXML(cmXMLWriter& xml)
     }
     this->CleanTestOutput(
       memcheckstr,
-      static_cast<size_t>(this->CustomMaximumFailedTestOutputSize));
+      static_cast<size_t>(this->CustomMaximumFailedTestOutputSize),
+      this->TestOutputTruncation);
     this->WriteTestResultHeader(xml, result);
     xml.StartElement("Results");
     int memoryErrors = 0;

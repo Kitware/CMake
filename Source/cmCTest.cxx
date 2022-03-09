@@ -2036,6 +2036,13 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
                  "Invalid value for '--test-output-size-failed': " << args[i]
                                                                    << "\n");
     }
+  } else if (this->CheckArgument(arg, "--test-output-truncation"_s) &&
+             i < args.size() - 1) {
+    i++;
+    if (!this->Impl->TestHandler.SetTestOutputTruncation(args[i])) {
+      errormsg = "Invalid value for '--test-output-truncation': " + args[i];
+      return false;
+    }
   } else if (this->CheckArgument(arg, "-N"_s, "--show-only")) {
     this->Impl->ShowOnly = true;
   } else if (cmHasLiteralPrefix(arg, "--show-only=")) {
@@ -2462,6 +2469,11 @@ bool cmCTest::SetArgsFromPreset(const std::string& presetName,
     if (expandedPreset->Output->MaxFailedTestOutputSize) {
       this->Impl->TestHandler.SetTestOutputSizeFailed(
         *expandedPreset->Output->MaxFailedTestOutputSize);
+    }
+
+    if (expandedPreset->Output->TestOutputTruncation) {
+      this->Impl->TestHandler.TestOutputTruncation =
+        *expandedPreset->Output->TestOutputTruncation;
     }
 
     if (expandedPreset->Output->MaxTestNameWidth) {

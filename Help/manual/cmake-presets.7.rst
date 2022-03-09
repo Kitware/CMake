@@ -42,7 +42,7 @@ The root object recognizes the following fields:
 ``version``
 
   A required integer representing the version of the JSON schema.
-  The supported versions are ``1``, ``2``, ``3``, and ``4``.
+  The supported versions are ``1``, ``2``, ``3``, ``4``, and ``5``.
 
 ``cmakeMinimumRequired``
 
@@ -714,6 +714,12 @@ that may contain the following fields:
     An optional integer specifying the maximum output for failed tests in
     bytes. Equivalent to passing ``--test-output-size-failed`` on the
     command line.
+
+  ``testOutputTruncation``
+
+    An optional string specifying the test output truncation mode. Equivalent
+    to passing ``--test-output-truncation`` on the command line."
+    This is allowed in preset files specifying version ``5`` or above.
 
   ``maxTestNameWidth``
 

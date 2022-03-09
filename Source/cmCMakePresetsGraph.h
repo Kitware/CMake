@@ -14,6 +14,8 @@
 
 #include <cm/optional>
 
+#include "CTest/cmCTestTypes.h"
+
 enum class PackageResolveMode;
 
 class cmCMakePresetsGraph
@@ -47,6 +49,7 @@ public:
     CONDITION_UNSUPPORTED,
     TOOLCHAIN_FILE_UNSUPPORTED,
     CYCLIC_INCLUDE,
+    TEST_OUTPUT_TRUNCATION_UNSUPPORTED,
   };
 
   enum class ArchToolsetStrategy
@@ -226,6 +229,7 @@ public:
       cm::optional<bool> SubprojectSummary;
       cm::optional<int> MaxPassedTestOutputSize;
       cm::optional<int> MaxFailedTestOutputSize;
+      cm::optional<cmCTestTypes::TruncationMode> TestOutputTruncation;
       cm::optional<int> MaxTestNameWidth;
     };
 

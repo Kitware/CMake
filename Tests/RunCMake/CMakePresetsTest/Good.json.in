@@ -1,5 +1,5 @@
 {
-    "version": 2,
+    "version": 5,
     "configurePresets": [
         {
             "name": "default",
@@ -48,7 +48,8 @@
                 "quiet": false,
                 "outputLogFile": "",
                 "labelSummary": true,
-                "subprojectSummary": true
+                "subprojectSummary": true,
+                "testOutputTruncation": "tail"
             },
             "filter": {
                 "include": {

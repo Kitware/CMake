@@ -44,6 +44,9 @@ static const char* cmDocumentationOptions[][2] = {
   { "--test-output-size-failed <size>",
     "Limit the output for failed tests "
     "to <size> bytes" },
+  { "--test-output-truncation <mode>",
+    "Truncate 'tail' (default), 'middle' or 'head' of test output once "
+    "maximum output size is reached" },
   { "-F", "Enable failover." },
   { "-j <jobs>, --parallel <jobs>",
     "Run the tests in parallel using the "

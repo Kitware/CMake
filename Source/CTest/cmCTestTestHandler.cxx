@@ -281,6 +281,7 @@ cmCTestTestHandler::cmCTestTestHandler()
 
   this->CustomMaximumPassedTestOutputSize = 1 * 1024;
   this->CustomMaximumFailedTestOutputSize = 300 * 1024;
+  this->TestOutputTruncation = cmCTestTypes::TruncationMode::Tail;
 
   this->MemCheck = false;
 
@@ -325,6 +326,7 @@ void cmCTestTestHandler::Initialize()
   this->CustomPostTest.clear();
   this->CustomMaximumPassedTestOutputSize = 1 * 1024;
   this->CustomMaximumFailedTestOutputSize = 300 * 1024;
+  this->TestOutputTruncation = cmCTestTypes::TruncationMode::Tail;
 
   this->TestsToRun.clear();
 
@@ -358,6 +360,11 @@ void cmCTestTestHandler::PopulateCustomVectors(cmMakefile* mf)
   this->CTest->PopulateCustomInteger(
     mf, "CTEST_CUSTOM_MAXIMUM_FAILED_TEST_OUTPUT_SIZE",
     this->CustomMaximumFailedTestOutputSize);
+
+  cmValue dval = mf->GetDefinition("CTEST_CUSTOM_TEST_OUTPUT_TRUNCATION");
+  if (dval) {
+    this->SetTestOutputTruncation(dval);
+  }
 }
 
 int cmCTestTestHandler::PreProcessHandler()
@@ -2076,6 +2083,20 @@ void cmCTestTestHandler::SetExcludeRegExp(const std::string& arg)
   this->ExcludeRegExp = arg;
 }
 
+bool cmCTestTestHandler::SetTestOutputTruncation(const std::string& mode)
+{
+  if (mode == "tail") {
+    this->TestOutputTruncation = cmCTestTypes::TruncationMode::Tail;
+  } else if (mode == "middle") {
+    this->TestOutputTruncation = cmCTestTypes::TruncationMode::Middle;
+  } else if (mode == "head") {
+    this->TestOutputTruncation = cmCTestTypes::TruncationMode::Head;
+  } else {
+    return false;
+  }
+  return true;
+}
+
 void cmCTestTestHandler::SetTestsToRunInformation(cmValue in)
 {
   if (!in) {
@@ -2094,41 +2115,58 @@ void cmCTestTestHandler::SetTestsToRunInformation(cmValue in)
   }
 }
 
-void cmCTestTestHandler::CleanTestOutput(std::string& output, size_t length)
+void cmCTestTestHandler::CleanTestOutput(std::string& output, size_t length,
+                                         cmCTestTypes::TruncationMode truncate)
 {
   if (!length || length >= output.size() ||
       output.find("CTEST_FULL_OUTPUT") != std::string::npos) {
     return;
   }
 
-  // Truncate at given length but do not break in the middle of a multi-byte
-  // UTF-8 encoding.
+  // Advance n bytes in string delimited by begin/end but do not break in the
+  // middle of a multi-byte UTF-8 encoding.
+  auto utf8_advance = [](char const* const begin, char const* const end,
+                         size_t n) -> const char* {
+    char const* const stop = begin + n;
+    char const* current = begin;
+    while (current < stop) {
+      unsigned int ch;
+      if (const char* next = cm_utf8_decode_character(current, end, &ch)) {
+        if (next > stop) {
+          break;
+        }
+        current = next;
+      } else // Bad byte will be handled by cmXMLWriter.
+      {
+        ++current;
+      }
+    }
+    return current;
+  };
+
+  // Truncation message.
+  const std::string msg =
+    "\n[This part of the test output was removed since it "
+    "exceeds the threshold of " +
+    std::to_string(length) + " bytes.]\n";
+
   char const* const begin = output.c_str();
   char const* const end = begin + output.size();
-  char const* const truncate = begin + length;
-  char const* current = begin;
-  while (current < truncate) {
-    unsigned int ch;
-    if (const char* next = cm_utf8_decode_character(current, end, &ch)) {
-      if (next > truncate) {
-        break;
-      }
-      current = next;
-    } else // Bad byte will be handled by cmXMLWriter.
-    {
-      ++current;
-    }
-  }
-  output.erase(current - begin);
 
-  // Append truncation message.
-  std::ostringstream msg;
-  msg << "...\n"
-         "The rest of the test output was removed since it exceeds the "
-         "threshold "
-         "of "
-      << length << " bytes.\n";
-  output += msg.str();
+  // Erase head, middle or tail of output.
+  if (truncate == cmCTestTypes::TruncationMode::Head) {
+    char const* current = utf8_advance(begin, end, output.size() - length);
+    output.erase(0, current - begin);
+    output.insert(0, msg + "...");
+  } else if (truncate == cmCTestTypes::TruncationMode::Middle) {
+    char const* current = utf8_advance(begin, end, length / 2);
+    output.erase(current - begin, output.size() - length);
+    output.insert(current - begin, "..." + msg + "...");
+  } else { // default or "tail"
+    char const* current = utf8_advance(begin, end, length);
+    output.erase(current - begin);
+    output += ("..." + msg);
+  }
 }
 
 bool cmCTestTestHandler::SetTestsProperties(
