@@ -336,6 +336,20 @@ static void test_xcb(void)
   xcb_disconnect(connection);
 }
 
+#  ifdef HAVE_xcb_randr
+#    include <xcb/randr.h>
+
+static void test_xcb_randr(void)
+{
+  int screen_nbr;
+  xcb_connection_t* connection = xcb_connect(NULL, &screen_nbr);
+  xcb_randr_query_version_cookie_t cookie =
+    xcb_randr_query_version(connection, 0, 0);
+  xcb_disconnect(connection);
+}
+
+#  endif
+
 #  ifdef HAVE_xcb_util
 #    include <xcb/xcb_aux.h>
 
@@ -453,6 +467,9 @@ int main(int argc, char* argv[])
 #endif
 #ifdef HAVE_xcb
     test_xcb,
+#endif
+#ifdef HAVE_xcb_util
+    test_xcb_randr,
 #endif
 #ifdef HAVE_xcb_util
     test_xcb_util,
