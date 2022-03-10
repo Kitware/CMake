@@ -1125,9 +1125,9 @@ Output-Related Expressions
 
     add_library(lib1 STATIC ...)
     add_library(lib2 ...)
-    target_link_libraries(lib2 PRIVATE "$<LINK_LIBRARY:whole_archive,lib1>")
+    target_link_libraries(lib2 PRIVATE "$<LINK_LIBRARY:load_archive,lib1>")
 
-  This specify to use the ``lib1`` target with feature ``whole_archive`` for
+  This specify to use the ``lib1`` target with feature ``load_archive`` for
   linking target ``lib2``. The feature must have be defined by
   :variable:`CMAKE_<LANG>_LINK_LIBRARY_USING_<FEATURE>` variable or, if
   :variable:`CMAKE_<LANG>_LINK_LIBRARY_USING_<FEATURE>_SUPPORTED` is false,

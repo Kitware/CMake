@@ -331,6 +331,15 @@ else()
 endif()
 unset(__WINDOWS_MSVC_CMP0091)
 
+
+# Features for LINK_LIBRARY generator expression
+if(MSVC_VERSION GREATER "1900")
+  ## WHOLE_ARCHIVE: Force loading all members of an archive
+  set(CMAKE_LINK_LIBRARY_USING_WHOLE_ARCHIVE "/WHOLEARCHIVE:<LIBRARY>")
+  set(CMAKE_LINK_LIBRARY_USING_WHOLE_ARCHIVE_SUPPORTED TRUE)
+endif()
+
+
 macro(__windows_compiler_msvc lang)
   if(NOT MSVC_VERSION LESS 1400)
     # for 2005 make sure the manifest is put in the dll with mt
