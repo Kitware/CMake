@@ -695,6 +695,14 @@ void cmCTestRunTest::ComputeArguments()
                << " command: " << testCommand << std::endl);
 
   // Print any test-specific env vars in verbose mode
+  if (!this->TestProperties->Directory.empty()) {
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+               this->Index << ": "
+                           << "Working Directory: "
+                           << this->TestProperties->Directory << std::endl);
+  }
+
+  // Print any test-specific env vars in verbose mode
   if (!this->TestProperties->Environment.empty()) {
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                this->Index << ": "

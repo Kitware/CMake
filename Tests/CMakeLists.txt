@@ -2999,7 +2999,7 @@ if(BUILD_TESTING)
     -C "\${CTestTest_CONFIG}"
     )
   set_property(TEST CTestTestVerboseOutput PROPERTY PASS_REGULAR_EXPRESSION
-    "Environment variables:.*foo=bar.*this=that"
+    "Test command:.*Working Directory:.*Environment variables:.*foo=bar.*this=that"
   )
 
   configure_file(
