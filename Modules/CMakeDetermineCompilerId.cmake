@@ -495,7 +495,7 @@ Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
       if(CMAKE_VS_PLATFORM_NAME STREQUAL x64)
         set(cuda_target "<TargetMachinePlatform>64</TargetMachinePlatform>")
       endif()
-      if(NOT CMAKE_CUDA_ARCHITECTURES MATCHES "^(all|all-major)$")
+      if(CMAKE_CUDA_ARCHITECTURES AND NOT CMAKE_CUDA_ARCHITECTURES MATCHES "^(all|all-major)$")
         foreach(arch ${CMAKE_CUDA_ARCHITECTURES})
           string(REGEX MATCH "[0-9]+" arch_name "${arch}")
           string(APPEND cuda_codegen "compute_${arch_name},sm_${arch_name};")
