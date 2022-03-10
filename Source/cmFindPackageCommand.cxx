@@ -262,6 +262,9 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
     } else if (args[i] == "EXACT") {
       this->VersionExact = true;
       doing = DoingNone;
+    } else if (args[i] == "GLOBAL") {
+      this->GlobalScope = true;
+      doing = DoingNone;
     } else if (args[i] == "MODULE") {
       moduleArgs.insert(i);
       doing = DoingNone;
@@ -362,6 +365,12 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
         cmStrCat("called with invalid argument \"", args[i], "\""));
       return false;
     }
+  }
+
+  if (!this->GlobalScope) {
+    cmValue value(
+      this->Makefile->GetDefinition("CMAKE_FIND_PACKAGE_TARGETS_GLOBAL"));
+    this->GlobalScope = value.IsOn();
   }
 
   std::vector<std::string> doubledComponents;
@@ -1200,6 +1209,11 @@ bool cmFindPackageCommand::ReadListFile(const std::string& f,
                                         PolicyScopeRule psr)
 {
   const bool noPolicyScope = !this->PolicyScope || psr == NoPolicyScope;
+
+  using ITScope = cmMakefile::ImportedTargetScope;
+  ITScope scope = this->GlobalScope ? ITScope::Global : ITScope::Local;
+  cmMakefile::SetGlobalTargetImportScope globScope(this->Makefile, scope);
+
   if (this->Makefile->ReadDependentFile(f, noPolicyScope)) {
     return true;
   }

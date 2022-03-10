@@ -79,7 +79,8 @@ Basic Signature
   find_package(<PackageName> [version] [EXACT] [QUIET] [MODULE]
                [REQUIRED] [[COMPONENTS] [components...]]
                [OPTIONAL_COMPONENTS components...]
-               [NO_POLICY_SCOPE])
+               [NO_POLICY_SCOPE]
+               [GLOBAL])
 
 The basic signature is supported by both Module and Config modes.
 The ``MODULE`` keyword implies that only Module mode can be used to find
@@ -114,6 +115,11 @@ there is no single expected behavior and target packages should clearly
 define what occurs in such cases.  Common arrangements include assuming it
 should find all components, no components or some well-defined subset of the
 available components.
+
+Specifying the ``GLOBAL`` keyword will promote all imported targets to
+a global scope in the importing project. Alternatively this functionality
+can be enabled by setting the variable
+:variable:`CMAKE_FIND_PACKAGE_TARGETS_GLOBAL`
 
 .. _FIND_PACKAGE_VERSION_FORMAT:
 
