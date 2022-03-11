@@ -153,6 +153,7 @@ function(run_cmake test)
     "|BullseyeCoverage"
     "|[a-z]+\\([0-9]+\\) malloc:"
     "|clang[^:]*: warning: the object size sanitizer has no effect at -O0, but is explicitly enabled:"
+    "|lld-link: warning: procedure symbol record for .* refers to PDB item index [0-9A-Fa-fx]+ which is not a valid function ID record"
     "|Error kstat returned"
     "|Hit xcodebuild bug"
     "|Recompacting log\\.\\.\\."
