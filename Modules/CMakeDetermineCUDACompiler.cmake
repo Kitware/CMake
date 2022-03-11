@@ -249,7 +249,8 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
       set(CMAKE_CUDA_COMPILER_TOOLKIT_VERSION "${CMAKE_MATCH_1}")
     endif()
 
-    # Make the all and all-major architecture information available.
+    # Make the all, all-major, and native architecture information available.
+    # FIXME(#23161): Defer architecture detection until compiler testing.
     include(${CMAKE_ROOT}/Modules/CUDA/architectures.cmake)
   endif()
 
@@ -272,6 +273,7 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
     endif()
   endif()
 
+  # FIXME(#23161): Defer architecture testing until compiler testing.
   if(DEFINED CMAKE_CUDA_ARCHITECTURES)
     if(CMAKE_CUDA_ARCHITECTURES MATCHES "^(all|all-major)$")
       # For sufficiently new NVCC we can just use the all and all-major flags.
@@ -288,6 +290,17 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
         elseif(CMAKE_CUDA_ARCHITECTURES STREQUAL "all-major")
           set(architectures_test ${CMAKE_CUDA_ARCHITECTURES_ALL_MAJOR})
         endif()
+      endif()
+    elseif(CMAKE_CUDA_ARCHITECTURES STREQUAL "native")
+      # For sufficiently new NVCC we can just use the 'native' value directly.
+      # For VS we don't test since we can't find nvcc this early (see #23161).
+      if(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA" AND CMAKE_CUDA_COMPILER_TOOLKIT_VERSION VERSION_GREATER_EQUAL 11.6)
+        string(APPEND nvcc_test_flags " -arch=${CMAKE_CUDA_ARCHITECTURES}")
+        set(architectures_tested "${CMAKE_CUDA_ARCHITECTURES}")
+      elseif(CMAKE_GENERATOR MATCHES "Visual Studio")
+        set(architectures_tested "${CMAKE_CUDA_ARCHITECTURES}")
+      else()
+        set(architectures_test ${_CUDA_ARCHITECTURES_NATIVE})
       endif()
     elseif(CMAKE_CUDA_ARCHITECTURES OR "${CMAKE_CUDA_ARCHITECTURES}" STREQUAL "")
       # Explicit architectures.  Test them during detection.
@@ -346,6 +359,7 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
 
     # We now know the version, so make the architecture variables available.
     set(CMAKE_CUDA_COMPILER_TOOLKIT_VERSION ${CMAKE_CUDA_COMPILER_VERSION})
+    # FIXME(#23161): Defer architecture detection until compiler testing.
     include(${CMAKE_ROOT}/Modules/CUDA/architectures.cmake)
   endif()
 
@@ -633,7 +647,7 @@ if("${CMAKE_CUDA_ARCHITECTURES}" STREQUAL "")
       message(FATAL_ERROR "Failed to detect a default CUDA architecture.\n\nCompiler output:\n${CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT}")
     endif()
   endif()
-elseif(CMAKE_CUDA_ARCHITECTURES AND NOT "${architectures_tested}" MATCHES "^(all|all-major)$")
+elseif(CMAKE_CUDA_ARCHITECTURES AND NOT "${architectures_tested}" MATCHES "^(all|all-major|native)$")
   # Sort since order mustn't matter.
   list(SORT architectures_detected)
   list(SORT architectures_tested)
