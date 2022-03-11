@@ -860,6 +860,44 @@ public:
   void PushLoopBlockBarrier();
   void PopLoopBlockBarrier();
 
+  bool IsImportedTargetGlobalScope() const;
+
+  enum class ImportedTargetScope
+  {
+    Local,
+    Global,
+  };
+
+  /** Helper class to manage whether imported packages
+   * should be globally scoped based off the find package command
+   */
+  class SetGlobalTargetImportScope
+  {
+  public:
+    SetGlobalTargetImportScope(cmMakefile* mk, ImportedTargetScope const scope)
+      : Makefile(mk)
+    {
+      if (scope == ImportedTargetScope::Global &&
+          !this->Makefile->IsImportedTargetGlobalScope()) {
+        this->Makefile->CurrentImportedTargetScope = scope;
+        this->Set = true;
+      } else {
+        this->Set = false;
+      }
+    }
+    ~SetGlobalTargetImportScope()
+    {
+      if (this->Set) {
+        this->Makefile->CurrentImportedTargetScope =
+          ImportedTargetScope::Local;
+      }
+    }
+
+  private:
+    cmMakefile* Makefile;
+    bool Set;
+  };
+
   /** Helper class to push and pop scopes automatically.  */
   class ScopePushPop
   {
@@ -1124,4 +1162,5 @@ private:
   std::set<std::string> WarnedCMP0074;
   bool IsSourceFileTryCompile;
   mutable bool SuppressSideEffects;
+  ImportedTargetScope CurrentImportedTargetScope;
 };
