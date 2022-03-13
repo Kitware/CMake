@@ -968,6 +968,16 @@ function(matlab_add_unit_test)
     message(FATAL_ERROR "[MATLAB] The Matlab test name cannot be empty")
   endif()
 
+  # The option to run a batch program with MATLAB changes depending on the MATLAB version
+  # For MATLAB before R2019a (9.6), the only supported option is -r, afterwords the suggested option
+  # is -batch as -r is deprecated
+  set(maut_BATCH_OPTION "-r")
+  if(NOT (Matlab_VERSION_STRING STREQUAL ""))
+    if(Matlab_VERSION_STRING VERSION_GREATER_EQUAL "9.6")
+      set(maut_BATCH_OPTION "-batch")
+    endif()
+  endif()
+
   add_test(NAME ${${prefix}_NAME}
            COMMAND ${CMAKE_COMMAND}
             "-Dtest_name=${${prefix}_NAME}"
@@ -981,6 +991,7 @@ function(matlab_add_unit_test)
             "-Dunittest_file_to_run=${${prefix}_UNITTEST_FILE}"
             "-Dcustom_Matlab_test_command=${${prefix}_CUSTOM_TEST_COMMAND}"
             "-Dcmd_to_run_before_test=${${prefix}_UNITTEST_PRECOMMAND}"
+            "-Dmaut_BATCH_OPTION=${maut_BATCH_OPTION}"
             -P ${_FindMatlab_SELF_DIR}/MatlabTestsRedirect.cmake
            ${${prefix}_TEST_ARGS}
            ${${prefix}_UNPARSED_ARGUMENTS}
