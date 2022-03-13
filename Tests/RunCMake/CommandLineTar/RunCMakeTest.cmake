@@ -34,3 +34,6 @@ run_cmake(zip)
 
 # Extracting only selected files or directories
 run_cmake(zip-filtered)
+
+# Use the --mtime option to set the mtime when creating archive
+run_cmake(set-mtime)
