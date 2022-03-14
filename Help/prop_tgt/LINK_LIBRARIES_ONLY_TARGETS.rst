@@ -20,16 +20,15 @@ This property is initialized by the value of the
 target is created.  The property may be explicitly enabled on an imported
 target to check its link interface.
 
-For example, the following code:
+In the following example, CMake will halt with an error at configure time
+because ``miLib`` is not a target:
 
 .. code-block:: cmake
 
   set(CMAKE_LINK_LIBRARIES_ONLY_TARGETS ON)
-  add_executable(myLib STATIC myLib.c)
+  add_library(myLib STATIC myLib.c)
   add_executable(myExe myExe.c)
   target_link_libraries(myExe PRIVATE miLib) # typo for myLib
-
-will produce a CMake-time error that ``miLib`` is not a target.
 
 In order to link toolchain-provided libraries by name while still
 enforcing ``LINK_LIBRARIES_ONLY_TARGETS``, use an
