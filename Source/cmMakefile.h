@@ -1162,5 +1162,5 @@ private:
   std::set<std::string> WarnedCMP0074;
   bool IsSourceFileTryCompile;
   mutable bool SuppressSideEffects;
-  ImportedTargetScope CurrentImportedTargetScope;
+  ImportedTargetScope CurrentImportedTargetScope = ImportedTargetScope::Local;
 };
