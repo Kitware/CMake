@@ -5,7 +5,7 @@
 FindJNI
 -------
 
-Find Java Native Interface (JNI) libraries.
+Find Java Native Interface (JNI) headers and libraries.
 
 JNI enables Java code running in a Java Virtual Machine (JVM) to call
 and be called by native applications and libraries written in other
@@ -22,11 +22,11 @@ Result Variables
 This module sets the following result variables:
 
 ``JNI_INCLUDE_DIRS``
-  the include dirs to use
+  The include directories to use.
 ``JNI_LIBRARIES``
-  the libraries to use (JAWT and JVM)
+  The libraries to use (JAWT and JVM).
 ``JNI_FOUND``
-  TRUE if JNI headers and libraries were found.
+  ``TRUE`` if JNI headers and libraries were found.
 
 Cache Variables
 ^^^^^^^^^^^^^^^
@@ -34,15 +34,15 @@ Cache Variables
 The following cache variables are also available to set or use:
 
 ``JAVA_AWT_LIBRARY``
-  the path to the Java AWT Native Interface (JAWT) library
+  The path to the Java AWT Native Interface (JAWT) library.
 ``JAVA_JVM_LIBRARY``
-  the path to the Java Virtual Machine (JVM) library
+  The path to the Java Virtual Machine (JVM) library.
 ``JAVA_INCLUDE_PATH``
-  the include path to jni.h
+  The include path to ``jni.h``.
 ``JAVA_INCLUDE_PATH2``
-  the include path to jni_md.h and jniport.h
+  The include path to ``jni_md.h`` and ``jniport.h``.
 ``JAVA_AWT_INCLUDE_PATH``
-  the include path to jawt.h
+  The include path to ``jawt.h``.
 #]=======================================================================]
 
 # Expand {libarch} occurrences to java_libarch subdirectory(-ies) and set ${_var}
