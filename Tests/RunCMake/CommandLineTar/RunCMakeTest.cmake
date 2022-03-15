@@ -37,3 +37,6 @@ run_cmake(zip-filtered)
 
 # Use the --mtime option to set the mtime when creating archive
 run_cmake(set-mtime)
+
+# Use the --touch option to avoid extracting the mtime
+run_cmake(touch-mtime)

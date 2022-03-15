@@ -1227,7 +1227,8 @@ the ``MTIME`` option.
     [DESTINATION <dir>]
     [PATTERNS <patterns>...]
     [LIST_ONLY]
-    [VERBOSE])
+    [VERBOSE]
+    [TOUCH])
 
 .. versionadded:: 3.18
 
@@ -1244,5 +1245,9 @@ If the ``PATTERNS`` option is not given, the entire archive will be listed or
 extracted.
 
 ``LIST_ONLY`` will list the files in the archive rather than extract them.
+
+.. versionadded:: 3.24
+  The ``TOUCH`` option gives extracted files a current local
+  timestamp instead of extracting file timestamps from the archive.
 
 With ``VERBOSE``, the command will produce verbose output.

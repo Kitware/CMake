@@ -3507,6 +3507,7 @@ bool HandleArchiveExtractCommand(std::vector<std::string> const& args,
     bool ListOnly = false;
     std::string Destination;
     std::vector<std::string> Patterns;
+    bool Touch = false;
   };
 
   static auto const parser = cmArgumentParser<Arguments>{}
@@ -3514,7 +3515,8 @@ bool HandleArchiveExtractCommand(std::vector<std::string> const& args,
                                .Bind("VERBOSE"_s, &Arguments::Verbose)
                                .Bind("LIST_ONLY"_s, &Arguments::ListOnly)
                                .Bind("DESTINATION"_s, &Arguments::Destination)
-                               .Bind("PATTERNS"_s, &Arguments::Patterns);
+                               .Bind("PATTERNS"_s, &Arguments::Patterns)
+                               .Bind("TOUCH"_s, &Arguments::Touch);
 
   std::vector<std::string> unrecognizedArguments;
   std::vector<std::string> keywordsMissingValues;
@@ -3577,8 +3579,11 @@ bool HandleArchiveExtractCommand(std::vector<std::string> const& args,
       return false;
     }
 
-    if (!cmSystemTools::ExtractTar(inFile, parsedArgs.Patterns,
-                                   parsedArgs.Verbose)) {
+    if (!cmSystemTools::ExtractTar(
+          inFile, parsedArgs.Patterns,
+          parsedArgs.Touch ? cmSystemTools::cmTarExtractTimestamps::No
+                           : cmSystemTools::cmTarExtractTimestamps::Yes,
+          parsedArgs.Verbose)) {
       status.SetError(cmStrCat("failed to extract: ", inFile));
       cmSystemTools::SetFatalErrorOccured();
       return false;
