@@ -462,17 +462,13 @@ std::vector<cmGlobalGenerator::GeneratedMakeCommand>
 cmGlobalGhsMultiGenerator::GenerateBuildCommand(
   const std::string& makeProgram, const std::string& projectName,
   const std::string& projectDir, std::vector<std::string> const& targetNames,
-  const std::string& /*config*/, int jobs, bool /*verbose*/,
+  const std::string& /*config*/, int jobs, bool verbose,
   const cmBuildOptions& /*buildOptions*/,
   std::vector<std::string> const& makeOptions)
 {
-  GeneratedMakeCommand makeCommand = {};
-  std::string gbuild;
-  if (cmValue gbuildCached =
-        this->CMakeInstance->GetCacheDefinition("CMAKE_MAKE_PROGRAM")) {
-    gbuild = *gbuildCached;
-  }
-  makeCommand.Add(this->SelectMakeProgram(makeProgram, gbuild));
+  GeneratedMakeCommand makeCommand;
+
+  makeCommand.Add(this->SelectMakeProgram(makeProgram));
 
   if (jobs != cmake::NO_BUILD_PARALLEL_LEVEL) {
     if (jobs == cmake::DEFAULT_BUILD_PARALLEL_LEVEL) {
@@ -482,38 +478,46 @@ cmGlobalGhsMultiGenerator::GenerateBuildCommand(
     }
   }
 
-  makeCommand.Add(makeOptions.begin(), makeOptions.end());
-
-  /* determine which top-project file to use */
+  /* determine the top-project file in the project directory */
   std::string proj = projectName + ".top" + FILE_EXTENSION;
   std::vector<std::string> files;
   cmSystemTools::Glob(projectDir, ".*\\.top\\.gpj", files);
   if (!files.empty()) {
-    /* if multiple top-projects are found in build directory
-     * then prefer projectName top-project.
-     */
-    if (!cm::contains(files, proj)) {
-      proj = files.at(0);
-    }
+    /* use the real top-level project in the directory */
+    proj = files.at(0);
   }
-
   makeCommand.Add("-top", proj);
+
+  /* determine targets to build */
+  bool build_all = false;
   if (!targetNames.empty()) {
-    if (cm::contains(targetNames, "clean")) {
-      makeCommand.Add("-clean");
-    } else {
-      for (const auto& tname : targetNames) {
-        if (!tname.empty()) {
+    for (const auto& tname : targetNames) {
+      if (!tname.empty()) {
+        if (tname == "clean") {
+          makeCommand.Add("-clean");
+        } else {
           makeCommand.Add(tname + ".tgt.gpj");
         }
+      } else {
+        build_all = true;
       }
     }
   } else {
+    build_all = true;
+  }
+
+  if (build_all) {
     /* transform name to default build */;
     std::string all = std::string(this->GetAllTargetName()) + ".tgt.gpj";
     makeCommand.Add(all);
   }
-  return { makeCommand };
+
+  if (verbose) {
+    makeCommand.Add("-commands");
+  }
+  makeCommand.Add(makeOptions.begin(), makeOptions.end());
+
+  return { std::move(makeCommand) };
 }
 
 void cmGlobalGhsMultiGenerator::WriteMacros(std::ostream& fout,
