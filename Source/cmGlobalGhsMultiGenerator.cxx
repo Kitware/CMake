@@ -523,9 +523,10 @@ cmGlobalGhsMultiGenerator::GenerateBuildCommand(
   makeCommand.Add(this->SelectMakeProgram(makeProgram, gbuild));
 
   if (jobs != cmake::NO_BUILD_PARALLEL_LEVEL) {
-    makeCommand.Add("-parallel");
-    if (jobs != cmake::DEFAULT_BUILD_PARALLEL_LEVEL) {
-      makeCommand.Add(std::to_string(jobs));
+    if (jobs == cmake::DEFAULT_BUILD_PARALLEL_LEVEL) {
+      makeCommand.Add("-parallel");
+    } else {
+      makeCommand.Add(std::string("-parallel=") + std::to_string(jobs));
     }
   }
 
