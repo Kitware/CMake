@@ -92,6 +92,7 @@ protected:
     const cmBuildOptions& buildOptions = cmBuildOptions(),
     std::vector<std::string> const& makeOptions =
       std::vector<std::string>()) override;
+  void AddExtraIDETargets() override;
 
 private:
   void GetToolset(cmMakefile* mf, std::string& tsd, const std::string& ts);
@@ -111,10 +112,12 @@ private:
   void WriteAllTarget(cmLocalGenerator* root,
                       std::vector<cmLocalGenerator*>& generators,
                       std::string& all_target);
-
+  bool AddCheckTarget();
+  std::string StampFile;
   static std::string TrimQuotes(std::string str);
 
   static const char* DEFAULT_BUILD_PROGRAM;
+  static const char* CHECK_BUILD_SYSTEM_TARGET;
 
   bool ComputeTargetBuildOrder(cmGeneratorTarget const* tgt,
                                std::vector<cmGeneratorTarget const*>& build);

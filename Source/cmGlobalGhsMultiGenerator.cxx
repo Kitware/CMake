@@ -9,6 +9,7 @@
 #include <cm/memory>
 #include <cm/string>
 #include <cmext/algorithm>
+#include <cmext/memory>
 
 #include "cmDocumentationEntry.h"
 #include "cmGeneratedFileStream.h"
@@ -18,6 +19,7 @@
 #include "cmLocalGhsMultiGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmSourceFile.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
@@ -32,6 +34,8 @@ const char* cmGlobalGhsMultiGenerator::DEFAULT_BUILD_PROGRAM = "gbuild";
 #elif defined(_WIN32)
 const char* cmGlobalGhsMultiGenerator::DEFAULT_BUILD_PROGRAM = "gbuild.exe";
 #endif
+const char* cmGlobalGhsMultiGenerator::CHECK_BUILD_SYSTEM_TARGET =
+  "RERUN_CMAKE";
 
 cmGlobalGhsMultiGenerator::cmGlobalGhsMultiGenerator(cmake* cm)
   : cmGlobalGenerator(cm)
@@ -476,6 +480,13 @@ void cmGlobalGhsMultiGenerator::Generate()
   this->WriteFileHeader(ftarget);
   this->WriteCustomTargetBOD(ftarget);
   ftarget.Close();
+
+  // create the stamp file when running CMake
+  if (!this->StampFile.empty()) {
+    cmGeneratedFileStream fstamp(this->StampFile);
+    fstamp.SetCopyIfDifferent(false);
+    fstamp.Close();
+  }
 }
 
 void cmGlobalGhsMultiGenerator::OutputTopLevelProject(
@@ -681,4 +692,104 @@ bool cmGlobalGhsMultiGenerator::VisitTarget(
   }
   /* already complete */
   return false;
+}
+
+bool cmGlobalGhsMultiGenerator::AddCheckTarget()
+{
+  // Skip the target if no regeneration is to be done.
+  if (this->GlobalSettingIsOn("CMAKE_SUPPRESS_REGENERATION")) {
+    return false;
+  }
+
+  // Get the generators.
+  std::vector<std::unique_ptr<cmLocalGenerator>> const& generators =
+    this->LocalGenerators;
+  auto& lg =
+    cm::static_reference_cast<cmLocalGhsMultiGenerator>(generators[0]);
+
+  // The name of the output file for the custom command.
+  this->StampFile = lg.GetBinaryDirectory() + std::string("/CMakeFiles/") +
+    CHECK_BUILD_SYSTEM_TARGET;
+
+  // Add a custom rule to re-run CMake if any input files changed.
+  {
+    // Collect the input files used to generate all targets in this
+    // project.
+    std::vector<std::string> listFiles;
+    for (const auto& gen : generators) {
+      cm::append(listFiles, gen->GetMakefile()->GetListFiles());
+    }
+
+    // Add the cache file.
+    listFiles.push_back(cmStrCat(
+      this->GetCMakeInstance()->GetHomeOutputDirectory(), "/CMakeCache.txt"));
+
+    // Print not implemented warning.
+    if (this->GetCMakeInstance()->DoWriteGlobVerifyTarget()) {
+      std::ostringstream msg;
+      msg << "Any pre-check scripts, such as those generated for file(GLOB "
+             "CONFIGURE_DEPENDS), will not be run by gbuild.";
+      this->GetCMakeInstance()->IssueMessage(MessageType::AUTHOR_WARNING,
+                                             msg.str());
+    }
+
+    // Sort the list of input files and remove duplicates.
+    std::sort(listFiles.begin(), listFiles.end(), std::less<std::string>());
+    auto newEnd = std::unique(listFiles.begin(), listFiles.end());
+    listFiles.erase(newEnd, listFiles.end());
+
+    // Create a rule to re-run CMake and create output file.
+    std::string argS = cmStrCat("-S", lg.GetSourceDirectory());
+    std::string argB = cmStrCat("-B", lg.GetBinaryDirectory());
+    cmCustomCommandLines commandLines = cmMakeSingleCommandLine(
+      { cmSystemTools::GetCMakeCommand(), argS, argB });
+
+    /* Create the target(Exclude from ALL_BUILD).
+     *
+     * The build tool, currently, does not support rereading the project files
+     * if they get updated. So do not run this target as part of ALL_BUILD.
+     */
+    auto cc = cm::make_unique<cmCustomCommand>();
+    cmTarget* tgt =
+      lg.AddUtilityCommand(CHECK_BUILD_SYSTEM_TARGET, true, std::move(cc));
+    auto ptr = cm::make_unique<cmGeneratorTarget>(tgt, &lg);
+    auto* gt = ptr.get();
+    lg.AddGeneratorTarget(std::move(ptr));
+
+    // Add the rule.
+    cc = cm::make_unique<cmCustomCommand>();
+    cc->SetOutputs(this->StampFile);
+    cc->SetDepends(listFiles);
+    cc->SetCommandLines(commandLines);
+    cc->SetComment("Checking Build System");
+    cc->SetCMP0116Status(cmPolicies::NEW);
+    cc->SetEscapeOldStyle(false);
+    cc->SetStdPipesUTF8(true);
+
+    if (cmSourceFile* file =
+          lg.AddCustomCommandToOutput(std::move(cc), true)) {
+      gt->AddSource(file->ResolveFullPath());
+    } else {
+      cmSystemTools::Error("Error adding rule for " + this->StampFile);
+    }
+    // Organize in the "predefined targets" folder:
+    if (this->UseFolderProperty()) {
+      tgt->SetProperty("FOLDER", this->GetPredefinedTargetsFolder());
+    }
+  }
+
+  return true;
+}
+
+void cmGlobalGhsMultiGenerator::AddExtraIDETargets()
+{
+  // ToDo: Add ALL_BUILD project target? Yes, need to replace current method
+
+  /* Add Custom Target to check if CMake needs to be rerun.
+   *
+   * The build tool, currently, does not support rereading the project files
+   * if they get updated.  So do not make the other targets dependent on this
+   * check.
+   */
+  this->AddCheckTarget();
 }
