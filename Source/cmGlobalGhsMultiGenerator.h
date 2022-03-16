@@ -102,17 +102,16 @@ private:
                              std::vector<cmLocalGenerator*>& generators);
   void WriteTopLevelProject(std::ostream& fout, cmLocalGenerator* root);
   void WriteMacros(std::ostream& fout, cmLocalGenerator* root);
-  void WriteHighLevelDirectives(cmLocalGenerator* root, std::ostream& fout);
-  void WriteSubProjects(std::ostream& fout, std::string& all_target);
+  void WriteHighLevelDirectives(std::ostream& fout, cmLocalGenerator* root);
+  void WriteSubProjects(std::ostream& fout);
   void WriteTargets(cmLocalGenerator* root);
   void WriteProjectLine(std::ostream& fout, cmGeneratorTarget const* target,
                         std::string& rootBinaryDir);
   void WriteCustomRuleBOD(std::ostream& fout);
   void WriteCustomTargetBOD(std::ostream& fout);
-  void WriteAllTarget(cmLocalGenerator* root,
-                      std::vector<cmLocalGenerator*>& generators,
-                      std::string& all_target);
   bool AddCheckTarget();
+  void AddAllTarget();
+
   std::string StampFile;
   static std::string TrimQuotes(std::string str);
 

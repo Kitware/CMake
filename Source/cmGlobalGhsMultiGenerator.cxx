@@ -2,8 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalGhsMultiGenerator.h"
 
+#include <algorithm>
+#include <functional>
 #include <map>
-#include <ostream>
+#include <sstream>
 #include <utility>
 
 #include <cm/memory>
@@ -11,6 +13,8 @@
 #include <cmext/algorithm>
 #include <cmext/memory>
 
+#include "cmCustomCommand.h"
+#include "cmCustomCommandLines.h"
 #include "cmDocumentationEntry.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
@@ -19,11 +23,13 @@
 #include "cmLocalGhsMultiGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmPolicies.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmTarget.h"
 #include "cmValue.h"
 #include "cmVersion.h"
 #include "cmake.h"
@@ -283,7 +289,7 @@ void cmGlobalGhsMultiGenerator::WriteTopLevelProject(std::ostream& fout,
 {
   this->WriteFileHeader(fout);
   this->WriteMacros(fout, root);
-  this->WriteHighLevelDirectives(root, fout);
+  this->WriteHighLevelDirectives(fout, root);
   GhsMultiGpj::WriteGpjTag(GhsMultiGpj::PROJECT, fout);
 
   fout << "# Top Level Project File\n";
@@ -311,10 +317,8 @@ void cmGlobalGhsMultiGenerator::WriteTopLevelProject(std::ostream& fout,
   }
 }
 
-void cmGlobalGhsMultiGenerator::WriteSubProjects(std::ostream& fout,
-                                                 std::string& all_target)
+void cmGlobalGhsMultiGenerator::WriteSubProjects(std::ostream& fout)
 {
-  fout << "CMakeFiles/" << all_target << " [Project]\n";
   // All known targets
   for (cmGeneratorTarget const* target : this->ProjectTargets) {
     if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY ||
@@ -335,6 +339,9 @@ void cmGlobalGhsMultiGenerator::WriteProjectLine(
 {
   cmValue projName = target->GetProperty("GENERATOR_FILE_NAME");
   cmValue projType = target->GetProperty("GENERATOR_FILE_NAME_EXT");
+  /* If either value is not valid then this particular target is an
+   * unsupported target type and should be skipped.
+   */
   if (projName && projType) {
     cmLocalGenerator* lg = target->GetLocalGenerator();
     std::string dir = lg->GetCurrentBinaryDirectory();
@@ -350,12 +357,6 @@ void cmGlobalGhsMultiGenerator::WriteProjectLine(
     std::string projFile = dir + *projName + FILE_EXTENSION;
     fout << projFile;
     fout << ' ' << *projType << '\n';
-  } else {
-    /* Should never happen */
-    std::string message =
-      "The project file for target [" + target->GetName() + "] is missing.\n";
-    cmSystemTools::Error(message);
-    fout << "{comment} " << target->GetName() << " [missing project file]\n";
   }
 }
 
@@ -393,62 +394,6 @@ void cmGlobalGhsMultiGenerator::WriteTargets(cmLocalGenerator* root)
     }
     fbld.Close();
   }
-}
-
-void cmGlobalGhsMultiGenerator::WriteAllTarget(
-  cmLocalGenerator* root, std::vector<cmLocalGenerator*>& generators,
-  std::string& all_target)
-{
-  this->ProjectTargets.clear();
-
-  // create target build file
-  all_target = root->GetProjectName() + "." + this->GetAllTargetName() +
-    ".tgt" + FILE_EXTENSION;
-  std::string fname =
-    root->GetCurrentBinaryDirectory() + "/CMakeFiles/" + all_target;
-  cmGeneratedFileStream fbld(fname);
-  fbld.SetCopyIfDifferent(true);
-  this->WriteFileHeader(fbld);
-  GhsMultiGpj::WriteGpjTag(GhsMultiGpj::PROJECT, fbld);
-
-  // Collect all targets under this root generator and the transitive
-  // closure of their dependencies.
-  TargetDependSet projectTargets;
-  TargetDependSet originalTargets;
-  this->GetTargetSets(projectTargets, originalTargets, root, generators);
-  OrderedTargetDependSet sortedProjectTargets(projectTargets, "");
-  std::vector<cmGeneratorTarget const*> defaultTargets;
-  for (cmGeneratorTarget const* t : sortedProjectTargets) {
-    /* save list of all targets in sorted order */
-    this->ProjectTargets.push_back(t);
-  }
-  for (cmGeneratorTarget const* t : sortedProjectTargets) {
-    if (!t->IsInBuildSystem()) {
-      continue;
-    }
-    if (!this->IsExcluded(t->GetLocalGenerator(), t)) {
-      defaultTargets.push_back(t);
-    }
-  }
-  std::vector<cmGeneratorTarget const*> build;
-  if (this->ComputeTargetBuildOrder(defaultTargets, build)) {
-    std::string message = "The inter-target dependency graph for project [" +
-      root->GetProjectName() + "] had a cycle.\n";
-    cmSystemTools::Error(message);
-  } else {
-    // determine the targets for ALL target
-    std::string rootBinaryDir =
-      cmStrCat(root->GetCurrentBinaryDirectory(), "/CMakeFiles");
-    for (cmGeneratorTarget const* target : build) {
-      if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY ||
-          target->GetType() == cmStateEnums::MODULE_LIBRARY ||
-          target->GetType() == cmStateEnums::SHARED_LIBRARY) {
-        continue;
-      }
-      this->WriteProjectLine(fbld, target, rootBinaryDir);
-    }
-  }
-  fbld.Close();
 }
 
 void cmGlobalGhsMultiGenerator::Generate()
@@ -493,10 +438,21 @@ void cmGlobalGhsMultiGenerator::OutputTopLevelProject(
   cmLocalGenerator* root, std::vector<cmLocalGenerator*>& generators)
 {
   std::string fname;
-  std::string all_target;
 
   if (generators.empty()) {
     return;
+  }
+
+  // Collect all targets under this root generator and the transitive
+  // closure of their dependencies.
+  TargetDependSet projectTargets;
+  TargetDependSet originalTargets;
+  this->GetTargetSets(projectTargets, originalTargets, root, generators);
+  OrderedTargetDependSet sortedProjectTargets(projectTargets, "");
+  this->ProjectTargets.clear();
+  for (cmGeneratorTarget const* t : sortedProjectTargets) {
+    /* save list of all targets in sorted order */
+    this->ProjectTargets.push_back(t);
   }
 
   /* Name top-level projects as filename.top.gpj to avoid name clashes
@@ -509,11 +465,8 @@ void cmGlobalGhsMultiGenerator::OutputTopLevelProject(
   cmGeneratedFileStream top(fname);
   top.SetCopyIfDifferent(true);
   this->WriteTopLevelProject(top, root);
-
-  this->WriteAllTarget(root, generators, all_target);
   this->WriteTargets(root);
-
-  this->WriteSubProjects(top, all_target);
+  this->WriteSubProjects(top);
   top.Close();
 }
 
@@ -569,9 +522,7 @@ cmGlobalGhsMultiGenerator::GenerateBuildCommand(
     }
   } else {
     /* transform name to default build */;
-    std::string all = proj;
-    all.replace(all.end() - 7, all.end(),
-                std::string(this->GetAllTargetName()) + ".tgt.gpj");
+    std::string all = std::string(this->GetAllTargetName()) + ".tgt.gpj";
     makeCommand.Add(all);
   }
   return { makeCommand };
@@ -591,7 +542,7 @@ void cmGlobalGhsMultiGenerator::WriteMacros(std::ostream& fout,
 }
 
 void cmGlobalGhsMultiGenerator::WriteHighLevelDirectives(
-  cmLocalGenerator* root, std::ostream& fout)
+  std::ostream& fout, cmLocalGenerator* root)
 {
   /* put primary target and customization files into project file */
   cmValue const tgt = root->GetMakefile()->GetDefinition("GHS_PRIMARY_TARGET");
@@ -781,9 +732,53 @@ bool cmGlobalGhsMultiGenerator::AddCheckTarget()
   return true;
 }
 
+void cmGlobalGhsMultiGenerator::AddAllTarget()
+{
+  // Add a special target that depends on ALL projects for easy build
+  // of one configuration only.
+  for (auto const& it : this->ProjectMap) {
+    std::vector<cmLocalGenerator*> const& gen = it.second;
+    // add the ALL_BUILD to the first local generator of each project
+    if (!gen.empty()) {
+      // Use no actual command lines so that the target itself is not
+      // considered always out of date.
+      auto cc = cm::make_unique<cmCustomCommand>();
+      cc->SetCMP0116Status(cmPolicies::NEW);
+      cc->SetEscapeOldStyle(false);
+      cc->SetComment("Build all projects");
+      cmTarget* allBuild = gen[0]->AddUtilityCommand(this->GetAllTargetName(),
+                                                     true, std::move(cc));
+
+      gen[0]->AddGeneratorTarget(
+        cm::make_unique<cmGeneratorTarget>(allBuild, gen[0]));
+
+      // Organize in the "predefined targets" folder:
+      if (this->UseFolderProperty()) {
+        allBuild->SetProperty("FOLDER", this->GetPredefinedTargetsFolder());
+      }
+
+      // Now make all targets depend on the ALL_BUILD target
+      for (cmLocalGenerator const* i : gen) {
+        for (const auto& tgt : i->GetGeneratorTargets()) {
+          // Skip global or imported targets
+          if (tgt->GetType() == cmStateEnums::GLOBAL_TARGET ||
+              tgt->IsImported()) {
+            continue;
+          }
+          // Skip Exclude From All Targets
+          if (!this->IsExcluded(gen[0], tgt.get())) {
+            allBuild->AddUtility(tgt->GetName(), false);
+          }
+        }
+      }
+    }
+  }
+}
+
 void cmGlobalGhsMultiGenerator::AddExtraIDETargets()
 {
-  // ToDo: Add ALL_BUILD project target? Yes, need to replace current method
+  // Add a special target that depends on ALL projects.
+  this->AddAllTarget();
 
   /* Add Custom Target to check if CMake needs to be rerun.
    *
