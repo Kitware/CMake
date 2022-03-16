@@ -2319,7 +2319,7 @@ if(BUILD_TESTING)
     endmacro()
     macro(add_test_GhsMulti_rename_install test_name)
       add_test_GhsMulti( ${test_name} GhsMultiRenameInstall ${test_name}
-        "-DCMAKE_INSTALL_PREFIX=. -DRUN_TEST=${test_name}" ${CMAKE_CMAKE_COMMAND} --build . --target install)
+        "-DCMAKE_INSTALL_PREFIX=. -DRUN_TEST=${test_name}" ${CMAKE_CMAKE_COMMAND} --build . --target INSTALL)
     endmacro()
     #unset ghs config variables
     unset(ghs_config_name)

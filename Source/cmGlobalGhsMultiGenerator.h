@@ -81,8 +81,6 @@ public:
   // Write the common disclaimer text at the top of each build file.
   void WriteFileHeader(std::ostream& fout);
 
-  const char* GetInstallTargetName() const override { return "install"; }
-
 protected:
   void Generate() override;
   std::vector<GeneratedMakeCommand> GenerateBuildCommand(
