@@ -76,6 +76,7 @@ apt-get install -y \
     libxerces-c-dev \
     libxml2-dev libxml2-utils \
     libxslt-dev xsltproc \
+    openjdk-11-jdk \
     python2 python2-dev python-numpy pypy pypy-dev \
     python3 python3-dev python3-numpy pypy3 pypy3-dev python3-venv \
     qtbase5-dev qtbase5-dev-tools \
