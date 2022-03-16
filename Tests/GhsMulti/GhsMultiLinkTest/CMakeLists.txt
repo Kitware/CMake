@@ -38,8 +38,7 @@ if (RUN_TEST STREQUAL "NO_FLAGS")
 else()
   unset(fileName CACHE)
   find_file(fileName exe1.gpj
-    ${CMAKE_CURRENT_BINARY_DIR}/link_build
-    ${CMAKE_CURRENT_BINARY_DIR}/link_build/exe1
+    ${CMAKE_CURRENT_BINARY_DIR}/link_build/exe1.dir
     )
   message("Parsing project file: ${fileName}")
   file(STRINGS ${fileName} fileText)
@@ -54,13 +53,14 @@ else()
     string(FIND "${fileText}" "${opt}" opt_found)
     if ( opt_found EQUAL -1 )
       message(SEND_ERROR "Could not find: ${opt}")
+    else()
+      message("located: ${opt}")
     endif()
   endforeach()
 
   unset(fileName CACHE)
   find_file (fileName lib1.gpj
-    ${CMAKE_CURRENT_BINARY_DIR}/link_build
-    ${CMAKE_CURRENT_BINARY_DIR}/link_build/lib1
+    ${CMAKE_CURRENT_BINARY_DIR}/link_build/lib1.dir
     )
   message("Parsing project file: ${fileName}")
   file(STRINGS ${fileName} fileText)
@@ -71,13 +71,14 @@ else()
     string(FIND "${fileText}" "${opt}" opt_found)
     if (opt_found EQUAL -1)
       message(SEND_ERROR "Could not find: ${opt}")
+    else()
+      message("located: ${opt}")
     endif()
   endforeach()
 
   unset(fileName CACHE)
   find_file (fileName lib2.gpj
-    ${CMAKE_CURRENT_BINARY_DIR}/link_build
-    ${CMAKE_CURRENT_BINARY_DIR}/link_build/lib2
+    ${CMAKE_CURRENT_BINARY_DIR}/link_build/lib2.dir
     )
   message("Parsing project file: ${fileName}")
   file(STRINGS ${fileName} fileText)
@@ -87,6 +88,8 @@ else()
     string(FIND "${fileText}" "${opt}" opt_found)
     if ( opt_found EQUAL -1 )
       message(SEND_ERROR "Could not find: ${opt}")
+    else()
+      message("located: ${opt}")
     endif()
   endforeach()
 endif()
