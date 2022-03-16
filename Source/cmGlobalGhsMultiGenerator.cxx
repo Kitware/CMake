@@ -328,8 +328,7 @@ void cmGlobalGhsMultiGenerator::WriteSubProjects(std::ostream& fout)
          target->GetName() != this->GetInstallTargetName())) {
       continue;
     }
-    fout << "CMakeFiles/" << target->GetName() + ".tgt" + FILE_EXTENSION
-         << " [Project]\n";
+    fout << target->GetName() + ".tgt" + FILE_EXTENSION << " [Project]\n";
   }
 }
 
@@ -337,33 +336,22 @@ void cmGlobalGhsMultiGenerator::WriteProjectLine(
   std::ostream& fout, cmGeneratorTarget const* target,
   std::string& rootBinaryDir)
 {
-  cmValue projName = target->GetProperty("GENERATOR_FILE_NAME");
+  cmValue projFile = target->GetProperty("GENERATOR_FILE_NAME");
   cmValue projType = target->GetProperty("GENERATOR_FILE_NAME_EXT");
   /* If either value is not valid then this particular target is an
    * unsupported target type and should be skipped.
    */
-  if (projName && projType) {
-    cmLocalGenerator* lg = target->GetLocalGenerator();
-    std::string dir = lg->GetCurrentBinaryDirectory();
-    dir = cmSystemTools::ForceToRelativePath(rootBinaryDir, dir);
-    if (dir == ".") {
-      dir.clear();
-    } else {
-      if (dir.back() != '/') {
-        dir += "/";
-      }
-    }
+  if (projFile && projType) {
+    std::string path = cmSystemTools::RelativePath(rootBinaryDir, projFile);
 
-    std::string projFile = dir + *projName + FILE_EXTENSION;
-    fout << projFile;
+    fout << path;
     fout << ' ' << *projType << '\n';
   }
 }
 
 void cmGlobalGhsMultiGenerator::WriteTargets(cmLocalGenerator* root)
 {
-  std::string rootBinaryDir =
-    cmStrCat(root->GetCurrentBinaryDirectory(), "/CMakeFiles");
+  std::string rootBinaryDir = root->GetCurrentBinaryDirectory();
 
   // All known targets
   for (cmGeneratorTarget const* target : this->ProjectTargets) {
