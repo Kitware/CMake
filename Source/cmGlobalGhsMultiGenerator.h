@@ -101,7 +101,7 @@ private:
   void WriteTopLevelProject(std::ostream& fout, cmLocalGenerator* root);
   void WriteMacros(std::ostream& fout, cmLocalGenerator* root);
   void WriteHighLevelDirectives(std::ostream& fout, cmLocalGenerator* root);
-  void WriteSubProjects(std::ostream& fout);
+  void WriteSubProjects(std::ostream& fout, bool filterPredefined);
   void WriteTargets(cmLocalGenerator* root);
   void WriteProjectLine(std::ostream& fout, cmGeneratorTarget const* target,
                         std::string& rootBinaryDir);
