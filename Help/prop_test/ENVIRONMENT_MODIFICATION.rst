@@ -7,10 +7,11 @@ Specify environment variables that should be modified for running a test. Note
 that the operations performed by this property are performed after the
 :prop_test:`ENVIRONMENT` property is already applied.
 
-If set to a list of environment variables and values of the form
-``MYVAR=OP:VALUE``, where ``MYVAR`` is the case-sensitive name of an
-environment variable to be modified. Entries are considered in the
-order specified in the property's value. The ``OP`` may be one of:
+Set to a :ref:`semicolon-separated list <CMake Language Lists>` of
+environment variables and values of the form ``MYVAR=OP:VALUE``,
+where ``MYVAR`` is the case-sensitive name of an environment variable
+to be modified.  Entries are considered in the order specified in the
+property's value.  The ``OP`` may be one of:
 
   - ``reset``: Reset to the unmodified value, ignoring all modifications to
     ``MYVAR`` prior to this entry. Note that this will reset the variable to

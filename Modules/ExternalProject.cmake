@@ -811,11 +811,11 @@ External Project Definition
 
   **Miscellaneous Options:**
     ``LIST_SEPARATOR <sep>``
-      For any of the various ``..._COMMAND`` options, replace ``;`` with
-      ``<sep>`` in the specified command lines. This can be useful where list
-      variables may be given in commands where they should end up as
-      space-separated arguments (``<sep>`` would be a single space character
-      string in this case).
+      For any of the various ``..._COMMAND`` options, and ``CMAKE_ARGS``,
+      replace ``;`` with ``<sep>`` in the specified command lines.
+      This can be useful where list variables may be given in commands where
+      they should end up as space-separated arguments (``<sep>`` would be a
+      single space character string in this case).
 
     ``COMMAND <cmd>...``
       Any of the other ``..._COMMAND`` options can have additional commands
