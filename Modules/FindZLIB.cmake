@@ -53,6 +53,11 @@ Hints
 
 A user may set ``ZLIB_ROOT`` to a zlib installation root to tell this
 module where to look.
+
+.. versionadded:: 3.24
+  Set ``ZLIB_USE_STATIC_LIBS`` to ``ON`` to look for static libraries.
+  Default is ``OFF``.
+
 #]=======================================================================]
 
 set(_ZLIB_SEARCHES)
@@ -72,8 +77,8 @@ set(_ZLIB_SEARCH_NORMAL
 unset(_ZLIB_x86)
 list(APPEND _ZLIB_SEARCHES _ZLIB_SEARCH_NORMAL)
 
-set(ZLIB_NAMES z zlib zdll zlib1 zlibstatic)
-set(ZLIB_NAMES_DEBUG zd zlibd zdlld zlibd1 zlib1d zlibstaticd)
+set(ZLIB_NAMES z zlib zdll zlib1 zlibstatic zlibstat zlibvc)
+set(ZLIB_NAMES_DEBUG zd zlibd zdlld zlibd1 zlib1d zlibstaticd zlibstatd zlibvcd)
 
 # Try each search configuration.
 foreach(search ${_ZLIB_SEARCHES})
@@ -82,10 +87,25 @@ endforeach()
 
 # Allow ZLIB_LIBRARY to be set manually, as the location of the zlib library
 if(NOT ZLIB_LIBRARY)
+  # Support preference of static libs by adjusting CMAKE_FIND_LIBRARY_SUFFIXES
+  if(ZLIB_USE_STATIC_LIBS)
+    set(_zlib_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
+    if(WIN32)
+      set(CMAKE_FIND_LIBRARY_SUFFIXES .lib .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
+    else()
+      set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
+    endif()
+  endif()
+
   foreach(search ${_ZLIB_SEARCHES})
     find_library(ZLIB_LIBRARY_RELEASE NAMES ${ZLIB_NAMES} NAMES_PER_DIR ${${search}} PATH_SUFFIXES lib)
     find_library(ZLIB_LIBRARY_DEBUG NAMES ${ZLIB_NAMES_DEBUG} NAMES_PER_DIR ${${search}} PATH_SUFFIXES lib)
   endforeach()
+
+  # Restore the original find library ordering
+  if(ZLIB_USE_STATIC_LIBS)
+    set(CMAKE_FIND_LIBRARY_SUFFIXES ${_zlib_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES})
+  endif()
 
   include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
   select_library_configurations(ZLIB)
