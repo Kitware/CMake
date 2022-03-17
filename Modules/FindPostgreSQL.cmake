@@ -53,7 +53,7 @@ is set regardless of the presence of the ``Server`` component in find_package ca
 # In Windows the default installation of PostgreSQL uses that as part of the path.
 # E.g C:\Program Files\PostgreSQL\8.4.
 # Currently, the following version numbers are known to this module:
-# "11" "10" "9.6" "9.5" "9.4" "9.3" "9.2" "9.1" "9.0" "8.4" "8.3" "8.2" "8.1" "8.0"
+# "13" "12" "11" "10" "9.6" "9.5" "9.4" "9.3" "9.2" "9.1" "9.0" "8.4" "8.3" "8.2" "8.1" "8.0"
 #
 # To use this variable just do something like this:
 # set(PostgreSQL_ADDITIONAL_VERSIONS "9.2" "8.4.4")
