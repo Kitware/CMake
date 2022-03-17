@@ -151,6 +151,26 @@ source and build trees and generate a buildsystem:
 
 In all cases the ``<options>`` may be zero or more of the `Options`_ below.
 
+The above styles for specifying the source and build trees may be mixed.
+Paths specified with ``-S`` or ``-B`` are always classified as source or
+build trees, respectively.  Paths specified with plain arguments are
+classified based on their content and the types of paths given earlier.
+If only one type of path is given, the current working directory (cwd)
+is used for the other.  For example:
+
+============================== ============ ===========
+ Command Line                   Source Dir   Build Dir
+============================== ============ ===========
+ ``cmake src``                  ``src``      `cwd`
+ ``cmake build`` (existing)     `loaded`     ``build``
+ ``cmake -S src``               ``src``      `cwd`
+ ``cmake -S src build``         ``src``      ``build``
+ ``cmake -S src -B build``      ``src``      ``build``
+ ``cmake -B build``             `cwd`        ``build``
+ ``cmake -B build src``         ``src``      ``build``
+ ``cmake -B build -S src``      ``src``      ``build``
+============================== ============ ===========
+
 After generating a buildsystem one may use the corresponding native
 build tool to build the project.  For example, after using the
 :generator:`Unix Makefiles` generator one may run ``make`` directly:
