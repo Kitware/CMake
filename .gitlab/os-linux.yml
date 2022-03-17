@@ -227,6 +227,7 @@
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
         CMAKE_ARCH: x86_64
         CTEST_LABELS: "CUDA"
+        CMAKE_CUDA_ARCHITECTURES_NATIVE_CLAMP: 1
 
 .cuda9.2_nvidia:
     extends: .cuda9.2
@@ -242,6 +243,7 @@
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
         CMAKE_ARCH: x86_64
         CTEST_LABELS: "CUDA"
+        CMAKE_CUDA_ARCHITECTURES_NATIVE_CLAMP: 1
 
 .cuda10.2_nvidia:
     extends: .cuda10.2
@@ -264,6 +266,7 @@
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
         CMAKE_ARCH: x86_64
         CTEST_LABELS: "CUDA"
+        CMAKE_CUDA_ARCHITECTURES_NATIVE_CLAMP: 1
 
 .cuda11.6_nvidia:
     extends: .cuda11.6
