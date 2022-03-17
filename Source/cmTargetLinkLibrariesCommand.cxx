@@ -9,6 +9,7 @@
 #include <utility>
 
 #include <cm/optional>
+#include <cm/string_view>
 
 #include "cmExecutionStatus.h"
 #include "cmGeneratorExpression.h"
@@ -183,8 +184,11 @@ bool cmTargetLinkLibrariesCommand(std::vector<std::string> const& args,
 
   // Accumulate consectuive non-keyword arguments into one entry in
   // order to handle unquoted generator expressions containing ';'.
+  std::size_t genexNesting = 0;
   cm::optional<std::string> currentEntry;
   auto processCurrentEntry = [&]() -> bool {
+    // FIXME: Warn about partial genex if genexNesting > 0?
+    genexNesting = 0;
     if (currentEntry) {
       assert(!haveLLT);
       if (!tll.HandleLibrary(currentProcessingState, *currentEntry,
@@ -220,7 +224,7 @@ bool cmTargetLinkLibrariesCommand(std::vector<std::string> const& args,
   // of debug and optimized that can be used.
   for (unsigned int i = 1; i < args.size(); ++i) {
     if (keywords.count(args[i])) {
-      // A keyword argument terminates any preceding accumulated entry.
+      // A keyword argument terminates any accumulated partial genex.
       if (!processCurrentEntry()) {
         return false;
       }
@@ -321,12 +325,33 @@ bool cmTargetLinkLibrariesCommand(std::vector<std::string> const& args,
       }
       llt = GENERAL_LibraryType;
     } else {
+      // Track the genex nesting level.
+      {
+        cm::string_view arg = args[i];
+        for (std::string::size_type pos = 0; pos < arg.size(); ++pos) {
+          cm::string_view cur = arg.substr(pos);
+          if (cmHasLiteralPrefix(cur, "$<")) {
+            ++genexNesting;
+            ++pos;
+          } else if (genexNesting > 0 && cmHasLiteralPrefix(cur, ">")) {
+            --genexNesting;
+          }
+        }
+      }
+
       // Accumulate this argument in the current entry.
       extendCurrentEntry(args[i]);
+
+      // Process this entry if it does not end inside a genex.
+      if (genexNesting == 0) {
+        if (!processCurrentEntry()) {
+          return false;
+        }
+      }
     }
   }
 
-  // Process the last accumulated entry, if any.
+  // Process the last accumulated partial genex, if any.
   if (!processCurrentEntry()) {
     return false;
   }
