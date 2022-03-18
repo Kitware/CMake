@@ -183,12 +183,6 @@ public:
 #endif
   std::string ReportCapabilities() const;
 
-  enum class HomeDirArgStyle
-  {
-    Plain,
-    Dash_S,
-  };
-
   /**
    * Set the home directory from `-S` or from a known location
    * that contains a CMakeLists.txt. Will generate warnings
@@ -199,12 +193,11 @@ public:
    *  | `dirA dirA`       | dirA   | N/A            |
    *  | `-S dirA -S dirA` | dirA   | N/A            |
    *  | `-S dirA -S dirB` | dirB   | Ignoring dirA  |
-   *  | `-S dirA dirB`    | dirA   | Ignoring dirB  |
+   *  | `-S dirA dirB`    | dirB   | Ignoring dirA  |
    *  | `dirA -S dirB`    | dirB   | Ignoring dirA  |
    *  | `dirA dirB`       | dirB   | Ignoring dirA  |
    */
-  void SetHomeDirectoryViaCommandLine(std::string const& path,
-                                      HomeDirArgStyle argStyle);
+  void SetHomeDirectoryViaCommandLine(std::string const& path);
 
   //@{
   /**
