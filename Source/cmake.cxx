@@ -819,7 +819,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
     std::string path = cmSystemTools::CollapseFullPath(value);
     cmSystemTools::ConvertToUnixSlashes(path);
 
-    state->SetHomeDirectoryViaCommandLine(path, HomeDirArgStyle::Dash_S);
+    state->SetHomeDirectoryViaCommandLine(path);
     return true;
   };
 
@@ -1555,7 +1555,7 @@ bool cmake::SetDirectoriesFromFile(const std::string& arg)
     // When invoked with a path that points to an existing CMakeCache
     // This function is called multiple times with the same path
     if (is_source_dir) {
-      this->SetHomeDirectoryViaCommandLine(listPath, HomeDirArgStyle::Plain);
+      this->SetHomeDirectoryViaCommandLine(listPath);
       if (no_build_tree) {
         std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
         this->SetHomeOutputDirectory(cwd);
@@ -1780,28 +1780,19 @@ void cmake::PrintPresetList(const cmCMakePresetsGraph& graph) const
 }
 #endif
 
-void cmake::SetHomeDirectoryViaCommandLine(std::string const& path,
-                                           HomeDirArgStyle argStyle)
+void cmake::SetHomeDirectoryViaCommandLine(std::string const& path)
 {
-  bool fromDashS = argStyle == HomeDirArgStyle::Dash_S;
-  static bool homeDirectorySetExplicitly = false;
   if (path.empty()) {
     return;
   }
 
   auto prev_path = this->GetHomeDirectory();
   if (prev_path != path && !prev_path.empty()) {
-    const bool ignore_prev_path =
-      (fromDashS || (!fromDashS && !homeDirectorySetExplicitly));
-    const std::string& ignored_path = (ignore_prev_path) ? prev_path : path;
     this->IssueMessage(MessageType::WARNING,
                        cmStrCat("Ignoring extra path from command line:\n \"",
-                                ignored_path, "\""));
+                                prev_path, "\""));
   }
-  if (fromDashS || !homeDirectorySetExplicitly) {
-    this->SetHomeDirectory(path);
-  }
-  homeDirectorySetExplicitly = fromDashS;
+  this->SetHomeDirectory(path);
 }
 
 void cmake::SetHomeDirectory(const std::string& dir)
