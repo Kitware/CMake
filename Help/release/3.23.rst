@@ -225,6 +225,12 @@ CPack
 Deprecated and Removed Features
 ===============================
 
+* :manual:`cmake(1)` now warns when multiple source paths are specified,
+  as in ``cmake -S src1 src2``.  This has never been officially documented
+  or supported, but older versions accidentally accepted multiple source
+  paths and used the last path specified.  Update scripts to avoid
+  passing multiple source path arguments.
+
 * The :manual:`cpack(1)` undocumented ``OSXX11`` generator has been removed.
 
 Other Changes
