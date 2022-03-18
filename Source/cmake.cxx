@@ -1158,6 +1158,12 @@ void cmake::SetArgs(const std::vector<std::string>& args)
     // iterate each argument
     std::string const& arg = args[i];
 
+    if (scriptMode && arg == "--") {
+      // Stop processing CMake args and avoid possible errors
+      // when arbitrary args are given to CMake script.
+      break;
+    }
+
     // Generator flag has special handling for when to print help
     // so it becomes the exception
     if (generatorCommand.matches(arg)) {
