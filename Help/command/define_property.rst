@@ -13,11 +13,13 @@ Define and document custom properties.
                    [INITIALIZE_FROM_VARIABLE <variable>])
 
 Defines one property in a scope for use with the :command:`set_property` and
-:command:`get_property` commands.  This is primarily useful to associate
-documentation with property names that may be retrieved with the
-:command:`get_property` command. The first argument determines the kind of
-scope in which the property should be used.  It must be one of the
-following:
+:command:`get_property` commands. It is mainly useful for defining the way
+a property is initialized or inherited. Historically, the command also
+associated documentation with a property, but that is no longer considered a
+primary use case.
+
+The first argument determines the kind of scope in which the property should
+be used.  It must be one of the following:
 
 ::
 
@@ -56,8 +58,8 @@ out the contents to append to.
 
 The ``BRIEF_DOCS`` and ``FULL_DOCS`` options are followed by strings to be
 associated with the property as its brief and full documentation.
-Corresponding options to the :command:`get_property` command will retrieve
-the documentation.
+CMake does not use this documentation other than making it available to the
+project via corresponding options to the :command:`get_property` command.
 
 .. versionchanged:: 3.23
 
