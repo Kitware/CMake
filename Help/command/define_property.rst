@@ -63,7 +63,9 @@ the documentation.
 
   The ``BRIEF_DOCS`` and ``FULL_DOCS`` options are optional.
 
-The ``INITIALIZE_FROM_VARIABLE`` option is followed by the name of a variable
-from which to initialize the property. The variable name must end with the
-property name, must have a prefix before the property name, and must not begin
-with ``CMAKE_`` or ``_CMAKE_``.
+.. versionadded:: 3.23
+
+  The ``INITIALIZE_FROM_VARIABLE`` option specifies a variable from which the
+  property should be initialized. It can only be used with target properties.
+  The ``<variable>`` name must end with the property name, must have a prefix
+  before the property name, and must not begin with ``CMAKE_`` or ``_CMAKE_``.
