@@ -1,15 +1,14 @@
   find_library called with the following settings:.*
     VAR: CREATED_LIBRARY
     NAMES: \"created\"
-           \"created_no_exist\"
     Documentation.*
     Framework.*
     AppBundle.*
     CMAKE_FIND_USE_CMAKE_PATH: 1
     CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: 1
-    CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: 0
+    CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: 1
     CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: 1
-    CMAKE_FIND_USE_INSTALL_PREFIX: 1
+    CMAKE_FIND_USE_INSTALL_PREFIX: 0
 
   find_library considered the following locations:.*
   The item was not found.*
@@ -27,4 +26,18 @@
 
   find_library considered the following locations:.*
   The item was found at.*
-.*lib/libcreated.a
+  .*IgnoreInstallPrefix-build/lib.*
+  find_library called with the following settings:.*
+    VAR: CREATED_LIBRARY
+    NAMES: \"created\"
+    Documentation.*
+    Framework.*
+    AppBundle.*
+    CMAKE_FIND_USE_CMAKE_PATH: 1
+    CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: 1
+    CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: 1
+    CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: 1
+    CMAKE_FIND_USE_INSTALL_PREFIX: 0
+
+  find_library considered the following locations:.*
+  The item was not found.*

@@ -39,6 +39,7 @@ cmFindCommon::cmFindCommon(cmExecutionStatus& status)
   this->NoCMakeEnvironmentPath = false;
   this->NoSystemEnvironmentPath = false;
   this->NoCMakeSystemPath = false;
+  this->NoCMakeInstallPath = false;
 
 // OS X Bundle and Framework search policy.  The default is to
 // search frameworks first on apple.
@@ -179,14 +180,15 @@ void cmFindCommon::SelectDefaultMacMode()
 
 void cmFindCommon::SelectDefaultSearchModes()
 {
-  const std::array<std::pair<bool&, std::string>, 5> search_paths = {
+  const std::array<std::pair<bool&, std::string>, 6> search_paths = {
     { { this->NoPackageRootPath, "CMAKE_FIND_USE_PACKAGE_ROOT_PATH" },
       { this->NoCMakePath, "CMAKE_FIND_USE_CMAKE_PATH" },
       { this->NoCMakeEnvironmentPath,
         "CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH" },
       { this->NoSystemEnvironmentPath,
         "CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH" },
-      { this->NoCMakeSystemPath, "CMAKE_FIND_USE_CMAKE_SYSTEM_PATH" } }
+      { this->NoCMakeSystemPath, "CMAKE_FIND_USE_CMAKE_SYSTEM_PATH" },
+      { this->NoCMakeInstallPath, "CMAKE_FIND_USE_INSTALL_PREFIX" } }
   };
 
   for (auto const& path : search_paths) {
@@ -348,6 +350,8 @@ bool cmFindCommon::CheckCommonArgument(std::string const& arg)
     this->NoSystemEnvironmentPath = true;
   } else if (arg == "NO_CMAKE_SYSTEM_PATH") {
     this->NoCMakeSystemPath = true;
+  } else if (arg == "NO_CMAKE_INSTALL_PREFIX") {
+    this->NoCMakeInstallPath = true;
   } else if (arg == "NO_CMAKE_FIND_ROOT_PATH") {
     this->FindRootPathMode = RootPathModeNever;
   } else if (arg == "ONLY_CMAKE_FIND_ROOT_PATH") {

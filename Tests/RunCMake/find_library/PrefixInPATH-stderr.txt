@@ -8,6 +8,7 @@
     CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: 1
     CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: 1
     CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: 1
+    CMAKE_FIND_USE_INSTALL_PREFIX: 1
 
   find_library considered the following locations:.*
 .*/does_not_exist.*
