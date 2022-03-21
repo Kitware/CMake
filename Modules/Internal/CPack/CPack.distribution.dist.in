@@ -4,6 +4,5 @@
 	<welcome file="@CPACK_RESOURCE_FILE_WELCOME_NOPATH@"/>
 	<readme file="@CPACK_RESOURCE_FILE_README_NOPATH@"/>
 	<license file="@CPACK_RESOURCE_FILE_LICENSE_NOPATH@"/>
-	<options allow-external-scripts="no" customize="allow" rootVolumeOnly="false"></options>
-	@CPACK_PACKAGEMAKER_CHOICES@
+@CPACK_APPLE_PKG_INSTALLER_CONTENT@
 </installer-gui-script>

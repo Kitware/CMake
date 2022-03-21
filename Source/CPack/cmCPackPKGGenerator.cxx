@@ -120,10 +120,20 @@ void cmCPackPKGGenerator::WriteDistributionFile(const char* metapackageFile,
   std::string distributionFile =
     cmStrCat(metapackageFile, "/Contents/distribution.dist");
 
+  std::ostringstream xContents;
+  cmXMLWriter xout(xContents, 1);
+
+  // Installer-wide options
+  xout.StartElement("options");
+  xout.Attribute("allow-external-scripts", "no");
+  xout.Attribute("customize", "allow");
+  if (cmIsOff(this->GetOption("CPACK_PRODUCTBUILD_DOMAINS"))) {
+    xout.Attribute("rootVolumeOnly", "false");
+  }
+  xout.EndElement();
+
   // Create the choice outline, which provides a tree-based view of
   // the components in their groups.
-  std::ostringstream choiceOut;
-  cmXMLWriter xout(choiceOut, 1);
   xout.StartElement("choices-outline");
 
   // Emit the outline for the groups
@@ -169,7 +179,7 @@ void cmCPackPKGGenerator::WriteDistributionFile(const char* metapackageFile,
   // Dark Aqua
   this->CreateBackground("darkAqua", metapackageFile, genName, xout);
 
-  this->SetOption("CPACK_PACKAGEMAKER_CHOICES", choiceOut.str());
+  this->SetOption("CPACK_APPLE_PKG_INSTALLER_CONTENT", xContents.str());
 
   // Create the distribution.dist file in the metapackage to turn it
   // into a distribution package.
