@@ -932,9 +932,7 @@ Function .onInit
 ;Run the uninstaller
 uninst:
   ClearErrors
-  StrLen $2 "\@CPACK_NSIS_UNINSTALL_NAME@.exe"
-  StrCpy $3 $0 -$2 # remove "\@CPACK_NSIS_UNINSTALL_NAME@.exe" from UninstallString to get path
-  ExecWait '"$0" /S _?=$3' ;Do not copy the uninstaller to a temp file
+  ExecWait '$0 /S'
 
   IfErrors uninst_failed inst
 uninst_failed:
