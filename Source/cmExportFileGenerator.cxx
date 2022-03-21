@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExportFileGenerator.h"
 
-#include <array>
 #include <cassert>
 #include <cstring>
 #include <sstream>
@@ -176,24 +175,18 @@ bool cmExportFileGenerator::PopulateInterfaceLinkLibrariesProperty(
   if (!target->IsLinkable()) {
     return false;
   }
-  static const std::array<std::string, 3> linkIfaceProps = {
-    { "INTERFACE_LINK_LIBRARIES", "INTERFACE_LINK_LIBRARIES_DIRECT",
-      "INTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE" }
-  };
-  bool hadINTERFACE_LINK_LIBRARIES = false;
-  for (std::string const& linkIfaceProp : linkIfaceProps) {
-    if (cmValue input = target->GetProperty(linkIfaceProp)) {
-      std::string prepro =
-        cmGeneratorExpression::Preprocess(*input, preprocessRule);
-      if (!prepro.empty()) {
-        this->ResolveTargetsInGeneratorExpressions(
-          prepro, target, missingTargets, ReplaceFreeTargets);
-        properties[linkIfaceProp] = prepro;
-        hadINTERFACE_LINK_LIBRARIES = true;
-      }
+  cmValue input = target->GetProperty("INTERFACE_LINK_LIBRARIES");
+  if (input) {
+    std::string prepro =
+      cmGeneratorExpression::Preprocess(*input, preprocessRule);
+    if (!prepro.empty()) {
+      this->ResolveTargetsInGeneratorExpressions(
+        prepro, target, missingTargets, ReplaceFreeTargets);
+      properties["INTERFACE_LINK_LIBRARIES"] = prepro;
+      return true;
     }
   }
-  return hadINTERFACE_LINK_LIBRARIES;
+  return false;
 }
 
 static bool isSubDirectory(std::string const& a, std::string const& b)

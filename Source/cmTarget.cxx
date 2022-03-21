@@ -203,8 +203,6 @@ public:
   std::vector<BT<std::string>> LinkDirectoriesEntries;
   std::vector<BT<std::string>> LinkImplementationPropertyEntries;
   std::vector<BT<std::string>> LinkInterfacePropertyEntries;
-  std::vector<BT<std::string>> LinkInterfaceDirectPropertyEntries;
-  std::vector<BT<std::string>> LinkInterfaceDirectExcludePropertyEntries;
   std::vector<BT<std::string>> HeaderSetsEntries;
   std::vector<BT<std::string>> InterfaceHeaderSetsEntries;
   std::vector<std::pair<cmTarget::TLLSignature, cmListFileContext>>
@@ -1144,16 +1142,6 @@ cmBTStringRange cmTarget::GetLinkInterfaceEntries() const
   return cmMakeRange(this->impl->LinkInterfacePropertyEntries);
 }
 
-cmBTStringRange cmTarget::GetLinkInterfaceDirectEntries() const
-{
-  return cmMakeRange(this->impl->LinkInterfaceDirectPropertyEntries);
-}
-
-cmBTStringRange cmTarget::GetLinkInterfaceDirectExcludeEntries() const
-{
-  return cmMakeRange(this->impl->LinkInterfaceDirectExcludePropertyEntries);
-}
-
 cmBTStringRange cmTarget::GetHeaderSetsEntries() const
 {
   return cmMakeRange(this->impl->HeaderSetsEntries);
@@ -1198,8 +1186,6 @@ MAKE_PROP(HEADER_SET);
 MAKE_PROP(HEADER_SETS);
 MAKE_PROP(INTERFACE_HEADER_SETS);
 MAKE_PROP(INTERFACE_LINK_LIBRARIES);
-MAKE_PROP(INTERFACE_LINK_LIBRARIES_DIRECT);
-MAKE_PROP(INTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE);
 #undef MAKE_PROP
 }
 
@@ -1330,19 +1316,6 @@ void cmTarget::StoreProperty(const std::string& prop, ValueType value)
     if (value) {
       cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
       this->impl->LinkInterfacePropertyEntries.emplace_back(value, lfbt);
-    }
-  } else if (prop == propINTERFACE_LINK_LIBRARIES_DIRECT) {
-    this->impl->LinkInterfaceDirectPropertyEntries.clear();
-    if (value) {
-      cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
-      this->impl->LinkInterfaceDirectPropertyEntries.emplace_back(value, lfbt);
-    }
-  } else if (prop == propINTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE) {
-    this->impl->LinkInterfaceDirectExcludePropertyEntries.clear();
-    if (value) {
-      cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
-      this->impl->LinkInterfaceDirectExcludePropertyEntries.emplace_back(value,
-                                                                         lfbt);
     }
   } else if (prop == propSOURCES) {
     this->impl->SourceEntries.clear();
@@ -1601,17 +1574,6 @@ void cmTarget::AppendProperty(const std::string& prop,
     if (!value.empty()) {
       cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
       this->impl->LinkInterfacePropertyEntries.emplace_back(value, lfbt);
-    }
-  } else if (prop == propINTERFACE_LINK_LIBRARIES_DIRECT) {
-    if (!value.empty()) {
-      cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
-      this->impl->LinkInterfaceDirectPropertyEntries.emplace_back(value, lfbt);
-    }
-  } else if (prop == propINTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE) {
-    if (!value.empty()) {
-      cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
-      this->impl->LinkInterfaceDirectExcludePropertyEntries.emplace_back(value,
-                                                                         lfbt);
     }
   } else if (prop == "SOURCES") {
     cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
@@ -1923,8 +1885,6 @@ cmValue cmTarget::GetProperty(const std::string& prop) const
     propHEADER_SETS,
     propINTERFACE_HEADER_SETS,
     propINTERFACE_LINK_LIBRARIES,
-    propINTERFACE_LINK_LIBRARIES_DIRECT,
-    propINTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE,
   };
   if (specialProps.count(prop)) {
     if (prop == propC_STANDARD || prop == propCXX_STANDARD ||
@@ -1952,25 +1912,6 @@ cmValue cmTarget::GetProperty(const std::string& prop) const
 
       static std::string output;
       output = cmJoin(this->impl->LinkInterfacePropertyEntries, ";");
-      return cmValue(output);
-    }
-    if (prop == propINTERFACE_LINK_LIBRARIES_DIRECT) {
-      if (this->impl->LinkInterfaceDirectPropertyEntries.empty()) {
-        return nullptr;
-      }
-
-      static std::string output;
-      output = cmJoin(this->impl->LinkInterfaceDirectPropertyEntries, ";");
-      return cmValue(output);
-    }
-    if (prop == propINTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE) {
-      if (this->impl->LinkInterfaceDirectExcludePropertyEntries.empty()) {
-        return nullptr;
-      }
-
-      static std::string output;
-      output =
-        cmJoin(this->impl->LinkInterfaceDirectExcludePropertyEntries, ";");
       return cmValue(output);
     }
     // the type property returns what type the target is

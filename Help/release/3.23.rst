@@ -130,11 +130,6 @@ Properties
   not be treated as a system library (i.e. its include directories
   are not automatically ``SYSTEM``).
 
-* The :prop_tgt:`INTERFACE_LINK_LIBRARIES_DIRECT` and
-  :prop_tgt:`INTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE` target properties
-  were added to express usage requirements affecting a consumer's
-  direct link dependencies.
-
 * The :prop_tgt:`XCODE_EMBED_PLUGINS <XCODE_EMBED_<type>>` target property
   was added to tell the :generator:`Xcode` generator what targets to put in
   the ``Embed PlugIns`` build phase.
