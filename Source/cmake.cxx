@@ -868,6 +868,11 @@ void cmake::SetArgs(const std::vector<std::string>& args)
     CommandArgument{ "-B", "No build directory specified for -B",
                      CommandArgument::Values::One,
                      CommandArgument::RequiresSeparator::No, BuildArgLambda },
+    CommandArgument{ "--fresh", CommandArgument::Values::Zero,
+                     [](std::string const&, cmake* cm) -> bool {
+                       cm->FreshCache = true;
+                       return true;
+                     } },
     CommandArgument{ "-P", "-P must be followed by a file name.",
                      CommandArgument::Values::One,
                      CommandArgument::RequiresSeparator::No,
@@ -2404,12 +2409,19 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
   }
 
   if (this->GetWorkingMode() == NORMAL_MODE) {
+    if (this->FreshCache) {
+      this->DeleteCache(this->GetHomeOutputDirectory());
+    }
     // load the cache
     if (this->LoadCache() < 0) {
       cmSystemTools::Error("Error executing cmake::LoadCache(). Aborting.\n");
       return -1;
     }
   } else {
+    if (this->FreshCache) {
+      cmSystemTools::Error("--fresh allowed only when configuring a project");
+      return -1;
+    }
     this->AddCMakePaths();
   }
 

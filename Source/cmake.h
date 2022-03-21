@@ -703,6 +703,7 @@ private:
   FileExtensions HipFileExtensions;
   bool ClearBuildSystem = false;
   bool DebugTryCompile = false;
+  bool FreshCache = false;
   bool RegenerateDuringBuild = false;
   std::unique_ptr<cmFileTimeCache> FileTimeCache;
   std::string GraphVizFile;

@@ -73,6 +73,8 @@ const char* cmDocumentationOptions[][2] = {
   { "--list-presets", "List available presets." },
   { "-E", "CMake command mode." },
   { "-L[A][H]", "List non-advanced cached variables." },
+  { "--fresh",
+    "Configure a fresh build tree, removing any existing cache file." },
   { "--build <dir>", "Build a CMake-generated project binary tree." },
   { "--install <dir>", "Install a CMake-generated project binary tree." },
   { "--open <dir>", "Open generated project in the associated application." },
