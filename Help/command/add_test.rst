@@ -20,6 +20,9 @@ if necessary.  See policy :policy:`CMP0110`.  The options are:
   automatically be replaced by the location of the executable created
   at build time.
 
+  The command may be specified using
+  :manual:`generator expressions <cmake-generator-expressions(7)>`.
+
 ``CONFIGURATIONS``
   Restrict execution of the test only to the named configurations.
 
@@ -29,6 +32,9 @@ if necessary.  See policy :policy:`CMP0110`.  The options are:
   If not specified the test will be run with the current working
   directory set to the build directory corresponding to the
   current source directory.
+
+  The working directory may be specified using
+  :manual:`generator expressions <cmake-generator-expressions(7)>`.
 
 ``COMMAND_EXPAND_LISTS``
   .. versionadded:: 3.16
@@ -48,9 +54,10 @@ unless the :prop_test:`PASS_REGULAR_EXPRESSION`,
 .. versionadded:: 3.16
   Added :prop_test:`SKIP_REGULAR_EXPRESSION` property.
 
-The ``COMMAND`` and ``WORKING_DIRECTORY`` options may use "generator
-expressions" with the syntax ``$<...>``.  See the
-:manual:`cmake-generator-expressions(7)` manual for available expressions.
+Tests added with the ``add_test(NAME)`` signature support using
+:manual:`generator expressions <cmake-generator-expressions(7)>`
+in test properties set by :command:`set_property(TEST)` or
+:command:`set_tests_properties`.
 
 Example usage:
 
@@ -73,10 +80,15 @@ file produced by target ``myexe``.
 
 ---------------------------------------------------------------------
 
+This command also supports a simpler, but less flexible, signature:
+
 .. code-block:: cmake
 
   add_test(<name> <command> [<arg>...])
 
-Add a test called ``<name>`` with the given command-line.  Unlike
-the above ``NAME`` signature no transformation is performed on the
-command-line to support target names or generator expressions.
+Add a test called ``<name>`` with the given command-line.
+
+Unlike the above ``NAME`` signature, target names are not supported
+in the command-line.  Furthermore, tests added with this signature do not
+support :manual:`generator expressions <cmake-generator-expressions(7)>`
+in the command-line or test properties.
