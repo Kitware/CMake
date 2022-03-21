@@ -1,54 +1,56 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#test project was generated
-unset(fileName CACHE)
-find_file (fileName lib1.gpj
-  ${CMAKE_CURRENT_BINARY_DIR}
-  ${CMAKE_CURRENT_BINARY_DIR}/lib1
-  )
+function(verify_skipped_tgt name)
+  unset(fileName CACHE)
+  find_file (fileName ${name}.tgt.gpj
+    ${CMAKE_CURRENT_BINARY_DIR}
+    )
 
-if (fileName)
-  message("Found target lib1: ${fileName}")
-else()
-  message(SEND_ERROR "Could not find target lib1: ${fileName}")
-endif()
+  if (fileName)
+    message("Found target ${name}: ${fileName}")
+  else()
+    message(SEND_ERROR "Could not find target ${name}: ${fileName}")
+  endif()
 
-#test project was built
-unset(fileName CACHE)
-find_file (fileName lib1.a
-  ${CMAKE_CURRENT_BINARY_DIR}
-  ${CMAKE_CURRENT_BINARY_DIR}/lib1
-  )
+  #test project was built
+  unset(fileName CACHE)
+  find_file (fileName lib${name}.a
+    ${CMAKE_CURRENT_BINARY_DIR}
+    )
 
-if (fileName)
-  message(SEND_ERROR "Found target lib1: ${fileName}")
-else()
-  message("Could not find target lib1: ${fileName}")
-endif()
+  if (fileName)
+    message(SEND_ERROR "Found target ${name}: ${fileName}")
+  else()
+    message("Could not find target ${name}: ${fileName}")
+  endif()
+endfunction()
 
-#test project was generated
-unset(fileName CACHE)
-find_file (fileName lib2.gpj
-  ${CMAKE_CURRENT_BINARY_DIR}
-  ${CMAKE_CURRENT_BINARY_DIR}/lib2
-  )
+function(locate_tgt name)
+  unset(fileName CACHE)
+  find_file (fileName ${name}.tgt.gpj
+    ${CMAKE_CURRENT_BINARY_DIR}
+    )
 
-if (fileName)
-  message("Found target lib2 ${fileName}")
-else()
-  message(SEND_ERROR "Could not find target lib2: ${fileName}")
-endif()
+  if (fileName)
+    message("Found target ${name}: ${fileName}")
+  else()
+    message(SEND_ERROR "Could not find target ${name}: ${fileName}")
+  endif()
 
-#test project was built
-unset(fileName CACHE)
-find_file (fileName lib2.a
-  ${CMAKE_CURRENT_BINARY_DIR}
-  ${CMAKE_CURRENT_BINARY_DIR}/lib2
-  )
+  #test project was built
+  unset(fileName CACHE)
+  find_file (fileName lib${name}.a
+    ${CMAKE_CURRENT_BINARY_DIR}
+    )
 
-if (fileName)
-  message(SEND_ERROR "Found target lib2: ${fileName}")
-else()
-  message("Could not find target lib2: ${fileName}")
-endif()
+  if (fileName)
+    message( "Found target ${name}: ${fileName}")
+  else()
+    message(SEND_ERROR "Could not find target ${name}: ${fileName}")
+  endif()
+endfunction()
+
+verify_skipped_tgt(lib1)
+verify_skipped_tgt(lib2)
+locate_tgt(lib3)

@@ -14,4 +14,6 @@ set_target_properties( lib1 PROPERTIES EXCLUDE_FROM_ALL yes )
 
 add_library(lib2 EXCLUDE_FROM_ALL lib1.c)
 
+add_library(lib3 lib1.c)
+
 add_executable(exe1 exe1.c)

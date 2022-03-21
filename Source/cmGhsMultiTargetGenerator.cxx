@@ -107,12 +107,6 @@ void cmGhsMultiTargetGenerator::Generate()
       return;
   }
 
-  // Tell the global generator the name of the project file
-  this->GeneratorTarget->Target->SetProperty("GENERATOR_FILE_NAME",
-                                             this->Name);
-  this->GeneratorTarget->Target->SetProperty(
-    "GENERATOR_FILE_NAME_EXT", GhsMultiGpj::GetGpjTag(this->TagType));
-
   this->GenerateTarget();
 }
 
@@ -121,7 +115,14 @@ void cmGhsMultiTargetGenerator::GenerateTarget()
   // Open the target file in copy-if-different mode.
   std::string fproj =
     cmStrCat(this->LocalGenerator->GetCurrentBinaryDirectory(), '/',
-             this->Name, cmGlobalGhsMultiGenerator::FILE_EXTENSION);
+             this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget),
+             '/', this->Name, cmGlobalGhsMultiGenerator::FILE_EXTENSION);
+
+  // Tell the global generator the name of the project file
+  this->GeneratorTarget->Target->SetProperty("GENERATOR_FILE_NAME", fproj);
+  this->GeneratorTarget->Target->SetProperty(
+    "GENERATOR_FILE_NAME_EXT", GhsMultiGpj::GetGpjTag(this->TagType));
+
   cmGeneratedFileStream fout(fproj);
   fout.SetCopyIfDifferent(true);
 
@@ -155,10 +156,16 @@ void cmGhsMultiTargetGenerator::WriteTargetSpecifics(std::ostream& fout,
 {
   std::string outpath;
 
+  /* Determine paths from the target project file to where the output artifacts
+   * need to be located.
+   */
   if (this->TagType != GhsMultiGpj::SUBPROJECT) {
     // set target binary file destination
-    outpath = this->GeneratorTarget->GetDirectory(config);
-    outpath = this->LocalGenerator->MaybeRelativeToCurBinDir(outpath);
+    std::string binpath = cmStrCat(
+      this->LocalGenerator->GetCurrentBinaryDirectory(), '/',
+      this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget));
+    outpath = cmSystemTools::RelativePath(
+      binpath, this->GeneratorTarget->GetDirectory(config));
     /* clang-format off */
     fout << "    :binDirRelative=\"" << outpath << "\"\n"
             "    -o \"" << this->TargetNameReal << "\"\n";
@@ -166,7 +173,7 @@ void cmGhsMultiTargetGenerator::WriteTargetSpecifics(std::ostream& fout,
   }
 
   // set target object file destination
-  outpath = this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
+  outpath = ".";
   fout << "    :outputDirRelative=\"" << outpath << "\"\n";
 }
 
@@ -576,11 +583,12 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
       // Open the filestream in copy-if-different mode.
       std::string gname = sg;
       cmsys::SystemTools::ReplaceString(gname, "\\", "_");
-      std::string lpath = cmStrCat(
-        this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget), '/',
-        gname, cmGlobalGhsMultiGenerator::FILE_EXTENSION);
+      std::string lpath =
+        cmStrCat(gname, cmGlobalGhsMultiGenerator::FILE_EXTENSION);
       std::string fpath = cmStrCat(
-        this->LocalGenerator->GetCurrentBinaryDirectory(), '/', lpath);
+        this->LocalGenerator->GetCurrentBinaryDirectory(), '/',
+        this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget), '/',
+        lpath);
       cmGeneratedFileStream* f = new cmGeneratedFileStream(fpath);
       f->SetCopyIfDifferent(true);
       gfiles.push_back(f);

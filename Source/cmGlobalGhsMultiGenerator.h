@@ -81,8 +81,6 @@ public:
   // Write the common disclaimer text at the top of each build file.
   void WriteFileHeader(std::ostream& fout);
 
-  const char* GetInstallTargetName() const override { return "install"; }
-
 protected:
   void Generate() override;
   std::vector<GeneratedMakeCommand> GenerateBuildCommand(
@@ -92,6 +90,7 @@ protected:
     const cmBuildOptions& buildOptions = cmBuildOptions(),
     std::vector<std::string> const& makeOptions =
       std::vector<std::string>()) override;
+  void AddExtraIDETargets() override;
 
 private:
   void GetToolset(cmMakefile* mf, std::string& tsd, const std::string& ts);
@@ -101,20 +100,21 @@ private:
                              std::vector<cmLocalGenerator*>& generators);
   void WriteTopLevelProject(std::ostream& fout, cmLocalGenerator* root);
   void WriteMacros(std::ostream& fout, cmLocalGenerator* root);
-  void WriteHighLevelDirectives(cmLocalGenerator* root, std::ostream& fout);
-  void WriteSubProjects(std::ostream& fout, std::string& all_target);
+  void WriteHighLevelDirectives(std::ostream& fout, cmLocalGenerator* root);
+  void WriteSubProjects(std::ostream& fout, bool filterPredefined);
   void WriteTargets(cmLocalGenerator* root);
   void WriteProjectLine(std::ostream& fout, cmGeneratorTarget const* target,
                         std::string& rootBinaryDir);
   void WriteCustomRuleBOD(std::ostream& fout);
   void WriteCustomTargetBOD(std::ostream& fout);
-  void WriteAllTarget(cmLocalGenerator* root,
-                      std::vector<cmLocalGenerator*>& generators,
-                      std::string& all_target);
+  bool AddCheckTarget();
+  void AddAllTarget();
 
+  std::string StampFile;
   static std::string TrimQuotes(std::string str);
 
   static const char* DEFAULT_BUILD_PROGRAM;
+  static const char* CHECK_BUILD_SYSTEM_TARGET;
 
   bool ComputeTargetBuildOrder(cmGeneratorTarget const* tgt,
                                std::vector<cmGeneratorTarget const*>& build);
