@@ -5,6 +5,24 @@
   useful with :prop_tgt:`LINK_LIBRARY_OVERRIDE` and
   :prop_tgt:`LINK_LIBRARY_OVERRIDE_<LIBRARY>` target properties.
 
+**Features available for a subset of environments**
+
+``WHOLE_ARCHIVE``
+  Force load of all members in a static library.
+
+  Target platforms supported: all ``Apple`` variants, ``Linux``, all ``BSD``
+  variants, ``SunOS``, ``Windows``, ``CYGWIN``, and ``MSYS``.
+
+  Platform-specific notes:
+
+  * On Apple platforms, the library must be specified as a CMake target name, a
+    library file name (such as ``libfoo.a``), or a library file path (such as
+    ``/path/to/libfoo.a``).  It cannot be specified as a plain library name
+    (such as ``foo``, where ``foo`` is not CMake target), due to a limitation
+    in the Apple linker.
+  * On Windows platforms, for ``MSVC`` or MSVC-like toolchains, the version
+    must be greater than ``1900``.
+
 **Features available in Apple environments**
 
 It is assumed that the linker used is the one provided by `XCode` or is
