@@ -91,10 +91,10 @@ bool cmDefinePropertyCommand(std::vector<std::string> const& args,
                                PropertyName, "\""));
       return false;
     }
-    if (initializeFromVariable == PropertyName) {
-      status.SetError(cmStrCat(
-        "Variable name must have a non-empty prefix before property name \"",
-        PropertyName, "\""));
+    if (PropertyName.find('_') == std::string::npos) {
+      status.SetError(cmStrCat("Property name \"", PropertyName,
+                               "\" defined with INITIALIZE_FROM_VARIABLE does "
+                               "not contain underscore"));
       return false;
     }
 

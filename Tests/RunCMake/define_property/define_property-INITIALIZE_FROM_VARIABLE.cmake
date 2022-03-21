@@ -16,14 +16,14 @@ endfunction()
 
 set(Test_PROP1 "Hello")
 set(Test_PROP2 "world")
-set(Test_PROP3 "!")
-define_property(TARGET PROPERTY PROP1
+set(MyTest_PROP3 "!")
+define_property(TARGET PROPERTY Test_PROP1
   INITIALIZE_FROM_VARIABLE Test_PROP1
   )
 
 add_subdirectory(define_property-INITIALIZE_FROM_VARIABLE-subdirectory)
 
 add_executable(top_exe main.c)
-assert_prop_eq(top_exe PROP1 "Hello")
-assert_prop_eq(top_exe PROP2 "world")
-assert_prop_eq(top_exe PROP3 "!")
+assert_prop_eq(top_exe Test_PROP1 "Hello")
+assert_prop_eq(top_exe Test_PROP2 "world")
+assert_prop_eq(top_exe Test_PROP3 "!")
