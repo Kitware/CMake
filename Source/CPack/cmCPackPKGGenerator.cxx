@@ -293,8 +293,7 @@ void cmCPackPKGGenerator::CreateChoice(const cmCPackComponent& component,
 
 void cmCPackPKGGenerator::CreateDomains(cmXMLWriter& xout)
 {
-  std::string opt = "CPACK_PRODUCTBUILD_DOMAINS";
-  if (cmIsOff(this->GetOption(opt))) {
+  if (cmIsOff(this->GetOption("CPACK_PRODUCTBUILD_DOMAINS"))) {
     return;
   }
 
@@ -302,19 +301,19 @@ void cmCPackPKGGenerator::CreateDomains(cmXMLWriter& xout)
 
   // Product can be installed at the root of any volume by default
   // unless specified
-  cmValue param = this->GetOption(cmStrCat(opt, "_ANYWHERE"));
+  cmValue param = this->GetOption("CPACK_PRODUCTBUILD_DOMAINS_ANYWHERE");
   xout.Attribute("enable_anywhere",
                  (param && cmIsOff(param)) ? "false" : "true");
 
   // Product cannot be installed into the current user's home directory
   // by default unless specified
-  param = this->GetOption(cmStrCat(opt, "_USER"));
+  param = this->GetOption("CPACK_PRODUCTBUILD_DOMAINS_USER");
   xout.Attribute("enable_currentUserHome",
                  (param && cmIsOn(param)) ? "true" : "false");
 
   // Product can be installed into the root directory by default
   // unless specified
-  param = this->GetOption(cmStrCat(opt, "_ROOT"));
+  param = this->GetOption("CPACK_PRODUCTBUILD_DOMAINS_ROOT");
   xout.Attribute("enable_localSystem",
                  (param && cmIsOff(param)) ? "false" : "true");
 
