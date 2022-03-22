@@ -97,20 +97,20 @@ bool cmDefinePropertyCommand(std::vector<std::string> const& args,
         PropertyName, "\""));
       return false;
     }
-  }
 
-  // Make sure the variable is not reserved.
-  static constexpr const char* reservedPrefixes[] = {
-    "CMAKE_",
-    "_CMAKE_",
-  };
-  if (std::any_of(std::begin(reservedPrefixes), std::end(reservedPrefixes),
-                  [&initializeFromVariable](const char* prefix) {
-                    return cmHasPrefix(initializeFromVariable, prefix);
-                  })) {
-    status.SetError(
-      cmStrCat("variable name \"", initializeFromVariable, "\" is reserved"));
-    return false;
+    // Make sure the variable is not reserved.
+    static constexpr const char* reservedPrefixes[] = {
+      "CMAKE_",
+      "_CMAKE_",
+    };
+    if (std::any_of(std::begin(reservedPrefixes), std::end(reservedPrefixes),
+                    [&initializeFromVariable](const char* prefix) {
+                      return cmHasPrefix(initializeFromVariable, prefix);
+                    })) {
+      status.SetError(cmStrCat("variable name \"", initializeFromVariable,
+                               "\" is reserved"));
+      return false;
+    }
   }
 
   // Actually define the property.
