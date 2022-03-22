@@ -399,17 +399,18 @@ public:
   LinkClosure const* GetLinkClosure(const std::string& config) const;
 
   cmLinkImplementation const* GetLinkImplementation(
-    const std::string& config) const;
+    const std::string& config, LinkInterfaceFor implFor) const;
 
   void ComputeLinkImplementationLanguages(
     const std::string& config, cmOptionalLinkImplementation& impl) const;
 
   cmLinkImplementationLibraries const* GetLinkImplementationLibraries(
-    const std::string& config) const;
+    const std::string& config, LinkInterfaceFor implFor) const;
 
   void ComputeLinkImplementationLibraries(const std::string& config,
                                           cmOptionalLinkImplementation& impl,
-                                          const cmGeneratorTarget* head) const;
+                                          const cmGeneratorTarget* head,
+                                          LinkInterfaceFor implFor) const;
 
   struct TargetOrString
   {
@@ -984,6 +985,7 @@ private:
                             const cmGeneratorTarget* head,
                             bool secondPass) const;
   cmLinkImplementation const* GetLinkImplementation(const std::string& config,
+                                                    LinkInterfaceFor implFor,
                                                     bool secondPass) const;
 
   enum class LinkItemRole
@@ -1108,9 +1110,16 @@ private:
   };
   using LinkImplMapType = std::map<std::string, HeadToLinkImplementationMap>;
   mutable LinkImplMapType LinkImplMap;
+  mutable LinkImplMapType LinkImplUsageRequirementsOnlyMap;
+
+  HeadToLinkImplementationMap& GetHeadToLinkImplementationMap(
+    std::string const& config) const;
+  HeadToLinkImplementationMap& GetHeadToLinkImplementationUsageRequirementsMap(
+    std::string const& config) const;
 
   cmLinkImplementationLibraries const* GetLinkImplementationLibrariesInternal(
-    const std::string& config, const cmGeneratorTarget* head) const;
+    const std::string& config, const cmGeneratorTarget* head,
+    LinkInterfaceFor implFor) const;
   bool ComputeOutputDir(const std::string& config,
                         cmStateEnums::ArtifactType artifact,
                         std::string& out) const;

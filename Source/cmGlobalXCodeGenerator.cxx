@@ -1627,7 +1627,10 @@ void cmGlobalXCodeGenerator::ForceLinkerLanguage(cmGeneratorTarget* gtgt)
 
   // If the language is compiled as a source trust Xcode to link with it.
   for (auto const& Language :
-       gtgt->GetLinkImplementation("NOCONFIG")->Languages) {
+       gtgt
+         ->GetLinkImplementation("NOCONFIG",
+                                 cmGeneratorTarget::LinkInterfaceFor::Link)
+         ->Languages) {
     if (Language == llang) {
       return;
     }

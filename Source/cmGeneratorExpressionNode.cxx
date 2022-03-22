@@ -1415,7 +1415,8 @@ static std::string getLinkedTargetsContent(
 {
   std::string result;
   if (cmLinkImplementationLibraries const* impl =
-        target->GetLinkImplementationLibraries(context->Config)) {
+        target->GetLinkImplementationLibraries(
+          context->Config, cmGeneratorTarget::LinkInterfaceFor::Usage)) {
     for (cmLinkImplItem const& lib : impl->Libraries) {
       if (lib.Target) {
         // Pretend $<TARGET_PROPERTY:lib.Target,prop> appeared in our

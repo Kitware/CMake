@@ -114,7 +114,8 @@ bool StaticLibraryCycle(cmGeneratorTarget const* targetOrigin,
       }
       // Collect all static_library dependencies from the test target
       cmLinkImplementationLibraries const* libs =
-        testTarget->GetLinkImplementationLibraries(config);
+        testTarget->GetLinkImplementationLibraries(
+          config, cmGeneratorTarget::LinkInterfaceFor::Link);
       if (libs) {
         for (cmLinkItem const& item : libs->Libraries) {
           cmGeneratorTarget const* depTarget = item.Target;
@@ -1266,7 +1267,8 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
       std::map<cmGeneratorTarget const*, std::size_t> commonTargets;
       for (std::string const& config : this->ConfigsList) {
         cmLinkImplementationLibraries const* libs =
-          this->GenTarget->GetLinkImplementationLibraries(config);
+          this->GenTarget->GetLinkImplementationLibraries(
+            config, cmGeneratorTarget::LinkInterfaceFor::Link);
         if (libs) {
           for (cmLinkItem const& item : libs->Libraries) {
             cmGeneratorTarget const* libTarget = item.Target;
