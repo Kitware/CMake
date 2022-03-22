@@ -182,7 +182,9 @@ CPack
   :variable:`CPACK_PRODUCTBUILD_DOMAINS_ANYWHERE`,
   :variable:`CPACK_PRODUCTBUILD_DOMAINS_USER`, and
   :variable:`CPACK_PRODUCTBUILD_DOMAINS_ROOT` variables for
-  adding the domains element to the Distribution XML.
+  adding the domains element to the Distribution XML. With these variables,
+  it is now possible to install products to the user's home directory
+  without requiring administrative privileges.
 
 * The :cpack_gen:`CPack productbuild Generator` gained a new variable,
   :variable:`CPACK_PRODUCTBUILD_IDENTIFIER`, used to customize the unique

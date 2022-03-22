@@ -90,14 +90,15 @@ macOS using ProductBuild:
 
  .. versionadded:: 3.23
 
- Adds a domains element to Distribution XML if specified. When set to true,
- the productbuild generator creates the following XML element:
+ This option enables more granular control over where the product may be
+ installed. When it is set to true, a ``domains`` element of the following
+ form will be added to the productbuild Distribution XML:
 
  .. code-block:: xml
 
     <domains enable_anywhere="true" enable_currentUserHome="false" enable_localSystem="true"/>
 
- The default values used for the attributes can be overridden with
+ The default values are as shown above, but can be overridden with
  :variable:`CPACK_PRODUCTBUILD_DOMAINS_ANYWHERE`,
  :variable:`CPACK_PRODUCTBUILD_DOMAINS_USER`, and
  :variable:`CPACK_PRODUCTBUILD_DOMAINS_ROOT`.
@@ -106,25 +107,43 @@ macOS using ProductBuild:
 
  .. versionadded:: 3.23
 
- May be used to override the ``enable_anywhere`` attribute in the domains
- element in the Distribution XML when :variable:`CPACK_PRODUCTBUILD_DOMAINS`
- is set to ``TRUE``.
+ May be used to override the ``enable_anywhere`` attribute in the ``domains``
+ element of the Distribution XML. When set to true, the product can be
+ installed at the root of any volume, including non-system volumes.
+
+ :variable:`CPACK_PRODUCTBUILD_DOMAINS` must be set to true for this variable
+ to have any effect.
 
 .. variable:: CPACK_PRODUCTBUILD_DOMAINS_USER
 
  .. versionadded:: 3.23
 
- May be used to override the ``enable_currentUserHome`` attribute in the domains
- element in the Distribution XML when :variable:`CPACK_PRODUCTBUILD_DOMAINS`
- is set to ``TRUE``.
+ May be used to override the ``enable_currentUserHome`` attribute in the
+ ``domains`` element of the Distribution XML. When set to true, the product
+ can be installed into the current user's home directory. Note that when
+ installing into the user's home directory, the following additional
+ requirements will apply:
+
+ * The installer may not write outside the user's home directory.
+ * The install will be performed as the current user rather than as ``root``.
+   This may have ramifications for :variable:`CPACK_PREFLIGHT_<COMP>_SCRIPT`
+   and :variable:`CPACK_POSTFLIGHT_<COMP>_SCRIPT`.
+ * Administrative privileges will not be needed to perform the install.
+
+ :variable:`CPACK_PRODUCTBUILD_DOMAINS` must be set to true for this variable
+ to have any effect.
 
 .. variable:: CPACK_PRODUCTBUILD_DOMAINS_ROOT
 
  .. versionadded:: 3.23
 
- May be used to override the ``enable_localSystem`` attribute in the domains
- element in the Distribution XML when :variable:`CPACK_PRODUCTBUILD_DOMAINS`
- is set to ``TRUE``.
+ May be used to override the ``enable_localSystem`` attribute in the
+ ``domains`` element of the Distribution XML. When set to true, the product
+ can be installed in the root directory. This should normally be set to true
+ unless the product should only be installed to the user's home directory.
+
+ :variable:`CPACK_PRODUCTBUILD_DOMAINS` must be set to true for this variable
+ to have any effect.
 
 Background Image
 """"""""""""""""
