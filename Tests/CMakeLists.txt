@@ -3589,8 +3589,6 @@ if(BUILD_TESTING)
     --test-command InterfaceLinkLibraries)
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/InterfaceLinkLibraries")
 
-  ADD_TEST_MACRO(InterfaceLinkLibrariesDirect)
-
   if(NOT CMake_TEST_EXTERNAL_CMAKE)
     add_subdirectory(CMakeTests)
   endif()
