@@ -1106,12 +1106,15 @@ Output-Related Expressions
 
   .. versionadded:: 3.1
 
-  Content of ``...`` except when evaluated in a link interface while
-  propagating :ref:`Target Usage Requirements`, in which case it is the
-  empty string.
-  Intended for use only in an :prop_tgt:`INTERFACE_LINK_LIBRARIES` target
-  property, perhaps via the :command:`target_link_libraries` command,
-  to specify private link dependencies without other usage requirements.
+  Content of ``...``, except while collecting :ref:`Target Usage Requirements`,
+  in which case it is the empty string.  This is intended for use in an
+  :prop_tgt:`INTERFACE_LINK_LIBRARIES` target property, typically populated
+  via the :command:`target_link_libraries` command, to specify private link
+  dependencies without other usage requirements.
+
+  .. versionadded:: 3.24
+    ``LINK_ONLY`` may also be used in a :prop_tgt:`LINK_LIBRARIES` target
+    property.  See policy :policy:`CMP0131`.
 
 .. genex:: $<LINK_LIBRARY:feature,library-list>
 

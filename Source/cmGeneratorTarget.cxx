@@ -8152,6 +8152,20 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
     // Keep this logic in sync with ExpandLinkItems.
     cmGeneratorExpressionDAGChecker dagChecker(this, "LINK_LIBRARIES", nullptr,
                                                nullptr);
+    // The $<LINK_ONLY> expression may be used to specify link dependencies
+    // that are otherwise excluded from usage requirements.
+    if (implFor == LinkInterfaceFor::Usage) {
+      switch (this->GetPolicyStatusCMP0131()) {
+        case cmPolicies::WARN:
+        case cmPolicies::OLD:
+          break;
+        case cmPolicies::REQUIRED_IF_USED:
+        case cmPolicies::REQUIRED_ALWAYS:
+        case cmPolicies::NEW:
+          dagChecker.SetTransitivePropertiesOnly();
+          break;
+      }
+    }
     cmGeneratorExpression ge(entry.Backtrace);
     std::unique_ptr<cmCompiledGeneratorExpression> const cge =
       ge.Parse(entry.Value);
