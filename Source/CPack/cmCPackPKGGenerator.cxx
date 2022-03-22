@@ -120,10 +120,20 @@ void cmCPackPKGGenerator::WriteDistributionFile(const char* metapackageFile,
   std::string distributionFile =
     cmStrCat(metapackageFile, "/Contents/distribution.dist");
 
+  std::ostringstream xContents;
+  cmXMLWriter xout(xContents, 1);
+
+  // Installer-wide options
+  xout.StartElement("options");
+  xout.Attribute("allow-external-scripts", "no");
+  xout.Attribute("customize", "allow");
+  if (cmIsOff(this->GetOption("CPACK_PRODUCTBUILD_DOMAINS"))) {
+    xout.Attribute("rootVolumeOnly", "false");
+  }
+  xout.EndElement();
+
   // Create the choice outline, which provides a tree-based view of
   // the components in their groups.
-  std::ostringstream choiceOut;
-  cmXMLWriter xout(choiceOut, 1);
   xout.StartElement("choices-outline");
 
   // Emit the outline for the groups
@@ -169,7 +179,7 @@ void cmCPackPKGGenerator::WriteDistributionFile(const char* metapackageFile,
   // Dark Aqua
   this->CreateBackground("darkAqua", metapackageFile, genName, xout);
 
-  this->SetOption("CPACK_PACKAGEMAKER_CHOICES", choiceOut.str());
+  this->SetOption("CPACK_APPLE_PKG_INSTALLER_CONTENT", xContents.str());
 
   // Create the distribution.dist file in the metapackage to turn it
   // into a distribution package.
@@ -293,8 +303,7 @@ void cmCPackPKGGenerator::CreateChoice(const cmCPackComponent& component,
 
 void cmCPackPKGGenerator::CreateDomains(cmXMLWriter& xout)
 {
-  std::string opt = "CPACK_PRODUCTBUILD_DOMAINS";
-  if (cmIsOff(this->GetOption(opt))) {
+  if (cmIsOff(this->GetOption("CPACK_PRODUCTBUILD_DOMAINS"))) {
     return;
   }
 
@@ -302,19 +311,19 @@ void cmCPackPKGGenerator::CreateDomains(cmXMLWriter& xout)
 
   // Product can be installed at the root of any volume by default
   // unless specified
-  cmValue param = this->GetOption(cmStrCat(opt, "_ANYWHERE"));
+  cmValue param = this->GetOption("CPACK_PRODUCTBUILD_DOMAINS_ANYWHERE");
   xout.Attribute("enable_anywhere",
                  (param && cmIsOff(param)) ? "false" : "true");
 
   // Product cannot be installed into the current user's home directory
   // by default unless specified
-  param = this->GetOption(cmStrCat(opt, "_USER"));
+  param = this->GetOption("CPACK_PRODUCTBUILD_DOMAINS_USER");
   xout.Attribute("enable_currentUserHome",
                  (param && cmIsOn(param)) ? "true" : "false");
 
   // Product can be installed into the root directory by default
   // unless specified
-  param = this->GetOption(cmStrCat(opt, "_ROOT"));
+  param = this->GetOption("CPACK_PRODUCTBUILD_DOMAINS_ROOT");
   xout.Attribute("enable_localSystem",
                  (param && cmIsOff(param)) ? "false" : "true");
 
