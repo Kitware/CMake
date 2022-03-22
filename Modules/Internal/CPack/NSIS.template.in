@@ -931,9 +931,11 @@ Function .onInit
 ;Run the uninstaller
 uninst:
   ClearErrors
-  StrLen $2 "\@CPACK_NSIS_UNINSTALL_NAME@.exe"
-  StrCpy $3 $0 -$2 # remove "\@CPACK_NSIS_UNINSTALL_NAME@.exe" from UninstallString to get path
-  ExecWait '"$0" /S _?=$3' ;Do not copy the uninstaller to a temp file
+  StrCpy $2 $0 1
+  StrCmp '"' $2 0 +3 ; checks if string is quoted (CPack before v3.20.6 did not quote it)
+  ExecWait '$0 /S'
+  Goto +2
+  ExecWait '"$0" /S'
 
   IfErrors uninst_failed inst
 uninst_failed:
