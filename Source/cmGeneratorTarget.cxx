@@ -8035,6 +8035,7 @@ class TransitiveLinkImpl
 {
   cmGeneratorTarget const* Self;
   std::string const& Config;
+  LinkInterfaceFor ImplFor;
   cmLinkImplementation& Impl;
 
   std::set<cmLinkItem> Emitted;
@@ -8045,9 +8046,10 @@ class TransitiveLinkImpl
 
 public:
   TransitiveLinkImpl(cmGeneratorTarget const* self, std::string const& config,
-                     cmLinkImplementation& impl)
+                     LinkInterfaceFor implFor, cmLinkImplementation& impl)
     : Self(self)
     , Config(config)
+    , ImplFor(implFor)
     , Impl(impl)
   {
   }
@@ -8064,8 +8066,8 @@ void TransitiveLinkImpl::Follow(cmGeneratorTarget const* target)
   }
 
   // Get this target's usage requirements.
-  cmLinkInterfaceLibraries const* iface = target->GetLinkInterfaceLibraries(
-    this->Config, this->Self, LinkInterfaceFor::Usage);
+  cmLinkInterfaceLibraries const* iface =
+    target->GetLinkInterfaceLibraries(this->Config, this->Self, this->ImplFor);
   if (!iface) {
     return;
   }
@@ -8129,9 +8131,10 @@ void TransitiveLinkImpl::Compute()
 
 void ComputeLinkImplTransitive(cmGeneratorTarget const* self,
                                std::string const& config,
+                               LinkInterfaceFor implFor,
                                cmLinkImplementation& impl)
 {
-  TransitiveLinkImpl transitiveLinkImpl(self, config, impl);
+  TransitiveLinkImpl transitiveLinkImpl(self, config, implFor, impl);
   transitiveLinkImpl.Compute();
 }
 }
@@ -8140,7 +8143,6 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
   const std::string& config, cmOptionalLinkImplementation& impl,
   cmGeneratorTarget const* head, LinkInterfaceFor implFor) const
 {
-  static_cast<void>(implFor);
   cmLocalGenerator const* lg = this->LocalGenerator;
   cmMakefile const* mf = lg->GetMakefile();
   cmBTStringRange entryRange = this->Target->GetLinkImplementationEntries();
@@ -8245,7 +8247,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
 
   // Update the list of direct link dependencies from usage requirements.
   if (head == this) {
-    ComputeLinkImplTransitive(this, config, impl);
+    ComputeLinkImplTransitive(this, config, implFor, impl);
   }
 
   // Get the list of configurations considered to be DEBUG.

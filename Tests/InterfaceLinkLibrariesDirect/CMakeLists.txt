@@ -52,7 +52,7 @@ set_property(TARGET A APPEND PROPERTY INTERFACE_LINK_LIBRARIES_DIRECT
 add_library(static_A_public STATIC static_A_public.c)
 target_link_libraries(static_A_public PUBLIC A)
 
-# Uses A's usage requirements, but does not propagate them.
+# Uses A's usage requirements, but propagates only the linking requirements.
 # Does not use the exe-only usage requirement.  Does use the optional one.
 add_library(static_A_private STATIC static_A_private.c)
 target_link_libraries(static_A_private PRIVATE A)
@@ -63,9 +63,14 @@ add_executable(exe_use_static_A_public exe_use_static_A_public.c)
 target_link_libraries(exe_use_static_A_public PRIVATE static_A_public)
 set_property(TARGET exe_use_static_A_public PROPERTY A_LINK_OPTIONAL 1)
 
-# Does not use A's usage requirements.
+# Does not use A's usage requirements, but does use its non-optional linking requirements.
 add_executable(exe_use_static_A_private exe_use_static_A_private.c)
 target_link_libraries(exe_use_static_A_private PRIVATE static_A_private)
+
+# Uses A's usage requirements, including an optional one, but overrides the link ordering.
+add_executable(exe_use_static_A_public_explicit exe_use_static_A_public_explicit.c)
+target_link_libraries(exe_use_static_A_public_explicit PRIVATE static_A_public A direct_from_A direct_from_A_for_exe direct_from_A_optional)
+set_property(TARGET exe_use_static_A_public_explicit PROPERTY A_LINK_OPTIONAL 1)
 
 #----------------------------------------------------------------------------
 

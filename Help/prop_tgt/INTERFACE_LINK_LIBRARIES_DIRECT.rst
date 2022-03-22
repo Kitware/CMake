@@ -56,11 +56,27 @@ on ``X``'s dependents:
     target_link_libraries(X PUBLIC Y)
 
   then ``Y`` is placed in ``X``'s :prop_tgt:`INTERFACE_LINK_LIBRARIES`,
-  so ``Y``'s usage requirements, including ``INTERFACE_PROPERTY_LINK_DIRECT``
-  and ``INTERFACE_PROPERTY_LINK_DIRECT_EXCLUDE``, are propagated
-  to ``X``'s dependents.
+  so ``Y``'s usage requirements, including ``INTERFACE_PROPERTY_LINK_DIRECT``,
+  ``INTERFACE_PROPERTY_LINK_DIRECT_EXCLUDE``, and the usage requirements
+  declared by the direct link dependencies they add, are propagated to
+  ``X``'s dependents.
 
-* If ``X`` links ``Y`` privately:
+* If ``X`` is a static library or object library, and links ``Y`` privately:
+
+  .. code-block:: cmake
+
+    target_link_libraries(X PRIVATE Y)
+
+  then ``$<LINK_ONLY:Y>`` is placed in ``X``'s
+  :prop_tgt:`INTERFACE_LINK_LIBRARIES`.  ``Y``'s linking requirements,
+  including ``INTERFACE_PROPERTY_LINK_DIRECT``,
+  ``INTERFACE_PROPERTY_LINK_DIRECT_EXCLUDE``, and the transitive link
+  dependencies declared by the direct link dependencies they add, are
+  propagated to ``X``'s dependents.  However, ``Y``'s non-linking
+  usage requirements are blocked by the :genex:`LINK_ONLY` generator
+  expression, and are not propagated to ``X``'s dependents.
+
+* If ``X`` is a shared library or executable, and links ``Y`` privately:
 
   .. code-block:: cmake
 
@@ -68,13 +84,10 @@ on ``X``'s dependents:
 
   then ``Y`` is not placed in ``X``'s :prop_tgt:`INTERFACE_LINK_LIBRARIES`,
   so ``Y``'s usage requirements, even ``INTERFACE_PROPERTY_LINK_DIRECT``
-  and ``INTERFACE_PROPERTY_LINK_DIRECT_EXCLUDE``, are not propagated
-  to ``X``'s dependents.
-  (If ``X`` is a static library or object library, then ``$<LINK_ONLY:Y>``
-  is placed in ``X``'s :prop_tgt:`INTERFACE_LINK_LIBRARIES`, but the
-  :genex:`LINK_ONLY` generator expression block ``Y``'s usage requirements.)
+  and ``INTERFACE_PROPERTY_LINK_DIRECT_EXCLUDE``, are not propagated to
+  ``X``'s dependents.
 
-* In either case, the content of ``X``'s :prop_tgt:`INTERFACE_LINK_LIBRARIES`
+* In all cases, the content of ``X``'s :prop_tgt:`INTERFACE_LINK_LIBRARIES`
   is not affected by ``Y``'s ``INTERFACE_PROPERTY_LINK_DIRECT`` or
   ``INTERFACE_PROPERTY_LINK_DIRECT_EXCLUDE``.
 
@@ -184,7 +197,7 @@ be an intermediate library:
 .. code-block:: cmake
 
   add_library(app_impl STATIC app_impl.cpp)
-  target_link_libraries(app_impl PUBLIC Foo)
+  target_link_libraries(app_impl PRIVATE Foo)
 
   add_executable(app main.cpp)
   target_link_libraries(app PRIVATE app_impl)
