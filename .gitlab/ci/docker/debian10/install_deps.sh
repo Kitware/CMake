@@ -80,6 +80,7 @@ apt-get install -y \
     libxerces-c-dev \
     libxml2-dev libxml2-utils \
     libxslt-dev xsltproc \
+    openjdk-11-jdk \
     python2 python2-dev python-numpy pypy pypy-dev \
     python3 python3-dev python3-numpy pypy3 pypy3-dev python3-venv \
     qtbase5-dev qtbase5-dev-tools \
@@ -98,9 +99,7 @@ rm ironpython_2.7.10.deb ironpython.sha256sum
 
 # Perforce
 curl -L -O https://www.perforce.com/downloads/perforce/r21.2/bin.linux26x86_64/helix-core-server.tgz
-echo '72620c55e9389705582506d6f3388005fb4f674888a00a12a51edc2ae37823b3  helix-core-server.tgz' > helix.sha256sum
-sha256sum --check helix.sha256sum
 tar -C /usr/local/bin -xvzf helix-core-server.tgz -- p4 p4d
-rm helix-core-server.tgz helix.sha256sum
+rm helix-core-server.tgz
 
 apt-get clean

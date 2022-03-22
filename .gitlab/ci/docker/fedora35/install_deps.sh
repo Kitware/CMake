@@ -69,6 +69,7 @@ dnf install --setopt=install_weak_deps=False -y \
     gsl-devel \
     gtest-devel \
     gtk2-devel \
+    java-11-openjdk-devel \
     jsoncpp-devel \
     lapack-devel \
     libarchive-devel \
@@ -110,7 +111,5 @@ pip2.7 install numpy
 
 # Perforce
 curl -L -O https://www.perforce.com/downloads/perforce/r21.2/bin.linux26x86_64/helix-core-server.tgz
-echo '72620c55e9389705582506d6f3388005fb4f674888a00a12a51edc2ae37823b3  helix-core-server.tgz' > helix.sha256sum
-sha256sum --check helix.sha256sum
 tar -C /usr/local/bin -xvzf helix-core-server.tgz -- p4 p4d
 rm helix-core-server.tgz
