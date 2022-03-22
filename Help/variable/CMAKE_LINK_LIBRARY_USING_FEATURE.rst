@@ -19,8 +19,9 @@ definition of features dependent from the link language.
 
 This variable will be used by :genex:`LINK_LIBRARY` generator expression if,
 for the linker language, the variable
-:variable:`CMAKE_<LANG>_LINK_LIBRARY_USING_<FEATURE>_SUPPORTED` is false or not
-set.
+:variable:`CMAKE_<LANG>_LINK_LIBRARY_USING_<FEATURE>_SUPPORTED` is not defined
+and the variable :variable:`CMAKE_LINK_LIBRARY_USING_<FEATURE>_SUPPORTED` is
+``TRUE``.
 
 .. include:: CMAKE_LINK_LIBRARY_USING_FEATURE.txt
 
