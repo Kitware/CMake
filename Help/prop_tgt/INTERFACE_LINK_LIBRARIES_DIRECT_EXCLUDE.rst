@@ -1,7 +1,7 @@
 INTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE
 ---------------------------------------
 
-.. versionadded:: 3.23
+.. versionadded:: 3.24
 
 List of libraries that consumers of this library should *not* treat
 as direct link dependencies.
