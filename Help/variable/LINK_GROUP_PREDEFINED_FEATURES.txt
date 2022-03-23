@@ -15,8 +15,8 @@ static libraries, the following feature can be used:
   ``-z rescan-start`` and ``-z rescan-end``).
 
   Using this feature has a significant performance cost. It is best to use it
-  only when there are unavoidable circular references between two or more static
-  libraries.
+  only when there are unavoidable circular references between two or more
+  static libraries.
 
-  This feature is available on ``Linux`` and ``SunOS`` platforms as well as
-  ``Windows`` when ``GNU`` toolchain is used.
+  This feature is available on ``Linux``, ``BSD``, and ``SunOS`` target
+  platforms as well as ``Windows`` when ``GNU`` toolchain is used.

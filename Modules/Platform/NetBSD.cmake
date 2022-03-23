@@ -39,4 +39,11 @@ endif()
 set(CMAKE_LINK_LIBRARY_USING_WHOLE_ARCHIVE_SUPPORTED TRUE)
 
 
+# Features for LINK_GROUP generator expression
+## RESCAN: request the linker to rescan static libraries until there is
+## no pending undefined symbols
+set(CMAKE_LINK_GROUP_USING_RESCAN "LINKER:--start-group" "LINKER:--end-group")
+set(CMAKE_LINK_GROUP_USING_RESCAN_SUPPORTED TRUE)
+
+
 include(Platform/UnixPaths)
