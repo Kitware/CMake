@@ -16,7 +16,9 @@ variable for more information.
 The installation prefix is also added to :variable:`CMAKE_SYSTEM_PREFIX_PATH`
 so that :command:`find_package`, :command:`find_program`,
 :command:`find_library`, :command:`find_path`, and :command:`find_file`
-will search the prefix for other software.
+will search the prefix for other software. This behavior can be disabled by
+setting the :variable:`CMAKE_FIND_NO_INSTALL_PREFIX` to ``TRUE`` before the
+first :command:`project` invocation.
 
 .. note::
 
