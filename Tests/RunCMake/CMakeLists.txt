@@ -148,6 +148,8 @@ if("${CMAKE_C_COMPILER_ID}" STREQUAL "LCC" OR
   add_RunCMake_test("CMP0129")
 endif()
 
+add_RunCMake_test(CMP0132)
+
 # The test for Policy 65 requires the use of the
 # CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS variable, which both the VS and Xcode
 # generators ignore.  The policy will have no effect on those generators.
