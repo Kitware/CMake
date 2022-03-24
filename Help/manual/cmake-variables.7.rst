@@ -285,6 +285,7 @@ Variables that Change Behavior
    /variable/CMAKE_XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER_STOP
    /variable/CMAKE_XCODE_SCHEME_WORKING_DIRECTORY
    /variable/CMAKE_XCODE_SCHEME_ZOMBIE_OBJECTS
+   /variable/CMAKE_XCODE_XCCONFIG
    /variable/PackageName_ROOT
 
 Variables that Describe the System

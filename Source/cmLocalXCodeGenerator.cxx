@@ -6,6 +6,7 @@
 #include <ostream>
 #include <utility>
 
+#include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalXCodeGenerator.h"
 #include "cmMakefile.h"
@@ -132,5 +133,24 @@ void cmLocalXCodeGenerator::ComputeObjectFilenames(
       // TODO: emit warning about duplicate name?
     }
     si.second = objectName;
+  }
+}
+
+void cmLocalXCodeGenerator::AddXCConfigSources(cmGeneratorTarget* target)
+{
+  auto xcconfig = target->GetProperty("XCODE_XCCONFIG");
+  if (!xcconfig) {
+    return;
+  }
+  auto configs = target->Makefile->GetGeneratorConfigs(
+                          cmMakefile::IncludeEmptyConfig);
+
+  for (auto& config : configs) {
+    auto file = cmGeneratorExpression::Evaluate(
+      xcconfig,
+      this, config);
+    if (!file.empty()) {
+      target->AddSource(file);
+    }
   }
 }

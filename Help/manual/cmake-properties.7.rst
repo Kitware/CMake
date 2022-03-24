@@ -457,6 +457,7 @@ Properties on Targets
    /prop_tgt/XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER_STOP
    /prop_tgt/XCODE_SCHEME_WORKING_DIRECTORY
    /prop_tgt/XCODE_SCHEME_ZOMBIE_OBJECTS
+   /prop_tgt/XCODE_XCCONFIG
    /prop_tgt/XCTEST
 
 .. _`Test Properties`:
