@@ -95,6 +95,10 @@
 #    define IMAGE_FILE_MACHINE_ARM64 0xaa64 // ARM64 Little-Endian
 #  endif
 
+#  ifndef IMAGE_FILE_MACHINE_ARM64EC
+#    define IMAGE_FILE_MACHINE_ARM64EC 0xa641 // ARM64EC Little-Endian
+#  endif
+
 typedef struct cmANON_OBJECT_HEADER_BIGOBJ
 {
   /* same as ANON_OBJECT_HEADER_V2 */
@@ -134,6 +138,13 @@ typedef struct _cmIMAGE_SYMBOL_EX
   BYTE NumberOfAuxSymbols;
 } cmIMAGE_SYMBOL_EX;
 typedef cmIMAGE_SYMBOL_EX UNALIGNED* cmPIMAGE_SYMBOL_EX;
+
+enum class Arch
+{
+  Generic,
+  I386,
+  ARM64EC,
+};
 
 PIMAGE_SECTION_HEADER GetSectionHeaderOffset(
   PIMAGE_FILE_HEADER pImageFileHeader)
@@ -193,7 +204,8 @@ public:
    */
 
   DumpSymbols(ObjectHeaderType* ih, std::set<std::string>& symbols,
-              std::set<std::string>& dataSymbols, bool isI386)
+              std::set<std::string>& dataSymbols,
+              Arch symbolArch = Arch::Generic)
     : Symbols(symbols)
     , DataSymbols(dataSymbols)
   {
@@ -203,7 +215,7 @@ public:
                          this->ObjectImageHeader->PointerToSymbolTable);
     this->SectionHeaders = GetSectionHeaderOffset(this->ObjectImageHeader);
     this->SymbolCount = this->ObjectImageHeader->NumberOfSymbols;
-    this->IsI386 = isI386;
+    this->SymbolArch = symbolArch;
   }
 
   /*
@@ -259,7 +271,7 @@ public:
             }
           }
           // For i386 builds we need to remove _
-          if (this->IsI386 && symbol[0] == '_') {
+          if (this->SymbolArch == Arch::I386 && symbol[0] == '_') {
             symbol.erase(0, 1);
           }
 
@@ -279,13 +291,20 @@ public:
             // skip symbols containing a dot or are from managed code
             if (symbol.find('.') == std::string::npos &&
                 !SymbolIsFromManagedCode(symbol)) {
-              if (!pSymbolTable->Type && (SectChar & IMAGE_SCN_MEM_WRITE)) {
-                // Read only (i.e. constants) must be excluded
-                this->DataSymbols.insert(symbol);
-              } else {
-                if (pSymbolTable->Type || !(SectChar & IMAGE_SCN_MEM_READ) ||
-                    (SectChar & IMAGE_SCN_MEM_EXECUTE)) {
-                  this->Symbols.insert(symbol);
+              // skip arm64ec thunk symbols
+              if (this->SymbolArch != Arch::ARM64EC ||
+                  (symbol.find("$ientry_thunk") == std::string::npos &&
+                   symbol.find("$entry_thunk") == std::string::npos &&
+                   symbol.find("$iexit_thunk") == std::string::npos &&
+                   symbol.find("$exit_thunk") == std::string::npos)) {
+                if (!pSymbolTable->Type && (SectChar & IMAGE_SCN_MEM_WRITE)) {
+                  // Read only (i.e. constants) must be excluded
+                  this->DataSymbols.insert(symbol);
+                } else {
+                  if (pSymbolTable->Type || !(SectChar & IMAGE_SCN_MEM_READ) ||
+                      (SectChar & IMAGE_SCN_MEM_EXECUTE)) {
+                    this->Symbols.insert(symbol);
+                  }
                 }
               }
             }
@@ -316,7 +335,7 @@ private:
   PIMAGE_SECTION_HEADER SectionHeaders;
   ObjectHeaderType* ObjectImageHeader;
   SymbolTableType* SymbolTable;
-  bool IsI386;
+  Arch SymbolArch;
 };
 #endif
 
@@ -421,7 +440,8 @@ static bool DumpFile(std::string const& nmPath, const char* filename,
          (imageHeader->Machine == IMAGE_FILE_MACHINE_AMD64) ||
          (imageHeader->Machine == IMAGE_FILE_MACHINE_ARM) ||
          (imageHeader->Machine == IMAGE_FILE_MACHINE_ARMNT) ||
-         (imageHeader->Machine == IMAGE_FILE_MACHINE_ARM64)) &&
+         (imageHeader->Machine == IMAGE_FILE_MACHINE_ARM64) ||
+         (imageHeader->Machine == IMAGE_FILE_MACHINE_ARM64EC)) &&
         (imageHeader->Characteristics == 0)) {
       /*
        * The tests above are checking for IMAGE_FILE_HEADER.Machine
@@ -431,7 +451,11 @@ static bool DumpFile(std::string const& nmPath, const char* filename,
        */
       DumpSymbols<IMAGE_FILE_HEADER, IMAGE_SYMBOL> symbolDumper(
         (PIMAGE_FILE_HEADER)lpFileBase, symbols, dataSymbols,
-        (imageHeader->Machine == IMAGE_FILE_MACHINE_I386));
+        (imageHeader->Machine == IMAGE_FILE_MACHINE_I386
+           ? Arch::I386
+           : (imageHeader->Machine == IMAGE_FILE_MACHINE_ARM64EC
+                ? Arch::ARM64EC
+                : Arch::Generic)));
       symbolDumper.DumpObjFile();
     } else {
       // check for /bigobj and llvm LTO format
@@ -440,8 +464,12 @@ static bool DumpFile(std::string const& nmPath, const char* filename,
       if (h->Sig1 == 0x0 && h->Sig2 == 0xffff) {
         // bigobj
         DumpSymbols<cmANON_OBJECT_HEADER_BIGOBJ, cmIMAGE_SYMBOL_EX>
-          symbolDumper((cmANON_OBJECT_HEADER_BIGOBJ*)lpFileBase, symbols,
-                       dataSymbols, (h->Machine == IMAGE_FILE_MACHINE_I386));
+          symbolDumper(
+            (cmANON_OBJECT_HEADER_BIGOBJ*)lpFileBase, symbols, dataSymbols,
+            (h->Machine == IMAGE_FILE_MACHINE_I386
+               ? Arch::I386
+               : (h->Machine == IMAGE_FILE_MACHINE_ARM64EC ? Arch::ARM64EC
+                                                           : Arch::Generic)));
         symbolDumper.DumpObjFile();
       } else if (
         // BCexCODE - llvm bitcode
