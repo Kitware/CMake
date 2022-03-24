@@ -105,6 +105,9 @@
 #  define PLATFORM_ID "Integrity"
 # endif
 
+# elif defined(_ADI_COMPILER)
+#  define PLATFORM_ID "ADSP"
+
 #else /* unknown platform */
 # define PLATFORM_ID
 
@@ -232,6 +235,12 @@
 # else /* unknown architecture */
 #  define ARCHITECTURE_ID ""
 # endif
+
+# elif defined(__ADSPSHARC__)
+#  define ARCHITECTURE_ID "SHARC"
+
+# elif defined(__ADSPBLACKFIN__)
+#  define ARCHITECTURE_ID "Blackfin"
 
 #else
 #  define ARCHITECTURE_ID

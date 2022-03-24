@@ -841,14 +841,23 @@ function(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
     set(ARCHITECTURE_ID)
     set(SIMULATE_ID)
     set(SIMULATE_VERSION)
+    set(CMAKE_${lang}_COMPILER_ID_STRING_REGEX ".?I.?N.?F.?O.?:.?[A-Za-z0-9_]+\\[[^]]*\\]")
     foreach(encoding "" "ENCODING;UTF-16LE" "ENCODING;UTF-16BE")
       file(STRINGS "${file}" CMAKE_${lang}_COMPILER_ID_STRINGS
         LIMIT_COUNT 38 ${encoding}
-        REGEX ".?I.?N.?F.?O.?:.?[A-Za-z0-9_]+\\[[^]]*\\]")
+        REGEX "${CMAKE_${lang}_COMPILER_ID_STRING_REGEX}")
       if(NOT CMAKE_${lang}_COMPILER_ID_STRINGS STREQUAL "")
         break()
       endif()
     endforeach()
+
+    # Some ADSP processors result in characters being detected as separate strings
+    if(CMAKE_${lang}_COMPILER_ID_STRINGS STREQUAL "")
+      file(STRINGS "${file}" CMAKE_${lang}_COMPILER_ID_STRINGS LENGTH_MAXIMUM 1)
+      string(REGEX REPLACE ";" "" CMAKE_${lang}_COMPILER_ID_STRING "${CMAKE_${lang}_COMPILER_ID_STRINGS}")
+      string(REGEX MATCHALL "${CMAKE_${lang}_COMPILER_ID_STRING_REGEX}"
+        CMAKE_${lang}_COMPILER_ID_STRINGS "${CMAKE_${lang}_COMPILER_ID_STRING}")
+    endif()
 
     # With the IAR Compiler, some strings are found twice, first time as incomplete
     # list like "?<Constant "INFO:compiler[IAR]">".  Remove the incomplete copies.
