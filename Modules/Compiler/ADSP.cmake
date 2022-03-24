@@ -8,7 +8,7 @@ macro(__compiler_adsp lang)
   set(CMAKE_${lang}_LINKER_WRAPPER_FLAG "-flags-link" " ")
   set(CMAKE_${lang}_LINKER_WRAPPER_FLAG_SEP ",")
 
-  set(_CMAKE_${lang}_ADSP_FLAGS "-proc=${CMAKE_SYSTEM_PROCESSOR}")
+  set(_CMAKE_${lang}_ADSP_FLAGS "-proc=${CMAKE_ADSP_PROCESSOR}")
 
   set(CMAKE_${lang}_COMPILE_OBJECT
     "<CMAKE_${lang}_COMPILER> ${_CMAKE_${lang}_ADSP_FLAGS} <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT> -c <SOURCE>")
