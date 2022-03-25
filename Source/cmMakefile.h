@@ -674,11 +674,18 @@ public:
                     bool copyonly, bool atOnly, bool escapeQuotes,
                     mode_t permissions = 0, cmNewLineStyle = cmNewLineStyle());
 
+  enum class CommandMissingFromStack
+  {
+    No,
+    Yes,
+  };
+
   /**
    * Print a command's invocation
    */
-  void PrintCommandTrace(cmListFileFunction const& lff,
-                         cm::optional<std::string> const& deferId = {}) const;
+  void PrintCommandTrace(
+    cmListFileFunction const& lff, cmListFileBacktrace const& bt,
+    CommandMissingFromStack missing = CommandMissingFromStack::No) const;
 
   /**
    * Set a callback that is invoked whenever ExecuteCommand is called.

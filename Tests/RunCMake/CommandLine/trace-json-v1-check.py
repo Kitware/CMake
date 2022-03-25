@@ -56,6 +56,11 @@ required_traces = [
         'cmd': 'message',
         'frame': 3,
         'global_frame': 6 if expand else 5
+    },
+    {
+        'cmd': 'else',
+        'global_frame': 4 if expand else 3,
+        'line': 3
     }
 ]
 
@@ -98,4 +103,7 @@ with open(trace_file, 'r') as fp:
             if subset == j:
                 required_traces.remove(j)
 
-assert not required_traces
+assert not required_traces, (
+    "The following traces were expected to be part of the "
+    "output but weren't", required_traces
+)
