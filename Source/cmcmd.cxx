@@ -1368,6 +1368,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
       std::vector<std::string> files;
       std::string mtime;
       std::string format;
+      cmSystemTools::cmTarExtractTimestamps extractTimestamps =
+        cmSystemTools::cmTarExtractTimestamps::Yes;
       cmSystemTools::cmTarCompression compress =
         cmSystemTools::TarCompressNone;
       int nCompress = 0;
@@ -1393,6 +1395,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
                                    format);
               return 1;
             }
+          } else if (arg == "--touch") {
+            extractTimestamps = cmSystemTools::cmTarExtractTimestamps::No;
           } else {
             cmSystemTools::Error("Unknown option to -E tar: " + arg);
             return 1;
@@ -1464,7 +1468,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
           return 1;
         }
       } else if (action == cmSystemTools::TarActionExtract) {
-        if (!cmSystemTools::ExtractTar(outFile, files, verbose)) {
+        if (!cmSystemTools::ExtractTar(outFile, files, extractTimestamps,
+                                       verbose)) {
           cmSystemTools::Error("Problem extracting tar: " + outFile);
           return 1;
         }

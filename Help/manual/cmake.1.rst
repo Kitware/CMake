@@ -948,6 +948,12 @@ Available commands are:
 
     Specify modification time recorded in tarball entries.
 
+  ``--touch``
+    .. versionadded:: 3.24
+
+    Use current local timestamp instead of extracting file timestamps
+    from the archive.
+
   ``--``
     .. versionadded:: 3.1
 

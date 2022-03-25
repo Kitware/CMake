@@ -417,6 +417,12 @@ public:
     TarCompressNone
   };
 
+  enum class cmTarExtractTimestamps
+  {
+    Yes,
+    No
+  };
+
   static bool ListTar(const std::string& outFileName,
                       const std::vector<std::string>& files, bool verbose);
   static bool CreateTar(const std::string& outFileName,
@@ -426,7 +432,9 @@ public:
                         std::string const& format = std::string(),
                         int compressionLevel = 0);
   static bool ExtractTar(const std::string& inFileName,
-                         const std::vector<std::string>& files, bool verbose);
+                         const std::vector<std::string>& files,
+                         cmTarExtractTimestamps extractTimestamps,
+                         bool verbose);
   // This should be called first thing in main
   // it will keep child processes from inheriting the
   // stdin and stdout of this process.  This is important
