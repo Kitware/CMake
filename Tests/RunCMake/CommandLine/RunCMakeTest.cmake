@@ -52,7 +52,8 @@ run_cmake_command(G_no-arg ${CMAKE_COMMAND} -B DummyBuildDir -G)
 run_cmake_command(G_bad-arg ${CMAKE_COMMAND} -B DummyBuildDir -G NoSuchGenerator)
 run_cmake_command(P_no-arg ${CMAKE_COMMAND} -P)
 run_cmake_command(P_no-file ${CMAKE_COMMAND} -P nosuchscriptfile.cmake)
-run_cmake_command(P_arbitrary_args ${CMAKE_COMMAND} -P "${RunCMake_SOURCE_DIR}/P_arbitrary_args.cmake" -- -DFOO -S -B)
+run_cmake_command(P_arbitrary_args ${CMAKE_COMMAND} -P "${RunCMake_SOURCE_DIR}/P_arbitrary_args.cmake" -- -DFOO -S -B --fresh)
+run_cmake_command(P_fresh ${CMAKE_COMMAND} -P "${RunCMake_SOURCE_DIR}/P_fresh.cmake" --fresh)
 
 run_cmake_command(build-no-dir
   ${CMAKE_COMMAND} --build)
@@ -211,6 +212,22 @@ message(STATUS "CMAKE_BINARY_DIR='${CMAKE_BINARY_DIR}'")
   run_cmake_with_options(ExplicitDirs-C_buildsrcdir -B DummyBuildDir ${RunCMake_SOURCE_DIR}/C_buildsrcdir/src -C ${RunCMake_TEST_BINARY_DIR}/initial-cache.txt)
 endfunction()
 run_ExplicitDirs()
+
+function(run_Fresh)
+  set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/Fresh-build")
+
+  set(RunCMake_TEST_VARIANT_DESCRIPTION "-empty")
+  run_cmake_with_options(Fresh --fresh -DFIRST=ON)
+  set(RunCMake_TEST_NO_CLEAN 1)
+
+  set(RunCMake_TEST_VARIANT_DESCRIPTION "-reconfig")
+  run_cmake_with_options(Fresh --fresh)
+
+  set(RunCMake_TEST_VARIANT_DESCRIPTION "-src-from-cache")
+  set(RunCMake_TEST_NO_SOURCE_DIR 1)
+  run_cmake_with_options(Fresh --fresh "${RunCMake_TEST_BINARY_DIR}")
+endfunction()
+run_Fresh()
 
 function(run_Toolchain)
   set(RunCMake_TEST_NO_SOURCE_DIR 1)
