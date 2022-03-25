@@ -803,6 +803,7 @@ if(CMake_TEST_FindMatlab OR CMake_TEST_FindMatlab_MCR OR (NOT "${CMake_TEST_Find
     endif()
 
   add_RunCMake_test(FindMatlab ${FindMatlab_additional_test_options})
+  set_property(TEST RunCMake.FindMatlab APPEND PROPERTY LABELS "Matlab")
 endif()
 
 add_executable(pseudo_emulator pseudo_emulator.c)
