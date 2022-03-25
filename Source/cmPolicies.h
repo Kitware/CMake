@@ -390,7 +390,10 @@ class cmMakefile;
          "Compiler id for MCST LCC compilers is now LCC, not GNU.", 3, 23, 0, \
          cmPolicies::WARN)                                                    \
   SELECT(POLICY, CMP0130, "while() diagnoses condition evaluation errors.",   \
-         3, 24, 0, cmPolicies::WARN)
+         3, 24, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0131,                                                     \
+         "LINK_LIBRARIES supports the LINK_ONLY generator expression.", 3,    \
+         24, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \
@@ -426,7 +429,8 @@ class cmMakefile;
   F(CMP0108)                                                                  \
   F(CMP0112)                                                                  \
   F(CMP0113)                                                                  \
-  F(CMP0119)
+  F(CMP0119)                                                                  \
+  F(CMP0131)
 
 /** \class cmPolicies
  * \brief Handles changes in CMake behavior and policies

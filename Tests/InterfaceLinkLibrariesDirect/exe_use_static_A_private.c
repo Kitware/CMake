@@ -9,15 +9,15 @@
 #endif
 
 extern void static_A_private(void);
-extern void not_direct_from_A(void);
-extern void not_direct_from_A_for_exe(void);
+extern void direct_from_A(void);
+extern void direct_from_A_for_exe(void);
 extern void not_direct_from_A_optional(void);
 
 int main(void)
 {
   static_A_private();
-  not_direct_from_A();
-  not_direct_from_A_for_exe();
+  direct_from_A();
+  direct_from_A_for_exe();
   not_direct_from_A_optional();
   return 0;
 }
