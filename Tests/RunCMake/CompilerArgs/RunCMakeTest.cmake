@@ -31,6 +31,11 @@ function(run_compiler_env lang)
   run_cmake(${lang})
   set(RunCMake_TEST_NO_CLEAN 1)
   run_cmake_command(${lang}-Build ${CMAKE_COMMAND} --build . ${verbose_args})
+
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}/CMakeFiles")
+  set(RunCMake_TEST_VARIANT_DESCRIPTION "-env-cached")
+  run_cmake(${lang})
+  run_cmake_command(${lang}-Build ${CMAKE_COMMAND} --build . ${verbose_args})
 endfunction()
 
 function(run_compiler_tc lang)
@@ -41,6 +46,11 @@ function(run_compiler_tc lang)
   set(RunCMake_TEST_VARIANT_DESCRIPTION "-tc")
   run_cmake(${lang})
   set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(${lang}-Build ${CMAKE_COMMAND} --build . ${verbose_args})
+
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}/CMakeFiles")
+  set(RunCMake_TEST_VARIANT_DESCRIPTION "-tc-cached")
+  run_cmake(${lang})
   run_cmake_command(${lang}-Build ${CMAKE_COMMAND} --build . ${verbose_args})
 endfunction()
 
