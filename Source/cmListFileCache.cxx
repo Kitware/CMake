@@ -470,17 +470,6 @@ cmListFileBacktrace::cmListFileBacktrace(std::shared_ptr<Entry const> top)
 {
 }
 
-cmListFileBacktrace cmListFileBacktrace::Push(std::string const& file) const
-{
-  // We are entering a file-level scope but have not yet reached
-  // any specific line or command invocation within it.  This context
-  // is useful to print when it is at the top but otherwise can be
-  // skipped during call stack printing.
-  cmListFileContext lfc;
-  lfc.FilePath = file;
-  return this->Push(lfc);
-}
-
 cmListFileBacktrace cmListFileBacktrace::Push(
   cmListFileContext const& lfc) const
 {

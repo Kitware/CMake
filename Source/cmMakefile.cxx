@@ -491,7 +491,8 @@ cmMakefile::IncludeScope::IncludeScope(cmMakefile* mf,
   , CheckCMP0011(false)
   , ReportError(true)
 {
-  this->Makefile->Backtrace = this->Makefile->Backtrace.Push(filenametoread);
+  this->Makefile->Backtrace = this->Makefile->Backtrace.Push(
+    cmListFileContext::FromListFilePath(filenametoread));
 
   this->Makefile->PushFunctionBlockerBarrier();
 
@@ -624,7 +625,8 @@ public:
     : Makefile(mf)
     , ReportError(true)
   {
-    this->Makefile->Backtrace = this->Makefile->Backtrace.Push(filenametoread);
+    this->Makefile->Backtrace = this->Makefile->Backtrace.Push(
+      cmListFileContext::FromListFilePath(filenametoread));
 
     this->Makefile->StateSnapshot =
       this->Makefile->GetState()->CreateInlineListFileSnapshot(
@@ -1587,7 +1589,8 @@ void cmMakefile::Configure()
   // Add the bottom of all backtraces within this directory.
   // We will never pop this scope because it should be available
   // for messages during the generate step too.
-  this->Backtrace = this->Backtrace.Push(currentStart);
+  this->Backtrace =
+    this->Backtrace.Push(cmListFileContext::FromListFilePath(currentStart));
 
   BuildsystemFileScope scope(this);
 

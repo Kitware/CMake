@@ -128,6 +128,17 @@ public:
   {
   }
 
+  static cmListFileContext FromListFilePath(std::string const& filePath)
+  {
+    // We are entering a file-level scope but have not yet reached
+    // any specific line or command invocation within it.  This context
+    // is useful to print when it is at the top but otherwise can be
+    // skipped during call stack printing.
+    cmListFileContext lfc;
+    lfc.FilePath = filePath;
+    return lfc;
+  }
+
   static cmListFileContext FromListFileFunction(
     cmListFileFunction const& lff, std::string const& fileName,
     cm::optional<std::string> deferId = {})
@@ -153,9 +164,6 @@ class cmListFileBacktrace
 public:
   // Default-constructed backtrace is empty.
   cmListFileBacktrace() = default;
-
-  // Get a backtrace with the given file scope added to the top.
-  cmListFileBacktrace Push(std::string const& file) const;
 
   // Get a backtrace with the given call context added to the top.
   cmListFileBacktrace Push(cmListFileContext const& lfc) const;
