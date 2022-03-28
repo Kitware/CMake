@@ -191,8 +191,6 @@ void cmMakefileExecutableTargetGenerator::WriteNvidiaDeviceExecutableRule(
     this->CreateObjectLists(useLinkScript, false, useResponseFileForObjects,
                             buildObjs, depends, false);
 
-    std::string const& aixExports = this->GetAIXExports(this->GetConfigName());
-
     cmRulePlaceholderExpander::RuleVariables vars;
     std::string objectDir = this->GeneratorTarget->GetSupportDirectory();
 
@@ -211,7 +209,6 @@ void cmMakefileExecutableTargetGenerator::WriteNvidiaDeviceExecutableRule(
                                                   cmOutputConverter::SHELL);
 
     vars.Language = linkLanguage.c_str();
-    vars.AIXExports = aixExports.c_str();
     vars.Objects = buildObjs.c_str();
     vars.ObjectDir = objectDir.c_str();
     vars.Target = target.c_str();
@@ -521,11 +518,14 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
     std::string manifests = this->GetManifests(this->GetConfigName());
 
+    std::string const& aixExports = this->GetAIXExports(this->GetConfigName());
+
     cmRulePlaceholderExpander::RuleVariables vars;
     vars.CMTargetName = this->GeneratorTarget->GetName().c_str();
     vars.CMTargetType =
       cmState::GetTargetTypeName(this->GeneratorTarget->GetType()).c_str();
     vars.Language = linkLanguage.c_str();
+    vars.AIXExports = aixExports.c_str();
     vars.Objects = buildObjs.c_str();
     std::string objectDir = this->GeneratorTarget->GetSupportDirectory();
 
