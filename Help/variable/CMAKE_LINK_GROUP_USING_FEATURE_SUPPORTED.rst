@@ -10,5 +10,4 @@ linker language.
 .. note::
 
   This variable is evaluated if, and only if, the variable
-  :variable:`CMAKE_<LANG>_LINK_GROUP_USING_<FEATURE>_SUPPORTED` evaluates to
-  ``FALSE``.
+  :variable:`CMAKE_<LANG>_LINK_GROUP_USING_<FEATURE>_SUPPORTED` is not defined.

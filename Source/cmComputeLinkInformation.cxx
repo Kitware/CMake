@@ -803,7 +803,9 @@ bool cmComputeLinkInformation::AddLibraryFeature(std::string const& feature)
     cmStrCat("CMAKE_", this->LinkLanguage, "_LINK_LIBRARY_USING_", feature);
   cmValue featureSupported =
     this->Makefile->GetDefinition(cmStrCat(featureName, "_SUPPORTED"));
-  if (!featureSupported.IsOn()) {
+  if (!featureSupported) {
+    // language specific variable is not defined, fallback to the more generic
+    // one
     featureName = cmStrCat("CMAKE_LINK_LIBRARY_USING_", feature);
     featureSupported =
       this->Makefile->GetDefinition(cmStrCat(featureName, "_SUPPORTED"));
@@ -965,7 +967,9 @@ cmComputeLinkInformation::GetGroupFeature(std::string const& feature)
     cmStrCat("CMAKE_", this->LinkLanguage, "_LINK_GROUP_USING_", feature);
   cmValue featureSupported =
     this->Makefile->GetDefinition(cmStrCat(featureName, "_SUPPORTED"));
-  if (!featureSupported.IsOn()) {
+  if (!featureSupported) {
+    // language specific variable is not defined, fallback to the more generic
+    // one
     featureName = cmStrCat("CMAKE_LINK_GROUP_USING_", feature);
     featureSupported =
       this->Makefile->GetDefinition(cmStrCat(featureName, "_SUPPORTED"));

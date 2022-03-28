@@ -20,6 +20,9 @@ set(CMAKE_C_LINK_GROUP_USING_feat1_SUPPORTED TRUE)
 set(CMAKE_C_LINK_LIBRARY_USING_feat1 "--LIBFLAG<LIBRARY>")
 set(CMAKE_C_LINK_LIBRARY_USING_feat1_SUPPORTED TRUE)
 
+set(CMAKE_C_LINK_GROUP_USING_feat2 "--START_GROUP" "--END_GROUP")
+set(CMAKE_LINK_GROUP_USING_feat2 "--START_GROUP" "--END_GROUP")
+set(CMAKE_LINK_GROUP_USING_feat2_SUPPORTED TRUE)
 
 add_library(LinkGroup_simple1 SHARED lib.c)
 target_link_libraries(LinkGroup_simple1 PRIVATE "$<LINK_GROUP:feat1,base1,base2>")
@@ -29,6 +32,10 @@ add_library(base3 SHARED base.c)
 target_link_libraries(base3 PUBLIC base1)
 add_library(LinkGroup_simple2 SHARED lib.c)
 target_link_libraries(LinkGroup_simple2 PRIVATE "$<LINK_GROUP:feat1,base2,base3>")
+
+
+add_library(LinkGroup_multiple-definitions SHARED lib.c)
+target_link_libraries(LinkGroup_multiple-definitions PRIVATE "$<LINK_GROUP:feat2,base1,base2>")
 
 
 add_library(base4 SHARED base.c)

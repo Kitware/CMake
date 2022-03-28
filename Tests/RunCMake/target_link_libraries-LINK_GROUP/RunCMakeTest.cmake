@@ -42,6 +42,7 @@ if ((RunCMake_GENERATOR MATCHES "Makefiles|Ninja|Xcode"
 
   run_cmake_target(LINK_GROUP simple1 LinkGroup_simple1)
   run_cmake_target(LINK_GROUP simple2 LinkGroup_simple2)
+  run_cmake_target(LINK_GROUP multiple-definitions LinkGroup_multiple-definitions)
   run_cmake_target(LINK_GROUP multiple-groups LinkGroup_multiple-groups)
   run_cmake_target(LINK_GROUP group-and-single LinkGroup_group-and-single)
   run_cmake_target(LINK_GROUP with-LINK_LIBRARY LinkGroup_with-LINK_LIBRARY)
