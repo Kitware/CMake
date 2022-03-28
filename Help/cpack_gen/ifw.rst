@@ -24,12 +24,12 @@ Microsoft Windows, and macOS.
 To make use of this generator, QtIFW needs to be installed.
 The :module:`CPackIFW` module looks for the location of the
 QtIFW command-line utilities, and defines several commands to
-control the behavior of this generator.
+control the behavior of this generator. See `Hints for Finding QtIFW`_.
 
 Variables
 ^^^^^^^^^
 
-You can use the following variables to change behavior of CPack ``IFW``
+You can use the following variables to change the behavior of the CPack ``IFW``
 generator.
 
 Debug
@@ -48,12 +48,12 @@ Package
 .. variable:: CPACK_IFW_PACKAGE_TITLE
 
  Name of the installer as displayed on the title bar.
- By default used :variable:`CPACK_PACKAGE_DESCRIPTION_SUMMARY`.
+ If not specified, it defaults to :variable:`CPACK_PACKAGE_DESCRIPTION_SUMMARY`.
 
 .. variable:: CPACK_IFW_PACKAGE_PUBLISHER
 
  Publisher of the software (as shown in the Windows Control Panel).
- By default used :variable:`CPACK_PACKAGE_VENDOR`.
+ If not specified, it defaults to :variable:`CPACK_PACKAGE_VENDOR`.
 
 .. variable:: CPACK_IFW_PRODUCT_URL
 
@@ -61,83 +61,93 @@ Package
 
 .. variable:: CPACK_IFW_PACKAGE_ICON
 
- Filename for a custom installer icon. The actual file is '.icns' (macOS),
- '.ico' (Windows). No functionality on Unix.
+ Filename for a custom installer icon. It must be an absolute path.
+ This should be a ``.icns`` file on macOS and a ``.ico`` file on Windows.
+ It is ignored on other platforms.
 
 .. variable:: CPACK_IFW_PACKAGE_WINDOW_ICON
 
  Filename for a custom window icon in PNG format for the Installer
- application.
+ application. It must be an absolute path.
 
 .. variable:: CPACK_IFW_PACKAGE_LOGO
 
- Filename for a logo is used as QWizard::LogoPixmap.
+ Filename for a logo image in PNG format, used as ``QWizard::LogoPixmap``.
+ It must be an absolute path.
 
 .. variable:: CPACK_IFW_PACKAGE_WATERMARK
 
  .. versionadded:: 3.8
 
- Filename for a watermark is used as QWizard::WatermarkPixmap.
+ Filename for a watermark image in PNG format, used as
+ ``QWizard::WatermarkPixmap``. It must be an absolute path.
 
 .. variable:: CPACK_IFW_PACKAGE_BANNER
 
  .. versionadded:: 3.8
 
- Filename for a banner is used as QWizard::BannerPixmap.
+ Filename for a banner image in PNG format, used as ``QWizard::BannerPixmap``.
+ It must be an absolute path.
 
 .. variable:: CPACK_IFW_PACKAGE_BACKGROUND
 
  .. versionadded:: 3.8
 
- Filename for an image used as QWizard::BackgroundPixmap (only used by MacStyle).
+ Filename for a background image in PNG format, used as
+ ``QWizard::BackgroundPixmap`` (only used by ``MacStyle``). It must be an
+ absolute path.
 
 .. variable:: CPACK_IFW_PACKAGE_WIZARD_STYLE
 
  .. versionadded:: 3.8
 
- Wizard style to be used ("Modern", "Mac", "Aero" or "Classic").
+ Wizard style to be used (``Modern``, ``Mac``, ``Aero`` or ``Classic``).
 
 .. variable:: CPACK_IFW_PACKAGE_WIZARD_DEFAULT_WIDTH
 
  .. versionadded:: 3.8
 
- Default width of the wizard in pixels. Setting a banner image will override this.
+ Default width of the wizard in pixels. Setting a banner image will override
+ this.
 
 .. variable:: CPACK_IFW_PACKAGE_WIZARD_DEFAULT_HEIGHT
 
  .. versionadded:: 3.8
 
- Default height of the wizard in pixels. Setting a watermark image will override this.
+ Default height of the wizard in pixels. Setting a watermark image will
+ override this.
 
 .. variable:: CPACK_IFW_PACKAGE_WIZARD_SHOW_PAGE_LIST
 
  .. versionadded:: 3.20
 
- Set to ``OFF`` if the widget listing installer pages on the left side of the wizard should not be shown.
+ Set to ``OFF`` if the widget listing installer pages on the left side of the
+ wizard should not be shown.
 
- It is ``ON`` by default, but will only have an effect if using QtIFW 4.0 or later.
+ It is ``ON`` by default, but will only have an effect if using QtIFW 4.0 or
+ later.
 
 .. variable:: CPACK_IFW_PACKAGE_TITLE_COLOR
 
  .. versionadded:: 3.8
 
- Color of the titles and subtitles (takes an HTML color code, such as "#88FF33").
+ Color of the titles and subtitles (takes an HTML color code, such as
+ ``#88FF33``).
 
 .. variable:: CPACK_IFW_PACKAGE_STYLE_SHEET
 
  .. versionadded:: 3.15
 
- Filename for a stylesheet.
+ Filename for a stylesheet. It must be an absolute path.
 
 .. variable:: CPACK_IFW_TARGET_DIRECTORY
 
  Default target directory for installation.
- By default used
- "@ApplicationsDir@/:variable:`CPACK_PACKAGE_INSTALL_DIRECTORY`"
- (variables embedded in '@' are expanded by the
- `QtIFW scripting engine <https://doc.qt.io/qtinstallerframework/scripting.html>`_).
-
- You can use predefined variables.
+ If :variable:`CPACK_PACKAGE_INSTALL_DIRECTORY` is set, this defaults to
+ ``@ApplicationsDir@/${CPACK_PACKAGE_INSTALL_DIRECTORY}``. If that variable
+ isn't set either, the default used is ``@RootDir@/usr/local``.
+ Predefined variables of the form ``@...@`` are expanded by the
+ `QtIFW scripting engine <https://doc.qt.io/qtinstallerframework/scripting.html>`_.
 
 .. variable:: CPACK_IFW_ADMIN_TARGET_DIRECTORY
 
@@ -155,29 +165,28 @@ Package
 
 .. variable:: CPACK_IFW_PACKAGE_GROUP
 
- The group, which will be used to configure the root package
+ The group, which will be used to configure the root package.
 
 .. variable:: CPACK_IFW_PACKAGE_NAME
 
- The root package name, which will be used if configuration group is not
- specified
+ The root package name, which will be used if the configuration group is not
+ specified.
 
 .. variable:: CPACK_IFW_PACKAGE_START_MENU_DIRECTORY
 
  .. versionadded:: 3.3
 
  Name of the default program group for the product in the Windows Start menu.
-
- By default used :variable:`CPACK_IFW_PACKAGE_NAME`.
+ If not specified, it defaults to :variable:`CPACK_IFW_PACKAGE_NAME`.
 
 .. variable:: CPACK_IFW_PACKAGE_MAINTENANCE_TOOL_NAME
 
  .. versionadded:: 3.3
 
  Filename of the generated maintenance tool.
- The platform-specific executable file extension is appended.
+ The platform-specific executable file extension will be appended.
 
- By default used QtIFW defaults (``maintenancetool``).
+ If not specified, QtIFW provides a default name (``maintenancetool``).
 
 .. variable:: CPACK_IFW_PACKAGE_MAINTENANCE_TOOL_INI_FILE
 
@@ -185,23 +194,15 @@ Package
 
  Filename for the configuration of the generated maintenance tool.
 
- By default used QtIFW defaults (``maintenancetool.ini``).
+ If not specified, QtIFW uses a default file name (``maintenancetool.ini``).
 
 .. variable:: CPACK_IFW_PACKAGE_ALLOW_NON_ASCII_CHARACTERS
 
  .. versionadded:: 3.3
 
  Set to ``ON`` if the installation path can contain non-ASCII characters.
-
- Is ``ON`` for QtIFW less 2.0 tools.
-
-.. variable:: CPACK_IFW_PACKAGE_DISABLE_COMMAND_LINE_INTERFACE
-
- .. versionadded:: 3.23
-
- Set to ``ON`` if command line interface features should be disabled.
-
- Is ``OFF`` by default, but will only have an effect if using QtIFW 4.0 or later.
+ Only supported for QtIFW 2.0 and later. Older QtIFW versions will always
+ allow non-ASCII characters.
 
 .. variable:: CPACK_IFW_PACKAGE_ALLOW_SPACE_IN_PATH
 
@@ -210,6 +211,14 @@ Package
  Set to ``OFF`` if the installation path cannot contain space characters.
 
  Is ``ON`` for QtIFW less 2.0 tools.
+
+.. variable:: CPACK_IFW_PACKAGE_DISABLE_COMMAND_LINE_INTERFACE
+
+ .. versionadded:: 3.23
+
+ Set to ``ON`` if command line interface features should be disabled.
+ It is ``OFF`` by default and will only have an effect if using QtIFW 4.0 or
+ later.
 
 .. variable:: CPACK_IFW_PACKAGE_CONTROL_SCRIPT
 
@@ -221,10 +230,11 @@ Package
 
  .. versionadded:: 3.7
 
- List of additional resources ('.qrc' files) to include in the installer
- binary.
+ List of additional resources (``.qrc`` files) to include in the installer
+ binary. They should be specified as absolute paths and no two resource files
+ can have the same file name.
 
- You can use :command:`cpack_ifw_add_package_resources` command to resolve
+ You can use the :command:`cpack_ifw_add_package_resources` command to resolve
  relative paths.
 
 .. variable:: CPACK_IFW_PACKAGE_FILE_EXTENSION
@@ -234,44 +244,47 @@ Package
  The target binary extension.
 
  On Linux, the name of the target binary is automatically extended with
- '.run', if you do not specify the extension.
+ ``.run``, if you do not specify the extension.
 
  On Windows, the target is created as an application with the extension
- '.exe', which is automatically added, if not supplied.
+ ``.exe``, which is automatically added, if not supplied.
 
  On Mac, the target is created as an DMG disk image with the extension
- '.dmg', which is automatically added, if not supplied.
+ ``.dmg``, which is automatically added, if not supplied.
 
 .. variable:: CPACK_IFW_REPOSITORIES_ALL
 
  The list of remote repositories.
 
  The default value of this variable is computed by CPack and contains
- all repositories added with command :command:`cpack_ifw_add_repository`
- or updated with command :command:`cpack_ifw_update_repository`.
+ all repositories added with :command:`cpack_ifw_add_repository`
+ or updated with :command:`cpack_ifw_update_repository`.
 
 .. variable:: CPACK_IFW_DOWNLOAD_ALL
 
- If this is ``ON`` all components will be downloaded.
- By default is ``OFF`` or used value
- from ``CPACK_DOWNLOAD_ALL`` if set
+ If this is ``ON``, all components will be downloaded. If not set, the
+ behavior is determined by whether :command:`cpack_configure_downloads` has
+ been called with the ``ALL`` option or not.
 
 .. variable:: CPACK_IFW_PACKAGE_PRODUCT_IMAGES
 
  .. versionadded:: 3.23
 
- A list of images to be shown on the ``PerformInstallationPage``.
+ A list of images to be shown on the ``PerformInstallationPage``. These
+ must be absolute paths and the images must be in PNG format.
 
- This feature is available for QtIFW 4.0.0 or newer.
+ This feature is available for QtIFW 4.0.0 and later.
 
 .. variable:: CPACK_IFW_PACKAGE_RUN_PROGRAM
 
  .. versionadded:: 3.23
 
- Command executed after the installer is done if the user accepts the action.
- Provide the full path to the application.
+ Command executed after the installer is finished, if the user accepts the
+ action. Provide the full path to the application, as found when installed.
+ This typically means the path should begin with the QtIFW predefined variable
+ ``@TargetDir@``.
 
- This feature is available for QtIFW 4.0.0 and newer.
+ This feature is available for QtIFW 4.0.0 and later.
 
 .. variable:: CPACK_IFW_PACKAGE_RUN_PROGRAM_ARGUMENTS
 
@@ -280,7 +293,7 @@ Package
  List of arguments passed to the program specified in
  :variable:`CPACK_IFW_PACKAGE_RUN_PROGRAM`.
 
- This feature is available for QtIFW 4.0.0 and newer.
+ This feature is available for QtIFW 4.0.0 and later.
 
 .. variable:: CPACK_IFW_PACKAGE_RUN_PROGRAM_DESCRIPTION
 
@@ -288,16 +301,17 @@ Package
 
  Text shown next to the check box for running the program after the
  installation. If :variable:`CPACK_IFW_PACKAGE_RUN_PROGRAM` is set but no
- description provided, the UI will display ``Run <Name> now``. instead.
+ description is provided, QtIFW will use a default message like
+ ``Run <Name> now``.
 
- This feature is available for QtIFW 4.0.0 and newer.
+ This feature is available for QtIFW 4.0.0 and later.
 
 .. variable:: CPACK_IFW_PACKAGE_SIGNING_IDENTITY
 
- .. versionadded: 3.23
+ .. versionadded:: 3.23
 
  Allows specifying a code signing identity to be used for signing the generated
- app bundle. Only available on macOS.
+ app bundle. Only available on macOS, ignored on other platforms.
 
 .. variable:: CPACK_IFW_ARCHIVE_FORMAT
 
@@ -317,27 +331,30 @@ Package
   If the Qt Installer Framework tools were built without libarchive support,
   only ``7z`` format is supported.
 
- This feature is available for QtIFW 4.2.0 and newer.
+ This feature is available for QtIFW 4.2.0 and later.
 
 .. variable:: CPACK_IFW_ARCHIVE_COMPRESSION
 
  .. versionadded:: 3.23
 
- Archive compression level. Defaults to 5 (*Normal compression*).
+ Archive compression level. The allowable values are:
 
   * 0 (*No compression*)
-  * 1 (*Fastest compressing*)
-  * 3 (*Fast compressing*)
-  * 5 (*Normal compressing*)
-  * 7 (*Maximum compressing*)
-  * 9 (*Ultra compressing*)
+  * 1 (*Fastest compression*)
+  * 3 (*Fast compression*)
+  * 5 (*Normal compression*)
+  * 7 (*Maximum compression*)
+  * 9 (*Ultra compression*)
+
+ If this variable is not set, QtIFW will use a default compression level,
+ which will typically be 5 (*Normal compression*).
 
  .. note::
 
   Some formats do not support all the possible values. For example ``zip``
   compression only supports values from 1 to 7.
 
- This feature is available for QtIFW 4.2.0 and newer.
+ This feature is available for QtIFW 4.2.0 and later.
 
 Components
 """"""""""
@@ -348,16 +365,17 @@ Components
 
 .. variable:: CPACK_IFW_PACKAGES_DIRECTORIES
 
- Additional prepared packages dirs that will be used to resolve
+ Additional prepared packages directories that will be used to resolve
  dependent components.
 
 .. variable:: CPACK_IFW_REPOSITORIES_DIRECTORIES
 
  .. versionadded:: 3.10
 
- Additional prepared repository dirs that will be used to resolve and
- repack dependent components. This feature available only
- since QtIFW 3.1.
+ Additional prepared repository directories that will be used to resolve and
+ repack dependent components.
+
+ This feature is available for QtIFW 3.1 and later.
 
 QtIFW Tools
 """""""""""
@@ -366,10 +384,11 @@ QtIFW Tools
 
  .. versionadded:: 3.3
 
- The version of used QtIFW tools.
+ The version of the QtIFW tools that will be used. This variable is set
+ by the :module:`CPackIFW` module.
 
 The following variables provide the locations of the QtIFW
-command-line tools as discovered by the module :module:`CPackIFW`.
+command-line tools as discovered by the :module:`CPackIFW` module.
 These variables are cached, and may be configured if needed.
 
 .. variable:: CPACK_IFW_ARCHIVEGEN_EXECUTABLE
@@ -397,30 +416,33 @@ These variables are cached, and may be configured if needed.
 Hints for Finding QtIFW
 """""""""""""""""""""""
 
-Generally, the CPack ``IFW`` generator automatically finds QtIFW tools,
-but if you don't use a default path for installation of the QtIFW tools,
-the path may be specified in either a CMake or an environment variable:
+Generally, the CPack ``IFW`` generator automatically finds QtIFW tools.
+The following (in order of precedence) can also be set to augment the
+locations normally searched by :command:`find_program`:
 
 .. variable:: CPACK_IFW_ROOT
 
- .. versionadded:: 3.9
+  .. versionadded:: 3.9
 
- An CMake variable which specifies the location of the QtIFW tool suite.
+  CMake variable
 
- The variable will be cached in the ``CPackConfig.cmake`` file and used at
- CPack runtime.
+.. envvar:: CPACK_IFW_ROOT
+
+  .. versionadded:: 3.9
+
+  Environment variable
 
 .. variable:: QTIFWDIR
 
- An environment variable which specifies the location of the QtIFW tool
- suite.
+  CMake variable
+
+.. envvar:: QTIFWDIR
+
+  Environment variable
 
 .. note::
-  The specified path should not contain "bin" at the end
-  (for example: "D:\\DevTools\\QtIFW2.0.5").
-
-The :variable:`CPACK_IFW_ROOT` variable has a higher priority and overrides
-the value of the :variable:`QTIFWDIR` variable.
+  The specified path should not contain ``bin`` at the end
+  (for example: ``D:\\DevTools\\QtIFW2.0.5``).
 
 Other Settings
 ^^^^^^^^^^^^^^
@@ -428,7 +450,7 @@ Other Settings
 Online installer
 """"""""""""""""
 
-By default, this generator generates an *offline installer*. This means that
+By default, this generator generates an *offline installer*. This means
 that all packaged files are fully contained in the installer executable.
 
 In contrast, an *online installer* will download some or all components from
@@ -458,14 +480,13 @@ CMake script. This is an optional feature.
 
 Installers created by QtIFW tools have built-in support for
 internationalization and many phrases are localized to many languages,
-but this does not apply to the description of the your components and groups
-that will be distributed.
+but this does not apply to the description of your components and groups.
 
 Localization of the description of your components and groups is useful for
 users of your installers.
 
-A localized variable or argument can contain a single default value, and a
-set of pairs the name of the locale and the localized value.
+A localized variable or argument can contain a single default value, and
+after that a set of pairs with the name of the locale and the localized value.
 
 For example:
 
@@ -483,16 +504,16 @@ See Also
 Qt Installer Framework Manual:
 
 * Index page:
-  http://doc.qt.io/qtinstallerframework/index.html
+  https://doc.qt.io/qtinstallerframework/index.html
 
 * Component Scripting:
-  http://doc.qt.io/qtinstallerframework/scripting.html
+  https://doc.qt.io/qtinstallerframework/scripting.html
 
 * Predefined Variables:
-  http://doc.qt.io/qtinstallerframework/scripting.html#predefined-variables
+  https://doc.qt.io/qtinstallerframework/scripting.html#predefined-variables
 
 * Promoting Updates:
-  http://doc.qt.io/qtinstallerframework/ifw-updates.html
+  https://doc.qt.io/qtinstallerframework/ifw-updates.html
 
 Download Qt Installer Framework for your platform from Qt site:
- http://download.qt.io/official_releases/qt-installer-framework
+ https://download.qt.io/official_releases/qt-installer-framework
