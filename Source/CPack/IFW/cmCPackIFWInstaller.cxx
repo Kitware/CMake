@@ -26,7 +26,7 @@ void cmCPackIFWInstaller::printSkippedOptionWarning(
   cmCPackIFWLogger(
     WARNING,
     "Option "
-      << optionName << " is set to \"" << optionValue
+      << optionName << " contains the value \"" << optionValue
       << "\" but will be skipped because the specified file does not exist."
       << std::endl);
 }
@@ -276,7 +276,12 @@ void cmCPackIFWInstaller::ConfigureFromOptions()
   // Control script
   if (cmValue optIFW_CONTROL_SCRIPT =
         this->GetOption("CPACK_IFW_PACKAGE_CONTROL_SCRIPT")) {
-    this->ControlScript = *optIFW_CONTROL_SCRIPT;
+    if (!cmSystemTools::FileExists(optIFW_CONTROL_SCRIPT)) {
+      this->printSkippedOptionWarning("CPACK_IFW_PACKAGE_CONTROL_SCRIPT",
+                                      optIFW_CONTROL_SCRIPT);
+    } else {
+      this->ControlScript = *optIFW_CONTROL_SCRIPT;
+    }
   }
 
   // Resources
@@ -284,6 +289,13 @@ void cmCPackIFWInstaller::ConfigureFromOptions()
         this->GetOption("CPACK_IFW_PACKAGE_RESOURCES")) {
     this->Resources.clear();
     cmExpandList(optIFW_PACKAGE_RESOURCES, this->Resources);
+    for (const auto& file : this->Resources) {
+      if (!cmSystemTools::FileExists(file)) {
+        // The warning will say skipped, but there will later be a hard error
+        // when the binarycreator tool tries to read the missing file.
+        this->printSkippedOptionWarning("CPACK_IFW_PACKAGE_RESOURCES", file);
+      }
+    }
   }
 
   // ProductImages
@@ -291,6 +303,14 @@ void cmCPackIFWInstaller::ConfigureFromOptions()
         this->GetOption("CPACK_IFW_PACKAGE_PRODUCT_IMAGES")) {
     this->ProductImages.clear();
     cmExpandList(productImages, this->ProductImages);
+    for (const auto& file : this->ProductImages) {
+      if (!cmSystemTools::FileExists(file)) {
+        // The warning will say skipped, but there will later be a hard error
+        // when the binarycreator tool tries to read the missing file.
+        this->printSkippedOptionWarning("CPACK_IFW_PACKAGE_PRODUCT_IMAGES",
+                                        file);
+      }
+    }
   }
 
   // Run program, run program arguments, and run program description
