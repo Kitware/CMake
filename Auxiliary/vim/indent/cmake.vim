@@ -3,7 +3,7 @@
 " Author:       Andy Cedilnik <andy.cedilnik@kitware.com>
 " Maintainer:   Dimitri Merejkowsky <d.merej@gmail.com>
 " Former Maintainer: Karthik Krishnan <karthik.krishnan@kitware.com>
-" Last Change:  2017 Aug 30
+" Last Change:  2022 Mar 22
 "
 " License:      The CMake license applies to this file. See
 "               https://cmake.org/licensing
@@ -14,9 +14,6 @@ if exists("b:did_indent")
 endif
 let b:did_indent = 1
 
-let s:keepcpo= &cpo
-set cpo&vim
-
 setlocal indentexpr=CMakeGetIndent(v:lnum)
 setlocal indentkeys+==ENDIF(,ENDFOREACH(,ENDMACRO(,ELSE(,ELSEIF(,ENDWHILE(
 
@@ -24,6 +21,8 @@ setlocal indentkeys+==ENDIF(,ENDFOREACH(,ENDMACRO(,ELSE(,ELSEIF(,ENDWHILE(
 if exists("*CMakeGetIndent")
   finish
 endif
+let s:keepcpo= &cpo
+set cpo&vim
 
 fun! CMakeGetIndent(lnum)
   let this_line = getline(a:lnum)
@@ -54,32 +53,41 @@ fun! CMakeGetIndent(lnum)
   let cmake_indent_open_regex = '^\s*' . cmake_regex_identifier .
                     \           '\s*(' . cmake_regex_arguments .
                     \           '\(' . cmake_regex_comment . '\)\?$'
-
   let cmake_indent_close_regex = '^' . cmake_regex_arguments .
                     \            ')\s*' .
                     \            '\(' . cmake_regex_comment . '\)\?$'
 
+  let cmake_closing_parens_line = '^\s*\()\+\)\s*$'
+
   let cmake_indent_begin_regex = '^\s*\(IF\|MACRO\|FOREACH\|ELSE\|ELSEIF\|WHILE\|FUNCTION\)\s*('
   let cmake_indent_end_regex = '^\s*\(ENDIF\|ENDFOREACH\|ENDMACRO\|ELSE\|ELSEIF\|ENDWHILE\|ENDFUNCTION\)\s*('
 
-  " Add
-  if previous_line =~? cmake_indent_comment_line " Handle comments
-    let ind = ind
+  if this_line =~? cmake_closing_parens_line
+    if previous_line !~? cmake_indent_open_regex
+      let ind = ind - shiftwidth()
+    endif
   else
-    if previous_line =~? cmake_indent_begin_regex
-      let ind = ind + shiftwidth()
+    " Add
+    if previous_line =~? cmake_indent_comment_line " Handle comments
+      let ind = ind
+    else
+      if previous_line =~? cmake_indent_begin_regex
+        let ind = ind + shiftwidth()
+      endif
+      if previous_line =~? cmake_indent_open_regex
+        let ind = ind + shiftwidth()
+      endif
     endif
-    if previous_line =~? cmake_indent_open_regex
-      let ind = ind + shiftwidth()
-    endif
-  endif
 
-  " Subtract
-  if this_line =~? cmake_indent_end_regex
-    let ind = ind - shiftwidth()
-  endif
-  if previous_line =~? cmake_indent_close_regex
-    let ind = ind - shiftwidth()
+    " Subtract
+    if this_line =~? cmake_indent_end_regex
+      let ind = ind - shiftwidth()
+    endif
+    if previous_line !~? cmake_closing_parens_line
+      if previous_line =~? cmake_indent_close_regex
+        let ind = ind - shiftwidth()
+      endif
+    endif
   endif
 
   return ind
