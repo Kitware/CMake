@@ -73,11 +73,11 @@ bool cmIfFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
     }
     // watch for our state change
     if (scopeDepth == 0 && func.LowerCaseName() == "else") {
+      cmListFileBacktrace elseBT = mf.GetBacktrace().Push(
+        cmListFileContext{ func.OriginalName(),
+                           this->GetStartingContext().FilePath, func.Line() });
 
       if (this->ElseSeen) {
-        cmListFileBacktrace elseBT = mf.GetBacktrace().Push(cmListFileContext{
-          func.OriginalName(), this->GetStartingContext().FilePath,
-          func.Line() });
         mf.GetCMakeInstance()->IssueMessage(
           MessageType::FATAL_ERROR,
           "A duplicate ELSE command was found inside an IF block.", elseBT);
@@ -92,7 +92,8 @@ bool cmIfFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
       // if trace is enabled, print a (trivially) evaluated "else"
       // statement
       if (!this->IsBlocking && mf.GetCMakeInstance()->GetTrace()) {
-        mf.PrintCommandTrace(func);
+        mf.PrintCommandTrace(func, elseBT,
+                             cmMakefile::CommandMissingFromStack::Yes);
       }
     } else if (scopeDepth == 0 && func.LowerCaseName() == "elseif") {
       cmListFileBacktrace elseifBT = mf.GetBacktrace().Push(
@@ -111,7 +112,8 @@ bool cmIfFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
       } else {
         // if trace is enabled, print the evaluated "elseif" statement
         if (mf.GetCMakeInstance()->GetTrace()) {
-          mf.PrintCommandTrace(func);
+          mf.PrintCommandTrace(func, elseifBT,
+                               cmMakefile::CommandMissingFromStack::Yes);
         }
 
         std::string errorString;

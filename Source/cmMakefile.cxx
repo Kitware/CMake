@@ -241,14 +241,14 @@ cmListFileBacktrace cmMakefile::GetBacktrace() const
   return this->Backtrace;
 }
 
-void cmMakefile::PrintCommandTrace(
-  cmListFileFunction const& lff,
-  cm::optional<std::string> const& deferId) const
+void cmMakefile::PrintCommandTrace(cmListFileFunction const& lff,
+                                   cmListFileBacktrace const& bt,
+                                   CommandMissingFromStack missing) const
 {
   // Check if current file in the list of requested to trace...
   std::vector<std::string> const& trace_only_this_files =
     this->GetCMakeInstance()->GetTraceSources();
-  std::string const& full_path = this->GetBacktrace().Top().FilePath;
+  std::string const& full_path = bt.Top().FilePath;
   std::string const& only_filename = cmSystemTools::GetFilenameName(full_path);
   bool trace = trace_only_this_files.empty();
   if (!trace) {
@@ -282,6 +282,7 @@ void cmMakefile::PrintCommandTrace(
       args.push_back(arg.Value);
     }
   }
+  cm::optional<std::string> const& deferId = bt.Top().DeferId;
 
   switch (this->GetCMakeInstance()->GetTraceFormat()) {
     case cmake::TraceFormat::TRACE_JSON_V1: {
@@ -303,9 +304,9 @@ void cmMakefile::PrintCommandTrace(
         val["args"].append(arg);
       }
       val["time"] = cmSystemTools::GetTime();
-      val["frame"] =
+      val["frame"] = (missing == CommandMissingFromStack::Yes ? 1 : 0) +
         static_cast<Json::Value::UInt64>(this->ExecutionStatusStack.size());
-      val["global_frame"] =
+      val["global_frame"] = (missing == CommandMissingFromStack::Yes ? 1 : 0) +
         static_cast<Json::Value::UInt64>(this->RecursionDepth);
       msg << Json::writeString(builder, val);
 #endif
@@ -427,7 +428,7 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
     if (!cmSystemTools::GetFatalErrorOccured()) {
       // if trace is enabled, print out invoke information
       if (this->GetCMakeInstance()->GetTrace()) {
-        this->PrintCommandTrace(lff, this->Backtrace.Top().DeferId);
+        this->PrintCommandTrace(lff, this->Backtrace);
       }
       // Try invoking the command.
       bool invokeSucceeded = command(lff.Arguments(), status);
