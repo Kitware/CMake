@@ -142,6 +142,14 @@ if (CMAKE_SYSTEM_NAME MATCHES "(Linux|Darwin)")
 endif()
 add_RunCMake_test(CMP0126)
 
+if("${CMAKE_C_COMPILER_ID}" STREQUAL "LCC" OR
+   "${CMAKE_CXX_COMPILER_ID}" STREQUAL "LCC" OR
+   "${CMAKE_Fortran_COMPILER_ID}" STREQUAL "LCC")
+  add_RunCMake_test("CMP0129")
+endif()
+
+add_RunCMake_test(CMP0132)
+
 # The test for Policy 65 requires the use of the
 # CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS variable, which both the VS and Xcode
 # generators ignore.  The policy will have no effect on those generators.
@@ -976,8 +984,4 @@ endif()
 
 if(WIN32)
   add_RunCMake_test(Win32GenEx)
-endif()
-
-if("${CMAKE_C_COMPILER_ID}" STREQUAL "LCC" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "LCC" OR "${CMAKE_Fortran_COMPILER_ID}" STREQUAL "LCC")
-  add_RunCMake_test("CMP0129")
 endif()

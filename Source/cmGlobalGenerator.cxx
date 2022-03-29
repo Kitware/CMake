@@ -759,7 +759,9 @@ void cmGlobalGenerator::EnableLanguage(
       needTestLanguage[lang] = true;
       // Some generators like visual studio should not use the env variables
       // So the global generator can specify that in this variable
-      if (!mf->GetDefinition("CMAKE_GENERATOR_NO_COMPILER_ENV")) {
+      if ((mf->GetPolicyStatus(cmPolicies::CMP0132) == cmPolicies::OLD ||
+           mf->GetPolicyStatus(cmPolicies::CMP0132) == cmPolicies::WARN) &&
+          !mf->GetDefinition("CMAKE_GENERATOR_NO_COMPILER_ENV")) {
         // put ${CMake_(LANG)_COMPILER_ENV_VAR}=${CMAKE_(LANG)_COMPILER
         // into the environment, in case user scripts want to run
         // configure, or sub cmakes
