@@ -1501,6 +1501,11 @@ bool cmGlobalGenerator::Compute()
     return false;
   }
 
+  // Iterate through all targets and add verification targets for header sets
+  if (!this->AddHeaderSetVerification()) {
+    return false;
+  }
+
   // Iterate through all targets and set up AUTOMOC, AUTOUIC and AUTORCC
   if (!this->QtAutoGen()) {
     return false;
@@ -1720,6 +1725,27 @@ bool cmGlobalGenerator::QtAutoGen()
 #else
   return true;
 #endif
+}
+
+bool cmGlobalGenerator::AddHeaderSetVerification()
+{
+  for (auto const& gen : this->LocalGenerators) {
+    // Because AddHeaderSetVerification() adds generator targets, we need to
+    // cache the existing list of generator targets before starting.
+    std::vector<cmGeneratorTarget*> genTargets;
+    genTargets.reserve(gen->GetGeneratorTargets().size());
+    for (auto const& tgt : gen->GetGeneratorTargets()) {
+      genTargets.push_back(tgt.get());
+    }
+
+    for (auto* tgt : genTargets) {
+      if (!tgt->AddHeaderSetVerification()) {
+        return false;
+      }
+    }
+  }
+
+  return true;
 }
 
 bool cmGlobalGenerator::AddAutomaticSources()

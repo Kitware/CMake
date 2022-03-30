@@ -573,6 +573,8 @@ protected:
   /// @return true on success
   bool QtAutoGen();
 
+  bool AddHeaderSetVerification();
+
   bool AddAutomaticSources();
 
   std::string SelectMakeProgram(const std::string& makeProgram,

@@ -8522,3 +8522,176 @@ cmGeneratorTarget::ManagedType cmGeneratorTarget::GetManagedType(
   // has to be set manually for C# targets.
   return this->IsCSharpOnly() ? ManagedType::Managed : ManagedType::Native;
 }
+
+bool cmGeneratorTarget::AddHeaderSetVerification()
+{
+  if (!this->GetPropertyAsBool("VERIFY_HEADER_SETS")) {
+    return true;
+  }
+
+  if (this->GetType() != cmStateEnums::STATIC_LIBRARY &&
+      this->GetType() != cmStateEnums::SHARED_LIBRARY &&
+      this->GetType() != cmStateEnums::UNKNOWN_LIBRARY &&
+      this->GetType() != cmStateEnums::OBJECT_LIBRARY &&
+      this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
+      !this->IsExecutableWithExports()) {
+    return true;
+  }
+
+  cmTarget* verifyTarget = nullptr;
+
+  auto interfaceFileSetEntries = this->Target->GetInterfaceHeaderSetsEntries();
+
+  std::set<cmFileSet*> fileSets;
+  auto const addFileSets = [&fileSets, this](const cmBTStringRange& entries) {
+    for (auto const& entry : entries) {
+      for (auto const& name : cmExpandedList(entry.Value)) {
+        fileSets.insert(this->Target->GetFileSet(name));
+      }
+    }
+  };
+  addFileSets(interfaceFileSetEntries);
+
+  cm::optional<std::set<std::string>> languages;
+  for (auto* fileSet : fileSets) {
+    auto dirCges = fileSet->CompileDirectoryEntries();
+    auto fileCges = fileSet->CompileFileEntries();
+
+    static auto const contextSensitive =
+      [](const std::unique_ptr<cmCompiledGeneratorExpression>& cge) {
+        return cge->GetHadContextSensitiveCondition();
+      };
+    bool dirCgesContextSensitive = false;
+    bool fileCgesContextSensitive = false;
+
+    std::vector<std::string> dirs;
+    std::map<std::string, std::vector<std::string>> filesPerDir;
+    bool first = true;
+    for (auto const& config : this->Makefile->GetGeneratorConfigs(
+           cmMakefile::GeneratorConfigQuery::IncludeEmptyConfig)) {
+      if (first || dirCgesContextSensitive) {
+        dirs = fileSet->EvaluateDirectoryEntries(dirCges, this->LocalGenerator,
+                                                 config, this);
+        dirCgesContextSensitive =
+          std::any_of(dirCges.begin(), dirCges.end(), contextSensitive);
+      }
+      if (first || fileCgesContextSensitive) {
+        filesPerDir.clear();
+        for (auto const& fileCge : fileCges) {
+          fileSet->EvaluateFileEntry(dirs, filesPerDir, fileCge,
+                                     this->LocalGenerator, config, this);
+          if (fileCge->GetHadContextSensitiveCondition()) {
+            fileCgesContextSensitive = true;
+          }
+        }
+      }
+
+      for (auto const& files : filesPerDir) {
+        for (auto const& file : files.second) {
+          std::string filename = this->GenerateHeaderSetVerificationFile(
+            *this->Makefile->GetOrCreateSource(file), files.first, languages);
+          if (filename.empty()) {
+            continue;
+          }
+
+          if (!verifyTarget) {
+            {
+              cmMakefile::PolicyPushPop polScope(this->Makefile);
+              this->Makefile->SetPolicy(cmPolicies::CMP0119, cmPolicies::NEW);
+              verifyTarget = this->Makefile->AddLibrary(
+                cmStrCat(this->GetName(), "_verify_header_sets"),
+                cmStateEnums::OBJECT_LIBRARY, {}, true);
+            }
+
+            verifyTarget->AddLinkLibrary(
+              *this->Makefile, this->GetName(),
+              cmTargetLinkLibraryType::GENERAL_LibraryType);
+            verifyTarget->SetProperty("AUTOMOC", "OFF");
+            verifyTarget->SetProperty("AUTORCC", "OFF");
+            verifyTarget->SetProperty("AUTOUIC", "OFF");
+            verifyTarget->SetProperty("DISABLE_PRECOMPILE_HEADERS", "ON");
+            verifyTarget->SetProperty("UNITY_BUILD", "OFF");
+          }
+
+          if (fileCgesContextSensitive) {
+            filename = cmStrCat("$<$<CONFIG:", config, ">:", filename, ">");
+          }
+          verifyTarget->AddSource(filename);
+        }
+      }
+
+      if (!dirCgesContextSensitive && !fileCgesContextSensitive) {
+        break;
+      }
+      first = false;
+    }
+  }
+
+  if (verifyTarget) {
+    this->LocalGenerator->AddGeneratorTarget(
+      cm::make_unique<cmGeneratorTarget>(verifyTarget, this->LocalGenerator));
+  }
+
+  return true;
+}
+
+std::string cmGeneratorTarget::GenerateHeaderSetVerificationFile(
+  cmSourceFile& source, const std::string& dir,
+  cm::optional<std::set<std::string>>& languages) const
+{
+  std::string extension;
+  std::string language = source.GetOrDetermineLanguage();
+
+  if (language.empty()) {
+    if (!languages) {
+      languages.emplace();
+      for (auto const& tgtSource : this->GetAllConfigSources()) {
+        auto const& tgtSourceLanguage =
+          tgtSource.Source->GetOrDetermineLanguage();
+        if (tgtSourceLanguage == "CXX") {
+          languages->insert("CXX");
+          break; // C++ overrides everything else, so we don't need to keep
+                 // checking.
+        }
+        if (tgtSourceLanguage == "C") {
+          languages->insert("C");
+        }
+      }
+    }
+
+    if (languages->count("CXX")) {
+      language = "CXX";
+    } else if (languages->count("C")) {
+      language = "C";
+    }
+  }
+
+  if (language == "C") {
+    extension = ".c";
+  } else if (language == "CXX") {
+    extension = ".cxx";
+  } else {
+    return "";
+  }
+
+  std::string headerFilename = dir;
+  if (!headerFilename.empty()) {
+    headerFilename += '/';
+  }
+  headerFilename += source.GetLocation().GetName();
+
+  auto filename = cmStrCat(this->LocalGenerator->GetCurrentBinaryDirectory(),
+                           '/', this->GetName(), "_verify_header_sets/",
+                           headerFilename, extension);
+  auto* verificationSource = this->Makefile->GetOrCreateSource(filename);
+  verificationSource->SetProperty("LANGUAGE", language);
+
+  cmSystemTools::MakeDirectory(cmSystemTools::GetFilenamePath(filename));
+
+  cmGeneratedFileStream fout(filename);
+  fout.SetCopyIfDifferent(true);
+  fout << "#include <" << headerFilename << ">\n";
+  fout.close();
+
+  return filename;
+}
