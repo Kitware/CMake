@@ -11,6 +11,7 @@
 #include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstallType.h"
+#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmStringAlgorithms.h"
 

@@ -11,11 +11,11 @@
 #include <vector>
 
 #include "cmInstallGenerator.h"
-#include "cmListFileCache.h"
 #include "cmScriptGenerator.h"
 
 class cmExportInstallFileGenerator;
 class cmExportSet;
+class cmListFileBacktrace;
 class cmLocalGenerator;
 
 /** \class cmInstallExportGenerator

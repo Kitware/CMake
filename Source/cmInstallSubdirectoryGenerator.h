@@ -8,8 +8,8 @@
 #include <string>
 
 #include "cmInstallGenerator.h"
-#include "cmListFileCache.h"
 
+class cmListFileBacktrace;
 class cmLocalGenerator;
 class cmMakefile;
 

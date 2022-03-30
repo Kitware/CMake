@@ -35,7 +35,6 @@
 #include "cmInstallRuntimeDependencySetGenerator.h"
 #include "cmInstallScriptGenerator.h"
 #include "cmInstallTargetGenerator.h"
-#include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
@@ -48,6 +47,8 @@
 #include "cmTarget.h"
 #include "cmTargetExport.h"
 #include "cmValue.h"
+
+class cmListFileBacktrace;
 
 namespace {
 

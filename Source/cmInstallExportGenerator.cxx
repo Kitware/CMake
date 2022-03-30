@@ -15,6 +15,7 @@
 #include "cmExportInstallFileGenerator.h"
 #include "cmExportSet.h"
 #include "cmInstallType.h"
+#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
