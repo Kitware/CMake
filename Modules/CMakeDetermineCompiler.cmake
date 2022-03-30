@@ -119,9 +119,15 @@ macro(_cmake_find_compiler_path lang)
     # (e.g. via ctest) or set in CMAKE_TOOLCHAIN_FILE
     # if CMAKE_${lang}_COMPILER is a list, use the first item as
     # CMAKE_${lang}_COMPILER and the rest as CMAKE_${lang}_COMPILER_ARG1
-    set(CMAKE_${lang}_COMPILER_ARG1 "${CMAKE_${lang}_COMPILER}")
-    list(POP_FRONT CMAKE_${lang}_COMPILER_ARG1 CMAKE_${lang}_COMPILER)
-    list(JOIN CMAKE_${lang}_COMPILER_ARG1 " " CMAKE_${lang}_COMPILER_ARG1)
+    # Otherwise, preserve any existing CMAKE_${lang}_COMPILER_ARG1 that might
+    # have been saved by CMakeDetermine${lang}Compiler in a previous run.
+    list(LENGTH CMAKE_${lang}_COMPILER _CMAKE_${lang}_COMPILER_LENGTH)
+    if(_CMAKE_${lang}_COMPILER_LENGTH GREATER 1)
+      set(CMAKE_${lang}_COMPILER_ARG1 "${CMAKE_${lang}_COMPILER}")
+      list(POP_FRONT CMAKE_${lang}_COMPILER_ARG1 CMAKE_${lang}_COMPILER)
+      list(JOIN CMAKE_${lang}_COMPILER_ARG1 " " CMAKE_${lang}_COMPILER_ARG1)
+    endif()
+    unset(_CMAKE_${lang}_COMPILER_LENGTH)
 
     # find the compiler in the PATH if necessary
     # if compiler (and arguments) comes from cache then synchronize cache with updated CMAKE_<LANG>_COMPILER
