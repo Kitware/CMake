@@ -55,7 +55,7 @@ where ``<dir>`` is one of:
   object code libraries (``lib`` or ``lib64``)
 
   On Debian, this may be ``lib/<multiarch-tuple>`` when
-  :variable:`CMAKE_INSTALL_PREFIX` is ``/``, ``/usr``, or ``/usr/local``.
+  :variable:`CMAKE_INSTALL_PREFIX` is ``/usr``.
 ``INCLUDEDIR``
   C header files (``include``)
 ``OLDINCLUDEDIR``
@@ -273,9 +273,7 @@ if(NOT DEFINED CMAKE_INSTALL_LIBDIR OR (_libdir_set
 
     if(__system_type_for_install STREQUAL "debian")
       if(CMAKE_LIBRARY_ARCHITECTURE)
-        if("${CMAKE_INSTALL_PREFIX}" STREQUAL "/"
-            OR "${CMAKE_INSTALL_PREFIX}" MATCHES "^/usr/?$"
-            OR "${CMAKE_INSTALL_PREFIX}" MATCHES "^/usr/local/?$")
+        if("${CMAKE_INSTALL_PREFIX}" MATCHES "^/usr/?$")
           set(_LIBDIR_DEFAULT "lib/${CMAKE_LIBRARY_ARCHITECTURE}")
         endif()
         if(DEFINED _GNUInstallDirs_LAST_CMAKE_INSTALL_PREFIX
