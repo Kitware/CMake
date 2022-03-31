@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.18)
 project(WithDefs CUDA)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 set(release_compile_defs DEFREL)
 
 #Goal for this example:
