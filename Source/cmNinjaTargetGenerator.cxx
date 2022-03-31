@@ -1678,27 +1678,31 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
   compileObjectVars.Includes = includes.c_str();
 
   // Rule for compiling object file.
-  std::vector<std::string> compileCmds;
+  std::string cudaCompileMode;
   if (language == "CUDA") {
-    std::string cmdVar;
     if (this->GeneratorTarget->GetPropertyAsBool(
           "CUDA_SEPARABLE_COMPILATION")) {
-      cmdVar = "CMAKE_CUDA_COMPILE_SEPARABLE_COMPILATION";
-    } else if (this->GeneratorTarget->GetPropertyAsBool(
-                 "CUDA_PTX_COMPILATION")) {
-      cmdVar = "CMAKE_CUDA_COMPILE_PTX_COMPILATION";
-    } else {
-      cmdVar = "CMAKE_CUDA_COMPILE_WHOLE_COMPILATION";
+      const std::string& rdcFlag =
+        this->Makefile->GetRequiredDefinition("_CMAKE_CUDA_RDC_FLAG");
+      cudaCompileMode = cmStrCat(cudaCompileMode, rdcFlag, " ");
     }
-    const std::string& compileCmd =
-      this->GetMakefile()->GetRequiredDefinition(cmdVar);
-    cmExpandList(compileCmd, compileCmds);
-  } else {
-    const std::string cmdVar = cmStrCat("CMAKE_", language, "_COMPILE_OBJECT");
-    const std::string& compileCmd =
-      this->GetMakefile()->GetRequiredDefinition(cmdVar);
-    cmExpandList(compileCmd, compileCmds);
+    if (this->GeneratorTarget->GetPropertyAsBool("CUDA_PTX_COMPILATION")) {
+      const std::string& ptxFlag =
+        this->Makefile->GetRequiredDefinition("_CMAKE_CUDA_PTX_FLAG");
+      cudaCompileMode = cmStrCat(cudaCompileMode, ptxFlag);
+    } else {
+      const std::string& wholeFlag =
+        this->Makefile->GetRequiredDefinition("_CMAKE_CUDA_WHOLE_FLAG");
+      cudaCompileMode = cmStrCat(cudaCompileMode, wholeFlag);
+    }
+    compileObjectVars.CudaCompileMode = cudaCompileMode.c_str();
   }
+
+  std::vector<std::string> compileCmds;
+  const std::string cmdVar = cmStrCat("CMAKE_", language, "_COMPILE_OBJECT");
+  const std::string& compileCmd =
+    this->Makefile->GetRequiredDefinition(cmdVar);
+  cmExpandList(compileCmd, compileCmds);
 
   std::unique_ptr<cmRulePlaceholderExpander> rulePlaceholderExpander(
     this->GetLocalGenerator()->CreateRulePlaceholderExpander());
