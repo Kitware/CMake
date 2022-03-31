@@ -1106,8 +1106,8 @@ bool HandleJSONCommand(std::vector<std::string> const& arguments,
         mode != "EQUAL"_s) {
       throw json_error(
         { "got an invalid mode '"_s, mode,
-          "', expected one of GET, GET_ARRAY, TYPE, MEMBER, MEMBERS,"
-          " LENGTH, REMOVE, SET, EQUAL"_s });
+          "', expected one of GET, TYPE, MEMBER, LENGTH, REMOVE, SET, "
+          " EQUAL"_s });
     }
 
     const auto& jsonstr = args.PopFront("missing json string argument"_s);
