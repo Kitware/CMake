@@ -8,6 +8,8 @@ language from either the :command:`project` or :command:`enable_language`
 commands.  It is loaded after CMake's builtin compiler and platform information
 modules have been loaded but before the information is used.  The file
 may set platform information variables to override CMake's defaults.
+See :variable:`CMAKE_USER_MAKE_RULES_OVERRIDE_<LANG>` for the language-specific
+version of this variable.
 
 This feature is intended for use only in overriding information
 variables that must be set before CMake builds its first test project
