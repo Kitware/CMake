@@ -278,8 +278,8 @@ endif()
 
 # Search with pkg-config if specified
 if(BLA_PREFER_PKGCONFIG)
-  find_package(PkgConfig)
-  pkg_check_modules(PKGC_LAPACK lapack)
+  find_package(PkgConfig QUIET)
+  pkg_check_modules(PKGC_LAPACK QUIET lapack)
   if(PKGC_LAPACK_FOUND)
     set(LAPACK_FOUND TRUE)
     set(LAPACK_LIBRARIES "${PKGC_LAPACK_LINK_LIBRARIES}")
