@@ -612,7 +612,7 @@ Requires an element of object type.
 .. code-block:: cmake
 
   string(JSON <out-var> [ERROR_VARIABLE <error-variable>]
-         LENGTH <json-string> <member|index> [<member|index> ...])
+         LENGTH <json-string> [<member|index> ...])
 
 Get the length of an element in ``<json-string>`` at the location
 given by the list of ``<member|index>`` arguments.
