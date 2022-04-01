@@ -1,0 +1,4 @@
+CMake Error at Registry_BadKey1.cmake:[0-9]+ \(message\):
+  WRONG_ROOT: invalid root key.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
