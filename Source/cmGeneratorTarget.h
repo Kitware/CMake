@@ -856,6 +856,9 @@ public:
   std::string GetFortranModuleDirectory(std::string const& working_dir) const;
   bool IsFortranBuildingInstrinsicModules() const;
 
+  bool IsLinkLookupScope(std::string const& n,
+                         cmLocalGenerator const*& lg) const;
+
   cmValue GetSourcesProperty() const;
 
   void AddISPCGeneratedHeader(std::string const& header,
@@ -1072,9 +1075,6 @@ private:
     ISPCGeneratedHeaders;
   std::unordered_map<std::string, std::vector<std::string>>
     ISPCGeneratedObjects;
-
-  bool IsLinkLookupScope(std::string const& n,
-                         cmLocalGenerator const*& lg) const;
 
   enum class LinkInterfaceField
   {
