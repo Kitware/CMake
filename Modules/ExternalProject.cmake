@@ -170,6 +170,19 @@ External Project Definition
         the default name is generally suitable and is not normally used outside
         of code internal to the ``ExternalProject`` module.
 
+      ``DOWNLOAD_EXTRACT_TIMESTAMP <bool>``
+        .. versionadded:: 3.24
+
+        When specified with a true value, the timestamps of the extracted
+        files will match those in the archive. When false, the timestamps of
+        the extracted files will reflect the time at which the extraction
+        was performed. If the download URL changes, timestamps based off
+        those in the archive can result in dependent targets not being rebuilt
+        when they potentially should have been. Therefore, unless the file
+        timestamps are significant to the project in some way, use a false
+        value for this option. If ``DOWNLOAD_EXTRACT_TIMESTAMP`` is not given,
+        the default is false. See policy :policy:`CMP0135`.
+
       ``DOWNLOAD_NO_EXTRACT <bool>``
         .. versionadded:: 3.6
 
@@ -1534,7 +1547,7 @@ function(_ep_write_verifyfile_script script_filename LOCAL hash)
 endfunction()
 
 
-function(_ep_write_extractfile_script script_filename name filename directory)
+function(_ep_write_extractfile_script script_filename name filename directory options)
   set(args "")
 
   if(filename MATCHES "(\\.|=)(7z|tar\\.bz2|tar\\.gz|tar\\.xz|tbz2|tgz|txz|zip)$")
@@ -2761,16 +2774,51 @@ hash=${hash}
         )
       endif()
       list(APPEND cmd ${CMAKE_COMMAND} -P ${stamp_dir}/verify-${name}.cmake)
-      if (NOT no_extract)
+      get_target_property(extract_timestamp ${name} _EP_DOWNLOAD_EXTRACT_TIMESTAMP)
+      if(no_extract)
+        if(NOT extract_timestamp STREQUAL "extract_timestamp-NOTFOUND")
+          message(FATAL_ERROR
+            "Cannot specify DOWNLOAD_EXTRACT_TIMESTAMP when using "
+            "DOWNLOAD_NO_EXTRACT TRUE"
+          )
+        endif()
+        set_property(TARGET ${name} PROPERTY _EP_DOWNLOADED_FILE ${file})
+      else()
+        if(extract_timestamp STREQUAL "extract_timestamp-NOTFOUND")
+          # Default depends on policy CMP0135
+          if(_EP_CMP0135 STREQUAL "")
+            message(AUTHOR_WARNING
+              "The DOWNLOAD_EXTRACT_TIMESTAMP option was not given and policy "
+              "CMP0135 is not set. The policy's OLD behavior will be used. "
+              "When using a URL download, the timestamps of extracted files "
+              "should preferably be that of the time of extraction, otherwise "
+              "code that depends on the extracted contents might not be "
+              "rebuilt if the URL changes. The OLD behavior preserves the "
+              "timestamps from the archive instead, but this is usually not "
+              "what you want. Update your project to the NEW behavior or "
+              "specify the DOWNLOAD_EXTRACT_TIMESTAMP option with a value of "
+              "true to avoid this robustness issue."
+            )
+            set(extract_timestamp TRUE)
+          elseif(_EP_CMP0135 STREQUAL "NEW")
+            set(extract_timestamp FALSE)
+          else()
+            set(extract_timestamp TRUE)
+          endif()
+        endif()
+        if(extract_timestamp)
+          set(options "")
+        else()
+          set(options "--touch")
+        endif()
         _ep_write_extractfile_script(
           "${stamp_dir}/extract-${name}.cmake"
           "${name}"
           "${file}"
           "${source_dir}"
+          "${options}"
         )
         list(APPEND cmd COMMAND ${CMAKE_COMMAND} -P ${stamp_dir}/extract-${name}.cmake)
-      else ()
-        set_property(TARGET ${name} PROPERTY _EP_DOWNLOADED_FILE ${file})
       endif ()
     endif()
   else()
@@ -3438,6 +3486,9 @@ function(ExternalProject_Add name)
       )
     set(cmp0114 "NEW")
   endif()
+  cmake_policy(GET CMP0135 _EP_CMP0135
+    PARENT_SCOPE # undocumented, do not use outside of CMake
+    )
 
   _ep_get_configuration_subdir_suffix(cfgdir)
 
@@ -3483,6 +3534,7 @@ function(ExternalProject_Add name)
     URL_HASH
     URL_MD5
     DOWNLOAD_NAME
+    DOWNLOAD_EXTRACT_TIMESTAMP
     DOWNLOAD_NO_EXTRACT
     DOWNLOAD_NO_PROGRESS
     TIMEOUT

@@ -29,7 +29,7 @@ file(MAKE_DIRECTORY "${ut_dir}")
 # Extract it:
 #
 message(STATUS "extracting... [tar @args@]")
-execute_process(COMMAND ${CMAKE_COMMAND} -E tar @args@ ${filename}
+execute_process(COMMAND ${CMAKE_COMMAND} -E tar @args@ ${filename} @options@
   WORKING_DIRECTORY ${ut_dir}
   RESULT_VARIABLE rv
 )

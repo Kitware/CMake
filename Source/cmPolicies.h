@@ -404,6 +404,10 @@ class cmMakefile;
   SELECT(POLICY, CMP0134,                                                     \
          "Fallback to \"HOST\" Windows registry view when \"TARGET\" view "   \
          "is not usable.",                                                    \
+         3, 24, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0135,                                                     \
+         "ExternalProject ignores timestamps in archives by default for the " \
+         "URL download method",                                               \
          3, 24, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
