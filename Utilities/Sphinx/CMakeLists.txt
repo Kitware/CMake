@@ -139,6 +139,7 @@ set(doc_html_opts "")
 if(CMake_SPHINX_CMAKE_ORG)
   list(APPEND doc_html_opts
     -A googleanalytics=1
+    -A opensearch=1
     -A versionswitch=1
     )
 

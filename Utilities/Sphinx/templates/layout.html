@@ -31,6 +31,11 @@
 {%- endblock %}
 
 {% block extrahead %}
+  {%- if opensearch is defined %}
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="Search within CMake Documentation of Latest Version"
+          href="{{ pathto('../latest-opensearch.xml', 1) }}"/>
+  {%- endif %}
   {%- if versionswitch is defined %}
     <script type="text/javascript" src="{{ pathto('../version_switch.js', 1) }}"></script>
   {%- endif %}
