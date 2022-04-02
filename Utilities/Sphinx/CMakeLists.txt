@@ -141,6 +141,10 @@ if(CMake_SPHINX_CMAKE_ORG)
     -A googleanalytics=1
     -A versionswitch=1
     )
+
+  if(CMake_SPHINX_CMAKE_ORG_OUTDATED)
+    list(APPEND doc_html_opts -A outdated=1)
+  endif()
 endif()
 
 set(doc_format_outputs "")

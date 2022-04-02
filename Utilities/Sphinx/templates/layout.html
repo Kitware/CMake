@@ -17,6 +17,19 @@
   </li>
 {% endblock %}
 
+{%- block relbar1 %}
+{{ super() }}
+{%- if outdated is defined %}
+    <div class="outdated">
+      This documents an old version of CMake.
+      <a href="https://cmake.org/cmake/help/latest/{{ pagename }}.html">
+        Click here to see the latest release.
+      </a>
+      <span class="version_switch_note"></span>
+    </div>
+{%- endif %}
+{%- endblock %}
+
 {% block extrahead %}
   {%- if versionswitch is defined %}
     <script type="text/javascript" src="{{ pathto('../version_switch.js', 1) }}"></script>
