@@ -167,7 +167,7 @@ function(run_cmake test)
     "|[^\n]*xcodebuild[^\n]*DVTPlugInManager"
     "|[^\n]*xcodebuild[^\n]*Requested but did not find extension point with identifier"
     "|[^\n]*xcodebuild[^\n]*warning: file type[^\n]*is based on missing file type"
-    "|[^\n]*objc[^\n]*: Class AMSupportURL[^\n]* One of the two will be used. Which one is undefined."
+    "|[^\n]*objc[^\n]*: Class [^\n]* One of the two will be used. Which one is undefined."
     "|[^\n]*is a member of multiple groups"
     "|[^\n]*offset in archive not a multiple of 8"
     "|[^\n]*from Time Machine by path"
