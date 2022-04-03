@@ -1,0 +1,6 @@
+FindMatlab-no-implicit-link
+---------------------------
+
+* The :module:`FindMatlab` module :command:`matlab_add_mex` function
+  gained a ``NO_IMPLICIT_LINK_TO_MATLAB_LIBRARIES`` option to disable
+  automatic linking of MATLAB libraries.

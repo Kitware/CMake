@@ -1020,6 +1020,7 @@ endfunction()
          [LINK_TO target1 target2 ...]
          [R2017b | R2018a]
          [EXCLUDE_FROM_ALL]
+         [NO_IMPLICIT_LINK_TO_MATLAB_LIBRARIES]
          [...]
      )
 
@@ -1029,7 +1030,8 @@ endfunction()
     list of source files.
   ``LINK_TO``
     a list of additional link dependencies.  The target links to ``libmex``
-    and ``libmx`` by default.
+    and ``libmx`` by default, unless the
+    ``NO_IMPLICIT_LINK_TO_MATLAB_LIBRARIES`` option is passed.
   ``OUTPUT_NAME``
     if given, overrides the default name. The default name is
     the name of the target without any prefix and
@@ -1065,6 +1067,12 @@ endfunction()
     This option has the same meaning as for :prop_tgt:`EXCLUDE_FROM_ALL` and
     is forwarded to :command:`add_library` or :command:`add_executable`
     commands.
+  ``NO_IMPLICIT_LINK_TO_MATLAB_LIBRARIES``
+    .. versionadded:: 3.24
+
+    This option permits to disable the automatic linking of MATLAB
+    libraries, so that only the libraries that are actually required can be
+    linked via the ``LINK_TO`` option.
 
   The documentation file is not processed and should be in the following
   format:
@@ -1091,7 +1099,7 @@ function(matlab_add_mex)
 
   endif()
 
-  set(options EXECUTABLE MODULE SHARED R2017b R2018a EXCLUDE_FROM_ALL)
+  set(options EXECUTABLE MODULE SHARED R2017b R2018a EXCLUDE_FROM_ALL NO_IMPLICIT_LINK_TO_MATLAB_LIBRARIES)
   set(oneValueArgs NAME DOCUMENTATION OUTPUT_NAME)
   set(multiValueArgs LINK_TO SRC)
 
@@ -1163,16 +1171,19 @@ function(matlab_add_mex)
 
   target_include_directories(${${prefix}_NAME} PRIVATE ${Matlab_INCLUDE_DIRS})
 
-  if(Matlab_HAS_CPP_API)
-    if(Matlab_ENGINE_LIBRARY)
-      target_link_libraries(${${prefix}_NAME} ${Matlab_ENGINE_LIBRARY})
+  if(NOT ${prefix}_NO_IMPLICIT_LINK_TO_MATLAB_LIBRARIES)
+    if(Matlab_HAS_CPP_API)
+      if(Matlab_ENGINE_LIBRARY)
+        target_link_libraries(${${prefix}_NAME} ${Matlab_ENGINE_LIBRARY})
+      endif()
+      if(Matlab_DATAARRAY_LIBRARY)
+        target_link_libraries(${${prefix}_NAME} ${Matlab_DATAARRAY_LIBRARY})
+      endif()
     endif()
-    if(Matlab_DATAARRAY_LIBRARY)
-      target_link_libraries(${${prefix}_NAME} ${Matlab_DATAARRAY_LIBRARY})
-    endif()
-  endif()
 
-  target_link_libraries(${${prefix}_NAME} ${Matlab_MEX_LIBRARY} ${Matlab_MX_LIBRARY} ${${prefix}_LINK_TO})
+    target_link_libraries(${${prefix}_NAME} ${Matlab_MEX_LIBRARY} ${Matlab_MX_LIBRARY})
+  endif()
+  target_link_libraries(${${prefix}_NAME} ${${prefix}_LINK_TO})
   set_target_properties(${${prefix}_NAME}
       PROPERTIES
         PREFIX ""
