@@ -74,12 +74,19 @@
 
 .run_cmake_org_help:
     rules:
+        - if: '$CMAKE_CI_PACKAGE =~ /v[0-9]+\.[0-9]+/'
+          variables:
+              RSYNC_DESTINATION: "$CMAKE_CI_PACKAGE"
+              CMAKE_CI_VERSION_NO_GIT: "ON"
+          when: manual
         - if: '$CMAKE_CI_PROJECT_MAIN_BRANCH != null && $CI_COMMIT_BRANCH != null && $CMAKE_CI_PROJECT_MAIN_BRANCH == $CI_COMMIT_BRANCH'
           variables:
               RSYNC_DESTINATION: "git-master"
+              CMAKE_CI_VERSION_NO_GIT: "OFF"
           when: on_success
         - if: '$CMAKE_CI_PROJECT_CONTINUOUS_BRANCH != null && $CI_COMMIT_BRANCH != null && $CMAKE_CI_PROJECT_CONTINUOUS_BRANCH == $CI_COMMIT_BRANCH'
           variables:
               RSYNC_DESTINATION: "git-stage"
+              CMAKE_CI_VERSION_NO_GIT: "OFF"
           when: on_success
         - when: never

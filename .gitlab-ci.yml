@@ -74,6 +74,8 @@ b:cmake.org-help:
     extends:
         - .cmake_org_help
         - .run_cmake_org_help
+    dependencies: []
+    needs: []
 
 u:cmake.org-help:
     extends:
