@@ -2,7 +2,7 @@
 
 .run_manually:
     rules:
-        - if: '$CMAKE_CI_PACKAGE == "true"'
+        - if: '$CMAKE_CI_PACKAGE != null'
           when: never
         - if: '$CMAKE_CI_NIGHTLY == "true"'
           when: on_success
@@ -23,7 +23,7 @@
 
 .run_automatically:
     rules:
-        - if: '$CMAKE_CI_PACKAGE == "true"'
+        - if: '$CMAKE_CI_PACKAGE != null'
           when: never
         - if: '$CMAKE_CI_NIGHTLY == "true"'
           when: on_success
@@ -44,7 +44,7 @@
 
 .run_dependent:
     rules:
-        - if: '$CMAKE_CI_PACKAGE == "true"'
+        - if: '$CMAKE_CI_PACKAGE != null'
           when: never
         - if: '($CMAKE_CI_NIGHTLY == "true" && $CMAKE_CI_NIGHTLY_IGNORE_DEPS == "true")'
           when: always
@@ -64,7 +64,11 @@
 
 .run_only_for_package:
     rules:
-        - if: '$CMAKE_CI_PACKAGE == "true"'
+        - if: '$CMAKE_CI_PACKAGE != null && $CMAKE_CI_JOB_UPLOAD_PACKAGE == null'
+          when: on_success
+        - if: '$CMAKE_CI_PACKAGE == "dev" && $CMAKE_CI_JOB_UPLOAD_PACKAGE == "true"'
+          variables:
+              RSYNC_DESTINATION: "dev"
           when: on_success
         - when: never
 
