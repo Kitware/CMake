@@ -1,6 +1,6 @@
 # Steps for uploading artifacts
 
-.rsync_upload_binary:
+.rsync_upload_package:
     image: "fedora:35"
     stage: upload
     tags:
@@ -17,6 +17,9 @@
         - chmod 400 $RSYNC_BINARY_KEY
         - ssh-keygen -y -f $RSYNC_BINARY_KEY > $RSYNC_BINARY_KEY.pub
         - rsync -tv --recursive -e "ssh -i $RSYNC_BINARY_KEY -o StrictHostKeyChecking=no -o LogLevel=ERROR" build/ kitware@cmake.org:$RSYNC_DESTINATION/
+
+    variables:
+        CMAKE_CI_JOB_UPLOAD_PACKAGE: "true"
 
 .rsync_upload_help:
     stage: upload
