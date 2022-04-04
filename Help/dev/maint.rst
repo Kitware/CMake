@@ -245,20 +245,6 @@ Commit with a message such as::
   Release versions do not have the development topic section of
   the CMake Release Notes index page.
 
-Update ``.gitlab-ci.yml`` to drop the upload jobs from the
-packaging pipeline by renaming them to start in ``.``:
-
-.. code-block:: shell
-
-  sed -i 's/^u:/.u:/' .gitlab-ci.yml
-
-Commit with a message such as::
-
-  gitlab-ci: Drop package pipeline upload jobs for release branch
-
-  The package pipeline for release versions should not upload packages
-  automatically to our archive of nightly development versions.
-
 Update ``Source/CMakeVersion.cmake`` to set the version to
 ``$major.$minor.0-rc0``:
 
@@ -290,15 +276,13 @@ Merge the ``release-$ver`` branch to ``master``:
   git merge --no-ff release-$ver
 
 Begin post-release development by restoring the development branch release
-note infrastructure, the nightly package pipeline upload jobs, and
-the version date from ``origin/master``:
+note infrastructure, and the version date from ``origin/master``:
 
 .. code-block:: shell
 
   git checkout origin/master -- \
     Source/CMakeVersion.cmake Help/release/dev/0-sample-topic.rst
   sed -i $'/^Releases/ i\\\n.. include:: dev.txt\\\n' Help/release/index.rst
-  sed -i 's/^\.u:/u:/' .gitlab-ci.yml
 
 Update ``Source/CMakeVersion.cmake`` to set the version to
 ``$major.$minor.$date``:
