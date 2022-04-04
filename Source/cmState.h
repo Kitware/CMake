@@ -14,7 +14,6 @@
 
 #include "cmDefinitions.h"
 #include "cmLinkedTree.h"
-#include "cmListFileCache.h"
 #include "cmPolicies.h"
 #include "cmProperty.h"
 #include "cmPropertyDefinition.h"
@@ -30,6 +29,11 @@ class cmMakefile;
 class cmStateSnapshot;
 class cmMessenger;
 class cmExecutionStatus;
+class cmListFileBacktrace;
+struct cmListFileArgument;
+
+template <typename T>
+class BT;
 
 class cmState
 {

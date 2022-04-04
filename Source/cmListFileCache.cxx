@@ -1,8 +1,8 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
+#define cmListFileCache_cxx
 #include "cmListFileCache.h"
 
-#include <cassert>
 #include <memory>
 #include <sstream>
 #include <utility>
@@ -445,64 +445,8 @@ cm::optional<cmListFileContext> cmListFileParser::CheckNesting() const
   return cm::nullopt;
 }
 
-// We hold a call/file context.
-struct cmListFileBacktrace::Entry
-{
-  Entry(std::shared_ptr<Entry const> parent, cmListFileContext lfc)
-    : Context(std::move(lfc))
-    , Parent(std::move(parent))
-  {
-  }
-
-  cmListFileContext Context;
-  std::shared_ptr<Entry const> Parent;
-};
-
-/* NOLINTNEXTLINE(performance-unnecessary-value-param) */
-cmListFileBacktrace::cmListFileBacktrace(std::shared_ptr<Entry const> parent,
-                                         cmListFileContext const& lfc)
-  : TopEntry(std::make_shared<Entry const>(std::move(parent), lfc))
-{
-}
-
-cmListFileBacktrace::cmListFileBacktrace(std::shared_ptr<Entry const> top)
-  : TopEntry(std::move(top))
-{
-}
-
-cmListFileBacktrace cmListFileBacktrace::Push(std::string const& file) const
-{
-  // We are entering a file-level scope but have not yet reached
-  // any specific line or command invocation within it.  This context
-  // is useful to print when it is at the top but otherwise can be
-  // skipped during call stack printing.
-  cmListFileContext lfc;
-  lfc.FilePath = file;
-  return this->Push(lfc);
-}
-
-cmListFileBacktrace cmListFileBacktrace::Push(
-  cmListFileContext const& lfc) const
-{
-  return cmListFileBacktrace(this->TopEntry, lfc);
-}
-
-cmListFileBacktrace cmListFileBacktrace::Pop() const
-{
-  assert(this->TopEntry);
-  return cmListFileBacktrace(this->TopEntry->Parent);
-}
-
-cmListFileContext const& cmListFileBacktrace::Top() const
-{
-  assert(this->TopEntry);
-  return this->TopEntry->Context;
-}
-
-bool cmListFileBacktrace::Empty() const
-{
-  return !this->TopEntry;
-}
+#include "cmConstStack.tcc"
+template class cmConstStack<cmListFileContext, cmListFileBacktrace>;
 
 std::ostream& operator<<(std::ostream& os, cmListFileContext const& lfc)
 {

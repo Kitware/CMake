@@ -10,7 +10,6 @@
 #include <string>
 #include <vector>
 
-#include "cmListFileCache.h"
 #include "cmLocalCommonGenerator.h"
 #include "cmNinjaTypes.h"
 #include "cmOutputConverter.h"
@@ -21,6 +20,7 @@ class cmGeneratedFileStream;
 class cmGeneratorTarget;
 class cmGlobalGenerator;
 class cmGlobalNinjaGenerator;
+class cmListFileBacktrace;
 class cmMakefile;
 class cmRulePlaceholderExpander;
 class cmake;

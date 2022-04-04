@@ -10,10 +10,13 @@
 
 #include "cmAlgorithms.h"
 #include "cmLinkedTree.h"
-#include "cmListFileCache.h"
 #include "cmStatePrivate.h"
 #include "cmStateSnapshot.h"
 #include "cmValue.h"
+
+class cmListFileBacktrace;
+template <typename T>
+class BT;
 
 class cmStateDirectory
 {

@@ -6,6 +6,7 @@
 
 #include "cmGeneratorExpression.h"
 #include "cmInstallType.h"
+#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmStringAlgorithms.h"

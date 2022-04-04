@@ -10,12 +10,12 @@
 #include <vector>
 
 #include "cmGraphAdjacencyList.h"
-#include "cmListFileCache.h"
 
 class cmComputeComponentGraph;
 class cmGeneratorTarget;
 class cmGlobalGenerator;
 class cmLinkItem;
+class cmListFileBacktrace;
 class cmSourceFile;
 class cmTargetDependSet;
 

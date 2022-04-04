@@ -182,6 +182,8 @@ set(SRCS
   cmComputeTargetDepends.cxx
   cmConsoleBuf.h
   cmConsoleBuf.cxx
+  cmConstStack.h
+  cmConstStack.tcc
   cmCPackPropertiesGenerator.h
   cmCPackPropertiesGenerator.cxx
   cmCryptoHash.cxx

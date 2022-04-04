@@ -10,7 +10,6 @@
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
 #include "cmExecutionStatus.h"
-#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -20,6 +19,7 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
+class cmListFileBacktrace;
 class cmTarget;
 
 static void FinalAction(cmMakefile& makefile, std::string const& name,
