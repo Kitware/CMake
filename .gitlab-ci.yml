@@ -59,7 +59,7 @@ p:doc-package:
         - .cmake_doc_artifacts
         - .run_only_for_package
 
-.u:source-package:
+u:source-package:
     extends:
         - .rsync_upload_package
         - .run_only_for_package
@@ -67,8 +67,6 @@ p:doc-package:
         - p:source-package
     needs:
         - p:source-package
-    variables:
-        RSYNC_DESTINATION: dev
 
 # Documentation builds
 
@@ -529,7 +527,7 @@ b:linux-x86_64-package:
     needs:
         - p:doc-package
 
-.u:linux-x86_64-package:
+u:linux-x86_64-package:
     extends:
         - .rsync_upload_package
         - .run_only_for_package
@@ -537,8 +535,6 @@ b:linux-x86_64-package:
         - b:linux-x86_64-package
     needs:
         - b:linux-x86_64-package
-    variables:
-        RSYNC_DESTINATION: dev
 
 b:linux-aarch64-package:
     extends:
@@ -553,7 +549,7 @@ b:linux-aarch64-package:
     needs:
         - p:doc-package
 
-.u:linux-aarch64-package:
+u:linux-aarch64-package:
     extends:
         - .rsync_upload_package
         - .run_only_for_package
@@ -561,8 +557,6 @@ b:linux-aarch64-package:
         - b:linux-aarch64-package
     needs:
         - b:linux-aarch64-package
-    variables:
-        RSYNC_DESTINATION: dev
 
 ## Sanitizer builds
 
@@ -694,7 +688,7 @@ b:macos-package:
     needs:
         - p:doc-package
 
-.u:macos-package:
+u:macos-package:
     extends:
         - .rsync_upload_package
         - .run_only_for_package
@@ -702,8 +696,6 @@ b:macos-package:
         - b:macos-package
     needs:
         - b:macos-package
-    variables:
-        RSYNC_DESTINATION: dev
 
 b:macos10.10-package:
     extends:
@@ -717,7 +709,7 @@ b:macos10.10-package:
     needs:
         - p:doc-package
 
-.u:macos10.10-package:
+u:macos10.10-package:
     extends:
         - .rsync_upload_package
         - .run_only_for_package
@@ -725,8 +717,6 @@ b:macos10.10-package:
         - b:macos10.10-package
     needs:
         - b:macos10.10-package
-    variables:
-        RSYNC_DESTINATION: dev
 
 # Windows builds
 
