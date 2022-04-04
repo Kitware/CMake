@@ -16,7 +16,6 @@
 #include "cmFileSet.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
-#include "cmGlobalGenerator.h"
 #include "cmLinkItem.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
@@ -607,10 +606,10 @@ void cmExportFileGenerator::GenerateInterfaceProperties(
 
 bool cmExportFileGenerator::AddTargetNamespace(
   std::string& input, cmGeneratorTarget const* target,
-  std::vector<std::string>& missingTargets)
+  cmLocalGenerator const* lg, std::vector<std::string>& missingTargets)
 {
   cmGeneratorTarget::TargetOrString resolved =
-    target->ResolveTargetReference(input);
+    target->ResolveTargetReference(input, lg);
 
   cmGeneratorTarget* tgt = resolved.Target;
   if (!tgt) {
@@ -640,8 +639,10 @@ void cmExportFileGenerator::ResolveTargetsInGeneratorExpressions(
   std::string& input, cmGeneratorTarget const* target,
   std::vector<std::string>& missingTargets, FreeTargetsReplace replace)
 {
+  cmLocalGenerator const* lg = target->GetLocalGenerator();
   if (replace == NoReplaceFreeTargets) {
-    this->ResolveTargetsInGeneratorExpression(input, target, missingTargets);
+    this->ResolveTargetsInGeneratorExpression(input, target, lg,
+                                              missingTargets);
     return;
   }
   std::vector<std::string> parts;
@@ -650,13 +651,14 @@ void cmExportFileGenerator::ResolveTargetsInGeneratorExpressions(
   std::string sep;
   input.clear();
   for (std::string& li : parts) {
-    if (cmHasLiteralPrefix(li, CMAKE_DIRECTORY_ID_SEP)) {
+    if (target->IsLinkLookupScope(li, lg)) {
       continue;
     }
     if (cmGeneratorExpression::Find(li) == std::string::npos) {
-      this->AddTargetNamespace(li, target, missingTargets);
+      this->AddTargetNamespace(li, target, lg, missingTargets);
     } else {
-      this->ResolveTargetsInGeneratorExpression(li, target, missingTargets);
+      this->ResolveTargetsInGeneratorExpression(li, target, lg,
+                                                missingTargets);
     }
     input += sep + li;
     sep = ";";
@@ -665,7 +667,7 @@ void cmExportFileGenerator::ResolveTargetsInGeneratorExpressions(
 
 void cmExportFileGenerator::ResolveTargetsInGeneratorExpression(
   std::string& input, cmGeneratorTarget const* target,
-  std::vector<std::string>& missingTargets)
+  cmLocalGenerator const* lg, std::vector<std::string>& missingTargets)
 {
   std::string::size_type pos = 0;
   std::string::size_type lastPos = pos;
@@ -689,7 +691,7 @@ void cmExportFileGenerator::ResolveTargetsInGeneratorExpression(
     std::string targetName =
       input.substr(nameStartPos, commaPos - nameStartPos);
 
-    if (this->AddTargetNamespace(targetName, target, missingTargets)) {
+    if (this->AddTargetNamespace(targetName, target, lg, missingTargets)) {
       input.replace(nameStartPos, commaPos - nameStartPos, targetName);
     }
     lastPos = nameStartPos + targetName.size() + 1;
@@ -711,7 +713,7 @@ void cmExportFileGenerator::ResolveTargetsInGeneratorExpression(
                     "literal.";
       break;
     }
-    if (!this->AddTargetNamespace(targetName, target, missingTargets)) {
+    if (!this->AddTargetNamespace(targetName, target, lg, missingTargets)) {
       errorString = "$<TARGET_NAME:...> requires its parameter to be a "
                     "reachable target.";
       break;
@@ -732,7 +734,7 @@ void cmExportFileGenerator::ResolveTargetsInGeneratorExpression(
     }
     std::string libName = input.substr(nameStartPos, endPos - nameStartPos);
     if (cmGeneratorExpression::IsValidTargetName(libName) &&
-        this->AddTargetNamespace(libName, target, missingTargets)) {
+        this->AddTargetNamespace(libName, target, lg, missingTargets)) {
       input.replace(nameStartPos, endPos - nameStartPos, libName);
     }
     lastPos = nameStartPos + libName.size() + 1;
@@ -900,6 +902,8 @@ void cmExportFileGenerator::SetImportLinkProperty(
     return;
   }
 
+  cmLocalGenerator const* lg = target->GetLocalGenerator();
+
   // Construct the property value.
   std::string link_entries;
   const char* sep = "";
@@ -910,7 +914,7 @@ void cmExportFileGenerator::SetImportLinkProperty(
 
     if (targetNames == ImportLinkPropertyTargetNames::Yes) {
       std::string temp = asString(l);
-      this->AddTargetNamespace(temp, target, missingTargets);
+      this->AddTargetNamespace(temp, target, lg, missingTargets);
       link_entries += temp;
     } else {
       link_entries += asString(l);

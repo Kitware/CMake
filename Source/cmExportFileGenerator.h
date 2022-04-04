@@ -17,6 +17,7 @@
 
 class cmFileSet;
 class cmGeneratorTarget;
+class cmLocalGenerator;
 class cmTargetExport;
 
 #define STRINGIFY_HELPER(X) #X
@@ -223,11 +224,12 @@ private:
                                  std::vector<std::string>& missingTargets);
 
   bool AddTargetNamespace(std::string& input, cmGeneratorTarget const* target,
+                          cmLocalGenerator const* lg,
                           std::vector<std::string>& missingTargets);
 
   void ResolveTargetsInGeneratorExpression(
     std::string& input, cmGeneratorTarget const* target,
-    std::vector<std::string>& missingTargets);
+    cmLocalGenerator const* lg, std::vector<std::string>& missingTargets);
 
   virtual void ReplaceInstallPrefix(std::string& input);
 
