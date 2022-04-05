@@ -70,37 +70,21 @@ u:source-package:
 
 # Documentation builds
 
-b:help:master:
+b:cmake.org-help:
     extends:
         - .cmake_org_help
-        - .run_only_for_continuous_master
+        - .run_cmake_org_help
+    dependencies: []
+    needs: []
 
-u:help:master:
+u:cmake.org-help:
     extends:
         - .rsync_upload_help
-        - .run_only_for_continuous_master
-    variables:
-        RSYNC_DESTINATION: git-master
+        - .run_cmake_org_help
     dependencies:
-        - b:help:master
+        - b:cmake.org-help
     needs:
-        - b:help:master
-
-b:help:stage:
-    extends:
-        - .cmake_org_help
-        - .run_only_for_continuous_stage
-
-u:help:stage:
-    extends:
-        - .rsync_upload_help
-        - .run_only_for_continuous_stage
-    variables:
-        RSYNC_DESTINATION: git-stage
-    dependencies:
-        - b:help:stage
-    needs:
-        - b:help:stage
+        - b:cmake.org-help
 
 # Lint builds
 
