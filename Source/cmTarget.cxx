@@ -13,6 +13,7 @@
 #include <unordered_set>
 
 #include <cm/memory>
+#include <cm/string_view>
 #include <cmext/algorithm>
 #include <cmext/string_view>
 
@@ -216,6 +217,19 @@ public:
                             std::string const& value) const;
 
   std::string ProcessSourceItemCMP0049(const std::string& s) const;
+
+  template <typename ValueType>
+  void AddDirectoryToFileSet(cmTarget* self, std::string const& fileSetName,
+                             ValueType value, cm::string_view description,
+                             bool clear);
+  template <typename ValueType>
+  void AddPathToFileSet(cmTarget* self, std::string const& fileSetName,
+                        ValueType value, cm::string_view description,
+                        bool clear);
+  cmValue GetFileSetDirectories(cmTarget const* self,
+                                std::string const& fileSetName) const;
+  cmValue GetFileSetPaths(cmTarget const* self,
+                          std::string const& fileSetName) const;
 };
 
 namespace {
@@ -1240,6 +1254,12 @@ bool StringIsEmpty<cmValue>(cmValue const& value)
 {
   return value.IsEmpty();
 }
+
+template <>
+bool StringIsEmpty<std::string>(std::string const& value)
+{
+  return value.empty();
+}
 }
 
 template <typename ValueType>
@@ -1423,31 +1443,11 @@ void cmTarget::StoreProperty(const std::string& prop, ValueType value)
       this->impl->LanguageStandardProperties.erase(prop);
     }
   } else if (prop == propHEADER_DIRS) {
-    auto* fileSet = this->GetFileSet("HEADERS");
-    if (!fileSet) {
-      this->impl->Makefile->IssueMessage(
-        MessageType::FATAL_ERROR,
-        "The default header set has not yet been created.");
-      return;
-    }
-    fileSet->ClearDirectoryEntries();
-    if (!StringIsEmpty(value)) {
-      fileSet->AddDirectoryEntry(
-        BT<std::string>(value, this->impl->Makefile->GetBacktrace()));
-    }
+    this->impl->AddDirectoryToFileSet(this, "HEADERS", value,
+                                      "The default header set"_s, true);
   } else if (prop == propHEADER_SET) {
-    auto* fileSet = this->GetFileSet("HEADERS");
-    if (!fileSet) {
-      this->impl->Makefile->IssueMessage(
-        MessageType::FATAL_ERROR,
-        "The default header set has not yet been created.");
-      return;
-    }
-    fileSet->ClearFileEntries();
-    if (!StringIsEmpty(value)) {
-      fileSet->AddFileEntry(
-        BT<std::string>(value, this->impl->Makefile->GetBacktrace()));
-    }
+    this->impl->AddPathToFileSet(this, "HEADERS", value,
+                                 "The default header set"_s, true);
   } else if (cmHasLiteralPrefix(prop, "HEADER_DIRS_")) {
     auto fileSetName = prop.substr(cmStrLen("HEADER_DIRS_"));
     if (fileSetName.empty()) {
@@ -1455,19 +1455,9 @@ void cmTarget::StoreProperty(const std::string& prop, ValueType value)
                                          "Header set name cannot be empty.");
       return;
     }
-    auto* fileSet = this->GetFileSet(fileSetName);
-    if (!fileSet) {
-      this->impl->Makefile->IssueMessage(
-        MessageType::FATAL_ERROR,
-        cmStrCat("Header set \"", fileSetName,
-                 "\" has not yet been created."));
-      return;
-    }
-    fileSet->ClearDirectoryEntries();
-    if (!StringIsEmpty(value)) {
-      fileSet->AddDirectoryEntry(
-        BT<std::string>(value, this->impl->Makefile->GetBacktrace()));
-    }
+    this->impl->AddDirectoryToFileSet(
+      this, fileSetName, value, cmStrCat("Header set \"", fileSetName, "\""),
+      true);
   } else if (cmHasLiteralPrefix(prop, "HEADER_SET_")) {
     auto fileSetName = prop.substr(cmStrLen("HEADER_SET_"));
     if (fileSetName.empty()) {
@@ -1475,19 +1465,9 @@ void cmTarget::StoreProperty(const std::string& prop, ValueType value)
                                          "Header set name cannot be empty.");
       return;
     }
-    auto* fileSet = this->GetFileSet(fileSetName);
-    if (!fileSet) {
-      this->impl->Makefile->IssueMessage(
-        MessageType::FATAL_ERROR,
-        cmStrCat("Header set \"", fileSetName,
-                 "\" has not yet been created."));
-      return;
-    }
-    fileSet->ClearFileEntries();
-    if (!StringIsEmpty(value)) {
-      fileSet->AddFileEntry(
-        BT<std::string>(value, this->impl->Makefile->GetBacktrace()));
-    }
+    this->impl->AddPathToFileSet(this, fileSetName, value,
+                                 cmStrCat("Header set \"", fileSetName, "\""),
+                                 true);
   } else if (prop == propHEADER_SETS) {
     this->impl->Makefile->IssueMessage(MessageType::FATAL_ERROR,
                                        "HEADER_SETS property is read-only\n");
@@ -1608,15 +1588,8 @@ void cmTarget::AppendProperty(const std::string& prop,
     this->impl->Makefile->IssueMessage(
       MessageType::FATAL_ERROR, prop + " property may not be appended.");
   } else if (prop == "HEADER_DIRS") {
-    auto* fileSet = this->GetFileSet("HEADERS");
-    if (!fileSet) {
-      this->impl->Makefile->IssueMessage(
-        MessageType::FATAL_ERROR,
-        "The default header set has not yet been created.");
-      return;
-    }
-    fileSet->AddDirectoryEntry(
-      BT<std::string>(value, this->impl->Makefile->GetBacktrace()));
+    this->impl->AddDirectoryToFileSet(this, "HEADERS", value,
+                                      "The default header set"_s, false);
   } else if (cmHasLiteralPrefix(prop, "HEADER_DIRS_")) {
     auto fileSetName = prop.substr(cmStrLen("HEADER_DIRS_"));
     if (fileSetName.empty()) {
@@ -1624,26 +1597,12 @@ void cmTarget::AppendProperty(const std::string& prop,
                                          "Header set name cannot be empty.");
       return;
     }
-    auto* fileSet = this->GetFileSet(fileSetName);
-    if (!fileSet) {
-      this->impl->Makefile->IssueMessage(
-        MessageType::FATAL_ERROR,
-        cmStrCat("Header set \"", fileSetName,
-                 "\" has not yet been created."));
-      return;
-    }
-    fileSet->AddDirectoryEntry(
-      BT<std::string>(value, this->impl->Makefile->GetBacktrace()));
+    this->impl->AddDirectoryToFileSet(
+      this, fileSetName, value, cmStrCat("Header set \"", fileSetName, "\""),
+      false);
   } else if (prop == "HEADER_SET") {
-    auto* fileSet = this->GetFileSet("HEADERS");
-    if (!fileSet) {
-      this->impl->Makefile->IssueMessage(
-        MessageType::FATAL_ERROR,
-        "The default header set has not yet been created.");
-      return;
-    }
-    fileSet->AddFileEntry(
-      BT<std::string>(value, this->impl->Makefile->GetBacktrace()));
+    this->impl->AddPathToFileSet(this, "HEADERS", value,
+                                 "The default header set"_s, false);
   } else if (cmHasLiteralPrefix(prop, "HEADER_SET_")) {
     auto fileSetName = prop.substr(cmStrLen("HEADER_SET_"));
     if (fileSetName.empty()) {
@@ -1651,16 +1610,9 @@ void cmTarget::AppendProperty(const std::string& prop,
                                          "Header set name cannot be empty.");
       return;
     }
-    auto* fileSet = this->GetFileSet(fileSetName);
-    if (!fileSet) {
-      this->impl->Makefile->IssueMessage(
-        MessageType::FATAL_ERROR,
-        cmStrCat("Header set \"", fileSetName,
-                 "\" has not yet been created."));
-      return;
-    }
-    fileSet->AddFileEntry(
-      BT<std::string>(value, this->impl->Makefile->GetBacktrace()));
+    this->impl->AddPathToFileSet(this, fileSetName, value,
+                                 cmStrCat("Header set \"", fileSetName, "\""),
+                                 false);
   } else if (prop == "HEADER_SETS") {
     this->impl->Makefile->IssueMessage(MessageType::FATAL_ERROR,
                                        "HEADER_SETS property is read-only\n");
@@ -1682,6 +1634,76 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
 void cmTarget::SetProperty(const std::string& prop, cmValue value)
 {
   this->StoreProperty(prop, value);
+}
+
+template <typename ValueType>
+void cmTargetInternals::AddDirectoryToFileSet(cmTarget* self,
+                                              std::string const& fileSetName,
+                                              ValueType value,
+                                              cm::string_view description,
+                                              bool clear)
+{
+  auto* fileSet = self->GetFileSet(fileSetName);
+  if (!fileSet) {
+    this->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat(description, "has not yet been created."));
+    return;
+  }
+  if (clear) {
+    fileSet->ClearDirectoryEntries();
+  }
+  if (!StringIsEmpty(value)) {
+    fileSet->AddDirectoryEntry(
+      BT<std::string>(value, this->Makefile->GetBacktrace()));
+  }
+}
+
+template <typename ValueType>
+void cmTargetInternals::AddPathToFileSet(cmTarget* self,
+                                         std::string const& fileSetName,
+                                         ValueType value,
+                                         cm::string_view description,
+                                         bool clear)
+{
+  auto* fileSet = self->GetFileSet(fileSetName);
+  if (!fileSet) {
+    this->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat(description, "has not yet been created."));
+    return;
+  }
+  if (clear) {
+    fileSet->ClearFileEntries();
+  }
+  if (!StringIsEmpty(value)) {
+    fileSet->AddFileEntry(
+      BT<std::string>(value, this->Makefile->GetBacktrace()));
+  }
+}
+
+cmValue cmTargetInternals::GetFileSetDirectories(
+  cmTarget const* self, std::string const& fileSetName) const
+{
+  auto const* fileSet = self->GetFileSet(fileSetName);
+  if (!fileSet) {
+    return nullptr;
+  }
+  static std::string output;
+  output = cmJoin(fileSet->GetDirectoryEntries(), ";"_s);
+  return cmValue(output);
+}
+
+cmValue cmTargetInternals::GetFileSetPaths(
+  cmTarget const* self, std::string const& fileSetName) const
+{
+  auto const* fileSet = self->GetFileSet(fileSetName);
+  if (!fileSet) {
+    return nullptr;
+  }
+  static std::string output;
+  output = cmJoin(fileSet->GetFileEntries(), ";"_s);
+  return cmValue(output);
 }
 
 void cmTarget::AppendBuildInterfaceIncludes()
@@ -2076,22 +2098,10 @@ cmValue cmTarget::GetProperty(const std::string& prop) const
                        .GetCurrentSource());
     }
     if (prop == propHEADER_DIRS) {
-      auto const* fileSet = this->GetFileSet("HEADERS");
-      if (!fileSet) {
-        return nullptr;
-      }
-      static std::string output;
-      output = cmJoin(fileSet->GetDirectoryEntries(), ";"_s);
-      return cmValue(output);
+      return this->impl->GetFileSetDirectories(this, "HEADERS");
     }
     if (prop == propHEADER_SET) {
-      auto const* fileSet = this->GetFileSet("HEADERS");
-      if (!fileSet) {
-        return nullptr;
-      }
-      static std::string output;
-      output = cmJoin(fileSet->GetFileEntries(), ";"_s);
-      return cmValue(output);
+      return this->impl->GetFileSetPaths(this, "HEADERS");
     }
     if (prop == propHEADER_SETS) {
       std::vector<std::string> set_names;
@@ -2122,26 +2132,14 @@ cmValue cmTarget::GetProperty(const std::string& prop) const
     if (fileSetName.empty()) {
       return nullptr;
     }
-    auto const* fileSet = this->GetFileSet(fileSetName);
-    if (!fileSet) {
-      return nullptr;
-    }
-    static std::string output;
-    output = cmJoin(fileSet->GetDirectoryEntries(), ";"_s);
-    return cmValue(output);
+    return this->impl->GetFileSetDirectories(this, fileSetName);
   }
   if (cmHasLiteralPrefix(prop, "HEADER_SET_")) {
     std::string fileSetName = prop.substr(cmStrLen("HEADER_SET_"));
     if (fileSetName.empty()) {
       return nullptr;
     }
-    auto const* fileSet = this->GetFileSet(fileSetName);
-    if (!fileSet) {
-      return nullptr;
-    }
-    static std::string output;
-    output = cmJoin(fileSet->GetFileEntries(), ";"_s);
-    return cmValue(output);
+    return this->impl->GetFileSetPaths(this, fileSetName);
   }
 
   cmValue retVal = this->impl->Properties.GetPropertyValue(prop);
