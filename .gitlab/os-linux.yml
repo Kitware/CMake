@@ -512,5 +512,8 @@
         - *before_script_linux
         - mkdir -p build/
         - cd build/
-        - cmake ../Utilities/Sphinx -GNinja -DSPHINX_HTML=ON -DSPHINX_FLAGS="-A versionswitch=1"
+        - cmake ../Utilities/Sphinx -GNinja -DSPHINX_HTML=ON
+          -DCMake_SPHINX_CMAKE_ORG=ON
+          -DCMake_SPHINX_CMAKE_ORG_OUTDATED=$CMAKE_CI_SPHINX_OUTDATED
+          -DCMake_VERSION_NO_GIT=$CMAKE_CI_VERSION_NO_GIT
         - ninja
