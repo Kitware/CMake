@@ -616,6 +616,16 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
   cmTarget* allbuild =
     root->AddUtilityCommand("ALL_BUILD", true, std::move(cc));
 
+  // Add xcconfig files to ALL_BUILD sources
+  for (auto& config : this->CurrentConfigurationTypes) {
+    auto xcconfig = cmGeneratorExpression::Evaluate(
+      this->CurrentMakefile->GetSafeDefinition("CMAKE_XCODE_XCCONFIG"),
+      this->CurrentLocalGenerator, config);
+    if (!xcconfig.empty()) {
+      allbuild->AddSource(xcconfig);
+    }
+  }
+
   root->AddGeneratorTarget(cm::make_unique<cmGeneratorTarget>(allbuild, root));
 
   // Add XCODE depend helper
@@ -1142,6 +1152,9 @@ std::string GetSourcecodeValueFromFileExtension(
   } else if (ext == "xcassets") {
     keepLastKnownFileType = true;
     sourcecode = "folder.assetcatalog";
+  } else if (ext == "xcconfig") {
+    keepLastKnownFileType = true;
+    sourcecode = "text.xcconfig";
   }
   // else
   //  {
@@ -3045,6 +3058,8 @@ std::string cmGlobalXCodeGenerator::AddConfigurations(cmXCodeObject* target,
     config->AddAttribute("name", this->CreateString(i));
     config->SetComment(i);
     config->AddAttribute("buildSettings", buildSettings);
+
+    this->CreateTargetXCConfigSettings(gtgt, config, i);
   }
   if (!configVector.empty()) {
     configlist->AddAttribute("defaultConfigurationName",
@@ -3054,6 +3069,67 @@ std::string cmGlobalXCodeGenerator::AddConfigurations(cmXCodeObject* target,
     return configVector[0];
   }
   return "";
+}
+
+void cmGlobalXCodeGenerator::CreateGlobalXCConfigSettings(
+  cmLocalGenerator* root, cmXCodeObject* config, const std::string& configName)
+{
+  auto xcconfig = cmGeneratorExpression::Evaluate(
+    this->CurrentMakefile->GetSafeDefinition("CMAKE_XCODE_XCCONFIG"),
+    this->CurrentLocalGenerator, configName);
+  if (xcconfig.empty()) {
+    return;
+  }
+
+  auto sf = this->CurrentMakefile->GetSource(xcconfig);
+  if (!sf) {
+    cmSystemTools::Error(
+      cmStrCat("sources for ALL_BUILD do not contain xcconfig file: '",
+               xcconfig, "' (configuration: ", configName, ")"));
+    return;
+  }
+
+  cmXCodeObject* fileRef = this->CreateXCodeFileReferenceFromPath(
+    sf->ResolveFullPath(), root->FindGeneratorTargetToUse("ALL_BUILD"), "",
+    sf);
+
+  if (!fileRef) {
+    // error is already reported by CreateXCodeFileReferenceFromPath
+    return;
+  }
+
+  config->AddAttribute("baseConfigurationReference",
+                       this->CreateObjectReference(fileRef));
+}
+
+void cmGlobalXCodeGenerator::CreateTargetXCConfigSettings(
+  cmGeneratorTarget* target, cmXCodeObject* config,
+  const std::string& configName)
+{
+  auto xcconfig =
+    cmGeneratorExpression::Evaluate(target->GetSafeProperty("XCODE_XCCONFIG"),
+                                    this->CurrentLocalGenerator, configName);
+  if (xcconfig.empty()) {
+    return;
+  }
+
+  auto sf = target->Makefile->GetSource(xcconfig);
+  if (!sf) {
+    cmSystemTools::Error(cmStrCat("target sources for target ",
+                                  target->Target->GetName(),
+                                  " do not contain xcconfig file: '", xcconfig,
+                                  "' (configuration: ", configName, ")"));
+    return;
+  }
+
+  cmXCodeObject* fileRef = this->CreateXCodeFileReferenceFromPath(
+    sf->ResolveFullPath(), target, "", sf);
+  if (!fileRef) {
+    // error is already reported by CreateXCodeFileReferenceFromPath
+    return;
+  }
+  config->AddAttribute("baseConfigurationReference",
+                       this->CreateObjectReference(fileRef));
 }
 
 const char* cmGlobalXCodeGenerator::GetTargetLinkFlagsVar(
@@ -4245,6 +4321,8 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
   }
 
   for (auto& config : configs) {
+    CreateGlobalXCConfigSettings(root, config.second, config.first);
+
     cmXCodeObject* buildSettingsForCfg = this->CreateFlatClone(buildSettings);
 
     // Put this last so it can override existing settings

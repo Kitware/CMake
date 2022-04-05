@@ -224,6 +224,12 @@ private:
   void AddPositionIndependentLinkAttribute(cmGeneratorTarget* target,
                                            cmXCodeObject* buildSettings,
                                            const std::string& configName);
+  void CreateGlobalXCConfigSettings(cmLocalGenerator* root,
+                                    cmXCodeObject* config,
+                                    const std::string& configName);
+  void CreateTargetXCConfigSettings(cmGeneratorTarget* target,
+                                    cmXCodeObject* config,
+                                    const std::string& configName);
   void CreateBuildSettings(cmGeneratorTarget* gtgt,
                            cmXCodeObject* buildSettings,
                            const std::string& buildType);
