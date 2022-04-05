@@ -64,11 +64,13 @@
 
 .run_only_for_package:
     rules:
-        - if: '$CMAKE_CI_PACKAGE != null && $CMAKE_CI_JOB_UPLOAD_PACKAGE == null'
-          when: on_success
-        - if: '$CMAKE_CI_PACKAGE == "dev" && $CMAKE_CI_JOB_UPLOAD_PACKAGE == "true"'
+        - if: '$CMAKE_CI_PACKAGE == "dev"'
           variables:
               RSYNC_DESTINATION: "dev"
+          when: on_success
+        - if: '$CMAKE_CI_PACKAGE != null && $CI_JOB_STAGE == "prep"'
+          when: manual
+        - if: '$CMAKE_CI_PACKAGE != null && $CI_JOB_STAGE != "upload"'
           when: on_success
         - when: never
 
