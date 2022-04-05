@@ -220,16 +220,17 @@ public:
 
   template <typename ValueType>
   void AddDirectoryToFileSet(cmTarget* self, std::string const& fileSetName,
-                             ValueType value, cm::string_view description,
-                             bool clear);
+                             ValueType value, cm::string_view fileSetType,
+                             cm::string_view description, bool clear);
   template <typename ValueType>
   void AddPathToFileSet(cmTarget* self, std::string const& fileSetName,
-                        ValueType value, cm::string_view description,
-                        bool clear);
+                        ValueType value, cm::string_view fileSetType,
+                        cm::string_view description, bool clear);
   cmValue GetFileSetDirectories(cmTarget const* self,
-                                std::string const& fileSetName) const;
-  cmValue GetFileSetPaths(cmTarget const* self,
-                          std::string const& fileSetName) const;
+                                std::string const& fileSetName,
+                                cm::string_view fileSetType) const;
+  cmValue GetFileSetPaths(cmTarget const* self, std::string const& fileSetName,
+                          cm::string_view fileSetType) const;
 };
 
 namespace {
@@ -1443,10 +1444,10 @@ void cmTarget::StoreProperty(const std::string& prop, ValueType value)
       this->impl->LanguageStandardProperties.erase(prop);
     }
   } else if (prop == propHEADER_DIRS) {
-    this->impl->AddDirectoryToFileSet(this, "HEADERS", value,
+    this->impl->AddDirectoryToFileSet(this, "HEADERS", value, "HEADERS"_s,
                                       "The default header set"_s, true);
   } else if (prop == propHEADER_SET) {
-    this->impl->AddPathToFileSet(this, "HEADERS", value,
+    this->impl->AddPathToFileSet(this, "HEADERS", value, "HEADERS"_s,
                                  "The default header set"_s, true);
   } else if (cmHasLiteralPrefix(prop, "HEADER_DIRS_")) {
     auto fileSetName = prop.substr(cmStrLen("HEADER_DIRS_"));
@@ -1456,8 +1457,8 @@ void cmTarget::StoreProperty(const std::string& prop, ValueType value)
       return;
     }
     this->impl->AddDirectoryToFileSet(
-      this, fileSetName, value, cmStrCat("Header set \"", fileSetName, "\""),
-      true);
+      this, fileSetName, value, "HEADERS"_s,
+      cmStrCat("Header set \"", fileSetName, "\""), true);
   } else if (cmHasLiteralPrefix(prop, "HEADER_SET_")) {
     auto fileSetName = prop.substr(cmStrLen("HEADER_SET_"));
     if (fileSetName.empty()) {
@@ -1465,7 +1466,7 @@ void cmTarget::StoreProperty(const std::string& prop, ValueType value)
                                          "Header set name cannot be empty.");
       return;
     }
-    this->impl->AddPathToFileSet(this, fileSetName, value,
+    this->impl->AddPathToFileSet(this, fileSetName, value, "HEADERS"_s,
                                  cmStrCat("Header set \"", fileSetName, "\""),
                                  true);
   } else if (prop == propHEADER_SETS) {
@@ -1588,7 +1589,7 @@ void cmTarget::AppendProperty(const std::string& prop,
     this->impl->Makefile->IssueMessage(
       MessageType::FATAL_ERROR, prop + " property may not be appended.");
   } else if (prop == "HEADER_DIRS") {
-    this->impl->AddDirectoryToFileSet(this, "HEADERS", value,
+    this->impl->AddDirectoryToFileSet(this, "HEADERS", value, "HEADERS"_s,
                                       "The default header set"_s, false);
   } else if (cmHasLiteralPrefix(prop, "HEADER_DIRS_")) {
     auto fileSetName = prop.substr(cmStrLen("HEADER_DIRS_"));
@@ -1598,10 +1599,10 @@ void cmTarget::AppendProperty(const std::string& prop,
       return;
     }
     this->impl->AddDirectoryToFileSet(
-      this, fileSetName, value, cmStrCat("Header set \"", fileSetName, "\""),
-      false);
+      this, fileSetName, value, "HEADERS"_s,
+      cmStrCat("Header set \"", fileSetName, "\""), false);
   } else if (prop == "HEADER_SET") {
-    this->impl->AddPathToFileSet(this, "HEADERS", value,
+    this->impl->AddPathToFileSet(this, "HEADERS", value, "HEADERS"_s,
                                  "The default header set"_s, false);
   } else if (cmHasLiteralPrefix(prop, "HEADER_SET_")) {
     auto fileSetName = prop.substr(cmStrLen("HEADER_SET_"));
@@ -1610,7 +1611,7 @@ void cmTarget::AppendProperty(const std::string& prop,
                                          "Header set name cannot be empty.");
       return;
     }
-    this->impl->AddPathToFileSet(this, fileSetName, value,
+    this->impl->AddPathToFileSet(this, fileSetName, value, "HEADERS"_s,
                                  cmStrCat("Header set \"", fileSetName, "\""),
                                  false);
   } else if (prop == "HEADER_SETS") {
@@ -1637,17 +1638,22 @@ void cmTarget::SetProperty(const std::string& prop, cmValue value)
 }
 
 template <typename ValueType>
-void cmTargetInternals::AddDirectoryToFileSet(cmTarget* self,
-                                              std::string const& fileSetName,
-                                              ValueType value,
-                                              cm::string_view description,
-                                              bool clear)
+void cmTargetInternals::AddDirectoryToFileSet(
+  cmTarget* self, std::string const& fileSetName, ValueType value,
+  cm::string_view fileSetType, cm::string_view description, bool clear)
 {
   auto* fileSet = self->GetFileSet(fileSetName);
   if (!fileSet) {
     this->Makefile->IssueMessage(
       MessageType::FATAL_ERROR,
       cmStrCat(description, "has not yet been created."));
+    return;
+  }
+  if (fileSet->GetType() != fileSetType) {
+    this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
+                                 cmStrCat("File set \"", fileSetName,
+                                          "\" is not of type \"", fileSetType,
+                                          "\"."));
     return;
   }
   if (clear) {
@@ -1660,17 +1666,22 @@ void cmTargetInternals::AddDirectoryToFileSet(cmTarget* self,
 }
 
 template <typename ValueType>
-void cmTargetInternals::AddPathToFileSet(cmTarget* self,
-                                         std::string const& fileSetName,
-                                         ValueType value,
-                                         cm::string_view description,
-                                         bool clear)
+void cmTargetInternals::AddPathToFileSet(
+  cmTarget* self, std::string const& fileSetName, ValueType value,
+  cm::string_view fileSetType, cm::string_view description, bool clear)
 {
   auto* fileSet = self->GetFileSet(fileSetName);
   if (!fileSet) {
     this->Makefile->IssueMessage(
       MessageType::FATAL_ERROR,
       cmStrCat(description, "has not yet been created."));
+    return;
+  }
+  if (fileSet->GetType() != fileSetType) {
+    this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
+                                 cmStrCat("File set \"", fileSetName,
+                                          "\" is not of type \"", fileSetType,
+                                          "\"."));
     return;
   }
   if (clear) {
@@ -1683,10 +1694,18 @@ void cmTargetInternals::AddPathToFileSet(cmTarget* self,
 }
 
 cmValue cmTargetInternals::GetFileSetDirectories(
-  cmTarget const* self, std::string const& fileSetName) const
+  cmTarget const* self, std::string const& fileSetName,
+  cm::string_view fileSetType) const
 {
   auto const* fileSet = self->GetFileSet(fileSetName);
   if (!fileSet) {
+    return nullptr;
+  }
+  if (fileSet->GetType() != fileSetType) {
+    this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
+                                 cmStrCat("File set \"", fileSetName,
+                                          "\" is not of type \"", fileSetType,
+                                          "\"."));
     return nullptr;
   }
   static std::string output;
@@ -1694,11 +1713,19 @@ cmValue cmTargetInternals::GetFileSetDirectories(
   return cmValue(output);
 }
 
-cmValue cmTargetInternals::GetFileSetPaths(
-  cmTarget const* self, std::string const& fileSetName) const
+cmValue cmTargetInternals::GetFileSetPaths(cmTarget const* self,
+                                           std::string const& fileSetName,
+                                           cm::string_view fileSetType) const
 {
   auto const* fileSet = self->GetFileSet(fileSetName);
   if (!fileSet) {
+    return nullptr;
+  }
+  if (fileSet->GetType() != fileSetType) {
+    this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
+                                 cmStrCat("File set \"", fileSetName,
+                                          "\" is not of type \"", fileSetType,
+                                          "\"."));
     return nullptr;
   }
   static std::string output;
@@ -2098,10 +2125,10 @@ cmValue cmTarget::GetProperty(const std::string& prop) const
                        .GetCurrentSource());
     }
     if (prop == propHEADER_DIRS) {
-      return this->impl->GetFileSetDirectories(this, "HEADERS");
+      return this->impl->GetFileSetDirectories(this, "HEADERS", "HEADERS"_s);
     }
     if (prop == propHEADER_SET) {
-      return this->impl->GetFileSetPaths(this, "HEADERS");
+      return this->impl->GetFileSetPaths(this, "HEADERS", "HEADERS"_s);
     }
     if (prop == propHEADER_SETS) {
       std::vector<std::string> set_names;
@@ -2132,14 +2159,14 @@ cmValue cmTarget::GetProperty(const std::string& prop) const
     if (fileSetName.empty()) {
       return nullptr;
     }
-    return this->impl->GetFileSetDirectories(this, fileSetName);
+    return this->impl->GetFileSetDirectories(this, fileSetName, "HEADERS"_s);
   }
   if (cmHasLiteralPrefix(prop, "HEADER_SET_")) {
     std::string fileSetName = prop.substr(cmStrLen("HEADER_SET_"));
     if (fileSetName.empty()) {
       return nullptr;
     }
-    return this->impl->GetFileSetPaths(this, fileSetName);
+    return this->impl->GetFileSetPaths(this, fileSetName, "HEADERS"_s);
   }
 
   cmValue retVal = this->impl->Properties.GetPropertyValue(prop);
