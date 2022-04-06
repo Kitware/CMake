@@ -1,4 +1,4 @@
-/* A Bison parser, made by GNU Bison 3.7.5.  */
+/* A Bison parser, made by GNU Bison 3.8.2.  */
 
 /* Bison implementation for Yacc-like parsers in C
 
@@ -16,7 +16,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -46,10 +46,10 @@
    USER NAME SPACE" below.  */
 
 /* Identify Bison output, and Bison version.  */
-#define YYBISON 30705
+#define YYBISON 30802
 
 /* Bison version string.  */
-#define YYBISON_VERSION "3.7.5"
+#define YYBISON_VERSION "3.8.2"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -336,12 +336,18 @@ typedef int yy_state_fast_t;
 # define YY_USE(E) /* empty */
 #endif
 
-#if defined __GNUC__ && ! defined __ICC && 407 <= __GNUC__ * 100 + __GNUC_MINOR__
 /* Suppress an incorrect diagnostic about yylval being uninitialized.  */
-# define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN                            \
+#if defined __GNUC__ && ! defined __ICC && 406 <= __GNUC__ * 100 + __GNUC_MINOR__
+# if __GNUC__ * 100 + __GNUC_MINOR__ < 407
+#  define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN                           \
+    _Pragma ("GCC diagnostic push")                                     \
+    _Pragma ("GCC diagnostic ignored \"-Wuninitialized\"")
+# else
+#  define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN                           \
     _Pragma ("GCC diagnostic push")                                     \
     _Pragma ("GCC diagnostic ignored \"-Wuninitialized\"")              \
     _Pragma ("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")
+# endif
 # define YY_IGNORE_MAYBE_UNINITIALIZED_END      \
     _Pragma ("GCC diagnostic pop")
 #else
@@ -557,7 +563,7 @@ static const yytype_int8 yytranslate[] =
 };
 
 #if YYDEBUG
-  /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
+/* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
        0,    85,    85,    90,    93,    98,   101,   106,   109,   114,
@@ -593,16 +599,6 @@ yysymbol_name (yysymbol_kind_t yysymbol)
 }
 #endif
 
-#ifdef YYPRINT
-/* YYTOKNUM[NUM] -- (External) token number corresponding to the
-   (internal) symbol number NUM (which must be that of a token).  */
-static const yytype_int16 yytoknum[] =
-{
-       0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
-     265,   266,   267,   268,   269,   270,   271
-};
-#endif
-
 #define YYPACT_NINF (-11)
 
 #define yypact_value_is_default(Yyn) \
@@ -613,8 +609,8 @@ static const yytype_int16 yytoknum[] =
 #define yytable_value_is_error(Yyn) \
   0
 
-  /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
-     STATE-NUM.  */
+/* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
+   STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
        1,     1,     1,     1,     1,   -11,     6,   -10,    -4,     9,
@@ -624,9 +620,9 @@ static const yytype_int8 yypact[] =
      -11
 };
 
-  /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
-     Performed when YYTABLE does not specify something else to do.  Zero
-     means the default is an error.  */
+/* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
+   Performed when YYTABLE does not specify something else to do.  Zero
+   means the default is an error.  */
 static const yytype_int8 yydefact[] =
 {
        0,     0,     0,     0,     0,    23,     0,     2,     3,     5,
@@ -636,21 +632,21 @@ static const yytype_int8 yydefact[] =
       18
 };
 
-  /* YYPGOTO[NTERM-NUM].  */
+/* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
      -11,   -11,    22,    10,     8,    12,    -3,    -2,    -1,   -11
 };
 
-  /* YYDEFGOTO[NTERM-NUM].  */
+/* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
        0,     6,     7,     8,     9,    10,    11,    12,    13,    14
 };
 
-  /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
-     positive, shift that token.  If negative, reduce the rule whose
-     number is the opposite.  If YYTABLE_NINF, syntax error.  */
+/* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
+   positive, shift that token.  If negative, reduce the rule whose
+   number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
       15,    16,    20,    18,     1,     2,    19,    27,    28,    29,
@@ -667,8 +663,8 @@ static const yytype_int8 yycheck[] =
       20,    -1,    -1,    -1,    22
 };
 
-  /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
-     symbol of state STATE-NUM.  */
+/* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
+   state STATE-NUM.  */
 static const yytype_int8 yystos[] =
 {
        0,     3,     4,    10,    15,    16,    18,    19,    20,    21,
@@ -678,7 +674,7 @@ static const yytype_int8 yystos[] =
       25
 };
 
-  /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
+/* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr1[] =
 {
        0,    17,    18,    19,    19,    20,    20,    21,    21,    22,
@@ -686,7 +682,7 @@ static const yytype_int8 yyr1[] =
       25,    25,    25,    26,    26
 };
 
-  /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
+/* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr2[] =
 {
        0,     2,     1,     1,     3,     1,     3,     1,     3,     1,
@@ -703,6 +699,7 @@ enum { YYENOMEM = -2 };
 #define YYACCEPT        goto yyacceptlab
 #define YYABORT         goto yyabortlab
 #define YYERROR         goto yyerrorlab
+#define YYNOMEM         goto yyexhaustedlab
 
 
 #define YYRECOVERING()  (!!yyerrstatus)
@@ -743,10 +740,7 @@ do {                                            \
     YYFPRINTF Args;                             \
 } while (0)
 
-/* This macro is provided for backward compatibility. */
-# ifndef YY_LOCATION_PRINT
-#  define YY_LOCATION_PRINT(File, Loc) ((void) 0)
-# endif
+
 
 
 # define YY_SYMBOL_PRINT(Title, Kind, Value, Location)                    \
@@ -774,10 +768,6 @@ yy_symbol_value_print (FILE *yyo,
   YY_USE (yyscanner);
   if (!yyvaluep)
     return;
-# ifdef YYPRINT
-  if (yykind < YYNTOKENS)
-    YYPRINT (yyo, yytoknum[yykind], *yyvaluep);
-# endif
   YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
   YY_USE (yykind);
   YY_IGNORE_MAYBE_UNINITIALIZED_END
@@ -1239,6 +1229,7 @@ YYSTYPE yylval YY_INITIAL_VALUE (= yyval_default);
   YYDPRINTF ((stderr, "Starting parse\n"));
 
   yychar = YYEMPTY; /* Cause a token to be read.  */
+
   goto yysetstate;
 
 
@@ -1264,7 +1255,7 @@ yysetstate:
 
   if (yyss + yystacksize - 1 <= yyssp)
 #if !defined yyoverflow && !defined YYSTACK_RELOCATE
-    goto yyexhaustedlab;
+    YYNOMEM;
 #else
     {
       /* Get the current used size of the three stacks, in elements.  */
@@ -1292,7 +1283,7 @@ yysetstate:
 # else /* defined YYSTACK_RELOCATE */
       /* Extend the stack our own way.  */
       if (YYMAXDEPTH <= yystacksize)
-        goto yyexhaustedlab;
+        YYNOMEM;
       yystacksize *= 2;
       if (YYMAXDEPTH < yystacksize)
         yystacksize = YYMAXDEPTH;
@@ -1303,7 +1294,7 @@ yysetstate:
           YY_CAST (union yyalloc *,
                    YYSTACK_ALLOC (YY_CAST (YYSIZE_T, YYSTACK_BYTES (yystacksize))));
         if (! yyptr)
-          goto yyexhaustedlab;
+          YYNOMEM;
         YYSTACK_RELOCATE (yyss_alloc, yyss);
         YYSTACK_RELOCATE (yyvs_alloc, yyvs);
 #  undef YYSTACK_RELOCATE
@@ -1324,6 +1315,7 @@ yysetstate:
         YYABORT;
     }
 #endif /* !defined yyoverflow && !defined YYSTACK_RELOCATE */
+
 
   if (yystate == YYFINAL)
     YYACCEPT;
@@ -1441,7 +1433,7 @@ yyreduce:
       {
     cmExpr_yyget_extra(yyscanner)->SetResult((yyvsp[0].Number));
   }
-#line 1445 "cmExprParser.cxx"
+#line 1437 "cmExprParser.cxx"
     break;
 
   case 3: /* exp: bitwiseor  */
@@ -1449,7 +1441,7 @@ yyreduce:
             {
     (yyval.Number) = (yyvsp[0].Number);
   }
-#line 1453 "cmExprParser.cxx"
+#line 1445 "cmExprParser.cxx"
     break;
 
   case 4: /* exp: exp exp_OR bitwiseor  */
@@ -1457,7 +1449,7 @@ yyreduce:
                        {
     (yyval.Number) = (yyvsp[-2].Number) | (yyvsp[0].Number);
   }
-#line 1461 "cmExprParser.cxx"
+#line 1453 "cmExprParser.cxx"
     break;
 
   case 5: /* bitwiseor: bitwisexor  */
@@ -1465,7 +1457,7 @@ yyreduce:
              {
     (yyval.Number) = (yyvsp[0].Number);
   }
-#line 1469 "cmExprParser.cxx"
+#line 1461 "cmExprParser.cxx"
     break;
 
   case 6: /* bitwiseor: bitwiseor exp_XOR bitwisexor  */
@@ -1473,7 +1465,7 @@ yyreduce:
                                {
     (yyval.Number) = (yyvsp[-2].Number) ^ (yyvsp[0].Number);
   }
-#line 1477 "cmExprParser.cxx"
+#line 1469 "cmExprParser.cxx"
     break;
 
   case 7: /* bitwisexor: bitwiseand  */
@@ -1481,7 +1473,7 @@ yyreduce:
              {
     (yyval.Number) = (yyvsp[0].Number);
   }
-#line 1485 "cmExprParser.cxx"
+#line 1477 "cmExprParser.cxx"
     break;
 
   case 8: /* bitwisexor: bitwisexor exp_AND bitwiseand  */
@@ -1489,7 +1481,7 @@ yyreduce:
                                 {
     (yyval.Number) = (yyvsp[-2].Number) & (yyvsp[0].Number);
   }
-#line 1493 "cmExprParser.cxx"
+#line 1485 "cmExprParser.cxx"
     break;
 
   case 9: /* bitwiseand: shift  */
@@ -1497,7 +1489,7 @@ yyreduce:
         {
     (yyval.Number) = (yyvsp[0].Number);
   }
-#line 1501 "cmExprParser.cxx"
+#line 1493 "cmExprParser.cxx"
     break;
 
   case 10: /* bitwiseand: bitwiseand exp_SHIFTLEFT shift  */
@@ -1505,7 +1497,7 @@ yyreduce:
                                  {
     (yyval.Number) = (yyvsp[-2].Number) << (yyvsp[0].Number);
   }
-#line 1509 "cmExprParser.cxx"
+#line 1501 "cmExprParser.cxx"
     break;
 
   case 11: /* bitwiseand: bitwiseand exp_SHIFTRIGHT shift  */
@@ -1513,7 +1505,7 @@ yyreduce:
                                   {
     (yyval.Number) = (yyvsp[-2].Number) >> (yyvsp[0].Number);
   }
-#line 1517 "cmExprParser.cxx"
+#line 1509 "cmExprParser.cxx"
     break;
 
   case 12: /* shift: term  */
@@ -1521,7 +1513,7 @@ yyreduce:
        {
     (yyval.Number) = (yyvsp[0].Number);
   }
-#line 1525 "cmExprParser.cxx"
+#line 1517 "cmExprParser.cxx"
     break;
 
   case 13: /* shift: shift exp_PLUS term  */
@@ -1529,7 +1521,7 @@ yyreduce:
                       {
     (yyval.Number) = (yyvsp[-2].Number) + (yyvsp[0].Number);
   }
-#line 1533 "cmExprParser.cxx"
+#line 1525 "cmExprParser.cxx"
     break;
 
   case 14: /* shift: shift exp_MINUS term  */
@@ -1537,7 +1529,7 @@ yyreduce:
                        {
     (yyval.Number) = (yyvsp[-2].Number) - (yyvsp[0].Number);
   }
-#line 1541 "cmExprParser.cxx"
+#line 1533 "cmExprParser.cxx"
     break;
 
   case 15: /* term: unary  */
@@ -1545,7 +1537,7 @@ yyreduce:
         {
     (yyval.Number) = (yyvsp[0].Number);
   }
-#line 1549 "cmExprParser.cxx"
+#line 1541 "cmExprParser.cxx"
     break;
 
   case 16: /* term: term exp_TIMES unary  */
@@ -1553,7 +1545,7 @@ yyreduce:
                        {
     (yyval.Number) = (yyvsp[-2].Number) * (yyvsp[0].Number);
   }
-#line 1557 "cmExprParser.cxx"
+#line 1549 "cmExprParser.cxx"
     break;
 
   case 17: /* term: term exp_DIVIDE unary  */
@@ -1564,7 +1556,7 @@ yyreduce:
     }
     (yyval.Number) = (yyvsp[-2].Number) / (yyvsp[0].Number);
   }
-#line 1568 "cmExprParser.cxx"
+#line 1560 "cmExprParser.cxx"
     break;
 
   case 18: /* term: term exp_MOD unary  */
@@ -1572,7 +1564,7 @@ yyreduce:
                      {
     (yyval.Number) = (yyvsp[-2].Number) % (yyvsp[0].Number);
   }
-#line 1576 "cmExprParser.cxx"
+#line 1568 "cmExprParser.cxx"
     break;
 
   case 19: /* unary: factor  */
@@ -1580,7 +1572,7 @@ yyreduce:
          {
     (yyval.Number) = (yyvsp[0].Number);
   }
-#line 1584 "cmExprParser.cxx"
+#line 1576 "cmExprParser.cxx"
     break;
 
   case 20: /* unary: exp_PLUS unary  */
@@ -1588,7 +1580,7 @@ yyreduce:
                  {
     (yyval.Number) = + (yyvsp[0].Number);
   }
-#line 1592 "cmExprParser.cxx"
+#line 1584 "cmExprParser.cxx"
     break;
 
   case 21: /* unary: exp_MINUS unary  */
@@ -1596,7 +1588,7 @@ yyreduce:
                   {
     (yyval.Number) = - (yyvsp[0].Number);
   }
-#line 1600 "cmExprParser.cxx"
+#line 1592 "cmExprParser.cxx"
     break;
 
   case 22: /* unary: exp_NOT unary  */
@@ -1604,7 +1596,7 @@ yyreduce:
                 {
     (yyval.Number) = ~ (yyvsp[0].Number);
   }
-#line 1608 "cmExprParser.cxx"
+#line 1600 "cmExprParser.cxx"
     break;
 
   case 23: /* factor: exp_NUMBER  */
@@ -1612,7 +1604,7 @@ yyreduce:
              {
     (yyval.Number) = (yyvsp[0].Number);
   }
-#line 1616 "cmExprParser.cxx"
+#line 1608 "cmExprParser.cxx"
     break;
 
   case 24: /* factor: exp_OPENPARENT exp exp_CLOSEPARENT  */
@@ -1620,11 +1612,11 @@ yyreduce:
                                      {
     (yyval.Number) = (yyvsp[-1].Number);
   }
-#line 1624 "cmExprParser.cxx"
+#line 1616 "cmExprParser.cxx"
     break;
 
 
-#line 1628 "cmExprParser.cxx"
+#line 1620 "cmExprParser.cxx"
 
       default: break;
     }
@@ -1700,7 +1692,7 @@ yyerrlab:
           }
         yyerror (yyscanner, yymsgp);
         if (yysyntax_error_status == YYENOMEM)
-          goto yyexhaustedlab;
+          YYNOMEM;
       }
     }
 
@@ -1736,6 +1728,7 @@ yyerrorlab:
      label yyerrorlab therefore never appears in user code.  */
   if (0)
     YYERROR;
+  ++yynerrs;
 
   /* Do not reclaim the symbols of the rule whose action triggered
      this YYERROR.  */
@@ -1796,7 +1789,7 @@ yyerrlab1:
 `-------------------------------------*/
 yyacceptlab:
   yyresult = 0;
-  goto yyreturn;
+  goto yyreturnlab;
 
 
 /*-----------------------------------.
@@ -1804,24 +1797,22 @@ yyacceptlab:
 `-----------------------------------*/
 yyabortlab:
   yyresult = 1;
-  goto yyreturn;
+  goto yyreturnlab;
 
 
-#if 1
-/*-------------------------------------------------.
-| yyexhaustedlab -- memory exhaustion comes here.  |
-`-------------------------------------------------*/
+/*-----------------------------------------------------------.
+| yyexhaustedlab -- YYNOMEM (memory exhaustion) comes here.  |
+`-----------------------------------------------------------*/
 yyexhaustedlab:
   yyerror (yyscanner, YY_("memory exhausted"));
   yyresult = 2;
-  goto yyreturn;
-#endif
+  goto yyreturnlab;
 
 
-/*-------------------------------------------------------.
-| yyreturn -- parsing is finished, clean up and return.  |
-`-------------------------------------------------------*/
-yyreturn:
+/*----------------------------------------------------------.
+| yyreturnlab -- parsing is finished, clean up and return.  |
+`----------------------------------------------------------*/
+yyreturnlab:
   if (yychar != YYEMPTY)
     {
       /* Make sure we have latest lookahead translation.  See comments at
