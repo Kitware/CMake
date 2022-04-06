@@ -264,3 +264,17 @@ Other Changes
 * :manual:`ccmake(1)` may now be enabled on Windows when building
   CMake from source.  This is experimental, and so is not included
   in official distributions.
+
+Updates
+=======
+
+Changes made since CMake 3.23.0 include the following.
+
+3.23.1
+------
+
+* The :command:`target_sources` ``FILE_SET`` feature added in CMake 3.23.0
+  does not yet place header files properly in Apple :prop_tgt:`FRAMEWORK`
+  targets.  Pending further work in a future version of CMake, it is now
+  an error to add a ``FILE_SET`` of type ``HEADERS`` to such targets on
+  Apple platforms.
