@@ -28,6 +28,7 @@ Environment Variables that Control the Build
 .. toctree::
    :maxdepth: 1
 
+   /envvar/ADSP_ROOT
    /envvar/CMAKE_APPLE_SILICON_PROCESSOR
    /envvar/CMAKE_BUILD_PARALLEL_LEVEL
    /envvar/CMAKE_BUILD_TYPE
