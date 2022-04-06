@@ -115,6 +115,9 @@ static void cmExpr_yyerror(yyscan_t yyscanner, const char* message);
 # pragma GCC diagnostic ignored "-Wfree-nonheap-object"
 #endif
 #if defined(__clang__) && defined(__has_warning)
+# if __has_warning("-Wunused-but-set-variable")
+#  pragma clang diagnostic ignored "-Wunused-but-set-variable"
+# endif
 # if __has_warning("-Wused-but-marked-unused")
 #  pragma clang diagnostic ignored "-Wused-but-marked-unused"
 # endif
@@ -124,7 +127,7 @@ static void cmExpr_yyerror(yyscan_t yyscanner, const char* message);
 #  pragma diag_suppress 550 /* variable set but never used */
 #endif
 
-#line 128 "cmExprParser.cxx"
+#line 131 "cmExprParser.cxx"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -566,9 +569,9 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    85,    85,    90,    93,    98,   101,   106,   109,   114,
-     117,   120,   125,   128,   131,   136,   139,   142,   148,   153,
-     156,   159,   162,   167,   170
+       0,    88,    88,    93,    96,   101,   104,   109,   112,   117,
+     120,   123,   128,   131,   134,   139,   142,   145,   151,   156,
+     159,   162,   165,   170,   173
 };
 #endif
 
@@ -1429,194 +1432,194 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* start: exp  */
-#line 85 "cmExprParser.y"
+#line 88 "cmExprParser.y"
       {
     cmExpr_yyget_extra(yyscanner)->SetResult((yyvsp[0].Number));
   }
-#line 1437 "cmExprParser.cxx"
+#line 1440 "cmExprParser.cxx"
     break;
 
   case 3: /* exp: bitwiseor  */
-#line 90 "cmExprParser.y"
+#line 93 "cmExprParser.y"
             {
     (yyval.Number) = (yyvsp[0].Number);
   }
-#line 1445 "cmExprParser.cxx"
+#line 1448 "cmExprParser.cxx"
     break;
 
   case 4: /* exp: exp exp_OR bitwiseor  */
-#line 93 "cmExprParser.y"
+#line 96 "cmExprParser.y"
                        {
     (yyval.Number) = (yyvsp[-2].Number) | (yyvsp[0].Number);
   }
-#line 1453 "cmExprParser.cxx"
+#line 1456 "cmExprParser.cxx"
     break;
 
   case 5: /* bitwiseor: bitwisexor  */
-#line 98 "cmExprParser.y"
+#line 101 "cmExprParser.y"
              {
     (yyval.Number) = (yyvsp[0].Number);
   }
-#line 1461 "cmExprParser.cxx"
+#line 1464 "cmExprParser.cxx"
     break;
 
   case 6: /* bitwiseor: bitwiseor exp_XOR bitwisexor  */
-#line 101 "cmExprParser.y"
+#line 104 "cmExprParser.y"
                                {
     (yyval.Number) = (yyvsp[-2].Number) ^ (yyvsp[0].Number);
   }
-#line 1469 "cmExprParser.cxx"
+#line 1472 "cmExprParser.cxx"
     break;
 
   case 7: /* bitwisexor: bitwiseand  */
-#line 106 "cmExprParser.y"
+#line 109 "cmExprParser.y"
              {
     (yyval.Number) = (yyvsp[0].Number);
   }
-#line 1477 "cmExprParser.cxx"
+#line 1480 "cmExprParser.cxx"
     break;
 
   case 8: /* bitwisexor: bitwisexor exp_AND bitwiseand  */
-#line 109 "cmExprParser.y"
+#line 112 "cmExprParser.y"
                                 {
     (yyval.Number) = (yyvsp[-2].Number) & (yyvsp[0].Number);
   }
-#line 1485 "cmExprParser.cxx"
+#line 1488 "cmExprParser.cxx"
     break;
 
   case 9: /* bitwiseand: shift  */
-#line 114 "cmExprParser.y"
+#line 117 "cmExprParser.y"
         {
     (yyval.Number) = (yyvsp[0].Number);
   }
-#line 1493 "cmExprParser.cxx"
+#line 1496 "cmExprParser.cxx"
     break;
 
   case 10: /* bitwiseand: bitwiseand exp_SHIFTLEFT shift  */
-#line 117 "cmExprParser.y"
+#line 120 "cmExprParser.y"
                                  {
     (yyval.Number) = (yyvsp[-2].Number) << (yyvsp[0].Number);
   }
-#line 1501 "cmExprParser.cxx"
+#line 1504 "cmExprParser.cxx"
     break;
 
   case 11: /* bitwiseand: bitwiseand exp_SHIFTRIGHT shift  */
-#line 120 "cmExprParser.y"
+#line 123 "cmExprParser.y"
                                   {
     (yyval.Number) = (yyvsp[-2].Number) >> (yyvsp[0].Number);
   }
-#line 1509 "cmExprParser.cxx"
+#line 1512 "cmExprParser.cxx"
     break;
 
   case 12: /* shift: term  */
-#line 125 "cmExprParser.y"
+#line 128 "cmExprParser.y"
        {
     (yyval.Number) = (yyvsp[0].Number);
   }
-#line 1517 "cmExprParser.cxx"
+#line 1520 "cmExprParser.cxx"
     break;
 
   case 13: /* shift: shift exp_PLUS term  */
-#line 128 "cmExprParser.y"
+#line 131 "cmExprParser.y"
                       {
     (yyval.Number) = (yyvsp[-2].Number) + (yyvsp[0].Number);
   }
-#line 1525 "cmExprParser.cxx"
+#line 1528 "cmExprParser.cxx"
     break;
 
   case 14: /* shift: shift exp_MINUS term  */
-#line 131 "cmExprParser.y"
+#line 134 "cmExprParser.y"
                        {
     (yyval.Number) = (yyvsp[-2].Number) - (yyvsp[0].Number);
   }
-#line 1533 "cmExprParser.cxx"
+#line 1536 "cmExprParser.cxx"
     break;
 
   case 15: /* term: unary  */
-#line 136 "cmExprParser.y"
+#line 139 "cmExprParser.y"
         {
     (yyval.Number) = (yyvsp[0].Number);
   }
-#line 1541 "cmExprParser.cxx"
+#line 1544 "cmExprParser.cxx"
     break;
 
   case 16: /* term: term exp_TIMES unary  */
-#line 139 "cmExprParser.y"
+#line 142 "cmExprParser.y"
                        {
     (yyval.Number) = (yyvsp[-2].Number) * (yyvsp[0].Number);
   }
-#line 1549 "cmExprParser.cxx"
+#line 1552 "cmExprParser.cxx"
     break;
 
   case 17: /* term: term exp_DIVIDE unary  */
-#line 142 "cmExprParser.y"
+#line 145 "cmExprParser.y"
                         {
     if (yyvsp[0].Number == 0) {
       throw std::overflow_error("divide by zero");
     }
     (yyval.Number) = (yyvsp[-2].Number) / (yyvsp[0].Number);
   }
-#line 1560 "cmExprParser.cxx"
+#line 1563 "cmExprParser.cxx"
     break;
 
   case 18: /* term: term exp_MOD unary  */
-#line 148 "cmExprParser.y"
+#line 151 "cmExprParser.y"
                      {
     (yyval.Number) = (yyvsp[-2].Number) % (yyvsp[0].Number);
   }
-#line 1568 "cmExprParser.cxx"
+#line 1571 "cmExprParser.cxx"
     break;
 
   case 19: /* unary: factor  */
-#line 153 "cmExprParser.y"
+#line 156 "cmExprParser.y"
          {
     (yyval.Number) = (yyvsp[0].Number);
   }
-#line 1576 "cmExprParser.cxx"
+#line 1579 "cmExprParser.cxx"
     break;
 
   case 20: /* unary: exp_PLUS unary  */
-#line 156 "cmExprParser.y"
+#line 159 "cmExprParser.y"
                  {
     (yyval.Number) = + (yyvsp[0].Number);
   }
-#line 1584 "cmExprParser.cxx"
+#line 1587 "cmExprParser.cxx"
     break;
 
   case 21: /* unary: exp_MINUS unary  */
-#line 159 "cmExprParser.y"
+#line 162 "cmExprParser.y"
                   {
     (yyval.Number) = - (yyvsp[0].Number);
   }
-#line 1592 "cmExprParser.cxx"
+#line 1595 "cmExprParser.cxx"
     break;
 
   case 22: /* unary: exp_NOT unary  */
-#line 162 "cmExprParser.y"
+#line 165 "cmExprParser.y"
                 {
     (yyval.Number) = ~ (yyvsp[0].Number);
   }
-#line 1600 "cmExprParser.cxx"
+#line 1603 "cmExprParser.cxx"
     break;
 
   case 23: /* factor: exp_NUMBER  */
-#line 167 "cmExprParser.y"
+#line 170 "cmExprParser.y"
              {
     (yyval.Number) = (yyvsp[0].Number);
   }
-#line 1608 "cmExprParser.cxx"
+#line 1611 "cmExprParser.cxx"
     break;
 
   case 24: /* factor: exp_OPENPARENT exp exp_CLOSEPARENT  */
-#line 170 "cmExprParser.y"
+#line 173 "cmExprParser.y"
                                      {
     (yyval.Number) = (yyvsp[-1].Number);
   }
-#line 1616 "cmExprParser.cxx"
+#line 1619 "cmExprParser.cxx"
     break;
 
 
-#line 1620 "cmExprParser.cxx"
+#line 1623 "cmExprParser.cxx"
 
       default: break;
     }
@@ -1840,7 +1843,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 175 "cmExprParser.y"
+#line 178 "cmExprParser.y"
 
 /* End of grammar */
 
