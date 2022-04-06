@@ -147,6 +147,12 @@ if(CMake_SPHINX_CMAKE_ORG)
   if(CMake_SPHINX_CMAKE_ORG_OUTDATED)
     list(APPEND doc_html_opts -A outdated=1)
   endif()
+
+  list(APPEND qthelp_extra_commands
+    COMMAND ${CMAKE_COMMAND} -E copy
+      "${CMAKE_CURRENT_BINARY_DIR}/qthelp/CMake.qch"
+      "${CMAKE_CURRENT_BINARY_DIR}/html/CMake.qch"
+    )
 endif()
 
 set(doc_format_outputs "")

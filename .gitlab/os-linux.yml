@@ -512,7 +512,9 @@
         - *before_script_linux
         - mkdir -p build/
         - cd build/
-        - cmake ../Utilities/Sphinx -GNinja -DSPHINX_HTML=ON
+        - cmake ../Utilities/Sphinx -GNinja
+          -DSPHINX_HTML=ON
+          -DSPHINX_QTHELP=$CMAKE_CI_SPHINX_QTHELP
           -DCMake_SPHINX_CMAKE_ORG=ON
           -DCMake_SPHINX_CMAKE_ORG_OUTDATED=$CMAKE_CI_SPHINX_OUTDATED
           -DCMake_VERSION_NO_GIT=$CMAKE_CI_VERSION_NO_GIT
