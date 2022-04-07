@@ -5,16 +5,48 @@
 FindJNI
 -------
 
-Find Java Native Interface (JNI) libraries.
+Find Java Native Interface (JNI) headers and libraries.
 
-JNI enables Java code running in a Java Virtual Machine (JVM) to call
-and be called by native applications and libraries written in other
-languages such as C, C++.
+JNI enables Java code running in a Java Virtual Machine (JVM) or Dalvik Virtual
+Machine (DVM) on Android to call and be called by native applications and
+libraries written in other languages such as C and C++.
 
 This module finds if Java is installed and determines where the
 include files and libraries are.  It also determines what the name of
 the library is.  The caller may set variable ``JAVA_HOME`` to specify a
 Java installation prefix explicitly.
+
+.. versionadded:: 3.24
+
+  Added imported targets, components ``AWT``, ``JVM``, and Android NDK support.
+  If no components are specified, the module defaults to an empty components
+  list while targeting Android, and all available components otherwise.
+
+  When using Android NDK, the corresponding package version is reported and a
+  specific release can be requested. At Android API level 31 and above, the
+  additional ``NativeHelper`` component can be requested. ``NativeHelper`` is
+  also exposed as an implicit dependency of the ``JVM`` component (only if this
+  does not cause a conflict) which provides a uniform access to JVM functions.
+
+Imported Targets
+^^^^^^^^^^^^^^^^
+
+.. versionadded:: 3.24
+
+``JNI::JNI``
+  Main JNI target, defined only if ``jni.h`` was found.
+
+``JNI::AWT``
+  Java AWT Native Interface (JAWT) library, defined only if component ``AWT`` was
+  found.
+
+``JNI::JVM``
+  Java Virtual Machine (JVM) library, defined only if component ``JVM`` was found.
+
+``JNI::NativeHelper``
+  When targeting Android API level 31 and above, the import target will provide
+  access to ``libnativehelper.so`` that exposes JVM functions such as
+  ``JNI_CreateJavaVM``.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
@@ -22,11 +54,30 @@ Result Variables
 This module sets the following result variables:
 
 ``JNI_INCLUDE_DIRS``
-  the include dirs to use
+  The include directories to use.
 ``JNI_LIBRARIES``
-  the libraries to use (JAWT and JVM)
+  The libraries to use (JAWT and JVM).
 ``JNI_FOUND``
-  TRUE if JNI headers and libraries were found.
+  ``TRUE`` if JNI headers and libraries were found.
+``JNI_<component>_FOUND``
+  .. versionadded:: 3.24
+
+  ``TRUE`` if ``<component>`` was found.
+``JNI_VERSION``
+  Full Android NDK package version (including suffixes such as ``-beta3`` and
+  ``-rc1``) or undefined otherwise.
+``JNI_VERSION_MAJOR``
+  .. versionadded:: 3.24
+
+  Android NDK major version or undefined otherwise.
+``JNI_VERSION_MINOR``
+  .. versionadded:: 3.24
+
+  Android NDK minor version or undefined otherwise.
+``JNI_VERSION_PATCH``
+  .. versionadded:: 3.24
+
+  Android NDK patch version or undefined otherwise.
 
 Cache Variables
 ^^^^^^^^^^^^^^^
@@ -34,16 +85,54 @@ Cache Variables
 The following cache variables are also available to set or use:
 
 ``JAVA_AWT_LIBRARY``
-  the path to the Java AWT Native Interface (JAWT) library
+  The path to the Java AWT Native Interface (JAWT) library.
 ``JAVA_JVM_LIBRARY``
-  the path to the Java Virtual Machine (JVM) library
+  The path to the Java Virtual Machine (JVM) library.
 ``JAVA_INCLUDE_PATH``
-  the include path to jni.h
+  The include path to ``jni.h``.
 ``JAVA_INCLUDE_PATH2``
-  the include path to jni_md.h and jniport.h
+  The include path to machine-dependant headers ``jni_md.h`` and ``jniport.h``.
+  The variable is defined only if ``jni.h`` depends on one of these headers. In
+  contrast, Android NDK ``jni.h`` can be typically used standalone.
 ``JAVA_AWT_INCLUDE_PATH``
-  the include path to jawt.h
+  The include path to ``jawt.h``.
 #]=======================================================================]
+
+cmake_policy(PUSH)
+cmake_policy(SET CMP0057 NEW)
+
+include(CheckSourceCompiles)
+include(CMakePushCheckState)
+include(FindPackageHandleStandardArgs)
+
+if(NOT JNI_FIND_COMPONENTS)
+  if(ANDROID)
+    if(CMAKE_ANDROID_API LESS 31)
+      # There are no components for Android NDK
+      set(JNI_FIND_COMPONENTS)
+    else()
+      set(JNI_FIND_COMPONENTS NativeHelper)
+      set(JNI_FIND_REQUIRED_NativeHelper TRUE)
+    endif()
+  else(ANDROID)
+    set(JNI_FIND_COMPONENTS AWT JVM)
+    # For compatibility purposes, if no components are specified both are
+    # considered required.
+    set(JNI_FIND_REQUIRED_AWT TRUE)
+    set(JNI_FIND_REQUIRED_JVM TRUE)
+  endif()
+else()
+  # On Android, if JVM was requested we need to find NativeHelper as well which
+  # is an implicit dependency of JVM allowing to provide uniform access to basic
+  # JVM/DVM functionality.
+  if(ANDROID AND CMAKE_ANDROID_API GREATER_EQUAL 31 AND JVM IN_LIST JNI_FIND_COMPONENTS)
+    if(NOT NativeHelper IN_LIST JNI_FIND_COMPONENTS)
+      list(APPEND JNI_FIND_COMPONENTS NativeHelper)
+      # NativeHelper is required only if JVM was requested as such.
+      set(JNI_FIND_REQUIRED_NativeHelper ${JNI_FIND_REQUIRED_JVM})
+    endif()
+  endif()
+endif()
 
 # Expand {libarch} occurrences to java_libarch subdirectory(-ies) and set ${_var}
 macro(java_append_library_directories _var)
@@ -328,10 +417,19 @@ set(_JNI_NORMAL_JAWT
   )
 
 foreach(search ${_JNI_SEARCHES})
-  find_library(JAVA_JVM_LIBRARY ${_JNI_${search}_JVM})
-  find_library(JAVA_AWT_LIBRARY ${_JNI_${search}_JAWT})
-  if(JAVA_JVM_LIBRARY)
-    break()
+  if(JVM IN_LIST JNI_FIND_COMPONENTS)
+    find_library(JAVA_JVM_LIBRARY ${_JNI_${search}_JVM}
+      DOC "Java Virtual Machine library"
+    )
+  endif(JVM IN_LIST JNI_FIND_COMPONENTS)
+
+  if(AWT IN_LIST JNI_FIND_COMPONENTS)
+    find_library(JAVA_AWT_LIBRARY ${_JNI_${search}_JAWT}
+      DOC "Java AWT Native Interface library"
+    )
+    if(JAVA_JVM_LIBRARY)
+      break()
+    endif()
   endif()
 endforeach()
 unset(_JNI_SEARCHES)
@@ -350,11 +448,46 @@ endif()
 # add in the include path
 find_path(JAVA_INCLUDE_PATH jni.h
   ${JAVA_AWT_INCLUDE_DIRECTORIES}
+  DOC "JNI include directory"
 )
 
+if(JAVA_INCLUDE_PATH)
+  if(CMAKE_C_COMPILER_LOADED)
+    set(_JNI_CHECK_LANG C)
+  elseif(CMAKE_CXX_COMPILER_LOADED)
+    set(_JNI_CHECK_LANG CXX)
+  else()
+    set(_JNI_CHECK_LANG FALSE)
+  endif()
+
+  # Skip the check if neither C nor CXX is loaded.
+  if(_JNI_CHECK_LANG)
+    cmake_push_check_state(RESET)
+    # The result of the following check is not relevant for the user as
+    # JAVA_INCLUDE_PATH2 will be added to REQUIRED_VARS if necessary.
+    set(CMAKE_REQUIRED_QUIET ON)
+    set(CMAKE_REQUIRED_INCLUDES ${JAVA_INCLUDE_PATH})
+
+    # Determine whether jni.h requires jni_md.h and add JAVA_INCLUDE_PATH2
+    # correspondingly to REQUIRED_VARS
+    check_source_compiles(${_JNI_CHECK_LANG}
+"
+#include <jni.h>
+int main(void) { return 0; }
+"
+      JNI_INCLUDE_PATH2_OPTIONAL)
+
+    cmake_pop_check_state()
+  else()
+    # If the above check is skipped assume jni_md.h is not needed.
+    set(JNI_INCLUDE_PATH2_OPTIONAL TRUE)
+  endif()
+
+  unset(_JNI_CHECK_LANG)
+endif()
+
 find_path(JAVA_INCLUDE_PATH2 NAMES jni_md.h jniport.h
-  PATHS
-  ${JAVA_INCLUDE_PATH}
+  PATHS ${JAVA_INCLUDE_PATH}
   ${JAVA_INCLUDE_PATH}/darwin
   ${JAVA_INCLUDE_PATH}/win32
   ${JAVA_INCLUDE_PATH}/linux
@@ -364,11 +497,50 @@ find_path(JAVA_INCLUDE_PATH2 NAMES jni_md.h jniport.h
   ${JAVA_INCLUDE_PATH}/hp-ux
   ${JAVA_INCLUDE_PATH}/alpha
   ${JAVA_INCLUDE_PATH}/aix
+  DOC "jni_md.h jniport.h include directory"
 )
 
-find_path(JAVA_AWT_INCLUDE_PATH jawt.h
-  ${JAVA_INCLUDE_PATH}
-)
+if(AWT IN_LIST JNI_FIND_COMPONENTS)
+  find_path(JAVA_AWT_INCLUDE_PATH jawt.h
+    ${JAVA_INCLUDE_PATH}
+    DOC "Java AWT Native Interface include directory"
+  )
+endif()
+
+if(ANDROID)
+  # Some functions in jni.h (e.g., JNI_GetCreatedJavaVMs) are exported by
+  # libnativehelper.so, however, only when targeting Android API level >= 31.
+  find_library(JAVA_NativeHelper_LIBRARY NAMES nativehelper
+    DOC "Android nativehelper library"
+  )
+endif()
+
+# Set found components
+if(JAVA_AWT_INCLUDE_PATH AND JAVA_AWT_LIBRARY)
+  set(JNI_AWT_FOUND TRUE)
+else()
+  set(JNI_AWT_FOUND FALSE)
+endif()
+
+# JVM is available even on Android referencing the nativehelper library
+if(JAVA_JVM_LIBRARY)
+  set(JNI_JVM_FOUND TRUE)
+else(JAVA_JVM_LIBRARY)
+  set(JNI_JVM_FOUND FALSE)
+endif()
+
+if(JAVA_NativeHelper_LIBRARY)
+  # Alias JAVA_JVM_LIBRARY to JAVA_NativeHelper_LIBRARY
+  if(NOT JAVA_JVM_LIBRARY)
+    set(JAVA_JVM_LIBRARY "${JAVA_NativeHelper_LIBRARY}" CACHE FILEPATH
+      "Alias to nativehelper library" FORCE)
+    # Make JVM component available
+    set(JNI_JVM_FOUND TRUE)
+  endif()
+  set(JNI_NativeHelper_FOUND TRUE)
+else()
+  set(JNI_NativeHelper_FOUND FALSE)
+endif()
 
 # Restore CMAKE_FIND_FRAMEWORK
 if(DEFINED _JNI_CMAKE_FIND_FRAMEWORK)
@@ -378,12 +550,35 @@ else()
   unset(CMAKE_FIND_FRAMEWORK)
 endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(JNI  DEFAULT_MSG  JAVA_AWT_LIBRARY
-                                                    JAVA_JVM_LIBRARY
-                                                    JAVA_INCLUDE_PATH
-                                                    JAVA_INCLUDE_PATH2
-                                                    JAVA_AWT_INCLUDE_PATH)
+if(ANDROID)
+  # Extract NDK version from source.properties in the NDK root
+  set(JAVA_SOURCE_PROPERTIES_FILE ${CMAKE_ANDROID_NDK}/source.properties)
+
+  if(EXISTS ${JAVA_SOURCE_PROPERTIES_FILE})
+    file(READ ${JAVA_SOURCE_PROPERTIES_FILE} NDK_VERSION_CONTENTS)
+    string (REGEX REPLACE
+      ".*Pkg\\.Revision = (([0-9]+)\\.([0-9]+)\\.([0-9]+)([^\n]+)?).*" "\\1"
+      JNI_VERSION "${NDK_VERSION_CONTENTS}")
+    set(JNI_VERSION_MAJOR ${CMAKE_MATCH_1})
+    set(JNI_VERSION_MINOR ${CMAKE_MATCH_2})
+    set(JNI_VERSION_PATCH ${CMAKE_MATCH_3})
+    set(JNI_VERSION_COMPONENTS 3)
+
+    set(JNI_FPHSA_ARGS VERSION_VAR JNI_VERSION HANDLE_VERSION_RANGE)
+  endif()
+endif()
+
+set(JNI_REQUIRED_VARS JAVA_INCLUDE_PATH)
+
+if(NOT JNI_INCLUDE_PATH2_OPTIONAL)
+  list(APPEND JNI_REQUIRED_VARS JAVA_INCLUDE_PATH2)
+endif()
+
+find_package_handle_standard_args(JNI
+  REQUIRED_VARS ${JNI_REQUIRED_VARS}
+  ${JNI_FPHSA_ARGS}
+  HANDLE_COMPONENTS
+)
 
 mark_as_advanced(
   JAVA_AWT_LIBRARY
@@ -393,13 +588,93 @@ mark_as_advanced(
   JAVA_INCLUDE_PATH2
 )
 
-set(JNI_LIBRARIES
-  ${JAVA_AWT_LIBRARY}
-  ${JAVA_JVM_LIBRARY}
-)
+set(JNI_LIBRARIES)
 
-set(JNI_INCLUDE_DIRS
-  ${JAVA_INCLUDE_PATH}
-  ${JAVA_INCLUDE_PATH2}
-  ${JAVA_AWT_INCLUDE_PATH}
-)
+foreach(component IN LISTS JNI_FIND_COMPONENTS)
+  if(JNI_${component}_FOUND)
+    list(APPEND JNI_LIBRARIES ${JAVA_${component}_LIBRARY})
+  endif()
+endforeach()
+
+set(JNI_INCLUDE_DIRS ${JAVA_INCLUDE_PATH})
+
+if(NOT JNI_INCLUDE_PATH2_OPTIONAL)
+  list(APPEND JNI_INCLUDE_DIRS ${JAVA_INCLUDE_PATH2})
+endif()
+
+if(JNI_FIND_REQUIRED_AWT)
+  list(APPEND JNI_INCLUDE_DIRS ${JAVA_AWT_INCLUDE_PATH})
+endif()
+
+if(JNI_FOUND)
+  if(NOT TARGET JNI::JNI)
+    add_library(JNI::JNI IMPORTED INTERFACE)
+  endif()
+
+  set_property(TARGET JNI::JNI PROPERTY INTERFACE_INCLUDE_DIRECTORIES
+    ${JAVA_INCLUDE_PATH})
+
+  if(JNI_NativeHelper_FOUND)
+    if(NOT TARGET JNI::NativeHelper)
+      add_library(JNI::NativeHelper IMPORTED UNKNOWN)
+    endif()
+
+    set_property(TARGET JNI::NativeHelper PROPERTY INTERFACE_LINK_LIBRARIES
+      JNI::JNI)
+    set_property(TARGET JNI::NativeHelper PROPERTY IMPORTED_LOCATION
+      ${JAVA_NativeHelper_LIBRARY})
+  endif()
+
+  if(NOT JNI_INCLUDE_PATH2_OPTIONAL AND JAVA_INCLUDE_PATH2)
+    set_property(TARGET JNI::JNI APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES
+      ${JAVA_INCLUDE_PATH2})
+  endif()
+
+  if(JNI_AWT_FOUND)
+    if(NOT TARGET JNI::AWT)
+      add_library(JNI::AWT IMPORTED UNKNOWN)
+    endif(NOT TARGET JNI::AWT)
+
+    set_property(TARGET JNI::AWT PROPERTY INTERFACE_INCLUDE_DIRECTORIES
+      ${JAVA_AWT_INCLUDE_PATH})
+    set_property(TARGET JNI::AWT PROPERTY IMPORTED_LOCATION
+      ${JAVA_AWT_LIBRARY})
+    set_property(TARGET JNI::AWT PROPERTY INTERFACE_LINK_LIBRARIES JNI::JNI)
+  endif()
+
+  if(JNI_JVM_FOUND OR JNI_NativeHelper_FOUND)
+    # If Android nativehelper is available but not the JVM library, we still
+    # define the JNI::JVM target but only declare JNI::NativeHelper as an
+    # interface link library of the former. This provides a uniform access to
+    # fundamental JVM functionality regardless of whether JVM or DVM is used. At
+    # the same time, this allows the user to detect whenever exclusively
+    # nativehelper functionality is available.
+    if(NOT TARGET JNI::JVM)
+      if(JAVA_JVM_LIBRARY AND NOT JAVA_JVM_LIBRARY STREQUAL JAVA_NativeHelper_LIBRARY)
+        # JAVA_JVM_LIBRARY is not an alias of JAVA_NativeHelper_LIBRARY
+        add_library(JNI::JVM IMPORTED UNKNOWN)
+      else()
+        add_library(JNI::JVM IMPORTED INTERFACE)
+      endif()
+    endif(NOT TARGET JNI::JVM)
+
+    set_property(TARGET JNI::JVM PROPERTY INTERFACE_LINK_LIBRARIES JNI::JNI)
+    get_property(_JNI_JVM_TYPE TARGET JNI::JVM PROPERTY TYPE)
+
+    if(NOT _JNI_JVM_TYPE STREQUAL "INTERFACE_LIBRARY")
+      set_property(TARGET JNI::JVM PROPERTY IMPORTED_LOCATION
+        ${JAVA_JVM_LIBRARY})
+    else()
+      # We declare JNI::NativeHelper a dependency of JNI::JVM only if the latter
+      # was not initially found. If the solely theoretical situation occurs
+      # where both libraries are available, we want to avoid any potential
+      # errors that can occur due to duplicate symbols.
+      set_property(TARGET JNI::JVM APPEND PROPERTY INTERFACE_LINK_LIBRARIES
+        JNI::NativeHelper)
+    endif()
+
+    unset(_JNI_JVM_TYPE)
+  endif()
+endif()
+
+cmake_policy(POP)
