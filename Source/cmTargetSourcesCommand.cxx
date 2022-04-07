@@ -230,6 +230,10 @@ bool TargetSourcesImpl::HandleOneFileSet(
     this->SetError("FILE_SETs may not be added to custom targets");
     return false;
   }
+  if (this->Target->IsFrameworkOnApple()) {
+    this->SetError("FILE_SETs may not be added to FRAMEWORK targets");
+    return false;
+  }
 
   bool const isDefault = args.Type == args.FileSet ||
     (args.Type.empty() && args.FileSet[0] >= 'A' && args.FileSet[0] <= 'Z');
