@@ -1,4 +1,4 @@
-/* A Bison parser, made by GNU Bison 3.7.5.  */
+/* A Bison parser, made by GNU Bison 3.8.2.  */
 
 /* Bison implementation for Yacc-like parsers in C
 
@@ -16,7 +16,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -46,10 +46,10 @@
    USER NAME SPACE" below.  */
 
 /* Identify Bison output, and Bison version.  */
-#define YYBISON 30705
+#define YYBISON 30802
 
 /* Bison version string.  */
-#define YYBISON_VERSION "3.7.5"
+#define YYBISON_VERSION "3.8.2"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -131,8 +131,13 @@ static void cmCommandArgument_yyerror(yyscan_t yyscanner, const char* message);
 # pragma GCC diagnostic ignored "-Wconversion"
 # pragma GCC diagnostic ignored "-Wfree-nonheap-object"
 #endif
+#if defined(__clang__) && defined(__has_warning)
+# if __has_warning("-Wunused-but-set-variable")
+#  pragma clang diagnostic ignored "-Wunused-but-set-variable"
+# endif
+#endif
 
-#line 136 "cmCommandArgumentParser.cxx"
+#line 141 "cmCommandArgumentParser.cxx"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -342,12 +347,18 @@ typedef int yy_state_fast_t;
 # define YY_USE(E) /* empty */
 #endif
 
-#if defined __GNUC__ && ! defined __ICC && 407 <= __GNUC__ * 100 + __GNUC_MINOR__
 /* Suppress an incorrect diagnostic about yylval being uninitialized.  */
-# define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN                            \
+#if defined __GNUC__ && ! defined __ICC && 406 <= __GNUC__ * 100 + __GNUC_MINOR__
+# if __GNUC__ * 100 + __GNUC_MINOR__ < 407
+#  define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN                           \
+    _Pragma ("GCC diagnostic push")                                     \
+    _Pragma ("GCC diagnostic ignored \"-Wuninitialized\"")
+# else
+#  define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN                           \
     _Pragma ("GCC diagnostic push")                                     \
     _Pragma ("GCC diagnostic ignored \"-Wuninitialized\"")              \
     _Pragma ("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")
+# endif
 # define YY_IGNORE_MAYBE_UNINITIALIZED_END      \
     _Pragma ("GCC diagnostic pop")
 #else
@@ -562,12 +573,12 @@ static const yytype_int8 yytranslate[] =
 };
 
 #if YYDEBUG
-  /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
+/* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    97,    97,   103,   106,   111,   114,   119,   122,   127,
-     130,   133,   136,   139,   142,   147,   150,   153,   156,   161,
-     164,   169,   172,   177,   180
+       0,   102,   102,   108,   111,   116,   119,   124,   127,   132,
+     135,   138,   141,   144,   147,   152,   155,   158,   161,   166,
+     169,   174,   177,   182,   185
 };
 #endif
 
@@ -597,16 +608,6 @@ yysymbol_name (yysymbol_kind_t yysymbol)
 }
 #endif
 
-#ifdef YYPRINT
-/* YYTOKNUM[NUM] -- (External) token number corresponding to the
-   (internal) symbol number NUM (which must be that of a token).  */
-static const yytype_int16 yytoknum[] =
-{
-       0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
-     265,   266,   267,   268,   269
-};
-#endif
-
 #define YYPACT_NINF (-3)
 
 #define yypact_value_is_default(Yyn) \
@@ -617,8 +618,8 @@ static const yytype_int16 yytoknum[] =
 #define yytable_value_is_error(Yyn) \
   0
 
-  /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
-     STATE-NUM.  */
+/* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
+   STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
        0,    14,    26,    26,    -3,    -3,    -3,    -3,    -3,    -3,
@@ -627,9 +628,9 @@ static const yytype_int8 yypact[] =
       -3,    -3,    -3
 };
 
-  /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
-     Performed when YYTABLE does not specify something else to do.  Zero
-     means the default is an error.  */
+/* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
+   Performed when YYTABLE does not specify something else to do.  Zero
+   means the default is an error.  */
 static const yytype_int8 yydefact[] =
 {
        5,    21,    21,    21,    11,    12,    13,     9,    14,    10,
@@ -638,21 +639,21 @@ static const yytype_int8 yydefact[] =
       22,    16,    17
 };
 
-  /* YYPGOTO[NTERM-NUM].  */
+/* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
       -3,    -3,    -3,     8,    -3,    -3,     2,     9,    -2,    -3
 };
 
-  /* YYDEFGOTO[NTERM-NUM].  */
+/* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
        0,    11,    12,    13,    14,    15,    19,    20,    21,    22
 };
 
-  /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
-     positive, shift that token.  If negative, reduce the rule whose
-     number is the opposite.  If YYTABLE_NINF, syntax error.  */
+/* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
+   positive, shift that token.  If negative, reduce the rule whose
+   number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
       23,    24,    16,     1,     2,     3,     4,     5,     6,     7,
@@ -671,8 +672,8 @@ static const yytype_int8 yycheck[] =
       14
 };
 
-  /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
-     symbol of state STATE-NUM.  */
+/* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
+   state STATE-NUM.  */
 static const yytype_int8 yystos[] =
 {
        0,     3,     4,     5,     6,     7,     8,     9,    11,    12,
@@ -681,7 +682,7 @@ static const yytype_int8 yystos[] =
       23,     8,     8
 };
 
-  /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
+/* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr1[] =
 {
        0,    15,    16,    17,    17,    18,    18,    19,    19,    20,
@@ -689,7 +690,7 @@ static const yytype_int8 yyr1[] =
       22,    23,    23,    24,    24
 };
 
-  /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
+/* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr2[] =
 {
        0,     2,     1,     1,     2,     0,     2,     1,     1,     1,
@@ -706,6 +707,7 @@ enum { YYENOMEM = -2 };
 #define YYACCEPT        goto yyacceptlab
 #define YYABORT         goto yyabortlab
 #define YYERROR         goto yyerrorlab
+#define YYNOMEM         goto yyexhaustedlab
 
 
 #define YYRECOVERING()  (!!yyerrstatus)
@@ -746,10 +748,7 @@ do {                                            \
     YYFPRINTF Args;                             \
 } while (0)
 
-/* This macro is provided for backward compatibility. */
-# ifndef YY_LOCATION_PRINT
-#  define YY_LOCATION_PRINT(File, Loc) ((void) 0)
-# endif
+
 
 
 # define YY_SYMBOL_PRINT(Title, Kind, Value, Location)                    \
@@ -777,10 +776,6 @@ yy_symbol_value_print (FILE *yyo,
   YY_USE (yyscanner);
   if (!yyvaluep)
     return;
-# ifdef YYPRINT
-  if (yykind < YYNTOKENS)
-    YYPRINT (yyo, yytoknum[yykind], *yyvaluep);
-# endif
   YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
   YY_USE (yykind);
   YY_IGNORE_MAYBE_UNINITIALIZED_END
@@ -1242,6 +1237,7 @@ YYSTYPE yylval YY_INITIAL_VALUE (= yyval_default);
   YYDPRINTF ((stderr, "Starting parse\n"));
 
   yychar = YYEMPTY; /* Cause a token to be read.  */
+
   goto yysetstate;
 
 
@@ -1267,7 +1263,7 @@ yysetstate:
 
   if (yyss + yystacksize - 1 <= yyssp)
 #if !defined yyoverflow && !defined YYSTACK_RELOCATE
-    goto yyexhaustedlab;
+    YYNOMEM;
 #else
     {
       /* Get the current used size of the three stacks, in elements.  */
@@ -1295,7 +1291,7 @@ yysetstate:
 # else /* defined YYSTACK_RELOCATE */
       /* Extend the stack our own way.  */
       if (YYMAXDEPTH <= yystacksize)
-        goto yyexhaustedlab;
+        YYNOMEM;
       yystacksize *= 2;
       if (YYMAXDEPTH < yystacksize)
         yystacksize = YYMAXDEPTH;
@@ -1306,7 +1302,7 @@ yysetstate:
           YY_CAST (union yyalloc *,
                    YYSTACK_ALLOC (YY_CAST (YYSIZE_T, YYSTACK_BYTES (yystacksize))));
         if (! yyptr)
-          goto yyexhaustedlab;
+          YYNOMEM;
         YYSTACK_RELOCATE (yyss_alloc, yyss);
         YYSTACK_RELOCATE (yyvs_alloc, yyvs);
 #  undef YYSTACK_RELOCATE
@@ -1327,6 +1323,7 @@ yysetstate:
         YYABORT;
     }
 #endif /* !defined yyoverflow && !defined YYSTACK_RELOCATE */
+
 
   if (yystate == YYFINAL)
     YYACCEPT;
@@ -1440,192 +1437,192 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* Start: GoalWithOptionalBackSlash  */
-#line 97 "cmCommandArgumentParser.y"
+#line 102 "cmCommandArgumentParser.y"
                             {
     (yyval.str) = 0;
     yyGetParser->SetResult((yyvsp[0].str));
   }
-#line 1449 "cmCommandArgumentParser.cxx"
+#line 1446 "cmCommandArgumentParser.cxx"
     break;
 
   case 3: /* GoalWithOptionalBackSlash: Goal  */
-#line 103 "cmCommandArgumentParser.y"
+#line 108 "cmCommandArgumentParser.y"
        {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1457 "cmCommandArgumentParser.cxx"
+#line 1454 "cmCommandArgumentParser.cxx"
     break;
 
   case 4: /* GoalWithOptionalBackSlash: Goal "\\"  */
-#line 106 "cmCommandArgumentParser.y"
+#line 111 "cmCommandArgumentParser.y"
                   {
     (yyval.str) = yyGetParser->CombineUnions((yyvsp[-1].str), (yyvsp[0].str));
   }
-#line 1465 "cmCommandArgumentParser.cxx"
+#line 1462 "cmCommandArgumentParser.cxx"
     break;
 
   case 5: /* Goal: %empty  */
-#line 111 "cmCommandArgumentParser.y"
+#line 116 "cmCommandArgumentParser.y"
   {
     (yyval.str) = 0;
   }
-#line 1473 "cmCommandArgumentParser.cxx"
+#line 1470 "cmCommandArgumentParser.cxx"
     break;
 
   case 6: /* Goal: String Goal  */
-#line 114 "cmCommandArgumentParser.y"
+#line 119 "cmCommandArgumentParser.y"
               {
     (yyval.str) = yyGetParser->CombineUnions((yyvsp[-1].str), (yyvsp[0].str));
   }
-#line 1481 "cmCommandArgumentParser.cxx"
+#line 1478 "cmCommandArgumentParser.cxx"
     break;
 
   case 7: /* String: OuterText  */
-#line 119 "cmCommandArgumentParser.y"
+#line 124 "cmCommandArgumentParser.y"
             {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1489 "cmCommandArgumentParser.cxx"
+#line 1486 "cmCommandArgumentParser.cxx"
     break;
 
   case 8: /* String: Variable  */
-#line 122 "cmCommandArgumentParser.y"
-           {
-    (yyval.str) = (yyvsp[0].str);
-  }
-#line 1497 "cmCommandArgumentParser.cxx"
-    break;
-
-  case 9: /* OuterText: cal_NAME  */
 #line 127 "cmCommandArgumentParser.y"
            {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1505 "cmCommandArgumentParser.cxx"
+#line 1494 "cmCommandArgumentParser.cxx"
+    break;
+
+  case 9: /* OuterText: cal_NAME  */
+#line 132 "cmCommandArgumentParser.y"
+           {
+    (yyval.str) = (yyvsp[0].str);
+  }
+#line 1502 "cmCommandArgumentParser.cxx"
     break;
 
   case 10: /* OuterText: "@"  */
-#line 130 "cmCommandArgumentParser.y"
+#line 135 "cmCommandArgumentParser.y"
          {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1513 "cmCommandArgumentParser.cxx"
+#line 1510 "cmCommandArgumentParser.cxx"
     break;
 
   case 11: /* OuterText: "$"  */
-#line 133 "cmCommandArgumentParser.y"
+#line 138 "cmCommandArgumentParser.y"
              {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1521 "cmCommandArgumentParser.cxx"
+#line 1518 "cmCommandArgumentParser.cxx"
     break;
 
   case 12: /* OuterText: "{"  */
-#line 136 "cmCommandArgumentParser.y"
+#line 141 "cmCommandArgumentParser.y"
              {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1529 "cmCommandArgumentParser.cxx"
+#line 1526 "cmCommandArgumentParser.cxx"
     break;
 
   case 13: /* OuterText: "}"  */
-#line 139 "cmCommandArgumentParser.y"
+#line 144 "cmCommandArgumentParser.y"
              {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1537 "cmCommandArgumentParser.cxx"
+#line 1534 "cmCommandArgumentParser.cxx"
     break;
 
   case 14: /* OuterText: cal_SYMBOL  */
-#line 142 "cmCommandArgumentParser.y"
+#line 147 "cmCommandArgumentParser.y"
              {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1545 "cmCommandArgumentParser.cxx"
+#line 1542 "cmCommandArgumentParser.cxx"
     break;
 
   case 15: /* Variable: cal_ENVCURLY EnvVarName "}"  */
-#line 147 "cmCommandArgumentParser.y"
+#line 152 "cmCommandArgumentParser.y"
                                      {
     (yyval.str) = yyGetParser->ExpandSpecialVariable((yyvsp[-2].str), (yyvsp[-1].str));
   }
-#line 1553 "cmCommandArgumentParser.cxx"
+#line 1550 "cmCommandArgumentParser.cxx"
     break;
 
   case 16: /* Variable: cal_NCURLY MultipleIds "}"  */
-#line 150 "cmCommandArgumentParser.y"
+#line 155 "cmCommandArgumentParser.y"
                                     {
     (yyval.str) = yyGetParser->ExpandSpecialVariable((yyvsp[-2].str), (yyvsp[-1].str));
   }
-#line 1561 "cmCommandArgumentParser.cxx"
+#line 1558 "cmCommandArgumentParser.cxx"
     break;
 
   case 17: /* Variable: cal_DCURLY MultipleIds "}"  */
-#line 153 "cmCommandArgumentParser.y"
+#line 158 "cmCommandArgumentParser.y"
                                     {
     (yyval.str) = yyGetParser->ExpandVariable((yyvsp[-1].str));
   }
-#line 1569 "cmCommandArgumentParser.cxx"
+#line 1566 "cmCommandArgumentParser.cxx"
     break;
 
   case 18: /* Variable: cal_ATNAME  */
-#line 156 "cmCommandArgumentParser.y"
+#line 161 "cmCommandArgumentParser.y"
              {
     (yyval.str) = yyGetParser->ExpandVariableForAt((yyvsp[0].str));
   }
-#line 1577 "cmCommandArgumentParser.cxx"
+#line 1574 "cmCommandArgumentParser.cxx"
     break;
 
   case 19: /* EnvVarName: MultipleIds  */
-#line 161 "cmCommandArgumentParser.y"
+#line 166 "cmCommandArgumentParser.y"
               {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1585 "cmCommandArgumentParser.cxx"
+#line 1582 "cmCommandArgumentParser.cxx"
     break;
 
   case 20: /* EnvVarName: cal_SYMBOL EnvVarName  */
-#line 164 "cmCommandArgumentParser.y"
+#line 169 "cmCommandArgumentParser.y"
                         {
     (yyval.str) = (yyvsp[-1].str);
   }
-#line 1593 "cmCommandArgumentParser.cxx"
+#line 1590 "cmCommandArgumentParser.cxx"
     break;
 
   case 21: /* MultipleIds: %empty  */
-#line 169 "cmCommandArgumentParser.y"
+#line 174 "cmCommandArgumentParser.y"
   {
     (yyval.str) = 0;
   }
-#line 1601 "cmCommandArgumentParser.cxx"
+#line 1598 "cmCommandArgumentParser.cxx"
     break;
 
   case 22: /* MultipleIds: ID MultipleIds  */
-#line 172 "cmCommandArgumentParser.y"
+#line 177 "cmCommandArgumentParser.y"
                  {
     (yyval.str) = yyGetParser->CombineUnions((yyvsp[-1].str), (yyvsp[0].str));
   }
-#line 1609 "cmCommandArgumentParser.cxx"
+#line 1606 "cmCommandArgumentParser.cxx"
     break;
 
   case 23: /* ID: cal_NAME  */
-#line 177 "cmCommandArgumentParser.y"
+#line 182 "cmCommandArgumentParser.y"
            {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1617 "cmCommandArgumentParser.cxx"
+#line 1614 "cmCommandArgumentParser.cxx"
     break;
 
   case 24: /* ID: Variable  */
-#line 180 "cmCommandArgumentParser.y"
+#line 185 "cmCommandArgumentParser.y"
            {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1625 "cmCommandArgumentParser.cxx"
+#line 1622 "cmCommandArgumentParser.cxx"
     break;
 
 
-#line 1629 "cmCommandArgumentParser.cxx"
+#line 1626 "cmCommandArgumentParser.cxx"
 
       default: break;
     }
@@ -1701,7 +1698,7 @@ yyerrlab:
           }
         yyerror (yyscanner, yymsgp);
         if (yysyntax_error_status == YYENOMEM)
-          goto yyexhaustedlab;
+          YYNOMEM;
       }
     }
 
@@ -1737,6 +1734,7 @@ yyerrorlab:
      label yyerrorlab therefore never appears in user code.  */
   if (0)
     YYERROR;
+  ++yynerrs;
 
   /* Do not reclaim the symbols of the rule whose action triggered
      this YYERROR.  */
@@ -1797,7 +1795,7 @@ yyerrlab1:
 `-------------------------------------*/
 yyacceptlab:
   yyresult = 0;
-  goto yyreturn;
+  goto yyreturnlab;
 
 
 /*-----------------------------------.
@@ -1805,24 +1803,22 @@ yyacceptlab:
 `-----------------------------------*/
 yyabortlab:
   yyresult = 1;
-  goto yyreturn;
+  goto yyreturnlab;
 
 
-#if 1
-/*-------------------------------------------------.
-| yyexhaustedlab -- memory exhaustion comes here.  |
-`-------------------------------------------------*/
+/*-----------------------------------------------------------.
+| yyexhaustedlab -- YYNOMEM (memory exhaustion) comes here.  |
+`-----------------------------------------------------------*/
 yyexhaustedlab:
   yyerror (yyscanner, YY_("memory exhausted"));
   yyresult = 2;
-  goto yyreturn;
-#endif
+  goto yyreturnlab;
 
 
-/*-------------------------------------------------------.
-| yyreturn -- parsing is finished, clean up and return.  |
-`-------------------------------------------------------*/
-yyreturn:
+/*----------------------------------------------------------.
+| yyreturnlab -- parsing is finished, clean up and return.  |
+`----------------------------------------------------------*/
+yyreturnlab:
   if (yychar != YYEMPTY)
     {
       /* Make sure we have latest lookahead translation.  See comments at
@@ -1850,7 +1846,7 @@ yyreturn:
   return yyresult;
 }
 
-#line 185 "cmCommandArgumentParser.y"
+#line 190 "cmCommandArgumentParser.y"
 
 /* End of grammar */
 

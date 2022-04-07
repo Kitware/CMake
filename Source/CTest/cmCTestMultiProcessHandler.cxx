@@ -1284,10 +1284,8 @@ void cmCTestMultiProcessHandler::PrintTestList()
   }
 
   this->TestHandler->SetMaxIndex(this->FindMaxIndex());
-  int count = 0;
 
   for (auto& it : this->Properties) {
-    count++;
     cmCTestTestHandler::cmCTestTestProperties& p = *it.second;
 
     // Don't worry if this fails, we are only showing the test list, not

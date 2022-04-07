@@ -40,6 +40,9 @@ static void cmExpr_yyerror(yyscan_t yyscanner, const char* message);
 # pragma GCC diagnostic ignored "-Wfree-nonheap-object"
 #endif
 #if defined(__clang__) && defined(__has_warning)
+# if __has_warning("-Wunused-but-set-variable")
+#  pragma clang diagnostic ignored "-Wunused-but-set-variable"
+# endif
 # if __has_warning("-Wused-but-marked-unused")
 #  pragma clang diagnostic ignored "-Wused-but-marked-unused"
 # endif

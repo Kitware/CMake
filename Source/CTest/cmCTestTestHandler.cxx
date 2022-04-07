@@ -2486,22 +2486,19 @@ bool cmCTestTestHandler::WriteJUnitXML()
   // Iterate over the test results to get the number of tests that
   // passed, failed, etc.
   auto num_tests = 0;
-  auto num_passed = 0;
   auto num_failed = 0;
   auto num_notrun = 0;
   auto num_disabled = 0;
   SetOfTests resultsSet(this->TestResults.begin(), this->TestResults.end());
   for (cmCTestTestResult const& result : resultsSet) {
     num_tests++;
-    if (result.Status == cmCTestTestHandler::COMPLETED) {
-      num_passed++;
-    } else if (result.Status == cmCTestTestHandler::NOT_RUN) {
+    if (result.Status == cmCTestTestHandler::NOT_RUN) {
       if (result.CompletionStatus == "Disabled") {
         num_disabled++;
       } else {
         num_notrun++;
       }
-    } else {
+    } else if (result.Status != cmCTestTestHandler::COMPLETED) {
       num_failed++;
     }
   }
