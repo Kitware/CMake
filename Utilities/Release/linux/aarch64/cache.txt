@@ -32,7 +32,7 @@ SPHINX_EXECUTABLE:FILEPATH=/usr/local/bin/sphinx-build
 SPHINX_HTML:BOOL=ON
 SPHINX_MAN:BOOL=ON
 SPHINX_QTHELP:BOOL=ON
-QCOLLECTIONGENERATOR_EXECUTABLE:PATH=/opt/qt/bin/qhelpgenerator
+QHELPGENERATOR_EXECUTABLE:PATH=/opt/qt/bin/qhelpgenerator
 
 # We bootstrap as part of the build so skip its test.
 CMAKE_SKIP_BOOTSTRAP_TEST:STRING=TRUE
