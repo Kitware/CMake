@@ -1227,16 +1227,16 @@ std::string ConvertToString<cmValue>(cmValue value)
 }
 
 template <typename ValueType>
-bool StringIsEmpty(ValueType value);
+bool StringIsEmpty(ValueType const& value);
 
 template <>
-bool StringIsEmpty<const char*>(const char* value)
+bool StringIsEmpty<const char*>(const char* const& value)
 {
   return cmValue::IsEmpty(value);
 }
 
 template <>
-bool StringIsEmpty<cmValue>(cmValue value)
+bool StringIsEmpty<cmValue>(cmValue const& value)
 {
   return value.IsEmpty();
 }
