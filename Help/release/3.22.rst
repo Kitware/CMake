@@ -143,6 +143,11 @@ Other Changes
 
 * The :cpack_gen:`CPack NSIS Generator` now requires NSIS 3.03 or later.
 
+Updates
+=======
+
+Changes made since CMake 3.22.0 include the following.
+
 3.22.1
 ------
 
