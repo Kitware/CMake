@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmTargetSourcesCommand.h"
 
-#include <algorithm>
 #include <sstream>
 #include <utility>
 
@@ -239,7 +238,11 @@ bool TargetSourcesImpl::HandleOneFileSet(
     (args.Type.empty() && args.FileSet[0] >= 'A' && args.FileSet[0] <= 'Z');
   std::string type = isDefault ? args.FileSet : args.Type;
 
-  auto fileSet = this->Target->GetOrCreateFileSet(args.FileSet, type);
+  cmFileSetVisibility visibility =
+    cmFileSetVisibilityFromName(scope, this->Makefile);
+
+  auto fileSet =
+    this->Target->GetOrCreateFileSet(args.FileSet, type, visibility);
   if (fileSet.second) {
     if (!isDefault) {
       if (!cmFileSet::IsValidName(args.FileSet)) {
@@ -279,37 +282,11 @@ bool TargetSourcesImpl::HandleOneFileSet(
       return false;
     }
 
-    std::string existingScope = "PRIVATE";
-
-    auto const fileSetsProperty = cmTarget::GetFileSetsPropertyName(type);
-    auto const interfaceFileSetsProperty =
-      cmTarget::GetInterfaceFileSetsPropertyName(type);
-    std::vector<std::string> fileSets;
-    std::vector<std::string> interfaceFileSets;
-    cmExpandList(this->Target->GetSafeProperty(fileSetsProperty), fileSets);
-    cmExpandList(this->Target->GetSafeProperty(interfaceFileSetsProperty),
-                 interfaceFileSets);
-
-    if (std::find(interfaceFileSets.begin(), interfaceFileSets.end(),
-                  args.FileSet) != interfaceFileSets.end()) {
-      existingScope = "INTERFACE";
-    }
-    if (std::find(fileSets.begin(), fileSets.end(), args.FileSet) !=
-        fileSets.end()) {
-      if (existingScope == "INTERFACE"_s) {
-        existingScope = "PUBLIC";
-      }
-    } else if (existingScope != "INTERFACE"_s) {
-      this->SetError(cmStrCat("File set \"", args.FileSet, "\" is not in ",
-                              fileSetsProperty, " or ",
-                              interfaceFileSetsProperty));
-      return false;
-    }
-
-    if (scope != existingScope) {
+    if (visibility != fileSet.first->GetVisibility()) {
       this->SetError(
         cmStrCat("Scope ", scope, " for file set \"", args.FileSet,
-                 "\" does not match original scope ", existingScope));
+                 "\" does not match original scope ",
+                 cmFileSetVisibilityToName(fileSet.first->GetVisibility())));
       return false;
     }
   }
@@ -330,11 +307,11 @@ bool TargetSourcesImpl::HandleOneFileSet(
       for (auto const& dir : cmExpandedList(baseDirectories)) {
         auto interfaceDirectoriesGenex =
           cmStrCat("$<BUILD_INTERFACE:", dir, ">");
-        if (scope == "PRIVATE"_s || scope == "PUBLIC"_s) {
+        if (cmFileSetVisibilityIsForSelf(visibility)) {
           this->Target->AppendProperty("INCLUDE_DIRECTORIES",
                                        interfaceDirectoriesGenex);
         }
-        if (scope == "INTERFACE"_s || scope == "PUBLIC"_s) {
+        if (cmFileSetVisibilityIsForInterface(visibility)) {
           this->Target->AppendProperty("INTERFACE_INCLUDE_DIRECTORIES",
                                        interfaceDirectoriesGenex);
         }

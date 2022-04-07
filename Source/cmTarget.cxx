@@ -2342,10 +2342,10 @@ cmFileSet* cmTarget::GetFileSet(const std::string& name)
 }
 
 std::pair<cmFileSet*, bool> cmTarget::GetOrCreateFileSet(
-  const std::string& name, const std::string& type)
+  const std::string& name, const std::string& type, cmFileSetVisibility vis)
 {
-  auto result =
-    this->impl->FileSets.emplace(std::make_pair(name, cmFileSet(name, type)));
+  auto result = this->impl->FileSets.emplace(
+    std::make_pair(name, cmFileSet(name, type, vis)));
   return std::make_pair(&result.first->second, result.second);
 }
 
