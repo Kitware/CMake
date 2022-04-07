@@ -77,7 +77,7 @@ have zero or more named file sets. Each file set has a name, a type, a scope of
 ``INTERFACE``, ``PUBLIC``, or ``PRIVATE``, one or more base directories, and
 files within those directories. The only acceptable type is ``HEADERS``. The
 optional default file sets are named after their type. The target may not be a
-custom target.
+custom target or :prop_tgt:`FRAMEWORK` target.
 
 Files in a ``PRIVATE`` or ``PUBLIC`` file set are marked as source files for
 the purposes of IDE integration. Additionally, files in ``HEADERS`` file sets
