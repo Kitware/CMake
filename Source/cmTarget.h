@@ -220,6 +220,8 @@ public:
   //! Return whether this target is a GUI executable on Android.
   bool IsAndroidGuiExecutable() const;
 
+  bool HasKnownObjectFileLocation(std::string* reason = nullptr) const;
+
   //! Get a backtrace from the creation of the target.
   cmListFileBacktrace const& GetBacktrace() const;
 

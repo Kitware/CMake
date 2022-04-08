@@ -4924,7 +4924,7 @@ bool cmGlobalXCodeGenerator::IsMultiConfig() const
 }
 
 bool cmGlobalXCodeGenerator::HasKnownObjectFileLocation(
-  std::string* reason) const
+  cmTarget const&, std::string* reason) const
 {
   if (this->ObjectDirArch.find('$') != std::string::npos) {
     if (reason != nullptr) {

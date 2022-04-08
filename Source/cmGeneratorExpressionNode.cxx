@@ -1785,7 +1785,7 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
     {
       std::string reason;
       if (!context->EvaluateForBuildsystem &&
-          !gg->HasKnownObjectFileLocation(&reason)) {
+          !gt->Target->HasKnownObjectFileLocation(&reason)) {
         std::ostringstream e;
         e << "The evaluation of the TARGET_OBJECTS generator expression "
              "is only suitable for consumption by CMake (limited"
