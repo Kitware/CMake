@@ -157,6 +157,8 @@ protected:
     cmValue typeGuid,
     const std::set<BT<std::pair<std::string, bool>>>& dependencies) = 0;
 
+  virtual bool SupportsCxxModuleDyndep() const { return false; }
+
   std::string ConvertToSolutionPath(const std::string& path);
 
   std::set<std::string> IsPartOfDefaultBuild(

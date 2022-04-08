@@ -21,6 +21,7 @@
 #include "cmComputeLinkInformation.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
+#include "cmFileSet.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
@@ -46,6 +47,7 @@
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmTarget.h"
 #include "cmValue.h"
 #include "cmake.h"
 
@@ -190,6 +192,16 @@ void cmMakefileTargetGenerator::CreateRuleFile()
 
 void cmMakefileTargetGenerator::WriteTargetBuildRules()
 {
+  this->GeneratorTarget->CheckCxxModuleStatus(this->GetConfigName());
+
+  if (this->GeneratorTarget->HaveCxx20ModuleSources()) {
+    this->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("The \"", this->GeneratorTarget->GetName(),
+               "\" target contains C++ module sources which are not supported "
+               "by the generator"));
+  }
+
   // -- Write the custom commands for this target
 
   // Evaluates generator expressions and expands prop_value
@@ -302,6 +314,40 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
     }
   }
 
+  std::map<std::string, std::string> file_set_map;
+
+  auto const* tgt = this->GeneratorTarget->Target;
+  for (auto const& name : tgt->GetAllFileSetNames()) {
+    auto const* file_set = tgt->GetFileSet(name);
+    if (!file_set) {
+      this->Makefile->IssueMessage(
+        MessageType::INTERNAL_ERROR,
+        cmStrCat("Target \"", tgt->GetName(),
+                 "\" is tracked to have file set \"", name,
+                 "\", but it was not found."));
+      continue;
+    }
+
+    auto fileEntries = file_set->CompileFileEntries();
+    auto directoryEntries = file_set->CompileDirectoryEntries();
+    auto directories = file_set->EvaluateDirectoryEntries(
+      directoryEntries, this->LocalGenerator, this->GetConfigName(),
+      this->GeneratorTarget);
+
+    std::map<std::string, std::vector<std::string>> files;
+    for (auto const& entry : fileEntries) {
+      file_set->EvaluateFileEntry(directories, files, entry,
+                                  this->LocalGenerator, this->GetConfigName(),
+                                  this->GeneratorTarget);
+    }
+
+    for (auto const& it : files) {
+      for (auto const& filename : it.second) {
+        file_set_map[filename] = file_set->GetType();
+      }
+    }
+  }
+
   std::vector<cmSourceFile const*> objectSources;
   this->GeneratorTarget->GetObjectSources(objectSources,
                                           this->GetConfigName());
@@ -312,6 +358,25 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
     for (cmSourceFile const* sf : objectSources) {
       // Generate this object file's rule file.
       this->WriteObjectRuleFiles(*sf);
+    }
+  }
+
+  for (cmSourceFile const* sf : objectSources) {
+    auto const& path = sf->GetFullPath();
+    auto const it = file_set_map.find(path);
+    if (it != file_set_map.end()) {
+      auto const& file_set_type = it->second;
+      if (file_set_type == "CXX_MODULES"_s ||
+          file_set_type == "CXX_MODULE_HEADER_UNITS"_s) {
+        if (sf->GetLanguage() != "CXX"_s) {
+          this->Makefile->IssueMessage(
+            MessageType::FATAL_ERROR,
+            cmStrCat(
+              "Target \"", tgt->GetName(), "\" contains the source\n  ", path,
+              "\nin a file set of type \"", file_set_type,
+              R"(" but the source is not classified as a "CXX" source.)"));
+        }
+      }
     }
   }
 }

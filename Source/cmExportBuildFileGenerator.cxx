@@ -9,7 +9,9 @@
 #include <sstream>
 #include <utility>
 
+#include <cm/string_view>
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmExportSet.h"
 #include "cmFileSet.h"
@@ -382,6 +384,21 @@ std::string cmExportBuildFileGenerator::GetFileSetDirectories(
       std::any_of(directoryEntries.begin(), directoryEntries.end(),
                   EntryIsContextSensitive);
 
+    auto const& type = fileSet->GetType();
+    // C++ modules do not support interface file sets which are dependent upon
+    // the configuration.
+    if (contextSensitive &&
+        (type == "CXX_MODULES"_s || type == "CXX_MODULE_HEADER_UNITS"_s)) {
+      auto* mf = this->LG->GetMakefile();
+      std::ostringstream e;
+      e << "The \"" << gte->GetName() << "\" target's interface file set \""
+        << fileSet->GetName() << "\" of type \"" << type
+        << "\" contains context-sensitive base directory entries which is not "
+           "supported.";
+      mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+      return std::string{};
+    }
+
     for (auto const& directory : directories) {
       auto dest = cmOutputConverter::EscapeForCMake(
         directory, cmOutputConverter::WrapQuotes::NoWrap);
@@ -426,6 +443,21 @@ std::string cmExportBuildFileGenerator::GetFileSetFiles(cmGeneratorTarget* gte,
                   EntryIsContextSensitive) ||
       std::any_of(fileEntries.begin(), fileEntries.end(),
                   EntryIsContextSensitive);
+
+    auto const& type = fileSet->GetType();
+    // C++ modules do not support interface file sets which are dependent upon
+    // the configuration.
+    if (contextSensitive &&
+        (type == "CXX_MODULES"_s || type == "CXX_MODULE_HEADER_UNITS"_s)) {
+      auto* mf = this->LG->GetMakefile();
+      std::ostringstream e;
+      e << "The \"" << gte->GetName() << "\" target's interface file set \""
+        << fileSet->GetName() << "\" of type \"" << type
+        << "\" contains context-sensitive file entries which is not "
+           "supported.";
+      mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+      return std::string{};
+    }
 
     for (auto const& it : files) {
       for (auto const& filename : it.second) {

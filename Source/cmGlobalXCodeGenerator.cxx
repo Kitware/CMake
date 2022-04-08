@@ -1376,6 +1376,18 @@ bool cmGlobalXCodeGenerator::CreateXCodeTarget(
     return true;
   }
 
+  for (std::string const& configName : this->CurrentConfigurationTypes) {
+    gtgt->CheckCxxModuleStatus(configName);
+  }
+
+  if (gtgt->HaveCxx20ModuleSources()) {
+    gtgt->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("The \"", gtgt->GetName(),
+               "\" target contains C++ module sources which are not "
+               "supported by the generator"));
+  }
+
   auto& gtgt_visited = this->CommandsVisited[gtgt];
   auto& deps = this->GetTargetDirectDepends(gtgt);
   for (auto& d : deps) {

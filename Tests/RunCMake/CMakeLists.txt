@@ -564,6 +564,9 @@ if(CMake_TEST_CUDA)
 endif()
 add_RunCMake_test(DependencyGraph -DCMAKE_Fortran_COMPILER=${CMAKE_Fortran_COMPILER})
 
+# Add C++ Module tests.
+add_RunCMake_test(CXXModules)
+
 # ctresalloc links against CMakeLib and CTestLib, which means it can't be built
 # if CMake_TEST_EXTERNAL_CMAKE is activated (the compiler might be different.)
 # So, it has to be provided in the original build tree.
