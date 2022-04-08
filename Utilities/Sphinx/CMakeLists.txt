@@ -103,12 +103,12 @@ endif()
 if(SPHINX_QTHELP)
   find_package(PythonInterp REQUIRED)
 
-  find_program(QCOLLECTIONGENERATOR_EXECUTABLE
-    NAMES qcollectiongenerator-qt5 qcollectiongenerator
-    DOC "qcollectiongenerator tool"
+  find_program(QHELPGENERATOR_EXECUTABLE
+    NAMES qhelpgenerator-qt5 qhelpgenerator
+    DOC "qhelpgenerator tool"
     )
-  if (NOT QCOLLECTIONGENERATOR_EXECUTABLE)
-    message(FATAL_ERROR "QCOLLECTIONGENERATOR_EXECUTABLE (qcollectiongenerator) not found!")
+  if(NOT QHELPGENERATOR_EXECUTABLE)
+    message(FATAL_ERROR "QHELPGENERATOR_EXECUTABLE (qhelpgenerator) not found!")
   endif()
   list(APPEND doc_formats qthelp)
 
@@ -128,7 +128,7 @@ if(SPHINX_QTHELP)
       "${CMAKE_CURRENT_SOURCE_DIR}/create_identifiers.py"
       "${CMAKE_CURRENT_BINARY_DIR}/qthelp/"
 
-    COMMAND ${QCOLLECTIONGENERATOR_EXECUTABLE}
+    COMMAND ${QHELPGENERATOR_EXECUTABLE}
       ${CMAKE_CURRENT_BINARY_DIR}/qthelp/CMake.qhcp
   )
 endif()
