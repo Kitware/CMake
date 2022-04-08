@@ -394,6 +394,7 @@ Properties on Targets
    /prop_tgt/VS_DOTNET_REFERENCEPROP_refname_TAG_tagname
    /prop_tgt/VS_DOTNET_REFERENCES
    /prop_tgt/VS_DOTNET_REFERENCES_COPY_LOCAL
+   /prop_tgt/VS_DOTNET_STARTUP_OBJECT
    /prop_tgt/VS_DOTNET_TARGET_FRAMEWORK_VERSION
    /prop_tgt/VS_DPI_AWARE
    /prop_tgt/VS_GLOBAL_KEYWORD

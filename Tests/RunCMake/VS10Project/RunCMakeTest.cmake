@@ -83,6 +83,7 @@ else()
   run_UnityBuildPCH()
 endif()
 
+run_cmake(VsDotnetStartupObject)
 run_cmake(VsDotnetTargetFramework)
 run_cmake(VsDotnetTargetFrameworkVersion)
 run_cmake(VsNoCompileBatching)
