@@ -142,7 +142,7 @@ function (check_pie_supported)
       # no support at link time. Set cache variables to NO
       set(CMAKE_${lang}_LINK_PIE_SUPPORTED NO CACHE INTERNAL "PIE (${lang})")
       set(CMAKE_${lang}_LINK_NO_PIE_SUPPORTED NO CACHE INTERNAL "NO_PIE (${lang})")
-      string (APPEND outputs "PIE and NO_PIE are not supported by linker for ${lang}")
+      string (APPEND outputs "PIE and NO_PIE are not supported by linker for ${lang}\n")
     endif()
   endforeach()
 
