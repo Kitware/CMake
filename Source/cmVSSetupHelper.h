@@ -118,6 +118,7 @@ private:
   int ChooseVSInstance(const std::vector<VSInstanceInfo>& vecVSInstances);
   bool EnumerateAndChooseVSInstance();
   bool LoadSpecifiedVSInstanceFromDisk();
+  bool EnumerateVSInstancesWithCOM(std::vector<VSInstanceInfo>& VSInstances);
 
   unsigned int Version;
 
