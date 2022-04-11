@@ -817,8 +817,20 @@ _cpack_set_default(CPACK_NSIS_INSTALLER_ICON_CODE "")
 _cpack_set_default(CPACK_NSIS_INSTALLER_MUI_ICON_CODE "")
 
 # DragNDrop specific variables
-if(CPACK_RESOURCE_FILE_LICENSE AND NOT CPACK_RESOURCE_FILE_LICENSE STREQUAL "${CMAKE_ROOT}/Templates/CPack.GenericLicense.txt")
-  _cpack_set_default(CPACK_DMG_SLA_USE_RESOURCE_FILE_LICENSE ON)
+if(NOT DEFINED CPACK_DMG_SLA_USE_RESOURCE_FILE_LICENSE
+    AND CPACK_RESOURCE_FILE_LICENSE AND NOT CPACK_RESOURCE_FILE_LICENSE STREQUAL "${CMAKE_ROOT}/Templates/CPack.GenericLicense.txt")
+  cmake_policy(GET CMP0133 _CPack_CMP0133)
+  if(NOT "x${_CPack_CMP0133}x" STREQUAL "xNEWx")
+    if(NOT "x${_CPack_CMP0133}x" STREQUAL "xOLDx" AND CMAKE_POLICY_WARNING_CMP0133)
+      cmake_policy(GET_WARNING CMP0133 _CMP0133_warning)
+      message(AUTHOR_WARNING
+        "${_CMP0133_warning}\n"
+        "For compatibility, CMake will enable the SLA in the CPack DragNDrop Generator."
+        )
+    endif()
+    _cpack_set_default(CPACK_DMG_SLA_USE_RESOURCE_FILE_LICENSE ON)
+  endif()
+  unset(_CPack_CMP0133)
 endif()
 
 # WiX specific variables
