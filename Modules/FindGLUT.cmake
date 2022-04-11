@@ -111,7 +111,7 @@ if(WIN32)
   find_path( GLUT_INCLUDE_DIR NAMES GL/glut.h
     PATHS  ${GLUT_ROOT_PATH}/include )
   mark_as_advanced(GLUT_INCLUDE_DIR)
-  find_library( GLUT_glut_LIBRARY_RELEASE NAMES glut glut32 freeglut
+  find_library( GLUT_glut_LIBRARY_RELEASE NAMES freeglut glut glut32
     PATHS
     ${OPENGL_LIBRARY_DIR}
     ${GLUT_ROOT_PATH}/Release
