@@ -4,6 +4,11 @@
 
 #include <utility>
 
+#if !defined(CMAKE_BOOTSTRAP)
+#  include <cm3p/json/reader.h>
+#  include <cm3p/json/value.h>
+#endif
+
 #include "cmsys/Encoding.hxx"
 #include "cmsys/FStream.hxx"
 
@@ -295,6 +300,54 @@ bool cmVSSetupAPIHelper::IsEWDKEnabled()
   return false;
 }
 
+bool cmVSSetupAPIHelper::EnumerateVSInstancesWithVswhere(
+  std::vector<VSInstanceInfo>& VSInstances)
+{
+#if !defined(CMAKE_BOOTSTRAP)
+  // Construct vswhere command to get installed VS instances in JSON format
+  std::string vswhereExe = getenv("ProgramFiles(x86)") +
+    std::string(R"(\Microsoft Visual Studio\Installer\vswhere.exe)");
+  std::vector<std::string> vswhereCmd = { vswhereExe, "-format", "json" };
+
+  // Execute vswhere command and capture JSON output
+  std::string json_output;
+  int retVal = 1;
+  if (!cmSystemTools::RunSingleCommand(vswhereCmd, &json_output, &json_output,
+                                       &retVal, nullptr,
+                                       cmSystemTools::OUTPUT_NONE)) {
+    return false;
+  }
+
+  // Parse JSON output and iterate over elements
+  Json::CharReaderBuilder builder;
+  auto jsonReader = std::unique_ptr<Json::CharReader>(builder.newCharReader());
+  Json::Value json;
+  std::string error;
+
+  if (!jsonReader->parse(json_output.data(),
+                         json_output.data() + json_output.size(), &json,
+                         &error)) {
+    return false;
+  }
+
+  for (const auto& item : json) {
+    VSInstanceInfo instance;
+    instance.Version = item["installationVersion"].asString();
+    instance.VSInstallLocation = item["installationPath"].asString();
+    instance.IsWin10SDKInstalled = true;
+    instance.IsWin81SDKInstalled = false;
+    cmSystemTools::ConvertToUnixSlashes(instance.VSInstallLocation);
+    if (LoadVSInstanceVCToolsetVersion(instance)) {
+      VSInstances.push_back(instance);
+    }
+  }
+  return true;
+#else
+  static_cast<void>(VSInstances);
+  return false;
+#endif
+}
+
 bool cmVSSetupAPIHelper::EnumerateVSInstancesWithCOM(
   std::vector<VSInstanceInfo>& VSInstances)
 {
@@ -371,8 +424,9 @@ bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
 
   std::vector<VSInstanceInfo> vecVSInstancesAll;
 
-  // Enumerate VS instances with COM interface
-  if (!EnumerateVSInstancesWithCOM(vecVSInstancesAll)) {
+  // Enumerate VS instances with either COM interface or Vswhere
+  if (!EnumerateVSInstancesWithCOM(vecVSInstancesAll) &&
+      !EnumerateVSInstancesWithVswhere(vecVSInstancesAll)) {
     return false;
   }
 
