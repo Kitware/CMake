@@ -97,6 +97,9 @@ endfunction()
 find_package(PkgConfig QUIET)
 if(PKG_CONFIG_FOUND)
   pkg_check_modules(GLUT QUIET glut)
+  if(NOT GLUT_FOUND)
+    pkg_check_modules(GLUT QUIET freeglut)
+  endif()
   if(GLUT_FOUND)
     # GLUT_INCLUDE_DIRS is now the official result variable, but
     # older versions of CMake only provided GLUT_INCLUDE_DIR.
