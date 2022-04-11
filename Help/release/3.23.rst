@@ -114,8 +114,8 @@ Variables
 Properties
 ----------
 
-* The :prop_tgt:`HEADER_SETS` and :prop_tgt:`INTERFACE_HEADER_SETS` target
-  properties were added to list header sets associated with a target.
+* The :prop_tgt:`HEADER_SETS` and :prop_tgt:`INTERFACE_HEADER_SETS` read-only
+  target properties were added to list header sets associated with a target.
 
 * The :prop_tgt:`HEADER_SET` and :prop_tgt:`HEADER_SET_<NAME>` target
   properties were added to list files in the default header set

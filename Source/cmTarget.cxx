@@ -1456,37 +1456,14 @@ void cmTarget::StoreProperty(const std::string& prop, ValueType value)
         BT<std::string>(value, this->impl->Makefile->GetBacktrace()));
     }
   } else if (prop == propHEADER_SETS) {
-    if (value) {
-      for (auto const& name : cmExpandedList(value)) {
-        if (!this->GetFileSet(name)) {
-          this->impl->Makefile->IssueMessage(
-            MessageType::FATAL_ERROR,
-            cmStrCat("Header set \"", name, "\" has not yet been created."));
-          return;
-        }
-      }
-    }
-    this->impl->HeaderSetsEntries.clear();
-    if (!StringIsEmpty(value)) {
-      this->impl->HeaderSetsEntries.emplace_back(
-        value, this->impl->Makefile->GetBacktrace());
-    }
+    this->impl->Makefile->IssueMessage(MessageType::FATAL_ERROR,
+                                       "HEADER_SETS property is read-only\n");
+    return;
   } else if (prop == propINTERFACE_HEADER_SETS) {
-    if (value) {
-      for (auto const& name : cmExpandedList(value)) {
-        if (!this->GetFileSet(name)) {
-          this->impl->Makefile->IssueMessage(
-            MessageType::FATAL_ERROR,
-            cmStrCat("Header set \"", name, "\" has not yet been created."));
-          return;
-        }
-      }
-    }
-    this->impl->InterfaceHeaderSetsEntries.clear();
-    if (!StringIsEmpty(value)) {
-      this->impl->InterfaceHeaderSetsEntries.emplace_back(
-        value, this->impl->Makefile->GetBacktrace());
-    }
+    this->impl->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      "INTERFACE_HEADER_SETS property is read-only\n");
+    return;
   } else {
     this->impl->Properties.SetProperty(prop, value);
   }
@@ -1641,27 +1618,14 @@ void cmTarget::AppendProperty(const std::string& prop,
     fileSet->AddFileEntry(
       BT<std::string>(value, this->impl->Makefile->GetBacktrace()));
   } else if (prop == "HEADER_SETS") {
-    for (auto const& name : cmExpandedList(value)) {
-      if (!this->GetFileSet(name)) {
-        this->impl->Makefile->IssueMessage(
-          MessageType::FATAL_ERROR,
-          cmStrCat("Header set \"", name, "\" has not yet been created."));
-        return;
-      }
-    }
-    this->impl->HeaderSetsEntries.emplace_back(
-      value, this->impl->Makefile->GetBacktrace());
+    this->impl->Makefile->IssueMessage(MessageType::FATAL_ERROR,
+                                       "HEADER_SETS property is read-only\n");
+    return;
   } else if (prop == "INTERFACE_HEADER_SETS") {
-    for (auto const& name : cmExpandedList(value)) {
-      if (!this->GetFileSet(name)) {
-        this->impl->Makefile->IssueMessage(
-          MessageType::FATAL_ERROR,
-          cmStrCat("Header set \"", name, "\" has not yet been created."));
-        return;
-      }
-    }
-    this->impl->InterfaceHeaderSetsEntries.emplace_back(
-      value, this->impl->Makefile->GetBacktrace());
+    this->impl->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      "INTERFACE_HEADER_SETS property is read-only\n");
+    return;
   } else {
     this->impl->Properties.AppendProperty(prop, value, asString);
   }
@@ -2038,13 +2002,26 @@ cmValue cmTarget::GetProperty(const std::string& prop) const
       return cmValue(output);
     }
     if (prop == propHEADER_SETS) {
+      std::vector<std::string> set_names;
+      for (auto const& file_set : this->impl->FileSets) {
+        if (cmFileSetVisibilityIsForSelf(file_set.second.GetVisibility())) {
+          set_names.push_back(file_set.second.GetName());
+        }
+      }
       static std::string output;
-      output = cmJoin(this->impl->HeaderSetsEntries, ";"_s);
+      output = cmJoin(set_names, ";"_s);
       return cmValue(output);
     }
     if (prop == propINTERFACE_HEADER_SETS) {
+      std::vector<std::string> set_names;
+      for (auto const& file_set : this->impl->FileSets) {
+        if (cmFileSetVisibilityIsForInterface(
+              file_set.second.GetVisibility())) {
+          set_names.push_back(file_set.second.GetName());
+        }
+      }
       static std::string output;
-      output = cmJoin(this->impl->InterfaceHeaderSetsEntries, ";"_s);
+      output = cmJoin(set_names, ";"_s);
       return cmValue(output);
     }
   }
@@ -2346,6 +2323,16 @@ std::pair<cmFileSet*, bool> cmTarget::GetOrCreateFileSet(
 {
   auto result = this->impl->FileSets.emplace(
     std::make_pair(name, cmFileSet(name, type, vis)));
+  if (result.second) {
+    if (cmFileSetVisibilityIsForSelf(vis)) {
+      this->impl->HeaderSetsEntries.emplace_back(
+        name, this->impl->Makefile->GetBacktrace());
+    }
+    if (cmFileSetVisibilityIsForInterface(vis)) {
+      this->impl->InterfaceHeaderSetsEntries.emplace_back(
+        name, this->impl->Makefile->GetBacktrace());
+    }
+  }
   return std::make_pair(&result.first->second, result.second);
 }
 

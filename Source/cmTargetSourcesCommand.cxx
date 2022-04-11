@@ -264,15 +264,6 @@ bool TargetSourcesImpl::HandleOneFileSet(
     if (args.BaseDirs.empty()) {
       args.BaseDirs.emplace_back(this->Makefile->GetCurrentSourceDirectory());
     }
-
-    if (scope == "PRIVATE"_s || scope == "PUBLIC"_s) {
-      this->Target->AppendProperty(cmTarget::GetFileSetsPropertyName(type),
-                                   args.FileSet);
-    }
-    if (scope == "INTERFACE"_s || scope == "PUBLIC"_s) {
-      this->Target->AppendProperty(
-        cmTarget::GetInterfaceFileSetsPropertyName(type), args.FileSet);
-    }
   } else {
     type = fileSet.first->GetType();
     if (!args.Type.empty() && args.Type != type) {
