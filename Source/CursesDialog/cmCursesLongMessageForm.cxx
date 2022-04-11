@@ -191,9 +191,9 @@ void cmCursesLongMessageForm::HandleInput()
     if (key == 'o' || key == 'e') {
       break;
     }
-    if (key == KEY_DOWN || key == ctrl('n')) {
+    if (key == KEY_DOWN || key == ctrl('n') || key == 'j') {
       form_driver(this->Form, REQ_SCR_FLINE);
-    } else if (key == KEY_UP || key == ctrl('p')) {
+    } else if (key == KEY_UP || key == ctrl('p') || key == 'k') {
       form_driver(this->Form, REQ_SCR_BLINE);
     } else if (key == KEY_NPAGE || key == ctrl('d')) {
       form_driver(this->Form, REQ_SCR_FPAGE);
