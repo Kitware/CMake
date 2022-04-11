@@ -26,3 +26,7 @@ endif()
 if(CMake_TEST_HIP)
   run_cmake(CheckHIPCompilerFlag)
 endif()
+
+if(APPLE)
+  run_cmake_with_options(HeaderpadWorkaround --debug-trycompile)
+endif()
