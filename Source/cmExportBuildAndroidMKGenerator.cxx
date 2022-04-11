@@ -4,6 +4,7 @@
 
 #include <sstream>
 #include <utility>
+#include <vector>
 
 #include <cmext/algorithm>
 
@@ -60,7 +61,7 @@ void cmExportBuildAndroidMKGenerator::GenerateImportPropertyCode(
 }
 
 void cmExportBuildAndroidMKGenerator::GenerateMissingTargetsCheckCode(
-  std::ostream&, const std::vector<std::string>&)
+  std::ostream&)
 {
 }
 
