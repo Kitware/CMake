@@ -71,13 +71,18 @@ function(run_cmake_presets name)
     set(_unused_cli)
   endif()
 
+  set(_preset "--preset=${name}")
+  if(CMakePresets_NO_PRESET)
+    set(_preset)
+  endif()
+
   set(RunCMake_TEST_COMMAND ${CMAKE_COMMAND}
     ${_source_args}
     -DRunCMake_TEST=${name}
     -DRunCMake_GENERATOR=${RunCMake_GENERATOR}
     -DCMAKE_MAKE_PROGRAM=${RunCMake_MAKE_PROGRAM}
     ${_unused_cli}
-    --preset=${name}
+    ${_preset}
     ${ARGN}
     )
   run_cmake(${name})
@@ -288,7 +293,10 @@ run_cmake_presets(ListPresets --list-presets)
 set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/ListPresetsWorkingDir")
 set(RunCMake_TEST_NO_CLEAN 1)
 set(CMakePresets_NO_SOURCE_ARGS 1)
+set(CMakePresets_NO_PRESET 1)
 run_cmake_presets(ListPresetsWorkingDir --list-presets)
+run_cmake_presets(ListConfigurePresetsWorkingDir --list-presets=configure)
+unset(CMakePresets_NO_PRESET)
 unset(CMakePresets_NO_SOURCE_ARGS)
 unset(RunCMake_TEST_NO_CLEAN)
 unset(RunCMake_TEST_BINARY_DIR)
