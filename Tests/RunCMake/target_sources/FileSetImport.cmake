@@ -17,7 +17,7 @@ include("${export_build_dir}/export.cmake")
 include("${export_build_dir}/install/lib/cmake/export.cmake")
 
 assert_prop_eq(export::lib1 HEADER_SETS "")
-assert_prop_eq(export::lib1 INTERFACE_HEADER_SETS "HEADERS;b;c;d;e;f;g;dir3")
+assert_prop_eq(export::lib1 INTERFACE_HEADER_SETS "HEADERS;b;c;d;dir3;e;f;g")
 assert_prop_eq(export::lib1 HEADER_SET "${CMAKE_CURRENT_SOURCE_DIR}/error.c")
 assert_prop_eq(export::lib1 HEADER_DIRS "${CMAKE_CURRENT_SOURCE_DIR}")
 assert_prop_eq(export::lib1 HEADER_SET_b "${CMAKE_CURRENT_SOURCE_DIR}/h2.h")
@@ -35,7 +35,7 @@ assert_prop_eq(export::lib1 HEADER_DIRS_g "${CMAKE_CURRENT_SOURCE_DIR}/dir1;${CM
 assert_prop_eq(export::lib1 INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_SOURCE_DIR};$<1:${CMAKE_CURRENT_SOURCE_DIR}/dir>;${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_SOURCE_DIR}/$<IF:$<CONFIG:Debug>,debug,release>;${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_SOURCE_DIR}/dir1;${CMAKE_CURRENT_SOURCE_DIR}/dir2;${CMAKE_CURRENT_SOURCE_DIR}/dir3;$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>;$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>;$<BUILD_INTERFACE:$<1:${CMAKE_CURRENT_SOURCE_DIR}/dir>>;$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>;$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/$<IF:$<CONFIG:Debug>,debug,release>>;$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>;$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/dir1>;$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/dir2>;$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/dir3>")
 
 assert_prop_eq(install::lib1 HEADER_SETS "")
-assert_prop_eq(install::lib1 INTERFACE_HEADER_SETS "HEADERS;b;c;d;e;f;g;dir3")
+assert_prop_eq(install::lib1 INTERFACE_HEADER_SETS "HEADERS;b;c;d;dir3;e;f;g")
 assert_prop_eq(install::lib1 HEADER_SET "${export_build_dir}/install/include/error.c")
 assert_prop_eq(install::lib1 HEADER_DIRS "${export_build_dir}/install/include")
 assert_prop_eq(install::lib1 HEADER_SET_b "${export_build_dir}/install/include/h2.h")

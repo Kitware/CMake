@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "cmAlgorithms.h"
+#include "cmFileSet.h"
 #include "cmPolicies.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
@@ -19,7 +20,6 @@
 #include "cmValue.h"
 
 class cmCustomCommand;
-class cmFileSet;
 class cmGlobalGenerator;
 class cmInstallTargetGenerator;
 class cmListFileBacktrace;
@@ -287,7 +287,8 @@ public:
   const cmFileSet* GetFileSet(const std::string& name) const;
   cmFileSet* GetFileSet(const std::string& name);
   std::pair<cmFileSet*, bool> GetOrCreateFileSet(const std::string& name,
-                                                 const std::string& type);
+                                                 const std::string& type,
+                                                 cmFileSetVisibility vis);
 
   std::vector<std::string> GetAllInterfaceFileSets() const;
 

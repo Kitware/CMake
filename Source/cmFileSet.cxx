@@ -7,19 +7,79 @@
 #include <utility>
 #include <vector>
 
+#include <cmext/string_view>
+
 #include "cmsys/RegularExpression.hxx"
 
 #include "cmGeneratorExpression.h"
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
+#include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 
-cmFileSet::cmFileSet(std::string name, std::string type)
+cm::static_string_view cmFileSetVisibilityToName(cmFileSetVisibility vis)
+{
+  switch (vis) {
+    case cmFileSetVisibility::Interface:
+      return "INTERFACE"_s;
+    case cmFileSetVisibility::Public:
+      return "PUBLIC"_s;
+    case cmFileSetVisibility::Private:
+      return "PRIVATE"_s;
+  }
+  return ""_s;
+}
+
+cmFileSetVisibility cmFileSetVisibilityFromName(cm::string_view name,
+                                                cmMakefile* mf)
+{
+  if (name == "INTERFACE"_s) {
+    return cmFileSetVisibility::Interface;
+  }
+  if (name == "PUBLIC"_s) {
+    return cmFileSetVisibility::Public;
+  }
+  if (name == "PRIVATE"_s) {
+    return cmFileSetVisibility::Private;
+  }
+  mf->IssueMessage(
+    MessageType::FATAL_ERROR,
+    cmStrCat("File set visibility \"", name, "\" is not valid."));
+  return cmFileSetVisibility::Private;
+}
+
+bool cmFileSetVisibilityIsForSelf(cmFileSetVisibility vis)
+{
+  switch (vis) {
+    case cmFileSetVisibility::Interface:
+      return false;
+    case cmFileSetVisibility::Public:
+    case cmFileSetVisibility::Private:
+      return true;
+  }
+  return false;
+}
+
+bool cmFileSetVisibilityIsForInterface(cmFileSetVisibility vis)
+{
+  switch (vis) {
+    case cmFileSetVisibility::Interface:
+    case cmFileSetVisibility::Public:
+      return true;
+    case cmFileSetVisibility::Private:
+      return false;
+  }
+  return false;
+}
+
+cmFileSet::cmFileSet(std::string name, std::string type,
+                     cmFileSetVisibility visibility)
   : Name(std::move(name))
   , Type(std::move(type))
+  , Visibility(visibility)
 {
 }
 
