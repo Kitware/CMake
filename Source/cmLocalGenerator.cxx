@@ -2493,12 +2493,12 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
     static const std::array<std::string, 4> langs = { { "C", "CXX", "OBJC",
                                                         "OBJCXX" } };
 
-    bool haveAnyPch = false;
+    std::set<std::string> pchLangSet;
     if (this->GetGlobalGenerator()->IsXcode()) {
       for (const std::string& lang : langs) {
         const std::string pchHeader = target->GetPchHeader(config, lang, "");
         if (!pchHeader.empty()) {
-          haveAnyPch = true;
+          pchLangSet.emplace(lang);
         }
       }
     }
@@ -2543,9 +2543,11 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
         const std::string pchHeader = target->GetPchHeader(config, lang, arch);
 
         if (pchSource.empty() || pchHeader.empty()) {
-          if (this->GetGlobalGenerator()->IsXcode() && haveAnyPch) {
+          if (this->GetGlobalGenerator()->IsXcode() && !pchLangSet.empty()) {
             for (auto* sf : sources) {
-              sf->SetProperty("SKIP_PRECOMPILE_HEADERS", "ON");
+              if (pchLangSet.find(sf->GetLanguage()) == pchLangSet.end()) {
+                sf->SetProperty("SKIP_PRECOMPILE_HEADERS", "ON");
+              }
             }
           }
           continue;
