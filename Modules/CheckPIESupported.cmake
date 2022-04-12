@@ -22,10 +22,13 @@ property for executables will be honored at link time.
   Options are:
 
   ``OUTPUT_VARIABLE <output>``
-    Set ``<output>`` variable with details about any error.
+    Set ``<output>`` variable with details about any error. If the check is
+    bypassed because it uses cached results from a previous call, the output
+    will be empty even if errors were present in the previous call.
 
   ``LANGUAGES <lang>...``
     Check the linkers used for each of the specified languages.
+    If this option is not provided, the command checks all enabled languages.
 
     ``C``, ``CXX``, ``Fortran`` are supported.
 
@@ -43,9 +46,9 @@ Variables
 For each language checked, two boolean cache variables are defined.
 
  ``CMAKE_<lang>_LINK_PIE_SUPPORTED``
-   Set to ``YES`` if ``PIE`` is supported by the linker and ``NO`` otherwise.
+   Set to true if ``PIE`` is supported by the linker and false otherwise.
  ``CMAKE_<lang>_LINK_NO_PIE_SUPPORTED``
-   Set to ``YES`` if ``NO_PIE`` is supported by the linker and ``NO`` otherwise.
+   Set to true if ``NO_PIE`` is supported by the linker and false otherwise.
 
 Examples
 ^^^^^^^^
@@ -139,7 +142,7 @@ function (check_pie_supported)
       # no support at link time. Set cache variables to NO
       set(CMAKE_${lang}_LINK_PIE_SUPPORTED NO CACHE INTERNAL "PIE (${lang})")
       set(CMAKE_${lang}_LINK_NO_PIE_SUPPORTED NO CACHE INTERNAL "NO_PIE (${lang})")
-      string (APPEND outputs "PIE and NO_PIE are not supported by linker for ${lang}")
+      string (APPEND outputs "PIE and NO_PIE are not supported by linker for ${lang}\n")
     endif()
   endforeach()
 
