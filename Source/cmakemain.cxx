@@ -308,10 +308,11 @@ int do_cmake(int ac, char const* const* av)
                        parsedArgs.emplace_back("--find-package");
                        return true;
                      } },
-    CommandArgument{ "--list-presets", CommandArgument::Values::Zero,
-                     [&](std::string const&) -> bool {
+    CommandArgument{ "--list-presets", CommandArgument::Values::ZeroOrOne,
+                     [&](std::string const& value) -> bool {
                        workingMode = cmake::HELP_MODE;
                        parsedArgs.emplace_back("--list-presets");
+                       parsedArgs.emplace_back(value);
                        return true;
                      } },
   };
