@@ -97,6 +97,9 @@ endfunction()
 find_package(PkgConfig QUIET)
 if(PKG_CONFIG_FOUND)
   pkg_check_modules(GLUT QUIET glut)
+  if(NOT GLUT_FOUND)
+    pkg_check_modules(GLUT QUIET freeglut)
+  endif()
   if(GLUT_FOUND)
     # GLUT_INCLUDE_DIRS is now the official result variable, but
     # older versions of CMake only provided GLUT_INCLUDE_DIR.
@@ -111,7 +114,7 @@ if(WIN32)
   find_path( GLUT_INCLUDE_DIR NAMES GL/glut.h
     PATHS  ${GLUT_ROOT_PATH}/include )
   mark_as_advanced(GLUT_INCLUDE_DIR)
-  find_library( GLUT_glut_LIBRARY_RELEASE NAMES glut glut32 freeglut
+  find_library( GLUT_glut_LIBRARY_RELEASE NAMES freeglut glut glut32
     PATHS
     ${OPENGL_LIBRARY_DIR}
     ${GLUT_ROOT_PATH}/Release
