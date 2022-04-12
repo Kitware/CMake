@@ -7,20 +7,38 @@
 #include <string>
 #include <vector>
 
+#include <cm/string_view>
+#include <cmext/string_view>
+
 #include "cmListFileCache.h"
 
 class cmCompiledGeneratorExpression;
 struct cmGeneratorExpressionDAGChecker;
 class cmGeneratorTarget;
 class cmLocalGenerator;
+class cmMakefile;
+
+enum class cmFileSetVisibility
+{
+  Private,
+  Public,
+  Interface,
+};
+cm::static_string_view cmFileSetVisibilityToName(cmFileSetVisibility vis);
+cmFileSetVisibility cmFileSetVisibilityFromName(cm::string_view name,
+                                                cmMakefile* mf);
+bool cmFileSetVisibilityIsForSelf(cmFileSetVisibility vis);
+bool cmFileSetVisibilityIsForInterface(cmFileSetVisibility vis);
 
 class cmFileSet
 {
 public:
-  cmFileSet(std::string name, std::string type);
+  cmFileSet(std::string name, std::string type,
+            cmFileSetVisibility visibility);
 
   const std::string& GetName() const { return this->Name; }
   const std::string& GetType() const { return this->Type; }
+  cmFileSetVisibility GetVisibility() const { return this->Visibility; }
 
   void ClearDirectoryEntries();
   void AddDirectoryEntry(BT<std::string> directories);
@@ -61,6 +79,7 @@ public:
 private:
   std::string Name;
   std::string Type;
+  cmFileSetVisibility Visibility;
   std::vector<BT<std::string>> DirectoryEntries;
   std::vector<BT<std::string>> FileEntries;
 };

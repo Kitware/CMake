@@ -3,12 +3,12 @@ INTERFACE_HEADER_SETS
 
 .. versionadded:: 3.23
 
-List of the target's ``INTERFACE`` and ``PUBLIC`` header sets (i.e. all
-file sets with the type ``HEADERS``). Files listed in these header sets
+Read-only list of the target's ``INTERFACE`` and ``PUBLIC`` header sets (i.e.
+all file sets with the type ``HEADERS``). Files listed in these header sets
 can be installed with :command:`install(TARGETS)` and exported with
 :command:`install(EXPORT)` and :command:`export`.
 
-This property is normally only set by :command:`target_sources(FILE_SET)`
-rather than being manipulated directly.
+Header sets may be defined using the :command:`target_sources` command
+``FILE_SET`` option with type ``HEADERS``.
 
 See also :prop_tgt:`HEADER_SETS`.
