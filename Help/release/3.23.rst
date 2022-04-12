@@ -278,3 +278,7 @@ Changes made since CMake 3.23.0 include the following.
   targets.  Pending further work in a future version of CMake, it is now
   an error to add a ``FILE_SET`` of type ``HEADERS`` to such targets on
   Apple platforms.
+
+* The :prop_tgt:`HEADER_SETS` and :prop_tgt:`INTERFACE_HEADER_SETS` target
+  properties added in CMake 3.23.0 are now read-only records of the header
+  sets created by the :command:`target_sources` command.
