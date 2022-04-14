@@ -96,7 +96,6 @@ macro(_check_threads_lib LIBNAME FUNCNAME VARNAME)
      CHECK_LIBRARY_EXISTS(${LIBNAME} ${FUNCNAME} "" ${VARNAME})
      if(${VARNAME})
        set(CMAKE_THREAD_LIBS_INIT "-l${LIBNAME}")
-       set(CMAKE_HAVE_THREADS_LIBRARY 1)
        set(Threads_FOUND TRUE)
      endif()
   endif ()
@@ -153,7 +152,6 @@ if(CMAKE_HAVE_PTHREAD_H)
   # We have pthread.h
   # Let's check for the library now.
   #
-  set(CMAKE_HAVE_THREADS_LIBRARY)
   if(NOT THREADS_HAVE_PTHREAD_ARG)
     # Check if pthread functions are in normal C library.
     # We list some pthread functions in PTHREAD_C_CXX_TEST_SOURCE test code.
@@ -166,7 +164,6 @@ if(CMAKE_HAVE_PTHREAD_H)
     endif()
     if(CMAKE_HAVE_LIBC_PTHREAD)
       set(CMAKE_THREAD_LIBS_INIT "")
-      set(CMAKE_HAVE_THREADS_LIBRARY 1)
       set(Threads_FOUND TRUE)
     else()
       # Check for -pthread first if enabled. This is the recommended
