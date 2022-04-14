@@ -1026,6 +1026,16 @@ which is just the string ``tgt``.
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on (see policy :policy:`CMP0112`).
 
+.. genex:: $<TARGET_BUNDLE_DIR_NAME:tgt>
+
+  .. versionadded:: 3.24
+
+  Name of the bundle directory (``my.app``, ``my.framework``, or
+  ``my.bundle``), where ``tgt`` is the name of a target.
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on (see policy :policy:`CMP0112`).
+
 .. genex:: $<TARGET_BUNDLE_CONTENT_DIR:tgt>
 
   .. versionadded:: 3.9

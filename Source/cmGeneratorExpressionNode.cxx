@@ -2098,6 +2098,7 @@ class ArtifactPathTag;
 class ArtifactPdbTag;
 class ArtifactSonameTag;
 class ArtifactBundleDirTag;
+class ArtifactBundleDirNameTag;
 class ArtifactBundleContentDirTag;
 
 template <typename ArtifactT, typename ComponentT>
@@ -2153,6 +2154,12 @@ struct TargetFilesystemArtifactDependency<ArtifactT, ArtifactDirTag>
 };
 template <>
 struct TargetFilesystemArtifactDependency<ArtifactBundleDirTag,
+                                          ArtifactPathTag>
+  : TargetFilesystemArtifactDependencyCMP0112
+{
+};
+template <>
+struct TargetFilesystemArtifactDependency<ArtifactBundleDirNameTag,
                                           ArtifactPathTag>
   : TargetFilesystemArtifactDependencyCMP0112
 {
@@ -2281,6 +2288,31 @@ struct TargetFilesystemArtifactResultCreator<ArtifactBundleDirTag>
     std::string outpath = target->GetDirectory(context->Config) + '/';
     return target->BuildBundleDirectory(outpath, context->Config,
                                         cmGeneratorTarget::BundleDirLevel);
+  }
+};
+
+template <>
+struct TargetFilesystemArtifactResultCreator<ArtifactBundleDirNameTag>
+{
+  static std::string Create(cmGeneratorTarget* target,
+                            cmGeneratorExpressionContext* context,
+                            const GeneratorExpressionContent* content)
+  {
+    if (target->IsImported()) {
+      ::reportError(
+        context, content->GetOriginalExpression(),
+        "TARGET_BUNDLE_DIR_NAME not allowed for IMPORTED targets.");
+      return std::string();
+    }
+    if (!target->IsBundleOnApple()) {
+      ::reportError(
+        context, content->GetOriginalExpression(),
+        "TARGET_BUNDLE_DIR_NAME is allowed only for Bundle targets.");
+      return std::string();
+    }
+
+    return target->GetAppBundleDirectory(context->Config,
+                                         cmGeneratorTarget::BundleDirLevel);
   }
 };
 
@@ -2417,7 +2449,8 @@ struct TargetFilesystemArtifact : public TargetArtifactBase
       return std::string();
     }
     // Not a dependent target if we are querying for ArtifactDirTag,
-    // ArtifactNameTag, ArtifactBundleDirTag, and ArtifactBundleContentDirTag
+    // ArtifactNameTag, ArtifactBundleDirTag, ArtifactBundleDirNameTag,
+    // and ArtifactBundleContentDirTag
     TargetFilesystemArtifactDependency<ArtifactT, ComponentT>::AddDependency(
       target, context);
 
@@ -2457,6 +2490,10 @@ static const TargetFilesystemArtifactNodeGroup<ArtifactPdbTag>
 
 static const TargetFilesystemArtifact<ArtifactBundleDirTag, ArtifactPathTag>
   targetBundleDirNode;
+
+static const TargetFilesystemArtifact<ArtifactBundleDirNameTag,
+                                      ArtifactNameTag>
+  targetBundleDirNameNode;
 
 static const TargetFilesystemArtifact<ArtifactBundleContentDirTag,
                                       ArtifactPathTag>
@@ -2783,6 +2820,7 @@ const cmGeneratorExpressionNode* cmGeneratorExpressionNode::GetNode(
     { "TARGET_SONAME_FILE_DIR", &targetSoNameNodeGroup.FileDir },
     { "TARGET_PDB_FILE_DIR", &targetPdbNodeGroup.FileDir },
     { "TARGET_BUNDLE_DIR", &targetBundleDirNode },
+    { "TARGET_BUNDLE_DIR_NAME", &targetBundleDirNameNode },
     { "TARGET_BUNDLE_CONTENT_DIR", &targetBundleContentDirNode },
     { "STREQUAL", &strEqualNode },
     { "EQUAL", &equalNode },
