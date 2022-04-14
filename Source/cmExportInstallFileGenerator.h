@@ -57,13 +57,11 @@ public:
 protected:
   // Implement virtual methods from the superclass.
   bool GenerateMainFile(std::ostream& os) override;
-  void GenerateImportTargetsConfig(
-    std::ostream& os, const std::string& config, std::string const& suffix,
-    std::vector<std::string>& missingTargets) override;
+  void GenerateImportTargetsConfig(std::ostream& os, const std::string& config,
+                                   std::string const& suffix) override;
   cmStateEnums::TargetType GetExportTargetType(
     cmTargetExport const* targetExport) const;
   void HandleMissingTarget(std::string& link_libs,
-                           std::vector<std::string>& missingTargets,
                            cmGeneratorTarget const* depender,
                            cmGeneratorTarget* dependee) override;
 
@@ -85,8 +83,7 @@ protected:
   virtual void CleanupTemporaryVariables(std::ostream&);
 
   /** Generate a per-configuration file for the targets.  */
-  virtual bool GenerateImportFileConfig(
-    const std::string& config, std::vector<std::string>& missingTargets);
+  virtual bool GenerateImportFileConfig(const std::string& config);
 
   /** Fill in properties indicating installed file locations.  */
   void SetImportLocationProperty(const std::string& config,

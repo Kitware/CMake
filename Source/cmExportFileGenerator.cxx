@@ -106,9 +106,8 @@ bool cmExportFileGenerator::GenerateImportFile()
   return result;
 }
 
-void cmExportFileGenerator::GenerateImportConfig(
-  std::ostream& os, const std::string& config,
-  std::vector<std::string>& missingTargets)
+void cmExportFileGenerator::GenerateImportConfig(std::ostream& os,
+                                                 const std::string& config)
 {
   // Construct the property configuration suffix.
   std::string suffix = "_";
@@ -119,7 +118,7 @@ void cmExportFileGenerator::GenerateImportConfig(
   }
 
   // Generate the per-config target information.
-  this->GenerateImportTargetsConfig(os, config, suffix, missingTargets);
+  this->GenerateImportTargetsConfig(os, config, suffix);
 }
 
 void cmExportFileGenerator::PopulateInterfaceProperty(
@@ -136,7 +135,7 @@ void cmExportFileGenerator::PopulateInterfaceProperty(
   const std::string& propName, const std::string& outputName,
   cmGeneratorTarget const* target,
   cmGeneratorExpression::PreprocessContext preprocessRule,
-  ImportPropertyMap& properties, std::vector<std::string>& missingTargets)
+  ImportPropertyMap& properties)
 {
   cmValue input = target->GetProperty(propName);
   if (input) {
@@ -149,8 +148,7 @@ void cmExportFileGenerator::PopulateInterfaceProperty(
     std::string prepro =
       cmGeneratorExpression::Preprocess(*input, preprocessRule);
     if (!prepro.empty()) {
-      this->ResolveTargetsInGeneratorExpressions(prepro, target,
-                                                 missingTargets);
+      this->ResolveTargetsInGeneratorExpressions(prepro, target);
       properties[outputName] = prepro;
     }
   }
@@ -170,7 +168,7 @@ void cmExportFileGenerator::GenerateRequiredCMakeVersion(
 bool cmExportFileGenerator::PopulateInterfaceLinkLibrariesProperty(
   cmGeneratorTarget const* target,
   cmGeneratorExpression::PreprocessContext preprocessRule,
-  ImportPropertyMap& properties, std::vector<std::string>& missingTargets)
+  ImportPropertyMap& properties)
 {
   if (!target->IsLinkable()) {
     return false;
@@ -185,8 +183,8 @@ bool cmExportFileGenerator::PopulateInterfaceLinkLibrariesProperty(
       std::string prepro =
         cmGeneratorExpression::Preprocess(*input, preprocessRule);
       if (!prepro.empty()) {
-        this->ResolveTargetsInGeneratorExpressions(
-          prepro, target, missingTargets, ReplaceFreeTargets);
+        this->ResolveTargetsInGeneratorExpressions(prepro, target,
+                                                   ReplaceFreeTargets);
         properties[linkIfaceProp] = prepro;
         hadINTERFACE_LINK_LIBRARIES = true;
       }
@@ -343,7 +341,7 @@ static void prefixItems(std::string& exportDirs)
 void cmExportFileGenerator::PopulateSourcesInterface(
   cmGeneratorTarget const* gt,
   cmGeneratorExpression::PreprocessContext preprocessRule,
-  ImportPropertyMap& properties, std::vector<std::string>& missingTargets)
+  ImportPropertyMap& properties)
 {
   assert(preprocessRule == cmGeneratorExpression::InstallInterface);
 
@@ -362,7 +360,7 @@ void cmExportFileGenerator::PopulateSourcesInterface(
   std::string prepro =
     cmGeneratorExpression::Preprocess(*input, preprocessRule, true);
   if (!prepro.empty()) {
-    this->ResolveTargetsInGeneratorExpressions(prepro, gt, missingTargets);
+    this->ResolveTargetsInGeneratorExpressions(prepro, gt);
 
     if (!checkInterfaceDirs(prepro, gt, propName)) {
       return;
@@ -374,8 +372,7 @@ void cmExportFileGenerator::PopulateSourcesInterface(
 void cmExportFileGenerator::PopulateIncludeDirectoriesInterface(
   cmGeneratorTarget const* target,
   cmGeneratorExpression::PreprocessContext preprocessRule,
-  ImportPropertyMap& properties, std::vector<std::string>& missingTargets,
-  cmTargetExport const& te)
+  ImportPropertyMap& properties, cmTargetExport const& te)
 {
   assert(preprocessRule == cmGeneratorExpression::InstallInterface);
 
@@ -422,7 +419,7 @@ void cmExportFileGenerator::PopulateIncludeDirectoriesInterface(
   std::string prepro =
     cmGeneratorExpression::Preprocess(includes, preprocessRule, true);
   if (!prepro.empty()) {
-    this->ResolveTargetsInGeneratorExpressions(prepro, target, missingTargets);
+    this->ResolveTargetsInGeneratorExpressions(prepro, target);
 
     if (!checkInterfaceDirs(prepro, target, propName)) {
       return;
@@ -434,7 +431,7 @@ void cmExportFileGenerator::PopulateIncludeDirectoriesInterface(
 void cmExportFileGenerator::PopulateLinkDependsInterface(
   cmGeneratorTarget const* gt,
   cmGeneratorExpression::PreprocessContext preprocessRule,
-  ImportPropertyMap& properties, std::vector<std::string>& missingTargets)
+  ImportPropertyMap& properties)
 {
   assert(preprocessRule == cmGeneratorExpression::InstallInterface);
 
@@ -453,7 +450,7 @@ void cmExportFileGenerator::PopulateLinkDependsInterface(
   std::string prepro =
     cmGeneratorExpression::Preprocess(*input, preprocessRule, true);
   if (!prepro.empty()) {
-    this->ResolveTargetsInGeneratorExpressions(prepro, gt, missingTargets);
+    this->ResolveTargetsInGeneratorExpressions(prepro, gt);
 
     if (!checkInterfaceDirs(prepro, gt, propName)) {
       return;
@@ -465,7 +462,7 @@ void cmExportFileGenerator::PopulateLinkDependsInterface(
 void cmExportFileGenerator::PopulateLinkDirectoriesInterface(
   cmGeneratorTarget const* gt,
   cmGeneratorExpression::PreprocessContext preprocessRule,
-  ImportPropertyMap& properties, std::vector<std::string>& missingTargets)
+  ImportPropertyMap& properties)
 {
   assert(preprocessRule == cmGeneratorExpression::InstallInterface);
 
@@ -484,7 +481,7 @@ void cmExportFileGenerator::PopulateLinkDirectoriesInterface(
   std::string prepro =
     cmGeneratorExpression::Preprocess(*input, preprocessRule, true);
   if (!prepro.empty()) {
-    this->ResolveTargetsInGeneratorExpressions(prepro, gt, missingTargets);
+    this->ResolveTargetsInGeneratorExpressions(prepro, gt);
 
     if (!checkInterfaceDirs(prepro, gt, propName)) {
       return;
@@ -496,10 +493,10 @@ void cmExportFileGenerator::PopulateLinkDirectoriesInterface(
 void cmExportFileGenerator::PopulateInterfaceProperty(
   const std::string& propName, cmGeneratorTarget const* target,
   cmGeneratorExpression::PreprocessContext preprocessRule,
-  ImportPropertyMap& properties, std::vector<std::string>& missingTargets)
+  ImportPropertyMap& properties)
 {
   this->PopulateInterfaceProperty(propName, propName, target, preprocessRule,
-                                  properties, missingTargets);
+                                  properties);
 }
 
 static void getPropertyContents(cmGeneratorTarget const* tgt,
@@ -604,9 +601,9 @@ void cmExportFileGenerator::GenerateInterfaceProperties(
   }
 }
 
-bool cmExportFileGenerator::AddTargetNamespace(
-  std::string& input, cmGeneratorTarget const* target,
-  cmLocalGenerator const* lg, std::vector<std::string>& missingTargets)
+bool cmExportFileGenerator::AddTargetNamespace(std::string& input,
+                                               cmGeneratorTarget const* target,
+                                               cmLocalGenerator const* lg)
 {
   cmGeneratorTarget::TargetOrString resolved =
     target->ResolveTargetReference(input, lg);
@@ -625,7 +622,7 @@ bool cmExportFileGenerator::AddTargetNamespace(
     input = this->Namespace + tgt->GetExportName();
   } else {
     std::string namespacedTarget;
-    this->HandleMissingTarget(namespacedTarget, missingTargets, target, tgt);
+    this->HandleMissingTarget(namespacedTarget, target, tgt);
     if (!namespacedTarget.empty()) {
       input = namespacedTarget;
     } else {
@@ -637,12 +634,11 @@ bool cmExportFileGenerator::AddTargetNamespace(
 
 void cmExportFileGenerator::ResolveTargetsInGeneratorExpressions(
   std::string& input, cmGeneratorTarget const* target,
-  std::vector<std::string>& missingTargets, FreeTargetsReplace replace)
+  FreeTargetsReplace replace)
 {
   cmLocalGenerator const* lg = target->GetLocalGenerator();
   if (replace == NoReplaceFreeTargets) {
-    this->ResolveTargetsInGeneratorExpression(input, target, lg,
-                                              missingTargets);
+    this->ResolveTargetsInGeneratorExpression(input, target, lg);
     return;
   }
   std::vector<std::string> parts;
@@ -655,10 +651,9 @@ void cmExportFileGenerator::ResolveTargetsInGeneratorExpressions(
       continue;
     }
     if (cmGeneratorExpression::Find(li) == std::string::npos) {
-      this->AddTargetNamespace(li, target, lg, missingTargets);
+      this->AddTargetNamespace(li, target, lg);
     } else {
-      this->ResolveTargetsInGeneratorExpression(li, target, lg,
-                                                missingTargets);
+      this->ResolveTargetsInGeneratorExpression(li, target, lg);
     }
     input += sep + li;
     sep = ";";
@@ -667,7 +662,7 @@ void cmExportFileGenerator::ResolveTargetsInGeneratorExpressions(
 
 void cmExportFileGenerator::ResolveTargetsInGeneratorExpression(
   std::string& input, cmGeneratorTarget const* target,
-  cmLocalGenerator const* lg, std::vector<std::string>& missingTargets)
+  cmLocalGenerator const* lg)
 {
   std::string::size_type pos = 0;
   std::string::size_type lastPos = pos;
@@ -691,7 +686,7 @@ void cmExportFileGenerator::ResolveTargetsInGeneratorExpression(
     std::string targetName =
       input.substr(nameStartPos, commaPos - nameStartPos);
 
-    if (this->AddTargetNamespace(targetName, target, lg, missingTargets)) {
+    if (this->AddTargetNamespace(targetName, target, lg)) {
       input.replace(nameStartPos, commaPos - nameStartPos, targetName);
     }
     lastPos = nameStartPos + targetName.size() + 1;
@@ -713,7 +708,7 @@ void cmExportFileGenerator::ResolveTargetsInGeneratorExpression(
                     "literal.";
       break;
     }
-    if (!this->AddTargetNamespace(targetName, target, lg, missingTargets)) {
+    if (!this->AddTargetNamespace(targetName, target, lg)) {
       errorString = "$<TARGET_NAME:...> requires its parameter to be a "
                     "reachable target.";
       break;
@@ -734,7 +729,7 @@ void cmExportFileGenerator::ResolveTargetsInGeneratorExpression(
     }
     std::string libName = input.substr(nameStartPos, endPos - nameStartPos);
     if (cmGeneratorExpression::IsValidTargetName(libName) &&
-        this->AddTargetNamespace(libName, target, lg, missingTargets)) {
+        this->AddTargetNamespace(libName, target, lg)) {
       input.replace(nameStartPos, endPos - nameStartPos, libName);
     }
     lastPos = nameStartPos + libName.size() + 1;
@@ -756,8 +751,7 @@ void cmExportFileGenerator::ReplaceInstallPrefix(std::string& /*unused*/)
 void cmExportFileGenerator::SetImportLinkInterface(
   const std::string& config, std::string const& suffix,
   cmGeneratorExpression::PreprocessContext preprocessRule,
-  cmGeneratorTarget const* target, ImportPropertyMap& properties,
-  std::vector<std::string>& missingTargets)
+  cmGeneratorTarget const* target, ImportPropertyMap& properties)
 {
   // Add the transitive link dependencies for this configuration.
   cmLinkInterface const* iface = target->GetLinkInterface(config, target);
@@ -769,7 +763,7 @@ void cmExportFileGenerator::SetImportLinkInterface(
     // Policy CMP0022 must not be NEW.
     this->SetImportLinkProperty(
       suffix, target, "IMPORTED_LINK_INTERFACE_LIBRARIES", iface->Libraries,
-      properties, missingTargets, ImportLinkPropertyTargetNames::Yes);
+      properties, ImportLinkPropertyTargetNames::Yes);
     return;
   }
 
@@ -808,7 +802,7 @@ void cmExportFileGenerator::SetImportLinkInterface(
   std::string prepro =
     cmGeneratorExpression::Preprocess(*propContent, preprocessRule);
   if (!prepro.empty()) {
-    this->ResolveTargetsInGeneratorExpressions(prepro, target, missingTargets,
+    this->ResolveTargetsInGeneratorExpressions(prepro, target,
                                                ReplaceFreeTargets);
     properties["IMPORTED_LINK_INTERFACE_LIBRARIES" + suffix] = prepro;
   }
@@ -816,8 +810,7 @@ void cmExportFileGenerator::SetImportLinkInterface(
 
 void cmExportFileGenerator::SetImportDetailProperties(
   const std::string& config, std::string const& suffix,
-  cmGeneratorTarget* target, ImportPropertyMap& properties,
-  std::vector<std::string>& missingTargets)
+  cmGeneratorTarget* target, ImportPropertyMap& properties)
 {
   // Get the makefile in which to lookup target information.
   cmMakefile* mf = target->Makefile;
@@ -848,12 +841,11 @@ void cmExportFileGenerator::SetImportDetailProperties(
         target->GetLinkInterface(config, target)) {
     this->SetImportLinkProperty(
       suffix, target, "IMPORTED_LINK_INTERFACE_LANGUAGES", iface->Languages,
-      properties, missingTargets, ImportLinkPropertyTargetNames::No);
+      properties, ImportLinkPropertyTargetNames::No);
 
-    std::vector<std::string> dummy;
     this->SetImportLinkProperty(
       suffix, target, "IMPORTED_LINK_DEPENDENT_LIBRARIES", iface->SharedDeps,
-      properties, dummy, ImportLinkPropertyTargetNames::Yes);
+      properties, ImportLinkPropertyTargetNames::Yes);
     if (iface->Multiplicity > 0) {
       std::string prop =
         cmStrCat("IMPORTED_LINK_INTERFACE_MULTIPLICITY", suffix);
@@ -894,8 +886,7 @@ template <typename T>
 void cmExportFileGenerator::SetImportLinkProperty(
   std::string const& suffix, cmGeneratorTarget const* target,
   const std::string& propName, std::vector<T> const& entries,
-  ImportPropertyMap& properties, std::vector<std::string>& missingTargets,
-  ImportLinkPropertyTargetNames targetNames)
+  ImportPropertyMap& properties, ImportLinkPropertyTargetNames targetNames)
 {
   // Skip the property if there are no entries.
   if (entries.empty()) {
@@ -914,7 +905,7 @@ void cmExportFileGenerator::SetImportLinkProperty(
 
     if (targetNames == ImportLinkPropertyTargetNames::Yes) {
       std::string temp = asString(l);
-      this->AddTargetNamespace(temp, target, lg, missingTargets);
+      this->AddTargetNamespace(temp, target, lg);
       link_entries += temp;
     } else {
       link_entries += asString(l);
@@ -1124,10 +1115,9 @@ void cmExportFileGenerator::GenerateImportPropertyCode(
      << "\n";
 }
 
-void cmExportFileGenerator::GenerateMissingTargetsCheckCode(
-  std::ostream& os, const std::vector<std::string>& missingTargets)
+void cmExportFileGenerator::GenerateMissingTargetsCheckCode(std::ostream& os)
 {
-  if (missingTargets.empty()) {
+  if (this->MissingTargets.empty()) {
     /* clang-format off */
     os << "# This file does not depend on other imported targets which have\n"
           "# been exported from the same project but in a separate "
@@ -1142,7 +1132,7 @@ void cmExportFileGenerator::GenerateMissingTargetsCheckCode(
         "foreach(_target ";
   /* clang-format on */
   std::set<std::string> emitted;
-  for (std::string const& missingTarget : missingTargets) {
+  for (std::string const& missingTarget : this->MissingTargets) {
     if (emitted.insert(missingTarget).second) {
       os << "\"" << missingTarget << "\" ";
     }

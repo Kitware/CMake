@@ -71,8 +71,6 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
   // Compute the relative import prefix for the file
   this->GenerateImportPrefix(os);
 
-  std::vector<std::string> missingTargets;
-
   bool require2_8_12 = false;
   bool require3_0_0 = false;
   bool require3_1_0 = false;
@@ -90,35 +88,34 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
     ImportPropertyMap properties;
 
     this->PopulateIncludeDirectoriesInterface(
-      gt, cmGeneratorExpression::InstallInterface, properties, missingTargets,
-      *te);
+      gt, cmGeneratorExpression::InstallInterface, properties, *te);
     this->PopulateSourcesInterface(gt, cmGeneratorExpression::InstallInterface,
-                                   properties, missingTargets);
+                                   properties);
     this->PopulateInterfaceProperty("INTERFACE_SYSTEM_INCLUDE_DIRECTORIES", gt,
                                     cmGeneratorExpression::InstallInterface,
-                                    properties, missingTargets);
+                                    properties);
     this->PopulateInterfaceProperty("INTERFACE_COMPILE_DEFINITIONS", gt,
                                     cmGeneratorExpression::InstallInterface,
-                                    properties, missingTargets);
+                                    properties);
     this->PopulateInterfaceProperty("INTERFACE_COMPILE_OPTIONS", gt,
                                     cmGeneratorExpression::InstallInterface,
-                                    properties, missingTargets);
+                                    properties);
     this->PopulateInterfaceProperty("INTERFACE_PRECOMPILE_HEADERS", gt,
                                     cmGeneratorExpression::InstallInterface,
-                                    properties, missingTargets);
+                                    properties);
     this->PopulateInterfaceProperty("INTERFACE_AUTOUIC_OPTIONS", gt,
                                     cmGeneratorExpression::InstallInterface,
-                                    properties, missingTargets);
+                                    properties);
     this->PopulateInterfaceProperty("INTERFACE_COMPILE_FEATURES", gt,
                                     cmGeneratorExpression::InstallInterface,
-                                    properties, missingTargets);
+                                    properties);
     this->PopulateInterfaceProperty("INTERFACE_LINK_OPTIONS", gt,
                                     cmGeneratorExpression::InstallInterface,
-                                    properties, missingTargets);
+                                    properties);
     this->PopulateLinkDirectoriesInterface(
-      gt, cmGeneratorExpression::InstallInterface, properties, missingTargets);
+      gt, cmGeneratorExpression::InstallInterface, properties);
     this->PopulateLinkDependsInterface(
-      gt, cmGeneratorExpression::InstallInterface, properties, missingTargets);
+      gt, cmGeneratorExpression::InstallInterface, properties);
 
     std::string errorMessage;
     if (!this->PopulateExportProperties(gt, properties, errorMessage)) {
@@ -131,8 +128,7 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
       gt->GetPolicyStatusCMP0022() != cmPolicies::OLD;
     if (newCMP0022Behavior) {
       if (this->PopulateInterfaceLinkLibrariesProperty(
-            gt, cmGeneratorExpression::InstallInterface, properties,
-            missingTargets) &&
+            gt, cmGeneratorExpression::InstallInterface, properties) &&
           !this->ExportOld) {
         require2_8_12 = true;
       }
@@ -174,13 +170,13 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
   // Don't do this if we only export INTERFACE_LIBRARY targets.
   if (requiresConfigFiles) {
     for (std::string const& c : this->Configurations) {
-      if (!this->GenerateImportFileConfig(c, missingTargets)) {
+      if (!this->GenerateImportFileConfig(c)) {
         result = false;
       }
     }
   }
 
-  this->GenerateMissingTargetsCheckCode(os, missingTargets);
+  this->GenerateMissingTargetsCheckCode(os);
 
   return result;
 }
@@ -273,7 +269,7 @@ void cmExportInstallFileGenerator::ReplaceInstallPrefix(std::string& input)
 }
 
 bool cmExportInstallFileGenerator::GenerateImportFileConfig(
-  const std::string& config, std::vector<std::string>& missingTargets)
+  const std::string& config)
 {
   // Skip configurations not enabled for this export.
   if (!this->IEGen->InstallsForConfig(config)) {
@@ -305,7 +301,7 @@ bool cmExportInstallFileGenerator::GenerateImportFileConfig(
   this->GenerateImportHeaderCode(os, config);
 
   // Generate the per-config target information.
-  this->GenerateImportConfig(os, config, missingTargets);
+  this->GenerateImportConfig(os, config);
 
   // End with the import file footer.
   this->GenerateImportFooterCode(os);
@@ -317,8 +313,7 @@ bool cmExportInstallFileGenerator::GenerateImportFileConfig(
 }
 
 void cmExportInstallFileGenerator::GenerateImportTargetsConfig(
-  std::ostream& os, const std::string& config, std::string const& suffix,
-  std::vector<std::string>& missingTargets)
+  std::ostream& os, const std::string& config, std::string const& suffix)
 {
   // Add each target in the set to the export.
   for (std::unique_ptr<cmTargetExport> const& te :
@@ -350,12 +345,11 @@ void cmExportInstallFileGenerator::GenerateImportTargetsConfig(
     if (!properties.empty()) {
       // Get the rest of the target details.
       cmGeneratorTarget* gtgt = te->Target;
-      this->SetImportDetailProperties(config, suffix, gtgt, properties,
-                                      missingTargets);
+      this->SetImportDetailProperties(config, suffix, gtgt, properties);
 
       this->SetImportLinkInterface(config, suffix,
                                    cmGeneratorExpression::InstallInterface,
-                                   gtgt, properties, missingTargets);
+                                   gtgt, properties);
 
       // TODO: PUBLIC_HEADER_LOCATION
       // This should wait until the build feature propagation stuff
@@ -454,8 +448,8 @@ cmStateEnums::TargetType cmExportInstallFileGenerator::GetExportTargetType(
 }
 
 void cmExportInstallFileGenerator::HandleMissingTarget(
-  std::string& link_libs, std::vector<std::string>& missingTargets,
-  cmGeneratorTarget const* depender, cmGeneratorTarget* dependee)
+  std::string& link_libs, cmGeneratorTarget const* depender,
+  cmGeneratorTarget* dependee)
 {
   const std::string name = dependee->GetName();
   cmGlobalGenerator* gg = dependee->GetLocalGenerator()->GetGlobalGenerator();
@@ -466,7 +460,7 @@ void cmExportInstallFileGenerator::HandleMissingTarget(
 
     missingTarget += dependee->GetExportName();
     link_libs += missingTarget;
-    missingTargets.push_back(std::move(missingTarget));
+    this->MissingTargets.emplace_back(std::move(missingTarget));
   } else {
     // All exported targets should be known here and should be unique.
     // This is probably user-error.
