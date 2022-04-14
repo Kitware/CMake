@@ -75,6 +75,8 @@ public:
 
 private:
   static std::string FormatSystemError(LSTATUS status);
+  static std::wstring ToWide(cm::string_view str);
+  static std::string ToNarrow(const wchar_t* str, int size = -1);
 
   HKEY Handler;
 };
@@ -104,7 +106,7 @@ KeyHandler KeyHandler::OpenKey(cm::string_view key, View view)
   }
   std::wstring subKey;
   if (start != cm::string_view::npos) {
-    subKey = cmsys::Encoding::ToWide(key.substr(start + 1).data());
+    subKey = ToWide(key.substr(start + 1));
   }
   // Update path format
   std::replace(subKey.begin(), subKey.end(), L'/', L'\\');
@@ -125,19 +127,82 @@ KeyHandler KeyHandler::OpenKey(cm::string_view key, View view)
 
 std::string KeyHandler::FormatSystemError(LSTATUS status)
 {
-  std::string formattedMessage;
+  std::string formattedMessage{ "Windows Registry: unexpected error." };
   LPWSTR message = nullptr;
   DWORD size = 1024;
   if (FormatMessageW(
         FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER, nullptr,
-        status, 0, reinterpret_cast<LPWSTR>(&message), size, nullptr) == 0) {
-    formattedMessage = "Windows Registry: unexpected error.";
-  } else {
-    formattedMessage = cmTrimWhitespace(cmsys::Encoding::ToNarrow(message));
+        status, 0, reinterpret_cast<LPWSTR>(&message), size, nullptr) != 0) {
+    try {
+      formattedMessage = cmTrimWhitespace(ToNarrow(message));
+    } catch (...) {
+      // ignore any exception because this method can be called
+      // as part of the raise of an exception
+    }
   }
   LocalFree(message);
 
   return formattedMessage;
+}
+
+std::wstring KeyHandler::ToWide(cm::string_view str)
+{
+  std::wstring wstr;
+
+  if (str.empty()) {
+    return wstr;
+  }
+
+  const auto wlength =
+    MultiByteToWideChar(KWSYS_ENCODING_DEFAULT_CODEPAGE, 0, str.data(),
+                        int(str.size()), nullptr, 0);
+  if (wlength > 0) {
+    auto wdata = cm::make_unique<wchar_t[]>(wlength);
+    const auto r =
+      MultiByteToWideChar(KWSYS_ENCODING_DEFAULT_CODEPAGE, 0, str.data(),
+                          int(str.size()), wdata.get(), wlength);
+    if (r > 0) {
+      wstr = std::wstring(wdata.get(), wlength);
+    } else {
+      throw registry_error(FormatSystemError(GetLastError()));
+    }
+  } else {
+    throw registry_error(FormatSystemError(GetLastError()));
+  }
+
+  return wstr;
+}
+
+std::string KeyHandler::ToNarrow(const wchar_t* wstr, int size)
+{
+  std::string str;
+
+  if (size == 0 || (size == -1 && wstr[0] == L'\0')) {
+    return str;
+  }
+
+  const auto length =
+    WideCharToMultiByte(KWSYS_ENCODING_DEFAULT_CODEPAGE, 0, wstr, size,
+                        nullptr, 0, nullptr, nullptr);
+  if (length > 0) {
+    auto data = cm::make_unique<char[]>(length);
+    const auto r =
+      WideCharToMultiByte(KWSYS_ENCODING_DEFAULT_CODEPAGE, 0, wstr, size,
+                          data.get(), length, nullptr, nullptr);
+    if (r > 0) {
+      if (size == -1) {
+        str = std::string(data.get());
+      } else {
+        str = std::string(data.get(), length);
+      }
+    } else {
+      throw registry_error(FormatSystemError(GetLastError()));
+    }
+  } else {
+    throw registry_error(FormatSystemError(GetLastError()));
+  }
+
+  return str;
 }
 
 std::string KeyHandler::ReadValue(cm::string_view name,
@@ -153,14 +218,14 @@ std::string KeyHandler::ReadValue(cm::string_view name,
   }
   auto data = cm::make_unique<BYTE[]>(size);
   DWORD type;
-  auto valueName = cmsys::Encoding::ToWide(name.data());
+  auto valueName = this->ToWide(name);
   if ((status = RegQueryValueExW(this->Handler, valueName.c_str(), nullptr,
                                  &type, data.get(), &size)) != ERROR_SUCCESS) {
     throw registry_error(this->FormatSystemError(status));
   }
   switch (type) {
     case REG_SZ:
-      return cmsys::Encoding::ToNarrow(reinterpret_cast<wchar_t*>(data.get()));
+      return this->ToNarrow(reinterpret_cast<wchar_t*>(data.get()));
       break;
     case REG_EXPAND_SZ: {
       auto expandSize = ExpandEnvironmentStringsW(
@@ -170,7 +235,7 @@ std::string KeyHandler::ReadValue(cm::string_view name,
                                     expandData.get(), expandSize + 1) == 0) {
         throw registry_error(this->FormatSystemError(GetLastError()));
       } else {
-        return cmsys::Encoding::ToNarrow(expandData.get());
+        return this->ToNarrow(expandData.get());
       }
     } break;
     case REG_DWORD:
@@ -181,12 +246,12 @@ std::string KeyHandler::ReadValue(cm::string_view name,
       break;
     case REG_MULTI_SZ: {
       // replace separator with semicolon
-      auto sep = cmsys::Encoding::ToWide(separator.data())[0];
+      auto sep = this->ToWide(separator)[0];
       std::replace(reinterpret_cast<wchar_t*>(data.get()),
                    reinterpret_cast<wchar_t*>(data.get()) +
                      (size / sizeof(wchar_t)) - 1,
                    sep, L';');
-      return cmsys::Encoding::ToNarrow(reinterpret_cast<wchar_t*>(data.get()));
+      return this->ToNarrow(reinterpret_cast<wchar_t*>(data.get()));
     } break;
     default:
       throw registry_error(cmStrCat(type, ": unsupported type."));
@@ -213,7 +278,7 @@ std::vector<std::string> KeyHandler::GetValueNames()
   while ((status = RegEnumValueW(this->Handler, index, data.get(), &size,
                                  nullptr, nullptr, nullptr, nullptr)) ==
          ERROR_SUCCESS) {
-    auto name = cmsys::Encoding::ToNarrow(data.get());
+    auto name = this->ToNarrow(data.get());
     valueNames.push_back(name.empty() ? "(default)" : name);
     size = maxSize;
     ++index;
@@ -243,7 +308,7 @@ std::vector<std::string> KeyHandler::GetSubKeys()
 
   while ((status = RegEnumKeyW(this->Handler, index, data.get(), size)) ==
          ERROR_SUCCESS) {
-    subKeys.push_back(cmsys::Encoding::ToNarrow(data.get()));
+    subKeys.push_back(this->ToNarrow(data.get()));
     ++index;
   }
   if (status != ERROR_NO_MORE_ITEMS) {
