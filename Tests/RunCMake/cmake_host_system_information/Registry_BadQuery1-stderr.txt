@@ -1,0 +1,4 @@
+CMake Error at Registry_BadQuery1.cmake:[0-9]+ \(cmake_host_system_information\):
+  cmake_host_system_information given invalid argument\(s\) "BAD_OPTION".
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

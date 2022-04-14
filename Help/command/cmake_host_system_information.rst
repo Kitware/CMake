@@ -1,9 +1,23 @@
 cmake_host_system_information
 -----------------------------
 
-Query host system specific information.
+Query various host system information.
 
-.. code-block:: cmake
+Synopsis
+^^^^^^^^
+
+.. parsed-literal::
+
+  `Query host system specific information`_
+    cmake_host_system_information(RESULT <variable> QUERY <key> ...)
+
+  `Query Windows registry`_
+    cmake_host_system_information(RESULT <variable> QUERY WINDOWS_REGISTRY <key> ...)
+
+Query host system specific information
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+::
 
   cmake_host_system_information(RESULT <variable> QUERY <key> ...)
 
@@ -180,7 +194,7 @@ distribution-specific files`_ to collect OS identification data and map it
 into `man 5 os-release`_ variables.
 
 Fallback Interface Variables
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+""""""""""""""""""""""""""""
 
 .. variable:: CMAKE_GET_OS_RELEASE_FALLBACK_SCRIPTS
 
@@ -246,3 +260,135 @@ Example:
 
 .. _man 5 os-release: https://www.freedesktop.org/software/systemd/man/os-release.html
 .. _various distribution-specific files: http://linuxmafia.com/faq/Admin/release-files.html
+
+Query Windows registry
+^^^^^^^^^^^^^^^^^^^^^^
+
+.. versionadded:: 3.24
+
+::
+
+  cmake_host_system_information(RESULT <variable>
+                                QUERY WINDOWS_REGISTRY <key> [VALUE_NAMES|SUBKEYS|VALUE <name>]
+                                [VIEW (64|32|64_32|32_64|HOST|TARGET|BOTH)]
+                                [SEPARATOR <separator>]
+                                [ERROR_VARIABLE <result>])
+
+Performs query operations on local computer registry subkey. Returns a list of
+subkeys or value names that are located under the specified subkey in the
+registry or the data of the specified value name. The result of the queried
+entity is stored in ``<variable>``.
+
+.. note::
+
+  Querying registry for any other platforms than ``Windows``, including
+  ``CYGWIN``, will always returns an empty string and sets an error message in
+  the variable specified with sub-option ``ERROR_VARIABLE``.
+
+``<key>`` specify the full path of a subkey on the local computer. The
+``<key>`` must include a valid root key. Valid root keys for the local computer
+are:
+
+* ``HKLM`` or ``HKEY_LOCAL_MACHINE``
+* ``HKCU`` or ``HKEY_CURRENT_USER``
+* ``HKCR`` or ``HKEY_CLASSES_ROOT``
+* ``HKU`` or ``HKEY_USERS``
+* ``HKCC`` or ``HKEY_CURRENT_CONFIG``
+
+And, optionally, the path to a subkey under the specified root key. The path
+separator can be the slash or the backslash. ``<key>`` is not case sensitive.
+For example:
+
+.. code-block:: cmake
+
+  cmake_host_system_information(RESULT result QUERY WINDOWS_REGISTRY "HKLM")
+  cmake_host_system_information(RESULT result QUERY WINDOWS_REGISTRY "HKLM/SOFTWARE/Kitware")
+  cmake_host_system_information(RESULT result QUERY WINDOWS_REGISTRY "HKCU\\SOFTWARE\\Kitware")
+
+``VALUE_NAMES``
+  Request the list of value names defined under ``<key>``. If a default value
+  is defined, it will be identified with the special name ``(default)``.
+
+``SUBKEYS``
+  Request the list of subkeys defined under ``<key>``.
+
+``VALUE <name>``
+  Request the data stored in value named ``<name>``. If ``VALUE`` is not
+  specified or argument is the special name ``(default)``, the content of the
+  default value, if any, will be returned.
+
+  .. code-block:: cmake
+
+     # query default value for HKLM/SOFTWARE/Kitware key
+     cmake_host_system_information(RESULT result
+                                   QUERY WINDOWS_REGISTRY "HKLM/SOFTWARE/Kitware")
+
+     # query default value for HKLM/SOFTWARE/Kitware key using special value name
+     cmake_host_system_information(RESULT result
+                                   QUERY WINDOWS_REGISTRY "HKLM/SOFTWARE/Kitware"
+                                   VALUE "(default)")
+
+  Supported types are:
+
+  * ``REG_SZ``.
+  * ``REG_EXPAND_SZ``. The returned data is expanded.
+  * ``REG_MULTI_SZ``. The returned is expressed as a CMake list. See also
+    ``SEPARATOR`` sub-option.
+  * ``REG_DWORD``.
+  * ``REG_QWORD``.
+
+  For all other types, an empty string is returned.
+
+``VIEW``
+  Specify which registry views must be queried. When not specified, ``BOTH``
+  view is used.
+
+  ``64``
+    Query the 64bit registry. On ``32bit Windows``, returns always an empty
+    string.
+
+  ``32``
+    Query the 32bit registry.
+
+  ``64_32``
+    For ``VALUE`` sub-option or default value, query the registry using view
+    ``64``, and if the request failed, query the registry using view ``32``.
+    For ``VALUE_NAMES`` and ``SUBKEYS`` sub-options, query both views (``64``
+    and ``32``) and merge the results (sorted and duplicates removed).
+
+  ``32_64``
+    For ``VALUE`` sub-option or default value, query the registry using view
+    ``32``, and if the request failed, query the registry using view ``64``.
+    For ``VALUE_NAMES`` and ``SUBKEYS`` sub-options, query both views (``32``
+    and ``64``) and merge the results (sorted and duplicates removed).
+
+  ``HOST``
+    Query the registry matching the architecture of the host: ``64`` on ``64bit
+    Windows`` and ``32`` on ``32bit Windows``.
+
+  ``TARGET``
+    Query the registry matching the architecture specified by
+    :variable:`CMAKE_SIZEOF_VOID_P` variable. If not defined, fallback to
+    ``HOST`` view.
+
+  ``BOTH``
+    Query both views (``32`` and ``64``). The order depends of the following
+    rules: If :variable:`CMAKE_SIZEOF_VOID_P` variable is defined. Use the
+    following view depending of the content of this variable:
+
+    * ``8``: ``64_32``
+    * ``4``: ``32_64``
+
+    If :variable:`CMAKE_SIZEOF_VOID_P` variable is not defined, rely on
+    architecture of the host:
+
+    * ``64bit``: ``64_32``
+    * ``32bit``: ``32``
+
+``SEPARATOR``
+  Specify the separator character for ``REG_MULTI_SZ`` type. When not
+  specified, the character ``\0`` is used.
+
+``ERROR_VARIABLE <result>``
+  Returns any error raised during query operation. In case of success, the
+  variable holds an empty string.
