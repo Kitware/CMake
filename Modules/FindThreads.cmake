@@ -152,33 +152,32 @@ if(CMAKE_HAVE_PTHREAD_H)
   # We have pthread.h
   # Let's check for the library now.
   #
-  if(NOT THREADS_HAVE_PTHREAD_ARG)
-    # Check if pthread functions are in normal C library.
-    # We list some pthread functions in PTHREAD_C_CXX_TEST_SOURCE test code.
-    # If the pthread functions already exist in C library, we could just use
-    # them instead of linking to the additional pthread library.
-    if(CMAKE_C_COMPILER_LOADED)
-      CHECK_C_SOURCE_COMPILES("${PTHREAD_C_CXX_TEST_SOURCE}" CMAKE_HAVE_LIBC_PTHREAD)
-    elseif(CMAKE_CXX_COMPILER_LOADED)
-      CHECK_CXX_SOURCE_COMPILES("${PTHREAD_C_CXX_TEST_SOURCE}" CMAKE_HAVE_LIBC_PTHREAD)
-    endif()
-    if(CMAKE_HAVE_LIBC_PTHREAD)
-      set(CMAKE_THREAD_LIBS_INIT "")
-      set(Threads_FOUND TRUE)
-    else()
-      # Check for -pthread first if enabled. This is the recommended
-      # way, but not backwards compatible as one must also pass -pthread
-      # as compiler flag then.
-      if (THREADS_PREFER_PTHREAD_FLAG)
-         _threads_check_flag_pthread()
-      endif ()
 
-      if(CMAKE_SYSTEM MATCHES "GHS-MULTI")
-        _threads_check_lib(posix pthread_create CMAKE_HAVE_PTHREADS_CREATE)
-      endif()
-      _threads_check_lib(pthreads pthread_create CMAKE_HAVE_PTHREADS_CREATE)
-      _threads_check_lib(pthread  pthread_create CMAKE_HAVE_PTHREAD_CREATE)
+  # Check if pthread functions are in normal C library.
+  # We list some pthread functions in PTHREAD_C_CXX_TEST_SOURCE test code.
+  # If the pthread functions already exist in C library, we could just use
+  # them instead of linking to the additional pthread library.
+  if(CMAKE_C_COMPILER_LOADED)
+    CHECK_C_SOURCE_COMPILES("${PTHREAD_C_CXX_TEST_SOURCE}" CMAKE_HAVE_LIBC_PTHREAD)
+  elseif(CMAKE_CXX_COMPILER_LOADED)
+    CHECK_CXX_SOURCE_COMPILES("${PTHREAD_C_CXX_TEST_SOURCE}" CMAKE_HAVE_LIBC_PTHREAD)
+  endif()
+  if(CMAKE_HAVE_LIBC_PTHREAD)
+    set(CMAKE_THREAD_LIBS_INIT "")
+    set(Threads_FOUND TRUE)
+  else()
+    # Check for -pthread first if enabled. This is the recommended
+    # way, but not backwards compatible as one must also pass -pthread
+    # as compiler flag then.
+    if (THREADS_PREFER_PTHREAD_FLAG)
+      _threads_check_flag_pthread()
+    endif ()
+
+    if(CMAKE_SYSTEM MATCHES "GHS-MULTI")
+      _threads_check_lib(posix pthread_create CMAKE_HAVE_PTHREADS_CREATE)
     endif()
+    _threads_check_lib(pthreads pthread_create CMAKE_HAVE_PTHREADS_CREATE)
+    _threads_check_lib(pthread  pthread_create CMAKE_HAVE_PTHREAD_CREATE)
   endif()
 
   _threads_check_flag_pthread()
