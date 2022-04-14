@@ -226,7 +226,8 @@ CMakeSetupDialog::CMakeSetupDialog()
   this->SourceDirectory->setCompleter(new QCMakeFileCompleter(this, true));
 
   // fixed pitch font in output window
-  QFont outputFont("Courier");
+  QFont outputFont("Courier New");
+  outputFont.setStyleHint(QFont::Monospace);
   this->Output->setFont(outputFont);
   this->ErrorFormat.setForeground(QBrush(Qt::red));
 
