@@ -91,7 +91,7 @@ int main(void)
 
 # Internal helper macro.
 # Do NOT even think about using it outside of this file!
-macro(_check_threads_lib LIBNAME FUNCNAME VARNAME)
+macro(_threads_check_lib LIBNAME FUNCNAME VARNAME)
   if(NOT Threads_FOUND)
      CHECK_LIBRARY_EXISTS(${LIBNAME} ${FUNCNAME} "" ${VARNAME})
      if(${VARNAME})
@@ -103,7 +103,7 @@ endmacro()
 
 # Internal helper macro.
 # Do NOT even think about using it outside of this file!
-macro(_check_pthreads_flag)
+macro(_threads_check_flag_pthread)
   if(NOT Threads_FOUND)
     # If we did not find -lpthreads, -lpthread, or -lthread, look for -pthread
     if(NOT DEFINED THREADS_HAVE_PTHREAD_ARG)
@@ -170,18 +170,18 @@ if(CMAKE_HAVE_PTHREAD_H)
       # way, but not backwards compatible as one must also pass -pthread
       # as compiler flag then.
       if (THREADS_PREFER_PTHREAD_FLAG)
-         _check_pthreads_flag()
+         _threads_check_flag_pthread()
       endif ()
 
       if(CMAKE_SYSTEM MATCHES "GHS-MULTI")
-        _check_threads_lib(posix pthread_create CMAKE_HAVE_PTHREADS_CREATE)
+        _threads_check_lib(posix pthread_create CMAKE_HAVE_PTHREADS_CREATE)
       endif()
-      _check_threads_lib(pthreads pthread_create CMAKE_HAVE_PTHREADS_CREATE)
-      _check_threads_lib(pthread  pthread_create CMAKE_HAVE_PTHREAD_CREATE)
+      _threads_check_lib(pthreads pthread_create CMAKE_HAVE_PTHREADS_CREATE)
+      _threads_check_lib(pthread  pthread_create CMAKE_HAVE_PTHREAD_CREATE)
     endif()
   endif()
 
-  _check_pthreads_flag()
+  _threads_check_flag_pthread()
 endif()
 
 if(CMAKE_THREAD_LIBS_INIT OR CMAKE_HAVE_LIBC_PTHREAD)
