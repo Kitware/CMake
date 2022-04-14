@@ -178,10 +178,6 @@ if(CMAKE_HAVE_PTHREAD_H)
       endif()
       _check_threads_lib(pthreads pthread_create CMAKE_HAVE_PTHREADS_CREATE)
       _check_threads_lib(pthread  pthread_create CMAKE_HAVE_PTHREAD_CREATE)
-      if(CMAKE_SYSTEM_NAME MATCHES "SunOS")
-          # On sun also check for -lthread
-          _check_threads_lib(thread thr_create CMAKE_HAVE_THR_CREATE)
-      endif()
     endif()
   endif()
 
