@@ -4,6 +4,11 @@
 
 #include <utility>
 
+#if !defined(CMAKE_BOOTSTRAP)
+#  include <cm3p/json/reader.h>
+#  include <cm3p/json/value.h>
+#endif
+
 #include "cmsys/Encoding.hxx"
 #include "cmsys/FStream.hxx"
 
@@ -295,6 +300,87 @@ bool cmVSSetupAPIHelper::IsEWDKEnabled()
   return false;
 }
 
+bool cmVSSetupAPIHelper::EnumerateVSInstancesWithVswhere(
+  std::vector<VSInstanceInfo>& VSInstances)
+{
+#if !defined(CMAKE_BOOTSTRAP)
+  // Construct vswhere command to get installed VS instances in JSON format
+  std::string vswhereExe = getenv("ProgramFiles(x86)") +
+    std::string(R"(\Microsoft Visual Studio\Installer\vswhere.exe)");
+  std::vector<std::string> vswhereCmd = { vswhereExe, "-format", "json" };
+
+  // Execute vswhere command and capture JSON output
+  std::string json_output;
+  int retVal = 1;
+  if (!cmSystemTools::RunSingleCommand(vswhereCmd, &json_output, &json_output,
+                                       &retVal, nullptr,
+                                       cmSystemTools::OUTPUT_NONE)) {
+    return false;
+  }
+
+  // Parse JSON output and iterate over elements
+  Json::CharReaderBuilder builder;
+  auto jsonReader = std::unique_ptr<Json::CharReader>(builder.newCharReader());
+  Json::Value json;
+  std::string error;
+
+  if (!jsonReader->parse(json_output.data(),
+                         json_output.data() + json_output.size(), &json,
+                         &error)) {
+    return false;
+  }
+
+  for (const auto& item : json) {
+    VSInstanceInfo instance;
+    instance.Version = item["installationVersion"].asString();
+    instance.VSInstallLocation = item["installationPath"].asString();
+    instance.IsWin10SDKInstalled = true;
+    instance.IsWin81SDKInstalled = false;
+    cmSystemTools::ConvertToUnixSlashes(instance.VSInstallLocation);
+    if (LoadVSInstanceVCToolsetVersion(instance)) {
+      VSInstances.push_back(instance);
+    }
+  }
+  return true;
+#else
+  static_cast<void>(VSInstances);
+  return false;
+#endif
+}
+
+bool cmVSSetupAPIHelper::EnumerateVSInstancesWithCOM(
+  std::vector<VSInstanceInfo>& VSInstances)
+{
+  if (initializationFailure || setupConfig == NULL || setupConfig2 == NULL ||
+      setupHelper == NULL)
+    return false;
+
+  SmartCOMPtr<IEnumSetupInstances> enumInstances = NULL;
+  if (FAILED(
+        setupConfig2->EnumInstances((IEnumSetupInstances**)&enumInstances)) ||
+      !enumInstances) {
+    return false;
+  }
+
+  SmartCOMPtr<ISetupInstance> instance;
+  while (SUCCEEDED(enumInstances->Next(1, &instance, NULL)) && instance) {
+    SmartCOMPtr<ISetupInstance2> instance2 = NULL;
+    if (FAILED(
+          instance->QueryInterface(IID_ISetupInstance2, (void**)&instance2)) ||
+        !instance2) {
+      instance = NULL;
+      continue;
+    }
+
+    VSInstanceInfo instanceInfo;
+    bool isInstalled = GetVSInstanceInfo(instance2, instanceInfo);
+    instance = instance2 = NULL;
+    if (isInstalled)
+      VSInstances.push_back(instanceInfo);
+  }
+  return true;
+}
+
 bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
 {
   bool isVSInstanceExists = false;
@@ -321,10 +407,6 @@ bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
     return true;
   }
 
-  if (initializationFailure || setupConfig == NULL || setupConfig2 == NULL ||
-      setupHelper == NULL)
-    return false;
-
   std::string envVSCommonToolsDir;
   std::string envVSCommonToolsDirEnvName =
     "VS" + std::to_string(this->Version) + "0COMNTOOLS";
@@ -334,72 +416,60 @@ bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
     cmSystemTools::ConvertToUnixSlashes(envVSCommonToolsDir);
   }
 
-  std::vector<VSInstanceInfo> vecVSInstances;
-  SmartCOMPtr<IEnumSetupInstances> enumInstances = NULL;
-  if (FAILED(
-        setupConfig2->EnumInstances((IEnumSetupInstances**)&enumInstances)) ||
-      !enumInstances) {
-    return false;
-  }
-
   std::string const wantVersion = std::to_string(this->Version) + '.';
 
   bool specifiedLocationNotSpecifiedVersion = false;
 
   SmartCOMPtr<ISetupInstance> instance;
-  while (SUCCEEDED(enumInstances->Next(1, &instance, NULL)) && instance) {
-    SmartCOMPtr<ISetupInstance2> instance2 = NULL;
-    if (FAILED(
-          instance->QueryInterface(IID_ISetupInstance2, (void**)&instance2)) ||
-        !instance2) {
-      instance = NULL;
+
+  std::vector<VSInstanceInfo> vecVSInstancesAll;
+
+  // Enumerate VS instances with either COM interface or Vswhere
+  if (!EnumerateVSInstancesWithCOM(vecVSInstancesAll) &&
+      !EnumerateVSInstancesWithVswhere(vecVSInstancesAll)) {
+    return false;
+  }
+
+  std::vector<VSInstanceInfo> vecVSInstances;
+  for (const auto& instanceInfo : vecVSInstancesAll) {
+    // We are looking for a specific major version.
+    if (instanceInfo.Version.size() < wantVersion.size() ||
+        instanceInfo.Version.substr(0, wantVersion.size()) != wantVersion) {
       continue;
     }
 
-    VSInstanceInfo instanceInfo;
-    bool isInstalled = GetVSInstanceInfo(instance2, instanceInfo);
-    instance = instance2 = NULL;
-
-    if (isInstalled) {
-      // We are looking for a specific major version.
-      if (instanceInfo.Version.size() < wantVersion.size() ||
-          instanceInfo.Version.substr(0, wantVersion.size()) != wantVersion) {
-        continue;
-      }
-
-      if (!this->SpecifiedVSInstallLocation.empty()) {
-        // We are looking for a specific instance.
-        std::string currentVSLocation = instanceInfo.GetInstallLocation();
-        if (cmSystemTools::ComparePath(currentVSLocation,
-                                       this->SpecifiedVSInstallLocation)) {
-          if (this->SpecifiedVSInstallVersion.empty() ||
-              instanceInfo.Version == this->SpecifiedVSInstallVersion) {
-            chosenInstanceInfo = instanceInfo;
-            return true;
-          }
-          specifiedLocationNotSpecifiedVersion = true;
-        }
-      } else if (!this->SpecifiedVSInstallVersion.empty()) {
-        // We are looking for a specific version.
-        if (instanceInfo.Version == this->SpecifiedVSInstallVersion) {
+    if (!this->SpecifiedVSInstallLocation.empty()) {
+      // We are looking for a specific instance.
+      std::string currentVSLocation = instanceInfo.GetInstallLocation();
+      if (cmSystemTools::ComparePath(currentVSLocation,
+                                     this->SpecifiedVSInstallLocation)) {
+        if (this->SpecifiedVSInstallVersion.empty() ||
+            instanceInfo.Version == this->SpecifiedVSInstallVersion) {
           chosenInstanceInfo = instanceInfo;
           return true;
         }
-      } else {
-        // We are not looking for a specific instance.
-        // If we've been given a hint then use it.
-        if (!envVSCommonToolsDir.empty()) {
-          std::string currentVSLocation =
-            cmStrCat(instanceInfo.GetInstallLocation(), "/Common7/Tools");
-          if (cmSystemTools::ComparePath(currentVSLocation,
-                                         envVSCommonToolsDir)) {
-            chosenInstanceInfo = instanceInfo;
-            return true;
-          }
-        }
-        // Otherwise, add this to the list of candidates.
-        vecVSInstances.push_back(instanceInfo);
+        specifiedLocationNotSpecifiedVersion = true;
       }
+    } else if (!this->SpecifiedVSInstallVersion.empty()) {
+      // We are looking for a specific version.
+      if (instanceInfo.Version == this->SpecifiedVSInstallVersion) {
+        chosenInstanceInfo = instanceInfo;
+        return true;
+      }
+    } else {
+      // We are not looking for a specific instance.
+      // If we've been given a hint then use it.
+      if (!envVSCommonToolsDir.empty()) {
+        std::string currentVSLocation =
+          cmStrCat(instanceInfo.GetInstallLocation(), "/Common7/Tools");
+        if (cmSystemTools::ComparePath(currentVSLocation,
+                                       envVSCommonToolsDir)) {
+          chosenInstanceInfo = instanceInfo;
+          return true;
+        }
+      }
+      // Otherwise, add this to the list of candidates.
+      vecVSInstances.push_back(instanceInfo);
     }
   }
 
