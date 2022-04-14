@@ -569,7 +569,7 @@ cmCMakePresetsGraph::ReadFileResult cmCMakePresetsGraph::ReadJSONFile(
     }
 
     // Support for TestOutputTruncation added in version 5.
-    if (v < 5 && preset.Output) {
+    if (v < 5 && preset.Output && preset.Output->TestOutputTruncation) {
       return ReadFileResult::TEST_OUTPUT_TRUNCATION_UNSUPPORTED;
     }
 

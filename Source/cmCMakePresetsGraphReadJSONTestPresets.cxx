@@ -58,10 +58,10 @@ auto const TestPresetOptionalOutputVerbosityHelper =
                                        TestPresetOutputVerbosityHelper);
 
 ReadFileResult TestPresetOutputTruncationHelper(
-  cmCTestTypes::TruncationMode& out, const Json::Value* value)
+  cm::optional<cmCTestTypes::TruncationMode>& out, const Json::Value* value)
 {
   if (!value) {
-    out = cmCTestTypes::TruncationMode::Tail;
+    out = cm::nullopt;
     return ReadFileResult::READ_OK;
   }
 
@@ -86,10 +86,6 @@ ReadFileResult TestPresetOutputTruncationHelper(
 
   return ReadFileResult::INVALID_PRESET;
 }
-
-auto const TestPresetOptionalTruncationHelper =
-  cmJSONOptionalHelper<cmCTestTypes::TruncationMode, ReadFileResult>(
-    ReadFileResult::READ_OK, TestPresetOutputTruncationHelper);
 
 auto const TestPresetOptionalOutputHelper =
   cmJSONOptionalHelper<TestPreset::OutputOptions, ReadFileResult>(
@@ -121,7 +117,7 @@ auto const TestPresetOptionalOutputHelper =
             cmCMakePresetsGraphInternal::PresetOptionalIntHelper, false)
       .Bind("testOutputTruncation"_s,
             &TestPreset::OutputOptions::TestOutputTruncation,
-            TestPresetOptionalTruncationHelper, false)
+            TestPresetOutputTruncationHelper, false)
       .Bind("maxTestNameWidth"_s, &TestPreset::OutputOptions::MaxTestNameWidth,
             cmCMakePresetsGraphInternal::PresetOptionalIntHelper, false));
 
