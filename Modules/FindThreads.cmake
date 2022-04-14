@@ -180,7 +180,9 @@ if(CMAKE_HAVE_PTHREAD_H)
   _threads_check_lib(pthreads pthread_create CMAKE_HAVE_PTHREADS_CREATE)
   _threads_check_lib(pthread  pthread_create CMAKE_HAVE_PTHREAD_CREATE)
 
-  _threads_check_flag_pthread()
+  if (NOT THREADS_PREFER_PTHREAD_FLAG)
+    _threads_check_flag_pthread()
+  endif()
 endif()
 
 if(CMAKE_THREAD_LIBS_INIT OR CMAKE_HAVE_LIBC_PTHREAD)
