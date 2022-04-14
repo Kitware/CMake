@@ -691,6 +691,11 @@ bool cmTarget::IsAndroidGuiExecutable() const
           this->impl->IsAndroid && this->GetPropertyAsBool("ANDROID_GUI"));
 }
 
+bool cmTarget::HasKnownObjectFileLocation(std::string* reason) const
+{
+  return this->GetGlobalGenerator()->HasKnownObjectFileLocation(*this, reason);
+}
+
 std::vector<cmCustomCommand> const& cmTarget::GetPreBuildCommands() const
 {
   return this->impl->PreBuildCommands;

@@ -459,10 +459,13 @@ public:
 
   virtual bool IsNinja() const { return false; }
 
-  /** Return true if we know the exact location of object files.
-      If false, store the reason in the given string.
-      This is meaningful only after EnableLanguage has been called.  */
-  virtual bool HasKnownObjectFileLocation(std::string*) const { return true; }
+  /** Return true if we know the exact location of object files for the given
+     cmTarget. If false, store the reason in the given string. This is
+     meaningful only after EnableLanguage has been called.  */
+  virtual bool HasKnownObjectFileLocation(cmTarget const&, std::string*) const
+  {
+    return true;
+  }
 
   virtual bool UseFolderProperty() const;
 

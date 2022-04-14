@@ -1167,6 +1167,20 @@ std::string GetSourcecodeValueFromFileExtension(
   return sourcecode;
 }
 
+template <class T>
+std::string GetTargetObjectDirArch(T const& target,
+                                   const std::string& defaultVal)
+{
+  auto archs = cmExpandedList(target.GetSafeProperty("OSX_ARCHITECTURES"));
+  if (archs.size() > 1) {
+    return "$(CURRENT_ARCH)";
+  } else if (archs.size() == 1) {
+    return archs.front();
+  } else {
+    return defaultVal;
+  }
+}
+
 } // anonymous
 
 // Extracts the framework directory, if path matches the framework syntax
@@ -4924,9 +4938,11 @@ bool cmGlobalXCodeGenerator::IsMultiConfig() const
 }
 
 bool cmGlobalXCodeGenerator::HasKnownObjectFileLocation(
-  std::string* reason) const
+  cmTarget const& target, std::string* reason) const
 {
-  if (this->ObjectDirArch.find('$') != std::string::npos) {
+  auto objectDirArch = GetTargetObjectDirArch(target, this->ObjectDirArch);
+
+  if (objectDirArch.find('$') != std::string::npos) {
     if (reason != nullptr) {
       *reason = " under Xcode with multiple architectures";
     }
@@ -4957,10 +4973,12 @@ void cmGlobalXCodeGenerator::ComputeTargetObjectDirectory(
   cmGeneratorTarget* gt) const
 {
   std::string configName = this->GetCMakeCFGIntDir();
+  auto objectDirArch = GetTargetObjectDirArch(*gt, this->ObjectDirArch);
+
   std::string dir =
     cmStrCat(this->GetObjectsDirectory("$(PROJECT_NAME)", configName, gt,
                                        "$(OBJECT_FILE_DIR_normal:base)/"),
-             this->ObjectDirArch, '/');
+             objectDirArch, '/');
   gt->ObjectDirectory = dir;
 }
 

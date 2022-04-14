@@ -107,7 +107,8 @@ public:
 
   bool IsXcode() const override { return true; }
 
-  bool HasKnownObjectFileLocation(std::string* reason) const override;
+  bool HasKnownObjectFileLocation(cmTarget const&,
+                                  std::string* reason) const override;
 
   bool IsIPOSupported() const override { return true; }
 
