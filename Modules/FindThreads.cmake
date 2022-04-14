@@ -91,6 +91,22 @@ int main(void)
 
 # Internal helper macro.
 # Do NOT even think about using it outside of this file!
+macro(_threads_check_libc)
+  if(NOT Threads_FOUND)
+    if(CMAKE_C_COMPILER_LOADED)
+      CHECK_C_SOURCE_COMPILES("${PTHREAD_C_CXX_TEST_SOURCE}" CMAKE_HAVE_LIBC_PTHREAD)
+    elseif(CMAKE_CXX_COMPILER_LOADED)
+      CHECK_CXX_SOURCE_COMPILES("${PTHREAD_C_CXX_TEST_SOURCE}" CMAKE_HAVE_LIBC_PTHREAD)
+    endif()
+    if(CMAKE_HAVE_LIBC_PTHREAD)
+      set(CMAKE_THREAD_LIBS_INIT "")
+      set(Threads_FOUND TRUE)
+    endif()
+  endif ()
+endmacro()
+
+# Internal helper macro.
+# Do NOT even think about using it outside of this file!
 macro(_threads_check_lib LIBNAME FUNCNAME VARNAME)
   if(NOT Threads_FOUND)
      CHECK_LIBRARY_EXISTS(${LIBNAME} ${FUNCNAME} "" ${VARNAME})
@@ -157,15 +173,7 @@ if(CMAKE_HAVE_PTHREAD_H)
   # We list some pthread functions in PTHREAD_C_CXX_TEST_SOURCE test code.
   # If the pthread functions already exist in C library, we could just use
   # them instead of linking to the additional pthread library.
-  if(CMAKE_C_COMPILER_LOADED)
-    CHECK_C_SOURCE_COMPILES("${PTHREAD_C_CXX_TEST_SOURCE}" CMAKE_HAVE_LIBC_PTHREAD)
-  elseif(CMAKE_CXX_COMPILER_LOADED)
-    CHECK_CXX_SOURCE_COMPILES("${PTHREAD_C_CXX_TEST_SOURCE}" CMAKE_HAVE_LIBC_PTHREAD)
-  endif()
-  if(CMAKE_HAVE_LIBC_PTHREAD)
-    set(CMAKE_THREAD_LIBS_INIT "")
-    set(Threads_FOUND TRUE)
-  endif()
+  _threads_check_libc()
 
   # Check for -pthread first if enabled. This is the recommended
   # way, but not backwards compatible as one must also pass -pthread
