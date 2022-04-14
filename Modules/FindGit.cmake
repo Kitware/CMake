@@ -31,16 +31,16 @@ Example usage:
    endif()
 #]=======================================================================]
 
-# Look for 'git' or 'eg' (easy git)
+# Look for 'git'
 #
-set(git_names git eg)
+set(git_names git)
 
 # Prefer .cmd variants on Windows unless running in a Makefile
 # in the MSYS shell.
 #
 if(CMAKE_HOST_WIN32)
   if(NOT CMAKE_GENERATOR MATCHES "MSYS")
-    set(git_names git.cmd git eg.cmd eg)
+    set(git_names git.cmd git)
     # GitHub search path for Windows
     file(GLOB github_path
       "$ENV{LOCALAPPDATA}/Github/PortableGit*/cmd"
