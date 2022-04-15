@@ -162,6 +162,7 @@ Full Signature
                [OPTIONAL_COMPONENTS components...]
                [CONFIG|NO_MODULE]
                [NO_POLICY_SCOPE]
+               [GLOBAL]
                [NAMES name1 [name2 ...]]
                [CONFIGS config1 [config2 ...]]
                [HINTS path1 [path2 ... ]]
