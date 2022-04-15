@@ -201,7 +201,57 @@ struct cmCommandLineArgument
     return (parseState == ParseMode::Valid);
   }
 
+  template <typename... Values>
+  static std::function<FunctionSignature> setToTrue(Values&&... values)
+  {
+    return ArgumentLambdaHelper<FunctionSignature>::generateSetToTrue(
+      std::forward<Values>(values)...);
+  }
+
+  template <typename... Values>
+  static std::function<FunctionSignature> setToValue(Values&&... values)
+  {
+    return ArgumentLambdaHelper<FunctionSignature>::generateSetToValue(
+      std::forward<Values>(values)...);
+  }
+
 private:
+  template <typename T>
+  class ArgumentLambdaHelper;
+
+  template <typename... CallState>
+  class ArgumentLambdaHelper<bool(const std::string&, CallState...)>
+  {
+  public:
+    static std::function<bool(const std::string&, CallState...)>
+    generateSetToTrue(bool& value1)
+    {
+      return [&value1](const std::string&, CallState&&...) -> bool {
+        value1 = true;
+        return true;
+      };
+    }
+
+    static std::function<bool(const std::string&, CallState...)>
+    generateSetToTrue(bool& value1, bool& value2)
+    {
+      return [&value1, &value2](const std::string&, CallState&&...) -> bool {
+        value1 = true;
+        value2 = true;
+        return true;
+      };
+    }
+
+    static std::function<bool(const std::string&, CallState...)>
+    generateSetToValue(std::string& value1)
+    {
+      return [&value1](const std::string& arg, CallState&&...) -> bool {
+        value1 = arg;
+        return true;
+      };
+    }
+  };
+
   std::string extract_single_value(std::string const& input,
                                    ParseMode& parseState) const
   {
