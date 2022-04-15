@@ -565,10 +565,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
                      "No install directory specified for --install-prefix",
                      CommandArgument::Values::One, PrefixLambda },
     CommandArgument{ "--find-package", CommandArgument::Values::Zero,
-                     [&](std::string const&, cmake*) -> bool {
-                       findPackageMode = true;
-                       return true;
-                     } },
+                     CommandArgument::setToTrue(findPackageMode) },
   };
   for (decltype(args.size()) i = 1; i < args.size(); ++i) {
     std::string const& arg = args[i];
@@ -876,10 +873,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
     CommandArgument{ "-P", "-P must be followed by a file name.",
                      CommandArgument::Values::One,
                      CommandArgument::RequiresSeparator::No,
-                     [&](std::string const&, cmake*) -> bool {
-                       scriptMode = true;
-                       return true;
-                     } },
+                     CommandArgument::setToTrue(scriptMode) },
     CommandArgument{ "-D", "-D must be followed with VAR=VALUE.",
                      CommandArgument::Values::One,
                      CommandArgument::RequiresSeparator::No,
