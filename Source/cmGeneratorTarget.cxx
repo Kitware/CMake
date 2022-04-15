@@ -1213,8 +1213,10 @@ bool cmGeneratorTarget::IsInBuildSystem() const
     case cmStateEnums::GLOBAL_TARGET:
       return true;
     case cmStateEnums::INTERFACE_LIBRARY:
-      // An INTERFACE library is in the build system if it has SOURCES.
-      if (!this->SourceEntries.empty()) {
+      // An INTERFACE library is in the build system if it has SOURCES or
+      // HEADER_SETS.
+      if (!this->SourceEntries.empty() ||
+          !this->Target->GetHeaderSetsEntries().empty()) {
         return true;
       }
       break;
