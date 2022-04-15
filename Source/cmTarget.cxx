@@ -1291,7 +1291,12 @@ void cmTarget::AddInstallIncludeDirectories(cmTargetExport const& te,
 cmStringRange cmTarget::GetInstallIncludeDirectoriesEntries(
   cmTargetExport const& te) const
 {
-  return cmMakeRange(this->impl->InstallIncludeDirectoriesEntries[&te]);
+  auto i = this->impl->InstallIncludeDirectoriesEntries.find(&te);
+  if (i == this->impl->InstallIncludeDirectoriesEntries.end()) {
+    decltype(i->second) empty;
+    return cmMakeRange(empty);
+  }
+  return cmMakeRange(i->second);
 }
 
 cmBTStringRange cmTarget::GetIncludeDirectoriesEntries() const
