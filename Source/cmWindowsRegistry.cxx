@@ -3,6 +3,8 @@
 
 #include "cmWindowsRegistry.h"
 
+#include <unordered_map>
+
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #  include <algorithm>
 #  include <cstdint>
@@ -333,6 +335,38 @@ cmWindowsRegistry::cmWindowsRegistry(cmMakefile& makefile)
 #else
   (void)makefile;
 #endif
+}
+
+cm::optional<cmWindowsRegistry::View> cmWindowsRegistry::ToView(
+  cm::string_view name)
+{
+  static std::unordered_map<cm::string_view, cmWindowsRegistry::View>
+    ViewDefinitions{
+      { "BOTH"_s, View::Both },     { "HOST"_s, View::Host },
+      { "TARGET"_s, View::Target }, { "32"_s, View::Reg32 },
+      { "64"_s, View::Reg64 },      { "32_64"_s, View::Reg32_64 },
+      { "64_32"_s, View::Reg64_32 }
+    };
+
+  auto it = ViewDefinitions.find(name);
+
+  return it == ViewDefinitions.end() ? cm::nullopt
+                                     : cm::optional{ it->second };
+}
+
+cm::string_view cmWindowsRegistry::FromView(View view)
+{
+  static std::unordered_map<cmWindowsRegistry::View, cm::string_view>
+    ViewDefinitions{
+      { View::Both, "BOTH"_s },     { View::Host, "HOST"_s },
+      { View::Target, "TARGET"_s }, { View::Reg32, "32"_s },
+      { View::Reg64, "64"_s },      { View::Reg32_64, "32_64"_s },
+      { View::Reg64_32, "64_32"_s }
+    };
+
+  auto it = ViewDefinitions.find(view);
+
+  return it == ViewDefinitions.end() ? ""_s : it->second;
 }
 
 cm::string_view cmWindowsRegistry::GetLastError() const

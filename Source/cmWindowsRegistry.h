@@ -27,6 +27,11 @@ public:
     Reg64
   };
 
+  // Helper routine to convert string to enum value
+  static cm::optional<View> ToView(cm::string_view name);
+  // Helper routine to convert enum to string
+  static cm::string_view FromView(View view);
+
   cm::optional<std::string> ReadValue(cm::string_view key,
                                       View view = View::Both,
                                       cm::string_view separator = "\0"_s)

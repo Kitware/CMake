@@ -9,7 +9,6 @@
 #include <map>
 #include <string>
 #include <type_traits>
-#include <unordered_map>
 #include <utility>
 
 #include <cm/optional>
@@ -469,14 +468,6 @@ bool QueryWindowsRegistry(Range args, cmExecutionStatus& status,
                           std::string const& variable)
 {
   using View = cmWindowsRegistry::View;
-  static std::unordered_map<cm::string_view, cmWindowsRegistry::View>
-    ViewDefinitions{
-      { "BOTH"_s, View::Both },     { "HOST"_s, View::Host },
-      { "TARGET"_s, View::Target }, { "32"_s, View::Reg32 },
-      { "64"_s, View::Reg64 },      { "32_64"_s, View::Reg32_64 },
-      { "64_32"_s, View::Reg64_32 }
-    };
-
   if (args.empty()) {
     status.SetError("missing <key> specification.");
     return false;
@@ -522,8 +513,8 @@ bool QueryWindowsRegistry(Range args, cmExecutionStatus& status,
                     "\"VALUE_NAMES\" or \"SUBKEYS\".");
     return false;
   }
-  if (!arguments.View.empty() &&
-      ViewDefinitions.find(arguments.View) == ViewDefinitions.end()) {
+
+  if (!arguments.View.empty() && !cmWindowsRegistry::ToView(arguments.View)) {
     status.SetError(
       cmStrCat("given invalid value for \"VIEW\": ", arguments.View, '.'));
     return false;
@@ -533,8 +524,9 @@ bool QueryWindowsRegistry(Range args, cmExecutionStatus& status,
 
   makefile.AddDefinition(variable, ""_s);
 
-  auto view =
-    arguments.View.empty() ? View::Both : ViewDefinitions[arguments.View];
+  auto view = arguments.View.empty()
+    ? View::Both
+    : *cmWindowsRegistry::ToView(arguments.View);
   cmWindowsRegistry registry(makefile);
   if (arguments.ValueNames) {
     auto result = registry.GetValueNames(key, view);
