@@ -424,7 +424,7 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
   if (!this->Logo.empty()) {
     std::string srcName = cmSystemTools::GetFilenameName(this->Logo);
     std::string suffix = cmSystemTools::GetFilenameLastExtension(srcName);
-    std::string name = "cm_logo." + suffix;
+    std::string name = "cm_logo" + suffix;
     std::string path = this->Directory + "/config/" + name;
     cmsys::SystemTools::CopyFileIfDifferent(this->Logo, path);
     xout.Element("Logo", name);
@@ -461,7 +461,7 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
       std::string srcName =
         cmSystemTools::GetFilenameName(this->InstallerApplicationIcon);
       std::string suffix = cmSystemTools::GetFilenameLastExtension(srcName);
-      std::string name = "cm_appicon." + suffix;
+      std::string name = "cm_appicon" + suffix;
       std::string path = this->Directory + "/config/" + name;
       cmsys::SystemTools::CopyFileIfDifferent(this->InstallerApplicationIcon,
                                               path);
@@ -476,7 +476,7 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
       std::string srcName =
         cmSystemTools::GetFilenameName(this->InstallerWindowIcon);
       std::string suffix = cmSystemTools::GetFilenameLastExtension(srcName);
-      std::string name = "cm_winicon." + suffix;
+      std::string name = "cm_winicon" + suffix;
       std::string path = this->Directory + "/config/" + name;
       cmsys::SystemTools::CopyFileIfDifferent(this->InstallerWindowIcon, path);
       xout.Element("InstallerWindowIcon", name);
