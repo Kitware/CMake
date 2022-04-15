@@ -528,7 +528,7 @@ if(BUILD_TESTING)
     PASS_REGULAR_EXPRESSION "CMake Error: CMake can not determine linker language for target: test")
   ADD_TEST_MACRO(CrossCompile CrossCompile)
   set_tests_properties(CrossCompile PROPERTIES
-    PASS_REGULAR_EXPRESSION "TRY_RUN.. invoked in cross-compiling mode")
+    PASS_REGULAR_EXPRESSION "try_run.. invoked in cross-compiling mode")
   if("${CMAKE_GENERATOR}" MATCHES "Make")
     ADD_TEST_MACRO(Policy0002 Policy0002)
   endif()
