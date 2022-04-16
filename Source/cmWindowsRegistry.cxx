@@ -1,33 +1,61 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
+#include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmWindowsRegistry.h"
 
+#include <cctype>
+#include <cstddef>
+#include <functional>
+#include <type_traits>
 #include <unordered_map>
+#include <utility>
+
+#include <cmext/string_view>
+
+#include "cmsys/RegularExpression.hxx"
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #  include <algorithm>
-#  include <cstdint>
+#  include <cstring>
 #  include <exception>
 #  include <iterator>
-#  include <utility>
 #  include <vector>
 
 #  include <cm/memory>
-#  include <cmext/string_view>
 
 #  include <windows.h>
-
-#  include "cmsys/Encoding.hxx"
-#  include "cmsys/SystemTools.hxx"
 
 #  include "cmMakefile.h"
 #  include "cmStringAlgorithms.h"
 #  include "cmValue.h"
 #endif
 
-#if defined(_WIN32) && !defined(__CYGWIN__)
 namespace {
+//  Case-independent string comparison
+int Strucmp(cm::string_view l, cm::string_view r)
+{
+  if (l.empty() && r.empty()) {
+    return 0;
+  }
+  if (l.empty() || r.empty()) {
+    return static_cast<int>(l.size() - r.size());
+  }
+
+  int lc;
+  int rc;
+  cm::string_view::size_type li = 0;
+  cm::string_view::size_type ri = 0;
+
+  do {
+    lc = std::tolower(l[li++]);
+    rc = std::tolower(r[ri++]);
+  } while (lc == rc && li < l.size() && ri < r.size());
+
+  return lc == rc ? static_cast<int>(l.size() - r.size()) : lc - rc;
+}
+
+#if defined(_WIN32) && !defined(__CYGWIN__)
 bool Is64BitWindows()
 {
 #  if defined(_WIN64)
@@ -38,6 +66,26 @@ bool Is64BitWindows()
   BOOL isWow64 = false;
   return IsWow64Process(GetCurrentProcess(), &isWow64) && isWow64;
 #  endif
+}
+
+// Helper to translate Windows registry value type to enum ValueType
+cm::optional<cmWindowsRegistry::ValueType> ToValueType(DWORD type)
+{
+  using ValueType = cmWindowsRegistry::ValueType;
+
+  static std::unordered_map<DWORD, ValueType> ValueTypes{
+    { REG_SZ, ValueType::Reg_SZ },
+    { REG_EXPAND_SZ, ValueType::Reg_EXPAND_SZ },
+    { REG_MULTI_SZ, ValueType::Reg_MULTI_SZ },
+    { REG_DWORD, ValueType::Reg_DWORD },
+    { REG_QWORD, ValueType::Reg_QWORD }
+  };
+
+  auto it = ValueTypes.find(type);
+
+  return it == ValueTypes.end()
+    ? cm::nullopt
+    : cm::optional<cmWindowsRegistry::ValueType>{ it->second };
 }
 
 // class registry_exception
@@ -61,6 +109,7 @@ class KeyHandler
 {
 public:
   using View = cmWindowsRegistry::View;
+  using ValueTypeSet = cmWindowsRegistry::ValueTypeSet;
 
   KeyHandler(HKEY hkey)
     : Handler(hkey)
@@ -68,9 +117,14 @@ public:
   }
   ~KeyHandler() { RegCloseKey(this->Handler); }
 
+  static KeyHandler OpenKey(cm::string_view rootKey, cm::string_view subKey,
+                            View view);
   static KeyHandler OpenKey(cm::string_view key, View view);
 
-  std::string ReadValue(cm::string_view name, cm::string_view separator);
+  std::string ReadValue(
+    cm::string_view name,
+    ValueTypeSet supportedTypes = cmWindowsRegistry::AllTypes,
+    cm::string_view separator = "\0"_s);
 
   std::vector<std::string> GetValueNames();
   std::vector<std::string> GetSubKeys();
@@ -83,16 +137,14 @@ private:
   HKEY Handler;
 };
 
-KeyHandler KeyHandler::OpenKey(cm::string_view key, View view)
+KeyHandler KeyHandler::OpenKey(cm::string_view rootKey, cm::string_view subKey,
+                               View view)
 {
   if (view == View::Reg64 && !Is64BitWindows()) {
     throw registry_error("No 64bit registry on Windows32.");
   }
 
-  auto start = key.find_first_of("\\/"_s);
-  auto rootKey = key.substr(0, start);
   HKEY hRootKey;
-
   if (rootKey == "HKCU"_s || rootKey == "HKEY_CURRENT_USER"_s) {
     hRootKey = HKEY_CURRENT_USER;
   } else if (rootKey == "HKLM"_s || rootKey == "HKEY_LOCAL_MACHINE"_s) {
@@ -106,12 +158,9 @@ KeyHandler KeyHandler::OpenKey(cm::string_view key, View view)
   } else {
     throw registry_error(cmStrCat(rootKey, ": invalid root key."));
   }
-  std::wstring subKey;
-  if (start != cm::string_view::npos) {
-    subKey = ToWide(key.substr(start + 1));
-  }
   // Update path format
-  std::replace(subKey.begin(), subKey.end(), L'/', L'\\');
+  auto key = ToWide(subKey);
+  std::replace(key.begin(), key.end(), L'/', L'\\');
 
   REGSAM options = KEY_READ;
   if (Is64BitWindows()) {
@@ -119,12 +168,23 @@ KeyHandler KeyHandler::OpenKey(cm::string_view key, View view)
   }
 
   HKEY hKey;
-  if (LSTATUS status = RegOpenKeyExW(hRootKey, subKey.c_str(), 0, options,
-                                     &hKey) != ERROR_SUCCESS) {
+  LSTATUS status;
+  if ((status = RegOpenKeyExW(hRootKey, key.c_str(), 0, options, &hKey)) !=
+      ERROR_SUCCESS) {
     throw registry_error(FormatSystemError(status));
   }
 
   return KeyHandler(hKey);
+}
+
+KeyHandler KeyHandler::OpenKey(cm::string_view key, View view)
+{
+  auto start = key.find_first_of("\\/"_s);
+
+  return OpenKey(key.substr(0, start),
+                 start == cm::string_view::npos ? cm::string_view{ ""_s }
+                                                : key.substr(start + 1),
+                 view);
 }
 
 std::string KeyHandler::FormatSystemError(LSTATUS status)
@@ -208,6 +268,7 @@ std::string KeyHandler::ToNarrow(const wchar_t* wstr, int size)
 }
 
 std::string KeyHandler::ReadValue(cm::string_view name,
+                                  ValueTypeSet supportedTypes,
                                   cm::string_view separator)
 {
   LSTATUS status;
@@ -225,6 +286,12 @@ std::string KeyHandler::ReadValue(cm::string_view name,
                                  &type, data.get(), &size)) != ERROR_SUCCESS) {
     throw registry_error(this->FormatSystemError(status));
   }
+
+  auto valueType = ToValueType(type);
+  if (!valueType || !supportedTypes.contains(*valueType)) {
+    throw registry_error(cmStrCat(type, ": unsupported type."));
+  }
+
   switch (type) {
     case REG_SZ:
       return this->ToNarrow(reinterpret_cast<wchar_t*>(data.get()));
@@ -319,12 +386,109 @@ std::vector<std::string> KeyHandler::GetSubKeys()
 
   return subKeys;
 }
-}
 #endif
 
+// ExpressionParser: Helper to parse expression holding multiple
+// registry specifications
+class ExpressionParser
+{
+public:
+  ExpressionParser(cm::string_view expression)
+    : Expression(expression)
+    , Separator(";"_s)
+    , RegistryFormat{
+      "\\[({.+})?(HKCU|HKEY_CURRENT_USER|HKLM|HKEY_LOCAL_MACHINE|HKCR|HKEY_"
+      "CLASSES_"
+      "ROOT|HKCC|HKEY_CURRENT_CONFIG|HKU|HKEY_USERS)[/\\]?([^]]*)\\]"
+    }
+  {
+  }
+
+  bool Find()
+  {
+    // reset result members
+    this->RootKey = cm::string_view{};
+    this->SubKey = cm::string_view{};
+    this->ValueName = cm::string_view{};
+
+    auto result = this->RegistryFormat.find(this->Expression);
+
+    if (result) {
+      auto separator = cm::string_view{
+        this->Expression.data() + this->RegistryFormat.start(1),
+        this->RegistryFormat.end(1) - this->RegistryFormat.start(1)
+      };
+      if (separator.empty()) {
+        separator = this->Separator;
+      } else {
+        separator = separator.substr(1, separator.length() - 2);
+      }
+
+      this->RootKey = cm::string_view{
+        this->Expression.data() + this->RegistryFormat.start(2),
+        this->RegistryFormat.end(2) - this->RegistryFormat.start(2)
+      };
+      this->SubKey = cm::string_view{
+        this->Expression.data() + this->RegistryFormat.start(3),
+        this->RegistryFormat.end(3) - this->RegistryFormat.start(3)
+      };
+
+      auto pos = this->SubKey.find(separator);
+      if (pos != cm::string_view::npos) {
+        // split in ValueName and SubKey
+        this->ValueName = this->SubKey.substr(pos + separator.size());
+        if (Strucmp(this->ValueName, "(default)") == 0) {
+          // handle magic name for default value
+          this->ValueName = ""_s;
+        }
+        this->SubKey = this->SubKey.substr(0, pos);
+      } else {
+        this->ValueName = ""_s;
+      }
+    }
+    return result;
+  }
+
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  void Replace(const std::string& value)
+  {
+    this->Expression.replace(
+      this->RegistryFormat.start(),
+      this->RegistryFormat.end() - this->RegistryFormat.start(), value);
+  }
+
+  cm::string_view GetRootKey() const { return this->RootKey; }
+
+  cm::string_view GetSubKey() const { return this->SubKey; }
+  cm::string_view GetValueName() const { return this->ValueName; }
+
+  const std::string& GetExpression() const { return this->Expression; }
+#endif
+
+private:
+  std::string Expression;
+  cm::string_view Separator;
+  cmsys::RegularExpression RegistryFormat;
+  cm::string_view RootKey;
+  cm::string_view SubKey;
+  cm::string_view ValueName;
+};
+}
+
 // class cmWindowsRegistry
-cmWindowsRegistry::cmWindowsRegistry(cmMakefile& makefile)
-#if !defined(_WIN32) || defined(__CYGWIN__)
+const cmWindowsRegistry::ValueTypeSet cmWindowsRegistry::SimpleTypes =
+  cmWindowsRegistry::ValueTypeSet{ cmWindowsRegistry::ValueType::Reg_SZ,
+                                   cmWindowsRegistry::ValueType::Reg_EXPAND_SZ,
+                                   cmWindowsRegistry::ValueType::Reg_DWORD,
+                                   cmWindowsRegistry::ValueType::Reg_QWORD };
+const cmWindowsRegistry::ValueTypeSet cmWindowsRegistry::AllTypes =
+  cmWindowsRegistry::SimpleTypes + cmWindowsRegistry::ValueType::Reg_MULTI_SZ;
+
+cmWindowsRegistry::cmWindowsRegistry(cmMakefile& makefile,
+                                     const ValueTypeSet& supportedTypes)
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  : SupportedTypes(supportedTypes)
+#else
   : LastError("No Registry on this platform.")
 #endif
 {
@@ -334,6 +498,7 @@ cmWindowsRegistry::cmWindowsRegistry(cmMakefile& makefile)
   }
 #else
   (void)makefile;
+  (void)supportedTypes;
 #endif
 }
 
@@ -350,8 +515,22 @@ cm::optional<cmWindowsRegistry::View> cmWindowsRegistry::ToView(
 
   auto it = ViewDefinitions.find(name);
 
-  return it == ViewDefinitions.end() ? cm::nullopt
-                                     : cm::optional{ it->second };
+  return it == ViewDefinitions.end()
+    ? cm::nullopt
+    : cm::optional<cmWindowsRegistry::View>{ it->second };
+}
+
+// define hash structure required by std::unordered_map
+namespace std {
+template <>
+struct hash<cmWindowsRegistry::View>
+{
+  size_t operator()(cmWindowsRegistry::View const& v) const noexcept
+  {
+    return static_cast<
+      typename underlying_type<cmWindowsRegistry::View>::type>(v);
+  }
+};
 }
 
 cm::string_view cmWindowsRegistry::FromView(View view)
@@ -434,7 +613,7 @@ cm::optional<std::string> cmWindowsRegistry::ReadValue(
   // compute list of registry views
   auto views = this->ComputeViews(view);
 
-  if (cmsys::SystemTools::Strucmp(name.data(), "(default)") == 0) {
+  if (Strucmp(name, "(default)") == 0) {
     // handle magic name for default value
     name = ""_s;
   }
@@ -446,7 +625,7 @@ cm::optional<std::string> cmWindowsRegistry::ReadValue(
     try {
       this->LastError.clear();
       auto handler = KeyHandler::OpenKey(key, v);
-      return handler.ReadValue(name, separator);
+      return handler.ReadValue(name, this->SupportedTypes, separator);
     } catch (const registry_error& e) {
       this->LastError = e.what();
       continue;
@@ -538,4 +717,54 @@ cm::optional<std::vector<std::string>> cmWindowsRegistry::GetSubKeys(
   (void)view;
 #endif
   return cm::nullopt;
+}
+
+cm::optional<std::vector<std::string>> cmWindowsRegistry::ExpandExpression(
+  cm::string_view expression, View view, cm::string_view separator)
+{
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  static std::string NOTFOUND{ "/REGISTRY-NOTFOUND" };
+
+  this->LastError.clear();
+
+  // compute list of registry views
+  auto views = this->ComputeViews(view);
+  std::vector<std::string> result;
+
+  for (auto v : views) {
+    ExpressionParser parser(expression);
+
+    while (parser.Find()) {
+      try {
+        auto handler =
+          KeyHandler::OpenKey(parser.GetRootKey(), parser.GetSubKey(), v);
+        auto data = handler.ReadValue(parser.GetValueName(),
+                                      this->SupportedTypes, separator);
+        parser.Replace(data);
+      } catch (const registry_error& e) {
+        this->LastError = e.what();
+        parser.Replace(NOTFOUND);
+        continue;
+      }
+    }
+    result.emplace_back(parser.GetExpression());
+    if (expression == parser.GetExpression()) {
+      // there no substitutions, so can ignore other views
+      break;
+    }
+  }
+
+  return result;
+#else
+  (void)view;
+  (void)separator;
+
+  ExpressionParser parser(expression);
+  if (parser.Find()) {
+    // expression holds unsupported registry access
+    // so the expression cannot be used on this platform
+    return cm::nullopt;
+  }
+  return std::vector<std::string>{ std::string{ expression } };
+#endif
 }

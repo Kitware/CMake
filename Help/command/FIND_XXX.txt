@@ -13,6 +13,7 @@ The general signature is:
              name | |NAMES|
              [HINTS [path | ENV var]... ]
              [PATHS [path | ENV var]... ]
+             [REGISTRY_VIEW (64|32|64_32|32_64|HOST|TARGET|BOTH)]
              [PATH_SUFFIXES suffix1 [suffix2 ...]]
              [DOC "cache documentation string"]
              [NO_CACHE]
@@ -50,6 +51,18 @@ Options include:
   Specify directories to search in addition to the default locations.
   The ``ENV var`` sub-option reads paths from a system environment
   variable.
+
+  .. versionchanged:: 3.24
+    On ``Windows`` platform, it is possible to include registry queries as part
+    of the directories. Such specifications will be ignored on all other
+    platforms.
+
+  .. include:: FIND_XXX_REGISTRY_QUERY.txt
+
+``REGISTRY_VIEW``
+  .. versionadded:: 3.24
+
+  .. include:: FIND_XXX_REGISTRY_VIEW.txt
 
 ``PATH_SUFFIXES``
   Specify additional subdirectories to check below each directory

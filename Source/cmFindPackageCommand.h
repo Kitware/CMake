@@ -200,6 +200,7 @@ private:
   bool UseRealPath = false;
   bool PolicyScope = true;
   bool GlobalScope = false;
+  bool RegistryViewDefined = false;
   std::string LibraryArchitecture;
   std::vector<std::string> Names;
   std::vector<std::string> Configs;

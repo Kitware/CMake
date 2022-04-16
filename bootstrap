@@ -490,6 +490,7 @@ CMAKE_CXX_SOURCES="\
   cmUVProcessChain \
   cmVersion \
   cmWhileCommand \
+  cmWindowsRegistry \
   cmWorkingDirectory \
   cmake  \
   cmakemain \
@@ -1611,6 +1612,9 @@ fi
 if ${cmake_system_mingw}; then
   cmake_report cmConfigure.h${_tmp} "#if defined(_WIN32) && !defined(NOMINMAX)"
   cmake_report cmConfigure.h${_tmp} "#  define NOMINMAX"
+  cmake_report cmConfigure.h${_tmp} "#endif"
+  cmake_report cmConfigure.h${_tmp} "#if defined(_WIN32) && !defined(KWSYS_ENCODING_DEFAULT_CODEPAGE)"
+  cmake_report cmConfigure.h${_tmp} "#  define KWSYS_ENCODING_DEFAULT_CODEPAGE CP_UTF8"
   cmake_report cmConfigure.h${_tmp} "#endif"
 fi
 

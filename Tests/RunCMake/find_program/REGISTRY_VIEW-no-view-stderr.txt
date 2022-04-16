@@ -1,0 +1,4 @@
+CMake Error at REGISTRY_VIEW-no-view.cmake:[0-9]+ \(find_program\):
+  find_program missing required argument for "REGISTRY_VIEW"
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

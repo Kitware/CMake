@@ -8,6 +8,8 @@ find_library
 .. |prefix_XXX_SUBDIR| replace:: ``<prefix>/lib``
 .. |entry_XXX_SUBDIR| replace:: ``<entry>/lib``
 
+.. |FIND_XXX_REGISTRY_VIEW_DEFAULT| replace:: ``TARGET``
+
 .. |FIND_PACKAGE_ROOT_PREFIX_PATH_XXX| replace::
    ``<prefix>/lib/<arch>`` if :variable:`CMAKE_LIBRARY_ARCHITECTURE` is set,
    and |FIND_PACKAGE_ROOT_PREFIX_PATH_XXX_SUBDIR|

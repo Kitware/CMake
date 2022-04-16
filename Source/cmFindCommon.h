@@ -11,6 +11,7 @@
 
 #include "cmPathLabel.h"
 #include "cmSearchPath.h"
+#include "cmWindowsRegistry.h"
 
 class cmExecutionStatus;
 class cmMakefile;
@@ -131,6 +132,7 @@ protected:
   bool NoSystemEnvironmentPath;
   bool NoCMakeSystemPath;
   bool NoCMakeInstallPath;
+  cmWindowsRegistry::View RegistryView = cmWindowsRegistry::View::Target;
 
   std::vector<std::string> SearchPathSuffixes;
 

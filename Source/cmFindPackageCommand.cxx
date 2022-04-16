@@ -13,6 +13,7 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cm/optional>
 #include <cmext/string_view>
 
 #include "cmsys/Directory.hxx"
@@ -33,6 +34,7 @@
 #include "cmSystemTools.h"
 #include "cmValue.h"
 #include "cmVersion.h"
+#include "cmWindowsRegistry.h"
 
 #if defined(__HAIKU__)
 #  include <FindDirectory.h>
@@ -317,6 +319,20 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
       // Ignore legacy option.
       configArgs.insert(i);
       doing = DoingNone;
+    } else if (args[i] == "REGISTRY_VIEW") {
+      if (++i == args.size()) {
+        this->SetError("missing required argument for \"REGISTRY_VIEW\"");
+        return false;
+      }
+      auto view = cmWindowsRegistry::ToView(args[i]);
+      if (view) {
+        this->RegistryView = *view;
+        this->RegistryViewDefined = true;
+      } else {
+        this->SetError(
+          cmStrCat("given invalid value for \"REGISTRY_VIEW\": ", args[i]));
+        return false;
+      }
     } else if (this->CheckCommonArgument(args[i])) {
       configArgs.insert(i);
       doing = DoingNone;
@@ -766,6 +782,11 @@ void cmFindPackageCommand::SetModuleVariables(const std::string& components)
     this->AddFindDefinition(id, this->VersionRangeMin);
     id = cmStrCat(this->Name, "_FIND_VERSION_RANGE_MAX");
     this->AddFindDefinition(id, this->VersionRangeMax);
+  }
+
+  if (this->RegistryViewDefined) {
+    this->AddFindDefinition(cmStrCat(this->Name, "_FIND_REGISTRY_VIEW"),
+                            cmWindowsRegistry::FromView(this->RegistryView));
   }
 }
 

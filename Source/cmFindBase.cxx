@@ -7,6 +7,7 @@
 #include <map>
 #include <utility>
 
+#include <cm/optional>
 #include <cmext/algorithm>
 
 #include "cmCMakePath.h"
@@ -20,6 +21,7 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
+#include "cmWindowsRegistry.h"
 #include "cmake.h"
 
 class cmExecutionStatus;
@@ -123,6 +125,19 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
       doing = DoingNone;
       this->Required = true;
       newStyle = true;
+    } else if (args[j] == "REGISTRY_VIEW") {
+      if (++j == args.size()) {
+        this->SetError("missing required argument for \"REGISTRY_VIEW\"");
+        return false;
+      }
+      auto view = cmWindowsRegistry::ToView(args[j]);
+      if (view) {
+        this->RegistryView = *view;
+      } else {
+        this->SetError(
+          cmStrCat("given invalid value for \"REGISTRY_VIEW\": ", args[j]));
+        return false;
+      }
     } else if (this->CheckCommonArgument(args[j])) {
       doing = DoingNone;
     } else {
