@@ -24,7 +24,8 @@ selects for the target ``foo`` a multi-threaded statically-linked runtime
 library.
 
 If this property is not set then CMake uses the default value
-``MultiThreadedDLL`` to select a Watcom runtime library.
+``MultiThreadedDLL`` on Windows and ``SingleThreaded`` on other
+platforms to select a Watcom runtime library.
 
 .. note::
 

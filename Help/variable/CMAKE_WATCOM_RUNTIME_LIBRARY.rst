@@ -26,8 +26,8 @@ library.
 
 If this variable is not set then the :prop_tgt:`WATCOM_RUNTIME_LIBRARY` target
 property will not be set automatically.  If that property is not set then
-CMake uses the default value ``MultiThreadedDLL`` to select a Watcom runtime
-library.
+CMake uses the default value ``MultiThreadedDLL`` on Windows and
+``SingleThreaded`` on other platforms to select a Watcom runtime library.
 
 .. note::
 
