@@ -47,6 +47,16 @@ public:
   }
   void SetExportSet(cmExportSet*);
 
+  /** Set the name of the C++ module directory.  */
+  void SetCxxModuleDirectory(std::string cxx_module_dir)
+  {
+    this->CxxModulesDirectory = std::move(cxx_module_dir);
+  }
+  const std::string& GetCxxModuleDirectory() const
+  {
+    return this->CxxModulesDirectory;
+  }
+
   /** Set whether to append generated code to the output file.  */
   void SetAppendMode(bool append) { this->AppendMode = append; }
 
@@ -88,4 +98,6 @@ protected:
   cmExportSet* ExportSet;
   std::vector<cmGeneratorTarget*> Exports;
   cmLocalGenerator* LG;
+  // The directory for C++ module information.
+  std::string CxxModulesDirectory;
 };

@@ -1995,7 +1995,7 @@ bool HandleExportAndroidMKMode(std::vector<std::string> const& args,
     cm::make_unique<cmInstallExportGenerator>(
       &exportSet, ica.GetDestination(), ica.GetPermissions(),
       ica.GetConfigurations(), ica.GetComponent(), message,
-      ica.GetExcludeFromAll(), fname, name_space, exportOld, true,
+      ica.GetExcludeFromAll(), fname, name_space, "", exportOld, true,
       helper.Makefile->GetBacktrace()));
 
   return true;
@@ -2018,11 +2018,18 @@ bool HandleExportMode(std::vector<std::string> const& args,
   std::string name_space;
   bool exportOld = false;
   std::string filename;
+  std::string cxx_modules_directory;
 
   ica.Bind("EXPORT"_s, exp);
   ica.Bind("NAMESPACE"_s, name_space);
   ica.Bind("EXPORT_LINK_INTERFACE_LIBRARIES"_s, exportOld);
   ica.Bind("FILE"_s, filename);
+
+  bool const supportCxx20FileSetTypes = cmExperimental::HasSupportEnabled(
+    *helper.Makefile, cmExperimental::Feature::CxxModuleCMakeApi);
+  if (supportCxx20FileSetTypes) {
+    ica.Bind("CXX_MODULES_DIRECTORY"_s, cxx_modules_directory);
+  }
 
   std::vector<std::string> unknownArgs;
   ica.Parse(args, &unknownArgs);
@@ -2109,8 +2116,8 @@ bool HandleExportMode(std::vector<std::string> const& args,
     cm::make_unique<cmInstallExportGenerator>(
       &exportSet, ica.GetDestination(), ica.GetPermissions(),
       ica.GetConfigurations(), ica.GetComponent(), message,
-      ica.GetExcludeFromAll(), fname, name_space, exportOld, false,
-      helper.Makefile->GetBacktrace()));
+      ica.GetExcludeFromAll(), fname, name_space, cxx_modules_directory,
+      exportOld, false, helper.Makefile->GetBacktrace()));
 
   return true;
 }
