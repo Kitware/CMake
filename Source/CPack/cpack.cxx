@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
 #include <cstddef>
+#include <functional>
 #include <iostream>
 #include <map>
 #include <memory>
@@ -10,12 +11,14 @@
 #include <utility>
 #include <vector>
 
-#include "cmsys/CommandLineArguments.hxx"
+#include <cmext/algorithm>
+
 #include "cmsys/Encoding.hxx"
 
 #include "cmCPackGenerator.h"
 #include "cmCPackGeneratorFactory.h"
 #include "cmCPackLog.h"
+#include "cmCommandLineArgument.h"
 #include "cmConsoleBuf.h"
 #include "cmDocumentation.h"
 #include "cmDocumentationEntry.h"
@@ -58,39 +61,6 @@ const char* cmDocumentationOptions[][2] = {
   { nullptr, nullptr }
 };
 
-int cpackUnknownArgument(const char* /*unused*/, void* /*unused*/)
-{
-  return 1;
-}
-
-struct cpackDefinitions
-{
-  using MapType = std::map<std::string, std::string>;
-  MapType Map;
-  cmCPackLog* Log{};
-};
-
-int cpackDefinitionArgument(const char* argument, const char* cValue,
-                            void* call_data)
-{
-  (void)argument;
-  cpackDefinitions* def = static_cast<cpackDefinitions*>(call_data);
-  std::string value = cValue;
-  size_t pos = value.find_first_of('=');
-  if (pos == std::string::npos) {
-    cmCPack_Log(def->Log, cmCPackLog::LOG_ERROR,
-                "Please specify CPack definitions as: KEY=VALUE" << std::endl);
-    return 0;
-  }
-  std::string key = value.substr(0, pos);
-  value.erase(0, pos + 1);
-  def->Map[key] = value;
-  cmCPack_Log(def->Log, cmCPackLog::LOG_DEBUG,
-              "Set CPack variable: " << key << " to \"" << value << "\""
-                                     << std::endl);
-  return 1;
-}
-
 void cpackProgressCallback(const std::string& message, float /*unused*/)
 {
   std::cout << "-- " << message << std::endl;
@@ -111,6 +81,10 @@ int main(int argc, char const* const* argv)
   argc = args.argc();
   argv = args.argv();
 
+  std::vector<std::string> inputArgs;
+  inputArgs.reserve(argc - 1);
+  cm::append(inputArgs, argv + 1, argv + argc);
+
   cmSystemTools::InitializeLibUV();
   cmSystemTools::FindCMakeResources(argv[0]);
   cmCPackLog log;
@@ -130,10 +104,6 @@ int main(int argc, char const* const* argv)
   std::string generator;
   bool help = false;
   bool helpVersion = false;
-  bool verbose = false;
-  bool trace = false;
-  bool traceExpand = false;
-  bool debug = false;
   std::string helpFull;
   std::string helpMAN;
   std::string helpHTML;
@@ -146,64 +116,93 @@ int main(int argc, char const* const* argv)
   std::string cpackProjectVendor;
   std::string cpackConfigFile;
 
-  cpackDefinitions definitions;
-  definitions.Log = &log;
+  std::map<std::string, std::string> definitions;
 
-  cpackConfigFile.clear();
-
-  cmsys::CommandLineArguments arg;
-  arg.Initialize(argc, argv);
-  using argT = cmsys::CommandLineArguments;
-  // Help arguments
-  arg.AddArgument("--help", argT::NO_ARGUMENT, &help, "CPack help");
-  arg.AddArgument("--help-full", argT::SPACE_ARGUMENT, &helpFull,
-                  "CPack help");
-  arg.AddArgument("--help-html", argT::SPACE_ARGUMENT, &helpHTML,
-                  "CPack help");
-  arg.AddArgument("--help-man", argT::SPACE_ARGUMENT, &helpMAN, "CPack help");
-  arg.AddArgument("--version", argT::NO_ARGUMENT, &helpVersion, "CPack help");
-
-  arg.AddArgument("-V", argT::NO_ARGUMENT, &verbose, "CPack verbose");
-  arg.AddArgument("--verbose", argT::NO_ARGUMENT, &verbose, "-V");
-  arg.AddArgument("--debug", argT::NO_ARGUMENT, &debug, "-V");
-  arg.AddArgument("--config", argT::SPACE_ARGUMENT, &cpackConfigFile,
-                  "CPack configuration file");
-  arg.AddArgument("--trace", argT::NO_ARGUMENT, &trace,
-                  "Put underlying cmake scripts in trace mode.");
-  arg.AddArgument("--trace-expand", argT::NO_ARGUMENT, &traceExpand,
-                  "Put underlying cmake scripts in expanded trace mode.");
-  arg.AddArgument("-C", argT::SPACE_ARGUMENT, &cpackBuildConfig,
-                  "CPack build configuration");
-  arg.AddArgument("-G", argT::SPACE_ARGUMENT, &generator, "CPack generator");
-  arg.AddArgument("-P", argT::SPACE_ARGUMENT, &cpackProjectName,
-                  "CPack project name");
-  arg.AddArgument("-R", argT::SPACE_ARGUMENT, &cpackProjectVersion,
-                  "CPack project version");
-  arg.AddArgument("-B", argT::SPACE_ARGUMENT, &cpackProjectDirectory,
-                  "CPack project directory");
-  arg.AddArgument("--patch", argT::SPACE_ARGUMENT, &cpackProjectPatch,
-                  "CPack project patch");
-  arg.AddArgument("--vendor", argT::SPACE_ARGUMENT, &cpackProjectVendor,
-                  "CPack project vendor");
-  arg.AddCallback("-D", argT::SPACE_ARGUMENT, cpackDefinitionArgument,
-                  &definitions, "CPack Definitions");
-  arg.SetUnknownArgumentCallback(cpackUnknownArgument);
-
-  // Parse command line
-  int parsed = arg.Parse();
-
-  // Setup logging
-  if (verbose) {
-    log.SetVerbose(verbose);
+  auto const verboseLambda = [&log](const std::string&, cmake*,
+                                    cmMakefile*) -> bool {
+    log.SetVerbose(true);
     cmCPack_Log(&log, cmCPackLog::LOG_OUTPUT, "Enable Verbose" << std::endl);
-  }
-  if (debug) {
-    log.SetDebug(debug);
-    cmCPack_Log(&log, cmCPackLog::LOG_OUTPUT, "Enable Debug" << std::endl);
-  }
+    return true;
+  };
 
-  cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE,
-              "Read CPack config file: " << cpackConfigFile << std::endl);
+  auto const debugLambda = [&log](const std::string&, cmake*,
+                                  cmMakefile*) -> bool {
+    log.SetDebug(true);
+    cmCPack_Log(&log, cmCPackLog::LOG_OUTPUT, "Enable Debug" << std::endl);
+    return true;
+  };
+
+  auto const traceLambda = [](const std::string&, cmake* state,
+                              cmMakefile*) -> bool {
+    state->SetTrace(true);
+    return true;
+  };
+
+  auto const traceExpandLambda = [](const std::string&, cmake* state,
+                                    cmMakefile*) -> bool {
+    state->SetTrace(true);
+    state->SetTraceExpand(true);
+    return true;
+  };
+
+  using CommandArgument =
+    cmCommandLineArgument<bool(std::string const&, cmake*, cmMakefile*)>;
+
+  std::vector<CommandArgument> arguments = {
+    CommandArgument{ "--help", CommandArgument::Values::Zero,
+                     CommandArgument::setToTrue(help) },
+    CommandArgument{ "--help-full", CommandArgument::Values::Zero,
+                     CommandArgument::setToValue(helpFull) },
+    CommandArgument{ "--help-html", CommandArgument::Values::Zero,
+                     CommandArgument::setToValue(helpHTML) },
+    CommandArgument{ "--help-man", CommandArgument::Values::Zero,
+                     CommandArgument::setToValue(helpMAN) },
+    CommandArgument{ "--version", CommandArgument::Values::Zero,
+                     CommandArgument::setToTrue(helpVersion) },
+    CommandArgument{ "-V", CommandArgument::Values::Zero, verboseLambda },
+    CommandArgument{ "--verbose", CommandArgument::Values::Zero,
+                     verboseLambda },
+    CommandArgument{ "--debug", CommandArgument::Values::Zero, debugLambda },
+    CommandArgument{ "--config", CommandArgument::Values::One,
+                     CommandArgument::setToValue(cpackConfigFile) },
+    CommandArgument{ "--trace", CommandArgument::Values::One, traceLambda },
+    CommandArgument{ "--trace-expand", CommandArgument::Values::One,
+                     traceExpandLambda },
+    CommandArgument{ "-C", CommandArgument::Values::One,
+                     CommandArgument::setToValue(cpackBuildConfig) },
+    CommandArgument{ "-G", CommandArgument::Values::One,
+                     CommandArgument::setToValue(generator) },
+    CommandArgument{ "-P", CommandArgument::Values::One,
+                     CommandArgument::setToValue(cpackProjectName) },
+    CommandArgument{ "-R", CommandArgument::Values::One,
+                     CommandArgument::setToValue(cpackProjectVersion) },
+    CommandArgument{ "-B", CommandArgument::Values::One,
+                     CommandArgument::setToValue(cpackProjectDirectory) },
+    CommandArgument{ "--patch", CommandArgument::Values::One,
+                     CommandArgument::setToValue(cpackProjectPatch) },
+    CommandArgument{ "--vendor", CommandArgument::Values::One,
+                     CommandArgument::setToValue(cpackProjectVendor) },
+    CommandArgument{
+      "-D", CommandArgument::Values::One,
+      [&log, &definitions](const std::string& arg, cmake*,
+                           cmMakefile*) -> bool {
+        std::string value = arg;
+        size_t pos = value.find_first_of('=');
+        if (pos == std::string::npos) {
+          cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
+                      "Please specify CPack definitions as: KEY=VALUE"
+                        << std::endl);
+          return false;
+        }
+        std::string key = value.substr(0, pos);
+        value.erase(0, pos + 1);
+        definitions[key] = value;
+        cmCPack_Log(&log, cmCPackLog::LOG_DEBUG,
+                    "Set CPack variable: " << key << " to \"" << value << "\""
+                                           << std::endl);
+        return true;
+      } },
+  };
 
   cmake cminst(cmake::RoleScript, cmState::CPack);
   cminst.SetHomeDirectory("");
@@ -216,13 +215,21 @@ int main(int argc, char const* const* argv)
   globalMF.AddDefinition("CMAKE_LEGACY_CYGWIN_WIN32", "0");
 #endif
 
-  if (trace) {
-    cminst.SetTrace(true);
+  bool parsed = true;
+  for (std::size_t i = 0; i < inputArgs.size(); i++) {
+    auto const& arg = inputArgs[i];
+    for (auto const& m : arguments) {
+      if (m.matches(arg)) {
+        if (!m.parse(arg, i, inputArgs, &cminst, &globalMF)) {
+          parsed = false;
+        }
+        break;
+      }
+    }
   }
-  if (traceExpand) {
-    cminst.SetTrace(true);
-    cminst.SetTraceExpand(true);
-  }
+
+  cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE,
+              "Read CPack config file: " << cpackConfigFile << std::endl);
 
   bool cpackConfigFileSpecified = true;
   if (cpackConfigFile.empty()) {
@@ -315,7 +322,7 @@ int main(int argc, char const* const* argv)
                                cpackProjectDirectory);
       }
     }
-    for (auto const& cd : definitions.Map) {
+    for (auto const& cd : definitions) {
       globalMF.AddDefinition(cd.first, cd.second);
     }
 
@@ -344,7 +351,7 @@ int main(int argc, char const* const* argv)
         if (!mf->GetDefinition("CPACK_PACKAGE_NAME")) {
           cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
                       "CPack project name not specified" << std::endl);
-          parsed = 0;
+          parsed = false;
         }
         if (parsed &&
             !(mf->GetDefinition("CPACK_PACKAGE_VERSION") ||
@@ -359,14 +366,14 @@ int main(int argc, char const* const* argv)
                            "CPACK_PACKAGE_VERSION_MINOR, and "
                            "CPACK_PACKAGE_VERSION_PATCH."
                         << std::endl);
-          parsed = 0;
+          parsed = false;
         }
         if (parsed) {
           std::unique_ptr<cmCPackGenerator> cpackGenerator =
             generators.NewGenerator(gen);
           if (cpackGenerator) {
-            cpackGenerator->SetTrace(trace);
-            cpackGenerator->SetTraceExpand(traceExpand);
+            cpackGenerator->SetTrace(cminst.GetTrace());
+            cpackGenerator->SetTraceExpand(cminst.GetTraceExpand());
           } else {
             cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
                         "Could not create CPack generator: " << gen
@@ -384,14 +391,14 @@ int main(int argc, char const* const* argv)
             std::cerr << "\n";
             generatorDocs.PrintDocumentation(cmDocumentation::ListGenerators,
                                              std::cerr);
-            parsed = 0;
+            parsed = false;
           }
 
           if (parsed && !cpackGenerator->Initialize(gen, mf)) {
             cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
                         "Cannot initialize the generator " << gen
                                                            << std::endl);
-            parsed = 0;
+            parsed = false;
           }
 
           if (!mf->GetDefinition("CPACK_INSTALL_COMMANDS") &&
@@ -405,7 +412,7 @@ int main(int argc, char const* const* argv)
               "CPACK_INSTALL_COMMANDS, CPACK_INSTALL_SCRIPT, or "
               "CPACK_INSTALLED_DIRECTORIES."
                 << std::endl);
-            parsed = 0;
+            parsed = false;
           }
           if (parsed) {
             cmValue projName = mf->GetDefinition("CPACK_PACKAGE_NAME");
