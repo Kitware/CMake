@@ -2534,6 +2534,11 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
     }
   }
 
+  const char* module_ext = "";
+  if (arg_modmapfmt == "gcc") {
+    module_ext = ".gcm";
+  }
+
   // Extend the module map with those provided by this target.
   // We do this after loading the modules provided by linked targets
   // in case we have one of the same name that must be preferred.
@@ -2552,7 +2557,7 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
         // Assume the module file path matches the logical module name.
         std::string safe_logical_name = p.LogicalName;
         cmSystemTools::ReplaceString(safe_logical_name, ":", "-");
-        mod = cmStrCat(module_dir, safe_logical_name);
+        mod = cmStrCat(module_dir, safe_logical_name, module_ext);
       }
       mod_files[p.LogicalName] = mod;
       tm[p.LogicalName] = mod;
