@@ -31,6 +31,7 @@
   "dir-cur-src": "<SOURCE_DIR>",
   "dir-top-bld": "<BINARY_DIR>",
   "dir-top-src": "<SOURCE_DIR>",
+  "exports": [],
   "include-dirs": [],
   "language": "CXX",
   "linked-target-dirs": [],
