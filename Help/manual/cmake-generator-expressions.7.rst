@@ -1057,10 +1057,10 @@ which is just the string ``tgt``.
   .. versionadded:: 3.21
 
   List of DLLs that the target depends on at runtime. This is determined by
-  the locations of all the ``SHARED`` and ``MODULE`` targets in the target's
-  transitive dependencies. Using this generator expression on targets other
-  than executables, ``SHARED`` libraries, and ``MODULE`` libraries is an error.
-  On non-DLL platforms, it evaluates to an empty string.
+  the locations of all the ``SHARED`` targets in the target's transitive
+  dependencies. Using this generator expression on targets other than
+  executables, ``SHARED`` libraries, and ``MODULE`` libraries is an error. On
+  non-DLL platforms, it evaluates to an empty string.
 
   This generator expression can be used to copy all of the DLLs that a target
   depends on into its output directory in a ``POST_BUILD`` custom command. For
@@ -1080,9 +1080,9 @@ which is just the string ``tgt``.
   .. note::
 
     :ref:`Imported Targets` are supported only if they know the location
-    of their ``.dll`` files.  An imported ``SHARED`` or ``MODULE`` library
-    must have :prop_tgt:`IMPORTED_LOCATION` set to its ``.dll`` file.  See
-    the :ref:`add_library imported libraries <add_library imported libraries>`
+    of their ``.dll`` files.  An imported ``SHARED`` library must have
+    :prop_tgt:`IMPORTED_LOCATION` set to its ``.dll`` file.  See the
+    :ref:`add_library imported libraries <add_library imported libraries>`
     section for details.  Many :ref:`Find Modules` produce imported targets
     with the ``UNKNOWN`` type and therefore will be ignored.
 
