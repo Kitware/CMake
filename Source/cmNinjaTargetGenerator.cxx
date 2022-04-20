@@ -586,6 +586,7 @@ std::string GetScanCommand(const std::string& cmakeCmd, const std::string& tdi,
 // not perform explicit preprocessing too.
 cmNinjaRule GetScanRule(
   std::string const& ruleName, std::string const& ppFileName,
+  std::string const& deptype,
   cmRulePlaceholderExpander::RuleVariables const& vars,
   const std::string& responseFlag, const std::string& flags,
   cmRulePlaceholderExpander* const rulePlaceholderExpander,
@@ -594,8 +595,13 @@ cmNinjaRule GetScanRule(
 {
   cmNinjaRule rule(ruleName);
   // Scanning always uses a depfile for preprocessor dependencies.
-  rule.DepType = ""; // no deps= for multiple outputs
-  rule.DepFile = "$DEP_FILE";
+  if (deptype == "msvc"_s) {
+    rule.DepType = deptype;
+    rule.DepFile = "";
+  } else {
+    rule.DepType = ""; // no deps= for multiple outputs
+    rule.DepFile = "$DEP_FILE";
+  }
 
   cmRulePlaceholderExpander::RuleVariables scanVars;
   scanVars.CMTargetName = vars.CMTargetName;
@@ -699,6 +705,9 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
       cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
 
   if (needDyndep) {
+    const auto& scanDepType = this->GetMakefile()->GetSafeDefinition(
+      cmStrCat("CMAKE_EXPERIMENTAL_", lang, "_SCANDEP_DEPFILE_FORMAT"));
+
     // Rule to scan dependencies of sources that need preprocessing.
     {
       std::vector<std::string> scanCommands;
@@ -726,10 +735,10 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
                                                  "$DYNDEP_INTERMEDIATE_FILE"));
       }
 
-      auto scanRule =
-        GetScanRule(scanRuleName, ppFileName, vars, responseFlag, flags,
-                    rulePlaceholderExpander.get(), this->GetLocalGenerator(),
-                    std::move(scanCommands), config);
+      auto scanRule = GetScanRule(
+        scanRuleName, ppFileName, scanDepType, vars, responseFlag, flags,
+        rulePlaceholderExpander.get(), this->GetLocalGenerator(),
+        std::move(scanCommands), config);
 
       scanRule.Comment =
         cmStrCat("Rule for generating ", lang, " dependencies.");
@@ -757,9 +766,10 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
       scanCommands.emplace_back(
         GetScanCommand(cmakeCmd, tdi, lang, "$in", "$out"));
 
-      auto scanRule = GetScanRule(
-        scanRuleName, "", vars, "", flags, rulePlaceholderExpander.get(),
-        this->GetLocalGenerator(), std::move(scanCommands), config);
+      auto scanRule =
+        GetScanRule(scanRuleName, "", scanDepType, vars, "", flags,
+                    rulePlaceholderExpander.get(), this->GetLocalGenerator(),
+                    std::move(scanCommands), config);
 
       // Write the rule for generating dependencies for the given language.
       scanRule.Comment = cmStrCat("Rule for generating ", lang,
@@ -1249,7 +1259,8 @@ cmNinjaBuild GetScanBuildStatement(const std::string& ruleName,
     scanBuild.Variables["PREPROCESSED_OUTPUT_FILE"] = ppFileName;
   }
 
-  // Scanning always uses a depfile for preprocessor dependencies.
+  // Scanning always provides a depfile for preprocessor dependencies. This
+  // variable is unused in `msvc`-deptype scanners.
   std::string const& depFileName = cmStrCat(scanBuild.Outputs.front(), ".d");
   scanBuild.Variables["DEP_FILE"] =
     lg->ConvertToOutputFormat(depFileName, cmOutputConverter::SHELL);
