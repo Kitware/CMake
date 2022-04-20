@@ -52,8 +52,7 @@ static void cmScriptGeneratorEncodeConfig(const std::string& config,
 
 std::string cmScriptGenerator::CreateConfigTest(const std::string& config)
 {
-  std::string result =
-    cmStrCat("\"${", this->RuntimeConfigVariable, "}\" MATCHES \"^(");
+  std::string result = cmStrCat(this->RuntimeConfigVariable, " MATCHES \"^(");
   if (!config.empty()) {
     cmScriptGeneratorEncodeConfig(config, result);
   }
@@ -64,8 +63,7 @@ std::string cmScriptGenerator::CreateConfigTest(const std::string& config)
 std::string cmScriptGenerator::CreateConfigTest(
   std::vector<std::string> const& configs)
 {
-  std::string result =
-    cmStrCat("\"${", this->RuntimeConfigVariable, "}\" MATCHES \"^(");
+  std::string result = cmStrCat(this->RuntimeConfigVariable, " MATCHES \"^(");
   const char* sep = "";
   for (std::string const& config : configs) {
     result += sep;
