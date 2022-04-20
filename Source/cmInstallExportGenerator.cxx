@@ -202,8 +202,10 @@ void cmInstallExportGenerator::GenerateScriptActions(std::ostream& os,
   os << indentNN << "file(GLOB _cmake_old_config_files \"" << installedDir
      << this->EFGen->GetConfigImportFileGlob() << "\")\n";
   os << indentNN << "if(_cmake_old_config_files)\n";
+  os << indentNNN << "string(REPLACE \";\" \", \" _cmake_old_config_files_text \"${_cmake_old_config_files}\")\n";
   os << indentNNN << R"(message(STATUS "Old export file \")" << installedFile
-     << "\\\" will be replaced.  Removing files [${_cmake_old_config_files}].\")\n";
+     << "\\\" will be replaced.  Removing files [${_cmake_old_config_files_text}].\")\n";
+  os << indentNNN << "unset(_cmake_old_config_files_text)\n";
   os << indentNNN << "file(REMOVE ${_cmake_old_config_files})\n";
   os << indentNN << "endif()\n";
   os << indentNN << "unset(_cmake_old_config_files)\n";
