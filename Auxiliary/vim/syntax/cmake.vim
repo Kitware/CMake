@@ -370,6 +370,7 @@ syn keyword cmakeProperty contained
             \ VS_DOTNET_DOCUMENTATION_FILE
             \ VS_DOTNET_REFERENCES
             \ VS_DOTNET_REFERENCES_COPY_LOCAL
+            \ VS_DOTNET_STARTUP_OBJECT
             \ VS_DOTNET_TARGET_FRAMEWORK_VERSION
             \ VS_DPI_AWARE
             \ VS_GLOBAL_KEYWORD

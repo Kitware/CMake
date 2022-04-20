@@ -664,6 +664,14 @@ void cmVisualStudio10TargetGenerator::WriteClassicMsBuildProjectFile(
       }
     }
 
+    cmValue startupObject =
+      this->GeneratorTarget->GetProperty("VS_DOTNET_STARTUP_OBJECT");
+
+    if (startupObject && this->Managed) {
+      Elem e1(e0, "PropertyGroup");
+      e1.Element("StartupObject", *startupObject);
+    }
+
     switch (this->ProjectType) {
       case VsProjectType::vcxproj: {
         std::string const& props =
@@ -927,6 +935,12 @@ void cmVisualStudio10TargetGenerator::WriteSdkStyleProjectFile(
         break;
     }
     e1.Element("OutputType", outputType);
+
+    cmValue startupObject =
+      this->GeneratorTarget->GetProperty("VS_DOTNET_STARTUP_OBJECT");
+    if (startupObject) {
+      e1.Element("StartupObject", *startupObject);
+    }
   }
 
   for (const std::string& config : this->Configurations) {
