@@ -206,7 +206,9 @@ void cmInstallExportGenerator::GenerateScriptActions(std::ostream& os,
      << "\\\" will be replaced.  Removing files [${_cmake_old_config_files}].\")\n";
   os << indentNNN << "file(REMOVE ${_cmake_old_config_files})\n";
   os << indentNN << "endif()\n";
+  os << indentNN << "unset(_cmake_old_config_files)\n";
   os << indentN << "endif()\n";
+  os << indentN << "unset(_cmake_export_file_changed)\n";
   os << indent << "endif()\n";
   /* clang-format on */
 
