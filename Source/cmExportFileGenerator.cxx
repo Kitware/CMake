@@ -988,7 +988,7 @@ void cmExportFileGenerator::GenerateExpectedTargetsCode(
         "set(_cmake_targets_defined \"\")\n"
         "set(_cmake_targets_not_defined \"\")\n"
         "set(_cmake_expected_targets \"\")\n"
-        "foreach(_cmake_expected_target " << expectedTargets << ")\n"
+        "foreach(_cmake_expected_target IN ITEMS " << expectedTargets << ")\n"
         "  list(APPEND _cmake_expected_targets \"${_cmake_expected_target}\")\n"
         "  if(TARGET \"${_cmake_expected_target}\")\n"
         "    list(APPEND _cmake_targets_defined \"${_cmake_expected_target}\")\n"
