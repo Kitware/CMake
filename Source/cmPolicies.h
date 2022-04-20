@@ -396,7 +396,11 @@ class cmMakefile;
          24, 0, cmPolicies::WARN)                                             \
   SELECT(POLICY, CMP0132,                                                     \
          "Do not set compiler environment variables on first run", 3, 24, 0,  \
-         cmPolicies::WARN)
+         cmPolicies::WARN)                                                    \
+  SELECT(POLICY, CMP0133,                                                     \
+         "The CPack module disables SLA by default in the CPack DragNDrop "   \
+         "Generator.",                                                        \
+         3, 24, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \

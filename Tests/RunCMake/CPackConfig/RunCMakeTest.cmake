@@ -1,5 +1,7 @@
 include(RunCMake)
 
+run_cmake(CMP0133-NEW)
+run_cmake(CMP0133-WARN)
 run_cmake(Simple)
 run_cmake(Default)
 run_cmake(Special)
