@@ -77,12 +77,6 @@ echo '<?xml version="1.0" encoding="UTF-8"?>
 </dict>
 </plist>' > "$entitlements_xml"
 
-# Extract SLA
-readonly sla_xml="$tmpdir/sla.xml"
-hdiutil udifderez -xml "$dmg" > "$sla_xml"
-plutil -remove 'blkx' "$sla_xml"
-plutil -remove 'plst' "$sla_xml"
-
 # Convert from read-only original image to read-write.
 readonly udrw_dmg="$tmpdir/udrw.dmg"
 hdiutil convert "$dmg" -format UDRW -o "${udrw_dmg}"
@@ -112,6 +106,3 @@ hdiutil detach "$vol_path"
 
 # Convert back to read-only, compressed image.
 hdiutil convert "${udrw_dmg}" -format UDZO -imagekey zlib-level=9 -ov -o "$dmg"
-
-# Re-insert SLA.
-hdiutil udifrez -xml "${sla_xml}" 'FIXME_WHY_IS_THIS_ARGUMENT_NEEDED' "$dmg"
