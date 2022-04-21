@@ -76,7 +76,7 @@ function(add_RunCMake_test_group test types)
 endfunction()
 
 # Some tests use python for extra checks.
-find_package(PythonInterp QUIET)
+find_package(Python QUIET)
 
 if(XCODE_VERSION AND "${XCODE_VERSION}" VERSION_LESS 6.1)
   set(Swift_ARGS -DXCODE_BELOW_6_1=1)
@@ -302,7 +302,7 @@ add_RunCMake_test(ExcludeFromAll)
 add_RunCMake_test(ExternalData)
 add_RunCMake_test(FeatureSummary)
 add_RunCMake_test(FPHSA)
-add_RunCMake_test(FileAPI -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
+add_RunCMake_test(FileAPI -DPython_EXECUTABLE=${Python_EXECUTABLE}
                           -DCMAKE_CXX_COMPILER_ID=${CMAKE_CXX_COMPILER_ID})
 add_RunCMake_test(FindBoost)
 add_RunCMake_test(FindLua)
@@ -400,7 +400,7 @@ add_RunCMake_test(build_command)
 add_executable(exit_code exit_code.c)
 set(execute_process_ARGS
   -DEXIT_CODE_EXE=$<TARGET_FILE:exit_code>
-  -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
+  -DPython_EXECUTABLE=${Python_EXECUTABLE}
   )
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
   list(APPEND execute_process_ARGS -DTEST_ENCODING_EXE=$<TARGET_FILE:testEncoding>)
@@ -748,7 +748,7 @@ endif()
 
 add_executable(pseudo_llvm-rc pseudo_llvm-rc.c)
 add_RunCMake_test(CommandLine -DLLVM_RC=$<TARGET_FILE:pseudo_llvm-rc> -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
-                  -DCYGWIN=${CYGWIN} -DMSYS=${MSYS} -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
+                  -DCYGWIN=${CYGWIN} -DMSYS=${MSYS} -DPython_EXECUTABLE=${Python_EXECUTABLE}
                   -DEXIT_CODE_EXE=$<TARGET_FILE:exit_code>)
 add_RunCMake_test(CommandLineTar)
 
@@ -784,7 +784,7 @@ if(CMake_TEST_RunCMake_ExternalProject_DOWNLOAD_SERVER_TIMEOUT)
 endif()
 add_RunCMake_test(ExternalProject)
 add_RunCMake_test(FetchContent)
-set(CTestCommandLine_ARGS -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE})
+set(CTestCommandLine_ARGS -DPython_EXECUTABLE=${Python_EXECUTABLE})
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
   list(APPEND CTestCommandLine_ARGS -DTEST_AFFINITY=$<TARGET_FILE:testAffinity>)
 endif()
@@ -968,16 +968,16 @@ add_RunCMake_test(PrecompileHeaders -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
 
 add_RunCMake_test("UnityBuild")
 add_RunCMake_test(CMakePresets
-  -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
+  -DPython_EXECUTABLE=${Python_EXECUTABLE}
   -DCMake_TEST_JSON_SCHEMA=${CMake_TEST_JSON_SCHEMA}
   )
 add_RunCMake_test(CMakePresetsBuild
-  -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
+  -DPython_EXECUTABLE=${Python_EXECUTABLE}
   -DCMake_TEST_JSON_SCHEMA=${CMake_TEST_JSON_SCHEMA}
   -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
   )
 add_RunCMake_test(CMakePresetsTest
-  -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
+  -DPython_EXECUTABLE=${Python_EXECUTABLE}
   -DCMake_TEST_JSON_SCHEMA=${CMake_TEST_JSON_SCHEMA}
   )
 

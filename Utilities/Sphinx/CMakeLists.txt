@@ -101,7 +101,7 @@ if(SPHINX_INFO)
   )
 endif()
 if(SPHINX_QTHELP)
-  find_package(PythonInterp REQUIRED)
+  find_package(Python REQUIRED)
 
   find_program(QHELPGENERATOR_EXECUTABLE
     NAMES qhelpgenerator-qt5 qhelpgenerator
@@ -124,7 +124,7 @@ if(SPHINX_QTHELP)
 
     # Create proper identifiers. Workaround for
     # https://bitbucket.org/birkenfeld/sphinx/issue/1491/qthelp-should-generate-identifiers-for
-    COMMAND "${PYTHON_EXECUTABLE}"
+    COMMAND "${Python_EXECUTABLE}"
       "${CMAKE_CURRENT_SOURCE_DIR}/create_identifiers.py"
       "${CMAKE_CURRENT_BINARY_DIR}/qthelp/"
 

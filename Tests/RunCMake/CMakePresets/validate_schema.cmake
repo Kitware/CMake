@@ -4,7 +4,7 @@ function(validate_schema file expected_result)
   endif()
 
   execute_process(
-    COMMAND "${PYTHON_EXECUTABLE}" "${CMakePresets_VALIDATE_SCRIPT_PATH}" "${file}"
+    COMMAND "${Python_EXECUTABLE}" "${CMakePresets_VALIDATE_SCRIPT_PATH}" "${file}"
     RESULT_VARIABLE _result
     OUTPUT_VARIABLE _output
     ERROR_VARIABLE _error

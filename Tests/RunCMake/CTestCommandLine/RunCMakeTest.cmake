@@ -342,14 +342,14 @@ endfunction()
 run_TestStdin()
 
 function(show_only_json_check_python v)
-  if(RunCMake_TEST_FAILED OR NOT PYTHON_EXECUTABLE)
+  if(RunCMake_TEST_FAILED OR NOT Python_EXECUTABLE)
     return()
   endif()
   set(json_file "${RunCMake_TEST_BINARY_DIR}/ctest.json")
   file(WRITE "${json_file}" "${actual_stdout}")
   set(actual_stdout "" PARENT_SCOPE)
   execute_process(
-    COMMAND ${PYTHON_EXECUTABLE} "${RunCMake_SOURCE_DIR}/show-only_json-v${v}_check.py" "${json_file}"
+    COMMAND ${Python_EXECUTABLE} "${RunCMake_SOURCE_DIR}/show-only_json-v${v}_check.py" "${json_file}"
     RESULT_VARIABLE result
     OUTPUT_VARIABLE output
     ERROR_VARIABLE output
