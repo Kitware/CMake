@@ -1,3 +1,6 @@
+include(Compiler/SunPro)
+__compiler_sunpro(Fortran)
+
 set(CMAKE_Fortran_VERBOSE_FLAG "-v")
 set(CMAKE_Fortran_FORMAT_FIXED_FLAG "-fixed")
 set(CMAKE_Fortran_FORMAT_FREE_FLAG "-free")

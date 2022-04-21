@@ -1025,6 +1025,14 @@ void cmLocalGenerator::AddCompileOptions(std::vector<BT<std::string>>& flags,
     flags.emplace_back(std::move(compReqFlag));
   }
 
+  // Add Warning as errors flags
+  const cmValue wError = target->GetProperty("COMPILE_WARNING_AS_ERROR");
+  const cmValue wErrorFlag = this->Makefile->GetDefinition(
+    cmStrCat("CMAKE_", lang, "_COMPILE_OPTIONS_WARNING_AS_ERROR"));
+  if (wError.IsOn() && wErrorFlag.IsSet()) {
+    flags.emplace_back(wErrorFlag);
+  }
+
   // Add compile flag for the MSVC compiler only.
   cmMakefile* mf = this->GetMakefile();
   if (cmValue jmc =
@@ -1919,6 +1927,7 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
 
   std::string compilerSimulateId = this->Makefile->GetSafeDefinition(
     cmStrCat("CMAKE_", lang, "_SIMULATE_ID"));
+
   if (lang == "Swift") {
     if (cmValue v = target->GetProperty("Swift_LANGUAGE_VERSION")) {
       if (cmSystemTools::VersionCompare(

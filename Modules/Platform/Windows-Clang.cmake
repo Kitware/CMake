@@ -39,6 +39,7 @@ macro(__windows_compiler_clang_gnu lang)
   set(CMAKE_${lang}_LINKER_WRAPPER_FLAG_SEP)
 
   set(CMAKE_${lang}_LINKER_MANIFEST_FLAG " -Xlinker /MANIFESTINPUT:")
+  set(CMAKE_${lang}_COMPILE_OPTIONS_WARNING_AS_ERROR "-Werror")
 
   if("${CMAKE_${lang}_SIMULATE_VERSION}" MATCHES "^([0-9]+)\\.([0-9]+)")
     math(EXPR MSVC_VERSION "${CMAKE_MATCH_1}*100 + ${CMAKE_MATCH_2}")
@@ -189,6 +190,7 @@ if("x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC"
     macro(__windows_compiler_clang_base lang)
       set(_COMPILE_${lang} "${_COMPILE_${lang}_MSVC}")
       __windows_compiler_msvc(${lang})
+      set(CMAKE_${lang}_COMPILE_OPTIONS_WARNING_AS_ERROR "-WX")
       set(CMAKE_INCLUDE_SYSTEM_FLAG_${lang} "-imsvc ")
     endmacro()
   else()
