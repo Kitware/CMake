@@ -25,6 +25,15 @@ function(CMAKE_CHECK_LINKER_FLAG _lang _flag _var)
   set(CMAKE_REQUIRED_LINK_OPTIONS "${_flag}")
 
   check_compiler_flag_common_patterns(_common_patterns)
+
+  # Match linker warnings if the exact flag is ignored.
+  foreach(flag IN LISTS _flag)
+    string(REGEX REPLACE "([][+.*?()^$])" [[\\\1]] _flag_regex "${flag}")
+    list(APPEND _common_patterns
+      FAIL_REGEX "warning: .*${_flag_regex}.* ignored"
+      )
+  endforeach()
+
   cmake_check_source_compiles(${_lang}
     "${_lang_src}"
     ${_var}
