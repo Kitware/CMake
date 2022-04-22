@@ -417,13 +417,15 @@ public:
   bool HasOutputPathPrefix() const { return !this->OutputPathPrefix.empty(); }
   void StripNinjaOutputPathPrefixAsSuffix(std::string& path);
 
+  struct CxxModuleExportInfo;
   bool WriteDyndepFile(
     std::string const& dir_top_src, std::string const& dir_top_bld,
     std::string const& dir_cur_src, std::string const& dir_cur_bld,
     std::string const& arg_dd, std::vector<std::string> const& arg_ddis,
     std::string const& module_dir,
     std::vector<std::string> const& linked_target_dirs,
-    std::string const& arg_lang, std::string const& arg_modmapfmt);
+    std::string const& arg_lang, std::string const& arg_modmapfmt,
+    CxxModuleExportInfo const& export_info);
 
   virtual std::string BuildAlias(const std::string& alias,
                                  const std::string& /*config*/) const

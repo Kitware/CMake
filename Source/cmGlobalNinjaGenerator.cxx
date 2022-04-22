@@ -15,6 +15,7 @@
 #include <cm/string_view>
 #include <cmext/algorithm>
 #include <cmext/memory>
+#include <cmext/string_view>
 
 #include <cm3p/json/reader.h>
 #include <cm3p/json/value.h>
@@ -24,6 +25,7 @@
 
 #include "cmCxxModuleMapper.h"
 #include "cmDocumentationEntry.h"
+#include "cmFileSet.h"
 #include "cmFortranParser.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpressionEvaluationFile.h"
@@ -2482,13 +2484,29 @@ cm::optional<cmSourceInfo> cmcmd_cmake_ninja_depends_fortran(
 }
 }
 
+struct CxxModuleFileSet
+{
+  std::string Name;
+  std::string RelativeDirectory;
+  std::string SourcePath;
+  std::string Type;
+  cmFileSetVisibility Visibility;
+  cm::optional<std::string> Destination;
+};
+
+struct cmGlobalNinjaGenerator::CxxModuleExportInfo
+{
+  std::map<std::string, CxxModuleFileSet> ObjectToFileSet;
+};
+
 bool cmGlobalNinjaGenerator::WriteDyndepFile(
   std::string const& dir_top_src, std::string const& dir_top_bld,
   std::string const& dir_cur_src, std::string const& dir_cur_bld,
   std::string const& arg_dd, std::vector<std::string> const& arg_ddis,
   std::string const& module_dir,
   std::vector<std::string> const& linked_target_dirs,
-  std::string const& arg_lang, std::string const& arg_modmapfmt)
+  std::string const& arg_lang, std::string const& arg_modmapfmt,
+  CxxModuleExportInfo const& export_info)
 {
   // Setup path conversions.
   {
@@ -2636,7 +2654,102 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
   cmGeneratedFileStream tmf(target_mods_file);
   tmf << tm;
 
-  return true;
+  bool result = true;
+
+  // Fortran doesn't support any of the file-set or BMI installation considered
+  // below.
+  if (arg_lang != "Fortran"_s) {
+    for (cmScanDepInfo const& object : objects) {
+      // Convert to forward slashes.
+      auto output_path = object.PrimaryOutput;
+#  ifdef _WIN32
+      cmSystemTools::ConvertToUnixSlashes(output_path);
+#  endif
+      // Find the fileset for this object.
+      auto fileset_info_itr = export_info.ObjectToFileSet.find(output_path);
+      bool const has_provides = !object.Provides.empty();
+      if (fileset_info_itr == export_info.ObjectToFileSet.end()) {
+        // If it provides anything, it should have a `CXX_MODULES` or
+        // `CXX_MODULE_INTERNAL_PARTITIONS` type and be present.
+        if (has_provides) {
+          // Take the first module provided to provide context.
+          auto const& provides = object.Provides[0];
+          char const* ok_types = "`CXX_MODULES`";
+          if (provides.LogicalName.find(':') != std::string::npos) {
+            ok_types = "`CXX_MODULES` (or `CXX_MODULE_INTERNAL_PARTITIONS` if "
+                       "it is not `export`ed)";
+          }
+          cmSystemTools::Error(
+            cmStrCat("Output ", object.PrimaryOutput, " provides the `",
+                     provides.LogicalName,
+                     "` module but it is not found in a `FILE_SET` of type ",
+                     ok_types));
+          result = false;
+        }
+
+        // This object file does not provide anything, so nothing more needs to
+        // be done.
+        continue;
+      }
+
+      auto const& file_set = fileset_info_itr->second;
+
+      // Verify the fileset type for the object.
+      if (file_set.Type == "CXX_MODULES"_s) {
+        if (!has_provides) {
+          cmSystemTools::Error(cmStrCat(
+            "Output ", object.PrimaryOutput,
+            " is of type `CXX_MODULES` but does not provide a module"));
+          result = false;
+          continue;
+        }
+      } else if (file_set.Type == "CXX_MODULE_INTERNAL_PARTITIONS"_s) {
+        if (!has_provides) {
+          cmSystemTools::Error(cmStrCat(
+            "Source ", file_set.SourcePath,
+            " is of type `CXX_MODULE_INTERNAL_PARTITIONS` but does not "
+            "provide a module"));
+          result = false;
+          continue;
+        }
+        auto const& provides = object.Provides[0];
+        if (provides.LogicalName.find(':') == std::string::npos) {
+          cmSystemTools::Error(cmStrCat(
+            "Source ", file_set.SourcePath,
+            " is of type `CXX_MODULE_INTERNAL_PARTITIONS` but does not "
+            "provide a module partition"));
+          result = false;
+          continue;
+        }
+      } else if (file_set.Type == "CXX_MODULE_HEADERS"_s) {
+        // TODO.
+      } else {
+        if (has_provides) {
+          auto const& provides = object.Provides[0];
+          char const* ok_types = "`CXX_MODULES`";
+          if (provides.LogicalName.find(':') != std::string::npos) {
+            ok_types = "`CXX_MODULES` (or `CXX_MODULE_INTERNAL_PARTITIONS` if "
+                       "it is not `export`ed)";
+          }
+          cmSystemTools::Error(cmStrCat(
+            "Source ", file_set.SourcePath, " provides the `",
+            provides.LogicalName, "` C++ module but is of type `",
+            file_set.Type, "` module but must be of type ", ok_types));
+          result = false;
+        }
+
+        // Not a C++ module; ignore.
+        continue;
+      }
+
+      if (!cmFileSetVisibilityIsForInterface(file_set.Visibility)) {
+        // Nothing needs to be conveyed about non-`PUBLIC` modules.
+        continue;
+      }
+    }
+  }
+
+  return result;
 }
 
 int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
@@ -2710,6 +2823,26 @@ int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
     }
   }
 
+  cmGlobalNinjaGenerator::CxxModuleExportInfo export_info;
+  Json::Value const& tdi_cxx_modules = tdi["cxx-modules"];
+  if (tdi_cxx_modules.isObject()) {
+    for (auto i = tdi_cxx_modules.begin(); i != tdi_cxx_modules.end(); ++i) {
+      CxxModuleFileSet& fsi = export_info.ObjectToFileSet[i.key().asString()];
+      auto const& tdi_cxx_module_info = *i;
+      fsi.Name = tdi_cxx_module_info["name"].asString();
+      fsi.RelativeDirectory =
+        tdi_cxx_module_info["relative-directory"].asString();
+      fsi.SourcePath = tdi_cxx_module_info["source"].asString();
+      fsi.Type = tdi_cxx_module_info["type"].asString();
+      fsi.Visibility = cmFileSetVisibilityFromName(
+        tdi_cxx_module_info["visibility"].asString(), nullptr);
+      auto const& tdi_fs_dest = tdi_cxx_module_info["destination"];
+      if (tdi_fs_dest.isString()) {
+        fsi.Destination = tdi_fs_dest.asString();
+      }
+    }
+  }
+
   cmake cm(cmake::RoleInternal, cmState::Unknown);
   cm.SetHomeDirectory(dir_top_src);
   cm.SetHomeOutputDirectory(dir_top_bld);
@@ -2717,7 +2850,8 @@ int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
   if (!ggd ||
       !cm::static_reference_cast<cmGlobalNinjaGenerator>(ggd).WriteDyndepFile(
         dir_top_src, dir_top_bld, dir_cur_src, dir_cur_bld, arg_dd, arg_ddis,
-        module_dir, linked_target_dirs, arg_lang, arg_modmapfmt)) {
+        module_dir, linked_target_dirs, arg_lang, arg_modmapfmt,
+        export_info)) {
     return 1;
   }
   return 0;
