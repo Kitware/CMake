@@ -74,6 +74,7 @@ dnf install --setopt=install_weak_deps=False -y \
     lapack-devel \
     libarchive-devel \
     libcurl-devel \
+    libicu-devel \
     libinput-devel systemd-devel \
     libjpeg-turbo-devel \
     libpng-devel \
