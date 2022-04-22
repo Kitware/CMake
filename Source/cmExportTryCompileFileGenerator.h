@@ -55,6 +55,9 @@ protected:
   std::string GetFileSetFiles(cmGeneratorTarget* target, cmFileSet* fileSet,
                               cmTargetExport* te) override;
 
+  std::string GetCxxModulesDirectory() const override { return {}; }
+  void GenerateCxxModuleConfigInformation(std::ostream&) const override {}
+
 private:
   std::string FindTargets(const std::string& prop,
                           const cmGeneratorTarget* tgt,

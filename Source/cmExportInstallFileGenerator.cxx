@@ -166,10 +166,20 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
 
   this->LoadConfigFiles(os);
 
+  bool result = true;
+
+  this->GenerateCxxModuleInformation(os);
+  if (requiresConfigFiles) {
+    for (std::string const& c : this->Configurations) {
+      if (!this->GenerateImportCxxModuleConfigTargetInclusion(c)) {
+        result = false;
+      }
+    }
+  }
+
   this->CleanupTemporaryVariables(os);
   this->GenerateImportedFileCheckLoop(os);
 
-  bool result = true;
   // Generate an import file for each configuration.
   // Don't do this if we only export INTERFACE_LIBRARY targets.
   if (requiresConfigFiles) {
@@ -668,4 +678,66 @@ std::string cmExportInstallFileGenerator::GetFileSetFiles(
   }
 
   return cmJoin(resultVector, " ");
+}
+
+std::string cmExportInstallFileGenerator::GetCxxModulesDirectory() const
+{
+  return IEGen->GetCxxModuleDirectory();
+}
+
+void cmExportInstallFileGenerator::GenerateCxxModuleConfigInformation(
+  std::ostream& os) const
+{
+  // Now load per-configuration properties for them.
+  /* clang-format off */
+  os << "# Load information for each installed configuration.\n"
+        "file(GLOB _cmake_cxx_module_includes \"${CMAKE_CURRENT_LIST_DIR}/cxx-modules-*.cmake\")\n"
+        "foreach(_cmake_cxx_module_include IN LISTS _cmake_cxx_module_includes)\n"
+        "  include(\"${_cmake_cxx_module_include}\")\n"
+        "endforeach()\n"
+        "unset(_cmake_cxx_module_include)\n"
+        "unset(_cmake_cxx_module_includes)\n";
+  /* clang-format on */
+}
+
+bool cmExportInstallFileGenerator::
+  GenerateImportCxxModuleConfigTargetInclusion(std::string const& config)
+{
+  auto cxx_modules_dirname = this->GetCxxModulesDirectory();
+  if (cxx_modules_dirname.empty()) {
+    return true;
+  }
+
+  std::string filename_config = config;
+  if (filename_config.empty()) {
+    filename_config = "noconfig";
+  }
+
+  std::string const dest =
+    cmStrCat(this->FileDir, '/', cxx_modules_dirname, '/');
+  std::string fileName =
+    cmStrCat(dest, "cxx-modules-", filename_config, ".cmake");
+
+  cmGeneratedFileStream os(fileName, true);
+  if (!os) {
+    std::string se = cmSystemTools::GetLastSystemError();
+    std::ostringstream e;
+    e << "cannot write to file \"" << fileName << "\": " << se;
+    cmSystemTools::Error(e.str());
+    return false;
+  }
+  os.SetCopyIfDifferent(true);
+
+  // Record this per-config import file.
+  this->ConfigCxxModuleFiles[config] = fileName;
+
+  auto& prop_files = this->ConfigCxxModuleTargetFiles[config];
+  for (auto const* tgt : this->ExportedTargets) {
+    auto prop_filename = cmStrCat("target-", tgt->GetExportName(), '-',
+                                  filename_config, ".cmake");
+    prop_files.emplace_back(cmStrCat(dest, prop_filename));
+    os << "include(\"${CMAKE_CURRENT_LIST_DIR}/" << prop_filename << "\")\n";
+  }
+
+  return true;
 }

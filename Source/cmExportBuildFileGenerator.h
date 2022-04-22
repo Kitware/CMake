@@ -91,6 +91,10 @@ protected:
   std::string GetFileSetFiles(cmGeneratorTarget* gte, cmFileSet* fileSet,
                               cmTargetExport* te) override;
 
+  std::string GetCxxModulesDirectory() const override;
+  void GenerateCxxModuleConfigInformation(std::ostream&) const override;
+  bool GenerateImportCxxModuleConfigTargetInclusion(std::string) const;
+
   std::pair<std::vector<std::string>, std::string> FindBuildExportInfo(
     cmGlobalGenerator* gg, const std::string& name);
 

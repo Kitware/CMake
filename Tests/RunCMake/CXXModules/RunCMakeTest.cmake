@@ -71,6 +71,9 @@ run_cmake(InstallBMI)
 run_cmake(InstallBMIGenericArgs)
 run_cmake(InstallBMIIgnore)
 
+run_cmake(ExportBuildCxxModules)
+run_cmake(ExportInstallCxxModules)
+
 # Actual compilation tests.
 if (NOT CMake_TEST_MODULE_COMPILATION)
   return ()

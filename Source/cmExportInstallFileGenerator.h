@@ -50,6 +50,23 @@ public:
     return this->ConfigImportFiles;
   }
 
+  /** Get the per-config C++ module file generated for each configuration.
+      This maps from the configuration name to the file temporary location
+      for installation.  */
+  std::map<std::string, std::string> const& GetConfigCxxModuleFiles()
+  {
+    return this->ConfigCxxModuleFiles;
+  }
+
+  /** Get the per-config C++ module file generated for each configuration.
+      This maps from the configuration name to the file temporary location
+      for installation for each target in the export set.  */
+  std::map<std::string, std::vector<std::string>> const&
+  GetConfigCxxModuleTargetFiles()
+  {
+    return this->ConfigCxxModuleTargetFiles;
+  }
+
   /** Compute the globbing expression used to load per-config import
       files from the main file.  */
   std::string GetConfigImportFileGlob();
@@ -100,8 +117,16 @@ protected:
   std::string GetFileSetFiles(cmGeneratorTarget* gte, cmFileSet* fileSet,
                               cmTargetExport* te) override;
 
+  std::string GetCxxModulesDirectory() const override;
+  void GenerateCxxModuleConfigInformation(std::ostream&) const override;
+  bool GenerateImportCxxModuleConfigTargetInclusion(std::string const&);
+
   cmInstallExportGenerator* IEGen;
 
   // The import file generated for each configuration.
   std::map<std::string, std::string> ConfigImportFiles;
+  // The C++ module property file generated for each configuration.
+  std::map<std::string, std::string> ConfigCxxModuleFiles;
+  // The C++ module property target files generated for each configuration.
+  std::map<std::string, std::vector<std::string>> ConfigCxxModuleTargetFiles;
 };
