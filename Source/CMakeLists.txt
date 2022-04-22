@@ -607,6 +607,8 @@ set(SRCS
   cmInstallCommand.h
   cmInstallCommandArguments.cxx
   cmInstallCommandArguments.h
+  cmInstallCxxModuleBmiGenerator.cxx
+  cmInstallCxxModuleBmiGenerator.h
   cmInstallFilesCommand.cxx
   cmInstallFilesCommand.h
   cmInstallProgramsCommand.cxx

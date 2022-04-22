@@ -20,11 +20,13 @@
 
 #include "cmArgumentParser.h"
 #include "cmExecutionStatus.h"
+#include "cmExperimental.h"
 #include "cmExportSet.h"
 #include "cmFileSet.h"
 #include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstallCommandArguments.h"
+#include "cmInstallCxxModuleBmiGenerator.h"
 #include "cmInstallDirectoryGenerator.h"
 #include "cmInstallExportGenerator.h"
 #include "cmInstallFileSetGenerator.h"
@@ -109,6 +111,8 @@ public:
   std::string GetArchiveDestination(
     const cmInstallCommandArguments* args) const;
   std::string GetLibraryDestination(
+    const cmInstallCommandArguments* args) const;
+  std::string GetCxxModulesBmiDestination(
     const cmInstallCommandArguments* args) const;
   std::string GetIncludeDestination(
     const cmInstallCommandArguments* args) const;
@@ -413,6 +417,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
     std::vector<std::string> PublicHeader;
     std::vector<std::string> Resource;
     std::vector<std::vector<std::string>> FileSets;
+    std::vector<std::string> CxxModulesBmi;
   };
 
   static auto const argHelper =
@@ -427,7 +432,8 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
       .Bind("PRIVATE_HEADER"_s, &ArgVectors::PrivateHeader)
       .Bind("PUBLIC_HEADER"_s, &ArgVectors::PublicHeader)
       .Bind("RESOURCE"_s, &ArgVectors::Resource)
-      .Bind("FILE_SET"_s, &ArgVectors::FileSets);
+      .Bind("FILE_SET"_s, &ArgVectors::FileSets)
+      .Bind("CXX_MODULES_BMI"_s, &ArgVectors::CxxModulesBmi);
 
   std::vector<std::string> genericArgVector;
   ArgVectors const argVectors = argHelper.Parse(args, &genericArgVector);
@@ -466,6 +472,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
   cmInstallCommandIncludesArgument includesArgs;
   std::vector<cmInstallCommandFileSetArguments> fileSetArgs(
     argVectors.FileSets.size(), { helper.DefaultComponentName });
+  cmInstallCommandArguments cxxModuleBmiArgs(helper.DefaultComponentName);
 
   // now parse the args for specific parts of the target (e.g. LIBRARY,
   // RUNTIME, ARCHIVE etc.
@@ -489,6 +496,15 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
     fileSetArgs[i] = std::move(fileSetArg);
   }
 
+  bool const supportCxx20FileSetTypes = cmExperimental::HasSupportEnabled(
+    *helper.Makefile, cmExperimental::Feature::CxxModuleCMakeApi);
+  if (!supportCxx20FileSetTypes) {
+    std::copy(argVectors.CxxModulesBmi.begin(), argVectors.CxxModulesBmi.end(),
+              std::back_inserter(unknownArgs));
+  } else {
+    cxxModuleBmiArgs.Parse(argVectors.CxxModulesBmi, &unknownArgs);
+  }
+
   if (!unknownArgs.empty()) {
     // Unknown argument.
     status.SetError(
@@ -509,6 +525,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
   for (auto& fileSetArg : fileSetArgs) {
     fileSetArg.SetGenericArguments(&genericArgs);
   }
+  cxxModuleBmiArgs.SetGenericArguments(&genericArgs);
 
   success = success && archiveArgs.Finalize();
   success = success && libraryArgs.Finalize();
@@ -521,6 +538,9 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
   success = success && resourceArgs.Finalize();
   for (auto& fileSetArg : fileSetArgs) {
     success = success && fileSetArg.Finalize();
+  }
+  if (supportCxx20FileSetTypes) {
+    success = success && cxxModuleBmiArgs.Finalize();
   }
 
   if (!success) {
@@ -535,7 +555,8 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
       publicHeaderArgs.GetNamelinkOnly() || resourceArgs.GetNamelinkOnly() ||
       std::any_of(fileSetArgs.begin(), fileSetArgs.end(),
                   [](const cmInstallCommandFileSetArguments& fileSetArg)
-                    -> bool { return fileSetArg.GetNamelinkOnly(); })) {
+                    -> bool { return fileSetArg.GetNamelinkOnly(); }) ||
+      cxxModuleBmiArgs.GetNamelinkOnly()) {
     status.SetError(
       "TARGETS given NAMELINK_ONLY option not in LIBRARY group.  "
       "The NAMELINK_ONLY option may be specified only following LIBRARY.");
@@ -547,7 +568,8 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
       publicHeaderArgs.GetNamelinkSkip() || resourceArgs.GetNamelinkSkip() ||
       std::any_of(fileSetArgs.begin(), fileSetArgs.end(),
                   [](const cmInstallCommandFileSetArguments& fileSetArg)
-                    -> bool { return fileSetArg.GetNamelinkSkip(); })) {
+                    -> bool { return fileSetArg.GetNamelinkSkip(); }) ||
+      cxxModuleBmiArgs.GetNamelinkSkip()) {
     status.SetError(
       "TARGETS given NAMELINK_SKIP option not in LIBRARY group.  "
       "The NAMELINK_SKIP option may be specified only following LIBRARY.");
@@ -563,7 +585,8 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
       resourceArgs.HasNamelinkComponent() ||
       std::any_of(fileSetArgs.begin(), fileSetArgs.end(),
                   [](const cmInstallCommandFileSetArguments& fileSetArg)
-                    -> bool { return fileSetArg.HasNamelinkComponent(); })) {
+                    -> bool { return fileSetArg.HasNamelinkComponent(); }) ||
+      cxxModuleBmiArgs.HasNamelinkComponent()) {
     status.SetError(
       "TARGETS given NAMELINK_COMPONENT option not in LIBRARY group.  "
       "The NAMELINK_COMPONENT option may be specified only following "
@@ -582,7 +605,8 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
       !publicHeaderArgs.GetType().empty() || !resourceArgs.GetType().empty() ||
       std::any_of(fileSetArgs.begin(), fileSetArgs.end(),
                   [](const cmInstallCommandFileSetArguments& fileSetArg)
-                    -> bool { return !fileSetArg.GetType().empty(); })) {
+                    -> bool { return !fileSetArg.GetType().empty(); }) ||
+      !cxxModuleBmiArgs.GetType().empty()) {
     status.SetError(
       "TARGETS given TYPE option. The TYPE option may only be specified in "
       " install(FILES) and install(DIRECTORIES).");
@@ -705,6 +729,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
   bool installsPublicHeader = false;
   bool installsResource = false;
   std::vector<bool> installsFileSet(fileSetArgs.size(), false);
+  bool installsCxxModuleBmi = false;
 
   // Generate install script code to install the given targets.
   for (cmTarget* ti : targets) {
@@ -721,6 +746,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
     std::unique_ptr<cmInstallFilesGenerator> publicHeaderGenerator;
     std::unique_ptr<cmInstallFilesGenerator> resourceGenerator;
     std::vector<std::unique_ptr<cmInstallFileSetGenerator>> fileSetGenerators;
+    std::unique_ptr<cmInstallCxxModuleBmiGenerator> cxxModuleBmiGenerator;
 
     // Avoid selecting default destinations for PUBLIC_HEADER and
     // PRIVATE_HEADER if any artifacts are specified.
@@ -759,6 +785,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
         for (auto const& gen : fileSetGenerators) {
           te->FileSetGenerators[gen->GetFileSet()] = gen.get();
         }
+        te->CxxModuleBmiGenerator = cxxModuleBmiGenerator.get();
         target.AddInstallIncludeDirectories(
           *te, cmMakeRange(includesArgs.GetIncludeDirs()));
         te->NamelinkOnly = namelinkOnly;
@@ -1104,6 +1131,19 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
       }
     }
 
+    if (supportCxx20FileSetTypes &&
+        !cxxModuleBmiArgs.GetDestination().empty()) {
+      cxxModuleBmiGenerator = cm::make_unique<cmInstallCxxModuleBmiGenerator>(
+        target.GetName(),
+        helper.GetCxxModulesBmiDestination(&cxxModuleBmiArgs),
+        cxxModuleBmiArgs.GetPermissions(),
+        cxxModuleBmiArgs.GetConfigurations(), cxxModuleBmiArgs.GetComponent(),
+        cmInstallGenerator::SelectMessageLevel(target.GetMakefile()),
+        cxxModuleBmiArgs.GetExcludeFromAll(), cxxModuleBmiArgs.GetOptional(),
+        helper.Makefile->GetBacktrace());
+      target.SetHaveInstallRule(true);
+    }
+
     // Add this install rule to an export if one was specified.
     if (!addTargetExport()) {
       return false;
@@ -1120,6 +1160,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
     installsPrivateHeader = installsPrivateHeader || privateHeaderGenerator;
     installsPublicHeader = installsPublicHeader || publicHeaderGenerator;
     installsResource = installsResource || resourceGenerator;
+    installsCxxModuleBmi = installsCxxModuleBmi || cxxModuleBmiGenerator;
 
     helper.Makefile->AddInstallGenerator(std::move(archiveGenerator));
     helper.Makefile->AddInstallGenerator(std::move(libraryGenerator));
@@ -1134,6 +1175,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
     for (auto& gen : fileSetGenerators) {
       helper.Makefile->AddInstallGenerator(std::move(gen));
     }
+    helper.Makefile->AddInstallGenerator(std::move(cxxModuleBmiGenerator));
   }
 
   if (runtimeDependenciesArgVector && !runtimeDependencySet->Empty()) {
@@ -1190,6 +1232,10 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
       helper.Makefile->GetGlobalGenerator()->AddInstallComponent(
         fileSetArgs[i].GetComponent());
     }
+  }
+  if (installsCxxModuleBmi) {
+    helper.Makefile->GetGlobalGenerator()->AddInstallComponent(
+      cxxModuleBmiArgs.GetComponent());
   }
 
   return true;
@@ -2277,6 +2323,15 @@ std::string Helper::GetLibraryDestination(
   const cmInstallCommandArguments* args) const
 {
   return this->GetDestination(args, "CMAKE_INSTALL_LIBDIR", "lib");
+}
+
+std::string Helper::GetCxxModulesBmiDestination(
+  const cmInstallCommandArguments* args) const
+{
+  if (args) {
+    return args->GetDestination();
+  }
+  return {};
 }
 
 std::string Helper::GetIncludeDestination(

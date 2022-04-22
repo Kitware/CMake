@@ -132,7 +132,7 @@ Installing Targets
   install(TARGETS targets... [EXPORT <export-name>]
           [RUNTIME_DEPENDENCIES args...|RUNTIME_DEPENDENCY_SET <set-name>]
           [[ARCHIVE|LIBRARY|RUNTIME|OBJECTS|FRAMEWORK|BUNDLE|
-            PRIVATE_HEADER|PUBLIC_HEADER|RESOURCE|FILE_SET <set-name>]
+            PRIVATE_HEADER|PUBLIC_HEADER|RESOURCE|FILE_SET <set-name>|CXX_MODULES_BMI]
            [DESTINATION <dir>]
            [PERMISSIONS permissions...]
            [CONFIGURATIONS [Debug|Release|...]]
@@ -214,6 +214,18 @@ that may be installed:
   preserved. For example, a file added to the file set as
   ``/blah/include/myproj/here.h`` with a base directory ``/blah/include``
   would be installed to ``myproj/here.h`` below the destination.
+
+``CXX_MODULES_BMI``
+
+.. note ::
+
+  Experimental. Gated by ``CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API``
+
+  Any module files from C++ modules from ``PUBLIC`` sources in a file set of
+  type ``CXX_MODULES`` will be installed to the given ``DESTINATION``. All
+  modules are placed directly in the destination as no directory structure is
+  derived from the names of the modules. An empty ``DESTINATION`` may be used
+  to suppress installing these files (for use in generic code).
 
 For each of these arguments given, the arguments following them only apply
 to the target or file type specified in the argument. If none is given, the

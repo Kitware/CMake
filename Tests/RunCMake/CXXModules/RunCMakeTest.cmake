@@ -67,6 +67,10 @@ foreach (fileset_type IN LISTS fileset_types)
   run_cmake("NotCXXSource${fileset_type}")
 endforeach ()
 
+run_cmake(InstallBMI)
+run_cmake(InstallBMIGenericArgs)
+run_cmake(InstallBMIIgnore)
+
 # Actual compilation tests.
 if (NOT CMake_TEST_MODULE_COMPILATION)
   return ()

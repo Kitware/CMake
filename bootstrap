@@ -393,6 +393,7 @@ CMAKE_CXX_SOURCES="\
   cmIncludeRegularExpressionCommand \
   cmInstallCommand \
   cmInstallCommandArguments \
+  cmInstallCxxModuleBmiGenerator \
   cmInstallDirectoryGenerator \
   cmInstallExportGenerator \
   cmInstallFileSetGenerator \

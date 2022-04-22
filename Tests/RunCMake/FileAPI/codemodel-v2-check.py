@@ -213,6 +213,16 @@ def check_directory(c):
                 assert is_int(at["index"])
                 assert c["targets"][at["index"]]["name"] == et["index"]
 
+            if e.get("cxxModuleBmiTarget", None) is not None:
+                expected_keys.append("cxxModuleBmiTarget")
+                et = e["cxxModuleBmiTarget"]
+                at = a["cxxModuleBmiTarget"]
+                assert is_dict(at)
+                assert sorted(at.keys()) == ["id", "index"]
+                assert matches(at["id"], et["id"])
+                assert is_int(at["index"])
+                assert c["targets"][at["index"]]["name"] == et["index"]
+
             if e["backtrace"] is not None:
                 expected_keys.append("backtrace")
                 check_backtrace(d, a["backtrace"], e["backtrace"])
