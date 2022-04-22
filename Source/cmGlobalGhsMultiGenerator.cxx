@@ -425,13 +425,6 @@ void cmGlobalGhsMultiGenerator::Generate()
   this->WriteFileHeader(ftarget);
   this->WriteCustomTargetBOD(ftarget);
   ftarget.Close();
-
-  // create the stamp file when running CMake
-  if (!this->StampFile.empty()) {
-    cmGeneratedFileStream fstamp(this->StampFile);
-    fstamp.SetCopyIfDifferent(false);
-    fstamp.Close();
-  }
 }
 
 void cmGlobalGhsMultiGenerator::OutputTopLevelProject(
@@ -695,10 +688,16 @@ bool cmGlobalGhsMultiGenerator::AddCheckTarget()
     listFiles.erase(newEnd, listFiles.end());
 
     // Create a rule to re-run CMake and create output file.
+    cmCustomCommandLines commandLines;
+    commandLines.emplace_back(
+      cmMakeCommandLine({ cmSystemTools::GetCMakeCommand(), "-E", "rm", "-f",
+                          this->StampFile }));
     std::string argS = cmStrCat("-S", lg.GetSourceDirectory());
     std::string argB = cmStrCat("-B", lg.GetBinaryDirectory());
-    cmCustomCommandLines commandLines = cmMakeSingleCommandLine(
-      { cmSystemTools::GetCMakeCommand(), argS, argB });
+    commandLines.emplace_back(
+      cmMakeCommandLine({ cmSystemTools::GetCMakeCommand(), argS, argB }));
+    commandLines.emplace_back(cmMakeCommandLine(
+      { cmSystemTools::GetCMakeCommand(), "-E", "touch", this->StampFile }));
 
     /* Create the target(Exclude from ALL_BUILD).
      *
