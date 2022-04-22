@@ -48,6 +48,7 @@ run_cmake(VersionRangeConfig2)
 run_cmake(VersionRangeConfig02)
 run_cmake(VersionRangeConfigStd)
 run_cmake(VersionRangeConfigStd2)
+run_cmake_with_options(IgnoreInstallPrefix  "-DCMAKE_INSTALL_PREFIX=${RunCMake_SOURCE_DIR}/PackageRoot/foo/cmake_root")
 run_cmake(IgnorePath)
 run_cmake(IgnorePrefixPath)
 if(UNIX

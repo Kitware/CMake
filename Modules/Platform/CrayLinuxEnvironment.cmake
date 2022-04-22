@@ -68,6 +68,7 @@ if (NOT CMAKE_FIND_NO_INSTALL_PREFIX)
     )
   endif()
 endif()
+_cmake_record_install_prefix()
 
 list(APPEND CMAKE_SYSTEM_INCLUDE_PATH
   $ENV{SYSROOT_DIR}/usr/include/X11

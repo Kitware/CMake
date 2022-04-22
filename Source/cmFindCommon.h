@@ -130,6 +130,7 @@ protected:
   bool NoCMakeEnvironmentPath;
   bool NoSystemEnvironmentPath;
   bool NoCMakeSystemPath;
+  bool NoCMakeInstallPath;
 
   std::vector<std::string> SearchPathSuffixes;
 

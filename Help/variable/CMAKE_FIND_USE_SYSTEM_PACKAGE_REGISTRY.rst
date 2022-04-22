@@ -27,6 +27,7 @@ See also :ref:`Disabling the Package Registry`.
 
 See also the :variable:`CMAKE_FIND_USE_CMAKE_PATH`,
 :variable:`CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH`,
+:variable:`CMAKE_FIND_USE_INSTALL_PREFIX`,
 :variable:`CMAKE_FIND_USE_CMAKE_SYSTEM_PATH`,
 :variable:`CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH`,
 :variable:`CMAKE_FIND_USE_PACKAGE_REGISTRY`,

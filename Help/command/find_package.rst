@@ -176,6 +176,7 @@ Full Signature
                [NO_CMAKE_PACKAGE_REGISTRY]
                [NO_CMAKE_BUILDS_PATH] # Deprecated; does nothing.
                [NO_CMAKE_SYSTEM_PATH]
+               [NO_CMAKE_INSTALL_PREFIX]
                [NO_CMAKE_SYSTEM_PACKAGE_REGISTRY]
                [CMAKE_FIND_ROOT_PATH_BOTH |
                 ONLY_CMAKE_FIND_ROOT_PATH |
@@ -346,9 +347,11 @@ enabled.
    package registry.
 
 7. Search cmake variables defined in the Platform files for the
-   current system.  This can be skipped if ``NO_CMAKE_SYSTEM_PATH`` is
-   passed or by setting the :variable:`CMAKE_FIND_USE_CMAKE_SYSTEM_PATH`
-   to ``FALSE``:
+   current system. The searching of ``CMAKE_INSTALL_PREFIX` can be skipped
+   if ``NO_CMAKE_INSTALL_PREFIX`` is passed or by setting the
+   :variable:`CMAKE_FIND_USE_INSTALL_PREFIX` to ``FALSE. All these locations
+   can be skipped if ``NO_CMAKE_SYSTEM_PATH`` is passed or by setting the
+   :variable:`CMAKE_FIND_USE_CMAKE_SYSTEM_PATH` to ``FALSE``:
 
    * :variable:`CMAKE_SYSTEM_PREFIX_PATH`
    * :variable:`CMAKE_SYSTEM_FRAMEWORK_PATH`

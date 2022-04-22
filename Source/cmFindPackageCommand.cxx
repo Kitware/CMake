@@ -1682,7 +1682,57 @@ void cmFindPackageCommand::FillPrefixesCMakeSystemVariable()
 {
   cmSearchPath& paths = this->LabeledPaths[PathLabel::CMakeSystem];
 
-  paths.AddCMakePath("CMAKE_SYSTEM_PREFIX_PATH");
+  const bool install_prefix_in_list =
+    !this->Makefile->IsOn("CMAKE_FIND_NO_INSTALL_PREFIX");
+  const bool remove_install_prefix = this->NoCMakeInstallPath;
+  const bool add_install_prefix = !this->NoCMakeInstallPath &&
+    this->Makefile->IsDefinitionSet("CMAKE_FIND_USE_INSTALL_PREFIX");
+
+  // We have 3 possible states for `CMAKE_SYSTEM_PREFIX_PATH` and
+  // `CMAKE_INSTALL_PREFIX`.
+  // Either we need to remove `CMAKE_INSTALL_PREFIX`, add
+  // `CMAKE_INSTALL_PREFIX`, or do nothing.
+  //
+  // When we need to remove `CMAKE_INSTALL_PREFIX` we remove the Nth occurrence
+  // of `CMAKE_INSTALL_PREFIX` from `CMAKE_SYSTEM_PREFIX_PATH`, where `N` is
+  // computed by `CMakeSystemSpecificInformation.cmake` while constructing
+  // `CMAKE_SYSTEM_PREFIX_PATH`. This ensures that if projects / toolchains
+  // have removed `CMAKE_INSTALL_PREFIX` from the list, we don't remove
+  // some other entry by mistake
+  long install_prefix_count = -1;
+  std::string install_path_to_remove;
+  if (cmValue to_skip = this->Makefile->GetDefinition(
+        "_CMAKE_SYSTEM_PREFIX_PATH_INSTALL_PREFIX_COUNT")) {
+    cmStrToLong(to_skip, &install_prefix_count);
+  }
+  if (cmValue install_value = this->Makefile->GetDefinition(
+        "_CMAKE_SYSTEM_PREFIX_PATH_INSTALL_PREFIX_VALUE")) {
+    install_path_to_remove = *install_value;
+  }
+
+  if (remove_install_prefix && install_prefix_in_list &&
+      install_prefix_count > 0 && !install_path_to_remove.empty()) {
+
+    cmValue prefix_paths =
+      this->Makefile->GetDefinition("CMAKE_SYSTEM_PREFIX_PATH");
+    // remove entry from CMAKE_SYSTEM_PREFIX_PATH
+    std::vector<std::string> expanded = cmExpandedList(*prefix_paths);
+    long count = 0;
+    for (const auto& path : expanded) {
+      bool to_add =
+        !(path == install_path_to_remove && ++count == install_prefix_count);
+      if (to_add) {
+        paths.AddPath(path);
+      }
+    }
+  } else if (add_install_prefix && !install_prefix_in_list) {
+    paths.AddCMakePath("CMAKE_INSTALL_PREFIX");
+    paths.AddCMakePath("CMAKE_SYSTEM_PREFIX_PATH");
+  } else {
+    // Otherwise the current setup of `CMAKE_SYSTEM_PREFIX_PATH` is correct
+    paths.AddCMakePath("CMAKE_SYSTEM_PREFIX_PATH");
+  }
+
   paths.AddCMakePath("CMAKE_SYSTEM_FRAMEWORK_PATH");
   paths.AddCMakePath("CMAKE_SYSTEM_APPBUNDLE_PATH");
 
