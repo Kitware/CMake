@@ -1040,24 +1040,26 @@ Additionally, IDEs will show the source files as part of the target for
 interactive reading and editing.
 
 A primary use-case for ``INTERFACE`` libraries is header-only libraries.
+Since CMake 3.23, header files may be associated with a library by adding
+them to a header set using the :command:`target_sources` command:
 
 .. code-block:: cmake
 
-  add_library(Eigen INTERFACE
-    src/eigen.h
-    src/vector.h
-    src/matrix.h
-    )
-  target_include_directories(Eigen INTERFACE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
-    $<INSTALL_INTERFACE:include/Eigen>
+  add_library(Eigen INTERFACE)
+
+  target_sources(Eigen INTERFACE
+    FILE_SET HEADERS
+      BASE_DIRS src
+      FILES src/eigen.h src/vector.h src/matrix.h
   )
 
   add_executable(exe1 exe1.cpp)
   target_link_libraries(exe1 Eigen)
 
-Here, the usage requirements from the ``Eigen`` target are consumed and used
-when compiling, but it has no effect on linking.
+When we specify the ``FILE_SET`` here, the ``BASE_DIRS`` we define automatically
+become include directories in the usage requirements for the target ``Eigen``.
+The usage requirements from the target are consumed and used when compiling, but
+have no effect on linking.
 
 Another use-case is to employ an entirely target-focussed design for usage
 requirements:
@@ -1081,26 +1083,25 @@ This way, the build specification of ``exe1`` is expressed entirely as linked
 targets, and the complexity of compiler-specific flags is encapsulated in an
 ``INTERFACE`` library target.
 
-``INTERFACE`` libraries may be installed and exported.  Any content they refer
-to must be installed separately:
+``INTERFACE`` libraries may be installed and exported. We can install the
+default header set along with the target:
 
 .. code-block:: cmake
 
-  set(Eigen_headers
-    src/eigen.h
-    src/vector.h
-    src/matrix.h
-    )
-  add_library(Eigen INTERFACE ${Eigen_headers})
-  target_include_directories(Eigen INTERFACE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
-    $<INSTALL_INTERFACE:include/Eigen>
+  add_library(Eigen INTERFACE)
+
+  target_sources(Eigen INTERFACE
+    FILE_SET HEADERS
+      BASE_DIRS src
+      FILES src/eigen.h src/vector.h src/matrix.h
   )
 
-  install(TARGETS Eigen EXPORT eigenExport)
+  install(TARGETS Eigen EXPORT eigenExport
+    FILE_SET HEADERS DESTINATION include/Eigen)
   install(EXPORT eigenExport NAMESPACE Upstream::
     DESTINATION lib/cmake/Eigen
   )
-  install(FILES ${Eigen_headers}
-    DESTINATION include/Eigen
-  )
+
+Here, the headers defined in the header set are installed to ``include/Eigen``.
+The install destination automatically becomes an include directory that is a
+usage requirement for consumers.
