@@ -195,18 +195,22 @@ void cmInstallExportGenerator::GenerateScriptActions(std::ostream& os,
   Indent indentNN = indentN.Next();
   Indent indentNNN = indentNN.Next();
   /* clang-format off */
-  os << indentN << "file(DIFFERENT EXPORT_FILE_CHANGED FILES\n"
+  os << indentN << "file(DIFFERENT _cmake_export_file_changed FILES\n"
      << indentN << "     \"" << installedFile << "\"\n"
      << indentN << "     \"" << this->MainImportFile << "\")\n";
-  os << indentN << "if(EXPORT_FILE_CHANGED)\n";
-  os << indentNN << "file(GLOB OLD_CONFIG_FILES \"" << installedDir
+  os << indentN << "if(_cmake_export_file_changed)\n";
+  os << indentNN << "file(GLOB _cmake_old_config_files \"" << installedDir
      << this->EFGen->GetConfigImportFileGlob() << "\")\n";
-  os << indentNN << "if(OLD_CONFIG_FILES)\n";
+  os << indentNN << "if(_cmake_old_config_files)\n";
+  os << indentNNN << "string(REPLACE \";\" \", \" _cmake_old_config_files_text \"${_cmake_old_config_files}\")\n";
   os << indentNNN << R"(message(STATUS "Old export file \")" << installedFile
-     << "\\\" will be replaced.  Removing files [${OLD_CONFIG_FILES}].\")\n";
-  os << indentNNN << "file(REMOVE ${OLD_CONFIG_FILES})\n";
+     << "\\\" will be replaced.  Removing files [${_cmake_old_config_files_text}].\")\n";
+  os << indentNNN << "unset(_cmake_old_config_files_text)\n";
+  os << indentNNN << "file(REMOVE ${_cmake_old_config_files})\n";
   os << indentNN << "endif()\n";
+  os << indentNN << "unset(_cmake_old_config_files)\n";
   os << indentN << "endif()\n";
+  os << indentN << "unset(_cmake_export_file_changed)\n";
   os << indent << "endif()\n";
   /* clang-format on */
 

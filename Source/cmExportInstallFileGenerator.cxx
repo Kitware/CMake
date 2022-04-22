@@ -253,12 +253,13 @@ void cmExportInstallFileGenerator::LoadConfigFiles(std::ostream& os)
   // Now load per-configuration properties for them.
   /* clang-format off */
   os << "# Load information for each installed configuration.\n"
-     << "get_filename_component(_DIR \"${CMAKE_CURRENT_LIST_FILE}\" PATH)\n"
-     << "file(GLOB CONFIG_FILES \"${_DIR}/"
+     << "file(GLOB _cmake_config_files \"${CMAKE_CURRENT_LIST_DIR}/"
      << this->GetConfigImportFileGlob() << "\")\n"
-     << "foreach(f ${CONFIG_FILES})\n"
-     << "  include(${f})\n"
+     << "foreach(_cmake_config_file IN LISTS _cmake_config_files)\n"
+     << "  include(\"${_cmake_config_file}\")\n"
      << "endforeach()\n"
+     << "unset(_cmake_config_file)\n"
+     << "unset(_cmake_config_files)\n"
      << "\n";
   /* clang-format on */
 }
