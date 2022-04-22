@@ -57,7 +57,6 @@ bool cmLinkLineDeviceComputer::ComputeRequiresDeviceLinking(
   // For this we only consider targets
   using ItemVector = cmComputeLinkInformation::ItemVector;
   ItemVector const& items = cli.GetItems();
-  std::string config = cli.GetConfig();
   return std::any_of(
     items.begin(), items.end(),
     [](cmComputeLinkInformation::Item const& item) -> bool {
