@@ -2494,9 +2494,21 @@ struct CxxModuleFileSet
   cm::optional<std::string> Destination;
 };
 
+struct CxxModuleExport
+{
+  std::string Name;
+  std::string Destination;
+  std::string Prefix;
+  std::string CxxModuleInfoDir;
+  std::string Namespace;
+  bool Install;
+};
+
 struct cmGlobalNinjaGenerator::CxxModuleExportInfo
 {
   std::map<std::string, CxxModuleFileSet> ObjectToFileSet;
+  std::vector<CxxModuleExport> Exports;
+  std::string Config;
 };
 
 bool cmGlobalNinjaGenerator::WriteDyndepFile(
@@ -2659,6 +2671,43 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
   // Fortran doesn't support any of the file-set or BMI installation considered
   // below.
   if (arg_lang != "Fortran"_s) {
+    // Prepare the export information blocks.
+    std::string const config_upper =
+      cmSystemTools::UpperCase(export_info.Config);
+    std::vector<std::pair<std::unique_ptr<cmGeneratedFileStream>,
+                          CxxModuleExport const*>>
+      exports;
+    for (auto const& exp : export_info.Exports) {
+      std::unique_ptr<cmGeneratedFileStream> properties;
+
+      std::string const export_dir =
+        cmStrCat(exp.Prefix, '/', exp.CxxModuleInfoDir, '/');
+      std::string const property_file_path = cmStrCat(
+        export_dir, "target-", exp.Name, '-', export_info.Config, ".cmake");
+      properties = cm::make_unique<cmGeneratedFileStream>(property_file_path);
+
+      // Set up the preamble.
+      *properties << "set_property(TARGET \"" << exp.Namespace << exp.Name
+                  << "\"\n"
+                  << "  PROPERTY IMPORTED_CXX_MODULES_" << config_upper
+                  << '\n';
+
+      exports.emplace_back(std::move(properties), &exp);
+    }
+
+    auto cmEscape = [](cm::string_view str) {
+      return cmOutputConverter::EscapeForCMake(
+        str, cmOutputConverter::WrapQuotes::NoWrap);
+    };
+    auto install_destination =
+      [&cmEscape](std::string const& dest) -> std::pair<bool, std::string> {
+      if (cmSystemTools::FileIsFullPath(dest)) {
+        return std::make_pair(true, cmEscape(dest));
+      }
+      return std::make_pair(false,
+                            cmStrCat("${_IMPORT_PREFIX}/", cmEscape(dest)));
+    };
+
     for (cmScanDepInfo const& object : objects) {
       // Convert to forward slashes.
       auto output_path = object.PrimaryOutput;
@@ -2746,6 +2795,50 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
         // Nothing needs to be conveyed about non-`PUBLIC` modules.
         continue;
       }
+
+      // Write out properties for any exports.
+      for (auto const& p : object.Provides) {
+        std::string build_bmi_path;
+        auto m = mod_files.find(p.LogicalName);
+        if (m != mod_files.end()) {
+          build_bmi_path = cmEscape(m->second);
+        }
+
+        for (auto const& exp : exports) {
+          std::string iface_source;
+          if (exp.second->Install && file_set.Destination) {
+            auto dest = install_destination(*file_set.Destination);
+            iface_source = cmStrCat(
+              dest.second, '/', cmEscape(file_set.RelativeDirectory),
+              cmEscape(cmSystemTools::GetFilenameName(file_set.SourcePath)));
+          } else {
+            iface_source = cmEscape(file_set.SourcePath);
+          }
+
+          std::string bmi_path;
+          if (!exp.second->Install) {
+            bmi_path = build_bmi_path;
+          }
+
+          if (iface_source.empty()) {
+            // No destination for the C++ module source; ignore this property
+            // value.
+            continue;
+          }
+
+          *exp.first << "    \"" << cmEscape(p.LogicalName) << '='
+                     << iface_source;
+          if (!bmi_path.empty()) {
+            *exp.first << ',' << bmi_path;
+          }
+          *exp.first << "\"\n";
+        }
+      }
+    }
+
+    // Add trailing parenthesis for the `set_property` call.
+    for (auto const& exp : exports) {
+      *exp.first << ")\n";
     }
   }
 
@@ -2824,6 +2917,24 @@ int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
   }
 
   cmGlobalNinjaGenerator::CxxModuleExportInfo export_info;
+  export_info.Config = tdi["config"].asString();
+  if (export_info.Config.empty()) {
+    export_info.Config = "noconfig";
+  }
+  Json::Value const& tdi_exports = tdi["exports"];
+  if (tdi_exports.isArray()) {
+    for (auto const& tdi_export : tdi_exports) {
+      CxxModuleExport exp;
+      exp.Install = tdi_export["install"].asBool();
+      exp.Name = tdi_export["export-name"].asString();
+      exp.Destination = tdi_export["destination"].asString();
+      exp.Prefix = tdi_export["export-prefix"].asString();
+      exp.CxxModuleInfoDir = tdi_export["cxx-module-info-dir"].asString();
+      exp.Namespace = tdi_export["namespace"].asString();
+
+      export_info.Exports.push_back(exp);
+    }
+  }
   Json::Value const& tdi_cxx_modules = tdi["cxx-modules"];
   if (tdi_cxx_modules.isObject()) {
     for (auto i = tdi_cxx_modules.begin(); i != tdi_cxx_modules.end(); ++i) {
