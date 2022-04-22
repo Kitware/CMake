@@ -618,6 +618,11 @@ if(BUILD_TESTING)
   set(Module.CheckIPOSupported-CXX_BUILD_OPTIONS -DCMake_TEST_IPO_WORKS_CXX=${CMake_TEST_IPO_WORKS_CXX})
   ADD_TEST_MACRO(Module.CheckIPOSupported-CXX CheckIPOSupported-CXX)
 
+  if(CMake_TEST_CUDA)
+    ADD_TEST_MACRO(Module.CheckIPOSupported-CUDA CheckIPOSupported-CUDA)
+    set_property(TEST Module.CheckIPOSupported-CUDA APPEND PROPERTY LABELS "CUDA")
+  endif()
+
   if(CMAKE_Fortran_COMPILER)
     set(Module.CheckIPOSupported-Fortran_BUILD_OPTIONS -DCMake_TEST_IPO_WORKS_Fortran=${CMake_TEST_IPO_WORKS_Fortran})
     ADD_TEST_MACRO(Module.CheckIPOSupported-Fortran CheckIPOSupported-Fortran)

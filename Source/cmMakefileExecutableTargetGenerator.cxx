@@ -136,16 +136,10 @@ void cmMakefileExecutableTargetGenerator::WriteNvidiaDeviceExecutableRule(
   std::vector<std::string> depends;
   this->AppendLinkDepends(depends, linkLanguage);
 
-  // Build a list of compiler flags and linker flags.
-  std::string langFlags;
-  std::string linkFlags;
-
   // Add language feature flags.
+  std::string langFlags;
   this->LocalGenerator->AddLanguageFlagsForLinking(
     langFlags, this->GeneratorTarget, linkLanguage, this->GetConfigName());
-
-  // Add device-specific linker flags.
-  this->GetDeviceLinkFlags(linkFlags, linkLanguage);
 
   // Construct a list of files associated with this executable that
   // may need to be cleaned.
@@ -173,12 +167,19 @@ void cmMakefileExecutableTargetGenerator::WriteNvidiaDeviceExecutableRule(
     // Set path conversion for link script shells.
     this->LocalGenerator->SetLinkScriptShell(useLinkScript);
 
-    std::unique_ptr<cmLinkLineComputer> linkLineComputer(
+    std::unique_ptr<cmLinkLineDeviceComputer> linkLineComputer(
       new cmLinkLineDeviceComputer(
         this->LocalGenerator,
         this->LocalGenerator->GetStateSnapshot().GetDirectory()));
     linkLineComputer->SetForResponse(useResponseFileForLibs);
     linkLineComputer->SetRelink(relink);
+
+    // Create set of linking flags.
+    std::string linkFlags;
+    std::string ignored_;
+    this->LocalGenerator->GetDeviceLinkFlags(
+      *linkLineComputer, this->GetConfigName(), ignored_, linkFlags, ignored_,
+      ignored_, this->GeneratorTarget);
 
     // Collect up flags to link in needed libraries.
     std::string linkLibs;

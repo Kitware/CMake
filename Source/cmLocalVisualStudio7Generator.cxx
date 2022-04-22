@@ -680,7 +680,8 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
     langForClCompile = linkLanguage;
     if (langForClCompile == "C" || langForClCompile == "CXX" ||
         langForClCompile == "Fortran") {
-      this->AddLanguageFlags(flags, target, langForClCompile, configName);
+      this->AddLanguageFlags(flags, target, cmBuildStep::Compile,
+                             langForClCompile, configName);
     }
     // set the correct language
     if (linkLanguage == "C") {
