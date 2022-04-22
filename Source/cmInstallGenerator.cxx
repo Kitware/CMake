@@ -41,10 +41,10 @@ void cmInstallGenerator::CheckCMP0082(bool& haveSubdirectoryInstall,
 void cmInstallGenerator::AddInstallRule(
   std::ostream& os, std::string const& dest, cmInstallType type,
   std::vector<std::string> const& files, bool optional /* = false */,
-  const char* permissions_file /* = 0 */,
-  const char* permissions_dir /* = 0 */, const char* rename /* = 0 */,
-  const char* literal_args /* = 0 */, Indent indent,
-  const char* files_var /* = 0 */)
+  const char* permissions_file /* = nullptr */,
+  const char* permissions_dir /* = nullptr */,
+  const char* rename /* = nullptr */, const char* literal_args /* = nullptr */,
+  Indent indent, const char* files_var /* = nullptr */)
 {
   // Use the FILE command to install the file.
   std::string stype;
