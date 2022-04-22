@@ -18,12 +18,12 @@ in directory:
 endfunction()
 
 function(check_python case)
-  if(RunCMake_TEST_FAILED OR NOT PYTHON_EXECUTABLE)
+  if(RunCMake_TEST_FAILED OR NOT Python_EXECUTABLE)
     return()
   endif()
   file(GLOB index ${RunCMake_TEST_BINARY_DIR}/.cmake/api/v1/reply/index-*.json)
   execute_process(
-    COMMAND ${PYTHON_EXECUTABLE} "${RunCMake_SOURCE_DIR}/${case}-check.py" "${index}" "${CMAKE_CXX_COMPILER_ID}"
+    COMMAND ${Python_EXECUTABLE} "${RunCMake_SOURCE_DIR}/${case}-check.py" "${index}" "${CMAKE_CXX_COMPILER_ID}"
       "${RunCMake_TEST_BINARY_DIR}"
     RESULT_VARIABLE result
     OUTPUT_VARIABLE output

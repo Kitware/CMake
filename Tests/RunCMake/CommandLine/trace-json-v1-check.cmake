@@ -1,6 +1,6 @@
-if(PYTHON_EXECUTABLE)
+if(Python_EXECUTABLE)
   execute_process(
-    COMMAND ${PYTHON_EXECUTABLE} "${RunCMake_SOURCE_DIR}/trace-json-v1-check.py" "${RunCMake_BINARY_DIR}/json-v1.trace"
+    COMMAND ${Python_EXECUTABLE} "${RunCMake_SOURCE_DIR}/trace-json-v1-check.py" "${RunCMake_BINARY_DIR}/json-v1.trace"
     RESULT_VARIABLE result
     OUTPUT_VARIABLE output
     ERROR_VARIABLE output

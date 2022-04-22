@@ -55,7 +55,6 @@ bool joinImpl(std::vector<std::string> const& args, std::string const& glue,
 bool HandleHashCommand(std::vector<std::string> const& args,
                        cmExecutionStatus& status)
 {
-#if !defined(CMAKE_BOOTSTRAP)
   if (args.size() != 3) {
     status.SetError(
       cmStrCat(args[0], " requires an output variable and an input string"));
@@ -69,10 +68,6 @@ bool HandleHashCommand(std::vector<std::string> const& args,
     return true;
   }
   return false;
-#else
-  status.SetError(cmStrCat(args[0], " not available during bootstrap"));
-  return false;
-#endif
 }
 
 bool HandleToUpperLowerCommand(std::vector<std::string> const& args,

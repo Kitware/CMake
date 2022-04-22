@@ -19,7 +19,7 @@ CMake_QT_STATIC_QWindowsIntegrationPlugin_LIBRARIES:STRING=c:/qt-x86_64/plugins/
 
 # Build documentation.
 CMAKE_DOC_DIR:STRING=doc/cmake
-PYTHON_EXECUTABLE:FILEPATH=C:/python3/python.exe
+Python_EXECUTABLE:FILEPATH=C:/python3/python.exe
 SPHINX_EXECUTABLE:FILEPATH=C:/python3/Scripts/sphinx-build.exe
 SPHINX_HTML:BOOL=ON
 SPHINX_MAN:BOOL=ON
