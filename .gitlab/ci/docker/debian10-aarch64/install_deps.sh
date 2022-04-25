@@ -58,6 +58,7 @@ apt-get install -y \
     libgsl-dev \
     libgtest-dev \
     libgtk2.0-dev \
+    libicu-dev \
     libinput-dev \
     libjpeg-dev \
     libjsoncpp-dev \
