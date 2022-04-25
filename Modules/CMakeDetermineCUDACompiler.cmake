@@ -248,10 +248,6 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
     if(CMAKE_CUDA_COMPILER_ID_OUTPUT MATCHES [=[V([0-9]+\.[0-9]+\.[0-9]+)]=])
       set(CMAKE_CUDA_COMPILER_TOOLKIT_VERSION "${CMAKE_MATCH_1}")
     endif()
-
-    # Make the all, all-major, and native architecture information available.
-    # FIXME(#23161): Defer architecture detection until compiler testing.
-    include(${CMAKE_ROOT}/Modules/CUDA/architectures.cmake)
   endif()
 
   set(CMAKE_CUDA_COMPILER_ID_FLAGS_ALWAYS "-v")
@@ -273,76 +269,34 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
     endif()
   endif()
 
-  # FIXME(#23161): Defer architecture testing until compiler testing.
-  if(DEFINED CMAKE_CUDA_ARCHITECTURES)
-    if(CMAKE_CUDA_ARCHITECTURES MATCHES "^(all|all-major)$")
-      # For sufficiently new NVCC we can just use the all and all-major flags.
-      # For VS we don't test since we can't figure out the version this early (see #23161).
-      # For others select based on version.
-      if(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA" AND CMAKE_CUDA_COMPILER_TOOLKIT_VERSION VERSION_GREATER_EQUAL 11.5)
-        string(APPEND nvcc_test_flags " -arch=${CMAKE_CUDA_ARCHITECTURES}")
-        set(architectures_tested "${CMAKE_CUDA_ARCHITECTURES}")
-      elseif(CMAKE_GENERATOR MATCHES "Visual Studio")
-        set(architectures_tested "${CMAKE_CUDA_ARCHITECTURES}")
-      else()
-        if(CMAKE_CUDA_ARCHITECTURES STREQUAL "all")
-          set(architectures_test ${CMAKE_CUDA_ARCHITECTURES_ALL})
-        elseif(CMAKE_CUDA_ARCHITECTURES STREQUAL "all-major")
-          set(architectures_test ${CMAKE_CUDA_ARCHITECTURES_ALL_MAJOR})
-        endif()
-      endif()
-    elseif(CMAKE_CUDA_ARCHITECTURES STREQUAL "native")
-      # For sufficiently new NVCC we can just use the 'native' value directly.
-      # For VS we don't test since we can't find nvcc this early (see #23161).
-      if(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA" AND CMAKE_CUDA_COMPILER_TOOLKIT_VERSION VERSION_GREATER_EQUAL 11.6)
-        string(APPEND nvcc_test_flags " -arch=${CMAKE_CUDA_ARCHITECTURES}")
-        set(architectures_tested "${CMAKE_CUDA_ARCHITECTURES}")
-      elseif(CMAKE_GENERATOR MATCHES "Visual Studio")
-        set(architectures_tested "${CMAKE_CUDA_ARCHITECTURES}")
-      else()
-        set(architectures_test ${_CUDA_ARCHITECTURES_NATIVE})
-      endif()
-    elseif(CMAKE_CUDA_ARCHITECTURES OR "${CMAKE_CUDA_ARCHITECTURES}" STREQUAL "")
-      # Explicit architectures.  Test them during detection.
-      set(architectures_explicit TRUE)
-      set(architectures_test ${CMAKE_CUDA_ARCHITECTURES})
-    endif()
-  endif()
-
-  foreach(arch ${architectures_test})
-    # Strip specifiers as PTX vs binary doesn't matter.
-    string(REGEX MATCH "[0-9]+" arch_name "${arch}")
-    string(APPEND clang_test_flags " --cuda-gpu-arch=sm_${arch_name}")
-    string(APPEND nvcc_test_flags " -gencode=arch=compute_${arch_name},code=sm_${arch_name}")
-    list(APPEND architectures_tested "${arch_name}")
-  endforeach()
-
   # Rest of the code treats an empty value as equivalent to "use the defaults".
   # Error out early to prevent confusing errors as a result of this.
   # Note that this also catches invalid non-numerical values such as "a".
-  if(DEFINED architectures_explicit AND "${architectures_tested}" STREQUAL "")
-    message(FATAL_ERROR "CMAKE_CUDA_ARCHITECTURES must be valid if set.")
+  if(DEFINED CMAKE_CUDA_ARCHITECTURES)
+    if(CMAKE_CUDA_ARCHITECTURES STREQUAL "")
+      message(FATAL_ERROR "CMAKE_CUDA_ARCHITECTURES must be non-empty if set.")
+    elseif(CMAKE_CUDA_ARCHITECTURES AND NOT CMAKE_CUDA_ARCHITECTURES MATCHES "^([0-9]+[;0-9]*|all|all-major|native)$")
+      message(FATAL_ERROR
+        "CMAKE_CUDA_ARCHITECTURES:\n"
+        "  ${CMAKE_CUDA_ARCHITECTURES}\n"
+        "is not one of the following:\n"
+        "* a semicolon-separated list of integers\n"
+        "* a special value: all, all-major, native\n"
+        )
+    endif()
   endif()
 
   if(CMAKE_CUDA_COMPILER_ID STREQUAL "Clang")
-    if(NOT CMAKE_CUDA_ARCHITECTURES)
-      # Clang doesn't automatically select an architecture supported by the SDK.
-      # Try in reverse order of deprecation with the most recent at front (i.e. the most likely to work for new setups).
-      foreach(arch "52" "30" "20")
-        list(APPEND CMAKE_CUDA_COMPILER_ID_TEST_FLAGS_FIRST "${clang_test_flags} --cuda-gpu-arch=sm_${arch}")
-      endforeach()
-    endif()
-
-    # If the user specified CMAKE_CUDA_ARCHITECTURES this will include all the architecture flags.
-    # Otherwise this won't include any architecture flags and we'll fallback to Clang's defaults.
-    list(APPEND CMAKE_CUDA_COMPILER_ID_TEST_FLAGS_FIRST "${clang_test_flags}")
+    # Clang doesn't automatically select an architecture supported by the SDK.
+    # Try in reverse order of deprecation with the most recent at front (i.e. the most likely to work for new setups).
+    foreach(arch "52" "30" "20")
+      list(APPEND CMAKE_CUDA_COMPILER_ID_TEST_FLAGS_FIRST "${clang_test_flags} --cuda-gpu-arch=sm_${arch}")
+    endforeach()
   elseif(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA")
     list(APPEND CMAKE_CUDA_COMPILER_ID_TEST_FLAGS_FIRST "${nvcc_test_flags}")
   endif()
 
   # We perform compiler identification for a second time to extract implicit linking info and host compiler for NVCC.
-  # We also use it to verify that CMAKE_CUDA_ARCHITECTURES and additionally on Clang that CUDA toolkit path works.
-  # The latter could be done during compiler testing in the future to avoid doing this for Clang.
   # We need to unset the compiler ID otherwise CMAKE_DETERMINE_COMPILER_ID() doesn't work.
   set(CMAKE_CUDA_COMPILER_ID)
   set(CMAKE_CUDA_PLATFORM_ID)
@@ -357,11 +311,11 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
     get_filename_component(CMAKE_CUDA_COMPILER_TOOLKIT_ROOT "${CMAKE_CUDA_COMPILER_TOOLKIT_ROOT}" DIRECTORY)
     set(CMAKE_CUDA_COMPILER_LIBRARY_ROOT "${CMAKE_CUDA_COMPILER_TOOLKIT_ROOT}")
 
-    # We now know the version, so make the architecture variables available.
+    # The compiler comes with the toolkit, so the versions are the same.
     set(CMAKE_CUDA_COMPILER_TOOLKIT_VERSION ${CMAKE_CUDA_COMPILER_VERSION})
-    # FIXME(#23161): Defer architecture detection until compiler testing.
-    include(${CMAKE_ROOT}/Modules/CUDA/architectures.cmake)
   endif()
+
+  include(${CMAKE_ROOT}/Modules/CUDA/architectures.cmake)
 
   _cmake_find_compiler_sysroot(CUDA)
 endif()
@@ -647,31 +601,6 @@ if("${CMAKE_CUDA_ARCHITECTURES}" STREQUAL "")
       message(FATAL_ERROR "Failed to detect a default CUDA architecture.\n\nCompiler output:\n${CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT}")
     endif()
   endif()
-elseif(CMAKE_CUDA_ARCHITECTURES AND NOT "${architectures_tested}" MATCHES "^(all|all-major|native)$")
-  # Sort since order mustn't matter.
-  list(SORT architectures_detected)
-  list(SORT architectures_tested)
-
-  # We don't distinguish real/virtual architectures during testing.
-  # For "70-real;70-virtual" we detect "70" as working and architectures_tested is "70;70".
-  # Thus we need to remove duplicates before checking if they're equal.
-  list(REMOVE_DUPLICATES architectures_tested)
-
-  # Print the actual architectures for generic values (all and all-major).
-  if(NOT DEFINED architectures_explicit)
-    set(architectures_error "${CMAKE_CUDA_ARCHITECTURES} (${architectures_tested})")
-  else()
-    set(architectures_error "${architectures_tested}")
-  endif()
-
-  if(NOT "${architectures_detected}" STREQUAL "${architectures_tested}")
-    message(FATAL_ERROR
-      "The CMAKE_CUDA_ARCHITECTURES:\n"
-      "  ${architectures_error}\n"
-      "do not all work with this compiler.  Try:\n"
-      "  ${architectures_detected}\n"
-      "instead.")
-  endif()
 endif()
 
 # configure all variables set in this file
@@ -687,9 +616,7 @@ unset(_CUDA_LIBRARY_DIR)
 unset(_CUDA_TARGET_DIR)
 unset(_CUDA_TARGET_NAME)
 
-unset(architectures_explicit)
 unset(architectures_detected)
-unset(architectures_tested)
 
 set(CMAKE_CUDA_COMPILER_ENV_VAR "CUDACXX")
 set(CMAKE_CUDA_HOST_COMPILER_ENV_VAR "CUDAHOSTCXX")
