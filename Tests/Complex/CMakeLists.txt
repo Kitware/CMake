@@ -432,21 +432,6 @@ if(NOT RESULT STREQUAL "a[b]c[d]e")
 endif()
 
 #
-# This tests needs Ansi C++98
-#
-set(CMAKE_CXX_STANDARD 98)
-#
-# GNU extensions are needed for stricmp() on Windows.
-#
-set(CMAKE_CXX_EXTENSIONS TRUE)
-
-# Clang/C2 in C++98 mode cannot properly handle some of MSVC headers
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND
-    CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC")
-  set(CMAKE_CXX_STANDARD 11)
-endif()
-
-#
 # Create the libs and the main exe
 #
 add_subdirectory(Library)
