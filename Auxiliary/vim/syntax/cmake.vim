@@ -3781,6 +3781,7 @@ syn keyword cmakeGeneratorExpressions contained
             \ STREQUAL
             \ TARGET_BUNDLE_CONTENT_DIR
             \ TARGET_BUNDLE_DIR
+            \ TARGET_BUNDLE_DIR_NAME
             \ TARGET_EXISTS
             \ TARGET_FILE
             \ TARGET_FILE_BASE_NAME

@@ -1,0 +1,8 @@
+CMake Error at NonValidTarget-TARGET_BUNDLE_DIR_NAME.cmake:[0-9]* \(file\):
+  Error evaluating generator expression:
+
+    \$<TARGET_BUNDLE_DIR_NAME:empty>
+
+  TARGET_BUNDLE_DIR_NAME is allowed only for Bundle targets.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]* \(include\)
