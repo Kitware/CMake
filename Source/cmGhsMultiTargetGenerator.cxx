@@ -634,13 +634,8 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
           compile = false;
         }
 
-        *fout << comment << fname << '\n';
+        *fout << comment << fname << WriteObjectLangOverride(si) << '\n';
         if (compile) {
-          if ("ld" != si->GetExtension() && "int" != si->GetExtension() &&
-              "bsp" != si->GetExtension()) {
-            WriteObjectLangOverride(*fout, si);
-          }
-
           this->WriteSourceProperty(*fout, si, "INCLUDE_DIRECTORIES", "-I");
           this->WriteSourceProperty(*fout, si, "COMPILE_DEFINITIONS", "-D");
           this->WriteSourceProperty(*fout, si, "COMPILE_OPTIONS", "");
@@ -736,17 +731,16 @@ void cmGhsMultiTargetGenerator::WriteCustomCommandLine(
   }
 }
 
-void cmGhsMultiTargetGenerator::WriteObjectLangOverride(
-  std::ostream& fout, const cmSourceFile* sourceFile)
+std::string cmGhsMultiTargetGenerator::WriteObjectLangOverride(
+  const cmSourceFile* sourceFile)
 {
+  std::string ret;
   cmValue rawLangProp = sourceFile->GetProperty("LANGUAGE");
   if (rawLangProp) {
-    std::string sourceLangProp(*rawLangProp);
-    std::string const& extension = sourceFile->GetExtension();
-    if ("CXX" == sourceLangProp && ("c" == extension || "C" == extension)) {
-      fout << "    -dotciscxx\n";
-    }
+    ret = cmStrCat(" [", *rawLangProp, "]");
   }
+
+  return ret;
 }
 
 bool cmGhsMultiTargetGenerator::DetermineIfIntegrityApp()

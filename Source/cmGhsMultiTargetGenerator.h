@@ -65,8 +65,7 @@ private:
   void WriteSourceProperty(std::ostream& fout, const cmSourceFile* sf,
                            std::string const& propName,
                            std::string const& propFlag);
-  static void WriteObjectLangOverride(std::ostream& fout,
-                                      const cmSourceFile* sourceFile);
+  static std::string WriteObjectLangOverride(const cmSourceFile* sourceFile);
 
   bool DetermineIfIntegrityApp();
   cmGeneratorTarget* GeneratorTarget;
