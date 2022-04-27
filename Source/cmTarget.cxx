@@ -2545,6 +2545,17 @@ std::string cmTarget::GetInterfaceFileSetsPropertyName(const std::string& type)
   return "";
 }
 
+std::vector<std::string> cmTarget::GetAllFileSetNames() const
+{
+  std::vector<std::string> result;
+
+  for (auto const& it : this->impl->FileSets) {
+    result.push_back(it.first);
+  }
+
+  return result;
+}
+
 std::vector<std::string> cmTarget::GetAllInterfaceFileSets() const
 {
   std::vector<std::string> result;

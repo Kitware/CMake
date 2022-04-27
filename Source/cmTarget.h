@@ -292,6 +292,7 @@ public:
                                                  const std::string& type,
                                                  cmFileSetVisibility vis);
 
+  std::vector<std::string> GetAllFileSetNames() const;
   std::vector<std::string> GetAllInterfaceFileSets() const;
 
   static std::string GetFileSetsPropertyName(const std::string& type);
