@@ -28,7 +28,7 @@ class cmTargetExport;
  * a build tree.  A single file exports information for all
  * configurations built.
  *
- * This is used to implement the EXPORT() command.
+ * This is used to implement the export() command.
  */
 class cmExportBuildFileGenerator : public cmExportFileGenerator
 {

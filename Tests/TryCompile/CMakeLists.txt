@@ -201,7 +201,7 @@ add_executable(TryCompile pass.c)
 
 ######################################
 
-# now two tests for TRY_RUN
+# now two tests for try_run()
 
 # try to run a file that should compile and run without error
 # also check that OUTPUT_VARIABLE contains both the compile output

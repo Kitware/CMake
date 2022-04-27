@@ -20,7 +20,7 @@ class cmGeneratorTarget;
  * a build tree.  This exports the targets to the Android ndk build tool
  * makefile format for prebuilt libraries.
  *
- * This is used to implement the EXPORT() command.
+ * This is used to implement the export() command.
  */
 class cmExportBuildAndroidMKGenerator : public cmExportBuildFileGenerator
 {
