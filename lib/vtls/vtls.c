@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -125,15 +125,6 @@ static bool blobcmp(struct curl_blob *first, struct curl_blob *second)
   return !memcmp(first->data, second->data, first->len); /* same data */
 }
 
-static bool safecmp(char *a, char *b)
-{
-  if(a && b)
-    return !strcmp(a, b);
-  else if(!a && !b)
-    return TRUE; /* match */
-  return FALSE; /* no match */
-}
-
 
 bool
 Curl_ssl_config_matches(struct ssl_primary_config *data,
@@ -147,12 +138,12 @@ Curl_ssl_config_matches(struct ssl_primary_config *data,
      blobcmp(data->cert_blob, needle->cert_blob) &&
      blobcmp(data->ca_info_blob, needle->ca_info_blob) &&
      blobcmp(data->issuercert_blob, needle->issuercert_blob) &&
-     safecmp(data->CApath, needle->CApath) &&
-     safecmp(data->CAfile, needle->CAfile) &&
-     safecmp(data->issuercert, needle->issuercert) &&
-     safecmp(data->clientcert, needle->clientcert) &&
-     safecmp(data->random_file, needle->random_file) &&
-     safecmp(data->egdsocket, needle->egdsocket) &&
+     Curl_safecmp(data->CApath, needle->CApath) &&
+     Curl_safecmp(data->CAfile, needle->CAfile) &&
+     Curl_safecmp(data->issuercert, needle->issuercert) &&
+     Curl_safecmp(data->clientcert, needle->clientcert) &&
+     Curl_safecmp(data->random_file, needle->random_file) &&
+     Curl_safecmp(data->egdsocket, needle->egdsocket) &&
      Curl_safe_strcasecompare(data->cipher_list, needle->cipher_list) &&
      Curl_safe_strcasecompare(data->cipher_list13, needle->cipher_list13) &&
      Curl_safe_strcasecompare(data->curves, needle->curves) &&
@@ -299,6 +290,8 @@ ssl_connect_init_proxy(struct connectdata *conn, int sockindex)
        rather than move the contents. */
     pbdata = conn->proxy_ssl[sockindex].backend;
     conn->proxy_ssl[sockindex] = conn->ssl[sockindex];
+
+    DEBUGASSERT(pbdata != NULL);
 
     memset(&conn->ssl[sockindex], 0, sizeof(conn->ssl[sockindex]));
     memset(pbdata, 0, Curl_ssl->sizeof_ssl_backend_data);
@@ -628,7 +621,8 @@ void Curl_ssl_associate_conn(struct Curl_easy *data,
 {
   if(Curl_ssl->associate_connection) {
     Curl_ssl->associate_connection(data, conn, FIRSTSOCKET);
-    if(conn->sock[SECONDARYSOCKET] && conn->bits.sock_accepted)
+    if((conn->sock[SECONDARYSOCKET] != CURL_SOCKET_BAD) &&
+       conn->bits.sock_accepted)
       Curl_ssl->associate_connection(data, conn, SECONDARYSOCKET);
   }
 }
@@ -638,7 +632,8 @@ void Curl_ssl_detach_conn(struct Curl_easy *data,
 {
   if(Curl_ssl->disassociate_connection) {
     Curl_ssl->disassociate_connection(data, FIRSTSOCKET);
-    if(conn->sock[SECONDARYSOCKET] && conn->bits.sock_accepted)
+    if((conn->sock[SECONDARYSOCKET] != CURL_SOCKET_BAD) &&
+       conn->bits.sock_accepted)
       Curl_ssl->disassociate_connection(data, SECONDARYSOCKET);
   }
 }
@@ -872,6 +867,32 @@ CURLcode Curl_ssl_random(struct Curl_easy *data,
 }
 
 /*
+ * Curl_ssl_snihost() converts the input host name to a suitable SNI name put
+ * in data->state.buffer. Returns a pointer to the name (or NULL if a problem)
+ * and stores the new length in 'olen'.
+ *
+ * SNI fields must not have any trailing dot and while RFC 6066 section 3 says
+ * the SNI field is case insensitive, browsers always send the data lowercase
+ * and subsequently there are numerous servers out there that don't work
+ * unless the name is lowercased.
+ */
+
+char *Curl_ssl_snihost(struct Curl_easy *data, const char *host, size_t *olen)
+{
+  size_t len = strlen(host);
+  if(len && (host[len-1] == '.'))
+    len--;
+  if((long)len >= data->set.buffer_size)
+    return NULL;
+
+  Curl_strntolower(data->state.buffer, host, len);
+  data->state.buffer[len] = 0;
+  if(olen)
+    *olen = len;
+  return data->state.buffer;
+}
+
+/*
  * Public key pem to der conversion
  */
 
@@ -969,7 +990,7 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
     if(encode != CURLE_OK)
       return encode;
 
-    encode = Curl_base64_encode(data, (char *)sha256sumdigest,
+    encode = Curl_base64_encode((char *)sha256sumdigest,
                                 CURL_SHA256_DIGEST_LENGTH, &encoded,
                                 &encodedlen);
     Curl_safefree(sha256sumdigest);
@@ -1296,8 +1317,6 @@ const struct Curl_ssl *Curl_ssl =
   &Curl_ssl_openssl;
 #elif defined(USE_SCHANNEL)
   &Curl_ssl_schannel;
-#elif defined(USE_MESALINK)
-  &Curl_ssl_mesalink;
 #elif defined(USE_BEARSSL)
   &Curl_ssl_bearssl;
 #else
@@ -1328,9 +1347,6 @@ static const struct Curl_ssl *available_backends[] = {
 #endif
 #if defined(USE_SCHANNEL)
   &Curl_ssl_schannel,
-#endif
-#if defined(USE_MESALINK)
-  &Curl_ssl_mesalink,
 #endif
 #if defined(USE_BEARSSL)
   &Curl_ssl_bearssl,

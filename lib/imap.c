@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -507,7 +507,7 @@ static CURLcode imap_perform_login(struct Curl_easy *data,
 
   /* Check we have a username and password to authenticate with and end the
      connect phase if we don't */
-  if(!conn->bits.user_passwd) {
+  if(!data->state.aptr.user) {
     state(data, IMAP_STOP);
 
     return result;
@@ -608,7 +608,7 @@ static CURLcode imap_perform_authentication(struct Curl_easy *data,
   /* Check if already authenticated OR if there is enough data to authenticate
      with and end the connect phase if we don't */
   if(imapc->preauth ||
-     !Curl_sasl_can_authenticate(&imapc->sasl, conn)) {
+     !Curl_sasl_can_authenticate(&imapc->sasl, data)) {
     state(data, IMAP_STOP);
     return result;
   }
@@ -624,7 +624,7 @@ static CURLcode imap_perform_authentication(struct Curl_easy *data,
       result = imap_perform_login(data, conn);
     else {
       /* Other mechanisms not supported */
-      infof(data, "No known authentication mechanisms supported!");
+      infof(data, "No known authentication mechanisms supported");
       result = CURLE_LOGIN_DENIED;
     }
   }
@@ -777,7 +777,7 @@ static CURLcode imap_perform_append(struct Curl_easy *data)
                                        NULL, MIMESTRATEGY_MAIL);
 
     if(!result)
-      if(!Curl_checkheaders(data, "Mime-Version"))
+      if(!Curl_checkheaders(data, STRCONST("Mime-Version")))
         result = Curl_mime_add_header(&data->set.mimepost.curlheaders,
                                       "Mime-Version: 1.0");
 
@@ -874,7 +874,7 @@ static CURLcode imap_state_servergreet_resp(struct Curl_easy *data,
     /* PREAUTH */
     struct imap_conn *imapc = &conn->proto.imapc;
     imapc->preauth = TRUE;
-    infof(data, "PREAUTH connection, already authenticated!");
+    infof(data, "PREAUTH connection, already authenticated");
   }
   else if(imapcode != IMAP_RESP_OK) {
     failf(data, "Got unexpected imap-server response");
@@ -1986,7 +1986,7 @@ static CURLcode imap_parse_url_path(struct Curl_easy *data)
     if(end > begin && end[-1] == '/')
       end--;
 
-    result = Curl_urldecode(data, begin, end - begin, &imap->mailbox, NULL,
+    result = Curl_urldecode(begin, end - begin, &imap->mailbox, NULL,
                             REJECT_CTRL);
     if(result)
       return result;
@@ -2009,7 +2009,7 @@ static CURLcode imap_parse_url_path(struct Curl_easy *data)
       return CURLE_URL_MALFORMAT;
 
     /* Decode the name parameter */
-    result = Curl_urldecode(data, begin, ptr - begin, &name, NULL,
+    result = Curl_urldecode(begin, ptr - begin, &name, NULL,
                             REJECT_CTRL);
     if(result)
       return result;
@@ -2020,7 +2020,7 @@ static CURLcode imap_parse_url_path(struct Curl_easy *data)
       ptr++;
 
     /* Decode the value parameter */
-    result = Curl_urldecode(data, begin, ptr - begin, &value, &valuelen,
+    result = Curl_urldecode(begin, ptr - begin, &value, &valuelen,
                             REJECT_CTRL);
     if(result) {
       free(name);
@@ -2108,7 +2108,7 @@ static CURLcode imap_parse_custom_request(struct Curl_easy *data)
 
   if(custom) {
     /* URL decode the custom request */
-    result = Curl_urldecode(data, custom, 0, &imap->custom, NULL, REJECT_CTRL);
+    result = Curl_urldecode(custom, 0, &imap->custom, NULL, REJECT_CTRL);
 
     /* Extract the parameters if specified */
     if(!result) {

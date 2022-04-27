@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -65,6 +65,7 @@
 #include "connect.h"
 #include "select.h"
 #include "progress.h"
+#include "timediff.h"
 
 #  if defined(CURL_STATICLIB) && !defined(CARES_STATICLIB) &&   \
   defined(WIN32)
@@ -290,7 +291,7 @@ int Curl_resolver_getsock(struct Curl_easy *data,
 
   timeout = ares_timeout((ares_channel)data->state.async.resolver, &maxtime,
                          &timebuf);
-  milli = (timeout->tv_sec * 1000) + (timeout->tv_usec/1000);
+  milli = (long)curlx_tvtoms(timeout);
   if(milli == 0)
     milli += 10;
   Curl_expire(data, milli, EXPIRE_ASYNC_NAME);

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2016 - 2021, Steve Holme, <steve_holme@hotmail.com>.
+ * Copyright (C) 2016 - 2022, Steve Holme, <steve_holme@hotmail.com>.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -76,6 +76,8 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
   bool matched = FALSE;
 
 #if defined(CURL_WINDOWS_APP)
+  (void)buildVersion;
+
   /* We have no way to determine the Windows version from Windows apps,
      so let's assume we're running on the target Windows version. */
   const WORD fullVersion = MAKEWORD(minorVersion, majorVersion);

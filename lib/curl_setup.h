@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -99,14 +99,6 @@
 
 #ifdef __OS400__
 #  include "config-os400.h"
-#endif
-
-#ifdef TPF
-#  include "config-tpf.h"
-#endif
-
-#ifdef __VXWORKS__
-#  include "config-vxworks.h"
 #endif
 
 #ifdef __PLAN9__
@@ -272,22 +264,6 @@
 
 #ifdef HAVE_EXTRA_STRDUP_H
 #  include <extra/strdup.h>
-#endif
-
-#ifdef TPF
-#  include <strings.h>    /* for bzero, strcasecmp, and strncasecmp */
-#  include <string.h>     /* for strcpy and strlen */
-#  include <stdlib.h>     /* for rand and srand */
-#  include <sys/socket.h> /* for select and ioctl*/
-#  include <netdb.h>      /* for in_addr_t definition */
-#  include <tpf/sysapi.h> /* for tpf_process_signals */
-   /* change which select is used for libcurl */
-#  define select(a,b,c,d,e) tpf_select_libcurl(a,b,c,d,e)
-#endif
-
-#ifdef __VXWORKS__
-#  include <sockLib.h>    /* for generic BSD socket functions */
-#  include <ioLib.h>      /* for basic I/O interface functions */
 #endif
 
 #ifdef __AMIGA__
@@ -619,14 +595,6 @@
 #  endif
 #endif
 
-#ifdef NETWARE
-int netware_init(void);
-#ifndef __NOVELL_LIBC__
-#include <sys/bsdskt.h>
-#include <sys/timeval.h>
-#endif
-#endif
-
 #if defined(HAVE_LIBIDN2) && defined(HAVE_IDN2_H) && !defined(USE_WIN32_IDN)
 /* The lib and header are present */
 #define USE_LIBIDN2
@@ -641,7 +609,7 @@ int netware_init(void);
 #if defined(USE_GNUTLS) || defined(USE_OPENSSL) || defined(USE_NSS) || \
     defined(USE_MBEDTLS) || \
     defined(USE_WOLFSSL) || defined(USE_SCHANNEL) || \
-    defined(USE_SECTRANSP) || defined(USE_GSKIT) || defined(USE_MESALINK) || \
+    defined(USE_SECTRANSP) || defined(USE_GSKIT) || \
     defined(USE_BEARSSL) || defined(USE_RUSTLS)
 #define USE_SSL    /* SSL support has been enabled */
 #endif
@@ -804,6 +772,11 @@ endings either CRLF or LF so 't' is appropriate.
 #define CURLMAX(x,y) ((x)>(y)?(x):(y))
 #define CURLMIN(x,y) ((x)<(y)?(x):(y))
 
+/* A convenience macro to provide both the string literal and the length of
+   the string literal in one go, useful for functions that take "string,len"
+   as their argument */
+#define STRCONST(x) x,sizeof(x)-1
+
 /* Some versions of the Android SDK is missing the declaration */
 #if defined(HAVE_GETPWUID_R) && defined(HAVE_DECL_GETPWUID_R_MISSING)
 struct passwd;
@@ -821,7 +794,7 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 #define USE_HTTP2
 #endif
 
-#if defined(USE_NGTCP2) || defined(USE_QUICHE)
+#if defined(USE_NGTCP2) || defined(USE_QUICHE) || defined(USE_MSH3)
 #define ENABLE_QUIC
 #endif
 
