@@ -5,6 +5,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -73,6 +74,9 @@ protected:
   std::string ComputeTargetCompilePDB(const std::string& config) const;
 
   std::string GetLinkerLauncher(const std::string& config);
+
+  bool HaveRequiredLanguages(const std::vector<cmSourceFile const*>& sources,
+                             std::set<std::string>& languagesNeeded) const;
 
 private:
   using ByLanguageMap = std::map<std::string, std::string>;
