@@ -170,6 +170,7 @@ foreach(format ${doc_formats})
     # arguments in peculiar order
     add_custom_command(
       OUTPUT ${doc_format_output}
+      ${${format}_pre_commands}
       COMMAND ${SPHINX_EXECUTABLE}
               -M ${format}
               ${CMake_SOURCE_DIR}/Help
@@ -188,6 +189,7 @@ foreach(format ${doc_formats})
     # other formats use standard builder (-b) mode
     add_custom_command(
       OUTPUT ${doc_format_output}
+      ${${format}_pre_commands}
       COMMAND ${SPHINX_EXECUTABLE}
               -c ${CMAKE_CURRENT_BINARY_DIR}
               -d ${CMAKE_CURRENT_BINARY_DIR}/${doctrees}
