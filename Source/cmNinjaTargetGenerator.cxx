@@ -21,6 +21,7 @@
 
 #include "cmComputeLinkInformation.h"
 #include "cmCustomCommandGenerator.h"
+#include "cmFileSet.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
@@ -28,6 +29,7 @@
 #include "cmLocalGenerator.h"
 #include "cmLocalNinjaGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmNinjaNormalTargetGenerator.h"
 #include "cmNinjaUtilityTargetGenerator.h"
 #include "cmOutputConverter.h"
@@ -39,6 +41,7 @@
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmTarget.h"
 #include "cmValue.h"
 #include "cmake.h"
 
@@ -250,6 +253,55 @@ std::string cmNinjaTargetGenerator::ComputeFlagsForObject(
 
     this->LocalGenerator->AppendCompileOptions(
       flags, genexInterpreter.Evaluate(pchOptions, COMPILE_OPTIONS));
+  }
+
+  if (this->NeedCxxModuleSupport(language, config)) {
+    auto const& path = source->GetFullPath();
+    auto const* tgt = this->GeneratorTarget->Target;
+
+    std::string file_set_type;
+
+    for (auto const& name : tgt->GetAllFileSetNames()) {
+      auto const* file_set = tgt->GetFileSet(name);
+      if (!file_set) {
+        this->GetMakefile()->IssueMessage(
+          MessageType::INTERNAL_ERROR,
+          cmStrCat("Target `", tgt->GetName(),
+                   "` is tracked to have file set `", name,
+                   "`, but it was not found."));
+        continue;
+      }
+
+      auto fileEntries = file_set->CompileFileEntries();
+      auto directoryEntries = file_set->CompileDirectoryEntries();
+      auto directories = file_set->EvaluateDirectoryEntries(
+        directoryEntries, this->LocalGenerator, config, this->GeneratorTarget);
+
+      std::map<std::string, std::vector<std::string>> files;
+      for (auto const& entry : fileEntries) {
+        file_set->EvaluateFileEntry(directories, files, entry,
+                                    this->LocalGenerator, config,
+                                    this->GeneratorTarget);
+      }
+
+      for (auto const& it : files) {
+        for (auto const& filename : it.second) {
+          if (filename == path) {
+            file_set_type = file_set->GetType();
+            break;
+          }
+        }
+      }
+
+      if (!file_set_type.empty()) {
+        std::string source_type_var = cmStrCat(
+          "CMAKE_EXPERIMENTAL_CXX_MODULE_SOURCE_TYPE_FLAG_", file_set_type);
+        cmMakefile* mf = this->GetMakefile();
+        if (cmValue source_type_flag = mf->GetDefinition(source_type_var)) {
+          this->LocalGenerator->AppendFlags(flags, *source_type_flag);
+        }
+      }
+    }
   }
 
   return flags;
