@@ -91,12 +91,27 @@ int main(void)
 
 # Internal helper macro.
 # Do NOT even think about using it outside of this file!
-macro(_check_threads_lib LIBNAME FUNCNAME VARNAME)
+macro(_threads_check_libc)
+  if(NOT Threads_FOUND)
+    if(CMAKE_C_COMPILER_LOADED)
+      CHECK_C_SOURCE_COMPILES("${PTHREAD_C_CXX_TEST_SOURCE}" CMAKE_HAVE_LIBC_PTHREAD)
+    elseif(CMAKE_CXX_COMPILER_LOADED)
+      CHECK_CXX_SOURCE_COMPILES("${PTHREAD_C_CXX_TEST_SOURCE}" CMAKE_HAVE_LIBC_PTHREAD)
+    endif()
+    if(CMAKE_HAVE_LIBC_PTHREAD)
+      set(CMAKE_THREAD_LIBS_INIT "")
+      set(Threads_FOUND TRUE)
+    endif()
+  endif ()
+endmacro()
+
+# Internal helper macro.
+# Do NOT even think about using it outside of this file!
+macro(_threads_check_lib LIBNAME FUNCNAME VARNAME)
   if(NOT Threads_FOUND)
      CHECK_LIBRARY_EXISTS(${LIBNAME} ${FUNCNAME} "" ${VARNAME})
      if(${VARNAME})
        set(CMAKE_THREAD_LIBS_INIT "-l${LIBNAME}")
-       set(CMAKE_HAVE_THREADS_LIBRARY 1)
        set(Threads_FOUND TRUE)
      endif()
   endif ()
@@ -104,7 +119,7 @@ endmacro()
 
 # Internal helper macro.
 # Do NOT even think about using it outside of this file!
-macro(_check_pthreads_flag)
+macro(_threads_check_flag_pthread)
   if(NOT Threads_FOUND)
     # If we did not find -lpthreads, -lpthread, or -lthread, look for -pthread
     if(NOT DEFINED THREADS_HAVE_PTHREAD_ARG)
@@ -153,42 +168,29 @@ if(CMAKE_HAVE_PTHREAD_H)
   # We have pthread.h
   # Let's check for the library now.
   #
-  set(CMAKE_HAVE_THREADS_LIBRARY)
-  if(NOT THREADS_HAVE_PTHREAD_ARG)
-    # Check if pthread functions are in normal C library.
-    # We list some pthread functions in PTHREAD_C_CXX_TEST_SOURCE test code.
-    # If the pthread functions already exist in C library, we could just use
-    # them instead of linking to the additional pthread library.
-    if(CMAKE_C_COMPILER_LOADED)
-      CHECK_C_SOURCE_COMPILES("${PTHREAD_C_CXX_TEST_SOURCE}" CMAKE_HAVE_LIBC_PTHREAD)
-    elseif(CMAKE_CXX_COMPILER_LOADED)
-      CHECK_CXX_SOURCE_COMPILES("${PTHREAD_C_CXX_TEST_SOURCE}" CMAKE_HAVE_LIBC_PTHREAD)
-    endif()
-    if(CMAKE_HAVE_LIBC_PTHREAD)
-      set(CMAKE_THREAD_LIBS_INIT "")
-      set(CMAKE_HAVE_THREADS_LIBRARY 1)
-      set(Threads_FOUND TRUE)
-    else()
-      # Check for -pthread first if enabled. This is the recommended
-      # way, but not backwards compatible as one must also pass -pthread
-      # as compiler flag then.
-      if (THREADS_PREFER_PTHREAD_FLAG)
-         _check_pthreads_flag()
-      endif ()
 
-      if(CMAKE_SYSTEM MATCHES "GHS-MULTI")
-        _check_threads_lib(posix pthread_create CMAKE_HAVE_PTHREADS_CREATE)
-      endif()
-      _check_threads_lib(pthreads pthread_create CMAKE_HAVE_PTHREADS_CREATE)
-      _check_threads_lib(pthread  pthread_create CMAKE_HAVE_PTHREAD_CREATE)
-      if(CMAKE_SYSTEM_NAME MATCHES "SunOS")
-          # On sun also check for -lthread
-          _check_threads_lib(thread thr_create CMAKE_HAVE_THR_CREATE)
-      endif()
-    endif()
+  # Check if pthread functions are in normal C library.
+  # We list some pthread functions in PTHREAD_C_CXX_TEST_SOURCE test code.
+  # If the pthread functions already exist in C library, we could just use
+  # them instead of linking to the additional pthread library.
+  _threads_check_libc()
+
+  # Check for -pthread first if enabled. This is the recommended
+  # way, but not backwards compatible as one must also pass -pthread
+  # as compiler flag then.
+  if (THREADS_PREFER_PTHREAD_FLAG)
+    _threads_check_flag_pthread()
+  endif ()
+
+  if(CMAKE_SYSTEM MATCHES "GHS-MULTI")
+    _threads_check_lib(posix pthread_create CMAKE_HAVE_PTHREADS_CREATE)
   endif()
+  _threads_check_lib(pthreads pthread_create CMAKE_HAVE_PTHREADS_CREATE)
+  _threads_check_lib(pthread  pthread_create CMAKE_HAVE_PTHREAD_CREATE)
 
-  _check_pthreads_flag()
+  if (NOT THREADS_PREFER_PTHREAD_FLAG)
+    _threads_check_flag_pthread()
+  endif()
 endif()
 
 if(CMAKE_THREAD_LIBS_INIT OR CMAKE_HAVE_LIBC_PTHREAD)
