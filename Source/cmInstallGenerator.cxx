@@ -91,21 +91,28 @@ void cmInstallGenerator::AddInstallRule(
       os << "\")\n";
     }
     if (files_var) {
-      os << indent << "foreach(_f IN LISTS " << files_var << ")\n";
-      os << indent.Next() << "get_filename_component(_fn \"${_f}\" NAME)\n";
+      os << indent << "foreach(_cmake_abs_file IN LISTS " << files_var
+         << ")\n";
+      os << indent.Next()
+         << "get_filename_component(_cmake_abs_file_name "
+            "\"${_cmake_abs_file}\" NAME)\n";
       os << indent.Next() << "list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES \""
-         << dest << "/${_fn}\")\n";
+         << dest << "/${_cmake_abs_file_name}\")\n";
       os << indent << "endforeach()\n";
+      os << indent << "unset(_cmake_abs_file_name)\n";
+      os << indent << "unset(_cmake_abs_file)\n";
     }
     os << indent << "if(CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)\n";
-    os << indent.Next() << "message(WARNING \"ABSOLUTE path INSTALL "
-       << "DESTINATION : ${CMAKE_ABSOLUTE_DESTINATION_FILES}\")\n";
+    os << indent.Next()
+       << "message(WARNING \"ABSOLUTE path INSTALL "
+          "DESTINATION : ${CMAKE_ABSOLUTE_DESTINATION_FILES}\")\n";
     os << indent << "endif()\n";
 
     os << indent << "if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)\n";
-    os << indent.Next() << "message(FATAL_ERROR \"ABSOLUTE path INSTALL "
-       << "DESTINATION forbidden (by caller): "
-       << "${CMAKE_ABSOLUTE_DESTINATION_FILES}\")\n";
+    os << indent.Next()
+       << "message(FATAL_ERROR \"ABSOLUTE path INSTALL "
+          "DESTINATION forbidden (by caller): "
+          "${CMAKE_ABSOLUTE_DESTINATION_FILES}\")\n";
     os << indent << "endif()\n";
   }
   std::string absDest = ConvertToAbsoluteDestination(dest);
