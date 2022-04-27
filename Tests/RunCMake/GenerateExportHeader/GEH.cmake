@@ -43,14 +43,6 @@ endif()
 
 include(GenerateExportHeader)
 
-set(CMAKE_CXX_STANDARD 98)
-
-# Clang/C2 in C++98 mode cannot properly handle some of MSVC headers
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND
-    CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC")
-  set(CMAKE_CXX_STANDARD 11)
-endif()
-
 add_subdirectory(lib_shared_and_static)
 
 if(CMAKE_SYSTEM_NAME MATCHES "AIX" AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
