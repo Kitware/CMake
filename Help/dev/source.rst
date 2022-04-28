@@ -117,6 +117,11 @@ These are:
   * ``cm::contains``:
     Checks if element or key is contained in container.
 
+* ``<cmext/enum_set>``
+
+  * ``cm::enum_set``:
+    Container to manage set of elements from an ``enum class`` definition.
+
 * ``<cmext/iterator>``:
 
   * ``cm::is_terator``:
