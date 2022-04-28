@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1188,12 +1188,15 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
     fp = stdin;
     fromfile = FALSE;
   }
-  else if(file && !*file) {
-    /* points to a "" string */
+  else if(!file || !*file) {
+    /* points to an empty string or NULL */
     fp = NULL;
   }
-  else
-    fp = file?fopen(file, FOPEN_READTEXT):NULL;
+  else {
+    fp = fopen(file, FOPEN_READTEXT);
+    if(!fp)
+      infof(data, "WARNING: failed to open cookie file \"%s\"", file);
+  }
 
   c->newsession = newsession; /* new session? */
 
@@ -1227,7 +1230,7 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
      */
     remove_expired(c);
 
-    if(fromfile)
+    if(fromfile && fp)
       fclose(fp);
   }
 

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -22,8 +22,23 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_GSKIT) || defined(USE_NSS) || defined(USE_GNUTLS) || \
-    defined(USE_WOLFSSL) || defined(USE_SCHANNEL) || defined(USE_SECTRANSP)
+#if defined(USE_GSKIT) || defined(USE_NSS) || defined(USE_GNUTLS) ||    \
+  defined(USE_WOLFSSL) || defined(USE_SCHANNEL) || defined(USE_SECTRANSP)
+
+#if defined(USE_GSKIT) || defined(USE_WOLFSSL) || defined(USE_SCHANNEL)
+#define WANT_PARSEX509 /* uses Curl_parseX509() */
+#endif
+
+#if defined(USE_GSKIT) || defined(USE_NSS) || defined(USE_GNUTLS) ||    \
+  defined(USE_SCHANNEL) || defined(USE_SECTRANSP)
+#define WANT_EXTRACT_CERTINFO /* uses Curl_extract_certinfo() */
+#define WANT_PARSEX509 /* ... uses Curl_parseX509() */
+#endif
+
+#if defined(USE_GSKIT)
+#define WANT_VERIFYHOST /* uses Curl_verifyhost () */
+#define WANT_PARSEX509 /* ... uses Curl_parseX509() */
+#endif
 
 #include <curl/curl.h>
 #include "urldata.h"
@@ -40,6 +55,56 @@
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
+
+/*
+ * Constants.
+ */
+
+/* Largest supported ASN.1 structure. */
+#define CURL_ASN1_MAX                   ((size_t) 0x40000)      /* 256K */
+
+/* ASN.1 classes. */
+#define CURL_ASN1_UNIVERSAL             0
+#define CURL_ASN1_APPLICATION           1
+#define CURL_ASN1_CONTEXT_SPECIFIC      2
+#define CURL_ASN1_PRIVATE               3
+
+/* ASN.1 types. */
+#define CURL_ASN1_BOOLEAN               1
+#define CURL_ASN1_INTEGER               2
+#define CURL_ASN1_BIT_STRING            3
+#define CURL_ASN1_OCTET_STRING          4
+#define CURL_ASN1_NULL                  5
+#define CURL_ASN1_OBJECT_IDENTIFIER     6
+#define CURL_ASN1_OBJECT_DESCRIPTOR     7
+#define CURL_ASN1_INSTANCE_OF           8
+#define CURL_ASN1_REAL                  9
+#define CURL_ASN1_ENUMERATED            10
+#define CURL_ASN1_EMBEDDED              11
+#define CURL_ASN1_UTF8_STRING           12
+#define CURL_ASN1_RELATIVE_OID          13
+#define CURL_ASN1_SEQUENCE              16
+#define CURL_ASN1_SET                   17
+#define CURL_ASN1_NUMERIC_STRING        18
+#define CURL_ASN1_PRINTABLE_STRING      19
+#define CURL_ASN1_TELETEX_STRING        20
+#define CURL_ASN1_VIDEOTEX_STRING       21
+#define CURL_ASN1_IA5_STRING            22
+#define CURL_ASN1_UTC_TIME              23
+#define CURL_ASN1_GENERALIZED_TIME      24
+#define CURL_ASN1_GRAPHIC_STRING        25
+#define CURL_ASN1_VISIBLE_STRING        26
+#define CURL_ASN1_GENERAL_STRING        27
+#define CURL_ASN1_UNIVERSAL_STRING      28
+#define CURL_ASN1_CHARACTER_STRING      29
+#define CURL_ASN1_BMP_STRING            30
+
+#ifdef WANT_EXTRACT_CERTINFO
+/* ASN.1 OID table entry. */
+struct Curl_OID {
+  const char *numoid;  /* Dotted-numeric OID. */
+  const char *textoid; /* OID name. */
+};
 
 /* ASN.1 OIDs. */
 static const char       cnOID[] = "2.5.4.3";    /* Common name. */
@@ -94,6 +159,8 @@ static const struct Curl_OID OIDtable[] = {
   { "2.16.840.1.101.3.4.2.3",   "sha512" },
   { (const char *) NULL,        (const char *) NULL }
 };
+
+#endif /* WANT_EXTRACT_CERTINFO */
 
 /*
  * Lightweight ASN.1 parser.
@@ -172,6 +239,8 @@ static const char *getASN1Element(struct Curl_asn1Element *elem,
   elem->end = beg + len;
   return elem->end;
 }
+
+#ifdef WANT_EXTRACT_CERTINFO
 
 /*
  * Search the null terminated OID or OID identifier in local table.
@@ -683,28 +752,9 @@ static ssize_t encodeDN(char *buf, size_t buflen, struct Curl_asn1Element *dn)
   return l;
 }
 
-/*
- * Convert an ASN.1 distinguished name into a printable string.
- * Return the dynamically allocated string, or NULL if an error occurs.
- */
-static const char *DNtostr(struct Curl_asn1Element *dn)
-{
-  char *buf = NULL;
-  ssize_t buflen = encodeDN(NULL, 0, dn);
+#endif /* WANT_EXTRACT_CERTINFO */
 
-  if(buflen >= 0) {
-    buf = malloc(buflen + 1);
-    if(buf) {
-      if(encodeDN(buf, buflen + 1, dn) == -1) {
-        free(buf);
-        return NULL;
-      }
-      buf[buflen] = '\0';
-    }
-  }
-  return buf;
-}
-
+#ifdef WANT_PARSEX509
 /*
  * ASN.1 parse an X509 certificate into structure subfields.
  * Syntax is assumed to have already been checked by the SSL backend.
@@ -824,6 +874,9 @@ int Curl_parseX509(struct Curl_X509certificate *cert,
   return 0;
 }
 
+#endif /* WANT_PARSEX509 */
+
+#ifdef WANT_EXTRACT_CERTINFO
 
 /*
  * Copy at most 64-characters, terminate with a newline and returns the
@@ -967,6 +1020,28 @@ static int do_pubkey(struct Curl_easy *data, int certnum,
     }
   }
   return 0;
+}
+
+/*
+ * Convert an ASN.1 distinguished name into a printable string.
+ * Return the dynamically allocated string, or NULL if an error occurs.
+ */
+static const char *DNtostr(struct Curl_asn1Element *dn)
+{
+  char *buf = NULL;
+  ssize_t buflen = encodeDN(NULL, 0, dn);
+
+  if(buflen >= 0) {
+    buf = malloc(buflen + 1);
+    if(buf) {
+      if(encodeDN(buf, buflen + 1, dn) == -1) {
+        free(buf);
+        return NULL;
+      }
+      buf[buflen] = '\0';
+    }
+  }
+  return buf;
 }
 
 CURLcode Curl_extract_certinfo(struct Curl_easy *data,
@@ -1119,7 +1194,7 @@ CURLcode Curl_extract_certinfo(struct Curl_easy *data,
     return result;
 
   /* Generate PEM certificate. */
-  result = Curl_base64_encode(data, cert.certificate.beg,
+  result = Curl_base64_encode(cert.certificate.beg,
                               cert.certificate.end - cert.certificate.beg,
                               &cp1, &cl1);
   if(result)
@@ -1153,10 +1228,12 @@ CURLcode Curl_extract_certinfo(struct Curl_easy *data,
   return result;
 }
 
+#endif /* WANT_EXTRACT_CERTINFO */
+
 #endif /* USE_GSKIT or USE_NSS or USE_GNUTLS or USE_WOLFSSL or USE_SCHANNEL
         * or USE_SECTRANSP */
 
-#if defined(USE_GSKIT)
+#ifdef WANT_VERIFYHOST
 
 static const char *checkOID(const char *beg, const char *end,
                             const char *oid)
@@ -1198,6 +1275,7 @@ CURLcode Curl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
   ssize_t len;
   const char * const hostname = SSL_HOST_NAME();
   const char * const dispname = SSL_HOST_DISPNAME();
+  size_t hostlen = strlen(hostname);
 #ifdef ENABLE_IPV6
   struct in6_addr addr;
 #else
@@ -1253,7 +1331,8 @@ CURLcode Curl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
           len = utf8asn1str(&dnsname, CURL_ASN1_IA5_STRING,
                             name.beg, name.end);
           if(len > 0 && (size_t)len == strlen(dnsname))
-            matched = Curl_cert_hostcheck(dnsname, hostname);
+            matched = Curl_cert_hostcheck(dnsname,
+                                          (size_t)len, hostname, hostlen);
           else
             matched = 0;
           free(dnsname);
@@ -1312,7 +1391,8 @@ CURLcode Curl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
     }
     if(strlen(dnsname) != (size_t) len)         /* Nul byte in string ? */
       failf(data, "SSL: illegal cert name field");
-    else if(Curl_cert_hostcheck((const char *) dnsname, hostname)) {
+    else if(Curl_cert_hostcheck((const char *) dnsname,
+                                len, hostname, hostlen)) {
       infof(data, "  common name: %s (matched)", dnsname);
       free(dnsname);
       return CURLE_OK;
@@ -1326,4 +1406,4 @@ CURLcode Curl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
   return CURLE_PEER_FAILED_VERIFICATION;
 }
 
-#endif /* USE_GSKIT */
+#endif /* WANT_VERIFYHOST */

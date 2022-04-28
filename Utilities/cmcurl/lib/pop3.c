@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -401,7 +401,7 @@ static CURLcode pop3_perform_user(struct Curl_easy *data,
 
   /* Check we have a username and password to authenticate with and end the
      connect phase if we don't */
-  if(!conn->bits.user_passwd) {
+  if(!data->state.aptr.user) {
     state(data, POP3_STOP);
 
     return result;
@@ -435,7 +435,7 @@ static CURLcode pop3_perform_apop(struct Curl_easy *data,
 
   /* Check we have a username and password to authenticate with and end the
      connect phase if we don't */
-  if(!conn->bits.user_passwd) {
+  if(!data->state.aptr.user) {
     state(data, POP3_STOP);
 
     return result;
@@ -545,7 +545,7 @@ static CURLcode pop3_perform_authentication(struct Curl_easy *data,
 
   /* Check we have enough data to authenticate with and end the
      connect phase if we don't */
-  if(!Curl_sasl_can_authenticate(&pop3c->sasl, conn)) {
+  if(!Curl_sasl_can_authenticate(&pop3c->sasl, data)) {
     state(data, POP3_STOP);
     return result;
   }
@@ -571,7 +571,7 @@ static CURLcode pop3_perform_authentication(struct Curl_easy *data,
       result = pop3_perform_user(data, conn);
     else {
       /* Other mechanisms not supported */
-      infof(data, "No known authentication mechanisms supported!");
+      infof(data, "No known authentication mechanisms supported");
       result = CURLE_LOGIN_DENIED;
     }
   }
@@ -924,7 +924,7 @@ static CURLcode pop3_state_command_resp(struct Curl_easy *data,
 
   if(pop3code != '+') {
     state(data, POP3_STOP);
-    return CURLE_RECV_ERROR;
+    return CURLE_WEIRD_SERVER_REPLY;
   }
 
   /* This 'OK' line ends with a CR LF pair which is the two first bytes of the
@@ -1423,7 +1423,7 @@ static CURLcode pop3_parse_url_path(struct Curl_easy *data)
   const char *path = &data->state.up.path[1]; /* skip leading path */
 
   /* URL decode the path for the message ID */
-  return Curl_urldecode(data, path, 0, &pop3->id, NULL, REJECT_CTRL);
+  return Curl_urldecode(path, 0, &pop3->id, NULL, REJECT_CTRL);
 }
 
 /***********************************************************************
@@ -1440,7 +1440,7 @@ static CURLcode pop3_parse_custom_request(struct Curl_easy *data)
 
   /* URL decode the custom request */
   if(custom)
-    result = Curl_urldecode(data, custom, 0, &pop3->custom, NULL, REJECT_CTRL);
+    result = Curl_urldecode(custom, 0, &pop3->custom, NULL, REJECT_CTRL);
 
   return result;
 }

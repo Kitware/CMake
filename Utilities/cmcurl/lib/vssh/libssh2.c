@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -433,7 +433,9 @@ static int sshkeycallback(struct Curl_easy *easy,
  * libssh2 1.2.8 fixed the problem with 32bit ints used for sockets on win64.
  */
 #ifdef HAVE_LIBSSH2_SESSION_HANDSHAKE
-#define libssh2_session_startup(x,y) libssh2_session_handshake(x,y)
+#define session_startup(x,y) libssh2_session_handshake(x, y)
+#else
+#define session_startup(x,y) libssh2_session_startup(x, (int)y)
 #endif
 
 static CURLcode ssh_knownhost(struct Curl_easy *data)
@@ -495,7 +497,7 @@ static CURLcode ssh_knownhost(struct Curl_easy *data)
         break;
 #endif
       default:
-        infof(data, "unsupported key type, can't check knownhosts!");
+        infof(data, "unsupported key type, can't check knownhosts");
         keybit = 0;
         break;
       }
@@ -590,7 +592,7 @@ static CURLcode ssh_knownhost(struct Curl_easy *data)
                                           LIBSSH2_KNOWNHOST_KEYENC_RAW|
                                           keybit, NULL);
         if(addrc)
-          infof(data, "Warning adding the known host %s failed!",
+          infof(data, "WARNING: adding the known host %s failed",
                 conn->host.name);
         else if(rc == CURLKHSTAT_FINE_ADD_TO_FILE ||
                 rc == CURLKHSTAT_FINE_REPLACE) {
@@ -601,7 +603,7 @@ static CURLcode ssh_knownhost(struct Curl_easy *data)
                                         data->set.str[STRING_SSH_KNOWNHOSTS],
                                         LIBSSH2_KNOWNHOST_FILE_OPENSSH);
           if(wrc) {
-            infof(data, "Warning, writing %s failed!",
+            infof(data, "WARNING: writing %s failed",
                   data->set.str[STRING_SSH_KNOWNHOSTS]);
           }
         }
@@ -661,7 +663,7 @@ static CURLcode ssh_check_fingerprint(struct Curl_easy *data)
 
     /* The length of fingerprint is 32 bytes for SHA256.
      * See libssh2_hostkey_hash documentation. */
-    if(Curl_base64_encode(data, fingerprint, 32, &fingerprint_b64,
+    if(Curl_base64_encode(fingerprint, 32, &fingerprint_b64,
                           &fingerprint_b64_len) != CURLE_OK) {
       state(data, SSH_SESSION_FREE);
       sshc->actualcode = CURLE_PEER_FAILED_VERIFICATION;
@@ -692,12 +694,12 @@ static CURLcode ssh_check_fingerprint(struct Curl_easy *data)
      * against a known fingerprint, if available.
      */
     if((pub_pos != b64_pos) ||
-        Curl_strncasecompare(fingerprint_b64, pubkey_sha256, pub_pos) != 1) {
+       strncmp(fingerprint_b64, pubkey_sha256, pub_pos)) {
       free(fingerprint_b64);
 
       failf(data,
-          "Denied establishing ssh session: mismatch sha256 fingerprint. "
-          "Remote %s is not equal to %s", fingerprint_b64, pubkey_sha256);
+            "Denied establishing ssh session: mismatch sha256 fingerprint. "
+            "Remote %s is not equal to %s", fingerprint_b64, pubkey_sha256);
       state(data, SSH_SESSION_FREE);
       sshc->actualcode = CURLE_PEER_FAILED_VERIFICATION;
       return sshc->actualcode;
@@ -705,7 +707,7 @@ static CURLcode ssh_check_fingerprint(struct Curl_easy *data)
 
     free(fingerprint_b64);
 
-    infof(data, "SHA256 checksum match!");
+    infof(data, "SHA256 checksum match");
   }
 
   if(pubkey_md5) {
@@ -725,27 +727,24 @@ static CURLcode ssh_check_fingerprint(struct Curl_easy *data)
       infof(data, "SSH MD5 fingerprint: %s", md5buffer);
     }
 
-    /* Before we authenticate we check the hostkey's MD5 fingerprint
-     * against a known fingerprint, if available.
-     */
-    if(pubkey_md5 && strlen(pubkey_md5) == 32) {
-      if(!fingerprint || !strcasecompare(md5buffer, pubkey_md5)) {
-        if(fingerprint) {
-          failf(data,
+    /* This does NOT verify the length of 'pubkey_md5' separately, which will
+       make the comparison below fail unless it is exactly 32 characters */
+    if(!fingerprint || !strcasecompare(md5buffer, pubkey_md5)) {
+      if(fingerprint) {
+        failf(data,
               "Denied establishing ssh session: mismatch md5 fingerprint. "
               "Remote %s is not equal to %s", md5buffer, pubkey_md5);
-        }
-        else {
-          failf(data,
+      }
+      else {
+        failf(data,
               "Denied establishing ssh session: md5 fingerprint "
               "not available");
-        }
-        state(data, SSH_SESSION_FREE);
-        sshc->actualcode = CURLE_PEER_FAILED_VERIFICATION;
-        return sshc->actualcode;
       }
-      infof(data, "MD5 checksum match!");
+      state(data, SSH_SESSION_FREE);
+      sshc->actualcode = CURLE_PEER_FAILED_VERIFICATION;
+      return sshc->actualcode;
     }
+    infof(data, "MD5 checksum match");
   }
 
   if(!pubkey_md5 && !pubkey_sha256) {
@@ -932,7 +931,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
       /* FALLTHROUGH */
 
     case SSH_S_STARTUP:
-      rc = libssh2_session_startup(sshc->ssh_session, (int)sock);
+      rc = session_startup(sshc->ssh_session, sock);
       if(rc == LIBSSH2_ERROR_EAGAIN) {
         break;
       }
@@ -1468,7 +1467,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
          */
         cp = strchr(cmd, ' ');
         if(!cp) {
-          failf(data, "Syntax error command '%s'. Missing parameter!",
+          failf(data, "Syntax error command '%s', missing parameter",
                 cmd);
           state(data, SSH_SFTP_CLOSE);
           sshc->nextstate = SSH_NO_STATE;
@@ -3227,7 +3226,7 @@ static CURLcode ssh_connect(struct Curl_easy *data, bool *done)
     sshrecv.recvptr = ssh_tls_recv;
     sshsend.sendptr = ssh_tls_send;
 
-    infof(data, "Uses HTTPS proxy!");
+    infof(data, "Uses HTTPS proxy");
     /*
       Setup libssh2 callbacks to make it read/write TLS from the socket.
 

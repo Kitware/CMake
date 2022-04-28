@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -44,10 +44,10 @@ LIB_VTLS_CFILES =           \
   vtls/bearssl.c            \
   vtls/gskit.c              \
   vtls/gtls.c               \
+  vtls/hostcheck.c          \
   vtls/keylog.c             \
   vtls/mbedtls.c            \
   vtls/mbedtls_threadlock.c \
-  vtls/mesalink.c           \
   vtls/nss.c                \
   vtls/openssl.c            \
   vtls/rustls.c             \
@@ -55,30 +55,34 @@ LIB_VTLS_CFILES =           \
   vtls/schannel_verify.c    \
   vtls/sectransp.c          \
   vtls/vtls.c               \
-  vtls/wolfssl.c
+  vtls/wolfssl.c            \
+  vtls/x509asn1.c
 
 LIB_VTLS_HFILES =           \
   vtls/bearssl.h            \
   vtls/gskit.h              \
   vtls/gtls.h               \
+  vtls/hostcheck.h          \
   vtls/keylog.h             \
   vtls/mbedtls.h            \
   vtls/mbedtls_threadlock.h \
-  vtls/mesalink.h           \
   vtls/nssg.h               \
   vtls/openssl.h            \
   vtls/rustls.h             \
   vtls/schannel.h           \
   vtls/sectransp.h          \
   vtls/vtls.h               \
-  vtls/wolfssl.h
+  vtls/wolfssl.h            \
+  vtls/x509asn1.h
 
 LIB_VQUIC_CFILES = \
+  vquic/msh3.c   \
   vquic/ngtcp2.c   \
   vquic/quiche.c   \
   vquic/vquic.c
 
 LIB_VQUIC_HFILES = \
+  vquic/msh3.h   \
   vquic/ngtcp2.h   \
   vquic/quiche.h   \
   vquic/vquic.h
@@ -137,10 +141,11 @@ LIB_CFILES =         \
   getenv.c           \
   getinfo.c          \
   gopher.c           \
+  h2h3.c             \
   hash.c             \
+  headers.c          \
   hmac.c             \
   hostasyn.c         \
-  hostcheck.c        \
   hostip.c           \
   hostip4.c          \
   hostip6.c          \
@@ -170,7 +175,6 @@ LIB_CFILES =         \
   mqtt.c             \
   multi.c            \
   netrc.c            \
-  non-ascii.c        \
   nonblock.c         \
   openldap.c         \
   parsedate.c        \
@@ -203,6 +207,7 @@ LIB_CFILES =         \
   system_win32.c     \
   telnet.c           \
   tftp.c             \
+  timediff.c         \
   timeval.c          \
   transfer.c         \
   url.c              \
@@ -210,8 +215,7 @@ LIB_CFILES =         \
   version.c          \
   version_win32.c    \
   warnless.c         \
-  wildcard.c         \
-  x509asn1.c
+  wildcard.c
 
 LIB_HFILES =         \
   altsvc.h           \
@@ -268,8 +272,9 @@ LIB_HFILES =         \
   ftplistparser.h    \
   getinfo.h          \
   gopher.h           \
+  h2h3.h             \
   hash.h             \
-  hostcheck.h        \
+  headers.h          \
   hostip.h           \
   hsts.h             \
   http.h             \
@@ -291,7 +296,6 @@ LIB_HFILES =         \
   multihandle.h      \
   multiif.h          \
   netrc.h            \
-  non-ascii.h        \
   nonblock.h         \
   parsedate.h        \
   pingpong.h         \
@@ -324,6 +328,7 @@ LIB_HFILES =         \
   system_win32.h     \
   telnet.h           \
   tftp.h             \
+  timediff.h         \
   timeval.h          \
   transfer.h         \
   url.h              \
@@ -331,8 +336,7 @@ LIB_HFILES =         \
   urldata.h          \
   version_win32.h    \
   warnless.h         \
-  wildcard.h         \
-  x509asn1.h
+  wildcard.h
 
 LIB_RCFILES = libcurl.rc
 
