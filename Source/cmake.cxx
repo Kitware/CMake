@@ -2103,6 +2103,21 @@ int cmake::ActualConfigure()
       cmStateEnums::INTERNAL);
   }
 
+  // We want to create the package redirects directory as early as possible,
+  // but not before pre-configure checks have passed. This ensures we get
+  // errors about inappropriate source/binary directories first.
+  const auto redirectsDir =
+    cmStrCat(this->GetHomeOutputDirectory(), "/CMakeFiles/pkgRedirects");
+  cmSystemTools::RemoveADirectory(redirectsDir);
+  if (!cmSystemTools::MakeDirectory(redirectsDir)) {
+    cmSystemTools::Error(
+      "Unable to (re)create the private pkgRedirects directory:\n" +
+      redirectsDir);
+    return -1;
+  }
+  this->AddCacheEntry("CMAKE_FIND_PACKAGE_REDIRECTS_DIR", redirectsDir,
+                      "Value Computed by CMake.", cmStateEnums::STATIC);
+
   // no generator specified on the command line
   if (!this->GlobalGenerator) {
     cmValue genName = this->State->GetInitializedCacheValue("CMAKE_GENERATOR");
