@@ -275,13 +275,14 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
   if(DEFINED CMAKE_CUDA_ARCHITECTURES)
     if(CMAKE_CUDA_ARCHITECTURES STREQUAL "")
       message(FATAL_ERROR "CMAKE_CUDA_ARCHITECTURES must be non-empty if set.")
-    elseif(CMAKE_CUDA_ARCHITECTURES AND NOT CMAKE_CUDA_ARCHITECTURES MATCHES "^([0-9]+[;0-9]*|all|all-major|native)$")
+    elseif(CMAKE_CUDA_ARCHITECTURES AND NOT CMAKE_CUDA_ARCHITECTURES MATCHES "^([0-9]+(-real|-virtual)?(;[0-9]+(-real|-virtual)?|;)*|all|all-major|native)$")
       message(FATAL_ERROR
         "CMAKE_CUDA_ARCHITECTURES:\n"
         "  ${CMAKE_CUDA_ARCHITECTURES}\n"
         "is not one of the following:\n"
-        "* a semicolon-separated list of integers\n"
-        "* a special value: all, all-major, native\n"
+        "  * a semicolon-separated list of integers, each optionally\n"
+        "    followed by '-real' or '-virtual'\n"
+        "  * a special value: all, all-major, native\n"
         )
     endif()
   endif()

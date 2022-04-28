@@ -5,9 +5,9 @@
 
   is not one of the following:
 
-  \* a semicolon-separated list of integers
-
-  \* a special value: all, all-major, native
+    \* a semicolon-separated list of integers, each optionally
+      followed by '-real' or '-virtual'
+    \* a special value: all, all-major, native
 
 Call Stack \(most recent call first\):
   architectures-invalid\.cmake:2 \(enable_language\)

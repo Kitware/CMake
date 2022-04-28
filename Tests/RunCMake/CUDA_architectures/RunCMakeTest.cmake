@@ -20,3 +20,8 @@ if(CMAKE_CUDA_COMPILER_ID STREQUAL "Clang" AND CMAKE_CUDA_ARCHITECTURES)
 endif()
 run_cmake(architectures-off)
 unset(RunCMake_TEST_OPTIONS)
+
+if(CMAKE_CUDA_ARCHITECTURES MATCHES "([0-9]+)")
+  set(arch "${CMAKE_MATCH_1}")
+  run_cmake_with_options(architectures-suffix -Darch=${arch})
+endif()

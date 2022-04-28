@@ -1,0 +1,4 @@
+^(CMake Warning in [^
+]*/Tests/RunCMake/CUDA_architectures/architectures-suffix-build/CMakeFiles/CMakeTmp/CMakeLists.txt:
+  Clang doesn't support disabling CUDA real code generation.
+*)*$
