@@ -78,6 +78,7 @@ run_cmake(ExportInstallCxxModules)
 if (RunCMake_GENERATOR MATCHES "Ninja")
   run_cmake(NinjaDependInfoFileSet)
   run_cmake(NinjaDependInfoExport)
+  run_cmake(NinjaDependInfoBMIInstall)
 else ()
   message(FATAL_ERROR
     "Please add 'DependInfo' tests for the '${RunCMake_GENERATOR}' generator.")

@@ -28,6 +28,7 @@
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalNinjaGenerator.h"
+#include "cmInstallCxxModuleBmiGenerator.h"
 #include "cmInstallExportGenerator.h"
 #include "cmInstallFileSetGenerator.h"
 #include "cmInstallGenerator.h"
@@ -1762,6 +1763,43 @@ void cmNinjaTargetGenerator::WriteTargetDependInfo(std::string const& lang,
   // Add information about the export sets that this target is a member of.
   Json::Value& tdi_exports = tdi["exports"] = Json::arrayValue;
   std::string export_name = this->GeneratorTarget->GetExportName();
+
+  cmInstallCxxModuleBmiGenerator const* bmi_gen = nullptr;
+  for (auto const& ig : this->GetMakefile()->GetInstallGenerators()) {
+    if (auto const* bmig =
+          dynamic_cast<cmInstallCxxModuleBmiGenerator const*>(ig.get())) {
+      if (bmig->GetTarget() == this->GeneratorTarget) {
+        bmi_gen = bmig;
+        continue;
+      }
+    }
+  }
+  if (bmi_gen) {
+    Json::Value tdi_bmi_info = Json::objectValue;
+
+    tdi_bmi_info["permissions"] = bmi_gen->GetFilePermissions();
+    tdi_bmi_info["destination"] = bmi_gen->GetDestination(config);
+    const char* msg_level = "";
+    switch (bmi_gen->GetMessageLevel()) {
+      case cmInstallGenerator::MessageDefault:
+        break;
+      case cmInstallGenerator::MessageAlways:
+        msg_level = "MESSAGE_ALWAYS";
+        break;
+      case cmInstallGenerator::MessageLazy:
+        msg_level = "MESSAGE_LAZY";
+        break;
+      case cmInstallGenerator::MessageNever:
+        msg_level = "MESSAGE_NEVER";
+        break;
+    }
+    tdi_bmi_info["message-level"] = msg_level;
+    tdi_bmi_info["script-location"] = bmi_gen->GetScriptLocation(config);
+
+    tdi["bmi-installation"] = tdi_bmi_info;
+  } else {
+    tdi["bmi-installation"] = Json::nullValue;
+  }
 
   auto const& all_install_exports =
     this->GetGlobalGenerator()->GetExportSets();
