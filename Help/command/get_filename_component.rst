@@ -4,9 +4,15 @@ get_filename_component
 Get a specific component of a full filename.
 
 .. versionchanged:: 3.20
-  This command been superseded by :command:`cmake_path` command, except
-  ``REALPATH`` now offered by :ref:`file(REAL_PATH) <REAL_PATH>` command and
+  This command has been superseded by :command:`cmake_path` command, except
+  ``REALPATH`` now offered by :ref:`file(REAL_PATH)<REAL_PATH>` command and
   ``PROGRAM`` now available in :command:`separate_arguments(PROGRAM)` command.
+
+.. versionchanged:: 3.24
+  The undocumented feature offering the capability to query the ``Windows``
+  registry is superseded by
+  :ref:`cmake_host_system_information(QUERY WINDOWS_REGISTRY)<Query Windows registry>`
+  command.
 
 .. code-block:: cmake
 

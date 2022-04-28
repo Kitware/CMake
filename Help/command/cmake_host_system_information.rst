@@ -261,6 +261,8 @@ Example:
 .. _man 5 os-release: https://www.freedesktop.org/software/systemd/man/os-release.html
 .. _various distribution-specific files: http://linuxmafia.com/faq/Admin/release-files.html
 
+.. _Query Windows registry:
+
 Query Windows registry
 ^^^^^^^^^^^^^^^^^^^^^^
 
