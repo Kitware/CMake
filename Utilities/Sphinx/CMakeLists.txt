@@ -68,7 +68,7 @@ if(SPHINX_HTML)
 
   # we provide the path to the produced html output in the console
   # for tools that support URI protocol schemes
-  set(html_extra_commands
+  set(html_post_commands
     COMMAND ${CMAKE_COMMAND} -E echo "sphinx-build html: HTML documentation generated in file://${CMAKE_CURRENT_BINARY_DIR}/html/index.html"
   )
 
@@ -94,7 +94,7 @@ if(SPHINX_INFO)
 
   # Sphinx texinfo builder supports .info, .txt, .html and .pdf output.
   # SPHINX_INFO controls the .info output.
-  set(texinfo_extra_commands
+  set(texinfo_post_commands
     COMMAND ${MAKEINFO_EXECUTABLE} --no-split -o
       ${CMAKE_CURRENT_BINARY_DIR}/texinfo/cmake.info
       ${CMAKE_CURRENT_BINARY_DIR}/texinfo/cmake.texi
@@ -112,7 +112,7 @@ if(SPHINX_QTHELP)
   endif()
   list(APPEND doc_formats qthelp)
 
-  set(qthelp_extra_commands
+  set(qthelp_post_commands
     # Workaround for assistant prior to
     # https://codereview.qt-project.org/#change,82250 in Qt 4.
     COMMAND ${CMAKE_COMMAND} "-DCSS_DIR=${CMAKE_CURRENT_BINARY_DIR}/qthelp/_static"
@@ -148,7 +148,11 @@ if(CMake_SPHINX_CMAKE_ORG)
     list(APPEND doc_html_opts -A outdated=1)
   endif()
 
-  list(APPEND qthelp_extra_commands
+  list(APPEND html_pre_commands
+    COMMAND ${CMAKE_COMMAND} -Dversion=${CMake_VERSION} -P ${CMAKE_CURRENT_SOURCE_DIR}/tutorial_archive.cmake
+    )
+
+  list(APPEND qthelp_post_commands
     COMMAND ${CMAKE_COMMAND} -E copy
       "${CMAKE_CURRENT_BINARY_DIR}/qthelp/CMake.qch"
       "${CMAKE_CURRENT_BINARY_DIR}/html/CMake.qch"
@@ -170,6 +174,7 @@ foreach(format ${doc_formats})
     # arguments in peculiar order
     add_custom_command(
       OUTPUT ${doc_format_output}
+      ${${format}_pre_commands}
       COMMAND ${SPHINX_EXECUTABLE}
               -M ${format}
               ${CMake_SOURCE_DIR}/Help
@@ -179,7 +184,7 @@ foreach(format ${doc_formats})
               ${sphinx_flags}
               ${doc_${format}_opts}
               > ${doc_format_log} # log stdout, pass stderr
-      ${${format}_extra_commands}
+      ${${format}_post_commands}
       DEPENDS ${doc_format_last}
       COMMENT "sphinx-build ${format}: see Utilities/Sphinx/${doc_format_log}"
       VERBATIM
@@ -188,6 +193,7 @@ foreach(format ${doc_formats})
     # other formats use standard builder (-b) mode
     add_custom_command(
       OUTPUT ${doc_format_output}
+      ${${format}_pre_commands}
       COMMAND ${SPHINX_EXECUTABLE}
               -c ${CMAKE_CURRENT_BINARY_DIR}
               -d ${CMAKE_CURRENT_BINARY_DIR}/${doctrees}
@@ -197,7 +203,7 @@ foreach(format ${doc_formats})
               ${CMake_SOURCE_DIR}/Help
               ${CMAKE_CURRENT_BINARY_DIR}/${format}
               > ${doc_format_log} # log stdout, pass stderr
-      ${${format}_extra_commands}
+      ${${format}_post_commands}
       DEPENDS ${doc_format_last}
       COMMENT "sphinx-build ${format}: see Utilities/Sphinx/${doc_format_log}"
       VERBATIM
