@@ -1121,7 +1121,6 @@ if(APPLE)
     CPack/cmCPackBundleGenerator.cxx
     CPack/cmCPackDragNDropGenerator.cxx
     CPack/cmCPackPKGGenerator.cxx
-    CPack/cmCPackPackageMakerGenerator.cxx
     CPack/cmCPackProductBuildGenerator.cxx
     )
 endif()

@@ -317,7 +317,6 @@ used directly.
    /module/CPackFreeBSD
    /module/CPackNSIS
    /module/CPackNuGet
-   /module/CPackPackageMaker
    /module/CPackProductBuild
    /module/CPackRPM
    /module/CPackWIX

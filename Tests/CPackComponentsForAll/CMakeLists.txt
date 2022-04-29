@@ -5,7 +5,7 @@
 # which supports CPack components.
 #
 # Depending on the CPack generator and on some CPACK_xxx var values
-# the generator may produce a single (NSIS, PackageMaker)
+# the generator may produce a single (NSIS, productbuild)
 # or several package files (Archive Generators, RPM, DEB)
 cmake_minimum_required(VERSION 2.8.3.20101130 FATAL_ERROR)
 project(CPackComponentsForAll)
