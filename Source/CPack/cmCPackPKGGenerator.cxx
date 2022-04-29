@@ -123,7 +123,9 @@ void cmCPackPKGGenerator::WriteDistributionFile(const char* metapackageFile,
   std::ostringstream xContents;
   cmXMLWriter xout(xContents, 1);
 
-  // Installer-wide options
+  // Installer-wide options and domains. These need to be separate from the
+  // choices and background elements added further below so that we can
+  // preserve backward compatibility.
   xout.StartElement("options");
   xout.Attribute("allow-external-scripts", "no");
   xout.Attribute("customize", "allow");
@@ -131,55 +133,69 @@ void cmCPackPKGGenerator::WriteDistributionFile(const char* metapackageFile,
     xout.Attribute("rootVolumeOnly", "false");
   }
   xout.EndElement();
+  this->CreateDomains(xout);
+
+  // In order to preserve backward compatibility, all elements added below
+  // here need to be made available in a variable named
+  // CPACK_PACKAGEMAKER_CHOICES. The above elements are new and only appear
+  // in the CPACK_APPLE_PKG_INSTALLER_CONTENT variable, which is a superset
+  // of what CPACK_PACKAGEMAKER_CHOICES used to provide. The renaming reflects
+  // the fact that CMake has deprecated the PackageMaker generator.
 
   // Create the choice outline, which provides a tree-based view of
   // the components in their groups.
-  xout.StartElement("choices-outline");
+  std::ostringstream choiceOut;
+  cmXMLWriter xChoiceOut(choiceOut, 1);
+  xChoiceOut.StartElement("choices-outline");
 
   // Emit the outline for the groups
   for (auto const& group : this->ComponentGroups) {
     if (group.second.ParentGroup == nullptr) {
-      CreateChoiceOutline(group.second, xout);
+      CreateChoiceOutline(group.second, xChoiceOut);
     }
   }
 
   // Emit the outline for the non-grouped components
   for (auto const& comp : this->Components) {
     if (!comp.second.Group) {
-      xout.StartElement("line");
-      xout.Attribute("choice", comp.first + "Choice");
-      xout.Content(""); // Avoid self-closing tag.
-      xout.EndElement();
+      xChoiceOut.StartElement("line");
+      xChoiceOut.Attribute("choice", comp.first + "Choice");
+      xChoiceOut.Content(""); // Avoid self-closing tag.
+      xChoiceOut.EndElement();
     }
   }
   if (!this->PostFlightComponent.Name.empty()) {
-    xout.StartElement("line");
-    xout.Attribute("choice", PostFlightComponent.Name + "Choice");
-    xout.Content(""); // Avoid self-closing tag.
-    xout.EndElement();
+    xChoiceOut.StartElement("line");
+    xChoiceOut.Attribute("choice", PostFlightComponent.Name + "Choice");
+    xChoiceOut.Content(""); // Avoid self-closing tag.
+    xChoiceOut.EndElement();
   }
-  xout.EndElement(); // choices-outline>
+  xChoiceOut.EndElement(); // choices-outline>
 
   // Create the actual choices
   for (auto const& group : this->ComponentGroups) {
-    CreateChoice(group.second, xout);
+    CreateChoice(group.second, xChoiceOut);
   }
   for (auto const& comp : this->Components) {
-    CreateChoice(comp.second, xout);
+    CreateChoice(comp.second, xChoiceOut);
   }
 
   if (!this->PostFlightComponent.Name.empty()) {
-    CreateChoice(PostFlightComponent, xout);
+    CreateChoice(PostFlightComponent, xChoiceOut);
   }
 
-  this->CreateDomains(xout);
-
-  // default background
-  this->CreateBackground(nullptr, metapackageFile, genName, xout);
+  // default background. These are not strictly part of the choices, but they
+  // must be included in CPACK_PACKAGEMAKER_CHOICES to preserve backward
+  // compatibility.
+  this->CreateBackground(nullptr, metapackageFile, genName, xChoiceOut);
   // Dark Aqua
-  this->CreateBackground("darkAqua", metapackageFile, genName, xout);
+  this->CreateBackground("darkAqua", metapackageFile, genName, xChoiceOut);
 
-  this->SetOption("CPACK_APPLE_PKG_INSTALLER_CONTENT", xContents.str());
+  // Provide the content for substitution into the template. Support both the
+  // old and new variables.
+  this->SetOption("CPACK_PACKAGEMAKER_CHOICES", choiceOut.str());
+  this->SetOption("CPACK_APPLE_PKG_INSTALLER_CONTENT",
+                  cmStrCat(xContents.str(), "    ", choiceOut.str()));
 
   // Create the distribution.dist file in the metapackage to turn it
   // into a distribution package.
