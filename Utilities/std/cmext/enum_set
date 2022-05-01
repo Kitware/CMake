@@ -58,7 +58,11 @@ public:
 
   enum_set_iterator& operator--()
   {
-    while (--this->Index >= 0 && !this->Set->test(this->Index))
+    if (this->Index == 0) {
+      return *this;
+    }
+
+    while (!this->Set->test(--this->Index) && this->Index != 0)
       ;
 
     return *this;
