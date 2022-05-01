@@ -96,7 +96,15 @@ _cmake()
             _filedir
             return
             ;;
-        --build|--install|--open)
+        --build)
+            # Seed the reply with non-directory arguments that we know are
+            # allowed to follow --build. _filedir will then prepend any valid
+            # directory matches to these.
+            COMPREPLY=( $( compgen -W "--preset --list-presets" -- "$cur" ) )
+            _filedir -d
+            return
+            ;;
+        --install|--open)
             _filedir -d
             return
             ;;
@@ -147,6 +155,34 @@ _cmake()
          --help-variable)
             COMPREPLY=( $( compgen -W '$( cmake --help-variable-list \
                 2>/dev/null | grep -v "^cmake version " )' -- "$cur" ) )
+            return
+            ;;
+        --list-presets)
+            local IFS=$'\n'
+            local quoted
+            printf -v quoted %q "$cur"
+
+            if [[ ! "${IFS}${COMP_WORDS[*]}${IFS}" =~ "${IFS}--build${IFS}" ]]; then
+                COMPREPLY=( $( compgen -W "configure${IFS}build${IFS}test${IFS}all" -- "$quoted" ) )
+            fi
+            return
+            ;;
+         --preset)
+            local IFS=$'\n'
+            local quoted
+            printf -v quoted %q "$cur"
+
+            local build_or_configure="configure"
+            if [[ "${IFS}${COMP_WORDS[*]}${IFS}" =~ "${IFS}--build${IFS}" ]]; then
+                build_or_configure="build"
+            fi
+
+            local presets=$( cmake --list-presets="$build_or_configure" 2>/dev/null |
+                grep -o "^  \".*\"" | sed \
+                -e "s/^  //g" \
+                -e "s/\"//g" \
+                -e 's/ /\\\\ /g' )
+            COMPREPLY=( $( compgen -W "$presets" -- "$quoted" ) )
             return
             ;;
     esac

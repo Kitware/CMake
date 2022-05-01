@@ -103,6 +103,17 @@ _ctest()
                 2>/dev/null | grep -v "^ctest version " )' -- "$cur" ) )
             return
             ;;
+         --preset)
+            local IFS=$'\n'
+            local quoted
+            printf -v quoted %q "$cur"
+            COMPREPLY=( $( compgen -W '$( ctest --list-presets 2>/dev/null |
+                grep -o "^  \".*\"" | sed \
+                -e "s/^  //g" \
+                -e "s/\"//g" \
+                -e "s/ /\\\\ /g" )' -- "$quoted" ) )
+            return
+            ;;
     esac
 
     if [[ "$cur" == -* ]]; then
