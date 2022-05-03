@@ -3832,63 +3832,15 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaLinkOptions(
       return false;
     }
 
-    // Would like to use:
-    // cmLinkLineDeviceComputer computer(this->LocalGenerator,
-    //                                   this->LocalGenerator->GetStateSnapshot().GetDirectory());
-    // std::string computed_libs = computer.ComputeLinkLibraries(cli,
-    // std::string{}); but it outputs in "<libA> <libB>" format instead of
-    // "<libA>;<libB>"
-    // Note:
-    // Any modification of this algorithm should be reflected also in
-    // cmLinkLineDeviceComputer
     cmComputeLinkInformation& cli = *pcli;
+    cmLinkLineDeviceComputer computer(
+      this->LocalGenerator,
+      this->LocalGenerator->GetStateSnapshot().GetDirectory());
+    std::vector<BT<std::string>> btLibVec;
+    computer.ComputeLinkLibraries(cli, std::string{}, btLibVec);
     std::vector<std::string> libVec;
-    const auto& libs = cli.GetItems();
-    for (cmComputeLinkInformation::Item const& l : libs) {
-
-      if (l.Target) {
-        auto managedType = l.Target->GetManagedType(configName);
-        // Do not allow C# targets to be added to the LIB listing. LIB files
-        // are used for linking C++ dependencies. C# libraries do not have lib
-        // files. Instead, they compile down to C# reference libraries (DLL
-        // files). The
-        // `<ProjectReference>` elements added to the vcxproj are enough for
-        // the IDE to deduce the DLL file required by other C# projects that
-        // need its reference library.
-        if (managedType == cmGeneratorTarget::ManagedType::Managed) {
-          continue;
-        }
-        const auto type = l.Target->GetType();
-
-        bool skip = false;
-        switch (type) {
-          case cmStateEnums::SHARED_LIBRARY:
-          case cmStateEnums::MODULE_LIBRARY:
-          case cmStateEnums::INTERFACE_LIBRARY:
-            skip = true;
-            break;
-          case cmStateEnums::STATIC_LIBRARY:
-            skip = l.Target->GetPropertyAsBool("CUDA_RESOLVE_DEVICE_SYMBOLS");
-            break;
-          default:
-            break;
-        }
-        if (skip) {
-          continue;
-        }
-      }
-
-      if (l.IsPath == cmComputeLinkInformation::ItemIsPath::Yes) {
-        std::string path =
-          this->LocalGenerator->MaybeRelativeToCurBinDir(l.Value.Value);
-        ConvertToWindowsSlash(path);
-        if (!cmVS10IsTargetsFile(l.Value.Value)) {
-          libVec.push_back(l.HasFeature() ? l.GetFormattedItem(path).Value
-                                          : path);
-        }
-      } else {
-        libVec.push_back(l.Value.Value);
-      }
+    for (auto const& item : btLibVec) {
+      libVec.emplace_back(item.Value);
     }
 
     cudaLinkOptions.AddFlag("AdditionalDependencies", libVec);
