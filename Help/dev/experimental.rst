@@ -36,7 +36,14 @@ For example, add code like the following to a test project:
 The tool specified by ``CMAKE_EXPERIMENTAL_CXX_SCANDEP_SOURCE`` is
 expected to process the translation unit, write preprocessor dependencies
 to the file specified by the ``<DEP_FILE>`` placeholder, and write module
-dependencies to the file specified by the ``<DYNDEP_FILE>`` placeholder.
+dependencies to the file specified by the ``<DYNDEP_FILE>`` placeholder. The
+``CMAKE_EXPERIMENTAL_CXX_SCANDEP_DEPFILE_FORMAT`` file may be set to ``msvc``
+for scandep rules which use ``msvc``-style dependency reporting.
+
+For tools which need to know the file set the source belongs to, the
+``CMAKE_EXPERIMENTAL_CXX_MODULE_SOURCE_TYPE_FLAG_<FILE_SET_TYPE>`` flag may
+be provided so that different source types can be distinguished prior to
+scanning.
 
 The module dependencies should be written in the format described
 by the `P1689r4`_ paper.

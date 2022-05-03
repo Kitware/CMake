@@ -1291,7 +1291,12 @@ void cmTarget::AddInstallIncludeDirectories(cmTargetExport const& te,
 cmStringRange cmTarget::GetInstallIncludeDirectoriesEntries(
   cmTargetExport const& te) const
 {
-  return cmMakeRange(this->impl->InstallIncludeDirectoriesEntries[&te]);
+  auto i = this->impl->InstallIncludeDirectoriesEntries.find(&te);
+  if (i == this->impl->InstallIncludeDirectoriesEntries.end()) {
+    decltype(i->second) empty;
+    return cmMakeRange(empty);
+  }
+  return cmMakeRange(i->second);
 }
 
 cmBTStringRange cmTarget::GetIncludeDirectoriesEntries() const
@@ -2538,6 +2543,17 @@ std::string cmTarget::GetInterfaceFileSetsPropertyName(const std::string& type)
     return "INTERFACE_HEADER_SETS";
   }
   return "";
+}
+
+std::vector<std::string> cmTarget::GetAllFileSetNames() const
+{
+  std::vector<std::string> result;
+
+  for (auto const& it : this->impl->FileSets) {
+    result.push_back(it.first);
+  }
+
+  return result;
 }
 
 std::vector<std::string> cmTarget::GetAllInterfaceFileSets() const
