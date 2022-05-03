@@ -23,7 +23,8 @@ target_include_directories(upstream SYSTEM PUBLIC
 )
 
 add_library(config_specific INTERFACE)
-if(CMAKE_GENERATOR STREQUAL "Xcode")
+get_property(isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+if(isMultiConfig)
   # CMAKE_BUILD_TYPE does not work here for multi-config generators
   target_include_directories(config_specific SYSTEM INTERFACE
     "${CMAKE_CURRENT_SOURCE_DIR}/config_specific"
