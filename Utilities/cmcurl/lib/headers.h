@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_MESALINK_H
-#define HEADER_CURL_MESALINK_H
+#ifndef HEADER_CURL_HEADER_H
+#define HEADER_CURL_HEADER_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,8 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2017 - 2018, Yiming Jing, <jingyiming@baidu.com>
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -24,9 +23,31 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#ifdef USE_MESALINK
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_HEADERS_API)
 
-extern const struct Curl_ssl Curl_ssl_mesalink;
+struct Curl_header_store {
+  struct Curl_llist_element node;
+  char *name; /* points into 'buffer' */
+  char *value; /* points into 'buffer */
+  int request; /* 0 is the first request, then 1.. 2.. */
+  unsigned char type; /* CURLH_* defines */
+  char buffer[1]; /* this is the raw header blob */
+};
 
-#endif /* USE_MESALINK */
-#endif /* HEADER_CURL_MESALINK_H */
+/*
+ * Curl_headers_push() gets passed a full header to store.
+ */
+CURLcode Curl_headers_push(struct Curl_easy *data, const char *header,
+                           unsigned char type);
+
+/*
+ * Curl_headers_cleanup(). Free all stored headers and associated memory.
+ */
+CURLcode Curl_headers_cleanup(struct Curl_easy *data);
+
+#else
+#define Curl_headers_push(x,y,z) CURLE_OK
+#define Curl_headers_cleanup(x) Curl_nop_stmt
+#endif
+
+#endif /* HEADER_CURL_HEADER_H */

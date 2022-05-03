@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -25,6 +25,7 @@
 #ifdef USE_QUICHE
 #include <quiche.h>
 #include <openssl/err.h>
+#include <openssl/ssl.h>
 #include "urldata.h"
 #include "sendf.h"
 #include "strdup.h"
@@ -35,6 +36,10 @@
 #include "connect.h"
 #include "strerror.h"
 #include "vquic.h"
+#include "transfer.h"
+#include "h2h3.h"
+#include "vtls/openssl.h"
+#include "vtls/keylog.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -172,6 +177,68 @@ static void quiche_debug_log(const char *line, void *argp)
 }
 #endif
 
+static void keylog_callback(const SSL *ssl, const char *line)
+{
+  (void)ssl;
+  Curl_tls_keylog_write_line(line);
+}
+
+static SSL_CTX *quic_ssl_ctx(struct Curl_easy *data)
+{
+  SSL_CTX *ssl_ctx = SSL_CTX_new(TLS_method());
+
+  SSL_CTX_set_alpn_protos(ssl_ctx,
+                          (const uint8_t *)QUICHE_H3_APPLICATION_PROTOCOL,
+                          sizeof(QUICHE_H3_APPLICATION_PROTOCOL) - 1);
+
+  SSL_CTX_set_default_verify_paths(ssl_ctx);
+
+  /* Open the file if a TLS or QUIC backend has not done this before. */
+  Curl_tls_keylog_open();
+  if(Curl_tls_keylog_enabled()) {
+    SSL_CTX_set_keylog_callback(ssl_ctx, keylog_callback);
+  }
+
+  {
+    struct connectdata *conn = data->conn;
+    const char * const ssl_cafile = conn->ssl_config.CAfile;
+    const char * const ssl_capath = conn->ssl_config.CApath;
+
+    if(conn->ssl_config.verifypeer) {
+      SSL_CTX_set_verify(ssl_ctx, SSL_VERIFY_PEER, NULL);
+      /* tell OpenSSL where to find CA certificates that are used to verify
+         the server's certificate. */
+      if(!SSL_CTX_load_verify_locations(ssl_ctx, ssl_cafile, ssl_capath)) {
+        /* Fail if we insist on successfully verifying the server. */
+        failf(data, "error setting certificate verify locations:"
+              "  CAfile: %s CApath: %s",
+              ssl_cafile ? ssl_cafile : "none",
+              ssl_capath ? ssl_capath : "none");
+        return NULL;
+      }
+      infof(data, " CAfile: %s", ssl_cafile ? ssl_cafile : "none");
+      infof(data, " CApath: %s", ssl_capath ? ssl_capath : "none");
+    }
+  }
+  return ssl_ctx;
+}
+
+static int quic_init_ssl(struct quicsocket *qs, struct connectdata *conn)
+{
+  /* this will need some attention when HTTPS proxy over QUIC get fixed */
+  const char * const hostname = conn->host.name;
+
+  DEBUGASSERT(!qs->ssl);
+  qs->ssl = SSL_new(qs->sslctx);
+
+  SSL_set_app_data(qs->ssl, qs);
+
+  /* set SNI */
+  SSL_set_tlsext_host_name(qs->ssl, hostname);
+  return 0;
+}
+
+
 CURLcode Curl_quic_connect(struct Curl_easy *data,
                            struct connectdata *conn, curl_socket_t sockfd,
                            int sockindex,
@@ -179,7 +246,6 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
 {
   CURLcode result;
   struct quicsocket *qs = &conn->hequic[sockindex];
-  char *keylog_file = NULL;
   char ipbuf[40];
   int port;
 
@@ -216,24 +282,24 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
                                        sizeof(QUICHE_H3_APPLICATION_PROTOCOL)
                                        - 1);
 
+  qs->sslctx = quic_ssl_ctx(data);
+  if(!qs->sslctx)
+    return CURLE_QUIC_CONNECT_ERROR;
+
+  if(quic_init_ssl(qs, conn))
+    return CURLE_QUIC_CONNECT_ERROR;
+
   result = Curl_rand(data, qs->scid, sizeof(qs->scid));
   if(result)
     return result;
 
-  keylog_file = getenv("SSLKEYLOGFILE");
-
-  if(keylog_file)
-    quiche_config_log_keys(qs->cfg);
-
-  qs->conn = quiche_connect(conn->host.name, (const uint8_t *) qs->scid,
-                            sizeof(qs->scid), addr, addrlen, qs->cfg);
+  qs->conn = quiche_conn_new_with_tls((const uint8_t *) qs->scid,
+                                      sizeof(qs->scid), NULL, 0, addr, addrlen,
+                                      qs->cfg, qs->ssl, false);
   if(!qs->conn) {
     failf(data, "can't create quiche connection");
     return CURLE_OUT_OF_MEMORY;
   }
-
-  if(keylog_file)
-    quiche_conn_set_keylog_path(qs->conn, keylog_file);
 
   /* Known to not work on Windows */
 #if !defined(WIN32) && defined(HAVE_QUICHE_CONN_SET_QLOG_FD)
@@ -284,7 +350,8 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-static CURLcode quiche_has_connected(struct connectdata *conn,
+static CURLcode quiche_has_connected(struct Curl_easy *data,
+                                     struct connectdata *conn,
                                      int sockindex,
                                      int tempindex)
 {
@@ -297,6 +364,21 @@ static CURLcode quiche_has_connected(struct connectdata *conn,
   conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
   conn->httpversion = 30;
   conn->bundle->multiuse = BUNDLE_MULTIPLEX;
+
+  if(conn->ssl_config.verifyhost) {
+    X509 *server_cert;
+    server_cert = SSL_get_peer_certificate(qs->ssl);
+    if(!server_cert) {
+      return CURLE_PEER_FAILED_VERIFICATION;
+    }
+    result = Curl_ossl_verifyhost(data, conn, server_cert);
+    X509_free(server_cert);
+    if(result)
+      return result;
+    infof(data, "Verified certificate just fine");
+  }
+  else
+    infof(data, "Skipped certificate verification");
 
   qs->h3config = quiche_h3_config_new();
   if(!qs->h3config)
@@ -344,8 +426,8 @@ CURLcode Curl_quic_is_connected(struct Curl_easy *data,
 
   if(quiche_conn_is_established(qs->conn)) {
     *done = TRUE;
-    result = quiche_has_connected(conn, 0, sockindex);
-    DEBUGF(infof(data, "quiche established connection!"));
+    result = quiche_has_connected(data, conn, 0, sockindex);
+    DEBUGF(infof(data, "quiche established connection"));
   }
 
   return result;
@@ -392,7 +474,18 @@ static CURLcode process_ingress(struct Curl_easy *data, int sockfd,
       break;
 
     if(recvd < 0) {
+      if(QUICHE_ERR_TLS_FAIL == recvd) {
+        long verify_ok = SSL_get_verify_result(qs->ssl);
+        if(verify_ok != X509_V_OK) {
+          failf(data, "SSL certificate problem: %s",
+                X509_verify_cert_error_string(verify_ok));
+
+          return CURLE_PEER_FAILED_VERIFICATION;
+        }
+      }
+
       failf(data, "quiche_conn_recv() == %zd", recvd);
+
       return CURLE_RECV_ERROR;
     }
   } while(1);
@@ -451,7 +544,7 @@ static int cb_each_header(uint8_t *name, size_t name_len,
   struct h3h1header *headers = (struct h3h1header *)argp;
   size_t olen = 0;
 
-  if((name_len == 7) && !strncmp(":status", (char *)name, 7)) {
+  if((name_len == 7) && !strncmp(H2H3_PSEUDO_STATUS, (char *)name, 7)) {
     msnprintf(headers->dest,
               headers->destlen, "HTTP/3 %.*s\n",
               (int) value_len, value);
@@ -496,6 +589,19 @@ static ssize_t h3_stream_recv(struct Curl_easy *data,
     return -1;
   }
 
+  if(qs->h3_recving) {
+    /* body receiving state */
+    rcode = quiche_h3_recv_body(qs->h3c, qs->conn, stream->stream3_id,
+                                (unsigned char *)buf, buffersize);
+    if(rcode <= 0) {
+      recvd = -1;
+      qs->h3_recving = FALSE;
+      /* fall through into the while loop below */
+    }
+    else
+      recvd = rcode;
+  }
+
   while(recvd < 0) {
     int64_t s = quiche_h3_conn_poll(qs->h3c, qs->conn, &ev);
     if(s < 0)
@@ -537,8 +643,14 @@ static ssize_t h3_stream_recv(struct Curl_easy *data,
         recvd = -1;
         break;
       }
+      qs->h3_recving = TRUE;
       recvd += rcode;
       break;
+
+    case QUICHE_H3_EVENT_RESET:
+      streamclose(conn, "Stream reset");
+      *curlcode = CURLE_PARTIAL_FILE;
+      return -1;
 
     case QUICHE_H3_EVENT_FINISHED:
       streamclose(conn, "End of stream");
@@ -585,10 +697,12 @@ static ssize_t h3_stream_send(struct Curl_easy *data,
     sent = len;
   }
   else {
-    H3BUGF(infof(data, "Pass on %zd body bytes to quiche", len));
     sent = quiche_h3_send_body(qs->h3c, qs->conn, stream->stream3_id,
                                (uint8_t *)mem, len, FALSE);
-    if(sent < 0) {
+    if(sent == QUICHE_H3_ERR_DONE) {
+      sent = 0;
+    }
+    else if(sent < 0) {
       *curlcode = CURLE_SEND_ERROR;
       return -1;
     }
@@ -618,175 +732,34 @@ void Curl_quic_ver(char *p, size_t len)
 static CURLcode http_request(struct Curl_easy *data, const void *mem,
                              size_t len)
 {
-  /*
-   */
   struct connectdata *conn = data->conn;
   struct HTTP *stream = data->req.p.http;
   size_t nheader;
-  size_t i;
-  size_t authority_idx;
-  char *hdbuf = (char *)mem;
-  char *end, *line_end;
   int64_t stream3_id;
   quiche_h3_header *nva = NULL;
   struct quicsocket *qs = conn->quic;
   CURLcode result = CURLE_OK;
+  struct h2h3req *hreq = NULL;
 
   stream->h3req = TRUE; /* senf off! */
 
-  /* Calculate number of headers contained in [mem, mem + len). Assumes a
-     correctly generated HTTP header field block. */
-  nheader = 0;
-  for(i = 1; i < len; ++i) {
-    if(hdbuf[i] == '\n' && hdbuf[i - 1] == '\r') {
-      ++nheader;
-      ++i;
-    }
-  }
-  if(nheader < 2)
+  result = Curl_pseudo_headers(data, mem, len, &hreq);
+  if(result)
     goto fail;
+  nheader = hreq->entries;
 
-  /* We counted additional 2 \r\n in the first and last line. We need 3
-     new headers: :method, :path and :scheme. Therefore we need one
-     more space. */
-  nheader += 1;
   nva = malloc(sizeof(quiche_h3_header) * nheader);
   if(!nva) {
     result = CURLE_OUT_OF_MEMORY;
     goto fail;
   }
-
-  /* Extract :method, :path from request line
-     We do line endings with CRLF so checking for CR is enough */
-  line_end = memchr(hdbuf, '\r', len);
-  if(!line_end) {
-    result = CURLE_BAD_FUNCTION_ARGUMENT; /* internal error */
-    goto fail;
-  }
-
-  /* Method does not contain spaces */
-  end = memchr(hdbuf, ' ', line_end - hdbuf);
-  if(!end || end == hdbuf)
-    goto fail;
-  nva[0].name = (unsigned char *)":method";
-  nva[0].name_len = strlen((char *)nva[0].name);
-  nva[0].value = (unsigned char *)hdbuf;
-  nva[0].value_len = (size_t)(end - hdbuf);
-
-  hdbuf = end + 1;
-
-  /* Path may contain spaces so scan backwards */
-  end = NULL;
-  for(i = (size_t)(line_end - hdbuf); i; --i) {
-    if(hdbuf[i - 1] == ' ') {
-      end = &hdbuf[i - 1];
-      break;
-    }
-  }
-  if(!end || end == hdbuf)
-    goto fail;
-  nva[1].name = (unsigned char *)":path";
-  nva[1].name_len = strlen((char *)nva[1].name);
-  nva[1].value = (unsigned char *)hdbuf;
-  nva[1].value_len = (size_t)(end - hdbuf);
-
-  nva[2].name = (unsigned char *)":scheme";
-  nva[2].name_len = strlen((char *)nva[2].name);
-  if(conn->handler->flags & PROTOPT_SSL)
-    nva[2].value = (unsigned char *)"https";
-  else
-    nva[2].value = (unsigned char *)"http";
-  nva[2].value_len = strlen((char *)nva[2].value);
-
-
-  authority_idx = 0;
-  i = 3;
-  while(i < nheader) {
-    size_t hlen;
-
-    hdbuf = line_end + 2;
-
-    /* check for next CR, but only within the piece of data left in the given
-       buffer */
-    line_end = memchr(hdbuf, '\r', len - (hdbuf - (char *)mem));
-    if(!line_end || (line_end == hdbuf))
-      goto fail;
-
-    /* header continuation lines are not supported */
-    if(*hdbuf == ' ' || *hdbuf == '\t')
-      goto fail;
-
-    for(end = hdbuf; end < line_end && *end != ':'; ++end)
-      ;
-    if(end == hdbuf || end == line_end)
-      goto fail;
-    hlen = end - hdbuf;
-
-    if(hlen == 4 && strncasecompare("host", hdbuf, 4)) {
-      authority_idx = i;
-      nva[i].name = (unsigned char *)":authority";
-      nva[i].name_len = strlen((char *)nva[i].name);
-    }
-    else {
-      nva[i].name_len = (size_t)(end - hdbuf);
-      /* Lower case the header name for HTTP/3 */
-      Curl_strntolower((char *)hdbuf, hdbuf, nva[i].name_len);
-      nva[i].name = (unsigned char *)hdbuf;
-    }
-    hdbuf = end + 1;
-    while(*hdbuf == ' ' || *hdbuf == '\t')
-      ++hdbuf;
-    end = line_end;
-
-#if 0 /* This should probably go in more or less like this */
-    switch(inspect_header((const char *)nva[i].name, nva[i].namelen, hdbuf,
-                          end - hdbuf)) {
-    case HEADERINST_IGNORE:
-      /* skip header fields prohibited by HTTP/2 specification. */
-      --nheader;
-      continue;
-    case HEADERINST_TE_TRAILERS:
-      nva[i].value = (uint8_t*)"trailers";
-      nva[i].value_len = sizeof("trailers") - 1;
-      break;
-    default:
-      nva[i].value = (unsigned char *)hdbuf;
-      nva[i].value_len = (size_t)(end - hdbuf);
-    }
-#endif
-    nva[i].value = (unsigned char *)hdbuf;
-    nva[i].value_len = (size_t)(end - hdbuf);
-
-    ++i;
-  }
-
-  /* :authority must come before non-pseudo header fields */
-  if(authority_idx && authority_idx != AUTHORITY_DST_IDX) {
-    quiche_h3_header authority = nva[authority_idx];
-    for(i = authority_idx; i > AUTHORITY_DST_IDX; --i) {
-      nva[i] = nva[i - 1];
-    }
-    nva[i] = authority;
-  }
-
-  /* Warn stream may be rejected if cumulative length of headers is too
-     large. */
-#define MAX_ACC 60000  /* <64KB to account for some overhead */
-  {
-    size_t acc = 0;
-
-    for(i = 0; i < nheader; ++i) {
-      acc += nva[i].name_len + nva[i].value_len;
-
-      H3BUGF(infof(data, "h3 [%.*s: %.*s]",
-                   nva[i].name_len, nva[i].name,
-                   nva[i].value_len, nva[i].value));
-    }
-
-    if(acc > MAX_ACC) {
-      infof(data, "http_request: Warning: The cumulative length of all "
-            "headers exceeds %d bytes and that could cause the "
-            "stream to be rejected.", MAX_ACC);
+  else {
+    unsigned int i;
+    for(i = 0; i < nheader; i++) {
+      nva[i].name = (unsigned char *)hreq->header[i].name;
+      nva[i].name_len = hreq->header[i].namelen;
+      nva[i].value = (unsigned char *)hreq->header[i].value;
+      nva[i].value_len = hreq->header[i].valuelen;
     }
   }
 
@@ -808,7 +781,7 @@ static CURLcode http_request(struct Curl_easy *data, const void *mem,
                                          (uint8_t *)data->set.postfields,
                                          stream->upload_left, TRUE);
       if(sent <= 0) {
-        failf(data, "quiche_h3_send_body failed!");
+        failf(data, "quiche_h3_send_body failed");
         result = CURLE_SEND_ERROR;
       }
       stream->upload_left = 0; /* nothing left to send */
@@ -833,10 +806,12 @@ static CURLcode http_request(struct Curl_easy *data, const void *mem,
         stream3_id, (void *)data);
   stream->stream3_id = stream3_id;
 
+  Curl_pseudo_free(hreq);
   return CURLE_OK;
 
 fail:
   free(nva);
+  Curl_pseudo_free(hreq);
   return result;
 }
 

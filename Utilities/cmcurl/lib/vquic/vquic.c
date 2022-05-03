@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -67,7 +67,7 @@ CURLcode Curl_qlogdir(struct Curl_easy *data,
       result = Curl_dyn_add(&fname, hex);
     }
     if(!result)
-      result = Curl_dyn_add(&fname, ".qlog");
+      result = Curl_dyn_add(&fname, ".sqlog");
 
     if(!result) {
       int qlogfd = open(Curl_dyn_ptr(&fname), QLOGMODE,

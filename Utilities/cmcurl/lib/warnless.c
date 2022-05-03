@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -360,7 +360,7 @@ curl_socket_t curlx_sitosk(int i)
 
 #endif /* USE_WINSOCK */
 
-#if defined(WIN32) || defined(_WIN32)
+#if defined(WIN32)
 
 ssize_t curlx_read(int fd, void *buf, size_t count)
 {
@@ -372,7 +372,7 @@ ssize_t curlx_write(int fd, const void *buf, size_t count)
   return (ssize_t)write(fd, buf, curlx_uztoui(count));
 }
 
-#endif /* WIN32 || _WIN32 */
+#endif /* WIN32 */
 
 #if defined(__INTEL_COMPILER) && defined(__unix__)
 

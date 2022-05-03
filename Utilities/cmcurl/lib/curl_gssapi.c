@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2011 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2011 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -60,7 +60,7 @@ OM_uint32 Curl_gss_init_sec_context(
 #ifdef GSS_C_DELEG_POLICY_FLAG
     req_flags |= GSS_C_DELEG_POLICY_FLAG;
 #else
-    infof(data, "warning: support for CURLGSSAPI_DELEGATION_POLICY_FLAG not "
+    infof(data, "WARNING: support for CURLGSSAPI_DELEGATION_POLICY_FLAG not "
         "compiled in");
 #endif
   }

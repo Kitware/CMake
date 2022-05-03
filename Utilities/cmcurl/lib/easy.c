@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -68,7 +68,6 @@
 #include "slist.h"
 #include "mime.h"
 #include "amigaos.h"
-#include "non-ascii.h"
 #include "warnless.h"
 #include "multiif.h"
 #include "sigpipe.h"
@@ -165,12 +164,6 @@ static CURLcode global_init(long flags, bool memoryfuncs)
   if(!Curl_amiga_init()) {
     DEBUGF(fprintf(stderr, "Error: Curl_amiga_init failed\n"));
     goto fail;
-  }
-#endif
-
-#ifdef NETWARE
-  if(netware_init()) {
-    DEBUGF(fprintf(stderr, "Warning: LONG namespace not available\n"));
   }
 #endif
 
@@ -933,8 +926,6 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
   }
 #endif /* USE_ARES */
 
-  Curl_convert_setup(outcurl);
-
   Curl_initinfo(outcurl);
 
   outcurl->magic = CURLEASY_MAGIC_NUMBER;
@@ -1111,7 +1102,7 @@ static CURLcode easy_connection(struct Curl_easy *data,
 
   /* only allow these to be called on handles with CURLOPT_CONNECT_ONLY */
   if(!data->set.connect_only) {
-    failf(data, "CONNECT_ONLY is required!");
+    failf(data, "CONNECT_ONLY is required");
     return CURLE_UNSUPPORTED_PROTOCOL;
   }
 

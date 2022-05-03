@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2019 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2019 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,7 +21,7 @@
  ***************************************************************************/
 /*
  * The Alt-Svc: header is defined in RFC 7838:
- * https://tools.ietf.org/html/rfc7838
+ * https://datatracker.ietf.org/doc/html/rfc7838
  */
 #include "curl_setup.h"
 
@@ -53,6 +53,8 @@
 #if defined(USE_QUICHE) && !defined(UNITTESTS)
 #define H3VERSION "h3-29"
 #elif defined(USE_NGTCP2) && !defined(UNITTESTS)
+#define H3VERSION "h3-29"
+#elif defined(USE_MSH3) && !defined(UNITTESTS)
 #define H3VERSION "h3-29"
 #else
 #define H3VERSION "h3"
@@ -264,7 +266,7 @@ struct altsvcinfo *Curl_altsvc_init(void)
 
   /* set default behavior */
   asi->flags = CURLALTSVC_H1
-#ifdef USE_NGHTTP2
+#ifdef USE_HTTP2
     | CURLALTSVC_H2
 #endif
 #ifdef ENABLE_QUIC

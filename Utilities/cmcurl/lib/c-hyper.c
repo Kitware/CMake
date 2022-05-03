@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -142,7 +142,7 @@ static int hyper_each_header(void *userdata,
       return HYPER_ITER_BREAK;
   }
   else {
-    if(Curl_dyn_add(&data->state.headerb, "\r\n"))
+    if(Curl_dyn_addn(&data->state.headerb, STRCONST("\r\n")))
       return HYPER_ITER_BREAK;
   }
   len = Curl_dyn_len(&data->state.headerb);
@@ -293,10 +293,8 @@ static CURLcode status_line(struct Curl_easy *data,
       writetype |= CLIENTWRITE_BODY;
     result = Curl_client_write(data, writetype,
                                Curl_dyn_ptr(&data->state.headerb), len);
-    if(result) {
-      data->state.hresult = CURLE_ABORTED_BY_CALLBACK;
-      return HYPER_ITER_BREAK;
-    }
+    if(result)
+      return result;
   }
   data->info.header_size += (long)len;
   data->req.headerbytecount += (long)len;
@@ -416,7 +414,7 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
     else if(h->endtask == task) {
       /* end of transfer */
       *done = TRUE;
-      infof(data, "hyperstream is done!");
+      infof(data, "hyperstream is done");
       if(!k->bodywrites) {
         /* hyper doesn't always call the body write callback */
         bool stilldone;
@@ -806,7 +804,7 @@ static void http1xx_cb(void *arg, struct hyper_response *resp)
   }
 
   if(data->state.hresult)
-    infof(data, "ERROR in 1xx, bail out!");
+    infof(data, "ERROR in 1xx, bail out");
 }
 
 /*
@@ -906,6 +904,8 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     hyper_clientconn_options_http2(options, 1);
     h2 = TRUE;
   }
+  hyper_clientconn_options_set_preserve_header_case(options, 1);
+  hyper_clientconn_options_set_preserve_header_order(options, 1);
 
   hyper_clientconn_options_exec(options, h->exec);
 
@@ -1022,7 +1022,8 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
       goto error;
   }
 
-  p_accept = Curl_checkheaders(data, "Accept")?NULL:"Accept: */*\r\n";
+  p_accept = Curl_checkheaders(data,
+                               STRCONST("Accept"))?NULL:"Accept: */*\r\n";
   if(p_accept) {
     result = Curl_hyper_header(data, headers, p_accept);
     if(result)
@@ -1036,8 +1037,8 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
 
 #ifndef CURL_DISABLE_PROXY
   if(conn->bits.httpproxy && !conn->bits.tunnel_proxy &&
-     !Curl_checkheaders(data, "Proxy-Connection") &&
-     !Curl_checkProxyheaders(data, conn, "Proxy-Connection")) {
+     !Curl_checkheaders(data, STRCONST("Proxy-Connection")) &&
+     !Curl_checkProxyheaders(data, conn, STRCONST("Proxy-Connection"))) {
     result = Curl_hyper_header(data, headers, "Proxy-Connection: Keep-Alive");
     if(result)
       goto error;
@@ -1045,7 +1046,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
 #endif
 
   Curl_safefree(data->state.aptr.ref);
-  if(data->state.referer && !Curl_checkheaders(data, "Referer")) {
+  if(data->state.referer && !Curl_checkheaders(data, STRCONST("Referer"))) {
     data->state.aptr.ref = aprintf("Referer: %s\r\n", data->state.referer);
     if(!data->state.aptr.ref)
       result = CURLE_OUT_OF_MEMORY;
@@ -1055,7 +1056,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
       goto error;
   }
 
-  if(!Curl_checkheaders(data, "Accept-Encoding") &&
+  if(!Curl_checkheaders(data, STRCONST("Accept-Encoding")) &&
      data->set.str[STRING_ENCODING]) {
     Curl_safefree(data->state.aptr.accept_encoding);
     data->state.aptr.accept_encoding =
