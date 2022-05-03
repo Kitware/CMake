@@ -11,6 +11,7 @@
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmPolicies.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
@@ -58,6 +59,17 @@ cmFindCommon::cmFindCommon(cmExecutionStatus& status)
   this->InitializeSearchPathGroups();
 
   this->DebugMode = false;
+
+  // Windows Registry views
+  // When policy CMP0134 is not NEW, rely on previous behavior:
+  if (this->Makefile->GetPolicyStatus(cmPolicies::CMP0134) !=
+      cmPolicies::NEW) {
+    if (this->Makefile->GetDefinition("CMAKE_SIZEOF_VOID_P") == "8") {
+      this->RegistryView = cmWindowsRegistry::View::Reg64;
+    } else {
+      this->RegistryView = cmWindowsRegistry::View::Reg32;
+    }
+  }
 }
 
 void cmFindCommon::SetError(std::string const& e)

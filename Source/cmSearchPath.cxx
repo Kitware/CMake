@@ -6,11 +6,14 @@
 #include <cassert>
 #include <utility>
 
+#include <cm/optional>
+
 #include "cmFindCommon.h"
 #include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
+#include "cmWindowsRegistry.h"
 
 cmSearchPath::cmSearchPath(cmFindCommon* findCmd)
   : FC(findCmd)
@@ -46,26 +49,13 @@ void cmSearchPath::AddUserPath(const std::string& path)
 
   std::vector<std::string> outPaths;
 
-  // We should view the registry as the target application would view
-  // it.
-  cmSystemTools::KeyWOW64 view = cmSystemTools::KeyWOW64_32;
-  cmSystemTools::KeyWOW64 other_view = cmSystemTools::KeyWOW64_64;
-  if (this->FC->Makefile->PlatformIs64Bit()) {
-    view = cmSystemTools::KeyWOW64_64;
-    other_view = cmSystemTools::KeyWOW64_32;
-  }
-
-  // Expand using the view of the target application.
-  std::string expanded = path;
-  cmSystemTools::ExpandRegistryValues(expanded, view);
-  cmSystemTools::GlobDirs(expanded, outPaths);
-
-  // Executables can be either 32-bit or 64-bit, so expand using the
-  // alternative view.
-  if (expanded != path && this->FC->CMakePathName == "PROGRAM") {
-    expanded = path;
-    cmSystemTools::ExpandRegistryValues(expanded, other_view);
-    cmSystemTools::GlobDirs(expanded, outPaths);
+  cmWindowsRegistry registry(*this->FC->Makefile,
+                             cmWindowsRegistry::SimpleTypes);
+  auto expandedPaths = registry.ExpandExpression(path, this->FC->RegistryView);
+  if (expandedPaths) {
+    for (const auto& expandedPath : expandedPaths.value()) {
+      cmSystemTools::GlobDirs(expandedPath, outPaths);
+    }
   }
 
   // Process them all from the current directory

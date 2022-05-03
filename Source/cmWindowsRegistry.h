@@ -7,6 +7,7 @@
 
 #include <cm/optional>
 #include <cm/string_view>
+#include <cmext/enum_set>
 #include <cmext/string_view>
 
 class cmMakefile;
@@ -14,8 +15,6 @@ class cmMakefile;
 class cmWindowsRegistry
 {
 public:
-  cmWindowsRegistry(cmMakefile&);
-
   enum class View
   {
     Both,
@@ -26,6 +25,30 @@ public:
     Reg32,
     Reg64
   };
+
+  // Registry supported types
+  enum class ValueType : std::uint8_t
+  {
+    Reg_SZ,
+    Reg_EXPAND_SZ,
+    Reg_MULTI_SZ,
+    Reg_DWORD,
+    Reg_QWORD
+  };
+  using ValueTypeSet = cm::enum_set<ValueType>;
+
+  // All types as defined by enum ValueType
+  static const ValueTypeSet AllTypes;
+  // same as AllTYpes but without type REG_MULTI_SZ
+  static const ValueTypeSet SimpleTypes;
+
+  cmWindowsRegistry(cmMakefile&,
+                    const ValueTypeSet& supportedTypes = AllTypes);
+
+  // Helper routine to convert string to enum value
+  static cm::optional<View> ToView(cm::string_view name);
+  // Helper routine to convert enum to string
+  static cm::string_view FromView(View view);
 
   cm::optional<std::string> ReadValue(cm::string_view key,
                                       View view = View::Both,
@@ -43,6 +66,12 @@ public:
   cm::optional<std::vector<std::string>> GetSubKeys(cm::string_view key,
                                                     View view = View::Both);
 
+  // Expand an expression which may contains multiple references
+  // to registry keys.
+  // Depending of the view specified, one or two expansions can be done.
+  cm::optional<std::vector<std::string>> ExpandExpression(
+    cm::string_view expression, View view, cm::string_view separator = "\0"_s);
+
   cm::string_view GetLastError() const;
 
 private:
@@ -50,6 +79,7 @@ private:
   std::vector<View> ComputeViews(View view);
 
   int TargetSize = 0;
+  ValueTypeSet SupportedTypes = AllTypes;
 #endif
   std::string LastError;
 };

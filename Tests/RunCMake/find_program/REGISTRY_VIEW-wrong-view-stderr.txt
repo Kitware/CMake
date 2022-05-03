@@ -1,0 +1,4 @@
+CMake Error at REGISTRY_VIEW-wrong-view.cmake:[0-9]+ \(find_program\):
+  find_program given invalid value for "REGISTRY_VIEW": WRONG_VIEW
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

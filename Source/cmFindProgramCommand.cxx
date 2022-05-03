@@ -12,6 +12,8 @@
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
+#include "cmWindowsRegistry.h"
 
 class cmExecutionStatus;
 
@@ -172,6 +174,18 @@ cmFindProgramCommand::cmFindProgramCommand(cmExecutionStatus& status)
   this->NamesPerDirAllowed = true;
   this->VariableDocumentation = "Path to a program.";
   this->VariableType = cmStateEnums::FILEPATH;
+  // Windows Registry views
+  // When policy CMP0134 is not NEW, rely on previous behavior:
+  if (this->Makefile->GetPolicyStatus(cmPolicies::CMP0134) !=
+      cmPolicies::NEW) {
+    if (this->Makefile->GetDefinition("CMAKE_SIZEOF_VOID_P") == "8") {
+      this->RegistryView = cmWindowsRegistry::View::Reg64_32;
+    } else {
+      this->RegistryView = cmWindowsRegistry::View::Reg32_64;
+    }
+  } else {
+    this->RegistryView = cmWindowsRegistry::View::Both;
+  }
 }
 
 // cmFindProgramCommand

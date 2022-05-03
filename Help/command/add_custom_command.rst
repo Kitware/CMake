@@ -288,12 +288,12 @@ The options are:
 
   .. productionlist:: depfile
     depfile: `rule`*
-    rule: `targets` (`:` (`separator` `dependencies`?)?)? `eol`
+    rule: `targets` (':' (`separator` `dependencies`?)?)? `eol`
     targets: `target` (`separator` `target`)* `separator`*
     target: `pathname`
     dependencies: `dependency` (`separator` `dependency`)* `separator`*
     dependency: `pathname`
-    separator: (space | line_continue)+
+    separator: (`space` | `line_continue`)+
     line_continue: '\' `eol`
     space: ' ' | '\t'
     pathname: `character`+

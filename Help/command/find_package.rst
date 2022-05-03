@@ -1,6 +1,12 @@
 find_package
 ------------
 
+.. |FIND_XXX| replace:: find_package
+.. |FIND_ARGS_XXX| replace:: <PackageName>
+.. |FIND_XXX_REGISTRY_VIEW_DEFAULT| replace:: ``TARGET``
+.. |CMAKE_FIND_ROOT_PATH_MODE_XXX| replace::
+   :variable:`CMAKE_FIND_ROOT_PATH_MODE_PACKAGE`
+
 .. only:: html
 
    .. contents::
@@ -74,11 +80,12 @@ sections on this page.
 Basic Signature
 ^^^^^^^^^^^^^^^
 
-.. code-block:: cmake
+.. parsed-literal::
 
   find_package(<PackageName> [version] [EXACT] [QUIET] [MODULE]
                [REQUIRED] [[COMPONENTS] [components...]]
                [OPTIONAL_COMPONENTS components...]
+               [REGISTRY_VIEW  (64|32|64_32|32_64|HOST|TARGET|BOTH)]
                [NO_POLICY_SCOPE]
                [GLOBAL])
 
@@ -115,6 +122,12 @@ there is no single expected behavior and target packages should clearly
 define what occurs in such cases.  Common arrangements include assuming it
 should find all components, no components or some well-defined subset of the
 available components.
+
+.. versionadded:: 3.24
+  The ``REGISTRY_VIEW`` keyword enables to specify which registry views must be
+  queried. This keyword is only meaningful on ``Windows`` platform and will be
+  ignored on all other ones. Formally, it is up to the target package how to
+  interpret the registry view information given to it.
 
 Specifying the ``GLOBAL`` keyword will promote all imported targets to
 a global scope in the importing project. Alternatively this functionality
@@ -155,7 +168,7 @@ of the ``NO_POLICY_SCOPE`` option.
 Full Signature
 ^^^^^^^^^^^^^^
 
-.. code-block:: cmake
+.. parsed-literal::
 
   find_package(<PackageName> [version] [EXACT] [QUIET]
                [REQUIRED] [[COMPONENTS] [components...]]
@@ -167,6 +180,7 @@ Full Signature
                [CONFIGS config1 [config2 ...]]
                [HINTS path1 [path2 ... ]]
                [PATHS path1 [path2 ... ]]
+               [REGISTRY_VIEW  (64|32|64_32|32_64|HOST|TARGET|BOTH)]
                [PATH_SUFFIXES suffix1 [suffix2 ...]]
                [NO_DEFAULT_PATH]
                [NO_PACKAGE_ROOT_PATH]
@@ -271,6 +285,19 @@ that order).
 * Paths with ``libx32`` are searched on platforms using the x32 ABI
   if the :prop_gbl:`FIND_LIBRARY_USE_LIBX32_PATHS` property is set to ``TRUE``.
 * The ``lib`` path is always searched.
+
+.. versionchanged:: 3.24
+  On ``Windows`` platform, it is possible to include registry queries as part
+  of the directories specified through ``HINTS`` and ``PATHS`` keywords. Such
+  specifications will be ignored on all other platforms.
+
+.. include:: FIND_XXX_REGISTRY_QUERY.txt
+
+.. versionadded:: 3.24
+  ``REGISTRY_VIEW`` can be specified to manage ``Windows`` registry queries
+  specified as part of ``PATHS`` and ``HINTS``.
+
+.. include:: FIND_XXX_REGISTRY_VIEW.txt
 
 If ``PATH_SUFFIXES`` is specified, the suffixes are appended to each
 (``W``) or (``U``) directory entry one-by-one.
@@ -381,11 +408,6 @@ of the above locations to be ignored.
 .. versionadded:: 3.16
    Added the ``CMAKE_FIND_USE_<CATEGORY>`` variables to globally disable
    various search locations.
-
-.. |FIND_XXX| replace:: find_package
-.. |FIND_ARGS_XXX| replace:: <PackageName>
-.. |CMAKE_FIND_ROOT_PATH_MODE_XXX| replace::
-   :variable:`CMAKE_FIND_ROOT_PATH_MODE_PACKAGE`
 
 .. include:: FIND_XXX_ROOT.txt
 .. include:: FIND_XXX_ORDER.txt
@@ -557,6 +579,8 @@ restores their original state before returning):
   True if ``REQUIRED`` option was given
 ``<PackageName>_FIND_QUIETLY``
   True if ``QUIET`` option was given
+``<PackageName>_FIND_REGISTRY_VIEW``
+  The requested view if ``REGISTRY_VIEW`` option was given
 ``<PackageName>_FIND_VERSION``
   Full requested version string
 ``<PackageName>_FIND_VERSION_MAJOR``
