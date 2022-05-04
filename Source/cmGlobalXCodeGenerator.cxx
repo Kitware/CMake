@@ -468,6 +468,10 @@ bool cmGlobalXCodeGenerator::Open(const std::string& bindir,
     }
     CFRelease(cfStr);
   }
+#else
+  (void)bindir;
+  (void)projectName;
+  (void)dryRun;
 #endif
 
   return ret;
