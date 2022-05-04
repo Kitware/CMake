@@ -31,6 +31,7 @@ using ConfigurePreset = cmCMakePresetsGraph::ConfigurePreset;
 using BuildPreset = cmCMakePresetsGraph::BuildPreset;
 using TestPreset = cmCMakePresetsGraph::TestPreset;
 using ArchToolsetStrategy = cmCMakePresetsGraph::ArchToolsetStrategy;
+using JSONHelperBuilder = cmJSONHelperBuilder<ReadFileResult>;
 
 constexpr int MIN_VERSION = 1;
 constexpr int MAX_VERSION = 5;
@@ -59,29 +60,26 @@ std::unique_ptr<cmCMakePresetsGraphInternal::NotCondition> InvertCondition(
   return retval;
 }
 
-auto const ConditionStringHelper = cmJSONStringHelper<ReadFileResult>(
+auto const ConditionStringHelper = JSONHelperBuilder::String(
   ReadFileResult::READ_OK, ReadFileResult::INVALID_CONDITION);
 
-auto const ConditionBoolHelper = cmJSONBoolHelper<ReadFileResult>(
+auto const ConditionBoolHelper = JSONHelperBuilder::Bool(
   ReadFileResult::READ_OK, ReadFileResult::INVALID_CONDITION);
 
-auto const ConditionStringListHelper =
-  cmJSONVectorHelper<std::string, ReadFileResult>(
-    ReadFileResult::READ_OK, ReadFileResult::INVALID_CONDITION,
-    ConditionStringHelper);
+auto const ConditionStringListHelper = JSONHelperBuilder::Vector<std::string>(
+  ReadFileResult::READ_OK, ReadFileResult::INVALID_CONDITION,
+  ConditionStringHelper);
 
 auto const ConstConditionHelper =
-  cmJSONObjectHelper<cmCMakePresetsGraphInternal::ConstCondition,
-                     ReadFileResult>(ReadFileResult::READ_OK,
-                                     ReadFileResult::INVALID_CONDITION, false)
+  JSONHelperBuilder::Object<cmCMakePresetsGraphInternal::ConstCondition>(
+    ReadFileResult::READ_OK, ReadFileResult::INVALID_CONDITION, false)
     .Bind<std::string>("type"_s, nullptr, ConditionStringHelper, true)
     .Bind("value"_s, &cmCMakePresetsGraphInternal::ConstCondition::Value,
           ConditionBoolHelper, true);
 
 auto const EqualsConditionHelper =
-  cmJSONObjectHelper<cmCMakePresetsGraphInternal::EqualsCondition,
-                     ReadFileResult>(ReadFileResult::READ_OK,
-                                     ReadFileResult::INVALID_CONDITION, false)
+  JSONHelperBuilder::Object<cmCMakePresetsGraphInternal::EqualsCondition>(
+    ReadFileResult::READ_OK, ReadFileResult::INVALID_CONDITION, false)
     .Bind<std::string>("type"_s, nullptr, ConditionStringHelper, true)
     .Bind("lhs"_s, &cmCMakePresetsGraphInternal::EqualsCondition::Lhs,
           ConditionStringHelper, true)
@@ -89,9 +87,8 @@ auto const EqualsConditionHelper =
           ConditionStringHelper, true);
 
 auto const InListConditionHelper =
-  cmJSONObjectHelper<cmCMakePresetsGraphInternal::InListCondition,
-                     ReadFileResult>(ReadFileResult::READ_OK,
-                                     ReadFileResult::INVALID_CONDITION, false)
+  JSONHelperBuilder::Object<cmCMakePresetsGraphInternal::InListCondition>(
+    ReadFileResult::READ_OK, ReadFileResult::INVALID_CONDITION, false)
     .Bind<std::string>("type"_s, nullptr, ConditionStringHelper, true)
     .Bind("string"_s, &cmCMakePresetsGraphInternal::InListCondition::String,
           ConditionStringHelper, true)
@@ -99,9 +96,8 @@ auto const InListConditionHelper =
           ConditionStringListHelper, true);
 
 auto const MatchesConditionHelper =
-  cmJSONObjectHelper<cmCMakePresetsGraphInternal::MatchesCondition,
-                     ReadFileResult>(ReadFileResult::READ_OK,
-                                     ReadFileResult::INVALID_CONDITION, false)
+  JSONHelperBuilder::Object<cmCMakePresetsGraphInternal::MatchesCondition>(
+    ReadFileResult::READ_OK, ReadFileResult::INVALID_CONDITION, false)
     .Bind<std::string>("type"_s, nullptr, ConditionStringHelper, true)
     .Bind("string"_s, &cmCMakePresetsGraphInternal::MatchesCondition::String,
           ConditionStringHelper, true)
@@ -113,23 +109,20 @@ ReadFileResult SubConditionHelper(
   const Json::Value* value);
 
 auto const ListConditionVectorHelper =
-  cmJSONVectorHelper<std::unique_ptr<cmCMakePresetsGraph::Condition>,
-                     ReadFileResult>(ReadFileResult::READ_OK,
-                                     ReadFileResult::INVALID_CONDITION,
-                                     SubConditionHelper);
+  JSONHelperBuilder::Vector<std::unique_ptr<cmCMakePresetsGraph::Condition>>(
+    ReadFileResult::READ_OK, ReadFileResult::INVALID_CONDITION,
+    SubConditionHelper);
 auto const AnyAllOfConditionHelper =
-  cmJSONObjectHelper<cmCMakePresetsGraphInternal::AnyAllOfCondition,
-                     ReadFileResult>(ReadFileResult::READ_OK,
-                                     ReadFileResult::INVALID_CONDITION, false)
+  JSONHelperBuilder::Object<cmCMakePresetsGraphInternal::AnyAllOfCondition>(
+    ReadFileResult::READ_OK, ReadFileResult::INVALID_CONDITION, false)
     .Bind<std::string>("type"_s, nullptr, ConditionStringHelper, true)
     .Bind("conditions"_s,
           &cmCMakePresetsGraphInternal::AnyAllOfCondition::Conditions,
           ListConditionVectorHelper);
 
 auto const NotConditionHelper =
-  cmJSONObjectHelper<cmCMakePresetsGraphInternal::NotCondition,
-                     ReadFileResult>(ReadFileResult::READ_OK,
-                                     ReadFileResult::INVALID_CONDITION, false)
+  JSONHelperBuilder::Object<cmCMakePresetsGraphInternal::NotCondition>(
+    ReadFileResult::READ_OK, ReadFileResult::INVALID_CONDITION, false)
     .Bind<std::string>("type"_s, nullptr, ConditionStringHelper, true)
     .Bind("condition"_s,
           &cmCMakePresetsGraphInternal::NotCondition::SubCondition,
@@ -251,37 +244,36 @@ ReadFileResult EnvironmentHelper(cm::optional<std::string>& out,
   return ReadFileResult::INVALID_PRESET;
 }
 
-auto const VersionIntHelper = cmJSONIntHelper<ReadFileResult>(
+auto const VersionIntHelper = JSONHelperBuilder::Int(
   ReadFileResult::READ_OK, ReadFileResult::INVALID_VERSION);
 
-auto const VersionHelper = cmJSONRequiredHelper<int, ReadFileResult>(
+auto const VersionHelper = JSONHelperBuilder::Required<int>(
   ReadFileResult::NO_VERSION, VersionIntHelper);
 
 auto const RootVersionHelper =
-  cmJSONObjectHelper<int, ReadFileResult>(ReadFileResult::READ_OK,
-                                          ReadFileResult::INVALID_ROOT)
+  JSONHelperBuilder::Object<int>(ReadFileResult::READ_OK,
+                                 ReadFileResult::INVALID_ROOT)
     .Bind("version"_s, VersionHelper, false);
 
-auto const CMakeVersionUIntHelper = cmJSONUIntHelper<ReadFileResult>(
+auto const CMakeVersionUIntHelper = JSONHelperBuilder::UInt(
   ReadFileResult::READ_OK, ReadFileResult::INVALID_VERSION);
 
 auto const CMakeVersionHelper =
-  cmJSONObjectHelper<CMakeVersion, ReadFileResult>(
+  JSONHelperBuilder::Object<CMakeVersion>(
     ReadFileResult::READ_OK, ReadFileResult::INVALID_CMAKE_VERSION, false)
     .Bind("major"_s, &CMakeVersion::Major, CMakeVersionUIntHelper, false)
     .Bind("minor"_s, &CMakeVersion::Minor, CMakeVersionUIntHelper, false)
     .Bind("patch"_s, &CMakeVersion::Patch, CMakeVersionUIntHelper, false);
 
-auto const IncludeHelper = cmJSONStringHelper<ReadFileResult>(
+auto const IncludeHelper = JSONHelperBuilder::String(
   ReadFileResult::READ_OK, ReadFileResult::INVALID_INCLUDE);
 
-auto const IncludeVectorHelper =
-  cmJSONVectorHelper<std::string, ReadFileResult>(
-    ReadFileResult::READ_OK, ReadFileResult::INVALID_INCLUDE, IncludeHelper);
+auto const IncludeVectorHelper = JSONHelperBuilder::Vector<std::string>(
+  ReadFileResult::READ_OK, ReadFileResult::INVALID_INCLUDE, IncludeHelper);
 
 auto const RootPresetsHelper =
-  cmJSONObjectHelper<RootPresets, ReadFileResult>(
-    ReadFileResult::READ_OK, ReadFileResult::INVALID_ROOT, false)
+  JSONHelperBuilder::Object<RootPresets>(ReadFileResult::READ_OK,
+                                         ReadFileResult::INVALID_ROOT, false)
     .Bind<int>("version"_s, nullptr, VersionHelper)
     .Bind("configurePresets"_s, &RootPresets::ConfigurePresets,
           cmCMakePresetsGraphInternal::ConfigurePresetsHelper, false)
@@ -302,7 +294,7 @@ namespace cmCMakePresetsGraphInternal {
 cmCMakePresetsGraph::ReadFileResult PresetStringHelper(
   std::string& out, const Json::Value* value)
 {
-  static auto const helper = cmJSONStringHelper<ReadFileResult>(
+  static auto const helper = JSONHelperBuilder::String(
     ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESET);
 
   return helper(out, value);
@@ -311,7 +303,7 @@ cmCMakePresetsGraph::ReadFileResult PresetStringHelper(
 cmCMakePresetsGraph::ReadFileResult PresetVectorStringHelper(
   std::vector<std::string>& out, const Json::Value* value)
 {
-  static auto const helper = cmJSONVectorHelper<std::string, ReadFileResult>(
+  static auto const helper = JSONHelperBuilder::Vector<std::string>(
     ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESET,
     cmCMakePresetsGraphInternal::PresetStringHelper);
 
@@ -321,7 +313,7 @@ cmCMakePresetsGraph::ReadFileResult PresetVectorStringHelper(
 cmCMakePresetsGraph::ReadFileResult PresetBoolHelper(bool& out,
                                                      const Json::Value* value)
 {
-  static auto const helper = cmJSONBoolHelper<ReadFileResult>(
+  static auto const helper = JSONHelperBuilder::Bool(
     ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESET);
 
   return helper(out, value);
@@ -330,7 +322,7 @@ cmCMakePresetsGraph::ReadFileResult PresetBoolHelper(bool& out,
 cmCMakePresetsGraph::ReadFileResult PresetOptionalBoolHelper(
   cm::optional<bool>& out, const Json::Value* value)
 {
-  static auto const helper = cmJSONOptionalHelper<bool, ReadFileResult>(
+  static auto const helper = JSONHelperBuilder::Optional<bool>(
     ReadFileResult::READ_OK, PresetBoolHelper);
 
   return helper(out, value);
@@ -339,7 +331,7 @@ cmCMakePresetsGraph::ReadFileResult PresetOptionalBoolHelper(
 cmCMakePresetsGraph::ReadFileResult PresetIntHelper(int& out,
                                                     const Json::Value* value)
 {
-  static auto const helper = cmJSONIntHelper<ReadFileResult>(
+  static auto const helper = JSONHelperBuilder::Int(
     ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESET);
 
   return helper(out, value);
@@ -348,8 +340,8 @@ cmCMakePresetsGraph::ReadFileResult PresetIntHelper(int& out,
 cmCMakePresetsGraph::ReadFileResult PresetOptionalIntHelper(
   cm::optional<int>& out, const Json::Value* value)
 {
-  static auto const helper = cmJSONOptionalHelper<int, ReadFileResult>(
-    ReadFileResult::READ_OK, PresetIntHelper);
+  static auto const helper =
+    JSONHelperBuilder::Optional<int>(ReadFileResult::READ_OK, PresetIntHelper);
 
   return helper(out, value);
 }
@@ -357,7 +349,7 @@ cmCMakePresetsGraph::ReadFileResult PresetOptionalIntHelper(
 cmCMakePresetsGraph::ReadFileResult PresetVectorIntHelper(
   std::vector<int>& out, const Json::Value* value)
 {
-  static auto const helper = cmJSONVectorHelper<int, ReadFileResult>(
+  static auto const helper = JSONHelperBuilder::Vector<int>(
     ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESET, PresetIntHelper);
 
   return helper(out, value);
@@ -409,10 +401,9 @@ cmCMakePresetsGraph::ReadFileResult EnvironmentMapHelper(
   std::map<std::string, cm::optional<std::string>>& out,
   const Json::Value* value)
 {
-  static auto const helper =
-    cmJSONMapHelper<cm::optional<std::string>, ReadFileResult>(
-      ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESET,
-      EnvironmentHelper);
+  static auto const helper = JSONHelperBuilder::Map<cm::optional<std::string>>(
+    ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESET,
+    EnvironmentHelper);
 
   return helper(out, value);
 }
