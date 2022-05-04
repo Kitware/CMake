@@ -90,50 +90,35 @@ if(_JAVA_HOME)
 endif()
 if (WIN32)
   macro (_JAVA_GET_INSTALLED_VERSIONS _KIND)
-    execute_process(COMMAND REG QUERY HKLM\\SOFTWARE\\JavaSoft\\${_KIND}
+    execute_process(COMMAND REG QUERY "HKLM\\SOFTWARE\\JavaSoft\\${_KIND}"
       RESULT_VARIABLE _JAVA_RESULT
       OUTPUT_VARIABLE _JAVA_VERSIONS
       ERROR_QUIET)
     if (NOT  _JAVA_RESULT)
-      string (REGEX MATCHALL "HKEY_LOCAL_MACHINE\\\\SOFTWARE\\\\JavaSoft\\\\${_KIND}\\\\[0-9.]+" _JAVA_VERSIONS "${_JAVA_VERSIONS}")
+      string (REGEX MATCHALL "HKEY_LOCAL_MACHINE\\\\SOFTWARE\\\\JavaSoft\\\\${_KIND}\\\\[0-9._]+" _JAVA_VERSIONS "${_JAVA_VERSIONS}")
+      string (REGEX REPLACE "HKEY_LOCAL_MACHINE\\\\SOFTWARE\\\\JavaSoft\\\\${_KIND}\\\\([0-9._]+)" "\\1" _JAVA_VERSIONS "${_JAVA_VERSIONS}")
       if (_JAVA_VERSIONS)
         # sort versions. Most recent first
-        ## handle version 9 apart from other versions to get correct ordering
-        set (_JAVA_V9 ${_JAVA_VERSIONS})
-        list (FILTER _JAVA_VERSIONS EXCLUDE REGEX "${_KIND}\\\\9")
-        list (SORT _JAVA_VERSIONS)
-        list (REVERSE _JAVA_VERSIONS)
-        list (FILTER _JAVA_V9 INCLUDE REGEX "${_KIND}\\\\9")
-        list (SORT _JAVA_V9)
-        list (REVERSE _JAVA_V9)
-        list (APPEND _JAVA_VERSIONS ${_JAVA_V9})
-        foreach (_JAVA_HINT IN LISTS _JAVA_VERSIONS)
-          list(APPEND _JAVA_HINTS "[${_JAVA_HINT};JavaHome]/bin")
+        list (SORT _JAVA_VERSIONS COMPARE NATURAL ORDER DESCENDING)
+        foreach (_JAVA_VERSION IN LISTS _JAVA_VERSIONS)
+          string(REPLACE "_" "." _JAVA_CMAKE_VERSION "${_JAVA_VERSION}")
+          if (Java_FIND_VERSION_EXACT
+              AND NOT _JAVA_CMAKE_VERSION MATCHES "^${Java_FIND_VERSION}")
+            continue()
+          endif()
+          list(APPEND _JAVA_HINTS "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\${_KIND}\\${_JAVA_VERSION};JavaHome]/bin")
         endforeach()
       endif()
     endif()
   endmacro()
 
-  # search for installed versions for version 9 and upper
+  # for version 9 and upper
   _JAVA_GET_INSTALLED_VERSIONS("JDK")
   _JAVA_GET_INSTALLED_VERSIONS("JRE")
 
-  list(APPEND _JAVA_HINTS
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.9;JavaHome]/bin"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.8;JavaHome]/bin"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.7;JavaHome]/bin"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.6;JavaHome]/bin"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.5;JavaHome]/bin"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.4;JavaHome]/bin"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.3;JavaHome]/bin"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Runtime Environment\\1.9;JavaHome]/bin"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Runtime Environment\\1.8;JavaHome]/bin"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Runtime Environment\\1.7;JavaHome]/bin"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Runtime Environment\\1.6;JavaHome]/bin"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Runtime Environment\\1.5;JavaHome]/bin"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Runtime Environment\\1.4;JavaHome]/bin"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Runtime Environment\\1.3;JavaHome]/bin"
-  )
+  # for versions older than 9
+  _JAVA_GET_INSTALLED_VERSIONS("Java Development Kit")
+  _JAVA_GET_INSTALLED_VERSIONS("Java Runtime Environment")
 endif()
 
 # Hard-coded guesses should still go in PATHS. This ensures that the user
@@ -336,13 +321,13 @@ else()
     find_package_handle_standard_args(Java
       REQUIRED_VARS Java_JAVA_EXECUTABLE Java_JAR_EXECUTABLE Java_JAVAC_EXECUTABLE
                     Java_JAVAH_EXECUTABLE Java_JAVADOC_EXECUTABLE
-      VERSION_VAR Java_VERSION_STRING
+      VERSION_VAR Java_VERSION
       )
   else()
     find_package_handle_standard_args(Java
       REQUIRED_VARS Java_JAVA_EXECUTABLE Java_JAR_EXECUTABLE Java_JAVAC_EXECUTABLE
                     Java_JAVADOC_EXECUTABLE
-      VERSION_VAR Java_VERSION_STRING
+      VERSION_VAR Java_VERSION
       )
   endif()
 endif()
