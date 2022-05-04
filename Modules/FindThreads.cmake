@@ -156,41 +156,27 @@ macro(_threads_check_flag_pthread)
   endif()
 endmacro()
 
-# Do we have pthreads?
-if(CMAKE_C_COMPILER_LOADED)
-  CHECK_INCLUDE_FILE("pthread.h" CMAKE_HAVE_PTHREAD_H)
-else()
-  CHECK_INCLUDE_FILE_CXX("pthread.h" CMAKE_HAVE_PTHREAD_H)
+# Check if pthread functions are in normal C library.
+# We list some pthread functions in PTHREAD_C_CXX_TEST_SOURCE test code.
+# If the pthread functions already exist in C library, we could just use
+# them instead of linking to the additional pthread library.
+_threads_check_libc()
+
+# Check for -pthread first if enabled. This is the recommended
+# way, but not backwards compatible as one must also pass -pthread
+# as compiler flag then.
+if (THREADS_PREFER_PTHREAD_FLAG)
+  _threads_check_flag_pthread()
+endif ()
+
+if(CMAKE_SYSTEM MATCHES "GHS-MULTI")
+  _threads_check_lib(posix pthread_create CMAKE_HAVE_PTHREADS_CREATE)
 endif()
+_threads_check_lib(pthreads pthread_create CMAKE_HAVE_PTHREADS_CREATE)
+_threads_check_lib(pthread  pthread_create CMAKE_HAVE_PTHREAD_CREATE)
 
-if(CMAKE_HAVE_PTHREAD_H)
-  #
-  # We have pthread.h
-  # Let's check for the library now.
-  #
-
-  # Check if pthread functions are in normal C library.
-  # We list some pthread functions in PTHREAD_C_CXX_TEST_SOURCE test code.
-  # If the pthread functions already exist in C library, we could just use
-  # them instead of linking to the additional pthread library.
-  _threads_check_libc()
-
-  # Check for -pthread first if enabled. This is the recommended
-  # way, but not backwards compatible as one must also pass -pthread
-  # as compiler flag then.
-  if (THREADS_PREFER_PTHREAD_FLAG)
-    _threads_check_flag_pthread()
-  endif ()
-
-  if(CMAKE_SYSTEM MATCHES "GHS-MULTI")
-    _threads_check_lib(posix pthread_create CMAKE_HAVE_PTHREADS_CREATE)
-  endif()
-  _threads_check_lib(pthreads pthread_create CMAKE_HAVE_PTHREADS_CREATE)
-  _threads_check_lib(pthread  pthread_create CMAKE_HAVE_PTHREAD_CREATE)
-
-  if (NOT THREADS_PREFER_PTHREAD_FLAG)
-    _threads_check_flag_pthread()
-  endif()
+if (NOT THREADS_PREFER_PTHREAD_FLAG)
+  _threads_check_flag_pthread()
 endif()
 
 if(CMAKE_THREAD_LIBS_INIT OR CMAKE_HAVE_LIBC_PTHREAD)
