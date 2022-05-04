@@ -582,7 +582,8 @@ Scope
  They are never cached.
 
 References
- `Variable References`_ have the form ``$ENV{<variable>}``.
+ `Variable References`_ have the form ``$ENV{<variable>}``, using the
+ :variable:`ENV` operator.
 
 Initialization
  Initial values of the CMake environment variables are those of
