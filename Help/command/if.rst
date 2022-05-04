@@ -71,8 +71,9 @@ Basic Expressions
  True if given a variable that is defined to a value that is not a false
  constant.  False otherwise, including if the variable is undefined.
  Note that macro arguments are not variables.
- Environment variables also cannot be tested this way, e.g.
- ``if(ENV{some_var})`` will always evaluate to false.
+ :ref:`Environment Variables <CMake Language Environment Variables>` also
+ cannot be tested this way, e.g. ``if(ENV{some_var})`` will always evaluate
+ to false.
 
 ``if(<string>)``
  A quoted string always evaluates to false unless:
