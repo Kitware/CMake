@@ -1061,6 +1061,18 @@ To view the presets available for a project, use
 
   cmake <source-dir> --list-presets
 
+
+.. _`CMake Exit Code`:
+
+Return Value (Exit Code)
+========================
+
+Upon regular termination, the ``cmake`` executable returns the exit code ``0``.
+
+If termination is caused by the command :command:`message(FATAL_ERROR)`,
+or another error condition, then a non-zero exit code is returned.
+
+
 See Also
 ========
 
