@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCommonTargetGenerator.h"
 
-#include <set>
+#include <algorithm>
 #include <sstream>
 #include <utility>
 
@@ -13,9 +13,11 @@
 #include "cmLocalCommonGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmOutputConverter.h"
 #include "cmRange.h"
 #include "cmSourceFile.h"
+#include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmTarget.h"
@@ -320,4 +322,30 @@ std::string cmCommonTargetGenerator::GetLinkerLauncher(
     }
   }
   return std::string();
+}
+
+bool cmCommonTargetGenerator::HaveRequiredLanguages(
+  const std::vector<cmSourceFile const*>& sources,
+  std::set<std::string>& languagesNeeded) const
+{
+  for (cmSourceFile const* sf : sources) {
+    languagesNeeded.insert(sf->GetLanguage());
+  }
+
+  auto* makefile = this->Makefile;
+  auto* state = makefile->GetState();
+  auto unary = [&state, &makefile](const std::string& lang) -> bool {
+    const bool valid = state->GetLanguageEnabled(lang);
+    if (!valid) {
+      makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("The language ", lang,
+                 " was requested for compilation but was not enabled."
+                 " To enable a language it needs to be specified in a"
+                 " 'project' or 'enable_language' command in the root"
+                 " CMakeLists.txt"));
+    }
+    return valid;
+  };
+  return std::all_of(languagesNeeded.cbegin(), languagesNeeded.cend(), unary);
 }
