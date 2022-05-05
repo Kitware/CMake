@@ -328,3 +328,12 @@ Windows using WiX.
  If this variable is set then the inclusion of WixUIExtensions is skipped,
  i.e. the ``-ext "WixUIExtension"`` command line is not included during
  the execution of the WiX light tool.
+
+.. variable:: CPACK_WIX_ARCHITECTURE
+
+ .. versionadded:: 3.24
+
+ This variable can be optionally set to specify the target architecture
+ of the installer. May for example be set to ``x64`` or ``arm64``.
+
+ When unspecified, CPack will default to ``x64`` or ``x86``.
