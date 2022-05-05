@@ -619,6 +619,8 @@ in the set of :variable:`CMAKE_ARGV<n> <CMAKE_ARGV0>` variables passed to the
 script (including the ``--`` itself).
 
 
+.. _`Run a Command-Line Tool`:
+
 Run a Command-Line Tool
 =======================
 

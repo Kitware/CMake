@@ -582,7 +582,8 @@ Scope
  They are never cached.
 
 References
- `Variable References`_ have the form ``$ENV{<variable>}``.
+ `Variable References`_ have the form ``$ENV{<variable>}``, using the
+ :variable:`ENV` operator.
 
 Initialization
  Initial values of the CMake environment variables are those of
@@ -593,6 +594,13 @@ Initialization
  not the system environment at large.
  Changed values are not written back to the calling process,
  and they are not seen by subsequent build or test processes.
+
+ See the :ref:`cmake -E env <Run a Command-Line Tool>` command-line
+ tool to run a command in a modified environment.
+
+Inspection
+ See the :ref:`cmake -E environment <Run a Command-Line Tool>` command-line
+ tool to display all current environment variables.
 
 The :manual:`cmake-env-variables(7)` manual documents environment
 variables that have special meaning to CMake.
