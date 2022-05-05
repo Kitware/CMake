@@ -14,10 +14,11 @@
 
 #include <cm3p/json/value.h>
 
-template <typename T, typename E>
-using cmJSONHelper = std::function<E(T& out, const Json::Value* value)>;
+template <typename T, typename E, typename... CallState>
+using cmJSONHelper =
+  std::function<E(T& out, const Json::Value* value, CallState&&... state)>;
 
-template <typename E>
+template <typename E, typename... CallState>
 struct cmJSONHelperBuilder
 {
   template <typename T>
@@ -35,24 +36,26 @@ struct cmJSONHelperBuilder
     Object& Bind(const cm::string_view& name, M U::*member, F func,
                  bool required = true)
     {
-      return this->BindPrivate(
-        name,
-        [func, member](T& out, const Json::Value* value) -> E {
-          return func(out.*member, value);
-        },
-        required);
+      return this->BindPrivate(name,
+                               [func, member](T& out, const Json::Value* value,
+                                              CallState&&... state) -> E {
+                                 return func(out.*member, value,
+                                             std::forward(state)...);
+                               },
+                               required);
     }
     template <typename M, typename F>
     Object& Bind(const cm::string_view& name, std::nullptr_t, F func,
                  bool required = true)
     {
-      return this->BindPrivate(
-        name,
-        [func](T& /*out*/, const Json::Value* value) -> E {
-          M dummy;
-          return func(dummy, value);
-        },
-        required);
+      return this->BindPrivate(name,
+                               [func](T& /*out*/, const Json::Value* value,
+                                      CallState&&... state) -> E {
+                                 M dummy;
+                                 return func(dummy, value,
+                                             std::forward(state)...);
+                               },
+                               required);
     }
     template <typename F>
     Object& Bind(const cm::string_view& name, F func, bool required = true)
@@ -60,7 +63,7 @@ struct cmJSONHelperBuilder
       return this->BindPrivate(name, MemberFunction(func), required);
     }
 
-    E operator()(T& out, const Json::Value* value) const
+    E operator()(T& out, const Json::Value* value, CallState&&... state) const
     {
       if (!value && this->AnyRequired) {
         return this->Fail;
@@ -76,14 +79,14 @@ struct cmJSONHelperBuilder
       for (auto const& m : this->Members) {
         std::string name(m.Name.data(), m.Name.size());
         if (value && value->isMember(name)) {
-          E result = m.Function(out, &(*value)[name]);
+          E result = m.Function(out, &(*value)[name], std::forward(state)...);
           if (result != this->Success) {
             return result;
           }
           extraFields.erase(
             std::find(extraFields.begin(), extraFields.end(), name));
         } else if (!m.Required) {
-          E result = m.Function(out, nullptr);
+          E result = m.Function(out, nullptr, std::forward(state)...);
           if (result != this->Success) {
             return result;
           }
@@ -98,7 +101,8 @@ struct cmJSONHelperBuilder
 
   private:
     // Not a true cmJSONHelper, it just happens to match the signature
-    using MemberFunction = std::function<E(T& out, const Json::Value* value)>;
+    using MemberFunction =
+      std::function<E(T& out, const Json::Value* value, CallState&&... state)>;
     struct Member
     {
       cm::string_view Name;
@@ -125,11 +129,11 @@ struct cmJSONHelperBuilder
       return *this;
     }
   };
-  static cmJSONHelper<std::string, E> String(E success, E fail,
-                                             const std::string& defval = "")
+  static cmJSONHelper<std::string, E, CallState...> String(
+    E success, E fail, const std::string& defval = "")
   {
-    return [success, fail, defval](std::string& out,
-                                   const Json::Value* value) -> E {
+    return [success, fail, defval](std::string& out, const Json::Value* value,
+                                   CallState&&... /*state*/) -> E {
       if (!value) {
         out = defval;
         return success;
@@ -142,9 +146,11 @@ struct cmJSONHelperBuilder
     };
   }
 
-  static cmJSONHelper<int, E> Int(E success, E fail, int defval = 0)
+  static cmJSONHelper<int, E, CallState...> Int(E success, E fail,
+                                                int defval = 0)
   {
-    return [success, fail, defval](int& out, const Json::Value* value) -> E {
+    return [success, fail, defval](int& out, const Json::Value* value,
+                                   CallState&&... /*state*/) -> E {
       if (!value) {
         out = defval;
         return success;
@@ -157,11 +163,11 @@ struct cmJSONHelperBuilder
     };
   }
 
-  static cmJSONHelper<unsigned int, E> UInt(E success, E fail,
-                                            unsigned int defval = 0)
+  static cmJSONHelper<unsigned int, E, CallState...> UInt(
+    E success, E fail, unsigned int defval = 0)
   {
-    return [success, fail, defval](unsigned int& out,
-                                   const Json::Value* value) -> E {
+    return [success, fail, defval](unsigned int& out, const Json::Value* value,
+                                   CallState&&... /*state*/) -> E {
       if (!value) {
         out = defval;
         return success;
@@ -174,9 +180,11 @@ struct cmJSONHelperBuilder
     };
   }
 
-  static cmJSONHelper<bool, E> Bool(E success, E fail, bool defval = false)
+  static cmJSONHelper<bool, E, CallState...> Bool(E success, E fail,
+                                                  bool defval = false)
   {
-    return [success, fail, defval](bool& out, const Json::Value* value) -> E {
+    return [success, fail, defval](bool& out, const Json::Value* value,
+                                   CallState&&... /*state*/) -> E {
       if (!value) {
         out = defval;
         return success;
@@ -190,11 +198,12 @@ struct cmJSONHelperBuilder
   }
 
   template <typename T, typename F, typename Filter>
-  static cmJSONHelper<std::vector<T>, E> VectorFilter(E success, E fail,
-                                                      F func, Filter filter)
+  static cmJSONHelper<std::vector<T>, E, CallState...> VectorFilter(
+    E success, E fail, F func, Filter filter)
   {
     return [success, fail, func, filter](std::vector<T>& out,
-                                         const Json::Value* value) -> E {
+                                         const Json::Value* value,
+                                         CallState&&... state) -> E {
       if (!value) {
         out.clear();
         return success;
@@ -205,7 +214,7 @@ struct cmJSONHelperBuilder
       out.clear();
       for (auto const& item : *value) {
         T t;
-        E result = func(t, &item);
+        E result = func(t, &item, std::forward(state)...);
         if (result != success) {
           return result;
         }
@@ -219,19 +228,20 @@ struct cmJSONHelperBuilder
   }
 
   template <typename T, typename F>
-  static cmJSONHelper<std::vector<T>, E> Vector(E success, E fail, F func)
+  static cmJSONHelper<std::vector<T>, E, CallState...> Vector(E success,
+                                                              E fail, F func)
   {
     return VectorFilter<T, F>(success, fail, func,
                               [](const T&) { return true; });
   }
 
   template <typename T, typename F, typename Filter>
-  static cmJSONHelper<std::map<std::string, T>, E> MapFilter(E success, E fail,
-                                                             F func,
-                                                             Filter filter)
+  static cmJSONHelper<std::map<std::string, T>, E, CallState...> MapFilter(
+    E success, E fail, F func, Filter filter)
   {
     return [success, fail, func, filter](std::map<std::string, T>& out,
-                                         const Json::Value* value) -> E {
+                                         const Json::Value* value,
+                                         CallState&&... state) -> E {
       if (!value) {
         out.clear();
         return success;
@@ -245,7 +255,7 @@ struct cmJSONHelperBuilder
           continue;
         }
         T t;
-        E result = func(t, &(*value)[key]);
+        E result = func(t, &(*value)[key], std::forward(state)...);
         if (result != success) {
           return result;
         }
@@ -256,35 +266,38 @@ struct cmJSONHelperBuilder
   }
 
   template <typename T, typename F>
-  static cmJSONHelper<std::map<std::string, T>, E> Map(E success, E fail,
-                                                       F func)
+  static cmJSONHelper<std::map<std::string, T>, E, CallState...> Map(E success,
+                                                                     E fail,
+                                                                     F func)
   {
     return MapFilter<T, F>(success, fail, func,
                            [](const std::string&) { return true; });
   }
 
   template <typename T, typename F>
-  static cmJSONHelper<cm::optional<T>, E> Optional(E success, F func)
+  static cmJSONHelper<cm::optional<T>, E, CallState...> Optional(E success,
+                                                                 F func)
   {
-    return
-      [success, func](cm::optional<T>& out, const Json::Value* value) -> E {
-        if (!value) {
-          out.reset();
-          return success;
-        }
-        out.emplace();
-        return func(*out, value);
-      };
+    return [success, func](cm::optional<T>& out, const Json::Value* value,
+                           CallState&&... state) -> E {
+      if (!value) {
+        out.reset();
+        return success;
+      }
+      out.emplace();
+      return func(*out, value, std::forward(state)...);
+    };
   }
 
   template <typename T, typename F>
-  static cmJSONHelper<T, E> Required(E fail, F func)
+  static cmJSONHelper<T, E, CallState...> Required(E fail, F func)
   {
-    return [fail, func](T& out, const Json::Value* value) -> E {
+    return [fail, func](T& out, const Json::Value* value,
+                        CallState&&... state) -> E {
       if (!value) {
         return fail;
       }
-      return func(out, value);
+      return func(out, value, std::forward(state)...);
     };
   }
 };
