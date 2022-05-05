@@ -272,7 +272,7 @@ Deprecated and Removed Features
   of all policies are deprecated and that projects should port to the
   NEW behaviors.
 
-* The :cpack_gen:`CPack PackageMaker Generator` generator has been
+* The CPack ``PackageMaker`` generator has been
   deprecated because Xcode no longer distributes the PackageMaker tools.
   The undocumented ``OSXX11`` generator has also been deprecated.
 

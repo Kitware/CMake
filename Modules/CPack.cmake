@@ -669,12 +669,10 @@ if(NOT CPACK_GENERATOR)
       if(APPLE)
         option(CPACK_BINARY_BUNDLE       "Enable to build OSX bundles"      OFF)
         option(CPACK_BINARY_DRAGNDROP    "Enable to build OSX Drag And Drop package" OFF)
-        option(CPACK_BINARY_PACKAGEMAKER "Enable to build PackageMaker packages (deprecated)" OFF)
         option(CPACK_BINARY_PRODUCTBUILD "Enable to build productbuild packages" OFF)
         mark_as_advanced(
           CPACK_BINARY_BUNDLE
           CPACK_BINARY_DRAGNDROP
-          CPACK_BINARY_PACKAGEMAKER
           CPACK_BINARY_PRODUCTBUILD
           )
       else()
@@ -726,7 +724,6 @@ if(NOT CPACK_GENERATOR)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_IFW          IFW)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_NSIS         NSIS)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_NUGET        NuGet)
-  cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_PACKAGEMAKER PackageMaker)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_PRODUCTBUILD productbuild)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_RPM          RPM)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_STGZ         STGZ)

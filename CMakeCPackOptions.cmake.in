@@ -198,14 +198,6 @@ if(CPACK_GENERATOR MATCHES "IFW")
 
 endif()
 
-if("${CPACK_GENERATOR}" STREQUAL "PackageMaker")
-  if(CMAKE_PACKAGE_QTGUI)
-    set(CPACK_PACKAGE_DEFAULT_LOCATION "/Applications")
-  else()
-    set(CPACK_PACKAGE_DEFAULT_LOCATION "/usr")
-  endif()
-endif()
-
 if("${CPACK_GENERATOR}" STREQUAL "DragNDrop")
   set(CPACK_DMG_BACKGROUND_IMAGE
       "@CMake_SOURCE_DIR@/Packaging/CMakeDMGBackground.tif")

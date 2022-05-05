@@ -294,17 +294,6 @@ if(BUILD_TESTING)
     mark_as_advanced(CTEST_TEST_CTEST)
   endif ()
 
-  # Should CPack tests be run? By default, yes, but...
-  #
-  # Disable packaging test on Apple 10.3 and below. PackageMaker starts
-  # DiskManagementTool as root and disowns it
-  # (http://lists.apple.com/archives/installer-dev/2005/Jul/msg00005.html).
-  # It is left holding open pipe handles and preventing ProcessUNIX from
-  # detecting end-of-data even after its immediate child exits. Then
-  # the test hangs until it times out and is killed. This is a
-  # well-known bug in kwsys process execution that I would love to get
-  # time to fix.
-  #
   option(CTEST_TEST_CPACK
     "Should the tests that use '--build-target package' be run?"
     ON)

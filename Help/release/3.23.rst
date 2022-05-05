@@ -187,7 +187,7 @@ CPack
 
 * The ``CPack.distribution.dist.in`` template used by the
   :cpack_gen:`CPack productbuild Generator` and
-  :cpack_gen:`CPack PackageMaker Generator` was updated to use a new
+  CPack ``PackageMaker`` generator was updated to use a new
   ``CPACK_APPLE_PKG_INSTALLER_CONTENT`` variable for its main content.
   This replaced the previously undocumented and now deprecated
   ``CPACK_PACKAGEMAKER_CHOICES`` variable.
