@@ -108,7 +108,7 @@ public:
       std::string value = makefile->GetSafeDefinition(var);
       if (warnCMP0067 && !value.empty()) {
         value.clear();
-        warnCMP0067Variables.push_back(var);
+        warnCMP0067Variables.emplace_back(var);
       }
       return value;
     };
@@ -335,11 +335,11 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     } else if (argv[i] == "__CMAKE_INTERNAL") {
       doing = DoingCMakeInternal;
     } else if (doing == DoingCMakeFlags) {
-      cmakeFlags.push_back(argv[i]);
+      cmakeFlags.emplace_back(argv[i]);
     } else if (doing == DoingCompileDefinitions) {
       cmExpandList(argv[i], compileDefs);
     } else if (doing == DoingLinkOptions) {
-      linkOptions.push_back(argv[i]);
+      linkOptions.emplace_back(argv[i]);
     } else if (doing == DoingLinkLibraries) {
       libsToLink += "\"" + cmTrimWhitespace(argv[i]) + "\" ";
       if (cmTarget* tgt = this->Makefile->FindTargetToUse(argv[i])) {
@@ -364,7 +364,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
             return -1;
         }
         if (tgt->IsImported()) {
-          targets.push_back(argv[i]);
+          targets.emplace_back(argv[i]);
         }
       }
     } else if (doing == DoingOutputVariable) {
@@ -377,7 +377,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       copyFileError = argv[i];
       doing = DoingNone;
     } else if (doing == DoingSources) {
-      sources.push_back(argv[i]);
+      sources.emplace_back(argv[i]);
     } else if (doing == DoingCMakeInternal) {
       cmakeInternal = argv[i];
       doing = DoingNone;
@@ -488,7 +488,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
 
     // Choose sources.
     if (!useSources) {
-      sources.push_back(argv[2]);
+      sources.emplace_back(argv[2]);
     }
 
     // Detect languages to enable.
@@ -944,13 +944,13 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
           kCMAKE_TRY_COMPILE_OSX_ARCHITECTURES)) {
       vars.erase(kCMAKE_OSX_ARCHITECTURES);
       std::string flag = "-DCMAKE_OSX_ARCHITECTURES=" + *tcArchs;
-      cmakeFlags.push_back(std::move(flag));
+      cmakeFlags.emplace_back(std::move(flag));
     }
 
     for (std::string const& var : vars) {
       if (cmValue val = this->Makefile->GetDefinition(var)) {
         std::string flag = "-D" + var + "=" + *val;
-        cmakeFlags.push_back(std::move(flag));
+        cmakeFlags.emplace_back(std::move(flag));
       }
     }
   }
@@ -960,7 +960,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     for (std::string const& var : ghs_platform_vars) {
       if (cmValue val = this->Makefile->GetDefinition(var)) {
         std::string flag = "-D" + var + "=" + "'" + *val + "'";
-        cmakeFlags.push_back(std::move(flag));
+        cmakeFlags.emplace_back(std::move(flag));
       }
     }
   }
@@ -1105,18 +1105,18 @@ void cmCoreTryCompile::FindOutputFile(const std::string& targetName,
   // if a config was specified try that first
   if (cmNonempty(config)) {
     std::string tmp = cmStrCat('/', *config);
-    searchDirs.push_back(std::move(tmp));
+    searchDirs.emplace_back(std::move(tmp));
   }
   searchDirs.emplace_back("/Debug");
 #if defined(__APPLE__)
   std::string app = "/" + targetName + ".app";
   if (cmNonempty(config)) {
     std::string tmp = cmStrCat('/', *config, app);
-    searchDirs.push_back(std::move(tmp));
+    searchDirs.emplace_back(std::move(tmp));
   }
   std::string tmp = "/Debug" + app;
   searchDirs.emplace_back(std::move(tmp));
-  searchDirs.push_back(std::move(app));
+  searchDirs.emplace_back(std::move(app));
 #endif
   searchDirs.emplace_back("/Development");
 
