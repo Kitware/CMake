@@ -357,14 +357,20 @@ See `Build and Test Mode`_.
 Specify the directory in which to look for tests.
 
 ``--test-output-size-passed <size>``
+ .. versionadded:: 3.4
+
  Limit the output for passed tests to ``<size>`` bytes.
 
 ``--test-output-size-failed <size>``
+ .. versionadded:: 3.4
+
  Limit the output for failed tests to ``<size>`` bytes.
 
 ``--test-output-truncation <mode>``
- Truncate 'tail' (default), 'middle' or 'head' of test output once maximum
- output size is reached.
+ .. versionadded:: 3.24
+
+ Truncate ``tail`` (default), ``middle`` or ``head`` of test output once
+ maximum output size is reached.
 
 ``--overwrite``
  Overwrite CTest configuration option.
