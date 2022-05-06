@@ -76,6 +76,7 @@ private:
       : cmFindCommon::PathLabel(label)
     {
     }
+    static PathLabel PackageRedirect;
     static PathLabel UserRegistry;
     static PathLabel Builds;
     static PathLabel SystemRegistry;
@@ -119,8 +120,10 @@ private:
   };
   bool ReadListFile(const std::string& f, PolicyScopeRule psr);
   void StoreVersionFound();
+  void SetConfigDirCacheVariable(const std::string& value);
 
   void ComputePrefixes();
+  void FillPrefixesPackageRedirect();
   void FillPrefixesPackageRoot();
   void FillPrefixesCMakeEnvironment();
   void FillPrefixesCMakeVariable();

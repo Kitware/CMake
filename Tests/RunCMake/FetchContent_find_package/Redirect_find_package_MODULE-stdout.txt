@@ -1,0 +1,9 @@
+(-- )?find_package\(FirstProject\):
+(-- )?Confirmation project has been added
+(-- )?FirstProject_FOUND = 1
+(-- )?FetchContent_MakeAvailable\(FirstProject\):
+(-- )?FetchContent_MakeAvailable\(SecondProject\):
+(-- )?Confirmation project has been added
+(-- )?find_package\(SecondProject\):
+(-- )?SecondProject_FOUND = 1
+(-- )?End of test

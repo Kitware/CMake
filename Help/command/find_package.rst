@@ -17,7 +17,7 @@ and load its package-specific details.
 Search Modes
 ^^^^^^^^^^^^
 
-The command has two very distinct ways of conducting the search:
+The command has a few modes by which it searches for packages:
 
 **Module mode**
   In this mode, CMake searches for a file called ``Find<PackageName>.cmake``,
@@ -60,7 +60,17 @@ The command has two very distinct ways of conducting the search:
   Config mode is supported by both the :ref:`basic <Basic Signature>` and
   :ref:`full <Full Signature>` command signatures.
 
-The command arguments determine which of the above modes is used.  When the
+**FetchContent redirection mode**
+  .. versionadded:: 3.24
+    A call to ``find_package()`` can be redirected internally to a package
+    provided by the :module:`FetchContent` module.  To the caller, the behavior
+    will appear similar to Config mode, except that the search logic is
+    by-passed and the component information is not used.  See
+    :command:`FetchContent_Declare` and :command:`FetchContent_MakeAvailable`
+    for further details.
+
+When not redirected to a package provided by :module:`FetchContent`, the
+command arguments determine whether Module or Config mode is used.  When the
 `basic signature`_ is used, the command searches in Module mode first.
 If the package is not found, the search falls back to Config mode.
 A user may set the :variable:`CMAKE_FIND_PACKAGE_PREFER_CONFIG` variable
@@ -70,7 +80,7 @@ forced to use only Module mode with a ``MODULE`` keyword.  If the
 `full signature`_ is used, the command only searches in Config mode.
 
 Where possible, user code should generally look for packages using the
-`basic signature`_, since that allows the package to be found with either mode.
+`basic signature`_, since that allows the package to be found with any mode.
 Project maintainers wishing to provide a config package should understand
 the bigger picture, as explained in :ref:`Full Signature` and all subsequent
 sections on this page.
@@ -203,9 +213,12 @@ proceeds at once with Config mode search.
 
 Config mode search attempts to locate a configuration file provided by the
 package to be found.  A cache entry called ``<PackageName>_DIR`` is created to
-hold the directory containing the file.  By default the command
-searches for a package with the name ``<PackageName>``.  If the ``NAMES`` option
-is given the names following it are used instead of ``<PackageName>``.
+hold the directory containing the file.  By default, the command searches for
+a package with the name ``<PackageName>``.  If the ``NAMES`` option is given,
+the names following it are used instead of ``<PackageName>``.  The names are
+also considered when determining whether to redirect the call to a package
+provided by :module:`FetchContent`.
+
 The command searches for a file called ``<PackageName>Config.cmake`` or
 ``<lowercasePackageName>-config.cmake`` for each name specified.
 A replacement set of possible configuration file names may be given
@@ -241,6 +254,14 @@ Config Mode Search Procedure
   When Config mode is used, this search procedure is applied regardless of
   whether the :ref:`full <full signature>` or :ref:`basic <basic signature>`
   signature was given.
+
+.. versionadded:: 3.24
+  All calls to ``find_package()`` (even in Module mode) first look for a config
+  package file in the :variable:`CMAKE_FIND_PACKAGE_REDIRECTS_DIR` directory.
+  The :module:`FetchContent` module, or even the project itself, may write files
+  to that location to redirect ``find_package()`` calls to content already
+  provided by the project.  If no config package file is found in that location,
+  the search proceeds with the logic described below.
 
 CMake constructs a set of possible installation prefixes for the
 package.  Under each prefix several directories are searched for a
@@ -420,7 +441,8 @@ to resolve symbolic links and store the real path to the file.
 Every non-REQUIRED ``find_package`` call can be disabled or made REQUIRED:
 
 * Setting the :variable:`CMAKE_DISABLE_FIND_PACKAGE_<PackageName>` variable
-  to ``TRUE`` disables the package.
+  to ``TRUE`` disables the package.  This also disables redirection to a
+  package provided by :module:`FetchContent`.
 
 * Setting the :variable:`CMAKE_REQUIRE_FIND_PACKAGE_<PackageName>` variable
   to ``TRUE`` makes the package REQUIRED.
@@ -443,8 +465,8 @@ version (see :ref:`format specification <FIND_PACKAGE_VERSION_FORMAT>`). If the
 ``EXACT`` option is given, only a version of the package claiming an exact match
 of the requested version may be found.  CMake does not establish any
 convention for the meaning of version numbers.  Package version
-numbers are checked by "version" files provided by the packages
-themselves.  For a candidate package configuration file
+numbers are checked by "version" files provided by the packages themselves
+or by :module:`FetchContent`.  For a candidate package configuration file
 ``<config-file>.cmake`` the corresponding version file is located next
 to it and named either ``<config-file>-version.cmake`` or
 ``<config-file>Version.cmake``.  If no such version file is available

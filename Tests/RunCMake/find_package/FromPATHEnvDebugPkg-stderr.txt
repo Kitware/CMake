@@ -6,6 +6,11 @@
 
   The file was not found.
 
+  The internally managed CMAKE_FIND_PACKAGE_REDIRECTS_DIR.
+
+    [^
+]*/Tests/RunCMake/find_package/FromPATHEnvDebugPkg-build/CMakeFiles/pkgRedirects
+
   <PackageName>_ROOT CMake variable \[CMAKE_FIND_USE_PACKAGE_ROOT_PATH\].
 
     none
@@ -68,6 +73,10 @@
   find_package considered the following locations for Resolved's Config
   module:
 
+    [^
+]*/Tests/RunCMake/find_package/FromPATHEnvDebugPkg-build/CMakeFiles/pkgRedirects/ResolvedConfig.cmake
+    [^
+]*/Tests/RunCMake/find_package/FromPATHEnvDebugPkg-build/CMakeFiles/pkgRedirects/resolved-config.cmake
     [^
 ]*/Tests/RunCMake/find_package/PackageRoot/ResolvedConfig.cmake
 
