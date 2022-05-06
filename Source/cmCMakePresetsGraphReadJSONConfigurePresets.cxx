@@ -21,6 +21,7 @@ using ReadFileResult = cmCMakePresetsGraph::ReadFileResult;
 using CacheVariable = cmCMakePresetsGraph::CacheVariable;
 using ConfigurePreset = cmCMakePresetsGraph::ConfigurePreset;
 using ArchToolsetStrategy = cmCMakePresetsGraph::ArchToolsetStrategy;
+using JSONHelperBuilder = cmJSONHelperBuilder<ReadFileResult>;
 
 ReadFileResult ArchToolsetStrategyHelper(
   cm::optional<ArchToolsetStrategy>& out, const Json::Value* value)
@@ -53,7 +54,7 @@ ArchToolsetHelper(
   cm::optional<ArchToolsetStrategy> ConfigurePreset::*strategyField)
 {
   auto const objectHelper =
-    cmJSONObjectHelper<ConfigurePreset, ReadFileResult>(
+    JSONHelperBuilder::Object<ConfigurePreset>(
       ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESET, false)
       .Bind("value", valueField,
             cmCMakePresetsGraphInternal::PresetStringHelper, false)
@@ -85,7 +86,7 @@ auto const ArchitectureHelper = ArchToolsetHelper(
 auto const ToolsetHelper = ArchToolsetHelper(
   &ConfigurePreset::Toolset, &ConfigurePreset::ToolsetStrategy);
 
-auto const VariableStringHelper = cmJSONStringHelper<ReadFileResult>(
+auto const VariableStringHelper = JSONHelperBuilder::String(
   ReadFileResult::READ_OK, ReadFileResult::INVALID_VARIABLE);
 
 ReadFileResult VariableValueHelper(std::string& out, const Json::Value* value)
@@ -104,7 +105,7 @@ ReadFileResult VariableValueHelper(std::string& out, const Json::Value* value)
 }
 
 auto const VariableObjectHelper =
-  cmJSONObjectHelper<CacheVariable, ReadFileResult>(
+  JSONHelperBuilder::Object<CacheVariable>(
     ReadFileResult::READ_OK, ReadFileResult::INVALID_VARIABLE, false)
     .Bind("type"_s, &CacheVariable::Type, VariableStringHelper, false)
     .Bind("value"_s, &CacheVariable::Value, VariableValueHelper);
@@ -138,11 +139,11 @@ ReadFileResult VariableHelper(cm::optional<CacheVariable>& out,
 }
 
 auto const VariablesHelper =
-  cmJSONMapHelper<cm::optional<CacheVariable>, ReadFileResult>(
+  JSONHelperBuilder::Map<cm::optional<CacheVariable>>(
     ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESET, VariableHelper);
 
 auto const PresetWarningsHelper =
-  cmJSONObjectHelper<ConfigurePreset, ReadFileResult>(
+  JSONHelperBuilder::Object<ConfigurePreset>(
     ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESET, false)
     .Bind("dev"_s, &ConfigurePreset::WarnDev,
           cmCMakePresetsGraphInternal::PresetOptionalBoolHelper, false)
@@ -156,7 +157,7 @@ auto const PresetWarningsHelper =
           cmCMakePresetsGraphInternal::PresetOptionalBoolHelper, false);
 
 auto const PresetErrorsHelper =
-  cmJSONObjectHelper<ConfigurePreset, ReadFileResult>(
+  JSONHelperBuilder::Object<ConfigurePreset>(
     ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESET, false)
     .Bind("dev"_s, &ConfigurePreset::ErrorDev,
           cmCMakePresetsGraphInternal::PresetOptionalBoolHelper, false)
@@ -164,7 +165,7 @@ auto const PresetErrorsHelper =
           cmCMakePresetsGraphInternal::PresetOptionalBoolHelper, false);
 
 auto const PresetDebugHelper =
-  cmJSONObjectHelper<ConfigurePreset, ReadFileResult>(
+  JSONHelperBuilder::Object<ConfigurePreset>(
     ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESET, false)
     .Bind("output"_s, &ConfigurePreset::DebugOutput,
           cmCMakePresetsGraphInternal::PresetOptionalBoolHelper, false)
@@ -174,7 +175,7 @@ auto const PresetDebugHelper =
           cmCMakePresetsGraphInternal::PresetOptionalBoolHelper, false);
 
 auto const ConfigurePresetHelper =
-  cmJSONObjectHelper<ConfigurePreset, ReadFileResult>(
+  JSONHelperBuilder::Object<ConfigurePreset>(
     ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESET, false)
     .Bind("name"_s, &ConfigurePreset::Name,
           cmCMakePresetsGraphInternal::PresetStringHelper)
@@ -218,10 +219,9 @@ namespace cmCMakePresetsGraphInternal {
 ReadFileResult ConfigurePresetsHelper(std::vector<ConfigurePreset>& out,
                                       const Json::Value* value)
 {
-  static auto const helper =
-    cmJSONVectorHelper<ConfigurePreset, ReadFileResult>(
-      ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESETS,
-      ConfigurePresetHelper);
+  static auto const helper = JSONHelperBuilder::Vector<ConfigurePreset>(
+    ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESETS,
+    ConfigurePresetHelper);
 
   return helper(out, value);
 }

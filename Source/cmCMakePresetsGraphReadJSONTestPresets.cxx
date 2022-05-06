@@ -21,6 +21,7 @@
 namespace {
 using ReadFileResult = cmCMakePresetsGraph::ReadFileResult;
 using TestPreset = cmCMakePresetsGraph::TestPreset;
+using JSONHelperBuilder = cmJSONHelperBuilder<ReadFileResult>;
 
 ReadFileResult TestPresetOutputVerbosityHelper(
   TestPreset::OutputOptions::VerbosityEnum& out, const Json::Value* value)
@@ -53,9 +54,8 @@ ReadFileResult TestPresetOutputVerbosityHelper(
 }
 
 auto const TestPresetOptionalOutputVerbosityHelper =
-  cmJSONOptionalHelper<TestPreset::OutputOptions::VerbosityEnum,
-                       ReadFileResult>(ReadFileResult::READ_OK,
-                                       TestPresetOutputVerbosityHelper);
+  JSONHelperBuilder::Optional<TestPreset::OutputOptions::VerbosityEnum>(
+    ReadFileResult::READ_OK, TestPresetOutputVerbosityHelper);
 
 ReadFileResult TestPresetOutputTruncationHelper(
   cm::optional<cmCTestTypes::TruncationMode>& out, const Json::Value* value)
@@ -88,9 +88,9 @@ ReadFileResult TestPresetOutputTruncationHelper(
 }
 
 auto const TestPresetOptionalOutputHelper =
-  cmJSONOptionalHelper<TestPreset::OutputOptions, ReadFileResult>(
+  JSONHelperBuilder::Optional<TestPreset::OutputOptions>(
     ReadFileResult::READ_OK,
-    cmJSONObjectHelper<TestPreset::OutputOptions, ReadFileResult>(
+    JSONHelperBuilder::Object<TestPreset::OutputOptions>(
       ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESET, false)
       .Bind("shortProgress"_s, &TestPreset::OutputOptions::ShortProgress,
             cmCMakePresetsGraphInternal::PresetOptionalBoolHelper, false)
@@ -122,12 +122,10 @@ auto const TestPresetOptionalOutputHelper =
             cmCMakePresetsGraphInternal::PresetOptionalIntHelper, false));
 
 auto const TestPresetOptionalFilterIncludeIndexObjectHelper =
-  cmJSONOptionalHelper<TestPreset::IncludeOptions::IndexOptions,
-                       ReadFileResult>(
+  JSONHelperBuilder::Optional<TestPreset::IncludeOptions::IndexOptions>(
     ReadFileResult::READ_OK,
-    cmJSONObjectHelper<TestPreset::IncludeOptions::IndexOptions,
-                       ReadFileResult>(ReadFileResult::READ_OK,
-                                       ReadFileResult::INVALID_PRESET)
+    JSONHelperBuilder::Object<TestPreset::IncludeOptions::IndexOptions>(
+      ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESET)
       .Bind("start"_s, &TestPreset::IncludeOptions::IndexOptions::Start,
             cmCMakePresetsGraphInternal::PresetOptionalIntHelper, false)
       .Bind("end"_s, &TestPreset::IncludeOptions::IndexOptions::End,
@@ -161,9 +159,9 @@ ReadFileResult TestPresetOptionalFilterIncludeIndexHelper(
 }
 
 auto const TestPresetOptionalFilterIncludeHelper =
-  cmJSONOptionalHelper<TestPreset::IncludeOptions, ReadFileResult>(
+  JSONHelperBuilder::Optional<TestPreset::IncludeOptions>(
     ReadFileResult::READ_OK,
-    cmJSONObjectHelper<TestPreset::IncludeOptions, ReadFileResult>(
+    JSONHelperBuilder::Object<TestPreset::IncludeOptions>(
       ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESET)
       .Bind("name"_s, &TestPreset::IncludeOptions::Name,
             cmCMakePresetsGraphInternal::PresetStringHelper, false)
@@ -175,12 +173,10 @@ auto const TestPresetOptionalFilterIncludeHelper =
             cmCMakePresetsGraphInternal::PresetOptionalBoolHelper, false));
 
 auto const TestPresetOptionalFilterExcludeFixturesHelper =
-  cmJSONOptionalHelper<TestPreset::ExcludeOptions::FixturesOptions,
-                       ReadFileResult>(
+  JSONHelperBuilder::Optional<TestPreset::ExcludeOptions::FixturesOptions>(
     ReadFileResult::READ_OK,
-    cmJSONObjectHelper<TestPreset::ExcludeOptions::FixturesOptions,
-                       ReadFileResult>(ReadFileResult::READ_OK,
-                                       ReadFileResult::INVALID_PRESET)
+    JSONHelperBuilder::Object<TestPreset::ExcludeOptions::FixturesOptions>(
+      ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESET)
       .Bind("any"_s, &TestPreset::ExcludeOptions::FixturesOptions::Any,
             cmCMakePresetsGraphInternal::PresetStringHelper, false)
       .Bind("setup"_s, &TestPreset::ExcludeOptions::FixturesOptions::Setup,
@@ -189,9 +185,9 @@ auto const TestPresetOptionalFilterExcludeFixturesHelper =
             cmCMakePresetsGraphInternal::PresetStringHelper, false));
 
 auto const TestPresetOptionalFilterExcludeHelper =
-  cmJSONOptionalHelper<TestPreset::ExcludeOptions, ReadFileResult>(
+  JSONHelperBuilder::Optional<TestPreset::ExcludeOptions>(
     ReadFileResult::READ_OK,
-    cmJSONObjectHelper<TestPreset::ExcludeOptions, ReadFileResult>(
+    JSONHelperBuilder::Object<TestPreset::ExcludeOptions>(
       ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESET)
       .Bind("name"_s, &TestPreset::ExcludeOptions::Name,
             cmCMakePresetsGraphInternal::PresetStringHelper, false)
@@ -221,9 +217,8 @@ ReadFileResult TestPresetExecutionShowOnlyHelper(
 }
 
 auto const TestPresetOptionalExecutionShowOnlyHelper =
-  cmJSONOptionalHelper<TestPreset::ExecutionOptions::ShowOnlyEnum,
-                       ReadFileResult>(ReadFileResult::READ_OK,
-                                       TestPresetExecutionShowOnlyHelper);
+  JSONHelperBuilder::Optional<TestPreset::ExecutionOptions::ShowOnlyEnum>(
+    ReadFileResult::READ_OK, TestPresetExecutionShowOnlyHelper);
 
 ReadFileResult TestPresetExecutionModeHelper(
   TestPreset::ExecutionOptions::RepeatOptions::ModeEnum& out,
@@ -256,12 +251,10 @@ ReadFileResult TestPresetExecutionModeHelper(
 }
 
 auto const TestPresetOptionalExecutionRepeatHelper =
-  cmJSONOptionalHelper<TestPreset::ExecutionOptions::RepeatOptions,
-                       ReadFileResult>(
+  JSONHelperBuilder::Optional<TestPreset::ExecutionOptions::RepeatOptions>(
     ReadFileResult::READ_OK,
-    cmJSONObjectHelper<TestPreset::ExecutionOptions::RepeatOptions,
-                       ReadFileResult>(ReadFileResult::READ_OK,
-                                       ReadFileResult::INVALID_PRESET)
+    JSONHelperBuilder::Object<TestPreset::ExecutionOptions::RepeatOptions>(
+      ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESET)
       .Bind("mode"_s, &TestPreset::ExecutionOptions::RepeatOptions::Mode,
             TestPresetExecutionModeHelper, true)
       .Bind("count"_s, &TestPreset::ExecutionOptions::RepeatOptions::Count,
@@ -299,14 +292,13 @@ ReadFileResult TestPresetExecutionNoTestsActionHelper(
 }
 
 auto const TestPresetOptionalExecutionNoTestsActionHelper =
-  cmJSONOptionalHelper<TestPreset::ExecutionOptions::NoTestsActionEnum,
-                       ReadFileResult>(ReadFileResult::READ_OK,
-                                       TestPresetExecutionNoTestsActionHelper);
+  JSONHelperBuilder::Optional<TestPreset::ExecutionOptions::NoTestsActionEnum>(
+    ReadFileResult::READ_OK, TestPresetExecutionNoTestsActionHelper);
 
 auto const TestPresetExecutionHelper =
-  cmJSONOptionalHelper<TestPreset::ExecutionOptions, ReadFileResult>(
+  JSONHelperBuilder::Optional<TestPreset::ExecutionOptions>(
     ReadFileResult::READ_OK,
-    cmJSONObjectHelper<TestPreset::ExecutionOptions, ReadFileResult>(
+    JSONHelperBuilder::Object<TestPreset::ExecutionOptions>(
       ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESET)
       .Bind("stopOnFailure"_s, &TestPreset::ExecutionOptions::StopOnFailure,
             cmCMakePresetsGraphInternal::PresetOptionalBoolHelper, false)
@@ -334,9 +326,9 @@ auto const TestPresetExecutionHelper =
             TestPresetOptionalExecutionNoTestsActionHelper, false));
 
 auto const TestPresetFilterHelper =
-  cmJSONOptionalHelper<TestPreset::FilterOptions, ReadFileResult>(
+  JSONHelperBuilder::Optional<TestPreset::FilterOptions>(
     ReadFileResult::READ_OK,
-    cmJSONObjectHelper<TestPreset::FilterOptions, ReadFileResult>(
+    JSONHelperBuilder::Object<TestPreset::FilterOptions>(
       ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESET)
       .Bind("include"_s, &TestPreset::FilterOptions::Include,
             TestPresetOptionalFilterIncludeHelper, false)
@@ -344,8 +336,8 @@ auto const TestPresetFilterHelper =
             TestPresetOptionalFilterExcludeHelper, false));
 
 auto const TestPresetHelper =
-  cmJSONObjectHelper<TestPreset, ReadFileResult>(
-    ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESET, false)
+  JSONHelperBuilder::Object<TestPreset>(ReadFileResult::READ_OK,
+                                        ReadFileResult::INVALID_PRESET, false)
     .Bind("name"_s, &TestPreset::Name,
           cmCMakePresetsGraphInternal::PresetStringHelper)
     .Bind("inherits"_s, &TestPreset::Inherits,
@@ -386,7 +378,7 @@ namespace cmCMakePresetsGraphInternal {
 cmCMakePresetsGraph::ReadFileResult TestPresetsHelper(
   std::vector<cmCMakePresetsGraph::TestPreset>& out, const Json::Value* value)
 {
-  static auto const helper = cmJSONVectorHelper<TestPreset, ReadFileResult>(
+  static auto const helper = JSONHelperBuilder::Vector<TestPreset>(
     ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESETS,
     TestPresetHelper);
 
