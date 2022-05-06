@@ -108,7 +108,7 @@ public:
       std::string value = makefile->GetSafeDefinition(var);
       if (warnCMP0067 && !value.empty()) {
         value.clear();
-        warnCMP0067Variables.push_back(var);
+        warnCMP0067Variables.emplace_back(var);
       }
       return value;
     };
@@ -335,11 +335,11 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     } else if (argv[i] == "__CMAKE_INTERNAL") {
       doing = DoingCMakeInternal;
     } else if (doing == DoingCMakeFlags) {
-      cmakeFlags.push_back(argv[i]);
+      cmakeFlags.emplace_back(argv[i]);
     } else if (doing == DoingCompileDefinitions) {
       cmExpandList(argv[i], compileDefs);
     } else if (doing == DoingLinkOptions) {
-      linkOptions.push_back(argv[i]);
+      linkOptions.emplace_back(argv[i]);
     } else if (doing == DoingLinkLibraries) {
       libsToLink += "\"" + cmTrimWhitespace(argv[i]) + "\" ";
       if (cmTarget* tgt = this->Makefile->FindTargetToUse(argv[i])) {
@@ -364,7 +364,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
             return -1;
         }
         if (tgt->IsImported()) {
-          targets.push_back(argv[i]);
+          targets.emplace_back(argv[i]);
         }
       }
     } else if (doing == DoingOutputVariable) {
@@ -377,7 +377,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       copyFileError = argv[i];
       doing = DoingNone;
     } else if (doing == DoingSources) {
-      sources.push_back(argv[i]);
+      sources.emplace_back(argv[i]);
     } else if (doing == DoingCMakeInternal) {
       cmakeInternal = argv[i];
       doing = DoingNone;
@@ -488,7 +488,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
 
     // Choose sources.
     if (!useSources) {
-      sources.push_back(argv[2]);
+      sources.emplace_back(argv[2]);
     }
 
     // Detect languages to enable.
@@ -720,103 +720,6 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
               fname.c_str());
     }
 
-    // Forward a set of variables to the inner project cache.
-    {
-      std::set<std::string> vars;
-      vars.insert(&c_properties[lang_property_start],
-                  &c_properties[lang_property_start + lang_property_size]);
-      vars.insert(&cxx_properties[lang_property_start],
-                  &cxx_properties[lang_property_start + lang_property_size]);
-      vars.insert(&cuda_properties[lang_property_start],
-                  &cuda_properties[lang_property_start + lang_property_size]);
-      vars.insert(
-        &fortran_properties[lang_property_start],
-        &fortran_properties[lang_property_start + lang_property_size]);
-      vars.insert(&hip_properties[lang_property_start],
-                  &hip_properties[lang_property_start + lang_property_size]);
-      vars.insert(&objc_properties[lang_property_start],
-                  &objc_properties[lang_property_start + lang_property_size]);
-      vars.insert(
-        &objcxx_properties[lang_property_start],
-        &objcxx_properties[lang_property_start + lang_property_size]);
-      vars.insert(&ispc_properties[lang_property_start],
-                  &ispc_properties[lang_property_start + lang_property_size]);
-      vars.insert(&swift_properties[lang_property_start],
-                  &swift_properties[lang_property_start + lang_property_size]);
-      vars.insert(kCMAKE_CUDA_ARCHITECTURES);
-      vars.insert(kCMAKE_CUDA_RUNTIME_LIBRARY);
-      vars.insert(kCMAKE_ENABLE_EXPORTS);
-      vars.insert(kCMAKE_HIP_ARCHITECTURES);
-      vars.insert(kCMAKE_HIP_RUNTIME_LIBRARY);
-      vars.insert(kCMAKE_ISPC_INSTRUCTION_SETS);
-      vars.insert(kCMAKE_ISPC_HEADER_SUFFIX);
-      vars.insert(kCMAKE_LINK_SEARCH_END_STATIC);
-      vars.insert(kCMAKE_LINK_SEARCH_START_STATIC);
-      vars.insert(kCMAKE_OSX_ARCHITECTURES);
-      vars.insert(kCMAKE_OSX_DEPLOYMENT_TARGET);
-      vars.insert(kCMAKE_OSX_SYSROOT);
-      vars.insert(kCMAKE_APPLE_ARCH_SYSROOTS);
-      vars.insert(kCMAKE_POSITION_INDEPENDENT_CODE);
-      vars.insert(kCMAKE_SYSROOT);
-      vars.insert(kCMAKE_SYSROOT_COMPILE);
-      vars.insert(kCMAKE_SYSROOT_LINK);
-      vars.insert(kCMAKE_WARN_DEPRECATED);
-      vars.emplace("CMAKE_MSVC_RUNTIME_LIBRARY"_s);
-
-      if (cmValue varListStr = this->Makefile->GetDefinition(
-            kCMAKE_TRY_COMPILE_PLATFORM_VARIABLES)) {
-        std::vector<std::string> varList = cmExpandedList(*varListStr);
-        vars.insert(varList.begin(), varList.end());
-      }
-
-      if (this->Makefile->GetPolicyStatus(cmPolicies::CMP0083) ==
-          cmPolicies::NEW) {
-        // To ensure full support of PIE, propagate cache variables
-        // driving the link options
-        vars.insert(&c_properties[pie_property_start],
-                    &c_properties[pie_property_start + pie_property_size]);
-        vars.insert(&cxx_properties[pie_property_start],
-                    &cxx_properties[pie_property_start + pie_property_size]);
-        vars.insert(&cuda_properties[pie_property_start],
-                    &cuda_properties[pie_property_start + pie_property_size]);
-        vars.insert(
-          &fortran_properties[pie_property_start],
-          &fortran_properties[pie_property_start + pie_property_size]);
-        vars.insert(&hip_properties[pie_property_start],
-                    &hip_properties[pie_property_start + pie_property_size]);
-        vars.insert(&objc_properties[pie_property_start],
-                    &objc_properties[pie_property_start + pie_property_size]);
-        vars.insert(
-          &objcxx_properties[pie_property_start],
-          &objcxx_properties[pie_property_start + pie_property_size]);
-        vars.insert(&ispc_properties[pie_property_start],
-                    &ispc_properties[pie_property_start + pie_property_size]);
-        vars.insert(&swift_properties[pie_property_start],
-                    &swift_properties[pie_property_start + pie_property_size]);
-      }
-
-      /* for the TRY_COMPILEs we want to be able to specify the architecture.
-         So the user can set CMAKE_OSX_ARCHITECTURES to i386;ppc and then set
-         CMAKE_TRY_COMPILE_OSX_ARCHITECTURES first to i386 and then to ppc to
-         have the tests run for each specific architecture. Since
-         cmLocalGenerator doesn't allow building for "the other"
-         architecture only via CMAKE_OSX_ARCHITECTURES.
-         */
-      if (cmValue tcArchs = this->Makefile->GetDefinition(
-            kCMAKE_TRY_COMPILE_OSX_ARCHITECTURES)) {
-        vars.erase(kCMAKE_OSX_ARCHITECTURES);
-        std::string flag = "-DCMAKE_OSX_ARCHITECTURES=" + *tcArchs;
-        cmakeFlags.push_back(std::move(flag));
-      }
-
-      for (std::string const& var : vars) {
-        if (cmValue val = this->Makefile->GetDefinition(var)) {
-          std::string flag = "-D" + var + "=" + *val;
-          cmakeFlags.push_back(std::move(flag));
-        }
-      }
-    }
-
     /* Set the appropriate policy information for ENABLE_EXPORTS */
     fprintf(fout, "cmake_policy(SET CMP0065 %s)\n",
             this->Makefile->GetPolicyStatus(cmPolicies::CMP0065) ==
@@ -959,12 +862,105 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     projectName = "CMAKE_TRY_COMPILE";
   }
 
+  // Forward a set of variables to the inner project cache.
+  if (this->SrcFileSignature) {
+    std::set<std::string> vars;
+    vars.insert(&c_properties[lang_property_start],
+                &c_properties[lang_property_start + lang_property_size]);
+    vars.insert(&cxx_properties[lang_property_start],
+                &cxx_properties[lang_property_start + lang_property_size]);
+    vars.insert(&cuda_properties[lang_property_start],
+                &cuda_properties[lang_property_start + lang_property_size]);
+    vars.insert(&fortran_properties[lang_property_start],
+                &fortran_properties[lang_property_start + lang_property_size]);
+    vars.insert(&hip_properties[lang_property_start],
+                &hip_properties[lang_property_start + lang_property_size]);
+    vars.insert(&objc_properties[lang_property_start],
+                &objc_properties[lang_property_start + lang_property_size]);
+    vars.insert(&objcxx_properties[lang_property_start],
+                &objcxx_properties[lang_property_start + lang_property_size]);
+    vars.insert(&ispc_properties[lang_property_start],
+                &ispc_properties[lang_property_start + lang_property_size]);
+    vars.insert(&swift_properties[lang_property_start],
+                &swift_properties[lang_property_start + lang_property_size]);
+    vars.insert(kCMAKE_CUDA_ARCHITECTURES);
+    vars.insert(kCMAKE_CUDA_RUNTIME_LIBRARY);
+    vars.insert(kCMAKE_ENABLE_EXPORTS);
+    vars.insert(kCMAKE_HIP_ARCHITECTURES);
+    vars.insert(kCMAKE_HIP_RUNTIME_LIBRARY);
+    vars.insert(kCMAKE_ISPC_INSTRUCTION_SETS);
+    vars.insert(kCMAKE_ISPC_HEADER_SUFFIX);
+    vars.insert(kCMAKE_LINK_SEARCH_END_STATIC);
+    vars.insert(kCMAKE_LINK_SEARCH_START_STATIC);
+    vars.insert(kCMAKE_OSX_ARCHITECTURES);
+    vars.insert(kCMAKE_OSX_DEPLOYMENT_TARGET);
+    vars.insert(kCMAKE_OSX_SYSROOT);
+    vars.insert(kCMAKE_APPLE_ARCH_SYSROOTS);
+    vars.insert(kCMAKE_POSITION_INDEPENDENT_CODE);
+    vars.insert(kCMAKE_SYSROOT);
+    vars.insert(kCMAKE_SYSROOT_COMPILE);
+    vars.insert(kCMAKE_SYSROOT_LINK);
+    vars.insert(kCMAKE_WARN_DEPRECATED);
+    vars.emplace("CMAKE_MSVC_RUNTIME_LIBRARY"_s);
+
+    if (cmValue varListStr = this->Makefile->GetDefinition(
+          kCMAKE_TRY_COMPILE_PLATFORM_VARIABLES)) {
+      std::vector<std::string> varList = cmExpandedList(*varListStr);
+      vars.insert(varList.begin(), varList.end());
+    }
+
+    if (this->Makefile->GetPolicyStatus(cmPolicies::CMP0083) ==
+        cmPolicies::NEW) {
+      // To ensure full support of PIE, propagate cache variables
+      // driving the link options
+      vars.insert(&c_properties[pie_property_start],
+                  &c_properties[pie_property_start + pie_property_size]);
+      vars.insert(&cxx_properties[pie_property_start],
+                  &cxx_properties[pie_property_start + pie_property_size]);
+      vars.insert(&cuda_properties[pie_property_start],
+                  &cuda_properties[pie_property_start + pie_property_size]);
+      vars.insert(&fortran_properties[pie_property_start],
+                  &fortran_properties[pie_property_start + pie_property_size]);
+      vars.insert(&hip_properties[pie_property_start],
+                  &hip_properties[pie_property_start + pie_property_size]);
+      vars.insert(&objc_properties[pie_property_start],
+                  &objc_properties[pie_property_start + pie_property_size]);
+      vars.insert(&objcxx_properties[pie_property_start],
+                  &objcxx_properties[pie_property_start + pie_property_size]);
+      vars.insert(&ispc_properties[pie_property_start],
+                  &ispc_properties[pie_property_start + pie_property_size]);
+      vars.insert(&swift_properties[pie_property_start],
+                  &swift_properties[pie_property_start + pie_property_size]);
+    }
+
+    /* for the TRY_COMPILEs we want to be able to specify the architecture.
+       So the user can set CMAKE_OSX_ARCHITECTURES to i386;ppc and then set
+       CMAKE_TRY_COMPILE_OSX_ARCHITECTURES first to i386 and then to ppc to
+       have the tests run for each specific architecture. Since
+       cmLocalGenerator doesn't allow building for "the other"
+       architecture only via CMAKE_OSX_ARCHITECTURES.
+       */
+    if (cmValue tcArchs = this->Makefile->GetDefinition(
+          kCMAKE_TRY_COMPILE_OSX_ARCHITECTURES)) {
+      vars.erase(kCMAKE_OSX_ARCHITECTURES);
+      std::string flag = "-DCMAKE_OSX_ARCHITECTURES=" + *tcArchs;
+      cmakeFlags.emplace_back(std::move(flag));
+    }
+
+    for (std::string const& var : vars) {
+      if (cmValue val = this->Makefile->GetDefinition(var)) {
+        std::string flag = "-D" + var + "=" + *val;
+        cmakeFlags.emplace_back(std::move(flag));
+      }
+    }
+  }
+
   if (this->Makefile->GetState()->UseGhsMultiIDE()) {
     // Forward the GHS variables to the inner project cache.
     for (std::string const& var : ghs_platform_vars) {
       if (cmValue val = this->Makefile->GetDefinition(var)) {
         std::string flag = "-D" + var + "=" + "'" + *val + "'";
-        cmakeFlags.push_back(std::move(flag));
+        cmakeFlags.emplace_back(std::move(flag));
       }
     }
   }
@@ -1109,18 +1105,18 @@ void cmCoreTryCompile::FindOutputFile(const std::string& targetName,
   // if a config was specified try that first
   if (cmNonempty(config)) {
     std::string tmp = cmStrCat('/', *config);
-    searchDirs.push_back(std::move(tmp));
+    searchDirs.emplace_back(std::move(tmp));
   }
   searchDirs.emplace_back("/Debug");
 #if defined(__APPLE__)
   std::string app = "/" + targetName + ".app";
   if (cmNonempty(config)) {
     std::string tmp = cmStrCat('/', *config, app);
-    searchDirs.push_back(std::move(tmp));
+    searchDirs.emplace_back(std::move(tmp));
   }
   std::string tmp = "/Debug" + app;
   searchDirs.emplace_back(std::move(tmp));
-  searchDirs.push_back(std::move(app));
+  searchDirs.emplace_back(std::move(app));
 #endif
   searchDirs.emplace_back("/Development");
 
