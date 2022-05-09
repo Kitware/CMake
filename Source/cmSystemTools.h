@@ -535,6 +535,9 @@ public:
   /** Get the system name. */
   static cm::string_view GetSystemName();
 
+  /** Get the system path separator character */
+  static char GetSystemPathlistSeparator();
+
 private:
   static bool s_ForceUnixPaths;
   static bool s_RunCommandHideConsole;
