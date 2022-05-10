@@ -123,28 +123,56 @@ The options are:
 The variables set through the ``VERSION``, ``DESCRIPTION`` and ``HOMEPAGE_URL``
 options are intended for use as default values in package metadata and documentation.
 
+.. _`Code Injection`:
+
 Code Injection
 ^^^^^^^^^^^^^^
 
-If the :variable:`CMAKE_PROJECT_INCLUDE_BEFORE` or
-:variable:`CMAKE_PROJECT_<PROJECT-NAME>_INCLUDE_BEFORE` variables are set,
-the files they point to will be included as the first step of the
-``project()`` command.
-If both are set, then :variable:`CMAKE_PROJECT_INCLUDE_BEFORE` will be
-included before :variable:`CMAKE_PROJECT_<PROJECT-NAME>_INCLUDE_BEFORE`.
+A number of variables can be defined by the user to specify files to include
+at different points during the execution of the ``project()`` command.
+The following outlines the steps performed during a ``project()`` call:
 
-If the :variable:`CMAKE_PROJECT_INCLUDE` or
-:variable:`CMAKE_PROJECT_<PROJECT-NAME>_INCLUDE` variables are set, the files
-they point to will be included as the last step of the ``project()`` command.
-If both are set, then :variable:`CMAKE_PROJECT_INCLUDE` will be included before
-:variable:`CMAKE_PROJECT_<PROJECT-NAME>_INCLUDE`.
+* .. versionadded:: 3.15
+    For every ``project()`` call regardless of the project
+    name, include the file named by :variable:`CMAKE_PROJECT_INCLUDE_BEFORE`,
+    if set.
 
-.. versionadded:: 3.15
-  Added the ``CMAKE_PROJECT_INCLUDE`` and ``CMAKE_PROJECT_INCLUDE_BEFORE``
-  variables.
+* .. versionadded:: 3.17
+    If the ``project()`` command specifies ``<PROJECT-NAME>`` as its project
+    name, include the file named by
+    :variable:`CMAKE_PROJECT_<PROJECT-NAME>_INCLUDE_BEFORE`, if set.
 
-.. versionadded:: 3.17
-  Added the ``CMAKE_PROJECT_<PROJECT-NAME>_INCLUDE_BEFORE`` variable.
+* Set the various project-specific variables detailed in the `Synopsis`_
+  and `Options`_ sections above.
+
+* For the very first ``project()`` call only:
+
+  * If :variable:`CMAKE_TOOLCHAIN_FILE` is set, read it at least once.
+    It may be read multiple times and it may also be read again when
+    enabling languages later (see below).
+
+  * Set the variables describing the host and target platforms.
+    Language-specific variables might or might not be set at this point.
+    On the first run, the only language-specific variables that might be
+    defined are those a toolchain file may have set. On subsequent runs,
+    language-specific variables cached from a previous run may be set.
+
+  * .. versionadded:: 3.24
+      Include each file listed in :variable:`CMAKE_PROJECT_TOP_LEVEL_INCLUDES`,
+      if set. The variable is ignored by CMake thereafter.
+
+* Enable any languages specified in the call, or the default languages if
+  none were provided. The toolchain file may be re-read when enabling a
+  language for the first time.
+
+* .. versionadded:: 3.15
+    For every ``project()`` call regardless of the project
+    name, include the file named by :variable:`CMAKE_PROJECT_INCLUDE`,
+    if set.
+
+* If the ``project()`` command specifies ``<PROJECT-NAME>`` as its project
+  name, include the file named by
+  :variable:`CMAKE_PROJECT_<PROJECT-NAME>_INCLUDE`, if set.
 
 Usage
 ^^^^^
