@@ -2077,6 +2077,10 @@ if(BUILD_TESTING)
     ADD_TEST_MACRO(ModuleDefinition example_exe)
   endif()
 
+  if (CMAKE_C_COMPILER_ID MATCHES "Watcom" AND WIN32)
+    ADD_TEST_MACRO(WatcomRuntimeLibrary)
+  endif()
+
   ADD_TEST_MACRO(CheckCompilerRelatedVariables CheckCompilerRelatedVariables)
 
   if("${CMAKE_GENERATOR}" MATCHES "Makefile" OR

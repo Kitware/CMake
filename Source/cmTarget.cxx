@@ -543,6 +543,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     initProp("LINK_DEPENDS_NO_SHARED");
     initProp("LINK_INTERFACE_LIBRARIES");
     initProp("MSVC_RUNTIME_LIBRARY");
+    initProp("WATCOM_RUNTIME_LIBRARY");
     initProp("WIN32_EXECUTABLE");
     initProp("MACOSX_BUNDLE");
     initProp("MACOSX_RPATH");

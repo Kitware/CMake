@@ -58,6 +58,7 @@ Policies Introduced by CMake 3.24
 .. toctree::
    :maxdepth: 1
 
+   CMP0136: Watcom runtime library flags are selected by an abstraction. </policy/CMP0136>
    CMP0135: ExternalProject ignores timestamps in archives by default for the URL download method. </policy/CMP0135>
    CMP0134: Fallback to \"HOST\" Windows registry view when \"TARGET\" view is not usable. </policy/CMP0134>
    CMP0133: The CPack module disables SLA by default in the CPack DragNDrop Generator. </policy/CMP0133>

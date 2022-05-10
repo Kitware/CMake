@@ -228,6 +228,8 @@ std::string const kCMAKE_TRY_COMPILE_OSX_ARCHITECTURES =
 std::string const kCMAKE_TRY_COMPILE_PLATFORM_VARIABLES =
   "CMAKE_TRY_COMPILE_PLATFORM_VARIABLES";
 std::string const kCMAKE_WARN_DEPRECATED = "CMAKE_WARN_DEPRECATED";
+std::string const kCMAKE_WATCOM_RUNTIME_LIBRARY_DEFAULT =
+  "CMAKE_WATCOM_RUNTIME_LIBRARY_DEFAULT";
 
 /* GHS Multi platform variables */
 std::set<std::string> const ghs_platform_vars{
@@ -553,6 +555,13 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
           this->Makefile->GetDefinition(kCMAKE_MSVC_RUNTIME_LIBRARY_DEFAULT)) {
       fprintf(fout, "cmake_policy(SET CMP0091 %s)\n",
               !msvcRuntimeLibraryDefault->empty() ? "NEW" : "OLD");
+    }
+
+    /* Set Watcom runtime library policy to match our selection.  */
+    if (cmValue watcomRuntimeLibraryDefault = this->Makefile->GetDefinition(
+          kCMAKE_WATCOM_RUNTIME_LIBRARY_DEFAULT)) {
+      fprintf(fout, "cmake_policy(SET CMP0136 %s)\n",
+              !watcomRuntimeLibraryDefault->empty() ? "NEW" : "OLD");
     }
 
     /* Set CUDA architectures policy to match outer project.  */
@@ -902,6 +911,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     vars.insert(kCMAKE_SYSROOT_LINK);
     vars.insert(kCMAKE_WARN_DEPRECATED);
     vars.emplace("CMAKE_MSVC_RUNTIME_LIBRARY"_s);
+    vars.emplace("CMAKE_WATCOM_RUNTIME_LIBRARY"_s);
 
     if (cmValue varListStr = this->Makefile->GetDefinition(
           kCMAKE_TRY_COMPILE_PLATFORM_VARIABLES)) {
