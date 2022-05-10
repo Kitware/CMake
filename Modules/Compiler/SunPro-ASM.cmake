@@ -1,3 +1,6 @@
+include(Compiler/SunPro)
+__compiler_sunpro(ASM)
+
 set(CMAKE_ASM_SOURCE_FILE_EXTENSIONS s )
 
 set(CMAKE_ASM_VERBOSE_FLAG "-#")
