@@ -35,6 +35,18 @@ Available features are:
 
 * From ``C++14``:
 
+  * ``<cm/array>``:
+    ``cm::cbegin``, ``cm::cend``, ``cm::rbegin``, ``cm::rend``,
+    ``cm::crbegin``, ``cm::crend``
+
+  * ``<cm/deque>``:
+    ``cm::cbegin``, ``cm::cend``, ``cm::rbegin``, ``cm::rend``,
+    ``cm::crbegin``, ``cm::crend``
+
+  * ``<cm/forward_list>``:
+    ``cm::cbegin``, ``cm::cend``, ``cm::rbegin``, ``cm::rend``,
+    ``cm::crbegin``, ``cm::crend``
+
   * ``<cm/iomanip>``:
     ``cm::quoted``
 
@@ -42,8 +54,28 @@ Available features are:
     ``cm::make_reverse_iterator``, ``cm::cbegin``, ``cm::cend``,
     ``cm::rbegin``, ``cm::rend``, ``cm::crbegin``, ``cm::crend``
 
+  * ``<cm/list>``:
+    ``cm::cbegin``, ``cm::cend``, ``cm::rbegin``, ``cm::rend``,
+    ``cm::crbegin``, ``cm::crend``
+
+  * ``<cm/map>``:
+    ``cm::cbegin``, ``cm::cend``, ``cm::rbegin``, ``cm::rend``,
+    ``cm::crbegin``, ``cm::crend``
+
   * ``<cm/memory>``:
     ``cm::make_unique``
+
+  * ``<cm/set>``:
+    ``cm::cbegin``, ``cm::cend``, ``cm::rbegin``, ``cm::rend``,
+    ``cm::crbegin``, ``cm::crend``
+
+  * ``<cm/string>``:
+    ``cm::cbegin``, ``cm::cend``, ``cm::rbegin``, ``cm::rend``,
+    ``cm::crbegin``, ``cm::crend``
+
+  * ``<cm/string_view>``:
+    ``cm::cbegin``, ``cm::cend``, ``cm::rbegin``, ``cm::rend``,
+    ``cm::crbegin``, ``cm::crend``
 
   * ``<cm/shared_mutex>``:
     ``cm::shared_lock``
@@ -51,59 +83,113 @@ Available features are:
   * ``<cm/type_traits>``:
     ``cm::enable_if_t``
 
+  * ``<cm/unordered_map>``:
+    ``cm::cbegin``, ``cm::cend``, ``cm::rbegin``, ``cm::rend``,
+    ``cm::crbegin``, ``cm::crend``
+
+  * ``<cm/unordered_set>``:
+    ``cm::cbegin``, ``cm::cend``, ``cm::rbegin``, ``cm::rend``,
+    ``cm::crbegin``, ``cm::crend``
+
+  * ``<cm/vector>``:
+    ``cm::cbegin``, ``cm::cend``, ``cm::rbegin``, ``cm::rend``,
+    ``cm::crbegin``, ``cm::crend``
+
 * From ``C++17``:
 
   * ``<cm/algorithm>``:
     ``cm::clamp``
 
+  * ``<cm/array>``:
+    ``cm::size``, ``cm::empty``, ``cm::data``
+
+  * ``<cm/deque>``:
+    ``cm::size``, ``cm::empty``, ``cm::data``
+
   * ``cm/filesystem>``:
     ``cm::filesystem::path``
 
+  * ``<cm/forward_list>``:
+    ``cm::size``, ``cm::empty``, ``cm::data``
+
   * ``<cm/iterator>``:
+    ``cm::size``, ``cm::empty``, ``cm::data``
+
+  * ``<cm/list>``:
+    ``cm::size``, ``cm::empty``, ``cm::data``
+
+  * ``<cm/map>``:
     ``cm::size``, ``cm::empty``, ``cm::data``
 
   * ``<cm/optional>``:
     ``cm::nullopt_t``, ``cm::nullopt``, ``cm::optional``,
     ``cm::make_optional``, ``cm::bad_optional_access``
 
+  * ``<cm/set>``:
+    ``cm::size``, ``cm::empty``, ``cm::data``
+
   * ``<cm/shared_mutex>``:
     ``cm::shared_mutex``
 
+  * ``<cm/string>``:
+    ``cm::size``, ``cm::empty``, ``cm::data``
+
   * ``<cm/string_view>``:
-    ``cm::string_view``
+    ``cm::string_view``, ``cm::size``, ``cm::empty``, ``cm::data``
 
   * ``<cm/type_traits>``:
     ``cm::bool_constant``, ``cm::invoke_result_t``, ``cm::invoke_result``,
     ``cm::void_t``
 
+  * ``<cm/unordered_map>``:
+    ``cm::size``, ``cm::empty``, ``cm::data``
+
+  * ``<cm/unordered_set>``:
+    ``cm::size``, ``cm::empty``, ``cm::data``
+
   * ``<cm/utility>``:
     ``cm::in_place_t``, ``cm::in_place``
 
+  * ``<cm/vector>``:
+    ``cm::size``, ``cm::empty``, ``cm::data``
+
 * From ``C++20``:
 
+  * ``<cm/array>``:
+    ``cm::ssize``
+
   * ``<cm/deque>``:
-    ``cm::erase``, ``cm::erase_if``
+    ``cm::erase``, ``cm::erase_if``, ``cm::ssize``
+
+  * ``<cm/forward_list>``:
+    ``cm::ssize``
+
+  * ``<cm/iterator>``:
+    ``cm::ssize``
 
   * ``<cm/list>``:
-    ``cm::erase``, ``cm::erase_if``
+    ``cm::erase``, ``cm::erase_if``, ``cm::ssize``
 
   * ``<cm/map>`` :
-    ``cm::erase_if``
+    ``cm::erase_if``, ``cm::ssize``
 
   * ``<cm/set>`` :
-    ``cm::erase_if``
+    ``cm::erase_if``, ``cm::ssize``
+
+  * ``<cm/string_view>``:
+    ``cm::ssize``
 
   * ``<cm/string>``:
-    ``cm::erase``, ``cm::erase_if``
+    ``cm::erase``, ``cm::erase_if``, ``cm::ssize``
 
   * ``<cm/unordered_map>``:
-    ``cm::erase_if``
+    ``cm::erase_if``, ``cm::ssize``
 
   * ``<cm/unordered_set>``:
-    ``cm::erase_if``
+    ``cm::erase_if``, ``cm::ssize``
 
   * ``<cm/vector>``:
-    ``cm::erase``, ``cm::erase_if``
+    ``cm::erase``, ``cm::erase_if``, ``cm::ssize``
 
 Additionally, some useful non-standard extensions to the C++ standard library
 are available in headers under the directory ``cmext/`` in namespace ``cm``.
