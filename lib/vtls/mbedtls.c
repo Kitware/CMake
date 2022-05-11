@@ -279,7 +279,7 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
   const char * const ssl_capath = SSL_CONN_CONFIG(CApath);
   char * const ssl_cert = SSL_SET_OPTION(primary.clientcert);
   const struct curl_blob *ssl_cert_blob = SSL_SET_OPTION(primary.cert_blob);
-  const char * const ssl_crlfile = SSL_SET_OPTION(CRLfile);
+  const char * const ssl_crlfile = SSL_SET_OPTION(primary.CRLfile);
   const char * const hostname = SSL_HOST_NAME();
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   const long int port = SSL_HOST_PORT();
@@ -303,8 +303,9 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
                               &ts_entropy, NULL, 0);
   if(ret) {
     mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-    failf(data, "Failed - mbedTLS: ctr_drbg_init returned (-0x%04X) %s",
+    failf(data, "mbedtls_ctr_drbg_seed returned (-0x%04X) %s",
           -ret, errorbuf);
+    return CURLE_FAILED_INIT;
   }
 #else
   mbedtls_entropy_init(&backend->entropy);
@@ -314,8 +315,9 @@ mbed_connect_step1(struct Curl_easy *data, struct connectdata *conn,
                               &backend->entropy, NULL, 0);
   if(ret) {
     mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-    failf(data, "Failed - mbedTLS: ctr_drbg_init returned (-0x%04X) %s",
+    failf(data, "mbedtls_ctr_drbg_seed returned (-0x%04X) %s",
           -ret, errorbuf);
+    return CURLE_FAILED_INIT;
   }
 #endif /* THREADING_SUPPORT */
 
@@ -815,8 +817,8 @@ mbed_connect_step2(struct Curl_easy *data, struct connectdata *conn,
     if(next_protocol) {
       infof(data, VTLS_INFOF_ALPN_ACCEPTED_1STR, next_protocol);
 #ifdef USE_HTTP2
-      if(!strncmp(next_protocol, ALPN_H2, ALPN_H2_LEN) &&
-         !next_protocol[ALPN_H2_LEN]) {
+      if(!strncmp(next_protocol, ALPN_H2, ALPN_H2_LENGTH) &&
+         !next_protocol[ALPN_H2_LENGTH]) {
         conn->negnpn = CURL_HTTP_VERSION_2;
       }
       else
@@ -1015,7 +1017,7 @@ static CURLcode mbedtls_random(struct Curl_easy *data,
 
   if(ret) {
     mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-    failf(data, "Failed - mbedTLS: ctr_drbg_seed returned (-0x%04X) %s",
+    failf(data, "mbedtls_ctr_drbg_seed returned (-0x%04X) %s",
           -ret, errorbuf);
   }
   else {
@@ -1023,7 +1025,7 @@ static CURLcode mbedtls_random(struct Curl_easy *data,
 
     if(ret) {
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-      failf(data, "mbedTLS: ctr_drbg_init returned (-0x%04X) %s",
+      failf(data, "mbedtls_ctr_drbg_random returned (-0x%04X) %s",
             -ret, errorbuf);
     }
   }
