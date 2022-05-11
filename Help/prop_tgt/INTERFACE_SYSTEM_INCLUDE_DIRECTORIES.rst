@@ -5,9 +5,12 @@ List of public system include directories for a library.
 
 Targets may populate this property to publish the include directories
 which contain system headers, and therefore should not result in
-compiler warnings.  The :command:`target_include_directories(SYSTEM)`
-command signature populates this property with values given to the
-``PUBLIC`` and ``INTERFACE`` keywords.
+compiler warnings.  Additionally, system include directories are searched
+after normal include directories regardless of the order specified.
+
+The :command:`target_include_directories(SYSTEM)` command signature
+populates this property with values given to the ``PUBLIC`` and
+``INTERFACE`` keywords.
 
 Projects may also get and set the property directly, but must be aware that
 adding directories to this property does not make those directories used

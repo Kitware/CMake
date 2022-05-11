@@ -8,6 +8,11 @@
 #include <set>
 #include <vector>
 
+#ifdef _WIN32
+#  include <unordered_map>
+#  include <utility>
+#endif
+
 #include "cmState.h"
 #include "cmStateDirectory.h"
 #include "cmStringAlgorithms.h"
@@ -117,17 +122,34 @@ std::string cmOutputConverter::MaybeRelativeToCurBinDir(
 std::string cmOutputConverter::ConvertToOutputForExisting(
   const std::string& remote, OutputFormat format) const
 {
+#ifdef _WIN32
+  // Cache the Short Paths since we only convert the same few paths anyway and
+  // calling `GetShortPathNameW` is really expensive.
+  static std::unordered_map<std::string, std::string> shortPathCache{};
+
   // If this is a windows shell, the result has a space, and the path
   // already exists, we can use a short-path to reference it without a
   // space.
   if (this->GetState()->UseWindowsShell() &&
       remote.find_first_of(" #") != std::string::npos &&
       cmSystemTools::FileExists(remote)) {
-    std::string tmp;
-    if (cmSystemTools::GetShortPath(remote, tmp)) {
-      return this->ConvertToOutputFormat(tmp, format);
-    }
+
+    std::string shortPath = [&]() {
+      auto cachedShortPathIt = shortPathCache.find(remote);
+
+      if (cachedShortPathIt != shortPathCache.end()) {
+        return cachedShortPathIt->second;
+      }
+
+      std::string tmp{};
+      cmSystemTools::GetShortPath(remote, tmp);
+      shortPathCache[remote] = tmp;
+      return tmp;
+    }();
+
+    return this->ConvertToOutputFormat(shortPath, format);
   }
+#endif
 
   // Otherwise, perform standard conversion.
   return this->ConvertToOutputFormat(remote, format);
@@ -143,7 +165,7 @@ std::string cmOutputConverter::ConvertToOutputFormat(cm::string_view source,
     result = this->EscapeForShell(result, true, false, output == WATCOMQUOTE,
                                   output == NINJAMULTI);
   } else if (output == RESPONSE) {
-    result = this->EscapeForShell(result, false, false, false);
+    result = this->EscapeForShell(result, false, false, false, false, true);
   }
   return result;
 }
@@ -175,9 +197,11 @@ static bool cmOutputConverterIsShellOperator(cm::string_view str)
   return (shellOperators.count(str) != 0);
 }
 
-std::string cmOutputConverter::EscapeForShell(
-  cm::string_view str, bool makeVars, bool forEcho, bool useWatcomQuote,
-  bool unescapeNinjaConfiguration) const
+std::string cmOutputConverter::EscapeForShell(cm::string_view str,
+                                              bool makeVars, bool forEcho,
+                                              bool useWatcomQuote,
+                                              bool unescapeNinjaConfiguration,
+                                              bool forResponse) const
 {
   // Do not escape shell operators.
   if (cmOutputConverterIsShellOperator(str)) {
@@ -203,6 +227,9 @@ std::string cmOutputConverter::EscapeForShell(
   if (useWatcomQuote) {
     flags |= Shell_Flag_WatcomQuote;
   }
+  if (forResponse) {
+    flags |= Shell_Flag_IsResponse;
+  }
   if (this->GetState()->UseWatcomWMake()) {
     flags |= Shell_Flag_WatcomWMake;
   }
@@ -219,10 +246,11 @@ std::string cmOutputConverter::EscapeForShell(
   return Shell_GetArgument(str, flags);
 }
 
-std::string cmOutputConverter::EscapeForCMake(cm::string_view str)
+std::string cmOutputConverter::EscapeForCMake(cm::string_view str,
+                                              WrapQuotes wrapQuotes)
 {
   // Always double-quote the argument to take care of most escapes.
-  std::string result = "\"";
+  std::string result = (wrapQuotes == WrapQuotes::Wrap) ? "\"" : "";
   for (const char c : str) {
     if (c == '"') {
       // Escape the double quote to avoid ending the argument.
@@ -238,7 +266,9 @@ std::string cmOutputConverter::EscapeForCMake(cm::string_view str)
       result += c;
     }
   }
-  result += "\"";
+  if (wrapQuotes == WrapQuotes::Wrap) {
+    result += "\"";
+  }
   return result;
 }
 
@@ -355,6 +385,13 @@ bool cmOutputConverter::Shell_CharNeedsQuotes(char c, int flags)
   /* On all platforms quotes are needed to preserve whitespace.  */
   if (Shell_CharIsWhitespace(c)) {
     return true;
+  }
+
+  /* Quote hyphens in response files */
+  if (flags & Shell_Flag_IsResponse) {
+    if (c == '-') {
+      return true;
+    }
   }
 
   if (flags & Shell_Flag_IsUnix) {

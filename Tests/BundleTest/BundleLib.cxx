@@ -20,7 +20,8 @@ int findBundleFile(char* exec, const char* file)
 {
   int res;
   char* nexec = strdup(exec);
-  char* fpath = (char*)malloc(strlen(exec) + 100);
+  size_t fpathlen = strlen(nexec) + 1 + strlen(file);
+  char* fpath = (char*)malloc(fpathlen);
   int cc;
   int cnt = 0;
   printf("Process executable name: %s\n", exec);
@@ -36,7 +37,7 @@ int findBundleFile(char* exec, const char* file)
     }
   }
   printf("Process executable path: %s\n", nexec);
-  sprintf(fpath, "%s/%s", nexec, file);
+  snprintf(fpath, fpathlen, "%s/%s", nexec, file);
   printf("Check for file: %s\n", fpath);
   res = fileExists(fpath);
   free(nexec);

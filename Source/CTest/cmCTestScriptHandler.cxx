@@ -48,8 +48,6 @@
 #  include <unistd.h>
 #endif
 
-#define CTEST_INITIAL_CMAKE_OUTPUT_FILE_NAME "CTestInitialCMakeOutput.log"
-
 cmCTestScriptHandler::cmCTestScriptHandler() = default;
 
 void cmCTestScriptHandler::Initialize()
@@ -411,7 +409,7 @@ int cmCTestScriptHandler::ExtractVariables()
   char updateVar[40];
   int i;
   for (i = 1; i < 10; ++i) {
-    sprintf(updateVar, "CTEST_EXTRA_UPDATES_%i", i);
+    snprintf(updateVar, sizeof(updateVar), "CTEST_EXTRA_UPDATES_%i", i);
     cmValue updateVal = this->Makefile->GetDefinition(updateVar);
     if (updateVal) {
       if (this->UpdateCmd.empty()) {

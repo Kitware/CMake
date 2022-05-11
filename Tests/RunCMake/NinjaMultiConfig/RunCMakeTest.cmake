@@ -448,7 +448,7 @@ run_cmake_command(NoUnusedVariables ${CMAKE_COMMAND} ${CMAKE_CURRENT_LIST_DIR}
   )
 
 # CudaSimple uses separable compilation, which is currently only supported on NVCC.
-if(CMake_TEST_CUDA AND NOT CMake_TEST_CUDA STREQUAL "Clang")
+if(CMake_TEST_CUDA)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/CudaSimple-build)
   run_cmake_configure(CudaSimple)
   include(${RunCMake_TEST_BINARY_DIR}/target_files.cmake)

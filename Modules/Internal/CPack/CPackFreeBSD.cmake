@@ -34,7 +34,7 @@ function(_cpack_freebsd_fallback_var OUTPUT_VAR_NAME)
     endif()
   endforeach()
   if(NOT VALUE)
-    message(WARNING "Variable ${OUTPUT_VAR_NAME} could not be given a fallback value from any variable ${FALLBACK_VAR_NAMES}.")
+    message(WARNING "Variable ${OUTPUT_VAR_NAME} could not be given a fallback value from (any of) ${FALLBACK_VAR_NAMES}.")
   endif()
 endfunction()
 

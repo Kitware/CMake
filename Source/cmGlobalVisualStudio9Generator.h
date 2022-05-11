@@ -3,8 +3,12 @@
 #pragma once
 
 #include <memory>
+#include <string>
 
 #include "cmGlobalVisualStudio8Generator.h"
+
+class cmGlobalGeneratorFactory;
+class cmake;
 
 /** \class cmGlobalVisualStudio9Generator
  * \brief Write a Unix makefiles.

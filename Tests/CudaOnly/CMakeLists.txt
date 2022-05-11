@@ -4,8 +4,10 @@ macro (add_cuda_test_macro name)
     PROPERTY LABELS "CUDA")
 endmacro ()
 
+add_cuda_test_macro(CudaOnly.All CudaOnlyAll)
 add_cuda_test_macro(CudaOnly.Architecture Architecture)
 add_cuda_test_macro(CudaOnly.CompileFlags CudaOnlyCompileFlags)
+
 add_cuda_test_macro(CudaOnly.EnableStandard CudaOnlyEnableStandard)
 add_cuda_test_macro(CudaOnly.ExportPTX CudaOnlyExportPTX)
 add_cuda_test_macro(CudaOnly.SharedRuntimePlusToolkit CudaOnlySharedRuntimePlusToolkit)
@@ -16,6 +18,7 @@ add_cuda_test_macro(CudaOnly.WithDefs CudaOnlyWithDefs)
 add_cuda_test_macro(CudaOnly.CircularLinkLine CudaOnlyCircularLinkLine)
 add_cuda_test_macro(CudaOnly.ResolveDeviceSymbols CudaOnlyResolveDeviceSymbols)
 add_cuda_test_macro(CudaOnly.SeparateCompilation main/CudaOnlySeparateCompilation)
+add_cuda_test_macro(CudaOnly.SeparateCompilationPTX CudaOnlySeparateCompilationPTX)
 
 if(CMake_TEST_CUDA AND NOT CMake_TEST_CUDA STREQUAL "Clang")
   # Clang doesn't have flags for selecting the runtime.

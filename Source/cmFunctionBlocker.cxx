@@ -27,7 +27,7 @@ bool cmFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
       if (!this->ArgumentsMatch(lff, mf)) {
         cmListFileContext const& lfc = this->GetStartingContext();
         cmListFileContext closingContext =
-          cmListFileContext::FromCommandContext(lff, lfc.FilePath);
+          cmListFileContext::FromListFileFunction(lff, lfc.FilePath);
         std::ostringstream e;
         /* clang-format off */
         e << "A logical block opening on the line\n"

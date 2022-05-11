@@ -1,0 +1,4 @@
+-- PROG='[^']*/Tests/RunCMake/find_program/A/testAandB'
+-- PROG='PROG-NOTFOUND'
+-- PROG='[^']*/Tests/RunCMake/find_program/B/testAandB'
+-- PROG='[^']*/Tests/RunCMake/find_program/A/testAandB'

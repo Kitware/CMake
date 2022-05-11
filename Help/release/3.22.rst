@@ -142,3 +142,37 @@ Other Changes
   This became available as of VS 16.10 (toolchain version 14.29.30037).
 
 * The :cpack_gen:`CPack NSIS Generator` now requires NSIS 3.03 or later.
+
+Updates
+=======
+
+Changes made since CMake 3.22.0 include the following.
+
+3.22.1
+------
+
+* This version made no changes to documented features or interfaces.
+  Some implementation updates were made to support ecosystem changes
+  and/or fix regressions.
+
+3.22.2
+------
+
+* The ``OLD`` behavior of :policy:`CMP0128` was fixed to add flags even when
+  the specified standard matches the compiler default.
+
+3.22.3
+------
+
+* The :command:`while` command again ignores errors in condition evaluation
+  as CMake 3.21 and below did.  This bug was fixed in 3.22.0, but exposed
+  errors in existing projects.  The fix has been reverted to restore
+  compatibility.  The fix may be restored in a future version of CMake
+  via a policy.
+
+3.22.4
+------
+
+* This version made no changes to documented features or interfaces.
+  Some implementation updates were made to support ecosystem changes
+  and/or fix regressions.

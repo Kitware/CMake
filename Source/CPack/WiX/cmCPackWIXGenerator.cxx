@@ -219,7 +219,9 @@ bool cmCPackWIXGenerator::InitializeWiXConfiguration()
   CollectExtensions("CPACK_WIX_EXTENSIONS", this->CandleExtensions);
   CollectExtensions("CPACK_WIX_CANDLE_EXTENSIONS", this->CandleExtensions);
 
-  this->LightExtensions.insert("WixUIExtension");
+  if (!cmIsOn(GetOption("CPACK_WIX_SKIP_WIX_UI_EXTENSION"))) {
+    this->LightExtensions.insert("WixUIExtension");
+  }
   CollectExtensions("CPACK_WIX_EXTENSIONS", this->LightExtensions);
   CollectExtensions("CPACK_WIX_LIGHT_EXTENSIONS", this->LightExtensions);
   CollectXmlNamespaces("CPACK_WIX_CUSTOM_XMLNS", this->CustomXmlNamespaces);

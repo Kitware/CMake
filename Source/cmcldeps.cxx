@@ -294,7 +294,8 @@ int main()
       return exit_code;
 
     // compile rc file with rc.exe
-    return process(srcfilename, "", objfile, prefix, binpath + " " + rest);
+    return process(srcfilename, "", objfile, prefix, binpath + " " + rest,
+                   std::string(), true);
   }
 
   usage("Invalid language specified.");

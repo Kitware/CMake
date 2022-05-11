@@ -4,15 +4,17 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <iosfwd>
+#include <cstddef>
 #include <map>
 #include <memory>
 #include <set>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "cmGeneratorTarget.h"
+#include "cmVsProjectType.h"
 
 class cmComputeLinkInformation;
 class cmCustomCommand;
@@ -196,6 +198,7 @@ private:
   std::string GetCSharpSourceLink(cmSourceFile const* source);
 
   void WriteStdOutEncodingUtf8(Elem& e1);
+  void UpdateCache();
 
 private:
   friend class cmVS10GeneratorOptions;
@@ -209,11 +212,8 @@ private:
   OptionsMap NasmOptions;
   OptionsMap LinkOptions;
   std::string LangForClCompile;
-  enum VsProjectType
-  {
-    vcxproj,
-    csproj
-  } ProjectType;
+
+  VsProjectType ProjectType;
   bool InSourceBuild;
   std::vector<std::string> Configurations;
   std::vector<TargetsFileAndConfigs> TargetsFileAndConfigsVec;
@@ -231,6 +231,7 @@ private:
   unsigned int NsightTegraVersion[4];
   bool TargetCompileAsWinRT;
   std::set<std::string> IPOEnabledConfigurations;
+  std::set<std::string> ASanEnabledConfigurations;
   std::map<std::string, std::string> SpectreMitigation;
   cmGlobalVisualStudio10Generator* const GlobalGenerator;
   cmLocalVisualStudio10Generator* const LocalGenerator;
@@ -259,6 +260,15 @@ private:
   std::vector<cmSourceFile const*> XamlObjs;
   void ClassifyAllConfigSources();
   void ClassifyAllConfigSource(cmGeneratorTarget::AllConfigSource const& acs);
+
+  // .Net SDK-stype project variable and helper functions
+  void WriteClassicMsBuildProjectFile(cmGeneratedFileStream& BuildFileStream);
+  void WriteSdkStyleProjectFile(cmGeneratedFileStream& BuildFileStream);
+
+  void WriteCommonPropertyGroupGlobals(
+    cmVisualStudio10TargetGenerator::Elem& e1);
+
+  bool HasCustomCommands() const;
 
   std::unordered_map<std::string, ConfigToSettings> ParsedToolTargetSettings;
   bool PropertyIsSameInAllConfigs(const ConfigToSettings& toolSettings,

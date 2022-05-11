@@ -1,5 +1,10 @@
 file(TOUCH "${RunCMake_TEST_BINARY_DIR}/main.c")
-foreach(i RANGE 1 20000)
+if(RunCMake_GENERATOR STREQUAL "Borland Makefiles")
+  set(num_headers 2000)
+else()
+  set(num_headers 20000)
+endif()
+foreach(i RANGE 1 ${num_headers})
   file(WRITE "${RunCMake_TEST_BINARY_DIR}/temp_header_file_${i}.h"
     "#define HEADER_${i} ${i}\n"
     )

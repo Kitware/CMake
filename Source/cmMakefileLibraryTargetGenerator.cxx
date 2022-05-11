@@ -308,9 +308,6 @@ void cmMakefileLibraryTargetGenerator::WriteNvidiaDeviceLibraryRules(
   // Expand the rule variables.
   std::vector<std::string> real_link_commands;
   {
-    bool useWatcomQuote =
-      this->Makefile->IsOn(linkRuleVar + "_USE_WATCOM_QUOTE");
-
     // Set path conversion for link script shells.
     this->LocalGenerator->SetLinkScriptShell(useLinkScript);
 
@@ -321,7 +318,6 @@ void cmMakefileLibraryTargetGenerator::WriteNvidiaDeviceLibraryRules(
         this->LocalGenerator,
         this->LocalGenerator->GetStateSnapshot().GetDirectory()));
     linkLineComputer->SetForResponse(useResponseFileForLibs);
-    linkLineComputer->SetUseWatcomQuote(useWatcomQuote);
     linkLineComputer->SetRelink(relink);
 
     this->CreateLinkLibs(linkLineComputer.get(), linkLibs,
@@ -332,11 +328,7 @@ void cmMakefileLibraryTargetGenerator::WriteNvidiaDeviceLibraryRules(
     std::string buildObjs;
     this->CreateObjectLists(useLinkScript, false, // useArchiveRules
                             useResponseFileForObjects, buildObjs, depends,
-                            useWatcomQuote);
-
-    cmOutputConverter::OutputFormat output = (useWatcomQuote)
-      ? cmOutputConverter::WATCOMQUOTE
-      : cmOutputConverter::SHELL;
+                            false);
 
     std::string objectDir = this->GeneratorTarget->GetSupportDirectory();
     objectDir = this->LocalGenerator->ConvertToOutputFormat(
@@ -344,7 +336,8 @@ void cmMakefileLibraryTargetGenerator::WriteNvidiaDeviceLibraryRules(
       cmOutputConverter::SHELL);
 
     std::string target = this->LocalGenerator->ConvertToOutputFormat(
-      this->LocalGenerator->MaybeRelativeToCurBinDir(targetOutput), output);
+      this->LocalGenerator->MaybeRelativeToCurBinDir(targetOutput),
+      cmOutputConverter::SHELL);
 
     std::string targetFullPathCompilePDB =
       this->ComputeTargetCompilePDB(this->GetConfigName());

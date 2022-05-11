@@ -191,6 +191,7 @@ Properties on Targets
    /prop_tgt/DEPLOYMENT_REMOTE_DIRECTORY
    /prop_tgt/DEPRECATION
    /prop_tgt/DISABLE_PRECOMPILE_HEADERS
+   /prop_tgt/DOTNET_SDK
    /prop_tgt/DOTNET_TARGET_FRAMEWORK
    /prop_tgt/DOTNET_TARGET_FRAMEWORK_VERSION
    /prop_tgt/EchoString
@@ -214,6 +215,11 @@ Properties on Targets
    /prop_tgt/GHS_NO_SOURCE_GROUP_FILE
    /prop_tgt/GNUtoMS
    /prop_tgt/HAS_CXX
+   /prop_tgt/HEADER_DIRS
+   /prop_tgt/HEADER_DIRS_NAME
+   /prop_tgt/HEADER_SET
+   /prop_tgt/HEADER_SET_NAME
+   /prop_tgt/HEADER_SETS
    /prop_tgt/HIP_ARCHITECTURES
    /prop_tgt/HIP_EXTENSIONS
    /prop_tgt/HIP_STANDARD
@@ -239,6 +245,7 @@ Properties on Targets
    /prop_tgt/IMPORTED_LOCATION_CONFIG
    /prop_tgt/IMPORTED_NO_SONAME
    /prop_tgt/IMPORTED_NO_SONAME_CONFIG
+   /prop_tgt/IMPORTED_NO_SYSTEM
    /prop_tgt/IMPORTED_OBJECTS
    /prop_tgt/IMPORTED_OBJECTS_CONFIG
    /prop_tgt/IMPORTED_SONAME
@@ -254,6 +261,7 @@ Properties on Targets
    /prop_tgt/INTERFACE_COMPILE_DEFINITIONS
    /prop_tgt/INTERFACE_COMPILE_FEATURES
    /prop_tgt/INTERFACE_COMPILE_OPTIONS
+   /prop_tgt/INTERFACE_HEADER_SETS
    /prop_tgt/INTERFACE_INCLUDE_DIRECTORIES
    /prop_tgt/INTERFACE_LINK_DEPENDS
    /prop_tgt/INTERFACE_LINK_DIRECTORIES
@@ -297,6 +305,7 @@ Properties on Targets
    /prop_tgt/LINK_INTERFACE_MULTIPLICITY
    /prop_tgt/LINK_INTERFACE_MULTIPLICITY_CONFIG
    /prop_tgt/LINK_LIBRARIES
+   /prop_tgt/LINK_LIBRARIES_ONLY_TARGETS
    /prop_tgt/LINK_OPTIONS
    /prop_tgt/LINK_SEARCH_END_STATIC
    /prop_tgt/LINK_SEARCH_START_STATIC
@@ -425,6 +434,7 @@ Properties on Targets
    /prop_tgt/XCODE_SCHEME_ARGUMENTS
    /prop_tgt/XCODE_SCHEME_DEBUG_AS_ROOT
    /prop_tgt/XCODE_SCHEME_DEBUG_DOCUMENT_VERSIONING
+   /prop_tgt/XCODE_SCHEME_ENABLE_GPU_FRAME_CAPTURE_MODE
    /prop_tgt/XCODE_SCHEME_DISABLE_MAIN_THREAD_CHECKER
    /prop_tgt/XCODE_SCHEME_DYNAMIC_LIBRARY_LOADS
    /prop_tgt/XCODE_SCHEME_DYNAMIC_LINKER_API_USAGE

@@ -84,11 +84,9 @@ private:
 
 struct VSInstanceInfo
 {
-  std::wstring InstanceId;
-  std::wstring VSInstallLocation;
-  std::wstring Version;
+  std::string VSInstallLocation;
+  std::string Version;
   std::string VCToolsetVersion;
-  ULONGLONG ullVersion = 0; // A.B.C.D = (A<<48)|(B<<32)|(C<<16)|D
   bool IsWin10SDKInstalled = false;
   bool IsWin81SDKInstalled = false;
 
@@ -101,7 +99,8 @@ public:
   cmVSSetupAPIHelper(unsigned int version);
   ~cmVSSetupAPIHelper();
 
-  bool SetVSInstance(std::string const& vsInstallLocation);
+  bool SetVSInstance(std::string const& vsInstallLocation,
+                     std::string const& vsInstallVersion);
 
   bool IsVSInstalled();
   bool GetVSInstanceInfo(std::string& vsInstallLocation);
@@ -118,6 +117,7 @@ private:
                                bool& bWin10SDK, bool& bWin81SDK);
   int ChooseVSInstance(const std::vector<VSInstanceInfo>& vecVSInstances);
   bool EnumerateAndChooseVSInstance();
+  bool LoadSpecifiedVSInstanceFromDisk();
 
   unsigned int Version;
 
@@ -134,4 +134,5 @@ private:
   bool IsEWDKEnabled();
 
   std::string SpecifiedVSInstallLocation;
+  std::string SpecifiedVSInstallVersion;
 };

@@ -490,6 +490,9 @@ specifiers:
 ``%S``
   The second of the current minute.  60 represents a leap second. (00-60)
 
+``%f``
+  The microsecond of the current second (000000-999999).
+
 ``%U``
   The week number of the current year (00-53).
 
@@ -609,7 +612,7 @@ Requires an element of object type.
 .. code-block:: cmake
 
   string(JSON <out-var> [ERROR_VARIABLE <error-variable>]
-         LENGTH <json-string> <member|index> [<member|index> ...])
+         LENGTH <json-string> [<member|index> ...])
 
 Get the length of an element in ``<json-string>`` at the location
 given by the list of ``<member|index>`` arguments.

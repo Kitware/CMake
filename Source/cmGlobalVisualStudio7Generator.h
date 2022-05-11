@@ -2,14 +2,26 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #pragma once
 
+#include <iosfwd>
+#include <map>
 #include <memory>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
 
-#include "cmGlobalGeneratorFactory.h"
+#include <cm3p/json/value.h>
+
 #include "cmGlobalVisualStudioGenerator.h"
 #include "cmValue.h"
 
-class cmTarget;
+class cmGeneratorTarget;
 struct cmIDEFlagTable;
+class cmLocalGenerator;
+class cmMakefile;
+class cmake;
+template <typename T>
+class BT;
 
 /** \class cmGlobalVisualStudio7Generator
  * \brief Write a Unix makefiles.
@@ -57,7 +69,8 @@ public:
   std::vector<GeneratedMakeCommand> GenerateBuildCommand(
     const std::string& makeProgram, const std::string& projectName,
     const std::string& projectDir, std::vector<std::string> const& targetNames,
-    const std::string& config, bool fast, int jobs, bool verbose,
+    const std::string& config, int jobs, bool verbose,
+    const cmBuildOptions& buildOptions = cmBuildOptions(),
     std::vector<std::string> const& makeOptions =
       std::vector<std::string>()) override;
 

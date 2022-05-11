@@ -1,0 +1,9 @@
+^CMake Warning:
+  Ignoring extra path from command line:
+
+   .*other_dir1"
+.*
+CMake Warning:
+  Ignoring extra path from command line:
+
+   .*other_dir2"$

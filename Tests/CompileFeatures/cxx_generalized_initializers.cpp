@@ -11,8 +11,11 @@ class initializer_list
   const _E* __begin_;
   size_t __size_;
 
-#ifdef __INTEL_COMPILER
-  // The Intel compiler internally asserts the constructor overloads, so
+#if defined(__INTEL_COMPILER) ||                                              \
+  (defined(__LCC__) &&                                                        \
+   (defined(__GNUC__) || defined(__GNUG__) || defined(__MCST__)))
+  // Compilers based on EDG, such as Intel compiler and MCST LCC,
+  // internally assert the constructor overloads, so
   // reproduce the constructor used in its <initializer_list> header.
   initializer_list(const _E*, size_t) {}
 #else

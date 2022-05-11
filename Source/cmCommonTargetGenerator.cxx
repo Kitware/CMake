@@ -101,7 +101,8 @@ void cmCommonTargetGenerator::AppendFortranFormatFlags(
 }
 
 void cmCommonTargetGenerator::AppendFortranPreprocessFlags(
-  std::string& flags, cmSourceFile const& source)
+  std::string& flags, cmSourceFile const& source,
+  PreprocessFlagsRequired requires_pp)
 {
   const std::string srcpp = source.GetSafeProperty("Fortran_PREPROCESS");
   cmOutputConverter::FortranPreprocess preprocess =
@@ -114,7 +115,9 @@ void cmCommonTargetGenerator::AppendFortranPreprocessFlags(
   const char* var = nullptr;
   switch (preprocess) {
     case cmOutputConverter::FortranPreprocess::Needed:
-      var = "CMAKE_Fortran_COMPILE_OPTIONS_PREPROCESS_ON";
+      if (requires_pp == PreprocessFlagsRequired::YES) {
+        var = "CMAKE_Fortran_COMPILE_OPTIONS_PREPROCESS_ON";
+      }
       break;
     case cmOutputConverter::FortranPreprocess::NotNeeded:
       var = "CMAKE_Fortran_COMPILE_OPTIONS_PREPROCESS_OFF";

@@ -53,7 +53,7 @@ std::string Status::GetString() const
       LocalFree(message);
     } break;
 #endif
-  };
+  }
   return err;
 }
 

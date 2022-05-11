@@ -96,6 +96,7 @@ foreach(LANG IN ITEMS C CXX Fortran)
       else()
         set(_Intel_possible_redistdirs
           "${_Intel_basedir}/../lib/${_Intel_archdir}"
+          "${_Intel_basedir}/../compiler/lib/${_Intel_archdir}_lin"
           "${_Intel_basedir}/../../compiler/lib/${_Intel_archdir}_lin"
           )
       endif()

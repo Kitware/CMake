@@ -16,13 +16,18 @@ conditions are true.
 
     cmake_dependent_option(<option> "<help_text>" <value> <depends> <force>)
 
-  Makes ``<option>`` available to the user if ``<depends>`` is true. When
-  ``<option>`` is available, the given ``<help_text>`` and initial ``<value>``
-  are used. If the ``<depends>`` condition is not true, ``<option>`` will not be
-  presented and will always have the value given by ``<force>``. Any value set by
-  the user is preserved for when the option is presented again. In case ``<depends>``
-  is a :ref:`semicolon-separated list <CMake Language Lists>`, all elements must
-  be true in order to initialize ``<option>`` with ``<value>``.
+  Makes ``<option>`` available to the user if the
+  :ref:`semicolon-separated list <CMake Language Lists>` of conditions in
+  ``<depends>`` are all true.  Otherwise, a local variable named ``<option>``
+  is set to ``<force>``.
+
+  When ``<option>`` is available, the given ``<help_text>`` and initial
+  ``<value>`` are used. Otherwise, any value set by the user is preserved for
+  when ``<depends>`` is satisfied in the future.
+
+  Note that the ``<option>`` variable only has a value which satisfies the
+  ``<depends>`` condition within the scope of the caller because it is a local
+  variable.
 
 Example invocation:
 

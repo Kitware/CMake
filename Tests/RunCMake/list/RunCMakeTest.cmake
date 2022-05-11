@@ -77,6 +77,9 @@ run_cmake(TRANSFORM-Selector-FOR-NoEnoughArguments)
 run_cmake(TRANSFORM-Selector-FOR-TooManyArguments)
 run_cmake(TRANSFORM-Selector-FOR-BadArgument)
 run_cmake(TRANSFORM-Selector-FOR-InvalidIndex)
+run_cmake(TRANSFORM-Selector-FOR-ZeroStepArgument)
+run_cmake(TRANSFORM-Selector-FOR-NegativeStepArgument)
+run_cmake(TRANSFORM-Selector-FOR-BackwardsRange)
 # 'output' oriented tests
 run_cmake(TRANSFORM-Output-OUTPUT_VARIABLE-NoArguments)
 run_cmake(TRANSFORM-Output-OUTPUT_VARIABLE-TooManyArguments)
@@ -113,3 +116,6 @@ run_cmake(POP_FRONT-NoArgs)
 # Successful tests
 run_cmake(POP_BACK)
 run_cmake(POP_FRONT)
+
+# Nonexistent variables treated as empty
+run_cmake(LIST-nonexistent)

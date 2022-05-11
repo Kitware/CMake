@@ -53,56 +53,38 @@ p:source-package:
 
 p:doc-package:
     extends:
-        - .fedora34_sphinx_package
+        - .fedora35_sphinx_package
         - .cmake_prep_doc_linux
         - .linux_builder_tags_qt
         - .cmake_doc_artifacts
         - .run_only_for_package
 
-.u:source-package:
+u:source-package:
     extends:
-        - .rsync_upload_binary
+        - .rsync_upload_package
         - .run_only_for_package
     dependencies:
         - p:source-package
     needs:
         - p:source-package
-    variables:
-        RSYNC_DESTINATION: dev
 
 # Documentation builds
 
-b:help:master:
+b:cmake.org-help:
     extends:
         - .cmake_org_help
-        - .run_only_for_continuous_master
+        - .run_cmake_org_help
+    dependencies: []
+    needs: []
 
-.u:help:master:
+u:cmake.org-help:
     extends:
         - .rsync_upload_help
-        - .run_only_for_continuous_master
-    variables:
-        RSYNC_DESTINATION: git-master
+        - .run_cmake_org_help
     dependencies:
-        - b:help:master
+        - b:cmake.org-help
     needs:
-        - b:help:master
-
-b:help:stage:
-    extends:
-        - .cmake_org_help
-        - .run_only_for_continuous_stage
-
-.u:help:stage:
-    extends:
-        - .rsync_upload_help
-        - .run_only_for_continuous_stage
-    variables:
-        RSYNC_DESTINATION: git-stage
-    dependencies:
-        - b:help:stage
-    needs:
-        - b:help:stage
+        - b:cmake.org-help
 
 # Lint builds
 
@@ -119,16 +101,16 @@ l:iwyu-debian10:
         - .linux_builder_tags
         - .run_automatically
 
-l:tidy-fedora34:
+l:tidy-fedora35:
     extends:
-        - .fedora34_tidy
+        - .fedora35_tidy
         - .cmake_build_linux
         - .linux_builder_tags_qt
         - .run_automatically
 
-l:sphinx-fedora34:
+l:sphinx-fedora35:
     extends:
-        - .fedora34_sphinx
+        - .fedora35_sphinx
         - .cmake_build_linux
         - .linux_builder_tags_qt
         - .run_automatically
@@ -136,9 +118,9 @@ l:sphinx-fedora34:
         CMAKE_CI_JOB_CONTINUOUS: "true"
         CMAKE_CI_JOB_HELP: "true"
 
-l:clang-analyzer-fedora34:
+l:clang-analyzer-fedora35:
     extends:
-        - .fedora34_clang_analyzer
+        - .fedora35_clang_analyzer
         - .cmake_build_linux
         - .linux_builder_tags_qt
         - .run_automatically
@@ -207,17 +189,17 @@ t:debian10-makefiles-clang:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora34-makefiles:
+t:fedora35-makefiles:
     extends:
-        - .fedora34_makefiles
+        - .fedora35_makefiles
         - .cmake_test_linux_release
         - .linux_builder_tags_qt
         - .run_dependent
         - .needs_centos6_x86_64
 
-t:fedora34-makefiles-nospace:
+t:fedora35-makefiles-nospace:
     extends:
-        - .fedora34_makefiles
+        - .fedora35_makefiles
         - .cmake_test_linux_release
         - .linux_builder_tags_qt
         - .cmake_junit_artifacts
@@ -225,7 +207,7 @@ t:fedora34-makefiles-nospace:
         - .needs_centos6_x86_64
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake-ci"
-        CMAKE_CI_BUILD_NAME: fedora34_makefiles_nospace
+        CMAKE_CI_BUILD_NAME: fedora35_makefiles_nospace
         CMAKE_CI_JOB_NIGHTLY: "true"
 
 t:cuda9.2-nvidia:
@@ -236,7 +218,7 @@ t:cuda9.2-nvidia:
         - .run_dependent
         - .needs_centos6_x86_64
     variables:
-        CMAKE_CI_JOB_NIGHTLY: "true"
+        CMAKE_CI_NO_MR: "true"
 
 t:cuda10.2-nvidia:
     extends:
@@ -255,7 +237,26 @@ t:cuda10.2-clang:
         - .run_dependent
         - .needs_centos6_x86_64
     variables:
-        CMAKE_CI_JOB_NIGHTLY: "true"
+        CMAKE_CI_NO_MR: "true"
+
+t:cuda11.6-nvidia:
+    extends:
+        - .cuda11.6_nvidia
+        - .cmake_test_linux_release
+        - .linux_builder_tags_cuda
+        - .cmake_junit_artifacts
+        - .run_dependent
+        - .needs_centos6_x86_64
+
+t:cuda11.6-clang:
+    extends:
+        - .cuda11.6_clang
+        - .cmake_test_linux_release
+        - .linux_builder_tags_cuda
+        - .run_dependent
+        - .needs_centos6_x86_64
+    variables:
+        CMAKE_CI_NO_MR: "true"
 
 t:hip4.2-radeon:
     extends:
@@ -265,39 +266,39 @@ t:hip4.2-radeon:
         - .run_dependent
         - .needs_centos6_x86_64
     variables:
-        CMAKE_CI_JOB_NIGHTLY: "true"
+        CMAKE_CI_NO_MR: "true"
 
-b:fedora34-ninja:
+b:fedora35-ninja:
     extends:
-        - .fedora34_ninja
+        - .fedora35_ninja
         - .cmake_build_linux
         - .cmake_build_artifacts
         - .linux_builder_tags_qt
         - .run_manually
 
-t:fedora34-ninja:
+t:fedora35-ninja:
     extends:
-        - .fedora34_ninja
+        - .fedora35_ninja
         - .cmake_test_linux
         - .linux_builder_tags_x11
         - .cmake_test_artifacts
         - .run_dependent
     dependencies:
-        - b:fedora34-ninja
+        - b:fedora35-ninja
     needs:
-        - b:fedora34-ninja
+        - b:fedora35-ninja
 
-t:fedora34-ninja-multi:
+t:fedora35-ninja-multi:
     extends:
-        - .fedora34_ninja_multi
+        - .fedora35_ninja_multi
         - .cmake_test_linux_external
         - .linux_builder_tags_qt
         - .cmake_junit_artifacts
         - .run_dependent
     dependencies:
-        - t:fedora34-ninja
+        - t:fedora35-ninja
     needs:
-        - t:fedora34-ninja
+        - t:fedora35-ninja
 
 t:intel2016-makefiles:
     extends:
@@ -529,16 +530,14 @@ b:linux-x86_64-package:
     needs:
         - p:doc-package
 
-.u:linux-x86_64-package:
+u:linux-x86_64-package:
     extends:
-        - .rsync_upload_binary
+        - .rsync_upload_package
         - .run_only_for_package
     dependencies:
         - b:linux-x86_64-package
     needs:
         - b:linux-x86_64-package
-    variables:
-        RSYNC_DESTINATION: dev
 
 b:linux-aarch64-package:
     extends:
@@ -553,22 +552,20 @@ b:linux-aarch64-package:
     needs:
         - p:doc-package
 
-.u:linux-aarch64-package:
+u:linux-aarch64-package:
     extends:
-        - .rsync_upload_binary
+        - .rsync_upload_package
         - .run_only_for_package
     dependencies:
         - b:linux-aarch64-package
     needs:
         - b:linux-aarch64-package
-    variables:
-        RSYNC_DESTINATION: dev
 
 ## Sanitizer builds
 
-b:fedora34-asan:
+b:fedora35-asan:
     extends:
-        - .fedora34_asan
+        - .fedora35_asan
         - .cmake_build_linux
         - .cmake_build_artifacts
         - .linux_builder_tags_qt
@@ -576,16 +573,16 @@ b:fedora34-asan:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora34-asan:
+t:fedora35-asan:
     extends:
-        - .fedora34_asan
+        - .fedora35_asan
         - .cmake_memcheck_linux
         - .linux_builder_tags_qt
         - .run_dependent
     dependencies:
-        - b:fedora34-asan
+        - b:fedora35-asan
     needs:
-        - b:fedora34-asan
+        - b:fedora35-asan
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
@@ -694,16 +691,14 @@ b:macos-package:
     needs:
         - p:doc-package
 
-.u:macos-package:
+u:macos-package:
     extends:
-        - .rsync_upload_binary
+        - .rsync_upload_package
         - .run_only_for_package
     dependencies:
         - b:macos-package
     needs:
         - b:macos-package
-    variables:
-        RSYNC_DESTINATION: dev
 
 b:macos10.10-package:
     extends:
@@ -717,16 +712,14 @@ b:macos10.10-package:
     needs:
         - p:doc-package
 
-.u:macos10.10-package:
+u:macos10.10-package:
     extends:
-        - .rsync_upload_binary
+        - .rsync_upload_package
         - .run_only_for_package
     dependencies:
         - b:macos10.10-package
     needs:
         - b:macos10.10-package
-    variables:
-        RSYNC_DESTINATION: dev
 
 # Windows builds
 
@@ -749,6 +742,8 @@ t:windows-vs2022-x64-ninja:
         - b:windows-vs2022-x64-ninja
     needs:
         - b:windows-vs2022-x64-ninja
+    variables:
+        CMAKE_CI_JOB_NIGHTLY_NINJA: "true"
 
 t:windows-vs2022-x64:
     extends:
@@ -761,3 +756,101 @@ t:windows-vs2022-x64:
         - t:windows-vs2022-x64-ninja
     needs:
         - t:windows-vs2022-x64-ninja
+
+t:windows-vs2019-x64:
+    extends:
+        - .windows_vs2019_x64
+        - .cmake_test_windows_external
+        - .windows_tags_concurrent_vs2019
+        - .cmake_junit_artifacts
+        - .run_dependent
+    dependencies:
+        - t:windows-vs2022-x64-ninja
+    needs:
+        - t:windows-vs2022-x64-ninja
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
+t:windows-vs2022-x64-nmake:
+    extends:
+        - .windows_vs2022_x64_nmake
+        - .cmake_test_windows_nmake
+        - .windows_tags_concurrent_vs2022
+        - .cmake_junit_artifacts
+        - .run_dependent
+    dependencies:
+        - t:windows-vs2022-x64-ninja
+    needs:
+        - t:windows-vs2022-x64-ninja
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
+t:windows-vs2022-x64-jom:
+    extends:
+        - .windows_vs2022_x64_jom
+        - .cmake_test_windows_jom
+        - .windows_tags_concurrent_vs2022
+        - .cmake_junit_artifacts
+        - .run_dependent
+    dependencies:
+        - t:windows-vs2022-x64-ninja
+    needs:
+        - t:windows-vs2022-x64-ninja
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
+t:windows-borland5.5:
+    extends:
+        - .windows_borland5.5
+        - .cmake_test_windows_borland
+        - .windows_tags_concurrent
+        - .cmake_junit_artifacts
+        - .run_dependent
+    dependencies:
+        - t:windows-vs2022-x64-ninja
+    needs:
+        - t:windows-vs2022-x64-ninja
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
+t:windows-borland5.8:
+    extends:
+        - .windows_borland5.8
+        - .cmake_test_windows_borland
+        - .windows_tags_concurrent
+        - .cmake_junit_artifacts
+        - .run_dependent
+    dependencies:
+        - t:windows-vs2022-x64-ninja
+    needs:
+        - t:windows-vs2022-x64-ninja
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
+t:windows-msvc-v71-nmake:
+    extends:
+        - .windows_msvc_v71_nmake
+        - .cmake_test_windows_msvc
+        - .windows_tags_concurrent
+        - .cmake_junit_artifacts
+        - .run_dependent
+    dependencies:
+        - t:windows-vs2022-x64-ninja
+    needs:
+        - t:windows-vs2022-x64-ninja
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
+t:windows-openwatcom1.9:
+    extends:
+        - .windows_openwatcom1.9
+        - .cmake_test_windows_openwatcom
+        - .windows_tags_concurrent
+        - .cmake_junit_artifacts
+        - .run_dependent
+    dependencies:
+        - t:windows-vs2022-x64-ninja
+    needs:
+        - t:windows-vs2022-x64-ninja
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"

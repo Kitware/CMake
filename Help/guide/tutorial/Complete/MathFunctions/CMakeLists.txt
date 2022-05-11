@@ -62,6 +62,6 @@ if(TARGET SqrtLibrary)
   list(APPEND installable_libs SqrtLibrary)
 endif()
 install(TARGETS ${installable_libs}
-        DESTINATION lib
-        EXPORT MathFunctionsTargets)
+        EXPORT MathFunctionsTargets
+        DESTINATION lib)
 install(FILES MathFunctions.h DESTINATION include)

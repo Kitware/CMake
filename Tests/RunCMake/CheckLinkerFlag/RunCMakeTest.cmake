@@ -1,6 +1,6 @@
 include(RunCMake)
 
-if (CMAKE_C_COMPILER_ID MATCHES "Clang|GNU")
+if (CMAKE_C_COMPILER_ID MATCHES "Clang|GNU|LCC")
   run_cmake(CheckCLinkerFlag)
   run_cmake(CheckCXXLinkerFlag)
   if (APPLE)
@@ -9,7 +9,7 @@ if (CMAKE_C_COMPILER_ID MATCHES "Clang|GNU")
   endif()
 endif()
 
-if (CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
+if (CMAKE_Fortran_COMPILER_ID MATCHES "GNU|LCC")
   run_cmake(CheckFortranLinkerFlag)
 endif()
 

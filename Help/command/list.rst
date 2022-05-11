@@ -128,7 +128,9 @@ Modification
 
   list(APPEND <list> [<element> ...])
 
-Appends elements to the list.
+Appends elements to the list. If no variable named ``<list>`` exists in the
+current scope its value is treated as empty and the elements are appended to
+that empty list.
 
 .. _FILTER:
 
@@ -150,7 +152,12 @@ For more information on regular expressions look under
 
   list(INSERT <list> <element_index> <element> [<element> ...])
 
-Inserts elements to the list to the specified location.
+Inserts elements to the list to the specified index. It is an
+error to specify an out-of-range index. Valid indexes are 0 to `N`
+where `N` is the length of the list, inclusive. An empty list
+has length 0. If no variable named ``<list>`` exists in the
+current scope its value is treated as empty and the elements are
+inserted in that empty list.
 
 .. _POP_BACK:
 
@@ -186,7 +193,9 @@ to the given variables and then remove the first `N` values from
 
 .. versionadded:: 3.15
 
-Insert elements to the 0th position in the list.
+Insert elements to the 0th position in the list. If no variable named
+``<list>`` exists in the current scope its value is treated as empty and
+the elements are prepended to that empty list.
 
 .. _REMOVE_ITEM:
 

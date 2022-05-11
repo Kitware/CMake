@@ -132,7 +132,7 @@ Installing Targets
   install(TARGETS targets... [EXPORT <export-name>]
           [RUNTIME_DEPENDENCIES args...|RUNTIME_DEPENDENCY_SET <set-name>]
           [[ARCHIVE|LIBRARY|RUNTIME|OBJECTS|FRAMEWORK|BUNDLE|
-            PRIVATE_HEADER|PUBLIC_HEADER|RESOURCE]
+            PRIVATE_HEADER|PUBLIC_HEADER|RESOURCE|FILE_SET <set-name>]
            [DESTINATION <dir>]
            [PERMISSIONS permissions...]
            [CONFIGURATIONS [Debug|Release|...]]
@@ -204,6 +204,17 @@ that may be installed:
   Similar to ``PUBLIC_HEADER`` and ``PRIVATE_HEADER``, but for
   ``RESOURCE`` files. See :prop_tgt:`RESOURCE` for details.
 
+``FILE_SET <set>``
+  .. versionadded:: 3.23
+
+  File sets are defined by the :command:`target_sources(FILE_SET)` command.
+  If the file set ``<set>`` exists and is ``PUBLIC`` or ``INTERFACE``, any
+  files in the set are installed under the destination (see below).
+  The directory structure relative to the file set's base directories is
+  preserved. For example, a file added to the file set as
+  ``/blah/include/myproj/here.h`` with a base directory ``/blah/include``
+  would be installed to ``myproj/here.h`` below the destination.
+
 For each of these arguments given, the arguments following them only apply
 to the target or file type specified in the argument. If none is given, the
 installation properties apply to all target types. If only one is given then
@@ -214,30 +225,32 @@ For regular executables, static libraries and shared libraries, the
 ``DESTINATION`` argument is not required.  For these target types, when
 ``DESTINATION`` is omitted, a default destination will be taken from the
 appropriate variable from :module:`GNUInstallDirs`, or set to a built-in
-default value if that variable is not defined.  The same is true for the
-public and private headers associated with the installed targets through the
-:prop_tgt:`PUBLIC_HEADER` and :prop_tgt:`PRIVATE_HEADER` target properties.
-A destination must always be provided for module libraries, Apple bundles and
-frameworks.  A destination can be omitted for interface and object libraries,
-but they are handled differently (see the discussion of this topic toward the
-end of this section).
+default value if that variable is not defined.  The same is true for file
+sets, and the public and private headers associated with the installed
+targets through the :prop_tgt:`PUBLIC_HEADER` and :prop_tgt:`PRIVATE_HEADER`
+target properties. A destination must always be provided for module libraries,
+Apple bundles and frameworks.  A destination can be omitted for interface and
+object libraries, but they are handled differently (see the discussion of this
+topic toward the end of this section).
 
 The following table shows the target types with their associated variables and
 built-in defaults that apply when no destination is given:
 
-================== =============================== ======================
-   Target Type         GNUInstallDirs Variable        Built-In Default
-================== =============================== ======================
-``RUNTIME``        ``${CMAKE_INSTALL_BINDIR}``     ``bin``
-``LIBRARY``        ``${CMAKE_INSTALL_LIBDIR}``     ``lib``
-``ARCHIVE``        ``${CMAKE_INSTALL_LIBDIR}``     ``lib``
-``PRIVATE_HEADER`` ``${CMAKE_INSTALL_INCLUDEDIR}`` ``include``
-``PUBLIC_HEADER``  ``${CMAKE_INSTALL_INCLUDEDIR}`` ``include``
-================== =============================== ======================
+=============================== =============================== ======================
+   Target Type                      GNUInstallDirs Variable        Built-In Default
+=============================== =============================== ======================
+``RUNTIME``                     ``${CMAKE_INSTALL_BINDIR}``     ``bin``
+``LIBRARY``                     ``${CMAKE_INSTALL_LIBDIR}``     ``lib``
+``ARCHIVE``                     ``${CMAKE_INSTALL_LIBDIR}``     ``lib``
+``PRIVATE_HEADER``              ``${CMAKE_INSTALL_INCLUDEDIR}`` ``include``
+``PUBLIC_HEADER``               ``${CMAKE_INSTALL_INCLUDEDIR}`` ``include``
+``FILE_SET`` (type ``HEADERS``) ``${CMAKE_INSTALL_INCLUDEDIR}`` ``include``
+=============================== =============================== ======================
 
 Projects wishing to follow the common practice of installing headers into a
-project-specific subdirectory will need to provide a destination rather than
-rely on the above.
+project-specific subdirectory may prefer using file sets with appropriate
+paths and base directories. Otherwise, they must provide a ``DESTINATION``
+instead of being able to rely on the above (see next example below).
 
 To make packages compliant with distribution filesystem layout policies, if
 projects must specify a ``DESTINATION``, it is recommended that they use a
@@ -246,7 +259,7 @@ This allows package maintainers to control the install destination by setting
 the appropriate cache variables.  The following example shows a static library
 being installed to the default destination provided by
 :module:`GNUInstallDirs`, but with its headers installed to a project-specific
-subdirectory that follows the above recommendation:
+subdirectory without using file sets:
 
 .. code-block:: cmake
 
@@ -337,6 +350,11 @@ top level:
   install the export file itself, call `install(EXPORT)`_, documented below.
   See documentation of the :prop_tgt:`EXPORT_NAME` target property to change
   the name of the exported target.
+
+  If ``EXPORT`` is used and the targets include ``PUBLIC`` or ``INTERFACE``
+  file sets, all of them must be specified with ``FILE_SET`` arguments. All
+  ``PUBLIC`` or ``INTERFACE`` file sets associated with a target are included
+  in the export.
 
 ``INCLUDES DESTINATION``
   This option specifies a list of directories which will be added to the
@@ -478,6 +496,12 @@ Installing Files
 .. _FILES:
 .. _PROGRAMS:
 
+.. note::
+
+  If installing header files, consider using file sets defined by
+  :command:`target_sources(FILE_SET)` instead. File sets associate
+  headers with a target and they install as part of the target.
+
 .. code-block:: cmake
 
   install(<FILES|PROGRAMS> files...
@@ -534,7 +558,8 @@ file type if they wish to explicitly define the install destination.
 
 Projects wishing to follow the common practice of installing headers into a
 project-specific subdirectory will need to provide a destination rather than
-rely on the above.
+rely on the above. Using file sets for headers instead of ``install(FILES)``
+would be even better (see :command:`target_sources(FILE_SET)`).
 
 Note that some of the types' built-in defaults use the ``DATAROOT`` directory as
 a prefix. The ``DATAROOT`` prefix is calculated similarly to the types, with
@@ -547,13 +572,14 @@ projects must specify a ``DESTINATION``, it is recommended that they use a
 path that begins with the appropriate :module:`GNUInstallDirs` variable.
 This allows package maintainers to control the install destination by setting
 the appropriate cache variables.  The following example shows how to follow
-this advice while installing headers to a project-specific subdirectory:
+this advice while installing an image to a project-specific documentation
+subdirectory:
 
 .. code-block:: cmake
 
   include(GNUInstallDirs)
-  install(FILES mylib.h
-          DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/myproj
+  install(FILES logo.png
+          DESTINATION ${CMAKE_INSTALL_DOCDIR}/myproj
   )
 
 .. versionadded:: 3.4
@@ -571,6 +597,13 @@ Installing Directories
 
 .. _`install(DIRECTORY)`:
 .. _DIRECTORY:
+
+.. note::
+
+  To install a directory sub-tree of headers, consider using file sets
+  defined by :command:`target_sources(FILE_SET)` instead. File sets not only
+  preserve directory structure, they also associate headers with a target
+  and install as part of the target.
 
 .. code-block:: cmake
 
@@ -623,10 +656,10 @@ any expression.  For example, the code
 
 .. code-block:: cmake
 
-  install(DIRECTORY src/ DESTINATION include/myproj
-          FILES_MATCHING PATTERN "*.h")
+  install(DIRECTORY src/ DESTINATION doc/myproj
+          FILES_MATCHING PATTERN "*.png")
 
-will extract and install header files from a source tree.
+will extract and install images from a source tree.
 
 Some options may follow a ``PATTERN`` or ``REGEX`` expression as described
 under :ref:`string(REGEX) <Regex Specification>` and are applied
@@ -795,7 +828,7 @@ of the ``Development`` component in the package metadata, ensuring that the
 library is always installed if the headers and CMake export file are present.
 
 .. versionadded:: 3.7
-  In addition to cmake language files, the ``EXPORT_ANDROID_MK`` mode maybe
+  In addition to cmake language files, the ``EXPORT_ANDROID_MK`` mode may be
   used to specify an export to the android ndk build system.  This mode
   accepts the same options as the normal export mode.  The Android
   NDK supports the use of prebuilt libraries, both static and shared. This

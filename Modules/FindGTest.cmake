@@ -22,6 +22,14 @@ Imported targets
 ``GTest::gtest_main``
   The Google Test ``gtest_main`` library, if found
 
+.. versionadded:: 3.23
+
+``GTest::gmock``
+  The Google Mock ``gmock`` library, if found; adds Thread::Thread
+  automatically
+``GTest::gmock_main``
+  The Google Mock ``gmock_main`` library, if found
+
 .. deprecated:: 3.20
   For backwards compatibility, this module defines additionally the
   following deprecated :prop_tgt:`IMPORTED` targets (available since 3.5):
@@ -31,7 +39,6 @@ Imported targets
   automatically
 ``GTest::Main``
   The Google Test ``gtest_main`` library, if found
-
 
 Result variables
 ^^^^^^^^^^^^^^^^
@@ -245,14 +252,28 @@ if(MSVC AND GTEST_MSVC_SEARCH STREQUAL "MD")
     __gtest_find_library(GTEST_LIBRARY_DEBUG      gtest-mdd gtestd)
     __gtest_find_library(GTEST_MAIN_LIBRARY       gtest_main-md  gtest_main)
     __gtest_find_library(GTEST_MAIN_LIBRARY_DEBUG gtest_main-mdd gtest_maind)
+    __gtest_find_library(GMOCK_LIBRARY            gmock-md  gmock)
+    __gtest_find_library(GMOCK_LIBRARY_DEBUG      gmock-mdd gmockd)
+    __gtest_find_library(GMOCK_MAIN_LIBRARY       gmock_main-md  gmock_main)
+    __gtest_find_library(GMOCK_MAIN_LIBRARY_DEBUG gmock_main-mdd gmock_maind)
 else()
     __gtest_find_library(GTEST_LIBRARY            gtest)
     __gtest_find_library(GTEST_LIBRARY_DEBUG      gtestd)
     __gtest_find_library(GTEST_MAIN_LIBRARY       gtest_main)
     __gtest_find_library(GTEST_MAIN_LIBRARY_DEBUG gtest_maind)
+    __gtest_find_library(GMOCK_LIBRARY            gmock)
+    __gtest_find_library(GMOCK_LIBRARY_DEBUG      gmockd)
+    __gtest_find_library(GMOCK_MAIN_LIBRARY       gmock_main)
+    __gtest_find_library(GMOCK_MAIN_LIBRARY_DEBUG gmock_maind)
 endif()
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(GTest DEFAULT_MSG GTEST_LIBRARY GTEST_INCLUDE_DIR GTEST_MAIN_LIBRARY)
+
+if(GMOCK_LIBRARY AND GMOCK_MAIN_LIBRARY)
+    set(GMock_FOUND True)
+else()
+    set(GMock_FOUND False)
+endif()
 
 if(GTest_FOUND)
     set(GTEST_INCLUDE_DIRS ${GTEST_INCLUDE_DIR})
@@ -291,4 +312,37 @@ if(GTest_FOUND)
     endif()
 
     __gtest_define_backwards_compatible_library_targets()
+endif()
+
+if(GMock_FOUND)
+    if(NOT TARGET GTest::gmock)
+        __gtest_determine_library_type(GMOCK_LIBRARY)
+        add_library(GTest::gmock ${GMOCK_LIBRARY_TYPE} IMPORTED)
+        set(_gmock_link_libraries "GTest::gtest")
+        if(TARGET Threads::Threads)
+            list(APPEND _gmock_link_libraries Threads::Threads)
+        endif()
+        set_target_properties(GTest::gmock PROPERTIES
+            INTERFACE_LINK_LIBRARIES "${_gmock_link_libraries}")
+        if(GMOCK_LIBRARY_TYPE STREQUAL "SHARED")
+            set_target_properties(GTest::gmock PROPERTIES
+                INTERFACE_COMPILE_DEFINITIONS "GMOCK_LINKED_AS_SHARED_LIBRARY=1")
+        endif()
+        if(GTEST_INCLUDE_DIRS)
+            set_target_properties(GTest::gmock PROPERTIES
+                INTERFACE_INCLUDE_DIRECTORIES "${GTEST_INCLUDE_DIRS}")
+        endif()
+        __gtest_import_library(GTest::gmock GMOCK_LIBRARY "")
+        __gtest_import_library(GTest::gmock GMOCK_LIBRARY "RELEASE")
+        __gtest_import_library(GTest::gmock GMOCK_LIBRARY "DEBUG")
+    endif()
+    if(NOT TARGET GTest::gmock_main)
+        __gtest_determine_library_type(GMOCK_MAIN_LIBRARY)
+        add_library(GTest::gmock_main ${GMOCK_MAIN_LIBRARY_TYPE} IMPORTED)
+        set_target_properties(GTest::gmock_main PROPERTIES
+            INTERFACE_LINK_LIBRARIES "GTest::gmock")
+        __gtest_import_library(GTest::gmock_main GMOCK_MAIN_LIBRARY "")
+        __gtest_import_library(GTest::gmock_main GMOCK_MAIN_LIBRARY "RELEASE")
+        __gtest_import_library(GTest::gmock_main GMOCK_MAIN_LIBRARY "DEBUG")
+    endif()
 endif()

@@ -12,6 +12,6 @@ if(NOT RunCMake_GENERATOR MATCHES "Visual Studio|Xcode" AND
   run_CMP0119(WARN)
   run_CMP0119(OLD)
 endif()
-if((CMAKE_C_COMPILER_ID MATCHES "(GNU|Clang|MSVC|Borland|Embarcadero|Intel|TI)"))
+if((CMAKE_C_COMPILER_ID MATCHES "(GNU|LCC|Clang|MSVC|Borland|Embarcadero|Intel|TI)"))
   run_CMP0119(NEW)
 endif()

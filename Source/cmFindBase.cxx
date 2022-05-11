@@ -168,7 +168,7 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
   }
   this->ExpandPaths();
 
-  this->ComputeFinalPaths();
+  this->ComputeFinalPaths(IgnorePaths::Yes);
 
   return true;
 }

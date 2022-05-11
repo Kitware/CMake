@@ -11,7 +11,8 @@ documentation.
 By default this contains the system directories for the current system, the
 :variable:`CMAKE_INSTALL_PREFIX`, and the :variable:`CMAKE_STAGING_PREFIX`.
 The installation and staging prefixes may be excluded by setting
-the :variable:`CMAKE_FIND_NO_INSTALL_PREFIX` variable.
+the :variable:`CMAKE_FIND_NO_INSTALL_PREFIX` variable before the
+first :command:`project` invocation.
 
 The system directories that are contained in ``CMAKE_SYSTEM_PREFIX_PATH`` are
 locations that typically include installed software. An example being

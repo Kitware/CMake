@@ -2,6 +2,7 @@ include(CheckCCompilerFlag)
 include(CheckCSourceCompiles)
 include(CheckIncludeFile)
 include(CheckIncludeFiles)
+include(CheckLibraryExists)
 include(CheckSymbolExists)
 include(TestBigEndian)
 

@@ -12,7 +12,7 @@ inline unsigned char Base32EncodeChar(int schar)
   return Base32EncodeTable[schar];
 }
 
-void Base32Encode5(const unsigned char src[5], char dst[8])
+static void Base32Encode5(const unsigned char src[5], char dst[8])
 {
   // [0]:5 bits
   dst[0] = Base32EncodeChar((src[0] >> 3) & 0x1F);

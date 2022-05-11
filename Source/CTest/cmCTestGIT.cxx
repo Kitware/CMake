@@ -24,7 +24,7 @@ static unsigned int cmCTestGITVersion(unsigned int epic, unsigned int major,
                                       unsigned int minor, unsigned int fix)
 {
   // 1.6.5.0 maps to 10605000
-  return fix + minor * 1000 + major * 100000 + epic * 10000000;
+  return epic * 10000000 + major * 100000 + minor * 1000 + fix;
 }
 
 cmCTestGIT::cmCTestGIT(cmCTest* ct, std::ostream& log)
@@ -582,16 +582,17 @@ private:
     time_t seconds = static_cast<time_t>(person.Time);
     struct tm* t = gmtime(&seconds);
     char dt[1024];
-    sprintf(dt, "%04d-%02d-%02d %02d:%02d:%02d", t->tm_year + 1900,
-            t->tm_mon + 1, t->tm_mday, t->tm_hour, t->tm_min, t->tm_sec);
+    snprintf(dt, sizeof(dt), "%04d-%02d-%02d %02d:%02d:%02d",
+             t->tm_year + 1900, t->tm_mon + 1, t->tm_mday, t->tm_hour,
+             t->tm_min, t->tm_sec);
     std::string out = dt;
 
     // Add the time-zone field "+zone" or "-zone".
     char tz[32];
     if (person.TimeZone >= 0) {
-      sprintf(tz, " +%04ld", person.TimeZone);
+      snprintf(tz, sizeof(tz), " +%04ld", person.TimeZone);
     } else {
-      sprintf(tz, " -%04ld", -person.TimeZone);
+      snprintf(tz, sizeof(tz), " -%04ld", -person.TimeZone);
     }
     out += tz;
     return out;

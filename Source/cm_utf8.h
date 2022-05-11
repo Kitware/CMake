@@ -6,6 +6,8 @@
 extern "C" {
 #endif
 
+extern unsigned char const cm_utf8_ones[256];
+
 /** Decode one UTF-8 character from the input byte range.  On success,
     stores the unicode character number in *pc and returns the first
     position not extracted.  On failure, returns 0.  */

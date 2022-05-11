@@ -99,7 +99,6 @@ codesign --verify --timestamp --options=runtime --verbose --deep \
   "$vol_path/CMake.app/Contents/bin/ccmake" \
   "$vol_path/CMake.app/Contents/bin/ctest" \
   "$vol_path/CMake.app/Contents/bin/cpack" \
-  "$vol_path/CMake.app/Contents/share/cmake"*"/Modules/Internal/CPack/CPack.OSXScriptLauncher.in" \
   "$vol_path/CMake.app"
 
 xcnotary notarize "$vol_path/CMake.app" -d "$dev_acct" -k "$key_item" $provider

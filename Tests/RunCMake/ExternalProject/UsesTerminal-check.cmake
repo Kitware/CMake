@@ -37,10 +37,11 @@ endmacro()
 # Check Ninja build output to verify whether each target step is in the
 # console pool.
 macro(CheckNinjaTarget _target
-  _download _update _configure _build _test _install
+  _download _update _patch _configure _build _test _install
   )
   CheckNinjaStep(${_target} download ${_download})
   CheckNinjaStep(${_target} update ${_update})
+  CheckNinjaStep(${_target} patch ${_patch})
   CheckNinjaStep(${_target} configure ${_configure})
   CheckNinjaStep(${_target} build ${_build})
   CheckNinjaStep(${_target} test ${_test})
@@ -88,10 +89,10 @@ endif()
 
 # Actual tests:
 CheckNinjaTarget(TerminalTest1
-  true  true  true  true  true  true )
+  true  true  true  true  true  true  true )
 CheckNinjaTarget(TerminalTest2
-  true  false true  false true  false)
+  true  false true  false true  false true)
 CheckNinjaTarget(TerminalTest3
-  false true  false true  false true )
+  false true  false true  false true  false)
 CheckNinjaTarget(TerminalTest4
-  false false false false false false)
+  false false false false false false false)

@@ -3,17 +3,14 @@
 #include "cm_codecvt.hxx"
 
 #if defined(_WIN32)
-#  include <windows.h>
+#  include <cassert>
+#  include <cstring>
 
-#  include <assert.h>
-#  include <string.h>
+#  include <windows.h>
 #  undef max
 #  include "cmsys/Encoding.hxx"
-#endif
 
-#if defined(_WIN32)
-/* Number of leading ones before a zero in the byte (see cm_utf8.c).  */
-extern "C" unsigned char const cm_utf8_ones[256];
+#  include "cm_utf8.h"
 #endif
 
 codecvt::codecvt(Encoding e)
@@ -42,7 +39,7 @@ codecvt::codecvt(Encoding e)
 
 codecvt::~codecvt() = default;
 
-bool codecvt::do_always_noconv() const throw()
+bool codecvt::do_always_noconv() const noexcept
 {
   return this->m_noconv;
 }
@@ -234,12 +231,12 @@ void codecvt::BufferPartial(mbstate_t& state, int size,
 }
 #endif
 
-int codecvt::do_max_length() const throw()
+int codecvt::do_max_length() const noexcept
 {
   return 4;
 }
 
-int codecvt::do_encoding() const throw()
+int codecvt::do_encoding() const noexcept
 {
   return 0;
 }

@@ -85,6 +85,11 @@ std::string cmRulePlaceholderExpander::ExpandRuleVariable(
       return replaceValues.ObjectsQuoted;
     }
   }
+  if (replaceValues.CudaCompileMode) {
+    if (variable == "CUDA_COMPILE_MODE") {
+      return replaceValues.CudaCompileMode;
+    }
+  }
   if (replaceValues.AIXExports) {
     if (variable == "AIX_EXPORTS") {
       return replaceValues.AIXExports;

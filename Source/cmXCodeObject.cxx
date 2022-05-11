@@ -6,8 +6,6 @@
 
 #include <CoreFoundation/CoreFoundation.h>
 
-#include "cmSystemTools.h"
-
 const char* cmXCodeObject::PBXTypeNames[] = {
   /* clang-format needs this comment to break after the opening brace */
   "PBXGroup",

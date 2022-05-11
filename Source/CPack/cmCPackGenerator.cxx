@@ -186,7 +186,7 @@ int cmCPackGenerator::InstallProject()
   std::string bareTempInstallDirectory =
     this->GetOption("CPACK_TEMPORARY_INSTALL_DIRECTORY");
   std::string tempInstallDirectoryStr = bareTempInstallDirectory;
-  bool setDestDir = cmIsOn(this->GetOption("CPACK_SET_DESTDIR")) |
+  bool setDestDir = cmIsOn(this->GetOption("CPACK_SET_DESTDIR")) ||
     cmIsInternallyOn(this->GetOption("CPACK_SET_DESTDIR"));
   if (!setDestDir) {
     tempInstallDirectoryStr += this->GetPackagingInstallPrefix();

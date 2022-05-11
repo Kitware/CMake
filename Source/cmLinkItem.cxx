@@ -68,8 +68,8 @@ cmLinkImplItem::cmLinkImplItem()
 {
 }
 
-cmLinkImplItem::cmLinkImplItem(cmLinkItem item, bool fromGenex)
+cmLinkImplItem::cmLinkImplItem(cmLinkItem item, bool checkCMP0027)
   : cmLinkItem(std::move(item))
-  , FromGenex(fromGenex)
+  , CheckCMP0027(checkCMP0027)
 {
 }

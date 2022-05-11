@@ -143,12 +143,10 @@ CUDA Driver Library
 """"""""""""""""""""
 
 The CUDA Driver library (cuda) are used by applications that use calls
-such as `cuMemAlloc`, and `cuMemFree`. This is generally used by advanced
-
+such as `cuMemAlloc`, and `cuMemFree`.
 
 Targets Created:
 
-- ``CUDA::cuda_driver``
 - ``CUDA::cuda_driver``
 
 .. _`cuda_toolkit_cuBLAS`:
@@ -177,6 +175,7 @@ Targets Created:
 - ``CUDA::cufft``
 - ``CUDA::cufftw``
 - ``CUDA::cufft_static``
+- ``CUDA::cufft_static_nocallback`` starting in CUDA 9.2, requires CMake 3.23+
 - ``CUDA::cufftw_static``
 
 cuRAND
@@ -500,11 +499,16 @@ if(CMAKE_CUDA_COMPILER_TOOLKIT_ROOT)
   set(CUDAToolkit_LIBRARY_ROOT "${CMAKE_CUDA_COMPILER_LIBRARY_ROOT}")
   set(CUDAToolkit_BIN_DIR "${CUDAToolkit_ROOT_DIR}/bin")
   set(CUDAToolkit_NVCC_EXECUTABLE "${CUDAToolkit_BIN_DIR}/nvcc${CMAKE_EXECUTABLE_SUFFIX}")
-else()
+  set(CUDAToolkit_VERSION "${CMAKE_CUDA_COMPILER_TOOLKIT_VERSION}")
 
+  if(CUDAToolkit_VERSION MATCHES [=[([0-9]+)\.([0-9]+)\.([0-9]+)]=])
+    set(CUDAToolkit_VERSION_MAJOR "${CMAKE_MATCH_1}")
+    set(CUDAToolkit_VERSION_MINOR "${CMAKE_MATCH_2}")
+    set(CUDAToolkit_VERSION_PATCH "${CMAKE_MATCH_3}")
+  endif()
+else()
   function(_CUDAToolkit_find_root_dir )
     cmake_parse_arguments(arg "" "" "SEARCH_PATHS;FIND_FLAGS" ${ARGN})
-
 
     if(NOT CUDAToolkit_BIN_DIR)
       if(NOT CUDAToolkit_SENTINEL_FILE)
@@ -688,6 +692,40 @@ else()
     get_filename_component(CUDAToolkit_LIBRARY_ROOT "${_CUDAToolkit_version_file}" DIRECTORY ABSOLUTE)
   endif()
   unset(_CUDAToolkit_version_file)
+
+  if(CUDAToolkit_NVCC_EXECUTABLE AND
+     CMAKE_CUDA_COMPILER_VERSION AND
+     CUDAToolkit_NVCC_EXECUTABLE STREQUAL CMAKE_CUDA_COMPILER)
+    # Need to set these based off the already computed CMAKE_CUDA_COMPILER_VERSION value
+    # This if statement will always match, but is used to provide variables for MATCH 1,2,3...
+    if(CMAKE_CUDA_COMPILER_VERSION MATCHES [=[([0-9]+)\.([0-9]+)\.([0-9]+)]=])
+      set(CUDAToolkit_VERSION_MAJOR "${CMAKE_MATCH_1}")
+      set(CUDAToolkit_VERSION_MINOR "${CMAKE_MATCH_2}")
+      set(CUDAToolkit_VERSION_PATCH "${CMAKE_MATCH_3}")
+      set(CUDAToolkit_VERSION "${CMAKE_CUDA_COMPILER_VERSION}")
+    endif()
+  elseif(CUDAToolkit_NVCC_EXECUTABLE)
+    # Compute the version by invoking nvcc
+    execute_process(COMMAND ${CUDAToolkit_NVCC_EXECUTABLE} "--version" OUTPUT_VARIABLE NVCC_OUT)
+    if(NVCC_OUT MATCHES [=[ V([0-9]+)\.([0-9]+)\.([0-9]+)]=])
+      set(CUDAToolkit_VERSION_MAJOR "${CMAKE_MATCH_1}")
+      set(CUDAToolkit_VERSION_MINOR "${CMAKE_MATCH_2}")
+      set(CUDAToolkit_VERSION_PATCH "${CMAKE_MATCH_3}")
+      set(CUDAToolkit_VERSION "${CMAKE_MATCH_1}.${CMAKE_MATCH_2}.${CMAKE_MATCH_3}")
+    endif()
+    unset(NVCC_OUT)
+  else()
+    _CUDAToolkit_find_version_file(version_file)
+    if(version_file)
+      file(READ "${version_file}" VERSION_INFO)
+      if(VERSION_INFO MATCHES [=[CUDA Version ([0-9]+)\.([0-9]+)\.([0-9]+)]=])
+        set(CUDAToolkit_VERSION_MAJOR "${CMAKE_MATCH_1}")
+        set(CUDAToolkit_VERSION_MINOR "${CMAKE_MATCH_2}")
+        set(CUDAToolkit_VERSION_PATCH "${CMAKE_MATCH_3}")
+        set(CUDAToolkit_VERSION "${CMAKE_MATCH_1}.${CMAKE_MATCH_2}.${CMAKE_MATCH_3}")
+      endif()
+    endif()
+  endif()
 endif()
 
 # Find target directory when crosscompiling.
@@ -752,40 +790,6 @@ if(NOT EXISTS "${CUDAToolkit_INCLUDE_DIR}/cublas_v2.h")
       message(STATUS "Unable to find cublas_v2.h in either \"${CUDAToolkit_INCLUDE_DIR}\" or \"${CUDAToolkit_MATH_INCLUDE_DIR}\"")
     endif()
     unset(CUDAToolkit_MATH_INCLUDE_DIR)
-  endif()
-endif()
-
-if(CUDAToolkit_NVCC_EXECUTABLE AND
-   CMAKE_CUDA_COMPILER_VERSION AND
-   CUDAToolkit_NVCC_EXECUTABLE STREQUAL CMAKE_CUDA_COMPILER)
-  # Need to set these based off the already computed CMAKE_CUDA_COMPILER_VERSION value
-  # This if statement will always match, but is used to provide variables for MATCH 1,2,3...
-  if(CMAKE_CUDA_COMPILER_VERSION MATCHES [=[([0-9]+)\.([0-9]+)\.([0-9]+)]=])
-    set(CUDAToolkit_VERSION_MAJOR "${CMAKE_MATCH_1}")
-    set(CUDAToolkit_VERSION_MINOR "${CMAKE_MATCH_2}")
-    set(CUDAToolkit_VERSION_PATCH "${CMAKE_MATCH_3}")
-    set(CUDAToolkit_VERSION "${CMAKE_CUDA_COMPILER_VERSION}")
-  endif()
-elseif(CUDAToolkit_NVCC_EXECUTABLE)
-  # Compute the version by invoking nvcc
-  execute_process(COMMAND ${CUDAToolkit_NVCC_EXECUTABLE} "--version" OUTPUT_VARIABLE NVCC_OUT)
-  if(NVCC_OUT MATCHES [=[ V([0-9]+)\.([0-9]+)\.([0-9]+)]=])
-    set(CUDAToolkit_VERSION_MAJOR "${CMAKE_MATCH_1}")
-    set(CUDAToolkit_VERSION_MINOR "${CMAKE_MATCH_2}")
-    set(CUDAToolkit_VERSION_PATCH "${CMAKE_MATCH_3}")
-    set(CUDAToolkit_VERSION  "${CMAKE_MATCH_1}.${CMAKE_MATCH_2}.${CMAKE_MATCH_3}")
-  endif()
-  unset(NVCC_OUT)
-else()
-  _CUDAToolkit_find_version_file(version_file)
-  if(version_file)
-    file(READ "${version_file}" VERSION_INFO)
-    if(VERSION_INFO MATCHES [=[CUDA Version ([0-9]+)\.([0-9]+)\.([0-9]+)]=])
-      set(CUDAToolkit_VERSION_MAJOR "${CMAKE_MATCH_1}")
-      set(CUDAToolkit_VERSION_MINOR "${CMAKE_MATCH_2}")
-      set(CUDAToolkit_VERSION_PATCH "${CMAKE_MATCH_3}")
-      set(CUDAToolkit_VERSION  "${CMAKE_MATCH_1}.${CMAKE_MATCH_2}.${CMAKE_MATCH_3}")
-    endif()
   endif()
 endif()
 
@@ -925,13 +929,40 @@ if(CUDAToolkit_FOUND)
     _CUDAToolkit_find_and_add_import_lib(${cuda_lib}_static DEPS culibos)
   endforeach()
 
+  if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 11.0.0)
+    # cublas depends on cublasLt
+    # https://docs.nvidia.com/cuda/archive/11.0/cublas/index.html#static-library
+    _CUDAToolkit_find_and_add_import_lib(cublas DEPS cublasLt)
+    _CUDAToolkit_find_and_add_import_lib(cublas_static DEPS cublasLt_static)
+  endif()
+
   # cuFFTW depends on cuFFT
   _CUDAToolkit_find_and_add_import_lib(cufftw DEPS cufft)
-  _CUDAToolkit_find_and_add_import_lib(cufftw DEPS cufft_static)
+  _CUDAToolkit_find_and_add_import_lib(cufftw_static DEPS cufft_static)
+  if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 9.2)
+    _CUDAToolkit_find_and_add_import_lib(cufft_static_nocallback DEPS culibos)
+  endif()
 
   # cuSOLVER depends on cuBLAS, and cuSPARSE
   _CUDAToolkit_find_and_add_import_lib(cusolver DEPS cublas cusparse)
   _CUDAToolkit_find_and_add_import_lib(cusolver_static DEPS cublas_static cusparse_static culibos)
+
+
+  if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 10.1.2)
+    # cusolver depends on liblapack_static.a starting with CUDA 10.1 update 2,
+    # https://docs.nvidia.com/cuda/archive/11.5.0/cusolver/index.html#static-link-lapack
+    _CUDAToolkit_find_and_add_import_lib(cusolver_lapack_static ALT lapack_static) # implementation detail static lib
+    _CUDAToolkit_find_and_add_import_lib(cusolver_static DEPS cusolver_lapack_static)
+  endif()
+
+  if(CUDAToolkit_VERSION VERSION_GREATER 11.2.1)
+    # cusolver depends on libcusolver_metis and cublasLt
+    # https://docs.nvidia.com/cuda/archive/11.2.2/cusolver/index.html#link-dependency
+    _CUDAToolkit_find_and_add_import_lib(cusolver DEPS cublasLt)
+
+    _CUDAToolkit_find_and_add_import_lib(cusolver_metis_static ALT metis_static) # implementation detail static lib
+    _CUDAToolkit_find_and_add_import_lib(cusolver_static DEPS cusolver_metis_static cublasLt_static)
+  endif()
 
   # nvGRAPH depends on cuRAND, and cuSOLVER.
   _CUDAToolkit_find_and_add_import_lib(nvgraph DEPS curand cusolver)

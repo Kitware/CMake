@@ -20,6 +20,13 @@ if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "_asan")
     )
 endif()
 
+if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "_jom")
+  list(APPEND test_exclusions
+    # JOM often fails with "Couldn't change working directory to ...".
+    "^ExternalProject$"
+    )
+endif()
+
 string(REPLACE ";" "|" test_exclusions "${test_exclusions}")
 if (test_exclusions)
   set(test_exclusions "(${test_exclusions})")

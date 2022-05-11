@@ -7,7 +7,7 @@
 
 #include <cm/memory>
 
-#include "cmCustomCommandLines.h"
+#include "cmCustomCommand.h"
 #include "cmDuration.h"
 #include "cmGeneratorTarget.h"
 #include "cmLocalGenerator.h"
@@ -171,13 +171,12 @@ void cmQtAutoGenGlobalInitializer::GetOrCreateGlobalTarget(
     cmMakefile* makefile = localGen->GetMakefile();
 
     // Create utility target
-    std::vector<std::string> no_byproducts;
-    std::vector<std::string> no_depends;
-    cmCustomCommandLines no_commands;
-    const cmPolicies::PolicyStatus cmp0116_new = cmPolicies::NEW;
-    cmTarget* target = localGen->AddUtilityCommand(
-      name, true, makefile->GetHomeOutputDirectory().c_str(), no_byproducts,
-      no_depends, no_commands, cmp0116_new, false, comment.c_str());
+    auto cc = cm::make_unique<cmCustomCommand>();
+    cc->SetWorkingDirectory(makefile->GetHomeOutputDirectory().c_str());
+    cc->SetCMP0116Status(cmPolicies::NEW);
+    cc->SetEscapeOldStyle(false);
+    cc->SetComment(comment.c_str());
+    cmTarget* target = localGen->AddUtilityCommand(name, true, std::move(cc));
     localGen->AddGeneratorTarget(
       cm::make_unique<cmGeneratorTarget>(target, localGen));
 

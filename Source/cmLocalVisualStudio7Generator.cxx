@@ -2,26 +2,45 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmLocalVisualStudio7Generator.h"
 
+#include <algorithm>
+#include <cassert>
+#include <cstring>
+#include <functional>
+#include <sstream>
+#include <utility>
+
 #include <cm/memory>
 #include <cmext/algorithm>
 
 #include <windows.h>
 
 #include <cm3p/expat.h>
-#include <ctype.h> // for isspace
+
+#include "cmsys/FStream.hxx"
 
 #include "cmComputeLinkInformation.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
+#include "cmCustomCommandLines.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
+#include "cmGlobalGenerator.h"
 #include "cmGlobalVisualStudio7Generator.h"
+#include "cmGlobalVisualStudioGenerator.h"
+#include "cmListFileCache.h"
 #include "cmMakefile.h"
-#include "cmMessageType.h"
+#include "cmOutputConverter.h"
+#include "cmPolicies.h"
 #include "cmSourceFile.h"
+#include "cmSourceGroup.h"
+#include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmTarget.h"
+#include "cmTargetDepend.h"
+#include "cmValue.h"
+#include "cmVsProjectType.h"
 #include "cmXMLParser.h"
 #include "cmake.h"
 
@@ -109,19 +128,21 @@ void cmLocalVisualStudio7Generator::FixGlobalTargets()
   const auto& tgts = this->GetGeneratorTargets();
   for (auto& l : tgts) {
     if (l->GetType() == cmStateEnums::GLOBAL_TARGET) {
-      std::vector<std::string> no_depends;
       cmCustomCommandLines force_commands =
         cmMakeSingleCommandLine({ "cd", "." });
-      std::string no_main_dependency;
       std::string force = cmStrCat(this->GetCurrentBinaryDirectory(),
                                    "/CMakeFiles/", l->GetName(), "_force");
       if (cmSourceFile* sf =
             this->Makefile->GetOrCreateGeneratedSource(force)) {
         sf->SetProperty("SYMBOLIC", "1");
       }
-      if (cmSourceFile* file = this->AddCustomCommandToOutput(
-            force, no_depends, no_main_dependency, force_commands, " ",
-            nullptr, cmPolicies::NEW, true)) {
+      auto cc = cm::make_unique<cmCustomCommand>();
+      cc->SetOutputs(force);
+      cc->SetCommandLines(force_commands);
+      cc->SetComment(" ");
+      cc->SetCMP0116Status(cmPolicies::NEW);
+      if (cmSourceFile* file =
+            this->AddCustomCommandToOutput(std::move(cc), true)) {
         l->AddSource(file->ResolveFullPath());
       }
     }
@@ -177,8 +198,8 @@ void cmLocalVisualStudio7Generator::GenerateTarget(cmGeneratorTarget* target)
   // Intel Fortran for VS10 uses VS9 format ".vfproj" files.
   cmGlobalVisualStudioGenerator::VSVersion realVersion = gg->GetVersion();
   if (this->FortranProject &&
-      gg->GetVersion() >= cmGlobalVisualStudioGenerator::VS10) {
-    gg->SetVersion(cmGlobalVisualStudioGenerator::VS9);
+      gg->GetVersion() >= cmGlobalVisualStudioGenerator::VSVersion::VS10) {
+    gg->SetVersion(cmGlobalVisualStudioGenerator::VSVersion::VS9);
   }
 
   // add to the list of projects
@@ -239,16 +260,20 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
   std::string argB = cmStrCat("-B", this->GetBinaryDirectory());
   std::string stampName =
     cmStrCat(this->GetCurrentBinaryDirectory(), "/CMakeFiles/generate.stamp");
-  bool stdPipesUTF8 = true;
   cmCustomCommandLines commandLines =
     cmMakeSingleCommandLine({ cmSystemTools::GetCMakeCommand(), argS, argB,
                               "--check-stamp-file", stampName });
   std::string comment = cmStrCat("Building Custom Rule ", makefileIn);
-  const char* no_working_directory = nullptr;
-  this->AddCustomCommandToOutput(stampName, listFiles, makefileIn,
-                                 commandLines, comment.c_str(),
-                                 no_working_directory, cmPolicies::NEW, true,
-                                 false, false, false, "", "", stdPipesUTF8);
+  auto cc = cm::make_unique<cmCustomCommand>();
+  cc->SetOutputs(stampName);
+  cc->SetMainDependency(makefileIn);
+  cc->SetDepends(listFiles);
+  cc->SetCommandLines(commandLines);
+  cc->SetComment(comment.c_str());
+  cc->SetCMP0116Status(cmPolicies::NEW);
+  cc->SetEscapeOldStyle(false);
+  cc->SetStdPipesUTF8(true);
+  this->AddCustomCommandToOutput(std::move(cc), true);
   if (cmSourceFile* file = this->Makefile->GetSource(makefileIn)) {
     // Finalize the source file path now since we're adding this after
     // the generator validated all project-named sources.
@@ -546,7 +571,17 @@ public:
     this->First = true;
     this->Stream << "\t\t\t<Tool\n\t\t\t\tName=\"" << tool << "\"";
   }
-  void Finish() { this->Stream << (this->First ? "" : "\"") << "/>\n"; }
+  void Finish()
+  {
+    // If any commands were generated, finish constructing them.
+    if (!this->First) {
+      std::string finishScript =
+        this->LG->FinishConstructScript(VsProjectType::vcxproj);
+      this->Stream << this->LG->EscapeForXML(finishScript) << "\"";
+    }
+
+    this->Stream << "/>\n";
+  }
   void Write(std::vector<cmCustomCommand> const& ccs)
   {
     for (cmCustomCommand const& command : ccs) {
@@ -1071,7 +1106,8 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
         fout << "\t\t\t\tGenerateDebugInformation=\"true\"\n";
       }
       if (this->WindowsCEProject) {
-        if (this->GetVersion() < cmGlobalVisualStudioGenerator::VS9) {
+        if (this->GetVersion() <
+            cmGlobalVisualStudioGenerator::VSVersion::VS9) {
           fout << "\t\t\t\tSubSystem=\"9\"\n";
         } else {
           fout << "\t\t\t\tSubSystem=\"8\"\n";
@@ -1148,7 +1184,8 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
         fout << "\t\t\t\tGenerateDebugInformation=\"true\"\n";
       }
       if (this->WindowsCEProject) {
-        if (this->GetVersion() < cmGlobalVisualStudioGenerator::VS9) {
+        if (this->GetVersion() <
+            cmGlobalVisualStudioGenerator::VSVersion::VS9) {
           fout << "\t\t\t\tSubSystem=\"9\"\n";
         } else {
           fout << "\t\t\t\tSubSystem=\"8\"\n";
@@ -1784,6 +1821,7 @@ void cmLocalVisualStudio7Generator::WriteCustomRule(
     if (this->FortranProject) {
       cmSystemTools::ReplaceString(script, "$(Configuration)", config);
     }
+    script += this->FinishConstructScript(VsProjectType::vcxproj);
     /* clang-format off */
     fout << "\t\t\t\t\t<Tool\n"
          << "\t\t\t\t\tName=\"" << customTool << "\"\n"
@@ -1990,7 +2028,8 @@ void cmLocalVisualStudio7Generator::WriteProjectStart(
        << "<VisualStudioProject\n"
        << "\tProjectType=\"Visual C++\"\n";
   /* clang-format on */
-  fout << "\tVersion=\"" << (gg->GetVersion() / 10) << ".00\"\n";
+  fout << "\tVersion=\"" << (static_cast<uint16_t>(gg->GetVersion()) / 10)
+       << ".00\"\n";
   cmValue p = target->GetProperty("PROJECT_LABEL");
   const std::string projLabel = p ? *p : libName;
   p = target->GetProperty("VS_KEYWORD");

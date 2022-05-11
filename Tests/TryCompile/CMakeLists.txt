@@ -1,4 +1,7 @@
 cmake_minimum_required (VERSION 2.8.12)
+if(POLICY CMP0129)
+  cmake_policy(SET CMP0129 NEW)
+endif()
 project(TryCompile)
 
 macro(TEST_ASSERT value msg)
@@ -321,7 +324,7 @@ if(DEFINED CXX_BOGUS_FLAG)
   message(SEND_ERROR "CHECK_CXX_COMPILER_FLAG shouldn't construct CXX_BOGUS_FLAG as a normal variable")
 endif()
 
-if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+if(CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID STREQUAL "LCC")
   unset(C_STRICT_PROTOTYPES CACHE)
   CHECK_C_COMPILER_FLAG("-Werror;-Wstrict-prototypes" C_STRICT_PROTOTYPES)
   TEST_ASSERT(C_STRICT_PROTOTYPES "CHECK_C_COMPILER_FLAG failed -Werror -Wstrict-prototypes")

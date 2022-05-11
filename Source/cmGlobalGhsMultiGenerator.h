@@ -9,6 +9,7 @@
 #include <utility>
 #include <vector>
 
+#include "cmBuildOptions.h"
 #include "cmGlobalGenerator.h"
 #include "cmGlobalGeneratorFactory.h"
 #include "cmTargetDepend.h"
@@ -87,7 +88,8 @@ protected:
   std::vector<GeneratedMakeCommand> GenerateBuildCommand(
     const std::string& makeProgram, const std::string& projectName,
     const std::string& projectDir, std::vector<std::string> const& targetNames,
-    const std::string& config, bool fast, int jobs, bool verbose,
+    const std::string& config, int jobs, bool verbose,
+    const cmBuildOptions& buildOptions = cmBuildOptions(),
     std::vector<std::string> const& makeOptions =
       std::vector<std::string>()) override;
 
@@ -112,9 +114,7 @@ private:
 
   static std::string TrimQuotes(std::string str);
 
-  std::string OsDir;
   static const char* DEFAULT_BUILD_PROGRAM;
-  static const char* DEFAULT_TOOLSET_ROOT;
 
   bool ComputeTargetBuildOrder(cmGeneratorTarget const* tgt,
                                std::vector<cmGeneratorTarget const*>& build);

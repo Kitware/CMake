@@ -24,13 +24,13 @@ public:
   /** Entry point from ctest executable main().  */
   static int Main(int argc, const char* const argv[]);
 
+  cmCTestLaunch(const cmCTestLaunch&) = delete;
+  cmCTestLaunch& operator=(const cmCTestLaunch&) = delete;
+
 private:
   // Initialize the launcher from its command line.
   cmCTestLaunch(int argc, const char* const* argv);
   ~cmCTestLaunch();
-
-  cmCTestLaunch(const cmCTestLaunch&) = delete;
-  cmCTestLaunch& operator=(const cmCTestLaunch&) = delete;
 
   // Run the real command.
   int Run();

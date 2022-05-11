@@ -1,0 +1,17 @@
+cmake_policy(SET CMP0053 NEW)
+include(RunCMake)
+
+run_cmake(VsDotnetSdkCustomCommandsTarget)
+run_cmake(VsDotnetSdkCustomCommandsSource)
+run_cmake(DotnetSdkVariables)
+
+function(run_VsDotnetSdk)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/VsDotnetSdk-build)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  run_cmake(VsDotnetSdk)
+  set(build_flags /restore)
+  run_cmake_command(VsDotnetSdk-build ${CMAKE_COMMAND} --build . -- ${build_flags})
+endfunction()
+run_VsDotnetSdk()

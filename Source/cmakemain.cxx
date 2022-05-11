@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cctype>
 #include <climits>
 #include <cstdio>
 #include <cstring>
@@ -19,6 +20,7 @@
 
 #include <cm3p/uv.h>
 
+#include "cmBuildOptions.h"
 #include "cmCommandLineArgument.h"
 #include "cmConsoleBuf.h"
 #include "cmDocumentationEntry.h" // IWYU pragma: keep
@@ -90,6 +92,10 @@ const char* cmDocumentationOptions[][2] = {
     "useful on one try_compile at a time." },
   { "--debug-output", "Put cmake in a debug mode." },
   { "--debug-find", "Put cmake find in a debug mode." },
+  { "--debug-find-pkg=<pkg-name>[,...]",
+    "Limit cmake debug-find to the comma-separated list of packages" },
+  { "--debug-find-var=<var-name>[,...]",
+    "Limit cmake debug-find to the comma-separated list of result variables" },
   { "--trace", "Put cmake in trace mode." },
   { "--trace-expand", "Put cmake in trace mode with variable expansion." },
   { "--trace-format=<human|json-v1>", "Set the output format of the trace." },
@@ -161,11 +167,11 @@ void cmakemainMessageCallback(const std::string& m,
   // cannot use it to print messages.  Another implementation will
   // be needed to print colored messages on Windows.
   static_cast<void>(md);
-  std::cerr << m << cmakemainGetStack(cm) << "\n";
+  std::cerr << m << cmakemainGetStack(cm) << '\n' << std::flush;
 #else
   cmsysTerminal_cfprintf(md.desiredColor, stderr, "%s", m.c_str());
   fflush(stderr); // stderr is buffered in some cases.
-  std::cerr << cmakemainGetStack(cm) << "\n";
+  std::cerr << cmakemainGetStack(cm) << '\n' << std::flush;
 #endif
 }
 
@@ -300,10 +306,11 @@ int do_cmake(int ac, char const* const* av)
                        parsedArgs.emplace_back("--find-package");
                        return true;
                      } },
-    CommandArgument{ "--list-presets", CommandArgument::Values::Zero,
-                     [&](std::string const&) -> bool {
+    CommandArgument{ "--list-presets", CommandArgument::Values::ZeroOrOne,
+                     [&](std::string const& value) -> bool {
                        workingMode = cmake::HELP_MODE;
                        parsedArgs.emplace_back("--list-presets");
+                       parsedArgs.emplace_back(value);
                        return true;
                      } },
   };
@@ -441,6 +448,7 @@ int do_build(int ac, char const* const* av)
   bool cleanFirst = false;
   bool foundClean = false;
   bool foundNonClean = false;
+  PackageResolveMode resolveMode = PackageResolveMode::Default;
   bool verbose = cmSystemTools::HasEnv("VERBOSE");
   std::string presetName;
   bool listPresets = false;
@@ -473,6 +481,22 @@ int do_build(int ac, char const* const* av)
       return true;
     }
     return false;
+  };
+  auto resolvePackagesLambda = [&](std::string const& value) -> bool {
+    std::string v = value;
+    std::transform(v.begin(), v.end(), v.begin(), ::tolower);
+
+    if (v == "on") {
+      resolveMode = PackageResolveMode::Force;
+    } else if (v == "only") {
+      resolveMode = PackageResolveMode::OnlyResolve;
+    } else if (v == "off") {
+      resolveMode = PackageResolveMode::Disable;
+    } else {
+      return false;
+    }
+
+    return true;
   };
   auto verboseLambda = [&](std::string const&) -> bool {
     verbose = true;
@@ -510,6 +534,8 @@ int do_build(int ac, char const* const* av)
                        cleanFirst = true;
                        return true;
                      } },
+    CommandArgument{ "--resolve-package-references",
+                     CommandArgument::Values::One, resolvePackagesLambda },
     CommandArgument{ "-v", CommandArgument::Values::Zero, verboseLambda },
     CommandArgument{ "--verbose", CommandArgument::Values::Zero,
                      verboseLambda },
@@ -635,6 +661,8 @@ int do_build(int ac, char const* const* av)
       "  --config <cfg> = For multi-configuration tools, choose <cfg>.\n"
       "  --clean-first  = Build target 'clean' first, then build.\n"
       "                   (To clean only, use --target 'clean'.)\n"
+      "  --resolve-package-references={on|only|off}\n"
+      "                 = Restore/resolve package references during build.\n"
       "  --verbose, -v  = Enable verbose output - if supported - including\n"
       "                   the build commands to be executed. \n"
       "  --             = Pass remaining options to the native tool.\n"
@@ -652,8 +680,10 @@ int do_build(int ac, char const* const* av)
     cmakemainProgressCallback(msg, prog, &cm);
   });
 
+  cmBuildOptions buildOptions(cleanFirst, false, resolveMode);
+
   return cm.Build(jobs, std::move(dir), std::move(targets), std::move(config),
-                  std::move(nativeOptions), cleanFirst, verbose, presetName,
+                  std::move(nativeOptions), buildOptions, verbose, presetName,
                   listPresets);
 #endif
 }

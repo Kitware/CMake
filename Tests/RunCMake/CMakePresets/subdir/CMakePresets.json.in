@@ -1,0 +1,12 @@
+{
+  "version": 4,
+  "include": [
+    "../IncludeCommon.json"
+  ],
+  "configurePresets": [
+    {
+      "name": "Subdir",
+      "inherits": "IncludeCommon"
+    }
+  ]
+}

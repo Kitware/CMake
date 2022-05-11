@@ -73,7 +73,7 @@ std::ostream& operator<<(std::ostream& os, cmXMLSafe const& self)
       } else {
         // Use a human-readable hex value for this invalid character.
         char buf[16];
-        sprintf(buf, "%X", ch);
+        snprintf(buf, sizeof(buf), "%X", ch);
         os << "[NON-XML-CHAR-0x" << buf << "]";
       }
 
@@ -82,7 +82,7 @@ std::ostream& operator<<(std::ostream& os, cmXMLSafe const& self)
       ch = static_cast<unsigned char>(*first++);
       // Use a human-readable hex value for this invalid byte.
       char buf[16];
-      sprintf(buf, "%X", ch);
+      snprintf(buf, sizeof(buf), "%X", ch);
       os << "[NON-UTF-8-BYTE-0x" << buf << "]";
     }
   }

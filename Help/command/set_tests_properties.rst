@@ -9,8 +9,10 @@ Set a property of the tests.
 
 Sets a property for the tests.  If the test is not found, CMake
 will report an error.
-:manual:`Generator expressions <cmake-generator-expressions(7)>` will be
-expanded the same as supported by the test's :command:`add_test` call.
+
+Test property values may be specified using
+:manual:`generator expressions <cmake-generator-expressions(7)>`
+for tests created by the :command:`add_test(NAME)` signature.
 
 See also the :command:`set_property(TEST)` command.
 

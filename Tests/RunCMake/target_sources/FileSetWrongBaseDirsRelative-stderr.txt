@@ -1,0 +1,10 @@
+CMake Error at reldir/CMakeLists\.txt:[0-9]+ \(target_sources\):
+  File:
+
+    [^
+]*/Tests/RunCMake/target_sources/reldir/\.\./h1\.h
+
+  must be in one of the file set's base directories:
+
+    [^
+]*/Tests/RunCMake/target_sources/reldir/\.

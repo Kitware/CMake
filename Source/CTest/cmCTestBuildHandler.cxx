@@ -81,6 +81,7 @@ static const char* cmCTestErrorMatches[] = {
   "^The project cannot be built\\.",
   "^\\[ERROR\\]",
   "^Command .* failed with exit code",
+  "lcc: \"([^\"]+)\", (line|строка) ([0-9]+): (error|ошибка)",
   nullptr
 };
 
@@ -122,6 +123,7 @@ static const char* cmCTestWarningMatches[] = {
   "cc-[0-9]* CC: REMARK File = .*, Line = [0-9]*",
   "^CMake Warning.*:",
   "^\\[WARNING\\]",
+  "lcc: \"([^\"]+)\", (line|строка) ([0-9]+): (warning|предупреждение)",
   nullptr
 };
 
@@ -160,6 +162,9 @@ static cmCTestBuildCompileErrorWarningRex cmCTestWarningErrorFileLine[] = {
   { "^([a-zA-Z./0-9_+ ~-]+)\\(([0-9]+)\\)", 1, 2 },
   { "\"([a-zA-Z./0-9_+ ~-]+)\", line ([0-9]+)", 1, 2 },
   { "File = ([a-zA-Z./0-9_+ ~-]+), Line = ([0-9]+)", 1, 2 },
+  { "lcc: \"([^\"]+)\", (line|строка) ([0-9]+): "
+    "(error|ошибка|warning|предупреждение)",
+    1, 3 },
   { nullptr, 0, 0 }
 };
 

@@ -1,0 +1,17 @@
+CMake Warning \(dev\) at CMP0028-WARN\.cmake:3 \(target_link_libraries\):
+  Policy CMP0028 is not set: Double colon in target name means ALIAS or
+  IMPORTED target.  Run "cmake --help-policy CMP0028" for policy details.
+  Use the cmake_policy command to set the policy and suppress this warning.
+
+  Target "foo" links to:
+
+    External::Library
+
+  but the target was not found.  Possible reasons include:
+(
+    \*[^
+]+)*
+
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.

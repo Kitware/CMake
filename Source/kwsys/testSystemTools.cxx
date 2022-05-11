@@ -295,12 +295,15 @@ static bool CheckFileOperations()
 // Reset umask
 #ifdef __MSYS__
   mode_t fullMask = S_IWRITE;
+  mode_t testPerm = S_IREAD;
 #elif defined(_WIN32) && !defined(__CYGWIN__)
   // NOTE:  Windows doesn't support toggling _S_IREAD.
   mode_t fullMask = _S_IWRITE;
+  mode_t testPerm = 0;
 #else
   // On a normal POSIX platform, we can toggle all permissions.
   mode_t fullMask = S_IRWXU | S_IRWXG | S_IRWXO;
+  mode_t testPerm = S_IRUSR;
 #endif
 
   // Test file permissions without umask
@@ -311,7 +314,7 @@ static bool CheckFileOperations()
     res = false;
   }
 
-  if (!kwsys::SystemTools::SetPermissions(testNewFile, 0)) {
+  if (!kwsys::SystemTools::SetPermissions(testNewFile, testPerm)) {
     std::cerr << "Problem with SetPermissions (1) for: " << testNewFile
               << std::endl;
     res = false;
@@ -323,17 +326,17 @@ static bool CheckFileOperations()
     res = false;
   }
 
-  if ((thisPerm & fullMask) != 0) {
+  if ((thisPerm & fullMask) != testPerm) {
     std::cerr << "SetPermissions failed to set permissions (1) for: "
               << testNewFile << ": actual = " << thisPerm
-              << "; expected = " << 0 << std::endl;
+              << "; expected = " << testPerm << std::endl;
     res = false;
   }
 
   // While we're at it, check proper TestFileAccess functionality.
   bool do_write_test = true;
 #if defined(__linux__) || defined(__FreeBSD__) || defined(__OpenBSD__) ||     \
-  defined(__NetBSD__) || defined(__DragonFly__)
+  defined(__NetBSD__) || defined(__DragonFly__) || defined(__HOS_AIX__)
   // If we are running as root on POSIX-ish systems (Linux and the BSDs,
   // at least), ignore this check, as root can always write to files.
   do_write_test = (getuid() != 0);
@@ -623,6 +626,16 @@ static bool CheckStringOperations()
       lines[3] != "Little" || lines[4] != "Lamb.") {
     std::cerr << "Problem with Split "
               << "\"Mary Had A Little Lamb.\"" << std::endl;
+    res = false;
+  }
+
+  std::vector<std::string> linesToJoin = { "Mary", "Had", "A", "Little",
+                                           "Lamb." };
+  std::string joinResult = kwsys::SystemTools::Join(linesToJoin, " ");
+  if (joinResult != "Mary Had A Little Lamb.") {
+    std::cerr << "Problem with Join "
+                 "\"Mary Had A Little Lamb.\""
+              << std::endl;
     res = false;
   }
 
@@ -926,7 +939,8 @@ static bool CheckGetLineFromStream()
   bool result;
 
   file.seekg(0, std::ios::beg);
-  result = kwsys::SystemTools::GetLineFromStream(file, line, &has_newline, -1);
+  result = kwsys::SystemTools::GetLineFromStream(file, line, &has_newline,
+                                                 std::string::npos);
   if (!result || line.size() != 5) {
     std::cerr << "First line does not have five characters: " << line.size()
               << std::endl;
@@ -934,7 +948,8 @@ static bool CheckGetLineFromStream()
   }
 
   file.seekg(0, std::ios::beg);
-  result = kwsys::SystemTools::GetLineFromStream(file, line, &has_newline, -1);
+  result = kwsys::SystemTools::GetLineFromStream(file, line, &has_newline,
+                                                 std::string::npos);
   if (!result || line.size() != 5) {
     std::cerr << "First line does not have five characters after rewind: "
               << line.size() << std::endl;
@@ -943,10 +958,10 @@ static bool CheckGetLineFromStream()
 
   bool ret = true;
 
-  for (size_t size = 1; size <= 5; ++size) {
+  for (std::string::size_type size = 1; size <= 5; ++size) {
     file.seekg(0, std::ios::beg);
-    result = kwsys::SystemTools::GetLineFromStream(file, line, &has_newline,
-                                                   static_cast<long>(size));
+    result =
+      kwsys::SystemTools::GetLineFromStream(file, line, &has_newline, size);
     if (!result || line.size() != size) {
       std::cerr << "Should have read " << size << " characters but got "
                 << line.size() << std::endl;
@@ -989,7 +1004,8 @@ static bool CheckGetLineFromStreamLongLine()
   bool result;
 
   // Read first line.
-  result = kwsys::SystemTools::GetLineFromStream(file, line, &has_newline, -1);
+  result = kwsys::SystemTools::GetLineFromStream(file, line, &has_newline,
+                                                 std::string::npos);
   if (!result || line != firstLine) {
     std::cerr << "First line does not match, expected " << firstLine.size()
               << " characters, got " << line.size() << std::endl;
@@ -1002,7 +1018,8 @@ static bool CheckGetLineFromStreamLongLine()
 
   // Read empty line.
   has_newline = false;
-  result = kwsys::SystemTools::GetLineFromStream(file, line, &has_newline, -1);
+  result = kwsys::SystemTools::GetLineFromStream(file, line, &has_newline,
+                                                 std::string::npos);
   if (!result || !line.empty()) {
     std::cerr << "Expected successful read with an empty line, got "
               << line.size() << " characters" << std::endl;
@@ -1015,7 +1032,8 @@ static bool CheckGetLineFromStreamLongLine()
 
   // Read second line.
   has_newline = false;
-  result = kwsys::SystemTools::GetLineFromStream(file, line, &has_newline, -1);
+  result = kwsys::SystemTools::GetLineFromStream(file, line, &has_newline,
+                                                 std::string::npos);
   if (!result || line != secondLine) {
     std::cerr << "Second line does not match, expected " << secondLine.size()
               << " characters, got " << line.size() << std::endl;

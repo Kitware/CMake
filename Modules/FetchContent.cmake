@@ -43,7 +43,7 @@ dependencies and then ensuring they are populated with a separate call:
     URL_HASH MD5=5588a7b18261c20068beabfb4f530b87
   )
 
-  FetchContent_MakeAvailable(googletest secret_sauce)
+  FetchContent_MakeAvailable(googletest myCompanyIcons)
 
 The :command:`FetchContent_MakeAvailable` command ensures the named
 dependencies have been populated, either by an earlier call or by populating
@@ -920,13 +920,14 @@ function(__FetchContent_directPopulate contentName)
       BUILD_COMMAND
       INSTALL_COMMAND
       TEST_COMMAND
-      # We force both of these to be ON since we are always executing serially
+      # We force these to be ON since we are always executing serially
       # and we want all steps to have access to the terminal in case they
       # need input from the command line (e.g. ask for a private key password)
       # or they want to provide timely progress. We silently absorb and
       # discard these if they are set by the caller.
       USES_TERMINAL_DOWNLOAD
       USES_TERMINAL_UPDATE
+      USES_TERMINAL_PATCH
   )
   set(multiValueArgs "")
 

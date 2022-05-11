@@ -12,18 +12,21 @@ Introduction
 
 One problem that CMake users often face is sharing settings with other people
 for common ways to configure a project. This may be done to support CI builds,
-or for users who frequently use the same build. CMake supports two files,
+or for users who frequently use the same build. CMake supports two main files,
 ``CMakePresets.json`` and ``CMakeUserPresets.json``, that allow users to
-specify common configure options and share them with others.
+specify common configure options and share them with others. CMake also
+supports files included with the ``include`` field.
 
 ``CMakePresets.json`` and ``CMakeUserPresets.json`` live in the project's root
 directory. They both have exactly the same format, and both are optional
-(though at least one must be present if ``--preset`` is specified.)
-``CMakePresets.json`` is meant to save project-wide builds, while
-``CMakeUserPresets.json`` is meant for developers to save their own local
-builds. ``CMakePresets.json`` may be checked into a version control system, and
-``CMakeUserPresets.json`` should NOT be checked in. For example, if a project
-is using Git, ``CMakePresets.json`` may be tracked, and
+(though at least one must be present if ``--preset`` is specified).
+``CMakePresets.json`` is meant to specify project-wide build details, while
+``CMakeUserPresets.json`` is meant for developers to specify their own local
+build details.
+
+``CMakePresets.json`` may be checked into a version control system, and
+``CMakeUserPresets.json`` should NOT be checked in. For example, if a
+project is using Git, ``CMakePresets.json`` may be tracked, and
 ``CMakeUserPresets.json`` should be added to the ``.gitignore``.
 
 Format
@@ -39,7 +42,7 @@ The root object recognizes the following fields:
 ``version``
 
   A required integer representing the version of the JSON schema.
-  The supported versions are ``1``, ``2``, and ``3``.
+  The supported versions are ``1``, ``2``, ``3``, and ``4``.
 
 ``cmakeMinimumRequired``
 
@@ -57,6 +60,13 @@ The root object recognizes the following fields:
   ``patch``
 
     An optional integer representing the patch version.
+
+``include``
+
+  An optional array of strings representing files to include. If the filenames
+  are not absolute, they are considered relative to the current file.
+  This is allowed in preset files specifying version ``4`` or above.
+  See `Includes`_ for discussion of the constraints on included files.
 
 ``vendor``
 
@@ -81,6 +91,26 @@ The root object recognizes the following fields:
 
   An optional array of `Test Preset`_ objects.
   This is allowed in preset files specifying version ``2`` or above.
+
+Includes
+^^^^^^^^
+
+``CMakePresets.json`` and ``CMakeUserPresets.json`` can include other files
+with the ``include`` field in file version ``4`` and later. Files included
+by these files can also include other files. If ``CMakePresets.json`` and
+``CMakeUserPresets.json`` are both present, ``CMakeUserPresets.json``
+implicitly includes ``CMakePresets.json``, even with no ``include`` field,
+in all versions of the format.
+
+If a preset file contains presets that inherit from presets in another file,
+the file must include the other file either directly or indirectly.
+Include cycles are not allowed among files. If ``a.json`` includes
+``b.json``, ``b.json`` cannot include ``a.json``. However, a file may be
+included multiple times from the same file or from different files.
+
+Files directly or indirectly included from ``CMakePresets.json`` should be
+guaranteed to be provided by the project. ``CMakeUserPresets.json`` may
+include files from anywhere.
 
 Configure Preset
 ^^^^^^^^^^^^^^^^
@@ -108,16 +138,20 @@ that may contain the following fields:
 ``inherits``
 
   An optional array of strings representing the names of presets to inherit
-  from. The preset will inherit all of the fields from the ``inherits``
+  from. This field can also be a string, which is equivalent to an array
+  containing one string.
+
+  The preset will inherit all of the fields from the ``inherits``
   presets by default (except ``name``, ``hidden``, ``inherits``,
   ``description``, and ``displayName``), but can override them as
   desired. If multiple ``inherits`` presets provide conflicting values for
   the same field, the earlier preset in the ``inherits`` list will be
-  preferred. Presets in ``CMakePresets.json`` may not inherit from presets
-  in ``CMakeUserPresets.json``.
+  preferred.
 
-  This field can also be a string, which is equivalent to an array
-  containing one string.
+  A preset can only inherit from another preset that is defined in the
+  same file or in one of the files it includes (directly or indirectly).
+  Presets in ``CMakePresets.json`` may not inherit from presets in
+  ``CMakeUserPresets.json``.
 
 ``condition``
 
@@ -350,17 +384,21 @@ that may contain the following fields:
 
 ``inherits``
 
-  An optional array of strings representing the names of presets to
-  inherit from. The preset will inherit all of the fields from the
+  An optional array of strings representing the names of presets to inherit
+  from. This field can also be a string, which is equivalent to an array
+  containing one string.
+
+  The preset will inherit all of the fields from the
   ``inherits`` presets by default (except ``name``, ``hidden``,
   ``inherits``, ``description``, and ``displayName``), but can override
   them as desired. If multiple ``inherits`` presets provide conflicting
   values for the same field, the earlier preset in the ``inherits`` list
-  will be preferred. Presets in ``CMakePresets.json`` may not inherit from
-  presets in ``CMakeUserPresets.json``.
+  will be preferred.
 
-  This field can also be a string, which is equivalent to an array
-  containing one string.
+  A preset can only inherit from another preset that is defined in the
+  same file or in one of the files it includes (directly or indirectly).
+  Presets in ``CMakePresets.json`` may not inherit from presets in
+  ``CMakeUserPresets.json``.
 
 ``condition``
 
@@ -453,6 +491,42 @@ that may contain the following fields:
   An optional bool. If true, equivalent to passing ``--clean-first`` on
   the command line.
 
+``resolvePackageReferences``
+
+  An optional string that specifies the package resolve mode. This is
+  allowed in preset files specifying version ``4`` or above.
+
+  Package references are used to define dependencies to packages from
+  external package managers. Currently only NuGet in combination with the
+  Visual Studio generator is supported. If there are no targets that define
+  package references, this option does nothing. Valid values are:
+
+  ``on``
+
+    Causes package references to be resolved before attempting a build.
+
+  ``off``
+
+    Package references will not be resolved. Note that this may cause
+    errors in some build environments, such as .NET SDK style projects.
+
+  ``only``
+
+    Only resolve package references, but do not perform a build.
+
+  .. note::
+
+    The command line parameter ``--resolve-package-references`` will take
+    priority over this setting. If the command line parameter is not provided
+    and this setting is not specified, an environment-specific cache variable
+    will be evaluated to decide, if package restoration should be performed.
+
+    When using the Visual Studio generator, package references are defined
+    using the :prop_tgt:`VS_PACKAGE_REFERENCES` property. Package references
+    are restored using NuGet. It can be disabled by setting the
+    ``CMAKE_VS_NUGET_PACKAGE_RESTORE`` variable to ``OFF``. This can also be
+    done from within a configure preset.
+
 ``verbose``
 
   An optional bool. If true, equivalent to passing ``--verbose`` on the
@@ -487,17 +561,21 @@ that may contain the following fields:
 
 ``inherits``
 
-  An optional array of strings representing the names of presets to
-  inherit from. The preset will inherit all of the fields from the
+  An optional array of strings representing the names of presets to inherit
+  from. This field can also be a string, which is equivalent to an array
+  containing one string.
+
+  The preset will inherit all of the fields from the
   ``inherits`` presets by default (except ``name``, ``hidden``,
   ``inherits``, ``description``, and ``displayName``), but can override
   them as desired. If multiple ``inherits`` presets provide conflicting
   values for the same field, the earlier preset in the ``inherits`` list
-  will be preferred. Presets in ``CMakePresets.json`` may not inherit from
-  presets in ``CMakeUserPresets.json``.
+  will be preferred.
 
-  This field can also be a string, which is equivalent to an array
-  containing one string.
+  A preset can only inherit from another preset that is defined in the
+  same file or in one of the files it includes (directly or indirectly).
+  Presets in ``CMakePresets.json`` may not inherit from presets in
+  ``CMakeUserPresets.json``.
 
 ``condition``
 
@@ -947,7 +1025,8 @@ Recognized macros include:
 
 ``${sourceDir}``
 
-  Path to the project source directory.
+  Path to the project source directory (i.e. the same as
+  :variable:`CMAKE_SOURCE_DIR`).
 
 ``${sourceParentDir}``
 
@@ -973,6 +1052,11 @@ Recognized macros include:
   The name of the host operating system. Contains the same value as
   :variable:`CMAKE_HOST_SYSTEM_NAME`. This is allowed in preset files
   specifying version ``3`` or above.
+
+``${fileDir}``
+
+  Path to the directory containing the preset file which contains the macro.
+  This is allowed in preset files specifying version ``4`` or above.
 
 ``${dollar}``
 

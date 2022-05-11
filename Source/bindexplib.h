@@ -4,10 +4,9 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <cstdio>
 #include <set>
 #include <string>
-
-#include <stdio.h>
 
 class bindexplib
 {

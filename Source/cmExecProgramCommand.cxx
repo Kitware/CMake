@@ -114,7 +114,7 @@ bool cmExecProgramCommand(std::vector<std::string> const& args,
 
   if (!return_variable.empty()) {
     char buffer[100];
-    sprintf(buffer, "%d", retVal);
+    snprintf(buffer, sizeof(buffer), "%d", retVal);
     status.GetMakefile().AddDefinition(return_variable, buffer);
   }
 

@@ -5,12 +5,11 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <chrono>
+#include <cstddef>
 #include <deque>
 #include <iosfwd>
 #include <string>
 #include <vector>
-
-#include <stddef.h>
 
 #include "cmsys/RegularExpression.hxx"
 

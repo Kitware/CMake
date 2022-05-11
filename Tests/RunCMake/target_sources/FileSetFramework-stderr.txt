@@ -1,0 +1,4 @@
+^CMake Error at FileSetFramework\.cmake:[0-9]+ \(target_sources\):
+  target_sources FILE_SETs may not be added to FRAMEWORK targets
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$

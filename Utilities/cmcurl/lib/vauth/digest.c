@@ -230,7 +230,7 @@ static CURLcode auth_digest_get_qop_values(const char *options, int *value)
     return CURLE_OUT_OF_MEMORY;
 
   token = strtok_r(tmp, ",", &tok_buf);
-  while(token != NULL) {
+  while(token) {
     if(strcasecompare(token, DIGEST_QOP_VALUE_STRING_AUTH))
       *value |= DIGEST_QOP_VALUE_AUTH;
     else if(strcasecompare(token, DIGEST_QOP_VALUE_STRING_AUTH_INT))
@@ -556,7 +556,7 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
           return CURLE_OUT_OF_MEMORY;
 
         token = strtok_r(tmp, ",", &tok_buf);
-        while(token != NULL) {
+        while(token) {
           if(strcasecompare(token, DIGEST_QOP_VALUE_STRING_AUTH)) {
             foundAuth = TRUE;
           }
@@ -666,8 +666,8 @@ static CURLcode auth_create_digest_http_message(
                   struct digestdata *digest,
                   char **outptr, size_t *outlen,
                   void (*convert_to_ascii)(unsigned char *, unsigned char *),
-                  void (*hash)(unsigned char *, const unsigned char *,
-                               const size_t))
+                  CURLcode (*hash)(unsigned char *, const unsigned char *,
+                                   const size_t))
 {
   CURLcode result;
   unsigned char hashbuf[32]; /* 32 bytes/256 bits */
@@ -722,8 +722,7 @@ static CURLcode auth_create_digest_http_message(
            unq(nonce-value) ":" unq(cnonce-value)
   */
 
-  hashthis = aprintf("%s:%s:%s", digest->userhash ? userh : userp,
-                                 digest->realm, passwdp);
+  hashthis = aprintf("%s:%s:%s", userp, digest->realm, passwdp);
   if(!hashthis)
     return CURLE_OUT_OF_MEMORY;
 

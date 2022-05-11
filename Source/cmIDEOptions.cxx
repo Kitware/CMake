@@ -2,15 +2,15 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmIDEOptions.h"
 
+#include <algorithm>
+#include <cstring>
 #include <iterator>
+#include <utility>
 
 #include <cmext/algorithm>
 
-#include <string.h>
-
 #include "cmsys/String.h"
 
-#include "cmAlgorithms.h"
 #include "cmIDEFlagTable.h"
 #include "cmStringAlgorithms.h"
 

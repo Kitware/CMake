@@ -1,5 +1,10 @@
 $erroractionpreference = "stop"
 
+if ("$env:CMAKE_CI_JOB_NIGHTLY_NINJA" -eq "true" -And "$env:CMAKE_CI_NIGHTLY" -eq "true") {
+    & .gitlab/ci/ninja-nightly.ps1
+    exit $LASTEXITCODE
+}
+
 $version = "1.10.2"
 $sha256sum = "BBDE850D247D2737C5764C927D1071CBB1F1957DCABDA4A130FA8547C12C695F"
 $filename = "ninja-win"

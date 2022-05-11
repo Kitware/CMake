@@ -7,7 +7,6 @@
 #include "cmExecutionStatus.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstalledFile.h"
-#include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
@@ -22,8 +21,6 @@
 #include "cmTest.h"
 #include "cmValue.h"
 #include "cmake.h"
-
-class cmMessenger;
 
 namespace {
 enum OutType
@@ -187,7 +184,8 @@ bool cmGetPropertyCommand(std::vector<std::string> const& args,
           status.GetMakefile().GetState()->GetPropertyDefinition(propertyName,
                                                                  scope)) {
       output = def->GetShortDescription();
-    } else {
+    }
+    if (output.empty()) {
       output = "NOTFOUND";
     }
     status.GetMakefile().AddDefinition(variable, output);
@@ -198,7 +196,8 @@ bool cmGetPropertyCommand(std::vector<std::string> const& args,
           status.GetMakefile().GetState()->GetPropertyDefinition(propertyName,
                                                                  scope)) {
       output = def->GetFullDescription();
-    } else {
+    }
+    if (output.empty()) {
       output = "NOTFOUND";
     }
     status.GetMakefile().AddDefinition(variable, output);
@@ -365,9 +364,8 @@ bool HandleTargetMode(cmExecutionStatus& status, const std::string& name,
       }
       return StoreResult(infoType, status.GetMakefile(), variable, nullptr);
     }
-    cmListFileBacktrace bt = status.GetMakefile().GetBacktrace();
-    cmMessenger* messenger = status.GetMakefile().GetMessenger();
-    cmValue prop = target->GetComputedProperty(propertyName, messenger, bt);
+    cmValue prop =
+      target->GetComputedProperty(propertyName, status.GetMakefile());
     if (!prop) {
       prop = target->GetProperty(propertyName);
     }

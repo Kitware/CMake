@@ -1,0 +1,12 @@
+CMake Error at CMP0028-NEW-iface\.cmake:5 \(target_link_libraries\):
+  The link interface of target "iface" contains:
+
+    External::Library
+
+  but the target was not found.  Possible reasons include:
+(
+    \*[^
+]+)*
+
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

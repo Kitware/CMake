@@ -1,0 +1,6 @@
+{
+  "version": 4,
+  "include": [
+    "IncludeCycle3Files3.json"
+  ]
+}

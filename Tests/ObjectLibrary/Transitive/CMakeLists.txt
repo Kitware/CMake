@@ -1,4 +1,3 @@
-cmake_policy(SET CMP0022 NEW)
 add_library(FooStatic STATIC FooStatic.c)
 
 add_library(FooObject1 OBJECT FooObject.c)

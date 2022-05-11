@@ -1,0 +1,5 @@
+^CMake Error at FileSetChangeType\.cmake:[0-9]+ \(target_sources\):
+  target_sources Type "RESOURCES" for file set "a" does not match original
+  type "HEADERS"
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$

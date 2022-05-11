@@ -41,5 +41,5 @@ private:
   using t_GeneratorCreatorsMap = std::map<std::string, CreateGeneratorCall*>;
   t_GeneratorCreatorsMap GeneratorCreators;
   DescriptionsMap GeneratorDescriptions;
-  cmCPackLog* Logger;
+  cmCPackLog* Logger{};
 };

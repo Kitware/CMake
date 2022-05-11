@@ -40,8 +40,8 @@ class cmLinkImplItem : public cmLinkItem
 {
 public:
   cmLinkImplItem();
-  cmLinkImplItem(cmLinkItem item, bool fromGenex);
-  bool FromGenex = false;
+  cmLinkImplItem(cmLinkItem item, bool checkCMP0027);
+  bool CheckCMP0027 = false;
 };
 
 /** The link implementation specifies the direct library

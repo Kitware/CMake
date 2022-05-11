@@ -31,7 +31,7 @@
 
 #  include <cm3p/json/value.h>
 
-#  include "cmCMakePresetsFile.h"
+#  include "cmCMakePresetsGraph.h"
 #endif
 
 class cmExternalMakefileProjectGeneratorFactory;
@@ -45,6 +45,7 @@ class cmMakefileProfilingData;
 #endif
 class cmMessenger;
 class cmVariableWatch;
+struct cmBuildOptions;
 struct cmDocumentationEntry;
 
 /** \brief Represents a cmake invocation.
@@ -182,6 +183,22 @@ public:
 #endif
   std::string ReportCapabilities() const;
 
+  /**
+   * Set the home directory from `-S` or from a known location
+   * that contains a CMakeLists.txt. Will generate warnings
+   * when overriding an existing source directory.
+   *
+   *  |    args           | src dir| warning        |
+   *  | ----------------- | ------ | -------------- |
+   *  | `dirA dirA`       | dirA   | N/A            |
+   *  | `-S dirA -S dirA` | dirA   | N/A            |
+   *  | `-S dirA -S dirB` | dirB   | Ignoring dirA  |
+   *  | `-S dirA dirB`    | dirB   | Ignoring dirA  |
+   *  | `dirA -S dirB`    | dirB   | Ignoring dirA  |
+   *  | `dirA dirB`       | dirB   | Ignoring dirA  |
+   */
+  void SetHomeDirectoryViaCommandLine(std::string const& path);
+
   //@{
   /**
    * Set/Get the home directory (or output directory) in the project. The
@@ -248,7 +265,7 @@ public:
 
 #ifndef CMAKE_BOOTSTRAP
   //! Print list of configure presets
-  void PrintPresetList(const cmCMakePresetsFile& file) const;
+  void PrintPresetList(const cmCMakePresetsGraph& graph) const;
 #endif
 
   //! Return the global generator assigned to this instance of cmake
@@ -492,7 +509,11 @@ public:
 
   //! Do we want debug output from the find commands during the cmake run.
   bool GetDebugFindOutput() const { return this->DebugFindOutput; }
-  void SetDebugFindOutputOn(bool b) { this->DebugFindOutput = b; }
+  bool GetDebugFindOutput(std::string const& var) const;
+  bool GetDebugFindPkgOutput(std::string const& pkg) const;
+  void SetDebugFindOutput(bool b) { this->DebugFindOutput = b; }
+  void SetDebugFindOutputPkgs(std::string const& args);
+  void SetDebugFindOutputVars(std::string const& args);
 
   //! Do we want trace output during the cmake run.
   bool GetTrace() const { return this->Trace; }
@@ -589,8 +610,8 @@ public:
   //! run the --build option
   int Build(int jobs, std::string dir, std::vector<std::string> targets,
             std::string config, std::vector<std::string> nativeOptions,
-            bool clean, bool verbose, const std::string& presetName,
-            bool listPresets);
+            cmBuildOptions& buildOptions, bool verbose,
+            const std::string& presetName, bool listPresets);
 
   //! run the --open option
   bool Open(const std::string& dir, bool dryRun);
@@ -651,7 +672,7 @@ protected:
    */
   int CheckBuildSystem();
 
-  void SetDirectoriesFromFile(const std::string& arg);
+  bool SetDirectoriesFromFile(const std::string& arg);
 
   //! Make sure all commands are what they say they are and there is no
   /// macros.
@@ -694,7 +715,7 @@ private:
   std::string GraphVizFile;
   InstalledFilesMap InstalledFiles;
 #ifndef CMAKE_BOOTSTRAP
-  std::map<std::string, cm::optional<cmCMakePresetsFile::CacheVariable>>
+  std::map<std::string, cm::optional<cmCMakePresetsGraph::CacheVariable>>
     UnprocessedPresetVariables;
   std::map<std::string, cm::optional<std::string>>
     UnprocessedPresetEnvironment;
@@ -710,6 +731,9 @@ private:
   std::unique_ptr<cmMessenger> Messenger;
 
   std::vector<std::string> TraceOnlyThisSources;
+
+  std::set<std::string> DebugFindPkgs;
+  std::set<std::string> DebugFindVars;
 
   LogLevel MessageLogLevel = LogLevel::LOG_STATUS;
   bool LogLevelWasSetViaCLI = false;

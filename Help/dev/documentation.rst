@@ -513,7 +513,7 @@ bracket is excluded if and only if the line starts in ``#``.
 Additional such ``.rst:`` comments may appear anywhere in the module file.
 All such comments must start with ``#`` in the first column.
 
-For example, a ``Findxxx.cmake`` module may contain:
+For example, a ``FindXxx.cmake`` module may contain:
 
 ::
 
@@ -540,13 +540,13 @@ For example, a ``Findxxx.cmake`` module may contain:
   <code>
 
   #[=======================================================================[.rst:
-  .. command:: xxx_do_something
+  .. command:: Xxx_do_something
 
    This command does something for Xxx::
 
-    xxx_do_something(some arguments)
+    Xxx_do_something(some arguments)
   #]=======================================================================]
-  macro(xxx_do_something)
+  macro(Xxx_do_something)
     <code>
   endmacro()
 
@@ -559,3 +559,56 @@ documentation, simply leave out the ``Help/module/<module-name>.rst``
 file and the ``Help/manual/cmake-modules.7.rst`` toctree entry.
 
 .. _`Bracket Comment`: https://cmake.org/cmake/help/latest/manual/cmake-language.7.html#bracket-comment
+
+Module Functions and Macros
+---------------------------
+
+Modules may provide CMake functions and macros defined by the `function()`_
+and `macro()`_ commands.  To avoid conflicts across modules, name the
+functions and macros using the prefix ``<ModuleName>_`` followed by the
+rest of the name, where ``<ModuleName>`` is the exact-case spelling of
+the module name.  We have no convention for the portion of names after
+the ``<ModuleName>_`` prefix.
+
+For historical reasons, some modules that come with CMake do not follow
+this prefix convention.  When adding new functions to these modules,
+discussion during review can decide whether to follow their existing
+convention or to use the module name prefix.
+
+Documentation of public functions and macros should be provided in
+the module, typically in the main `module documentation`_ at the top.
+For example, a ``MyModule`` module may document a function like this::
+
+  #[=======================================================================[.rst:
+  MyModule
+  --------
+
+  This is my module.  It provides some functions.
+
+  .. command:: MyModule_Some_Function
+
+    This is some function:
+
+    .. code-block:: cmake
+
+      MyModule_Some_Function(...)
+  #]=======================================================================]
+
+Documentation may alternatively be placed just before each definition.
+For example, a ``MyModule`` module may document another function like this::
+
+  #[=======================================================================[.rst:
+  .. command:: MyModule_Other_Function
+
+    This is another function:
+
+    .. code-block:: cmake
+
+      MyModule_Other_Function(...)
+  #]=======================================================================]
+  function(MyModule_Other_Function ...)
+    # ...
+  endfunction()
+
+.. _`function()`: https://cmake.org/cmake/help/latest/command/function.html
+.. _`macro()`: https://cmake.org/cmake/help/latest/command/macro.html

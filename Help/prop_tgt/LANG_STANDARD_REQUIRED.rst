@@ -11,16 +11,22 @@ The variations are:
 * :prop_tgt:`OBJCXX_STANDARD_REQUIRED`
 
 These properties specify whether the value of :prop_tgt:`<LANG>_STANDARD` is a
-requirement. When ``OFF`` or unset, the :prop_tgt:`<LANG>_STANDARD` target
+requirement.  When false or unset, the :prop_tgt:`<LANG>_STANDARD` target
 property is treated as optional and may "decay" to a previous standard if the
-requested is not available.
+requested standard is not available.  When ``<LANG>_STANDARD_REQUIRED`` is set
+to true, :prop_tgt:`<LANG>_STANDARD` becomes a hard requirement and a fatal
+error will be issued if that requirement cannot be met.
+
+Note that the actual language standard used may be higher than that specified
+by :prop_tgt:`<LANG>_STANDARD`, regardless of the value of
+``<LANG>_STANDARD_REQUIRED``.  In particular,
+:ref:`transitive usage requirements <Target Usage Requirements>` or the use of
+:manual:`compile features <cmake-compile-features(7)>` can raise the required
+language standard above what :prop_tgt:`<LANG>_STANDARD` specifies.
 
 These properties are initialized by the value of the
 :variable:`CMAKE_<LANG>_STANDARD_REQUIRED` variable if it is set when a target
 is created.
-
-For supported CMake versions see the respective pages.
-To control language standard versions see :prop_tgt:`<LANG>_STANDARD`.
 
 See the :manual:`cmake-compile-features(7)` manual for information on
 compile features and a list of supported compilers.

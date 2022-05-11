@@ -44,6 +44,7 @@ namespace {
 
 const char* LastName = nullptr;
 
+extern "C" void TrapsForSignals(int sig);
 extern "C" void TrapsForSignals(int sig)
 {
   fprintf(stderr, "CMake loaded command %s crashed with signal: %d.\n",

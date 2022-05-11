@@ -17,9 +17,7 @@ cmCPackCygwinBinaryGenerator::cmCPackCygwinBinaryGenerator()
 {
 }
 
-cmCPackCygwinBinaryGenerator::~cmCPackCygwinBinaryGenerator()
-{
-}
+cmCPackCygwinBinaryGenerator::~cmCPackCygwinBinaryGenerator() = default;
 
 int cmCPackCygwinBinaryGenerator::InitializeInternal()
 {
@@ -43,7 +41,7 @@ int cmCPackCygwinBinaryGenerator::PackageFiles()
   // create an extra scope to force the stream
   // to create the file before the super class is called
   {
-    cmGeneratedFileStream ofs(manifestFile.c_str());
+    cmGeneratedFileStream ofs(manifestFile);
     for (std::string const& file : files) {
       // remove the temp dir and replace with /usr
       ofs << file.substr(tempdir.size()) << "\n";

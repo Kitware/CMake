@@ -11,9 +11,11 @@
 
 #include "cmExportFileGenerator.h"
 
+class cmFileSet;
 class cmGeneratorTarget;
 class cmGlobalGenerator;
 class cmMakefile;
+class cmTargetExport;
 
 class cmExportTryCompileFileGenerator : public cmExportFileGenerator
 {
@@ -47,6 +49,13 @@ protected:
 
   std::string InstallNameDir(cmGeneratorTarget const* target,
                              const std::string& config) override;
+
+  std::string GetFileSetDirectories(cmGeneratorTarget* target,
+                                    cmFileSet* fileSet,
+                                    cmTargetExport* te) override;
+
+  std::string GetFileSetFiles(cmGeneratorTarget* target, cmFileSet* fileSet,
+                              cmTargetExport* te) override;
 
 private:
   std::string FindTargets(const std::string& prop,

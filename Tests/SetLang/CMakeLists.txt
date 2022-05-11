@@ -1,5 +1,8 @@
 # test forcing a source file language to c++ from c
 cmake_minimum_required (VERSION 2.6)
+if(POLICY CMP0129)
+  cmake_policy(SET CMP0129 NEW)
+endif()
 project(SetLang)
 # force this to be verbose so I can debug a dashboard entry
 set(CMAKE_VERBOSE_MAKEFILE 1)
@@ -20,7 +23,7 @@ if(CMAKE_GENERATOR MATCHES "^Visual Studio" AND "x${CMAKE_C_COMPILER_ID}" STREQU
   set_property(TARGET stay PROPERTY COMPILE_OPTIONS "-TP")
 endif()
 
-if((CMAKE_C_COMPILER_ID MATCHES "(GNU|Clang|MSVC|Borland|Embarcadero|Intel|TI|XL)"))
+if((CMAKE_C_COMPILER_ID MATCHES "(GNU|LCC|Clang|MSVC|Borland|Embarcadero|Intel|TI|XL)"))
   cmake_policy(SET CMP0119 NEW)
   add_library(zoom zoom.zzz)
   set_source_files_properties(zoom.zzz PROPERTIES LANGUAGE CXX)

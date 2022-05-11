@@ -6,14 +6,11 @@
 
 #include "cmExecutionStatus.h"
 #include "cmGlobalGenerator.h"
-#include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmTarget.h"
 #include "cmValue.h"
-
-class cmMessenger;
 
 bool cmGetTargetPropertyCommand(std::vector<std::string> const& args,
                                 cmExecutionStatus& status)
@@ -43,9 +40,7 @@ bool cmGetTargetPropertyCommand(std::vector<std::string> const& args,
       }
     } else if (!args[2].empty()) {
       cmValue prop_cstr = nullptr;
-      cmListFileBacktrace bt = mf.GetBacktrace();
-      cmMessenger* messenger = mf.GetMessenger();
-      prop_cstr = tgt->GetComputedProperty(args[2], messenger, bt);
+      prop_cstr = tgt->GetComputedProperty(args[2], mf);
       if (!prop_cstr) {
         prop_cstr = tgt->GetProperty(args[2]);
       }

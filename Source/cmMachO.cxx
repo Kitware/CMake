@@ -56,7 +56,7 @@ bool peek(cmsys::ifstream& fin, T& v)
 template <typename T>
 bool read(cmsys::ifstream& fin, T& v)
 {
-  return !!fin.read(reinterpret_cast<char*>(&v), sizeof(T));
+  return static_cast<bool>(fin.read(reinterpret_cast<char*>(&v), sizeof(T)));
 }
 
 // read from the file and fill multiple data structures where
@@ -68,7 +68,8 @@ bool read(cmsys::ifstream& fin, std::vector<T>& v)
   if (v.empty()) {
     return true;
   }
-  return !!fin.read(reinterpret_cast<char*>(&v[0]), sizeof(T) * v.size());
+  return static_cast<bool>(
+    fin.read(reinterpret_cast<char*>(&v[0]), sizeof(T) * v.size()));
 }
 }
 
@@ -340,7 +341,8 @@ bool cmMachO::GetInstallName(std::string& install_name)
     if (lc_cmd == LC_ID_DYLIB || lc_cmd == LC_LOAD_WEAK_DYLIB ||
         lc_cmd == LC_LOAD_DYLIB) {
       if (sizeof(dylib_command) < cmd.LoadCommand.size()) {
-        uint32_t namelen = cmd.LoadCommand.size() - sizeof(dylib_command);
+        uint32_t namelen = static_cast<uint32_t>(cmd.LoadCommand.size() -
+                                                 sizeof(dylib_command));
         install_name.assign(&cmd.LoadCommand[sizeof(dylib_command)], namelen);
         return true;
       }

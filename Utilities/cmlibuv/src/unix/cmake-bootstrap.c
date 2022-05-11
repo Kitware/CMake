@@ -7,25 +7,8 @@ void uv__process_title_cleanup(void) {
 void uv__threadpool_cleanup(void) {
 }
 
-int uv__tcp_nodelay(int fd, int on) {
-  errno = EINVAL;
-  return -1;
-}
-
-int uv__tcp_keepalive(int fd, int on, unsigned int delay) {
-  errno = EINVAL;
-  return -1;
-}
-
-int uv_tcp_listen(uv_tcp_t* tcp, int backlog, uv_connection_cb cb) {
-  return -EINVAL;
-}
-
 int uv_udp_open(uv_udp_t* handle, uv_os_sock_t sock) {
   return -EINVAL;
-}
-
-void uv__tcp_close(uv_tcp_t* handle) {
 }
 
 void uv__udp_close(uv_udp_t* handle) {
@@ -153,8 +136,8 @@ int uv__statx(int dirfd,
   return -1;
 }
 
-ssize_t uv__fs_copy_file_range(int fd_in, ssize_t* off_in,
-                               int fd_out, ssize_t* off_out,
+ssize_t uv__fs_copy_file_range(int fd_in, off_t* off_in,
+                               int fd_out, off_t* off_out,
                                size_t len, unsigned int flags)
 {
   errno = ENOSYS;

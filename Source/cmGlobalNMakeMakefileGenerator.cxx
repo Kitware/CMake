@@ -2,13 +2,20 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalNMakeMakefileGenerator.h"
 
+#include <ostream>
+
+#include <cmext/algorithm>
+
 #include "cmsys/RegularExpression.hxx"
 
 #include "cmDocumentationEntry.h"
 #include "cmDuration.h"
-#include "cmLocalUnixMakefileGenerator3.h"
+#include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmState.h"
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 #include "cmake.h"
 
 cmGlobalNMakeMakefileGenerator::cmGlobalNMakeMakefileGenerator(cmake* cm)
@@ -99,7 +106,8 @@ std::vector<cmGlobalGenerator::GeneratedMakeCommand>
 cmGlobalNMakeMakefileGenerator::GenerateBuildCommand(
   const std::string& makeProgram, const std::string& projectName,
   const std::string& projectDir, std::vector<std::string> const& targetNames,
-  const std::string& config, bool fast, int /*jobs*/, bool verbose,
+  const std::string& config, int /*jobs*/, bool verbose,
+  const cmBuildOptions& buildOptions,
   std::vector<std::string> const& makeOptions)
 {
   std::vector<std::string> nmakeMakeOptions;
@@ -110,8 +118,8 @@ cmGlobalNMakeMakefileGenerator::GenerateBuildCommand(
   cm::append(nmakeMakeOptions, makeOptions);
 
   return this->cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
-    makeProgram, projectName, projectDir, targetNames, config, fast,
-    cmake::NO_BUILD_PARALLEL_LEVEL, verbose, nmakeMakeOptions);
+    makeProgram, projectName, projectDir, targetNames, config,
+    cmake::NO_BUILD_PARALLEL_LEVEL, verbose, buildOptions, nmakeMakeOptions);
 }
 
 void cmGlobalNMakeMakefileGenerator::PrintBuildCommandAdvice(std::ostream& os,

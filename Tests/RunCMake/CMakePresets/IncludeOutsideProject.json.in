@@ -1,0 +1,11 @@
+{
+  "version": 4,
+  "include": [
+    "IncludeOutsideProjectIntermediate.json"
+  ],
+  "configurePresets": [
+    {
+      "name": "IncludeOutsideProject"
+    }
+  ]
+}

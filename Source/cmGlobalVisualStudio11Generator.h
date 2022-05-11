@@ -4,13 +4,14 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <iosfwd>
 #include <memory>
 #include <set>
 #include <string>
 
+#include <cm/optional>
+
 #include "cmGlobalVisualStudio10Generator.h"
-#include "cmStateTypes.h"
+#include "cmTransformDepfile.h"
 
 class cmGlobalGeneratorFactory;
 class cmMakefile;

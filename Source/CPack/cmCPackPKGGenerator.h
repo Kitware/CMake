@@ -43,7 +43,8 @@ protected:
   // which will be configured via ConfigureFile.
   bool CopyCreateResourceFile(const std::string& name,
                               const std::string& dirName);
-  bool CopyResourcePlistFile(const std::string& name, const char* outName = 0);
+  bool CopyResourcePlistFile(const std::string& name,
+                             const char* outName = nullptr);
 
   int CopyInstallScript(const std::string& resdir, const std::string& script,
                         const std::string& name);
@@ -89,6 +90,10 @@ protected:
   /// Creates a background in the distribution XML.
   void CreateBackground(const char* themeName, const char* metapackageFile,
                         cm::string_view genName, cmXMLWriter& xout);
+
+  /// Create the "domains" XML element to indicate where the product can
+  /// be installed
+  void CreateDomains(cmXMLWriter& xout);
 
   // The PostFlight component when creating a metapackage
   cmCPackComponent PostFlightComponent;

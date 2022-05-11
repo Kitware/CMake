@@ -1,0 +1,8 @@
+^Test project [^
+]*/Tests/RunCMake/CTestCommandLine/Subdirectories
+  Test #1: add_subdirectory
+  Test #2: add_subdirectory\.sub
+  Test #3: subdirs
+  Test #4: subdirs\.sub
++
+Total Tests: 4$

@@ -120,10 +120,20 @@ void cmCPackPKGGenerator::WriteDistributionFile(const char* metapackageFile,
   std::string distributionFile =
     cmStrCat(metapackageFile, "/Contents/distribution.dist");
 
+  std::ostringstream xContents;
+  cmXMLWriter xout(xContents, 1);
+
+  // Installer-wide options
+  xout.StartElement("options");
+  xout.Attribute("allow-external-scripts", "no");
+  xout.Attribute("customize", "allow");
+  if (cmIsOff(this->GetOption("CPACK_PRODUCTBUILD_DOMAINS"))) {
+    xout.Attribute("rootVolumeOnly", "false");
+  }
+  xout.EndElement();
+
   // Create the choice outline, which provides a tree-based view of
   // the components in their groups.
-  std::ostringstream choiceOut;
-  cmXMLWriter xout(choiceOut, 1);
   xout.StartElement("choices-outline");
 
   // Emit the outline for the groups
@@ -162,12 +172,14 @@ void cmCPackPKGGenerator::WriteDistributionFile(const char* metapackageFile,
     CreateChoice(PostFlightComponent, xout);
   }
 
+  this->CreateDomains(xout);
+
   // default background
   this->CreateBackground(nullptr, metapackageFile, genName, xout);
   // Dark Aqua
   this->CreateBackground("darkAqua", metapackageFile, genName, xout);
 
-  this->SetOption("CPACK_PACKAGEMAKER_CHOICES", choiceOut.str());
+  this->SetOption("CPACK_APPLE_PKG_INSTALLER_CONTENT", xContents.str());
 
   // Create the distribution.dist file in the metapackage to turn it
   // into a distribution package.
@@ -210,9 +222,14 @@ void cmCPackPKGGenerator::CreateChoice(const cmCPackComponentGroup& group,
 void cmCPackPKGGenerator::CreateChoice(const cmCPackComponent& component,
                                        cmXMLWriter& xout)
 {
-  std::string packageId =
-    cmStrCat("com.", this->GetOption("CPACK_PACKAGE_VENDOR"), '.',
-             this->GetOption("CPACK_PACKAGE_NAME"), '.', component.Name);
+  std::string packageId;
+  if (cmValue i = this->GetOption("CPACK_PRODUCTBUILD_IDENTIFIER")) {
+    packageId = cmStrCat(i, '.', component.Name);
+  } else {
+    packageId =
+      cmStrCat("com.", this->GetOption("CPACK_PACKAGE_VENDOR"), '.',
+               this->GetOption("CPACK_PACKAGE_NAME"), '.', component.Name);
+  }
 
   xout.StartElement("choice");
   xout.Attribute("id", component.Name + "Choice");
@@ -268,7 +285,10 @@ void cmCPackPKGGenerator::CreateChoice(const cmCPackComponent& component,
   xout.Attribute("id", packageId);
   xout.Attribute("version", this->GetOption("CPACK_PACKAGE_VERSION"));
   xout.Attribute("installKBytes", installedSize);
-  xout.Attribute("auth", "Admin");
+  // The auth attribute is deprecated in favor of the domains element
+  if (cmIsOff(this->GetOption("CPACK_PRODUCTBUILD_DOMAINS"))) {
+    xout.Attribute("auth", "Admin");
+  }
   xout.Attribute("onConclusion", "None");
   if (component.IsDownloaded) {
     xout.Content(this->GetOption("CPACK_DOWNLOAD_SITE"));
@@ -279,6 +299,35 @@ void cmCPackPKGGenerator::CreateChoice(const cmCPackComponent& component,
                                           /*escapeSlashes=*/false));
   }
   xout.EndElement(); // pkg-ref
+}
+
+void cmCPackPKGGenerator::CreateDomains(cmXMLWriter& xout)
+{
+  if (cmIsOff(this->GetOption("CPACK_PRODUCTBUILD_DOMAINS"))) {
+    return;
+  }
+
+  xout.StartElement("domains");
+
+  // Product can be installed at the root of any volume by default
+  // unless specified
+  cmValue param = this->GetOption("CPACK_PRODUCTBUILD_DOMAINS_ANYWHERE");
+  xout.Attribute("enable_anywhere",
+                 (param && cmIsOff(param)) ? "false" : "true");
+
+  // Product cannot be installed into the current user's home directory
+  // by default unless specified
+  param = this->GetOption("CPACK_PRODUCTBUILD_DOMAINS_USER");
+  xout.Attribute("enable_currentUserHome",
+                 (param && cmIsOn(param)) ? "true" : "false");
+
+  // Product can be installed into the root directory by default
+  // unless specified
+  param = this->GetOption("CPACK_PRODUCTBUILD_DOMAINS_ROOT");
+  xout.Attribute("enable_localSystem",
+                 (param && cmIsOff(param)) ? "false" : "true");
+
+  xout.EndElement();
 }
 
 void cmCPackPKGGenerator::AddDependencyAttributes(

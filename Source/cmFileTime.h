@@ -24,6 +24,8 @@ public:
 #endif
   cmFileTime() = default;
   ~cmFileTime() = default;
+  cmFileTime(const cmFileTime&) = default;
+  cmFileTime& operator=(const cmFileTime&) = default;
 
   /**
    * @brief Loads the file time of fileName from the file system

@@ -262,7 +262,7 @@ installers.  The most commonly-used variables are:
   create Start Menu shortcuts.  For example, setting this to the list
   ``ccmake;CMake`` will create a shortcut named "CMake" that will execute the
   installed executable ``ccmake``.  Not all CPack generators use it (at least
-  NSIS, WIX and OSXX11 do).
+  NSIS, and WIX do).
 
 .. variable:: CPACK_STRIP_FILES
 
@@ -658,13 +658,11 @@ if(NOT CPACK_GENERATOR)
       if(APPLE)
         option(CPACK_BINARY_BUNDLE       "Enable to build OSX bundles"      OFF)
         option(CPACK_BINARY_DRAGNDROP    "Enable to build OSX Drag And Drop package" OFF)
-        option(CPACK_BINARY_OSXX11       "Enable to build OSX X11 packages (deprecated)" OFF)
         option(CPACK_BINARY_PACKAGEMAKER "Enable to build PackageMaker packages (deprecated)" OFF)
         option(CPACK_BINARY_PRODUCTBUILD "Enable to build productbuild packages" OFF)
         mark_as_advanced(
           CPACK_BINARY_BUNDLE
           CPACK_BINARY_DRAGNDROP
-          CPACK_BINARY_OSXX11
           CPACK_BINARY_PACKAGEMAKER
           CPACK_BINARY_PRODUCTBUILD
           )
@@ -717,7 +715,6 @@ if(NOT CPACK_GENERATOR)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_IFW          IFW)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_NSIS         NSIS)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_NUGET        NuGet)
-  cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_OSXX11       OSXX11)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_PACKAGEMAKER PackageMaker)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_PRODUCTBUILD productbuild)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_RPM          RPM)
@@ -807,6 +804,11 @@ _cpack_set_default(CPACK_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
 _cpack_set_default(CPACK_NSIS_INSTALLER_ICON_CODE "")
 _cpack_set_default(CPACK_NSIS_INSTALLER_MUI_ICON_CODE "")
+
+# DragNDrop specific variables
+if(CPACK_RESOURCE_FILE_LICENSE AND NOT CPACK_RESOURCE_FILE_LICENSE STREQUAL "${CMAKE_ROOT}/Templates/CPack.GenericLicense.txt")
+  _cpack_set_default(CPACK_DMG_SLA_USE_RESOURCE_FILE_LICENSE ON)
+endif()
 
 # WiX specific variables
 _cpack_set_default(CPACK_WIX_SIZEOF_VOID_P "${CMAKE_SIZEOF_VOID_P}")

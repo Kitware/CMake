@@ -3,12 +3,13 @@
 
 if(NOT CMake_SOURCE_DIR)
   set(CMakeHelp_STANDALONE 1)
-  cmake_minimum_required(VERSION 3.1...3.20 FATAL_ERROR)
+  cmake_minimum_required(VERSION 3.1...3.21 FATAL_ERROR)
   get_filename_component(tmp "${CMAKE_CURRENT_SOURCE_DIR}" PATH)
   get_filename_component(CMake_SOURCE_DIR "${tmp}" PATH)
   include(${CMake_SOURCE_DIR}/Modules/CTestUseLaunchers.cmake)
   include(${CMake_SOURCE_DIR}/Source/CMakeVersion.cmake)
   include(${CMake_SOURCE_DIR}/Source/CMakeInstallDestinations.cmake)
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/CTestCustom.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/CTestCustom.cmake @ONLY)
   unset(CMAKE_DATA_DIR)
   unset(CMAKE_DATA_DIR CACHE)
   macro(CMake_OPTIONAL_COMPONENT)
@@ -47,6 +48,12 @@ if(copyright_line MATCHES "${copyright_line_regex}")
   set(conf_copyright "${CMAKE_MATCH_1}")
 else()
   set(conf_copyright "Kitware, Inc.")
+endif()
+
+if(CMake_SPHINX_CMAKE_ORG)
+  set(conf_baseurl "https://cmake.org/cmake/help/latest")
+else()
+  set(conf_baseurl "")
 endif()
 
 set(conf_docs "${CMake_SOURCE_DIR}/Help")
@@ -96,12 +103,12 @@ endif()
 if(SPHINX_QTHELP)
   find_package(PythonInterp REQUIRED)
 
-  find_program(QCOLLECTIONGENERATOR_EXECUTABLE
-    NAMES qcollectiongenerator-qt5 qcollectiongenerator
-    DOC "qcollectiongenerator tool"
+  find_program(QHELPGENERATOR_EXECUTABLE
+    NAMES qhelpgenerator-qt5 qhelpgenerator
+    DOC "qhelpgenerator tool"
     )
-  if (NOT QCOLLECTIONGENERATOR_EXECUTABLE)
-    message(FATAL_ERROR "QCOLLECTIONGENERATOR_EXECUTABLE (qcollectiongenerator) not found!")
+  if(NOT QHELPGENERATOR_EXECUTABLE)
+    message(FATAL_ERROR "QHELPGENERATOR_EXECUTABLE (qhelpgenerator) not found!")
   endif()
   list(APPEND doc_formats qthelp)
 
@@ -121,7 +128,7 @@ if(SPHINX_QTHELP)
       "${CMAKE_CURRENT_SOURCE_DIR}/create_identifiers.py"
       "${CMAKE_CURRENT_BINARY_DIR}/qthelp/"
 
-    COMMAND ${QCOLLECTIONGENERATOR_EXECUTABLE}
+    COMMAND ${QHELPGENERATOR_EXECUTABLE}
       ${CMAKE_CURRENT_BINARY_DIR}/qthelp/CMake.qhcp
   )
 endif()
@@ -129,11 +136,35 @@ if(SPHINX_LATEXPDF)
   list(APPEND doc_formats latexpdf)
 endif()
 
+set(doc_html_opts "")
+if(CMake_SPHINX_CMAKE_ORG)
+  list(APPEND doc_html_opts
+    -A googleanalytics=1
+    -A opensearch=1
+    -A versionswitch=1
+    )
+
+  if(CMake_SPHINX_CMAKE_ORG_OUTDATED)
+    list(APPEND doc_html_opts -A outdated=1)
+  endif()
+
+  list(APPEND qthelp_extra_commands
+    COMMAND ${CMAKE_COMMAND} -E copy
+      "${CMAKE_CURRENT_BINARY_DIR}/qthelp/CMake.qch"
+      "${CMAKE_CURRENT_BINARY_DIR}/html/CMake.qch"
+    )
+endif()
+
 set(doc_format_outputs "")
 set(doc_format_last "")
 foreach(format ${doc_formats})
   set(doc_format_output "doc_format_${format}")
   set(doc_format_log "build-${format}.log")
+  if(CMake_SPHINX_CMAKE_ORG)
+    set(doctrees "doctrees/${format}")
+  else()
+    set(doctrees "doctrees")
+  endif()
   if(format STREQUAL "latexpdf")
     # This format does not use builder (-b) but make_mode (-M) which expects
     # arguments in peculiar order
@@ -144,8 +175,9 @@ foreach(format ${doc_formats})
               ${CMake_SOURCE_DIR}/Help
               ${CMAKE_CURRENT_BINARY_DIR}/${format}
               -c ${CMAKE_CURRENT_BINARY_DIR}
-              -d ${CMAKE_CURRENT_BINARY_DIR}/doctrees
+              -d ${CMAKE_CURRENT_BINARY_DIR}/${doctrees}
               ${sphinx_flags}
+              ${doc_${format}_opts}
               > ${doc_format_log} # log stdout, pass stderr
       ${${format}_extra_commands}
       DEPENDS ${doc_format_last}
@@ -158,9 +190,10 @@ foreach(format ${doc_formats})
       OUTPUT ${doc_format_output}
       COMMAND ${SPHINX_EXECUTABLE}
               -c ${CMAKE_CURRENT_BINARY_DIR}
-              -d ${CMAKE_CURRENT_BINARY_DIR}/doctrees
+              -d ${CMAKE_CURRENT_BINARY_DIR}/${doctrees}
               -b ${format}
               ${sphinx_flags}
+              ${doc_${format}_opts}
               ${CMake_SOURCE_DIR}/Help
               ${CMAKE_CURRENT_BINARY_DIR}/${format}
               > ${doc_format_log} # log stdout, pass stderr
@@ -172,7 +205,9 @@ foreach(format ${doc_formats})
   endif()
   set_property(SOURCE ${doc_format_output} PROPERTY SYMBOLIC 1)
   list(APPEND doc_format_outputs ${doc_format_output})
-  set(doc_format_last ${doc_format_output})
+  if(NOT CMake_SPHINX_CMAKE_ORG)
+    set(doc_format_last ${doc_format_output})
+  endif()
 endforeach()
 
 add_custom_target(documentation ALL DEPENDS ${doc_format_outputs})
@@ -190,6 +225,10 @@ if(CMake_SPHINX_DEPEND_ON_EXECUTABLES)
       add_dependencies(documentation ${t})
     endif()
   endforeach()
+endif()
+
+if(CMake_SPHINX_CMAKE_ORG)
+  return()
 endif()
 
 if(SPHINX_INFO)

@@ -1,0 +1,5 @@
+^CMake Error at .*/Modules/CMakeDetermineCUDACompiler\.cmake:[0-9]+ \(message\):
+  CMAKE_CUDA_ARCHITECTURES must be valid if set\.
+Call Stack \(most recent call first\):
+  architectures-invalid\.cmake:2 \(enable_language\)
+  CMakeLists\.txt:3 \(include\)$

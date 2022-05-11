@@ -152,8 +152,12 @@ struct StandardLevelComputer
              "dialect \""
           << this->Language << *standardProp << "\" "
           << (ext ? "(with compiler extensions)" : "")
-          << ", but CMake "
-             "does not know the compile flags to use to enable it.";
+          << ". But the current compiler \""
+          << makefile->GetSafeDefinition("CMAKE_" + this->Language +
+                                         "_COMPILER_ID")
+          << "\" does not support this, or "
+             "CMake does not know the flags to enable it.";
+
         makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
       }
       return option_flag;
@@ -206,8 +210,9 @@ struct StandardLevelComputer
 
     // If the standard requested is older than the compiler's default or the
     // extension mode doesn't match then we need to use a flag.
-    if (stdIt < defaultStdIt ||
-        (cmp0128 == cmPolicies::NEW && ext != defaultExt)) {
+    if ((cmp0128 != cmPolicies::NEW && stdIt <= defaultStdIt) ||
+        (cmp0128 == cmPolicies::NEW &&
+         (stdIt < defaultStdIt || ext != defaultExt))) {
       auto offset = std::distance(cm::cbegin(stds), stdIt);
       return cmStrCat("CMAKE_", this->Language, stdsStrings[offset], "_", type,
                       "_COMPILE_OPTION");

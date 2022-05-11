@@ -1,5 +1,5 @@
 CMake - Cross Platform Makefile Generator
-Copyright 2000-2021 Kitware, Inc. and Contributors
+Copyright 2000-2022 Kitware, Inc. and Contributors
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -62,7 +62,9 @@ The following individuals and institutions are among the Contributors:
 * Helio Chissini de Castro <helio@kde.org>
 * Ilya Lavrenov <ilya.lavrenov@itseez.com>
 * Insight Software Consortium <insightsoftwareconsortium.org>
+* Intel Corporation <www.intel.com>
 * Jan Woetzel
+* Jordan Williams <jordan@jwillikers.com>
 * Julien Schueller
 * Kelly Thompson <kgt@lanl.gov>
 * Konstantin Podsvirov <konstantin@podsvirov.pro>

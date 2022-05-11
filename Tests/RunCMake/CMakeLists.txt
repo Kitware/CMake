@@ -84,7 +84,8 @@ endif()
 
 # Test MSVC for older host CMake versions, and test
 # WIN32/CMAKE_C_COMPILER_ID to fix check on Intel for Windows.
-if(MSVC OR (WIN32 AND CMAKE_C_COMPILER_ID MATCHES "MSVC|Intel"))
+if(MSVC OR (WIN32 AND CMAKE_C_COMPILER_ID MATCHES "MSVC|Intel")
+   OR (WIN32 AND CMAKE_C_COMPILER_ID MATCHES "Clang" AND CMAKE_C_SIMULATE_ID MATCHES "MSVC"))
   set(LINKER_SUPPORTS_PDB 1)
 else()
   set(LINKER_SUPPORTS_PDB 0)
@@ -94,7 +95,6 @@ add_RunCMake_test(CMP0019)
 add_RunCMake_test(CMP0022)
 add_RunCMake_test(CMP0026)
 add_RunCMake_test(CMP0027)
-add_RunCMake_test(CMP0028)
 add_RunCMake_test(CMP0037)
 add_RunCMake_test(CMP0038)
 add_RunCMake_test(CMP0039)
@@ -256,7 +256,7 @@ endif()
 add_RunCMake_test(ArtifactOutputDirs)
 
 if(NOT DEFINED CMake_TEST_BuildDepends_GNU_AS
-    AND CMAKE_C_COMPILER_ID STREQUAL "GNU"
+    AND (CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID STREQUAL "LCC")
     AND CMAKE_GENERATOR MATCHES "^Ninja"
     )
   execute_process(COMMAND "${CMAKE_C_COMPILER}" -print-prog-name=as
@@ -329,8 +329,9 @@ add_RunCMake_test(GoogleTest) # Note: does not actually depend on Google Test
 add_RunCMake_test(Graphviz)
 add_RunCMake_test(TargetPropertyGeneratorExpressions)
 add_RunCMake_test(Languages)
+add_RunCMake_test(LinkItemValidation)
 add_RunCMake_test(LinkStatic)
-if(CMAKE_CXX_COMPILER_ID MATCHES "^(Cray|PGI|NVHPC|XL|XLClang|Fujitsu|FujitsuClang)$")
+if(CMAKE_CXX_COMPILER_ID MATCHES "^(Cray|PGI|NVHPC|XL|XLClang|IBMClang|Fujitsu|FujitsuClang)$")
   add_RunCMake_test(MetaCompileFeatures)
 endif()
 if(MSVC)
@@ -345,9 +346,8 @@ if(UNIX AND CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG AND CMAKE_EXECUTABLE_FORMAT STRE
   add_RunCMake_test(RuntimePath)
 endif()
 add_RunCMake_test(ScriptMode)
-add_RunCMake_test(Swift -DCMAKE_Swift_COMPILER=${CMAKE_Swift_COMPILER})
+add_RunCMake_test(Swift -DCMAKE_Swift_COMPILER=${CMAKE_Swift_COMPILER} -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME})
 add_RunCMake_test(TargetObjects)
-add_RunCMake_test(TargetSources)
 add_RunCMake_test(TargetProperties)
 add_RunCMake_test(ToolchainFile)
 add_RunCMake_test(find_dependency)
@@ -419,6 +419,7 @@ add_RunCMake_test(ctest_update)
 add_RunCMake_test(ctest_upload)
 add_RunCMake_test(ctest_environment)
 add_RunCMake_test(ctest_fixtures)
+add_RunCMake_test(define_property)
 add_RunCMake_test(file -DCYGWIN=${CYGWIN} -DMSYS=${MSYS})
 add_RunCMake_test(file-CHMOD -DMSYS=${MSYS})
 add_RunCMake_test(file-RPATH -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME})
@@ -534,6 +535,10 @@ add_RunCMake_test(no_install_prefix)
 add_RunCMake_test(configure_file)
 add_RunCMake_test(CTestTimeout -DTIMEOUT=${CTestTestTimeout_TIME})
 add_RunCMake_test(CTestTimeoutAfterMatch)
+if(CMake_TEST_CUDA)
+  add_RunCMake_test(CUDA_architectures)
+  set_property(TEST RunCMake.CUDA_architectures APPEND PROPERTY LABELS "CUDA")
+endif()
 add_RunCMake_test(DependencyGraph -DCMAKE_Fortran_COMPILER=${CMAKE_Fortran_COMPILER})
 
 # ctresalloc links against CMakeLib and CTestLib, which means it can't be built
@@ -580,12 +585,16 @@ if(NOT WIN32
   add_RunCMake_test(SymlinkTrees)
 endif ()
 
-find_package(Qt4 QUIET)
-find_package(Qt5Core QUIET)
-if (QT4_FOUND AND Qt5Core_FOUND AND NOT Qt5Core_VERSION VERSION_LESS 5.1.0)
+if(CMake_TEST_Qt4)
+  find_package(Qt4 QUIET)
+endif()
+if(CMake_TEST_Qt5)
+  find_package(Qt5Core QUIET)
+endif()
+if (CMake_TEST_Qt4 AND CMake_TEST_Qt5 AND QT4_FOUND AND Qt5Core_FOUND AND NOT Qt5Core_VERSION VERSION_LESS 5.1.0)
   add_RunCMake_test(IncompatibleQt)
 endif()
-if (QT4_FOUND)
+if (CMake_TEST_Qt4 AND QT4_FOUND)
   add_RunCMake_test(ObsoleteQtMacros -DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE})
 endif()
 
@@ -615,6 +624,11 @@ if("${CMAKE_GENERATOR}" MATCHES "Visual Studio ([^9]|9[0-9])")
   if( vs12 AND wince )
     add_RunCMake_test( VS10ProjectWinCE "-DRunCMake_GENERATOR_PLATFORM=${wince_sdk}")
   endif()
+endif()
+
+if(CMAKE_GENERATOR MATCHES "^Visual Studio (1[6-9]|[2-9][0-9])")
+  add_RunCMake_test(VsDotnetSdk)
+  add_RunCMake_test(VsNugetPackageRestore)
 endif()
 
 if(XCODE_VERSION)
@@ -682,7 +696,7 @@ set_property(TEST RunCMake.CheckCompilerFlag
 add_RunCMake_test(CheckModules)
 add_RunCMake_test(CheckIPOSupported)
 if (CMAKE_SYSTEM_NAME MATCHES "(Linux|Darwin)"
-    AND (CMAKE_C_COMPILER_ID MATCHES "Clang|GNU" OR CMAKE_Fortran_COMPILER_ID MATCHES "GNU"))
+    AND (CMAKE_C_COMPILER_ID MATCHES "Clang|GNU|LCC" OR CMAKE_Fortran_COMPILER_ID MATCHES "GNU|LCC"))
   add_RunCMake_test(CheckLinkerFlag -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
                                     -DCMAKE_Fortran_COMPILER_ID=${CMAKE_Fortran_COMPILER_ID}
                                     -DCMake_TEST_CUDA=${CMake_TEST_CUDA}
@@ -904,6 +918,7 @@ endif()
 add_RunCMake_test("CTestCommandExpandLists")
 
 add_RunCMake_test(PrecompileHeaders -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
+  -DCMAKE_C_SIMULATE_ID=${CMAKE_C_SIMULATE_ID}
   -DCMAKE_C_COMPILER_VERSION=${CMAKE_C_COMPILER_VERSION})
 
 add_RunCMake_test("UnityBuild")
@@ -927,4 +942,8 @@ endif()
 
 if(WIN32)
   add_RunCMake_test(Win32GenEx)
+endif()
+
+if("${CMAKE_C_COMPILER_ID}" STREQUAL "LCC" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "LCC" OR "${CMAKE_Fortran_COMPILER_ID}" STREQUAL "LCC")
+  add_RunCMake_test("CMP0129")
 endif()

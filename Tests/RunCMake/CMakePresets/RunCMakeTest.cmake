@@ -44,6 +44,20 @@ function(run_cmake_presets name)
     configure_file("${CMakeUserPresets_FILE}" "${RunCMake_TEST_SOURCE_DIR}/CMakeUserPresets.json" @ONLY)
   endif()
 
+  set(_CMakePresets_EXTRA_FILES_OUT)
+  set(_CMakePresets_EXTRA_FILES_SCHEMA_EXPECTED_RESULTS)
+  foreach(_extra_file IN LISTS CMakePresets_EXTRA_FILES)
+    cmake_path(RELATIVE_PATH _extra_file
+      BASE_DIRECTORY "${RunCMake_SOURCE_DIR}"
+      OUTPUT_VARIABLE _extra_file_relative
+      )
+    string(REGEX REPLACE "\\.in$" "" _extra_file_out_relative "${_extra_file_relative}")
+    set(_extra_file_out "${RunCMake_TEST_SOURCE_DIR}/${_extra_file_out_relative}")
+    configure_file("${_extra_file}" "${_extra_file_out}" @ONLY)
+    list(APPEND _CMakePresets_EXTRA_FILES_OUT "${_extra_file_out}")
+    list(APPEND _CMakePresets_EXTRA_FILES_SCHEMA_EXPECTED_RESULTS 0)
+  endforeach()
+
   set(_s_arg -S)
   if(CMakePresets_NO_S_ARG)
     set(_s_arg)
@@ -57,13 +71,18 @@ function(run_cmake_presets name)
     set(_unused_cli)
   endif()
 
+  set(_preset "--preset=${name}")
+  if(CMakePresets_NO_PRESET)
+    set(_preset)
+  endif()
+
   set(RunCMake_TEST_COMMAND ${CMAKE_COMMAND}
     ${_source_args}
     -DRunCMake_TEST=${name}
     -DRunCMake_GENERATOR=${RunCMake_GENERATOR}
     -DCMAKE_MAKE_PROGRAM=${RunCMake_MAKE_PROGRAM}
     ${_unused_cli}
-    --preset=${name}
+    ${_preset}
     ${ARGN}
     )
   run_cmake(${name})
@@ -274,7 +293,10 @@ run_cmake_presets(ListPresets --list-presets)
 set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/ListPresetsWorkingDir")
 set(RunCMake_TEST_NO_CLEAN 1)
 set(CMakePresets_NO_SOURCE_ARGS 1)
+set(CMakePresets_NO_PRESET 1)
 run_cmake_presets(ListPresetsWorkingDir --list-presets)
+run_cmake_presets(ListConfigurePresetsWorkingDir --list-presets=configure)
+unset(CMakePresets_NO_PRESET)
 unset(CMakePresets_NO_SOURCE_ARGS)
 unset(RunCMake_TEST_NO_CLEAN)
 unset(RunCMake_TEST_BINARY_DIR)
@@ -303,6 +325,16 @@ run_cmake_presets(HostSystemName)
 set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/HostSystemNameFuture.json.in")
 run_cmake_presets(HostSystemNameFuture)
 
+# Test ${fileDir} macro
+set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/FileDir.json.in")
+set(CMakePresets_EXTRA_FILES
+  "${RunCMake_SOURCE_DIR}/subdir/FileDir.json.in"
+  )
+run_cmake_presets(FileDir)
+unset(CMakePresets_EXTRA_FILES)
+set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/FileDirFuture.json.in")
+run_cmake_presets(FileDirFuture)
+
 # Test conditions
 set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/Conditions.json.in")
 run_cmake_presets(ListConditions --list-presets)
@@ -319,6 +351,37 @@ run_cmake_presets(OptionalBinaryDirFieldNoS)
 unset(CMakePresets_SOURCE_ARG)
 unset(CMakePresets_NO_S_ARG)
 
+# Test include field
+set(CMakePresets_SCHEMA_EXPECTED_RESULT 1)
+run_cmake_presets(IncludeV3)
+set(CMakePresets_SCHEMA_EXPECTED_RESULT 0)
+set(CMakePresets_EXTRA_FILES
+  "${RunCMake_SOURCE_DIR}/IncludeV4V3Extra.json.in"
+  )
+set(CMakePresets_EXTRA_FILES_SCHEMA_EXPECTED_RESULTS 1)
+run_cmake_presets(IncludeV4V3)
+unset(CMakePresets_EXTRA_FILES_SCHEMA_EXPECTED_RESULTS)
+set(CMakePresets_EXTRA_FILES
+  "${RunCMake_SOURCE_DIR}/IncludeCommon.json.in"
+  "${RunCMake_SOURCE_DIR}/IncludeUserCommon.json.in"
+  "${RunCMake_SOURCE_DIR}/subdir/CMakePresets.json.in"
+  )
+run_cmake_presets(Include --list-presets)
+unset(CMakePresets_EXTRA_FILES)
+run_cmake_presets(IncludeNotFound)
+run_cmake_presets(IncludeCycle)
+set(CMakePresets_EXTRA_FILES
+  "${RunCMake_SOURCE_DIR}/IncludeCycle3Files2.json.in"
+  "${RunCMake_SOURCE_DIR}/IncludeCycle3Files3.json.in"
+  )
+run_cmake_presets(IncludeCycle3Files)
+set(CMakePresets_EXTRA_FILES
+  "${RunCMake_SOURCE_DIR}/IncludeOutsideProjectIntermediate.json.in"
+  )
+run_cmake_presets(IncludeOutsideProject)
+unset(CMakePresets_EXTRA_FILES)
+run_cmake_presets(IncludeUserOutsideProject)
+
 # Test the example from the documentation
 file(READ "${RunCMake_SOURCE_DIR}/../../../Help/manual/presets/example.json" _example)
 string(REPLACE "\"generator\": \"Ninja\"" "\"generator\": \"@RunCMake_GENERATOR@\"" _example "${_example}")
@@ -327,4 +390,9 @@ if(CMAKE_HOST_WIN32)
 endif()
 file(WRITE "${RunCMake_BINARY_DIR}/example.json.in" "${_example}")
 set(CMakePresets_FILE "${RunCMake_BINARY_DIR}/example.json.in")
+set(CMakePresets_EXTRA_FILES
+  "${RunCMake_SOURCE_DIR}/otherThings.json.in"
+  "${RunCMake_SOURCE_DIR}/moreThings.json.in"
+)
 run_cmake_presets(DocumentationExample --preset=default)
+unset(CMakePresets_EXTRA_FILES)

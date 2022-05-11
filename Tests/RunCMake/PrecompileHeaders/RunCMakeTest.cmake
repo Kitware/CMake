@@ -23,10 +23,12 @@ if(RunCMake_GENERATOR MATCHES "Make|Ninja")
   run_cmake(PchWarnInvalid)
 
   if(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND
-     CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 11.0.0)
+      CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 11.0.0 AND
+      NOT CMAKE_C_SIMULATE_ID STREQUAL "MSVC")
     run_cmake(PchInstantiateTemplates)
   endif()
 endif()
 run_test(PchReuseFromObjLib)
 run_test(PchIncludedAllLanguages)
+run_test(PchIncludedOneLanguage)
 run_test(PchLibObjLibExe)

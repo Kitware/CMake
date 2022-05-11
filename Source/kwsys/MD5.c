@@ -10,6 +10,7 @@
 #endif
 
 #include <stddef.h> /* size_t */
+#include <stdint.h> /* uintptr_t */
 #include <stdlib.h> /* malloc, free */
 #include <string.h> /* memcpy, strlen */
 
@@ -202,7 +203,7 @@ static void md5_process(md5_state_t* pms, const md5_byte_t* data /*[64]*/)
        * On little-endian machines, we can process properly aligned
        * data without copying it.
        */
-      if (!((data - (const md5_byte_t*)0) & 3)) {
+      if (!((uintptr_t)data & 3)) {
         /* data are properly aligned */
         X = (const md5_word_t*)data;
       } else {

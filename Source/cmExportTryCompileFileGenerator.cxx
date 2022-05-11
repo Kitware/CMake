@@ -7,16 +7,21 @@
 
 #include <cm/memory>
 
+#include "cmFileSet.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionDAGChecker.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
+#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmOutputConverter.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmTarget.h"
 #include "cmValue.h"
+
+class cmTargetExport;
 
 cmExportTryCompileFileGenerator::cmExportTryCompileFileGenerator(
   cmGlobalGenerator* gg, const std::vector<std::string>& targets,
@@ -102,10 +107,16 @@ void cmExportTryCompileFileGenerator::PopulateProperties(
   const cmGeneratorTarget* target, ImportPropertyMap& properties,
   std::set<cmGeneratorTarget const*>& emitted)
 {
+  // Look through all non-special properties.
   std::vector<std::string> props = target->GetPropertyKeys();
+  // Include special properties that might be relevant here.
+  props.emplace_back("INTERFACE_LINK_LIBRARIES");
   for (std::string const& p : props) {
-
-    properties[p] = *target->GetProperty(p);
+    cmValue v = target->GetProperty(p);
+    if (!v) {
+      continue;
+    }
+    properties[p] = *v;
 
     if (cmHasLiteralPrefix(p, "IMPORTED_LINK_INTERFACE_LIBRARIES") ||
         cmHasLiteralPrefix(p, "IMPORTED_LINK_DEPENDENT_LIBRARIES") ||
@@ -136,4 +147,18 @@ std::string cmExportTryCompileFileGenerator::InstallNameDir(
   }
 
   return install_name_dir;
+}
+
+std::string cmExportTryCompileFileGenerator::GetFileSetDirectories(
+  cmGeneratorTarget* /*gte*/, cmFileSet* fileSet, cmTargetExport* /*te*/)
+{
+  return cmOutputConverter::EscapeForCMake(
+    cmJoin(fileSet->GetDirectoryEntries(), ";"));
+}
+
+std::string cmExportTryCompileFileGenerator::GetFileSetFiles(
+  cmGeneratorTarget* /*gte*/, cmFileSet* fileSet, cmTargetExport* /*te*/)
+{
+  return cmOutputConverter::EscapeForCMake(
+    cmJoin(fileSet->GetFileEntries(), ";"));
 }

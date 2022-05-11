@@ -77,7 +77,7 @@ bool cmMacroHelperCommand::operator()(
   argVs.reserve(expandedArgs.size());
   char argvName[60];
   for (unsigned int j = 0; j < expandedArgs.size(); ++j) {
-    sprintf(argvName, "${ARGV%u}", j);
+    snprintf(argvName, sizeof(argvName), "${ARGV%u}", j);
     argVs.emplace_back(argvName);
   }
   // Invoke all the functions that were collected in the block.

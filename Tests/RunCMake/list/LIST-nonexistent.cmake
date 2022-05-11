@@ -1,0 +1,45 @@
+# Various list operations should treat non-existent variables as empty
+# - APPEND
+# - PREPEND
+# - INSERT (only valid index is 0)
+set(nex_l0 "")
+list(APPEND nex_l0 a)
+list(APPEND nex_l0 b)
+if(NOT nex_l0 STREQUAL "a;b")
+  message(FATAL_ERROR "a;b expected, got ${nex_l0}")
+endif()
+
+unset(nex_l1)
+list(APPEND nex_l1 c)
+list(APPEND nex_l1 d)
+if(NOT nex_l1 STREQUAL "c;d")
+  message(FATAL_ERROR "c;d expected, got ${nex_l1}")
+endif()
+
+set(nex_l2 "")
+list(PREPEND nex_l2 E)
+list(PREPEND nex_l2 f)
+if(NOT nex_l2 STREQUAL "f;E")
+  message(FATAL_ERROR "f;E expected, got ${nex_l2}")
+endif()
+
+unset(nex_l3)
+list(PREPEND nex_l3 hi)
+list(PREPEND nex_l3 G)
+if(NOT nex_l3 STREQUAL "G;hi")
+  message(FATAL_ERROR "G;hi expected, got ${nex_l3}")
+endif()
+
+set(nex_l4 "")
+list(INSERT nex_l4 0 j)
+list(INSERT nex_l4 0 kl)
+if(NOT nex_l4 STREQUAL "kl;j")
+  message(FATAL_ERROR "kl;j expected, got ${nex_l4}")
+endif()
+
+unset(nex_l5)
+list(INSERT nex_l5 0 M)
+list(INSERT nex_l5 0 noP)
+if(NOT nex_l5 STREQUAL "noP;M")
+  message(FATAL_ERROR "noP;M expected, got ${nex_l5}")
+endif()

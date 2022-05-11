@@ -304,13 +304,14 @@ static char *nss_sslver_to_name(PRUint16 nssver)
   }
 }
 
-static SECStatus set_ciphers(struct Curl_easy *data, PRFileDesc * model,
-                             char *cipher_list)
+/* the longest cipher name this supports */
+#define MAX_CIPHER_LENGTH 128
+
+static SECStatus set_ciphers(struct Curl_easy *data, PRFileDesc *model,
+                             const char *cipher_list)
 {
   unsigned int i;
-  PRBool cipher_state[NUM_OF_CIPHERS];
-  PRBool found;
-  char *cipher;
+  const char *cipher;
 
   /* use accessors to avoid dynamic linking issues after an update of NSS */
   const PRUint16 num_implemented_ciphers = SSL_GetNumImplementedCiphers();
@@ -326,51 +327,52 @@ static SECStatus set_ciphers(struct Curl_easy *data, PRFileDesc * model,
     SSL_CipherPrefSet(model, implemented_ciphers[i], PR_FALSE);
   }
 
-  /* Set every entry in our list to false */
-  for(i = 0; i < NUM_OF_CIPHERS; i++) {
-    cipher_state[i] = PR_FALSE;
-  }
-
   cipher = cipher_list;
 
-  while(cipher_list && (cipher_list[0])) {
+  while(cipher && cipher[0]) {
+    const char *end;
+    char name[MAX_CIPHER_LENGTH + 1];
+    size_t len;
+    bool found = FALSE;
     while((*cipher) && (ISSPACE(*cipher)))
       ++cipher;
 
-    cipher_list = strpbrk(cipher, ":, ");
-    if(cipher_list) {
-      *cipher_list++ = '\0';
+    end = strpbrk(cipher, ":, ");
+    if(end)
+      len = end - cipher;
+    else
+      len = strlen(cipher);
+
+    if(len > MAX_CIPHER_LENGTH) {
+      failf(data, "Bad cipher list");
+      return SECFailure;
     }
+    else if(len) {
+      memcpy(name, cipher, len);
+      name[len] = 0;
 
-    found = PR_FALSE;
-
-    for(i = 0; i<NUM_OF_CIPHERS; i++) {
-      if(strcasecompare(cipher, cipherlist[i].name)) {
-        cipher_state[i] = PR_TRUE;
-        found = PR_TRUE;
-        break;
+      for(i = 0; i<NUM_OF_CIPHERS; i++) {
+        if(strcasecompare(name, cipherlist[i].name)) {
+          /* Enable the selected cipher */
+          if(SSL_CipherPrefSet(model, cipherlist[i].num, PR_TRUE) !=
+             SECSuccess) {
+            failf(data, "cipher-suite not supported by NSS: %s", name);
+            return SECFailure;
+          }
+          found = TRUE;
+          break;
+        }
       }
     }
 
-    if(found == PR_FALSE) {
-      failf(data, "Unknown cipher in list: %s", cipher);
+    if(!found && len) {
+      failf(data, "Unknown cipher: %s", name);
       return SECFailure;
     }
-
-    if(cipher_list) {
-      cipher = cipher_list;
-    }
-  }
-
-  /* Finally actually enable the selected ciphers */
-  for(i = 0; i<NUM_OF_CIPHERS; i++) {
-    if(!cipher_state[i])
-      continue;
-
-    if(SSL_CipherPrefSet(model, cipherlist[i].num, PR_TRUE) != SECSuccess) {
-      failf(data, "cipher-suite not supported by NSS: %s", cipherlist[i].name);
-      return SECFailure;
-    }
+    if(end)
+      cipher = ++end;
+    else
+      break;
   }
 
   return SECSuccess;
@@ -782,7 +784,7 @@ static char *nss_get_password(PK11SlotInfo *slot, PRBool retry, void *arg)
 {
   (void)slot; /* unused */
 
-  if(retry || NULL == arg)
+  if(retry || !arg)
     return NULL;
   else
     return (char *)PORT_Strdup((char *)arg);
@@ -955,7 +957,7 @@ static void display_cert_info(struct Curl_easy *data,
   subject = CERT_NameToAscii(&cert->subject);
   issuer = CERT_NameToAscii(&cert->issuer);
   common_name = CERT_GetCommonName(&cert->subject);
-  infof(data, "subject: %s\n", subject);
+  infof(data, "subject: %s", subject);
 
   CERT_GetCertTimes(cert, &notBefore, &notAfter);
   PR_ExplodeTime(notBefore, PR_GMTParameters, &printableTime);
@@ -1168,7 +1170,7 @@ static SECStatus SelectClientCert(void *arg, PRFileDesc *sock,
     struct SECKEYPrivateKeyStr *key;
 
     PK11SlotInfo *slot = nss_find_slot_by_name(pem_slotname);
-    if(NULL == slot) {
+    if(!slot) {
       failf(data, "NSS: PK11 slot not found: %s", pem_slotname);
       return SECFailure;
     }
@@ -1182,7 +1184,7 @@ static SECStatus SelectClientCert(void *arg, PRFileDesc *sock,
 
     cert = PK11_FindCertFromDERCertItem(slot, &cert_der, proto_win);
     SECITEM_FreeItem(&cert_der, PR_FALSE);
-    if(NULL == cert) {
+    if(!cert) {
       failf(data, "NSS: client certificate from file not found");
       PK11_FreeSlot(slot);
       return SECFailure;
@@ -1190,7 +1192,7 @@ static SECStatus SelectClientCert(void *arg, PRFileDesc *sock,
 
     key = PK11_FindPrivateKeyFromCert(slot, cert, NULL);
     PK11_FreeSlot(slot);
-    if(NULL == key) {
+    if(!key) {
       failf(data, "NSS: private key from file not found");
       CERT_DestroyCertificate(cert);
       return SECFailure;
@@ -1207,9 +1209,9 @@ static SECStatus SelectClientCert(void *arg, PRFileDesc *sock,
   /* use the default NSS hook */
   if(SECSuccess != NSS_GetClientAuthData((void *)nickname, sock, caNames,
                                           pRetCert, pRetKey)
-      || NULL == *pRetCert) {
+     || !*pRetCert) {
 
-    if(NULL == nickname)
+    if(!nickname)
       failf(data, "NSS: client certificate not found (nickname not "
             "specified)");
     else
@@ -1220,7 +1222,7 @@ static SECStatus SelectClientCert(void *arg, PRFileDesc *sock,
 
   /* get certificate nickname if any */
   nickname = (*pRetCert)->nickname;
-  if(NULL == nickname)
+  if(!nickname)
     nickname = "[unknown]";
 
   if(!strncmp(nickname, pem_slotname, sizeof(pem_slotname) - 1U)) {
@@ -1229,7 +1231,7 @@ static SECStatus SelectClientCert(void *arg, PRFileDesc *sock,
     return SECFailure;
   }
 
-  if(NULL == *pRetKey) {
+  if(!*pRetKey) {
     failf(data, "NSS: private key not found for certificate: %s", nickname);
     return SECFailure;
   }
@@ -1344,7 +1346,7 @@ static CURLcode nss_init_core(struct Curl_easy *data, const char *cert_dir)
   PRErrorCode err;
   const char *err_name;
 
-  if(nss_context != NULL)
+  if(nss_context)
     return CURLE_OK;
 
   memset((void *) &initparams, '\0', sizeof(initparams));
@@ -1360,7 +1362,7 @@ static CURLcode nss_init_core(struct Curl_easy *data, const char *cert_dir)
                                   NSS_INIT_READONLY | NSS_INIT_PK11RELOAD);
     free(certpath);
 
-    if(nss_context != NULL)
+    if(nss_context)
       return CURLE_OK;
 
     err = PR_GetError();
@@ -1372,7 +1374,7 @@ static CURLcode nss_init_core(struct Curl_easy *data, const char *cert_dir)
   nss_context = NSS_InitContext("", "", "", "", &initparams, NSS_INIT_READONLY
          | NSS_INIT_NOCERTDB   | NSS_INIT_NOMODDB       | NSS_INIT_FORCEOPEN
          | NSS_INIT_NOROOTINIT | NSS_INIT_OPTIMIZESPACE | NSS_INIT_PK11RELOAD);
-  if(nss_context != NULL)
+  if(nss_context)
     return CURLE_OK;
 
   err = PR_GetError();
@@ -2250,10 +2252,11 @@ static CURLcode nss_connect_common(struct Curl_easy *data,
   case CURLE_OK:
     break;
   case CURLE_AGAIN:
+    /* CURLE_AGAIN in non-blocking mode is not an error */
     if(!blocking)
-      /* CURLE_AGAIN in non-blocking mode is not an error */
       return CURLE_OK;
-    /* FALLTHROUGH */
+    else
+      return result;
   default:
     return result;
   }

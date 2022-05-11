@@ -1,0 +1,4 @@
+^CMake Error at FileSetWrongType\.cmake:[0-9]+ \(target_sources\):
+  target_sources File set TYPE may only be "HEADERS"
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$

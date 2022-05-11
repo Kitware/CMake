@@ -6,6 +6,8 @@
 
 #include <set>
 
+#include "cmListFileCache.h"
+
 class cmGeneratorTarget;
 
 /** One edge in the global target dependency graph.

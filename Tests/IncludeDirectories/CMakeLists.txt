@@ -1,10 +1,15 @@
 cmake_minimum_required (VERSION 2.6)
-project(IncludeDirectories)
 
+if(POLICY CMP0129)
+  cmake_policy(SET CMP0129 NEW)
+endif()
+
+project(IncludeDirectories)
 if (((CMAKE_C_COMPILER_ID STREQUAL GNU AND CMAKE_C_COMPILER_VERSION VERSION_GREATER 4.4)
     OR (CMAKE_C_COMPILER_ID STREQUAL Clang AND NOT "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC")
     OR CMAKE_C_COMPILER_ID STREQUAL NVHPC
     OR CMAKE_C_COMPILER_ID STREQUAL AppleClang
+    OR CMAKE_C_COMPILER_ID STREQUAL LCC
     OR ("x${CMAKE_C_COMPILER_ID}" STREQUAL "xMSVC" AND
        CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL "19.29.30036.3" AND
        NOT CMAKE_GENERATOR MATCHES "Visual Studio")) # No support for VS generators yet.
@@ -115,6 +120,13 @@ endif()
 add_library(ordertest ordertest.cpp)
 target_include_directories(ordertest SYSTEM PUBLIC SystemIncludeDirectories/systemlib)
 target_include_directories(ordertest PUBLIC SystemIncludeDirectories/userlib)
+
+add_library(ordertest2 ordertest.cpp)
+target_include_directories(ordertest2 SYSTEM PRIVATE SystemIncludeDirectories/systemlib)
+target_link_libraries(ordertest2 PRIVATE ordertest2_userlib)
+add_library(ordertest2_userlib INTERFACE IMPORTED)
+target_include_directories(ordertest2_userlib INTERFACE SystemIncludeDirectories/userlib)
+set_property(TARGET ordertest2_userlib PROPERTY IMPORTED_NO_SYSTEM 1)
 
 add_subdirectory(StandardIncludeDirectories)
 add_subdirectory(TargetIncludeDirectories)

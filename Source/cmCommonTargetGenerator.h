@@ -46,8 +46,14 @@ protected:
   void AppendFortranFormatFlags(std::string& flags,
                                 cmSourceFile const& source);
 
-  void AppendFortranPreprocessFlags(std::string& flags,
-                                    cmSourceFile const& source);
+  enum class PreprocessFlagsRequired
+  {
+    YES,
+    NO
+  };
+  void AppendFortranPreprocessFlags(
+    std::string& flags, cmSourceFile const& source,
+    PreprocessFlagsRequired requires_pp = PreprocessFlagsRequired::YES);
 
   virtual void AddIncludeFlags(std::string& flags, std::string const& lang,
                                const std::string& config) = 0;

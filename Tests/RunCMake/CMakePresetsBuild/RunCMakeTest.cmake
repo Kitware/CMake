@@ -70,7 +70,7 @@ else()
   set(Good_json_jobs [["jobs": 0,]])
 endif()
 
-run_cmake_build_presets(Good "default;other" "build-other;withEnvironment;noEnvironment;macros;vendorObject;singleTarget")
+run_cmake_build_presets(Good "default;other" "build-other;withEnvironment;noEnvironment;macros;vendorObject;singleTarget;initResolve")
 run_cmake_build_presets(InvalidConfigurePreset "default" "badConfigurePreset")
 run_cmake_build_presets(Condition "default" "enabled;disabled")
 
@@ -83,4 +83,6 @@ set(CMakePresets_SCHEMA_EXPECTED_RESULT 1)
 run_cmake_build_presets(PresetsUnsupported "x" "x")
 run_cmake_build_presets(ConditionFuture "x" "conditionFuture")
 set(CMakePresets_SCHEMA_EXPECTED_RESULT 0)
+
+run_cmake_build_presets(ConfigurePresetUnreachable "x" "x")
 set(CMakePresetsBuild_BUILD_ONLY 0)

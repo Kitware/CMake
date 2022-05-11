@@ -11,8 +11,10 @@ ARG FROM_IMAGE_NAME=kitware/cmake:build-win-x86-deps-2020-04-27
 ARG FROM_IMAGE_DIGEST=@sha256:04e229c0c0ba2247855d0e8c0fb87c1686f983adbafa4ce413e61b3905edb76b
 ARG FROM_IMAGE=$FROM_IMAGE_NAME$FROM_IMAGE_DIGEST
 
-FROM $FROM_IMAGE as build
+FROM $FROM_IMAGE as source
 COPY . C:\cmake\src\cmake
+
+FROM source as build
 ARG ARCH="x86_64"
 ARG TEST="true"
 RUN \cmake\src\cmake\Utilities\Release\win\x86\build.bat %ARCH% %TEST%

@@ -363,6 +363,11 @@ enabled.
 9. Search paths specified by the ``PATHS`` option.  These are typically
    hard-coded guesses.
 
+The :variable:`CMAKE_IGNORE_PATH`, :variable:`CMAKE_IGNORE_PREFIX_PATH`,
+:variable:`CMAKE_SYSTEM_IGNORE_PATH` and
+:variable:`CMAKE_SYSTEM_IGNORE_PREFIX_PATH` variables can also cause some
+of the above locations to be ignored.
+
 .. versionadded:: 3.16
    Added the ``CMAKE_FIND_USE_<CATEGORY>`` variables to globally disable
    various search locations.

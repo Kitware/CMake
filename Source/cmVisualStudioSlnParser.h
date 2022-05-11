@@ -5,12 +5,11 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <bitset>
+#include <cstddef>
 #include <iosfwd>
 #include <string>
 
 #include <cm/string_view>
-
-#include <stddef.h>
 
 class cmSlnData;
 

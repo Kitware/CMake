@@ -32,12 +32,13 @@ cmFindLibraryCommand::cmFindLibraryCommand(cmExecutionStatus& status)
 // cmFindLibraryCommand
 bool cmFindLibraryCommand::InitialPass(std::vector<std::string> const& argsIn)
 {
-  this->DebugMode = this->ComputeIfDebugModeWanted();
   this->CMakePathName = "LIBRARY";
 
   if (!this->ParseArguments(argsIn)) {
     return false;
   }
+
+  this->DebugMode = this->ComputeIfDebugModeWanted(this->VariableName);
 
   if (this->AlreadyDefined) {
     this->NormalizeFindResult();

@@ -60,7 +60,7 @@ protected slots:
   void updatePresets(const QVector<QCMakePreset>& presets);
   void updatePreset(const QString& name);
   void showPresetLoadError(const QString& dir,
-                           cmCMakePresetsFile::ReadFileResult result);
+                           cmCMakePresetsGraph::ReadFileResult result);
   void showProgress(const QString& msg, float percent);
   void setEnabledState(bool);
   bool setupFirstConfigure();

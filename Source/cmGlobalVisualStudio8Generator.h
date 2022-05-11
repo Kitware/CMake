@@ -2,9 +2,19 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #pragma once
 
+#include <iosfwd>
+#include <set>
+#include <string>
+#include <vector>
+
 #include <cm/optional>
 
 #include "cmGlobalVisualStudio71Generator.h"
+
+class cmGeneratorTarget;
+class cmMakefile;
+class cmake;
+struct cmIDEFlagTable;
 
 /** \class cmGlobalVisualStudio8Generator
  * \brief Write a Unix makefiles.

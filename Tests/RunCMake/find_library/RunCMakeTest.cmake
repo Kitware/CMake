@@ -12,3 +12,5 @@ run_cmake(Required)
 run_cmake(NO_CACHE)
 
 run_cmake_script(FromScriptMode "-DTEMP_DIR=${RunCMake_BINARY_DIR}/FromScriptMode-temp")
+
+run_cmake_with_options(FromPATHEnvDebugVar --debug-find-var=CREATED_LIBRARY)

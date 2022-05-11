@@ -42,6 +42,11 @@ static unsigned int const cm_utf8_min[7] = {
 const char* cm_utf8_decode_character(const char* first, const char* last,
                                      unsigned int* pc)
 {
+  /* We need at least one byte.  */
+  if (first == last) {
+    return 0;
+  }
+
   /* Count leading ones in the first byte.  */
   unsigned char c = (unsigned char)*first++;
   unsigned char const ones = cm_utf8_ones[c];

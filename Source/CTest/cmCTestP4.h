@@ -34,14 +34,6 @@ private:
     std::string Name;
     std::string EMail;
     std::string AccessTime;
-
-    User()
-      : UserName()
-      , Name()
-      , EMail()
-      , AccessTime()
-    {
-    }
   };
   std::map<std::string, User> Users;
   std::vector<std::string> P4Options;

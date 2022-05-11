@@ -540,7 +540,7 @@ size_t cmSystemTools::CalculateCommandLineLengthLimit()
 #if defined(_SC_ARG_MAX)
   // ARG_MAX is the maximum size of the command and environment
   // that can be passed to the exec functions on UNIX.
-  // The value in limits.h does not need to be present and may
+  // The value in climits does not need to be present and may
   // depend upon runtime memory constraints, hence sysconf()
   // should be used to query it.
   long szArgMax = sysconf(_SC_ARG_MAX);
@@ -1158,39 +1158,26 @@ void cmSystemTools::MoveFileIfDifferent(const std::string& source,
   RemoveFile(source);
 }
 
+#ifndef CMAKE_BOOTSTRAP
 std::string cmSystemTools::ComputeFileHash(const std::string& source,
                                            cmCryptoHash::Algo algo)
 {
-#if !defined(CMAKE_BOOTSTRAP)
   cmCryptoHash hash(algo);
   return hash.HashFile(source);
-#else
-  (void)source;
-  cmSystemTools::Message("hashsum not supported in bootstrapping mode",
-                         "Error");
-  return std::string();
-#endif
 }
 
 std::string cmSystemTools::ComputeStringMD5(const std::string& input)
 {
-#if !defined(CMAKE_BOOTSTRAP)
   cmCryptoHash md5(cmCryptoHash::AlgoMD5);
   return md5.HashString(input);
-#else
-  (void)input;
-  cmSystemTools::Message("md5sum not supported in bootstrapping mode",
-                         "Error");
-  return "";
-#endif
 }
 
+#  ifdef _WIN32
 std::string cmSystemTools::ComputeCertificateThumbprint(
   const std::string& source)
 {
   std::string thumbprint;
 
-#if !defined(CMAKE_BOOTSTRAP) && defined(_WIN32)
   CRYPT_INTEGER_BLOB cryptBlob;
   HCERTSTORE certStore = NULL;
   PCCERT_CONTEXT certContext = NULL;
@@ -1247,14 +1234,11 @@ std::string cmSystemTools::ComputeCertificateThumbprint(
     }
     CloseHandle(certFile);
   }
-#else
-  (void)source;
-  cmSystemTools::Message("ComputeCertificateThumbprint is not implemented",
-                         "Error");
-#endif
 
   return thumbprint;
 }
+#  endif
+#endif
 
 void cmSystemTools::Glob(const std::string& directory,
                          const std::string& regexp,
@@ -1693,7 +1677,8 @@ void list_item_verbose(FILE* out, struct archive_entry* entry)
   /* Use uname if it's present, else uid. */
   p = archive_entry_uname(entry);
   if ((p == nullptr) || (*p == '\0')) {
-    sprintf(tmp, "%lu ", static_cast<unsigned long>(archive_entry_uid(entry)));
+    snprintf(tmp, sizeof(tmp), "%lu ",
+             static_cast<unsigned long>(archive_entry_uid(entry)));
     p = tmp;
   }
   w = strlen(p);
@@ -1707,7 +1692,8 @@ void list_item_verbose(FILE* out, struct archive_entry* entry)
     fprintf(out, "%s", p);
     w = strlen(p);
   } else {
-    sprintf(tmp, "%lu", static_cast<unsigned long>(archive_entry_gid(entry)));
+    snprintf(tmp, sizeof(tmp), "%lu",
+             static_cast<unsigned long>(archive_entry_gid(entry)));
     w = strlen(tmp);
     fprintf(out, "%s", tmp);
   }
@@ -1721,15 +1707,15 @@ void list_item_verbose(FILE* out, struct archive_entry* entry)
       archive_entry_filetype(entry) == AE_IFBLK) {
     unsigned long rdevmajor = archive_entry_rdevmajor(entry);
     unsigned long rdevminor = archive_entry_rdevminor(entry);
-    sprintf(tmp, "%lu,%lu", rdevmajor, rdevminor);
+    snprintf(tmp, sizeof(tmp), "%lu,%lu", rdevmajor, rdevminor);
   } else {
     /*
      * Note the use of platform-dependent macros to format
      * the filesize here.  We need the format string and the
      * corresponding type for the cast.
      */
-    sprintf(tmp, BSDTAR_FILESIZE_PRINTF,
-            static_cast<BSDTAR_FILESIZE_TYPE>(archive_entry_size(entry)));
+    snprintf(tmp, sizeof(tmp), BSDTAR_FILESIZE_PRINTF,
+             static_cast<BSDTAR_FILESIZE_TYPE>(archive_entry_size(entry)));
   }
   if (w + strlen(tmp) >= gs_width) {
     gs_width = w + strlen(tmp) + 1;
@@ -2496,8 +2482,8 @@ bool cmSystemTools::GuessLibraryInstallName(std::string const& fullPath,
   return false;
 }
 
-std::string::size_type cmSystemToolsFindRPath(cm::string_view const& have,
-                                              cm::string_view const& want)
+static std::string::size_type cmSystemToolsFindRPath(
+  cm::string_view const& have, cm::string_view const& want)
 {
   std::string::size_type pos = 0;
   while (pos < have.size()) {
@@ -2694,11 +2680,11 @@ std::function<bool(std::string*, const cmELF&)> MakeEmptyCallback(
 }
 }
 
-cm::optional<bool> ChangeRPathELF(std::string const& file,
-                                  std::string const& oldRPath,
-                                  std::string const& newRPath,
-                                  bool removeEnvironmentRPath,
-                                  std::string* emsg, bool* changed)
+static cm::optional<bool> ChangeRPathELF(std::string const& file,
+                                         std::string const& oldRPath,
+                                         std::string const& newRPath,
+                                         bool removeEnvironmentRPath,
+                                         std::string* emsg, bool* changed)
 {
   auto adjustCallback = [oldRPath, newRPath, removeEnvironmentRPath](
                           cm::optional<std::string>& outRPath,
@@ -3306,7 +3292,7 @@ std::string cmSystemTools::EncodeURL(std::string const& in, bool escapeSlashes)
       case ' ':
       case '=':
       case '%':
-        sprintf(hexCh, "%%%02X", static_cast<int>(c));
+        snprintf(hexCh, sizeof(hexCh), "%%%02X", static_cast<int>(c));
         break;
       case '/':
         if (escapeSlashes) {

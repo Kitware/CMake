@@ -103,7 +103,7 @@ static bool isPolicyNewerThan(cmPolicies::PolicyID id, unsigned int majorV,
   return false;
 }
 
-const char* idToShortDescription(cmPolicies::PolicyID id)
+static const char* idToShortDescription(cmPolicies::PolicyID id)
 {
   switch (id) {
 #define POLICY_CASE(ID, SHORT_DESCRIPTION)                                    \

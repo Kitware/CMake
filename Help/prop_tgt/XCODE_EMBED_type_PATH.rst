@@ -16,3 +16,6 @@ The supported values for ``<type>`` are:
 
 ``APP_EXTENSIONS``
   .. versionadded:: 3.21
+
+``PLUGINS``
+  .. versionadded:: 3.23
