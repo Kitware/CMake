@@ -161,6 +161,7 @@ protected:
   bool OkToGenerate = false;
   // Number of pages displayed
   int NumberOfPages = 0;
+  bool IsEmpty = false;
 
   int InitialWidth;
   std::unique_ptr<cmake> CMakeInstance;
