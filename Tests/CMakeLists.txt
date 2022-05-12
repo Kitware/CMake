@@ -431,8 +431,10 @@ if(BUILD_TESTING)
 
   if(${CMAKE_GENERATOR} MATCHES "Visual Studio ([^9]|[9][0-9])")
     ADD_TEST_MACRO(CSharpOnly CSharpOnly)
-    ADD_TEST_MACRO(CSharpLinkToCxx CSharpLinkToCxx)
-    ADD_TEST_MACRO(CSharpLinkFromCxx CSharpLinkFromCxx)
+    if(NOT CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64")
+      ADD_TEST_MACRO(CSharpLinkToCxx CSharpLinkToCxx)
+      ADD_TEST_MACRO(CSharpLinkFromCxx CSharpLinkFromCxx)
+    endif()
     ADD_TEST_MACRO(CSharpWin32GenEx CSharpWin32GenEx)
     set_tests_properties(CSharpWin32GenEx PROPERTIES
       PASS_REGULAR_EXPRESSION "Target \"CSharpWin32GenEx\" has a generator expression in its\n  WIN32_EXECUTABLE property\\.  This is not supported on managed executables\\."
@@ -2113,6 +2115,7 @@ if(BUILD_TESTING)
   if(MSVC AND NOT MSVC_VERSION LESS 1310
      AND (NOT CMAKE_GENERATOR MATCHES "Visual Studio 9 "
           OR CMAKE_SIZEOF_VOID_P EQUAL 4)
+     AND (NOT CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64")
       )
     ADD_TEST_MACRO(VSMASM VSMASM)
   endif()
@@ -2123,7 +2126,8 @@ if(BUILD_TESTING)
     endif()
 
     if(NOT "${CMAKE_GENERATOR}" MATCHES "Visual Studio 9 "
-        AND NOT CMAKE_GENERATOR_TOOLSET STREQUAL "v90")
+        AND NOT CMAKE_GENERATOR_TOOLSET STREQUAL "v90"
+        AND NOT CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64")
       ADD_TEST_MACRO(VSWindowsFormsResx VSWindowsFormsResx)
       ADD_TEST_MACRO(VSManagedCustomCommand)
     endif()

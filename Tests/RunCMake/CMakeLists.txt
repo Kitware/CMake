@@ -960,7 +960,9 @@ endif()
 
 if(${CMAKE_GENERATOR} MATCHES "Visual Studio ([^9]|9[0-9])")
   add_RunCMake_test(CSharpCustomCommand)
-  add_RunCMake_test(CSharpReferenceImport)
+  if(NOT CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64")
+    add_RunCMake_test(CSharpReferenceImport)
+  endif()
 endif()
 
 add_RunCMake_test("CTestCommandExpandLists")
