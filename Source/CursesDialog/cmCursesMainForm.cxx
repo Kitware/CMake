@@ -35,11 +35,6 @@ cmCursesMainForm::cmCursesMainForm(std::vector<std::string> args,
   : Args(std::move(args))
   , InitialWidth(initWidth)
 {
-  this->HasNonStatusOutputs = false;
-  this->NumberOfPages = 0;
-  this->AdvancedMode = false;
-  this->NumberOfVisibleEntries = 0;
-  this->OkToGenerate = false;
   this->HelpMessage.emplace_back(
     "Welcome to ccmake, curses based user interface for CMake.");
   this->HelpMessage.emplace_back();
@@ -54,7 +49,6 @@ cmCursesMainForm::cmCursesMainForm(std::vector<std::string> args,
     cmStrCat(cmSystemTools::GetProgramPath(this->Args[0]), "/cmake");
   this->Args[0] = whereCMake;
   this->CMakeInstance->SetArgs(this->Args);
-  this->SearchMode = false;
 }
 
 cmCursesMainForm::~cmCursesMainForm()
