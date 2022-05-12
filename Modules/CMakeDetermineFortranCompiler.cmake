@@ -44,17 +44,14 @@ else()
     # finally list compilers to try
     if(NOT CMAKE_Fortran_COMPILER_INIT)
       # Known compilers:
-      #  f77/f90/f95: generic compiler names
       #  ftn: Cray fortran compiler wrapper
-      #  g77: GNU Fortran 77 compiler
       #  gfortran: putative GNU Fortran 95+ compiler (in progress)
-      #  fort77: native F77 compiler under HP-UX (and some older Crays)
-      #  frt: Fujitsu F77 compiler
+      #  frt: Fujitsu Fortran compiler
       #  pathf90/pathf95/pathf2003: PathScale Fortran compiler
-      #  pgf77/pgf90/pgf95/pgfortran: Portland Group F77/F90/F95 compilers
+      #  pgfortran: Portland Group Fortran compilers
       #  nvfortran: NVHPC Fotran compiler
       #  flang: Flang Fortran compiler
-      #  xlf/xlf90/xlf95: IBM (AIX) F77/F90/F95 compilers
+      #  xlf: IBM (AIX) Fortran compiler
       #  lf95: Lahey-Fujitsu F95 compiler
       #  fl32: Microsoft Fortran 77 "PowerStation" compiler
       #  af77: Apogee F77 compiler for Intergraph hardware running CLIX
@@ -62,31 +59,20 @@ else()
       #  fort: Compaq (now HP) Fortran 90/95 compiler for Tru64 and Linux/Alpha
       #  ifx: Intel Fortran LLVM-based compiler
       #  ifort: Intel Classic Fortran compiler
-      #  ifc: Intel Fortran 95 compiler for Linux/x86
-      #  efc: Intel Fortran 95 compiler for IA64
       #  nagfor: NAG Fortran compiler
       #
-      #  The order is 95 or newer compilers first, then 90,
-      #  then 77 or older compilers, gnu is always last in the group,
+      #  GNU is last to be searched,
       #  so if you paid for a compiler it is picked by default.
-      if(CMAKE_HOST_WIN32)
-        set(CMAKE_Fortran_COMPILER_LIST
-          ifort ifx pgf95 pgfortran nvfortran lf95 fort
-          flang gfortran gfortran-4 g95 f90 pgf90
-          pgf77 g77 f77 nag
-          )
-      else()
-        set(CMAKE_Fortran_COMPILER_LIST
-          ftn
-          ifort ifc ifx efc pgf95 pgfortran nvfortran lf95 xlf95 fort
-          flang lfortran gfortran gfortran-4 g95 f90 pgf90
-          frt pgf77 xlf g77 f77 nag
-          )
-      endif()
+      set(CMAKE_Fortran_COMPILER_LIST
+        ftn
+        ifx ifort nvfortran pgfortran lf95 xlf fort
+        flang lfortran frt nagfor
+        gfortran
+        )
 
       # Vendor-specific compiler names.
       set(_Fortran_COMPILER_NAMES_LCC       lfortran gfortran)
-      set(_Fortran_COMPILER_NAMES_GNU       gfortran gfortran-4 g95 g77)
+      set(_Fortran_COMPILER_NAMES_GNU       gfortran)
       set(_Fortran_COMPILER_NAMES_Intel     ifort ifc efc ifx)
       set(_Fortran_COMPILER_NAMES_Absoft    af95 af90 af77)
       set(_Fortran_COMPILER_NAMES_PGI       pgf95 pgfortran pgf90 pgf77)
