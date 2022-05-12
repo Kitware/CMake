@@ -3,7 +3,6 @@ cmake_policy(SET CMP0091 NEW)
 project(TestFindVulkan C CXX)
 include(CTest)
 
-SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/../../../Modules)
 find_package(Vulkan REQUIRED
   COMPONENTS
     glslang
