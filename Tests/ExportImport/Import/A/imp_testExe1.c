@@ -19,7 +19,7 @@ extern int testStaticLibPlugin(void);
 #else
 #  define testLib4libcfg testLib4libopt
 #endif
-extern testLib4libcfg(void);
+extern int testLib4libcfg(void);
 
 int main()
 {
