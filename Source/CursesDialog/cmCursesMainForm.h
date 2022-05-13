@@ -138,7 +138,7 @@ protected:
   // Output produced by the last pass
   std::vector<std::string> Outputs;
   // Did the last pass produced outputs of interest (errors, warnings, ...)
-  bool HasNonStatusOutputs;
+  bool HasNonStatusOutputs = false;
   // Last progress bar
   std::string LastProgress;
 
@@ -155,17 +155,18 @@ protected:
   // Fields displayed. Includes labels, new entry markers, entries
   std::vector<FIELD*> Fields;
   // Number of entries shown (depends on mode -normal or advanced-)
-  size_t NumberOfVisibleEntries;
-  bool AdvancedMode;
+  size_t NumberOfVisibleEntries = 0;
+  bool AdvancedMode = false;
   // Did the iteration converge (no new entries) ?
-  bool OkToGenerate;
+  bool OkToGenerate = false;
   // Number of pages displayed
-  int NumberOfPages;
+  int NumberOfPages = 0;
+  bool IsEmpty = false;
 
   int InitialWidth;
   std::unique_ptr<cmake> CMakeInstance;
 
   std::string SearchString;
   std::string OldSearchString;
-  bool SearchMode;
+  bool SearchMode = false;
 };
