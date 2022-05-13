@@ -35,11 +35,6 @@ cmCursesMainForm::cmCursesMainForm(std::vector<std::string> args,
   : Args(std::move(args))
   , InitialWidth(initWidth)
 {
-  this->HasNonStatusOutputs = false;
-  this->NumberOfPages = 0;
-  this->AdvancedMode = false;
-  this->NumberOfVisibleEntries = 0;
-  this->OkToGenerate = false;
   this->HelpMessage.emplace_back(
     "Welcome to ccmake, curses based user interface for CMake.");
   this->HelpMessage.emplace_back();
@@ -54,7 +49,6 @@ cmCursesMainForm::cmCursesMainForm(std::vector<std::string> args,
     cmStrCat(cmSystemTools::GetProgramPath(this->Args[0]), "/cmake");
   this->Args[0] = whereCMake;
   this->CMakeInstance->SetArgs(this->Args);
-  this->SearchMode = false;
 }
 
 cmCursesMainForm::~cmCursesMainForm()
@@ -99,13 +93,13 @@ void cmCursesMainForm::InitializeUI()
 
   int entrywidth = this->InitialWidth - 35;
 
-  if (count == 0) {
-    // If cache is empty, display a label saying so and a
-    // dummy entry widget (does not respond to input)
-    cmCursesCacheEntryComposite comp("EMPTY CACHE", 30, 30);
-    comp.Entry = cm::make_unique<cmCursesDummyWidget>(1, 1, 1, 1);
-    newEntries.emplace_back(std::move(comp));
-  } else {
+  // Add a label to display when cache is empty
+  // dummy entry widget (does not respond to input)
+  cmCursesCacheEntryComposite comp("EMPTY CACHE", 30, 30);
+  comp.Entry = cm::make_unique<cmCursesDummyWidget>(1, 1, 1, 1);
+  newEntries.emplace_back(std::move(comp));
+
+  if (count > 0) {
     // Create the composites.
 
     // First add entries which are new
@@ -196,7 +190,8 @@ void cmCursesMainForm::RePost()
     this->Fields.push_back(entry.Entry->Field);
   }
   // if no cache entries there should still be one dummy field
-  if (this->Fields.empty()) {
+  this->IsEmpty = this->Fields.empty();
+  if (this->IsEmpty) {
     const auto& front = this->Entries.front();
     this->Fields.push_back(front.Label->Field);
     this->Fields.push_back(front.IsNewLabel->Field);
@@ -875,7 +870,7 @@ void cmCursesMainForm::HandleInput()
         }
       }
       // delete cache entry
-      else if (key == 'd' && this->NumberOfVisibleEntries) {
+      else if (key == 'd' && this->NumberOfVisibleEntries && !this->IsEmpty) {
         this->OkToGenerate = false;
         FIELD* cur = current_field(this->Form);
         size_t findex = field_index(cur);
