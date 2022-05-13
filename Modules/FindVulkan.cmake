@@ -77,61 +77,61 @@ environment.
 #]=======================================================================]
 
 if(WIN32)
-  find_path(Vulkan_INCLUDE_DIR
-    NAMES vulkan/vulkan.h
-    HINTS
-      "$ENV{VULKAN_SDK}/Include"
-    )
-
+  set(_Vulkan_library_name vulkan-1)
+  set(_Vulkan_hint_include_search_paths
+    "$ENV{VULKAN_SDK}/Include"
+  )
   if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-    find_library(Vulkan_LIBRARY
-      NAMES vulkan-1
-      HINTS
-        "$ENV{VULKAN_SDK}/Lib"
-        "$ENV{VULKAN_SDK}/Bin"
-      )
-    find_program(Vulkan_GLSLC_EXECUTABLE
-      NAMES glslc
-      HINTS
-        "$ENV{VULKAN_SDK}/Bin"
-      )
-    find_program(Vulkan_GLSLANG_VALIDATOR_EXECUTABLE
-      NAMES glslangValidator
-      HINTS
-        "$ENV{VULKAN_SDK}/Bin"
-      )
-  elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
-    find_library(Vulkan_LIBRARY
-      NAMES vulkan-1
-      HINTS
-        "$ENV{VULKAN_SDK}/Lib32"
-        "$ENV{VULKAN_SDK}/Bin32"
-      )
-    find_program(Vulkan_GLSLC_EXECUTABLE
-      NAMES glslc
-      HINTS
-        "$ENV{VULKAN_SDK}/Bin32"
-      )
-    find_program(Vulkan_GLSLANG_VALIDATOR_EXECUTABLE
-      NAMES glslangValidator
-      HINTS
-        "$ENV{VULKAN_SDK}/Bin32"
-      )
+    set(_Vulkan_hint_executable_search_paths
+      "$ENV{VULKAN_SDK}/Bin"
+    )
+    set(_Vulkan_hint_library_search_paths
+      "$ENV{VULKAN_SDK}/Lib"
+      "$ENV{VULKAN_SDK}/Bin"
+    )
+  else()
+    set(_Vulkan_hint_executable_search_paths
+      "$ENV{VULKAN_SDK}/Bin32"
+    )
+    set(_Vulkan_hint_library_search_paths
+      "$ENV{VULKAN_SDK}/Lib32"
+      "$ENV{VULKAN_SDK}/Bin32"
+    )
   endif()
 else()
-  find_path(Vulkan_INCLUDE_DIR
-    NAMES vulkan/vulkan.h
-    HINTS "$ENV{VULKAN_SDK}/include")
-  find_library(Vulkan_LIBRARY
-    NAMES vulkan
-    HINTS "$ENV{VULKAN_SDK}/lib")
-  find_program(Vulkan_GLSLC_EXECUTABLE
-    NAMES glslc
-    HINTS "$ENV{VULKAN_SDK}/bin")
-  find_program(Vulkan_GLSLANG_VALIDATOR_EXECUTABLE
-    NAMES glslangValidator
-    HINTS "$ENV{VULKAN_SDK}/bin")
+  set(_Vulkan_library_name vulkan)
+  set(_Vulkan_hint_include_search_paths
+    "$ENV{VULKAN_SDK}/include"
+  )
+  set(_Vulkan_hint_executable_search_paths
+    "$ENV{VULKAN_SDK}/bin"
+  )
+  set(_Vulkan_hint_library_search_paths
+    "$ENV{VULKAN_SDK}/lib"
+  )
 endif()
+
+find_path(Vulkan_INCLUDE_DIR
+  NAMES vulkan/vulkan.h
+  HINTS
+    ${_Vulkan_hint_include_search_paths}
+  )
+
+find_library(Vulkan_LIBRARY
+  NAMES ${_Vulkan_library_name}
+  HINTS
+    ${_Vulkan_hint_library_search_paths}
+  )
+find_program(Vulkan_GLSLC_EXECUTABLE
+  NAMES glslc
+  HINTS
+    ${_Vulkan_hint_executable_search_paths}
+  )
+find_program(Vulkan_GLSLANG_VALIDATOR_EXECUTABLE
+  NAMES glslangValidator
+  HINTS
+    ${_Vulkan_hint_executable_search_paths}
+  )
 
 set(Vulkan_LIBRARIES ${Vulkan_LIBRARY})
 set(Vulkan_INCLUDE_DIRS ${Vulkan_INCLUDE_DIR})
@@ -189,3 +189,8 @@ if(Vulkan_FOUND AND Vulkan_GLSLANG_VALIDATOR_EXECUTABLE AND NOT TARGET Vulkan::g
   add_executable(Vulkan::glslangValidator IMPORTED)
   set_property(TARGET Vulkan::glslangValidator PROPERTY IMPORTED_LOCATION "${Vulkan_GLSLANG_VALIDATOR_EXECUTABLE}")
 endif()
+
+unset(_Vulkan_library_name)
+unset(_Vulkan_hint_include_search_paths)
+unset(_Vulkan_hint_executable_search_paths)
+unset(_Vulkan_hint_library_search_paths)
