@@ -15,9 +15,9 @@ Optional COMPONENTS
 
 .. versionadded:: 3.24
 
-This module respects several optional COMPONENTS: ``glslang`` ``shaderc_combined`` and
-``SPIRV-Tools``.  There are corresponding import targets for each of these
-flags.
+This module respects several optional COMPONENTS: ``glslc``,
+``glslangValidator``, ``glslang``, ``shaderc_combined`` and ``SPIRV-Tools``.
+There are corresponding import targets for each of these flags.
 
 IMPORTED Targets
 ^^^^^^^^^^^^^^^^
@@ -78,6 +78,14 @@ This module defines the following variables:
   .. versionadded:: 3.23
 
   value from ``vulkan/vulkan_core.h``
+``Vulkan_glslc_FOUND``
+  .. versionadded:: 3.24
+
+  True, if the SDK has the glslc executable.
+``Vulkan_glslangValidator_FOUND``
+  .. versionadded:: 3.24
+
+  True, if the SDK has the glslangValidator executable.
 ``Vulkan_glslang_FOUND``
   .. versionadded:: 3.24
 
@@ -130,6 +138,15 @@ environment.
 cmake_policy(PUSH)
 cmake_policy(SET CMP0057 NEW)
 
+# For backward compatibility as `FindVulkan` in previous CMake versions allow to retrieve `glslc`
+# and `glslangValidator` without requesting the corresponding component.
+if(NOT glslc IN_LIST Vulkan_FIND_COMPONENTS)
+  list(APPEND Vulkan_FIND_COMPONENTS glslc)
+endif()
+if(NOT glslangValidator IN_LIST Vulkan_FIND_COMPONENTS)
+  list(APPEND Vulkan_FIND_COMPONENTS glslangValidator)
+endif()
+
 if(WIN32)
   set(_Vulkan_library_name vulkan-1)
   set(_Vulkan_hint_include_search_paths
@@ -179,20 +196,22 @@ find_library(Vulkan_LIBRARY
   )
 mark_as_advanced(Vulkan_LIBRARY)
 
-find_program(Vulkan_GLSLC_EXECUTABLE
-  NAMES glslc
-  HINTS
-    ${_Vulkan_hint_executable_search_paths}
-  )
-mark_as_advanced(Vulkan_GLSLC_EXECUTABLE)
-
-find_program(Vulkan_GLSLANG_VALIDATOR_EXECUTABLE
-  NAMES glslangValidator
-  HINTS
-    ${_Vulkan_hint_executable_search_paths}
-  )
-mark_as_advanced(Vulkan_GLSLANG_VALIDATOR_EXECUTABLE)
-
+if(glslc IN_LIST Vulkan_FIND_COMPONENTS)
+  find_program(Vulkan_GLSLC_EXECUTABLE
+    NAMES glslc
+    HINTS
+      ${_Vulkan_hint_executable_search_paths}
+    )
+  mark_as_advanced(Vulkan_GLSLC_EXECUTABLE)
+endif()
+if(glslangValidator IN_LIST Vulkan_FIND_COMPONENTS)
+  find_program(Vulkan_GLSLANG_VALIDATOR_EXECUTABLE
+    NAMES glslangValidator
+    HINTS
+      ${_Vulkan_hint_executable_search_paths}
+    )
+  mark_as_advanced(Vulkan_GLSLANG_VALIDATOR_EXECUTABLE)
+endif()
 if(glslang IN_LIST Vulkan_FIND_COMPONENTS)
   find_library(Vulkan_glslang-spirv_LIBRARY
     NAMES SPIRV
@@ -303,6 +322,18 @@ if(SPIRV-Tools IN_LIST Vulkan_FIND_COMPONENTS)
     HINTS
       ${_Vulkan_hint_library_search_paths})
   mark_as_advanced(Vulkan_SPIRV-Tools_DEBUG_LIBRARY)
+endif()
+
+if(Vulkan_GLSLC_EXECUTABLE)
+  set(Vulkan_glslc_FOUND TRUE)
+else()
+  set(Vulkan_glslc_FOUND FALSE)
+endif()
+
+if(Vulkan_GLSLANG_VALIDATOR_EXECUTABLE)
+  set(Vulkan_glslangValidator_FOUND TRUE)
+else()
+  set(Vulkan_glslangValidator_FOUND FALSE)
 endif()
 
 function(_Vulkan_set_library_component_found component)
