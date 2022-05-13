@@ -1,0 +1,13 @@
+{
+    "version": 5,
+    "configurePresets": [
+        {
+            "name": "PathListSep",
+            "generator": "@RunCMake_GENERATOR@",
+            "binaryDir": "${sourceDir}/build",
+            "cacheVariables": {
+                "TEST_PATH_LIST_SEP": "${sourceDir}${pathListSep}${sourceDir}"
+            }
+        }
+    ]
+}

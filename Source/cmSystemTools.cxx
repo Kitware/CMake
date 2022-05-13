@@ -3429,3 +3429,12 @@ cm::string_view cmSystemTools::GetSystemName()
   return "";
 #endif
 }
+
+char cmSystemTools::GetSystemPathlistSeparator()
+{
+#if defined(_WIN32)
+  return ';';
+#else
+  return ':';
+#endif
+}

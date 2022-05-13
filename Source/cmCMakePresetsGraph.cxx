@@ -361,6 +361,13 @@ bool ExpandMacros(const cmCMakePresetsGraph& graph, const T& preset,
           cmSystemTools::GetParentDirectory(preset.OriginFile->Filename);
         return ExpandMacroResult::Ok;
       }
+      if (macroName == "pathListSep") {
+        if (version < 5) {
+          return ExpandMacroResult::Error;
+        }
+        macroOut += cmSystemTools::GetSystemPathlistSeparator();
+        return ExpandMacroResult::Ok;
+      }
     }
 
     return ExpandMacroResult::Ignore;
