@@ -85,7 +85,7 @@ signatures that specify them.  The common options are:
 
 ``COMPONENT``
   Specify an installation component name with which the install rule
-  is associated, such as "runtime" or "development".  During
+  is associated, such as ``Runtime`` or ``Development``.  During
   component-specific installation only install rules associated with
   the given component name will be executed.  During a full installation
   all components are installed unless marked with ``EXCLUDE_FROM_ALL``.
