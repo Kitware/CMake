@@ -116,22 +116,28 @@ find_path(Vulkan_INCLUDE_DIR
   HINTS
     ${_Vulkan_hint_include_search_paths}
   )
+mark_as_advanced(Vulkan_INCLUDE_DIR)
 
 find_library(Vulkan_LIBRARY
   NAMES ${_Vulkan_library_name}
   HINTS
     ${_Vulkan_hint_library_search_paths}
   )
+mark_as_advanced(Vulkan_LIBRARY)
+
 find_program(Vulkan_GLSLC_EXECUTABLE
   NAMES glslc
   HINTS
     ${_Vulkan_hint_executable_search_paths}
   )
+mark_as_advanced(Vulkan_GLSLC_EXECUTABLE)
+
 find_program(Vulkan_GLSLANG_VALIDATOR_EXECUTABLE
   NAMES glslangValidator
   HINTS
     ${_Vulkan_hint_executable_search_paths}
   )
+mark_as_advanced(Vulkan_GLSLANG_VALIDATOR_EXECUTABLE)
 
 set(Vulkan_LIBRARIES ${Vulkan_LIBRARY})
 set(Vulkan_INCLUDE_DIRS ${Vulkan_INCLUDE_DIR})
@@ -163,9 +169,6 @@ find_package_handle_standard_args(Vulkan
   VERSION_VAR
     Vulkan_VERSION
 )
-
-mark_as_advanced(Vulkan_INCLUDE_DIR Vulkan_LIBRARY Vulkan_GLSLC_EXECUTABLE
-                 Vulkan_GLSLANG_VALIDATOR_EXECUTABLE)
 
 if(Vulkan_FOUND AND NOT TARGET Vulkan::Vulkan)
   add_library(Vulkan::Vulkan UNKNOWN IMPORTED)
