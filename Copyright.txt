@@ -78,6 +78,7 @@ The following individuals and institutions are among the Contributors:
 * Michael Hirsch, Ph.D. <www.scivision.co>
 * Michael Stürmer
 * Miguel A. Figueroa-Villanueva
+* Mike Durso <rbprogrammer@gmail.com>
 * Mike Jackson
 * Mike McQuaid <mike@mikemcquaid.com>
 * Nicolas Bock <nicolasbock@gmail.com>
