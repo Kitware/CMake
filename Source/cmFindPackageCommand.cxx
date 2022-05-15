@@ -238,6 +238,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
   const char* components_sep = "";
   std::set<std::string> requiredComponents;
   std::set<std::string> optionalComponents;
+  std::vector<std::pair<std::string, const char*>> componentVarDefs;
 
   // Always search directly in a generated path.
   this->SearchPathSuffixes.emplace_back();
@@ -356,7 +357,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
       }
 
       std::string req_var = this->Name + "_FIND_REQUIRED_" + args[i];
-      this->AddFindDefinition(req_var, isRequired);
+      componentVarDefs.emplace_back(req_var, isRequired);
 
       // Append to the list of required components.
       components += components_sep;
@@ -573,7 +574,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
     }
   }
 
-  this->SetModuleVariables(components);
+  this->SetModuleVariables(components, componentVarDefs);
 
   // See if we have been told to delegate to FetchContent or some other
   // redirected config package first. We have to check all names that
@@ -697,6 +698,12 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
 
   this->AppendSuccessInformation();
 
+  // Restore original state of "_FIND_" variables set in SetModuleVariables()
+  this->RestoreFindDefinitions();
+
+  // Pop the package stack
+  this->Makefile->FindPackageRootPathStack.pop_back();
+
   if (!this->DebugBuffer.empty()) {
     this->DebugMessage(this->DebugBuffer);
   }
@@ -778,13 +785,18 @@ void cmFindPackageCommand::SetVersionVariables(
   addDefinition(prefix + "_COUNT", buf);
 }
 
-void cmFindPackageCommand::SetModuleVariables(const std::string& components)
+void cmFindPackageCommand::SetModuleVariables(
+  const std::string& components,
+  const std::vector<std::pair<std::string, const char*>>& componentVarDefs)
 {
   this->AddFindDefinition("CMAKE_FIND_PACKAGE_NAME", this->Name);
 
-  // Store the list of components.
+  // Store the list of components and associated variable definitions
   std::string components_var = this->Name + "_FIND_COMPONENTS";
   this->AddFindDefinition(components_var, components);
+  for (const auto& varDef : componentVarDefs) {
+    this->AddFindDefinition(varDef.first, varDef.second);
+  }
 
   if (this->Quiet) {
     // Tell the module that is about to be read that it should find
@@ -1388,12 +1400,6 @@ void cmFindPackageCommand::AppendSuccessInformation()
     this->Makefile->GetState()->SetGlobalProperty(requiredInfoPropName,
                                                   "REQUIRED");
   }
-
-  // Restore original state of "_FIND_" variables we set.
-  this->RestoreFindDefinitions();
-
-  // Pop the package stack
-  this->Makefile->FindPackageRootPathStack.pop_back();
 }
 
 inline std::size_t collectPathsForDebug(std::string& buffer,
