@@ -1,0 +1,2 @@
+-- CMAKE_ENABLE_EXPORTS=''
+-- FOO=''
