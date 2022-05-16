@@ -1026,11 +1026,13 @@ void cmLocalGenerator::AddCompileOptions(std::vector<BT<std::string>>& flags,
   }
 
   // Add Warning as errors flags
-  const cmValue wError = target->GetProperty("COMPILE_WARNING_AS_ERROR");
-  const cmValue wErrorFlag = this->Makefile->GetDefinition(
-    cmStrCat("CMAKE_", lang, "_COMPILE_OPTIONS_WARNING_AS_ERROR"));
-  if (wError.IsOn() && wErrorFlag.IsSet()) {
-    flags.emplace_back(wErrorFlag);
+  if (!this->GetCMakeInstance()->GetIgnoreWarningAsError()) {
+    const cmValue wError = target->GetProperty("COMPILE_WARNING_AS_ERROR");
+    const cmValue wErrorFlag = this->Makefile->GetDefinition(
+      cmStrCat("CMAKE_", lang, "_COMPILE_OPTIONS_WARNING_AS_ERROR"));
+    if (wError.IsOn() && wErrorFlag.IsSet()) {
+      flags.emplace_back(wErrorFlag);
+    }
   }
 
   // Add compile flag for the MSVC compiler only.

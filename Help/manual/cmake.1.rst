@@ -426,6 +426,11 @@ Options
  in :variable:`CMAKE_SOURCE_DIR` and :variable:`CMAKE_BINARY_DIR`.
  This flag tells CMake to warn about other files as well.
 
+``--compile-no-warning-as-error``
+ Ignore target property :prop_tgt:`COMPILE_WARNING_AS_ERROR` and variable
+ :variable:`CMAKE_COMPILE_WARNING_AS_ERROR`, preventing warnings from being
+ treated as errors on compile.
+
 ``--profiling-output=<path>``
  Used in conjunction with ``--profiling-format`` to output to a given path.
 

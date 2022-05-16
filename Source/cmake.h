@@ -534,6 +534,8 @@ public:
   void SetWarnUnusedCli(bool b) { this->WarnUnusedCli = b; }
   bool GetCheckSystemVars() const { return this->CheckSystemVars; }
   void SetCheckSystemVars(bool b) { this->CheckSystemVars = b; }
+  bool GetIgnoreWarningAsError() const { return this->IgnoreWarningAsError; }
+  void SetIgnoreWarningAsError(bool b) { this->IgnoreWarningAsError = b; }
 
   void MarkCliAsUsed(const std::string& variable);
 
@@ -686,6 +688,7 @@ private:
   bool WarnUninitialized = false;
   bool WarnUnusedCli = true;
   bool CheckSystemVars = false;
+  bool IgnoreWarningAsError = false;
   std::map<std::string, bool> UsedCliVariables;
   std::string CMakeEditCommand;
   std::string CXXEnvironment;
