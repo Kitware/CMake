@@ -983,6 +983,9 @@ static void display_cert_info(struct Curl_easy *data,
   PR_Free(common_name);
 }
 
+/* A number of certs that will never occur in a real server handshake */
+#define TOO_MANY_CERTS 300
+
 static CURLcode display_conn_info(struct Curl_easy *data, PRFileDesc *sock)
 {
   CURLcode result = CURLE_OK;
@@ -1018,6 +1021,11 @@ static CURLcode display_conn_info(struct Curl_easy *data, PRFileDesc *sock)
         cert2 = CERT_FindCertIssuer(cert, now, certUsageSSLCA);
         while(cert2) {
           i++;
+          if(i >= TOO_MANY_CERTS) {
+            CERT_DestroyCertificate(cert2);
+            failf(data, "certificate loop");
+            return CURLE_SSL_CERTPROBLEM;
+          }
           if(cert2->isRoot) {
             CERT_DestroyCertificate(cert2);
             break;
@@ -2027,13 +2035,13 @@ static CURLcode nss_setup_connect(struct Curl_easy *data,
     }
   }
 
-  if(SSL_SET_OPTION(CRLfile)) {
-    const CURLcode rv = nss_load_crl(SSL_SET_OPTION(CRLfile));
+  if(SSL_SET_OPTION(primary.CRLfile)) {
+    const CURLcode rv = nss_load_crl(SSL_SET_OPTION(primary.CRLfile));
     if(rv) {
       result = rv;
       goto error;
     }
-    infof(data, "  CRLfile: %s", SSL_SET_OPTION(CRLfile));
+    infof(data, "  CRLfile: %s", SSL_SET_OPTION(primary.CRLfile));
   }
 
   if(SSL_SET_OPTION(primary.clientcert)) {

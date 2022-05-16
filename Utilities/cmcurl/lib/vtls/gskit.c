@@ -293,27 +293,6 @@ static CURLcode set_numeric(struct Curl_easy *data,
 }
 
 
-static CURLcode set_callback(struct Curl_easy *data,
-                             gsk_handle h, GSK_CALLBACK_ID id, void *info)
-{
-  char buffer[STRERROR_LEN];
-  int rc = gsk_attribute_set_callback(h, id, info);
-
-  switch(rc) {
-  case GSK_OK:
-    return CURLE_OK;
-  case GSK_ERROR_IO:
-    failf(data, "gsk_attribute_set_callback() I/O error: %s",
-          Curl_strerror(errno, buffer, sizeof(buffer)));
-    break;
-  default:
-    failf(data, "gsk_attribute_set_callback(): %s", gsk_strerror(rc));
-    break;
-  }
-  return CURLE_SSL_CONNECT_ERROR;
-}
-
-
 static CURLcode set_ciphers(struct Curl_easy *data,
                             gsk_handle h, unsigned int *protoflags)
 {
@@ -796,13 +775,13 @@ static CURLcode gskit_connect_step1(struct Curl_easy *data,
     BACKEND->localfd = sockpair[0];
     BACKEND->remotefd = sockpair[1];
     setsockopt(BACKEND->localfd, SOL_SOCKET, SO_RCVBUF,
-               (void *) sobufsize, sizeof(sobufsize));
+               (void *) &sobufsize, sizeof(sobufsize));
     setsockopt(BACKEND->remotefd, SOL_SOCKET, SO_RCVBUF,
-               (void *) sobufsize, sizeof(sobufsize));
+               (void *) &sobufsize, sizeof(sobufsize));
     setsockopt(BACKEND->localfd, SOL_SOCKET, SO_SNDBUF,
-               (void *) sobufsize, sizeof(sobufsize));
+               (void *) &sobufsize, sizeof(sobufsize));
     setsockopt(BACKEND->remotefd, SOL_SOCKET, SO_SNDBUF,
-               (void *) sobufsize, sizeof(sobufsize));
+               (void *) &sobufsize, sizeof(sobufsize));
     curlx_nonblock(BACKEND->localfd, TRUE);
     curlx_nonblock(BACKEND->remotefd, TRUE);
   }
