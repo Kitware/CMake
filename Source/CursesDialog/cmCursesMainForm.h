@@ -162,6 +162,7 @@ protected:
   // Number of pages displayed
   int NumberOfPages = 0;
   bool IsEmpty = false;
+  std::unique_ptr<cmCursesCacheEntryComposite> EmptyCacheEntry;
 
   int InitialWidth;
   std::unique_ptr<cmake> CMakeInstance;
