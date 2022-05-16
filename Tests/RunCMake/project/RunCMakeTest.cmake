@@ -1,5 +1,14 @@
 include(RunCMake)
 
+# Use an initial cache file to define the project() variables
+# to avoid long command lines. Also see the CMakeOnly test case
+# which tests some of the individual variables one at a time.
+# Here, we are focused on testing that the variables are all injected
+# at the expected points in the expected order.
+run_cmake_with_options(CodeInjection
+  -C "${CMAKE_CURRENT_LIST_DIR}/CodeInjection/initial_cache.cmake"
+)
+
 if(CMake_TEST_RESOURCES)
   run_cmake(ExplicitRC)
 endif()

@@ -688,6 +688,33 @@ void cmGlobalGenerator::EnableLanguage(
     if (!this->FindMakeProgram(mf)) {
       return;
     }
+
+    // One-time includes of user-provided project setup files
+    std::string includes =
+      mf->GetSafeDefinition("CMAKE_PROJECT_TOP_LEVEL_INCLUDES");
+    std::vector<std::string> includesList = cmExpandedList(includes);
+    for (std::string const& setupFile : includesList) {
+      std::string absSetupFile = cmSystemTools::CollapseFullPath(
+        setupFile, mf->GetCurrentSourceDirectory());
+      if (!cmSystemTools::FileExists(absSetupFile)) {
+        cmSystemTools::Error(
+          "CMAKE_PROJECT_TOP_LEVEL_INCLUDES file does not exist: " +
+          setupFile);
+        return;
+      }
+      if (cmSystemTools::FileIsDirectory(absSetupFile)) {
+        cmSystemTools::Error(
+          "CMAKE_PROJECT_TOP_LEVEL_INCLUDES file is a directory: " +
+          setupFile);
+        return;
+      }
+      if (!mf->ReadListFile(absSetupFile)) {
+        cmSystemTools::Error(
+          "Failed reading CMAKE_PROJECT_TOP_LEVEL_INCLUDES file: " +
+          setupFile);
+        return;
+      }
+    }
   }
 
   // Check that the languages are supported by the generator and its
