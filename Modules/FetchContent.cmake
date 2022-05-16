@@ -1351,6 +1351,14 @@ ExternalProject_Add_Step(${contentName}-populate copyfile
       list(APPEND subCMakeOpts "-DCMAKE_MAKE_PROGRAM:FILEPATH=${CMAKE_MAKE_PROGRAM}")
     endif()
 
+    # Override the sub-build's configuration types for multi-config generators.
+    # This ensures we are not affected by any custom setting from the project
+    # and can always request a known configuration further below.
+    get_property(is_multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+    if(is_multi_config)
+      list(APPEND subCMakeOpts "-DCMAKE_CONFIGURATION_TYPES:STRING=Release")
+    endif()
+
   else()
     # Likely we've been invoked via CMake's script mode where no
     # generator is set (and hence CMAKE_MAKE_PROGRAM could not be
@@ -1395,7 +1403,8 @@ set_property(GLOBAL PROPERTY _CMAKE_FindGit_GIT_EXECUTABLE_VERSION
   # If we've already previously done these steps, they will not cause
   # anything to be updated, so extra rebuilds of the project won't occur.
   # Make sure to pass through CMAKE_MAKE_PROGRAM in case the main project
-  # has this set to something not findable on the PATH.
+  # has this set to something not findable on the PATH. We also ensured above
+  # that the Release config will be defined for multi-config generators.
   configure_file("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/FetchContent/CMakeLists.cmake.in"
                  "${ARG_SUBBUILD_DIR}/CMakeLists.txt")
   execute_process(
@@ -1411,7 +1420,7 @@ set_property(GLOBAL PROPERTY _CMAKE_FindGit_GIT_EXECUTABLE_VERSION
     message(FATAL_ERROR "CMake step for ${contentName} failed: ${result}")
   endif()
   execute_process(
-    COMMAND ${CMAKE_COMMAND} --build .
+    COMMAND ${CMAKE_COMMAND} --build . --config Release
     RESULT_VARIABLE result
     ${outputOptions}
     WORKING_DIRECTORY "${ARG_SUBBUILD_DIR}"
