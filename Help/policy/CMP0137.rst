@@ -21,6 +21,10 @@ the :ref:`whole-project <Try Compiling Whole Projects>` signature.
 The ``NEW`` behavior for this policy is to pass the same variables that the
 :ref:`source file <Try Compiling Source Files>` signature does.
 
+Regardless of the policy setting, the
+:variable:`CMAKE_TRY_COMPILE_NO_PLATFORM_VARIABLES` variable may be set
+to suppress passing the platform variables through either signature.
+
 This policy was introduced in CMake version 3.24.  Use the
 :command:`cmake_policy` command to set this policy to ``OLD`` or ``NEW``
 explicitly. Unlike many policies, CMake version |release| does *not* warn

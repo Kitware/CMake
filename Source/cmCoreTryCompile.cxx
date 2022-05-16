@@ -872,9 +872,10 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
   }
 
   // Forward a set of variables to the inner project cache.
-  if (this->SrcFileSignature ||
-      this->Makefile->GetPolicyStatus(cmPolicies::CMP0137) ==
-        cmPolicies::NEW) {
+  if ((this->SrcFileSignature ||
+       this->Makefile->GetPolicyStatus(cmPolicies::CMP0137) ==
+         cmPolicies::NEW) &&
+      !this->Makefile->IsOn("CMAKE_TRY_COMPILE_NO_PLATFORM_VARIABLES")) {
     std::set<std::string> vars;
     vars.insert(&c_properties[lang_property_start],
                 &c_properties[lang_property_start + lang_property_size]);

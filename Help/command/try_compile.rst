@@ -216,3 +216,7 @@ a build configuration.
 .. versionchanged:: 3.14
   For the :generator:`Green Hills MULTI` generator the GHS toolset and target
   system customization cache variables are also propagated into the test project.
+
+.. versionadded:: 3.24
+  The :variable:`CMAKE_TRY_COMPILE_NO_PLATFORM_VARIABLES` variable may be
+  set to disable passing platform variables into the test project.

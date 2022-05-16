@@ -31,3 +31,7 @@ command source file signature.
   Listed variables are propagated to the :command:`try_compile`
   :ref:`whole-project <Try Compiling Whole Projects>` signature too.
   See :policy:`CMP0137`.
+
+.. versionadded:: 3.24
+  The :variable:`CMAKE_TRY_COMPILE_NO_PLATFORM_VARIABLES` variable may be
+  set to disable passing platform variables into the test project.
