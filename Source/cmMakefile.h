@@ -833,7 +833,7 @@ public:
 
   private:
     cmMakefile* Makefile;
-    bool ReportError;
+    bool ReportError = true;
   };
 
   class MacroPushPop
@@ -850,7 +850,7 @@ public:
 
   private:
     cmMakefile* Makefile;
-    bool ReportError;
+    bool ReportError = true;
   };
 
   void PushFunctionScope(std::string const& fileName,

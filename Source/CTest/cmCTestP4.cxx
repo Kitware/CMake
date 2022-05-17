@@ -118,7 +118,6 @@ class cmCTestP4::DiffParser : public cmCTestVC::LineParser
 public:
   DiffParser(cmCTestP4* p4, const char* prefix)
     : P4(p4)
-    , AlreadyNotified(false)
   {
     this->SetLog(&this->P4->Log, prefix);
     this->RegexDiff.compile("^==== (.*)#[0-9]+ - (.*)");
@@ -126,7 +125,7 @@ public:
 
 private:
   cmCTestP4* P4;
-  bool AlreadyNotified;
+  bool AlreadyNotified = false;
   std::string CurrentPath;
   cmsys::RegularExpression RegexDiff;
 
@@ -193,7 +192,6 @@ public:
   DescribeParser(cmCTestP4* p4, const char* prefix)
     : LineParser('\n', false)
     , P4(p4)
-    , Section(SectionHeader)
   {
     this->SetLog(&this->P4->Log, prefix);
     this->RegexHeader.compile("^Change ([0-9]+) by (.+)@(.+) on (.*)$");
@@ -216,7 +214,7 @@ private:
     SectionDiff,
     SectionCount
   };
-  SectionType Section;
+  SectionType Section = SectionHeader;
   Revision Rev;
 
   bool ProcessLine() override

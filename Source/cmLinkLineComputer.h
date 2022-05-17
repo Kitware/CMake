@@ -67,8 +67,8 @@ protected:
   cmStateDirectory StateDir;
   cmOutputConverter* OutputConverter;
 
-  bool ForResponse;
-  bool UseWatcomQuote;
-  bool UseNinjaMulti;
-  bool Relink;
+  bool ForResponse = false;
+  bool UseWatcomQuote = false;
+  bool UseNinjaMulti = false;
+  bool Relink = false;
 };

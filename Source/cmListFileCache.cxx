@@ -36,7 +36,7 @@ struct cmListFileParser
   cmListFile* ListFile;
   cmListFileBacktrace Backtrace;
   cmMessenger* Messenger;
-  const char* FileName;
+  const char* FileName = nullptr;
   cmListFileLexer* Lexer;
   std::string FunctionName;
   long FunctionLine;
@@ -55,7 +55,6 @@ cmListFileParser::cmListFileParser(cmListFile* lf, cmListFileBacktrace lfbt,
   : ListFile(lf)
   , Backtrace(std::move(lfbt))
   , Messenger(messenger)
-  , FileName(nullptr)
   , Lexer(cmListFileLexer_New())
 {
 }

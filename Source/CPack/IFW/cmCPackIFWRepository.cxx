@@ -116,13 +116,12 @@ public:
   cmCPackeIFWUpdatesPatcher(cmCPackIFWRepository* r, cmXMLWriter& x)
     : repository(r)
     , xout(x)
-    , patched(false)
   {
   }
 
   cmCPackIFWRepository* repository;
   cmXMLWriter& xout;
-  bool patched;
+  bool patched = false;
 
 protected:
   void StartElement(const std::string& name, const char** atts) override

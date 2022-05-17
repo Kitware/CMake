@@ -66,7 +66,6 @@ class QCMakeAdvancedFilter : public QSortFilterProxyModel
 public:
   QCMakeAdvancedFilter(QObject* o)
     : QSortFilterProxyModel(o)
-    , ShowAdvanced(false)
   {
   }
 
@@ -78,7 +77,7 @@ public:
   bool showAdvanced() const { return this->ShowAdvanced; }
 
 protected:
-  bool ShowAdvanced;
+  bool ShowAdvanced = false;
 
   bool filterAcceptsRow(int row, const QModelIndex& p) const override
   {

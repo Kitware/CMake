@@ -100,11 +100,6 @@ cmCompiledGeneratorExpression::cmCompiledGeneratorExpression(
   cmListFileBacktrace backtrace, std::string input)
   : Backtrace(std::move(backtrace))
   , Input(std::move(input))
-  , EvaluateForBuildsystem(false)
-  , Quiet(false)
-  , HadContextSensitiveCondition(false)
-  , HadHeadSensitiveCondition(false)
-  , HadLinkLanguageSensitiveCondition(false)
 {
   cmGeneratorExpressionLexer l;
   std::vector<cmGeneratorExpressionToken> tokens = l.Tokenize(this->Input);

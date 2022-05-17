@@ -88,7 +88,6 @@ class cmCTestBZR::InfoParser : public cmCTestVC::LineParser
 public:
   InfoParser(cmCTestBZR* bzr, const char* prefix)
     : BZR(bzr)
-    , CheckOutFound(false)
   {
     this->SetLog(&bzr->Log, prefix);
     this->RegexCheckOut.compile("checkout of branch: *([^\t\r\n]+)$");
@@ -97,7 +96,7 @@ public:
 
 private:
   cmCTestBZR* BZR;
-  bool CheckOutFound;
+  bool CheckOutFound = false;
   cmsys::RegularExpression RegexCheckOut;
   cmsys::RegularExpression RegexParent;
   bool ProcessLine() override

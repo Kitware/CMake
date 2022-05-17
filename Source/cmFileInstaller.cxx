@@ -23,13 +23,6 @@ using namespace cmFSPermissions;
 
 cmFileInstaller::cmFileInstaller(cmExecutionStatus& status)
   : cmFileCopier(status, "INSTALL")
-  , InstallType(cmInstallType_FILES)
-  , InstallMode(cmInstallMode::COPY)
-  , Optional(false)
-  , MessageAlways(false)
-  , MessageLazy(false)
-  , MessageNever(false)
-  , DestDirLength(0)
 {
   // Installation does not use source permissions by default.
   this->UseSourcePermissions = false;

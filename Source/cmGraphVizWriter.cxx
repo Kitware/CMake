@@ -109,18 +109,6 @@ cmGraphVizWriter::cmGraphVizWriter(std::string const& fileName,
   , GraphHeader("node [\n  fontsize = \"12\"\n];")
   , GraphNodePrefix("node")
   , GlobalGenerator(globalGenerator)
-  , NextNodeId(0)
-  , GenerateForExecutables(true)
-  , GenerateForStaticLibs(true)
-  , GenerateForSharedLibs(true)
-  , GenerateForModuleLibs(true)
-  , GenerateForInterfaceLibs(true)
-  , GenerateForObjectLibs(true)
-  , GenerateForUnknownLibs(true)
-  , GenerateForCustomTargets(false)
-  , GenerateForExternals(true)
-  , GeneratePerTarget(true)
-  , GenerateDependers(true)
 {
 }
 

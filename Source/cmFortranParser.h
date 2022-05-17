@@ -123,13 +123,12 @@ struct cmFortranFile
     : File(file)
     , Buffer(buffer)
     , Directory(std::move(dir))
-    , LastCharWasNewline(false)
   {
   }
   FILE* File;
   YY_BUFFER_STATE Buffer;
   std::string Directory;
-  bool LastCharWasNewline;
+  bool LastCharWasNewline = false;
 };
 
 struct cmFortranCompiler

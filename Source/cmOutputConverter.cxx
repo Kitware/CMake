@@ -29,7 +29,6 @@ bool PathEqOrSubDir(std::string const& a, std::string const& b)
 
 cmOutputConverter::cmOutputConverter(cmStateSnapshot const& snapshot)
   : StateSnapshot(snapshot)
-  , LinkScriptShell(false)
 {
   assert(this->StateSnapshot.IsValid());
   this->ComputeRelativePathTopSource();

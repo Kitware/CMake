@@ -2069,8 +2069,8 @@ class cmVSLink
 {
   int Type;
   bool Verbose;
-  bool Incremental;
-  bool LinkGeneratesManifest;
+  bool Incremental = false;
+  bool LinkGeneratesManifest = true;
   std::vector<std::string> LinkCommand;
   std::vector<std::string> UserManifests;
   std::string LinkerManifestFile;
@@ -2085,8 +2085,6 @@ public:
   cmVSLink(int type, bool verbose)
     : Type(type)
     , Verbose(verbose)
-    , Incremental(false)
-    , LinkGeneratesManifest(true)
   {
   }
   bool Parse(std::vector<std::string>::const_iterator argBeg,

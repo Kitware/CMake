@@ -78,12 +78,12 @@ protected:
 
   // Information used during generation.
   std::string ConfigurationName;
-  std::vector<std::string> const* ConfigurationTypes;
+  std::vector<std::string> const* ConfigurationTypes = nullptr;
 
   // True if the subclass needs to generate an explicit rule for each
   // configuration.  False if the subclass only generates one rule for
   // all enabled configurations.
-  bool ActionsPerConfig;
+  bool ActionsPerConfig = false;
 
 private:
   void GenerateScriptActionsOnce(std::ostream& os, Indent indent);

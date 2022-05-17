@@ -111,7 +111,6 @@ public:
   LogParser(cmCTestCVS* cvs, const char* prefix, std::vector<Revision>& revs)
     : CVS(cvs)
     , Revisions(revs)
-    , Section(SectionHeader)
   {
     this->SetLog(&cvs->Log, prefix);
     this->RegexRevision.compile("^revision +([^ ]*) *$");
@@ -131,7 +130,7 @@ private:
     SectionRevisions,
     SectionEnd
   };
-  SectionType Section;
+  SectionType Section = SectionHeader;
   Revision Rev;
 
   bool ProcessLine() override

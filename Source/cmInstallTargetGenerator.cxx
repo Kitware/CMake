@@ -50,7 +50,6 @@ cmInstallTargetGenerator::cmInstallTargetGenerator(
   : cmInstallGenerator(dest, configurations, component, message,
                        exclude_from_all, false, std::move(backtrace))
   , TargetName(std::move(targetName))
-  , Target(nullptr)
   , FilePermissions(std::move(file_permissions))
   , ImportLibrary(implib)
   , Optional(optional)
