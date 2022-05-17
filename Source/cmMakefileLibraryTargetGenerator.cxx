@@ -929,7 +929,9 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   }
 
   // Compute the list of outputs.
-  std::vector<std::string> outputs(1, targetFullPathReal);
+  std::vector<std::string> outputs;
+  outputs.reserve(3);
+  outputs.push_back(targetFullPathReal);
   if (this->TargetNames.SharedObject != this->TargetNames.Real) {
     outputs.push_back(targetFullPathSO);
   }
