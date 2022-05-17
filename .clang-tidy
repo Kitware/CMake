@@ -7,7 +7,6 @@ bugprone-*,\
 -bugprone-misplaced-widening-cast,\
 -bugprone-narrowing-conversions,\
 -bugprone-too-small-loop-variable,\
-google-readability-casting,\
 misc-*,\
 -misc-no-recursion,\
 -misc-non-private-member-variables-in-classes,\
