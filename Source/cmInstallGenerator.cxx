@@ -165,14 +165,22 @@ void cmInstallGenerator::AddInstallRule(
 }
 
 std::string cmInstallGenerator::CreateComponentTest(
-  const std::string& component, bool exclude_from_all)
+  const std::string& component, bool exclude_from_all, bool all_components)
 {
+  if (all_components) {
+    if (exclude_from_all) {
+      return "CMAKE_INSTALL_COMPONENT";
+    }
+    return {};
+  }
+
   std::string result = "CMAKE_INSTALL_COMPONENT STREQUAL \"";
   result += component;
   result += "\"";
   if (!exclude_from_all) {
     result += " OR NOT CMAKE_INSTALL_COMPONENT";
   }
+
   return result;
 }
 
@@ -181,10 +189,11 @@ void cmInstallGenerator::GenerateScript(std::ostream& os)
   // Track indentation.
   Indent indent;
 
+  std::string component_test = this->CreateComponentTest(
+    this->Component, this->ExcludeFromAll, this->AllComponents);
+
   // Begin this block of installation.
-  if (!this->AllComponents) {
-    std::string component_test =
-      this->CreateComponentTest(this->Component, this->ExcludeFromAll);
+  if (!component_test.empty()) {
     os << indent << "if(" << component_test << ")\n";
   }
 
@@ -193,7 +202,7 @@ void cmInstallGenerator::GenerateScript(std::ostream& os)
                               this->AllComponents ? indent : indent.Next());
 
   // End this block of installation.
-  if (!this->AllComponents) {
+  if (!component_test.empty()) {
     os << indent << "endif()\n\n";
   }
 }

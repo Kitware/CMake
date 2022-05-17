@@ -78,7 +78,8 @@ protected:
   void GenerateScript(std::ostream& os) override;
 
   std::string CreateComponentTest(const std::string& component,
-                                  bool exclude_from_all);
+                                  bool exclude_from_all,
+                                  bool all_components = false);
 
   using TweakMethod =
     std::function<void(std::ostream& os, Indent indent,
