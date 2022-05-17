@@ -101,7 +101,7 @@ bool cmCTestCVS::UpdateImpl()
 
   UpdateParser out(this, "up-out> ");
   UpdateParser err(this, "up-err> ");
-  return this->RunUpdateCommand(&cvs_update[0], &out, &err);
+  return this->RunUpdateCommand(cvs_update.data(), &out, &err);
 }
 
 class cmCTestCVS::LogParser : public cmCTestVC::LineParser
@@ -258,7 +258,7 @@ void cmCTestCVS::WriteXMLDirectory(cmXMLWriter& xml, std::string const& path,
     revisions.resize(2, this->Unknown);
 
     // Write the entry for this file with these revisions.
-    File f(fi.second, &revisions[0], &revisions[1]);
+    File f(fi.second, revisions.data(), revisions.data() + 1);
     this->WriteXMLEntry(xml, path, fi.first, full, f);
   }
   xml.EndElement(); // Directory

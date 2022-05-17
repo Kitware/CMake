@@ -182,7 +182,7 @@ void cmCryptoHash::Append(cm::string_view input)
 std::vector<unsigned char> cmCryptoHash::Finalize()
 {
   std::vector<unsigned char> hash(rhash_get_digest_size(this->Id), 0);
-  rhash_final(this->CTX, &hash[0]);
+  rhash_final(this->CTX, hash.data());
   return hash;
 }
 

@@ -157,7 +157,7 @@ bool cmCTestHG::UpdateImpl()
 
   OutputLogger out(this->Log, "update-out> ");
   OutputLogger err(this->Log, "update-err> ");
-  return this->RunUpdateCommand(&hg_update[0], &out, &err);
+  return this->RunUpdateCommand(hg_update.data(), &out, &err);
 }
 
 class cmCTestHG::LogParser
@@ -213,13 +213,13 @@ private:
     if (name == "logentry") {
       this->HG->DoRevision(this->Rev, this->Changes);
     } else if (!this->CData.empty() && name == "author") {
-      this->Rev.Author.assign(&this->CData[0], this->CData.size());
+      this->Rev.Author.assign(this->CData.data(), this->CData.size());
     } else if (!this->CData.empty() && name == "email") {
-      this->Rev.EMail.assign(&this->CData[0], this->CData.size());
+      this->Rev.EMail.assign(this->CData.data(), this->CData.size());
     } else if (!this->CData.empty() && name == "date") {
-      this->Rev.Date.assign(&this->CData[0], this->CData.size());
+      this->Rev.Date.assign(this->CData.data(), this->CData.size());
     } else if (!this->CData.empty() && name == "msg") {
-      this->Rev.Log.assign(&this->CData[0], this->CData.size());
+      this->Rev.Log.assign(this->CData.data(), this->CData.size());
     } else if (!this->CData.empty() && name == "files") {
       std::vector<std::string> paths = this->SplitCData();
       for (std::string const& path : paths) {

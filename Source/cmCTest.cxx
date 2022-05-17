@@ -1672,16 +1672,16 @@ std::string cmCTest::Base64EncodeFile(std::string const& file)
 #endif
   );
   std::vector<char> file_buffer(len + 1);
-  ifs.read(&file_buffer[0], len);
+  ifs.read(file_buffer.data(), len);
   ifs.close();
 
   std::vector<char> encoded_buffer((len * 3) / 2 + 5);
 
   size_t const rlen = cmsysBase64_Encode(
-    reinterpret_cast<unsigned char*>(&file_buffer[0]), len,
-    reinterpret_cast<unsigned char*>(&encoded_buffer[0]), 1);
+    reinterpret_cast<unsigned char*>(file_buffer.data()), len,
+    reinterpret_cast<unsigned char*>(encoded_buffer.data()), 1);
 
-  return std::string(&encoded_buffer[0], rlen);
+  return std::string(encoded_buffer.data(), rlen);
 }
 
 bool cmCTest::SubmitExtraFiles(std::vector<std::string> const& files)
@@ -3729,7 +3729,7 @@ bool cmCTest::CompressString(std::string& str)
   strm.avail_in = static_cast<uInt>(str.size());
   strm.next_in = in;
   strm.avail_out = outSize;
-  strm.next_out = &out[0];
+  strm.next_out = out.data();
   ret = deflate(&strm, Z_FINISH);
 
   if (ret != Z_STREAM_END) {
@@ -3743,10 +3743,10 @@ bool cmCTest::CompressString(std::string& str)
   // Now base64 encode the resulting binary string
   std::vector<unsigned char> base64EncodedBuffer((outSize * 3) / 2);
 
-  size_t rlen =
-    cmsysBase64_Encode(&out[0], strm.total_out, &base64EncodedBuffer[0], 1);
+  size_t rlen = cmsysBase64_Encode(out.data(), strm.total_out,
+                                   base64EncodedBuffer.data(), 1);
 
-  str.assign(reinterpret_cast<char*>(&base64EncodedBuffer[0]), rlen);
+  str.assign(reinterpret_cast<char*>(base64EncodedBuffer.data()), rlen);
 
   return true;
 }

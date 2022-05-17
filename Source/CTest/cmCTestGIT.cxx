@@ -176,7 +176,7 @@ bool cmCTestGIT::UpdateByFetchAndReset()
   // Fetch upstream refs.
   OutputLogger fetch_out(this->Log, "fetch-out> ");
   OutputLogger fetch_err(this->Log, "fetch-err> ");
-  if (!this->RunUpdateCommand(&git_fetch[0], &fetch_out, &fetch_err)) {
+  if (!this->RunUpdateCommand(git_fetch.data(), &fetch_out, &fetch_err)) {
     return false;
   }
 
@@ -225,7 +225,7 @@ bool cmCTestGIT::UpdateByCustom(std::string const& custom)
 
   OutputLogger custom_out(this->Log, "custom-out> ");
   OutputLogger custom_err(this->Log, "custom-err> ");
-  return this->RunUpdateCommand(&git_custom[0], &custom_out, &custom_err);
+  return this->RunUpdateCommand(git_custom.data(), &custom_out, &custom_err);
 }
 
 bool cmCTestGIT::UpdateInternal()

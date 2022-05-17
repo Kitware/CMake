@@ -17,10 +17,10 @@ std::string cmUuid::FromMd5(std::vector<unsigned char> const& uuidNamespace,
 
   cmCryptoHash md5(cmCryptoHash::AlgoMD5);
   md5.Initialize();
-  md5.Append(&hashInput[0], hashInput.size());
+  md5.Append(hashInput.data(), hashInput.size());
   std::vector<unsigned char> digest = md5.Finalize();
 
-  return this->FromDigest(&digest[0], 3);
+  return this->FromDigest(digest.data(), 3);
 }
 
 std::string cmUuid::FromSha1(std::vector<unsigned char> const& uuidNamespace,
@@ -31,10 +31,10 @@ std::string cmUuid::FromSha1(std::vector<unsigned char> const& uuidNamespace,
 
   cmCryptoHash sha1(cmCryptoHash::AlgoSHA1);
   sha1.Initialize();
-  sha1.Append(&hashInput[0], hashInput.size());
+  sha1.Append(hashInput.data(), hashInput.size());
   std::vector<unsigned char> digest = sha1.Finalize();
 
-  return this->FromDigest(&digest[0], 5);
+  return this->FromDigest(digest.data(), 5);
 }
 
 void cmUuid::CreateHashInput(std::vector<unsigned char> const& uuidNamespace,
@@ -46,7 +46,7 @@ void cmUuid::CreateHashInput(std::vector<unsigned char> const& uuidNamespace,
   if (!name.empty()) {
     output.resize(output.size() + name.size());
 
-    memcpy(&output[0] + uuidNamespace.size(), name.c_str(), name.size());
+    memcpy(output.data() + uuidNamespace.size(), name.c_str(), name.size());
   }
 }
 

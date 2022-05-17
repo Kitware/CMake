@@ -160,7 +160,7 @@ cmCTestP4::User cmCTestP4::GetUserData(const std::string& username)
 
     UserParser out(this, "users-out> ");
     OutputLogger err(this->Log, "users-err> ");
-    this->RunChild(&p4_users[0], &out, &err);
+    this->RunChild(p4_users.data(), &out, &err);
 
     // The user should now be added to the map. Search again.
     it = this->Users.find(username);
@@ -352,7 +352,7 @@ std::string cmCTestP4::GetWorkingRevision()
   IdentifyParser out(this, "p4_changes-out> ", rev);
   OutputLogger err(this->Log, "p4_changes-err> ");
 
-  bool result = this->RunChild(&p4_identify[0], &out, &err);
+  bool result = this->RunChild(p4_identify.data(), &out, &err);
 
   // If there was a problem contacting the server return "<unknown>"
   if (!result) {
@@ -416,7 +416,7 @@ bool cmCTestP4::LoadRevisions()
   OutputLogger err(this->Log, "p4_changes-err> ");
 
   this->ChangeLists.clear();
-  this->RunChild(&p4_changes[0], &out, &err);
+  this->RunChild(p4_changes.data(), &out, &err);
 
   if (this->ChangeLists.empty()) {
     return true;
@@ -433,7 +433,7 @@ bool cmCTestP4::LoadRevisions()
 
     DescribeParser outDescribe(this, "p4_describe-out> ");
     OutputLogger errDescribe(this->Log, "p4_describe-err> ");
-    this->RunChild(&p4_describe[0], &outDescribe, &errDescribe);
+    this->RunChild(p4_describe.data(), &outDescribe, &errDescribe);
   }
   return true;
 }
@@ -453,7 +453,7 @@ bool cmCTestP4::LoadModifications()
 
   DiffParser out(this, "p4_diff-out> ");
   OutputLogger err(this->Log, "p4_diff-err> ");
-  this->RunChild(&p4_diff[0], &out, &err);
+  this->RunChild(p4_diff.data(), &out, &err);
   return true;
 }
 
@@ -471,7 +471,7 @@ bool cmCTestP4::UpdateCustom(const std::string& custom)
   OutputLogger custom_out(this->Log, "p4_customsync-out> ");
   OutputLogger custom_err(this->Log, "p4_customsync-err> ");
 
-  return this->RunUpdateCommand(&p4_custom[0], &custom_out, &custom_err);
+  return this->RunUpdateCommand(p4_custom.data(), &custom_out, &custom_err);
 }
 
 bool cmCTestP4::UpdateImpl()
@@ -521,5 +521,5 @@ bool cmCTestP4::UpdateImpl()
   OutputLogger out(this->Log, "p4_sync-out> ");
   OutputLogger err(this->Log, "p4_sync-err> ");
 
-  return this->RunUpdateCommand(&p4_sync[0], &out, &err);
+  return this->RunUpdateCommand(p4_sync.data(), &out, &err);
 }
