@@ -285,7 +285,7 @@ bool HandleStringsCommand(std::vector<std::string> const& args,
   }
 
   // Get the variable in which to store the results.
-  std::string outVar = args[2];
+  std::string const& outVar = args[2];
 
   // Parse the options.
   enum

@@ -478,7 +478,7 @@ bool cmDependsFortran::CopyModule(const std::vector<std::string>& args)
   // when the interface described in the module does not.
 
   std::string mod = args[2];
-  std::string stamp = args[3];
+  std::string const& stamp = args[3];
   std::string compilerId;
   if (args.size() >= 5) {
     compilerId = args[4];

@@ -2804,7 +2804,7 @@ bool cmCTest::HandleTestActionArgument(const char* ctestExec, size_t& i,
                                        const std::vector<std::string>& args)
 {
   bool success = true;
-  std::string arg = args[i];
+  std::string const& arg = args[i];
   if (this->CheckArgument(arg, "-T"_s, "--test-action") &&
       (i < args.size() - 1)) {
     this->Impl->ProduceXML = true;
@@ -2836,7 +2836,7 @@ bool cmCTest::HandleTestModelArgument(const char* ctestExec, size_t& i,
                                       const std::vector<std::string>& args)
 {
   bool success = true;
-  std::string arg = args[i];
+  std::string const& arg = args[i];
   if (this->CheckArgument(arg, "-M"_s, "--test-model") &&
       (i < args.size() - 1)) {
     i++;

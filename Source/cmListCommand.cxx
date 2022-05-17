@@ -1199,7 +1199,7 @@ bool HandleSortCommand(std::vector<std::string> const& args,
   const std::string messageHint = "sub-command SORT ";
 
   while (argumentIndex < args.size()) {
-    const std::string option = args[argumentIndex++];
+    std::string const& option = args[argumentIndex++];
     if (option == "COMPARE") {
       if (sortCompare != cmStringSorter::Compare::UNINITIALIZED) {
         std::string error = cmStrCat(messageHint, "option \"", option,
@@ -1208,7 +1208,7 @@ bool HandleSortCommand(std::vector<std::string> const& args,
         return false;
       }
       if (argumentIndex < args.size()) {
-        const std::string argument = args[argumentIndex++];
+        std::string const& argument = args[argumentIndex++];
         if (argument == "STRING") {
           sortCompare = cmStringSorter::Compare::STRING;
         } else if (argument == "FILE_BASENAME") {
@@ -1235,7 +1235,7 @@ bool HandleSortCommand(std::vector<std::string> const& args,
         return false;
       }
       if (argumentIndex < args.size()) {
-        const std::string argument = args[argumentIndex++];
+        std::string const& argument = args[argumentIndex++];
         if (argument == "SENSITIVE") {
           sortCaseSensitivity = cmStringSorter::CaseSensitivity::SENSITIVE;
         } else if (argument == "INSENSITIVE") {
@@ -1259,7 +1259,7 @@ bool HandleSortCommand(std::vector<std::string> const& args,
         return false;
       }
       if (argumentIndex < args.size()) {
-        const std::string argument = args[argumentIndex++];
+        std::string const& argument = args[argumentIndex++];
         if (argument == "ASCENDING") {
           sortOrder = cmStringSorter::Order::ASCENDING;
         } else if (argument == "DESCENDING") {

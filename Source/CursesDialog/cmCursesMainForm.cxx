@@ -617,7 +617,7 @@ void cmCursesMainForm::FillCacheManagerFromUI()
     cmValue existingValue =
       this->CMakeInstance->GetState()->GetCacheEntryValue(cacheKey);
     if (existingValue) {
-      std::string oldValue = *existingValue;
+      std::string const& oldValue = *existingValue;
       std::string newValue = entry.Entry->GetValue();
       std::string fixedOldValue;
       std::string fixedNewValue;
