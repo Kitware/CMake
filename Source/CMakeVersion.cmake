@@ -6,8 +6,12 @@ set(CMake_VERSION_PATCH 1)
 set(CMake_VERSION_IS_DIRTY 0)
 
 # Our build definition sets this variable to control the patch part of the version number.
+# We pass $(Build.BuildNumber) to Microsoft_CMake_VERSION_PATCH in pipelines,
+# $(Build.BuildNumber) could contain a ".", i.e., 20220516.1, for PR builds, we need to
+# remove the dot to not accidentally set the Tweak field of version, i.e., dots are
+# seperator in version.
 if(Microsoft_CMake_VERSION_PATCH)
-  set(CMake_VERSION_PATCH ${Microsoft_CMake_VERSION_PATCH})
+  string(REPLACE "." "" CMake_VERSION_PATCH ${Microsoft_CMake_VERSION_PATCH})
 endif()
 
 # Compute the full version string.
