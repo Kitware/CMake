@@ -7,6 +7,8 @@ try_compile
 
 Try building some code.
 
+.. _`Try Compiling Whole Projects`:
+
 Try Compiling Whole Projects
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -24,6 +26,15 @@ In this form, ``<srcdir>`` should contain a complete CMake project with a
 will not be deleted after this command is run.  Specify ``<targetName>`` to
 build a specific target instead of the ``all`` or ``ALL_BUILD`` target.  See
 below for the meaning of other options.
+
+.. versionchanged:: 3.24
+  CMake variables describing platform settings, and those listed by the
+  :variable:`CMAKE_TRY_COMPILE_PLATFORM_VARIABLES` variable, are propagated
+  into the project's build configuration.  See policy :policy:`CMP0137`.
+  Previously this was only done by the
+  :ref:`source file <Try Compiling Source Files>` signature.
+
+.. _`Try Compiling Source Files`:
 
 Try Compiling Source Files
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -205,3 +216,7 @@ a build configuration.
 .. versionchanged:: 3.14
   For the :generator:`Green Hills MULTI` generator the GHS toolset and target
   system customization cache variables are also propagated into the test project.
+
+.. versionadded:: 3.24
+  The :variable:`CMAKE_TRY_COMPILE_NO_PLATFORM_VARIABLES` variable may be
+  set to disable passing platform variables into the test project.
