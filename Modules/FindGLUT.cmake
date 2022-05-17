@@ -275,8 +275,4 @@ if (GLUT_FOUND)
         PROPERTY INTERFACE_LINK_LIBRARIES GLUT::Cocoa)
     endif()
   endif()
-
-  #The following deprecated settings are for backwards compatibility with CMake1.4
-  set (GLUT_LIBRARY ${GLUT_LIBRARIES})
-  set (GLUT_INCLUDE_PATH ${GLUT_INCLUDE_DIRS})
 endif()
