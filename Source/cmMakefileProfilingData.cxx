@@ -60,7 +60,7 @@ void cmMakefileProfilingData::StartEntry(const cmListFileFunction& lff,
     v["ph"] = "B";
     v["name"] = lff.LowerCaseName();
     v["cat"] = "cmake";
-    v["ts"] = Json::Value::UInt64(
+    v["ts"] = static_cast<Json::Value::UInt64>(
       std::chrono::duration_cast<std::chrono::microseconds>(
         std::chrono::steady_clock::now().time_since_epoch())
         .count());
@@ -98,7 +98,7 @@ void cmMakefileProfilingData::StopEntry()
     cmsys::SystemInformation info;
     Json::Value v;
     v["ph"] = "E";
-    v["ts"] = Json::Value::UInt64(
+    v["ts"] = static_cast<Json::Value::UInt64>(
       std::chrono::duration_cast<std::chrono::microseconds>(
         std::chrono::steady_clock::now().time_since_epoch())
         .count());

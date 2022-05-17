@@ -124,7 +124,7 @@ void cmCTestSubmitHandler::Initialize()
 {
   // We submit all available parts by default.
   for (cmCTest::Part p = cmCTest::PartStart; p != cmCTest::PartCount;
-       p = cmCTest::Part(p + 1)) {
+       p = static_cast<cmCTest::Part>(p + 1)) {
     this->SubmitPart[p] = true;
   }
   this->HasWarnings = false;
@@ -810,7 +810,7 @@ int cmCTestSubmitHandler::ProcessHandler()
 
   // Query parts for files to submit.
   for (cmCTest::Part p = cmCTest::PartStart; p != cmCTest::PartCount;
-       p = cmCTest::Part(p + 1)) {
+       p = static_cast<cmCTest::Part>(p + 1)) {
     // Skip parts we are not submitting.
     if (!this->SubmitPart[p]) {
       continue;
@@ -894,7 +894,7 @@ void cmCTestSubmitHandler::SelectParts(std::set<cmCTest::Part> const& parts)
 {
   // Check whether each part is selected.
   for (cmCTest::Part p = cmCTest::PartStart; p != cmCTest::PartCount;
-       p = cmCTest::Part(p + 1)) {
+       p = static_cast<cmCTest::Part>(p + 1)) {
     this->SubmitPart[p] = parts.find(p) != parts.end();
   }
 }

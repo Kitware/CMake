@@ -108,7 +108,7 @@ static bool AllocateCTestResources(
 
   // Do the actual allocation
   return AllocateCTestResources<AllocationStrategy>(
-    resources, resourcesSorted, std::size_t(0), allocationsPtr);
+    resources, resourcesSorted, static_cast<std::size_t>(0), allocationsPtr);
 }
 
 class RoundRobinAllocationStrategy

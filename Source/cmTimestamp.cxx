@@ -50,7 +50,7 @@ std::string cmTimestamp::CurrentTime(const std::string& formatString,
     // SOURCE_DATE_EPOCH has only a resolution in the seconds range
     microseconds = 0;
   }
-  if (currentTimeT == time_t(-1)) {
+  if (currentTimeT == static_cast<time_t>(-1)) {
     return std::string();
   }
 

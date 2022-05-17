@@ -586,7 +586,8 @@ void cmCTestTestHandler::LogTestSummary(const std::vector<std::string>& passed,
 {
   std::size_t total = passed.size() + failed.size();
 
-  float percent = float(passed.size()) * 100.0f / float(total);
+  float percent =
+    static_cast<float>(passed.size()) * 100.0f / static_cast<float>(total);
   if (!failed.empty() && percent > 99) {
     percent = 99;
   }

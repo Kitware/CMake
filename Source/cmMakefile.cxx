@@ -4507,7 +4507,7 @@ void cmMakefile::RecordPolicies(cmPolicies::PolicyMap& pm) const
   /* Record the setting of every policy.  */
   using PolicyID = cmPolicies::PolicyID;
   for (PolicyID pid = cmPolicies::CMP0000; pid != cmPolicies::CMPCOUNT;
-       pid = PolicyID(pid + 1)) {
+       pid = static_cast<PolicyID>(pid + 1)) {
     pm.Set(pid, this->GetPolicyStatus(pid));
   }
 }

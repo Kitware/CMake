@@ -433,7 +433,7 @@ bool cmFileInstaller::HandleInstallDestination()
       }
     }
     destination = sdestdir + destination.substr(skip);
-    this->DestDirLength = int(sdestdir.size());
+    this->DestDirLength = static_cast<int>(sdestdir.size());
   }
 
   // check if default dir creation permissions were set

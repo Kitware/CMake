@@ -460,8 +460,8 @@ bool cmForEachCommand(std::vector<std::string> const& args,
       // in the `fb->Args` vector. The first item is the iteration variable
       // name...
       const std::size_t iter_cnt = 2u +
-        int(start < stop) * (stop - start) / std::abs(step) +
-        int(start > stop) * (start - stop) / std::abs(step);
+        static_cast<int>(start < stop) * (stop - start) / std::abs(step) +
+        static_cast<int>(start > stop) * (start - stop) / std::abs(step);
       fb->Args.resize(iter_cnt);
       fb->Args.front() = args.front();
       auto cc = start;

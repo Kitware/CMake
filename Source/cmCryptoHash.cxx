@@ -83,15 +83,15 @@ std::unique_ptr<cmCryptoHash> cmCryptoHash::New(cm::string_view algo)
 bool cmCryptoHash::IntFromHexDigit(char input, char& output)
 {
   if (input >= '0' && input <= '9') {
-    output = char(input - '0');
+    output = static_cast<char>(input - '0');
     return true;
   }
   if (input >= 'a' && input <= 'f') {
-    output = char(input - 'a' + 0xA);
+    output = static_cast<char>(input - 'a' + 0xA);
     return true;
   }
   if (input >= 'A' && input <= 'F') {
-    output = char(input - 'A' + 0xA);
+    output = static_cast<char>(input - 'A' + 0xA);
     return true;
   }
   return false;

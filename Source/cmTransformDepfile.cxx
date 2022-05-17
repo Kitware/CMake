@@ -89,7 +89,9 @@ void WriteMSBuildAdditionalInputs(cmsys::ofstream& fout,
   }
 
   // Write a UTF-8 BOM so MSBuild knows the encoding when reading the file.
-  static const char utf8bom[] = { char(0xEF), char(0xBB), char(0xBF) };
+  static const char utf8bom[] = { static_cast<char>(0xEF),
+                                  static_cast<char>(0xBB),
+                                  static_cast<char>(0xBF) };
   fout.write(utf8bom, sizeof(utf8bom));
 
   // Write the format expected by MSBuild CustomBuild AdditionalInputs.

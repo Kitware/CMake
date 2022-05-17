@@ -322,7 +322,7 @@ std::string cmCTest::DecodeURL(const std::string& in)
   for (const char* c = in.c_str(); *c; ++c) {
     if (*c == '%' && isxdigit(*(c + 1)) && isxdigit(*(c + 2))) {
       char buf[3] = { *(c + 1), *(c + 2), 0 };
-      out.append(1, char(strtoul(buf, nullptr, 16)));
+      out.append(1, static_cast<char>(strtoul(buf, nullptr, 16)));
       c += 2;
     } else {
       out.append(1, *c);
@@ -357,7 +357,7 @@ cmCTest::cmCTest()
   this->Impl->Parts[PartDone].SetName("Done");
 
   // Fill the part name-to-id map.
-  for (Part p = PartStart; p != PartCount; p = Part(p + 1)) {
+  for (Part p = PartStart; p != PartCount; p = static_cast<Part>(p + 1)) {
     this->Impl
       ->PartMap[cmSystemTools::LowerCase(this->Impl->Parts[p].GetName())] = p;
   }
@@ -643,7 +643,7 @@ bool cmCTest::InitializeFromCommand(cmCTestStartCommand* command)
   std::string src_dir = this->GetCTestConfiguration("SourceDirectory");
   std::string bld_dir = this->GetCTestConfiguration("BuildDirectory");
   this->Impl->BuildID = "";
-  for (Part p = PartStart; p != PartCount; p = Part(p + 1)) {
+  for (Part p = PartStart; p != PartCount; p = static_cast<Part>(p + 1)) {
     this->Impl->Parts[p].SubmitFiles.clear();
   }
 
@@ -797,7 +797,7 @@ int cmCTest::GetTestModel() const
 bool cmCTest::SetTest(const std::string& ttype, bool report)
 {
   if (cmSystemTools::LowerCase(ttype) == "all") {
-    for (Part p = PartStart; p != PartCount; p = Part(p + 1)) {
+    for (Part p = PartStart; p != PartCount; p = static_cast<Part>(p + 1)) {
       this->Impl->Parts[p].Enable();
     }
     return true;
@@ -935,7 +935,8 @@ int cmCTest::ProcessSteps()
   bool notest = true;
   int update_count = 0;
 
-  for (Part p = PartStart; notest && p != PartCount; p = Part(p + 1)) {
+  for (Part p = PartStart; notest && p != PartCount;
+       p = static_cast<Part>(p + 1)) {
     notest = !this->Impl->Parts[p];
   }
   if (this->Impl->Parts[PartUpdate] &&
@@ -2019,7 +2020,8 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
     i++;
     long outputSize;
     if (cmStrToLong(args[i], &outputSize)) {
-      this->Impl->TestHandler.SetTestOutputSizePassed(int(outputSize));
+      this->Impl->TestHandler.SetTestOutputSizePassed(
+        static_cast<int>(outputSize));
     } else {
       cmCTestLog(this, WARNING,
                  "Invalid value for '--test-output-size-passed': " << args[i]
@@ -2030,7 +2032,8 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
     i++;
     long outputSize;
     if (cmStrToLong(args[i], &outputSize)) {
-      this->Impl->TestHandler.SetTestOutputSizeFailed(int(outputSize));
+      this->Impl->TestHandler.SetTestOutputSizeFailed(
+        static_cast<int>(outputSize));
     } else {
       cmCTestLog(this, WARNING,
                  "Invalid value for '--test-output-size-failed': " << args[i]

@@ -43,7 +43,7 @@ static bool stringToId(const char* input, cmPolicies::PolicyID& pid)
   if (id >= cmPolicies::CMPCOUNT) {
     return false;
   }
-  pid = cmPolicies::PolicyID(id);
+  pid = static_cast<cmPolicies::PolicyID>(id);
   return true;
 }
 
@@ -279,7 +279,7 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile* mf, unsigned int majorVer,
   // now loop over all the policies and set them as appropriate
   std::vector<cmPolicies::PolicyID> ancientPolicies;
   for (PolicyID pid = cmPolicies::CMP0000; pid != cmPolicies::CMPCOUNT;
-       pid = PolicyID(pid + 1)) {
+       pid = static_cast<PolicyID>(pid + 1)) {
     if (isPolicyNewerThan(pid, majorVer, minorVer, patchVer)) {
       if (cmPolicies::GetPolicyStatus(pid) == cmPolicies::REQUIRED_ALWAYS) {
         ancientPolicies.push_back(pid);

@@ -242,9 +242,9 @@ bool cmProjectCommand(std::vector<std::string> const& args,
       const int vc = std::sscanf(version.c_str(), "%u.%u.%u.%u", &v[0], &v[1],
                                  &v[2], &v[3]);
       for (auto i = 0u; i < MAX_VERSION_COMPONENTS; ++i) {
-        if (int(i) < vc) {
+        if (static_cast<int>(i) < vc) {
           std::snprintf(vb[i], maxIntLength, "%u", v[i]);
-          version_string += &"."[std::size_t(i == 0)];
+          version_string += &"."[static_cast<std::size_t>(i == 0)];
           version_string += vb[i];
           version_components[i] = vb[i];
         } else {
