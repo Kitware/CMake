@@ -127,6 +127,9 @@ environment.
 
 #]=======================================================================]
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0057 NEW)
+
 if(WIN32)
   set(_Vulkan_library_name vulkan-1)
   set(_Vulkan_hint_include_search_paths
@@ -619,3 +622,5 @@ unset(_Vulkan_library_name)
 unset(_Vulkan_hint_include_search_paths)
 unset(_Vulkan_hint_executable_search_paths)
 unset(_Vulkan_hint_library_search_paths)
+
+cmake_policy(POP)
