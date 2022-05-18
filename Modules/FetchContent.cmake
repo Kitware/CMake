@@ -1665,11 +1665,15 @@ macro(FetchContent_MakeAvailable)
       # have already populated this dependency. If we previously tried to
       # use find_package() for this and it succeeded, those things might
       # no longer be in scope, so we have to do it again.
-      set(__cmake_fpArgsPropName "_FetchContent_${__cmake_contentNameLower}_find_package_args")
-      get_property(__cmake_haveFpArgs GLOBAL PROPERTY ${__cmake_fpArgsPropName} DEFINED)
+      get_property(__cmake_haveFpArgs GLOBAL PROPERTY
+        _FetchContent_${__cmake_contentNameLower}_find_package_args DEFINED
+      )
       if(__cmake_haveFpArgs)
+        unset(__cmake_haveFpArgs)
         message(VERBOSE "Trying find_package(${__cmake_contentName} ...) before FetchContent")
-        get_property(__cmake_fpArgs GLOBAL PROPERTY ${__cmake_fpArgsPropName})
+        get_property(__cmake_fpArgs GLOBAL PROPERTY
+          _FetchContent_${__cmake_contentNameLower}_find_package_args
+        )
 
         # This call could lead to FetchContent_MakeAvailable() being called for
         # a nested dependency and it may occur in the current variable scope.
@@ -1683,6 +1687,7 @@ macro(FetchContent_MakeAvailable)
           __cmake_contentNameLower
           __cmake_contentName
         )
+        unset(__cmake_fpArgs)
 
         if(${__cmake_contentName}_FOUND)
           set(${__cmake_contentNameLower}_SOURCE_DIR "")
@@ -1692,6 +1697,8 @@ macro(FetchContent_MakeAvailable)
           continue()
         endif()
       endif()
+    else()
+      unset(__cmake_haveFpArgs)
     endif()
 
     FetchContent_GetProperties(${__cmake_contentName})
@@ -1731,5 +1738,6 @@ macro(FetchContent_MakeAvailable)
   # clear local variables to prevent leaking into the caller's scope
   unset(__cmake_contentName)
   unset(__cmake_contentNameLower)
+  unset(__cmake_contentNameUpper)
 
 endmacro()
