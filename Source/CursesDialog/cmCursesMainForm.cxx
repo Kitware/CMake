@@ -95,9 +95,10 @@ void cmCursesMainForm::InitializeUI()
 
   // Add a label to display when cache is empty
   // dummy entry widget (does not respond to input)
-  cmCursesCacheEntryComposite comp("EMPTY CACHE", 30, 30);
-  comp.Entry = cm::make_unique<cmCursesDummyWidget>(1, 1, 1, 1);
-  newEntries.emplace_back(std::move(comp));
+  this->EmptyCacheEntry =
+    cm::make_unique<cmCursesCacheEntryComposite>("EMPTY CACHE", 30, 30);
+  this->EmptyCacheEntry->Entry =
+    cm::make_unique<cmCursesDummyWidget>(1, 1, 1, 1);
 
   if (count > 0) {
     // Create the composites.
@@ -192,10 +193,9 @@ void cmCursesMainForm::RePost()
   // if no cache entries there should still be one dummy field
   this->IsEmpty = this->Fields.empty();
   if (this->IsEmpty) {
-    const auto& front = this->Entries.front();
-    this->Fields.push_back(front.Label->Field);
-    this->Fields.push_back(front.IsNewLabel->Field);
-    this->Fields.push_back(front.Entry->Field);
+    this->Fields.push_back(this->EmptyCacheEntry->Label->Field);
+    this->Fields.push_back(this->EmptyCacheEntry->IsNewLabel->Field);
+    this->Fields.push_back(this->EmptyCacheEntry->Entry->Field);
     this->NumberOfVisibleEntries = 1;
   }
   // Has to be null terminated.
