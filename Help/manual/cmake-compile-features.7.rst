@@ -115,6 +115,8 @@ of at-least C++ 11 (or C++ 14, C++ 17, ...), adding flags such as
 ``-std=gnu++11`` if necessary.  This applies to sources within ``mylib``
 as well as any dependents (that may include headers from ``mylib``).
 
+.. include:: ../prop_gbl/CMAKE_LANG_STD_FLAGS.txt
+
 Availability of Compiler Extensions
 -----------------------------------
 

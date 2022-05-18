@@ -17,6 +17,7 @@ Known toolset version numbers are::
   140       = VS 2015 (14.0)
   141       = VS 2017 (15.0)
   142       = VS 2019 (16.0)
+  143       = VS 2022 (17.0)
 
 Compiler versions newer than those known to CMake will be reported
 as the latest known toolset version.

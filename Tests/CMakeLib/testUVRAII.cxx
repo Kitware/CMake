@@ -221,10 +221,15 @@ static bool testLoopDestructor()
 
 int testUVRAII(int, char** const)
 {
-  if ((testAsyncShutdown() &&
-       testAsyncDtor() & testAsyncMove() & testCrossAssignment() &
-         testAllMoves() & testLoopReset() & testLoopDestructor()) == 0) {
+  if (!testAsyncShutdown()) {
     return -1;
   }
-  return 0;
+  bool passed = true;
+  passed = testAsyncDtor() && passed;
+  passed = testAsyncMove() && passed;
+  passed = testCrossAssignment() && passed;
+  passed = testAllMoves() && passed;
+  passed = testLoopReset() && passed;
+  passed = testLoopDestructor() && passed;
+  return passed ? 0 : -1;
 }

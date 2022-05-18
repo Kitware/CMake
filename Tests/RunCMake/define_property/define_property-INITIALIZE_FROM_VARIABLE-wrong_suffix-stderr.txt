@@ -1,0 +1,5 @@
+^CMake Error at define_property-INITIALIZE_FROM_VARIABLE-wrong_suffix\.cmake:[0-9]+ \(define_property\):
+  define_property Variable name "Test_PROP2" does not end with property name
+  "PROP1"
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$

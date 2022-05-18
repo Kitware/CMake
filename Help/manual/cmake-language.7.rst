@@ -627,3 +627,45 @@ in list elements, thus flattening nested lists:
 .. code-block:: cmake
 
  set(x a "b;c") # sets "x" to "a;b;c", not "a;b\;c"
+
+In general, lists do not support elements containing ``;`` characters.
+To avoid problems, consider the following advice:
+
+* The interfaces of many CMake commands, variables, and properties accept
+  semicolon-separated lists.  Avoid passing lists with elements containing
+  semicolons to these interfaces unless they document either direct support
+  or some way to escape or encode semicolons.
+
+* When constructing a list, substitute an otherwise-unused placeholder
+  for ``;`` in elements when.  Then substitute ``;`` for the placeholder
+  when processing list elements.
+  For example, the following code uses ``|`` in place of ``;`` characters:
+
+  .. code-block:: cmake
+
+    set(mylist a "b|c")
+    foreach(entry IN LISTS mylist)
+      string(REPLACE "|" ";" entry "${entry}")
+      # use "${entry}" normally
+    endforeach()
+
+  The :module:`ExternalProject` module's ``LIST_SEPARATOR`` option is an
+  example of an interface built using this approach.
+
+* In lists of :manual:`generator expressions <cmake-generator-expressions(7)>`,
+  use the :genex:`$<SEMICOLON>` generator expression.
+
+* In command calls, use `Quoted Argument`_ syntax whenever possible.
+  The called command will receive the content of the argument with
+  semicolons preserved.  An `Unquoted Argument`_ will be split on
+  semicolons.
+
+* In :command:`function` implementations, avoid ``ARGV`` and ``ARGN``,
+  which do not distinguish semicolons in values from those separating values.
+  Instead, prefer using named positional arguments and the ``ARGC`` and
+  ``ARGV#`` variables.
+  When using :command:`cmake_parse_arguments` to parse arguments, prefer
+  its ``PARSE_ARGV`` signature, which uses the ``ARGV#`` variables.
+
+  Note that this approach does not apply to :command:`macro` implementations
+  because they reference arguments using placeholders, not real variables.

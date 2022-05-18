@@ -288,6 +288,7 @@ if(NOT MATLAB_ADDITIONAL_VERSIONS)
 endif()
 
 set(MATLAB_VERSIONS_MAPPING
+  "R2022a=9.12"
   "R2021b=9.11"
   "R2021a=9.10"
   "R2020b=9.9"
@@ -1353,7 +1354,7 @@ function(_Matlab_get_version_from_root matlab_root matlab_or_mcr matlab_known_ve
              ${versioninfo_string}
             )
 
-      if(CMAKE_MATCH_1 MATCHES "(([0-9])\\.([0-9]))[\\.0-9]*")
+      if(CMAKE_MATCH_1 MATCHES "(([0-9]+)\\.([0-9]+))[\\.0-9]*")
         set(_matlab_version_tmp "${CMAKE_MATCH_1}")
       endif()
     endif()
@@ -1573,6 +1574,7 @@ if(_numbers_of_matlab_roots GREATER 0)
     list(GET _matlab_possible_roots ${_list_index} Matlab_VERSION_STRING)
     list(GET _matlab_possible_roots ${_matlab_root_dir_index} Matlab_ROOT_DIR)
   elseif(DEFINED Matlab_FIND_VERSION)
+    set(_list_index -1)
     foreach(_matlab_root_index RANGE 1 ${_numbers_of_matlab_roots} 3)
       list(GET _matlab_possible_roots ${_matlab_root_index} _matlab_root_version)
       if(_matlab_root_version VERSION_GREATER_EQUAL Matlab_FIND_VERSION)

@@ -16,6 +16,8 @@
 #include <cmext/algorithm>
 #include <cmext/string_view>
 
+#include "cm_codecvt.hxx"
+
 #include "cmComputeLinkInformation.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
@@ -897,27 +899,30 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
 
   // Construct the compile rules.
   {
-    std::vector<std::string> compileCommands;
+    std::string cudaCompileMode;
     if (lang == "CUDA") {
-      std::string cmdVar;
       if (this->GeneratorTarget->GetPropertyAsBool(
             "CUDA_SEPARABLE_COMPILATION")) {
-        cmdVar = "CMAKE_CUDA_COMPILE_SEPARABLE_COMPILATION";
-      } else if (this->GeneratorTarget->GetPropertyAsBool(
-                   "CUDA_PTX_COMPILATION")) {
-        cmdVar = "CMAKE_CUDA_COMPILE_PTX_COMPILATION";
-      } else {
-        cmdVar = "CMAKE_CUDA_COMPILE_WHOLE_COMPILATION";
+        const std::string& rdcFlag =
+          this->Makefile->GetRequiredDefinition("_CMAKE_CUDA_RDC_FLAG");
+        cudaCompileMode = cmStrCat(cudaCompileMode, rdcFlag, " ");
       }
-      const std::string& compileRule =
-        this->Makefile->GetRequiredDefinition(cmdVar);
-      cmExpandList(compileRule, compileCommands);
-    } else {
-      const std::string cmdVar = "CMAKE_" + lang + "_COMPILE_OBJECT";
-      const std::string& compileRule =
-        this->Makefile->GetRequiredDefinition(cmdVar);
-      cmExpandList(compileRule, compileCommands);
+      if (this->GeneratorTarget->GetPropertyAsBool("CUDA_PTX_COMPILATION")) {
+        const std::string& ptxFlag =
+          this->Makefile->GetRequiredDefinition("_CMAKE_CUDA_PTX_FLAG");
+        cudaCompileMode = cmStrCat(cudaCompileMode, ptxFlag);
+      } else {
+        const std::string& wholeFlag =
+          this->Makefile->GetRequiredDefinition("_CMAKE_CUDA_WHOLE_FLAG");
+        cudaCompileMode = cmStrCat(cudaCompileMode, wholeFlag);
+      }
+      vars.CudaCompileMode = cudaCompileMode.c_str();
     }
+
+    std::vector<std::string> compileCommands;
+    const std::string& compileRule = this->Makefile->GetRequiredDefinition(
+      "CMAKE_" + lang + "_COMPILE_OBJECT");
+    cmExpandList(compileRule, compileCommands);
 
     if (this->GeneratorTarget->GetPropertyAsBool("EXPORT_COMPILE_COMMANDS") &&
         lang_can_export_cmds && compileCommands.size() == 1) {
@@ -1527,9 +1532,9 @@ void cmMakefileTargetGenerator::WriteDeviceLinkRule(
     return;
   }
 
+  cmLocalUnixMakefileGenerator3* localGen{ this->LocalGenerator };
   std::vector<std::string> architectures = cmExpandedList(architecturesStr);
-  std::string const& relPath =
-    this->LocalGenerator->GetHomeRelativeOutputPath();
+  std::string const& relPath = localGen->GetHomeRelativeOutputPath();
 
   // Ensure there are no duplicates.
   const std::vector<std::string> linkDeps = [&]() -> std::vector<std::string> {
@@ -1549,12 +1554,12 @@ void cmMakefileTargetGenerator::WriteDeviceLinkRule(
 
   const std::string objectDir = this->GeneratorTarget->ObjectDirectory;
   const std::string relObjectDir =
-    this->LocalGenerator->MaybeRelativeToCurBinDir(objectDir);
+    localGen->MaybeRelativeToCurBinDir(objectDir);
 
   // Construct a list of files associated with this executable that
   // may need to be cleaned.
   std::vector<std::string> cleanFiles;
-  cleanFiles.push_back(this->LocalGenerator->MaybeRelativeToCurBinDir(output));
+  cleanFiles.push_back(localGen->MaybeRelativeToCurBinDir(output));
 
   std::string profiles;
   std::vector<std::string> fatbinaryDepends;
@@ -1591,8 +1596,8 @@ void cmMakefileTargetGenerator::WriteDeviceLinkRule(
       " -arch=sm_", architecture, registerFileCmd, " -o=$@ ",
       cmJoin(linkDeps, " "));
 
-    this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, nullptr, cubin,
-                                        linkDeps, { command }, false);
+    localGen->WriteMakeRule(*this->BuildFileStream, nullptr, cubin, linkDeps,
+                            { command }, false);
   }
 
   // Combine all architectures into a single fatbinary.
@@ -1606,9 +1611,8 @@ void cmMakefileTargetGenerator::WriteDeviceLinkRule(
   const std::string fatbinaryOutputRel =
     cmStrCat(relPath, relObjectDir, "cmake_cuda_fatbin.h");
 
-  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, nullptr,
-                                      fatbinaryOutputRel, fatbinaryDepends,
-                                      { fatbinaryCommand }, false);
+  localGen->WriteMakeRule(*this->BuildFileStream, nullptr, fatbinaryOutputRel,
+                          fatbinaryDepends, { fatbinaryCommand }, false);
 
   // Compile the stub that registers the kernels and contains the
   // fatbinaries.
@@ -1622,18 +1626,21 @@ void cmMakefileTargetGenerator::WriteDeviceLinkRule(
   vars.Fatbinary = fatbinaryOutput.c_str();
   vars.RegisterFile = registerFile.c_str();
 
+  std::string linkFlags;
+  this->GetDeviceLinkFlags(linkFlags, "CUDA");
+  vars.LinkFlags = linkFlags.c_str();
+
   std::string flags = this->GetFlags("CUDA", this->GetConfigName());
   vars.Flags = flags.c_str();
 
   std::string compileCmd = this->GetLinkRule("CMAKE_CUDA_DEVICE_LINK_COMPILE");
   std::unique_ptr<cmRulePlaceholderExpander> rulePlaceholderExpander(
-    this->LocalGenerator->CreateRulePlaceholderExpander());
-  rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator,
-                                               compileCmd, vars);
+    localGen->CreateRulePlaceholderExpander());
+  rulePlaceholderExpander->ExpandRuleVariables(localGen, compileCmd, vars);
 
   commands.emplace_back(compileCmd);
-  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, nullptr, output,
-                                      { fatbinaryOutputRel }, commands, false);
+  localGen->WriteMakeRule(*this->BuildFileStream, nullptr, output,
+                          { fatbinaryOutputRel }, commands, false);
 
   // Clean all the possible executable names and symlinks.
   this->CleanFiles.insert(cleanFiles.begin(), cleanFiles.end());
@@ -2072,11 +2079,22 @@ std::string cmMakefileTargetGenerator::CreateResponseFile(
   const char* name, std::string const& options,
   std::vector<std::string>& makefile_depends)
 {
+  // FIXME: Find a better way to determine the response file encoding,
+  // perhaps using tool-specific platform information variables.
+  // For now, use the makefile encoding as a heuristic.
+  codecvt::Encoding responseEncoding =
+    this->GlobalGenerator->GetMakefileEncoding();
+  // Non-MSVC tooling may not understand a BOM.
+  if (responseEncoding == codecvt::UTF8_WITH_BOM &&
+      !this->Makefile->IsOn("MSVC")) {
+    responseEncoding = codecvt::UTF8;
+  }
+
   // Create the response file.
   std::string responseFileNameFull =
     cmStrCat(this->TargetBuildDirectoryFull, '/', name);
-  cmGeneratedFileStream responseStream(
-    responseFileNameFull, false, this->GlobalGenerator->GetMakefileEncoding());
+  cmGeneratedFileStream responseStream(responseFileNameFull, false,
+                                       responseEncoding);
   responseStream.SetCopyIfDifferent(true);
   responseStream << options << "\n";
 
@@ -2173,7 +2191,7 @@ void cmMakefileTargetGenerator::CreateObjectLists(
     for (unsigned int i = 0; i < object_strings.size(); ++i) {
       // Number the response files.
       char rsp[32];
-      sprintf(rsp, "objects%u.rsp", i + 1);
+      snprintf(rsp, sizeof(rsp), "objects%u.rsp", i + 1);
 
       // Create this response file.
       std::string objects_rsp =

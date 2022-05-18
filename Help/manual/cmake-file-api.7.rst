@@ -425,7 +425,7 @@ Version 1 does not exist to avoid confusion with that from
 
   {
     "kind": "codemodel",
-    "version": { "major": 2, "minor": 2 },
+    "version": { "major": 2, "minor": 4 },
     "paths": {
       "source": "/path/to/top-level-source-dir",
       "build": "/path/to/top-level-build-dir"
@@ -758,6 +758,15 @@ with members:
       ``destination`` member is populated. This type has additional members
       ``runtimeDependencySetName`` and ``runtimeDependencySetType``.
 
+    ``fileSet``
+      An :command:`install(TARGETS)` call with ``FILE_SET``.
+      The ``destination`` and ``paths`` members are populated.
+      The ``isOptional`` member may exist.
+      This type has additional members ``fileSetName``, ``fileSetType``,
+      ``fileSetDirectories``, and ``fileSetTarget``.
+
+      This type was added in codemodel version 2.4.
+
   ``isExcludeFromAll``
     Optional member that is present with boolean value ``true`` when
     :command:`install` is called with the ``EXCLUDE_FROM_ALL`` option.
@@ -834,6 +843,41 @@ with members:
     ``framework``
       Indicates that this installer installs dependencies that are macOS
       frameworks.
+
+  ``fileSetName``
+    Optional member that is present when ``type`` is ``fileSet``. The value is
+    a string with the name of the file set.
+
+    This field was added in codemodel version 2.4.
+
+  ``fileSetType``
+    Optional member that is present when ``type`` is ``fileSet``. The value is
+    a string with the type of the file set.
+
+    This field was added in codemodel version 2.4.
+
+  ``fileSetDirectories``
+    Optional member that is present when ``type`` is ``fileSet``. The value
+    is a list of strings with the file set's base directories (determined by
+    genex-evaluation of :prop_tgt:`HEADER_DIRS` or
+    :prop_tgt:`HEADER_DIRS_<NAME>`).
+
+    This field was added in codemodel version 2.4.
+
+  ``fileSetTarget``
+    Optional member that is present when ``type`` is ``fileSet``. The value
+    is a JSON object with members:
+
+    ``id``
+      A string uniquely identifying the target.  This matches
+      the ``id`` member of the target in the main "codemodel"
+      object's ``targets`` array.
+
+    ``index``
+      An unsigned integer 0-based index into the main "codemodel"
+      object's ``targets`` array for the target.
+
+    This field was added in codemodel version 2.4.
 
   ``scriptFile``
     Optional member that is present when ``type`` is ``script``.

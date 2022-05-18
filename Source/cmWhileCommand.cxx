@@ -79,12 +79,17 @@ bool cmWhileFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
     return out;
   };
 
+  // FIXME(#23296): For compatibility with older versions of CMake, we
+  // tolerate condition errors that evaluate to false.  We should add
+  // a policy to enforce such errors.
+  bool enforceError = true;
   std::string errorString;
   MessageType messageType;
 
   for (cmConditionEvaluator conditionEvaluator(mf, whileBT);
-       conditionEvaluator.IsTrue(expandArgs(this->Args, expandedArguments),
-                                 errorString, messageType);) {
+       (enforceError = /* enforce condition errors that evaluate to true */
+        conditionEvaluator.IsTrue(expandArgs(this->Args, expandedArguments),
+                                  errorString, messageType));) {
     // Invoke all the functions that were collected in the block.
     for (cmListFileFunction const& fn : functions) {
       cmExecutionStatus status(mf);
@@ -105,7 +110,7 @@ bool cmWhileFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
     }
   }
 
-  if (!errorString.empty()) {
+  if (!errorString.empty() && enforceError) {
     std::string err = "had incorrect arguments:\n ";
     for (auto const& i : expandedArguments) {
       err += " ";

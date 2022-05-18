@@ -23,11 +23,13 @@
 #include "cmCryptoHash.h"
 #include "cmExportSet.h"
 #include "cmFileAPI.h"
+#include "cmFileSet.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstallDirectoryGenerator.h"
 #include "cmInstallExportGenerator.h"
+#include "cmInstallFileSetGenerator.h"
 #include "cmInstallFilesGenerator.h"
 #include "cmInstallGenerator.h"
 #include "cmInstallGetRuntimeDependenciesGenerator.h"
@@ -1042,6 +1044,53 @@ Json::Value DirectoryObject::DumpInstaller(cmInstallGenerator* gen)
       case cmInstallRuntimeDependencySetGenerator::DependencyType::Library:
         installer["runtimeDependencySetType"] = "library";
         break;
+    }
+  } else if (auto* installFileSet =
+               dynamic_cast<cmInstallFileSetGenerator*>(gen)) {
+    installer["type"] = "fileSet";
+    installer["destination"] = installFileSet->GetDestination(this->Config);
+
+    auto* fileSet = installFileSet->GetFileSet();
+    auto* target = installFileSet->GetTarget();
+
+    auto dirCges = fileSet->CompileDirectoryEntries();
+    auto dirs = fileSet->EvaluateDirectoryEntries(
+      dirCges, target->GetLocalGenerator(), this->Config, target);
+
+    auto entryCges = fileSet->CompileFileEntries();
+    std::map<std::string, std::vector<std::string>> entries;
+    for (auto const& entryCge : entryCges) {
+      fileSet->EvaluateFileEntry(dirs, entries, entryCge,
+                                 target->GetLocalGenerator(), this->Config,
+                                 target);
+    }
+
+    Json::Value files = Json::arrayValue;
+    for (auto const& it : entries) {
+      auto dir = it.first;
+      if (!dir.empty()) {
+        dir += '/';
+      }
+      for (auto const& file : it.second) {
+        files.append(this->DumpInstallerPath(
+          this->TopSource, file,
+          cmStrCat(dir, cmSystemTools::GetFilenameName(file))));
+      }
+    }
+    installer["paths"] = std::move(files);
+    installer["fileSetName"] = fileSet->GetName();
+    installer["fileSetType"] = fileSet->GetType();
+    installer["fileSetDirectories"] = Json::arrayValue;
+    for (auto const& dir : dirs) {
+      installer["fileSetDirectories"].append(
+        RelativeIfUnder(this->TopSource, dir));
+    }
+    installer["fileSetTarget"] = Json::objectValue;
+    installer["fileSetTarget"]["id"] = TargetId(target, this->TopBuild);
+    installer["fileSetTarget"]["index"] = this->TargetIndexMap[target];
+
+    if (installFileSet->GetOptional()) {
+      installer["isOptional"] = true;
     }
   }
 

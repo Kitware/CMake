@@ -116,4 +116,3 @@
             - build/html
         exclude:
             - build/html/.buildinfo
-            - build/html/objects.inv

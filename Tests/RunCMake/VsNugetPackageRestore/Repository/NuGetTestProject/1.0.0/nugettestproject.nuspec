@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>NuGetTestProject</id>
+    <version>1.0.0</version>
+    <authors>CMake.org</authors>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Package to test automatic NuGet package restore.</description>
+    <summary>NuGetTestProject built using CMake</summary>
+  </metadata>
+</package>

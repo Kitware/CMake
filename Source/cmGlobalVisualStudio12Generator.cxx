@@ -2,10 +2,18 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalVisualStudio12Generator.h"
 
-#include "cmAlgorithms.h"
+#include <cstring>
+#include <sstream>
+#include <vector>
+
 #include "cmDocumentationEntry.h"
-#include "cmLocalVisualStudio10Generator.h"
+#include "cmGlobalGenerator.h"
+#include "cmGlobalGeneratorFactory.h"
+#include "cmGlobalVisualStudioGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 
 static const char vs12generatorName[] = "Visual Studio 12 2013";
 
@@ -114,7 +122,7 @@ cmGlobalVisualStudio12Generator::cmGlobalVisualStudio12Generator(
   this->DefaultLinkFlagTableName = "v12";
   this->DefaultMasmFlagTableName = "v12";
   this->DefaultRCFlagTableName = "v12";
-  this->Version = VS12;
+  this->Version = VSVersion::VS12;
 }
 
 bool cmGlobalVisualStudio12Generator::MatchesGeneratorName(

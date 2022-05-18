@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.0)
 if(POLICY CMP0092)
   cmake_policy(SET CMP0092 NEW)
 endif()
+if(POLICY CMP0129)
+  cmake_policy(SET CMP0129 NEW)
+endif()
 get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
 if(NOT _isMultiConfig AND NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build" FORCE)
@@ -30,8 +33,8 @@ endif()
 set_property(TARGET CompileOptions PROPERTY COMPILE_OPTIONS
   "-DTEST_DEFINE"
   "-DNEEDS_ESCAPE=\"E$CAPE\""
-  "$<$<CXX_COMPILER_ID:GNU>:-DTEST_DEFINE_GNU>"
-  "$<$<COMPILE_LANG_AND_ID:CXX,GNU>:-DTEST_DEFINE_CXX_AND_GNU>"
+  "$<$<CXX_COMPILER_ID:GNU,LCC>:-DTEST_DEFINE_GNU>"
+  "$<$<COMPILE_LANG_AND_ID:CXX,GNU,LCC>:-DTEST_DEFINE_CXX_AND_GNU>"
   "SHELL:" # produces no options
   ${c_tests}
   ${cxx_tests}
@@ -49,15 +52,15 @@ else()
     )
 endif()
 
-if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|Borland|Embarcadero" AND NOT "${CMAKE_GENERATOR}" MATCHES "NMake Makefiles")
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|LCC|Clang|Borland|Embarcadero" AND NOT "${CMAKE_GENERATOR}" MATCHES "NMake Makefiles")
   set_property(TARGET CompileOptions APPEND PROPERTY COMPILE_OPTIONS
     "-DTEST_OCTOTHORPE=\"#\""
     )
 endif()
 
-if(CMAKE_CXX_COMPILER_ID MATCHES "^(GNU|AppleClang|MSVC)$")
+if(CMAKE_CXX_COMPILER_ID MATCHES "^(GNU|LCC|AppleClang|MSVC)$")
   target_compile_definitions(CompileOptions PRIVATE "DO_FLAG_TESTS")
-  if(CMAKE_CXX_COMPILER_ID MATCHES "^(GNU|AppleClang)$")
+  if(CMAKE_CXX_COMPILER_ID MATCHES "^(GNU|LCC|AppleClang)$")
     string(APPEND CMAKE_CXX_FLAGS " -w")
   endif()
   string(APPEND CMAKE_CXX_FLAGS                " -DFLAG_A=1 -DFLAG_B=1")
@@ -79,7 +82,7 @@ endif()
 
 target_link_libraries(CompileOptions testlib)
 
-if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|LCC")
   target_compile_definitions(CompileOptions
     PRIVATE
       "DO_GNU_TESTS"

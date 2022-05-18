@@ -2,13 +2,24 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #pragma once
 
+#include <cstddef>
 #include <memory>
 #include <set>
+#include <string>
+#include <vector>
 
 #include <cm/optional>
 #include <cm/string_view>
 
 #include "cmGlobalVisualStudio8Generator.h"
+
+class cmGeneratorTarget;
+class cmGlobalGeneratorFactory;
+class cmLocalGenerator;
+class cmMakefile;
+class cmSourceFile;
+class cmake;
+struct cmIDEFlagTable;
 
 /** \class cmGlobalVisualStudio10Generator
  * \brief Write a Unix makefiles.
@@ -32,7 +43,8 @@ public:
   std::vector<GeneratedMakeCommand> GenerateBuildCommand(
     const std::string& makeProgram, const std::string& projectName,
     const std::string& projectDir, std::vector<std::string> const& targetNames,
-    const std::string& config, bool fast, int jobs, bool verbose,
+    const std::string& config, int jobs, bool verbose,
+    const cmBuildOptions& buildOptions = cmBuildOptions(),
     std::vector<std::string> const& makeOptions =
       std::vector<std::string>()) override;
 
@@ -160,6 +172,8 @@ public:
   cmIDEFlagTable const* GetCudaHostFlagTable() const;
   cmIDEFlagTable const* GetMasmFlagTable() const;
   cmIDEFlagTable const* GetNasmFlagTable() const;
+
+  bool IsMsBuildRestoreSupported() const;
 
 protected:
   cmGlobalVisualStudio10Generator(cmake* cm, const std::string& name,

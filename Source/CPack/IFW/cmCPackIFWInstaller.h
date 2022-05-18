@@ -109,6 +109,9 @@ public:
   /// uninstalling
   std::string RemoveTargetDir;
 
+  /// Set to true if command line interface features should be disabled
+  std::string DisableCommandLineInterface;
+
   /// Set to false if the installation path cannot contain space characters
   std::string AllowSpaceInPath;
 
@@ -117,6 +120,25 @@ public:
 
   /// List of resources to include in the installer binary
   std::vector<std::string> Resources;
+
+  /// A list of images to be shown on PerformInstallationPage.
+  std::vector<std::string> ProductImages;
+
+  /// Command executed after the installer is done if the user accepts the
+  /// action
+  std::string RunProgram;
+
+  /// Arguments passed to the program specified in <RunProgram>
+  std::vector<std::string> RunProgramArguments;
+
+  /// Text shown next to the check box for running the program after the
+  /// installation
+  std::string RunProgramDescription;
+
+#ifdef __APPLE__
+  /// Code signing identity for signing the generated app bundle
+  std::string SigningIdentity;
+#endif
 
 public:
   // Internal implementation

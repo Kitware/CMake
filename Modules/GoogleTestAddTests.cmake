@@ -9,7 +9,7 @@ set(flush_tests_MODE WRITE)
 # Flushes script to ${_CTEST_FILE}
 macro(flush_script)
   file(${flush_tests_MODE} "${_CTEST_FILE}" "${script}")
-  set(flush_tests_MODE APPEND)
+  set(flush_tests_MODE APPEND PARENT_SCOPE)
 
   set(script "")
 endmacro()
@@ -20,24 +20,48 @@ macro(flush_tests_buffer)
   set(tests_buffer "")
 endmacro()
 
-macro(add_command NAME)
-  set(_args "")
-  foreach(_arg ${ARGN})
-    if(_arg MATCHES "[^-./:a-zA-Z0-9_]")
-      string(APPEND _args " [==[${_arg}]==]")
+function(add_command NAME TEST_NAME)
+  set(args "")
+  foreach(arg ${ARGN})
+    if(arg MATCHES "[^-./:a-zA-Z0-9_]")
+      string(APPEND args " [==[${arg}]==]")
     else()
-      string(APPEND _args " ${_arg}")
+      string(APPEND args " ${arg}")
     endif()
   endforeach()
-  string(APPEND script "${NAME}(${_args})\n")
-  string(LENGTH "${script}" _script_len)
-  if(${_script_len} GREATER "50000")
+  string(APPEND script "${NAME}(${TEST_NAME} ${args})\n")
+  string(LENGTH "${script}" script_len)
+  if(${script_len} GREATER "50000")
     flush_script()
   endif()
-  # Unsets macro local variables to prevent leakage outside of this macro.
-  unset(_args)
-  unset(_script_len)
-endmacro()
+  set(script "${script}" PARENT_SCOPE)
+endfunction()
+
+function(generate_testname_guards OUTPUT OPEN_GUARD_VAR CLOSE_GUARD_VAR)
+  set(open_guard "[=[")
+  set(close_guard "]=]")
+  set(counter 1)
+  while("${OUTPUT}" MATCHES "${close_guard}")
+    math(EXPR counter "${counter} + 1")
+    string(REPEAT "=" ${counter} equals)
+    set(open_guard "[${equals}[")
+    set(close_guard "]${equals}]")
+  endwhile()
+  set(${OPEN_GUARD_VAR} "${open_guard}" PARENT_SCOPE)
+  set(${CLOSE_GUARD_VAR} "${close_guard}" PARENT_SCOPE)
+endfunction()
+
+function(escape_square_brackets OUTPUT BRACKET PLACEHOLDER PLACEHOLDER_VAR OUTPUT_VAR)
+  if("${OUTPUT}" MATCHES "\\${BRACKET}")
+    set(placeholder "${PLACEHOLDER}")
+    while("${OUTPUT}" MATCHES "${placeholder}")
+        set(placeholder "${placeholder}_")
+    endwhile()
+    string(REPLACE "${BRACKET}" "${placeholder}" OUTPUT "${OUTPUT}")
+    set(${PLACEHOLDER_VAR} "${placeholder}" PARENT_SCOPE)
+    set(${OUTPUT_VAR} "${OUTPUT}" PARENT_SCOPE)
+  endif()
+endfunction()
 
 function(gtest_discover_tests_impl)
 
@@ -80,15 +104,23 @@ function(gtest_discover_tests_impl)
   )
   if(NOT ${result} EQUAL 0)
     string(REPLACE "\n" "\n    " output "${output}")
+    if(_TEST_EXECUTOR)
+      set(path "${_TEST_EXECUTOR} ${_TEST_EXECUTABLE}")
+    else()
+      set(path "${_TEST_EXECUTABLE}")
+    endif()
     message(FATAL_ERROR
       "Error running test executable.\n"
-      "  Path: '${_TEST_EXECUTABLE}'\n"
+      "  Path: '${path}'\n"
       "  Result: ${result}\n"
       "  Output:\n"
       "    ${output}\n"
     )
   endif()
 
+  generate_testname_guards("${output}" open_guard close_guard)
+  escape_square_brackets("${output}" "[" "__osb" open_sb output)
+  escape_square_brackets("${output}" "]" "__csb" close_sb output)
   # Preserve semicolon in test-parameters
   string(REPLACE [[;]] [[\;]] output "${output}")
   string(REPLACE "\n" ";" output "${output}")
@@ -100,41 +132,48 @@ function(gtest_discover_tests_impl)
       # Do we have a module name or a test name?
       if(NOT line MATCHES "^  ")
         # Module; remove trailing '.' to get just the name...
-        string(REGEX REPLACE "\\.( *#.*)?" "" suite "${line}")
-        if(line MATCHES "#" AND NOT _NO_PRETTY_TYPES)
-          string(REGEX REPLACE "/[0-9]\\.+ +#.*= +" "/" pretty_suite "${line}")
+        string(REGEX REPLACE "\\.( *#.*)?$" "" suite "${line}")
+        if(line MATCHES "#")
+          string(REGEX REPLACE "/.*" "" pretty_suite "${line}")
+          if(NOT _NO_PRETTY_TYPES)
+            string(REGEX REPLACE ".*/[0-9]+[ .#]+TypeParam = (.*)" "\\1" type_parameter "${line}")
+          else()
+            string(REGEX REPLACE ".*/([0-9]+)[ .#]+TypeParam = .*" "\\1" type_parameter "${line}")
+          endif()
+          set(test_name_template "@prefix@@pretty_suite@.@pretty_test@<@type_parameter@>@suffix@")
         else()
           set(pretty_suite "${suite}")
+          set(test_name_template "@prefix@@pretty_suite@.@pretty_test@@suffix@")
         endif()
         string(REGEX REPLACE "^DISABLED_" "" pretty_suite "${pretty_suite}")
       else()
-        # Test name; strip spaces and comments to get just the name...
-        string(REGEX REPLACE " +" "" test "${line}")
+        string(STRIP "${line}" test)
         if(test MATCHES "#" AND NOT _NO_PRETTY_VALUES)
-          string(REGEX REPLACE "/[0-9]+#GetParam..=" "/" pretty_test "${test}")
+          string(REGEX REPLACE "/[0-9]+[ #]+GetParam\\(\\) = " "/" pretty_test "${test}")
         else()
-          string(REGEX REPLACE "#.*" "" pretty_test "${test}")
+          string(REGEX REPLACE " +#.*" "" pretty_test "${test}")
         endif()
         string(REGEX REPLACE "^DISABLED_" "" pretty_test "${pretty_test}")
-        string(REGEX REPLACE "#.*" "" test "${test}")
+        string(REGEX REPLACE " +#.*" "" test "${test}")
         if(NOT "${_TEST_XML_OUTPUT_DIR}" STREQUAL "")
           set(TEST_XML_OUTPUT_PARAM "--gtest_output=xml:${_TEST_XML_OUTPUT_DIR}/${prefix}${suite}.${test}${suffix}.xml")
         else()
           unset(TEST_XML_OUTPUT_PARAM)
         endif()
 
-        # sanitize test name for further processing downstream
-        set(testname "${prefix}${pretty_suite}.${pretty_test}${suffix}")
-        # escape \
-        string(REPLACE [[\]] [[\\]] testname "${testname}")
-        # escape ;
-        string(REPLACE [[;]] [[\;]] testname "${testname}")
-        # escape $
-        string(REPLACE [[$]] [[\$]] testname "${testname}")
+        string(CONFIGURE "${test_name_template}" testname)
+        # unescape []
+        if(open_sb)
+          string(REPLACE "${open_sb}" "[" testname "${testname}")
+        endif()
+        if(close_sb)
+          string(REPLACE "${close_sb}" "]" testname "${testname}")
+        endif()
+        set(guarded_testname "${open_guard}${testname}${close_guard}")
 
-        # ...and add to script
+        # add to script
         add_command(add_test
-          "${testname}"
+          "${guarded_testname}"
           ${_TEST_EXECUTOR}
           "${_TEST_EXECUTABLE}"
           "--gtest_filter=${suite}.${test}"
@@ -144,21 +183,28 @@ function(gtest_discover_tests_impl)
         )
         if(suite MATCHES "^DISABLED_" OR test MATCHES "^DISABLED_")
           add_command(set_tests_properties
-            "${testname}"
+            "${guarded_testname}"
             PROPERTIES DISABLED TRUE
           )
         endif()
+
         add_command(set_tests_properties
-          "${testname}"
+          "${guarded_testname}"
           PROPERTIES
           WORKING_DIRECTORY "${_TEST_WORKING_DIR}"
-          SKIP_REGULAR_EXPRESSION "\\\\[  SKIPPED \\\\]"
+          SKIP_REGULAR_EXPRESSION "\\[  SKIPPED \\]"
           ${properties}
         )
-        list(APPEND tests_buffer "${testname}")
-        list(LENGTH tests_buffer tests_buffer_length)
-        if(${tests_buffer_length} GREATER "250")
-          flush_tests_buffer()
+
+        # possibly unbalanced square brackets render lists invalid so skip such tests in ${_TEST_LIST}
+        if(NOT "${testname}" MATCHES [=[(\[|\])]=])
+          # escape ;
+          string(REPLACE [[;]] [[\\;]] testname "${testname}")
+          list(APPEND tests_buffer "${testname}")
+          list(LENGTH tests_buffer tests_buffer_length)
+          if(${tests_buffer_length} GREATER "250")
+            flush_tests_buffer()
+          endif()
         endif()
       endif()
     endif()
@@ -168,7 +214,7 @@ function(gtest_discover_tests_impl)
   # Create a list of all discovered tests, which users may use to e.g. set
   # properties on the tests
   flush_tests_buffer()
-  add_command(set ${_TEST_LIST} ${tests})
+  add_command(set "" ${_TEST_LIST} "${tests}")
 
   # Write CTest script
   flush_script()

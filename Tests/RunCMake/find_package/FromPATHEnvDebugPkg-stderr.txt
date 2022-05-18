@@ -1,0 +1,80 @@
+^CMake Debug Log at FromPATHEnvDebugPkg.cmake:[0-9]+ \(find_package\):
+  find_package considered the following paths for FindResolved.cmake:
+
+    [^
+]*/Modules/FindResolved.cmake
+
+  The file was not found.
+
+  <PackageName>_ROOT CMake variable \[CMAKE_FIND_USE_PACKAGE_ROOT_PATH\].
+
+    none
+
+  CMAKE_PREFIX_PATH variable \[CMAKE_FIND_USE_CMAKE_PATH\].
+
+    none
+
+  CMAKE_FRAMEWORK_PATH and CMAKE_APPBUNDLE_PATH variables
+  \[CMAKE_FIND_USE_CMAKE_PATH\].
+
+    none
+
+  Env variable Resolved_DIR \[CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH\].
+
+    none
+
+  CMAKE_PREFIX_PATH env variable \[CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH\].
+(
+    [^
+]+)+
+
+  CMAKE_FRAMEWORK_PATH and CMAKE_APPBUNDLE_PATH env variables
+  \[CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH\].
+(
+    [^
+]+)+
+
+  Paths specified by the find_package HINTS option.
+
+    none
+
+  Standard system environment variables
+  \[CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH\].
+
+    [^
+]*/Tests/RunCMake/find_package/PackageRoot
+
+  CMake User Package Registry \[CMAKE_FIND_USE_PACKAGE_REGISTRY\].
+(
+    [^
+]+)+
+
+  CMake variables defined in the Platform file
+  \[CMAKE_FIND_USE_CMAKE_SYSTEM_PATH\].
+(
+    [^
+]+)+
+
+  CMake System Package Registry
+  \[CMAKE_FIND_PACKAGE_NO_SYSTEM_PACKAGE_REGISTRY\].
+(
+    [^
+]+)+
+
+  Paths specified by the find_package PATHS option.
+
+    none
+
+  find_package considered the following locations for Resolved's Config
+  module:
+
+    [^
+]*/Tests/RunCMake/find_package/PackageRoot/ResolvedConfig.cmake
+
+  The file was found at
+
+    [^
+]*/Tests/RunCMake/find_package/PackageRoot/ResolvedConfig.cmake
+
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)$

@@ -65,6 +65,7 @@ public:
     const char* SwiftOutputFileMap = nullptr;
     const char* SwiftSources = nullptr;
     const char* ISPCHeader = nullptr;
+    const char* CudaCompileMode = nullptr;
     const char* Fatbinary = nullptr;
     const char* RegisterFile = nullptr;
     const char* Launcher = nullptr;

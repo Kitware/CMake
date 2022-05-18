@@ -699,7 +699,8 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
 
     /* Use a random file name to avoid rapid creation and deletion
        of the same executable name (some filesystems fail on that).  */
-    sprintf(targetNameBuf, "cmTC_%05x", cmSystemTools::RandomSeed() & 0xFFFFF);
+    snprintf(targetNameBuf, sizeof(targetNameBuf), "cmTC_%05x",
+             cmSystemTools::RandomSeed() & 0xFFFFF);
     targetName = targetNameBuf;
 
     if (!targets.empty()) {
@@ -829,6 +830,12 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
                 cmPolicies::NEW
               ? "NEW"
               : "OLD");
+
+    // Workaround for -Wl,-headerpad_max_install_names issue until we can avoid
+    // adding that flag in the platform and compiler language files
+    fprintf(fout,
+            "include(\"${CMAKE_ROOT}/Modules/Internal/"
+            "HeaderpadWorkaround.cmake\")\n");
 
     if (targetType == cmStateEnums::EXECUTABLE) {
       /* Put the executable at a known location (for COPY_FILE).  */

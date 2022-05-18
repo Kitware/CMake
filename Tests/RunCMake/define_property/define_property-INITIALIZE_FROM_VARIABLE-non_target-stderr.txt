@@ -1,0 +1,5 @@
+^CMake Error at define_property-INITIALIZE_FROM_VARIABLE-non_target\.cmake:[0-9]+ \(define_property\):
+  define_property Scope must be TARGET if INITIALIZE_FROM_VARIABLE is
+  specified
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$

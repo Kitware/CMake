@@ -329,9 +329,10 @@ int cmCPackRPMGenerator::PackageComponents(bool ignoreGroup)
 
   if (retval) {
     this->AddGeneratedPackageNames();
+    return retval;
   }
 
-  return retval;
+  return 0;
 }
 
 int cmCPackRPMGenerator::PackageComponentsAllInOne(
@@ -424,7 +425,7 @@ std::string cmCPackRPMGenerator::GetComponentInstallDirNameSuffix(
   }
 
   if (this->componentPackageMethod == ONE_PACKAGE) {
-    return std::string("ALL_COMPONENTS_IN_ONE");
+    return { "ALL_COMPONENTS_IN_ONE" };
   }
   // We have to find the name of the COMPONENT GROUP
   // the current COMPONENT belongs to.

@@ -1,0 +1,20 @@
+  <PackageName>_ROOT CMake variable.*
+  CMAKE_PREFIX_PATH variable.*
+  CMAKE_FRAMEWORK_PATH and CMAKE_APPBUNDLE_PATH variables.*
+  Env variable NotHere_DIR.*
+  CMAKE_PREFIX_PATH env variable.*
+  CMAKE_FRAMEWORK_PATH and CMAKE_APPBUNDLE_PATH env variables.*
+  Paths specified by the find_package HINTS option.*
+  Standard system environment variables.*
+  CMake User Package Registry.*
+  CMake variables defined in the Platform file.*
+  CMake System Package Registry.*
+  Paths specified by the find_package PATHS option.*
+.*
+    .*NotHereConfig.cmake
+    .*nothere-config.cmake
+.*
+CMake Warning at MissingConfigDebugPkg.cmake:2 \(message\):
+  This warning must be reachable.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)$

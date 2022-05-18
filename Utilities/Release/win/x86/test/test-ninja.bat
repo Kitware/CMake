@@ -12,7 +12,6 @@ cd \cmake\src\cmake-ninja && ^
   @echo CMake_TEST_IPO_WORKS_C:BOOL=ON
   @echo CMake_TEST_IPO_WORKS_CXX:BOOL=ON
   @echo CMake_TEST_NO_NETWORK:BOOL=ON
-  @echo CTEST_RUN_MFC:BOOL=OFF
 ) && ^
 cmake ..\cmake -DCMake_TEST_HOST_CMAKE=1 -G "Ninja" && ^
 ninja && ^

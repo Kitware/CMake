@@ -24,7 +24,9 @@ file name components no longer add a dependency on the evaluated target.
 In CMake 3.18 and lower a dependency on the evaluated target of the above
 generator expressions would always be added.  CMake 3.19 and above prefer
 to not add this dependency.  This policy provides compatibility for projects
-that have not been updated to expect the new behavior.
+that have not been updated to expect the new behavior.  The policy setting
+is recorded on each target when it is created, and decides whether generator
+expressions referencing that target imply a dependency on it.
 
 The ``OLD`` behavior for this policy is to add a dependency on the evaluated
 target for the above generator expressions.  The ``NEW`` behavior of

@@ -2,11 +2,20 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalVisualStudio14Generator.h"
 
+#include <cstring>
+#include <sstream>
+
 #include <cm/vector>
 
 #include "cmDocumentationEntry.h"
-#include "cmLocalVisualStudio10Generator.h"
+#include "cmGlobalGenerator.h"
+#include "cmGlobalGeneratorFactory.h"
+#include "cmGlobalVisualStudioGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
+#include "cmValue.h"
 
 static const char vs14generatorName[] = "Visual Studio 14 2015";
 
@@ -116,7 +125,7 @@ cmGlobalVisualStudio14Generator::cmGlobalVisualStudio14Generator(
   this->DefaultLinkFlagTableName = "v140";
   this->DefaultMasmFlagTableName = "v14";
   this->DefaultRCFlagTableName = "v14";
-  this->Version = VS14;
+  this->Version = VSVersion::VS14;
 }
 
 bool cmGlobalVisualStudio14Generator::MatchesGeneratorName(

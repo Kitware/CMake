@@ -107,7 +107,7 @@ bool HandleExprCommand(std::vector<std::string> const& args,
       fmt = "%" KWIML_INT_PRId64;
       break;
   }
-  sprintf(buffer, fmt, helper.GetResult());
+  snprintf(buffer, sizeof(buffer), fmt, helper.GetResult());
 
   std::string const& w = helper.GetWarning();
   if (!w.empty()) {

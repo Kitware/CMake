@@ -1,7 +1,6 @@
 CMAKE_CACHEFILE_DIR
 -------------------
 
-The directory with the ``CMakeCache.txt`` file.
-
-This is the full path to the directory that has the ``CMakeCache.txt``
-file in it.  This is the same as :variable:`CMAKE_BINARY_DIR`.
+This variable is used internally by CMake, and may not be set during
+the first configuration of a build tree.  When it is set, it has the
+same value as :variable:`CMAKE_BINARY_DIR`.  Use that variable instead.

@@ -139,7 +139,7 @@ if( NOT GSL_VERSION )
   # 2. If gsl-config is not available, try looking in gsl/gsl_version.h
   if( NOT GSL_VERSION AND EXISTS "${GSL_INCLUDE_DIRS}/gsl/gsl_version.h" )
     file( STRINGS "${GSL_INCLUDE_DIRS}/gsl/gsl_version.h" gsl_version_h_contents REGEX "define GSL_VERSION" )
-    string( REGEX REPLACE ".*([0-9]\\.[0-9][0-9]?).*" "\\1" GSL_VERSION ${gsl_version_h_contents} )
+    string( REGEX REPLACE ".*define[ ]+GSL_VERSION[ ]+\"([^\"]*)\".*" "\\1" GSL_VERSION ${gsl_version_h_contents} )
   endif()
 
   # might also try scraping the directory name for a regex match "gsl-X.X"

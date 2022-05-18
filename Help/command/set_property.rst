@@ -85,6 +85,10 @@ It must be one of the following:
   Scope may name zero or more existing tests.
   See also the :command:`set_tests_properties` command.
 
+  Test property values may be specified using
+  :manual:`generator expressions <cmake-generator-expressions(7)>`
+  for tests created by the :command:`add_test(NAME)` signature.
+
 ``CACHE``
   Scope must name zero or more cache existing entries.
 

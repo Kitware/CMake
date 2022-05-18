@@ -12,7 +12,7 @@
 #    define CM_HAVE_CPU_AFFINITY
 #    include <pthread.h>
 #    include <sched.h>
-// On some platforms CPU_ZERO needs memset but sched.h forgets string.h
+// On some platforms CPU_ZERO needs memset but sched.h forgets cstring
 #    include <cstring> // IWYU pragma: keep
 #    if defined(__FreeBSD__)
 #      include <pthread_np.h>

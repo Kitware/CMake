@@ -17,3 +17,5 @@ run_cmake(IncompleteMatchesFail)
 
 run_cmake(TestNameThatExists)
 run_cmake(TestNameThatDoesNotExist)
+
+run_cmake_script(AndOr)

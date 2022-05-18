@@ -4,6 +4,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <cstdint>
 #include <ctime>
 #include <string>
 
@@ -23,9 +24,14 @@ public:
   std::string CreateTimestampFromTimeT(time_t timeT, std::string formatString,
                                        bool utcFlag) const;
 
+  std::string CreateTimestampFromTimeT(time_t timeT, uint32_t microseconds,
+                                       std::string formatString,
+                                       bool utcFlag) const;
+
 private:
   time_t CreateUtcTimeTFromTm(struct tm& timeStruct) const;
 
   std::string AddTimestampComponent(char flag, struct tm& timeStruct,
-                                    time_t timeT) const;
+                                    time_t timeT,
+                                    uint32_t microseconds = 0) const;
 };

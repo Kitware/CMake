@@ -152,6 +152,7 @@ syn keyword cmakeProperty contained
             \ DISABLED
             \ DISABLED_FEATURES
             \ DISABLE_PRECOMPILE_HEADERS
+            \ DOTNET_SDK
             \ DOTNET_TARGET_FRAMEWORK
             \ DOTNET_TARGET_FRAMEWORK_VERSION
             \ ECLIPSE_EXTRA_CPROJECT_CONTENTS
@@ -426,6 +427,7 @@ syn keyword cmakeProperty contained
             \ XCODE_SCHEME_ARGUMENTS
             \ XCODE_SCHEME_DEBUG_AS_ROOT
             \ XCODE_SCHEME_DEBUG_DOCUMENT_VERSIONING
+            \ XCODE_SCHEME_ENABLE_GPU_FRAME_CAPTURE_MODE
             \ XCODE_SCHEME_DISABLE_MAIN_THREAD_CHECKER
             \ XCODE_SCHEME_DYNAMIC_LIBRARY_LOADS
             \ XCODE_SCHEME_DYNAMIC_LINKER_API_USAGE
@@ -1000,6 +1002,7 @@ syn keyword cmakeVariable contained
             \ CMAKE_DIRECTORY_LABELS
             \ CMAKE_DISABLE_PRECOMPILE_HEADERS
             \ CMAKE_DL_LIBS
+            \ CMAKE_DOTNET_SDK
             \ CMAKE_DOTNET_TARGET_FRAMEWORK
             \ CMAKE_DOTNET_TARGET_FRAMEWORK_VERSION
             \ CMAKE_ECLIPSE_GENERATE_LINKED_RESOURCES
@@ -1524,6 +1527,7 @@ syn keyword cmakeVariable contained
             \ CMAKE_XCODE_SCHEME_ADDRESS_SANITIZER
             \ CMAKE_XCODE_SCHEME_ADDRESS_SANITIZER_USE_AFTER_RETURN
             \ CMAKE_XCODE_SCHEME_DEBUG_DOCUMENT_VERSIONING
+            \ CMAKE_XCODE_SCHEME_ENABLE_GPU_FRAME_CAPTURE_MODE
             \ CMAKE_XCODE_SCHEME_DISABLE_MAIN_THREAD_CHECKER
             \ CMAKE_XCODE_SCHEME_DYNAMIC_LIBRARY_LOADS
             \ CMAKE_XCODE_SCHEME_DYNAMIC_LINKER_API_USAGE
@@ -1608,6 +1612,7 @@ syn keyword cmakeVariable contained
             \ CTEST_SCP_COMMAND
             \ CTEST_SITE
             \ CTEST_SOURCE_DIRECTORY
+            \ CTEST_SUBMIT_INACTIVITY_TIMEOUT
             \ CTEST_SUBMIT_URL
             \ CTEST_SVN_COMMAND
             \ CTEST_SVN_OPTIONS
@@ -1900,7 +1905,7 @@ syn keyword cmakeVariable contained
             \ DOXYGEN_XML_PROGRAMLISTING
             \ ENV
             \ EXECUTABLE_OUTPUT_PATH
-            \ GHS-MULTI
+            \ GHSMULTI
             \ IOS
             \ LIBRARY_OUTPUT_PATH
             \ MINGW
@@ -2051,6 +2056,7 @@ syn keyword cmakeKWExternalProject contained
             \ USES_TERMINAL_CONFIGURE
             \ USES_TERMINAL_DOWNLOAD
             \ USES_TERMINAL_INSTALL
+            \ USES_TERMINAL_PATCH
             \ USES_TERMINAL_TEST
             \ USES_TERMINAL_UPDATE
             \ WORKING_DIRECTORY

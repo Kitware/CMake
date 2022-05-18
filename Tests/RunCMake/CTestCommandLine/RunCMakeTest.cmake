@@ -85,6 +85,38 @@ subdirs()
 endfunction()
 run_BadCTestTestfile()
 
+function(run_Subdirectories)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/Subdirectories)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}/add_subdirectory")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}/add_subdirectory/sub")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}/subdirs")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}/subdirs/sub")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" "
+add_subdirectory(add_subdirectory)
+subdirs(subdirs)
+")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/add_subdirectory/CTestTestfile.cmake" "
+add_test(add_subdirectory \"${CMAKE_COMMAND}\" -E echo add_subdirectory)
+add_subdirectory(sub)
+")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/add_subdirectory/sub/CTestTestfile.cmake" "
+add_test(add_subdirectory.sub \"${CMAKE_COMMAND}\" -E echo add_subdirectory.sub)
+")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/subdirs/CTestTestfile.cmake" "
+add_test(subdirs \"${CMAKE_COMMAND}\" -E echo subdirs)
+subdirs(sub)
+")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/subdirs/sub/CTestTestfile.cmake" "
+add_test(subdirs.sub \"${CMAKE_COMMAND}\" -E echo subdirs.sub)
+")
+
+  run_cmake_command(Subdirectories ${CMAKE_CTEST_COMMAND} -N)
+endfunction()
+run_Subdirectories()
+
 function(run_MergeOutput)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/MergeOutput)
   set(RunCMake_TEST_NO_CLEAN 1)

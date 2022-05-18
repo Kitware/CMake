@@ -883,7 +883,7 @@ std::string cmCPackNSISGenerator::CreateSelectionDependenciesDescription(
 {
   // Don't visit a component twice
   if (visited.count(component)) {
-    return std::string();
+    return {};
   }
   visited.insert(component);
 
@@ -907,7 +907,7 @@ std::string cmCPackNSISGenerator::CreateDeselectionDependenciesDescription(
 {
   // Don't visit a component twice
   if (visited.count(component)) {
-    return std::string();
+    return {};
   }
   visited.insert(component);
 
@@ -933,7 +933,7 @@ std::string cmCPackNSISGenerator::CreateComponentGroupDescription(
 {
   if (group->Components.empty() && group->Subgroups.empty()) {
     // Silently skip empty groups. NSIS doesn't support them.
-    return std::string();
+    return {};
   }
 
   std::string code = "SectionGroup ";

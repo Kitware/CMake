@@ -1,0 +1,13 @@
+^CMake Error at CMakeLists.txt:[0-9]+ \(project\):
+  Generator
+
+    Visual Studio [^
+]+
+
+  could not find specified instance of Visual Studio:
+
+    [^
+]+/Tests/RunCMake/GeneratorInstance
+
+  The directory exists, but the instance is not known to the Visual Studio
+  Installer, and no 'version=' field was given\.$

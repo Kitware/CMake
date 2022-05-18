@@ -18,6 +18,7 @@
 
 #include "cm_codecvt.hxx"
 
+#include "cmBuildOptions.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalCommonGenerator.h"
 #include "cmGlobalGeneratorFactory.h"
@@ -77,6 +78,7 @@ public:
 
   static std::string EncodeRuleName(std::string const& name);
   std::string EncodeLiteral(const std::string& lit);
+  void EncodeLiteralInplace(std::string& lit);
   std::string EncodePath(const std::string& path);
 
   std::unique_ptr<cmLinkLineComputer> CreateLinkLineComputer(
@@ -199,7 +201,8 @@ public:
   std::vector<GeneratedMakeCommand> GenerateBuildCommand(
     const std::string& makeProgram, const std::string& projectName,
     const std::string& projectDir, std::vector<std::string> const& targetNames,
-    const std::string& config, bool fast, int jobs, bool verbose,
+    const std::string& config, int jobs, bool verbose,
+    const cmBuildOptions& buildOptions = cmBuildOptions(),
     std::vector<std::string> const& makeOptions =
       std::vector<std::string>()) override;
 
@@ -526,6 +529,7 @@ private:
   /// The file containing the build statement. (the relationship of the
   /// compilation DAG).
   std::unique_ptr<cmGeneratedFileStream> BuildFileStream;
+  std::unique_ptr<char[]> BuildFileStreamBuffer;
   /// The file containing the rule statements. (The action attached to each
   /// edge of the compilation DAG).
   std::unique_ptr<cmGeneratedFileStream> RulesFileStream;

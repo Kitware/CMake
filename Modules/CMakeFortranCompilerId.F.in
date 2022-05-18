@@ -95,6 +95,13 @@
 # endif
 #elif defined(__ABSOFT__)
         PRINT *, 'INFO:compiler[Absoft]'
+#elif defined(__LCC__) && (defined(__GNUC__) || defined(__GNUG__) || defined(__MCST__))
+        PRINT *, 'INFO:compiler[LCC]'
+# define COMPILER_VERSION_MAJOR DEC(1)
+# define COMPILER_VERSION_MINOR DEC(__LCC__ - 100)
+# if defined(__LCC_MINOR__)
+#  define COMPILER_VERSION_PATCH DEC(__LCC_MINOR__)
+# endif
 #elif defined(__GNUC__)
         PRINT *, 'INFO:compiler[GNU]'
 # define COMPILER_VERSION_MAJOR DEC(__GNUC__)

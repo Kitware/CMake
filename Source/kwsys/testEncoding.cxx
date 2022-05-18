@@ -80,7 +80,7 @@ static int testRobustEncoding()
   std::ios::fmtflags const& flags = std::cout.flags();
 
   int ret = 0;
-  char cstr[] = { (char)-1, 0 };
+  char cstr[] = { static_cast<char>(-1), 0 };
   // this conversion could fail
   std::wstring wstr = kwsys::Encoding::ToWide(cstr);
 
@@ -89,7 +89,7 @@ static int testRobustEncoding()
     const wchar_t* wcstr = wstr.c_str();
     std::cout << "ToWide(NULL) returned";
     for (size_t i = 0; i < wstr.size(); i++) {
-      std::cout << " " << std::hex << (int)wcstr[i];
+      std::cout << " " << std::hex << static_cast<int>(wcstr[i]);
     }
     std::cout << std::endl;
     ret++;
@@ -99,7 +99,7 @@ static int testRobustEncoding()
     const wchar_t* wcstr = wstr.c_str();
     std::cout << "ToWide(\"\") returned";
     for (size_t i = 0; i < wstr.size(); i++) {
-      std::cout << " " << std::hex << (int)wcstr[i];
+      std::cout << " " << std::hex << static_cast<int>(wcstr[i]);
     }
     std::cout << std::endl;
     ret++;
@@ -160,7 +160,9 @@ static int testCommandLineArguments()
 {
   int status = 0;
 
-  char const* argv[2] = { "./app.exe", (char const*)helloWorldStrings[1] };
+  char const* argv[2] = {
+    "./app.exe", reinterpret_cast<char const*>(helloWorldStrings[1])
+  };
 
   kwsys::Encoding::CommandLineArguments args(2, argv);
   kwsys::Encoding::CommandLineArguments arg2 =

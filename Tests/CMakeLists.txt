@@ -531,8 +531,8 @@ if(BUILD_TESTING)
   if (NOT CMAKE_GENERATOR STREQUAL "Xcode")
     ADD_TEST_MACRO(SourceFileIncludeDirProperty SourceFileIncludeDirProperty)
   endif()
-  if(CMAKE_CXX_COMPILER_ID STREQUAL GNU
-      AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.7)
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "LCC" OR (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
+      AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.7))
     set(runCxxDialectTest 1)
   endif()
   if(CMAKE_CXX_COMPILER_ID STREQUAL Clang
@@ -670,7 +670,7 @@ if(BUILD_TESTING)
 
   ADD_TEST_MACRO(Module.WriteCompilerDetectionHeader WriteCompilerDetectionHeader)
 
-  if (APPLE OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+  if (APPLE OR CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "LCC")
     include(CheckCXXCompilerFlag)
     check_cxx_compiler_flag(-fPIE run_pic_test)
   else()
@@ -687,9 +687,10 @@ if(BUILD_TESTING)
     ADD_TEST_MACRO(PositionIndependentTargets PositionIndependentTargets)
   endif()
 
-  if((CMAKE_CXX_COMPILER_ID MATCHES "GNU") AND
+  if(CMAKE_CXX_COMPILER_ID MATCHES "LCC" OR
+    ((CMAKE_CXX_COMPILER_ID MATCHES "GNU") AND
     (NOT "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS 4.2) AND
-    (CMAKE_SYSTEM_NAME MATCHES "Linux"))
+    (CMAKE_SYSTEM_NAME MATCHES "Linux")))
 
     include(CheckCXXCompilerFlag)
     check_cxx_compiler_flag(
@@ -2011,7 +2012,7 @@ if(BUILD_TESTING)
   set_tests_properties ( linkorder2 PROPERTIES DEPENDS linkorder1)
 
   # Test static linking on toolchains known to support it.
-  if(CMAKE_C_COMPILER_ID STREQUAL "GNU"
+  if((CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID STREQUAL "LCC")
       AND NOT APPLE AND NOT WIN32 AND NOT CYGWIN
       AND EXISTS "/usr/lib/libm.a")
     add_test(LinkStatic  ${CMAKE_CTEST_COMMAND}
@@ -2026,7 +2027,7 @@ if(BUILD_TESTING)
       )
   endif()
 
-  if(MAKE_SUPPORTS_SPACES AND NOT CMAKE_GENERATOR STREQUAL "Xcode")
+  if(MAKE_SUPPORTS_SPACES AND NOT CMAKE_GENERATOR STREQUAL "Xcode" AND NOT CMAKE_GENERATOR STREQUAL "Watcom WMake")
     add_test(SubDirSpaces ${CMAKE_CTEST_COMMAND}
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/SubDirSpaces"
@@ -2106,109 +2107,7 @@ if(BUILD_TESTING)
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/MakeClean")
   endif()
 
-  if(NOT DEFINED CTEST_RUN_MFC)
-    set(CTEST_RUN_MFC OFF)
-
-    if(MSVC)
-      set(CTEST_RUN_MFC ON)
-
-      # Look for evidence that this is a VCExpress build. If so, avoid
-      # the MFC test by default.
-      string(TOLOWER "${CMAKE_MAKE_PROGRAM}" mkprog)
-      if(mkprog MATCHES "vcexpress")
-        message(STATUS
-          "CMAKE_MAKE_PROGRAM indicates vcexpress, avoiding MFC test")
-        set(CTEST_RUN_MFC OFF)
-      endif()
-
-      # Since MSBuild might also be the "makeprogram" for a VCExpress
-      # build tree, use one more heuristic, too. The string representing
-      # the .vcproj file type contains "VCExpress" on machines where an
-      # express edition of VS was installed last:
-      if(CTEST_RUN_MFC)
-        execute_process(COMMAND cmd /c assoc .vcproj
-          OUTPUT_STRIP_TRAILING_WHITESPACE
-          OUTPUT_VARIABLE ov)
-        if(ov MATCHES "VCExpress")
-          message(STATUS
-            ".vcproj file association indicates VCExpress, avoiding MFC test")
-          set(CTEST_RUN_MFC OFF)
-        elseif( NOT ov )
-          message(STATUS
-            ".vcproj has no file association, avoiding MFC test")
-          set(CTEST_RUN_MFC OFF)
-        endif()
-      endif()
-
-      if(CTEST_RUN_MFC)
-        # For the Watcom WMake generator, avoid the MFC test by default.
-        if("${CMAKE_GENERATOR}" MATCHES "WMake")
-          message(STATUS
-            "using the Watcom WMake generator, avoiding MFC test")
-          set(CTEST_RUN_MFC OFF)
-        elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "IntelLLVM")
-          # clang-cl cannot deal with implicit dependencies in UTF16 files
-          # (see #18311).  IntelLLVM inherits this behavior from Clang.
-          # TODO: maybe clang should also skip the MFC test
-          message(STATUS
-            "using generator other than Visual Studio with clang-cl, avoiding MFC test")
-          set(CTEST_RUN_MFC OFF)
-        endif()
-      endif()
-
-      # Last resort, after quick checks are done. Do a try_compile, and avoid
-      # the MFC test if the simplest possible MFC app cannot be compiled.
-      if(CTEST_RUN_MFC AND NOT DEFINED HAVE_MFC)
-        configure_file(
-          ${CMAKE_CURRENT_SOURCE_DIR}/MFC/try_compile/CMakeLists.txt
-          ${CMAKE_CURRENT_BINARY_DIR}/MFC/try_compile/CMakeLists.txt
-          COPYONLY
-          )
-        configure_file(
-          ${CMAKE_CURRENT_SOURCE_DIR}/MFC/mfc1/stdafx.cpp
-          ${CMAKE_CURRENT_BINARY_DIR}/MFC/try_compile/stdafx.cpp
-          COPYONLY
-          )
-        configure_file(
-          ${CMAKE_CURRENT_SOURCE_DIR}/MFC/mfc1/stdafx.h
-          ${CMAKE_CURRENT_BINARY_DIR}/MFC/try_compile/stdafx.h
-          COPYONLY
-          )
-
-        message(STATUS "Looking for MFC")
-
-        try_compile(HAVE_MFC
-          ${CMAKE_CURRENT_BINARY_DIR}/MFC/try_compile/build
-          ${CMAKE_CURRENT_BINARY_DIR}/MFC/try_compile
-          try_compile_mfc
-          OUTPUT_VARIABLE HAVE_MFC_OUTPUT)
-
-        if(HAVE_MFC)
-          message(STATUS "Looking for MFC - found")
-          set(HAVE_MFC 1 CACHE INTERNAL "Have MFC")
-          file(APPEND
-            ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-            "Determining if MFC exists passed with the following output:\n"
-            "${HAVE_MFC_OUTPUT}\n\n")
-        else()
-          message(STATUS "Looking for MFC - not found")
-          set(HAVE_MFC "" CACHE INTERNAL "Have MFC")
-          file(APPEND
-            ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-            "Determining if MFC exists failed with the following output:\n"
-            "${HAVE_MFC_OUTPUT}\n\n")
-        endif()
-      endif()
-
-      if(CTEST_RUN_MFC AND NOT HAVE_MFC)
-        message(STATUS
-          "cannot compile simplest ever MFC app, avoiding MFC test")
-        set(CTEST_RUN_MFC OFF)
-      endif()
-    endif()
-  endif()
-
-  if(CTEST_RUN_MFC)
+  if(CMake_TEST_MFC)
     add_test(MFC ${CMAKE_CTEST_COMMAND}
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/MFC"
@@ -3665,6 +3564,7 @@ if(BUILD_TESTING)
   if(CMAKE_GENERATOR MATCHES "^((Unix|MSYS) Makefiles|Ninja)$" AND
      ((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.4)
       OR (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC")
+      OR (CMAKE_CXX_COMPILER_ID STREQUAL "LCC")
       OR (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")))
     add_test(IncludeDirectoriesCPATH ${CMAKE_CTEST_COMMAND}
       --build-and-test

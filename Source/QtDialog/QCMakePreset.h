@@ -5,7 +5,7 @@
 #include <QString>
 #include <QVariant>
 
-#include "cmCMakePresetsFile.h"
+#include "cmCMakePresetsGraph.h"
 
 class QCMakePreset
 {

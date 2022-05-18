@@ -8,7 +8,7 @@ FindRuby
 Find Ruby
 
 This module finds if Ruby is installed and determines where the
-include files and libraries are.  Ruby 1.8 through 2.7 are
+include files and libraries are.  Ruby 1.8 through 3.1 are
 supported.
 
 The minimum required version of Ruby can be specified using the
@@ -139,13 +139,13 @@ set(Ruby_FIND_VERSION_SHORT_NODOT "${Ruby_FIND_VERSION_MAJOR}${Ruby_FIND_VERSION
 
 # Set name of possible executables, ignoring the minor
 # Eg:
-# 2.1.1 => from ruby27 to ruby21 included
-# 2.1   => from ruby27 to ruby21 included
-# 2     => from ruby26 to ruby20 included
-# empty => from ruby27 to ruby18 included
+# 2.1.1 => from ruby31 to ruby21 included
+# 2.1   => from ruby31 to ruby21 included
+# 2     => from ruby31 to ruby20 included
+# empty => from ruby31 to ruby18 included
 if(NOT Ruby_FIND_VERSION_EXACT)
 
-  foreach(_ruby_version RANGE 27 18 -1)
+  foreach(_ruby_version RANGE 31 18 -1)
     string(SUBSTRING "${_ruby_version}" 0 1 _ruby_major_version)
     string(SUBSTRING "${_ruby_version}" 1 1 _ruby_minor_version)
 
@@ -266,9 +266,20 @@ while(1)
   _RUBY_VALIDATE_INTERPRETER (${Ruby_FIND_VERSION})
   if (Ruby_EXECUTABLE)
     break()
+  else()
+    # Remove first entry from names list.
+    LIST(REMOVE_AT _Ruby_POSSIBLE_EXECUTABLE_NAMES 0)
+
+    # If the list is now empty, abort.
+    if (NOT _Ruby_POSSIBLE_EXECUTABLE_NAMES)
+      break()
+    else()
+      # Otherwise, continue with the remaining list. Make sure that we clear
+      # the cached variable.
+      unset(Ruby_EXECUTABLE CACHE)
+    endif()
   endif()
 
-  break()
 endwhile()
 
 if(Ruby_EXECUTABLE AND NOT Ruby_VERSION_MAJOR)
@@ -397,6 +408,16 @@ if(Ruby_EXECUTABLE AND NOT Ruby_VERSION_MAJOR)
   if(${Ruby_EXECUTABLE} MATCHES "ruby2\\.?7")
     set(Ruby_VERSION_MAJOR 2)
     set(Ruby_VERSION_MINOR 7)
+  endif()
+  # check whether we found 3.0.x
+  if(${Ruby_EXECUTABLE} MATCHES "ruby3\\.?0")
+    set(Ruby_VERSION_MAJOR 3)
+    set(Ruby_VERSION_MINOR 0)
+  endif()
+  # check whether we found 3.1.x
+  if(${Ruby_EXECUTABLE} MATCHES "ruby3\\.?1")
+    set(Ruby_VERSION_MAJOR 3)
+    set(Ruby_VERSION_MINOR 1)
   endif()
 endif()
 

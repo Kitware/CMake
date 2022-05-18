@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <packageSources>
+    <clear />
+    <add key="local" value="@CMAKE_CURRENT_SOURCE_DIR@/Repository/" />
+  </packageSources>
+</configuration>

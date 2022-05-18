@@ -1,0 +1,40 @@
+^CMake Error at OnlyTargets\.cmake:11 \(target_link_libraries\):
+  Target "exe" has LINK_LIBRARIES_ONLY_TARGETS enabled, but it links to:
+
+    non_target_in_exe
+
+  which is not a target\.  Possible reasons include:
+(
+    \*[^
+]+)*
+
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at OnlyTargets\.cmake:21 \(target_link_libraries\):
+  Target "iface" has LINK_LIBRARIES_ONLY_TARGETS enabled, but its link
+  interface contains:
+
+    non_target_in_iface
+
+  which is not a target\.  Possible reasons include:
+(
+    \*[^
+]+)*
+
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at OnlyTargets\.cmake:30 \(target_link_libraries\):
+  Target "iface_imported_checked" has LINK_LIBRARIES_ONLY_TARGETS enabled,
+  but its link interface contains:
+
+    non_target_in_iface_imported_checked
+
+  which is not a target\.  Possible reasons include:
+(
+    \*[^
+]+)*
+
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

@@ -1,0 +1,5 @@
+list(LENGTH flush_script_test_TESTS LIST_SIZE)
+set(EXPECTED_LIST_SIZE 4)
+if(NOT LIST_SIZE EQUAL ${EXPECTED_LIST_SIZE})
+  message("TEST_LIST should have ${EXPECTED_LIST_SIZE} elements but it has ${LIST_SIZE}")
+endif()

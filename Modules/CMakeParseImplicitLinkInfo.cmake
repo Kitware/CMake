@@ -58,6 +58,10 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var fwk_var log_var obj
       endif()
       separate_arguments(args NATIVE_COMMAND "${line}")
       list(GET args 0 cmd)
+      if("${cmd}" MATCHES "->")
+        # LCC has '-> ' in-front of the linker
+        list(GET args 1 cmd)
+      endif()
     else()
       #check to see if the link line is comma-separated instead of space separated
       string(REGEX REPLACE "," " " line "${line}")

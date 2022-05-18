@@ -20,6 +20,20 @@ variable if it is set when a target is created.
 The ``CUDA_ARCHITECTURES`` target property must be set to a non-empty value on targets
 that compile CUDA sources, or it is an error.  See policy :policy:`CMP0104`.
 
+The ``CUDA_ARCHITECTURES`` may be set to one of the following special values:
+
+``all``
+  .. versionadded:: 3.23
+
+  Compile for all supported major and minor real architectures,
+  and the highest major virtual architecture.
+
+``all-major``
+  .. versionadded:: 3.23
+
+  Compile for all supported major real architectures, and the highest
+  major virtual architecture.
+
 Examples
 ^^^^^^^^
 

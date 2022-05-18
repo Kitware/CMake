@@ -2,14 +2,16 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalBorlandMakefileGenerator.h"
 
+#include <ostream>
 #include <utility>
 
 #include <cm/memory>
 
 #include "cmDocumentationEntry.h"
+#include "cmGlobalGenerator.h"
+#include "cmLocalGenerator.h"
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
-#include "cmMessageType.h"
 #include "cmState.h"
 #include "cmake.h"
 
@@ -69,12 +71,13 @@ std::vector<cmGlobalGenerator::GeneratedMakeCommand>
 cmGlobalBorlandMakefileGenerator::GenerateBuildCommand(
   const std::string& makeProgram, const std::string& projectName,
   const std::string& projectDir, std::vector<std::string> const& targetNames,
-  const std::string& config, bool fast, int /*jobs*/, bool verbose,
+  const std::string& config, int /*jobs*/, bool verbose,
+  const cmBuildOptions& buildOptions,
   std::vector<std::string> const& makeOptions)
 {
   return this->cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
-    makeProgram, projectName, projectDir, targetNames, config, fast,
-    cmake::NO_BUILD_PARALLEL_LEVEL, verbose, makeOptions);
+    makeProgram, projectName, projectDir, targetNames, config,
+    cmake::NO_BUILD_PARALLEL_LEVEL, verbose, buildOptions, makeOptions);
 }
 
 void cmGlobalBorlandMakefileGenerator::PrintBuildCommandAdvice(

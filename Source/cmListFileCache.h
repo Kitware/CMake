@@ -4,7 +4,6 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <cstddef>
 #include <iosfwd>
 #include <memory>
 #include <string>
@@ -13,7 +12,6 @@
 
 #include <cm/optional>
 
-#include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
 
 /** \class cmListFileCache
@@ -24,28 +22,6 @@
  */
 
 class cmMessenger;
-
-struct cmCommandContext
-{
-  struct cmCommandName
-  {
-    std::string Original;
-    std::string Lower;
-    cmCommandName() = default;
-    cmCommandName(std::string name)
-      : Original(std::move(name))
-      , Lower(cmSystemTools::LowerCase(this->Original))
-    {
-    }
-  } Name;
-  long Line = 0;
-  cmCommandContext() = default;
-  cmCommandContext(std::string name, long line)
-    : Name(std::move(name))
-    , Line(line)
-  {
-  }
-};
 
 struct cmListFileArgument
 {
@@ -72,49 +48,6 @@ struct cmListFileArgument
   long Line = 0;
 };
 
-class cmListFileContext
-{
-public:
-  std::string Name;
-  std::string FilePath;
-  long Line = 0;
-  static long const DeferPlaceholderLine = -1;
-  cm::optional<std::string> DeferId;
-
-  cmListFileContext() = default;
-  cmListFileContext(std::string name, std::string filePath, long line)
-    : Name(std::move(name))
-    , FilePath(std::move(filePath))
-    , Line(line)
-  {
-  }
-
-#if __cplusplus < 201703L && (!defined(_MSVC_LANG) || _MSVC_LANG < 201703L)
-  cmListFileContext(const cmListFileContext& /*other*/) = default;
-  cmListFileContext(cmListFileContext&& /*other*/) = default;
-
-  cmListFileContext& operator=(const cmListFileContext& /*other*/) = default;
-  cmListFileContext& operator=(cmListFileContext&& /*other*/) = delete;
-#endif
-
-  static cmListFileContext FromCommandContext(
-    cmCommandContext const& lfcc, std::string const& fileName,
-    cm::optional<std::string> deferId = {})
-  {
-    cmListFileContext lfc;
-    lfc.FilePath = fileName;
-    lfc.Line = lfcc.Line;
-    lfc.Name = lfcc.Name.Original;
-    lfc.DeferId = std::move(deferId);
-    return lfc;
-  }
-};
-
-std::ostream& operator<<(std::ostream&, cmListFileContext const&);
-bool operator<(const cmListFileContext& lhs, const cmListFileContext& rhs);
-bool operator==(cmListFileContext const& lhs, cmListFileContext const& rhs);
-bool operator!=(cmListFileContext const& lhs, cmListFileContext const& rhs);
-
 class cmListFileFunction
 {
 public:
@@ -127,12 +60,12 @@ public:
 
   std::string const& OriginalName() const noexcept
   {
-    return this->Impl->Name.Original;
+    return this->Impl->OriginalName;
   }
 
   std::string const& LowerCaseName() const noexcept
   {
-    return this->Impl->Name.Lower;
+    return this->Impl->LowerCaseName;
   }
 
   long Line() const noexcept { return this->Impl->Line; }
@@ -142,45 +75,86 @@ public:
     return this->Impl->Arguments;
   }
 
-  operator cmCommandContext const&() const noexcept { return *this->Impl; }
-
 private:
-  struct Implementation : public cmCommandContext
+  struct Implementation
   {
     Implementation(std::string name, long line,
                    std::vector<cmListFileArgument> args)
-      : cmCommandContext{ std::move(name), line }
+      : OriginalName{ std::move(name) }
+      , LowerCaseName{ cmSystemTools::LowerCase(this->OriginalName) }
+      , Line{ line }
       , Arguments{ std::move(args) }
     {
     }
+
+    std::string OriginalName;
+    std::string LowerCaseName;
+    long Line = 0;
     std::vector<cmListFileArgument> Arguments;
   };
 
   std::shared_ptr<Implementation const> Impl;
 };
 
+class cmListFileContext
+{
+public:
+  std::string Name;
+  std::string FilePath;
+  long Line = 0;
+  static long const DeferPlaceholderLine = -1;
+  cm::optional<std::string> DeferId;
+
+  cmListFileContext() = default;
+  cmListFileContext(cmListFileContext&& /*other*/) = default;
+  cmListFileContext(const cmListFileContext& /*other*/) = default;
+  cmListFileContext& operator=(const cmListFileContext& /*other*/) = default;
+#if __cplusplus >= 201703L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L)
+  cmListFileContext& operator=(cmListFileContext&& /*other*/) = default;
+#else
+  // The move assignment operators for several STL classes did not become
+  // noexcept until C++17, which causes some tools to warn about this move
+  // assignment operator throwing an exception when it shouldn't.
+  cmListFileContext& operator=(cmListFileContext&& /*other*/) = delete;
+#endif
+
+  cmListFileContext(std::string name, std::string filePath, long line)
+    : Name(std::move(name))
+    , FilePath(std::move(filePath))
+    , Line(line)
+  {
+  }
+
+  static cmListFileContext FromListFileFunction(
+    cmListFileFunction const& lff, std::string const& fileName,
+    cm::optional<std::string> deferId = {})
+  {
+    cmListFileContext lfc;
+    lfc.FilePath = fileName;
+    lfc.Line = lff.Line();
+    lfc.Name = lff.OriginalName();
+    lfc.DeferId = std::move(deferId);
+    return lfc;
+  }
+};
+
+std::ostream& operator<<(std::ostream&, cmListFileContext const&);
+bool operator<(const cmListFileContext& lhs, const cmListFileContext& rhs);
+bool operator==(cmListFileContext const& lhs, cmListFileContext const& rhs);
+bool operator!=(cmListFileContext const& lhs, cmListFileContext const& rhs);
+
 // Represent a backtrace (call stack).  Provide value semantics
 // but use efficient reference-counting underneath to avoid copies.
 class cmListFileBacktrace
 {
 public:
-  // Default-constructed backtrace may not be used until after
-  // set via assignment from a backtrace constructed with a
-  // valid snapshot.
+  // Default-constructed backtrace is empty.
   cmListFileBacktrace() = default;
 
-  // Construct an empty backtrace whose bottom sits in the directory
-  // indicated by the given valid snapshot.
-  cmListFileBacktrace(cmStateSnapshot const& snapshot);
-
-  cmStateSnapshot GetBottom() const;
-
   // Get a backtrace with the given file scope added to the top.
-  // May not be called until after construction with a valid snapshot.
   cmListFileBacktrace Push(std::string const& file) const;
 
   // Get a backtrace with the given call context added to the top.
-  // May not be called until after construction with a valid snapshot.
   cmListFileBacktrace Push(cmListFileContext const& lfc) const;
 
   // Get a backtrace with the top level removed.
@@ -190,15 +164,6 @@ public:
   // Get the context at the top of the backtrace.
   // This may be called only if Empty() would return false.
   cmListFileContext const& Top() const;
-
-  // Print the top of the backtrace.
-  void PrintTitle(std::ostream& out) const;
-
-  // Print the call stack below the top of the backtrace.
-  void PrintCallStack(std::ostream& out) const;
-
-  // Get the number of 'frames' in this backtrace
-  size_t Depth() const;
 
   // Return true if this backtrace is empty.
   bool Empty() const;

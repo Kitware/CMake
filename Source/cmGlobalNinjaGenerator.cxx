@@ -156,7 +156,7 @@ std::string cmGlobalNinjaGenerator::EncodeRuleName(std::string const& name)
       encoded += i;
     } else {
       char buf[16];
-      sprintf(buf, ".%02x", static_cast<unsigned int>(i));
+      snprintf(buf, sizeof(buf), ".%02x", static_cast<unsigned int>(i));
       encoded += buf;
     }
   }
@@ -166,14 +166,18 @@ std::string cmGlobalNinjaGenerator::EncodeRuleName(std::string const& name)
 std::string cmGlobalNinjaGenerator::EncodeLiteral(const std::string& lit)
 {
   std::string result = lit;
-  cmSystemTools::ReplaceString(result, "$", "$$");
-  cmSystemTools::ReplaceString(result, "\n", "$\n");
+  EncodeLiteralInplace(result);
+  return result;
+}
+
+void cmGlobalNinjaGenerator::EncodeLiteralInplace(std::string& lit)
+{
+  cmSystemTools::ReplaceString(lit, "$", "$$");
+  cmSystemTools::ReplaceString(lit, "\n", "$\n");
   if (this->IsMultiConfig()) {
-    cmSystemTools::ReplaceString(result,
-                                 cmStrCat('$', this->GetCMakeCFGIntDir()),
+    cmSystemTools::ReplaceString(lit, cmStrCat('$', this->GetCMakeCFGIntDir()),
                                  this->GetCMakeCFGIntDir());
   }
-  return result;
 }
 
 std::string cmGlobalNinjaGenerator::EncodePath(const std::string& path)
@@ -185,7 +189,7 @@ std::string cmGlobalNinjaGenerator::EncodePath(const std::string& path)
   else
     std::replace(result.begin(), result.end(), '/', '\\');
 #endif
-  result = this->EncodeLiteral(result);
+  this->EncodeLiteralInplace(result);
   cmSystemTools::ReplaceString(result, " ", "$ ");
   cmSystemTools::ReplaceString(result, ":", "$:");
   return result;
@@ -955,7 +959,7 @@ cmGlobalNinjaGenerator::GenerateBuildCommand(
   const std::string& makeProgram, const std::string& /*projectName*/,
   const std::string& /*projectDir*/,
   std::vector<std::string> const& targetNames, const std::string& config,
-  bool /*fast*/, int jobs, bool verbose,
+  int jobs, bool verbose, const cmBuildOptions& /*buildOptions*/,
   std::vector<std::string> const& makeOptions)
 {
   GeneratedMakeCommand makeCommand;
@@ -1020,6 +1024,19 @@ bool cmGlobalNinjaGenerator::OpenBuildFileStreams()
                             cmGlobalNinjaGenerator::NINJA_BUILD_FILE)) {
     return false;
   }
+
+  // New buffer size 8 MiB
+  constexpr auto buildFileStreamBufferSize = 8 * 1024 * 1024;
+
+  // Ensure the buffer is allocated
+  if (!this->BuildFileStreamBuffer) {
+    this->BuildFileStreamBuffer =
+      cm::make_unique<char[]>(buildFileStreamBufferSize);
+  }
+
+  // Enlarge the internal buffer of the `BuildFileStream`
+  this->BuildFileStream->rdbuf()->pubsetbuf(this->BuildFileStreamBuffer.get(),
+                                            buildFileStreamBufferSize);
 
   // Write a comment about this file.
   *this->BuildFileStream

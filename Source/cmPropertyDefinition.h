@@ -22,7 +22,8 @@ class cmPropertyDefinition
 public:
   /// Constructor
   cmPropertyDefinition(std::string shortDescription,
-                       std::string fullDescription, bool chained);
+                       std::string fullDescription, bool chained,
+                       std::string initializeFromVariable);
 
   /// Is the property chained?
   bool IsChained() const { return this->Chained; }
@@ -39,10 +40,17 @@ public:
     return this->FullDescription;
   }
 
+  /// Get the variable the property is initialized from
+  const std::string& GetInitializeFromVariable() const
+  {
+    return this->InitializeFromVariable;
+  }
+
 private:
   std::string ShortDescription;
   std::string FullDescription;
   bool Chained;
+  std::string InitializeFromVariable;
 };
 
 /** \class cmPropertyDefinitionMap
@@ -54,13 +62,19 @@ public:
   // define the property
   void DefineProperty(const std::string& name, cmProperty::ScopeType scope,
                       const std::string& ShortDescription,
-                      const std::string& FullDescription, bool chain);
+                      const std::string& FullDescription, bool chain,
+                      const std::string& initializeFromVariable);
 
   // get the property definition if present, otherwise nullptr
   cmPropertyDefinition const* GetPropertyDefinition(
     const std::string& name, cmProperty::ScopeType scope) const;
 
+  using KeyType = std::pair<std::string, cmProperty::ScopeType>;
+  const std::map<KeyType, cmPropertyDefinition>& GetMap() const
+  {
+    return this->Map_;
+  }
+
 private:
-  using key_type = std::pair<std::string, cmProperty::ScopeType>;
-  std::map<key_type, cmPropertyDefinition> Map_;
+  std::map<KeyType, cmPropertyDefinition> Map_;
 };

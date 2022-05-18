@@ -2,6 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalVisualStudio7Generator.h"
 
+#include <algorithm>
+#include <cstdio>
+#include <ostream>
 #include <utility>
 #include <vector>
 
@@ -10,19 +13,22 @@
 
 #include <windows.h>
 
-#include <assert.h>
-
-#include "cmsys/Encoding.hxx"
-
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
+#include "cmGlobalGenerator.h"
+#include "cmLocalGenerator.h"
 #include "cmLocalVisualStudio7Generator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmState.h"
+#include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
+#include "cmTarget.h"
+#include "cmTargetDepend.h"
 #include "cmUuid.h"
+#include "cmVisualStudioGeneratorOptions.h"
 #include "cmake.h"
 
 static cmVS7FlagTable cmVS7ExtraFlagTable[] = {
@@ -206,7 +212,7 @@ cmGlobalVisualStudio7Generator::GenerateBuildCommand(
   const std::string& makeProgram, const std::string& projectName,
   const std::string& /*projectDir*/,
   std::vector<std::string> const& targetNames, const std::string& config,
-  bool /*fast*/, int /*jobs*/, bool /*verbose*/,
+  int /*jobs*/, bool /*verbose*/, const cmBuildOptions& /*buildOptions*/,
   std::vector<std::string> const& makeOptions)
 {
   // Select the caller- or user-preferred make program, else devenv.
@@ -298,7 +304,8 @@ void cmGlobalVisualStudio7Generator::Generate()
                                 GetSLNFile(this->LocalGenerators[0].get()));
   }
 
-  if (this->Version == VS10 && !this->CMakeInstance->GetIsInTryCompile()) {
+  if (this->Version == VSVersion::VS10 &&
+      !this->CMakeInstance->GetIsInTryCompile()) {
     std::string cmakeWarnVS10;
     if (cmValue cached = this->CMakeInstance->GetState()->GetCacheEntryValue(
           "CMAKE_WARN_VS10")) {
@@ -367,8 +374,16 @@ void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
         this->IsPartOfDefaultBuild(configs, projectTargets, target);
       cmValue vcprojName = target->GetProperty("GENERATOR_FILE_NAME");
       if (vcprojName) {
+        std::string mapping;
+
+        // On VS 19 and above, always map .NET SDK projects to "Any CPU".
+        if (target->IsDotNetSdkTarget() &&
+            this->GetVersion() >= VSVersion::VS16 &&
+            !this->IsReservedTarget(target->GetName())) {
+          mapping = "Any CPU";
+        }
         this->WriteProjectConfigurations(fout, *vcprojName, *target, configs,
-                                         configsPartOfDefaultBuild);
+                                         configsPartOfDefaultBuild, mapping);
       }
     }
   }

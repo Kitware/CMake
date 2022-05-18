@@ -13,6 +13,7 @@ macro (CHECK_COMPILER_FLAG_COMMON_PATTERNS _VAR)
     FAIL_REGEX "unknown .*option"                          # Clang
     FAIL_REGEX "optimization flag .* not supported"        # Clang
     FAIL_REGEX "unknown argument ignored"                  # Clang (cl)
+    FAIL_REGEX "warning: .* ignored"                       # Clang (linker)
     FAIL_REGEX "ignoring unknown option"                   # MSVC, Intel
     FAIL_REGEX "warning D9002"                             # MSVC, any lang
     FAIL_REGEX "option.*not supported"                     # Intel

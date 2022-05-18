@@ -5,19 +5,17 @@
 
 #include <sstream>
 
+#include "cmMakefile.h"
 #include "cmMessageType.h"
-#include "cmMessenger.h"
 #include "cmPolicies.h"
-#include "cmStateSnapshot.h"
 
 bool cmTargetPropertyComputer::HandleLocationPropertyPolicy(
-  std::string const& tgtName, cmMessenger* messenger,
-  cmListFileBacktrace const& context)
+  std::string const& tgtName, cmMakefile const& mf)
 {
   std::ostringstream e;
   const char* modal = nullptr;
   MessageType messageType = MessageType::AUTHOR_WARNING;
-  switch (context.GetBottom().GetPolicy(cmPolicies::CMP0026)) {
+  switch (mf.GetPolicyStatus(cmPolicies::CMP0026)) {
     case cmPolicies::WARN:
       e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0026) << "\n";
       modal = "should";
@@ -38,7 +36,7 @@ bool cmTargetPropertyComputer::HandleLocationPropertyPolicy(
       << "\".  Use the target name directly with "
          "add_custom_command, or use the generator expression $<TARGET_FILE>, "
          "as appropriate.\n";
-    messenger->IssueMessage(messageType, e.str(), context);
+    mf.IssueMessage(messageType, e.str());
   }
 
   return messageType != MessageType::FATAL_ERROR;

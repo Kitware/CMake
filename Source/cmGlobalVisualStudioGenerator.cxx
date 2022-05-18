@@ -3,8 +3,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalVisualStudioGenerator.h"
 
+#include <cassert>
 #include <future>
 #include <iostream>
+#include <sstream>
+#include <system_error>
+#include <utility>
 
 #include <cm/iterator>
 #include <cm/memory>
@@ -14,17 +18,20 @@
 #include <objbase.h>
 #include <shellapi.h>
 
-#include "cmsys/Encoding.hxx"
-
 #include "cmCallVisualStudioMacro.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
-#include "cmLocalVisualStudioGenerator.h"
+#include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
+#include "cmPolicies.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
+#include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmake.h"
 
@@ -95,21 +102,21 @@ bool cmGlobalVisualStudioGenerator::GetBuildAsX() const
 const char* cmGlobalVisualStudioGenerator::GetIDEVersion() const
 {
   switch (this->Version) {
-    case cmGlobalVisualStudioGenerator::VS9:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS9:
       return "9.0";
-    case cmGlobalVisualStudioGenerator::VS10:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS10:
       return "10.0";
-    case cmGlobalVisualStudioGenerator::VS11:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS11:
       return "11.0";
-    case cmGlobalVisualStudioGenerator::VS12:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS12:
       return "12.0";
-    case cmGlobalVisualStudioGenerator::VS14:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS14:
       return "14.0";
-    case cmGlobalVisualStudioGenerator::VS15:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS15:
       return "15.0";
-    case cmGlobalVisualStudioGenerator::VS16:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS16:
       return "16.0";
-    case cmGlobalVisualStudioGenerator::VS17:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS17:
       return "17.0";
   }
   return "";
@@ -122,11 +129,11 @@ void cmGlobalVisualStudioGenerator::WriteSLNHeader(std::ostream& fout)
   fout << '\n';
 
   switch (this->Version) {
-    case cmGlobalVisualStudioGenerator::VS9:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS9:
       fout << "Microsoft Visual Studio Solution File, Format Version 10.00\n";
       fout << "# Visual Studio 2008\n";
       break;
-    case cmGlobalVisualStudioGenerator::VS10:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS10:
       fout << "Microsoft Visual Studio Solution File, Format Version 11.00\n";
       if (this->ExpressEdition) {
         fout << "# Visual C++ Express 2010\n";
@@ -134,7 +141,7 @@ void cmGlobalVisualStudioGenerator::WriteSLNHeader(std::ostream& fout)
         fout << "# Visual Studio 2010\n";
       }
       break;
-    case cmGlobalVisualStudioGenerator::VS11:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS11:
       fout << "Microsoft Visual Studio Solution File, Format Version 12.00\n";
       if (this->ExpressEdition) {
         fout << "# Visual Studio Express 2012 for Windows Desktop\n";
@@ -142,7 +149,7 @@ void cmGlobalVisualStudioGenerator::WriteSLNHeader(std::ostream& fout)
         fout << "# Visual Studio 2012\n";
       }
       break;
-    case cmGlobalVisualStudioGenerator::VS12:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS12:
       fout << "Microsoft Visual Studio Solution File, Format Version 12.00\n";
       if (this->ExpressEdition) {
         fout << "# Visual Studio Express 2013 for Windows Desktop\n";
@@ -150,7 +157,7 @@ void cmGlobalVisualStudioGenerator::WriteSLNHeader(std::ostream& fout)
         fout << "# Visual Studio 2013\n";
       }
       break;
-    case cmGlobalVisualStudioGenerator::VS14:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS14:
       // Visual Studio 14 writes .sln format 12.00
       fout << "Microsoft Visual Studio Solution File, Format Version 12.00\n";
       if (this->ExpressEdition) {
@@ -159,7 +166,7 @@ void cmGlobalVisualStudioGenerator::WriteSLNHeader(std::ostream& fout)
         fout << "# Visual Studio 14\n";
       }
       break;
-    case cmGlobalVisualStudioGenerator::VS15:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS15:
       // Visual Studio 15 writes .sln format 12.00
       fout << "Microsoft Visual Studio Solution File, Format Version 12.00\n";
       if (this->ExpressEdition) {
@@ -168,7 +175,7 @@ void cmGlobalVisualStudioGenerator::WriteSLNHeader(std::ostream& fout)
         fout << "# Visual Studio 15\n";
       }
       break;
-    case cmGlobalVisualStudioGenerator::VS16:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS16:
       // Visual Studio 16 writes .sln format 12.00
       fout << "Microsoft Visual Studio Solution File, Format Version 12.00\n";
       if (this->ExpressEdition) {
@@ -177,7 +184,7 @@ void cmGlobalVisualStudioGenerator::WriteSLNHeader(std::ostream& fout)
         fout << "# Visual Studio Version 16\n";
       }
       break;
-    case cmGlobalVisualStudioGenerator::VS17:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS17:
       // Visual Studio 17 writes .sln format 12.00
       fout << "Microsoft Visual Studio Solution File, Format Version 12.00\n";
       if (this->ExpressEdition) {
@@ -204,19 +211,18 @@ void cmGlobalVisualStudioGenerator::AddExtraIDETargets()
 {
   // Add a special target that depends on ALL projects for easy build
   // of one configuration only.
-  const char* no_working_dir = nullptr;
-  std::vector<std::string> no_byproducts;
-  std::vector<std::string> no_depends;
-  cmCustomCommandLines no_commands;
   for (auto const& it : this->ProjectMap) {
     std::vector<cmLocalGenerator*> const& gen = it.second;
     // add the ALL_BUILD to the first local generator of each project
     if (!gen.empty()) {
       // Use no actual command lines so that the target itself is not
       // considered always out of date.
-      cmTarget* allBuild = gen[0]->AddUtilityCommand(
-        "ALL_BUILD", true, no_working_dir, no_byproducts, no_depends,
-        no_commands, cmPolicies::NEW, false, "Build all projects");
+      auto cc = cm::make_unique<cmCustomCommand>();
+      cc->SetCMP0116Status(cmPolicies::NEW);
+      cc->SetEscapeOldStyle(false);
+      cc->SetComment("Build all projects");
+      cmTarget* allBuild =
+        gen[0]->AddUtilityCommand("ALL_BUILD", true, std::move(cc));
 
       gen[0]->AddGeneratorTarget(
         cm::make_unique<cmGeneratorTarget>(allBuild, gen[0]));
@@ -947,9 +953,13 @@ void cmGlobalVisualStudioGenerator::AddSymbolExportCommand(
 
   cmCustomCommandLines commandLines = cmMakeSingleCommandLine(
     { cmakeCommand, "-E", "__create_def", mdi->DefFile, objs_file });
-  cmCustomCommand command(outputs, empty, empty, commandLines,
-                          gt->Target->GetMakefile()->GetBacktrace(),
-                          "Auto build dll exports", ".", true);
+  cmCustomCommand command;
+  command.SetOutputs(outputs);
+  command.SetCommandLines(commandLines);
+  command.SetComment("Auto build dll exports");
+  command.SetBacktrace(gt->Target->GetMakefile()->GetBacktrace());
+  command.SetWorkingDirectory(".");
+  command.SetStdPipesUTF8(true);
   commands.push_back(std::move(command));
 }
 

@@ -8,7 +8,8 @@
 #include "cmRST.h"
 #include "cmSystemTools.h"
 
-void reportLine(std::ostream& os, bool ret, std::string const& line, bool eol)
+static void reportLine(std::ostream& os, bool ret, std::string const& line,
+                       bool eol)
 {
   if (ret) {
     os << "\"" << line << "\" (" << (eol ? "with EOL" : "without EOL") << ")";

@@ -35,9 +35,9 @@ public:
   /** Destruct.   */
   ~cmXCOFF();
 
-  cmXCOFF(cmXCOFF&&);
+  cmXCOFF(cmXCOFF&&) noexcept;
   cmXCOFF(cmXCOFF const&) = delete;
-  cmXCOFF& operator=(cmXCOFF&&);
+  cmXCOFF& operator=(cmXCOFF&&) noexcept;
   cmXCOFF& operator=(cmXCOFF const&) = delete;
 
   /** Get the error message if any.  */

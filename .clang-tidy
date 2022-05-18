@@ -1,6 +1,8 @@
 ---
 Checks: "-*,\
 bugprone-*,\
+-bugprone-easily-swappable-parameters,\
+-bugprone-implicit-widening-of-multiplication-result,\
 -bugprone-macro-parentheses,\
 -bugprone-misplaced-widening-cast,\
 -bugprone-narrowing-conversions,\
@@ -12,6 +14,7 @@ misc-*,\
 -misc-static-assert,\
 modernize-*,\
 -modernize-avoid-c-arrays,\
+-modernize-return-braced-init-list,\
 -modernize-use-nodiscard,\
 -modernize-use-noexcept,\
 -modernize-use-trailing-return-type,\
@@ -27,6 +30,8 @@ readability-*,\
 -readability-magic-numbers,\
 -readability-named-parameter,\
 -readability-redundant-declaration,\
+-readability-redundant-member-init,\
+-readability-suspicious-call-argument,\
 -readability-uppercase-literal-suffix,\
 "
 HeaderFilterRegex: 'Source/cm[^/]*\.(h|hxx|cxx)$'

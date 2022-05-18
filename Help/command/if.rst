@@ -38,21 +38,29 @@ The following syntax applies to the ``condition`` argument of
 the ``if``, ``elseif`` and :command:`while` clauses.
 
 Compound conditions are evaluated in the following order of precedence:
-Innermost parentheses are evaluated first. Next come unary tests such
-as `EXISTS`_, `COMMAND`_, and `DEFINED`_.  Then binary tests such as
-`EQUAL`_, `LESS`_, `LESS_EQUAL`_, `GREATER`_, `GREATER_EQUAL`_,
-`STREQUAL`_, `STRLESS`_, `STRLESS_EQUAL`_, `STRGREATER`_,
-`STRGREATER_EQUAL`_, `VERSION_EQUAL`_, `VERSION_LESS`_,
-`VERSION_LESS_EQUAL`_, `VERSION_GREATER`_, `VERSION_GREATER_EQUAL`_,
-and `MATCHES`_.  Then the boolean operators in the order `NOT`_,  `AND`_,
-and finally `OR`_.
+
+1. Parentheses.
+
+2. Unary tests such as `EXISTS`_, `COMMAND`_, and `DEFINED`_.
+
+3. Binary tests such as `EQUAL`_, `LESS`_, `LESS_EQUAL`_, `GREATER`_,
+   `GREATER_EQUAL`_, `STREQUAL`_, `STRLESS`_, `STRLESS_EQUAL`_,
+   `STRGREATER`_, `STRGREATER_EQUAL`_, `VERSION_EQUAL`_, `VERSION_LESS`_,
+   `VERSION_LESS_EQUAL`_, `VERSION_GREATER`_, `VERSION_GREATER_EQUAL`_,
+   and `MATCHES`_.
+
+4. Unary logical operator `NOT`_.
+
+5. Binary logical operators `AND`_ and `OR`_, from left to right,
+   without any short-circuit.
 
 Basic Expressions
 """""""""""""""""
 
 ``if(<constant>)``
  True if the constant is ``1``, ``ON``, ``YES``, ``TRUE``, ``Y``,
- or a non-zero number.  False if the constant is ``0``, ``OFF``,
+ or a non-zero number (including floating point numbers).
+ False if the constant is ``0``, ``OFF``,
  ``NO``, ``FALSE``, ``N``, ``IGNORE``, ``NOTFOUND``, the empty string,
  or ends in the suffix ``-NOTFOUND``.  Named boolean constants are
  case-insensitive.  If the argument is not one of these specific
@@ -126,7 +134,16 @@ Existence Checks
 ``if(DEFINED <name>|CACHE{<name>}|ENV{<name>})``
  True if a variable, cache variable or environment variable
  with given ``<name>`` is defined. The value of the variable
- does not matter. Note that macro arguments are not variables.
+ does not matter. Note the following caveats:
+
+ * Macro arguments are not variables.
+ * It is not possible to test directly whether a `<name>` is a non-cache
+   variable.  The expression ``if(DEFINED someName)`` will evaluate to true
+   if either a cache or non-cache variable ``someName`` exists.  In
+   comparison, the expression ``if(DEFINED CACHE{someName})`` will only
+   evaluate to true if a cache variable ``someName`` exists.  Both expressions
+   need to be tested if you need to know whether a non-cache variable exists:
+   ``if(DEFINED someName AND NOT DEFINED CACHE{someName})``.
 
  .. versionadded:: 3.14
   Added support for ``CACHE{<name>}`` variables.

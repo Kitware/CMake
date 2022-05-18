@@ -129,6 +129,12 @@ if(CMAKE_Fortran_COMPILE_OPTIONS_PREPROCESS_ON AND
   add_executable(preprocess_target preprocess2.f)
   set_property(TARGET preprocess_target PROPERTY Fortran_PREPROCESS ON)
 
+  if(CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
+    # gfortran might report spurious warnings if we include the
+    # preprocessing flags at the compilation stage
+    target_compile_options(preprocess_target PRIVATE -Wall -Werror)
+  endif()
+
   # Test that we can preprocess a single source file
   add_executable(preprocess_source preprocess3.f)
   set_property(SOURCE preprocess3.f PROPERTY Fortran_PREPROCESS ON)

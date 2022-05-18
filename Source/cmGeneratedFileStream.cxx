@@ -136,7 +136,8 @@ void cmGeneratedFileStreamBase::Open(std::string const& name)
     this->TempName += this->TempExt;
   } else {
     char buf[64];
-    sprintf(buf, "tmp%05x", cmSystemTools::RandomSeed() & 0xFFFFF);
+    snprintf(buf, sizeof(buf), "tmp%05x",
+             cmSystemTools::RandomSeed() & 0xFFFFF);
     this->TempName += buf;
   }
 

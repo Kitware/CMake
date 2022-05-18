@@ -19,7 +19,7 @@ file Copyright.txt or https://cmake.org/licensing#kwsys for details.  */
 
 #include <testSystemTools.h>
 
-int _doLongPathTest()
+static int _doLongPathTest()
 {
   using namespace kwsys;
   static const int LONG_PATH_THRESHOLD = 512;
@@ -77,7 +77,7 @@ int _doLongPathTest()
   return res;
 }
 
-int _nonExistentDirectoryTest()
+static int _nonExistentDirectoryTest()
 {
   using namespace kwsys;
   int res = 0;
@@ -105,7 +105,7 @@ int _nonExistentDirectoryTest()
   return res;
 }
 
-int _copyDirectoryTest()
+static int _copyDirectoryTest()
 {
   using namespace kwsys;
   const std::string source(TEST_SYSTEMTOOLS_BINARY_DIR

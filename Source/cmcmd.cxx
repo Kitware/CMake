@@ -58,7 +58,6 @@
 #ifdef _WIN32
 #  include <fcntl.h> // for _O_BINARY
 #  include <io.h>    // for _setmode
-#  include <stdio.h> // for std{out,err} and fileno
 #endif
 
 #include <cm/string_view>
@@ -1112,7 +1111,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
       int count;
       if (countFile) {
         if (1 != fscanf(countFile, "%i", &count)) {
-          cmSystemTools::Message("Could not read from count file.");
+          std::cerr << "Could not read from count file.\n";
         }
         fclose(countFile);
       } else {
@@ -1426,8 +1425,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
             action = cmSystemTools::TarActionExtract;
           } break;
           default: {
-            cmSystemTools::Message(
-              std::string("tar: Unknown argument: ") + flag, "Warning");
+            std::cerr << "tar: Unknown argument: " << flag << "\n";
           }
         }
       }
@@ -1448,8 +1446,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
         }
       } else if (action == cmSystemTools::TarActionCreate) {
         if (files.empty()) {
-          cmSystemTools::Message("tar: No files or directories specified",
-                                 "Warning");
+          std::cerr << "tar: No files or directories specified\n";
         }
         if (!cmSystemTools::CreateTar(outFile, files, compress, verbose, mtime,
                                       format)) {
@@ -1588,7 +1585,11 @@ int cmcmd::HashSumFile(std::vector<std::string> const& args,
       std::cerr << "Error: " << filename << " is a directory" << std::endl;
       retval++;
     } else {
-      std::string value = cmSystemTools::ComputeFileHash(filename, algo);
+      std::string value
+#ifndef CMAKE_BOOTSTRAP
+        = cmSystemTools::ComputeFileHash(filename, algo)
+#endif
+        ;
       if (value.empty()) {
         // To mimic "md5sum/shasum" behavior in a shell:
         std::cerr << filename << ": No such file or directory" << std::endl;
@@ -1684,7 +1685,7 @@ static void cmcmdProgressReport(std::string const& dir, std::string const& num)
     return;
   }
   if (1 != fscanf(progFile, "%i", &count)) {
-    cmSystemTools::Message("Could not read from progress file.");
+    std::cerr << "Could not read from progress file.\n";
   }
   fclose(progFile);
 
@@ -2135,8 +2136,8 @@ struct NumberFormatter
   {
   }
 };
-std::ostream& operator<<(std::ostream& stream,
-                         NumberFormatter const& formatter)
+static std::ostream& operator<<(std::ostream& stream,
+                                NumberFormatter const& formatter)
 {
   auto const& flags = stream.flags();
   if (formatter.Format == FORMAT_DECIMAL) {

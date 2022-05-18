@@ -1,8 +1,0 @@
-CMake Error at unbalanced-parenthesis.cmake:[0-9]+ \(while\):
-  had incorrect arguments:
-
-    "NOT" "\(" "IN_LIST" "some_list"
-
-  mismatched parenthesis in condition
-Call Stack \(most recent call first\):
-  CMakeLists\.txt:[0-9]+ \(include\)

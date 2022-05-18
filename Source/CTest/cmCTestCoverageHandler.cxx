@@ -49,9 +49,8 @@ public:
   }
   ~cmCTestRunProcess()
   {
-    if (!(this->PipeState == -1) &&
-        !(this->PipeState == cmsysProcess_Pipe_None) &&
-        !(this->PipeState == cmsysProcess_Pipe_Timeout)) {
+    if (this->PipeState != -1 && this->PipeState != cmsysProcess_Pipe_None &&
+        this->PipeState != cmsysProcess_Pipe_Timeout) {
       this->WaitForExit();
     }
     cmsysProcess_Delete(this->Process);
@@ -148,7 +147,8 @@ bool cmCTestCoverageHandler::StartCoverageLogFile(
   cmGeneratedFileStream& covLogFile, int logFileCount)
 {
   char covLogFilename[1024];
-  sprintf(covLogFilename, "CoverageLog-%d", logFileCount);
+  snprintf(covLogFilename, sizeof(covLogFilename), "CoverageLog-%d",
+           logFileCount);
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                      "Open file: " << covLogFilename << std::endl,
                      this->Quiet);
@@ -165,7 +165,8 @@ void cmCTestCoverageHandler::EndCoverageLogFile(cmGeneratedFileStream& ostr,
                                                 int logFileCount)
 {
   char covLogFilename[1024];
-  sprintf(covLogFilename, "CoverageLog-%d.xml", logFileCount);
+  snprintf(covLogFilename, sizeof(covLogFilename), "CoverageLog-%d.xml",
+           logFileCount);
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                      "Close file: " << covLogFilename << std::endl,
                      this->Quiet);
@@ -692,7 +693,7 @@ void cmCTestCoverageHandler::PopulateCustomVectors(cmMakefile* mf)
 #  define fnc_prefix(s, t) cmHasPrefix(s, t)
 #endif
 
-bool IsFileInDir(const std::string& infile, const std::string& indir)
+static bool IsFileInDir(const std::string& infile, const std::string& indir)
 {
   std::string file = cmSystemTools::CollapseFullPath(infile);
   std::string dir = cmSystemTools::CollapseFullPath(indir);

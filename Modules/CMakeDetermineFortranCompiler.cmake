@@ -52,6 +52,7 @@ else()
       #  frt: Fujitsu F77 compiler
       #  pathf90/pathf95/pathf2003: PathScale Fortran compiler
       #  pgf77/pgf90/pgf95/pgfortran: Portland Group F77/F90/F95 compilers
+      #  nvfortran: NVHPC Fotran compiler
       #  flang: Flang Fortran compiler
       #  xlf/xlf90/xlf95: IBM (AIX) F77/F90/F95 compilers
       #  lf95: Lahey-Fujitsu F95 compiler
@@ -70,20 +71,21 @@ else()
       #  so if you paid for a compiler it is picked by default.
       if(CMAKE_HOST_WIN32)
         set(CMAKE_Fortran_COMPILER_LIST
-          ifort ifx pgf95 pgfortran lf95 fort
+          ifort ifx pgf95 pgfortran nvfortran lf95 fort
           flang gfortran gfortran-4 g95 f90 pgf90
           pgf77 g77 f77 nag
           )
       else()
         set(CMAKE_Fortran_COMPILER_LIST
           ftn
-          ifort ifc ifx efc pgf95 pgfortran lf95 xlf95 fort
-          flang gfortran gfortran-4 g95 f90 pgf90
+          ifort ifc ifx efc pgf95 pgfortran nvfortran lf95 xlf95 fort
+          flang lfortran gfortran gfortran-4 g95 f90 pgf90
           frt pgf77 xlf g77 f77 nag
           )
       endif()
 
       # Vendor-specific compiler names.
+      set(_Fortran_COMPILER_NAMES_LCC       lfortran gfortran)
       set(_Fortran_COMPILER_NAMES_GNU       gfortran gfortran-4 g95 g77)
       set(_Fortran_COMPILER_NAMES_Intel     ifort ifc efc ifx)
       set(_Fortran_COMPILER_NAMES_Absoft    af95 af90 af77)
@@ -93,6 +95,7 @@ else()
       set(_Fortran_COMPILER_NAMES_XL        xlf)
       set(_Fortran_COMPILER_NAMES_VisualAge xlf95 xlf90 xlf)
       set(_Fortran_COMPILER_NAMES_NAG       nagfor)
+      set(_Fortran_COMPILER_NAMES_NVHPC     nvfortran)
     endif()
 
     _cmake_find_compiler(Fortran)

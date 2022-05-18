@@ -10,6 +10,7 @@
 
 #include "cmGlobalVisualStudioGenerator.h"
 #include "cmLocalGenerator.h"
+#include "cmVsProjectType.h"
 
 class cmCustomCommand;
 class cmCustomCommandGenerator;
@@ -30,9 +31,10 @@ public:
   cmLocalVisualStudioGenerator(cmGlobalGenerator* gg, cmMakefile* mf);
   virtual ~cmLocalVisualStudioGenerator();
 
-  /** Construct a script from the given list of command lines.  */
   std::string ConstructScript(cmCustomCommandGenerator const& ccg,
                               const std::string& newline = "\n");
+  std::string FinishConstructScript(VsProjectType projectType,
+                                    const std::string& newline = "\n");
 
   /** Label to which to jump in a batch file after a failed step in a
       sequence of custom commands. */

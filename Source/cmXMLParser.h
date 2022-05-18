@@ -21,6 +21,7 @@ class cmXMLParser
 {
 public:
   cmXMLParser();
+  cmXMLParser(const cmXMLParser& /*other*/) = default;
   virtual ~cmXMLParser();
 
   //! Parse given XML string

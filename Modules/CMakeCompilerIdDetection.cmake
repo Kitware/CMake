@@ -59,6 +59,7 @@ function(compiler_id_detection outvar lang)
       HP
       Compaq
       zOS
+      IBMClang
       XLClang
       XL
       VisualAge
@@ -84,6 +85,7 @@ function(compiler_id_detection outvar lang)
     )
     list(APPEND ordered_compilers
       Clang
+      LCC
       GNU
       MSVC
       ADSP

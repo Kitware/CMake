@@ -1,6 +1,7 @@
 file(TOUCH "${RunCMake_TEST_BINARY_DIR}/topccdep.txt")
 file(TOUCH "${RunCMake_TEST_BINARY_DIR}/topexedep.txt")
 file(TOUCH "${RunCMake_TEST_BINARY_DIR}/toplibdep.txt")
+file(TOUCH "${RunCMake_TEST_BINARY_DIR}/toplibdep2.txt")
 file(TOUCH "${RunCMake_TEST_BINARY_DIR}/DepfileSubdir/subccdep.txt")
 file(TOUCH "${RunCMake_TEST_BINARY_DIR}/DepfileSubdir/subexedep.txt")
 file(TOUCH "${RunCMake_TEST_BINARY_DIR}/DepfileSubdir/sublibdep.txt")

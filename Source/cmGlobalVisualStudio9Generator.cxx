@@ -2,13 +2,18 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalVisualStudio9Generator.h"
 
+#include <cstring>
 #include <utility>
+#include <vector>
 
 #include "cmDocumentationEntry.h"
-#include "cmLocalVisualStudio7Generator.h"
-#include "cmMakefile.h"
-#include "cmMessageType.h"
+#include "cmGlobalGenerator.h"
+#include "cmGlobalGeneratorFactory.h"
+#include "cmGlobalVisualStudioGenerator.h"
+#include "cmSystemTools.h"
 #include "cmVisualStudioWCEPlatformParser.h"
+
+class cmake;
 
 static const char vs9generatorName[] = "Visual Studio 9 2008";
 
@@ -119,7 +124,7 @@ cmGlobalVisualStudio9Generator::cmGlobalVisualStudio9Generator(
   std::string const& platformInGeneratorName)
   : cmGlobalVisualStudio8Generator(cm, name, platformInGeneratorName)
 {
-  this->Version = VS9;
+  this->Version = VSVersion::VS9;
   std::string vc9Express;
   this->ExpressEdition = cmSystemTools::ReadRegistryValue(
     "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\9.0\\Setup\\VC;"

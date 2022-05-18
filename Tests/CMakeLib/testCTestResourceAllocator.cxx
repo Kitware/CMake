@@ -12,7 +12,7 @@ static const cmCTestResourceSpec spec{ { {
   /* clang-format on */
 } } };
 
-bool testInitializeFromResourceSpec()
+static bool testInitializeFromResourceSpec()
 {
   bool retval = true;
 
@@ -39,7 +39,7 @@ bool testInitializeFromResourceSpec()
   return retval;
 }
 
-bool testAllocateResource()
+static bool testAllocateResource()
 {
   bool retval = true;
 
@@ -216,7 +216,7 @@ bool testAllocateResource()
   return retval;
 }
 
-bool testDeallocateResource()
+static bool testDeallocateResource()
 {
   bool retval = true;
 
@@ -370,7 +370,7 @@ bool testDeallocateResource()
   return retval;
 }
 
-bool testResourceFree()
+static bool testResourceFree()
 {
   bool retval = true;
 

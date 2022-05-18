@@ -55,6 +55,7 @@ for fpath in cmake_manuals:
 man_show_urls = False
 man_make_section_directory = False
 
+html_baseurl = '@conf_baseurl@'
 html_show_sourcelink = True
 html_static_path = ['@conf_path@/static']
 html_style = 'cmake.css'

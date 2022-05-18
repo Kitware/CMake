@@ -3,24 +3,35 @@
 #include "cmGlobalVisualStudio10Generator.h"
 
 #include <algorithm>
+#include <cstring>
+#include <map>
+#include <sstream>
 #include <utility>
 
 #include <cm/memory>
 
 #include <cm3p/json/reader.h>
+#include <cm3p/json/value.h>
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
 #include "cmsys/RegularExpression.hxx"
 
-#include "cmAlgorithms.h"
 #include "cmDocumentationEntry.h"
 #include "cmGeneratorTarget.h"
+#include "cmGlobalGenerator.h"
+#include "cmGlobalGeneratorFactory.h"
+#include "cmGlobalVisualStudio71Generator.h"
+#include "cmGlobalVisualStudio7Generator.h"
+#include "cmGlobalVisualStudioGenerator.h"
+#include "cmIDEFlagTable.h"
+#include "cmLocalGenerator.h"
 #include "cmLocalVisualStudio10Generator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmSourceFile.h"
 #include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 #include "cmVersion.h"
 #include "cmVisualStudioSlnData.h"
 #include "cmVisualStudioSlnParser.h"
@@ -159,7 +170,7 @@ cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(
   this->DefaultNasmFlagTableName = "v10";
   this->DefaultRCFlagTableName = "v10";
 
-  this->Version = VS10;
+  this->Version = VSVersion::VS10;
   this->PlatformToolsetNeedsDebugEnum = false;
 }
 
@@ -266,8 +277,8 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
   }
 
   this->SupportsUnityBuilds =
-    this->Version >= cmGlobalVisualStudioGenerator::VS16 ||
-    (this->Version == cmGlobalVisualStudioGenerator::VS15 &&
+    this->Version >= cmGlobalVisualStudioGenerator::VSVersion::VS16 ||
+    (this->Version == cmGlobalVisualStudioGenerator::VSVersion::VS15 &&
      cmSystemTools::PathExists(this->VCTargetsPath +
                                "/Microsoft.Cpp.Unity.targets"));
 
@@ -580,7 +591,7 @@ bool cmGlobalVisualStudio10Generator::InitializeWindowsCE(cmMakefile* mf)
 
   this->DefaultPlatformToolset = this->SelectWindowsCEToolset();
 
-  if (this->GetVersion() == cmGlobalVisualStudioGenerator::VS12) {
+  if (this->GetVersion() == cmGlobalVisualStudioGenerator::VSVersion::VS12) {
     // VS 12 .NET CF defaults to .NET framework 3.9 for Windows CE.
     this->DefaultTargetFrameworkVersion = "v3.9";
     this->DefaultTargetFrameworkIdentifier = "WindowsEmbeddedCompact";
@@ -712,6 +723,10 @@ void cmGlobalVisualStudio10Generator::Generate()
       "which then triggers the VS 10 property dialog bug.";
     /* clang-format on */
     lg->IssueMessage(MessageType::WARNING, e.str());
+  }
+  if (cmValue cached = this->CMakeInstance->GetState()->GetCacheEntryValue(
+        "CMAKE_VS_NUGET_PACKAGE_RESTORE")) {
+    this->CMakeInstance->MarkCliAsUsed("CMAKE_VS_NUGET_PACKAGE_RESTORE");
   }
 }
 
@@ -1088,7 +1103,8 @@ std::vector<cmGlobalGenerator::GeneratedMakeCommand>
 cmGlobalVisualStudio10Generator::GenerateBuildCommand(
   const std::string& makeProgram, const std::string& projectName,
   const std::string& projectDir, std::vector<std::string> const& targetNames,
-  const std::string& config, bool fast, int jobs, bool verbose,
+  const std::string& config, int jobs, bool verbose,
+  const cmBuildOptions& buildOptions,
   std::vector<std::string> const& makeOptions)
 {
   std::vector<GeneratedMakeCommand> makeCommands;
@@ -1118,7 +1134,7 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
     slnFile += ".sln";
     cmVisualStudioSlnParser parser;
     if (parser.ParseFile(slnFile, slnData,
-                         cmVisualStudioSlnParser::DataGroupProjects)) {
+                         cmVisualStudioSlnParser::DataGroupAll)) {
       std::vector<cmSlnProjectEntry> slnProjects = slnData.GetProjects();
       for (cmSlnProjectEntry const& project : slnProjects) {
         if (useDevEnv) {
@@ -1134,8 +1150,8 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
   if (useDevEnv) {
     // Use devenv to build solutions containing Intel Fortran projects.
     return cmGlobalVisualStudio7Generator::GenerateBuildCommand(
-      makeProgram, projectName, projectDir, targetNames, config, fast, jobs,
-      verbose, makeOptions);
+      makeProgram, projectName, projectDir, targetNames, config, jobs, verbose,
+      buildOptions, makeOptions);
   }
 
   std::vector<std::string> realTargetNames = targetNames;
@@ -1154,37 +1170,108 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
     GeneratedMakeCommand makeCommand;
     makeCommand.RequiresOutputForward = requiresOutputForward;
     makeCommand.Add(makeProgramSelected);
+    cm::optional<cmSlnProjectEntry> proj = cm::nullopt;
 
     if (tname == "clean") {
-      makeCommand.Add(std::string(projectName) + ".sln");
+      makeCommand.Add(cmStrCat(projectName, ".sln"));
       makeCommand.Add("/t:Clean");
     } else {
       std::string targetProject = cmStrCat(tname, ".vcxproj");
+      proj = slnData.GetProjectByName(tname);
       if (targetProject.find('/') == std::string::npos) {
         // it might be in a subdir
-        if (cmSlnProjectEntry const* proj = slnData.GetProjectByName(tname)) {
+        if (proj) {
           targetProject = proj->GetRelativePath();
           cmSystemTools::ConvertToUnixSlashes(targetProject);
         }
       }
-      makeCommand.Add(std::move(targetProject));
+      makeCommand.Add(targetProject);
+
+      // Check if we do need a restore at all (i.e. if there are package
+      // references and restore has not been disabled by a command line option.
+      PackageResolveMode restoreMode = buildOptions.ResolveMode;
+      bool requiresRestore = true;
+
+      if (restoreMode == PackageResolveMode::Disable) {
+        requiresRestore = false;
+      } else if (cmValue cached =
+                   this->CMakeInstance->GetState()->GetCacheEntryValue(
+                     tname + "_REQUIRES_VS_PACKAGE_RESTORE")) {
+        requiresRestore = cached.IsOn();
+      } else {
+        // There are no package references defined.
+        requiresRestore = false;
+      }
+
+      // If a restore is required, evaluate the restore mode.
+      if (requiresRestore) {
+        if (restoreMode == PackageResolveMode::OnlyResolve) {
+          // Only invoke the restore target on the project.
+          makeCommand.Add("/t:Restore");
+        } else {
+          // Invoke restore target, unless it has been explicitly disabled.
+          bool restorePackages = true;
+
+          if (this->Version < VSVersion::VS15) {
+            // Package restore is only supported starting from Visual Studio
+            // 2017. Package restore must be executed manually using NuGet
+            // shell for older versions.
+            this->CMakeInstance->IssueMessage(
+              MessageType::WARNING,
+              "Restoring package references is only supported for Visual "
+              "Studio 2017 and later. You have to manually restore the "
+              "packages using NuGet before building the project.");
+            restorePackages = false;
+          } else if (restoreMode == PackageResolveMode::Default) {
+            // Decide if a restore is performed, based on a cache variable.
+            if (cmValue cached =
+                  this->CMakeInstance->GetState()->GetCacheEntryValue(
+                    "CMAKE_VS_NUGET_PACKAGE_RESTORE"))
+              restorePackages = cached.IsOn();
+          }
+
+          if (restorePackages) {
+            if (this->IsMsBuildRestoreSupported()) {
+              makeCommand.Add("/restore");
+            } else {
+              GeneratedMakeCommand restoreCommand;
+              restoreCommand.Add(makeProgramSelected);
+              restoreCommand.Add(targetProject);
+              restoreCommand.Add("/t:Restore");
+              makeCommands.emplace_back(restoreCommand);
+            }
+          }
+        }
+      }
     }
-    std::string configArg = "/p:Configuration=";
-    if (!config.empty()) {
-      configArg += config;
-    } else {
-      configArg += "Debug";
+
+    std::string plainConfig = config;
+    if (config.empty()) {
+      plainConfig = "Debug";
     }
-    makeCommand.Add(configArg);
-    makeCommand.Add(std::string("/p:Platform=") + this->GetPlatformName());
-    makeCommand.Add(std::string("/p:VisualStudioVersion=") +
-                    this->GetIDEVersion());
+
+    std::string platform = GetPlatformName();
+    if (proj) {
+      std::string extension =
+        cmSystemTools::GetFilenameLastExtension(proj->GetRelativePath());
+      extension = cmSystemTools::LowerCase(extension);
+      if (extension.compare(".csproj") == 0) {
+        // Use correct platform name
+        platform =
+          slnData.GetConfigurationTarget(tname, plainConfig, platform);
+      }
+    }
+
+    makeCommand.Add(cmStrCat("/p:Configuration=", plainConfig));
+    makeCommand.Add(cmStrCat("/p:Platform=", platform));
+    makeCommand.Add(
+      cmStrCat("/p:VisualStudioVersion=", this->GetIDEVersion()));
 
     if (jobs != cmake::NO_BUILD_PARALLEL_LEVEL) {
       if (jobs == cmake::DEFAULT_BUILD_PARALLEL_LEVEL) {
         makeCommand.Add("/m");
       } else {
-        makeCommand.Add(std::string("/m:") + std::to_string(jobs));
+        makeCommand.Add(cmStrCat("/m:", std::to_string(jobs)));
       }
       // Having msbuild.exe and cl.exe using multiple jobs is discouraged
       makeCommand.Add("/p:CL_MPCount=1");
@@ -1192,7 +1279,7 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
 
     // Respect the verbosity: 'n' normal will show build commands
     //                        'm' minimal only the build step's title
-    makeCommand.Add(std::string("/v:") + ((verbose) ? "n" : "m"));
+    makeCommand.Add(cmStrCat("/v:", ((verbose) ? "n" : "m")));
     makeCommand.Add(makeOptions.begin(), makeOptions.end());
     makeCommands.emplace_back(std::move(makeCommand));
   }
@@ -1273,23 +1360,23 @@ std::string cmGlobalVisualStudio10Generator::Encoding()
 const char* cmGlobalVisualStudio10Generator::GetToolsVersion() const
 {
   switch (this->Version) {
-    case cmGlobalVisualStudioGenerator::VS9:
-    case cmGlobalVisualStudioGenerator::VS10:
-    case cmGlobalVisualStudioGenerator::VS11:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS9:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS10:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS11:
       return "4.0";
 
       // in Visual Studio 2013 they detached the MSBuild tools version
       // from the .Net Framework version and instead made it have it's own
       // version number
-    case cmGlobalVisualStudioGenerator::VS12:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS12:
       return "12.0";
-    case cmGlobalVisualStudioGenerator::VS14:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS14:
       return "14.0";
-    case cmGlobalVisualStudioGenerator::VS15:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS15:
       return "15.0";
-    case cmGlobalVisualStudioGenerator::VS16:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS16:
       return "16.0";
-    case cmGlobalVisualStudioGenerator::VS17:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS17:
       return "17.0";
   }
   return "";
@@ -1546,6 +1633,18 @@ cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetMasmFlagTable() const
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetNasmFlagTable() const
 {
   return LoadFlagTable(std::string(), this->DefaultNasmFlagTableName, "NASM");
+}
+
+bool cmGlobalVisualStudio10Generator::IsMsBuildRestoreSupported() const
+{
+  if (this->Version >= VSVersion::VS16) {
+    return true;
+  }
+
+  static std::string const vsVer15_7_5 = "15.7.27703.2042";
+  cm::optional<std::string> vsVer = this->GetVSInstanceVersion();
+  return (vsVer &&
+          cmSystemTools::VersionCompareGreaterEq(*vsVer, vsVer15_7_5));
 }
 
 std::string cmGlobalVisualStudio10Generator::GetClFlagTableName() const

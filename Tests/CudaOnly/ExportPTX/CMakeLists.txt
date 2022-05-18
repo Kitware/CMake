@@ -11,6 +11,7 @@ list(SUBLIST CMAKE_CUDA_ARCHITECTURES 0 1 CMAKE_CUDA_ARCHITECTURES)
 string(APPEND CMAKE_CUDA_ARCHITECTURES "-virtual")
 
 add_library(CudaPTX OBJECT kernelA.cu kernelB.cu)
+target_compile_definitions(CudaPTX PRIVATE "CUDA_PTX_COMPILATION")
 set_property(TARGET CudaPTX PROPERTY CUDA_PTX_COMPILATION ON)
 
 #Test ObjectFiles with file(GENERATE)
@@ -56,7 +57,7 @@ add_custom_command(
     "-DBIN_TO_C_COMMAND=${bin_to_c}"
     "-DOBJECTS=$<TARGET_OBJECTS:CudaPTX>"
     "-DOUTPUT=${output_file}"
-    -P ${CMAKE_CURRENT_SOURCE_DIR}/bin2c_wrapper.cmake
+    -P ${CMAKE_CURRENT_SOURCE_DIR}/../utils/bin2c_wrapper.cmake
   VERBATIM
   DEPENDS $<TARGET_OBJECTS:CudaPTX>
   COMMENT "Converting Object files to a C header"

@@ -40,6 +40,7 @@
 #include "rand.h"
 #include "slist.h"
 #include "strcase.h"
+#include "dynbuf.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -279,29 +280,52 @@ static void mimesetstate(struct mime_state *state,
 
 
 /* Escape header string into allocated memory. */
-static char *escape_string(const char *src)
+static char *escape_string(struct Curl_easy *data,
+                           const char *src, enum mimestrategy strategy)
 {
-  size_t bytecount = 0;
-  size_t i;
-  char *dst;
+  CURLcode result;
+  struct dynbuf db;
+  const char * const *table;
+  const char * const *p;
+  /* replace first character by rest of string. */
+  static const char * const mimetable[] = {
+    "\\\\\\",
+    "\"\\\"",
+    NULL
+  };
+  /* WHATWG HTML living standard 4.10.21.8 2 specifies:
+     For field names and filenames for file fields, the result of the
+     encoding in the previous bullet point must be escaped by replacing
+     any 0x0A (LF) bytes with the byte sequence `%0A`, 0x0D (CR) with `%0D`
+     and 0x22 (") with `%22`.
+     The user agent must not perform any other escapes. */
+  static const char * const formtable[] = {
+    "\"%22",
+    "\r%0D",
+    "\n%0A",
+    NULL
+  };
 
-  for(i = 0; src[i]; i++)
-    if(src[i] == '"' || src[i] == '\\')
-      bytecount++;
+  table = formtable;
+  /* data can be NULL when this function is called indirectly from
+     curl_formget(). */
+  if(strategy == MIMESTRATEGY_MAIL ||
+     (data && (data->set.mime_options & CURLMIMEOPT_FORMESCAPE)))
+    table = mimetable;
 
-  bytecount += i;
-  dst = malloc(bytecount + 1);
-  if(!dst)
-    return NULL;
+  Curl_dyn_init(&db, CURL_MAX_INPUT_LENGTH);
 
-  for(i = 0; *src; src++) {
-    if(*src == '"' || *src == '\\')
-      dst[i++] = '\\';
-    dst[i++] = *src;
+  for(result = Curl_dyn_add(&db, ""); !result && *src; src++) {
+    for(p = table; *p && **p != *src; p++)
+      ;
+
+    if(*p)
+      result = Curl_dyn_add(&db, *p + 1);
+    else
+      result = Curl_dyn_addn(&db, src, 1);
   }
 
-  dst[i] = '\0';
-  return dst;
+  return Curl_dyn_ptr(&db);
 }
 
 /* Check if header matches. */
@@ -462,11 +486,13 @@ static size_t encoder_base64_read(char *buffer, size_t size, bool ateof,
       /* Buffered data size can only be 0, 1 or 2. */
       ptr[2] = ptr[3] = '=';
       i = 0;
-      switch(st->bufend - st->bufbeg) {
-      case 2:
-        i = (st->buf[st->bufbeg + 1] & 0xFF) << 8;
-        /* FALLTHROUGH */
-      case 1:
+
+      /* If there is buffered data */
+      if(st->bufend != st->bufbeg) {
+
+        if(st->bufend - st->bufbeg == 2)
+          i = (st->buf[st->bufbeg + 1] & 0xFF) << 8;
+
         i |= (st->buf[st->bufbeg] & 0xFF) << 16;
         ptr[0] = base64[(i >> 18) & 0x3F];
         ptr[1] = base64[(i >> 12) & 0x3F];
@@ -476,7 +502,6 @@ static size_t encoder_base64_read(char *buffer, size_t size, bool ateof,
         }
         cursize += 4;
         st->pos += 4;
-        break;
       }
     }
   }
@@ -1865,12 +1890,12 @@ CURLcode Curl_mime_prepare_headers(curl_mimepart *part,
       char *filename = NULL;
 
       if(part->name) {
-        name = escape_string(part->name);
+        name = escape_string(part->easy, part->name, strategy);
         if(!name)
           ret = CURLE_OUT_OF_MEMORY;
       }
       if(!ret && part->filename) {
-        filename = escape_string(part->filename);
+        filename = escape_string(part->easy, part->filename, strategy);
         if(!filename)
           ret = CURLE_OUT_OF_MEMORY;
       }
@@ -1954,7 +1979,8 @@ void Curl_mime_unpause(curl_mimepart *part)
 }
 
 
-#else /* !CURL_DISABLE_HTTP || !CURL_DISABLE_SMTP || !CURL_DISABLE_IMAP */
+#else /* !CURL_DISABLE_HTTP && !CURL_DISABLE_MIME ||
+         !CURL_DISABLE_SMTP || !CURL_DISABLE_IMAP */
 
 /* Mime not compiled in: define stubs for externally-referenced functions. */
 curl_mime *curl_mime_init(CURL *easy)

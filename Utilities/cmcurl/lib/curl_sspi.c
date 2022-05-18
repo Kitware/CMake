@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -83,7 +83,7 @@ CURLcode Curl_sspi_global_init(void)
      * have both these DLLs (security.dll forwards calls to secur32.dll) */
 
     /* Load SSPI dll into the address space of the calling process */
-    if(curlx_verify_windows_version(4, 0, PLATFORM_WINNT, VERSION_EQUAL))
+    if(curlx_verify_windows_version(4, 0, 0, PLATFORM_WINNT, VERSION_EQUAL))
       s_hSecDll = Curl_load_library(TEXT("security.dll"));
     else
       s_hSecDll = Curl_load_library(TEXT("secur32.dll"));

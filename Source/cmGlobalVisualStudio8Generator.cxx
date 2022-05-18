@@ -2,21 +2,40 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalVisualStudio8Generator.h"
 
+#include <algorithm>
+#include <functional>
+#include <ostream>
+#include <utility>
+
 #include <cm/memory>
+#include <cmext/algorithm>
 #include <cmext/memory>
 
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
-#include "cmDocumentationEntry.h"
+#include "cmCustomCommandTypes.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
+#include "cmGlobalGenerator.h"
+#include "cmGlobalVisualStudio7Generator.h"
+#include "cmGlobalVisualStudioGenerator.h"
+#include "cmListFileCache.h"
+#include "cmLocalGenerator.h"
 #include "cmLocalVisualStudio7Generator.h"
 #include "cmMakefile.h"
-#include "cmMessageType.h"
+#include "cmPolicies.h"
 #include "cmSourceFile.h"
-#include "cmVisualStudioWCEPlatformParser.h"
+#include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
+#include "cmTarget.h"
+#include "cmTargetDepend.h"
+#include "cmValue.h"
+#include "cmVisualStudioGeneratorOptions.h"
 #include "cmake.h"
+
+struct cmIDEFlagTable;
 
 cmGlobalVisualStudio8Generator::cmGlobalVisualStudio8Generator(
   cmake* cm, const std::string& name,
@@ -147,13 +166,10 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
   auto& lg =
     cm::static_reference_cast<cmLocalVisualStudio7Generator>(generators[0]);
 
-  const char* no_working_directory = nullptr;
-  std::vector<std::string> no_byproducts;
-  std::vector<std::string> no_depends;
-  cmCustomCommandLines no_commands;
-  cmTarget* tgt = lg.AddUtilityCommand(
-    CMAKE_CHECK_BUILD_SYSTEM_TARGET, false, no_working_directory,
-    no_byproducts, no_depends, no_commands, cmPolicies::NEW);
+  auto cc = cm::make_unique<cmCustomCommand>();
+  cc->SetCMP0116Status(cmPolicies::NEW);
+  cmTarget* tgt = lg.AddUtilityCommand(CMAKE_CHECK_BUILD_SYSTEM_TARGET, false,
+                                       std::move(cc));
 
   auto ptr = cm::make_unique<cmGeneratorTarget>(tgt, &lg);
   auto gt = ptr.get();
@@ -203,11 +219,15 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
       std::vector<std::string> byproducts;
       byproducts.push_back(cm->GetGlobVerifyStamp());
 
-      lg.AddCustomCommandToTarget(CMAKE_CHECK_BUILD_SYSTEM_TARGET, byproducts,
-                                  no_depends, verifyCommandLines,
+      cc = cm::make_unique<cmCustomCommand>();
+      cc->SetByproducts(byproducts);
+      cc->SetCommandLines(verifyCommandLines);
+      cc->SetComment("Checking File Globs");
+      cc->SetCMP0116Status(cmPolicies::NEW);
+      cc->SetStdPipesUTF8(stdPipesUTF8);
+      lg.AddCustomCommandToTarget(CMAKE_CHECK_BUILD_SYSTEM_TARGET,
                                   cmCustomCommandType::PRE_BUILD,
-                                  "Checking File Globs", no_working_directory,
-                                  cmPolicies::NEW, stdPipesUTF8);
+                                  std::move(cc));
 
       // Ensure ZERO_CHECK always runs in Visual Studio using MSBuild,
       // otherwise the prebuild command will not be run.
@@ -234,13 +254,16 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     // file as the main dependency because it would get
     // overwritten by the CreateVCProjBuildRule.
     // (this could be avoided with per-target source files)
-    std::string no_main_dependency;
-    cmImplicitDependsList no_implicit_depends;
-    if (cmSourceFile* file = lg.AddCustomCommandToOutput(
-          stamps, no_byproducts, listFiles, no_main_dependency,
-          no_implicit_depends, commandLines, "Checking Build System",
-          no_working_directory, cmPolicies::NEW, true, false, false, false, "",
-          "", stdPipesUTF8)) {
+    cc = cm::make_unique<cmCustomCommand>();
+    cc->SetOutputs(stamps);
+    cc->SetDepends(listFiles);
+    cc->SetCommandLines(commandLines);
+    cc->SetComment("Checking Build System");
+    cc->SetCMP0116Status(cmPolicies::NEW);
+    cc->SetEscapeOldStyle(false);
+    cc->SetStdPipesUTF8(stdPipesUTF8);
+    if (cmSourceFile* file =
+          lg.AddCustomCommandToOutput(std::move(cc), true)) {
       gt->AddSource(file->ResolveFullPath());
     } else {
       cmSystemTools::Error("Error adding rule for " + stamps[0]);

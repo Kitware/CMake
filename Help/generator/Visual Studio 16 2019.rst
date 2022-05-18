@@ -15,18 +15,8 @@ Powershell, Python, etc.) are not supported.
 Instance Selection
 ^^^^^^^^^^^^^^^^^^
 
-VS 2019 supports multiple installations on the same machine.
-The :variable:`CMAKE_GENERATOR_INSTANCE` variable may be set as a
-cache entry containing the absolute path to a Visual Studio instance.
-If the value is not specified explicitly by the user or a toolchain file,
-CMake queries the Visual Studio Installer to locate VS instances, chooses
-one, and sets the variable as a cache entry to hold the value persistently.
-
-When CMake first chooses an instance, if the ``VS160COMNTOOLS`` environment
-variable is set and points to the ``Common7/Tools`` directory within
-one of the instances, that instance will be used.  Otherwise, if more
-than one instance is installed we do not define which one is chosen
-by default.
+VS 2019 supports multiple installations on the same machine.  The
+:variable:`CMAKE_GENERATOR_INSTANCE` variable may be used to select one.
 
 Platform Selection
 ^^^^^^^^^^^^^^^^^^

@@ -1,0 +1,12 @@
+CMake Error at CMP0028-NEW\.cmake:5 \(target_link_libraries\):
+  Target "foo" links to:
+
+    External::Library
+
+  but the target was not found.  Possible reasons include:
+(
+    \*[^
+]+)*
+
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

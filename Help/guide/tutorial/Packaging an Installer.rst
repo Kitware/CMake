@@ -22,8 +22,9 @@ That is all there is to it. We start by including
 libraries that are needed by the project for the current platform. Next we set
 some CPack variables to where we have stored the license and version
 information for this project. The version information was set earlier in this
-tutorial and the ``license.txt`` has been included in the top-level source
-directory for this step.
+tutorial and the ``License.txt`` has been included in the top-level source
+directory for this step.  The :variable:`CPACK_SOURCE_GENERATOR` variable
+selects a file format for the source package.
 
 Finally we include the :module:`CPack module <CPack>` which will use these
 variables and some other properties of the current system to setup an
@@ -44,7 +45,11 @@ To specify the generator, use the ``-G`` option. For multi-config builds, use
 
   cpack -G ZIP -C Debug
 
-To create a source distribution you would type:
+For a list of available generators, see :manual:`cpack-generators(7)` or call
+``cpack --help``. An :cpack_gen:`archive generator <CPack Archive Generator>`
+like ZIP creates a compressed archive of all *installed* files.
+
+To create an archive of the *full* source tree you would type:
 
 .. code-block:: console
 

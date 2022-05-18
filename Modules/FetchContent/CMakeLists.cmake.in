@@ -22,6 +22,7 @@ ExternalProject_Add(${contentName}-populate
                     TEST_COMMAND        ""
                     USES_TERMINAL_DOWNLOAD  YES
                     USES_TERMINAL_UPDATE    YES
+                    USES_TERMINAL_PATCH     YES
 )
 
 @__FETCHCONTENT_COPY_FILE@

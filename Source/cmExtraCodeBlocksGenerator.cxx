@@ -677,6 +677,12 @@ std::string cmExtraCodeBlocksGenerator::GetCBCompilerId(const cmMakefile* mf)
     } else {
       compiler = "pgi"; // does not exist as default in CodeBlocks 16.01
     }
+  } else if (compilerId == "LCC") {
+    if (pureFortran) {
+      compiler = "lfortran";
+    } else {
+      compiler = "lcc";
+    }
   } else if (compilerId == "GNU") {
     if (pureFortran) {
       compiler = "gfortran";

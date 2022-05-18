@@ -106,6 +106,7 @@ set(CMakePresets_SCHEMA_EXPECTED_RESULT 1)
 run_cmake_test_presets(PresetsUnsupported "" "" "x")
 run_cmake_test_presets(ConditionFuture "" "" "x")
 set(CMakePresets_SCHEMA_EXPECTED_RESULT 0)
+run_cmake_test_presets(ConfigurePresetUnreachable "" "" "x")
 set(CMakePresetsTest_NO_CONFIGURE 0)
 
 set(CMakePresetsTest_NO_BUILD 0)

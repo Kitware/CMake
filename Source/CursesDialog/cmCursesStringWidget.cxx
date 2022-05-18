@@ -85,7 +85,8 @@ bool cmCursesStringWidget::HandleInput(int& key, cmCursesMainForm* fm,
 
   // <Enter> is used to change edit mode (like <Esc> in vi).
   while (!this->Done) {
-    sprintf(debugMessage, "String widget handling input, key: %d", key);
+    snprintf(debugMessage, sizeof(debugMessage),
+             "String widget handling input, key: %d", key);
     cmCursesForm::LogMessage(debugMessage);
 
     fm->PrintKeys();

@@ -17,10 +17,13 @@
 #include <cstdlib>
 #include <cstring>
 #include <sstream>
+#include <utility>
 
 #ifdef __MINGW32__
 #  include <libloaderapi.h>
 #endif
+
+#include <cm3p/uv.h>
 
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -28,7 +31,13 @@
 std::string cmTimestamp::CurrentTime(const std::string& formatString,
                                      bool utcFlag) const
 {
-  time_t currentTimeT = time(nullptr);
+  // get current time with microsecond resolution
+  uv_timeval64_t timeval;
+  uv_gettimeofday(&timeval);
+  auto currentTimeT = static_cast<time_t>(timeval.tv_sec);
+  auto microseconds = static_cast<uint32_t>(timeval.tv_usec);
+
+  // check for override via SOURCE_DATE_EPOCH for reproducible builds
   std::string source_date_epoch;
   cmSystemTools::GetEnv("SOURCE_DATE_EPOCH", source_date_epoch);
   if (!source_date_epoch.empty()) {
@@ -38,12 +47,15 @@ std::string cmTimestamp::CurrentTime(const std::string& formatString,
       cmSystemTools::Error("Cannot parse SOURCE_DATE_EPOCH as integer");
       exit(27);
     }
+    // SOURCE_DATE_EPOCH has only a resolution in the seconds range
+    microseconds = 0;
   }
   if (currentTimeT == time_t(-1)) {
     return std::string();
   }
 
-  return this->CreateTimestampFromTimeT(currentTimeT, formatString, utcFlag);
+  return this->CreateTimestampFromTimeT(currentTimeT, microseconds,
+                                        formatString, utcFlag);
 }
 
 std::string cmTimestamp::FileModificationTime(const char* path,
@@ -57,11 +69,32 @@ std::string cmTimestamp::FileModificationTime(const char* path,
     return std::string();
   }
 
-  time_t mtime = cmsys::SystemTools::ModifiedTime(real_path);
-  return this->CreateTimestampFromTimeT(mtime, formatString, utcFlag);
+  // use libuv's implementation of stat(2) to get the file information
+  time_t mtime = 0;
+  uint32_t microseconds = 0;
+  uv_fs_t req;
+  if (uv_fs_stat(nullptr, &req, real_path.c_str(), nullptr) == 0) {
+    mtime = static_cast<time_t>(req.statbuf.st_mtim.tv_sec);
+    // tv_nsec has nanosecond resolution, but we truncate it to microsecond
+    // resolution in order to be consistent with cmTimestamp::CurrentTime()
+    microseconds = static_cast<uint32_t>(req.statbuf.st_mtim.tv_nsec / 1000);
+  }
+  uv_fs_req_cleanup(&req);
+
+  return this->CreateTimestampFromTimeT(mtime, microseconds, formatString,
+                                        utcFlag);
 }
 
 std::string cmTimestamp::CreateTimestampFromTimeT(time_t timeT,
+                                                  std::string formatString,
+                                                  bool utcFlag) const
+{
+  return this->CreateTimestampFromTimeT(timeT, 0, std::move(formatString),
+                                        utcFlag);
+}
+
+std::string cmTimestamp::CreateTimestampFromTimeT(time_t timeT,
+                                                  const uint32_t microseconds,
                                                   std::string formatString,
                                                   bool utcFlag) const
 {
@@ -95,7 +128,8 @@ std::string cmTimestamp::CreateTimestampFromTimeT(time_t timeT,
                                             : static_cast<char>(0);
 
     if (c1 == '%' && c2 != 0) {
-      result += this->AddTimestampComponent(c2, timeStruct, timeT);
+      result +=
+        this->AddTimestampComponent(c2, timeStruct, timeT, microseconds);
       ++i;
     } else {
       result += c1;
@@ -144,9 +178,9 @@ time_t cmTimestamp::CreateUtcTimeTFromTm(struct tm& tm) const
 #endif
 }
 
-std::string cmTimestamp::AddTimestampComponent(char flag,
-                                               struct tm& timeStruct,
-                                               const time_t timeT) const
+std::string cmTimestamp::AddTimestampComponent(
+  char flag, struct tm& timeStruct, const time_t timeT,
+  const uint32_t microseconds) const
 {
   std::string formatString = cmStrCat('%', flag);
 
@@ -180,12 +214,18 @@ std::string cmTimestamp::AddTimestampComponent(char flag,
       const time_t unixEpoch = this->CreateUtcTimeTFromTm(tmUnixEpoch);
       if (unixEpoch == -1) {
         cmSystemTools::Error(
-          "Error generating UNIX epoch in "
-          "STRING(TIMESTAMP ...). Please, file a bug report against CMake");
+          "Error generating UNIX epoch in string(TIMESTAMP ...) or "
+          "file(TIMESTAMP ...). Please, file a bug report against CMake");
         return std::string();
       }
 
       return std::to_string(static_cast<long int>(difftime(timeT, unixEpoch)));
+    }
+    case 'f': // microseconds
+    {
+      // clip number to 6 digits and pad with leading zeros
+      std::string microsecs = std::to_string(microseconds % 1000000);
+      return std::string(6 - microsecs.length(), '0') + microsecs;
     }
     default: {
       return formatString;

@@ -14,6 +14,9 @@ current scope in the following situations:
   This can occur when the variable was set on the command line using a form
   like ``cmake -DMYVAR=blah`` instead of ``cmake -DMYVAR:STRING=blah``.
 
+* The ``FORCE`` or ``INTERNAL`` keywords were used when setting the cache
+  variable.
+
 Note that the ``NEW`` behavior has an important difference to the similar
 ``NEW`` behavior of policy :policy:`CMP0077`.  The :command:`set(CACHE)`
 command always sets the cache variable if it did not exist previously,

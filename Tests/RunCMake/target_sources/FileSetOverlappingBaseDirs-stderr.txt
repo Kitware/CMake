@@ -1,0 +1,9 @@
+CMake Error at FileSetOverlappingBaseDirs\.cmake:[0-9]+ \(target_sources\):
+  Base directories in file set cannot be subdirectories of each other:
+
+    [^
+]*/Tests/RunCMake/target_sources/\.
+    [^
+]*/Tests/RunCMake/target_sources/dir3
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

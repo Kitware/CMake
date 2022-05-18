@@ -1,0 +1,36 @@
+set(ENV_PATH "$ENV{PATH}")
+set(ENV_CMAKE_PREFIX_PATH "$ENV{CMAKE_PREFIX_PATH}")
+
+set(ENV{CMAKE_PREFIX_PATH} "")
+
+set(ENV{PATH} "${CMAKE_CURRENT_SOURCE_DIR}/PackageRoot")
+find_package(Resolved QUIET)
+
+foreach(path "/does_not_exist" "/PackageRoot" "")
+  unset(ResolvedA_FOUND CACHE)
+  set(ResolvedA_DIR "")
+  set(ENV{PATH} "${CMAKE_CURRENT_SOURCE_DIR}${path}")
+  find_package(ResolvedA QUIET)
+  message(STATUS "Resolved_FOUND='${ResolvedA_FOUND}'")
+endforeach()
+
+set(CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH OFF)
+foreach(path "/does_not_exist" "/PackageRoot" "")
+  unset(Resolved_FOUND CACHE)
+  set(Resolved_DIR "")
+  set(ENV{PATH} "${CMAKE_CURRENT_SOURCE_DIR}${path}")
+  find_package(ResolvedB QUIET)
+  message(STATUS "Resolved_FOUND='${ResolvedB_FOUND}'")
+endforeach()
+
+set(CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH ON)
+foreach(path "/does_not_exist" "/PackageRoot" "")
+  unset(Resolved_FOUND CACHE)
+  set(Resolved_DIR "")
+  set(ENV{PATH} "${CMAKE_CURRENT_SOURCE_DIR}${path}")
+  find_package(ResolvedC NO_SYSTEM_ENVIRONMENT_PATH QUIET)
+  message(STATUS "Resolved_FOUND='${ResolvedC_FOUND}'")
+endforeach()
+
+set(ENV{CMAKE_PREFIX_PATH} "${ENV_CMAKE_PREFIX_PATH}")
+set(ENV{PATH} "${ENV_PATH}")

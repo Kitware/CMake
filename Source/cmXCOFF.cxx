@@ -61,20 +61,20 @@ namespace {
 
 struct XCOFF32
 {
-  typedef struct filehdr filehdr;
-  typedef struct aouthdr aouthdr;
-  typedef struct scnhdr scnhdr;
-  typedef struct ldhdr ldhdr;
+  using filehdr = struct filehdr;
+  using aouthdr = struct aouthdr;
+  using scnhdr = struct scnhdr;
+  using ldhdr = struct ldhdr;
   static const std::size_t aouthdr_size = _AOUTHSZ_EXEC;
 };
 const unsigned char xcoff32_magic[] = { 0x01, 0xDF };
 
 struct XCOFF64
 {
-  typedef struct filehdr_64 filehdr;
-  typedef struct aouthdr_64 aouthdr;
-  typedef struct scnhdr_64 scnhdr;
-  typedef struct ldhdr_64 ldhdr;
+  using filehdr = struct filehdr_64;
+  using aouthdr = struct aouthdr_64;
+  using scnhdr = struct scnhdr_64;
+  using ldhdr = struct ldhdr_64;
   static const std::size_t aouthdr_size = _AOUTHSZ_EXEC_64;
 };
 const unsigned char xcoff64_magic[] = { 0x01, 0xF7 };
@@ -326,8 +326,8 @@ cmXCOFF::cmXCOFF(const char* fname, Mode mode)
 
 cmXCOFF::~cmXCOFF() = default;
 
-cmXCOFF::cmXCOFF(cmXCOFF&&) = default;
-cmXCOFF& cmXCOFF::operator=(cmXCOFF&&) = default;
+cmXCOFF::cmXCOFF(cmXCOFF&&) noexcept = default;
+cmXCOFF& cmXCOFF::operator=(cmXCOFF&&) noexcept = default;
 
 bool cmXCOFF::Valid() const
 {

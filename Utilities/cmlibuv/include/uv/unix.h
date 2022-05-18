@@ -72,11 +72,9 @@
 # include "bsd.h"
 #elif defined(__CYGWIN__) || \
       defined(__MSYS__)   || \
+      defined(__HAIKU__)  || \
+      defined(__QNX__)    || \
       defined(__GNU__)
-# include "posix.h"
-#elif defined(__HAIKU__)
-# include "posix.h"
-#elif defined(__QNX__)
 # include "posix.h"
 #endif
 
