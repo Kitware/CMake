@@ -1,0 +1,8 @@
+CMake Error at bad-option.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<PATH:BAD_OPTION,ARG>
+
+  BAD_OPTION: invalid option.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

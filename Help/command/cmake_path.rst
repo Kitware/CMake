@@ -96,6 +96,8 @@ The following conventions are used in this command's documentation:
   The name of a variable into which the result of a command will be written.
 
 
+.. _Path Structure And Terminology:
+
 Path Structure And Terminology
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -215,6 +217,8 @@ normalize a path is as follows:
 7. If the path is empty by this stage, add a ``dot`` (normal form of ``./``
    is ``.``).
 
+
+.. _Path Decomposition:
 
 Decomposition
 ^^^^^^^^^^^^^
@@ -385,6 +389,8 @@ Path traversal examples
   Parent path is "c:/"
 
 
+.. _Path Query:
+
 Query
 ^^^^^
 
@@ -495,6 +501,8 @@ according to the following pseudo-code logic:
   takes literal strings as input, not the names of variables.
 
 
+.. _Path Modification:
+
 Modification
 ^^^^^^^^^^^^
 
@@ -509,7 +517,7 @@ path, it is converted into a cmake-style path with forward-slashes
 (``/``). On Windows, the long filename marker is taken into account.
 
 When the ``NORMALIZE`` option is specified, the path is :ref:`normalized
-<Normalization>` before the conversion.
+<Normalization>` after the conversion.
 
 For example:
 
@@ -643,6 +651,8 @@ is equivalent to the following:
   endif()
   cmake_path(APPEND_STRING path "input")
 
+
+.. _Path Generation:
 
 Generation
 ^^^^^^^^^^

@@ -1,0 +1,8 @@
+CMake Error at unexpected-arg.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<PATH:[A-Z_]+,.+>
+
+  \$<PATH:[A-Z_]+(,[A-Z_]+)?> expression requires exactly (one|two) parameters?.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
