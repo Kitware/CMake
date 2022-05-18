@@ -10,6 +10,14 @@ FindVulkan
 Find Vulkan, which is a low-overhead, cross-platform 3D graphics
 and computing API.
 
+Optional COMPONENTS
+^^^^^^^^^^^^^^^^^^^
+
+.. versionadded:: 3.24
+
+This module respects several optional COMPONENTS: ``shaderc_combined``.  There
+are corresponding import targets for each of these flags.
+
 IMPORTED Targets
 ^^^^^^^^^^^^^^^^
 
@@ -36,6 +44,12 @@ This module defines :prop_tgt:`IMPORTED` targets if Vulkan has been found:
   The glslangValidator tool, if found.  It is used to compile GLSL and
   HLSL shaders into SPIR-V.
 
+``Vulkan::shaderc_combined``
+  .. versionadded:: 3.24
+
+  Defined if SDK has the Google static library for Vulkan shader compilation
+  (shaderc_combined).
+
 Result Variables
 ^^^^^^^^^^^^^^^^
 
@@ -51,6 +65,13 @@ This module defines the following variables:
   .. versionadded:: 3.23
 
   value from ``vulkan/vulkan_core.h``
+``Vulkan_shaderc_combined_FOUND``
+  .. versionadded:: 3.24
+
+  True, if the SDK has the shaderc_combined library.
+
+.. versionadded:: 3.24
+  Variables for component library ``shaderc_combined``.
 
 The module will also defines these cache variables:
 
@@ -62,6 +83,10 @@ The module will also defines these cache variables:
   the path to the GLSL SPIR-V compiler
 ``Vulkan_GLSLANG_VALIDATOR_EXECUTABLE``
   the path to the glslangValidator tool
+``Vulkan_shaderc_combined_LIBRARY``
+  .. versionadded:: 3.24
+
+  Path to the shaderc_combined library.
 
 Hints
 ^^^^^
@@ -139,6 +164,45 @@ find_program(Vulkan_GLSLANG_VALIDATOR_EXECUTABLE
   )
 mark_as_advanced(Vulkan_GLSLANG_VALIDATOR_EXECUTABLE)
 
+if(shaderc_combined IN_LIST Vulkan_FIND_COMPONENTS)
+  find_library(Vulkan_shaderc_combined_LIBRARY
+    NAMES shaderc_combined
+    HINTS
+    ${_Vulkan_hint_library_search_paths})
+  mark_as_advanced(Vulkan_shaderc_combined_LIBRARY)
+
+  find_library(Vulkan_shaderc_combined_DEBUG_LIBRARY
+    NAMES shaderc_combinedd
+    HINTS
+    ${_Vulkan_hint_library_search_paths})
+  mark_as_advanced(Vulkan_shaderc_combined_DEBUG_LIBRARY)
+endif()
+
+function(_Vulkan_set_library_component_found component)
+  if(Vulkan_${component}_LIBRARY OR Vulkan_${component}_DEBUG_LIBRARY)
+    set(Vulkan_${component}_FOUND TRUE PARENT_SCOPE)
+
+    # For Windows Vulkan SDK, third party tools binaries are provided with different MSVC ABI:
+    #   - Release binaries uses a runtime library
+    #   - Debug binaries uses a debug runtime library
+    # This lead to incompatibilities in linking for some configuration types due to CMake-default or project-configured selected MSVC ABI.
+    if(WIN32)
+      if(NOT Vulkan_${component}_LIBRARY)
+        message(WARNING
+"Library ${component} for Release configuration is missing, imported target Vulkan::${component} may not be able to link when targeting this build configuration due to incompatible MSVC ABI.")
+      endif()
+      if(NOT Vulkan_${component}_DEBUG_LIBRARY)
+        message(WARNING
+"Library ${component} for Debug configuration is missing, imported target Vulkan::${component} may not be able to link when targeting this build configuration due to incompatible MSVC ABI. Consider re-installing the Vulkan SDK and request debug libraries to fix this warning.")
+      endif()
+    endif()
+  else()
+    set(Vulkan_${component}_FOUND FALSE PARENT_SCOPE)
+  endif()
+endfunction()
+
+_Vulkan_set_library_component_found(shaderc_combined)
+
 set(Vulkan_LIBRARIES ${Vulkan_LIBRARY})
 set(Vulkan_INCLUDE_DIRS ${Vulkan_INCLUDE_DIR})
 
@@ -168,6 +232,7 @@ find_package_handle_standard_args(Vulkan
     Vulkan_INCLUDE_DIR
   VERSION_VAR
     Vulkan_VERSION
+  HANDLE_COMPONENTS
 )
 
 if(Vulkan_FOUND AND NOT TARGET Vulkan::Vulkan)
@@ -191,6 +256,38 @@ endif()
 if(Vulkan_FOUND AND Vulkan_GLSLANG_VALIDATOR_EXECUTABLE AND NOT TARGET Vulkan::glslangValidator)
   add_executable(Vulkan::glslangValidator IMPORTED)
   set_property(TARGET Vulkan::glslangValidator PROPERTY IMPORTED_LOCATION "${Vulkan_GLSLANG_VALIDATOR_EXECUTABLE}")
+endif()
+
+if(Vulkan_FOUND)
+  if((Vulkan_shaderc_combined_LIBRARY OR Vulkan_shaderc_combined_DEBUG_LIBRARY) AND NOT TARGET Vulkan::shaderc_combined)
+    add_library(Vulkan::shaderc_combined STATIC IMPORTED)
+    set_property(TARGET Vulkan::shaderc_combined
+      PROPERTY
+        INTERFACE_INCLUDE_DIRECTORIES "${Vulkan_INCLUDE_DIRS}")
+    if(Vulkan_shaderc_combined_LIBRARY)
+      set_property(TARGET Vulkan::shaderc_combined APPEND
+        PROPERTY
+          IMPORTED_CONFIGURATIONS Release)
+      set_property(TARGET Vulkan::shaderc_combined
+        PROPERTY
+          IMPORTED_LOCATION_RELEASE "${Vulkan_shaderc_combined_LIBRARY}")
+    endif()
+    if(Vulkan_shaderc_combined_DEBUG_LIBRARY)
+      set_property(TARGET Vulkan::shaderc_combined APPEND
+        PROPERTY
+          IMPORTED_CONFIGURATIONS Debug)
+      set_property(TARGET Vulkan::shaderc_combined
+        PROPERTY
+          IMPORTED_LOCATION_DEBUG "${Vulkan_shaderc_combined_DEBUG_LIBRARY}")
+    endif()
+
+    if(UNIX)
+      find_package(Threads REQUIRED)
+      target_link_libraries(Vulkan::shaderc_combined
+        INTERFACE
+          Threads::Threads)
+    endif()
+  endif()
 endif()
 
 unset(_Vulkan_library_name)
