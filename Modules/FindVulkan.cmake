@@ -15,8 +15,9 @@ Optional COMPONENTS
 
 .. versionadded:: 3.24
 
-This module respects several optional COMPONENTS: ``shaderc_combined``.  There
-are corresponding import targets for each of these flags.
+This module respects several optional COMPONENTS: ``shaderc_combined`` and
+``SPIRV-Tools``.  There are corresponding import targets for each of these
+flags.
 
 IMPORTED Targets
 ^^^^^^^^^^^^^^^^
@@ -50,6 +51,12 @@ This module defines :prop_tgt:`IMPORTED` targets if Vulkan has been found:
   Defined if SDK has the Google static library for Vulkan shader compilation
   (shaderc_combined).
 
+``Vulkan::SPIRV-Tools``
+  .. versionadded:: 3.24
+
+  Defined if SDK has the Khronos library to process SPIR-V modules
+  (SPIRV-Tools).
+
 Result Variables
 ^^^^^^^^^^^^^^^^
 
@@ -69,9 +76,10 @@ This module defines the following variables:
   .. versionadded:: 3.24
 
   True, if the SDK has the shaderc_combined library.
+``Vulkan_SPIRV-Tools_FOUND``
+  .. versionadded:: 3.24
 
-.. versionadded:: 3.24
-  Variables for component library ``shaderc_combined``.
+  True, if the SDK has the SPIRV-Tools library.
 
 The module will also defines these cache variables:
 
@@ -87,6 +95,10 @@ The module will also defines these cache variables:
   .. versionadded:: 3.24
 
   Path to the shaderc_combined library.
+``Vulkan_SPIRV-Tools_LIBRARY``
+  .. versionadded:: 3.24
+
+  Path to the SPIRV-Tools library.
 
 Hints
 ^^^^^
@@ -177,6 +189,19 @@ if(shaderc_combined IN_LIST Vulkan_FIND_COMPONENTS)
     ${_Vulkan_hint_library_search_paths})
   mark_as_advanced(Vulkan_shaderc_combined_DEBUG_LIBRARY)
 endif()
+if(SPIRV-Tools IN_LIST Vulkan_FIND_COMPONENTS)
+  find_library(Vulkan_SPIRV-Tools_LIBRARY
+    NAMES SPIRV-Tools
+    HINTS
+      ${_Vulkan_hint_library_search_paths})
+  mark_as_advanced(Vulkan_SPIRV-Tools_LIBRARY)
+
+  find_library(Vulkan_SPIRV-Tools_DEBUG_LIBRARY
+    NAMES SPIRV-Toolsd
+    HINTS
+      ${_Vulkan_hint_library_search_paths})
+  mark_as_advanced(Vulkan_SPIRV-Tools_DEBUG_LIBRARY)
+endif()
 
 function(_Vulkan_set_library_component_found component)
   if(Vulkan_${component}_LIBRARY OR Vulkan_${component}_DEBUG_LIBRARY)
@@ -202,6 +227,7 @@ function(_Vulkan_set_library_component_found component)
 endfunction()
 
 _Vulkan_set_library_component_found(shaderc_combined)
+_Vulkan_set_library_component_found(SPIRV-Tools)
 
 set(Vulkan_LIBRARIES ${Vulkan_LIBRARY})
 set(Vulkan_INCLUDE_DIRS ${Vulkan_INCLUDE_DIR})
@@ -286,6 +312,29 @@ if(Vulkan_FOUND)
       target_link_libraries(Vulkan::shaderc_combined
         INTERFACE
           Threads::Threads)
+    endif()
+  endif()
+
+  if((Vulkan_SPIRV-Tools_LIBRARY OR Vulkan_SPIRV-Tools_DEBUG_LIBRARY) AND NOT TARGET Vulkan::SPIRV-Tools)
+    add_library(Vulkan::SPIRV-Tools STATIC IMPORTED)
+    set_property(TARGET Vulkan::SPIRV-Tools
+      PROPERTY
+        INTERFACE_INCLUDE_DIRECTORIES "${Vulkan_INCLUDE_DIRS}")
+    if(Vulkan_SPIRV-Tools_LIBRARY)
+      set_property(TARGET Vulkan::SPIRV-Tools APPEND
+        PROPERTY
+          IMPORTED_CONFIGURATIONS Release)
+      set_property(TARGET Vulkan::SPIRV-Tools
+        PROPERTY
+          IMPORTED_LOCATION_RELEASE "${Vulkan_SPIRV-Tools_LIBRARY}")
+    endif()
+    if(Vulkan_SPIRV-Tools_DEBUG_LIBRARY)
+      set_property(TARGET Vulkan::SPIRV-Tools APPEND
+        PROPERTY
+          IMPORTED_CONFIGURATIONS Debug)
+      set_property(TARGET Vulkan::SPIRV-Tools
+        PROPERTY
+          IMPORTED_LOCATION_DEBUG "${Vulkan_SPIRV-Tools_DEBUG_LIBRARY}")
     endif()
   endif()
 endif()
