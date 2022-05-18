@@ -1,5 +1,5 @@
 function(check_file target filename)
-  set(full_filename "${RunCMake_TEST_BINARY_DIR}/${target}_verify_header_sets/${filename}")
+  set(full_filename "${RunCMake_TEST_BINARY_DIR}/${target}_verify_interface_header_sets/${filename}")
   if(NOT EXISTS "${full_filename}")
     string(APPEND RunCMake_TEST_FAILED "File ${full_filename} should exist but does not\n")
     set(RunCMake_TEST_FAILED "${RunCMake_TEST_FAILED}" PARENT_SCOPE)
