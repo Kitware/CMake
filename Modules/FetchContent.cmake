@@ -1165,10 +1165,18 @@ function(__FetchContent_setPopulated contentName)
 
   set(propertyName "${prefix}_sourceDir")
   define_property(GLOBAL PROPERTY ${propertyName})
+  if("${arg_SOURCE_DIR}" STREQUAL "")
+    # Don't discard a previously provided SOURCE_DIR
+    get_property(arg_SOURCE_DIR GLOBAL PROPERTY ${propertyName})
+  endif()
   set_property(GLOBAL PROPERTY ${propertyName} "${arg_SOURCE_DIR}")
 
   set(propertyName "${prefix}_binaryDir")
   define_property(GLOBAL PROPERTY ${propertyName})
+  if("${arg_BINARY_DIR}" STREQUAL "")
+    # Don't discard a previously provided BINARY_DIR
+    get_property(arg_BINARY_DIR GLOBAL PROPERTY ${propertyName})
+  endif()
   set_property(GLOBAL PROPERTY ${propertyName} "${arg_BINARY_DIR}")
 
   set(propertyName "${prefix}_populated")
@@ -1690,10 +1698,8 @@ macro(FetchContent_MakeAvailable)
         unset(__cmake_fpArgs)
 
         if(${__cmake_contentName}_FOUND)
-          set(${__cmake_contentNameLower}_SOURCE_DIR "")
-          set(${__cmake_contentNameLower}_BINARY_DIR "")
-          set(${__cmake_contentNameLower}_POPULATED  TRUE)
           __FetchContent_setPopulated(${__cmake_contentName})
+          FetchContent_GetProperties(${__cmake_contentName})
           continue()
         endif()
       endif()
