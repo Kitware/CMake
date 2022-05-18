@@ -1356,7 +1356,7 @@ ExternalProject_Add_Step(${contentName}-populate copyfile
     # and can always request a known configuration further below.
     get_property(is_multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
     if(is_multi_config)
-      list(APPEND subCMakeOpts "-DCMAKE_CONFIGURATION_TYPES:STRING=Release")
+      list(APPEND subCMakeOpts "-DCMAKE_CONFIGURATION_TYPES:STRING=Debug")
     endif()
 
   else()
@@ -1404,7 +1404,7 @@ set_property(GLOBAL PROPERTY _CMAKE_FindGit_GIT_EXECUTABLE_VERSION
   # anything to be updated, so extra rebuilds of the project won't occur.
   # Make sure to pass through CMAKE_MAKE_PROGRAM in case the main project
   # has this set to something not findable on the PATH. We also ensured above
-  # that the Release config will be defined for multi-config generators.
+  # that the Debug config will be defined for multi-config generators.
   configure_file("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/FetchContent/CMakeLists.cmake.in"
                  "${ARG_SUBBUILD_DIR}/CMakeLists.txt")
   execute_process(
@@ -1420,7 +1420,7 @@ set_property(GLOBAL PROPERTY _CMAKE_FindGit_GIT_EXECUTABLE_VERSION
     message(FATAL_ERROR "CMake step for ${contentName} failed: ${result}")
   endif()
   execute_process(
-    COMMAND ${CMAKE_COMMAND} --build . --config Release
+    COMMAND ${CMAKE_COMMAND} --build . --config Debug
     RESULT_VARIABLE result
     ${outputOptions}
     WORKING_DIRECTORY "${ARG_SUBBUILD_DIR}"
