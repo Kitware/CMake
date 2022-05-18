@@ -23,6 +23,7 @@
 #include "cmsys/String.h"
 
 #include "cmAlgorithms.h"
+#include "cmDependencyProvider.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -239,6 +240,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
   std::set<std::string> requiredComponents;
   std::set<std::string> optionalComponents;
   std::vector<std::pair<std::string, const char*>> componentVarDefs;
+  bool bypassProvider = false;
 
   // Always search directly in a generated path.
   this->SearchPathSuffixes.emplace_back();
@@ -268,6 +270,9 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
   for (unsigned int i = 1; i < args.size(); ++i) {
     if (args[i] == "QUIET") {
       this->Quiet = true;
+      doing = DoingNone;
+    } else if (args[i] == "BYPASS_PROVIDER") {
+      bypassProvider = true;
       doing = DoingNone;
     } else if (args[i] == "EXACT") {
       this->VersionExact = true;
@@ -409,7 +414,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
     return false;
   }
 
-  // Maybe choose one mode exclusively.
+  // Check and eliminate search modes not allowed by the args provided
   this->UseFindModules = configArgs.empty();
   this->UseConfigFiles = moduleArgs.empty();
   if (!this->UseFindModules && !this->UseConfigFiles) {
@@ -542,6 +547,48 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
       return false;
     }
     return true;
+  }
+
+  // Now choose what method(s) we will use to satisfy the request. Note that
+  // we still want all the above checking of arguments, etc. regardless of the
+  // method used. This will ensure ill-formed arguments are caught earlier,
+  // before things like dependency providers need to deal with them.
+
+  // A dependency provider (if set) gets first look before other methods.
+  // We do this before modifying the package root path stack because a
+  // provider might use methods that ignore that.
+  cmState* state = this->Makefile->GetState();
+  cmState::Command providerCommand = state->GetDependencyProviderCommand(
+    cmDependencyProvider::Method::FindPackage);
+  if (bypassProvider) {
+    if (this->DebugMode && providerCommand) {
+      this->DebugMessage(
+        "BYPASS_PROVIDER given, skipping dependency provider");
+    }
+  } else if (providerCommand) {
+    if (this->DebugMode) {
+      this->DebugMessage(cmStrCat("Trying dependency provider command: ",
+                                  state->GetDependencyProvider()->GetCommand(),
+                                  "()"));
+    }
+    std::vector<cmListFileArgument> listFileArgs(args.size() + 1);
+    listFileArgs[0] =
+      cmListFileArgument("FIND_PACKAGE", cmListFileArgument::Unquoted, 0);
+    std::transform(args.begin(), args.end(), listFileArgs.begin() + 1,
+                   [](const std::string& arg) {
+                     return cmListFileArgument(arg,
+                                               cmListFileArgument::Bracket, 0);
+                   });
+    if (!providerCommand(listFileArgs, this->Status)) {
+      return false;
+    }
+    if (this->Makefile->IsOn(cmStrCat(this->Name, "_FOUND"))) {
+      if (this->DebugMode) {
+        this->DebugMessage("Package was found by the dependency provider");
+      }
+      this->AppendSuccessInformation();
+      return true;
+    }
   }
 
   {
