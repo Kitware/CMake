@@ -37,6 +37,12 @@
         VCVARSPLATFORM: "x64"
         VCVARSVERSION: "14.32.31326"
 
+.windows_vcvarsall_vs2022_x86:
+    variables:
+        VCVARSALL: "${VS170COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
+        VCVARSPLATFORM: "x86"
+        VCVARSVERSION: "14.32.31326"
+
 .windows_vs2022_x64_ninja:
     extends:
         - .windows_build_ninja
@@ -44,6 +50,30 @@
 
     variables:
         CMAKE_CONFIGURATION: windows_vs2022_x64_ninja
+
+.windows_package:
+    extends:
+        - .windows_build_ninja
+
+    variables:
+        CMAKE_CI_BUILD_TYPE: Release
+        CMAKE_CI_NO_INSTALL: 1
+
+.windows_x86_64_package:
+    extends:
+        - .windows_package
+        - .windows_vcvarsall_vs2022_x64
+
+    variables:
+        CMAKE_CONFIGURATION: windows_x86_64_package
+
+.windows_i386_package:
+    extends:
+        - .windows_package
+        - .windows_vcvarsall_vs2022_x86
+
+    variables:
+        CMAKE_CONFIGURATION: windows_i386_package
 
 ### External testing
 
@@ -233,6 +263,18 @@
         - ctest -VV -S .gitlab/ci/ctest_build.cmake
         - sccache --show-stats
         - sccache --stop-server
+
+    interruptible: true
+
+.cmake_package_windows:
+    stage: package
+
+    script:
+        - *before_script_windows
+        - Invoke-Expression -Command .gitlab/ci/vcvarsall.ps1
+        - cd build
+        - cpack -G ZIP
+        - cpack -G WIX
 
     interruptible: true
 
