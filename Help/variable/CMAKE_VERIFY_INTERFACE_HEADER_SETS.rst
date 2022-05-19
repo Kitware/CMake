@@ -1,11 +1,11 @@
-CMAKE_VERIFY_HEADER_SETS
-------------------------
+CMAKE_VERIFY_INTERFACE_HEADER_SETS
+----------------------------------
 
 .. versionadded:: 3.24
 
-This variable is used to initialize the :prop_tgt:`VERIFY_HEADER_SETS`
-property of targets when they are created.  Setting it to true
-enables header set verification.
+This variable is used to initialize the
+:prop_tgt:`VERIFY_INTERFACE_HEADER_SETS` property of targets when they are
+created.  Setting it to true enables header set verification.
 
 Projects should not set this variable, it is intended as a developer
 control to be set on the :manual:`cmake(1)` command line or other

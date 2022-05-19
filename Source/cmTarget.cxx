@@ -621,7 +621,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   }
 
   initProp("FOLDER");
-  initProp("VERIFY_HEADER_SETS");
+  initProp("VERIFY_INTERFACE_HEADER_SETS");
 
   if (this->GetGlobalGenerator()->IsXcode()) {
     initProp("XCODE_GENERATE_SCHEME");

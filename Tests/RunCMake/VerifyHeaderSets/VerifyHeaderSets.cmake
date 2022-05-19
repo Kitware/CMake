@@ -27,7 +27,7 @@ add_library(none STATIC lib.c)
 
 add_library(property_off STATIC lib.c)
 target_sources(property_off INTERFACE FILE_SET HEADERS FILES a.h dir/c.h dir/cxx.h)
-set_property(TARGET property_off PROPERTY VERIFY_HEADER_SETS OFF)
+set_property(TARGET property_off PROPERTY VERIFY_INTERFACE_HEADER_SETS OFF)
 
 add_library(private STATIC lib.c)
 target_sources(private PRIVATE FILE_SET HEADERS FILES a.h dir/c.h dir/cxx.h)

@@ -8527,7 +8527,7 @@ cmGeneratorTarget::ManagedType cmGeneratorTarget::GetManagedType(
 
 bool cmGeneratorTarget::AddHeaderSetVerification()
 {
-  if (!this->GetPropertyAsBool("VERIFY_HEADER_SETS")) {
+  if (!this->GetPropertyAsBool("VERIFY_INTERFACE_HEADER_SETS")) {
     return true;
   }
 
@@ -8601,7 +8601,7 @@ bool cmGeneratorTarget::AddHeaderSetVerification()
               cmMakefile::PolicyPushPop polScope(this->Makefile);
               this->Makefile->SetPolicy(cmPolicies::CMP0119, cmPolicies::NEW);
               verifyTarget = this->Makefile->AddLibrary(
-                cmStrCat(this->GetName(), "_verify_header_sets"),
+                cmStrCat(this->GetName(), "_verify_interface_header_sets"),
                 cmStateEnums::OBJECT_LIBRARY, {}, true);
             }
 
@@ -8682,9 +8682,9 @@ std::string cmGeneratorTarget::GenerateHeaderSetVerificationFile(
   }
   headerFilename += source.GetLocation().GetName();
 
-  auto filename = cmStrCat(this->LocalGenerator->GetCurrentBinaryDirectory(),
-                           '/', this->GetName(), "_verify_header_sets/",
-                           headerFilename, extension);
+  auto filename = cmStrCat(
+    this->LocalGenerator->GetCurrentBinaryDirectory(), '/', this->GetName(),
+    "_verify_interface_header_sets/", headerFilename, extension);
   auto* verificationSource = this->Makefile->GetOrCreateSource(filename);
   verificationSource->SetProperty("LANGUAGE", language);
 
