@@ -4,13 +4,8 @@
     artifacts:
         expire_in: 1d
         paths:
-            # XXX(globbing): Can be simplified with support from
-            # https://gitlab.com/gitlab-org/gitlab-runner/issues/4840
-            - build/CTestTestfile.cmake
-            - build/*/CTestTestfile.cmake
-            - build/*/*/CTestTestfile.cmake
-            - build/*/*/*/CTestTestfile.cmake
-            - build/*/*/*/*/CTestTestfile.cmake
+            # Test specifications.
+            - build/**/CTestTestfile.cmake
 
             # Allow CMake to find CMAKE_ROOT.
             - build/CMakeFiles/CMakeSourceDir.txt
