@@ -54,10 +54,8 @@ Options include:
 
   .. versionchanged:: 3.24
     On ``Windows`` platform, it is possible to include registry queries as part
-    of the directories. Such specifications will be ignored on all other
-    platforms.
-
-  .. include:: FIND_XXX_REGISTRY_QUERY.txt
+    of the directories, using a :ref:`dedicated syntax <Find Using Windows Registry>`.
+    Such specifications will be ignored on all other platforms.
 
 ``REGISTRY_VIEW``
   .. versionadded:: 3.24

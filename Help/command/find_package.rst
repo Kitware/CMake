@@ -309,10 +309,9 @@ that order).
 
 .. versionchanged:: 3.24
   On ``Windows`` platform, it is possible to include registry queries as part
-  of the directories specified through ``HINTS`` and ``PATHS`` keywords. Such
-  specifications will be ignored on all other platforms.
-
-.. include:: FIND_XXX_REGISTRY_QUERY.txt
+  of the directories specified through ``HINTS`` and ``PATHS`` keywords, using
+  a :ref:`dedicated syntax <Find Using Windows Registry>`. Such specifications
+  will be ignored on all other platforms.
 
 .. versionadded:: 3.24
   ``REGISTRY_VIEW`` can be specified to manage ``Windows`` registry queries
