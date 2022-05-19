@@ -1086,6 +1086,14 @@ void cmake::SetArgs(const std::vector<std::string>& args)
                   << "uninitialized variables.\n";
         state->SetCheckSystemVars(true);
         return true;
+      } },
+    CommandArgument{
+      "--compile-no-warning-as-error", CommandArgument::Values::Zero,
+      [](std::string const&, cmake* state) -> bool {
+        std::cout << "Ignoring COMPILE_WARNING_AS_ERROR target property and "
+                  << "CMAKE_COMPILE_WARNING_AS_ERROR variable.\n";
+        state->SetIgnoreWarningAsError(true);
+        return true;
       } }
   };
 
