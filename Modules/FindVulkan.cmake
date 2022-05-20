@@ -10,6 +10,15 @@ FindVulkan
 Find Vulkan, which is a low-overhead, cross-platform 3D graphics
 and computing API.
 
+Optional COMPONENTS
+^^^^^^^^^^^^^^^^^^^
+
+.. versionadded:: 3.24
+
+This module respects several optional COMPONENTS: ``glslc``,
+``glslangValidator``, ``glslang``, ``shaderc_combined`` and ``SPIRV-Tools``.
+There are corresponding import targets for each of these flags.
+
 IMPORTED Targets
 ^^^^^^^^^^^^^^^^
 
@@ -36,6 +45,24 @@ This module defines :prop_tgt:`IMPORTED` targets if Vulkan has been found:
   The glslangValidator tool, if found.  It is used to compile GLSL and
   HLSL shaders into SPIR-V.
 
+``Vulkan::glslang``
+  .. versionadded:: 3.24
+
+  Defined if SDK has the Khronos-reference front-end shader parser and SPIR-V
+  generator library (glslang).
+
+``Vulkan::shaderc_combined``
+  .. versionadded:: 3.24
+
+  Defined if SDK has the Google static library for Vulkan shader compilation
+  (shaderc_combined).
+
+``Vulkan::SPIRV-Tools``
+  .. versionadded:: 3.24
+
+  Defined if SDK has the Khronos library to process SPIR-V modules
+  (SPIRV-Tools).
+
 Result Variables
 ^^^^^^^^^^^^^^^^
 
@@ -51,6 +78,26 @@ This module defines the following variables:
   .. versionadded:: 3.23
 
   value from ``vulkan/vulkan_core.h``
+``Vulkan_glslc_FOUND``
+  .. versionadded:: 3.24
+
+  True, if the SDK has the glslc executable.
+``Vulkan_glslangValidator_FOUND``
+  .. versionadded:: 3.24
+
+  True, if the SDK has the glslangValidator executable.
+``Vulkan_glslang_FOUND``
+  .. versionadded:: 3.24
+
+  True, if the SDK has the glslang library.
+``Vulkan_shaderc_combined_FOUND``
+  .. versionadded:: 3.24
+
+  True, if the SDK has the shaderc_combined library.
+``Vulkan_SPIRV-Tools_FOUND``
+  .. versionadded:: 3.24
+
+  True, if the SDK has the SPIRV-Tools library.
 
 The module will also defines these cache variables:
 
@@ -62,6 +109,18 @@ The module will also defines these cache variables:
   the path to the GLSL SPIR-V compiler
 ``Vulkan_GLSLANG_VALIDATOR_EXECUTABLE``
   the path to the glslangValidator tool
+``Vulkan_glslang_LIBRARY``
+  .. versionadded:: 3.24
+
+  Path to the glslang library.
+``Vulkan_shaderc_combined_LIBRARY``
+  .. versionadded:: 3.24
+
+  Path to the shaderc_combined library.
+``Vulkan_SPIRV-Tools_LIBRARY``
+  .. versionadded:: 3.24
+
+  Path to the SPIRV-Tools library.
 
 Hints
 ^^^^^
@@ -76,62 +135,257 @@ environment.
 
 #]=======================================================================]
 
-if(WIN32)
-  find_path(Vulkan_INCLUDE_DIR
-    NAMES vulkan/vulkan.h
-    HINTS
-      "$ENV{VULKAN_SDK}/Include"
-    )
+cmake_policy(PUSH)
+cmake_policy(SET CMP0057 NEW)
 
+# For backward compatibility as `FindVulkan` in previous CMake versions allow to retrieve `glslc`
+# and `glslangValidator` without requesting the corresponding component.
+if(NOT glslc IN_LIST Vulkan_FIND_COMPONENTS)
+  list(APPEND Vulkan_FIND_COMPONENTS glslc)
+endif()
+if(NOT glslangValidator IN_LIST Vulkan_FIND_COMPONENTS)
+  list(APPEND Vulkan_FIND_COMPONENTS glslangValidator)
+endif()
+
+if(WIN32)
+  set(_Vulkan_library_name vulkan-1)
+  set(_Vulkan_hint_include_search_paths
+    "$ENV{VULKAN_SDK}/Include"
+  )
   if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-    find_library(Vulkan_LIBRARY
-      NAMES vulkan-1
-      HINTS
-        "$ENV{VULKAN_SDK}/Lib"
-        "$ENV{VULKAN_SDK}/Bin"
-      )
-    find_program(Vulkan_GLSLC_EXECUTABLE
-      NAMES glslc
-      HINTS
-        "$ENV{VULKAN_SDK}/Bin"
-      )
-    find_program(Vulkan_GLSLANG_VALIDATOR_EXECUTABLE
-      NAMES glslangValidator
-      HINTS
-        "$ENV{VULKAN_SDK}/Bin"
-      )
-  elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
-    find_library(Vulkan_LIBRARY
-      NAMES vulkan-1
-      HINTS
-        "$ENV{VULKAN_SDK}/Lib32"
-        "$ENV{VULKAN_SDK}/Bin32"
-      )
-    find_program(Vulkan_GLSLC_EXECUTABLE
-      NAMES glslc
-      HINTS
-        "$ENV{VULKAN_SDK}/Bin32"
-      )
-    find_program(Vulkan_GLSLANG_VALIDATOR_EXECUTABLE
-      NAMES glslangValidator
-      HINTS
-        "$ENV{VULKAN_SDK}/Bin32"
-      )
+    set(_Vulkan_hint_executable_search_paths
+      "$ENV{VULKAN_SDK}/Bin"
+    )
+    set(_Vulkan_hint_library_search_paths
+      "$ENV{VULKAN_SDK}/Lib"
+      "$ENV{VULKAN_SDK}/Bin"
+    )
+  else()
+    set(_Vulkan_hint_executable_search_paths
+      "$ENV{VULKAN_SDK}/Bin32"
+    )
+    set(_Vulkan_hint_library_search_paths
+      "$ENV{VULKAN_SDK}/Lib32"
+      "$ENV{VULKAN_SDK}/Bin32"
+    )
   endif()
 else()
-  find_path(Vulkan_INCLUDE_DIR
-    NAMES vulkan/vulkan.h
-    HINTS "$ENV{VULKAN_SDK}/include")
-  find_library(Vulkan_LIBRARY
-    NAMES vulkan
-    HINTS "$ENV{VULKAN_SDK}/lib")
+  set(_Vulkan_library_name vulkan)
+  set(_Vulkan_hint_include_search_paths
+    "$ENV{VULKAN_SDK}/include"
+  )
+  set(_Vulkan_hint_executable_search_paths
+    "$ENV{VULKAN_SDK}/bin"
+  )
+  set(_Vulkan_hint_library_search_paths
+    "$ENV{VULKAN_SDK}/lib"
+  )
+endif()
+
+find_path(Vulkan_INCLUDE_DIR
+  NAMES vulkan/vulkan.h
+  HINTS
+    ${_Vulkan_hint_include_search_paths}
+  )
+mark_as_advanced(Vulkan_INCLUDE_DIR)
+
+find_library(Vulkan_LIBRARY
+  NAMES ${_Vulkan_library_name}
+  HINTS
+    ${_Vulkan_hint_library_search_paths}
+  )
+mark_as_advanced(Vulkan_LIBRARY)
+
+if(glslc IN_LIST Vulkan_FIND_COMPONENTS)
   find_program(Vulkan_GLSLC_EXECUTABLE
     NAMES glslc
-    HINTS "$ENV{VULKAN_SDK}/bin")
+    HINTS
+      ${_Vulkan_hint_executable_search_paths}
+    )
+  mark_as_advanced(Vulkan_GLSLC_EXECUTABLE)
+endif()
+if(glslangValidator IN_LIST Vulkan_FIND_COMPONENTS)
   find_program(Vulkan_GLSLANG_VALIDATOR_EXECUTABLE
     NAMES glslangValidator
-    HINTS "$ENV{VULKAN_SDK}/bin")
+    HINTS
+      ${_Vulkan_hint_executable_search_paths}
+    )
+  mark_as_advanced(Vulkan_GLSLANG_VALIDATOR_EXECUTABLE)
 endif()
+if(glslang IN_LIST Vulkan_FIND_COMPONENTS)
+  find_library(Vulkan_glslang-spirv_LIBRARY
+    NAMES SPIRV
+    HINTS
+      ${_Vulkan_hint_library_search_paths}
+    )
+  mark_as_advanced(Vulkan_glslang-spirv_LIBRARY)
+
+  find_library(Vulkan_glslang-spirv_DEBUG_LIBRARY
+    NAMES SPIRVd
+    HINTS
+      ${_Vulkan_hint_library_search_paths}
+    )
+  mark_as_advanced(Vulkan_glslang-spirv_DEBUG_LIBRARY)
+
+  find_library(Vulkan_glslang-oglcompiler_LIBRARY
+    NAMES OGLCompiler
+    HINTS
+      ${_Vulkan_hint_library_search_paths}
+    )
+  mark_as_advanced(Vulkan_glslang-oglcompiler_LIBRARY)
+
+  find_library(Vulkan_glslang-oglcompiler_DEBUG_LIBRARY
+    NAMES OGLCompilerd
+    HINTS
+      ${_Vulkan_hint_library_search_paths}
+    )
+  mark_as_advanced(Vulkan_glslang-oglcompiler_DEBUG_LIBRARY)
+
+  find_library(Vulkan_glslang-osdependent_LIBRARY
+    NAMES OSDependent
+    HINTS
+      ${_Vulkan_hint_library_search_paths}
+    )
+  mark_as_advanced(Vulkan_glslang-osdependent_LIBRARY)
+
+  find_library(Vulkan_glslang-osdependent_DEBUG_LIBRARY
+    NAMES OSDependentd
+    HINTS
+      ${_Vulkan_hint_library_search_paths}
+    )
+  mark_as_advanced(Vulkan_glslang-osdependent_DEBUG_LIBRARY)
+
+  find_library(Vulkan_glslang-machineindependent_LIBRARY
+    NAMES MachineIndependent
+    HINTS
+      ${_Vulkan_hint_library_search_paths}
+    )
+  mark_as_advanced(Vulkan_glslang-machineindependent_LIBRARY)
+
+  find_library(Vulkan_glslang-machineindependent_DEBUG_LIBRARY
+    NAMES MachineIndependentd
+    HINTS
+      ${_Vulkan_hint_library_search_paths}
+    )
+  mark_as_advanced(Vulkan_glslang-machineindependent_DEBUG_LIBRARY)
+
+  find_library(Vulkan_glslang-genericcodegen_LIBRARY
+    NAMES GenericCodeGen
+    HINTS
+      ${_Vulkan_hint_library_search_paths}
+    )
+  mark_as_advanced(Vulkan_glslang-genericcodegen_LIBRARY)
+
+  find_library(Vulkan_glslang-genericcodegen_DEBUG_LIBRARY
+    NAMES GenericCodeGend
+    HINTS
+      ${_Vulkan_hint_library_search_paths}
+    )
+  mark_as_advanced(Vulkan_glslang-genericcodegen_DEBUG_LIBRARY)
+
+  find_library(Vulkan_glslang_LIBRARY
+    NAMES glslang
+    HINTS
+      ${_Vulkan_hint_library_search_paths}
+    )
+  mark_as_advanced(Vulkan_glslang_LIBRARY)
+
+  find_library(Vulkan_glslang_DEBUG_LIBRARY
+    NAMES glslangd
+    HINTS
+      ${_Vulkan_hint_library_search_paths}
+    )
+  mark_as_advanced(Vulkan_glslang_DEBUG_LIBRARY)
+endif()
+if(shaderc_combined IN_LIST Vulkan_FIND_COMPONENTS)
+  find_library(Vulkan_shaderc_combined_LIBRARY
+    NAMES shaderc_combined
+    HINTS
+    ${_Vulkan_hint_library_search_paths})
+  mark_as_advanced(Vulkan_shaderc_combined_LIBRARY)
+
+  find_library(Vulkan_shaderc_combined_DEBUG_LIBRARY
+    NAMES shaderc_combinedd
+    HINTS
+    ${_Vulkan_hint_library_search_paths})
+  mark_as_advanced(Vulkan_shaderc_combined_DEBUG_LIBRARY)
+endif()
+if(SPIRV-Tools IN_LIST Vulkan_FIND_COMPONENTS)
+  find_library(Vulkan_SPIRV-Tools_LIBRARY
+    NAMES SPIRV-Tools
+    HINTS
+      ${_Vulkan_hint_library_search_paths})
+  mark_as_advanced(Vulkan_SPIRV-Tools_LIBRARY)
+
+  find_library(Vulkan_SPIRV-Tools_DEBUG_LIBRARY
+    NAMES SPIRV-Toolsd
+    HINTS
+      ${_Vulkan_hint_library_search_paths})
+  mark_as_advanced(Vulkan_SPIRV-Tools_DEBUG_LIBRARY)
+endif()
+
+if(Vulkan_GLSLC_EXECUTABLE)
+  set(Vulkan_glslc_FOUND TRUE)
+else()
+  set(Vulkan_glslc_FOUND FALSE)
+endif()
+
+if(Vulkan_GLSLANG_VALIDATOR_EXECUTABLE)
+  set(Vulkan_glslangValidator_FOUND TRUE)
+else()
+  set(Vulkan_glslangValidator_FOUND FALSE)
+endif()
+
+function(_Vulkan_set_library_component_found component)
+  cmake_parse_arguments(PARSE_ARGV 1 _ARG
+    "NO_WARNING"
+    ""
+    "DEPENDENT_COMPONENTS")
+
+  set(all_dependent_component_found TRUE)
+  foreach(dependent_component IN LISTS _ARG_DEPENDENT_COMPONENTS)
+    if(NOT Vulkan_${dependent_component}_FOUND)
+      set(all_dependent_component_found FALSE)
+      break()
+    endif()
+  endforeach()
+
+  if(all_dependent_component_found AND (Vulkan_${component}_LIBRARY OR Vulkan_${component}_DEBUG_LIBRARY))
+    set(Vulkan_${component}_FOUND TRUE PARENT_SCOPE)
+
+    # For Windows Vulkan SDK, third party tools binaries are provided with different MSVC ABI:
+    #   - Release binaries uses a runtime library
+    #   - Debug binaries uses a debug runtime library
+    # This lead to incompatibilities in linking for some configuration types due to CMake-default or project-configured selected MSVC ABI.
+    if(WIN32 AND NOT _ARG_NO_WARNING)
+      if(NOT Vulkan_${component}_LIBRARY)
+        message(WARNING
+"Library ${component} for Release configuration is missing, imported target Vulkan::${component} may not be able to link when targeting this build configuration due to incompatible MSVC ABI.")
+      endif()
+      if(NOT Vulkan_${component}_DEBUG_LIBRARY)
+        message(WARNING
+"Library ${component} for Debug configuration is missing, imported target Vulkan::${component} may not be able to link when targeting this build configuration due to incompatible MSVC ABI. Consider re-installing the Vulkan SDK and request debug libraries to fix this warning.")
+      endif()
+    endif()
+  else()
+    set(Vulkan_${component}_FOUND FALSE PARENT_SCOPE)
+  endif()
+endfunction()
+
+_Vulkan_set_library_component_found(glslang-spirv NO_WARNING)
+_Vulkan_set_library_component_found(glslang-oglcompiler NO_WARNING)
+_Vulkan_set_library_component_found(glslang-osdependent NO_WARNING)
+_Vulkan_set_library_component_found(glslang-machineindependent NO_WARNING)
+_Vulkan_set_library_component_found(glslang-genericcodegen NO_WARNING)
+_Vulkan_set_library_component_found(glslang
+  DEPENDENT_COMPONENTS
+    glslang-spirv
+    glslang-oglcompiler
+    glslang-osdependent
+    glslang-machineindependent
+    glslang-genericcodegen)
+_Vulkan_set_library_component_found(shaderc_combined)
+_Vulkan_set_library_component_found(SPIRV-Tools)
 
 set(Vulkan_LIBRARIES ${Vulkan_LIBRARY})
 set(Vulkan_INCLUDE_DIRS ${Vulkan_INCLUDE_DIR})
@@ -162,10 +416,8 @@ find_package_handle_standard_args(Vulkan
     Vulkan_INCLUDE_DIR
   VERSION_VAR
     Vulkan_VERSION
+  HANDLE_COMPONENTS
 )
-
-mark_as_advanced(Vulkan_INCLUDE_DIR Vulkan_LIBRARY Vulkan_GLSLC_EXECUTABLE
-                 Vulkan_GLSLANG_VALIDATOR_EXECUTABLE)
 
 if(Vulkan_FOUND AND NOT TARGET Vulkan::Vulkan)
   add_library(Vulkan::Vulkan UNKNOWN IMPORTED)
@@ -189,3 +441,217 @@ if(Vulkan_FOUND AND Vulkan_GLSLANG_VALIDATOR_EXECUTABLE AND NOT TARGET Vulkan::g
   add_executable(Vulkan::glslangValidator IMPORTED)
   set_property(TARGET Vulkan::glslangValidator PROPERTY IMPORTED_LOCATION "${Vulkan_GLSLANG_VALIDATOR_EXECUTABLE}")
 endif()
+
+if(Vulkan_FOUND)
+  if((Vulkan_glslang-spirv_LIBRARY OR Vulkan_glslang-spirv_DEBUG_LIBRARY) AND NOT TARGET Vulkan::glslang-spirv)
+    add_library(Vulkan::glslang-spirv STATIC IMPORTED)
+    set_property(TARGET Vulkan::glslang-spirv
+      PROPERTY
+        INTERFACE_INCLUDE_DIRECTORIES "${Vulkan_INCLUDE_DIRS}")
+    if(Vulkan_glslang-spirv_LIBRARY)
+      set_property(TARGET Vulkan::glslang-spirv APPEND
+        PROPERTY
+          IMPORTED_CONFIGURATIONS Release)
+      set_property(TARGET Vulkan::glslang-spirv
+        PROPERTY
+          IMPORTED_LOCATION_RELEASE "${Vulkan_glslang-spirv_LIBRARY}")
+    endif()
+    if(Vulkan_glslang-spirv_DEBUG_LIBRARY)
+      set_property(TARGET Vulkan::glslang-spirv APPEND
+        PROPERTY
+          IMPORTED_CONFIGURATIONS Debug)
+      set_property(TARGET Vulkan::glslang-spirv
+        PROPERTY
+          IMPORTED_LOCATION_DEBUG "${Vulkan_glslang-spirv_DEBUG_LIBRARY}")
+    endif()
+  endif()
+
+  if((Vulkan_glslang-oglcompiler_LIBRARY OR Vulkan_glslang-oglcompiler_DEBUG_LIBRARY) AND NOT TARGET Vulkan::glslang-oglcompiler)
+    add_library(Vulkan::glslang-oglcompiler STATIC IMPORTED)
+    set_property(TARGET Vulkan::glslang-oglcompiler
+      PROPERTY
+        INTERFACE_INCLUDE_DIRECTORIES "${Vulkan_INCLUDE_DIRS}")
+    if(Vulkan_glslang-oglcompiler_LIBRARY)
+      set_property(TARGET Vulkan::glslang-oglcompiler APPEND
+        PROPERTY
+          IMPORTED_CONFIGURATIONS Release)
+      set_property(TARGET Vulkan::glslang-oglcompiler
+        PROPERTY
+          IMPORTED_LOCATION_RELEASE "${Vulkan_glslang-oglcompiler_LIBRARY}")
+    endif()
+    if(Vulkan_glslang-oglcompiler_DEBUG_LIBRARY)
+      set_property(TARGET Vulkan::glslang-oglcompiler APPEND
+        PROPERTY
+          IMPORTED_CONFIGURATIONS Debug)
+      set_property(TARGET Vulkan::glslang-oglcompiler
+        PROPERTY
+          IMPORTED_LOCATION_DEBUG "${Vulkan_glslang-oglcompiler_DEBUG_LIBRARY}")
+    endif()
+  endif()
+
+  if((Vulkan_glslang-osdependent_LIBRARY OR Vulkan_glslang-osdependent_DEBUG_LIBRARY) AND NOT TARGET Vulkan::glslang-osdependent)
+    add_library(Vulkan::glslang-osdependent STATIC IMPORTED)
+    set_property(TARGET Vulkan::glslang-osdependent
+      PROPERTY
+        INTERFACE_INCLUDE_DIRECTORIES "${Vulkan_INCLUDE_DIRS}")
+    if(Vulkan_glslang-osdependent_LIBRARY)
+      set_property(TARGET Vulkan::glslang-osdependent APPEND
+        PROPERTY
+          IMPORTED_CONFIGURATIONS Release)
+      set_property(TARGET Vulkan::glslang-osdependent
+        PROPERTY
+          IMPORTED_LOCATION_RELEASE "${Vulkan_glslang-osdependent_LIBRARY}")
+    endif()
+    if(Vulkan_glslang-osdependent_DEBUG_LIBRARY)
+      set_property(TARGET Vulkan::glslang-osdependent APPEND
+        PROPERTY
+          IMPORTED_CONFIGURATIONS Debug)
+      set_property(TARGET Vulkan::glslang-osdependent
+        PROPERTY
+          IMPORTED_LOCATION_DEBUG "${Vulkan_glslang-osdependent_DEBUG_LIBRARY}")
+    endif()
+  endif()
+
+  if((Vulkan_glslang-machineindependent_LIBRARY OR Vulkan_glslang-machineindependent_DEBUG_LIBRARY) AND NOT TARGET Vulkan::glslang-machineindependent)
+    add_library(Vulkan::glslang-machineindependent STATIC IMPORTED)
+    set_property(TARGET Vulkan::glslang-machineindependent
+      PROPERTY
+        INTERFACE_INCLUDE_DIRECTORIES "${Vulkan_INCLUDE_DIRS}")
+    if(Vulkan_glslang-machineindependent_LIBRARY)
+      set_property(TARGET Vulkan::glslang-machineindependent APPEND
+        PROPERTY
+          IMPORTED_CONFIGURATIONS Release)
+      set_property(TARGET Vulkan::glslang-machineindependent
+        PROPERTY
+          IMPORTED_LOCATION_RELEASE "${Vulkan_glslang-machineindependent_LIBRARY}")
+    endif()
+    if(Vulkan_glslang-machineindependent_DEBUG_LIBRARY)
+      set_property(TARGET Vulkan::glslang-machineindependent APPEND
+        PROPERTY
+          IMPORTED_CONFIGURATIONS Debug)
+      set_property(TARGET Vulkan::glslang-machineindependent
+        PROPERTY
+          IMPORTED_LOCATION_DEBUG "${Vulkan_glslang-machineindependent_DEBUG_LIBRARY}")
+    endif()
+  endif()
+
+  if((Vulkan_glslang-genericcodegen_LIBRARY OR Vulkan_glslang-genericcodegen_DEBUG_LIBRARY) AND NOT TARGET Vulkan::glslang-genericcodegen)
+    add_library(Vulkan::glslang-genericcodegen STATIC IMPORTED)
+    set_property(TARGET Vulkan::glslang-genericcodegen
+      PROPERTY
+        INTERFACE_INCLUDE_DIRECTORIES "${Vulkan_INCLUDE_DIRS}")
+    if(Vulkan_glslang-genericcodegen_LIBRARY)
+      set_property(TARGET Vulkan::glslang-genericcodegen APPEND
+        PROPERTY
+          IMPORTED_CONFIGURATIONS Release)
+      set_property(TARGET Vulkan::glslang-genericcodegen
+        PROPERTY
+          IMPORTED_LOCATION_RELEASE "${Vulkan_glslang-genericcodegen_LIBRARY}")
+    endif()
+    if(Vulkan_glslang-genericcodegen_DEBUG_LIBRARY)
+      set_property(TARGET Vulkan::glslang-genericcodegen APPEND
+        PROPERTY
+          IMPORTED_CONFIGURATIONS Debug)
+      set_property(TARGET Vulkan::glslang-genericcodegen
+        PROPERTY
+          IMPORTED_LOCATION_DEBUG "${Vulkan_glslang-genericcodegen_DEBUG_LIBRARY}")
+    endif()
+  endif()
+
+  if((Vulkan_glslang_LIBRARY OR Vulkan_glslang_DEBUG_LIBRARY)
+      AND TARGET Vulkan::glslang-spirv
+      AND TARGET Vulkan::glslang-oglcompiler
+      AND TARGET Vulkan::glslang-osdependent
+      AND TARGET Vulkan::glslang-machineindependent
+      AND TARGET Vulkan::glslang-genericcodegen
+      AND NOT TARGET Vulkan::glslang)
+    add_library(Vulkan::glslang STATIC IMPORTED)
+    set_property(TARGET Vulkan::glslang
+      PROPERTY
+        INTERFACE_INCLUDE_DIRECTORIES "${Vulkan_INCLUDE_DIRS}")
+    if(Vulkan_glslang_LIBRARY)
+      set_property(TARGET Vulkan::glslang APPEND
+        PROPERTY
+          IMPORTED_CONFIGURATIONS Release)
+      set_property(TARGET Vulkan::glslang
+        PROPERTY
+          IMPORTED_LOCATION_RELEASE "${Vulkan_glslang_LIBRARY}")
+    endif()
+    if(Vulkan_glslang_DEBUG_LIBRARY)
+      set_property(TARGET Vulkan::glslang APPEND
+        PROPERTY
+          IMPORTED_CONFIGURATIONS Debug)
+      set_property(TARGET Vulkan::glslang
+        PROPERTY
+          IMPORTED_LOCATION_DEBUG "${Vulkan_glslang_DEBUG_LIBRARY}")
+    endif()
+    target_link_libraries(Vulkan::glslang
+      INTERFACE
+        Vulkan::glslang-spirv
+        Vulkan::glslang-oglcompiler
+        Vulkan::glslang-osdependent
+        Vulkan::glslang-machineindependent
+        Vulkan::glslang-genericcodegen
+    )
+  endif()
+
+  if((Vulkan_shaderc_combined_LIBRARY OR Vulkan_shaderc_combined_DEBUG_LIBRARY) AND NOT TARGET Vulkan::shaderc_combined)
+    add_library(Vulkan::shaderc_combined STATIC IMPORTED)
+    set_property(TARGET Vulkan::shaderc_combined
+      PROPERTY
+        INTERFACE_INCLUDE_DIRECTORIES "${Vulkan_INCLUDE_DIRS}")
+    if(Vulkan_shaderc_combined_LIBRARY)
+      set_property(TARGET Vulkan::shaderc_combined APPEND
+        PROPERTY
+          IMPORTED_CONFIGURATIONS Release)
+      set_property(TARGET Vulkan::shaderc_combined
+        PROPERTY
+          IMPORTED_LOCATION_RELEASE "${Vulkan_shaderc_combined_LIBRARY}")
+    endif()
+    if(Vulkan_shaderc_combined_DEBUG_LIBRARY)
+      set_property(TARGET Vulkan::shaderc_combined APPEND
+        PROPERTY
+          IMPORTED_CONFIGURATIONS Debug)
+      set_property(TARGET Vulkan::shaderc_combined
+        PROPERTY
+          IMPORTED_LOCATION_DEBUG "${Vulkan_shaderc_combined_DEBUG_LIBRARY}")
+    endif()
+
+    if(UNIX)
+      find_package(Threads REQUIRED)
+      target_link_libraries(Vulkan::shaderc_combined
+        INTERFACE
+          Threads::Threads)
+    endif()
+  endif()
+
+  if((Vulkan_SPIRV-Tools_LIBRARY OR Vulkan_SPIRV-Tools_DEBUG_LIBRARY) AND NOT TARGET Vulkan::SPIRV-Tools)
+    add_library(Vulkan::SPIRV-Tools STATIC IMPORTED)
+    set_property(TARGET Vulkan::SPIRV-Tools
+      PROPERTY
+        INTERFACE_INCLUDE_DIRECTORIES "${Vulkan_INCLUDE_DIRS}")
+    if(Vulkan_SPIRV-Tools_LIBRARY)
+      set_property(TARGET Vulkan::SPIRV-Tools APPEND
+        PROPERTY
+          IMPORTED_CONFIGURATIONS Release)
+      set_property(TARGET Vulkan::SPIRV-Tools
+        PROPERTY
+          IMPORTED_LOCATION_RELEASE "${Vulkan_SPIRV-Tools_LIBRARY}")
+    endif()
+    if(Vulkan_SPIRV-Tools_DEBUG_LIBRARY)
+      set_property(TARGET Vulkan::SPIRV-Tools APPEND
+        PROPERTY
+          IMPORTED_CONFIGURATIONS Debug)
+      set_property(TARGET Vulkan::SPIRV-Tools
+        PROPERTY
+          IMPORTED_LOCATION_DEBUG "${Vulkan_SPIRV-Tools_DEBUG_LIBRARY}")
+    endif()
+  endif()
+endif()
+
+unset(_Vulkan_library_name)
+unset(_Vulkan_hint_include_search_paths)
+unset(_Vulkan_hint_executable_search_paths)
+unset(_Vulkan_hint_library_search_paths)
+
+cmake_policy(POP)
