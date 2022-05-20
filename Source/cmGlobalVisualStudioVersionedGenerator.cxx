@@ -27,16 +27,17 @@
 
 #if defined(_M_ARM64)
 #  define HOST_PLATFORM_NAME "ARM64"
-#  define HOST_TOOLS_ARCH ""
+#  define HOST_TOOLS_ARCH(v)                                                  \
+    (v >= cmGlobalVisualStudioGenerator::VSVersion::VS17) ? "ARM64" : ""
 #elif defined(_M_ARM)
 #  define HOST_PLATFORM_NAME "ARM"
-#  define HOST_TOOLS_ARCH ""
+#  define HOST_TOOLS_ARCH(v) ""
 #elif defined(_M_IA64)
 #  define HOST_PLATFORM_NAME "Itanium"
-#  define HOST_TOOLS_ARCH ""
+#  define HOST_TOOLS_ARCH(v) ""
 #elif defined(_WIN64)
 #  define HOST_PLATFORM_NAME "x64"
-#  define HOST_TOOLS_ARCH "x64"
+#  define HOST_TOOLS_ARCH(v) "x64"
 #else
 static bool VSIsWow64()
 {
@@ -58,10 +59,12 @@ static std::string VSHostPlatformName()
 #endif
 }
 
-static std::string VSHostArchitecture()
+static std::string VSHostArchitecture(
+  cmGlobalVisualStudioGenerator::VSVersion v)
 {
+  static_cast<void>(v);
 #ifdef HOST_TOOLS_ARCH
-  return HOST_TOOLS_ARCH;
+  return HOST_TOOLS_ARCH(v);
 #else
   if (VSIsWow64()) {
     return "x64";
@@ -433,7 +436,8 @@ cmGlobalVisualStudioVersionedGenerator::cmGlobalVisualStudioVersionedGenerator(
   this->DefaultLinkFlagTableName = VSVersionToToolset(this->Version);
   if (this->Version >= cmGlobalVisualStudioGenerator::VSVersion::VS16) {
     this->DefaultPlatformName = VSHostPlatformName();
-    this->DefaultPlatformToolsetHostArchitecture = VSHostArchitecture();
+    this->DefaultPlatformToolsetHostArchitecture =
+      VSHostArchitecture(this->Version);
   }
   if (this->Version >= cmGlobalVisualStudioGenerator::VSVersion::VS17) {
     // FIXME: Search for an existing framework?  Under '%ProgramFiles(x86)%',
