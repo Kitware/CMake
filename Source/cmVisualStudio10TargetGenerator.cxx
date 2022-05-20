@@ -3356,6 +3356,43 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
     }
   }
 
+  // Get includes for this target
+  if (!this->LangForClCompile.empty()) {
+    auto includeList = this->GetIncludes(configName, this->LangForClCompile);
+
+    auto sysIncludeFlag = this->Makefile->GetDefinition(
+      cmStrCat("CMAKE_INCLUDE_SYSTEM_FLAG_", this->LangForClCompile));
+
+    if (sysIncludeFlag) {
+      bool gotOneSys = false;
+      for (auto i : includeList) {
+        cmSystemTools::ConvertToUnixSlashes(i);
+        if (this->GeneratorTarget->IsSystemIncludeDirectory(
+              i, configName, this->LangForClCompile)) {
+          auto flag = cmTrimWhitespace(*sysIncludeFlag);
+          if (this->MSTools) {
+            cmSystemTools::ReplaceString(flag, "-external:I", "/external:I");
+          }
+          clOptions.AppendFlagString("AdditionalOptions",
+                                     cmStrCat(flag, " \"", i, '"'));
+          gotOneSys = true;
+        } else {
+          clOptions.AddInclude(i);
+        }
+      }
+
+      if (gotOneSys) {
+        if (auto sysIncludeFlagWarning = this->Makefile->GetDefinition(
+              cmStrCat("_CMAKE_INCLUDE_SYSTEM_FLAG_", this->LangForClCompile,
+                       "_WARNING"))) {
+          flags = cmStrCat(flags, ' ', *sysIncludeFlagWarning);
+        }
+      }
+    } else {
+      clOptions.AddIncludes(includeList);
+    }
+  }
+
   clOptions.Parse(flags);
   clOptions.Parse(defineFlags);
   std::vector<std::string> targetDefines;
@@ -3380,12 +3417,6 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
 
   if (this->ProjectType == VsProjectType::csproj) {
     clOptions.AppendFlag("DefineConstants", targetDefines);
-  }
-
-  // Get includes for this target
-  if (!this->LangForClCompile.empty()) {
-    clOptions.AddIncludes(
-      this->GetIncludes(configName, this->LangForClCompile));
   }
 
   if (this->MSTools) {
