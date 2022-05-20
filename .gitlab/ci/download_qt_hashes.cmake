@@ -12,3 +12,6 @@ set("5.15.1-0-202009071110qtbase-MacOS-MacOS_10_13-Clang-MacOS-MacOS_10_13-X86_6
 
 set("qt-5.9.9-macosx10.10-x86_64-arm64.tar.xz_hash" d4449771afa0bc6a809c14f1e6d939e7732494cf059503ae451e2bfe8fc60cc1)
 set("qt-5.15.2-macosx10.13-x86_64-arm64.tar.xz_hash" 7b9463a01c8beeee5bf8d01c70deff2d08561cd20aaf6f7a2f41cf8b68ce8a6b)
+
+set("qt-5.12.1-win-i386-msvc_v142-1.zip_hash" aa78711fdaa5d9b146bf7ddcf15983f9fbb3f995462f2d043f8cca74b40ddd11)
+set("qt-5.12.1-win-x86_64-msvc_v142-1.zip_hash" c2fc068b9dac40bb420e28e1ee15ce4f2ccfc866d767f3b99b6bb435b7c4f44b)

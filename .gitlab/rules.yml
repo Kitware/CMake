@@ -70,7 +70,7 @@
           when: on_success
         - if: '$CMAKE_CI_PACKAGE != null && $CI_JOB_STAGE == "prep"'
           when: manual
-        - if: '$CMAKE_CI_PACKAGE != null && $CI_JOB_STAGE != "upload"'
+        - if: '$CMAKE_CI_PACKAGE != null && $CI_JOB_STAGE != "package" && $CI_JOB_STAGE != "upload"'
           when: on_success
         - when: never
 

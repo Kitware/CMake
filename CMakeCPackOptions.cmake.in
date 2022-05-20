@@ -248,6 +248,13 @@ if("${CPACK_GENERATOR}" STREQUAL "WIX")
 
   set(CPACK_WIX_LIGHT_EXTRA_FLAGS "-dcl:high")
 
+  if(NOT "$ENV{CMAKE_CI_PACKAGE}" STREQUAL "")
+    # Suppress validation.  It does not work without
+    # an interactive session or an admin account.
+    # https://github.com/wixtoolset/issues/issues/3968
+    list(APPEND CPACK_WIX_LIGHT_EXTRA_FLAGS "-sval")
+  endif()
+
   set(CPACK_WIX_UI_BANNER
     "@CMake_SOURCE_DIR@/Utilities/Release/WiX/ui_banner.jpg"
   )

@@ -91,3 +91,9 @@ macOS
 
 The ``macos/`` directory contains scripts used to produce dependencies
 for building CMake binaries on macOS.
+
+Windows
+-------
+
+The ``win/`` directory contains scripts used to produce dependencies
+for building CMake binaries on Windows.

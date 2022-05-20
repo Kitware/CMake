@@ -16,6 +16,7 @@ stages:
     - build
     - test
     - test-ext
+    - package
     - upload
 
 ################################################################################
@@ -36,6 +37,7 @@ stages:
 
 # Job prefixes:
 #   - `b:` build
+#   - `k:` package
 #   - `l:` lint
 #   - `p:` prep
 #   - `t:` test
@@ -983,3 +985,69 @@ t:windows-openwatcom1.9:
         - t:windows-vs2022-x64-ninja
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
+
+b:windows-x86_64-package:
+    extends:
+        - .windows_x86_64_package
+        - .cmake_build_windows
+        - .cmake_build_package_artifacts
+        - .windows_tags_nonconcurrent_vs2022
+        - .run_only_for_package
+    dependencies:
+        - p:doc-package
+    needs:
+        - p:doc-package
+
+k:windows-x86_64-package:
+    extends:
+        - .windows_x86_64_package
+        - .cmake_package_windows
+        - .cmake_release_artifacts
+        - .windows_tags_nonconcurrent_vs2022
+        - .run_only_for_package
+    dependencies:
+        - b:windows-x86_64-package
+    needs:
+        - b:windows-x86_64-package
+
+u:windows-x86_64-package:
+    extends:
+        - .rsync_upload_package
+        - .run_only_for_package
+    dependencies:
+        - k:windows-x86_64-package
+    needs:
+        - k:windows-x86_64-package
+
+b:windows-i386-package:
+    extends:
+        - .windows_i386_package
+        - .cmake_build_windows
+        - .cmake_build_package_artifacts
+        - .windows_tags_nonconcurrent_vs2022
+        - .run_only_for_package
+    dependencies:
+        - p:doc-package
+    needs:
+        - p:doc-package
+
+k:windows-i386-package:
+    extends:
+        - .windows_i386_package
+        - .cmake_package_windows
+        - .cmake_release_artifacts
+        - .windows_tags_nonconcurrent_vs2022
+        - .run_only_for_package
+    dependencies:
+        - b:windows-i386-package
+    needs:
+        - b:windows-i386-package
+
+u:windows-i386-package:
+    extends:
+        - .rsync_upload_package
+        - .run_only_for_package
+    dependencies:
+        - k:windows-i386-package
+    needs:
+        - k:windows-i386-package
