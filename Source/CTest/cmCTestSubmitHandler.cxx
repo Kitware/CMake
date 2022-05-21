@@ -730,15 +730,15 @@ int cmCTestSubmitHandler::ProcessHandler()
     return -1;
   }
 
-  if (getenv("HTTP_PROXY")) {
+  if (char const* proxy = getenv("HTTP_PROXY")) {
     this->HTTPProxyType = 1;
-    this->HTTPProxy = getenv("HTTP_PROXY");
+    this->HTTPProxy = proxy;
     if (getenv("HTTP_PROXY_PORT")) {
       this->HTTPProxy += ":";
       this->HTTPProxy += getenv("HTTP_PROXY_PORT");
     }
-    if (getenv("HTTP_PROXY_TYPE")) {
-      std::string type = getenv("HTTP_PROXY_TYPE");
+    if (char const* proxy_type = getenv("HTTP_PROXY_TYPE")) {
+      std::string type = proxy_type;
       // HTTP/SOCKS4/SOCKS5
       if (type == "HTTP") {
         this->HTTPProxyType = 1;
