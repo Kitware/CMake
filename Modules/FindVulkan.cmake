@@ -17,6 +17,7 @@ Optional COMPONENTS
 
 This module respects several optional COMPONENTS: ``glslc``,
 ``glslangValidator``, ``glslang``, ``shaderc_combined`` and ``SPIRV-Tools``.
+On macOS, an additional component ``MoltenVK`` is available.
 There are corresponding import targets for each of these flags.
 
 IMPORTED Targets
@@ -63,6 +64,12 @@ This module defines :prop_tgt:`IMPORTED` targets if Vulkan has been found:
   Defined if SDK has the Khronos library to process SPIR-V modules
   (SPIRV-Tools).
 
+``Vulkan::MoltenVK``
+  .. versionadded:: 3.24
+
+  Defined if SDK has the Khronos library which implement a subset of Vulkan API
+  over Apple Metal graphics framework. (MoltenVK).
+
 Result Variables
 ^^^^^^^^^^^^^^^^
 
@@ -98,6 +105,10 @@ This module defines the following variables:
   .. versionadded:: 3.24
 
   True, if the SDK has the SPIRV-Tools library.
+``Vulkan_MoltenVK_FOUND``
+  .. versionadded:: 3.24
+
+  True, if the SDK has the MoltenVK library.
 
 The module will also defines these cache variables:
 
@@ -121,6 +132,10 @@ The module will also defines these cache variables:
   .. versionadded:: 3.24
 
   Path to the SPIRV-Tools library.
+``Vulkan_MoltenVK_LIBRARY``
+  .. versionadded:: 3.24
+
+  Path to the MoltenVK library.
 
 Hints
 ^^^^^
@@ -180,6 +195,28 @@ else()
   set(_Vulkan_hint_library_search_paths
     "$ENV{VULKAN_SDK}/lib"
   )
+endif()
+if(APPLE AND DEFINED ENV{VULKAN_SDK})
+  cmake_path(SET _MoltenVK_path NORMALIZE "$ENV{VULKAN_SDK}/../MoltenVK")
+  if(EXISTS "${_MoltenVK_path}")
+    list(APPEND _Vulkan_hint_include_search_paths
+      "${_MoltenVK_path}/include"
+    )
+    if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
+      list(APPEND _Vulkan_hint_library_search_paths
+        "${_MoltenVK_path}/dylib/iOS"
+      )
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "tvOS")
+      list(APPEND _Vulkan_hint_library_search_paths
+        "${_MoltenVK_path}/dylib/tvOS"
+      )
+    else()
+      list(APPEND _Vulkan_hint_library_search_paths
+        "${_MoltenVK_path}/dylib/macOS"
+      )
+    endif()
+  endif()
+  unset(_MoltenVK_path)
 endif()
 
 find_path(Vulkan_INCLUDE_DIR
@@ -323,6 +360,20 @@ if(SPIRV-Tools IN_LIST Vulkan_FIND_COMPONENTS)
       ${_Vulkan_hint_library_search_paths})
   mark_as_advanced(Vulkan_SPIRV-Tools_DEBUG_LIBRARY)
 endif()
+if(MoltenVK IN_LIST Vulkan_FIND_COMPONENTS)
+  find_library(Vulkan_MoltenVK_LIBRARY
+    NAMES MoltenVK
+    HINTS
+      ${_Vulkan_hint_library_search_paths})
+  mark_as_advanced(Vulkan_MoltenVK_LIBRARY)
+
+  find_path(Vulkan_MoltenVK_INCLUDE_DIR
+    NAMES MoltenVK/mvk_vulkan.h
+    HINTS
+      ${_Vulkan_hint_include_search_paths}
+    )
+  mark_as_advanced(Vulkan_MoltenVK_INCLUDE_DIR)
+endif()
 
 if(Vulkan_GLSLC_EXECUTABLE)
   set(Vulkan_glslc_FOUND TRUE)
@@ -387,6 +438,12 @@ _Vulkan_set_library_component_found(glslang
 _Vulkan_set_library_component_found(shaderc_combined)
 _Vulkan_set_library_component_found(SPIRV-Tools)
 
+if(Vulkan_MoltenVK_INCLUDE_DIR AND Vulkan_MoltenVK_LIBRARY)
+  set(Vulkan_MoltenVK_FOUND TRUE)
+else()
+  set(Vulkan_MoltenVK_FOUND FALSE)
+endif()
+
 set(Vulkan_LIBRARIES ${Vulkan_LIBRARY})
 set(Vulkan_INCLUDE_DIRS ${Vulkan_INCLUDE_DIR})
 
@@ -406,6 +463,25 @@ if(Vulkan_INCLUDE_DIR)
     endif()
     list(APPEND VulkanHeaderVersion2 ${VulkanHeaderVersion})
     list(JOIN VulkanHeaderVersion2 "." Vulkan_VERSION)
+  endif()
+endif()
+
+if(Vulkan_MoltenVK_FOUND)
+  set(Vulkan_MoltenVK_VERSION "")
+  if(Vulkan_MoltenVK_INCLUDE_DIR)
+    set(VK_MVK_MOLTENVK_H ${Vulkan_MoltenVK_INCLUDE_DIR}/MoltenVK/vk_mvk_moltenvk.h)
+    if(EXISTS ${VK_MVK_MOLTENVK_H})
+      file(STRINGS  ${VK_MVK_MOLTENVK_H} _Vulkan_MoltenVK_VERSION_MAJOR REGEX "^#define MVK_VERSION_MAJOR ")
+      string(REGEX MATCHALL "[0-9]+" _Vulkan_MoltenVK_VERSION_MAJOR "${_Vulkan_MoltenVK_VERSION_MAJOR}")
+      file(STRINGS  ${VK_MVK_MOLTENVK_H} _Vulkan_MoltenVK_VERSION_MINOR REGEX "^#define MVK_VERSION_MINOR ")
+      string(REGEX MATCHALL "[0-9]+" _Vulkan_MoltenVK_VERSION_MINOR "${_Vulkan_MoltenVK_VERSION_MINOR}")
+      file(STRINGS  ${VK_MVK_MOLTENVK_H} _Vulkan_MoltenVK_VERSION_PATCH REGEX "^#define MVK_VERSION_PATCH ")
+      string(REGEX MATCHALL "[0-9]+" _Vulkan_MoltenVK_VERSION_PATCH "${_Vulkan_MoltenVK_VERSION_PATCH}")
+      set(Vulkan_MoltenVK_VERSION "${_Vulkan_MoltenVK_VERSION_MAJOR}.${_Vulkan_MoltenVK_VERSION_MINOR}.${_Vulkan_MoltenVK_VERSION_PATCH}")
+      unset(_Vulkan_MoltenVK_VERSION_MAJOR)
+      unset(_Vulkan_MoltenVK_VERSION_MINOR)
+      unset(_Vulkan_MoltenVK_VERSION_PATCH)
+    endif()
   endif()
 endif()
 
@@ -646,6 +722,17 @@ if(Vulkan_FOUND)
         PROPERTY
           IMPORTED_LOCATION_DEBUG "${Vulkan_SPIRV-Tools_DEBUG_LIBRARY}")
     endif()
+  endif()
+endif()
+
+if(Vulkan_MoltenVK_FOUND)
+  if(Vulkan_MoltenVK_LIBRARY AND NOT TARGET Vulkan::MoltenVK)
+    add_library(Vulkan::MoltenVK SHARED IMPORTED)
+    set_target_properties(Vulkan::MoltenVK
+      PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${Vulkan_MoltenVK_INCLUDE_DIR}"
+        IMPORTED_LOCATION "${Vulkan_MoltenVK_LIBRARY}"
+    )
   endif()
 endif()
 
