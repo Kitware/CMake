@@ -1466,9 +1466,8 @@ function(_ep_write_downloadfile_script
   set(HTTP_HEADERS_ARGS "")
   if(NOT http_headers STREQUAL "")
     foreach(header ${http_headers})
-      set(
-          HTTP_HEADERS_ARGS
-          "HTTPHEADER \"${header}\"\n        ${HTTP_HEADERS_ARGS}"
+      string(PREPEND HTTP_HEADERS_ARGS
+        "HTTPHEADER \"${header}\"\n        "
       )
     endforeach()
   endif()
@@ -2035,9 +2034,11 @@ function(_ep_step_add_target name step no_deps)
   add_custom_target(${name}-${step}
     DEPENDS ${stamp_file})
   cmake_policy(POP)
-  set_property(TARGET ${name}-${step} PROPERTY _EP_IS_EXTERNAL_PROJECT_STEP 1)
-  set_property(TARGET ${name}-${step} PROPERTY LABELS ${name})
-  set_property(TARGET ${name}-${step} PROPERTY FOLDER "ExternalProjectTargets/${name}")
+  set_target_properties(${name}-${step} PROPERTIES
+    _EP_IS_EXTERNAL_PROJECT_STEP 1
+    LABELS "${name}"
+    FOLDER "ExternalProjectTargets/${name}"
+  )
 
   if(cmp0114 STREQUAL "NEW")
     # Add target-level dependencies for the step.
@@ -3164,7 +3165,7 @@ function(_ep_extract_configure_command var name)
         list(APPEND cmd "-G${CMAKE_GENERATOR}")
         if("${CMAKE_GENERATOR}" MATCHES "Green Hills MULTI")
           set(has_cmake_cache_default_args 1)
-          set(cmake_cache_default_args ${cmake_cache_default_args}
+          list(APPEND cmake_cache_default_args
             "-DGHS_TARGET_PLATFORM:STRING=${GHS_TARGET_PLATFORM}"
             "-DGHS_PRIMARY_TARGET:STRING=${GHS_PRIMARY_TARGET}"
             "-DGHS_TOOLSET_ROOT:STRING=${GHS_TOOLSET_ROOT}"
@@ -3489,11 +3490,12 @@ function(ExternalProject_Add name)
   # argument was passed, we explicitly set it for the target.
   add_custom_target(${name} ALL DEPENDS ${complete_stamp_file})
   cmake_policy(POP)
-  set_property(TARGET ${name} PROPERTY _EP_IS_EXTERNAL_PROJECT 1)
-  set_property(TARGET ${name} PROPERTY LABELS ${name})
-  set_property(TARGET ${name} PROPERTY FOLDER "ExternalProjectTargets/${name}")
-
-  set_property(TARGET ${name} PROPERTY _EP_CMP0114 "${cmp0114}")
+  set_target_properties(${name} PROPERTIES
+    _EP_IS_EXTERNAL_PROJECT 1
+    LABELS ${name}
+    FOLDER "ExternalProjectTargets/${name}"
+    _EP_CMP0114 "${cmp0114}"
+  )
 
   set(keywords
     #
