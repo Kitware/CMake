@@ -11,20 +11,24 @@ find_package(Vulkan REQUIRED
 
 add_executable(test_tgt main.c)
 target_link_libraries(test_tgt Vulkan::Vulkan)
+target_compile_features(test_tgt PRIVATE cxx_std_11)
 add_test(NAME test_tgt COMMAND test_tgt)
 
 add_executable(test_var main.c)
 target_include_directories(test_var PRIVATE ${Vulkan_INCLUDE_DIRS})
 target_link_libraries(test_var PRIVATE ${Vulkan_LIBRARIES})
+target_compile_features(test_var PRIVATE cxx_std_11)
 add_test(NAME test_var COMMAND test_var)
 
 add_executable(test_tgt_dl main-dynamicVulkanLoading.cpp)
 target_link_libraries(test_tgt_dl Vulkan::Headers ${CMAKE_DL_LIBS})
+target_compile_features(test_tgt_dl PRIVATE cxx_std_11)
 add_test(NAME test_tgt_dl COMMAND test_tgt_dl)
 
 add_executable(test_var_dl main-dynamicVulkanLoading.cpp)
 target_include_directories(test_var_dl PRIVATE ${Vulkan_INCLUDE_DIRS})
 target_link_libraries(test_var_dl ${CMAKE_DL_LIBS})
+target_compile_features(test_var_dl PRIVATE cxx_std_11)
 add_test(NAME test_var_dl COMMAND test_var_dl)
 
 add_executable(test_tgt_glslang main-glslang.cxx)
