@@ -1559,8 +1559,10 @@ function(_ep_write_extractfile_script script_filename name filename directory op
   endif()
 
   if(args STREQUAL "")
-    message(SEND_ERROR "error: do not know how to extract '${filename}' -- known types are .7z, .tar, .tar.bz2, .tar.gz, .tar.xz, .tbz2, .tgz, .txz and .zip")
-    return()
+    message(FATAL_ERROR
+      "Do not know how to extract '${filename}' -- known types are: "
+      ".7z, .tar, .tar.bz2, .tar.gz, .tar.xz, .tbz2, .tgz, .txz and .zip"
+    )
   endif()
 
   configure_file(
@@ -2832,7 +2834,7 @@ hash=${hash}
     set(method source_dir)
     _ep_is_dir_empty("${source_dir}" empty)
     if(${empty})
-      message(SEND_ERROR
+      message(FATAL_ERROR
         "No download info given for '${name}' and its source directory:\n"
         " ${source_dir}\n"
         "is not an existing non-empty directory.  Please specify one of:\n"
