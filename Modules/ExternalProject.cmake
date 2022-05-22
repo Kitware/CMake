@@ -1238,44 +1238,11 @@ function(_ep_parse_arguments f keywords name ns args)
 endfunction()
 
 
-define_property(DIRECTORY PROPERTY "EP_BASE" INHERITED
-  BRIEF_DOCS "Base directory for External Project storage."
-  FULL_DOCS
-  "See documentation of the ExternalProject_Add() function in the "
-  "ExternalProject module."
-  )
-
-define_property(DIRECTORY PROPERTY "EP_PREFIX" INHERITED
-  BRIEF_DOCS "Top prefix for External Project storage."
-  FULL_DOCS
-  "See documentation of the ExternalProject_Add() function in the "
-  "ExternalProject module."
-  )
-
-define_property(DIRECTORY PROPERTY "EP_STEP_TARGETS" INHERITED
-  BRIEF_DOCS
-  "List of ExternalProject steps that automatically get corresponding targets"
-  FULL_DOCS
-  "These targets will be dependent on the main target dependencies. "
-  "See documentation of the ExternalProject_Add_StepTargets() function in the "
-  "ExternalProject module."
-  )
-
-define_property(DIRECTORY PROPERTY "EP_INDEPENDENT_STEP_TARGETS" INHERITED
-  BRIEF_DOCS
-  "List of ExternalProject steps that automatically get corresponding targets"
-  FULL_DOCS
-  "These targets will not be dependent on the main target dependencies. "
-  "See documentation of the ExternalProject_Add_StepTargets() function in the "
-  "ExternalProject module."
-  )
-
-define_property(DIRECTORY PROPERTY "EP_UPDATE_DISCONNECTED" INHERITED
-  BRIEF_DOCS "Never update automatically from the remote repo."
-  FULL_DOCS
-  "See documentation of the ExternalProject_Add() function in the "
-  "ExternalProject module."
-  )
+define_property(DIRECTORY PROPERTY "EP_BASE" INHERITED)
+define_property(DIRECTORY PROPERTY "EP_PREFIX" INHERITED)
+define_property(DIRECTORY PROPERTY "EP_STEP_TARGETS" INHERITED)
+define_property(DIRECTORY PROPERTY "EP_INDEPENDENT_STEP_TARGETS" INHERITED)
+define_property(DIRECTORY PROPERTY "EP_UPDATE_DISCONNECTED" INHERITED)
 
 function(_ep_write_gitclone_script
          script_filename
