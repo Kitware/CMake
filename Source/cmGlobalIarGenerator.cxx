@@ -36,6 +36,9 @@
 
 #include "cmsys/Glob.hxx"
 
+#include <filesystem>
+namespace fs = std::filesystem;
+
 
 /// @brief XML Declaration.
 const char* cmGlobalIarGenerator::XML_DECL =
@@ -2350,6 +2353,10 @@ void cmGlobalIarGenerator::Workspace::CreateWorkspaceFile()
   this->workspacePath = wsFileName;
   std::string batFileName = this->workspaceDir + "/BUILD_" + this->name + ".bat";
 
+  std::string settingsDirName = this->workspaceDir + "/settings";
+  fs::create_directories(settingsDirName);
+  std::string wsdtFilePath = this->workspaceDir + "/settings/" + this->name + ".wsdt";
+
   std::string iarBuildCmd = cmGlobalIarGenerator::GLOBALCFG.iarArmPath;
   std::size_t lastSlash = iarBuildCmd.find_last_of("/\\");
   if (lastSlash != std::string::npos)
@@ -2367,10 +2374,15 @@ void cmGlobalIarGenerator::Workspace::CreateWorkspaceFile()
 
   FILE* pFile = fopen(wsFileName.c_str(), "w");
   FILE* pBatFile = fopen(batFileName.c_str(), "w");
+  FILE* pWsdtFile = fopen(wsdtFilePath.c_str(), "w");
 
   std::string output;
   output.reserve(1 << 20); // 1K.
   output += XML_DECL;
+
+  std::string wsdtOutput;
+  wsdtOutput.reserve(1 << 20); // 1K.
+  wsdtOutput += XML_DECL;
 
   std::string batchOutput = "";
   batchOutput.reserve(1 << 20); // 1K.
@@ -2380,6 +2392,9 @@ void cmGlobalIarGenerator::Workspace::CreateWorkspaceFile()
   batchOutput += "SET RETURN_VALUE=0\n\n";
 
   XmlNode root = XmlNode("workspace");
+
+  XmlNode rootWsdt = XmlNode("workspace");
+  XmlNode* wsdt = new XmlNode("CurrentConfigs");
 
   XmlNode* batch = new XmlNode("batchDefinition");
   batch->NewChild("name", cmGlobalIarGenerator::GLOBALCFG.buildType + "_BuildAll");
@@ -2407,6 +2422,8 @@ void cmGlobalIarGenerator::Workspace::CreateWorkspaceFile()
           XmlNode* member = batch->NewChild("member");
           member->NewChild("project", it->first);
           member->NewChild("configuration", cmGlobalIarGenerator::GLOBALCFG.buildType);
+
+          wsdt->NewChild("Project", it->first + "/" + cmGlobalIarGenerator::GLOBALCFG.buildType);
 
           // Add batch command.
           std::string projPathWin = projPath;
@@ -2440,6 +2457,8 @@ void cmGlobalIarGenerator::Workspace::CreateWorkspaceFile()
       member->NewChild("project", (*it)->name);
       member->NewChild("configuration", cmGlobalIarGenerator::GLOBALCFG.buildType);
 
+      wsdt->NewChild("Project", (*it)->name + "/" + cmGlobalIarGenerator::GLOBALCFG.buildType);
+
       // Add batch command.
       std::string projPathWin = projPath;
       std::replace( projPathWin.begin(), projPathWin.end(), '/', '\\');
@@ -2455,17 +2474,24 @@ void cmGlobalIarGenerator::Workspace::CreateWorkspaceFile()
   batchOutput += "REM END IAR BUILD.\n";
   batchOutput += "REM ===================================================\n\n";
 
-
   XmlNode* batchBuild = root.NewChild("batchBuild");
   batchBuild->AddChild(batch);
 
+  XmlNode* wsdtCfg = rootWsdt.NewChild("ConfigDictionary");
+  wsdtCfg->AddChild(wsdt);
+  wsdtCfg->NewChild("CurrentProj", this->name);
+  wsdtCfg->NewChild("OverviewSelected", "1");
+
   root.ToString(0, output);
+  rootWsdt.ToString(0, wsdtOutput);
 
   fwrite(output.c_str(), output.length(), 1, pFile);
   fwrite(batchOutput.c_str(), batchOutput.length(), 1, pBatFile);
+  fwrite(wsdtOutput.c_str(), wsdtOutput.length(), 1, pWsdtFile);
 
   fclose(pFile);
   fclose(pBatFile);
+  fclose(pWsdtFile);
 
   //this->CreateDebuggerFile();
 }
