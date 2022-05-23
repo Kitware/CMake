@@ -143,7 +143,9 @@ macro(_pkgconfig_invoke _pkglist _prefix _varname _regexp)
       string(REGEX REPLACE "${_regexp}" " " _pkgconfig_invoke_result "${_pkgconfig_invoke_result}")
     endif()
 
-    separate_arguments(_pkgconfig_invoke_result)
+    # pkg-config can represent "spaces within an argument" by backslash-escaping the space.
+    # UNIX_COMMAND mode treats backslash-escaped spaces as "not a space that delimits arguments".
+    separate_arguments(_pkgconfig_invoke_result UNIX_COMMAND "${_pkgconfig_invoke_result}")
 
     #message(STATUS "  ${_varname} ... ${_pkgconfig_invoke_result}")
     set(_pkgconfig_${_varname} ${_pkgconfig_invoke_result})
@@ -167,13 +169,14 @@ macro(_pkgconfig_invoke_dyn _pkglist _prefix _varname cleanup_regexp)
 endmacro()
 
 # Splits given arguments into options and a package list
-macro(_pkgconfig_parse_options _result _is_req _is_silent _no_cmake_path _no_cmake_environment_path _imp_target _imp_target_global)
+macro(_pkgconfig_parse_options _result _is_req _is_silent _no_cmake_path _no_cmake_environment_path _imp_target _imp_target_global _static_target)
   set(${_is_req} 0)
   set(${_is_silent} 0)
   set(${_no_cmake_path} 0)
   set(${_no_cmake_environment_path} 0)
   set(${_imp_target} 0)
   set(${_imp_target_global} 0)
+  set(${_static_target} 0)
   if(DEFINED PKG_CONFIG_USE_CMAKE_PREFIX_PATH)
     if(NOT PKG_CONFIG_USE_CMAKE_PREFIX_PATH)
       set(${_no_cmake_path} 1)
@@ -203,6 +206,9 @@ macro(_pkgconfig_parse_options _result _is_req _is_silent _no_cmake_path _no_cma
     if (_pkg STREQUAL "GLOBAL")
       set(${_imp_target_global} 1)
     endif()
+    if (_pkg STREQUAL "STATIC_TARGET")
+      set(${_static_target} 1)
+    endif()
   endforeach()
 
   if (${_imp_target_global} AND NOT ${_imp_target})
@@ -215,6 +221,7 @@ macro(_pkgconfig_parse_options _result _is_req _is_silent _no_cmake_path _no_cma
   list(REMOVE_ITEM ${_result} "NO_CMAKE_PATH")
   list(REMOVE_ITEM ${_result} "NO_CMAKE_ENVIRONMENT_PATH")
   list(REMOVE_ITEM ${_result} "IMPORTED_TARGET")
+  list(REMOVE_ITEM ${_result} "STATIC_TARGET")
   list(REMOVE_ITEM ${_result} "GLOBAL")
 endmacro()
 
@@ -246,7 +253,7 @@ endfunction()
 # scan the LDFLAGS returned by pkg-config for library directories and
 # libraries, figure out the absolute paths of that libraries in the
 # given directories
-function(_pkg_find_libs _prefix _no_cmake_path _no_cmake_environment_path)
+function(_pkg_find_libs _prefix _no_cmake_path _no_cmake_environment_path _static)
   unset(_libs)
   unset(_find_opts)
 
@@ -259,9 +266,23 @@ function(_pkg_find_libs _prefix _no_cmake_path _no_cmake_environment_path)
     list(APPEND _find_opts "NO_CMAKE_ENVIRONMENT_PATH")
   endif()
 
+  if(_static)
+    set(var_prefix ${_prefix}_STATIC)
+    set(pkgcfg_lib_prefix pkgcfg_static_lib_${_prefix})
+    # reconfigure library prefixes/suffixes so that only static libraries can be found
+    set(CMAKE_FIND_LIBRARY_PREFIXES "${CMAKE_STATIC_LIBRARY_PREFIX}")
+    set(CMAKE_FIND_LIBRARY_SUFFIXES "${CMAKE_STATIC_LIBRARY_SUFFIX}")
+  else()
+    set(var_prefix ${_prefix})
+    set(pkgcfg_lib_prefix pkgcfg_lib_${_prefix})
+    # reconfigure library prefixes/suffixes so that only dynamic libraries can be found
+    set(CMAKE_FIND_LIBRARY_PREFIXES "${CMAKE_SHARED_LIBRARY_PREFIX}")
+    set(CMAKE_FIND_LIBRARY_SUFFIXES "${CMAKE_SHARED_LIBRARY_SUFFIX}")
+  endif()
+
   unset(_search_paths)
   unset(_next_is_framework)
-  foreach (flag IN LISTS ${_prefix}_LDFLAGS)
+  foreach (flag IN LISTS ${var_prefix}_LDFLAGS)
     if (_next_is_framework)
       list(APPEND _libs "-framework ${flag}")
       unset(_next_is_framework)
@@ -280,61 +301,78 @@ function(_pkg_find_libs _prefix _no_cmake_path _no_cmake_environment_path)
       continue()
     endif()
 
+    set(lib_var_name ${pkgcfg_lib_prefix}_${_pkg_search})
+
     if(_search_paths)
         # Firstly search in -L paths
-        find_library(pkgcfg_lib_${_prefix}_${_pkg_search}
+        find_library(${lib_var_name}
                      NAMES ${_pkg_search}
                      HINTS ${_search_paths} NO_DEFAULT_PATH)
     endif()
-    find_library(pkgcfg_lib_${_prefix}_${_pkg_search}
+    find_library(${lib_var_name}
                  NAMES ${_pkg_search}
                  ${_find_opts})
-    mark_as_advanced(pkgcfg_lib_${_prefix}_${_pkg_search})
-    if(pkgcfg_lib_${_prefix}_${_pkg_search})
-      list(APPEND _libs "${pkgcfg_lib_${_prefix}_${_pkg_search}}")
+
+    mark_as_advanced(${lib_var_name})
+    if(${lib_var_name})
+      list(APPEND _libs "${${lib_var_name}}")
     else()
       list(APPEND _libs ${_pkg_search})
     endif()
   endforeach()
 
-  set(${_prefix}_LINK_LIBRARIES "${_libs}" PARENT_SCOPE)
+  set(${var_prefix}_LINK_LIBRARIES "${_libs}" PARENT_SCOPE)
 endfunction()
 
 # create an imported target from all the information returned by pkg-config
-function(_pkg_create_imp_target _prefix _imp_target_global)
-  if (NOT TARGET PkgConfig::${_prefix})
+function(_pkg_create_imp_target _prefix _imp_target_global _var_qualifier)
+  set(tgt PkgConfig::${_prefix})
+  set(var_prefix ${_prefix}${_var_qualifier})
+
+  if (NOT TARGET ${tgt})
     if(${_imp_target_global})
       set(_global_opt "GLOBAL")
     else()
       unset(_global_opt)
     endif()
-    add_library(PkgConfig::${_prefix} INTERFACE IMPORTED ${_global_opt})
+    add_library(${tgt} INTERFACE IMPORTED ${_global_opt})
 
-    if(${_prefix}_INCLUDE_DIRS)
-      set_property(TARGET PkgConfig::${_prefix} PROPERTY
-                   INTERFACE_INCLUDE_DIRECTORIES "${${_prefix}_INCLUDE_DIRS}")
+    if(${var_prefix}_INCLUDE_DIRS)
+      set_property(TARGET ${tgt} PROPERTY
+                   INTERFACE_INCLUDE_DIRECTORIES "${${var_prefix}_INCLUDE_DIRS}")
     endif()
-    if(${_prefix}_LINK_LIBRARIES)
-      set_property(TARGET PkgConfig::${_prefix} PROPERTY
-                   INTERFACE_LINK_LIBRARIES "${${_prefix}_LINK_LIBRARIES}")
+    if(${var_prefix}_LINK_LIBRARIES)
+      set_property(TARGET ${tgt} PROPERTY
+                   INTERFACE_LINK_LIBRARIES "${${var_prefix}_LINK_LIBRARIES}")
     endif()
-    if(${_prefix}_LDFLAGS_OTHER)
-      set_property(TARGET PkgConfig::${_prefix} PROPERTY
-                   INTERFACE_LINK_OPTIONS "${${_prefix}_LDFLAGS_OTHER}")
+    if(${var_prefix}_LDFLAGS_OTHER)
+      set_property(TARGET ${tgt} PROPERTY
+                   INTERFACE_LINK_OPTIONS "${${var_prefix}_LDFLAGS_OTHER}")
     endif()
-    if(${_prefix}_CFLAGS_OTHER)
-      set_property(TARGET PkgConfig::${_prefix} PROPERTY
-                   INTERFACE_COMPILE_OPTIONS "${${_prefix}_CFLAGS_OTHER}")
+    if(${var_prefix}_CFLAGS_OTHER)
+      set_property(TARGET ${tgt} PROPERTY
+                   INTERFACE_COMPILE_OPTIONS "${${var_prefix}_CFLAGS_OTHER}")
     endif()
   endif()
 endfunction()
 
 # recalculate the dynamic output
 # this is a macro and not a function so the result of _pkg_find_libs is automatically propagated
-macro(_pkg_recalculate _prefix _no_cmake_path _no_cmake_environment_path _imp_target _imp_target_global)
-  _pkg_find_libs(${_prefix} ${_no_cmake_path} ${_no_cmake_environment_path})
+macro(_pkg_recalculate _prefix _no_cmake_path _no_cmake_environment_path _imp_target _imp_target_global _static_target)
+  # populate unqualified (shared) series of variables
+  _pkg_find_libs("${_prefix}" ${_no_cmake_path} ${_no_cmake_environment_path} FALSE)
+  # populate STATIC_ series of variables
+  _pkg_find_libs("${_prefix}" ${_no_cmake_path} ${_no_cmake_environment_path} TRUE)
+
   if(${_imp_target})
-    _pkg_create_imp_target(${_prefix} ${_imp_target_global})
+    if (${_static_target})
+      set(var_qualifier "_STATIC")
+    else()
+      set(var_qualifier "")
+    endif()
+    # create unqualified target, sourced from whichever series of variables is preferred.
+    # default: source target from unqualified (shared) variables. otherwise STATIC_ variables
+    _pkg_create_imp_target("${_prefix}" ${_imp_target_global} "${var_qualifier}")
   endif()
 endmacro()
 
@@ -503,7 +541,7 @@ function(_pkgconfig_extract_isystem _prefix)
 endfunction()
 
 ###
-macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cmake_environment_path _imp_target _imp_target_global _prefix)
+macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cmake_environment_path _imp_target _imp_target_global _static_target _prefix)
   _pkgconfig_unset(${_prefix}_FOUND)
   _pkgconfig_unset(${_prefix}_VERSION)
   _pkgconfig_unset(${_prefix}_PREFIX)
@@ -639,20 +677,21 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
       _pkgconfig_invoke_dyn("${_pkg_check_modules_packages}" "${_prefix}" LIBRARY_DIRS  "(^| )-L"             --libs-only-L )
       _pkgconfig_invoke_dyn("${_pkg_check_modules_packages}" "${_prefix}" LDFLAGS       ""                    --libs )
       _pkgconfig_invoke_dyn("${_pkg_check_modules_packages}" "${_prefix}" LDFLAGS_OTHER ""                    --libs-only-other )
-
-      if (APPLE AND "-framework" IN_LIST ${_prefix}_LDFLAGS_OTHER)
-        _pkgconfig_extract_frameworks("${_prefix}")
-      endif()
-
       _pkgconfig_invoke_dyn("${_pkg_check_modules_packages}" "${_prefix}" INCLUDE_DIRS  "(^| )(-I|-isystem ?)" --cflags-only-I )
       _pkgconfig_invoke_dyn("${_pkg_check_modules_packages}" "${_prefix}" CFLAGS        ""                    --cflags )
       _pkgconfig_invoke_dyn("${_pkg_check_modules_packages}" "${_prefix}" CFLAGS_OTHER  ""                    --cflags-only-other )
 
-      if (${_prefix}_CFLAGS_OTHER MATCHES "-isystem")
-        _pkgconfig_extract_isystem("${_prefix}")
-      endif ()
+      foreach (qualifier IN ITEMS "" "_STATIC")
+        set(qual_prefix ${_prefix}${qualifier})
+        if (APPLE AND "-framework" IN_LIST ${qual_prefix}_LDFLAGS_OTHER)
+          _pkgconfig_extract_frameworks("${qual_prefix}")
+        endif()
+        if (${qual_prefix}_CFLAGS_OTHER MATCHES "-isystem")
+          _pkgconfig_extract_isystem("${qual_prefix}")
+        endif ()
+      endforeach()
 
-      _pkg_recalculate("${_prefix}" ${_no_cmake_path} ${_no_cmake_environment_path} ${_imp_target} ${_imp_target_global})
+      _pkg_recalculate("${_prefix}" ${_no_cmake_path} ${_no_cmake_environment_path} ${_imp_target} ${_imp_target_global} ${_static_target})
     endif()
 
     _pkg_restore_path_internal()
@@ -676,7 +715,7 @@ endmacro()
                       [REQUIRED] [QUIET]
                       [NO_CMAKE_PATH]
                       [NO_CMAKE_ENVIRONMENT_PATH]
-                      [IMPORTED_TARGET [GLOBAL]]
+                      [IMPORTED_TARGET [GLOBAL] [STATIC_TARGET]]
                       <moduleSpec> [<moduleSpec>...])
 
   When the ``REQUIRED`` argument is given, the command will fail with an error
@@ -706,6 +745,13 @@ endmacro()
   .. versionadded:: 3.13
     The ``GLOBAL`` argument will make the
     imported target available in global scope.
+
+  .. versionadded:: 3.24
+    The ``STATIC_TARGET`` argument will make the
+    imported target reference the static libraries
+    reported in ``<XXX>_STATIC_LINK_LIBRARIES``.
+    Without this option, the imported target
+    references the ``<XXX>_LINK_LIBRARIES``.
 
   .. versionadded:: 3.15
     Non-library linker options reported by ``pkg-config`` are stored in the
@@ -738,6 +784,10 @@ endmacro()
     only the libraries (without the '-l')
   ``<XXX>_LINK_LIBRARIES``
     the libraries and their absolute paths
+  ``<XXX>_STATIC_LINK_LIBRARIES``
+    .. versionadded:: 3.24
+
+    static libraries and their absolute paths
   ``<XXX>_LIBRARY_DIRS``
     the paths of the libraries (without the '-L')
   ``<XXX>_LDFLAGS``
@@ -819,12 +869,12 @@ endmacro()
     XRENDER_STATIC_LIBRARIES=Xrender;X11;pthread;Xau;Xdmcp
 #]========================================]
 macro(pkg_check_modules _prefix _module0)
-  _pkgconfig_parse_options(_pkg_modules _pkg_is_required _pkg_is_silent _no_cmake_path _no_cmake_environment_path _imp_target _imp_target_global "${_module0}" ${ARGN})
+  _pkgconfig_parse_options(_pkg_modules _pkg_is_required _pkg_is_silent _no_cmake_path _no_cmake_environment_path _imp_target _imp_target_global _static_target "${_module0}" ${ARGN})
   # check cached value
   if (NOT DEFINED __pkg_config_checked_${_prefix} OR __pkg_config_checked_${_prefix} LESS ${PKG_CONFIG_VERSION} OR NOT ${_prefix}_FOUND OR
       (NOT "${ARGN}" STREQUAL "" AND NOT "${__pkg_config_arguments_${_prefix}}" STREQUAL "${_module0};${ARGN}") OR
       (    "${ARGN}" STREQUAL "" AND NOT "${__pkg_config_arguments_${_prefix}}" STREQUAL "${_module0}"))
-    _pkg_check_modules_internal("${_pkg_is_required}" "${_pkg_is_silent}" ${_no_cmake_path} ${_no_cmake_environment_path} ${_imp_target} ${_imp_target_global} "${_prefix}" ${_pkg_modules})
+    _pkg_check_modules_internal("${_pkg_is_required}" "${_pkg_is_silent}" ${_no_cmake_path} ${_no_cmake_environment_path} ${_imp_target} ${_imp_target_global} ${_static_target} "${_prefix}" ${_pkg_modules})
 
     _pkgconfig_set(__pkg_config_checked_${_prefix} ${PKG_CONFIG_VERSION})
     if (${_prefix}_FOUND)
@@ -832,7 +882,7 @@ macro(pkg_check_modules _prefix _module0)
     endif()
   else()
     if (${_prefix}_FOUND)
-      _pkg_recalculate("${_prefix}" ${_no_cmake_path} ${_no_cmake_environment_path} ${_imp_target} ${_imp_target_global})
+      _pkg_recalculate("${_prefix}" ${_no_cmake_path} ${_no_cmake_environment_path} ${_imp_target} ${_imp_target_global} ${_static_target})
     endif()
   endif()
 endmacro()
@@ -866,7 +916,7 @@ endmacro()
     pkg_search_module (BAR libxml-2.0 libxml2 libxml>=2)
 #]========================================]
 macro(pkg_search_module _prefix _module0)
-  _pkgconfig_parse_options(_pkg_modules_alt _pkg_is_required _pkg_is_silent _no_cmake_path _no_cmake_environment_path _imp_target _imp_target_global "${_module0}" ${ARGN})
+  _pkgconfig_parse_options(_pkg_modules_alt _pkg_is_required _pkg_is_silent _no_cmake_path _no_cmake_environment_path _imp_target _imp_target_global _static_target "${_module0}" ${ARGN})
   # check cached value
   if (NOT DEFINED __pkg_config_checked_${_prefix} OR __pkg_config_checked_${_prefix} LESS ${PKG_CONFIG_VERSION} OR NOT ${_prefix}_FOUND)
     set(_pkg_modules_found 0)
@@ -878,7 +928,7 @@ macro(pkg_search_module _prefix _module0)
     # iterate through all modules and stop at the first working one.
     foreach(_pkg_alt ${_pkg_modules_alt})
       if(NOT _pkg_modules_found)
-        _pkg_check_modules_internal(0 1 ${_no_cmake_path} ${_no_cmake_environment_path} ${_imp_target} ${_imp_target_global} "${_prefix}" "${_pkg_alt}")
+        _pkg_check_modules_internal(0 1 ${_no_cmake_path} ${_no_cmake_environment_path} ${_imp_target} ${_imp_target_global} ${_static_target} "${_prefix}" "${_pkg_alt}")
       endif()
 
       if (${_prefix}_FOUND)
@@ -895,7 +945,7 @@ macro(pkg_search_module _prefix _module0)
 
     _pkgconfig_set(__pkg_config_checked_${_prefix} ${PKG_CONFIG_VERSION})
   elseif (${_prefix}_FOUND)
-    _pkg_recalculate("${_prefix}" ${_no_cmake_path} ${_no_cmake_environment_path} ${_imp_target} ${_imp_target_global})
+    _pkg_recalculate("${_prefix}" ${_no_cmake_path} ${_no_cmake_environment_path} ${_imp_target} ${_imp_target_global} ${_static_target})
   endif()
 endmacro()
 
