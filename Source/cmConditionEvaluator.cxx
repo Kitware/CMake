@@ -526,9 +526,6 @@ bool cmConditionEvaluator::HandleLevel0(cmArgumentList& newArgs,
 bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
                                         MessageType&)
 {
-  const auto policy64IsOld = this->Policy64Status == cmPolicies::OLD ||
-    this->Policy64Status == cmPolicies::WARN;
-
   for (auto args = newArgs.make2ArgsIterator(); args.current != newArgs.end();
        args.advance(newArgs)) {
 
@@ -617,7 +614,8 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
     }
     // does a test exist
     else if (this->IsKeyword(keyTEST, *args.current)) {
-      if (policy64IsOld) {
+      if (this->Policy64Status == cmPolicies::OLD ||
+          this->Policy64Status == cmPolicies::WARN) {
         continue;
       }
       newArgs.ReduceOneArg(bool(this->Makefile.GetTest(args.next->GetValue())),
