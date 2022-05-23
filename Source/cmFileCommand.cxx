@@ -1610,7 +1610,7 @@ size_t cmWriteToMemoryCallback(void* ptr, size_t size, size_t nmemb,
   return realsize;
 }
 
-size_t cmFileCommandCurlDebugCallback(CURL*, curl_infotype type, char* chPtr,
+void cmFileCommandCurlDebugCallback(CURL*, curl_infotype type, char* chPtr,
                                       size_t size, void* data)
 {
   cmFileCommandVectorOfChar& vec =
@@ -1636,7 +1636,6 @@ size_t cmFileCommandCurlDebugCallback(CURL*, curl_infotype type, char* chPtr,
     default:
       break;
   }
-  return 0;
 }
 
 class cURLProgressHelper
