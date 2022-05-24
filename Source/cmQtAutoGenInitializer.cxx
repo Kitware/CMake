@@ -407,6 +407,7 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
   }
 
   // Common directories
+  std::string relativeBuildDir;
   {
     // Collapsed current binary directory
     std::string const cbd = cmSystemTools::CollapseFullPath(
@@ -424,6 +425,8 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
         cmStrCat(cbd, '/', this->GenTarget->GetName(), "_autogen");
     }
     cmSystemTools::ConvertToUnixSlashes(this->Dir.Build);
+    this->Dir.RelativeBuild =
+      cmSystemTools::RelativePath(cbd, this->Dir.Build);
     // Cleanup build directory
     this->AddCleanFile(this->Dir.Build);
 
@@ -1357,7 +1360,7 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
         cmStrCat(this->Dir.Build, "/", timestampFileName);
       this->AutogenTarget.DepFile = cmStrCat(this->Dir.Build, "/deps");
       this->AutogenTarget.DepFileRuleName =
-        cmStrCat(this->GenTarget->GetName(), "_autogen/", timestampFileName);
+        cmStrCat(this->Dir.RelativeBuild, "/", timestampFileName);
       commandLines.push_back(cmMakeCommandLine(
         { cmSystemTools::GetCMakeCommand(), "-E", "touch", outputFile }));
 
