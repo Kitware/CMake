@@ -1,0 +1,43 @@
+CMP0138
+-------
+
+.. versionadded:: 3.24
+
+MSVC compilers use ``-ZI`` instead of ``/Zi`` for x86 and x64 by default.
+
+When using MSVC C/C++ compilers in CMake 3.23 and below, debug information
+format flag ``/Zi`` is added to :variable:`CMAKE_<LANG>_FLAGS_DEBUG` and
+:variable:`CMAKE_<LANG>_FLAGS_RELWITHDEBINFO` by default. The ``/Zi`` flag
+produces a separate PDB file that contains all the symbolic debugging
+information for use with the debugger, however, it does not support Edit
+and Continue feature in a debugging session.
+
+CMake 3.24 and above adds ``-ZI`` to :variable:`CMAKE_<LANG>_FLAGS_DEBUG`
+and :variable:`CMAKE_<LANG>_FLAGS_RELWITHDEBINFO` instead to enable Edit
+and Continue by default.
+
+This policy provides compatibility with projects that have not been updated
+to expect the lack of warning flags. The policy setting takes effect as of
+the first :command:`project` or :command:`enable_language` command that
+initializes :variable:`CMAKE_<LANG>_FLAGS_DEBUG` and
+:variable:`CMAKE_<LANG>_FLAGS_RELWITHDEBINFO` for a given language
+``<LANG>`` using MSVC compilers.
+
+.. note::
+
+  Once the policy has taken effect at the top of a project for a given
+  language, that choice must be used throughout the tree for that language.
+  In projects that have nested projects in subdirectories, be sure to
+  convert everything together.
+
+The ``OLD`` behavior for this policy is to place ``/Zi`` in the default
+:variable:`CMAKE_<LANG>_FLAGS_DEBUG` and
+:variable:`CMAKE_<LANG>_FLAGS_RELWITHDEBINFO` cache entries. The ``NEW``
+behavior for this policy is to place ``-ZI`` in the default cache entries.
+
+This policy was introduced in CMake version 3.24. Use the
+:command:`cmake_policy` command to set it to ``OLD`` or ``NEW`` explicitly.
+Unlike many policies, CMake version |release| does *not* warn
+when this policy is not set and simply uses ``OLD`` behavior.
+
+.. include:: DEPRECATED.txt

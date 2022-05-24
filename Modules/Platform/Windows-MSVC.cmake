@@ -441,6 +441,10 @@ macro(__windows_compiler_msvc lang)
     endif()
     unset(_cmp0092)
 
+    if(NOT DEFINED _ZiOrZI)
+      set(_ZiOrZI "/Zi")
+    endif()
+
     if(CMAKE_VS_PLATFORM_TOOLSET MATCHES "v[0-9]+_clang_.*")
       # note: MSVC 14 2015 Update 1 sets -fno-ms-compatibility by default, but this does not allow one to compile many projects
       # that include MS's own headers. CMake itself is affected project too.
@@ -451,15 +455,16 @@ macro(__windows_compiler_msvc lang)
       string(APPEND CMAKE_${lang}_FLAGS_MINSIZEREL_INIT "${_MD} -DNDEBUG") # TODO: Add '-Os' once VS generator maps it properly for Clang
     else()
       string(APPEND CMAKE_${lang}_FLAGS_INIT " ${_PLATFORM_DEFINES}${_PLATFORM_DEFINES_${lang}} /D_WINDOWS${_W3}${_FLAGS_${lang}}")
-      string(APPEND CMAKE_${lang}_FLAGS_DEBUG_INIT "${_MDd} /Zi /Ob0 /Od ${_RTC1}")
+      string(APPEND CMAKE_${lang}_FLAGS_DEBUG_INIT "${_MDd} ${_ZiOrZI} /Ob0 /Od ${_RTC1}")
       string(APPEND CMAKE_${lang}_FLAGS_RELEASE_INIT "${_MD} /O2 /Ob2 /DNDEBUG")
-      string(APPEND CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT "${_MD} /Zi /O2 /Ob1 /DNDEBUG")
+      string(APPEND CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT "${_MD} ${_ZiOrZI} /O2 /Ob1 /DNDEBUG")
       string(APPEND CMAKE_${lang}_FLAGS_MINSIZEREL_INIT "${_MD} /O1 /Ob1 /DNDEBUG")
     endif()
     unset(_Wall)
     unset(_W3)
     unset(_MDd)
     unset(_MD)
+    unset(_ZiOrZI)
 
     set(CMAKE_${lang}_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreaded         -MT)
     set(CMAKE_${lang}_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDLL      -MD)
