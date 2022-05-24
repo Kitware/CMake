@@ -15,6 +15,7 @@
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 #include "cmVersion.h"
 
 static bool stringToId(const char* input, cmPolicies::PolicyID& pid)

@@ -2,6 +2,14 @@ include(Compiler/Clang-C)
 include(Compiler/ARMClang)
 __compiler_armclang(C)
 
+if((NOT DEFINED CMAKE_DEPENDS_USE_COMPILER OR CMAKE_DEPENDS_USE_COMPILER)
+    AND CMAKE_GENERATOR MATCHES "Makefiles|WMake"
+    AND CMAKE_DEPFILE_FLAGS_C)
+  # dependencies are computed by the compiler itself
+  set(CMAKE_C_DEPFILE_FORMAT gcc)
+  set(CMAKE_C_DEPENDS_USE_COMPILER TRUE)
+endif()
+
 set(CMAKE_C90_STANDARD_COMPILE_OPTION "-std=c90")
 set(CMAKE_C90_EXTENSION_COMPILE_OPTION "-std=gnu90")
 set(CMAKE_C90_STANDARD__HAS_FULL_SUPPORT ON)

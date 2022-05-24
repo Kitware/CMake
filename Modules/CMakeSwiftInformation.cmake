@@ -70,6 +70,15 @@ set(CMAKE_Swift_FLAGS_RELEASE_INIT "-O")
 set(CMAKE_Swift_FLAGS_RELWITHDEBINFO_INIT "-O -g")
 set(CMAKE_Swift_FLAGS_MINSIZEREL_INIT "-Osize")
 
+if(CMAKE_EXECUTABLE_FORMAT STREQUAL "ELF")
+  if(NOT DEFINED CMAKE_Swift_LINK_WHAT_YOU_USE_FLAG)
+    set(CMAKE_Swift_LINK_WHAT_YOU_USE_FLAG "LINKER:--no-as-needed")
+  endif()
+  if(NOT DEFINED CMAKE_LINK_WHAT_YOU_USE_CHECK)
+    set(CMAKE_LINK_WHAT_YOU_USE_CHECK ldd -u -r)
+  endif()
+endif()
+
 cmake_initialize_per_config_variable(CMAKE_Swift_FLAGS "Swift Compiler Flags")
 
 # NOTE(compnerd) we do not have an object compile rule since we build the objects as part of the link step

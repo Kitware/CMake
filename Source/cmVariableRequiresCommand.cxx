@@ -4,10 +4,10 @@
 
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
-#include "cmProperty.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 // cmLibraryCommand
 bool cmVariableRequiresCommand(std::vector<std::string> const& args,
@@ -38,7 +38,7 @@ bool cmVariableRequiresCommand(std::vector<std::string> const& args,
       }
     }
   }
-  cmProp reqVar = status.GetMakefile().GetDefinition(resultVariable);
+  cmValue reqVar = status.GetMakefile().GetDefinition(resultVariable);
   // if reqVar is unset, then set it to requirementsMet
   // if reqVar is set to true, but requirementsMet is false , then
   // set reqVar to false.

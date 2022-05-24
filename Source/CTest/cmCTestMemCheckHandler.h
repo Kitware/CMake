@@ -119,9 +119,9 @@ private:
   bool InitializeMemoryChecking();
 
   /**
-   * Generate the Dart compatible output
+   * Generate CTest DynamicAnalysis.xml files
    */
-  void GenerateDartOutput(cmXMLWriter& xml) override;
+  void GenerateCTestXML(cmXMLWriter& xml) override;
 
   std::vector<std::string> CustomPreMemCheck;
   std::vector<std::string> CustomPostMemCheck;

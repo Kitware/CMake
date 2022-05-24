@@ -13,6 +13,7 @@
 #include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 static void GetIncludes(cmMakefile& mf, const std::string& arg,
                         std::vector<std::string>& incs);

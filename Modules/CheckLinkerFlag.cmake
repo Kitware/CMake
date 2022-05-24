@@ -41,6 +41,10 @@ include_guard(GLOBAL)
 
 include(CMakeCheckCompilerFlagCommonPatterns)
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0054 NEW) # if() quoted variables not dereferenced
+cmake_policy(SET CMP0057 NEW) # if() supports IN_LIST
+
 function(CHECK_LINKER_FLAG _lang _flag _var)
   get_property (_supported_languages GLOBAL PROPERTY ENABLED_LANGUAGES)
   if (NOT _lang IN_LIST _supported_languages)
@@ -82,3 +86,5 @@ function(CHECK_LINKER_FLAG _lang _flag _var)
   endforeach()
   set(${_var} "${${_var}}" PARENT_SCOPE)
 endfunction()
+
+cmake_policy(POP)

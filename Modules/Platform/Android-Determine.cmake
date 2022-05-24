@@ -52,14 +52,16 @@ if(CMAKE_GENERATOR MATCHES "Visual Studio")
     endif()
     configure_file(${CMAKE_ROOT}/Modules/Platform/Android/VCXProjInspect.vcxproj.in
       ${CMAKE_PLATFORM_INFO_DIR}/VCXProjInspect.vcxproj @ONLY)
+    cmake_host_system_information(RESULT _msbuild QUERY VS_MSBUILD_COMMAND) # undocumented query
     execute_process(
-      COMMAND "${CMAKE_VS_MSBUILD_COMMAND}" "VCXProjInspect.vcxproj"
+      COMMAND "${_msbuild}" "VCXProjInspect.vcxproj"
         "/p:Configuration=Debug" "/p:Platform=${vcx_platform}"
       WORKING_DIRECTORY ${CMAKE_PLATFORM_INFO_DIR}
       OUTPUT_VARIABLE VCXPROJ_INSPECT_OUTPUT
       ERROR_VARIABLE VCXPROJ_INSPECT_OUTPUT
       RESULT_VARIABLE VCXPROJ_INSPECT_RESULT
       )
+    unset(_msbuild)
     if(NOT CMAKE_SYSROOT AND VCXPROJ_INSPECT_OUTPUT MATCHES "CMAKE_SYSROOT=([^%\r\n]+)[\r\n]")
       # Strip VS diagnostic output from the end of the line.
       string(REGEX REPLACE " \\(TaskId:[0-9]*\\)$" "" _sysroot "${CMAKE_MATCH_1}")

@@ -8,7 +8,7 @@ readonly name="zstd"
 readonly ownership="zstd upstream <kwrobot@kitware.com>"
 readonly subtree="Utilities/cmzstd"
 readonly repo="https://github.com/facebook/zstd.git"
-readonly tag="v1.4.5"
+readonly tag="v1.5.0"
 readonly shortlog=false
 readonly paths="
   LICENSE
@@ -23,7 +23,7 @@ readonly paths="
   lib/deprecated/*.h
   lib/dictBuilder/*.c
   lib/dictBuilder/*.h
-  lib/zstd.h
+  lib/*.h
 "
 
 extract_source () {

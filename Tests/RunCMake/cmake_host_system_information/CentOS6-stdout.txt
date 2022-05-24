@@ -1,0 +1,7 @@
+-- CENTOS6_ID=`centos`
+-- CENTOS6_ID_LIKE=`rhel`
+-- CENTOS6_NAME=`CentOS`
+-- CENTOS6_PRETTY_NAME=`CentOS release 6\.10 \(Final\)`
+-- CENTOS6_USED_FALLBACK_SCRIPT=`.*/Modules/Internal/OSRelease/010-TryOldCentOS.cmake`
+-- CENTOS6_VERSION=`6\.10`
+-- CENTOS6_VERSION_ID=`6\.10`

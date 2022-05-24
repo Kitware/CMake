@@ -55,7 +55,10 @@ public:
 #endif
 
   /** Return true on "Success", false otherwise.  */
-  explicit operator bool() const { return this->Kind_ == Kind::Success; }
+  bool IsSuccess() const { return this->Kind_ == Kind::Success; }
+
+  /** Return true on "Success", false otherwise.  */
+  explicit operator bool() const { return this->IsSuccess(); }
 
   /** Return the kind of status.  */
   Kind GetKind() const { return this->Kind_; }

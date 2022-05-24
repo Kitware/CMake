@@ -42,4 +42,9 @@ public:
   std::map<std::string, DirectoryTarget> ComputeDirectoryTargets() const;
   bool IsExcludedFromAllInConfig(const DirectoryTarget::Target& t,
                                  const std::string& config);
+
+protected:
+  virtual bool SupportsDirectConsole() const { return true; }
+  const char* GetEditCacheTargetName() const override { return "edit_cache"; }
+  std::string GetEditCacheCommand() const override;
 };

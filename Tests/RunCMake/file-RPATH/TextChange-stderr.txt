@@ -1,0 +1,12 @@
+^CMake Error at [^
+]*/Tests/RunCMake/file-RPATH/TextChange.cmake:[0-9]+ \(file\):
+  file RPATH_CHANGE could not write new RPATH:
+
+    /new/rpath
+
+  to the file:
+
+    [^
+]*/Tests/RunCMake/file-RPATH/TextChange-build/not_a_binary.txt
+
+  The file format is not recognized\.$

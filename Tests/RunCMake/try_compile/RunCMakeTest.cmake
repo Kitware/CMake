@@ -16,6 +16,8 @@ run_cmake(BadSources2)
 run_cmake(NonSourceCopyFile)
 run_cmake(NonSourceCompileDefinitions)
 
+run_cmake(EnvConfig)
+
 set(RunCMake_TEST_OPTIONS --debug-trycompile)
 run_cmake(PlatformVariables)
 run_cmake(WarnDeprecated)

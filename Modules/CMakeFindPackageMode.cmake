@@ -78,7 +78,7 @@ if(UNIX)
   # from the outside
   if(NOT CMAKE_SIZEOF_VOID_P)
     set(CMAKE_SIZEOF_VOID_P 4)
-    if(EXISTS /usr/lib64)
+    if(EXISTS ${CMAKE_SYSROOT}/usr/lib64)
       set(CMAKE_SIZEOF_VOID_P 8)
     else()
       # use the file utility to check whether itself is 64 bit:

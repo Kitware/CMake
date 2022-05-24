@@ -123,6 +123,12 @@ A literal block can be empty::
 .. note::
  Notes are called out.
 
+.. versionadded:: 1.2
+ Version blocks are preserved.
+
+.. versionchanged:: 2.3
+ Version blocks are preserved.
+
 .. |substitution| replace::
    |nested substitution|
    with multiple lines becomes one line

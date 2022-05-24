@@ -169,7 +169,7 @@ static bool testAllMoves()
   allTypes b(std::move(a));
   allTypes c = std::move(b);
   return true;
-};
+}
 
 static bool testLoopReset()
 {
@@ -192,7 +192,7 @@ static bool testLoopReset()
   }
 
   return true;
-};
+}
 
 static bool testLoopDestructor()
 {
@@ -217,7 +217,7 @@ static bool testLoopDestructor()
   }
 
   return true;
-};
+}
 
 int testUVRAII(int, char** const)
 {

@@ -12,13 +12,14 @@
 #include "cmStateDirectory.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 namespace {
 bool PathEqOrSubDir(std::string const& a, std::string const& b)
 {
   return (cmSystemTools::ComparePath(a, b) ||
           cmSystemTools::IsSubDirectory(a, b));
-};
+}
 }
 
 cmOutputConverter::cmOutputConverter(cmStateSnapshot const& snapshot)

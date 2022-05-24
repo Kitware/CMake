@@ -22,6 +22,7 @@
 #include "cmCTestResourceSpec.h"
 #include "cmDuration.h"
 #include "cmListFileCache.h"
+#include "cmValue.h"
 
 class cmMakefile;
 class cmXMLWriter;
@@ -65,8 +66,8 @@ public:
   /// them on
   void UseIncludeRegExp();
   void UseExcludeRegExp();
-  void SetIncludeRegExp(const char*);
-  void SetExcludeRegExp(const char*);
+  void SetIncludeRegExp(const std::string&);
+  void SetExcludeRegExp(const std::string&);
 
   void SetMaxIndex(int n) { this->MaxIndex = n; }
   int GetMaxIndex() { return this->MaxIndex; }
@@ -81,7 +82,7 @@ public:
   }
 
   //! pass the -I argument down
-  void SetTestsToRunInformation(const char*);
+  void SetTestsToRunInformation(cmValue);
 
   cmCTestTestHandler();
 
@@ -151,6 +152,7 @@ public:
     // return code of test which will mark test as "not run"
     int SkipReturnCode;
     std::vector<std::string> Environment;
+    std::vector<std::string> EnvironmentModification;
     std::vector<std::string> Labels;
     std::set<std::string> LockedResources;
     std::set<std::string> FixturesSetup;
@@ -177,7 +179,7 @@ public:
     std::string CompletionStatus;
     std::string CustomCompletionStatus;
     std::string Output;
-    std::string DartString;
+    std::string TestMeasurementsOutput;
     int TestCount;
     cmCTestTestProperties* Properties;
   };
@@ -276,9 +278,9 @@ public:
 
 private:
   /**
-   * Generate the Dart compatible output
+   * Write test results in CTest's Test.xml format
    */
-  virtual void GenerateDartOutput(cmXMLWriter& xml);
+  virtual void GenerateCTestXML(cmXMLWriter& xml);
 
   /**
    * Write test results in JUnit XML format
@@ -348,8 +350,7 @@ private:
   cmCTestResourceSpec ResourceSpec;
   std::string ResourceSpecFile;
 
-  void GenerateRegressionImages(cmXMLWriter& xml, const std::string& dart);
-  cmsys::RegularExpression DartStuff1;
+  void RecordCustomTestMeasurements(cmXMLWriter& xml, std::string content);
   void CheckLabelFilter(cmCTestTestProperties& it);
   void CheckLabelFilterExclude(cmCTestTestProperties& it);
   void CheckLabelFilterInclude(cmCTestTestProperties& it);
@@ -358,8 +359,10 @@ private:
   bool UseUnion;
   ListOfTests TestList;
   size_t TotalNumberOfTests;
-  cmsys::RegularExpression DartStuff;
+  cmsys::RegularExpression AllTestMeasurementsRegex;
+  cmsys::RegularExpression SingleTestMeasurementRegex;
   cmsys::RegularExpression CustomCompletionStatusRegex;
+  cmsys::RegularExpression CustomLabelRegex;
 
   std::ostream* LogFile;
 

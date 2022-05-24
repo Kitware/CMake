@@ -49,7 +49,7 @@ public:
     std::vector<std::unique_ptr<cmLocalGenerator>> const& localGenerators);
   ~cmQtAutoGenGlobalInitializer();
 
-  Keywords const& kw() const { return this->Keywords_; };
+  Keywords const& kw() const { return this->Keywords_; }
 
   bool generate();
 

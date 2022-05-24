@@ -60,3 +60,12 @@ if("${output_index}" EQUAL "-1")
 else()
   message(STATUS "Found BrandingText")
 endif()
+
+# license page should not be present
+file(STRINGS "${project_file}" line REGEX "!insertmacro MUI_PAGE_LICENSE")
+string(FIND "${line}" "MUI_PAGE_LICENSE" output_index)
+if("${output_index}" EQUAL "-1")
+  message(STATUS "License not found in the project")
+else()
+  message(FATAL_ERROR "License found in the project")
+endif()

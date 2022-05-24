@@ -247,7 +247,7 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
 #ifdef USE_SSL
   if(conn->handler->flags & PROTOPT_SSL) {
     CURLcode result;
-    result = Curl_ssl_connect_nonblocking(data, conn,
+    result = Curl_ssl_connect_nonblocking(data, conn, FALSE,
                                           FIRSTSOCKET, &li->ssldone);
     if(result)
       return result;
@@ -270,7 +270,8 @@ static CURLcode oldap_connecting(struct Curl_easy *data, bool *done)
   if(conn->handler->flags & PROTOPT_SSL) {
     /* Is the SSL handshake complete yet? */
     if(!li->ssldone) {
-      CURLcode result = Curl_ssl_connect_nonblocking(data, conn, FIRSTSOCKET,
+      CURLcode result = Curl_ssl_connect_nonblocking(data, conn, FALSE,
+                                                     FIRSTSOCKET,
                                                      &li->ssldone);
       if(result || !li->ssldone)
         return result;
@@ -399,7 +400,7 @@ static CURLcode oldap_do(struct Curl_easy *data, bool *done)
 
   connkeep(conn, "OpenLDAP do");
 
-  infof(data, "LDAP local: %s\n", data->state.url);
+  infof(data, "LDAP local: %s", data->state.url);
 
   rc = ldap_url_parse(data->state.url, &ludp);
   if(rc != LDAP_URL_SUCCESS) {
@@ -509,7 +510,7 @@ static ssize_t oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
       else {
         /* successful */
         if(code == LDAP_SIZELIMIT_EXCEEDED)
-          infof(data, "There are more than %d entries\n", lr->nument);
+          infof(data, "There are more than %d entries", lr->nument);
         data->req.size = data->req.bytecount;
         *err = CURLE_OK;
         ret = 0;

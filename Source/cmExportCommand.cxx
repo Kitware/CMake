@@ -282,6 +282,7 @@ static bool HandlePackage(std::vector<std::string> const& args,
   // CMP0090 decides both the default and what variable changes it.
   switch (mf.GetPolicyStatus(cmPolicies::CMP0090)) {
     case cmPolicies::WARN:
+      CM_FALLTHROUGH;
     case cmPolicies::OLD:
       // Default is to export, but can be disabled.
       if (mf.IsOn("CMAKE_EXPORT_NO_PACKAGE_REGISTRY")) {

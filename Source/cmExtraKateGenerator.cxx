@@ -13,11 +13,11 @@
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
-#include "cmProperty.h"
 #include "cmSourceFile.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 cmExtraKateGenerator::cmExtraKateGenerator() = default;
 
@@ -128,7 +128,7 @@ void cmExtraKateGenerator::WriteTargets(const cmLocalGenerator& lg,
             // only add the "edit_cache" target if it's not ccmake, because
             // this will not work within the IDE
             if (targetName == "edit_cache") {
-              cmProp editCommand =
+              cmValue editCommand =
                 localGen->GetMakefile()->GetDefinition("CMAKE_EDIT_COMMAND");
               if (!editCommand ||
                   strstr(editCommand->c_str(), "ccmake") != nullptr) {

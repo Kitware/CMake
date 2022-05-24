@@ -9,6 +9,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 #include "cmake.h"
 
 cmCPackCygwinBinaryGenerator::cmCPackCygwinBinaryGenerator()
@@ -59,14 +60,15 @@ int cmCPackCygwinBinaryGenerator::PackageFiles()
 const char* cmCPackCygwinBinaryGenerator::GetOutputExtension()
 {
   this->OutputExtension = "-";
-  const char* patchNumber = this->GetOption("CPACK_CYGWIN_PATCH_NUMBER");
+  cmValue patchNumber = this->GetOption("CPACK_CYGWIN_PATCH_NUMBER");
   if (!patchNumber) {
-    patchNumber = "1";
+    this->OutputExtension += "1";
     cmCPackLogger(cmCPackLog::LOG_WARNING,
                   "CPACK_CYGWIN_PATCH_NUMBER not specified using 1"
                     << std::endl);
+  } else {
+    this->OutputExtension += patchNumber;
   }
-  this->OutputExtension += patchNumber;
   this->OutputExtension += ".tar.bz2";
   return this->OutputExtension.c_str();
 }

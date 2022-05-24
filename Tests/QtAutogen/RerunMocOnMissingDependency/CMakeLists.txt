@@ -1,6 +1,6 @@
 # This test checks whether a missing dependency of the moc output triggers an AUTOMOC re-run.
 
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.16)
 project(RerunMocOnMissingDependency)
 include("../AutogenCoreTest.cmake")
 
@@ -13,10 +13,10 @@ add_executable(exe "${main_source}")
 set(testProjectTemplateDir "${CMAKE_CURRENT_SOURCE_DIR}/MocOnMissingDependency")
 set(testProjectSrc "${CMAKE_CURRENT_BINARY_DIR}/MocOnMissingDependency")
 set(testProjectBinDir "${CMAKE_CURRENT_BINARY_DIR}/MocOnMissingDependency-build")
-if(DEFINED Qt5Core_VERSION AND Qt5Core_VERSION VERSION_GREATER_EQUAL "5.15.0")
-    set(moc_depfiles_supported TRUE)
+if(DEFINED Qt${QT_TEST_VERSION}Core_VERSION AND Qt${QT_TEST_VERSION}Core_VERSION VERSION_GREATER_EQUAL "5.15.0")
+  set(moc_depfiles_supported TRUE)
 else()
-    set(moc_depfiles_supported FALSE)
+  set(moc_depfiles_supported FALSE)
 endif()
 
 # Utility macros
@@ -48,6 +48,7 @@ try_compile(MOC_RERUN
   MocOnMissingDependency
   CMAKE_FLAGS "-DQT_TEST_VERSION=${QT_TEST_VERSION}"
               "-DCMAKE_AUTOGEN_VERBOSE=ON"
+              "-DCMAKE_PREFIX_PATH:STRING=${CMAKE_PREFIX_PATH}"
               "-DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}"
   OUTPUT_VARIABLE output
 )

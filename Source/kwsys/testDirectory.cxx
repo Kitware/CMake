@@ -122,7 +122,7 @@ int _copyDirectoryTest()
   }
   const Status copysuccess = SystemTools::CopyADirectory(source, destination);
   const bool destinationexists = SystemTools::PathExists(destination);
-  if (copysuccess) {
+  if (copysuccess.IsSuccess()) {
     std::cerr << "CopyADirectory should have returned false" << std::endl;
     SystemTools::RemoveADirectory(destination);
     return 3;

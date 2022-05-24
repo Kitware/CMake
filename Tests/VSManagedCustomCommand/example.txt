@@ -1,0 +1,4 @@
+__declspec(dllexport) int example()
+{
+  return 0;
+}

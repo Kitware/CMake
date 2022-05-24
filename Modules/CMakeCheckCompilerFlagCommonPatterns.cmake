@@ -32,5 +32,6 @@ macro (CHECK_COMPILER_FLAG_COMMON_PATTERNS _VAR)
     FAIL_REGEX "Warning: illegal option"                   # SunStudio 12
     FAIL_REGEX "[Ww]arning: Invalid suboption"             # Fujitsu
     FAIL_REGEX "An invalid option .* appears on the command line" # Cray
+    FAIL_REGEX "WARNING: invalid compiler option"          # TI armcl
   )
 endmacro ()

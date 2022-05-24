@@ -44,7 +44,7 @@ function(gtest_discover_tests_impl)
   cmake_parse_arguments(
     ""
     ""
-    "NO_PRETTY_TYPES;NO_PRETTY_VALUES;TEST_EXECUTABLE;TEST_WORKING_DIR;TEST_PREFIX;TEST_SUFFIX;TEST_LIST;CTEST_FILE;TEST_DISCOVERY_TIMEOUT;TEST_XML_OUTPUT_DIR"
+    "NO_PRETTY_TYPES;NO_PRETTY_VALUES;TEST_EXECUTABLE;TEST_WORKING_DIR;TEST_PREFIX;TEST_SUFFIX;TEST_LIST;CTEST_FILE;TEST_DISCOVERY_TIMEOUT;TEST_XML_OUTPUT_DIR;TEST_FILTER"
     "TEST_EXTRA_ARGS;TEST_PROPERTIES;TEST_EXECUTOR"
     ${ARGN}
   )
@@ -58,6 +58,12 @@ function(gtest_discover_tests_impl)
   set(tests)
   set(tests_buffer)
 
+  if(_TEST_FILTER)
+    set(filter "--gtest_filter=${_TEST_FILTER}")
+  else()
+    set(filter)
+  endif()
+
   # Run test executable to get list of available tests
   if(NOT EXISTS "${_TEST_EXECUTABLE}")
     message(FATAL_ERROR
@@ -66,7 +72,7 @@ function(gtest_discover_tests_impl)
     )
   endif()
   execute_process(
-    COMMAND ${_TEST_EXECUTOR} "${_TEST_EXECUTABLE}" --gtest_list_tests
+    COMMAND ${_TEST_EXECUTOR} "${_TEST_EXECUTABLE}" --gtest_list_tests ${filter}
     WORKING_DIRECTORY "${_TEST_WORKING_DIR}"
     TIMEOUT ${_TEST_DISCOVERY_TIMEOUT}
     OUTPUT_VARIABLE output
@@ -178,6 +184,7 @@ if(CMAKE_SCRIPT_MODE_FILE)
     TEST_WORKING_DIR ${TEST_WORKING_DIR}
     TEST_PREFIX ${TEST_PREFIX}
     TEST_SUFFIX ${TEST_SUFFIX}
+    TEST_FILTER ${TEST_FILTER}
     TEST_LIST ${TEST_LIST}
     CTEST_FILE ${CTEST_FILE}
     TEST_DISCOVERY_TIMEOUT ${TEST_DISCOVERY_TIMEOUT}

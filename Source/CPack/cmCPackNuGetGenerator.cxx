@@ -14,6 +14,7 @@
 #include "cmCPackLog.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 bool cmCPackNuGetGenerator::SupportsComponentInstallation() const
 {
@@ -81,10 +82,10 @@ void cmCPackNuGetGenerator::SetupGroupComponentVariables(bool ignoreGroup)
                      std::back_inserter(components),
                      [](cmCPackComponent const* comp) { return comp->Name; });
       this->SetOption("CPACK_NUGET_" + compGUp + "_GROUP_COMPONENTS",
-                      cmJoin(components, ";").c_str());
+                      cmJoin(components, ";"));
     }
     if (!groups.empty()) {
-      this->SetOption("CPACK_NUGET_GROUPS", cmJoin(groups, ";").c_str());
+      this->SetOption("CPACK_NUGET_GROUPS", cmJoin(groups, ";"));
     }
 
     // Handle Orphan components (components not belonging to any groups)
@@ -102,8 +103,7 @@ void cmCPackNuGetGenerator::SetupGroupComponentVariables(bool ignoreGroup)
       }
     }
     if (!components.empty()) {
-      this->SetOption("CPACK_NUGET_COMPONENTS",
-                      cmJoin(components, ";").c_str());
+      this->SetOption("CPACK_NUGET_COMPONENTS", cmJoin(components, ";"));
     }
 
   } else {
@@ -114,13 +114,13 @@ void cmCPackNuGetGenerator::SetupGroupComponentVariables(bool ignoreGroup)
                    [](std::pair<std::string, cmCPackComponent> const& comp) {
                      return comp.first;
                    });
-    this->SetOption("CPACK_NUGET_COMPONENTS", cmJoin(components, ";").c_str());
+    this->SetOption("CPACK_NUGET_COMPONENTS", cmJoin(components, ";"));
   }
 }
 
 void cmCPackNuGetGenerator::AddGeneratedPackageNames()
 {
-  const char* const files_list = this->GetOption("GEN_CPACK_OUTPUT_FILES");
+  cmValue const files_list = this->GetOption("GEN_CPACK_OUTPUT_FILES");
   if (!files_list) {
     cmCPackLogger(
       cmCPackLog::LOG_ERROR,
@@ -129,7 +129,7 @@ void cmCPackNuGetGenerator::AddGeneratedPackageNames()
     return;
   }
   // add the generated packages to package file names list
-  std::string fileNames{ files_list };
+  const std::string& fileNames = *files_list;
   const char sep = ';';
   std::string::size_type pos1 = 0;
   std::string::size_type pos2 = fileNames.find(sep, pos1 + 1);

@@ -2,6 +2,10 @@
 
 set -e
 
+if test "$CMAKE_CI_JOB_NIGHTLY_NINJA" = "true" -a "$CMAKE_CI_NIGHTLY" = "true"; then
+    exec .gitlab/ci/ninja-nightly.sh
+fi
+
 readonly version="1.10.2"
 baseurl="https://github.com/ninja-build/ninja/releases/download/v$version"
 

@@ -1,0 +1,5 @@
+Test project .*/Tests/RunCMake/GoogleTest/GoogleTest-discovery-arg-change
+  Test #1: typed/short\.case
+  Test #2: typed/float\.case
+
+Total Tests: 2

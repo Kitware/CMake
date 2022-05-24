@@ -3084,12 +3084,6 @@ static int do_uncompress_block(struct archive_read* a, const uint8_t* p) {
 
 			continue;
 		}
-
-		/* The program counter shouldn't reach here. */
-		archive_set_error(&a->archive, ARCHIVE_ERRNO_FILE_FORMAT,
-		    "Unsupported block code: 0x%x", num);
-
-		return ARCHIVE_FATAL;
 	}
 
 	return ARCHIVE_OK;
@@ -3837,7 +3831,7 @@ static int verify_checksums(struct archive_read* a) {
 
 				DEBUG_CODE {
 					printf("Checksum error: CRC32 "
-					    "(was: %08x, expected: %08x)\n",
+					    "(was: %08" PRIx32 ", expected: %08" PRIx32 ")\n",
 					    rar->file.calculated_crc32,
 					    rar->file.stored_crc32);
 				}
@@ -3851,7 +3845,7 @@ static int verify_checksums(struct archive_read* a) {
 			} else {
 				DEBUG_CODE {
 					printf("Checksum OK: CRC32 "
-					    "(%08x/%08x)\n",
+					    "(%08" PRIx32 "/%08" PRIx32 ")\n",
 					    rar->file.stored_crc32,
 					    rar->file.calculated_crc32);
 				}
@@ -3911,6 +3905,9 @@ static int rar5_read_data(struct archive_read *a, const void **buff,
     size_t *size, int64_t *offset) {
 	int ret;
 	struct rar5* rar = get_context(a);
+
+	if (size)
+		*size = 0;
 
 	if(rar->file.dir > 0) {
 		/* Don't process any data if this file entry was declared

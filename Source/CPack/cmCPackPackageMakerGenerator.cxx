@@ -18,6 +18,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 #include "cmXMLWriter.h"
 
 static inline unsigned int getVersion(unsigned int major, unsigned int minor)
@@ -79,9 +80,9 @@ int cmCPackPackageMakerGenerator::PackageFiles()
     resDir += "/en.lproj";
   }
 
-  const char* preflight = this->GetOption("CPACK_PREFLIGHT_SCRIPT");
-  const char* postflight = this->GetOption("CPACK_POSTFLIGHT_SCRIPT");
-  const char* postupgrade = this->GetOption("CPACK_POSTUPGRADE_SCRIPT");
+  cmValue preflight = this->GetOption("CPACK_PREFLIGHT_SCRIPT");
+  cmValue postflight = this->GetOption("CPACK_POSTFLIGHT_SCRIPT");
+  cmValue postupgrade = this->GetOption("CPACK_POSTUPGRADE_SCRIPT");
 
   if (this->Components.empty()) {
     // Create directory structure
@@ -167,10 +168,9 @@ int cmCPackPackageMakerGenerator::PackageFiles()
 
     // Create the directory where downloaded component packages will
     // be placed.
-    const char* userUploadDirectory =
-      this->GetOption("CPACK_UPLOAD_DIRECTORY");
+    cmValue userUploadDirectory = this->GetOption("CPACK_UPLOAD_DIRECTORY");
     std::string uploadDirectory;
-    if (userUploadDirectory && *userUploadDirectory) {
+    if (userUploadDirectory && !userUploadDirectory->empty()) {
       uploadDirectory = userUploadDirectory;
     } else {
       uploadDirectory =
@@ -352,8 +352,8 @@ int cmCPackPackageMakerGenerator::InitializeInternal()
                      "/PackageMaker.app/Contents/MacOS");
 
   std::string pkgPath;
-  const char* inst_program = this->GetOption("CPACK_INSTALLER_PROGRAM");
-  if (inst_program && *inst_program) {
+  cmValue inst_program = this->GetOption("CPACK_INSTALLER_PROGRAM");
+  if (inst_program && !inst_program->empty()) {
     pkgPath = inst_program;
   } else {
     pkgPath = cmSystemTools::FindProgram("PackageMaker", paths, false);
@@ -362,7 +362,7 @@ int cmCPackPackageMakerGenerator::InitializeInternal()
                     "Cannot find PackageMaker compiler" << std::endl);
       return 0;
     }
-    this->SetOptionIfNotSet("CPACK_INSTALLER_PROGRAM", pkgPath.c_str());
+    this->SetOptionIfNotSet("CPACK_INSTALLER_PROGRAM", pkgPath);
   }
 
   // Get path to the real PackageMaker, not a symlink:
@@ -427,11 +427,12 @@ int cmCPackPackageMakerGenerator::InitializeInternal()
   // Determine the package compatibility version. If it wasn't
   // specified by the user, we define it based on which features the
   // user requested.
-  const char* packageCompat = this->GetOption("CPACK_OSX_PACKAGE_VERSION");
-  if (packageCompat && *packageCompat) {
+  cmValue packageCompat = this->GetOption("CPACK_OSX_PACKAGE_VERSION");
+  if (packageCompat && !packageCompat->empty()) {
     unsigned int majorVersion = 10;
     unsigned int minorVersion = 5;
-    int res = sscanf(packageCompat, "%u.%u", &majorVersion, &minorVersion);
+    int res =
+      sscanf(packageCompat->c_str(), "%u.%u", &majorVersion, &minorVersion);
     if (res == 2) {
       this->PackageCompatibilityVersion =
         getVersion(majorVersion, minorVersion);
@@ -454,8 +455,7 @@ int cmCPackPackageMakerGenerator::InitializeInternal()
                   "Cannot find hdiutil compiler" << std::endl);
     return 0;
   }
-  this->SetOptionIfNotSet("CPACK_INSTALLER_PROGRAM_DISK_IMAGE",
-                          pkgPath.c_str());
+  this->SetOptionIfNotSet("CPACK_INSTALLER_PROGRAM_DISK_IMAGE", pkgPath);
 
   return this->Superclass::InitializeInternal();
 }
@@ -543,8 +543,7 @@ bool cmCPackPackageMakerGenerator::GenerateComponentPackage(
 
     // Create the Info.plist file for this component
     std::string moduleVersionSuffix = cmStrCat('.', component.Name);
-    this->SetOption("CPACK_MODULE_VERSION_SUFFIX",
-                    moduleVersionSuffix.c_str());
+    this->SetOption("CPACK_MODULE_VERSION_SUFFIX", moduleVersionSuffix);
     std::string infoFileName = cmStrCat(component.Name, "-Info.plist");
     if (!this->CopyResourcePlistFile("Info.plist", infoFileName.c_str())) {
       return false;

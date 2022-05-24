@@ -140,7 +140,7 @@ bool cmAddTestCommandHandleNameMode(std::vector<std::string> const& args,
   test->SetOldStyle(false);
   test->SetCommand(command);
   if (!working_directory.empty()) {
-    test->SetProperty("WORKING_DIRECTORY", working_directory.c_str());
+    test->SetProperty("WORKING_DIRECTORY", working_directory);
   }
   test->SetCommandExpandLists(command_expand_lists);
   mf.AddTestGenerator(cm::make_unique<cmTestGenerator>(test, configurations));

@@ -19,13 +19,13 @@
 #include "cmMessageType.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
-#include "cmProperty.h"
 #include "cmPropertyMap.h"
 #include "cmRange.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTest.h"
+#include "cmValue.h"
 
 namespace /* anonymous */
 {
@@ -167,7 +167,7 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
     exe = target->GetFullPath(config);
 
     // Prepend with the emulator when cross compiling if required.
-    cmProp emulator = target->GetProperty("CROSSCOMPILING_EMULATOR");
+    cmValue emulator = target->GetProperty("CROSSCOMPILING_EMULATOR");
     if (cmNonempty(emulator)) {
       std::vector<std::string> emulatorWithArgs = cmExpandedList(*emulator);
       std::string emulatorExe(emulatorWithArgs[0]);

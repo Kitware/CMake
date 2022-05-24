@@ -44,7 +44,7 @@ public:
   cmMakefile* GetMakefile() { return this->Makefile; }
 
   void SetExecutionStatus(cmExecutionStatus* s);
-  cmExecutionStatus* GetExecutionStatus() { return this->Status; };
+  cmExecutionStatus* GetExecutionStatus() { return this->Status; }
 
   /**
    * This is called by the cmMakefile when the command is first

@@ -6,6 +6,9 @@
     <Keyword>Win32Proj</Keyword>
     @id_system@
     @id_system_version@
+    @id_TargetFrameworkVersion@
+    @id_TargetFrameworkIdentifier@
+    @id_TargetFrameworkTargetsVersion@
     @id_WindowsTargetPlatformVersion@
     @id_WindowsSDKDesktopARMSupport@
   </PropertyGroup>

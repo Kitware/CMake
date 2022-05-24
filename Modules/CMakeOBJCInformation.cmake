@@ -91,6 +91,15 @@ if(CMAKE_USER_MAKE_RULES_OVERRIDE_OBJC)
   set(CMAKE_USER_MAKE_RULES_OVERRIDE_OBJC "${_override}")
 endif()
 
+if(CMAKE_EXECUTABLE_FORMAT STREQUAL "ELF")
+  if(NOT DEFINED CMAKE_OBJC_LINK_WHAT_YOU_USE_FLAG)
+    set(CMAKE_OBJC_LINK_WHAT_YOU_USE_FLAG "LINKER:--no-as-needed")
+  endif()
+  if(NOT DEFINED CMAKE_LINK_WHAT_YOU_USE_CHECK)
+    set(CMAKE_LINK_WHAT_YOU_USE_CHECK ldd -u -r)
+  endif()
+endif()
+
 
 # for most systems a module is the same as a shared library
 # so unless the variable CMAKE_MODULE_EXISTS is set just

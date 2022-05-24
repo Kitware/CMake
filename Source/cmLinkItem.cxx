@@ -32,7 +32,11 @@ bool operator<(cmLinkItem const& l, cmLinkItem const& r)
 {
   // Order among targets.
   if (l.Target && r.Target) {
-    return l.Target < r.Target;
+    if (l.Target != r.Target) {
+      return l.Target < r.Target;
+    }
+    // Order identical targets via cross-config.
+    return l.Cross < r.Cross;
   }
   // Order targets before strings.
   if (l.Target) {
@@ -42,10 +46,10 @@ bool operator<(cmLinkItem const& l, cmLinkItem const& r)
     return false;
   }
   // Order among strings.
-  if (l.String < r.String) {
-    return true;
+  if (l.String != r.String) {
+    return l.String < r.String;
   }
-  // Order among cross-config.
+  // Order identical strings via cross-config.
   return l.Cross < r.Cross;
 }
 

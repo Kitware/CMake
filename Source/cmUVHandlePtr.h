@@ -23,7 +23,7 @@
 
 #else
 
-#  define CM_INHERIT_CTOR(Class, Base, Tpl) using Base Tpl ::Base;
+#  define CM_INHERIT_CTOR(Class, Base, Tpl) using Base Tpl ::Base
 
 #endif
 

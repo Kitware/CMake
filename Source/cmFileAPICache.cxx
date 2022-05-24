@@ -10,8 +10,8 @@
 #include <cm3p/json/value.h>
 
 #include "cmFileAPI.h"
-#include "cmProperty.h"
 #include "cmState.h"
+#include "cmValue.h"
 #include "cmake.h"
 
 namespace {
@@ -95,7 +95,7 @@ Json::Value Cache::DumpEntryProperty(std::string const& name,
 {
   Json::Value property = Json::objectValue;
   property["name"] = prop;
-  cmProp p = this->State->GetCacheEntryProperty(name, prop);
+  cmValue p = this->State->GetCacheEntryProperty(name, prop);
   property["value"] = p ? *p : "";
   return property;
 }

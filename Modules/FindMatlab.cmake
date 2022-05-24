@@ -93,6 +93,33 @@ behavior:
   additional versions of Matlab for the automatic retrieval of the installed
   versions.
 
+Imported targets
+^^^^^^^^^^^^^^^^
+
+.. versionadded:: 3.22
+
+This module defines the following :prop_tgt:`IMPORTED` targets:
+
+``Matlab::mex``
+  The ``mex`` library, always available.
+
+``Matlab::mx``
+  The mx library of Matlab (arrays), always available.
+
+``Matlab::eng``
+  Matlab engine library. Available only if the ``ENG_LIBRARY`` component
+  is requested.
+
+``Matlab::mat``
+  Matlab matrix library. Available only if the ``MAT_LIBRARY`` component
+  is requested.
+
+``Matlab::MatlabEngine``
+  Matlab C++ engine library, always available for R2018a and newer.
+
+``Matlab::MatlabDataArray``
+  Matlab C++ data array library, always available for R2018a and newer.
+
 Variables defined by the module
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -451,7 +478,7 @@ function(matlab_extract_all_installed_versions_from_registry win64 matlab_versio
 
   if(matlabs_from_registry)
     list(REMOVE_DUPLICATES matlabs_from_registry)
-    list(SORT matlabs_from_registry)
+    list(SORT matlabs_from_registry COMPARE NATURAL)
     list(REVERSE matlabs_from_registry)
   endif()
 
@@ -495,7 +522,7 @@ macro(extract_matlab_versions_from_registry_brute_force matlab_versions)
   # we order from more recent to older
   if(matlab_supported_versions)
     list(REMOVE_DUPLICATES matlab_supported_versions)
-    list(SORT matlab_supported_versions)
+    list(SORT matlab_supported_versions COMPARE NATURAL)
     list(REVERSE matlab_supported_versions)
   endif()
 
@@ -1326,7 +1353,7 @@ function(_Matlab_get_version_from_root matlab_root matlab_or_mcr matlab_known_ve
              ${versioninfo_string}
             )
 
-      if(CMAKE_MATCH_1 MATCHES "(([0-9])\\.([0-9]))[\\.0-9]*")
+      if(CMAKE_MATCH_1 MATCHES "(([0-9]+)\\.([0-9]+))[\\.0-9]*")
         set(_matlab_version_tmp "${CMAKE_MATCH_1}")
       endif()
     endif()
@@ -1545,6 +1572,30 @@ if(_numbers_of_matlab_roots GREATER 0)
     list(GET _matlab_possible_roots ${_matlab_or_mcr_index} Matlab_Or_MCR)
     list(GET _matlab_possible_roots ${_list_index} Matlab_VERSION_STRING)
     list(GET _matlab_possible_roots ${_matlab_root_dir_index} Matlab_ROOT_DIR)
+  elseif(DEFINED Matlab_FIND_VERSION)
+    set(_list_index -1)
+    foreach(_matlab_root_index RANGE 1 ${_numbers_of_matlab_roots} 3)
+      list(GET _matlab_possible_roots ${_matlab_root_index} _matlab_root_version)
+      if(_matlab_root_version VERSION_GREATER_EQUAL Matlab_FIND_VERSION)
+        set(_list_index ${_matlab_root_index})
+        break()
+      endif()
+    endforeach()
+
+    if(_list_index LESS 0)
+      set(_list_index 1)
+    endif()
+
+    math(EXPR _matlab_or_mcr_index "${_list_index} - 1")
+    math(EXPR _matlab_root_dir_index "${_list_index} + 1")
+    list(GET _matlab_possible_roots ${_matlab_or_mcr_index} Matlab_Or_MCR)
+    list(GET _matlab_possible_roots ${_list_index} Matlab_VERSION_STRING)
+    list(GET _matlab_possible_roots ${_matlab_root_dir_index} Matlab_ROOT_DIR)
+    # adding a warning in case of ambiguity
+    if(_numbers_of_matlab_roots GREATER 3 AND MATLAB_FIND_DEBUG)
+      message(WARNING "[MATLAB] Found several distributions of Matlab. Setting the current version to ${Matlab_VERSION_STRING} (located ${Matlab_ROOT_DIR})."
+                      " If this is not the desired behavior, use the EXACT keyword or provide the -DMatlab_ROOT_DIR=... on the command line")
+    endif()
   else()
     list(GET _matlab_possible_roots 0 Matlab_Or_MCR)
     list(GET _matlab_possible_roots 1 Matlab_VERSION_STRING)
@@ -1865,6 +1916,32 @@ endif()
 if(Matlab_DATAARRAY_LIBRARY)
   list(APPEND Matlab_LIBRARIES ${Matlab_DATAARRAY_LIBRARY})
 endif()
+
+# internal
+# This small stub permits to add imported targets for the found MATLAB libraries
+function(_Matlab_add_imported_target _matlab_library_variable_name _matlab_library_target_name)
+  if(Matlab_${_matlab_library_variable_name}_LIBRARY)
+    if(NOT TARGET Matlab::${_matlab_library_target_name})
+      add_library(Matlab::${_matlab_library_target_name} UNKNOWN IMPORTED)
+      set_target_properties(Matlab::${_matlab_library_target_name} PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${Matlab_INCLUDE_DIRS}"
+        IMPORTED_LOCATION "${Matlab_${_matlab_library_variable_name}_LIBRARY}")
+      if(_matlab_library_target_name STREQUAL "mex" OR
+         _matlab_library_target_name STREQUAL "eng" OR
+         _matlab_library_target_name STREQUAL "mat")
+        set_target_properties(Matlab::${_matlab_library_target_name} PROPERTIES
+          INTERFACE_LINK_LIBRARIES Matlab::mx)
+      endif()
+    endif()
+  endif()
+endfunction()
+
+_Matlab_add_imported_target(MX mx)
+_Matlab_add_imported_target(MEX mex)
+_Matlab_add_imported_target(ENG eng)
+_Matlab_add_imported_target(MAT mat)
+_Matlab_add_imported_target(ENGINE MatlabEngine)
+_Matlab_add_imported_target(DATAARRAY MatlabDataArray)
 
 find_package_handle_standard_args(
   Matlab

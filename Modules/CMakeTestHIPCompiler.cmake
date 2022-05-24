@@ -10,7 +10,7 @@ if(CMAKE_HIP_COMPILER_FORCED)
 endif()
 
 set(__CMAKE_HIP_FLAGS "${CMAKE_HIP_FLAGS}")
-string(APPEND CMAKE_HIP_FLAGS "--cuda-host-only")
+string(APPEND CMAKE_HIP_FLAGS " --cuda-host-only")
 
 include(CMakeTestCompilerCommon)
 

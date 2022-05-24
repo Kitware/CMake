@@ -6,11 +6,11 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
-#include "cmProperty.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
+#include "cmValue.h"
 
 // cmOptionCommand
 bool cmOptionCommand(std::vector<std::string> const& args,
@@ -29,12 +29,12 @@ bool cmOptionCommand(std::vector<std::string> const& args,
   {
     auto policyStatus =
       status.GetMakefile().GetPolicyStatus(cmPolicies::CMP0077);
-    const auto* existsBeforeSet =
+    const auto& existsBeforeSet =
       status.GetMakefile().GetStateSnapshot().GetDefinition(args[0]);
     switch (policyStatus) {
       case cmPolicies::WARN:
         checkAndWarn = (existsBeforeSet != nullptr);
-        break;
+        CM_FALLTHROUGH;
       case cmPolicies::OLD:
         // OLD behavior does not warn.
         break;
@@ -53,7 +53,7 @@ bool cmOptionCommand(std::vector<std::string> const& args,
   // See if a cache variable with this name already exists
   // If so just make sure the doc state is correct
   cmState* state = status.GetMakefile().GetState();
-  cmProp existingValue = state->GetCacheEntryValue(args[0]);
+  cmValue existingValue = state->GetCacheEntryValue(args[0]);
   if (existingValue &&
       (state->GetCacheEntryType(args[0]) != cmStateEnums::UNINITIALIZED)) {
     state->SetCacheEntryProperty(args[0], "HELPSTRING", args[1]);
@@ -77,7 +77,7 @@ bool cmOptionCommand(std::vector<std::string> const& args,
   }
 
   if (checkAndWarn) {
-    const auto* existsAfterSet =
+    const auto& existsAfterSet =
       status.GetMakefile().GetStateSnapshot().GetDefinition(args[0]);
     if (!existsAfterSet) {
       status.GetMakefile().IssueMessage(

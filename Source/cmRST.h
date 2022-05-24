@@ -83,6 +83,7 @@ private:
   cmsys::RegularExpression TocTreeDirective;
   cmsys::RegularExpression ProductionListDirective;
   cmsys::RegularExpression NoteDirective;
+  cmsys::RegularExpression VersionDirective;
   cmsys::RegularExpression ModuleRST;
   cmsys::RegularExpression CMakeRole;
   cmsys::RegularExpression InlineLink;

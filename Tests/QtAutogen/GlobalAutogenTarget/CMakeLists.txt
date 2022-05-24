@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.16)
 project(GlobalAutogenTarget)
 include("../AutogenCoreTest.cmake")
 
@@ -74,6 +74,7 @@ execute_process(
         -T "${CMAKE_GENERATOR_TOOLSET}"
         "-DQT_TEST_VERSION=${QT_TEST_VERSION}"
         "-DCMAKE_AUTOGEN_VERBOSE=${CMAKE_AUTOGEN_VERBOSE}"
+        "-DCMAKE_PREFIX_PATH:STRING=${CMAKE_PREFIX_PATH}"
         "-DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}"
     WORKING_DIRECTORY "${GAT_BDIR}"
     OUTPUT_VARIABLE output

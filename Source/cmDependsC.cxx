@@ -10,9 +10,9 @@
 #include "cmGlobalUnixMakefileGenerator3.h"
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
-#include "cmProperty.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 #define INCLUDE_REGEX_LINE                                                    \
   "^[ \t]*[#%][ \t]*(include|import)[ \t]*[<\"]([^\">]+)([\">])"
@@ -40,12 +40,12 @@ cmDependsC::cmDependsC(cmLocalUnixMakefileGenerator3* lg,
   std::string complainRegex = "^$";
   {
     std::string scanRegexVar = cmStrCat("CMAKE_", lang, "_INCLUDE_REGEX_SCAN");
-    if (cmProp sr = mf->GetDefinition(scanRegexVar)) {
+    if (cmValue sr = mf->GetDefinition(scanRegexVar)) {
       scanRegex = *sr;
     }
     std::string complainRegexVar =
       cmStrCat("CMAKE_", lang, "_INCLUDE_REGEX_COMPLAIN");
-    if (cmProp cr = mf->GetDefinition(complainRegexVar)) {
+    if (cmValue cr = mf->GetDefinition(complainRegexVar)) {
       complainRegex = *cr;
     }
   }

@@ -7,9 +7,9 @@
 #include "cmExecutionStatus.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
-#include "cmProperty.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
+#include "cmValue.h"
 
 // cmGetCMakePropertyCommand
 bool cmGetCMakePropertyCommand(std::vector<std::string> const& args,
@@ -24,12 +24,12 @@ bool cmGetCMakePropertyCommand(std::vector<std::string> const& args,
   std::string output = "NOTFOUND";
 
   if (args[1] == "VARIABLES") {
-    if (cmProp varsProp = status.GetMakefile().GetProperty("VARIABLES")) {
+    if (cmValue varsProp = status.GetMakefile().GetProperty("VARIABLES")) {
       output = *varsProp;
     }
   } else if (args[1] == "MACROS") {
     output.clear();
-    if (cmProp macrosProp = status.GetMakefile().GetProperty("MACROS")) {
+    if (cmValue macrosProp = status.GetMakefile().GetProperty("MACROS")) {
       output = *macrosProp;
     }
   } else if (args[1] == "COMPONENTS") {
@@ -37,7 +37,7 @@ bool cmGetCMakePropertyCommand(std::vector<std::string> const& args,
       status.GetMakefile().GetGlobalGenerator()->GetInstallComponents();
     output = cmJoin(*components, ";");
   } else {
-    cmProp prop = nullptr;
+    cmValue prop = nullptr;
     if (!args[1].empty()) {
       prop = status.GetMakefile().GetState()->GetGlobalProperty(args[1]);
     }

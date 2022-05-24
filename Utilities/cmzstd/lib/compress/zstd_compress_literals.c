@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020, Yann Collet, Facebook, Inc.
+ * Copyright (c) Yann Collet, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under both the BSD-style license (found in the
@@ -15,7 +15,7 @@
 
 size_t ZSTD_noCompressLiterals (void* dst, size_t dstCapacity, const void* src, size_t srcSize)
 {
-    BYTE* const ostart = (BYTE* const)dst;
+    BYTE* const ostart = (BYTE*)dst;
     U32   const flSize = 1 + (srcSize>31) + (srcSize>4095);
 
     RETURN_ERROR_IF(srcSize + flSize > dstCapacity, dstSize_tooSmall, "");
@@ -35,14 +35,14 @@ size_t ZSTD_noCompressLiterals (void* dst, size_t dstCapacity, const void* src, 
             assert(0);
     }
 
-    memcpy(ostart + flSize, src, srcSize);
+    ZSTD_memcpy(ostart + flSize, src, srcSize);
     DEBUGLOG(5, "Raw literals: %u -> %u", (U32)srcSize, (U32)(srcSize + flSize));
     return srcSize + flSize;
 }
 
 size_t ZSTD_compressRleLiteralsBlock (void* dst, size_t dstCapacity, const void* src, size_t srcSize)
 {
-    BYTE* const ostart = (BYTE* const)dst;
+    BYTE* const ostart = (BYTE*)dst;
     U32   const flSize = 1 + (srcSize>31) + (srcSize>4095);
 
     (void)dstCapacity;  /* dstCapacity already guaranteed to be >=4, hence large enough */
@@ -86,7 +86,7 @@ size_t ZSTD_compressLiterals (ZSTD_hufCTables_t const* prevHuf,
                 disableLiteralCompression, (U32)srcSize);
 
     /* Prepare nextEntropy assuming reusing the existing table */
-    memcpy(nextHuf, prevHuf, sizeof(*prevHuf));
+    ZSTD_memcpy(nextHuf, prevHuf, sizeof(*prevHuf));
 
     if (disableLiteralCompression)
         return ZSTD_noCompressLiterals(dst, dstCapacity, src, srcSize);
@@ -117,12 +117,12 @@ size_t ZSTD_compressLiterals (ZSTD_hufCTables_t const* prevHuf,
         }
     }
 
-    if ((cLitSize==0) | (cLitSize >= srcSize - minGain) | ERR_isError(cLitSize)) {
-        memcpy(nextHuf, prevHuf, sizeof(*prevHuf));
+    if ((cLitSize==0) || (cLitSize >= srcSize - minGain) || ERR_isError(cLitSize)) {
+        ZSTD_memcpy(nextHuf, prevHuf, sizeof(*prevHuf));
         return ZSTD_noCompressLiterals(dst, dstCapacity, src, srcSize);
     }
     if (cLitSize==1) {
-        memcpy(nextHuf, prevHuf, sizeof(*prevHuf));
+        ZSTD_memcpy(nextHuf, prevHuf, sizeof(*prevHuf));
         return ZSTD_compressRleLiteralsBlock(dst, dstCapacity, src, srcSize);
     }
 

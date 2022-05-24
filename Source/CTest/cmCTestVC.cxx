@@ -10,8 +10,8 @@
 #include "cmsys/Process.h"
 
 #include "cmCTest.h"
-#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 #include "cmXMLWriter.h"
 
 cmCTestVC::cmCTestVC(cmCTest* ct, std::ostream& log)

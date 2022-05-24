@@ -1,0 +1,6 @@
+This file should be placed in CMAKE_INSTALL_PREFIX
+as a copy if the CMAKE_INSTALL_MODE environment variable
+is unset or equals "COPY".
+If the variable's value is "SYMLINK" or "SYMLINK_OR_COPY",
+the CMAKE_INSTALL_PREFIX should rather receive a symbolic
+link to this file.

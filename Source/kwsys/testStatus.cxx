@@ -31,6 +31,10 @@ int testStatus(int, char* [])
       std::cerr << "Status Success constructor does not produce Success\n";
       res = false;
     }
+    if (!status.IsSuccess()) {
+      std::cerr << "Status Success gives false IsSuccess\n";
+      res = false;
+    }
     if (!status) {
       std::cerr << "Status Success kind is not true\n";
       res = false;
@@ -53,6 +57,10 @@ int testStatus(int, char* [])
     status = kwsys::Status::POSIX(EINVAL);
     if (status.GetKind() != kwsys::Status::Kind::POSIX) {
       std::cerr << "Status POSIX constructor does not produce POSIX\n";
+      res = false;
+    }
+    if (status.IsSuccess()) {
+      std::cerr << "Status POSIX gives true IsSuccess\n";
       res = false;
     }
     if (status) {
@@ -85,6 +93,10 @@ int testStatus(int, char* [])
     status = kwsys::Status::Windows(ERROR_INVALID_PARAMETER);
     if (status.GetKind() != kwsys::Status::Kind::Windows) {
       std::cerr << "Status Windows constructor does not produce Windows\n";
+      res = false;
+    }
+    if (status.IsSuccess()) {
+      std::cerr << "Status Windows gives true IsSuccess\n";
       res = false;
     }
     if (status) {

@@ -8,6 +8,7 @@
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
+#include "cmValue.h"
 
 cmInstalledFile::cmInstalledFile() = default;
 

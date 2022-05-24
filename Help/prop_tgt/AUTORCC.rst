@@ -5,8 +5,8 @@ Should the target be processed with auto-rcc (for Qt projects).
 
 :prop_tgt:`AUTORCC` is a boolean specifying whether CMake will handle
 the Qt ``rcc`` code generator automatically, i.e. without having to use
-the :module:`QT4_ADD_RESOURCES() <FindQt4>` or ``QT5_ADD_RESOURCES()``
-macro.  Currently Qt4 and Qt5 are supported.
+commands like :module:`QT4_ADD_RESOURCES() <FindQt4>`, ``QT5_ADD_RESOURCES()``,
+etc.  Currently, Qt versions 4 to 6 are supported.
 
 When this property is ``ON``, CMake will handle ``.qrc`` files added
 as target sources at build time and invoke ``rcc`` accordingly.

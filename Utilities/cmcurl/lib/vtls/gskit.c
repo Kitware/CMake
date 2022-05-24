@@ -180,6 +180,7 @@ static bool is_separator(char c)
 static CURLcode gskit_status(struct Curl_easy *data, int rc,
                              const char *procname, CURLcode defcode)
 {
+  char buffer[STRERROR_LEN];
   /* Process GSKit status and map it to a CURLcode. */
   switch(rc) {
   case GSK_OK:
@@ -208,7 +209,8 @@ static CURLcode gskit_status(struct Curl_easy *data, int rc,
     case ENOMEM:
       return CURLE_OUT_OF_MEMORY;
     default:
-      failf(data, "%s I/O error: %s", procname, strerror(errno));
+      failf(data, "%s I/O error: %s", procname,
+            Curl_strerror(errno, buffer, sizeof(buffer)));
       break;
     }
     break;
@@ -223,13 +225,15 @@ static CURLcode gskit_status(struct Curl_easy *data, int rc,
 static CURLcode set_enum(struct Curl_easy *data, gsk_handle h,
                 GSK_ENUM_ID id, GSK_ENUM_VALUE value, bool unsupported_ok)
 {
+  char buffer[STRERROR_LEN];
   int rc = gsk_attribute_set_enum(h, id, value);
 
   switch(rc) {
   case GSK_OK:
     return CURLE_OK;
   case GSK_ERROR_IO:
-    failf(data, "gsk_attribute_set_enum() I/O error: %s", strerror(errno));
+    failf(data, "gsk_attribute_set_enum() I/O error: %s",
+          Curl_strerror(errno, buffer, sizeof(buffer)));
     break;
   case GSK_ATTRIBUTE_INVALID_ID:
     if(unsupported_ok)
@@ -245,13 +249,15 @@ static CURLcode set_enum(struct Curl_easy *data, gsk_handle h,
 static CURLcode set_buffer(struct Curl_easy *data, gsk_handle h,
                         GSK_BUF_ID id, const char *buffer, bool unsupported_ok)
 {
+  char buffer[STRERROR_LEN];
   int rc = gsk_attribute_set_buffer(h, id, buffer, 0);
 
   switch(rc) {
   case GSK_OK:
     return CURLE_OK;
   case GSK_ERROR_IO:
-    failf(data, "gsk_attribute_set_buffer() I/O error: %s", strerror(errno));
+    failf(data, "gsk_attribute_set_buffer() I/O error: %s",
+          Curl_strerror(errno, buffer, sizeof(buffer)));
     break;
   case GSK_ATTRIBUTE_INVALID_ID:
     if(unsupported_ok)
@@ -267,6 +273,7 @@ static CURLcode set_buffer(struct Curl_easy *data, gsk_handle h,
 static CURLcode set_numeric(struct Curl_easy *data,
                             gsk_handle h, GSK_NUM_ID id, int value)
 {
+  char buffer[STRERROR_LEN];
   int rc = gsk_attribute_set_numeric_value(h, id, value);
 
   switch(rc) {
@@ -274,7 +281,7 @@ static CURLcode set_numeric(struct Curl_easy *data,
     return CURLE_OK;
   case GSK_ERROR_IO:
     failf(data, "gsk_attribute_set_numeric_value() I/O error: %s",
-          strerror(errno));
+          Curl_strerror(errno, buffer, sizeof(buffer)));
     break;
   default:
     failf(data, "gsk_attribute_set_numeric_value(): %s", gsk_strerror(rc));
@@ -287,13 +294,15 @@ static CURLcode set_numeric(struct Curl_easy *data,
 static CURLcode set_callback(struct Curl_easy *data,
                              gsk_handle h, GSK_CALLBACK_ID id, void *info)
 {
+  char buffer[STRERROR_LEN];
   int rc = gsk_attribute_set_callback(h, id, info);
 
   switch(rc) {
   case GSK_OK:
     return CURLE_OK;
   case GSK_ERROR_IO:
-    failf(data, "gsk_attribute_set_callback() I/O error: %s", strerror(errno));
+    failf(data, "gsk_attribute_set_callback() I/O error: %s",
+          Curl_strerror(errno, buffer, sizeof(buffer)));
     break;
   default:
     failf(data, "gsk_attribute_set_callback(): %s", gsk_strerror(rc));
@@ -966,7 +975,9 @@ static CURLcode gskit_connect_step2(struct Curl_easy *data,
         continue;       /* Retry. */
       }
       if(errno != ETIME) {
-        failf(data, "QsoWaitForIOCompletion() I/O error: %s", strerror(errno));
+        char buffer[STRERROR_LEN];
+        failf(data, "QsoWaitForIOCompletion() I/O error: %s",
+              Curl_strerror(errno, buffer, sizeof(buffer)));
         cancel_async_handshake(conn, sockindex);
         close_async_handshake(connssl);
         return CURLE_SSL_CONNECT_ERROR;
@@ -1011,7 +1022,7 @@ static CURLcode gskit_connect_step3(struct Curl_easy *data,
      CURLE_OK) {
     int i;
 
-    infof(data, "Server certificate:\n");
+    infof(data, "Server certificate:");
     p = cdev;
     for(i = 0; i++ < cdec; p++)
       switch(p->cert_data_id) {
@@ -1020,16 +1031,16 @@ static CURLcode gskit_connect_step3(struct Curl_easy *data,
         certend = cert + cdev->cert_data_l;
         break;
       case CERT_DN_PRINTABLE:
-        infof(data, "\t subject: %.*s\n", p->cert_data_l, p->cert_data_p);
+        infof(data, "\t subject: %.*s", p->cert_data_l, p->cert_data_p);
         break;
       case CERT_ISSUER_DN_PRINTABLE:
-        infof(data, "\t issuer: %.*s\n", p->cert_data_l, p->cert_data_p);
+        infof(data, "\t issuer: %.*s", p->cert_data_l, p->cert_data_p);
         break;
       case CERT_VALID_FROM:
-        infof(data, "\t start date: %.*s\n", p->cert_data_l, p->cert_data_p);
+        infof(data, "\t start date: %.*s", p->cert_data_l, p->cert_data_p);
         break;
       case CERT_VALID_TO:
-        infof(data, "\t expire date: %.*s\n", p->cert_data_l, p->cert_data_p);
+        infof(data, "\t expire date: %.*s", p->cert_data_l, p->cert_data_p);
         break;
     }
   }
@@ -1192,6 +1203,7 @@ static int gskit_shutdown(struct Curl_easy *data,
   int what;
   int rc;
   char buf[120];
+  int loop = 10; /* don't get stuck */
 
   if(!BACKEND->handle)
     return 0;
@@ -1206,7 +1218,7 @@ static int gskit_shutdown(struct Curl_easy *data,
   what = SOCKET_READABLE(conn->sock[sockindex],
                          SSL_SHUTDOWN_TIMEOUT);
 
-  for(;;) {
+  while(loop--) {
     ssize_t nread;
 
     if(what < 0) {
@@ -1228,7 +1240,8 @@ static int gskit_shutdown(struct Curl_easy *data,
     nread = read(conn->sock[sockindex], buf, sizeof(buf));
 
     if(nread < 0) {
-      failf(data, "read: %s", strerror(errno));
+      char buffer[STRERROR_LEN];
+      failf(data, "read: %s", Curl_strerror(errno, buffer, sizeof(buffer)));
       rc = -1;
     }
 

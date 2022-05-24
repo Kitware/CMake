@@ -101,6 +101,7 @@
 
   # Wrappers for 3rd-party libraries
   { include: [ "@<.*curl/curlver.h>", private, "<cm3p/curl/curl.h>", public ] },
+  { include: [ "@<.*json/config.h>", private, "<cm3p/json/value.h>", public ] },
   { include: [ "@<.*json/forwards.h>", private, "<cm3p/json/value.h>", public ] },
   { include: [ "@<.*uv/.+\\.h>", private, "<cm3p/uv.h>", public ] },
   { include: [ "@<.*expat_external.h>", private, "<cm3p/expat.h>", public ] },

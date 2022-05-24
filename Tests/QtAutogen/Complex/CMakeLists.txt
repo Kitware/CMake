@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.16)
 project(Complex)
 include("../AutogenGuiTest.cmake")
 
@@ -16,6 +16,8 @@ add_library(privateSlot OBJECT private_slot.cpp)
 # Pass Qt compiler features to targets that don't link against Qt
 target_compile_features(codeeditorLib PRIVATE ${QT_COMPILE_FEATURES})
 target_compile_features(privateSlot PRIVATE ${QT_COMPILE_FEATURES})
+target_link_libraries(codeeditorLib PRIVATE ${QT_LIBRARIES})
+target_link_libraries(privateSlot PRIVATE ${QT_LIBRARIES})
 
 configure_file(generated_resource.qrc.in generated_resource.qrc @ONLY)
 add_custom_command(

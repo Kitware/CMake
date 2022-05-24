@@ -1,10 +1,10 @@
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.16)
 project(MocOsMacros)
 include("../AutogenCoreTest.cmake")
 
 # Tests if moc processes Q_OS_XXX macros
 
-message( "Qt5Core_VERSION: ${Qt5Core_VERSION}" )
+message( "Qt${QT_TEST_VERSION}Core_VERSION: ${Qt${QT_TEST_VERSION}Core_VERSION}" )
 message(
   "CMAKE_CXX_COMPILER_PREDEFINES_COMMAND: "
   ${CMAKE_CXX_COMPILER_PREDEFINES_COMMAND} )
@@ -12,7 +12,7 @@ message(
 # On some platforms (e.g. MAC) Q_OS_XXX requires moc to include moc_predefs.h
 # which is supported since Qt 5.8 and requires
 # CMAKE_CXX_COMPILER_PREDEFINES_COMMAND to be defined.
-if( ( ${Qt5Core_VERSION} VERSION_GREATER_EQUAL "5.8" ) AND
+if( ( ${Qt${QT_TEST_VERSION}Core_VERSION} VERSION_GREATER_EQUAL "5.8" ) AND
   DEFINED CMAKE_CXX_COMPILER_PREDEFINES_COMMAND
 )
   message( "Test enabled!" )

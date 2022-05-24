@@ -106,7 +106,7 @@ endmacro()
 # Do NOT even think about using it outside of this file!
 macro(_check_pthreads_flag)
   if(NOT Threads_FOUND)
-    # If we did not found -lpthread, -lpthread, or -lthread, look for -pthread
+    # If we did not find -lpthreads, -lpthread, or -lthread, look for -pthread
     if(NOT DEFINED THREADS_HAVE_PTHREAD_ARG)
       message(CHECK_START "Check if compiler accepts -pthread")
       if(CMAKE_C_COMPILER_LOADED)

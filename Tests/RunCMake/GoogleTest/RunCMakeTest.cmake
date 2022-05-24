@@ -1,5 +1,12 @@
 include(RunCMake)
 
+if(RunCMake_GENERATOR STREQUAL "Borland Makefiles" OR
+   RunCMake_GENERATOR STREQUAL "Watcom WMake")
+  set(fs_delay 3)
+else()
+  set(fs_delay 1.125)
+endif()
+
 function(run_GoogleTest DISCOVERY_MODE)
   # Use a single build tree for a few tests without cleaning.
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/GoogleTest-build)
@@ -37,6 +44,20 @@ function(run_GoogleTest DISCOVERY_MODE)
     ${CMAKE_CTEST_COMMAND}
     -C Debug
     -L TEST2
+    --no-label-summary
+  )
+
+  run_cmake_command(GoogleTest-test3
+    ${CMAKE_CTEST_COMMAND}
+    -C Debug
+    -L TEST3
+    --no-label-summary
+  )
+
+  run_cmake_command(GoogleTest-test4
+    ${CMAKE_CTEST_COMMAND}
+    -C Debug
+    -L TEST4
     --no-label-summary
   )
 
@@ -139,6 +160,46 @@ function(run_GoogleTest_discovery_timeout DISCOVERY_MODE)
   )
 endfunction()
 
+function(run_GoogleTest_discovery_arg_change DISCOVERY_MODE)
+  # Use a single build tree for a few tests without cleaning.
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/GoogleTest-discovery-arg-change)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+
+  run_cmake_with_options(GoogleTestDiscoveryArgChange
+    -DCMAKE_GTEST_DISCOVER_TESTS_DISCOVERY_MODE=${DISCOVERY_MODE}
+    -DTEST_FILTER=basic
+  )
+  run_cmake_command(GoogleTest-discovery-arg-change-build
+    ${CMAKE_COMMAND}
+    --build .
+    --config Release
+    --target fake_gtest
+  )
+  run_cmake_command(GoogleTest-discovery-arg-change-basic
+    ${CMAKE_CTEST_COMMAND}
+    -C Release
+    -N
+  )
+  execute_process(COMMAND ${CMAKE_COMMAND} -E sleep ${fs_delay}) # handle 1s resolution
+  run_cmake_with_options(GoogleTestDiscoveryArgChange
+    -DCMAKE_GTEST_DISCOVER_TESTS_DISCOVERY_MODE=${DISCOVERY_MODE}
+    -DTEST_FILTER=typed
+  )
+  run_cmake_command(GoogleTest-discovery-arg-change-build
+    ${CMAKE_COMMAND}
+    --build .
+    --config Release
+    --target fake_gtest
+  )
+  run_cmake_command(GoogleTest-discovery-arg-change-typed
+    ${CMAKE_CTEST_COMMAND}
+    -C Release
+    -N
+  )
+endfunction()
+
 function(run_GoogleTest_discovery_multi_config)
   # Use a single build tree for a few tests without cleaning.
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/GoogleTest-discovery-multi-config)
@@ -181,6 +242,10 @@ foreach(DISCOVERY_MODE POST_BUILD PRE_TEST)
   run_GoogleTestXML(${DISCOVERY_MODE})
   message("Testing ${DISCOVERY_MODE} discovery mode via DISCOVERY_MODE option...")
   run_GoogleTest_discovery_timeout(${DISCOVERY_MODE})
+  if(# VS 9 does not rebuild if POST_BUILD command changes.
+      NOT "${DISCOVERY_MODE};${RunCMake_GENERATOR}" MATCHES "^POST_BUILD;Visual Studio 9")
+    run_GoogleTest_discovery_arg_change(${DISCOVERY_MODE})
+  endif()
 endforeach()
 
 if(RunCMake_GENERATOR_IS_MULTI_CONFIG)

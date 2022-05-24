@@ -21,27 +21,27 @@ if (QT_TEST_VERSION EQUAL 4)
     qt4_generate_moc(${ARGN})
   endmacro()
 
-elseif(QT_TEST_VERSION EQUAL 5)
+elseif(QT_TEST_VERSION GREATER_EQUAL 5)
 
-  find_package(Qt5Widgets REQUIRED)
+  find_package(Qt${QT_TEST_VERSION}Widgets REQUIRED)
 
-  set(QT_QTCORE_TARGET Qt5::Core)
-  set(QT_LIBRARIES Qt5::Widgets)
+  set(QT_QTCORE_TARGET Qt${QT_TEST_VERSION}::Core)
+  set(QT_LIBRARIES Qt${QT_TEST_VERSION}::Widgets)
 
   # Include directories
-  include_directories(${Qt5Widgets_INCLUDE_DIRS})
+  include_directories(${Qt${QT_TEST_VERSION}Widgets_INCLUDE_DIRS})
 
   # Definitions
-  if(Qt5_POSITION_INDEPENDENT_CODE AND CMAKE_CXX_COMPILE_OPTIONS_PIC)
+  if(Qt${QT_TEST_VERSION}_POSITION_INDEPENDENT_CODE AND CMAKE_CXX_COMPILE_OPTIONS_PIC)
     add_definitions(${CMAKE_CXX_COMPILE_OPTIONS_PIC})
   endif()
 
   # Qt macros
   macro(qtx_wrap_cpp)
-    qt5_wrap_cpp(${ARGN})
+    cmake_language(CALL qt${QT_TEST_VERSION}_wrap_cpp ${ARGN})
   endmacro()
   macro(qtx_generate_moc)
-    qt5_generate_moc(${ARGN})
+    cmake_language(CALL qt${QT_TEST_VERSION}_generate_moc ${ARGN})
   endmacro()
 
 else()

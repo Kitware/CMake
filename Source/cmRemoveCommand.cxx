@@ -4,8 +4,8 @@
 
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
-#include "cmProperty.h"
 #include "cmStringAlgorithms.h"
+#include "cmValue.h"
 
 // cmRemoveCommand
 bool cmRemoveCommand(std::vector<std::string> const& args,
@@ -17,7 +17,7 @@ bool cmRemoveCommand(std::vector<std::string> const& args,
 
   std::string const& variable = args[0]; // VAR is always first
   // get the old value
-  cmProp cacheValue = status.GetMakefile().GetDefinition(variable);
+  cmValue cacheValue = status.GetMakefile().GetDefinition(variable);
 
   // if there is no old value then return
   if (!cacheValue) {

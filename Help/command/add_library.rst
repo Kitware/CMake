@@ -166,6 +166,8 @@ itself and is not included as a target in the generated buildsystem.
   call are ``PRIVATE`` to the interface library and do not appear in its
   :prop_tgt:`INTERFACE_SOURCES` target property.
 
+.. _`add_library imported libraries`:
+
 Imported Libraries
 ^^^^^^^^^^^^^^^^^^
 
@@ -205,7 +207,8 @@ The ``<type>`` must be one of:
     :prop_tgt:`IMPORTED_IMPLIB_<CONFIG>`) specifies the location of the
     DLL import library file (``.lib`` or ``.dll.a``) on disk, and the
     ``IMPORTED_LOCATION`` is the location of the ``.dll`` runtime
-    library (and is optional).
+    library (and is optional, but needed by the :genex:`TARGET_RUNTIME_DLLS`
+    generator expression).
 
   Additional usage requirements may be specified in ``INTERFACE_*`` properties.
 

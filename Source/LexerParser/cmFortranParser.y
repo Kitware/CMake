@@ -151,6 +151,10 @@ stmt:
       cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
       cmFortranParser_RuleUse(parser, $5);
     }
+    if (cmsysString_strcasecmp($3, "intrinsic") == 0) {
+      cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
+      cmFortranParser_RuleUseIntrinsic(parser, $5);
+    }
     free($3);
     free($5);
   }

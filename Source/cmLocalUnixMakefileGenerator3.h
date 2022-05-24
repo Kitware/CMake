@@ -299,7 +299,7 @@ private:
     cmGeneratorTarget const* target)
   {
     return this->CommandsVisited[target];
-  };
+  }
 
   std::map<cmGeneratorTarget const*, std::set<cmSourceFile const*>>
     CommandsVisited;

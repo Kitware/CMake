@@ -160,6 +160,7 @@ syn keyword cmakeProperty contained
             \ ENABLED_LANGUAGES
             \ ENABLE_EXPORTS
             \ ENVIRONMENT
+            \ ENVIRONMENT_MODIFICATION
             \ EXCLUDE_FROM_ALL
             \ EXCLUDE_FROM_DEFAULT_BUILD
             \ EXPORT_NAME
@@ -2807,6 +2808,7 @@ syn keyword cmakeKWfind_package contained
             \ ABI
             \ BUNDLE
             \ CMAKE_DISABLE_FIND_PACKAGE_
+            \ CMAKE_REQUIRE_FIND_PACKAGE_
             \ CMAKE_FIND_ROOT_PATH_BOTH
             \ COMPONENTS
             \ CONFIG

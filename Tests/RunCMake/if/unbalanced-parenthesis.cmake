@@ -1,0 +1,5 @@
+set(paren "(")
+if(${paren})
+  message(STATUS "Condition incorrectly true")
+endif()
+message(STATUS "Code incorrectly accepted")

@@ -4,7 +4,6 @@ macro (add_cuda_test_macro name)
     PROPERTY LABELS "CUDA")
 endmacro ()
 
-add_cuda_test_macro(Cuda.ConsumeCompileFeatures CudaConsumeCompileFeatures)
 add_cuda_test_macro(Cuda.CXXStandardSetTwice CXXStandardSetTwice)
 add_cuda_test_macro(Cuda.ObjectLibrary CudaObjectLibrary)
 add_cuda_test_macro(Cuda.MixedStandardLevels1 MixedStandardLevels1)

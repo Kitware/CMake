@@ -71,6 +71,8 @@ struct Curl_dns_entry {
   long inuse;
 };
 
+bool Curl_host_is_ipnum(const char *hostname);
+
 /*
  * Curl_resolv() returns an entry with the info for the specified host
  * and port.
@@ -95,7 +97,7 @@ enum resolve_t Curl_resolv_timeout(struct Curl_easy *data,
                                    struct Curl_dns_entry **dnsentry,
                                    timediff_t timeoutms);
 
-#ifdef CURLRES_IPV6
+#ifdef ENABLE_IPV6
 /*
  * Curl_ipv6works() returns TRUE if IPv6 seems to work.
  */

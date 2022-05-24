@@ -15,10 +15,10 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
-#include "cmProperty.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 static bool IncludeByVariable(cmExecutionStatus& status,
                               const std::string& variable);
@@ -308,7 +308,7 @@ bool cmProjectCommand(std::vector<std::string> const& args,
     }
     std::string vw;
     for (std::string const& i : vv) {
-      cmProp v = mf.GetDefinition(i);
+      cmValue v = mf.GetDefinition(i);
       if (cmNonempty(v)) {
         if (cmp0048 == cmPolicies::WARN) {
           if (!injectedProjectCommand) {
@@ -358,7 +358,7 @@ static bool IncludeByVariable(cmExecutionStatus& status,
                               const std::string& variable)
 {
   cmMakefile& mf = status.GetMakefile();
-  cmProp include = mf.GetDefinition(variable);
+  cmValue include = mf.GetDefinition(variable);
   if (!include) {
     return true;
   }

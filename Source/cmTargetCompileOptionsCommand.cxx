@@ -37,7 +37,8 @@ private:
     }
 
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    tgt->InsertCompileOption(this->Join(content), lfbt, prepend);
+    tgt->InsertCompileOption(BT<std::string>(this->Join(content), lfbt),
+                             prepend);
     return true; // Successfully handled.
   }
 

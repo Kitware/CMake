@@ -23,7 +23,7 @@ function(cmake_parse_library_architecture lang implicit_dirs implicit_objs outpu
 
     foreach(obj IN LISTS implicit_objs)
       get_filename_component(dir "${obj}" DIRECTORY)
-      if("${dir}" MATCHES "(/usr)+/lib/${CMAKE_LIBRARY_ARCHITECTURE_REGEX}$")
+      if("${dir}" MATCHES "(/usr)?/lib/${CMAKE_LIBRARY_ARCHITECTURE_REGEX}$")
         get_filename_component(arch "${dir}" NAME)
         set(library_arch "${arch}")
         break()

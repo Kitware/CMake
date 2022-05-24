@@ -1356,14 +1356,12 @@ std::string SymbolProperties::Demangle(const char* symbol) const
   std::string result = safes(symbol);
 #  if defined(KWSYS_SYSTEMINFORMATION_HAS_CPP_DEMANGLE)
   int status = 0;
-  size_t bufferLen = 1024;
-  char* buffer = (char*)malloc(1024);
   char* demangledSymbol =
-    abi::__cxa_demangle(symbol, buffer, &bufferLen, &status);
+    abi::__cxa_demangle(symbol, nullptr, nullptr, &status);
   if (!status) {
     result = demangledSymbol;
   }
-  free(buffer);
+  free(demangledSymbol);
 #  else
   (void)symbol;
 #  endif

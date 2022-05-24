@@ -24,6 +24,24 @@ gtest_discover_tests(
   PROPERTIES LABELS TEST2
 )
 
+gtest_discover_tests(
+  fake_gtest
+  TEST_PREFIX TEST:
+  TEST_SUFFIX !3
+  TEST_FILTER basic*
+  EXTRA_ARGS how now "\"brown\" cow"
+  PROPERTIES LABELS TEST3
+)
+
+gtest_discover_tests(
+  fake_gtest
+  TEST_PREFIX TEST:
+  TEST_SUFFIX !4
+  TEST_FILTER typed*
+  EXTRA_ARGS how now "\"brown\" cow"
+  PROPERTIES LABELS TEST4
+)
+
 add_executable(no_tests_defined no_tests_defined.cpp)
 xcode_sign_adhoc(no_tests_defined)
 

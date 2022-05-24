@@ -11,9 +11,9 @@
 #include "cmFileAPI.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
-#include "cmProperty.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
+#include "cmValue.h"
 #include "cmake.h"
 
 namespace {
@@ -136,7 +136,7 @@ void Toolchains::DumpToolchainVariable(cmMakefile const* mf,
       object[variable.ObjectKey] = jsonArray;
     }
   } else {
-    cmProp def = mf->GetDefinition(variableName);
+    cmValue def = mf->GetDefinition(variableName);
     if (def) {
       object[variable.ObjectKey] = *def;
     }

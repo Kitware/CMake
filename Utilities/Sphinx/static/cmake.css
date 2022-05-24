@@ -22,3 +22,15 @@ div.sphinxsidebarwrapper {
 dd > :first-child > p {
   margin-top: 0px;
 }
+
+div.outdated {
+  background-color: #f0f0c0;
+  color: black;
+  font-size: 90%;
+  padding-bottom: 5px;
+  padding-left: 2px;
+  padding-right: 2px;
+  padding-top: 5px;
+  text-align: center;
+  width: 100%;
+}

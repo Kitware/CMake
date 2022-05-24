@@ -42,7 +42,7 @@ bool cmGlobalNMakeMakefileGenerator::FindMakeProgram(cmMakefile* mf)
   if (!this->cmGlobalGenerator::FindMakeProgram(mf)) {
     return false;
   }
-  if (cmProp nmakeCommand = mf->GetDefinition("CMAKE_MAKE_PROGRAM")) {
+  if (cmValue nmakeCommand = mf->GetDefinition("CMAKE_MAKE_PROGRAM")) {
     std::vector<std::string> command{ *nmakeCommand, "-?" };
     std::string out;
     std::string err;
@@ -70,7 +70,7 @@ bool cmGlobalNMakeMakefileGenerator::FindMakeProgram(cmMakefile* mf)
 void cmGlobalNMakeMakefileGenerator::CheckNMakeFeatures()
 {
   this->NMakeSupportsUTF8 = !cmSystemTools::VersionCompare(
-    cmSystemTools::OP_LESS, this->NMakeVersion.c_str(), "9");
+    cmSystemTools::OP_LESS, this->NMakeVersion, "9");
 }
 
 void cmGlobalNMakeMakefileGenerator::GetDocumentation(
@@ -81,7 +81,7 @@ void cmGlobalNMakeMakefileGenerator::GetDocumentation(
 }
 
 void cmGlobalNMakeMakefileGenerator::PrintCompilerAdvice(
-  std::ostream& os, std::string const& lang, const char* envVar) const
+  std::ostream& os, std::string const& lang, cmValue envVar) const
 {
   if (lang == "CXX" || lang == "C") {
     /* clang-format off */

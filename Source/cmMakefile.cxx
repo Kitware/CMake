@@ -190,7 +190,7 @@ void cmMakefile::MaybeWarnCMP0074(std::string const& pkg)
 {
   // Warn if a <pkg>_ROOT variable we may use is set.
   std::string const varName = pkg + "_ROOT";
-  cmProp var = this->GetDefinition(varName);
+  cmValue var = this->GetDefinition(varName);
   std::string env;
   cmSystemTools::GetEnv(varName, env);
 
@@ -212,57 +212,29 @@ void cmMakefile::MaybeWarnCMP0074(std::string const& pkg)
   }
 }
 
-cmStringRange cmMakefile::GetIncludeDirectoriesEntries() const
+cmBTStringRange cmMakefile::GetIncludeDirectoriesEntries() const
 {
   return this->StateSnapshot.GetDirectory().GetIncludeDirectoriesEntries();
 }
 
-cmBacktraceRange cmMakefile::GetIncludeDirectoriesBacktraces() const
-{
-  return this->StateSnapshot.GetDirectory()
-    .GetIncludeDirectoriesEntryBacktraces();
-}
-
-cmStringRange cmMakefile::GetCompileOptionsEntries() const
+cmBTStringRange cmMakefile::GetCompileOptionsEntries() const
 {
   return this->StateSnapshot.GetDirectory().GetCompileOptionsEntries();
 }
 
-cmBacktraceRange cmMakefile::GetCompileOptionsBacktraces() const
-{
-  return this->StateSnapshot.GetDirectory().GetCompileOptionsEntryBacktraces();
-}
-
-cmStringRange cmMakefile::GetCompileDefinitionsEntries() const
+cmBTStringRange cmMakefile::GetCompileDefinitionsEntries() const
 {
   return this->StateSnapshot.GetDirectory().GetCompileDefinitionsEntries();
 }
 
-cmBacktraceRange cmMakefile::GetCompileDefinitionsBacktraces() const
-{
-  return this->StateSnapshot.GetDirectory()
-    .GetCompileDefinitionsEntryBacktraces();
-}
-
-cmStringRange cmMakefile::GetLinkOptionsEntries() const
+cmBTStringRange cmMakefile::GetLinkOptionsEntries() const
 {
   return this->StateSnapshot.GetDirectory().GetLinkOptionsEntries();
 }
 
-cmBacktraceRange cmMakefile::GetLinkOptionsBacktraces() const
-{
-  return this->StateSnapshot.GetDirectory().GetLinkOptionsEntryBacktraces();
-}
-
-cmStringRange cmMakefile::GetLinkDirectoriesEntries() const
+cmBTStringRange cmMakefile::GetLinkDirectoriesEntries() const
 {
   return this->StateSnapshot.GetDirectory().GetLinkDirectoriesEntries();
-}
-
-cmBacktraceRange cmMakefile::GetLinkDirectoriesBacktraces() const
-{
-  return this->StateSnapshot.GetDirectory()
-    .GetLinkDirectoriesEntryBacktraces();
 }
 
 cmListFileBacktrace cmMakefile::GetBacktrace() const
@@ -428,7 +400,7 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
 
   // Check for maximum recursion depth.
   int depth = CMake_DEFAULT_RECURSION_LIMIT;
-  cmProp depthStr = this->GetDefinition("CMAKE_MAXIMUM_RECURSION_DEPTH");
+  cmValue depthStr = this->GetDefinition("CMAKE_MAXIMUM_RECURSION_DEPTH");
   if (depthStr) {
     std::istringstream s(*depthStr);
     int d;
@@ -614,7 +586,7 @@ void cmMakefile::IncludeScope::EnforceCMP0011()
 bool cmMakefile::ReadDependentFile(const std::string& filename,
                                    bool noPolicyScope)
 {
-  if (cmProp def = this->GetDefinition("CMAKE_CURRENT_LIST_FILE")) {
+  if (cmValue def = this->GetDefinition("CMAKE_CURRENT_LIST_FILE")) {
     this->AddDefinition("CMAKE_PARENT_LIST_FILE", *def);
   }
   std::string filenametoread = cmSystemTools::CollapseFullPath(
@@ -846,6 +818,7 @@ void cmMakefile::EnforceDirectoryLevelRules() const
         // version.
         this->GetCMakeInstance()->IssueMessage(MessageType::AUTHOR_WARNING,
                                                msg.str(), this->Backtrace);
+        CM_FALLTHROUGH;
       case cmPolicies::OLD:
         // OLD behavior is to use policy version 2.4 set in
         // cmListFileCache.
@@ -857,7 +830,7 @@ void cmMakefile::EnforceDirectoryLevelRules() const
         this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
                                                msg.str(), this->Backtrace);
         cmSystemTools::SetFatalErrorOccured();
-        return;
+        break;
     }
   }
 }
@@ -952,10 +925,9 @@ void cmMakefile::DoGenerate(cmLocalGenerator& lg)
 void cmMakefile::Generate(cmLocalGenerator& lg)
 {
   this->DoGenerate(lg);
-  cmProp oldValue = this->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
+  cmValue oldValue = this->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
   if (oldValue &&
-      cmSystemTools::VersionCompare(cmSystemTools::OP_LESS, oldValue->c_str(),
-                                    "2.4")) {
+      cmSystemTools::VersionCompare(cmSystemTools::OP_LESS, oldValue, "2.4")) {
     this->GetCMakeInstance()->IssueMessage(
       MessageType::FATAL_ERROR,
       "You have set CMAKE_BACKWARDS_COMPATIBILITY to a CMake version less "
@@ -1030,6 +1002,7 @@ cmTarget* cmMakefile::GetCustomCommandTarget(
       case cmPolicies::WARN:
         e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0040) << "\n";
         issueMessage = true;
+        CM_FALLTHROUGH;
       case cmPolicies::OLD:
         break;
       case cmPolicies::NEW:
@@ -1037,6 +1010,7 @@ cmTarget* cmMakefile::GetCustomCommandTarget(
       case cmPolicies::REQUIRED_ALWAYS:
         issueMessage = true;
         messageType = MessageType::FATAL_ERROR;
+        break;
     }
 
     if (issueMessage) {
@@ -1386,10 +1360,10 @@ void cmMakefile::AddLinkDirectory(std::string const& directory, bool before)
 {
   if (before) {
     this->StateSnapshot.GetDirectory().PrependLinkDirectoriesEntry(
-      directory, this->Backtrace);
+      BT<std::string>(directory, this->Backtrace));
   } else {
     this->StateSnapshot.GetDirectory().AppendLinkDirectoriesEntry(
-      directory, this->Backtrace);
+      BT<std::string>(directory, this->Backtrace));
   }
 }
 
@@ -1434,7 +1408,7 @@ bool cmMakefile::ParseDefineFlag(std::string const& def, bool remove)
   const char* define = def.c_str() + 2;
 
   if (remove) {
-    if (cmProp cdefs = this->GetProperty("COMPILE_DEFINITIONS")) {
+    if (cmValue cdefs = this->GetProperty("COMPILE_DEFINITIONS")) {
       // Expand the list.
       std::vector<std::string> defs = cmExpandedList(*cdefs);
 
@@ -1444,7 +1418,7 @@ bool cmMakefile::ParseDefineFlag(std::string const& def, bool remove)
       std::string ndefs = cmJoin(cmMakeRange(defBegin, defEnd), ";");
 
       // Store the new list.
-      this->SetProperty("COMPILE_DEFINITIONS", ndefs.c_str());
+      this->SetProperty("COMPILE_DEFINITIONS", ndefs);
     }
   } else {
     // Append the definition to the directory property.
@@ -1465,30 +1439,29 @@ void cmMakefile::InitializeFromParent(cmMakefile* parent)
   // Include transform property.  There is no per-config version.
   {
     const char* prop = "IMPLICIT_DEPENDS_INCLUDE_TRANSFORM";
-    this->SetProperty(prop, cmToCStr(parent->GetProperty(prop)));
+    this->SetProperty(prop, parent->GetProperty(prop));
   }
 
   // compile definitions property and per-config versions
   cmPolicies::PolicyStatus polSt = this->GetPolicyStatus(cmPolicies::CMP0043);
   if (polSt == cmPolicies::WARN || polSt == cmPolicies::OLD) {
     this->SetProperty("COMPILE_DEFINITIONS",
-                      cmToCStr(parent->GetProperty("COMPILE_DEFINITIONS")));
+                      parent->GetProperty("COMPILE_DEFINITIONS"));
     std::vector<std::string> configs =
       this->GetGeneratorConfigs(cmMakefile::ExcludeEmptyConfig);
     for (std::string const& config : configs) {
       std::string defPropName =
         cmStrCat("COMPILE_DEFINITIONS_", cmSystemTools::UpperCase(config));
-      cmProp prop = parent->GetProperty(defPropName);
-      this->SetProperty(defPropName, cmToCStr(prop));
+      cmValue prop = parent->GetProperty(defPropName);
+      this->SetProperty(defPropName, prop);
     }
   }
 
   // labels
-  this->SetProperty("LABELS", cmToCStr(parent->GetProperty("LABELS")));
+  this->SetProperty("LABELS", parent->GetProperty("LABELS"));
 
   // link libraries
-  this->SetProperty("LINK_LIBRARIES",
-                    cmToCStr(parent->GetProperty("LINK_LIBRARIES")));
+  this->SetProperty("LINK_LIBRARIES", parent->GetProperty("LINK_LIBRARIES"));
 
   // the initial project name
   this->StateSnapshot.SetProjectName(parent->StateSnapshot.GetProjectName());
@@ -1781,6 +1754,7 @@ void cmMakefile::ConfigureSubDirectory(cmMakefile* mf)
           << cmPolicies::GetPolicyWarning(cmPolicies::CMP0014);
         /* clang-format on */
         this->IssueMessage(MessageType::AUTHOR_WARNING, e.str());
+        CM_FALLTHROUGH;
       case cmPolicies::OLD:
         // OLD behavior does not warn.
         break;
@@ -1791,6 +1765,7 @@ void cmMakefile::ConfigureSubDirectory(cmMakefile* mf)
       case cmPolicies::NEW:
         // NEW behavior prints the error.
         this->IssueMessage(MessageType::FATAL_ERROR, e.str());
+        break;
     }
     return;
   }
@@ -1877,16 +1852,16 @@ void cmMakefile::AddIncludeDirectories(const std::vector<std::string>& incs,
   std::string entryString = cmJoin(incs, ";");
   if (before) {
     this->StateSnapshot.GetDirectory().PrependIncludeDirectoriesEntry(
-      entryString, this->Backtrace);
+      BT<std::string>(entryString, this->Backtrace));
   } else {
     this->StateSnapshot.GetDirectory().AppendIncludeDirectoriesEntry(
-      entryString, this->Backtrace);
+      BT<std::string>(entryString, this->Backtrace));
   }
 
   // Property on each target:
   for (auto& target : this->Targets) {
     cmTarget& t = target.second;
-    t.InsertInclude(entryString, this->Backtrace, before);
+    t.InsertInclude(BT<std::string>(entryString, this->Backtrace), before);
   }
 }
 
@@ -1927,7 +1902,7 @@ void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
                                     cmStateEnums::CacheEntryType type,
                                     bool force)
 {
-  cmProp existingValue = this->GetState()->GetInitializedCacheValue(name);
+  cmValue existingValue = this->GetState()->GetInitializedCacheValue(name);
   // must be outside the following if() to keep it alive long enough
   std::string nvalue;
 
@@ -1956,7 +1931,7 @@ void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
         nvalue += files[cc];
       }
 
-      this->GetCMakeInstance()->AddCacheEntry(name, nvalue.c_str(), doc, type);
+      this->GetCMakeInstance()->AddCacheEntry(name, nvalue, doc, type);
       nvalue = *this->GetState()->GetInitializedCacheValue(name);
       value = nvalue.c_str();
     }
@@ -2045,7 +2020,7 @@ void cmMakefile::AddGlobalLinkInformation(cmTarget& target)
     default:;
   }
 
-  if (cmProp linkLibsProp = this->GetProperty("LINK_LIBRARIES")) {
+  if (cmValue linkLibsProp = this->GetProperty("LINK_LIBRARIES")) {
     std::vector<std::string> linkLibs = cmExpandedList(*linkLibsProp);
 
     for (auto j = linkLibs.begin(); j != linkLibs.end(); ++j) {
@@ -2118,15 +2093,23 @@ cmTarget* cmMakefile::AddExecutable(const std::string& exeName,
 cmTarget* cmMakefile::AddNewTarget(cmStateEnums::TargetType type,
                                    const std::string& name)
 {
-  auto it = this->Targets
-              .emplace(name,
-                       cmTarget(name, type, cmTarget::VisibilityNormal, this,
-                                cmTarget::PerConfig::Yes))
-              .first;
+  return &this->CreateNewTarget(name, type).first;
+}
+
+std::pair<cmTarget&, bool> cmMakefile::CreateNewTarget(
+  const std::string& name, cmStateEnums::TargetType type,
+  cmTarget::PerConfig perConfig)
+{
+  auto ib = this->Targets.emplace(
+    name, cmTarget(name, type, cmTarget::VisibilityNormal, this, perConfig));
+  auto it = ib.first;
+  if (!ib.second) {
+    return std::make_pair(std::ref(it->second), false);
+  }
   this->OrderedTargets.push_back(&it->second);
   this->GetGlobalGenerator()->IndexTarget(&it->second);
   this->GetStateSnapshot().GetDirectory().AddNormalTargetName(name);
-  return &it->second;
+  return std::make_pair(std::ref(it->second), true);
 }
 
 cmTarget* cmMakefile::AddNewUtilityTarget(const std::string& utilityName,
@@ -2235,7 +2218,7 @@ cmSourceGroup* cmMakefile::GetOrCreateSourceGroup(
 cmSourceGroup* cmMakefile::GetOrCreateSourceGroup(const std::string& name)
 {
   std::string delimiters;
-  if (cmProp p = this->GetDefinition("SOURCE_GROUP_DELIMITER")) {
+  if (cmValue p = this->GetDefinition("SOURCE_GROUP_DELIMITER")) {
     delimiters = *p;
   } else {
     delimiters = "/\\";
@@ -2288,7 +2271,7 @@ void cmMakefile::ExpandVariablesCMP0019()
   }
   std::ostringstream w;
 
-  cmProp includeDirs = this->GetProperty("INCLUDE_DIRECTORIES");
+  cmValue includeDirs = this->GetProperty("INCLUDE_DIRECTORIES");
   if (includeDirs && mightExpandVariablesCMP0019(includeDirs->c_str())) {
     std::string dirs = *includeDirs;
     this->ExpandVariablesInString(dirs, true, true);
@@ -2300,7 +2283,7 @@ void cmMakefile::ExpandVariablesCMP0019()
         << "  " << dirs << "\n";
       /* clang-format on */
     }
-    this->SetProperty("INCLUDE_DIRECTORIES", dirs.c_str());
+    this->SetProperty("INCLUDE_DIRECTORIES", dirs);
   }
 
   // Also for each target's INCLUDE_DIRECTORIES property:
@@ -2326,7 +2309,7 @@ void cmMakefile::ExpandVariablesCMP0019()
     }
   }
 
-  if (cmProp linkDirsProp = this->GetProperty("LINK_DIRECTORIES")) {
+  if (cmValue linkDirsProp = this->GetProperty("LINK_DIRECTORIES")) {
     if (mightExpandVariablesCMP0019(linkDirsProp->c_str())) {
       std::string d = *linkDirsProp;
       const std::string orig = d;
@@ -2342,7 +2325,7 @@ void cmMakefile::ExpandVariablesCMP0019()
     }
   }
 
-  if (cmProp linkLibsProp = this->GetProperty("LINK_LIBRARIES")) {
+  if (cmValue linkLibsProp = this->GetProperty("LINK_LIBRARIES")) {
     std::vector<std::string> linkLibs = cmExpandedList(*linkLibsProp);
 
     for (auto l = linkLibs.begin(); l != linkLibs.end(); ++l) {
@@ -2386,7 +2369,7 @@ bool cmMakefile::IsOn(const std::string& name) const
 
 bool cmMakefile::IsSet(const std::string& name) const
 {
-  cmProp value = this->GetDefinition(name);
+  cmValue value = this->GetDefinition(name);
   if (!value) {
     return false;
   }
@@ -2404,12 +2387,12 @@ bool cmMakefile::IsSet(const std::string& name) const
 
 bool cmMakefile::PlatformIs32Bit() const
 {
-  if (cmProp plat_abi = this->GetDefinition("CMAKE_INTERNAL_PLATFORM_ABI")) {
+  if (cmValue plat_abi = this->GetDefinition("CMAKE_INTERNAL_PLATFORM_ABI")) {
     if (*plat_abi == "ELF X32") {
       return false;
     }
   }
-  if (cmProp sizeof_dptr = this->GetDefinition("CMAKE_SIZEOF_VOID_P")) {
+  if (cmValue sizeof_dptr = this->GetDefinition("CMAKE_SIZEOF_VOID_P")) {
     return atoi(sizeof_dptr->c_str()) == 4;
   }
   return false;
@@ -2417,7 +2400,7 @@ bool cmMakefile::PlatformIs32Bit() const
 
 bool cmMakefile::PlatformIs64Bit() const
 {
-  if (cmProp sizeof_dptr = this->GetDefinition("CMAKE_SIZEOF_VOID_P")) {
+  if (cmValue sizeof_dptr = this->GetDefinition("CMAKE_SIZEOF_VOID_P")) {
     return atoi(sizeof_dptr->c_str()) == 8;
   }
   return false;
@@ -2425,7 +2408,7 @@ bool cmMakefile::PlatformIs64Bit() const
 
 bool cmMakefile::PlatformIsx32() const
 {
-  if (cmProp plat_abi = this->GetDefinition("CMAKE_INTERNAL_PLATFORM_ABI")) {
+  if (cmValue plat_abi = this->GetDefinition("CMAKE_INTERNAL_PLATFORM_ABI")) {
     if (*plat_abi == "ELF X32") {
       return true;
     }
@@ -2475,7 +2458,7 @@ const char* cmMakefile::GetSONameFlag(const std::string& language) const
     name += language;
   }
   name += "_FLAG";
-  return cmToCStr(this->GetDefinition(name));
+  return this->GetDefinition(name).GetCStr();
 }
 
 bool cmMakefile::CanIWriteThisFile(std::string const& fileName) const
@@ -2498,7 +2481,7 @@ const std::string& cmMakefile::GetRequiredDefinition(
   const std::string& name) const
 {
   static std::string const empty;
-  cmProp def = this->GetDefinition(name);
+  cmValue def = this->GetDefinition(name);
   if (!def) {
     cmSystemTools::Error("Error required internal CMake variable not "
                          "set, cmake may not be built correctly.\n"
@@ -2511,7 +2494,7 @@ const std::string& cmMakefile::GetRequiredDefinition(
 
 bool cmMakefile::IsDefinitionSet(const std::string& name) const
 {
-  cmProp def = this->StateSnapshot.GetDefinition(name);
+  cmValue def = this->StateSnapshot.GetDefinition(name);
   if (!def) {
     def = this->GetState()->GetInitializedCacheValue(name);
   }
@@ -2528,7 +2511,7 @@ bool cmMakefile::IsDefinitionSet(const std::string& name) const
 
 bool cmMakefile::IsNormalDefinitionSet(const std::string& name) const
 {
-  cmProp def = this->StateSnapshot.GetDefinition(name);
+  cmValue def = this->StateSnapshot.GetDefinition(name);
 #ifndef CMAKE_BOOTSTRAP
   if (cmVariableWatch* vv = this->GetVariableWatch()) {
     if (!def) {
@@ -2540,9 +2523,9 @@ bool cmMakefile::IsNormalDefinitionSet(const std::string& name) const
   return def != nullptr;
 }
 
-cmProp cmMakefile::GetDefinition(const std::string& name) const
+cmValue cmMakefile::GetDefinition(const std::string& name) const
 {
-  cmProp def = this->StateSnapshot.GetDefinition(name);
+  cmValue def = this->StateSnapshot.GetDefinition(name);
   if (!def) {
     def = this->GetState()->GetInitializedCacheValue(name);
   }
@@ -2553,7 +2536,7 @@ cmProp cmMakefile::GetDefinition(const std::string& name) const
       vv->VariableAccessed(name,
                            def ? cmVariableWatch::VARIABLE_READ_ACCESS
                                : cmVariableWatch::UNKNOWN_VARIABLE_READ_ACCESS,
-                           cmToCStr(def), this);
+                           def.GetCStr(), this);
 
     if (watch_function_executed) {
       // A callback was executed and may have caused re-allocation of the
@@ -2571,19 +2554,14 @@ cmProp cmMakefile::GetDefinition(const std::string& name) const
 
 const std::string& cmMakefile::GetSafeDefinition(const std::string& name) const
 {
-  static std::string const empty;
-  cmProp def = this->GetDefinition(name);
-  if (!def) {
-    return empty;
-  }
-  return *def;
+  return this->GetDefinition(name);
 }
 
 bool cmMakefile::GetDefExpandList(const std::string& name,
                                   std::vector<std::string>& out,
                                   bool emptyArgs) const
 {
-  cmProp def = this->GetDefinition(name);
+  cmValue def = this->GetDefinition(name);
   if (!def) {
     return false;
   }
@@ -2736,7 +2714,7 @@ MessageType cmMakefile::ExpandVariablesInStringOld(
 
       // Lookup the definition of VAR.
       std::string var(first + 1, last - first - 2);
-      if (cmProp val = this->GetDefinition(var)) {
+      if (cmValue val = this->GetDefinition(var)) {
         // Store the value in the output escaping as requested.
         if (escapeQuotes) {
           source.append(cmEscapeQuotes(*val));
@@ -2808,6 +2786,7 @@ MessageType cmMakefile::ExpandVariablesInStringOld(
         case cmPolicies::REQUIRED_ALWAYS:
           error << "\n"
                 << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0010);
+          break;
         case cmPolicies::NEW:
           // NEW behavior is to report the error.
           break;
@@ -2941,7 +2920,7 @@ MessageType cmMakefile::ExpandVariablesInStringNew(
           openstack.pop_back();
           result.append(last, in - last);
           std::string const& lookup = result.substr(var.loc);
-          cmProp value = nullptr;
+          cmValue value = nullptr;
           std::string varresult;
           std::string svalue;
           switch (var.domain) {
@@ -2959,7 +2938,7 @@ MessageType cmMakefile::ExpandVariablesInStringNew(
               break;
             case ENVIRONMENT:
               if (cmSystemTools::GetEnv(lookup, svalue)) {
-                value = &svalue;
+                value = cmValue(svalue);
               }
               break;
             case CACHE:
@@ -3086,7 +3065,7 @@ MessageType cmMakefile::ExpandVariablesInStringNew(
             if (filename && variable == lineVar) {
               varresult = std::to_string(line);
             } else {
-              cmProp def = this->GetDefinition(variable);
+              cmValue def = this->GetDefinition(variable);
               if (def) {
                 varresult = *def;
               } else if (!this->SuppressSideEffects) {
@@ -3105,8 +3084,8 @@ MessageType cmMakefile::ExpandVariablesInStringNew(
             break;
           }
         }
-      // Failed to find a valid @ expansion; treat it as literal.
-      /* FALLTHROUGH */
+        // Failed to find a valid @ expansion; treat it as literal.
+        CM_FALLTHROUGH;
       default: {
         if (!openstack.empty() &&
             !(isalnum(inc) || inc == '_' || inc == '/' || inc == '.' ||
@@ -3180,6 +3159,24 @@ void cmMakefile::RemoveVariablesInString(std::string& source,
   while (var2.find(source)) {
     source.erase(var2.start(), var2.end() - var2.start());
   }
+}
+
+void cmMakefile::InitCMAKE_CONFIGURATION_TYPES(std::string const& genDefault)
+{
+  if (this->GetDefinition("CMAKE_CONFIGURATION_TYPES")) {
+    return;
+  }
+  std::string initConfigs;
+  if (this->GetCMakeInstance()->GetIsInTryCompile() ||
+      !cmSystemTools::GetEnv("CMAKE_CONFIGURATION_TYPES", initConfigs)) {
+    initConfigs = genDefault;
+  }
+  this->AddCacheDefinition(
+    "CMAKE_CONFIGURATION_TYPES", initConfigs,
+    "Semicolon separated list of supported configuration types, "
+    "only supports Debug, Release, MinSizeRel, and RelWithDebInfo, "
+    "anything else will be ignored.",
+    cmStateEnums::STRING);
 }
 
 std::string cmMakefile::GetDefaultConfiguration() const
@@ -3542,8 +3539,8 @@ int cmMakefile::TryCompile(const std::string& srcdir,
   // make sure the same generator is used
   // use this program as the cmake to be run, it should not
   // be run that way but the cmake object requires a vailid path
-  cmake cm(cmake::RoleProject, cmState::Project);
-  cm.SetIsInTryCompile(true);
+  cmake cm(cmake::RoleProject, cmState::Project,
+           cmState::ProjectKind::TryCompile);
   auto gg = cm.CreateGlobalGenerator(this->GetGlobalGenerator()->GetName());
   if (!gg) {
     this->IssueMessage(MessageType::INTERNAL_ERROR,
@@ -3565,18 +3562,19 @@ int cmMakefile::TryCompile(const std::string& srcdir,
   cm.SetGeneratorToolset(this->GetSafeDefinition("CMAKE_GENERATOR_TOOLSET"));
   cm.LoadCache();
   if (!cm.GetGlobalGenerator()->IsMultiConfig()) {
-    if (cmProp config =
+    if (cmValue config =
           this->GetDefinition("CMAKE_TRY_COMPILE_CONFIGURATION")) {
       // Tell the single-configuration generator which one to use.
       // Add this before the user-provided CMake arguments in case
       // one of the arguments is -DCMAKE_BUILD_TYPE=...
-      cm.AddCacheEntry("CMAKE_BUILD_TYPE", config->c_str(),
-                       "Build configuration", cmStateEnums::STRING);
+      cm.AddCacheEntry("CMAKE_BUILD_TYPE", config, "Build configuration",
+                       cmStateEnums::STRING);
     }
   }
-  cmProp recursionDepth = this->GetDefinition("CMAKE_MAXIMUM_RECURSION_DEPTH");
+  cmValue recursionDepth =
+    this->GetDefinition("CMAKE_MAXIMUM_RECURSION_DEPTH");
   if (recursionDepth) {
-    cm.AddCacheEntry("CMAKE_MAXIMUM_RECURSION_DEPTH", recursionDepth->c_str(),
+    cm.AddCacheEntry("CMAKE_MAXIMUM_RECURSION_DEPTH", recursionDepth,
                      "Maximum recursion depth", cmStateEnums::STRING);
   }
   // if cmake args were provided then pass them in
@@ -3709,7 +3707,7 @@ std::string cmMakefile::GetModulesFile(const std::string& filename,
   std::string moduleInCMakeModulePath;
 
   // Always search in CMAKE_MODULE_PATH:
-  cmProp cmakeModulePath = this->GetDefinition("CMAKE_MODULE_PATH");
+  cmValue cmakeModulePath = this->GetDefinition("CMAKE_MODULE_PATH");
   if (cmakeModulePath) {
     std::vector<std::string> modulePath = cmExpandedList(*cmakeModulePath);
 
@@ -3750,7 +3748,7 @@ std::string cmMakefile::GetModulesFile(const std::string& filename,
   }
 
   if (!moduleInCMakeModulePath.empty() && !moduleInCMakeRoot.empty()) {
-    cmProp currentFile = this->GetDefinition("CMAKE_CURRENT_LIST_FILE");
+    cmValue currentFile = this->GetDefinition("CMAKE_CURRENT_LIST_FILE");
     std::string mods = cmSystemTools::GetCMakeRoot() + "/Modules/";
     if (currentFile && cmSystemTools::IsSubDirectory(*currentFile, mods)) {
       switch (this->GetPolicyStatus(cmPolicies::CMP0017)) {
@@ -3807,7 +3805,7 @@ void cmMakefile::ConfigureString(const std::string& input, std::string& output,
 
     // Replace #cmakedefine instances.
     if (this->cmDefineRegex.find(line)) {
-      cmProp def = this->GetDefinition(this->cmDefineRegex.match(2));
+      cmValue def = this->GetDefinition(this->cmDefineRegex.match(2));
       if (!cmIsOff(def)) {
         const std::string indentation = this->cmDefineRegex.match(1);
         cmSystemTools::ReplaceString(line, "#" + indentation + "cmakedefine",
@@ -3820,7 +3818,7 @@ void cmMakefile::ConfigureString(const std::string& input, std::string& output,
       }
     } else if (this->cmDefine01Regex.find(line)) {
       const std::string indentation = this->cmDefine01Regex.match(1);
-      cmProp def = this->GetDefinition(this->cmDefine01Regex.match(2));
+      cmValue def = this->GetDefinition(this->cmDefine01Regex.match(2));
       cmSystemTools::ReplaceString(line, "#" + indentation + "cmakedefine01",
                                    "#" + indentation + "define");
       output += line;
@@ -3966,6 +3964,10 @@ void cmMakefile::SetProperty(const std::string& prop, const char* value)
 {
   this->StateSnapshot.GetDirectory().SetProperty(prop, value, this->Backtrace);
 }
+void cmMakefile::SetProperty(const std::string& prop, cmValue value)
+{
+  this->StateSnapshot.GetDirectory().SetProperty(prop, value, this->Backtrace);
+}
 
 void cmMakefile::AppendProperty(const std::string& prop,
                                 const std::string& value, bool asString)
@@ -3974,26 +3976,25 @@ void cmMakefile::AppendProperty(const std::string& prop,
                                                     this->Backtrace);
 }
 
-cmProp cmMakefile::GetProperty(const std::string& prop) const
+cmValue cmMakefile::GetProperty(const std::string& prop) const
 {
   // Check for computed properties.
   static std::string output;
   if (prop == "TESTS") {
     std::vector<std::string> keys;
     // get list of keys
-    std::transform(this->Tests.begin(), this->Tests.end(),
-                   std::back_inserter(keys),
-                   [](decltype(this->Tests)::value_type const& pair) {
-                     return pair.first;
-                   });
+    const auto* t = this;
+    std::transform(
+      t->Tests.begin(), t->Tests.end(), std::back_inserter(keys),
+      [](decltype(t->Tests)::value_type const& pair) { return pair.first; });
     output = cmJoin(keys, ";");
-    return &output;
+    return cmValue(output);
   }
 
   return this->StateSnapshot.GetDirectory().GetProperty(prop);
 }
 
-cmProp cmMakefile::GetProperty(const std::string& prop, bool chain) const
+cmValue cmMakefile::GetProperty(const std::string& prop, bool chain) const
 {
   return this->StateSnapshot.GetDirectory().GetProperty(prop, chain);
 }
@@ -4052,7 +4053,7 @@ void cmMakefile::GetTests(const std::string& config,
 void cmMakefile::AddCMakeDependFilesFromUser()
 {
   std::vector<std::string> deps;
-  if (cmProp deps_str = this->GetProperty("CMAKE_CONFIGURE_DEPENDS")) {
+  if (cmValue deps_str = this->GetProperty("CMAKE_CONFIGURE_DEPENDS")) {
     cmExpandList(*deps_str, deps);
   }
   for (std::string const& dep : deps) {
@@ -4341,7 +4342,7 @@ static std::string const nMatchesVariable = "CMAKE_MATCH_COUNT";
 
 void cmMakefile::ClearMatches()
 {
-  cmProp nMatchesStr = this->GetDefinition(nMatchesVariable);
+  cmValue nMatchesStr = this->GetDefinition(nMatchesVariable);
   if (!nMatchesStr) {
     return;
   }
@@ -4394,7 +4395,7 @@ cmPolicies::PolicyStatus cmMakefile::GetPolicyStatus(cmPolicies::PolicyID id,
 bool cmMakefile::PolicyOptionalWarningEnabled(std::string const& var) const
 {
   // Check for an explicit CMAKE_POLICY_WARNING_CMP<NNNN> setting.
-  if (cmProp val = this->GetDefinition(var)) {
+  if (cmValue val = this->GetDefinition(var)) {
     return cmIsOn(val);
   }
   // Enable optional policy warnings with --debug-output, --trace,
@@ -4426,13 +4427,12 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
     return false;
   }
 
-  // Deprecate old policies, especially those that require a lot
-  // of code to maintain the old behavior.
-  if (status == cmPolicies::OLD && id <= cmPolicies::CMP0081 &&
+  // Deprecate old policies.
+  if (status == cmPolicies::OLD && id <= cmPolicies::CMP0088 &&
       !(this->GetCMakeInstance()->GetIsInTryCompile() &&
         (
           // Policies set by cmCoreTryCompile::TryCompileCode.
-          id == cmPolicies::CMP0065))) {
+          id == cmPolicies::CMP0065 || id == cmPolicies::CMP0083))) {
     this->IssueMessage(MessageType::DEPRECATION_WARNING,
                        cmPolicies::GetPolicyDeprecatedWarning(id));
   }
@@ -4511,7 +4511,8 @@ bool cmMakefile::IgnoreErrorsCMP0061() const
   bool ignoreErrors = true;
   switch (this->GetPolicyStatus(cmPolicies::CMP0061)) {
     case cmPolicies::WARN:
-    // No warning for this policy!
+      // No warning for this policy!
+      CM_FALLTHROUGH;
     case cmPolicies::OLD:
       break;
     case cmPolicies::REQUIRED_IF_USED:

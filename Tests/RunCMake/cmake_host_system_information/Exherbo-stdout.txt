@@ -1,0 +1,9 @@
+-- TEST1_ANSI_COLOR=`0;32`
+-- TEST1_BUG_REPORT_URL=`https://bugs.exherbo.org/`
+-- TEST1_HOME_URL=`https://www.exherbo.org/`
+-- TEST1_ID=`exherbo`
+-- TEST1_NAME=`Exherbo`
+-- TEST1_PRETTY_NAME=`Exherbo Linux`
+-- TEST1_SUPPORT_URL=`irc://irc.freenode.net/#exherbo`
+-- TEST2_ID=`exherbo`
+-- TEST2_VERSION=``

@@ -11,13 +11,12 @@
 #include "cmGeneratorTarget.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
-#include "cmProperty.h"
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
-#include "cmStringAlgorithms.h"
-
-class cmake;
+#include "cmSystemTools.h"
+#include "cmValue.h"
+#include "cmake.h"
 
 cmGlobalCommonGenerator::cmGlobalCommonGenerator(cmake* cm)
   : cmGlobalGenerator(cm)
@@ -48,7 +47,7 @@ cmGlobalCommonGenerator::ComputeDirectoryTargets() const
       DirectoryTarget::Target t;
       t.GT = gt.get();
       const std::string EXCLUDE_FROM_ALL("EXCLUDE_FROM_ALL");
-      if (cmProp exclude = gt->GetProperty(EXCLUDE_FROM_ALL)) {
+      if (cmValue exclude = gt->GetProperty(EXCLUDE_FROM_ALL)) {
         for (const std::string& config : configs) {
           cmGeneratorExpressionInterpreter genexInterpreter(lg.get(), config,
                                                             gt.get());
@@ -94,4 +93,34 @@ bool cmGlobalCommonGenerator::IsExcludedFromAllInConfig(
     return cm::contains(t.ExcludedFromAllInConfigs, config);
   }
   return !t.ExcludedFromAllInConfigs.empty();
+}
+
+std::string cmGlobalCommonGenerator::GetEditCacheCommand() const
+{
+  // If generating for an extra IDE, the edit_cache target cannot
+  // launch a terminal-interactive tool, so always use cmake-gui.
+  if (!this->GetExtraGeneratorName().empty()) {
+    return cmSystemTools::GetCMakeGUICommand();
+  }
+
+  // Use an internal cache entry to track the latest dialog used
+  // to edit the cache, and use that for the edit_cache target.
+  cmake* cm = this->GetCMakeInstance();
+  std::string editCacheCommand = cm->GetCMakeEditCommand();
+  if (!cm->GetCacheDefinition("CMAKE_EDIT_COMMAND") ||
+      !editCacheCommand.empty()) {
+    if (this->SupportsDirectConsole() && editCacheCommand.empty()) {
+      editCacheCommand = cmSystemTools::GetCMakeCursesCommand();
+    }
+    if (editCacheCommand.empty()) {
+      editCacheCommand = cmSystemTools::GetCMakeGUICommand();
+    }
+    if (!editCacheCommand.empty()) {
+      cm->AddCacheEntry("CMAKE_EDIT_COMMAND", editCacheCommand,
+                        "Path to cache edit program executable.",
+                        cmStateEnums::INTERNAL);
+    }
+  }
+  cmValue edit_cmd = cm->GetCacheDefinition("CMAKE_EDIT_COMMAND");
+  return edit_cmd ? *edit_cmd : std::string();
 }

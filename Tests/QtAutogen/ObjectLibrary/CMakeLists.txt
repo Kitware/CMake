@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.16)
 project(ObjectLibrary)
 include("../AutogenCoreTest.cmake")
 
@@ -11,7 +11,7 @@ add_subdirectory(a)
 # Object library b defined locally
 include_directories(b)
 add_library(b OBJECT b/classb.cpp)
-target_compile_features(b PRIVATE ${QT_COMPILE_FEATURES})
+target_link_libraries(b PRIVATE ${QT_LIBRARIES})
 
 # Executable with OBJECT library generator expressions
 add_executable(someProgram main.cpp $<TARGET_OBJECTS:a> $<TARGET_OBJECTS:b>)

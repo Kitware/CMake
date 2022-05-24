@@ -2,7 +2,7 @@ include(Platform/Windows-Intel)
 set(_COMPILE_CXX " /TP")
 __windows_compiler_intel(CXX)
 
-set(CMAKE_DEPFILE_FLAGS_CXX "-QMMD -QMT <DEP_TARGET> -QMF <DEP_FILE>")
+set(CMAKE_DEPFILE_FLAGS_CXX "-QMD -QMT <DEP_TARGET> -QMF <DEP_FILE>")
 set(CMAKE_CXX_DEPFILE_FORMAT gcc)
 
 if(CMAKE_GENERATOR MATCHES "^Ninja")

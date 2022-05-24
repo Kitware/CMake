@@ -197,6 +197,19 @@ void cmFortranParser_RuleUse(cmFortranParser* parser, const char* module_name)
   parser->Info.Requires.insert(parser->ModName(mod_name));
 }
 
+void cmFortranParser_RuleUseIntrinsic(cmFortranParser* parser,
+                                      const char* module_name)
+{
+  if (parser->InPPFalseBranch) {
+    return;
+  }
+
+  // syntax:   "use, intrinsic:: module_name"
+  // requires: "module_name.mod"
+  std::string const& mod_name = cmSystemTools::LowerCase(module_name);
+  parser->Info.Intrinsics.insert(parser->ModName(mod_name));
+}
+
 void cmFortranParser_RuleLineDirective(cmFortranParser* parser,
                                        const char* filename)
 {

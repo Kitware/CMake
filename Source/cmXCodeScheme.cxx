@@ -204,7 +204,7 @@ void cmXCodeScheme::WriteLaunchAction(cmXMLWriter& xout,
 
   // Info tab begin
 
-  if (cmProp exe =
+  if (cmValue exe =
         this->Target->GetTarget()->GetProperty("XCODE_SCHEME_EXECUTABLE")) {
 
     xout.StartElement("PathRunnable");
@@ -220,7 +220,7 @@ void cmXCodeScheme::WriteLaunchAction(cmXMLWriter& xout,
 
   // Arguments tab begin
 
-  if (cmProp argList =
+  if (cmValue argList =
         this->Target->GetTarget()->GetProperty("XCODE_SCHEME_ARGUMENTS")) {
     std::vector<std::string> arguments = cmExpandedList(*argList);
     if (!arguments.empty()) {
@@ -240,7 +240,7 @@ void cmXCodeScheme::WriteLaunchAction(cmXMLWriter& xout,
     }
   }
 
-  if (cmProp envList =
+  if (cmValue envList =
         this->Target->GetTarget()->GetProperty("XCODE_SCHEME_ENVIRONMENT")) {
     std::vector<std::string> envs = cmExpandedList(*envList);
     if (!envs.empty()) {
@@ -323,7 +323,7 @@ bool cmXCodeScheme::WriteLaunchActionBooleanAttribute(
   cmXMLWriter& xout, const std::string& attrName, const std::string& varName,
   bool defaultValue)
 {
-  cmProp property = Target->GetTarget()->GetProperty(varName);
+  cmValue property = Target->GetTarget()->GetProperty(varName);
   bool isOn = (!property && defaultValue) || cmIsOn(property);
 
   if (isOn) {

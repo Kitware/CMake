@@ -38,6 +38,7 @@ set(targets
   linux-C-XL-16.1.0.0 linux-CXX-XL-16.1.0.0
   linux-CUDA-NVIDIA-10.1.168-CLANG linux-CUDA-NVIDIA-10.1.168-XLClang-v-empty
     linux-CUDA-NVIDIA-9.2.148-GCC
+  linux-custom_clang-C-Clang-13.0.0 linux-custom_clang-CXX-Clang-13.0.0
   mingw.org-C-GNU-4.9.3 mingw.org-CXX-GNU-4.9.3
   netbsd-C-GNU-4.8.5 netbsd-CXX-GNU-4.8.5
     netbsd_nostdinc-C-GNU-4.8.5 netbsd_nostdinc-CXX-GNU-4.8.5

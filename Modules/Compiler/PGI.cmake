@@ -26,7 +26,7 @@ macro(__compiler_pgi lang)
   endif()
 
   set(CMAKE_${lang}_LINKER_WRAPPER_FLAG "-Wl,")
-  set(CMAKE_${lang}_LINKER_WRAPPER_FLAG ",")
+  set(CMAKE_${lang}_LINKER_WRAPPER_FLAG_SEP ",")
 
   set(_CMAKE_${lang}_IPO_SUPPORTED_BY_CMAKE YES)
   if(NOT CMAKE_SYSTEM_PROCESSOR STREQUAL ppc64le AND (NOT CMAKE_HOST_WIN32 OR CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 16.3))

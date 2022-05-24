@@ -25,11 +25,11 @@
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageMetadata.h"
-#include "cmProperty.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 #include "cmake.h"
 #include "cmcmd.h"
 
@@ -161,11 +161,11 @@ void cmakemainMessageCallback(const std::string& m,
   // cannot use it to print messages.  Another implementation will
   // be needed to print colored messages on Windows.
   static_cast<void>(md);
-  std::cerr << m << cmakemainGetStack(cm) << "\n";
+  std::cerr << m << cmakemainGetStack(cm) << '\n' << std::flush;
 #else
   cmsysTerminal_cfprintf(md.desiredColor, stderr, "%s", m.c_str());
   fflush(stderr); // stderr is buffered in some cases.
-  std::cerr << cmakemainGetStack(cm) << "\n";
+  std::cerr << cmakemainGetStack(cm) << '\n' << std::flush;
 #endif
 }
 
@@ -375,11 +375,11 @@ int do_cmake(int ac, char const* const* av)
       cmStateEnums::CacheEntryType t = cm.GetState()->GetCacheEntryType(k);
       if (t != cmStateEnums::INTERNAL && t != cmStateEnums::STATIC &&
           t != cmStateEnums::UNINITIALIZED) {
-        cmProp advancedProp =
+        cmValue advancedProp =
           cm.GetState()->GetCacheEntryProperty(k, "ADVANCED");
         if (list_all_cached || !advancedProp) {
           if (list_help) {
-            cmProp help =
+            cmValue help =
               cm.GetState()->GetCacheEntryProperty(k, "HELPSTRING");
             std::cout << "// " << (help ? *help : "") << std::endl;
           }

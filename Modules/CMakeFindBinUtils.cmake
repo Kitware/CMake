@@ -82,10 +82,11 @@ if(("x${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_SIMULATE_ID}" STREQUAL "xMSVC" AND
   if("x${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ID}" STREQUAL "xClang")
     set(_CMAKE_NM_NAMES "llvm-nm" "nm")
     list(PREPEND _CMAKE_AR_NAMES "llvm-lib")
-    list(PREPEND _CMAKE_MT_NAMES "llvm-mt")
+    # llvm-mt does not support all flags we need in vs_link_exe
+    # list(PREPEND _CMAKE_MT_NAMES "llvm-mt")
     list(PREPEND _CMAKE_LINKER_NAMES "lld-link")
     list(APPEND _CMAKE_TOOL_VARS NM)
-  elseif("x${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ID}" MATCHES "^xIntel")
+  elseif("x${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ID}" STREQUAL "xIntel")
     list(PREPEND _CMAKE_AR_NAMES "xilib")
     list(PREPEND _CMAKE_LINKER_NAMES "xilink")
   endif()
@@ -117,7 +118,7 @@ elseif("x${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ID}" MATCHES "^xIAR$")
   endfunction()
 
   __resolve_IAR_hints("${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER}" _CMAKE_TOOLCHAIN_LOCATION)
-  set(_CMAKE_IAR_ITOOLS "ARM" "RX" "RH850" "RL78" "RISCV" "STM8")
+  set(_CMAKE_IAR_ITOOLS "ARM" "RX" "RH850" "RL78" "RISCV" "RISC-V" "STM8")
   set(_CMAKE_IAR_XTOOLS "AVR" "MSP430" "V850" "8051")
 
   if("${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ARCHITECTURE_ID}" IN_LIST _CMAKE_IAR_ITOOLS)
@@ -172,7 +173,15 @@ else()
     else()
       list(PREPEND _CMAKE_LINKER_NAMES "ld.lld")
     endif()
-    list(PREPEND _CMAKE_AR_NAMES "llvm-ar")
+    if(APPLE)
+      # llvm-ar does not generate a symbol table that the Apple ld64 linker accepts.
+      # FIXME(#23333): We still need to consider 'llvm-ar' as a fallback because
+      # the 'APPLE' definition may be based on the host in this context, and a
+      # cross-compiling toolchain may not have 'ar'.
+      list(APPEND _CMAKE_AR_NAMES "llvm-ar")
+    else()
+      list(PREPEND _CMAKE_AR_NAMES "llvm-ar")
+    endif()
     list(PREPEND _CMAKE_RANLIB_NAMES "llvm-ranlib")
     if("${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_VERSION}" VERSION_GREATER_EQUAL 11)
       # llvm-strip versions prior to 11 require additional flags we do not yet add.

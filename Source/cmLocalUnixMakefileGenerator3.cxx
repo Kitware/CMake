@@ -33,7 +33,6 @@
 #include "cmMakefile.h"
 #include "cmMakefileTargetGenerator.h"
 #include "cmOutputConverter.h"
-#include "cmProperty.h"
 #include "cmRange.h"
 #include "cmRulePlaceholderExpander.h"
 #include "cmSourceFile.h"
@@ -43,6 +42,7 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTargetDepend.h"
+#include "cmValue.h"
 #include "cmVersion.h"
 #include "cmake.h"
 
@@ -570,7 +570,7 @@ void cmLocalUnixMakefileGenerator3::WriteMakeRule(
 
   // Mark the rule as symbolic if requested.
   if (symbolic) {
-    if (cmProp sym =
+    if (cmValue sym =
           this->Makefile->GetDefinition("CMAKE_MAKE_SYMBOLIC_RULE")) {
       os << tgt << space << ": " << *sym << "\n";
     }
@@ -884,7 +884,7 @@ void cmLocalUnixMakefileGenerator3::AppendRuleDepend(
 {
   // Add a dependency on the rule file itself unless an option to skip
   // it is specifically enabled by the user or project.
-  cmProp nodep = this->Makefile->GetDefinition("CMAKE_SKIP_RULE_DEPENDENCY");
+  cmValue nodep = this->Makefile->GetDefinition("CMAKE_SKIP_RULE_DEPENDENCY");
   if (cmIsOff(nodep)) {
     depends.emplace_back(ruleFileName);
   }
@@ -999,7 +999,7 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
 
       std::string launcher;
       // Short-circuit if there is no launcher.
-      cmProp val = this->GetRuleLauncher(target, "RULE_LAUNCH_CUSTOM");
+      cmValue val = this->GetRuleLauncher(target, "RULE_LAUNCH_CUSTOM");
       if (cmNonempty(val)) {
         // Expand rule variables referenced in the given launcher command.
         cmRulePlaceholderExpander::RuleVariables vars;
@@ -1125,7 +1125,7 @@ void cmLocalUnixMakefileGenerator3::AppendDirectoryCleanCommand(
 {
   std::vector<std::string> cleanFiles;
   // Look for additional files registered for cleaning in this directory.
-  if (cmProp prop_value =
+  if (cmValue prop_value =
         this->Makefile->GetProperty("ADDITIONAL_CLEAN_FILES")) {
     cmExpandList(cmGeneratorExpression::Evaluate(
                    *prop_value, this,
@@ -1501,18 +1501,18 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(
   // Lookup useful directory information.
   if (haveDirectoryInfo) {
     // Test whether we need to force Unix paths.
-    if (cmProp force = mf->GetDefinition("CMAKE_FORCE_UNIX_PATHS")) {
+    if (cmValue force = mf->GetDefinition("CMAKE_FORCE_UNIX_PATHS")) {
       if (!cmIsOff(force)) {
         cmSystemTools::SetForceUnixPaths(true);
       }
     }
 
     // Setup relative path top directories.
-    if (cmProp relativePathTopSource =
+    if (cmValue relativePathTopSource =
           mf->GetDefinition("CMAKE_RELATIVE_PATH_TOP_SOURCE")) {
       this->SetRelativePathTopSource(*relativePathTopSource);
     }
-    if (cmProp relativePathTopBinary =
+    if (cmValue relativePathTopBinary =
           mf->GetDefinition("CMAKE_RELATIVE_PATH_TOP_BINARY")) {
       this->SetRelativePathTopBinary(*relativePathTopBinary);
     }
@@ -1582,7 +1582,7 @@ void cmLocalUnixMakefileGenerator3::CheckMultipleOutputs(bool verbose)
   cmMakefile* mf = this->Makefile;
 
   // Get the string listing the multiple output pairs.
-  cmProp pairs_string = mf->GetDefinition("CMAKE_MULTIPLE_OUTPUT_PAIRS");
+  cmValue pairs_string = mf->GetDefinition("CMAKE_MULTIPLE_OUTPUT_PAIRS");
   if (!pairs_string) {
     return;
   }
@@ -1654,7 +1654,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalAllRules(
       std::vector<std::string> commands;
       std::vector<std::string> depends;
 
-      cmProp p = gt->GetProperty("EchoString");
+      cmValue p = gt->GetProperty("EchoString");
       const char* text = p ? p->c_str() : "Running external command ...";
       depends.reserve(gt->GetUtilities().size());
       for (BT<std::pair<std::string, bool>> const& u : gt->GetUtilities()) {
@@ -1754,7 +1754,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalAllRules(
   recursiveTarget = cmStrCat(this->GetCurrentBinaryDirectory(), "/preinstall");
   commands.clear();
   depends.clear();
-  cmProp noall =
+  cmValue noall =
     this->Makefile->GetDefinition("CMAKE_SKIP_INSTALL_ALL_DEPENDENCY");
   if (cmIsOff(noall)) {
     // Drive the build before installing.
@@ -1804,7 +1804,7 @@ void cmLocalUnixMakefileGenerator3::ClearDependencies(cmMakefile* mf,
                                                       bool verbose)
 {
   // Get the list of target files to check
-  cmProp infoDef = mf->GetDefinition("CMAKE_DEPEND_INFO_FILES");
+  cmValue infoDef = mf->GetDefinition("CMAKE_DEPEND_INFO_FILES");
   if (!infoDef) {
     return;
   }
@@ -1903,7 +1903,7 @@ void cmLocalUnixMakefileGenerator3::WriteDependLanguageInfo(
 
       // Tell the dependency scanner what compiler is used.
       std::string cidVar = cmStrCat("CMAKE_", lang, "_COMPILER_ID");
-      cmProp cid = this->Makefile->GetDefinition(cidVar);
+      cmValue cid = this->Makefile->GetDefinition(cidVar);
       if (cmNonempty(cid)) {
         cmakefileStream << "set(CMAKE_" << lang << "_COMPILER_ID \"" << *cid
                         << "\")\n";
@@ -1960,11 +1960,11 @@ void cmLocalUnixMakefileGenerator3::WriteDependLanguageInfo(
     // Store include transform rule properties.  Write the directory
     // rules first because they may be overridden by later target rules.
     std::vector<std::string> transformRules;
-    if (cmProp xform =
+    if (cmValue xform =
           this->Makefile->GetProperty("IMPLICIT_DEPENDS_INCLUDE_TRANSFORM")) {
       cmExpandList(*xform, transformRules);
     }
-    if (cmProp xform =
+    if (cmValue xform =
           target->GetProperty("IMPLICIT_DEPENDS_INCLUDE_TRANSFORM")) {
       cmExpandList(*xform, transformRules);
     }

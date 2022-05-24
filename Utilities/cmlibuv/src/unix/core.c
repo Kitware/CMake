@@ -72,14 +72,17 @@ extern char** environ;
 # include <sys/sysctl.h>
 # include <sys/filio.h>
 # include <sys/wait.h>
-# include <sys/param.h>
-# include <sys/cpuset.h>
 # if defined(__FreeBSD__)
 #  define uv__accept4 accept4
 # endif
 # if defined(__NetBSD__)
 #  define uv__accept4(a, b, c, d) paccept((a), (b), (c), NULL, (d))
 # endif
+#endif
+
+#if defined(__FreeBSD__)
+# include <sys/param.h>
+# include <sys/cpuset.h>
 #endif
 
 #if defined(__MVS__)

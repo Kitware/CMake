@@ -118,13 +118,12 @@ as well as any dependents (that may include headers from ``mylib``).
 Availability of Compiler Extensions
 -----------------------------------
 
-Because the :prop_tgt:`CXX_EXTENSIONS` target property is ``ON`` by default,
-CMake uses extended variants of language dialects by default, such as
-``-std=gnu++11`` instead of ``-std=c++11``.  That target property may be
-set to ``OFF`` to use the non-extended variant of the dialect flag.  Note
-that because most compilers enable extensions by default, this could
-expose cross-platform bugs in user code or in the headers of third-party
-dependencies.
+The :prop_tgt:`<LANG>_EXTENSIONS` target property defaults to the compiler's
+default (see :variable:`CMAKE_<LANG>_EXTENSIONS_DEFAULT`). Note that because
+most compilers enable extensions by default, this may expose portability bugs
+in user code or in the headers of third-party dependencies.
+
+:prop_tgt:`<LANG>_EXTENSIONS` used to default to ``ON``. See :policy:`CMP0128`.
 
 Optional Compile Features
 =========================

@@ -2,17 +2,22 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestRunTest.h"
 
+#include <algorithm>
 #include <chrono>
 #include <cstddef> // IWYU pragma: keep
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
+#include <functional>
 #include <iomanip>
 #include <ratio>
 #include <sstream>
 #include <utility>
 
 #include <cm/memory>
+#include <cm/optional>
+#include <cm/string_view>
+#include <cmext/string_view>
 
 #include "cmsys/RegularExpression.hxx"
 
@@ -44,7 +49,9 @@ void cmCTestRunTest::CheckOutput(std::string const& line)
   // Check for special CTest XML tags in this line of output.
   // If any are found, this line is excluded from ProcessOutput.
   if (!line.empty() && line.find("<CTest") != std::string::npos) {
+    bool ctest_tag_found = false;
     if (this->TestHandler->CustomCompletionStatusRegex.find(line)) {
+      ctest_tag_found = true;
       this->TestResult.CustomCompletionStatus =
         this->TestHandler->CustomCompletionStatusRegex.match(1);
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
@@ -52,6 +59,20 @@ void cmCTestRunTest::CheckOutput(std::string const& line)
                                   << "Test Details changed to '"
                                   << this->TestResult.CustomCompletionStatus
                                   << "'" << std::endl);
+    } else if (this->TestHandler->CustomLabelRegex.find(line)) {
+      ctest_tag_found = true;
+      auto label = this->TestHandler->CustomLabelRegex.match(1);
+      auto& labels = this->TestProperties->Labels;
+      if (std::find(labels.begin(), labels.end(), label) == labels.end()) {
+        labels.push_back(label);
+        std::sort(labels.begin(), labels.end());
+        cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                   this->GetIndex()
+                     << ": "
+                     << "Test Label added: '" << label << "'" << std::endl);
+      }
+    }
+    if (ctest_tag_found) {
       return;
     }
   }
@@ -245,7 +266,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
     *this->TestHandler->LogFile << "Test time = " << buf << std::endl;
   }
 
-  this->DartProcessing();
+  this->ParseOutputForMeasurements();
 
   // if this is doing MemCheck then all the output needs to be put into
   // Output since that is what is parsed by cmCTestMemCheckHandler
@@ -623,6 +644,7 @@ bool cmCTestRunTest::StartTest(size_t completed, size_t total)
 
   return this->ForkProcess(timeout, this->TestProperties->ExplicitTimeout,
                            &this->TestProperties->Environment,
+                           &this->TestProperties->EnvironmentModification,
                            &this->TestProperties->Affinity);
 }
 
@@ -679,28 +701,45 @@ void cmCTestRunTest::ComputeArguments()
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                this->Index << ":  " << env << std::endl);
   }
+  if (!this->TestProperties->EnvironmentModification.empty()) {
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+               this->Index << ": "
+                           << "Environment variable modifications: "
+                           << std::endl);
+  }
+  for (std::string const& envmod :
+       this->TestProperties->EnvironmentModification) {
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+               this->Index << ":  " << envmod << std::endl);
+  }
 }
 
-void cmCTestRunTest::DartProcessing()
+void cmCTestRunTest::ParseOutputForMeasurements()
 {
   if (!this->ProcessOutput.empty() &&
-      this->ProcessOutput.find("<DartMeasurement") != std::string::npos) {
-    if (this->TestHandler->DartStuff.find(this->ProcessOutput)) {
-      this->TestResult.DartString = this->TestHandler->DartStuff.match(1);
+      (this->ProcessOutput.find("<DartMeasurement") != std::string::npos ||
+       this->ProcessOutput.find("<CTestMeasurement") != std::string::npos)) {
+    if (this->TestHandler->AllTestMeasurementsRegex.find(
+          this->ProcessOutput)) {
+      this->TestResult.TestMeasurementsOutput =
+        this->TestHandler->AllTestMeasurementsRegex.match(1);
       // keep searching and replacing until none are left
-      while (this->TestHandler->DartStuff1.find(this->ProcessOutput)) {
+      while (this->TestHandler->SingleTestMeasurementRegex.find(
+        this->ProcessOutput)) {
         // replace the exact match for the string
         cmSystemTools::ReplaceString(
-          this->ProcessOutput, this->TestHandler->DartStuff1.match(1).c_str(),
-          "");
+          this->ProcessOutput,
+          this->TestHandler->SingleTestMeasurementRegex.match(1).c_str(), "");
       }
     }
   }
 }
 
-bool cmCTestRunTest::ForkProcess(cmDuration testTimeOut, bool explicitTimeout,
-                                 std::vector<std::string>* environment,
-                                 std::vector<size_t>* affinity)
+bool cmCTestRunTest::ForkProcess(
+  cmDuration testTimeOut, bool explicitTimeout,
+  std::vector<std::string>* environment,
+  std::vector<std::string>* environment_modification,
+  std::vector<size_t>* affinity)
 {
   this->TestProcess->SetId(this->Index);
   this->TestProcess->SetWorkingDirectory(this->TestProperties->Directory);
@@ -743,9 +782,142 @@ bool cmCTestRunTest::ForkProcess(cmDuration testTimeOut, bool explicitTimeout,
 
   std::ostringstream envMeasurement;
   if (environment && !environment->empty()) {
+    // Environment modification works on the assumption that the environment is
+    // actually modified here. If another strategy is used, there will need to
+    // be updates below in `apply_diff`.
     cmSystemTools::AppendEnv(*environment);
     for (auto const& var : *environment) {
       envMeasurement << var << std::endl;
+    }
+  }
+
+  if (environment_modification && !environment_modification->empty()) {
+    std::map<std::string, cm::optional<std::string>> env_application;
+
+#ifdef _WIN32
+    char path_sep = ';';
+#else
+    char path_sep = ':';
+#endif
+
+    auto apply_diff =
+      [&env_application](const std::string& name,
+                         std::function<void(std::string&)> const& apply) {
+        cm::optional<std::string> old_value = env_application[name];
+        std::string output;
+        if (old_value) {
+          output = *old_value;
+        } else {
+          // This only works because the environment is actually modified above
+          // (`AppendEnv`). If CTest ever just creates an environment block
+          // directly, that block will need to be queried for the subprocess'
+          // value instead.
+          const char* curval = cmSystemTools::GetEnv(name);
+          if (curval) {
+            output = curval;
+          }
+        }
+        apply(output);
+        env_application[name] = output;
+      };
+
+    bool err_occurred = false;
+
+    for (auto const& envmod : *environment_modification) {
+      // Split on `=`
+      auto const eq_loc = envmod.find_first_of('=');
+      if (eq_loc == std::string::npos) {
+        cmCTestLog(this->CTest, ERROR_MESSAGE,
+                   "Error: Missing `=` after the variable name in: "
+                     << envmod << std::endl);
+        err_occurred = true;
+        continue;
+      }
+      auto const name = envmod.substr(0, eq_loc);
+
+      // Split value on `:`
+      auto const op_value_start = eq_loc + 1;
+      auto const colon_loc = envmod.find_first_of(':', op_value_start);
+      if (colon_loc == std::string::npos) {
+        cmCTestLog(this->CTest, ERROR_MESSAGE,
+                   "Error: Missing `:` after the operation in: " << envmod
+                                                                 << std::endl);
+        err_occurred = true;
+        continue;
+      }
+      auto const op =
+        envmod.substr(op_value_start, colon_loc - op_value_start);
+
+      auto const value_start = colon_loc + 1;
+      auto const value = envmod.substr(value_start);
+
+      // Determine what to do with the operation.
+      if (op == "reset"_s) {
+        auto entry = env_application.find(name);
+        if (entry != env_application.end()) {
+          env_application.erase(entry);
+        }
+      } else if (op == "set"_s) {
+        env_application[name] = value;
+      } else if (op == "unset"_s) {
+        env_application[name] = {};
+      } else if (op == "string_append"_s) {
+        apply_diff(name, [&value](std::string& output) { output += value; });
+      } else if (op == "string_prepend"_s) {
+        apply_diff(name,
+                   [&value](std::string& output) { output.insert(0, value); });
+      } else if (op == "path_list_append"_s) {
+        apply_diff(name, [&value, path_sep](std::string& output) {
+          if (!output.empty()) {
+            output += path_sep;
+          }
+          output += value;
+        });
+      } else if (op == "path_list_prepend"_s) {
+        apply_diff(name, [&value, path_sep](std::string& output) {
+          if (!output.empty()) {
+            output.insert(output.begin(), path_sep);
+          }
+          output.insert(0, value);
+        });
+      } else if (op == "cmake_list_append"_s) {
+        apply_diff(name, [&value](std::string& output) {
+          if (!output.empty()) {
+            output += ';';
+          }
+          output += value;
+        });
+      } else if (op == "cmake_list_prepend"_s) {
+        apply_diff(name, [&value](std::string& output) {
+          if (!output.empty()) {
+            output.insert(output.begin(), ';');
+          }
+          output.insert(0, value);
+        });
+      } else {
+        cmCTestLog(this->CTest, ERROR_MESSAGE,
+                   "Error: Unrecognized environment manipulation argument: "
+                     << op << std::endl);
+        err_occurred = true;
+        continue;
+      }
+    }
+
+    if (err_occurred) {
+      return false;
+    }
+
+    for (auto const& env_apply : env_application) {
+      if (env_apply.second) {
+        auto const env_update =
+          cmStrCat(env_apply.first, '=', *env_apply.second);
+        cmSystemTools::PutEnv(env_update);
+        envMeasurement << env_update << std::endl;
+      } else {
+        cmSystemTools::UnsetEnv(env_apply.first.c_str());
+        // Signify that this variable is being actively unset
+        envMeasurement << "#" << env_apply.first << "=" << std::endl;
+      }
     }
   }
 

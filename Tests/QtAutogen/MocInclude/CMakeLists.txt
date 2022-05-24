@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.16)
 project(MocInclude)
 get_filename_component(CS_REAL ${CMAKE_CURRENT_SOURCE_DIR} REALPATH)
 include("${CS_REAL}/../AutogenCoreTest.cmake")

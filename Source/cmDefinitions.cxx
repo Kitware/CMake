@@ -34,11 +34,11 @@ cmDefinitions::Def const& cmDefinitions::GetInternal(const std::string& key,
   return begin->Map.emplace(key, def).first->second;
 }
 
-const std::string* cmDefinitions::Get(const std::string& key, StackIter begin,
-                                      StackIter end)
+cmValue cmDefinitions::Get(const std::string& key, StackIter begin,
+                           StackIter end)
 {
   Def const& def = cmDefinitions::GetInternal(key, begin, end, false);
-  return def.Value ? def.Value.str_if_stable() : nullptr;
+  return def.Value ? cmValue(def.Value.str_if_stable()) : nullptr;
 }
 
 void cmDefinitions::Raise(const std::string& key, StackIter begin,

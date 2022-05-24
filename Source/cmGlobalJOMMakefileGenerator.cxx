@@ -39,8 +39,9 @@ void cmGlobalJOMMakefileGenerator::GetDocumentation(
   entry.Brief = "Generates JOM makefiles.";
 }
 
-void cmGlobalJOMMakefileGenerator::PrintCompilerAdvice(
-  std::ostream& os, std::string const& lang, const char* envVar) const
+void cmGlobalJOMMakefileGenerator::PrintCompilerAdvice(std::ostream& os,
+                                                       std::string const& lang,
+                                                       cmValue envVar) const
 {
   if (lang == "CXX" || lang == "C") {
     /* clang-format off */

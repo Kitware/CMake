@@ -1,0 +1,58 @@
+CMAKE_LANG=CXX
+CMAKE_LINKER=/opt/llvm-13/bin/ld.lld
+CMAKE_CXX_COMPILER_ABI=ELF
+CMAKE_CXX_COMPILER_AR=/opt/llvm-13/bin/llvm-ar
+CMAKE_CXX_COMPILER_ARCHITECTURE_ID=
+CMAKE_CXX_COMPILER_EXTERNAL_TOOLCHAIN=
+CMAKE_CXX_COMPILER_ID=Clang
+CMAKE_CXX_COMPILER_LAUNCHER=
+CMAKE_CXX_COMPILER_LOADED=1
+CMAKE_CXX_COMPILER_RANLIB=/opt/llvm-13/bin/llvm-ranlib
+CMAKE_CXX_COMPILER_TARGET=
+CMAKE_CXX_COMPILER_VERSION=13.0.0
+CMAKE_CXX_COMPILER_VERSION_INTERAL=
+Change Dir: /tmp/cmake/Tests/RunCMake/ParseImplicitData/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_5372b/fast && /usr/bin/make  -f CMakeFiles/cmTC_5372b.dir/build.make CMakeFiles/cmTC_5372b.dir/build
+make[1]: Entering directory '/tmp/cmake/Tests/RunCMake/ParseImplicitData/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_5372b.dir/CMakeCXXCompilerABI.cpp.o
+/opt/llvm-13/bin/clang++   -v -MD -MT CMakeFiles/cmTC_5372b.dir/CMakeCXXCompilerABI.cpp.o -MF CMakeFiles/cmTC_5372b.dir/CMakeCXXCompilerABI.cpp.o.d -o CMakeFiles/cmTC_5372b.dir/CMakeCXXCompilerABI.cpp.o -c /opt/cmake-3.21.3/share/cmake-3.21/Modules/CMakeCXXCompilerABI.cpp
+clang version 13.0.0
+Target: x86_64-pc-linux-gnu
+Thread model: posix
+InstalledDir: /opt/llvm-13/bin
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/9
+Selected GCC installation: /usr/lib/gcc/x86_64-linux-gnu/9
+Candidate multilib: .@m64
+Candidate multilib: 32@m32
+Candidate multilib: x32@mx32
+Selected multilib: .@m64
+ (in-process)
+ "/opt/llvm-13/bin/clang-13" -cc1 -triple x86_64-pc-linux-gnu -emit-obj -mrelax-all --mrelax-relocations -disable-free -main-file-name CMakeCXXCompilerABI.cpp -mrelocation-model static -mframe-pointer=all -fmath-errno -fno-rounding-math -mconstructor-aliases -munwind-tables -target-cpu x86-64 -tune-cpu generic -debugger-tuning=gdb -v -fcoverage-compilation-dir=/tmp/cmake/Tests/RunCMake/ParseImplicitData/build/CMakeFiles/CMakeTmp -resource-dir /opt/llvm-13/lib/clang/13.0.0 -dependency-file CMakeFiles/cmTC_5372b.dir/CMakeCXXCompilerABI.cpp.o.d -MT CMakeFiles/cmTC_5372b.dir/CMakeCXXCompilerABI.cpp.o -sys-header-deps -internal-isystem /opt/llvm-13/bin/../include/x86_64-pc-linux-gnu/c++/v1 -internal-isystem /opt/llvm-13/bin/../include/c++/v1 -internal-isystem /opt/llvm-13/lib/clang/13.0.0/include -internal-isystem /usr/local/include -internal-isystem /usr/lib/gcc/x86_64-linux-gnu/9/../../../../x86_64-linux-gnu/include -internal-externc-isystem /usr/include/x86_64-linux-gnu -internal-externc-isystem /include -internal-externc-isystem /usr/include -fdeprecated-macro -fdebug-compilation-dir=/tmp/cmake/Tests/RunCMake/ParseImplicitData/build/CMakeFiles/CMakeTmp -ferror-limit 19 -fgnuc-version=4.2.1 -fcxx-exceptions -fexceptions -faddrsig -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o CMakeFiles/cmTC_5372b.dir/CMakeCXXCompilerABI.cpp.o -x c++ /opt/cmake-3.21.3/share/cmake-3.21/Modules/CMakeCXXCompilerABI.cpp
+clang -cc1 version 13.0.0 based upon LLVM 13.0.0 default target x86_64-pc-linux-gnu
+ignoring nonexistent directory "/usr/lib/gcc/x86_64-linux-gnu/9/../../../../x86_64-linux-gnu/include"
+ignoring nonexistent directory "/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ /opt/llvm-13/bin/../include/x86_64-pc-linux-gnu/c++/v1
+ /opt/llvm-13/bin/../include/c++/v1
+ /opt/llvm-13/lib/clang/13.0.0/include
+ /usr/local/include
+ /usr/include/x86_64-linux-gnu
+ /usr/include
+End of search list.
+Linking CXX executable cmTC_5372b
+/opt/cmake-3.21.3/bin/cmake -E cmake_link_script CMakeFiles/cmTC_5372b.dir/link.txt --verbose=1
+/opt/llvm-13/bin/clang++  -v -rdynamic CMakeFiles/cmTC_5372b.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_5372b
+clang version 13.0.0
+Target: x86_64-pc-linux-gnu
+Thread model: posix
+InstalledDir: /opt/llvm-13/bin
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/9
+Selected GCC installation: /usr/lib/gcc/x86_64-linux-gnu/9
+Candidate multilib: .@m64
+Candidate multilib: 32@m32
+Candidate multilib: x32@mx32
+Selected multilib: .@m64
+ "/opt/llvm-13/bin/ld.lld" -export-dynamic -z relro --hash-style=gnu --build-id --eh-frame-hdr -m elf_x86_64 -export-dynamic -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_5372b /lib/x86_64-linux-gnu/crt1.o /lib/x86_64-linux-gnu/crti.o /opt/llvm-13/lib/clang/13.0.0/lib/x86_64-pc-linux-gnu/clang_rt.crtbegin.o -L/opt/llvm-13/bin/../lib/x86_64-pc-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/9 -L/usr/lib/gcc/x86_64-linux-gnu/9/../../../../lib64 -L/lib/x86_64-linux-gnu -L/lib/../lib64 -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib64 -L/opt/llvm-13/bin/../lib -L/lib -L/usr/lib CMakeFiles/cmTC_5372b.dir/CMakeCXXCompilerABI.cpp.o -lc++ -lm /opt/llvm-13/lib/clang/13.0.0/lib/x86_64-pc-linux-gnu/libclang_rt.builtins.a -l:libunwind.so -lc /opt/llvm-13/lib/clang/13.0.0/lib/x86_64-pc-linux-gnu/libclang_rt.builtins.a -l:libunwind.so /opt/llvm-13/lib/clang/13.0.0/lib/x86_64-pc-linux-gnu/clang_rt.crtend.o /lib/x86_64-linux-gnu/crtn.o
+make[1]: Leaving directory '/tmp/cmake/Tests/RunCMake/ParseImplicitData/build/CMakeFiles/CMakeTmp'

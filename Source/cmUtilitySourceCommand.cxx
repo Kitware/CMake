@@ -6,11 +6,11 @@
 
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
-#include "cmProperty.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 // cmUtilitySourceCommand
 bool cmUtilitySourceCommand(std::vector<std::string> const& args,
@@ -25,7 +25,7 @@ bool cmUtilitySourceCommand(std::vector<std::string> const& args,
 
   // The first argument is the cache entry name.
   std::string const& cacheEntry = *arg++;
-  cmProp cacheValue = status.GetMakefile().GetDefinition(cacheEntry);
+  cmValue cacheValue = status.GetMakefile().GetDefinition(cacheEntry);
   // If it exists already and appears up to date then we are done.  If
   // the string contains "(IntDir)" but that is not the
   // CMAKE_CFG_INTDIR setting then the value is out of date.
@@ -85,7 +85,7 @@ bool cmUtilitySourceCommand(std::vector<std::string> const& args,
   std::string utilityDirectory =
     status.GetMakefile().GetCurrentBinaryDirectory();
   std::string exePath;
-  if (cmProp d =
+  if (cmValue d =
         status.GetMakefile().GetDefinition("EXECUTABLE_OUTPUT_PATH")) {
     exePath = *d;
   }

@@ -95,6 +95,19 @@ unset(CMAKELISTS_EXTRA_CODE)
 unset(CTEST_EXTRA_CODE)
 
 #-----------------------------------------------------------------------------
+# add output test
+set(CTEST_EXTRA_CODE
+"set(CTEST_MEMORYCHECK_SANITIZER_OPTIONS \"simulate_sanitizer=1\")
+")
+set(CMAKELISTS_EXTRA_CODE
+"add_test(NAME TestSan COMMAND \"\${CMAKE_COMMAND}\"
+-P \"${RunCMake_SOURCE_DIR}/testUndefinedBehaviorSanitizer.cmake\")
+")
+run_mc_test(ExpectedOutputs "" -DMEMCHECK_TYPE=UndefinedBehaviorSanitizer)
+unset(CMAKELISTS_EXTRA_CODE)
+unset(CTEST_EXTRA_CODE)
+
+#-----------------------------------------------------------------------------
 set(CTEST_EXTRA_CODE "string(REPLACE \" \" \"\\\\ \" PRE_POST_COMMAND \"\${CTEST_MEMORYCHECK_COMMAND}\")
 
 set(CTEST_CUSTOM_PRE_MEMCHECK \"\${PRE_POST_COMMAND} pre command\")

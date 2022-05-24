@@ -5,8 +5,8 @@ Specify the default value for the :command:`file(DOWNLOAD)` and
 :command:`file(UPLOAD)` commands' ``TLS_VERIFY`` options.
 If not set, the default is *off*.
 
-This setting is also used by the :module:`ExternalProject` module
-for internal calls to :command:`file(DOWNLOAD)`.
+This variable is also used by the :module:`ExternalProject` and
+:module:`FetchContent` modules for internal calls to :command:`file(DOWNLOAD)`.
 
 TLS verification can help provide confidence that one is connecting
 to the desired server.  When downloading known content, one should

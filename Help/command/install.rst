@@ -30,6 +30,10 @@ are executed in order during installation.
   with those in the parent directory to run in the order declared (see
   policy :policy:`CMP0082`).
 
+.. versionchanged:: 3.22
+  The environment variable :envvar:`CMAKE_INSTALL_MODE` can override the
+  default copying behavior of :command:`install()`.
+
 There are multiple signatures for this command.  Some of them define
 installation options for files and targets.  Options common to
 multiple signatures are covered here but they are valid only for

@@ -12,8 +12,8 @@
 #include "cmCTestTestHandler.h"
 #include "cmDuration.h"
 #include "cmMakefile.h"
-#include "cmProperty.h"
 #include "cmStringAlgorithms.h"
+#include "cmValue.h"
 
 void cmCTestTestCommand::BindArguments()
 {
@@ -40,7 +40,7 @@ void cmCTestTestCommand::BindArguments()
 
 cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
 {
-  cmProp ctestTimeout = this->Makefile->GetDefinition("CTEST_TEST_TIMEOUT");
+  cmValue ctestTimeout = this->Makefile->GetDefinition("CTEST_TEST_TIMEOUT");
 
   cmDuration timeout;
   if (ctestTimeout) {
@@ -54,7 +54,7 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
   }
   this->CTest->SetTimeOut(timeout);
 
-  cmProp resourceSpecFile =
+  cmValue resourceSpecFile =
     this->Makefile->GetDefinition("CTEST_RESOURCE_SPEC_FILE");
   if (this->ResourceSpecFile.empty() && resourceSpecFile) {
     this->ResourceSpecFile = *resourceSpecFile;
@@ -64,13 +64,13 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
   if (!this->Start.empty() || !this->End.empty() || !this->Stride.empty()) {
     handler->SetOption(
       "TestsToRunInformation",
-      cmStrCat(this->Start, ',', this->End, ',', this->Stride).c_str());
+      cmStrCat(this->Start, ',', this->End, ',', this->Stride));
   }
   if (!this->Exclude.empty()) {
-    handler->SetOption("ExcludeRegularExpression", this->Exclude.c_str());
+    handler->SetOption("ExcludeRegularExpression", this->Exclude);
   }
   if (!this->Include.empty()) {
-    handler->SetOption("IncludeRegularExpression", this->Include.c_str());
+    handler->SetOption("IncludeRegularExpression", this->Include);
   }
   if (!this->ExcludeLabel.empty()) {
     handler->AddMultiOption("ExcludeLabelRegularExpression",
@@ -81,30 +81,30 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
   }
   if (!this->ExcludeFixture.empty()) {
     handler->SetOption("ExcludeFixtureRegularExpression",
-                       this->ExcludeFixture.c_str());
+                       this->ExcludeFixture);
   }
   if (!this->ExcludeFixtureSetup.empty()) {
     handler->SetOption("ExcludeFixtureSetupRegularExpression",
-                       this->ExcludeFixtureSetup.c_str());
+                       this->ExcludeFixtureSetup);
   }
   if (!this->ExcludeFixtureCleanup.empty()) {
     handler->SetOption("ExcludeFixtureCleanupRegularExpression",
-                       this->ExcludeFixtureCleanup.c_str());
+                       this->ExcludeFixtureCleanup);
   }
   if (this->StopOnFailure) {
     handler->SetOption("StopOnFailure", "ON");
   }
   if (!this->ParallelLevel.empty()) {
-    handler->SetOption("ParallelLevel", this->ParallelLevel.c_str());
+    handler->SetOption("ParallelLevel", this->ParallelLevel);
   }
   if (!this->Repeat.empty()) {
-    handler->SetOption("Repeat", this->Repeat.c_str());
+    handler->SetOption("Repeat", this->Repeat);
   }
   if (!this->ScheduleRandom.empty()) {
-    handler->SetOption("ScheduleRandom", this->ScheduleRandom.c_str());
+    handler->SetOption("ScheduleRandom", this->ScheduleRandom);
   }
   if (!this->ResourceSpecFile.empty()) {
-    handler->SetOption("ResourceSpecFile", this->ResourceSpecFile.c_str());
+    handler->SetOption("ResourceSpecFile", this->ResourceSpecFile);
   }
   if (!this->StopTime.empty()) {
     this->CTest->SetStopTime(this->StopTime);
@@ -114,7 +114,7 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
   // or CTEST_TEST_LOAD script variable, or ctest --test-load
   // command line argument... in that order.
   unsigned long testLoad;
-  cmProp ctestTestLoad = this->Makefile->GetDefinition("CTEST_TEST_LOAD");
+  cmValue ctestTestLoad = this->Makefile->GetDefinition("CTEST_TEST_LOAD");
   if (!this->TestLoad.empty()) {
     if (!cmStrToULong(this->TestLoad, &testLoad)) {
       testLoad = 0;
@@ -134,7 +134,7 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
   }
   handler->SetTestLoad(testLoad);
 
-  if (cmProp labelsForSubprojects =
+  if (cmValue labelsForSubprojects =
         this->Makefile->GetDefinition("CTEST_LABELS_FOR_SUBPROJECTS")) {
     this->CTest->SetCTestConfiguration("LabelsForSubprojects",
                                        *labelsForSubprojects, this->Quiet);

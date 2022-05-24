@@ -12,11 +12,11 @@
 
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
-#include "cmProperty.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 class cmExecutionStatus;
 
@@ -46,7 +46,7 @@ bool cmFindLibraryCommand::InitialPass(std::vector<std::string> const& argsIn)
 
   // add custom lib<qual> paths instead of using fixed lib32, lib64 or
   // libx32
-  if (cmProp customLib = this->Makefile->GetDefinition(
+  if (cmValue customLib = this->Makefile->GetDefinition(
         "CMAKE_FIND_LIBRARY_CUSTOM_LIB_SUFFIX")) {
     this->AddArchitecturePaths(customLib->c_str());
   }
@@ -247,7 +247,7 @@ struct cmFindLibraryHelper
         cmStrCat(this->PrefixRegexStr, name, this->SuffixRegexStr);
       this->DebugSearches.FailedAt(path, regexName);
     }
-  };
+  }
 
   void DebugLibraryFound(std::string const& name, std::string const& path)
   {
@@ -256,9 +256,37 @@ struct cmFindLibraryHelper
         cmStrCat(this->PrefixRegexStr, name, this->SuffixRegexStr);
       this->DebugSearches.FoundAt(path, regexName);
     }
-  };
+  }
 };
 
+namespace {
+
+std::string const& get_prefixes(cmMakefile* mf)
+{
+#ifdef _WIN32
+  static std::string defaultPrefix = ";lib";
+#else
+  static std::string defaultPrefix = "lib";
+#endif
+  cmValue prefixProp = mf->GetDefinition("CMAKE_FIND_LIBRARY_PREFIXES");
+  return (prefixProp) ? *prefixProp : defaultPrefix;
+}
+
+std::string const& get_suffixes(cmMakefile* mf)
+{
+#ifdef _WIN32
+  static std::string defaultSuffix = ".lib;.dll.a;.a";
+#elif defined(__APPLE__)
+  static std::string defaultSuffix = ".tbd;.dylib;.so;.a";
+#elif defined(__hpux)
+  static std::string defaultSuffix = ".sl;.so;.a";
+#else
+  static std::string defaultSuffix = ".so;.a";
+#endif
+  cmValue suffixProp = mf->GetDefinition("CMAKE_FIND_LIBRARY_SUFFIXES");
+  return (suffixProp) ? *suffixProp : defaultSuffix;
+}
+}
 cmFindLibraryHelper::cmFindLibraryHelper(std::string debugName, cmMakefile* mf,
                                          cmFindBase const* base)
   : Makefile(mf)
@@ -268,10 +296,9 @@ cmFindLibraryHelper::cmFindLibraryHelper(std::string debugName, cmMakefile* mf,
   this->GG = this->Makefile->GetGlobalGenerator();
 
   // Collect the list of library name prefixes/suffixes to try.
-  std::string const& prefixes_list =
-    this->Makefile->GetRequiredDefinition("CMAKE_FIND_LIBRARY_PREFIXES");
-  std::string const& suffixes_list =
-    this->Makefile->GetRequiredDefinition("CMAKE_FIND_LIBRARY_SUFFIXES");
+  std::string const& prefixes_list = get_prefixes(this->Makefile);
+  std::string const& suffixes_list = get_suffixes(this->Makefile);
+
   cmExpandList(prefixes_list, this->Prefixes, true);
   cmExpandList(suffixes_list, this->Suffixes, true);
   this->RegexFromList(this->PrefixRegexStr, this->Prefixes);

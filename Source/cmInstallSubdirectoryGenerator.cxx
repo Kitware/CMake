@@ -57,6 +57,7 @@ void cmInstallSubdirectoryGenerator::GenerateScript(std::ostream& os)
       this->LocalGenerator->GetPolicyStatus(cmPolicies::CMP0082);
     switch (status) {
       case cmPolicies::WARN:
+        CM_FALLTHROUGH;
       case cmPolicies::OLD:
         // OLD behavior is handled in cmLocalGenerator::GenerateInstallRules()
         break;

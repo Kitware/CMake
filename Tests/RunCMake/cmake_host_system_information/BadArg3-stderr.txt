@@ -1,0 +1,4 @@
+CMake Error at BadArg3\.cmake:1 \(cmake_host_system_information\):
+  cmake_host_system_information does not recognize <key> FOOBAR
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:7 \(include\)

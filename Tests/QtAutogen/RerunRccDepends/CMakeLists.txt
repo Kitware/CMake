@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.16)
 project(RerunRccDepends)
 include("../AutogenCoreTest.cmake")
 
@@ -66,6 +66,7 @@ try_compile(RCC_DEPENDS
   RccDepends
   CMAKE_FLAGS "-DQT_TEST_VERSION=${QT_TEST_VERSION}"
               "-DCMAKE_AUTOGEN_VERBOSE=${CMAKE_AUTOGEN_VERBOSE}"
+              "-DCMAKE_PREFIX_PATH:STRING=${CMAKE_PREFIX_PATH}"
               "-DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}"
   OUTPUT_VARIABLE output
 )

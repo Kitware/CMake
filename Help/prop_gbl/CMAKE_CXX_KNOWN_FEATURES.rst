@@ -18,6 +18,8 @@ The features known to this version of CMake are listed below.
 High level meta features indicating C++ standard support
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+.. versionadded:: 3.8
+
 The following meta features indicate general support for the associated
 language standard.  It reflects the language support claimed by the compiler,
 but it does not necessarily imply complete conformance to that standard.
@@ -35,9 +37,13 @@ but it does not necessarily imply complete conformance to that standard.
   Compiler mode is at least C++ 17.
 
 ``cxx_std_20``
+  .. versionadded:: 3.12
+
   Compiler mode is at least C++ 20.
 
 ``cxx_std_23``
+  .. versionadded:: 3.20
+
   Compiler mode is at least C++ 23.
 
 Low level individual compile features

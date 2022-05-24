@@ -1,0 +1,16 @@
+Test project .*
+    Start 27: TEST:basic\.case_foo!3
+1/4 Test #27: TEST:basic\.case_foo!3 \.+ +Passed +[0-9.]+ sec
+    Start 28: TEST:basic\.case_bar!3
+2/4 Test #28: TEST:basic\.case_bar!3 \.+ +Passed +[0-9.]+ sec
+    Start 29: TEST:basic\.disabled_case!3
+3/4 Test #29: TEST:basic\.disabled_case!3 \.+\*+Not Run \(Disabled\) +[0-9.]+ sec
+    Start 30: TEST:basic\.DISABLEDnot_really_case!3
+4/4 Test #30: TEST:basic\.DISABLEDnot_really_case!3 \.+ +Passed +[0-9.]+ sec
+
+100% tests passed, 0 tests failed out of 3
+
+Total Test time \(real\) = +[0-9.]+ sec
+
+The following tests did not run:
+.*29 - TEST:basic.disabled_case!3 \(Disabled\)

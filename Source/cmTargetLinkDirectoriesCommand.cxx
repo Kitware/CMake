@@ -34,7 +34,8 @@ private:
                            bool prepend, bool /*system*/) override
   {
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    tgt->InsertLinkDirectory(this->Join(content), lfbt, prepend);
+    tgt->InsertLinkDirectory(BT<std::string>(this->Join(content), lfbt),
+                             prepend);
     return true; // Successfully handled.
   }
 };

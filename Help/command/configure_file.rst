@@ -96,6 +96,7 @@ The arguments are:
   with respect to the value of :variable:`CMAKE_CURRENT_BINARY_DIR`.
   If the path names an existing directory the output file is placed
   in that directory with the same file name as the input file.
+  If the path contains non-existent directories, they are created.
 
 ``NO_SOURCE_PERMISSIONS``
   .. versionadded:: 3.19

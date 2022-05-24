@@ -11,9 +11,9 @@
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
-#include "cmProperty.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 #include "cmake.h"
 
 cmFindCommon::PathGroup cmFindCommon::PathGroup::All("ALL");
@@ -183,7 +183,7 @@ void cmFindCommon::SelectDefaultSearchModes()
   };
 
   for (auto const& path : search_paths) {
-    cmProp def = this->Makefile->GetDefinition(path.second);
+    cmValue def = this->Makefile->GetDefinition(path.second);
     if (def) {
       path.first = !cmIsOn(*def);
     }
@@ -203,11 +203,11 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths)
     return;
   }
 
-  cmProp sysroot = this->Makefile->GetDefinition("CMAKE_SYSROOT");
-  cmProp sysrootCompile =
+  cmValue sysroot = this->Makefile->GetDefinition("CMAKE_SYSROOT");
+  cmValue sysrootCompile =
     this->Makefile->GetDefinition("CMAKE_SYSROOT_COMPILE");
-  cmProp sysrootLink = this->Makefile->GetDefinition("CMAKE_SYSROOT_LINK");
-  cmProp rootPath = this->Makefile->GetDefinition("CMAKE_FIND_ROOT_PATH");
+  cmValue sysrootLink = this->Makefile->GetDefinition("CMAKE_SYSROOT_LINK");
+  cmValue rootPath = this->Makefile->GetDefinition("CMAKE_FIND_ROOT_PATH");
   const bool noSysroot = !cmNonempty(sysroot);
   const bool noCompileSysroot = !cmNonempty(sysrootCompile);
   const bool noLinkSysroot = !cmNonempty(sysrootLink);
@@ -234,7 +234,7 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths)
     cmSystemTools::ConvertToUnixSlashes(r);
   }
 
-  cmProp stagePrefix = this->Makefile->GetDefinition("CMAKE_STAGING_PREFIX");
+  cmValue stagePrefix = this->Makefile->GetDefinition("CMAKE_STAGING_PREFIX");
 
   // Copy the original set of unrooted paths.
   std::vector<std::string> unrootedPaths = paths;

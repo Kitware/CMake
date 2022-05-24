@@ -18,6 +18,7 @@
 #include "cmProcessTools.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 static unsigned int cmCTestGITVersion(unsigned int epic, unsigned int major,
                                       unsigned int minor, unsigned int fix)

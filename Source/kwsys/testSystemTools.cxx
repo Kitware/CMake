@@ -436,7 +436,7 @@ static bool CheckFileOperations()
   if (symlinkStatus.GetWindows() != ERROR_PRIVILEGE_NOT_HELD)
 #endif
   {
-    if (!symlinkStatus) {
+    if (!symlinkStatus.IsSuccess()) {
       std::cerr << "CreateSymlink for: " << testBadSymlink << " -> "
                 << testBadSymlinkTgt
                 << " failed: " << symlinkStatus.GetString() << std::endl;

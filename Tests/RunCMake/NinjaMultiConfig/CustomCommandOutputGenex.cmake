@@ -143,6 +143,16 @@ add_custom_command(
     PROPERTY SYMBOLIC 1)
 add_custom_target(echo_dbgx DEPENDS "$<$<CONFIG:Debug>:echo_dbgx_Debug.txt>")
 
+# A non-cross-config custom command expresses target dependencies in command config.
+add_custom_command(
+  OUTPUT echo_depend_target.txt
+  COMMAND ${CMAKE_COMMAND} -E env $<TARGET_FILE:echo> $<CONFIG>
+  # A real project should do:
+  #   DEPENDS $<TARGET_FILE:echo>
+  # but here we are testing the target-level dependency implied by TARGET_FILE.
+  )
+add_custom_target(echo_depend_target DEPENDS echo_depend_target.txt)
+
 add_custom_target(echo_target_raw
   BYPRODUCTS echo_target_raw_$<CONFIG>.txt
   COMMENT echo_target_raw

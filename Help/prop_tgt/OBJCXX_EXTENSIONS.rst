@@ -18,5 +18,7 @@ If the property is not set, and the project has set the :prop_tgt:`CXX_EXTENSION
 the value of :prop_tgt:`CXX_EXTENSIONS` is set for :prop_tgt:`OBJCXX_EXTENSIONS`.
 
 This property is initialized by the value of
-the :variable:`CMAKE_OBJCXX_EXTENSIONS` variable if it is set when a target
-is created.
+the :variable:`CMAKE_OBJCXX_EXTENSIONS` variable if set when a target is
+created and otherwise by the value of
+:variable:`CMAKE_OBJCXX_EXTENSIONS_DEFAULT <CMAKE_<LANG>_EXTENSIONS_DEFAULT>`
+(see :policy:`CMP0128`).

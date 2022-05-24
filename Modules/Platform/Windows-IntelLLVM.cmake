@@ -12,6 +12,6 @@ include(Platform/Windows-MSVC)
 macro(__windows_compiler_intel lang)
   __windows_compiler_msvc(${lang})
 
-  set(CMAKE_DEPFILE_FLAGS_${lang} "-QMMD -QMT <DEP_TARGET> -QMF <DEP_FILE>")
+  set(CMAKE_DEPFILE_FLAGS_${lang} "-QMD -QMT <DEP_TARGET> -QMF <DEP_FILE>")
   set(CMAKE_${lang}_DEPFILE_FORMAT gcc)
 endmacro()

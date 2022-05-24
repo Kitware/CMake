@@ -310,7 +310,7 @@ public:
     cmQtAutoMocUicT* Gen() const
     {
       return static_cast<cmQtAutoMocUicT*>(this->UserData());
-    };
+    }
 
     // -- Accessors. Only valid during Process() call!
     Logger const& Log() const { return this->Gen()->Log(); }
@@ -346,7 +346,7 @@ public:
       : JobT(true)
     {
     }
-    void Process() override{};
+    void Process() override {}
   };
 
   /** Generate moc_predefs.h.  */
@@ -2083,7 +2083,7 @@ void cmQtAutoMocUicT::JobCompileUicT::Process()
     auto optionIt = this->UicConst().UiFiles.find(sourceFile);
     if (optionIt != this->UicConst().UiFiles.end()) {
       UicMergeOptions(allOpts, optionIt->second.Options,
-                      (this->BaseConst().QtVersion.Major == 5));
+                      (this->BaseConst().QtVersion.Major >= 5));
     }
     cm::append(cmd, allOpts);
   }

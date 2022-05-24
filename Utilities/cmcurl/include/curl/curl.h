@@ -25,9 +25,6 @@
 /*
  * If you have libcurl problems, all docs and details are found here:
  *   https://curl.se/libcurl/
- *
- * curl-library mailing list subscription and unsubscription web interface:
- *   https://cool.haxx.se/mailman/listinfo/curl-library/
  */
 
 #ifdef CURL_NO_OLDIES
@@ -74,8 +71,9 @@
 #if defined(_AIX) || defined(__NOVELL_LIBC__) || defined(__NetBSD__) || \
     defined(__minix) || defined(__SYMBIAN32__) || defined(__INTEGRITY) || \
     defined(ANDROID) || defined(__ANDROID__) || defined(__OpenBSD__) || \
-    defined(__CYGWIN__) || defined(AMIGA) || \
-   (defined(__FreeBSD_version) && (__FreeBSD_version < 800000))
+    defined(__CYGWIN__) || defined(AMIGA) || defined(__NuttX__) || \
+   (defined(__FreeBSD_version) && (__FreeBSD_version < 800000)) || \
+    defined(__VXWORKS__)
 #include <sys/select.h>
 #endif
 
@@ -541,7 +539,7 @@ typedef enum {
   CURLE_OBSOLETE46,              /* 46 - NOT USED */
   CURLE_TOO_MANY_REDIRECTS,      /* 47 - catch endless re-direct loops */
   CURLE_UNKNOWN_OPTION,          /* 48 - User specified an unknown option */
-  CURLE_TELNET_OPTION_SYNTAX,    /* 49 - Malformed telnet option */
+  CURLE_SETOPT_OPTION_SYNTAX,    /* 49 - Malformed setopt option */
   CURLE_OBSOLETE50,              /* 50 - NOT USED */
   CURLE_OBSOLETE51,              /* 51 - NOT USED */
   CURLE_GOT_NOTHING,             /* 52 - when this is a specific error */
@@ -635,6 +633,9 @@ typedef enum {
 
 /* The following were added in 7.21.5, April 2011 */
 #define CURLE_UNKNOWN_TELNET_OPTION CURLE_UNKNOWN_OPTION
+
+/* Added for 7.78.0 */
+#define CURLE_TELNET_OPTION_SYNTAX CURLE_SETOPT_OPTION_SYNTAX
 
 /* The following were added in 7.17.1 */
 /* These are scheduled to disappear by 2009 */
@@ -2084,13 +2085,13 @@ typedef enum {
   /* Parameters for V4 signature */
   CURLOPT(CURLOPT_AWS_SIGV4, CURLOPTTYPE_STRINGPOINT, 305),
 
-  /* Same as CURLOPT_SSL_VERIFYPEER but for DOH (DNS-over-HTTPS) servers. */
+  /* Same as CURLOPT_SSL_VERIFYPEER but for DoH (DNS-over-HTTPS) servers. */
   CURLOPT(CURLOPT_DOH_SSL_VERIFYPEER, CURLOPTTYPE_LONG, 306),
 
-  /* Same as CURLOPT_SSL_VERIFYHOST but for DOH (DNS-over-HTTPS) servers. */
+  /* Same as CURLOPT_SSL_VERIFYHOST but for DoH (DNS-over-HTTPS) servers. */
   CURLOPT(CURLOPT_DOH_SSL_VERIFYHOST, CURLOPTTYPE_LONG, 307),
 
-  /* Same as CURLOPT_SSL_VERIFYSTATUS but for DOH (DNS-over-HTTPS) servers. */
+  /* Same as CURLOPT_SSL_VERIFYSTATUS but for DoH (DNS-over-HTTPS) servers. */
   CURLOPT(CURLOPT_DOH_SSL_VERIFYSTATUS, CURLOPTTYPE_LONG, 308),
 
   /* The CA certificates as "blob" used to validate the peer certificate

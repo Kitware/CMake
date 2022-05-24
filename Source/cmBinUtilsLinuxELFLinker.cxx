@@ -11,16 +11,13 @@
 #include <cmsys/RegularExpression.hxx>
 
 #include "cmBinUtilsLinuxELFObjdumpGetRuntimeDependenciesTool.h"
+#include "cmELF.h"
 #include "cmLDConfigLDConfigTool.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmRuntimeDependencyArchive.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-
-#ifdef CMake_USE_ELF_PARSER
-#  include "cmELF.h"
-#endif
 
 static std::string ReplaceOrigin(const std::string& rpath,
                                  const std::string& origin)
@@ -91,7 +88,6 @@ bool cmBinUtilsLinuxELFLinker::ScanDependencies(
 {
   std::vector<std::string> parentRpaths;
 
-#ifdef CMake_USE_ELF_PARSER
   cmELF elf(file.c_str());
   if (!elf) {
     return false;
@@ -106,7 +102,6 @@ bool cmBinUtilsLinuxELFLinker::ScanDependencies(
       this->Machine = elf.GetMachine();
     }
   }
-#endif
 
   return this->ScanDependencies(file, parentRpaths);
 }
@@ -175,15 +170,11 @@ bool cmBinUtilsLinuxELFLinker::ScanDependencies(
 namespace {
 bool FileHasArchitecture(const char* filename, std::uint16_t machine)
 {
-#ifdef CMake_USE_ELF_PARSER
   cmELF elf(filename);
   if (!elf) {
     return false;
   }
   return machine == 0 || machine == elf.GetMachine();
-#else
-  return true;
-#endif
 }
 }
 

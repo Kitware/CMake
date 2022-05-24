@@ -22,11 +22,11 @@
 #include "cmDocumentationFormatter.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
-#include "cmProperty.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 #include "cmake.h"
 
 namespace {
@@ -326,11 +326,11 @@ int main(int argc, char const* const* argv)
       cmSystemTools::CollapseFullPath(cpackProjectDirectory);
     globalMF.AddDefinition("CPACK_PACKAGE_DIRECTORY", cpackProjectDirectory);
 
-    cmProp cpackModulesPath = globalMF.GetDefinition("CPACK_MODULE_PATH");
+    cmValue cpackModulesPath = globalMF.GetDefinition("CPACK_MODULE_PATH");
     if (cpackModulesPath) {
       globalMF.AddDefinition("CMAKE_MODULE_PATH", *cpackModulesPath);
     }
-    cmProp genList = globalMF.GetDefinition("CPACK_GENERATOR");
+    cmValue genList = globalMF.GetDefinition("CPACK_GENERATOR");
     if (!genList) {
       cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
                   "CPack generator not specified" << std::endl);
@@ -408,20 +408,20 @@ int main(int argc, char const* const* argv)
             parsed = 0;
           }
           if (parsed) {
-            cmProp projName = mf->GetDefinition("CPACK_PACKAGE_NAME");
+            cmValue projName = mf->GetDefinition("CPACK_PACKAGE_NAME");
             cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE,
                         "Use generator: " << cpackGenerator->GetNameOfClass()
                                           << std::endl);
             cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE,
                         "For project: " << *projName << std::endl);
 
-            cmProp projVersion = mf->GetDefinition("CPACK_PACKAGE_VERSION");
+            cmValue projVersion = mf->GetDefinition("CPACK_PACKAGE_VERSION");
             if (!projVersion) {
-              cmProp projVersionMajor =
+              cmValue projVersionMajor =
                 mf->GetDefinition("CPACK_PACKAGE_VERSION_MAJOR");
-              cmProp projVersionMinor =
+              cmValue projVersionMinor =
                 mf->GetDefinition("CPACK_PACKAGE_VERSION_MINOR");
-              cmProp projVersionPatch =
+              cmValue projVersionPatch =
                 mf->GetDefinition("CPACK_PACKAGE_VERSION_PATCH");
               std::ostringstream ostr;
               ostr << *projVersionMajor << "." << *projVersionMinor << "."

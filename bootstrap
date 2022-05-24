@@ -325,6 +325,7 @@ CMAKE_CXX_SOURCES="\
   cmDefinePropertyCommand \
   cmDefinitions \
   cmDocumentationFormatter \
+  cmELF \
   cmEnableLanguageCommand \
   cmEnableTestingCommand \
   cmExecProgramCommand \
@@ -426,6 +427,7 @@ CMAKE_CXX_SOURCES="\
   cmPolicies \
   cmProcessOutput \
   cmProjectCommand \
+  cmValue \
   cmPropertyDefinition \
   cmPropertyMap \
   cmGccDepfileLexerHelper \

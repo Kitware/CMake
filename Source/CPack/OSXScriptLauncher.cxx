@@ -118,5 +118,5 @@ int main(int argc, char* argv[])
 
   cmsysProcess_Delete(cp);
 
-  return 0;
+  return !result;
 }

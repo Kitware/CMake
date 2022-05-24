@@ -13,6 +13,7 @@
 #include <stack>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include <cm/optional>
@@ -28,11 +29,10 @@
 #include "cmMessageType.h"
 #include "cmNewLineStyle.h"
 #include "cmPolicies.h"
-#include "cmProperty.h"
 #include "cmSourceFileLocationKind.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
-#include "cmStringAlgorithms.h"
+#include "cmValue.h"
 
 // IWYU does not see that 'std::unordered_map<std::string, cmTarget>'
 // will not compile without the complete type.
@@ -230,6 +230,10 @@ public:
   cmTarget* AddImportedTarget(const std::string& name,
                               cmStateEnums::TargetType type, bool global);
 
+  std::pair<cmTarget&, bool> CreateNewTarget(
+    const std::string& name, cmStateEnums::TargetType type,
+    cmTarget::PerConfig perConfig = cmTarget::PerConfig::Yes);
+
   cmTarget* AddNewTarget(cmStateEnums::TargetType type,
                          const std::string& name);
 
@@ -282,6 +286,10 @@ public:
    * can be used in CMake to refer to lists, directories, etc.
    */
   void AddDefinition(const std::string& name, cm::string_view value);
+  void AddDefinition(const std::string& name, cmValue value)
+  {
+    this->AddDefinition(name, *value);
+  }
   /**
    * Add bool variable definition to the build.
    */
@@ -309,6 +317,8 @@ public:
    * Specify the name of the project for this build.
    */
   void SetProjectName(std::string const& name);
+
+  void InitCMAKE_CONFIGURATION_TYPES(std::string const& genDefault);
 
   /* Get the default configuration */
   std::string GetDefaultConfiguration() const;
@@ -392,13 +402,13 @@ public:
    * Set a regular expression that include files must match
    * in order to be considered as part of the depend information.
    */
-  void SetIncludeRegularExpression(const char* regex)
+  void SetIncludeRegularExpression(const std::string& regex)
   {
-    this->SetProperty("INCLUDE_REGULAR_EXPRESSION", regex);
+    this->SetProperty("INCLUDE_REGULAR_EXPRESSION", regex.c_str());
   }
-  const char* GetIncludeRegularExpression() const
+  const std::string& GetIncludeRegularExpression() const
   {
-    return cmToCStr(this->GetProperty("INCLUDE_REGULAR_EXPRESSION"));
+    return this->GetProperty("INCLUDE_REGULAR_EXPRESSION");
   }
 
   /**
@@ -482,7 +492,7 @@ public:
    * If the variable is not found in this makefile instance, the
    * cache is then queried.
    */
-  cmProp GetDefinition(const std::string&) const;
+  cmValue GetDefinition(const std::string&) const;
   const std::string& GetSafeDefinition(const std::string&) const;
   const std::string& GetRequiredDefinition(const std::string& name) const;
   bool IsDefinitionSet(const std::string&) const;
@@ -762,10 +772,15 @@ public:
 
   //! Set/Get a property of this directory
   void SetProperty(const std::string& prop, const char* value);
+  void SetProperty(const std::string& prop, cmValue value);
+  void SetProperty(const std::string& prop, const std::string& value)
+  {
+    this->SetProperty(prop, cmValue(value));
+  }
   void AppendProperty(const std::string& prop, const std::string& value,
                       bool asString = false);
-  cmProp GetProperty(const std::string& prop) const;
-  cmProp GetProperty(const std::string& prop, bool chain) const;
+  cmValue GetProperty(const std::string& prop) const;
+  cmValue GetProperty(const std::string& prop, bool chain) const;
   bool GetPropertyAsBool(const std::string& prop) const;
   std::vector<std::string> GetPropertyKeys() const;
 
@@ -867,16 +882,11 @@ public:
   bool CheckCMP0037(std::string const& targetName,
                     cmStateEnums::TargetType targetType) const;
 
-  cmStringRange GetIncludeDirectoriesEntries() const;
-  cmBacktraceRange GetIncludeDirectoriesBacktraces() const;
-  cmStringRange GetCompileOptionsEntries() const;
-  cmBacktraceRange GetCompileOptionsBacktraces() const;
-  cmStringRange GetCompileDefinitionsEntries() const;
-  cmBacktraceRange GetCompileDefinitionsBacktraces() const;
-  cmStringRange GetLinkOptionsEntries() const;
-  cmBacktraceRange GetLinkOptionsBacktraces() const;
-  cmStringRange GetLinkDirectoriesEntries() const;
-  cmBacktraceRange GetLinkDirectoriesBacktraces() const;
+  cmBTStringRange GetIncludeDirectoriesEntries() const;
+  cmBTStringRange GetCompileOptionsEntries() const;
+  cmBTStringRange GetCompileDefinitionsEntries() const;
+  cmBTStringRange GetLinkOptionsEntries() const;
+  cmBTStringRange GetLinkDirectoriesEntries() const;
 
   std::set<std::string> const& GetSystemIncludeDirectories() const
   {

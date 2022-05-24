@@ -5,9 +5,9 @@
 #include "cmExecutionStatus.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
-#include "cmProperty.h"
 #include "cmStateTypes.h"
 #include "cmTarget.h"
+#include "cmValue.h"
 #include "cmake.h"
 
 cmTargetPropCommandBase::cmTargetPropCommandBase(cmExecutionStatus& status)
@@ -181,7 +181,7 @@ void cmTargetPropCommandBase::HandleInterfaceContent(
 {
   if (prepend) {
     const std::string propName = std::string("INTERFACE_") + this->Property;
-    cmProp propValue = tgt->GetProperty(propName);
+    cmValue propValue = tgt->GetProperty(propName);
     const std::string totalContent =
       this->Join(content) + (propValue ? (";" + *propValue) : std::string());
     tgt->SetProperty(propName, totalContent);

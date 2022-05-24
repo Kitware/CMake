@@ -30,7 +30,8 @@ The options are:
     Build      = ctest_build results, in Build.xml
     Test       = ctest_test results, in Test.xml
     Coverage   = ctest_coverage results, in Coverage.xml
-    MemCheck   = ctest_memcheck results, in DynamicAnalysis.xml
+    MemCheck   = ctest_memcheck results, in DynamicAnalysis.xml and
+                 DynamicAnalysis-Test.xml
     Notes      = Files listed by CTEST_NOTES_FILES, in Notes.xml
     ExtraFiles = Files listed by CTEST_EXTRA_SUBMIT_FILES
     Upload     = Files prepared for upload by ctest_upload(), in Upload.xml

@@ -1,0 +1,6 @@
+set(f "${CMAKE_CURRENT_BINARY_DIR}/not_a_binary.txt")
+file(WRITE "${f}" "Not a binary.\n")
+file(RPATH_CHECK FILE "${f}" RPATH "")
+if(NOT EXISTS "${f}")
+  message(FATAL_ERROR "RPATH_CHECK removed\n ${f}\nfor empty RPATH")
+endif()

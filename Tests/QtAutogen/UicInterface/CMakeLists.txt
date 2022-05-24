@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.16)
 project(UicInterface)
 include("../AutogenGuiTest.cmake")
 
@@ -11,12 +11,12 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
 add_library(KI18n klocalizedstring.cpp)
-target_link_libraries(KI18n ${QT_QTCORE_TARGET})
+target_link_libraries(KI18n PRIVATE ${QT_QTCORE_TARGET})
 
 set(autouic_options
   -tr tr2$<$<NOT:$<BOOL:$<TARGET_PROPERTY:NO_KUIT_SEMANTIC>>>:x>i18n
 )
-if (NOT Qt5Widgets_VERSION VERSION_LESS 5.3.0)
+if (NOT Qt${QT_TEST_VERSION}Widgets_VERSION VERSION_LESS 5.3.0)
   list(APPEND autouic_options -include klocalizedstring.h)
 endif()
 

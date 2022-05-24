@@ -7,27 +7,42 @@ int main(int argc, char** argv)
   // it only requires that we produces output in the expected format when
   // invoked with --gtest_list_tests. Thus, we fake that here. This allows us
   // to test the module without actually needing Google Test.
+  bool is_filtered =
+    argc > 2 && std::string(argv[2]).find("--gtest_filter=") == 0;
+  bool is_basic_only =
+    is_filtered && std::string(argv[2]).find("basic*") != std::string::npos;
+  bool is_typed_only =
+    is_filtered && std::string(argv[2]).find("typed*") != std::string::npos;
+
   if (argc > 1 && std::string(argv[1]) == "--gtest_list_tests") {
-    std::cout << "basic." << std::endl;
-    std::cout << "  case_foo" << std::endl;
-    std::cout << "  case_bar" << std::endl;
-    std::cout << "  DISABLED_disabled_case" << std::endl;
-    std::cout << "  DISABLEDnot_really_case" << std::endl;
-    std::cout << "DISABLED_disabled." << std::endl;
-    std::cout << "  case" << std::endl;
-    std::cout << "DISABLEDnotreally." << std::endl;
-    std::cout << "  case" << std::endl;
-    std::cout << "typed/0.  # TypeParam = short" << std::endl;
-    std::cout << "  case" << std::endl;
-    std::cout << "typed/1.  # TypeParam = float" << std::endl;
-    std::cout << "  case" << std::endl;
-    std::cout << "value/test." << std::endl;
-    std::cout << "  case/0  # GetParam() = 1" << std::endl;
-    std::cout << "  case/1  # GetParam() = \"foo\"" << std::endl;
-    std::cout << "param/special." << std::endl;
-    std::cout << "  case/0  # GetParam() = \"semicolon;\"" << std::endl;
-    std::cout << "  case/1  # GetParam() = \"backslash\\\"" << std::endl;
-    std::cout << "  case/2  # GetParam() = \"${var}\"" << std::endl;
+    if (!is_typed_only) {
+      std::cout << "basic." << std::endl;
+      std::cout << "  case_foo" << std::endl;
+      std::cout << "  case_bar" << std::endl;
+      std::cout << "  DISABLED_disabled_case" << std::endl;
+      std::cout << "  DISABLEDnot_really_case" << std::endl;
+    }
+    if (!is_basic_only && !is_typed_only) {
+      std::cout << "DISABLED_disabled." << std::endl;
+      std::cout << "  case" << std::endl;
+      std::cout << "DISABLEDnotreally." << std::endl;
+      std::cout << "  case" << std::endl;
+    }
+    if (!is_basic_only) {
+      std::cout << "typed/0.  # TypeParam = short" << std::endl;
+      std::cout << "  case" << std::endl;
+      std::cout << "typed/1.  # TypeParam = float" << std::endl;
+      std::cout << "  case" << std::endl;
+    }
+    if (!is_basic_only && !is_typed_only) {
+      std::cout << "value/test." << std::endl;
+      std::cout << "  case/0  # GetParam() = 1" << std::endl;
+      std::cout << "  case/1  # GetParam() = \"foo\"" << std::endl;
+      std::cout << "param/special." << std::endl;
+      std::cout << "  case/0  # GetParam() = \"semicolon;\"" << std::endl;
+      std::cout << "  case/1  # GetParam() = \"backslash\\\"" << std::endl;
+      std::cout << "  case/2  # GetParam() = \"${var}\"" << std::endl;
+    }
     return 0;
   }
 

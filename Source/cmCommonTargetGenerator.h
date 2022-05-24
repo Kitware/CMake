@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#include "cmValue.h"
+
 class cmGeneratorTarget;
 class cmGlobalCommonGenerator;
 class cmLinkLineComputer;
@@ -28,8 +30,7 @@ public:
 
 protected:
   // Feature query methods.
-  const char* GetFeature(const std::string& feature,
-                         const std::string& config);
+  cmValue GetFeature(const std::string& feature, const std::string& config);
 
   // Helper to add flag for windows .def file.
   void AddModuleDefinitionFlag(cmLinkLineComputer* linkLineComputer,
@@ -40,6 +41,7 @@ protected:
   cmLocalCommonGenerator* LocalCommonGenerator;
   cmGlobalCommonGenerator* GlobalCommonGenerator;
   std::vector<std::string> ConfigNames;
+  bool UseLWYU = false;
 
   void AppendFortranFormatFlags(std::string& flags,
                                 cmSourceFile const& source);

@@ -120,6 +120,7 @@ bool cmIncludeCommand(std::vector<std::string> const& args,
       case cmPolicies::WARN:
         e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0024) << "\n";
         modal = "should";
+        CM_FALLTHROUGH;
       case cmPolicies::OLD:
         break;
       case cmPolicies::REQUIRED_IF_USED:

@@ -16,11 +16,11 @@
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
-#include "cmProperty.h"
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
+#include "cmValue.h"
 
 class cmOutputConverter;
 
@@ -177,7 +177,7 @@ bool requireDeviceLinking(cmGeneratorTarget& target, cmLocalGenerator& lg,
     return false;
   }
 
-  if (cmProp resolveDeviceSymbols =
+  if (cmValue resolveDeviceSymbols =
         target.GetProperty("CUDA_RESOLVE_DEVICE_SYMBOLS")) {
     // If CUDA_RESOLVE_DEVICE_SYMBOLS has been explicitly set we need
     // to honor the value no matter what it is.

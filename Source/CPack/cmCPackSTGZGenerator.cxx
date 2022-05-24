@@ -15,6 +15,7 @@
 #include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 cmCPackSTGZGenerator::cmCPackSTGZGenerator()
   : cmCPackArchiveGenerator(cmArchiveWrite::CompressGZip, "paxr", ".sh")
@@ -33,7 +34,7 @@ int cmCPackSTGZGenerator::InitializeInternal()
                   "Cannot find template file: " << inFile << std::endl);
     return 0;
   }
-  this->SetOptionIfNotSet("CPACK_STGZ_HEADER_FILE", inFile.c_str());
+  this->SetOptionIfNotSet("CPACK_STGZ_HEADER_FILE", inFile);
   this->SetOptionIfNotSet("CPACK_AT_SIGN", "@");
 
   return this->Superclass::InitializeInternal();
@@ -78,8 +79,7 @@ int cmCPackSTGZGenerator::GenerateHeader(std::ostream* os)
   while (cmSystemTools::GetLineFromStream(ilfs, line)) {
     licenseText += line + "\n";
   }
-  this->SetOptionIfNotSet("CPACK_RESOURCE_FILE_LICENSE_CONTENT",
-                          licenseText.c_str());
+  this->SetOptionIfNotSet("CPACK_RESOURCE_FILE_LICENSE_CONTENT", licenseText);
 
   const char headerLengthTag[] = "###CPACK_HEADER_LENGTH###";
 
