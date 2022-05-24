@@ -543,6 +543,8 @@ set(SRCS
   cmExecuteProcessCommand.h
   cmExpandedCommandArgument.cxx
   cmExpandedCommandArgument.h
+  cmExperimental.cxx
+  cmExperimental.h
   cmExportCommand.cxx
   cmExportCommand.h
   cmExportLibraryDependenciesCommand.cxx
