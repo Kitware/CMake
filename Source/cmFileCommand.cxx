@@ -1610,8 +1610,8 @@ size_t cmWriteToMemoryCallback(void* ptr, size_t size, size_t nmemb,
   return realsize;
 }
 
-size_t cmFileCommandCurlDebugCallback(CURL*, curl_infotype type, char* chPtr,
-                                      size_t size, void* data)
+int cmFileCommandCurlDebugCallback(CURL*, curl_infotype type, char* chPtr,
+                                   size_t size, void* data)
 {
   cmFileCommandVectorOfChar& vec =
     *static_cast<cmFileCommandVectorOfChar*>(data);
