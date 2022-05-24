@@ -25,7 +25,14 @@ struct FeatureData
   std::string const Variable;
   std::string const Description;
   bool Warned;
-} LookupTable[] = {};
+} LookupTable[] = {
+  // CxxModuleCMakeApi
+  { "17be90bd-a850-44e0-be50-448de847d652",
+    "CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API",
+    "CMake's C++ module support is experimental. It is meant only for "
+    "experimentation and feedback to CMake developers.",
+    false },
+};
 static_assert(sizeof(LookupTable) / sizeof(LookupTable[0]) ==
                 static_cast<size_t>(cmExperimental::Feature::Sentinel),
               "Experimental feature lookup table mismatch");

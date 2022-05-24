@@ -7,6 +7,23 @@ See documentation on `CMake Development`_ for more information.
 
 .. _`CMake Development`: README.rst
 
+Features are gated behind ``CMAKE_EXPERIMENTAL_`` variables which must be set
+to specific values in order to enable their gated behaviors. Note that the
+specific values will change over time to reinforce their experimental nature.
+When used, a warning will be generated to indicate that an experimental
+feature is in use and that the affected behavior in the project is not part of
+CMake's stability guarantees.
+
+C++20 Module APIs
+=================
+
+Variable: ``CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API``
+Value: ``17be90bd-a850-44e0-be50-448de847d652``
+
+In order to support C++20 modules, there are a number of behaviors that have
+CMake APIs to provide the required features to build and export them from a
+project.
+
 C++20 Module Dependencies
 =========================
 

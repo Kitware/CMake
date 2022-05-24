@@ -12,6 +12,8 @@ class cmExperimental
 public:
   enum class Feature
   {
+    CxxModuleCMakeApi,
+
     Sentinel,
   };
 
