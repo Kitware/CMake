@@ -197,6 +197,8 @@ Variable Queries
 
 .. genex:: $<HIP_COMPILER_ID:compiler_ids>
 
+  .. versionadded:: 3.21
+
   where ``compiler_ids`` is a comma-separated list.
   ``1`` if the CMake's compiler id of the HIP compiler matches any one
   of the entries in ``compiler_ids``, otherwise ``0``.
@@ -248,6 +250,8 @@ Variable Queries
   See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
 
 .. genex:: $<HIP_COMPILER_VERSION:version>
+
+  .. versionadded:: 3.21
 
   ``1`` if the version of the HIP compiler matches ``version``, otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
@@ -716,6 +720,8 @@ Variable Queries
 
 .. genex:: $<HIP_COMPILER_ID>
 
+  .. versionadded:: 3.21
+
   The CMake's compiler id of the HIP compiler used.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 
@@ -761,6 +767,8 @@ Variable Queries
   See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
 
 .. genex:: $<HIP_COMPILER_VERSION>
+
+  .. versionadded:: 3.21
 
   The version of the HIP compiler used.
   See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
