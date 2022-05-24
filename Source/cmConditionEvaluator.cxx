@@ -95,7 +95,8 @@ struct cmRt2CtSelector<Comp>
 
 std::string bool2string(bool const value)
 {
-  return std::string(std::size_t(1), static_cast<char>('0' + int(value)));
+  return std::string(static_cast<std::size_t>(1),
+                     static_cast<char>('0' + static_cast<int>(value)));
 }
 
 bool looksLikeSpecialVariable(const std::string& var,
@@ -141,15 +142,17 @@ public:
     {
       this->current = std::next(this->current);
       this->next =
-        std::next(this->current, difference_type(this->current != args.end()));
+        std::next(this->current,
+                  static_cast<difference_type>(this->current != args.end()));
       return *this;
     }
 
   private:
     CurrentAndNextIter(base_t& args)
       : current(args.begin())
-      , next(std::next(this->current,
-                       difference_type(this->current != args.end())))
+      , next(
+          std::next(this->current,
+                    static_cast<difference_type>(this->current != args.end())))
     {
     }
   };
@@ -167,19 +170,21 @@ public:
     {
       this->current = std::next(this->current);
       this->next =
-        std::next(this->current, difference_type(this->current != args.end()));
-      this->nextnext =
-        std::next(this->next, difference_type(this->next != args.end()));
+        std::next(this->current,
+                  static_cast<difference_type>(this->current != args.end()));
+      this->nextnext = std::next(
+        this->next, static_cast<difference_type>(this->next != args.end()));
       return *this;
     }
 
   private:
     CurrentAndTwoMoreIter(base_t& args)
       : current(args.begin())
-      , next(std::next(this->current,
-                       difference_type(this->current != args.end())))
-      , nextnext(
-          std::next(this->next, difference_type(this->next != args.end())))
+      , next(
+          std::next(this->current,
+                    static_cast<difference_type>(this->current != args.end())))
+      , nextnext(std::next(
+          this->next, static_cast<difference_type>(this->next != args.end())))
     {
     }
   };
@@ -580,7 +585,8 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
     // does a command exist
     else if (this->IsKeyword(keyCOMMAND, *args.current)) {
       newArgs.ReduceOneArg(
-        bool(this->Makefile.GetState()->GetCommand(args.next->GetValue())),
+        static_cast<bool>(
+          this->Makefile.GetState()->GetCommand(args.next->GetValue())),
         args);
     }
     // does a policy exist
@@ -591,8 +597,9 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
     }
     // does a target exist
     else if (this->IsKeyword(keyTARGET, *args.current)) {
-      newArgs.ReduceOneArg(
-        bool(this->Makefile.FindTargetToUse(args.next->GetValue())), args);
+      newArgs.ReduceOneArg(static_cast<bool>(this->Makefile.FindTargetToUse(
+                             args.next->GetValue())),
+                           args);
     }
     // is a variable defined
     else if (this->IsKeyword(keyDEFINED, *args.current)) {
@@ -607,7 +614,8 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
 
       else if (looksLikeSpecialVariable(var, "CACHE"_s, varNameLen)) {
         const auto cache = args.next->GetValue().substr(6, varNameLen - 7);
-        result = bool(this->Makefile.GetState()->GetCacheEntryValue(cache));
+        result = static_cast<bool>(
+          this->Makefile.GetState()->GetCacheEntryValue(cache));
       }
 
       else {
@@ -620,8 +628,9 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
       if (policy64IsOld) {
         continue;
       }
-      newArgs.ReduceOneArg(bool(this->Makefile.GetTest(args.next->GetValue())),
-                           args);
+      newArgs.ReduceOneArg(
+        static_cast<bool>(this->Makefile.GetTest(args.next->GetValue())),
+        args);
     }
   }
   return true;

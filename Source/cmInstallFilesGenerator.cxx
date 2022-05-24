@@ -19,7 +19,6 @@ cmInstallFilesGenerator::cmInstallFilesGenerator(
   bool optional, cmListFileBacktrace backtrace)
   : cmInstallGenerator(dest, configurations, component, message,
                        exclude_from_all, false, std::move(backtrace))
-  , LocalGenerator(nullptr)
   , Files(files)
   , FilePermissions(std::move(file_permissions))
   , Rename(std::move(rename))

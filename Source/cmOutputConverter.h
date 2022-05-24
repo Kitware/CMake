@@ -138,7 +138,7 @@ private:
   static bool Shell_ArgumentNeedsQuotes(cm::string_view in, int flags);
   static std::string Shell_GetArgument(cm::string_view in, int flags);
 
-  bool LinkScriptShell;
+  bool LinkScriptShell = false;
 
   // The top-most directories for relative path conversion.  Both the
   // source and destination location of a relative path conversion

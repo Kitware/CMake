@@ -44,7 +44,7 @@ protected:
                            Indent indent,
                            std::vector<std::string> const& files);
 
-  cmLocalGenerator* LocalGenerator;
+  cmLocalGenerator* LocalGenerator = nullptr;
   std::vector<std::string> const Files;
   std::string const FilePermissions;
   std::string const Rename;

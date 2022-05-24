@@ -56,7 +56,7 @@ private:
   {
     std::string val;
     if (!this->CurrentValue.empty()) {
-      val.assign(&this->CurrentValue[0], this->CurrentValue.size());
+      val.assign(this->CurrentValue.data(), this->CurrentValue.size());
     }
     return val;
   }
@@ -124,7 +124,7 @@ void cmCTestSubmitHandler::Initialize()
 {
   // We submit all available parts by default.
   for (cmCTest::Part p = cmCTest::PartStart; p != cmCTest::PartCount;
-       p = cmCTest::Part(p + 1)) {
+       p = static_cast<cmCTest::Part>(p + 1)) {
     this->SubmitPart[p] = true;
   }
   this->HasWarnings = false;
@@ -730,15 +730,15 @@ int cmCTestSubmitHandler::ProcessHandler()
     return -1;
   }
 
-  if (getenv("HTTP_PROXY")) {
+  if (char const* proxy = getenv("HTTP_PROXY")) {
     this->HTTPProxyType = 1;
-    this->HTTPProxy = getenv("HTTP_PROXY");
+    this->HTTPProxy = proxy;
     if (getenv("HTTP_PROXY_PORT")) {
       this->HTTPProxy += ":";
       this->HTTPProxy += getenv("HTTP_PROXY_PORT");
     }
-    if (getenv("HTTP_PROXY_TYPE")) {
-      std::string type = getenv("HTTP_PROXY_TYPE");
+    if (char const* proxy_type = getenv("HTTP_PROXY_TYPE")) {
+      std::string type = proxy_type;
       // HTTP/SOCKS4/SOCKS5
       if (type == "HTTP") {
         this->HTTPProxyType = 1;
@@ -810,7 +810,7 @@ int cmCTestSubmitHandler::ProcessHandler()
 
   // Query parts for files to submit.
   for (cmCTest::Part p = cmCTest::PartStart; p != cmCTest::PartCount;
-       p = cmCTest::Part(p + 1)) {
+       p = static_cast<cmCTest::Part>(p + 1)) {
     // Skip parts we are not submitting.
     if (!this->SubmitPart[p]) {
       continue;
@@ -894,9 +894,8 @@ void cmCTestSubmitHandler::SelectParts(std::set<cmCTest::Part> const& parts)
 {
   // Check whether each part is selected.
   for (cmCTest::Part p = cmCTest::PartStart; p != cmCTest::PartCount;
-       p = cmCTest::Part(p + 1)) {
-    this->SubmitPart[p] =
-      (std::set<cmCTest::Part>::const_iterator(parts.find(p)) != parts.end());
+       p = static_cast<cmCTest::Part>(p + 1)) {
+    this->SubmitPart[p] = parts.find(p) != parts.end();
   }
 }
 

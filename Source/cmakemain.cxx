@@ -409,7 +409,7 @@ int extract_job_number(std::string const& command,
     } else if (numJobs > INT_MAX) {
       std::cerr << "The <jobs> value is too large.\n\n";
     } else {
-      jobs = int(numJobs);
+      jobs = static_cast<int>(numJobs);
     }
   } else {
     std::cerr << "'" << command << "' invalid number '" << jobString
@@ -594,7 +594,7 @@ int do_build(int ac, char const* const* av)
                          "is too large.\n\n";
             dir.clear();
           } else {
-            jobs = int(numJobs);
+            jobs = static_cast<int>(numJobs);
           }
         } else {
           std::cerr << "'CMAKE_BUILD_PARALLEL_LEVEL' environment variable\n"

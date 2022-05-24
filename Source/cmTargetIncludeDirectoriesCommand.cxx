@@ -99,7 +99,7 @@ bool cmTargetIncludeDirectoriesCommand(std::vector<std::string> const& args,
 {
   return TargetIncludeDirectoriesImpl(status).HandleArguments(
     args, "INCLUDE_DIRECTORIES",
-    TargetIncludeDirectoriesImpl::ArgumentFlags(
+    static_cast<TargetIncludeDirectoriesImpl::ArgumentFlags>(
       TargetIncludeDirectoriesImpl::PROCESS_BEFORE |
       TargetIncludeDirectoriesImpl::PROCESS_AFTER |
       TargetIncludeDirectoriesImpl::PROCESS_SYSTEM));

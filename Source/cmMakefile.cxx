@@ -478,8 +478,8 @@ public:
 private:
   cmMakefile* Makefile;
   bool NoPolicyScope;
-  bool CheckCMP0011;
-  bool ReportError;
+  bool CheckCMP0011 = false;
+  bool ReportError = true;
   void EnforceCMP0011();
 };
 
@@ -488,8 +488,6 @@ cmMakefile::IncludeScope::IncludeScope(cmMakefile* mf,
                                        bool noPolicyScope)
   : Makefile(mf)
   , NoPolicyScope(noPolicyScope)
-  , CheckCMP0011(false)
-  , ReportError(true)
 {
   this->Makefile->Backtrace = this->Makefile->Backtrace.Push(
     cmListFileContext::FromListFilePath(filenametoread));
@@ -623,7 +621,6 @@ class cmMakefile::ListFileScope
 public:
   ListFileScope(cmMakefile* mf, std::string const& filenametoread)
     : Makefile(mf)
-    , ReportError(true)
   {
     this->Makefile->Backtrace = this->Makefile->Backtrace.Push(
       cmListFileContext::FromListFilePath(filenametoread));
@@ -650,7 +647,7 @@ public:
 
 private:
   cmMakefile* Makefile;
-  bool ReportError;
+  bool ReportError = true;
 };
 
 class cmMakefile::DeferScope
@@ -1536,7 +1533,6 @@ class cmMakefile::BuildsystemFileScope
 public:
   BuildsystemFileScope(cmMakefile* mf)
     : Makefile(mf)
-    , ReportError(true)
   {
     std::string currentStart =
       cmStrCat(this->Makefile->StateSnapshot.GetDirectory().GetCurrentSource(),
@@ -1578,7 +1574,7 @@ private:
   cmGlobalGenerator* GG;
   cmMakefile* CurrentMakefile;
   cmStateSnapshot Snapshot;
-  bool ReportError;
+  bool ReportError = true;
 };
 
 void cmMakefile::Configure()
@@ -4511,7 +4507,7 @@ void cmMakefile::RecordPolicies(cmPolicies::PolicyMap& pm) const
   /* Record the setting of every policy.  */
   using PolicyID = cmPolicies::PolicyID;
   for (PolicyID pid = cmPolicies::CMP0000; pid != cmPolicies::CMPCOUNT;
-       pid = PolicyID(pid + 1)) {
+       pid = static_cast<PolicyID>(pid + 1)) {
     pm.Set(pid, this->GetPolicyStatus(pid));
   }
 }
@@ -4538,7 +4534,6 @@ cmMakefile::FunctionPushPop::FunctionPushPop(cmMakefile* mf,
                                              const std::string& fileName,
                                              cmPolicies::PolicyMap const& pm)
   : Makefile(mf)
-  , ReportError(true)
 {
   this->Makefile->PushFunctionScope(fileName, pm);
 }
@@ -4552,7 +4547,6 @@ cmMakefile::MacroPushPop::MacroPushPop(cmMakefile* mf,
                                        const std::string& fileName,
                                        const cmPolicies::PolicyMap& pm)
   : Makefile(mf)
-  , ReportError(true)
 {
   this->Makefile->PushMacroScope(fileName, pm);
 }

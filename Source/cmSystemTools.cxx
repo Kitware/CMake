@@ -1995,7 +1995,7 @@ int cmSystemTools::WaitForLine(cmsysProcess* process, std::string& line,
           --length;
         }
         if (length > 0) {
-          line.append(&out[0], length);
+          line.append(out.data(), length);
         }
         out.erase(out.begin(), outiter + 1);
         return cmsysProcess_Pipe_STDOUT;
@@ -2013,7 +2013,7 @@ int cmSystemTools::WaitForLine(cmsysProcess* process, std::string& line,
           --length;
         }
         if (length > 0) {
-          line.append(&err[0], length);
+          line.append(err.data(), length);
         }
         err.erase(err.begin(), erriter + 1);
         return cmsysProcess_Pipe_STDERR;
@@ -2057,12 +2057,12 @@ int cmSystemTools::WaitForLine(cmsysProcess* process, std::string& line,
         erriter = err.begin() + size;
       }
       if (!out.empty()) {
-        line.append(&out[0], outiter - out.begin());
+        line.append(out.data(), outiter - out.begin());
         out.erase(out.begin(), out.end());
         return cmsysProcess_Pipe_STDOUT;
       }
       if (!err.empty()) {
-        line.append(&err[0], erriter - err.begin());
+        line.append(err.data(), erriter - err.begin());
         err.erase(err.begin(), err.end());
         return cmsysProcess_Pipe_STDERR;
       }
@@ -3149,7 +3149,7 @@ static cm::optional<bool> RemoveRPathELF(std::string const& file,
     }
     return false;
   }
-  if (!f.write(&bytes[0], bytes.size())) {
+  if (!f.write(bytes.data(), bytes.size())) {
     if (emsg) {
       *emsg = "Error replacing DYNAMIC table header.";
     }

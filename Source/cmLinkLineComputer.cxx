@@ -18,10 +18,6 @@ cmLinkLineComputer::cmLinkLineComputer(cmOutputConverter* outputConverter,
                                        cmStateDirectory const& stateDir)
   : StateDir(stateDir)
   , OutputConverter(outputConverter)
-  , ForResponse(false)
-  , UseWatcomQuote(false)
-  , UseNinjaMulti(false)
-  , Relink(false)
 {
 }
 

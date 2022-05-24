@@ -13,9 +13,7 @@ dnf install --setopt=install_weak_deps=False -y \
 
 curl -sSL https://get.rvm.io | bash -s stable
 
-# This is intentionally an older version.
-# If updating, the associated `env_fedora*_makefiles.cmake` file needs updated
-# as well.
-/usr/local/rvm/bin/rvm install ruby-2.7.0
+# keep version in sync with `env_fedora*_makefiles.cmake`
+/usr/local/rvm/bin/rvm install ruby-3.0.4
 
 tar -C /usr/local -cf /root/rvm.tar rvm

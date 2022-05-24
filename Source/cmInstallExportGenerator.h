@@ -65,7 +65,7 @@ protected:
   std::string const FileName;
   std::string const Namespace;
   bool const ExportOld;
-  cmLocalGenerator* LocalGenerator;
+  cmLocalGenerator* LocalGenerator = nullptr;
 
   std::string TempDir;
   std::string MainImportFile;

@@ -12,8 +12,6 @@ cmScriptGenerator::cmScriptGenerator(std::string config_var,
                                      std::vector<std::string> configurations)
   : RuntimeConfigVariable(std::move(config_var))
   , Configurations(std::move(configurations))
-  , ConfigurationTypes(nullptr)
-  , ActionsPerConfig(false)
 {
 }
 

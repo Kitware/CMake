@@ -32,11 +32,7 @@ class LanguageStandardState
 {
 public:
   LanguageStandardState(std::string&& lang)
-    : IsEnabled(false)
-    , DidStandard(false)
-    , DidStandardRequired(false)
-    , DidExtensions(false)
-    , StandardFlag(lang + "_STANDARD")
+    : StandardFlag(lang + "_STANDARD")
     , RequiredFlag(lang + "_STANDARD_REQUIRED")
     , ExtensionFlag(lang + "_EXTENSIONS")
   {
@@ -154,10 +150,10 @@ public:
   }
 
 private:
-  bool IsEnabled;
-  bool DidStandard;
-  bool DidStandardRequired;
-  bool DidExtensions;
+  bool IsEnabled = false;
+  bool DidStandard = false;
+  bool DidStandardRequired = false;
+  bool DidExtensions = false;
 
   std::string StandardFlag;
   std::string RequiredFlag;

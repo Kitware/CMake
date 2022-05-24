@@ -468,7 +468,7 @@ std::string cmCPackIFWGenerator::GetComponentInstallDirNameSuffix(
   const std::string suffix = "/data";
 
   if (this->componentPackageMethod == this->ONE_PACKAGE) {
-    return std::string(prefix + this->GetRootPackageName() + suffix);
+    return cmStrCat(prefix, this->GetRootPackageName(), suffix);
   }
 
   return prefix +

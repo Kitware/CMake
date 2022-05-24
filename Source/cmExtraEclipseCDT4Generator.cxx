@@ -737,7 +737,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     // exclude source directory from output search path
     // - only if not named the same as an output directory
     if (!cmSystemTools::FileIsDirectory(
-          std::string(this->HomeOutputDirectory + "/" + p))) {
+          cmStrCat(this->HomeOutputDirectory, '/', p))) {
       excludeFromOut += p + "/|";
     }
   }

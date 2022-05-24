@@ -881,7 +881,7 @@ private:
 
   std::string CreateFortranModuleDirectory(
     std::string const& working_dir) const;
-  mutable bool FortranModuleDirectoryCreated;
+  mutable bool FortranModuleDirectoryCreated = false;
   mutable std::string FortranModuleDirectory;
 
   friend class cmTargetTraceDependencies;
@@ -906,7 +906,7 @@ private:
   mutable std::string ExportMacro;
 
   void ConstructSourceFileFlags() const;
-  mutable bool SourceFileFlagsConstructed;
+  mutable bool SourceFileFlagsConstructed = false;
   mutable std::map<cmSourceFile const*, SourceFileFlags> SourceFlagsMap;
 
   mutable std::map<std::string, bool> DebugCompatiblePropertiesDone;
@@ -1143,24 +1143,24 @@ private:
   mutable OutputNameMapType OutputNameMap;
   mutable std::set<cmLinkItem> UtilityItems;
   cmPolicies::PolicyMap PolicyMap;
-  mutable bool PolicyWarnedCMP0022;
-  mutable bool PolicyReportedCMP0069;
-  mutable bool DebugIncludesDone;
-  mutable bool DebugCompileOptionsDone;
-  mutable bool DebugCompileFeaturesDone;
-  mutable bool DebugCompileDefinitionsDone;
-  mutable bool DebugLinkOptionsDone;
-  mutable bool DebugLinkDirectoriesDone;
-  mutable bool DebugPrecompileHeadersDone;
-  mutable bool DebugSourcesDone;
-  mutable bool UtilityItemsDone;
+  mutable bool PolicyWarnedCMP0022 = false;
+  mutable bool PolicyReportedCMP0069 = false;
+  mutable bool DebugIncludesDone = false;
+  mutable bool DebugCompileOptionsDone = false;
+  mutable bool DebugCompileFeaturesDone = false;
+  mutable bool DebugCompileDefinitionsDone = false;
+  mutable bool DebugLinkOptionsDone = false;
+  mutable bool DebugLinkDirectoriesDone = false;
+  mutable bool DebugPrecompileHeadersDone = false;
+  mutable bool DebugSourcesDone = false;
+  mutable bool UtilityItemsDone = false;
   enum class Tribool
   {
     False = 0x0,
     True = 0x1,
     Indeterminate = 0x2
   };
-  mutable Tribool SourcesAreContextDependent;
+  mutable Tribool SourcesAreContextDependent = Tribool::Indeterminate;
 
   bool ComputePDBOutputDir(const std::string& kind, const std::string& config,
                            std::string& out) const;

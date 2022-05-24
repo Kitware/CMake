@@ -617,7 +617,7 @@ void cmCursesMainForm::FillCacheManagerFromUI()
     cmValue existingValue =
       this->CMakeInstance->GetState()->GetCacheEntryValue(cacheKey);
     if (existingValue) {
-      std::string oldValue = *existingValue;
+      std::string const& oldValue = *existingValue;
       std::string newValue = entry.Entry->GetValue();
       std::string fixedOldValue;
       std::string fixedNewValue;
@@ -973,7 +973,7 @@ void cmCursesMainForm::JumpToCacheEntry(const char* astr)
         }
       }
     }
-    if (size_t(findex) >= 3 * this->NumberOfVisibleEntries - 1) {
+    if (static_cast<size_t>(findex) >= 3 * this->NumberOfVisibleEntries - 1) {
       set_current_field(this->Form, this->Fields[2]);
     } else if (new_page(this->Fields[findex + 1])) {
       form_driver(this->Form, REQ_NEXT_PAGE);

@@ -413,7 +413,7 @@ static const struct TargetExistsNode : public cmGeneratorExpressionNode
       return std::string();
     }
 
-    std::string targetName = parameters.front();
+    std::string const& targetName = parameters.front();
     if (targetName.empty() ||
         !cmGeneratorExpression::IsValidTargetName(targetName)) {
       reportError(context, content->GetOriginalExpression(),
@@ -445,7 +445,7 @@ static const struct TargetNameIfExistsNode : public cmGeneratorExpressionNode
       return std::string();
     }
 
-    std::string targetName = parameters.front();
+    std::string const& targetName = parameters.front();
     if (targetName.empty() ||
         !cmGeneratorExpression::IsValidTargetName(targetName)) {
       reportError(context, content->GetOriginalExpression(),
@@ -1759,7 +1759,7 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
     const GeneratorExpressionContent* content,
     cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
   {
-    std::string tgtName = parameters.front();
+    std::string const& tgtName = parameters.front();
     cmGeneratorTarget* gt = context->LG->FindGeneratorTargetToUse(tgtName);
     if (!gt) {
       std::ostringstream e;
@@ -1847,7 +1847,7 @@ static const struct TargetRuntimeDllsNode : public cmGeneratorExpressionNode
     const GeneratorExpressionContent* content,
     cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
   {
-    std::string tgtName = parameters.front();
+    std::string const& tgtName = parameters.front();
     cmGeneratorTarget* gt = context->LG->FindGeneratorTargetToUse(tgtName);
     if (!gt) {
       std::ostringstream e;
@@ -2396,7 +2396,7 @@ protected:
     cmGeneratorExpressionDAGChecker* dagChecker) const
   {
     // Lookup the referenced target.
-    std::string name = parameters.front();
+    std::string const& name = parameters.front();
 
     if (!cmGeneratorExpression::IsValidTargetName(name)) {
       ::reportError(context, content->GetOriginalExpression(),

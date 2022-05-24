@@ -322,7 +322,7 @@ std::string cmCTest::DecodeURL(const std::string& in)
   for (const char* c = in.c_str(); *c; ++c) {
     if (*c == '%' && isxdigit(*(c + 1)) && isxdigit(*(c + 2))) {
       char buf[3] = { *(c + 1), *(c + 2), 0 };
-      out.append(1, char(strtoul(buf, nullptr, 16)));
+      out.append(1, static_cast<char>(strtoul(buf, nullptr, 16)));
       c += 2;
     } else {
       out.append(1, *c);
@@ -357,7 +357,7 @@ cmCTest::cmCTest()
   this->Impl->Parts[PartDone].SetName("Done");
 
   // Fill the part name-to-id map.
-  for (Part p = PartStart; p != PartCount; p = Part(p + 1)) {
+  for (Part p = PartStart; p != PartCount; p = static_cast<Part>(p + 1)) {
     this->Impl
       ->PartMap[cmSystemTools::LowerCase(this->Impl->Parts[p].GetName())] = p;
   }
@@ -643,7 +643,7 @@ bool cmCTest::InitializeFromCommand(cmCTestStartCommand* command)
   std::string src_dir = this->GetCTestConfiguration("SourceDirectory");
   std::string bld_dir = this->GetCTestConfiguration("BuildDirectory");
   this->Impl->BuildID = "";
-  for (Part p = PartStart; p != PartCount; p = Part(p + 1)) {
+  for (Part p = PartStart; p != PartCount; p = static_cast<Part>(p + 1)) {
     this->Impl->Parts[p].SubmitFiles.clear();
   }
 
@@ -797,7 +797,7 @@ int cmCTest::GetTestModel() const
 bool cmCTest::SetTest(const std::string& ttype, bool report)
 {
   if (cmSystemTools::LowerCase(ttype) == "all") {
-    for (Part p = PartStart; p != PartCount; p = Part(p + 1)) {
+    for (Part p = PartStart; p != PartCount; p = static_cast<Part>(p + 1)) {
       this->Impl->Parts[p].Enable();
     }
     return true;
@@ -935,7 +935,8 @@ int cmCTest::ProcessSteps()
   bool notest = true;
   int update_count = 0;
 
-  for (Part p = PartStart; notest && p != PartCount; p = Part(p + 1)) {
+  for (Part p = PartStart; notest && p != PartCount;
+       p = static_cast<Part>(p + 1)) {
     notest = !this->Impl->Parts[p];
   }
   if (this->Impl->Parts[PartUpdate] &&
@@ -1672,16 +1673,16 @@ std::string cmCTest::Base64EncodeFile(std::string const& file)
 #endif
   );
   std::vector<char> file_buffer(len + 1);
-  ifs.read(&file_buffer[0], len);
+  ifs.read(file_buffer.data(), len);
   ifs.close();
 
   std::vector<char> encoded_buffer((len * 3) / 2 + 5);
 
   size_t const rlen = cmsysBase64_Encode(
-    reinterpret_cast<unsigned char*>(&file_buffer[0]), len,
-    reinterpret_cast<unsigned char*>(&encoded_buffer[0]), 1);
+    reinterpret_cast<unsigned char*>(file_buffer.data()), len,
+    reinterpret_cast<unsigned char*>(encoded_buffer.data()), 1);
 
-  return std::string(&encoded_buffer[0], rlen);
+  return std::string(encoded_buffer.data(), rlen);
 }
 
 bool cmCTest::SubmitExtraFiles(std::vector<std::string> const& files)
@@ -2019,7 +2020,8 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
     i++;
     long outputSize;
     if (cmStrToLong(args[i], &outputSize)) {
-      this->Impl->TestHandler.SetTestOutputSizePassed(int(outputSize));
+      this->Impl->TestHandler.SetTestOutputSizePassed(
+        static_cast<int>(outputSize));
     } else {
       cmCTestLog(this, WARNING,
                  "Invalid value for '--test-output-size-passed': " << args[i]
@@ -2030,7 +2032,8 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
     i++;
     long outputSize;
     if (cmStrToLong(args[i], &outputSize)) {
-      this->Impl->TestHandler.SetTestOutputSizeFailed(int(outputSize));
+      this->Impl->TestHandler.SetTestOutputSizeFailed(
+        static_cast<int>(outputSize));
     } else {
       cmCTestLog(this, WARNING,
                  "Invalid value for '--test-output-size-failed': " << args[i]
@@ -2801,7 +2804,7 @@ bool cmCTest::HandleTestActionArgument(const char* ctestExec, size_t& i,
                                        const std::vector<std::string>& args)
 {
   bool success = true;
-  std::string arg = args[i];
+  std::string const& arg = args[i];
   if (this->CheckArgument(arg, "-T"_s, "--test-action") &&
       (i < args.size() - 1)) {
     this->Impl->ProduceXML = true;
@@ -2833,7 +2836,7 @@ bool cmCTest::HandleTestModelArgument(const char* ctestExec, size_t& i,
                                       const std::vector<std::string>& args)
 {
   bool success = true;
-  std::string arg = args[i];
+  std::string const& arg = args[i];
   if (this->CheckArgument(arg, "-M"_s, "--test-model") &&
       (i < args.size() - 1)) {
     i++;
@@ -3729,7 +3732,7 @@ bool cmCTest::CompressString(std::string& str)
   strm.avail_in = static_cast<uInt>(str.size());
   strm.next_in = in;
   strm.avail_out = outSize;
-  strm.next_out = &out[0];
+  strm.next_out = out.data();
   ret = deflate(&strm, Z_FINISH);
 
   if (ret != Z_STREAM_END) {
@@ -3743,10 +3746,10 @@ bool cmCTest::CompressString(std::string& str)
   // Now base64 encode the resulting binary string
   std::vector<unsigned char> base64EncodedBuffer((outSize * 3) / 2);
 
-  size_t rlen =
-    cmsysBase64_Encode(&out[0], strm.total_out, &base64EncodedBuffer[0], 1);
+  size_t rlen = cmsysBase64_Encode(out.data(), strm.total_out,
+                                   base64EncodedBuffer.data(), 1);
 
-  str.assign(reinterpret_cast<char*>(&base64EncodedBuffer[0]), rlen);
+  str.assign(reinterpret_cast<char*>(base64EncodedBuffer.data()), rlen);
 
   return true;
 }

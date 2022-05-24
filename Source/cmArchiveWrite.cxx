@@ -92,7 +92,6 @@ cmArchiveWrite::cmArchiveWrite(std::ostream& os, Compress c,
   : Stream(os)
   , Archive(archive_write_new())
   , Disk(archive_read_disk_new())
-  , Verbose(false)
   , Format(format)
 {
   // Upstream fixed an issue with their integer parsing in 3.4.0

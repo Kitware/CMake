@@ -23,13 +23,6 @@ using namespace cmFSPermissions;
 
 cmFileInstaller::cmFileInstaller(cmExecutionStatus& status)
   : cmFileCopier(status, "INSTALL")
-  , InstallType(cmInstallType_FILES)
-  , InstallMode(cmInstallMode::COPY)
-  , Optional(false)
-  , MessageAlways(false)
-  , MessageLazy(false)
-  , MessageNever(false)
-  , DestDirLength(0)
 {
   // Installation does not use source permissions by default.
   this->UseSourcePermissions = false;
@@ -440,7 +433,7 @@ bool cmFileInstaller::HandleInstallDestination()
       }
     }
     destination = sdestdir + destination.substr(skip);
-    this->DestDirLength = int(sdestdir.size());
+    this->DestDirLength = static_cast<int>(sdestdir.size());
   }
 
   // check if default dir creation permissions were set

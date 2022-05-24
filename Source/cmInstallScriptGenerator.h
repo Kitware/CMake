@@ -41,5 +41,5 @@ protected:
   std::string const Script;
   bool const Code;
   cmLocalGenerator* LocalGenerator;
-  bool AllowGenex;
+  bool AllowGenex = false;
 };

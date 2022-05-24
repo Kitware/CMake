@@ -65,5 +65,5 @@ private:
   cmGeneratorTarget* GT;
   cmMakefile* Makefile;
   cmLocalGenerator* LocalGenerator;
-  std::set<std::string>* MacContentFolders;
+  std::set<std::string>* MacContentFolders = nullptr;
 };

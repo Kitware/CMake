@@ -156,7 +156,7 @@ private:
   std::ostream& Stream;
   struct archive* Archive;
   struct archive* Disk;
-  bool Verbose;
+  bool Verbose = false;
   std::string Format;
   std::string Error;
   std::string MTime;

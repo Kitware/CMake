@@ -2210,7 +2210,7 @@ int cmCTestCoverageHandler::GetLabelId(std::string const& label)
 {
   auto i = this->LabelIdMap.find(label);
   if (i == this->LabelIdMap.end()) {
-    int n = int(this->Labels.size());
+    int n = static_cast<int>(this->Labels.size());
     this->Labels.push_back(label);
     LabelIdMapType::value_type entry(label, n);
     i = this->LabelIdMap.insert(entry).first;

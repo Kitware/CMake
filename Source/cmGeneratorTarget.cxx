@@ -335,20 +335,6 @@ EvaluatedTargetPropertyEntries EvaluateTargetPropertyEntries(
 
 cmGeneratorTarget::cmGeneratorTarget(cmTarget* t, cmLocalGenerator* lg)
   : Target(t)
-  , FortranModuleDirectoryCreated(false)
-  , SourceFileFlagsConstructed(false)
-  , PolicyWarnedCMP0022(false)
-  , PolicyReportedCMP0069(false)
-  , DebugIncludesDone(false)
-  , DebugCompileOptionsDone(false)
-  , DebugCompileFeaturesDone(false)
-  , DebugCompileDefinitionsDone(false)
-  , DebugLinkOptionsDone(false)
-  , DebugLinkDirectoriesDone(false)
-  , DebugPrecompileHeadersDone(false)
-  , DebugSourcesDone(false)
-  , UtilityItemsDone(false)
-  , SourcesAreContextDependent(Tribool::Indeterminate)
 {
   this->Makefile = this->Target->GetMakefile();
   this->LocalGenerator = lg;
@@ -2775,15 +2761,14 @@ cmGeneratorTarget::LinkClosure const* cmGeneratorTarget::GetLinkClosure(
 
 class cmTargetSelectLinker
 {
-  int Preference;
+  int Preference = 0;
   cmGeneratorTarget const* Target;
   cmGlobalGenerator* GG;
   std::set<std::string> Preferred;
 
 public:
   cmTargetSelectLinker(cmGeneratorTarget const* target)
-    : Preference(0)
-    , Target(target)
+    : Target(target)
   {
     this->GG = this->Target->GetLocalGenerator()->GetGlobalGenerator();
   }

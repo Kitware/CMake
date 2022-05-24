@@ -32,7 +32,6 @@ cmInstallExportGenerator::cmInstallExportGenerator(
   , FileName(std::move(filename))
   , Namespace(std::move(name_space))
   , ExportOld(exportOld)
-  , LocalGenerator(nullptr)
 {
   if (android) {
 #ifndef CMAKE_BOOTSTRAP

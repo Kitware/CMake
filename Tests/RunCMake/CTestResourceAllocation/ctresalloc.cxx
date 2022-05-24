@@ -89,7 +89,8 @@ static int doWrite(int argc, char const* const* argv)
       return 1;
     }
     int resourceGroupCount = std::atoi(resourceGroupCountEnv);
-    if (resourceGroups.size() != std::size_t(resourceGroupCount)) {
+    if (resourceGroups.size() !=
+        static_cast<std::size_t>(resourceGroupCount)) {
       std::cout
         << "CTEST_RESOURCE_GROUP_COUNT does not match expected resource groups"
         << std::endl
