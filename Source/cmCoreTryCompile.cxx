@@ -986,7 +986,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
   if (this->Makefile->GetState()->UseIarIDE()) {
     // Forward the GHS variables to the inner project cache.
     for (std::string const& var : iar_platform_vars) {
-      if (cmProp val = this->Makefile->GetDefinition(var)) {
+      if (cmValue val = this->Makefile->GetDefinition(var)) {
         std::string flag = "-D" + var + "=" + "'" + *val + "'";
         cmakeFlags.push_back(std::move(flag));
       }

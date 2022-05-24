@@ -1388,7 +1388,7 @@ void cmGlobalIarGenerator::ConvertTargetToProject(const cmTarget& tgt,
       {
       if (it->first == l.get()->GetName())
         {
-          cmProp propStrPtr = l.get()->GetProperty(importedLocationStr);
+          cmValue propStrPtr = l.get()->GetProperty(importedLocationStr);
           const char* pPropertyStr = NULL;
           if (propStrPtr != NULL)
           {
