@@ -58,3 +58,13 @@ target_sources(lang_test_c INTERFACE FILE_SET HEADERS FILES lang_test.h)
 add_library(lang_test_cxx STATIC lib.c lib.cxx)
 target_compile_definitions(lang_test_cxx INTERFACE EXPECT_CXX)
 target_sources(lang_test_cxx INTERFACE FILE_SET HEADERS FILES lang_test.h)
+
+set_property(SOURCE error.h PROPERTY LANGUAGE C)
+
+add_library(list STATIC lib.c)
+target_sources(list INTERFACE
+  FILE_SET a TYPE HEADERS FILES a.h
+  FILE_SET c TYPE HEADERS FILES dir/c.h
+  FILE_SET error TYPE HEADERS FILES error.h
+  )
+set_property(TARGET list PROPERTY INTERFACE_HEADER_SETS_TO_VERIFY "a;c")
