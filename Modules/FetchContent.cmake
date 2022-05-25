@@ -193,6 +193,11 @@ Commands
       ``OVERRIDE_FIND_PACKAGE`` cannot be used when ``FIND_PACKAGE_ARGS`` is
       given.
 
+      :ref:`dependency_providers` discusses another way that
+      :command:`FetchContent_MakeAvailable` calls can be redirected.
+      ``FIND_PACKAGE_ARGS`` is intended for project control, whereas
+      dependency providers allow users to override project behavior.
+
     ``OVERRIDE_FIND_PACKAGE``
       When a ``FetchContent_Declare(<name> ...)`` call includes this option,
       subsequent calls to ``find_package(<name> ...)`` will ensure that
@@ -203,6 +208,13 @@ Commands
       :command:`find_package` for the named dependency, allowing the former to
       satisfy the package requirements of the latter.  ``FIND_PACKAGE_ARGS``
       cannot be used when ``OVERRIDE_FIND_PACKAGE`` is given.
+
+      If a :ref:`dependency provider <dependency_providers>` has been set
+      and the project calls :command:`find_package` for the ``<name>``
+      dependency, ``OVERRIDE_FIND_PACKAGE`` will not prevent the provider
+      from seeing that call.  Dependency providers always have the opportunity
+      to intercept any direct call to :command:`find_package`, except if that
+      call contains the ``BYPASS_PROVIDER`` option.
 
 .. command:: FetchContent_MakeAvailable
 
@@ -217,17 +229,35 @@ Commands
   :command:`FetchContent_Declare` for each dependency, and the first such call
   will control how that dependency will be made available, as described below.
 
-  .. versionadded:: 3.24
-    If permitted, :command:`find_package(<name> [<args>...]) <find_package>`
-    will be called, where ``<args>...`` may be provided by the
-    ``FIND_PACKAGE_ARGS`` option in :command:`FetchContent_Declare`.
-    The value of the :variable:`FETCHCONTENT_TRY_FIND_PACKAGE_MODE` variable
-    at the time :command:`FetchContent_Declare` was called determines whether
-    ``FetchContent_MakeAvailable()`` can call :command:`find_package`.
+  If ``<lowercaseName>_SOURCE_DIR`` is not set:
 
-  If :command:`find_package` was unsuccessful or was not allowed to be called,
-  ``FetchContent_MakeAvailable()`` then uses the following logic to make the
-  dependency available:
+  * .. versionadded:: 3.24
+
+      If a :ref:`dependency provider <dependency_providers>` is set, call the
+      provider's command with ``FETCHCONTENT_MAKEAVAILABLE_SERIAL`` as the
+      first argument, followed by the arguments of the first call to
+      :command:`FetchContent_Declare` for ``<name>``.  If ``SOURCE_DIR`` or
+      ``BINARY_DIR`` were not part of the original declared arguments, they
+      will be added with their default values.
+      If :variable:`FETCHCONTENT_TRY_FIND_PACKAGE_MODE` was set to ``NEVER``
+      when the details were declared, any ``FIND_PACKAGE_ARGS`` will be
+      omitted.  The ``OVERRIDE_FIND_PACKAGE`` keyword is also always omitted.
+      If the provider fulfilled the request, ``FetchContent_MakeAvailable()``
+      will consider that dependency handled, skip the remaining steps below
+      and move on to the next dependency in the list.
+
+  * .. versionadded:: 3.24
+
+      If permitted, :command:`find_package(<name> [<args>...]) <find_package>`
+      will be called, where ``<args>...`` may be provided by the
+      ``FIND_PACKAGE_ARGS`` option in :command:`FetchContent_Declare`.
+      The value of the :variable:`FETCHCONTENT_TRY_FIND_PACKAGE_MODE` variable
+      at the time :command:`FetchContent_Declare` was called determines whether
+      ``FetchContent_MakeAvailable()`` can call :command:`find_package`.
+
+  If the dependency was not satisfied by a provider or a
+  :command:`find_package` call, ``FetchContent_MakeAvailable()`` then uses
+  the following logic to make the dependency available:
 
   * If the dependency has already been populated earlier in this run, set
     the ``<lowercaseName>_POPULATED``, ``<lowercaseName>_SOURCE_DIR`` and
@@ -468,7 +498,7 @@ Commands
   When using saved content details, a call to
   :command:`FetchContent_MakeAvailable` or :command:`FetchContent_Populate`
   records information in global properties which can be queried at any time.
-  This information includes the source and binary directories associated with
+  This information may include the source and binary directories associated with
   the content and also whether or not the content population has been processed
   during the current configure run.
 
@@ -488,6 +518,8 @@ Commands
   set the same variables as a call to
   :command:`FetchContent_MakeAvailable(name) <FetchContent_MakeAvailable>` or
   :command:`FetchContent_Populate(name) <FetchContent_Populate>`.
+  Note that the ``SOURCE_DIR`` and ``BINARY_DIR`` values can be empty if the
+  call is fulfilled by a :ref:`dependency provider <dependency_providers>`.
 
   This command is rarely needed when using
   :command:`FetchContent_MakeAvailable`.  It is more commonly used as part of
@@ -510,6 +542,33 @@ Commands
       # Bring the populated content into the build
       add_subdirectory(${depname_SOURCE_DIR} ${depname_BINARY_DIR})
     endif()
+
+.. command:: FetchContent_SetPopulated
+
+  .. versionadded:: 3.24
+
+  .. note::
+    This command should only be called by
+    :ref:`dependency providers <dependency_providers>`.  Calling it in any
+    other context is unsupported and future CMake versions may halt with a
+    fatal error in such cases.
+
+  .. code-block:: cmake
+
+    FetchContent_SetPopulated(
+      <name>
+      [SOURCE_DIR <srcDir>]
+      [BINARY_DIR <binDir>]
+    )
+
+  If a provider command fulfills a ``FETCHCONTENT_MAKEAVAILABLE_SERIAL``
+  request, it must call this function before returning.  The ``SOURCE_DIR``
+  and ``BINARY_DIR`` arguments can be used to specify the values that
+  :command:`FetchContent_GetProperties` should return for its corresponding
+  arguments.  Only provide ``SOURCE_DIR`` and ``BINARY_DIR`` if they have
+  the same meaning as if they had been populated by the built-in
+  :command:`FetchContent_MakeAvailable` implementation.
+
 
 Variables
 ^^^^^^^^^
@@ -588,7 +647,7 @@ A number of cache variables can influence the behavior where details from a
     behavior if ``FETCHCONTENT_TRY_FIND_PACKAGE_MODE`` is not set.
 
   ``ALWAYS``
-    :command:`find_package` will be called by
+    :command:`find_package` can be called by
     :command:`FetchContent_MakeAvailable` regardless of whether the
     :command:`FetchContent_Declare` call included a ``FIND_PACKAGE_ARGS``
     keyword or not.  If no ``FIND_PACKAGE_ARGS`` keyword was given, the
@@ -1099,14 +1158,26 @@ function(FetchContent_Declare contentName)
   endif()
 
   set(options "")
-  set(oneValueArgs SVN_REPOSITORY)
+  set(oneValueArgs
+    BINARY_DIR
+    SOURCE_DIR
+    SVN_REPOSITORY
+  )
   set(multiValueArgs "")
 
   cmake_parse_arguments(PARSE_ARGV 1 ARG
     "${options}" "${oneValueArgs}" "${multiValueArgs}")
 
-  unset(srcDirSuffix)
-  unset(svnRepoArgs)
+  string(TOLOWER ${contentName} contentNameLower)
+
+  if(NOT ARG_BINARY_DIR)
+    set(ARG_BINARY_DIR "${FETCHCONTENT_BASE_DIR}/${contentNameLower}-build")
+  endif()
+
+  if(NOT ARG_SOURCE_DIR)
+    set(ARG_SOURCE_DIR "${FETCHCONTENT_BASE_DIR}/${contentNameLower}-src")
+  endif()
+
   if(ARG_SVN_REPOSITORY)
     # Add a hash of the svn repository URL to the source dir. This works
     # around the problem where if the URL changes, the download would
@@ -1116,25 +1187,21 @@ function(FetchContent_Declare contentName)
     # problem on windows due to path length limits).
     string(SHA1 urlSHA ${ARG_SVN_REPOSITORY})
     string(SUBSTRING ${urlSHA} 0 7 urlSHA)
-    set(srcDirSuffix "-${urlSHA}")
-    set(svnRepoArgs  SVN_REPOSITORY ${ARG_SVN_REPOSITORY})
+    string(APPEND ARG_SOURCE_DIR "-${urlSHA}")
+    list(PREPEND ARG_UNPARSED_ARGUMENTS SVN_REPOSITORY "${ARG_SVN_REPOSITORY}")
   endif()
 
-  string(TOLOWER ${contentName} contentNameLower)
+  list(PREPEND ARG_UNPARSED_ARGUMENTS
+    SOURCE_DIR "${ARG_SOURCE_DIR}"
+    BINARY_DIR "${ARG_BINARY_DIR}"
+  )
 
   set(__argsQuoted)
   foreach(__item IN LISTS ARG_UNPARSED_ARGUMENTS)
     string(APPEND __argsQuoted " [==[${__item}]==]")
   endforeach()
-  cmake_language(EVAL CODE "
-    __FetchContent_declareDetails(
-      ${contentNameLower}
-      SOURCE_DIR \"${FETCHCONTENT_BASE_DIR}/${contentNameLower}-src${srcDirSuffix}\"
-      BINARY_DIR \"${FETCHCONTENT_BASE_DIR}/${contentNameLower}-build\"
-      \${svnRepoArgs}
-      # List these last so they can override things we set above
-      ${__argsQuoted}
-    )"
+  cmake_language(EVAL CODE
+    "__FetchContent_declareDetails(${contentNameLower} ${__argsQuoted})"
   )
 
 endfunction()
@@ -1145,11 +1212,11 @@ endfunction()
 # The setter also records the source and binary dirs used.
 #=======================================================================
 
-# Internal use, projects must not call this directly. It is intended
-# for use by things like the FetchContent_Populate() function to
-# record when FetchContent_Populate() is called for a particular
-# content name.
-function(__FetchContent_setPopulated contentName)
+# Semi-internal use. Projects must not call this directly. Dependency
+# providers must call it if they satisfy a request made with the
+# FETCHCONTENT_MAKEAVAILABLE_SERIAL method (that is the only permitted
+# place to call it outside of the FetchContent module).
+function(FetchContent_SetPopulated contentName)
 
   cmake_parse_arguments(PARSE_ARGV 1 arg
     ""
@@ -1165,10 +1232,18 @@ function(__FetchContent_setPopulated contentName)
 
   set(propertyName "${prefix}_sourceDir")
   define_property(GLOBAL PROPERTY ${propertyName})
+  if("${arg_SOURCE_DIR}" STREQUAL "")
+    # Don't discard a previously provided SOURCE_DIR
+    get_property(arg_SOURCE_DIR GLOBAL PROPERTY ${propertyName})
+  endif()
   set_property(GLOBAL PROPERTY ${propertyName} "${arg_SOURCE_DIR}")
 
   set(propertyName "${prefix}_binaryDir")
   define_property(GLOBAL PROPERTY ${propertyName})
+  if("${arg_BINARY_DIR}" STREQUAL "")
+    # Don't discard a previously provided BINARY_DIR
+    get_property(arg_BINARY_DIR GLOBAL PROPERTY ${propertyName})
+  endif()
   set_property(GLOBAL PROPERTY ${propertyName} "${arg_BINARY_DIR}")
 
   set(propertyName "${prefix}_populated")
@@ -1480,7 +1555,8 @@ function(FetchContent_Populate contentName)
   if(${contentNameLower}_POPULATED)
     if("${${contentNameLower}_SOURCE_DIR}" STREQUAL "")
       message(FATAL_ERROR
-        "Content ${contentName} already populated by find_package()"
+        "Content ${contentName} already populated by find_package() or a "
+        "dependency provider"
       )
     else()
       message(FATAL_ERROR
@@ -1584,7 +1660,7 @@ function(FetchContent_Populate contentName)
     )
   endif()
 
-  __FetchContent_setPopulated(
+  FetchContent_SetPopulated(
     ${contentName}
     SOURCE_DIR "${${contentNameLower}_SOURCE_DIR}"
     BINARY_DIR "${${contentNameLower}_BINARY_DIR}"
@@ -1654,22 +1730,98 @@ endfunction()
 # calls will be available to the caller.
 macro(FetchContent_MakeAvailable)
 
+  get_property(__cmake_providerCommand GLOBAL PROPERTY
+    __FETCHCONTENT_MAKEAVAILABLE_SERIAL_PROVIDER
+  )
   foreach(__cmake_contentName IN ITEMS ${ARGV})
     string(TOLOWER ${__cmake_contentName} __cmake_contentNameLower)
 
     # If user specified FETCHCONTENT_SOURCE_DIR_... for this dependency, that
-    # overrides everything else and we shouldn't try to use find_package().
+    # overrides everything else and we shouldn't try to use find_package() or
+    # a dependency provider.
     string(TOUPPER ${__cmake_contentName} __cmake_contentNameUpper)
     if("${FETCHCONTENT_SOURCE_DIR_${__cmake_contentNameUpper}}" STREQUAL "")
+      # Dependency provider gets first opportunity, but prevent infinite
+      # recursion if we are called again for the same thing
+      if(NOT "${__cmake_providerCommand}" STREQUAL "" AND
+        NOT DEFINED __cmake_fcProvider_${__cmake_contentNameLower})
+        message(VERBOSE
+          "Trying FETCHCONTENT_MAKEAVAILABLE_SERIAL dependency provider for "
+          "${__cmake_contentName}"
+        )
+        # It's still valid if there are no saved details. The project may have
+        # been written to assume a dependency provider is always set and will
+        # provide dependencies without having any declared details for them.
+        __FetchContent_getSavedDetails(${__cmake_contentName} __cmake_contentDetails)
+        set(__cmake_providerArgs
+          "FETCHCONTENT_MAKEAVAILABLE_SERIAL"
+          "${__cmake_contentName}"
+        )
+        # Empty arguments must be preserved because of things like
+        # GIT_SUBMODULES (see CMP0097)
+        foreach(__cmake_item IN LISTS __cmake_contentDetails)
+          string(APPEND __cmake_providerArgs " [==[${__cmake_item}]==]")
+        endforeach()
+
+        # This property might be defined but empty. As long as it is defined,
+        # find_package() can be called.
+        get_property(__cmake_addfpargs GLOBAL PROPERTY
+          _FetchContent_${contentNameLower}_find_package_args
+          DEFINED
+        )
+        if(__cmake_addfpargs)
+          get_property(__cmake_fpargs GLOBAL PROPERTY
+            _FetchContent_${contentNameLower}_find_package_args
+          )
+          string(APPEND __cmake_providerArgs " FIND_PACKAGE_ARGS")
+          foreach(__cmake_item IN LISTS __cmake_fpargs)
+            string(APPEND __cmake_providerArgs " [==[${__cmake_item}]==]")
+          endforeach()
+        endif()
+
+        # Calling the provider could lead to FetchContent_MakeAvailable() being
+        # called for a nested dependency. That nested call may occur in the
+        # current variable scope. We have to save and restore the variables we
+        # need preserved.
+        list(APPEND __cmake_fcCurrentVarsStack
+          ${__cmake_contentName}
+          ${__cmake_contentNameLower}
+        )
+
+        set(__cmake_fcProvider_${__cmake_contentNameLower} YES)
+        cmake_language(EVAL CODE "${__cmake_providerCommand}(${__cmake_providerArgs})")
+        unset(__cmake_fcProvider_${__cmake_contentNameLower})
+
+        list(POP_BACK __cmake_fcCurrentVarsStack
+          __cmake_contentNameLower
+          __cmake_contentName
+        )
+
+        unset(__cmake_providerArgs)
+        unset(__cmake_addfpargs)
+        unset(__cmake_fpargs)
+        unset(__cmake_item)
+        unset(__cmake_contentDetails)
+
+        FetchContent_GetProperties(${__cmake_contentName})
+        if(${__cmake_contentNameLower}_POPULATED)
+          continue()
+        endif()
+      endif()
+
       # Check if we've been asked to try find_package() first, even if we
       # have already populated this dependency. If we previously tried to
       # use find_package() for this and it succeeded, those things might
       # no longer be in scope, so we have to do it again.
-      set(__cmake_fpArgsPropName "_FetchContent_${__cmake_contentNameLower}_find_package_args")
-      get_property(__cmake_haveFpArgs GLOBAL PROPERTY ${__cmake_fpArgsPropName} DEFINED)
+      get_property(__cmake_haveFpArgs GLOBAL PROPERTY
+        _FetchContent_${__cmake_contentNameLower}_find_package_args DEFINED
+      )
       if(__cmake_haveFpArgs)
+        unset(__cmake_haveFpArgs)
         message(VERBOSE "Trying find_package(${__cmake_contentName} ...) before FetchContent")
-        get_property(__cmake_fpArgs GLOBAL PROPERTY ${__cmake_fpArgsPropName})
+        get_property(__cmake_fpArgs GLOBAL PROPERTY
+          _FetchContent_${__cmake_contentNameLower}_find_package_args
+        )
 
         # This call could lead to FetchContent_MakeAvailable() being called for
         # a nested dependency and it may occur in the current variable scope.
@@ -1683,15 +1835,16 @@ macro(FetchContent_MakeAvailable)
           __cmake_contentNameLower
           __cmake_contentName
         )
+        unset(__cmake_fpArgs)
 
         if(${__cmake_contentName}_FOUND)
-          set(${__cmake_contentNameLower}_SOURCE_DIR "")
-          set(${__cmake_contentNameLower}_BINARY_DIR "")
-          set(${__cmake_contentNameLower}_POPULATED  TRUE)
-          __FetchContent_setPopulated(${__cmake_contentName})
+          FetchContent_SetPopulated(${__cmake_contentName})
+          FetchContent_GetProperties(${__cmake_contentName})
           continue()
         endif()
       endif()
+    else()
+      unset(__cmake_haveFpArgs)
     endif()
 
     FetchContent_GetProperties(${__cmake_contentName})
@@ -1731,5 +1884,7 @@ macro(FetchContent_MakeAvailable)
   # clear local variables to prevent leaking into the caller's scope
   unset(__cmake_contentName)
   unset(__cmake_contentNameLower)
+  unset(__cmake_contentNameUpper)
+  unset(__cmake_providerCommand)
 
 endmacro()

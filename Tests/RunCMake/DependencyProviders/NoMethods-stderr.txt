@@ -1,0 +1,2 @@
+CMake Error at set_provider\.cmake:[0-9]+ \(cmake_language\):
+  cmake_language Must specify at least one provider method

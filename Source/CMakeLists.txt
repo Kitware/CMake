@@ -199,6 +199,7 @@ set(SRCS
   cmCustomCommandTypes.h
   cmDefinitions.cxx
   cmDefinitions.h
+  cmDependencyProvider.h
   cmDepends.cxx
   cmDepends.h
   cmDependsC.cxx

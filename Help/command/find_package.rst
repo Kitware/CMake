@@ -12,7 +12,8 @@ find_package
    .. contents::
 
 Find a package (usually provided by something external to the project),
-and load its package-specific details.
+and load its package-specific details.  Calls to this command can also
+be intercepted by :ref:`dependency providers <dependency_providers>`.
 
 Search Modes
 ^^^^^^^^^^^^

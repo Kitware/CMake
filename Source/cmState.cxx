@@ -1072,3 +1072,12 @@ bool cmState::ParseCacheEntry(const std::string& entry, std::string& var,
 
   return flag;
 }
+
+cmState::Command cmState::GetDependencyProviderCommand(
+  cmDependencyProvider::Method method) const
+{
+  return (this->DependencyProvider &&
+          this->DependencyProvider->SupportsMethod(method))
+    ? this->GetCommand(this->DependencyProvider->GetCommand())
+    : Command{};
+}

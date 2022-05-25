@@ -9,6 +9,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <cm/string_view>
@@ -97,7 +98,9 @@ private:
     const std::string& prefix, const std::string& version, unsigned int count,
     unsigned int major, unsigned int minor, unsigned int patch,
     unsigned int tweak);
-  void SetModuleVariables(const std::string& components);
+  void SetModuleVariables(
+    const std::string& components,
+    const std::vector<std::pair<std::string, const char*>>& componentVarDefs);
   bool FindModule(bool& found);
   void AddFindDefinition(const std::string& var, cm::string_view value);
   void RestoreFindDefinitions();
