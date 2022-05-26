@@ -144,23 +144,25 @@ find_program(Java_JAVA_EXECUTABLE
 
 if(Java_JAVA_EXECUTABLE)
     execute_process(COMMAND "${Java_JAVA_EXECUTABLE}" -version
-      RESULT_VARIABLE res
-      OUTPUT_VARIABLE var
-      ERROR_VARIABLE var # sun-java output to stderr
+      RESULT_VARIABLE _java_res
+      OUTPUT_VARIABLE _java_var
+      ERROR_VARIABLE _java_var # sun-java output to stderr
       OUTPUT_STRIP_TRAILING_WHITESPACE
       ERROR_STRIP_TRAILING_WHITESPACE)
-    if( res )
-      if(var MATCHES "Unable to locate a Java Runtime to invoke|No Java runtime present, requesting install")
-        set(Java_JAVA_EXECUTABLE Java_JAVA_EXECUTABLE-NOTFOUND)
-      elseif(${Java_FIND_REQUIRED})
-        message( FATAL_ERROR "Error executing java -version" )
-      else()
-        message( STATUS "Warning, could not run java -version")
+    if(_java_res)
+      if(NOT Java_FIND_QUIETLY)
+        message(STATUS "Java version check failed: "
+          "${Java_JAVA_EXECUTABLE} -version returned an error: \"${_java_var}\"")
+      endif()
+      if(_java_var MATCHES "Unable to locate a Java Runtime|No Java runtime present, requesting install")
+        # macOS distributes a java stub that provides an error message
+        set(Java_JAVA_EXECUTABLE "Java_JAVA_EXECUTABLE-NOTFOUND" CACHE PATH
+            "Path to the Java executable" FORCE)
       endif()
     else()
       # Extract version components (up to 4 levels) from "java -version" output.
       set(_java_version_regex [[(([0-9]+)(\.([0-9]+)(\.([0-9]+)(_([0-9]+))?)?)?.*)]])
-      if(var MATCHES "java version \"${_java_version_regex}\"")
+      if(_java_var MATCHES "java version \"${_java_version_regex}\"")
         # Sun, GCJ, older OpenJDK
         set(Java_VERSION_STRING "${CMAKE_MATCH_1}")
         set(Java_VERSION_MAJOR "${CMAKE_MATCH_2}")
@@ -175,7 +177,7 @@ if(Java_JAVA_EXECUTABLE)
           set(Java_VERSION_PATCH 0)
         endif()
         set(Java_VERSION_TWEAK "${CMAKE_MATCH_8}")
-      elseif(var MATCHES "openjdk version \"${_java_version_regex}\"")
+      elseif(_java_var MATCHES "openjdk version \"${_java_version_regex}\"")
         # OpenJDK
         set(Java_VERSION_STRING "${CMAKE_MATCH_1}")
         set(Java_VERSION_MAJOR "${CMAKE_MATCH_2}")
@@ -190,14 +192,14 @@ if(Java_JAVA_EXECUTABLE)
           set(Java_VERSION_PATCH 0)
         endif()
         set(Java_VERSION_TWEAK "${CMAKE_MATCH_8}")
-      elseif(var MATCHES "openjdk version \"([0-9]+)-[A-Za-z]+\"")
+      elseif(_java_var MATCHES "openjdk version \"([0-9]+)-[A-Za-z]+\"")
         # OpenJDK 9 early access builds or locally built
         set(Java_VERSION_STRING "1.${CMAKE_MATCH_1}.0")
         set(Java_VERSION_MAJOR "1")
         set(Java_VERSION_MINOR "${CMAKE_MATCH_1}")
         set(Java_VERSION_PATCH "0")
         set(Java_VERSION_TWEAK "")
-      elseif(var MATCHES "java full version \"kaffe-${_java_version_regex}\"")
+      elseif(_java_var MATCHES "java full version \"kaffe-${_java_version_regex}\"")
         # Kaffe style
         set(Java_VERSION_STRING "${CMAKE_MATCH_1}")
         set(Java_VERSION_MAJOR "${CMAKE_MATCH_2}")
@@ -206,7 +208,7 @@ if(Java_JAVA_EXECUTABLE)
         set(Java_VERSION_TWEAK "${CMAKE_MATCH_8}")
       else()
         if(NOT Java_FIND_QUIETLY)
-          string(REPLACE "\n" "\n  " ver_msg "\n${var}")
+          string(REPLACE "\n" "\n  " ver_msg "\n${_java_var}")
           message(WARNING "Java version not recognized:${ver_msg}\nPlease report.")
         endif()
         set(Java_VERSION_STRING "")
@@ -215,18 +217,21 @@ if(Java_JAVA_EXECUTABLE)
         set(Java_VERSION_PATCH "")
         set(Java_VERSION_TWEAK "")
       endif()
+      unset(_java_version_regex)
+      unset(_java_var)
       set(Java_VERSION "${Java_VERSION_MAJOR}")
       if(NOT "x${Java_VERSION}" STREQUAL "x")
-        foreach(c MINOR PATCH TWEAK)
-          if(NOT "x${Java_VERSION_${c}}" STREQUAL "x")
-            string(APPEND Java_VERSION ".${Java_VERSION_${c}}")
+        foreach(_java_c MINOR PATCH TWEAK)
+          if(NOT "x${Java_VERSION_${_java_c}}" STREQUAL "x")
+            string(APPEND Java_VERSION ".${Java_VERSION_${_java_c}}")
           else()
             break()
           endif()
         endforeach()
+        unset(_java_c)
       endif()
     endif()
-
+    unset(_java_res)
 endif()
 
 
@@ -315,6 +320,7 @@ if(Java_FIND_COMPONENTS)
       set(Java_${component}_FOUND TRUE)
     endforeach()
   endif()
+  unset(_JAVA_REQUIRED_VARS)
 else()
   # Check for Development
   if(Java_VERSION VERSION_LESS "10")
@@ -341,7 +347,7 @@ mark_as_advanced(
   Java_JAVADOC_EXECUTABLE
   Java_IDLJ_EXECUTABLE
   Java_JARSIGNER_EXECUTABLE
-  )
+)
 
 # LEGACY
 set(JAVA_RUNTIME ${Java_JAVA_EXECUTABLE})
