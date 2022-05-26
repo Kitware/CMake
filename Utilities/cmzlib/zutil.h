@@ -163,6 +163,12 @@ extern const char * const z_errmsg[10]; /* indexed by 2-zlib_error */
 #  endif
 #endif
 
+#if defined(_MSC_VER)
+#pragma warning ( disable : 4127 ) /* cond expr is constant */
+#pragma warning ( disable : 4131 ) /* old style declaration */
+#pragma warning ( disable : 4244 ) /* conversion loss of data */
+#endif
+
         /* common defaults */
 
 #ifndef OS_CODE
