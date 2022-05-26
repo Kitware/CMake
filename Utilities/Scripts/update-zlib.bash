@@ -8,7 +8,7 @@ readonly name="zlib"
 readonly ownership="zlib upstream <kwrobot@kitware.com>"
 readonly subtree="Utilities/cmzlib"
 readonly repo="https://github.com/madler/zlib.git"
-readonly tag="v1.2.3"
+readonly tag="v1.2.12"
 readonly shortlog=false
 readonly paths="
   README
@@ -19,7 +19,11 @@ readonly paths="
   crc32.h
   deflate.c
   deflate.h
-  gzio.c
+  gzclose.c
+  gzguts.h
+  gzlib.c
+  gzread.c
+  gzwrite.c
   inffast.c
   inffast.h
   inffixed.h
@@ -41,10 +45,10 @@ extract_source () {
     pushd "${extractdir}/${name}-reduced"
     echo "* -whitespace" > .gitattributes
     echo -n "'zlib' general purpose compression library
-version 1.2.3, July 18th, 2005
+version 1.2.12, March 27th, 2022
 
 Copyright " > Copyright.txt
-    sed -n '/^ (C) 1995-/,+19 {s/^  \?//;s/2004/2005/;p}' README >> Copyright.txt
+    sed -n '/^ (C) 1995-/,+19 {s/^  \?//;p}' README >> Copyright.txt
     popd
 }
 
