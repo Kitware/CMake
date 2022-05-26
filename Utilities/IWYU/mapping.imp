@@ -106,7 +106,6 @@
   { include: [ "@<.*uv/.+\\.h>", private, "<cm3p/uv.h>", public ] },
   { include: [ "@<.*expat_external.h>", private, "<cm3p/expat.h>", public ] },
   { include: [ "@<.*zconf.h>", private, "<cm3p/zlib.h>", public ] },
-  { include: [ "@<.*cm_zlib_mangle.h>", private, "<cm3p/zlib.h>", public ] },
   # # System symbols used by libuv
   { symbol: [ "ssize_t", private, "<cm3p/uv.h>", public ] },
 
