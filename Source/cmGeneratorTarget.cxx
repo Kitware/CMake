@@ -8525,19 +8525,37 @@ bool cmGeneratorTarget::AddHeaderSetVerification()
     return true;
   }
 
+  auto verifyValue = this->GetProperty("INTERFACE_HEADER_SETS_TO_VERIFY");
+  const bool all = verifyValue.IsEmpty();
+  std::set<std::string> verifySet;
+  if (!all) {
+    auto verifyList = cmExpandedList(verifyValue);
+    verifySet.insert(verifyList.begin(), verifyList.end());
+  }
+
   cmTarget* verifyTarget = nullptr;
 
   auto interfaceFileSetEntries = this->Target->GetInterfaceHeaderSetsEntries();
 
   std::set<cmFileSet*> fileSets;
-  auto const addFileSets = [&fileSets, this](const cmBTStringRange& entries) {
-    for (auto const& entry : entries) {
-      for (auto const& name : cmExpandedList(entry.Value)) {
+  for (auto const& entry : interfaceFileSetEntries) {
+    for (auto const& name : cmExpandedList(entry.Value)) {
+      if (all || verifySet.count(name)) {
         fileSets.insert(this->Target->GetFileSet(name));
+        verifySet.erase(name);
       }
     }
-  };
-  addFileSets(interfaceFileSetEntries);
+  }
+  if (!verifySet.empty()) {
+    this->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("Property INTERFACE_HEADER_SETS_TO_VERIFY of target \"",
+               this->GetName(),
+               "\" contained the following header sets that are nonexistent "
+               "or not INTERFACE:\n  ",
+               cmJoin(verifySet, "\n  ")));
+    return false;
+  }
 
   cm::optional<std::set<std::string>> languages;
   for (auto* fileSet : fileSets) {
