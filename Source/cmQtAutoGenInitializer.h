@@ -178,6 +178,7 @@ private:
   {
     std::string Info;
     std::string Build;
+    std::string RelativeBuild;
     std::string Work;
     ConfigString Include;
     std::string IncludeGenExp;
