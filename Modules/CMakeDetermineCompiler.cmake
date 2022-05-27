@@ -53,10 +53,9 @@ macro(_cmake_find_compiler lang)
       NO_DEFAULT_PATH
       DOC "${lang} compiler")
   endif()
-  if(CMAKE_HOST_WIN32 AND CMAKE_GENERATOR MATCHES "Ninja")
-    # On Windows command-line builds, the Makefile generators each imply
-    # a preferred compiler tool.  The Ninja generator does not imply a
-    # compiler tool, so use the compiler that occurs first in PATH.
+  if(CMAKE_HOST_WIN32 AND CMAKE_GENERATOR MATCHES "Ninja|MSYS Makefiles|MinGW Makefiles")
+    # On Windows command-line builds, some generators imply a preferred compiler tool.
+    # These generators do not, so use the compiler that occurs first in PATH.
     find_program(CMAKE_${lang}_COMPILER
       NAMES ${CMAKE_${lang}_COMPILER_LIST}
       NAMES_PER_DIR
