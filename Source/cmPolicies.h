@@ -414,7 +414,10 @@ class cmMakefile;
          24, 0, cmPolicies::WARN)                                             \
   SELECT(POLICY, CMP0137,                                                     \
          "try_compile() passes platform variables in project mode", 3, 24, 0, \
-         cmPolicies::WARN)
+         cmPolicies::WARN)                                                    \
+  SELECT(POLICY, CMP0138,                                                     \
+         "MSVC compilers use -ZI instead of /Zi for x86 and x64 by default.", \
+         3, 24, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \
