@@ -270,7 +270,6 @@ CMAKE_PROBLEMATIC_FILES="\
   Utilities/cmlibarchive/config.h \
   Utilities/cmliblzma/config.h \
   Utilities/cmnghttp2/config.h \
-  Utilities/cmzlib/zlibDllConfig.h \
   "
 
 CMAKE_UNUSED_SOURCES="\

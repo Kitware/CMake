@@ -147,7 +147,7 @@ extern const char * const z_errmsg[10]; /* indexed by 2-zlib_error */
 #  define OS_CODE  0x0f
 #endif
 
-#if defined(_BEOS_) || defined(RISCOS) 
+#if defined(_BEOS_) || defined(RISCOS)
 #  define fdopen(fd,mode) NULL /* No fdopen() */
 #endif
 
@@ -161,6 +161,12 @@ extern const char * const z_errmsg[10]; /* indexed by 2-zlib_error */
 #  else
 #    define fdopen(fd,type)  _fdopen(fd,type)
 #  endif
+#endif
+
+#if defined(_MSC_VER)
+#pragma warning ( disable : 4127 ) /* cond expr is constant */
+#pragma warning ( disable : 4131 ) /* old style declaration */
+#pragma warning ( disable : 4244 ) /* conversion loss of data */
 #endif
 
         /* common defaults */
