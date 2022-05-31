@@ -10,6 +10,15 @@
 #include <QTranslator>
 #include <QtPlugin>
 
+// FIXME(#23565): Qt6 has QTextCodec in Core5Compat, but using its
+// `setCodecForLocale` does not make cmake-gui support non-ASCII chars
+// on Windows.  For now we only support them with Qt5.  How do we support
+// them with Qt6, preferably without Core5Compat?
+#if defined(Q_OS_WIN) && (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
+#  include <QTextCodec>
+#  define CMAKE_HAVE_QTEXTCODEC
+#endif
+
 #include "cmsys/CommandLineArguments.hxx"
 #include "cmsys/Encoding.hxx"
 #include "cmsys/SystemTools.hxx"
@@ -123,6 +132,11 @@ int main(int argc, char** argv)
   QApplication app(argc, argv);
 
   setlocale(LC_NUMERIC, "C");
+
+#ifdef CMAKE_HAVE_QTEXTCODEC
+  QTextCodec* utf8_codec = QTextCodec::codecForName("UTF-8");
+  QTextCodec::setCodecForLocale(utf8_codec);
+#endif
 
   // tell the cmake library where cmake is
   QDir cmExecDir(QApplication::applicationDirPath());
