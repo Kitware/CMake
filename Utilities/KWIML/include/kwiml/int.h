@@ -719,7 +719,7 @@ An includer may test the following macros after inclusion:
 #endif
 
 #if defined(__INTEL_COMPILER)
-#elif defined(__BORLANDC__)
+#elif defined(__BORLANDC__) && !defined(__CODEGEARC_VERSION__)
 # define KWIML_INT_private_NO_FMTLL /* type 'long long' but not 'll' format */
 # define KWIML_INT_BROKEN_INT64_C 1  /* system macro defined incorrectly */
 # define KWIML_INT_BROKEN_UINT64_C 1 /* system macro defined incorrectly */
