@@ -1164,8 +1164,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
 
   this->addPoolNinjaVariable("JOB_POOL_LINK", gt, vars);
 
-  this->AddModuleDefinitionFlag(linkLineComputer.get(), vars["LINK_FLAGS"],
-                                config);
+  localGen.AppendModuleDefinitionFlag(vars["LINK_FLAGS"], gt,
+                                      linkLineComputer.get(), config);
 
   this->UseLWYU = this->GetLocalGenerator()->AppendLWYUFlags(
     vars["LINK_FLAGS"], this->GetGeneratorTarget(),

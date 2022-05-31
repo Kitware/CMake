@@ -9,7 +9,6 @@
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalCommonGenerator.h"
-#include "cmLinkLineComputer.h"
 #include "cmLocalCommonGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
@@ -45,33 +44,6 @@ cmValue cmCommonTargetGenerator::GetFeature(const std::string& feature,
                                             const std::string& config)
 {
   return this->GeneratorTarget->GetFeature(feature, config);
-}
-
-void cmCommonTargetGenerator::AddModuleDefinitionFlag(
-  cmLinkLineComputer* linkLineComputer, std::string& flags,
-  const std::string& config)
-{
-  cmGeneratorTarget::ModuleDefinitionInfo const* mdi =
-    this->GeneratorTarget->GetModuleDefinitionInfo(config);
-  if (!mdi || mdi->DefFile.empty()) {
-    return;
-  }
-
-  // TODO: Create a per-language flag variable.
-  cmValue defFileFlag =
-    this->Makefile->GetDefinition("CMAKE_LINK_DEF_FILE_FLAG");
-  if (!defFileFlag) {
-    return;
-  }
-
-  // Append the flag and value.  Use ConvertToLinkReference to help
-  // vs6's "cl -link" pass it to the linker.
-  std::string flag =
-    cmStrCat(*defFileFlag,
-             this->LocalCommonGenerator->ConvertToOutputFormat(
-               linkLineComputer->ConvertToLinkReference(mdi->DefFile),
-               cmOutputConverter::SHELL));
-  this->LocalCommonGenerator->AppendFlags(flags, flag);
 }
 
 void cmCommonTargetGenerator::AppendFortranFormatFlags(

@@ -3137,6 +3137,32 @@ void cmLocalGenerator::AppendPositionIndependentLinkerFlags(
   }
 }
 
+void cmLocalGenerator::AppendModuleDefinitionFlag(
+  std::string& flags, cmGeneratorTarget const* target,
+  cmLinkLineComputer* linkLineComputer, std::string const& config)
+{
+  cmGeneratorTarget::ModuleDefinitionInfo const* mdi =
+    target->GetModuleDefinitionInfo(config);
+  if (!mdi || mdi->DefFile.empty()) {
+    return;
+  }
+
+  cmValue defFileFlag =
+    this->Makefile->GetDefinition("CMAKE_LINK_DEF_FILE_FLAG");
+  if (!defFileFlag) {
+    return;
+  }
+
+  // Append the flag and value.  Use ConvertToLinkReference to help
+  // vs6's "cl -link" pass it to the linker.
+  std::string flag =
+    cmStrCat(*defFileFlag,
+             this->ConvertToOutputFormat(
+               linkLineComputer->ConvertToLinkReference(mdi->DefFile),
+               cmOutputConverter::SHELL));
+  this->AppendFlags(flags, flag);
+}
+
 bool cmLocalGenerator::AppendLWYUFlags(std::string& flags,
                                        const cmGeneratorTarget* target,
                                        const std::string& lang)
