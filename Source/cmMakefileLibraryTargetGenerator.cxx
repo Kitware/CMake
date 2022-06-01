@@ -322,15 +322,17 @@ void cmMakefileLibraryTargetGenerator::WriteNvidiaDeviceLibraryRules(
     linkLineComputer->SetForResponse(useResponseFileForLibs);
     linkLineComputer->SetRelink(relink);
 
-    this->CreateLinkLibs(linkLineComputer.get(), linkLibs,
-                         useResponseFileForLibs, depends);
+    this->CreateLinkLibs(
+      linkLineComputer.get(), linkLibs, useResponseFileForLibs, depends,
+      cmMakefileTargetGenerator::ResponseFlagFor::DeviceLink);
 
     // Construct object file lists that may be needed to expand the
     // rule.
     std::string buildObjs;
-    this->CreateObjectLists(useLinkScript, false, // useArchiveRules
-                            useResponseFileForObjects, buildObjs, depends,
-                            false);
+    this->CreateObjectLists(
+      useLinkScript, false, // useArchiveRules
+      useResponseFileForObjects, buildObjs, depends, false,
+      cmMakefileTargetGenerator::ResponseFlagFor::DeviceLink);
 
     std::string objectDir = this->GeneratorTarget->GetSupportDirectory();
     objectDir = this->LocalGenerator->ConvertToOutputFormat(

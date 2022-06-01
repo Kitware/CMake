@@ -182,14 +182,16 @@ void cmMakefileExecutableTargetGenerator::WriteNvidiaDeviceExecutableRule(
 
     // Collect up flags to link in needed libraries.
     std::string linkLibs;
-    this->CreateLinkLibs(linkLineComputer.get(), linkLibs,
-                         useResponseFileForLibs, depends);
+    this->CreateLinkLibs(
+      linkLineComputer.get(), linkLibs, useResponseFileForLibs, depends,
+      cmMakefileTargetGenerator::ResponseFlagFor::DeviceLink);
 
     // Construct object file lists that may be needed to expand the
     // rule.
     std::string buildObjs;
-    this->CreateObjectLists(useLinkScript, false, useResponseFileForObjects,
-                            buildObjs, depends, false);
+    this->CreateObjectLists(
+      useLinkScript, false, useResponseFileForObjects, buildObjs, depends,
+      false, cmMakefileTargetGenerator::ResponseFlagFor::DeviceLink);
 
     cmRulePlaceholderExpander::RuleVariables vars;
     std::string objectDir = this->GeneratorTarget->GetSupportDirectory();

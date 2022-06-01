@@ -107,7 +107,7 @@ std::unique_ptr<cmMakefileTargetGenerator> cmMakefileTargetGenerator::New(
   return result;
 }
 
-std::string cmMakefileTargetGenerator::GetConfigName()
+std::string cmMakefileTargetGenerator::GetConfigName() const
 {
   auto const& configNames = this->LocalGenerator->GetConfigNames();
   assert(configNames.size() == 1);
@@ -2080,7 +2080,7 @@ bool cmMakefileTargetGenerator::CheckUseResponseFileForLibraries(
 }
 
 std::string cmMakefileTargetGenerator::CreateResponseFile(
-  const char* name, std::string const& options,
+  const std::string& name, std::string const& options,
   std::vector<std::string>& makefile_depends)
 {
   // FIXME: Find a better way to determine the response file encoding,
@@ -2126,7 +2126,8 @@ cmMakefileTargetGenerator::CreateLinkLineComputer(
 
 void cmMakefileTargetGenerator::CreateLinkLibs(
   cmLinkLineComputer* linkLineComputer, std::string& linkLibs,
-  bool useResponseFile, std::vector<std::string>& makefile_depends)
+  bool useResponseFile, std::vector<std::string>& makefile_depends,
+  ResponseFlagFor responseMode)
 {
   std::string frameworkPath;
   std::string linkPath;
@@ -2139,20 +2140,13 @@ void cmMakefileTargetGenerator::CreateLinkLibs(
   if (useResponseFile &&
       linkLibs.find_first_not_of(' ') != std::string::npos) {
     // Lookup the response file reference flag.
-    std::string responseFlagVar =
-      cmStrCat("CMAKE_",
-               this->GeneratorTarget->GetLinkerLanguage(this->GetConfigName()),
-               "_RESPONSE_FILE_LINK_FLAG");
-    std::string responseFlag;
-    if (cmValue p = this->Makefile->GetDefinition(responseFlagVar)) {
-      responseFlag = *p;
-    } else {
-      responseFlag = "@";
-    }
+    std::string responseFlag = this->GetResponseFlag(responseMode);
 
     // Create this response file.
+    std::string responseFileName =
+      (responseMode == Link) ? "linkLibs.rsp" : "deviceLinkLibs.rsp";
     std::string link_rsp =
-      this->CreateResponseFile("linklibs.rsp", linkLibs, makefile_depends);
+      this->CreateResponseFile(responseFileName, linkLibs, makefile_depends);
 
     // Reference the response file.
     linkLibs = cmStrCat(responseFlag,
@@ -2164,7 +2158,7 @@ void cmMakefileTargetGenerator::CreateLinkLibs(
 void cmMakefileTargetGenerator::CreateObjectLists(
   bool useLinkScript, bool useArchiveRules, bool useResponseFile,
   std::string& buildObjs, std::vector<std::string>& makefile_depends,
-  bool useWatcomQuote)
+  bool useWatcomQuote, ResponseFlagFor responseMode)
 {
   std::string variableName;
   std::string variableNameExternal;
@@ -2179,27 +2173,19 @@ void cmMakefileTargetGenerator::CreateObjectLists(
     this->WriteObjectsStrings(object_strings, responseFileLimit);
 
     // Lookup the response file reference flag.
-    std::string responseFlagVar =
-      cmStrCat("CMAKE_",
-               this->GeneratorTarget->GetLinkerLanguage(this->GetConfigName()),
-               "_RESPONSE_FILE_LINK_FLAG");
-    std::string responseFlag;
-    if (cmValue p = this->Makefile->GetDefinition(responseFlagVar)) {
-      responseFlag = *p;
-    } else {
-      responseFlag = "@";
-    }
+    std::string responseFlag = this->GetResponseFlag(responseMode);
 
     // Write a response file for each string.
     const char* sep = "";
     for (unsigned int i = 0; i < object_strings.size(); ++i) {
       // Number the response files.
-      char rsp[32];
-      snprintf(rsp, sizeof(rsp), "objects%u.rsp", i + 1);
+      std::string responseFileName =
+        (responseMode == Link) ? "objects" : "deviceObjects";
+      responseFileName += std::to_string(i + 1);
 
       // Create this response file.
-      std::string objects_rsp =
-        this->CreateResponseFile(rsp, object_strings[i], makefile_depends);
+      std::string objects_rsp = this->CreateResponseFile(
+        responseFileName, object_strings[i], makefile_depends);
 
       // Separate from previous response file references.
       buildObjs += sep;
@@ -2251,7 +2237,7 @@ void cmMakefileTargetGenerator::AddIncludeFlags(std::string& flags,
     }
     std::string name = cmStrCat("includes_", lang, ".rsp");
     std::string arg = std::move(responseFlag) +
-      this->CreateResponseFile(name.c_str(), includeFlags,
+      this->CreateResponseFile(name, includeFlags,
                                this->FlagFileDepends[lang]);
     this->LocalGenerator->AppendFlags(flags, arg);
   } else {
@@ -2303,4 +2289,23 @@ void cmMakefileTargetGenerator::GenDefFile(
   for (cmSourceFile const* src : mdi->Sources) {
     fout << src->GetFullPath() << "\n";
   }
+}
+
+std::string cmMakefileTargetGenerator::GetResponseFlag(
+  ResponseFlagFor mode) const
+{
+  std::string responseFlag = "@";
+  std::string responseFlagVar;
+
+  auto lang = this->GeneratorTarget->GetLinkerLanguage(this->GetConfigName());
+  if (mode == cmMakefileTargetGenerator::ResponseFlagFor::Link) {
+    responseFlagVar = cmStrCat("CMAKE_", lang, "_RESPONSE_FILE_LINK_FLAG");
+  } else if (mode == cmMakefileTargetGenerator::ResponseFlagFor::DeviceLink) {
+    responseFlagVar = "CMAKE_CUDA_RESPONSE_FILE_DEVICE_LINK_FLAG";
+  }
+
+  if (cmValue p = this->Makefile->GetDefinition(responseFlagVar)) {
+    responseFlag = *p;
+  }
+  return responseFlag;
 }
