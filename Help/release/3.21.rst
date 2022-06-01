@@ -335,8 +335,8 @@ Changes made since CMake 3.21.0 include the following.
   "Visual Studio 2022" release candidates.  Previously it was based on
   preview versions.
 
-3.21.5, 3.21.6
---------------
+3.21.5, 3.21.6, 3.21.7
+----------------------
 
 These versions made no changes to documented features or interfaces.
 Some implementation updates were made to support ecosystem changes
