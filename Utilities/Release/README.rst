@@ -24,6 +24,7 @@ The ``<os>/<arch>/`` directories contain Docker specifications that anyone
 may use to produce binaries for CMake on the following platforms:
 
 * ``linux/x86_64/``: Linux on ``x86_64`` architectures.
+* ``linux/aarch64/``: Linux on ``aarch64`` architectures.
 * ``win/x86/``: Windows on ``x86_64`` and ``i386`` architectures.
 
 Each ``<os>/<arch>/`` directory contains the following:
