@@ -19,7 +19,10 @@ else()
     set(_CMD_JAVA_HOME "")
     if(APPLE AND EXISTS /usr/libexec/java_home)
       execute_process(COMMAND /usr/libexec/java_home
-        OUTPUT_VARIABLE _CMD_JAVA_HOME OUTPUT_STRIP_TRAILING_WHITESPACE)
+        OUTPUT_VARIABLE _CMD_JAVA_HOME
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET
+      )
     endif()
     if(_CMD_JAVA_HOME AND IS_DIRECTORY "${_CMD_JAVA_HOME}")
       set(_JAVA_HOME "${_CMD_JAVA_HOME}")
