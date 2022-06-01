@@ -407,8 +407,9 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
         this->LocalGenerator,
         this->LocalGenerator->GetStateSnapshot().GetDirectory());
 
-    this->AddModuleDefinitionFlag(linkLineComputer.get(), linkFlags,
-                                  this->GetConfigName());
+    this->LocalGenerator->AppendModuleDefinitionFlag(
+      linkFlags, this->GeneratorTarget, linkLineComputer.get(),
+      this->GetConfigName());
   }
 
   this->LocalGenerator->AppendIPOLinkerFlags(

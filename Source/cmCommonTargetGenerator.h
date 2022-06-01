@@ -13,7 +13,6 @@
 
 class cmGeneratorTarget;
 class cmGlobalCommonGenerator;
-class cmLinkLineComputer;
 class cmLocalCommonGenerator;
 class cmMakefile;
 class cmSourceFile;
@@ -32,10 +31,6 @@ public:
 protected:
   // Feature query methods.
   cmValue GetFeature(const std::string& feature, const std::string& config);
-
-  // Helper to add flag for windows .def file.
-  void AddModuleDefinitionFlag(cmLinkLineComputer* linkLineComputer,
-                               std::string& flags, const std::string& config);
 
   cmGeneratorTarget* GeneratorTarget;
   cmMakefile* Makefile;

@@ -178,6 +178,10 @@ public:
                                             cmGeneratorTarget* target,
                                             const std::string& config,
                                             const std::string& lang);
+  void AppendModuleDefinitionFlag(std::string& flags,
+                                  cmGeneratorTarget const* target,
+                                  cmLinkLineComputer* linkLineComputer,
+                                  std::string const& config);
   bool AppendLWYUFlags(std::string& flags, const cmGeneratorTarget* target,
                        const std::string& lang);
 

@@ -1448,22 +1448,6 @@ void cmLocalGenerator::GetTargetFlags(
           sharedLibFlags += this->Makefile->GetSafeDefinition(build);
           sharedLibFlags += " ";
         }
-        if (this->Makefile->IsOn("WIN32") &&
-            !(this->Makefile->IsOn("CYGWIN") ||
-              this->Makefile->IsOn("MINGW"))) {
-          std::vector<cmSourceFile*> sources;
-          target->GetSourceFiles(sources, config);
-          std::string defFlag =
-            this->Makefile->GetSafeDefinition("CMAKE_LINK_DEF_FILE_FLAG");
-          for (cmSourceFile* sf : sources) {
-            if (sf->GetExtension() == "def") {
-              sharedLibFlags += defFlag;
-              sharedLibFlags +=
-                this->ConvertToOutputFormat(sf->ResolveFullPath(), SHELL);
-              sharedLibFlags += " ";
-            }
-          }
-        }
       }
 
       cmValue targetLinkFlags = target->GetProperty("LINK_FLAGS");
@@ -1577,6 +1561,8 @@ void cmLocalGenerator::GetTargetFlags(
   this->AppendPositionIndependentLinkerFlags(extraLinkFlags, target, config,
                                              linkLanguage);
   this->AppendIPOLinkerFlags(extraLinkFlags, target, config, linkLanguage);
+  this->AppendModuleDefinitionFlag(extraLinkFlags, target, linkLineComputer,
+                                   config);
 
   if (!extraLinkFlags.empty()) {
     linkFlags.emplace_back(std::move(extraLinkFlags));
@@ -3135,6 +3121,32 @@ void cmLocalGenerator::AppendPositionIndependentLinkerFlags(
   for (const auto& flag : flagsList) {
     this->AppendFlagEscape(flags, flag);
   }
+}
+
+void cmLocalGenerator::AppendModuleDefinitionFlag(
+  std::string& flags, cmGeneratorTarget const* target,
+  cmLinkLineComputer* linkLineComputer, std::string const& config)
+{
+  cmGeneratorTarget::ModuleDefinitionInfo const* mdi =
+    target->GetModuleDefinitionInfo(config);
+  if (!mdi || mdi->DefFile.empty()) {
+    return;
+  }
+
+  cmValue defFileFlag =
+    this->Makefile->GetDefinition("CMAKE_LINK_DEF_FILE_FLAG");
+  if (!defFileFlag) {
+    return;
+  }
+
+  // Append the flag and value.  Use ConvertToLinkReference to help
+  // vs6's "cl -link" pass it to the linker.
+  std::string flag =
+    cmStrCat(*defFileFlag,
+             this->ConvertToOutputFormat(
+               linkLineComputer->ConvertToLinkReference(mdi->DefFile),
+               cmOutputConverter::SHELL));
+  this->AppendFlags(flags, flag);
 }
 
 bool cmLocalGenerator::AppendLWYUFlags(std::string& flags,
