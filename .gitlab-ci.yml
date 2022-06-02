@@ -52,6 +52,8 @@ p:source-package:
         - .linux_builder_tags
         - .cmake_release_artifacts
         - .run_only_for_package
+    variables:
+        CMAKE_CI_ARTIFACTS_NAME: "artifacts-source"
 
 p:doc-package:
     extends:
@@ -138,6 +140,8 @@ b:centos6-x86_64:
         - .cmake_release_artifacts
         - .linux_builder_tags
         - .run_manually
+    variables:
+        CMAKE_CI_ARTIFACTS_NAME: "artifacts-centos6-x86_64"
 
 b:centos7-aarch64:
     extends:
@@ -147,6 +151,7 @@ b:centos7-aarch64:
         - .linux_builder_tags_aarch64
         - .run_manually
     variables:
+        CMAKE_CI_ARTIFACTS_NAME: "artifacts-centos7-aarch64"
         CMAKE_CI_NO_MR: "true"
 
 t:debian10-ninja:
@@ -600,6 +605,8 @@ b:linux-x86_64-package:
         - p:doc-package
     needs:
         - p:doc-package
+    variables:
+        CMAKE_CI_ARTIFACTS_NAME: "artifacts-linux-x86_64"
 
 u:linux-x86_64-package:
     extends:
@@ -622,6 +629,8 @@ b:linux-aarch64-package:
         - p:doc-package
     needs:
         - p:doc-package
+    variables:
+        CMAKE_CI_ARTIFACTS_NAME: "artifacts-linux-aarch64"
 
 u:linux-aarch64-package:
     extends:
@@ -761,6 +770,8 @@ b:macos-package:
         - p:doc-package
     needs:
         - p:doc-package
+    variables:
+        CMAKE_CI_ARTIFACTS_NAME: "artifacts-macos-universal"
 
 u:macos-package:
     extends:
@@ -782,6 +793,8 @@ b:macos10.10-package:
         - p:doc-package
     needs:
         - p:doc-package
+    variables:
+        CMAKE_CI_ARTIFACTS_NAME: "artifacts-macos10.10-universal"
 
 u:macos10.10-package:
     extends:
@@ -997,6 +1010,8 @@ b:windows-x86_64-package:
         - p:doc-package
     needs:
         - p:doc-package
+    variables:
+        CMAKE_CI_ARTIFACTS_NAME: "artifacts-windows-x86_64-build"
 
 k:windows-x86_64-package:
     extends:
@@ -1009,6 +1024,8 @@ k:windows-x86_64-package:
         - b:windows-x86_64-package
     needs:
         - b:windows-x86_64-package
+    variables:
+        CMAKE_CI_ARTIFACTS_NAME: "artifacts-windows-x86_64"
 
 u:windows-x86_64-package:
     extends:
@@ -1030,6 +1047,8 @@ b:windows-i386-package:
         - p:doc-package
     needs:
         - p:doc-package
+    variables:
+        CMAKE_CI_ARTIFACTS_NAME: "artifacts-windows-i386-build"
 
 k:windows-i386-package:
     extends:
@@ -1042,6 +1061,8 @@ k:windows-i386-package:
         - b:windows-i386-package
     needs:
         - b:windows-i386-package
+    variables:
+        CMAKE_CI_ARTIFACTS_NAME: "artifacts-windows-i386"
 
 u:windows-i386-package:
     extends:

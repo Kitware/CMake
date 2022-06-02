@@ -66,6 +66,7 @@
 .cmake_build_package_artifacts:
     artifacts:
         expire_in: 1d
+        name: "$CMAKE_CI_ARTIFACTS_NAME"
         paths:
             # Allow CPack to find CMAKE_ROOT.
             - build/CMakeFiles/CMakeSourceDir.txt
@@ -94,6 +95,7 @@
 .cmake_release_artifacts:
     artifacts:
         expire_in: 5d
+        name: "$CMAKE_CI_ARTIFACTS_NAME"
         # Release artifacts are of interest even for failed jobs.
         when: always
         paths:
