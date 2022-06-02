@@ -24,7 +24,7 @@ The ``<os>/<arch>/`` directories contain Docker specifications that anyone
 may use to produce binaries for CMake on the following platforms:
 
 * ``linux/x86_64/``: Linux on ``x86_64`` architectures.
-* ``win/x86/``: Windows on ``x86_64`` and ``i386`` architectures.
+* ``linux/aarch64/``: Linux on ``aarch64`` architectures.
 
 Each ``<os>/<arch>/`` directory contains the following:
 
@@ -41,7 +41,7 @@ Each ``<os>/<arch>/`` directory contains the following:
 * ``<os>/<arch>/Dockerfile``:
   Produce an image containing a portable CMake binary package.
   Build this image using the CMake source directory as the build context.
-  The resulting image will have an ``/out`` (or ``c:/out``) directory
+  The resulting image will have an ``/out`` directory
   containing the package.  For example, on Linux ``x86_64``:
 
   .. code-block:: console
@@ -51,9 +51,6 @@ Each ``<os>/<arch>/`` directory contains the following:
     $ docker container create --name cmake-build cmake:build
     $ docker cp cmake-build:/out .
     $ ls out/cmake-*-linux-x86_64.*
-
-  On Windows, the ``win/x86`` specifications support both the ``x86_64``
-  and ``i386`` architectures selected via ``--build-arg ARCH=...``.
 
 * ``<os>/<arch>/test/Dockerfile``:
   Produces a base image with a test environment for packaged CMake binaries.
@@ -79,10 +76,6 @@ Each ``<os>/<arch>/`` directory contains the following:
     $ docker build --tag cmake:test --network none -f test/Dockerfile .
     $ docker run --network none cmake:test bash test-make.bash
     $ docker run --network none cmake:test bash test-ninja.bash
-
-  On Windows, the test scripts are called ``test-nmake.bat`` and
-  ``test-ninja.bat``.  In the ``x86`` architecture they accept one
-  argument specifying either ``x86_64`` or ``i386``.
 
 .. _`kitware/cmake Docker Hub Repository`: https://hub.docker.com/r/kitware/cmake
 
