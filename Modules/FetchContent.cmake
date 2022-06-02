@@ -1159,9 +1159,12 @@ function(FetchContent_Declare contentName)
 
   set(options "")
   set(oneValueArgs
+    SVN_REPOSITORY
+    DOWNLOAD_NO_EXTRACT
+    DOWNLOAD_EXTRACT_TIMESTAMP
+    URL
     BINARY_DIR
     SOURCE_DIR
-    SVN_REPOSITORY
   )
   set(multiValueArgs "")
 
@@ -1188,13 +1191,47 @@ function(FetchContent_Declare contentName)
     string(SHA1 urlSHA ${ARG_SVN_REPOSITORY})
     string(SUBSTRING ${urlSHA} 0 7 urlSHA)
     string(APPEND ARG_SOURCE_DIR "-${urlSHA}")
-    list(PREPEND ARG_UNPARSED_ARGUMENTS SVN_REPOSITORY "${ARG_SVN_REPOSITORY}")
   endif()
 
-  list(PREPEND ARG_UNPARSED_ARGUMENTS
-    SOURCE_DIR "${ARG_SOURCE_DIR}"
-    BINARY_DIR "${ARG_BINARY_DIR}"
-  )
+  # The ExternalProject_Add() call in the sub-build won't see the CMP0135
+  # policy setting of our caller. Work out if that policy will be needed and
+  # explicitly set the relevant option if not already provided. The condition
+  # here is essentially an abbreviated version of the logic in
+  # ExternalProject's _ep_add_download_command() function.
+  if(ARG_URL AND
+     NOT IS_DIRECTORY "${ARG_URL}" AND
+     NOT ARG_DOWNLOAD_NO_EXTRACT AND
+     NOT DEFINED ARG_DOWNLOAD_EXTRACT_TIMESTAMP)
+    cmake_policy(GET CMP0135 _FETCHCONTENT_CMP0135
+      PARENT_SCOPE # undocumented, do not use outside of CMake
+    )
+    if(_FETCHCONTENT_CMP0135 STREQUAL "")
+      message(AUTHOR_WARNING
+        "The DOWNLOAD_EXTRACT_TIMESTAMP option was not given and policy "
+        "CMP0135 is not set. The policy's OLD behavior will be used. "
+        "When using a URL download, the timestamps of extracted files "
+        "should preferably be that of the time of extraction, otherwise "
+        "code that depends on the extracted contents might not be "
+        "rebuilt if the URL changes. The OLD behavior preserves the "
+        "timestamps from the archive instead, but this is usually not "
+        "what you want. Update your project to the NEW behavior or "
+        "specify the DOWNLOAD_EXTRACT_TIMESTAMP option with a value of "
+        "true to avoid this robustness issue."
+      )
+      set(ARG_DOWNLOAD_EXTRACT_TIMESTAMP TRUE)
+    elseif(_FETCHCONTENT_CMP0135 STREQUAL "NEW")
+      set(ARG_DOWNLOAD_EXTRACT_TIMESTAMP FALSE)
+    else()
+      set(ARG_DOWNLOAD_EXTRACT_TIMESTAMP TRUE)
+    endif()
+  endif()
+
+  # Add back in the keyword args we pulled out and potentially tweaked/added
+  foreach(key IN LISTS oneValueArgs)
+    if(DEFINED ARG_${key})
+      list(PREPEND ARG_UNPARSED_ARGUMENTS ${key} "${ARG_${key}}")
+    endif()
+  endforeach()
 
   set(__argsQuoted)
   foreach(__item IN LISTS ARG_UNPARSED_ARGUMENTS)
