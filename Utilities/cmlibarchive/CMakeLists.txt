@@ -103,6 +103,16 @@ ELSEIF(CMAKE_C_COMPILER_ID STREQUAL "PathScale")
   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -woffall")
 ENDIF()
 
+# Activate POSIX APIs.
+if(CMAKE_SYSTEM_NAME MATCHES "^(Linux)$")
+  add_definitions(-D_DEFAULT_SOURCE -D_BSD_SOURCE)
+  string(APPEND CMAKE_REQUIRED_DEFINITIONS " -D_DEFAULT_SOURCE -D_BSD_SOURCE")
+endif()
+if(NOT CMAKE_SYSTEM_NAME MATCHES "BSD|Darwin|Windows")
+  add_definitions(-D_XOPEN_SOURCE=600)
+  string(APPEND CMAKE_REQUIRED_DEFINITIONS " -D_XOPEN_SOURCE=600")
+endif()
+
 IF(0) # CMake does not need flags specific to libarchive upstream development.
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
   OPTION(ENABLE_WERROR "Treat warnings as errors - default is ON for Debug, OFF otherwise." ON)

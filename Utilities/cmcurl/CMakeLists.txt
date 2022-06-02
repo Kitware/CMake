@@ -119,6 +119,20 @@ elseif(CMAKE_C_COMPILER_ID STREQUAL "PathScale")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -woffall")
 endif()
 
+# Activate POSIX APIs.
+if(CMAKE_SYSTEM_NAME MATCHES "^(AIX|OS400)$")
+  add_definitions(-D_ALL_SOURCE)
+endif()
+if(CMAKE_SYSTEM_NAME MATCHES "^(Linux)$")
+  add_definitions(-D_DEFAULT_SOURCE -D_BSD_SOURCE)
+endif()
+if(CMAKE_SYSTEM_NAME MATCHES "^(SunOS)$")
+  add_definitions(-D__EXTENSIONS__)
+endif()
+if(NOT CMAKE_SYSTEM_NAME MATCHES "BSD|Darwin|Windows")
+  add_definitions(-D_XOPEN_SOURCE=600)
+endif()
+
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |

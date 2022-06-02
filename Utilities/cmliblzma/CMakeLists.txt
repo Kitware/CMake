@@ -166,6 +166,14 @@ ELSEIF(CMAKE_C_COMPILER_ID STREQUAL "PathScale")
   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -woffall")
 ENDIF()
 
+# Activate POSIX APIs.
+if(CMAKE_SYSTEM_NAME MATCHES "^(AIX|OS400)$")
+  add_definitions(-D_ALL_SOURCE)
+endif()
+if(NOT CMAKE_SYSTEM_NAME MATCHES "BSD|Darwin|Windows")
+  add_definitions(-D_XOPEN_SOURCE=600)
+endif()
+
 ADD_LIBRARY(cmliblzma STATIC ${LZMA_SRCS})
 
 IF(CMAKE_C_COMPILER_ID STREQUAL "XL")
