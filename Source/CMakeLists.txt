@@ -197,6 +197,8 @@ set(SRCS
   cmCustomCommandLines.cxx
   cmCustomCommandLines.h
   cmCustomCommandTypes.h
+  cmCxxModuleMapper.cxx
+  cmCxxModuleMapper.h
   cmDefinitions.cxx
   cmDefinitions.h
   cmDependencyProvider.h
