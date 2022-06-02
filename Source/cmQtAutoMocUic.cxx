@@ -2175,7 +2175,14 @@ void cmQtAutoMocUicT::JobMocsCompilationT::Process()
     // Placeholder content
     content += "// No files found that require moc or the moc files are "
                "included\n"
-               "enum some_compilers { need_more_than_nothing };\n";
+               "struct cmake_automoc_silence_linker_warning{\n"
+               "    virtual ~cmake_automoc_silence_linker_warning();\n"
+               "};\n"
+               "\n"
+               "inline "
+               "cmake_automoc_silence_linker_warning::"
+               "~cmake_automoc_silence_linker_warning()\n"
+               "{}\n";
   } else {
     // Valid content
     const bool mc = this->BaseConst().MultiConfig;
