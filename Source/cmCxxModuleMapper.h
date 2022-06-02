@@ -14,6 +14,7 @@ struct cmScanDepInfo;
 
 enum class CxxModuleMapFormat
 {
+  Gcc,
 };
 
 struct CxxModuleLocations
