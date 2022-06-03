@@ -1,0 +1,8 @@
+
+include ("${RunCMake_SOURCE_DIR}/check_errors.cmake")
+
+expect_true("$<PATH_EQUAL:a///b/c,a/b/c>" "a///b/c" "a/b/c")
+
+expect_false("$<PATH_EQUAL:a/b/d/../c,a/b/c>" "a/b/d/../c" "a/b/c")
+
+expect_true("$<PATH_EQUAL:$<PATH:NORMAL_PATH,a/b/d/../c>,a/b/c>" "a/b/d/../c" "a/b/c")

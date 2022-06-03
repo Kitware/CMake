@@ -1034,6 +1034,23 @@ static const struct PathNode : public cmGeneratorExpressionNode
   }
 } pathNode;
 
+static const struct PathEqualNode : public cmGeneratorExpressionNode
+{
+  PathEqualNode() {} // NOLINT(modernize-use-equals-default)
+
+  int NumExpectedParameters() const override { return 2; }
+
+  std::string Evaluate(
+    const std::vector<std::string>& parameters,
+    cmGeneratorExpressionContext* /*context*/,
+    const GeneratorExpressionContent* /*content*/,
+    cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
+  {
+    return cmCMakePath{ parameters[0] } == cmCMakePath{ parameters[1] } ? "1"
+                                                                        : "0";
+  }
+} pathEqualNode;
+
 static const struct MakeCIdentifierNode : public cmGeneratorExpressionNode
 {
   MakeCIdentifierNode() {} // NOLINT(modernize-use-equals-default)
@@ -3265,6 +3282,7 @@ const cmGeneratorExpressionNode* cmGeneratorExpressionNode::GetNode(
     { "LOWER_CASE", &lowerCaseNode },
     { "UPPER_CASE", &upperCaseNode },
     { "PATH", &pathNode },
+    { "PATH_EQUAL", &pathEqualNode },
     { "MAKE_C_IDENTIFIER", &makeCIdentifierNode },
     { "BOOL", &boolNode },
     { "IF", &ifNode },

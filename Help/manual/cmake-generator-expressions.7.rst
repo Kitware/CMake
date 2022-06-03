@@ -123,6 +123,19 @@ String Comparisons
 
   ``1`` if ``v1`` is a version greater than or equal to ``v2``, else ``0``.
 
+Path Comparisons
+----------------
+
+.. genex:: $<PATH_EQUAL:path1,path2>
+
+  .. versionadded:: 3.24
+
+  Compares the lexical representations of two paths. No normalization is
+  performed on either path. Returns ``1`` if the paths are equal, ``0``
+  otherwise.
+
+  See :ref:`cmake_path(COMPARE) <Path COMPARE>` for more details.
+
 .. _GenEx Path Queries:
 
 Path Queries

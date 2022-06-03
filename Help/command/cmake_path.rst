@@ -473,6 +473,7 @@ are :ref:`normalized <Normalization>` before the check.
   set(path "/a/b")
   cmake_path(IS_PREFIX path "/a/c/../b" NORMALIZE result)   # result = true
 
+.. _Path COMPARE:
 .. _COMPARE:
 
 ::
