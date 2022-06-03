@@ -1,0 +1,25 @@
+cmake_policy(SET CMP0139 NEW)
+
+
+set(path "a///b/c")
+if (NOT path PATH_EQUAL "a/b/c")
+  message(SEND_ERROR "if(PATH_EQUAL): '${path}' not equal to 'a/b/c'")
+endif()
+set(path2 "a/b/c")
+if (NOT path PATH_EQUAL path2)
+  message(SEND_ERROR "if(PATH_EQUAL): '${path}' not equal to '${path2}'")
+endif()
+
+set (path "a/b/d/../c")
+if (path PATH_EQUAL "a/b/c")
+  message(SEND_ERROR "if(PATH_EQUAL): '${path}' equal to 'a/b/c'")
+endif()
+set(path2 "a/b/c")
+if ("a/b/d/../c" PATH_EQUAL path2)
+  message(SEND_ERROR "if(PATH_EQUAL): 'a/b/d/../c' equal to '${path2}'")
+endif()
+
+cmake_path(NORMAL_PATH path)
+if (NOT path PATH_EQUAL "a/b/c")
+  message(SEND_ERROR "if(PATH_EQUAL): '${path}' not equal to 'a/b/c'")
+endif()

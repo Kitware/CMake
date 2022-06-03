@@ -16,6 +16,7 @@
 
 #include "cmsys/RegularExpression.hxx"
 
+#include "cmCMakePath.h"
 #include "cmExpandedCommandArgument.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -58,6 +59,7 @@ auto const keyVERSION_GREATER = "VERSION_GREATER"_s;
 auto const keyVERSION_GREATER_EQUAL = "VERSION_GREATER_EQUAL"_s;
 auto const keyVERSION_LESS = "VERSION_LESS"_s;
 auto const keyVERSION_LESS_EQUAL = "VERSION_LESS_EQUAL"_s;
+auto const keyPATH_EQUAL = "PATH_EQUAL"_s;
 
 cmSystemTools::CompareOp const MATCH2CMPOP[5] = {
   cmSystemTools::OP_LESS, cmSystemTools::OP_LESS_EQUAL,
@@ -217,6 +219,7 @@ cmConditionEvaluator::cmConditionEvaluator(cmMakefile& makefile,
   , Policy54Status(makefile.GetPolicyStatus(cmPolicies::CMP0054))
   , Policy57Status(makefile.GetPolicyStatus(cmPolicies::CMP0057))
   , Policy64Status(makefile.GetPolicyStatus(cmPolicies::CMP0064))
+  , Policy139Status(makefile.GetPolicyStatus(cmPolicies::CMP0139))
 {
 }
 
@@ -769,6 +772,29 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
         e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0057)
           << "\n"
              "IN_LIST will be interpreted as an operator "
+             "when the policy is set to NEW.  "
+             "Since the policy is not set the OLD behavior will be used.";
+
+        this->Makefile.IssueMessage(MessageType::AUTHOR_WARNING, e.str());
+      }
+    }
+
+    else if (this->IsKeyword(keyPATH_EQUAL, *args.next)) {
+
+      if (this->Policy139Status != cmPolicies::OLD &&
+          this->Policy139Status != cmPolicies::WARN) {
+
+        cmValue lhs = this->GetVariableOrString(*args.current);
+        cmValue rhs = this->GetVariableOrString(*args.nextnext);
+        const auto result = cmCMakePath{ *lhs } == cmCMakePath{ *rhs };
+        newArgs.ReduceTwoArgs(result, args);
+      }
+
+      else if (this->Policy139Status == cmPolicies::WARN) {
+        std::ostringstream e;
+        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0139)
+          << "\n"
+             "PATH_EQUAL will be interpreted as an operator "
              "when the policy is set to NEW.  "
              "Since the policy is not set the OLD behavior will be used.";
 
