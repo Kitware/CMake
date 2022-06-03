@@ -6,6 +6,13 @@ include(RunCMake)
 unset(ENV{http_proxy})
 unset(ENV{https_proxy})
 
+if(RunCMake_GENERATOR STREQUAL "Borland Makefiles" OR
+   RunCMake_GENERATOR STREQUAL "Watcom WMake")
+  set(fs_delay 3)
+else()
+  set(fs_delay 1.125)
+endif()
+
 run_cmake(BadIndependentStep1)
 run_cmake(BadIndependentStep2)
 run_cmake(NoOptions)
@@ -72,7 +79,7 @@ function(__ep_test_source_dir_change)
   # we have to ensure we don't re-run the configure stage too quickly after the
   # first build. Otherwise, the modified RepositoryInfo.txt files the next
   # configure writes might still have the same timestamp as the previous one.
-  execute_process(COMMAND ${CMAKE_COMMAND} -E sleep 1.125)
+  execute_process(COMMAND ${CMAKE_COMMAND} -E sleep ${fs_delay})
   run_cmake_command(SourceDirChange-change ${CMAKE_COMMAND} -DSOURCE_DIR_CHANGE=YES .)
   run_cmake_command(SourceDirChange-build2 ${CMAKE_COMMAND} --build .)
 endfunction()
