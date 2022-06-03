@@ -112,6 +112,8 @@ The following values of :variable:`CMAKE_INSTALL_PREFIX` are special:
   For example, the ``SYSCONFDIR`` value ``etc`` becomes ``/etc/opt/...``.
   This is defined by the `Filesystem Hierarchy Standard`_.
 
+  This behavior does not apply to paths under ``/opt/homebrew/...``.
+
 .. _`Filesystem Hierarchy Standard`: https://refspecs.linuxfoundation.org/FHS_3.0/fhs/index.html
 
 Macros
@@ -400,7 +402,7 @@ macro(GNUInstallDirs_get_absolute_install_dir absvar var)
       else()
         set(${absvar} "${CMAKE_INSTALL_PREFIX}/${${var}}")
       endif()
-    elseif("${CMAKE_INSTALL_PREFIX}" MATCHES "^/opt/.*")
+    elseif("${CMAKE_INSTALL_PREFIX}" MATCHES "^/opt/" AND NOT "${CMAKE_INSTALL_PREFIX}" MATCHES "^/opt/homebrew/")
       if("${GGAID_dir}" STREQUAL "SYSCONFDIR" OR "${GGAID_dir}" STREQUAL "LOCALSTATEDIR" OR "${GGAID_dir}" STREQUAL "RUNSTATEDIR")
         set(${absvar} "/${${var}}${CMAKE_INSTALL_PREFIX}")
       else()
