@@ -1,1 +1,2 @@
-Using timestamps from archive
+-- ExternalProject: Using timestamps from archive
+-- FetchContent: Using timestamps from archive
