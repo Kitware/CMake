@@ -11,7 +11,7 @@ cleanup() {
 readonly suffix="-$(date -u +%Y-%m-%d)-${RANDOM}"
 readonly build_container="ninja-build-linux-aarch64$suffix"
 readonly build_image="ninja:build-linux-aarch64$suffix"
-readonly git_tag="${1-v1.10.2}"
+readonly git_tag="${1-v1.11.0}"
 
 trap "cleanup" EXIT INT TERM
 
