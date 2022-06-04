@@ -425,6 +425,11 @@ of the following is specified:
 ``POST_BUILD``
   Run after all other rules within the target have been executed.
 
+Projects should always specify one of the above three keywords when using
+the ``TARGET`` form.  For backward compatibility reasons, ``POST_BUILD`` is
+assumed if no such keyword is given, but projects should explicitly provide
+one of the keywords to make clear the behavior they expect.
+
 .. note::
   Because generator expressions can be used in custom commands,
   it is possible to define ``COMMAND`` lines or whole custom commands
