@@ -395,9 +395,9 @@ enabled.
    package registry.
 
 7. Search cmake variables defined in the Platform files for the
-   current system. The searching of ``CMAKE_INSTALL_PREFIX` can be skipped
-   if ``NO_CMAKE_INSTALL_PREFIX`` is passed or by setting the
-   :variable:`CMAKE_FIND_USE_INSTALL_PREFIX` to ``FALSE. All these locations
+   current system. The searching of :variable:`CMAKE_INSTALL_PREFIX` can be
+   skipped if ``NO_CMAKE_INSTALL_PREFIX`` is passed or by setting the
+   :variable:`CMAKE_FIND_USE_INSTALL_PREFIX` to ``FALSE``. All these locations
    can be skipped if ``NO_CMAKE_SYSTEM_PATH`` is passed or by setting the
    :variable:`CMAKE_FIND_USE_CMAKE_SYSTEM_PATH` to ``FALSE``:
 
