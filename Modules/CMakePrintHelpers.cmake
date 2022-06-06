@@ -125,13 +125,14 @@ function(cmake_print_properties)
   endif()
 
   if(NOT mode)
-    message(FATAL_ERROR "Mode keyword missing in cmake_print_properties() call, must be one of TARGETS SOURCES TESTS DIRECTORIES CACHE_ENTRIES PROPERTIES")
+    message(FATAL_ERROR "${_missing_mode_message}")
     return()
   endif()
 
   list(LENGTH mode modeLength)
   if("${modeLength}" GREATER 1)
-    message(FATAL_ERROR "Multiple mode keyword used in cmake_print_properties() call, it must be exactly one of TARGETS SOURCES TESTS DIRECTORIES CACHE_ENTRIES PROPERTIES")
+    message(FATAL_ERROR
+      "Multiple mode keywords used in cmake_print_properties() call, there must be exactly one of ${_mode_names}.")
     return()
   endif()
 
