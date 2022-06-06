@@ -11,6 +11,12 @@ FetchContent
 
   .. contents::
 
+.. note:: The :guide:`Using Dependencies Guide` provides a high-level
+  introduction to this general topic. It provides a broader overview of
+  where the ``FetchContent`` module fits into the bigger picture,
+  including its relationship to the :command:`find_package` command.
+  The guide is recommended pre-reading before moving on to the details below.
+
 Overview
 ^^^^^^^^
 
@@ -720,7 +726,7 @@ frameworks are available to the main build:
   # Catch2 will be available to the rest of the build
   FetchContent_MakeAvailable(googletest Catch2)
 
-.. _FetchContent-find_package-integration:
+.. _FetchContent-find_package-integration-examples:
 
 Integrating With find_package()
 """""""""""""""""""""""""""""""

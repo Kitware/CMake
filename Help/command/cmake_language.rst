@@ -236,6 +236,9 @@ Dependency Providers
 
 .. versionadded:: 3.24
 
+.. note:: A high-level introduction to this feature can be found in the
+          :ref:`Using Dependencies Guide <dependency_providers_overview>`.
+
 .. code-block:: cmake
 
   cmake_language(SET_DEPENDENCY_PROVIDER <command>
