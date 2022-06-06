@@ -1,4 +1,3 @@
-set(CMake_TEST_ISPC "ON" CACHE STRING "")
 set(CMake_TEST_GUI "ON" CACHE BOOL "")
 
 # "Release" flags without "-DNDEBUG" so we get assertions.
