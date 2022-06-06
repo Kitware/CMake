@@ -47,7 +47,7 @@ Compound conditions are evaluated in the following order of precedence:
    `GREATER_EQUAL`_, `STREQUAL`_, `STRLESS`_, `STRLESS_EQUAL`_,
    `STRGREATER`_, `STRGREATER_EQUAL`_, `VERSION_EQUAL`_, `VERSION_LESS`_,
    `VERSION_LESS_EQUAL`_, `VERSION_GREATER`_, `VERSION_GREATER_EQUAL`_,
-   and `MATCHES`_.
+   `PATH_EQUAL`_, and `MATCHES`_.
 
 4. Unary logical operator `NOT`_.
 
@@ -313,6 +313,34 @@ Version Comparisons
   ``major[.minor[.patch[.tweak]]]``, omitted components are treated as zero).
   Any non-integer version component or non-integer trailing part of a version
   component effectively truncates the string at that point.
+
+Path Comparisons
+""""""""""""""""
+
+.. _PATH_EQUAL:
+
+``if(<variable|string> PATH_EQUAL <variable|string>)``
+ .. versionadded:: 3.24
+  Compares the lexical representations of two paths provided as string
+  literals or variables. No normalization is performed on either path.
+
+  Lexical comparison has the advantage over string comparison to have a
+  knowledge of the structure of the path. So, the following comparison is
+  ``TRUE`` using ``PATH_EQUAL`` operator, but ``FALSE`` with ``STREQUAL``:
+
+  .. code-block:: cmake
+
+    # comparison is TRUE
+    if ("/a//b/c" PATH_EQUAL "/a/b/c")
+       ...
+    endif()
+
+    # comparison is FALSE
+    if ("/a//b/c" STREQUAL "/a/b/c")
+       ...
+    endif()
+
+  See :ref:`cmake_path(COMPARE) <Path COMPARE>` for more details.
 
 Variable Expansion
 ^^^^^^^^^^^^^^^^^^
