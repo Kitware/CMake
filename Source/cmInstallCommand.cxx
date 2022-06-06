@@ -741,9 +741,9 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
                   [=](const cmInstallCommandFileSetArguments& fileSetArg)
                     -> bool { return fileSetArg.GetFileSet() == name; });
               })) {
-          status.SetError(cmStrCat(
-            "TARGETS target ", target.GetName(),
-            " is exported but not all of its file sets are installed"));
+          status.SetError(cmStrCat("TARGETS target ", target.GetName(),
+                                   " is exported but not all of its interface "
+                                   "file sets are installed"));
           return false;
         }
 

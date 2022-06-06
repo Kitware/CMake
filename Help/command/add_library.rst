@@ -151,6 +151,7 @@ itself and is not included as a target in the generated buildsystem.
   ``PUBLIC`` keywords.
 
   If an interface library has source files (i.e. the :prop_tgt:`SOURCES`
+  target property is set), or header sets (i.e. the :prop_tgt:`HEADER_SETS`
   target property is set), it will appear in the generated buildsystem
   as a build target much like a target defined by the
   :command:`add_custom_target` command.  It does not compile any sources,

@@ -180,7 +180,9 @@ bool cmGeneratedFileStreamBase::Close()
   // Else, the destination was not replaced.
   //
   // Always delete the temporary file. We never want it to stay around.
-  cmSystemTools::RemoveFile(this->TempName);
+  if (!this->TempName.empty()) {
+    cmSystemTools::RemoveFile(this->TempName);
+  }
 
   return replaced;
 }

@@ -185,6 +185,13 @@ CPack
   :variable:`CPACK_PRODUCTBUILD_IDENTIFIER`, used to customize the unique
   product identifier associated with the product.
 
+* The ``CPack.distribution.dist.in`` template used by the
+  :cpack_gen:`CPack productbuild Generator` and
+  :cpack_gen:`CPack PackageMaker Generator` was updated to use a new
+  ``CPACK_APPLE_PKG_INSTALLER_CONTENT`` variable for its main content.
+  This replaced the previously undocumented and now deprecated
+  ``CPACK_PACKAGEMAKER_CHOICES`` variable.
+
 * The :cpack_gen:`CPack IFW Generator` gained the new
   :variable:`CPACK_IFW_ARCHIVE_FORMAT` and
   :variable:`CPACK_IFW_ARCHIVE_COMPRESSION` variables for setting the
@@ -229,6 +236,15 @@ Deprecated and Removed Features
   passing multiple source path arguments.
 
 * The :manual:`cpack(1)` undocumented ``OSXX11`` generator has been removed.
+
+* The previously undocumented ``CPACK_PACKAGEMAKER_CHOICES`` variable used in
+  the ``CPack.distribution.dist.in`` template has been replaced by a new
+  ``CPACK_APPLE_PKG_INSTALLER_CONTENT`` variable. This only affects projects
+  that were providing their own custom ``CPack.distribution.dist.in`` template
+  file, but still relied on ``CPACK_PACKAGEMAKER_CHOICES`` being set. Those
+  custom template files should be updated to use
+  ``CPACK_APPLE_PKG_INSTALLER_CONTENT`` instead, or to fully define all the
+  template file's contents without relying on substitution of either variable.
 
 Other Changes
 =============
@@ -282,3 +298,14 @@ Changes made since CMake 3.23.0 include the following.
 * The :prop_tgt:`HEADER_SETS` and :prop_tgt:`INTERFACE_HEADER_SETS` target
   properties added in CMake 3.23.0 are now read-only records of the header
   sets created by the :command:`target_sources` command.
+
+3.23.2
+------
+
+* The ``CPACK_PACKAGEMAKER_CHOICES`` variable used in the
+  ``CPack.distribution.dist.in`` template file was replaced by a new
+  ``CPACK_APPLE_PKG_INSTALLER_CONTENT`` variable in CMake 3.23.0.
+  This broke projects that provided their own template file but still
+  expected the ``CPACK_PACKAGEMAKER_CHOICES`` variable to be defined.
+  The old ``CPACK_PACKAGEMAKER_CHOICES`` variable is now also set to the
+  same content as it was before, but it is formally deprecated.
