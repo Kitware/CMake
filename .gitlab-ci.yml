@@ -843,6 +843,20 @@ t:windows-vs2022-x64-ninja:
     variables:
         CMAKE_CI_JOB_NIGHTLY_NINJA: "true"
 
+t:windows-vs2022-x64-ninja-multi:
+    extends:
+        - .windows_vs2022_x64_ninja_multi
+        - .cmake_test_windows_external
+        - .windows_tags_concurrent_vs2022
+        - .cmake_junit_artifacts
+        - .run_dependent
+    dependencies:
+        - t:windows-vs2022-x64-ninja
+    needs:
+        - t:windows-vs2022-x64-ninja
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
 t:windows-vs2022-x64:
     extends:
         - .windows_vs2022_x64
