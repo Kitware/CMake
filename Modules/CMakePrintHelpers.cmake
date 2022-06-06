@@ -19,7 +19,10 @@ e.g. for debugging.
 
 This function prints the values of the properties of the given targets,
 source files, directories, tests or cache entries.  Exactly one of the
-scope keywords must be used.  Example::
+scope keywords must be used.  The scope keyword and its arguments must
+come before the ``PROPERTIES`` keyword, in the arguments list.
+
+Example::
 
   cmake_print_properties(TARGETS foo bar PROPERTIES
                          LOCATION INTERFACE_INCLUDE_DIRECTORIES)
