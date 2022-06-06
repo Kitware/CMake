@@ -234,6 +234,7 @@
 ## Windows-specific scripts
 
 .before_script_windows: &before_script_windows
+    - Invoke-Expression -Command .gitlab/ci/env.ps1
     - $pwdpath = $pwd.Path
     - powershell -File ".gitlab/ci/wix.ps1"
     - Set-Item -Force -Path "env:WIX" -Value "$pwdpath\.gitlab\wix"
@@ -292,6 +293,7 @@
     stage: test-ext
 
     script:
+        - Invoke-Expression -Command .gitlab/ci/env.ps1
         - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake
 
     interruptible: true
