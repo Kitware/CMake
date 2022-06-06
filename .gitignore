@@ -4,6 +4,8 @@
 *.user*
 
 *.pyc
+
+Help/_generated
 Testing
 CMakeUserPresets.json
 
