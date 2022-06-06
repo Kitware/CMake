@@ -20,6 +20,7 @@
 #endif
 
 /* macros for large file support, must be defined before any include file */
+#define _LARGEFILE_SOURCE
 #define _LARGEFILE64_SOURCE
 #define _FILE_OFFSET_BITS 64
 
