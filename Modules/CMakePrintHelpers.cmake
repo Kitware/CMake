@@ -10,12 +10,12 @@ e.g. for debugging.
 
 ::
 
-  cmake_print_properties([TARGETS target1 ..  targetN]
-                        [SOURCES source1 .. sourceN]
-                        [DIRECTORIES dir1 .. dirN]
-                        [TESTS test1 .. testN]
-                        [CACHE_ENTRIES entry1 .. entryN]
-                        PROPERTIES prop1 .. propN )
+  cmake_print_properties(<TARGETS       [<target1> ...] |
+                          SOURCES       [<source1> ...] |
+                          DIRECTORIES   [<dir1> ...]    |
+                          TESTS         [<test1> ...]   |
+                          CACHE_ENTRIES [<entry1> ...]  >
+                         PROPERTIES [<prop1> ...]         )
 
 This function prints the values of the properties of the given targets,
 source files, directories, tests or cache entries.  Exactly one of the
