@@ -71,11 +71,7 @@ macro(mangle_flags variable)
 endmacro()
 
 function(test_cmp0128_old_same_standard)
-  if(extensions_default)
-    set(flag_ext "_EXT")
-  endif()
-
-  set(flag "${${lang}${${lang}_STANDARD_DEFAULT}${flag_ext}_FLAG}")
+  set(flag "${${lang}${${lang}_STANDARD_DEFAULT}_EXT_FLAG}")
 
   if(NOT flag)
     return()
