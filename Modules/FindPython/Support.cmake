@@ -1248,9 +1248,18 @@ endif()
 
 # Python and Anaconda distributions: define which architectures can be used
 if (CMAKE_SIZEOF_VOID_P)
-  # In this case, search only for 64bit or 32bit
   math (EXPR _${_PYTHON_PREFIX}_ARCH "${CMAKE_SIZEOF_VOID_P} * 8")
-  set (_${_PYTHON_PREFIX}_ARCH2 ${_${_PYTHON_PREFIX}_ARCH})
+  if ("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
+      OR "Development.Embed" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
+    # In this case, search only for 64bit or 32bit
+    set (_${_PYTHON_PREFIX}_ARCH2 ${_${_PYTHON_PREFIX}_ARCH})
+  else()
+    if (_${_PYTHON_PREFIX}_ARCH EQUAL "32")
+      set (_${_PYTHON_PREFIX}_ARCH2 64)
+    else()
+      set (_${_PYTHON_PREFIX}_ARCH2 32)
+    endif()
+  endif()
 else()
   # architecture unknown, search for both 64bit and 32bit
   set (_${_PYTHON_PREFIX}_ARCH 64)
