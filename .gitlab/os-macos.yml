@@ -126,6 +126,7 @@
 ## macOS-specific scripts
 
 .before_script_macos: &before_script_macos
+    - source .gitlab/ci/env.sh
     - .gitlab/ci/cmake.sh
     - export PATH=$PWD/.gitlab/cmake/bin:$PATH
     - .gitlab/ci/ninja.sh
