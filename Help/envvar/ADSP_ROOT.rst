@@ -1,6 +1,8 @@
 ADSP_ROOT
 ---------
 
+.. versionadded:: 3.24
+
 .. include:: ENV_VAR.txt
 
 The ``ADSP_ROOT`` environment variable specifies a default value

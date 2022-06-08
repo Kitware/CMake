@@ -1,6 +1,8 @@
 CMAKE_ADSP_ROOT
 ---------------
 
+.. versionadded:: 3.24
+
 When :ref:`Cross Compiling for ADSP SHARC/Blackfin`,
 this variable holds the absolute path to the latest CCES or VDSP++ install.
 The directory is expected to contain the ``cc21k.exe`` and ``ccblkfn.exe`` compilers.
