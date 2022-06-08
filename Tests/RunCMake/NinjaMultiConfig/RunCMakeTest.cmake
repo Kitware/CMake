@@ -432,6 +432,13 @@ run_cmake_configure(ExcludeFromAll)
 include(${RunCMake_TEST_BINARY_DIR}/target_files.cmake)
 run_cmake_build(ExcludeFromAll all "" all:all)
 
+set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/ExternalProject-build)
+set(RunCMake_TEST_OPTIONS "-DCMAKE_CROSS_CONFIGS=all;-DCMAKE_DEFAULT_CONFIGS=Debug\\;Release")
+run_cmake_configure(ExternalProject)
+unset(RunCMake_TEST_OPTIONS)
+run_cmake_build(ExternalProject release-in-debug-graph "Debug" all:Release)
+run_cmake_build(ExternalProject debug-in-release-graph "Release" all:Debug)
+
 # FIXME Get this working
 #set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/AutoMocExecutable-build)
 #run_cmake_configure(AutoMocExecutable)
