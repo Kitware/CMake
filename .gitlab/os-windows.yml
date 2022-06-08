@@ -125,6 +125,13 @@
         CMAKE_CI_BUILD_TYPE: Release
         CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
 
+.windows_ninja_multi:
+    extends: .windows
+
+    variables:
+        CMAKE_GENERATOR: "Ninja Multi-Config"
+        CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
+
 .windows_nmake:
     extends: .windows
 
@@ -156,6 +163,14 @@
 
     variables:
         CMAKE_CONFIGURATION: windows_vs2022_x64_jom
+
+.windows_vs2022_x64_ninja_multi:
+    extends:
+        - .windows_ninja_multi
+        - .windows_vcvarsall_vs2022_x64
+
+    variables:
+        CMAKE_CONFIGURATION: windows_vs2022_x64_ninja_multi
 
 .windows_clang_ninja:
     extends:
