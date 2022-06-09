@@ -1639,6 +1639,10 @@ void cmVisualStudio10TargetGenerator::WriteAndroidConfigurationValues(
       e1.Element("UseOfStl", *stlType);
     }
   }
+  std::string const& apiLevel = gg->GetSystemVersion();
+  if (!apiLevel.empty()) {
+    e1.Element("AndroidAPILevel", cmStrCat("android-", apiLevel));
+  }
 }
 
 void cmVisualStudio10TargetGenerator::WriteCustomCommands(Elem& e0)
