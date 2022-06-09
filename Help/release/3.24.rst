@@ -28,14 +28,16 @@ Generators
 * The :generator:`Green Hills MULTI` generator now generates build
   rules to re-run CMake if any CMake files are updated.
 
-* The :ref:`Visual Studio Generators` now support ``SYSTEM`` headers.
+* The :ref:`Visual Studio Generators` now support ``SYSTEM`` headers
+  when using VS 2019 Update 11 or later.
 
 Command-Line
 ------------
 
 * :manual:`cmake(1)` gained the ``--fresh`` command-line option to remove
-  any existing ``CMakeCache.txt`` when configuring a build tree, thus
-  starting a new configuration as if the build tree were freshly created.
+  any existing ``CMakeCache.txt`` file and associated ``CMakeFiles/``
+  directory, when configuring a build tree, thus starting a new configuration
+  as if the build tree were freshly created.
 
 * :manual:`cmake(1)` gained the ``--compile-no-warning-as-error`` command-line
   option which causes the effects of the :prop_tgt:`COMPILE_WARNING_AS_ERROR`
@@ -93,14 +95,14 @@ Commands
   ``RANGE_END`` to specify a range of bytes to download.  This can be
   useful for downloading parts of big binary files.
 
-* The :command:`find_file`, :command:`find_library`, :command:`find_path`,
-  :command:`find_package`, and :command:`find_program` commands have gained
-  the ``NO_CMAKE_INSTALL_PREFIX`` option to control searching
+* The :command:`find_file`, :command:`find_path`, :command:`find_library`,
+  :command:`find_program`, and :command:`find_package` commands gained the
+  ``NO_CMAKE_INSTALL_PREFIX`` option to control searching
   :variable:`CMAKE_INSTALL_PREFIX`.
 
 * The :command:`find_file`, :command:`find_path`, :command:`find_library`,
   :command:`find_program`, and :command:`find_package` commands gained the
-  capability to specify which Windows Registry views must be queried.
+  ability to specify which Windows Registry views must be queried.
 
 * The :command:`find_package` command gained a ``GLOBAL`` option that
   allows for the promotion of imported targets to global scope for the
@@ -117,7 +119,7 @@ Variables
   color build system messages with :ref:`Makefile Generators`, replacing
   :variable:`CMAKE_COLOR_MAKEFILE`.
 
-  The :envvar:`CMAKE_COLOR_DIAGNOSTICS` environment was added to set
+  The :envvar:`CMAKE_COLOR_DIAGNOSTICS` environment variable was added to set
   a default value for :variable:`CMAKE_COLOR_DIAGNOSTICS`.
 
 * The :variable:`CMAKE_COMPILE_WARNING_AS_ERROR` variable and corresponding
@@ -230,9 +232,9 @@ Generator Expressions
 
 * The :genex:`LINK_LIBRARY` generator expression was added to manage how
   libraries are specified during the link step.
-  The variables :variable:`CMAKE_<LANG>_LINK_LIBRARY_USING_<FEATURE>` and
-  :variable:`CMAKE_LINK_LIBRARY_USING_<FEATURE>` are used to define features
-  usable by the :genex:`LINK_LIBRARY` generator expression.
+  The :variable:`CMAKE_<LANG>_LINK_LIBRARY_USING_<FEATURE>` and
+  :variable:`CMAKE_LINK_LIBRARY_USING_<FEATURE>` variables are used to define
+  features usable by the :genex:`LINK_LIBRARY` generator expression.
   Moreover, the :prop_tgt:`LINK_LIBRARY_OVERRIDE` and
   :prop_tgt:`LINK_LIBRARY_OVERRIDE_<LIBRARY>` target properties are
   available to resolve incompatible features.
@@ -267,14 +269,13 @@ Generator Expressions
   * ``MSYS``
 
 * The :genex:`LINK_GROUP` generator expression was added to manage the
-  grouping of libraries during the link step.  The variables
+  grouping of libraries during the link step.  The
   :variable:`CMAKE_<LANG>_LINK_GROUP_USING_<FEATURE>` and
-  :variable:`CMAKE_LINK_GROUP_USING_<FEATURE>` are used to define
-  features usable by the :genex:`LINK_GROUP` generator expression.
-
-  The :genex:`LINK_GROUP` generator expression can manage, on ``Linux``
-  and ``BSD`` systems, circular references among static libraries
-  by using the ``RESCAN`` feature.
+  :variable:`CMAKE_LINK_GROUP_USING_<FEATURE>` variables are used to define
+  features usable with the :genex:`LINK_GROUP` generator expression.
+  This release defines the ``RESCAN`` feature, which can be used to handle
+  circular references among static libraries when using toolchains for
+  Linux, BSD, SunOS and GNU toolchains for Windows.
 
 * The :genex:`PATH` generator expression was added to manage paths.
 
@@ -302,7 +303,7 @@ CPack
 
 * CPack now supports the :variable:`CPACK_THREADS` option for ``zstd``
   compression when compiled with libarchive 3.6 or higher.  It is
-  supported by official CMake binaries available on ``cmake.org``.
+  supported by official CMake binaries available on `cmake.org`_.
 
 Deprecated and Removed Features
 ===============================
@@ -314,7 +315,7 @@ Deprecated and Removed Features
 * The deprecated :cpack_gen:`CPack PackageMaker Generator` has been removed.
 
 * The :module:`FindGLUT` module no longer provides the undocumented
-  result variables ``GLUT_LIBRARY`` and ``GLUT_INCLUDE_PATH``.
+  ``GLUT_LIBRARY`` and ``GLUT_INCLUDE_PATH`` result variables.
 
 Other Changes
 =============
@@ -340,7 +341,8 @@ Other Changes
 * The :command:`while` command now diagnoses errors during condition
   evaluation.  See policy :policy:`CMP0130`.
 
-* The precompiled macOS binaries provided on
-  `cmake.org <https://cmake.org/download/>`_ no longer attach a SLA
-  to the ``.dmg`` packages.  This was removed because macOS 12 deprecated
+* The precompiled macOS binaries provided on `cmake.org`_ no longer attach a
+  SLA to the ``.dmg`` packages.  This was removed because macOS 12 deprecated
   the tools used to attach ``.dmg`` resources.
+
+.. _`cmake.org`: https://cmake.org/download/
