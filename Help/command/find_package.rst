@@ -11,6 +11,12 @@ find_package
 
    .. contents::
 
+.. note:: The :guide:`Using Dependencies Guide` provides a high-level
+  introduction to this general topic. It provides a broader overview of
+  where the ``find_package()`` command fits into the bigger picture,
+  including its relationship to the :module:`FetchContent` module.
+  The guide is recommended pre-reading before moving on to the details below.
+
 Find a package (usually provided by something external to the project),
 and load its package-specific details.  Calls to this command can also
 be intercepted by :ref:`dependency providers <dependency_providers>`.

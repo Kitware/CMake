@@ -15,7 +15,8 @@ when it populates a dependency.  This allows subsequent calls to
 :command:`find_package` for the same dependency to re-use the populated
 contents instead of trying to satisfy the dependency from somewhere external
 to the build.  Projects may also want to write files into this directory in
-some situations (see :ref:`FetchContent-find_package-integration` for examples).
+some situations (see :ref:`FetchContent-find_package-integration-examples`
+for examples).
 
 The directory that ``CMAKE_FIND_PACKAGE_REDIRECTS_DIR`` points to will always
 be erased and recreated empty at the start of every CMake run.  Any files
