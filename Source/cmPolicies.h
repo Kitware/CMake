@@ -415,7 +415,8 @@ class cmMakefile;
   SELECT(POLICY, CMP0137,                                                     \
          "try_compile() passes platform variables in project mode", 3, 24, 0, \
          cmPolicies::WARN)                                                    \
-  SELECT(POLICY, CMP0138, "Placeholder for reverted policy.", 3, 24, 0,       \
+  SELECT(POLICY, CMP0138,                                                     \
+         "CheckIPOSupported uses flags from calling project.", 3, 24, 0,      \
          cmPolicies::WARN)                                                    \
   SELECT(                                                                     \
     POLICY, CMP0139,                                                          \
