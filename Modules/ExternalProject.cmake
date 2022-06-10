@@ -2063,19 +2063,19 @@ endif()
   set(${cmd_var} "${command}" PARENT_SCOPE)
 endfunction()
 
-# This module used to use "/${CMAKE_CFG_INTDIR}" directly and produced
-# makefiles with "/./" in paths for custom command dependencies. Which
-# resulted in problems with parallel make -j invocations.
-#
-# This function was added so that the suffix (search below for ${cfgdir}) is
-# only set to "/${CMAKE_CFG_INTDIR}" when ${CMAKE_CFG_INTDIR} is not going to
-# be "." (multi-configuration build systems like Visual Studio and Xcode...)
-#
-function(_ep_get_configuration_subdir_suffix suffix_var)
+# On multi-config generators, provide a placeholder for a per-config subdir.
+# On single-config generators, this is empty.
+function(_ep_get_configuration_subdir_genex suffix_var)
   set(suffix "")
   get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
   if(_isMultiConfig)
-    set(suffix "/${CMAKE_CFG_INTDIR}")
+    if(CMAKE_GENERATOR STREQUAL "Xcode")
+      # The Xcode generator does not support per-config sources,
+      # so use the underlying build system's placeholder instead.
+      set(suffix "/${CMAKE_CFG_INTDIR}")
+    else()
+      set(suffix "/$<CONFIG>")
+    endif()
   endif()
   set(${suffix_var} "${suffix}" PARENT_SCOPE)
 endfunction()
@@ -2088,7 +2088,7 @@ function(_ep_get_step_stampfile
 )
   ExternalProject_Get_Property(${name} stamp_dir)
 
-  _ep_get_configuration_subdir_suffix(cfgdir)
+  _ep_get_configuration_subdir_genex(cfgdir)
   set(stampfile "${stamp_dir}${cfgdir}/${name}-${step}")
 
   set(${stampfile_var} "${stampfile}" PARENT_SCOPE)
@@ -2100,7 +2100,7 @@ function(_ep_get_complete_stampfile
   stampfile_var
 )
   set(cmf_dir ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles)
-  _ep_get_configuration_subdir_suffix(cfgdir)
+  _ep_get_configuration_subdir_genex(cfgdir)
   set(stampfile "${cmf_dir}${cfgdir}/${name}-complete")
 
   set(${stampfile_var} ${stampfile} PARENT_SCOPE)
@@ -2423,18 +2423,25 @@ function(ExternalProject_Add_Step name step)
     PROPERTY _EP_${step}_ALWAYS
   )
   if(always)
-    set_property(SOURCE ${stamp_file} PROPERTY SYMBOLIC 1)
     set(touch)
+    # Mark stamp files for all configs as SYMBOLIC since we do not create them.
     # Remove any existing stamp in case the option changed in an existing tree.
     get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
     if(_isMultiConfig)
+      _ep_get_configuration_subdir_genex(cfgdir)
       foreach(cfg ${CMAKE_CONFIGURATION_TYPES})
-        string(REPLACE "/${CMAKE_CFG_INTDIR}" "/${cfg}"
+        string(REPLACE "${cfgdir}" "/${cfg}"
           stamp_file_config "${stamp_file}"
         )
+        set_property(SOURCE ${stamp_file_config} PROPERTY SYMBOLIC 1)
         file(REMOVE ${stamp_file_config})
       endforeach()
+      if(CMAKE_GENERATOR STREQUAL "Xcode")
+        # See Xcode case in _ep_get_configuration_subdir_genex.
+        set_property(SOURCE ${stamp_file} PROPERTY SYMBOLIC 1)
+      endif()
     else()
+      set_property(SOURCE ${stamp_file} PROPERTY SYMBOLIC 1)
       file(REMOVE ${stamp_file})
     endif()
   else()
@@ -3940,7 +3947,7 @@ function(ExternalProject_Add name)
     PARENT_SCOPE # undocumented, do not use outside of CMake
   )
 
-  _ep_get_configuration_subdir_suffix(cfgdir)
+  _ep_get_configuration_subdir_genex(cfgdir)
 
   # Add a custom target for the external project.
   set(cmf_dir ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles)
