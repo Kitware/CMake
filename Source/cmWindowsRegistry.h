@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #pragma once
 
+#include <cstdint> // IWYU pragma: keep
 #include <string>
 #include <vector>
 
