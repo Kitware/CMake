@@ -72,7 +72,7 @@
 		1DEB928608733DD80010E9CD = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "@id_code_sign_identity@";
 				PRODUCT_NAME = CompilerId@id_lang@;
 			};
 			name = Debug;
