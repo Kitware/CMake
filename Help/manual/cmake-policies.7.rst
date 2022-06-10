@@ -59,7 +59,7 @@ Policies Introduced by CMake 3.24
    :maxdepth: 1
 
    CMP0139: The if() command supports path comparisons using PATH_EQUAL operator. </policy/CMP0139>
-   CMP0138: MSVC compilers use -ZI instead of /Zi for x86 and x64 by default. </policy/CMP0138>
+   CMP0138: Placeholder for reverted policy. </policy/CMP0138>
    CMP0137: try_compile() passes platform variables in project mode. </policy/CMP0137>
    CMP0136: Watcom runtime library flags are selected by an abstraction. </policy/CMP0136>
    CMP0135: ExternalProject ignores timestamps in archives by default for the URL download method. </policy/CMP0135>
