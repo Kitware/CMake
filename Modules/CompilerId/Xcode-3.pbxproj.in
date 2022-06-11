@@ -49,6 +49,7 @@
 		};
 		2C8FEB8E15DC1A1A00E56A5D = {
 			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
@@ -72,7 +73,7 @@
 		1DEB928608733DD80010E9CD = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "@id_code_sign_identity@";
 				PRODUCT_NAME = CompilerId@id_lang@;
 			};
 			name = Debug;
