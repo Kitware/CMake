@@ -1,0 +1,4 @@
+CMake Error at VALIDATOR-undefined-function.cmake:[0-9]+ \(find_program\):
+  find_program command specified for "VALIDATOR" is undefined: undefined.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

@@ -1,0 +1,3 @@
+-- FILE='[^']+/Tests/RunCMake/find_file/include/PrefixInPATH.h'
+-- FILE='[^']+/Tests/RunCMake/find_file/include/PrefixInPATH.h'
+-- FILE='FILE-NOTFOUND'
