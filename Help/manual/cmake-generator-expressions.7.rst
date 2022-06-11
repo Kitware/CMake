@@ -1449,7 +1449,7 @@ Output-Related Expressions
   .. versionadded:: 3.24
 
   Manage the grouping of libraries during the link step.
-  This expression may be used to specify how to kept groups of libraries during
+  This expression may be used to specify how to keep groups of libraries during
   the link of a target.
   For example:
 
