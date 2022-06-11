@@ -195,7 +195,14 @@ Commands
 
       Everything after the ``FIND_PACKAGE_ARGS`` keyword is appended to the
       :command:`find_package` call, so all other ``<contentOptions>`` must
-      come before the ``FIND_PACKAGE_ARGS`` keyword.
+      come before the ``FIND_PACKAGE_ARGS`` keyword.  If the
+      :variable:`CMAKE_FIND_PACKAGE_TARGETS_GLOBAL` variable is set to true
+      at the time ``FetchContent_Declare()`` is called, a ``GLOBAL`` keyword
+      will be appended to the :command:`find_package` arguments if it was
+      not already specified.  It will also be appended if
+      ``FIND_PACKAGE_ARGS`` was not given, but
+      :variable:`FETCHCONTENT_TRY_FIND_PACKAGE_MODE` was set to ``ALWAYS``.
+
       ``OVERRIDE_FIND_PACKAGE`` cannot be used when ``FIND_PACKAGE_ARGS`` is
       given.
 
@@ -260,6 +267,11 @@ Commands
       The value of the :variable:`FETCHCONTENT_TRY_FIND_PACKAGE_MODE` variable
       at the time :command:`FetchContent_Declare` was called determines whether
       ``FetchContent_MakeAvailable()`` can call :command:`find_package`.
+      If the :variable:`CMAKE_FIND_PACKAGE_TARGETS_GLOBAL` variable is set to
+      true when ``FetchContent_MakeAvailable()`` is called, it still affects
+      any imported targets created when that in turn calls
+      :command:`find_package`, even if that variable was false when the
+      corresponding details were declared.
 
   If the dependency was not satisfied by a provider or a
   :command:`find_package` call, ``FetchContent_MakeAvailable()`` then uses
@@ -1078,10 +1090,17 @@ function(__FetchContent_declareDetails contentName)
 
   set(__cmdArgs)
   set(__findPackageArgs)
+  set(__sawQuietKeyword NO)
+  set(__sawGlobalKeyword NO)
   foreach(__item IN LISTS ARGN)
     if(DEFINED __findPackageArgs)
       # All remaining args are for find_package()
       string(APPEND __findPackageArgs " [==[${__item}]==]")
+      if(__item STREQUAL "QUIET")
+        set(__sawQuietKeyword YES)
+      elseif(__item STREQUAL "GLOBAL")
+        set(__sawGlobalKeyword YES)
+      endif()
       continue()
     endif()
 
@@ -1120,8 +1139,11 @@ function(__FetchContent_declareDetails contentName)
   if(__tryFindPackage AND __tryFindPackageAllowed)
     set(propertyName "_FetchContent_${contentNameLower}_find_package_args")
     define_property(GLOBAL PROPERTY ${propertyName})
-    if(NOT QUIET IN_LIST __findPackageArgs)
+    if(NOT __sawQuietKeyword)
       list(INSERT __findPackageArgs 0 QUIET)
+    endif()
+    if(CMAKE_FIND_PACKAGE_TARGETS_GLOBAL AND NOT __sawGlobalKeyword)
+      list(APPEND __findPackageArgs GLOBAL)
     endif()
     cmake_language(EVAL CODE
       "set_property(GLOBAL PROPERTY ${propertyName} ${__findPackageArgs})"

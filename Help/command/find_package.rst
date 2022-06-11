@@ -146,10 +146,11 @@ available components.
   ignored on all other ones. Formally, it is up to the target package how to
   interpret the registry view information given to it.
 
-Specifying the ``GLOBAL`` keyword will promote all imported targets to
-a global scope in the importing project. Alternatively this functionality
-can be enabled by setting the variable
-:variable:`CMAKE_FIND_PACKAGE_TARGETS_GLOBAL`
+.. versionadded:: 3.24
+  Specifying the ``GLOBAL`` keyword will promote all imported targets to
+  a global scope in the importing project. Alternatively, this functionality
+  can be enabled by setting the :variable:`CMAKE_FIND_PACKAGE_TARGETS_GLOBAL`
+  variable.
 
 .. _FIND_PACKAGE_VERSION_FORMAT:
 
