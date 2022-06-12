@@ -252,7 +252,7 @@ void QCMake::configure()
     this->CMakeInstance->PreLoadCMakeFiles();
 
     InterruptFlag = 0;
-    cmSystemTools::ResetErrorOccuredFlag();
+    cmSystemTools::ResetErrorOccurredFlag();
 
     err = this->CMakeInstance->Configure();
 
@@ -277,7 +277,7 @@ void QCMake::generate()
 #endif
 
     InterruptFlag = 0;
-    cmSystemTools::ResetErrorOccuredFlag();
+    cmSystemTools::ResetErrorOccurredFlag();
 
     err = this->CMakeInstance->Generate();
 
@@ -297,7 +297,7 @@ void QCMake::open()
 #endif
 
   InterruptFlag = 0;
-  cmSystemTools::ResetErrorOccuredFlag();
+  cmSystemTools::ResetErrorOccurredFlag();
 
   auto successful =
     this->CMakeInstance->Open(this->BinaryDirectory.toStdString(), false);

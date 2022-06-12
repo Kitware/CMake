@@ -433,7 +433,7 @@ cmValue cmGeneratorTarget::GetProperty(const std::string& prop) const
         cmTargetPropertyComputer::GetProperty(this, prop, *this->Makefile)) {
     return result;
   }
-  if (cmSystemTools::GetFatalErrorOccured()) {
+  if (cmSystemTools::GetFatalErrorOccurred()) {
     return nullptr;
   }
   return this->Target->GetProperty(prop);
@@ -5698,7 +5698,7 @@ void checkPropertyConsistency(cmGeneratorTarget const* depender,
     if (emitted.insert(p).second) {
       getLinkInterfaceDependentProperty<PropertyType>(depender, p, config, t,
                                                       nullptr);
-      if (cmSystemTools::GetErrorOccuredFlag()) {
+      if (cmSystemTools::GetErrorOccurredFlag()) {
         return;
       }
     }
@@ -5777,25 +5777,25 @@ void cmGeneratorTarget::CheckPropertyCompatibility(
 
     checkPropertyConsistency<bool>(this, dep.Target, strBool, emittedBools,
                                    config, BoolType, nullptr);
-    if (cmSystemTools::GetErrorOccuredFlag()) {
+    if (cmSystemTools::GetErrorOccurredFlag()) {
       return;
     }
     checkPropertyConsistency<const char*>(this, dep.Target, strString,
                                           emittedStrings, config, StringType,
                                           nullptr);
-    if (cmSystemTools::GetErrorOccuredFlag()) {
+    if (cmSystemTools::GetErrorOccurredFlag()) {
       return;
     }
     checkPropertyConsistency<const char*>(this, dep.Target, strNumMin,
                                           emittedMinNumbers, config,
                                           NumberMinType, nullptr);
-    if (cmSystemTools::GetErrorOccuredFlag()) {
+    if (cmSystemTools::GetErrorOccurredFlag()) {
       return;
     }
     checkPropertyConsistency<const char*>(this, dep.Target, strNumMax,
                                           emittedMaxNumbers, config,
                                           NumberMaxType, nullptr);
-    if (cmSystemTools::GetErrorOccuredFlag()) {
+    if (cmSystemTools::GetErrorOccurredFlag()) {
       return;
     }
   }

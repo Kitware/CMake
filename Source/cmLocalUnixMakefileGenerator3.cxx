@@ -1332,7 +1332,7 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(
 {
   // read in the target info file
   if (!this->Makefile->ReadListFile(tgtInfo) ||
-      cmSystemTools::GetErrorOccuredFlag()) {
+      cmSystemTools::GetErrorOccurredFlag()) {
     cmSystemTools::Error("Target DependInfo.cmake file not found");
   }
 
@@ -1497,7 +1497,7 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(
       cmStrCat(this->GetCurrentBinaryDirectory(),
                "/CMakeFiles/CMakeDirectoryInformation.cmake");
     if (mf->ReadListFile(dirInfoFile) &&
-        !cmSystemTools::GetErrorOccuredFlag()) {
+        !cmSystemTools::GetErrorOccurredFlag()) {
       haveDirectoryInfo = true;
     }
   }

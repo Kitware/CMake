@@ -314,7 +314,7 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile* mf, unsigned int majorVer,
   // Make sure the project does not use any ancient policies.
   if (!ancientPolicies.empty()) {
     DiagnoseAncientPolicies(ancientPolicies, majorVer, minorVer, patchVer, mf);
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
 

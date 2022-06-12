@@ -38,7 +38,7 @@ bool cmWriteFileCommand(std::vector<std::string> const& args,
     std::string e =
       "attempted to write a file: " + fileName + " into a source directory.";
     status.SetError(e);
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
 

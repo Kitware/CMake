@@ -516,7 +516,7 @@ void cmFindBase::StoreFindResult(const std::string& value)
                   ? "files"
                   : "names"),
                ": ", cmJoin(this->Names, ", ")));
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
   }
 }
 

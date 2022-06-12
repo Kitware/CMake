@@ -222,7 +222,7 @@ bool cmMessageCommand(std::vector<std::string> const& args,
   }
 
   if (fatal) {
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
   }
   return true;
 }

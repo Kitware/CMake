@@ -29,7 +29,7 @@ namespace {
 bool FatalError(cmExecutionStatus& status, std::string const& error)
 {
   status.SetError(error);
-  cmSystemTools::SetFatalErrorOccured();
+  cmSystemTools::SetFatalErrorOccurred();
   return false;
 }
 
