@@ -2726,6 +2726,10 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
                             cmStrCat("${_IMPORT_PREFIX}/", cmEscape(dest)));
     };
 
+    // public/private requirement tracking.
+    std::set<std::string> private_modules;
+    std::map<std::string, std::set<std::string>> public_source_requires;
+
     for (cmScanDepInfo const& object : objects) {
       // Convert to forward slashes.
       auto output_path = object.PrimaryOutput;
@@ -2811,7 +2815,18 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
 
       if (!cmFileSetVisibilityIsForInterface(file_set.Visibility)) {
         // Nothing needs to be conveyed about non-`PUBLIC` modules.
+        for (auto const& p : object.Provides) {
+          private_modules.insert(p.LogicalName);
+        }
         continue;
+      }
+
+      // The module is public. Record what it directly requires.
+      {
+        auto& reqs = public_source_requires[file_set.SourcePath];
+        for (auto const& r : object.Requires) {
+          reqs.insert(r.LogicalName);
+        }
       }
 
       // Write out properties and install rules for any exports.
@@ -2920,6 +2935,18 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
     // Add trailing parenthesis for the `set_property` call.
     for (auto const& exp : exports) {
       *exp.first << ")\n";
+    }
+
+    // Check that public sources only require public modules.
+    for (auto const& pub_reqs : public_source_requires) {
+      for (auto const& req : pub_reqs.second) {
+        if (private_modules.count(req)) {
+          cmSystemTools::Error(cmStrCat(
+            "Public C++ module source `", pub_reqs.first, "` requires the `",
+            req, "` C++ module which is provided by a private source"));
+          result = false;
+        }
+      }
     }
   }
 
