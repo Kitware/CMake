@@ -12,6 +12,8 @@ set(qt_version_nodot "${qt_version_major}${qt_version_minor}${qt_version_patch}"
 # Files needed to download.
 set(qt_files)
 if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "windows.*package")
+  set(qt_url_root "https://cmake.org/files/dependencies")
+  set(qt_url_path "")
   if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "windows_x86_64_package")
     list(APPEND qt_files "qt-5.12.1-win-x86_64-msvc_v142-1.zip")
     set(qt_subdir "qt-5.12.1-win-x86_64-msvc_v142-1")
@@ -21,8 +23,6 @@ if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "windows.*package")
   else ()
     message(FATAL_ERROR "Unknown arch to use for Qt")
   endif()
-  set(qt_url_root "https://cmake.org/files/dependencies")
-  set(qt_url_path "")
 elseif ("$ENV{CMAKE_CONFIGURATION}" MATCHES "windows")
   # Determine the ABI to fetch for Qt.
   if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "vs2015")
