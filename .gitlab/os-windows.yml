@@ -43,6 +43,12 @@
         VCVARSPLATFORM: "x86"
         VCVARSVERSION: "14.32.31326"
 
+.windows_vcvarsall_vs2022_x64_arm64:
+    variables:
+        VCVARSALL: "${VS170COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
+        VCVARSPLATFORM: "x64_arm64"
+        VCVARSVERSION: "14.32.31326"
+
 .windows_vs2022_x64_ninja:
     extends:
         - .windows_build_ninja
@@ -74,6 +80,14 @@
 
     variables:
         CMAKE_CONFIGURATION: windows_i386_package
+
+.windows_arm64_package:
+    extends:
+        - .windows_package
+        - .windows_vcvarsall_vs2022_x64_arm64
+
+    variables:
+        CMAKE_CONFIGURATION: windows_arm64_package
 
 ### External testing
 
@@ -219,6 +233,15 @@
         - shell
         - vs2022
         - msvc-19.32
+        - nonconcurrent
+
+.windows_tags_nonconcurrent_vs2022_arm64:
+    tags:
+        - cmake # Since this is a bare runner, pin to a project.
+        - windows
+        - shell
+        - vs2022
+        - msvc-19.32-arm64
         - nonconcurrent
 
 .windows_tags_concurrent_vs2022:

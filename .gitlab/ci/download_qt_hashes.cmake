@@ -15,3 +15,7 @@ set("qt-5.15.2-macosx10.13-x86_64-arm64.tar.xz_hash" 7b9463a01c8beeee5bf8d01c70d
 
 set("qt-5.12.1-win-i386-msvc_v142-1.zip_hash" aa78711fdaa5d9b146bf7ddcf15983f9fbb3f995462f2d043f8cca74b40ddd11)
 set("qt-5.12.1-win-x86_64-msvc_v142-1.zip_hash" c2fc068b9dac40bb420e28e1ee15ce4f2ccfc866d767f3b99b6bb435b7c4f44b)
+
+set("qt-6.3.0-win-arm64-msvc_v143-1.zip_hash" 0950db703b0d305ff2855c69d8553e10036ebe5c65f95c4a850cf1f703410798)
+set("qt-6.3.0-win-i386-msvc_v143-1.zip_hash" 52d68ff3b8a045222b59ebe12878b8597e97019c2ae930e846ec816ce6df18db)
+set("qt-6.3.0-win-x86_64-msvc_v143-1.zip_hash" 3764a3076cf2331ec28bd88d6bddcab1578b1bb1329157bfe33ea02c2c63c6e1)

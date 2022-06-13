@@ -1100,3 +1100,17 @@ u:windows-i386-package:
         - k:windows-i386-package
     needs:
         - k:windows-i386-package
+
+b:windows-arm64-package:
+    extends:
+        - .windows_arm64_package
+        - .cmake_build_windows
+        - .cmake_build_package_artifacts
+        - .windows_tags_nonconcurrent_vs2022_arm64
+        - .run_only_for_package
+    dependencies:
+        - p:doc-package
+    needs:
+        - p:doc-package
+    variables:
+        CMAKE_CI_ARTIFACTS_NAME: "artifacts-windows-arm64-build"
