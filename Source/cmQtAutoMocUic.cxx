@@ -2789,7 +2789,7 @@ void cmQtAutoMocUicT::CreateParseJobs(SourceFileMapT const& sourceMap)
 std::string cmQtAutoMocUicT::CollapseFullPathTS(std::string const& path) const
 {
   std::lock_guard<std::mutex> guard(this->CMakeLibMutex_);
-#if defined(__NVCOMPILER)
+#if defined(__NVCOMPILER) || defined(__LCC__)
   static_cast<void>(guard); // convince compiler var is used
 #endif
   return cmSystemTools::CollapseFullPath(path,
@@ -3031,7 +3031,7 @@ std::vector<std::string> cmQtAutoMocUicT::dependenciesFromDepFile(
   const char* filePath)
 {
   std::lock_guard<std::mutex> guard(this->CMakeLibMutex_);
-#if defined(__NVCOMPILER)
+#if defined(__NVCOMPILER) || defined(__LCC__)
   static_cast<void>(guard); // convince compiler var is used
 #endif
   auto const content = cmReadGccDepfile(filePath);
