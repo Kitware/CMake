@@ -127,7 +127,7 @@ bool cmParseArgumentsCommand(std::vector<std::string> const& args,
       status.GetMakefile().IssueMessage(
         MessageType::FATAL_ERROR,
         "PARSE_ARGV must be called with exactly 6 arguments.");
-      cmSystemTools::SetFatalErrorOccured();
+      cmSystemTools::SetFatalErrorOccurred();
       return true;
     }
     parseFromArgV = true;
@@ -136,7 +136,7 @@ bool cmParseArgumentsCommand(std::vector<std::string> const& args,
       status.GetMakefile().IssueMessage(MessageType::FATAL_ERROR,
                                         "PARSE_ARGV index '" + *argIter +
                                           "' is not an unsigned integer");
-      cmSystemTools::SetFatalErrorOccured();
+      cmSystemTools::SetFatalErrorOccurred();
       return true;
     }
     argIter++; // move past N
@@ -190,7 +190,7 @@ bool cmParseArgumentsCommand(std::vector<std::string> const& args,
                                         "PARSE_ARGV called with ARGC='" +
                                           argc +
                                           "' that is not an unsigned integer");
-      cmSystemTools::SetFatalErrorOccured();
+      cmSystemTools::SetFatalErrorOccurred();
       return true;
     }
     for (unsigned long i = argvStart; i < count; ++i) {
@@ -201,7 +201,7 @@ bool cmParseArgumentsCommand(std::vector<std::string> const& args,
         status.GetMakefile().IssueMessage(MessageType::FATAL_ERROR,
                                           "PARSE_ARGV called with " +
                                             argName.str() + " not set");
-        cmSystemTools::SetFatalErrorOccured();
+        cmSystemTools::SetFatalErrorOccurred();
         return true;
       }
       list.emplace_back(*arg);

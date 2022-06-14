@@ -290,7 +290,7 @@ void cmCPackFreeBSDGenerator::write_manifest_fields(
     cmExpandedList(var_lookup("CPACK_FREEBSD_PACKAGE_LICENSE"));
   std::string licenselogic("single");
   if (licenses.empty()) {
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
   } else if (licenses.size() > 1) {
     licenselogic = var_lookup("CPACK_FREEBSD_PACKAGE_LICENSE_LOGIC");
   }

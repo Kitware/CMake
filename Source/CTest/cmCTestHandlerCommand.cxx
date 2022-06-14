@@ -29,8 +29,8 @@ class SaveRestoreErrorState
 public:
   SaveRestoreErrorState()
   {
-    this->InitialErrorState = cmSystemTools::GetErrorOccuredFlag();
-    cmSystemTools::ResetErrorOccuredFlag(); // rest the error state
+    this->InitialErrorState = cmSystemTools::GetErrorOccurredFlag();
+    cmSystemTools::ResetErrorOccurredFlag(); // rest the error state
     this->CaptureCMakeErrorValue = false;
   }
   // if the function has a CAPTURE_CMAKE_ERROR then we should restore
@@ -44,21 +44,21 @@ public:
     // otherwise leave it be what it is
     if (!this->CaptureCMakeErrorValue) {
       if (this->InitialErrorState) {
-        cmSystemTools::SetErrorOccured();
+        cmSystemTools::SetErrorOccurred();
       }
       return;
     }
     // if we have saved the error in a return variable
     // then put things back exactly like they were
-    bool currentState = cmSystemTools::GetErrorOccuredFlag();
+    bool currentState = cmSystemTools::GetErrorOccurredFlag();
     // if the state changed during this command we need
     // to handle it, if not then nothing needs to be done
     if (currentState != this->InitialErrorState) {
       // restore the initial error state
       if (this->InitialErrorState) {
-        cmSystemTools::SetErrorOccured();
+        cmSystemTools::SetErrorOccurred();
       } else {
-        cmSystemTools::ResetErrorOccuredFlag();
+        cmSystemTools::ResetErrorOccurredFlag();
       }
     }
   }
@@ -212,7 +212,7 @@ bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
   // log the error message if there was an error
   if (captureCMakeError) {
     const char* returnString = "0";
-    if (cmSystemTools::GetErrorOccuredFlag()) {
+    if (cmSystemTools::GetErrorOccurredFlag()) {
       returnString = "-1";
       std::string const& err = status.GetError();
       // print out the error if it is not "unknown error" which means

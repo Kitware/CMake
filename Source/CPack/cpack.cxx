@@ -473,7 +473,7 @@ int main(int argc, char const* const* argv)
     return doc.PrintRequestedDocumentation(std::cout) ? 0 : 1;
   }
 
-  if (cmSystemTools::GetErrorOccuredFlag()) {
+  if (cmSystemTools::GetErrorOccurredFlag()) {
     return 1;
   }
 

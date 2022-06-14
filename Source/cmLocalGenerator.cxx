@@ -399,7 +399,7 @@ void cmLocalGenerator::ProcessEvaluationFiles(
 {
   for (const auto& geef : this->Makefile->GetEvaluationFiles()) {
     geef->Generate(this);
-    if (cmSystemTools::GetFatalErrorOccured()) {
+    if (cmSystemTools::GetFatalErrorOccurred()) {
       return;
     }
     std::vector<std::string> files = geef->GetFiles();
@@ -1982,7 +1982,7 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
                     "CMAKE_" + lang + "_COMPILER_ID") == "MSVC" ||
                   this->Makefile->GetSafeDefinition(
                     "CMAKE_" + lang + "_SIMULATE_ID") == "MSVC") &&
-                 !cmSystemTools::GetErrorOccuredFlag()) {
+                 !cmSystemTools::GetErrorOccurredFlag()) {
         // The compiler uses the MSVC ABI so it needs a known runtime library.
         this->IssueMessage(MessageType::FATAL_ERROR,
                            "MSVC_RUNTIME_LIBRARY value '" +
@@ -2013,7 +2013,7 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
                     "CMAKE_" + lang + "_COMPILER_ID") == "OpenWatcom" ||
                   this->Makefile->GetSafeDefinition(
                     "CMAKE_" + lang + "_SIMULATE_ID") == "OpenWatcom") &&
-                 !cmSystemTools::GetErrorOccuredFlag()) {
+                 !cmSystemTools::GetErrorOccurredFlag()) {
         // The compiler uses the Watcom ABI so it needs a known runtime
         // library.
         this->IssueMessage(MessageType::FATAL_ERROR,

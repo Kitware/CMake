@@ -78,7 +78,7 @@ void cmListFileParser::IssueError(const std::string& text) const
   cmListFileBacktrace lfbt = this->Backtrace;
   lfbt = lfbt.Push(lfc);
   this->Messenger->IssueMessage(MessageType::FATAL_ERROR, text, lfbt);
-  cmSystemTools::SetFatalErrorOccured();
+  cmSystemTools::SetFatalErrorOccurred();
 }
 
 bool cmListFileParser::ParseFile(const char* filename)
@@ -174,7 +174,7 @@ bool cmListFileParser::Parse()
       MessageType::FATAL_ERROR,
       "Flow control statements are not properly nested.",
       this->Backtrace.Push(*badNesting));
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
 

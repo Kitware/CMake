@@ -494,21 +494,21 @@ int cmCursesMainForm::Configure(int noconfigure)
 
   if (retVal != 0 || this->HasNonStatusOutputs) {
     // see if there was an error
-    if (cmSystemTools::GetErrorOccuredFlag()) {
+    if (cmSystemTools::GetErrorOccurredFlag()) {
       this->OkToGenerate = false;
     }
     int xx;
     int yy;
     getmaxyx(stdscr, yy, xx);
     const char* title = "Configure produced the following output";
-    if (cmSystemTools::GetErrorOccuredFlag()) {
+    if (cmSystemTools::GetErrorOccurredFlag()) {
       title = "Configure failed with the following output";
     }
     cmCursesLongMessageForm* msgs = new cmCursesLongMessageForm(
       this->Outputs, title,
       cmCursesLongMessageForm::ScrollBehavior::ScrollDown);
     // reset error condition
-    cmSystemTools::ResetErrorOccuredFlag();
+    cmSystemTools::ResetErrorOccurredFlag();
     CurrentForm = msgs;
     msgs->Render(1, 1, xx, yy);
     msgs->HandleInput();
@@ -547,16 +547,16 @@ int cmCursesMainForm::Generate()
 
   if (retVal != 0 || this->HasNonStatusOutputs) {
     // see if there was an error
-    if (cmSystemTools::GetErrorOccuredFlag()) {
+    if (cmSystemTools::GetErrorOccurredFlag()) {
       this->OkToGenerate = false;
     }
     // reset error condition
-    cmSystemTools::ResetErrorOccuredFlag();
+    cmSystemTools::ResetErrorOccurredFlag();
     int xx;
     int yy;
     getmaxyx(stdscr, yy, xx);
     const char* title = "Generate produced the following output";
-    if (cmSystemTools::GetErrorOccuredFlag()) {
+    if (cmSystemTools::GetErrorOccurredFlag()) {
       title = "Generate failed with the following output";
     }
     cmCursesLongMessageForm* msgs = new cmCursesLongMessageForm(

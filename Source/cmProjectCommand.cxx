@@ -102,7 +102,7 @@ bool cmProjectCommand(std::vector<std::string> const& args,
       if (haveLanguages) {
         mf.IssueMessage(MessageType::FATAL_ERROR,
                         "LANGUAGES may be specified at most once.");
-        cmSystemTools::SetFatalErrorOccured();
+        cmSystemTools::SetFatalErrorOccurred();
         return true;
       }
       haveLanguages = true;
@@ -121,7 +121,7 @@ bool cmProjectCommand(std::vector<std::string> const& args,
       if (haveVersion) {
         mf.IssueMessage(MessageType::FATAL_ERROR,
                         "VERSION may be specified at most once.");
-        cmSystemTools::SetFatalErrorOccured();
+        cmSystemTools::SetFatalErrorOccurred();
         return true;
       }
       haveVersion = true;
@@ -140,7 +140,7 @@ bool cmProjectCommand(std::vector<std::string> const& args,
       if (haveDescription) {
         mf.IssueMessage(MessageType::FATAL_ERROR,
                         "DESCRIPTION may be specified at most once.");
-        cmSystemTools::SetFatalErrorOccured();
+        cmSystemTools::SetFatalErrorOccurred();
         return true;
       }
       haveDescription = true;
@@ -159,7 +159,7 @@ bool cmProjectCommand(std::vector<std::string> const& args,
       if (haveHomepage) {
         mf.IssueMessage(MessageType::FATAL_ERROR,
                         "HOMEPAGE_URL may be specified at most once.");
-        cmSystemTools::SetFatalErrorOccured();
+        cmSystemTools::SetFatalErrorOccurred();
         return true;
       }
       haveHomepage = true;
@@ -200,7 +200,7 @@ bool cmProjectCommand(std::vector<std::string> const& args,
     mf.IssueMessage(MessageType::FATAL_ERROR,
                     "project with VERSION, DESCRIPTION or HOMEPAGE_URL must "
                     "use LANGUAGES before language names.");
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     return true;
   }
   if (haveLanguages && languages.empty()) {
@@ -214,7 +214,7 @@ bool cmProjectCommand(std::vector<std::string> const& args,
     if (cmp0048 == cmPolicies::OLD || cmp0048 == cmPolicies::WARN) {
       mf.IssueMessage(MessageType::FATAL_ERROR,
                       "VERSION not allowed unless CMP0048 is set to NEW");
-      cmSystemTools::SetFatalErrorOccured();
+      cmSystemTools::SetFatalErrorOccurred();
       return true;
     }
 
@@ -223,7 +223,7 @@ bool cmProjectCommand(std::vector<std::string> const& args,
     if (!vx.find(version)) {
       std::string e = R"(VERSION ")" + version + R"(" format invalid.)";
       mf.IssueMessage(MessageType::FATAL_ERROR, e);
-      cmSystemTools::SetFatalErrorOccured();
+      cmSystemTools::SetFatalErrorOccurred();
       return true;
     }
 
@@ -380,7 +380,7 @@ static bool IncludeByVariable(cmExecutionStatus& status,
     return true;
   }
 
-  if (cmSystemTools::GetFatalErrorOccured()) {
+  if (cmSystemTools::GetFatalErrorOccurred()) {
     return true;
   }
 

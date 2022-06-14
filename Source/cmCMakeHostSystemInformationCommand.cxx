@@ -338,7 +338,7 @@ std::map<std::string, std::string> GetOSReleaseVariables(
 
     // include FATAL_ERROR and ERROR in the return status
     if (!makefile.ReadListFile(script) ||
-        cmSystemTools::GetErrorOccuredFlag()) {
+        cmSystemTools::GetErrorOccurredFlag()) {
       // Ok, no worries... go try the next script.
       continue;
     }

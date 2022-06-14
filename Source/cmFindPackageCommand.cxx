@@ -1197,7 +1197,7 @@ bool cmFindPackageCommand::HandlePackageMode(
                                                   : MessageType::WARNING,
                                    e.str());
       if (this->Required) {
-        cmSystemTools::SetFatalErrorOccured();
+        cmSystemTools::SetFatalErrorOccurred();
       }
 
       if (!aw.str().empty()) {

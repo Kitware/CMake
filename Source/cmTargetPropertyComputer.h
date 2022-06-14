@@ -23,7 +23,7 @@ public:
     if (cmValue loc = GetLocation(tgt, prop, mf)) {
       return loc;
     }
-    if (cmSystemTools::GetFatalErrorOccured()) {
+    if (cmSystemTools::GetFatalErrorOccurred()) {
       return nullptr;
     }
     if (prop == "SOURCES") {

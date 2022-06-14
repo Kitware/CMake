@@ -2002,7 +2002,7 @@ int cmake::HandleDeleteCacheVariables(const std::string& var)
   }
   cmSystemTools::Message(warning.str());
   // avoid reconfigure if there were errors
-  if (!cmSystemTools::GetErrorOccuredFlag()) {
+  if (!cmSystemTools::GetErrorOccurredFlag()) {
     // re-run configure
     return this->Configure();
   }
@@ -2287,7 +2287,7 @@ int cmake::ActualConfigure()
   this->State->SaveVerificationScript(this->GetHomeOutputDirectory(),
                                       this->Messenger.get());
   this->SaveCache(this->GetHomeOutputDirectory());
-  if (cmSystemTools::GetErrorOccuredFlag()) {
+  if (cmSystemTools::GetErrorOccurredFlag()) {
     return -1;
   }
   return 0;
@@ -2401,7 +2401,7 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
 {
   // Process the arguments
   this->SetArgs(args);
-  if (cmSystemTools::GetErrorOccuredFlag()) {
+  if (cmSystemTools::GetErrorOccurredFlag()) {
     return -1;
   }
   if (this->GetWorkingMode() == HELP_MODE) {
@@ -2458,7 +2458,7 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
 
   // In script mode we terminate after running the script.
   if (this->GetWorkingMode() != NORMAL_MODE) {
-    if (cmSystemTools::GetErrorOccuredFlag()) {
+    if (cmSystemTools::GetErrorOccurredFlag()) {
       return -1;
     }
     return 0;
@@ -2532,7 +2532,7 @@ int cmake::Generate()
   if (this->WarnUnusedCli) {
     this->RunCheckForUnusedVariables();
   }
-  if (cmSystemTools::GetErrorOccuredFlag()) {
+  if (cmSystemTools::GetErrorOccurredFlag()) {
     return -1;
   }
   // Save the cache again after a successful Generate so that any internal
@@ -2892,7 +2892,7 @@ int cmake::CheckBuildSystem()
   cmGlobalGenerator gg(&cm);
   cmMakefile mf(&gg, cm.GetCurrentSnapshot());
   if (!mf.ReadListFile(this->CheckBuildSystemArgument) ||
-      cmSystemTools::GetErrorOccuredFlag()) {
+      cmSystemTools::GetErrorOccurredFlag()) {
     if (verbose) {
       std::ostringstream msg;
       msg << "Re-run cmake error reading : " << this->CheckBuildSystemArgument

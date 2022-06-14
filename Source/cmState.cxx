@@ -503,7 +503,7 @@ bool cmState::AddScriptedCommand(std::string const& name, BT<Command> command,
       cmStrCat("Built-in flow control command \"", sName,
                "\" cannot be overridden."),
       command.Backtrace);
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
 

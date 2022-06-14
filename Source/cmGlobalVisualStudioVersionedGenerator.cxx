@@ -885,7 +885,7 @@ cmGlobalVisualStudioVersionedGenerator::FindMSBuildCommandEarly(cmMakefile* mf)
 {
   std::string instance = mf->GetSafeDefinition("CMAKE_GENERATOR_INSTANCE");
   if (!this->SetGeneratorInstance(instance, mf)) {
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     return {};
   }
   return this->cmGlobalVisualStudio14Generator::FindMSBuildCommandEarly(mf);

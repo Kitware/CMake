@@ -525,7 +525,7 @@ int cmCPackGenerator::InstallProjectViaInstallScript(
       this->SetOptionIfNotSet("CMAKE_CURRENT_SOURCE_DIR",
                               tempInstallDirectory);
       bool res = this->MakefileMap->ReadListFile(installScript);
-      if (cmSystemTools::GetErrorOccuredFlag() || !res) {
+      if (cmSystemTools::GetErrorOccurredFlag() || !res) {
         return 0;
       }
     }
@@ -973,7 +973,7 @@ int cmCPackGenerator::InstallCMakeProject(
       }
     }
   }
-  if (cmSystemTools::GetErrorOccuredFlag() || !res) {
+  if (cmSystemTools::GetErrorOccurredFlag() || !res) {
     return 0;
   }
   return 1;
@@ -985,7 +985,7 @@ bool cmCPackGenerator::ReadListFile(const char* moduleName)
   std::string fullPath = this->MakefileMap->GetModulesFile(moduleName);
   retval = this->MakefileMap->ReadListFile(fullPath);
   // include FATAL_ERROR and ERROR in the return status
-  retval = retval && (!cmSystemTools::GetErrorOccuredFlag());
+  retval = retval && (!cmSystemTools::GetErrorOccurredFlag());
   return retval;
 }
 
@@ -1117,7 +1117,7 @@ int cmCPackGenerator::DoPackage()
     this->MakefileMap->SetPolicyVersion(cmVersion::GetCMakeVersion(),
                                         std::string());
 
-    if (!this->PackageFiles() || cmSystemTools::GetErrorOccuredFlag()) {
+    if (!this->PackageFiles() || cmSystemTools::GetErrorOccurredFlag()) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
                     "Problem compressing the directory" << std::endl);
       return 0;
@@ -1214,7 +1214,7 @@ int cmCPackGenerator::Initialize(const std::string& name, cmMakefile* mf)
     mf->ReadListFile(config);
   }
   int result = this->InitializeInternal();
-  if (cmSystemTools::GetErrorOccuredFlag()) {
+  if (cmSystemTools::GetErrorOccurredFlag()) {
     return 0;
   }
 

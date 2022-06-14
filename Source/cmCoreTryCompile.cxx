@@ -974,8 +974,8 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     }
   }
 
-  bool erroroc = cmSystemTools::GetErrorOccuredFlag();
-  cmSystemTools::ResetErrorOccuredFlag();
+  bool erroroc = cmSystemTools::GetErrorOccurredFlag();
+  cmSystemTools::ResetErrorOccurredFlag();
   std::string output;
   // actually do the try compile now that everything is setup
   int res = this->Makefile->TryCompile(
@@ -983,7 +983,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     this->SrcFileSignature, cmake::NO_BUILD_PARALLEL_LEVEL, &cmakeFlags,
     output);
   if (erroroc) {
-    cmSystemTools::SetErrorOccured();
+    cmSystemTools::SetErrorOccurred();
   }
 
   // set the result var to the return value to indicate success or failure

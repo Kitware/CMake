@@ -44,9 +44,9 @@ int cmCTestBuildAndTestHandler::ProcessHandler()
 {
   this->Output.clear();
   std::string output;
-  cmSystemTools::ResetErrorOccuredFlag();
+  cmSystemTools::ResetErrorOccurredFlag();
   int retv = this->RunCMakeAndTest(&this->Output);
-  cmSystemTools::ResetErrorOccuredFlag();
+  cmSystemTools::ResetErrorOccurredFlag();
   return retv;
 }
 

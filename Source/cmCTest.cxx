@@ -1391,7 +1391,7 @@ void cmCTest::StartXML(cmXMLWriter& xml, bool append)
                "Current Tag empty, this may mean"
                " NightlStartTime was not set correctly."
                  << std::endl);
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
   }
 
   // find out about the system
@@ -3022,17 +3022,17 @@ int cmCTest::ReadCustomConfigurationFileTree(const std::string& dir,
     cmCTestLog(this, DEBUG,
                "* Read custom CTest configuration file: " << fname
                                                           << std::endl);
-    bool erroroc = cmSystemTools::GetErrorOccuredFlag();
-    cmSystemTools::ResetErrorOccuredFlag();
+    bool erroroc = cmSystemTools::GetErrorOccurredFlag();
+    cmSystemTools::ResetErrorOccurredFlag();
 
-    if (!mf->ReadListFile(fname) || cmSystemTools::GetErrorOccuredFlag()) {
+    if (!mf->ReadListFile(fname) || cmSystemTools::GetErrorOccurredFlag()) {
       cmCTestLog(this, ERROR_MESSAGE,
                  "Problem reading custom configuration: " << fname
                                                           << std::endl);
     }
     found = true;
     if (erroroc) {
-      cmSystemTools::SetErrorOccured();
+      cmSystemTools::SetErrorOccurred();
     }
   }
 
@@ -3047,7 +3047,7 @@ int cmCTest::ReadCustomConfigurationFileTree(const std::string& dir,
       cmCTestLog(this, DEBUG,
                  "* Read custom CTest configuration file: " << file
                                                             << std::endl);
-      if (!mf->ReadListFile(file) || cmSystemTools::GetErrorOccuredFlag()) {
+      if (!mf->ReadListFile(file) || cmSystemTools::GetErrorOccurredFlag()) {
         cmCTestLog(this, ERROR_MESSAGE,
                    "Problem reading custom configuration: " << file
                                                             << std::endl);
@@ -3661,7 +3661,7 @@ void cmCTest::Log(int logType, const char* file, int line, const char* msg,
         cmCTestLogOutputFileLine(err);
         err << msg;
         err.flush();
-        cmSystemTools::SetErrorOccured();
+        cmSystemTools::SetErrorOccurred();
         break;
       default:
         cmCTestLogOutputFileLine(out);
