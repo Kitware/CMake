@@ -299,6 +299,30 @@
         CMAKE_CONFIGURATION: hip4.2_radeon
         CMAKE_GENERATOR: "Ninja Multi-Config"
 
+### C++ modules
+
+.gcc_cxx_modules_x86_64:
+    image: "kitware/cmake:ci-gcc_cxx_modules-x86_64-2022-06-14"
+
+    variables:
+        GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
+        CMAKE_ARCH: x86_64
+        CC: "/opt/gcc-p1689/bin/gcc"
+        CXX: "/opt/gcc-p1689/bin/g++"
+
+.gcc_cxx_modules_ninja:
+    extends: .gcc_cxx_modules_x86_64
+
+    variables:
+        CMAKE_CONFIGURATION: linux_gcc_cxx_modules_ninja
+
+.gcc_cxx_modules_ninja_multi:
+    extends: .gcc_cxx_modules_x86_64
+
+    variables:
+        CMAKE_CONFIGURATION: linux_gcc_cxx_modules_ninja_multi
+        CMAKE_GENERATOR: "Ninja Multi-Config"
+
 ## Tags
 
 .linux_builder_tags:

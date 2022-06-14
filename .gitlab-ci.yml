@@ -275,6 +275,26 @@ t:hip4.2-radeon:
     variables:
         CMAKE_CI_NO_MR: "true"
 
+t:linux-gcc-cxx-modules-ninja:
+    extends:
+        - .gcc_cxx_modules_ninja
+        - .cmake_test_linux_release
+        - .linux_builder_tags
+        - .run_dependent
+        - .needs_centos6_x86_64
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
+t:linux-gcc-cxx-modules-ninja-multi:
+    extends:
+        - .gcc_cxx_modules_ninja_multi
+        - .cmake_test_linux_release
+        - .linux_builder_tags
+        - .run_dependent
+        - .needs_centos6_x86_64
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
 b:fedora36-ninja:
     extends:
         - .fedora36_ninja
