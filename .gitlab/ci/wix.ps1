@@ -1,14 +1,14 @@
 $erroractionpreference = "stop"
 
-$release = "wix3112rtm"
-$sha256sum = "2C1888D5D1DBA377FC7FA14444CF556963747FF9A0A289A3599CF09DA03B9E2E"
-$filename = "wix311-binaries"
+$release = "v3.14.0.6526"
+$sha256sum = "4C89898DF3BCAB13E12F7CA54399C35AD273475AD2CB6284611D00AE2D063C2C"
+$filename = "wix314-binaries"
 $tarball = "$filename.zip"
 
 $outdir = $pwd.Path
 $outdir = "$outdir\.gitlab"
 $ProgressPreference = 'SilentlyContinue'
-Invoke-WebRequest -Uri "https://github.com/wixtoolset/wix3/releases/download/$release/$tarball" -OutFile "$outdir\$tarball"
+Invoke-WebRequest -Uri "https://wixtoolset.org/downloads/$release/$tarball" -OutFile "$outdir\$tarball"
 $hash = Get-FileHash "$outdir\$tarball" -Algorithm SHA256
 if ($hash.Hash -ne $sha256sum) {
     exit 1

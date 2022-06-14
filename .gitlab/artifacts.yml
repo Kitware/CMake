@@ -105,6 +105,7 @@
             - build/cmake-*-macos*-universal.*
             - build/cmake-*-windows-x86_64.*
             - build/cmake-*-windows-i386.*
+            - build/cmake-*-windows-arm64.*
             # Any source packages made.
             - build/cmake-*.tar.gz
             - build/cmake-*.zip
