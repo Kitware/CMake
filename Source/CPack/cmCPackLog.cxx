@@ -159,6 +159,6 @@ void cmCPackLog::Log(int tag, const char* file, int line, const char* msg,
   }
 
   if (error) {
-    cmSystemTools::SetErrorOccured();
+    cmSystemTools::SetErrorOccurred();
   }
 }

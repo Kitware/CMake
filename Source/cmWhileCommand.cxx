@@ -105,7 +105,7 @@ bool cmWhileFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
       if (status.GetContinueInvoked()) {
         break;
       }
-      if (cmSystemTools::GetFatalErrorOccured()) {
+      if (cmSystemTools::GetFatalErrorOccurred()) {
         return true;
       }
     }
@@ -145,7 +145,7 @@ bool cmWhileFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
     }
     mf.GetCMakeInstance()->IssueMessage(messageType, err, whileBT);
     if (messageType == MessageType::FATAL_ERROR) {
-      cmSystemTools::SetFatalErrorOccured();
+      cmSystemTools::SetFatalErrorOccurred();
     }
   }
 

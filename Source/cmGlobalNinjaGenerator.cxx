@@ -604,7 +604,7 @@ void cmGlobalNinjaGenerator::Generate()
   this->WriteUnknownExplicitDependencies(*this->GetCommonFileStream());
   this->WriteBuiltinTargets(*this->GetCommonFileStream());
 
-  if (cmSystemTools::GetErrorOccuredFlag()) {
+  if (cmSystemTools::GetErrorOccurredFlag()) {
     this->RulesFileStream->setstate(std::ios::failbit);
     for (auto const& config : this->Makefiles[0]->GetGeneratorConfigs(
            cmMakefile::IncludeEmptyConfig)) {
@@ -651,7 +651,7 @@ void cmGlobalNinjaGenerator::CleanMetaData()
                                                       "'\n"
                                                       "failed with:\n ",
                                                       error));
-      cmSystemTools::SetFatalErrorOccured();
+      cmSystemTools::SetFatalErrorOccurred();
     }
   };
 
@@ -710,7 +710,7 @@ bool cmGlobalNinjaGenerator::FindMakeProgram(cmMakefile* mf)
                                 "'\n"
                                 "failed with:\n ",
                                 error));
-      cmSystemTools::SetFatalErrorOccured();
+      cmSystemTools::SetFatalErrorOccurred();
       return false;
     }
     this->NinjaVersion = cmTrimWhitespace(version);
@@ -790,7 +790,7 @@ void cmGlobalNinjaGenerator::CheckNinjaCodePage()
                                                     "'\n"
                                                     "failed with:\n ",
                                                     error));
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
   } else if (result == 0) {
     std::istringstream outputStream(output);
     std::string line;
@@ -837,7 +837,7 @@ bool cmGlobalNinjaGenerator::CheckLanguages(
       mf->IssueMessage(MessageType::FATAL_ERROR,
                        "multiple values for CMAKE_OSX_ARCHITECTURES not "
                        "supported with Swift");
-      cmSystemTools::SetFatalErrorOccured();
+      cmSystemTools::SetFatalErrorOccurred();
       return false;
     }
   }
@@ -870,7 +870,7 @@ bool cmGlobalNinjaGenerator::CheckCxxModuleSupport()
       ;
     /* clang-format on */
     this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR, e.str());
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
   }
   return false;
 }
@@ -891,7 +891,7 @@ bool cmGlobalNinjaGenerator::CheckFortran(cmMakefile* mf) const
     ;
   /* clang-format on */
   mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
-  cmSystemTools::SetFatalErrorOccured();
+  cmSystemTools::SetFatalErrorOccurred();
   return false;
 }
 
@@ -912,7 +912,7 @@ bool cmGlobalNinjaGenerator::CheckISPC(cmMakefile* mf) const
     ;
   /* clang-format on */
   mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
-  cmSystemTools::SetFatalErrorOccured();
+  cmSystemTools::SetFatalErrorOccurred();
   return false;
 }
 

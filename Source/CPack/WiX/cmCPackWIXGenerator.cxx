@@ -151,7 +151,7 @@ bool cmCPackWIXGenerator::RunLightCommand(std::string const& objectFiles)
 
 int cmCPackWIXGenerator::PackageFiles()
 {
-  if (!PackageFilesImpl() || cmSystemTools::GetErrorOccuredFlag()) {
+  if (!PackageFilesImpl() || cmSystemTools::GetErrorOccurredFlag()) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Fatal WiX Generator Error" << std::endl);
     return false;

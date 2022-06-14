@@ -441,7 +441,7 @@ bool cmGlobalGenerator::FindMakeProgram(cmMakefile* mf)
         << this->GetName() << "\".  CMAKE_MAKE_PROGRAM is not set.  You "
         << "probably need to select a different build tool.";
     cmSystemTools::Error(err.str());
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
   std::string makeProgram = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
@@ -531,7 +531,7 @@ void cmGlobalGenerator::EnableLanguage(
 
   if (languages.empty()) {
     cmSystemTools::Error("EnableLanguage must have a lang specified!");
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     return;
   }
 
@@ -543,7 +543,7 @@ void cmGlobalGenerator::EnableLanguage(
         << "' is currently being enabled.  "
            "Recursive call not allowed.";
       mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
-      cmSystemTools::SetFatalErrorOccured();
+      cmSystemTools::SetFatalErrorOccurred();
       return;
     }
   }
@@ -560,7 +560,7 @@ void cmGlobalGenerator::EnableLanguage(
             << " which is not enabled.";
           this->TryCompileOuterMakefile->IssueMessage(MessageType::FATAL_ERROR,
                                                       e.str());
-          cmSystemTools::SetFatalErrorOccured();
+          cmSystemTools::SetFatalErrorOccurred();
           return;
         }
       }
@@ -659,28 +659,28 @@ void cmGlobalGenerator::EnableLanguage(
     // Tell the generator about the instance, if any.
     std::string instance = mf->GetSafeDefinition("CMAKE_GENERATOR_INSTANCE");
     if (!this->SetGeneratorInstance(instance, mf)) {
-      cmSystemTools::SetFatalErrorOccured();
+      cmSystemTools::SetFatalErrorOccurred();
       return;
     }
 
     // Tell the generator about the target system.
     std::string system = mf->GetSafeDefinition("CMAKE_SYSTEM_NAME");
     if (!this->SetSystemName(system, mf)) {
-      cmSystemTools::SetFatalErrorOccured();
+      cmSystemTools::SetFatalErrorOccurred();
       return;
     }
 
     // Tell the generator about the platform, if any.
     std::string platform = mf->GetSafeDefinition("CMAKE_GENERATOR_PLATFORM");
     if (!this->SetGeneratorPlatform(platform, mf)) {
-      cmSystemTools::SetFatalErrorOccured();
+      cmSystemTools::SetFatalErrorOccurred();
       return;
     }
 
     // Tell the generator about the toolset, if any.
     std::string toolset = mf->GetSafeDefinition("CMAKE_GENERATOR_TOOLSET");
     if (!this->SetGeneratorToolset(toolset, false, mf)) {
-      cmSystemTools::SetFatalErrorOccured();
+      cmSystemTools::SetFatalErrorOccurred();
       return;
     }
 
@@ -785,7 +785,7 @@ void cmGlobalGenerator::EnableLanguage(
         cmSystemTools::Error("Could not find cmake module file: " +
                              determineCompiler);
       }
-      if (cmSystemTools::GetFatalErrorOccured()) {
+      if (cmSystemTools::GetFatalErrorOccurred()) {
         return;
       }
       needTestLanguage[lang] = true;
@@ -954,7 +954,7 @@ void cmGlobalGenerator::EnableLanguage(
   }
 
   if (fatalError) {
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
   }
 
   for (std::string const& lang : cur_languages) {
@@ -1374,7 +1374,7 @@ void cmGlobalGenerator::Configure()
 
   if (this->CMakeInstance->GetWorkingMode() == cmake::NORMAL_MODE) {
     std::ostringstream msg;
-    if (cmSystemTools::GetErrorOccuredFlag()) {
+    if (cmSystemTools::GetErrorOccurredFlag()) {
       msg << "Configuring incomplete, errors occurred!";
       const char* logs[] = { "CMakeOutput.log", "CMakeError.log", nullptr };
       for (const char** log = logs; *log; ++log) {
@@ -1645,7 +1645,7 @@ void cmGlobalGenerator::Generate()
 
   for (auto& buildExpSet : this->BuildExportSets) {
     if (!buildExpSet.second->GenerateImportFile()) {
-      if (!cmSystemTools::GetErrorOccuredFlag()) {
+      if (!cmSystemTools::GetErrorOccurredFlag()) {
         this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
                                                "Could not write export file.");
       }

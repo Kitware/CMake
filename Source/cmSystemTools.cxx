@@ -156,8 +156,8 @@ static int cm_archive_read_open_file(struct archive* a, const char* file,
 
 bool cmSystemTools::s_RunCommandHideConsole = false;
 bool cmSystemTools::s_DisableRunCommandOutput = false;
-bool cmSystemTools::s_ErrorOccured = false;
-bool cmSystemTools::s_FatalErrorOccured = false;
+bool cmSystemTools::s_ErrorOccurred = false;
+bool cmSystemTools::s_FatalErrorOccurred = false;
 bool cmSystemTools::s_ForceUnixPaths = false;
 
 // replace replace with with as many times as it shows up in source.
@@ -212,7 +212,7 @@ std::string cmSystemTools::HelpFileName(cm::string_view str)
 void cmSystemTools::Error(const std::string& m)
 {
   std::string message = "CMake Error: " + m;
-  cmSystemTools::s_ErrorOccured = true;
+  cmSystemTools::s_ErrorOccurred = true;
   cmSystemTools::Message(message, "Error");
 }
 

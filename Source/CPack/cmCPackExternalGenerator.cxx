@@ -73,7 +73,7 @@ int cmCPackExternalGenerator::PackageFiles()
 
     bool res = this->MakefileMap->ReadListFile(packageScript);
 
-    if (cmSystemTools::GetErrorOccuredFlag() || !res) {
+    if (cmSystemTools::GetErrorOccurredFlag() || !res) {
       return 0;
     }
 

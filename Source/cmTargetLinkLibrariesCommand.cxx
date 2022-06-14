@@ -130,7 +130,7 @@ bool cmTargetLinkLibrariesCommand(std::vector<std::string> const& args,
         break;
       case MessageType::FATAL_ERROR:
         mf.IssueMessage(MessageType::FATAL_ERROR, e.str());
-        cmSystemTools::SetFatalErrorOccured();
+        cmSystemTools::SetFatalErrorOccurred();
         break;
       default:
         break;
@@ -361,7 +361,7 @@ bool cmTargetLinkLibrariesCommand(std::vector<std::string> const& args,
     mf.IssueMessage(MessageType::FATAL_ERROR,
                     cmStrCat("The \"", LinkLibraryTypeNames[llt],
                              "\" argument must be followed by a library."));
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
   }
 
   const cmPolicies::PolicyStatus policy22Status =

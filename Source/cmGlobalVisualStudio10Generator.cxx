@@ -254,7 +254,7 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
       "that is not an absolute path to an existing directory.";
     /* clang-format on */
     mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
 
@@ -955,7 +955,7 @@ bool cmGlobalVisualStudio10Generator::FindVCTargetsPath(cmMakefile* mf)
   if (!cmSystemTools::MakeDirectory(wd)) {
     std::string e = "Failed to make directory:\n  " + wd;
     mf->IssueMessage(MessageType::FATAL_ERROR, e);
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
 
@@ -1086,7 +1086,7 @@ bool cmGlobalVisualStudio10Generator::FindVCTargetsPath(cmMakefile* mf)
       e << "Exit code: " << ret << "\n";
     }
     mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
   this->VCTargetsPath = regex.match(1);
@@ -1327,7 +1327,7 @@ bool cmGlobalVisualStudio10Generator::Find64BitTools(cmMakefile* mf)
       << "  http://msdn.microsoft.com/en-us/windows/bb980924.aspx";
     /* clang-format on */
     mf->IssueMessage(MessageType::FATAL_ERROR, e.str().c_str());
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
 }

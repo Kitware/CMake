@@ -417,7 +417,7 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
     std::ostringstream e;
     e << "Maximum recursion depth of " << depth << " exceeded";
     this->IssueMessage(MessageType::FATAL_ERROR, e.str());
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
 
@@ -425,7 +425,7 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
   if (cmState::Command command =
         this->GetState()->GetCommandByExactName(lff.LowerCaseName())) {
     // Decide whether to invoke the command.
-    if (!cmSystemTools::GetFatalErrorOccured()) {
+    if (!cmSystemTools::GetFatalErrorOccurred()) {
       // if trace is enabled, print out invoke information
       if (this->GetCMakeInstance()->GetTrace()) {
         this->PrintCommandTrace(lff, this->Backtrace);
@@ -442,17 +442,17 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
         }
         result = false;
         if (this->GetCMakeInstance()->GetWorkingMode() != cmake::NORMAL_MODE) {
-          cmSystemTools::SetFatalErrorOccured();
+          cmSystemTools::SetFatalErrorOccurred();
         }
       }
     }
   } else {
-    if (!cmSystemTools::GetFatalErrorOccured()) {
+    if (!cmSystemTools::GetFatalErrorOccurred()) {
       std::string error =
         cmStrCat("Unknown CMake command \"", lff.OriginalName(), "\".");
       this->IssueMessage(MessageType::FATAL_ERROR, error);
       result = false;
-      cmSystemTools::SetFatalErrorOccured();
+      cmSystemTools::SetFatalErrorOccurred();
     }
   }
 
@@ -610,7 +610,7 @@ bool cmMakefile::ReadDependentFile(const std::string& filename,
   }
 
   this->RunListFile(listFile, filenametoread);
-  if (cmSystemTools::GetFatalErrorOccured()) {
+  if (cmSystemTools::GetFatalErrorOccurred()) {
     incScope.Quiet();
   }
   return true;
@@ -711,7 +711,7 @@ bool cmMakefile::ReadListFile(const std::string& filename)
   }
 
   this->RunListFile(listFile, filenametoread);
-  if (cmSystemTools::GetFatalErrorOccured()) {
+  if (cmSystemTools::GetFatalErrorOccurred()) {
     scope.Quiet();
   }
   return true;
@@ -732,7 +732,7 @@ bool cmMakefile::ReadListFileAsString(const std::string& content,
   }
 
   this->RunListFile(listFile, filenametoread);
-  if (cmSystemTools::GetFatalErrorOccured()) {
+  if (cmSystemTools::GetFatalErrorOccurred()) {
     scope.Quiet();
   }
   return true;
@@ -762,7 +762,7 @@ void cmMakefile::RunListFile(cmListFile const& listFile,
   for (size_t i = 0; i < numberFunctions; ++i) {
     cmExecutionStatus status(*this);
     this->ExecuteCommand(listFile.Functions[i], status);
-    if (cmSystemTools::GetFatalErrorOccured()) {
+    if (cmSystemTools::GetFatalErrorOccurred()) {
       break;
     }
     if (status.GetReturnInvoked()) {
@@ -792,7 +792,7 @@ void cmMakefile::RunListFile(cmListFile const& listFile,
 
       cmExecutionStatus status(*this);
       this->ExecuteCommand(d.Command, status, std::move(id));
-      if (cmSystemTools::GetFatalErrorOccured()) {
+      if (cmSystemTools::GetFatalErrorOccurred()) {
         break;
       }
     }
@@ -838,7 +838,7 @@ void cmMakefile::EnforceDirectoryLevelRules() const
         // NEW behavior is to issue an error.
         this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
                                                msg.str(), this->Backtrace);
-        cmSystemTools::SetFatalErrorOccured();
+        cmSystemTools::SetFatalErrorOccurred();
         break;
     }
   }
@@ -1685,7 +1685,7 @@ void cmMakefile::Configure()
   this->Defer = cm::make_unique<DeferCommands>();
   this->RunListFile(listFile, currentStart, this->Defer.get());
   this->Defer.reset();
-  if (cmSystemTools::GetFatalErrorOccured()) {
+  if (cmSystemTools::GetFatalErrorOccurred()) {
     scope.Quiet();
   }
 
@@ -2618,7 +2618,7 @@ const std::string& cmMakefile::ExpandVariablesInString(
   // If it's an error in either case, just report the error...
   if (mtype != MessageType::LOG) {
     if (mtype == MessageType::FATAL_ERROR) {
-      cmSystemTools::SetFatalErrorOccured();
+      cmSystemTools::SetFatalErrorOccurred();
     }
     this->IssueMessage(mtype, errorstr);
   }
@@ -3282,7 +3282,7 @@ bool cmMakefile::ExpandArguments(std::vector<cmListFileArgument> const& inArgs,
       cmExpandList(value, outArgs);
     }
   }
-  return !cmSystemTools::GetFatalErrorOccured();
+  return !cmSystemTools::GetFatalErrorOccurred();
 }
 
 bool cmMakefile::ExpandArguments(
@@ -3314,7 +3314,7 @@ bool cmMakefile::ExpandArguments(
       }
     }
   }
-  return !cmSystemTools::GetFatalErrorOccured();
+  return !cmSystemTools::GetFatalErrorOccurred();
 }
 
 void cmMakefile::AddFunctionBlocker(std::unique_ptr<cmFunctionBlocker> fb)
@@ -3509,7 +3509,7 @@ int cmMakefile::TryCompile(const std::string& srcdir,
     this->IssueMessage(MessageType::FATAL_ERROR,
                        "Failed to set working directory to " + bindir + " : " +
                          std::strerror(workdir.GetLastResult()));
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     this->IsSourceFileTryCompile = false;
     return 1;
   }
@@ -3525,7 +3525,7 @@ int cmMakefile::TryCompile(const std::string& srcdir,
                        "Global generator '" +
                          this->GetGlobalGenerator()->GetName() +
                          "' could not be created.");
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     this->IsSourceFileTryCompile = false;
     return 1;
   }
@@ -3597,7 +3597,7 @@ int cmMakefile::TryCompile(const std::string& srcdir,
   if (cm.Configure() != 0) {
     this->IssueMessage(MessageType::FATAL_ERROR,
                        "Failed to configure test project build system.");
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     this->IsSourceFileTryCompile = false;
     return 1;
   }
@@ -3605,7 +3605,7 @@ int cmMakefile::TryCompile(const std::string& srcdir,
   if (cm.Generate() != 0) {
     this->IssueMessage(MessageType::FATAL_ERROR,
                        "Failed to generate test project build system.");
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     this->IsSourceFileTryCompile = false;
     return 1;
   }

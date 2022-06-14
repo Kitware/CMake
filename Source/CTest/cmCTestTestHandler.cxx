@@ -1818,7 +1818,7 @@ bool cmCTestTestHandler::GetListOfTests()
   if (!mf.ReadListFile(testFilename)) {
     return false;
   }
-  if (cmSystemTools::GetErrorOccuredFlag()) {
+  if (cmSystemTools::GetErrorOccurredFlag()) {
     // SEND_ERROR or FATAL_ERROR in CTestTestfile or TEST_INCLUDE_FILES
     return false;
   }

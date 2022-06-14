@@ -81,7 +81,7 @@ bool cmIfFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
         mf.GetCMakeInstance()->IssueMessage(
           MessageType::FATAL_ERROR,
           "A duplicate ELSE command was found inside an IF block.", elseBT);
-        cmSystemTools::SetFatalErrorOccured();
+        cmSystemTools::SetFatalErrorOccurred();
         return true;
       }
 
@@ -103,7 +103,7 @@ bool cmIfFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
         mf.GetCMakeInstance()->IssueMessage(
           MessageType::FATAL_ERROR,
           "An ELSEIF command was found after an ELSE command.", elseifBT);
-        cmSystemTools::SetFatalErrorOccured();
+        cmSystemTools::SetFatalErrorOccurred();
         return true;
       }
 
@@ -133,7 +133,7 @@ bool cmIfFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
             cmStrCat(cmIfCommandError(expandedArguments), errorString);
           mf.GetCMakeInstance()->IssueMessage(messType, err, elseifBT);
           if (messType == MessageType::FATAL_ERROR) {
-            cmSystemTools::SetFatalErrorOccured();
+            cmSystemTools::SetFatalErrorOccurred();
             return true;
           }
         }
@@ -188,7 +188,7 @@ bool cmIfCommand(std::vector<cmListFileArgument> const& args,
       cmStrCat("if ", cmIfCommandError(expandedArguments), errorString);
     if (status == MessageType::FATAL_ERROR) {
       makefile.IssueMessage(MessageType::FATAL_ERROR, err);
-      cmSystemTools::SetFatalErrorOccured();
+      cmSystemTools::SetFatalErrorOccurred();
       return true;
     }
     makefile.IssueMessage(status, err);

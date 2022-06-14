@@ -556,7 +556,7 @@ void cmGlobalXCodeGenerator::AddExtraIDETargets()
 void cmGlobalXCodeGenerator::Generate()
 {
   this->cmGlobalGenerator::Generate();
-  if (cmSystemTools::GetErrorOccuredFlag()) {
+  if (cmSystemTools::GetErrorOccurredFlag()) {
     return;
   }
 

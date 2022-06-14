@@ -182,7 +182,7 @@ void cmGeneratorExpressionEvaluationFile::Generate(cmLocalGenerator* lg)
     for (std::string const& li : allConfigs) {
       this->Generate(lg, li, le, inputExpression.get(), outputFiles,
                      this->Permissions);
-      if (cmSystemTools::GetFatalErrorOccured()) {
+      if (cmSystemTools::GetFatalErrorOccurred()) {
         return;
       }
     }

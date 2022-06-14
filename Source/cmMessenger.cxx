@@ -143,7 +143,7 @@ static void displayMessage(MessageType t, std::ostringstream& msg)
   md.desiredColor = getMessageColor(t);
   if (t == MessageType::FATAL_ERROR || t == MessageType::INTERNAL_ERROR ||
       t == MessageType::DEPRECATION_ERROR || t == MessageType::AUTHOR_ERROR) {
-    cmSystemTools::SetErrorOccured();
+    cmSystemTools::SetErrorOccurred();
     md.title = "Error";
     cmSystemTools::Message(msg.str(), md);
   } else {

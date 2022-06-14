@@ -77,28 +77,28 @@ public:
   static bool GetInterruptFlag();
 
   //! Return true if there was an error at any point.
-  static bool GetErrorOccuredFlag()
+  static bool GetErrorOccurredFlag()
   {
-    return cmSystemTools::s_ErrorOccured ||
-      cmSystemTools::s_FatalErrorOccured || GetInterruptFlag();
+    return cmSystemTools::s_ErrorOccurred ||
+      cmSystemTools::s_FatalErrorOccurred || GetInterruptFlag();
   }
   //! If this is set to true, cmake stops processing commands.
-  static void SetFatalErrorOccured()
+  static void SetFatalErrorOccurred()
   {
-    cmSystemTools::s_FatalErrorOccured = true;
+    cmSystemTools::s_FatalErrorOccurred = true;
   }
-  static void SetErrorOccured() { cmSystemTools::s_ErrorOccured = true; }
+  static void SetErrorOccurred() { cmSystemTools::s_ErrorOccurred = true; }
   //! Return true if there was an error at any point.
-  static bool GetFatalErrorOccured()
+  static bool GetFatalErrorOccurred()
   {
-    return cmSystemTools::s_FatalErrorOccured || GetInterruptFlag();
+    return cmSystemTools::s_FatalErrorOccurred || GetInterruptFlag();
   }
 
   //! Set the error occurred flag and fatal error back to false
-  static void ResetErrorOccuredFlag()
+  static void ResetErrorOccurredFlag()
   {
-    cmSystemTools::s_FatalErrorOccured = false;
-    cmSystemTools::s_ErrorOccured = false;
+    cmSystemTools::s_FatalErrorOccurred = false;
+    cmSystemTools::s_ErrorOccurred = false;
   }
 
   //! Return true if the path is a framework
@@ -541,7 +541,7 @@ public:
 private:
   static bool s_ForceUnixPaths;
   static bool s_RunCommandHideConsole;
-  static bool s_ErrorOccured;
-  static bool s_FatalErrorOccured;
+  static bool s_ErrorOccurred;
+  static bool s_FatalErrorOccurred;
   static bool s_DisableRunCommandOutput;
 };
