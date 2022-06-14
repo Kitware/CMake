@@ -1616,8 +1616,9 @@ void cmNinjaTargetGenerator::WriteTargetDependInfo(std::string const& lang,
     mod_dir = this->GeneratorTarget->GetFortranModuleDirectory(
       this->Makefile->GetHomeOutputDirectory());
   } else if (lang == "CXX") {
-    mod_dir =
-      cmSystemTools::CollapseFullPath(this->GeneratorTarget->ObjectDirectory);
+    mod_dir = this->GetGlobalGenerator()->ExpandCFGIntDir(
+      cmSystemTools::CollapseFullPath(this->GeneratorTarget->ObjectDirectory),
+      config);
   }
   if (mod_dir.empty()) {
     mod_dir = this->Makefile->GetCurrentBinaryDirectory();
