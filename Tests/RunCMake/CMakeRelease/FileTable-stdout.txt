@@ -17,6 +17,8 @@
 "cmake-@version@-windows-i386\.zip"
 "cmake-@version@-windows-x86_64\.msi"
 "cmake-@version@-windows-x86_64\.zip"
+"cmake-@version@-windows-arm64\.msi"
+"cmake-@version@-windows-arm64\.zip"
 "cmake-@version@\.tar\.gz"
 "cmake-@version@\.zip"
 -- query: \.files\[\] \| select\(\.os\[\] \| \. == "source"\) \| \.name

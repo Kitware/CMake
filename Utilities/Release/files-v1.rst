@@ -76,7 +76,7 @@ The members are:
     Source packages have an empty list of architectures (``[]``).
     Binary packages have a non-empty list of architectures, with at least
     one name matching the output of ``uname -m`` on corresponding hosts.
-    On Windows, architecture names include ``x86_64`` and ``i386``.
+    On Windows, architecture names include ``x86_64``, ``i386``, and ``arm64``.
     On macOS, universal binary packages list all architectures,
     e.g. ``["arm64","x86_64"]``.
 
