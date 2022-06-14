@@ -1114,3 +1114,26 @@ b:windows-arm64-package:
         - p:doc-package
     variables:
         CMAKE_CI_ARTIFACTS_NAME: "artifacts-windows-arm64-build"
+
+k:windows-arm64-package:
+    extends:
+        - .windows_arm64_package
+        - .cmake_package_windows
+        - .cmake_release_artifacts
+        - .windows_tags_nonconcurrent_vs2022_arm64
+        - .run_only_for_package
+    dependencies:
+        - b:windows-arm64-package
+    needs:
+        - b:windows-arm64-package
+    variables:
+        CMAKE_CI_ARTIFACTS_NAME: "artifacts-windows-arm64"
+
+u:windows-arm64-package:
+    extends:
+        - .rsync_upload_package
+        - .run_only_for_package
+    dependencies:
+        - k:windows-arm64-package
+    needs:
+        - k:windows-arm64-package
