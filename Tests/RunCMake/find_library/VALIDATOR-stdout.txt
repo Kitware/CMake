@@ -1,0 +1,3 @@
+-- LIB='[^']+/Tests/RunCMake/find_library/lib/libPrefixInPATH.a'
+-- LIB='[^']+/Tests/RunCMake/find_library/lib/libPrefixInPATH.a'
+-- LIB='LIB-NOTFOUND'

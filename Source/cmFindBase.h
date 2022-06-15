@@ -31,6 +31,11 @@ public:
    */
   virtual bool ParseArguments(std::vector<std::string> const& args);
 
+  /**
+   * To check validity of a found path using user's validator, if any
+   */
+  bool Validate(const std::string& path) const;
+
 protected:
   friend class cmFindBaseDebugState;
   void ExpandPaths();
@@ -62,6 +67,8 @@ protected:
   bool StoreResultInCache = true;
 
   bool Required = false;
+
+  std::string ValidatorName;
 
 private:
   // Add pieces of the search.

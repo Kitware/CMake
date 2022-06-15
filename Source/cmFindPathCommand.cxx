@@ -88,7 +88,8 @@ std::string cmFindPathCommand::FindHeaderInFramework(
     if (!frameWorkName.empty()) {
       std::string fpath = cmStrCat(dir, frameWorkName, ".framework");
       std::string intPath = cmStrCat(fpath, "/Headers/", fileName);
-      if (cmSystemTools::FileExists(intPath)) {
+      if (cmSystemTools::FileExists(intPath) &&
+          this->Validate(this->IncludeFileInPath ? intPath : fpath)) {
         debug.FoundAt(intPath);
         if (this->IncludeFileInPath) {
           return intPath;
@@ -124,7 +125,8 @@ std::string cmFindPathCommand::FindNormalHeader(cmFindBaseDebugState& debug)
   for (std::string const& n : this->Names) {
     for (std::string const& sp : this->SearchPaths) {
       tryPath = cmStrCat(sp, n);
-      if (cmSystemTools::FileExists(tryPath)) {
+      if (cmSystemTools::FileExists(tryPath) &&
+          this->Validate(this->IncludeFileInPath ? tryPath : sp)) {
         debug.FoundAt(tryPath);
         if (this->IncludeFileInPath) {
           return tryPath;
