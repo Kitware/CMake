@@ -104,12 +104,22 @@ function (run_cxx_module_test directory)
     set(RunCMake_TEST_OPTIONS -DCMAKE_BUILD_TYPE=Debug)
   endif ()
 
+  if (RunCMake_CXXModules_INSTALL)
+    set(prefix "${RunCMake_BINARY_DIR}/examples/${test_name}-install")
+    file(REMOVE_RECURSE "${prefix}")
+    list(APPEND RunCMake_TEST_OPTIONS
+      "-DCMAKE_INSTALL_PREFIX=${prefix}")
+  endif ()
+
   list(APPEND RunCMake_TEST_OPTIONS
     "-DCMake_TEST_MODULE_COMPILATION_RULES=${CMake_TEST_MODULE_COMPILATION_RULES}"
     ${ARGN})
   run_cmake("examples/${test_name}")
   set(RunCMake_TEST_NO_CLEAN 1)
   run_cmake_command("examples/${test_name}-build" "${CMAKE_COMMAND}" --build . --config Debug)
+  if (RunCMake_CXXModules_INSTALL)
+    run_cmake_command("examples/${test_name}-install" "${CMAKE_COMMAND}" --build . --target install --config Debug)
+  endif ()
   run_cmake_command("examples/${test_name}-test" "${CMAKE_CTEST_COMMAND}" -C Debug --output-on-failure)
 endfunction ()
 
@@ -135,4 +145,13 @@ endif ()
 # Tests which use internal partitions.
 if ("internal_partitions" IN_LIST CMake_TEST_MODULE_COMPILATION)
   run_cxx_module_test(internal-partitions)
+endif ()
+
+# All of the following tests perform installation.
+set(RunCMake_CXXModules_INSTALL 1)
+
+# Tests which install BMIs
+if ("install_bmi" IN_LIST CMake_TEST_MODULE_COMPILATION)
+  run_cxx_module_test(install-bmi)
+  run_cxx_module_test(install-bmi-and-interfaces)
 endif ()
