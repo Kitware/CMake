@@ -1,6 +1,8 @@
 include(RunCMake)
 
 run_cmake(BadLinkLibraries)
+run_cmake(BinDirEmpty)
+run_cmake(BinDirRelative)
 
 if (CMAKE_SYSTEM_NAME MATCHES "^(Linux|Darwin|Windows)$" AND
     CMAKE_C_COMPILER_ID MATCHES "^(MSVC|GNU|LCC|Clang|AppleClang)$")

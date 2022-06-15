@@ -391,6 +391,22 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     }
   }
 
+  if (!this->BinaryDirectory.empty()) {
+    if (!cmSystemTools::FileIsFullPath(this->BinaryDirectory)) {
+      this->Makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("<bindir> is not an absolute path:\n '",
+                 this->BinaryDirectory, "'"));
+      // Do not try to clean up the ill-specified directory.
+      this->BinaryDirectory.clear();
+      return -1;
+    }
+  } else {
+    this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
+                                 "No <bindir> specified.");
+    return -1;
+  }
+
   if (didCopyFile && copyFile.empty()) {
     this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
                                  "COPY_FILE must be followed by a file path");
