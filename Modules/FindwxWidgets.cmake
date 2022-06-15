@@ -29,9 +29,9 @@ select a configuration):
 ::
 
   wxWidgets_ROOT_DIR      - Base wxWidgets directory
-                            (e.g., C:/wxWidgets-2.6.3).
+                            (e.g., C:/wxWidgets-3.2.0).
   wxWidgets_LIB_DIR       - Path to wxWidgets libraries
-                            (e.g., C:/wxWidgets-2.6.3/lib/vc_lib).
+                            (e.g., C:/wxWidgets-3.2.0/lib/vc_x64_lib).
   wxWidgets_CONFIGURATION - Configuration to use
                             (e.g., msw, mswd, mswu, mswunivud, etc.)
   wxWidgets_EXCLUDE_COMMON_LIBRARIES
@@ -214,6 +214,9 @@ if(EXISTS "${wxWidgets_CURRENT_LIST_DIR}/UsewxWidgets.cmake")
 else()
   set(wxWidgets_USE_FILE UsewxWidgets)
 endif()
+
+# Known wxWidgets versions.
+set(wx_versions 3.3 3.2 3.1 3.0 2.9 2.8 2.7 2.6 2.5)
 
 macro(wx_extract_version)
   unset(_wx_filename)
@@ -443,6 +446,13 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
   # WIN32: Start actual work.
   #-------------------------------------------------------------------
 
+  set(wx_paths "wxWidgets")
+  foreach(version ${wx_versions})
+    foreach(patch RANGE 15 0 -1)
+      list(APPEND wx_paths "wxWidgets-${version}.${patch}")
+    endforeach()
+  endforeach()
+
   # Look for an installation tree.
   find_path(wxWidgets_ROOT_DIR
     NAMES include/wx/wx.h
@@ -454,41 +464,7 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
       D:/
       ENV ProgramFiles
     PATH_SUFFIXES
-      wxWidgets-3.1.0
-      wxWidgets-3.0.2
-      wxWidgets-3.0.1
-      wxWidgets-3.0.0
-      wxWidgets-2.9.5
-      wxWidgets-2.9.4
-      wxWidgets-2.9.3
-      wxWidgets-2.9.2
-      wxWidgets-2.9.1
-      wxWidgets-2.9.0
-      wxWidgets-2.8.9
-      wxWidgets-2.8.8
-      wxWidgets-2.8.7
-      wxWidgets-2.8.6
-      wxWidgets-2.8.5
-      wxWidgets-2.8.4
-      wxWidgets-2.8.3
-      wxWidgets-2.8.2
-      wxWidgets-2.8.1
-      wxWidgets-2.8.0
-      wxWidgets-2.7.4
-      wxWidgets-2.7.3
-      wxWidgets-2.7.2
-      wxWidgets-2.7.1
-      wxWidgets-2.7.0
-      wxWidgets-2.7.0-1
-      wxWidgets-2.6.4
-      wxWidgets-2.6.3
-      wxWidgets-2.6.2
-      wxWidgets-2.6.1
-      wxWidgets-2.5.4
-      wxWidgets-2.5.3
-      wxWidgets-2.5.2
-      wxWidgets-2.5.1
-      wxWidgets
+      ${wx_paths}
     DOC "wxWidgets base/installation directory"
     )
 
@@ -773,12 +749,14 @@ else()
     # Look for wx-config -- this can be set in the environment,
     # or try versioned and toolchain-versioned variants of the -config
     # executable as well.
+    set(wx_config_names "wx-config")
+    foreach(version ${wx_versions})
+      list(APPEND wx_config_names "wx-config-${version}" "wxgtk3u-${version}-config" "wxgtk2u-${version}-config")
+    endforeach()
     find_program(wxWidgets_CONFIG_EXECUTABLE
       NAMES
         $ENV{WX_CONFIG}
-        wx-config
-        wx-config-3.1 wx-config-3.0 wx-config-2.9 wx-config-2.8
-        wxgtk3u-3.1-config wxgtk3u-3.0-config wxgtk2u-2.8-config
+        ${wx_config_names}
       DOC "Location of wxWidgets library configuration provider binary (wx-config)."
       ONLY_CMAKE_FIND_ROOT_PATH
       )
