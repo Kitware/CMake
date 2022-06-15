@@ -605,6 +605,15 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       // does not include any system headers anyway.
       fprintf(fout,
               "set_property(DIRECTORY PROPERTY INCLUDE_DIRECTORIES \"\")\n");
+
+      // The link and compile lines for ABI detection step need to not use
+      // response files so we can extract implicit includes given to
+      // the underlying host compiler
+      if (testLangs.find("CUDA") != testLangs.end()) {
+        fprintf(fout, "set(CMAKE_CUDA_USE_RESPONSE_FILE_FOR_INCLUDES OFF)\n");
+        fprintf(fout, "set(CMAKE_CUDA_USE_RESPONSE_FILE_FOR_LIBRARIES OFF)\n");
+        fprintf(fout, "set(CMAKE_CUDA_USE_RESPONSE_FILE_FOR_OBJECTS OFF)\n");
+      }
     }
     fprintf(fout, "set(CMAKE_VERBOSE_MAKEFILE 1)\n");
     for (std::string const& li : testLangs) {

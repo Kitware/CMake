@@ -56,7 +56,7 @@ public:
 
   cmGeneratorTarget* GetGeneratorTarget() { return this->GeneratorTarget; }
 
-  std::string GetConfigName();
+  std::string GetConfigName() const;
 
 protected:
   void GetDeviceLinkFlags(std::string& linkFlags,
@@ -157,28 +157,40 @@ protected:
   /** Create a response file with the given set of options.  Returns
       the relative path from the target build working directory to the
       response file name.  */
-  std::string CreateResponseFile(const char* name, std::string const& options,
+  std::string CreateResponseFile(const std::string& name,
+                                 std::string const& options,
                                  std::vector<std::string>& makefile_depends);
 
   bool CheckUseResponseFileForObjects(std::string const& l) const;
   bool CheckUseResponseFileForLibraries(std::string const& l) const;
 
+  enum ResponseFlagFor
+  {
+    Link,
+    DeviceLink
+  };
+
   /** Create list of flags for link libraries. */
   void CreateLinkLibs(cmLinkLineComputer* linkLineComputer,
                       std::string& linkLibs, bool useResponseFile,
-                      std::vector<std::string>& makefile_depends);
+                      std::vector<std::string>& makefile_depends,
+                      ResponseFlagFor responseMode = ResponseFlagFor::Link);
 
   /** Create lists of object files for linking and cleaning.  */
   void CreateObjectLists(bool useLinkScript, bool useArchiveRules,
                          bool useResponseFile, std::string& buildObjs,
                          std::vector<std::string>& makefile_depends,
-                         bool useWatcomQuote);
+                         bool useWatcomQuote,
+                         ResponseFlagFor responseMode = ResponseFlagFor::Link);
 
   /** Add commands for generate def files */
   void GenDefFile(std::vector<std::string>& real_link_commands);
 
   void AddIncludeFlags(std::string& flags, const std::string& lang,
                        const std::string& config) override;
+
+  /** Return the response flag for the given configuration */
+  std::string GetResponseFlag(ResponseFlagFor mode) const;
 
   virtual void CloseFileStreams();
   cmLocalUnixMakefileGenerator3* LocalGenerator;
