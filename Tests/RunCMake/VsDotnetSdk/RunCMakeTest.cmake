@@ -4,6 +4,7 @@ include(RunCMake)
 run_cmake(VsDotnetSdkCustomCommandsTarget)
 run_cmake(VsDotnetSdkCustomCommandsSource)
 run_cmake(VsDotnetSdkStartupObject)
+run_cmake(VsDotnetSdkDefines)
 run_cmake(DotnetSdkVariables)
 
 function(run_VsDotnetSdk)
