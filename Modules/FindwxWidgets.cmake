@@ -292,10 +292,11 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
   #
   # Find libraries associated to a configuration.
   #
-  macro(WX_FIND_LIBS _PF _UNV _UCD _DBG)
+  macro(WX_FIND_LIBS _PF _UNV _UCD _DBG _VER)
     DBG_MSG_V("m_unv = ${_UNV}")
     DBG_MSG_V("m_ucd = ${_UCD}")
     DBG_MSG_V("m_dbg = ${_DBG}")
+    DBG_MSG_V("m_ver = ${_VER}")
 
     # FIXME: What if both regex libs are available. regex should be
     # found outside the loop and only wx${LIB}${_UCD}${_DBG}.
@@ -313,28 +314,14 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
 
     # Find wxWidgets multilib base libraries.
     find_library(WX_base${_DBG}
-      NAMES
-      wxbase31${_UCD}${_DBG}
-      wxbase30${_UCD}${_DBG}
-      wxbase29${_UCD}${_DBG}
-      wxbase28${_UCD}${_DBG}
-      wxbase27${_UCD}${_DBG}
-      wxbase26${_UCD}${_DBG}
-      wxbase25${_UCD}${_DBG}
+      NAMES wxbase${_VER}${_UCD}${_DBG}
       PATHS ${WX_LIB_DIR}
       NO_DEFAULT_PATH
       )
     mark_as_advanced(WX_base${_DBG})
     foreach(LIB net odbc xml)
       find_library(WX_${LIB}${_DBG}
-        NAMES
-        wxbase31${_UCD}${_DBG}_${LIB}
-        wxbase30${_UCD}${_DBG}_${LIB}
-        wxbase29${_UCD}${_DBG}_${LIB}
-        wxbase28${_UCD}${_DBG}_${LIB}
-        wxbase27${_UCD}${_DBG}_${LIB}
-        wxbase26${_UCD}${_DBG}_${LIB}
-        wxbase25${_UCD}${_DBG}_${LIB}
+        NAMES wxbase${_VER}${_UCD}${_DBG}_${LIB}
         PATHS ${WX_LIB_DIR}
         NO_DEFAULT_PATH
         )
@@ -343,14 +330,7 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
 
     # Find wxWidgets monolithic library.
     find_library(WX_mono${_DBG}
-      NAMES
-      wx${_PF}${_UNV}31${_UCD}${_DBG}
-      wx${_PF}${_UNV}30${_UCD}${_DBG}
-      wx${_PF}${_UNV}29${_UCD}${_DBG}
-      wx${_PF}${_UNV}28${_UCD}${_DBG}
-      wx${_PF}${_UNV}27${_UCD}${_DBG}
-      wx${_PF}${_UNV}26${_UCD}${_DBG}
-      wx${_PF}${_UNV}25${_UCD}${_DBG}
+      NAMES wx${_PF}${_UNV}${_VER}${_UCD}${_DBG}
       PATHS ${WX_LIB_DIR}
       NO_DEFAULT_PATH
       )
@@ -360,14 +340,7 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
     foreach(LIB core adv aui html media xrc dbgrid gl qa richtext
                 stc ribbon propgrid webview)
       find_library(WX_${LIB}${_DBG}
-        NAMES
-        wx${_PF}${_UNV}31${_UCD}${_DBG}_${LIB}
-        wx${_PF}${_UNV}30${_UCD}${_DBG}_${LIB}
-        wx${_PF}${_UNV}29${_UCD}${_DBG}_${LIB}
-        wx${_PF}${_UNV}28${_UCD}${_DBG}_${LIB}
-        wx${_PF}${_UNV}27${_UCD}${_DBG}_${LIB}
-        wx${_PF}${_UNV}26${_UCD}${_DBG}_${LIB}
-        wx${_PF}${_UNV}25${_UCD}${_DBG}_${LIB}
+        NAMES wx${_PF}${_UNV}${_VER}${_UCD}${_DBG}_${LIB}
         PATHS ${WX_LIB_DIR}
         NO_DEFAULT_PATH
         )
@@ -678,10 +651,14 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
           set(wxWidgets_FOUND FALSE)
         endif()
 
+        # Get version number.
+        wx_extract_version()
+        set(VER "${wxWidgets_VERSION_MAJOR}${wxWidgets_VERSION_MINOR}")
+
         # Find wxWidgets libraries.
-        WX_FIND_LIBS("${PF}" "${UNV}" "${UCD}" "${DBG}")
+        WX_FIND_LIBS("${PF}" "${UNV}" "${UCD}" "${DBG}" "${VER}")
         if(WX_USE_REL_AND_DBG)
-          WX_FIND_LIBS("${PF}" "${UNV}" "${UCD}" "d")
+          WX_FIND_LIBS("${PF}" "${UNV}" "${UCD}" "d" "${VER}")
         endif()
 
         # Settings for requested libs (i.e., include dir, libraries, etc.).
