@@ -104,7 +104,7 @@ function (run_cxx_module_test directory)
     set(RunCMake_TEST_OPTIONS -DCMAKE_BUILD_TYPE=Debug)
   endif ()
 
-  set(RunCMake_TEST_OPTIONS
+  list(APPEND RunCMake_TEST_OPTIONS
     "-DCMake_TEST_MODULE_COMPILATION_RULES=${CMake_TEST_MODULE_COMPILATION_RULES}"
     ${ARGN})
   run_cmake("examples/${test_name}")
