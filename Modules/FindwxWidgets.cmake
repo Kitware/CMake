@@ -215,6 +215,29 @@ else()
   set(wxWidgets_USE_FILE UsewxWidgets)
 endif()
 
+macro(wx_extract_version)
+  unset(_wx_filename)
+  find_file(_wx_filename wx/version.h PATHS ${wxWidgets_INCLUDE_DIRS} NO_DEFAULT_PATH)
+  dbg_msg("_wx_filename:  ${_wx_filename}")
+
+  if(NOT _wx_filename)
+    message(FATAL_ERROR "wxWidgets wx/version.h file not found in ${wxWidgets_INCLUDE_DIRS}.")
+  endif()
+
+  file(READ "${_wx_filename}" _wx_version_h)
+  unset(_wx_filename CACHE)
+
+  string(REGEX REPLACE "^(.*\n)?#define +wxMAJOR_VERSION +([0-9]+).*"
+    "\\2" wxWidgets_VERSION_MAJOR "${_wx_version_h}" )
+  string(REGEX REPLACE "^(.*\n)?#define +wxMINOR_VERSION +([0-9]+).*"
+    "\\2" wxWidgets_VERSION_MINOR "${_wx_version_h}" )
+  string(REGEX REPLACE "^(.*\n)?#define +wxRELEASE_NUMBER +([0-9]+).*"
+    "\\2" wxWidgets_VERSION_PATCH "${_wx_version_h}" )
+  set(wxWidgets_VERSION_STRING
+    "${wxWidgets_VERSION_MAJOR}.${wxWidgets_VERSION_MINOR}.${wxWidgets_VERSION_PATCH}" )
+  dbg_msg("wxWidgets_VERSION_STRING:    ${wxWidgets_VERSION_STRING}")
+endmacro()
+
 #=====================================================================
 # Determine whether unix or win32 paths should be used
 #=====================================================================
@@ -981,26 +1004,7 @@ unset(_wx_lib_missing)
 
 # Check if a specific version was requested by find_package().
 if(wxWidgets_FOUND)
-  unset(_wx_filename)
-  find_file(_wx_filename wx/version.h PATHS ${wxWidgets_INCLUDE_DIRS} NO_DEFAULT_PATH)
-  dbg_msg("_wx_filename:  ${_wx_filename}")
-
-  if(NOT _wx_filename)
-    message(FATAL_ERROR "wxWidgets wx/version.h file not found in ${wxWidgets_INCLUDE_DIRS}.")
-  endif()
-
-  file(READ "${_wx_filename}" _wx_version_h)
-  unset(_wx_filename CACHE)
-
-  string(REGEX REPLACE "^(.*\n)?#define +wxMAJOR_VERSION +([0-9]+).*"
-    "\\2" wxWidgets_VERSION_MAJOR "${_wx_version_h}" )
-  string(REGEX REPLACE "^(.*\n)?#define +wxMINOR_VERSION +([0-9]+).*"
-    "\\2" wxWidgets_VERSION_MINOR "${_wx_version_h}" )
-  string(REGEX REPLACE "^(.*\n)?#define +wxRELEASE_NUMBER +([0-9]+).*"
-    "\\2" wxWidgets_VERSION_PATCH "${_wx_version_h}" )
-  set(wxWidgets_VERSION_STRING
-    "${wxWidgets_VERSION_MAJOR}.${wxWidgets_VERSION_MINOR}.${wxWidgets_VERSION_PATCH}" )
-  dbg_msg("wxWidgets_VERSION_STRING:    ${wxWidgets_VERSION_STRING}")
+  wx_extract_version()
 endif()
 
 # Debug output:
