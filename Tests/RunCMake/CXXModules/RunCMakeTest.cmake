@@ -110,7 +110,7 @@ function (run_cxx_module_test directory)
   run_cmake("examples/${test_name}")
   set(RunCMake_TEST_NO_CLEAN 1)
   run_cmake_command("${test_name}-build" "${CMAKE_COMMAND}" --build . --config Debug)
-  run_cmake_command("${test_name}-test" "${CMAKE_CTEST_COMMAND}" -C Debug)
+  run_cmake_command("${test_name}-test" "${CMAKE_CTEST_COMMAND}" -C Debug --output-on-failure)
 endfunction ()
 
 string(REPLACE "," ";" CMake_TEST_MODULE_COMPILATION "${CMake_TEST_MODULE_COMPILATION}")
