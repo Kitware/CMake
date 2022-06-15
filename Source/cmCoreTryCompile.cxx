@@ -238,7 +238,7 @@ std::set<std::string> const ghs_platform_vars{
 int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
                                      bool isTryRun)
 {
-  this->BinaryDirectory = argv[1];
+  std::string const& resultVar = argv[0];
   this->OutputFile.clear();
   // which signature were we called with ?
   this->SrcFileSignature = true;
@@ -264,7 +264,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     }
   }
 
-  std::string sourceDirectory = argv[2];
+  std::string sourceDirectory;
   std::string projectName;
   std::string targetName;
   std::vector<std::string> cmakeFlags(1, "CMAKE_FLAGS"); // fake argv[0]
@@ -287,7 +287,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
   bool didOutputVariable = false;
   bool didCopyFile = false;
   bool didCopyFileError = false;
-  bool useSources = argv[2] == "SOURCES";
+  bool useSources = false;
   std::vector<std::string> sources;
 
   enum Doing
@@ -303,9 +303,12 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     DoingSources,
     DoingCMakeInternal
   };
-  Doing doing = useSources ? DoingSources : DoingNone;
-  for (size_t i = 3; i < argv.size(); ++i) {
-    if (argv[i] == "CMAKE_FLAGS") {
+  Doing doing = DoingNone;
+  for (size_t i = 1; i < argv.size(); ++i) {
+    if (argv[i] == "SOURCES") {
+      useSources = true;
+      doing = DoingSources;
+    } else if (argv[i] == "CMAKE_FLAGS") {
       doing = DoingCMakeFlags;
     } else if (argv[i] == "COMPILE_DEFINITIONS") {
       doing = DoingCompileDefinitions;
@@ -379,6 +382,10 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     } else if (doing == DoingCMakeInternal) {
       cmakeInternal = argv[i];
       doing = DoingNone;
+    } else if (i == 1) {
+      this->BinaryDirectory = argv[i];
+    } else if (i == 2) {
+      sourceDirectory = argv[i];
     } else if (i == 3) {
       this->SrcFileSignature = false;
       projectName = argv[i];
@@ -1012,7 +1019,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
   }
 
   // set the result var to the return value to indicate success or failure
-  this->Makefile->AddCacheDefinition(argv[0], (res == 0 ? "TRUE" : "FALSE"),
+  this->Makefile->AddCacheDefinition(resultVar, (res == 0 ? "TRUE" : "FALSE"),
                                      "Result of TRY_COMPILE",
                                      cmStateEnums::INTERNAL);
 
