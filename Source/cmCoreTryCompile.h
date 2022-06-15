@@ -7,8 +7,9 @@
 #include <string>
 #include <vector>
 
-#include "cmCommand.h"
 #include "cmStateTypes.h"
+
+class cmMakefile;
 
 /** \class cmCoreTryCompile
  * \brief Base class for cmTryCompileCommand and cmTryRunCommand
@@ -16,10 +17,14 @@
  * cmCoreTryCompile implements the functionality to build a program.
  * It is the base class for cmTryCompileCommand and cmTryRunCommand.
  */
-class cmCoreTryCompile : public cmCommand
+class cmCoreTryCompile
 {
 public:
-protected:
+  cmCoreTryCompile(cmMakefile* mf)
+    : Makefile(mf)
+  {
+  }
+
   /**
    * This is the core code for try compile. It is here so that other
    * commands, such as TryRun can access the same logic without
@@ -46,4 +51,5 @@ protected:
   std::string OutputFile;
   std::string FindErrorMessage;
   bool SrcFileSignature = false;
+  cmMakefile* Makefile;
 };
