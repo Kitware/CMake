@@ -760,6 +760,10 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     }
   }
 
+  if (this->IsImported()) {
+    this->SetProperty("SYSTEM", "ON");
+  }
+
   for (auto const& prop : mf->GetState()->GetPropertyDefinitions().GetMap()) {
     if (prop.first.second == cmProperty::TARGET &&
         !prop.second.GetInitializeFromVariable().empty()) {

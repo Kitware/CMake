@@ -807,11 +807,16 @@ void handleSystemIncludesDep(cmLocalGenerator* lg,
                                                  dagChecker, depTgt, language),
                  result);
   }
-  if (!depTgt->IsImported() || excludeImported) {
+  if (!depTgt->GetPropertyAsBool("SYSTEM")) {
     return;
   }
-  if (depTgt->GetPropertyAsBool("IMPORTED_NO_SYSTEM")) {
-    return;
+  if (depTgt->IsImported()) {
+    if (excludeImported) {
+      return;
+    }
+    if (depTgt->GetPropertyAsBool("IMPORTED_NO_SYSTEM")) {
+      return;
+    }
   }
 
   if (cmValue dirs = depTgt->GetProperty("INTERFACE_INCLUDE_DIRECTORIES")) {
