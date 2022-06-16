@@ -43,6 +43,8 @@ check_property("ENABLE_GPU_FRAME_CAPTURE_MODE_DISABLED" "enableGPUFrameCaptureMo
 check_property("ENABLE_GPU_FRAME_CAPTURE_MODE_METAL" "enableGPUFrameCaptureMode=\"1\"")
 check_property("ENABLE_GPU_FRAME_CAPTURE_MODE_DISABLED_MIXED_CASE" "enableGPUFrameCaptureMode=\"3\"")
 check_property("ENABLE_GPU_FRAME_CAPTURE_MODE_METAL_MIXED_CASE" "enableGPUFrameCaptureMode=\"1\"")
+check_property("LAUNCH_MODE_AUTO" "launchStyle=\"0\"")
+check_property("LAUNCH_MODE_WAIT" "launchStyle=\"1\"")
 
 check_property("EXECUTABLE" "myExecutable")
 check_property("ARGUMENTS" [=["--foo"]=])

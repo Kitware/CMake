@@ -38,6 +38,8 @@ create_scheme_for_property(ENABLE_GPU_FRAME_CAPTURE_MODE_DISABLED ENABLE_GPU_FRA
 create_scheme_for_property(ENABLE_GPU_FRAME_CAPTURE_MODE_METAL ENABLE_GPU_FRAME_CAPTURE_MODE Metal)
 create_scheme_for_property(ENABLE_GPU_FRAME_CAPTURE_MODE_DISABLED_MIXED_CASE ENABLE_GPU_FRAME_CAPTURE_MODE DISAbled)
 create_scheme_for_property(ENABLE_GPU_FRAME_CAPTURE_MODE_METAL_MIXED_CASE ENABLE_GPU_FRAME_CAPTURE_MODE METal)
+create_scheme_for_property(LAUNCH_MODE_AUTO LAUNCH_MODE AUTO)
+create_scheme_for_property(LAUNCH_MODE_WAIT LAUNCH_MODE WAIT)
 create_scheme_for_property(EXECUTABLE EXECUTABLE myExecutable)
 create_scheme_for_property(ARGUMENTS ARGUMENTS "--foo;--bar=baz")
 create_scheme_for_property(ENVIRONMENT ENVIRONMENT "FOO=foo;BAR=bar")

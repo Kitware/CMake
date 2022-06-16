@@ -147,7 +147,15 @@ void cmXCodeScheme::WriteLaunchAction(cmXMLWriter& xout,
                  "Xcode.DebuggerFoundation.Debugger.LLDB");
   xout.Attribute("selectedLauncherIdentifier",
                  "Xcode.DebuggerFoundation.Launcher.LLDB");
-  xout.Attribute("launchStyle", "0");
+  {
+    cmValue launchMode =
+      this->Target->GetTarget()->GetProperty("XCODE_SCHEME_LAUNCH_MODE");
+    std::string value = "0"; // == 'AUTO'
+    if (launchMode && *launchMode == "WAIT") {
+      value = "1";
+    }
+    xout.Attribute("launchStyle", value);
+  }
   WriteCustomWorkingDirectory(xout, configuration);
 
   xout.Attribute("ignoresPersistentStateOnLaunch", "NO");
