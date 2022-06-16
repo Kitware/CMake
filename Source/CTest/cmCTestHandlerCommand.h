@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 
+#include <cm/string_view>
+
 #include "cmArgumentParser.h"
 #include "cmCTestCommand.h"
 
@@ -42,7 +44,7 @@ protected:
 
   // Command argument handling.
   virtual void BindArguments();
-  virtual void CheckArguments(std::vector<std::string> const& keywords);
+  virtual void CheckArguments(std::vector<cm::string_view> const& keywords);
 
   bool Append = false;
   bool Quiet = false;

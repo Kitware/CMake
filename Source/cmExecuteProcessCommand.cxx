@@ -95,13 +95,13 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
       .Bind("COMMAND_ERROR_IS_FATAL"_s, &Arguments::CommandErrorIsFatal);
 
   std::vector<std::string> unparsedArguments;
-  std::vector<std::string> keywordsMissingValue;
+  std::vector<cm::string_view> keywordsMissingValue;
   Arguments const arguments =
     parser.Parse(args, &unparsedArguments, &keywordsMissingValue);
 
   if (!keywordsMissingValue.empty()) {
-    status.SetError(" called with no value for " +
-                    keywordsMissingValue.front() + ".");
+    status.SetError(cmStrCat(" called with no value for ",
+                             keywordsMissingValue.front(), "."));
     return false;
   }
   if (!unparsedArguments.empty()) {

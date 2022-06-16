@@ -958,8 +958,8 @@ bool HandleRPathChangeCommand(std::vector<std::string> const& args,
   bool removeEnvironmentRPath = false;
   cmArgumentParser<void> parser;
   std::vector<std::string> unknownArgs;
-  std::vector<std::string> missingArgs;
-  std::vector<std::string> parsedArgs;
+  std::vector<cm::string_view> missingArgs;
+  std::vector<cm::string_view> parsedArgs;
   parser.Bind("FILE"_s, file)
     .Bind("OLD_RPATH"_s, oldRPath)
     .Bind("NEW_RPATH"_s, newRPath)
@@ -1028,8 +1028,8 @@ bool HandleRPathSetCommand(std::vector<std::string> const& args,
   std::string newRPath;
   cmArgumentParser<void> parser;
   std::vector<std::string> unknownArgs;
-  std::vector<std::string> missingArgs;
-  std::vector<std::string> parsedArgs;
+  std::vector<cm::string_view> missingArgs;
+  std::vector<cm::string_view> parsedArgs;
   parser.Bind("FILE"_s, file).Bind("NEW_RPATH"_s, newRPath);
   parser.Parse(cmMakeRange(args).advance(1), &unknownArgs, &missingArgs,
                &parsedArgs);
@@ -1087,7 +1087,7 @@ bool HandleRPathRemoveCommand(std::vector<std::string> const& args,
   std::string file;
   cmArgumentParser<void> parser;
   std::vector<std::string> unknownArgs;
-  std::vector<std::string> missingArgs;
+  std::vector<cm::string_view> missingArgs;
   parser.Bind("FILE"_s, file);
   parser.Parse(cmMakeRange(args).advance(1), &unknownArgs, &missingArgs);
   if (!unknownArgs.empty()) {
@@ -1138,8 +1138,8 @@ bool HandleRPathCheckCommand(std::vector<std::string> const& args,
   std::string rpath;
   cmArgumentParser<void> parser;
   std::vector<std::string> unknownArgs;
-  std::vector<std::string> missingArgs;
-  std::vector<std::string> parsedArgs;
+  std::vector<cm::string_view> missingArgs;
+  std::vector<cm::string_view> parsedArgs;
   parser.Bind("FILE"_s, file).Bind("RPATH"_s, rpath);
   parser.Parse(cmMakeRange(args).advance(1), &unknownArgs, &missingArgs,
                &parsedArgs);
@@ -1261,8 +1261,8 @@ bool HandleRealPathCommand(std::vector<std::string> const& args,
       .Bind("EXPAND_TILDE"_s, &Arguments::ExpandTilde);
 
   std::vector<std::string> unparsedArguments;
-  std::vector<std::string> keywordsMissingValue;
-  std::vector<std::string> parsedKeywords;
+  std::vector<cm::string_view> keywordsMissingValue;
+  std::vector<cm::string_view> parsedKeywords;
   auto arguments =
     parser.Parse(cmMakeRange(args).advance(3), &unparsedArguments,
                  &keywordsMissingValue, &parsedKeywords);
@@ -2521,8 +2521,8 @@ bool HandleGenerateCommand(std::vector<std::string> const& args,
       .Bind("NEWLINE_STYLE"_s, &Arguments::NewLineStyle);
 
   std::vector<std::string> unparsedArguments;
-  std::vector<std::string> keywordsMissingValues;
-  std::vector<std::string> parsedKeywords;
+  std::vector<cm::string_view> keywordsMissingValues;
+  std::vector<cm::string_view> parsedKeywords;
   Arguments const arguments =
     parser.Parse(cmMakeRange(args).advance(1), &unparsedArguments,
                  &keywordsMissingValues, &parsedKeywords);
@@ -2578,7 +2578,7 @@ bool HandleGenerateCommand(std::vector<std::string> const& args,
   }
 
   const bool inputIsContent = parsedKeywords[1] != "INPUT"_s;
-  if (inputIsContent && parsedKeywords[1] != "CONTENT") {
+  if (inputIsContent && parsedKeywords[1] != "CONTENT"_s) {
     status.SetError("Unknown argument to GENERATE subcommand.");
   }
 
@@ -3102,7 +3102,7 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
       .Bind("POST_EXCLUDE_FILES_STRICT"_s, &Arguments::PostExcludeFilesStrict);
 
   std::vector<std::string> unrecognizedArguments;
-  std::vector<std::string> keywordsMissingValues;
+  std::vector<cm::string_view> keywordsMissingValues;
   auto parsedArgs =
     parser.Parse(cmMakeRange(args).advance(1), &unrecognizedArguments,
                  &keywordsMissingValues);
@@ -3114,18 +3114,18 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
   }
 
   // Arguments that are allowed to be empty lists.  Keep entries sorted!
-  const std::vector<std::string> LIST_ARGS = {
-    "DIRECTORIES",
-    "EXECUTABLES",
-    "LIBRARIES",
-    "MODULES",
-    "POST_EXCLUDE_FILES",
-    "POST_EXCLUDE_FILES_STRICT",
-    "POST_EXCLUDE_REGEXES",
-    "POST_INCLUDE_FILES",
-    "POST_INCLUDE_REGEXES",
-    "PRE_EXCLUDE_REGEXES",
-    "PRE_INCLUDE_REGEXES",
+  static const std::vector<cm::string_view> LIST_ARGS = {
+    "DIRECTORIES"_s,
+    "EXECUTABLES"_s,
+    "LIBRARIES"_s,
+    "MODULES"_s,
+    "POST_EXCLUDE_FILES"_s,
+    "POST_EXCLUDE_FILES_STRICT"_s,
+    "POST_EXCLUDE_REGEXES"_s,
+    "POST_INCLUDE_FILES"_s,
+    "POST_INCLUDE_REGEXES"_s,
+    "PRE_EXCLUDE_REGEXES"_s,
+    "PRE_INCLUDE_REGEXES"_s,
   };
   auto kwbegin = keywordsMissingValues.cbegin();
   auto kwend = cmRemoveMatching(keywordsMissingValues, LIST_ARGS);
@@ -3251,8 +3251,8 @@ bool HandleConfigureCommand(std::vector<std::string> const& args,
       .Bind("NEWLINE_STYLE"_s, &Arguments::NewlineStyle);
 
   std::vector<std::string> unrecognizedArguments;
-  std::vector<std::string> keywordsMissingArguments;
-  std::vector<std::string> parsedKeywords;
+  std::vector<cm::string_view> keywordsMissingArguments;
+  std::vector<cm::string_view> parsedKeywords;
   auto parsedArgs =
     parser.Parse(cmMakeRange(args).advance(1), &unrecognizedArguments,
                  &keywordsMissingArguments, &parsedKeywords);
@@ -3265,7 +3265,7 @@ bool HandleConfigureCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  std::vector<std::string> mandatoryOptions{ "OUTPUT", "CONTENT" };
+  std::vector<cm::string_view> mandatoryOptions{ "OUTPUT"_s, "CONTENT"_s };
   for (auto const& e : mandatoryOptions) {
     const bool optionHasNoValue =
       std::find(keywordsMissingArguments.begin(),
@@ -3392,7 +3392,7 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
       .Bind("PATHS"_s, &Arguments::Paths);
 
   std::vector<std::string> unrecognizedArguments;
-  std::vector<std::string> keywordsMissingValues;
+  std::vector<cm::string_view> keywordsMissingValues;
   auto parsedArgs =
     parser.Parse(cmMakeRange(args).advance(1), &unrecognizedArguments,
                  &keywordsMissingValues);
@@ -3404,12 +3404,12 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
   }
 
   // Arguments that are allowed to be empty lists.  Keep entries sorted!
-  const std::vector<std::string> LIST_ARGS = {
-    "MTIME", // "MTIME" should not be in this list because it requires one
-             // value, but it has long been accidentally accepted without
-             // one and treated as if an empty value were given.
-             // Fixing this would require a policy.
-    "PATHS", // "PATHS" is here only so we can issue a custom error below.
+  static const std::vector<cm::string_view> LIST_ARGS = {
+    "MTIME"_s, // "MTIME" should not be in this list because it requires one
+               // value, but it has long been accidentally accepted without
+               // one and treated as if an empty value were given.
+               // Fixing this would require a policy.
+    "PATHS"_s, // "PATHS" is here only so we can issue a custom error below.
   };
   auto kwbegin = keywordsMissingValues.cbegin();
   auto kwend = cmRemoveMatching(keywordsMissingValues, LIST_ARGS);
@@ -3525,7 +3525,7 @@ bool HandleArchiveExtractCommand(std::vector<std::string> const& args,
                                .Bind("TOUCH"_s, &Arguments::Touch);
 
   std::vector<std::string> unrecognizedArguments;
-  std::vector<std::string> keywordsMissingValues;
+  std::vector<cm::string_view> keywordsMissingValues;
   auto parsedArgs =
     parser.Parse(cmMakeRange(args).advance(1), &unrecognizedArguments,
                  &keywordsMissingValues);
@@ -3537,7 +3537,7 @@ bool HandleArchiveExtractCommand(std::vector<std::string> const& args,
   }
 
   // Arguments that are allowed to be empty lists.  Keep entries sorted!
-  const std::vector<std::string> LIST_ARGS = { "PATTERNS" };
+  static const std::vector<cm::string_view> LIST_ARGS = { "PATTERNS"_s };
   auto kwbegin = keywordsMissingValues.cbegin();
   auto kwend = cmRemoveMatching(keywordsMissingValues, LIST_ARGS);
   if (kwend != kwbegin) {
@@ -3648,7 +3648,7 @@ bool HandleChmodCommandImpl(std::vector<std::string> const& args, bool recurse,
       .Bind("DIRECTORY_PERMISSIONS"_s, &Arguments::DirectoryPermissions);
 
   std::vector<std::string> pathEntries;
-  std::vector<std::string> keywordsMissingValues;
+  std::vector<cm::string_view> keywordsMissingValues;
   Arguments parsedArgs = parser.Parse(cmMakeRange(args).advance(1),
                                       &pathEntries, &keywordsMissingValues);
 
@@ -3672,7 +3672,7 @@ bool HandleChmodCommandImpl(std::vector<std::string> const& args, bool recurse,
 
   if (!keywordsMissingValues.empty()) {
     for (const auto& i : keywordsMissingValues) {
-      status.SetError(i + " is not given any arguments");
+      status.SetError(cmStrCat(i, " is not given any arguments"));
       cmSystemTools::SetFatalErrorOccurred();
     }
     return false;

@@ -42,7 +42,7 @@ namespace {
 using options_map = std::map<std::string, bool>;
 using single_map = std::map<std::string, std::string>;
 using multi_map = std::map<std::string, std::vector<std::string>>;
-using options_set = std::set<std::string>;
+using options_set = std::set<cm::string_view>;
 
 struct UserArgumentParser : public cmArgumentParser<void>
 {
@@ -208,7 +208,7 @@ bool cmParseArgumentsCommand(std::vector<std::string> const& args,
     }
   }
 
-  std::vector<std::string> keywordsMissingValues;
+  std::vector<cm::string_view> keywordsMissingValues;
 
   parser.Parse(list, &unparsed, &keywordsMissingValues);
 

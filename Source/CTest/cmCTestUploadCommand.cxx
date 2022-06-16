@@ -5,6 +5,7 @@
 #include <set>
 #include <sstream>
 
+#include <cm/string_view>
 #include <cm/vector>
 #include <cmext/string_view>
 
@@ -21,7 +22,7 @@ void cmCTestUploadCommand::BindArguments()
   this->Bind("CAPTURE_CMAKE_ERROR"_s, this->CaptureCMakeError);
 }
 
-void cmCTestUploadCommand::CheckArguments(std::vector<std::string> const&)
+void cmCTestUploadCommand::CheckArguments(std::vector<cm::string_view> const&)
 {
   cm::erase_if(this->Files, [this](std::string const& arg) -> bool {
     if (!cmSystemTools::FileExists(arg)) {

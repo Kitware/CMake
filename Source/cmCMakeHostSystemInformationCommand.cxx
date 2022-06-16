@@ -491,7 +491,7 @@ bool QueryWindowsRegistry(Range args, cmExecutionStatus& status,
     .Bind("SEPARATOR"_s, &Arguments::Separator)
     .Bind("ERROR_VARIABLE"_s, &Arguments::ErrorVariable);
   std::vector<std::string> invalidArgs;
-  std::vector<std::string> keywordsMissingValue;
+  std::vector<cm::string_view> keywordsMissingValue;
 
   Arguments const arguments =
     parser.Parse(args.advance(1), &invalidArgs, &keywordsMissingValue);

@@ -7,6 +7,7 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cm/string_view>
 #include <cmext/algorithm>
 #include <cmext/string_view>
 
@@ -79,7 +80,7 @@ bool cmExportCommand(std::vector<std::string> const& args,
   }
 
   std::vector<std::string> unknownArgs;
-  std::vector<std::string> keywordsMissingValue;
+  std::vector<cm::string_view> keywordsMissingValue;
   Arguments const arguments =
     parser.Parse(args, &unknownArgs, &keywordsMissingValue);
 

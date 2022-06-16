@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#include <cm/string_view>
+
 #include "cmCTestHandlerCommand.h"
 
 class cmCommand;
@@ -35,7 +37,7 @@ public:
 
 protected:
   void BindArguments() override;
-  void CheckArguments(std::vector<std::string> const& keywords) override;
+  void CheckArguments(std::vector<cm::string_view> const& keywords) override;
   cmCTestGenericHandler* InitializeHandler() override;
 
   bool CDashUpload = false;

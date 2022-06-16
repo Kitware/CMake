@@ -44,8 +44,8 @@ public:
 
   void Consume(cm::string_view arg, void* result,
                std::vector<std::string>* unparsedArguments,
-               std::vector<std::string>* keywordsMissingValue,
-               std::vector<std::string>* parsedKeywords);
+               std::vector<cm::string_view>* keywordsMissingValue,
+               std::vector<cm::string_view>* parsedKeywords);
 
 private:
   ActionMap const& Bindings;
@@ -79,8 +79,8 @@ public:
   template <typename Range>
   void Parse(Result& result, Range const& args,
              std::vector<std::string>* unparsedArguments = nullptr,
-             std::vector<std::string>* keywordsMissingValue = nullptr,
-             std::vector<std::string>* parsedKeywords = nullptr) const
+             std::vector<cm::string_view>* keywordsMissingValue = nullptr,
+             std::vector<cm::string_view>* parsedKeywords = nullptr) const
   {
     ArgumentParser::Instance instance(this->Bindings);
     for (cm::string_view arg : args) {
@@ -92,8 +92,8 @@ public:
   template <typename Range>
   Result Parse(Range const& args,
                std::vector<std::string>* unparsedArguments = nullptr,
-               std::vector<std::string>* keywordsMissingValue = nullptr,
-               std::vector<std::string>* parsedKeywords = nullptr) const
+               std::vector<cm::string_view>* keywordsMissingValue = nullptr,
+               std::vector<cm::string_view>* parsedKeywords = nullptr) const
   {
     Result result;
     this->Parse(result, args, unparsedArguments, keywordsMissingValue,
@@ -120,8 +120,8 @@ public:
   template <typename Range>
   void Parse(Range const& args,
              std::vector<std::string>* unparsedArguments = nullptr,
-             std::vector<std::string>* keywordsMissingValue = nullptr,
-             std::vector<std::string>* parsedKeywords = nullptr) const
+             std::vector<cm::string_view>* keywordsMissingValue = nullptr,
+             std::vector<cm::string_view>* parsedKeywords = nullptr) const
   {
     ArgumentParser::Instance instance(this->Bindings);
     for (cm::string_view arg : args) {

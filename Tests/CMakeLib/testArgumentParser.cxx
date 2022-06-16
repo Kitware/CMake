@@ -47,11 +47,12 @@ std::initializer_list<cm::string_view> const args = {
 
 bool verifyResult(Result const& result,
                   std::vector<std::string> const& unparsedArguments,
-                  std::vector<std::string> const& keywordsMissingValue)
+                  std::vector<cm::string_view> const& keywordsMissingValue)
 {
   static std::vector<std::string> const foobar = { "foo", "bar" };
   static std::vector<std::string> const barfoo = { "bar", "foo" };
-  static std::vector<std::string> const missing = { "STRING_1", "LIST_1" };
+  static std::vector<cm::string_view> const missing = { "STRING_1"_s,
+                                                        "LIST_1"_s };
 
 #define ASSERT_TRUE(x)                                                        \
   do {                                                                        \
@@ -89,7 +90,7 @@ bool testArgumentParserDynamic()
 {
   Result result;
   std::vector<std::string> unparsedArguments;
-  std::vector<std::string> keywordsMissingValue;
+  std::vector<cm::string_view> keywordsMissingValue;
 
   cmArgumentParser<void>{}
     .Bind("OPTION_1"_s, result.Option1)
@@ -123,7 +124,7 @@ bool testArgumentParserStatic()
       .Bind("MULTI_3"_s, &Result::Multi3);
 
   std::vector<std::string> unparsedArguments;
-  std::vector<std::string> keywordsMissingValue;
+  std::vector<cm::string_view> keywordsMissingValue;
   Result const result =
     parser.Parse(args, &unparsedArguments, &keywordsMissingValue);
 

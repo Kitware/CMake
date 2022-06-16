@@ -4,6 +4,7 @@
 
 #include <set>
 
+#include <cm/string_view>
 #include <cmext/algorithm>
 #include <cmext/string_view>
 
@@ -19,10 +20,10 @@ void cmCTestCoverageCommand::BindArguments()
 }
 
 void cmCTestCoverageCommand::CheckArguments(
-  std::vector<std::string> const& keywords)
+  std::vector<cm::string_view> const& keywords)
 {
   this->LabelsMentioned =
-    !this->Labels.empty() || cm::contains(keywords, "LABELS");
+    !this->Labels.empty() || cm::contains(keywords, "LABELS"_s);
 }
 
 cmCTestGenericHandler* cmCTestCoverageCommand::InitializeHandler()
