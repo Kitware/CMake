@@ -952,6 +952,10 @@ void cmVisualStudio10TargetGenerator::WriteSdkStyleProjectFile(
     std::string outDir = this->GeneratorTarget->GetDirectory(config) + "/";
     ConvertToWindowsSlash(outDir);
     e1.Element("OutputPath", outDir);
+
+    Options& o = *(this->ClOptions[config]);
+    OptionsHelper oh(o, e1);
+    oh.OutputFlagMap();
   }
 
   this->WriteDotNetDocumentationFile(e0);
