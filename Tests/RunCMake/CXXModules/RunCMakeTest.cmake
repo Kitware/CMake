@@ -147,6 +147,12 @@ if ("internal_partitions" IN_LIST CMake_TEST_MODULE_COMPILATION)
   run_cxx_module_test(internal-partitions)
 endif ()
 
+# Tests which install BMIs
+if ("export_bmi" IN_LIST CMake_TEST_MODULE_COMPILATION)
+  run_cxx_module_test(export-interface-build)
+  run_cxx_module_test(export-bmi-and-interface-build)
+endif ()
+
 # All of the following tests perform installation.
 set(RunCMake_CXXModules_INSTALL 1)
 
@@ -154,4 +160,9 @@ set(RunCMake_CXXModules_INSTALL 1)
 if ("install_bmi" IN_LIST CMake_TEST_MODULE_COMPILATION)
   run_cxx_module_test(install-bmi)
   run_cxx_module_test(install-bmi-and-interfaces)
+
+  if ("export_bmi" IN_LIST CMake_TEST_MODULE_COMPILATION)
+    run_cxx_module_test(export-interface-install)
+    run_cxx_module_test(export-bmi-and-interface-install)
+  endif ()
 endif ()
