@@ -822,13 +822,13 @@ void cmFindPackageCommand::SetVersionVariables(
   char buf[64];
   snprintf(buf, sizeof(buf), "%u", major);
   addDefinition(prefix + "_MAJOR", buf);
-  sprintf(buf, "%u", minor);
+  snprintf(buf, sizeof(buf), "%u", minor);
   addDefinition(prefix + "_MINOR", buf);
-  sprintf(buf, "%u", patch);
+  snprintf(buf, sizeof(buf), "%u", patch);
   addDefinition(prefix + "_PATCH", buf);
-  sprintf(buf, "%u", tweak);
+  snprintf(buf, sizeof(buf), "%u", tweak);
   addDefinition(prefix + "_TWEAK", buf);
-  sprintf(buf, "%u", count);
+  snprintf(buf, sizeof(buf), "%u", count);
   addDefinition(prefix + "_COUNT", buf);
 }
 

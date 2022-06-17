@@ -143,7 +143,8 @@ bool HandleHexCommand(std::vector<std::string> const& args,
 
   std::string::size_type hexIndex = 0;
   for (auto const& c : instr) {
-    sprintf(&output[hexIndex], "%.2x", static_cast<unsigned char>(c) & 0xFF);
+    snprintf(&output[hexIndex], 3, "%.2x",
+             static_cast<unsigned char>(c) & 0xFF);
     hexIndex += 2;
   }
 
