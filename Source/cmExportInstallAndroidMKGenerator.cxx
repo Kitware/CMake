@@ -35,8 +35,7 @@ void cmExportInstallAndroidMKGenerator::GenerateImportHeaderCode(
   for (size_t n = 0; n < numDotDot; n++) {
     path += "/..";
   }
-  os << "_IMPORT_PREFIX := "
-     << "$(LOCAL_PATH)" << path << "\n\n";
+  os << "_IMPORT_PREFIX := $(LOCAL_PATH)" << path << "\n\n";
   for (std::unique_ptr<cmTargetExport> const& te :
        this->IEGen->GetExportSet()->GetTargetExports()) {
     // Collect import properties for this target.
