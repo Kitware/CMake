@@ -65,7 +65,13 @@ public:
     this->Bind(*optVal);
   }
 
-  void Consume(cm::string_view arg);
+  template <typename Range>
+  void Parse(Range const& args)
+  {
+    for (cm::string_view arg : args) {
+      this->Consume(arg);
+    }
+  }
 
 private:
   ActionMap const& Bindings;
@@ -77,6 +83,8 @@ private:
   std::string* CurrentString = nullptr;
   std::vector<std::string>* CurrentList = nullptr;
   bool ExpectValue = false;
+
+  void Consume(cm::string_view arg);
 
   template <typename Result>
   friend class ::cmArgumentParser;
@@ -114,9 +122,7 @@ public:
     ArgumentParser::Instance instance(this->Bindings, unparsedArguments,
                                       keywordsMissingValue, parsedKeywords,
                                       &result);
-    for (cm::string_view arg : args) {
-      instance.Consume(arg);
-    }
+    instance.Parse(args);
   }
 
   template <typename Range>
@@ -153,9 +159,7 @@ public:
   {
     ArgumentParser::Instance instance(this->Bindings, unparsedArguments,
                                       keywordsMissingValue, parsedKeywords);
-    for (cm::string_view arg : args) {
-      instance.Consume(arg);
-    }
+    instance.Parse(args);
   }
 
 protected:
