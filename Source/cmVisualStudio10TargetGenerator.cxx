@@ -3856,21 +3856,28 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaLinkOptions(
   this->GeneratorTarget->GetLinkOptions(linkOpts, configName, "CUDA");
   // LINK_OPTIONS are escaped.
   this->LocalGenerator->AppendCompileOptions(linkFlags, linkOpts);
+
+  cmComputeLinkInformation* pcli =
+    this->GeneratorTarget->GetLinkInformation(configName);
+  if (doDeviceLinking && pcli) {
+
+    cmLinkLineDeviceComputer computer(
+      this->LocalGenerator,
+      this->LocalGenerator->GetStateSnapshot().GetDirectory());
+    std::string ignored_;
+    this->LocalGenerator->GetDeviceLinkFlags(computer, configName, ignored_,
+                                             linkFlags, ignored_, ignored_,
+                                             this->GeneratorTarget);
+
+    this->LocalGenerator->AddLanguageFlagsForLinking(
+      linkFlags, this->GeneratorTarget, "CUDA", configName);
+  }
   cudaLinkOptions.AppendFlagString("AdditionalOptions", linkFlags);
 
   // For static libraries that have device linking enabled compute
   // the  libraries
   if (this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY &&
       doDeviceLinking) {
-    cmComputeLinkInformation* pcli =
-      this->GeneratorTarget->GetLinkInformation(configName);
-    if (!pcli) {
-      cmSystemTools::Error(
-        "CMake can not compute cmComputeLinkInformation for target: " +
-        this->Name);
-      return false;
-    }
-
     cmComputeLinkInformation& cli = *pcli;
     cmLinkLineDeviceComputer computer(
       this->LocalGenerator,

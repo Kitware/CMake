@@ -161,71 +161,12 @@ bool cmVisualStudioGeneratorOptions::UsingSBCS() const
 
 void cmVisualStudioGeneratorOptions::FixCudaCodeGeneration()
 {
-  // Extract temporary values stored by our flag table.
-  FlagValue arch = this->TakeFlag("cmake-temp-arch");
-  FlagValue code = this->TakeFlag("cmake-temp-code");
-  FlagValue gencode = this->TakeFlag("cmake-temp-gencode");
-
-  // No -code allowed without -arch.
-  if (arch.empty()) {
-    code.clear();
-  }
-
-  // Create a CodeGeneration field with [arch],[code] syntax in each entry.
-  // CUDA will convert it to `-gencode=arch=[arch],code="[code],[arch]"`.
-  FlagValue& result = this->FlagMap["CodeGeneration"];
-
-  // If there are no flags, leave the CodeGeneration field empty.
-  if (arch.empty() && gencode.empty()) {
-    return;
-  }
-
-  // First entries for the -arch=<arch> [-code=<code>,...] pair.
-  if (!arch.empty()) {
-    std::string arch_name = arch[0];
-    if (arch_name == "all" || arch_name == "all-major" ||
-        arch_name == "native") {
-      AppendFlagString("AdditionalOptions", "-arch=" + arch_name);
-      return;
-    }
-    std::vector<std::string> codes;
-    if (!code.empty()) {
-      codes = cmTokenize(code[0], ",");
-    }
-    if (codes.empty()) {
-      codes.push_back(arch_name);
-      // nvcc -arch=<arch> has a special case that allows a real
-      // architecture to be specified instead of a virtual arch.
-      // It translates to -arch=<virtual> -code=<real>.
-      cmSystemTools::ReplaceString(arch_name, "sm_", "compute_");
-    }
-    for (std::string const& c : codes) {
-      std::string entry = arch_name + "," + c;
-      result.push_back(entry);
-    }
-  }
-
-  // Now add entries for the following signatures:
-  // -gencode=<arch>,<code>
-  // -gencode=<arch>,[<code1>,<code2>]
-  // -gencode=<arch>,"<code1>,<code2>"
-  for (std::string const& e : gencode) {
-    std::string entry = e;
-    cmSystemTools::ReplaceString(entry, "arch=", "");
-    cmSystemTools::ReplaceString(entry, "code=", "");
-    cmSystemTools::ReplaceString(entry, "[", "");
-    cmSystemTools::ReplaceString(entry, "]", "");
-    cmSystemTools::ReplaceString(entry, "\"", "");
-
-    std::vector<std::string> codes = cmTokenize(entry, ",");
-    if (codes.size() >= 2) {
-      auto gencode_arch = cm::cbegin(codes);
-      for (auto ci = gencode_arch + 1; ci != cm::cend(codes); ++ci) {
-        std::string code_entry = *gencode_arch + "," + *ci;
-        result.push_back(code_entry);
-      }
-    }
-  }
+  // Create an empty CodeGeneration field, and pass the the actual
+  // compile flags via additional options so that we have consistent
+  // behavior and avoid issues with MSBuild extensions injecting
+  // virtual code when we request real only.
+  FlagValue& code_gen_flag = this->FlagMap["CodeGeneration"];
+  code_gen_flag = "";
 }
 
 void cmVisualStudioGeneratorOptions::FixManifestUACFlags()
