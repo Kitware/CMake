@@ -1088,6 +1088,10 @@ void cmExportFileGenerator::GenerateImportTargetCode(
        << " PROPERTY IMPORTED_NO_SYSTEM 1)\n";
   }
 
+  if (target->GetPropertyAsBool("EXPORT_NO_SYSTEM")) {
+    os << "set_property(TARGET " << targetName << " PROPERTY SYSTEM 0)\n";
+  }
+
   os << "\n";
 }
 
