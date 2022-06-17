@@ -1126,7 +1126,8 @@ void cmCoreTryCompile::FindOutputFile(const std::string& targetName,
     searchDirs.emplace_back(std::move(tmp));
   }
   searchDirs.emplace_back("/Debug");
-#if defined(__APPLE__)
+
+  // handle app-bundles (for targeting apple-platforms)
   std::string app = "/" + targetName + ".app";
   if (cmNonempty(config)) {
     std::string tmp = cmStrCat('/', *config, app);
@@ -1135,7 +1136,7 @@ void cmCoreTryCompile::FindOutputFile(const std::string& targetName,
   std::string tmp = "/Debug" + app;
   searchDirs.emplace_back(std::move(tmp));
   searchDirs.emplace_back(std::move(app));
-#endif
+
   searchDirs.emplace_back("/Development");
 
   for (std::string const& sdir : searchDirs) {
