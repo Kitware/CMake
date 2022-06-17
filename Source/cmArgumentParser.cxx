@@ -74,19 +74,16 @@ void Instance::Bind(std::vector<std::vector<std::string>>& val)
   this->ExpectValue = false;
 }
 
-void Instance::Consume(cm::string_view arg, void* result,
-                       std::vector<std::string>* unparsedArguments,
-                       std::vector<cm::string_view>* keywordsMissingValue,
-                       std::vector<cm::string_view>* parsedKeywords)
+void Instance::Consume(cm::string_view arg)
 {
   auto const it = this->Bindings.Find(arg);
   if (it != this->Bindings.end()) {
-    if (parsedKeywords != nullptr) {
-      parsedKeywords->emplace_back(it->first);
+    if (this->ParsedKeywords != nullptr) {
+      this->ParsedKeywords->emplace_back(it->first);
     }
-    it->second(*this, result);
-    if (this->ExpectValue && keywordsMissingValue != nullptr) {
-      keywordsMissingValue->emplace_back(it->first);
+    it->second(*this);
+    if (this->ExpectValue && this->KeywordsMissingValue != nullptr) {
+      this->KeywordsMissingValue->emplace_back(it->first);
     }
     return;
   }
@@ -97,13 +94,13 @@ void Instance::Consume(cm::string_view arg, void* result,
     this->CurrentList = nullptr;
   } else if (this->CurrentList != nullptr) {
     this->CurrentList->emplace_back(arg);
-  } else if (unparsedArguments != nullptr) {
-    unparsedArguments->emplace_back(arg);
+  } else if (this->UnparsedArguments != nullptr) {
+    this->UnparsedArguments->emplace_back(arg);
   }
 
   if (this->ExpectValue) {
-    if (keywordsMissingValue != nullptr) {
-      keywordsMissingValue->pop_back();
+    if (this->KeywordsMissingValue != nullptr) {
+      this->KeywordsMissingValue->pop_back();
     }
     this->ExpectValue = false;
   }
