@@ -899,6 +899,14 @@ std::string cmGlobalVisualStudioVersionedGenerator::FindMSBuildCommand()
   std::string vs;
   if (vsSetupAPIHelper.GetVSInstanceInfo(vs)) {
     if (this->Version >= cmGlobalVisualStudioGenerator::VSVersion::VS17) {
+#if defined(_M_ARM64)
+      std::string msbuild_arm64 =
+        vs + "/MSBuild/Current/Bin/arm64/MSBuild.exe";
+      if (cmSystemTools::FileExists(msbuild_arm64)) {
+        return msbuild_arm64;
+      }
+#endif
+
       msbuild = vs + "/MSBuild/Current/Bin/amd64/MSBuild.exe";
       if (cmSystemTools::FileExists(msbuild)) {
         return msbuild;
