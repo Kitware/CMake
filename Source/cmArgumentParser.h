@@ -71,6 +71,7 @@ public:
     for (cm::string_view arg : args) {
       this->Consume(arg);
     }
+    this->FinishKeyword();
   }
 
 private:
@@ -80,11 +81,13 @@ private:
   std::vector<cm::string_view>* ParsedKeywords = nullptr;
   void* Result = nullptr;
 
+  cm::string_view Keyword;
   std::string* CurrentString = nullptr;
   std::vector<std::string>* CurrentList = nullptr;
   bool ExpectValue = false;
 
   void Consume(cm::string_view arg);
+  void FinishKeyword();
 
   template <typename Result>
   friend class ::cmArgumentParser;

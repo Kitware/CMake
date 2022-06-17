@@ -78,13 +78,12 @@ void Instance::Consume(cm::string_view arg)
 {
   auto const it = this->Bindings.Find(arg);
   if (it != this->Bindings.end()) {
+    this->FinishKeyword();
+    this->Keyword = it->first;
     if (this->ParsedKeywords != nullptr) {
       this->ParsedKeywords->emplace_back(it->first);
     }
     it->second(*this);
-    if (this->ExpectValue && this->KeywordsMissingValue != nullptr) {
-      this->KeywordsMissingValue->emplace_back(it->first);
-    }
     return;
   }
 
@@ -98,11 +97,18 @@ void Instance::Consume(cm::string_view arg)
     this->UnparsedArguments->emplace_back(arg);
   }
 
+  this->ExpectValue = false;
+}
+
+void Instance::FinishKeyword()
+{
+  if (this->Keyword.empty()) {
+    return;
+  }
   if (this->ExpectValue) {
     if (this->KeywordsMissingValue != nullptr) {
-      this->KeywordsMissingValue->pop_back();
+      this->KeywordsMissingValue->emplace_back(this->Keyword);
     }
-    this->ExpectValue = false;
   }
 }
 
