@@ -1218,7 +1218,7 @@ std::string cmSystemTools::ComputeCertificateThumbprint(
                       certContext, CERT_HASH_PROP_ID, hashData, &hashLength)) {
                   for (DWORD i = 0; i < hashLength; i++) {
                     // Convert each byte to hexadecimal
-                    sprintf(pHashPrint, "%02X", hashData[i]);
+                    snprintf(pHashPrint, 3, "%02X", hashData[i]);
                     pHashPrint += 2;
                   }
                   *pHashPrint = '\0';
