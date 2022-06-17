@@ -395,11 +395,26 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
 {
   VisualStudioFolders.clear();
 
+  std::vector<std::string> configs =
+    root->GetMakefile()->GetGeneratorConfigs(cmMakefile::ExcludeEmptyConfig);
+
   for (cmGeneratorTarget const* target : projectTargets) {
     if (!this->IsInSolution(target)) {
       continue;
     }
     bool written = false;
+
+    for (auto const& c : configs) {
+      target->CheckCxxModuleStatus(c);
+    }
+
+    if (target->HaveCxx20ModuleSources() && !this->SupportsCxxModuleDyndep()) {
+      root->GetMakefile()->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("The \"", target->GetName(),
+                 "\" target contains C++ module sources which are not "
+                 "supported by the generator"));
+    }
 
     // handle external vc project files
     cmValue expath = target->GetProperty("EXTERNAL_MSPROJECT");

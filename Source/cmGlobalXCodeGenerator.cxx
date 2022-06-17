@@ -468,6 +468,10 @@ bool cmGlobalXCodeGenerator::Open(const std::string& bindir,
     }
     CFRelease(cfStr);
   }
+#else
+  (void)bindir;
+  (void)projectName;
+  (void)dryRun;
 #endif
 
   return ret;
@@ -1370,6 +1374,18 @@ bool cmGlobalXCodeGenerator::CreateXCodeTarget(
 
   if (!gtgt->IsInBuildSystem()) {
     return true;
+  }
+
+  for (std::string const& configName : this->CurrentConfigurationTypes) {
+    gtgt->CheckCxxModuleStatus(configName);
+  }
+
+  if (gtgt->HaveCxx20ModuleSources()) {
+    gtgt->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("The \"", gtgt->GetName(),
+               "\" target contains C++ module sources which are not "
+               "supported by the generator"));
   }
 
   auto& gtgt_visited = this->CommandsVisited[gtgt];

@@ -9,6 +9,7 @@
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalCommonGenerator.h"
+#include "cmGlobalGenerator.h"
 #include "cmLocalCommonGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
@@ -175,6 +176,9 @@ std::vector<std::string> cmCommonTargetGenerator::GetLinkedTargetDirectories(
         cmLocalGenerator* lg = linkee->GetLocalGenerator();
         std::string di = cmStrCat(lg->GetCurrentBinaryDirectory(), '/',
                                   lg->GetTargetDirectory(linkee));
+        if (lg->GetGlobalGenerator()->IsMultiConfig()) {
+          di = cmStrCat(di, '/', config);
+        }
         dirs.push_back(std::move(di));
       }
     }

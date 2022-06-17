@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cctype>
 #include <cstdio>
+#include <functional>
 #include <sstream>
 #include <utility>
 
@@ -21,6 +22,7 @@
 
 #include "cmsys/FStream.hxx"
 
+#include "cmCxxModuleMapper.h"
 #include "cmDocumentationEntry.h"
 #include "cmFortranParser.h"
 #include "cmGeneratedFileStream.h"
@@ -2517,7 +2519,7 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
   // Populate the module map with those provided by linked targets first.
   for (std::string const& linked_target_dir : linked_target_dirs) {
     std::string const ltmn =
-      cmStrCat(linked_target_dir, "/", arg_lang, "Modules.json");
+      cmStrCat(linked_target_dir, '/', arg_lang, "Modules.json");
     Json::Value ltm;
     cmsys::ifstream ltmf(ltmn.c_str(), std::ios::in | std::ios::binary);
     Json::Reader reader;
@@ -2534,10 +2536,19 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
     }
   }
 
-  const char* module_ext = "";
-  if (arg_modmapfmt == "gcc") {
-    module_ext = ".gcm";
+  cm::optional<CxxModuleMapFormat> modmap_fmt;
+  if (arg_modmapfmt.empty()) {
+    // nothing to do.
+  } else if (arg_modmapfmt == "gcc") {
+    modmap_fmt = CxxModuleMapFormat::Gcc;
+  } else {
+    cmSystemTools::Error(
+      cmStrCat("-E cmake_ninja_dyndep does not understand the ", arg_modmapfmt,
+               " module map format"));
+    return false;
   }
+
+  auto module_ext = CxxModuleMapExtension(modmap_fmt);
 
   // Extend the module map with those provided by this target.
   // We do this after loading the modules provided by linked targets
@@ -2555,7 +2566,8 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
         }
       } else {
         // Assume the module file path matches the logical module name.
-        std::string safe_logical_name = p.LogicalName;
+        std::string safe_logical_name =
+          p.LogicalName; // TODO: needs fixing for header units
         cmSystemTools::ReplaceString(safe_logical_name, ":", "-");
         mod = cmStrCat(module_dir, safe_logical_name, module_ext);
       }
@@ -2568,6 +2580,20 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
   ddf << "ninja_dyndep_version = 1.0\n";
 
   {
+    CxxModuleLocations locs;
+    locs.RootDirectory = ".";
+    locs.PathForGenerator = [this](std::string const& path) -> std::string {
+      return this->ConvertToNinjaPath(path);
+    };
+    locs.BmiLocationForModule =
+      [&mod_files](std::string const& logical) -> cm::optional<std::string> {
+      auto m = mod_files.find(logical);
+      if (m != mod_files.end()) {
+        return m->second;
+      }
+      return {};
+    };
+
     cmNinjaBuild build("dyndep");
     build.Outputs.emplace_back("");
     for (cmScanDepInfo const& object : objects) {
@@ -2589,46 +2615,14 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
         build.Variables.emplace("restat", "1");
       }
 
-      if (arg_modmapfmt.empty()) {
-        // nothing to do.
-      } else {
-        std::stringstream mm;
-        if (arg_modmapfmt == "gcc") {
-          // Documented in GCC's documentation. The format is a series of lines
-          // with a module name and the associated filename separated by
-          // spaces. The first line may use `$root` as the module name to
-          // specify a "repository root". That is used to anchor any relative
-          // paths present in the file (CMake should never generate any).
-
-          // Write the root directory to use for module paths.
-          mm << "$root .\n";
-
-          for (auto const& l : object.Provides) {
-            auto m = mod_files.find(l.LogicalName);
-            if (m != mod_files.end()) {
-              mm << l.LogicalName << " " << this->ConvertToNinjaPath(m->second)
-                 << "\n";
-            }
-          }
-          for (auto const& r : object.Requires) {
-            auto m = mod_files.find(r.LogicalName);
-            if (m != mod_files.end()) {
-              mm << r.LogicalName << " " << this->ConvertToNinjaPath(m->second)
-                 << "\n";
-            }
-          }
-        } else {
-          cmSystemTools::Error(
-            cmStrCat("-E cmake_ninja_dyndep does not understand the ",
-                     arg_modmapfmt, " module map format"));
-          return false;
-        }
+      if (modmap_fmt) {
+        auto mm = CxxModuleMapContent(*modmap_fmt, locs, object);
 
         // XXX(modmap): If changing this path construction, change
         // `cmNinjaTargetGenerator::WriteObjectBuildStatements` to generate the
         // corresponding file path.
         cmGeneratedFileStream mmf(cmStrCat(object.PrimaryOutput, ".modmap"));
-        mmf << mm.str();
+        mmf << mm;
       }
 
       this->WriteBuild(ddf, build);

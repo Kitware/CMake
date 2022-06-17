@@ -328,6 +328,7 @@ CMAKE_CXX_SOURCES="\
   cmCustomCommand \
   cmCustomCommandGenerator \
   cmCustomCommandLines \
+  cmCxxModuleMapper \
   cmDefinePropertyCommand \
   cmDefinitions \
   cmDocumentationFormatter \
@@ -337,6 +338,7 @@ CMAKE_CXX_SOURCES="\
   cmExecProgramCommand \
   cmExecuteProcessCommand \
   cmExpandedCommandArgument \
+  cmExperimental \
   cmExportBuildFileGenerator \
   cmExportFileGenerator \
   cmExportInstallFileGenerator \

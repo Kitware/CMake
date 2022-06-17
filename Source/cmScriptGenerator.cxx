@@ -133,7 +133,7 @@ void cmScriptGenerator::GenerateScriptActionsOnce(std::ostream& os,
     std::string config_test = this->CreateConfigTest(this->Configurations);
     os << indent << "if(" << config_test << ")\n";
     this->GenerateScriptActions(os, indent.Next());
-    os << indent << "endif(" << config_test << ")\n";
+    os << indent << "endif()\n";
   }
 }
 

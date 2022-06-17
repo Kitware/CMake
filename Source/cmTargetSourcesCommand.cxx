@@ -9,6 +9,7 @@
 #include <cmext/string_view>
 
 #include "cmArgumentParser.h"
+#include "cmExperimental.h"
 #include "cmFileSet.h"
 #include "cmGeneratorExpression.h"
 #include "cmListFileCache.h"
@@ -256,9 +257,30 @@ bool TargetSourcesImpl::HandleOneFileSet(
       this->SetError("Must specify a TYPE when creating file set");
       return false;
     }
-    if (type != "HEADERS"_s) {
-      this->SetError("File set TYPE may only be \"HEADERS\"");
-      return false;
+    bool const supportCxx20FileSetTypes = cmExperimental::HasSupportEnabled(
+      *this->Makefile, cmExperimental::Feature::CxxModuleCMakeApi);
+
+    if (supportCxx20FileSetTypes) {
+      if (type != "HEADERS"_s && type != "CXX_MODULES"_s &&
+          type != "CXX_MODULE_HEADER_UNITS"_s) {
+        this->SetError(
+          R"(File set TYPE may only be "HEADERS", "CXX_MODULES", or "CXX_MODULE_HEADER_UNITS")");
+        return false;
+      }
+
+      if (cmFileSetVisibilityIsForInterface(visibility) &&
+          !cmFileSetVisibilityIsForSelf(visibility)) {
+        if (type == "CXX_MODULES"_s || type == "CXX_MODULE_HEADER_UNITS"_s) {
+          this->SetError(
+            R"(File set TYPEs "CXX_MODULES" and "CXX_MODULE_HEADER_UNITS" may not have "INTERFACE" visibility)");
+          return false;
+        }
+      }
+    } else {
+      if (type != "HEADERS"_s) {
+        this->SetError("File set TYPE may only be \"HEADERS\"");
+        return false;
+      }
     }
 
     if (args.BaseDirs.empty()) {
@@ -294,7 +316,7 @@ bool TargetSourcesImpl::HandleOneFileSet(
   if (!baseDirectories.empty()) {
     fileSet.first->AddDirectoryEntry(
       BT<std::string>(baseDirectories, this->Makefile->GetBacktrace()));
-    if (type == "HEADERS"_s) {
+    if (type == "HEADERS"_s || type == "CXX_MODULE_HEADER_UNITS"_s) {
       for (auto const& dir : cmExpandedList(baseDirectories)) {
         auto interfaceDirectoriesGenex =
           cmStrCat("$<BUILD_INTERFACE:", dir, ">");

@@ -272,6 +272,8 @@ public:
   cmListFileBacktrace Backtrace;
 
   FileSetType HeadersFileSets;
+  FileSetType CxxModulesFileSets;
+  FileSetType CxxModuleHeadersFileSets;
 
   cmTargetInternals();
 
@@ -301,6 +303,19 @@ cmTargetInternals::cmTargetInternals()
                     "The default header set"_s, "Header set"_s,
                     FileSetEntries("HEADER_SETS"_s),
                     FileSetEntries("INTERFACE_HEADER_SETS"_s))
+  , CxxModulesFileSets("CXX_MODULES"_s, "CXX_MODULE_DIRS"_s,
+                       "CXX_MODULE_SET"_s, "CXX_MODULE_DIRS_"_s,
+                       "CXX_MODULE_SET_"_s, "C++ module"_s,
+                       "The default C++ module set"_s, "C++ module set"_s,
+                       FileSetEntries("CXX_MODULE_SETS"_s),
+                       FileSetEntries("INTERFACE_CXX_MODULE_SETS"_s))
+  , CxxModuleHeadersFileSets(
+      "CXX_MODULE_HEADER_UNITS"_s, "CXX_MODULE_HEADER_UNIT_DIRS"_s,
+      "CXX_MODULE_HEADER_UNIT_SET"_s, "CXX_MODULE_HEADER_UNIT_DIRS_"_s,
+      "CXX_MODULE_HEADER_UNIT_SET_"_s, "C++ module header"_s,
+      "The default C++ module header set"_s, "C++ module header set"_s,
+      FileSetEntries("CXX_MODULE_HEADER_UNIT_SETS"_s),
+      FileSetEntries("INTERFACE_CXX_MODULE_HEADER_UNIT_SETS"_s))
 {
 }
 
@@ -1371,9 +1386,30 @@ cmBTStringRange cmTarget::GetHeaderSetsEntries() const
   return cmMakeRange(this->impl->HeadersFileSets.SelfEntries.Entries);
 }
 
+cmBTStringRange cmTarget::GetCxxModuleSetsEntries() const
+{
+  return cmMakeRange(this->impl->CxxModulesFileSets.SelfEntries.Entries);
+}
+
+cmBTStringRange cmTarget::GetCxxModuleHeaderSetsEntries() const
+{
+  return cmMakeRange(this->impl->CxxModuleHeadersFileSets.SelfEntries.Entries);
+}
+
 cmBTStringRange cmTarget::GetInterfaceHeaderSetsEntries() const
 {
   return cmMakeRange(this->impl->HeadersFileSets.InterfaceEntries.Entries);
+}
+
+cmBTStringRange cmTarget::GetInterfaceCxxModuleSetsEntries() const
+{
+  return cmMakeRange(this->impl->CxxModulesFileSets.InterfaceEntries.Entries);
+}
+
+cmBTStringRange cmTarget::GetInterfaceCxxModuleHeaderSetsEntries() const
+{
+  return cmMakeRange(
+    this->impl->CxxModuleHeadersFileSets.InterfaceEntries.Entries);
 }
 
 namespace {
@@ -1635,6 +1671,12 @@ void cmTarget::StoreProperty(const std::string& prop, ValueType value)
   } else if (this->impl->HeadersFileSets.WriteProperties(
                this, this->impl.get(), prop, value, true)) {
     /* Handled in the `if` condition. */
+  } else if (this->impl->CxxModulesFileSets.WriteProperties(
+               this, this->impl.get(), prop, value, true)) {
+    /* Handled in the `if` condition. */
+  } else if (this->impl->CxxModuleHeadersFileSets.WriteProperties(
+               this, this->impl.get(), prop, value, true)) {
+    /* Handled in the `if` condition. */
   } else {
     this->impl->Properties.SetProperty(prop, value);
   }
@@ -1746,6 +1788,13 @@ void cmTarget::AppendProperty(const std::string& prop,
     this->impl->Makefile->IssueMessage(
       MessageType::FATAL_ERROR, prop + " property may not be appended.");
   } else if (this->impl->HeadersFileSets.WriteProperties(
+               this, this->impl.get(), prop, value,
+               false)) { // NOLINT(bugprone-branch-clone)
+    /* Handled in the `if` condition. */
+  } else if (this->impl->CxxModulesFileSets.WriteProperties(
+               this, this->impl.get(), prop, value, false)) {
+    /* Handled in the `if` condition. */
+  } else if (this->impl->CxxModuleHeadersFileSets.WriteProperties(
                this, this->impl.get(), prop, value, false)) {
     /* Handled in the `if` condition. */
   } else {
@@ -2254,6 +2303,17 @@ cmValue cmTarget::GetProperty(const std::string& prop) const
     if (headers.first) {
       return headers.second;
     }
+    auto cxx_modules = this->impl->CxxModulesFileSets.ReadProperties(
+      this, this->impl.get(), prop);
+    if (cxx_modules.first) {
+      return cxx_modules.second;
+    }
+    auto cxx_module_headers =
+      this->impl->CxxModuleHeadersFileSets.ReadProperties(
+        this, this->impl.get(), prop);
+    if (cxx_module_headers.first) {
+      return cxx_module_headers.second;
+    }
   }
 
   cmValue retVal = this->impl->Properties.GetPropertyValue(prop);
@@ -2531,6 +2591,11 @@ std::pair<cmFileSet*, bool> cmTarget::GetOrCreateFileSet(
     auto bt = this->impl->Makefile->GetBacktrace();
     if (type == this->impl->HeadersFileSets.TypeName) {
       this->impl->HeadersFileSets.AddFileSet(name, vis, std::move(bt));
+    } else if (type == this->impl->CxxModulesFileSets.TypeName) {
+      this->impl->CxxModulesFileSets.AddFileSet(name, vis, std::move(bt));
+    } else if (type == this->impl->CxxModuleHeadersFileSets.TypeName) {
+      this->impl->CxxModuleHeadersFileSets.AddFileSet(name, vis,
+                                                      std::move(bt));
     }
   }
   return std::make_pair(&result.first->second, result.second);
@@ -2541,6 +2606,12 @@ std::string cmTarget::GetFileSetsPropertyName(const std::string& type)
   if (type == "HEADERS") {
     return "HEADER_SETS";
   }
+  if (type == "CXX_MODULES") {
+    return "CXX_MODULE_SETS";
+  }
+  if (type == "CXX_MODULE_HEADER_UNITS") {
+    return "CXX_MODULE_HEADER_UNIT_SETS";
+  }
   return "";
 }
 
@@ -2548,6 +2619,12 @@ std::string cmTarget::GetInterfaceFileSetsPropertyName(const std::string& type)
 {
   if (type == "HEADERS") {
     return "INTERFACE_HEADER_SETS";
+  }
+  if (type == "CXX_MODULES") {
+    return "INTERFACE_CXX_MODULE_SETS";
+  }
+  if (type == "CXX_MODULE_HEADER_UNITS") {
+    return "INTERFACE_CXX_MODULE_HEADER_UNIT_SETS";
   }
   return "";
 }
@@ -2576,6 +2653,8 @@ std::vector<std::string> cmTarget::GetAllInterfaceFileSets() const
   };
 
   appendEntries(this->impl->HeadersFileSets.InterfaceEntries.Entries);
+  appendEntries(this->impl->CxxModulesFileSets.InterfaceEntries.Entries);
+  appendEntries(this->impl->CxxModuleHeadersFileSets.InterfaceEntries.Entries);
 
   return result;
 }

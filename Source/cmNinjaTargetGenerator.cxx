@@ -36,7 +36,6 @@
 #include "cmRange.h"
 #include "cmRulePlaceholderExpander.h"
 #include "cmSourceFile.h"
-#include "cmStandardLevelResolver.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
@@ -153,17 +152,12 @@ std::string cmNinjaTargetGenerator::LanguageDyndepRule(
 bool cmNinjaTargetGenerator::NeedCxxModuleSupport(
   std::string const& lang, std::string const& config) const
 {
-  if (lang != "CXX") {
+  if (lang != "CXX"_s) {
     return false;
   }
-  if (!this->Makefile->IsOn("CMAKE_EXPERIMENTAL_CXX_MODULE_DYNDEP")) {
-    return false;
-  }
-  cmGeneratorTarget const* tgt = this->GetGeneratorTarget();
-  cmStandardLevelResolver standardResolver(this->Makefile);
-  bool const uses_cxx20 =
-    standardResolver.HaveStandardAvailable(tgt, "CXX", config, "cxx_std_20");
-  return uses_cxx20 && this->GetGlobalGenerator()->CheckCxxModuleSupport();
+  return this->GetGeneratorTarget()->HaveCxxModuleSupport(config) ==
+    cmGeneratorTarget::Cxx20SupportLevel::Supported &&
+    this->GetGlobalGenerator()->CheckCxxModuleSupport();
 }
 
 bool cmNinjaTargetGenerator::NeedDyndep(std::string const& lang,
@@ -255,51 +249,53 @@ std::string cmNinjaTargetGenerator::ComputeFlagsForObject(
       flags, genexInterpreter.Evaluate(pchOptions, COMPILE_OPTIONS));
   }
 
-  if (this->NeedCxxModuleSupport(language, config)) {
-    auto const& path = source->GetFullPath();
-    auto const* tgt = this->GeneratorTarget->Target;
+  auto const& path = source->GetFullPath();
+  auto const* tgt = this->GeneratorTarget->Target;
 
-    std::string file_set_type;
+  std::string file_set_type;
 
-    for (auto const& name : tgt->GetAllFileSetNames()) {
-      auto const* file_set = tgt->GetFileSet(name);
-      if (!file_set) {
+  for (auto const& name : tgt->GetAllFileSetNames()) {
+    auto const* file_set = tgt->GetFileSet(name);
+    if (!file_set) {
+      this->GetMakefile()->IssueMessage(
+        MessageType::INTERNAL_ERROR,
+        cmStrCat("Target \"", tgt->GetName(),
+                 "\" is tracked to have file set \"", name,
+                 "\", but it was not found."));
+      continue;
+    }
+
+    auto fileEntries = file_set->CompileFileEntries();
+    auto directoryEntries = file_set->CompileDirectoryEntries();
+    auto directories = file_set->EvaluateDirectoryEntries(
+      directoryEntries, this->LocalGenerator, config, this->GeneratorTarget);
+
+    std::map<std::string, std::vector<std::string>> files;
+    for (auto const& entry : fileEntries) {
+      file_set->EvaluateFileEntry(directories, files, entry,
+                                  this->LocalGenerator, config,
+                                  this->GeneratorTarget);
+    }
+
+    for (auto const& it : files) {
+      for (auto const& filename : it.second) {
+        if (filename == path) {
+          file_set_type = file_set->GetType();
+          break;
+        }
+      }
+    }
+
+    if (file_set_type == "CXX_MODULES"_s ||
+        file_set_type == "CXX_MODULE_HEADER_UNITS"_s) {
+      if (source->GetLanguage() != "CXX"_s) {
         this->GetMakefile()->IssueMessage(
-          MessageType::INTERNAL_ERROR,
-          cmStrCat("Target `", tgt->GetName(),
-                   "` is tracked to have file set `", name,
-                   "`, but it was not found."));
+          MessageType::FATAL_ERROR,
+          cmStrCat(
+            "Target \"", tgt->GetName(), "\" contains the source\n  ", path,
+            "\nin a file set of type \"", file_set_type,
+            R"(" but the source is not classified as a "CXX" source.)"));
         continue;
-      }
-
-      auto fileEntries = file_set->CompileFileEntries();
-      auto directoryEntries = file_set->CompileDirectoryEntries();
-      auto directories = file_set->EvaluateDirectoryEntries(
-        directoryEntries, this->LocalGenerator, config, this->GeneratorTarget);
-
-      std::map<std::string, std::vector<std::string>> files;
-      for (auto const& entry : fileEntries) {
-        file_set->EvaluateFileEntry(directories, files, entry,
-                                    this->LocalGenerator, config,
-                                    this->GeneratorTarget);
-      }
-
-      for (auto const& it : files) {
-        for (auto const& filename : it.second) {
-          if (filename == path) {
-            file_set_type = file_set->GetType();
-            break;
-          }
-        }
-      }
-
-      if (!file_set_type.empty()) {
-        std::string source_type_var = cmStrCat(
-          "CMAKE_EXPERIMENTAL_CXX_MODULE_SOURCE_TYPE_FLAG_", file_set_type);
-        cmMakefile* mf = this->GetMakefile();
-        if (cmValue source_type_flag = mf->GetDefinition(source_type_var)) {
-          this->LocalGenerator->AppendFlags(flags, *source_type_flag);
-        }
       }
     }
   }
@@ -1038,6 +1034,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
   const std::string& config, const std::string& fileConfig,
   bool firstForConfig)
 {
+  this->GeneratorTarget->CheckCxxModuleStatus(config);
+
   // Write comments.
   cmGlobalNinjaGenerator::WriteDivider(this->GetImplFileStream(fileConfig));
   this->GetImplFileStream(fileConfig)
@@ -1616,8 +1614,9 @@ void cmNinjaTargetGenerator::WriteTargetDependInfo(std::string const& lang,
     mod_dir = this->GeneratorTarget->GetFortranModuleDirectory(
       this->Makefile->GetHomeOutputDirectory());
   } else if (lang == "CXX") {
-    mod_dir =
-      cmSystemTools::CollapseFullPath(this->GeneratorTarget->ObjectDirectory);
+    mod_dir = this->GetGlobalGenerator()->ExpandCFGIntDir(
+      cmSystemTools::CollapseFullPath(this->GeneratorTarget->ObjectDirectory),
+      config);
   }
   if (mod_dir.empty()) {
     mod_dir = this->Makefile->GetCurrentBinaryDirectory();
