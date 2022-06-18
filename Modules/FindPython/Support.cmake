@@ -14,6 +14,8 @@ cmake_policy(PUSH)
 cmake_policy (SET CMP0012 NEW)
 # IN_LIST operator
 cmake_policy (SET CMP0057 NEW)
+# registry view behavior
+cmake_policy (SET CMP0134 NEW)
 
 if (NOT DEFINED _PYTHON_PREFIX)
   message (FATAL_ERROR "FindPython: INTERNAL ERROR")
@@ -175,30 +177,31 @@ function (_PYTHON_GET_REGISTRIES _PYTHON_PGR_REGISTRY_PATHS)
       foreach (version IN LISTS _PGR_VERSION)
         string (REPLACE "." "" version_no_dots ${version})
         list (APPEND registries
-                     [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${version}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
-                     [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${version}-${_${_PYTHON_PREFIX}_ARCH2}\\InstallPath])
+                     [HKEY_CURRENT_USER/SOFTWARE/Python/PythonCore/${version}-${_${_PYTHON_PREFIX}_ARCH}/InstallPath]
+                     [HKEY_CURRENT_USER/SOFTWARE/Python/PythonCore/${version}-${_${_PYTHON_PREFIX}_ARCH2}/InstallPath])
         if (version VERSION_GREATER_EQUAL "3.5")
+          # cmake_host_system_information is not usable in bootstrap
           get_filename_component (arch "[HKEY_CURRENT_USER\\Software\\Python\\PythonCore\\${version};SysArchitecture]" NAME)
           if (arch MATCHES "(${_${_PYTHON_PREFIX}_ARCH}|${_${_PYTHON_PREFIX}_ARCH2})bit")
             list (APPEND registries
-                         [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${version}\\InstallPath])
+                         [HKEY_CURRENT_USER/SOFTWARE/Python/PythonCore/${version}/InstallPath])
           endif()
         else()
           list (APPEND registries
-                       [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${version}\\InstallPath])
+                       [HKEY_CURRENT_USER/SOFTWARE/Python/PythonCore/${version}/InstallPath])
         endif()
         list (APPEND registries
-                     [HKEY_CURRENT_USER\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${version_no_dots}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
-                     [HKEY_CURRENT_USER\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${version_no_dots}-${_${_PYTHON_PREFIX}_ARCH2}\\InstallPath]
-                     [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${version}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
-                     [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${version}-${_${_PYTHON_PREFIX}_ARCH2}\\InstallPath]
-                     [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${version}\\InstallPath]
-                     [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${version_no_dots}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
-                     [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${version_no_dots}-${_${_PYTHON_PREFIX}_ARCH2}\\InstallPath])
+                     [HKEY_CURRENT_USER/SOFTWARE/Python/ContinuumAnalytics/Anaconda${version_no_dots}-${_${_PYTHON_PREFIX}_ARCH}/InstallPath]
+                     [HKEY_CURRENT_USER/SOFTWARE/Python/ContinuumAnalytics/Anaconda${version_no_dots}-${_${_PYTHON_PREFIX}_ARCH2}/InstallPath]
+                     [HKEY_LOCAL_MACHINE/SOFTWARE/Python/PythonCore/${version}-${_${_PYTHON_PREFIX}_ARCH}/InstallPath]
+                     [HKEY_LOCAL_MACHINE/SOFTWARE/Python/PythonCore/${version}-${_${_PYTHON_PREFIX}_ARCH2}/InstallPath]
+                     [HKEY_LOCAL_MACHINE/SOFTWARE/Python/PythonCore/${version}/InstallPath]
+                     [HKEY_LOCAL_MACHINE/SOFTWARE/Python/ContinuumAnalytics/Anaconda${version_no_dots}-${_${_PYTHON_PREFIX}_ARCH}/InstallPath]
+                     [HKEY_LOCAL_MACHINE/SOFTWARE/Python/ContinuumAnalytics/Anaconda${version_no_dots}-${_${_PYTHON_PREFIX}_ARCH2}/InstallPath])
       endforeach()
     elseif (implementation STREQUAL "IronPython")
       foreach (version  IN LISTS _PGR_VERSION)
-        list (APPEND registries [HKEY_LOCAL_MACHINE\\SOFTWARE\\IronPython\\${version}\\InstallPath])
+        list (APPEND registries [HKEY_LOCAL_MACHINE/SOFTWARE/IronPython/${version}/InstallPath])
       endforeach()
     endif()
   endforeach()
@@ -1247,12 +1250,14 @@ if (DEFINED ${_PYTHON_PREFIX}_FIND_STRATEGY)
 endif()
 
 # Python and Anaconda distributions: define which architectures can be used
+unset (_${_PYTHON_PREFIX}_REGISTRY_VIEW)
 if (CMAKE_SIZEOF_VOID_P)
   math (EXPR _${_PYTHON_PREFIX}_ARCH "${CMAKE_SIZEOF_VOID_P} * 8")
   if ("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
       OR "Development.Embed" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
     # In this case, search only for 64bit or 32bit
     set (_${_PYTHON_PREFIX}_ARCH2 ${_${_PYTHON_PREFIX}_ARCH})
+    set (_${_PYTHON_PREFIX}_REGISTRY_VIEW REGISTRY_VIEW ${_${_PYTHON_PREFIX}_ARCH})
   else()
     if (_${_PYTHON_PREFIX}_ARCH EQUAL "32")
       set (_${_PYTHON_PREFIX}_ARCH2 64)
@@ -1626,6 +1631,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                         HINTS ${_${_PYTHON_PREFIX}_HINTS}
                         PATHS ${_${_PYTHON_PREFIX}_REGISTRY_PATHS}
                         PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
+                        ${_${_PYTHON_PREFIX}_REGISTRY_VIEW}
                         NO_SYSTEM_ENVIRONMENT_PATH
                         NO_CMAKE_SYSTEM_PATH)
           _python_validate_interpreter (${${_PYTHON_PREFIX}_VALIDATE_OPTIONS})
@@ -1676,6 +1682,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                         NAMES_PER_DIR
                         PATHS ${_${_PYTHON_PREFIX}_REGISTRY_PATHS}
                         PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
+                        ${_${_PYTHON_PREFIX}_REGISTRY_VIEW}
                         NO_DEFAULT_PATH)
           _python_validate_interpreter (${${_PYTHON_PREFIX}_VALIDATE_OPTIONS})
           if (_${_PYTHON_PREFIX}_EXECUTABLE)
@@ -1742,6 +1749,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                         HINTS ${_${_PYTHON_PREFIX}_HINTS}
                         PATHS ${_${_PYTHON_PREFIX}_REGISTRY_PATHS}
                         PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
+                        ${_${_PYTHON_PREFIX}_REGISTRY_VIEW}
                         NO_SYSTEM_ENVIRONMENT_PATH
                         NO_CMAKE_SYSTEM_PATH)
         endif()
@@ -1794,6 +1802,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                         NAMES_PER_DIR
                         PATHS ${_${_PYTHON_PREFIX}_REGISTRY_PATHS}
                         PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
+                        ${_${_PYTHON_PREFIX}_REGISTRY_VIEW}
                         NO_DEFAULT_PATH)
         endif()
 
@@ -2072,6 +2081,7 @@ if ("Compiler" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                         HINTS ${_${_PYTHON_PREFIX}_IRON_ROOT} ${_${_PYTHON_PREFIX}_HINTS}
                         PATHS ${_${_PYTHON_PREFIX}_REGISTRY_PATHS}
                         PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
+                        ${_${_PYTHON_PREFIX}_REGISTRY_VIEW}
                         NO_SYSTEM_ENVIRONMENT_PATH
                         NO_CMAKE_SYSTEM_PATH)
           _python_validate_compiler (${_${_PYTHON_PREFIX}_VALIDATE_OPTIONS})
@@ -2123,6 +2133,7 @@ if ("Compiler" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                         NAMES_PER_DIR
                         PATHS ${_${_PYTHON_PREFIX}_REGISTRY_PATHS}
                         PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
+                        ${_${_PYTHON_PREFIX}_REGISTRY_VIEW}
                         NO_DEFAULT_PATH)
           _python_validate_compiler (${_${_PYTHON_PREFIX}_VALIDATE_OPTIONS})
           if (_${_PYTHON_PREFIX}_COMPILER)
@@ -2182,6 +2193,7 @@ if ("Compiler" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                         HINTS ${_${_PYTHON_PREFIX}_IRON_ROOT} ${_${_PYTHON_PREFIX}_HINTS}
                         PATHS ${_${_PYTHON_PREFIX}_REGISTRY_PATHS}
                         PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
+                        ${_${_PYTHON_PREFIX}_REGISTRY_VIEW}
                         NO_SYSTEM_ENVIRONMENT_PATH
                         NO_CMAKE_SYSTEM_PATH)
           _python_validate_compiler (VERSION ${_${_PYTHON_PREFIX}_VERSION} ${_${_PYTHON_PREFIX}_VALIDATE_OPTIONS})
@@ -2223,6 +2235,7 @@ if ("Compiler" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                         NAMES_PER_DIR
                         PATHS ${_${_PYTHON_PREFIX}_REGISTRY_PATHS}
                         PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
+                        ${_${_PYTHON_PREFIX}_REGISTRY_VIEW}
                         NO_DEFAULT_PATH)
           _python_validate_compiler (VERSION ${_${_PYTHON_PREFIX}_VERSION} ${_${_PYTHON_PREFIX}_VALIDATE_OPTIONS})
           if (_${_PYTHON_PREFIX}_COMPILER)
