@@ -25,6 +25,7 @@ endif()
 set(CMAKE_Swift_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/swift)
 
 add_executable(SwiftOnly main.swift)
+target_compile_definitions(SwiftOnly PRIVATE SWIFTONLY)
 
 add_library(L L.swift)
 
