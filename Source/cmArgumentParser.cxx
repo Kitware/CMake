@@ -34,46 +34,63 @@ auto KeywordActionMap::Find(cm::string_view name) const -> const_iterator
   return (it != this->end() && it->first == name) ? it : this->end();
 }
 
+void Instance::Bind(std::function<Continue(cm::string_view)> f)
+{
+  this->KeywordValueFunc = std::move(f);
+  this->ExpectValue = true;
+}
+
 void Instance::Bind(bool& val)
 {
   val = true;
-  this->CurrentString = nullptr;
-  this->CurrentList = nullptr;
+  this->KeywordValueFunc = nullptr;
   this->ExpectValue = false;
 }
 
 void Instance::Bind(std::string& val)
 {
-  this->CurrentString = &val;
-  this->CurrentList = nullptr;
+  this->KeywordValueFunc = [&val](cm::string_view arg) -> Continue {
+    val = std::string(arg);
+    return Continue::No;
+  };
   this->ExpectValue = true;
 }
 
 void Instance::Bind(Maybe<std::string>& val)
 {
-  this->CurrentString = &val;
-  this->CurrentList = nullptr;
+  this->KeywordValueFunc = [&val](cm::string_view arg) -> Continue {
+    static_cast<std::string&>(val) = std::string(arg);
+    return Continue::No;
+  };
   this->ExpectValue = false;
 }
 
 void Instance::Bind(MaybeEmpty<std::vector<std::string>>& val)
 {
-  this->CurrentString = nullptr;
-  this->CurrentList = &val;
+  this->KeywordValueFunc = [&val](cm::string_view arg) -> Continue {
+    val.emplace_back(arg);
+    return Continue::Yes;
+  };
   this->ExpectValue = false;
 }
 
 void Instance::Bind(NonEmpty<std::vector<std::string>>& val)
 {
-  this->CurrentString = nullptr;
-  this->CurrentList = &val;
+  this->KeywordValueFunc = [&val](cm::string_view arg) -> Continue {
+    val.emplace_back(arg);
+    return Continue::Yes;
+  };
   this->ExpectValue = true;
 }
 
-void Instance::Bind(std::vector<std::vector<std::string>>& val)
+void Instance::Bind(std::vector<std::vector<std::string>>& multiVal)
 {
-  this->CurrentString = nullptr;
-  this->CurrentList = (static_cast<void>(val.emplace_back()), &val.back());
+  multiVal.emplace_back();
+  std::vector<std::string>& val = multiVal.back();
+  this->KeywordValueFunc = [&val](cm::string_view arg) -> Continue {
+    val.emplace_back(arg);
+    return Continue::Yes;
+  };
   this->ExpectValue = false;
 }
 
@@ -90,17 +107,21 @@ void Instance::Consume(cm::string_view arg)
     return;
   }
 
-  if (this->CurrentString != nullptr) {
-    this->CurrentString->assign(std::string(arg));
-    this->CurrentString = nullptr;
-    this->CurrentList = nullptr;
-  } else if (this->CurrentList != nullptr) {
-    this->CurrentList->emplace_back(arg);
-  } else if (this->UnparsedArguments != nullptr) {
-    this->UnparsedArguments->emplace_back(arg);
+  if (this->KeywordValueFunc) {
+    switch (this->KeywordValueFunc(arg)) {
+      case Continue::Yes:
+        break;
+      case Continue::No:
+        this->KeywordValueFunc = nullptr;
+        break;
+    }
+    this->ExpectValue = false;
+    return;
   }
 
-  this->ExpectValue = false;
+  if (this->UnparsedArguments != nullptr) {
+    this->UnparsedArguments->emplace_back(arg);
+  }
 }
 
 void Instance::FinishKeyword()
