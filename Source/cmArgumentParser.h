@@ -209,6 +209,70 @@ public:
     return *this;
   }
 
+  cmArgumentParser& Bind(cm::static_string_view name,
+                         Continue (Result::*member)(cm::string_view),
+                         ExpectAtLeast expect = { 1 })
+  {
+    this->Base::Bind(name, [member, expect](Instance& instance) {
+      Result* result = static_cast<Result*>(instance.Result);
+      instance.Bind(
+        [result, member](cm::string_view arg) -> Continue {
+          return (result->*member)(arg);
+        },
+        expect);
+    });
+    return *this;
+  }
+
+  cmArgumentParser& Bind(cm::static_string_view name,
+                         Continue (Result::*member)(cm::string_view,
+                                                    cm::string_view),
+                         ExpectAtLeast expect = { 1 })
+  {
+    this->Base::Bind(name, [member, expect](Instance& instance) {
+      Result* result = static_cast<Result*>(instance.Result);
+      cm::string_view keyword = instance.Keyword;
+      instance.Bind(
+        [result, member, keyword](cm::string_view arg) -> Continue {
+          return (result->*member)(keyword, arg);
+        },
+        expect);
+    });
+    return *this;
+  }
+
+  cmArgumentParser& Bind(cm::static_string_view name,
+                         std::function<Continue(Result&, cm::string_view)> f,
+                         ExpectAtLeast expect = { 1 })
+  {
+    this->Base::Bind(name, [f, expect](Instance& instance) {
+      Result* result = static_cast<Result*>(instance.Result);
+      instance.Bind(
+        [result, &f](cm::string_view arg) -> Continue {
+          return f(*result, arg);
+        },
+        expect);
+    });
+    return *this;
+  }
+
+  cmArgumentParser& Bind(
+    cm::static_string_view name,
+    std::function<Continue(Result&, cm::string_view, cm::string_view)> f,
+    ExpectAtLeast expect = { 1 })
+  {
+    this->Base::Bind(name, [f, expect](Instance& instance) {
+      Result* result = static_cast<Result*>(instance.Result);
+      cm::string_view keyword = instance.Keyword;
+      instance.Bind(
+        [result, keyword, &f](cm::string_view arg) -> Continue {
+          return f(*result, keyword, arg);
+        },
+        expect);
+    });
+    return *this;
+  }
+
   cmArgumentParser& BindParsedKeywords(
     std::vector<cm::string_view> Result::*member)
   {
@@ -249,6 +313,33 @@ public:
   cmArgumentParser& Bind(cm::static_string_view name, T& ref)
   {
     this->Base::Bind(name, [&ref](Instance& instance) { instance.Bind(ref); });
+    return *this;
+  }
+
+  cmArgumentParser& Bind(cm::static_string_view name,
+                         std::function<Continue(cm::string_view)> f,
+                         ExpectAtLeast expect = { 1 })
+  {
+    this->Base::Bind(name, [f, expect](Instance& instance) {
+      instance.Bind([&f](cm::string_view arg) -> Continue { return f(arg); },
+                    expect);
+    });
+    return *this;
+  }
+
+  cmArgumentParser& Bind(
+    cm::static_string_view name,
+    std::function<Continue(cm::string_view, cm::string_view)> f,
+    ExpectAtLeast expect = { 1 })
+  {
+    this->Base::Bind(name, [f, expect](Instance& instance) {
+      cm::string_view keyword = instance.Keyword;
+      instance.Bind(
+        [keyword, &f](cm::string_view arg) -> Continue {
+          return f(keyword, arg);
+        },
+        expect);
+    });
     return *this;
   }
 
