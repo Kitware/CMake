@@ -32,6 +32,26 @@ public:
   const_iterator Find(cm::string_view name) const;
 };
 
+class Base
+{
+public:
+  using Instance = ArgumentParser::Instance;
+
+  ArgumentParser::ActionMap Bindings;
+
+  bool MaybeBind(cm::string_view name, Action action)
+  {
+    return this->Bindings.Emplace(name, std::move(action)).second;
+  }
+
+  void Bind(cm::string_view name, Action action)
+  {
+    bool const inserted = this->MaybeBind(name, std::move(action));
+    assert(inserted);
+    static_cast<void>(inserted);
+  }
+};
+
 class Instance
 {
 public:
@@ -96,7 +116,7 @@ private:
 } // namespace ArgumentParser
 
 template <typename Result>
-class cmArgumentParser
+class cmArgumentParser : private ArgumentParser::Base
 {
 public:
   // I *think* this function could be made `constexpr` when the code is
@@ -104,15 +124,9 @@ public:
   template <typename T>
   cmArgumentParser& Bind(cm::static_string_view name, T Result::*member)
   {
-    bool const inserted =
-      this->Bindings
-        .Emplace(name,
-                 [member](ArgumentParser::Instance& instance) {
-                   instance.Bind(
-                     static_cast<Result*>(instance.Result)->*member);
-                 })
-        .second;
-    assert(inserted), (void)inserted;
+    this->Base::Bind(name, [member](Instance& instance) {
+      instance.Bind(static_cast<Result*>(instance.Result)->*member);
+    });
     return *this;
   }
 
@@ -122,9 +136,8 @@ public:
              std::vector<cm::string_view>* keywordsMissingValue = nullptr,
              std::vector<cm::string_view>* parsedKeywords = nullptr) const
   {
-    ArgumentParser::Instance instance(this->Bindings, unparsedArguments,
-                                      keywordsMissingValue, parsedKeywords,
-                                      &result);
+    Instance instance(this->Bindings, unparsedArguments, keywordsMissingValue,
+                      parsedKeywords, &result);
     instance.Parse(args);
   }
 
@@ -138,20 +151,16 @@ public:
                 parsedKeywords);
     return result;
   }
-
-private:
-  ArgumentParser::ActionMap Bindings;
 };
 
 template <>
-class cmArgumentParser<void>
+class cmArgumentParser<void> : private ArgumentParser::Base
 {
 public:
   template <typename T>
   cmArgumentParser& Bind(cm::static_string_view name, T& ref)
   {
-    bool const inserted = this->Bind(cm::string_view(name), ref);
-    assert(inserted), (void)inserted;
+    this->Base::Bind(name, [&ref](Instance& instance) { instance.Bind(ref); });
     return *this;
   }
 
@@ -160,8 +169,8 @@ public:
              std::vector<cm::string_view>* keywordsMissingValue = nullptr,
              std::vector<cm::string_view>* parsedKeywords = nullptr) const
   {
-    ArgumentParser::Instance instance(this->Bindings, unparsedArguments,
-                                      keywordsMissingValue, parsedKeywords);
+    Instance instance(this->Bindings, unparsedArguments, keywordsMissingValue,
+                      parsedKeywords);
     instance.Parse(args);
   }
 
@@ -169,13 +178,7 @@ protected:
   template <typename T>
   bool Bind(cm::string_view name, T& ref)
   {
-    return this->Bindings
-      .Emplace(
-        name,
-        [&ref](ArgumentParser::Instance& instance) { instance.Bind(ref); })
-      .second;
+    return this->MaybeBind(name,
+                           [&ref](Instance& instance) { instance.Bind(ref); });
   }
-
-private:
-  ArgumentParser::ActionMap Bindings;
 };
