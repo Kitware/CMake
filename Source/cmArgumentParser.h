@@ -10,6 +10,7 @@
 #include <utility>
 #include <vector>
 
+#include <cm/optional>
 #include <cm/string_view>
 #include <cmext/string_view>
 
@@ -38,6 +39,16 @@ public:
   void Bind(std::string& val);
   void Bind(std::vector<std::string>& val);
   void Bind(std::vector<std::vector<std::string>>& val);
+
+  // cm::optional<> records the presence the keyword to which it binds.
+  template <typename T>
+  void Bind(cm::optional<T>& optVal)
+  {
+    if (!optVal) {
+      optVal.emplace();
+    }
+    this->Bind(*optVal);
+  }
 
   void Consume(cm::string_view arg, void* result,
                std::vector<std::string>* unparsedArguments,
