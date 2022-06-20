@@ -22,14 +22,22 @@ class cmArgumentParser; // IWYU pragma: keep
 namespace ArgumentParser {
 
 class Instance;
-using Action = std::function<void(Instance&)>;
+using KeywordAction = std::function<void(Instance&)>;
 
-// using ActionMap = cm::flat_map<cm::string_view, Action>;
-class ActionMap : public std::vector<std::pair<cm::string_view, Action>>
+// using KeywordActionMap = cm::flat_map<cm::string_view, KeywordAction>;
+class KeywordActionMap
+  : public std::vector<std::pair<cm::string_view, KeywordAction>>
 {
 public:
-  std::pair<iterator, bool> Emplace(cm::string_view name, Action action);
+  std::pair<iterator, bool> Emplace(cm::string_view name,
+                                    KeywordAction action);
   const_iterator Find(cm::string_view name) const;
+};
+
+class ActionMap
+{
+public:
+  KeywordActionMap Keywords;
 };
 
 class Base
@@ -39,12 +47,12 @@ public:
 
   ArgumentParser::ActionMap Bindings;
 
-  bool MaybeBind(cm::string_view name, Action action)
+  bool MaybeBind(cm::string_view name, KeywordAction action)
   {
-    return this->Bindings.Emplace(name, std::move(action)).second;
+    return this->Bindings.Keywords.Emplace(name, std::move(action)).second;
   }
 
-  void Bind(cm::string_view name, Action action)
+  void Bind(cm::string_view name, KeywordAction action)
   {
     bool const inserted = this->MaybeBind(name, std::move(action));
     assert(inserted);

@@ -8,7 +8,7 @@
 
 namespace ArgumentParser {
 
-auto ActionMap::Emplace(cm::string_view name, Action action)
+auto KeywordActionMap::Emplace(cm::string_view name, KeywordAction action)
   -> std::pair<iterator, bool>
 {
   auto const it =
@@ -21,7 +21,7 @@ auto ActionMap::Emplace(cm::string_view name, Action action)
     : std::make_pair(this->emplace(it, name, std::move(action)), true);
 }
 
-auto ActionMap::Find(cm::string_view name) const -> const_iterator
+auto KeywordActionMap::Find(cm::string_view name) const -> const_iterator
 {
   auto const it =
     std::lower_bound(this->begin(), this->end(), name,
@@ -76,8 +76,8 @@ void Instance::Bind(std::vector<std::vector<std::string>>& val)
 
 void Instance::Consume(cm::string_view arg)
 {
-  auto const it = this->Bindings.Find(arg);
-  if (it != this->Bindings.end()) {
+  auto const it = this->Bindings.Keywords.Find(arg);
+  if (it != this->Bindings.Keywords.end()) {
     this->FinishKeyword();
     this->Keyword = it->first;
     if (this->ParsedKeywords != nullptr) {
