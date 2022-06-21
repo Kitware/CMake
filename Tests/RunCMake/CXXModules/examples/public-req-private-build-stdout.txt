@@ -1,0 +1,1 @@
+CMake Error: Public C\+\+ module source `.*/Tests/RunCMake/CXXModules/examples/public-req-private/pub.cxx` requires the `priv` C\+\+ module which is provided by a private source
