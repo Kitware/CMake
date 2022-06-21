@@ -212,6 +212,7 @@ Properties on Targets
    /prop_tgt/EXCLUDE_FROM_DEFAULT_BUILD_CONFIG
    /prop_tgt/EXPORT_COMPILE_COMMANDS
    /prop_tgt/EXPORT_NAME
+   /prop_tgt/EXPORT_NO_SYSTEM
    /prop_tgt/EXPORT_PROPERTIES
    /prop_tgt/FOLDER
    /prop_tgt/Fortran_BUILDING_INSTRINSIC_MODULES

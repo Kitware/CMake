@@ -75,6 +75,10 @@ add_library(imp_testInterfaceInclude1 STATIC imp_testInterfaceInclude1.c)
 target_include_directories(imp_testInterfaceInclude1 SYSTEM PRIVATE testInterfaceIncludeSystem)
 target_link_libraries(imp_testInterfaceInclude1 PRIVATE exp_testInterfaceIncludeUser)
 
+add_library(imp_testInterfaceInclude1b STATIC imp_testInterfaceInclude1.c)
+target_include_directories(imp_testInterfaceInclude1b SYSTEM PRIVATE testInterfaceIncludeSystem)
+target_link_libraries(imp_testInterfaceInclude1b PRIVATE exp_testInterfaceIncludeUser2)
+
 add_executable(imp_UseSharedLibWithHelper1 ../../../InterfaceLinkLibrariesDirect/UseSharedLibWithHelper.c)
 target_link_libraries(imp_UseSharedLibWithHelper1 PRIVATE exp_testSharedLibWithHelper testSharedLibHelperExclude)
 
@@ -122,9 +126,13 @@ target_link_libraries(imp_testExe1b
   bld_testStaticLibWithPlugin
   )
 
-add_library(imp_testInterfaceInclude1b STATIC imp_testInterfaceInclude1.c)
-target_include_directories(imp_testInterfaceInclude1b SYSTEM PRIVATE testInterfaceIncludeSystem)
-target_link_libraries(imp_testInterfaceInclude1b PRIVATE bld_testInterfaceIncludeUser)
+add_library(imp_testInterfaceInclude1c STATIC imp_testInterfaceInclude1.c)
+target_include_directories(imp_testInterfaceInclude1c SYSTEM PRIVATE testInterfaceIncludeSystem)
+target_link_libraries(imp_testInterfaceInclude1c PRIVATE bld_testInterfaceIncludeUser)
+
+add_library(imp_testInterfaceInclude1d STATIC imp_testInterfaceInclude1.c)
+target_include_directories(imp_testInterfaceInclude1d SYSTEM PRIVATE testInterfaceIncludeSystem)
+target_link_libraries(imp_testInterfaceInclude1d PRIVATE bld_testInterfaceIncludeUser2)
 
 add_custom_target(check_testLib1_genex ALL
   COMMAND ${CMAKE_COMMAND} -DtestLib1=$<TARGET_FILE:exp_testLib1>
