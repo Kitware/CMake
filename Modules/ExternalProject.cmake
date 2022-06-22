@@ -1669,6 +1669,7 @@ function(_ep_set_directories name)
     ${script_filename}
     @ONLY
   )
+  unset(cfgdir) # do not leak into mkdirs.cmake script
   include(${script_filename})
 endfunction()
 
@@ -2624,11 +2625,12 @@ endfunction()
 function(_ep_add_mkdir_command name)
   ExternalProject_Get_Property(${name} tmp_dir)
   set(script_filename "${tmp_dir}/${name}-mkdirs.cmake")
+  _ep_get_configuration_subdir_genex(cfgdir)
 
   ExternalProject_Add_Step(${name} mkdir
     INDEPENDENT TRUE
     COMMENT "Creating directories for '${name}'"
-    COMMAND ${CMAKE_COMMAND} -P ${script_filename}
+    COMMAND ${CMAKE_COMMAND} -Dcfgdir=${cfgdir} -P ${script_filename}
   )
 endfunction()
 
