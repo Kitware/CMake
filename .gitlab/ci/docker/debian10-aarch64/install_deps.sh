@@ -64,6 +64,7 @@ apt-get install -y \
     libjsoncpp-dev \
     liblapack-dev \
     liblzma-dev \
+    libopenal-dev \
     libopenmpi-dev openmpi-bin \
     libpng-dev \
     libpq-dev postgresql-server-dev-11 \
