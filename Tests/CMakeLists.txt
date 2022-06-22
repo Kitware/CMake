@@ -3371,7 +3371,8 @@ if(BUILD_TESTING)
     set(JavaExportImport_BUILD_OPTIONS -DCMake_TEST_NESTED_MAKE_PROGRAM:FILEPATH=${CMake_TEST_EXPLICIT_MAKE_PROGRAM})
     ADD_TEST_MACRO(JavaExportImport JavaExportImport)
 
-    get_filename_component(JNIPATH ${Java_JAVAC_EXECUTABLE} PATH)
+    get_filename_component(JAVACPATH ${Java_JAVAC_EXECUTABLE} REALPATH)
+    get_filename_component(JNIPATH ${JAVACPATH} PATH)
     find_file(JNI_H jni.h
       "${JNIPATH}/../include"
       "${JNIPATH}/../java/include")
