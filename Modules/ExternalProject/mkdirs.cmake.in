@@ -17,3 +17,6 @@ set(configSubDirs @CMAKE_CONFIGURATION_TYPES@)
 foreach(subDir IN LISTS configSubDirs)
     file(MAKE_DIRECTORY "@stamp_dir@/${subDir}")
 endforeach()
+if(cfgdir)
+  file(MAKE_DIRECTORY "@stamp_dir@${cfgdir}") # cfgdir has leading slash
+endif()
