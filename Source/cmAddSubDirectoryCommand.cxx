@@ -26,11 +26,16 @@ bool cmAddSubDirectoryCommand(std::vector<std::string> const& args,
   std::string binArg;
 
   bool excludeFromAll = false;
+  bool system = false;
 
   // process the rest of the arguments looking for optional args
   for (std::string const& arg : cmMakeRange(args).advance(1)) {
     if (arg == "EXCLUDE_FROM_ALL") {
       excludeFromAll = true;
+      continue;
+    }
+    if (arg == "SYSTEM") {
+      system = true;
       continue;
     }
     if (binArg.empty()) {
@@ -39,6 +44,11 @@ bool cmAddSubDirectoryCommand(std::vector<std::string> const& args,
       status.SetError("called with incorrect number of arguments");
       return false;
     }
+  }
+  // "SYSTEM" directory property should also affects targets in nested
+  // subdirectories.
+  if (mf.GetPropertyAsBool("SYSTEM")) {
+    system = true;
   }
 
   // Compute the full path to the specified source directory.
@@ -102,7 +112,7 @@ bool cmAddSubDirectoryCommand(std::vector<std::string> const& args,
   binPath = cmSystemTools::CollapseFullPath(binPath);
 
   // Add the subdirectory using the computed full paths.
-  mf.AddSubDirectory(srcPath, binPath, excludeFromAll, true);
+  mf.AddSubDirectory(srcPath, binPath, excludeFromAll, true, system);
 
   return true;
 }
