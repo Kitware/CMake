@@ -83,6 +83,7 @@
 			buildSettings = {
 				CODE_SIGNING_REQUIRED = NO;
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)";
+				GENERATE_INFOPLIST_FILE = YES;
 				SYMROOT = .;
 				@id_archs@
 				@id_arch_active@
