@@ -831,7 +831,7 @@ that file if something else hasn't already done so.
   if("${GTEST_BOTH_LIBRARIES}" STREQUAL "")
     set(GTEST_BOTH_LIBRARIES ${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARIES})
   endif()
-  ]=]
+  ]=])
   endif()
 
 Projects will also likely be using ``find_package(GTest)`` rather than
@@ -850,7 +850,7 @@ a typical ``find_package(GTest)`` call.
   [=[
   include(CMakeFindDependencyMacro)
   find_dependency(googletest)
-  ]=]
+  ]=])
   endif()
 
   if(NOT EXISTS ${CMAKE_FIND_PACKAGE_REDIRECTS_DIR}/gtest-config-version.cmake AND
@@ -861,7 +861,7 @@ a typical ``find_package(GTest)`` call.
   if(NOT PACKAGE_VERSION_COMPATIBLE)
     include(${CMAKE_FIND_PACKAGE_REDIRECTS_DIR}/googletestConfigVersion.cmake OPTIONAL)
   endif()
-  ]=]
+  ]=])
   endif()
 
 Overriding Where To Find CMakeLists.txt
