@@ -1056,8 +1056,11 @@ if(BUILD_TESTING)
       endif()
     endif()
     if(NSIS_MAKENSIS_EXECUTABLE)
-      set(CPackComponents_BUILD_OPTIONS ${CPackComponents_BUILD_OPTIONS}
-        -DCPACK_BINARY_NSIS:BOOL=ON)
+      execute_process(COMMAND ${NSIS_MAKENSIS_EXECUTABLE} "-VERSION" ERROR_QUIET OUTPUT_QUIET RESULT_VARIABLE NSIS_OK)
+      if("${NSIS_OK}" STREQUAL "0")
+        set(CPackComponents_BUILD_OPTIONS ${CPackComponents_BUILD_OPTIONS}
+          -DCPACK_BINARY_NSIS:BOOL=ON)
+      endif()
     endif()
 
     add_test(CPackComponents ${CMAKE_CTEST_COMMAND}
