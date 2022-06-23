@@ -341,4 +341,6 @@ Other Changes
   SLA to the ``.dmg`` packages.  This was removed because macOS 12 deprecated
   the tools used to attach ``.dmg`` resources.
 
+* A precompiled Windows ``arm64`` binary is now provided on `cmake.org`_.
+
 .. _`cmake.org`: https://cmake.org/download/
