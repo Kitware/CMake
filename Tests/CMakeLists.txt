@@ -3383,49 +3383,62 @@ if(BUILD_TESTING)
     if(JNI_H AND EXISTS "${JNI_H}") # in case jni.h is a broken symlink
       file(READ "${JNI_H}" JNI_FILE)
       if("${JNI_FILE}" MATCHES "JDK1_2")
-        add_test(NAME Java.Jar COMMAND ${CMAKE_CTEST_COMMAND}
-          --build-and-test
-          "${CMake_SOURCE_DIR}/Tests/Java"
-          "${CMake_BINARY_DIR}/Tests/JavaJar"
-          ${build_generator_args}
-          --build-project hello
-          --build-run-dir "${CMake_BINARY_DIR}/Tests/JavaJar/"
-          --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIG>)
-        list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/JavaJar")
 
-        # For next tests, java tool must have same architecture as toolchain
-        math(EXPR _object_mode "${CMAKE_SIZEOF_VOID_P} * 8")
         execute_process(
           COMMAND "${Java_JAVA_EXECUTABLE}" -version
           OUTPUT_VARIABLE _version ERROR_VARIABLE _version RESULT_VARIABLE _result
           )
-        if(_result EQUAL 0 AND _version MATCHES "${_object_mode}-Bit")
-          ## next test is valid only if Java version is less than 1.10
-          if ("${Java_VERSION}" VERSION_LESS 1.10)
-            add_test(NAME Java.Javah COMMAND ${CMAKE_CTEST_COMMAND}
-              --build-and-test
-              "${CMake_SOURCE_DIR}/Tests/JavaJavah"
-              "${CMake_BINARY_DIR}/Tests/JavaJavah"
-              ${build_generator_args}
-              --build-project helloJavah
-              --build-run-dir "${CMake_BINARY_DIR}/Tests/JavaJavah/"
-              --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIG>)
-            list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/JavaJavah")
+
+        # E2K has broken Java RVM before 3.5.2
+        if (CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "e2k" AND _result EQUAL 0)
+          string(REGEX MATCH "RVM ([0-9.]+)" RVMVER "${_version}")
+          # Consider empty match a broken version too
+          if("${CMAKE_MATCH_1}" VERSION_LESS "3.5.2")
+            set(BROKEN_RVM TRUE)
           endif()
-          ## next test is valid only if Java is, at least, version 1.8
-          if (NOT "${Java_VERSION}" VERSION_LESS 1.8)
-            add_test(NAME Java.NativeHeaders COMMAND ${CMAKE_CTEST_COMMAND}
-              --build-and-test
-              "${CMake_SOURCE_DIR}/Tests/JavaNativeHeaders"
-              "${CMake_BINARY_DIR}/Tests/JavaNativeHeaders"
-              ${build_generator_args}
-              --build-project helloJavaNativeHeaders
-              --build-run-dir "${CMake_BINARY_DIR}/Tests/JavaNativeHeaders/"
-              --build-target install
-              --build-options
-              "-DCMAKE_INSTALL_PREFIX:PATH=${CMake_BINARY_DIR}/Tests/JavaNativeHeaders/Install"
-              --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIG>)
-            list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/JavaNativeHeaders")
+        endif()
+
+        if(NOT BROKEN_RVM)
+          add_test(NAME Java.Jar COMMAND ${CMAKE_CTEST_COMMAND}
+            --build-and-test
+            "${CMake_SOURCE_DIR}/Tests/Java"
+            "${CMake_BINARY_DIR}/Tests/JavaJar"
+            ${build_generator_args}
+            --build-project hello
+            --build-run-dir "${CMake_BINARY_DIR}/Tests/JavaJar/"
+            --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIG>)
+          list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/JavaJar")
+
+          # For next tests, java tool must have same architecture as toolchain
+          math(EXPR _object_mode "${CMAKE_SIZEOF_VOID_P} * 8")
+          if(_result EQUAL 0 AND _version MATCHES "${_object_mode}-Bit")
+            ## next test is valid only if Java version is less than 1.10
+            if ("${Java_VERSION}" VERSION_LESS 1.10)
+              add_test(NAME Java.Javah COMMAND ${CMAKE_CTEST_COMMAND}
+                --build-and-test
+                "${CMake_SOURCE_DIR}/Tests/JavaJavah"
+                "${CMake_BINARY_DIR}/Tests/JavaJavah"
+                ${build_generator_args}
+                --build-project helloJavah
+                --build-run-dir "${CMake_BINARY_DIR}/Tests/JavaJavah/"
+                --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIG>)
+              list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/JavaJavah")
+            endif()
+            ## next test is valid only if Java is, at least, version 1.8
+            if (NOT "${Java_VERSION}" VERSION_LESS 1.8)
+              add_test(NAME Java.NativeHeaders COMMAND ${CMAKE_CTEST_COMMAND}
+                --build-and-test
+                "${CMake_SOURCE_DIR}/Tests/JavaNativeHeaders"
+                "${CMake_BINARY_DIR}/Tests/JavaNativeHeaders"
+                ${build_generator_args}
+                --build-project helloJavaNativeHeaders
+                --build-run-dir "${CMake_BINARY_DIR}/Tests/JavaNativeHeaders/"
+                --build-target install
+                --build-options
+                "-DCMAKE_INSTALL_PREFIX:PATH=${CMake_BINARY_DIR}/Tests/JavaNativeHeaders/Install"
+                --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIG>)
+              list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/JavaNativeHeaders")
+            endif()
           endif()
         endif()
       endif()
