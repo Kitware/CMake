@@ -1460,6 +1460,7 @@ if(BUILD_TESTING)
             LTTngUST
             ODBC
             OpenACC
+            OpenAL
             OpenCL
             OpenGL
             OpenMP
