@@ -154,6 +154,11 @@ Variables
   were added to enable build rules that verify all headers in header sets
   can be used on their own.
 
+* The :variable:`CMAKE_VS_NO_COMPILE_BATCHING` variable and corresponding
+  :prop_tgt:`VS_NO_COMPILE_BATCHING` target property were added to
+  tell :ref:`Visual Studio Generators` whether to disable compiler
+  parallelism and call the compiler with one source file at a time.
+
 * The :variable:`CMAKE_WATCOM_RUNTIME_LIBRARY` variable and
   :prop_tgt:`WATCOM_RUNTIME_LIBRARY` target property were introduced to
   select the runtime library used by compilers targeting the Watcom ABI.
@@ -184,10 +189,6 @@ Properties
   when the program or project is executed. This is necessary when more
   than one ``static void Main(string[])`` function signature is available
   in a managed .NET project.
-
-* The :prop_tgt:`VS_NO_COMPILE_BATCHING` target property was added to
-  tell :ref:`Visual Studio Generators` whether to disable compiler parallelism
-  and call the compiler with one source file at a time.
 
 Modules
 -------
