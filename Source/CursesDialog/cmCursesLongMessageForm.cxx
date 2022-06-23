@@ -84,7 +84,7 @@ void cmCursesLongMessageForm::UpdateStatusBar()
   for (size_t i = 0; i < sideSpace; i++) {
     version[i] = ' ';
   }
-  sprintf(version + sideSpace, "%s", vertmp);
+  snprintf(version + sideSpace, sizeof(version) - sideSpace, "%s", vertmp);
   version[width] = '\0';
 
   char fmt_s[] = "%s";
