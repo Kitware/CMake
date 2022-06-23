@@ -70,6 +70,11 @@ This module defines :prop_tgt:`IMPORTED` targets if Vulkan has been found:
   Defined if SDK has the Khronos library which implement a subset of Vulkan API
   over Apple Metal graphics framework. (MoltenVK).
 
+``Vulkan::volk``
+  .. versionadded:: 3.25
+
+  Defined if SDK has the Vulkan meta-loader (volk).
+
 Result Variables
 ^^^^^^^^^^^^^^^^
 
@@ -109,6 +114,10 @@ This module defines the following variables:
   .. versionadded:: 3.24
 
   True, if the SDK has the MoltenVK library.
+``Vulkan_volk_FOUND``
+  .. versionadded:: 3.25
+
+  True, if the SDK has the volk library.
 
 The module will also defines these cache variables:
 
@@ -136,6 +145,11 @@ The module will also defines these cache variables:
   .. versionadded:: 3.24
 
   Path to the MoltenVK library.
+
+``Vulkan_volk_LIBRARY``
+  .. versionadded:: 3.25
+
+  Path to the volk library.
 
 Hints
 ^^^^^
@@ -374,6 +388,13 @@ if(MoltenVK IN_LIST Vulkan_FIND_COMPONENTS)
     )
   mark_as_advanced(Vulkan_MoltenVK_INCLUDE_DIR)
 endif()
+if(volk IN_LIST Vulkan_FIND_COMPONENTS)
+  find_library(Vulkan_volk_LIBRARY
+          NAMES volk
+          HINTS
+            ${_Vulkan_hint_library_search_paths})
+  mark_as_advanced(Vulkan_Volk_LIBRARY)
+endif()
 
 if(Vulkan_GLSLC_EXECUTABLE)
   set(Vulkan_glslc_FOUND TRUE)
@@ -437,6 +458,7 @@ _Vulkan_set_library_component_found(glslang
     glslang-genericcodegen)
 _Vulkan_set_library_component_found(shaderc_combined)
 _Vulkan_set_library_component_found(SPIRV-Tools)
+_Vulkan_set_library_component_found(volk)
 
 if(Vulkan_MoltenVK_INCLUDE_DIR AND Vulkan_MoltenVK_LIBRARY)
   set(Vulkan_MoltenVK_FOUND TRUE)
@@ -721,6 +743,25 @@ if(Vulkan_FOUND)
       set_property(TARGET Vulkan::SPIRV-Tools
         PROPERTY
           IMPORTED_LOCATION_DEBUG "${Vulkan_SPIRV-Tools_DEBUG_LIBRARY}")
+    endif()
+  endif()
+
+  if(Vulkan_volk_LIBRARY AND NOT TARGET Vulkan::volk)
+    add_library(Vulkan::volk STATIC IMPORTED)
+    set_property(TARGET Vulkan::volk
+            PROPERTY
+              INTERFACE_INCLUDE_DIRECTORIES "${Vulkan_INCLUDE_DIRS}")
+    set_property(TARGET Vulkan::volk APPEND
+            PROPERTY
+              IMPORTED_CONFIGURATIONS Release)
+    set_property(TARGET Vulkan::volk APPEND
+            PROPERTY
+              IMPORTED_LOCATION_RELEASE "${Vulkan_volk_LIBRARY}")
+
+    if (NOT WIN32)
+      set_property(TARGET Vulkan::volk APPEND
+              PROPERTY
+                IMPORTED_LINK_INTERFACE_LIBRARIES dl)
     endif()
   endif()
 endif()

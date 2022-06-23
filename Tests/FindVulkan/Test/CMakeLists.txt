@@ -7,6 +7,7 @@ set(components
   glslang
   shaderc_combined
   SPIRV-Tools
+  volk
 )
 if(APPLE)
   list(APPEND components MoltenVK)
@@ -74,6 +75,10 @@ if(APPLE)
   target_link_libraries(test_tgt_MoltenVK Vulkan::MoltenVK)
   add_test(NAME test_tgt_MoltenVK COMMAND test_tgt_MoltenVK)
 endif()
+
+add_executable(test_tgt_volk main-volk.cxx)
+target_link_libraries(test_tgt_volk Vulkan::volk)
+add_test(NAME test_tgt_volk COMMAND test_tgt_volk)
 
 if(Vulkan_GLSLC_EXECUTABLE)
   add_test(NAME test_glslc
