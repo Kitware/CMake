@@ -72,6 +72,8 @@ if(NOT CURL_NO_CURL_CMAKE)
   # can print what we found and return.
   if(CURL_FOUND)
     find_package_handle_standard_args(CURL HANDLE_COMPONENTS CONFIG_MODE)
+    # The upstream curl package sets CURL_VERSION, not CURL_VERSION_STRING.
+    set(CURL_VERSION_STRING "${CURL_VERSION}")
     return()
   endif()
 endif()
