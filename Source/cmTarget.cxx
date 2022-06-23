@@ -598,6 +598,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     initProp("Swift_LANGUAGE_VERSION");
     initProp("Swift_MODULE_DIRECTORY");
     initProp("VS_JUST_MY_CODE_DEBUGGING");
+    initProp("VS_NO_COMPILE_BATCHING");
     initProp("DISABLE_PRECOMPILE_HEADERS");
     initProp("UNITY_BUILD");
     initProp("UNITY_BUILD_UNIQUE_ID");
