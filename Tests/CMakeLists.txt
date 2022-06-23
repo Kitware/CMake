@@ -1156,7 +1156,6 @@ if(BUILD_TESTING)
                                      "components-source"
                                      "components-shlibdeps1"
                                      "components-depend1"
-                                     "components-depend2"
                                      "compression")
       # Run additional tests if dpkg-shlibdeps is available (and is new enough version)
       find_program(SHLIBDEPS_EXECUTABLE NAMES dpkg-shlibdeps)
@@ -1175,6 +1174,11 @@ if(BUILD_TESTING)
           (NOT SHLIBDEPS_EXECUTABLE_VERSION VERSION_LESS 1.17 AND NOT CMAKE_BINARY_DIR MATCHES ".*[ ].*"))
             list(APPEND DEB_CONFIGURATIONS_TO_TEST "shlibdeps-with-private-lib-failure"
                                                    "shlibdeps-with-private-lib-success")
+        endif()
+        # Check if distro has symbols or shlibs data
+        file(GLOB SHLIBS_FILES_EXIST "/var/lib/dpkg/info/*.shlibs" "/var/lib/dpkg/info/*.symbols")
+        if(SHLIBS_FILES_EXIST)
+          list(APPEND DEB_CONFIGURATIONS_TO_TEST "components-depend2")
         endif()
       endif()
 
