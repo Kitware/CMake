@@ -72,7 +72,18 @@ macro(__compiler_gnu lang)
   # * https://gcc.gnu.org/onlinedocs/gcc-4.5.4/gcc/Option-Summary.html (yes)
   if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 4.5)
     set(_CMAKE_${lang}_IPO_MAY_BE_SUPPORTED_BY_COMPILER YES)
-    set(__lto_flags -flto)
+
+    set(__lto_flags "")
+
+    # '-flto=auto' introduced since GCC 10.1:
+    # * https://gcc.gnu.org/onlinedocs/gcc-9.5.0/gcc/Optimize-Options.html#Optimize-Options (no)
+    # * https://gcc.gnu.org/onlinedocs/gcc-10.1.0/gcc/Optimize-Options.html#Optimize-Options (yes)
+    # Since GCC 12.1, the abundance of a parameter produces a warning if compiling multiple targets.
+    if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 10.1)
+      list(APPEND __lto_flags -flto=auto)
+    else()
+      list(APPEND __lto_flags -flto)
+    endif()
 
     if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 4.7)
       # '-ffat-lto-objects' introduced since GCC 4.7:
