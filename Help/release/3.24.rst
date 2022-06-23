@@ -219,11 +219,6 @@ Modules
   gained a ``NO_IMPLICIT_LINK_TO_MATLAB_LIBRARIES`` option to disable
   automatic linking of MATLAB libraries.
 
-* The :module:`FindPkgConfig` module learned to find static libraries
-  in addition to the default search for shared libraries.
-  :command:`pkg_check_modules` gained a ``STATIC_TARGET`` option
-  to make the imported target reference static libraries.
-
 * The :module:`FindZLIB` gained a new ``ZLIB_USE_STATIC_LIBS`` variable to
   search only for static libraries.
 
