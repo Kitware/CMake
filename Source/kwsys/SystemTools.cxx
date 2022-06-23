@@ -3067,17 +3067,14 @@ std::string SystemTools::GetRealPath(const std::string& path,
   return ret;
 }
 
-bool SystemTools::FileIsDirectory(const std::string& inName)
+// Remove any trailing slash from the name except in a root component.
+static const char* RemoveTrailingSlashes(
+  const std::string& inName, char (&local_buffer)[KWSYS_SYSTEMTOOLS_MAXPATH],
+  std::string& string_buffer)
 {
-  if (inName.empty()) {
-    return false;
-  }
   size_t length = inName.size();
   const char* name = inName.c_str();
 
-  // Remove any trailing slash from the name except in a root component.
-  char local_buffer[KWSYS_SYSTEMTOOLS_MAXPATH];
-  std::string string_buffer;
   size_t last = length - 1;
   if (last > 0 && (name[last] == '/' || name[last] == '\\') &&
       strcmp(name, "/") != 0 && name[last - 1] != ':') {
@@ -3090,6 +3087,19 @@ bool SystemTools::FileIsDirectory(const std::string& inName)
       name = string_buffer.c_str();
     }
   }
+
+  return name;
+}
+
+bool SystemTools::FileIsDirectory(const std::string& inName)
+{
+  if (inName.empty()) {
+    return false;
+  }
+
+  char local_buffer[KWSYS_SYSTEMTOOLS_MAXPATH];
+  std::string string_buffer;
+  const auto name = RemoveTrailingSlashes(inName, local_buffer, string_buffer);
 
 // Now check the file node type.
 #if defined(_WIN32)
@@ -3107,9 +3117,21 @@ bool SystemTools::FileIsDirectory(const std::string& inName)
   }
 }
 
-bool SystemTools::FileIsExecutable(const std::string& name)
+bool SystemTools::FileIsExecutable(const std::string& inName)
 {
-  return !FileIsDirectory(name) && TestFileAccess(name, TEST_FILE_EXECUTE);
+#ifdef _WIN32
+  char local_buffer[KWSYS_SYSTEMTOOLS_MAXPATH];
+  std::string string_buffer;
+  const auto name = RemoveTrailingSlashes(inName, local_buffer, string_buffer);
+  const auto attr =
+    GetFileAttributesW(Encoding::ToWindowsExtendedPath(name).c_str());
+
+  // On Windows any file that exists and is not a directory is considered
+  // readable and therefore also executable:
+  return attr != INVALID_FILE_ATTRIBUTES && !(attr & FILE_ATTRIBUTE_DIRECTORY);
+#else
+  return !FileIsDirectory(inName) && TestFileAccess(inName, TEST_FILE_EXECUTE);
+#endif
 }
 
 #if defined(_WIN32)
