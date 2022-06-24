@@ -1501,8 +1501,7 @@ std::string cmSystemTools::RelativeIfUnder(std::string const& top,
 bool cmSystemTools::UnsetEnv(const char* value)
 {
 #  if !defined(HAVE_UNSETENV)
-  std::string var = cmStrCat(value, '=');
-  return cmSystemTools::PutEnv(var);
+  return cmSystemTools::UnPutEnv(value);
 #  else
   unsetenv(value);
   return true;
