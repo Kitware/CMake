@@ -955,7 +955,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
                      CommandArgument::Values::One,
                      [](std::string const& value, cmake* state) -> bool {
                        const auto logLevel = StringToLogLevel(value);
-                       if (logLevel == LogLevel::LOG_UNDEFINED) {
+                       if (logLevel == Message::LogLevel::LOG_UNDEFINED) {
                          cmSystemTools::Error(
                            "Invalid level specified for --log-level");
                          return false;
@@ -971,7 +971,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
                      CommandArgument::Values::One,
                      [](std::string const& value, cmake* state) -> bool {
                        const auto logLevel = StringToLogLevel(value);
-                       if (logLevel == LogLevel::LOG_UNDEFINED) {
+                       if (logLevel == Message::LogLevel::LOG_UNDEFINED) {
                          cmSystemTools::Error(
                            "Invalid level specified for --loglevel");
                          return false;
@@ -1402,14 +1402,17 @@ void cmake::SetArgs(const std::vector<std::string>& args)
 #endif
 }
 
-cmake::LogLevel cmake::StringToLogLevel(const std::string& levelStr)
+Message::LogLevel cmake::StringToLogLevel(const std::string& levelStr)
 {
-  using LevelsPair = std::pair<std::string, LogLevel>;
+  using LevelsPair = std::pair<std::string, Message::LogLevel>;
   static const std::vector<LevelsPair> levels = {
-    { "error", LogLevel::LOG_ERROR },     { "warning", LogLevel::LOG_WARNING },
-    { "notice", LogLevel::LOG_NOTICE },   { "status", LogLevel::LOG_STATUS },
-    { "verbose", LogLevel::LOG_VERBOSE }, { "debug", LogLevel::LOG_DEBUG },
-    { "trace", LogLevel::LOG_TRACE }
+    { "error", Message::LogLevel::LOG_ERROR },
+    { "warning", Message::LogLevel::LOG_WARNING },
+    { "notice", Message::LogLevel::LOG_NOTICE },
+    { "status", Message::LogLevel::LOG_STATUS },
+    { "verbose", Message::LogLevel::LOG_VERBOSE },
+    { "debug", Message::LogLevel::LOG_DEBUG },
+    { "trace", Message::LogLevel::LOG_TRACE }
   };
 
   const auto levelStrLowCase = cmSystemTools::LowerCase(levelStr);
@@ -1418,7 +1421,7 @@ cmake::LogLevel cmake::StringToLogLevel(const std::string& levelStr)
                                [&levelStrLowCase](const LevelsPair& p) {
                                  return p.first == levelStrLowCase;
                                });
-  return (it != levels.cend()) ? it->second : LogLevel::LOG_UNDEFINED;
+  return (it != levels.cend()) ? it->second : Message::LogLevel::LOG_UNDEFINED;
 }
 
 cmake::TraceFormat cmake::StringToTraceFormat(const std::string& traceStr)
