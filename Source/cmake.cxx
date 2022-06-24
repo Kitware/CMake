@@ -3,6 +3,7 @@
 #include "cmake.h"
 
 #include <algorithm>
+#include <array>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -1402,26 +1403,52 @@ void cmake::SetArgs(const std::vector<std::string>& args)
 #endif
 }
 
-Message::LogLevel cmake::StringToLogLevel(const std::string& levelStr)
+namespace {
+using LevelsPair = std::pair<cm::string_view, Message::LogLevel>;
+using LevelsPairArray = std::array<LevelsPair, 7>;
+const LevelsPairArray& getStringToLogLevelPairs()
 {
-  using LevelsPair = std::pair<std::string, Message::LogLevel>;
-  static const std::vector<LevelsPair> levels = {
-    { "error", Message::LogLevel::LOG_ERROR },
-    { "warning", Message::LogLevel::LOG_WARNING },
-    { "notice", Message::LogLevel::LOG_NOTICE },
-    { "status", Message::LogLevel::LOG_STATUS },
-    { "verbose", Message::LogLevel::LOG_VERBOSE },
-    { "debug", Message::LogLevel::LOG_DEBUG },
-    { "trace", Message::LogLevel::LOG_TRACE }
+  static const LevelsPairArray levels = {
+    { { "error", Message::LogLevel::LOG_ERROR },
+      { "warning", Message::LogLevel::LOG_WARNING },
+      { "notice", Message::LogLevel::LOG_NOTICE },
+      { "status", Message::LogLevel::LOG_STATUS },
+      { "verbose", Message::LogLevel::LOG_VERBOSE },
+      { "debug", Message::LogLevel::LOG_DEBUG },
+      { "trace", Message::LogLevel::LOG_TRACE } }
   };
+  return levels;
+}
+} // namespace
 
-  const auto levelStrLowCase = cmSystemTools::LowerCase(levelStr);
+Message::LogLevel cmake::StringToLogLevel(cm::string_view levelStr)
+{
+  const LevelsPairArray& levels = getStringToLogLevelPairs();
 
+  const auto levelStrLowCase =
+    cmSystemTools::LowerCase(std::string{ levelStr });
+
+  // NOLINTNEXTLINE(readability-qualified-auto)
   const auto it = std::find_if(levels.cbegin(), levels.cend(),
                                [&levelStrLowCase](const LevelsPair& p) {
                                  return p.first == levelStrLowCase;
                                });
   return (it != levels.cend()) ? it->second : Message::LogLevel::LOG_UNDEFINED;
+}
+
+std::string cmake::LogLevelToString(Message::LogLevel level)
+{
+  const LevelsPairArray& levels = getStringToLogLevelPairs();
+
+  // NOLINTNEXTLINE(readability-qualified-auto)
+  const auto it =
+    std::find_if(levels.cbegin(), levels.cend(),
+                 [&level](const LevelsPair& p) { return p.second == level; });
+  const cm::string_view levelStrLowerCase =
+    (it != levels.cend()) ? it->first : "undefined";
+  std::string levelStrUpperCase =
+    cmSystemTools::UpperCase(std::string{ levelStrLowerCase });
+  return levelStrUpperCase;
 }
 
 cmake::TraceFormat cmake::StringToTraceFormat(const std::string& traceStr)

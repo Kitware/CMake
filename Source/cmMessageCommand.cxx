@@ -157,18 +157,7 @@ bool cmMessageCommand(std::vector<std::string> const& args,
   assert("Message log level expected to be set" &&
          level != Message::LogLevel::LOG_UNDEFINED);
 
-  auto desiredLevel = mf.GetCMakeInstance()->GetLogLevel();
-  assert("Expected a valid log level here" &&
-         desiredLevel != Message::LogLevel::LOG_UNDEFINED);
-
-  // Command line option takes precedence over the cache variable
-  if (!mf.GetCMakeInstance()->WasLogLevelSetViaCLI()) {
-    const auto desiredLevelFromCache =
-      cmake::StringToLogLevel(mf.GetSafeDefinition("CMAKE_MESSAGE_LOG_LEVEL"));
-    if (desiredLevelFromCache != Message::LogLevel::LOG_UNDEFINED) {
-      desiredLevel = desiredLevelFromCache;
-    }
-  }
+  Message::LogLevel desiredLevel = mf.GetCurrentLogLevel();
 
   if (desiredLevel < level) {
     // Suppress the message

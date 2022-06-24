@@ -19,10 +19,12 @@
 #include "cmGlobalGenerator.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmRange.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmake.h"
 
 namespace {
 
@@ -303,6 +305,27 @@ bool cmCMakeLanguageCommandSET_DEPENDENCY_PROVIDER(
 
   return true;
 }
+
+bool cmCMakeLanguageCommandGET_MESSAGE_LOG_LEVEL(
+  std::vector<cmListFileArgument> const& args, cmExecutionStatus& status)
+{
+  cmMakefile& makefile = status.GetMakefile();
+  std::vector<std::string> expandedArgs;
+  makefile.ExpandArguments(args, expandedArgs);
+
+  if (args.size() < 2 || expandedArgs.size() > 2) {
+    return FatalError(
+      status,
+      "sub-command GET_MESSAGE_LOG_LEVEL expects exactly one argument");
+  }
+
+  Message::LogLevel logLevel = makefile.GetCurrentLogLevel();
+  std::string outputValue = cmake::LogLevelToString(logLevel);
+
+  const std::string& outputVariable = expandedArgs[1];
+  makefile.AddDefinition(outputVariable, outputValue);
+  return true;
+}
 }
 
 bool cmCMakeLanguageCommand(std::vector<cmListFileArgument> const& args,
@@ -449,6 +472,10 @@ bool cmCMakeLanguageCommand(std::vector<cmListFileArgument> const& args,
 
   if (expArgs[expArg] == "EVAL") {
     return cmCMakeLanguageCommandEVAL(args, status);
+  }
+
+  if (expArgs[expArg] == "GET_MESSAGE_LOG_LEVEL") {
+    return cmCMakeLanguageCommandGET_MESSAGE_LOG_LEVEL(args, status);
   }
 
   return FatalError(status, "called with unknown meta-operation");

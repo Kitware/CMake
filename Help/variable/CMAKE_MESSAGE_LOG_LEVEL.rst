@@ -15,3 +15,8 @@ subsequent CMake runs will continue to use the chosen log level.
 
 Projects should not set this variable, it is intended for users so that
 they may control the log level according to their own needs.
+
+.. versionadded:: 3.25
+  See the :command:`cmake_language`
+  :ref:`cmake_language <query_message_log_level>` command for a way to query
+  the current message logging level.

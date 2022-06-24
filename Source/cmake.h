@@ -458,7 +458,8 @@ public:
   //! Get the selected log level for `message()` commands during the cmake run.
   Message::LogLevel GetLogLevel() const { return this->MessageLogLevel; }
   void SetLogLevel(Message::LogLevel level) { this->MessageLogLevel = level; }
-  static Message::LogLevel StringToLogLevel(const std::string& levelStr);
+  static Message::LogLevel StringToLogLevel(cm::string_view levelStr);
+  static std::string LogLevelToString(Message::LogLevel level);
   static TraceFormat StringToTraceFormat(const std::string& levelStr);
 
   bool HasCheckInProgress() const
