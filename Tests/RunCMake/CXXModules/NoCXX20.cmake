@@ -5,6 +5,7 @@ target_sources(nocxx20
   PUBLIC
     FILE_SET fs TYPE CXX_MODULES FILES
       sources/module.cxx)
-target_compile_features(nocxx20
-  PRIVATE
-    cxx_std_17)
+set_target_properties(nocxx20
+  PROPERTIES
+  CXX_STANDARD 17
+  CXX_STANDARD_REQUIRED ON)
