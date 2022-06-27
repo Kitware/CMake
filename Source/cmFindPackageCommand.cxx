@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdio>
-#include <cstring>
 #include <deque>
 #include <functional>
 #include <iterator>
@@ -2240,7 +2239,9 @@ bool cmFileListGeneratorBase::Consider(std::string const& fullPath,
 bool cmFileListGeneratorBase::IsIgnoredEntry(const char* const fname)
 {
   assert(fname != nullptr);
-  return strcmp(fname, ".") == 0 || strcmp(fname, "..") == 0;
+  assert(fname[0] != 0);
+  return fname[0] == '.' &&
+    (fname[1] == 0 || (fname[1] == '.' && fname[2] == 0));
 }
 
 class cmFileListGeneratorFixed : public cmFileListGeneratorBase
