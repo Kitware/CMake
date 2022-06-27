@@ -3402,7 +3402,7 @@ if(BUILD_TESTING)
         endif()
 
         if(NOT BROKEN_RVM)
-          add_test(NAME Java.Jar COMMAND ${CMAKE_CTEST_COMMAND}
+          add_test(NAME Java.Jar COMMAND ${CMAKE_CTEST_COMMAND} -C $<CONFIG>
             --build-and-test
             "${CMake_SOURCE_DIR}/Tests/Java"
             "${CMake_BINARY_DIR}/Tests/JavaJar"
@@ -3417,7 +3417,7 @@ if(BUILD_TESTING)
           if(_result EQUAL 0 AND _version MATCHES "${_object_mode}-Bit")
             ## next test is valid only if Java version is less than 1.10
             if ("${Java_VERSION}" VERSION_LESS 1.10)
-              add_test(NAME Java.Javah COMMAND ${CMAKE_CTEST_COMMAND}
+              add_test(NAME Java.Javah COMMAND ${CMAKE_CTEST_COMMAND} -C $<CONFIG>
                 --build-and-test
                 "${CMake_SOURCE_DIR}/Tests/JavaJavah"
                 "${CMake_BINARY_DIR}/Tests/JavaJavah"
@@ -3429,7 +3429,7 @@ if(BUILD_TESTING)
             endif()
             ## next test is valid only if Java is, at least, version 1.8
             if (NOT "${Java_VERSION}" VERSION_LESS 1.8)
-              add_test(NAME Java.NativeHeaders COMMAND ${CMAKE_CTEST_COMMAND}
+              add_test(NAME Java.NativeHeaders COMMAND ${CMAKE_CTEST_COMMAND} -C $<CONFIG>
                 --build-and-test
                 "${CMake_SOURCE_DIR}/Tests/JavaNativeHeaders"
                 "${CMake_BINARY_DIR}/Tests/JavaNativeHeaders"
