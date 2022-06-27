@@ -104,6 +104,15 @@ public:
 };
 #endif
 
+// Parse the version number and store the results that were
+// successfully parsed.
+int parseVersion(const std::string& version, unsigned int& major,
+                 unsigned int& minor, unsigned int& patch, unsigned int& tweak)
+{
+  return std::sscanf(version.c_str(), "%u.%u.%u.%u", &major, &minor, &patch,
+                     &tweak);
+}
+
 } // anonymous namespace
 
 cmFindPackageCommand::PathLabel
@@ -194,7 +203,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
   if (cmValue const rv =
         this->Makefile->GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION")) {
     unsigned int v[3] = { 0, 0, 0 };
-    sscanf(rv->c_str(), "%u.%u.%u", &v[0], &v[1], &v[2]);
+    std::sscanf(rv->c_str(), "%u.%u.%u", &v[0], &v[1], &v[2]);
     this->RequiredCMakeVersion = CMake_VERSION_ENCODE(v[0], v[1], v[2]);
   }
 
@@ -540,15 +549,6 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
     this->SetError("EXACT cannot be specified with a version range.");
     return false;
   }
-
-  // Parse the version number and store the results that were
-  // successfully parsed.
-  auto parseVersion = [](const std::string& version, unsigned int& major,
-                         unsigned int& minor, unsigned int& patch,
-                         unsigned int& tweak) -> unsigned int {
-    return sscanf(version.c_str(), "%u.%u.%u.%u", &major, &minor, &patch,
-                  &tweak);
-  };
 
   if (!this->Version.empty()) {
     this->VersionCount =
@@ -2100,8 +2100,8 @@ bool cmFindPackageCommand::CheckVersionFile(std::string const& version_file,
       unsigned int parsed_patch;
       unsigned int parsed_tweak;
       this->VersionFoundCount =
-        sscanf(this->VersionFound.c_str(), "%u.%u.%u.%u", &parsed_major,
-               &parsed_minor, &parsed_patch, &parsed_tweak);
+        parseVersion(this->VersionFound, parsed_major, parsed_minor,
+                     parsed_patch, parsed_tweak);
       switch (this->VersionFoundCount) {
         case 4:
           this->VersionFoundTweak = parsed_tweak;
