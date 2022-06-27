@@ -2279,12 +2279,10 @@ private:
   std::vector<std::string> const& Vector;
   bool Search(std::string const& parent, cmFileList& lister) override
   {
-    for (std::string const& i : this->Vector) {
-      if (this->Consider(parent + i, lister)) {
-        return true;
-      }
-    }
-    return false;
+    return std::any_of(this->Vector.cbegin(), this->Vector.cend(),
+                       [this, &parent, &lister](std::string const& i) {
+                         return this->Consider(parent + i, lister);
+                       });
   }
   std::unique_ptr<cmFileListGeneratorBase> Clone() const override
   {
@@ -2349,12 +2347,10 @@ private:
                                  this->SortOrder, this->SortDirection);
     }
 
-    for (std::string const& i : matches) {
-      if (this->Consider(parent + i, lister)) {
-        return true;
-      }
-    }
-    return false;
+    return std::any_of(matches.cbegin(), matches.cend(),
+                       [this, &parent, &lister](std::string const& i) {
+                         return this->Consider(parent + i, lister);
+                       });
   }
   std::unique_ptr<cmFileListGeneratorBase> Clone() const override
   {
@@ -2401,12 +2397,10 @@ private:
       }
     }
 
-    for (std::string const& i : matches) {
-      if (this->Consider(parent + i, lister)) {
-        return true;
-      }
-    }
-    return false;
+    return std::any_of(matches.cbegin(), matches.cend(),
+                       [this, &parent, &lister](std::string const& i) {
+                         return this->Consider(parent + i, lister);
+                       });
   }
   std::unique_ptr<cmFileListGeneratorBase> Clone() const override
   {
@@ -2483,12 +2477,10 @@ private:
     std::vector<std::string> const& files = g.GetFiles();
 
     // Look for directories among the matches.
-    for (std::string const& f : files) {
-      if (this->Consider(f, lister)) {
-        return true;
-      }
-    }
-    return false;
+    return std::any_of(files.cbegin(), files.cend(),
+                       [this, &lister](std::string const& f) {
+                         return this->Consider(f, lister);
+                       });
   }
   std::unique_ptr<cmFileListGeneratorBase> Clone() const override
   {
