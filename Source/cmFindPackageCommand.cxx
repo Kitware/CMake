@@ -2176,13 +2176,7 @@ public:
     }
     return *this;
   }
-  bool Search()
-  {
-    if (this->First) {
-      return this->First->Search(*this);
-    }
-    return false;
-  }
+  bool Search() { return this->First && this->First->Search(*this); }
 
 private:
   virtual bool Visit(std::string const& fullPath) = 0;
