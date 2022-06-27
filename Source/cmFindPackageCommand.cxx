@@ -54,7 +54,6 @@
 #endif
 
 class cmExecutionStatus;
-class cmFileList;
 
 namespace {
 
@@ -2147,6 +2146,9 @@ void cmFindPackageCommand::StoreVersionFound()
   }
 }
 
+namespace {
+class cmFileList;
+
 class cmFileListGeneratorBase
 {
 public:
@@ -2188,27 +2190,6 @@ private:
   cmFileListGeneratorBase* Last = nullptr;
 };
 
-class cmFindPackageFileList : public cmFileList
-{
-public:
-  cmFindPackageFileList(cmFindPackageCommand* fpc, bool use_suffixes = true)
-    : FPC(fpc)
-    , UseSuffixes(use_suffixes)
-  {
-  }
-
-private:
-  bool Visit(std::string const& fullPath) override
-  {
-    if (this->UseSuffixes) {
-      return this->FPC->SearchDirectory(fullPath);
-    }
-    return this->FPC->CheckDirectory(fullPath);
-  }
-  cmFindPackageCommand* FPC;
-  bool UseSuffixes;
-};
-
 bool cmFileListGeneratorBase::Search(cmFileList& listing)
 {
   return this->Search(std::string{}, listing);
@@ -2240,7 +2221,30 @@ bool cmFileListGeneratorBase::IsIgnoredEntry(const char* const fname)
   return fname[0] == '.' &&
     (fname[1] == 0 || (fname[1] == '.' && fname[2] == 0));
 }
+} // anonymous namespace
 
+class cmFindPackageFileList : public cmFileList
+{
+public:
+  cmFindPackageFileList(cmFindPackageCommand* fpc, bool use_suffixes = true)
+    : FPC(fpc)
+    , UseSuffixes(use_suffixes)
+  {
+  }
+
+private:
+  bool Visit(std::string const& fullPath) override
+  {
+    if (this->UseSuffixes) {
+      return this->FPC->SearchDirectory(fullPath);
+    }
+    return this->FPC->CheckDirectory(fullPath);
+  }
+  cmFindPackageCommand* FPC;
+  bool UseSuffixes;
+};
+
+namespace {
 class cmFileListGeneratorFixed : public cmFileListGeneratorBase
 {
 public:
@@ -2492,6 +2496,7 @@ private:
     return cm::make_unique<cmFileListGeneratorGlob>(*this);
   }
 };
+} // anonymous namespace
 
 bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
 {
