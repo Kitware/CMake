@@ -17,6 +17,7 @@ run_cmake(NonSourceCopyFile)
 run_cmake(NonSourceCompileDefinitions)
 run_cmake(BinDirEmpty)
 run_cmake(BinDirRelative)
+run_cmake(EmptyListArgs)
 
 run_cmake(EnvConfig)
 
