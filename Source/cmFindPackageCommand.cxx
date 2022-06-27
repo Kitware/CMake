@@ -1941,7 +1941,7 @@ bool cmFindPackageCommand::SearchDirectory(std::string const& dir)
     std::string d = dir;
     if (!s.empty()) {
       d += s;
-      d += "/";
+      d += '/';
     }
     if (this->CheckDirectory(d)) {
       return true;
@@ -2231,9 +2231,9 @@ bool cmFileListGeneratorBase::Consider(std::string const& fullPath,
     return false;
   }
   if (this->Next) {
-    return this->Next->Search(fullPath + "/", listing);
+    return this->Next->Search(fullPath + '/', listing);
   }
-  return listing.Visit(fullPath + "/");
+  return listing.Visit(fullPath + '/');
 }
 
 class cmFileListGeneratorFixed : public cmFileListGeneratorBase
