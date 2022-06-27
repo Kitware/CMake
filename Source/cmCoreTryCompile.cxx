@@ -283,7 +283,6 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
   std::vector<std::string> linkOptions;
   std::string libsToLink = " ";
   bool useOldLinkLibs = true;
-  char targetNameBuf[64];
   bool didOutputVariable = false;
   bool didCopyFile = false;
   bool didCopyFileError = false;
@@ -417,6 +416,16 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
                                  "No <bindir> specified.");
     return -1;
+  }
+
+  if (this->SrcFileSignature) {
+    projectName = "CMAKE_TRY_COMPILE";
+    /* Use a random file name to avoid rapid creation and deletion
+       of the same executable name (some filesystems fail on that).  */
+    char targetNameBuf[64];
+    snprintf(targetNameBuf, sizeof(targetNameBuf), "cmTC_%05x",
+             cmSystemTools::RandomSeed() & 0xFFFFF);
+    targetName = targetNameBuf;
   }
 
   if (didCopyFile && copyFile.empty()) {
@@ -733,12 +742,6 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
               cmJoin(compileDefs, "]==] [==[").c_str());
     }
 
-    /* Use a random file name to avoid rapid creation and deletion
-       of the same executable name (some filesystems fail on that).  */
-    snprintf(targetNameBuf, sizeof(targetNameBuf), "cmTC_%05x",
-             cmSystemTools::RandomSeed() & 0xFFFFF);
-    targetName = targetNameBuf;
-
     if (!targets.empty()) {
       std::string fname = "/" + std::string(targetName) + "Targets.cmake";
       cmExportTryCompileFileGenerator tcfg(gg, targets, this->Makefile,
@@ -895,7 +898,6 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
               libsToLink.c_str());
     }
     fclose(fout);
-    projectName = "CMAKE_TRY_COMPILE";
   }
 
   // Forward a set of variables to the inner project cache.
