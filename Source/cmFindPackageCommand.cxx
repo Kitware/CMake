@@ -56,6 +56,21 @@ struct StrverscmpOp
   }
 };
 
+std::size_t collectPathsForDebug(std::string& buffer,
+                                 cmSearchPath const& searchPath,
+                                 std::size_t startIndex = 0)
+{
+  const auto& paths = searchPath.GetPaths();
+  if (paths.empty()) {
+    buffer += "  none\n";
+    return 0;
+  }
+  for (std::size_t i = startIndex; i < paths.size(); i++) {
+    buffer += "  " + paths[i].Path + "\n";
+  }
+  return paths.size();
+}
+
 } // anonymous namespace
 
 cmFindPackageCommand::PathLabel
@@ -1443,21 +1458,6 @@ void cmFindPackageCommand::AppendSuccessInformation()
     this->Makefile->GetState()->SetGlobalProperty(requiredInfoPropName,
                                                   "REQUIRED");
   }
-}
-
-inline std::size_t collectPathsForDebug(std::string& buffer,
-                                        cmSearchPath const& searchPath,
-                                        std::size_t startIndex = 0)
-{
-  const auto& paths = searchPath.GetPaths();
-  if (paths.empty()) {
-    buffer += "  none\n";
-    return 0;
-  }
-  for (std::size_t i = startIndex; i < paths.size(); i++) {
-    buffer += "  " + paths[i].Path + "\n";
-  }
-  return paths.size();
 }
 
 void cmFindPackageCommand::ComputePrefixes()
