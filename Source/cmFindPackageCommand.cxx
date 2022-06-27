@@ -2152,6 +2152,7 @@ public:
 
 protected:
   bool Consider(std::string const& fullPath, cmFileList& listing);
+  static bool IsIgnoredEntry(const char* fname);
 
 private:
   bool Search(cmFileList&);
@@ -2234,6 +2235,12 @@ bool cmFileListGeneratorBase::Consider(std::string const& fullPath,
     return this->Next->Search(fullPath + '/', listing);
   }
   return listing.Visit(fullPath + '/');
+}
+
+bool cmFileListGeneratorBase::IsIgnoredEntry(const char* const fname)
+{
+  assert(fname != nullptr);
+  return strcmp(fname, ".") == 0 || strcmp(fname, "..") == 0;
 }
 
 class cmFileListGeneratorFixed : public cmFileListGeneratorBase
@@ -2330,7 +2337,7 @@ private:
     d.Load(parent);
     for (unsigned long i = 0; i < d.GetNumberOfFiles(); ++i) {
       const char* fname = d.GetFile(i);
-      if (strcmp(fname, ".") == 0 || strcmp(fname, "..") == 0) {
+      if (this->IsIgnoredEntry(fname)) {
         continue;
       }
       for (std::string const& n : this->Names) {
@@ -2386,7 +2393,7 @@ private:
     d.Load(parent);
     for (unsigned long i = 0; i < d.GetNumberOfFiles(); ++i) {
       const char* fname = d.GetFile(i);
-      if (strcmp(fname, ".") == 0 || strcmp(fname, "..") == 0) {
+      if (this->IsIgnoredEntry(fname)) {
         continue;
       }
       for (std::string name : this->Names) {
@@ -2433,7 +2440,7 @@ private:
     d.Load(parent);
     for (unsigned long i = 0; i < d.GetNumberOfFiles(); ++i) {
       const char* fname = d.GetFile(i);
-      if (strcmp(fname, ".") == 0 || strcmp(fname, "..") == 0) {
+      if (this->IsIgnoredEntry(fname)) {
         continue;
       }
       if (cmsysString_strcasecmp(fname, this->String.c_str()) == 0) {
