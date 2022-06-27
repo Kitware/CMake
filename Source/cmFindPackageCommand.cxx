@@ -2208,7 +2208,7 @@ private:
 
 bool cmFileListGeneratorBase::Search(cmFileList& listing)
 {
-  return this->Search("", listing);
+  return this->Search(std::string{}, listing);
 }
 
 cmFileListGeneratorBase* cmFileListGeneratorBase::SetNext(
