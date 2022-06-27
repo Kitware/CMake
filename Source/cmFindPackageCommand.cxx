@@ -140,10 +140,9 @@ void cmFindPackageCommand::Sort(std::vector<std::string>::iterator begin,
     } else {
       std::sort(begin, end);
     }
-  } else if (order == Natural)
-  // natural order uses letters and numbers (contiguous numbers digit are
-  // compared such that e.g. 000  00 < 01 < 010 < 09 < 0 < 1 < 9 < 10
-  {
+  } else if (order == Natural) {
+    // natural order uses letters and numbers (contiguous numbers digit are
+    // compared such that e.g. 000  00 < 01 < 010 < 09 < 0 < 1 < 9 < 10
     if (dir == Dec) {
       std::sort(begin, end, StrverscmpOp<std::greater>());
     } else {
