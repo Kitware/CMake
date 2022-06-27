@@ -75,7 +75,7 @@ std::size_t collectPathsForDebug(std::string& buffer,
     buffer += "  none\n";
     return 0;
   }
-  for (std::size_t i = startIndex; i < paths.size(); i++) {
+  for (auto i = startIndex; i < paths.size(); i++) {
     buffer += "  " + paths[i].Path + "\n";
   }
   return paths.size();
@@ -317,9 +317,9 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
   cmsys::RegularExpression versionRegex(
     R"V(^([0-9]+(\.[0-9]+)*)(\.\.\.(<?)([0-9]+(\.[0-9]+)*))?$)V");
   bool haveVersion = false;
-  std::set<unsigned int> configArgs;
-  std::set<unsigned int> moduleArgs;
-  for (unsigned int i = 1; i < args.size(); ++i) {
+  std::vector<std::size_t> configArgs;
+  std::vector<std::size_t> moduleArgs;
+  for (std::size_t i = 1u; i < args.size(); ++i) {
     if (args[i] == "QUIET") {
       this->Quiet = true;
       doing = DoingNone;
@@ -333,17 +333,17 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
       this->GlobalScope = true;
       doing = DoingNone;
     } else if (args[i] == "MODULE") {
-      moduleArgs.insert(i);
+      moduleArgs.push_back(i);
       doing = DoingNone;
       // XXX(clang-tidy): https://bugs.llvm.org/show_bug.cgi?id=44165
       // NOLINTNEXTLINE(bugprone-branch-clone)
     } else if (args[i] == "CONFIG") {
-      configArgs.insert(i);
+      configArgs.push_back(i);
       doing = DoingNone;
       // XXX(clang-tidy): https://bugs.llvm.org/show_bug.cgi?id=44165
       // NOLINTNEXTLINE(bugprone-branch-clone)
     } else if (args[i] == "NO_MODULE") {
-      configArgs.insert(i);
+      configArgs.push_back(i);
       doing = DoingNone;
     } else if (args[i] == "REQUIRED") {
       this->Required = true;
@@ -353,36 +353,36 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
     } else if (args[i] == "OPTIONAL_COMPONENTS") {
       doing = DoingOptionalComponents;
     } else if (args[i] == "NAMES") {
-      configArgs.insert(i);
+      configArgs.push_back(i);
       doing = DoingNames;
     } else if (args[i] == "PATHS") {
-      configArgs.insert(i);
+      configArgs.push_back(i);
       doing = DoingPaths;
     } else if (args[i] == "HINTS") {
-      configArgs.insert(i);
+      configArgs.push_back(i);
       doing = DoingHints;
     } else if (args[i] == "PATH_SUFFIXES") {
-      configArgs.insert(i);
+      configArgs.push_back(i);
       doing = DoingPathSuffixes;
     } else if (args[i] == "CONFIGS") {
-      configArgs.insert(i);
+      configArgs.push_back(i);
       doing = DoingConfigs;
     } else if (args[i] == "NO_POLICY_SCOPE") {
       this->PolicyScope = false;
       doing = DoingNone;
     } else if (args[i] == "NO_CMAKE_PACKAGE_REGISTRY") {
       this->NoUserRegistry = true;
-      configArgs.insert(i);
+      configArgs.push_back(i);
       doing = DoingNone;
     } else if (args[i] == "NO_CMAKE_SYSTEM_PACKAGE_REGISTRY") {
       this->NoSystemRegistry = true;
-      configArgs.insert(i);
+      configArgs.push_back(i);
       doing = DoingNone;
       // XXX(clang-tidy): https://bugs.llvm.org/show_bug.cgi?id=44165
       // NOLINTNEXTLINE(bugprone-branch-clone)
     } else if (args[i] == "NO_CMAKE_BUILDS_PATH") {
       // Ignore legacy option.
-      configArgs.insert(i);
+      configArgs.push_back(i);
       doing = DoingNone;
     } else if (args[i] == "REGISTRY_VIEW") {
       if (++i == args.size()) {
@@ -399,7 +399,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
         return false;
       }
     } else if (this->CheckCommonArgument(args[i])) {
-      configArgs.insert(i);
+      configArgs.push_back(i);
       doing = DoingNone;
     } else if ((doing == DoingComponents) ||
                (doing == DoingOptionalComponents)) {
@@ -472,11 +472,11 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
   if (!this->UseFindModules && !this->UseConfigFiles) {
     std::ostringstream e;
     e << "given options exclusive to Module mode:\n";
-    for (unsigned int si : moduleArgs) {
+    for (auto si : moduleArgs) {
       e << "  " << args[si] << "\n";
     }
     e << "and options exclusive to Config mode:\n";
-    for (unsigned int si : configArgs) {
+    for (auto si : configArgs) {
       e << "  " << args[si] << "\n";
     }
     e << "The options are incompatible.";
