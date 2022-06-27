@@ -42,6 +42,17 @@
 #  include <StorageDefs.h>
 #endif
 
+#if defined(_WIN32) && !defined(__CYGWIN__)
+#  include <windows.h>
+// http://msdn.microsoft.com/en-us/library/aa384253%28v=vs.85%29.aspx
+#  if !defined(KEY_WOW64_32KEY)
+#    define KEY_WOW64_32KEY 0x0200
+#  endif
+#  if !defined(KEY_WOW64_64KEY)
+#    define KEY_WOW64_64KEY 0x0100
+#  endif
+#endif
+
 class cmExecutionStatus;
 class cmFileList;
 
@@ -70,6 +81,29 @@ std::size_t collectPathsForDebug(std::string& buffer,
   }
   return paths.size();
 }
+
+#if !(defined(_WIN32) && !defined(__CYGWIN__))
+class cmFindPackageCommandHoldFile
+{
+  const char* File;
+
+public:
+  cmFindPackageCommandHoldFile(const char* f)
+    : File(f)
+  {
+  }
+  ~cmFindPackageCommandHoldFile()
+  {
+    if (this->File) {
+      cmSystemTools::RemoveFile(this->File);
+    }
+  }
+  cmFindPackageCommandHoldFile(const cmFindPackageCommandHoldFile&) = delete;
+  cmFindPackageCommandHoldFile& operator=(
+    const cmFindPackageCommandHoldFile&) = delete;
+  void Release() { this->File = nullptr; }
+};
+#endif
 
 } // anonymous namespace
 
@@ -1670,14 +1704,6 @@ void cmFindPackageCommand::FillPrefixesSystemRegistry()
 }
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
-#  include <windows.h>
-// http://msdn.microsoft.com/en-us/library/aa384253%28v=vs.85%29.aspx
-#  if !defined(KEY_WOW64_32KEY)
-#    define KEY_WOW64_32KEY 0x0200
-#  endif
-#  if !defined(KEY_WOW64_64KEY)
-#    define KEY_WOW64_64KEY 0x0100
-#  endif
 void cmFindPackageCommand::LoadPackageRegistryWinUser()
 {
   // HKEY_CURRENT_USER\\Software shares 32-bit and 64-bit views.
@@ -1752,28 +1778,8 @@ void cmFindPackageCommand::LoadPackageRegistryWin(bool user, unsigned int view,
     RegCloseKey(hKey);
   }
 }
+
 #else
-class cmFindPackageCommandHoldFile
-{
-  const char* File;
-
-public:
-  cmFindPackageCommandHoldFile(const char* f)
-    : File(f)
-  {
-  }
-  ~cmFindPackageCommandHoldFile()
-  {
-    if (this->File) {
-      cmSystemTools::RemoveFile(this->File);
-    }
-  }
-  cmFindPackageCommandHoldFile(const cmFindPackageCommandHoldFile&) = delete;
-  cmFindPackageCommandHoldFile& operator=(
-    const cmFindPackageCommandHoldFile&) = delete;
-  void Release() { this->File = nullptr; }
-};
-
 void cmFindPackageCommand::LoadPackageRegistryDir(std::string const& dir,
                                                   cmSearchPath& outPaths)
 {
