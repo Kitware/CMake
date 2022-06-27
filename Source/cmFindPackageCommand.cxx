@@ -45,6 +45,19 @@
 class cmExecutionStatus;
 class cmFileList;
 
+namespace {
+
+template <template <typename> class Op>
+struct StrverscmpOp
+{
+  bool operator()(const std::string& lhs, const std::string& rhs) const
+  {
+    return Op<int>()(cmSystemTools::strverscmp(lhs, rhs), 0);
+  }
+};
+
+} // anonymous namespace
+
 cmFindPackageCommand::PathLabel
   cmFindPackageCommand::PathLabel::PackageRedirect("PACKAGE_REDIRECT");
 cmFindPackageCommand::PathLabel cmFindPackageCommand::PathLabel::UserRegistry(
@@ -58,22 +71,6 @@ const cm::string_view cmFindPackageCommand::VERSION_ENDPOINT_INCLUDED(
   "INCLUDE");
 const cm::string_view cmFindPackageCommand::VERSION_ENDPOINT_EXCLUDED(
   "EXCLUDE");
-
-struct StrverscmpGreater
-{
-  bool operator()(const std::string& lhs, const std::string& rhs) const
-  {
-    return cmSystemTools::strverscmp(lhs, rhs) > 0;
-  }
-};
-
-struct StrverscmpLesser
-{
-  bool operator()(const std::string& lhs, const std::string& rhs) const
-  {
-    return cmSystemTools::strverscmp(lhs, rhs) < 0;
-  }
-};
 
 void cmFindPackageCommand::Sort(std::vector<std::string>::iterator begin,
                                 std::vector<std::string>::iterator end,
@@ -90,9 +87,9 @@ void cmFindPackageCommand::Sort(std::vector<std::string>::iterator begin,
   // compared such that e.g. 000  00 < 01 < 010 < 09 < 0 < 1 < 9 < 10
   {
     if (dir == Dec) {
-      std::sort(begin, end, StrverscmpGreater());
+      std::sort(begin, end, StrverscmpOp<std::greater>());
     } else {
-      std::sort(begin, end, StrverscmpLesser());
+      std::sort(begin, end, StrverscmpOp<std::less>());
     }
   }
   // else do not sort
