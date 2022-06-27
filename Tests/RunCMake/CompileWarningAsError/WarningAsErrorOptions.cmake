@@ -6,6 +6,13 @@ macro(get_warning_options warning_options lang)
   elseif (CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC"
           OR (CMAKE_${lang}_COMPILER_ID STREQUAL "Intel" AND CMAKE_${lang}_SIMULATE_ID MATCHES "MSVC"))
     set(${warning_options} "-W4")
+  elseif (CMAKE_${lang}_COMPILER_ID STREQUAL "NVIDIA"
+      AND CMAKE_${lang}_COMPILER_VERSION VERSION_GREATER_EQUAL 10.2.89)
+    if(CMAKE_${lang}_SIMULATE_ID MATCHES "MSVC")
+      set(${warning_options} "-Xcompiler=-W4")
+    else()
+      set(${warning_options} "-Xcompiler=-Wall")
+    endif()
   elseif (CMAKE_${lang}_COMPILER_ID STREQUAL "Intel")
     set(${warning_options} "-w3")
   elseif (CMAKE_${lang}_COMPILER_ID STREQUAL "XL")

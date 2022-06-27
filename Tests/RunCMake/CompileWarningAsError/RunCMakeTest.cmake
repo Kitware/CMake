@@ -10,6 +10,10 @@ endfunction()
 
 set(langs C CXX)
 set(exts c cxx)
+if(CMake_TEST_CUDA)
+  list(APPEND langs CUDA)
+  list(APPEND exts cu)
+endif()
 
 foreach(lang ext IN ZIP_LISTS langs exts)
   run_compile_warn(WerrorOn ${lang} ${ext})
