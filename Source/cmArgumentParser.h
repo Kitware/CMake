@@ -78,7 +78,7 @@ public:
 
   template <typename Range>
   void Parse(Result& result, Range const& args,
-             std::vector<std::string>* unparsedArguments = nullptr,
+             std::vector<std::string>* unparsedArguments,
              std::vector<cm::string_view>* keywordsMissingValue = nullptr,
              std::vector<cm::string_view>* parsedKeywords = nullptr) const
   {
@@ -90,8 +90,7 @@ public:
   }
 
   template <typename Range>
-  Result Parse(Range const& args,
-               std::vector<std::string>* unparsedArguments = nullptr,
+  Result Parse(Range const& args, std::vector<std::string>* unparsedArguments,
                std::vector<cm::string_view>* keywordsMissingValue = nullptr,
                std::vector<cm::string_view>* parsedKeywords = nullptr) const
   {
@@ -118,8 +117,7 @@ public:
   }
 
   template <typename Range>
-  void Parse(Range const& args,
-             std::vector<std::string>* unparsedArguments = nullptr,
+  void Parse(Range const& args, std::vector<std::string>* unparsedArguments,
              std::vector<cm::string_view>* keywordsMissingValue = nullptr,
              std::vector<cm::string_view>* parsedKeywords = nullptr) const
   {

@@ -197,7 +197,7 @@ std::vector<std::string> TargetSourcesImpl::ConvertToAbsoluteContent(
 bool TargetSourcesImpl::HandleFileSetMode(
   const std::string& scope, const std::vector<std::string>& content)
 {
-  auto args = FileSetsArgsParser.Parse(content);
+  auto args = FileSetsArgsParser.Parse(content, /*unparsedArguments=*/nullptr);
 
   for (auto& argList : args.FileSets) {
     argList.emplace(argList.begin(), "FILE_SET"_s);

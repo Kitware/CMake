@@ -172,7 +172,8 @@ bool HandleReadCommand(std::vector<std::string> const& args,
                                .Bind("LIMIT"_s, &Arguments::Limit)
                                .Bind("HEX"_s, &Arguments::Hex);
 
-  Arguments const arguments = parser.Parse(cmMakeRange(args).advance(3));
+  Arguments const arguments = parser.Parse(cmMakeRange(args).advance(3),
+                                           /*unparsedArguments=*/nullptr);
 
   std::string fileName = fileNameArg;
   if (!cmsys::SystemTools::FileIsFullPath(fileName)) {
@@ -1197,7 +1198,8 @@ bool HandleReadElfCommand(std::vector<std::string> const& args,
                                .Bind("RPATH"_s, &Arguments::RPath)
                                .Bind("RUNPATH"_s, &Arguments::RunPath)
                                .Bind("CAPTURE_ERROR"_s, &Arguments::Error);
-  Arguments const arguments = parser.Parse(cmMakeRange(args).advance(2));
+  Arguments const arguments = parser.Parse(cmMakeRange(args).advance(2),
+                                           /*unparsedArguments=*/nullptr);
 
   if (!cmSystemTools::FileExists(fileNameArg, true)) {
     status.SetError(cmStrCat("READ_ELF given FILE \"", fileNameArg,
