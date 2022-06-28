@@ -2895,7 +2895,8 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
         endif()
         unset (_${_PYTHON_PREFIX}_INCLUDE_HINTS)
 
-        if (_${_PYTHON_PREFIX}_LIBRARY_RELEASE)
+        if ("LIBRARY" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_ARTIFACTS
+            AND _${_PYTHON_PREFIX}_LIBRARY_RELEASE)
           # Use the library's install prefix as a hint
           if (_${_PYTHON_PREFIX}_LIBRARY_RELEASE MATCHES "^(.+/Frameworks/Python.framework/Versions/[0-9.]+)")
             list (APPEND _${_PYTHON_PREFIX}_INCLUDE_HINTS "${CMAKE_MATCH_1}")
@@ -2979,7 +2980,8 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
     if (_${_PYTHON_PREFIX}_INCLUDE_DIR)
       # retrieve version from header file
       _python_get_version (INCLUDE PREFIX _${_PYTHON_PREFIX}_INC_)
-      if (_${_PYTHON_PREFIX}_LIBRARY_RELEASE)
+      if ("LIBRARY" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_ARTIFACTS
+          AND _${_PYTHON_PREFIX}_LIBRARY_RELEASE)
         if ("${_${_PYTHON_PREFIX}_INC_VERSION_MAJOR}.${_${_PYTHON_PREFIX}_INC_VERSION_MINOR}"
             VERSION_EQUAL _${_PYTHON_PREFIX}_VERSION)
           # update versioning
