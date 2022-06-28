@@ -27,6 +27,8 @@ struct Result : public ArgumentParser::ParseResult
   cm::optional<std::string> String2;
   cm::optional<std::string> String3;
   ArgumentParser::Maybe<std::string> String4;
+  ArgumentParser::NonEmpty<std::string> String5;
+  ArgumentParser::NonEmpty<std::string> String6;
 
   ArgumentParser::NonEmpty<std::vector<std::string>> List1;
   ArgumentParser::NonEmpty<std::vector<std::string>> List2;
@@ -87,6 +89,8 @@ struct Result : public ArgumentParser::ParseResult
   ArgumentParser::NonEmpty<std::vector<std::string>> UnboundNonEmpty{
     1, "unbound"
   };
+  ArgumentParser::NonEmpty<std::string> UnboundNonEmptyStr{ 'u', 'n', 'b', 'o',
+                                                            'u', 'n', 'd' };
 
   std::vector<cm::string_view> ParsedKeywords;
 };
@@ -100,6 +104,8 @@ std::initializer_list<cm::string_view> const args = {
   "STRING_2", "foo", "bar",  // string arg + unparsed value, presence captured
   // "STRING_3",             // string arg that is not present
   "STRING_4",                // string arg allowed to be missing value
+  "STRING_5", "foo",         // string arg that is not empty
+  "STRING_6", "",            // string arg that is empty
   "LIST_1",                  // list arg missing values
   "LIST_2", "foo", "bar",    // list arg with 2 elems
   "LIST_3", "bar",           // list arg ...
@@ -133,6 +139,8 @@ bool verifyResult(Result const& result,
     "STRING_1",
     "STRING_2",
     "STRING_4",
+    "STRING_5",
+    "STRING_6",
     "LIST_1",
     "LIST_2",
     "LIST_3",
@@ -159,6 +167,7 @@ bool verifyResult(Result const& result,
   };
   static std::map<cm::string_view, std::string> const keywordErrors = {
     { "STRING_1"_s, "  missing required value\n" },
+    { "STRING_6"_s, "  empty string not allowed\n" },
     { "LIST_1"_s, "  missing required value\n" },
     { "LIST_4"_s, "  missing required value\n" },
     { "FUNC_0"_s, "  missing required value\n" }
@@ -184,6 +193,8 @@ bool verifyResult(Result const& result,
   ASSERT_TRUE(*result.String2 == "foo");
   ASSERT_TRUE(!result.String3);
   ASSERT_TRUE(result.String4.empty());
+  ASSERT_TRUE(result.String5 == "foo");
+  ASSERT_TRUE(result.String6.empty());
 
   ASSERT_TRUE(result.List1.empty());
   ASSERT_TRUE(result.List2 == foobar);
@@ -217,6 +228,7 @@ bool verifyResult(Result const& result,
   ASSERT_TRUE(result.UnboundMaybe == "unbound");
   ASSERT_TRUE(result.UnboundMaybeEmpty == unbound);
   ASSERT_TRUE(result.UnboundNonEmpty == unbound);
+  ASSERT_TRUE(result.UnboundNonEmptyStr == "unbound");
 
   ASSERT_TRUE(result.ParsedKeywords == parsedKeywords);
 
@@ -249,6 +261,8 @@ bool testArgumentParserDynamic()
       .Bind("STRING_2"_s, result.String2)
       .Bind("STRING_3"_s, result.String3)
       .Bind("STRING_4"_s, result.String4)
+      .Bind("STRING_5"_s, result.String5)
+      .Bind("STRING_6"_s, result.String6)
       .Bind("LIST_1"_s, result.List1)
       .Bind("LIST_2"_s, result.List2)
       .Bind("LIST_3"_s, result.List3)
@@ -299,6 +313,8 @@ static auto const parserStatic = //
     .Bind("STRING_2"_s, &Result::String2)
     .Bind("STRING_3"_s, &Result::String3)
     .Bind("STRING_4"_s, &Result::String4)
+    .Bind("STRING_5"_s, &Result::String5)
+    .Bind("STRING_6"_s, &Result::String6)
     .Bind("LIST_1"_s, &Result::List1)
     .Bind("LIST_2"_s, &Result::List2)
     .Bind("LIST_3"_s, &Result::List3)

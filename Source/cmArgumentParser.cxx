@@ -76,6 +76,20 @@ void Instance::Bind(std::string& val)
     ExpectAtLeast{ 1 });
 }
 
+void Instance::Bind(NonEmpty<std::string>& val)
+{
+  this->Bind(
+    [this, &val](cm::string_view arg) -> Continue {
+      if (arg.empty() && this->ParseResults) {
+        this->ParseResults->AddKeywordError(this->Keyword,
+                                            "  empty string not allowed\n");
+      }
+      val.assign(std::string(arg));
+      return Continue::No;
+    },
+    ExpectAtLeast{ 1 });
+}
+
 void Instance::Bind(Maybe<std::string>& val)
 {
   this->Bind(
