@@ -408,6 +408,11 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       this->BinaryDirectory.clear();
       return -1;
     }
+    // compute the binary dir when TRY_COMPILE is called with a src file
+    // signature
+    if (this->SrcFileSignature) {
+      this->BinaryDirectory += "/CMakeFiles/CMakeTmp";
+    }
   } else {
     this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
                                  "No <bindir> specified.");
@@ -448,6 +453,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     return -1;
   }
 
+  // only valid for srcfile signatures
   if (!this->SrcFileSignature) {
     if (!cState.Validate(this->Makefile)) {
       return -1;
@@ -467,14 +473,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     if (!objcxxState.Validate(this->Makefile)) {
       return -1;
     }
-  }
 
-  // compute the binary dir when TRY_COMPILE is called with a src file
-  // signature
-  if (this->SrcFileSignature) {
-    this->BinaryDirectory += "/CMakeFiles/CMakeTmp";
-  } else {
-    // only valid for srcfile signatures
     if (!compileDefs.empty()) {
       this->Makefile->IssueMessage(
         MessageType::FATAL_ERROR,
