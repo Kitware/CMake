@@ -91,6 +91,17 @@ macro(_ipo_run_language_check language)
 
   set(try_compile_src "${CMAKE_ROOT}/Modules/CheckIPOSupported")
 
+  set(_C_ext "c")
+  set(_CXX_ext "cpp")
+  set(_Fortran_ext "f")
+
+  set(ext ${_${language}_ext})
+  if(NOT "${ext}" STREQUAL "")
+    set(copy_sources foo.${ext} main.${ext})
+  else()
+    message(FATAL_ERROR "Language not supported")
+  endif()
+
   # Use:
   # * TRY_COMPILE_PROJECT_NAME
   # * CMAKE_VERSION
@@ -99,20 +110,6 @@ macro(_ipo_run_language_check language)
       "${srcdir}/CMakeLists.txt"
       @ONLY
   )
-
-  string(COMPARE EQUAL "${language}" "C" is_c)
-  string(COMPARE EQUAL "${language}" "CXX" is_cxx)
-  string(COMPARE EQUAL "${language}" "Fortran" is_fortran)
-
-  if(is_c)
-    set(copy_sources foo.c main.c)
-  elseif(is_cxx)
-    set(copy_sources foo.cpp main.cpp)
-  elseif(is_fortran)
-    set(copy_sources foo.f main.f)
-  else()
-    message(FATAL_ERROR "Language not supported")
-  endif()
 
   foreach(x ${copy_sources})
     configure_file(
