@@ -304,6 +304,8 @@ with this method.
 ``FetchContent`` And ``find_package()`` Integration
 ===================================================
 
+.. versionadded:: 3.24
+
 Some dependencies support being added by either :command:`find_package` or
 :module:`FetchContent`.  Such dependencies must ensure they define the same
 namespaced targets in both installed and built-from-source scenarios.
@@ -374,6 +376,8 @@ For more advanced use cases, see the
 
 Dependency Providers
 ====================
+
+.. versionadded:: 3.24
 
 The preceding section discussed techniques that projects can use to specify
 their dependencies.  Ideally, the project shouldn't really care where a
