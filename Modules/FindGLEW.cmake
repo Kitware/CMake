@@ -63,6 +63,7 @@ This module defines the following variables:
 #]=======================================================================]
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
 
 find_package(GLEW CONFIG QUIET)
 
@@ -194,8 +195,6 @@ find_library(GLEW_STATIC_LIBRARY_DEBUG
 
 set(CMAKE_FIND_LIBRARY_SUFFIXES ${__GLEW_CURRENT_FIND_LIBRARY_SUFFIXES})
 unset(__GLEW_CURRENT_FIND_LIBRARY_SUFFIXES)
-
-include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
 
 select_library_configurations(GLEW_SHARED)
 select_library_configurations(GLEW_STATIC)
