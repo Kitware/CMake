@@ -44,14 +44,14 @@ void Instance::Bind(std::string& val)
   this->ExpectValue = true;
 }
 
-void Instance::Bind(StringList& val)
+void Instance::Bind(std::vector<std::string>& val)
 {
   this->CurrentString = nullptr;
   this->CurrentList = &val;
   this->ExpectValue = true;
 }
 
-void Instance::Bind(MultiStringList& val)
+void Instance::Bind(std::vector<std::vector<std::string>>& val)
 {
   this->CurrentString = nullptr;
   this->CurrentList = (static_cast<void>(val.emplace_back()), &val.back());

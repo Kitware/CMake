@@ -15,9 +15,6 @@
 
 namespace ArgumentParser {
 
-using StringList = std::vector<std::string>;
-using MultiStringList = std::vector<StringList>;
-
 class Instance;
 using Action = std::function<void(Instance&, void*)>;
 
@@ -39,8 +36,8 @@ public:
 
   void Bind(bool& val);
   void Bind(std::string& val);
-  void Bind(StringList& val);
-  void Bind(MultiStringList& val);
+  void Bind(std::vector<std::string>& val);
+  void Bind(std::vector<std::vector<std::string>>& val);
 
   void Consume(cm::string_view arg, void* result,
                std::vector<std::string>* unparsedArguments,
@@ -50,7 +47,7 @@ public:
 private:
   ActionMap const& Bindings;
   std::string* CurrentString = nullptr;
-  StringList* CurrentList = nullptr;
+  std::vector<std::string>* CurrentList = nullptr;
   bool ExpectValue = false;
 };
 
