@@ -3113,6 +3113,7 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
     return false;
   }
 
+  // Arguments that are allowed to be empty lists.  Keep entries sorted!
   const std::vector<std::string> LIST_ARGS = {
     "DIRECTORIES",
     "EXECUTABLES",
@@ -3402,8 +3403,13 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
     return false;
   }
 
+  // Arguments that are allowed to be empty lists.  Keep entries sorted!
   const std::vector<std::string> LIST_ARGS = {
-    "OUTPUT", "FORMAT", "COMPRESSION", "COMPRESSION_LEVEL", "MTIME", "PATHS"
+    "MTIME", // "MTIME" should not be in this list because it requires one
+             // value, but it has long been accidentally accepted without
+             // one and treated as if an empty value were given.
+             // Fixing this would require a policy.
+    "PATHS", // "PATHS" is here only so we can issue a custom error below.
   };
   auto kwbegin = keywordsMissingValues.cbegin();
   auto kwend = cmRemoveMatching(keywordsMissingValues, LIST_ARGS);
@@ -3530,8 +3536,8 @@ bool HandleArchiveExtractCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  const std::vector<std::string> LIST_ARGS = { "INPUT", "DESTINATION",
-                                               "PATTERNS" };
+  // Arguments that are allowed to be empty lists.  Keep entries sorted!
+  const std::vector<std::string> LIST_ARGS = { "PATTERNS" };
   auto kwbegin = keywordsMissingValues.cbegin();
   auto kwend = cmRemoveMatching(keywordsMissingValues, LIST_ARGS);
   if (kwend != kwbegin) {
