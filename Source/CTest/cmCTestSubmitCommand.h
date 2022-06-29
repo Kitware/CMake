@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-#include <cm/string_view>
+#include <cm/optional>
 
 #include "cmCTestHandlerCommand.h"
 
@@ -37,13 +37,11 @@ public:
 
 protected:
   void BindArguments() override;
-  void CheckArguments(std::vector<cm::string_view> const& keywords) override;
+  void CheckArguments() override;
   cmCTestGenericHandler* InitializeHandler() override;
 
   bool CDashUpload = false;
-  bool FilesMentioned = false;
   bool InternalTest = false;
-  bool PartsMentioned = false;
 
   std::string BuildID;
   std::string CDashUploadFile;
@@ -52,7 +50,7 @@ protected:
   std::string RetryDelay;
   std::string SubmitURL;
 
-  std::vector<std::string> Files;
+  cm::optional<std::vector<std::string>> Files;
   std::vector<std::string> HttpHeaders;
-  std::vector<std::string> Parts;
+  cm::optional<std::vector<std::string>> Parts;
 };

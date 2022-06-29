@@ -9,7 +9,6 @@
 #include <vector>
 
 #include <cm/memory>
-#include <cm/string_view>
 
 #include "cmCTestHandlerCommand.h"
 #include "cmCommand.h"
@@ -43,7 +42,7 @@ public:
 
 protected:
   void BindArguments() override;
-  void CheckArguments(std::vector<cm::string_view> const&) override;
+  void CheckArguments() override;
   cmCTestGenericHandler* InitializeHandler() override;
 
   std::vector<std::string> Files;
