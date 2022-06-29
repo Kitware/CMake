@@ -249,6 +249,11 @@ Options
  For backward compatibility reasons, ``--loglevel`` is also accepted as a
  synonym for this option.
 
+ .. versionadded:: 3.25
+   See the :command:`cmake_language`
+   :ref:`cmake_language <query_message_log_level>` command for a way to query
+   the current message logging level.
+
 ``--log-context``
  Enable the :command:`message` command outputting context attached to each
  message.

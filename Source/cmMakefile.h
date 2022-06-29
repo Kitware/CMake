@@ -925,6 +925,7 @@ public:
   };
 
   void IssueMessage(MessageType t, std::string const& text) const;
+  Message::LogLevel GetCurrentLogLevel() const;
 
   /** Set whether or not to report a CMP0000 violation.  */
   void SetCheckCMP0000(bool b) { this->CheckCMP0000 = b; }

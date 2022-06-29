@@ -119,19 +119,6 @@ public:
     FIND_PACKAGE_MODE
   };
 
-  /** \brief Define log level constants. */
-  enum LogLevel
-  {
-    LOG_UNDEFINED,
-    LOG_ERROR,
-    LOG_WARNING,
-    LOG_NOTICE,
-    LOG_STATUS,
-    LOG_VERBOSE,
-    LOG_DEBUG,
-    LOG_TRACE
-  };
-
   /** \brief Define supported trace formats **/
   enum TraceFormat
   {
@@ -469,9 +456,10 @@ public:
   bool WasLogLevelSetViaCLI() const { return this->LogLevelWasSetViaCLI; }
 
   //! Get the selected log level for `message()` commands during the cmake run.
-  LogLevel GetLogLevel() const { return this->MessageLogLevel; }
-  void SetLogLevel(LogLevel level) { this->MessageLogLevel = level; }
-  static LogLevel StringToLogLevel(const std::string& levelStr);
+  Message::LogLevel GetLogLevel() const { return this->MessageLogLevel; }
+  void SetLogLevel(Message::LogLevel level) { this->MessageLogLevel = level; }
+  static Message::LogLevel StringToLogLevel(cm::string_view levelStr);
+  static std::string LogLevelToString(Message::LogLevel level);
   static TraceFormat StringToTraceFormat(const std::string& levelStr);
 
   bool HasCheckInProgress() const
@@ -732,7 +720,7 @@ private:
   std::set<std::string> DebugFindPkgs;
   std::set<std::string> DebugFindVars;
 
-  LogLevel MessageLogLevel = LogLevel::LOG_STATUS;
+  Message::LogLevel MessageLogLevel = Message::LogLevel::LOG_STATUS;
   bool LogLevelWasSetViaCLI = false;
   bool LogContext = false;
 

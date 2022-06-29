@@ -81,94 +81,83 @@ bool cmMessageCommand(std::vector<std::string> const& args,
 
   auto type = MessageType::MESSAGE;
   auto fatal = false;
-  auto level = cmake::LogLevel::LOG_UNDEFINED;
+  auto level = Message::LogLevel::LOG_UNDEFINED;
   auto checkingType = CheckingType::UNDEFINED;
   if (*i == "SEND_ERROR") {
     type = MessageType::FATAL_ERROR;
-    level = cmake::LogLevel::LOG_ERROR;
+    level = Message::LogLevel::LOG_ERROR;
     ++i;
   } else if (*i == "FATAL_ERROR") {
     fatal = true;
     type = MessageType::FATAL_ERROR;
-    level = cmake::LogLevel::LOG_ERROR;
+    level = Message::LogLevel::LOG_ERROR;
     ++i;
   } else if (*i == "WARNING") {
     type = MessageType::WARNING;
-    level = cmake::LogLevel::LOG_WARNING;
+    level = Message::LogLevel::LOG_WARNING;
     ++i;
   } else if (*i == "AUTHOR_WARNING") {
     if (mf.IsSet("CMAKE_SUPPRESS_DEVELOPER_ERRORS") &&
         !mf.IsOn("CMAKE_SUPPRESS_DEVELOPER_ERRORS")) {
       fatal = true;
       type = MessageType::AUTHOR_ERROR;
-      level = cmake::LogLevel::LOG_ERROR;
+      level = Message::LogLevel::LOG_ERROR;
     } else if (!mf.IsOn("CMAKE_SUPPRESS_DEVELOPER_WARNINGS")) {
       type = MessageType::AUTHOR_WARNING;
-      level = cmake::LogLevel::LOG_WARNING;
+      level = Message::LogLevel::LOG_WARNING;
     } else {
       return true;
     }
     ++i;
   } else if (*i == "CHECK_START") {
-    level = cmake::LogLevel::LOG_STATUS;
+    level = Message::LogLevel::LOG_STATUS;
     checkingType = CheckingType::CHECK_START;
     ++i;
   } else if (*i == "CHECK_PASS") {
-    level = cmake::LogLevel::LOG_STATUS;
+    level = Message::LogLevel::LOG_STATUS;
     checkingType = CheckingType::CHECK_PASS;
     ++i;
   } else if (*i == "CHECK_FAIL") {
-    level = cmake::LogLevel::LOG_STATUS;
+    level = Message::LogLevel::LOG_STATUS;
     checkingType = CheckingType::CHECK_FAIL;
     ++i;
   } else if (*i == "STATUS") {
-    level = cmake::LogLevel::LOG_STATUS;
+    level = Message::LogLevel::LOG_STATUS;
     ++i;
   } else if (*i == "VERBOSE") {
-    level = cmake::LogLevel::LOG_VERBOSE;
+    level = Message::LogLevel::LOG_VERBOSE;
     ++i;
   } else if (*i == "DEBUG") {
-    level = cmake::LogLevel::LOG_DEBUG;
+    level = Message::LogLevel::LOG_DEBUG;
     ++i;
   } else if (*i == "TRACE") {
-    level = cmake::LogLevel::LOG_TRACE;
+    level = Message::LogLevel::LOG_TRACE;
     ++i;
   } else if (*i == "DEPRECATION") {
     if (mf.IsOn("CMAKE_ERROR_DEPRECATED")) {
       fatal = true;
       type = MessageType::DEPRECATION_ERROR;
-      level = cmake::LogLevel::LOG_ERROR;
+      level = Message::LogLevel::LOG_ERROR;
     } else if (!mf.IsSet("CMAKE_WARN_DEPRECATED") ||
                mf.IsOn("CMAKE_WARN_DEPRECATED")) {
       type = MessageType::DEPRECATION_WARNING;
-      level = cmake::LogLevel::LOG_WARNING;
+      level = Message::LogLevel::LOG_WARNING;
     } else {
       return true;
     }
     ++i;
   } else if (*i == "NOTICE") {
     // `NOTICE` message type is going to be output to stderr
-    level = cmake::LogLevel::LOG_NOTICE;
+    level = Message::LogLevel::LOG_NOTICE;
     ++i;
   } else {
     // Messages w/o any type are `NOTICE`s
-    level = cmake::LogLevel::LOG_NOTICE;
+    level = Message::LogLevel::LOG_NOTICE;
   }
   assert("Message log level expected to be set" &&
-         level != cmake::LogLevel::LOG_UNDEFINED);
+         level != Message::LogLevel::LOG_UNDEFINED);
 
-  auto desiredLevel = mf.GetCMakeInstance()->GetLogLevel();
-  assert("Expected a valid log level here" &&
-         desiredLevel != cmake::LogLevel::LOG_UNDEFINED);
-
-  // Command line option takes precedence over the cache variable
-  if (!mf.GetCMakeInstance()->WasLogLevelSetViaCLI()) {
-    const auto desiredLevelFromCache =
-      cmake::StringToLogLevel(mf.GetSafeDefinition("CMAKE_MESSAGE_LOG_LEVEL"));
-    if (desiredLevelFromCache != cmake::LogLevel::LOG_UNDEFINED) {
-      desiredLevel = desiredLevelFromCache;
-    }
-  }
+  Message::LogLevel desiredLevel = mf.GetCurrentLogLevel();
 
   if (desiredLevel < level) {
     // Suppress the message
@@ -178,17 +167,17 @@ bool cmMessageCommand(std::vector<std::string> const& args,
   auto message = cmJoin(cmMakeRange(i, args.cend()), "");
 
   switch (level) {
-    case cmake::LogLevel::LOG_ERROR:
-    case cmake::LogLevel::LOG_WARNING:
+    case Message::LogLevel::LOG_ERROR:
+    case Message::LogLevel::LOG_WARNING:
       // we've overridden the message type, above, so display it directly
       mf.GetMessenger()->DisplayMessage(type, message, mf.GetBacktrace());
       break;
 
-    case cmake::LogLevel::LOG_NOTICE:
+    case Message::LogLevel::LOG_NOTICE:
       cmSystemTools::Message(IndentText(message, mf));
       break;
 
-    case cmake::LogLevel::LOG_STATUS:
+    case Message::LogLevel::LOG_STATUS:
       switch (checkingType) {
         case CheckingType::CHECK_START:
           mf.DisplayStatus(IndentText(message, mf), -1);
@@ -209,9 +198,9 @@ bool cmMessageCommand(std::vector<std::string> const& args,
       }
       break;
 
-    case cmake::LogLevel::LOG_VERBOSE:
-    case cmake::LogLevel::LOG_DEBUG:
-    case cmake::LogLevel::LOG_TRACE:
+    case Message::LogLevel::LOG_VERBOSE:
+    case Message::LogLevel::LOG_DEBUG:
+    case Message::LogLevel::LOG_TRACE:
       mf.DisplayStatus(IndentText(message, mf), -1);
       break;
 

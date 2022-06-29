@@ -149,6 +149,29 @@ void cmMakefile::IssueMessage(MessageType t, std::string const& text) const
   this->GetCMakeInstance()->IssueMessage(t, text, this->Backtrace);
 }
 
+Message::LogLevel cmMakefile::GetCurrentLogLevel() const
+{
+  const cmake* cmakeInstance = this->GetCMakeInstance();
+
+  const Message::LogLevel logLevelCliOrDefault = cmakeInstance->GetLogLevel();
+  assert("Expected a valid log level here" &&
+         logLevelCliOrDefault != Message::LogLevel::LOG_UNDEFINED);
+
+  Message::LogLevel result = logLevelCliOrDefault;
+
+  // If the log-level was set via the command line option, it takes precedence
+  // over the CMAKE_MESSAGE_LOG_LEVEL variable.
+  if (!cmakeInstance->WasLogLevelSetViaCLI()) {
+    const Message::LogLevel logLevelFromVar = cmake::StringToLogLevel(
+      this->GetSafeDefinition("CMAKE_MESSAGE_LOG_LEVEL"));
+    if (logLevelFromVar != Message::LogLevel::LOG_UNDEFINED) {
+      result = logLevelFromVar;
+    }
+  }
+
+  return result;
+}
+
 bool cmMakefile::CheckCMP0037(std::string const& targetName,
                               cmStateEnums::TargetType targetType) const
 {
