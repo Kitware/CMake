@@ -1,0 +1,7 @@
+^CMake Error at extract-missing-args.cmake:[0-9]+ \(file\):
+  file Keywords missing values:
+
+    INPUT
+    DESTINATION
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)$
