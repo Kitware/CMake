@@ -217,8 +217,10 @@
  * BoringSSL: supported since 5fd1807d95f7 (committed 2016-09-30)
  * LibreSSL: since 2.5.3 (April 12, 2017)
  */
-#if (OPENSSL_VERSION_NUMBER >= 0x10002000L) ||  \
-  defined(OPENSSL_IS_BORINGSSL)
+#if ((OPENSSL_VERSION_NUMBER >= 0x10002000L) &&  \
+     !(defined(LIBRESSL_VERSION_NUMBER) &&       \
+      LIBRESSL_VERSION_NUMBER < 0x20503000L)) || \
+     defined(OPENSSL_IS_BORINGSSL)
 #define HAVE_SSL_CTX_SET_EC_CURVES
 #endif
 
@@ -2282,6 +2284,14 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
 #  define HAS_NPN 1
 #endif
 
+/* Check for OpenSSL 1.1.0 which has set_{min,max}_proto_version(). */
+#undef HAS_MODERN_SET_PROTO_VER
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L \
+    && !(defined(LIBRESSL_VERSION_NUMBER) && \
+      LIBRESSL_VERSION_NUMBER < 0x20600000L)
+#  define HAS_MODERN_SET_PROTO_VER 1
+#endif
+
 #ifdef HAS_NPN
 
 /*
@@ -2340,7 +2350,7 @@ select_next_proto_cb(SSL *ssl,
 }
 #endif /* HAS_NPN */
 
-#if (OPENSSL_VERSION_NUMBER >= 0x10100000L) /* 1.1.0 */
+#ifdef HAS_MODERN_SET_PROTO_VER
 static CURLcode
 set_ssl_version_min_max(SSL_CTX *ctx, struct connectdata *conn)
 {
@@ -2424,7 +2434,7 @@ set_ssl_version_min_max(SSL_CTX *ctx, struct connectdata *conn)
 
   return CURLE_OK;
 }
-#endif
+#endif /* HAS_MODERN_SET_PROTO_VER */
 
 #ifdef OPENSSL_IS_BORINGSSL
 typedef uint32_t ctx_option_t;
@@ -2434,7 +2444,7 @@ typedef uint64_t ctx_option_t;
 typedef long ctx_option_t;
 #endif
 
-#if (OPENSSL_VERSION_NUMBER < 0x10100000L) /* 1.1.0 */
+#if !defined(HAS_MODERN_SET_PROTO_VER)
 static CURLcode
 set_ssl_version_min_max_legacy(ctx_option_t *ctx_options,
                                struct Curl_easy *data,
@@ -2509,7 +2519,7 @@ set_ssl_version_min_max_legacy(ctx_option_t *ctx_options,
   }
   return CURLE_OK;
 }
-#endif
+#endif /* ! HAS_MODERN_SET_PROTO_VER */
 
 /* The "new session" callback must return zero if the session can be removed
  * or non-zero if the session has been put into the session cache.
@@ -2813,7 +2823,7 @@ static CURLcode ossl_connect_step1(struct Curl_easy *data,
       ctx_options |= SSL_OP_NO_SSLv2;
       ctx_options |= SSL_OP_NO_SSLv3;
 
-#if (OPENSSL_VERSION_NUMBER >= 0x10100000L) /* 1.1.0 */
+#if HAS_MODERN_SET_PROTO_VER /* 1.1.0 */
       result = set_ssl_version_min_max(backend->ctx, conn);
 #else
       result = set_ssl_version_min_max_legacy(&ctx_options, data, conn,

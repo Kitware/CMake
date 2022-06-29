@@ -1056,8 +1056,11 @@ if(BUILD_TESTING)
       endif()
     endif()
     if(NSIS_MAKENSIS_EXECUTABLE)
-      set(CPackComponents_BUILD_OPTIONS ${CPackComponents_BUILD_OPTIONS}
-        -DCPACK_BINARY_NSIS:BOOL=ON)
+      execute_process(COMMAND ${NSIS_MAKENSIS_EXECUTABLE} "-VERSION" ERROR_QUIET OUTPUT_QUIET RESULT_VARIABLE NSIS_OK)
+      if("${NSIS_OK}" STREQUAL "0")
+        set(CPackComponents_BUILD_OPTIONS ${CPackComponents_BUILD_OPTIONS}
+          -DCPACK_BINARY_NSIS:BOOL=ON)
+      endif()
     endif()
 
     add_test(CPackComponents ${CMAKE_CTEST_COMMAND}
@@ -1153,7 +1156,6 @@ if(BUILD_TESTING)
                                      "components-source"
                                      "components-shlibdeps1"
                                      "components-depend1"
-                                     "components-depend2"
                                      "compression")
       # Run additional tests if dpkg-shlibdeps is available (and is new enough version)
       find_program(SHLIBDEPS_EXECUTABLE NAMES dpkg-shlibdeps)
@@ -1172,6 +1174,11 @@ if(BUILD_TESTING)
           (NOT SHLIBDEPS_EXECUTABLE_VERSION VERSION_LESS 1.17 AND NOT CMAKE_BINARY_DIR MATCHES ".*[ ].*"))
             list(APPEND DEB_CONFIGURATIONS_TO_TEST "shlibdeps-with-private-lib-failure"
                                                    "shlibdeps-with-private-lib-success")
+        endif()
+        # Check if distro has symbols or shlibs data
+        file(GLOB SHLIBS_FILES_EXIST "/var/lib/dpkg/info/*.shlibs" "/var/lib/dpkg/info/*.symbols")
+        if(SHLIBS_FILES_EXIST)
+          list(APPEND DEB_CONFIGURATIONS_TO_TEST "components-depend2")
         endif()
       endif()
 
@@ -2666,7 +2673,10 @@ if(BUILD_TESTING)
   endif()
   if(NOT DEFINED CMake_TEST_CTestUpdate_HG AND HG_EXECUTABLE
       AND (UNIX OR NOT "${HG_EXECUTABLE}" MATCHES "cygwin"))
-    set(CMake_TEST_CTestUpdate_HG 1)
+    execute_process(COMMAND "${HG_EXECUTABLE}" --version OUTPUT_QUIET ERROR_QUIET RESULT_VARIABLE HG_RV)
+    if(HG_RV EQUAL 0)
+      set(CMake_TEST_CTestUpdate_HG 1)
+    endif()
   endif()
   if(CMake_TEST_CTestUpdate_HG)
     if(NOT HG_EXECUTABLE)
@@ -3368,56 +3378,70 @@ if(BUILD_TESTING)
     set(JavaExportImport_BUILD_OPTIONS -DCMake_TEST_NESTED_MAKE_PROGRAM:FILEPATH=${CMake_TEST_EXPLICIT_MAKE_PROGRAM})
     ADD_TEST_MACRO(JavaExportImport JavaExportImport)
 
-    get_filename_component(JNIPATH ${Java_JAVAC_EXECUTABLE} PATH)
+    get_filename_component(JAVACPATH ${Java_JAVAC_EXECUTABLE} REALPATH)
+    get_filename_component(JNIPATH ${JAVACPATH} PATH)
     find_file(JNI_H jni.h
       "${JNIPATH}/../include"
       "${JNIPATH}/../java/include")
     if(JNI_H AND EXISTS "${JNI_H}") # in case jni.h is a broken symlink
       file(READ "${JNI_H}" JNI_FILE)
       if("${JNI_FILE}" MATCHES "JDK1_2")
-        add_test(NAME Java.Jar COMMAND ${CMAKE_CTEST_COMMAND}
-          --build-and-test
-          "${CMake_SOURCE_DIR}/Tests/Java"
-          "${CMake_BINARY_DIR}/Tests/JavaJar"
-          ${build_generator_args}
-          --build-project hello
-          --build-run-dir "${CMake_BINARY_DIR}/Tests/JavaJar/"
-          --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIG>)
-        list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/JavaJar")
 
-        # For next tests, java tool must have same architecture as toolchain
-        math(EXPR _object_mode "${CMAKE_SIZEOF_VOID_P} * 8")
         execute_process(
           COMMAND "${Java_JAVA_EXECUTABLE}" -version
           OUTPUT_VARIABLE _version ERROR_VARIABLE _version RESULT_VARIABLE _result
           )
-        if(_result EQUAL 0 AND _version MATCHES "${_object_mode}-Bit")
-          ## next test is valid only if Java version is less than 1.10
-          if ("${Java_VERSION}" VERSION_LESS 1.10)
-            add_test(NAME Java.Javah COMMAND ${CMAKE_CTEST_COMMAND}
-              --build-and-test
-              "${CMake_SOURCE_DIR}/Tests/JavaJavah"
-              "${CMake_BINARY_DIR}/Tests/JavaJavah"
-              ${build_generator_args}
-              --build-project helloJavah
-              --build-run-dir "${CMake_BINARY_DIR}/Tests/JavaJavah/"
-              --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIG>)
-            list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/JavaJavah")
+
+        # E2K has broken Java RVM before 3.5.2
+        if (CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "e2k" AND _result EQUAL 0)
+          string(REGEX MATCH "RVM ([0-9.]+)" RVMVER "${_version}")
+          # Consider empty match a broken version too
+          if("${CMAKE_MATCH_1}" VERSION_LESS "3.5.2")
+            set(BROKEN_RVM TRUE)
           endif()
-          ## next test is valid only if Java is, at least, version 1.8
-          if (NOT "${Java_VERSION}" VERSION_LESS 1.8)
-            add_test(NAME Java.NativeHeaders COMMAND ${CMAKE_CTEST_COMMAND}
-              --build-and-test
-              "${CMake_SOURCE_DIR}/Tests/JavaNativeHeaders"
-              "${CMake_BINARY_DIR}/Tests/JavaNativeHeaders"
-              ${build_generator_args}
-              --build-project helloJavaNativeHeaders
-              --build-run-dir "${CMake_BINARY_DIR}/Tests/JavaNativeHeaders/"
-              --build-target install
-              --build-options
-              "-DCMAKE_INSTALL_PREFIX:PATH=${CMake_BINARY_DIR}/Tests/JavaNativeHeaders/Install"
-              --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIG>)
-            list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/JavaNativeHeaders")
+        endif()
+
+        if(NOT BROKEN_RVM)
+          add_test(NAME Java.Jar COMMAND ${CMAKE_CTEST_COMMAND} -C $<CONFIG>
+            --build-and-test
+            "${CMake_SOURCE_DIR}/Tests/Java"
+            "${CMake_BINARY_DIR}/Tests/JavaJar"
+            ${build_generator_args}
+            --build-project hello
+            --build-run-dir "${CMake_BINARY_DIR}/Tests/JavaJar/"
+            --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIG>)
+          list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/JavaJar")
+
+          # For next tests, java tool must have same architecture as toolchain
+          math(EXPR _object_mode "${CMAKE_SIZEOF_VOID_P} * 8")
+          if(_result EQUAL 0 AND _version MATCHES "${_object_mode}-Bit")
+            ## next test is valid only if Java version is less than 1.10
+            if ("${Java_VERSION}" VERSION_LESS 1.10)
+              add_test(NAME Java.Javah COMMAND ${CMAKE_CTEST_COMMAND} -C $<CONFIG>
+                --build-and-test
+                "${CMake_SOURCE_DIR}/Tests/JavaJavah"
+                "${CMake_BINARY_DIR}/Tests/JavaJavah"
+                ${build_generator_args}
+                --build-project helloJavah
+                --build-run-dir "${CMake_BINARY_DIR}/Tests/JavaJavah/"
+                --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIG>)
+              list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/JavaJavah")
+            endif()
+            ## next test is valid only if Java is, at least, version 1.8
+            if (NOT "${Java_VERSION}" VERSION_LESS 1.8)
+              add_test(NAME Java.NativeHeaders COMMAND ${CMAKE_CTEST_COMMAND} -C $<CONFIG>
+                --build-and-test
+                "${CMake_SOURCE_DIR}/Tests/JavaNativeHeaders"
+                "${CMake_BINARY_DIR}/Tests/JavaNativeHeaders"
+                ${build_generator_args}
+                --build-project helloJavaNativeHeaders
+                --build-run-dir "${CMake_BINARY_DIR}/Tests/JavaNativeHeaders/"
+                --build-target install
+                --build-options
+                "-DCMAKE_INSTALL_PREFIX:PATH=${CMake_BINARY_DIR}/Tests/JavaNativeHeaders/Install"
+                --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIG>)
+              list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/JavaNativeHeaders")
+            endif()
           endif()
         endif()
       endif()

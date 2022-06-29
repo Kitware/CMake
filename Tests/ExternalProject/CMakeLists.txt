@@ -45,7 +45,11 @@ if(NOT DEFINED EP_TEST_HG OR EP_TEST_HG)
   find_package(Hg)
 endif()
 if(NOT DEFINED EP_TEST_HG AND Hg_FOUND)
-  set(EP_TEST_HG 1)
+  # Check if hg executable is working
+  execute_process(COMMAND "${HG_EXECUTABLE}" --version OUTPUT_QUIET ERROR_QUIET RESULT_VARIABLE HG_RV)
+  if(HG_RV EQUAL 0)
+    set(EP_TEST_HG 1)
+  endif()
 endif()
 
 message(STATUS "EP_TEST_CVS='${EP_TEST_CVS}' CVS_EXECUTABLE='${CVS_EXECUTABLE}'")
