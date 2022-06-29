@@ -1178,7 +1178,11 @@ function(FetchContent_Declare contentName)
 
   # Always check this even if we won't save these details.
   # This helps projects catch errors earlier.
-  if("OVERRIDE_FIND_PACKAGE" IN_LIST ARGN AND "FIND_PACKAGE_ARGS" IN_LIST ARGN)
+  # Avoid using if(... IN_LIST ...) so we don't have to alter policy settings
+  list(FIND ARGN OVERRIDE_FIND_PACKAGE index_OVERRIDE_FIND_PACKAGE)
+  list(FIND ARGN FIND_PACKAGE_ARGS index_FIND_PACKAGE_ARGS)
+  if(index_OVERRIDE_FIND_PACKAGE GREATER_EQUAL 0 AND
+     index_FIND_PACKAGE_ARGS GREATER_EQUAL 0)
     message(FATAL_ERROR
       "Cannot specify both OVERRIDE_FIND_PACKAGE and FIND_PACKAGE_ARGS "
       "when declaring details for ${contentName}"
@@ -1750,7 +1754,9 @@ function(__FetchContent_setupFindPackageRedirection contentName)
     DEFINED
   )
 
-  if(NOT wantFindPackage AND NOT OVERRIDE_FIND_PACKAGE IN_LIST contentDetails)
+  # Avoid using if(... IN_LIST ...) so we don't have to alter policy settings
+  list(FIND contentDetails OVERRIDE_FIND_PACKAGE indexResult)
+  if(NOT wantFindPackage AND indexResult EQUAL -1)
     # No find_package() redirection allowed
     return()
   endif()
