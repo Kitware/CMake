@@ -2763,8 +2763,18 @@ struct TargetFilesystemArtifactResultCreator<ArtifactBundleDirNameTag>
       return std::string();
     }
 
-    return target->GetAppBundleDirectory(context->Config,
-                                         cmGeneratorTarget::BundleDirLevel);
+    auto level = cmGeneratorTarget::BundleDirLevel;
+    auto config = context->Config;
+    if (target->IsAppBundleOnApple()) {
+      return target->GetAppBundleDirectory(config, level);
+    }
+    if (target->IsFrameworkOnApple()) {
+      return target->GetFrameworkDirectory(config, level);
+    }
+    if (target->IsCFBundleOnApple()) {
+      return target->GetCFBundleDirectory(config, level);
+    }
+    return std::string();
   }
 };
 
