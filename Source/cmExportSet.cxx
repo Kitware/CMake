@@ -2,10 +2,15 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExportSet.h"
 
+#include <algorithm>
 #include <tuple>
 #include <utility>
 
+#include "cmGeneratorTarget.h"
 #include "cmLocalGenerator.h"
+#include "cmMessageType.h"
+#include "cmStringAlgorithms.h"
+#include "cmTarget.h"
 #include "cmTargetExport.h"
 
 cmExportSet::cmExportSet(std::string name)
@@ -15,11 +20,35 @@ cmExportSet::cmExportSet(std::string name)
 
 cmExportSet::~cmExportSet() = default;
 
-void cmExportSet::Compute(cmLocalGenerator* lg)
+bool cmExportSet::Compute(cmLocalGenerator* lg)
 {
   for (std::unique_ptr<cmTargetExport>& tgtExport : this->TargetExports) {
     tgtExport->Target = lg->FindGeneratorTargetToUse(tgtExport->TargetName);
+
+    auto const interfaceFileSets =
+      tgtExport->Target->Target->GetAllInterfaceFileSets();
+    auto const fileSetInTargetExport =
+      [&tgtExport, lg](const std::string& fileSetName) -> bool {
+      auto* fileSet = tgtExport->Target->Target->GetFileSet(fileSetName);
+
+      if (!tgtExport->FileSetGenerators.count(fileSet)) {
+        lg->IssueMessage(MessageType::FATAL_ERROR,
+                         cmStrCat("File set \"", fileSetName,
+                                  "\" is listed in interface file sets of ",
+                                  tgtExport->Target->GetName(),
+                                  " but has not been exported"));
+        return false;
+      }
+      return true;
+    };
+
+    if (!std::all_of(interfaceFileSets.begin(), interfaceFileSets.end(),
+                     fileSetInTargetExport)) {
+      return false;
+    }
   }
+
+  return true;
 }
 
 void cmExportSet::AddTargetExport(std::unique_ptr<cmTargetExport> te)
