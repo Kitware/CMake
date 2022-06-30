@@ -1,0 +1,8 @@
+file(READ "${RunCMake_TEST_BINARY_DIR}/output-INPUT.txt" input)
+if(NOT input MATCHES "INPUT file")
+  string(APPEND RunCMake_TEST_FAILED "INPUT incorrectly overridden by CONTENT")
+endif()
+file(READ "${RunCMake_TEST_BINARY_DIR}/output-CONTENT.txt" content)
+if(NOT content MATCHES "CONTENT argument")
+  string(APPEND RunCMake_TEST_FAILED "CONTENT incorrectly overridden by INPUT")
+endif()
