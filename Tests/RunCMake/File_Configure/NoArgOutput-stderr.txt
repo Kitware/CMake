@@ -1,0 +1,4 @@
+^CMake Error at NoArgOutput.cmake:[0-9]+ \(file\):
+  file CONFIGURE OUTPUT option is mandatory.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)$
