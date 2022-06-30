@@ -3479,7 +3479,7 @@ void cmMakefile::AddTargetObject(std::string const& tgtName,
 #endif
 }
 
-void cmMakefile::EnableLanguage(std::vector<std::string> const& lang,
+void cmMakefile::EnableLanguage(std::vector<std::string> const& languages,
                                 bool optional)
 {
   if (this->DeferRunning) {
@@ -3494,21 +3494,23 @@ void cmMakefile::EnableLanguage(std::vector<std::string> const& lang,
   // If RC is explicitly listed we need to do it after other languages.
   // On some platforms we enable RC implicitly while enabling others.
   // Do not let that look like recursive enable_language(RC).
-  std::vector<std::string> langs;
-  std::vector<std::string> langsRC;
-  langs.reserve(lang.size());
-  for (std::string const& i : lang) {
-    if (i == "RC") {
-      langsRC.push_back(i);
+  std::vector<std::string> languages_without_RC;
+  std::vector<std::string> languages_for_RC;
+  languages_without_RC.reserve(languages.size());
+  for (std::string const& language : languages) {
+    if (language == "RC") {
+      languages_for_RC.push_back(language);
     } else {
-      langs.push_back(i);
+      languages_without_RC.push_back(language);
     }
   }
-  if (!langs.empty()) {
-    this->GetGlobalGenerator()->EnableLanguage(langs, this, optional);
+  if (!languages_without_RC.empty()) {
+    this->GetGlobalGenerator()->EnableLanguage(languages_without_RC, this,
+                                               optional);
   }
-  if (!langsRC.empty()) {
-    this->GetGlobalGenerator()->EnableLanguage(langsRC, this, optional);
+  if (!languages_for_RC.empty()) {
+    this->GetGlobalGenerator()->EnableLanguage(languages_for_RC, this,
+                                               optional);
   }
 }
 
