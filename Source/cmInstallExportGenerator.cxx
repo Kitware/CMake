@@ -48,8 +48,7 @@ cmInstallExportGenerator::~cmInstallExportGenerator() = default;
 bool cmInstallExportGenerator::Compute(cmLocalGenerator* lg)
 {
   this->LocalGenerator = lg;
-  this->ExportSet->Compute(lg);
-  return true;
+  return this->ExportSet->Compute(lg);
 }
 
 std::string cmInstallExportGenerator::TempDirCalculate() const
