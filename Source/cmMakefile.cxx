@@ -3491,13 +3491,35 @@ void cmMakefile::EnableLanguage(std::vector<std::string> const& languages,
   if (const char* def = this->GetGlobalGenerator()->GetCMakeCFGIntDir()) {
     this->AddDefinition("CMAKE_CFG_INTDIR", def);
   }
+
+  std::vector<std::string> unique_languages;
+  {
+    std::vector<std::string> duplicate_languages;
+    for (std::string const& language : languages) {
+      if (!cm::contains(unique_languages, language)) {
+        unique_languages.push_back(language);
+      } else if (!cm::contains(duplicate_languages, language)) {
+        duplicate_languages.push_back(language);
+      }
+    }
+    if (!duplicate_languages.empty()) {
+      auto quantity = duplicate_languages.size() == 1 ? std::string(" has")
+                                                      : std::string("s have");
+      this->IssueMessage(MessageType::AUTHOR_WARNING,
+                         "Languages to be enabled may not be specified more "
+                         "than once at the same time. The following language" +
+                           quantity + " been specified multiple times: " +
+                           cmJoin(duplicate_languages, ", "));
+    }
+  }
+
   // If RC is explicitly listed we need to do it after other languages.
   // On some platforms we enable RC implicitly while enabling others.
   // Do not let that look like recursive enable_language(RC).
   std::vector<std::string> languages_without_RC;
   std::vector<std::string> languages_for_RC;
-  languages_without_RC.reserve(languages.size());
-  for (std::string const& language : languages) {
+  languages_without_RC.reserve(unique_languages.size());
+  for (std::string const& language : unique_languages) {
     if (language == "RC") {
       languages_for_RC.push_back(language);
     } else {
