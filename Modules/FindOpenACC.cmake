@@ -27,6 +27,13 @@ The module provides :prop_tgt:`IMPORTED` targets:
 Variables
 ^^^^^^^^^
 
+The module defines the following variables:
+
+``OpenACC_FOUND``
+  .. versionadded:: 3.25
+
+  Variable indicating that OpenACC flags for at least one languages have been found.
+
 This module will set the following variables per language in your
 project, where ``<lang>`` is one of C, CXX, or Fortran:
 
@@ -270,6 +277,9 @@ foreach (LANG IN ITEMS C CXX Fortran)
       REQUIRED_VARS OpenACC_${LANG}_FLAGS
       VERSION_VAR OpenACC_${LANG}_VERSION
     )
+    if(OpenACC_${LANG}_FOUND)
+      set(OpenACC_FOUND TRUE)
+    endif()
   endif()
 endforeach()
 
