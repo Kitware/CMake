@@ -1,0 +1,9 @@
+^CMake Error at create-missing-args.cmake:[0-9]+ \(file\):
+  file Keywords missing values:
+
+    OUTPUT
+    FORMAT
+    COMPRESSION
+    COMPRESSION_LEVEL
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)$
