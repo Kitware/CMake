@@ -3,11 +3,12 @@ CMAKE_<LANG>_LINK_GROUP_USING_<FEATURE>_SUPPORTED
 
 .. versionadded:: 3.24
 
-Set to ``TRUE`` if the ``<FEATURE>``, as defined by variable
-:variable:`CMAKE_<LANG>_LINK_GROUP_USING_<FEATURE>`, is supported for the
-linker language ``<LANG>``.
+This variable specifies whether the ``<FEATURE>`` is supported for the link
+language ``<LANG>``.  If this variable is true, then the ``<FEATURE>`` must
+be defined by :variable:`CMAKE_<LANG>_LINK_GROUP_USING_<FEATURE>`, and the
+more generic :variable:`CMAKE_LINK_GROUP_USING_<FEATURE>_SUPPORTED` and
+:variable:`CMAKE_LINK_GROUP_USING_<FEATURE>` variables are not used.
 
-.. note::
-
-  This variable is evaluated before the more generic variable
-  :variable:`CMAKE_LINK_GROUP_USING_<FEATURE>_SUPPORTED`.
+If ``CMAKE_<LANG>_LINK_GROUP_USING_<FEATURE>_SUPPORTED`` is false or is not
+set, then the :variable:`CMAKE_LINK_GROUP_USING_<FEATURE>_SUPPORTED` variable
+will determine whether ``<FEATURE>`` is deemed to be supported.

@@ -1370,229 +1370,237 @@ Output-Related Expressions
 
   .. versionadded:: 3.24
 
-  Manage how libraries are specified during the link step.
-  This expression may be used to specify how to link libraries in a target.
-  For example:
+  Specify a set of libraries to link to a target, along with a ``feature``
+  which provides details about *how* they should be linked.  For example:
 
   .. code-block:: cmake
 
     add_library(lib1 STATIC ...)
     add_library(lib2 ...)
-    target_link_libraries(lib2 PRIVATE "$<LINK_LIBRARY:load_archive,lib1>")
+    target_link_libraries(lib2 PRIVATE "$<LINK_LIBRARY:WHOLE_ARCHIVE,lib1>")
 
-  This specify to use the ``lib1`` target with feature ``load_archive`` for
-  linking target ``lib2``. The feature must have be defined by
-  :variable:`CMAKE_<LANG>_LINK_LIBRARY_USING_<FEATURE>` variable or, if
-  :variable:`CMAKE_<LANG>_LINK_LIBRARY_USING_<FEATURE>_SUPPORTED` is false,
-  by :variable:`CMAKE_LINK_LIBRARY_USING_<FEATURE>` variable.
+  This specifies that ``lib2`` should link to ``lib1`` and use the
+  ``WHOLE_ARCHIVE`` feature when doing so.
 
-  .. note::
-
-    The evaluation of this generator expression will use, for the following
-    variables, the values defined at the level of the creation of the target:
-
-    * :variable:`CMAKE_<LANG>_LINK_LIBRARY_USING_<FEATURE>_SUPPORTED`
-    * :variable:`CMAKE_<LANG>_LINK_LIBRARY_USING_<FEATURE>`
-    * :variable:`CMAKE_LINK_LIBRARY_USING_<FEATURE>_SUPPORTED`
-    * :variable:`CMAKE_LINK_LIBRARY_USING_<FEATURE>`
-
-  This expression can only be used to specify link libraries (i.e. part of
-  :command:`link_libraries` or :command:`target_link_libraries` commands and
-  :prop_tgt:`LINK_LIBRARIES` or :prop_tgt:`INTERFACE_LINK_LIBRARIES` target
-  properties).
-
-  .. note::
-
-    If this expression appears in the :prop_tgt:`INTERFACE_LINK_LIBRARIES`
-    property of a target, it will be included in the imported target generated
-    by :command:`install(EXPORT)` command. It is the responsibility of the
-    environment consuming this import to define the link feature used by this
-    expression.
-
-  The ``library-list`` argument can hold CMake targets or external libraries.
-  Any CMake target of type :ref:`OBJECT <Object Libraries>` or
-  :ref:`INTERFACE <Interface Libraries>` will be ignored by this expression and
-  will be handled in the standard way.
-
-  Each target or external library involved in the link step must have only one
-  kind of feature (the absence of feature is also incompatible with any
-  feature). For example:
-
-  .. code-block:: cmake
-
-    add_library(lib1 ...)
-
-    add_library(lib2 ...)
-    target_link_libraries(lib2 PUBLIC "$<LINK_LIBRARY:feature1,lib1>")
-
-    add_library(lib3 ...)
-    target_link_libraries(lib3 PRIVATE lib1 lib2)
-    # an error will be raised here because lib1 has two different features
-
-  To resolve such incompatibilities, the :prop_tgt:`LINK_LIBRARY_OVERRIDE`
-  and  :prop_tgt:`LINK_LIBRARY_OVERRIDE_<LIBRARY>` target properties can be
-  used.
-
-  .. note::
-
-    This expression does not guarantee that the list of specified libraries
-    will be kept grouped. So, to manage constructs like ``start-group`` and
-    ``end-group``, as supported by ``GNU ld``, the :genex:`LINK_GROUP`
-    generator expression can be used.
-
-  CMake pre-defines some features of general interest:
+  Feature names are case-sensitive and may only contain letters, numbers and
+  underscores.  Feature names defined in all uppercase are reserved for CMake's
+  own built-in features.  The pre-defined built-in library features are:
 
   .. include:: ../variable/LINK_LIBRARY_PREDEFINED_FEATURES.txt
+
+  Built-in and custom library features are defined in terms of the following
+  variables:
+
+  * :variable:`CMAKE_<LANG>_LINK_LIBRARY_USING_<FEATURE>_SUPPORTED`
+  * :variable:`CMAKE_<LANG>_LINK_LIBRARY_USING_<FEATURE>`
+  * :variable:`CMAKE_LINK_LIBRARY_USING_<FEATURE>_SUPPORTED`
+  * :variable:`CMAKE_LINK_LIBRARY_USING_<FEATURE>`
+
+  The value used for each of these variables is the value as set at the end of
+  the directory scope in which the target was created.  The usage is as follows:
+
+  1. If the language-specific
+     :variable:`CMAKE_<LANG>_LINK_LIBRARY_USING_<FEATURE>_SUPPORTED` variable
+     is true, the ``feature`` must be defined by the corresponding
+     :variable:`CMAKE_<LANG>_LINK_LIBRARY_USING_<FEATURE>` variable.
+  2. If no language-specific ``feature`` is supported, then the
+     :variable:`CMAKE_LINK_LIBRARY_USING_<FEATURE>_SUPPORTED` variable must be
+     true and the ``feature`` must be defined by the corresponding
+     :variable:`CMAKE_LINK_LIBRARY_USING_<FEATURE>` variable.
+
+  The following limitations should be noted:
+
+  * The ``library-list`` can specify CMake targets or libraries.
+    Any CMake target of type :ref:`OBJECT <Object Libraries>`
+    or :ref:`INTERFACE <Interface Libraries>` will ignore the feature aspect
+    of the expression and instead be linked in the standard way.
+
+  * The ``$<LINK_LIBRARY:...>`` generator expression can only be used to
+    specify link libraries.  In practice, this means it can appear in the
+    :prop_tgt:`LINK_LIBRARIES` and :prop_tgt:`INTERFACE_LINK_LIBRARIES`
+    target properties, and be specified in :command:`target_link_libraries`
+    and :command:`link_libraries` commands.
+
+  * If a ``$<LINK_LIBRARY:...>`` generator expression appears in the
+    :prop_tgt:`INTERFACE_LINK_LIBRARIES` property of a target, it will be
+    included in the imported target generated by a :command:`install(EXPORT)`
+    command.  It is the responsibility of the environment consuming this
+    import to define the link feature used by this expression.
+
+  * Each target or library involved in the link step must have at most only
+    one kind of library feature.  The absence of a feature is also incompatible
+    with all other features.  For example:
+
+    .. code-block:: cmake
+
+      add_library(lib1 ...)
+      add_library(lib2 ...)
+      add_library(lib3 ...)
+
+      # lib1 will be associated with feature1
+      target_link_libraries(lib2 PUBLIC "$<LINK_LIBRARY:feature1,lib1>")
+
+      # lib1 is being linked with no feature here. This conflicts with the
+      # use of feature1 in the line above and would result in an error.
+      target_link_libraries(lib3 PRIVATE lib1 lib2)
+
+    Where it isn't possible to use the same feature throughout a build for a
+    given target or library, the :prop_tgt:`LINK_LIBRARY_OVERRIDE` and
+    :prop_tgt:`LINK_LIBRARY_OVERRIDE_<LIBRARY>` target properties can be
+    used to resolve such incompatibilities.
+
+  * The ``$<LINK_LIBRARY:...>`` generator expression does not guarantee
+    that the list of specified targets and libraries will be kept grouped
+    together.  To manage constructs like ``--start-group`` and ``--end-group``,
+    as supported by the GNU ``ld`` linker, use the :genex:`LINK_GROUP`
+    generator expression instead.
 
 .. genex:: $<LINK_GROUP:feature,library-list>
 
   .. versionadded:: 3.24
 
-  Manage the grouping of libraries during the link step.
-  This expression may be used to specify how to keep groups of libraries during
-  the link of a target.
-  For example:
+  Specify a group of libraries to link to a target, along with a ``feature``
+  which defines how that group should be linked.  For example:
 
   .. code-block:: cmake
 
     add_library(lib1 STATIC ...)
     add_library(lib2 ...)
-    target_link_libraries(lib2 PRIVATE "$<LINK_GROUP:cross_refs,lib1,external>")
+    target_link_libraries(lib2 PRIVATE "$<LINK_GROUP:RESCAN,lib1,external>")
 
-  This specify to use the ``lib1`` target and ``external`` library  with the
-  group feature ``cross_refs`` for linking target ``lib2``. The feature must
-  have be defined by :variable:`CMAKE_<LANG>_LINK_GROUP_USING_<FEATURE>`
-  variable or, if :variable:`CMAKE_<LANG>_LINK_GROUP_USING_<FEATURE>_SUPPORTED`
-  is false, by :variable:`CMAKE_LINK_GROUP_USING_<FEATURE>` variable.
+  This specifies that ``lib2`` should link to ``lib1`` and ``external``, and
+  that both of those two libraries should be included on the linker command
+  line according to the definition of the ``RESCAN`` feature.
 
-  .. note::
+  Feature names are case-sensitive and may only contain letters, numbers and
+  underscores.  Feature names defined in all uppercase are reserved for CMake's
+  own built-in features.  Currently, there is only one pre-defined built-in
+  group feature:
 
-    The evaluation of this generator expression will use, for the following
-    variables, the values defined at the level of the creation of the target:
+  .. include:: ../variable/LINK_GROUP_PREDEFINED_FEATURES.txt
 
-    * :variable:`CMAKE_<LANG>_LINK_GROUP_USING_<FEATURE>_SUPPORTED`
-    * :variable:`CMAKE_<LANG>_LINK_GROUP_USING_<FEATURE>`
-    * :variable:`CMAKE_LINK_GROUP_USING_<FEATURE>_SUPPORTED`
-    * :variable:`CMAKE_LINK_GROUP_USING_<FEATURE>`
+  Built-in and custom group features are defined in terms of the following
+  variables:
 
-  This expression can only be used to specify link libraries (i.e. part of
-  :command:`link_libraries` or :command:`target_link_libraries` commands and
-  :prop_tgt:`LINK_LIBRARIES` or :prop_tgt:`INTERFACE_LINK_LIBRARIES` target
-  properties).
+  * :variable:`CMAKE_<LANG>_LINK_GROUP_USING_<FEATURE>_SUPPORTED`
+  * :variable:`CMAKE_<LANG>_LINK_GROUP_USING_<FEATURE>`
+  * :variable:`CMAKE_LINK_GROUP_USING_<FEATURE>_SUPPORTED`
+  * :variable:`CMAKE_LINK_GROUP_USING_<FEATURE>`
 
-  .. note::
+  The value used for each of these variables is the value as set at the end of
+  the directory scope in which the target was created.  The usage is as follows:
 
-    If this expression appears in the :prop_tgt:`INTERFACE_LINK_LIBRARIES`
-    property of a target, it will be included in the imported target generated
-    by :command:`install(EXPORT)` command. It is the responsibility of the
-    environment consuming this import to define the link feature used by this
-    expression.
+  1. If the language-specific
+     :variable:`CMAKE_<LANG>_LINK_GROUP_USING_<FEATURE>_SUPPORTED` variable
+     is true, the ``feature`` must be defined by the corresponding
+     :variable:`CMAKE_<LANG>_LINK_GROUP_USING_<FEATURE>` variable.
+  2. If no language-specific ``feature`` is supported, then the
+     :variable:`CMAKE_LINK_GROUP_USING_<FEATURE>_SUPPORTED` variable must be
+     true and the ``feature`` must be defined by the corresponding
+     :variable:`CMAKE_LINK_GROUP_USING_<FEATURE>` variable.
 
-  The ``library-list`` argument can hold CMake targets or external libraries.
-  Any CMake target of type :ref:`OBJECT <Object Libraries>` or
-  :ref:`INTERFACE <Interface Libraries>` will be ignored by this expression and
-  will be handled in the standard way.
+  The ``LINK_GROUP`` generator expression is compatible with the
+  :genex:`LINK_LIBRARY` generator expression. The libraries involved in a
+  group can be specified using the :genex:`LINK_LIBRARY` generator expression.
 
-  .. note::
-
-    This expression is compatible with the :genex:`LINK_LIBRARY` generator
-    expression. The libraries involved in a group can be specified using the
-    :genex:`LINK_LIBRARY` generator expression.
-
-  Each target or external library involved in the link step can be part of
-  different groups as far as these groups use the same feature, so mixing
-  different group features for the same target or library is forbidden. The
-  different groups will be part of the link step.
+  Each target or external library involved in the link step is allowed to be
+  part of multiple groups, but only if all the groups involved specify the
+  same ``feature``.  Such groups will not be merged on the linker command line,
+  the individual groups will still be preserved.  Mixing different group
+  features for the same target or library is forbidden.
 
   .. code-block:: cmake
 
     add_library(lib1 ...)
     add_library(lib2 ...)
-
     add_library(lib3 ...)
-    target_link_libraries(lib3 PUBLIC "$<LINK_GROUP:feature1,lib1,lib2>")
-
     add_library(lib4 ...)
-    target_link_libraries(lib4 PRIVATE "$<LINK_GROUP:feature1,lib1,lib3>")
-    # lib4 will be linked with the groups {lib1,lib2} and {lib1,lib3}
-
     add_library(lib5 ...)
+
+    target_link_libraries(lib3 PUBLIC  "$<LINK_GROUP:feature1,lib1,lib2>")
+    target_link_libraries(lib4 PRIVATE "$<LINK_GROUP:feature1,lib1,lib3>")
+    # lib4 will be linked with the groups {lib1,lib2} and {lib1,lib3}.
+    # Both groups specify the same feature, so this is fine.
+
     target_link_libraries(lib5 PRIVATE "$<LINK_GROUP:feature2,lib1,lib3>")
-    # an error will be raised here because lib1 is part of two groups with
-    # different features
+    # An error will be raised here because both lib1 and lib3 are part of two
+    # groups with different features.
 
   When a target or an external library is involved in the link step as part of
-  a group and also as standalone, any occurrence of the standalone link item
-  will be replaced by the group or groups it belong to.
+  a group and also as not part of any group, any occurrence of the non-group
+  link item will be replaced by the groups it belongs to.
 
   .. code-block:: cmake
 
     add_library(lib1 ...)
     add_library(lib2 ...)
-
     add_library(lib3 ...)
+    add_library(lib4 ...)
+
     target_link_libraries(lib3 PUBLIC lib1)
 
-    add_library(lib4 ...)
     target_link_libraries(lib4 PRIVATE lib3 "$<LINK_GROUP:feature1,lib1,lib2>")
     # lib4 will only be linked with lib3 and the group {lib1,lib2}
 
-  This example will be "re-written" by CMake in the following form:
+  Because ``lib1`` is part of the group defined for ``lib4``, that group then
+  gets applied back to the use of ``lib1`` for ``lib3``.  The end result will
+  be as though the linking relationship for ``lib3`` had been specified as:
 
   .. code-block:: cmake
 
-    add_library(lib1 ...)
-    add_library(lib2 ...)
-
-    add_library(lib3 ...)
     target_link_libraries(lib3 PUBLIC "$<LINK_GROUP:feature1,lib1,lib2>")
 
-    add_library(lib4 ...)
-    target_link_libraries(lib4 PRIVATE lib3 "$<LINK_GROUP:feature1,lib1,lib2>")
-    # lib4 will only be linked with lib3 and the group {lib1,lib2}
-
-  Be aware that the precedence of the group over the standalone link item can
-  result in some circular dependency between groups, which will raise an
-  error because circular dependencies are not allowed for groups.
+  Be aware that the precedence of the group over the non-group link item can
+  result in circular dependencies between groups.  If this occurs, a fatal
+  error is raised because circular dependencies are not allowed for groups.
 
   .. code-block:: cmake
 
     add_library(lib1A ...)
     add_library(lib1B ...)
-
     add_library(lib2A ...)
     add_library(lib2B ...)
+    add_library(lib3 ...)
 
+    # Non-group linking relationships, these are non-circular so far
     target_link_libraries(lib1A PUBLIC lib2A)
     target_link_libraries(lib2B PUBLIC lib1B)
 
-    add_library(lib ...)
-    target_link_libraries(lib3 PRIVATE "$<LINK_GROUP:feat,lib1A,lib1B>"
-                                       "$<LINK_GROUP:feat,lib2A,lib2B>")
+    # The addition of these groups creates circular dependencies
+    target_link_libraries(lib3 PRIVATE
+      "$<LINK_GROUP:feat,lib1A,lib1B>"
+      "$<LINK_GROUP:feat,lib2A,lib2B>"
+    )
 
-  This example will be "re-written" by CMake in the following form:
+  Because of the groups defined for ``lib3``, the linking relationships for
+  ``lib1A`` and ``lib2B`` effectively get expanded to the equivalent of:
 
   .. code-block:: cmake
-
-    add_library(lib1A ...)
-    add_library(lib1B ...)
-
-    add_library(lib2A ...)
-    add_library(lib2B ...)
 
     target_link_libraries(lib1A PUBLIC "$<LINK_GROUP:feat,lib2A,lib2B>")
     target_link_libraries(lib2B PUBLIC "$<LINK_GROUP:feat,lib1A,lib1B>")
 
-    add_library(lib ...)
-    target_link_libraries(lib3 PRIVATE "$<LINK_GROUP:feat,lib1A,lib1B>"
-                                       "$<LINK_GROUP:feat,lib2A,lib2B>")
+  This creates a circular dependency between groups:
+  ``lib1A --> lib2B --> lib1A``.
 
-  So, we have a circular dependency between groups ``{lib1A,lib1B}`` and
-  ``{lib2A,lib2B}``.
+  The following limitations should also be noted:
 
-  CMake pre-defines some features of general interest:
+  * The ``library-list`` can specify CMake targets or libraries.
+    Any CMake target of type :ref:`OBJECT <Object Libraries>`
+    or :ref:`INTERFACE <Interface Libraries>` will ignore the feature aspect
+    of the expression and instead be linked in the standard way.
 
-  .. include:: ../variable/LINK_GROUP_PREDEFINED_FEATURES.txt
+  * The ``$<LINK_GROUP:...>`` generator expression can only be used to
+    specify link libraries.  In practice, this means it can appear in the
+    :prop_tgt:`LINK_LIBRARIES` and :prop_tgt:`INTERFACE_LINK_LIBRARIES`
+    target properties, and be specified in :command:`target_link_libraries`
+    and :command:`link_libraries` commands.
+
+  * If a ``$<LINK_GROUP:...>`` generator expression appears in the
+    :prop_tgt:`INTERFACE_LINK_LIBRARIES` property of a target, it will be
+    included in the imported target generated by a :command:`install(EXPORT)`
+    command.  It is the responsibility of the environment consuming this
+    import to define the link feature used by this expression.
 
 .. genex:: $<INSTALL_INTERFACE:...>
 
