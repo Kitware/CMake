@@ -3,25 +3,14 @@ CMAKE_<LANG>_LINK_GROUP_USING_<FEATURE>
 
 .. versionadded:: 3.24
 
-This variable defines, for the specified ``<FEATURE>`` and the linker language
-``<LANG>``, the expression expected by the linker when libraries are specified
-using :genex:`LINK_GROUP` generator expression.
+This variable defines how to link a group of libraries for the specified
+``<FEATURE>`` when a :genex:`LINK_GROUP` generator expression is used and
+the link language for the target is ``<LANG>``.
+For this variable to have any effect, the associated
+:variable:`CMAKE_<LANG>_LINK_GROUP_USING_<FEATURE>_SUPPORTED` variable
+must be set to true.
 
-.. note::
-
-  * Feature names can contain Latin letters, digits and undercores.
-  * Feature names defined in all uppercase are reserved to CMake.
-
-See also the associated variable
-:variable:`CMAKE_<LANG>_LINK_GROUP_USING_<FEATURE>_SUPPORTED` and
-:variable:`CMAKE_LINK_GROUP_USING_<FEATURE>` variable for the definition of
-features independent from the link language.
+The :variable:`CMAKE_LINK_GROUP_USING_<FEATURE>` variable should be defined
+instead for features that are independent of the link language.
 
 .. include:: CMAKE_LINK_GROUP_USING_FEATURE.txt
-
-Predefined Features
-^^^^^^^^^^^^^^^^^^^
-
-CMake pre-defines some features of general interest:
-
-.. include:: LINK_GROUP_PREDEFINED_FEATURES.txt
