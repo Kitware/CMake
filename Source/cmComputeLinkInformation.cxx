@@ -549,6 +549,17 @@ bool cmComputeLinkInformation::Compute()
     if (linkEntry.Kind == cmComputeLinkDepends::LinkEntry::Group) {
       const auto& groupFeature = this->GetGroupFeature(linkEntry.Feature);
       if (groupFeature.Supported) {
+        if (linkEntry.Item.Value == "</LINK_GROUP>" &&
+            currentFeature != nullptr) {
+          // emit feature suffix, if any
+          if (!currentFeature->Suffix.empty()) {
+            this->Items.emplace_back(
+              BT<std::string>{ currentFeature->Suffix,
+                               this->Items.back().Value.Backtrace },
+              ItemIsPath::No);
+          }
+          currentFeature = nullptr;
+        }
         this->Items.emplace_back(
           BT<std::string>{ linkEntry.Item.Value == "<LINK_GROUP>"
                              ? groupFeature.Prefix
