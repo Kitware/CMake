@@ -768,11 +768,8 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
                 "package configuration file provided by "
              << this->Name << " (" << this->Name << "Config.cmake or "
              << cmSystemTools::LowerCase(this->Name)
-             << "-config.cmake).  "
-                "Otherwise make Find"
-             << this->Name
-             << ".cmake available in "
-                "CMAKE_MODULE_PATH.";
+             << "-config.cmake).  Otherwise make Find" << this->Name
+             << ".cmake available in CMAKE_MODULE_PATH.";
         }
         aw << "\n"
               "(Variable CMAKE_FIND_PACKAGE_WARN_NO_MODULE enabled this "
@@ -1167,8 +1164,9 @@ bool cmFindPackageCommand::HandlePackageMode(
           << (this->VersionExact ? "exactly matches" : "is compatible with")
           << " requested version "
           << (this->VersionRange.empty() ? "" : "range ") << "\""
-          << this->VersionComplete << "\".\n"
-          << "The following configuration files were considered but not "
+          << this->VersionComplete
+          << "\".\n"
+             "The following configuration files were considered but not "
              "accepted:\n";
 
         for (ConfigFileInfo const& info :
@@ -1216,8 +1214,9 @@ bool cmFindPackageCommand::HandlePackageMode(
                "package or SDK, be sure it has been installed.";
         } else // if(!this->UseFindModules && !this->UseConfigFiles)
         {
-          e << "No \"Find" << this->Name << ".cmake\" found in "
-            << "CMAKE_MODULE_PATH.";
+          e << "No \"Find" << this->Name
+            << ".cmake\" found in "
+               "CMAKE_MODULE_PATH.";
 
           aw
             << "Find" << this->Name
