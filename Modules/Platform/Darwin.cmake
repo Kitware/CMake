@@ -103,9 +103,9 @@ foreach(lang C CXX Fortran OBJC OBJCXX)
   set(CMAKE_${lang}_CREATE_MACOSX_FRAMEWORK
       "<CMAKE_${lang}_COMPILER> <LANGUAGE_COMPILE_FLAGS> <CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS> <LINK_FLAGS> -o <TARGET> <SONAME_FLAG> <TARGET_INSTALLNAME_DIR><TARGET_SONAME> <OBJECTS> <LINK_LIBRARIES>")
 
-# Set default framework search path flag for languages known to use a
-# preprocessor that may find headers in frameworks.
-set(CMAKE_${lang}_FRAMEWORK_SEARCH_FLAG -F)
+  # Set default framework search path flag for languages known to use a
+  # preprocessor that may find headers in frameworks.
+  set(CMAKE_${lang}_FRAMEWORK_SEARCH_FLAG -F)
 endforeach()
 
 # Defines LINK_LIBRARY features for frameworks
