@@ -2157,14 +2157,27 @@ public:
 
 protected:
   bool Consider(std::string const& fullPath, cmFileList& listing);
-  static bool IsIgnoredEntry(const char* fname);
+  static bool IsIgnoredEntry(const char* fname)
+  {
+    assert(fname != nullptr);
+    assert(fname[0] != 0);
+    return fname[0] == '.' &&
+      (fname[1] == 0 || (fname[1] == '.' && fname[2] == 0));
+  }
 
 private:
-  bool Search(cmFileList&);
-  virtual bool Search(std::string const& parent, cmFileList&) = 0;
-  virtual std::unique_ptr<cmFileListGeneratorBase> Clone() const = 0;
   friend class cmFileList;
-  cmFileListGeneratorBase* SetNext(cmFileListGeneratorBase const& next);
+  virtual std::unique_ptr<cmFileListGeneratorBase> Clone() const = 0;
+  virtual bool Search(std::string const& parent, cmFileList&) = 0;
+  bool Search(cmFileList& listing)
+  {
+    return this->Search(std::string{}, listing);
+  }
+  cmFileListGeneratorBase* SetNext(cmFileListGeneratorBase const& next)
+  {
+    this->Next = next.Clone();
+    return this->Next.get();
+  }
   std::unique_ptr<cmFileListGeneratorBase> Next;
 };
 
@@ -2191,18 +2204,6 @@ private:
   cmFileListGeneratorBase* Last = nullptr;
 };
 
-bool cmFileListGeneratorBase::Search(cmFileList& listing)
-{
-  return this->Search(std::string{}, listing);
-}
-
-cmFileListGeneratorBase* cmFileListGeneratorBase::SetNext(
-  cmFileListGeneratorBase const& next)
-{
-  this->Next = next.Clone();
-  return this->Next.get();
-}
-
 bool cmFileListGeneratorBase::Consider(std::string const& fullPath,
                                        cmFileList& listing)
 {
@@ -2213,14 +2214,6 @@ bool cmFileListGeneratorBase::Consider(std::string const& fullPath,
     return this->Next->Search(fullPath + '/', listing);
   }
   return listing.Visit(fullPath + '/');
-}
-
-bool cmFileListGeneratorBase::IsIgnoredEntry(const char* const fname)
-{
-  assert(fname != nullptr);
-  assert(fname[0] != 0);
-  return fname[0] == '.' &&
-    (fname[1] == 0 || (fname[1] == '.' && fname[2] == 0));
 }
 } // anonymous namespace
 
