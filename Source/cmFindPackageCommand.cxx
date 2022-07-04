@@ -204,132 +204,125 @@ private:
   bool Loaded = false;
 };
 
-class cmFileListGeneratorProject
+class cmDirectoryListGenerator
+{
+public:
+  cmDirectoryListGenerator(std::vector<std::string> const& names)
+    : Names{ names }
+    , Matches{}
+    , Current{ this->Matches.cbegin() }
+  {
+  }
+  virtual ~cmDirectoryListGenerator() = default;
+
+  std::string GetNextCandidate(const std::string& parent)
+  {
+    // Construct a list of matches if not yet
+    if (this->Matches.empty()) {
+      cmsys::Directory directoryLister;
+      // ALERT `Directory::Load()` keeps only names
+      // internally and LOST entry type from `dirent`.
+      // So, `Directory::FileIsDirectory` gonna use
+      // `SystemTools::FileIsDirectory()` and waste a syscall.
+      // TODO Need to enhance the `Directory` class.
+      directoryLister.Load(parent);
+
+      // ATTENTION Is it guaranteed that first two entries are
+      // `.` and `..`?
+      // TODO If so, just start with index 2 and drop the
+      // `isDirentryToIgnore(i)` condition to check.
+      for (auto i = 0ul; i < directoryLister.GetNumberOfFiles(); ++i) {
+        const char* const fname = directoryLister.GetFile(i);
+        if (isDirentryToIgnore(fname)) {
+          continue;
+        }
+
+        for (const auto& n : this->Names.get()) {
+          // NOTE Customization point for `cmFileListGeneratorMacProject`
+          const auto name = this->TransformNameBeforeCmp(n);
+          // Skip entries that don't match and non-directories.
+          // ATTENTION BTW, original code also didn't check if it's a symlink
+          // to a directory!
+          const auto equal =
+            (cmsysString_strncasecmp(fname, name.c_str(), name.length()) == 0);
+          if (equal && directoryLister.FileIsDirectory(i)) {
+            this->Matches.emplace_back(fname);
+          }
+        }
+      }
+      // NOTE Customization point for `cmFileListGeneratorProject`
+      this->OnMatchesLoaded();
+
+      this->Current = this->Matches.cbegin();
+    }
+
+    if (this->Current != this->Matches.cend()) {
+      auto candidate = cmStrCat(parent, '/', *this->Current++);
+      return candidate;
+    }
+
+    return {};
+  }
+
+  void Reset()
+  {
+    this->Matches.clear();
+    this->Current = this->Matches.cbegin();
+  }
+
+protected:
+  virtual void OnMatchesLoaded() {}
+  virtual std::string TransformNameBeforeCmp(std::string same) { return same; }
+
+  std::reference_wrapper<const std::vector<std::string>> Names;
+  std::vector<std::string> Matches;
+  std::vector<std::string>::const_iterator Current;
+};
+
+class cmFileListGeneratorProject : public cmDirectoryListGenerator
 {
 public:
   cmFileListGeneratorProject(std::vector<std::string> const& names,
                              cmFindPackageCommand::SortOrderType so,
                              cmFindPackageCommand::SortDirectionType sd)
-    : Names{ names }
-    , Matches{}
-    , Current{ this->Matches.cbegin() }
+    : cmDirectoryListGenerator{ names }
     , SortOrder{ so }
     , SortDirection{ sd }
   {
   }
 
-  std::string GetNextCandidate(const std::string& parent)
+  void OnMatchesLoaded() override
   {
-    // Construct a list of matches if not yet
-    if (this->Matches.empty()) {
-      cmsys::Directory directoryLister;
-      directoryLister.Load(parent);
-      for (auto i = 0ul; i < directoryLister.GetNumberOfFiles(); ++i) {
-        const char* const fname = directoryLister.GetFile(i);
-        if (isDirentryToIgnore(fname)) {
-          continue;
-        }
-        for (const auto& name : this->Names.get()) {
-          // Skip entries that don't match and non-directories.
-          // ATTENTION BTW, original code also didn't check if it's a symlink
-          // to a directory! ALERT `Directory::Load()` keep only names
-          // internally and LOST entry type So `Directory::FileIsDirectory`
-          // gonna use `SystemTools::FileIsDirectory()` (wasing a syscall)
-          // again!
-          if (cmsysString_strncasecmp(fname, name.c_str(), name.length()) ==
-                0 &&
-              directoryLister.FileIsDirectory(i)) {
-            this->Matches.emplace_back(fname);
-          }
-        }
-      }
-      // check if there is a specific sorting order to perform
-      if (this->SortOrder != cmFindPackageCommand::None) {
-        cmFindPackageCommand::Sort(this->Matches.begin(), this->Matches.end(),
-                                   this->SortOrder, this->SortDirection);
-      }
-      this->Current = this->Matches.cbegin();
+    // check if there is a specific sorting order to perform
+    if (this->SortOrder != cmFindPackageCommand::None) {
+      cmFindPackageCommand::Sort(this->Matches.begin(), this->Matches.end(),
+                                 this->SortOrder, this->SortDirection);
     }
-    if (this->Current != this->Matches.cend()) {
-      auto candidate = cmStrCat(parent, '/', *this->Current++);
-      return candidate;
-    }
-    return {};
-  }
-
-  void Reset()
-  {
-    this->Matches.clear();
-    this->Current = this->Matches.cbegin();
   }
 
 private:
-  std::reference_wrapper<const std::vector<std::string>> Names;
-  std::vector<std::string> Matches;
-  std::vector<std::string>::const_iterator Current;
   // sort parameters
   const cmFindPackageCommand::SortOrderType SortOrder;
   const cmFindPackageCommand::SortDirectionType SortDirection;
 };
 
-class cmFileListGeneratorMacProject
+class cmFileListGeneratorMacProject : public cmDirectoryListGenerator
 {
 public:
   cmFileListGeneratorMacProject(const std::vector<std::string>& names,
                                 cm::string_view ext)
-    : Names{ names }
+    : cmDirectoryListGenerator{ names }
     , Extension{ ext }
-    , Matches{}
-    , Current{ this->Matches.cbegin() }
   {
   }
 
-  std::string GetNextCandidate(const std::string& parent)
+  std::string TransformNameBeforeCmp(std::string name) override
   {
-    // Construct a list of matches if not yet
-    if (this->Matches.empty()) {
-      cmsys::Directory directoryLister;
-      directoryLister.Load(parent);
-      for (auto i = 0ul; i < directoryLister.GetNumberOfFiles(); ++i) {
-        const char* const fname = directoryLister.GetFile(i);
-        if (isDirentryToIgnore(fname)) {
-          continue;
-        }
-        for (auto name : this->Names.get()) {
-          name += this->Extension;
-          // Skip entries that don't match and non-directories.
-          // ATTENTION BTW, original code also didn't check if it's a symlink
-          // to a directory! ALERT `Directory::Load()` keep only names
-          // internally and LOST entry type So `Directory::FileIsDirectory`
-          // gonna use `SystemTools::FileIsDirectory()` (wasing a syscall)
-          // again!
-          if (cmsysString_strncasecmp(fname, name.c_str(), name.length()) ==
-                0 &&
-              directoryLister.FileIsDirectory(i)) {
-            this->Matches.emplace_back(fname);
-          }
-        }
-      }
-      this->Current = this->Matches.cbegin();
-    }
-    if (this->Current != this->Matches.cend()) {
-      auto candidate = cmStrCat(parent, '/', *this->Current++);
-      return candidate;
-    }
-    return {};
-  }
-
-  void Reset()
-  {
-    this->Matches.clear();
-    this->Current = this->Matches.cbegin();
+    return cmStrCat(name, this->Extension);
   }
 
 private:
-  std::reference_wrapper<const std::vector<std::string>> Names;
   const cm::string_view Extension;
-  std::vector<std::string> Matches;
-  std::vector<std::string>::const_iterator Current;
 };
 
 class cmFileListGeneratorGlob
