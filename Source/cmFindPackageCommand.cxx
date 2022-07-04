@@ -2147,6 +2147,7 @@ void cmFindPackageCommand::StoreVersionFound()
   }
 }
 
+// BEGIN File paths generators
 namespace {
 class cmFileList;
 
@@ -2215,25 +2216,24 @@ bool cmFileListGeneratorBase::Consider(std::string const& fullPath,
   }
   return listing.Visit(fullPath + '/');
 }
-} // anonymous namespace
 
 class cmFindPackageFileList : public cmFileList
 {
 public:
-  cmFindPackageFileList(cmFindPackageCommand* const fpc)
-    : FPC(fpc)
+  using SearchFn = std::function<bool(const std::string&)>;
+  cmFindPackageFileList(const SearchFn search)
+    : searchFn(search)
   {
   }
 
 private:
   bool Visit(std::string const& fullPath) override
   {
-    return this->FPC->SearchDirectory(fullPath);
+    return this->searchFn(fullPath);
   }
-  cmFindPackageCommand* const FPC;
+  const SearchFn searchFn;
 };
 
-namespace {
 class cmFileListGeneratorFixed : public cmFileListGeneratorBase
 {
 public:
@@ -2486,6 +2486,7 @@ private:
   }
 };
 } // anonymous namespace
+// END File paths generators
 
 bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
 {
@@ -2515,9 +2516,13 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
   // add one.
   std::string const prefix = prefix_in.substr(0, prefix_in.size() - 1);
 
+  auto searchFn = [this](const std::string& fullPath) -> bool {
+    return this->SearchDirectory(fullPath);
+  };
+
   //  PREFIX/(cmake|CMake)/ (useful on windows or in build trees)
   {
-    cmFindPackageFileList lister(this);
+    cmFindPackageFileList lister(searchFn);
     lister / cmFileListGeneratorFixed(prefix) /
       cmFileListGeneratorCaseInsensitive("cmake");
     if (lister.Search()) {
@@ -2527,7 +2532,7 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
 
   //  PREFIX/(Foo|foo|FOO).*/
   {
-    cmFindPackageFileList lister(this);
+    cmFindPackageFileList lister(searchFn);
     lister / cmFileListGeneratorFixed(prefix) /
       cmFileListGeneratorProject(this->Names, this->SortOrder,
                                  this->SortDirection);
@@ -2538,7 +2543,7 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
 
   //  PREFIX/(Foo|foo|FOO).*/(cmake|CMake)/
   {
-    cmFindPackageFileList lister(this);
+    cmFindPackageFileList lister(searchFn);
     lister / cmFileListGeneratorFixed(prefix) /
       cmFileListGeneratorProject(this->Names, this->SortOrder,
                                  this->SortDirection) /
@@ -2567,7 +2572,7 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
 
   //  PREFIX/(lib/ARCH|lib*|share)/cmake/(Foo|foo|FOO).*/
   {
-    cmFindPackageFileList lister(this);
+    cmFindPackageFileList lister(searchFn);
     lister / cmFileListGeneratorFixed(prefix) /
       cmFileListGeneratorEnumerate(common) /
       cmFileListGeneratorFixed("cmake") /
@@ -2580,7 +2585,7 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
 
   //  PREFIX/(lib/ARCH|lib*|share)/(Foo|foo|FOO).*/
   {
-    cmFindPackageFileList lister(this);
+    cmFindPackageFileList lister(searchFn);
     lister / cmFileListGeneratorFixed(prefix) /
       cmFileListGeneratorEnumerate(common) /
       cmFileListGeneratorProject(this->Names, this->SortOrder,
@@ -2592,7 +2597,7 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
 
   //  PREFIX/(lib/ARCH|lib*|share)/(Foo|foo|FOO).*/(cmake|CMake)/
   {
-    cmFindPackageFileList lister(this);
+    cmFindPackageFileList lister(searchFn);
     lister / cmFileListGeneratorFixed(prefix) /
       cmFileListGeneratorEnumerate(common) /
       cmFileListGeneratorProject(this->Names, this->SortOrder,
@@ -2605,7 +2610,7 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
 
   // PREFIX/(Foo|foo|FOO).*/(lib/ARCH|lib*|share)/cmake/(Foo|foo|FOO).*/
   {
-    cmFindPackageFileList lister(this);
+    cmFindPackageFileList lister(searchFn);
     lister / cmFileListGeneratorFixed(prefix) /
       cmFileListGeneratorProject(this->Names, this->SortOrder,
                                  this->SortDirection) /
@@ -2620,7 +2625,7 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
 
   // PREFIX/(Foo|foo|FOO).*/(lib/ARCH|lib*|share)/(Foo|foo|FOO).*/
   {
-    cmFindPackageFileList lister(this);
+    cmFindPackageFileList lister(searchFn);
     lister / cmFileListGeneratorFixed(prefix) /
       cmFileListGeneratorProject(this->Names, this->SortOrder,
                                  this->SortDirection) /
@@ -2634,7 +2639,7 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
 
   // PREFIX/(Foo|foo|FOO).*/(lib/ARCH|lib*|share)/(Foo|foo|FOO).*/(cmake|CMake)/
   {
-    cmFindPackageFileList lister(this);
+    cmFindPackageFileList lister(searchFn);
     lister / cmFileListGeneratorFixed(prefix) /
       cmFileListGeneratorProject(this->Names, this->SortOrder,
                                  this->SortDirection) /
@@ -2658,9 +2663,13 @@ bool cmFindPackageCommand::SearchFrameworkPrefix(std::string const& prefix_in)
   // add one.
   std::string const prefix = prefix_in.substr(0, prefix_in.size() - 1);
 
+  auto searchFn = [this](const std::string& fullPath) -> bool {
+    return this->SearchDirectory(fullPath);
+  };
+
   // <prefix>/Foo.framework/Resources/
   {
-    cmFindPackageFileList lister(this);
+    cmFindPackageFileList lister(searchFn);
     lister / cmFileListGeneratorFixed(prefix) /
       cmFileListGeneratorMacProject(this->Names, ".framework") /
       cmFileListGeneratorFixed("Resources");
@@ -2670,7 +2679,7 @@ bool cmFindPackageCommand::SearchFrameworkPrefix(std::string const& prefix_in)
   }
   // <prefix>/Foo.framework/Resources/CMake/
   {
-    cmFindPackageFileList lister(this);
+    cmFindPackageFileList lister(searchFn);
     lister / cmFileListGeneratorFixed(prefix) /
       cmFileListGeneratorMacProject(this->Names, ".framework") /
       cmFileListGeneratorFixed("Resources") /
@@ -2682,7 +2691,7 @@ bool cmFindPackageCommand::SearchFrameworkPrefix(std::string const& prefix_in)
 
   // <prefix>/Foo.framework/Versions/*/Resources/
   {
-    cmFindPackageFileList lister(this);
+    cmFindPackageFileList lister(searchFn);
     lister / cmFileListGeneratorFixed(prefix) /
       cmFileListGeneratorMacProject(this->Names, ".framework") /
       cmFileListGeneratorFixed("Versions") /
@@ -2694,7 +2703,7 @@ bool cmFindPackageCommand::SearchFrameworkPrefix(std::string const& prefix_in)
 
   // <prefix>/Foo.framework/Versions/*/Resources/CMake/
   {
-    cmFindPackageFileList lister(this);
+    cmFindPackageFileList lister(searchFn);
     lister / cmFileListGeneratorFixed(prefix) /
       cmFileListGeneratorMacProject(this->Names, ".framework") /
       cmFileListGeneratorFixed("Versions") /
@@ -2716,9 +2725,13 @@ bool cmFindPackageCommand::SearchAppBundlePrefix(std::string const& prefix_in)
   // add one.
   std::string const prefix = prefix_in.substr(0, prefix_in.size() - 1);
 
+  auto searchFn = [this](const std::string& fullPath) -> bool {
+    return this->SearchDirectory(fullPath);
+  };
+
   // <prefix>/Foo.app/Contents/Resources
   {
-    cmFindPackageFileList lister(this);
+    cmFindPackageFileList lister(searchFn);
     lister / cmFileListGeneratorFixed(prefix) /
       cmFileListGeneratorMacProject(this->Names, ".app") /
       cmFileListGeneratorFixed("Contents/Resources");
@@ -2729,7 +2742,7 @@ bool cmFindPackageCommand::SearchAppBundlePrefix(std::string const& prefix_in)
 
   // <prefix>/Foo.app/Contents/Resources/CMake
   {
-    cmFindPackageFileList lister(this);
+    cmFindPackageFileList lister(searchFn);
     lister / cmFileListGeneratorFixed(prefix) /
       cmFileListGeneratorMacProject(this->Names, ".app") /
       cmFileListGeneratorFixed("Contents/Resources") /
