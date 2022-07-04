@@ -74,6 +74,7 @@ list(APPEND CTEST_CUSTOM_WARNING_EXCEPTION
   "cm(StringCommand|CTestTestHandler)\\.cxx.*warning.*rand.*may return deterministic values"
   "cm(StringCommand|CTestTestHandler)\\.cxx.*warning.*rand.*isn.*t random" # we do not do crypto
   "cm(StringCommand|CTestTestHandler)\\.cxx.*warning.*srand.*seed choices are.*poor" # we do not do crypto
+  "cmFindPackageCommand.cxx.*: warning #177-D: parameter .* was declared but never referenced"
   "IPA warning: function.*multiply defined in"
   "LICENSE WARNING" # PGI license expiry.  Not useful in nightly testing.
 
