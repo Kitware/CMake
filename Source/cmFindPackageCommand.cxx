@@ -2220,23 +2220,17 @@ bool cmFileListGeneratorBase::Consider(std::string const& fullPath,
 class cmFindPackageFileList : public cmFileList
 {
 public:
-  cmFindPackageFileList(cmFindPackageCommand* const fpc,
-                        bool const use_suffixes = true)
+  cmFindPackageFileList(cmFindPackageCommand* const fpc)
     : FPC(fpc)
-    , UseSuffixes(use_suffixes)
   {
   }
 
 private:
   bool Visit(std::string const& fullPath) override
   {
-    if (this->UseSuffixes) {
-      return this->FPC->SearchDirectory(fullPath);
-    }
-    return this->FPC->CheckDirectory(fullPath);
+    return this->FPC->SearchDirectory(fullPath);
   }
   cmFindPackageCommand* const FPC;
-  bool const UseSuffixes;
 };
 
 namespace {
