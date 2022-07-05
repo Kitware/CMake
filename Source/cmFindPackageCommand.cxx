@@ -2504,27 +2504,23 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
     return this->SearchDirectory(fullPath);
   };
 
+  auto iCMakeGen = cmCaseInsensitiveDirectoryListGenerator{ "cmake"_s };
+  auto firstPkgDirGen =
+    cmProjectDirectoryListGenerator{ this->Names, this->SortOrder,
+                                     this->SortDirection };
+
   // PREFIX/(cmake|CMake)/ (useful on windows or in build trees)
-  if (TryGeneratedPaths(
-        searchFn, prefix,
-        cmCaseInsensitiveDirectoryListGenerator{ "cmake"_s })) {
+  if (TryGeneratedPaths(searchFn, prefix, iCMakeGen)) {
     return true;
   }
 
   // PREFIX/(Foo|foo|FOO).*/
-  if (TryGeneratedPaths(
-        searchFn, prefix,
-        cmProjectDirectoryListGenerator{ this->Names, this->SortOrder,
-                                         this->SortDirection })) {
+  if (TryGeneratedPaths(searchFn, prefix, firstPkgDirGen)) {
     return true;
   }
 
   // PREFIX/(Foo|foo|FOO).*/(cmake|CMake)/
-  if (TryGeneratedPaths(
-        searchFn, prefix,
-        cmProjectDirectoryListGenerator{ this->Names, this->SortOrder,
-                                         this->SortDirection },
-        cmCaseInsensitiveDirectoryListGenerator{ "cmake"_s })) {
+  if (TryGeneratedPaths(searchFn, prefix, firstPkgDirGen, iCMakeGen)) {
     return true;
   }
 
@@ -2547,64 +2543,43 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
   common.emplace_back("lib"_s);
   common.emplace_back("share"_s);
 
+  auto cmnGen = cmEnumPathSegmentsGenerator{ common };
+  auto cmakeGen = cmAppendPathSegmentGenerator{ "cmake"_s };
+
   // PREFIX/(lib/ARCH|lib*|share)/cmake/(Foo|foo|FOO).*/
-  if (TryGeneratedPaths(
-        searchFn, prefix, cmEnumPathSegmentsGenerator{ common },
-        cmAppendPathSegmentGenerator{ "cmake"_s },
-        cmProjectDirectoryListGenerator{ this->Names, this->SortOrder,
-                                         this->SortDirection })) {
+  if (TryGeneratedPaths(searchFn, prefix, cmnGen, cmakeGen, firstPkgDirGen)) {
     return true;
   }
 
   // PREFIX/(lib/ARCH|lib*|share)/(Foo|foo|FOO).*/
-  if (TryGeneratedPaths(
-        searchFn, prefix, cmEnumPathSegmentsGenerator{ common },
-        cmProjectDirectoryListGenerator{ this->Names, this->SortOrder,
-                                         this->SortDirection })) {
+  if (TryGeneratedPaths(searchFn, prefix, cmnGen, firstPkgDirGen)) {
     return true;
   }
 
   // PREFIX/(lib/ARCH|lib*|share)/(Foo|foo|FOO).*/(cmake|CMake)/
-  if (TryGeneratedPaths(
-        searchFn, prefix, cmEnumPathSegmentsGenerator{ common },
-        cmProjectDirectoryListGenerator{ this->Names, this->SortOrder,
-                                         this->SortDirection },
-        cmCaseInsensitiveDirectoryListGenerator{ "cmake"_s })) {
+  if (TryGeneratedPaths(searchFn, prefix, cmnGen, firstPkgDirGen, iCMakeGen)) {
     return true;
   }
 
+  auto secondPkgDirGen =
+    cmProjectDirectoryListGenerator{ this->Names, this->SortOrder,
+                                     this->SortDirection };
+
   // PREFIX/(Foo|foo|FOO).*/(lib/ARCH|lib*|share)/cmake/(Foo|foo|FOO).*/
-  if (TryGeneratedPaths(
-        searchFn, prefix,
-        cmProjectDirectoryListGenerator{ this->Names, this->SortOrder,
-                                         this->SortDirection },
-        cmEnumPathSegmentsGenerator{ common },
-        cmAppendPathSegmentGenerator{ "cmake"_s },
-        cmProjectDirectoryListGenerator{ this->Names, this->SortOrder,
-                                         this->SortDirection })) {
+  if (TryGeneratedPaths(searchFn, prefix, firstPkgDirGen, cmnGen, cmakeGen,
+                        secondPkgDirGen)) {
     return true;
   }
 
   // PREFIX/(Foo|foo|FOO).*/(lib/ARCH|lib*|share)/(Foo|foo|FOO).*/
-  if (TryGeneratedPaths(
-        searchFn, prefix,
-        cmProjectDirectoryListGenerator{ this->Names, this->SortOrder,
-                                         this->SortDirection },
-        cmEnumPathSegmentsGenerator{ common },
-        cmProjectDirectoryListGenerator{ this->Names, this->SortOrder,
-                                         this->SortDirection })) {
+  if (TryGeneratedPaths(searchFn, prefix, firstPkgDirGen, cmnGen,
+                        secondPkgDirGen)) {
     return true;
   }
 
   // PREFIX/(Foo|foo|FOO).*/(lib/ARCH|lib*|share)/(Foo|foo|FOO).*/(cmake|CMake)/
-  if (TryGeneratedPaths(
-        searchFn, prefix,
-        cmProjectDirectoryListGenerator{ this->Names, this->SortOrder,
-                                         this->SortDirection },
-        cmEnumPathSegmentsGenerator{ common },
-        cmProjectDirectoryListGenerator{ this->Names, this->SortOrder,
-                                         this->SortDirection },
-        cmCaseInsensitiveDirectoryListGenerator{ "cmake"_s })) {
+  if (TryGeneratedPaths(searchFn, prefix, firstPkgDirGen, cmnGen,
+                        secondPkgDirGen, iCMakeGen)) {
     return true;
   }
 
@@ -2623,39 +2598,30 @@ bool cmFindPackageCommand::SearchFrameworkPrefix(std::string const& prefix_in)
     return this->SearchDirectory(fullPath);
   };
 
+  auto iCMakeGen = cmCaseInsensitiveDirectoryListGenerator{ "cmake"_s };
+  auto fwGen =
+    cmMacProjectDirectoryListGenerator{ this->Names, ".framework"_s };
+  auto rGen = cmAppendPathSegmentGenerator{ "Resources"_s };
+  auto vGen = cmAppendPathSegmentGenerator{ "Versions"_s };
+  auto grGen = cmFileListGeneratorGlob{ "/*/Resources"_s };
+
   // <prefix>/Foo.framework/Resources/
-  if (TryGeneratedPaths(
-        searchFn, prefix,
-        cmMacProjectDirectoryListGenerator{ this->Names, ".framework"_s },
-        cmAppendPathSegmentGenerator{ "Resources"_s })) {
+  if (TryGeneratedPaths(searchFn, prefix, fwGen, rGen)) {
     return true;
   }
 
   // <prefix>/Foo.framework/Resources/CMake/
-  if (TryGeneratedPaths(
-        searchFn, prefix,
-        cmMacProjectDirectoryListGenerator{ this->Names, ".framework"_s },
-        cmAppendPathSegmentGenerator{ "Resources"_s },
-        cmCaseInsensitiveDirectoryListGenerator{ "cmake"_s })) {
+  if (TryGeneratedPaths(searchFn, prefix, fwGen, rGen, iCMakeGen)) {
     return true;
   }
 
   // <prefix>/Foo.framework/Versions/*/Resources/
-  if (TryGeneratedPaths(
-        searchFn, prefix,
-        cmMacProjectDirectoryListGenerator{ this->Names, ".framework"_s },
-        cmAppendPathSegmentGenerator{ "Versions"_s },
-        cmFileListGeneratorGlob{ "/*/Resources"_s })) {
+  if (TryGeneratedPaths(searchFn, prefix, fwGen, vGen, grGen)) {
     return true;
   }
 
   // <prefix>/Foo.framework/Versions/*/Resources/CMake/
-  if (TryGeneratedPaths(
-        searchFn, prefix,
-        cmMacProjectDirectoryListGenerator{ this->Names, ".framework"_s },
-        cmAppendPathSegmentGenerator{ "Versions"_s },
-        cmFileListGeneratorGlob{ "/*/Resources"_s },
-        cmCaseInsensitiveDirectoryListGenerator{ "cmake"_s })) {
+  if (TryGeneratedPaths(searchFn, prefix, fwGen, vGen, grGen, iCMakeGen)) {
     return true;
   }
 
@@ -2674,19 +2640,17 @@ bool cmFindPackageCommand::SearchAppBundlePrefix(std::string const& prefix_in)
     return this->SearchDirectory(fullPath);
   };
 
+  auto appGen = cmMacProjectDirectoryListGenerator{ this->Names, ".app"_s };
+  auto crGen = cmAppendPathSegmentGenerator{ "Contents/Resources"_s };
+
   // <prefix>/Foo.app/Contents/Resources
-  if (TryGeneratedPaths(
-        searchFn, prefix,
-        cmMacProjectDirectoryListGenerator{ this->Names, ".app"_s },
-        cmAppendPathSegmentGenerator{ "Contents/Resources"_s })) {
+  if (TryGeneratedPaths(searchFn, prefix, appGen, crGen)) {
     return true;
   }
 
   // <prefix>/Foo.app/Contents/Resources/CMake
   if (TryGeneratedPaths(
-        searchFn, prefix,
-        cmMacProjectDirectoryListGenerator{ this->Names, ".app"_s },
-        cmAppendPathSegmentGenerator{ "Contents/Resources"_s },
+        searchFn, prefix, appGen, crGen,
         cmCaseInsensitiveDirectoryListGenerator{ "cmake"_s })) {
     return true;
   }
