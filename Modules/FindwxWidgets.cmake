@@ -468,10 +468,12 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
 
   # If wxWidgets_ROOT_DIR changed, clear lib dir.
   if(NOT WX_ROOT_DIR STREQUAL wxWidgets_ROOT_DIR)
+    if(NOT wxWidgets_LIB_DIR OR WX_ROOT_DIR)
+      set(wxWidgets_LIB_DIR "wxWidgets_LIB_DIR-NOTFOUND"
+          CACHE PATH "Cleared." FORCE)
+    endif()
     set(WX_ROOT_DIR ${wxWidgets_ROOT_DIR}
         CACHE INTERNAL "wxWidgets_ROOT_DIR")
-    set(wxWidgets_LIB_DIR "wxWidgets_LIB_DIR-NOTFOUND"
-        CACHE PATH "Cleared." FORCE)
   endif()
 
   if(WX_ROOT_DIR)
