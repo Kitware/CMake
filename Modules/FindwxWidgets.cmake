@@ -29,9 +29,9 @@ select a configuration):
 ::
 
   wxWidgets_ROOT_DIR      - Base wxWidgets directory
-                            (e.g., C:/wxWidgets-2.6.3).
+                            (e.g., C:/wxWidgets-3.2.0).
   wxWidgets_LIB_DIR       - Path to wxWidgets libraries
-                            (e.g., C:/wxWidgets-2.6.3/lib/vc_lib).
+                            (e.g., C:/wxWidgets-3.2.0/lib/vc_x64_lib).
   wxWidgets_CONFIGURATION - Configuration to use
                             (e.g., msw, mswd, mswu, mswunivud, etc.)
   wxWidgets_EXCLUDE_COMMON_LIBRARIES
@@ -215,6 +215,32 @@ else()
   set(wxWidgets_USE_FILE UsewxWidgets)
 endif()
 
+# Known wxWidgets versions.
+set(wx_versions 3.3 3.2 3.1 3.0 2.9 2.8 2.7 2.6 2.5)
+
+macro(wx_extract_version)
+  unset(_wx_filename)
+  find_file(_wx_filename wx/version.h PATHS ${wxWidgets_INCLUDE_DIRS} NO_DEFAULT_PATH)
+  dbg_msg("_wx_filename:  ${_wx_filename}")
+
+  if(NOT _wx_filename)
+    message(FATAL_ERROR "wxWidgets wx/version.h file not found in ${wxWidgets_INCLUDE_DIRS}.")
+  endif()
+
+  file(READ "${_wx_filename}" _wx_version_h)
+  unset(_wx_filename CACHE)
+
+  string(REGEX REPLACE "^(.*\n)?#define +wxMAJOR_VERSION +([0-9]+).*"
+    "\\2" wxWidgets_VERSION_MAJOR "${_wx_version_h}" )
+  string(REGEX REPLACE "^(.*\n)?#define +wxMINOR_VERSION +([0-9]+).*"
+    "\\2" wxWidgets_VERSION_MINOR "${_wx_version_h}" )
+  string(REGEX REPLACE "^(.*\n)?#define +wxRELEASE_NUMBER +([0-9]+).*"
+    "\\2" wxWidgets_VERSION_PATCH "${_wx_version_h}" )
+  set(wxWidgets_VERSION_STRING
+    "${wxWidgets_VERSION_MAJOR}.${wxWidgets_VERSION_MINOR}.${wxWidgets_VERSION_PATCH}" )
+  dbg_msg("wxWidgets_VERSION_STRING:    ${wxWidgets_VERSION_STRING}")
+endmacro()
+
 #=====================================================================
 # Determine whether unix or win32 paths should be used
 #=====================================================================
@@ -269,10 +295,11 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
   #
   # Find libraries associated to a configuration.
   #
-  macro(WX_FIND_LIBS _PF _UNV _UCD _DBG)
+  macro(WX_FIND_LIBS _PF _UNV _UCD _DBG _VER)
     DBG_MSG_V("m_unv = ${_UNV}")
     DBG_MSG_V("m_ucd = ${_UCD}")
     DBG_MSG_V("m_dbg = ${_DBG}")
+    DBG_MSG_V("m_ver = ${_VER}")
 
     # FIXME: What if both regex libs are available. regex should be
     # found outside the loop and only wx${LIB}${_UCD}${_DBG}.
@@ -290,28 +317,14 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
 
     # Find wxWidgets multilib base libraries.
     find_library(WX_base${_DBG}
-      NAMES
-      wxbase31${_UCD}${_DBG}
-      wxbase30${_UCD}${_DBG}
-      wxbase29${_UCD}${_DBG}
-      wxbase28${_UCD}${_DBG}
-      wxbase27${_UCD}${_DBG}
-      wxbase26${_UCD}${_DBG}
-      wxbase25${_UCD}${_DBG}
+      NAMES wxbase${_VER}${_UCD}${_DBG}
       PATHS ${WX_LIB_DIR}
       NO_DEFAULT_PATH
       )
     mark_as_advanced(WX_base${_DBG})
     foreach(LIB net odbc xml)
       find_library(WX_${LIB}${_DBG}
-        NAMES
-        wxbase31${_UCD}${_DBG}_${LIB}
-        wxbase30${_UCD}${_DBG}_${LIB}
-        wxbase29${_UCD}${_DBG}_${LIB}
-        wxbase28${_UCD}${_DBG}_${LIB}
-        wxbase27${_UCD}${_DBG}_${LIB}
-        wxbase26${_UCD}${_DBG}_${LIB}
-        wxbase25${_UCD}${_DBG}_${LIB}
+        NAMES wxbase${_VER}${_UCD}${_DBG}_${LIB}
         PATHS ${WX_LIB_DIR}
         NO_DEFAULT_PATH
         )
@@ -320,14 +333,7 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
 
     # Find wxWidgets monolithic library.
     find_library(WX_mono${_DBG}
-      NAMES
-      wx${_PF}${_UNV}31${_UCD}${_DBG}
-      wx${_PF}${_UNV}30${_UCD}${_DBG}
-      wx${_PF}${_UNV}29${_UCD}${_DBG}
-      wx${_PF}${_UNV}28${_UCD}${_DBG}
-      wx${_PF}${_UNV}27${_UCD}${_DBG}
-      wx${_PF}${_UNV}26${_UCD}${_DBG}
-      wx${_PF}${_UNV}25${_UCD}${_DBG}
+      NAMES wx${_PF}${_UNV}${_VER}${_UCD}${_DBG}
       PATHS ${WX_LIB_DIR}
       NO_DEFAULT_PATH
       )
@@ -337,14 +343,7 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
     foreach(LIB core adv aui html media xrc dbgrid gl qa richtext
                 stc ribbon propgrid webview)
       find_library(WX_${LIB}${_DBG}
-        NAMES
-        wx${_PF}${_UNV}31${_UCD}${_DBG}_${LIB}
-        wx${_PF}${_UNV}30${_UCD}${_DBG}_${LIB}
-        wx${_PF}${_UNV}29${_UCD}${_DBG}_${LIB}
-        wx${_PF}${_UNV}28${_UCD}${_DBG}_${LIB}
-        wx${_PF}${_UNV}27${_UCD}${_DBG}_${LIB}
-        wx${_PF}${_UNV}26${_UCD}${_DBG}_${LIB}
-        wx${_PF}${_UNV}25${_UCD}${_DBG}_${LIB}
+        NAMES wx${_PF}${_UNV}${_VER}${_UCD}${_DBG}_${LIB}
         PATHS ${WX_LIB_DIR}
         NO_DEFAULT_PATH
         )
@@ -447,6 +446,13 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
   # WIN32: Start actual work.
   #-------------------------------------------------------------------
 
+  set(wx_paths "wxWidgets")
+  foreach(version ${wx_versions})
+    foreach(patch RANGE 15 0 -1)
+      list(APPEND wx_paths "wxWidgets-${version}.${patch}")
+    endforeach()
+  endforeach()
+
   # Look for an installation tree.
   find_path(wxWidgets_ROOT_DIR
     NAMES include/wx/wx.h
@@ -458,41 +464,7 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
       D:/
       ENV ProgramFiles
     PATH_SUFFIXES
-      wxWidgets-3.1.0
-      wxWidgets-3.0.2
-      wxWidgets-3.0.1
-      wxWidgets-3.0.0
-      wxWidgets-2.9.5
-      wxWidgets-2.9.4
-      wxWidgets-2.9.3
-      wxWidgets-2.9.2
-      wxWidgets-2.9.1
-      wxWidgets-2.9.0
-      wxWidgets-2.8.9
-      wxWidgets-2.8.8
-      wxWidgets-2.8.7
-      wxWidgets-2.8.6
-      wxWidgets-2.8.5
-      wxWidgets-2.8.4
-      wxWidgets-2.8.3
-      wxWidgets-2.8.2
-      wxWidgets-2.8.1
-      wxWidgets-2.8.0
-      wxWidgets-2.7.4
-      wxWidgets-2.7.3
-      wxWidgets-2.7.2
-      wxWidgets-2.7.1
-      wxWidgets-2.7.0
-      wxWidgets-2.7.0-1
-      wxWidgets-2.6.4
-      wxWidgets-2.6.3
-      wxWidgets-2.6.2
-      wxWidgets-2.6.1
-      wxWidgets-2.5.4
-      wxWidgets-2.5.3
-      wxWidgets-2.5.2
-      wxWidgets-2.5.1
-      wxWidgets
+      ${wx_paths}
     DOC "wxWidgets base/installation directory"
     )
 
@@ -655,10 +627,14 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
           set(wxWidgets_FOUND FALSE)
         endif()
 
+        # Get version number.
+        wx_extract_version()
+        set(VER "${wxWidgets_VERSION_MAJOR}${wxWidgets_VERSION_MINOR}")
+
         # Find wxWidgets libraries.
-        WX_FIND_LIBS("${PF}" "${UNV}" "${UCD}" "${DBG}")
+        WX_FIND_LIBS("${PF}" "${UNV}" "${UCD}" "${DBG}" "${VER}")
         if(WX_USE_REL_AND_DBG)
-          WX_FIND_LIBS("${PF}" "${UNV}" "${UCD}" "d")
+          WX_FIND_LIBS("${PF}" "${UNV}" "${UCD}" "d" "${VER}")
         endif()
 
         # Settings for requested libs (i.e., include dir, libraries, etc.).
@@ -773,12 +749,14 @@ else()
     # Look for wx-config -- this can be set in the environment,
     # or try versioned and toolchain-versioned variants of the -config
     # executable as well.
+    set(wx_config_names "wx-config")
+    foreach(version ${wx_versions})
+      list(APPEND wx_config_names "wx-config-${version}" "wxgtk3u-${version}-config" "wxgtk2u-${version}-config")
+    endforeach()
     find_program(wxWidgets_CONFIG_EXECUTABLE
       NAMES
         $ENV{WX_CONFIG}
-        wx-config
-        wx-config-3.1 wx-config-3.0 wx-config-2.9 wx-config-2.8
-        wxgtk3u-3.1-config wxgtk3u-3.0-config wxgtk2u-2.8-config
+        ${wx_config_names}
       DOC "Location of wxWidgets library configuration provider binary (wx-config)."
       ONLY_CMAKE_FIND_ROOT_PATH
       )
@@ -981,26 +959,7 @@ unset(_wx_lib_missing)
 
 # Check if a specific version was requested by find_package().
 if(wxWidgets_FOUND)
-  unset(_wx_filename)
-  find_file(_wx_filename wx/version.h PATHS ${wxWidgets_INCLUDE_DIRS} NO_DEFAULT_PATH)
-  dbg_msg("_wx_filename:  ${_wx_filename}")
-
-  if(NOT _wx_filename)
-    message(FATAL_ERROR "wxWidgets wx/version.h file not found in ${wxWidgets_INCLUDE_DIRS}.")
-  endif()
-
-  file(READ "${_wx_filename}" _wx_version_h)
-  unset(_wx_filename CACHE)
-
-  string(REGEX REPLACE "^(.*\n)?#define +wxMAJOR_VERSION +([0-9]+).*"
-    "\\2" wxWidgets_VERSION_MAJOR "${_wx_version_h}" )
-  string(REGEX REPLACE "^(.*\n)?#define +wxMINOR_VERSION +([0-9]+).*"
-    "\\2" wxWidgets_VERSION_MINOR "${_wx_version_h}" )
-  string(REGEX REPLACE "^(.*\n)?#define +wxRELEASE_NUMBER +([0-9]+).*"
-    "\\2" wxWidgets_VERSION_PATCH "${_wx_version_h}" )
-  set(wxWidgets_VERSION_STRING
-    "${wxWidgets_VERSION_MAJOR}.${wxWidgets_VERSION_MINOR}.${wxWidgets_VERSION_PATCH}" )
-  dbg_msg("wxWidgets_VERSION_STRING:    ${wxWidgets_VERSION_STRING}")
+  wx_extract_version()
 endif()
 
 # Debug output:
