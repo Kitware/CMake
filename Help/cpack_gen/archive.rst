@@ -49,6 +49,8 @@ Variables specific to CPack Archive generator
 
   Package file name without extension. The extension is determined from the
   archive format (see list above) and automatically appended to the file name.
+  Note that ``<component>`` is all uppercase in the variable name.
+
   The default is ``<CPACK_PACKAGE_FILE_NAME>[-<component>]``, with spaces
   replaced by '-'.
 
