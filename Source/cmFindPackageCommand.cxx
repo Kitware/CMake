@@ -381,34 +381,37 @@ void ResetGenerator()
 {
 }
 
-template <typename T>
-void ResetGenerator(T&& g)
+template <typename Generator>
+void ResetGenerator(Generator&& generator)
 {
-  std::forward<T&&>(g).Reset();
+  std::forward<Generator&&>(generator).Reset();
 }
 
-template <typename T, typename... Ts>
-void ResetGenerator(T&& g, Ts&&... tail)
+template <typename Generator, typename... Generators>
+void ResetGenerator(Generator&& generator, Generators&&... generators)
 {
-  ResetGenerator(std::forward<T&&>(g));
-  ResetGenerator(std::forward<Ts&&>(tail)...);
+  ResetGenerator(std::forward<Generator&&>(generator));
+  ResetGenerator(std::forward<Generators&&>(generators)...);
 }
 
-template <typename Fn>
-bool TryGeneratedPaths(Fn&& checker, const std::string& fullPath)
+template <typename CallbackFn>
+bool TryGeneratedPaths(CallbackFn&& filesCollector,
+                       const std::string& fullPath)
 {
   assert(!fullPath.empty() && fullPath.back() != '/');
-  return std::forward<Fn&&>(checker)(fullPath + '/');
+  return std::forward<CallbackFn&&>(filesCollector)(fullPath + '/');
 }
 
-template <typename Fn, typename Generator, typename... Rest>
-bool TryGeneratedPaths(Fn&& checker, const std::string& startPath,
-                       Generator&& gen, Rest&&... tail)
+template <typename CallbackFn, typename Generator, typename... Rest>
+bool TryGeneratedPaths(CallbackFn&& filesCollector,
+                       const std::string& startPath, Generator&& gen,
+                       Rest&&... tail)
 {
+  ResetGenerator(std::forward<Generator&&>(gen));
   for (auto path = gen.GetNextCandidate(startPath); !path.empty();
        path = gen.GetNextCandidate(startPath)) {
     ResetGenerator(std::forward<Rest&&>(tail)...);
-    if (TryGeneratedPaths(std::forward<Fn&&>(checker), path,
+    if (TryGeneratedPaths(std::forward<CallbackFn&&>(filesCollector), path,
                           std::forward<Rest&&>(tail)...)) {
       return true;
     }
