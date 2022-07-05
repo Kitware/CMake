@@ -81,6 +81,14 @@ public:
   {
     if (!isValid())
       return false;
+    // The API in the FreeBSD sources (the header has no documentation),
+    // is as follows:
+    //
+    // int pkg_create(struct pkg_create *pc, const char *metadata, const char
+    // *plist, bool hash)
+    //
+    // We let the plist be determined from what is installed, and all
+    // the rest comes from the manifest data.
     int r = pkg_create(d, manifest.c_str(), nullptr, false);
     return r == 0;
   }
