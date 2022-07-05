@@ -408,7 +408,8 @@ int cmCPackFreeBSDGenerator::PackageFiles()
     return 0;
   }
 
-  std::string output_dir = cmSystemTools::CollapseFullPath("../", toplevel);
+  const std::string output_dir =
+    cmSystemTools::CollapseFullPath("../", toplevel);
   PkgCreate package(output_dir, toplevel, manifestname);
   if (package.isValid()) {
     if (!package.Create()) {
@@ -431,6 +432,24 @@ int cmCPackFreeBSDGenerator::PackageFiles()
       name.replace(name.size() - broken_suffix_17.size(), std::string::npos,
                    FreeBSDPackageSuffix_17);
       break;
+    }
+  }
+
+  const std::string packageFileName =
+    var_lookup("CPACK_PACKAGE_FILE_NAME") + FreeBSDPackageSuffix_17;
+  if (packageFileNames.size() == 1 && !packageFileName.empty() &&
+      packageFileNames[0] != packageFileName) {
+    // Since libpkg always writes <name>-<version>.<suffix>,
+    // if there is a CPACK_PACKAGE_FILE_NAME set, we need to
+    // rename, and then re-set the name.
+    const std::string sourceFile = packageFileNames[0];
+    const std::string packageSubDirectory =
+      cmSystemTools::GetParentDirectory(sourceFile);
+    const std::string targetFileName =
+      packageSubDirectory + '/' + packageFileName;
+    if (cmSystemTools::RenameFile(sourceFile, targetFileName)) {
+      this->packageFileNames.clear();
+      this->packageFileNames.emplace_back(targetFileName);
     }
   }
 
