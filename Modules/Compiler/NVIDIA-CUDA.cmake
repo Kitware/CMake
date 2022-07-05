@@ -30,6 +30,11 @@ if(CMAKE_CUDA_HOST_COMPILER AND NOT CMAKE_GENERATOR MATCHES "Visual Studio")
 endif()
 
 if (CMAKE_CUDA_COMPILER_VERSION VERSION_GREATER_EQUAL 10.2.89)
+  # Starting in 10.2, nvcc supported treating all warnings as errors
+  set(CMAKE_CUDA_COMPILE_OPTIONS_WARNING_AS_ERROR "-Werror all-warnings")
+endif()
+
+if (CMAKE_CUDA_COMPILER_VERSION VERSION_GREATER_EQUAL 10.2.89)
   # The -MD flag was only added to nvcc in 10.2 so
   # before that we had to invoke the compiler twice
   # to get header dependency information
