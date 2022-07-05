@@ -103,9 +103,9 @@ foreach(lang C CXX Fortran OBJC OBJCXX)
   set(CMAKE_${lang}_CREATE_MACOSX_FRAMEWORK
       "<CMAKE_${lang}_COMPILER> <LANGUAGE_COMPILE_FLAGS> <CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS> <LINK_FLAGS> -o <TARGET> <SONAME_FLAG> <TARGET_INSTALLNAME_DIR><TARGET_SONAME> <OBJECTS> <LINK_LIBRARIES>")
 
-# Set default framework search path flag for languages known to use a
-# preprocessor that may find headers in frameworks.
-set(CMAKE_${lang}_FRAMEWORK_SEARCH_FLAG -F)
+  # Set default framework search path flag for languages known to use a
+  # preprocessor that may find headers in frameworks.
+  set(CMAKE_${lang}_FRAMEWORK_SEARCH_FLAG -F)
 endforeach()
 
 # Defines LINK_LIBRARY features for frameworks
@@ -122,13 +122,13 @@ set(CMAKE_LINK_LIBRARY_USING_WEAK_FRAMEWORK "LINKER:-weak_framework,<LIBRARY>")
 set(CMAKE_LINK_LIBRARY_USING_WEAK_FRAMEWORK_SUPPORTED TRUE)
 
 # Defines LINK_LIBRARY features for libraries
-set(CMAKE_LINK_LIBRARY_USING_NEEDED_LIBRARY "PATH{LINKER:-needed_library <LIBRARY>}NAME{LINKER:-needed-l<LIB_ITEM>}")
+set(CMAKE_LINK_LIBRARY_USING_NEEDED_LIBRARY "PATH{LINKER:-needed_library <LIBRARY>}NAME{LINKER:-needed-l<LIBRARY>}")
 set(CMAKE_LINK_LIBRARY_USING_NEEDED_LIBRARY_SUPPORTED TRUE)
 
-set(CMAKE_LINK_LIBRARY_USING_REEXPORT_LIBRARY "PATH{LINKER:-reexport_library <LIBRARY>}NAME{LINKER:-reexport-l<LIB_ITEM>}")
+set(CMAKE_LINK_LIBRARY_USING_REEXPORT_LIBRARY "PATH{LINKER:-reexport_library <LIBRARY>}NAME{LINKER:-reexport-l<LIBRARY>}")
 set(CMAKE_LINK_LIBRARY_USING_REEXPORT_LIBRARY_SUPPORTED TRUE)
 
-set(CMAKE_LINK_LIBRARY_USING_WEAK_LIBRARY "PATH{LINKER:-weak_library <LIBRARY>}NAME{LINKER:-weak-l<LIB_ITEM>}")
+set(CMAKE_LINK_LIBRARY_USING_WEAK_LIBRARY "PATH{LINKER:-weak_library <LIBRARY>}NAME{LINKER:-weak-l<LIBRARY>}")
 set(CMAKE_LINK_LIBRARY_USING_WEAK_LIBRARY_SUPPORTED TRUE)
 
 # Defines LINK_LIBRARY feature to Force loading of all members of an archive
