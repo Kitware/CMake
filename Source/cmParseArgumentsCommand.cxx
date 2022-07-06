@@ -10,6 +10,7 @@
 #include <cm/string_view>
 
 #include "cmArgumentParser.h"
+#include "cmArgumentParserTypes.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -41,7 +42,8 @@ namespace {
 
 using options_map = std::map<std::string, bool>;
 using single_map = std::map<std::string, std::string>;
-using multi_map = std::map<std::string, std::vector<std::string>>;
+using multi_map =
+  std::map<std::string, ArgumentParser::NonEmpty<std::vector<std::string>>>;
 using options_set = std::set<cm::string_view>;
 
 struct UserArgumentParser : public cmArgumentParser<void>

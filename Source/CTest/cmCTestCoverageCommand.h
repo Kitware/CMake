@@ -11,6 +11,7 @@
 #include <cm/memory>
 #include <cm/optional>
 
+#include "cmArgumentParserTypes.h" // IWYU pragma: keep
 #include "cmCTestHandlerCommand.h"
 #include "cmCommand.h"
 
@@ -44,5 +45,5 @@ protected:
   void BindArguments() override;
   cmCTestGenericHandler* InitializeHandler() override;
 
-  cm::optional<std::vector<std::string>> Labels;
+  cm::optional<ArgumentParser::MaybeEmpty<std::vector<std::string>>> Labels;
 };

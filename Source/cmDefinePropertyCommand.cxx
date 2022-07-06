@@ -8,6 +8,7 @@
 #include <cmext/string_view>
 
 #include "cmArgumentParser.h"
+#include "cmArgumentParserTypes.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmProperty.h"
@@ -51,8 +52,8 @@ bool cmDefinePropertyCommand(std::vector<std::string> const& args,
   // Parse remaining arguments.
   bool inherited = false;
   std::string PropertyName;
-  std::vector<std::string> BriefDocs;
-  std::vector<std::string> FullDocs;
+  ArgumentParser::NonEmpty<std::vector<std::string>> BriefDocs;
+  ArgumentParser::NonEmpty<std::vector<std::string>> FullDocs;
   std::string initializeFromVariable;
 
   cmArgumentParser<void> parser;

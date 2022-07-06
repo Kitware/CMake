@@ -19,6 +19,7 @@
 #include "cmsys/Glob.hxx"
 
 #include "cmArgumentParser.h"
+#include "cmArgumentParserTypes.h"
 #include "cmExecutionStatus.h"
 #include "cmExperimental.h"
 #include "cmExportSet.h"
@@ -57,13 +58,13 @@ namespace {
 
 struct RuntimeDependenciesArgs
 {
-  std::vector<std::string> Directories;
-  std::vector<std::string> PreIncludeRegexes;
-  std::vector<std::string> PreExcludeRegexes;
-  std::vector<std::string> PostIncludeRegexes;
-  std::vector<std::string> PostExcludeRegexes;
-  std::vector<std::string> PostIncludeFiles;
-  std::vector<std::string> PostExcludeFiles;
+  ArgumentParser::MaybeEmpty<std::vector<std::string>> Directories;
+  ArgumentParser::MaybeEmpty<std::vector<std::string>> PreIncludeRegexes;
+  ArgumentParser::MaybeEmpty<std::vector<std::string>> PreExcludeRegexes;
+  ArgumentParser::MaybeEmpty<std::vector<std::string>> PostIncludeRegexes;
+  ArgumentParser::MaybeEmpty<std::vector<std::string>> PostExcludeRegexes;
+  ArgumentParser::MaybeEmpty<std::vector<std::string>> PostIncludeFiles;
+  ArgumentParser::MaybeEmpty<std::vector<std::string>> PostExcludeFiles;
 };
 
 auto const RuntimeDependenciesArgHelper =
@@ -406,18 +407,18 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
 
   struct ArgVectors
   {
-    std::vector<std::string> Archive;
-    std::vector<std::string> Library;
-    std::vector<std::string> Runtime;
-    std::vector<std::string> Object;
-    std::vector<std::string> Framework;
-    std::vector<std::string> Bundle;
-    std::vector<std::string> Includes;
-    std::vector<std::string> PrivateHeader;
-    std::vector<std::string> PublicHeader;
-    std::vector<std::string> Resource;
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> Archive;
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> Library;
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> Runtime;
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> Object;
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> Framework;
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> Bundle;
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> Includes;
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> PrivateHeader;
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> PublicHeader;
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> Resource;
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> CxxModulesBmi;
     std::vector<std::vector<std::string>> FileSets;
-    std::vector<std::string> CxxModulesBmi;
   };
 
   static auto const argHelper =
@@ -441,9 +442,10 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
   // now parse the generic args (i.e. the ones not specialized on LIBRARY/
   // ARCHIVE, RUNTIME etc. (see above)
   // These generic args also contain the targets and the export stuff
-  std::vector<std::string> targetList;
+  ArgumentParser::MaybeEmpty<std::vector<std::string>> targetList;
   std::string exports;
-  cm::optional<std::vector<std::string>> runtimeDependenciesArgVector;
+  cm::optional<ArgumentParser::MaybeEmpty<std::vector<std::string>>>
+    runtimeDependenciesArgVector;
   std::string runtimeDependencySetArg;
   std::vector<std::string> unknownArgs;
   cmInstallCommandArguments genericArgs(helper.DefaultComponentName);
@@ -1251,10 +1253,10 @@ bool HandleImportedRuntimeArtifactsMode(std::vector<std::string> const& args,
 
   struct ArgVectors
   {
-    std::vector<std::string> Library;
-    std::vector<std::string> Runtime;
-    std::vector<std::string> Framework;
-    std::vector<std::string> Bundle;
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> Library;
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> Runtime;
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> Framework;
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> Bundle;
   };
 
   static auto const argHelper = cmArgumentParser<ArgVectors>{}
@@ -1268,7 +1270,7 @@ bool HandleImportedRuntimeArtifactsMode(std::vector<std::string> const& args,
 
   // now parse the generic args (i.e. the ones not specialized on LIBRARY,
   // RUNTIME etc. (see above)
-  std::vector<std::string> targetList;
+  ArgumentParser::MaybeEmpty<std::vector<std::string>> targetList;
   std::string runtimeDependencySetArg;
   std::vector<std::string> unknownArgs;
   cmInstallCommandArguments genericArgs(helper.DefaultComponentName);
@@ -1509,7 +1511,7 @@ bool HandleFilesMode(std::vector<std::string> const& args,
   // This is the FILES mode.
   bool programs = (args[0] == "PROGRAMS");
   cmInstallCommandArguments ica(helper.DefaultComponentName);
-  std::vector<std::string> files;
+  ArgumentParser::MaybeEmpty<std::vector<std::string>> files;
   ica.Bind(programs ? "PROGRAMS"_s : "FILES"_s, files);
   std::vector<std::string> unknownArgs;
   ica.Parse(args, &unknownArgs);
@@ -2140,9 +2142,9 @@ bool HandleRuntimeDependencySetMode(std::vector<std::string> const& args,
 
   struct ArgVectors
   {
-    std::vector<std::string> Library;
-    std::vector<std::string> Runtime;
-    std::vector<std::string> Framework;
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> Library;
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> Runtime;
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> Framework;
   };
 
   static auto const argHelper = cmArgumentParser<ArgVectors>{}

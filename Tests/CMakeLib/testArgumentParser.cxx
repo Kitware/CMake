@@ -11,6 +11,7 @@
 #include <cmext/string_view>
 
 #include "cmArgumentParser.h"
+#include "cmArgumentParserTypes.h"
 
 namespace {
 
@@ -23,11 +24,12 @@ struct Result
   cm::optional<std::string> String2;
   cm::optional<std::string> String3;
 
-  std::vector<std::string> List1;
-  std::vector<std::string> List2;
-  cm::optional<std::vector<std::string>> List3;
-  cm::optional<std::vector<std::string>> List4;
-  cm::optional<std::vector<std::string>> List5;
+  ArgumentParser::NonEmpty<std::vector<std::string>> List1;
+  ArgumentParser::NonEmpty<std::vector<std::string>> List2;
+  cm::optional<ArgumentParser::NonEmpty<std::vector<std::string>>> List3;
+  cm::optional<ArgumentParser::NonEmpty<std::vector<std::string>>> List4;
+  cm::optional<ArgumentParser::NonEmpty<std::vector<std::string>>> List5;
+  cm::optional<ArgumentParser::MaybeEmpty<std::vector<std::string>>> List6;
 
   std::vector<std::vector<std::string>> Multi1;
   std::vector<std::vector<std::string>> Multi2;
@@ -48,6 +50,7 @@ std::initializer_list<cm::string_view> const args = {
   "LIST_3", "foo",           // ... with continuation
   "LIST_4",                  // list arg missing values, presence captured
   // "LIST_5",               // list arg that is not present
+  "LIST_6",                  // list arg allowed to be empty
   "MULTI_2",                 // multi list with 0 lists
   "MULTI_3", "foo", "bar",   // multi list with first list with two elems
   "MULTI_3", "bar", "foo",   // multi list with second list with two elems
@@ -88,6 +91,8 @@ bool verifyResult(Result const& result,
   ASSERT_TRUE(result.List4);
   ASSERT_TRUE(result.List4->empty());
   ASSERT_TRUE(!result.List5);
+  ASSERT_TRUE(result.List6);
+  ASSERT_TRUE(result.List6->empty());
 
   ASSERT_TRUE(result.Multi1.empty());
   ASSERT_TRUE(result.Multi2.size() == 1);
@@ -122,6 +127,7 @@ bool testArgumentParserDynamic()
     .Bind("LIST_3"_s, result.List3)
     .Bind("LIST_4"_s, result.List4)
     .Bind("LIST_5"_s, result.List5)
+    .Bind("LIST_6"_s, result.List6)
     .Bind("MULTI_1"_s, result.Multi1)
     .Bind("MULTI_2"_s, result.Multi2)
     .Bind("MULTI_3"_s, result.Multi3)
@@ -145,6 +151,7 @@ bool testArgumentParserStatic()
       .Bind("LIST_3"_s, &Result::List3)
       .Bind("LIST_4"_s, &Result::List4)
       .Bind("LIST_5"_s, &Result::List5)
+      .Bind("LIST_6"_s, &Result::List6)
       .Bind("MULTI_1"_s, &Result::Multi1)
       .Bind("MULTI_2"_s, &Result::Multi2)
       .Bind("MULTI_3"_s, &Result::Multi3)

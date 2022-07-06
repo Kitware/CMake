@@ -10,6 +10,7 @@
 
 #include <cm/memory>
 
+#include "cmArgumentParserTypes.h"
 #include "cmCTestHandlerCommand.h"
 #include "cmCommand.h"
 
@@ -45,5 +46,5 @@ protected:
   void CheckArguments() override;
   cmCTestGenericHandler* InitializeHandler() override;
 
-  std::vector<std::string> Files;
+  ArgumentParser::MaybeEmpty<std::vector<std::string>> Files;
 };

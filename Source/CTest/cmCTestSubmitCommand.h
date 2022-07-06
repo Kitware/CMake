@@ -10,6 +10,7 @@
 
 #include <cm/optional>
 
+#include "cmArgumentParserTypes.h"
 #include "cmCTestHandlerCommand.h"
 
 class cmCommand;
@@ -50,7 +51,7 @@ protected:
   std::string RetryDelay;
   std::string SubmitURL;
 
-  cm::optional<std::vector<std::string>> Files;
-  std::vector<std::string> HttpHeaders;
-  cm::optional<std::vector<std::string>> Parts;
+  cm::optional<ArgumentParser::MaybeEmpty<std::vector<std::string>>> Files;
+  ArgumentParser::MaybeEmpty<std::vector<std::string>> HttpHeaders;
+  cm::optional<ArgumentParser::MaybeEmpty<std::vector<std::string>>> Parts;
 };
