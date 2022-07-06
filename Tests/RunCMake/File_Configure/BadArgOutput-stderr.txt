@@ -1,4 +1,6 @@
 CMake Error at BadArgOutput.cmake:[0-9]+ \(file\):
-  file CONFIGURE OUTPUT option needs a value.
+  file CONFIGURE keywords missing values:
+
+    OUTPUT
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)

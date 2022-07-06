@@ -172,7 +172,8 @@ bool HandleReadCommand(std::vector<std::string> const& args,
                                .Bind("LIMIT"_s, &Arguments::Limit)
                                .Bind("HEX"_s, &Arguments::Hex);
 
-  Arguments const arguments = parser.Parse(cmMakeRange(args).advance(3));
+  Arguments const arguments = parser.Parse(cmMakeRange(args).advance(3),
+                                           /*unparsedArguments=*/nullptr);
 
   std::string fileName = fileNameArg;
   if (!cmsys::SystemTools::FileIsFullPath(fileName)) {
@@ -958,8 +959,8 @@ bool HandleRPathChangeCommand(std::vector<std::string> const& args,
   bool removeEnvironmentRPath = false;
   cmArgumentParser<void> parser;
   std::vector<std::string> unknownArgs;
-  std::vector<std::string> missingArgs;
-  std::vector<std::string> parsedArgs;
+  std::vector<cm::string_view> missingArgs;
+  std::vector<cm::string_view> parsedArgs;
   parser.Bind("FILE"_s, file)
     .Bind("OLD_RPATH"_s, oldRPath)
     .Bind("NEW_RPATH"_s, newRPath)
@@ -1028,8 +1029,8 @@ bool HandleRPathSetCommand(std::vector<std::string> const& args,
   std::string newRPath;
   cmArgumentParser<void> parser;
   std::vector<std::string> unknownArgs;
-  std::vector<std::string> missingArgs;
-  std::vector<std::string> parsedArgs;
+  std::vector<cm::string_view> missingArgs;
+  std::vector<cm::string_view> parsedArgs;
   parser.Bind("FILE"_s, file).Bind("NEW_RPATH"_s, newRPath);
   parser.Parse(cmMakeRange(args).advance(1), &unknownArgs, &missingArgs,
                &parsedArgs);
@@ -1087,7 +1088,7 @@ bool HandleRPathRemoveCommand(std::vector<std::string> const& args,
   std::string file;
   cmArgumentParser<void> parser;
   std::vector<std::string> unknownArgs;
-  std::vector<std::string> missingArgs;
+  std::vector<cm::string_view> missingArgs;
   parser.Bind("FILE"_s, file);
   parser.Parse(cmMakeRange(args).advance(1), &unknownArgs, &missingArgs);
   if (!unknownArgs.empty()) {
@@ -1138,8 +1139,8 @@ bool HandleRPathCheckCommand(std::vector<std::string> const& args,
   std::string rpath;
   cmArgumentParser<void> parser;
   std::vector<std::string> unknownArgs;
-  std::vector<std::string> missingArgs;
-  std::vector<std::string> parsedArgs;
+  std::vector<cm::string_view> missingArgs;
+  std::vector<cm::string_view> parsedArgs;
   parser.Bind("FILE"_s, file).Bind("RPATH"_s, rpath);
   parser.Parse(cmMakeRange(args).advance(1), &unknownArgs, &missingArgs,
                &parsedArgs);
@@ -1197,7 +1198,8 @@ bool HandleReadElfCommand(std::vector<std::string> const& args,
                                .Bind("RPATH"_s, &Arguments::RPath)
                                .Bind("RUNPATH"_s, &Arguments::RunPath)
                                .Bind("CAPTURE_ERROR"_s, &Arguments::Error);
-  Arguments const arguments = parser.Parse(cmMakeRange(args).advance(2));
+  Arguments const arguments = parser.Parse(cmMakeRange(args).advance(2),
+                                           /*unparsedArguments=*/nullptr);
 
   if (!cmSystemTools::FileExists(fileNameArg, true)) {
     status.SetError(cmStrCat("READ_ELF given FILE \"", fileNameArg,
@@ -1252,7 +1254,7 @@ bool HandleRealPathCommand(std::vector<std::string> const& args,
 
   struct Arguments
   {
-    std::string BaseDirectory;
+    cm::optional<std::string> BaseDirectory;
     bool ExpandTilde = false;
   };
   static auto const parser =
@@ -1261,11 +1263,9 @@ bool HandleRealPathCommand(std::vector<std::string> const& args,
       .Bind("EXPAND_TILDE"_s, &Arguments::ExpandTilde);
 
   std::vector<std::string> unparsedArguments;
-  std::vector<std::string> keywordsMissingValue;
-  std::vector<std::string> parsedKeywords;
-  auto arguments =
-    parser.Parse(cmMakeRange(args).advance(3), &unparsedArguments,
-                 &keywordsMissingValue, &parsedKeywords);
+  std::vector<cm::string_view> keywordsMissingValue;
+  auto arguments = parser.Parse(cmMakeRange(args).advance(3),
+                                &unparsedArguments, &keywordsMissingValue);
 
   if (!unparsedArguments.empty()) {
     status.SetError("REAL_PATH called with unexpected arguments");
@@ -1276,7 +1276,7 @@ bool HandleRealPathCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  if (parsedKeywords.empty()) {
+  if (!arguments.BaseDirectory) {
     arguments.BaseDirectory = status.GetMakefile().GetCurrentSourceDirectory();
   }
 
@@ -1295,7 +1295,7 @@ bool HandleRealPathCommand(std::vector<std::string> const& args,
   }
 
   cmCMakePath path(input, cmCMakePath::auto_format);
-  path = path.Absolute(arguments.BaseDirectory).Normal();
+  path = path.Absolute(*arguments.BaseDirectory).Normal();
   auto realPath = cmSystemTools::GetRealPath(path.GenericString());
 
   status.GetMakefile().AddDefinition(args[2], realPath);
@@ -2497,12 +2497,12 @@ bool HandleGenerateCommand(std::vector<std::string> const& args,
 
   struct Arguments
   {
-    std::string Output;
-    std::string Input;
-    std::string Content;
-    std::string Condition;
-    std::string Target;
-    std::string NewLineStyle;
+    cm::optional<std::string> Output;
+    cm::optional<std::string> Input;
+    cm::optional<std::string> Content;
+    cm::optional<std::string> Condition;
+    cm::optional<std::string> Target;
+    cm::optional<std::string> NewLineStyle;
     bool NoSourcePermissions = false;
     bool UseSourcePermissions = false;
     std::vector<std::string> FilePermissions;
@@ -2521,14 +2521,16 @@ bool HandleGenerateCommand(std::vector<std::string> const& args,
       .Bind("NEWLINE_STYLE"_s, &Arguments::NewLineStyle);
 
   std::vector<std::string> unparsedArguments;
-  std::vector<std::string> keywordsMissingValues;
-  std::vector<std::string> parsedKeywords;
+  std::vector<cm::string_view> keywordsMissingValues;
+  std::vector<cm::string_view> parsedKeywords;
   Arguments const arguments =
     parser.Parse(cmMakeRange(args).advance(1), &unparsedArguments,
                  &keywordsMissingValues, &parsedKeywords);
 
   if (!keywordsMissingValues.empty()) {
-    status.SetError("Incorrect arguments to GENERATE subcommand.");
+    status.SetError(
+      cmStrCat("GENERATE keywords missing values:\n  ",
+               cmJoin(cmMakeRange(keywordsMissingValues), "\n  ")));
     return false;
   }
 
@@ -2537,66 +2539,46 @@ bool HandleGenerateCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  bool mandatoryOptionsSpecified = false;
-  if (parsedKeywords.size() > 1) {
-    const bool outputOprionSpecified = parsedKeywords[0] == "OUTPUT"_s;
-    const bool inputOrContentSpecified =
-      parsedKeywords[1] == "INPUT"_s || parsedKeywords[1] == "CONTENT"_s;
-    if (outputOprionSpecified && inputOrContentSpecified) {
-      mandatoryOptionsSpecified = true;
-    }
-  }
-  if (!mandatoryOptionsSpecified) {
-    status.SetError("Incorrect arguments to GENERATE subcommand.");
+  if (!arguments.Output || parsedKeywords[0] != "OUTPUT"_s) {
+    status.SetError("GENERATE requires OUTPUT as first option.");
     return false;
   }
+  std::string const& output = *arguments.Output;
 
-  const bool conditionOptionSpecified =
-    std::find(parsedKeywords.begin(), parsedKeywords.end(), "CONDITION"_s) !=
-    parsedKeywords.end();
-  if (conditionOptionSpecified && arguments.Condition.empty()) {
+  if (!arguments.Input && !arguments.Content) {
+    status.SetError("GENERATE requires INPUT or CONTENT option.");
+    return false;
+  }
+  const bool inputIsContent = parsedKeywords[1] == "CONTENT"_s;
+  if (!inputIsContent && parsedKeywords[1] == "INPUT") {
+    status.SetError("Unknown argument to GENERATE subcommand.");
+  }
+  std::string const& input =
+    inputIsContent ? *arguments.Content : *arguments.Input;
+
+  if (arguments.Condition && arguments.Condition->empty()) {
     status.SetError("CONDITION of sub-command GENERATE must not be empty "
                     "if specified.");
     return false;
   }
+  std::string const& condition =
+    arguments.Condition ? *arguments.Condition : std::string();
 
-  const bool targetOptionSpecified =
-    std::find(parsedKeywords.begin(), parsedKeywords.end(), "TARGET"_s) !=
-    parsedKeywords.end();
-  if (targetOptionSpecified && arguments.Target.empty()) {
+  if (arguments.Target && arguments.Target->empty()) {
     status.SetError("TARGET of sub-command GENERATE must not be empty "
                     "if specified.");
     return false;
   }
+  std::string const& target =
+    arguments.Target ? *arguments.Target : std::string();
 
-  const bool outputOptionSpecified =
-    std::find(parsedKeywords.begin(), parsedKeywords.end(), "OUTPUT"_s) !=
-    parsedKeywords.end();
-  if (outputOptionSpecified && parsedKeywords[0] != "OUTPUT"_s) {
-    status.SetError("Incorrect arguments to GENERATE subcommand.");
-    return false;
-  }
-
-  const bool inputIsContent = parsedKeywords[1] != "INPUT"_s;
-  if (inputIsContent && parsedKeywords[1] != "CONTENT") {
-    status.SetError("Unknown argument to GENERATE subcommand.");
-  }
-
-  const bool newLineStyleSpecified =
-    std::find(parsedKeywords.begin(), parsedKeywords.end(),
-              "NEWLINE_STYLE"_s) != parsedKeywords.end();
   cmNewLineStyle newLineStyle;
-  if (newLineStyleSpecified) {
+  if (arguments.NewLineStyle) {
     std::string errorMessage;
     if (!newLineStyle.ReadFromArguments(args, errorMessage)) {
       status.SetError(cmStrCat("GENERATE ", errorMessage));
       return false;
     }
-  }
-
-  std::string input = arguments.Input;
-  if (inputIsContent) {
-    input = arguments.Content;
   }
 
   if (arguments.NoSourcePermissions && arguments.UseSourcePermissions) {
@@ -2656,8 +2638,7 @@ bool HandleGenerateCommand(std::vector<std::string> const& args,
     }
   }
 
-  AddEvaluationFile(input, arguments.Target, arguments.Output,
-                    arguments.Condition, inputIsContent,
+  AddEvaluationFile(input, target, output, condition, inputIsContent,
                     newLineStyle.GetCharacters(), permissions, status);
   return true;
 }
@@ -3102,7 +3083,7 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
       .Bind("POST_EXCLUDE_FILES_STRICT"_s, &Arguments::PostExcludeFilesStrict);
 
   std::vector<std::string> unrecognizedArguments;
-  std::vector<std::string> keywordsMissingValues;
+  std::vector<cm::string_view> keywordsMissingValues;
   auto parsedArgs =
     parser.Parse(cmMakeRange(args).advance(1), &unrecognizedArguments,
                  &keywordsMissingValues);
@@ -3114,18 +3095,18 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
   }
 
   // Arguments that are allowed to be empty lists.  Keep entries sorted!
-  const std::vector<std::string> LIST_ARGS = {
-    "DIRECTORIES",
-    "EXECUTABLES",
-    "LIBRARIES",
-    "MODULES",
-    "POST_EXCLUDE_FILES",
-    "POST_EXCLUDE_FILES_STRICT",
-    "POST_EXCLUDE_REGEXES",
-    "POST_INCLUDE_FILES",
-    "POST_INCLUDE_REGEXES",
-    "PRE_EXCLUDE_REGEXES",
-    "PRE_INCLUDE_REGEXES",
+  static const std::vector<cm::string_view> LIST_ARGS = {
+    "DIRECTORIES"_s,
+    "EXECUTABLES"_s,
+    "LIBRARIES"_s,
+    "MODULES"_s,
+    "POST_EXCLUDE_FILES"_s,
+    "POST_EXCLUDE_FILES_STRICT"_s,
+    "POST_EXCLUDE_REGEXES"_s,
+    "POST_INCLUDE_FILES"_s,
+    "POST_INCLUDE_REGEXES"_s,
+    "PRE_EXCLUDE_REGEXES"_s,
+    "PRE_INCLUDE_REGEXES"_s,
   };
   auto kwbegin = keywordsMissingValues.cbegin();
   auto kwend = cmRemoveMatching(keywordsMissingValues, LIST_ARGS);
@@ -3235,8 +3216,8 @@ bool HandleConfigureCommand(std::vector<std::string> const& args,
 {
   struct Arguments
   {
-    std::string Output;
-    std::string Content;
+    cm::optional<std::string> Output;
+    cm::optional<std::string> Content;
     bool EscapeQuotes = false;
     bool AtOnly = false;
     std::string NewlineStyle;
@@ -3251,11 +3232,10 @@ bool HandleConfigureCommand(std::vector<std::string> const& args,
       .Bind("NEWLINE_STYLE"_s, &Arguments::NewlineStyle);
 
   std::vector<std::string> unrecognizedArguments;
-  std::vector<std::string> keywordsMissingArguments;
-  std::vector<std::string> parsedKeywords;
+  std::vector<cm::string_view> keywordsMissingValues;
   auto parsedArgs =
     parser.Parse(cmMakeRange(args).advance(1), &unrecognizedArguments,
-                 &keywordsMissingArguments, &parsedKeywords);
+                 &keywordsMissingValues);
 
   auto argIt = unrecognizedArguments.begin();
   if (argIt != unrecognizedArguments.end()) {
@@ -3265,28 +3245,28 @@ bool HandleConfigureCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  std::vector<std::string> mandatoryOptions{ "OUTPUT", "CONTENT" };
-  for (auto const& e : mandatoryOptions) {
-    const bool optionHasNoValue =
-      std::find(keywordsMissingArguments.begin(),
-                keywordsMissingArguments.end(),
-                e) != keywordsMissingArguments.end();
-    if (optionHasNoValue) {
-      status.SetError(cmStrCat("CONFIGURE ", e, " option needs a value."));
-      cmSystemTools::SetFatalErrorOccurred();
-      return false;
-    }
+  // Arguments that are allowed to be empty lists.  Keep entries sorted!
+  static const std::vector<cm::string_view> LIST_ARGS = {
+    "NEWLINE_STYLE"_s, // Filter here so we can issue a custom error below.
+  };
+  auto kwbegin = keywordsMissingValues.cbegin();
+  auto kwend = cmRemoveMatching(keywordsMissingValues, LIST_ARGS);
+  if (kwend != kwbegin) {
+    status.SetError(cmStrCat("CONFIGURE keywords missing values:\n  ",
+                             cmJoin(cmMakeRange(kwbegin, kwend), "\n  ")));
+    cmSystemTools::SetFatalErrorOccurred();
+    return false;
   }
 
-  for (auto const& e : mandatoryOptions) {
-    const bool optionGiven =
-      std::find(parsedKeywords.begin(), parsedKeywords.end(), e) !=
-      parsedKeywords.end();
-    if (!optionGiven) {
-      status.SetError(cmStrCat("CONFIGURE ", e, " option is mandatory."));
-      cmSystemTools::SetFatalErrorOccurred();
-      return false;
-    }
+  if (!parsedArgs.Output) {
+    status.SetError("CONFIGURE OUTPUT option is mandatory.");
+    cmSystemTools::SetFatalErrorOccurred();
+    return false;
+  }
+  if (!parsedArgs.Content) {
+    status.SetError("CONFIGURE CONTENT option is mandatory.");
+    cmSystemTools::SetFatalErrorOccurred();
+    return false;
   }
 
   std::string errorMessage;
@@ -3298,7 +3278,7 @@ bool HandleConfigureCommand(std::vector<std::string> const& args,
 
   // Check for generator expressions
   std::string outputFile = cmSystemTools::CollapseFullPath(
-    parsedArgs.Output, status.GetMakefile().GetCurrentBinaryDirectory());
+    *parsedArgs.Output, status.GetMakefile().GetCurrentBinaryDirectory());
 
   std::string::size_type pos = outputFile.find_first_of("<>");
   if (pos != std::string::npos) {
@@ -3347,7 +3327,7 @@ bool HandleConfigureCommand(std::vector<std::string> const& args,
   fout.SetCopyIfDifferent(true);
 
   // copy input to output and expand variables from input at the same time
-  std::stringstream sin(parsedArgs.Content, std::ios::in);
+  std::stringstream sin(*parsedArgs.Content, std::ios::in);
   std::string inLine;
   std::string outLine;
   bool hasNewLine = false;
@@ -3392,7 +3372,7 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
       .Bind("PATHS"_s, &Arguments::Paths);
 
   std::vector<std::string> unrecognizedArguments;
-  std::vector<std::string> keywordsMissingValues;
+  std::vector<cm::string_view> keywordsMissingValues;
   auto parsedArgs =
     parser.Parse(cmMakeRange(args).advance(1), &unrecognizedArguments,
                  &keywordsMissingValues);
@@ -3404,12 +3384,12 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
   }
 
   // Arguments that are allowed to be empty lists.  Keep entries sorted!
-  const std::vector<std::string> LIST_ARGS = {
-    "MTIME", // "MTIME" should not be in this list because it requires one
-             // value, but it has long been accidentally accepted without
-             // one and treated as if an empty value were given.
-             // Fixing this would require a policy.
-    "PATHS", // "PATHS" is here only so we can issue a custom error below.
+  static const std::vector<cm::string_view> LIST_ARGS = {
+    "MTIME"_s, // "MTIME" should not be in this list because it requires one
+               // value, but it has long been accidentally accepted without
+               // one and treated as if an empty value were given.
+               // Fixing this would require a policy.
+    "PATHS"_s, // "PATHS" is here only so we can issue a custom error below.
   };
   auto kwbegin = keywordsMissingValues.cbegin();
   auto kwend = cmRemoveMatching(keywordsMissingValues, LIST_ARGS);
@@ -3525,7 +3505,7 @@ bool HandleArchiveExtractCommand(std::vector<std::string> const& args,
                                .Bind("TOUCH"_s, &Arguments::Touch);
 
   std::vector<std::string> unrecognizedArguments;
-  std::vector<std::string> keywordsMissingValues;
+  std::vector<cm::string_view> keywordsMissingValues;
   auto parsedArgs =
     parser.Parse(cmMakeRange(args).advance(1), &unrecognizedArguments,
                  &keywordsMissingValues);
@@ -3537,7 +3517,7 @@ bool HandleArchiveExtractCommand(std::vector<std::string> const& args,
   }
 
   // Arguments that are allowed to be empty lists.  Keep entries sorted!
-  const std::vector<std::string> LIST_ARGS = { "PATTERNS" };
+  static const std::vector<cm::string_view> LIST_ARGS = { "PATTERNS"_s };
   auto kwbegin = keywordsMissingValues.cbegin();
   auto kwend = cmRemoveMatching(keywordsMissingValues, LIST_ARGS);
   if (kwend != kwbegin) {
@@ -3648,7 +3628,7 @@ bool HandleChmodCommandImpl(std::vector<std::string> const& args, bool recurse,
       .Bind("DIRECTORY_PERMISSIONS"_s, &Arguments::DirectoryPermissions);
 
   std::vector<std::string> pathEntries;
-  std::vector<std::string> keywordsMissingValues;
+  std::vector<cm::string_view> keywordsMissingValues;
   Arguments parsedArgs = parser.Parse(cmMakeRange(args).advance(1),
                                       &pathEntries, &keywordsMissingValues);
 
@@ -3672,7 +3652,7 @@ bool HandleChmodCommandImpl(std::vector<std::string> const& args, bool recurse,
 
   if (!keywordsMissingValues.empty()) {
     for (const auto& i : keywordsMissingValues) {
-      status.SetError(i + " is not given any arguments");
+      status.SetError(cmStrCat(i, " is not given any arguments"));
       cmSystemTools::SetFatalErrorOccurred();
     }
     return false;

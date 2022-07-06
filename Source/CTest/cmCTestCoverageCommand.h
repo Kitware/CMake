@@ -9,6 +9,7 @@
 #include <vector>
 
 #include <cm/memory>
+#include <cm/optional>
 
 #include "cmCTestHandlerCommand.h"
 #include "cmCommand.h"
@@ -41,9 +42,7 @@ public:
 
 protected:
   void BindArguments() override;
-  void CheckArguments(std::vector<std::string> const& keywords) override;
   cmCTestGenericHandler* InitializeHandler() override;
 
-  bool LabelsMentioned;
-  std::vector<std::string> Labels;
+  cm::optional<std::vector<std::string>> Labels;
 };

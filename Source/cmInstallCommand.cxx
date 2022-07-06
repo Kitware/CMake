@@ -12,6 +12,7 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cm/optional>
 #include <cm/string_view>
 #include <cmext/string_view>
 
@@ -436,24 +437,22 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
   // These generic args also contain the targets and the export stuff
   std::vector<std::string> targetList;
   std::string exports;
-  std::vector<std::string> runtimeDependenciesArgVector;
+  cm::optional<std::vector<std::string>> runtimeDependenciesArgVector;
   std::string runtimeDependencySetArg;
   std::vector<std::string> unknownArgs;
-  std::vector<std::string> parsedArgs;
   cmInstallCommandArguments genericArgs(helper.DefaultComponentName);
   genericArgs.Bind("TARGETS"_s, targetList);
   genericArgs.Bind("EXPORT"_s, exports);
   genericArgs.Bind("RUNTIME_DEPENDENCIES"_s, runtimeDependenciesArgVector);
   genericArgs.Bind("RUNTIME_DEPENDENCY_SET"_s, runtimeDependencySetArg);
-  genericArgs.Parse(genericArgVector, &unknownArgs, nullptr, &parsedArgs);
+  genericArgs.Parse(genericArgVector, &unknownArgs);
   bool success = genericArgs.Finalize();
 
-  bool withRuntimeDependencies =
-    std::find(parsedArgs.begin(), parsedArgs.end(), "RUNTIME_DEPENDENCIES") !=
-    parsedArgs.end();
   RuntimeDependenciesArgs runtimeDependenciesArgs =
-    RuntimeDependenciesArgHelper.Parse(runtimeDependenciesArgVector,
-                                       &unknownArgs);
+    runtimeDependenciesArgVector
+    ? RuntimeDependenciesArgHelper.Parse(*runtimeDependenciesArgVector,
+                                         &unknownArgs)
+    : RuntimeDependenciesArgs();
 
   cmInstallCommandArguments archiveArgs(helper.DefaultComponentName);
   cmInstallCommandArguments libraryArgs(helper.DefaultComponentName);
@@ -597,7 +596,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
   }
 
   cmInstallRuntimeDependencySet* runtimeDependencySet = nullptr;
-  if (withRuntimeDependencies) {
+  if (runtimeDependenciesArgVector) {
     if (!runtimeDependencySetArg.empty()) {
       status.SetError("TARGETS cannot have both RUNTIME_DEPENDENCIES and "
                       "RUNTIME_DEPENDENCY_SET.");
@@ -1137,7 +1136,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
     }
   }
 
-  if (withRuntimeDependencies && !runtimeDependencySet->Empty()) {
+  if (runtimeDependenciesArgVector && !runtimeDependencySet->Empty()) {
     AddInstallRuntimeDependenciesGenerator(
       helper, runtimeDependencySet, runtimeArgs, libraryArgs, frameworkArgs,
       std::move(runtimeDependenciesArgs), installsRuntime, installsLibrary,
@@ -2106,7 +2105,7 @@ bool HandleRuntimeDependencySetMode(std::vector<std::string> const& args,
   // These generic args also contain the runtime dependency set
   std::string runtimeDependencySetArg;
   std::vector<std::string> runtimeDependencyArgVector;
-  std::vector<std::string> parsedArgs;
+  std::vector<cm::string_view> parsedArgs;
   cmInstallCommandArguments genericArgs(helper.DefaultComponentName);
   genericArgs.Bind("RUNTIME_DEPENDENCY_SET"_s, runtimeDependencySetArg);
   genericArgs.Parse(genericArgVector, &runtimeDependencyArgVector, nullptr,

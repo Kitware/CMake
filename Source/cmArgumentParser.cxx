@@ -44,14 +44,14 @@ void Instance::Bind(std::string& val)
   this->ExpectValue = true;
 }
 
-void Instance::Bind(StringList& val)
+void Instance::Bind(std::vector<std::string>& val)
 {
   this->CurrentString = nullptr;
   this->CurrentList = &val;
   this->ExpectValue = true;
 }
 
-void Instance::Bind(MultiStringList& val)
+void Instance::Bind(std::vector<std::vector<std::string>>& val)
 {
   this->CurrentString = nullptr;
   this->CurrentList = (static_cast<void>(val.emplace_back()), &val.back());
@@ -60,17 +60,17 @@ void Instance::Bind(MultiStringList& val)
 
 void Instance::Consume(cm::string_view arg, void* result,
                        std::vector<std::string>* unparsedArguments,
-                       std::vector<std::string>* keywordsMissingValue,
-                       std::vector<std::string>* parsedKeywords)
+                       std::vector<cm::string_view>* keywordsMissingValue,
+                       std::vector<cm::string_view>* parsedKeywords)
 {
   auto const it = this->Bindings.Find(arg);
   if (it != this->Bindings.end()) {
     if (parsedKeywords != nullptr) {
-      parsedKeywords->emplace_back(arg);
+      parsedKeywords->emplace_back(it->first);
     }
     it->second(*this, result);
     if (this->ExpectValue && keywordsMissingValue != nullptr) {
-      keywordsMissingValue->emplace_back(arg);
+      keywordsMissingValue->emplace_back(it->first);
     }
     return;
   }

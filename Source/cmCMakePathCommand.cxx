@@ -44,8 +44,8 @@ public:
 
   template <int Advance = 2>
   Result Parse(std::vector<std::string> const& args,
-               std::vector<std::string>* keywordsMissingValue = nullptr,
-               std::vector<std::string>* parsedKeywords = nullptr) const
+               std::vector<cm::string_view>* keywordsMissingValue = nullptr,
+               std::vector<cm::string_view>* parsedKeywords = nullptr) const
   {
     this->Inputs.clear();
 
@@ -89,11 +89,11 @@ public:
       args, &this->KeywordsMissingValue, &this->ParsedKeywords);
   }
 
-  const std::vector<std::string>& GetKeywordsMissingValue() const
+  const std::vector<cm::string_view>& GetKeywordsMissingValue() const
   {
     return this->KeywordsMissingValue;
   }
-  const std::vector<std::string>& GetParsedKeywords() const
+  const std::vector<cm::string_view>& GetParsedKeywords() const
   {
     return this->ParsedKeywords;
   }
@@ -121,8 +121,8 @@ public:
   }
 
 private:
-  mutable std::vector<std::string> KeywordsMissingValue;
-  mutable std::vector<std::string> ParsedKeywords;
+  mutable std::vector<cm::string_view> KeywordsMissingValue;
+  mutable std::vector<cm::string_view> ParsedKeywords;
 };
 
 struct OutputVariable

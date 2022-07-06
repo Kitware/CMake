@@ -10,13 +10,11 @@
 #include <utility>
 #include <vector>
 
+#include <cm/optional>
 #include <cm/string_view>
 #include <cmext/string_view>
 
 namespace ArgumentParser {
-
-using StringList = std::vector<std::string>;
-using MultiStringList = std::vector<StringList>;
 
 class Instance;
 using Action = std::function<void(Instance&, void*)>;
@@ -39,18 +37,28 @@ public:
 
   void Bind(bool& val);
   void Bind(std::string& val);
-  void Bind(StringList& val);
-  void Bind(MultiStringList& val);
+  void Bind(std::vector<std::string>& val);
+  void Bind(std::vector<std::vector<std::string>>& val);
+
+  // cm::optional<> records the presence the keyword to which it binds.
+  template <typename T>
+  void Bind(cm::optional<T>& optVal)
+  {
+    if (!optVal) {
+      optVal.emplace();
+    }
+    this->Bind(*optVal);
+  }
 
   void Consume(cm::string_view arg, void* result,
                std::vector<std::string>* unparsedArguments,
-               std::vector<std::string>* keywordsMissingValue,
-               std::vector<std::string>* parsedKeywords);
+               std::vector<cm::string_view>* keywordsMissingValue,
+               std::vector<cm::string_view>* parsedKeywords);
 
 private:
   ActionMap const& Bindings;
   std::string* CurrentString = nullptr;
-  StringList* CurrentList = nullptr;
+  std::vector<std::string>* CurrentList = nullptr;
   bool ExpectValue = false;
 };
 
@@ -78,9 +86,9 @@ public:
 
   template <typename Range>
   void Parse(Result& result, Range const& args,
-             std::vector<std::string>* unparsedArguments = nullptr,
-             std::vector<std::string>* keywordsMissingValue = nullptr,
-             std::vector<std::string>* parsedKeywords = nullptr) const
+             std::vector<std::string>* unparsedArguments,
+             std::vector<cm::string_view>* keywordsMissingValue = nullptr,
+             std::vector<cm::string_view>* parsedKeywords = nullptr) const
   {
     ArgumentParser::Instance instance(this->Bindings);
     for (cm::string_view arg : args) {
@@ -90,10 +98,9 @@ public:
   }
 
   template <typename Range>
-  Result Parse(Range const& args,
-               std::vector<std::string>* unparsedArguments = nullptr,
-               std::vector<std::string>* keywordsMissingValue = nullptr,
-               std::vector<std::string>* parsedKeywords = nullptr) const
+  Result Parse(Range const& args, std::vector<std::string>* unparsedArguments,
+               std::vector<cm::string_view>* keywordsMissingValue = nullptr,
+               std::vector<cm::string_view>* parsedKeywords = nullptr) const
   {
     Result result;
     this->Parse(result, args, unparsedArguments, keywordsMissingValue,
@@ -118,10 +125,9 @@ public:
   }
 
   template <typename Range>
-  void Parse(Range const& args,
-             std::vector<std::string>* unparsedArguments = nullptr,
-             std::vector<std::string>* keywordsMissingValue = nullptr,
-             std::vector<std::string>* parsedKeywords = nullptr) const
+  void Parse(Range const& args, std::vector<std::string>* unparsedArguments,
+             std::vector<cm::string_view>* keywordsMissingValue = nullptr,
+             std::vector<cm::string_view>* parsedKeywords = nullptr) const
   {
     ArgumentParser::Instance instance(this->Bindings);
     for (cm::string_view arg : args) {

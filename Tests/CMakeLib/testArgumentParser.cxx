@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+#include <cm/optional>
 #include <cm/string_view>
 #include <cmext/string_view>
 
@@ -19,39 +20,50 @@ struct Result
   bool Option2 = false;
 
   std::string String1;
-  std::string String2;
+  cm::optional<std::string> String2;
+  cm::optional<std::string> String3;
 
   std::vector<std::string> List1;
   std::vector<std::string> List2;
-  std::vector<std::string> List3;
+  cm::optional<std::vector<std::string>> List3;
+  cm::optional<std::vector<std::string>> List4;
+  cm::optional<std::vector<std::string>> List5;
 
   std::vector<std::vector<std::string>> Multi1;
   std::vector<std::vector<std::string>> Multi2;
-  std::vector<std::vector<std::string>> Multi3;
+  cm::optional<std::vector<std::vector<std::string>>> Multi3;
+  cm::optional<std::vector<std::vector<std::string>>> Multi4;
 };
 
 std::initializer_list<cm::string_view> const args = {
   /* clang-format off */
   "OPTION_1",                // option
+  // "OPTION_2",             // option that is not present
   "STRING_1",                // string arg missing value
-  "STRING_2", "foo", "bar",  // string arg + unparsed value
+  "STRING_2", "foo", "bar",  // string arg + unparsed value, presence captured
+  // "STRING_3",             // string arg that is not present
   "LIST_1",                  // list arg missing values
   "LIST_2", "foo", "bar",    // list arg with 2 elems
   "LIST_3", "bar",           // list arg ...
   "LIST_3", "foo",           // ... with continuation
+  "LIST_4",                  // list arg missing values, presence captured
+  // "LIST_5",               // list arg that is not present
   "MULTI_2",                 // multi list with 0 lists
   "MULTI_3", "foo", "bar",   // multi list with first list with two elems
   "MULTI_3", "bar", "foo",   // multi list with second list with two elems
+  // "MULTI_4",              // multi list arg that is not present
   /* clang-format on */
 };
 
 bool verifyResult(Result const& result,
                   std::vector<std::string> const& unparsedArguments,
-                  std::vector<std::string> const& keywordsMissingValue)
+                  std::vector<cm::string_view> const& keywordsMissingValue)
 {
   static std::vector<std::string> const foobar = { "foo", "bar" };
   static std::vector<std::string> const barfoo = { "bar", "foo" };
-  static std::vector<std::string> const missing = { "STRING_1", "LIST_1" };
+  static std::vector<cm::string_view> const missing = { "STRING_1"_s,
+                                                        "LIST_1"_s,
+                                                        "LIST_4"_s };
 
 #define ASSERT_TRUE(x)                                                        \
   do {                                                                        \
@@ -65,18 +77,26 @@ bool verifyResult(Result const& result,
   ASSERT_TRUE(!result.Option2);
 
   ASSERT_TRUE(result.String1.empty());
-  ASSERT_TRUE(result.String2 == "foo");
+  ASSERT_TRUE(result.String2);
+  ASSERT_TRUE(*result.String2 == "foo");
+  ASSERT_TRUE(!result.String3);
 
   ASSERT_TRUE(result.List1.empty());
   ASSERT_TRUE(result.List2 == foobar);
-  ASSERT_TRUE(result.List3 == barfoo);
+  ASSERT_TRUE(result.List3);
+  ASSERT_TRUE(*result.List3 == barfoo);
+  ASSERT_TRUE(result.List4);
+  ASSERT_TRUE(result.List4->empty());
+  ASSERT_TRUE(!result.List5);
 
   ASSERT_TRUE(result.Multi1.empty());
   ASSERT_TRUE(result.Multi2.size() == 1);
   ASSERT_TRUE(result.Multi2[0].empty());
-  ASSERT_TRUE(result.Multi3.size() == 2);
-  ASSERT_TRUE(result.Multi3[0] == foobar);
-  ASSERT_TRUE(result.Multi3[1] == barfoo);
+  ASSERT_TRUE(result.Multi3);
+  ASSERT_TRUE((*result.Multi3).size() == 2);
+  ASSERT_TRUE((*result.Multi3)[0] == foobar);
+  ASSERT_TRUE((*result.Multi3)[1] == barfoo);
+  ASSERT_TRUE(!result.Multi4);
 
   ASSERT_TRUE(unparsedArguments.size() == 1);
   ASSERT_TRUE(unparsedArguments[0] == "bar");
@@ -89,19 +109,23 @@ bool testArgumentParserDynamic()
 {
   Result result;
   std::vector<std::string> unparsedArguments;
-  std::vector<std::string> keywordsMissingValue;
+  std::vector<cm::string_view> keywordsMissingValue;
 
   cmArgumentParser<void>{}
     .Bind("OPTION_1"_s, result.Option1)
     .Bind("OPTION_2"_s, result.Option2)
     .Bind("STRING_1"_s, result.String1)
     .Bind("STRING_2"_s, result.String2)
+    .Bind("STRING_3"_s, result.String3)
     .Bind("LIST_1"_s, result.List1)
     .Bind("LIST_2"_s, result.List2)
     .Bind("LIST_3"_s, result.List3)
+    .Bind("LIST_4"_s, result.List4)
+    .Bind("LIST_5"_s, result.List5)
     .Bind("MULTI_1"_s, result.Multi1)
     .Bind("MULTI_2"_s, result.Multi2)
     .Bind("MULTI_3"_s, result.Multi3)
+    .Bind("MULTI_4"_s, result.Multi4)
     .Parse(args, &unparsedArguments, &keywordsMissingValue);
 
   return verifyResult(result, unparsedArguments, keywordsMissingValue);
@@ -115,15 +139,19 @@ bool testArgumentParserStatic()
       .Bind("OPTION_2"_s, &Result::Option2)
       .Bind("STRING_1"_s, &Result::String1)
       .Bind("STRING_2"_s, &Result::String2)
+      .Bind("STRING_3"_s, &Result::String3)
       .Bind("LIST_1"_s, &Result::List1)
       .Bind("LIST_2"_s, &Result::List2)
       .Bind("LIST_3"_s, &Result::List3)
+      .Bind("LIST_4"_s, &Result::List4)
+      .Bind("LIST_5"_s, &Result::List5)
       .Bind("MULTI_1"_s, &Result::Multi1)
       .Bind("MULTI_2"_s, &Result::Multi2)
-      .Bind("MULTI_3"_s, &Result::Multi3);
+      .Bind("MULTI_3"_s, &Result::Multi3)
+      .Bind("MULTI_4"_s, &Result::Multi4);
 
   std::vector<std::string> unparsedArguments;
-  std::vector<std::string> keywordsMissingValue;
+  std::vector<cm::string_view> keywordsMissingValue;
   Result const result =
     parser.Parse(args, &unparsedArguments, &keywordsMissingValue);
 

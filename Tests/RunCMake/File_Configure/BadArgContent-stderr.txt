@@ -1,4 +1,6 @@
 CMake Error at BadArgContent.cmake:[0-9]+ \(file\):
-  file CONFIGURE CONTENT option needs a value.
+  file CONFIGURE keywords missing values:
+
+    CONTENT
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)

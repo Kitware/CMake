@@ -7,6 +7,7 @@
 #include <cstring>
 #include <sstream>
 
+#include <cm/string_view>
 #include <cmext/string_view>
 
 #include "cmCTest.h"
@@ -81,11 +82,10 @@ bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
 
   // Process input arguments.
   std::vector<std::string> unparsedArguments;
-  std::vector<std::string> keywordsMissingValue;
-  std::vector<std::string> parsedKeywords;
-  this->Parse(args, &unparsedArguments, &keywordsMissingValue,
+  std::vector<cm::string_view> parsedKeywords;
+  this->Parse(args, &unparsedArguments, /*keywordsMissingValue=*/nullptr,
               &parsedKeywords);
-  this->CheckArguments(keywordsMissingValue);
+  this->CheckArguments();
 
   std::sort(parsedKeywords.begin(), parsedKeywords.end());
   auto it = std::adjacent_find(parsedKeywords.begin(), parsedKeywords.end());
@@ -242,6 +242,6 @@ void cmCTestHandlerCommand::BindArguments()
   this->Bind("SUBMIT_INDEX"_s, this->SubmitIndex);
 }
 
-void cmCTestHandlerCommand::CheckArguments(std::vector<std::string> const&)
+void cmCTestHandlerCommand::CheckArguments()
 {
 }

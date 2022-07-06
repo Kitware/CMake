@@ -42,7 +42,7 @@ protected:
 
   // Command argument handling.
   virtual void BindArguments();
-  virtual void CheckArguments(std::vector<std::string> const& keywords);
+  virtual void CheckArguments();
 
   bool Append = false;
   bool Quiet = false;

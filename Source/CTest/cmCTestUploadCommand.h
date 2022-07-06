@@ -42,7 +42,7 @@ public:
 
 protected:
   void BindArguments() override;
-  void CheckArguments(std::vector<std::string> const&) override;
+  void CheckArguments() override;
   cmCTestGenericHandler* InitializeHandler() override;
 
   std::vector<std::string> Files;

@@ -7,7 +7,7 @@
 #include <utility>
 
 #include <cm/memory>
-#include <cmext/algorithm>
+#include <cm/optional>
 #include <cmext/string_view>
 
 #include "cmsys/RegularExpression.hxx"
@@ -57,7 +57,7 @@ bool cmExportCommand(std::vector<std::string> const& args,
   struct Arguments
   {
     std::string ExportSetName;
-    std::vector<std::string> Targets;
+    cm::optional<std::vector<std::string>> Targets;
     std::string Namespace;
     std::string Filename;
     std::string AndroidMKFile;
@@ -79,9 +79,7 @@ bool cmExportCommand(std::vector<std::string> const& args,
   }
 
   std::vector<std::string> unknownArgs;
-  std::vector<std::string> keywordsMissingValue;
-  Arguments const arguments =
-    parser.Parse(args, &unknownArgs, &keywordsMissingValue);
+  Arguments const arguments = parser.Parse(args, &unknownArgs);
 
   if (!unknownArgs.empty()) {
     status.SetError("Unknown argument: \"" + unknownArgs.front() + "\".");
@@ -145,9 +143,8 @@ bool cmExportCommand(std::vector<std::string> const& args,
       return false;
     }
     exportSet = &it->second;
-  } else if (!arguments.Targets.empty() ||
-             cm::contains(keywordsMissingValue, "TARGETS")) {
-    for (std::string const& currentTarget : arguments.Targets) {
+  } else if (arguments.Targets) {
+    for (std::string const& currentTarget : *arguments.Targets) {
       if (mf.IsAlias(currentTarget)) {
         std::ostringstream e;
         e << "given ALIAS target \"" << currentTarget
