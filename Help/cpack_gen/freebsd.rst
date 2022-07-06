@@ -62,8 +62,6 @@ the RPM information (e.g. package license).
 
     - :variable:`CPACK_PACKAGE_DESCRIPTION_SUMMARY` (this is always set
       by CPack itself, if nothing else sets it explicitly).
-    - :variable:`PROJECT_DESCRIPTION` (this can be set with the DESCRIPTION
-      parameter for :command:`project`).
 
 .. variable:: CPACK_FREEBSD_PACKAGE_DESCRIPTION
 
@@ -75,6 +73,10 @@ the RPM information (e.g. package license).
 
     - :variable:`CPACK_DEBIAN_PACKAGE_DESCRIPTION` (this may be set already
       for Debian packaging, so it is used as a fallback).
+    - :variable:`CPACK_PACKAGE_DESCRIPTION_SUMMARY` (this is always set
+      by CPack itself, if nothing else sets it explicitly).
+    - :variable:`PROJECT_DESCRIPTION` (this can be set with the DESCRIPTION
+      parameter for :command:`project`).
 
 .. variable:: CPACK_FREEBSD_PACKAGE_WWW
 
@@ -85,12 +87,12 @@ the RPM information (e.g. package license).
   * Mandatory: YES
   * Default:
 
-   - :variable:`CMAKE_PROJECT_HOMEPAGE_URL`, or if that is not set,
-     :variable:`CPACK_DEBIAN_PACKAGE_HOMEPAGE` (this may be set already
+   - :variable:`CPACK_PACKAGE_HOMEPAGE_URL`, or if that is not set,
+   - :variable:`CPACK_DEBIAN_PACKAGE_HOMEPAGE` (this may be set already
      for Debian packaging, so it is used as a fallback).
 
   .. versionadded:: 3.12
-    The ``CMAKE_PROJECT_HOMEPAGE_URL`` variable.
+    The ``CPACK_PACKAGE_HOMEPAGE_URL`` variable.
 
 .. variable:: CPACK_FREEBSD_PACKAGE_LICENSE
 
