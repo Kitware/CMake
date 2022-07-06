@@ -23,6 +23,7 @@ struct Result
   std::string String1;
   cm::optional<std::string> String2;
   cm::optional<std::string> String3;
+  ArgumentParser::Maybe<std::string> String4;
 
   ArgumentParser::NonEmpty<std::vector<std::string>> List1;
   ArgumentParser::NonEmpty<std::vector<std::string>> List2;
@@ -44,6 +45,7 @@ std::initializer_list<cm::string_view> const args = {
   "STRING_1",                // string arg missing value
   "STRING_2", "foo", "bar",  // string arg + unparsed value, presence captured
   // "STRING_3",             // string arg that is not present
+  "STRING_4",                // string arg allowed to be missing value
   "LIST_1",                  // list arg missing values
   "LIST_2", "foo", "bar",    // list arg with 2 elems
   "LIST_3", "bar",           // list arg ...
@@ -83,6 +85,7 @@ bool verifyResult(Result const& result,
   ASSERT_TRUE(result.String2);
   ASSERT_TRUE(*result.String2 == "foo");
   ASSERT_TRUE(!result.String3);
+  ASSERT_TRUE(result.String4.empty());
 
   ASSERT_TRUE(result.List1.empty());
   ASSERT_TRUE(result.List2 == foobar);
@@ -122,6 +125,7 @@ bool testArgumentParserDynamic()
     .Bind("STRING_1"_s, result.String1)
     .Bind("STRING_2"_s, result.String2)
     .Bind("STRING_3"_s, result.String3)
+    .Bind("STRING_4"_s, result.String4)
     .Bind("LIST_1"_s, result.List1)
     .Bind("LIST_2"_s, result.List2)
     .Bind("LIST_3"_s, result.List3)
@@ -146,6 +150,7 @@ bool testArgumentParserStatic()
       .Bind("STRING_1"_s, &Result::String1)
       .Bind("STRING_2"_s, &Result::String2)
       .Bind("STRING_3"_s, &Result::String3)
+      .Bind("STRING_4"_s, &Result::String4)
       .Bind("LIST_1"_s, &Result::List1)
       .Bind("LIST_2"_s, &Result::List2)
       .Bind("LIST_3"_s, &Result::List3)

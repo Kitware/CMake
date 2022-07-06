@@ -46,6 +46,13 @@ void Instance::Bind(std::string& val)
   this->ExpectValue = true;
 }
 
+void Instance::Bind(Maybe<std::string>& val)
+{
+  this->CurrentString = &val;
+  this->CurrentList = nullptr;
+  this->ExpectValue = false;
+}
+
 void Instance::Bind(MaybeEmpty<std::vector<std::string>>& val)
 {
   this->CurrentString = nullptr;

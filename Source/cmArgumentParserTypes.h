@@ -7,6 +7,11 @@
 namespace ArgumentParser {
 
 template <typename T>
+struct Maybe : public T
+{
+};
+
+template <typename T>
 struct MaybeEmpty : public T
 {
 };

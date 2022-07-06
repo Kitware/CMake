@@ -28,7 +28,6 @@
 
 #include "cm_sys_stat.h"
 
-#include "cmAlgorithms.h"
 #include "cmArgumentParser.h"
 #include "cmArgumentParserTypes.h"
 #include "cmCMakePath.h"
@@ -3211,7 +3210,8 @@ bool HandleConfigureCommand(std::vector<std::string> const& args,
     cm::optional<std::string> Content;
     bool EscapeQuotes = false;
     bool AtOnly = false;
-    std::string NewlineStyle;
+    // "NEWLINE_STYLE" requires one value, but we use a custom check below.
+    ArgumentParser::Maybe<std::string> NewlineStyle;
   };
 
   static auto const parser =
@@ -3236,15 +3236,10 @@ bool HandleConfigureCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  // Arguments that are allowed to be empty lists.  Keep entries sorted!
-  static const std::vector<cm::string_view> LIST_ARGS = {
-    "NEWLINE_STYLE"_s, // Filter here so we can issue a custom error below.
-  };
-  auto kwbegin = keywordsMissingValues.cbegin();
-  auto kwend = cmRemoveMatching(keywordsMissingValues, LIST_ARGS);
-  if (kwend != kwbegin) {
-    status.SetError(cmStrCat("CONFIGURE keywords missing values:\n  ",
-                             cmJoin(cmMakeRange(kwbegin, kwend), "\n  ")));
+  if (!keywordsMissingValues.empty()) {
+    status.SetError(
+      cmStrCat("CONFIGURE keywords missing values:\n  ",
+               cmJoin(cmMakeRange(keywordsMissingValues), "\n  ")));
     cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
@@ -3347,7 +3342,10 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
     std::string Format;
     std::string Compression;
     std::string CompressionLevel;
-    std::string MTime;
+    // "MTIME" should require one value, but it has long been accidentally
+    // accepted without one and treated as if an empty value were given.
+    // Fixing this would require a policy.
+    ArgumentParser::Maybe<std::string> MTime;
     bool Verbose = false;
     // "PATHS" requires at least one value, but use a custom check below.
     ArgumentParser::MaybeEmpty<std::vector<std::string>> Paths;
@@ -3375,18 +3373,10 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  // Arguments that are allowed to be empty lists.  Keep entries sorted!
-  static const std::vector<cm::string_view> LIST_ARGS = {
-    "MTIME"_s, // "MTIME" should not be in this list because it requires one
-               // value, but it has long been accidentally accepted without
-               // one and treated as if an empty value were given.
-               // Fixing this would require a policy.
-  };
-  auto kwbegin = keywordsMissingValues.cbegin();
-  auto kwend = cmRemoveMatching(keywordsMissingValues, LIST_ARGS);
-  if (kwend != kwbegin) {
-    status.SetError(cmStrCat("Keywords missing values:\n  ",
-                             cmJoin(cmMakeRange(kwbegin, kwend), "\n  ")));
+  if (!keywordsMissingValues.empty()) {
+    status.SetError(
+      cmStrCat("Keywords missing values:\n  ",
+               cmJoin(cmMakeRange(keywordsMissingValues), "\n  ")));
     cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
