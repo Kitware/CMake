@@ -90,13 +90,25 @@ This module will set the following variables in your project:
 Hints
 ^^^^^
 
-Set ``OPENSSL_ROOT_DIR`` to the root directory of an OpenSSL installation.
+The following variables may be set to control search behavior:
 
-.. versionadded:: 3.4
-  Set ``OPENSSL_USE_STATIC_LIBS`` to ``TRUE`` to look for static libraries.
+``OPENSSL_ROOT_DIR``
+  Set to the root directory of an OpenSSL installation.
 
-.. versionadded:: 3.5
-  Set ``OPENSSL_MSVC_STATIC_RT`` set ``TRUE`` to choose the MT version of the lib.
+``OPENSSL_USE_STATIC_LIBS``
+  .. versionadded:: 3.4
+
+  Set to ``TRUE`` to look for static libraries.
+
+``OPENSSL_MSVC_STATIC_RT``
+  .. versionadded:: 3.5
+
+  Set to ``TRUE`` to choose the MT version of the lib.
+
+``ENV{PKG_CONFIG_PATH}``
+  On UNIX-like systems, ``pkg-config`` is used to locate the system OpenSSL.
+  Set the ``PKG_CONFIG_PATH`` environment varialbe to look in alternate
+  locations.  Useful on multi-lib systems.
 #]=======================================================================]
 
 macro(_OpenSSL_test_and_find_dependencies ssl_library crypto_library)
