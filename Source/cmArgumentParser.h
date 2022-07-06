@@ -12,6 +12,7 @@
 
 #include <cm/optional>
 #include <cm/string_view>
+#include <cm/type_traits>
 #include <cmext/string_view>
 
 #include "cmArgumentParserTypes.h" // IWYU pragma: keep
@@ -20,6 +21,28 @@ template <typename Result>
 class cmArgumentParser; // IWYU pragma: keep
 
 namespace ArgumentParser {
+
+class ParseResult
+{
+public:
+  explicit operator bool() const { return true; }
+};
+
+template <typename Result>
+typename std::enable_if<std::is_base_of<ParseResult, Result>::value,
+                        ParseResult*>::type
+AsParseResultPtr(Result& result)
+{
+  return &result;
+}
+
+template <typename Result>
+typename std::enable_if<!std::is_base_of<ParseResult, Result>::value,
+                        ParseResult*>::type
+AsParseResultPtr(Result&)
+{
+  return nullptr;
+}
 
 class Instance;
 using KeywordAction = std::function<void(Instance&)>;
@@ -44,6 +67,7 @@ class Base
 {
 public:
   using Instance = ArgumentParser::Instance;
+  using ParseResult = ArgumentParser::ParseResult;
 
   ArgumentParser::ActionMap Bindings;
 
@@ -63,12 +87,13 @@ public:
 class Instance
 {
 public:
-  Instance(ActionMap const& bindings,
+  Instance(ActionMap const& bindings, ParseResult* parseResult,
            std::vector<std::string>* unparsedArguments,
            std::vector<cm::string_view>* keywordsMissingValue,
            std::vector<cm::string_view>* parsedKeywords,
            void* result = nullptr)
     : Bindings(bindings)
+    , ParseResults(parseResult)
     , UnparsedArguments(unparsedArguments)
     , KeywordsMissingValue(keywordsMissingValue)
     , ParsedKeywords(parsedKeywords)
@@ -104,6 +129,7 @@ public:
 
 private:
   ActionMap const& Bindings;
+  ParseResult* ParseResults = nullptr;
   std::vector<std::string>* UnparsedArguments = nullptr;
   std::vector<cm::string_view>* KeywordsMissingValue = nullptr;
   std::vector<cm::string_view>* ParsedKeywords = nullptr;
@@ -139,14 +165,17 @@ public:
   }
 
   template <typename Range>
-  void Parse(Result& result, Range const& args,
+  bool Parse(Result& result, Range const& args,
              std::vector<std::string>* unparsedArguments,
              std::vector<cm::string_view>* keywordsMissingValue = nullptr,
              std::vector<cm::string_view>* parsedKeywords = nullptr) const
   {
-    Instance instance(this->Bindings, unparsedArguments, keywordsMissingValue,
-                      parsedKeywords, &result);
+    using ArgumentParser::AsParseResultPtr;
+    ParseResult* parseResultPtr = AsParseResultPtr(result);
+    Instance instance(this->Bindings, parseResultPtr, unparsedArguments,
+                      keywordsMissingValue, parsedKeywords, &result);
     instance.Parse(args);
+    return parseResultPtr ? static_cast<bool>(*parseResultPtr) : true;
   }
 
   template <typename Range>
@@ -173,13 +202,16 @@ public:
   }
 
   template <typename Range>
-  void Parse(Range const& args, std::vector<std::string>* unparsedArguments,
-             std::vector<cm::string_view>* keywordsMissingValue = nullptr,
-             std::vector<cm::string_view>* parsedKeywords = nullptr) const
+  ParseResult Parse(
+    Range const& args, std::vector<std::string>* unparsedArguments,
+    std::vector<cm::string_view>* keywordsMissingValue = nullptr,
+    std::vector<cm::string_view>* parsedKeywords = nullptr) const
   {
-    Instance instance(this->Bindings, unparsedArguments, keywordsMissingValue,
-                      parsedKeywords);
+    ParseResult parseResult;
+    Instance instance(this->Bindings, &parseResult, unparsedArguments,
+                      keywordsMissingValue, parsedKeywords);
     instance.Parse(args);
+    return parseResult;
   }
 
 protected:
