@@ -1,1 +1,1 @@
-^Scanning dependencies of target DepTarget$
+Scanning dependencies of target DepTarget$

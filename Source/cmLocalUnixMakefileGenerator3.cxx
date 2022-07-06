@@ -1412,13 +1412,16 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(
 
     if (needRescanDependInfo || needRescanDirInfo || needRescanDependencies) {
       // The dependencies must be regenerated.
-      std::string targetName = cmSystemTools::GetFilenameName(targetDir);
-      targetName = targetName.substr(0, targetName.length() - 4);
-      std::string message =
-        cmStrCat("Scanning dependencies of target ", targetName);
-      cmSystemTools::MakefileColorEcho(cmsysTerminal_Color_ForegroundMagenta |
-                                         cmsysTerminal_Color_ForegroundBold,
-                                       message.c_str(), true, color);
+      if (verbose) {
+        std::string targetName = cmSystemTools::GetFilenameName(targetDir);
+        targetName = targetName.substr(0, targetName.length() - 4);
+        std::string message =
+          cmStrCat("Scanning dependencies of target ", targetName);
+        cmSystemTools::MakefileColorEcho(
+          cmsysTerminal_Color_ForegroundMagenta |
+            cmsysTerminal_Color_ForegroundBold,
+          message.c_str(), true, color);
+      }
 
       status = this->ScanDependencies(targetDir, dependFile,
                                       internalDependFile, validDependencies);
@@ -1447,13 +1450,19 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(
                                         this->GetBinaryDirectory())
                       : std::function<bool(const std::string&)>())) {
       // regenerate dependencies files
-      std::string targetName =
-        cmCMakePath(targetDir).GetFileName().RemoveExtension().GenericString();
-      auto message = cmStrCat(
-        "Consolidate compiler generated dependencies of target ", targetName);
-      cmSystemTools::MakefileColorEcho(cmsysTerminal_Color_ForegroundMagenta |
-                                         cmsysTerminal_Color_ForegroundBold,
-                                       message.c_str(), true, color);
+      if (verbose) {
+        std::string targetName = cmCMakePath(targetDir)
+                                   .GetFileName()
+                                   .RemoveExtension()
+                                   .GenericString();
+        auto message =
+          cmStrCat("Consolidate compiler generated dependencies of target ",
+                   targetName);
+        cmSystemTools::MakefileColorEcho(
+          cmsysTerminal_Color_ForegroundMagenta |
+            cmsysTerminal_Color_ForegroundBold,
+          message.c_str(), true, color);
+      }
 
       // Open the make depends file.  This should be copy-if-different
       // because the make tool may try to reload it needlessly otherwise.
