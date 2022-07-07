@@ -2817,7 +2817,11 @@ bool HandleTimestampCommand(std::vector<std::string> const& args,
 
   unsigned int argsIndex = 1;
 
-  const std::string& filename = args[argsIndex++];
+  std::string filename = args[argsIndex++];
+  if (!cmsys::SystemTools::FileIsFullPath(filename)) {
+    filename = cmStrCat(status.GetMakefile().GetCurrentSourceDirectory(), '/',
+                        filename);
+  }
 
   const std::string& outputVariable = args[argsIndex++];
 
