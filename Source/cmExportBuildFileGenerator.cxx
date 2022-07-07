@@ -15,6 +15,7 @@
 
 #include "cmExportSet.h"
 #include "cmFileSet.h"
+#include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -25,6 +26,7 @@
 #include "cmPolicies.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetExport.h"
 #include "cmValue.h"
@@ -141,9 +143,16 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
     this->GenerateTargetFileSets(gte, os);
   }
 
+  this->GenerateCxxModuleInformation(os);
+
   // Generate import file content for each configuration.
   for (std::string const& c : this->Configurations) {
     this->GenerateImportConfig(os, c);
+  }
+
+  // Generate import file content for each configuration.
+  for (std::string const& c : this->Configurations) {
+    this->GenerateImportCxxModuleConfigTargetInclusion(c);
   }
 
   this->GenerateMissingTargetsCheckCode(os);
@@ -478,4 +487,61 @@ std::string cmExportBuildFileGenerator::GetFileSetFiles(cmGeneratorTarget* gte,
   }
 
   return cmJoin(resultVector, " ");
+}
+
+std::string cmExportBuildFileGenerator::GetCxxModulesDirectory() const
+{
+  return this->CxxModulesDirectory;
+}
+
+void cmExportBuildFileGenerator::GenerateCxxModuleConfigInformation(
+  std::ostream& os) const
+{
+  const char* opt = "";
+  if (this->Configurations.size() > 1) {
+    // With more than one configuration, each individual file is optional.
+    opt = " OPTIONAL";
+  }
+
+  // Generate import file content for each configuration.
+  for (std::string c : this->Configurations) {
+    if (c.empty()) {
+      c = "noconfig";
+    }
+    os << "include(\"${CMAKE_CURRENT_LIST_DIR}/cxx-modules-" << c << ".cmake\""
+       << opt << ")\n";
+  }
+}
+
+bool cmExportBuildFileGenerator::GenerateImportCxxModuleConfigTargetInclusion(
+  std::string config) const
+{
+  auto cxx_modules_dirname = this->GetCxxModulesDirectory();
+  if (cxx_modules_dirname.empty()) {
+    return true;
+  }
+
+  if (config.empty()) {
+    config = "noconfig";
+  }
+
+  std::string fileName = cmStrCat(this->FileDir, '/', cxx_modules_dirname,
+                                  "/cxx-modules-", config, ".cmake");
+
+  cmGeneratedFileStream os(fileName, true);
+  if (!os) {
+    std::string se = cmSystemTools::GetLastSystemError();
+    std::ostringstream e;
+    e << "cannot write to file \"" << fileName << "\": " << se;
+    cmSystemTools::Error(e.str());
+    return false;
+  }
+  os.SetCopyIfDifferent(true);
+
+  for (auto const* tgt : this->ExportedTargets) {
+    os << "include(\"${CMAKE_CURRENT_LIST_DIR}/target-" << tgt->GetExportName()
+       << '-' << config << ".cmake\")\n";
+  }
+
+  return true;
 }

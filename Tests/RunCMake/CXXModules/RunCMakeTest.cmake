@@ -60,11 +60,29 @@ foreach (fileset_type IN LISTS fileset_types)
   foreach (scope IN LISTS scopes)
     run_cmake("FileSet${fileset_type}${scope}")
   endforeach ()
+  run_cmake("FileSet${fileset_type}InterfaceImported")
 
   # Test the error message when a non-C++ source file is found in the source
   # list.
   run_cmake("NotCXXSource${fileset_type}")
 endforeach ()
+
+run_cmake(InstallBMI)
+run_cmake(InstallBMIGenericArgs)
+run_cmake(InstallBMIIgnore)
+
+run_cmake(ExportBuildCxxModules)
+run_cmake(ExportInstallCxxModules)
+
+# Generator-specific tests.
+if (RunCMake_GENERATOR MATCHES "Ninja")
+  run_cmake(NinjaDependInfoFileSet)
+  run_cmake(NinjaDependInfoExport)
+  run_cmake(NinjaDependInfoBMIInstall)
+else ()
+  message(FATAL_ERROR
+    "Please add 'DependInfo' tests for the '${RunCMake_GENERATOR}' generator.")
+endif ()
 
 # Actual compilation tests.
 if (NOT CMake_TEST_MODULE_COMPILATION)
@@ -86,13 +104,23 @@ function (run_cxx_module_test directory)
     set(RunCMake_TEST_OPTIONS -DCMAKE_BUILD_TYPE=Debug)
   endif ()
 
-  set(RunCMake_TEST_OPTIONS
+  if (RunCMake_CXXModules_INSTALL)
+    set(prefix "${RunCMake_BINARY_DIR}/examples/${test_name}-install")
+    file(REMOVE_RECURSE "${prefix}")
+    list(APPEND RunCMake_TEST_OPTIONS
+      "-DCMAKE_INSTALL_PREFIX=${prefix}")
+  endif ()
+
+  list(APPEND RunCMake_TEST_OPTIONS
     "-DCMake_TEST_MODULE_COMPILATION_RULES=${CMake_TEST_MODULE_COMPILATION_RULES}"
     ${ARGN})
   run_cmake("examples/${test_name}")
   set(RunCMake_TEST_NO_CLEAN 1)
-  run_cmake_command("${test_name}-build" "${CMAKE_COMMAND}" --build . --config Debug)
-  run_cmake_command("${test_name}-test" "${CMAKE_CTEST_COMMAND}" -C Debug)
+  run_cmake_command("examples/${test_name}-build" "${CMAKE_COMMAND}" --build . --config Debug)
+  if (RunCMake_CXXModules_INSTALL)
+    run_cmake_command("examples/${test_name}-install" "${CMAKE_COMMAND}" --build . --target install --config Debug)
+  endif ()
+  run_cmake_command("examples/${test_name}-test" "${CMAKE_CTEST_COMMAND}" -C Debug --output-on-failure)
 endfunction ()
 
 string(REPLACE "," ";" CMake_TEST_MODULE_COMPILATION "${CMake_TEST_MODULE_COMPILATION}")
@@ -102,6 +130,7 @@ if ("named" IN_LIST CMake_TEST_MODULE_COMPILATION)
   run_cxx_module_test(simple)
   run_cxx_module_test(library library-static -DBUILD_SHARED_LIBS=OFF)
   run_cxx_module_test(generated)
+  run_cxx_module_test(public-req-private)
 endif ()
 
 # Tests which use named modules in shared libraries.
@@ -117,4 +146,24 @@ endif ()
 # Tests which use internal partitions.
 if ("internal_partitions" IN_LIST CMake_TEST_MODULE_COMPILATION)
   run_cxx_module_test(internal-partitions)
+endif ()
+
+# Tests which install BMIs
+if ("export_bmi" IN_LIST CMake_TEST_MODULE_COMPILATION)
+  run_cxx_module_test(export-interface-build)
+  run_cxx_module_test(export-bmi-and-interface-build)
+endif ()
+
+# All of the following tests perform installation.
+set(RunCMake_CXXModules_INSTALL 1)
+
+# Tests which install BMIs
+if ("install_bmi" IN_LIST CMake_TEST_MODULE_COMPILATION)
+  run_cxx_module_test(install-bmi)
+  run_cxx_module_test(install-bmi-and-interfaces)
+
+  if ("export_bmi" IN_LIST CMake_TEST_MODULE_COMPILATION)
+    run_cxx_module_test(export-interface-install)
+    run_cxx_module_test(export-bmi-and-interface-install)
+  endif ()
 endif ()

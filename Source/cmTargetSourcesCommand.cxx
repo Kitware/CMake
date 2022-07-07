@@ -269,7 +269,8 @@ bool TargetSourcesImpl::HandleOneFileSet(
       }
 
       if (cmFileSetVisibilityIsForInterface(visibility) &&
-          !cmFileSetVisibilityIsForSelf(visibility)) {
+          !cmFileSetVisibilityIsForSelf(visibility) &&
+          !this->Target->IsImported()) {
         if (type == "CXX_MODULES"_s || type == "CXX_MODULE_HEADER_UNITS"_s) {
           this->SetError(
             R"(File set TYPEs "CXX_MODULES" and "CXX_MODULE_HEADER_UNITS" may not have "INTERFACE" visibility)");

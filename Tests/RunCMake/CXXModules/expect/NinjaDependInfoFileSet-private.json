@@ -1,0 +1,40 @@
+{
+  "bmi-installation": null,
+  "compiler-id": "<IGNORE>",
+  "config": "<CONFIG>",
+  "cxx-modules": {
+    "CMakeFiles/ninja-file-sets-private.dir/sources/module-internal-part.cxx.o": {
+      "destination": null,
+      "name": "internal_partitions",
+      "relative-directory": "sources",
+      "source": "<SOURCE_DIR>/sources/module-internal-part.cxx",
+      "type": "CXX_MODULES",
+      "visibility": "PRIVATE"
+    },
+    "CMakeFiles/ninja-file-sets-private.dir/sources/module-part.cxx.o": {
+      "destination": null,
+      "name": "modules",
+      "relative-directory": "",
+      "source": "<SOURCE_DIR>/sources/module-part.cxx",
+      "type": "CXX_MODULES",
+      "visibility": "PRIVATE"
+    },
+    "CMakeFiles/ninja-file-sets-private.dir/sources/module.cxx.o": {
+      "destination": null,
+      "name": "modules",
+      "relative-directory": "",
+      "source": "<SOURCE_DIR>/sources/module.cxx",
+      "type": "CXX_MODULES",
+      "visibility": "PRIVATE"
+    }
+  },
+  "dir-cur-bld": "<BINARY_DIR>",
+  "dir-cur-src": "<SOURCE_DIR>",
+  "dir-top-bld": "<BINARY_DIR>",
+  "dir-top-src": "<SOURCE_DIR>",
+  "exports": [],
+  "include-dirs": [],
+  "language": "CXX",
+  "linked-target-dirs": [],
+  "module-dir": "<BINARY_DIR>/CMakeFiles/ninja-file-sets-private.dir"
+}

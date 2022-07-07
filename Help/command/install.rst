@@ -132,7 +132,7 @@ Installing Targets
   install(TARGETS targets... [EXPORT <export-name>]
           [RUNTIME_DEPENDENCIES args...|RUNTIME_DEPENDENCY_SET <set-name>]
           [[ARCHIVE|LIBRARY|RUNTIME|OBJECTS|FRAMEWORK|BUNDLE|
-            PRIVATE_HEADER|PUBLIC_HEADER|RESOURCE|FILE_SET <set-name>]
+            PRIVATE_HEADER|PUBLIC_HEADER|RESOURCE|FILE_SET <set-name>|CXX_MODULES_BMI]
            [DESTINATION <dir>]
            [PERMISSIONS permissions...]
            [CONFIGURATIONS [Debug|Release|...]]
@@ -214,6 +214,18 @@ that may be installed:
   preserved. For example, a file added to the file set as
   ``/blah/include/myproj/here.h`` with a base directory ``/blah/include``
   would be installed to ``myproj/here.h`` below the destination.
+
+``CXX_MODULES_BMI``
+
+.. note ::
+
+  Experimental. Gated by ``CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API``
+
+  Any module files from C++ modules from ``PUBLIC`` sources in a file set of
+  type ``CXX_MODULES`` will be installed to the given ``DESTINATION``. All
+  modules are placed directly in the destination as no directory structure is
+  derived from the names of the modules. An empty ``DESTINATION`` may be used
+  to suppress installing these files (for use in generic code).
 
 For each of these arguments given, the arguments following them only apply
 to the target or file type specified in the argument. If none is given, the
@@ -778,9 +790,10 @@ Installing Exports
 .. code-block:: cmake
 
   install(EXPORT <export-name> DESTINATION <dir>
-          [NAMESPACE <namespace>] [[FILE <name>.cmake]|
+          [NAMESPACE <namespace>] [FILE <name>.cmake]
           [PERMISSIONS permissions...]
-          [CONFIGURATIONS [Debug|Release|...]]
+          [CONFIGURATIONS [Debug|Release|...]
+          [CXX_MODULES_DIRECTORY <directory>]
           [EXPORT_LINK_INTERFACE_LIBRARIES]
           [COMPONENT <component>]
           [EXCLUDE_FROM_ALL])
@@ -835,6 +848,18 @@ library is always installed if the headers and CMake export file are present.
   allows cmake to build the libraries of a project and make them available
   to an ndk build system complete with transitive dependencies, include flags
   and defines required to use the libraries.
+
+``CXX_MODULES_DIRECTORY``
+
+.. note ::
+
+  Experimental. Gated by ``CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API``
+
+  Specify a subdirectory to store C++ module information for targets in the
+  export set. This directory will be populated with files which add the
+  necessary target property information to the relevant targets. Note that
+  without this information, none of the C++ modules which are part of the
+  targets in the export set will support being imported in consuming targets.
 
 The ``EXPORT`` form is useful to help outside projects use targets built
 and installed by the current project.  For example, the code

@@ -25,7 +25,8 @@ Exporting Targets
 .. code-block:: cmake
 
   export(TARGETS <target>... [NAMESPACE <namespace>]
-         [APPEND] FILE <filename> [EXPORT_LINK_INTERFACE_LIBRARIES])
+         [APPEND] FILE <filename> [EXPORT_LINK_INTERFACE_LIBRARIES]
+         [CXX_MODULES_DIRECTORY <directory>])
 
 Creates a file ``<filename>`` that may be included by outside projects to
 import targets named by ``<target>...`` from the current project's build tree.
@@ -51,6 +52,16 @@ The options are:
   ``(IMPORTED_)?LINK_INTERFACE_LIBRARIES(_<CONFIG>)?``
   in the export, even when policy :policy:`CMP0022` is NEW.  This is useful
   to support consumers using CMake versions older than 2.8.12.
+
+``CXX_MODULES_DIRECTORY <directory>``
+
+.. note ::
+
+  Experimental. Gated by ``CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API``
+
+  Export C++ module properties to files under the given directory. Each file
+  will be named according to the target's export name (without any namespace).
+  These files will automatically be included from the export file.
 
 This signature requires all targets to be listed explicitly.  If a library
 target is included in the export, but a target to which it links is not
@@ -95,7 +106,8 @@ Exporting Targets matching install(EXPORT)
 
 .. code-block:: cmake
 
-  export(EXPORT <export-name> [NAMESPACE <namespace>] [FILE <filename>])
+  export(EXPORT <export-name> [NAMESPACE <namespace>] [FILE <filename>]
+         [CXX_MODULES_DIRECTORY <directory>])
 
 Creates a file ``<filename>`` that may be included by outside projects to
 import targets from the current project's build tree.  This is the same

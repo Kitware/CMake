@@ -28,7 +28,8 @@ public:
                            const std::vector<std::string>& configurations,
                            std::string const& component, MessageLevel message,
                            bool exclude_from_all, std::string filename,
-                           std::string name_space, bool exportOld,
+                           std::string name_space,
+                           std::string cxx_modules_directory, bool exportOld,
                            bool android, cmListFileBacktrace backtrace);
   cmInstallExportGenerator(const cmInstallExportGenerator&) = delete;
   ~cmInstallExportGenerator() override;
@@ -50,6 +51,10 @@ public:
   std::string GetDestinationFile() const;
   std::string GetFileName() const { return this->FileName; }
   std::string GetTempDir() const;
+  std::string GetCxxModuleDirectory() const
+  {
+    return this->CxxModulesDirectory;
+  }
 
 protected:
   void GenerateScript(std::ostream& os) override;
@@ -64,6 +69,7 @@ protected:
   std::string const FilePermissions;
   std::string const FileName;
   std::string const Namespace;
+  std::string const CxxModulesDirectory;
   bool const ExportOld;
   cmLocalGenerator* LocalGenerator = nullptr;
 

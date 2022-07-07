@@ -27,6 +27,7 @@
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
+#include "cmInstallCxxModuleBmiGenerator.h"
 #include "cmInstallDirectoryGenerator.h"
 #include "cmInstallExportGenerator.h"
 #include "cmInstallFileSetGenerator.h"
@@ -1090,6 +1091,21 @@ Json::Value DirectoryObject::DumpInstaller(cmInstallGenerator* gen)
     installer["fileSetTarget"]["index"] = this->TargetIndexMap[target];
 
     if (installFileSet->GetOptional()) {
+      installer["isOptional"] = true;
+    }
+  } else if (auto* cxxModuleBmi =
+               dynamic_cast<cmInstallCxxModuleBmiGenerator*>(gen)) {
+    installer["type"] = "cxxModuleBmi";
+    installer["destination"] = cxxModuleBmi->GetDestination(this->Config);
+
+    auto const* target = cxxModuleBmi->GetTarget();
+    installer["cxxModuleBmiTarget"] = Json::objectValue;
+    installer["cxxModuleBmiTarget"]["id"] = TargetId(target, this->TopBuild);
+    installer["cxxModuleBmiTarget"]["index"] = this->TargetIndexMap[target];
+
+    // FIXME: Parse FilePermissions.
+    // FIXME: Parse MessageLevel.
+    if (cxxModuleBmi->GetOptional()) {
       installer["isOptional"] = true;
     }
   }
