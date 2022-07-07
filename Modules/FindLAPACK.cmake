@@ -673,6 +673,10 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
     elseif(_lapack_sizeof_integer EQUAL 4)
       string(APPEND _lapack_nvhpc_lib "_lp64")
     endif()
+    set(_lapack_nvhpc_flags)
+    if(";${CMAKE_C_COMPILER_ID};${CMAKE_CXX_COMPILER_ID};${CMAKE_Fortran_COMPILER_ID};" MATCHES ";(NVHPC|PGI);")
+      set(_lapack_nvhpc_flags "-fortranlibs")
+    endif()
 
     check_lapack_libraries(
       LAPACK_LIBRARIES
@@ -680,7 +684,7 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
       cheev
       ""
       "${_lapack_nvhpc_lib}"
-      "-fortranlibs"
+      "${_lapack_nvhpc_flags}"
       ""
       ""
       "${BLAS_LIBRARIES}"
@@ -698,7 +702,7 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
         cheev
         ""
         "${_lapack_nvhpc_lib}"
-        "-fortranlibs"
+        "${_lapack_nvhpc_flags}"
         ""
         ""
         "${BLAS_LIBRARIES}"
@@ -706,6 +710,7 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
     endif()
 
     unset(_lapack_nvhpc_lib)
+    unset(_lapack_nvhpc_flags)
   endif()
 
   # Generic LAPACK library?
