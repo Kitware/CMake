@@ -1662,11 +1662,16 @@ static const struct LinkLibraryNode : public cmGeneratorExpressionNode
     const GeneratorExpressionContent* content,
     cmGeneratorExpressionDAGChecker* dagChecker) const override
   {
+    using ForGenex = cmGeneratorExpressionDAGChecker::ForGenex;
+
     if (!context->HeadTarget || !dagChecker ||
-        !dagChecker->EvaluatingLinkLibraries()) {
+        !dagChecker->EvaluatingLinkLibraries(nullptr,
+                                             ForGenex::LINK_LIBRARY)) {
       reportError(context, content->GetOriginalExpression(),
                   "$<LINK_LIBRARY:...> may only be used with binary targets "
-                  "to specify link libraries.");
+                  "to specify link libraries through 'LINK_LIBRARIES', "
+                  "'INTERFACE_LINK_LIBRARIES', and "
+                  "'INTERFACE_LINK_LIBRARIES_DIRECT' properties.");
       return std::string();
     }
 
@@ -1743,11 +1748,16 @@ static const struct LinkGroupNode : public cmGeneratorExpressionNode
     const GeneratorExpressionContent* content,
     cmGeneratorExpressionDAGChecker* dagChecker) const override
   {
+    using ForGenex = cmGeneratorExpressionDAGChecker::ForGenex;
+
     if (!context->HeadTarget || !dagChecker ||
-        !dagChecker->EvaluatingLinkLibraries()) {
-      reportError(context, content->GetOriginalExpression(),
-                  "$<LINK_GROUP:...> may only be used with binary targets "
-                  "to specify group of link libraries.");
+        !dagChecker->EvaluatingLinkLibraries(nullptr, ForGenex::LINK_GROUP)) {
+      reportError(
+        context, content->GetOriginalExpression(),
+        "$<LINK_GROUP:...> may only be used with binary targets "
+        "to specify group of link libraries through 'LINK_LIBRARIES', "
+        "'INTERFACE_LINK_LIBRARIES', and "
+        "'INTERFACE_LINK_LIBRARIES_DIRECT' properties.");
       return std::string();
     }
 

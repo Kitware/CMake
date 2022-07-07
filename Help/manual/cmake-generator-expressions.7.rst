@@ -1421,9 +1421,10 @@ Output-Related Expressions
 
   * The ``$<LINK_LIBRARY:...>`` generator expression can only be used to
     specify link libraries.  In practice, this means it can appear in the
-    :prop_tgt:`LINK_LIBRARIES` and :prop_tgt:`INTERFACE_LINK_LIBRARIES`
-    target properties, and be specified in :command:`target_link_libraries`
-    and :command:`link_libraries` commands.
+    :prop_tgt:`LINK_LIBRARIES`, :prop_tgt:`INTERFACE_LINK_LIBRARIES`, and
+    :prop_tgt:`INTERFACE_LINK_LIBRARIES_DIRECT`  target properties, and be
+    specified in :command:`target_link_libraries` and :command:`link_libraries`
+    commands.
 
   * If a ``$<LINK_LIBRARY:...>`` generator expression appears in the
     :prop_tgt:`INTERFACE_LINK_LIBRARIES` property of a target, it will be
@@ -1596,9 +1597,10 @@ Output-Related Expressions
 
   * The ``$<LINK_GROUP:...>`` generator expression can only be used to
     specify link libraries.  In practice, this means it can appear in the
-    :prop_tgt:`LINK_LIBRARIES` and :prop_tgt:`INTERFACE_LINK_LIBRARIES`
-    target properties, and be specified in :command:`target_link_libraries`
-    and :command:`link_libraries` commands.
+    :prop_tgt:`LINK_LIBRARIES`, :prop_tgt:`INTERFACE_LINK_LIBRARIES`,and
+    :prop_tgt:`INTERFACE_LINK_LIBRARIES_DIRECT` target properties, and be
+    specified in :command:`target_link_libraries` and :command:`link_libraries`
+    commands.
 
   * If a ``$<LINK_GROUP:...>`` generator expression appears in the
     :prop_tgt:`INTERFACE_LINK_LIBRARIES` property of a target, it will be
