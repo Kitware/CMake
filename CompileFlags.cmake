@@ -136,3 +136,12 @@ OFF to disable /MP completely." )
     endif()
   endif()
 endif()
+
+# Get rid of excess -Wunused-but-set-variable on release builds with LCC >= 1.26
+foreach(l C CXX)
+  if(CMAKE_${l}_COMPILER_ID STREQUAL "LCC" AND NOT CMAKE_${l}_COMPILER_VERSION VERSION_LESS 1.26)
+    foreach(c MINSIZEREL RELEASE RELWITHDEBINFO)
+      string(APPEND "CMAKE_${l}_FLAGS_${c}" " -Wno-unused-but-set-variable")
+    endforeach()
+  endif()
+endforeach()
