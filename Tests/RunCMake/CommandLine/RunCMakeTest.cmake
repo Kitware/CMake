@@ -940,8 +940,8 @@ set(CMAKE_DEPENDS_CHECK_C
 set(CMAKE_RELATIVE_PATH_TOP_SOURCE \"${RunCMake_TEST_SOURCE_DIR}\")
 set(CMAKE_RELATIVE_PATH_TOP_BINARY \"${RunCMake_TEST_BINARY_DIR}\")
 ")
-  run_cmake_command(cmake_depends ${CMAKE_COMMAND} -E cmake_depends
-    "Unix Makefiles"
+  run_cmake_command(cmake_depends ${CMAKE_COMMAND} -E env VERBOSE=1
+    ${CMAKE_COMMAND} -E cmake_depends "Unix Makefiles"
     ${RunCMake_TEST_SOURCE_DIR} ${RunCMake_TEST_SOURCE_DIR}
     ${RunCMake_TEST_BINARY_DIR} ${RunCMake_TEST_BINARY_DIR}
     ${RunCMake_TEST_BINARY_DIR}/CMakeFiles/DepTarget.dir/DependInfo.cmake
