@@ -53,8 +53,6 @@ the following variables:
   wxWidgets_USE_UNIVERSAL
   wxWidgets_USE_STATIC
 
-
-
 There is also a wxWidgets_CONFIG_OPTIONS variable for all other
 options that need to be passed to the wx-config utility.  For example,
 to use the base toolkit found in the /usr/local path, set the variable
@@ -244,7 +242,7 @@ endmacro()
 #=====================================================================
 # Determine whether unix or win32 paths should be used
 #=====================================================================
-if(WIN32 AND NOT CYGWIN AND NOT MSYS AND NOT MINGW AND NOT CMAKE_CROSSCOMPILING)
+if(WIN32 AND NOT CYGWIN AND NOT MSYS AND NOT CMAKE_CROSSCOMPILING)
   set(wxWidgets_FIND_STYLE "win32")
 else()
   set(wxWidgets_FIND_STYLE "unix")
@@ -470,10 +468,12 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
 
   # If wxWidgets_ROOT_DIR changed, clear lib dir.
   if(NOT WX_ROOT_DIR STREQUAL wxWidgets_ROOT_DIR)
+    if(NOT wxWidgets_LIB_DIR OR WX_ROOT_DIR)
+      set(wxWidgets_LIB_DIR "wxWidgets_LIB_DIR-NOTFOUND"
+          CACHE PATH "Cleared." FORCE)
+    endif()
     set(WX_ROOT_DIR ${wxWidgets_ROOT_DIR}
         CACHE INTERNAL "wxWidgets_ROOT_DIR")
-    set(wxWidgets_LIB_DIR "wxWidgets_LIB_DIR-NOTFOUND"
-        CACHE PATH "Cleared." FORCE)
   endif()
 
   if(WX_ROOT_DIR)
@@ -652,11 +652,17 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
     endif()
   endif()
 
+  if(MINGW AND NOT wxWidgets_FOUND)
+    # Try unix search mode as well.
+    set(wxWidgets_FIND_STYLE "unix")
+    dbg_msg_v("wxWidgets_FIND_STYLE changed to unix")
+  endif()
+endif()
+
 #=====================================================================
 # UNIX_FIND_STYLE
 #=====================================================================
-else()
-  if(wxWidgets_FIND_STYLE STREQUAL "unix")
+if(wxWidgets_FIND_STYLE STREQUAL "unix")
     #-----------------------------------------------------------------
     # UNIX: Helper MACROS
     #-----------------------------------------------------------------
@@ -920,19 +926,6 @@ else()
       endif()
       unset(_cygpath_exe CACHE)
     endif()
-
-#=====================================================================
-# Neither UNIX_FIND_STYLE, nor WIN32_FIND_STYLE
-#=====================================================================
-  else()
-    if(NOT wxWidgets_FIND_QUIETLY)
-      message(STATUS
-        "${CMAKE_CURRENT_LIST_FILE}(${CMAKE_CURRENT_LIST_LINE}): \n"
-        "  Platform unknown/unsupported. It's neither WIN32 nor UNIX "
-        "find style."
-        )
-    endif()
-  endif()
 endif()
 
 # Check that all libraries are present, as wx-config does not check it
