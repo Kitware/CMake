@@ -2930,7 +2930,7 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions(
   Elem& e0)
 {
   cmStateEnums::TargetType ttype = this->GeneratorTarget->GetType();
-  if (ttype > cmStateEnums::GLOBAL_TARGET) {
+  if (ttype > cmStateEnums::INTERFACE_LIBRARY) {
     return;
   }
   if (this->ProjectType == VsProjectType::csproj) {
