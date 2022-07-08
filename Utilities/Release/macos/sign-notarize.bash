@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -e
-readonly usage='usage: sign-notarize.bash -i <id> -d <dev-acct> -k <key-item> [-p <provider>] [--] <package>.dmg
+readonly usage='usage: sign-notarize.bash -i <id> -k <keychain-profile> [--] <package>.dmg
 
 Sign and notarize the "CMake.app" bundle inside the given "<package>.dmg" disk image.
 Also produce a "<package>.tar.gz" tarball containing the same "CMake.app".
@@ -8,9 +8,22 @@ Also produce a "<package>.tar.gz" tarball containing the same "CMake.app".
 Options:
 
     -i <id>                Signing Identity
-    -d <dev-acct>          Developer account name
-    -k <key-item>          Keychain item containing account credentials
-    -p <provider>          Provider short name
+    -k <keychain-profile>  Keychain profile containing stored credentials
+
+Create the keychain profile ahead of time using
+
+    xcrun notarytool store-credentials <keychain-profile> \
+      --apple-id <dev-acct> --team-id <team-id> [--password <app-specific-password>]
+
+where:
+
+    <dev-acct>              is an Apple ID of a developer account
+    <team-id>               is from https://developer.apple.com/account/#!/membership
+    <app-specific-password> is generated via https://support.apple.com/en-us/HT204397
+                            If --password is omitted, notarytool will prompt for it.
+
+This creates a keychain item called "com.apple.gke.notary.tool" with an
+account name "com.apple.gke.notary.tool.saved-creds.<keychain-profile>".
 '
 
 cleanup() {
@@ -29,15 +42,11 @@ die() {
 }
 
 id=''
-dev_acct=''
-key_item=''
-provider=''
+keychain_profile=''
 while test "$#" != 0; do
     case "$1" in
     -i) shift; id="$1" ;;
-    -d) shift; dev_acct="$1" ;;
-    -k) shift; key_item="$1" ;;
-    -p) shift; provider="$1" ;;
+    -k) shift; keychain_profile="$1" ;;
     --) shift ; break ;;
     -*) die "$usage" ;;
     *) break ;;
@@ -51,18 +60,14 @@ esac
 test "$#" = 0 || die "$usage"
 
 # Verify arguments.
-if test -z "$id" -o -z "$dev_acct" -o -z "$key_item"; then
+if test -z "$id" -o -z "$keychain_profile"; then
     die "$usage"
-fi
-if test -n "$provider"; then
-    provider="--provider $provider"
 fi
 
 # Verify environment.
-if ! xcnotary="$(type -p xcnotary)"; then
-    die "'xcnotary' not found in PATH"
+if ! xcrun --find notarytool 2>/dev/null; then
+    die "'xcrun notarytool' not found"
 fi
-readonly xcnotary
 
 readonly tmpdir="$(mktemp -d)"
 
@@ -95,7 +100,9 @@ codesign --verify --timestamp --options=runtime --verbose --deep \
   "$vol_path/CMake.app/Contents/bin/cpack" \
   "$vol_path/CMake.app"
 
-xcnotary notarize "$vol_path/CMake.app" -d "$dev_acct" -k "$key_item" $provider
+ditto -c -k --keepParent "$vol_path/CMake.app" "$tmpdir/CMake.app.zip"
+xcrun notarytool submit "$tmpdir/CMake.app.zip" --keychain-profile "$keychain_profile" --wait
+xcrun stapler staple "$vol_path/CMake.app"
 
 # Create a tarball of the volume next to the original disk image.
 readonly tar_gz="${dmg/%.dmg/.tar.gz}"
