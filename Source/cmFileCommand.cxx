@@ -28,8 +28,8 @@
 
 #include "cm_sys_stat.h"
 
-#include "cmAlgorithms.h"
 #include "cmArgumentParser.h"
+#include "cmArgumentParserTypes.h"
 #include "cmCMakePath.h"
 #include "cmCryptoHash.h"
 #include "cmELF.h"
@@ -2505,7 +2505,7 @@ bool HandleGenerateCommand(std::vector<std::string> const& args,
     cm::optional<std::string> NewLineStyle;
     bool NoSourcePermissions = false;
     bool UseSourcePermissions = false;
-    std::vector<std::string> FilePermissions;
+    ArgumentParser::NonEmpty<std::vector<std::string>> FilePermissions;
   };
 
   static auto const parser =
@@ -3052,17 +3052,18 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
     std::string ConflictingDependenciesPrefix;
     std::string RPathPrefix;
     std::string BundleExecutable;
-    std::vector<std::string> Executables;
-    std::vector<std::string> Libraries;
-    std::vector<std::string> Directories;
-    std::vector<std::string> Modules;
-    std::vector<std::string> PreIncludeRegexes;
-    std::vector<std::string> PreExcludeRegexes;
-    std::vector<std::string> PostIncludeRegexes;
-    std::vector<std::string> PostExcludeRegexes;
-    std::vector<std::string> PostIncludeFiles;
-    std::vector<std::string> PostExcludeFiles;
-    std::vector<std::string> PostExcludeFilesStrict;
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> Executables;
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> Libraries;
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> Directories;
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> Modules;
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> PreIncludeRegexes;
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> PreExcludeRegexes;
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> PostIncludeRegexes;
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> PostExcludeRegexes;
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> PostIncludeFiles;
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> PostExcludeFiles;
+    ArgumentParser::MaybeEmpty<std::vector<std::string>>
+      PostExcludeFilesStrict;
   };
 
   static auto const parser =
@@ -3098,25 +3099,10 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  // Arguments that are allowed to be empty lists.  Keep entries sorted!
-  static const std::vector<cm::string_view> LIST_ARGS = {
-    "DIRECTORIES"_s,
-    "EXECUTABLES"_s,
-    "LIBRARIES"_s,
-    "MODULES"_s,
-    "POST_EXCLUDE_FILES"_s,
-    "POST_EXCLUDE_FILES_STRICT"_s,
-    "POST_EXCLUDE_REGEXES"_s,
-    "POST_INCLUDE_FILES"_s,
-    "POST_INCLUDE_REGEXES"_s,
-    "PRE_EXCLUDE_REGEXES"_s,
-    "PRE_INCLUDE_REGEXES"_s,
-  };
-  auto kwbegin = keywordsMissingValues.cbegin();
-  auto kwend = cmRemoveMatching(keywordsMissingValues, LIST_ARGS);
-  if (kwend != kwbegin) {
-    status.SetError(cmStrCat("Keywords missing values:\n  ",
-                             cmJoin(cmMakeRange(kwbegin, kwend), "\n  ")));
+  if (!keywordsMissingValues.empty()) {
+    status.SetError(
+      cmStrCat("Keywords missing values:\n  ",
+               cmJoin(cmMakeRange(keywordsMissingValues), "\n  ")));
     cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
@@ -3224,7 +3210,8 @@ bool HandleConfigureCommand(std::vector<std::string> const& args,
     cm::optional<std::string> Content;
     bool EscapeQuotes = false;
     bool AtOnly = false;
-    std::string NewlineStyle;
+    // "NEWLINE_STYLE" requires one value, but we use a custom check below.
+    ArgumentParser::Maybe<std::string> NewlineStyle;
   };
 
   static auto const parser =
@@ -3249,15 +3236,10 @@ bool HandleConfigureCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  // Arguments that are allowed to be empty lists.  Keep entries sorted!
-  static const std::vector<cm::string_view> LIST_ARGS = {
-    "NEWLINE_STYLE"_s, // Filter here so we can issue a custom error below.
-  };
-  auto kwbegin = keywordsMissingValues.cbegin();
-  auto kwend = cmRemoveMatching(keywordsMissingValues, LIST_ARGS);
-  if (kwend != kwbegin) {
-    status.SetError(cmStrCat("CONFIGURE keywords missing values:\n  ",
-                             cmJoin(cmMakeRange(kwbegin, kwend), "\n  ")));
+  if (!keywordsMissingValues.empty()) {
+    status.SetError(
+      cmStrCat("CONFIGURE keywords missing values:\n  ",
+               cmJoin(cmMakeRange(keywordsMissingValues), "\n  ")));
     cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
@@ -3360,9 +3342,13 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
     std::string Format;
     std::string Compression;
     std::string CompressionLevel;
-    std::string MTime;
+    // "MTIME" should require one value, but it has long been accidentally
+    // accepted without one and treated as if an empty value were given.
+    // Fixing this would require a policy.
+    ArgumentParser::Maybe<std::string> MTime;
     bool Verbose = false;
-    std::vector<std::string> Paths;
+    // "PATHS" requires at least one value, but use a custom check below.
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> Paths;
   };
 
   static auto const parser =
@@ -3387,19 +3373,10 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  // Arguments that are allowed to be empty lists.  Keep entries sorted!
-  static const std::vector<cm::string_view> LIST_ARGS = {
-    "MTIME"_s, // "MTIME" should not be in this list because it requires one
-               // value, but it has long been accidentally accepted without
-               // one and treated as if an empty value were given.
-               // Fixing this would require a policy.
-    "PATHS"_s, // "PATHS" is here only so we can issue a custom error below.
-  };
-  auto kwbegin = keywordsMissingValues.cbegin();
-  auto kwend = cmRemoveMatching(keywordsMissingValues, LIST_ARGS);
-  if (kwend != kwbegin) {
-    status.SetError(cmStrCat("Keywords missing values:\n  ",
-                             cmJoin(cmMakeRange(kwbegin, kwend), "\n  ")));
+  if (!keywordsMissingValues.empty()) {
+    status.SetError(
+      cmStrCat("Keywords missing values:\n  ",
+               cmJoin(cmMakeRange(keywordsMissingValues), "\n  ")));
     cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
@@ -3496,7 +3473,7 @@ bool HandleArchiveExtractCommand(std::vector<std::string> const& args,
     bool Verbose = false;
     bool ListOnly = false;
     std::string Destination;
-    std::vector<std::string> Patterns;
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> Patterns;
     bool Touch = false;
   };
 
@@ -3520,13 +3497,10 @@ bool HandleArchiveExtractCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  // Arguments that are allowed to be empty lists.  Keep entries sorted!
-  static const std::vector<cm::string_view> LIST_ARGS = { "PATTERNS"_s };
-  auto kwbegin = keywordsMissingValues.cbegin();
-  auto kwend = cmRemoveMatching(keywordsMissingValues, LIST_ARGS);
-  if (kwend != kwbegin) {
-    status.SetError(cmStrCat("Keywords missing values:\n  ",
-                             cmJoin(cmMakeRange(kwbegin, kwend), "\n  ")));
+  if (!keywordsMissingValues.empty()) {
+    status.SetError(
+      cmStrCat("Keywords missing values:\n  ",
+               cmJoin(cmMakeRange(keywordsMissingValues), "\n  ")));
     cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
@@ -3620,9 +3594,9 @@ bool HandleChmodCommandImpl(std::vector<std::string> const& args, bool recurse,
 
   struct Arguments
   {
-    std::vector<std::string> Permissions;
-    std::vector<std::string> FilePermissions;
-    std::vector<std::string> DirectoryPermissions;
+    ArgumentParser::NonEmpty<std::vector<std::string>> Permissions;
+    ArgumentParser::NonEmpty<std::vector<std::string>> FilePermissions;
+    ArgumentParser::NonEmpty<std::vector<std::string>> DirectoryPermissions;
   };
 
   static auto const parser =

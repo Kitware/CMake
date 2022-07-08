@@ -11,6 +11,7 @@
 #include <cmext/string_view>
 
 #include "cmArgumentParser.h"
+#include "cmArgumentParserTypes.h"
 
 namespace {
 
@@ -22,12 +23,14 @@ struct Result
   std::string String1;
   cm::optional<std::string> String2;
   cm::optional<std::string> String3;
+  ArgumentParser::Maybe<std::string> String4;
 
-  std::vector<std::string> List1;
-  std::vector<std::string> List2;
-  cm::optional<std::vector<std::string>> List3;
-  cm::optional<std::vector<std::string>> List4;
-  cm::optional<std::vector<std::string>> List5;
+  ArgumentParser::NonEmpty<std::vector<std::string>> List1;
+  ArgumentParser::NonEmpty<std::vector<std::string>> List2;
+  cm::optional<ArgumentParser::NonEmpty<std::vector<std::string>>> List3;
+  cm::optional<ArgumentParser::NonEmpty<std::vector<std::string>>> List4;
+  cm::optional<ArgumentParser::NonEmpty<std::vector<std::string>>> List5;
+  cm::optional<ArgumentParser::MaybeEmpty<std::vector<std::string>>> List6;
 
   std::vector<std::vector<std::string>> Multi1;
   std::vector<std::vector<std::string>> Multi2;
@@ -42,12 +45,14 @@ std::initializer_list<cm::string_view> const args = {
   "STRING_1",                // string arg missing value
   "STRING_2", "foo", "bar",  // string arg + unparsed value, presence captured
   // "STRING_3",             // string arg that is not present
+  "STRING_4",                // string arg allowed to be missing value
   "LIST_1",                  // list arg missing values
   "LIST_2", "foo", "bar",    // list arg with 2 elems
   "LIST_3", "bar",           // list arg ...
   "LIST_3", "foo",           // ... with continuation
   "LIST_4",                  // list arg missing values, presence captured
   // "LIST_5",               // list arg that is not present
+  "LIST_6",                  // list arg allowed to be empty
   "MULTI_2",                 // multi list with 0 lists
   "MULTI_3", "foo", "bar",   // multi list with first list with two elems
   "MULTI_3", "bar", "foo",   // multi list with second list with two elems
@@ -80,6 +85,7 @@ bool verifyResult(Result const& result,
   ASSERT_TRUE(result.String2);
   ASSERT_TRUE(*result.String2 == "foo");
   ASSERT_TRUE(!result.String3);
+  ASSERT_TRUE(result.String4.empty());
 
   ASSERT_TRUE(result.List1.empty());
   ASSERT_TRUE(result.List2 == foobar);
@@ -88,6 +94,8 @@ bool verifyResult(Result const& result,
   ASSERT_TRUE(result.List4);
   ASSERT_TRUE(result.List4->empty());
   ASSERT_TRUE(!result.List5);
+  ASSERT_TRUE(result.List6);
+  ASSERT_TRUE(result.List6->empty());
 
   ASSERT_TRUE(result.Multi1.empty());
   ASSERT_TRUE(result.Multi2.size() == 1);
@@ -117,11 +125,13 @@ bool testArgumentParserDynamic()
     .Bind("STRING_1"_s, result.String1)
     .Bind("STRING_2"_s, result.String2)
     .Bind("STRING_3"_s, result.String3)
+    .Bind("STRING_4"_s, result.String4)
     .Bind("LIST_1"_s, result.List1)
     .Bind("LIST_2"_s, result.List2)
     .Bind("LIST_3"_s, result.List3)
     .Bind("LIST_4"_s, result.List4)
     .Bind("LIST_5"_s, result.List5)
+    .Bind("LIST_6"_s, result.List6)
     .Bind("MULTI_1"_s, result.Multi1)
     .Bind("MULTI_2"_s, result.Multi2)
     .Bind("MULTI_3"_s, result.Multi3)
@@ -140,11 +150,13 @@ bool testArgumentParserStatic()
       .Bind("STRING_1"_s, &Result::String1)
       .Bind("STRING_2"_s, &Result::String2)
       .Bind("STRING_3"_s, &Result::String3)
+      .Bind("STRING_4"_s, &Result::String4)
       .Bind("LIST_1"_s, &Result::List1)
       .Bind("LIST_2"_s, &Result::List2)
       .Bind("LIST_3"_s, &Result::List3)
       .Bind("LIST_4"_s, &Result::List4)
       .Bind("LIST_5"_s, &Result::List5)
+      .Bind("LIST_6"_s, &Result::List6)
       .Bind("MULTI_1"_s, &Result::Multi1)
       .Bind("MULTI_2"_s, &Result::Multi2)
       .Bind("MULTI_3"_s, &Result::Multi3)

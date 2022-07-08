@@ -4,6 +4,8 @@
 
 #include <algorithm>
 
+#include "cmArgumentParserTypes.h"
+
 namespace ArgumentParser {
 
 auto ActionMap::Emplace(cm::string_view name, Action action)
@@ -44,7 +46,21 @@ void Instance::Bind(std::string& val)
   this->ExpectValue = true;
 }
 
-void Instance::Bind(std::vector<std::string>& val)
+void Instance::Bind(Maybe<std::string>& val)
+{
+  this->CurrentString = &val;
+  this->CurrentList = nullptr;
+  this->ExpectValue = false;
+}
+
+void Instance::Bind(MaybeEmpty<std::vector<std::string>>& val)
+{
+  this->CurrentString = nullptr;
+  this->CurrentList = &val;
+  this->ExpectValue = false;
+}
+
+void Instance::Bind(NonEmpty<std::vector<std::string>>& val)
 {
   this->CurrentString = nullptr;
   this->CurrentList = &val;

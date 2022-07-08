@@ -14,6 +14,8 @@
 #include <cm/string_view>
 #include <cmext/string_view>
 
+#include "cmArgumentParserTypes.h" // IWYU pragma: keep
+
 namespace ArgumentParser {
 
 class Instance;
@@ -37,7 +39,9 @@ public:
 
   void Bind(bool& val);
   void Bind(std::string& val);
-  void Bind(std::vector<std::string>& val);
+  void Bind(Maybe<std::string>& val);
+  void Bind(MaybeEmpty<std::vector<std::string>>& val);
+  void Bind(NonEmpty<std::vector<std::string>>& val);
   void Bind(std::vector<std::vector<std::string>>& val);
 
   // cm::optional<> records the presence the keyword to which it binds.

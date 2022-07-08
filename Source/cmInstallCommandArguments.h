@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "cmArgumentParser.h"
+#include "cmArgumentParserTypes.h"
 
 class cmInstallCommandArguments : public cmArgumentParser<void>
 {
@@ -44,8 +45,8 @@ private:
   std::string NamelinkComponent;
   bool ExcludeFromAll = false;
   std::string Rename;
-  std::vector<std::string> Permissions;
-  std::vector<std::string> Configurations;
+  ArgumentParser::MaybeEmpty<std::vector<std::string>> Permissions;
+  ArgumentParser::MaybeEmpty<std::vector<std::string>> Configurations;
   bool Optional = false;
   bool NamelinkOnly = false;
   bool NamelinkSkip = false;

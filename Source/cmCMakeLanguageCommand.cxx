@@ -14,6 +14,7 @@
 #include <cmext/string_view>
 
 #include "cmArgumentParser.h"
+#include "cmArgumentParserTypes.h"
 #include "cmDependencyProvider.h"
 #include "cmExecutionStatus.h"
 #include "cmGlobalGenerator.h"
@@ -237,7 +238,7 @@ bool cmCMakeLanguageCommandSET_DEPENDENCY_PROVIDER(
   struct SetProviderArgs
   {
     std::string Command;
-    std::vector<std::string> Methods;
+    ArgumentParser::NonEmpty<std::vector<std::string>> Methods;
   };
 
   auto const ArgsParser =

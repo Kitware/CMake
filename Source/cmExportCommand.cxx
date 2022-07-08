@@ -13,6 +13,7 @@
 #include "cmsys/RegularExpression.hxx"
 
 #include "cmArgumentParser.h"
+#include "cmArgumentParserTypes.h"
 #include "cmExecutionStatus.h"
 #include "cmExperimental.h"
 #include "cmExportBuildAndroidMKGenerator.h"
@@ -58,7 +59,7 @@ bool cmExportCommand(std::vector<std::string> const& args,
   struct Arguments
   {
     std::string ExportSetName;
-    cm::optional<std::vector<std::string>> Targets;
+    cm::optional<ArgumentParser::MaybeEmpty<std::vector<std::string>>> Targets;
     std::string Namespace;
     std::string Filename;
     std::string AndroidMKFile;
