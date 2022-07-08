@@ -229,9 +229,7 @@ that may be installed:
 
 For each of these arguments given, the arguments following them only apply
 to the target or file type specified in the argument. If none is given, the
-installation properties apply to all target types. If only one is given then
-only targets of that type will be installed (which can be used to install
-just a DLL or just an import library.)
+installation properties apply to all target types.
 
 For regular executables, static libraries and shared libraries, the
 ``DESTINATION`` argument is not required.  For these target types, when
@@ -244,6 +242,14 @@ target properties. A destination must always be provided for module libraries,
 Apple bundles and frameworks.  A destination can be omitted for interface and
 object libraries, but they are handled differently (see the discussion of this
 topic toward the end of this section).
+
+For shared libraries on DLL platforms, if neither ``RUNTIME`` nor ``ARCHIVE``
+destinations are specified, both the ``RUNTIME`` and ``ARCHIVE`` components are
+installed to their default destinations. If either a ``RUNTIME`` or ``ARCHIVE``
+destination is specified, the component is installed to that destination, and
+the other component is not installed. If both ``RUNTIME`` and ``ARCHIVE``
+destinations are specified, then both components are installed to their
+respective destinations.
 
 The following table shows the target types with their associated variables and
 built-in defaults that apply when no destination is given:
