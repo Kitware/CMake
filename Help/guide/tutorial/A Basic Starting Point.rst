@@ -19,8 +19,19 @@ required. This will be the starting point for our tutorial. Create a
   add_executable(Tutorial tutorial.cxx)
 
 
-Note that this example uses lower case commands in the ``CMakeLists.txt`` file.
-Upper, lower, and mixed case commands are supported by CMake. The source
+Any project's top most ``CMakeLists.txt`` must start by specifying
+a minimum CMake version using :command:`cmake_minimum_required`. This ensures
+that the later CMake functions are run with a compatible version of CMake.
+
+To start a project, we use :command:`project` to set the project name. This
+call is required with every project and should be called soon after
+:command:`cmake_minimum_required`.
+
+Lastly, we use :command:`add_executable` to specify we want an executable
+named Tutorial generated using ``tutorial.cxx`` as the source.
+
+Note that this example uses lower case commands in the ``CMakeLists.txt``
+file. Upper, lower, and mixed case commands are supported by CMake. The source
 code for ``tutorial.cxx`` is provided in the ``Step1`` directory and can be
 used to compute the square root of a number.
 
@@ -79,7 +90,7 @@ to set the project name and version number.
   :language: cmake
   :end-before: # specify the C++ standard
 
-Then, configure a header file to pass the version number to the source
+Then use :command:`configure_file` to pass the version number to the source
 code:
 
 .. literalinclude:: Step2/CMakeLists.txt
@@ -91,7 +102,8 @@ code:
 
 Since the configured file will be written into the binary tree, we
 must add that directory to the list of paths to search for include
-files. Add the following lines to the end of the ``CMakeLists.txt`` file:
+files. Use :command:`target_include_directories` to add the following lines to
+the end of the ``CMakeLists.txt`` file:
 
 .. literalinclude:: Step2/CMakeLists.txt
   :caption: CMakeLists.txt
@@ -107,9 +119,9 @@ directory with the following contents:
   :name: TutorialConfig.h.in
   :language: c++
 
-When CMake configures this header file the values for
+When CMake configures this header file, the values for
 ``@Tutorial_VERSION_MAJOR@`` and ``@Tutorial_VERSION_MINOR@`` will be
-replaced.
+replaced with the corresponding version numbers from the project.
 
 Next modify ``tutorial.cxx`` to include the configured header file,
 ``TutorialConfig.h``.
@@ -141,7 +153,7 @@ Next let's add some C++11 features to our project by replacing ``atof`` with
 We will need to explicitly state in the CMake code that it should use the
 correct flags. The easiest way to enable support for a specific C++ standard
 in CMake is by using the :variable:`CMAKE_CXX_STANDARD` variable. For this
-tutorial, set the :variable:`CMAKE_CXX_STANDARD` variable in the
+tutorial, :command:`set` the :variable:`CMAKE_CXX_STANDARD` variable in the
 ``CMakeLists.txt`` file to ``11`` and :variable:`CMAKE_CXX_STANDARD_REQUIRED`
 to ``True``. Make sure to add the ``CMAKE_CXX_STANDARD`` declarations above the
 call to ``add_executable``.
