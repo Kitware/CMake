@@ -27,15 +27,15 @@ target property.
 Direct Link Dependencies as Usage Requirements
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The ``INTERFACE_PROPERTY_LINK_DIRECT`` and
+The ``INTERFACE_LINK_LIBRARIES_DIRECT`` and
 ``INTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE`` target properties
 are :ref:`usage requirements <Target Usage Requirements>`.
 Their effects propagate to dependent targets transitively, and can
 therefore affect the direct link dependencies of every target in a
 chain of dependent libraries.  Whenever some library target ``X`` links
 to another library target ``Y`` whose direct or transitive usage
-requirements contain ``INTERFACE_PROPERTY_LINK_DIRECT`` or
-``INTERFACE_PROPERTY_LINK_DIRECT_EXCLUDE``, the properties may affect
+requirements contain ``INTERFACE_LINK_LIBRARIES_DIRECT`` or
+``INTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE``, the properties may affect
 ``X``'s list of direct link dependencies:
 
 * If ``X`` is a shared library or executable, its dependencies are linked.
@@ -56,8 +56,8 @@ on ``X``'s dependents:
     target_link_libraries(X PUBLIC Y)
 
   then ``Y`` is placed in ``X``'s :prop_tgt:`INTERFACE_LINK_LIBRARIES`,
-  so ``Y``'s usage requirements, including ``INTERFACE_PROPERTY_LINK_DIRECT``,
-  ``INTERFACE_PROPERTY_LINK_DIRECT_EXCLUDE``, and the usage requirements
+  so ``Y``'s usage requirements, including ``INTERFACE_LINK_LIBRARIES_DIRECT``,
+  ``INTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE``, and the usage requirements
   declared by the direct link dependencies they add, are propagated to
   ``X``'s dependents.
 
@@ -69,8 +69,8 @@ on ``X``'s dependents:
 
   then ``$<LINK_ONLY:Y>`` is placed in ``X``'s
   :prop_tgt:`INTERFACE_LINK_LIBRARIES`.  ``Y``'s linking requirements,
-  including ``INTERFACE_PROPERTY_LINK_DIRECT``,
-  ``INTERFACE_PROPERTY_LINK_DIRECT_EXCLUDE``, and the transitive link
+  including ``INTERFACE_LINK_LIBRARIES_DIRECT``,
+  ``INTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE``, and the transitive link
   dependencies declared by the direct link dependencies they add, are
   propagated to ``X``'s dependents.  However, ``Y``'s non-linking
   usage requirements are blocked by the :genex:`LINK_ONLY` generator
@@ -83,16 +83,16 @@ on ``X``'s dependents:
     target_link_libraries(X PRIVATE Y)
 
   then ``Y`` is not placed in ``X``'s :prop_tgt:`INTERFACE_LINK_LIBRARIES`,
-  so ``Y``'s usage requirements, even ``INTERFACE_PROPERTY_LINK_DIRECT``
-  and ``INTERFACE_PROPERTY_LINK_DIRECT_EXCLUDE``, are not propagated to
+  so ``Y``'s usage requirements, even ``INTERFACE_LINK_LIBRARIES_DIRECT``
+  and ``INTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE``, are not propagated to
   ``X``'s dependents.
 
 * In all cases, the content of ``X``'s :prop_tgt:`INTERFACE_LINK_LIBRARIES`
-  is not affected by ``Y``'s ``INTERFACE_PROPERTY_LINK_DIRECT`` or
-  ``INTERFACE_PROPERTY_LINK_DIRECT_EXCLUDE``.
+  is not affected by ``Y``'s ``INTERFACE_LINK_LIBRARIES_DIRECT`` or
+  ``INTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE``.
 
-One may limit the effects of ``INTERFACE_PROPERTY_LINK_DIRECT`` and
-``INTERFACE_PROPERTY_LINK_DIRECT_EXCLUDE`` to a subset of dependent
+One may limit the effects of ``INTERFACE_LINK_LIBRARIES_DIRECT`` and
+``INTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE`` to a subset of dependent
 targets by using the :genex:`TARGET_PROPERTY` generator expression.
 For example, to limit the effects to executable targets, use an
 entry of the form::
@@ -178,7 +178,7 @@ final link line for ``app`` will link the libraries in the following
 order:
 
 * ``FooPlugin`` as a direct link dependency of ``app``
-  (via ``Foo``'s usage requiremens).
+  (via ``Foo``'s usage requirements).
 * ``FooExtras`` as a dependency of ``FooPlugin``.
 * ``Foo`` as a dependency of ``FooPlugin`` and ``FooExtras``.
 * ``Core`` as a dependency of ``FooPlugin``, ``FooExtras``, and ``Foo``.
@@ -229,7 +229,7 @@ The final link line for ``app`` will now link the libraries in the following
 order:
 
 * ``FooPlugin`` as a direct link dependency of ``app``
-  (via ``Foo``'s usage requiremens).
+  (via ``Foo``'s usage requirements).
 * ``app_impl`` as a direct link dependency of ``app``.
 * ``FooExtras`` as a dependency of ``FooPlugin``.
 * ``Foo`` as a dependency of ``app_impl``, ``FooPlugin``, and ``FooExtras``.
