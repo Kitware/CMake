@@ -259,9 +259,30 @@ endif()
 if("${COMPILE_OUTPUT}" MATCHES "hello world")
   message(SEND_ERROR " COMPILE_OUT contains the run output: \"${COMPILE_OUTPUT}\"")
 endif()
-# check the run output, it should stdout
+# check the run output, it should contain stdout
 if(NOT "${RUN_OUTPUT}" MATCHES "hello world")
   message(SEND_ERROR " RUN_OUTPUT didn't contain \"hello world\": \"${RUN_OUTPUT}\"")
+endif()
+
+# try to run a file and parse stdout and stderr separately
+try_run(SHOULD_EXIT_WITH_ERROR SHOULD_COMPILE
+    ${TryCompile_BINARY_DIR}
+    ${TryCompile_SOURCE_DIR}/stdout_and_stderr.c
+    COMPILE_OUTPUT_VARIABLE COMPILE_OUTPUT
+    RUN_OUTPUT_STDOUT_VARIABLE RUN_OUTPUT_STDOUT
+    RUN_OUTPUT_STDERR_VARIABLE RUN_OUTPUT_STDERR)
+
+if(NOT SHOULD_COMPILE)
+  message(STATUS " exit_with_error failed compiling: ${COMPILE_OUTPUT}")
+endif()
+
+# check the run stdout output
+if(NOT "${RUN_OUTPUT_STDOUT}" MATCHES "hello world")
+  message(SEND_ERROR " RUN_OUTPUT_STDOUT didn't contain \"hello world\": \"${RUN_OUTPUT_STDOUT}\"")
+endif()
+# check the run stderr output
+if(NOT "${RUN_OUTPUT_STDERR}" MATCHES "error")
+  message(SEND_ERROR " RUN_OUTPUT_STDERR didn't contain \"error\": \"${RUN_OUTPUT_STDERR}\"")
 endif()
 
 #######################################################################

@@ -10,3 +10,6 @@ if (CMAKE_SYSTEM_NAME MATCHES "^(Linux|Darwin|Windows)$" AND
 endif()
 
 run_cmake(WorkingDirArg)
+
+run_cmake(BadStdOutVariable)
+run_cmake(BadStdErrVariable)

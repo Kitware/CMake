@@ -19,6 +19,8 @@ Try Compiling and Running Source Files
           [LINK_LIBRARIES <libs>...]
           [COMPILE_OUTPUT_VARIABLE <var>]
           [RUN_OUTPUT_VARIABLE <var>]
+          [RUN_OUTPUT_STDOUT_VARIABLE <var>]
+          [RUN_OUTPUT_STDERR_VARIABLE <var>]
           [OUTPUT_VARIABLE <var>]
           [WORKING_DIRECTORY <var>]
           [ARGS <args>...])
@@ -70,6 +72,16 @@ The options are:
 ``RUN_OUTPUT_VARIABLE <var>``
   Report the output from running the executable in a given variable.
 
+``RUN_OUTPUT_STDOUT_VARIABLE <var>``
+  .. versionadded:: 3.25
+
+  Report the output of stdout from running the executable in a given variable.
+
+``RUN_OUTPUT_STDERR_VARIABLE <var>``
+  .. versionadded:: 3.25
+
+  Report the output of stderr from running the executable in a given variable.
+
 ``WORKING_DIRECTORY <var>``
   .. versionadded:: 3.20
 
@@ -110,6 +122,7 @@ These cache entries are:
 
 In order to make cross compiling your project easier, use ``try_run``
 only if really required.  If you use ``try_run``, use the
+``RUN_OUTPUT_STDOUT_VARIABLE``, ``RUN_OUTPUT_STDERR_VARIABLE``,
 ``RUN_OUTPUT_VARIABLE`` or ``OUTPUT_VARIABLE`` options only if really
 required.  Using them will require that when cross-compiling, the cache
 variables will have to be set manually to the output of the executable.

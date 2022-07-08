@@ -1,0 +1,5 @@
+CMake Error: RUN_OUTPUT_STDERR_VARIABLE specified but there is no variable
+CMake Error at BadStdErrVariable.cmake:1 \(try_run\):
+  try_run unknown error.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
