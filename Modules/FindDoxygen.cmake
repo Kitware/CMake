@@ -432,9 +432,44 @@ endif()
 # or use something like homebrew.
 # ============== End OSX stuff ================
 
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+
 #
 # Find Doxygen...
 #
+function(_Doxygen_get_version doxy_version result_var doxy_path)
+        execute_process(
+            COMMAND "${doxy_path}" --version
+            OUTPUT_VARIABLE full_doxygen_version
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            RESULT_VARIABLE version_result
+        )
+
+        # Ignore any commit hashes, etc.
+        string(REGEX MATCH [[^[0-9]+\.[0-9]+\.[0-9]+]] sem_doxygen_version "${full_doxygen_version}")
+
+        set(${result_var} ${version_result} PARENT_SCOPE)
+        set(${doxy_version} ${sem_doxygen_version} PARENT_SCOPE)
+endfunction()
+
+function(_Doxygen_version_validator version_match doxy_path)
+    if(NOT DEFINED Doxygen_FIND_VERSION)
+        set(${is_valid_version} TRUE PARENT_SCOPE)
+    else()
+        _Doxygen_get_version(candidate_version version_result "${doxy_path}")
+
+        if(version_result)
+            message(DEBUG "Unable to determine candidate doxygen version at ${doxy_path}: ${version_result}")
+        endif()
+
+        find_package_check_version("${candidate_version}" valid_doxy_version
+            HANDLE_VERSION_RANGE
+        )
+
+        set(${version_match} "${valid_doxy_version}" PARENT_SCOPE)
+    endif()
+endfunction()
+
 macro(_Doxygen_find_doxygen)
     find_program(
         DOXYGEN_EXECUTABLE
@@ -446,16 +481,13 @@ macro(_Doxygen_find_doxygen)
             /Applications/Utilities/Doxygen.app/Contents/Resources
             /Applications/Utilities/Doxygen.app/Contents/MacOS
         DOC "Doxygen documentation generation tool (http://www.doxygen.org)"
+        VALIDATOR _Doxygen_version_validator
     )
     mark_as_advanced(DOXYGEN_EXECUTABLE)
 
     if(DOXYGEN_EXECUTABLE)
-        execute_process(
-            COMMAND "${DOXYGEN_EXECUTABLE}" --version
-            OUTPUT_VARIABLE DOXYGEN_VERSION
-            OUTPUT_STRIP_TRAILING_WHITESPACE
-            RESULT_VARIABLE _Doxygen_version_result
-        )
+        _Doxygen_get_version(DOXYGEN_VERSION _Doxygen_version_result "${DOXYGEN_EXECUTABLE}")
+
         if(_Doxygen_version_result)
             message(WARNING "Unable to determine doxygen version: ${_Doxygen_version_result}")
         endif()
@@ -642,11 +674,11 @@ endforeach()
 unset(_comp)
 
 # Verify find results
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 find_package_handle_standard_args(
     Doxygen
     REQUIRED_VARS DOXYGEN_EXECUTABLE
     VERSION_VAR DOXYGEN_VERSION
+    HANDLE_VERSION_RANGE
     HANDLE_COMPONENTS
 )
 
