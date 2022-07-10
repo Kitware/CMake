@@ -8,6 +8,8 @@ Enforce that link items that can be target names are actually existing targets.
 Set this property to a true value to enable additional checks on the contents
 of the :prop_tgt:`LINK_LIBRARIES` and :prop_tgt:`INTERFACE_LINK_LIBRARIES`
 target properties, typically populated by :command:`target_link_libraries`.
+Checks are also applied to libraries added to a target through the
+:prop_tgt:`INTERFACE_LINK_LIBRARIES_DIRECT` properties of its dependencies.
 CMake will verify that link items that might be target names actually name
 existing targets.  An item is considered a possible target name if:
 
