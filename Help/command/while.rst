@@ -23,3 +23,11 @@ Per legacy, the :command:`endwhile` command admits
 an optional ``<condition>`` argument.
 If used, it must be a verbatim repeat of the argument of the opening
 ``while`` command.
+
+See Also
+^^^^^^^^
+
+  * :command:`break`
+  * :command:`continue`
+  * :command:`foreach`
+  * :command:`endwhile`
