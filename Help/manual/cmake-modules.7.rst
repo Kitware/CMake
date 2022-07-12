@@ -193,6 +193,7 @@ They are normally called through the :command:`find_package` command.
    /module/FindOpenGL
    /module/FindOpenMP
    /module/FindOpenSceneGraph
+   /module/FindOpenSP
    /module/FindOpenSSL
    /module/FindOpenThreads
    /module/Findosg
