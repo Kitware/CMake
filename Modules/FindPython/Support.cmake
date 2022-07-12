@@ -2871,7 +2871,15 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
 
   if ("INCLUDE_DIR" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_ARTIFACTS)
     while (NOT _${_PYTHON_PREFIX}_INCLUDE_DIR)
-      if ("LIBRARY" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_ARTIFACTS
+      set (_${_PYTHON_PREFIX}_LIBRARY_REQUIRED TRUE)
+      foreach (_${_PYTHON_PREFIX}_COMPONENT IN ITEMS Module Embed)
+        string (TOUPPER "${_${_PYTHON_PREFIX}_COMPONENT}" _${_PYTHON_PREFIX}_ID)
+        if ("Development.${_${_PYTHON_PREFIX}_COMPONENT}" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
+            AND NOT "LIBRARY" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_${_${_PYTHON_PREFIX}_ID}_ARTIFACTS)
+          set (_${_PYTHON_PREFIX}_LIBRARY_REQUIRED FALSE)
+        endif()
+      endforeach()
+      if (_${_PYTHON_PREFIX}_LIBRARY_REQUIRED
           AND NOT _${_PYTHON_PREFIX}_LIBRARY_RELEASE)
         # Don't search for include dir if no library was founded
         break()
