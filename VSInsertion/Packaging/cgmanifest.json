@@ -4,8 +4,8 @@
             "Component": {
                 "Type": "git",
                 "Git": {
-                    "RepositoryUrl": "https://gitlab.kitware.com/cmake/cmake.git",
-                    "CommitHash": "aa6a33fe54918967f6ffcad30773e01664e8a2b2"
+                    "RepositoryUrl": "https://github.com/microsoft/CMake.git",
+                    "CommitHash": "$CommitHashPlaceholder$"
                 }
             }
         }
