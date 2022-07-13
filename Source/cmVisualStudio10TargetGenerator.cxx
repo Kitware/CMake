@@ -1557,6 +1557,10 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValues(
       this->ASanEnabledConfigurations.end()) {
     e1.Element("EnableAsan", "true");
   }
+  if (this->FuzzerEnabledConfigurations.find(config) !=
+      this->FuzzerEnabledConfigurations.end()) {
+    e1.Element("EnableFuzzer", "true");
+  }
   {
     auto s = this->SpectreMitigation.find(config);
     if (s != this->SpectreMitigation.end()) {
@@ -3313,6 +3317,11 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   // Check if ASan is enabled.
   if (flags.find("/fsanitize=address") != std::string::npos) {
     this->ASanEnabledConfigurations.insert(configName);
+  }
+
+  // Check if (lib)Fuzzer is enabled.
+  if (flags.find("/fsanitize=fuzzer") != std::string::npos) {
+    this->FuzzerEnabledConfigurations.insert(configName);
   }
 
   // Precompile Headers

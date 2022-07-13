@@ -231,6 +231,7 @@ private:
   bool TargetCompileAsWinRT;
   std::set<std::string> IPOEnabledConfigurations;
   std::set<std::string> ASanEnabledConfigurations;
+  std::set<std::string> FuzzerEnabledConfigurations;
   std::map<std::string, std::string> SpectreMitigation;
   cmGlobalVisualStudio10Generator* const GlobalGenerator;
   cmLocalVisualStudio10Generator* const LocalGenerator;
