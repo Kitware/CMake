@@ -8,7 +8,9 @@ set(components
   shaderc_combined
   SPIRV-Tools
   volk
+  dxc
 )
+
 if(APPLE)
   list(APPEND components MoltenVK)
 endif()
@@ -80,6 +82,10 @@ add_executable(test_tgt_volk main-volk.cxx)
 target_link_libraries(test_tgt_volk Vulkan::volk)
 add_test(NAME test_tgt_volk COMMAND test_tgt_volk)
 
+add_executable(test_tgt_dxc_lib main-dxc_lib.cxx)
+target_link_libraries(test_tgt_dxc_lib Vulkan::dxc_lib)
+add_test(NAME test_tgt_dxc_lib COMMAND test_tgt_dxc_lib)
+
 if(Vulkan_GLSLC_EXECUTABLE)
   add_test(NAME test_glslc
     COMMAND ${CMAKE_COMMAND}
@@ -95,5 +101,14 @@ if(Vulkan_GLSLANG_VALIDATOR_EXECUTABLE)
     "-DVULKAN_GLSLANG_VALIDATOR_EXECUTABLE=${Vulkan_GLSLANG_VALIDATOR_EXECUTABLE}"
     "-DVULKAN_GLSLANG_VALIDATOR_EXECUTABLE_TARGET=$<TARGET_FILE:Vulkan::glslangValidator>"
     -P "${CMAKE_CURRENT_LIST_DIR}/Run-glslangValidator.cmake"
+    )
+endif()
+
+if(Vulkan_dxc_EXECUTABLE)
+  add_test(NAME test_dxc_exe
+    COMMAND ${CMAKE_COMMAND}
+    "-DVULKAN_DXC_EXECUTABLE=${Vulkan_dxc_EXECUTABLE}"
+    "-DVULKAN_DXC_EXECUTABLE_TARGET=$<TARGET_FILE:Vulkan::dxc_exe>"
+    -P "${CMAKE_CURRENT_LIST_DIR}/Run-dxc_exe.cmake"
     )
 endif()
