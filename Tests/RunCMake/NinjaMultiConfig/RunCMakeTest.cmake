@@ -453,6 +453,11 @@ run_cmake_command(NoUnusedVariables ${CMAKE_COMMAND} ${CMAKE_CURRENT_LIST_DIR}
   "-DCMAKE_DEFAULT_BUILD_TYPE=Debug"
   "-DCMAKE_DEFAULT_CONFIGS=all"
   )
+unset(RunCMake_TEST_BINARY_DIR)
+
+set(RunCMake_TEST_OPTIONS "-DCMAKE_CONFIGURATION_TYPES=Debug\\;Release;-DCMAKE_CROSS_CONFIGS=all;-DCMAKE_EXPORT_COMPILE_COMMANDS=ON")
+run_cmake(CompileCommands)
+unset(RunCMake_TEST_OPTIONS)
 
 # CudaSimple uses separable compilation, which is currently only supported on NVCC.
 if(CMake_TEST_CUDA)
