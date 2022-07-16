@@ -843,6 +843,12 @@ bool cmGlobalVisualStudioGenerator::IsInSolution(
   return gt->IsInBuildSystem();
 }
 
+bool cmGlobalVisualStudioGenerator::IsDepInSolution(
+  const std::string& targetName) const
+{
+  return !targetName.empty();
+}
+
 bool cmGlobalVisualStudioGenerator::TargetCompare::operator()(
   cmGeneratorTarget const* l, cmGeneratorTarget const* r) const
 {
