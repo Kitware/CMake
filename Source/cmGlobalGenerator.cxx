@@ -1361,7 +1361,9 @@ void cmGlobalGenerator::CreateGenerationObjects(TargetTypes targetTypes)
     this->CheckTargetProperties();
   }
   this->CreateGeneratorTargets(targetTypes);
-  this->ComputeBuildFileGenerators();
+  if (targetTypes == TargetTypes::AllTargets) {
+    this->ComputeBuildFileGenerators();
+  }
 }
 
 void cmGlobalGenerator::CreateImportedGenerationObjects(
