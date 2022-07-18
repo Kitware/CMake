@@ -1,12 +1,12 @@
 include(RunCMake)
 
-run_cmake(CHMOD-no-perms)
-run_cmake(CHMOD-no-keyword)
-run_cmake(CHMOD-all-perms)
-run_cmake(CHMOD-invalid-perms)
-run_cmake(CHMOD-invalid-path)
-run_cmake(CHMOD-ok)
-run_cmake(CHMOD-override)
+run_cmake(no-perms)
+run_cmake(no-keyword)
+run_cmake(all-perms)
+run_cmake(invalid-perms)
+run_cmake(invalid-path)
+run_cmake(ok)
+run_cmake(override)
 
 if(UNIX)
   execute_process(COMMAND id -u $ENV{USER}
@@ -15,5 +15,5 @@ if(UNIX)
 endif()
 
 if(NOT WIN32 AND NOT MSYS AND NOT "${uid}" STREQUAL "0")
-  run_cmake(CHMOD-write-only)
+  run_cmake(write-only)
 endif()
