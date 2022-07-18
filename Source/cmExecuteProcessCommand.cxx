@@ -47,7 +47,7 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  struct Arguments
+  struct Arguments : public ArgumentParser::ParseResult
   {
     std::vector<std::vector<std::string>> Commands;
     std::string OutputVariable;
@@ -95,14 +95,10 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
       .Bind("COMMAND_ERROR_IS_FATAL"_s, &Arguments::CommandErrorIsFatal);
 
   std::vector<std::string> unparsedArguments;
-  std::vector<cm::string_view> keywordsMissingValue;
-  Arguments const arguments =
-    parser.Parse(args, &unparsedArguments, &keywordsMissingValue);
+  Arguments const arguments = parser.Parse(args, &unparsedArguments);
 
-  if (!keywordsMissingValue.empty()) {
-    status.SetError(cmStrCat(" called with no value for ",
-                             keywordsMissingValue.front(), "."));
-    return false;
+  if (arguments.MaybeReportError(status.GetMakefile())) {
+    return true;
   }
   if (!unparsedArguments.empty()) {
     status.SetError(" given unknown argument \"" + unparsedArguments.front() +
