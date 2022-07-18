@@ -13,11 +13,21 @@ Call Stack \(most recent call first\):
 This warning is for project developers\.  Use -Wno-dev to suppress it\.
 
 CMake Error at badargs2\.cmake:[0-9]+ \(file\):
-  file Keywords missing values:
+  Error after keyword "BUNDLE_EXECUTABLE":
 
-    RESOLVED_DEPENDENCIES_VAR
-    UNRESOLVED_DEPENDENCIES_VAR
-    CONFLICTING_DEPENDENCIES_PREFIX
-    BUNDLE_EXECUTABLE
+    missing required value
+
+  Error after keyword "CONFLICTING_DEPENDENCIES_PREFIX":
+
+    missing required value
+
+  Error after keyword "RESOLVED_DEPENDENCIES_VAR":
+
+    missing required value
+
+  Error after keyword "UNRESOLVED_DEPENDENCIES_VAR":
+
+    missing required value
+
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)$
