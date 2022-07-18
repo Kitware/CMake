@@ -6,6 +6,7 @@
 
 #include <cassert>
 #include <functional>
+#include <map>
 #include <string>
 #include <utility>
 #include <vector>
@@ -20,12 +21,29 @@
 template <typename Result>
 class cmArgumentParser; // IWYU pragma: keep
 
+class cmMakefile;
+
 namespace ArgumentParser {
 
 class ParseResult
 {
+  std::map<cm::string_view, std::string> KeywordErrors;
+
 public:
-  explicit operator bool() const { return true; }
+  explicit operator bool() const { return this->KeywordErrors.empty(); }
+
+  void AddKeywordError(cm::string_view key, cm::string_view text)
+
+  {
+    this->KeywordErrors[key] += text;
+  }
+
+  std::map<cm::string_view, std::string> const& GetKeywordErrors() const
+  {
+    return this->KeywordErrors;
+  }
+
+  bool MaybeReportError(cmMakefile& mf) const;
 };
 
 template <typename Result>

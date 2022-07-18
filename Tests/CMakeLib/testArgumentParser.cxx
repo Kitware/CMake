@@ -3,7 +3,9 @@
 
 #include <initializer_list>
 #include <iostream>
+#include <map>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <cm/optional>
@@ -69,6 +71,11 @@ bool verifyResult(Result const& result,
   static std::vector<cm::string_view> const missing = { "STRING_1"_s,
                                                         "LIST_1"_s,
                                                         "LIST_4"_s };
+  static std::map<cm::string_view, std::string> const keywordErrors = {
+    { "STRING_1"_s, "  missing required value\n" },
+    { "LIST_1"_s, "  missing required value\n" },
+    { "LIST_4"_s, "  missing required value\n" }
+  };
 
 #define ASSERT_TRUE(x)                                                        \
   do {                                                                        \
@@ -78,7 +85,7 @@ bool verifyResult(Result const& result,
     }                                                                         \
   } while (false)
 
-  ASSERT_TRUE(result);
+  ASSERT_TRUE(!result);
 
   ASSERT_TRUE(result.Option1);
   ASSERT_TRUE(!result.Option2);
@@ -111,6 +118,13 @@ bool verifyResult(Result const& result,
   ASSERT_TRUE(unparsedArguments.size() == 1);
   ASSERT_TRUE(unparsedArguments[0] == "bar");
   ASSERT_TRUE(keywordsMissingValue == missing);
+
+  ASSERT_TRUE(result.GetKeywordErrors().size() == keywordErrors.size());
+  for (auto const& ke : result.GetKeywordErrors()) {
+    auto const ki = keywordErrors.find(ke.first);
+    ASSERT_TRUE(ki != keywordErrors.end());
+    ASSERT_TRUE(ke.second == ki->second);
+  }
 
   return true;
 }
@@ -179,7 +193,7 @@ bool testArgumentParserStaticBool()
   std::vector<cm::string_view> keywordsMissingValue;
   Result result;
   ASSERT_TRUE(parserStatic.Parse(result, args, &unparsedArguments,
-                                 &keywordsMissingValue) == true);
+                                 &keywordsMissingValue) == false);
   return verifyResult(result, unparsedArguments, keywordsMissingValue);
 }
 

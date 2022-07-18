@@ -5,6 +5,9 @@
 #include <algorithm>
 
 #include "cmArgumentParserTypes.h"
+#include "cmMakefile.h"
+#include "cmMessageType.h"
+#include "cmStringAlgorithms.h"
 
 namespace ArgumentParser {
 
@@ -106,10 +109,27 @@ void Instance::FinishKeyword()
     return;
   }
   if (this->ExpectValue) {
+    if (this->ParseResults != nullptr) {
+      this->ParseResults->AddKeywordError(this->Keyword,
+                                          "  missing required value\n");
+    }
     if (this->KeywordsMissingValue != nullptr) {
       this->KeywordsMissingValue->emplace_back(this->Keyword);
     }
   }
+}
+
+bool ParseResult::MaybeReportError(cmMakefile& mf) const
+{
+  if (*this) {
+    return false;
+  }
+  std::string e;
+  for (auto const& ke : this->KeywordErrors) {
+    e = cmStrCat(e, "Error after keyword \"", ke.first, "\":\n", ke.second);
+  }
+  mf.IssueMessage(MessageType::FATAL_ERROR, e);
+  return true;
 }
 
 } // namespace ArgumentParser
