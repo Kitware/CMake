@@ -1343,9 +1343,11 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     }
   }
 
-  this->ExportObjectCompileCommand(
-    language, sourceFilePath, objectDir, objectFileName, objectFileDir,
-    vars["FLAGS"], vars["DEFINES"], vars["INCLUDES"], config);
+  if (firstForConfig) {
+    this->ExportObjectCompileCommand(
+      language, sourceFilePath, objectDir, objectFileName, objectFileDir,
+      vars["FLAGS"], vars["DEFINES"], vars["INCLUDES"], config);
+  }
 
   objBuild.Outputs.push_back(objectFileName);
   if (firstForConfig) {
