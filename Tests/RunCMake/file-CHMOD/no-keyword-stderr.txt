@@ -1,3 +1,0 @@
-^CMake Error at [^
-]*/no-keyword\.cmake:[0-9]+ \(file\):
-  file No permissions given$

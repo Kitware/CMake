@@ -1,7 +1,9 @@
 include(RunCMake)
 
 run_cmake_script(no-perms)
-run_cmake_script(no-keyword)
+run_cmake_script(missing-perms)
+run_cmake_script(missing-file-perms)
+run_cmake_script(missing-dir-perms)
 run_cmake_script(all-perms)
 run_cmake_script(invalid-perms)
 run_cmake_script(invalid-path)
