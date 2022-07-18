@@ -1,6 +1,6 @@
 function (check_for_bmi prefix destination name)
   set(found 0)
-  foreach (ext IN ITEMS gcm)
+  foreach (ext IN ITEMS gcm ifc)
     if (EXISTS "${prefix}/${destination}/${name}.${ext}")
       set(found 1)
       break ()
