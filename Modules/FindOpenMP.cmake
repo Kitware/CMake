@@ -477,10 +477,14 @@ foreach(LANG IN ITEMS C CXX)
     if(NOT DEFINED OpenMP_${LANG}_FLAGS OR "${OpenMP_${LANG}_FLAGS}" STREQUAL "NOTFOUND"
       OR NOT DEFINED OpenMP_${LANG}_LIB_NAMES OR "${OpenMP_${LANG}_LIB_NAMES}" STREQUAL "NOTFOUND")
       _OPENMP_GET_FLAGS("${LANG}" "${LANG}" OpenMP_${LANG}_FLAGS_WORK OpenMP_${LANG}_LIB_NAMES_WORK)
-      set(OpenMP_${LANG}_FLAGS "${OpenMP_${LANG}_FLAGS_WORK}"
-        CACHE STRING "${LANG} compiler flags for OpenMP parallelization" FORCE)
-      set(OpenMP_${LANG}_LIB_NAMES "${OpenMP_${LANG}_LIB_NAMES_WORK}"
-        CACHE STRING "${LANG} compiler libraries for OpenMP parallelization" FORCE)
+      if(NOT DEFINED OpenMP_${LANG}_FLAGS OR "${OpenMP_${LANG}_FLAGS}" STREQUAL "NOTFOUND")
+        set(OpenMP_${LANG}_FLAGS "${OpenMP_${LANG}_FLAGS_WORK}"
+          CACHE STRING "${LANG} compiler flags for OpenMP parallelization" FORCE)
+      endif()
+      if(NOT DEFINED OpenMP_${LANG}_LIB_NAMES OR "${OpenMP_${LANG}_LIB_NAMES}" STREQUAL "NOTFOUND")
+        set(OpenMP_${LANG}_LIB_NAMES "${OpenMP_${LANG}_LIB_NAMES_WORK}"
+          CACHE STRING "${LANG} compiler libraries for OpenMP parallelization" FORCE)
+      endif()
       mark_as_advanced(OpenMP_${LANG}_FLAGS OpenMP_${LANG}_LIB_NAMES)
     endif()
   endif()
@@ -496,10 +500,14 @@ if(CMAKE_Fortran_COMPILER_LOADED)
       set(OpenMP_Fortran_HAVE_OMPLIB_MODULE TRUE CACHE BOOL INTERNAL "")
     endif()
 
-    set(OpenMP_Fortran_FLAGS "${OpenMP_Fortran_FLAGS_WORK}"
-      CACHE STRING "Fortran compiler flags for OpenMP parallelization")
-    set(OpenMP_Fortran_LIB_NAMES "${OpenMP_Fortran_LIB_NAMES_WORK}"
-      CACHE STRING "Fortran compiler libraries for OpenMP parallelization")
+    if(NOT DEFINED OpenMP_Fortran_FLAGS OR "${OpenMP_Fortran_FLAGS}" STREQUAL "NOTFOUND")
+      set(OpenMP_Fortran_FLAGS "${OpenMP_Fortran_FLAGS_WORK}"
+        CACHE STRING "Fortran compiler flags for OpenMP parallelization" FORCE)
+    endif()
+    if(NOT DEFINED OpenMP_Fortran_LIB_NAMES OR "${OpenMP_Fortran_LIB_NAMES}" STREQUAL "NOTFOUND")
+      set(OpenMP_Fortran_LIB_NAMES "${OpenMP_Fortran_LIB_NAMES_WORK}"
+        CACHE STRING "Fortran compiler libraries for OpenMP parallelization" FORCE)
+    endif()
     mark_as_advanced(OpenMP_Fortran_FLAGS OpenMP_Fortran_LIB_NAMES)
   endif()
 
@@ -512,11 +520,14 @@ if(CMAKE_Fortran_COMPILER_LOADED)
       set(OpenMP_Fortran_HAVE_OMPLIB_HEADER TRUE CACHE BOOL INTERNAL "")
     endif()
 
-    set(OpenMP_Fortran_FLAGS "${OpenMP_Fortran_FLAGS_WORK}"
-      CACHE STRING "Fortran compiler flags for OpenMP parallelization")
-
-    set(OpenMP_Fortran_LIB_NAMES "${OpenMP_Fortran_LIB_NAMES}"
-      CACHE STRING "Fortran compiler libraries for OpenMP parallelization")
+    if(NOT DEFINED OpenMP_Fortran_FLAGS OR "${OpenMP_Fortran_FLAGS}" STREQUAL "NOTFOUND")
+      set(OpenMP_Fortran_FLAGS "${OpenMP_Fortran_FLAGS_WORK}"
+        CACHE STRING "Fortran compiler flags for OpenMP parallelization" FORCE)
+    endif()
+    if(NOT DEFINED OpenMP_Fortran_LIB_NAMES OR "${OpenMP_Fortran_LIB_NAMES}" STREQUAL "NOTFOUND")
+      set(OpenMP_Fortran_LIB_NAMES "${OpenMP_Fortran_LIB_NAMES_WORK}"
+        CACHE STRING "Fortran compiler libraries for OpenMP parallelization" FORCE)
+    endif()
   endif()
 
   if(OpenMP_Fortran_HAVE_OMPLIB_MODULE)
