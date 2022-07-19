@@ -18,6 +18,7 @@
 enum class CxxModuleMapFormat
 {
   Gcc,
+  Msvc,
 };
 
 struct CxxModuleLocations
@@ -80,4 +81,5 @@ std::set<std::string> CxxModuleUsageSeed(
 // object file.
 std::string CxxModuleMapContent(CxxModuleMapFormat format,
                                 CxxModuleLocations const& loc,
-                                cmScanDepInfo const& obj);
+                                cmScanDepInfo const& obj,
+                                CxxModuleUsage const& usages);

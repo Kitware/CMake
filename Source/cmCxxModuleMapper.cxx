@@ -4,7 +4,9 @@
 
 #include <cassert>
 #include <cstddef>
+#include <set>
 #include <sstream>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -49,6 +51,80 @@ std::string CxxModuleMapContentGcc(CxxModuleLocations const& loc,
   for (auto const& r : obj.Requires) {
     if (auto bmi_loc = loc.BmiGeneratorPathForModule(r.LogicalName)) {
       mm << r.LogicalName << ' ' << *bmi_loc << '\n';
+    }
+  }
+
+  return mm.str();
+}
+
+std::string CxxModuleMapContentMsvc(CxxModuleLocations const& loc,
+                                    cmScanDepInfo const& obj,
+                                    CxxModuleUsage const& usages)
+{
+  std::stringstream mm;
+
+  // A response file of `-reference NAME=PATH` arguments.
+
+  // MSVC's command line only supports a single output. If more than one is
+  // expected, we cannot make a useful module map file.
+  if (obj.Provides.size() > 1) {
+    return {};
+  }
+
+  auto flag_for_method = [](LookupMethod method) -> cm::static_string_view {
+    switch (method) {
+      case LookupMethod::ByName:
+        return "-reference"_s;
+      case LookupMethod::IncludeAngle:
+        return "-headerUnit:angle"_s;
+      case LookupMethod::IncludeQuote:
+        return "-headerUnit:quote"_s;
+    }
+    assert(false && "unsupported lookup method");
+    return ""_s;
+  };
+
+  for (auto const& p : obj.Provides) {
+    if (p.IsInterface) {
+      mm << "-interface\n";
+    } else {
+      mm << "-internalPartition\n";
+    }
+
+    if (auto bmi_loc = loc.BmiGeneratorPathForModule(p.LogicalName)) {
+      mm << "-ifcOutput " << *bmi_loc << '\n';
+    }
+  }
+
+  std::set<std::string> transitive_usage_directs;
+  std::set<std::string> transitive_usage_names;
+
+  for (auto const& r : obj.Requires) {
+    if (auto bmi_loc = loc.BmiGeneratorPathForModule(r.LogicalName)) {
+      auto flag = flag_for_method(r.Method);
+
+      mm << flag << ' ' << r.LogicalName << '=' << *bmi_loc << "\n";
+      transitive_usage_directs.insert(r.LogicalName);
+
+      // Insert transitive usages.
+      auto transitive_usages = usages.Usage.find(r.LogicalName);
+      if (transitive_usages != usages.Usage.end()) {
+        transitive_usage_names.insert(transitive_usages->second.begin(),
+                                      transitive_usages->second.end());
+      }
+    }
+  }
+
+  for (auto const& transitive_name : transitive_usage_names) {
+    if (transitive_usage_directs.count(transitive_name)) {
+      continue;
+    }
+
+    auto module_ref = usages.Reference.find(transitive_name);
+    if (module_ref != usages.Reference.end()) {
+      auto flag = flag_for_method(module_ref->second.Method);
+      mm << flag << ' ' << transitive_name << '=' << module_ref->second.Path
+         << "\n";
     }
   }
 
@@ -105,6 +181,8 @@ cm::static_string_view CxxModuleMapExtension(
     switch (*format) {
       case CxxModuleMapFormat::Gcc:
         return ".gcm"_s;
+      case CxxModuleMapFormat::Msvc:
+        return ".ifc"_s;
     }
   }
 
@@ -215,11 +293,14 @@ std::set<std::string> CxxModuleUsageSeed(
 
 std::string CxxModuleMapContent(CxxModuleMapFormat format,
                                 CxxModuleLocations const& loc,
-                                cmScanDepInfo const& obj)
+                                cmScanDepInfo const& obj,
+                                CxxModuleUsage const& usages)
 {
   switch (format) {
     case CxxModuleMapFormat::Gcc:
       return CxxModuleMapContentGcc(loc, obj);
+    case CxxModuleMapFormat::Msvc:
+      return CxxModuleMapContentMsvc(loc, obj, usages);
   }
 
   assert(false);

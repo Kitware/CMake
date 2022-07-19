@@ -2625,6 +2625,8 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
     // nothing to do.
   } else if (arg_modmapfmt == "gcc") {
     modmap_fmt = CxxModuleMapFormat::Gcc;
+  } else if (arg_modmapfmt == "msvc") {
+    modmap_fmt = CxxModuleMapFormat::Msvc;
   } else {
     cmSystemTools::Error(
       cmStrCat("-E cmake_ninja_dyndep does not understand the ", arg_modmapfmt,
@@ -2712,7 +2714,7 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
       }
 
       if (modmap_fmt) {
-        auto mm = CxxModuleMapContent(*modmap_fmt, locs, object);
+        auto mm = CxxModuleMapContent(*modmap_fmt, locs, object, usages);
 
         // XXX(modmap): If changing this path construction, change
         // `cmNinjaTargetGenerator::WriteObjectBuildStatements` to generate the
