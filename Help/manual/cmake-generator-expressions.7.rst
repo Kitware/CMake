@@ -908,6 +908,8 @@ Variable Queries
 
 .. genex:: $<CUDA_COMPILER_ID>
 
+  .. versionadded:: 3.15
+
   CMake's compiler id of the CUDA compiler used.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 
@@ -955,6 +957,8 @@ Variable Queries
   See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
 
 .. genex:: $<CUDA_COMPILER_VERSION>
+
+  .. versionadded:: 3.15
 
   The version of the CUDA compiler used.
   See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
