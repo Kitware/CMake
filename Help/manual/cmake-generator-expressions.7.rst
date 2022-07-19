@@ -364,8 +364,6 @@ Variable Queries
   :manual:`cmake-compile-features(7)` manual for information on
   compile features and a list of supported compilers.
 
-.. _`Boolean COMPILE_LANGUAGE Generator Expression`:
-
 .. genex:: $<COMPILE_LANG_AND_ID:language,compiler_ids>
 
   .. versionadded:: 3.15
@@ -404,6 +402,8 @@ Variable Queries
               $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:Intel>>:COMPILING_CXX_WITH_INTEL>
               $<$<AND:$<COMPILE_LANGUAGE:C>,$<C_COMPILER_ID:Clang>>:COMPILING_C_WITH_CLANG>
     )
+
+.. _`Boolean COMPILE_LANGUAGE Generator Expression`:
 
 .. genex:: $<COMPILE_LANGUAGE:languages>
 
@@ -451,8 +451,6 @@ Variable Queries
     add_executable(myapp main.cpp)
     target_link_libraries(myapp myapp_c myapp_cxx)
 
-.. _`Boolean LINK_LANGUAGE Generator Expression`:
-
 .. genex:: $<LINK_LANG_AND_ID:language,compiler_ids>
 
   .. versionadded:: 3.18
@@ -494,6 +492,8 @@ Variable Queries
   <Constraints LINK_LANGUAGE Generator Expression>`
   ``$<LINK_LANGUAGE:language>`` for constraints about the usage of this
   generator expression.
+
+.. _`Boolean LINK_LANGUAGE Generator Expression`:
 
 .. genex:: $<LINK_LANGUAGE:languages>
 
