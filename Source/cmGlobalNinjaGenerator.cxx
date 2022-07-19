@@ -3,6 +3,7 @@
 #include "cmGlobalNinjaGenerator.h"
 
 #include <algorithm>
+#include <cassert>
 #include <cctype>
 #include <cstdio>
 #include <functional>
@@ -2555,6 +2556,8 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
     objects.push_back(std::move(info));
   }
 
+  CxxModuleUsage usages;
+
   // Map from module name to module file path, if known.
   std::map<std::string, std::string> mod_files;
 
@@ -2572,8 +2575,47 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
       return false;
     }
     if (ltm.isObject()) {
-      for (Json::Value::iterator i = ltm.begin(); i != ltm.end(); ++i) {
-        mod_files[i.key().asString()] = i->asString();
+      Json::Value const& target_modules = ltm["modules"];
+      if (target_modules.isObject()) {
+        for (auto i = target_modules.begin(); i != target_modules.end(); ++i) {
+          mod_files[i.key().asString()] = i->asString();
+        }
+      }
+      Json::Value const& target_modules_references = ltm["references"];
+      if (target_modules_references.isObject()) {
+        for (auto i = target_modules_references.begin();
+             i != target_modules_references.end(); ++i) {
+          if (i->isObject()) {
+            Json::Value const& reference_path = (*i)["path"];
+            CxxModuleReference module_reference;
+            if (reference_path.isString()) {
+              module_reference.Path = reference_path.asString();
+            }
+            Json::Value const& reference_method = (*i)["lookup-method"];
+            if (reference_method.isString()) {
+              std::string reference = reference_method.asString();
+              if (reference == "by-name") {
+                module_reference.Method = LookupMethod::ByName;
+              } else if (reference == "include-angle") {
+                module_reference.Method = LookupMethod::IncludeAngle;
+              } else if (reference == "include-quote") {
+                module_reference.Method = LookupMethod::IncludeQuote;
+              }
+            }
+            usages.Reference[i.key().asString()] = module_reference;
+          }
+        }
+      }
+      Json::Value const& target_modules_usage = ltm["usages"];
+      if (target_modules_usage.isObject()) {
+        for (auto i = target_modules_usage.begin();
+             i != target_modules_usage.end(); ++i) {
+          if (i->isArray()) {
+            for (auto j = i->begin(); j != i->end(); ++j) {
+              usages.Usage[i.key().asString()].insert(j->asString());
+            }
+          }
+        }
       }
     }
   }
@@ -2595,7 +2637,7 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
   // Extend the module map with those provided by this target.
   // We do this after loading the modules provided by linked targets
   // in case we have one of the same name that must be preferred.
-  Json::Value tm = Json::objectValue;
+  Json::Value target_modules = Json::objectValue;
   for (cmScanDepInfo const& object : objects) {
     for (auto const& p : object.Provides) {
       std::string mod;
@@ -2614,7 +2656,7 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
         mod = cmStrCat(module_dir, safe_logical_name, module_ext);
       }
       mod_files[p.LogicalName] = mod;
-      tm[p.LogicalName] = mod;
+      target_modules[p.LogicalName] = mod;
     }
   }
 
@@ -2635,6 +2677,18 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
       }
       return {};
     };
+
+    // Insert information about the current target's modules.
+    if (modmap_fmt) {
+      auto cycle_modules = CxxModuleUsageSeed(locs, objects, usages);
+      if (!cycle_modules.empty()) {
+        cmSystemTools::Error(
+          cmStrCat("Circular dependency detected in the C++ module import "
+                   "graph. See modules named: \"",
+                   cmJoin(cycle_modules, R"(", ")"_s), '"'));
+        return false;
+      }
+    }
 
     cmNinjaBuild build("dyndep");
     build.Outputs.emplace_back("");
@@ -2671,12 +2725,44 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
     }
   }
 
+  Json::Value target_module_info = Json::objectValue;
+  target_module_info["modules"] = target_modules;
+
+  auto& target_usages = target_module_info["usages"] = Json::objectValue;
+  for (auto const& u : usages.Usage) {
+    auto& mod_usage = target_usages[u.first] = Json::arrayValue;
+    for (auto const& v : u.second) {
+      mod_usage.append(v);
+    }
+  }
+
+  auto name_for_method = [](LookupMethod method) -> cm::static_string_view {
+    switch (method) {
+      case LookupMethod::ByName:
+        return "by-name"_s;
+      case LookupMethod::IncludeAngle:
+        return "include-angle"_s;
+      case LookupMethod::IncludeQuote:
+        return "include-quote"_s;
+    }
+    assert(false && "unsupported lookup method");
+    return ""_s;
+  };
+
+  auto& target_references = target_module_info["references"] =
+    Json::objectValue;
+  for (auto const& r : usages.Reference) {
+    auto& mod_ref = target_references[r.first] = Json::objectValue;
+    mod_ref["path"] = r.second.Path;
+    mod_ref["lookup-method"] = std::string(name_for_method(r.second.Method));
+  }
+
   // Store the map of modules provided by this target in a file for
   // use by dependents that reference this target in linked-target-dirs.
   std::string const target_mods_file = cmStrCat(
     cmSystemTools::GetFilenamePath(arg_dd), '/', arg_lang, "Modules.json");
   cmGeneratedFileStream tmf(target_mods_file);
-  tmf << tm;
+  tmf << target_module_info;
 
   bool result = true;
 
