@@ -99,8 +99,8 @@ String Comparisons
 
   .. versionadded:: 3.12
 
-  ``1`` if ``string`` is member of the semicolon-separated ``list``, else ``0``.
-  Uses case-sensitive comparisons.
+  ``1`` if ``string`` is an item in the semicolon-separated ``list``, else ``0``.
+  It uses case-sensitive comparisons.
 
 Version Comparisons
 -------------------
@@ -227,21 +227,21 @@ Variable Queries
 .. genex:: $<PLATFORM_ID:platform_ids>
 
   where ``platform_ids`` is a comma-separated list.
-  ``1`` if the CMake's platform id matches any one of the entries in
+  ``1`` if CMake's platform id matches any one of the entries in
   ``platform_ids``, otherwise ``0``.
   See also the :variable:`CMAKE_SYSTEM_NAME` variable.
 
 .. genex:: $<C_COMPILER_ID:compiler_ids>
 
   where ``compiler_ids`` is a comma-separated list.
-  ``1`` if the CMake's compiler id of the C compiler matches any one
+  ``1`` if CMake's compiler id of the C compiler matches any one
   of the entries in ``compiler_ids``, otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 
 .. genex:: $<CXX_COMPILER_ID:compiler_ids>
 
   where ``compiler_ids`` is a comma-separated list.
-  ``1`` if the CMake's compiler id of the CXX compiler matches any one
+  ``1`` if CMake's compiler id of the CXX compiler matches any one
   of the entries in ``compiler_ids``, otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 
@@ -250,7 +250,7 @@ Variable Queries
   .. versionadded:: 3.15
 
   where ``compiler_ids`` is a comma-separated list.
-  ``1`` if the CMake's compiler id of the CUDA compiler matches any one
+  ``1`` if CMake's compiler id of the CUDA compiler matches any one
   of the entries in ``compiler_ids``, otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 
@@ -259,7 +259,7 @@ Variable Queries
   .. versionadded:: 3.16
 
   where ``compiler_ids`` is a comma-separated list.
-  ``1`` if the CMake's compiler id of the Objective-C compiler matches any one
+  ``1`` if CMake's compiler id of the Objective-C compiler matches any one
   of the entries in ``compiler_ids``, otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 
@@ -268,14 +268,14 @@ Variable Queries
   .. versionadded:: 3.16
 
   where ``compiler_ids`` is a comma-separated list.
-  ``1`` if the CMake's compiler id of the Objective-C++ compiler matches any one
+  ``1`` if CMake's compiler id of the Objective-C++ compiler matches any one
   of the entries in ``compiler_ids``, otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 
 .. genex:: $<Fortran_COMPILER_ID:compiler_ids>
 
   where ``compiler_ids`` is a comma-separated list.
-  ``1`` if the CMake's compiler id of the Fortran compiler matches any one
+  ``1`` if CMake's compiler id of the Fortran compiler matches any one
   of the entries in ``compiler_ids``, otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 
@@ -284,7 +284,7 @@ Variable Queries
   .. versionadded:: 3.21
 
   where ``compiler_ids`` is a comma-separated list.
-  ``1`` if the CMake's compiler id of the HIP compiler matches any one
+  ``1`` if CMake's compiler id of the HIP compiler matches any one
   of the entries in ``compiler_ids``, otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 
@@ -293,7 +293,7 @@ Variable Queries
   .. versionadded:: 3.19
 
   where ``compiler_ids`` is a comma-separated list.
-  ``1`` if the CMake's compiler id of the ISPC compiler matches any one
+  ``1`` if CMake's compiler id of the ISPC compiler matches any one
   of the entries in ``compiler_ids``, otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 
@@ -358,7 +358,7 @@ Variable Queries
 
   .. versionadded:: 3.1
 
-  where ``features`` is a comma-spearated list.
+  where ``features`` is a comma-separated list.
   Evaluates to ``1`` if all of the ``features`` are available for the 'head'
   target, and ``0`` otherwise. If this expression is used while evaluating
   the link implementation of a target and if any dependency transitively
@@ -372,7 +372,7 @@ Variable Queries
   .. versionadded:: 3.15
 
   ``1`` when the language used for compilation unit matches ``language`` and
-  the CMake's compiler id of the language compiler matches any one of the
+  CMake's compiler id of the ``language`` compiler matches any one of the
   entries in ``compiler_ids``, otherwise ``0``. This expression is a short form
   for the combination of ``$<COMPILE_LANGUAGE:language>`` and
   ``$<LANG_COMPILER_ID:compiler_ids>``. This expression may be used to specify
@@ -415,7 +415,7 @@ Variable Queries
   ``1`` when the language used for compilation unit matches any of the entries
   in ``languages``, otherwise ``0``.  This expression may be used to specify
   compile options, compile definitions, and include directories for source files of a
-  particular language in a target. For example:
+  files of a particular language in a target. For example:
 
   .. code-block:: cmake
 
@@ -512,7 +512,7 @@ Variable Queries
     add_library(api_C ...)
     add_library(api_CXX ...)
     add_library(api INTERFACE)
-    target_link_options(api INTERFACE $<$<LINK_LANGUAGE:C>:-opt_c>
+    target_link_options(api   INTERFACE $<$<LINK_LANGUAGE:C>:-opt_c>
                                         $<$<LINK_LANGUAGE:CXX>:-opt_cxx>)
     target_link_libraries(api INTERFACE $<$<LINK_LANGUAGE:C>:api_C>
                                         $<$<LINK_LANGUAGE:CXX>:api_CXX>)
@@ -898,50 +898,50 @@ Variable Queries
 
 .. genex:: $<C_COMPILER_ID>
 
-  The CMake's compiler id of the C compiler used.
+  CMake's compiler id of the C compiler used.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 
 .. genex:: $<CXX_COMPILER_ID>
 
-  The CMake's compiler id of the CXX compiler used.
+  CMake's compiler id of the CXX compiler used.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 
 .. genex:: $<CUDA_COMPILER_ID>
 
-  The CMake's compiler id of the CUDA compiler used.
+  CMake's compiler id of the CUDA compiler used.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 
 .. genex:: $<OBJC_COMPILER_ID>
 
   .. versionadded:: 3.16
 
-  The CMake's compiler id of the OBJC compiler used.
+  CMake's compiler id of the OBJC compiler used.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 
 .. genex:: $<OBJCXX_COMPILER_ID>
 
   .. versionadded:: 3.16
 
-  The CMake's compiler id of the OBJCXX compiler used.
+  CMake's compiler id of the OBJCXX compiler used.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 
 .. genex:: $<Fortran_COMPILER_ID>
 
-  The CMake's compiler id of the Fortran compiler used.
+  CMake's compiler id of the Fortran compiler used.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 
 .. genex:: $<HIP_COMPILER_ID>
 
   .. versionadded:: 3.21
 
-  The CMake's compiler id of the HIP compiler used.
+  CMake's compiler id of the HIP compiler used.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 
 .. genex:: $<ISPC_COMPILER_ID>
 
   .. versionadded:: 3.19
 
-  The CMake's compiler id of the ISPC compiler used.
+  CMake's compiler id of the ISPC compiler used.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 
 .. genex:: $<C_COMPILER_VERSION>
@@ -1006,7 +1006,7 @@ Variable Queries
 
   .. versionadded:: 3.18
 
-  The link language of target when evaluating link options.
+  The link language of the target when evaluating link options.
   See :ref:`the related boolean expression
   <Boolean LINK_LANGUAGE Generator Expression>` ``$<LINK_LANGUAGE:language>``
   for notes about the portability of this generator expression.
@@ -1297,8 +1297,8 @@ which is just the string ``tgt``.
   List of DLLs that the target depends on at runtime. This is determined by
   the locations of all the ``SHARED`` targets in the target's transitive
   dependencies. Using this generator expression on targets other than
-  executables, ``SHARED`` libraries, and ``MODULE`` libraries is an error. On
-  non-DLL platforms, it evaluates to an empty string.
+  executables, ``SHARED`` libraries, and ``MODULE`` libraries is an error.
+  **On non-DLL platforms, this expression always evaluates to an empty string**.
 
   This generator expression can be used to copy all of the DLLs that a target
   depends on into its output directory in a ``POST_BUILD`` custom command. For
@@ -1338,7 +1338,7 @@ Output-Related Expressions
 
   Marks ``...`` as being the name of a target.  This is required if exporting
   targets to multiple dependent export sets.  The ``...`` must be a literal
-  name of a target- it may not contain generator expressions.
+  name of a target, it may not contain generator expressions.
 
 .. genex:: $<LINK_ONLY:...>
 
@@ -1613,8 +1613,8 @@ Output-Related Expressions
 
 .. genex:: $<INSTALL_INTERFACE:...>
 
-  Content of ``...`` when the property is exported using :command:`install(EXPORT)`,
-  and empty otherwise.
+  Content of ``...`` when the property is exported using
+  :command:`install(EXPORT)`, and empty otherwise.
 
 .. genex:: $<BUILD_INTERFACE:...>
 
@@ -1673,18 +1673,18 @@ Debugging
 
 Since generator expressions are evaluated during generation of the buildsystem,
 and not during processing of ``CMakeLists.txt`` files, it is not possible to
-inspect their result with the :command:`message()` command.
-
-One possible way to generate debug messages is to add a custom target,
+inspect their result with the :command:`message()` command.  One possible way
+to generate debug messages is to add a custom target:
 
 .. code-block:: cmake
 
   add_custom_target(genexdebug COMMAND ${CMAKE_COMMAND} -E echo "$<...>")
 
-The shell command ``make genexdebug`` (invoked after execution of ``cmake``)
-would then print the result of ``$<...>``.
+After running ``cmake``, you can then build the ``genexdebug`` target to print
+the result of the ``$<...>`` expression (i.e. run the command
+``cmake --build ... --target genexdebug``).
 
-Another way is to write debug messages to a file:
+Another way is to write debug messages to a file with :command:`file(GENERATE)`:
 
 .. code-block:: cmake
 
