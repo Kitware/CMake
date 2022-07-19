@@ -11,6 +11,7 @@
 #include <utility>
 #include <vector>
 
+#include <cm/optional>
 #include <cm/string_view>
 #include <cmext/string_view>
 
@@ -43,15 +44,14 @@ public:
   }
 
   template <int Advance = 2>
-  Result Parse(std::vector<std::string> const& args,
-               std::vector<cm::string_view>* keywordsMissingValue = nullptr,
-               std::vector<cm::string_view>* parsedKeywords = nullptr) const
+  Result Parse(
+    std::vector<std::string> const& args,
+    std::vector<cm::string_view>* keywordsMissingValue = nullptr) const
   {
     this->Inputs.clear();
 
     return this->cmArgumentParser<Result>::Parse(
-      cmMakeRange(args).advance(Advance), &this->Inputs, keywordsMissingValue,
-      parsedKeywords);
+      cmMakeRange(args).advance(Advance), &this->Inputs, keywordsMissingValue);
   }
 
   const std::vector<std::string>& GetInputs() const { return this->Inputs; }
@@ -83,19 +83,14 @@ public:
   Result Parse(std::vector<std::string> const& args) const
   {
     this->KeywordsMissingValue.clear();
-    this->ParsedKeywords.clear();
 
     return this->CMakePathArgumentParser<Result>::template Parse<Advance>(
-      args, &this->KeywordsMissingValue, &this->ParsedKeywords);
+      args, &this->KeywordsMissingValue);
   }
 
   const std::vector<cm::string_view>& GetKeywordsMissingValue() const
   {
     return this->KeywordsMissingValue;
-  }
-  const std::vector<cm::string_view>& GetParsedKeywords() const
-  {
-    return this->ParsedKeywords;
   }
 
   bool checkOutputVariable(const Result& arguments,
@@ -109,10 +104,7 @@ public:
       return false;
     }
 
-    if (std::find(this->GetParsedKeywords().begin(),
-                  this->GetParsedKeywords().end(),
-                  "OUTPUT_VARIABLE"_s) != this->GetParsedKeywords().end() &&
-        arguments.Output.empty()) {
+    if (arguments.Output && arguments.Output->empty()) {
       status.SetError("Invalid name for output variable.");
       return false;
     }
@@ -122,12 +114,11 @@ public:
 
 private:
   mutable std::vector<cm::string_view> KeywordsMissingValue;
-  mutable std::vector<cm::string_view> ParsedKeywords;
 };
 
 struct OutputVariable
 {
-  std::string Output;
+  cm::optional<std::string> Output;
 };
 // Usable when OUTPUT_VARIABLE is the only option
 class OutputVariableParser
@@ -307,7 +298,7 @@ bool HandleAppendCommand(std::vector<std::string> const& args,
   }
 
   status.GetMakefile().AddDefinition(
-    arguments.Output.empty() ? args[1] : arguments.Output, path.String());
+    arguments.Output ? *arguments.Output : args[1], path.String());
 
   return true;
 }
@@ -334,7 +325,7 @@ bool HandleAppendStringCommand(std::vector<std::string> const& args,
   }
 
   status.GetMakefile().AddDefinition(
-    arguments.Output.empty() ? args[1] : arguments.Output, path.String());
+    arguments.Output ? *arguments.Output : args[1], path.String());
 
   return true;
 }
@@ -364,7 +355,7 @@ bool HandleRemoveFilenameCommand(std::vector<std::string> const& args,
   path.RemoveFileName();
 
   status.GetMakefile().AddDefinition(
-    arguments.Output.empty() ? args[1] : arguments.Output, path.String());
+    arguments.Output ? *arguments.Output : args[1], path.String());
 
   return true;
 }
@@ -395,7 +386,7 @@ bool HandleReplaceFilenameCommand(std::vector<std::string> const& args,
     parser.GetInputs().empty() ? "" : parser.GetInputs().front());
 
   status.GetMakefile().AddDefinition(
-    arguments.Output.empty() ? args[1] : arguments.Output, path.String());
+    arguments.Output ? *arguments.Output : args[1], path.String());
 
   return true;
 }
@@ -405,7 +396,7 @@ bool HandleRemoveExtensionCommand(std::vector<std::string> const& args,
 {
   struct Arguments
   {
-    std::string Output;
+    cm::optional<std::string> Output;
     bool LastOnly = false;
   };
 
@@ -438,7 +429,7 @@ bool HandleRemoveExtensionCommand(std::vector<std::string> const& args,
   }
 
   status.GetMakefile().AddDefinition(
-    arguments.Output.empty() ? args[1] : arguments.Output, path.String());
+    arguments.Output ? *arguments.Output : args[1], path.String());
 
   return true;
 }
@@ -448,7 +439,7 @@ bool HandleReplaceExtensionCommand(std::vector<std::string> const& args,
 {
   struct Arguments
   {
-    std::string Output;
+    cm::optional<std::string> Output;
     bool LastOnly = false;
   };
 
@@ -483,7 +474,7 @@ bool HandleReplaceExtensionCommand(std::vector<std::string> const& args,
   }
 
   status.GetMakefile().AddDefinition(
-    arguments.Output.empty() ? args[1] : arguments.Output, path.String());
+    arguments.Output ? *arguments.Output : args[1], path.String());
 
   return true;
 }
@@ -512,7 +503,7 @@ bool HandleNormalPathCommand(std::vector<std::string> const& args,
   auto path = cmCMakePath(inputPath).Normal();
 
   status.GetMakefile().AddDefinition(
-    arguments.Output.empty() ? args[1] : arguments.Output, path.String());
+    arguments.Output ? *arguments.Output : args[1], path.String());
 
   return true;
 }
@@ -525,8 +516,8 @@ bool HandleTransformPathCommand(
 {
   struct Arguments
   {
-    std::string Output;
-    std::string BaseDirectory;
+    cm::optional<std::string> Output;
+    cm::optional<std::string> BaseDirectory;
     bool Normalize = false;
   };
 
@@ -554,10 +545,11 @@ bool HandleTransformPathCommand(
     return false;
   }
 
-  if (std::find(parser.GetParsedKeywords().begin(),
-                parser.GetParsedKeywords().end(),
-                "BASE_DIRECTORY"_s) == parser.GetParsedKeywords().end()) {
-    arguments.BaseDirectory = status.GetMakefile().GetCurrentSourceDirectory();
+  std::string baseDirectory;
+  if (arguments.BaseDirectory) {
+    baseDirectory = *arguments.BaseDirectory;
+  } else {
+    baseDirectory = status.GetMakefile().GetCurrentSourceDirectory();
   }
 
   std::string inputPath;
@@ -565,13 +557,13 @@ bool HandleTransformPathCommand(
     return false;
   }
 
-  auto path = transform(cmCMakePath(inputPath), arguments.BaseDirectory);
+  auto path = transform(cmCMakePath(inputPath), baseDirectory);
   if (arguments.Normalize) {
     path = path.Normal();
   }
 
   status.GetMakefile().AddDefinition(
-    arguments.Output.empty() ? args[1] : arguments.Output, path.String());
+    arguments.Output ? *arguments.Output : args[1], path.String());
 
   return true;
 }
