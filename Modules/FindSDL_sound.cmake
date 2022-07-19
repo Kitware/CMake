@@ -54,7 +54,19 @@ Typically, you should not use these variables directly, and you should
 use SDL_SOUND_LIBRARIES which contains SDL_SOUND_LIBRARY and the other
 audio libraries (if needed) to successfully compile on your system.
 
-Created by Eric Wing.  This module is a bit more complicated than the
+Responds to the $SDLDIR and $SDLSOUNDDIR environmental variable that
+would correspond to the ./configure --prefix=$SDLDIR used in building
+SDL.
+
+On OSX, this will prefer the Framework version (if found) over others.
+People will have to manually change the cache values of SDL_LIBRARY to
+override this selectionor set the CMake environment CMAKE_INCLUDE_PATH
+to modify the search paths.
+#]=======================================================================]
+
+
+#[[
+This module is a bit more complicated than the
 other FindSDL* family modules.  The reason is that SDL_sound can be
 compiled in a large variety of different ways which are independent of
 platform.  SDL_sound may dynamically link against other 3rd party
@@ -70,16 +82,7 @@ This module uses a brute force approach to create a test program that
 uses SDL_sound, and then tries to build it.  If the build fails, it
 parses the error output for known symbol names to figure out which
 libraries are needed.
-
-Responds to the $SDLDIR and $SDLSOUNDDIR environmental variable that
-would correspond to the ./configure --prefix=$SDLDIR used in building
-SDL.
-
-On OSX, this will prefer the Framework version (if found) over others.
-People will have to manually change the cache values of SDL_LIBRARY to
-override this selectionor set the CMake environment CMAKE_INCLUDE_PATH
-to modify the search paths.
-#]=======================================================================]
+#]]
 
 set(SDL_SOUND_EXTRAS "" CACHE STRING "SDL_sound extra flags")
 mark_as_advanced(SDL_SOUND_EXTRAS)
