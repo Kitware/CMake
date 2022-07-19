@@ -60,18 +60,21 @@ Logical Operators
 
 .. genex:: $<AND:conditions>
 
-  where ``conditions`` is a comma-separated list of boolean expressions.
-  Evaluates to ``1`` if all conditions are ``1``.
-  Otherwise evaluates to ``0``.
+  where ``conditions`` is a comma-separated list of boolean expressions,
+  all of which must evaluate to either ``1`` or ``0``.  The whole expression
+  evaluates to ``1`` if all conditions are ``1``.  If any condition is ``0``,
+  the whole expression evaluates to ``0``.
 
 .. genex:: $<OR:conditions>
 
   where ``conditions`` is a comma-separated list of boolean expressions.
-  Evaluates to ``1`` if at least one of the conditions is ``1``.
-  Otherwise evaluates to ``0``.
+  all of which must evaluate to either ``1`` or ``0``.  The whole expression
+  evaluates to ``1`` if at least one of the ``conditions`` is ``1``.  If all
+  ``conditions`` evaluate to ``0``, the whole expression evaluates to ``0``.
 
 .. genex:: $<NOT:condition>
 
+  ``condition`` must be ``0`` or ``1``.  The result of the expression is
   ``0`` if ``condition`` is ``1``, else ``1``.
 
 String Comparisons
