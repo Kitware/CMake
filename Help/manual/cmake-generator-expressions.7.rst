@@ -43,6 +43,93 @@ The above would expand to ``OLD_COMPILER`` if the
 :variable:`CMAKE_CXX_COMPILER_VERSION <CMAKE_<LANG>_COMPILER_VERSION>` is less
 than 4.2.0.
 
+Whitespace And Quoting
+======================
+
+Generator expressions are typically parsed after command arguments.
+If a generator expression contains spaces, new lines, semicolons or
+other characters that may be interpreted as command argument separators,
+the whole expression should be surrounded by quotes when passed to a
+command.  Failure to do so may result in the expression being split and
+it may no longer be recognized as a generator expression.
+
+When using :command:`add_custom_command` or :command:`add_custom_target`,
+use the ``VERBATIM`` and ``COMMAND_EXPAND_LISTS`` options to obtain robust
+argument splitting and quoting.
+
+.. code-block:: cmake
+
+  # WRONG: Embedded space will be treated as an argument separator.
+  # This ends up not being seen as a generator expression at all.
+  add_custom_target(run_some_tool
+    COMMAND some_tool -I$<JOIN:$<TARGET_PROPERTY:tgt,INCLUDE_DIRECTORIES>, -I>
+    VERBATIM
+  )
+
+.. code-block:: cmake
+
+  # Better, but still not robust. Quotes prevent the space from splitting the
+  # expression. However, the tool will receive the expanded value as a single
+  # argument.
+  add_custom_target(run_some_tool
+    COMMAND some_tool "-I$<JOIN:$<TARGET_PROPERTY:tgt,INCLUDE_DIRECTORIES>, -I>"
+    VERBATIM
+  )
+
+.. code-block:: cmake
+
+  # Nearly correct. Using a semicolon to separate arguments and adding the
+  # COMMAND_EXPAND_LISTS option means that paths with spaces will be handled
+  # correctly. Quoting the whole expression ensures it is seen as a generator
+  # expression. But if the target property is empty, we will get a bare -I
+  # with nothing after it.
+  add_custom_target(run_some_tool
+    COMMAND some_tool "-I$<JOIN:$<TARGET_PROPERTY:tgt,INCLUDE_DIRECTORIES>,;-I>"
+    COMMAND_EXPAND_LISTS
+    VERBATIM
+  )
+
+Using variables to build up a more complex generator expression is also a
+good way to reduce errors and improve readability.  The above example can be
+improved further like so:
+
+.. code-block:: cmake
+
+  # The $<BOOL:...> check prevents adding anything if the property is empty,
+  # assuming the property value cannot be one of CMake's false constants.
+  set(prop "$<TARGET_PROPERTY:tgt,INCLUDE_DIRECTORIES>")
+  add_custom_target(run_some_tool
+    COMMAND some_tool "$<$<BOOL:${prop}>:-I$<JOIN:${prop},;-I>>"
+    COMMAND_EXPAND_LISTS
+    VERBATIM
+  )
+
+A common mistake is to try to split a generator expression across multiple
+lines with indenting:
+
+.. code-block:: cmake
+
+  # WRONG: New lines and spaces all treated as argument separators, so the
+  # generator expression is split and not recognized correctly.
+  target_compile_definitions(tgt PRIVATE
+    $<$<AND:
+        $<CXX_COMPILER_ID:GNU>,
+        $<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,5>
+      >:HAVE_5_OR_LATER>
+  )
+
+Again, use helper variables with well-chosen names to build up a readable
+expression instead:
+
+.. code-block:: cmake
+
+  set(is_gnu "$<CXX_COMPILER_ID:GNU>")
+  set(v5_or_later "$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,5>")
+  set(meet_requirements "$<AND:${is_gnu},${v5_or_later}>")
+  target_compile_definitions(tgt PRIVATE
+    "$<${meet_requirements}:HAVE_5_OR_LATER>"
+  )
+
 Debugging
 =========
 
