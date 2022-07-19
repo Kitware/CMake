@@ -11,31 +11,57 @@ Introduction
 ============
 
 Generator expressions are evaluated during build system generation to produce
-information specific to each build configuration.
+information specific to each build configuration.  They have the form
+``$<...>``.
 
 Generator expressions are allowed in the context of many target properties,
 such as :prop_tgt:`LINK_LIBRARIES`, :prop_tgt:`INCLUDE_DIRECTORIES`,
 :prop_tgt:`COMPILE_DEFINITIONS` and others.  They may also be used when using
 commands to populate those properties, such as :command:`target_link_libraries`,
 :command:`target_include_directories`, :command:`target_compile_definitions`
-and others.
-
-They enable conditional linking, conditional definitions used when compiling,
-conditional include directories, and more.  The conditions may be based on
-the build configuration, target properties, platform information or any other
-queryable information.
-
-Generator expressions have the form ``$<...>``.  To avoid confusion, this page
-deviates from most of the CMake documentation in that it omits angular brackets
-``<...>`` around placeholders like ``condition``, ``string``, ``target``,
-among others.
+and others.  They enable conditional linking, conditional definitions used when
+compiling, conditional include directories, and more.  The conditions may be
+based on the build configuration, target properties, platform information,
+or any other queryable information.
 
 Generator expressions can be nested, as shown in most of the examples below.
+
+Debugging
+=========
+
+Since generator expressions are evaluated during generation of the buildsystem,
+and not during processing of ``CMakeLists.txt`` files, it is not possible to
+inspect their result with the :command:`message()` command.  One possible way
+to generate debug messages is to add a custom target:
+
+.. code-block:: cmake
+
+  add_custom_target(genexdebug COMMAND ${CMAKE_COMMAND} -E echo "$<...>")
+
+After running ``cmake``, you can then build the ``genexdebug`` target to print
+the result of the ``$<...>`` expression (i.e. run the command
+``cmake --build ... --target genexdebug``).
+
+Another way is to write debug messages to a file with :command:`file(GENERATE)`:
+
+.. code-block:: cmake
+
+  file(GENERATE OUTPUT filename CONTENT "$<...>")
+
+Generator Expression Reference
+==============================
+
+.. note::
+
+  This reference deviates from most of the CMake documentation in that it
+  omits angular brackets ``<...>`` around placeholders like ``condition``,
+  ``string``, ``target``, etc.  This is to prevent an opportunity for those
+  placeholders to be misinterpreted as generator expressions.
 
 .. _`Boolean Generator Expressions`:
 
 Boolean Generator Expressions
-=============================
+-----------------------------
 
 Boolean expressions evaluate to either ``0`` or ``1``.
 They are typically used to construct the condition in a :ref:`conditional
@@ -44,7 +70,7 @@ generator expression<Conditional Generator Expressions>`.
 Available boolean expressions are:
 
 Logical Operators
------------------
+^^^^^^^^^^^^^^^^^
 
 .. genex:: $<BOOL:string>
 
@@ -78,7 +104,7 @@ Logical Operators
   ``0`` if ``condition`` is ``1``, else ``1``.
 
 String Comparisons
-------------------
+^^^^^^^^^^^^^^^^^^
 
 .. genex:: $<STREQUAL:string1,string2>
 
@@ -103,7 +129,7 @@ String Comparisons
   It uses case-sensitive comparisons.
 
 Version Comparisons
--------------------
+^^^^^^^^^^^^^^^^^^^
 
 .. genex:: $<VERSION_LESS:v1,v2>
 
@@ -130,7 +156,7 @@ Version Comparisons
   ``1`` if ``v1`` is a version greater than or equal to ``v2``, else ``0``.
 
 Path Comparisons
-----------------
+^^^^^^^^^^^^^^^^
 
 .. genex:: $<PATH_EQUAL:path1,path2>
 
@@ -145,7 +171,7 @@ Path Comparisons
 .. _GenEx Path Queries:
 
 Path Queries
-------------
+^^^^^^^^^^^^
 
 The ``$<PATH>`` generator expression offers the same capabilities as the
 :command:`cmake_path` command, for the :ref:`Query <Path Query>` options.
@@ -208,7 +234,7 @@ The ``$<PATH>`` generator expression can also be used for path
   :ref:`normalized <Normalization>` before the check.
 
 Variable Queries
-----------------
+^^^^^^^^^^^^^^^^
 
 .. genex:: $<TARGET_EXISTS:target>
 
@@ -564,7 +590,7 @@ Variable Queries
     correctly add target ``libother`` as link dependency.
 
 String-Valued Generator Expressions
-===================================
+-----------------------------------
 
 These expressions expand to some string.
 For example,
@@ -609,7 +635,7 @@ introduce a helper variable to keep the code readable:
 The following string-valued generator expressions are available:
 
 Escaped Characters
-------------------
+^^^^^^^^^^^^^^^^^^
 
 String literals to escape the special meaning a character would otherwise have:
 
@@ -628,7 +654,7 @@ String literals to escape the special meaning a character would otherwise have:
 .. _`Conditional Generator Expressions`:
 
 Conditional Expressions
------------------------
+^^^^^^^^^^^^^^^^^^^^^^^
 
 Conditional generator expressions depend on a boolean condition
 that must be ``0`` or ``1``.
@@ -658,7 +684,7 @@ otherwise expands to the empty string.
 .. _`String Transforming Generator Expressions`:
 
 String Transformations
-----------------------
+^^^^^^^^^^^^^^^^^^^^^^
 
 .. genex:: $<JOIN:list,string>
 
@@ -736,7 +762,7 @@ String Transformations
 .. _GenEx Path Decomposition:
 
 Path Decomposition
-------------------
+^^^^^^^^^^^^^^^^^^
 
 The ``$<PATH>`` generator expression offers the same capabilities as the
 :command:`cmake_path` command, for the
@@ -775,7 +801,7 @@ The ``$<PATH>`` generator expression can also be used for path
 .. _GenEx Path Transformations:
 
 Path Transformations
---------------------
+^^^^^^^^^^^^^^^^^^^^
 
 The ``$<PATH>`` generator expression offers the same capabilities as the
 :command:`cmake_path` command, for the
@@ -881,7 +907,7 @@ The ``$<PATH>`` generator expression can also be used for path
   See :ref:`cmake_path(ABSOLUTE_PATH) <ABSOLUTE_PATH>` for more details.
 
 Variable Queries
-----------------
+^^^^^^^^^^^^^^^^
 
 .. genex:: $<CONFIG>
 
@@ -1024,7 +1050,7 @@ Variable Queries
 .. _`Target-Dependent Queries`:
 
 Target-Dependent Queries
-------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 These queries refer to a target ``tgt``. This can be any runtime artifact,
 namely:
@@ -1336,7 +1362,7 @@ which is just the string ``tgt``.
   :command:`install(RUNTIME_DEPENDENCY_SET)`, and empty otherwise.
 
 Output-Related Expressions
---------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. genex:: $<TARGET_NAME:...>
 
@@ -1671,25 +1697,3 @@ Output-Related Expressions
   With the :generator:`Ninja Multi-Config` generator, generator expressions
   in ``...`` are evaluated using the custom command's "command config".
   With other generators, the content of ``...`` is evaluated normally.
-
-Debugging
-=========
-
-Since generator expressions are evaluated during generation of the buildsystem,
-and not during processing of ``CMakeLists.txt`` files, it is not possible to
-inspect their result with the :command:`message()` command.  One possible way
-to generate debug messages is to add a custom target:
-
-.. code-block:: cmake
-
-  add_custom_target(genexdebug COMMAND ${CMAKE_COMMAND} -E echo "$<...>")
-
-After running ``cmake``, you can then build the ``genexdebug`` target to print
-the result of the ``$<...>`` expression (i.e. run the command
-``cmake --build ... --target genexdebug``).
-
-Another way is to write debug messages to a file with :command:`file(GENERATE)`:
-
-.. code-block:: cmake
-
-  file(GENERATE OUTPUT filename CONTENT "$<...>")
