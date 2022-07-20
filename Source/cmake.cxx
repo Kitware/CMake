@@ -1777,7 +1777,8 @@ void cmake::SetHomeDirectoryViaCommandLine(std::string const& path)
   }
 
   auto prev_path = this->GetHomeDirectory();
-  if (prev_path != path && !prev_path.empty()) {
+  if (prev_path != path && !prev_path.empty() &&
+      this->GetWorkingMode() == NORMAL_MODE) {
     this->IssueMessage(MessageType::WARNING,
                        cmStrCat("Ignoring extra path from command line:\n \"",
                                 prev_path, "\""));
