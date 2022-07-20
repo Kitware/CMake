@@ -1,5 +1,6 @@
 // A simple program that computes the square root of a number
 #include <iostream>
+#include <sstream>
 #include <string>
 
 #include "MathFunctions.h"

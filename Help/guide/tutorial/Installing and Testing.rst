@@ -1,4 +1,4 @@
-Step 4: Installing and Testing
+Step 5: Installing and Testing
 ==============================
 
 Now we can start adding install rules and testing support to our project.
@@ -12,7 +12,7 @@ executable and configured header.
 
 So to the end of ``MathFunctions/CMakeLists.txt`` we add:
 
-.. literalinclude:: Step5/MathFunctions/CMakeLists.txt
+.. literalinclude:: Step6/MathFunctions/CMakeLists.txt
   :caption: MathFunctions/CMakeLists.txt
   :name: MathFunctions/CMakeLists.txt-install-TARGETS
   :language: cmake
@@ -20,7 +20,7 @@ So to the end of ``MathFunctions/CMakeLists.txt`` we add:
 
 And to the end of the top-level ``CMakeLists.txt`` we add:
 
-.. literalinclude:: Step5/CMakeLists.txt
+.. literalinclude:: Step6/CMakeLists.txt
   :caption: CMakeLists.txt
   :name: CMakeLists.txt-install-TARGETS
   :language: cmake
@@ -65,7 +65,7 @@ Next let's test our application. At the end of the top-level ``CMakeLists.txt``
 file we can enable testing and then add a number of basic tests to verify that
 the application is working correctly.
 
-.. literalinclude:: Step5/CMakeLists.txt
+.. literalinclude:: Step6/CMakeLists.txt
   :caption: CMakeLists.txt
   :name: CMakeLists.txt-enable_testing
   :language: cmake

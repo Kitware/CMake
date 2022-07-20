@@ -1,4 +1,4 @@
-Step 8: Packaging an Installer
+Step 9: Packaging an Installer
 ==============================
 
 Next suppose that we want to distribute our project to other people so that
@@ -11,7 +11,7 @@ installations and package management features. To accomplish this we will use
 CPack to create platform specific installers. Specifically we need to add a
 few lines to the bottom of our top-level ``CMakeLists.txt`` file.
 
-.. literalinclude:: Step9/CMakeLists.txt
+.. literalinclude:: Step10/CMakeLists.txt
   :caption: CMakeLists.txt
   :name: CMakeLists.txt-include-CPack
   :language: cmake
