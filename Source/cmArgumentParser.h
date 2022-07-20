@@ -121,13 +121,10 @@ class Instance
 {
 public:
   Instance(ActionMap const& bindings, ParseResult* parseResult,
-           std::vector<std::string>* unparsedArguments,
-           std::vector<cm::string_view>* parsedKeywords,
-           void* result = nullptr)
+           std::vector<std::string>* unparsedArguments, void* result = nullptr)
     : Bindings(bindings)
     , ParseResults(parseResult)
     , UnparsedArguments(unparsedArguments)
-    , ParsedKeywords(parsedKeywords)
     , Result(result)
   {
   }
@@ -162,7 +159,6 @@ private:
   ActionMap const& Bindings;
   ParseResult* ParseResults = nullptr;
   std::vector<std::string>* UnparsedArguments = nullptr;
-  std::vector<cm::string_view>* ParsedKeywords = nullptr;
   void* Result = nullptr;
 
   cm::string_view Keyword;
@@ -206,23 +202,22 @@ public:
 
   template <typename Range>
   bool Parse(Result& result, Range const& args,
-             std::vector<std::string>* unparsedArguments,
-             std::vector<cm::string_view>* parsedKeywords = nullptr) const
+             std::vector<std::string>* unparsedArguments) const
   {
     using ArgumentParser::AsParseResultPtr;
     ParseResult* parseResultPtr = AsParseResultPtr(result);
     Instance instance(this->Bindings, parseResultPtr, unparsedArguments,
-                      parsedKeywords, &result);
+                      &result);
     instance.Parse(args);
     return parseResultPtr ? static_cast<bool>(*parseResultPtr) : true;
   }
 
   template <typename Range>
-  Result Parse(Range const& args, std::vector<std::string>* unparsedArguments,
-               std::vector<cm::string_view>* parsedKeywords = nullptr) const
+  Result Parse(Range const& args,
+               std::vector<std::string>* unparsedArguments) const
   {
     Result result;
-    this->Parse(result, args, unparsedArguments, parsedKeywords);
+    this->Parse(result, args, unparsedArguments);
     return result;
   }
 };
@@ -246,13 +241,11 @@ public:
   }
 
   template <typename Range>
-  ParseResult Parse(
-    Range const& args, std::vector<std::string>* unparsedArguments,
-    std::vector<cm::string_view>* parsedKeywords = nullptr) const
+  ParseResult Parse(Range const& args,
+                    std::vector<std::string>* unparsedArguments) const
   {
     ParseResult parseResult;
-    Instance instance(this->Bindings, &parseResult, unparsedArguments,
-                      parsedKeywords);
+    Instance instance(this->Bindings, &parseResult, unparsedArguments);
     instance.Parse(args);
     return parseResult;
   }
