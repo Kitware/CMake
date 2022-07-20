@@ -83,8 +83,7 @@ bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
   // Process input arguments.
   std::vector<std::string> unparsedArguments;
   std::vector<cm::string_view> parsedKeywords;
-  this->Parse(args, &unparsedArguments, /*keywordsMissingValue=*/nullptr,
-              &parsedKeywords);
+  this->Parse(args, &unparsedArguments, &parsedKeywords);
   this->CheckArguments();
 
   std::sort(parsedKeywords.begin(), parsedKeywords.end());

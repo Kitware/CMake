@@ -63,14 +63,10 @@ std::initializer_list<cm::string_view> const args = {
 };
 
 bool verifyResult(Result const& result,
-                  std::vector<std::string> const& unparsedArguments,
-                  std::vector<cm::string_view> const& keywordsMissingValue)
+                  std::vector<std::string> const& unparsedArguments)
 {
   static std::vector<std::string> const foobar = { "foo", "bar" };
   static std::vector<std::string> const barfoo = { "bar", "foo" };
-  static std::vector<cm::string_view> const missing = { "STRING_1"_s,
-                                                        "LIST_1"_s,
-                                                        "LIST_4"_s };
   static std::map<cm::string_view, std::string> const keywordErrors = {
     { "STRING_1"_s, "  missing required value\n" },
     { "LIST_1"_s, "  missing required value\n" },
@@ -117,7 +113,6 @@ bool verifyResult(Result const& result,
 
   ASSERT_TRUE(unparsedArguments.size() == 1);
   ASSERT_TRUE(unparsedArguments[0] == "bar");
-  ASSERT_TRUE(keywordsMissingValue == missing);
 
   ASSERT_TRUE(result.GetKeywordErrors().size() == keywordErrors.size());
   for (auto const& ke : result.GetKeywordErrors()) {
@@ -133,7 +128,6 @@ bool testArgumentParserDynamic()
 {
   Result result;
   std::vector<std::string> unparsedArguments;
-  std::vector<cm::string_view> keywordsMissingValue;
 
   static_cast<ArgumentParser::ParseResult&>(result) =
     cmArgumentParser<void>{}
@@ -153,9 +147,9 @@ bool testArgumentParserDynamic()
       .Bind("MULTI_2"_s, result.Multi2)
       .Bind("MULTI_3"_s, result.Multi3)
       .Bind("MULTI_4"_s, result.Multi4)
-      .Parse(args, &unparsedArguments, &keywordsMissingValue);
+      .Parse(args, &unparsedArguments);
 
-  return verifyResult(result, unparsedArguments, keywordsMissingValue);
+  return verifyResult(result, unparsedArguments);
 }
 
 static auto const parserStatic = //
@@ -181,20 +175,16 @@ static auto const parserStatic = //
 bool testArgumentParserStatic()
 {
   std::vector<std::string> unparsedArguments;
-  std::vector<cm::string_view> keywordsMissingValue;
-  Result const result =
-    parserStatic.Parse(args, &unparsedArguments, &keywordsMissingValue);
-  return verifyResult(result, unparsedArguments, keywordsMissingValue);
+  Result const result = parserStatic.Parse(args, &unparsedArguments);
+  return verifyResult(result, unparsedArguments);
 }
 
 bool testArgumentParserStaticBool()
 {
   std::vector<std::string> unparsedArguments;
-  std::vector<cm::string_view> keywordsMissingValue;
   Result result;
-  ASSERT_TRUE(parserStatic.Parse(result, args, &unparsedArguments,
-                                 &keywordsMissingValue) == false);
-  return verifyResult(result, unparsedArguments, keywordsMissingValue);
+  ASSERT_TRUE(parserStatic.Parse(result, args, &unparsedArguments) == false);
+  return verifyResult(result, unparsedArguments);
 }
 
 } // namespace

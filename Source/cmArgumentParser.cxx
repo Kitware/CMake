@@ -113,9 +113,6 @@ void Instance::FinishKeyword()
       this->ParseResults->AddKeywordError(this->Keyword,
                                           "  missing required value\n");
     }
-    if (this->KeywordsMissingValue != nullptr) {
-      this->KeywordsMissingValue->emplace_back(this->Keyword);
-    }
     if (this->Bindings.KeywordMissingValue) {
       this->Bindings.KeywordMissingValue(*this, this->Keyword);
     }

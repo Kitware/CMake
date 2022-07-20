@@ -2498,9 +2498,8 @@ bool HandleGenerateCommand(std::vector<std::string> const& args,
 
   std::vector<std::string> unparsedArguments;
   std::vector<cm::string_view> parsedKeywords;
-  Arguments const arguments =
-    parser.Parse(cmMakeRange(args).advance(1), &unparsedArguments,
-                 /*keywordsMissingValue=*/nullptr, &parsedKeywords);
+  Arguments const arguments = parser.Parse(
+    cmMakeRange(args).advance(1), &unparsedArguments, &parsedKeywords);
 
   if (arguments.MaybeReportError(status.GetMakefile())) {
     return true;
