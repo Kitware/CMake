@@ -201,6 +201,13 @@
     "flags": []
   },
   {
+    "name":  "DebugType",
+    "switch": "debug:embedded",
+    "comment": "",
+    "value": "embedded",
+    "flags": []
+  },
+  {
     "name":  "Optimize",
     "switch": "optimize",
     "comment": "",
