@@ -52,10 +52,10 @@ expressions to ensure the sources are correctly assigned to the target.
 .. code-block:: cmake
 
   # WRONG: starts with generator expression, but relative path used
-  target_sources(MyTarget "$<$<CONFIG:Debug>:dbgsrc.cpp>")
+  target_sources(MyTarget PRIVATE "$<$<CONFIG:Debug>:dbgsrc.cpp>")
 
   # CORRECT: absolute path used inside the generator expression
-  target_sources(MyTarget "$<$<CONFIG:Debug>:${CMAKE_CURRENT_SOURCE_DIR}/dbgsrc.cpp>")
+  target_sources(MyTarget PRIVATE "$<$<CONFIG:Debug>:${CMAKE_CURRENT_SOURCE_DIR}/dbgsrc.cpp>")
 
 See the :manual:`cmake-buildsystem(7)` manual for more on defining
 buildsystem properties.
