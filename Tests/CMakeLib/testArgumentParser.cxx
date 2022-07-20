@@ -38,6 +38,8 @@ struct Result : public ArgumentParser::ParseResult
   std::vector<std::vector<std::string>> Multi2;
   cm::optional<std::vector<std::vector<std::string>>> Multi3;
   cm::optional<std::vector<std::vector<std::string>>> Multi4;
+
+  std::vector<cm::string_view> ParsedKeywords;
 };
 
 std::initializer_list<cm::string_view> const args = {
@@ -67,6 +69,23 @@ bool verifyResult(Result const& result,
 {
   static std::vector<std::string> const foobar = { "foo", "bar" };
   static std::vector<std::string> const barfoo = { "bar", "foo" };
+  static std::vector<cm::string_view> const parsedKeywords = {
+    /* clang-format off */
+    "OPTION_1",
+    "STRING_1",
+    "STRING_2",
+    "STRING_4",
+    "LIST_1",
+    "LIST_2",
+    "LIST_3",
+    "LIST_3",
+    "LIST_4",
+    "LIST_6",
+    "MULTI_2",
+    "MULTI_3",
+    "MULTI_3",
+    /* clang-format on */
+  };
   static std::map<cm::string_view, std::string> const keywordErrors = {
     { "STRING_1"_s, "  missing required value\n" },
     { "LIST_1"_s, "  missing required value\n" },
@@ -114,6 +133,8 @@ bool verifyResult(Result const& result,
   ASSERT_TRUE(unparsedArguments.size() == 1);
   ASSERT_TRUE(unparsedArguments[0] == "bar");
 
+  ASSERT_TRUE(result.ParsedKeywords == parsedKeywords);
+
   ASSERT_TRUE(result.GetKeywordErrors().size() == keywordErrors.size());
   for (auto const& ke : result.GetKeywordErrors()) {
     auto const ki = keywordErrors.find(ke.first);
@@ -147,6 +168,7 @@ bool testArgumentParserDynamic()
       .Bind("MULTI_2"_s, result.Multi2)
       .Bind("MULTI_3"_s, result.Multi3)
       .Bind("MULTI_4"_s, result.Multi4)
+      .BindParsedKeywords(result.ParsedKeywords)
       .Parse(args, &unparsedArguments);
 
   return verifyResult(result, unparsedArguments);
@@ -170,6 +192,7 @@ static auto const parserStatic = //
     .Bind("MULTI_2"_s, &Result::Multi2)
     .Bind("MULTI_3"_s, &Result::Multi3)
     .Bind("MULTI_4"_s, &Result::Multi4)
+    .BindParsedKeywords(&Result::ParsedKeywords)
   /* keep semicolon on own line */;
 
 bool testArgumentParserStatic()

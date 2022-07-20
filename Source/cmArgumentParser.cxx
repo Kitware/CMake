@@ -86,6 +86,9 @@ void Instance::Consume(cm::string_view arg)
     if (this->ParsedKeywords != nullptr) {
       this->ParsedKeywords->emplace_back(it->first);
     }
+    if (this->Bindings.ParsedKeyword) {
+      this->Bindings.ParsedKeyword(*this, it->first);
+    }
     it->second(*this);
     return;
   }

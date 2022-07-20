@@ -81,6 +81,7 @@ class ActionMap
 public:
   KeywordActionMap Keywords;
   KeywordNameAction KeywordMissingValue;
+  KeywordNameAction ParsedKeyword;
 };
 
 class Base
@@ -101,6 +102,12 @@ public:
     bool const inserted = this->MaybeBind(name, std::move(action));
     assert(inserted);
     static_cast<void>(inserted);
+  }
+
+  void BindParsedKeyword(KeywordNameAction action)
+  {
+    assert(!this->Bindings.ParsedKeyword);
+    this->Bindings.ParsedKeyword = std::move(action);
   }
 
   void BindKeywordMissingValue(KeywordNameAction action)
@@ -187,6 +194,16 @@ public:
     return *this;
   }
 
+  cmArgumentParser& BindParsedKeywords(
+    std::vector<cm::string_view> Result::*member)
+  {
+    this->Base::BindParsedKeyword(
+      [member](Instance& instance, cm::string_view arg) {
+        (static_cast<Result*>(instance.Result)->*member).emplace_back(arg);
+      });
+    return *this;
+  }
+
   template <typename Range>
   bool Parse(Result& result, Range const& args,
              std::vector<std::string>* unparsedArguments,
@@ -218,6 +235,13 @@ public:
   cmArgumentParser& Bind(cm::static_string_view name, T& ref)
   {
     this->Base::Bind(name, [&ref](Instance& instance) { instance.Bind(ref); });
+    return *this;
+  }
+
+  cmArgumentParser& BindParsedKeywords(std::vector<cm::string_view>& ref)
+  {
+    this->Base::BindParsedKeyword(
+      [&ref](Instance&, cm::string_view arg) { ref.emplace_back(arg); });
     return *this;
   }
 
