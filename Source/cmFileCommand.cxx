@@ -954,19 +954,17 @@ bool HandleRPathChangeCommand(std::vector<std::string> const& args,
 {
   // Evaluate arguments.
   std::string file;
-  std::string oldRPath;
-  std::string newRPath;
+  cm::optional<std::string> oldRPath;
+  cm::optional<std::string> newRPath;
   bool removeEnvironmentRPath = false;
   cmArgumentParser<void> parser;
   std::vector<std::string> unknownArgs;
   std::vector<cm::string_view> missingArgs;
-  std::vector<cm::string_view> parsedArgs;
   parser.Bind("FILE"_s, file)
     .Bind("OLD_RPATH"_s, oldRPath)
     .Bind("NEW_RPATH"_s, newRPath)
     .Bind("INSTALL_REMOVE_ENVIRONMENT_RPATH"_s, removeEnvironmentRPath);
-  parser.Parse(cmMakeRange(args).advance(1), &unknownArgs, &missingArgs,
-               &parsedArgs);
+  parser.Parse(cmMakeRange(args).advance(1), &unknownArgs, &missingArgs);
   if (!unknownArgs.empty()) {
     status.SetError(
       cmStrCat("RPATH_CHANGE given unknown argument ", unknownArgs.front()));
@@ -981,15 +979,11 @@ bool HandleRPathChangeCommand(std::vector<std::string> const& args,
     status.SetError("RPATH_CHANGE not given FILE option.");
     return false;
   }
-  if (oldRPath.empty() &&
-      std::find(parsedArgs.begin(), parsedArgs.end(), "OLD_RPATH") ==
-        parsedArgs.end()) {
+  if (!oldRPath) {
     status.SetError("RPATH_CHANGE not given OLD_RPATH option.");
     return false;
   }
-  if (newRPath.empty() &&
-      std::find(parsedArgs.begin(), parsedArgs.end(), "NEW_RPATH") ==
-        parsedArgs.end()) {
+  if (!newRPath) {
     status.SetError("RPATH_CHANGE not given NEW_RPATH option.");
     return false;
   }
@@ -1003,17 +997,17 @@ bool HandleRPathChangeCommand(std::vector<std::string> const& args,
   std::string emsg;
   bool changed;
 
-  if (!cmSystemTools::ChangeRPath(file, oldRPath, newRPath,
+  if (!cmSystemTools::ChangeRPath(file, *oldRPath, *newRPath,
                                   removeEnvironmentRPath, &emsg, &changed)) {
     status.SetError(cmStrCat("RPATH_CHANGE could not write new RPATH:\n  ",
-                             newRPath, "\nto the file:\n  ", file, "\n",
+                             *newRPath, "\nto the file:\n  ", file, "\n",
                              emsg));
     success = false;
   }
   if (success) {
     if (changed) {
       std::string message =
-        cmStrCat("Set runtime path of \"", file, "\" to \"", newRPath, '"');
+        cmStrCat("Set runtime path of \"", file, "\" to \"", *newRPath, '"');
       status.GetMakefile().DisplayStatus(message, -1);
     }
     ft.Store(file);
@@ -1026,14 +1020,12 @@ bool HandleRPathSetCommand(std::vector<std::string> const& args,
 {
   // Evaluate arguments.
   std::string file;
-  std::string newRPath;
+  cm::optional<std::string> newRPath;
   cmArgumentParser<void> parser;
   std::vector<std::string> unknownArgs;
   std::vector<cm::string_view> missingArgs;
-  std::vector<cm::string_view> parsedArgs;
   parser.Bind("FILE"_s, file).Bind("NEW_RPATH"_s, newRPath);
-  parser.Parse(cmMakeRange(args).advance(1), &unknownArgs, &missingArgs,
-               &parsedArgs);
+  parser.Parse(cmMakeRange(args).advance(1), &unknownArgs, &missingArgs);
   if (!unknownArgs.empty()) {
     status.SetError(cmStrCat("RPATH_SET given unrecognized argument \"",
                              unknownArgs.front(), "\"."));
@@ -1048,9 +1040,7 @@ bool HandleRPathSetCommand(std::vector<std::string> const& args,
     status.SetError("RPATH_SET not given FILE option.");
     return false;
   }
-  if (newRPath.empty() &&
-      std::find(parsedArgs.begin(), parsedArgs.end(), "NEW_RPATH") ==
-        parsedArgs.end()) {
+  if (!newRPath) {
     status.SetError("RPATH_SET not given NEW_RPATH option.");
     return false;
   }
@@ -1064,16 +1054,16 @@ bool HandleRPathSetCommand(std::vector<std::string> const& args,
   std::string emsg;
   bool changed;
 
-  if (!cmSystemTools::SetRPath(file, newRPath, &emsg, &changed)) {
+  if (!cmSystemTools::SetRPath(file, *newRPath, &emsg, &changed)) {
     status.SetError(cmStrCat("RPATH_SET could not write new RPATH:\n  ",
-                             newRPath, "\nto the file:\n  ", file, "\n",
+                             *newRPath, "\nto the file:\n  ", file, "\n",
                              emsg));
     success = false;
   }
   if (success) {
     if (changed) {
       std::string message =
-        cmStrCat("Set runtime path of \"", file, "\" to \"", newRPath, '"');
+        cmStrCat("Set runtime path of \"", file, "\" to \"", *newRPath, '"');
       status.GetMakefile().DisplayStatus(message, -1);
     }
     ft.Store(file);
@@ -1136,14 +1126,12 @@ bool HandleRPathCheckCommand(std::vector<std::string> const& args,
 {
   // Evaluate arguments.
   std::string file;
-  std::string rpath;
+  cm::optional<std::string> rpath;
   cmArgumentParser<void> parser;
   std::vector<std::string> unknownArgs;
   std::vector<cm::string_view> missingArgs;
-  std::vector<cm::string_view> parsedArgs;
   parser.Bind("FILE"_s, file).Bind("RPATH"_s, rpath);
-  parser.Parse(cmMakeRange(args).advance(1), &unknownArgs, &missingArgs,
-               &parsedArgs);
+  parser.Parse(cmMakeRange(args).advance(1), &unknownArgs, &missingArgs);
   if (!unknownArgs.empty()) {
     status.SetError(
       cmStrCat("RPATH_CHECK given unknown argument ", unknownArgs.front()));
@@ -1158,9 +1146,7 @@ bool HandleRPathCheckCommand(std::vector<std::string> const& args,
     status.SetError("RPATH_CHECK not given FILE option.");
     return false;
   }
-  if (rpath.empty() &&
-      std::find(parsedArgs.begin(), parsedArgs.end(), "RPATH") ==
-        parsedArgs.end()) {
+  if (!rpath) {
     status.SetError("RPATH_CHECK not given RPATH option.");
     return false;
   }
@@ -1169,7 +1155,7 @@ bool HandleRPathCheckCommand(std::vector<std::string> const& args,
   // delete it.  This is used during installation to re-install a file
   // if its RPath will change.
   if (cmSystemTools::FileExists(file, true) &&
-      !cmSystemTools::CheckRPath(file, rpath)) {
+      !cmSystemTools::CheckRPath(file, *rpath)) {
     cmSystemTools::RemoveFile(file);
   }
 
