@@ -64,6 +64,7 @@ AsParseResultPtr(Result&)
 
 class Instance;
 using KeywordAction = std::function<void(Instance&)>;
+using KeywordNameAction = std::function<void(Instance&, cm::string_view)>;
 
 // using KeywordActionMap = cm::flat_map<cm::string_view, KeywordAction>;
 class KeywordActionMap
@@ -79,6 +80,7 @@ class ActionMap
 {
 public:
   KeywordActionMap Keywords;
+  KeywordNameAction KeywordMissingValue;
 };
 
 class Base
@@ -99,6 +101,12 @@ public:
     bool const inserted = this->MaybeBind(name, std::move(action));
     assert(inserted);
     static_cast<void>(inserted);
+  }
+
+  void BindKeywordMissingValue(KeywordNameAction action)
+  {
+    assert(!this->Bindings.KeywordMissingValue);
+    this->Bindings.KeywordMissingValue = std::move(action);
   }
 };
 
@@ -233,6 +241,9 @@ public:
   }
 
 protected:
+  using Base::Instance;
+  using Base::BindKeywordMissingValue;
+
   template <typename T>
   bool Bind(cm::string_view name, T& ref)
   {
