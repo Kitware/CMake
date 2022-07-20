@@ -419,3 +419,10 @@ There is no automatic evaluation for environment or cache
 :ref:`Variable References`.  Their values must be referenced as
 ``$ENV{<name>}`` or ``$CACHE{<name>}`` wherever the above-documented
 condition syntax accepts ``<variable|string>``.
+
+See also
+^^^^^^^^
+
+  * :command:`else`
+  * :command:`elseif`
+  * :command:`endif`
