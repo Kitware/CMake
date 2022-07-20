@@ -180,7 +180,7 @@ void cmGlobalVisualStudio71Generator::WriteExternalProject(
     fout << "\tProjectSection(ProjectDependencies) = postProject\n";
     for (BT<std::pair<std::string, bool>> const& it : depends) {
       std::string const& dep = it.Value.first;
-      if (!dep.empty()) {
+      if (this->IsDepInSolution(dep)) {
         fout << "\t\t{" << this->GetGUID(dep) << "} = {" << this->GetGUID(dep)
              << "}\n";
       }
