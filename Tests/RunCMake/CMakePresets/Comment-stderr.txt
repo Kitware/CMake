@@ -1,2 +1,9 @@
 ^CMake Error: Could not read presets from [^
-]*/Tests/RunCMake/CMakePresets/Comment: JSON parse error$
+]*/Tests/RunCMake/CMakePresets/Comment: JSON parse error
+Errors:
+[^
+]*Comment\/CMakePresets.json:
+\* Line 1, Column 1
+  Syntax error: value, object or array expected\.
+\* Line 2, Column 1
+  Extra non-whitespace after JSON value\.$
