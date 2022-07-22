@@ -39,15 +39,21 @@ public:
 
 private:
   void RunExecutable(const std::string& runArgs,
-                     std::string* runOutputContents);
+                     std::string* runOutputContents,
+                     std::string* runOutputStdOutContents,
+                     std::string* runOutputStdErrContents);
   void DoNotRunExecutable(const std::string& runArgs,
                           const std::string& srcFile,
-                          std::string* runOutputContents);
+                          std::string* runOutputContents,
+                          std::string* runOutputStdOutContents,
+                          std::string* runOutputStdErrContents);
 
   std::string CompileResultVariable;
   std::string RunResultVariable;
   std::string OutputVariable;
   std::string RunOutputVariable;
+  std::string RunOutputStdOutVariable;
+  std::string RunOutputStdErrVariable;
   std::string CompileOutputVariable;
   std::string WorkingDirectory;
 };
