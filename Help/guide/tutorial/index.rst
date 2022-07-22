@@ -25,10 +25,10 @@ provides the complete solution for the previous step.
   Adding a Library
   Adding Usage Requirements for a Library
   Installing and Testing
+  Adding Support for a Testing Dashboard
   Adding System Introspection
   Adding a Custom Command and Generated File
   Packaging an Installer
-  Adding Support for a Testing Dashboard
   Selecting Static or Shared Libraries
   Adding Generator Expressions
   Adding Export Configuration
