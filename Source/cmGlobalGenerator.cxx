@@ -49,6 +49,7 @@
 #include "cmState.h"
 #include "cmStateDirectory.h"
 #include "cmStateTypes.h"
+#include "cmSystemTools.h"
 #include "cmValue.h"
 #include "cmVersion.h"
 #include "cmWorkingDirectory.h"
@@ -60,10 +61,6 @@
 
 #  include "cmCryptoHash.h"
 #  include "cmQtAutoGenGlobalInitializer.h"
-#endif
-
-#if defined(_MSC_VER) && _MSC_VER >= 1800
-#  define KWSYS_WINDOWS_DEPRECATED_GetVersionEx
 #endif
 
 const std::string kCMAKE_PLATFORM_INFO_INITIALIZED =
@@ -616,34 +613,12 @@ void cmGlobalGenerator::EnableLanguage(
   // what platform we are running on
   if (!mf->GetDefinition("CMAKE_SYSTEM")) {
 #if defined(_WIN32) && !defined(__CYGWIN__)
-    /* Windows version number data.  */
-    OSVERSIONINFOEXW osviex;
-    ZeroMemory(&osviex, sizeof(osviex));
-    osviex.dwOSVersionInfoSize = sizeof(osviex);
-
-#  ifdef KWSYS_WINDOWS_DEPRECATED_GetVersionEx
-#    pragma warning(push)
-#    ifdef __INTEL_COMPILER
-#      pragma warning(disable : 1478)
-#    elif defined __clang__
-#      pragma clang diagnostic push
-#      pragma clang diagnostic ignored "-Wdeprecated-declarations"
-#    else
-#      pragma warning(disable : 4996)
-#    endif
-#  endif
-    GetVersionExW((OSVERSIONINFOW*)&osviex);
-#  ifdef KWSYS_WINDOWS_DEPRECATED_GetVersionEx
-#    ifdef __clang__
-#      pragma clang diagnostic pop
-#    else
-#      pragma warning(pop)
-#    endif
-#  endif
+    cmSystemTools::WindowsVersion windowsVersion =
+      cmSystemTools::GetWindowsVersion();
     std::ostringstream windowsVersionString;
-    windowsVersionString << osviex.dwMajorVersion << "."
-                         << osviex.dwMinorVersion << "."
-                         << osviex.dwBuildNumber;
+    windowsVersionString << windowsVersion.dwMajorVersion << "."
+                         << windowsVersion.dwMinorVersion << "."
+                         << windowsVersion.dwBuildNumber;
     mf->AddDefinition("CMAKE_HOST_SYSTEM_VERSION", windowsVersionString.str());
 #endif
     // Read the DetermineSystem file
