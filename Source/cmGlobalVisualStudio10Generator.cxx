@@ -1286,22 +1286,6 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
   return makeCommands;
 }
 
-bool cmGlobalVisualStudio10Generator::IsInSolution(
-  const cmGeneratorTarget* gt) const
-{
-  return gt->IsInBuildSystem() &&
-    !(this->Version >= cmGlobalVisualStudioGenerator::VSVersion::VS16 &&
-      gt->GetName() == CMAKE_CHECK_BUILD_SYSTEM_TARGET);
-}
-
-bool cmGlobalVisualStudio10Generator::IsDepInSolution(
-  const std::string& targetName) const
-{
-  return !targetName.empty() &&
-    !(this->Version >= cmGlobalVisualStudioGenerator::VSVersion::VS16 &&
-      targetName == CMAKE_CHECK_BUILD_SYSTEM_TARGET);
-}
-
 bool cmGlobalVisualStudio10Generator::Find64BitTools(cmMakefile* mf)
 {
   if (this->DefaultPlatformToolset == "v100") {
