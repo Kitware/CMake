@@ -36,6 +36,9 @@ There are corresponding imported targets for each of these.
 ``MoltenVK``
   On macOS, an additional component ``MoltenVK`` is available.
 
+The ``glslc`` and ``glslangValidator`` components are provided even
+if not explicitly requested (for backward compatibility).
+
 IMPORTED Targets
 ^^^^^^^^^^^^^^^^
 

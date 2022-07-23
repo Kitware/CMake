@@ -220,6 +220,10 @@ Modules
   gained a ``NO_IMPLICIT_LINK_TO_MATLAB_LIBRARIES`` option to disable
   automatic linking of MATLAB libraries.
 
+* The :module:`FindVulkan` module now supports components to select which
+  VulkanSDK tool and libraries to find in addition to the Vulkan SDK headers
+  and library.
+
 * The :module:`FindZLIB` gained a new ``ZLIB_USE_STATIC_LIBS`` variable to
   search only for static libraries.
 
