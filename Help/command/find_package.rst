@@ -103,8 +103,9 @@ Basic Signature
                [REQUIRED] [[COMPONENTS] [components...]]
                [OPTIONAL_COMPONENTS components...]
                [REGISTRY_VIEW  (64|32|64_32|32_64|HOST|TARGET|BOTH)]
+               [GLOBAL]
                [NO_POLICY_SCOPE]
-               [GLOBAL])
+               [BYPASS_PROVIDER])
 
 The basic signature is supported by both Module and Config modes.
 The ``MODULE`` keyword implies that only Module mode can be used to find
@@ -181,6 +182,14 @@ only take the single version at the lower end of the range into account.
 See the :command:`cmake_policy` command documentation for discussion
 of the ``NO_POLICY_SCOPE`` option.
 
+.. versionadded:: 3.24
+  The ``BYPASS_PROVIDER`` keyword is only allowed when ``find_package()`` is
+  being called by a :ref:`dependency provider <dependency_providers>`.
+  It can be used by providers to call the built-in ``find_package()``
+  implementation directly and prevent that call from being re-routed back to
+  itself.  Future versions of CMake may detect attempts to use this keyword
+  from places other than a dependency provider and halt with a fatal error.
+
 .. _`full signature`:
 
 Full Signature
@@ -192,8 +201,9 @@ Full Signature
                [REQUIRED] [[COMPONENTS] [components...]]
                [OPTIONAL_COMPONENTS components...]
                [CONFIG|NO_MODULE]
-               [NO_POLICY_SCOPE]
                [GLOBAL]
+               [NO_POLICY_SCOPE]
+               [BYPASS_PROVIDER]
                [NAMES name1 [name2 ...]]
                [CONFIGS config1 [config2 ...]]
                [HINTS path1 [path2 ... ]]
