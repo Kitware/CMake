@@ -388,7 +388,7 @@ can still be built out-of-the-box.
 
 The developer, on the other hand, may be much more interested in controlling
 *how* a dependency is provided to the project.  You might want to use a
-particular version of a package that you built themself.  You might want
+particular version of a package that you built yourself.  You might want
 to use a third party package manager.  You might want to redirect some
 requests to a different URL on a system you control for security or
 performance reasons.  CMake supports these sort of scenarios through
