@@ -4,9 +4,11 @@ CMP0097
 .. versionadded:: 3.16
 
 :command:`ExternalProject_Add` with ``GIT_SUBMODULES ""`` initializes no
-submodules.
+submodules.  The policy also applies to :command:`FetchContent_Declare`,
+which uses the same download and update features as
+:command:`ExternalProject_Add`.
 
-The module provides a ``GIT_SUBMODULES`` option which controls what submodules
+The commands provide a ``GIT_SUBMODULES`` option which controls what submodules
 to initialize and update. Starting with CMake 3.16, explicitly setting
 ``GIT_SUBMODULES`` to an empty string means no submodules will be initialized
 or updated.
