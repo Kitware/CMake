@@ -1,6 +1,7 @@
 CMake Error at BadArgOutput.cmake:[0-9]+ \(file\):
-  file CONFIGURE keywords missing values:
+  Error after keyword "OUTPUT":
 
-    OUTPUT
+    missing required value
+
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)

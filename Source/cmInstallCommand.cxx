@@ -2160,11 +2160,9 @@ bool HandleRuntimeDependencySetMode(std::vector<std::string> const& args,
   // These generic args also contain the runtime dependency set
   std::string runtimeDependencySetArg;
   std::vector<std::string> runtimeDependencyArgVector;
-  std::vector<cm::string_view> parsedArgs;
   cmInstallCommandArguments genericArgs(helper.DefaultComponentName);
   genericArgs.Bind("RUNTIME_DEPENDENCY_SET"_s, runtimeDependencySetArg);
-  genericArgs.Parse(genericArgVector, &runtimeDependencyArgVector, nullptr,
-                    &parsedArgs);
+  genericArgs.Parse(genericArgVector, &runtimeDependencyArgVector);
   bool success = genericArgs.Finalize();
 
   cmInstallCommandArguments libraryArgs(helper.DefaultComponentName);

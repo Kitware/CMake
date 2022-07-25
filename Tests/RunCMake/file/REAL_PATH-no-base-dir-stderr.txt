@@ -1,2 +1,7 @@
-CMake Error at REAL_PATH-no-base-dir.cmake:[0-9]+ \(file\):
-  file BASE_DIRECTORY requires a value
+^CMake Error at REAL_PATH-no-base-dir.cmake:[0-9]+ \(file\):
+  Error after keyword "BASE_DIRECTORY":
+
+    missing required value
+
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)$

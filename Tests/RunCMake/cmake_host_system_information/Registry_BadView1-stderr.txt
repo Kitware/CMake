@@ -1,5 +1,7 @@
 CMake Error at Registry_BadView1.cmake:[0-9]+ \(cmake_host_system_information\):
-  cmake_host_system_information missing expected value for argument\(s\)
-  "VIEW".
+  Error after keyword "VIEW":
+
+    missing required value
+
 Call Stack \(most recent call first\):
   CMakeLists.txt:[0-9]+ \(include\)

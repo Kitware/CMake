@@ -474,7 +474,7 @@ bool QueryWindowsRegistry(Range args, cmExecutionStatus& status,
   }
   std::string const& key = *args.begin();
 
-  struct Arguments
+  struct Arguments : public ArgumentParser::ParseResult
   {
     std::string ValueName;
     bool ValueNames = false;
@@ -491,19 +491,15 @@ bool QueryWindowsRegistry(Range args, cmExecutionStatus& status,
     .Bind("SEPARATOR"_s, &Arguments::Separator)
     .Bind("ERROR_VARIABLE"_s, &Arguments::ErrorVariable);
   std::vector<std::string> invalidArgs;
-  std::vector<cm::string_view> keywordsMissingValue;
 
-  Arguments const arguments =
-    parser.Parse(args.advance(1), &invalidArgs, &keywordsMissingValue);
+  Arguments const arguments = parser.Parse(args.advance(1), &invalidArgs);
   if (!invalidArgs.empty()) {
     status.SetError(cmStrCat("given invalid argument(s) \"",
                              cmJoin(invalidArgs, ", "_s), "\"."));
     return false;
   }
-  if (!keywordsMissingValue.empty()) {
-    status.SetError(cmStrCat("missing expected value for argument(s) \"",
-                             cmJoin(keywordsMissingValue, ", "_s), "\"."));
-    return false;
+  if (arguments.MaybeReportError(status.GetMakefile())) {
+    return true;
   }
   if ((!arguments.ValueName.empty() &&
        (arguments.ValueNames || arguments.SubKeys)) ||

@@ -1,6 +1,7 @@
 CMake Error at EmptyCondition1.cmake:2 \(file\):
-  file GENERATE keywords missing values:
+  Error after keyword "CONDITION":
 
-    CONDITION
+    missing required value
+
 Call Stack \(most recent call first\):
   CMakeLists.txt:[0-9]+ \(include\)

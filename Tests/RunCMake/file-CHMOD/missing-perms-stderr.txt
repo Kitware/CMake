@@ -1,0 +1,5 @@
+^CMake Error at [^
+]*/missing-perms.cmake:[0-9]+ \(file\):
+  Error after keyword "PERMISSIONS":
+
+    missing required value$

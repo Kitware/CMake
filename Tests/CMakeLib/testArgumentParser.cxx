@@ -3,7 +3,9 @@
 
 #include <initializer_list>
 #include <iostream>
+#include <map>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <cm/optional>
@@ -15,7 +17,7 @@
 
 namespace {
 
-struct Result
+struct Result : public ArgumentParser::ParseResult
 {
   bool Option1 = false;
   bool Option2 = false;
@@ -69,6 +71,11 @@ bool verifyResult(Result const& result,
   static std::vector<cm::string_view> const missing = { "STRING_1"_s,
                                                         "LIST_1"_s,
                                                         "LIST_4"_s };
+  static std::map<cm::string_view, std::string> const keywordErrors = {
+    { "STRING_1"_s, "  missing required value\n" },
+    { "LIST_1"_s, "  missing required value\n" },
+    { "LIST_4"_s, "  missing required value\n" }
+  };
 
 #define ASSERT_TRUE(x)                                                        \
   do {                                                                        \
@@ -77,6 +84,8 @@ bool verifyResult(Result const& result,
       return false;                                                           \
     }                                                                         \
   } while (false)
+
+  ASSERT_TRUE(!result);
 
   ASSERT_TRUE(result.Option1);
   ASSERT_TRUE(!result.Option2);
@@ -110,6 +119,13 @@ bool verifyResult(Result const& result,
   ASSERT_TRUE(unparsedArguments[0] == "bar");
   ASSERT_TRUE(keywordsMissingValue == missing);
 
+  ASSERT_TRUE(result.GetKeywordErrors().size() == keywordErrors.size());
+  for (auto const& ke : result.GetKeywordErrors()) {
+    auto const ki = keywordErrors.find(ke.first);
+    ASSERT_TRUE(ki != keywordErrors.end());
+    ASSERT_TRUE(ke.second == ki->second);
+  }
+
   return true;
 }
 
@@ -119,54 +135,65 @@ bool testArgumentParserDynamic()
   std::vector<std::string> unparsedArguments;
   std::vector<cm::string_view> keywordsMissingValue;
 
-  cmArgumentParser<void>{}
-    .Bind("OPTION_1"_s, result.Option1)
-    .Bind("OPTION_2"_s, result.Option2)
-    .Bind("STRING_1"_s, result.String1)
-    .Bind("STRING_2"_s, result.String2)
-    .Bind("STRING_3"_s, result.String3)
-    .Bind("STRING_4"_s, result.String4)
-    .Bind("LIST_1"_s, result.List1)
-    .Bind("LIST_2"_s, result.List2)
-    .Bind("LIST_3"_s, result.List3)
-    .Bind("LIST_4"_s, result.List4)
-    .Bind("LIST_5"_s, result.List5)
-    .Bind("LIST_6"_s, result.List6)
-    .Bind("MULTI_1"_s, result.Multi1)
-    .Bind("MULTI_2"_s, result.Multi2)
-    .Bind("MULTI_3"_s, result.Multi3)
-    .Bind("MULTI_4"_s, result.Multi4)
-    .Parse(args, &unparsedArguments, &keywordsMissingValue);
+  static_cast<ArgumentParser::ParseResult&>(result) =
+    cmArgumentParser<void>{}
+      .Bind("OPTION_1"_s, result.Option1)
+      .Bind("OPTION_2"_s, result.Option2)
+      .Bind("STRING_1"_s, result.String1)
+      .Bind("STRING_2"_s, result.String2)
+      .Bind("STRING_3"_s, result.String3)
+      .Bind("STRING_4"_s, result.String4)
+      .Bind("LIST_1"_s, result.List1)
+      .Bind("LIST_2"_s, result.List2)
+      .Bind("LIST_3"_s, result.List3)
+      .Bind("LIST_4"_s, result.List4)
+      .Bind("LIST_5"_s, result.List5)
+      .Bind("LIST_6"_s, result.List6)
+      .Bind("MULTI_1"_s, result.Multi1)
+      .Bind("MULTI_2"_s, result.Multi2)
+      .Bind("MULTI_3"_s, result.Multi3)
+      .Bind("MULTI_4"_s, result.Multi4)
+      .Parse(args, &unparsedArguments, &keywordsMissingValue);
 
   return verifyResult(result, unparsedArguments, keywordsMissingValue);
 }
 
+static auto const parserStatic = //
+  cmArgumentParser<Result>{}
+    .Bind("OPTION_1"_s, &Result::Option1)
+    .Bind("OPTION_2"_s, &Result::Option2)
+    .Bind("STRING_1"_s, &Result::String1)
+    .Bind("STRING_2"_s, &Result::String2)
+    .Bind("STRING_3"_s, &Result::String3)
+    .Bind("STRING_4"_s, &Result::String4)
+    .Bind("LIST_1"_s, &Result::List1)
+    .Bind("LIST_2"_s, &Result::List2)
+    .Bind("LIST_3"_s, &Result::List3)
+    .Bind("LIST_4"_s, &Result::List4)
+    .Bind("LIST_5"_s, &Result::List5)
+    .Bind("LIST_6"_s, &Result::List6)
+    .Bind("MULTI_1"_s, &Result::Multi1)
+    .Bind("MULTI_2"_s, &Result::Multi2)
+    .Bind("MULTI_3"_s, &Result::Multi3)
+    .Bind("MULTI_4"_s, &Result::Multi4)
+  /* keep semicolon on own line */;
+
 bool testArgumentParserStatic()
 {
-  static auto const parser = //
-    cmArgumentParser<Result>{}
-      .Bind("OPTION_1"_s, &Result::Option1)
-      .Bind("OPTION_2"_s, &Result::Option2)
-      .Bind("STRING_1"_s, &Result::String1)
-      .Bind("STRING_2"_s, &Result::String2)
-      .Bind("STRING_3"_s, &Result::String3)
-      .Bind("STRING_4"_s, &Result::String4)
-      .Bind("LIST_1"_s, &Result::List1)
-      .Bind("LIST_2"_s, &Result::List2)
-      .Bind("LIST_3"_s, &Result::List3)
-      .Bind("LIST_4"_s, &Result::List4)
-      .Bind("LIST_5"_s, &Result::List5)
-      .Bind("LIST_6"_s, &Result::List6)
-      .Bind("MULTI_1"_s, &Result::Multi1)
-      .Bind("MULTI_2"_s, &Result::Multi2)
-      .Bind("MULTI_3"_s, &Result::Multi3)
-      .Bind("MULTI_4"_s, &Result::Multi4);
-
   std::vector<std::string> unparsedArguments;
   std::vector<cm::string_view> keywordsMissingValue;
   Result const result =
-    parser.Parse(args, &unparsedArguments, &keywordsMissingValue);
+    parserStatic.Parse(args, &unparsedArguments, &keywordsMissingValue);
+  return verifyResult(result, unparsedArguments, keywordsMissingValue);
+}
 
+bool testArgumentParserStaticBool()
+{
+  std::vector<std::string> unparsedArguments;
+  std::vector<cm::string_view> keywordsMissingValue;
+  Result result;
+  ASSERT_TRUE(parserStatic.Parse(result, args, &unparsedArguments,
+                                 &keywordsMissingValue) == false);
   return verifyResult(result, unparsedArguments, keywordsMissingValue);
 }
 
@@ -181,6 +208,11 @@ int testArgumentParser(int /*unused*/, char* /*unused*/ [])
 
   if (!testArgumentParserStatic()) {
     std::cout << "While executing testArgumentParserStatic().\n";
+    return -1;
+  }
+
+  if (!testArgumentParserStaticBool()) {
+    std::cout << "While executing testArgumentParserStaticBool().\n";
     return -1;
   }
 

@@ -1,6 +1,7 @@
 CMake Error at NewLineStyle-NoArg.cmake:[0-9]+ \(file\):
-  file GENERATE keywords missing values:
+  Error after keyword "NEWLINE_STYLE":
 
-    NEWLINE_STYLE
+    missing required value
+
 Call Stack \(most recent call first\):
   CMakeLists.txt:[0-9]+ \(include\)
