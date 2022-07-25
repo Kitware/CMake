@@ -406,9 +406,6 @@ void cmake::PrintPresetEnvironment()
 // Parse the args
 bool cmake::SetCacheArgs(const std::vector<std::string>& args)
 {
-  auto findPackageMode = false;
-  auto seenScriptOption = false;
-
   auto DefineLambda = [](std::string const& entry, cmake* state) -> bool {
     std::string var;
     std::string value;
@@ -499,10 +496,10 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
     GetProjectCommandsInScriptMode(state->GetState());
     // Documented behavior of CMAKE{,_CURRENT}_{SOURCE,BINARY}_DIR is to be
     // set to $PWD for -P mode.
+    state->SetWorkingMode(SCRIPT_MODE);
     state->SetHomeDirectory(cmSystemTools::GetCurrentWorkingDirectory());
     state->SetHomeOutputDirectory(cmSystemTools::GetCurrentWorkingDirectory());
     state->ReadListFile(args, path);
-    seenScriptOption = true;
     return true;
   };
 
@@ -566,12 +563,12 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
                      "No install directory specified for --install-prefix",
                      CommandArgument::Values::One, PrefixLambda },
     CommandArgument{ "--find-package", CommandArgument::Values::Zero,
-                     CommandArgument::setToTrue(findPackageMode) },
+                     IgnoreAndTrueLambda },
   };
   for (decltype(args.size()) i = 1; i < args.size(); ++i) {
     std::string const& arg = args[i];
 
-    if (arg == "--" && seenScriptOption) {
+    if (arg == "--" && this->GetWorkingMode() == SCRIPT_MODE) {
       // Stop processing CMake args and avoid possible errors
       // when arbitrary args are given to CMake script.
       break;
@@ -586,7 +583,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
     }
   }
 
-  if (findPackageMode) {
+  if (this->GetWorkingMode() == FIND_PACKAGE_MODE) {
     return this->FindPackage(args);
   }
 
@@ -791,7 +788,6 @@ void cmake::SetArgs(const std::vector<std::string>& args)
   bool haveToolset = false;
   bool havePlatform = false;
   bool haveBArg = false;
-  bool scriptMode = false;
   std::string possibleUnknownArg;
   std::string extraProvidedPath;
 #if !defined(CMAKE_BOOTSTRAP)
@@ -874,7 +870,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
     CommandArgument{ "-P", "-P must be followed by a file name.",
                      CommandArgument::Values::One,
                      CommandArgument::RequiresSeparator::No,
-                     CommandArgument::setToTrue(scriptMode) },
+                     IgnoreAndTrueLambda },
     CommandArgument{ "-D", "-D must be followed with VAR=VALUE.",
                      CommandArgument::Values::One,
                      CommandArgument::RequiresSeparator::No,
@@ -1166,7 +1162,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
     // iterate each argument
     std::string const& arg = args[i];
 
-    if (scriptMode && arg == "--") {
+    if (this->GetWorkingMode() == SCRIPT_MODE && arg == "--") {
       // Stop processing CMake args and avoid possible errors
       // when arbitrary args are given to CMake script.
       break;
@@ -1212,12 +1208,12 @@ void cmake::SetArgs(const std::vector<std::string>& args)
     }
   }
 
-  if (!extraProvidedPath.empty() && !scriptMode) {
+  if (!extraProvidedPath.empty() && this->GetWorkingMode() == NORMAL_MODE) {
     this->IssueMessage(MessageType::WARNING,
                        cmStrCat("Ignoring extra path from command line:\n \"",
                                 extraProvidedPath, "\""));
   }
-  if (!possibleUnknownArg.empty() && !scriptMode) {
+  if (!possibleUnknownArg.empty() && this->GetWorkingMode() != SCRIPT_MODE) {
     cmSystemTools::Error(cmStrCat("Unknown argument ", possibleUnknownArg));
     cmSystemTools::Error("Run 'cmake --help' for all supported options.");
     exit(1);
@@ -1830,7 +1826,8 @@ void cmake::SetHomeDirectoryViaCommandLine(std::string const& path)
   }
 
   auto prev_path = this->GetHomeDirectory();
-  if (prev_path != path && !prev_path.empty()) {
+  if (prev_path != path && !prev_path.empty() &&
+      this->GetWorkingMode() == NORMAL_MODE) {
     this->IssueMessage(MessageType::WARNING,
                        cmStrCat("Ignoring extra path from command line:\n \"",
                                 prev_path, "\""));
