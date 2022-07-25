@@ -160,7 +160,7 @@ The last command to call for a basic project is
   :name: CMakeLists.txt-add_executable
   :language: cmake
   :start-after: # add the executable
-  :end-before: # add the binary tree to the search path for include files
+  :end-before: # TODO 9:
 
 .. raw:: html
 
@@ -240,7 +240,7 @@ the following:
   :name: tutorial.cxx-cxx11
   :language: c++
   :start-after: // convert input to double
-  :end-before: // calculate square root
+  :end-before: // TODO 12:
 
 .. raw:: html
 
@@ -265,7 +265,7 @@ add the :variable:`CMAKE_CXX_STANDARD` declarations above the call to
   :name: CMakeLists.txt-CXX_STANDARD
   :language: cmake
   :start-after: # specify the C++ standard
-  :end-before: # configure a header file to pass some of the CMake settings
+  :end-before: # TODO 7:
 
 .. raw:: html
 
@@ -345,7 +345,7 @@ lets us maintain a single source of data for the version number.
 
 First, we modify the ``CMakeLists.txt`` file to use the
 :command:`project` command to set both the project name and version number.
-When the command:`project` command is called, CMake defines
+When the :command:`project` command is called, CMake defines
 ``Tutorial_VERSION_MAJOR`` and ``Tutorial_VERSION_MINOR`` behind the scenes.
 
 .. raw:: html
@@ -375,7 +375,7 @@ specified CMake variables replaced:
   :name: CMakeLists.txt-configure_file
   :language: cmake
   :start-after: # to the source code
-  :end-before: # add the executable
+  :end-before: # TODO 8:
 
 .. raw:: html
 
@@ -420,6 +420,7 @@ be replaced with the corresponding version numbers from the project in
   :caption: TODO 10: TutorialConfig.h.in
   :name: TutorialConfig.h.in
   :language: c++
+  :end-before: // TODO 13:
 
 .. raw:: html
 
