@@ -36,12 +36,13 @@ There are corresponding imported targets for each of these.
 ``MoltenVK``
   On macOS, an additional component ``MoltenVK`` is available.
 
+``dxc``
+  .. versionadded:: 3.25
+
+  The DirectX Shader Compiler.
+
 The ``glslc`` and ``glslangValidator`` components are provided even
 if not explicitly requested (for backward compatibility).
-
-.. versionadded:: 3.25
-
-Added optional COMPONENT ``dxc`` with corresponding targets.
 
 IMPORTED Targets
 ^^^^^^^^^^^^^^^^
