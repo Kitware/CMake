@@ -909,7 +909,6 @@ bool cmQtAutoGenInitializer::InitScanFiles()
   // The reason is that their file names might be discovered from source files
   // at generation time.
   if (this->MocOrUicEnabled()) {
-    std::unordered_set<std::string> addedFiles;
     for (const auto& sf : this->Makefile->GetSourceFiles()) {
       // sf->GetExtension() is only valid after sf->ResolveFullPath() ...
       // Since we're iterating over source files that might be not in the
@@ -951,28 +950,25 @@ bool cmQtAutoGenInitializer::InitScanFiles()
                                                       cmExpandedList(uicOpts));
           }
 
-          auto uiHeaderFileName = cmStrCat(
-            "ui_"_s, cmSystemTools::GetFilenameWithoutLastExtension(fullPath),
-            ".h"_s);
+          auto uiHeaderRelativePath = cmSystemTools::RelativePath(
+            this->LocalGen->GetCurrentSourceDirectory(),
+            cmSystemTools::GetFilenamePath(fullPath));
 
-          // .ui files with the same base name will conflict. Yield an error.
-          {
-            auto insertResult = addedFiles.insert(uiHeaderFileName);
-            if (!insertResult.second) {
-              this->Makefile->IssueMessage(
-                MessageType::FATAL_ERROR,
-                cmStrCat("More than one .ui file with the name "_s,
-                         cmSystemTools::GetFilenameName(fullPath),
-                         " was found in the sources for target "_s,
-                         this->GenTarget->GetName(), "."));
-            }
+          // Avoid creating a path containing adjacent slashes
+          if (!uiHeaderRelativePath.empty() &&
+              uiHeaderRelativePath.back() != '/') {
+            uiHeaderRelativePath += '/';
           }
+
+          auto uiHeaderFilePath = cmStrCat(
+            '/', uiHeaderRelativePath, "ui_"_s,
+            cmSystemTools::GetFilenameWithoutLastExtension(fullPath), ".h"_s);
 
           ConfigString uiHeader;
           std::string uiHeaderGenex;
           this->ConfigFileNamesAndGenex(
             uiHeader, uiHeaderGenex, cmStrCat(this->Dir.Build, "/include"_s),
-            cmStrCat("/"_s, uiHeaderFileName));
+            uiHeaderFilePath);
 
           this->Uic.UiHeaders.emplace_back(
             std::make_pair(uiHeader, uiHeaderGenex));
