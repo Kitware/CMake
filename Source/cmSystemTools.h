@@ -509,6 +509,14 @@ public:
   };
   static WindowsFileRetry GetWindowsFileRetry();
   static WindowsFileRetry GetWindowsDirectoryRetry();
+
+  struct WindowsVersion
+  {
+    unsigned int dwMajorVersion;
+    unsigned int dwMinorVersion;
+    unsigned int dwBuildNumber;
+  };
+  static WindowsVersion GetWindowsVersion();
 #endif
 
   /** Get the real path for a given path, removing all symlinks.
