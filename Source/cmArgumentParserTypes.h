@@ -4,21 +4,61 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#if defined(__SUNPRO_CC)
+
+#  include <string>
+#  include <vector>
+
+namespace ArgumentParser {
+
+template <typename T>
+struct Maybe;
+template <>
+struct Maybe<std::string> : public std::string
+{
+  using std::string::basic_string;
+};
+
+template <typename T>
+struct MaybeEmpty;
+template <typename T>
+struct MaybeEmpty<std::vector<T>> : public std::vector<T>
+{
+  using std::vector<T>::vector;
+};
+
+template <typename T>
+struct NonEmpty;
+template <typename T>
+struct NonEmpty<std::vector<T>> : public std::vector<T>
+{
+  using std::vector<T>::vector;
+};
+
+} // namespace ArgumentParser
+
+#else
+
 namespace ArgumentParser {
 
 template <typename T>
 struct Maybe : public T
 {
+  using T::T;
 };
 
 template <typename T>
 struct MaybeEmpty : public T
 {
+  using T::T;
 };
 
 template <typename T>
 struct NonEmpty : public T
 {
+  using T::T;
 };
 
 } // namespace ArgumentParser
+
+#endif

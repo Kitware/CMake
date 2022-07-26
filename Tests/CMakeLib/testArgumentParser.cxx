@@ -39,6 +39,15 @@ struct Result : public ArgumentParser::ParseResult
   cm::optional<std::vector<std::vector<std::string>>> Multi3;
   cm::optional<std::vector<std::vector<std::string>>> Multi4;
 
+  ArgumentParser::Maybe<std::string> UnboundMaybe{ 'u', 'n', 'b', 'o',
+                                                   'u', 'n', 'd' };
+  ArgumentParser::MaybeEmpty<std::vector<std::string>> UnboundMaybeEmpty{
+    1, "unbound"
+  };
+  ArgumentParser::NonEmpty<std::vector<std::string>> UnboundNonEmpty{
+    1, "unbound"
+  };
+
   std::vector<cm::string_view> ParsedKeywords;
 };
 
@@ -69,6 +78,7 @@ bool verifyResult(Result const& result,
 {
   static std::vector<std::string> const foobar = { "foo", "bar" };
   static std::vector<std::string> const barfoo = { "bar", "foo" };
+  static std::vector<std::string> const unbound = { "unbound" };
   static std::vector<cm::string_view> const parsedKeywords = {
     /* clang-format off */
     "OPTION_1",
@@ -132,6 +142,10 @@ bool verifyResult(Result const& result,
 
   ASSERT_TRUE(unparsedArguments.size() == 1);
   ASSERT_TRUE(unparsedArguments[0] == "bar");
+
+  ASSERT_TRUE(result.UnboundMaybe == "unbound");
+  ASSERT_TRUE(result.UnboundMaybeEmpty == unbound);
+  ASSERT_TRUE(result.UnboundNonEmpty == unbound);
 
   ASSERT_TRUE(result.ParsedKeywords == parsedKeywords);
 
