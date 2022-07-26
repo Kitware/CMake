@@ -107,6 +107,10 @@
 #  include <sys/utsname.h>
 #endif
 
+#if defined(_MSC_VER) && _MSC_VER >= 1800
+#  define CM_WINDOWS_DEPRECATED_GetVersionEx
+#endif
+
 namespace {
 
 cmSystemTools::InterruptCallback s_InterruptCallback;
@@ -903,6 +907,40 @@ cmSystemTools::WindowsFileRetry cmSystemTools::GetWindowsDirectoryRetry()
   static cmSystemTools::WindowsFileRetry retry =
     InitWindowsDirectoryRetry().Retry;
   return retry;
+}
+
+cmSystemTools::WindowsVersion cmSystemTools::GetWindowsVersion()
+{
+  /* Windows version number data.  */
+  OSVERSIONINFOEXW osviex;
+  ZeroMemory(&osviex, sizeof(osviex));
+  osviex.dwOSVersionInfoSize = sizeof(osviex);
+
+#  ifdef CM_WINDOWS_DEPRECATED_GetVersionEx
+#    pragma warning(push)
+#    ifdef __INTEL_COMPILER
+#      pragma warning(disable : 1478)
+#    elif defined __clang__
+#      pragma clang diagnostic push
+#      pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#    else
+#      pragma warning(disable : 4996)
+#    endif
+#  endif
+  GetVersionExW((OSVERSIONINFOW*)&osviex);
+#  ifdef CM_WINDOWS_DEPRECATED_GetVersionEx
+#    ifdef __clang__
+#      pragma clang diagnostic pop
+#    else
+#      pragma warning(pop)
+#    endif
+#  endif
+
+  WindowsVersion result;
+  result.dwMajorVersion = osviex.dwMajorVersion;
+  result.dwMinorVersion = osviex.dwMinorVersion;
+  result.dwBuildNumber = osviex.dwBuildNumber;
+  return result;
 }
 #endif
 
