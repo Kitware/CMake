@@ -482,8 +482,9 @@ are :ref:`normalized <Normalization>` before the check.
   cmake_path(COMPARE <input1> NOT_EQUAL <input2> <out-var>)
 
 Compares the lexical representations of two paths provided as string literals.
-No normalization is performed on either path.  Equality is determined
-according to the following pseudo-code logic:
+No normalization is performed on either path, except multiple consecutive
+directory separators are effectively collapsed into a single separator.
+Equality is determined according to the following pseudo-code logic:
 
 ::
 
