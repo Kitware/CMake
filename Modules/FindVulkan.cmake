@@ -15,14 +15,34 @@ Optional COMPONENTS
 
 .. versionadded:: 3.24
 
-This module respects several optional COMPONENTS: ``glslc``,
-``glslangValidator``, ``glslang``, ``shaderc_combined`` and ``SPIRV-Tools``.
-On macOS, an additional component ``MoltenVK`` is available.
-There are corresponding import targets for each of these flags.
+This module respects several optional COMPONENTS.
+There are corresponding imported targets for each of these.
 
-.. versionadded:: 3.25
+``glslc``
+  The SPIR-V compiler.
 
-Added optional COMPONENT ``dxc`` with corresponding targets.
+``glslangValidator``
+  The ``glslangValidator`` tool.
+
+``glslang``
+  The SPIR-V generator library.
+
+``shaderc_combined``
+  The static library for Vulkan shader compilation.
+
+``SPIRV-Tools``
+  Tools to process SPIR-V modules.
+
+``MoltenVK``
+  On macOS, an additional component ``MoltenVK`` is available.
+
+``dxc``
+  .. versionadded:: 3.25
+
+  The DirectX Shader Compiler.
+
+The ``glslc`` and ``glslangValidator`` components are provided even
+if not explicitly requested (for backward compatibility).
 
 IMPORTED Targets
 ^^^^^^^^^^^^^^^^
