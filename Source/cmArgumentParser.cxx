@@ -34,6 +34,25 @@ auto KeywordActionMap::Find(cm::string_view name) const -> const_iterator
   return (it != this->end() && it->first == name) ? it : this->end();
 }
 
+auto PositionActionMap::Emplace(std::size_t pos, PositionAction action)
+  -> std::pair<iterator, bool>
+{
+  auto const it = std::lower_bound(
+    this->begin(), this->end(), pos,
+    [](value_type const& elem, std::size_t k) { return elem.first < k; });
+  return (it != this->end() && it->first == pos)
+    ? std::make_pair(it, false)
+    : std::make_pair(this->emplace(it, pos, std::move(action)), true);
+}
+
+auto PositionActionMap::Find(std::size_t pos) const -> const_iterator
+{
+  auto const it = std::lower_bound(
+    this->begin(), this->end(), pos,
+    [](value_type const& elem, std::size_t k) { return elem.first < k; });
+  return (it != this->end() && it->first == pos) ? it : this->end();
+}
+
 void Instance::Bind(std::function<Continue(cm::string_view)> f,
                     ExpectAtLeast expect)
 {
@@ -99,7 +118,7 @@ void Instance::Bind(std::vector<std::vector<std::string>>& multiVal)
     ExpectAtLeast{ 0 });
 }
 
-void Instance::Consume(cm::string_view arg)
+void Instance::Consume(std::size_t pos, cm::string_view arg)
 {
   auto const it = this->Bindings.Keywords.Find(arg);
   if (it != this->Bindings.Keywords.end()) {
@@ -122,6 +141,12 @@ void Instance::Consume(cm::string_view arg)
         break;
     }
     ++this->KeywordValuesSeen;
+    return;
+  }
+
+  auto const pit = this->Bindings.Positions.Find(pos);
+  if (pit != this->Bindings.Positions.end()) {
+    pit->second(*this, pos, arg);
     return;
   }
 

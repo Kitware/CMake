@@ -40,6 +40,8 @@ struct Result : public ArgumentParser::ParseResult
   cm::optional<std::vector<std::vector<std::string>>> Multi3;
   cm::optional<std::vector<std::vector<std::string>>> Multi4;
 
+  cm::optional<std::string> Pos1;
+
   bool Func0_ = false;
   ArgumentParser::Continue Func0(cm::string_view)
   {
@@ -93,6 +95,7 @@ std::initializer_list<cm::string_view> const args = {
   /* clang-format off */
   "OPTION_1",                // option
   // "OPTION_2",             // option that is not present
+  "pos1",                    // position index 1
   "STRING_1",                // string arg missing value
   "STRING_2", "foo", "bar",  // string arg + unparsed value, presence captured
   // "STRING_3",             // string arg that is not present
@@ -201,6 +204,8 @@ bool verifyResult(Result const& result,
   ASSERT_TRUE((*result.Multi3)[1] == barfoo);
   ASSERT_TRUE(!result.Multi4);
 
+  ASSERT_TRUE(result.Pos1 == "pos1");
+
   ASSERT_TRUE(result.Func0_ == false);
   ASSERT_TRUE(result.Func1_ == "foo");
   ASSERT_TRUE(result.Func2_ == func2map);
@@ -254,6 +259,7 @@ bool testArgumentParserDynamic()
       .Bind("MULTI_2"_s, result.Multi2)
       .Bind("MULTI_3"_s, result.Multi3)
       .Bind("MULTI_4"_s, result.Multi4)
+      .Bind(1, result.Pos1)
       .Bind("FUNC_0"_s,
             [&result](cm::string_view arg) -> ArgumentParser::Continue {
               return result.Func0(arg);
@@ -303,6 +309,7 @@ static auto const parserStatic = //
     .Bind("MULTI_2"_s, &Result::Multi2)
     .Bind("MULTI_3"_s, &Result::Multi3)
     .Bind("MULTI_4"_s, &Result::Multi4)
+    .Bind(1, &Result::Pos1)
     .Bind("FUNC_0"_s, &Result::Func0)
     .Bind("FUNC_1"_s, &Result::Func1)
     .Bind("FUNC_2a"_s, &Result::Func2)

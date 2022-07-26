@@ -5,6 +5,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <cassert>
+#include <cstddef>
 #include <functional>
 #include <map>
 #include <string>
@@ -81,6 +82,8 @@ struct ExpectAtLeast
 class Instance;
 using KeywordAction = std::function<void(Instance&)>;
 using KeywordNameAction = std::function<void(Instance&, cm::string_view)>;
+using PositionAction =
+  std::function<void(Instance&, std::size_t, cm::string_view)>;
 
 // using KeywordActionMap = cm::flat_map<cm::string_view, KeywordAction>;
 class KeywordActionMap
@@ -92,12 +95,22 @@ public:
   const_iterator Find(cm::string_view name) const;
 };
 
+// using PositionActionMap = cm::flat_map<cm::string_view, PositionAction>;
+class PositionActionMap
+  : public std::vector<std::pair<std::size_t, PositionAction>>
+{
+public:
+  std::pair<iterator, bool> Emplace(std::size_t pos, PositionAction action);
+  const_iterator Find(std::size_t pos) const;
+};
+
 class ActionMap
 {
 public:
   KeywordActionMap Keywords;
   KeywordNameAction KeywordMissingValue;
   KeywordNameAction ParsedKeyword;
+  PositionActionMap Positions;
 };
 
 class Base
@@ -133,6 +146,14 @@ public:
     assert(!this->Bindings.KeywordMissingValue);
     this->Bindings.KeywordMissingValue = std::move(action);
   }
+
+  void Bind(std::size_t pos, PositionAction action)
+  {
+    bool const inserted =
+      this->Bindings.Positions.Emplace(pos, std::move(action)).second;
+    assert(inserted);
+    static_cast<void>(inserted);
+  }
 };
 
 class Instance
@@ -166,10 +187,10 @@ public:
   }
 
   template <typename Range>
-  void Parse(Range const& args)
+  void Parse(Range const& args, std::size_t pos = 0)
   {
     for (cm::string_view arg : args) {
-      this->Consume(arg);
+      this->Consume(pos++, arg);
     }
     this->FinishKeyword();
   }
@@ -185,7 +206,7 @@ private:
   std::size_t KeywordValuesExpected = 0;
   std::function<Continue(cm::string_view)> KeywordValueFunc;
 
-  void Consume(cm::string_view arg);
+  void Consume(std::size_t pos, cm::string_view arg);
   void FinishKeyword();
 
   template <typename Result>
@@ -273,6 +294,18 @@ public:
     return *this;
   }
 
+  cmArgumentParser& Bind(std::size_t position,
+                         cm::optional<std::string> Result::*member)
+  {
+    this->Base::Bind(
+      position,
+      [member](Instance& instance, std::size_t, cm::string_view arg) {
+        Result* result = static_cast<Result*>(instance.Result);
+        result->*member = arg;
+      });
+    return *this;
+  }
+
   cmArgumentParser& BindParsedKeywords(
     std::vector<cm::string_view> Result::*member)
   {
@@ -285,22 +318,23 @@ public:
 
   template <typename Range>
   bool Parse(Result& result, Range const& args,
-             std::vector<std::string>* unparsedArguments) const
+             std::vector<std::string>* unparsedArguments,
+             std::size_t pos = 0) const
   {
     using ArgumentParser::AsParseResultPtr;
     ParseResult* parseResultPtr = AsParseResultPtr(result);
     Instance instance(this->Bindings, parseResultPtr, unparsedArguments,
                       &result);
-    instance.Parse(args);
+    instance.Parse(args, pos);
     return parseResultPtr ? static_cast<bool>(*parseResultPtr) : true;
   }
 
   template <typename Range>
-  Result Parse(Range const& args,
-               std::vector<std::string>* unparsedArguments) const
+  Result Parse(Range const& args, std::vector<std::string>* unparsedArguments,
+               std::size_t pos = 0) const
   {
     Result result;
-    this->Parse(result, args, unparsedArguments);
+    this->Parse(result, args, unparsedArguments, pos);
     return result;
   }
 };
@@ -343,6 +377,15 @@ public:
     return *this;
   }
 
+  cmArgumentParser& Bind(std::size_t position, cm::optional<std::string>& ref)
+  {
+    this->Base::Bind(position,
+                     [&ref](Instance&, std::size_t, cm::string_view arg) {
+                       ref = std::string(arg);
+                     });
+    return *this;
+  }
+
   cmArgumentParser& BindParsedKeywords(std::vector<cm::string_view>& ref)
   {
     this->Base::BindParsedKeyword(
@@ -352,11 +395,12 @@ public:
 
   template <typename Range>
   ParseResult Parse(Range const& args,
-                    std::vector<std::string>* unparsedArguments) const
+                    std::vector<std::string>* unparsedArguments,
+                    std::size_t pos = 0) const
   {
     ParseResult parseResult;
     Instance instance(this->Bindings, &parseResult, unparsedArguments);
-    instance.Parse(args);
+    instance.Parse(args, pos);
     return parseResult;
   }
 
