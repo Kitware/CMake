@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 
+#include <cm/string_view>
+
 #include "cmArgumentParser.h"
 #include "cmCTestCommand.h"
 
@@ -44,6 +46,7 @@ protected:
   virtual void BindArguments();
   virtual void CheckArguments();
 
+  std::vector<cm::string_view> ParsedKeywords;
   bool Append = false;
   bool Quiet = false;
   std::string CaptureCMakeError;

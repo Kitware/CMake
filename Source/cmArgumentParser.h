@@ -64,6 +64,7 @@ AsParseResultPtr(Result&)
 
 class Instance;
 using KeywordAction = std::function<void(Instance&)>;
+using KeywordNameAction = std::function<void(Instance&, cm::string_view)>;
 
 // using KeywordActionMap = cm::flat_map<cm::string_view, KeywordAction>;
 class KeywordActionMap
@@ -79,6 +80,8 @@ class ActionMap
 {
 public:
   KeywordActionMap Keywords;
+  KeywordNameAction KeywordMissingValue;
+  KeywordNameAction ParsedKeyword;
 };
 
 class Base
@@ -100,21 +103,28 @@ public:
     assert(inserted);
     static_cast<void>(inserted);
   }
+
+  void BindParsedKeyword(KeywordNameAction action)
+  {
+    assert(!this->Bindings.ParsedKeyword);
+    this->Bindings.ParsedKeyword = std::move(action);
+  }
+
+  void BindKeywordMissingValue(KeywordNameAction action)
+  {
+    assert(!this->Bindings.KeywordMissingValue);
+    this->Bindings.KeywordMissingValue = std::move(action);
+  }
 };
 
 class Instance
 {
 public:
   Instance(ActionMap const& bindings, ParseResult* parseResult,
-           std::vector<std::string>* unparsedArguments,
-           std::vector<cm::string_view>* keywordsMissingValue,
-           std::vector<cm::string_view>* parsedKeywords,
-           void* result = nullptr)
+           std::vector<std::string>* unparsedArguments, void* result = nullptr)
     : Bindings(bindings)
     , ParseResults(parseResult)
     , UnparsedArguments(unparsedArguments)
-    , KeywordsMissingValue(keywordsMissingValue)
-    , ParsedKeywords(parsedKeywords)
     , Result(result)
   {
   }
@@ -149,8 +159,6 @@ private:
   ActionMap const& Bindings;
   ParseResult* ParseResults = nullptr;
   std::vector<std::string>* UnparsedArguments = nullptr;
-  std::vector<cm::string_view>* KeywordsMissingValue = nullptr;
-  std::vector<cm::string_view>* ParsedKeywords = nullptr;
   void* Result = nullptr;
 
   cm::string_view Keyword;
@@ -182,28 +190,34 @@ public:
     return *this;
   }
 
+  cmArgumentParser& BindParsedKeywords(
+    std::vector<cm::string_view> Result::*member)
+  {
+    this->Base::BindParsedKeyword(
+      [member](Instance& instance, cm::string_view arg) {
+        (static_cast<Result*>(instance.Result)->*member).emplace_back(arg);
+      });
+    return *this;
+  }
+
   template <typename Range>
   bool Parse(Result& result, Range const& args,
-             std::vector<std::string>* unparsedArguments,
-             std::vector<cm::string_view>* keywordsMissingValue = nullptr,
-             std::vector<cm::string_view>* parsedKeywords = nullptr) const
+             std::vector<std::string>* unparsedArguments) const
   {
     using ArgumentParser::AsParseResultPtr;
     ParseResult* parseResultPtr = AsParseResultPtr(result);
     Instance instance(this->Bindings, parseResultPtr, unparsedArguments,
-                      keywordsMissingValue, parsedKeywords, &result);
+                      &result);
     instance.Parse(args);
     return parseResultPtr ? static_cast<bool>(*parseResultPtr) : true;
   }
 
   template <typename Range>
-  Result Parse(Range const& args, std::vector<std::string>* unparsedArguments,
-               std::vector<cm::string_view>* keywordsMissingValue = nullptr,
-               std::vector<cm::string_view>* parsedKeywords = nullptr) const
+  Result Parse(Range const& args,
+               std::vector<std::string>* unparsedArguments) const
   {
     Result result;
-    this->Parse(result, args, unparsedArguments, keywordsMissingValue,
-                parsedKeywords);
+    this->Parse(result, args, unparsedArguments);
     return result;
   }
 };
@@ -219,20 +233,27 @@ public:
     return *this;
   }
 
+  cmArgumentParser& BindParsedKeywords(std::vector<cm::string_view>& ref)
+  {
+    this->Base::BindParsedKeyword(
+      [&ref](Instance&, cm::string_view arg) { ref.emplace_back(arg); });
+    return *this;
+  }
+
   template <typename Range>
-  ParseResult Parse(
-    Range const& args, std::vector<std::string>* unparsedArguments,
-    std::vector<cm::string_view>* keywordsMissingValue = nullptr,
-    std::vector<cm::string_view>* parsedKeywords = nullptr) const
+  ParseResult Parse(Range const& args,
+                    std::vector<std::string>* unparsedArguments) const
   {
     ParseResult parseResult;
-    Instance instance(this->Bindings, &parseResult, unparsedArguments,
-                      keywordsMissingValue, parsedKeywords);
+    Instance instance(this->Bindings, &parseResult, unparsedArguments);
     instance.Parse(args);
     return parseResult;
   }
 
 protected:
+  using Base::Instance;
+  using Base::BindKeywordMissingValue;
+
   template <typename T>
   bool Bind(cm::string_view name, T& ref)
   {

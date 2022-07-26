@@ -83,8 +83,8 @@ void Instance::Consume(cm::string_view arg)
   if (it != this->Bindings.Keywords.end()) {
     this->FinishKeyword();
     this->Keyword = it->first;
-    if (this->ParsedKeywords != nullptr) {
-      this->ParsedKeywords->emplace_back(it->first);
+    if (this->Bindings.ParsedKeyword) {
+      this->Bindings.ParsedKeyword(*this, it->first);
     }
     it->second(*this);
     return;
@@ -113,8 +113,8 @@ void Instance::FinishKeyword()
       this->ParseResults->AddKeywordError(this->Keyword,
                                           "  missing required value\n");
     }
-    if (this->KeywordsMissingValue != nullptr) {
-      this->KeywordsMissingValue->emplace_back(this->Keyword);
+    if (this->Bindings.KeywordMissingValue) {
+      this->Bindings.KeywordMissingValue(*this, this->Keyword);
     }
   }
 }

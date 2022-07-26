@@ -82,14 +82,13 @@ bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
 
   // Process input arguments.
   std::vector<std::string> unparsedArguments;
-  std::vector<cm::string_view> parsedKeywords;
-  this->Parse(args, &unparsedArguments, /*keywordsMissingValue=*/nullptr,
-              &parsedKeywords);
+  this->Parse(args, &unparsedArguments);
   this->CheckArguments();
 
-  std::sort(parsedKeywords.begin(), parsedKeywords.end());
-  auto it = std::adjacent_find(parsedKeywords.begin(), parsedKeywords.end());
-  if (it != parsedKeywords.end()) {
+  std::sort(this->ParsedKeywords.begin(), this->ParsedKeywords.end());
+  auto it = std::adjacent_find(this->ParsedKeywords.begin(),
+                               this->ParsedKeywords.end());
+  if (it != this->ParsedKeywords.end()) {
     this->Makefile->IssueMessage(
       MessageType::FATAL_ERROR,
       cmStrCat("Called with more than one value for ", *it));
@@ -233,6 +232,7 @@ void cmCTestHandlerCommand::ProcessAdditionalValues(cmCTestGenericHandler*)
 
 void cmCTestHandlerCommand::BindArguments()
 {
+  this->BindParsedKeywords(this->ParsedKeywords);
   this->Bind("APPEND"_s, this->Append);
   this->Bind("QUIET"_s, this->Quiet);
   this->Bind("RETURN_VALUE"_s, this->ReturnValue);

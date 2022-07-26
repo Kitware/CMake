@@ -2482,6 +2482,7 @@ bool HandleGenerateCommand(std::vector<std::string> const& args,
     bool NoSourcePermissions = false;
     bool UseSourcePermissions = false;
     ArgumentParser::NonEmpty<std::vector<std::string>> FilePermissions;
+    std::vector<cm::string_view> ParsedKeywords;
   };
 
   static auto const parser =
@@ -2494,13 +2495,12 @@ bool HandleGenerateCommand(std::vector<std::string> const& args,
       .Bind("NO_SOURCE_PERMISSIONS"_s, &Arguments::NoSourcePermissions)
       .Bind("USE_SOURCE_PERMISSIONS"_s, &Arguments::UseSourcePermissions)
       .Bind("FILE_PERMISSIONS"_s, &Arguments::FilePermissions)
-      .Bind("NEWLINE_STYLE"_s, &Arguments::NewLineStyle);
+      .Bind("NEWLINE_STYLE"_s, &Arguments::NewLineStyle)
+      .BindParsedKeywords(&Arguments::ParsedKeywords);
 
   std::vector<std::string> unparsedArguments;
-  std::vector<cm::string_view> parsedKeywords;
   Arguments const arguments =
-    parser.Parse(cmMakeRange(args).advance(1), &unparsedArguments,
-                 /*keywordsMissingValue=*/nullptr, &parsedKeywords);
+    parser.Parse(cmMakeRange(args).advance(1), &unparsedArguments);
 
   if (arguments.MaybeReportError(status.GetMakefile())) {
     return true;
@@ -2511,7 +2511,7 @@ bool HandleGenerateCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  if (!arguments.Output || parsedKeywords[0] != "OUTPUT"_s) {
+  if (!arguments.Output || arguments.ParsedKeywords[0] != "OUTPUT"_s) {
     status.SetError("GENERATE requires OUTPUT as first option.");
     return false;
   }
@@ -2521,8 +2521,8 @@ bool HandleGenerateCommand(std::vector<std::string> const& args,
     status.SetError("GENERATE requires INPUT or CONTENT option.");
     return false;
   }
-  const bool inputIsContent = parsedKeywords[1] == "CONTENT"_s;
-  if (!inputIsContent && parsedKeywords[1] == "INPUT") {
+  const bool inputIsContent = arguments.ParsedKeywords[1] == "CONTENT"_s;
+  if (!inputIsContent && arguments.ParsedKeywords[1] == "INPUT") {
     status.SetError("Unknown argument to GENERATE subcommand.");
   }
   std::string const& input =
