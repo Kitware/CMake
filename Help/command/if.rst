@@ -320,13 +320,18 @@ Path Comparisons
 .. _PATH_EQUAL:
 
 ``if(<variable|string> PATH_EQUAL <variable|string>)``
- .. versionadded:: 3.24
-  Compares the lexical representations of two paths provided as string
-  literals or variables. No normalization is performed on either path.
+  .. versionadded:: 3.24
 
-  Lexical comparison has the advantage over string comparison to have a
-  knowledge of the structure of the path. So, the following comparison is
-  ``TRUE`` using ``PATH_EQUAL`` operator, but ``FALSE`` with ``STREQUAL``:
+  Compares the two paths component-by-component.  Only if every component of
+  both paths match will the two paths compare equal.  Multiple path separators
+  are effectively collapsed into a single separator, but note that backslashes
+  are not converted to forward slashes.  No other
+  :ref:`path normalization <Normalization>` is performed.
+
+  Component-wise comparison is superior to string-based comparison due to the
+  handling of multiple path separators.  In the following example, the
+  expression evaluates to true using ``PATH_EQUAL``, but false with
+  ``STREQUAL``:
 
   .. code-block:: cmake
 
