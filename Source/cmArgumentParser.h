@@ -68,6 +68,16 @@ enum class Continue
   Yes,
 };
 
+struct ExpectAtLeast
+{
+  std::size_t Count = 0;
+
+  ExpectAtLeast(std::size_t count)
+    : Count(count)
+  {
+  }
+};
+
 class Instance;
 using KeywordAction = std::function<void(Instance&)>;
 using KeywordNameAction = std::function<void(Instance&, cm::string_view)>;
@@ -93,6 +103,7 @@ public:
 class Base
 {
 public:
+  using ExpectAtLeast = ArgumentParser::ExpectAtLeast;
   using Continue = ArgumentParser::Continue;
   using Instance = ArgumentParser::Instance;
   using ParseResult = ArgumentParser::ParseResult;
@@ -136,7 +147,7 @@ public:
   {
   }
 
-  void Bind(std::function<Continue(cm::string_view)> f);
+  void Bind(std::function<Continue(cm::string_view)> f, ExpectAtLeast expect);
   void Bind(bool& val);
   void Bind(std::string& val);
   void Bind(Maybe<std::string>& val);
@@ -170,8 +181,9 @@ private:
   void* Result = nullptr;
 
   cm::string_view Keyword;
+  std::size_t KeywordValuesSeen = 0;
+  std::size_t KeywordValuesExpected = 0;
   std::function<Continue(cm::string_view)> KeywordValueFunc;
-  bool ExpectValue = false;
 
   void Consume(cm::string_view arg);
   void FinishKeyword();

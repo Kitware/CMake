@@ -34,64 +34,69 @@ auto KeywordActionMap::Find(cm::string_view name) const -> const_iterator
   return (it != this->end() && it->first == name) ? it : this->end();
 }
 
-void Instance::Bind(std::function<Continue(cm::string_view)> f)
+void Instance::Bind(std::function<Continue(cm::string_view)> f,
+                    ExpectAtLeast expect)
 {
   this->KeywordValueFunc = std::move(f);
-  this->ExpectValue = true;
+  this->KeywordValuesExpected = expect.Count;
 }
 
 void Instance::Bind(bool& val)
 {
   val = true;
-  this->KeywordValueFunc = nullptr;
-  this->ExpectValue = false;
+  this->Bind(nullptr, ExpectAtLeast{ 0 });
 }
 
 void Instance::Bind(std::string& val)
 {
-  this->KeywordValueFunc = [&val](cm::string_view arg) -> Continue {
-    val = std::string(arg);
-    return Continue::No;
-  };
-  this->ExpectValue = true;
+  this->Bind(
+    [&val](cm::string_view arg) -> Continue {
+      val = std::string(arg);
+      return Continue::No;
+    },
+    ExpectAtLeast{ 1 });
 }
 
 void Instance::Bind(Maybe<std::string>& val)
 {
-  this->KeywordValueFunc = [&val](cm::string_view arg) -> Continue {
-    static_cast<std::string&>(val) = std::string(arg);
-    return Continue::No;
-  };
-  this->ExpectValue = false;
+  this->Bind(
+    [&val](cm::string_view arg) -> Continue {
+      static_cast<std::string&>(val) = std::string(arg);
+      return Continue::No;
+    },
+    ExpectAtLeast{ 0 });
 }
 
 void Instance::Bind(MaybeEmpty<std::vector<std::string>>& val)
 {
-  this->KeywordValueFunc = [&val](cm::string_view arg) -> Continue {
-    val.emplace_back(arg);
-    return Continue::Yes;
-  };
-  this->ExpectValue = false;
+  this->Bind(
+    [&val](cm::string_view arg) -> Continue {
+      val.emplace_back(arg);
+      return Continue::Yes;
+    },
+    ExpectAtLeast{ 0 });
 }
 
 void Instance::Bind(NonEmpty<std::vector<std::string>>& val)
 {
-  this->KeywordValueFunc = [&val](cm::string_view arg) -> Continue {
-    val.emplace_back(arg);
-    return Continue::Yes;
-  };
-  this->ExpectValue = true;
+  this->Bind(
+    [&val](cm::string_view arg) -> Continue {
+      val.emplace_back(arg);
+      return Continue::Yes;
+    },
+    ExpectAtLeast{ 1 });
 }
 
 void Instance::Bind(std::vector<std::vector<std::string>>& multiVal)
 {
   multiVal.emplace_back();
   std::vector<std::string>& val = multiVal.back();
-  this->KeywordValueFunc = [&val](cm::string_view arg) -> Continue {
-    val.emplace_back(arg);
-    return Continue::Yes;
-  };
-  this->ExpectValue = false;
+  this->Bind(
+    [&val](cm::string_view arg) -> Continue {
+      val.emplace_back(arg);
+      return Continue::Yes;
+    },
+    ExpectAtLeast{ 0 });
 }
 
 void Instance::Consume(cm::string_view arg)
@@ -100,6 +105,7 @@ void Instance::Consume(cm::string_view arg)
   if (it != this->Bindings.Keywords.end()) {
     this->FinishKeyword();
     this->Keyword = it->first;
+    this->KeywordValuesSeen = 0;
     if (this->Bindings.ParsedKeyword) {
       this->Bindings.ParsedKeyword(*this, it->first);
     }
@@ -115,7 +121,7 @@ void Instance::Consume(cm::string_view arg)
         this->KeywordValueFunc = nullptr;
         break;
     }
-    this->ExpectValue = false;
+    ++this->KeywordValuesSeen;
     return;
   }
 
@@ -129,7 +135,7 @@ void Instance::FinishKeyword()
   if (this->Keyword.empty()) {
     return;
   }
-  if (this->ExpectValue) {
+  if (this->KeywordValuesSeen < this->KeywordValuesExpected) {
     if (this->ParseResults != nullptr) {
       this->ParseResults->AddKeywordError(this->Keyword,
                                           "  missing required value\n");
