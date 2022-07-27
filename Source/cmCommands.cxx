@@ -20,7 +20,6 @@
 #include "cmCMakeMinimumRequired.h"
 #include "cmCMakePathCommand.h"
 #include "cmCMakePolicyCommand.h"
-#include "cmCommand.h"
 #include "cmConfigureFileCommand.h"
 #include "cmContinueCommand.h"
 #include "cmCreateTestSourceList.h"
@@ -264,9 +263,8 @@ void GetProjectCommands(cmState* state)
                            cmTargetLinkLibrariesCommand);
   state->AddBuiltinCommand("target_link_options", cmTargetLinkOptionsCommand);
   state->AddBuiltinCommand("target_sources", cmTargetSourcesCommand);
-  state->AddBuiltinCommand("try_compile",
-                           cm::make_unique<cmTryCompileCommand>());
-  state->AddBuiltinCommand("try_run", cm::make_unique<cmTryRunCommand>());
+  state->AddBuiltinCommand("try_compile", cmTryCompileCommand);
+  state->AddBuiltinCommand("try_run", cmTryRunCommand);
   state->AddBuiltinCommand("target_precompile_headers",
                            cmTargetPrecompileHeadersCommand);
 

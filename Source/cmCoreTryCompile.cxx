@@ -238,7 +238,7 @@ std::set<std::string> const ghs_platform_vars{
 int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
                                      bool isTryRun)
 {
-  this->BinaryDirectory = argv[1];
+  std::string const& resultVar = argv[0];
   this->OutputFile.clear();
   // which signature were we called with ?
   this->SrcFileSignature = true;
@@ -264,7 +264,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     }
   }
 
-  std::string sourceDirectory = argv[2];
+  std::string sourceDirectory;
   std::string projectName;
   std::string targetName;
   std::vector<std::string> cmakeFlags(1, "CMAKE_FLAGS"); // fake argv[0]
@@ -283,11 +283,10 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
   std::vector<std::string> linkOptions;
   std::string libsToLink = " ";
   bool useOldLinkLibs = true;
-  char targetNameBuf[64];
   bool didOutputVariable = false;
   bool didCopyFile = false;
   bool didCopyFileError = false;
-  bool useSources = argv[2] == "SOURCES";
+  bool useSources = false;
   std::vector<std::string> sources;
 
   enum Doing
@@ -303,9 +302,12 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     DoingSources,
     DoingCMakeInternal
   };
-  Doing doing = useSources ? DoingSources : DoingNone;
-  for (size_t i = 3; i < argv.size(); ++i) {
-    if (argv[i] == "CMAKE_FLAGS") {
+  Doing doing = DoingNone;
+  for (size_t i = 1; i < argv.size(); ++i) {
+    if (argv[i] == "SOURCES") {
+      useSources = true;
+      doing = DoingSources;
+    } else if (argv[i] == "CMAKE_FLAGS") {
       doing = DoingCMakeFlags;
     } else if (argv[i] == "COMPILE_DEFINITIONS") {
       doing = DoingCompileDefinitions;
@@ -379,6 +381,10 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     } else if (doing == DoingCMakeInternal) {
       cmakeInternal = argv[i];
       doing = DoingNone;
+    } else if (i == 1) {
+      this->BinaryDirectory = argv[i];
+    } else if (i == 2) {
+      sourceDirectory = argv[i];
     } else if (i == 3) {
       this->SrcFileSignature = false;
       projectName = argv[i];
@@ -389,6 +395,37 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       m << "try_compile given unknown argument \"" << argv[i] << "\".";
       this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, m.str());
     }
+  }
+
+  if (!this->BinaryDirectory.empty()) {
+    if (!cmSystemTools::FileIsFullPath(this->BinaryDirectory)) {
+      this->Makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("<bindir> is not an absolute path:\n '",
+                 this->BinaryDirectory, "'"));
+      // Do not try to clean up the ill-specified directory.
+      this->BinaryDirectory.clear();
+      return -1;
+    }
+    // compute the binary dir when TRY_COMPILE is called with a src file
+    // signature
+    if (this->SrcFileSignature) {
+      this->BinaryDirectory += "/CMakeFiles/CMakeTmp";
+    }
+  } else {
+    this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
+                                 "No <bindir> specified.");
+    return -1;
+  }
+
+  if (this->SrcFileSignature) {
+    projectName = "CMAKE_TRY_COMPILE";
+    /* Use a random file name to avoid rapid creation and deletion
+       of the same executable name (some filesystems fail on that).  */
+    char targetNameBuf[64];
+    snprintf(targetNameBuf, sizeof(targetNameBuf), "cmTC_%05x",
+             cmSystemTools::RandomSeed() & 0xFFFFF);
+    targetName = targetNameBuf;
   }
 
   if (didCopyFile && copyFile.empty()) {
@@ -425,6 +462,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     return -1;
   }
 
+  // only valid for srcfile signatures
   if (!this->SrcFileSignature) {
     if (!cState.Validate(this->Makefile)) {
       return -1;
@@ -444,14 +482,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     if (!objcxxState.Validate(this->Makefile)) {
       return -1;
     }
-  }
 
-  // compute the binary dir when TRY_COMPILE is called with a src file
-  // signature
-  if (this->SrcFileSignature) {
-    this->BinaryDirectory += "/CMakeFiles/CMakeTmp";
-  } else {
-    // only valid for srcfile signatures
     if (!compileDefs.empty()) {
       this->Makefile->IssueMessage(
         MessageType::FATAL_ERROR,
@@ -711,12 +742,6 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
               cmJoin(compileDefs, "]==] [==[").c_str());
     }
 
-    /* Use a random file name to avoid rapid creation and deletion
-       of the same executable name (some filesystems fail on that).  */
-    snprintf(targetNameBuf, sizeof(targetNameBuf), "cmTC_%05x",
-             cmSystemTools::RandomSeed() & 0xFFFFF);
-    targetName = targetNameBuf;
-
     if (!targets.empty()) {
       std::string fname = "/" + std::string(targetName) + "Targets.cmake";
       cmExportTryCompileFileGenerator tcfg(gg, targets, this->Makefile,
@@ -873,7 +898,6 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
               libsToLink.c_str());
     }
     fclose(fout);
-    projectName = "CMAKE_TRY_COMPILE";
   }
 
   // Forward a set of variables to the inner project cache.
@@ -996,7 +1020,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
   }
 
   // set the result var to the return value to indicate success or failure
-  this->Makefile->AddCacheDefinition(argv[0], (res == 0 ? "TRUE" : "FALSE"),
+  this->Makefile->AddCacheDefinition(resultVar, (res == 0 ? "TRUE" : "FALSE"),
                                      "Result of TRY_COMPILE",
                                      cmStateEnums::INTERNAL);
 

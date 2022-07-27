@@ -6,7 +6,9 @@
 
 #include "cmsys/FStream.hxx"
 
+#include "cmCoreTryCompile.h"
 #include "cmDuration.h"
+#include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmRange.h"
@@ -17,24 +19,40 @@
 #include "cmValue.h"
 #include "cmake.h"
 
-class cmExecutionStatus;
+namespace {
 
-// cmTryRunCommand
-bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv,
-                                  cmExecutionStatus&)
+class TryRunCommandImpl : public cmCoreTryCompile
 {
-  if (argv.size() < 4) {
-    return false;
+public:
+  TryRunCommandImpl(cmMakefile* mf)
+    : cmCoreTryCompile(mf)
+  {
   }
 
-  if (this->Makefile->GetCMakeInstance()->GetWorkingMode() ==
-      cmake::FIND_PACKAGE_MODE) {
-    this->Makefile->IssueMessage(
-      MessageType::FATAL_ERROR,
-      "The try_run() command is not supported in --find-package mode.");
-    return false;
-  }
+  bool TryRunCode(std::vector<std::string> const& args);
 
+  void RunExecutable(const std::string& runArgs,
+                     std::string* runOutputContents,
+                     std::string* runOutputStdOutContents,
+                     std::string* runOutputStdErrContents);
+  void DoNotRunExecutable(const std::string& runArgs,
+                          const std::string& srcFile,
+                          std::string* runOutputContents,
+                          std::string* runOutputStdOutContents,
+                          std::string* runOutputStdErrContents);
+
+  std::string CompileResultVariable;
+  std::string RunResultVariable;
+  std::string OutputVariable;
+  std::string RunOutputVariable;
+  std::string RunOutputStdOutVariable;
+  std::string RunOutputStdErrVariable;
+  std::string CompileOutputVariable;
+  std::string WorkingDirectory;
+};
+
+bool TryRunCommandImpl::TryRunCode(std::vector<std::string> const& argv)
+{
   // build an arg list for TryCompile and extract the runArgs,
   std::vector<std::string> tryCompile;
 
@@ -240,9 +258,9 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv,
   return true;
 }
 
-void cmTryRunCommand::RunExecutable(const std::string& runArgs,
-                                    std::string* out, std::string* stdOut,
-                                    std::string* stdErr)
+void TryRunCommandImpl::RunExecutable(const std::string& runArgs,
+                                      std::string* out, std::string* stdOut,
+                                      std::string* stdErr)
 {
   int retVal = -1;
 
@@ -288,10 +306,11 @@ void cmTryRunCommand::RunExecutable(const std::string& runArgs,
  executable, two cache variables are created which will hold the results
  the executable would have produced.
 */
-void cmTryRunCommand::DoNotRunExecutable(const std::string& runArgs,
-                                         const std::string& srcFile,
-                                         std::string* out, std::string* stdOut,
-                                         std::string* stdErr)
+void TryRunCommandImpl::DoNotRunExecutable(const std::string& runArgs,
+                                           const std::string& srcFile,
+                                           std::string* out,
+                                           std::string* stdOut,
+                                           std::string* stdErr)
 {
   // copy the executable out of the CMakeFiles/ directory, so it is not
   // removed at the end of try_run() and the user can run it manually
@@ -520,4 +539,25 @@ void cmTryRunCommand::DoNotRunExecutable(const std::string& runArgs,
   } else if (out) {
     (*out) = *this->Makefile->GetDefinition(internalRunOutputName);
   }
+}
+}
+
+bool cmTryRunCommand(std::vector<std::string> const& args,
+                     cmExecutionStatus& status)
+{
+  if (args.size() < 4) {
+    return false;
+  }
+
+  cmMakefile& mf = status.GetMakefile();
+
+  if (mf.GetCMakeInstance()->GetWorkingMode() == cmake::FIND_PACKAGE_MODE) {
+    mf.IssueMessage(
+      MessageType::FATAL_ERROR,
+      "The try_run() command is not supported in --find-package mode.");
+    return false;
+  }
+
+  TryRunCommandImpl tr(&mf);
+  return tr.TryRunCode(args);
 }
