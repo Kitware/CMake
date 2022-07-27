@@ -3148,12 +3148,14 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   }
 
   // Check if ASan is enabled.
-  if (flags.find("/fsanitize=address") != std::string::npos) {
+  if (flags.find("/fsanitize=address") != std::string::npos ||
+      flags.find("-fsanitize=address") != std::string::npos) {
     this->ASanEnabledConfigurations.insert(configName);
   }
 
   // Check if (lib)Fuzzer is enabled.
-  if (flags.find("/fsanitize=fuzzer") != std::string::npos) {
+  if (flags.find("/fsanitize=fuzzer") != std::string::npos ||
+      flags.find("-fsanitize=fuzzer") != std::string::npos) {
     this->FuzzerEnabledConfigurations.insert(configName);
   }
 
@@ -3198,7 +3200,9 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
     // anymore, because cmGeneratorTarget may not be aware that the
     // target uses C++/CLI.
     if (flags.find("/clr") != std::string::npos ||
-        defineFlags.find("/clr") != std::string::npos) {
+        flags.find("-clr") != std::string::npos ||
+        defineFlags.find("/clr") != std::string::npos ||
+        defineFlags.find("-clr") != std::string::npos) {
       if (configName == this->Configurations[0]) {
         std::string message = "For the target \"" +
           this->GeneratorTarget->GetName() +

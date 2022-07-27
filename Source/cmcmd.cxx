@@ -2242,13 +2242,18 @@ bool cmVSLink::Parse(std::vector<std::string>::const_iterator argBeg,
   // Parse the link command to extract information we need.
   for (; arg != argEnd; ++arg) {
     if (cmSystemTools::Strucmp(arg->c_str(), "/INCREMENTAL:YES") == 0 ||
-        cmSystemTools::Strucmp(arg->c_str(), "/INCREMENTAL") == 0) {
+        cmSystemTools::Strucmp(arg->c_str(), "-INCREMENTAL:YES") == 0 ||
+        cmSystemTools::Strucmp(arg->c_str(), "/INCREMENTAL") == 0 ||
+        cmSystemTools::Strucmp(arg->c_str(), "-INCREMENTAL") == 0) {
       this->Incremental = true;
-    } else if (cmSystemTools::Strucmp(arg->c_str(), "/MANIFEST:NO") == 0) {
+    } else if (cmSystemTools::Strucmp(arg->c_str(), "/MANIFEST:NO") == 0 ||
+               cmSystemTools::Strucmp(arg->c_str(), "-MANIFEST:NO") == 0) {
       this->LinkGeneratesManifest = false;
-    } else if (cmHasLiteralPrefix(*arg, "/Fe")) {
+    } else if (cmHasLiteralPrefix(*arg, "/Fe") ||
+               cmHasLiteralPrefix(*arg, "-Fe")) {
       this->TargetFile = arg->substr(3);
-    } else if (cmHasLiteralPrefix(*arg, "/out:")) {
+    } else if (cmHasLiteralPrefix(*arg, "/out:") ||
+               cmHasLiteralPrefix(*arg, "-out:")) {
       this->TargetFile = arg->substr(5);
     }
   }

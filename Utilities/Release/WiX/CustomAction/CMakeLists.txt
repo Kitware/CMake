@@ -7,6 +7,10 @@ if(MSVC)
         "CMAKE_CXX_FLAGS_${CONFIG}"
         "${CMAKE_CXX_FLAGS_${CONFIG}}"
         )
+      string(REPLACE "-MD" "-MT"
+        "CMAKE_CXX_FLAGS_${CONFIG}"
+        "${CMAKE_CXX_FLAGS_${CONFIG}}"
+        )
     endforeach()
   endif()
 endif()
