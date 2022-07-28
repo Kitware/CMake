@@ -8688,6 +8688,12 @@ std::string cmGeneratorTarget::GenerateHeaderSetVerificationFile(
           languages->insert("C");
         }
       }
+
+      if (languages->empty()) {
+        std::vector<std::string> languagesVector;
+        this->GlobalGenerator->GetEnabledLanguages(languagesVector);
+        languages->insert(languagesVector.begin(), languagesVector.end());
+      }
     }
 
     if (languages->count("CXX")) {
