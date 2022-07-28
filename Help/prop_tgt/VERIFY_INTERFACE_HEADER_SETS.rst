@@ -22,7 +22,9 @@ If the header's :prop_sf:`LANGUAGE` property is set, the value of that property
 is used to determine the language with which to compile the header file.
 Otherwise, if the target has any C++ sources, the header is compiled as C++.
 Otherwise, if the target has any C sources, the header is compiled as C.
-Otherwise, the header file is not compiled.
+Otherwise, if C++ is enabled globally, the header is compiled as C++.
+Otherwise, if C is enabled globally, the header is compiled as C. Otherwise,
+the header file is not compiled.
 
 If the project wishes to control which header sets are verified by this
 property, you can set :prop_tgt:`INTERFACE_HEADER_SETS_TO_VERIFY`.
