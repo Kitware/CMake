@@ -1,5 +1,7 @@
 enable_language(C CXX)
 
+add_compile_definitions(TEST_ADD_COMPILE_DEFINITIONS)
+
 set_property(SOURCE a.h PROPERTY LANGUAGE C)
 set_property(SOURCE dir/c.h PROPERTY LANGUAGE C)
 set_property(SOURCE dir/cxx.h PROPERTY LANGUAGE CXX)
