@@ -1,6 +1,7 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
+#include <functional>
 #include <initializer_list>
 #include <iostream>
 #include <map>
@@ -39,6 +40,54 @@ struct Result : public ArgumentParser::ParseResult
   cm::optional<std::vector<std::vector<std::string>>> Multi3;
   cm::optional<std::vector<std::vector<std::string>>> Multi4;
 
+  cm::optional<std::string> Pos1;
+
+  bool Func0_ = false;
+  ArgumentParser::Continue Func0(cm::string_view)
+  {
+    Func0_ = true;
+    return ArgumentParser::Continue::No;
+  }
+
+  std::string Func1_;
+  ArgumentParser::Continue Func1(cm::string_view arg)
+  {
+    Func1_ = std::string(arg);
+    return ArgumentParser::Continue::No;
+  }
+
+  std::map<std::string, std::vector<std::string>> Func2_;
+  ArgumentParser::Continue Func2(cm::string_view key, cm::string_view arg)
+  {
+    Func2_[std::string(key)].emplace_back(arg);
+    return key == "FUNC_2b" ? ArgumentParser::Continue::Yes
+                            : ArgumentParser::Continue::No;
+  }
+
+  std::vector<std::string> Func3_;
+  ArgumentParser::Continue Func3(cm::string_view arg)
+  {
+    Func3_.emplace_back(arg);
+    return ArgumentParser::Continue::Yes;
+  }
+
+  std::map<std::string, std::vector<std::string>> Func4_;
+  ArgumentParser::Continue Func4(cm::string_view key, cm::string_view arg)
+  {
+    Func4_[std::string(key)].emplace_back(arg);
+    return key == "FUNC_4b" ? ArgumentParser::Continue::Yes
+                            : ArgumentParser::Continue::No;
+  }
+
+  ArgumentParser::Maybe<std::string> UnboundMaybe{ 'u', 'n', 'b', 'o',
+                                                   'u', 'n', 'd' };
+  ArgumentParser::MaybeEmpty<std::vector<std::string>> UnboundMaybeEmpty{
+    1, "unbound"
+  };
+  ArgumentParser::NonEmpty<std::vector<std::string>> UnboundNonEmpty{
+    1, "unbound"
+  };
+
   std::vector<cm::string_view> ParsedKeywords;
 };
 
@@ -46,6 +95,7 @@ std::initializer_list<cm::string_view> const args = {
   /* clang-format off */
   "OPTION_1",                // option
   // "OPTION_2",             // option that is not present
+  "pos1",                    // position index 1
   "STRING_1",                // string arg missing value
   "STRING_2", "foo", "bar",  // string arg + unparsed value, presence captured
   // "STRING_3",             // string arg that is not present
@@ -61,6 +111,13 @@ std::initializer_list<cm::string_view> const args = {
   "MULTI_3", "foo", "bar",   // multi list with first list with two elems
   "MULTI_3", "bar", "foo",   // multi list with second list with two elems
   // "MULTI_4",              // multi list arg that is not present
+  "FUNC_0",                  // callback arg missing value
+  "FUNC_1", "foo", "ign1",   // callback with one arg + unparsed value
+  "FUNC_2a", "foo", "ign2",  // callback with keyword-dependent arg count
+  "FUNC_2b", "bar", "zot",   // callback with keyword-dependent arg count
+  "FUNC_3", "foo", "bar",    // callback with list arg ...
+  "FUNC_4a", "foo", "ign4",  // callback with keyword-dependent arg count
+  "FUNC_4b", "bar", "zot",   // callback with keyword-dependent arg count
   /* clang-format on */
 };
 
@@ -69,6 +126,7 @@ bool verifyResult(Result const& result,
 {
   static std::vector<std::string> const foobar = { "foo", "bar" };
   static std::vector<std::string> const barfoo = { "bar", "foo" };
+  static std::vector<std::string> const unbound = { "unbound" };
   static std::vector<cm::string_view> const parsedKeywords = {
     /* clang-format off */
     "OPTION_1",
@@ -84,13 +142,29 @@ bool verifyResult(Result const& result,
     "MULTI_2",
     "MULTI_3",
     "MULTI_3",
+    "FUNC_0",
+    "FUNC_1",
+    "FUNC_2a",
+    "FUNC_2b",
+    "FUNC_3",
+    "FUNC_4a",
+    "FUNC_4b",
     /* clang-format on */
+  };
+  static std::map<std::string, std::vector<std::string>> const func2map = {
+    { "FUNC_2a", { "foo" } }, { "FUNC_2b", { "bar", "zot" } }
+  };
+  static std::map<std::string, std::vector<std::string>> const func4map = {
+    { "FUNC_4a", { "foo" } }, { "FUNC_4b", { "bar", "zot" } }
   };
   static std::map<cm::string_view, std::string> const keywordErrors = {
     { "STRING_1"_s, "  missing required value\n" },
     { "LIST_1"_s, "  missing required value\n" },
-    { "LIST_4"_s, "  missing required value\n" }
+    { "LIST_4"_s, "  missing required value\n" },
+    { "FUNC_0"_s, "  missing required value\n" }
   };
+  static std::vector<std::string> const unparsed = { "bar", "ign1", "ign2",
+                                                     "ign4" };
 
 #define ASSERT_TRUE(x)                                                        \
   do {                                                                        \
@@ -130,8 +204,19 @@ bool verifyResult(Result const& result,
   ASSERT_TRUE((*result.Multi3)[1] == barfoo);
   ASSERT_TRUE(!result.Multi4);
 
-  ASSERT_TRUE(unparsedArguments.size() == 1);
-  ASSERT_TRUE(unparsedArguments[0] == "bar");
+  ASSERT_TRUE(result.Pos1 == "pos1");
+
+  ASSERT_TRUE(result.Func0_ == false);
+  ASSERT_TRUE(result.Func1_ == "foo");
+  ASSERT_TRUE(result.Func2_ == func2map);
+  ASSERT_TRUE(result.Func3_ == foobar);
+  ASSERT_TRUE(result.Func4_ == func4map);
+
+  ASSERT_TRUE(unparsedArguments == unparsed);
+
+  ASSERT_TRUE(result.UnboundMaybe == "unbound");
+  ASSERT_TRUE(result.UnboundMaybeEmpty == unbound);
+  ASSERT_TRUE(result.UnboundNonEmpty == unbound);
 
   ASSERT_TRUE(result.ParsedKeywords == parsedKeywords);
 
@@ -149,6 +234,12 @@ bool testArgumentParserDynamic()
 {
   Result result;
   std::vector<std::string> unparsedArguments;
+
+  std::function<ArgumentParser::Continue(cm::string_view, cm::string_view)>
+    func4 = [&result](cm::string_view key,
+                      cm::string_view arg) -> ArgumentParser::Continue {
+    return result.Func4(key, arg);
+  };
 
   static_cast<ArgumentParser::ParseResult&>(result) =
     cmArgumentParser<void>{}
@@ -168,12 +259,38 @@ bool testArgumentParserDynamic()
       .Bind("MULTI_2"_s, result.Multi2)
       .Bind("MULTI_3"_s, result.Multi3)
       .Bind("MULTI_4"_s, result.Multi4)
+      .Bind(1, result.Pos1)
+      .Bind("FUNC_0"_s,
+            [&result](cm::string_view arg) -> ArgumentParser::Continue {
+              return result.Func0(arg);
+            })
+      .Bind("FUNC_1"_s,
+            [&result](cm::string_view arg) -> ArgumentParser::Continue {
+              return result.Func1(arg);
+            })
+      .Bind("FUNC_2a"_s,
+            [&result](cm::string_view key, cm::string_view arg)
+              -> ArgumentParser::Continue { return result.Func2(key, arg); })
+      .Bind("FUNC_2b"_s,
+            [&result](cm::string_view key, cm::string_view arg)
+              -> ArgumentParser::Continue { return result.Func2(key, arg); })
+      .Bind("FUNC_3"_s,
+            [&result](cm::string_view arg) -> ArgumentParser::Continue {
+              return result.Func3(arg);
+            })
+      .Bind("FUNC_4a"_s, func4)
+      .Bind("FUNC_4b"_s, func4)
       .BindParsedKeywords(result.ParsedKeywords)
       .Parse(args, &unparsedArguments);
 
   return verifyResult(result, unparsedArguments);
 }
 
+static auto const parserStaticFunc4 =
+  [](Result& result, cm::string_view key,
+     cm::string_view arg) -> ArgumentParser::Continue {
+  return result.Func4(key, arg);
+};
 static auto const parserStatic = //
   cmArgumentParser<Result>{}
     .Bind("OPTION_1"_s, &Result::Option1)
@@ -192,6 +309,17 @@ static auto const parserStatic = //
     .Bind("MULTI_2"_s, &Result::Multi2)
     .Bind("MULTI_3"_s, &Result::Multi3)
     .Bind("MULTI_4"_s, &Result::Multi4)
+    .Bind(1, &Result::Pos1)
+    .Bind("FUNC_0"_s, &Result::Func0)
+    .Bind("FUNC_1"_s, &Result::Func1)
+    .Bind("FUNC_2a"_s, &Result::Func2)
+    .Bind("FUNC_2b"_s, &Result::Func2)
+    .Bind("FUNC_3"_s,
+          [](Result& result, cm::string_view arg) -> ArgumentParser::Continue {
+            return result.Func3(arg);
+          })
+    .Bind("FUNC_4a"_s, parserStaticFunc4)
+    .Bind("FUNC_4b"_s, parserStaticFunc4)
     .BindParsedKeywords(&Result::ParsedKeywords)
   /* keep semicolon on own line */;
 

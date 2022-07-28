@@ -34,55 +34,97 @@ auto KeywordActionMap::Find(cm::string_view name) const -> const_iterator
   return (it != this->end() && it->first == name) ? it : this->end();
 }
 
+auto PositionActionMap::Emplace(std::size_t pos, PositionAction action)
+  -> std::pair<iterator, bool>
+{
+  auto const it = std::lower_bound(
+    this->begin(), this->end(), pos,
+    [](value_type const& elem, std::size_t k) { return elem.first < k; });
+  return (it != this->end() && it->first == pos)
+    ? std::make_pair(it, false)
+    : std::make_pair(this->emplace(it, pos, std::move(action)), true);
+}
+
+auto PositionActionMap::Find(std::size_t pos) const -> const_iterator
+{
+  auto const it = std::lower_bound(
+    this->begin(), this->end(), pos,
+    [](value_type const& elem, std::size_t k) { return elem.first < k; });
+  return (it != this->end() && it->first == pos) ? it : this->end();
+}
+
+void Instance::Bind(std::function<Continue(cm::string_view)> f,
+                    ExpectAtLeast expect)
+{
+  this->KeywordValueFunc = std::move(f);
+  this->KeywordValuesExpected = expect.Count;
+}
+
 void Instance::Bind(bool& val)
 {
   val = true;
-  this->CurrentString = nullptr;
-  this->CurrentList = nullptr;
-  this->ExpectValue = false;
+  this->Bind(nullptr, ExpectAtLeast{ 0 });
 }
 
 void Instance::Bind(std::string& val)
 {
-  this->CurrentString = &val;
-  this->CurrentList = nullptr;
-  this->ExpectValue = true;
+  this->Bind(
+    [&val](cm::string_view arg) -> Continue {
+      val = std::string(arg);
+      return Continue::No;
+    },
+    ExpectAtLeast{ 1 });
 }
 
 void Instance::Bind(Maybe<std::string>& val)
 {
-  this->CurrentString = &val;
-  this->CurrentList = nullptr;
-  this->ExpectValue = false;
+  this->Bind(
+    [&val](cm::string_view arg) -> Continue {
+      static_cast<std::string&>(val) = std::string(arg);
+      return Continue::No;
+    },
+    ExpectAtLeast{ 0 });
 }
 
 void Instance::Bind(MaybeEmpty<std::vector<std::string>>& val)
 {
-  this->CurrentString = nullptr;
-  this->CurrentList = &val;
-  this->ExpectValue = false;
+  this->Bind(
+    [&val](cm::string_view arg) -> Continue {
+      val.emplace_back(arg);
+      return Continue::Yes;
+    },
+    ExpectAtLeast{ 0 });
 }
 
 void Instance::Bind(NonEmpty<std::vector<std::string>>& val)
 {
-  this->CurrentString = nullptr;
-  this->CurrentList = &val;
-  this->ExpectValue = true;
+  this->Bind(
+    [&val](cm::string_view arg) -> Continue {
+      val.emplace_back(arg);
+      return Continue::Yes;
+    },
+    ExpectAtLeast{ 1 });
 }
 
-void Instance::Bind(std::vector<std::vector<std::string>>& val)
+void Instance::Bind(std::vector<std::vector<std::string>>& multiVal)
 {
-  this->CurrentString = nullptr;
-  this->CurrentList = (static_cast<void>(val.emplace_back()), &val.back());
-  this->ExpectValue = false;
+  multiVal.emplace_back();
+  std::vector<std::string>& val = multiVal.back();
+  this->Bind(
+    [&val](cm::string_view arg) -> Continue {
+      val.emplace_back(arg);
+      return Continue::Yes;
+    },
+    ExpectAtLeast{ 0 });
 }
 
-void Instance::Consume(cm::string_view arg)
+void Instance::Consume(std::size_t pos, cm::string_view arg)
 {
   auto const it = this->Bindings.Keywords.Find(arg);
   if (it != this->Bindings.Keywords.end()) {
     this->FinishKeyword();
     this->Keyword = it->first;
+    this->KeywordValuesSeen = 0;
     if (this->Bindings.ParsedKeyword) {
       this->Bindings.ParsedKeyword(*this, it->first);
     }
@@ -90,17 +132,27 @@ void Instance::Consume(cm::string_view arg)
     return;
   }
 
-  if (this->CurrentString != nullptr) {
-    this->CurrentString->assign(std::string(arg));
-    this->CurrentString = nullptr;
-    this->CurrentList = nullptr;
-  } else if (this->CurrentList != nullptr) {
-    this->CurrentList->emplace_back(arg);
-  } else if (this->UnparsedArguments != nullptr) {
-    this->UnparsedArguments->emplace_back(arg);
+  if (this->KeywordValueFunc) {
+    switch (this->KeywordValueFunc(arg)) {
+      case Continue::Yes:
+        break;
+      case Continue::No:
+        this->KeywordValueFunc = nullptr;
+        break;
+    }
+    ++this->KeywordValuesSeen;
+    return;
   }
 
-  this->ExpectValue = false;
+  auto const pit = this->Bindings.Positions.Find(pos);
+  if (pit != this->Bindings.Positions.end()) {
+    pit->second(*this, pos, arg);
+    return;
+  }
+
+  if (this->UnparsedArguments != nullptr) {
+    this->UnparsedArguments->emplace_back(arg);
+  }
 }
 
 void Instance::FinishKeyword()
@@ -108,7 +160,7 @@ void Instance::FinishKeyword()
   if (this->Keyword.empty()) {
     return;
   }
-  if (this->ExpectValue) {
+  if (this->KeywordValuesSeen < this->KeywordValuesExpected) {
     if (this->ParseResults != nullptr) {
       this->ParseResults->AddKeywordError(this->Keyword,
                                           "  missing required value\n");
