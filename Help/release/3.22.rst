@@ -170,8 +170,8 @@ Changes made since CMake 3.22.0 include the following.
   compatibility.  The fix may be restored in a future version of CMake
   via a policy.
 
-3.22.4, 3.22.5
---------------
+3.22.4, 3.22.5, 3.22.6
+----------------------
 
 * These versions made no changes to documented features or interfaces.
   Some implementation updates were made to support ecosystem changes
