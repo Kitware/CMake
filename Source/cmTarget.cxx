@@ -1935,6 +1935,51 @@ void cmTarget::AppendBuildInterfaceIncludes()
   }
 }
 
+void cmTarget::FinalizeTargetCompileInfo(
+  const cmBTStringRange& noConfigCompileDefinitions,
+  cm::optional<std::map<std::string, cmValue>>& perConfigCompileDefinitions)
+{
+  if (this->GetType() == cmStateEnums::GLOBAL_TARGET) {
+    return;
+  }
+
+  this->AppendBuildInterfaceIncludes();
+
+  if (this->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+    return;
+  }
+
+  for (auto const& def : noConfigCompileDefinitions) {
+    this->InsertCompileDefinition(def);
+  }
+
+  auto* mf = this->GetMakefile();
+  cmPolicies::PolicyStatus polSt = mf->GetPolicyStatus(cmPolicies::CMP0043);
+  if (polSt == cmPolicies::WARN || polSt == cmPolicies::OLD) {
+    if (perConfigCompileDefinitions) {
+      for (auto const& it : *perConfigCompileDefinitions) {
+        if (cmValue val = it.second) {
+          this->AppendProperty(it.first, *val);
+        }
+      }
+    } else {
+      perConfigCompileDefinitions.emplace();
+      std::vector<std::string> configs =
+        mf->GetGeneratorConfigs(cmMakefile::ExcludeEmptyConfig);
+
+      for (std::string const& c : configs) {
+        std::string defPropName =
+          cmStrCat("COMPILE_DEFINITIONS_", cmSystemTools::UpperCase(c));
+        cmValue val = mf->GetProperty(defPropName);
+        (*perConfigCompileDefinitions)[defPropName] = val;
+        if (val) {
+          this->AppendProperty(defPropName, *val);
+        }
+      }
+    }
+  }
+}
+
 void cmTarget::InsertInclude(BT<std::string> const& entry, bool before)
 {
   auto position = before ? this->impl->IncludeDirectoriesEntries.begin()

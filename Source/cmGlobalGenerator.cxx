@@ -14,6 +14,7 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cm/optional>
 #include <cmext/algorithm>
 #include <cmext/string_view>
 
@@ -1823,39 +1824,14 @@ void cmGlobalGenerator::FinalizeTargetCompileInfo()
 
   // Construct per-target generator information.
   for (const auto& mf : this->Makefiles) {
-    const cmBTStringRange noconfig_compile_definitions =
+    const cmBTStringRange noConfigCompileDefinitions =
       mf->GetCompileDefinitionsEntries();
+    cm::optional<std::map<std::string, cmValue>> perConfigCompileDefinitions;
 
     for (auto& target : mf->GetTargets()) {
       cmTarget* t = &target.second;
-      if (t->GetType() == cmStateEnums::GLOBAL_TARGET) {
-        continue;
-      }
-
-      t->AppendBuildInterfaceIncludes();
-
-      if (t->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
-        continue;
-      }
-
-      for (auto const& def : noconfig_compile_definitions) {
-        t->InsertCompileDefinition(def);
-      }
-
-      cmPolicies::PolicyStatus polSt =
-        mf->GetPolicyStatus(cmPolicies::CMP0043);
-      if (polSt == cmPolicies::WARN || polSt == cmPolicies::OLD) {
-        std::vector<std::string> configs =
-          mf->GetGeneratorConfigs(cmMakefile::ExcludeEmptyConfig);
-
-        for (std::string const& c : configs) {
-          std::string defPropName =
-            cmStrCat("COMPILE_DEFINITIONS_", cmSystemTools::UpperCase(c));
-          if (cmValue val = mf->GetProperty(defPropName)) {
-            t->AppendProperty(defPropName, *val);
-          }
-        }
-      }
+      t->FinalizeTargetCompileInfo(noConfigCompileDefinitions,
+                                   perConfigCompileDefinitions);
     }
 
     // The standard include directories for each language

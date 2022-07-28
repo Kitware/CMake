@@ -16,6 +16,7 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cm/optional>
 #include <cm/string_view>
 #include <cmext/algorithm>
 #include <cmext/string_view>
@@ -8636,6 +8637,11 @@ bool cmGeneratorTarget::AddHeaderSetVerification()
             verifyTarget->SetProperty("AUTOUIC", "OFF");
             verifyTarget->SetProperty("DISABLE_PRECOMPILE_HEADERS", "ON");
             verifyTarget->SetProperty("UNITY_BUILD", "OFF");
+            cm::optional<std::map<std::string, cmValue>>
+              perConfigCompileDefinitions;
+            verifyTarget->FinalizeTargetCompileInfo(
+              this->Makefile->GetCompileDefinitionsEntries(),
+              perConfigCompileDefinitions);
           }
 
           if (fileCgesContextSensitive) {
