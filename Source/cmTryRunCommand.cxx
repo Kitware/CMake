@@ -192,7 +192,7 @@ bool TryRunCommandImpl::TryRunCode(std::vector<std::string> const& argv)
   this->CompileResultVariable = argv[1];
 
   // do the try compile
-  bool compiled = this->TryCompileCode(tryCompile, true);
+  bool compiled = this->TryCompileCode(tryCompile, cmStateEnums::EXECUTABLE);
 
   // now try running the command if it compiled
   if (compiled) {

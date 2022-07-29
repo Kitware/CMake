@@ -30,7 +30,8 @@ public:
    * commands, such as TryRun can access the same logic without
    * duplication.
    */
-  bool TryCompileCode(std::vector<std::string> const& argv, bool isTryRun);
+  bool TryCompileCode(std::vector<std::string> const& argv,
+                      cmStateEnums::TargetType targetType);
 
   /**
    * This deletes all the files created by TryCompileCode.

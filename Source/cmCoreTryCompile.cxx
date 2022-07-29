@@ -236,33 +236,12 @@ std::set<std::string> const ghs_platform_vars{
 }
 
 bool cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
-                                      bool isTryRun)
+                                      cmStateEnums::TargetType targetType)
 {
   std::string const& resultVar = argv[0];
   this->OutputFile.clear();
   // which signature were we called with ?
   this->SrcFileSignature = true;
-
-  cmStateEnums::TargetType targetType = cmStateEnums::EXECUTABLE;
-  cmValue tt = this->Makefile->GetDefinition("CMAKE_TRY_COMPILE_TARGET_TYPE");
-  if (!isTryRun && cmNonempty(tt)) {
-    if (*tt == cmState::GetTargetTypeName(cmStateEnums::EXECUTABLE)) {
-      targetType = cmStateEnums::EXECUTABLE;
-    } else if (*tt ==
-               cmState::GetTargetTypeName(cmStateEnums::STATIC_LIBRARY)) {
-      targetType = cmStateEnums::STATIC_LIBRARY;
-    } else {
-      this->Makefile->IssueMessage(
-        MessageType::FATAL_ERROR,
-        cmStrCat("Invalid value '", *tt,
-                 "' for CMAKE_TRY_COMPILE_TARGET_TYPE.  Only '",
-                 cmState::GetTargetTypeName(cmStateEnums::EXECUTABLE),
-                 "' and '",
-                 cmState::GetTargetTypeName(cmStateEnums::STATIC_LIBRARY),
-                 "' are allowed."));
-      return false;
-    }
-  }
 
   std::string sourceDirectory;
   std::string projectName;
