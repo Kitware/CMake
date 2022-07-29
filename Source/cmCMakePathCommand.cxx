@@ -15,6 +15,7 @@
 #include <cmext/string_view>
 
 #include "cmArgumentParser.h"
+#include "cmArgumentParserTypes.h"
 #include "cmCMakePath.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
@@ -82,22 +83,11 @@ public:
     return this->CMakePathArgumentParser<Result>::template Parse<Advance>(
       args);
   }
-
-  bool checkOutputVariable(const Result& arguments,
-                           cmExecutionStatus& status) const
-  {
-    if (arguments.Output && arguments.Output->empty()) {
-      status.SetError("Invalid name for output variable.");
-      return false;
-    }
-
-    return true;
-  }
 };
 
 struct OutputVariable : public ArgumentParser::ParseResult
 {
-  cm::optional<std::string> Output;
+  cm::optional<ArgumentParser::NonEmpty<std::string>> Output;
 };
 // Usable when OUTPUT_VARIABLE is the only option
 class OutputVariableParser
@@ -270,9 +260,6 @@ bool HandleAppendCommand(std::vector<std::string> const& args,
   if (arguments.MaybeReportError(status.GetMakefile())) {
     return true;
   }
-  if (!parser.checkOutputVariable(arguments, status)) {
-    return false;
-  }
 
   cmCMakePath path(status.GetMakefile().GetSafeDefinition(args[1]));
   for (const auto& input : parser.GetInputs()) {
@@ -294,9 +281,6 @@ bool HandleAppendStringCommand(std::vector<std::string> const& args,
 
   if (arguments.MaybeReportError(status.GetMakefile())) {
     return true;
-  }
-  if (!parser.checkOutputVariable(arguments, status)) {
-    return false;
   }
 
   std::string inputPath;
@@ -324,9 +308,6 @@ bool HandleRemoveFilenameCommand(std::vector<std::string> const& args,
 
   if (arguments.MaybeReportError(status.GetMakefile())) {
     return true;
-  }
-  if (!parser.checkOutputVariable(arguments, status)) {
-    return false;
   }
 
   if (!parser.GetInputs().empty()) {
@@ -358,9 +339,6 @@ bool HandleReplaceFilenameCommand(std::vector<std::string> const& args,
   if (arguments.MaybeReportError(status.GetMakefile())) {
     return true;
   }
-  if (!parser.checkOutputVariable(arguments, status)) {
-    return false;
-  }
 
   if (parser.GetInputs().size() > 1) {
     status.SetError("REPLACE_FILENAME called with unexpected arguments.");
@@ -387,7 +365,7 @@ bool HandleRemoveExtensionCommand(std::vector<std::string> const& args,
 {
   struct Arguments : public ArgumentParser::ParseResult
   {
-    cm::optional<std::string> Output;
+    cm::optional<ArgumentParser::NonEmpty<std::string>> Output;
     bool LastOnly = false;
   };
 
@@ -399,9 +377,6 @@ bool HandleRemoveExtensionCommand(std::vector<std::string> const& args,
 
   if (arguments.MaybeReportError(status.GetMakefile())) {
     return true;
-  }
-  if (!parser.checkOutputVariable(arguments, status)) {
-    return false;
   }
 
   if (!parser.GetInputs().empty()) {
@@ -433,7 +408,7 @@ bool HandleReplaceExtensionCommand(std::vector<std::string> const& args,
 {
   struct Arguments : public ArgumentParser::ParseResult
   {
-    cm::optional<std::string> Output;
+    cm::optional<ArgumentParser::NonEmpty<std::string>> Output;
     bool LastOnly = false;
   };
 
@@ -445,9 +420,6 @@ bool HandleReplaceExtensionCommand(std::vector<std::string> const& args,
 
   if (arguments.MaybeReportError(status.GetMakefile())) {
     return true;
-  }
-  if (!parser.checkOutputVariable(arguments, status)) {
-    return false;
   }
 
   if (parser.GetInputs().size() > 1) {
@@ -486,9 +458,6 @@ bool HandleNormalPathCommand(std::vector<std::string> const& args,
   if (arguments.MaybeReportError(status.GetMakefile())) {
     return true;
   }
-  if (!parser.checkOutputVariable(arguments, status)) {
-    return false;
-  }
 
   if (!parser.GetInputs().empty()) {
     status.SetError("NORMAL_PATH called with unexpected arguments.");
@@ -516,7 +485,7 @@ bool HandleTransformPathCommand(
 {
   struct Arguments : public ArgumentParser::ParseResult
   {
-    cm::optional<std::string> Output;
+    cm::optional<ArgumentParser::NonEmpty<std::string>> Output;
     cm::optional<std::string> BaseDirectory;
     bool Normalize = false;
   };
@@ -531,9 +500,6 @@ bool HandleTransformPathCommand(
 
   if (arguments.MaybeReportError(status.GetMakefile())) {
     return true;
-  }
-  if (!parser.checkOutputVariable(arguments, status)) {
-    return false;
   }
 
   if (!parser.GetInputs().empty()) {

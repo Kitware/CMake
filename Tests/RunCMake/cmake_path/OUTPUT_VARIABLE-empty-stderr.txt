@@ -1,0 +1,4 @@
+CMake Error at .+/call-cmake_path.cmake:[0-9]+ \(cmake_path\):
+  Error after keyword "OUTPUT_VARIABLE":
+
+    empty string not allowed

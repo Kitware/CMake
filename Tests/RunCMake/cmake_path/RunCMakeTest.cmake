@@ -114,6 +114,9 @@ foreach (command IN ITEMS NATIVE_PATH
   run_cmake_command (${command}-invalid-output "${CMAKE_COMMAND}" "-DCMAKE_PATH_ARGUMENTS=${command} path ${extra_args}" -DCHECK_INVALID_OUTPUT=ON -P "${RunCMake_SOURCE_DIR}/call-cmake_path.cmake")
 endforeach()
 
+# OUTPUT_VARIABLE empty name
+set (RunCMake-stderr-file "OUTPUT_VARIABLE-empty-stderr.txt")
+
 foreach (command IN ITEMS APPEND APPEND_STRING REMOVE_FILENAME REPLACE_FILENAME
                           REMOVE_EXTENSION REPLACE_EXTENSION NORMAL_PATH
                           RELATIVE_PATH ABSOLUTE_PATH)

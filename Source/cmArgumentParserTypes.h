@@ -34,6 +34,11 @@ struct NonEmpty<std::vector<T>> : public std::vector<T>
 {
   using std::vector<T>::vector;
 };
+template <>
+struct NonEmpty<std::string> : public std::string
+{
+  using std::string::basic_string;
+};
 
 } // namespace ArgumentParser
 
