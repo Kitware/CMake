@@ -67,7 +67,7 @@ static bool VSHasDotNETFrameworkArm64()
   std::string dotNetArm64;
   return cmSystemTools::ReadRegistryValue(
     "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\.NETFramework;InstallRootArm64",
-    dotNetArm64);
+    dotNetArm64, cmSystemTools::KeyWOW64_64);
 }
 
 static bool VSIsWindows11OrGreater()
