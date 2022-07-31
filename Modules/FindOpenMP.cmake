@@ -279,7 +279,9 @@ function(_OPENMP_GET_FLAGS LANG FLAG_MODE OPENMP_FLAG_VAR OPENMP_LIB_NAMES_VAR)
                 DOC "Path to the ${_OPENMP_IMPLICIT_LIB_PLAIN} library for OpenMP"
                 HINTS ${OpenMP_${LANG}_IMPLICIT_LINK_DIRS}
                 CMAKE_FIND_ROOT_PATH_BOTH
-                NO_DEFAULT_PATH
+                NO_PACKAGE_ROOT_PATH
+                NO_CMAKE_PATH
+                NO_CMAKE_ENVIRONMENT_PATH
               )
             endif()
             mark_as_advanced(OpenMP_${_OPENMP_IMPLICIT_LIB_PLAIN}_LIBRARY)
