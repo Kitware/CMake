@@ -26,5 +26,9 @@ Otherwise, if C++ is enabled globally, the header is compiled as C++.
 Otherwise, if C is enabled globally, the header is compiled as C. Otherwise,
 the header file is not compiled.
 
+This property is initialized by the value of the
+:variable:`CMAKE_VERIFY_INTERFACE_HEADER_SETS` variable if it is set when
+a target is created.
+
 If the project wishes to control which header sets are verified by this
-property, you can set :prop_tgt:`INTERFACE_HEADER_SETS_TO_VERIFY`.
+property, it can set :prop_tgt:`INTERFACE_HEADER_SETS_TO_VERIFY`.
