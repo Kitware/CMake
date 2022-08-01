@@ -314,7 +314,7 @@ if(GTest_FOUND)
     __gtest_define_backwards_compatible_library_targets()
 endif()
 
-if(GMock_FOUND)
+if(GMock_FOUND AND GTest_FOUND)
     if(NOT TARGET GTest::gmock)
         __gtest_determine_library_type(GMOCK_LIBRARY)
         add_library(GTest::gmock ${GMOCK_LIBRARY_TYPE} IMPORTED)
