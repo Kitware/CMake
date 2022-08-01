@@ -235,8 +235,8 @@ std::set<std::string> const ghs_platform_vars{
 };
 }
 
-int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
-                                     bool isTryRun)
+bool cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
+                                      bool isTryRun)
 {
   std::string const& resultVar = argv[0];
   this->OutputFile.clear();
@@ -260,7 +260,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
                  "' and '",
                  cmState::GetTargetTypeName(cmStateEnums::STATIC_LIBRARY),
                  "' are allowed."));
-      return -1;
+      return false;
     }
   }
 
@@ -361,7 +361,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
                        "IMPORTED LINK_LIBRARIES.  Got ",
                        tgt->GetName(), " of type ",
                        cmState::GetTargetTypeName(tgt->GetType()), "."));
-            return -1;
+            return false;
         }
         if (tgt->IsImported()) {
           targets.emplace_back(argv[i]);
@@ -405,7 +405,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
                  this->BinaryDirectory, "'"));
       // Do not try to clean up the ill-specified directory.
       this->BinaryDirectory.clear();
-      return -1;
+      return false;
     }
     // compute the binary dir when TRY_COMPILE is called with a src file
     // signature
@@ -415,7 +415,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
   } else {
     this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
                                  "No <bindir> specified.");
-    return -1;
+    return false;
   }
 
   if (this->SrcFileSignature) {
@@ -431,69 +431,69 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
   if (didCopyFile && copyFile.empty()) {
     this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
                                  "COPY_FILE must be followed by a file path");
-    return -1;
+    return false;
   }
 
   if (didCopyFileError && copyFileError.empty()) {
     this->Makefile->IssueMessage(
       MessageType::FATAL_ERROR,
       "COPY_FILE_ERROR must be followed by a variable name");
-    return -1;
+    return false;
   }
 
   if (didCopyFileError && !didCopyFile) {
     this->Makefile->IssueMessage(
       MessageType::FATAL_ERROR,
       "COPY_FILE_ERROR may be used only with COPY_FILE");
-    return -1;
+    return false;
   }
 
   if (didOutputVariable && outputVariable.empty()) {
     this->Makefile->IssueMessage(
       MessageType::FATAL_ERROR,
       "OUTPUT_VARIABLE must be followed by a variable name");
-    return -1;
+    return false;
   }
 
   if (useSources && sources.empty()) {
     this->Makefile->IssueMessage(
       MessageType::FATAL_ERROR,
       "SOURCES must be followed by at least one source file");
-    return -1;
+    return false;
   }
 
   // only valid for srcfile signatures
   if (!this->SrcFileSignature) {
     if (!cState.Validate(this->Makefile)) {
-      return -1;
+      return false;
     }
     if (!cudaState.Validate(this->Makefile)) {
-      return -1;
+      return false;
     }
     if (!hipState.Validate(this->Makefile)) {
-      return -1;
+      return false;
     }
     if (!cxxState.Validate(this->Makefile)) {
-      return -1;
+      return false;
     }
     if (!objcState.Validate(this->Makefile)) {
-      return -1;
+      return false;
     }
     if (!objcxxState.Validate(this->Makefile)) {
-      return -1;
+      return false;
     }
 
     if (!compileDefs.empty()) {
       this->Makefile->IssueMessage(
         MessageType::FATAL_ERROR,
         "COMPILE_DEFINITIONS specified on a srcdir type TRY_COMPILE");
-      return -1;
+      return false;
     }
     if (!copyFile.empty()) {
       this->Makefile->IssueMessage(
         MessageType::FATAL_ERROR,
         "COPY_FILE specified on a srcdir type TRY_COMPILE");
-      return -1;
+      return false;
     }
   }
   // make sure the binary directory exists
@@ -505,7 +505,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     e << "Attempt at a recursive or nested TRY_COMPILE in directory\n"
       << "  " << this->BinaryDirectory << "\n";
     this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
-    return -1;
+    return false;
   }
 
   std::string outFileName = this->BinaryDirectory + "/CMakeLists.txt";
@@ -539,7 +539,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
         err << cmJoin(langs, " ");
         err << "\nSee project() command to enable other languages.";
         this->Makefile->IssueMessage(MessageType::FATAL_ERROR, err.str());
-        return -1;
+        return false;
       }
     }
 
@@ -566,7 +566,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
         << cmSystemTools::GetLastSystemError();
       /* clang-format on */
       this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
-      return -1;
+      return false;
     }
 
     cmValue def = this->Makefile->GetDefinition("CMAKE_MODULE_PATH");
@@ -753,7 +753,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
         this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
                                      "could not write export file.");
         fclose(fout);
-        return -1;
+        return false;
       }
       fprintf(fout, "\ninclude(\"${CMAKE_CURRENT_LIST_DIR}/%s\")\n\n",
               fname.c_str());
@@ -1047,7 +1047,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
         }
         if (copyFileError.empty()) {
           this->Makefile->IssueMessage(MessageType::FATAL_ERROR, emsg.str());
-          return -1;
+          return false;
         }
         copyFileErrorMessage = emsg.str();
       }
@@ -1057,7 +1057,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       this->Makefile->AddDefinition(copyFileError, copyFileErrorMessage);
     }
   }
-  return res;
+  return res == 0;
 }
 
 void cmCoreTryCompile::CleanupFiles(std::string const& binDir)

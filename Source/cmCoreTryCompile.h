@@ -30,7 +30,7 @@ public:
    * commands, such as TryRun can access the same logic without
    * duplication.
    */
-  int TryCompileCode(std::vector<std::string> const& argv, bool isTryRun);
+  bool TryCompileCode(std::vector<std::string> const& argv, bool isTryRun);
 
   /**
    * This deletes all the files created by TryCompileCode.
