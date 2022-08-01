@@ -1,5 +1,5 @@
-CMake Error at NoOutputVariable2.cmake:1 \(try_compile\):
-  Error after keyword "OUTPUT_VARIABLE":
+CMake Error at NoCStandard.cmake:1 \(try_compile\):
+  Error after keyword "C_STANDARD":
 
     missing required value
 

@@ -1,5 +1,7 @@
-^CMake Error: WORKING_DIRECTORY specified but there is no variable
-CMake Error at NoWorkingDirectory.cmake:[0-9]+ \(try_run\):
-  try_run unknown error.
+^CMake Error at NoWorkingDirectory.cmake:[0-9]+ \(try_run\):
+  Error after keyword "WORKING_DIRECTORY":
+
+    missing required value
+
 Call Stack \(most recent call first\):
   CMakeLists.txt:[0-9]+ \(include\)$

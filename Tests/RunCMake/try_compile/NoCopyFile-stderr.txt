@@ -1,4 +1,7 @@
 CMake Error at NoCopyFile.cmake:1 \(try_compile\):
-  COPY_FILE must be followed by a file path
+  Error after keyword "COPY_FILE":
+
+    missing required value
+
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)

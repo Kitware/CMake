@@ -6,6 +6,7 @@
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmRange.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
@@ -50,7 +51,12 @@ bool cmTryCompileCommand(std::vector<std::string> const& args,
   }
 
   cmCoreTryCompile tc(&mf);
-  tc.TryCompileCode(args, targetType);
+  cmCoreTryCompile::Arguments arguments =
+    tc.ParseArgs(cmMakeRange(args), false);
+  if (!arguments) {
+    return true;
+  }
+  tc.TryCompileCode(arguments, targetType);
 
   // if They specified clean then we clean up what we can
   if (tc.SrcFileSignature) {

@@ -1,4 +1,7 @@
 CMake Error at NoCopyFileError.cmake:1 \(try_compile\):
-  COPY_FILE_ERROR must be followed by a variable name
+  Error after keyword "COPY_FILE_ERROR":
+
+    missing required value
+
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)
