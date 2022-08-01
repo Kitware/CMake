@@ -1,0 +1,5 @@
+^CMake Error: COMPILE_OUTPUT_VARIABLE specified but there is no variable
+CMake Error at NoCompileOutputVariable.cmake:[0-9]+ \(try_run\):
+  try_run unknown error.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)$
