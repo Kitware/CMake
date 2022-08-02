@@ -481,7 +481,7 @@
         # use the scripts here.
         - "$LAUNCHER make -j$(nproc)"
         # NOTE: This regex matches that used in the release build.
-        - "$LAUNCHER bin/ctest --output-on-failure -j$(nproc) -R '^(CMake\\.|CMakeLib\\.|CMakeServerLib\\.|RunCMake\\.ctest_memcheck)'"
+        - "$LAUNCHER bin/ctest --output-on-failure -j$(nproc) -R '^(CMake\\.|CMakeLib\\.|RunCMake\\.ctest_memcheck)'"
         # Make a package.
         - bin/cpack -G TGZ
         - bin/cpack -G STGZ
