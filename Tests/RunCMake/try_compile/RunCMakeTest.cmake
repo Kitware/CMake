@@ -19,6 +19,7 @@ run_cmake(BinDirEmpty)
 run_cmake(BinDirRelative)
 run_cmake(EmptyValueArgs)
 run_cmake(EmptyListArgs)
+run_cmake(TryRunArgs)
 
 run_cmake(EnvConfig)
 

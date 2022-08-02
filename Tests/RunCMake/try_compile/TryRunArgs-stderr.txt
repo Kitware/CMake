@@ -1,0 +1,71 @@
+^CMake Warning \(dev\) at TryRunArgs.cmake:[0-9]+ \(try_compile\):
+  try_compile given unknown argument "COMPILE_OUTPUT_VARIABLE".
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
++
+CMake Warning \(dev\) at TryRunArgs.cmake:[0-9]+ \(try_compile\):
+  try_compile given unknown argument "compOutputVar".
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
++
+CMake Warning \(dev\) at TryRunArgs.cmake:[0-9]+ \(try_compile\):
+  try_compile given unknown argument "RUN_OUTPUT_VARIABLE".
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
++
+CMake Warning \(dev\) at TryRunArgs.cmake:[0-9]+ \(try_compile\):
+  try_compile given unknown argument "runOutputVar".
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
++
+CMake Warning \(dev\) at TryRunArgs.cmake:[0-9]+ \(try_compile\):
+  try_compile given unknown argument "RUN_OUTPUT_STDOUT_VARIABLE".
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
++
+CMake Warning \(dev\) at TryRunArgs.cmake:[0-9]+ \(try_compile\):
+  try_compile given unknown argument "runOutputStdOutVar".
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
++
+CMake Warning \(dev\) at TryRunArgs.cmake:[0-9]+ \(try_compile\):
+  try_compile given unknown argument "RUN_OUTPUT_STDERR_VARIABLE".
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
++
+CMake Warning \(dev\) at TryRunArgs.cmake:[0-9]+ \(try_compile\):
+  try_compile given unknown argument "runOutputStdErrVar".
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
++
+CMake Warning \(dev\) at TryRunArgs.cmake:[0-9]+ \(try_compile\):
+  try_compile given unknown argument "WORKING_DIRECTORY".
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
++
+CMake Warning \(dev\) at TryRunArgs.cmake:[0-9]+ \(try_compile\):
+  try_compile given unknown argument "runWorkDir".
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
++
+CMake Warning \(dev\) at TryRunArgs.cmake:[0-9]+ \(try_compile\):
+  try_compile given unknown argument "ARGS".
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
++
+CMake Warning \(dev\) at TryRunArgs.cmake:[0-9]+ \(try_compile\):
+  try_compile given unknown argument "runArgs".
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.$
