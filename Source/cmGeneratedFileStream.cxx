@@ -124,10 +124,10 @@ cmGeneratedFileStreamBase::~cmGeneratedFileStreamBase()
 void cmGeneratedFileStreamBase::Open(std::string const& name)
 {
   // Save the original name of the file.
-  this->Name = name;
+  this->Name = cmSystemTools::CollapseFullPath(name);
 
   // Create the name of the temporary file.
-  this->TempName = name;
+  this->TempName = this->Name;
 #if defined(__VMS)
   this->TempName += "_";
 #else
@@ -231,7 +231,7 @@ int cmGeneratedFileStreamBase::RenameFile(std::string const& oldname,
 
 void cmGeneratedFileStream::SetName(const std::string& fname)
 {
-  this->Name = fname;
+  this->Name = cmSystemTools::CollapseFullPath(fname);
 }
 
 void cmGeneratedFileStream::SetTempExt(std::string const& ext)
