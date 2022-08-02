@@ -1758,6 +1758,14 @@ bool cmGlobalGenerator::AddHeaderSetVerification()
     }
   }
 
+  cmTarget* allVerifyTarget = this->Makefiles.front()->FindTargetToUse(
+    "all_verify_interface_header_sets", true);
+  if (allVerifyTarget) {
+    this->LocalGenerators.front()->AddGeneratorTarget(
+      cm::make_unique<cmGeneratorTarget>(allVerifyTarget,
+                                         this->LocalGenerators.front().get()));
+  }
+
   return true;
 }
 

@@ -8535,6 +8535,9 @@ bool cmGeneratorTarget::AddHeaderSetVerification()
   }
 
   cmTarget* verifyTarget = nullptr;
+  cmTarget* allVerifyTarget =
+    this->GlobalGenerator->GetMakefiles().front()->FindTargetToUse(
+      "all_verify_interface_header_sets", true);
 
   auto interfaceFileSetEntries = this->Target->GetInterfaceHeaderSetsEntries();
 
@@ -8622,6 +8625,15 @@ bool cmGeneratorTarget::AddHeaderSetVerification()
             verifyTarget->FinalizeTargetCompileInfo(
               this->Makefile->GetCompileDefinitionsEntries(),
               perConfigCompileDefinitions);
+
+            if (!allVerifyTarget) {
+              allVerifyTarget = this->GlobalGenerator->GetMakefiles()
+                                  .front()
+                                  ->AddNewUtilityTarget(
+                                    "all_verify_interface_header_sets", true);
+            }
+
+            allVerifyTarget->AddUtility(verifyTarget->GetName(), false);
           }
 
           if (fileCgesContextSensitive) {

@@ -26,6 +26,10 @@ Otherwise, if C++ is enabled globally, the header is compiled as C++.
 Otherwise, if C is enabled globally, the header is compiled as C. Otherwise,
 the header file is not compiled.
 
+If any verification targets are created, a top-level target called
+``all_verify_interface_header_sets`` is created which depends on all
+verification targets.
+
 This property is initialized by the value of the
 :variable:`CMAKE_VERIFY_INTERFACE_HEADER_SETS` variable if it is set when
 a target is created.
