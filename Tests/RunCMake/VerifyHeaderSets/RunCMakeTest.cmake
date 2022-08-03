@@ -44,5 +44,11 @@ run_cmake_build(VerifyHeaderSets interface_lang_test_cxx_verify_interface_header
 run_cmake_build(VerifyHeaderSets list_verify_interface_header_sets)
 
 set(RunCMake_TEST_OPTIONS -DCMAKE_VERIFY_INTERFACE_HEADER_SETS=ON)
+run_cmake(AllVerifyInterfaceHeaderSets)
+unset(RunCMake_TEST_OPTIONS)
+
+run_cmake_build(AllVerifyInterfaceHeaderSets all_verify_interface_header_sets)
+
+set(RunCMake_TEST_OPTIONS -DCMAKE_VERIFY_INTERFACE_HEADER_SETS=ON)
 run_cmake(VerifyHeaderSetsNonexistent)
 unset(RunCMake_TEST_OPTIONS)
