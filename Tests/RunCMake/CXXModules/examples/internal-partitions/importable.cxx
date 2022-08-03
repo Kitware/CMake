@@ -1,5 +1,5 @@
 export module importable;
-import importable : internal_partition;
+import : internal_partition;
 
 #include "internal-partitions_export.h"
 

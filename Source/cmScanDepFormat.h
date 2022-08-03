@@ -18,6 +18,11 @@ struct cmSourceReqInfo
   std::string SourcePath;
   std::string CompiledModulePath;
   bool UseSourcePath = false;
+
+  // Provides-only fields.
+  bool IsInterface = true;
+
+  // Requires-only fields.
   LookupMethod Method = LookupMethod::ByName;
 };
 
