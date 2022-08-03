@@ -291,6 +291,7 @@ public:
   {
   }
 
+protected:
   void OnMatchesLoaded() override
   {
     // check if there is a specific sorting order to perform
@@ -316,6 +317,7 @@ public:
   {
   }
 
+protected:
   std::string TransformNameBeforeCmp(std::string name) override
   {
     return cmStrCat(name, this->Extension);
