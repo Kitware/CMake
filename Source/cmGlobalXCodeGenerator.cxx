@@ -2368,8 +2368,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     std::string& flags = cflags[lang];
 
     // Add language-specific flags.
-    this->CurrentLocalGenerator->AddLanguageFlags(flags, gtgt, lang,
-                                                  configName);
+    this->CurrentLocalGenerator->AddLanguageFlags(
+      flags, gtgt, cmBuildStep::Compile, lang, configName);
 
     if (gtgt->IsIPOEnabled(lang, configName)) {
       this->CurrentLocalGenerator->AppendFeatureOptions(flags, lang, "IPO");

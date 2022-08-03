@@ -537,7 +537,6 @@ std::vector<std::string> cmNinjaNormalTargetGenerator::ComputeDeviceLinkCmd()
   // this target requires separable cuda compilation
   // now build the correct command depending on if the target is
   // an executable or a dynamic library.
-  std::string linkCmd;
   switch (this->GetGeneratorTarget()->GetType()) {
     case cmStateEnums::STATIC_LIBRARY:
     case cmStateEnums::SHARED_LIBRARY:

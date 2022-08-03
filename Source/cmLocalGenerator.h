@@ -35,6 +35,7 @@ class cmGeneratorTarget;
 class cmGlobalGenerator;
 class cmImplicitDependsList;
 class cmLinkLineComputer;
+class cmLinkLineDeviceComputer;
 class cmMakefile;
 class cmRulePlaceholderExpander;
 class cmSourceFile;
@@ -57,6 +58,13 @@ enum class cmDependencyScannerKind
 {
   CMake,
   Compiler
+};
+
+/** What to compute language flags for */
+enum class cmBuildStep
+{
+  Compile,
+  Link
 };
 
 /** Target and source file which have a specific output.  */
@@ -143,7 +151,8 @@ public:
                             const std::string& filterArch = std::string());
 
   void AddLanguageFlags(std::string& flags, cmGeneratorTarget const* target,
-                        const std::string& lang, const std::string& config);
+                        cmBuildStep compileOrLink, const std::string& lang,
+                        const std::string& config);
   void AddLanguageFlagsForLinking(std::string& flags,
                                   cmGeneratorTarget const* target,
                                   const std::string& lang,
@@ -476,7 +485,7 @@ public:
 
   /** Fill out these strings for the given target.  Libraries to link,
    *  flags, and linkflags. */
-  void GetDeviceLinkFlags(cmLinkLineComputer& linkLineComputer,
+  void GetDeviceLinkFlags(cmLinkLineDeviceComputer& linkLineComputer,
                           const std::string& config, std::string& linkLibs,
                           std::string& linkFlags, std::string& frameworkPath,
                           std::string& linkPath, cmGeneratorTarget* target);

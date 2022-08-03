@@ -917,9 +917,17 @@ bool cmGeneratorTarget::IsIPOEnabled(std::string const& lang,
     return false;
   }
 
-  if (lang != "C" && lang != "CXX" && lang != "Fortran") {
+  if (lang != "C" && lang != "CXX" && lang != "CUDA" && lang != "Fortran") {
     // We do not define IPO behavior for other languages.
     return false;
+  }
+
+  if (lang == "CUDA") {
+    // CUDA IPO requires both CUDA_ARCHITECTURES and CUDA_SEPARABLE_COMPILATION
+    if (cmIsOff(this->GetSafeProperty("CUDA_ARCHITECTURES")) ||
+        cmIsOff(this->GetSafeProperty("CUDA_SEPARABLE_COMPILATION"))) {
+      return false;
+    }
   }
 
   cmPolicies::PolicyStatus cmp0069 = this->GetPolicyStatusCMP0069();
@@ -3429,7 +3437,9 @@ void cmGeneratorTarget::AddExplicitLanguageFlags(std::string& flags,
                                              "EXPLICIT_LANGUAGE");
 }
 
-void cmGeneratorTarget::AddCUDAArchitectureFlags(std::string& flags) const
+void cmGeneratorTarget::AddCUDAArchitectureFlags(cmBuildStep compileOrLink,
+                                                 const std::string& config,
+                                                 std::string& flags) const
 {
   std::string property = this->GetSafeProperty("CUDA_ARCHITECTURES");
 
@@ -3461,6 +3471,7 @@ void cmGeneratorTarget::AddCUDAArchitectureFlags(std::string& flags) const
 
   std::string const& compiler =
     this->Makefile->GetSafeDefinition("CMAKE_CUDA_COMPILER_ID");
+  const bool ipoEnabled = this->IsIPOEnabled("CUDA", config);
 
   // Check for special modes: `all`, `all-major`.
   if (property == "all" || property == "all-major") {
@@ -3540,6 +3551,13 @@ void cmGeneratorTarget::AddCUDAArchitectureFlags(std::string& flags) const
   }
 
   if (compiler == "NVIDIA") {
+    if (ipoEnabled && compileOrLink == cmBuildStep::Link) {
+      if (cmValue cudaIPOFlags =
+            this->Makefile->GetDefinition("CMAKE_CUDA_LINK_OPTIONS_IPO")) {
+        flags += cudaIPOFlags;
+      }
+    }
+
     for (CudaArchitecture& architecture : architectures) {
       flags +=
         " --generate-code=arch=compute_" + architecture.name + ",code=[";
@@ -3552,7 +3570,13 @@ void cmGeneratorTarget::AddCUDAArchitectureFlags(std::string& flags) const
         }
       }
 
-      if (architecture.real) {
+      if (ipoEnabled) {
+        if (compileOrLink == cmBuildStep::Compile) {
+          flags += "lto_" + architecture.name;
+        } else if (compileOrLink == cmBuildStep::Link) {
+          flags += "sm_" + architecture.name;
+        }
+      } else if (architecture.real) {
         flags += "sm_" + architecture.name;
       }
 

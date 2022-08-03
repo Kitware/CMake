@@ -36,6 +36,7 @@
 #include "cmInstallScriptGenerator.h"
 #include "cmInstallTargetGenerator.h"
 #include "cmLinkLineComputer.h"
+#include "cmLinkLineDeviceComputer.h"
 #include "cmMakefile.h"
 #include "cmRange.h"
 #include "cmRulePlaceholderExpander.h"
@@ -1381,7 +1382,7 @@ std::vector<BT<std::string>> cmLocalGenerator::GetStaticLibraryFlags(
 }
 
 void cmLocalGenerator::GetDeviceLinkFlags(
-  cmLinkLineComputer& linkLineComputer, const std::string& config,
+  cmLinkLineDeviceComputer& linkLineComputer, const std::string& config,
   std::string& linkLibs, std::string& linkFlags, std::string& frameworkPath,
   std::string& linkPath, cmGeneratorTarget* target)
 {
@@ -1389,12 +1390,26 @@ void cmLocalGenerator::GetDeviceLinkFlags(
 
   cmComputeLinkInformation* pcli = target->GetLinkInformation(config);
 
+  auto linklang = linkLineComputer.GetLinkerLanguage(target, config);
+  auto ipoEnabled = target->IsIPOEnabled(linklang, config);
+  if (!ipoEnabled) {
+    ipoEnabled = linkLineComputer.ComputeRequiresDeviceLinkingIPOFlag(*pcli);
+  }
+  if (ipoEnabled) {
+    if (cmValue cudaIPOFlags = this->Makefile->GetDefinition(
+          "CMAKE_CUDA_DEVICE_LINK_OPTIONS_IPO")) {
+      linkFlags += cudaIPOFlags;
+    }
+  }
+
   if (pcli) {
     // Compute the required device link libraries when
     // resolving gpu lang device symbols
     this->OutputLinkLibraries(pcli, &linkLineComputer, linkLibs, frameworkPath,
                               linkPath);
   }
+
+  // iterate link deps and see if any of them need IPO
 
   std::vector<std::string> linkOpts;
   target->GetLinkOptions(linkOpts, config, "CUDA");
@@ -1590,7 +1605,8 @@ std::vector<BT<std::string>> cmLocalGenerator::GetTargetCompileFlags(
   cmMakefile* mf = this->GetMakefile();
 
   // Add language-specific flags.
-  this->AddLanguageFlags(compileFlags, target, lang, config);
+  this->AddLanguageFlags(compileFlags, target, cmBuildStep::Compile, lang,
+                         config);
 
   if (target->IsIPOEnabled(lang, config)) {
     this->AppendFeatureOptions(compileFlags, lang, "IPO");
@@ -1903,6 +1919,7 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
 
 void cmLocalGenerator::AddLanguageFlags(std::string& flags,
                                         cmGeneratorTarget const* target,
+                                        cmBuildStep compileOrLink,
                                         const std::string& lang,
                                         const std::string& config)
 {
@@ -1926,7 +1943,7 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
       }
     }
   } else if (lang == "CUDA") {
-    target->AddCUDAArchitectureFlags(flags);
+    target->AddCUDAArchitectureFlags(compileOrLink, config, flags);
     target->AddCUDAToolkitFlags(flags);
   } else if (lang == "ISPC") {
     target->AddISPCTargetFlags(flags);
@@ -2038,7 +2055,7 @@ void cmLocalGenerator::AddLanguageFlagsForLinking(
     this->AddCompilerRequirementFlag(flags, target, lang, config);
   }
 
-  this->AddLanguageFlags(flags, target, lang, config);
+  this->AddLanguageFlags(flags, target, cmBuildStep::Link, lang, config);
 
   if (target->IsIPOEnabled(lang, config)) {
     this->AppendFeatureOptions(flags, lang, "IPO");

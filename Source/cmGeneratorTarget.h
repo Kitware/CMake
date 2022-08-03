@@ -23,6 +23,7 @@
 #include "cmStateTypes.h"
 #include "cmValue.h"
 
+enum class cmBuildStep;
 class cmComputeLinkInformation;
 class cmCustomCommand;
 class cmGlobalGenerator;
@@ -471,7 +472,9 @@ public:
   void AddExplicitLanguageFlags(std::string& flags,
                                 cmSourceFile const& sf) const;
 
-  void AddCUDAArchitectureFlags(std::string& flags) const;
+  void AddCUDAArchitectureFlags(cmBuildStep compileOrLink,
+                                const std::string& config,
+                                std::string& flags) const;
   void AddCUDAToolkitFlags(std::string& flags) const;
 
   void AddHIPArchitectureFlags(std::string& flags) const;

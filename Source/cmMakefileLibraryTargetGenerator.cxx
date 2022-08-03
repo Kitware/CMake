@@ -287,10 +287,6 @@ void cmMakefileLibraryTargetGenerator::WriteNvidiaDeviceLibraryRules(
   this->LocalGenerator->AddLanguageFlagsForLinking(
     langFlags, this->GeneratorTarget, linkLanguage, this->GetConfigName());
 
-  // Create set of linking flags.
-  std::string linkFlags;
-  this->GetDeviceLinkFlags(linkFlags, linkLanguage);
-
   // Clean files associated with this library.
   std::set<std::string> libCleanFiles;
   libCleanFiles.insert(
@@ -315,12 +311,19 @@ void cmMakefileLibraryTargetGenerator::WriteNvidiaDeviceLibraryRules(
 
     // Collect up flags to link in needed libraries.
     std::string linkLibs;
-    std::unique_ptr<cmLinkLineComputer> linkLineComputer(
+    std::unique_ptr<cmLinkLineDeviceComputer> linkLineComputer(
       new cmLinkLineDeviceComputer(
         this->LocalGenerator,
         this->LocalGenerator->GetStateSnapshot().GetDirectory()));
     linkLineComputer->SetForResponse(useResponseFileForLibs);
     linkLineComputer->SetRelink(relink);
+
+    // Create set of linking flags.
+    std::string linkFlags;
+    std::string ignored_;
+    this->LocalGenerator->GetDeviceLinkFlags(
+      *linkLineComputer, this->GetConfigName(), ignored_, linkFlags, ignored_,
+      ignored_, this->GeneratorTarget);
 
     this->CreateLinkLibs(
       linkLineComputer.get(), linkLibs, useResponseFileForLibs, depends,
