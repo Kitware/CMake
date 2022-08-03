@@ -26,7 +26,7 @@ RUN : \
  && nice make -j $(nproc) \
  && if $TEST; then \
         # Run tests that require the full build tree.
-        bin/ctest --output-on-failure -j 8 -R '^(CMake\.|CMakeLib\.|CMakeServerLib\.|RunCMake\.ctest_memcheck)'; \
+        bin/ctest --output-on-failure -j 8 -R '^(CMake\.|CMakeLib\.|RunCMake\.ctest_memcheck)'; \
     fi \
  && bin/cpack -G TGZ \
  && bin/cpack -G STGZ \
