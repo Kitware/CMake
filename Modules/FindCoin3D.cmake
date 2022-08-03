@@ -31,11 +31,11 @@ if (WIN32)
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\SIM\\Coin3D\\2;Installation Path]/include"
     )
 
-    find_library(COIN3D_LIBRARY_DEBUG coin2d
+    find_library(COIN3D_LIBRARY_DEBUG NAMES coin2d coin4d
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\SIM\\Coin3D\\2;Installation Path]/lib"
     )
 
-    find_library(COIN3D_LIBRARY_RELEASE coin2
+    find_library(COIN3D_LIBRARY_RELEASE NAMES coin2 coin4
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\SIM\\Coin3D\\2;Installation Path]/lib"
     )
 
