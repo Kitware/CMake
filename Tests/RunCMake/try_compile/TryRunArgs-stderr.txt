@@ -1,0 +1,13 @@
+^CMake Warning \(dev\) at TryRunArgs.cmake:[0-9]+ \(try_compile\):
+  Ignoring try_run arguments for try_compile:
+
+    COMPILE_OUTPUT_VARIABLE
+    RUN_OUTPUT_VARIABLE
+    RUN_OUTPUT_STDOUT_VARIABLE
+    RUN_OUTPUT_STDERR_VARIABLE
+    WORKING_DIRECTORY
+    ARGS
+
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.$

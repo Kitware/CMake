@@ -1,5 +1,0 @@
-CMake Error: RUN_OUTPUT_STDOUT_VARIABLE specified but there is no variable
-CMake Error at BadStdOutVariable.cmake:1 \(try_run\):
-  try_run unknown error.
-Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)

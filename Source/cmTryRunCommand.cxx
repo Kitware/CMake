@@ -4,8 +4,11 @@
 
 #include <cstdio>
 
+#include <cm/optional>
+
 #include "cmsys/FStream.hxx"
 
+#include "cmArgumentParserTypes.h"
 #include "cmCoreTryCompile.h"
 #include "cmDuration.h"
 #include "cmExecutionStatus.h"
@@ -32,115 +35,35 @@ public:
   bool TryRunCode(std::vector<std::string> const& args);
 
   void RunExecutable(const std::string& runArgs,
+                     cm::optional<std::string> const& workDir,
                      std::string* runOutputContents,
                      std::string* runOutputStdOutContents,
                      std::string* runOutputStdErrContents);
   void DoNotRunExecutable(const std::string& runArgs,
                           const std::string& srcFile,
+                          std::string const& compileResultVariable,
                           std::string* runOutputContents,
                           std::string* runOutputStdOutContents,
                           std::string* runOutputStdErrContents);
 
-  std::string CompileResultVariable;
   std::string RunResultVariable;
-  std::string OutputVariable;
-  std::string RunOutputVariable;
-  std::string RunOutputStdOutVariable;
-  std::string RunOutputStdErrVariable;
-  std::string CompileOutputVariable;
-  std::string WorkingDirectory;
 };
 
 bool TryRunCommandImpl::TryRunCode(std::vector<std::string> const& argv)
 {
-  // build an arg list for TryCompile and extract the runArgs,
-  std::vector<std::string> tryCompile;
-
-  this->CompileResultVariable.clear();
-  this->RunResultVariable.clear();
-  this->OutputVariable.clear();
-  this->RunOutputVariable.clear();
-  this->RunOutputStdOutVariable.clear();
-  this->RunOutputStdErrVariable.clear();
-  this->CompileOutputVariable.clear();
-
-  std::string runArgs;
-  unsigned int i;
-  for (i = 1; i < argv.size(); ++i) {
-    if (argv[i] == "ARGS") {
-      ++i;
-      while (i < argv.size() && argv[i] != "COMPILE_DEFINITIONS" &&
-             argv[i] != "CMAKE_FLAGS" && argv[i] != "LINK_OPTIONS" &&
-             argv[i] != "LINK_LIBRARIES") {
-        runArgs += " ";
-        runArgs += argv[i];
-        ++i;
-      }
-      if (i < argv.size()) {
-        tryCompile.push_back(argv[i]);
-      }
-    } else {
-      if (argv[i] == "OUTPUT_VARIABLE") {
-        if (argv.size() <= (i + 1)) {
-          cmSystemTools::Error(
-            "OUTPUT_VARIABLE specified but there is no variable");
-          return false;
-        }
-        i++;
-        this->OutputVariable = argv[i];
-      } else if (argv[i] == "RUN_OUTPUT_VARIABLE") {
-        if (argv.size() <= (i + 1)) {
-          cmSystemTools::Error(
-            "RUN_OUTPUT_VARIABLE specified but there is no variable");
-          return false;
-        }
-        i++;
-        this->RunOutputVariable = argv[i];
-      } else if (argv[i] == "RUN_OUTPUT_STDOUT_VARIABLE") {
-        if (argv.size() <= (i + 1)) {
-          cmSystemTools::Error(
-            "RUN_OUTPUT_STDOUT_VARIABLE specified but there is no variable");
-          return false;
-        }
-        i++;
-        this->RunOutputStdOutVariable = argv[i];
-      } else if (argv[i] == "RUN_OUTPUT_STDERR_VARIABLE") {
-        if (argv.size() <= (i + 1)) {
-          cmSystemTools::Error(
-            "RUN_OUTPUT_STDERR_VARIABLE specified but there is no variable");
-          return false;
-        }
-        i++;
-        this->RunOutputStdErrVariable = argv[i];
-      } else if (argv[i] == "COMPILE_OUTPUT_VARIABLE") {
-        if (argv.size() <= (i + 1)) {
-          cmSystemTools::Error(
-            "COMPILE_OUTPUT_VARIABLE specified but there is no variable");
-          return false;
-        }
-        i++;
-        this->CompileOutputVariable = argv[i];
-      } else if (argv[i] == "WORKING_DIRECTORY") {
-        if (argv.size() <= (i + 1)) {
-          cmSystemTools::Error(
-            "WORKING_DIRECTORY specified but there is no variable");
-          return false;
-        }
-        i++;
-        this->WorkingDirectory = argv[i];
-      } else {
-        tryCompile.push_back(argv[i]);
-      }
-    }
+  this->RunResultVariable = argv[0];
+  cmCoreTryCompile::Arguments arguments =
+    this->ParseArgs(cmMakeRange(argv).advance(1), true);
+  if (!arguments) {
+    return true;
   }
 
   // although they could be used together, don't allow it, because
   // using OUTPUT_VARIABLE makes crosscompiling harder
-  if (!this->OutputVariable.empty() &&
-      (!this->RunOutputVariable.empty() ||
-       !this->CompileOutputVariable.empty() ||
-       !this->RunOutputStdOutVariable.empty() ||
-       !this->RunOutputStdErrVariable.empty())) {
+  if (arguments.OutputVariable &&
+      (arguments.CompileOutputVariable || arguments.RunOutputVariable ||
+       arguments.RunOutputStdOutVariable ||
+       arguments.RunOutputStdErrVariable)) {
     cmSystemTools::Error(
       "You cannot use OUTPUT_VARIABLE together with COMPILE_OUTPUT_VARIABLE "
       ", RUN_OUTPUT_VARIABLE, RUN_OUTPUT_STDOUT_VARIABLE or "
@@ -151,9 +74,9 @@ bool TryRunCommandImpl::TryRunCode(std::vector<std::string> const& argv)
     return false;
   }
 
-  if ((!this->RunOutputStdOutVariable.empty() ||
-       !RunOutputStdErrVariable.empty()) &&
-      !this->RunOutputVariable.empty()) {
+  if ((arguments.RunOutputStdOutVariable ||
+       arguments.RunOutputStdErrVariable) &&
+      arguments.RunOutputVariable) {
     cmSystemTools::Error(
       "You cannot use RUN_OUTPUT_STDOUT_VARIABLE or "
       "RUN_OUTPUT_STDERR_VARIABLE together "
@@ -162,43 +85,40 @@ bool TryRunCommandImpl::TryRunCode(std::vector<std::string> const& argv)
     return false;
   }
 
-  if (!this->WorkingDirectory.empty()) {
-    if (!cmSystemTools::MakeDirectory(this->WorkingDirectory)) {
+  if (arguments.RunWorkingDirectory) {
+    if (!cmSystemTools::MakeDirectory(*arguments.RunWorkingDirectory)) {
       cmSystemTools::Error(cmStrCat("Error creating working directory \"",
-                                    this->WorkingDirectory, "\"."));
+                                    *arguments.RunWorkingDirectory, "\"."));
       return false;
     }
   }
 
   bool captureRunOutput = false;
   bool captureRunOutputStdOutErr = false;
-  if (!this->OutputVariable.empty()) {
+  if (arguments.OutputVariable) {
     captureRunOutput = true;
-    tryCompile.emplace_back("OUTPUT_VARIABLE");
-    tryCompile.push_back(this->OutputVariable);
+  } else if (arguments.CompileOutputVariable) {
+    arguments.OutputVariable = arguments.CompileOutputVariable;
   }
-  if (!this->CompileOutputVariable.empty()) {
-    tryCompile.emplace_back("OUTPUT_VARIABLE");
-    tryCompile.push_back(this->CompileOutputVariable);
-  }
-  if (!this->RunOutputStdOutVariable.empty() ||
-      !RunOutputStdErrVariable.empty()) {
+  if (arguments.RunOutputStdOutVariable || arguments.RunOutputStdErrVariable) {
     captureRunOutputStdOutErr = true;
-  } else if (!this->RunOutputVariable.empty()) {
+  } else if (arguments.RunOutputVariable) {
     captureRunOutput = true;
   }
-
-  this->RunResultVariable = argv[0];
-  this->CompileResultVariable = argv[1];
 
   // do the try compile
-  int res = this->TryCompileCode(tryCompile, true);
+  bool compiled = this->TryCompileCode(arguments, cmStateEnums::EXECUTABLE);
 
   // now try running the command if it compiled
-  if (!res) {
+  if (compiled) {
     if (this->OutputFile.empty()) {
       cmSystemTools::Error(this->FindErrorMessage);
     } else {
+      std::string runArgs;
+      if (arguments.RunArgs) {
+        runArgs = cmStrCat(" ", cmJoin(*arguments.RunArgs, " "));
+      }
+
       // "run" it and capture the output
       std::string runOutputContents;
       std::string runOutputStdOutContents;
@@ -206,47 +126,51 @@ bool TryRunCommandImpl::TryRunCode(std::vector<std::string> const& argv)
       if (this->Makefile->IsOn("CMAKE_CROSSCOMPILING") &&
           !this->Makefile->IsDefinitionSet("CMAKE_CROSSCOMPILING_EMULATOR")) {
         this->DoNotRunExecutable(
-          runArgs, argv[3], captureRunOutput ? &runOutputContents : nullptr,
-          captureRunOutputStdOutErr && !RunOutputStdOutVariable.empty()
+          runArgs, *arguments.SourceDirectoryOrFile,
+          *arguments.CompileResultVariable,
+          captureRunOutput ? &runOutputContents : nullptr,
+          captureRunOutputStdOutErr && arguments.RunOutputStdOutVariable
             ? &runOutputStdOutContents
             : nullptr,
-          captureRunOutputStdOutErr && !RunOutputStdErrVariable.empty()
+          captureRunOutputStdOutErr && arguments.RunOutputStdErrVariable
             ? &runOutputStdErrContents
             : nullptr);
       } else {
         this->RunExecutable(
-          runArgs, captureRunOutput ? &runOutputContents : nullptr,
-          captureRunOutputStdOutErr && !RunOutputStdOutVariable.empty()
+          runArgs, arguments.RunWorkingDirectory,
+          captureRunOutput ? &runOutputContents : nullptr,
+          captureRunOutputStdOutErr && arguments.RunOutputStdOutVariable
             ? &runOutputStdOutContents
             : nullptr,
-          captureRunOutputStdOutErr && !RunOutputStdErrVariable.empty()
+          captureRunOutputStdOutErr && arguments.RunOutputStdErrVariable
             ? &runOutputStdErrContents
             : nullptr);
       }
 
       // now put the output into the variables
-      if (!this->RunOutputVariable.empty()) {
-        this->Makefile->AddDefinition(this->RunOutputVariable,
+      if (arguments.RunOutputVariable) {
+        this->Makefile->AddDefinition(*arguments.RunOutputVariable,
                                       runOutputContents);
       }
-      if (!this->RunOutputStdOutVariable.empty()) {
-        this->Makefile->AddDefinition(this->RunOutputStdOutVariable,
+      if (arguments.RunOutputStdOutVariable) {
+        this->Makefile->AddDefinition(*arguments.RunOutputStdOutVariable,
                                       runOutputStdOutContents);
       }
-      if (!this->RunOutputStdErrVariable.empty()) {
-        this->Makefile->AddDefinition(this->RunOutputStdErrVariable,
+      if (arguments.RunOutputStdErrVariable) {
+        this->Makefile->AddDefinition(*arguments.RunOutputStdErrVariable,
                                       runOutputStdErrContents);
       }
 
-      if (!this->OutputVariable.empty()) {
+      if (arguments.OutputVariable && !arguments.CompileOutputVariable) {
         // if the TryCompileCore saved output in this outputVariable then
         // prepend that output to this output
         cmValue compileOutput =
-          this->Makefile->GetDefinition(this->OutputVariable);
+          this->Makefile->GetDefinition(*arguments.OutputVariable);
         if (compileOutput) {
           runOutputContents = *compileOutput + runOutputContents;
         }
-        this->Makefile->AddDefinition(this->OutputVariable, runOutputContents);
+        this->Makefile->AddDefinition(*arguments.OutputVariable,
+                                      runOutputContents);
       }
     }
   }
@@ -259,6 +183,7 @@ bool TryRunCommandImpl::TryRunCode(std::vector<std::string> const& argv)
 }
 
 void TryRunCommandImpl::RunExecutable(const std::string& runArgs,
+                                      cm::optional<std::string> const& workDir,
                                       std::string* out, std::string* stdOut,
                                       std::string* stdErr)
 {
@@ -286,8 +211,8 @@ void TryRunCommandImpl::RunExecutable(const std::string& runArgs,
   bool worked = cmSystemTools::RunSingleCommand(
     finalCommand, stdOut || stdErr ? stdOut : out,
     stdOut || stdErr ? stdErr : out, &retVal,
-    this->WorkingDirectory.empty() ? nullptr : this->WorkingDirectory.c_str(),
-    cmSystemTools::OUTPUT_NONE, cmDuration::zero());
+    workDir ? workDir->c_str() : nullptr, cmSystemTools::OUTPUT_NONE,
+    cmDuration::zero());
   // set the run var
   char retChar[16];
   const char* retStr;
@@ -306,11 +231,10 @@ void TryRunCommandImpl::RunExecutable(const std::string& runArgs,
  executable, two cache variables are created which will hold the results
  the executable would have produced.
 */
-void TryRunCommandImpl::DoNotRunExecutable(const std::string& runArgs,
-                                           const std::string& srcFile,
-                                           std::string* out,
-                                           std::string* stdOut,
-                                           std::string* stdErr)
+void TryRunCommandImpl::DoNotRunExecutable(
+  const std::string& runArgs, const std::string& srcFile,
+  std::string const& compileResultVariable, std::string* out,
+  std::string* stdOut, std::string* stdErr)
 {
   // copy the executable out of the CMakeFiles/ directory, so it is not
   // removed at the end of try_run() and the user can run it manually
@@ -490,7 +414,7 @@ void TryRunCommandImpl::DoNotRunExecutable(const std::string& runArgs,
       }
 
       comment += "The ";
-      comment += this->CompileResultVariable;
+      comment += compileResultVariable;
       comment += " variable holds the build result for this try_run().\n\n"
                  "Source file   : ";
       comment += srcFile + "\n";

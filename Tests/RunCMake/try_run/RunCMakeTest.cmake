@@ -13,5 +13,9 @@ endif()
 
 run_cmake(WorkingDirArg)
 
-run_cmake(BadStdOutVariable)
-run_cmake(BadStdErrVariable)
+run_cmake(NoOutputVariable)
+run_cmake(NoCompileOutputVariable)
+run_cmake(NoRunOutputVariable)
+run_cmake(NoRunStdOutVariable)
+run_cmake(NoRunStdErrVariable)
+run_cmake(NoWorkingDirectory)

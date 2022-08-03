@@ -6,6 +6,11 @@
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmRange.h"
+#include "cmState.h"
+#include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
+#include "cmValue.h"
 #include "cmake.h"
 
 bool cmTryCompileCommand(std::vector<std::string> const& args,
@@ -24,8 +29,34 @@ bool cmTryCompileCommand(std::vector<std::string> const& args,
     return false;
   }
 
+  cmStateEnums::TargetType targetType = cmStateEnums::EXECUTABLE;
+  cmValue tt = mf.GetDefinition("CMAKE_TRY_COMPILE_TARGET_TYPE");
+  if (cmNonempty(tt)) {
+    if (*tt == cmState::GetTargetTypeName(cmStateEnums::EXECUTABLE)) {
+      targetType = cmStateEnums::EXECUTABLE;
+    } else if (*tt ==
+               cmState::GetTargetTypeName(cmStateEnums::STATIC_LIBRARY)) {
+      targetType = cmStateEnums::STATIC_LIBRARY;
+    } else {
+      mf.IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("Invalid value '", *tt,
+                 "' for CMAKE_TRY_COMPILE_TARGET_TYPE.  Only '",
+                 cmState::GetTargetTypeName(cmStateEnums::EXECUTABLE),
+                 "' and '",
+                 cmState::GetTargetTypeName(cmStateEnums::STATIC_LIBRARY),
+                 "' are allowed."));
+      return false;
+    }
+  }
+
   cmCoreTryCompile tc(&mf);
-  tc.TryCompileCode(args, false);
+  cmCoreTryCompile::Arguments arguments =
+    tc.ParseArgs(cmMakeRange(args), false);
+  if (!arguments) {
+    return true;
+  }
+  tc.TryCompileCode(arguments, targetType);
 
   // if They specified clean then we clean up what we can
   if (tc.SrcFileSignature) {
