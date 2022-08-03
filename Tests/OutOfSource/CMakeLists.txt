@@ -16,3 +16,6 @@ configure_file(
   )
 
 set(KEN 1)
+
+configure_file(SubInBuildCMakeLists.cmake ${CMAKE_CURRENT_BINARY_DIR}/SubInBuild/CMakeLists.txt COPYONLY)
+add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/SubInBuild ${CMAKE_CURRENT_BINARY_DIR}/SubInBuild/Build)
