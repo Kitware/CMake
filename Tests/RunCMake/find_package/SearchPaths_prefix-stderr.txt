@@ -1,0 +1,10 @@
+  find_package considered the following locations for SearchPaths's Config
+  module:
+
+    .*/Tests/RunCMake/find_package/SearchPaths_prefix-build/CMakeFiles/pkgRedirects/SearchPathsConfig\.cmake
+    .*/Tests/RunCMake/find_package/SearchPaths_prefix-build/CMakeFiles/pkgRedirects/searchpaths-config\.cmake
+    .*/Tests/RunCMake/find_package/SearchPaths/prefix/SearchPathsConfig\.cmake
+
+  The file was found at
+
+    .*/Tests/RunCMake/find_package/SearchPaths/prefix/SearchPathsConfig\.cmake
