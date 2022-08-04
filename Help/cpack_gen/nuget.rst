@@ -162,6 +162,14 @@ List of CPack NuGet generator specific variables:
  * Mandatory : NO
  * Default   : -
 
+.. variable:: CPACK_NUGET_PACKAGE_REQUIRE_LICENSE_ACCEPTANCE
+
+ When set to a true value, the user will be prompted to accept the license
+ before installing the package.
+
+ * Mandatory : NO
+ * Default   : -
+
 .. variable:: CPACK_NUGET_PACKAGE_ICON
               CPACK_NUGET_<compName>_PACKAGE_ICON
 
