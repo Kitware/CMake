@@ -1,2 +1,5 @@
 ^CMake Error: Could not read presets from [^
-]*/Tests/RunCMake/CMakePresets/IncludeNotFound: File not found$
+]*/Tests/RunCMake/CMakePresets/IncludeNotFound: File not found
+Errors:
+[^
+]*/IncludeNotFound/NotFound.json: Failed to read file$

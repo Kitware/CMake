@@ -1283,9 +1283,13 @@ void cmake::SetArgs(const std::vector<std::string>& args)
     cmCMakePresetsGraph presetsGraph;
     auto result = presetsGraph.ReadProjectPresets(this->GetHomeDirectory());
     if (result != cmCMakePresetsGraph::ReadFileResult::READ_OK) {
-      cmSystemTools::Error(
+      std::string errorMsg =
         cmStrCat("Could not read presets from ", this->GetHomeDirectory(),
-                 ": ", cmCMakePresetsGraph::ResultToString(result)));
+                 ": ", cmCMakePresetsGraph::ResultToString(result));
+      if (!presetsGraph.errors.empty()) {
+        errorMsg = cmStrCat(errorMsg, "\nErrors:\n", presetsGraph.errors);
+      }
+      cmSystemTools::Error(errorMsg);
       return;
     }
 

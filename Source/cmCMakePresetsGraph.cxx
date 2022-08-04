@@ -901,8 +901,9 @@ cmCMakePresetsGraph::ReadProjectPresetsInternal(bool allowNoFiles)
   std::string filename = GetUserFilename(this->SourceDir);
   std::vector<File*> inProgressFiles;
   if (cmSystemTools::FileExists(filename)) {
-    auto result = this->ReadJSONFile(filename, RootType::User,
-                                     ReadReason::Root, inProgressFiles, file);
+    auto result =
+      this->ReadJSONFile(filename, RootType::User, ReadReason::Root,
+                         inProgressFiles, file, this->errors);
     if (result != ReadFileResult::READ_OK) {
       return result;
     }
@@ -910,8 +911,9 @@ cmCMakePresetsGraph::ReadProjectPresetsInternal(bool allowNoFiles)
   } else {
     filename = GetFilename(this->SourceDir);
     if (cmSystemTools::FileExists(filename)) {
-      auto result = this->ReadJSONFile(
-        filename, RootType::Project, ReadReason::Root, inProgressFiles, file);
+      auto result =
+        this->ReadJSONFile(filename, RootType::Project, ReadReason::Root,
+                           inProgressFiles, file, this->errors);
       if (result != ReadFileResult::READ_OK) {
         return result;
       }

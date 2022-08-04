@@ -411,7 +411,7 @@ cmCMakePresetsGraph::ReadFileResult EnvironmentMapHelper(
 
 cmCMakePresetsGraph::ReadFileResult cmCMakePresetsGraph::ReadJSONFile(
   const std::string& filename, RootType rootType, ReadReason readReason,
-  std::vector<File*>& inProgressFiles, File*& file)
+  std::vector<File*>& inProgressFiles, File*& file, std::string& errMsg)
 {
   ReadFileResult result;
 
@@ -430,6 +430,7 @@ cmCMakePresetsGraph::ReadFileResult cmCMakePresetsGraph::ReadJSONFile(
 
   cmsys::ifstream fin(filename.c_str());
   if (!fin) {
+    errMsg = cmStrCat(filename, ": Failed to read file\n", errMsg);
     return ReadFileResult::FILE_NOT_FOUND;
   }
   // If there's a BOM, toss it.
@@ -438,7 +439,8 @@ cmCMakePresetsGraph::ReadFileResult cmCMakePresetsGraph::ReadJSONFile(
   Json::Value root;
   Json::CharReaderBuilder builder;
   Json::CharReaderBuilder::strictMode(&builder.settings_);
-  if (!Json::parseFromStream(builder, fin, &root, nullptr)) {
+  if (!Json::parseFromStream(builder, fin, &root, &errMsg)) {
+    errMsg = cmStrCat(filename, ":\n", errMsg);
     return ReadFileResult::JSON_PARSE_ERROR;
   }
 
@@ -490,6 +492,8 @@ cmCMakePresetsGraph::ReadFileResult cmCMakePresetsGraph::ReadJSONFile(
   for (auto& preset : presets.ConfigurePresets) {
     preset.OriginFile = file;
     if (preset.Name.empty()) {
+      errMsg += R"(\n\t)";
+      errMsg += filename;
       return ReadFileResult::INVALID_PRESET;
     }
 
@@ -523,6 +527,8 @@ cmCMakePresetsGraph::ReadFileResult cmCMakePresetsGraph::ReadJSONFile(
   for (auto& preset : presets.BuildPresets) {
     preset.OriginFile = file;
     if (preset.Name.empty()) {
+      errMsg += R"(\n\t)";
+      errMsg += filename;
       return ReadFileResult::INVALID_PRESET;
     }
 
@@ -569,12 +575,13 @@ cmCMakePresetsGraph::ReadFileResult cmCMakePresetsGraph::ReadJSONFile(
 
   auto const includeFile = [this, &inProgressFiles, file](
                              const std::string& include, RootType rootType2,
-                             ReadReason readReason2) -> ReadFileResult {
+                             ReadReason readReason2,
+                             std::string& FailureMessage) -> ReadFileResult {
     ReadFileResult r;
     File* includedFile;
     if ((r = this->ReadJSONFile(include, rootType2, readReason2,
-                                inProgressFiles, includedFile)) !=
-        ReadFileResult::READ_OK) {
+                                inProgressFiles, includedFile,
+                                FailureMessage)) != ReadFileResult::READ_OK) {
       return r;
     }
 
@@ -589,8 +596,8 @@ cmCMakePresetsGraph::ReadFileResult cmCMakePresetsGraph::ReadJSONFile(
       include = cmStrCat(directory, '/', include);
     }
 
-    if ((result = includeFile(include, rootType, ReadReason::Included)) !=
-        ReadFileResult::READ_OK) {
+    if ((result = includeFile(include, rootType, ReadReason::Included,
+                              errMsg)) != ReadFileResult::READ_OK) {
       return result;
     }
   }
@@ -599,7 +606,7 @@ cmCMakePresetsGraph::ReadFileResult cmCMakePresetsGraph::ReadJSONFile(
     auto cmakePresetsFilename = GetFilename(this->SourceDir);
     if (cmSystemTools::FileExists(cmakePresetsFilename)) {
       if ((result = includeFile(cmakePresetsFilename, RootType::Project,
-                                ReadReason::Root)) !=
+                                ReadReason::Root, errMsg)) !=
           ReadFileResult::READ_OK) {
         return result;
       }

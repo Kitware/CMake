@@ -52,6 +52,7 @@ public:
     TEST_OUTPUT_TRUNCATION_UNSUPPORTED,
   };
 
+  std::string errors;
   enum class ArchToolsetStrategy
   {
     Set,
@@ -407,7 +408,7 @@ private:
   ReadFileResult ReadProjectPresetsInternal(bool allowNoFiles);
   ReadFileResult ReadJSONFile(const std::string& filename, RootType rootType,
                               ReadReason readReason,
-                              std::vector<File*>& inProgressFiles,
-                              File*& file);
+                              std::vector<File*>& inProgressFiles, File*& file,
+                              std::string& errMsg);
   void ClearPresets();
 };
