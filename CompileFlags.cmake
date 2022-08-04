@@ -23,7 +23,7 @@ else()
 endif()
 
 if(MSVC)
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stack:10000000")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${CMAKE_CXX_LINKER_WRAPPER_FLAG}-stack:10000000")
 endif()
 
 # MSVC 14.28 enables C5105, but the Windows SDK 10.0.18362.0 triggers it.
