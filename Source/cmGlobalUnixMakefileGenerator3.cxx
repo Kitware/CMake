@@ -181,12 +181,12 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile2()
     return;
   }
 
-  // get a local generator for some useful methods
-  auto& lg = cm::static_reference_cast<cmLocalUnixMakefileGenerator3>(
+  // The global dependency graph is expressed via the root local generator.
+  auto& rootLG = cm::static_reference_cast<cmLocalUnixMakefileGenerator3>(
     this->LocalGenerators[0]);
 
   // Write the do not edit header.
-  lg.WriteDisclaimer(makefileStream);
+  rootLG.WriteDisclaimer(makefileStream);
 
   // Write the main entry point target.  This must be the VERY first
   // target so that make with no arguments will run it.
@@ -196,10 +196,10 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile2()
   depends.emplace_back("all");
 
   // Write the rule.
-  lg.WriteMakeRule(makefileStream,
-                   "Default target executed when no arguments are "
-                   "given to make.",
-                   "default_target", depends, no_commands, true);
+  rootLG.WriteMakeRule(makefileStream,
+                       "Default target executed when no arguments are "
+                       "given to make.",
+                       "default_target", depends, no_commands, true);
 
   depends.clear();
 
@@ -210,22 +210,22 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile2()
   }
 
   // Write out the "special" stuff
-  lg.WriteSpecialTargetsTop(makefileStream);
+  rootLG.WriteSpecialTargetsTop(makefileStream);
 
   // Write the directory level rules.
   for (auto const& it : this->ComputeDirectoryTargets()) {
-    this->WriteDirectoryRules2(makefileStream, it.second);
+    this->WriteDirectoryRules2(makefileStream, rootLG, it.second);
   }
 
   // Write the target convenience rules
   for (const auto& localGen : this->LocalGenerators) {
     this->WriteConvenienceRules2(
-      makefileStream,
+      makefileStream, rootLG,
       cm::static_reference_cast<cmLocalUnixMakefileGenerator3>(localGen));
   }
 
   // Write special bottom targets
-  lg.WriteSpecialTargetsBottom(makefileStream);
+  rootLG.WriteSpecialTargetsBottom(makefileStream);
 }
 
 void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
@@ -359,8 +359,9 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefileLanguageRules(
 }
 
 void cmGlobalUnixMakefileGenerator3::WriteDirectoryRule2(
-  std::ostream& ruleFileStream, DirectoryTarget const& dt, const char* pass,
-  bool check_all, bool check_relink, std::vector<std::string> const& commands)
+  std::ostream& ruleFileStream, cmLocalUnixMakefileGenerator3& rootLG,
+  DirectoryTarget const& dt, const char* pass, bool check_all,
+  bool check_relink, std::vector<std::string> const& commands)
 {
   auto* lg = static_cast<cmLocalUnixMakefileGenerator3*>(dt.LG);
   std::string makeTarget =
@@ -406,19 +407,21 @@ void cmGlobalUnixMakefileGenerator3::WriteDirectoryRule2(
   } else {
     doc = cmStrCat("Recursive \"", pass, "\" directory target.");
   }
-  lg->WriteMakeRule(ruleFileStream, doc.c_str(), makeTarget, depends, commands,
-                    true);
+
+  rootLG.WriteMakeRule(ruleFileStream, doc.c_str(), makeTarget, depends,
+                       commands, true);
 }
 
 void cmGlobalUnixMakefileGenerator3::WriteDirectoryRules2(
-  std::ostream& ruleFileStream, DirectoryTarget const& dt)
+  std::ostream& ruleFileStream, cmLocalUnixMakefileGenerator3& rootLG,
+  DirectoryTarget const& dt)
 {
   auto* lg = static_cast<cmLocalUnixMakefileGenerator3*>(dt.LG);
   // Begin the directory-level rules section.
   {
     std::string dir = cmSystemTools::ConvertToOutputPath(
-      lg->MaybeRelativeToTopBinDir(lg->GetCurrentBinaryDirectory()));
-    lg->WriteDivider(ruleFileStream);
+      rootLG.MaybeRelativeToTopBinDir(lg->GetCurrentBinaryDirectory()));
+    rootLG.WriteDivider(ruleFileStream);
     if (lg->IsRootMakefile()) {
       ruleFileStream << "# Directory level rules for the build root directory";
     } else {
@@ -428,16 +431,18 @@ void cmGlobalUnixMakefileGenerator3::WriteDirectoryRules2(
   }
 
   // Write directory-level rules for "all".
-  this->WriteDirectoryRule2(ruleFileStream, dt, "all", true, false);
+  this->WriteDirectoryRule2(ruleFileStream, rootLG, dt, "all", true, false);
 
   // Write directory-level rules for "preinstall".
-  this->WriteDirectoryRule2(ruleFileStream, dt, "preinstall", true, true);
+  this->WriteDirectoryRule2(ruleFileStream, rootLG, dt, "preinstall", true,
+                            true);
 
   // Write directory-level rules for "clean".
   {
     std::vector<std::string> cmds;
     lg->AppendDirectoryCleanCommand(cmds);
-    this->WriteDirectoryRule2(ruleFileStream, dt, "clean", false, false, cmds);
+    this->WriteDirectoryRule2(ruleFileStream, rootLG, dt, "clean", false,
+                              false, cmds);
   }
 }
 
@@ -632,7 +637,8 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules(
 }
 
 void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
-  std::ostream& ruleFileStream, cmLocalUnixMakefileGenerator3& lg)
+  std::ostream& ruleFileStream, cmLocalUnixMakefileGenerator3& rootLG,
+  cmLocalUnixMakefileGenerator3& lg)
 {
   std::vector<std::string> depends;
   std::vector<std::string> commands;
@@ -696,8 +702,8 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
       }
 
       this->AppendGlobalTargetDepends(depends, gtarget.get());
-      lg.WriteMakeRule(ruleFileStream, "All Build rule for target.", localName,
-                       depends, commands, true);
+      rootLG.WriteMakeRule(ruleFileStream, "All Build rule for target.",
+                           localName, depends, commands, true);
 
       // Write the rule.
       commands.clear();
@@ -731,16 +737,16 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
       }
       localName =
         cmStrCat(lg.GetRelativeTargetDirectory(gtarget.get()), "/rule");
-      lg.WriteMakeRule(ruleFileStream,
-                       "Build rule for subdir invocation for target.",
-                       localName, depends, commands, true);
+      rootLG.WriteMakeRule(ruleFileStream,
+                           "Build rule for subdir invocation for target.",
+                           localName, depends, commands, true);
 
       // Add a target with the canonical name (no prefix, suffix or path).
       commands.clear();
       depends.clear();
       depends.push_back(localName);
-      lg.WriteMakeRule(ruleFileStream, "Convenience name for target.", name,
-                       depends, commands, true);
+      rootLG.WriteMakeRule(ruleFileStream, "Convenience name for target.",
+                           name, depends, commands, true);
 
       // Add rules to prepare the target for installation.
       if (gtarget->NeedRelinkBeforeInstall(lg.GetConfigName())) {
@@ -749,8 +755,9 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
         depends.clear();
         commands.clear();
         commands.push_back(lg.GetRecursiveMakeCall(makefileName, localName));
-        lg.WriteMakeRule(ruleFileStream, "Pre-install relink rule for target.",
-                         localName, depends, commands, true);
+        rootLG.WriteMakeRule(ruleFileStream,
+                             "Pre-install relink rule for target.", localName,
+                             depends, commands, true);
       }
 
       // add the clean rule
@@ -760,8 +767,8 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
       commands.clear();
       commands.push_back(
         lg.GetRecursiveMakeCall(makefileName, makeTargetName));
-      lg.WriteMakeRule(ruleFileStream, "clean rule for target.",
-                       makeTargetName, depends, commands, true);
+      rootLG.WriteMakeRule(ruleFileStream, "clean rule for target.",
+                           makeTargetName, depends, commands, true);
       commands.clear();
     }
   }
