@@ -1,0 +1,2 @@
+.*-- always: build
+.*-- always: install
