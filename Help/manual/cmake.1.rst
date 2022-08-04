@@ -227,7 +227,7 @@ Options
  Only load the cache.  Do not actually run configure and generate
  steps.
 
-.. option:: --graphviz=[file]
+.. option:: --graphviz=<file>
 
  Generate graphviz of dependencies, see :module:`CMakeGraphVizOptions` for more.
 
