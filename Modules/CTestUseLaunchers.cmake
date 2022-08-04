@@ -11,7 +11,7 @@ CTestUseLaunchers is automatically included when you include(CTest).
 However, it is split out into its own module file so projects can use
 the CTEST_USE_LAUNCHERS functionality independently.
 
-To use launchers, set CTEST_USE_LAUNCHERS to ON in a ctest -S
+To use launchers, set CTEST_USE_LAUNCHERS to ON in a :option:`ctest -S`
 dashboard script, and then also set it in the cache of the configured
 project.  Both cmake and ctest need to know the value of it for the
 launchers to work properly.  CMake needs to know in order to generate
@@ -27,9 +27,12 @@ variable initialization only occurs if CTEST_USE_LAUNCHERS is not
 already defined.
 
 .. versionadded:: 3.8
-  If CTEST_USE_LAUNCHERS is on in a ctest -S script
+  If CTEST_USE_LAUNCHERS is on in a :option:`ctest -S` script
   the ctest_configure command will add -DCTEST_USE_LAUNCHERS:BOOL=TRUE
   to the cmake command used to configure the project.
+
+.. TODO Use RST markup
+
 #]=======================================================================]
 
 if(NOT DEFINED CTEST_USE_LAUNCHERS AND DEFINED ENV{CTEST_USE_LAUNCHERS_DEFAULT})
