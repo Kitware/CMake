@@ -59,6 +59,6 @@ to configure the project:
   variable, changing the value has undefined behavior.
 
 The ``CMAKE_MAKE_PROGRAM`` variable is set for use by project code.
-The value is also used by the :manual:`cmake(1)` ``--build`` and
-:manual:`ctest(1)` ``--build-and-test`` tools to launch the native
+The value is also used by the :option:`cmake --build` and
+:option:`ctest --build-and-test` tools to launch the native
 build process.

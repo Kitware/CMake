@@ -47,8 +47,9 @@ does, and present the user with the presets listed in the file. Users should be
 able to see (and possibly edit) the CMake cache variables, environment
 variables, and command line options that are defined for a given preset. The
 IDE should then construct the list of appropriate :manual:`cmake(1)` command
-line arguments based on these settings, rather than using the ``--preset=``
-option directly. The ``--preset=`` option is intended only as a convenient
+line arguments based on these settings, rather than using the
+:option:`--preset= <cmake --preset>` option directly. The
+:option:`--preset= <cmake --preset>` option is intended only as a convenient
 frontend for command line users, and should not be used by the IDE.
 
 For example, if a preset named ``ninja`` specifies ``Ninja`` as the generator
@@ -109,8 +110,9 @@ Building
 
 If a Makefile or Ninja generator is used to generate the build tree, it is not
 recommended to invoke ``make`` or ``ninja`` directly. Instead, it is
-recommended that the IDE invoke :manual:`cmake(1)` with the ``--build``
-argument, which will in turn invoke the appropriate build tool.
+recommended that the IDE invoke :manual:`cmake(1)` with the
+:option:`--build <cmake --build>` argument, which will in turn invoke the
+appropriate build tool.
 
 If an IDE project generator is used, such as :generator:`Xcode` or one of the
 Visual Studio generators, and the IDE understands the project format used, the

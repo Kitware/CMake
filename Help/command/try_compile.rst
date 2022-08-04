@@ -79,8 +79,8 @@ contain something like the following:
 The options are:
 
 ``CMAKE_FLAGS <flags>...``
-  Specify flags of the form ``-DVAR:TYPE=VALUE`` to be passed to
-  the ``cmake`` command-line used to drive the test build.
+  Specify flags of the form :option:`-DVAR:TYPE=VALUE <cmake -D>` to be passed
+  to the :manual:`cmake(1)` command-line used to drive the test build.
   The above example shows how values for variables
   ``INCLUDE_DIRECTORIES``, ``LINK_DIRECTORIES``, and ``LINK_LIBRARIES``
   are used.
@@ -137,15 +137,16 @@ The options are:
   or :prop_tgt:`CUDA_EXTENSIONS` target property of the generated project.
 
 In this version all files in ``<bindir>/CMakeFiles/CMakeTmp`` will be
-cleaned automatically.  For debugging, ``--debug-trycompile`` can be
+cleaned automatically.  For debugging,
+:option:`--debug-trycompile <cmake --debug-trycompile>` can be
 passed to ``cmake`` to avoid this clean.  However, multiple sequential
 ``try_compile`` operations reuse this single output directory.  If you use
-``--debug-trycompile``, you can only debug one ``try_compile`` call at a time.
-The recommended procedure is to protect all ``try_compile`` calls in your
-project by ``if(NOT DEFINED <resultVar>)`` logic, configure with cmake
-all the way through once, then delete the cache entry associated with
-the try_compile call of interest, and then re-run cmake again with
-``--debug-trycompile``.
+:option:`--debug-trycompile <cmake --debug-trycompile>`, you can only debug
+one ``try_compile`` call at a time.  The recommended procedure is to protect
+all ``try_compile`` calls in your project by ``if(NOT DEFINED <resultVar>)``
+logic, configure with cmake all the way through once, then delete the cache
+entry associated with the try_compile call of interest, and then re-run cmake
+again with :option:`--debug-trycompile <cmake --debug-trycompile>`.
 
 Other Behavior Settings
 ^^^^^^^^^^^^^^^^^^^^^^^

@@ -5,8 +5,9 @@ CMAKE_MESSAGE_LOG_LEVEL
 
 When set, this variable specifies the logging level used by the
 :command:`message` command.  Valid values are the same as those for the
-``--log-level`` command line option of the :manual:`cmake(1)` program.
-If this variable is set and the ``--log-level`` command line option is
+:option:`--log-level <cmake --log-level>` command line option of the
+:manual:`cmake(1)` program.  If this variable is set and the
+:option:`--log-level <cmake --log-level>` command line option is
 given, the command line option takes precedence.
 
 The main advantage to using this variable is to make a log level persist

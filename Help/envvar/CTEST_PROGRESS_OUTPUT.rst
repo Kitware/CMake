@@ -14,5 +14,5 @@ variable is not set or has a value that evaluates to false, output is reported
 normally with each test having its own start and end lines logged to the
 output.
 
-The ``--progress`` option to :manual:`ctest <ctest(1)>` overrides this
-environment variable if both are given.
+The :option:`--progress <ctest --progress>` option to :manual:`ctest <ctest(1)>`
+overrides this environment variable if both are given.

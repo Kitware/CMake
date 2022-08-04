@@ -109,8 +109,9 @@ The options are:
   While running tests in parallel, try not to start tests when they
   may cause the CPU load to pass above a given threshold.  If not
   specified the :variable:`CTEST_TEST_LOAD` variable will be checked,
-  and then the ``--test-load`` command-line argument to :manual:`ctest(1)`.
-  See also the ``TestLoad`` setting in the :ref:`CTest Test Step`.
+  and then the :option:`--test-load <ctest --test-load>` command-line
+  argument to :manual:`ctest(1)`. See also the ``TestLoad`` setting
+  in the :ref:`CTest Test Step`.
 
 ``REPEAT <mode>:<n>``
   .. versionadded:: 3.17

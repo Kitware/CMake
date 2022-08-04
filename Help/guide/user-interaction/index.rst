@@ -71,8 +71,8 @@ The CMake tooling may report warnings which are intended
 for the provider of the software, not intended for the
 consumer of the software.  Such warnings end with "This
 warning is for project developers".  Users may disable
-such warnings by passing the ``-Wno-dev`` flag to
-:manual:`cmake(1)`.
+such warnings by passing the :option:`-Wno-dev <cmake -Wno-dev>`
+flag to :manual:`cmake(1)`.
 
 cmake-gui tool
 --------------
@@ -159,7 +159,7 @@ the :option:`-G <cmake -G>` option:
 
   $ cmake .. -G Ninja
 
-The output of ``cmake --help`` includes a list of
+The output of :option:`cmake --help` includes a list of
 :manual:`generators <cmake-generators(7)>` available
 for the user to choose from.  Note that generator
 names are case sensitive.
@@ -428,10 +428,10 @@ Using presets on the command-line
 ---------------------------------
 
 When using the :manual:`cmake(1)` command line tool, a
-preset can be invoked by using the ``--preset`` option. If
-``--preset`` is specified, the generator and build
-directory are not required, but can be specified to
-override them. For example, if you have the following
+preset can be invoked by using the :option:`--preset <cmake --preset>`
+option. If :option:`--preset <cmake --preset>` is specified,
+the generator and build directory are not required, but can be
+specified to override them. For example, if you have the following
 ``CMakePresets.json`` file:
 
 .. code-block:: json
@@ -503,23 +503,25 @@ command may be invoked in the build directory:
 
   $ cmake --build .
 
-The ``--build`` flag enables a particular mode of
-operation for the :manual:`cmake(1)` tool.  It invokes
-the  :variable:`CMAKE_MAKE_PROGRAM` command associated
-with the :manual:`generator <cmake-generators(7)>`, or
+The :option:`--build <cmake --build>` flag enables a
+particular mode of operation for the :manual:`cmake(1)`
+tool.  It invokes the  :variable:`CMAKE_MAKE_PROGRAM`
+command associated with the
+:manual:`generator <cmake-generators(7)>`, or
 the build tool configured by the user.
 
-The ``--build`` mode also accepts the parameter
-``--target`` to specify a particular target to build,
-for example a particular library, executable or
-custom target, or a particular special target like
-``install``:
+The :option:`--build <cmake --build>` mode also accepts
+the parameter :option:`--target <cmake --target>` to
+specify a particular target to build, for example a
+particular library, executable or custom target, or a
+particular special target like ``install``:
 
 .. code-block:: console
 
   $ cmake --build . --target myexe
 
-The ``--build`` mode also accepts a ``--config`` parameter
+The :option:`--build <cmake --build>` mode also accepts a
+:option:`--config <cmake --config>` parameter
 in the case of multi-config generators to specify which
 particular configuration to build:
 
@@ -527,23 +529,23 @@ particular configuration to build:
 
   $ cmake --build . --target myexe --config Release
 
-The ``--config`` option has no effect if the generator
-generates a buildsystem specific to a configuration which
-is chosen when invoking cmake with the
-:variable:`CMAKE_BUILD_TYPE` variable.
+The :option:`--config <cmake --config>` option has no
+effect if the generator generates a buildsystem specific
+to a configuration which is chosen when invoking cmake
+with the :variable:`CMAKE_BUILD_TYPE` variable.
 
 Some buildsystems omit details of command lines invoked
-during the build.  The ``--verbose`` flag can be used to
-cause those command lines to be shown:
+during the build.  The :option:`-verbose <cmake --verbose>`
+flag can be used to cause those command lines to be shown:
 
 .. code-block:: console
 
   $ cmake --build . --target myexe --verbose
 
-The ``--build`` mode can also pass particular command
-line options to the underlying build tool by listing
-them after ``--``.  This can be useful to specify
-options to the build tool, such as to continue the
+The :option:`--build <cmake --build>` mode can also pass
+particular command line options to the underlying build
+tool by listing them after ``--``.  This can be useful
+to specify options to the build tool, such as to continue the
 build after a failed job, where CMake does not
 provide a high-level user interface.
 
@@ -639,9 +641,9 @@ building the ``foo.i`` target will preprocess both files.
 Specifying a Build Program
 --------------------------
 
-The program invoked by the ``--build`` mode is determined
-by the :variable:`CMAKE_MAKE_PROGRAM` variable.  For most
-generators, the particular program does not need to be
+The program invoked by the :option:`--build <cmake --build>`
+mode is determined by the :variable:`CMAKE_MAKE_PROGRAM` variable.
+For most generators, the particular program does not need to be
 configured.
 
 ===================== =========================== ===========================
@@ -662,7 +664,8 @@ The ``jom`` tool is capable of reading makefiles of the
 ``NMake`` flavor and building in parallel, while the
 ``nmake`` tool always builds serially.  After generating
 with the :generator:`NMake Makefiles` generator a user
-can run ``jom`` instead of ``nmake``.  The ``--build``
+can run ``jom`` instead of ``nmake``.  The
+:option:`--build <cmake --build>`
 mode would also use ``jom`` if the
 :variable:`CMAKE_MAKE_PROGRAM` was set to ``jom`` while
 using the :generator:`NMake Makefiles` generator, and
@@ -746,8 +749,8 @@ run only tests without ``Qt`` in their name:
 
   $ ctest -E Qt
 
-Tests can be run in parallel by passing ``-j`` arguments
-to :manual:`ctest(1)`:
+Tests can be run in parallel by passing :option:`-j <ctest -j>`
+arguments to :manual:`ctest(1)`:
 
 .. code-block:: console
 
@@ -755,14 +758,15 @@ to :manual:`ctest(1)`:
 
 The environment variable :envvar:`CTEST_PARALLEL_LEVEL`
 can alternatively be set to avoid the need to pass
-``-j``.
+:option:`-j <ctest -j>`.
 
 By default :manual:`ctest(1)` does not print the output
-from the tests. The command line argument ``-V`` (or
-``--verbose``) enables verbose mode to print the
+from the tests. The command line argument :option:`-V <ctest -V>`
+(or ``--verbose``) enables verbose mode to print the
 output from all tests.
-The ``--output-on-failure`` option prints the test
-output for failing tests only.  The environment variable
-:envvar:`CTEST_OUTPUT_ON_FAILURE`
+The :option:`--output-on-failure <ctest --output-on-failure>`
+option prints the test output for failing tests only.
+The environment variable :envvar:`CTEST_OUTPUT_ON_FAILURE`
 can be set to ``1`` as an alternative to passing the
-``--output-on-failure`` option to :manual:`ctest(1)`.
+:option:`--output-on-failure <ctest --output-on-failure>`
+option to :manual:`ctest(1)`.

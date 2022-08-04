@@ -83,8 +83,9 @@ are sent to stderr and are not prefixed with hyphens.  The
 :manual:`CMake GUI <cmake-gui(1)>` displays all messages in its log area.
 The :manual:`curses interface <ccmake(1)>` shows ``STATUS`` to ``TRACE``
 messages one at a time on a status line and other messages in an
-interactive pop-up box.  The ``--log-level`` command-line option to each of
-these tools can be used to control which messages will be shown.
+interactive pop-up box.  The :option:`--log-level <cmake --log-level>`
+command-line option to each of these tools can be used to control which
+messages will be shown.
 
 .. versionadded:: 3.17
   To make a log level persist between CMake runs, the
@@ -104,7 +105,7 @@ these tools can be used to control which messages will be shown.
   list variable to a dot-separated string.  The message context will always
   appear before any indenting content but after any automatically added leading
   hyphens. By default, message context is not shown, it has to be explicitly
-  enabled by giving the :manual:`cmake <cmake(1)>` ``--log-context``
+  enabled by giving the :option:`cmake --log-context`
   command-line option or by setting the :variable:`CMAKE_MESSAGE_CONTEXT_SHOW`
   variable to true.  See the :variable:`CMAKE_MESSAGE_CONTEXT` documentation for
   usage examples.

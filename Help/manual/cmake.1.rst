@@ -96,7 +96,7 @@ Build Tree
 Generator
   This chooses the kind of buildsystem to generate.  See the
   :manual:`cmake-generators(7)` manual for documentation of all generators.
-  Run ``cmake --help`` to see a list of generators available locally.
+  Run :option:`cmake --help` to see a list of generators available locally.
   Optionally use the :option:`-G <cmake -G>` option below to specify a
   generator, or simply accept the default CMake chooses for the current
   platform.
@@ -558,7 +558,7 @@ following options:
 .. option:: --clean-first
 
   Build target ``clean`` first, then build.
-  (To clean only, use ``--target clean``.)
+  (To clean only, use :option:`--target clean <cmake --target>`.)
 
 .. option:: --resolve-package-references=<on|off|only>
 
@@ -601,7 +601,7 @@ following options:
 
   Pass remaining options to the native tool.
 
-Run ``cmake --build`` with no options for quick help.
+Run :option:`cmake --build` with no options for quick help.
 
 Install a Project
 =================
@@ -647,7 +647,7 @@ The options are:
 
   This option can be omitted if :envvar:`VERBOSE` environment variable is set.
 
-Run ``cmake --install`` with no options for quick help.
+Run :option:`cmake --install` with no options for quick help.
 
 Open a Project
 ==============
@@ -700,7 +700,10 @@ CMake provides builtin command-line tools through the signature
 
   cmake -E <command> [<options>]
 
-Run ``cmake -E`` or ``cmake -E help`` for a summary of commands.
+.. option:: -E [help]
+
+  Run ``cmake -E`` or ``cmake -E help`` for a summary of commands.
+
 Available commands are:
 
 .. option:: capabilities

@@ -46,7 +46,7 @@ use :option:`-C <cpack -C>` to specify the configuration. For example:
   cpack -G ZIP -C Debug
 
 For a list of available generators, see :manual:`cpack-generators(7)` or call
-``cpack --help``. An :cpack_gen:`archive generator <CPack Archive Generator>`
+:option:`cpack --help`. An :cpack_gen:`archive generator <CPack Archive Generator>`
 like ZIP creates a compressed archive of all *installed* files.
 
 To create an archive of the *full* source tree you would type:
