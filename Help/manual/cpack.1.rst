@@ -26,12 +26,12 @@ All supported generators are specified in the :manual:`cpack-generators
 <cpack-generators(7)>` manual.  The command ``cpack --help`` prints a
 list of generators supported for the target platform.  Which of them are
 to be used can be selected through the :variable:`CPACK_GENERATOR` variable
-or through the command-line option ``-G``.
+or through the command-line option :option:`-G <cpack -G>`.
 
 The **cpack** program is steered by a configuration file written in the
 :manual:`CMake language <cmake-language(7)>`. Unless chosen differently
-through the command-line option ``--config``, the file ``CPackConfig.cmake``
-in the current directory is used.
+through the command-line option :option:`--config <cpack --config>`, the
+file ``CPackConfig.cmake`` in the current directory is used.
 
 In the standard CMake workflow, the file ``CPackConfig.cmake`` is generated
 by the :manual:`cmake <cmake(1)>` executable, provided the :module:`CPack`

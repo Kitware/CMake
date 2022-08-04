@@ -97,8 +97,9 @@ Generator
   This chooses the kind of buildsystem to generate.  See the
   :manual:`cmake-generators(7)` manual for documentation of all generators.
   Run ``cmake --help`` to see a list of generators available locally.
-  Optionally use the ``-G`` option below to specify a generator, or simply
-  accept the default CMake chooses for the current platform.
+  Optionally use the :option:`-G <cmake -G>` option below to specify a
+  generator, or simply accept the default CMake chooses for the current
+  platform.
 
   When using one of the :ref:`Command-Line Build Tool Generators`
   CMake expects that the environment needed by the compiler toolchain
@@ -152,11 +153,11 @@ source and build trees and generate a buildsystem:
 In all cases the ``<options>`` may be zero or more of the `Options`_ below.
 
 The above styles for specifying the source and build trees may be mixed.
-Paths specified with ``-S`` or ``-B`` are always classified as source or
-build trees, respectively.  Paths specified with plain arguments are
-classified based on their content and the types of paths given earlier.
-If only one type of path is given, the current working directory (cwd)
-is used for the other.  For example:
+Paths specified with :option:`-S <cmake -S>` or :option:`-B <cmake -B>`
+are always classified as source or build trees, respectively.  Paths
+specified with plain arguments are classified based on their content
+and the types of paths given earlier.  If only one type of path is given,
+the current working directory (cwd) is used for the other.  For example:
 
 ============================== ============ ===========
  Command Line                   Source Dir   Build Dir
@@ -214,9 +215,9 @@ Options
  List ``CACHE`` variables will run CMake and list all the variables from
  the CMake ``CACHE`` that are not marked as ``INTERNAL`` or :prop_cache:`ADVANCED`.
  This will effectively display current CMake settings, which can then be
- changed with ``-D`` option.  Changing some of the variables may result
- in more variables being created.  If ``A`` is specified, then it will
- display also advanced variables.  If ``H`` is specified, it will also
+ changed with :option:`-D <cmake -D>` option.  Changing some of the variables
+ may result in more variables being created.  If ``A`` is specified, then it
+ will display also advanced variables.  If ``H`` is specified, it will also
  display help for each variable.
 
 .. option:: -N
@@ -307,7 +308,8 @@ Options
  is an entry in the given comma-separated list of case-sensitive package
  names.
 
- Like ``--debug-find``, but limiting scope to the specified packages.
+ Like :option:`--debug-find <cmake --debug-find>`, but limiting scope
+ to the specified packages.
 
 .. option:: --debug-find-var=<var>[,...]
 
@@ -315,7 +317,8 @@ Options
  as the result variable, where ``<var>`` is an entry in the given
  comma-separated list.
 
- Like ``--debug-find``, but limiting scope to the specified variable names.
+ Like :option:`--debug-find <cmake --debug-find>`, but limiting scope
+ to the specified variable names.
 
 .. option:: --trace
 
@@ -327,7 +330,7 @@ Options
 
  Put cmake in trace mode.
 
- Like ``--trace``, but with variables expanded.
+ Like :option:`--trace <cmake --trace>`, but with variables expanded.
 
 .. option:: --trace-format=<format>
 
@@ -461,7 +464,9 @@ Options
 
 .. option:: --profiling-output=<path>
 
- Used in conjunction with ``--profiling-format`` to output to a given path.
+ Used in conjunction with
+ :option:`--profiling-format <cmake --profiling-format>` to output to a
+ given path.
 
 .. option:: --profiling-format=<file>
 
@@ -709,7 +714,7 @@ Available commands are:
     A JSON object with version information. Keys are:
 
     ``string``
-      The full version string as displayed by cmake ``--version``.
+      The full version string as displayed by cmake :option:`--version <cmake --version>`.
     ``major``
       The major version number in integer form.
     ``minor``
@@ -736,7 +741,8 @@ Available commands are:
 
       Optional member that may be present when the generator supports
       platform specification via :variable:`CMAKE_GENERATOR_PLATFORM`
-      (``-A ...``).  The value is a list of platforms known to be supported.
+      (:option:`-A ... <cmake -A>`).  The value is a list of platforms known to
+      be supported.
     ``extraGenerators``
       A list of strings with all the extra generators compatible with
       the generator.

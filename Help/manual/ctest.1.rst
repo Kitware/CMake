@@ -130,8 +130,9 @@ Options
 
 .. option:: --test-load <level>
 
- While running tests in parallel (e.g. with ``-j``), try not to start
- tests when they may cause the CPU load to pass above a given threshold.
+ While running tests in parallel (e.g. with :option:`-j <ctest -j>`), try
+ not to start tests when they may cause the CPU load to pass above a given
+ threshold.
 
  When ``ctest`` is run as a `Dashboard Client`_ this sets the
  ``TestLoad`` option of the `CTest Test Step`_.
@@ -140,8 +141,10 @@ Options
  Make CTest quiet.
 
  This option will suppress all the output.  The output log file will
- still be generated if the ``--output-log`` is specified.  Options such
- as ``--verbose``, ``--extra-verbose``, and ``--debug`` are ignored
+ still be generated if the :option:`--output-log <ctest --output-log>` is
+ specified.  Options such as :option:`--verbose <ctest --verbose>`,
+ :option:`--extra-verbose <ctest --extra-verbose>`, and
+ :option:`--debug <ctest --debug>` are ignored
  if ``--quiet`` is specified.
 
 .. option:: -O <file>, --output-log <file>
@@ -156,16 +159,16 @@ Options
 
  This option tells CTest to write test results to ``<file>`` in JUnit XML
  format. If ``<file>`` already exists, it will be overwritten. If using the
- ``-S`` option to run a dashboard script, use the ``OUTPUT_JUNIT`` keyword
- with the :command:`ctest_test` command instead.
+ :option:`-S <ctest -S>` option to run a dashboard script, use the
+ ``OUTPUT_JUNIT`` keyword with the :command:`ctest_test` command instead.
 
 .. option:: -N, --show-only[=<format>]
 
  Disable actual execution of tests.
 
  This option tells CTest to list the tests that would be run but not
- actually run them.  Useful in conjunction with the ``-R`` and ``-E``
- options.
+ actually run them.  Useful in conjunction with the :option:`-R <ctest -R>`
+ and :option:`-E <ctest -E>` options.
 
  ``<format>`` can be one of the following values.
 
@@ -226,11 +229,13 @@ Options
 
 .. option:: -FS <regex>, --fixture-exclude-setup <regex>
 
- Same as ``-FA`` except only matching setup tests are excluded.
+ Same as :option:`-FA <ctest -FA>` except only matching setup tests are
+ excluded.
 
 .. option:: -FC <regex>, --fixture-exclude-cleanup <regex>
 
- Same as ``-FA`` except only matching cleanup tests are excluded.
+ Same as :option:`-FA <ctest -FA>` except only matching cleanup tests are
+ excluded.
 
 .. option:: -D <dashboard>, --dashboard <dashboard>
 
@@ -249,8 +254,8 @@ Options
  Define a variable for script mode.
 
  Pass in variable values on the command line.  Use in conjunction
- with ``-S`` to pass variable values to a dashboard script.  Parsing ``-D``
- arguments as variable values is only attempted if the value
+ with :option:`-S <ctest -S>` to pass variable values to a dashboard script.
+ Parsing ``-D`` arguments as variable values is only attempted if the value
  following ``-D`` does not match any of the known dashboard types.
 
 .. option:: -M <model>, --test-model <model>
@@ -259,7 +264,8 @@ Options
 
  This option tells CTest to act as a CDash client where the ``<model>``
  can be ``Experimental``, ``Nightly``, and ``Continuous``.
- Combining ``-M`` and ``-T`` is similar to ``-D``.
+ Combining ``-M`` and :option:`-T <ctest -T>` is similar to
+ :option:`-D <ctest -D>`.
 
  See `Dashboard Client`_.
 
@@ -270,7 +276,8 @@ Options
  This option tells CTest to act as a CDash client and perform some
  action such as ``start``, ``build``, ``test`` etc. See
  `Dashboard Client Steps`_ for the full list of actions.
- Combining ``-M`` and ``-T`` is similar to ``-D``.
+ Combining :option:`-M <ctest -M>` and ``-T`` is similar to
+ :option:`-D <ctest -D>`.
 
  See `Dashboard Client`_.
 
@@ -290,10 +297,10 @@ Options
 
  Execute a dashboard for a configuration.
 
- This option does the same operations as ``-S`` but it will do them in a
- separate process.  This is primarily useful in cases where the
- script may modify the environment and you do not want the modified
- environment to impact other ``-S`` scripts.
+ This option does the same operations as :option:`-S <ctest -S>` but it
+ will do them in a separate process.  This is primarily useful in cases
+ where the script may modify the environment and you do not want the modified
+ environment to impact other :option:`-S <ctest -S>` scripts.
 
  See `Dashboard Client`_.
 
@@ -309,10 +316,11 @@ Options
 
 .. option:: -U, --union
 
- Take the Union of ``-I`` and ``-R``.
+ Take the Union of :option:`-I <ctest -I>` and :option:`-R <ctest -R>`.
 
- When both ``-R`` and ``-I`` are specified by default the intersection of
- tests are run.  By specifying ``-U`` the union of tests is run instead.
+ When both :option:`-R <ctest -R>` and :option:`-I <ctest -I>` are specified
+ by default the intersection of tests are run.  By specifying ``-U`` the union
+ of tests is run instead.
 
 .. option:: --rerun-failed
 
@@ -320,10 +328,12 @@ Options
 
  This option tells CTest to perform only the tests that failed during
  its previous run.  When this option is specified, CTest ignores all
- other options intended to modify the list of tests to run (``-L``, ``-R``,
- ``-E``, ``-LE``, ``-I``, etc).  In the event that CTest runs and no tests
- fail, subsequent calls to CTest with the ``--rerun-failed`` option will run
- the set of tests that most recently failed (if any).
+ other options intended to modify the list of tests to run (
+ :option:`-L <ctest -L>`, :option:`-R <ctest -R>`, :option:`-E <ctest -E>`,
+ :option:`-LE <ctest -LE>`, :option:`-I <ctest -I>`, etc).  In the event that
+ CTest runs and no tests fail, subsequent calls to CTest with the
+ ``--rerun-failed`` option will run the set of tests that most recently
+ failed (if any).
 
 .. option:: --repeat <mode>:<n>
 
@@ -347,7 +357,7 @@ Options
 
 .. option:: --repeat-until-fail <n>
 
- Equivalent to ``--repeat until-fail:<n>``.
+ Equivalent to :option:`--repeat until-fail:\<n\> <ctest --repeat>`.
 
 .. option:: --max-width <width>
 
@@ -488,17 +498,17 @@ or excluded from a test run by filtering on the labels.
 Each individual filter is a regular expression applied to
 the labels attached to a test.
 
-When ``-L`` is used, in order for a test to be included in a
+When :option:`-L <ctest -L>` is used, in order for a test to be included in a
 test run, each regular expression must match at least one
-label.  Using more than one ``-L`` option means "match **all**
+label.  Using more than one :option:`-L <ctest -L>` option means "match **all**
 of these".
 
-The ``-LE`` option works just like ``-L``, but excludes tests
-rather than including them. A test is excluded if each regular
-expression matches at least one label.
+The :option:`-LE <ctest -LE>` option works just like :option:`-L <ctest -L>`,
+but excludes tests rather than including them. A test is excluded if each
+regular expression matches at least one label.
 
-If a test has no labels attached to it, then ``-L`` will never
-include that test, and ``-LE`` will never exclude that test.
+If a test has no labels attached to it, then :option:`-L <ctest -L>` will never
+include that test, and :option:`-LE <ctest -LE>` will never exclude that test.
 As an example of tests with labels, consider five tests,
 with the following labels:
 
@@ -650,7 +660,8 @@ this mode include:
 
 .. option:: --test-command
 
- The command to run as the test step with the ``--build-and-test`` option.
+ The command to run as the test step with the
+ :option:`--build-and-test <ctest --build-and-test>` option.
  All arguments following this keyword will be assumed to be part of the
  test command line, so it must be the last option given.
 
@@ -1101,9 +1112,9 @@ Configuration settings include:
 ``DefaultCTestConfigurationType``
   When the build system to be launched allows build-time selection
   of the configuration (e.g. ``Debug``, ``Release``), this specifies
-  the default configuration to be built when no ``-C`` option is
-  given to the ``ctest`` command.  The value will be substituted into
-  the value of ``MakeCommand`` to replace the literal string
+  the default configuration to be built when no :option:`-C <ctest -C>`
+  option is given to the ``ctest`` command.  The value will be substituted
+  into the value of ``MakeCommand`` to replace the literal string
   ``${CTEST_CONFIGURATION_TYPE}`` if it appears.
 
   * `CTest Script`_ variable: :variable:`CTEST_CONFIGURATION_TYPE`
@@ -1175,8 +1186,9 @@ Configuration settings include:
   See `Label and Subproject Summary`_.
 
 ``TestLoad``
-  While running tests in parallel (e.g. with ``-j``), try not to start
-  tests when they may cause the CPU load to pass above a given threshold.
+  While running tests in parallel (e.g. with :option:`-j <ctest -j>`),
+  try not to start tests when they may cause the CPU load to pass above
+  a given threshold.
 
   * `CTest Script`_ variable: :variable:`CTEST_TEST_LOAD`
   * :module:`CTest` module variable: ``CTEST_TEST_LOAD``
