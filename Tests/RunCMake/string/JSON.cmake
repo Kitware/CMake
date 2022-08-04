@@ -129,7 +129,7 @@ assert_strequal("${error}" "member '0' not found")
 
 string(JSON result ERROR_VARIABLE error GET "${json1}" array 10)
 assert_strequal("${result}" "array-10-NOTFOUND")
-assert_strequal("${error}" "expected an index less then 4 got '10'")
+assert_strequal("${error}" "expected an index less than 4 got '10'")
 
 string(JSON result ERROR_VARIABLE error GET "${json1}" array 2 some notThere)
 assert_strequal("${result}" "array-2-some-notThere-NOTFOUND")
@@ -240,7 +240,7 @@ endif()
 
 string(JSON result ERROR_VARIABLE error MEMBER "${json1}" values 100)
 assert_strequal("${result}" "values-100-NOTFOUND")
-assert_strequal("${error}" "expected an index less then 5 got '100'")
+assert_strequal("${error}" "expected an index less than 5 got '100'")
 
 # Test length loops
 string(JSON arrayLength ERROR_VARIABLE error LENGTH "${json1}" types array)
@@ -301,7 +301,7 @@ assert_json_equal("${error}" "${result}"
 
 string(JSON result ERROR_VARIABLE error REMOVE ${json2} array 100)
 assert_strequal("${result}" "array-100-NOTFOUND")
-assert_strequal("${error}" "expected an index less then 4 got '100'")
+assert_strequal("${error}" "expected an index less than 4 got '100'")
 
 # Test SET
 string(JSON result ERROR_VARIABLE error SET ${json2} new 5)
