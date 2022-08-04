@@ -588,7 +588,7 @@ following options:
 
   Ignored.  Behavior is default in CMake >= 3.0.
 
-.. option:: --verbose, -v
+.. option:: -v, --verbose
 
   Enable verbose output - if supported - including the build commands to be
   executed.
