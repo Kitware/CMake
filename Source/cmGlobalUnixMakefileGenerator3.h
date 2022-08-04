@@ -200,13 +200,16 @@ protected:
   void WriteMainCMakefile();
 
   void WriteConvenienceRules2(std::ostream& ruleFileStream,
-                              cmLocalUnixMakefileGenerator3&);
+                              cmLocalUnixMakefileGenerator3& rootLG,
+                              cmLocalUnixMakefileGenerator3& lg);
 
   void WriteDirectoryRule2(std::ostream& ruleFileStream,
+                           cmLocalUnixMakefileGenerator3& rootLG,
                            DirectoryTarget const& dt, const char* pass,
                            bool check_all, bool check_relink,
                            std::vector<std::string> const& commands = {});
   void WriteDirectoryRules2(std::ostream& ruleFileStream,
+                            cmLocalUnixMakefileGenerator3& rootLG,
                             DirectoryTarget const& dt);
 
   void AppendGlobalTargetDepends(std::vector<std::string>& depends,
