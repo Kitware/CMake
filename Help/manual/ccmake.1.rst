@@ -27,6 +27,8 @@ native tool on their platform.
 Options
 =======
 
+.. program:: ccmake
+
 .. include:: OPTIONS_BUILD.txt
 
 .. include:: OPTIONS_HELP.txt

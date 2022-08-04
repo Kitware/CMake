@@ -1,12 +1,15 @@
-``-S <path-to-source>``
+.. option:: -S <path-to-source>
+
  Path to root directory of the CMake project to build.
 
-``-B <path-to-build>``
+.. option:: -B <path-to-build>
+
  Path to directory which CMake will use as the root of build directory.
 
  If the directory doesn't already exist CMake will make it.
 
-``-C <initial-cache>``
+.. option:: -C <initial-cache>
+
  Pre-load a script to populate the cache.
 
  When CMake is first run in an empty build tree, it creates a
@@ -21,7 +24,8 @@
  References to :variable:`CMAKE_SOURCE_DIR` and :variable:`CMAKE_BINARY_DIR`
  within the script evaluate to the top-level source and build tree.
 
-``-D <var>:<type>=<value>, -D <var>=<value>``
+.. option:: -D <var>:<type>=<value>, -D <var>=<value>
+
  Create or update a CMake ``CACHE`` entry.
 
  When CMake is first run in an empty build tree, it creates a
@@ -41,7 +45,8 @@
  This option may also be given as a single argument:
  ``-D<var>:<type>=<value>`` or ``-D<var>=<value>``.
 
-``-U <globbing_expr>``
+.. option:: -U <globbing_expr>
+
  Remove matching entries from CMake ``CACHE``.
 
  This option may be used to remove one or more variables from the
@@ -51,7 +56,8 @@
 
  Use with care, you can make your ``CMakeCache.txt`` non-working.
 
-``-G <generator-name>``
+.. option:: -G <generator-name>
+
  Specify a build system generator.
 
  CMake may support multiple native build systems on certain
@@ -62,72 +68,84 @@
  If not specified, CMake checks the :envvar:`CMAKE_GENERATOR` environment
  variable and otherwise falls back to a builtin default selection.
 
-``-T <toolset-spec>``
+.. option:: -T <toolset-spec>
+
  Toolset specification for the generator, if supported.
 
  Some CMake generators support a toolset specification to tell
  the native build system how to choose a compiler.  See the
  :variable:`CMAKE_GENERATOR_TOOLSET` variable for details.
 
-``-A <platform-name>``
+.. option:: -A <platform-name>
+
  Specify platform name if supported by generator.
 
  Some CMake generators support a platform name to be given to the
  native build system to choose a compiler or SDK.  See the
  :variable:`CMAKE_GENERATOR_PLATFORM` variable for details.
 
-``--toolchain <path-to-file>``
+.. option:: --toolchain <path-to-file>
+
  Specify the cross compiling toolchain file, equivalent to setting
  :variable:`CMAKE_TOOLCHAIN_FILE` variable.
 
-``--install-prefix <directory>``
+.. option:: --install-prefix <directory>
+
  Specify the installation directory, used by the
  :variable:`CMAKE_INSTALL_PREFIX` variable. Must be an absolute path.
 
-``-Wno-dev``
+.. option:: -Wno-dev
+
  Suppress developer warnings.
 
  Suppress warnings that are meant for the author of the
  ``CMakeLists.txt`` files. By default this will also turn off
  deprecation warnings.
 
-``-Wdev``
+.. option:: -Wdev
+
  Enable developer warnings.
 
  Enable warnings that are meant for the author of the ``CMakeLists.txt``
  files. By default this will also turn on deprecation warnings.
 
-``-Werror=dev``
+.. option:: -Werror=dev
+
  Make developer warnings errors.
 
  Make warnings that are meant for the author of the ``CMakeLists.txt`` files
  errors. By default this will also turn on deprecated warnings as errors.
 
-``-Wno-error=dev``
+.. option:: -Wno-error=dev
+
  Make developer warnings not errors.
 
  Make warnings that are meant for the author of the ``CMakeLists.txt`` files not
  errors. By default this will also turn off deprecated warnings as errors.
 
-``-Wdeprecated``
+.. option:: -Wdeprecated
+
  Enable deprecated functionality warnings.
 
  Enable warnings for usage of deprecated functionality, that are meant
  for the author of the ``CMakeLists.txt`` files.
 
-``-Wno-deprecated``
+.. option:: -Wno-deprecated
+
  Suppress deprecated functionality warnings.
 
  Suppress warnings for usage of deprecated functionality, that are meant
  for the author of the ``CMakeLists.txt`` files.
 
-``-Werror=deprecated``
+.. option:: -Werror=deprecated
+
  Make deprecated macro and function warnings errors.
 
  Make warnings for usage of deprecated macros and functions, that are meant
  for the author of the ``CMakeLists.txt`` files, errors.
 
-``-Wno-error=deprecated``
+.. option:: -Wno-error=deprecated
+
  Make deprecated macro and function warnings not errors.
 
  Make warnings for usage of deprecated macros and functions, that are meant
