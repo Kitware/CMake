@@ -196,7 +196,8 @@ VisualC++ compiler, or a combination of the two:
   $ cmake .. -G "Visual Studio 16 2019"
 
 Visual Studio generators can target different architectures.
-One can specify the target architecture using the `-A` option:
+One can specify the target architecture using the
+:option:`-A <cmake -A>` option:
 
 .. code-block:: console
 
@@ -223,7 +224,7 @@ files several other options are available to use when
 initially running :manual:`cmake(1)`.
 
 The Visual Studio toolset can be specified with the
-``-T`` option:
+:option:`cmake -T` option:
 
 .. code-block:: console
 
@@ -232,9 +233,9 @@ The Visual Studio toolset can be specified with the
     $ # Build targeting Windows XP
     $ cmake.exe .. -G "Visual Studio 16 2019" -A x64 -T v120_xp
 
-Whereas the ``-A`` option specifies the _target_
-architecture, the ``-T`` option can be used to specify
-details of the toolchain used.  For example, `-Thost=x64`
+Whereas the :option:`-A <cmake -A>` option specifies the _target_
+architecture, the :option:`-T <cmake -T>` option can be used to specify
+details of the toolchain used.  For example, ``-Thost=x64``
 can be given to select the 64-bit version of the host
 tools.  The following demonstrates how to use 64-bit
 tools and also build for a 64-bit target architecture:
@@ -337,7 +338,7 @@ or later on a subsequent invocation of
     $ cd build
     $ cmake . -DCMAKE_BUILD_TYPE=Debug
 
-The ``-U`` flag may be used to unset variables
+The :option:`-U <cmake -U>` flag may be used to unset variables
 on the :manual:`cmake(1)` command line:
 
 .. code-block:: console

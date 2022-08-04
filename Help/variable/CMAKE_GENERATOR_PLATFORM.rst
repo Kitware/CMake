@@ -7,7 +7,7 @@ Generator-specific target platform specification provided by user.
 
 Some CMake generators support a target platform name to be given
 to the native build system to choose a compiler toolchain.
-If the user specifies a platform name (e.g. via the :manual:`cmake(1)` ``-A``
+If the user specifies a platform name (e.g. via the :option:`cmake -A`
 option or via the :envvar:`CMAKE_GENERATOR_PLATFORM` environment variable)
 the value will be available in this variable.
 

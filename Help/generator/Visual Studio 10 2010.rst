@@ -27,7 +27,7 @@ The default target platform name (architecture) is ``Win32``.
 
 .. versionadded:: 3.1
   The :variable:`CMAKE_GENERATOR_PLATFORM` variable may be set, perhaps
-  via the :manual:`cmake(1)` ``-A`` option, to specify a target platform
+  via the :option:`cmake -A` option, to specify a target platform
   name (architecture).  For example:
 
   * ``cmake -G "Visual Studio 10 2010" -A Win32``
@@ -49,4 +49,4 @@ Toolset Selection
 
 The ``v100`` toolset that comes with Visual Studio 10 2010 is selected by
 default.  The :variable:`CMAKE_GENERATOR_TOOLSET` option may be set, perhaps
-via the :manual:`cmake(1)` ``-T`` option, to specify another toolset.
+via the :option:`cmake -T` option, to specify another toolset.
