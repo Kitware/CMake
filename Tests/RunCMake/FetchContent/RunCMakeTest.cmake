@@ -15,6 +15,7 @@ run_cmake(UsesTerminalOverride)
 run_cmake(MakeAvailable)
 run_cmake(MakeAvailableTwice)
 run_cmake(MakeAvailableUndeclared)
+run_cmake(VerifyHeaderSet)
 
 run_cmake_with_options(ManualSourceDirectory
   -D "FETCHCONTENT_SOURCE_DIR_WITHPROJECT=${CMAKE_CURRENT_LIST_DIR}/WithProject"
