@@ -66,10 +66,9 @@ run:
   cmake -S /path/to/source -B /path/to/source/build -G Ninja
 
 In cases where a preset contains lots of cache variables, and passing all of
-them as ``-D`` flags would cause the command line length limit of the platform
-to be exceeded, the IDE should instead construct a temporary cache script and
-pass it with the ``-C`` flag. See :ref:`CMake Options` for details on how the
-``-C`` flag is used.
+them as :option:`-D <cmake -D>` flags would cause the command line length limit
+of the platform to be exceeded, the IDE should instead construct a temporary
+cache script and pass it with the :option:`-C <cmake -C>` flag.
 
 While reading, parsing, and evaluating the contents of ``CMakePresets.json`` is
 straightforward, it is not trivial. In addition to the documentation, IDE

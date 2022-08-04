@@ -351,7 +351,7 @@ on the command line can be modified using the
 
 The :manual:`cmake(1)` tool allows specifying a
 file to use to populate the initial cache using
-the ``-C`` option.  This can be useful to simplify
+the :option:`-C <cmake -C>` option.  This can be useful to simplify
 commands and scripts which repeatedly require the
 same cache entries.
 

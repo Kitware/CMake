@@ -207,8 +207,8 @@ following fields in the root:
   set.
 
 ``buildConfig``
-  The build configuration given to CPack with the ``-C`` option. Only present
-  if this option is set.
+  The build configuration given to CPack with the :option:`cpack -C` option.
+  Only present if this option is set.
 
 ``defaultDirectoryPermissions``
   The default directory permissions given in
