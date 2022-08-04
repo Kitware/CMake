@@ -53,9 +53,9 @@ Here's how it works:
 
 * :manual:`cpack <cpack(1)>` runs
 * it includes ``CPackConfig.cmake``
-* it iterates over the generators given by the ``-G`` command line option,
-  or if no such option was specified, over the list of generators given by
-  the :variable:`CPACK_GENERATOR` variable set in the ``CPackConfig.cmake``
+* it iterates over the generators given by the :option:`-G <cpack -G>` command
+  line option, or if no such option was specified, over the list of generators
+  given by the :variable:`CPACK_GENERATOR` variable set in the ``CPackConfig.cmake``
   input file.
 * foreach generator, it then
 
@@ -246,9 +246,9 @@ installers.  The most commonly-used variables are:
   List of CPack generators to use.  If not specified, CPack will create a
   set of options following the naming pattern
   :variable:`CPACK_BINARY_<GENNAME>` (e.g. ``CPACK_BINARY_NSIS``) allowing
-  the user to enable/disable individual generators.  If the ``-G`` option is
-  given on the :manual:`cpack <cpack(1)>` command line, it will override this
-  variable and any ``CPACK_BINARY_<GENNAME>`` options.
+  the user to enable/disable individual generators.  If the :option:`-G <cpack -G>`
+  option is given on the :manual:`cpack <cpack(1)>` command line, it will override
+  this variable and any ``CPACK_BINARY_<GENNAME>`` options.
 
 .. variable:: CPACK_OUTPUT_CONFIG_FILE
 
@@ -469,7 +469,8 @@ The following variables are for advanced uses of CPack:
   generates (when :variable:`CPACK_GENERATOR` is not set) a set of CMake
   options (see CMake :command:`option` command) which may then be used to
   select the CPack generator(s) to be used when building the ``package``
-  target or when running :manual:`cpack <cpack(1)>` without the ``-G`` option.
+  target or when running :manual:`cpack <cpack(1)>` without the
+  :option:`-G <cpack -G>` option.
 
 #]=======================================================================]
 

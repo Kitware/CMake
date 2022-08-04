@@ -198,9 +198,9 @@ that may contain the following fields:
   or above, this field may be omitted to fall back to regular generator
   discovery procedure.
 
-  Note that for Visual Studio generators, unlike in the command line ``-G``
-  argument, you cannot include the platform name in the generator name. Use
-  the ``architecture`` field instead.
+  Note that for Visual Studio generators, unlike in the command line
+  :option:`-G <cmake -G>` argument, you cannot include the platform name
+  in the generator name. Use the ``architecture`` field instead.
 
 ``architecture``, ``toolset``
 

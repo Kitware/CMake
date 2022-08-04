@@ -19,8 +19,8 @@ produce project files for an auxiliary IDE.
 
 CMake Generators are platform-specific so each may be available only
 on certain platforms.  The :manual:`cmake(1)` command-line tool ``--help``
-output lists available generators on the current platform.  Use its ``-G``
-option to specify the generator for a new build tree.
+output lists available generators on the current platform.  Use its
+:option:`-G <cmake -G>` option to specify the generator for a new build tree.
 The :manual:`cmake-gui(1)` offers interactive selection of a generator
 when creating a new build tree.
 

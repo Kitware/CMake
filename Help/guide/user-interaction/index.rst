@@ -153,7 +153,7 @@ platform.  Usually, the default generator is sufficient
 to allow the user to proceed to build the software.
 
 The user may override the default generator with
-the ``-G`` option:
+the :option:`-G <cmake -G>` option:
 
 .. code-block:: console
 
@@ -214,8 +214,8 @@ generator to use, typically a choice between a ``Makefile``
 or a ``Ninja`` based generator.
 
 Note that it is not possible to change the generator
-with ``-G`` after the first invocation of CMake.  To
-change the generator, the build directory must be
+with :option:`-G <cmake -G>` after the first invocation of CMake.
+To change the generator, the build directory must be
 deleted and the build must be started from scratch.
 
 When generating Visual Studio project and solutions
