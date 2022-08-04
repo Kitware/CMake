@@ -3,7 +3,7 @@ CPACK_CUSTOM_INSTALL_VARIABLES
 
 .. versionadded:: 3.21
 
-CPack variables (set via e.g. ``cpack -D``, ``CPackConfig.cmake`` or
+CPack variables (set via e.g. :option:`cpack -D`, ``CPackConfig.cmake`` or
 :variable:`CPACK_PROJECT_CONFIG_FILE` scripts) are not directly visible in
 installation scripts.  Instead, one can pass a list of ``varName=value``
 pairs in the ``CPACK_CUSTOM_INSTALL_VARIABLES`` variable.  At install time,
