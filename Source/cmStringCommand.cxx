@@ -1014,7 +1014,7 @@ int ParseIndex(
   Json::ArrayIndex index = static_cast<Json::ArrayIndex>(lindex);
   if (index >= max) {
     cmAlphaNum sizeStr{ max };
-    throw json_error({ "expected an index less then "_s, sizeStr.View(),
+    throw json_error({ "expected an index less than "_s, sizeStr.View(),
                        " got '"_s, str, "'"_s },
                      progress);
   }
