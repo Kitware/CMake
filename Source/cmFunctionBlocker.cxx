@@ -24,10 +24,11 @@ bool cmFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
       auto self = mf.RemoveFunctionBlocker();
       assert(self.get() == this);
 
-      if (!this->ArgumentsMatch(lff, mf)) {
-        cmListFileContext const& lfc = this->GetStartingContext();
-        cmListFileContext closingContext =
-          cmListFileContext::FromListFileFunction(lff, lfc.FilePath);
+      cmListFileContext const& lfc = this->GetStartingContext();
+      cmListFileContext closingContext =
+        cmListFileContext::FromListFileFunction(lff, lfc.FilePath);
+      if (this->EndCommandSupportsArguments() &&
+          !this->ArgumentsMatch(lff, mf)) {
         std::ostringstream e;
         /* clang-format off */
         e << "A logical block opening on the line\n"
@@ -35,6 +36,15 @@ bool cmFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
           << "closes on the line\n"
           << "  " << closingContext << "\n"
           << "with mis-matching arguments.";
+        /* clang-format on */
+        mf.IssueMessage(MessageType::AUTHOR_WARNING, e.str());
+      } else if (!this->EndCommandSupportsArguments() &&
+                 !lff.Arguments().empty()) {
+        std::ostringstream e;
+        /* clang-format off */
+        e << "A logical block closing on the line\n"
+          "  " << closingContext << "\n"
+          "has unexpected arguments.";
         /* clang-format on */
         mf.IssueMessage(MessageType::AUTHOR_WARNING, e.str());
       }
