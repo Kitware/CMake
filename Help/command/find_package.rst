@@ -291,6 +291,7 @@ Each entry is meant for installation trees following Windows (``W``), UNIX
   <prefix>/(cmake|CMake)/                                         (W)
   <prefix>/<name>*/                                               (W)
   <prefix>/<name>*/(cmake|CMake)/                                 (W)
+  <prefix>/<name>*/(cmake|CMake)/<name>*/                         (W)
   <prefix>/(lib/<arch>|lib*|share)/cmake/<name>*/                 (U)
   <prefix>/(lib/<arch>|lib*|share)/<name>*/                       (U)
   <prefix>/(lib/<arch>|lib*|share)/<name>*/(cmake|CMake)/         (U)

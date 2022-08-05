@@ -291,6 +291,7 @@ public:
   {
   }
 
+protected:
   void OnMatchesLoaded() override
   {
     // check if there is a specific sorting order to perform
@@ -316,6 +317,7 @@ public:
   {
   }
 
+protected:
   std::string TransformNameBeforeCmp(std::string name) override
   {
     return cmStrCat(name, this->Extension);
@@ -2524,6 +2526,16 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
     return true;
   }
 
+  auto secondPkgDirGen =
+    cmProjectDirectoryListGenerator{ this->Names, this->SortOrder,
+                                     this->SortDirection };
+
+  // PREFIX/(Foo|foo|FOO).*/(cmake|CMake)/(Foo|foo|FOO).*/
+  if (TryGeneratedPaths(searchFn, prefix, firstPkgDirGen, iCMakeGen,
+                        secondPkgDirGen)) {
+    return true;
+  }
+
   // Construct list of common install locations (lib and share).
   std::vector<cm::string_view> common;
   std::string libArch;
@@ -2560,10 +2572,6 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
   if (TryGeneratedPaths(searchFn, prefix, cmnGen, firstPkgDirGen, iCMakeGen)) {
     return true;
   }
-
-  auto secondPkgDirGen =
-    cmProjectDirectoryListGenerator{ this->Names, this->SortOrder,
-                                     this->SortDirection };
 
   // PREFIX/(Foo|foo|FOO).*/(lib/ARCH|lib*|share)/cmake/(Foo|foo|FOO).*/
   if (TryGeneratedPaths(searchFn, prefix, firstPkgDirGen, cmnGen, cmakeGen,
