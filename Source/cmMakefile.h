@@ -862,6 +862,10 @@ public:
   void PushScope();
   void PopScope();
   void RaiseScope(const std::string& var, const char* value);
+  void RaiseScope(const std::string& var, cmValue value)
+  {
+    this->RaiseScope(var, value.GetCStr());
+  }
 
   // push and pop loop scopes
   void PushLoopBlockBarrier();
