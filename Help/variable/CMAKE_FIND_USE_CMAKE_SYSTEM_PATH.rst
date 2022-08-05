@@ -20,6 +20,7 @@ take precedence over this variable.
 
 See also the :variable:`CMAKE_FIND_USE_CMAKE_PATH`,
 :variable:`CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH`,
+:variable:`CMAKE_FIND_USE_INSTALL_PREFIX`,
 :variable:`CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH`,
 :variable:`CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY`,
 :variable:`CMAKE_FIND_USE_PACKAGE_REGISTRY`,

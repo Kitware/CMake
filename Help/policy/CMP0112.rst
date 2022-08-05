@@ -18,6 +18,7 @@ file name components no longer add a dependency on the evaluated target.
     - ``TARGET_PDB_FILE_NAME``
     - ``TARGET_PDB_FILE_DIR``
     - ``TARGET_BUNDLE_DIR``
+    - ``TARGET_BUNDLE_DIR_NAME``
     - ``TARGET_BUNDLE_CONTENT_DIR``
 
 

@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.16)
 project(MocInclude)
-get_filename_component(CS_REAL ${CMAKE_CURRENT_SOURCE_DIR} REALPATH)
-include("${CS_REAL}/../AutogenCoreTest.cmake")
+if (NOT DEFINED AUTOGEN_CORE_TEST_CMAKE)
+  get_filename_component(AUTOGEN_CORE_TEST_CMAKE "../AutogenCoreTest.cmake" ABSOLUTE)
+endif()
+include("${AUTOGEN_CORE_TEST_CMAKE}")
 
 # Test moc include patterns
 

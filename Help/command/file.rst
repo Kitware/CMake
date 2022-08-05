@@ -1128,6 +1128,18 @@ Additional options to ``DOWNLOAD`` are:
   Historical short-hand for ``EXPECTED_HASH MD5=<value>``. It is an error to
   specify this if ``DOWNLOAD`` is not given a ``<file>``.
 
+``RANGE_START <value>``
+  .. versionadded:: 3.24
+
+  Offset of the start of the range in file in bytes. Could be omitted to
+  download up to the specified ``RANGE_END``.
+
+``RANGE_END <value>``
+  .. versionadded:: 3.24
+
+  Offset of the end of the range in file in bytes. Could be omitted to
+  download everything from the specified ``RANGE_START`` to the end of file.
+
 Locking
 ^^^^^^^
 
@@ -1215,7 +1227,8 @@ the ``MTIME`` option.
     [DESTINATION <dir>]
     [PATTERNS <patterns>...]
     [LIST_ONLY]
-    [VERBOSE])
+    [VERBOSE]
+    [TOUCH])
 
 .. versionadded:: 3.18
 
@@ -1232,5 +1245,9 @@ If the ``PATTERNS`` option is not given, the entire archive will be listed or
 extracted.
 
 ``LIST_ONLY`` will list the files in the archive rather than extract them.
+
+.. versionadded:: 3.24
+  The ``TOUCH`` option gives extracted files a current local
+  timestamp instead of extracting file timestamps from the archive.
 
 With ``VERBOSE``, the command will produce verbose output.

@@ -107,6 +107,10 @@
 #  include <sys/utsname.h>
 #endif
 
+#if defined(_MSC_VER) && _MSC_VER >= 1800
+#  define CM_WINDOWS_DEPRECATED_GetVersionEx
+#endif
+
 namespace {
 
 cmSystemTools::InterruptCallback s_InterruptCallback;
@@ -156,8 +160,8 @@ static int cm_archive_read_open_file(struct archive* a, const char* file,
 
 bool cmSystemTools::s_RunCommandHideConsole = false;
 bool cmSystemTools::s_DisableRunCommandOutput = false;
-bool cmSystemTools::s_ErrorOccured = false;
-bool cmSystemTools::s_FatalErrorOccured = false;
+bool cmSystemTools::s_ErrorOccurred = false;
+bool cmSystemTools::s_FatalErrorOccurred = false;
 bool cmSystemTools::s_ForceUnixPaths = false;
 
 // replace replace with with as many times as it shows up in source.
@@ -212,7 +216,7 @@ std::string cmSystemTools::HelpFileName(cm::string_view str)
 void cmSystemTools::Error(const std::string& m)
 {
   std::string message = "CMake Error: " + m;
-  cmSystemTools::s_ErrorOccured = true;
+  cmSystemTools::s_ErrorOccurred = true;
   cmSystemTools::Message(message, "Error");
 }
 
@@ -903,6 +907,40 @@ cmSystemTools::WindowsFileRetry cmSystemTools::GetWindowsDirectoryRetry()
   static cmSystemTools::WindowsFileRetry retry =
     InitWindowsDirectoryRetry().Retry;
   return retry;
+}
+
+cmSystemTools::WindowsVersion cmSystemTools::GetWindowsVersion()
+{
+  /* Windows version number data.  */
+  OSVERSIONINFOEXW osviex;
+  ZeroMemory(&osviex, sizeof(osviex));
+  osviex.dwOSVersionInfoSize = sizeof(osviex);
+
+#  ifdef CM_WINDOWS_DEPRECATED_GetVersionEx
+#    pragma warning(push)
+#    ifdef __INTEL_COMPILER
+#      pragma warning(disable : 1478)
+#    elif defined __clang__
+#      pragma clang diagnostic push
+#      pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#    else
+#      pragma warning(disable : 4996)
+#    endif
+#  endif
+  GetVersionExW((OSVERSIONINFOW*)&osviex);
+#  ifdef CM_WINDOWS_DEPRECATED_GetVersionEx
+#    ifdef __clang__
+#      pragma clang diagnostic pop
+#    else
+#      pragma warning(pop)
+#    endif
+#  endif
+
+  WindowsVersion result;
+  result.dwMajorVersion = osviex.dwMajorVersion;
+  result.dwMinorVersion = osviex.dwMinorVersion;
+  result.dwBuildNumber = osviex.dwBuildNumber;
+  return result;
 }
 #endif
 
@@ -1821,6 +1859,7 @@ bool copy_data(struct archive* ar, struct archive* aw)
 
 bool extract_tar(const std::string& outFileName,
                  const std::vector<std::string>& files, bool verbose,
+                 cmSystemTools::cmTarExtractTimestamps extractTimestamps,
                  bool extract)
 {
   cmLocaleRAII localeRAII;
@@ -1879,10 +1918,12 @@ bool extract_tar(const std::string& outFileName,
       cmSystemTools::Stdout("\n");
     }
     if (extract) {
-      r = archive_write_disk_set_options(ext, ARCHIVE_EXTRACT_TIME);
-      if (r != ARCHIVE_OK) {
-        ArchiveError("Problem with archive_write_disk_set_options(): ", ext);
-        break;
+      if (extractTimestamps == cmSystemTools::cmTarExtractTimestamps::Yes) {
+        r = archive_write_disk_set_options(ext, ARCHIVE_EXTRACT_TIME);
+        if (r != ARCHIVE_OK) {
+          ArchiveError("Problem with archive_write_disk_set_options(): ", ext);
+          break;
+        }
       }
 
       r = archive_write_header(ext, entry);
@@ -1942,13 +1983,15 @@ bool extract_tar(const std::string& outFileName,
 
 bool cmSystemTools::ExtractTar(const std::string& outFileName,
                                const std::vector<std::string>& files,
+                               cmTarExtractTimestamps extractTimestamps,
                                bool verbose)
 {
 #if !defined(CMAKE_BOOTSTRAP)
-  return extract_tar(outFileName, files, verbose, true);
+  return extract_tar(outFileName, files, verbose, extractTimestamps, true);
 #else
   (void)outFileName;
   (void)files;
+  (void)extractTimestamps;
   (void)verbose;
   return false;
 #endif
@@ -1959,7 +2002,8 @@ bool cmSystemTools::ListTar(const std::string& outFileName,
                             bool verbose)
 {
 #if !defined(CMAKE_BOOTSTRAP)
-  return extract_tar(outFileName, files, verbose, false);
+  return extract_tar(outFileName, files, verbose, cmTarExtractTimestamps::Yes,
+                     false);
 #else
   (void)outFileName;
   (void)files;
@@ -1989,7 +2033,7 @@ int cmSystemTools::WaitForLine(cmsysProcess* process, std::string& line,
           --length;
         }
         if (length > 0) {
-          line.append(&out[0], length);
+          line.append(out.data(), length);
         }
         out.erase(out.begin(), outiter + 1);
         return cmsysProcess_Pipe_STDOUT;
@@ -2007,7 +2051,7 @@ int cmSystemTools::WaitForLine(cmsysProcess* process, std::string& line,
           --length;
         }
         if (length > 0) {
-          line.append(&err[0], length);
+          line.append(err.data(), length);
         }
         err.erase(err.begin(), erriter + 1);
         return cmsysProcess_Pipe_STDERR;
@@ -2051,12 +2095,12 @@ int cmSystemTools::WaitForLine(cmsysProcess* process, std::string& line,
         erriter = err.begin() + size;
       }
       if (!out.empty()) {
-        line.append(&out[0], outiter - out.begin());
+        line.append(out.data(), outiter - out.begin());
         out.erase(out.begin(), out.end());
         return cmsysProcess_Pipe_STDOUT;
       }
       if (!err.empty()) {
-        line.append(&err[0], erriter - err.begin());
+        line.append(err.data(), erriter - err.begin());
         err.erase(err.begin(), err.end());
         return cmsysProcess_Pipe_STDERR;
       }
@@ -3143,7 +3187,7 @@ static cm::optional<bool> RemoveRPathELF(std::string const& file,
     }
     return false;
   }
-  if (!f.write(&bytes[0], bytes.size())) {
+  if (!f.write(bytes.data(), bytes.size())) {
     if (emsg) {
       *emsg = "Error replacing DYNAMIC table header.";
     }
@@ -3411,5 +3455,14 @@ cm::string_view cmSystemTools::GetSystemName()
     return systemName;
   }
   return "";
+#endif
+}
+
+char cmSystemTools::GetSystemPathlistSeparator()
+{
+#if defined(_WIN32)
+  return ';';
+#else
+  return ':';
 #endif
 }

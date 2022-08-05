@@ -37,8 +37,15 @@ Options:
 ``COMMAND``
  A child process command line.
 
- CMake executes the child process using operating system APIs directly.
- All arguments are passed VERBATIM to the child process.
+ CMake executes the child process using operating system APIs directly:
+
+ * On POSIX platforms, the command line is passed to the
+   child process in an ``argv[]`` style array.
+
+ * On Windows platforms, the command line is encoded as a string such
+   that child processes using ``CommandLineToArgvW`` will decode the
+   original arguments.
+
  No intermediate shell is used, so shell operators such as ``>``
  are treated as normal arguments.
  (Use the ``INPUT_*``, ``OUTPUT_*``, and ``ERROR_*`` options to

@@ -1,0 +1,4 @@
+CMake Error at Registry_BadView3.cmake:[0-9]+ \(cmake_host_system_information\):
+  cmake_host_system_information given invalid argument\(s\) "64".
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

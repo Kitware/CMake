@@ -118,7 +118,7 @@ protected:
   void IssueCMP0095Warning(const std::string& unescapedRpath);
 
   std::string const TargetName;
-  cmGeneratorTarget* Target;
+  cmGeneratorTarget* Target = nullptr;
   std::string const FilePermissions;
   NamelinkModeType NamelinkMode;
   bool const ImportLibrary;

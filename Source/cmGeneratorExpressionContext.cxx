@@ -16,10 +16,6 @@ cmGeneratorExpressionContext::cmGeneratorExpressionContext(
   , HeadTarget(headTarget)
   , CurrentTarget(currentTarget)
   , Quiet(quiet)
-  , HadError(false)
-  , HadContextSensitiveCondition(false)
-  , HadHeadSensitiveCondition(false)
-  , HadLinkLanguageSensitiveCondition(false)
   , EvaluateForBuildsystem(evaluateForBuildsystem)
 {
 }

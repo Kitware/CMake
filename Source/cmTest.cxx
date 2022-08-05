@@ -8,8 +8,7 @@
 #include "cmValue.h"
 
 cmTest::cmTest(cmMakefile* mf)
-  : CommandExpandLists(false)
-  , Backtrace(mf->GetBacktrace())
+  : Backtrace(mf->GetBacktrace())
 {
   this->Makefile = mf;
   this->OldStyle = true;

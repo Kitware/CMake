@@ -94,6 +94,13 @@
 #  include <linux/fs.h>
 #endif
 
+#if defined(__APPLE__) &&                                                     \
+  (__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ - 0 >= 101200)
+#  define KWSYS_SYSTEMTOOLS_HAVE_MACOS_COPYFILE_CLONE
+#  include <copyfile.h>
+#  include <sys/stat.h>
+#endif
+
 // Windows API.
 #if defined(_WIN32)
 #  include <windows.h>
@@ -2474,6 +2481,26 @@ Status SystemTools::CloneFileContent(std::string const& source,
   close(out);
 
   return status;
+#elif defined(__APPLE__) &&                                                   \
+  defined(KWSYS_SYSTEMTOOLS_HAVE_MACOS_COPYFILE_CLONE)
+  // NOTE: we cannot use `clonefile` as the {a,c,m}time for the file needs to
+  // be updated by `copy_file_if_different` and `copy_file`.
+  if (copyfile(source.c_str(), destination.c_str(), nullptr,
+               COPYFILE_METADATA | COPYFILE_CLONE) < 0) {
+    return Status::POSIX_errno();
+  }
+#  if KWSYS_CXX_HAS_UTIMENSAT
+  // utimensat is only available on newer Unixes and macOS 10.13+
+  if (utimensat(AT_FDCWD, destination.c_str(), nullptr, 0) < 0) {
+    return Status::POSIX_errno();
+  }
+#  else
+  // fall back to utimes
+  if (utimes(destination.c_str(), nullptr) < 0) {
+    return Status::POSIX_errno();
+  }
+#  endif
+  return Status::Success();
 #else
   (void)source;
   (void)destination;

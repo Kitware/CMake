@@ -124,10 +124,10 @@ private:
   std::stack<std::string, std::vector<std::string>> Elements;
   std::string IndentationElement;
   std::size_t Level;
-  std::size_t Indent;
-  bool ElementOpen;
-  bool BreakAttrib;
-  bool IsContent;
+  std::size_t Indent = 0;
+  bool ElementOpen = false;
+  bool BreakAttrib = false;
+  bool IsContent = false;
 };
 
 class cmXMLElement; // IWYU pragma: keep

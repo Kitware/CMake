@@ -17,6 +17,13 @@ CubeRenderer::CubeRenderer()
   // Create a new WinRT object to validate that we can link properly
   Batman ^ hero = ref new Batman();
   hero->savePeople();
+
+  // Test that .manifest files can be bundled with app
+  DX::ReadDataAsync("Direct3DApp1\\Simple.manifest")
+    .then([this](Platform::Array<byte> ^ fileData) {
+      std::string manifestContent(fileData->begin(), fileData->end());
+      assert(manifestContent.find("hello") == 0);
+    });
 }
 
 void CubeRenderer::CreateDeviceResources()

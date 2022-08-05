@@ -17,10 +17,10 @@ std::string cmUuid::FromMd5(std::vector<unsigned char> const& uuidNamespace,
 
   cmCryptoHash md5(cmCryptoHash::AlgoMD5);
   md5.Initialize();
-  md5.Append(&hashInput[0], hashInput.size());
+  md5.Append(hashInput.data(), hashInput.size());
   std::vector<unsigned char> digest = md5.Finalize();
 
-  return this->FromDigest(&digest[0], 3);
+  return this->FromDigest(digest.data(), 3);
 }
 
 std::string cmUuid::FromSha1(std::vector<unsigned char> const& uuidNamespace,
@@ -31,10 +31,10 @@ std::string cmUuid::FromSha1(std::vector<unsigned char> const& uuidNamespace,
 
   cmCryptoHash sha1(cmCryptoHash::AlgoSHA1);
   sha1.Initialize();
-  sha1.Append(&hashInput[0], hashInput.size());
+  sha1.Append(hashInput.data(), hashInput.size());
   std::vector<unsigned char> digest = sha1.Finalize();
 
-  return this->FromDigest(&digest[0], 5);
+  return this->FromDigest(digest.data(), 5);
 }
 
 void cmUuid::CreateHashInput(std::vector<unsigned char> const& uuidNamespace,
@@ -46,7 +46,7 @@ void cmUuid::CreateHashInput(std::vector<unsigned char> const& uuidNamespace,
   if (!name.empty()) {
     output.resize(output.size() + name.size());
 
-    memcpy(&output[0] + uuidNamespace.size(), name.c_str(), name.size());
+    memcpy(output.data() + uuidNamespace.size(), name.c_str(), name.size());
   }
 }
 
@@ -59,7 +59,7 @@ std::string cmUuid::FromDigest(const unsigned char* digest,
   memcpy(uuid, digest, 16);
 
   uuid[6] &= 0xF;
-  uuid[6] |= byte_t(version << 4);
+  uuid[6] |= static_cast<byte_t>(version << 4);
 
   uuid[8] &= 0x3F;
   uuid[8] |= 0x80;
@@ -118,7 +118,8 @@ std::string cmUuid::ByteToHex(unsigned char byte) const
   for (int i = 0; i < 2; ++i) {
     unsigned char rest = byte % 16;
     byte /= 16;
-    char c = (rest < 0xA) ? char('0' + rest) : char('a' + (rest - 0xA));
+    char c = (rest < 0xA) ? static_cast<char>('0' + rest)
+                          : static_cast<char>('a' + (rest - 0xA));
     result.at(1 - i) = c;
   }
 
@@ -143,7 +144,7 @@ bool cmUuid::StringToBinaryImpl(std::string const& input,
       return false;
     }
 
-    output.push_back(char(c1 << 4 | c2));
+    output.push_back(static_cast<char>(c1 << 4 | c2));
   }
 
   return true;
@@ -152,15 +153,15 @@ bool cmUuid::StringToBinaryImpl(std::string const& input,
 bool cmUuid::IntFromHexDigit(char input, char& output) const
 {
   if (input >= '0' && input <= '9') {
-    output = char(input - '0');
+    output = static_cast<char>(input - '0');
     return true;
   }
   if (input >= 'a' && input <= 'f') {
-    output = char(input - 'a' + 0xA);
+    output = static_cast<char>(input - 'a' + 0xA);
     return true;
   }
   if (input >= 'A' && input <= 'F') {
-    output = char(input - 'A' + 0xA);
+    output = static_cast<char>(input - 'A' + 0xA);
     return true;
   }
   return false;

@@ -38,5 +38,7 @@ public:
     std::map<cmSourceFile const*, std::string>& mapping,
     cmGeneratorTarget const* gt = nullptr) override;
 
+  void AddXCConfigSources(cmGeneratorTarget* target) override;
+
 private:
 };

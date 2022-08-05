@@ -19,12 +19,6 @@ function(run_compiler_env lang)
   # Use the correct compiler
   include(${RunCMake_BINARY_DIR}/Find${lang}Compiler-build/${lang}_comp.cmake)
 
-  # Use a single build tree for tests without cleaning.
-  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${lang}-env-build)
-  set(RunCMake_TEST_NO_CLEAN 1)
-  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
-  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
-
   # Set the compiler
   if(lang STREQUAL "C")
     set(ENV{CC} "'${temp_CMAKE_${lang}_COMPILER}' -DFOO1 -DFOO2")
@@ -32,19 +26,30 @@ function(run_compiler_env lang)
     set(ENV{${lang}} "'${temp_CMAKE_${lang}_COMPILER}' -DFOO1 -DFOO2")
   endif()
 
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${lang}-env-build)
+  set(RunCMake_TEST_VARIANT_DESCRIPTION "-env")
+  run_cmake(${lang})
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(${lang}-Build ${CMAKE_COMMAND} --build . ${verbose_args})
+
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}/CMakeFiles")
+  set(RunCMake_TEST_VARIANT_DESCRIPTION "-env-cached")
   run_cmake(${lang})
   run_cmake_command(${lang}-Build ${CMAKE_COMMAND} --build . ${verbose_args})
 endfunction()
 
 function(run_compiler_tc lang)
-  # Use a single build tree for tests without cleaning.
-  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${lang}-tc-build)
-  set(RunCMake_TEST_NO_CLEAN 1)
-  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
-  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
-
   set(RunCMake_TEST_OPTIONS
       -DCMAKE_TOOLCHAIN_FILE=${RunCMake_BINARY_DIR}/Find${lang}Compiler-build/toolchain_${lang}_comp.cmake)
+
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${lang}-tc-build)
+  set(RunCMake_TEST_VARIANT_DESCRIPTION "-tc")
+  run_cmake(${lang})
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(${lang}-Build ${CMAKE_COMMAND} --build . ${verbose_args})
+
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}/CMakeFiles")
+  set(RunCMake_TEST_VARIANT_DESCRIPTION "-tc-cached")
   run_cmake(${lang})
   run_cmake_command(${lang}-Build ${CMAKE_COMMAND} --build . ${verbose_args})
 endfunction()

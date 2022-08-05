@@ -65,8 +65,7 @@ private:
   void WriteSourceProperty(std::ostream& fout, const cmSourceFile* sf,
                            std::string const& propName,
                            std::string const& propFlag);
-  static void WriteObjectLangOverride(std::ostream& fout,
-                                      const cmSourceFile* sourceFile);
+  static std::string WriteObjectLangOverride(const cmSourceFile* sourceFile);
 
   bool DetermineIfIntegrityApp();
   cmGeneratorTarget* GeneratorTarget;
@@ -78,6 +77,5 @@ private:
   std::string TargetNameReal;
   GhsMultiGpj::Types TagType;
   std::string const Name;
-  std::string ConfigName;     /* CMAKE_BUILD_TYPE */
-  bool const CmdWindowsShell; /* custom commands run in cmd.exe or /bin/sh */
+  std::string ConfigName; /* CMAKE_BUILD_TYPE */
 };

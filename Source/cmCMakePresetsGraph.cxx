@@ -361,6 +361,13 @@ bool ExpandMacros(const cmCMakePresetsGraph& graph, const T& preset,
           cmSystemTools::GetParentDirectory(preset.OriginFile->Filename);
         return ExpandMacroResult::Ok;
       }
+      if (macroName == "pathListSep") {
+        if (version < 5) {
+          return ExpandMacroResult::Error;
+        }
+        macroOut += cmSystemTools::GetSystemPathlistSeparator();
+        return ExpandMacroResult::Ok;
+      }
     }
 
     return ExpandMacroResult::Ignore;
@@ -781,6 +788,8 @@ cmCMakePresetsGraph::TestPreset::VisitPresetInherit(
                            parentOutput.MaxPassedTestOutputSize);
       InheritOptionalValue(output.MaxFailedTestOutputSize,
                            parentOutput.MaxFailedTestOutputSize);
+      InheritOptionalValue(output.TestOutputTruncation,
+                           parentOutput.TestOutputTruncation);
       InheritOptionalValue(output.MaxTestNameWidth,
                            parentOutput.MaxTestNameWidth);
     } else {
@@ -1035,6 +1044,9 @@ const char* cmCMakePresetsGraph::ResultToString(ReadFileResult result)
              "support.";
     case ReadFileResult::CYCLIC_INCLUDE:
       return "Cyclic include among preset files";
+    case ReadFileResult::TEST_OUTPUT_TRUNCATION_UNSUPPORTED:
+      return "File version must be 5 or higher for testOutputTruncation "
+             "preset support.";
   }
 
   return "Unknown error";

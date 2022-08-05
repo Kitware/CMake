@@ -171,6 +171,7 @@ Properties on Targets
    /prop_tgt/COMPILE_PDB_NAME_CONFIG
    /prop_tgt/COMPILE_PDB_OUTPUT_DIRECTORY
    /prop_tgt/COMPILE_PDB_OUTPUT_DIRECTORY_CONFIG
+   /prop_tgt/COMPILE_WARNING_AS_ERROR
    /prop_tgt/CONFIG_OUTPUT_NAME
    /prop_tgt/CONFIG_POSTFIX
    /prop_tgt/CROSSCOMPILING_EMULATOR
@@ -262,10 +263,13 @@ Properties on Targets
    /prop_tgt/INTERFACE_COMPILE_FEATURES
    /prop_tgt/INTERFACE_COMPILE_OPTIONS
    /prop_tgt/INTERFACE_HEADER_SETS
+   /prop_tgt/INTERFACE_HEADER_SETS_TO_VERIFY
    /prop_tgt/INTERFACE_INCLUDE_DIRECTORIES
    /prop_tgt/INTERFACE_LINK_DEPENDS
    /prop_tgt/INTERFACE_LINK_DIRECTORIES
    /prop_tgt/INTERFACE_LINK_LIBRARIES
+   /prop_tgt/INTERFACE_LINK_LIBRARIES_DIRECT
+   /prop_tgt/INTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE
    /prop_tgt/INTERFACE_LINK_OPTIONS
    /prop_tgt/INTERFACE_POSITION_INDEPENDENT_CODE
    /prop_tgt/INTERFACE_PRECOMPILE_HEADERS
@@ -306,6 +310,8 @@ Properties on Targets
    /prop_tgt/LINK_INTERFACE_MULTIPLICITY_CONFIG
    /prop_tgt/LINK_LIBRARIES
    /prop_tgt/LINK_LIBRARIES_ONLY_TARGETS
+   /prop_tgt/LINK_LIBRARY_OVERRIDE
+   /prop_tgt/LINK_LIBRARY_OVERRIDE_LIBRARY
    /prop_tgt/LINK_OPTIONS
    /prop_tgt/LINK_SEARCH_END_STATIC
    /prop_tgt/LINK_SEARCH_START_STATIC
@@ -376,6 +382,7 @@ Properties on Targets
    /prop_tgt/UNITY_BUILD_CODE_BEFORE_INCLUDE
    /prop_tgt/UNITY_BUILD_MODE
    /prop_tgt/UNITY_BUILD_UNIQUE_ID
+   /prop_tgt/VERIFY_INTERFACE_HEADER_SETS
    /prop_tgt/VERSION
    /prop_tgt/VISIBILITY_INLINES_HIDDEN
    /prop_tgt/VS_CONFIGURATION_TYPE
@@ -389,6 +396,7 @@ Properties on Targets
    /prop_tgt/VS_DOTNET_REFERENCEPROP_refname_TAG_tagname
    /prop_tgt/VS_DOTNET_REFERENCES
    /prop_tgt/VS_DOTNET_REFERENCES_COPY_LOCAL
+   /prop_tgt/VS_DOTNET_STARTUP_OBJECT
    /prop_tgt/VS_DOTNET_TARGET_FRAMEWORK_VERSION
    /prop_tgt/VS_DPI_AWARE
    /prop_tgt/VS_GLOBAL_KEYWORD
@@ -400,6 +408,7 @@ Properties on Targets
    /prop_tgt/VS_JUST_MY_CODE_DEBUGGING
    /prop_tgt/VS_KEYWORD
    /prop_tgt/VS_MOBILE_EXTENSIONS_VERSION
+   /prop_tgt/VS_NO_COMPILE_BATCHING
    /prop_tgt/VS_NO_SOLUTION_DEPLOY
    /prop_tgt/VS_PACKAGE_REFERENCES
    /prop_tgt/VS_PLATFORM_TOOLSET
@@ -416,6 +425,7 @@ Properties on Targets
    /prop_tgt/VS_WINRT_COMPONENT
    /prop_tgt/VS_WINRT_EXTENSIONS
    /prop_tgt/VS_WINRT_REFERENCES
+   /prop_tgt/WATCOM_RUNTIME_LIBRARY
    /prop_tgt/WIN32_EXECUTABLE
    /prop_tgt/WINDOWS_EXPORT_ALL_SYMBOLS
    /prop_tgt/XCODE_ATTRIBUTE_an-attribute
@@ -451,6 +461,7 @@ Properties on Targets
    /prop_tgt/XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER_STOP
    /prop_tgt/XCODE_SCHEME_WORKING_DIRECTORY
    /prop_tgt/XCODE_SCHEME_ZOMBIE_OBJECTS
+   /prop_tgt/XCODE_XCCONFIG
    /prop_tgt/XCTEST
 
 .. _`Test Properties`:

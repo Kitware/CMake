@@ -59,3 +59,12 @@ set_property(TARGET bar_static_private APPEND PROPERTY INTERFACE_LINK_LIBRARIES 
 
 add_executable(InterfaceLinkLibraries main_vs6_4.cpp)
 set_property(TARGET InterfaceLinkLibraries APPEND PROPERTY LINK_LIBRARIES bar_static_private)
+
+add_library(foo_link_only STATIC foo_link_only.c)
+target_compile_definitions(foo_link_only PUBLIC FOO_LINK_ONLY)
+add_executable(use_foo_link_only_CMP0131_OLD use_foo_link_only.c)
+target_link_libraries(use_foo_link_only_CMP0131_OLD PRIVATE "$<LINK_ONLY:foo_link_only>")
+target_compile_definitions(use_foo_link_only_CMP0131_OLD PRIVATE EXPECT_FOO_LINK_ONLY)
+cmake_policy(SET CMP0131 NEW)
+add_executable(use_foo_link_only_CMP0131_NEW use_foo_link_only.c)
+target_link_libraries(use_foo_link_only_CMP0131_NEW PRIVATE "$<LINK_ONLY:foo_link_only>")

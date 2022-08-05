@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -76,11 +76,15 @@ bool curl_win32_idn_to_ascii(const char *in, char **out)
   if(in_w) {
     wchar_t punycode[IDN_MAX_LENGTH];
     int chars = IdnToAscii(0, in_w, -1, punycode, IDN_MAX_LENGTH);
-    free(in_w);
+    curlx_unicodefree(in_w);
     if(chars) {
-      *out = curlx_convert_wchar_to_UTF8(punycode);
-      if(*out)
-        success = TRUE;
+      char *mstr = curlx_convert_wchar_to_UTF8(punycode);
+      if(mstr) {
+        *out = strdup(mstr);
+        curlx_unicodefree(mstr);
+        if(*out)
+          success = TRUE;
+      }
     }
   }
 
@@ -97,11 +101,15 @@ bool curl_win32_ascii_to_idn(const char *in, char **out)
     wchar_t unicode[IDN_MAX_LENGTH];
     int chars = IdnToUnicode(0, in_w, curlx_uztosi(in_len),
                              unicode, IDN_MAX_LENGTH);
-    free(in_w);
+    curlx_unicodefree(in_w);
     if(chars) {
-      *out = curlx_convert_wchar_to_UTF8(unicode);
-      if(*out)
-        success = TRUE;
+      char *mstr = curlx_convert_wchar_to_UTF8(unicode);
+      if(mstr) {
+        *out = strdup(mstr);
+        curlx_unicodefree(mstr);
+        if(*out)
+          success = TRUE;
+      }
     }
   }
 

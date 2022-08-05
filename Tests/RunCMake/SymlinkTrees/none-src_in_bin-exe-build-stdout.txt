@@ -1,0 +1,4 @@
+source.c: '[^']*/Tests/RunCMake/SymlinkTrees/none/binary/source/source.c'
+source.h: '[^']*/Tests/RunCMake/SymlinkTrees/none/binary/source/include/source.h'
+binary.c: '[^']*/Tests/RunCMake/SymlinkTrees/none/binary/binary.c'
+binary.h: '[^']*/Tests/RunCMake/SymlinkTrees/none/binary/include/binary.h'

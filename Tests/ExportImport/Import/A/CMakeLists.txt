@@ -68,15 +68,22 @@ target_link_libraries(imp_testExe1
   exp_testLib7
   exp_testLibCycleA
   exp_testLibPerConfigDest
+  exp_testStaticLibWithPlugin
   )
 
 add_library(imp_testInterfaceInclude1 STATIC imp_testInterfaceInclude1.c)
 target_include_directories(imp_testInterfaceInclude1 SYSTEM PRIVATE testInterfaceIncludeSystem)
 target_link_libraries(imp_testInterfaceInclude1 PRIVATE exp_testInterfaceIncludeUser)
 
+add_executable(imp_UseSharedLibWithHelper1 ../../../InterfaceLinkLibrariesDirect/UseSharedLibWithHelper.c)
+target_link_libraries(imp_UseSharedLibWithHelper1 PRIVATE exp_testSharedLibWithHelper testSharedLibHelperExclude)
+
 # Try building a plugin to an executable imported from the install tree.
 add_library(imp_mod1 MODULE imp_mod1.c)
 target_link_libraries(imp_mod1 exp_testExe2)
+
+add_library(imp_ExePlugin1 MODULE ../../../InterfaceLinkLibrariesDirect/ExePlugin.c)
+target_link_libraries(imp_ExePlugin1 PRIVATE exp_testExeWithPluginHelper testExePluginHelperExclude)
 
 # Try referencing an executable imported from the build tree.
 add_custom_command(
@@ -112,6 +119,7 @@ target_link_libraries(imp_testExe1b
   bld_testLib7
   bld_testLibCycleA
   bld_testLibPerConfigDest
+  bld_testStaticLibWithPlugin
   )
 
 add_library(imp_testInterfaceInclude1b STATIC imp_testInterfaceInclude1.c)
@@ -183,9 +191,15 @@ target_link_libraries(SubDirLink_bld PRIVATE bld_TopDirLib bld_SubDirLinkA)
 add_executable(SubDirLink_exp SubDirLink.c)
 target_link_libraries(SubDirLink_exp PRIVATE exp_TopDirLib exp_SubDirLinkA)
 
+add_executable(imp_UseSharedLibWithHelper1b ../../../InterfaceLinkLibrariesDirect/UseSharedLibWithHelper.c)
+target_link_libraries(imp_UseSharedLibWithHelper1b PRIVATE bld_testSharedLibWithHelper testSharedLibHelperExclude)
+
 # Try building a plugin to an executable imported from the build tree.
 add_library(imp_mod1b MODULE imp_mod1.c)
 target_link_libraries(imp_mod1b bld_testExe2)
+
+add_library(imp_ExePlugin1b MODULE ../../../InterfaceLinkLibrariesDirect/ExePlugin.c)
+target_link_libraries(imp_ExePlugin1b PRIVATE bld_testExeWithPluginHelper testExePluginHelperExclude)
 
 # Export/CMakeLists.txt pretends the RelWithDebInfo (as well as Debug)
 # configuration should link to debug libs.

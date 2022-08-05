@@ -25,6 +25,7 @@ apt-get install -y \
 
 # Packages needed to test CTest.
 apt-get install -y \
+    bzr bzr-xmloutput \
     cvs \
     subversion \
     mercurial
@@ -57,11 +58,13 @@ apt-get install -y \
     libgsl-dev \
     libgtest-dev \
     libgtk2.0-dev \
+    libicu-dev \
     libinput-dev \
     libjpeg-dev \
     libjsoncpp-dev \
     liblapack-dev \
     liblzma-dev \
+    libopenal-dev \
     libopenmpi-dev openmpi-bin \
     libpng-dev \
     libpq-dev postgresql-server-dev-11 \
@@ -75,6 +78,7 @@ apt-get install -y \
     libxerces-c-dev \
     libxml2-dev libxml2-utils \
     libxslt-dev xsltproc \
+    openjdk-11-jdk \
     python2 python2-dev python-numpy pypy pypy-dev \
     python3 python3-dev python3-numpy pypy3 pypy3-dev python3-venv \
     qtbase5-dev qtbase5-dev-tools \

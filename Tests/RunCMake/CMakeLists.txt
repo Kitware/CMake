@@ -76,7 +76,7 @@ function(add_RunCMake_test_group test types)
 endfunction()
 
 # Some tests use python for extra checks.
-find_package(PythonInterp QUIET)
+find_package(Python QUIET)
 
 if(XCODE_VERSION AND "${XCODE_VERSION}" VERSION_LESS 6.1)
   set(Swift_ARGS -DXCODE_BELOW_6_1=1)
@@ -141,6 +141,16 @@ if (CMAKE_SYSTEM_NAME MATCHES "(Linux|Darwin)")
                             -DCMAKE_SHARED_LIBRARY_SUFFIX=${CMAKE_SHARED_LIBRARY_SUFFIX})
 endif()
 add_RunCMake_test(CMP0126)
+
+if("${CMAKE_C_COMPILER_ID}" STREQUAL "LCC" OR
+   "${CMAKE_CXX_COMPILER_ID}" STREQUAL "LCC" OR
+   "${CMAKE_Fortran_COMPILER_ID}" STREQUAL "LCC")
+  add_RunCMake_test("CMP0129")
+endif()
+
+add_RunCMake_test(CMP0132)
+add_RunCMake_test(CMP0135)
+add_RunCMake_test(CMP0139)
 
 # The test for Policy 65 requires the use of the
 # CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS variable, which both the VS and Xcode
@@ -278,6 +288,9 @@ endif()
 add_RunCMake_test(CMakeDependentOption)
 add_RunCMake_test(CMakeRoleGlobalProperty)
 add_RunCMake_test(CMakeRelease -DCMake_TEST_JQ=${CMake_TEST_JQ})
+if(CMAKE_GENERATOR MATCHES "Make|Ninja")
+  add_RunCMake_test(Color)
+endif()
 if(UNIX AND "${CMAKE_GENERATOR}" MATCHES "Unix Makefiles|Ninja")
   add_RunCMake_test(CompilerChange)
 endif()
@@ -291,7 +304,7 @@ add_RunCMake_test(ExcludeFromAll)
 add_RunCMake_test(ExternalData)
 add_RunCMake_test(FeatureSummary)
 add_RunCMake_test(FPHSA)
-add_RunCMake_test(FileAPI -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
+add_RunCMake_test(FileAPI -DPython_EXECUTABLE=${Python_EXECUTABLE}
                           -DCMAKE_CXX_COMPILER_ID=${CMAKE_CXX_COMPILER_ID})
 add_RunCMake_test(FindBoost)
 add_RunCMake_test(FindLua)
@@ -313,9 +326,13 @@ add_RunCMake_test(GenEx-LINK_LANGUAGE)
 add_RunCMake_test(GenEx-LINK_LANG_AND_ID)
 add_RunCMake_test(GenEx-HOST_LINK)
 add_RunCMake_test(GenEx-DEVICE_LINK)
+add_RunCMake_test(GenEx-LINK_LIBRARY)
+add_RunCMake_test(GenEx-LINK_GROUP)
 add_RunCMake_test(GenEx-TARGET_FILE -DLINKER_SUPPORTS_PDB=${LINKER_SUPPORTS_PDB})
 add_RunCMake_test(GenEx-GENEX_EVAL)
 add_RunCMake_test(GenEx-TARGET_RUNTIME_DLLS)
+add_RunCMake_test(GenEx-PATH)
+add_RunCMake_test(GenEx-PATH_EQUAL)
 add_RunCMake_test(GeneratorExpression)
 add_RunCMake_test(GeneratorInstance)
 add_RunCMake_test(GeneratorPlatform)
@@ -339,6 +356,9 @@ if(MSVC)
   add_RunCMake_test(MSVCRuntimeTypeInfo)
   add_RunCMake_test(MSVCWarningFlags)
 endif()
+if(XCODE_VERSION)
+  set(ObjectLibrary_ARGS -DXCODE_VERSION=${XCODE_VERSION})
+endif()
 add_RunCMake_test(ObjectLibrary)
 add_RunCMake_test(ParseImplicitIncludeInfo)
 add_RunCMake_test(ParseImplicitLinkInfo)
@@ -352,6 +372,8 @@ add_RunCMake_test(TargetProperties)
 add_RunCMake_test(ToolchainFile)
 add_RunCMake_test(find_dependency)
 add_RunCMake_test(CompileDefinitions)
+add_RunCMake_test(CompileWarningAsError -DCMake_TEST_CUDA=${CMake_TEST_CUDA})
+set_property(TEST RunCMake.CompileWarningAsError APPEND PROPERTY LABELS "CUDA")
 add_RunCMake_test(CompileFeatures -DCMake_NO_C_STANDARD=${CMake_NO_C_STANDARD} -DCMake_NO_CXX_STANDARD=${CMake_NO_CXX_STANDARD})
 add_RunCMake_test(Policy)
 add_RunCMake_test(PolicyScope)
@@ -384,7 +406,7 @@ add_RunCMake_test(build_command)
 add_executable(exit_code exit_code.c)
 set(execute_process_ARGS
   -DEXIT_CODE_EXE=$<TARGET_FILE:exit_code>
-  -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
+  -DPython_EXECUTABLE=${Python_EXECUTABLE}
   )
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
   list(APPEND execute_process_ARGS -DTEST_ENCODING_EXE=$<TARGET_FILE:testEncoding>)
@@ -441,8 +463,10 @@ add_RunCMake_test(load_cache)
 add_RunCMake_test(math)
 add_RunCMake_test(message)
 add_RunCMake_test(option)
+add_RunCMake_test(PrintHelpers)
 add_RunCMake_test(project -DCMake_TEST_RESOURCES=${CMake_TEST_RESOURCES})
 add_RunCMake_test(project_injected)
+add_RunCMake_test(DependencyProviders)
 add_RunCMake_test(return)
 add_RunCMake_test(separate_arguments)
 add_RunCMake_test(set_property)
@@ -657,6 +681,30 @@ add_RunCMake_test(target_link_libraries)
 add_RunCMake_test(target_link_libraries-ALIAS)
 add_RunCMake_test(target_link_libraries-LINK_LANGUAGE)
 add_RunCMake_test(target_link_libraries-LINK_LANG_AND_ID)
+add_RunCMake_test(target_link_libraries-LINK_LIBRARY -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
+                                                     -DMINGW=${MINGW}
+                                                     -DMSYS=${MSYS}
+                                                     -DCYGWIN=${CYGWIN}
+                                                     -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
+                                                     -DCMAKE_C_COMPILER_VERSION=${CMAKE_C_COMPILER_VERSION}
+                                                     -DMSVC_VERSION=${MSVC_VERSION}
+                                                     -DCMAKE_SHARED_LIBRARY_PREFIX=${CMAKE_SHARED_LIBRARY_PREFIX}
+                                                     -DCMAKE_SHARED_LIBRARY_SUFFIX=${CMAKE_SHARED_LIBRARY_SUFFIX}
+                                                     -DCMAKE_IMPORT_LIBRARY_PREFIX=${CMAKE_IMPORT_LIBRARY_PREFIX}
+                                                     -DCMAKE_IMPORT_LIBRARY_SUFFIX=${CMAKE_IMPORT_LIBRARY_SUFFIX}
+                                                     -DCMAKE_LINK_LIBRARY_FLAG=${CMAKE_LINK_LIBRARY_FLAG})
+add_RunCMake_test(target_link_libraries-LINK_GROUP -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
+                                                   -DMINGW=${MINGW}
+                                                   -DMSYS=${MSYS}
+                                                   -DCYGWIN=${CYGWIN}
+                                                   -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
+                                                   -DCMAKE_C_COMPILER_VERSION=${CMAKE_C_COMPILER_VERSION}
+                                                   -DMSVC_VERSION=${MSVC_VERSION}
+                                                   -DCMAKE_SHARED_LIBRARY_PREFIX=${CMAKE_SHARED_LIBRARY_PREFIX}
+                                                   -DCMAKE_SHARED_LIBRARY_SUFFIX=${CMAKE_SHARED_LIBRARY_SUFFIX}
+                                                   -DCMAKE_IMPORT_LIBRARY_PREFIX=${CMAKE_IMPORT_LIBRARY_PREFIX}
+                                                   -DCMAKE_IMPORT_LIBRARY_SUFFIX=${CMAKE_IMPORT_LIBRARY_SUFFIX}
+                                                   -DCMAKE_LINK_LIBRARY_FLAG=${CMAKE_LINK_LIBRARY_FLAG})
 add_RunCMake_test(add_link_options -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID})
 add_RunCMake_test(target_link_options -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
                                       -DCMake_TEST_CUDA=${CMake_TEST_CUDA})
@@ -708,7 +756,8 @@ endif()
 
 add_executable(pseudo_llvm-rc pseudo_llvm-rc.c)
 add_RunCMake_test(CommandLine -DLLVM_RC=$<TARGET_FILE:pseudo_llvm-rc> -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
-                  -DCYGWIN=${CYGWIN} -DMSYS=${MSYS} -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE})
+                  -DCYGWIN=${CYGWIN} -DMSYS=${MSYS} -DPython_EXECUTABLE=${Python_EXECUTABLE}
+                  -DEXIT_CODE_EXE=$<TARGET_FILE:exit_code>)
 add_RunCMake_test(CommandLineTar)
 
 if(CMAKE_PLATFORM_NO_VERSIONED_SONAME OR (NOT CMAKE_SHARED_LIBRARY_SONAME_FLAG AND NOT CMAKE_SHARED_LIBRARY_SONAME_C_FLAG))
@@ -738,9 +787,13 @@ add_RunCMake_test(CPackInstallProperties)
 if(XCODE_VERSION)
   set(ExternalProject_ARGS -DXCODE_VERSION=${XCODE_VERSION})
 endif()
+if(CMake_TEST_RunCMake_ExternalProject_DOWNLOAD_SERVER_TIMEOUT)
+  list(APPEND ExternalProject_ARGS -DDOWNLOAD_SERVER_TIMEOUT=${CMake_TEST_RunCMake_ExternalProject_DOWNLOAD_SERVER_TIMEOUT})
+endif()
 add_RunCMake_test(ExternalProject)
 add_RunCMake_test(FetchContent)
-set(CTestCommandLine_ARGS -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE})
+add_RunCMake_test(FetchContent_find_package)
+set(CTestCommandLine_ARGS -DPython_EXECUTABLE=${Python_EXECUTABLE})
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
   list(APPEND CTestCommandLine_ARGS -DTEST_AFFINITY=$<TARGET_FILE:testAffinity>)
 endif()
@@ -770,6 +823,7 @@ if(CMake_TEST_FindMatlab OR CMake_TEST_FindMatlab_MCR OR (NOT "${CMake_TEST_Find
     endif()
 
   add_RunCMake_test(FindMatlab ${FindMatlab_additional_test_options})
+  set_property(TEST RunCMake.FindMatlab APPEND PROPERTY LABELS "Matlab")
 endif()
 
 add_executable(pseudo_emulator pseudo_emulator.c)
@@ -912,7 +966,9 @@ endif()
 
 if(${CMAKE_GENERATOR} MATCHES "Visual Studio ([^9]|9[0-9])")
   add_RunCMake_test(CSharpCustomCommand)
-  add_RunCMake_test(CSharpReferenceImport)
+  if(NOT CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64")
+    add_RunCMake_test(CSharpReferenceImport)
+  endif()
 endif()
 
 add_RunCMake_test("CTestCommandExpandLists")
@@ -923,18 +979,20 @@ add_RunCMake_test(PrecompileHeaders -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
 
 add_RunCMake_test("UnityBuild")
 add_RunCMake_test(CMakePresets
-  -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
+  -DPython_EXECUTABLE=${Python_EXECUTABLE}
   -DCMake_TEST_JSON_SCHEMA=${CMake_TEST_JSON_SCHEMA}
   )
 add_RunCMake_test(CMakePresetsBuild
-  -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
+  -DPython_EXECUTABLE=${Python_EXECUTABLE}
   -DCMake_TEST_JSON_SCHEMA=${CMake_TEST_JSON_SCHEMA}
   -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
   )
 add_RunCMake_test(CMakePresetsTest
-  -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
+  -DPython_EXECUTABLE=${Python_EXECUTABLE}
   -DCMake_TEST_JSON_SCHEMA=${CMake_TEST_JSON_SCHEMA}
   )
+
+add_RunCMake_test(VerifyHeaderSets)
 
 if(${CMAKE_GENERATOR} MATCHES "Make|Ninja")
   add_RunCMake_test(TransformDepfile)
@@ -942,8 +1000,4 @@ endif()
 
 if(WIN32)
   add_RunCMake_test(Win32GenEx)
-endif()
-
-if("${CMAKE_C_COMPILER_ID}" STREQUAL "LCC" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "LCC" OR "${CMAKE_Fortran_COMPILER_ID}" STREQUAL "LCC")
-  add_RunCMake_test("CMP0129")
 endif()

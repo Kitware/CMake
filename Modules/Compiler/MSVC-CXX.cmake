@@ -1,10 +1,10 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-include(Compiler/CMakeCommonCompilerMacros)
+include(Compiler/MSVC)
+__compiler_msvc(CXX)
 
-set(CMAKE_CXX_CLANG_TIDY_DRIVER_MODE "cl")
-set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE_DRIVER_MODE "cl")
+include(Compiler/CMakeCommonCompilerMacros)
 
 if ((CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.0.24215.1 AND
      CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19.10) OR
@@ -76,14 +76,3 @@ elseif (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 16.0)
     _record_compiler_features(CXX "" CMAKE_CXX_COMPILE_FEATURES)
   endmacro()
 endif()
-
-# /JMC "Just My Code" is only supported by MSVC 19.05 onward.
-if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.05)
-  set(CMAKE_CXX_COMPILE_OPTIONS_JMC "-JMC")
-endif()
-
-# The `/external:I` flag was made non-experimental in 19.29.30036.3.
-if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.29.30036.3)
-  set(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-external:I")
-  set(_CMAKE_INCLUDE_SYSTEM_FLAG_CXX_WARNING "-external:W0 ")
-endif ()

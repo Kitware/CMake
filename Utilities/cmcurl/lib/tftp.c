@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -327,7 +327,7 @@ static CURLcode tftp_parse_option_ack(struct tftp_state_data *state,
 
     infof(data, "got option=(%s) value=(%s)", option, value);
 
-    if(checkprefix(option, TFTP_OPTION_BLKSIZE)) {
+    if(checkprefix(TFTP_OPTION_BLKSIZE, option)) {
       long blksize;
 
       blksize = strtol(value, NULL, 10);
@@ -359,7 +359,7 @@ static CURLcode tftp_parse_option_ack(struct tftp_state_data *state,
       infof(data, "%s (%d) %s (%d)", "blksize parsed from OACK",
             state->blksize, "requested", state->requested_blksize);
     }
-    else if(checkprefix(option, TFTP_OPTION_TSIZE)) {
+    else if(checkprefix(TFTP_OPTION_TSIZE, option)) {
       long tsize = 0;
 
       tsize = strtol(value, NULL, 10);
@@ -463,7 +463,7 @@ static CURLcode tftp_send_first(struct tftp_state_data *state,
     /* As RFC3617 describes the separator slash is not actually part of the
        file name so we skip the always-present first letter of the path
        string. */
-    result = Curl_urldecode(data, &state->data->state.up.path[1], 0,
+    result = Curl_urldecode(&state->data->state.up.path[1], 0,
                             &filename, NULL, REJECT_ZERO);
     if(result)
       return result;

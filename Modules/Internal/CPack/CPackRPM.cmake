@@ -790,7 +790,7 @@ function(cpack_rpm_variable_fallback OUTPUT_VAR_NAME)
   set(FALLBACK_VAR_NAMES ${ARGN})
 
   foreach(variable_name IN LISTS FALLBACK_VAR_NAMES)
-    if(${variable_name})
+    if(DEFINED ${variable_name})
       set(${OUTPUT_VAR_NAME} "${${variable_name}}" PARENT_SCOPE)
       break()
     endif()

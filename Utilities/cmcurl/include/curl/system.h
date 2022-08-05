@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -98,22 +98,6 @@
 #  define CURL_SUFFIX_CURL_OFF_TU    UL
 #  define CURL_TYPEOF_CURL_SOCKLEN_T int
 
-#elif defined(__WATCOMC__)
-#  if defined(__386__)
-#    define CURL_TYPEOF_CURL_OFF_T     __int64
-#    define CURL_FORMAT_CURL_OFF_T     "I64d"
-#    define CURL_FORMAT_CURL_OFF_TU    "I64u"
-#    define CURL_SUFFIX_CURL_OFF_T     i64
-#    define CURL_SUFFIX_CURL_OFF_TU    ui64
-#  else
-#    define CURL_TYPEOF_CURL_OFF_T     long
-#    define CURL_FORMAT_CURL_OFF_T     "ld"
-#    define CURL_FORMAT_CURL_OFF_TU    "lu"
-#    define CURL_SUFFIX_CURL_OFF_T     L
-#    define CURL_SUFFIX_CURL_OFF_TU    UL
-#  endif
-#  define CURL_TYPEOF_CURL_SOCKLEN_T int
-
 #elif defined(__POCC__)
 #  if (__POCC__ < 280)
 #    define CURL_TYPEOF_CURL_OFF_T     long
@@ -137,7 +121,7 @@
 #  define CURL_TYPEOF_CURL_SOCKLEN_T int
 
 #elif defined(__LCC__)
-#  if defined(__e2k__) /* MCST eLbrus C Compiler */
+#  if defined(__MCST__) /* MCST eLbrus Compiler Collection */
 #    define CURL_TYPEOF_CURL_OFF_T     long
 #    define CURL_FORMAT_CURL_OFF_T     "ld"
 #    define CURL_FORMAT_CURL_OFF_TU    "lu"

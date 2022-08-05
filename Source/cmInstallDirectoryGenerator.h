@@ -9,9 +9,9 @@
 #include <vector>
 
 #include "cmInstallGenerator.h"
-#include "cmListFileCache.h"
 #include "cmScriptGenerator.h"
 
+class cmListFileBacktrace;
 class cmLocalGenerator;
 
 /** \class cmInstallDirectoryGenerator
@@ -42,7 +42,7 @@ protected:
   void AddDirectoryInstallRule(std::ostream& os, const std::string& config,
                                Indent indent,
                                std::vector<std::string> const& dirs);
-  cmLocalGenerator* LocalGenerator;
+  cmLocalGenerator* LocalGenerator = nullptr;
   std::vector<std::string> const Directories;
   std::string const FilePermissions;
   std::string const DirPermissions;

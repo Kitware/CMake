@@ -388,7 +388,40 @@ class cmMakefile;
          22, 0, cmPolicies::WARN)                                             \
   SELECT(POLICY, CMP0129,                                                     \
          "Compiler id for MCST LCC compilers is now LCC, not GNU.", 3, 23, 0, \
-         cmPolicies::WARN)
+         cmPolicies::WARN)                                                    \
+  SELECT(POLICY, CMP0130, "while() diagnoses condition evaluation errors.",   \
+         3, 24, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0131,                                                     \
+         "LINK_LIBRARIES supports the LINK_ONLY generator expression.", 3,    \
+         24, 0, cmPolicies::WARN)                                             \
+  SELECT(POLICY, CMP0132,                                                     \
+         "Do not set compiler environment variables on first run", 3, 24, 0,  \
+         cmPolicies::WARN)                                                    \
+  SELECT(POLICY, CMP0133,                                                     \
+         "The CPack module disables SLA by default in the CPack DragNDrop "   \
+         "Generator.",                                                        \
+         3, 24, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0134,                                                     \
+         "Fallback to \"HOST\" Windows registry view when \"TARGET\" view "   \
+         "is not usable.",                                                    \
+         3, 24, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0135,                                                     \
+         "ExternalProject ignores timestamps in archives by default for the " \
+         "URL download method",                                               \
+         3, 24, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0136,                                                     \
+         "Watcom runtime library flags are selected by an abstraction.", 3,   \
+         24, 0, cmPolicies::WARN)                                             \
+  SELECT(POLICY, CMP0137,                                                     \
+         "try_compile() passes platform variables in project mode", 3, 24, 0, \
+         cmPolicies::WARN)                                                    \
+  SELECT(POLICY, CMP0138,                                                     \
+         "CheckIPOSupported uses flags from calling project.", 3, 24, 0,      \
+         cmPolicies::WARN)                                                    \
+  SELECT(                                                                     \
+    POLICY, CMP0139,                                                          \
+    "The if() command supports path comparisons using PATH_EQUAL operator.",  \
+    3, 24, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \
@@ -424,7 +457,8 @@ class cmMakefile;
   F(CMP0108)                                                                  \
   F(CMP0112)                                                                  \
   F(CMP0113)                                                                  \
-  F(CMP0119)
+  F(CMP0119)                                                                  \
+  F(CMP0131)
 
 /** \class cmPolicies
  * \brief Handles changes in CMake behavior and policies

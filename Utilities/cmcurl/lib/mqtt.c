@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2020 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2020 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2019, Björn Stenberg, <bjorn@haxx.se>
  *
  * This software is licensed as described in the file COPYING, which
@@ -60,6 +60,8 @@
  */
 
 static CURLcode mqtt_do(struct Curl_easy *data, bool *done);
+static CURLcode mqtt_done(struct Curl_easy *data,
+                          CURLcode status, bool premature);
 static CURLcode mqtt_doing(struct Curl_easy *data, bool *done);
 static int mqtt_getsock(struct Curl_easy *data, struct connectdata *conn,
                         curl_socket_t *sock);
@@ -74,7 +76,7 @@ const struct Curl_handler Curl_handler_mqtt = {
   "MQTT",                             /* scheme */
   mqtt_setup_conn,                    /* setup_connection */
   mqtt_do,                            /* do_it */
-  ZERO_NULL,                          /* done */
+  mqtt_done,                          /* done */
   ZERO_NULL,                          /* do_more */
   ZERO_NULL,                          /* connect_it */
   ZERO_NULL,                          /* connecting */
@@ -344,7 +346,9 @@ end:
 static CURLcode mqtt_disconnect(struct Curl_easy *data)
 {
   CURLcode result = CURLE_OK;
+  struct MQTT *mq = data->req.p.mqtt;
   result = mqtt_send(data, (char *)"\xe0\x00", 2);
+  Curl_safefree(mq->sendleftovers);
   return result;
 }
 
@@ -384,8 +388,7 @@ static CURLcode mqtt_get_topic(struct Curl_easy *data,
 {
   char *path = data->state.up.path;
   if(strlen(path) > 1)
-    return Curl_urldecode(data, path + 1, 0, topic, topiclen,
-                          REJECT_NADA);
+    return Curl_urldecode(path + 1, 0, topic, topiclen, REJECT_NADA);
   failf(data, "No MQTT topic found. Forgot to URL encode it?");
   return CURLE_URL_MALFORMAT;
 }
@@ -692,6 +695,16 @@ static CURLcode mqtt_do(struct Curl_easy *data, bool *done)
   return CURLE_OK;
 }
 
+static CURLcode mqtt_done(struct Curl_easy *data,
+                          CURLcode status, bool premature)
+{
+  struct MQTT *mq = data->req.p.mqtt;
+  (void)status;
+  (void)premature;
+  Curl_safefree(mq->sendleftovers);
+  return CURLE_OK;
+}
+
 static CURLcode mqtt_doing(struct Curl_easy *data, bool *done)
 {
   CURLcode result = CURLE_OK;
@@ -719,8 +732,14 @@ static CURLcode mqtt_doing(struct Curl_easy *data, bool *done)
   case MQTT_FIRST:
     /* Read the initial byte only */
     result = Curl_read(data, sockfd, (char *)&mq->firstbyte, 1, &nread);
-    if(!nread)
+    if(result)
       break;
+    else if(!nread) {
+      failf(data, "Connection disconnected");
+      *done = TRUE;
+      result = CURLE_RECV_ERROR;
+      break;
+    }
     Curl_debug(data, CURLINFO_HEADER_IN, (char *)&mq->firstbyte, 1);
     /* remember the first byte */
     mq->npacket = 0;

@@ -335,6 +335,12 @@ unset(CMakePresets_EXTRA_FILES)
 set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/FileDirFuture.json.in")
 run_cmake_presets(FileDirFuture)
 
+# Test ${pathListSep} macro
+set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/PathListSep.json.in")
+run_cmake_presets(PathListSep)
+set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/PathListSepFuture.json.in")
+run_cmake_presets(PathListSepFuture)
+
 # Test conditions
 set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/Conditions.json.in")
 run_cmake_presets(ListConditions --list-presets)

@@ -9,6 +9,7 @@
 #include <climits>
 #include <cstdio>
 #include <cstring>
+#include <functional>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -73,6 +74,8 @@ const char* cmDocumentationOptions[][2] = {
   { "--list-presets", "List available presets." },
   { "-E", "CMake command mode." },
   { "-L[A][H]", "List non-advanced cached variables." },
+  { "--fresh",
+    "Configure a fresh build tree, removing any existing cache file." },
   { "--build <dir>", "Build a CMake-generated project binary tree." },
   { "--install <dir>", "Install a CMake-generated project binary tree." },
   { "--open <dir>", "Open generated project in the associated application." },
@@ -108,6 +111,9 @@ const char* cmDocumentationOptions[][2] = {
   { "--check-system-vars",
     "Find problems with variable usage in system "
     "files." },
+  { "--compile-no-warning-as-error",
+    "Ignore COMPILE_WARNING_AS_ERROR property and "
+    "CMAKE_COMPILE_WARNING_AS_ERROR variable." },
 #  if !defined(CMAKE_BOOTSTRAP)
   { "--profiling-format=<fmt>",
     "Output data for profiling CMake scripts. Supported formats: "
@@ -201,7 +207,7 @@ int do_cmake(int ac, char const* const* av)
 #ifndef CMAKE_BOOTSTRAP
   cmDocumentation doc;
   doc.addCMakeStandardDocSections();
-  if (doc.CheckOptions(ac, av)) {
+  if (doc.CheckOptions(ac, av, "--")) {
     // Construct and print requested documentation.
     cmake hcm(cmake::RoleInternal, cmState::Unknown);
     hcm.SetHomeDirectory("");
@@ -260,37 +266,17 @@ int do_cmake(int ac, char const* const* av)
         return true;
       } },
     CommandArgument{ "--system-information", CommandArgument::Values::Zero,
-                     [&](std::string const&) -> bool {
-                       sysinfo = true;
-                       return true;
-                     } },
+                     CommandArgument::setToTrue(sysinfo) },
     CommandArgument{ "-N", CommandArgument::Values::Zero,
-                     [&](std::string const&) -> bool {
-                       view_only = true;
-                       return true;
-                     } },
+                     CommandArgument::setToTrue(view_only) },
     CommandArgument{ "-LAH", CommandArgument::Values::Zero,
-                     [&](std::string const&) -> bool {
-                       list_all_cached = true;
-                       list_help = true;
-                       return true;
-                     } },
+                     CommandArgument::setToTrue(list_all_cached, list_help) },
     CommandArgument{ "-LA", CommandArgument::Values::Zero,
-                     [&](std::string const&) -> bool {
-                       list_all_cached = true;
-                       return true;
-                     } },
+                     CommandArgument::setToTrue(list_all_cached) },
     CommandArgument{ "-LH", CommandArgument::Values::Zero,
-                     [&](std::string const&) -> bool {
-                       list_cached = true;
-                       list_help = true;
-                       return true;
-                     } },
+                     CommandArgument::setToTrue(list_cached, list_help) },
     CommandArgument{ "-L", CommandArgument::Values::Zero,
-                     [&](std::string const&) -> bool {
-                       list_cached = true;
-                       return true;
-                     } },
+                     CommandArgument::setToTrue(list_cached) },
     CommandArgument{ "-P", "No script specified for argument -P",
                      CommandArgument::Values::One,
                      CommandArgument::RequiresSeparator::No,
@@ -423,7 +409,7 @@ int extract_job_number(std::string const& command,
     } else if (numJobs > INT_MAX) {
       std::cerr << "The <jobs> value is too large.\n\n";
     } else {
-      jobs = int(numJobs);
+      jobs = static_cast<int>(numJobs);
     }
   } else {
     std::cerr << "'" << command << "' invalid number '" << jobString
@@ -508,15 +494,9 @@ int do_build(int ac, char const* const* av)
 
   std::vector<CommandArgument> arguments = {
     CommandArgument{ "--preset", CommandArgument::Values::One,
-                     [&](std::string const& value) -> bool {
-                       presetName = value;
-                       return true;
-                     } },
+                     CommandArgument::setToValue(presetName) },
     CommandArgument{ "--list-presets", CommandArgument::Values::Zero,
-                     [&](std::string const&) -> bool {
-                       listPresets = true;
-                       return true;
-                     } },
+                     CommandArgument::setToTrue(listPresets) },
     CommandArgument{ "-j", CommandArgument::Values::ZeroOrOne,
                      CommandArgument::RequiresSeparator::No, jLambda },
     CommandArgument{ "--parallel", CommandArgument::Values::ZeroOrOne,
@@ -525,15 +505,9 @@ int do_build(int ac, char const* const* av)
     CommandArgument{ "--target", CommandArgument::Values::OneOrMore,
                      targetLambda },
     CommandArgument{ "--config", CommandArgument::Values::One,
-                     [&](std::string const& value) -> bool {
-                       config = value;
-                       return true;
-                     } },
+                     CommandArgument::setToValue(config) },
     CommandArgument{ "--clean-first", CommandArgument::Values::Zero,
-                     [&](std::string const&) -> bool {
-                       cleanFirst = true;
-                       return true;
-                     } },
+                     CommandArgument::setToTrue(cleanFirst) },
     CommandArgument{ "--resolve-package-references",
                      CommandArgument::Values::One, resolvePackagesLambda },
     CommandArgument{ "-v", CommandArgument::Values::Zero, verboseLambda },
@@ -543,10 +517,7 @@ int do_build(int ac, char const* const* av)
     CommandArgument{ "--use-stderr", CommandArgument::Values::Zero,
                      [](std::string const&) -> bool { return true; } },
     CommandArgument{ "--", CommandArgument::Values::Zero,
-                     [&](std::string const&) -> bool {
-                       nativeOptionsPassed = true;
-                       return true;
-                     } },
+                     CommandArgument::setToTrue(nativeOptionsPassed) },
   };
 
   if (ac >= 3) {
@@ -623,7 +594,7 @@ int do_build(int ac, char const* const* av)
                          "is too large.\n\n";
             dir.clear();
           } else {
-            jobs = int(numJobs);
+            jobs = static_cast<int>(numJobs);
           }
         } else {
           std::cerr << "'CMAKE_BUILD_PARALLEL_LEVEL' environment variable\n"
@@ -829,31 +800,16 @@ int do_install(int ac, char const* const* av)
 
   std::vector<CommandArgument> arguments = {
     CommandArgument{ "--config", CommandArgument::Values::One,
-                     [&](std::string const& value) -> bool {
-                       config = value;
-                       return true;
-                     } },
+                     CommandArgument::setToValue(config) },
     CommandArgument{ "--component", CommandArgument::Values::One,
-                     [&](std::string const& value) -> bool {
-                       component = value;
-                       return true;
-                     } },
-    CommandArgument{ "--default-directory-permissions",
-                     CommandArgument::Values::One,
-                     [&](std::string const& value) -> bool {
-                       defaultDirectoryPermissions = value;
-                       return true;
-                     } },
+                     CommandArgument::setToValue(component) },
+    CommandArgument{
+      "--default-directory-permissions", CommandArgument::Values::One,
+      CommandArgument::setToValue(defaultDirectoryPermissions) },
     CommandArgument{ "--prefix", CommandArgument::Values::One,
-                     [&](std::string const& value) -> bool {
-                       prefix = value;
-                       return true;
-                     } },
+                     CommandArgument::setToValue(prefix) },
     CommandArgument{ "--strip", CommandArgument::Values::Zero,
-                     [&](std::string const&) -> bool {
-                       strip = true;
-                       return true;
-                     } },
+                     CommandArgument::setToTrue(strip) },
     CommandArgument{ "-v", CommandArgument::Values::Zero, verboseLambda },
     CommandArgument{ "--verbose", CommandArgument::Values::Zero,
                      verboseLambda }

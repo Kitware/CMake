@@ -17,12 +17,12 @@ QVariant QCMakePresetItemModel::data(const QModelIndex& index, int role) const
       // AccessibleDescriptionRole. This was determined by looking at
       // QComboBoxDelegate::isSeparator() (located in qcombobox_p.h.)
       if (index.internalId() == SEPARATOR_INDEX) {
-        return QString::fromLocal8Bit("separator");
+        return QString("separator");
       }
       return QString{};
     case Qt::DisplayRole: {
       if (index.internalId() == CUSTOM_INDEX) {
-        return QString::fromLocal8Bit("<custom>");
+        return QString("<custom>");
       }
       if (index.internalId() == SEPARATOR_INDEX) {
         return QVariant{};
@@ -32,7 +32,7 @@ QVariant QCMakePresetItemModel::data(const QModelIndex& index, int role) const
     }
     case Qt::ToolTipRole:
       if (index.internalId() == CUSTOM_INDEX) {
-        return QString::fromLocal8Bit("Specify all settings manually");
+        return QString("Specify all settings manually");
       }
       if (index.internalId() == SEPARATOR_INDEX) {
         return QVariant{};

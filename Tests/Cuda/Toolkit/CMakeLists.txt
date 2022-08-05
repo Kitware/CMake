@@ -54,3 +54,9 @@ endforeach()
 
 add_executable(Toolkit main.cpp)
 target_link_libraries(Toolkit PRIVATE CUDA::toolkit)
+
+# cupti is an optional component of the CUDA toolkit
+if(TARGET CUDA::cupti)
+  add_executable(cupti cupti.cpp)
+  target_link_libraries(cupti PRIVATE CUDA::cupti)
+endif()

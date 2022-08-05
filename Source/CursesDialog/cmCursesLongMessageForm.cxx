@@ -43,7 +43,8 @@ void cmCursesLongMessageForm::UpdateContent(std::string const& output,
   if (!output.empty() && this->Messages.size() < MAX_CONTENT_SIZE) {
     this->Messages.push_back('\n');
     this->Messages.append(output);
-    form_driver(this->Form, REQ_NEW_LINE);
+    form_driver(this->Form, REQ_NEXT_LINE);
+    form_driver(this->Form, REQ_BEG_LINE);
     this->DrawMessage(output.c_str());
   }
 
@@ -152,7 +153,8 @@ void cmCursesLongMessageForm::DrawMessage(const char* msg) const
   int i = 0;
   while (msg[i] != '\0' && i < MAX_CONTENT_SIZE) {
     if (msg[i] == '\n' && msg[i + 1] != '\0') {
-      form_driver(this->Form, REQ_NEW_LINE);
+      form_driver(this->Form, REQ_NEXT_LINE);
+      form_driver(this->Form, REQ_BEG_LINE);
     } else {
       form_driver(this->Form, msg[i]);
     }
@@ -191,9 +193,9 @@ void cmCursesLongMessageForm::HandleInput()
     if (key == 'o' || key == 'e') {
       break;
     }
-    if (key == KEY_DOWN || key == ctrl('n')) {
+    if (key == KEY_DOWN || key == ctrl('n') || key == 'j') {
       form_driver(this->Form, REQ_SCR_FLINE);
-    } else if (key == KEY_UP || key == ctrl('p')) {
+    } else if (key == KEY_UP || key == ctrl('p') || key == 'k') {
       form_driver(this->Form, REQ_SCR_BLINE);
     } else if (key == KEY_NPAGE || key == ctrl('d')) {
       form_driver(this->Form, REQ_SCR_FPAGE);

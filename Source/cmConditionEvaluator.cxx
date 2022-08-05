@@ -16,6 +16,7 @@
 
 #include "cmsys/RegularExpression.hxx"
 
+#include "cmCMakePath.h"
 #include "cmExpandedCommandArgument.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -58,6 +59,7 @@ auto const keyVERSION_GREATER = "VERSION_GREATER"_s;
 auto const keyVERSION_GREATER_EQUAL = "VERSION_GREATER_EQUAL"_s;
 auto const keyVERSION_LESS = "VERSION_LESS"_s;
 auto const keyVERSION_LESS_EQUAL = "VERSION_LESS_EQUAL"_s;
+auto const keyPATH_EQUAL = "PATH_EQUAL"_s;
 
 cmSystemTools::CompareOp const MATCH2CMPOP[5] = {
   cmSystemTools::OP_LESS, cmSystemTools::OP_LESS_EQUAL,
@@ -95,7 +97,8 @@ struct cmRt2CtSelector<Comp>
 
 std::string bool2string(bool const value)
 {
-  return std::string(std::size_t(1), static_cast<char>('0' + int(value)));
+  return std::string(static_cast<std::size_t>(1),
+                     static_cast<char>('0' + static_cast<int>(value)));
 }
 
 bool looksLikeSpecialVariable(const std::string& var,
@@ -141,15 +144,17 @@ public:
     {
       this->current = std::next(this->current);
       this->next =
-        std::next(this->current, difference_type(this->current != args.end()));
+        std::next(this->current,
+                  static_cast<difference_type>(this->current != args.end()));
       return *this;
     }
 
   private:
     CurrentAndNextIter(base_t& args)
       : current(args.begin())
-      , next(std::next(this->current,
-                       difference_type(this->current != args.end())))
+      , next(
+          std::next(this->current,
+                    static_cast<difference_type>(this->current != args.end())))
     {
     }
   };
@@ -167,19 +172,21 @@ public:
     {
       this->current = std::next(this->current);
       this->next =
-        std::next(this->current, difference_type(this->current != args.end()));
-      this->nextnext =
-        std::next(this->next, difference_type(this->next != args.end()));
+        std::next(this->current,
+                  static_cast<difference_type>(this->current != args.end()));
+      this->nextnext = std::next(
+        this->next, static_cast<difference_type>(this->next != args.end()));
       return *this;
     }
 
   private:
     CurrentAndTwoMoreIter(base_t& args)
       : current(args.begin())
-      , next(std::next(this->current,
-                       difference_type(this->current != args.end())))
-      , nextnext(
-          std::next(this->next, difference_type(this->next != args.end())))
+      , next(
+          std::next(this->current,
+                    static_cast<difference_type>(this->current != args.end())))
+      , nextnext(std::next(
+          this->next, static_cast<difference_type>(this->next != args.end())))
     {
     }
   };
@@ -212,6 +219,7 @@ cmConditionEvaluator::cmConditionEvaluator(cmMakefile& makefile,
   , Policy54Status(makefile.GetPolicyStatus(cmPolicies::CMP0054))
   , Policy57Status(makefile.GetPolicyStatus(cmPolicies::CMP0057))
   , Policy64Status(makefile.GetPolicyStatus(cmPolicies::CMP0064))
+  , Policy139Status(makefile.GetPolicyStatus(cmPolicies::CMP0139))
 {
 }
 
@@ -526,9 +534,6 @@ bool cmConditionEvaluator::HandleLevel0(cmArgumentList& newArgs,
 bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
                                         MessageType&)
 {
-  const auto policy64IsOld = this->Policy64Status == cmPolicies::OLD ||
-    this->Policy64Status == cmPolicies::WARN;
-
   for (auto args = newArgs.make2ArgsIterator(); args.current != newArgs.end();
        args.advance(newArgs)) {
 
@@ -580,7 +585,8 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
     // does a command exist
     else if (this->IsKeyword(keyCOMMAND, *args.current)) {
       newArgs.ReduceOneArg(
-        bool(this->Makefile.GetState()->GetCommand(args.next->GetValue())),
+        static_cast<bool>(
+          this->Makefile.GetState()->GetCommand(args.next->GetValue())),
         args);
     }
     // does a policy exist
@@ -591,8 +597,9 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
     }
     // does a target exist
     else if (this->IsKeyword(keyTARGET, *args.current)) {
-      newArgs.ReduceOneArg(
-        bool(this->Makefile.FindTargetToUse(args.next->GetValue())), args);
+      newArgs.ReduceOneArg(static_cast<bool>(this->Makefile.FindTargetToUse(
+                             args.next->GetValue())),
+                           args);
     }
     // is a variable defined
     else if (this->IsKeyword(keyDEFINED, *args.current)) {
@@ -607,7 +614,8 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
 
       else if (looksLikeSpecialVariable(var, "CACHE"_s, varNameLen)) {
         const auto cache = args.next->GetValue().substr(6, varNameLen - 7);
-        result = bool(this->Makefile.GetState()->GetCacheEntryValue(cache));
+        result = static_cast<bool>(
+          this->Makefile.GetState()->GetCacheEntryValue(cache));
       }
 
       else {
@@ -617,11 +625,13 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
     }
     // does a test exist
     else if (this->IsKeyword(keyTEST, *args.current)) {
-      if (policy64IsOld) {
+      if (this->Policy64Status == cmPolicies::OLD ||
+          this->Policy64Status == cmPolicies::WARN) {
         continue;
       }
-      newArgs.ReduceOneArg(bool(this->Makefile.GetTest(args.next->GetValue())),
-                           args);
+      newArgs.ReduceOneArg(
+        static_cast<bool>(this->Makefile.GetTest(args.next->GetValue())),
+        args);
     }
   }
   return true;
@@ -762,6 +772,29 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
         e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0057)
           << "\n"
              "IN_LIST will be interpreted as an operator "
+             "when the policy is set to NEW.  "
+             "Since the policy is not set the OLD behavior will be used.";
+
+        this->Makefile.IssueMessage(MessageType::AUTHOR_WARNING, e.str());
+      }
+    }
+
+    else if (this->IsKeyword(keyPATH_EQUAL, *args.next)) {
+
+      if (this->Policy139Status != cmPolicies::OLD &&
+          this->Policy139Status != cmPolicies::WARN) {
+
+        cmValue lhs = this->GetVariableOrString(*args.current);
+        cmValue rhs = this->GetVariableOrString(*args.nextnext);
+        const auto result = cmCMakePath{ *lhs } == cmCMakePath{ *rhs };
+        newArgs.ReduceTwoArgs(result, args);
+      }
+
+      else if (this->Policy139Status == cmPolicies::WARN) {
+        std::ostringstream e;
+        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0139)
+          << "\n"
+             "PATH_EQUAL will be interpreted as an operator "
              "when the policy is set to NEW.  "
              "Since the policy is not set the OLD behavior will be used.";
 

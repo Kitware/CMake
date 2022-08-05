@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2020 - 2021, Jacob Hoffman-Andrews,
+ * Copyright (C) 2020 - 2022, Jacob Hoffman-Andrews,
  * <github@hoffman-andrews.com>
  *
  * This software is licensed as described in the file COPYING, which
@@ -65,6 +65,7 @@ cr_data_pending(const struct connectdata *conn, int sockindex)
 {
   const struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
+  DEBUGASSERT(backend);
   return backend->data_pending;
 }
 
@@ -118,13 +119,17 @@ cr_recv(struct Curl_easy *data, int sockindex,
   struct connectdata *conn = data->conn;
   struct ssl_connect_data *const connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *const backend = connssl->backend;
-  struct rustls_connection *const rconn = backend->conn;
+  struct rustls_connection *rconn = NULL;
+
   size_t n = 0;
   size_t tls_bytes_read = 0;
   size_t plain_bytes_copied = 0;
   rustls_result rresult = 0;
   char errorbuf[255];
   rustls_io_result io_error;
+
+  DEBUGASSERT(backend);
+  rconn = backend->conn;
 
   io_error = rustls_connection_read_tls(rconn, read_cb,
     &conn->sock[sockindex], &tls_bytes_read);
@@ -215,12 +220,15 @@ cr_send(struct Curl_easy *data, int sockindex,
   struct connectdata *conn = data->conn;
   struct ssl_connect_data *const connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *const backend = connssl->backend;
-  struct rustls_connection *const rconn = backend->conn;
+  struct rustls_connection *rconn = NULL;
   size_t plainwritten = 0;
   size_t tlswritten = 0;
   size_t tlswritten_total = 0;
   rustls_result rresult;
   rustls_io_result io_error;
+
+  DEBUGASSERT(backend);
+  rconn = backend->conn;
 
   infof(data, "cr_send %ld bytes of plaintext", plainlen);
 
@@ -295,9 +303,13 @@ static CURLcode
 cr_init_backend(struct Curl_easy *data, struct connectdata *conn,
                 struct ssl_backend_data *const backend)
 {
-  struct rustls_connection *rconn = backend->conn;
+  struct rustls_connection *rconn = NULL;
   struct rustls_client_config_builder *config_builder = NULL;
-  const char *const ssl_cafile = SSL_CONN_CONFIG(CAfile);
+  struct rustls_root_cert_store *roots = NULL;
+  const struct curl_blob *ca_info_blob = SSL_CONN_CONFIG(ca_info_blob);
+  const char * const ssl_cafile =
+    /* CURLOPT_CAINFO_BLOB overrides CURLOPT_CAINFO */
+    (ca_info_blob ? NULL : SSL_CONN_CONFIG(CAfile));
   const bool verifypeer = SSL_CONN_CONFIG(verifypeer);
   const char *hostname = conn->host.name;
   char errorbuf[256];
@@ -308,14 +320,17 @@ cr_init_backend(struct Curl_easy *data, struct connectdata *conn,
     { (const uint8_t *)ALPN_H2, ALPN_H2_LENGTH },
   };
 
+  DEBUGASSERT(backend);
+  rconn = backend->conn;
+
   config_builder = rustls_client_config_builder_new();
 #ifdef USE_HTTP2
-  infof(data, "offering ALPN for HTTP/1.1 and HTTP/2");
+  infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_H2);
   rustls_client_config_builder_set_alpn_protocols(config_builder, alpn, 2);
 #else
-  infof(data, "offering ALPN for HTTP/1.1 only");
   rustls_client_config_builder_set_alpn_protocols(config_builder, alpn, 1);
 #endif
+  infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_HTTP_1_1);
   if(!verifypeer) {
     rustls_client_config_builder_dangerous_set_certificate_verifier(
       config_builder, cr_verify_none);
@@ -326,6 +341,29 @@ cr_init_backend(struct Curl_easy *data, struct connectdata *conn,
     if(cr_hostname_is_ip(hostname)) {
       rustls_client_config_builder_set_enable_sni(config_builder, false);
       hostname = "example.invalid";
+    }
+  }
+  else if(ca_info_blob) {
+    roots = rustls_root_cert_store_new();
+
+    /* Enable strict parsing only if verification isn't disabled. */
+    result = rustls_root_cert_store_add_pem(roots, ca_info_blob->data,
+                                            ca_info_blob->len, verifypeer);
+    if(result != RUSTLS_RESULT_OK) {
+      failf(data, "failed to parse trusted certificates from blob");
+      rustls_root_cert_store_free(roots);
+      rustls_client_config_free(
+        rustls_client_config_builder_build(config_builder));
+      return CURLE_SSL_CACERT_BADFILE;
+    }
+
+    result = rustls_client_config_builder_use_roots(config_builder, roots);
+    rustls_root_cert_store_free(roots);
+    if(result != RUSTLS_RESULT_OK) {
+      failf(data, "failed to load trusted certificates");
+      rustls_client_config_free(
+        rustls_client_config_builder_build(config_builder));
+      return CURLE_SSL_CACERT_BADFILE;
     }
   }
   else if(ssl_cafile) {
@@ -341,7 +379,14 @@ cr_init_backend(struct Curl_easy *data, struct connectdata *conn,
 
   backend->config = rustls_client_config_builder_build(config_builder);
   DEBUGASSERT(rconn == NULL);
-  result = rustls_client_connection_new(backend->config, hostname, &rconn);
+  {
+    char *snihost = Curl_ssl_snihost(data, hostname, NULL);
+    if(!snihost) {
+      failf(data, "Failed to set SNI");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+    result = rustls_client_connection_new(backend->config, snihost, &rconn);
+  }
   if(result != RUSTLS_RESULT_OK) {
     rustls_error(result, errorbuf, sizeof(errorbuf), &errorlen);
     failf(data, "rustls_client_connection_new: %.*s", errorlen, errorbuf);
@@ -361,20 +406,20 @@ cr_set_negotiated_alpn(struct Curl_easy *data, struct connectdata *conn,
 
   rustls_connection_get_alpn_protocol(rconn, &protocol, &len);
   if(!protocol) {
-    infof(data, "ALPN, server did not agree to a protocol");
+    infof(data, VTLS_INFOF_NO_ALPN);
     return;
   }
 
 #ifdef USE_HTTP2
   if(len == ALPN_H2_LENGTH && 0 == memcmp(ALPN_H2, protocol, len)) {
-    infof(data, "ALPN, negotiated h2");
+    infof(data, VTLS_INFOF_ALPN_ACCEPTED_1STR, ALPN_H2);
     conn->negnpn = CURL_HTTP_VERSION_2;
   }
   else
 #endif
   if(len == ALPN_HTTP_1_1_LENGTH &&
       0 == memcmp(ALPN_HTTP_1_1, protocol, len)) {
-    infof(data, "ALPN, negotiated http/1.1");
+    infof(data, VTLS_INFOF_ALPN_ACCEPTED_1STR, ALPN_HTTP_1_1);
     conn->negnpn = CURL_HTTP_VERSION_1_1;
   }
   else {
@@ -400,6 +445,8 @@ cr_connect_nonblocking(struct Curl_easy *data, struct connectdata *conn,
   bool wants_write;
   curl_socket_t writefd;
   curl_socket_t readfd;
+
+  DEBUGASSERT(backend);
 
   if(ssl_connection_none == connssl->state) {
     result = cr_init_backend(data, conn, connssl->backend);
@@ -495,7 +542,10 @@ cr_getsock(struct connectdata *conn, curl_socket_t *socks)
   struct ssl_connect_data *const connssl = &conn->ssl[FIRSTSOCKET];
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
   struct ssl_backend_data *const backend = connssl->backend;
-  struct rustls_connection *rconn = backend->conn;
+  struct rustls_connection *rconn = NULL;
+
+  DEBUGASSERT(backend);
+  rconn = backend->conn;
 
   if(rustls_connection_wants_write(rconn)) {
     socks[0] = sockfd;
@@ -514,6 +564,7 @@ cr_get_internals(struct ssl_connect_data *connssl,
                  CURLINFO info UNUSED_PARAM)
 {
   struct ssl_backend_data *backend = connssl->backend;
+  DEBUGASSERT(backend);
   return &backend->conn;
 }
 
@@ -525,6 +576,8 @@ cr_close(struct Curl_easy *data, struct connectdata *conn,
   struct ssl_backend_data *backend = connssl->backend;
   CURLcode tmperr = CURLE_OK;
   ssize_t n = 0;
+
+  DEBUGASSERT(backend);
 
   if(backend->conn) {
     rustls_connection_send_close_notify(backend->conn);
@@ -550,7 +603,8 @@ static size_t cr_version(char *buffer, size_t size)
 
 const struct Curl_ssl Curl_ssl_rustls = {
   { CURLSSLBACKEND_RUSTLS, "rustls" },
-  SSLSUPP_TLS13_CIPHERSUITES,      /* supports */
+  SSLSUPP_CAINFO_BLOB |            /* supports */
+  SSLSUPP_TLS13_CIPHERSUITES,
   sizeof(struct ssl_backend_data),
 
   Curl_none_init,                  /* init */

@@ -1,0 +1,3 @@
+Confirmation project has been added
+(-- )?Lowercase extra file was read
+(-- )?Uppercase extra file was read

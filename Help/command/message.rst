@@ -32,6 +32,9 @@ influences the way the message is handled:
 ``FATAL_ERROR``
   CMake Error, stop processing and generation.
 
+  The :manual:`cmake(1)` executable will return a non-zero
+  :ref:`exit code <CMake Exit Code>`.
+
 ``SEND_ERROR``
   CMake Error, continue processing, but skip generation.
 

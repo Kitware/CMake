@@ -39,6 +39,7 @@ macro(__windows_compiler_clang_gnu lang)
   set(CMAKE_${lang}_LINKER_WRAPPER_FLAG_SEP)
 
   set(CMAKE_${lang}_LINKER_MANIFEST_FLAG " -Xlinker /MANIFESTINPUT:")
+  set(CMAKE_${lang}_COMPILE_OPTIONS_WARNING_AS_ERROR "-Werror")
 
   if("${CMAKE_${lang}_SIMULATE_VERSION}" MATCHES "^([0-9]+)\\.([0-9]+)")
     math(EXPR MSVC_VERSION "${CMAKE_MATCH_1}*100 + ${CMAKE_MATCH_2}")
@@ -113,6 +114,13 @@ macro(__windows_compiler_clang_gnu lang)
   string(TOLOWER "${CMAKE_BUILD_TYPE}" BUILD_TYPE_LOWER)
   set(CMAKE_${lang}_STANDARD_LIBRARIES_INIT "-lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32 -loldnames")
 
+  # Features for LINK_LIBRARY generator expression
+  if(MSVC_VERSION GREATER "1900")
+    ## WHOLE_ARCHIVE: Force loading all members of an archive
+    set(CMAKE_${lang}_LINK_LIBRARY_USING_WHOLE_ARCHIVE "LINKER:/WHOLEARCHIVE:<LIBRARY>")
+    set(CMAKE_${lang}_LINK_LIBRARY_USING_WHOLE_ARCHIVE_SUPPORTED TRUE)
+  endif()
+
   enable_language(RC)
 endmacro()
 
@@ -182,6 +190,7 @@ if("x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC"
     macro(__windows_compiler_clang_base lang)
       set(_COMPILE_${lang} "${_COMPILE_${lang}_MSVC}")
       __windows_compiler_msvc(${lang})
+      set(CMAKE_${lang}_COMPILE_OPTIONS_WARNING_AS_ERROR "-WX")
       set(CMAKE_INCLUDE_SYSTEM_FLAG_${lang} "-imsvc")
     endmacro()
   else()

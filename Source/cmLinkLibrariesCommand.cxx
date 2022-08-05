@@ -35,5 +35,7 @@ bool cmLinkLibrariesCommand(std::vector<std::string> const& args,
     mf.AppendProperty("LINK_LIBRARIES", *i);
   }
 
+  mf.CheckProperty("LINK_LIBRARIES");
+
   return true;
 }

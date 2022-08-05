@@ -286,9 +286,9 @@ bool cmCTestSVN::RunSVNCommand(std::vector<char const*> const& parameters,
   args.push_back(nullptr);
 
   if (strcmp(parameters[0], "update") == 0) {
-    return this->RunUpdateCommand(&args[0], out, err);
+    return this->RunUpdateCommand(args.data(), out, err);
   }
-  return this->RunChild(&args[0], out, err);
+  return this->RunChild(args.data(), out, err);
 }
 
 class cmCTestSVN::LogParser
@@ -353,16 +353,16 @@ private:
     if (name == "logentry") {
       this->SVN->DoRevisionSVN(this->Rev, this->Changes);
     } else if (!this->CData.empty() && name == "path") {
-      std::string orig_path(&this->CData[0], this->CData.size());
+      std::string orig_path(this->CData.data(), this->CData.size());
       std::string new_path = this->SVNRepo.BuildLocalPath(orig_path);
       this->CurChange.Path.assign(new_path);
       this->Changes.push_back(this->CurChange);
     } else if (!this->CData.empty() && name == "author") {
-      this->Rev.Author.assign(&this->CData[0], this->CData.size());
+      this->Rev.Author.assign(this->CData.data(), this->CData.size());
     } else if (!this->CData.empty() && name == "date") {
-      this->Rev.Date.assign(&this->CData[0], this->CData.size());
+      this->Rev.Date.assign(this->CData.data(), this->CData.size());
     } else if (!this->CData.empty() && name == "msg") {
-      this->Rev.Log.assign(&this->CData[0], this->CData.size());
+      this->Rev.Log.assign(this->CData.data(), this->CData.size());
     }
     this->CData.clear();
   }

@@ -111,6 +111,8 @@ void cmExportTryCompileFileGenerator::PopulateProperties(
   std::vector<std::string> props = target->GetPropertyKeys();
   // Include special properties that might be relevant here.
   props.emplace_back("INTERFACE_LINK_LIBRARIES");
+  props.emplace_back("INTERFACE_LINK_LIBRARIES_DIRECT");
+  props.emplace_back("INTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE");
   for (std::string const& p : props) {
     cmValue v = target->GetProperty(p);
     if (!v) {

@@ -128,7 +128,6 @@ if(CMAKE_TOOLCHAIN_FILE)
     set(CMAKE_TOOLCHAIN_FILE "${_INCLUDED_TOOLCHAIN_FILE}" CACHE FILEPATH "The CMake toolchain file" FORCE)
   else()
     message(FATAL_ERROR "Could not find toolchain file: ${CMAKE_TOOLCHAIN_FILE}")
-    set(CMAKE_TOOLCHAIN_FILE "NOTFOUND" CACHE FILEPATH "The CMake toolchain file" FORCE)
   endif()
 endif()
 

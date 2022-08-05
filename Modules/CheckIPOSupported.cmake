@@ -36,6 +36,11 @@ module will return error in this case. See policy :policy:`CMP0069` for details.
 .. versionadded:: 3.13
   Add support for Visual Studio generators.
 
+.. versionadded:: 3.24
+  The check uses the caller's :variable:`CMAKE_<LANG>_FLAGS`
+  and :variable:`CMAKE_<LANG>_FLAGS_<CONFIG>` values.
+  See policy :policy:`CMP0138`.
+
 Examples
 ^^^^^^^^
 
@@ -117,6 +122,16 @@ macro(_ipo_run_language_check language)
     )
   endforeach()
 
+  if(ipo_CMP0138 STREQUAL "NEW")
+    set(CMAKE_TRY_COMPILE_CONFIGURATION Debug)
+    set(_CMAKE_LANG_FLAGS
+      "-DCMAKE_${language}_FLAGS:STRING=${CMAKE_${language}_FLAGS}"
+      "-DCMAKE_${language}_FLAGS_DEBUG:STRING=${CMAKE_${language}_FLAGS_DEBUG}"
+      )
+  else()
+    set(_CMAKE_LANG_FLAGS "")
+  endif()
+
   try_compile(
       _IPO_LANGUAGE_CHECK_RESULT
       "${bindir}"
@@ -125,6 +140,7 @@ macro(_ipo_run_language_check language)
       CMAKE_FLAGS
       "-DCMAKE_VERBOSE_MAKEFILE=ON"
       "-DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON"
+      ${_CMAKE_LANG_FLAGS}
       OUTPUT_VARIABLE output
   )
   set(_IPO_LANGUAGE_CHECK_RESULT "${_IPO_LANGUAGE_CHECK_RESULT}")
@@ -154,6 +170,11 @@ function(check_ipo_supported)
   if(is_old)
     message(FATAL_ERROR "Policy CMP0069 set to OLD")
   endif()
+
+  # Save policy setting for condition in _ipo_run_language_check.
+  cmake_policy(GET CMP0138 ipo_CMP0138
+    PARENT_SCOPE # undocumented, do not use outside of CMake
+    )
 
   set(optional)
   set(one RESULT OUTPUT)

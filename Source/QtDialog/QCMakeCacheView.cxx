@@ -66,7 +66,6 @@ class QCMakeAdvancedFilter : public QSortFilterProxyModel
 public:
   QCMakeAdvancedFilter(QObject* o)
     : QSortFilterProxyModel(o)
-    , ShowAdvanced(false)
   {
   }
 
@@ -78,7 +77,7 @@ public:
   bool showAdvanced() const { return this->ShowAdvanced; }
 
 protected:
-  bool ShowAdvanced;
+  bool ShowAdvanced = false;
 
   bool filterAcceptsRow(int row, const QModelIndex& p) const override
   {
@@ -304,7 +303,7 @@ void QCMakeCacheModel::setProperties(const QCMakePropertyList& props)
 
       int num = props2.size();
       for (int i = 0; i < num; i++) {
-        QCMakeProperty prop = props2[i];
+        QCMakeProperty const& prop = props2[i];
         QList<QStandardItem*> items;
         items.append(new QStandardItem());
         items.append(new QStandardItem());
@@ -326,7 +325,7 @@ void QCMakeCacheModel::setProperties(const QCMakePropertyList& props)
 
       int num = props2.size();
       for (int i = 0; i < num; i++) {
-        QCMakeProperty prop = props2[i];
+        QCMakeProperty const& prop = props2[i];
         QList<QStandardItem*> items;
         items.append(new QStandardItem());
         items.append(new QStandardItem());

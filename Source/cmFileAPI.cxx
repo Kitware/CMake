@@ -417,7 +417,7 @@ const char* cmFileAPI::ObjectKindName(ObjectKind kind)
     "toolchains", //
     "__test"      //
   };
-  return objectKindNames[size_t(kind)];
+  return objectKindNames[static_cast<size_t>(kind)];
 }
 
 std::string cmFileAPI::ObjectName(Object const& o)

@@ -1,0 +1,5 @@
+CMake Error at Registry_BadQuery2.cmake:[0-9]+ \(cmake_host_system_information\):
+  cmake_host_system_information missing expected value for argument\(s\)
+  "VALUE".
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

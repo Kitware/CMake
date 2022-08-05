@@ -28,7 +28,7 @@ class cmTargetExport;
  * a build tree.  A single file exports information for all
  * configurations built.
  *
- * This is used to implement the EXPORT() command.
+ * This is used to implement the export() command.
  */
 class cmExportBuildFileGenerator : public cmExportFileGenerator
 {
@@ -55,13 +55,11 @@ public:
 protected:
   // Implement virtual methods from the superclass.
   bool GenerateMainFile(std::ostream& os) override;
-  void GenerateImportTargetsConfig(
-    std::ostream& os, const std::string& config, std::string const& suffix,
-    std::vector<std::string>& missingTargets) override;
+  void GenerateImportTargetsConfig(std::ostream& os, const std::string& config,
+                                   std::string const& suffix) override;
   cmStateEnums::TargetType GetExportTargetType(
     cmGeneratorTarget const* target) const;
   void HandleMissingTarget(std::string& link_libs,
-                           std::vector<std::string>& missingTargets,
                            cmGeneratorTarget const* depender,
                            cmGeneratorTarget* dependee) override;
 

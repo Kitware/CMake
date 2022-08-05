@@ -19,13 +19,13 @@ struct cmFileInstaller : public cmFileCopier
   ~cmFileInstaller() override;
 
 protected:
-  cmInstallType InstallType;
-  cmInstallMode InstallMode;
-  bool Optional;
-  bool MessageAlways;
-  bool MessageLazy;
-  bool MessageNever;
-  int DestDirLength;
+  cmInstallType InstallType = cmInstallType_FILES;
+  cmInstallMode InstallMode = cmInstallMode::COPY;
+  bool Optional = false;
+  bool MessageAlways = false;
+  bool MessageLazy = false;
+  bool MessageNever = false;
+  int DestDirLength = 0;
   std::string Rename;
 
   std::string Manifest;

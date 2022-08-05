@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmRulePlaceholderExpander.h"
 
-#include <cctype>
 #include <utility>
 
 #include "cmOutputConverter.h"
@@ -20,195 +19,194 @@ cmRulePlaceholderExpander::cmRulePlaceholderExpander(
 {
 }
 
-std::string cmRulePlaceholderExpander::ExpandRuleVariable(
-  cmOutputConverter* outputConverter, std::string const& variable,
-  const RuleVariables& replaceValues)
+std::string cmRulePlaceholderExpander::ExpandVariable(
+  std::string const& variable)
 {
-  if (replaceValues.LinkFlags) {
+  if (this->ReplaceValues->LinkFlags) {
     if (variable == "LINK_FLAGS") {
-      return replaceValues.LinkFlags;
+      return this->ReplaceValues->LinkFlags;
     }
   }
-  if (replaceValues.Manifests) {
+  if (this->ReplaceValues->Manifests) {
     if (variable == "MANIFESTS") {
-      return replaceValues.Manifests;
+      return this->ReplaceValues->Manifests;
     }
   }
-  if (replaceValues.Flags) {
+  if (this->ReplaceValues->Flags) {
     if (variable == "FLAGS") {
-      return replaceValues.Flags;
+      return this->ReplaceValues->Flags;
     }
   }
 
-  if (replaceValues.Source) {
+  if (this->ReplaceValues->Source) {
     if (variable == "SOURCE") {
-      return replaceValues.Source;
+      return this->ReplaceValues->Source;
     }
   }
-  if (replaceValues.DynDepFile) {
+  if (this->ReplaceValues->DynDepFile) {
     if (variable == "DYNDEP_FILE") {
-      return replaceValues.DynDepFile;
+      return this->ReplaceValues->DynDepFile;
     }
   }
-  if (replaceValues.PreprocessedSource) {
+  if (this->ReplaceValues->PreprocessedSource) {
     if (variable == "PREPROCESSED_SOURCE") {
-      return replaceValues.PreprocessedSource;
+      return this->ReplaceValues->PreprocessedSource;
     }
   }
-  if (replaceValues.AssemblySource) {
+  if (this->ReplaceValues->AssemblySource) {
     if (variable == "ASSEMBLY_SOURCE") {
-      return replaceValues.AssemblySource;
+      return this->ReplaceValues->AssemblySource;
     }
   }
-  if (replaceValues.Object) {
+  if (this->ReplaceValues->Object) {
     if (variable == "OBJECT") {
-      return replaceValues.Object;
+      return this->ReplaceValues->Object;
     }
   }
-  if (replaceValues.ObjectDir) {
+  if (this->ReplaceValues->ObjectDir) {
     if (variable == "OBJECT_DIR") {
-      return replaceValues.ObjectDir;
+      return this->ReplaceValues->ObjectDir;
     }
   }
-  if (replaceValues.ObjectFileDir) {
+  if (this->ReplaceValues->ObjectFileDir) {
     if (variable == "OBJECT_FILE_DIR") {
-      return replaceValues.ObjectFileDir;
+      return this->ReplaceValues->ObjectFileDir;
     }
   }
-  if (replaceValues.Objects) {
+  if (this->ReplaceValues->Objects) {
     if (variable == "OBJECTS") {
-      return replaceValues.Objects;
+      return this->ReplaceValues->Objects;
     }
   }
-  if (replaceValues.ObjectsQuoted) {
+  if (this->ReplaceValues->ObjectsQuoted) {
     if (variable == "OBJECTS_QUOTED") {
-      return replaceValues.ObjectsQuoted;
+      return this->ReplaceValues->ObjectsQuoted;
     }
   }
-  if (replaceValues.CudaCompileMode) {
+  if (this->ReplaceValues->CudaCompileMode) {
     if (variable == "CUDA_COMPILE_MODE") {
-      return replaceValues.CudaCompileMode;
+      return this->ReplaceValues->CudaCompileMode;
     }
   }
-  if (replaceValues.AIXExports) {
+  if (this->ReplaceValues->AIXExports) {
     if (variable == "AIX_EXPORTS") {
-      return replaceValues.AIXExports;
+      return this->ReplaceValues->AIXExports;
     }
   }
-  if (replaceValues.ISPCHeader) {
+  if (this->ReplaceValues->ISPCHeader) {
     if (variable == "ISPC_HEADER") {
-      return replaceValues.ISPCHeader;
+      return this->ReplaceValues->ISPCHeader;
     }
   }
-  if (replaceValues.Defines && variable == "DEFINES") {
-    return replaceValues.Defines;
+  if (this->ReplaceValues->Defines && variable == "DEFINES") {
+    return this->ReplaceValues->Defines;
   }
-  if (replaceValues.Includes && variable == "INCLUDES") {
-    return replaceValues.Includes;
+  if (this->ReplaceValues->Includes && variable == "INCLUDES") {
+    return this->ReplaceValues->Includes;
   }
-  if (replaceValues.SwiftLibraryName) {
+  if (this->ReplaceValues->SwiftLibraryName) {
     if (variable == "SWIFT_LIBRARY_NAME") {
-      return replaceValues.SwiftLibraryName;
+      return this->ReplaceValues->SwiftLibraryName;
     }
   }
-  if (replaceValues.SwiftModule) {
+  if (this->ReplaceValues->SwiftModule) {
     if (variable == "SWIFT_MODULE") {
-      return replaceValues.SwiftModule;
+      return this->ReplaceValues->SwiftModule;
     }
   }
-  if (replaceValues.SwiftModuleName) {
+  if (this->ReplaceValues->SwiftModuleName) {
     if (variable == "SWIFT_MODULE_NAME") {
-      return replaceValues.SwiftModuleName;
+      return this->ReplaceValues->SwiftModuleName;
     }
   }
-  if (replaceValues.SwiftOutputFileMap) {
+  if (this->ReplaceValues->SwiftOutputFileMap) {
     if (variable == "SWIFT_OUTPUT_FILE_MAP") {
-      return replaceValues.SwiftOutputFileMap;
+      return this->ReplaceValues->SwiftOutputFileMap;
     }
   }
-  if (replaceValues.SwiftSources) {
+  if (this->ReplaceValues->SwiftSources) {
     if (variable == "SWIFT_SOURCES") {
-      return replaceValues.SwiftSources;
+      return this->ReplaceValues->SwiftSources;
     }
   }
-  if (replaceValues.TargetPDB) {
+  if (this->ReplaceValues->TargetPDB) {
     if (variable == "TARGET_PDB") {
-      return replaceValues.TargetPDB;
+      return this->ReplaceValues->TargetPDB;
     }
   }
-  if (replaceValues.TargetCompilePDB) {
+  if (this->ReplaceValues->TargetCompilePDB) {
     if (variable == "TARGET_COMPILE_PDB") {
-      return replaceValues.TargetCompilePDB;
+      return this->ReplaceValues->TargetCompilePDB;
     }
   }
-  if (replaceValues.DependencyFile) {
+  if (this->ReplaceValues->DependencyFile) {
     if (variable == "DEP_FILE") {
-      return replaceValues.DependencyFile;
+      return this->ReplaceValues->DependencyFile;
     }
   }
-  if (replaceValues.DependencyTarget) {
+  if (this->ReplaceValues->DependencyTarget) {
     if (variable == "DEP_TARGET") {
-      return replaceValues.DependencyTarget;
+      return this->ReplaceValues->DependencyTarget;
     }
   }
-  if (replaceValues.Fatbinary) {
+  if (this->ReplaceValues->Fatbinary) {
     if (variable == "FATBINARY") {
-      return replaceValues.Fatbinary;
+      return this->ReplaceValues->Fatbinary;
     }
   }
-  if (replaceValues.RegisterFile) {
+  if (this->ReplaceValues->RegisterFile) {
     if (variable == "REGISTER_FILE") {
-      return replaceValues.RegisterFile;
+      return this->ReplaceValues->RegisterFile;
     }
   }
 
-  if (replaceValues.Target) {
+  if (this->ReplaceValues->Target) {
     if (variable == "TARGET_QUOTED") {
-      std::string targetQuoted = replaceValues.Target;
+      std::string targetQuoted = this->ReplaceValues->Target;
       if (!targetQuoted.empty() && targetQuoted.front() != '\"') {
         targetQuoted = '\"';
-        targetQuoted += replaceValues.Target;
+        targetQuoted += this->ReplaceValues->Target;
         targetQuoted += '\"';
       }
       return targetQuoted;
     }
     if (variable == "TARGET_UNQUOTED") {
-      std::string unquoted = replaceValues.Target;
+      std::string unquoted = this->ReplaceValues->Target;
       std::string::size_type sz = unquoted.size();
       if (sz > 2 && unquoted.front() == '\"' && unquoted.back() == '\"') {
         unquoted = unquoted.substr(1, sz - 2);
       }
       return unquoted;
     }
-    if (replaceValues.LanguageCompileFlags) {
+    if (this->ReplaceValues->LanguageCompileFlags) {
       if (variable == "LANGUAGE_COMPILE_FLAGS") {
-        return replaceValues.LanguageCompileFlags;
+        return this->ReplaceValues->LanguageCompileFlags;
       }
     }
-    if (replaceValues.Target) {
+    if (this->ReplaceValues->Target) {
       if (variable == "TARGET") {
-        return replaceValues.Target;
+        return this->ReplaceValues->Target;
       }
     }
     if (variable == "TARGET_IMPLIB") {
       return this->TargetImpLib;
     }
     if (variable == "TARGET_VERSION_MAJOR") {
-      if (replaceValues.TargetVersionMajor) {
-        return replaceValues.TargetVersionMajor;
+      if (this->ReplaceValues->TargetVersionMajor) {
+        return this->ReplaceValues->TargetVersionMajor;
       }
       return "0";
     }
     if (variable == "TARGET_VERSION_MINOR") {
-      if (replaceValues.TargetVersionMinor) {
-        return replaceValues.TargetVersionMinor;
+      if (this->ReplaceValues->TargetVersionMinor) {
+        return this->ReplaceValues->TargetVersionMinor;
       }
       return "0";
     }
-    if (replaceValues.Target) {
+    if (this->ReplaceValues->Target) {
       if (variable == "TARGET_BASE") {
         // Strip the last extension off the target name.
-        std::string targetBase = replaceValues.Target;
+        std::string targetBase = this->ReplaceValues->Target;
         std::string::size_type pos = targetBase.rfind('.');
         if (pos != std::string::npos) {
           return targetBase.substr(0, pos);
@@ -220,54 +218,54 @@ std::string cmRulePlaceholderExpander::ExpandRuleVariable(
   if (variable == "TARGET_SONAME" || variable == "SONAME_FLAG" ||
       variable == "TARGET_INSTALLNAME_DIR") {
     // All these variables depend on TargetSOName
-    if (replaceValues.TargetSOName) {
+    if (this->ReplaceValues->TargetSOName) {
       if (variable == "TARGET_SONAME") {
-        return replaceValues.TargetSOName;
+        return this->ReplaceValues->TargetSOName;
       }
-      if (variable == "SONAME_FLAG" && replaceValues.SONameFlag) {
-        return replaceValues.SONameFlag;
+      if (variable == "SONAME_FLAG" && this->ReplaceValues->SONameFlag) {
+        return this->ReplaceValues->SONameFlag;
       }
-      if (replaceValues.TargetInstallNameDir &&
+      if (this->ReplaceValues->TargetInstallNameDir &&
           variable == "TARGET_INSTALLNAME_DIR") {
-        return replaceValues.TargetInstallNameDir;
+        return this->ReplaceValues->TargetInstallNameDir;
       }
     }
     return "";
   }
-  if (replaceValues.LinkLibraries) {
+  if (this->ReplaceValues->LinkLibraries) {
     if (variable == "LINK_LIBRARIES") {
-      return replaceValues.LinkLibraries;
+      return this->ReplaceValues->LinkLibraries;
     }
   }
-  if (replaceValues.Language) {
+  if (this->ReplaceValues->Language) {
     if (variable == "LANGUAGE") {
-      return replaceValues.Language;
+      return this->ReplaceValues->Language;
     }
   }
-  if (replaceValues.CMTargetName) {
+  if (this->ReplaceValues->CMTargetName) {
     if (variable == "TARGET_NAME") {
-      return replaceValues.CMTargetName;
+      return this->ReplaceValues->CMTargetName;
     }
   }
-  if (replaceValues.CMTargetType) {
+  if (this->ReplaceValues->CMTargetType) {
     if (variable == "TARGET_TYPE") {
-      return replaceValues.CMTargetType;
+      return this->ReplaceValues->CMTargetType;
     }
   }
-  if (replaceValues.Output) {
+  if (this->ReplaceValues->Output) {
     if (variable == "OUTPUT") {
-      return replaceValues.Output;
+      return this->ReplaceValues->Output;
     }
   }
   if (variable == "CMAKE_COMMAND") {
-    return outputConverter->ConvertToOutputFormat(
+    return this->OutputConverter->ConvertToOutputFormat(
       cmSystemTools::GetCMakeCommand(), cmOutputConverter::SHELL);
   }
 
   auto compIt = this->Compilers.find(variable);
 
   if (compIt != this->Compilers.end()) {
-    std::string ret = outputConverter->ConvertToOutputForExisting(
+    std::string ret = this->OutputConverter->ConvertToOutputForExisting(
       this->VariableMappings["CMAKE_" + compIt->second + "_COMPILER"]);
     std::string const& compilerArg1 =
       this->VariableMappings["CMAKE_" + compIt->second + "_COMPILER_ARG1"];
@@ -286,11 +284,12 @@ std::string cmRulePlaceholderExpander::ExpandRuleVariable(
       this->VariableMappings["CMAKE_" + compIt->second +
                              "_COMPILE_OPTIONS_SYSROOT"];
 
-    if (compIt->second == replaceValues.Language && replaceValues.Launcher) {
+    if (compIt->second == this->ReplaceValues->Language &&
+        this->ReplaceValues->Launcher) {
       // Add launcher as part of expansion so that it always appears
       // immediately before the command itself, regardless of whether the
       // overall rule template contains other content at the front.
-      ret = cmStrCat(replaceValues.Launcher, " ", ret);
+      ret = cmStrCat(this->ReplaceValues->Launcher, " ", ret);
     }
 
     // if there are required arguments to the compiler add it
@@ -308,13 +307,14 @@ std::string cmRulePlaceholderExpander::ExpandRuleVariable(
         !compilerOptionExternalToolchain.empty()) {
       ret += " ";
       ret += compilerOptionExternalToolchain;
-      ret += outputConverter->EscapeForShell(compilerExternalToolchain, true);
+      ret +=
+        this->OutputConverter->EscapeForShell(compilerExternalToolchain, true);
     }
     std::string sysroot;
     // Some platforms may use separate sysroots for compiling and linking.
     // If we detect link flags, then we pass the link sysroot instead.
     // FIXME: Use a more robust way to detect link line expansion.
-    if (replaceValues.LinkFlags) {
+    if (this->ReplaceValues->LinkFlags) {
       sysroot = this->LinkerSysroot;
     } else {
       sysroot = this->CompilerSysroot;
@@ -322,7 +322,7 @@ std::string cmRulePlaceholderExpander::ExpandRuleVariable(
     if (!sysroot.empty() && !compilerOptionSysroot.empty()) {
       ret += " ";
       ret += compilerOptionSysroot;
-      ret += outputConverter->EscapeForShell(sysroot, true);
+      ret += this->OutputConverter->EscapeForShell(sysroot, true);
     }
     return ret;
   }
@@ -331,13 +331,13 @@ std::string cmRulePlaceholderExpander::ExpandRuleVariable(
   if (mapIt != this->VariableMappings.end()) {
     if (variable.find("_FLAG") == std::string::npos) {
       std::string ret =
-        outputConverter->ConvertToOutputForExisting(mapIt->second);
+        this->OutputConverter->ConvertToOutputForExisting(mapIt->second);
 
-      if (replaceValues.Launcher && variable == "CMAKE_LINKER") {
+      if (this->ReplaceValues->Launcher && variable == "CMAKE_LINKER") {
         // Add launcher as part of expansion so that it always appears
         // immediately before the command itself, regardless of whether the
         // overall rule template contains other content at the front.
-        ret = cmStrCat(replaceValues.Launcher, " ", ret);
+        ret = cmStrCat(this->ReplaceValues->Launcher, " ", ret);
       }
 
       return ret;
@@ -351,47 +351,8 @@ void cmRulePlaceholderExpander::ExpandRuleVariables(
   cmOutputConverter* outputConverter, std::string& s,
   const RuleVariables& replaceValues)
 {
-  std::string::size_type start = s.find('<');
-  // no variables to expand
-  if (start == std::string::npos) {
-    return;
-  }
-  std::string::size_type pos = 0;
-  std::string expandedInput;
-  while (start != std::string::npos && start < s.size() - 2) {
-    std::string::size_type end = s.find('>', start);
-    // if we find a < with no > we are done
-    if (end == std::string::npos) {
-      return;
-    }
-    char c = s[start + 1];
-    // if the next char after the < is not A-Za-z then
-    // skip it and try to find the next < in the string
-    if (!isalpha(c)) {
-      start = s.find('<', start + 1);
-    } else {
-      // extract the var
-      std::string var = s.substr(start + 1, end - start - 1);
-      std::string replace =
-        this->ExpandRuleVariable(outputConverter, var, replaceValues);
-      expandedInput += s.substr(pos, start - pos);
+  this->OutputConverter = outputConverter;
+  this->ReplaceValues = &replaceValues;
 
-      // Prevent consecutive whitespace in the output if the rule variable
-      // expands to an empty string.
-      bool consecutive = replace.empty() && start > 0 && s[start - 1] == ' ' &&
-        end + 1 < s.size() && s[end + 1] == ' ';
-      if (consecutive) {
-        expandedInput.pop_back();
-      }
-
-      expandedInput += replace;
-
-      // move to next one
-      start = s.find('<', start + var.size() + 2);
-      pos = end + 1;
-    }
-  }
-  // add the rest of the input
-  expandedInput += s.substr(pos, s.size() - pos);
-  s = expandedInput;
+  this->ExpandVariables(s);
 }

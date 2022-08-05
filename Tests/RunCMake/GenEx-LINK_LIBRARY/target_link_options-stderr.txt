@@ -1,0 +1,10 @@
+CMake Error at target_link_options.cmake:[0-9]+ \(target_link_options\):
+  Error evaluating generator expression:
+
+    \$<LINK_LIBRARY:FEAT>
+
+  \$<LINK_LIBRARY:...> may only be used with binary targets to specify link
+  libraries through 'LINK_LIBRARIES', 'INTERFACE_LINK_LIBRARIES', and
+  'INTERFACE_LINK_LIBRARIES_DIRECT' properties.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

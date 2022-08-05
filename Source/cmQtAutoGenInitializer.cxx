@@ -114,7 +114,8 @@ bool StaticLibraryCycle(cmGeneratorTarget const* targetOrigin,
       }
       // Collect all static_library dependencies from the test target
       cmLinkImplementationLibraries const* libs =
-        testTarget->GetLinkImplementationLibraries(config);
+        testTarget->GetLinkImplementationLibraries(
+          config, cmGeneratorTarget::LinkInterfaceFor::Link);
       if (libs) {
         for (cmLinkItem const& item : libs->Libraries) {
           cmGeneratorTarget const* depTarget = item.Target;
@@ -406,6 +407,7 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
   }
 
   // Common directories
+  std::string relativeBuildDir;
   {
     // Collapsed current binary directory
     std::string const cbd = cmSystemTools::CollapseFullPath(
@@ -423,6 +425,8 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
         cmStrCat(cbd, '/', this->GenTarget->GetName(), "_autogen");
     }
     cmSystemTools::ConvertToUnixSlashes(this->Dir.Build);
+    this->Dir.RelativeBuild =
+      cmSystemTools::RelativePath(cbd, this->Dir.Build);
     // Cleanup build directory
     this->AddCleanFile(this->Dir.Build);
 
@@ -1266,7 +1270,8 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
       std::map<cmGeneratorTarget const*, std::size_t> commonTargets;
       for (std::string const& config : this->ConfigsList) {
         cmLinkImplementationLibraries const* libs =
-          this->GenTarget->GetLinkImplementationLibraries(config);
+          this->GenTarget->GetLinkImplementationLibraries(
+            config, cmGeneratorTarget::LinkInterfaceFor::Link);
         if (libs) {
           for (cmLinkItem const& item : libs->Libraries) {
             cmGeneratorTarget const* libTarget = item.Target;
@@ -1355,7 +1360,7 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
         cmStrCat(this->Dir.Build, "/", timestampFileName);
       this->AutogenTarget.DepFile = cmStrCat(this->Dir.Build, "/deps");
       this->AutogenTarget.DepFileRuleName =
-        cmStrCat(this->GenTarget->GetName(), "_autogen/", timestampFileName);
+        cmStrCat(this->Dir.RelativeBuild, "/", timestampFileName);
       commandLines.push_back(cmMakeCommandLine(
         { cmSystemTools::GetCMakeCommand(), "-E", "touch", outputFile }));
 

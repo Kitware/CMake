@@ -36,6 +36,8 @@ only for the policies that do not warn by default:
   policy :policy:`CMP0128`.
 * ``CMAKE_POLICY_WARNING_CMP0129`` controls the warning for
   policy :policy:`CMP0129`.
+* ``CMAKE_POLICY_WARNING_CMP0133`` controls the warning for
+  policy :policy:`CMP0133`.
 
 This variable should not be set by a project in CMake code.  Project
 developers running CMake may set this variable in their cache to

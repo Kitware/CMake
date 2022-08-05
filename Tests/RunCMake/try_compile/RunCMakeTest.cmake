@@ -72,6 +72,8 @@ endif()
 run_cmake(CMP0056)
 run_cmake(CMP0066)
 run_cmake(CMP0067)
+run_cmake(CMP0137-WARN)
+run_cmake(CMP0137-NEW)
 
 if(RunCMake_GENERATOR MATCHES "Make|Ninja")
   # Use a single build tree for a few tests without cleaning.

@@ -405,9 +405,6 @@ void cmake::PrintPresetEnvironment()
 // Parse the args
 bool cmake::SetCacheArgs(const std::vector<std::string>& args)
 {
-  auto findPackageMode = false;
-  auto seenScriptOption = false;
-
   auto DefineLambda = [](std::string const& entry, cmake* state) -> bool {
     std::string var;
     std::string value;
@@ -498,10 +495,10 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
     GetProjectCommandsInScriptMode(state->GetState());
     // Documented behavior of CMAKE{,_CURRENT}_{SOURCE,BINARY}_DIR is to be
     // set to $PWD for -P mode.
+    state->SetWorkingMode(SCRIPT_MODE);
     state->SetHomeDirectory(cmSystemTools::GetCurrentWorkingDirectory());
     state->SetHomeOutputDirectory(cmSystemTools::GetCurrentWorkingDirectory());
     state->ReadListFile(args, path);
-    seenScriptOption = true;
     return true;
   };
 
@@ -565,15 +562,12 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
                      "No install directory specified for --install-prefix",
                      CommandArgument::Values::One, PrefixLambda },
     CommandArgument{ "--find-package", CommandArgument::Values::Zero,
-                     [&](std::string const&, cmake*) -> bool {
-                       findPackageMode = true;
-                       return true;
-                     } },
+                     IgnoreAndTrueLambda },
   };
   for (decltype(args.size()) i = 1; i < args.size(); ++i) {
     std::string const& arg = args[i];
 
-    if (arg == "--" && seenScriptOption) {
+    if (arg == "--" && this->GetWorkingMode() == SCRIPT_MODE) {
       // Stop processing CMake args and avoid possible errors
       // when arbitrary args are given to CMake script.
       break;
@@ -588,7 +582,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
     }
   }
 
-  if (findPackageMode) {
+  if (this->GetWorkingMode() == FIND_PACKAGE_MODE) {
     return this->FindPackage(args);
   }
 
@@ -797,7 +791,6 @@ void cmake::SetArgs(const std::vector<std::string>& args)
   bool haveToolset = false;
   bool havePlatform = false;
   bool haveBArg = false;
-  bool scriptMode = false;
   std::string possibleUnknownArg;
   std::string extraProvidedPath;
 #if !defined(CMAKE_BOOTSTRAP)
@@ -872,13 +865,15 @@ void cmake::SetArgs(const std::vector<std::string>& args)
     CommandArgument{ "-B", "No build directory specified for -B",
                      CommandArgument::Values::One,
                      CommandArgument::RequiresSeparator::No, BuildArgLambda },
+    CommandArgument{ "--fresh", CommandArgument::Values::Zero,
+                     [](std::string const&, cmake* cm) -> bool {
+                       cm->FreshCache = true;
+                       return true;
+                     } },
     CommandArgument{ "-P", "-P must be followed by a file name.",
                      CommandArgument::Values::One,
                      CommandArgument::RequiresSeparator::No,
-                     [&](std::string const&, cmake*) -> bool {
-                       scriptMode = true;
-                       return true;
-                     } },
+                     IgnoreAndTrueLambda },
     CommandArgument{ "-D", "-D must be followed with VAR=VALUE.",
                      CommandArgument::Values::One,
                      CommandArgument::RequiresSeparator::No,
@@ -1091,6 +1086,14 @@ void cmake::SetArgs(const std::vector<std::string>& args)
                   << "uninitialized variables.\n";
         state->SetCheckSystemVars(true);
         return true;
+      } },
+    CommandArgument{
+      "--compile-no-warning-as-error", CommandArgument::Values::Zero,
+      [](std::string const&, cmake* state) -> bool {
+        std::cout << "Ignoring COMPILE_WARNING_AS_ERROR target property and "
+                  << "CMAKE_COMPILE_WARNING_AS_ERROR variable.\n";
+        state->SetIgnoreWarningAsError(true);
+        return true;
       } }
   };
 
@@ -1162,6 +1165,12 @@ void cmake::SetArgs(const std::vector<std::string>& args)
     // iterate each argument
     std::string const& arg = args[i];
 
+    if (this->GetWorkingMode() == SCRIPT_MODE && arg == "--") {
+      // Stop processing CMake args and avoid possible errors
+      // when arbitrary args are given to CMake script.
+      break;
+    }
+
     // Generator flag has special handling for when to print help
     // so it becomes the exception
     if (generatorCommand.matches(arg)) {
@@ -1202,12 +1211,12 @@ void cmake::SetArgs(const std::vector<std::string>& args)
     }
   }
 
-  if (!extraProvidedPath.empty() && !scriptMode) {
+  if (!extraProvidedPath.empty() && this->GetWorkingMode() == NORMAL_MODE) {
     this->IssueMessage(MessageType::WARNING,
                        cmStrCat("Ignoring extra path from command line:\n \"",
                                 extraProvidedPath, "\""));
   }
-  if (!possibleUnknownArg.empty() && !scriptMode) {
+  if (!possibleUnknownArg.empty() && this->GetWorkingMode() != SCRIPT_MODE) {
     cmSystemTools::Error(cmStrCat("Unknown argument ", possibleUnknownArg));
     cmSystemTools::Error("Run 'cmake --help' for all supported options.");
     exit(1);
@@ -1459,7 +1468,7 @@ void cmake::PrintTraceFormatVersion()
       Json::StreamWriterBuilder builder;
       builder["indentation"] = "";
       version["major"] = 1;
-      version["minor"] = 1;
+      version["minor"] = 2;
       val["version"] = version;
       msg = Json::writeString(builder, val);
 #endif
@@ -1791,7 +1800,8 @@ void cmake::SetHomeDirectoryViaCommandLine(std::string const& path)
   }
 
   auto prev_path = this->GetHomeDirectory();
-  if (prev_path != path && !prev_path.empty()) {
+  if (prev_path != path && !prev_path.empty() &&
+      this->GetWorkingMode() == NORMAL_MODE) {
     this->IssueMessage(MessageType::WARNING,
                        cmStrCat("Ignoring extra path from command line:\n \"",
                                 prev_path, "\""));
@@ -1993,7 +2003,7 @@ int cmake::HandleDeleteCacheVariables(const std::string& var)
   }
   cmSystemTools::Message(warning.str());
   // avoid reconfigure if there were errors
-  if (!cmSystemTools::GetErrorOccuredFlag()) {
+  if (!cmSystemTools::GetErrorOccurredFlag()) {
     // re-run configure
     return this->Configure();
   }
@@ -2101,6 +2111,21 @@ int cmake::ActualConfigure()
       "project",
       cmStateEnums::INTERNAL);
   }
+
+  // We want to create the package redirects directory as early as possible,
+  // but not before pre-configure checks have passed. This ensures we get
+  // errors about inappropriate source/binary directories first.
+  const auto redirectsDir =
+    cmStrCat(this->GetHomeOutputDirectory(), "/CMakeFiles/pkgRedirects");
+  cmSystemTools::RemoveADirectory(redirectsDir);
+  if (!cmSystemTools::MakeDirectory(redirectsDir)) {
+    cmSystemTools::Error(
+      "Unable to (re)create the private pkgRedirects directory:\n" +
+      redirectsDir);
+    return -1;
+  }
+  this->AddCacheEntry("CMAKE_FIND_PACKAGE_REDIRECTS_DIR", redirectsDir,
+                      "Value Computed by CMake.", cmStateEnums::STATIC);
 
   // no generator specified on the command line
   if (!this->GlobalGenerator) {
@@ -2263,7 +2288,7 @@ int cmake::ActualConfigure()
   this->State->SaveVerificationScript(this->GetHomeOutputDirectory(),
                                       this->Messenger.get());
   this->SaveCache(this->GetHomeOutputDirectory());
-  if (cmSystemTools::GetErrorOccuredFlag()) {
+  if (cmSystemTools::GetErrorOccurredFlag()) {
     return -1;
   }
   return 0;
@@ -2377,7 +2402,7 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
 {
   // Process the arguments
   this->SetArgs(args);
-  if (cmSystemTools::GetErrorOccuredFlag()) {
+  if (cmSystemTools::GetErrorOccurredFlag()) {
     return -1;
   }
   if (this->GetWorkingMode() == HELP_MODE) {
@@ -2402,12 +2427,19 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
   }
 
   if (this->GetWorkingMode() == NORMAL_MODE) {
+    if (this->FreshCache) {
+      this->DeleteCache(this->GetHomeOutputDirectory());
+    }
     // load the cache
     if (this->LoadCache() < 0) {
       cmSystemTools::Error("Error executing cmake::LoadCache(). Aborting.\n");
       return -1;
     }
   } else {
+    if (this->FreshCache) {
+      cmSystemTools::Error("--fresh allowed only when configuring a project");
+      return -1;
+    }
     this->AddCMakePaths();
   }
 
@@ -2427,7 +2459,7 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
 
   // In script mode we terminate after running the script.
   if (this->GetWorkingMode() != NORMAL_MODE) {
-    if (cmSystemTools::GetErrorOccuredFlag()) {
+    if (cmSystemTools::GetErrorOccurredFlag()) {
       return -1;
     }
     return 0;
@@ -2501,7 +2533,7 @@ int cmake::Generate()
   if (this->WarnUnusedCli) {
     this->RunCheckForUnusedVariables();
   }
-  if (cmSystemTools::GetErrorOccuredFlag()) {
+  if (cmSystemTools::GetErrorOccurredFlag()) {
     return -1;
   }
   // Save the cache again after a successful Generate so that any internal
@@ -2520,7 +2552,7 @@ void cmake::AddCacheEntry(const std::string& key, cmValue value,
                           const char* helpString, int type)
 {
   this->State->AddCacheEntry(key, value, helpString,
-                             cmStateEnums::CacheEntryType(type));
+                             static_cast<cmStateEnums::CacheEntryType>(type));
   this->UnwatchUnusedCli(key);
 
   if (key == "CMAKE_WARN_DEPRECATED"_s) {
@@ -2861,7 +2893,7 @@ int cmake::CheckBuildSystem()
   cmGlobalGenerator gg(&cm);
   cmMakefile mf(&gg, cm.GetCurrentSnapshot());
   if (!mf.ReadListFile(this->CheckBuildSystemArgument) ||
-      cmSystemTools::GetErrorOccuredFlag()) {
+      cmSystemTools::GetErrorOccurredFlag()) {
     if (verbose) {
       std::ostringstream msg;
       msg << "Re-run cmake error reading : " << this->CheckBuildSystemArgument

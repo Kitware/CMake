@@ -503,7 +503,7 @@ bool cmState::AddScriptedCommand(std::string const& name, BT<Command> command,
       cmStrCat("Built-in flow control command \"", sName,
                "\" cannot be overridden."),
       command.Backtrace);
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
 
@@ -1071,4 +1071,13 @@ bool cmState::ParseCacheEntry(const std::string& entry, std::string& var,
   }
 
   return flag;
+}
+
+cmState::Command cmState::GetDependencyProviderCommand(
+  cmDependencyProvider::Method method) const
+{
+  return (this->DependencyProvider &&
+          this->DependencyProvider->SupportsMethod(method))
+    ? this->GetCommand(this->DependencyProvider->GetCommand())
+    : Command{};
 }

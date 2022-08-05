@@ -42,7 +42,22 @@ The root object recognizes the following fields:
 ``version``
 
   A required integer representing the version of the JSON schema.
-  The supported versions are ``1``, ``2``, ``3``, and ``4``.
+  The supported versions are:
+
+  ``1``
+    .. versionadded:: 3.19
+
+  ``2``
+    .. versionadded:: 3.20
+
+  ``3``
+    .. versionadded:: 3.21
+
+  ``4``
+    .. versionadded:: 3.23
+
+  ``5``
+    .. versionadded:: 3.24
 
 ``cmakeMinimumRequired``
 
@@ -715,6 +730,12 @@ that may contain the following fields:
     bytes. Equivalent to passing ``--test-output-size-failed`` on the
     command line.
 
+  ``testOutputTruncation``
+
+    An optional string specifying the test output truncation mode. Equivalent
+    to passing ``--test-output-truncation`` on the command line."
+    This is allowed in preset files specifying version ``5`` or above.
+
   ``maxTestNameWidth``
 
     An optional integer specifying the maximum width of a test name to
@@ -1061,6 +1082,17 @@ Recognized macros include:
 ``${dollar}``
 
   A literal dollar sign (``$``).
+
+``${pathListSep}``
+
+  Native character for separating lists of paths, such as ``:`` or ``;``.
+
+  For example, by setting ``PATH`` to
+  ``/path/to/ninja/bin${pathListSep}$env{PATH}``, ``${pathListSep}`` will
+  expand to the underlying operating system's character used for
+  concatenation in ``PATH``.
+
+  This is allowed in preset files specifying version ``5`` or above.
 
 ``$env{<variable-name>}``
 

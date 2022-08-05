@@ -19,11 +19,6 @@
 cmRST::cmRST(std::ostream& os, std::string docroot)
   : OS(os)
   , DocRoot(std::move(docroot))
-  , IncludeDepth(0)
-  , OutputLinePending(false)
-  , LastLineEndedInColonColon(false)
-  , Markup(MarkupNone)
-  , Directive(DirectiveNone)
   , CMakeDirective("^.. (cmake:)?("
                    "command|envvar|genex|variable"
                    ")::[ \t]+([^ \t\n]+)$")

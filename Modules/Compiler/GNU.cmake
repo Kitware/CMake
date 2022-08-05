@@ -18,6 +18,7 @@ set(__pch_header_OBJCXX "objective-c++-header")
 macro(__compiler_gnu lang)
   # Feature flags.
   set(CMAKE_${lang}_VERBOSE_FLAG "-v")
+  set(CMAKE_${lang}_COMPILE_OPTIONS_WARNING_AS_ERROR "-Werror")
   set(CMAKE_${lang}_COMPILE_OPTIONS_PIC "-fPIC")
   set (_CMAKE_${lang}_PIE_MAY_BE_SUPPORTED_BY_LINKER NO)
   if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 3.4)
@@ -71,7 +72,18 @@ macro(__compiler_gnu lang)
   # * https://gcc.gnu.org/onlinedocs/gcc-4.5.4/gcc/Option-Summary.html (yes)
   if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 4.5)
     set(_CMAKE_${lang}_IPO_MAY_BE_SUPPORTED_BY_COMPILER YES)
-    set(__lto_flags -flto)
+
+    set(__lto_flags "")
+
+    # '-flto=auto' introduced since GCC 10.1:
+    # * https://gcc.gnu.org/onlinedocs/gcc-9.5.0/gcc/Optimize-Options.html#Optimize-Options (no)
+    # * https://gcc.gnu.org/onlinedocs/gcc-10.1.0/gcc/Optimize-Options.html#Optimize-Options (yes)
+    # Since GCC 12.1, the abundance of a parameter produces a warning if compiling multiple targets.
+    if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 10.1)
+      list(APPEND __lto_flags -flto=auto)
+    else()
+      list(APPEND __lto_flags -flto)
+    endif()
 
     if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 4.7)
       # '-ffat-lto-objects' introduced since GCC 4.7:
@@ -118,5 +130,12 @@ macro(__compiler_gnu lang)
     set(CMAKE_${lang}_COMPILE_OPTIONS_INVALID_PCH -Winvalid-pch)
     set(CMAKE_${lang}_COMPILE_OPTIONS_USE_PCH -include <PCH_HEADER>)
     set(CMAKE_${lang}_COMPILE_OPTIONS_CREATE_PCH -x ${__pch_header_${lang}} -include <PCH_HEADER>)
+  endif()
+
+  # '-fdiagnostics-color=always' introduced since GCC 4.9
+  # https://gcc.gnu.org/gcc-4.9/changes.html
+  if(CMAKE_${lang}_COMPILER_VERSION VERSION_GREATER_EQUAL 4.9)
+    set(CMAKE_${lang}_COMPILE_OPTIONS_COLOR_DIAGNOSTICS "-fdiagnostics-color=always")
+    set(CMAKE_${lang}_COMPILE_OPTIONS_COLOR_DIAGNOSTICS_OFF "-fno-diagnostics-color")
   endif()
 endmacro()

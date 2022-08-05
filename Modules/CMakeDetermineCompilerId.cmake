@@ -495,13 +495,7 @@ Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
       if(CMAKE_VS_PLATFORM_NAME STREQUAL x64)
         set(cuda_target "<TargetMachinePlatform>64</TargetMachinePlatform>")
       endif()
-      if(CMAKE_CUDA_ARCHITECTURES AND NOT CMAKE_CUDA_ARCHITECTURES MATCHES "^(all|all-major)$")
-        foreach(arch ${CMAKE_CUDA_ARCHITECTURES})
-          string(REGEX MATCH "[0-9]+" arch_name "${arch}")
-          string(APPEND cuda_codegen "compute_${arch_name},sm_${arch_name};")
-        endforeach()
-      endif()
-      set(id_ItemDefinitionGroup_entry "<CudaCompile>${cuda_target}<AdditionalOptions>%(AdditionalOptions)-v</AdditionalOptions><CodeGeneration>${cuda_codegen}</CodeGeneration></CudaCompile>")
+      set(id_ItemDefinitionGroup_entry "<CudaCompile>${cuda_target}<AdditionalOptions>%(AdditionalOptions)-v</AdditionalOptions></CudaCompile>")
       set(id_PostBuildEvent_Command [[echo CMAKE_CUDA_COMPILER=$(CudaToolkitBinDir)\nvcc.exe]])
       if(CMAKE_VS_PLATFORM_TOOLSET_CUDA_CUSTOM_DIR)
         # check for legacy cuda custom toolkit folder structure
@@ -617,6 +611,7 @@ Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
       endif()
     endif()
     if(CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND CMAKE_OSX_SYSROOT MATCHES "^$|[Mm][Aa][Cc][Oo][Ss]")
+      set(id_code_sign_identity "-")
       # When targeting macOS, use only the host architecture.
       if (_CMAKE_APPLE_ARCHS_DEFAULT)
         set(id_archs "ARCHS = \"${_CMAKE_APPLE_ARCHS_DEFAULT}\";")
@@ -626,6 +621,7 @@ Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
         set(id_arch_active "ONLY_ACTIVE_ARCH = YES;")
       endif()
     else()
+      set(id_code_sign_identity "")
       set(id_archs "")
       set(id_arch_active "ONLY_ACTIVE_ARCH = YES;")
     endif()
@@ -841,14 +837,23 @@ function(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
     set(ARCHITECTURE_ID)
     set(SIMULATE_ID)
     set(SIMULATE_VERSION)
+    set(CMAKE_${lang}_COMPILER_ID_STRING_REGEX ".?I.?N.?F.?O.?:.?[A-Za-z0-9_]+\\[[^]]*\\]")
     foreach(encoding "" "ENCODING;UTF-16LE" "ENCODING;UTF-16BE")
       file(STRINGS "${file}" CMAKE_${lang}_COMPILER_ID_STRINGS
         LIMIT_COUNT 38 ${encoding}
-        REGEX ".?I.?N.?F.?O.?:.?[A-Za-z0-9_]+\\[[^]]*\\]")
+        REGEX "${CMAKE_${lang}_COMPILER_ID_STRING_REGEX}")
       if(NOT CMAKE_${lang}_COMPILER_ID_STRINGS STREQUAL "")
         break()
       endif()
     endforeach()
+
+    # Some ADSP processors result in characters being detected as separate strings
+    if(CMAKE_${lang}_COMPILER_ID_STRINGS STREQUAL "")
+      file(STRINGS "${file}" CMAKE_${lang}_COMPILER_ID_STRINGS LENGTH_MAXIMUM 1)
+      string(REGEX REPLACE ";" "" CMAKE_${lang}_COMPILER_ID_STRING "${CMAKE_${lang}_COMPILER_ID_STRINGS}")
+      string(REGEX MATCHALL "${CMAKE_${lang}_COMPILER_ID_STRING_REGEX}"
+        CMAKE_${lang}_COMPILER_ID_STRINGS "${CMAKE_${lang}_COMPILER_ID_STRING}")
+    endif()
 
     # With the IAR Compiler, some strings are found twice, first time as incomplete
     # list like "?<Constant "INFO:compiler[IAR]">".  Remove the incomplete copies.

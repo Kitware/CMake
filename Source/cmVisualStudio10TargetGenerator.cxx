@@ -249,6 +249,8 @@ static std::string computeProjectFileExtension(VsProjectType projectType)
   switch (projectType) {
     case VsProjectType::csproj:
       return ".csproj";
+    case VsProjectType::proj:
+      return ".proj";
     default:
       return ".vcxproj";
   }
@@ -674,6 +676,14 @@ void cmVisualStudio10TargetGenerator::WriteClassicMsBuildProjectFile(
       }
     }
 
+    cmValue startupObject =
+      this->GeneratorTarget->GetProperty("VS_DOTNET_STARTUP_OBJECT");
+
+    if (startupObject && this->Managed) {
+      Elem e1(e0, "PropertyGroup");
+      e1.Element("StartupObject", *startupObject);
+    }
+
     switch (this->ProjectType) {
       case VsProjectType::vcxproj: {
         std::string const& props =
@@ -687,6 +697,8 @@ void cmVisualStudio10TargetGenerator::WriteClassicMsBuildProjectFile(
         Elem(e0, "Import")
           .Attribute("Project", VS10_CSharp_DEFAULT_PROPS)
           .Attribute("Condition", "Exists('" VS10_CSharp_DEFAULT_PROPS "')");
+        break;
+      default:
         break;
     }
 
@@ -744,6 +756,8 @@ void cmVisualStudio10TargetGenerator::WriteClassicMsBuildProjectFile(
         case VsProjectType::csproj:
           props = VS10_CSharp_USER_PROPS;
           break;
+        default:
+          break;
       }
       if (cmValue p = this->GeneratorTarget->GetProperty("VS_USER_PROPS")) {
         props = *p;
@@ -785,6 +799,8 @@ void cmVisualStudio10TargetGenerator::WriteClassicMsBuildProjectFile(
         } else {
           Elem(e0, "Import").Attribute("Project", VS10_CSharp_TARGETS);
         }
+        break;
+      default:
         break;
     }
 
@@ -931,6 +947,12 @@ void cmVisualStudio10TargetGenerator::WriteSdkStyleProjectFile(
         break;
     }
     e1.Element("OutputType", outputType);
+
+    cmValue startupObject =
+      this->GeneratorTarget->GetProperty("VS_DOTNET_STARTUP_OBJECT");
+    if (startupObject) {
+      e1.Element("StartupObject", *startupObject);
+    }
   }
 
   for (const std::string& config : this->Configurations) {
@@ -1600,6 +1622,10 @@ void cmVisualStudio10TargetGenerator::WriteAndroidConfigurationValues(
     if (*stlType != "none") {
       e1.Element("UseOfStl", *stlType);
     }
+  }
+  std::string const& apiLevel = gg->GetSystemVersion();
+  if (!apiLevel.empty()) {
+    e1.Element("AndroidAPILevel", cmStrCat("android-", apiLevel));
   }
 }
 
@@ -3096,6 +3122,8 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
         cm::make_unique<Options>(this->LocalGenerator, Options::CSharpCompiler,
                                  gg->GetCSharpFlagTable());
       break;
+    default:
+      break;
   }
   Options& clOptions = *pOptions;
 
@@ -3204,6 +3232,43 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
     }
   }
 
+  // Get includes for this target
+  if (!this->LangForClCompile.empty()) {
+    auto includeList = this->GetIncludes(configName, this->LangForClCompile);
+
+    auto sysIncludeFlag = this->Makefile->GetDefinition(
+      cmStrCat("CMAKE_INCLUDE_SYSTEM_FLAG_", this->LangForClCompile));
+
+    if (sysIncludeFlag) {
+      bool gotOneSys = false;
+      for (auto i : includeList) {
+        cmSystemTools::ConvertToUnixSlashes(i);
+        if (this->GeneratorTarget->IsSystemIncludeDirectory(
+              i, configName, this->LangForClCompile)) {
+          auto flag = cmTrimWhitespace(*sysIncludeFlag);
+          if (this->MSTools) {
+            cmSystemTools::ReplaceString(flag, "-external:I", "/external:I");
+          }
+          clOptions.AppendFlagString("AdditionalOptions",
+                                     cmStrCat(flag, " \"", i, '"'));
+          gotOneSys = true;
+        } else {
+          clOptions.AddInclude(i);
+        }
+      }
+
+      if (gotOneSys) {
+        if (auto sysIncludeFlagWarning = this->Makefile->GetDefinition(
+              cmStrCat("_CMAKE_INCLUDE_SYSTEM_FLAG_", this->LangForClCompile,
+                       "_WARNING"))) {
+          flags = cmStrCat(flags, ' ', *sysIncludeFlagWarning);
+        }
+      }
+    } else {
+      clOptions.AddIncludes(includeList);
+    }
+  }
+
   clOptions.Parse(flags);
   clOptions.Parse(defineFlags);
   std::vector<std::string> targetDefines;
@@ -3221,17 +3286,13 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
         return def.find('=') != std::string::npos;
       });
       break;
+    default:
+      break;
   }
   clOptions.AddDefines(targetDefines);
 
   if (this->ProjectType == VsProjectType::csproj) {
     clOptions.AppendFlag("DefineConstants", targetDefines);
-  }
-
-  // Get includes for this target
-  if (!this->LangForClCompile.empty()) {
-    clOptions.AddIncludes(
-      this->GetIncludes(configName, this->LangForClCompile));
   }
 
   if (this->MSTools) {
@@ -3348,7 +3409,9 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
   } else if (this->MSTools) {
     cmsys::RegularExpression clangToolset("v[0-9]+_clang_.*");
     const char* toolset = this->GlobalGenerator->GetPlatformToolset();
-    if (toolset && clangToolset.find(toolset)) {
+    cmValue noCompileBatching =
+      this->GeneratorTarget->GetProperty("VS_NO_COMPILE_BATCHING");
+    if (noCompileBatching.IsOn() || (toolset && clangToolset.find(toolset))) {
       e2.Element("ObjectFileName", "$(IntDir)%(filename).obj");
     } else {
       e2.Element("ObjectFileName", "$(IntDir)");
@@ -3676,62 +3739,15 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaLinkOptions(
       return false;
     }
 
-    // Would like to use:
-    // cmLinkLineDeviceComputer computer(this->LocalGenerator,
-    //                                   this->LocalGenerator->GetStateSnapshot().GetDirectory());
-    // std::string computed_libs = computer.ComputeLinkLibraries(cli,
-    // std::string{}); but it outputs in "<libA> <libB>" format instead of
-    // "<libA>;<libB>"
-    // Note:
-    // Any modification of this algorithm should be reflected also in
-    // cmLinkLineDeviceComputer
     cmComputeLinkInformation& cli = *pcli;
+    cmLinkLineDeviceComputer computer(
+      this->LocalGenerator,
+      this->LocalGenerator->GetStateSnapshot().GetDirectory());
+    std::vector<BT<std::string>> btLibVec;
+    computer.ComputeLinkLibraries(cli, std::string{}, btLibVec);
     std::vector<std::string> libVec;
-    const auto& libs = cli.GetItems();
-    for (cmComputeLinkInformation::Item const& l : libs) {
-
-      if (l.Target) {
-        auto managedType = l.Target->GetManagedType(configName);
-        // Do not allow C# targets to be added to the LIB listing. LIB files
-        // are used for linking C++ dependencies. C# libraries do not have lib
-        // files. Instead, they compile down to C# reference libraries (DLL
-        // files). The
-        // `<ProjectReference>` elements added to the vcxproj are enough for
-        // the IDE to deduce the DLL file required by other C# projects that
-        // need its reference library.
-        if (managedType == cmGeneratorTarget::ManagedType::Managed) {
-          continue;
-        }
-        const auto type = l.Target->GetType();
-
-        bool skip = false;
-        switch (type) {
-          case cmStateEnums::SHARED_LIBRARY:
-          case cmStateEnums::MODULE_LIBRARY:
-          case cmStateEnums::INTERFACE_LIBRARY:
-            skip = true;
-            break;
-          case cmStateEnums::STATIC_LIBRARY:
-            skip = l.Target->GetPropertyAsBool("CUDA_RESOLVE_DEVICE_SYMBOLS");
-            break;
-          default:
-            break;
-        }
-        if (skip) {
-          continue;
-        }
-      }
-
-      if (l.IsPath == cmComputeLinkInformation::ItemIsPath::Yes) {
-        std::string path =
-          this->LocalGenerator->MaybeRelativeToCurBinDir(l.Value.Value);
-        ConvertToWindowsSlash(path);
-        if (!cmVS10IsTargetsFile(l.Value.Value)) {
-          libVec.push_back(path);
-        }
-      } else {
-        libVec.push_back(l.Value.Value);
-      }
+    for (auto const& item : btLibVec) {
+      libVec.emplace_back(item.Value);
     }
 
     cudaLinkOptions.AddFlag("AdditionalDependencies", libVec);
@@ -4344,6 +4360,9 @@ void cmVisualStudio10TargetGenerator::AddLibraries(
               this->AdditionalUsingDirectories[config].insert(
                 cmSystemTools::GetFilenamePath(location));
               break;
+            default:
+              // In .proj files, we wouldn't be referencing libraries.
+              break;
           }
         }
       }
@@ -4365,7 +4384,8 @@ void cmVisualStudio10TargetGenerator::AddLibraries(
       if (cmVS10IsTargetsFile(l.Value.Value)) {
         vsTargetVec.push_back(path);
       } else {
-        libVec.push_back(path);
+        libVec.push_back(l.HasFeature() ? l.GetFormattedItem(path).Value
+                                        : path);
       }
     } else if (!l.Target ||
                l.Target->GetType() != cmStateEnums::INTERFACE_LIBRARY) {

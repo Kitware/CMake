@@ -13,6 +13,7 @@ The general signature is:
              name | |NAMES|
              [HINTS [path | ENV var]... ]
              [PATHS [path | ENV var]... ]
+             [REGISTRY_VIEW (64|32|64_32|32_64|HOST|TARGET|BOTH)]
              [PATH_SUFFIXES suffix1 [suffix2 ...]]
              [DOC "cache documentation string"]
              [NO_CACHE]
@@ -23,6 +24,7 @@ The general signature is:
              [NO_CMAKE_ENVIRONMENT_PATH]
              [NO_SYSTEM_ENVIRONMENT_PATH]
              [NO_CMAKE_SYSTEM_PATH]
+             [NO_CMAKE_INSTALL_PREFIX]
              [CMAKE_FIND_ROOT_PATH_BOTH |
               ONLY_CMAKE_FIND_ROOT_PATH |
               NO_CMAKE_FIND_ROOT_PATH]
@@ -49,6 +51,16 @@ Options include:
   Specify directories to search in addition to the default locations.
   The ``ENV var`` sub-option reads paths from a system environment
   variable.
+
+  .. versionchanged:: 3.24
+    On ``Windows`` platform, it is possible to include registry queries as part
+    of the directories, using a :ref:`dedicated syntax <Find Using Windows Registry>`.
+    Such specifications will be ignored on all other platforms.
+
+``REGISTRY_VIEW``
+  .. versionadded:: 3.24
+
+  .. include:: FIND_XXX_REGISTRY_VIEW.txt
 
 ``PATH_SUFFIXES``
   Specify additional subdirectories to check below each directory
@@ -154,9 +166,11 @@ If ``NO_DEFAULT_PATH`` is not specified, the search process is as follows:
    * |SYSTEM_ENVIRONMENT_PATH_WINDOWS_XXX|
 
 6. Search cmake variables defined in the Platform files
-   for the current system.  This can be skipped if ``NO_CMAKE_SYSTEM_PATH``
-   is passed or by setting the :variable:`CMAKE_FIND_USE_CMAKE_SYSTEM_PATH`
-   to ``FALSE``.
+   for the current system.  The searching of ``CMAKE_INSTALL_PREFIX`` can be
+   skipped if ``NO_CMAKE_INSTALL_PREFIX`` is passed or by setting the
+   :variable:`CMAKE_FIND_USE_INSTALL_PREFIX` to ``FALSE``. All these locations
+   can be skipped if ``NO_CMAKE_SYSTEM_PATH`` is passed or by setting the
+   :variable:`CMAKE_FIND_USE_CMAKE_SYSTEM_PATH` to ``FALSE``.
 
    * |CMAKE_SYSTEM_PREFIX_PATH_XXX|
    * |CMAKE_SYSTEM_XXX_PATH|

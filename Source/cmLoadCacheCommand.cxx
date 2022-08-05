@@ -106,7 +106,7 @@ static bool ReadWithPrefix(std::vector<std::string> const& args,
   }
 
   // Prepare the table of variables to read.
-  std::string const prefix = args[2];
+  std::string const& prefix = args[2];
   std::set<std::string> const variablesToRead(args.begin() + 3, args.end());
 
   // Read the cache file.

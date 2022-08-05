@@ -13,9 +13,16 @@ the current directory scope or above, see the
 The variable value will be true in:
 
 * the top-level directory of the project
-* the top-level directory of an external project added by :module:`ExternalProject`
+* the top-level directory of an external project added by
+  :module:`ExternalProject`
+* a directory added by :command:`add_subdirectory` that does not also contain
+  a :command:`project` call
+* a directory added by :command:`FetchContent_MakeAvailable`,
+  if the fetched content does not contain a :command:`project` call
 
 The variable value will be false in:
 
-* a directory added by :command:`add_subdirectory`
-* a directory added by :module:`FetchContent`
+* a directory added by :command:`add_subdirectory` that also contains
+  a :command:`project` call
+* a directory added by :command:`FetchContent_MakeAvailable`,
+  if the fetched content contains a :command:`project` call

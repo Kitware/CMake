@@ -19,37 +19,6 @@ cmGlobalMinGWMakefileGenerator::cmGlobalMinGWMakefileGenerator(cmake* cm)
   cm->GetState()->SetMinGWMake(true);
 }
 
-void cmGlobalMinGWMakefileGenerator::EnableLanguage(
-  std::vector<std::string> const& l, cmMakefile* mf, bool optional)
-{
-  this->FindMakeProgram(mf);
-  const std::string& makeProgram =
-    mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
-  std::vector<std::string> locations;
-  locations.push_back(cmSystemTools::GetProgramPath(makeProgram));
-  locations.push_back("/mingw/bin");
-  locations.push_back("c:/mingw/bin");
-  std::string tgcc = cmSystemTools::FindProgram("gcc", locations);
-  std::string gcc = "gcc.exe";
-  if (!tgcc.empty()) {
-    gcc = tgcc;
-  }
-  std::string tgxx = cmSystemTools::FindProgram("g++", locations);
-  std::string gxx = "g++.exe";
-  if (!tgxx.empty()) {
-    gxx = tgxx;
-  }
-  std::string trc = cmSystemTools::FindProgram("windres", locations);
-  std::string rc = "windres.exe";
-  if (!trc.empty()) {
-    rc = trc;
-  }
-  mf->AddDefinition("CMAKE_GENERATOR_CC", gcc);
-  mf->AddDefinition("CMAKE_GENERATOR_CXX", gxx);
-  mf->AddDefinition("CMAKE_GENERATOR_RC", rc);
-  this->cmGlobalUnixMakefileGenerator3::EnableLanguage(l, mf, optional);
-}
-
 void cmGlobalMinGWMakefileGenerator::GetDocumentation(
   cmDocumentationEntry& entry)
 {

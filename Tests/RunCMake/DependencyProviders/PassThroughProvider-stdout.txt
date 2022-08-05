@@ -1,0 +1,7 @@
+-- Before cmake_language
+-- After cmake_language
+-- Null provider called
+-- Provider invoked for method FIND_PACKAGE with args: AThing;QUIET
+-- AThing_FOUND = 0
+-- Null provider called
+-- Provider invoked for method FETCHCONTENT_MAKEAVAILABLE_SERIAL with args: SomeDep;SOURCE_DIR;.*/Tests/RunCMake/DependencyProviders;BINARY_DIR;.*/Tests/RunCMake/DependencyProviders/PassThroughProvider-build/_deps/somedep-build;SOURCE_SUBDIR;DoesNotExist

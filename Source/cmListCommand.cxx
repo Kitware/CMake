@@ -229,7 +229,7 @@ bool HandleAppendCommand(std::vector<std::string> const& args,
   // If `listString` or `args` is empty, no need to append `;`,
   // then index is going to be `1` and points to the end-of-string ";"
   auto const offset =
-    std::string::size_type(listString.empty() || args.empty());
+    static_cast<std::string::size_type>(listString.empty() || args.empty());
   listString += &";"[offset] + cmJoin(cmMakeRange(args).advance(2), ";");
 
   makefile.AddDefinition(listName, listString);
@@ -255,7 +255,7 @@ bool HandlePrependCommand(std::vector<std::string> const& args,
   // If `listString` or `args` is empty, no need to append `;`,
   // then `offset` is going to be `1` and points to the end-of-string ";"
   auto const offset =
-    std::string::size_type(listString.empty() || args.empty());
+    static_cast<std::string::size_type>(listString.empty() || args.empty());
   listString.insert(0,
                     cmJoin(cmMakeRange(args).advance(2), ";") + &";"[offset]);
 
@@ -1199,7 +1199,7 @@ bool HandleSortCommand(std::vector<std::string> const& args,
   const std::string messageHint = "sub-command SORT ";
 
   while (argumentIndex < args.size()) {
-    const std::string option = args[argumentIndex++];
+    std::string const& option = args[argumentIndex++];
     if (option == "COMPARE") {
       if (sortCompare != cmStringSorter::Compare::UNINITIALIZED) {
         std::string error = cmStrCat(messageHint, "option \"", option,
@@ -1208,7 +1208,7 @@ bool HandleSortCommand(std::vector<std::string> const& args,
         return false;
       }
       if (argumentIndex < args.size()) {
-        const std::string argument = args[argumentIndex++];
+        std::string const& argument = args[argumentIndex++];
         if (argument == "STRING") {
           sortCompare = cmStringSorter::Compare::STRING;
         } else if (argument == "FILE_BASENAME") {
@@ -1235,7 +1235,7 @@ bool HandleSortCommand(std::vector<std::string> const& args,
         return false;
       }
       if (argumentIndex < args.size()) {
-        const std::string argument = args[argumentIndex++];
+        std::string const& argument = args[argumentIndex++];
         if (argument == "SENSITIVE") {
           sortCaseSensitivity = cmStringSorter::CaseSensitivity::SENSITIVE;
         } else if (argument == "INSENSITIVE") {
@@ -1259,7 +1259,7 @@ bool HandleSortCommand(std::vector<std::string> const& args,
         return false;
       }
       if (argumentIndex < args.size()) {
-        const std::string argument = args[argumentIndex++];
+        std::string const& argument = args[argumentIndex++];
         if (argument == "ASCENDING") {
           sortOrder = cmStringSorter::Order::ASCENDING;
         } else if (argument == "DESCENDING") {
@@ -1346,7 +1346,7 @@ bool HandleSublistCommand(std::vector<std::string> const& args,
 
   using size_type = decltype(varArgsExpanded)::size_type;
 
-  if (start < 0 || size_type(start) >= varArgsExpanded.size()) {
+  if (start < 0 || static_cast<size_type>(start) >= varArgsExpanded.size()) {
     status.SetError(cmStrCat("begin index: ", start, " is out of range 0 - ",
                              varArgsExpanded.size() - 1));
     return false;
@@ -1357,9 +1357,10 @@ bool HandleSublistCommand(std::vector<std::string> const& args,
   }
 
   const size_type end =
-    (length == -1 || size_type(start + length) > varArgsExpanded.size())
+    (length == -1 ||
+     static_cast<size_type>(start + length) > varArgsExpanded.size())
     ? varArgsExpanded.size()
-    : size_type(start + length);
+    : static_cast<size_type>(start + length);
   std::vector<std::string> sublist(varArgsExpanded.begin() + start,
                                    varArgsExpanded.begin() + end);
   status.GetMakefile().AddDefinition(variableName, cmJoin(sublist, ";"));

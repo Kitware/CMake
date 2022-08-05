@@ -18,6 +18,7 @@ set(__pch_header_OBJCXX "objective-c++-header")
 macro(__compiler_lcc lang)
   # Feature flags.
   set(CMAKE_${lang}_VERBOSE_FLAG "-v")
+  set(CMAKE_${lang}_COMPILE_OPTIONS_WARNING_AS_ERROR "-Werror")
   set(CMAKE_${lang}_COMPILE_OPTIONS_PIC "-fPIC")
   set (_CMAKE_${lang}_PIE_MAY_BE_SUPPORTED_BY_LINKER NO)
   set(CMAKE_${lang}_COMPILE_OPTIONS_PIE "-fPIE")

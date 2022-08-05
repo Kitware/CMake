@@ -1,0 +1,4 @@
+(-- )?ConfigForm1 override successful
+(-- )?ConfigForm2 override successful
+(-- )?ConfigForm1_VERSION = 1.8
+(-- )?ConfigForm2_VERSION = 1.9.7

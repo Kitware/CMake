@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -74,6 +74,7 @@
 #include "warnless.h"
 #include "conncache.h"
 #include "multihandle.h"
+#include "share.h"
 #include "version_win32.h"
 #include "quic.h"
 #include "socks.h"
@@ -137,6 +138,14 @@ tcpkeepalive(struct Curl_easy *data,
           (void *)&optval, sizeof(optval)) < 0) {
       infof(data, "Failed to set TCP_KEEPIDLE on fd %d", sockfd);
     }
+#elif defined(TCP_KEEPALIVE)
+    /* Mac OS X style */
+    optval = curlx_sltosi(data->set.tcp_keepidle);
+    KEEPALIVE_FACTOR(optval);
+    if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPALIVE,
+      (void *)&optval, sizeof(optval)) < 0) {
+      infof(data, "Failed to set TCP_KEEPALIVE on fd %d", sockfd);
+    }
 #endif
 #ifdef TCP_KEEPINTVL
     optval = curlx_sltosi(data->set.tcp_keepintvl);
@@ -144,15 +153,6 @@ tcpkeepalive(struct Curl_easy *data,
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPINTVL,
           (void *)&optval, sizeof(optval)) < 0) {
       infof(data, "Failed to set TCP_KEEPINTVL on fd %d", sockfd);
-    }
-#endif
-#ifdef TCP_KEEPALIVE
-    /* Mac OS X style */
-    optval = curlx_sltosi(data->set.tcp_keepidle);
-    KEEPALIVE_FACTOR(optval);
-    if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPALIVE,
-          (void *)&optval, sizeof(optval)) < 0) {
-      infof(data, "Failed to set TCP_KEEPALIVE on fd %d", sockfd);
     }
 #endif
 #endif
@@ -257,6 +257,9 @@ static CURLcode bindlocal(struct Curl_easy *data,
 #ifdef IP_BIND_ADDRESS_NO_PORT
   int on = 1;
 #endif
+#ifndef ENABLE_IPV6
+  (void)scope;
+#endif
 
   /*************************************************************
    * Select device to bind socket to
@@ -314,8 +317,11 @@ static CURLcode bindlocal(struct Curl_easy *data,
       }
 #endif
 
-      switch(Curl_if2ip(af, scope, conn->scope_id, dev,
-                        myhost, sizeof(myhost))) {
+      switch(Curl_if2ip(af,
+#ifdef ENABLE_IPV6
+                        scope, conn->scope_id,
+#endif
+                        dev, myhost, sizeof(myhost))) {
         case IF2IP_NOT_FOUND:
           if(is_interface) {
             /* Do not fall back to treating it as a host name */
@@ -617,6 +623,7 @@ void Curl_persistconninfo(struct Curl_easy *data, struct connectdata *conn,
   data->info.conn_scheme = conn->handler->scheme;
   data->info.conn_protocol = conn->handler->protocol;
   data->info.conn_primary_port = conn->port;
+  data->info.conn_remote_port = conn->remote_port;
   data->info.conn_local_port = local_port;
 }
 
@@ -1481,7 +1488,11 @@ curl_socket_t Curl_getconnectinfo(struct Curl_easy *data,
     find.id_tofind = data->state.lastconnect_id;
     find.found = NULL;
 
-    Curl_conncache_foreach(data, data->multi_easy?
+    Curl_conncache_foreach(data,
+                           data->share && (data->share->specifier
+                           & (1<< CURL_LOCK_DATA_CONNECT))?
+                           &data->share->conn_cache:
+                           data->multi_easy?
                            &data->multi_easy->conn_cache:
                            &data->multi->conn_cache, &find, conn_is_conn);
 

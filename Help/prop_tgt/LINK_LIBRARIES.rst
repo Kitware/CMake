@@ -14,9 +14,17 @@ followed by indirect dependencies from the transitive closure of the
 direct dependencies' :prop_tgt:`INTERFACE_LINK_LIBRARIES` properties.
 See policy :policy:`CMP0022`.
 
-Contents of ``LINK_LIBRARIES`` may use "generator expressions" with the
-syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)` manual
-for available expressions.  See the :manual:`cmake-buildsystem(7)` manual
-for more on defining buildsystem properties.
+Contents of ``LINK_LIBRARIES`` may use
+:manual:`generator expressions <cmake-generator-expressions(7)>` with the
+syntax ``$<...>``.  Policy :policy:`CMP0131` affects the behavior of the
+:genex:`LINK_ONLY` generator expression for this property.
+
+See the :manual:`cmake-buildsystem(7)` manual for more on defining
+buildsystem properties.
 
 .. include:: LINK_LIBRARIES_INDIRECTION.txt
+
+In advanced use cases, the list of direct link dependencies specified
+by this property may be updated by usage requirements from dependencies.
+See the :prop_tgt:`INTERFACE_LINK_LIBRARIES_DIRECT` and
+:prop_tgt:`INTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE` target properties.

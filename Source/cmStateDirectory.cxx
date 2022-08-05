@@ -13,6 +13,7 @@
 #include <cmext/string_view>
 
 #include "cmAlgorithms.h"
+#include "cmListFileCache.h"
 #include "cmProperty.h"
 #include "cmPropertyMap.h"
 #include "cmRange.h"

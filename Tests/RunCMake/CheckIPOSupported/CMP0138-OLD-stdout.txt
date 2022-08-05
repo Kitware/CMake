@@ -1,0 +1,3 @@
+-- CMAKE_C_FLAGS:STRING=([^-]|-[^D]|-D[^F]|-DF[^O]|-DFO[^O])*
+-- CMAKE_C_FLAGS_DEBUG:STRING=([^-]|-[^D]|-D[^B]|-DB[^A]|-DBA[^R])*
+--

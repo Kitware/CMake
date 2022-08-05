@@ -77,7 +77,7 @@ endif()
 # *NIX systems.  See :module:`findpkgconfig`
 # This will return ``GSL_INCLUDEDIR`` and ``GSL_LIBDIR`` used below.
 if( GSL_USE_PKGCONFIG )
-  find_package(PkgConfig)
+  find_package(PkgConfig QUIET)
   pkg_check_modules( GSL QUIET gsl )
 
   if( EXISTS "${GSL_INCLUDEDIR}" )

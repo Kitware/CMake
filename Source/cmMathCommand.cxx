@@ -57,10 +57,10 @@ bool HandleExprCommand(std::vector<std::string> const& args,
 
   if (argumentIndex < args.size()) {
     const std::string messageHint = "sub-command EXPR ";
-    const std::string option = args[argumentIndex++];
+    std::string const& option = args[argumentIndex++];
     if (option == "OUTPUT_FORMAT") {
       if (argumentIndex < args.size()) {
-        const std::string argument = args[argumentIndex++];
+        std::string const& argument = args[argumentIndex++];
         if (argument == "DECIMAL") {
           outputFormat = NumericFormat::DECIMAL;
         } else if (argument == "HEXADECIMAL") {

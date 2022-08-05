@@ -1,0 +1,4 @@
+-- CMAKE_SOURCE_DIR='[^']*/Tests/RunCMake/CommandLine'
+-- CMAKE_BINARY_DIR='[^']*/Tests/RunCMake/CommandLine/Fresh-build'
+-- OLD CACHED_VAR_1=''
+-- NEW CACHED_VAR_1='CACHED-VALUE-1'

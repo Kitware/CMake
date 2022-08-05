@@ -143,7 +143,9 @@ macro(_pkgconfig_invoke _pkglist _prefix _varname _regexp)
       string(REGEX REPLACE "${_regexp}" " " _pkgconfig_invoke_result "${_pkgconfig_invoke_result}")
     endif()
 
-    separate_arguments(_pkgconfig_invoke_result)
+    # pkg-config can represent "spaces within an argument" by backslash-escaping the space.
+    # UNIX_COMMAND mode treats backslash-escaped spaces as "not a space that delimits arguments".
+    separate_arguments(_pkgconfig_invoke_result UNIX_COMMAND "${_pkgconfig_invoke_result}")
 
     #message(STATUS "  ${_varname} ... ${_pkgconfig_invoke_result}")
     set(_pkgconfig_${_varname} ${_pkgconfig_invoke_result})

@@ -1,0 +1,6 @@
+^CMake Error in CMakeLists\.txt:
+  File set "a" is listed in interface file sets of lib1 but has not been
+  exported
+
+
+CMake Generate step failed\.  Build files cannot be regenerated correctly\.$

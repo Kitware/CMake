@@ -37,6 +37,18 @@
         VCVARSPLATFORM: "x64"
         VCVARSVERSION: "14.32.31326"
 
+.windows_vcvarsall_vs2022_x86:
+    variables:
+        VCVARSALL: "${VS170COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
+        VCVARSPLATFORM: "x86"
+        VCVARSVERSION: "14.32.31326"
+
+.windows_vcvarsall_vs2022_x64_arm64:
+    variables:
+        VCVARSALL: "${VS170COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
+        VCVARSPLATFORM: "x64_arm64"
+        VCVARSVERSION: "14.32.31326"
+
 .windows_vs2022_x64_ninja:
     extends:
         - .windows_build_ninja
@@ -44,6 +56,38 @@
 
     variables:
         CMAKE_CONFIGURATION: windows_vs2022_x64_ninja
+
+.windows_package:
+    extends:
+        - .windows_build_ninja
+
+    variables:
+        CMAKE_CI_BUILD_TYPE: Release
+        CMAKE_CI_NO_INSTALL: 1
+
+.windows_x86_64_package:
+    extends:
+        - .windows_package
+        - .windows_vcvarsall_vs2022_x64
+
+    variables:
+        CMAKE_CONFIGURATION: windows_x86_64_package
+
+.windows_i386_package:
+    extends:
+        - .windows_package
+        - .windows_vcvarsall_vs2022_x86
+
+    variables:
+        CMAKE_CONFIGURATION: windows_i386_package
+
+.windows_arm64_package:
+    extends:
+        - .windows_package
+        - .windows_vcvarsall_vs2022_x64_arm64
+
+    variables:
+        CMAKE_CONFIGURATION: windows_arm64_package
 
 ### External testing
 
@@ -87,6 +131,21 @@
     variables:
         CMAKE_CONFIGURATION: windows_borland5.8
 
+.windows_ninja:
+    extends: .windows
+
+    variables:
+        CMAKE_GENERATOR: "Ninja"
+        CMAKE_CI_BUILD_TYPE: Release
+        CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
+
+.windows_ninja_multi:
+    extends: .windows
+
+    variables:
+        CMAKE_GENERATOR: "Ninja Multi-Config"
+        CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
+
 .windows_nmake:
     extends: .windows
 
@@ -118,6 +177,30 @@
 
     variables:
         CMAKE_CONFIGURATION: windows_vs2022_x64_jom
+
+.windows_vs2022_x64_ninja_multi:
+    extends:
+        - .windows_ninja_multi
+        - .windows_vcvarsall_vs2022_x64
+
+    variables:
+        CMAKE_CONFIGURATION: windows_vs2022_x64_ninja_multi
+
+.windows_clang_ninja:
+    extends:
+        - .windows_ninja
+        - .windows_vcvarsall_vs2022_x64
+
+    variables:
+        CMAKE_CONFIGURATION: windows_clang_ninja
+
+.windows_clang_nmake:
+    extends:
+        - .windows_nmake
+        - .windows_vcvarsall_vs2022_x64
+
+    variables:
+        CMAKE_CONFIGURATION: windows_clang_nmake
 
 .windows_msvc_v71_nmake:
     extends: .windows_nmake
@@ -152,6 +235,15 @@
         - msvc-19.32
         - nonconcurrent
 
+.windows_tags_nonconcurrent_vs2022_arm64:
+    tags:
+        - cmake # Since this is a bare runner, pin to a project.
+        - windows
+        - shell
+        - vs2022
+        - msvc-19.32-arm64
+        - nonconcurrent
+
 .windows_tags_concurrent_vs2022:
     tags:
         - cmake # Since this is a bare runner, pin to a project.
@@ -180,6 +272,7 @@
 ## Windows-specific scripts
 
 .before_script_windows: &before_script_windows
+    - Invoke-Expression -Command .gitlab/ci/env.ps1
     - $pwdpath = $pwd.Path
     - powershell -File ".gitlab/ci/wix.ps1"
     - Set-Item -Force -Path "env:WIX" -Value "$pwdpath\.gitlab\wix"
@@ -212,6 +305,18 @@
 
     interruptible: true
 
+.cmake_package_windows:
+    stage: package
+
+    script:
+        - *before_script_windows
+        - Invoke-Expression -Command .gitlab/ci/vcvarsall.ps1
+        - cd build
+        - cpack -G ZIP
+        - cpack -G WIX
+
+    interruptible: true
+
 .cmake_test_windows:
     stage: test
 
@@ -226,7 +331,8 @@
     stage: test-ext
 
     script:
-        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_test_external.cmake
+        - Invoke-Expression -Command .gitlab/ci/env.ps1
+        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake
 
     interruptible: true
 
@@ -235,7 +341,7 @@
 
     script:
         - Invoke-Expression -Command .gitlab/ci/vcvarsall.ps1
-        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_test_external.cmake
+        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake
 
     interruptible: true
 
@@ -247,7 +353,7 @@
         - $pwdpath = $pwd.Path
         - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab\jom;$env:PATH"
         - Invoke-Expression -Command .gitlab/ci/vcvarsall.ps1
-        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_test_external.cmake
+        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake
 
     interruptible: true
 
@@ -258,7 +364,21 @@
         - Invoke-Expression -Command .gitlab/ci/borland.ps1
         - $pwdpath = $pwd.Path
         - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab\bcc\bin;$env:PATH"
-        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_test_external.cmake
+        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake
+
+    interruptible: true
+
+.cmake_test_windows_clang:
+    stage: test-ext
+
+    script:
+        - $pwdpath = $pwd.Path
+        - powershell -File ".gitlab/ci/ninja.ps1"
+        - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab;$env:PATH"
+        - Invoke-Expression -Command .gitlab/ci/clang.ps1
+        - Invoke-Expression -Command .gitlab/ci/vcvarsall.ps1
+        - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab\llvm\bin;$env:PATH"
+        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake
 
     interruptible: true
 
@@ -268,7 +388,7 @@
     script:
         - Invoke-Expression -Command .gitlab/ci/msvc.ps1
         - Invoke-Expression -Command .gitlab/ci/vcvarsall.ps1
-        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_test_external.cmake
+        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake
 
     interruptible: true
 
@@ -283,6 +403,6 @@
         - Set-Item -Force -Path "env:EDPATH" -Value "$pwdpath\.gitlab\watcom\eddat"
         - Set-Item -Force -Path "env:WATCOM" -Value "$pwdpath\.gitlab\watcom"
         - Set-Item -Force -Path "env:WLINKTMP" -Value "."
-        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_test_external.cmake
+        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake
 
     interruptible: true

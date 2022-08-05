@@ -277,7 +277,7 @@ void cmCTestScriptHandler::CreateCMake()
 int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
 {
   // Reset the error flag so that the script is read in no matter what
-  cmSystemTools::ResetErrorOccuredFlag();
+  cmSystemTools::ResetErrorOccurredFlag();
 
   // if the argument has a , in it then it needs to be broken into the fist
   // argument (which is the script) and the second argument which will be
@@ -341,7 +341,7 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
   std::string systemFile =
     this->Makefile->GetModulesFile("CTestScriptMode.cmake");
   if (!this->Makefile->ReadListFile(systemFile) ||
-      cmSystemTools::GetErrorOccuredFlag()) {
+      cmSystemTools::GetErrorOccurredFlag()) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Error in read:" << systemFile << "\n");
     return 2;
@@ -356,10 +356,10 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
 
   // finally read in the script
   if (!this->Makefile->ReadListFile(script) ||
-      cmSystemTools::GetErrorOccuredFlag()) {
+      cmSystemTools::GetErrorOccurredFlag()) {
     // Reset the error flag so that it can run more than
     // one script with an error when you use ctest_run_script.
-    cmSystemTools::ResetErrorOccuredFlag();
+    cmSystemTools::ResetErrorOccurredFlag();
     return 2;
   }
 

@@ -11,6 +11,12 @@ FetchContent
 
   .. contents::
 
+.. note:: The :guide:`Using Dependencies Guide` provides a high-level
+  introduction to this general topic. It provides a broader overview of
+  where the ``FetchContent`` module fits into the bigger picture,
+  including its relationship to the :command:`find_package` command.
+  The guide is recommended pre-reading before moving on to the details below.
+
 Overview
 ^^^^^^^^
 
@@ -102,7 +108,12 @@ Commands
 
   .. code-block:: cmake
 
-    FetchContent_Declare(<name> <contentOptions>...)
+    FetchContent_Declare(
+      <name>
+      <contentOptions>...
+      [OVERRIDE_FIND_PACKAGE |
+       FIND_PACKAGE_ARGS args...]
+    )
 
   The ``FetchContent_Declare()`` function records the options that describe
   how to populate the specified content.  If such details have already
@@ -169,6 +180,55 @@ Commands
     they do for :command:`ExternalProject_Add`. Previously, these variables
     were ignored by the ``FetchContent`` module.
 
+  .. versionadded:: 3.24
+
+    ``FIND_PACKAGE_ARGS``
+      This option is for scenarios where the
+      :command:`FetchContent_MakeAvailable` command may first try a call to
+      :command:`find_package` to satisfy the dependency for ``<name>``.
+      By default, such a call would be simply ``find_package(<name>)``, but
+      ``FIND_PACKAGE_ARGS`` can be used to provide additional arguments to be
+      appended after the ``<name>``.  ``FIND_PACKAGE_ARGS`` can also be given
+      with nothing after it, which indicates that :command:`find_package` can
+      still be called if :variable:`FETCHCONTENT_TRY_FIND_PACKAGE_MODE` is
+      set to ``OPT_IN`` or is not set.
+
+      Everything after the ``FIND_PACKAGE_ARGS`` keyword is appended to the
+      :command:`find_package` call, so all other ``<contentOptions>`` must
+      come before the ``FIND_PACKAGE_ARGS`` keyword.  If the
+      :variable:`CMAKE_FIND_PACKAGE_TARGETS_GLOBAL` variable is set to true
+      at the time ``FetchContent_Declare()`` is called, a ``GLOBAL`` keyword
+      will be appended to the :command:`find_package` arguments if it was
+      not already specified.  It will also be appended if
+      ``FIND_PACKAGE_ARGS`` was not given, but
+      :variable:`FETCHCONTENT_TRY_FIND_PACKAGE_MODE` was set to ``ALWAYS``.
+
+      ``OVERRIDE_FIND_PACKAGE`` cannot be used when ``FIND_PACKAGE_ARGS`` is
+      given.
+
+      :ref:`dependency_providers` discusses another way that
+      :command:`FetchContent_MakeAvailable` calls can be redirected.
+      ``FIND_PACKAGE_ARGS`` is intended for project control, whereas
+      dependency providers allow users to override project behavior.
+
+    ``OVERRIDE_FIND_PACKAGE``
+      When a ``FetchContent_Declare(<name> ...)`` call includes this option,
+      subsequent calls to ``find_package(<name> ...)`` will ensure that
+      ``FetchContent_MakeAvailable(<name>)`` has been called, then use the
+      config package files in the :variable:`CMAKE_FIND_PACKAGE_REDIRECTS_DIR`
+      directory (which are usually created by ``FetchContent_MakeAvailable()``).
+      This effectively makes :command:`FetchContent_MakeAvailable` override
+      :command:`find_package` for the named dependency, allowing the former to
+      satisfy the package requirements of the latter.  ``FIND_PACKAGE_ARGS``
+      cannot be used when ``OVERRIDE_FIND_PACKAGE`` is given.
+
+      If a :ref:`dependency provider <dependency_providers>` has been set
+      and the project calls :command:`find_package` for the ``<name>``
+      dependency, ``OVERRIDE_FIND_PACKAGE`` will not prevent the provider
+      from seeing that call.  Dependency providers always have the opportunity
+      to intercept any direct call to :command:`find_package`, except if that
+      call contains the ``BYPASS_PROVIDER`` option.
+
 .. command:: FetchContent_MakeAvailable
 
   .. versionadded:: 3.14
@@ -177,9 +237,45 @@ Commands
 
     FetchContent_MakeAvailable(<name1> [<name2>...])
 
-  This command ensures that each of the named dependencies are populated and
-  potentially added to the build by the time it returns.  It iterates over
-  the list, and for each dependency, the following logic is applied:
+  This command ensures that each of the named dependencies are made available
+  to the project by the time it returns.  There must have been a call to
+  :command:`FetchContent_Declare` for each dependency, and the first such call
+  will control how that dependency will be made available, as described below.
+
+  If ``<lowercaseName>_SOURCE_DIR`` is not set:
+
+  * .. versionadded:: 3.24
+
+      If a :ref:`dependency provider <dependency_providers>` is set, call the
+      provider's command with ``FETCHCONTENT_MAKEAVAILABLE_SERIAL`` as the
+      first argument, followed by the arguments of the first call to
+      :command:`FetchContent_Declare` for ``<name>``.  If ``SOURCE_DIR`` or
+      ``BINARY_DIR`` were not part of the original declared arguments, they
+      will be added with their default values.
+      If :variable:`FETCHCONTENT_TRY_FIND_PACKAGE_MODE` was set to ``NEVER``
+      when the details were declared, any ``FIND_PACKAGE_ARGS`` will be
+      omitted.  The ``OVERRIDE_FIND_PACKAGE`` keyword is also always omitted.
+      If the provider fulfilled the request, ``FetchContent_MakeAvailable()``
+      will consider that dependency handled, skip the remaining steps below
+      and move on to the next dependency in the list.
+
+  * .. versionadded:: 3.24
+
+      If permitted, :command:`find_package(<name> [<args>...]) <find_package>`
+      will be called, where ``<args>...`` may be provided by the
+      ``FIND_PACKAGE_ARGS`` option in :command:`FetchContent_Declare`.
+      The value of the :variable:`FETCHCONTENT_TRY_FIND_PACKAGE_MODE` variable
+      at the time :command:`FetchContent_Declare` was called determines whether
+      ``FetchContent_MakeAvailable()`` can call :command:`find_package`.
+      If the :variable:`CMAKE_FIND_PACKAGE_TARGETS_GLOBAL` variable is set to
+      true when ``FetchContent_MakeAvailable()`` is called, it still affects
+      any imported targets created when that in turn calls
+      :command:`find_package`, even if that variable was false when the
+      corresponding details were declared.
+
+  If the dependency was not satisfied by a provider or a
+  :command:`find_package` call, ``FetchContent_MakeAvailable()`` then uses
+  the following logic to make the dependency available:
 
   * If the dependency has already been populated earlier in this run, set
     the ``<lowercaseName>_POPULATED``, ``<lowercaseName>_SOURCE_DIR`` and
@@ -193,6 +289,37 @@ Commands
     :variable:`FETCHCONTENT_SOURCE_DIR_<uppercaseName>` can be used to override
     the declared details and use content provided at the specified location
     instead.
+
+  * .. versionadded:: 3.24
+
+      Ensure the :variable:`CMAKE_FIND_PACKAGE_REDIRECTS_DIR` directory
+      contains a ``<lowercaseName>-config.cmake`` and a
+      ``<lowercaseName>-config-version.cmake`` file (or equivalently
+      ``<name>Config.cmake`` and ``<name>ConfigVersion.cmake``).
+      The directory that the :variable:`CMAKE_FIND_PACKAGE_REDIRECTS_DIR`
+      variable points to is cleared at the start of every CMake run.
+      If no config file exists when :command:`FetchContent_Populate` returns,
+      a minimal one will be written which :command:`includes <include>` any
+      ``<lowercaseName>-extra.cmake`` or ``<name>Extra.cmake`` file with the
+      ``OPTIONAL`` flag (so the files can be missing and won't generate a
+      warning).  Similarly, if no config version file exists, a very simple
+      one will be written which sets ``PACKAGE_VERSION_COMPATIBLE`` to true.
+      CMake cannot automatically determine an arbitrary dependency's version,
+      so it cannot set ``PACKAGE_VERSION`` or ``PACKAGE_VERSION_EXACT``.
+      When a dependency is pulled in via :command:`add_subdirectory` in the
+      next step, it may choose to overwrite the generated config version file
+      in :variable:`CMAKE_FIND_PACKAGE_REDIRECTS_DIR` with one that also sets
+      ``PACKAGE_VERSION``, and if appropriate, ``PACKAGE_VERSION_EXACT``.
+      The dependency may also write a ``<lowercaseName>-extra.cmake`` or
+      ``<name>Extra.cmake`` file to perform custom processing or define any
+      variables that their normal (installed) package config file would
+      otherwise usually define (many projects don't do any custom processing
+      or set any variables and therefore have no need to do this).
+      If required, the main project can write these files instead if the
+      dependency project doesn't do so.  This allows the main project to
+      add missing details from older dependencies that haven't or can't be
+      updated to support this functionality.
+      See `Integrating With find_package()`_ for examples.
 
   * If the top directory of the populated content contains a ``CMakeLists.txt``
     file, call :command:`add_subdirectory` to add it to the main build.
@@ -236,6 +363,18 @@ Commands
     FetchContent_Declare(uses_other ...)
     FetchContent_Declare(other ...)
     FetchContent_MakeAvailable(uses_other other)
+
+  Note that :variable:`CMAKE_VERIFY_INTERFACE_HEADER_SETS` is explicitly set
+  to false upon entry to ``FetchContent_MakeAvailable()``, and is restored to
+  its original value before the command returns.  Developers typically only
+  want to verify header sets from the main project, not those from any
+  dependencies.  This local manipulation of the
+  :variable:`CMAKE_VERIFY_INTERFACE_HEADER_SETS` variable provides that
+  intuitive behavior.  You can use variables like
+  :variable:`CMAKE_PROJECT_INCLUDE` or
+  :variable:`CMAKE_PROJECT_<PROJECT-NAME>_INCLUDE` to turn verification back
+  on for all or some dependencies.  You can also set the
+  :prop_tgt:`VERIFY_INTERFACE_HEADER_SETS` property of individual targets.
 
 .. command:: FetchContent_Populate
 
@@ -389,7 +528,7 @@ Commands
   When using saved content details, a call to
   :command:`FetchContent_MakeAvailable` or :command:`FetchContent_Populate`
   records information in global properties which can be queried at any time.
-  This information includes the source and binary directories associated with
+  This information may include the source and binary directories associated with
   the content and also whether or not the content population has been processed
   during the current configure run.
 
@@ -409,6 +548,8 @@ Commands
   set the same variables as a call to
   :command:`FetchContent_MakeAvailable(name) <FetchContent_MakeAvailable>` or
   :command:`FetchContent_Populate(name) <FetchContent_Populate>`.
+  Note that the ``SOURCE_DIR`` and ``BINARY_DIR`` values can be empty if the
+  call is fulfilled by a :ref:`dependency provider <dependency_providers>`.
 
   This command is rarely needed when using
   :command:`FetchContent_MakeAvailable`.  It is more commonly used as part of
@@ -432,13 +573,42 @@ Commands
       add_subdirectory(${depname_SOURCE_DIR} ${depname_BINARY_DIR})
     endif()
 
+.. command:: FetchContent_SetPopulated
+
+  .. versionadded:: 3.24
+
+  .. note::
+    This command should only be called by
+    :ref:`dependency providers <dependency_providers>`.  Calling it in any
+    other context is unsupported and future CMake versions may halt with a
+    fatal error in such cases.
+
+  .. code-block:: cmake
+
+    FetchContent_SetPopulated(
+      <name>
+      [SOURCE_DIR <srcDir>]
+      [BINARY_DIR <binDir>]
+    )
+
+  If a provider command fulfills a ``FETCHCONTENT_MAKEAVAILABLE_SERIAL``
+  request, it must call this function before returning.  The ``SOURCE_DIR``
+  and ``BINARY_DIR`` arguments can be used to specify the values that
+  :command:`FetchContent_GetProperties` should return for its corresponding
+  arguments.  Only provide ``SOURCE_DIR`` and ``BINARY_DIR`` if they have
+  the same meaning as if they had been populated by the built-in
+  :command:`FetchContent_MakeAvailable` implementation.
+
+
 Variables
 ^^^^^^^^^
 
 A number of cache variables can influence the behavior where details from a
 :command:`FetchContent_Declare` call are used to populate content.
-The variables are all intended for the developer to customize behavior and
-should not normally be set by the project.
+
+.. note::
+  All of these variables are intended for the developer to customize behavior.
+  They should not normally be set by the project.
 
 .. variable:: FETCHCONTENT_BASE_DIR
 
@@ -481,8 +651,53 @@ should not normally be set by the project.
   This can speed up the configure stage, but not as much as
   :variable:`FETCHCONTENT_FULLY_DISCONNECTED`.  It is ``OFF`` by default.
 
-In addition to the above cache variables, the following cache variables are
-also defined for each content name:
+.. variable:: FETCHCONTENT_TRY_FIND_PACKAGE_MODE
+
+  .. versionadded:: 3.24
+
+  This variable modifies the details that :command:`FetchContent_Declare`
+  records for a given dependency.  While it ultimately controls the behavior
+  of :command:`FetchContent_MakeAvailable`, it is the variable's value when
+  :command:`FetchContent_Declare` is called that gets used.  It makes no
+  difference what the variable is set to when
+  :command:`FetchContent_MakeAvailable` is called.  Since the variable should
+  only be set by the user and not by projects directly, it will typically have
+  the same value throughout anyway, so this distinction is not usually
+  noticeable.
+
+  ``FETCHCONTENT_TRY_FIND_PACKAGE_MODE`` ultimately controls whether
+  :command:`FetchContent_MakeAvailable` is allowed to call
+  :command:`find_package` to satisfy a dependency.  The variable can be set
+  to one of the following values:
+
+  ``OPT_IN``
+    :command:`FetchContent_MakeAvailable` will only call
+    :command:`find_package` if the :command:`FetchContent_Declare` call
+    included a ``FIND_PACKAGE_ARGS`` keyword.  This is also the default
+    behavior if ``FETCHCONTENT_TRY_FIND_PACKAGE_MODE`` is not set.
+
+  ``ALWAYS``
+    :command:`find_package` can be called by
+    :command:`FetchContent_MakeAvailable` regardless of whether the
+    :command:`FetchContent_Declare` call included a ``FIND_PACKAGE_ARGS``
+    keyword or not.  If no ``FIND_PACKAGE_ARGS`` keyword was given, the
+    behavior will be as though ``FIND_PACKAGE_ARGS`` had been provided,
+    with no additional arguments after it.
+
+  ``NEVER``
+    :command:`FetchContent_MakeAvailable` will not call
+    :command:`find_package`.  Any ``FIND_PACKAGE_ARGS`` given to the
+    :command:`FetchContent_Declare` call will be ignored.
+
+  As a special case, if the :variable:`FETCHCONTENT_SOURCE_DIR_<uppercaseName>`
+  variable has a non-empty value for a dependency, it is assumed that the
+  user is overriding all other methods of making that dependency available.
+  ``FETCHCONTENT_TRY_FIND_PACKAGE_MODE`` will have no effect on that
+  dependency and :command:`FetchContent_MakeAvailable` will not try to call
+  :command:`find_package` for it.
+
+In addition to the above, the following variables are also defined for each
+content name:
 
 .. variable:: FETCHCONTENT_SOURCE_DIR_<uppercaseName>
 
@@ -511,6 +726,9 @@ also defined for each content name:
 Examples
 ^^^^^^^^
 
+Typical Case
+""""""""""""
+
 This first fairly straightforward example ensures that some popular testing
 frameworks are available to the main build:
 
@@ -532,6 +750,135 @@ frameworks are available to the main build:
   # Catch2 will be available to the rest of the build
   FetchContent_MakeAvailable(googletest Catch2)
 
+.. _FetchContent-find_package-integration-examples:
+
+Integrating With find_package()
+"""""""""""""""""""""""""""""""
+
+For the previous example, if the user wanted to try to find ``googletest``
+and ``Catch2`` via :command:`find_package` first before trying to download
+and build them from source, they could set the
+:variable:`FETCHCONTENT_TRY_FIND_PACKAGE_MODE` variable to ``ALWAYS``.
+This would also affect any other calls to :command:`FetchContent_Declare`
+throughout the project, which might not be acceptable.  The behavior can be
+enabled for just these two dependencies instead by adding ``FIND_PACKAGE_ARGS``
+to the declared details and leaving
+:variable:`FETCHCONTENT_TRY_FIND_PACKAGE_MODE` unset, or set to ``OPT_IN``:
+
+.. code-block:: cmake
+
+  include(FetchContent)
+  FetchContent_Declare(
+    googletest
+    GIT_REPOSITORY https://github.com/google/googletest.git
+    GIT_TAG        703bd9caab50b139428cea1aaff9974ebee5742e # release-1.10.0
+    FIND_PACKAGE_ARGS NAMES gtest
+  )
+  FetchContent_Declare(
+    Catch2
+    GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+    GIT_TAG        de6fe184a9ac1a06895cdd1c9b437f0a0bdf14ad # v2.13.4
+    FIND_PACKAGE_ARGS
+  )
+
+  # This will try calling find_package() first for both dependencies
+  FetchContent_MakeAvailable(googletest Catch2)
+
+For ``Catch2``, no additional arguments to :command:`find_package` are needed,
+so no additional arguments are provided after the ``FIND_PACKAGE_ARGS``
+keyword.  For ``googletest``, its package is more commonly called ``gtest``,
+so arguments are added to support it being found by that name.
+
+If the user wanted to disable :command:`FetchContent_MakeAvailable` from
+calling :command:`find_package` for any dependency, even if it provided
+``FIND_PACKAGE_ARGS`` in its declared details, they could set
+:variable:`FETCHCONTENT_TRY_FIND_PACKAGE_MODE` to ``NEVER``.
+
+If the project wanted to indicate that these two dependencies should be
+downloaded and built from source and that :command:`find_package` calls
+should be redirected to use the built dependencies, the
+``OVERRIDE_FIND_PACKAGE`` option should be used when declaring the content
+details:
+
+.. code-block:: cmake
+
+  include(FetchContent)
+  FetchContent_Declare(
+    googletest
+    GIT_REPOSITORY https://github.com/google/googletest.git
+    GIT_TAG        703bd9caab50b139428cea1aaff9974ebee5742e # release-1.10.0
+    OVERRIDE_FIND_PACKAGE
+  )
+  FetchContent_Declare(
+    Catch2
+    GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+    GIT_TAG        de6fe184a9ac1a06895cdd1c9b437f0a0bdf14ad # v2.13.4
+    OVERRIDE_FIND_PACKAGE
+  )
+
+  # The following will automatically forward through to FetchContent_MakeAvailable()
+  find_package(googletest)
+  find_package(Catch2)
+
+CMake provides a FindGTest module which defines some variables that older
+projects may use instead of linking to the imported targets.  To support
+those cases, we can provide an extras file.  In keeping with the
+"first to define, wins" philosophy of ``FetchContent``, we only write out
+that file if something else hasn't already done so.
+
+.. code-block:: cmake
+
+  FetchContent_MakeAvailable(googletest)
+
+  if(NOT EXISTS ${CMAKE_FIND_PACKAGE_REDIRECTS_DIR}/googletest-extras.cmake AND
+     NOT EXISTS ${CMAKE_FIND_PACKAGE_REDIRECTS_DIR}/googletestExtras.cmake)
+    file(WRITE ${CMAKE_FIND_PACKAGE_REDIRECTS_DIR}/googletest-extras.cmake
+  [=[
+  if("${GTEST_LIBRARIES}" STREQUAL "" AND TARGET GTest::gtest)
+    set(GTEST_LIBRARIES GTest::gtest)
+  endif()
+  if("${GTEST_MAIN_LIBRARIES}" STREQUAL "" AND TARGET GTest::gtest_main)
+    set(GTEST_MAIN_LIBRARIES GTest::gtest_main)
+  endif()
+  if("${GTEST_BOTH_LIBRARIES}" STREQUAL "")
+    set(GTEST_BOTH_LIBRARIES ${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARIES})
+  endif()
+  ]=])
+  endif()
+
+Projects will also likely be using ``find_package(GTest)`` rather than
+``find_package(googletest)``, but it is possible to make use of the
+:variable:`CMAKE_FIND_PACKAGE_REDIRECTS_DIR` area to pull in the latter as
+a dependency of the former.  This is likely to be sufficient to satisfy
+a typical ``find_package(GTest)`` call.
+
+.. code-block:: cmake
+
+  FetchContent_MakeAvailable(googletest)
+
+  if(NOT EXISTS ${CMAKE_FIND_PACKAGE_REDIRECTS_DIR}/gtest-config.cmake AND
+     NOT EXISTS ${CMAKE_FIND_PACKAGE_REDIRECTS_DIR}/GTestConfig.cmake)
+    file(WRITE ${CMAKE_FIND_PACKAGE_REDIRECTS_DIR}/gtest-config.cmake
+  [=[
+  include(CMakeFindDependencyMacro)
+  find_dependency(googletest)
+  ]=])
+  endif()
+
+  if(NOT EXISTS ${CMAKE_FIND_PACKAGE_REDIRECTS_DIR}/gtest-config-version.cmake AND
+     NOT EXISTS ${CMAKE_FIND_PACKAGE_REDIRECTS_DIR}/GTestConfigVersion.cmake)
+    file(WRITE ${CMAKE_FIND_PACKAGE_REDIRECTS_DIR}/gtest-config-version.cmake
+  [=[
+  include(${CMAKE_FIND_PACKAGE_REDIRECTS_DIR}/googletest-config-version.cmake OPTIONAL)
+  if(NOT PACKAGE_VERSION_COMPATIBLE)
+    include(${CMAKE_FIND_PACKAGE_REDIRECTS_DIR}/googletestConfigVersion.cmake OPTIONAL)
+  endif()
+  ]=])
+  endif()
+
+Overriding Where To Find CMakeLists.txt
+"""""""""""""""""""""""""""""""""""""""
+
 If the sub-project's ``CMakeLists.txt`` file is not at the top level of its
 source tree, the ``SOURCE_SUBDIR`` option can be used to tell ``FetchContent``
 where to find it.  The following example shows how to use that option and
@@ -549,6 +896,9 @@ it into the main build:
   )
   set(protobuf_BUILD_TESTS OFF)
   FetchContent_MakeAvailable(protobuf)
+
+Complex Dependency Hierarchies
+""""""""""""""""""""""""""""""
 
 In more complex project hierarchies, the dependency relationships can be more
 complicated.  Consider a hierarchy where ``projA`` is the top level project and
@@ -647,6 +997,8 @@ A few key points should be noted in the above:
   child projects.  This saves repeating the same thing at each level of the
   project hierarchy unnecessarily.
 
+Populating Content Without Adding It To The Build
+"""""""""""""""""""""""""""""""""""""""""""""""""
 
 Projects don't always need to add the populated content to the build.
 Sometimes the project just wants to make the downloaded content available at
@@ -682,7 +1034,10 @@ named toolchain file relative to the build directory.  Because the tarball has
 already been downloaded and unpacked by then, the toolchain file will be in
 place, even the very first time that ``cmake`` is run in the build directory.
 
-Lastly, the following example demonstrates how one might download and unpack a
+Populating Content In CMake Script Mode
+"""""""""""""""""""""""""""""""""""""""
+
+This last example demonstrates how one might download and unpack a
 firmware tarball using CMake's :manual:`script mode <cmake(1)>`.  The call to
 :command:`FetchContent_Populate` specifies all the content details and the
 unpacked firmware will be placed in a ``firmware`` directory below the
@@ -722,19 +1077,89 @@ current working directory.
 function(__FetchContent_declareDetails contentName)
 
   string(TOLOWER ${contentName} contentNameLower)
-  set(propertyName "_FetchContent_${contentNameLower}_savedDetails")
-  get_property(alreadyDefined GLOBAL PROPERTY ${propertyName} DEFINED)
-  if(NOT alreadyDefined)
-    define_property(GLOBAL PROPERTY ${propertyName}
-      BRIEF_DOCS "Internal implementation detail of FetchContent_Populate()"
-      FULL_DOCS  "Details used by FetchContent_Populate() for ${contentName}"
+  set(savedDetailsPropertyName "_FetchContent_${contentNameLower}_savedDetails")
+  get_property(alreadyDefined GLOBAL PROPERTY ${savedDetailsPropertyName} DEFINED)
+  if(alreadyDefined)
+    return()
+  endif()
+
+  if("${FETCHCONTENT_TRY_FIND_PACKAGE_MODE}" STREQUAL "ALWAYS")
+    set(__tryFindPackage TRUE)
+    set(__tryFindPackageAllowed TRUE)
+  elseif("${FETCHCONTENT_TRY_FIND_PACKAGE_MODE}" STREQUAL "NEVER")
+    set(__tryFindPackage FALSE)
+    set(__tryFindPackageAllowed FALSE)
+  elseif("${FETCHCONTENT_TRY_FIND_PACKAGE_MODE}" STREQUAL "OPT_IN" OR
+         NOT DEFINED FETCHCONTENT_TRY_FIND_PACKAGE_MODE)
+    set(__tryFindPackage FALSE)
+    set(__tryFindPackageAllowed TRUE)
+  else()
+    message(FATAL_ERROR
+      "Unsupported value for FETCHCONTENT_TRY_FIND_PACKAGE_MODE: "
+      "${FETCHCONTENT_TRY_FIND_PACKAGE_MODE}"
     )
-    set(__cmdArgs)
-    foreach(__item IN LISTS ARGN)
-      string(APPEND __cmdArgs " [==[${__item}]==]")
-    endforeach()
+  endif()
+
+  set(__cmdArgs)
+  set(__findPackageArgs)
+  set(__sawQuietKeyword NO)
+  set(__sawGlobalKeyword NO)
+  foreach(__item IN LISTS ARGN)
+    if(DEFINED __findPackageArgs)
+      # All remaining args are for find_package()
+      string(APPEND __findPackageArgs " [==[${__item}]==]")
+      if(__item STREQUAL "QUIET")
+        set(__sawQuietKeyword YES)
+      elseif(__item STREQUAL "GLOBAL")
+        set(__sawGlobalKeyword YES)
+      endif()
+      continue()
+    endif()
+
+    # Still processing non-find_package() args
+    if(__item STREQUAL "FIND_PACKAGE_ARGS")
+      if(__tryFindPackageAllowed)
+        set(__tryFindPackage TRUE)
+      endif()
+      # All arguments after this keyword are for find_package(). Define the
+      # variable but with an empty value initially. This allows us to check
+      # at the start of the loop whether to store remaining items in this
+      # variable or not. Note that there could be no more args, which is still
+      # a valid case because we automatically provide ${contentName} as the
+      # package name and there may not need to be any further arguments.
+      set(__findPackageArgs "")
+      continue()  # Don't store this item
+    elseif(__item STREQUAL "OVERRIDE_FIND_PACKAGE")
+      set(__tryFindPackageAllowed FALSE)
+      # Define a separate dedicated property for find_package() to check
+      # in its implementation. This will be a placeholder until FetchContent
+      # actually does the population. After that, we will have created a
+      # stand-in config file that find_package() will pick up instead.
+      set(propertyName "_FetchContent_${contentNameLower}_override_find_package")
+      define_property(GLOBAL PROPERTY ${propertyName})
+      set_property(GLOBAL PROPERTY ${propertyName} TRUE)
+    endif()
+
+    string(APPEND __cmdArgs " [==[${__item}]==]")
+  endforeach()
+
+  define_property(GLOBAL PROPERTY ${savedDetailsPropertyName})
+  cmake_language(EVAL CODE
+    "set_property(GLOBAL PROPERTY ${savedDetailsPropertyName} ${__cmdArgs})"
+  )
+
+  if(__tryFindPackage AND __tryFindPackageAllowed)
+    set(propertyName "_FetchContent_${contentNameLower}_find_package_args")
+    define_property(GLOBAL PROPERTY ${propertyName})
+    if(NOT __sawQuietKeyword)
+      list(INSERT __findPackageArgs 0 QUIET)
+    endif()
+    if(CMAKE_FIND_PACKAGE_TARGETS_GLOBAL AND NOT __sawGlobalKeyword)
+      list(APPEND __findPackageArgs GLOBAL)
+    endif()
     cmake_language(EVAL CODE
-      "set_property(GLOBAL PROPERTY ${propertyName} ${__cmdArgs})")
+      "set_property(GLOBAL PROPERTY ${propertyName} ${__findPackageArgs})"
+    )
   endif()
 
 endfunction()
@@ -763,15 +1188,42 @@ endfunction()
 # SOURCE_DIR and BUILD_DIR.
 function(FetchContent_Declare contentName)
 
-  set(options "")
-  set(oneValueArgs SVN_REPOSITORY)
-  set(multiValueArgs "")
+  # Always check this even if we won't save these details.
+  # This helps projects catch errors earlier.
+  # Avoid using if(... IN_LIST ...) so we don't have to alter policy settings
+  list(FIND ARGN OVERRIDE_FIND_PACKAGE index_OVERRIDE_FIND_PACKAGE)
+  list(FIND ARGN FIND_PACKAGE_ARGS index_FIND_PACKAGE_ARGS)
+  if(index_OVERRIDE_FIND_PACKAGE GREATER_EQUAL 0 AND
+     index_FIND_PACKAGE_ARGS GREATER_EQUAL 0)
+    message(FATAL_ERROR
+      "Cannot specify both OVERRIDE_FIND_PACKAGE and FIND_PACKAGE_ARGS "
+      "when declaring details for ${contentName}"
+    )
+  endif()
 
-  cmake_parse_arguments(PARSE_ARGV 1 ARG
-    "${options}" "${oneValueArgs}" "${multiValueArgs}")
+  # Because we are only looking for a subset of the supported keywords, we
+  # cannot check for multi-value arguments with this method. We will have to
+  # handle the URL keyword differently.
+  set(oneValueArgs
+    SVN_REPOSITORY
+    DOWNLOAD_NO_EXTRACT
+    DOWNLOAD_EXTRACT_TIMESTAMP
+    BINARY_DIR
+    SOURCE_DIR
+  )
 
-  unset(srcDirSuffix)
-  unset(svnRepoArgs)
+  cmake_parse_arguments(PARSE_ARGV 1 ARG "" "${oneValueArgs}" "")
+
+  string(TOLOWER ${contentName} contentNameLower)
+
+  if(NOT ARG_BINARY_DIR)
+    set(ARG_BINARY_DIR "${FETCHCONTENT_BASE_DIR}/${contentNameLower}-build")
+  endif()
+
+  if(NOT ARG_SOURCE_DIR)
+    set(ARG_SOURCE_DIR "${FETCHCONTENT_BASE_DIR}/${contentNameLower}-src")
+  endif()
+
   if(ARG_SVN_REPOSITORY)
     # Add a hash of the svn repository URL to the source dir. This works
     # around the problem where if the URL changes, the download would
@@ -781,25 +1233,69 @@ function(FetchContent_Declare contentName)
     # problem on windows due to path length limits).
     string(SHA1 urlSHA ${ARG_SVN_REPOSITORY})
     string(SUBSTRING ${urlSHA} 0 7 urlSHA)
-    set(srcDirSuffix "-${urlSHA}")
-    set(svnRepoArgs  SVN_REPOSITORY ${ARG_SVN_REPOSITORY})
+    string(APPEND ARG_SOURCE_DIR "-${urlSHA}")
   endif()
 
-  string(TOLOWER ${contentName} contentNameLower)
+  # The ExternalProject_Add() call in the sub-build won't see the CMP0135
+  # policy setting of our caller. Work out if that policy will be needed and
+  # explicitly set the relevant option if not already provided. The condition
+  # here is essentially an abbreviated version of the logic in
+  # ExternalProject's _ep_add_download_command() function.
+  if(NOT ARG_DOWNLOAD_NO_EXTRACT AND
+     NOT DEFINED ARG_DOWNLOAD_EXTRACT_TIMESTAMP)
+    list(FIND ARGN URL urlIndex)
+    if(urlIndex GREATER_EQUAL 0)
+      math(EXPR urlIndex "${urlIndex} + 1")
+      list(LENGTH ARGN numArgs)
+      if(urlIndex GREATER_EQUAL numArgs)
+        message(FATAL_ERROR
+          "URL keyword needs to be followed by at least one URL"
+        )
+      endif()
+      # If we have multiple URLs, none of them are allowed to be local paths.
+      # Therefore, we can test just the first URL, and if it is non-local, so
+      # will be the others if there are more.
+      list(GET ARGN ${urlIndex} firstUrl)
+      if(NOT IS_DIRECTORY "${firstUrl}")
+        cmake_policy(GET CMP0135 _FETCHCONTENT_CMP0135
+          PARENT_SCOPE # undocumented, do not use outside of CMake
+        )
+        if(_FETCHCONTENT_CMP0135 STREQUAL "")
+          message(AUTHOR_WARNING
+            "The DOWNLOAD_EXTRACT_TIMESTAMP option was not given and policy "
+            "CMP0135 is not set. The policy's OLD behavior will be used. "
+            "When using a URL download, the timestamps of extracted files "
+            "should preferably be that of the time of extraction, otherwise "
+            "code that depends on the extracted contents might not be "
+            "rebuilt if the URL changes. The OLD behavior preserves the "
+            "timestamps from the archive instead, but this is usually not "
+            "what you want. Update your project to the NEW behavior or "
+            "specify the DOWNLOAD_EXTRACT_TIMESTAMP option with a value of "
+            "true to avoid this robustness issue."
+          )
+          set(ARG_DOWNLOAD_EXTRACT_TIMESTAMP TRUE)
+        elseif(_FETCHCONTENT_CMP0135 STREQUAL "NEW")
+          set(ARG_DOWNLOAD_EXTRACT_TIMESTAMP FALSE)
+        else()
+          set(ARG_DOWNLOAD_EXTRACT_TIMESTAMP TRUE)
+        endif()
+      endif()
+    endif()
+  endif()
+
+  # Add back in the keyword args we pulled out and potentially tweaked/added
+  foreach(key IN LISTS oneValueArgs)
+    if(DEFINED ARG_${key})
+      list(PREPEND ARG_UNPARSED_ARGUMENTS ${key} "${ARG_${key}}")
+    endif()
+  endforeach()
 
   set(__argsQuoted)
   foreach(__item IN LISTS ARG_UNPARSED_ARGUMENTS)
     string(APPEND __argsQuoted " [==[${__item}]==]")
   endforeach()
-  cmake_language(EVAL CODE "
-    __FetchContent_declareDetails(
-      ${contentNameLower}
-      SOURCE_DIR \"${FETCHCONTENT_BASE_DIR}/${contentNameLower}-src${srcDirSuffix}\"
-      BINARY_DIR \"${FETCHCONTENT_BASE_DIR}/${contentNameLower}-build\"
-      \${svnRepoArgs}
-      # List these last so they can override things we set above
-      ${__argsQuoted}
-    )"
+  cmake_language(EVAL CODE
+    "__FetchContent_declareDetails(${contentNameLower} ${__argsQuoted})"
   )
 
 endfunction()
@@ -810,35 +1306,43 @@ endfunction()
 # The setter also records the source and binary dirs used.
 #=======================================================================
 
-# Internal use, projects must not call this directly. It is
-# intended for use by the FetchContent_Populate() function to
-# record when FetchContent_Populate() is called for a particular
-# content name.
-function(__FetchContent_setPopulated contentName sourceDir binaryDir)
+# Semi-internal use. Projects must not call this directly. Dependency
+# providers must call it if they satisfy a request made with the
+# FETCHCONTENT_MAKEAVAILABLE_SERIAL method (that is the only permitted
+# place to call it outside of the FetchContent module).
+function(FetchContent_SetPopulated contentName)
+
+  cmake_parse_arguments(PARSE_ARGV 1 arg
+    ""
+    "SOURCE_DIR;BINARY_DIR"
+    ""
+  )
+  if(NOT "${arg_UNPARSED_ARGUMENTS}" STREQUAL "")
+    message(FATAL_ERROR "Unsupported arguments: ${arg_UNPARSED_ARGUMENTS}")
+  endif()
 
   string(TOLOWER ${contentName} contentNameLower)
   set(prefix "_FetchContent_${contentNameLower}")
 
   set(propertyName "${prefix}_sourceDir")
-  define_property(GLOBAL PROPERTY ${propertyName}
-    BRIEF_DOCS "Internal implementation detail of FetchContent_Populate()"
-    FULL_DOCS  "Details used by FetchContent_Populate() for ${contentName}"
-  )
-  set_property(GLOBAL PROPERTY ${propertyName} ${sourceDir})
+  define_property(GLOBAL PROPERTY ${propertyName})
+  if("${arg_SOURCE_DIR}" STREQUAL "")
+    # Don't discard a previously provided SOURCE_DIR
+    get_property(arg_SOURCE_DIR GLOBAL PROPERTY ${propertyName})
+  endif()
+  set_property(GLOBAL PROPERTY ${propertyName} "${arg_SOURCE_DIR}")
 
   set(propertyName "${prefix}_binaryDir")
-  define_property(GLOBAL PROPERTY ${propertyName}
-    BRIEF_DOCS "Internal implementation detail of FetchContent_Populate()"
-    FULL_DOCS  "Details used by FetchContent_Populate() for ${contentName}"
-  )
-  set_property(GLOBAL PROPERTY ${propertyName} ${binaryDir})
+  define_property(GLOBAL PROPERTY ${propertyName})
+  if("${arg_BINARY_DIR}" STREQUAL "")
+    # Don't discard a previously provided BINARY_DIR
+    get_property(arg_BINARY_DIR GLOBAL PROPERTY ${propertyName})
+  endif()
+  set_property(GLOBAL PROPERTY ${propertyName} "${arg_BINARY_DIR}")
 
   set(propertyName "${prefix}_populated")
-  define_property(GLOBAL PROPERTY ${propertyName}
-    BRIEF_DOCS "Internal implementation detail of FetchContent_Populate()"
-    FULL_DOCS  "Details used by FetchContent_Populate() for ${contentName}"
-  )
-  set_property(GLOBAL PROPERTY ${propertyName} True)
+  define_property(GLOBAL PROPERTY ${propertyName})
+  set_property(GLOBAL PROPERTY ${propertyName} TRUE)
 
 endfunction()
 
@@ -1016,6 +1520,14 @@ ExternalProject_Add_Step(${contentName}-populate copyfile
       list(APPEND subCMakeOpts "-DCMAKE_MAKE_PROGRAM:FILEPATH=${CMAKE_MAKE_PROGRAM}")
     endif()
 
+    # Override the sub-build's configuration types for multi-config generators.
+    # This ensures we are not affected by any custom setting from the project
+    # and can always request a known configuration further below.
+    get_property(is_multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+    if(is_multi_config)
+      list(APPEND subCMakeOpts "-DCMAKE_CONFIGURATION_TYPES:STRING=Debug")
+    endif()
+
   else()
     # Likely we've been invoked via CMake's script mode where no
     # generator is set (and hence CMAKE_MAKE_PROGRAM could not be
@@ -1060,7 +1572,8 @@ set_property(GLOBAL PROPERTY _CMAKE_FindGit_GIT_EXECUTABLE_VERSION
   # If we've already previously done these steps, they will not cause
   # anything to be updated, so extra rebuilds of the project won't occur.
   # Make sure to pass through CMAKE_MAKE_PROGRAM in case the main project
-  # has this set to something not findable on the PATH.
+  # has this set to something not findable on the PATH. We also ensured above
+  # that the Debug config will be defined for multi-config generators.
   configure_file("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/FetchContent/CMakeLists.cmake.in"
                  "${ARG_SUBBUILD_DIR}/CMakeLists.txt")
   execute_process(
@@ -1076,7 +1589,7 @@ set_property(GLOBAL PROPERTY _CMAKE_FindGit_GIT_EXECUTABLE_VERSION
     message(FATAL_ERROR "CMake step for ${contentName} failed: ${result}")
   endif()
   execute_process(
-    COMMAND ${CMAKE_COMMAND} --build .
+    COMMAND ${CMAKE_COMMAND} --build . --config Debug
     RESULT_VARIABLE result
     ${outputOptions}
     WORKING_DIRECTORY "${ARG_SUBBUILD_DIR}"
@@ -1134,7 +1647,16 @@ function(FetchContent_Populate contentName)
   # populated this content before in case the caller forgot to check.
   FetchContent_GetProperties(${contentName})
   if(${contentNameLower}_POPULATED)
-    message(FATAL_ERROR "Content ${contentName} already populated in ${${contentNameLower}_SOURCE_DIR}")
+    if("${${contentNameLower}_SOURCE_DIR}" STREQUAL "")
+      message(FATAL_ERROR
+        "Content ${contentName} already populated by find_package() or a "
+        "dependency provider"
+      )
+    else()
+      message(FATAL_ERROR
+        "Content ${contentName} already populated in ${${contentNameLower}_SOURCE_DIR}"
+      )
+    endif()
   endif()
 
   __FetchContent_getSavedDetails(${contentName} contentDetails)
@@ -1212,7 +1734,9 @@ function(FetchContent_Populate contentName)
 
     set(__detailsQuoted)
     foreach(__item IN LISTS contentDetails)
-      string(APPEND __detailsQuoted " [==[${__item}]==]")
+      if(NOT __item STREQUAL "OVERRIDE_FIND_PACKAGE")
+        string(APPEND __detailsQuoted " [==[${__item}]==]")
+      endif()
     endforeach()
     cmake_language(EVAL CODE "
       __FetchContent_directPopulate(
@@ -1230,10 +1754,10 @@ function(FetchContent_Populate contentName)
     )
   endif()
 
-  __FetchContent_setPopulated(
+  FetchContent_SetPopulated(
     ${contentName}
-    ${${contentNameLower}_SOURCE_DIR}
-    ${${contentNameLower}_BINARY_DIR}
+    SOURCE_DIR "${${contentNameLower}_SOURCE_DIR}"
+    BINARY_DIR "${${contentNameLower}_BINARY_DIR}"
   )
 
   # Pass variables back to the caller. The variables passed back here
@@ -1245,6 +1769,55 @@ function(FetchContent_Populate contentName)
 
 endfunction()
 
+function(__FetchContent_setupFindPackageRedirection contentName)
+
+  __FetchContent_getSavedDetails(${contentName} contentDetails)
+
+  string(TOLOWER ${contentName} contentNameLower)
+  get_property(wantFindPackage GLOBAL PROPERTY
+    _FetchContent_${contentNameLower}_find_package_args
+    DEFINED
+  )
+
+  # Avoid using if(... IN_LIST ...) so we don't have to alter policy settings
+  list(FIND contentDetails OVERRIDE_FIND_PACKAGE indexResult)
+  if(NOT wantFindPackage AND indexResult EQUAL -1)
+    # No find_package() redirection allowed
+    return()
+  endif()
+
+  # We write out dep-config.cmake and dep-config-version.cmake file name
+  # forms here because they are forced to lowercase. FetchContent
+  # dependency names are case-insensitive, but find_package() config files
+  # are only case-insensitive for the -config and -config-version forms,
+  # not the Config and ConfigVersion forms.
+  set(inFileDir ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/FetchContent)
+  set(configFilePrefix1 "${CMAKE_FIND_PACKAGE_REDIRECTS_DIR}/${contentName}Config")
+  set(configFilePrefix2 "${CMAKE_FIND_PACKAGE_REDIRECTS_DIR}/${contentNameLower}-config")
+  if(NOT EXISTS "${configFilePrefix1}.cmake" AND
+    NOT EXISTS "${configFilePrefix2}.cmake")
+    configure_file(${inFileDir}/package-config.cmake.in
+      "${configFilePrefix2}.cmake" @ONLY
+    )
+  endif()
+  if(NOT EXISTS "${configFilePrefix1}Version.cmake" AND
+    NOT EXISTS "${configFilePrefix2}-version.cmake")
+    configure_file(${inFileDir}/package-config-version.cmake.in
+      "${configFilePrefix2}-version.cmake" @ONLY
+    )
+  endif()
+
+  # Now that we've created the redirected package config files, prevent
+  # find_package() from delegating to FetchContent and let it find these
+  # config files through its normal processing.
+  set(propertyName "${prefix}_override_find_package")
+  set(GLOBAL PROPERTY ${propertyName} FALSE)
+  set(${contentName}_DIR "${CMAKE_FIND_PACKAGE_REDIRECTS_DIR}"
+    CACHE INTERNAL "Redirected by FetchContent"
+  )
+
+endfunction()
+
 # Arguments are assumed to be the names of dependencies that have been
 # declared previously and should be populated. It is not an error if
 # any of them have already been populated (they will just be skipped in
@@ -1253,11 +1826,134 @@ endfunction()
 # calls will be available to the caller.
 macro(FetchContent_MakeAvailable)
 
+  # We must append an item, even if the variable is unset, so prefix its value.
+  # We will strip that prefix when we pop the value at the end of the macro.
+  list(APPEND __cmake_fcCurrentVarsStack
+    "__fcprefix__${CMAKE_VERIFY_INTERFACE_HEADER_SETS}"
+  )
+  set(CMAKE_VERIFY_INTERFACE_HEADER_SETS FALSE)
+
+  get_property(__cmake_providerCommand GLOBAL PROPERTY
+    __FETCHCONTENT_MAKEAVAILABLE_SERIAL_PROVIDER
+  )
   foreach(__cmake_contentName IN ITEMS ${ARGV})
     string(TOLOWER ${__cmake_contentName} __cmake_contentNameLower)
+
+    # If user specified FETCHCONTENT_SOURCE_DIR_... for this dependency, that
+    # overrides everything else and we shouldn't try to use find_package() or
+    # a dependency provider.
+    string(TOUPPER ${__cmake_contentName} __cmake_contentNameUpper)
+    if("${FETCHCONTENT_SOURCE_DIR_${__cmake_contentNameUpper}}" STREQUAL "")
+      # Dependency provider gets first opportunity, but prevent infinite
+      # recursion if we are called again for the same thing
+      if(NOT "${__cmake_providerCommand}" STREQUAL "" AND
+        NOT DEFINED __cmake_fcProvider_${__cmake_contentNameLower})
+        message(VERBOSE
+          "Trying FETCHCONTENT_MAKEAVAILABLE_SERIAL dependency provider for "
+          "${__cmake_contentName}"
+        )
+        # It's still valid if there are no saved details. The project may have
+        # been written to assume a dependency provider is always set and will
+        # provide dependencies without having any declared details for them.
+        __FetchContent_getSavedDetails(${__cmake_contentName} __cmake_contentDetails)
+        set(__cmake_providerArgs
+          "FETCHCONTENT_MAKEAVAILABLE_SERIAL"
+          "${__cmake_contentName}"
+        )
+        # Empty arguments must be preserved because of things like
+        # GIT_SUBMODULES (see CMP0097)
+        foreach(__cmake_item IN LISTS __cmake_contentDetails)
+          string(APPEND __cmake_providerArgs " [==[${__cmake_item}]==]")
+        endforeach()
+
+        # This property might be defined but empty. As long as it is defined,
+        # find_package() can be called.
+        get_property(__cmake_addfpargs GLOBAL PROPERTY
+          _FetchContent_${contentNameLower}_find_package_args
+          DEFINED
+        )
+        if(__cmake_addfpargs)
+          get_property(__cmake_fpargs GLOBAL PROPERTY
+            _FetchContent_${contentNameLower}_find_package_args
+          )
+          string(APPEND __cmake_providerArgs " FIND_PACKAGE_ARGS")
+          foreach(__cmake_item IN LISTS __cmake_fpargs)
+            string(APPEND __cmake_providerArgs " [==[${__cmake_item}]==]")
+          endforeach()
+        endif()
+
+        # Calling the provider could lead to FetchContent_MakeAvailable() being
+        # called for a nested dependency. That nested call may occur in the
+        # current variable scope. We have to save and restore the variables we
+        # need preserved.
+        list(APPEND __cmake_fcCurrentVarsStack
+          ${__cmake_contentName}
+          ${__cmake_contentNameLower}
+        )
+
+        set(__cmake_fcProvider_${__cmake_contentNameLower} YES)
+        cmake_language(EVAL CODE "${__cmake_providerCommand}(${__cmake_providerArgs})")
+        unset(__cmake_fcProvider_${__cmake_contentNameLower})
+
+        list(POP_BACK __cmake_fcCurrentVarsStack
+          __cmake_contentNameLower
+          __cmake_contentName
+        )
+
+        unset(__cmake_providerArgs)
+        unset(__cmake_addfpargs)
+        unset(__cmake_fpargs)
+        unset(__cmake_item)
+        unset(__cmake_contentDetails)
+
+        FetchContent_GetProperties(${__cmake_contentName})
+        if(${__cmake_contentNameLower}_POPULATED)
+          continue()
+        endif()
+      endif()
+
+      # Check if we've been asked to try find_package() first, even if we
+      # have already populated this dependency. If we previously tried to
+      # use find_package() for this and it succeeded, those things might
+      # no longer be in scope, so we have to do it again.
+      get_property(__cmake_haveFpArgs GLOBAL PROPERTY
+        _FetchContent_${__cmake_contentNameLower}_find_package_args DEFINED
+      )
+      if(__cmake_haveFpArgs)
+        unset(__cmake_haveFpArgs)
+        message(VERBOSE "Trying find_package(${__cmake_contentName} ...) before FetchContent")
+        get_property(__cmake_fpArgs GLOBAL PROPERTY
+          _FetchContent_${__cmake_contentNameLower}_find_package_args
+        )
+
+        # This call could lead to FetchContent_MakeAvailable() being called for
+        # a nested dependency and it may occur in the current variable scope.
+        # We have to save/restore the variables we need to preserve.
+        list(APPEND __cmake_fcCurrentNameStack
+          ${__cmake_contentName}
+          ${__cmake_contentNameLower}
+        )
+        find_package(${__cmake_contentName} ${__cmake_fpArgs})
+        list(POP_BACK __cmake_fcCurrentNameStack
+          __cmake_contentNameLower
+          __cmake_contentName
+        )
+        unset(__cmake_fpArgs)
+
+        if(${__cmake_contentName}_FOUND)
+          FetchContent_SetPopulated(${__cmake_contentName})
+          FetchContent_GetProperties(${__cmake_contentName})
+          continue()
+        endif()
+      endif()
+    else()
+      unset(__cmake_haveFpArgs)
+    endif()
+
     FetchContent_GetProperties(${__cmake_contentName})
     if(NOT ${__cmake_contentNameLower}_POPULATED)
       FetchContent_Populate(${__cmake_contentName})
+      __FetchContent_setupFindPackageRedirection(${__cmake_contentName})
 
       # Only try to call add_subdirectory() if the populated content
       # can be treated that way. Protecting the call with the check
@@ -1283,13 +1979,23 @@ macro(FetchContent_MakeAvailable)
       endif()
 
       unset(__cmake_srcdir)
+      unset(__cmake_contentDetails)
+      unset(__cmake_arg_SOURCE_SUBDIR)
     endif()
   endforeach()
+
+  # Prefix will be "__fcprefix__"
+  list(POP_BACK __cmake_fcCurrentVarsStack __cmake_original_verify_setting)
+  string(SUBSTRING "${__cmake_original_verify_setting}"
+    12 -1 __cmake_original_verify_setting
+  )
+  set(CMAKE_VERIFY_INTERFACE_HEADER_SETS ${__cmake_original_verify_setting})
 
   # clear local variables to prevent leaking into the caller's scope
   unset(__cmake_contentName)
   unset(__cmake_contentNameLower)
-  unset(__cmake_contentDetails)
-  unset(__cmake_arg_SOURCE_SUBDIR)
+  unset(__cmake_contentNameUpper)
+  unset(__cmake_providerCommand)
+  unset(__cmake_original_verify_setting)
 
 endmacro()

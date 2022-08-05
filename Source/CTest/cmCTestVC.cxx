@@ -66,7 +66,7 @@ bool cmCTestVC::InitialCheckout(const std::string& command)
   this->Log << "--- Begin Initial Checkout ---\n";
   OutputLogger out(this->Log, "co-out> ");
   OutputLogger err(this->Log, "co-err> ");
-  bool result = this->RunChild(&vc_co[0], &out, &err, parent.c_str());
+  bool result = this->RunChild(vc_co.data(), &out, &err, parent.c_str());
   this->Log << "--- End Initial Checkout ---\n";
   if (!result) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,

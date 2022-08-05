@@ -13,3 +13,6 @@ build directory, and if not found, relative to the source directory.
 
 This is initialized by the :envvar:`CMAKE_TOOLCHAIN_FILE` environment
 variable if it is set when a new build tree is first created.
+
+See the :variable:`CMAKE_PROJECT_TOP_LEVEL_INCLUDES` variable for setting
+other things not directly related to the toolchain.

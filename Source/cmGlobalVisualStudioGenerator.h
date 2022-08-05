@@ -103,6 +103,12 @@ public:
   // return true if target is fortran only
   bool TargetIsFortranOnly(const cmGeneratorTarget* gt);
 
+  // return true if target should be included in solution.
+  virtual bool IsInSolution(const cmGeneratorTarget* gt) const;
+
+  // return true if project dependency should be included in solution.
+  virtual bool IsDepInSolution(const std::string& targetName) const;
+
   /** Get the top-level registry key for this VS version.  */
   std::string GetRegistryBase();
 

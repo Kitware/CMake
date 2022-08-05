@@ -84,6 +84,18 @@
       "name": "cmake-@version@-windows-x86_64.zip"
     },
     {
+      "os": ["windows", "Windows"],
+      "architecture": ["arm64"],
+      "class": "installer",
+      "name": "cmake-@version@-windows-arm64.msi"
+    },
+    {
+      "os": ["windows", "Windows"],
+      "architecture": ["arm64"],
+      "class": "archive",
+      "name": "cmake-@version@-windows-arm64.zip"
+    },
+    {
       "os": ["source"],
       "architecture": [],
       "class": "archive",

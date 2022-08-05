@@ -20,6 +20,7 @@
 namespace {
 using ReadFileResult = cmCMakePresetsGraph::ReadFileResult;
 using BuildPreset = cmCMakePresetsGraph::BuildPreset;
+using JSONHelperBuilder = cmJSONHelperBuilder<ReadFileResult>;
 
 ReadFileResult PackageResolveModeHelper(cm::optional<PackageResolveMode>& out,
                                         const Json::Value* value)
@@ -53,8 +54,8 @@ std::function<ReadFileResult(BuildPreset&, const Json::Value*)> const
 };
 
 auto const BuildPresetHelper =
-  cmJSONObjectHelper<BuildPreset, ReadFileResult>(
-    ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESET, false)
+  JSONHelperBuilder::Object<BuildPreset>(ReadFileResult::READ_OK,
+                                         ReadFileResult::INVALID_PRESET, false)
     .Bind("name"_s, &BuildPreset::Name,
           cmCMakePresetsGraphInternal::PresetStringHelper)
     .Bind("inherits"_s, &BuildPreset::Inherits,
@@ -99,7 +100,7 @@ namespace cmCMakePresetsGraphInternal {
 ReadFileResult BuildPresetsHelper(std::vector<BuildPreset>& out,
                                   const Json::Value* value)
 {
-  static auto const helper = cmJSONVectorHelper<BuildPreset, ReadFileResult>(
+  static auto const helper = JSONHelperBuilder::Vector<BuildPreset>(
     ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESETS,
     BuildPresetHelper);
 

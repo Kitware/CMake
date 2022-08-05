@@ -71,7 +71,14 @@ struct cmGeneratorExpressionDAGChecker
   bool EvaluatingLinkExpression() const;
   bool EvaluatingLinkOptionsExpression() const;
 
-  bool EvaluatingLinkLibraries(cmGeneratorTarget const* tgt = nullptr) const;
+  enum class ForGenex
+  {
+    ANY,
+    LINK_LIBRARY,
+    LINK_GROUP
+  };
+  bool EvaluatingLinkLibraries(cmGeneratorTarget const* tgt = nullptr,
+                               ForGenex genex = ForGenex::ANY) const;
 
 #define DECLARE_TRANSITIVE_PROPERTY_METHOD(METHOD) bool METHOD() const;
 

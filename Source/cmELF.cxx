@@ -83,7 +83,6 @@ public:
     : External(external)
     , Stream(std::move(fin))
     , ByteOrder(order)
-    , ELFType(cmELF::FileTypeInvalid)
   {
 // In most cases the processor-specific byte order will match that
 // of the target execution environment.  If we choose wrong here
@@ -150,7 +149,7 @@ protected:
   ByteOrderType ByteOrder;
 
   // The ELF file type.
-  cmELF::FileType ELFType;
+  cmELF::FileType ELFType = cmELF::FileTypeInvalid;
 
   // The ELF architecture.
   std::uint16_t Machine;

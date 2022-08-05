@@ -277,7 +277,8 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
       static_cast<size_t>(
         this->TestResult.Status == cmCTestTestHandler::COMPLETED
           ? this->TestHandler->CustomMaximumPassedTestOutputSize
-          : this->TestHandler->CustomMaximumFailedTestOutputSize));
+          : this->TestHandler->CustomMaximumFailedTestOutputSize),
+      this->TestHandler->TestOutputTruncation);
   }
   this->TestResult.Reason = reason;
   if (this->TestHandler->LogFile) {
@@ -692,6 +693,14 @@ void cmCTestRunTest::ComputeArguments()
                << this->Index << ": "
                << (this->TestHandler->MemCheck ? "MemCheck" : "Test")
                << " command: " << testCommand << std::endl);
+
+  // Print any test-specific env vars in verbose mode
+  if (!this->TestProperties->Directory.empty()) {
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+               this->Index << ": "
+                           << "Working Directory: "
+                           << this->TestProperties->Directory << std::endl);
+  }
 
   // Print any test-specific env vars in verbose mode
   if (!this->TestProperties->Environment.empty()) {

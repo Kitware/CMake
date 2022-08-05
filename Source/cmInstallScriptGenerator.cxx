@@ -20,7 +20,6 @@ cmInstallScriptGenerator::cmInstallScriptGenerator(
                        std::move(backtrace))
   , Script(std::move(script))
   , Code(code)
-  , AllowGenex(false)
 {
   // We need per-config actions if the script has generator expressions.
   if (cmGeneratorExpression::Find(this->Script) != std::string::npos) {

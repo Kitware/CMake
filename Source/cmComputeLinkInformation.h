@@ -5,6 +5,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
+#include <map>
 #include <memory>
 #include <set>
 #include <string>
@@ -13,6 +14,7 @@
 
 #include "cmsys/RegularExpression.hxx"
 
+#include "cmComputeLinkDepends.h"
 #include "cmListFileCache.h"
 #include "cmValue.h"
 
@@ -27,6 +29,9 @@ class cmake;
  */
 class cmComputeLinkInformation
 {
+private:
+  class FeatureDescriptor;
+
 public:
   cmComputeLinkInformation(cmGeneratorTarget const* target,
                            const std::string& config);
@@ -42,28 +47,38 @@ public:
     Yes,
   };
 
-  enum class ItemIsObject
-  {
-    No,
-    Yes,
-  };
-
   struct Item
   {
-    Item() = default;
     Item(BT<std::string> v, ItemIsPath isPath,
-         ItemIsObject isObject = ItemIsObject::No,
-         cmGeneratorTarget const* target = nullptr)
+         cmGeneratorTarget const* target = nullptr,
+         FeatureDescriptor const* feature = nullptr)
       : Value(std::move(v))
       , IsPath(isPath)
-      , IsObject(isObject)
       , Target(target)
+      , Feature(feature)
     {
     }
     BT<std::string> Value;
-    ItemIsPath IsPath = ItemIsPath::Yes;
-    ItemIsObject IsObject = ItemIsObject::No;
+    ItemIsPath IsPath = ItemIsPath::No;
     cmGeneratorTarget const* Target = nullptr;
+
+    bool HasFeature() const { return this->Feature != nullptr; }
+    const std::string& GetFeatureName() const
+    {
+      return HasFeature() ? this->Feature->Name
+                          : cmComputeLinkDepends::LinkEntry::DEFAULT;
+    }
+
+    BT<std::string> GetFormattedItem(std::string const& path) const
+    {
+      return { (this->Feature != nullptr)
+                 ? this->Feature->GetDecoratedItem(path, this->IsPath)
+                 : path,
+               Value.Backtrace };
+    }
+
+  private:
+    FeatureDescriptor const* Feature = nullptr;
   };
   using ItemVector = std::vector<Item>;
   void AppendValues(std::string& result, std::vector<BT<std::string>>& values);
@@ -104,10 +119,10 @@ public:
   const cmGeneratorTarget* GetTarget() { return this->Target; }
 
 private:
-  void AddItem(BT<std::string> const& item, const cmGeneratorTarget* tgt,
-               ItemIsObject isObject = ItemIsObject::No);
-  void AddSharedDepItem(BT<std::string> const& item,
-                        cmGeneratorTarget const* tgt);
+  using LinkEntry = cmComputeLinkDepends::LinkEntry;
+
+  void AddItem(LinkEntry const& entry);
+  void AddSharedDepItem(LinkEntry const& entry);
   void AddRuntimeDLL(cmGeneratorTarget const* tgt);
 
   // Output information.
@@ -181,22 +196,20 @@ private:
   std::string NoCaseExpression(std::string const& str);
 
   // Handling of link items.
-  void AddTargetItem(BT<std::string> const& item,
-                     const cmGeneratorTarget* target);
-  void AddFullItem(BT<std::string> const& item, ItemIsObject isObject);
-  bool CheckImplicitDirItem(std::string const& item);
-  void AddUserItem(BT<std::string> const& item, bool pathNotKnown);
-  void AddFrameworkItem(std::string const& item);
+  void AddTargetItem(LinkEntry const& entry);
+  void AddFullItem(LinkEntry const& entry);
+  bool CheckImplicitDirItem(LinkEntry const& entry);
+  void AddUserItem(LinkEntry const& entry, bool pathNotKnown);
+  void AddFrameworkItem(LinkEntry const& entry);
   void DropDirectoryItem(BT<std::string> const& item);
-  bool CheckSharedLibNoSOName(std::string const& item);
-  void AddSharedLibNoSOName(std::string const& item);
-  void HandleBadFullItem(std::string const& item, std::string const& file);
+  bool CheckSharedLibNoSOName(LinkEntry const& entry);
+  void AddSharedLibNoSOName(LinkEntry const& entry);
+  void HandleBadFullItem(LinkEntry const& entry, std::string const& file);
 
   // Framework info.
   void ComputeFrameworkInfo();
   void AddFrameworkPath(std::string const& p);
   std::set<std::string> FrameworkPathsEmitted;
-  cmsys::RegularExpression SplitFramework;
 
   // Linker search path computation.
   std::unique_ptr<cmOrderDirectories> OrderLinkerSearchPath;
@@ -237,4 +250,61 @@ private:
   void AddLibraryRuntimeInfo(std::string const& fullPath,
                              const cmGeneratorTarget* target);
   void AddLibraryRuntimeInfo(std::string const& fullPath);
+
+  class FeatureDescriptor
+  {
+  public:
+    FeatureDescriptor() = default;
+
+    const std::string Name;
+    const bool Supported = false;
+    const std::string Prefix;
+    const std::string Suffix;
+    std::string GetDecoratedItem(std::string const& library,
+                                 ItemIsPath isPath) const;
+    std::string GetDecoratedItem(std::string const& library,
+                                 std::string const& linkItem,
+                                 std::string const& defaultValue,
+                                 ItemIsPath isPath) const;
+
+  protected:
+    FeatureDescriptor(std::string name, std::string itemFormat);
+    FeatureDescriptor(std::string name, std::string itemPathFormat,
+                      std::string itemNameFormat);
+    FeatureDescriptor(std::string name, std::string prefix,
+                      std::string itemPathFormat, std::string itemNameFormat,
+                      std::string suffix);
+
+    FeatureDescriptor(std::string name, std::string prefix, std::string suffix,
+                      bool isGroup);
+
+  private:
+    std::string ItemPathFormat;
+    std::string ItemNameFormat;
+  };
+
+  class LibraryFeatureDescriptor : public FeatureDescriptor
+  {
+  public:
+    LibraryFeatureDescriptor(std::string name, std::string itemFormat);
+    LibraryFeatureDescriptor(std::string name, std::string itemPathFormat,
+                             std::string itemNameFormat);
+    LibraryFeatureDescriptor(std::string name, std::string prefix,
+                             std::string itemPathFormat,
+                             std::string itemNameFormat, std::string suffix);
+  };
+  std::map<std::string, FeatureDescriptor> LibraryFeatureDescriptors;
+  bool AddLibraryFeature(std::string const& feature);
+  FeatureDescriptor const& GetLibraryFeature(std::string const& feature) const;
+  FeatureDescriptor const* FindLibraryFeature(
+    std::string const& feature) const;
+
+  class GroupFeatureDescriptor : public FeatureDescriptor
+  {
+  public:
+    GroupFeatureDescriptor(std::string name, std::string prefix,
+                           std::string suffix);
+  };
+  std::map<std::string, FeatureDescriptor> GroupFeatureDescriptors;
+  FeatureDescriptor const& GetGroupFeature(std::string const& feature);
 };

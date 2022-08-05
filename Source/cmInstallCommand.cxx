@@ -35,7 +35,6 @@
 #include "cmInstallRuntimeDependencySetGenerator.h"
 #include "cmInstallScriptGenerator.h"
 #include "cmInstallTargetGenerator.h"
-#include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
@@ -48,6 +47,8 @@
 #include "cmTarget.h"
 #include "cmTargetExport.h"
 #include "cmValue.h"
+
+class cmListFileBacktrace;
 
 namespace {
 
@@ -918,8 +919,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
         if (!objectArgs.GetDestination().empty()) {
           // Verify that we know where the objects are to install them.
           std::string reason;
-          if (!helper.Makefile->GetGlobalGenerator()
-                 ->HasKnownObjectFileLocation(&reason)) {
+          if (!target.HasKnownObjectFileLocation(&reason)) {
             status.SetError(
               cmStrCat("TARGETS given OBJECT library \"", target.GetName(),
                        "\" whose objects may not be installed", reason, "."));

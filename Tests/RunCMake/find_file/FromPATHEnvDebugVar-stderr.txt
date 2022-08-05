@@ -8,6 +8,7 @@
     CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: 1
     CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: 0
     CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: 1
+    CMAKE_FIND_USE_INSTALL_PREFIX: 1
 
   find_file considered the following locations:.*
   The item was not found.*
@@ -21,5 +22,6 @@
     CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: 1
     CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: 0
     CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: 1
+    CMAKE_FIND_USE_INSTALL_PREFIX: 1
 
   find_file considered the following locations:.*

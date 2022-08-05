@@ -18,17 +18,14 @@ class cmTargetDepend
 
   // The set order depends only on the Target, so we use
   // mutable members to achieve a map with set syntax.
-  mutable bool Link;
-  mutable bool Util;
-  mutable bool Cross;
+  mutable bool Link = false;
+  mutable bool Util = false;
+  mutable bool Cross = false;
   mutable cmListFileBacktrace Backtrace;
 
 public:
   cmTargetDepend(cmGeneratorTarget const* t)
     : Target(t)
-    , Link(false)
-    , Util(false)
-    , Cross(false)
   {
   }
   operator cmGeneratorTarget const*() const { return this->Target; }

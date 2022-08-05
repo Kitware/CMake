@@ -1,0 +1,2 @@
+CMake Error at .*/FetchContent.cmake:[0-9]+ \(message\):
+  Unsupported value for FETCHCONTENT_TRY_FIND_PACKAGE_MODE: BOGUS

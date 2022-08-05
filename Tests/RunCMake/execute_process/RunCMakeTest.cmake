@@ -35,8 +35,8 @@ run_cmake_command(LastCommandError ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/La
 run_cmake_command(LastCommandTimeout ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/LastCommandTimeout.cmake)
 run_cmake_command(LastCommandGood ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/LastCommandGood.cmake)
 
-if(UNIX AND PYTHON_EXECUTABLE)
-  run_cmake_command(AnyCommandAbnormalExit ${CMAKE_COMMAND} -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE} -P ${RunCMake_SOURCE_DIR}/AnyCommandAbnormalExit.cmake)
-  run_cmake_command(LastCommandAbnormalExit-1 ${CMAKE_COMMAND} -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE} -P ${RunCMake_SOURCE_DIR}/LastCommandAbnormalExit-1.cmake)
-  run_cmake_command(LastCommandAbnormalExit-2 ${CMAKE_COMMAND} -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE} -P ${RunCMake_SOURCE_DIR}/LastCommandAbnormalExit-2.cmake)
+if(UNIX AND Python_EXECUTABLE)
+  run_cmake_command(AnyCommandAbnormalExit ${CMAKE_COMMAND} -DPython_EXECUTABLE=${Python_EXECUTABLE} -P ${RunCMake_SOURCE_DIR}/AnyCommandAbnormalExit.cmake)
+  run_cmake_command(LastCommandAbnormalExit-1 ${CMAKE_COMMAND} -DPython_EXECUTABLE=${Python_EXECUTABLE} -P ${RunCMake_SOURCE_DIR}/LastCommandAbnormalExit-1.cmake)
+  run_cmake_command(LastCommandAbnormalExit-2 ${CMAKE_COMMAND} -DPython_EXECUTABLE=${Python_EXECUTABLE} -P ${RunCMake_SOURCE_DIR}/LastCommandAbnormalExit-2.cmake)
 endif()

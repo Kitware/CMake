@@ -36,11 +36,6 @@ cmGhsMultiTargetGenerator::cmGhsMultiTargetGenerator(cmGeneratorTarget* target)
       static_cast<cmLocalGhsMultiGenerator*>(target->GetLocalGenerator()))
   , Makefile(target->Target->GetMakefile())
   , Name(target->GetName())
-#ifdef _WIN32
-  , CmdWindowsShell(true)
-#else
-  , CmdWindowsShell(false)
-#endif
 {
   // Store the configuration name that is being used
   if (cmValue config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE")) {
@@ -112,12 +107,6 @@ void cmGhsMultiTargetGenerator::Generate()
       return;
   }
 
-  // Tell the global generator the name of the project file
-  this->GeneratorTarget->Target->SetProperty("GENERATOR_FILE_NAME",
-                                             this->Name);
-  this->GeneratorTarget->Target->SetProperty(
-    "GENERATOR_FILE_NAME_EXT", GhsMultiGpj::GetGpjTag(this->TagType));
-
   this->GenerateTarget();
 }
 
@@ -126,7 +115,14 @@ void cmGhsMultiTargetGenerator::GenerateTarget()
   // Open the target file in copy-if-different mode.
   std::string fproj =
     cmStrCat(this->LocalGenerator->GetCurrentBinaryDirectory(), '/',
-             this->Name, cmGlobalGhsMultiGenerator::FILE_EXTENSION);
+             this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget),
+             '/', this->Name, cmGlobalGhsMultiGenerator::FILE_EXTENSION);
+
+  // Tell the global generator the name of the project file
+  this->GeneratorTarget->Target->SetProperty("GENERATOR_FILE_NAME", fproj);
+  this->GeneratorTarget->Target->SetProperty(
+    "GENERATOR_FILE_NAME_EXT", GhsMultiGpj::GetGpjTag(this->TagType));
+
   cmGeneratedFileStream fout(fproj);
   fout.SetCopyIfDifferent(true);
 
@@ -160,10 +156,16 @@ void cmGhsMultiTargetGenerator::WriteTargetSpecifics(std::ostream& fout,
 {
   std::string outpath;
 
+  /* Determine paths from the target project file to where the output artifacts
+   * need to be located.
+   */
   if (this->TagType != GhsMultiGpj::SUBPROJECT) {
     // set target binary file destination
-    outpath = this->GeneratorTarget->GetDirectory(config);
-    outpath = this->LocalGenerator->MaybeRelativeToCurBinDir(outpath);
+    std::string binpath = cmStrCat(
+      this->LocalGenerator->GetCurrentBinaryDirectory(), '/',
+      this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget));
+    outpath = cmSystemTools::RelativePath(
+      binpath, this->GeneratorTarget->GetDirectory(config));
     /* clang-format off */
     fout << "    :binDirRelative=\"" << outpath << "\"\n"
             "    -o \"" << this->TargetNameReal << "\"\n";
@@ -171,7 +173,7 @@ void cmGhsMultiTargetGenerator::WriteTargetSpecifics(std::ostream& fout,
   }
 
   // set target object file destination
-  outpath = this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
+  outpath = ".";
   fout << "    :outputDirRelative=\"" << outpath << "\"\n";
 }
 
@@ -187,6 +189,7 @@ void cmGhsMultiTargetGenerator::SetCompilerFlags(std::string const& config,
                                           language, config);
     this->LocalGenerator->AddVisibilityPresetFlags(
       flags, this->GeneratorTarget, language);
+    this->LocalGenerator->AddColorDiagnosticsFlags(flags, language);
 
     // Append old-style preprocessor definition flags.
     if (this->Makefile->GetDefineFlags() != " ") {
@@ -316,19 +319,37 @@ void cmGhsMultiTargetGenerator::WriteTargetLinkLine(std::ostream& fout,
 
 void cmGhsMultiTargetGenerator::WriteBuildEvents(std::ostream& fout)
 {
-  this->WriteBuildEventsHelper(
-    fout, this->GeneratorTarget->GetPreBuildCommands(),
-    std::string("prebuild"), std::string("preexecShell"));
+  this->WriteBuildEventsHelper(fout,
+                               this->GeneratorTarget->GetPreBuildCommands(),
+                               std::string("prebuild"),
+#ifdef _WIN32
+                               std::string("preexecShell")
+#else
+                               std::string("preexec")
+#endif
+  );
 
   if (this->TagType != GhsMultiGpj::CUSTOM_TARGET) {
-    this->WriteBuildEventsHelper(
-      fout, this->GeneratorTarget->GetPreLinkCommands(),
-      std::string("prelink"), std::string("preexecShell"));
+    this->WriteBuildEventsHelper(fout,
+                                 this->GeneratorTarget->GetPreLinkCommands(),
+                                 std::string("prelink"),
+#ifdef _WIN32
+                                 std::string("preexecShell")
+#else
+                                 std::string("preexec")
+#endif
+    );
   }
 
-  this->WriteBuildEventsHelper(
-    fout, this->GeneratorTarget->GetPostBuildCommands(),
-    std::string("postbuild"), std::string("postexecShell"));
+  this->WriteBuildEventsHelper(fout,
+                               this->GeneratorTarget->GetPostBuildCommands(),
+                               std::string("postbuild"),
+#ifdef _WIN32
+                               std::string("postexecShell")
+#else
+                               std::string("postexec")
+#endif
+  );
 }
 
 void cmGhsMultiTargetGenerator::WriteBuildEventsHelper(
@@ -336,6 +357,13 @@ void cmGhsMultiTargetGenerator::WriteBuildEventsHelper(
   std::string const& name, std::string const& cmd)
 {
   int cmdcount = 0;
+#ifdef _WIN32
+  std::string fext = ".bat";
+  std::string shell;
+#else
+  std::string fext = ".sh";
+  std::string shell = "/bin/sh ";
+#endif
 
   for (cmCustomCommand const& cc : ccv) {
     cmCustomCommandGenerator ccg(cc, this->ConfigName, this->LocalGenerator);
@@ -343,14 +371,14 @@ void cmGhsMultiTargetGenerator::WriteBuildEventsHelper(
     std::string fname =
       cmStrCat(this->LocalGenerator->GetCurrentBinaryDirectory(), '/',
                this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget),
-               '/', this->Name, '_', name, cmdcount++,
-               this->CmdWindowsShell ? ".bat" : ".sh");
+               '/', this->Name, '_', name, cmdcount++, fext);
+
     cmGeneratedFileStream f(fname);
     f.SetCopyIfDifferent(true);
     this->WriteCustomCommandsHelper(f, ccg);
     f.Close();
     if (this->TagType != GhsMultiGpj::CUSTOM_TARGET) {
-      fout << "    :" << cmd << "=\"" << fname << "\"\n";
+      fout << "    :" << cmd << "=\"" << shell << fname << "\"\n";
     } else {
       fout << fname << "\n    :outputName=\"" << fname << ".rule\"\n";
     }
@@ -409,15 +437,15 @@ void cmGhsMultiTargetGenerator::WriteCustomCommandsHelper(
       //
       bool useCall = false;
 
-      if (this->CmdWindowsShell) {
-        std::string suffix;
-        if (cmd.size() > 4) {
-          suffix = cmSystemTools::LowerCase(cmd.substr(cmd.size() - 4));
-          if (suffix == ".bat" || suffix == ".cmd") {
-            useCall = true;
-          }
+#ifdef _WIN32
+      std::string suffix;
+      if (cmd.size() > 4) {
+        suffix = cmSystemTools::LowerCase(cmd.substr(cmd.size() - 4));
+        if (suffix == ".bat" || suffix == ".cmd") {
+          useCall = true;
         }
       }
+#endif
 
       cmSystemTools::ReplaceString(cmd, "/./", "/");
       // Convert the command to a relative path only if the current
@@ -555,11 +583,12 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
       // Open the filestream in copy-if-different mode.
       std::string gname = sg;
       cmsys::SystemTools::ReplaceString(gname, "\\", "_");
-      std::string lpath = cmStrCat(
-        this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget), '/',
-        gname, cmGlobalGhsMultiGenerator::FILE_EXTENSION);
+      std::string lpath =
+        cmStrCat(gname, cmGlobalGhsMultiGenerator::FILE_EXTENSION);
       std::string fpath = cmStrCat(
-        this->LocalGenerator->GetCurrentBinaryDirectory(), '/', lpath);
+        this->LocalGenerator->GetCurrentBinaryDirectory(), '/',
+        this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget), '/',
+        lpath);
       cmGeneratedFileStream* f = new cmGeneratedFileStream(fpath);
       f->SetCopyIfDifferent(true);
       gfiles.push_back(f);
@@ -605,13 +634,8 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
           compile = false;
         }
 
-        *fout << comment << fname << '\n';
+        *fout << comment << fname << WriteObjectLangOverride(si) << '\n';
         if (compile) {
-          if ("ld" != si->GetExtension() && "int" != si->GetExtension() &&
-              "bsp" != si->GetExtension()) {
-            WriteObjectLangOverride(*fout, si);
-          }
-
           this->WriteSourceProperty(*fout, si, "INCLUDE_DIRECTORIES", "-I");
           this->WriteSourceProperty(*fout, si, "COMPILE_DEFINITIONS", "-D");
           this->WriteSourceProperty(*fout, si, "COMPILE_OPTIONS", "");
@@ -645,6 +669,11 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
           }
         }
         int cmdcount = 0;
+#ifdef _WIN32
+        std::string fext = ".bat";
+#else
+        std::string fext = ".sh";
+#endif
         for (auto& sf : customCommands) {
           const cmCustomCommand* cc = sf->GetCustomCommand();
           cmCustomCommandGenerator ccg(*cc, this->ConfigName,
@@ -655,8 +684,8 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
             this->LocalGenerator->GetCurrentBinaryDirectory(), '/',
             this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget),
             '/', this->Name, "_cc", cmdcount++, '_',
-            (sf->GetLocation()).GetName(),
-            this->CmdWindowsShell ? ".bat" : ".sh");
+            (sf->GetLocation()).GetName(), fext);
+
           cmGeneratedFileStream f(fname);
           f.SetCopyIfDifferent(true);
           this->WriteCustomCommandsHelper(f, ccg);
@@ -702,17 +731,16 @@ void cmGhsMultiTargetGenerator::WriteCustomCommandLine(
   }
 }
 
-void cmGhsMultiTargetGenerator::WriteObjectLangOverride(
-  std::ostream& fout, const cmSourceFile* sourceFile)
+std::string cmGhsMultiTargetGenerator::WriteObjectLangOverride(
+  const cmSourceFile* sourceFile)
 {
+  std::string ret;
   cmValue rawLangProp = sourceFile->GetProperty("LANGUAGE");
   if (rawLangProp) {
-    std::string sourceLangProp(*rawLangProp);
-    std::string const& extension = sourceFile->GetExtension();
-    if ("CXX" == sourceLangProp && ("c" == extension || "C" == extension)) {
-      fout << "    -dotciscxx\n";
-    }
+    ret = cmStrCat(" [", *rawLangProp, "]");
   }
+
+  return ret;
 }
 
 bool cmGhsMultiTargetGenerator::DetermineIfIntegrityApp()

@@ -604,7 +604,7 @@ void cmGlobalNinjaGenerator::Generate()
   this->WriteUnknownExplicitDependencies(*this->GetCommonFileStream());
   this->WriteBuiltinTargets(*this->GetCommonFileStream());
 
-  if (cmSystemTools::GetErrorOccuredFlag()) {
+  if (cmSystemTools::GetErrorOccurredFlag()) {
     this->RulesFileStream->setstate(std::ios::failbit);
     for (auto const& config : this->Makefiles[0]->GetGeneratorConfigs(
            cmMakefile::IncludeEmptyConfig)) {
@@ -651,7 +651,7 @@ void cmGlobalNinjaGenerator::CleanMetaData()
                                                       "'\n"
                                                       "failed with:\n ",
                                                       error));
-      cmSystemTools::SetFatalErrorOccured();
+      cmSystemTools::SetFatalErrorOccurred();
     }
   };
 
@@ -710,7 +710,7 @@ bool cmGlobalNinjaGenerator::FindMakeProgram(cmMakefile* mf)
                                 "'\n"
                                 "failed with:\n ",
                                 error));
-      cmSystemTools::SetFatalErrorOccured();
+      cmSystemTools::SetFatalErrorOccurred();
       return false;
     }
     this->NinjaVersion = cmTrimWhitespace(version);
@@ -790,7 +790,7 @@ void cmGlobalNinjaGenerator::CheckNinjaCodePage()
                                                     "'\n"
                                                     "failed with:\n ",
                                                     error));
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
   } else if (result == 0) {
     std::istringstream outputStream(output);
     std::string line;
@@ -837,7 +837,7 @@ bool cmGlobalNinjaGenerator::CheckLanguages(
       mf->IssueMessage(MessageType::FATAL_ERROR,
                        "multiple values for CMAKE_OSX_ARCHITECTURES not "
                        "supported with Swift");
-      cmSystemTools::SetFatalErrorOccured();
+      cmSystemTools::SetFatalErrorOccurred();
       return false;
     }
   }
@@ -870,7 +870,7 @@ bool cmGlobalNinjaGenerator::CheckCxxModuleSupport()
       ;
     /* clang-format on */
     this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR, e.str());
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
   }
   return false;
 }
@@ -891,7 +891,7 @@ bool cmGlobalNinjaGenerator::CheckFortran(cmMakefile* mf) const
     ;
   /* clang-format on */
   mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
-  cmSystemTools::SetFatalErrorOccured();
+  cmSystemTools::SetFatalErrorOccurred();
   return false;
 }
 
@@ -912,7 +912,7 @@ bool cmGlobalNinjaGenerator::CheckISPC(cmMakefile* mf) const
     ;
   /* clang-format on */
   mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
-  cmSystemTools::SetFatalErrorOccured();
+  cmSystemTools::SetFatalErrorOccurred();
   return false;
 }
 
@@ -2495,8 +2495,7 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
     snapshot.GetDirectory().SetCurrentBinary(dir_cur_bld);
     auto mfd = cm::make_unique<cmMakefile>(this, snapshot);
     auto lgd = this->CreateLocalGenerator(mfd.get());
-    lgd->SetRelativePathTopSource(dir_top_src);
-    lgd->SetRelativePathTopBinary(dir_top_bld);
+    lgd->SetRelativePathTop(dir_top_src, dir_top_bld);
     this->Makefiles.push_back(std::move(mfd));
     this->LocalGenerators.push_back(std::move(lgd));
   }
@@ -2535,6 +2534,11 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
     }
   }
 
+  const char* module_ext = "";
+  if (arg_modmapfmt == "gcc") {
+    module_ext = ".gcm";
+  }
+
   // Extend the module map with those provided by this target.
   // We do this after loading the modules provided by linked targets
   // in case we have one of the same name that must be preferred.
@@ -2551,7 +2555,9 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
         }
       } else {
         // Assume the module file path matches the logical module name.
-        mod = cmStrCat(module_dir, p.LogicalName);
+        std::string safe_logical_name = p.LogicalName;
+        cmSystemTools::ReplaceString(safe_logical_name, ":", "-");
+        mod = cmStrCat(module_dir, safe_logical_name, module_ext);
       }
       mod_files[p.LogicalName] = mod;
       tm[p.LogicalName] = mod;

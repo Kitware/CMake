@@ -370,6 +370,7 @@ syn keyword cmakeProperty contained
             \ VS_DOTNET_DOCUMENTATION_FILE
             \ VS_DOTNET_REFERENCES
             \ VS_DOTNET_REFERENCES_COPY_LOCAL
+            \ VS_DOTNET_STARTUP_OBJECT
             \ VS_DOTNET_TARGET_FRAMEWORK_VERSION
             \ VS_DPI_AWARE
             \ VS_GLOBAL_KEYWORD
@@ -381,6 +382,7 @@ syn keyword cmakeProperty contained
             \ VS_JUST_MY_CODE_DEBUGGING
             \ VS_KEYWORD
             \ VS_MOBILE_EXTENSIONS_VERSION
+            \ VS_NO_COMPILE_BATCHING
             \ VS_NO_SOLUTION_DEPLOY
             \ VS_PACKAGE_REFERENCES
             \ VS_PLATFORM_TOOLSET
@@ -704,6 +706,7 @@ syn keyword cmakeVariable contained
             \ CMAKE_CODEBLOCKS_COMPILER_ID
             \ CMAKE_CODEBLOCKS_EXCLUDE_EXTERNAL_FILES
             \ CMAKE_CODELITE_USE_TARGETS
+            \ CMAKE_COLOR_DIAGNOSTICS
             \ CMAKE_COLOR_MAKEFILE
             \ CMAKE_COMMAND
             \ CMAKE_COMPILER_2005
@@ -1044,6 +1047,7 @@ syn keyword cmakeVariable contained
             \ CMAKE_FIND_ROOT_PATH_MODE_PACKAGE
             \ CMAKE_FIND_ROOT_PATH_MODE_PROGRAM
             \ CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH
+            \ CMAKE_FIND_USE_INSTALL_PREFIX
             \ CMAKE_FIND_USE_CMAKE_PATH
             \ CMAKE_FIND_USE_CMAKE_SYSTEM_PATH
             \ CMAKE_FIND_USE_PACKAGE_REGISTRY
@@ -1572,6 +1576,7 @@ syn keyword cmakeVariable contained
             \ CTEST_CUSTOM_MAXIMUM_NUMBER_OF_ERRORS
             \ CTEST_CUSTOM_MAXIMUM_NUMBER_OF_WARNINGS
             \ CTEST_CUSTOM_MAXIMUM_PASSED_TEST_OUTPUT_SIZE
+            \ CTEST_CUSTOM_TEST_OUTPUT_TRUNCATION
             \ CTEST_CUSTOM_MEMCHECK_IGNORE
             \ CTEST_CUSTOM_POST_MEMCHECK
             \ CTEST_CUSTOM_POST_TEST
@@ -3776,6 +3781,7 @@ syn keyword cmakeGeneratorExpressions contained
             \ STREQUAL
             \ TARGET_BUNDLE_CONTENT_DIR
             \ TARGET_BUNDLE_DIR
+            \ TARGET_BUNDLE_DIR_NAME
             \ TARGET_EXISTS
             \ TARGET_FILE
             \ TARGET_FILE_BASE_NAME

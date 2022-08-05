@@ -8,6 +8,8 @@ find_program
 .. |prefix_XXX_SUBDIR| replace:: ``<prefix>/[s]bin``
 .. |entry_XXX_SUBDIR| replace:: ``<entry>/[s]bin``
 
+.. |FIND_XXX_REGISTRY_VIEW_DEFAULT| replace:: ``BOTH``
+
 .. |FIND_PACKAGE_ROOT_PREFIX_PATH_XXX| replace::
    |FIND_PACKAGE_ROOT_PREFIX_PATH_XXX_SUBDIR|
 .. |CMAKE_PREFIX_PATH_XXX| replace::

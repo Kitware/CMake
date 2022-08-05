@@ -15,6 +15,7 @@
 #include <vector>
 
 #include <cm/memory>
+#include <cm/optional>
 #include <cm/string_view>
 #include <cmext/algorithm>
 #include <cmext/string_view>
@@ -86,7 +87,7 @@ bool HandleWriteImpl(std::vector<std::string> const& args, bool append,
     std::string e =
       "attempted to write a file: " + fileName + " into a source directory.";
     status.SetError(e);
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
   std::string dir = cmSystemTools::GetFilenamePath(fileName);
@@ -284,7 +285,7 @@ bool HandleStringsCommand(std::vector<std::string> const& args,
   }
 
   // Get the variable in which to store the results.
-  std::string outVar = args[2];
+  std::string const& outVar = args[2];
 
   // Parse the options.
   enum
@@ -834,7 +835,7 @@ bool HandleMakeDirectoryCommand(std::vector<std::string> const& args,
       std::string e = "attempted to create a directory: " + *cdir +
         " into a source directory.";
       status.SetError(e);
-      cmSystemTools::SetFatalErrorOccured();
+      cmSystemTools::SetFatalErrorOccurred();
       return false;
     }
     if (!cmSystemTools::MakeDirectory(*cdir)) {
@@ -864,7 +865,7 @@ bool HandleTouchImpl(std::vector<std::string> const& args, bool create,
       std::string e =
         "attempted to touch a file: " + tfile + " in a source directory.";
       status.SetError(e);
-      cmSystemTools::SetFatalErrorOccured();
+      cmSystemTools::SetFatalErrorOccurred();
       return false;
     }
     if (!cmSystemTools::Touch(tfile, create)) {
@@ -1609,8 +1610,8 @@ size_t cmWriteToMemoryCallback(void* ptr, size_t size, size_t nmemb,
   return realsize;
 }
 
-size_t cmFileCommandCurlDebugCallback(CURL*, curl_infotype type, char* chPtr,
-                                      size_t size, void* data)
+int cmFileCommandCurlDebugCallback(CURL*, curl_infotype type, char* chPtr,
+                                   size_t size, void* data)
 {
   cmFileCommandVectorOfChar& vec =
     *static_cast<cmFileCommandVectorOfChar*>(data);
@@ -1778,6 +1779,7 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
   std::string userpwd;
 
   std::vector<std::string> curl_headers;
+  std::vector<std::pair<std::string, cm::optional<std::string>>> curl_ranges;
 
   while (i != args.end()) {
     if (*i == "TIMEOUT") {
@@ -1868,7 +1870,7 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
       }
       std::string algo = i->substr(0, pos);
       expectedHash = cmSystemTools::LowerCase(i->substr(pos + 1));
-      hash = std::unique_ptr<cmCryptoHash>(cmCryptoHash::New(algo));
+      hash = cmCryptoHash::New(algo);
       if (!hash) {
         std::string err =
           cmStrCat("DOWNLOAD EXPECTED_HASH given unknown ALGO: ", algo);
@@ -1890,6 +1892,27 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
         return false;
       }
       curl_headers.push_back(*i);
+    } else if (*i == "RANGE_START") {
+      ++i;
+      if (i == args.end()) {
+        status.SetError("DOWNLOAD missing value for RANGE_START.");
+        return false;
+      }
+      curl_ranges.emplace_back(*i, cm::nullopt);
+    } else if (*i == "RANGE_END") {
+      ++i;
+      if (curl_ranges.empty()) {
+        curl_ranges.emplace_back("0", *i);
+      } else {
+        auto& last_range = curl_ranges.back();
+        if (!last_range.second.has_value()) {
+          last_range.second = *i;
+        } else {
+          status.SetError("Multiple RANGE_END values is provided without "
+                          "the corresponding RANGE_START.");
+          return false;
+        }
+      }
     } else if (file.empty()) {
       file = *i;
     } else {
@@ -1899,6 +1922,7 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
     }
     ++i;
   }
+
   // Can't calculate hash if we don't save the file.
   // TODO Incrementally calculate hash in the write callback as the file is
   // being downloaded so this check can be relaxed.
@@ -1982,6 +2006,13 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
   } else {
     res = ::curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
     check_curl_result(res, "DOWNLOAD cannot set TLS/SSL Verify off: ");
+  }
+
+  for (const auto& range : curl_ranges) {
+    std::string curl_range = range.first + '-' +
+      (range.second.has_value() ? range.second.value() : "");
+    res = ::curl_easy_setopt(curl, CURLOPT_RANGE, curl_range.c_str());
+    check_curl_result(res, "DOWNLOAD cannot set range: ");
   }
 
   // check to see if a CAINFO file has been specified
@@ -2731,7 +2762,7 @@ bool HandleLockCommand(std::vector<std::string> const& args,
       MessageType::FATAL_ERROR,
       cmStrCat("directory\n  \"", parentDir,
                "\"\ncreation failed (check permissions)."));
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
   FILE* file = cmsys::SystemTools::Fopen(path, "w");
@@ -2740,7 +2771,7 @@ bool HandleLockCommand(std::vector<std::string> const& args,
       MessageType::FATAL_ERROR,
       cmStrCat("file\n  \"", path,
                "\"\ncreation failed (check permissions)."));
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
   fclose(file);
@@ -2764,7 +2795,7 @@ bool HandleLockCommand(std::vector<std::string> const& args,
         fileLockResult = lockPool.LockProcessScope(path, timeout);
         break;
       default:
-        cmSystemTools::SetFatalErrorOccured();
+        cmSystemTools::SetFatalErrorOccurred();
         return false;
     }
   }
@@ -2775,7 +2806,7 @@ bool HandleLockCommand(std::vector<std::string> const& args,
     status.GetMakefile().IssueMessage(
       MessageType::FATAL_ERROR,
       cmStrCat("error locking file\n  \"", path, "\"\n", result, "."));
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
 
@@ -3010,7 +3041,7 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
     status.SetError(
       cmStrCat("GET_RUNTIME_DEPENDENCIES is not supported on system \"",
                platform, "\""));
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
 
@@ -3078,7 +3109,7 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
   auto argIt = unrecognizedArguments.begin();
   if (argIt != unrecognizedArguments.end()) {
     status.SetError(cmStrCat("Unrecognized argument: \"", *argIt, "\""));
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
 
@@ -3100,7 +3131,7 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
   if (kwend != kwbegin) {
     status.SetError(cmStrCat("Keywords missing values:\n  ",
                              cmJoin(cmMakeRange(kwbegin, kwend), "\n  ")));
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
 
@@ -3112,13 +3143,13 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
     std::move(parsedArgs.PostExcludeFiles),
     std::move(parsedArgs.PostExcludeFilesStrict));
   if (!archive.Prepare()) {
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
 
   if (!archive.GetRuntimeDependencies(
         parsedArgs.Executables, parsedArgs.Libraries, parsedArgs.Modules)) {
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
 
@@ -3159,7 +3190,7 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
         e << "\n  " << path;
       }
       status.SetError(e.str());
-      cmSystemTools::SetFatalErrorOccured();
+      cmSystemTools::SetFatalErrorOccurred();
       return false;
     }
   }
@@ -3175,7 +3206,7 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
         e << "\n  " << path;
       }
       status.SetError(e.str());
-      cmSystemTools::SetFatalErrorOccured();
+      cmSystemTools::SetFatalErrorOccurred();
       return false;
     }
   }
@@ -3229,7 +3260,7 @@ bool HandleConfigureCommand(std::vector<std::string> const& args,
   if (argIt != unrecognizedArguments.end()) {
     status.SetError(
       cmStrCat("CONFIGURE Unrecognized argument: \"", *argIt, "\""));
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
 
@@ -3241,7 +3272,7 @@ bool HandleConfigureCommand(std::vector<std::string> const& args,
                 e) != keywordsMissingArguments.end();
     if (optionHasNoValue) {
       status.SetError(cmStrCat("CONFIGURE ", e, " option needs a value."));
-      cmSystemTools::SetFatalErrorOccured();
+      cmSystemTools::SetFatalErrorOccurred();
       return false;
     }
   }
@@ -3252,7 +3283,7 @@ bool HandleConfigureCommand(std::vector<std::string> const& args,
       parsedKeywords.end();
     if (!optionGiven) {
       status.SetError(cmStrCat("CONFIGURE ", e, " option is mandatory."));
-      cmSystemTools::SetFatalErrorOccured();
+      cmSystemTools::SetFatalErrorOccurred();
       return false;
     }
   }
@@ -3367,7 +3398,7 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
   auto argIt = unrecognizedArguments.begin();
   if (argIt != unrecognizedArguments.end()) {
     status.SetError(cmStrCat("Unrecognized argument: \"", *argIt, "\""));
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
 
@@ -3379,7 +3410,7 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
   if (kwend != kwbegin) {
     status.SetError(cmStrCat("Keywords missing values:\n  ",
                              cmJoin(cmMakeRange(kwbegin, kwend), "\n  ")));
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
 
@@ -3391,7 +3422,7 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
       !cm::contains(knownFormats, parsedArgs.Format)) {
     status.SetError(
       cmStrCat("archive format ", parsedArgs.Format, " not supported"));
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
 
@@ -3400,7 +3431,7 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
       cm::contains(zipFileFormats, parsedArgs.Format)) {
     status.SetError(cmStrCat("archive format ", parsedArgs.Format,
                              " does not support COMPRESSION arguments"));
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
 
@@ -3418,7 +3449,7 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
   } else if (!parsedArgs.Compression.empty()) {
     status.SetError(cmStrCat("compression type ", parsedArgs.Compression,
                              " is not supported"));
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
 
@@ -3429,7 +3460,7 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
       status.SetError(cmStrCat("compression level ",
                                parsedArgs.CompressionLevel,
                                " should be in range 0 to 9"));
-      cmSystemTools::SetFatalErrorOccured();
+      cmSystemTools::SetFatalErrorOccurred();
       return false;
     }
     compressionLevel = std::stoi(parsedArgs.CompressionLevel);
@@ -3437,21 +3468,21 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
       status.SetError(cmStrCat("compression level ",
                                parsedArgs.CompressionLevel,
                                " should be in range 0 to 9"));
-      cmSystemTools::SetFatalErrorOccured();
+      cmSystemTools::SetFatalErrorOccurred();
       return false;
     }
     if (compress == cmSystemTools::TarCompressNone) {
       status.SetError(cmStrCat("compression level is not supported for "
                                "compression \"None\"",
                                parsedArgs.Compression));
-      cmSystemTools::SetFatalErrorOccured();
+      cmSystemTools::SetFatalErrorOccurred();
       return false;
     }
   }
 
   if (parsedArgs.Paths.empty()) {
     status.SetError("ARCHIVE_CREATE requires a non-empty list of PATHS");
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
 
@@ -3459,7 +3490,7 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
                                 parsedArgs.Verbose, parsedArgs.MTime,
                                 parsedArgs.Format, compressionLevel)) {
     status.SetError(cmStrCat("failed to compress: ", parsedArgs.Output));
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
 
@@ -3476,6 +3507,7 @@ bool HandleArchiveExtractCommand(std::vector<std::string> const& args,
     bool ListOnly = false;
     std::string Destination;
     std::vector<std::string> Patterns;
+    bool Touch = false;
   };
 
   static auto const parser = cmArgumentParser<Arguments>{}
@@ -3483,7 +3515,8 @@ bool HandleArchiveExtractCommand(std::vector<std::string> const& args,
                                .Bind("VERBOSE"_s, &Arguments::Verbose)
                                .Bind("LIST_ONLY"_s, &Arguments::ListOnly)
                                .Bind("DESTINATION"_s, &Arguments::Destination)
-                               .Bind("PATTERNS"_s, &Arguments::Patterns);
+                               .Bind("PATTERNS"_s, &Arguments::Patterns)
+                               .Bind("TOUCH"_s, &Arguments::Touch);
 
   std::vector<std::string> unrecognizedArguments;
   std::vector<std::string> keywordsMissingValues;
@@ -3493,7 +3526,7 @@ bool HandleArchiveExtractCommand(std::vector<std::string> const& args,
   auto argIt = unrecognizedArguments.begin();
   if (argIt != unrecognizedArguments.end()) {
     status.SetError(cmStrCat("Unrecognized argument: \"", *argIt, "\""));
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
 
@@ -3504,7 +3537,7 @@ bool HandleArchiveExtractCommand(std::vector<std::string> const& args,
   if (kwend != kwbegin) {
     status.SetError(cmStrCat("Keywords missing values:\n  ",
                              cmJoin(cmMakeRange(kwbegin, kwend), "\n  ")));
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
 
@@ -3514,7 +3547,7 @@ bool HandleArchiveExtractCommand(std::vector<std::string> const& args,
     if (!cmSystemTools::ListTar(inFile, parsedArgs.Patterns,
                                 parsedArgs.Verbose)) {
       status.SetError(cmStrCat("failed to list: ", inFile));
-      cmSystemTools::SetFatalErrorOccured();
+      cmSystemTools::SetFatalErrorOccurred();
       return false;
     }
   } else {
@@ -3528,7 +3561,7 @@ bool HandleArchiveExtractCommand(std::vector<std::string> const& args,
 
       if (!cmSystemTools::MakeDirectory(destDir)) {
         status.SetError(cmStrCat("failed to create directory: ", destDir));
-        cmSystemTools::SetFatalErrorOccured();
+        cmSystemTools::SetFatalErrorOccurred();
         return false;
       }
 
@@ -3542,14 +3575,17 @@ bool HandleArchiveExtractCommand(std::vector<std::string> const& args,
     if (workdir.Failed()) {
       status.SetError(
         cmStrCat("failed to change working directory to: ", destDir));
-      cmSystemTools::SetFatalErrorOccured();
+      cmSystemTools::SetFatalErrorOccurred();
       return false;
     }
 
-    if (!cmSystemTools::ExtractTar(inFile, parsedArgs.Patterns,
-                                   parsedArgs.Verbose)) {
+    if (!cmSystemTools::ExtractTar(
+          inFile, parsedArgs.Patterns,
+          parsedArgs.Touch ? cmSystemTools::cmTarExtractTimestamps::No
+                           : cmSystemTools::cmTarExtractTimestamps::Yes,
+          parsedArgs.Verbose)) {
       status.SetError(cmStrCat("failed to extract: ", inFile));
-      cmSystemTools::SetFatalErrorOccured();
+      cmSystemTools::SetFatalErrorOccurred();
       return false;
     }
   }
@@ -3563,7 +3599,7 @@ bool ValidateAndConvertPermissions(const std::vector<std::string>& permissions,
   for (const auto& i : permissions) {
     if (!cmFSPermissions::stringToModeT(i, perms)) {
       status.SetError(i + " is an invalid permission specifier");
-      cmSystemTools::SetFatalErrorOccured();
+      cmSystemTools::SetFatalErrorOccurred();
       return false;
     }
   }
@@ -3575,7 +3611,7 @@ bool SetPermissions(const std::string& filename, const mode_t& perms,
 {
   if (!cmSystemTools::SetPermissions(filename, perms)) {
     status.SetError("Failed to set permissions for " + filename);
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
   return true;
@@ -3615,7 +3651,7 @@ bool HandleChmodCommandImpl(std::vector<std::string> const& args, bool recurse,
       parsedArgs.DirectoryPermissions.empty()) // no permissions given
   {
     status.SetError("No permissions given");
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
 
@@ -3624,14 +3660,14 @@ bool HandleChmodCommandImpl(std::vector<std::string> const& args, bool recurse,
   {
     status.SetError("Remove either PERMISSIONS or FILE_PERMISSIONS or "
                     "DIRECTORY_PERMISSIONS from the invocation");
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
 
   if (!keywordsMissingValues.empty()) {
     for (const auto& i : keywordsMissingValues) {
       status.SetError(i + " is not given any arguments");
-      cmSystemTools::SetFatalErrorOccured();
+      cmSystemTools::SetFatalErrorOccurred();
     }
     return false;
   }
@@ -3670,7 +3706,7 @@ bool HandleChmodCommandImpl(std::vector<std::string> const& args, bool recurse,
   for (const auto& i : allPathEntries) {
     if (!(cmSystemTools::FileExists(i) || cmSystemTools::FileIsDirectory(i))) {
       status.SetError(cmStrCat("does not exist:\n  ", i));
-      cmSystemTools::SetFatalErrorOccured();
+      cmSystemTools::SetFatalErrorOccurred();
       return false;
     }
 

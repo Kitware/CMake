@@ -175,8 +175,9 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
       this->LocalGenerator,
       this->LocalGenerator->GetStateSnapshot().GetDirectory());
 
-  this->AddModuleDefinitionFlag(linkLineComputer.get(), extraFlags,
-                                this->GetConfigName());
+  this->LocalGenerator->AppendModuleDefinitionFlag(
+    extraFlags, this->GeneratorTarget, linkLineComputer.get(),
+    this->GetConfigName());
 
   this->UseLWYU = this->LocalGenerator->AppendLWYUFlags(
     extraFlags, this->GeneratorTarget, linkLanguage);
@@ -209,8 +210,9 @@ void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules(bool relink)
       this->LocalGenerator,
       this->LocalGenerator->GetStateSnapshot().GetDirectory());
 
-  this->AddModuleDefinitionFlag(linkLineComputer.get(), extraFlags,
-                                this->GetConfigName());
+  this->LocalGenerator->AppendModuleDefinitionFlag(
+    extraFlags, this->GeneratorTarget, linkLineComputer.get(),
+    this->GetConfigName());
 
   this->WriteLibraryRules(linkRuleVar, extraFlags, relink);
 }
@@ -929,7 +931,9 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   }
 
   // Compute the list of outputs.
-  std::vector<std::string> outputs(1, targetFullPathReal);
+  std::vector<std::string> outputs;
+  outputs.reserve(3);
+  outputs.push_back(targetFullPathReal);
   if (this->TargetNames.SharedObject != this->TargetNames.Real) {
     outputs.push_back(targetFullPathSO);
   }

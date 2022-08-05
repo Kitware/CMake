@@ -1,17 +1,30 @@
 find_package
 ------------
 
+.. |FIND_XXX| replace:: find_package
+.. |FIND_ARGS_XXX| replace:: <PackageName>
+.. |FIND_XXX_REGISTRY_VIEW_DEFAULT| replace:: ``TARGET``
+.. |CMAKE_FIND_ROOT_PATH_MODE_XXX| replace::
+   :variable:`CMAKE_FIND_ROOT_PATH_MODE_PACKAGE`
+
 .. only:: html
 
    .. contents::
 
+.. note:: The :guide:`Using Dependencies Guide` provides a high-level
+  introduction to this general topic. It provides a broader overview of
+  where the ``find_package()`` command fits into the bigger picture,
+  including its relationship to the :module:`FetchContent` module.
+  The guide is recommended pre-reading before moving on to the details below.
+
 Find a package (usually provided by something external to the project),
-and load its package-specific details.
+and load its package-specific details.  Calls to this command can also
+be intercepted by :ref:`dependency providers <dependency_providers>`.
 
 Search Modes
 ^^^^^^^^^^^^
 
-The command has two very distinct ways of conducting the search:
+The command has a few modes by which it searches for packages:
 
 **Module mode**
   In this mode, CMake searches for a file called ``Find<PackageName>.cmake``,
@@ -54,7 +67,17 @@ The command has two very distinct ways of conducting the search:
   Config mode is supported by both the :ref:`basic <Basic Signature>` and
   :ref:`full <Full Signature>` command signatures.
 
-The command arguments determine which of the above modes is used.  When the
+**FetchContent redirection mode**
+  .. versionadded:: 3.24
+    A call to ``find_package()`` can be redirected internally to a package
+    provided by the :module:`FetchContent` module.  To the caller, the behavior
+    will appear similar to Config mode, except that the search logic is
+    by-passed and the component information is not used.  See
+    :command:`FetchContent_Declare` and :command:`FetchContent_MakeAvailable`
+    for further details.
+
+When not redirected to a package provided by :module:`FetchContent`, the
+command arguments determine whether Module or Config mode is used.  When the
 `basic signature`_ is used, the command searches in Module mode first.
 If the package is not found, the search falls back to Config mode.
 A user may set the :variable:`CMAKE_FIND_PACKAGE_PREFER_CONFIG` variable
@@ -64,7 +87,7 @@ forced to use only Module mode with a ``MODULE`` keyword.  If the
 `full signature`_ is used, the command only searches in Config mode.
 
 Where possible, user code should generally look for packages using the
-`basic signature`_, since that allows the package to be found with either mode.
+`basic signature`_, since that allows the package to be found with any mode.
 Project maintainers wishing to provide a config package should understand
 the bigger picture, as explained in :ref:`Full Signature` and all subsequent
 sections on this page.
@@ -74,12 +97,15 @@ sections on this page.
 Basic Signature
 ^^^^^^^^^^^^^^^
 
-.. code-block:: cmake
+.. parsed-literal::
 
   find_package(<PackageName> [version] [EXACT] [QUIET] [MODULE]
                [REQUIRED] [[COMPONENTS] [components...]]
                [OPTIONAL_COMPONENTS components...]
-               [NO_POLICY_SCOPE])
+               [REGISTRY_VIEW  (64|32|64_32|32_64|HOST|TARGET|BOTH)]
+               [GLOBAL]
+               [NO_POLICY_SCOPE]
+               [BYPASS_PROVIDER])
 
 The basic signature is supported by both Module and Config modes.
 The ``MODULE`` keyword implies that only Module mode can be used to find
@@ -115,6 +141,18 @@ define what occurs in such cases.  Common arrangements include assuming it
 should find all components, no components or some well-defined subset of the
 available components.
 
+.. versionadded:: 3.24
+  The ``REGISTRY_VIEW`` keyword enables to specify which registry views must be
+  queried. This keyword is only meaningful on ``Windows`` platform and will be
+  ignored on all other ones. Formally, it is up to the target package how to
+  interpret the registry view information given to it.
+
+.. versionadded:: 3.24
+  Specifying the ``GLOBAL`` keyword will promote all imported targets to
+  a global scope in the importing project. Alternatively, this functionality
+  can be enabled by setting the :variable:`CMAKE_FIND_PACKAGE_TARGETS_GLOBAL`
+  variable.
+
 .. _FIND_PACKAGE_VERSION_FORMAT:
 
 The ``[version]`` argument requests a version with which the package found
@@ -144,22 +182,33 @@ only take the single version at the lower end of the range into account.
 See the :command:`cmake_policy` command documentation for discussion
 of the ``NO_POLICY_SCOPE`` option.
 
+.. versionadded:: 3.24
+  The ``BYPASS_PROVIDER`` keyword is only allowed when ``find_package()`` is
+  being called by a :ref:`dependency provider <dependency_providers>`.
+  It can be used by providers to call the built-in ``find_package()``
+  implementation directly and prevent that call from being re-routed back to
+  itself.  Future versions of CMake may detect attempts to use this keyword
+  from places other than a dependency provider and halt with a fatal error.
+
 .. _`full signature`:
 
 Full Signature
 ^^^^^^^^^^^^^^
 
-.. code-block:: cmake
+.. parsed-literal::
 
   find_package(<PackageName> [version] [EXACT] [QUIET]
                [REQUIRED] [[COMPONENTS] [components...]]
                [OPTIONAL_COMPONENTS components...]
                [CONFIG|NO_MODULE]
+               [GLOBAL]
                [NO_POLICY_SCOPE]
+               [BYPASS_PROVIDER]
                [NAMES name1 [name2 ...]]
                [CONFIGS config1 [config2 ...]]
                [HINTS path1 [path2 ... ]]
                [PATHS path1 [path2 ... ]]
+               [REGISTRY_VIEW  (64|32|64_32|32_64|HOST|TARGET|BOTH)]
                [PATH_SUFFIXES suffix1 [suffix2 ...]]
                [NO_DEFAULT_PATH]
                [NO_PACKAGE_ROOT_PATH]
@@ -169,6 +218,7 @@ Full Signature
                [NO_CMAKE_PACKAGE_REGISTRY]
                [NO_CMAKE_BUILDS_PATH] # Deprecated; does nothing.
                [NO_CMAKE_SYSTEM_PATH]
+               [NO_CMAKE_INSTALL_PREFIX]
                [NO_CMAKE_SYSTEM_PACKAGE_REGISTRY]
                [CMAKE_FIND_ROOT_PATH_BOTH |
                 ONLY_CMAKE_FIND_ROOT_PATH |
@@ -181,9 +231,12 @@ proceeds at once with Config mode search.
 
 Config mode search attempts to locate a configuration file provided by the
 package to be found.  A cache entry called ``<PackageName>_DIR`` is created to
-hold the directory containing the file.  By default the command
-searches for a package with the name ``<PackageName>``.  If the ``NAMES`` option
-is given the names following it are used instead of ``<PackageName>``.
+hold the directory containing the file.  By default, the command searches for
+a package with the name ``<PackageName>``.  If the ``NAMES`` option is given,
+the names following it are used instead of ``<PackageName>``.  The names are
+also considered when determining whether to redirect the call to a package
+provided by :module:`FetchContent`.
+
 The command searches for a file called ``<PackageName>Config.cmake`` or
 ``<lowercasePackageName>-config.cmake`` for each name specified.
 A replacement set of possible configuration file names may be given
@@ -219,6 +272,14 @@ Config Mode Search Procedure
   When Config mode is used, this search procedure is applied regardless of
   whether the :ref:`full <full signature>` or :ref:`basic <basic signature>`
   signature was given.
+
+.. versionadded:: 3.24
+  All calls to ``find_package()`` (even in Module mode) first look for a config
+  package file in the :variable:`CMAKE_FIND_PACKAGE_REDIRECTS_DIR` directory.
+  The :module:`FetchContent` module, or even the project itself, may write files
+  to that location to redirect ``find_package()`` calls to content already
+  provided by the project.  If no config package file is found in that location,
+  the search proceeds with the logic described below.
 
 CMake constructs a set of possible installation prefixes for the
 package.  Under each prefix several directories are searched for a
@@ -263,6 +324,18 @@ that order).
 * Paths with ``libx32`` are searched on platforms using the x32 ABI
   if the :prop_gbl:`FIND_LIBRARY_USE_LIBX32_PATHS` property is set to ``TRUE``.
 * The ``lib`` path is always searched.
+
+.. versionchanged:: 3.24
+  On ``Windows`` platform, it is possible to include registry queries as part
+  of the directories specified through ``HINTS`` and ``PATHS`` keywords, using
+  a :ref:`dedicated syntax <Find Using Windows Registry>`. Such specifications
+  will be ignored on all other platforms.
+
+.. versionadded:: 3.24
+  ``REGISTRY_VIEW`` can be specified to manage ``Windows`` registry queries
+  specified as part of ``PATHS`` and ``HINTS``.
+
+.. include:: FIND_XXX_REGISTRY_VIEW.txt
 
 If ``PATH_SUFFIXES`` is specified, the suffixes are appended to each
 (``W``) or (``U``) directory entry one-by-one.
@@ -339,9 +412,11 @@ enabled.
    package registry.
 
 7. Search cmake variables defined in the Platform files for the
-   current system.  This can be skipped if ``NO_CMAKE_SYSTEM_PATH`` is
-   passed or by setting the :variable:`CMAKE_FIND_USE_CMAKE_SYSTEM_PATH`
-   to ``FALSE``:
+   current system. The searching of :variable:`CMAKE_INSTALL_PREFIX` can be
+   skipped if ``NO_CMAKE_INSTALL_PREFIX`` is passed or by setting the
+   :variable:`CMAKE_FIND_USE_INSTALL_PREFIX` to ``FALSE``. All these locations
+   can be skipped if ``NO_CMAKE_SYSTEM_PATH`` is passed or by setting the
+   :variable:`CMAKE_FIND_USE_CMAKE_SYSTEM_PATH` to ``FALSE``:
 
    * :variable:`CMAKE_SYSTEM_PREFIX_PATH`
    * :variable:`CMAKE_SYSTEM_FRAMEWORK_PATH`
@@ -372,11 +447,6 @@ of the above locations to be ignored.
    Added the ``CMAKE_FIND_USE_<CATEGORY>`` variables to globally disable
    various search locations.
 
-.. |FIND_XXX| replace:: find_package
-.. |FIND_ARGS_XXX| replace:: <PackageName>
-.. |CMAKE_FIND_ROOT_PATH_MODE_XXX| replace::
-   :variable:`CMAKE_FIND_ROOT_PATH_MODE_PACKAGE`
-
 .. include:: FIND_XXX_ROOT.txt
 .. include:: FIND_XXX_ORDER.txt
 
@@ -388,7 +458,8 @@ to resolve symbolic links and store the real path to the file.
 Every non-REQUIRED ``find_package`` call can be disabled or made REQUIRED:
 
 * Setting the :variable:`CMAKE_DISABLE_FIND_PACKAGE_<PackageName>` variable
-  to ``TRUE`` disables the package.
+  to ``TRUE`` disables the package.  This also disables redirection to a
+  package provided by :module:`FetchContent`.
 
 * Setting the :variable:`CMAKE_REQUIRE_FIND_PACKAGE_<PackageName>` variable
   to ``TRUE`` makes the package REQUIRED.
@@ -411,8 +482,8 @@ version (see :ref:`format specification <FIND_PACKAGE_VERSION_FORMAT>`). If the
 ``EXACT`` option is given, only a version of the package claiming an exact match
 of the requested version may be found.  CMake does not establish any
 convention for the meaning of version numbers.  Package version
-numbers are checked by "version" files provided by the packages
-themselves.  For a candidate package configuration file
+numbers are checked by "version" files provided by the packages themselves
+or by :module:`FetchContent`.  For a candidate package configuration file
 ``<config-file>.cmake`` the corresponding version file is located next
 to it and named either ``<config-file>-version.cmake`` or
 ``<config-file>Version.cmake``.  If no such version file is available
@@ -547,6 +618,8 @@ restores their original state before returning):
   True if ``REQUIRED`` option was given
 ``<PackageName>_FIND_QUIETLY``
   True if ``QUIET`` option was given
+``<PackageName>_FIND_REGISTRY_VIEW``
+  The requested view if ``REGISTRY_VIEW`` option was given
 ``<PackageName>_FIND_VERSION``
   Full requested version string
 ``<PackageName>_FIND_VERSION_MAJOR``

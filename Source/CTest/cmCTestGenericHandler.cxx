@@ -137,7 +137,7 @@ bool cmCTestGenericHandler::StartResultingXML(cmCTest::Part part,
                "maybe you forgot to call ctest_start() before calling "
                "ctest_configure()."
                  << std::endl);
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
   if (!this->CTest->OpenOutputFile(this->CTest->GetCurrentTag(), ostr.str(),

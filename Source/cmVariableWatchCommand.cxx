@@ -58,7 +58,7 @@ void cmVariableWatchCommandVariableAccessed(const std::string& variable,
       { stack, cmListFileArgument::Quoted, fakeLineNo }
     };
 
-    cmListFileFunction newLFF{ data->Command, fakeLineNo,
+    cmListFileFunction newLFF{ data->Command, fakeLineNo, fakeLineNo,
                                std::move(newLFFArgs) };
     cmExecutionStatus status(*makefile);
     if (!makefile->ExecuteCommand(newLFF, status)) {

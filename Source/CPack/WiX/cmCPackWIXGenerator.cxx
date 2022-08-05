@@ -89,10 +89,21 @@ bool cmCPackWIXGenerator::RunCandleCommand(std::string const& sourceFile,
     return false;
   }
 
+  std::string arch;
+  if (cmValue archOpt = GetOption("CPACK_WIX_ARCHITECTURE")) {
+    arch = *archOpt;
+  } else {
+    arch = GetArchitecture();
+    cmCPackLogger(
+      cmCPackLog::LOG_VERBOSE,
+      "CPACK_WIX_ARCHITECTURE was not set. Invoking WiX with architecture "
+        << arch << " . " << std::endl);
+  }
+
   std::ostringstream command;
   command << QuotePath(executable);
   command << " -nologo";
-  command << " -arch " << GetArchitecture();
+  command << " -arch " << arch;
   command << " -out " << QuotePath(objectFile);
 
   for (std::string const& ext : CandleExtensions) {
@@ -140,7 +151,7 @@ bool cmCPackWIXGenerator::RunLightCommand(std::string const& objectFiles)
 
 int cmCPackWIXGenerator::PackageFiles()
 {
-  if (!PackageFilesImpl() || cmSystemTools::GetErrorOccuredFlag()) {
+  if (!PackageFilesImpl() || cmSystemTools::GetErrorOccurredFlag()) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Fatal WiX Generator Error" << std::endl);
     return false;

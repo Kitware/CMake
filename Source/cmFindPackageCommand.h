@@ -9,6 +9,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <cm/string_view>
@@ -76,6 +77,7 @@ private:
       : cmFindCommon::PathLabel(label)
     {
     }
+    static PathLabel PackageRedirect;
     static PathLabel UserRegistry;
     static PathLabel Builds;
     static PathLabel SystemRegistry;
@@ -96,7 +98,9 @@ private:
     const std::string& prefix, const std::string& version, unsigned int count,
     unsigned int major, unsigned int minor, unsigned int patch,
     unsigned int tweak);
-  void SetModuleVariables(const std::string& components);
+  void SetModuleVariables(
+    const std::string& components,
+    const std::vector<std::pair<std::string, const char*>>& componentVarDefs);
   bool FindModule(bool& found);
   void AddFindDefinition(const std::string& var, cm::string_view value);
   void RestoreFindDefinitions();
@@ -119,8 +123,10 @@ private:
   };
   bool ReadListFile(const std::string& f, PolicyScopeRule psr);
   void StoreVersionFound();
+  void SetConfigDirCacheVariable(const std::string& value);
 
   void ComputePrefixes();
+  void FillPrefixesPackageRedirect();
   void FillPrefixesPackageRoot();
   void FillPrefixesCMakeEnvironment();
   void FillPrefixesCMakeVariable();
@@ -199,6 +205,8 @@ private:
   bool UseLibx32Paths = false;
   bool UseRealPath = false;
   bool PolicyScope = true;
+  bool GlobalScope = false;
+  bool RegistryViewDefined = false;
   std::string LibraryArchitecture;
   std::vector<std::string> Names;
   std::vector<std::string> Configs;

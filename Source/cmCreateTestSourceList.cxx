@@ -102,7 +102,6 @@ bool cmCreateTestSourceList(std::vector<std::string> const& args,
   }
 
   std::string functionMapCode;
-  int numTests = 0;
   std::vector<std::string>::iterator j;
   for (i = testsBegin, j = tests_func_name.begin(); i != tests.end();
        ++i, ++j) {
@@ -121,7 +120,6 @@ bool cmCreateTestSourceList(std::vector<std::string> const& args,
     functionMapCode += *j;
     functionMapCode += "\n"
                        "  },\n";
-    numTests++;
   }
   if (!extraInclude.empty()) {
     mf.AddDefinition("CMAKE_TESTDRIVER_EXTRA_INCLUDES", extraInclude);

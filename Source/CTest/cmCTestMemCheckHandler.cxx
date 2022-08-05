@@ -371,7 +371,8 @@ void cmCTestMemCheckHandler::GenerateCTestXML(cmXMLWriter& xml)
     }
     this->CleanTestOutput(
       memcheckstr,
-      static_cast<size_t>(this->CustomMaximumFailedTestOutputSize));
+      static_cast<size_t>(this->CustomMaximumFailedTestOutputSize),
+      this->TestOutputTruncation);
     this->WriteTestResultHeader(xml, result);
     xml.StartElement("Results");
     int memoryErrors = 0;
@@ -1206,7 +1207,8 @@ bool cmCTestMemCheckHandler::ProcessMemCheckCudaOutput(
 
       if (failure >= 0) {
         ostr << "<b>" << this->ResultStrings[failure] << "</b> ";
-        if (results.empty() || unsigned(failure) > results.size() - 1) {
+        if (results.empty() ||
+            static_cast<unsigned>(failure) > results.size() - 1) {
           results.push_back(1);
         } else {
           results[failure]++;

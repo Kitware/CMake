@@ -1,0 +1,18 @@
+CMake Error at nested-incompatible-genex.cmake:[0-9]+ \(add_library\):
+  Error evaluating generator expression:
+
+    \$<LINK_LIBRARY:feat,\$<LINK_GROUP:feat,foo>>
+
+  \$<LINK_GROUP:...> cannot be nested inside a \$<LINK_LIBRARY:...> expression.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Error at nested-incompatible-genex.cmake:[0-9]+ \(target_link_libraries\):
+  Error evaluating generator expression:
+
+    \$<LINK_LIBRARY:feat,\$<LINK_GROUP:feat,foo>>
+
+  \$<LINK_GROUP:...> cannot be nested inside a \$<LINK_LIBRARY:...> expression.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

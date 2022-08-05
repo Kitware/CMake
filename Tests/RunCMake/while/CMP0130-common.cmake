@@ -1,0 +1,6 @@
+set(paren "(")
+while(${paren})
+  message(STATUS "Condition incorrectly true")
+  break()
+endwhile()
+message(STATUS "Code incorrectly accepted")
