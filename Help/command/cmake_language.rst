@@ -51,6 +51,7 @@ is equivalent to
   To ensure consistency of the code, the following commands are not allowed:
 
   * ``if`` / ``elseif`` / ``else`` / ``endif``
+  * ``block`` / ``endblock``
   * ``while`` / ``endwhile``
   * ``foreach`` / ``endforeach``
   * ``function`` / ``endfunction``

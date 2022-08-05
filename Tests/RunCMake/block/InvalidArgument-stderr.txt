@@ -1,0 +1,4 @@
+CMake Error at InvalidArgument.cmake:[0-9]+ \(block\):
+  block PROPAGATE cannot be specified without a new scope for VARIABLES
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

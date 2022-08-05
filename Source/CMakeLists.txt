@@ -571,6 +571,8 @@ set(SRCS
   cmFindProgramCommand.h
   cmForEachCommand.cxx
   cmForEachCommand.h
+  cmBlockCommand.cxx
+  cmBlockCommand.h
   cmFunctionBlocker.cxx
   cmFunctionBlocker.h
   cmFunctionCommand.cxx

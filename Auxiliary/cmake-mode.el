@@ -41,8 +41,8 @@ set the path with these commands:
   :group 'cmake)
 
 ;; Keywords
-(defconst cmake-keywords-block-open '("IF" "MACRO" "FOREACH" "ELSE" "ELSEIF" "WHILE" "FUNCTION"))
-(defconst cmake-keywords-block-close '("ENDIF" "ENDFOREACH" "ENDMACRO" "ELSE" "ELSEIF" "ENDWHILE" "ENDFUNCTION"))
+(defconst cmake-keywords-block-open '("BLOCK" "IF" "MACRO" "FOREACH" "ELSE" "ELSEIF" "WHILE" "FUNCTION"))
+(defconst cmake-keywords-block-close '("ENDBLOCK" "ENDIF" "ENDFOREACH" "ENDMACRO" "ELSE" "ELSEIF" "ENDWHILE" "ENDFUNCTION"))
 (defconst cmake-keywords
   (let ((kwds (append cmake-keywords-block-open cmake-keywords-block-close nil)))
     (delete-dups kwds)))

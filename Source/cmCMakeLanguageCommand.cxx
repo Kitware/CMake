@@ -36,13 +36,14 @@ bool FatalError(cmExecutionStatus& status, std::string const& error)
   return false;
 }
 
-std::array<cm::static_string_view, 12> InvalidCommands{
+std::array<cm::static_string_view, 14> InvalidCommands{
   { // clang-format off
   "function"_s, "endfunction"_s,
   "macro"_s, "endmacro"_s,
   "if"_s, "elseif"_s, "else"_s, "endif"_s,
   "while"_s, "endwhile"_s,
-  "foreach"_s, "endforeach"_s
+  "foreach"_s, "endforeach"_s,
+  "block"_s, "endblock"_s
   } // clang-format on
 };
 

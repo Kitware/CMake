@@ -1,0 +1,4 @@
+CMake Error at WrongScope.cmake:[0-9]+ \(block\):
+  block SCOPE_FOR unsupported scope "WRONG_SCOPE"
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

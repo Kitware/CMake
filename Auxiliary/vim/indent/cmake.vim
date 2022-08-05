@@ -59,8 +59,8 @@ fun! CMakeGetIndent(lnum)
 
   let cmake_closing_parens_line = '^\s*\()\+\)\s*$'
 
-  let cmake_indent_begin_regex = '^\s*\(IF\|MACRO\|FOREACH\|ELSE\|ELSEIF\|WHILE\|FUNCTION\)\s*('
-  let cmake_indent_end_regex = '^\s*\(ENDIF\|ENDFOREACH\|ENDMACRO\|ELSE\|ELSEIF\|ENDWHILE\|ENDFUNCTION\)\s*('
+  let cmake_indent_begin_regex = '^\s*\(BLOCK\|IF\|MACRO\|FOREACH\|ELSE\|ELSEIF\|WHILE\|FUNCTION\)\s*('
+  let cmake_indent_end_regex = '^\s*\(ENDBLOCK\|ENDIF\|ENDFOREACH\|ENDMACRO\|ELSE\|ELSEIF\|ENDWHILE\|ENDFUNCTION\)\s*('
 
   if this_line =~? cmake_closing_parens_line
     if previous_line !~? cmake_indent_open_regex

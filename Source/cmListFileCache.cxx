@@ -347,6 +347,7 @@ enum class NestingStateEnum
   Foreach,
   Function,
   Macro,
+  Block
 };
 
 struct NestingState
@@ -431,6 +432,16 @@ cm::optional<cmListFileContext> cmListFileParser::CheckNesting() const
       });
     } else if (name == "endmacro") {
       if (!TopIs(stack, NestingStateEnum::Macro)) {
+        return cmListFileContext::FromListFileFunction(func, this->FileName);
+      }
+      stack.pop_back();
+    } else if (name == "block") {
+      stack.push_back({
+        NestingStateEnum::Block,
+        cmListFileContext::FromListFileFunction(func, this->FileName),
+      });
+    } else if (name == "endblock") {
+      if (!TopIs(stack, NestingStateEnum::Block)) {
         return cmListFileContext::FromListFileFunction(func, this->FileName);
       }
       stack.pop_back();
