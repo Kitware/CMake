@@ -16,6 +16,7 @@ relevant parent scope as described for the :command:`define_property`
 command and if still unable to find the property, ``VAR`` will be set to
 an empty string.
 
-For a list of standard properties you can type ``cmake --help-property-list``.
+For a list of standard properties you can type
+:option:`cmake --help-property-list`.
 
 See also the more general :command:`get_property` command.

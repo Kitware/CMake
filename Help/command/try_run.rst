@@ -35,8 +35,8 @@ information on how the test project is constructed to build the source file.
 The options are:
 
 ``CMAKE_FLAGS <flags>...``
-  Specify flags of the form ``-DVAR:TYPE=VALUE`` to be passed to
-  the ``cmake`` command-line used to drive the test build.
+  Specify flags of the form :option:`-DVAR:TYPE=VALUE <cmake -D>` to be passed
+  to the :manual:`cmake(1)` command-line used to drive the test build.
   The example in :command:`try_compile` shows how values for variables
   ``INCLUDE_DIRECTORIES``, ``LINK_DIRECTORIES``, and ``LINK_LIBRARIES``
   are used.

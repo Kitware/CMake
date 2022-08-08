@@ -369,7 +369,7 @@ enabled.
     See policy :policy:`CMP0074`.
 
 2. Search paths specified in cmake-specific cache variables.  These
-   are intended to be used on the command line with a ``-DVAR=value``.
+   are intended to be used on the command line with a :option:`-DVAR=VALUE <cmake -D>`.
    The values are interpreted as :ref:`semicolon-separated lists <CMake Language Lists>`.
    This can be skipped if ``NO_CMAKE_PATH`` is passed or by setting the
    :variable:`CMAKE_FIND_USE_CMAKE_PATH` to ``FALSE``:

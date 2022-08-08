@@ -19,10 +19,10 @@ supports files included with the ``include`` field.
 
 ``CMakePresets.json`` and ``CMakeUserPresets.json`` live in the project's root
 directory. They both have exactly the same format, and both are optional
-(though at least one must be present if ``--preset`` is specified).
-``CMakePresets.json`` is meant to specify project-wide build details, while
-``CMakeUserPresets.json`` is meant for developers to specify their own local
-build details.
+(though at least one must be present if :option:`--preset <cmake --preset>`
+is specified).  ``CMakePresets.json`` is meant to specify project-wide build
+details, while ``CMakeUserPresets.json`` is meant for developers to specify
+their own local build details.
 
 ``CMakePresets.json`` may be checked into a version control system, and
 ``CMakeUserPresets.json`` should NOT be checked in. For example, if a
@@ -198,9 +198,9 @@ that may contain the following fields:
   or above, this field may be omitted to fall back to regular generator
   discovery procedure.
 
-  Note that for Visual Studio generators, unlike in the command line ``-G``
-  argument, you cannot include the platform name in the generator name. Use
-  the ``architecture`` field instead.
+  Note that for Visual Studio generators, unlike in the command line
+  :option:`-G <cmake -G>` argument, you cannot include the platform name
+  in the generator name. Use the ``architecture`` field instead.
 
 ``architecture``, ``toolset``
 
@@ -312,30 +312,35 @@ that may contain the following fields:
 
   ``dev``
 
-    An optional boolean. Equivalent to passing ``-Wdev`` or ``-Wno-dev``
-    on the command line. This may not be set to ``false`` if ``errors.dev``
-    is set to ``true``.
+    An optional boolean. Equivalent to passing :option:`-Wdev <cmake -Wdev>`
+    or :option:`-Wno-dev <cmake -Wno-dev>` on the command line. This may not
+    be set to ``false`` if ``errors.dev`` is set to ``true``.
 
   ``deprecated``
 
-    An optional boolean. Equivalent to passing ``-Wdeprecated`` or
-    ``-Wno-deprecated`` on the command line. This may not be set to
-    ``false`` if ``errors.deprecated`` is set to ``true``.
+    An optional boolean. Equivalent to passing
+    :option:`-Wdeprecated <cmake -Wdeprecated>` or
+    :option:`-Wno-deprecated <cmake -Wno-deprecated>` on the command line.
+    This may not be set to ``false`` if ``errors.deprecated`` is set to
+    ``true``.
 
   ``uninitialized``
 
     An optional boolean. Setting this to ``true`` is equivalent to passing
-    ``--warn-uninitialized`` on the command line.
+    :option:`--warn-uninitialized <cmake --warn-uninitialized>` on the command
+    line.
 
   ``unusedCli``
 
     An optional boolean. Setting this to ``false`` is equivalent to passing
-    ``--no-warn-unused-cli`` on the command line.
+    :option:`--no-warn-unused-cli <cmake --no-warn-unused-cli>` on the command
+    line.
 
   ``systemVars``
 
     An optional boolean. Setting this to ``true`` is equivalent to passing
-    ``--check-system-vars`` on the command line.
+    :option:`--check-system-vars <cmake --check-system-vars>` on the command
+    line.
 
 ``errors``
 
@@ -362,17 +367,18 @@ that may contain the following fields:
   ``output``
 
     An optional boolean. Setting this to ``true`` is equivalent to passing
-    ``--debug-output`` on the command line.
+    :option:`--debug-output <cmake --debug-output>` on the command line.
 
   ``tryCompile``
 
     An optional boolean. Setting this to ``true`` is equivalent to passing
-    ``--debug-trycompile`` on the command line.
+    :option:`--debug-trycompile <cmake --debug-trycompile>` on the command
+    line.
 
   ``find``
 
     An optional boolean. Setting this to ``true`` is equivalent to passing
-    ``--debug-find`` on the command line.
+    :option:`--debug-find <cmake --debug-find>` on the command line.
 
 Build Preset
 ^^^^^^^^^^^^
@@ -392,7 +398,8 @@ that may contain the following fields:
 ``hidden``
 
   An optional boolean specifying whether or not a preset should be hidden.
-  If a preset is hidden, it cannot be used in the ``--preset`` argument
+  If a preset is hidden, it cannot be used in the
+  :option:`--preset <cmake --preset>` argument
   and does not have to have a valid ``configurePreset``, even from
   inheritance. ``hidden`` presets are intended to be used as a base for
   other presets to inherit via the ``inherits`` field.
@@ -486,25 +493,25 @@ that may contain the following fields:
 
 ``jobs``
 
-  An optional integer. Equivalent to passing ``--parallel`` or ``-j`` on
-  the command line.
+  An optional integer. Equivalent to passing
+  :option:`--parallel <cmake --parallel>` or ``-j`` on the command line.
 
 ``targets``
 
   An optional string or array of strings. Equivalent to passing
-  ``--target`` or ``-t`` on the command line. Vendors may ignore the
-  targets property or hide build presets that explicitly specify targets.
-  This field supports macro expansion.
+  :option:`--target <cmake --target>` or ``-t`` on the command line.
+  Vendors may ignore the targets property or hide build presets that
+  explicitly specify targets. This field supports macro expansion.
 
 ``configuration``
 
-  An optional string. Equivalent to passing ``--config`` on the command
-  line.
+  An optional string. Equivalent to passing :option:`--config <cmake --config>`
+  on the command line.
 
 ``cleanFirst``
 
-  An optional bool. If true, equivalent to passing ``--clean-first`` on
-  the command line.
+  An optional bool. If true, equivalent to passing
+  :option:`--clean-first <cmake --clean-first>` on the command line.
 
 ``resolvePackageReferences``
 
@@ -531,10 +538,12 @@ that may contain the following fields:
 
   .. note::
 
-    The command line parameter ``--resolve-package-references`` will take
-    priority over this setting. If the command line parameter is not provided
-    and this setting is not specified, an environment-specific cache variable
-    will be evaluated to decide, if package restoration should be performed.
+    The command line parameter
+    :option:`--resolve-package-references <cmake --resolve-package-references>`
+    will take priority over this setting. If the command line parameter is not
+    provided and this setting is not specified, an environment-specific cache
+    variable will be evaluated to decide, if package restoration should be
+    performed.
 
     When using the Visual Studio generator, package references are defined
     using the :prop_tgt:`VS_PACKAGE_REFERENCES` property. Package references
@@ -544,8 +553,8 @@ that may contain the following fields:
 
 ``verbose``
 
-  An optional bool. If true, equivalent to passing ``--verbose`` on the
-  command line.
+  An optional bool. If true, equivalent to passing
+  :option:`--verbose <cmake --verbose>` on the command line.
 
 ``nativeToolOptions``
 
@@ -569,7 +578,8 @@ that may contain the following fields:
 ``hidden``
 
   An optional boolean specifying whether or not a preset should be hidden.
-  If a preset is hidden, it cannot be used in the ``--preset`` argument
+  If a preset is hidden, it cannot be used in the
+  :option:`--preset <ctest --preset>` argument
   and does not have to have a valid ``configurePreset``, even from
   inheritance. ``hidden`` presets are intended to be used as a base for
   other presets to inherit via the ``inherits`` field.
@@ -650,15 +660,15 @@ that may contain the following fields:
 
 ``configuration``
 
-  An optional string. Equivalent to passing ``--build-config`` on the
-  command line.
+  An optional string. Equivalent to passing
+  :option:`--build-config <ctest --build-config>` on the command line.
 
 ``overwriteConfigurationFile``
 
   An optional array of configuration options to overwrite options
   specified in the CTest configuration file. Equivalent to passing
-  ``--overwrite`` for each value in the array. The array values
-  support macro expansion.
+  :option:`--overwrite <ctest --overwrite>` for each value in the array.
+  The array values support macro expansion.
 
 ``output``
 
@@ -667,8 +677,8 @@ that may contain the following fields:
 
   ``shortProgress``
 
-    An optional bool. If true, equivalent to passing ``--progress`` on the
-    command line.
+    An optional bool. If true, equivalent to passing
+    :option:`--progress <ctest --progress>` on the command line.
 
   ``verbosity``
 
@@ -681,65 +691,75 @@ that may contain the following fields:
 
     ``verbose``
 
-      Equivalent to passing ``--verbose`` on the command line.
+      Equivalent to passing :option:`--verbose <ctest --verbose>` on
+      the command line.
 
     ``extra``
 
-      Equivalent to passing ``--extra-verbose`` on the command line.
+      Equivalent to passing :option:`--extra-verbose <ctest --extra-verbose>`
+      on the command line.
 
   ``debug``
 
-    An optional bool. If true, equivalent to passing ``--debug`` on the
-    command line.
+    An optional bool. If true, equivalent to passing
+    :option:`--debug <ctest --debug>` on the command line.
 
   ``outputOnFailure``
 
     An optional bool. If true, equivalent to passing
-    ``--output-on-failure`` on the command line.
+    :option:`--output-on-failure <ctest --output-on-failure>` on the command
+    line.
 
   ``quiet``
 
-    An optional bool. If true, equivalent to passing ``--quiet`` on the
-    command line.
+    An optional bool. If true, equivalent to passing
+    :option:`--quiet <ctest --quiet>` on the command line.
 
   ``outputLogFile``
 
     An optional string specifying a path to a log file. Equivalent to
-    passing ``--output-log`` on the command line. This field supports
-    macro expansion.
+    passing :option:`--output-log <ctest --output-log>` on the command line.
+    This field supports macro expansion.
 
   ``labelSummary``
 
     An optional bool. If false, equivalent to passing
-    ``--no-label-summary`` on the command line.
+    :option:`--no-label-summary <ctest --no-label-summary>` on the command
+    line.
 
   ``subprojectSummary``
 
     An optional bool. If false, equivalent to passing
-    ``--no-subproject-summary`` on the command line.
+    :option:`--no-subproject-summary <ctest --no-subproject-summary>`
+    on the command line.
 
   ``maxPassedTestOutputSize``
 
     An optional integer specifying the maximum output for passed tests in
-    bytes. Equivalent to passing ``--test-output-size-passed`` on the
-    command line.
+    bytes. Equivalent to passing
+    :option:`--test-output-size-passed <ctest --test-output-size-passed>`
+    on the command line.
 
   ``maxFailedTestOutputSize``
 
     An optional integer specifying the maximum output for failed tests in
-    bytes. Equivalent to passing ``--test-output-size-failed`` on the
-    command line.
+    bytes. Equivalent to passing
+    :option:`--test-output-size-failed <ctest --test-output-size-failed>`
+    on the command line.
 
   ``testOutputTruncation``
 
     An optional string specifying the test output truncation mode. Equivalent
-    to passing ``--test-output-truncation`` on the command line."
-    This is allowed in preset files specifying version ``5`` or above.
+    to passing
+    :option:`--test-output-truncation <ctest --test-output-truncation>` on
+    the command line. This is allowed in preset files specifying version
+    ``5`` or above.
 
   ``maxTestNameWidth``
 
     An optional integer specifying the maximum width of a test name to
-    output. Equivalent to passing ``--max-width`` on the command line.
+    output. Equivalent to passing :option:`--max-width <ctest --max-width>`
+    on the command line.
 
 ``filter``
 
@@ -754,29 +774,29 @@ that may contain the following fields:
     ``name``
 
       An optional string specifying a regex for test names. Equivalent to
-      passing ``--tests-regex`` on the command line. This field supports
-      macro expansion. CMake regex syntax is described under
-      :ref:`string(REGEX) <Regex Specification>`.
+      passing :option:`--tests-regex <ctest --tests-regex>` on the command
+      line. This field supports macro expansion. CMake regex syntax is
+      described under :ref:`string(REGEX) <Regex Specification>`.
 
 
     ``label``
 
       An optional string specifying a regex for test labels. Equivalent to
-      passing ``--label-regex`` on the command line. This field supports
-      macro expansion.
+      passing :option:`--label-regex <ctest --label-regex>` on the command
+      line. This field supports macro expansion.
 
     ``useUnion``
 
-      An optional bool. Equivalent to passing ``--union`` on the command
-      line.
+      An optional bool. Equivalent to passing :option:`--union <ctest --union>`
+      on the command line.
 
     ``index``
 
       An optional object specifying tests to include by test index. The
       object may contain the following fields. Can also be an optional
       string specifying a file with the command line syntax for
-      ``--tests-information``. If specified as a string, this field
-      supports macro expansion.
+      :option:`--tests-information <ctest --tests-information>`.
+      If specified as a string, this field supports macro expansion.
 
       ``start``
 
@@ -803,14 +823,14 @@ that may contain the following fields:
     ``name``
 
       An optional string specifying a regex for test names. Equivalent to
-      passing ``--exclude-regex`` on the command line. This field supports
-      macro expansion.
+      passing :option:`--exclude-regex <ctest --exclude-regex>` on the
+      command line. This field supports macro expansion.
 
     ``label``
 
       An optional string specifying a regex for test labels. Equivalent to
-      passing ``--label-exclude`` on the command line. This field supports
-      macro expansion.
+      passing :option:`--label-exclude <ctest --label-exclude>` on the
+      command line. This field supports macro expansion.
 
     ``fixtures``
 
@@ -820,21 +840,23 @@ that may contain the following fields:
       ``any``
 
         An optional string specifying a regex for text fixtures to exclude
-        from adding any tests. Equivalent to ``--fixture-exclude-any`` on
+        from adding any tests. Equivalent to
+        :option:`--fixture-exclude-any <ctest --fixture-exclude-any>` on
         the command line. This field supports macro expansion.
 
       ``setup``
 
         An optional string specifying a regex for text fixtures to exclude
-        from adding setup tests. Equivalent to ``--fixture-exclude-setup``
+        from adding setup tests. Equivalent to
+        :option:`--fixture-exclude-setup <ctest --fixture-exclude-setup>`
         on the command line. This field supports macro expansion.
 
       ``cleanup``
 
         An optional string specifying a regex for text fixtures to exclude
         from adding cleanup tests. Equivalent to
-        ``--fixture-exclude-cleanup`` on the command line. This field
-        supports macro expansion.
+        :option:`--fixture-exclude-cleanup <ctest --fixture-exclude-cleanup>`
+        on the command line. This field supports macro expansion.
 
 ``execution``
 
@@ -843,32 +865,35 @@ that may contain the following fields:
 
   ``stopOnFailure``
 
-    An optional bool. If true, equivalent to passing ``--stop-on-failure``
-    on the command line.
+    An optional bool. If true, equivalent to passing
+    :option:`--stop-on-failure <ctest --stop-on-failure>` on the command
+    line.
 
   ``enableFailover``
 
-    An optional bool. If true, equivalent to passing ``-F`` on the command
-    line.
+    An optional bool. If true, equivalent to passing :option:`-F <ctest -F>`
+    on the command line.
 
   ``jobs``
 
-    An optional integer. Equivalent to passing ``--parallel`` on the
-    command line.
+    An optional integer. Equivalent to passing
+    :option:`--parallel <ctest --parallel>` on the command line.
 
   ``resourceSpecFile``
 
-    An optional string. Equivalent to passing ``--resource-spec-file`` on
+    An optional string. Equivalent to passing
+    :option:`--resource-spec-file <ctest --resource-spec-file>` on
     the command line. This field supports macro expansion.
 
   ``testLoad``
 
-    An optional integer. Equivalent to passing ``--test-load`` on the
-    command line.
+    An optional integer. Equivalent to passing
+    :option:`--test-load <ctest --test-load>` on the command line.
 
   ``showOnly``
 
-    An optional string. Equivalent to passing ``--show-only`` on the
+    An optional string. Equivalent to passing
+    :option:`--show-only <ctest --show-only>` on the
     command line. The string must be one of the following values:
 
     ``human``
@@ -878,8 +903,8 @@ that may contain the following fields:
   ``repeat``
 
     An optional object specifying how to repeat tests. Equivalent to
-    passing ``--repeat`` on the command line. The object must have the
-    following fields.
+    passing :option:`--repeat <ctest --repeat>` on the command line.
+    The object must have the following fields.
 
     ``mode``
 
@@ -898,19 +923,21 @@ that may contain the following fields:
   ``interactiveDebugging``
 
     An optional bool. If true, equivalent to passing
-    ``--interactive-debug-mode 1`` on the command line. If false,
-    equivalent to passing ``--interactive-debug-mode 0`` on the command
-    line.
+    :option:`--interactive-debug-mode 1 <ctest --interactive-debug-mode>`
+    on the command line. If false, equivalent to passing
+    :option:`--interactive-debug-mode 0 <ctest --interactive-debug-mode>`
+    on the command line.
 
   ``scheduleRandom``
 
-    An optional bool. If true, equivalent to passing ``--schedule-random``
-    on the command line.
+    An optional bool. If true, equivalent to passing
+    :option:`--schedule-random <ctest --schedule-random>` on the command
+    line.
 
   ``timeout``
 
-    An optional integer. Equivalent to passing ``--timeout`` on the
-    command line.
+    An optional integer. Equivalent to passing
+    :option:`--timeout <ctest --timeout>` on the command line.
 
   ``noTestsAction``
 
@@ -923,11 +950,13 @@ that may contain the following fields:
 
     ``error``
 
-      Equivalent to passing ``--no-tests=error`` on the command line.
+      Equivalent to passing :option:`--no-tests=error <ctest --no-tests>`
+      on the command line.
 
     ``ignore``
 
-      Equivalent to passing ``--no-tests=ignore`` on the command line.
+      Equivalent to passing :option:`--no-tests=ignore <ctest --no-tests>`
+      on the command line.
 
 Condition
 ^^^^^^^^^

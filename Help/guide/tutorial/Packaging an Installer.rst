@@ -38,15 +38,15 @@ binary directory run:
 
   cpack
 
-To specify the generator, use the ``-G`` option. For multi-config builds, use
-``-C`` to specify the configuration. For example:
+To specify the generator, use the :option:`-G <cpack -G>` option. For multi-config builds,
+use :option:`-C <cpack -C>` to specify the configuration. For example:
 
 .. code-block:: console
 
   cpack -G ZIP -C Debug
 
 For a list of available generators, see :manual:`cpack-generators(7)` or call
-``cpack --help``. An :cpack_gen:`archive generator <CPack Archive Generator>`
+:option:`cpack --help`. An :cpack_gen:`archive generator <CPack Archive Generator>`
 like ZIP creates a compressed archive of all *installed* files.
 
 To create an archive of the *full* source tree you would type:

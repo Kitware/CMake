@@ -27,8 +27,9 @@ first :command:`project` invocation.
 
 The ``CMAKE_INSTALL_PREFIX`` may be defined when configuring a build tree
 to set its installation prefix.  Or, when using the :manual:`cmake(1)`
-command-line tool's ``--install`` mode, one may specify a different prefix
-using the ``--prefix`` option:
+command-line tool's :option:`--install <cmake --install>` mode, one may
+specify a different prefix using the :option:`--prefix <cmake --prefix>`
+option:
 
 .. code-block:: shell
 

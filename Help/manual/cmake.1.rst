@@ -96,9 +96,10 @@ Build Tree
 Generator
   This chooses the kind of buildsystem to generate.  See the
   :manual:`cmake-generators(7)` manual for documentation of all generators.
-  Run ``cmake --help`` to see a list of generators available locally.
-  Optionally use the ``-G`` option below to specify a generator, or simply
-  accept the default CMake chooses for the current platform.
+  Run :option:`cmake --help` to see a list of generators available locally.
+  Optionally use the :option:`-G <cmake -G>` option below to specify a
+  generator, or simply accept the default CMake chooses for the current
+  platform.
 
   When using one of the :ref:`Command-Line Build Tool Generators`
   CMake expects that the environment needed by the compiler toolchain
@@ -152,11 +153,11 @@ source and build trees and generate a buildsystem:
 In all cases the ``<options>`` may be zero or more of the `Options`_ below.
 
 The above styles for specifying the source and build trees may be mixed.
-Paths specified with ``-S`` or ``-B`` are always classified as source or
-build trees, respectively.  Paths specified with plain arguments are
-classified based on their content and the types of paths given earlier.
-If only one type of path is given, the current working directory (cwd)
-is used for the other.  For example:
+Paths specified with :option:`-S <cmake -S>` or :option:`-B <cmake -B>`
+are always classified as source or build trees, respectively.  Paths
+specified with plain arguments are classified based on their content
+and the types of paths given earlier.  If only one type of path is given,
+the current working directory (cwd) is used for the other.  For example:
 
 ============================== ============ ===========
  Command Line                   Source Dir   Build Dir
@@ -195,47 +196,55 @@ automatically choosing and invoking the appropriate native build tool.
 Options
 -------
 
+.. program:: cmake
+
 .. include:: OPTIONS_BUILD.txt
 
-``--fresh``
+.. option:: --fresh
+
  .. versionadded:: 3.24
 
  Perform a fresh configuration of the build tree.
  This removes any existing ``CMakeCache.txt`` file and associated
  ``CMakeFiles/`` directory, and recreates them from scratch.
 
-``-L[A][H]``
+.. option:: -L[A][H]
+
  List non-advanced cached variables.
 
  List ``CACHE`` variables will run CMake and list all the variables from
  the CMake ``CACHE`` that are not marked as ``INTERNAL`` or :prop_cache:`ADVANCED`.
  This will effectively display current CMake settings, which can then be
- changed with ``-D`` option.  Changing some of the variables may result
- in more variables being created.  If ``A`` is specified, then it will
- display also advanced variables.  If ``H`` is specified, it will also
+ changed with :option:`-D <cmake -D>` option.  Changing some of the variables
+ may result in more variables being created.  If ``A`` is specified, then it
+ will display also advanced variables.  If ``H`` is specified, it will also
  display help for each variable.
 
-``-N``
+.. option:: -N
+
  View mode only.
 
  Only load the cache.  Do not actually run configure and generate
  steps.
 
-``--graphviz=[file]``
+.. option:: --graphviz=<file>
+
  Generate graphviz of dependencies, see :module:`CMakeGraphVizOptions` for more.
 
  Generate a graphviz input file that will contain all the library and
  executable dependencies in the project.  See the documentation for
  :module:`CMakeGraphVizOptions` for more details.
 
-``--system-information [file]``
+.. option:: --system-information [file]
+
  Dump information about this system.
 
  Dump a wide range of information about the current system.  If run
  from the top of a binary tree for a CMake project it will dump
  additional information such as the cache, log files etc.
 
-``--log-level=<ERROR|WARNING|NOTICE|STATUS|VERBOSE|DEBUG|TRACE>``
+.. option:: --log-level=<ERROR|WARNING|NOTICE|STATUS|VERBOSE|DEBUG|TRACE>
+
  Set the log level.
 
  The :command:`message` command will only output messages of the specified
@@ -250,11 +259,11 @@ Options
  synonym for this option.
 
  .. versionadded:: 3.25
-   See the :command:`cmake_language`
-   :ref:`cmake_language <query_message_log_level>` command for a way to query
-   the current message logging level.
+   See the :command:`cmake_language` command for a way to
+   :ref:`query the current message logging level <query_message_log_level>`.
 
-``--log-context``
+.. option:: --log-context
+
  Enable the :command:`message` command outputting context attached to each
  message.
 
@@ -264,7 +273,8 @@ Options
  When this command line option is given, :variable:`CMAKE_MESSAGE_CONTEXT_SHOW`
  is ignored.
 
-``--debug-trycompile``
+.. option:: --debug-trycompile
+
  Do not delete the :command:`try_compile` build tree.
  Only useful on one :command:`try_compile` at a time.
 
@@ -275,13 +285,15 @@ Options
  fail incorrectly.  This option is best used for one try-compile at a
  time, and only when debugging.
 
-``--debug-output``
+.. option:: --debug-output
+
  Put cmake in a debug mode.
 
  Print extra information during the cmake run like stack traces with
  :command:`message(SEND_ERROR)` calls.
 
-``--debug-find``
+.. option:: --debug-find
+
  Put cmake find commands in a debug mode.
 
  Print extra find call information during the cmake run to standard
@@ -289,32 +301,39 @@ Options
  See also the :variable:`CMAKE_FIND_DEBUG_MODE` variable for debugging
  a more local part of the project.
 
-``--debug-find-pkg=<pkg>[,...]``
+.. option:: --debug-find-pkg=<pkg>[,...]
+
  Put cmake find commands in a debug mode when running under calls
  to :command:`find_package(\<pkg\>) <find_package>`, where ``<pkg>``
  is an entry in the given comma-separated list of case-sensitive package
  names.
 
- Like ``--debug-find``, but limiting scope to the specified packages.
+ Like :option:`--debug-find <cmake --debug-find>`, but limiting scope
+ to the specified packages.
 
-``--debug-find-var=<var>[,...]``
+.. option:: --debug-find-var=<var>[,...]
+
  Put cmake find commands in a debug mode when called with ``<var>``
  as the result variable, where ``<var>`` is an entry in the given
  comma-separated list.
 
- Like ``--debug-find``, but limiting scope to the specified variable names.
+ Like :option:`--debug-find <cmake --debug-find>`, but limiting scope
+ to the specified variable names.
 
-``--trace``
+.. option:: --trace
+
  Put cmake in trace mode.
 
  Print a trace of all calls made and from where.
 
-``--trace-expand``
+.. option:: --trace-expand
+
  Put cmake in trace mode.
 
- Like ``--trace``, but with variables expanded.
+ Like :option:`--trace <cmake --trace>`, but with variables expanded.
 
-``--trace-format=<format>``
+.. option:: --trace-format=<format>
+
  Put cmake in trace mode and sets the trace output format.
 
  ``<format>`` can be one of the following values.
@@ -400,46 +419,57 @@ Options
        Indicates the version of the JSON format. The version has a
        major and minor components following semantic version conventions.
 
-``--trace-source=<file>``
+.. option:: --trace-source=<file>
+
  Put cmake in trace mode, but output only lines of a specified file.
 
  Multiple options are allowed.
 
-``--trace-redirect=<file>``
+.. option:: --trace-redirect=<file>
+
  Put cmake in trace mode and redirect trace output to a file instead of stderr.
 
-``--warn-uninitialized``
+.. option:: --warn-uninitialized
+
  Warn about uninitialized values.
 
  Print a warning when an uninitialized variable is used.
 
-``--warn-unused-vars``
+.. option:: --warn-unused-vars
+
  Does nothing.  In CMake versions 3.2 and below this enabled warnings about
  unused variables.  In CMake versions 3.3 through 3.18 the option was broken.
  In CMake 3.19 and above the option has been removed.
 
-``--no-warn-unused-cli``
+.. option:: --no-warn-unused-cli
+
  Don't warn about command line options.
 
  Don't find variables that are declared on the command line, but not
  used.
 
-``--check-system-vars``
+.. option:: --check-system-vars
+
  Find problems with variable usage in system files.
 
  Normally, unused and uninitialized variables are searched for only
  in :variable:`CMAKE_SOURCE_DIR` and :variable:`CMAKE_BINARY_DIR`.
  This flag tells CMake to warn about other files as well.
 
-``--compile-no-warning-as-error``
+.. option:: --compile-no-warning-as-error
+
  Ignore target property :prop_tgt:`COMPILE_WARNING_AS_ERROR` and variable
  :variable:`CMAKE_COMPILE_WARNING_AS_ERROR`, preventing warnings from being
  treated as errors on compile.
 
-``--profiling-output=<path>``
- Used in conjunction with ``--profiling-format`` to output to a given path.
+.. option:: --profiling-output=<path>
 
-``--profiling-format=<file>``
+ Used in conjunction with
+ :option:`--profiling-format <cmake --profiling-format>` to output to a
+ given path.
+
+.. option:: --profiling-format=<file>
+
  Enable the output of profiling data of CMake script in the given format.
 
  This can aid performance analysis of CMake scripts executed. Third party
@@ -450,7 +480,8 @@ Options
  about:tracing tab of Google Chrome or using a plugin for a tool like Trace
  Compass.
 
-``--preset <preset>``, ``--preset=<preset>``
+.. option:: --preset <preset>, --preset=<preset>
+
  Reads a :manual:`preset <cmake-presets(7)>` from
  ``<path-to-source>/CMakePresets.json`` and
  ``<path-to-source>/CMakeUserPresets.json``. The preset may specify the
@@ -466,7 +497,8 @@ Options
  a variable called ``MYVAR`` to ``1``, but the user sets it to ``2`` with a
  ``-D`` argument, the value ``2`` is preferred.
 
-``--list-presets, --list-presets=<[configure | build | test | all]>``
+.. option:: --list-presets, --list-presets=<[configure | build | test | all]>
+
  Lists the available presets. If no option is specified only configure presets
  will be listed. The current working directory must contain CMake preset files.
 
@@ -486,21 +518,25 @@ project binary tree:
 This abstracts a native build tool's command-line interface with the
 following options:
 
-``--build <dir>``
+.. option:: --build <dir>
+
   Project binary directory to be built.  This is required (unless a preset
   is specified) and must be first.
 
-``--preset <preset>``, ``--preset=<preset>``
+.. option:: --preset <preset>, --preset=<preset>
+
   Use a build preset to specify build options. The project binary directory
   is inferred from the ``configurePreset`` key. The current working directory
   must contain CMake preset files.
   See :manual:`preset <cmake-presets(7)>` for more details.
 
-``--list-presets``
+.. option:: --list-presets
+
   Lists the available build presets. The current working directory must
   contain CMake preset files.
 
-``--parallel [<jobs>], -j [<jobs>]``
+.. option:: --parallel [<jobs>], -j [<jobs>]
+
   The maximum number of concurrent processes to use when building.
   If ``<jobs>`` is omitted the native build tool's default number is used.
 
@@ -510,18 +546,22 @@ following options:
   Some native build tools always build in parallel.  The use of ``<jobs>``
   value of ``1`` can be used to limit to a single job.
 
-``--target <tgt>..., -t <tgt>...``
+.. option:: --target <tgt>..., -t <tgt>...
+
   Build ``<tgt>`` instead of the default target.  Multiple targets may be
   given, separated by spaces.
 
-``--config <cfg>``
+.. option:: --config <cfg>
+
   For multi-configuration tools, choose configuration ``<cfg>``.
 
-``--clean-first``
-  Build target ``clean`` first, then build.
-  (To clean only, use ``--target clean``.)
+.. option:: --clean-first
 
-``--resolve-package-references=<on|off|only>``
+  Build target ``clean`` first, then build.
+  (To clean only, use :option:`--target clean <cmake --target>`.)
+
+.. option:: --resolve-package-references=<on|off|only>
+
   .. versionadded:: 3.23
 
   Resolve remote package references from external package managers (e.g. NuGet)
@@ -544,10 +584,12 @@ following options:
   are restored using NuGet. It can be disabled by setting the
   ``CMAKE_VS_NUGET_PACKAGE_RESTORE`` variable to ``OFF``.
 
-``--use-stderr``
+.. option:: --use-stderr
+
   Ignored.  Behavior is default in CMake >= 3.0.
 
-``--verbose, -v``
+.. option:: -v, --verbose
+
   Enable verbose output - if supported - including the build commands to be
   executed.
 
@@ -555,10 +597,11 @@ following options:
   :variable:`CMAKE_VERBOSE_MAKEFILE` cached variable is set.
 
 
-``--``
+.. option:: --
+
   Pass remaining options to the native tool.
 
-Run ``cmake --build`` with no options for quick help.
+Run :option:`cmake --build` with no options for quick help.
 
 Install a Project
 =================
@@ -574,30 +617,37 @@ This may be used after building a project to run installation without
 using the generated build system or the native build tool.
 The options are:
 
-``--install <dir>``
+.. option:: --install <dir>
+
   Project binary directory to install. This is required and must be first.
 
-``--config <cfg>``
+.. option:: --config <cfg>
+
   For multi-configuration generators, choose configuration ``<cfg>``.
 
-``--component <comp>``
+.. option:: --component <comp>
+
   Component-based install. Only install component ``<comp>``.
 
-``--default-directory-permissions <permissions>``
+.. option:: --default-directory-permissions <permissions>
+
   Default directory install permissions. Permissions in format ``<u=rwx,g=rx,o=rx>``.
 
-``--prefix <prefix>``
+.. option:: --prefix <prefix>
+
   Override the installation prefix, :variable:`CMAKE_INSTALL_PREFIX`.
 
-``--strip``
+.. option:: --strip
+
   Strip before installing.
 
-``-v, --verbose``
+.. option:: -v, --verbose
+
   Enable verbose output.
 
   This option can be omitted if :envvar:`VERBOSE` environment variable is set.
 
-Run ``cmake --install`` with no options for quick help.
+Run :option:`cmake --install` with no options for quick help.
 
 Open a Project
 ==============
@@ -615,14 +665,22 @@ supported by some generators.
 Run a Script
 ============
 
+.. program:: cmake_P
+
 .. code-block:: shell
 
   cmake [{-D <var>=<value>}...] -P <cmake-script-file> [-- <unparsed-options>...]
 
-Process the given cmake file as a script written in the CMake
-language.  No configure or generate step is performed and the cache
-is not modified.  If variables are defined using ``-D``, this must be
-done before the ``-P`` argument.
+.. option:: -D <var>=<value>
+
+ Define a variable for script mode.
+
+.. option:: -P <cmake-script-file>
+
+ Process the given cmake file as a script written in the CMake
+ language.  No configure or generate step is performed and the cache
+ is not modified.  If variables are defined using ``-D``, this must be
+ done before the ``-P`` argument.
 
 Any options after ``--`` are not parsed by CMake, but they are still included
 in the set of :variable:`CMAKE_ARGV<n> <CMAKE_ARGV0>` variables passed to the
@@ -634,16 +692,22 @@ script (including the ``--`` itself).
 Run a Command-Line Tool
 =======================
 
+.. program:: cmake_E
+
 CMake provides builtin command-line tools through the signature
 
 .. code-block:: shell
 
   cmake -E <command> [<options>]
 
-Run ``cmake -E`` or ``cmake -E help`` for a summary of commands.
+.. option:: -E [help]
+
+  Run ``cmake -E`` or ``cmake -E help`` for a summary of commands.
+
 Available commands are:
 
-``capabilities``
+.. option:: capabilities
+
   .. versionadded:: 3.7
 
   Report cmake capabilities in JSON format. The output is a JSON object
@@ -653,7 +717,7 @@ Available commands are:
     A JSON object with version information. Keys are:
 
     ``string``
-      The full version string as displayed by cmake ``--version``.
+      The full version string as displayed by cmake :option:`--version <cmake --version>`.
     ``major``
       The major version number in integer form.
     ``minor``
@@ -680,7 +744,8 @@ Available commands are:
 
       Optional member that may be present when the generator supports
       platform specification via :variable:`CMAKE_GENERATOR_PLATFORM`
-      (``-A ...``).  The value is a list of platforms known to be supported.
+      (:option:`-A ... <cmake -A>`).  The value is a list of platforms known to
+      be supported.
     ``extraGenerators``
       A list of strings with all the extra generators compatible with
       the generator.
@@ -705,7 +770,8 @@ Available commands are:
     ``true`` if cmake supports server-mode and ``false`` otherwise.
     Always false since CMake 3.20.
 
-``cat [--] <files>...``
+.. option:: cat [--] <files>...
+
   .. versionadded:: 3.18
 
   Concatenate files and print on the standard output.
@@ -716,10 +782,12 @@ Available commands are:
     ``-`` will result in an error. Use ``--`` to indicate the end of options, in
     case a file starts with ``-``.
 
-``chdir <dir> <cmd> [<arg>...]``
+.. option:: chdir <dir> <cmd> [<arg>...]
+
   Change the current working directory and run a command.
 
-``compare_files [--ignore-eol] <file1> <file2>``
+.. option:: compare_files [--ignore-eol] <file1> <file2>
+
   Check if ``<file1>`` is same as ``<file2>``. If files are the same,
   then returns ``0``, if not it returns ``1``.  In case of invalid
   arguments, it returns 2.
@@ -728,7 +796,8 @@ Available commands are:
     The ``--ignore-eol`` option implies line-wise comparison and ignores
     LF/CRLF differences.
 
-``copy <file>... <destination>``
+.. option:: copy <file>... <destination>
+
   Copy files to ``<destination>`` (either file or directory).
   If multiple files are specified, the ``<destination>`` must be
   directory and it must exist. Wildcards are not supported.
@@ -738,7 +807,8 @@ Available commands are:
   .. versionadded:: 3.5
     Support for multiple input files.
 
-``copy_directory <dir>... <destination>``
+.. option:: copy_directory <dir>... <destination>
+
   Copy content of ``<dir>...`` directories to ``<destination>`` directory.
   If ``<destination>`` directory does not exist it will be created.
   ``copy_directory`` does follow symlinks.
@@ -750,7 +820,8 @@ Available commands are:
     The command now fails when the source directory does not exist.
     Previously it succeeded by creating an empty destination directory.
 
-``copy_if_different <file>... <destination>``
+.. option:: copy_if_different <file>... <destination>
+
   Copy files to ``<destination>`` (either file or directory) if
   they have changed.
   If multiple files are specified, the ``<destination>`` must be
@@ -760,7 +831,8 @@ Available commands are:
   .. versionadded:: 3.5
     Support for multiple input files.
 
-``create_symlink <old> <new>``
+.. option:: create_symlink <old> <new>
+
   Create a symbolic link ``<new>`` naming ``<old>``.
 
   .. versionadded:: 3.13
@@ -769,7 +841,8 @@ Available commands are:
   .. note::
     Path to where ``<new>`` symbolic link will be created has to exist beforehand.
 
-``create_hardlink <old> <new>``
+.. option:: create_hardlink <old> <new>
+
   .. versionadded:: 3.19
 
   Create a hard link ``<new>`` naming ``<old>``.
@@ -778,13 +851,16 @@ Available commands are:
     Path to where ``<new>`` hard link will be created has to exist beforehand.
     ``<old>`` has to exist beforehand.
 
-``echo [<string>...]``
+.. option:: echo [<string>...]
+
   Displays arguments as text.
 
-``echo_append [<string>...]``
+.. option:: echo_append [<string>...]
+
   Displays arguments as text but no new line.
 
-``env [--unset=NAME ...] [NAME=VALUE ...] [--] <command> [<arg>...]``
+.. option:: env [--unset=NAME ...] [NAME=VALUE ...] [--] <command> [<arg>...]
+
   .. versionadded:: 3.1
 
   Run command in a modified environment.
@@ -794,15 +870,18 @@ Available commands are:
     interpreting options/environment variables and treat the next argument as
     the command, even if it start with ``-`` or contains a ``=``.
 
-``environment``
+.. option:: environment
+
   Display the current environment variables.
 
-``false``
+.. option:: false
+
   .. versionadded:: 3.16
 
   Do nothing, with an exit code of 1.
 
-``make_directory <dir>...``
+.. option:: make_directory <dir>...
+
   Create ``<dir>`` directories.  If necessary, create parent
   directories too.  If a directory already exists it will be
   silently ignored.
@@ -810,13 +889,15 @@ Available commands are:
   .. versionadded:: 3.5
     Support for multiple input directories.
 
-``md5sum <file>...``
+.. option:: md5sum <file>...
+
   Create MD5 checksum of files in ``md5sum`` compatible format::
 
      351abe79cd3800b38cdfb25d45015a15  file1.txt
      052f86c15bbde68af55c7f7b340ab639  file2.txt
 
-``sha1sum <file>...``
+.. option:: sha1sum <file>...
+
   .. versionadded:: 3.10
 
   Create SHA1 checksum of files in ``sha1sum`` compatible format::
@@ -824,7 +905,8 @@ Available commands are:
      4bb7932a29e6f73c97bb9272f2bdc393122f86e0  file1.txt
      1df4c8f318665f9a5f2ed38f55adadb7ef9f559c  file2.txt
 
-``sha224sum <file>...``
+.. option:: sha224sum <file>...
+
   .. versionadded:: 3.10
 
   Create SHA224 checksum of files in ``sha224sum`` compatible format::
@@ -832,7 +914,8 @@ Available commands are:
      b9b9346bc8437bbda630b0b7ddfc5ea9ca157546dbbf4c613192f930  file1.txt
      6dfbe55f4d2edc5fe5c9197bca51ceaaf824e48eba0cc453088aee24  file2.txt
 
-``sha256sum <file>...``
+.. option:: sha256sum <file>...
+
   .. versionadded:: 3.10
 
   Create SHA256 checksum of files in ``sha256sum`` compatible format::
@@ -840,7 +923,8 @@ Available commands are:
      76713b23615d31680afeb0e9efe94d47d3d4229191198bb46d7485f9cb191acc  file1.txt
      15b682ead6c12dedb1baf91231e1e89cfc7974b3787c1e2e01b986bffadae0ea  file2.txt
 
-``sha384sum <file>...``
+.. option:: sha384sum <file>...
+
   .. versionadded:: 3.10
 
   Create SHA384 checksum of files in ``sha384sum`` compatible format::
@@ -848,7 +932,8 @@ Available commands are:
      acc049fedc091a22f5f2ce39a43b9057fd93c910e9afd76a6411a28a8f2b8a12c73d7129e292f94fc0329c309df49434  file1.txt
      668ddeb108710d271ee21c0f3acbd6a7517e2b78f9181c6a2ff3b8943af92b0195dcb7cce48aa3e17893173c0a39e23d  file2.txt
 
-``sha512sum <file>...``
+.. option:: sha512sum <file>...
+
   .. versionadded:: 3.10
 
   Create SHA512 checksum of files in ``sha512sum`` compatible format::
@@ -856,7 +941,8 @@ Available commands are:
      2a78d7a6c5328cfb1467c63beac8ff21794213901eaadafd48e7800289afbc08e5fb3e86aa31116c945ee3d7bf2a6194489ec6101051083d1108defc8e1dba89  file1.txt
      7a0b54896fe5e70cca6dd643ad6f672614b189bf26f8153061c4d219474b05dad08c4e729af9f4b009f1a1a280cb625454bf587c690f4617c27e3aebdf3b7a2d  file2.txt
 
-``remove [-f] <file>...``
+.. option:: remove [-f] <file>...
+
   .. deprecated:: 3.17
 
   Remove the file(s). The planned behavior was that if any of the
@@ -869,7 +955,8 @@ Available commands are:
   The implementation was buggy and always returned 0. It cannot be fixed without
   breaking backwards compatibility. Use ``rm`` instead.
 
-``remove_directory <dir>...``
+.. option:: remove_directory <dir>...
+
   .. deprecated:: 3.17
 
   Remove ``<dir>`` directories and their contents. If a directory does
@@ -882,11 +969,13 @@ Available commands are:
   .. versionadded:: 3.16
     If ``<dir>`` is a symlink to a directory, just the symlink will be removed.
 
-``rename <oldname> <newname>``
+.. option:: rename <oldname> <newname>
+
   Rename a file or directory (on one volume). If file with the ``<newname>`` name
   already exists, then it will be silently replaced.
 
-``rm [-rRf] [--] <file|dir>...``
+.. option:: rm [-rRf] [--] <file|dir>...
+
   .. versionadded:: 3.17
 
   Remove the files ``<file>`` or directories ``<dir>``.
@@ -897,15 +986,18 @@ Available commands are:
   situations instead. Use ``--`` to stop interpreting options and treat all
   remaining arguments as paths, even if they start with ``-``.
 
-``server``
+.. option:: server
+
   Launch :manual:`cmake-server(7)` mode.
 
-``sleep <number>...``
+.. option:: sleep <number>...
+
   .. versionadded:: 3.0
 
   Sleep for given number of seconds.
 
-``tar [cxt][vf][zjJ] file.tar [<options>] [--] [<pathname>...]``
+.. option:: tar [cxt][vf][zjJ] file.tar [<options>] [--] [<pathname>...]
+
   Create or extract a tar or zip archive.  Options are:
 
   ``c``
@@ -988,7 +1080,8 @@ Available commands are:
     ``tar`` tool. The command now also parses all flags, and if an invalid flag
     was provided, a warning is issued.
 
-``time <command> [<args>...]``
+.. option:: time <command> [<args>...]
+
   Run command and display elapsed time.
 
   .. versionadded:: 3.5
@@ -996,15 +1089,18 @@ Available commands are:
     through to the child process. This may break scripts that worked around the
     bug with their own extra quoting or escaping.
 
-``touch <file>...``
+.. option:: touch <file>...
+
   Creates ``<file>`` if file do not exist.
   If ``<file>`` exists, it is changing ``<file>`` access and modification times.
 
-``touch_nocreate <file>...``
+.. option:: touch_nocreate <file>...
+
   Touch a file if it exists but do not create it.  If a file does
   not exist it will be silently ignored.
 
-``true``
+.. option:: true
+
   .. versionadded:: 3.16
 
   Do nothing, with an exit code of 0.
@@ -1014,22 +1110,26 @@ Windows-specific Command-Line Tools
 
 The following ``cmake -E`` commands are available only on Windows:
 
-``delete_regv <key>``
+.. option:: delete_regv <key>
+
   Delete Windows registry value.
 
-``env_vs8_wince <sdkname>``
+.. option:: env_vs8_wince <sdkname>
+
   .. versionadded:: 3.2
 
   Displays a batch file which sets the environment for the provided
   Windows CE SDK installed in VS2005.
 
-``env_vs9_wince <sdkname>``
+.. option:: env_vs9_wince <sdkname>
+
   .. versionadded:: 3.2
 
   Displays a batch file which sets the environment for the provided
   Windows CE SDK installed in VS2008.
 
-``write_regv <key> <value>``
+.. option:: write_regv <key> <value>
+
   Write Windows registry value.
 
 
@@ -1062,6 +1162,8 @@ To print selected pages from the CMake documentation, use
   cmake --help[-<topic>]
 
 with one of the following options:
+
+.. program:: cmake
 
 .. include:: OPTIONS_HELP.txt
 

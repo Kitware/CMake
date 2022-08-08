@@ -29,19 +29,25 @@ native tool on their platform.
 Options
 =======
 
-``-S <path-to-source>``
+.. program:: cmake-gui
+
+.. option:: -S <path-to-source>
+
  Path to root directory of the CMake project to build.
 
-``-B <path-to-build>``
+.. option:: -B <path-to-build>
+
  Path to directory which CMake will use as the root of build directory.
 
  If the directory doesn't already exist CMake will make it.
 
-``--preset=<preset-name>``
+.. option:: --preset=<preset-name>
+
  Name of the preset to use from the project's
  :manual:`presets <cmake-presets(7)>` files, if it has them.
 
-``--browse-manual``
+.. option:: --browse-manual
+
  Open the CMake reference manual in a browser and immediately exit.
 
 .. include:: OPTIONS_HELP.txt

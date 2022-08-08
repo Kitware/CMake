@@ -26,7 +26,7 @@ Platform Selection
 The default target platform name (architecture) is ``Win32``.
 
 The :variable:`CMAKE_GENERATOR_PLATFORM` variable may be set, perhaps
-via the :manual:`cmake(1)` ``-A`` option, to specify a target platform
+via the :option:`cmake -A` option, to specify a target platform
 name (architecture).  For example:
 
 * ``cmake -G "Visual Studio 15 2017" -A Win32``
@@ -49,7 +49,7 @@ Toolset Selection
 
 The ``v141`` toolset that comes with Visual Studio 15 2017 is selected by
 default.  The :variable:`CMAKE_GENERATOR_TOOLSET` option may be set, perhaps
-via the :manual:`cmake(1)` ``-T`` option, to specify another toolset.
+via the :option:`cmake -T` option, to specify another toolset.
 
 .. |VS_TOOLSET_HOST_ARCH_DEFAULT| replace::
    By default this generator uses the 32-bit variant even on a 64-bit host.

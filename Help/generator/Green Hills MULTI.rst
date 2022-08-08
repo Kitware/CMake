@@ -28,12 +28,12 @@ Otherwise the ``primaryTarget`` will be composed from the values of :variable:`C
 and ``GHS_TARGET_PLATFORM``. Defaulting to the value of ``arm_integrity.tgt``
 
 * The :variable:`CMAKE_GENERATOR_PLATFORM` variable may be set, perhaps
-  via the :manual:`cmake(1)` ``-A`` option.
+  via the :option:`cmake -A` option.
 
   | Typical values of ``arm``, ``ppc``, ``86``, etcetera, are used.
 
-* The variable ``GHS_TARGET_PLATFORM`` may be set, perhaps via the :manual:`cmake(1)`
-  ``-D`` option.
+* The variable ``GHS_TARGET_PLATFORM`` may be set, perhaps via the :option:`cmake -D`
+  option.
 
   | Defaults to ``integrity``.
   | Usual values are ``integrity``, ``threadx``, ``uvelosity``, ``velosity``,
@@ -55,11 +55,11 @@ The generator searches for the latest compiler or can be given a location to use
 ``GHS_TOOLSET_ROOT`` is the directory that is checked for the latest compiler.
 
 * The :variable:`CMAKE_GENERATOR_TOOLSET` option may be set, perhaps
-  via the :manual:`cmake(1)` ``-T`` option, to specify the location of the toolset.
+  via the :option:`cmake -T` option, to specify the location of the toolset.
   Both absolute and relative paths are valid. Paths are relative to ``GHS_TOOLSET_ROOT``.
 
-* The variable ``GHS_TOOLSET_ROOT`` may be set, perhaps via the :manual:`cmake(1)`
-  ``-D`` option.
+* The variable ``GHS_TOOLSET_ROOT`` may be set, perhaps via the :option:`cmake -D`
+  option.
 
   | Root path for toolset searches and relative paths.
   | Defaults to ``C:/ghs`` in Windows or ``/usr/ghs`` in Linux.

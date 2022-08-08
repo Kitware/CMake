@@ -963,12 +963,12 @@ Generated Installation Script
 .. note::
 
   Use of this feature is not recommended. Please consider using the
-  ``--install`` argument of :manual:`cmake(1)` instead.
+  :option:`cmake --install` instead.
 
 The ``install()`` command generates a file, ``cmake_install.cmake``, inside
 the build directory, which is used internally by the generated install target
-and by CPack. You can also invoke this script manually with ``cmake -P``. This
-script accepts several variables:
+and by CPack. You can also invoke this script manually with
+:option:`cmake -P <cmake_P -P>`. This script accepts several variables:
 
 ``COMPONENT``
   Set this variable to install only a single CPack component as opposed to all

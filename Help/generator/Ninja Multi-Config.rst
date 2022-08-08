@@ -20,8 +20,8 @@ are intended to be run with ``ninja -f build-<Config>.ninja``. A
 :variable:`CMAKE_CONFIGURATION_TYPES`.
 
 ``cmake --build . --config <Config>`` will always use ``build-<Config>.ninja``
-to build. If no ``--config`` argument is specified, ``cmake --build .`` will
-use ``build.ninja``.
+to build. If no :option:`--config <cmake --config>` argument is specified,
+:option:`cmake --build .<cmake --build>` will use ``build.ninja``.
 
 Each ``build-<Config>.ninja`` file contains ``<target>`` targets as well as
 ``<target>:<Config>`` targets, where ``<Config>`` is the same as the

@@ -45,7 +45,7 @@ The parameters are as follows:
 
     ctest_start(Experimental GROUP GroupExperimental)
 
-  Later, in another ``ctest -S`` script:
+  Later, in another :option:`ctest -S` script:
 
   .. code-block:: cmake
 
