@@ -122,7 +122,11 @@ endmacro()
 macro(_threads_check_flag_pthread)
   if(NOT Threads_FOUND)
     # If we did not find -lpthreads, -lpthread, or -lthread, look for -pthread
-    if(NOT DEFINED THREADS_HAVE_PTHREAD_ARG)
+    # except on compilers known to not have it.
+    if(MSVC)
+      # Compilers targeting the MSVC ABI do not have a -pthread flag.
+      set(THREADS_HAVE_PTHREAD_ARG FALSE)
+    elseif(NOT DEFINED THREADS_HAVE_PTHREAD_ARG)
       message(CHECK_START "Check if compiler accepts -pthread")
       if(CMAKE_C_COMPILER_LOADED)
         set(_threads_src ${CMAKE_CURRENT_LIST_DIR}/CheckForPthreads.c)
