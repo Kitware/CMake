@@ -570,7 +570,7 @@ that may contain the following fields:
 ``name``
 
   A required string representing the machine-friendly name of the preset.
-  This identifier is used in the :ref:`ctest --preset <CTest Options>` option.
+  This identifier is used in the :option:`ctest --preset` option.
   There must not be two test presets in the union of ``CMakePresets.json``
   and ``CMakeUserPresets.json`` in the same directory with the same name.
   However, a test preset may have the same name as a configure or build preset.
