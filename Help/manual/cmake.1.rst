@@ -9,8 +9,7 @@ Synopsis
 .. parsed-literal::
 
  `Generate a Project Buildsystem`_
-  cmake [<options>] <path-to-source>
-  cmake [<options>] <path-to-existing-build>
+  cmake [<options>] <path-to-source | path-to-existing-build>
   cmake [<options>] -S <path-to-source> -B <path-to-build>
 
  `Build a Project`_
