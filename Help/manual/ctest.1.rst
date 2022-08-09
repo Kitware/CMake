@@ -76,6 +76,7 @@ Options
  displayed.  This option will show all test output.
 
 .. option:: -VV, --extra-verbose
+
  Enable more verbose output from tests.
 
  Test output is normally suppressed and only summary information is
@@ -138,6 +139,7 @@ Options
  ``TestLoad`` option of the `CTest Test Step`_.
 
 .. option:: -Q, --quiet
+
  Make CTest quiet.
 
  This option will suppress all the output.  The output log file will
@@ -406,7 +408,7 @@ Options
 
 .. option:: --test-dir <dir>
 
-Specify the directory in which to look for tests.
+ Specify the directory in which to look for tests.
 
 .. option:: --test-output-size-passed <size>
 
