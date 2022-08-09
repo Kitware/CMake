@@ -809,7 +809,7 @@ Run the ``ctest`` command with the current working directory set
 to the build tree and use one of these signatures::
 
   ctest -D <mode>[<step>]
-  ctest -M <mode> [ -T <step> ]...
+  ctest -M <mode> [-T <step>]...
 
 The ``<mode>`` must be one of the above `Dashboard Client Modes`_,
 and each ``<step>`` must be one of the above `Dashboard Client Steps`_.
