@@ -313,6 +313,7 @@ function(_GTK2_FIND_INCLUDE_DIR _var _hdr)
             /usr/openwin/lib
             /sw/lib
             /opt/local/lib
+            /opt/homebrew/lib
             /usr/pkg/lib
             /usr/pkg/include/glib
             $ENV{GTKMM_BASEPATH}/include
