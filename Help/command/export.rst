@@ -55,9 +55,9 @@ The options are:
 
 ``CXX_MODULES_DIRECTORY <directory>``
 
-.. note ::
+  .. note ::
 
-  Experimental. Gated by ``CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API``
+    Experimental. Gated by ``CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API``
 
   Export C++ module properties to files under the given directory. Each file
   will be named according to the target's export name (without any namespace).

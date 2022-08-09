@@ -83,9 +83,9 @@ files within those directories. The acceptable types include:
 
 ``CXX_MODULES``
 
-.. note ::
+  .. note ::
 
-  Experimental. Gated by ``CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API``
+    Experimental. Gated by ``CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API``
 
   Sources which contain C++ interface module or partition units (i.e., those
   using the ``export`` keyword). This file set type may not have an
@@ -93,9 +93,9 @@ files within those directories. The acceptable types include:
 
 ``CXX_MODULE_HEADER_UNITS``
 
-.. note ::
+  .. note ::
 
-  Experimental. Gated by ``CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API``
+    Experimental. Gated by ``CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API``
 
   C++ header sources which may be imported by other C++ source code. This file
   set type may not have an ``INTERFACE`` scope except on ``IMPORTED`` targets.
