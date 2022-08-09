@@ -242,12 +242,13 @@ Options
  from the top of a binary tree for a CMake project it will dump
  additional information such as the cache, log files etc.
 
-.. option:: --log-level=<ERROR|WARNING|NOTICE|STATUS|VERBOSE|DEBUG|TRACE>
+.. option:: --log-level=<level>
 
- Set the log level.
+ Set the log ``<level>``.
 
  The :command:`message` command will only output messages of the specified
- log level or higher.  The default log level is ``STATUS``.
+ log level or higher.  The valid log levels are ``ERROR``, ``WARNING``,
+ ``NOTICE``, ``STATUS`` (default), ``VERBOSE``, ``DEBUG``, or ``TRACE``.
 
  To make a log level persist between CMake runs, set
  :variable:`CMAKE_MESSAGE_LOG_LEVEL` as a cache variable instead.
