@@ -22,7 +22,7 @@ Synopsis
   cmake --open <dir>
 
  `Run a Script`_
-  cmake [{-D <var>=<value>}...] -P <cmake-script-file>
+  cmake [-D <var>=<value>]... -P <cmake-script-file>
 
  `Run a Command-Line Tool`_
   cmake -E <command> [<options>]
@@ -668,7 +668,7 @@ Run a Script
 
 .. code-block:: shell
 
-  cmake [{-D <var>=<value>}...] -P <cmake-script-file> [-- <unparsed-options>...]
+  cmake [-D <var>=<value>]... -P <cmake-script-file> [-- <unparsed-options>...]
 
 .. option:: -D <var>=<value>
 
