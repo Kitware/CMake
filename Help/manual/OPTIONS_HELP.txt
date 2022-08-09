@@ -1,17 +1,15 @@
-.. |file| replace:: The help is printed to a named ``<file>`` if given.
+.. |file| replace:: The output is printed to a named ``<file>`` if given.
+
+.. option:: -version [<file>], --version [<file>], /V [<file>]
+
+ Show program name/version banner and exit.
+ |file|
 
 .. option:: -h, -H, --help, -help, -usage, /?
 
  Print usage information and exit.
 
  Usage describes the basic command line interface and its options.
-
-.. option:: -version [<file>], --version [<file>], /V [<file>]
-
- Show program name/version banner and exit.
-
- If a file is specified, the version is written into it.
- |file|
 
 .. option:: --help-full [<file>]
 
