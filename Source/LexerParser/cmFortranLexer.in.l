@@ -75,10 +75,10 @@ Modify cmFortranLexer.cxx:
   return STRING;
 }
 
-<str_dq,str_sq>&[ \t]*\n |
-<str_dq,str_sq>&[ \t]*\n[ \t]*&  /* Ignore (continued strings, free fmt) */
+<str_dq,str_sq>&[ \t]*\r?\n |
+<str_dq,str_sq>&[ \t]*\r?\n[ \t]*&  /* Ignore (continued strings, free fmt) */
 
-<fixed_fmt,str_dq,str_sq>\n[ ]{5}[^ \t\n] {
+<fixed_fmt,str_dq,str_sq>\r?\n[ ]{5}[^ \t\r\n] {
   if (cmFortranParser_GetOldStartcond(yyextra) == fixed_fmt)
     ; /* Ignore (cont. strings, fixed fmt) */
   else
@@ -132,15 +132,15 @@ $[ \t]*else     { return F90PPR_ELSE; }
 $[ \t]*endif    { return F90PPR_ENDIF; }
 
  /* Line continuations, possible involving comments.  */
-&([ \t\n]*|!.*)*
-&([ \t\n]*|!.*)*&
+&([ \t\r\n]*|!.*)*
+&([ \t\r\n]*|!.*)*&
 
 , { return COMMA; }
 
 :: { return DCOLON; }
 : { return COLON; }
 
-<fixed_fmt>\n[ ]{5}[^ ]  { return GARBAGE; }
+<fixed_fmt>\r?\n[ ]{5}[^ ]  { return GARBAGE; }
 
 =|=>                     { return ASSIGNMENT_OP; }
 
@@ -159,13 +159,13 @@ $[ \t]*endif    { return F90PPR_ENDIF; }
 \( { return LPAREN; }
 \) { return RPAREN; }
 
-[^ \t\n\r:;,!'"a-zA-Z=&()]+ { return GARBAGE; }
+[^ \t\r\n:;,!'"a-zA-Z=&()]+ { return GARBAGE; }
 
 ;|\n { return EOSTMT; }
 
 
 [ \t\r,]         /* Ignore */
-\\[ \t]*\n       /* Ignore line-endings preceded by \ */
+\\[ \t]*\r?\n       /* Ignore line-endings preceded by \ */
 
 . { return *yytext; }
 
