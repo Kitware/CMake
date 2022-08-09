@@ -1,12 +1,12 @@
 .. |file| replace:: The help is printed to a named ``<file>`` if given.
 
-.. option:: --help, -help, -usage, -h, -H, /?
+.. option:: -h, -H, --help, -help, -usage, /?
 
  Print usage information and exit.
 
  Usage describes the basic command line interface and its options.
 
-.. option:: --version, -version, /V [<file>]
+.. option:: -version [<file>], --version [<file>], /V [<file>]
 
  Show program name/version banner and exit.
 

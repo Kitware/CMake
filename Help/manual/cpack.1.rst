@@ -73,7 +73,7 @@ Options
   details.  By default, ``CPackConfig.cmake`` in the current directory will
   be used.
 
-.. option:: --verbose, -V
+.. option:: -V, --verbose
 
   Run ``cpack`` with verbose output.  This can be used to show more details
   from the package generation tools and is suitable for project developers.

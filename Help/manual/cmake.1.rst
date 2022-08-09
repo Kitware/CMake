@@ -545,7 +545,7 @@ following options:
   Some native build tools always build in parallel.  The use of ``<jobs>``
   value of ``1`` can be used to limit to a single job.
 
-.. option:: --target <tgt>..., -t <tgt>...
+.. option:: -t <tgt>..., --target <tgt>...
 
   Build ``<tgt>`` instead of the default target.  Multiple targets may be
   given, separated by spaces.
