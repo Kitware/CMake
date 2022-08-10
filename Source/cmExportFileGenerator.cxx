@@ -843,9 +843,16 @@ void cmExportFileGenerator::SetImportDetailProperties(
       suffix, target, "IMPORTED_LINK_INTERFACE_LANGUAGES", iface->Languages,
       properties, ImportLinkPropertyTargetNames::No);
 
+    // Export IMPORTED_LINK_DEPENDENT_LIBRARIES to help consuming linkers
+    // find private dependencies of shared libraries.
+    std::size_t oldMissingTargetsSize = this->MissingTargets.size();
     this->SetImportLinkProperty(
       suffix, target, "IMPORTED_LINK_DEPENDENT_LIBRARIES", iface->SharedDeps,
       properties, ImportLinkPropertyTargetNames::Yes);
+    // Avoid enforcing shared library private dependencies as public package
+    // dependencies by ignoring missing targets added for them.
+    this->MissingTargets.resize(oldMissingTargetsSize);
+
     if (iface->Multiplicity > 0) {
       std::string prop =
         cmStrCat("IMPORTED_LINK_INTERFACE_MULTIPLICITY", suffix);
