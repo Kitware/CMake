@@ -597,9 +597,12 @@ this mode include:
 
 .. option:: --build-target
 
- Specify a specific target to build.
+ Specify a specific target to build.  The option can be given multiple times
+ with different targets, in which case each target is built in turn.
+ A clean will be done before building each target unless the
+ :option:`--build-noclean` option is given.
 
- If left out the ``all`` target is built.
+ If no ``--build-target`` is specified, the ``all`` target is built.
 
 .. option:: --build-nocmake
 
