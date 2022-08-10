@@ -3829,6 +3829,19 @@ function(_ep_add_install_command name)
     set(uses_terminal "")
   endif()
 
+  # With BUILD_ALWAYS+BUILD_BYPRODUCTS, Ninja restats the
+  # build step outputs and may not consider this step to
+  # be out-of-date.  Explicitly mark it out-of-date too.
+  get_property(build_always
+    TARGET ${name}
+    PROPERTY _EP_BUILD_ALWAYS
+  )
+  if(build_always)
+    set(always 1)
+  else()
+    set(always 0)
+  endif()
+
   set(__cmdQuoted)
   foreach(__item IN LISTS cmd)
     string(APPEND __cmdQuoted " [==[${__item}]==]")
@@ -3839,6 +3852,7 @@ function(_ep_add_install_command name)
       COMMAND ${__cmdQuoted}
       WORKING_DIRECTORY \${binary_dir}
       DEPENDEES build
+      ALWAYS \${always}
       ${log}
       ${uses_terminal}
     )"
