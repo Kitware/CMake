@@ -1,4 +1,4 @@
-Step 6: Adding System Introspection
+Step 7: Adding System Introspection
 ===================================
 
 Let us consider adding some code to our project that depends on features the
@@ -15,7 +15,7 @@ these functions using the :module:`CheckCXXSourceCompiles` module in
 Add the checks for ``log`` and ``exp`` to ``MathFunctions/CMakeLists.txt``,
 after the call to :command:`target_include_directories`:
 
-.. literalinclude:: Step7/MathFunctions/CMakeLists.txt
+.. literalinclude:: Step8/MathFunctions/CMakeLists.txt
   :caption: MathFunctions/CMakeLists.txt
   :name: MathFunctions/CMakeLists.txt-check_cxx_source_compiles
   :language: cmake
@@ -25,7 +25,7 @@ after the call to :command:`target_include_directories`:
 If available, use :command:`target_compile_definitions` to specify
 ``HAVE_LOG`` and ``HAVE_EXP`` as ``PRIVATE`` compile definitions.
 
-.. literalinclude:: Step7/MathFunctions/CMakeLists.txt
+.. literalinclude:: Step8/MathFunctions/CMakeLists.txt
   :caption: MathFunctions/CMakeLists.txt
   :name: MathFunctions/CMakeLists.txt-target_compile_definitions
   :language: cmake
@@ -37,7 +37,7 @@ compute the square root in the ``mysqrt`` function. Add the following code to
 the ``mysqrt`` function in ``MathFunctions/mysqrt.cxx`` (don't forget the
 ``#endif`` before returning the result!):
 
-.. literalinclude:: Step7/MathFunctions/mysqrt.cxx
+.. literalinclude:: Step8/MathFunctions/mysqrt.cxx
   :caption: MathFunctions/mysqrt.cxx
   :name: MathFunctions/mysqrt.cxx-ifdef
   :language: c++
@@ -46,7 +46,7 @@ the ``mysqrt`` function in ``MathFunctions/mysqrt.cxx`` (don't forget the
 
 We will also need to modify ``mysqrt.cxx`` to include ``cmath``.
 
-.. literalinclude:: Step7/MathFunctions/mysqrt.cxx
+.. literalinclude:: Step8/MathFunctions/mysqrt.cxx
   :caption: MathFunctions/mysqrt.cxx
   :name: MathFunctions/mysqrt.cxx-include-cmath
   :language: c++

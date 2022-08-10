@@ -1,4 +1,4 @@
-Step 10: Adding Generator Expressions
+Step 4: Adding Generator Expressions
 =====================================
 
 :manual:`Generator expressions <cmake-generator-expressions(7)>` are evaluated
@@ -37,16 +37,16 @@ instead of using :variable:`CMAKE_CXX_STANDARD`.
 
 So the following code:
 
-.. literalinclude:: Step10/CMakeLists.txt
+.. literalinclude:: Step4/CMakeLists.txt
   :caption: CMakeLists.txt
   :name: CMakeLists.txt-CXX_STANDARD-variable-remove
   :language: cmake
   :start-after: project(Tutorial VERSION 1.0)
-  :end-before: # control where the static and shared libraries are built so that on windows
+  :end-before: # should we use our own math functions
 
 Would be replaced with:
 
-.. literalinclude:: Step11/CMakeLists.txt
+.. literalinclude:: Step5/CMakeLists.txt
   :caption: CMakeLists.txt
   :name: CMakeLists.txt-cxx_std-feature
   :language: cmake
@@ -69,12 +69,12 @@ warning flags vary based on the compiler we use the ``COMPILE_LANG_AND_ID``
 generator expression to control which flags to apply given a language and a set
 of compiler ids as seen below:
 
-.. literalinclude:: Step11/CMakeLists.txt
+.. literalinclude:: Step5/CMakeLists.txt
   :caption: CMakeLists.txt
   :name: CMakeLists.txt-target_compile_options-genex
   :language: cmake
   :start-after: # the BUILD_INTERFACE genex
-  :end-before: # control where the static and shared libraries are built so that on windows
+  :end-before: # should we use our own math functions
 
 Looking at this we see that the warning flags are encapsulated inside a
 ``BUILD_INTERFACE`` condition. This is done so that consumers of our installed

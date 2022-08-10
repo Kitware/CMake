@@ -24,13 +24,13 @@ provides the complete solution for the previous step.
   A Basic Starting Point
   Adding a Library
   Adding Usage Requirements for a Library
+  Adding Generator Expressions
   Installing and Testing
   Adding Support for a Testing Dashboard
   Adding System Introspection
   Adding a Custom Command and Generated File
   Packaging an Installer
   Selecting Static or Shared Libraries
-  Adding Generator Expressions
   Adding Export Configuration
   Packaging Debug and Release
 

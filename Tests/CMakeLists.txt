@@ -1747,7 +1747,7 @@ if(BUILD_TESTING)
 
   if(NOT CMake_TEST_EXTERNAL_CMAKE)
     foreach(STP RANGE 2 12)
-      if (STP EQUAL 7)
+      if (STP EQUAL 8)
         set(pass_regex ".*using log and exp")
       else()
         set(pass_regex "The square root of 25 is 5")

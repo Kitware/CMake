@@ -1,4 +1,4 @@
-Step 5: Adding Support for a Testing Dashboard
+Step 6: Adding Support for a Testing Dashboard
 ==============================================
 
 Adding support for submitting our test results to a dashboard is simple. We
@@ -9,7 +9,7 @@ we include the :module:`CTest` module in our top-level ``CMakeLists.txt``.
 
 Replace:
 
-.. literalinclude:: Step5/CMakeLists.txt
+.. literalinclude:: Step6/CMakeLists.txt
   :caption: CMakeLists.txt
   :name: CMakeLists.txt-enable_testing-remove
   :language: cmake
@@ -18,7 +18,7 @@ Replace:
 
 With:
 
-.. literalinclude:: Step6/CMakeLists.txt
+.. literalinclude:: Step7/CMakeLists.txt
   :caption: CMakeLists.txt
   :name: CMakeLists.txt-include-CTest
   :language: cmake
@@ -46,7 +46,7 @@ downloaded from the ``Settings`` page of the project on the CDash
 instance that will host and display the test results.  Once downloaded from
 CDash, the file should not be modified locally.
 
-.. literalinclude:: Step6/CTestConfig.cmake
+.. literalinclude:: Step7/CTestConfig.cmake
   :caption: CTestConfig.cmake
   :name: CTestConfig.cmake
   :language: cmake
