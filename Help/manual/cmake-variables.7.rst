@@ -322,6 +322,7 @@ Variables that Describe the System
    /variable/CYGWIN
    /variable/GHSMULTI
    /variable/IOS
+   /variable/LINUX
    /variable/MINGW
    /variable/MSVC
    /variable/MSVC10
