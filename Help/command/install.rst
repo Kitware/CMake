@@ -217,9 +217,9 @@ that may be installed:
 
 ``CXX_MODULES_BMI``
 
-.. note ::
+  .. note ::
 
-  Experimental. Gated by ``CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API``
+    Experimental. Gated by ``CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API``
 
   Any module files from C++ modules from ``PUBLIC`` sources in a file set of
   type ``CXX_MODULES`` will be installed to the given ``DESTINATION``. All
@@ -857,9 +857,9 @@ library is always installed if the headers and CMake export file are present.
 
 ``CXX_MODULES_DIRECTORY``
 
-.. note ::
+  .. note ::
 
-  Experimental. Gated by ``CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API``
+    Experimental. Gated by ``CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API``
 
   Specify a subdirectory to store C++ module information for targets in the
   export set. This directory will be populated with files which add the
