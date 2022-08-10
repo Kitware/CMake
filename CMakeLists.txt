@@ -648,7 +648,7 @@ macro (CMAKE_BUILD_UTILITIES)
   #---------------------------------------------------------------------
   # Build jsoncpp library.
   if(CMAKE_USE_SYSTEM_JSONCPP)
-    find_package(JsonCpp 1.4.1)
+    find_package(JsonCpp 1.6.0)
     if(NOT JsonCpp_FOUND)
       message(FATAL_ERROR
         "CMAKE_USE_SYSTEM_JSONCPP is ON but a JsonCpp is not found!")
