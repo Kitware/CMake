@@ -161,8 +161,8 @@ private:
   std::vector<std::unique_ptr<cmGeneratorExpressionEvaluator>> Evaluators;
   const std::string Input;
   bool NeedsEvaluation;
-  bool EvaluateForBuildsystem;
-  bool Quiet;
+  bool EvaluateForBuildsystem = false;
+  bool Quiet = false;
 
   mutable std::set<cmGeneratorTarget*> DependTargets;
   mutable std::set<cmGeneratorTarget const*> AllTargetsSeen;
@@ -171,9 +171,9 @@ private:
                    std::map<std::string, std::string>>
     MaxLanguageStandard;
   mutable std::string Output;
-  mutable bool HadContextSensitiveCondition;
-  mutable bool HadHeadSensitiveCondition;
-  mutable bool HadLinkLanguageSensitiveCondition;
+  mutable bool HadContextSensitiveCondition = false;
+  mutable bool HadHeadSensitiveCondition = false;
+  mutable bool HadLinkLanguageSensitiveCondition = false;
   mutable std::set<cmGeneratorTarget const*> SourceSensitiveTargets;
 };
 

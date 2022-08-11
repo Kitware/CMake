@@ -97,6 +97,11 @@ Call Stack \(most recent call first\):
 FindBar processed here.
 +
 CMake Debug Log at ModuleModeDebugPkg/FindFoo.cmake:[0-9]+ \(find_package\):
+  The internally managed CMAKE_FIND_PACKAGE_REDIRECTS_DIR.
+
+    [^
+]*/Tests/RunCMake/find_package/ModuleModeDebugPkg-build/CMakeFiles/pkgRedirects
+
   Paths specified by the find_package HINTS option.
 
     none
@@ -106,6 +111,11 @@ CMake Debug Log at ModuleModeDebugPkg/FindFoo.cmake:[0-9]+ \(find_package\):
     none
 
   find_package considered the following locations for Zot's Config module:
+
+    [^
+]*/Tests/RunCMake/find_package/ModuleModeDebugPkg-build/CMakeFiles/pkgRedirects/ZotConfig.cmake
+    [^
+]*/Tests/RunCMake/find_package/ModuleModeDebugPkg-build/CMakeFiles/pkgRedirects/zot-config.cmake
 
   The file was not found.
 

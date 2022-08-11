@@ -131,6 +131,10 @@ bool cmAddLibraryCommand(std::vector<std::string> const& args,
     }
   }
 
+  if (importTarget && !importGlobal) {
+    importGlobal = mf.IsImportedTargetGlobalScope();
+  }
+
   if (type == cmStateEnums::INTERFACE_LIBRARY) {
     if (importGlobal && !importTarget) {
       status.SetError(

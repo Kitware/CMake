@@ -29,8 +29,8 @@ public:
 
   std::string const& GetRelativePathTopSource() const;
   std::string const& GetRelativePathTopBinary() const;
-  void SetRelativePathTopSource(std::string const& top);
-  void SetRelativePathTopBinary(std::string const& top);
+  void SetRelativePathTop(std::string const& topSource,
+                          std::string const& topBinary);
 
   enum OutputFormat
   {
@@ -138,7 +138,7 @@ private:
   static bool Shell_ArgumentNeedsQuotes(cm::string_view in, int flags);
   static std::string Shell_GetArgument(cm::string_view in, int flags);
 
-  bool LinkScriptShell;
+  bool LinkScriptShell = false;
 
   // The top-most directories for relative path conversion.  Both the
   // source and destination location of a relative path conversion
@@ -147,8 +147,17 @@ private:
   // safely by the build tools.
   std::string RelativePathTopSource;
   std::string RelativePathTopBinary;
+  enum class TopRelation
+  {
+    Separate,
+    BinInSrc,
+    SrcInBin,
+    InSource,
+  };
+  TopRelation RelativePathTopRelation = TopRelation::Separate;
   void ComputeRelativePathTopSource();
   void ComputeRelativePathTopBinary();
+  void ComputeRelativePathTopRelation();
   std::string MaybeRelativeTo(std::string const& local_path,
                               std::string const& remote_path) const;
 };

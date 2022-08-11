@@ -1,0 +1,6 @@
+CMake Error at bad-feature1.cmake:[0-9]+ \(add_library\):
+  Feature 'bad_feat', specified through generator-expression
+  '\$<LINK_LIBRARY>' to link target 'lib', is not supported for the 'C' link
+  language.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

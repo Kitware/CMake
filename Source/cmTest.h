@@ -64,7 +64,7 @@ private:
   cmPropertyMap Properties;
   std::string Name;
   std::vector<std::string> Command;
-  bool CommandExpandLists;
+  bool CommandExpandLists = false;
 
   bool OldStyle;
 

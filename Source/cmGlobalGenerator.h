@@ -367,6 +367,13 @@ public:
   /** Determine if a name resolves to a framework on disk or a built target
       that is a framework. */
   bool NameResolvesToFramework(const std::string& libname) const;
+  /** Split a framework path to the directory and name of the framework
+   * returns std::nullopt if the path does not match with framework format
+   * when extendedFormat is true, required format is relaxed (i.e. extension
+   * `.framework' is optional). Used when FRAMEWORK link feature is
+   * specified */
+  cm::optional<std::pair<std::string, std::string>> SplitFrameworkPath(
+    const std::string& path, bool extendedFormat = false) const;
 
   cmMakefile* FindMakefile(const std::string& start_dir) const;
   cmLocalGenerator* FindLocalGenerator(cmDirectoryId const& id) const;
@@ -452,10 +459,13 @@ public:
 
   virtual bool IsNinja() const { return false; }
 
-  /** Return true if we know the exact location of object files.
-      If false, store the reason in the given string.
-      This is meaningful only after EnableLanguage has been called.  */
-  virtual bool HasKnownObjectFileLocation(std::string*) const { return true; }
+  /** Return true if we know the exact location of object files for the given
+     cmTarget. If false, store the reason in the given string. This is
+     meaningful only after EnableLanguage has been called.  */
+  virtual bool HasKnownObjectFileLocation(cmTarget const&, std::string*) const
+  {
+    return true;
+  }
 
   virtual bool UseFolderProperty() const;
 
@@ -565,6 +575,8 @@ protected:
   /// @brief Qt AUTOMOC/UIC/RCC target generation
   /// @return true on success
   bool QtAutoGen();
+
+  bool AddHeaderSetVerification();
 
   bool AddAutomaticSources();
 

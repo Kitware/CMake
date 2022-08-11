@@ -45,9 +45,12 @@ cmFileSetVisibility cmFileSetVisibilityFromName(cm::string_view name,
   if (name == "PRIVATE"_s) {
     return cmFileSetVisibility::Private;
   }
-  mf->IssueMessage(
-    MessageType::FATAL_ERROR,
-    cmStrCat("File set visibility \"", name, "\" is not valid."));
+  auto msg = cmStrCat("File set visibility \"", name, "\" is not valid.");
+  if (mf) {
+    mf->IssueMessage(MessageType::FATAL_ERROR, msg);
+  } else {
+    cmSystemTools::Error(msg);
+  }
   return cmFileSetVisibility::Private;
 }
 

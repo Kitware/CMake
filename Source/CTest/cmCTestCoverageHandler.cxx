@@ -1218,11 +1218,8 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
           cmCTestLog(this->CTest, ERROR_MESSAGE,
                      "Cannot open file: " << gcovFile << std::endl);
         } else {
-          long cnt = -1;
           std::string nl;
           while (cmSystemTools::GetLineFromStream(ifile, nl)) {
-            cnt++;
-
             // Skip empty lines
             if (nl.empty()) {
               continue;
@@ -1528,7 +1525,6 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
             cmCTestLog(this->CTest, ERROR_MESSAGE,
                        "Cannot open file: " << lcovFile << std::endl);
           } else {
-            long cnt = -1;
             std::string nl;
 
             // Skip the first line
@@ -1537,8 +1533,6 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
                                "File is ready, start reading." << std::endl,
                                this->Quiet);
             while (cmSystemTools::GetLineFromStream(ifile, nl)) {
-              cnt++;
-
               // Skip empty lines
               if (nl.empty()) {
                 continue;
@@ -2216,7 +2210,7 @@ int cmCTestCoverageHandler::GetLabelId(std::string const& label)
 {
   auto i = this->LabelIdMap.find(label);
   if (i == this->LabelIdMap.end()) {
-    int n = int(this->Labels.size());
+    int n = static_cast<int>(this->Labels.size());
     this->Labels.push_back(label);
     LabelIdMapType::value_type entry(label, n);
     i = this->LabelIdMap.insert(entry).first;

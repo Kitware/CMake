@@ -41,10 +41,10 @@ void cmInstallGenerator::CheckCMP0082(bool& haveSubdirectoryInstall,
 void cmInstallGenerator::AddInstallRule(
   std::ostream& os, std::string const& dest, cmInstallType type,
   std::vector<std::string> const& files, bool optional /* = false */,
-  const char* permissions_file /* = 0 */,
-  const char* permissions_dir /* = 0 */, const char* rename /* = 0 */,
-  const char* literal_args /* = 0 */, Indent indent,
-  const char* files_var /* = 0 */)
+  const char* permissions_file /* = nullptr */,
+  const char* permissions_dir /* = nullptr */,
+  const char* rename /* = nullptr */, const char* literal_args /* = nullptr */,
+  Indent indent, const char* files_var /* = nullptr */)
 {
   // Use the FILE command to install the file.
   std::string stype;
@@ -91,21 +91,28 @@ void cmInstallGenerator::AddInstallRule(
       os << "\")\n";
     }
     if (files_var) {
-      os << indent << "foreach(_f IN LISTS " << files_var << ")\n";
-      os << indent.Next() << "get_filename_component(_fn \"${_f}\" NAME)\n";
+      os << indent << "foreach(_cmake_abs_file IN LISTS " << files_var
+         << ")\n";
+      os << indent.Next()
+         << "get_filename_component(_cmake_abs_file_name "
+            "\"${_cmake_abs_file}\" NAME)\n";
       os << indent.Next() << "list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES \""
-         << dest << "/${_fn}\")\n";
+         << dest << "/${_cmake_abs_file_name}\")\n";
       os << indent << "endforeach()\n";
+      os << indent << "unset(_cmake_abs_file_name)\n";
+      os << indent << "unset(_cmake_abs_file)\n";
     }
     os << indent << "if(CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)\n";
-    os << indent.Next() << "message(WARNING \"ABSOLUTE path INSTALL "
-       << "DESTINATION : ${CMAKE_ABSOLUTE_DESTINATION_FILES}\")\n";
+    os << indent.Next()
+       << "message(WARNING \"ABSOLUTE path INSTALL "
+          "DESTINATION : ${CMAKE_ABSOLUTE_DESTINATION_FILES}\")\n";
     os << indent << "endif()\n";
 
     os << indent << "if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)\n";
-    os << indent.Next() << "message(FATAL_ERROR \"ABSOLUTE path INSTALL "
-       << "DESTINATION forbidden (by caller): "
-       << "${CMAKE_ABSOLUTE_DESTINATION_FILES}\")\n";
+    os << indent.Next()
+       << "message(FATAL_ERROR \"ABSOLUTE path INSTALL "
+          "DESTINATION forbidden (by caller): "
+          "${CMAKE_ABSOLUTE_DESTINATION_FILES}\")\n";
     os << indent << "endif()\n";
   }
   std::string absDest = ConvertToAbsoluteDestination(dest);
@@ -158,14 +165,22 @@ void cmInstallGenerator::AddInstallRule(
 }
 
 std::string cmInstallGenerator::CreateComponentTest(
-  const std::string& component, bool exclude_from_all)
+  const std::string& component, bool exclude_from_all, bool all_components)
 {
-  std::string result = R"("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "x)";
+  if (all_components) {
+    if (exclude_from_all) {
+      return "CMAKE_INSTALL_COMPONENT";
+    }
+    return {};
+  }
+
+  std::string result = "CMAKE_INSTALL_COMPONENT STREQUAL \"";
   result += component;
-  result += "x\"";
+  result += "\"";
   if (!exclude_from_all) {
     result += " OR NOT CMAKE_INSTALL_COMPONENT";
   }
+
   return result;
 }
 
@@ -174,10 +189,11 @@ void cmInstallGenerator::GenerateScript(std::ostream& os)
   // Track indentation.
   Indent indent;
 
+  std::string component_test = this->CreateComponentTest(
+    this->Component, this->ExcludeFromAll, this->AllComponents);
+
   // Begin this block of installation.
-  if (!this->AllComponents) {
-    std::string component_test =
-      this->CreateComponentTest(this->Component, this->ExcludeFromAll);
+  if (!component_test.empty()) {
     os << indent << "if(" << component_test << ")\n";
   }
 
@@ -186,7 +202,7 @@ void cmInstallGenerator::GenerateScript(std::ostream& os)
                               this->AllComponents ? indent : indent.Next());
 
   // End this block of installation.
-  if (!this->AllComponents) {
+  if (!component_test.empty()) {
     os << indent << "endif()\n\n";
   }
 }

@@ -1286,6 +1286,17 @@
     "value": "",
     "flags": [
       "UserValue",
+      "UserRequired",
+      "SemicolonAppendable"
+    ]
+  },
+  {
+    "name": "ForcedIncludeFiles",
+    "switch": "FI",
+    "comment": "Forced Include File",
+    "value": "",
+    "flags": [
+      "UserFollowing",
       "SemicolonAppendable"
     ]
   },

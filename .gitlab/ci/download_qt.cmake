@@ -11,7 +11,24 @@ set(qt_version_nodot "${qt_version_major}${qt_version_minor}${qt_version_patch}"
 
 # Files needed to download.
 set(qt_files)
-if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "windows")
+if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "windows.*package")
+  set(qt_url_root "https://cmake.org/files/dependencies")
+  set(qt_url_path "")
+  if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "windows_x86_64_package")
+    list(APPEND qt_files "qt-5.12.1-win-x86_64-msvc_v142-1.zip")
+    set(qt_subdir "qt-5.12.1-win-x86_64-msvc_v142-1")
+  elseif ("$ENV{CMAKE_CONFIGURATION}" MATCHES "windows_i386_package")
+    list(APPEND qt_files "qt-5.12.1-win-i386-msvc_v142-1.zip")
+    set(qt_subdir "qt-5.12.1-win-i386-msvc_v142-1")
+  elseif ("$ENV{CMAKE_CONFIGURATION}" MATCHES "windows_arm64_package")
+    list(APPEND qt_files "qt-6.3.0-win-arm64-msvc_v143-1.zip")
+    set(qt_subdir "qt-6.3.0-win-arm64-msvc_v143-1")
+    list(APPEND qt_files "qt-6.3.0-win-x86_64-msvc_v143-1.zip")
+    set(qt_host_subdir "qt-6.3.0-win-x86_64-msvc_v143-1")
+  else ()
+    message(FATAL_ERROR "Unknown arch to use for Qt")
+  endif()
+elseif ("$ENV{CMAKE_CONFIGURATION}" MATCHES "windows")
   # Determine the ABI to fetch for Qt.
   if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "vs2015")
     set(qt_platform "windows_x86")
@@ -134,3 +151,8 @@ endif ()
 file(RENAME
   ".gitlab/${qt_subdir}"
   ".gitlab/qt")
+if(qt_host_subdir)
+  file(RENAME
+    ".gitlab/${qt_host_subdir}"
+    ".gitlab/qt-host")
+endif()

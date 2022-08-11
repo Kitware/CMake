@@ -843,7 +843,7 @@ endif()
 if(CUDAToolkit_FOUND)
 
   function(_CUDAToolkit_find_and_add_import_lib lib_name)
-    cmake_parse_arguments(arg "" "" "ALT;DEPS;EXTRA_PATH_SUFFIXES" ${ARGN})
+    cmake_parse_arguments(arg "" "" "ALT;DEPS;EXTRA_PATH_SUFFIXES;EXTRA_INCLUDE_DIRS" ${ARGN})
 
     set(search_names ${lib_name} ${arg_ALT})
 
@@ -883,6 +883,9 @@ if(CUDAToolkit_FOUND)
           target_link_libraries(CUDA::${lib_name} INTERFACE CUDA::${dep})
         endif()
       endforeach()
+      if(arg_EXTRA_INCLUDE_DIRS)
+        target_include_directories(CUDA::${lib_name} SYSTEM INTERFACE "${arg_EXTRA_INCLUDE_DIRS}")
+      endif()
     endif()
   endfunction()
 
@@ -974,12 +977,22 @@ if(CUDAToolkit_FOUND)
     _CUDAToolkit_find_and_add_import_lib(${cuda_lib}_static DEPS nppc_static)
   endforeach()
 
-  _CUDAToolkit_find_and_add_import_lib(cupti
-                                       EXTRA_PATH_SUFFIXES ../extras/CUPTI/lib64/
-                                                           ../extras/CUPTI/lib/)
-  _CUDAToolkit_find_and_add_import_lib(cupti_static
-                                       EXTRA_PATH_SUFFIXES ../extras/CUPTI/lib64/
-                                                           ../extras/CUPTI/lib/)
+  find_path(CUDAToolkit_CUPTI_INCLUDE_DIR cupti.h PATHS
+      "${CUDAToolkit_ROOT_DIR}/extras/CUPTI/include"
+      "${CUDAToolkit_INCLUDE_DIR}/../extras/CUPTI/include"
+      "${CUDATookit_INCLUDE_DIR}"
+      NO_DEFAULT_PATH)
+
+  if(CUDAToolkit_CUPTI_INCLUDE_DIR)
+    _CUDAToolkit_find_and_add_import_lib(cupti
+                                        EXTRA_PATH_SUFFIXES ../extras/CUPTI/lib64/
+                                                            ../extras/CUPTI/lib/
+                                        EXTRA_INCLUDE_DIRS "${CUDAToolkit_CUPTI_INCLUDE_DIR}")
+    _CUDAToolkit_find_and_add_import_lib(cupti_static
+                                        EXTRA_PATH_SUFFIXES ../extras/CUPTI/lib64/
+                                                            ../extras/CUPTI/lib/
+                                        EXTRA_INCLUDE_DIRS "${CUDAToolkit_CUPTI_INCLUDE_DIR}")
+  endif()
 
   _CUDAToolkit_find_and_add_import_lib(nvrtc DEPS cuda_driver)
 

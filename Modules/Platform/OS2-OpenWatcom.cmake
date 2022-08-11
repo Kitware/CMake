@@ -16,6 +16,14 @@ endif()
 set(CMAKE_C_COMPILE_OPTIONS_DLL "-bd") # Note: This variable is a ';' separated list
 set(CMAKE_SHARED_LIBRARY_C_FLAGS "-bd") # ... while this is a space separated string.
 
+cmake_policy(GET CMP0136 __OS2_WATCOM_CMP0136)
+if(__OS2_WATCOM_CMP0136 STREQUAL "NEW")
+  set(CMAKE_WATCOM_RUNTIME_LIBRARY_DEFAULT "SingleThreaded")
+else()
+  set(CMAKE_WATCOM_RUNTIME_LIBRARY_DEFAULT "")
+endif()
+unset(__OS2_WATCOM_CMP0136)
+
 string(APPEND CMAKE_C_FLAGS_INIT " -bt=os2")
 string(APPEND CMAKE_CXX_FLAGS_INIT " -bt=os2 -xs")
 
@@ -33,3 +41,10 @@ if(NOT CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES)
     set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES $ENV{WATCOM}/h $ENV{WATCOM}/h/os2)
   endif()
 endif()
+
+macro(__os2_open_watcom lang)
+  set(CMAKE_${lang}_COMPILE_OPTIONS_WATCOM_RUNTIME_LIBRARY_SingleThreaded         "")
+  set(CMAKE_${lang}_COMPILE_OPTIONS_WATCOM_RUNTIME_LIBRARY_SingleThreadedDLL      -br)
+  set(CMAKE_${lang}_COMPILE_OPTIONS_WATCOM_RUNTIME_LIBRARY_MultiThreaded          -bm)
+  set(CMAKE_${lang}_COMPILE_OPTIONS_WATCOM_RUNTIME_LIBRARY_MultiThreadedDLL       -bm -br)
+endmacro()

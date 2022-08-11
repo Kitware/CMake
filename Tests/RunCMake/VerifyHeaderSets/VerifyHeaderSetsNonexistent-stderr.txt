@@ -1,0 +1,9 @@
+^CMake Error in CMakeLists\.txt:
+  Property INTERFACE_HEADER_SETS_TO_VERIFY of target "nonexistent" contained
+  the following header sets that are nonexistent or not INTERFACE:
+
+    b
+    c
+
+
+CMake Generate step failed\.  Build files cannot be regenerated correctly\.$

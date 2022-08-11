@@ -399,7 +399,7 @@ void cmLocalGenerator::ProcessEvaluationFiles(
 {
   for (const auto& geef : this->Makefile->GetEvaluationFiles()) {
     geef->Generate(this);
-    if (cmSystemTools::GetFatalErrorOccured()) {
+    if (cmSystemTools::GetFatalErrorOccurred()) {
       return;
     }
     std::vector<std::string> files = geef->GetFiles();
@@ -1025,6 +1025,16 @@ void cmLocalGenerator::AddCompileOptions(std::vector<BT<std::string>>& flags,
     flags.emplace_back(std::move(compReqFlag));
   }
 
+  // Add Warning as errors flags
+  if (!this->GetCMakeInstance()->GetIgnoreWarningAsError()) {
+    const cmValue wError = target->GetProperty("COMPILE_WARNING_AS_ERROR");
+    const cmValue wErrorFlag = this->Makefile->GetDefinition(
+      cmStrCat("CMAKE_", lang, "_COMPILE_OPTIONS_WARNING_AS_ERROR"));
+    if (wError.IsOn() && wErrorFlag.IsSet()) {
+      flags.emplace_back(wErrorFlag);
+    }
+  }
+
   // Add compile flag for the MSVC compiler only.
   cmMakefile* mf = this->GetMakefile();
   if (cmValue jmc =
@@ -1438,22 +1448,6 @@ void cmLocalGenerator::GetTargetFlags(
           sharedLibFlags += this->Makefile->GetSafeDefinition(build);
           sharedLibFlags += " ";
         }
-        if (this->Makefile->IsOn("WIN32") &&
-            !(this->Makefile->IsOn("CYGWIN") ||
-              this->Makefile->IsOn("MINGW"))) {
-          std::vector<cmSourceFile*> sources;
-          target->GetSourceFiles(sources, config);
-          std::string defFlag =
-            this->Makefile->GetSafeDefinition("CMAKE_LINK_DEF_FILE_FLAG");
-          for (cmSourceFile* sf : sources) {
-            if (sf->GetExtension() == "def") {
-              sharedLibFlags += defFlag;
-              sharedLibFlags +=
-                this->ConvertToOutputFormat(sf->ResolveFullPath(), SHELL);
-              sharedLibFlags += " ";
-            }
-          }
-        }
       }
 
       cmValue targetLinkFlags = target->GetProperty("LINK_FLAGS");
@@ -1567,6 +1561,8 @@ void cmLocalGenerator::GetTargetFlags(
   this->AppendPositionIndependentLinkerFlags(extraLinkFlags, target, config,
                                              linkLanguage);
   this->AppendIPOLinkerFlags(extraLinkFlags, target, config, linkLanguage);
+  this->AppendModuleDefinitionFlag(extraLinkFlags, target, linkLineComputer,
+                                   config);
 
   if (!extraLinkFlags.empty()) {
     linkFlags.emplace_back(std::move(extraLinkFlags));
@@ -1609,6 +1605,7 @@ std::vector<BT<std::string>> cmLocalGenerator::GetTargetCompileFlags(
 
   this->AddCMP0018Flags(compileFlags, target, lang, config);
   this->AddVisibilityPresetFlags(compileFlags, target, lang);
+  this->AddColorDiagnosticsFlags(compileFlags, lang);
   this->AppendFlags(compileFlags, mf->GetDefineFlags());
   this->AppendFlags(compileFlags,
                     this->GetFrameworkFlags(lang, config, target));
@@ -1918,6 +1915,7 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
 
   std::string compilerSimulateId = this->Makefile->GetSafeDefinition(
     cmStrCat("CMAKE_", lang, "_SIMULATE_ID"));
+
   if (lang == "Swift") {
     if (cmValue v = target->GetProperty("Swift_LANGUAGE_VERSION")) {
       if (cmSystemTools::VersionCompare(
@@ -1984,11 +1982,43 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
                     "CMAKE_" + lang + "_COMPILER_ID") == "MSVC" ||
                   this->Makefile->GetSafeDefinition(
                     "CMAKE_" + lang + "_SIMULATE_ID") == "MSVC") &&
-                 !cmSystemTools::GetErrorOccuredFlag()) {
+                 !cmSystemTools::GetErrorOccurredFlag()) {
         // The compiler uses the MSVC ABI so it needs a known runtime library.
         this->IssueMessage(MessageType::FATAL_ERROR,
                            "MSVC_RUNTIME_LIBRARY value '" +
                              msvcRuntimeLibrary + "' not known for this " +
+                             lang + " compiler.");
+      }
+    }
+  }
+
+  // Add Watcom runtime library flags.  This is activated by the presence
+  // of a default selection whether or not it is overridden by a property.
+  cmValue watcomRuntimeLibraryDefault =
+    this->Makefile->GetDefinition("CMAKE_WATCOM_RUNTIME_LIBRARY_DEFAULT");
+  if (cmNonempty(watcomRuntimeLibraryDefault)) {
+    cmValue watcomRuntimeLibraryValue =
+      target->GetProperty("WATCOM_RUNTIME_LIBRARY");
+    if (!watcomRuntimeLibraryValue) {
+      watcomRuntimeLibraryValue = watcomRuntimeLibraryDefault;
+    }
+    std::string const watcomRuntimeLibrary = cmGeneratorExpression::Evaluate(
+      *watcomRuntimeLibraryValue, this, config, target);
+    if (!watcomRuntimeLibrary.empty()) {
+      if (cmValue watcomRuntimeLibraryOptions = this->Makefile->GetDefinition(
+            "CMAKE_" + lang + "_COMPILE_OPTIONS_WATCOM_RUNTIME_LIBRARY_" +
+            watcomRuntimeLibrary)) {
+        this->AppendCompileOptions(flags, *watcomRuntimeLibraryOptions);
+      } else if ((this->Makefile->GetSafeDefinition(
+                    "CMAKE_" + lang + "_COMPILER_ID") == "OpenWatcom" ||
+                  this->Makefile->GetSafeDefinition(
+                    "CMAKE_" + lang + "_SIMULATE_ID") == "OpenWatcom") &&
+                 !cmSystemTools::GetErrorOccurredFlag()) {
+        // The compiler uses the Watcom ABI so it needs a known runtime
+        // library.
+        this->IssueMessage(MessageType::FATAL_ERROR,
+                           "WATCOM_RUNTIME_LIBRARY value '" +
+                             watcomRuntimeLibrary + "' not known for this " +
                              lang + " compiler.");
       }
     }
@@ -2350,6 +2380,29 @@ void cmLocalGenerator::AddPositionIndependentFlags(std::string& flags,
     std::vector<std::string> options = cmExpandedList(picFlags);
     for (std::string const& o : options) {
       this->AppendFlagEscape(flags, o);
+    }
+  }
+}
+
+void cmLocalGenerator::AddColorDiagnosticsFlags(std::string& flags,
+                                                const std::string& lang)
+{
+  cmValue diag = this->Makefile->GetDefinition("CMAKE_COLOR_DIAGNOSTICS");
+  if (diag.IsSet()) {
+    std::string colorFlagName;
+    if (diag.IsOn()) {
+      colorFlagName =
+        cmStrCat("CMAKE_", lang, "_COMPILE_OPTIONS_COLOR_DIAGNOSTICS");
+    } else {
+      colorFlagName =
+        cmStrCat("CMAKE_", lang, "_COMPILE_OPTIONS_COLOR_DIAGNOSTICS_OFF");
+    }
+
+    std::vector<std::string> options;
+    this->Makefile->GetDefExpandList(colorFlagName, options);
+
+    for (std::string const& option : options) {
+      this->AppendFlagEscape(flags, option);
     }
   }
 }
@@ -3070,6 +3123,32 @@ void cmLocalGenerator::AppendPositionIndependentLinkerFlags(
   }
 }
 
+void cmLocalGenerator::AppendModuleDefinitionFlag(
+  std::string& flags, cmGeneratorTarget const* target,
+  cmLinkLineComputer* linkLineComputer, std::string const& config)
+{
+  cmGeneratorTarget::ModuleDefinitionInfo const* mdi =
+    target->GetModuleDefinitionInfo(config);
+  if (!mdi || mdi->DefFile.empty()) {
+    return;
+  }
+
+  cmValue defFileFlag =
+    this->Makefile->GetDefinition("CMAKE_LINK_DEF_FILE_FLAG");
+  if (!defFileFlag) {
+    return;
+  }
+
+  // Append the flag and value.  Use ConvertToLinkReference to help
+  // vs6's "cl -link" pass it to the linker.
+  std::string flag =
+    cmStrCat(*defFileFlag,
+             this->ConvertToOutputFormat(
+               linkLineComputer->ConvertToLinkReference(mdi->DefFile),
+               cmOutputConverter::SHELL));
+  this->AppendFlags(flags, flag);
+}
+
 bool cmLocalGenerator::AppendLWYUFlags(std::string& flags,
                                        const cmGeneratorTarget* target,
                                        const std::string& lang)
@@ -3201,7 +3280,7 @@ void cmLocalGenerator::AppendDefines(std::set<std::string>& defines,
                                      std::string const& defines_list) const
 {
   std::set<BT<std::string>> tmp;
-  this->AppendDefines(tmp, ExpandListWithBacktrace(defines_list));
+  this->AppendDefines(tmp, cmExpandListWithBacktrace(defines_list));
   for (BT<std::string> const& i : tmp) {
     defines.emplace(i.Value);
   }
@@ -3216,7 +3295,7 @@ void cmLocalGenerator::AppendDefines(std::set<BT<std::string>>& defines,
   }
 
   // Expand the list of definitions.
-  this->AppendDefines(defines, ExpandListWithBacktrace(defines_list));
+  this->AppendDefines(defines, cmExpandListWithBacktrace(defines_list));
 }
 
 void cmLocalGenerator::AppendDefines(

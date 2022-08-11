@@ -271,7 +271,7 @@ auto cmForEachFunctionBlocker::invoke(
     if (status.GetContinueInvoked()) {
       break;
     }
-    if (cmSystemTools::GetFatalErrorOccured()) {
+    if (cmSystemTools::GetFatalErrorOccurred()) {
       result.Restore = false;
       result.Break = true;
       break;
@@ -382,13 +382,13 @@ bool TryParseInteger(cmExecutionStatus& status, const std::string& str, int& i)
     std::ostringstream e;
     e << "Invalid integer: '" << str << "'";
     status.SetError(e.str());
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     return false;
   } catch (std::out_of_range&) {
     std::ostringstream e;
     e << "Integer out of range: '" << str << "'";
     status.SetError(e.str());
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
 
@@ -452,7 +452,7 @@ bool cmForEachCommand(std::vector<std::string> const& args,
         status.SetError(
           cmStrCat("called with incorrect range specification: start ", start,
                    ", stop ", stop, ", step ", step));
-        cmSystemTools::SetFatalErrorOccured();
+        cmSystemTools::SetFatalErrorOccurred();
         return false;
       }
 
@@ -460,8 +460,8 @@ bool cmForEachCommand(std::vector<std::string> const& args,
       // in the `fb->Args` vector. The first item is the iteration variable
       // name...
       const std::size_t iter_cnt = 2u +
-        int(start < stop) * (stop - start) / std::abs(step) +
-        int(start > stop) * (start - stop) / std::abs(step);
+        static_cast<int>(start < stop) * (stop - start) / std::abs(step) +
+        static_cast<int>(start > stop) * (start - stop) / std::abs(step);
       fb->Args.resize(iter_cnt);
       fb->Args.front() = args.front();
       auto cc = start;

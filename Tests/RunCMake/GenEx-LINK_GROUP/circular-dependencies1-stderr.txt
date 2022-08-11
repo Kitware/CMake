@@ -1,0 +1,11 @@
+CMake Error at circular-dependencies1.cmake:[0-9]+ \(add_library\):
+  The inter-target dependency graph, for the target "lib1", contains the
+  following strongly connected component \(cycle\):
+
+    group "feat:{dep1.1,dep1.2}"
+      depends on group "feat:{dep2.1,dep2.2}"
+    group "feat:{dep2.1,dep2.2}"
+      depends on group "feat:{dep1.1,dep1.2}"
+
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

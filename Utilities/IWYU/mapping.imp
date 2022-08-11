@@ -131,6 +131,9 @@
   { include: [ "<curses.h>", private, "\"cmCursesStandardIncludes.h\"", public ] },
   { include: [ "\"form.h\"", private, "\"cmCursesStandardIncludes.h\"", public ] },
   { include: [ "<form.h>", private, "\"cmCursesStandardIncludes.h\"", public ] },
+
+  # Help IWYU understand our explicit instantiation for cmConstStack.
+  { symbol: [ "cmConstStack::cmConstStack<T, Stack>", private, "\"cmConstStack.h\"", public ] },
 ]
 
 # vim: set ft=toml:

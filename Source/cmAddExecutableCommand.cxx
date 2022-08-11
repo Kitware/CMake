@@ -54,6 +54,10 @@ bool cmAddExecutableCommand(std::vector<std::string> const& args,
     }
   }
 
+  if (importTarget && !importGlobal) {
+    importGlobal = mf.IsImportedTargetGlobalScope();
+  }
+
   bool nameOk = cmGeneratorExpression::IsValidTargetName(exename) &&
     !cmGlobalGenerator::IsReservedTarget(exename);
 

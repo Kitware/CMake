@@ -399,17 +399,18 @@ public:
   LinkClosure const* GetLinkClosure(const std::string& config) const;
 
   cmLinkImplementation const* GetLinkImplementation(
-    const std::string& config) const;
+    const std::string& config, LinkInterfaceFor implFor) const;
 
   void ComputeLinkImplementationLanguages(
     const std::string& config, cmOptionalLinkImplementation& impl) const;
 
   cmLinkImplementationLibraries const* GetLinkImplementationLibraries(
-    const std::string& config) const;
+    const std::string& config, LinkInterfaceFor implFor) const;
 
   void ComputeLinkImplementationLibraries(const std::string& config,
                                           cmOptionalLinkImplementation& impl,
-                                          const cmGeneratorTarget* head) const;
+                                          const cmGeneratorTarget* head,
+                                          LinkInterfaceFor implFor) const;
 
   struct TargetOrString
   {
@@ -513,7 +514,8 @@ public:
     std::string const& config, std::string const& language) const;
 
   std::vector<BT<std::string>>& ResolveLinkerWrapper(
-    std::vector<BT<std::string>>& result, const std::string& language) const;
+    std::vector<BT<std::string>>& result, const std::string& language,
+    bool joinItems = false) const;
 
   void GetStaticLibraryLinkOptions(std::vector<std::string>& result,
                                    const std::string& config,
@@ -854,6 +856,9 @@ public:
   std::string GetFortranModuleDirectory(std::string const& working_dir) const;
   bool IsFortranBuildingInstrinsicModules() const;
 
+  bool IsLinkLookupScope(std::string const& n,
+                         cmLocalGenerator const*& lg) const;
+
   cmValue GetSourcesProperty() const;
 
   void AddISPCGeneratedHeader(std::string const& header,
@@ -866,12 +871,17 @@ public:
   std::vector<std::string> GetGeneratedISPCObjects(
     std::string const& config) const;
 
+  bool AddHeaderSetVerification();
+  std::string GenerateHeaderSetVerificationFile(
+    cmSourceFile& source, const std::string& dir,
+    cm::optional<std::set<std::string>>& languages) const;
+
 private:
   void AddSourceCommon(const std::string& src, bool before = false);
 
   std::string CreateFortranModuleDirectory(
     std::string const& working_dir) const;
-  mutable bool FortranModuleDirectoryCreated;
+  mutable bool FortranModuleDirectoryCreated = false;
   mutable std::string FortranModuleDirectory;
 
   friend class cmTargetTraceDependencies;
@@ -896,7 +906,7 @@ private:
   mutable std::string ExportMacro;
 
   void ConstructSourceFileFlags() const;
-  mutable bool SourceFileFlagsConstructed;
+  mutable bool SourceFileFlagsConstructed = false;
   mutable std::map<cmSourceFile const*, SourceFileFlags> SourceFlagsMap;
 
   mutable std::map<std::string, bool> DebugCompatiblePropertiesDone;
@@ -983,6 +993,7 @@ private:
                             const cmGeneratorTarget* head,
                             bool secondPass) const;
   cmLinkImplementation const* GetLinkImplementation(const std::string& config,
+                                                    LinkInterfaceFor implFor,
                                                     bool secondPass) const;
 
   enum class LinkItemRole
@@ -1006,6 +1017,8 @@ private:
     std::string Languages;
     std::string LibrariesProp;
     std::vector<BT<std::string>> Libraries;
+    std::vector<BT<std::string>> LibrariesHeadInclude;
+    std::vector<BT<std::string>> LibrariesHeadExclude;
     std::string SharedDeps;
   };
 
@@ -1063,13 +1076,16 @@ private:
   std::unordered_map<std::string, std::vector<std::string>>
     ISPCGeneratedObjects;
 
-  bool IsLinkLookupScope(std::string const& n,
-                         cmLocalGenerator const*& lg) const;
-
+  enum class LinkInterfaceField
+  {
+    Libraries,
+    HeadExclude,
+    HeadInclude,
+  };
   void ExpandLinkItems(std::string const& prop, cmBTStringRange entries,
                        std::string const& config,
                        const cmGeneratorTarget* headTarget,
-                       LinkInterfaceFor interfaceFor,
+                       LinkInterfaceFor interfaceFor, LinkInterfaceField field,
                        cmLinkInterface& iface) const;
 
   struct LookupLinkItemScope
@@ -1099,9 +1115,16 @@ private:
   };
   using LinkImplMapType = std::map<std::string, HeadToLinkImplementationMap>;
   mutable LinkImplMapType LinkImplMap;
+  mutable LinkImplMapType LinkImplUsageRequirementsOnlyMap;
+
+  HeadToLinkImplementationMap& GetHeadToLinkImplementationMap(
+    std::string const& config) const;
+  HeadToLinkImplementationMap& GetHeadToLinkImplementationUsageRequirementsMap(
+    std::string const& config) const;
 
   cmLinkImplementationLibraries const* GetLinkImplementationLibrariesInternal(
-    const std::string& config, const cmGeneratorTarget* head) const;
+    const std::string& config, const cmGeneratorTarget* head,
+    LinkInterfaceFor implFor) const;
   bool ComputeOutputDir(const std::string& config,
                         cmStateEnums::ArtifactType artifact,
                         std::string& out) const;
@@ -1120,24 +1143,24 @@ private:
   mutable OutputNameMapType OutputNameMap;
   mutable std::set<cmLinkItem> UtilityItems;
   cmPolicies::PolicyMap PolicyMap;
-  mutable bool PolicyWarnedCMP0022;
-  mutable bool PolicyReportedCMP0069;
-  mutable bool DebugIncludesDone;
-  mutable bool DebugCompileOptionsDone;
-  mutable bool DebugCompileFeaturesDone;
-  mutable bool DebugCompileDefinitionsDone;
-  mutable bool DebugLinkOptionsDone;
-  mutable bool DebugLinkDirectoriesDone;
-  mutable bool DebugPrecompileHeadersDone;
-  mutable bool DebugSourcesDone;
-  mutable bool UtilityItemsDone;
+  mutable bool PolicyWarnedCMP0022 = false;
+  mutable bool PolicyReportedCMP0069 = false;
+  mutable bool DebugIncludesDone = false;
+  mutable bool DebugCompileOptionsDone = false;
+  mutable bool DebugCompileFeaturesDone = false;
+  mutable bool DebugCompileDefinitionsDone = false;
+  mutable bool DebugLinkOptionsDone = false;
+  mutable bool DebugLinkDirectoriesDone = false;
+  mutable bool DebugPrecompileHeadersDone = false;
+  mutable bool DebugSourcesDone = false;
+  mutable bool UtilityItemsDone = false;
   enum class Tribool
   {
     False = 0x0,
     True = 0x1,
     Indeterminate = 0x2
   };
-  mutable Tribool SourcesAreContextDependent;
+  mutable Tribool SourcesAreContextDependent = Tribool::Indeterminate;
 
   bool ComputePDBOutputDir(const std::string& kind, const std::string& config,
                            std::string& out) const;

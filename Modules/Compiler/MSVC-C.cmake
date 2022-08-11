@@ -1,6 +1,9 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
+include(Compiler/MSVC)
+__compiler_msvc(C)
+
 include(Compiler/CMakeCommonCompilerMacros)
 
 if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 19.27)
@@ -67,16 +70,3 @@ else()
 endif()
 
 set(CMAKE_C_COMPILE_OPTIONS_EXPLICIT_LANGUAGE -TC)
-set(CMAKE_C_CLANG_TIDY_DRIVER_MODE "cl")
-set(CMAKE_C_INCLUDE_WHAT_YOU_USE_DRIVER_MODE "cl")
-
-# /JMC "Just My Code" is only supported by MSVC 19.05 onward.
-if (CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 19.05)
-  set(CMAKE_C_COMPILE_OPTIONS_JMC "-JMC")
-endif()
-
-# The `/external:I` flag was made non-experimental in 19.29.30036.3.
-if (CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 19.29.30036.3)
-  set(CMAKE_INCLUDE_SYSTEM_FLAG_C "-external:I")
-  set(_CMAKE_INCLUDE_SYSTEM_FLAG_C_WARNING "-external:W0 ")
-endif ()

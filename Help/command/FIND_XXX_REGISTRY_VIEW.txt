@@ -1,0 +1,41 @@
+Specify which registry views must be queried. This option is only meaningful
+on ``Windows`` platform and will be ignored on other ones. When not
+specified, |FIND_XXX_REGISTRY_VIEW_DEFAULT| view is used when :policy:`CMP0134`
+policy is ``NEW``. Refer to :policy:`CMP0134` policy for default view when
+policy is ``OLD`` or undefined.
+
+``64``
+  Query the 64bit registry. On ``32bit Windows``, returns always the string
+  ``/REGISTRY-NOTFOUND``.
+
+``32``
+  Query the 32bit registry.
+
+``64_32``
+  Query both views (``64`` and ``32``) and generate a path for each.
+
+``32_64``
+  Query both views (``32`` and ``64``) and generate a path for each.
+
+``HOST``
+  Query the registry matching the architecture of the host: ``64`` on ``64bit
+  Windows`` and ``32`` on ``32bit Windows``.
+
+``TARGET``
+  Query the registry matching the architecture specified by
+  :variable:`CMAKE_SIZEOF_VOID_P` variable. If not defined, fallback to
+  ``HOST`` view.
+
+``BOTH``
+  Query both views (``32`` and ``64``). The order depends of the following
+  rules: If :variable:`CMAKE_SIZEOF_VOID_P` variable is defined. Use the
+  following view depending of the content of this variable:
+
+  * ``8``: ``64_32``
+  * ``4``: ``32_64``
+
+  If :variable:`CMAKE_SIZEOF_VOID_P` variable is not defined, rely on
+  architecture of the host:
+
+  * ``64bit``: ``64_32``
+  * ``32bit``: ``32``

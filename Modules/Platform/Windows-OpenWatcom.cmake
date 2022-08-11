@@ -14,11 +14,20 @@ set(CMAKE_SHARED_LIBRARY_C_FLAGS "-bd") # ... while this is a space separated st
 
 set(CMAKE_RC_COMPILER "rc" )
 
-# single/multi-threaded                 /-bm
-# static/DLL run-time libraries         /-br
-# default is setup for multi-threaded + DLL run-time libraries
-string(APPEND CMAKE_C_FLAGS_INIT " -bt=nt -dWIN32 -br -bm")
-string(APPEND CMAKE_CXX_FLAGS_INIT " -bt=nt -xs -dWIN32 -br -bm")
+cmake_policy(GET CMP0136 __WINDOWS_WATCOM_CMP0136)
+if(__WINDOWS_WATCOM_CMP0136 STREQUAL "NEW")
+  set(CMAKE_WATCOM_RUNTIME_LIBRARY_DEFAULT "MultiThreadedDLL")
+  set(_br_bm "")
+else()
+  set(CMAKE_WATCOM_RUNTIME_LIBRARY_DEFAULT "")
+  set(_br_bm "-br -bm")
+endif()
+
+string(APPEND CMAKE_C_FLAGS_INIT " -bt=nt -dWIN32 ${_br_bm}")
+string(APPEND CMAKE_CXX_FLAGS_INIT " -bt=nt -xs -dWIN32 ${_br_bm}")
+
+unset(__WINDOWS_WATCOM_CMP0136)
+unset(_br_bm)
 
 if(CMAKE_CROSSCOMPILING)
   if(NOT CMAKE_C_STANDARD_INCLUDE_DIRECTORIES)
@@ -32,4 +41,9 @@ endif()
 macro(__windows_open_watcom lang)
   set(CMAKE_${lang}_CREATE_WIN32_EXE "system nt_win")
   set(CMAKE_${lang}_CREATE_CONSOLE_EXE "system nt")
+
+  set(CMAKE_${lang}_COMPILE_OPTIONS_WATCOM_RUNTIME_LIBRARY_SingleThreaded         "")
+  set(CMAKE_${lang}_COMPILE_OPTIONS_WATCOM_RUNTIME_LIBRARY_SingleThreadedDLL      -br)
+  set(CMAKE_${lang}_COMPILE_OPTIONS_WATCOM_RUNTIME_LIBRARY_MultiThreaded          -bm)
+  set(CMAKE_${lang}_COMPILE_OPTIONS_WATCOM_RUNTIME_LIBRARY_MultiThreadedDLL       -bm -br)
 endmacro()

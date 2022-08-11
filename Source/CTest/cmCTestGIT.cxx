@@ -176,7 +176,7 @@ bool cmCTestGIT::UpdateByFetchAndReset()
   // Fetch upstream refs.
   OutputLogger fetch_out(this->Log, "fetch-out> ");
   OutputLogger fetch_err(this->Log, "fetch-err> ");
-  if (!this->RunUpdateCommand(&git_fetch[0], &fetch_out, &fetch_err)) {
+  if (!this->RunUpdateCommand(git_fetch.data(), &fetch_out, &fetch_err)) {
     return false;
   }
 
@@ -225,7 +225,7 @@ bool cmCTestGIT::UpdateByCustom(std::string const& custom)
 
   OutputLogger custom_out(this->Log, "custom-out> ");
   OutputLogger custom_err(this->Log, "custom-err> ");
-  return this->RunUpdateCommand(&git_custom[0], &custom_out, &custom_err);
+  return this->RunUpdateCommand(git_custom.data(), &custom_out, &custom_err);
 }
 
 bool cmCTestGIT::UpdateInternal()
@@ -332,7 +332,6 @@ public:
   DiffParser(cmCTestGIT* git, const char* prefix)
     : LineParser('\0', false)
     , GIT(git)
-    , DiffField(DiffFieldNone)
   {
     this->SetLog(&git->Log, prefix);
   }
@@ -349,7 +348,7 @@ protected:
     DiffFieldSrc,
     DiffFieldDst
   };
-  DiffFieldType DiffField;
+  DiffFieldType DiffField = DiffFieldNone;
   Change CurChange;
 
   void DiffReset()
@@ -454,7 +453,6 @@ class cmCTestGIT::CommitParser : public cmCTestGIT::DiffParser
 public:
   CommitParser(cmCTestGIT* git, const char* prefix)
     : DiffParser(git, prefix)
-    , Section(SectionHeader)
   {
     this->Separator = SectionSep[this->Section];
   }
@@ -469,7 +467,7 @@ private:
     SectionCount
   };
   static char const SectionSep[SectionCount];
-  SectionType Section;
+  SectionType Section = SectionHeader;
   Revision Rev;
 
   struct Person
@@ -537,7 +535,8 @@ private:
 
   void NextSection()
   {
-    this->Section = SectionType((this->Section + 1) % SectionCount);
+    this->Section =
+      static_cast<SectionType>((this->Section + 1) % SectionCount);
     this->Separator = SectionSep[this->Section];
     if (this->Section == SectionHeader) {
       this->GIT->DoRevision(this->Rev, this->Changes);

@@ -21,7 +21,6 @@
 #ifdef __APPLE__
 #  include "cmCPackBundleGenerator.h"
 #  include "cmCPackDragNDropGenerator.h"
-#  include "cmCPackPackageMakerGenerator.h"
 #  include "cmCPackProductBuildGenerator.h"
 #endif
 
@@ -107,10 +106,6 @@ cmCPackGeneratorFactory::cmCPackGeneratorFactory()
   if (cmCPackBundleGenerator::CanGenerate()) {
     this->RegisterGenerator("Bundle", "Mac OSX bundle",
                             cmCPackBundleGenerator::CreateGenerator);
-  }
-  if (cmCPackPackageMakerGenerator::CanGenerate()) {
-    this->RegisterGenerator("PackageMaker", "Mac OSX Package Maker installer",
-                            cmCPackPackageMakerGenerator::CreateGenerator);
   }
   if (cmCPackProductBuildGenerator::CanGenerate()) {
     this->RegisterGenerator("productbuild", "Mac OSX pkg",

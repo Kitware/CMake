@@ -1,0 +1,6 @@
+CMake Error at bad-feature5.cmake:[0-9]+ \(add_library\):
+  Feature 'feat', specified by variable 'CMAKE_C_LINK_GROUP_USING_feat', is
+  malformed \(wrong number of elements\) and cannot be used to link target
+  'lib'.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

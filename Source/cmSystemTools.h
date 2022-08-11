@@ -77,28 +77,28 @@ public:
   static bool GetInterruptFlag();
 
   //! Return true if there was an error at any point.
-  static bool GetErrorOccuredFlag()
+  static bool GetErrorOccurredFlag()
   {
-    return cmSystemTools::s_ErrorOccured ||
-      cmSystemTools::s_FatalErrorOccured || GetInterruptFlag();
+    return cmSystemTools::s_ErrorOccurred ||
+      cmSystemTools::s_FatalErrorOccurred || GetInterruptFlag();
   }
   //! If this is set to true, cmake stops processing commands.
-  static void SetFatalErrorOccured()
+  static void SetFatalErrorOccurred()
   {
-    cmSystemTools::s_FatalErrorOccured = true;
+    cmSystemTools::s_FatalErrorOccurred = true;
   }
-  static void SetErrorOccured() { cmSystemTools::s_ErrorOccured = true; }
+  static void SetErrorOccurred() { cmSystemTools::s_ErrorOccurred = true; }
   //! Return true if there was an error at any point.
-  static bool GetFatalErrorOccured()
+  static bool GetFatalErrorOccurred()
   {
-    return cmSystemTools::s_FatalErrorOccured || GetInterruptFlag();
+    return cmSystemTools::s_FatalErrorOccurred || GetInterruptFlag();
   }
 
   //! Set the error occurred flag and fatal error back to false
-  static void ResetErrorOccuredFlag()
+  static void ResetErrorOccurredFlag()
   {
-    cmSystemTools::s_FatalErrorOccured = false;
-    cmSystemTools::s_ErrorOccured = false;
+    cmSystemTools::s_FatalErrorOccurred = false;
+    cmSystemTools::s_ErrorOccurred = false;
   }
 
   //! Return true if the path is a framework
@@ -417,6 +417,12 @@ public:
     TarCompressNone
   };
 
+  enum class cmTarExtractTimestamps
+  {
+    Yes,
+    No
+  };
+
   static bool ListTar(const std::string& outFileName,
                       const std::vector<std::string>& files, bool verbose);
   static bool CreateTar(const std::string& outFileName,
@@ -426,7 +432,9 @@ public:
                         std::string const& format = std::string(),
                         int compressionLevel = 0);
   static bool ExtractTar(const std::string& inFileName,
-                         const std::vector<std::string>& files, bool verbose);
+                         const std::vector<std::string>& files,
+                         cmTarExtractTimestamps extractTimestamps,
+                         bool verbose);
   // This should be called first thing in main
   // it will keep child processes from inheriting the
   // stdin and stdout of this process.  This is important
@@ -501,6 +509,14 @@ public:
   };
   static WindowsFileRetry GetWindowsFileRetry();
   static WindowsFileRetry GetWindowsDirectoryRetry();
+
+  struct WindowsVersion
+  {
+    unsigned int dwMajorVersion;
+    unsigned int dwMinorVersion;
+    unsigned int dwBuildNumber;
+  };
+  static WindowsVersion GetWindowsVersion();
 #endif
 
   /** Get the real path for a given path, removing all symlinks.
@@ -527,10 +543,13 @@ public:
   /** Get the system name. */
   static cm::string_view GetSystemName();
 
+  /** Get the system path separator character */
+  static char GetSystemPathlistSeparator();
+
 private:
   static bool s_ForceUnixPaths;
   static bool s_RunCommandHideConsole;
-  static bool s_ErrorOccured;
-  static bool s_FatalErrorOccured;
+  static bool s_ErrorOccurred;
+  static bool s_FatalErrorOccurred;
   static bool s_DisableRunCommandOutput;
 };

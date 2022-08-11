@@ -167,7 +167,7 @@ bool cmGeneratorExpressionDAGChecker::EvaluatingLinkExpression() const
   cm::string_view property(this->Top()->Property);
 
   return property == "LINK_DIRECTORIES"_s || property == "LINK_OPTIONS"_s ||
-    property == "LINK_DEPENDS"_s;
+    property == "LINK_DEPENDS"_s || property == "LINK_LIBRARY_OVERRIDE"_s;
 }
 
 bool cmGeneratorExpressionDAGChecker::EvaluatingLinkOptionsExpression() const
@@ -178,7 +178,7 @@ bool cmGeneratorExpressionDAGChecker::EvaluatingLinkOptionsExpression() const
 }
 
 bool cmGeneratorExpressionDAGChecker::EvaluatingLinkLibraries(
-  cmGeneratorTarget const* tgt) const
+  cmGeneratorTarget const* tgt, ForGenex genex) const
 {
   const auto* top = this->Top();
 
@@ -188,11 +188,17 @@ bool cmGeneratorExpressionDAGChecker::EvaluatingLinkLibraries(
     return top->Target == tgt && prop == "LINK_LIBRARIES"_s;
   }
 
-  return prop == "LINK_LIBRARIES"_s || prop == "INTERFACE_LINK_LIBRARIES"_s ||
+  auto result = prop == "LINK_LIBRARIES"_s ||
+    prop == "INTERFACE_LINK_LIBRARIES"_s ||
+    prop == "INTERFACE_LINK_LIBRARIES_DIRECT"_s ||
     prop == "LINK_INTERFACE_LIBRARIES"_s ||
     prop == "IMPORTED_LINK_INTERFACE_LIBRARIES"_s ||
     cmHasLiteralPrefix(prop, "LINK_INTERFACE_LIBRARIES_") ||
     cmHasLiteralPrefix(prop, "IMPORTED_LINK_INTERFACE_LIBRARIES_");
+
+  return genex == ForGenex::LINK_LIBRARY || genex == ForGenex::LINK_GROUP
+    ? result
+    : (result || prop == "INTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE"_s);
 }
 
 cmGeneratorExpressionDAGChecker const* cmGeneratorExpressionDAGChecker::Top()

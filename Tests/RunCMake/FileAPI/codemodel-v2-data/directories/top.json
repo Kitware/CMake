@@ -496,7 +496,7 @@
             "type": "export",
             "destination": "lib/cmake/foo",
             "paths": [
-                "^CMakeFiles/Export/lib/cmake/foo/FooTargets\\.cmake$"
+                "^CMakeFiles/Export/22ecfa717ccadd33cf3e4bcbabcbde6b/FooTargets\\.cmake$"
             ],
             "isExcludeFromAll": null,
             "isForAllComponents": null,

@@ -67,6 +67,7 @@ if (NOT CMAKE_FIND_NO_INSTALL_PREFIX)
     )
   endif()
 endif()
+_cmake_record_install_prefix()
 
 if(CMAKE_CROSSCOMPILING AND NOT CMAKE_HOST_SYSTEM_NAME MATCHES "Windows")
   # MinGW (useful when cross compiling from linux with CMAKE_FIND_ROOT_PATH set)

@@ -769,6 +769,10 @@ function(matlab_get_version_from_matlab_run matlab_binary_program matlab_list_ve
     set(devnull INPUT_FILE NUL)
   endif()
 
+  # we first try to run a simple program using the -r option, and then we use the
+  # -batch option that is supported and recommended since R2019a
+  set(_matlab_get_version_failed_with_r_option FALSE)
+
   # timeout set to 120 seconds, in case it does not start
   # note as said before OUTPUT_VARIABLE cannot be used in a platform
   # independent manner however, not setting it would flush the output of Matlab
@@ -786,21 +790,57 @@ function(matlab_get_version_from_matlab_run matlab_binary_program matlab_list_ve
   if(_matlab_result_version_call MATCHES "timeout")
     if(MATLAB_FIND_DEBUG)
       message(WARNING "[MATLAB] Unable to determine the version of Matlab."
-        " Matlab call timed out after 120 seconds.")
+        " Matlab call with -r option timed out after 120 seconds.")
     endif()
-    return()
+    set(_matlab_get_version_failed_with_r_option TRUE)
   endif()
 
-  if(${_matlab_result_version_call})
+  if(NOT ${_matlab_get_version_failed_with_r_option} AND ${_matlab_result_version_call})
     if(MATLAB_FIND_DEBUG)
-      message(WARNING "[MATLAB] Unable to determine the version of Matlab. Matlab call returned with error ${_matlab_result_version_call}.")
+      message(WARNING "[MATLAB] Unable to determine the version of Matlab. Matlab call with -r option returned with error ${_matlab_result_version_call}.")
     endif()
-    return()
-  elseif(NOT EXISTS "${_matlab_temporary_folder}/matlabVersionLog.cmaketmp")
+    set(_matlab_get_version_failed_with_r_option TRUE)
+  elseif(NOT ${_matlab_get_version_failed_with_r_option} AND NOT EXISTS "${_matlab_temporary_folder}/matlabVersionLog.cmaketmp")
     if(MATLAB_FIND_DEBUG)
       message(WARNING "[MATLAB] Unable to determine the version of Matlab. The log file does not exist.")
     endif()
-    return()
+    set(_matlab_get_version_failed_with_r_option TRUE)
+  endif()
+
+  if(_matlab_get_version_failed_with_r_option)
+    execute_process(
+      COMMAND "${matlab_binary_program}" -nosplash -nojvm ${_matlab_additional_commands} -logfile "matlabVersionLog.cmaketmp" -nodesktop -nodisplay -batch "version, exit"
+      OUTPUT_VARIABLE _matlab_version_from_cmd_dummy_batch
+      RESULT_VARIABLE _matlab_result_version_call_batch
+      ERROR_VARIABLE _matlab_result_version_call_error_batch
+      TIMEOUT 120
+      WORKING_DIRECTORY "${_matlab_temporary_folder}"
+      ${devnull}
+      )
+
+    if(_matlab_result_version_call_batch MATCHES "timeout")
+      if(MATLAB_FIND_DEBUG)
+        message(WARNING "[MATLAB] Unable to determine the version of Matlab."
+          " Matlab call with -batch option timed out after 120 seconds.")
+      endif()
+      return()
+    endif()
+
+    if(${_matlab_result_version_call_batch})
+      if(MATLAB_FIND_DEBUG)
+        message(WARNING "[MATLAB] Command executed \"${matlab_binary_program}\" -nosplash -nojvm ${_matlab_additional_commands} -logfile \"matlabVersionLog.cmaketmp\" -nodesktop -nodisplay -batch \"version, exit\"")
+        message(WARNING "_matlab_version_from_cmd_dummy_batch (OUTPUT_VARIABLE): ${_matlab_version_from_cmd_dummy_batch}")
+        message(WARNING "_matlab_result_version_call_batch (RESULT_VARIABLE): ${_matlab_result_version_call_batch}")
+        message(WARNING "_matlab_result_version_call_error_batch (ERROR_VARIABLE): ${_matlab_result_version_call_error_batch}")
+        message(WARNING "[MATLAB] Unable to determine the version of Matlab. Matlab call with -batch option returned with error ${_matlab_result_version_call_batch}.")
+      endif()
+      return()
+    elseif(NOT ${_matlab_get_version_failed_with_r_option} AND NOT EXISTS "${_matlab_temporary_folder}/matlabVersionLog.cmaketmp")
+      if(MATLAB_FIND_DEBUG)
+        message(WARNING "[MATLAB] Unable to determine the version of Matlab. The log file does not exist.")
+      endif()
+      return()
+    endif()
   endif()
 
   # if successful, read back the log
@@ -928,6 +968,16 @@ function(matlab_add_unit_test)
     message(FATAL_ERROR "[MATLAB] The Matlab test name cannot be empty")
   endif()
 
+  # The option to run a batch program with MATLAB changes depending on the MATLAB version
+  # For MATLAB before R2019a (9.6), the only supported option is -r, afterwords the suggested option
+  # is -batch as -r is deprecated
+  set(maut_BATCH_OPTION "-r")
+  if(NOT (Matlab_VERSION_STRING STREQUAL ""))
+    if(Matlab_VERSION_STRING VERSION_GREATER_EQUAL "9.6")
+      set(maut_BATCH_OPTION "-batch")
+    endif()
+  endif()
+
   add_test(NAME ${${prefix}_NAME}
            COMMAND ${CMAKE_COMMAND}
             "-Dtest_name=${${prefix}_NAME}"
@@ -941,6 +991,7 @@ function(matlab_add_unit_test)
             "-Dunittest_file_to_run=${${prefix}_UNITTEST_FILE}"
             "-Dcustom_Matlab_test_command=${${prefix}_CUSTOM_TEST_COMMAND}"
             "-Dcmd_to_run_before_test=${${prefix}_UNITTEST_PRECOMMAND}"
+            "-Dmaut_BATCH_OPTION=${maut_BATCH_OPTION}"
             -P ${_FindMatlab_SELF_DIR}/MatlabTestsRedirect.cmake
            ${${prefix}_TEST_ARGS}
            ${${prefix}_UNPARSED_ARGUMENTS}
@@ -969,6 +1020,7 @@ endfunction()
          [LINK_TO target1 target2 ...]
          [R2017b | R2018a]
          [EXCLUDE_FROM_ALL]
+         [NO_IMPLICIT_LINK_TO_MATLAB_LIBRARIES]
          [...]
      )
 
@@ -978,7 +1030,8 @@ endfunction()
     list of source files.
   ``LINK_TO``
     a list of additional link dependencies.  The target links to ``libmex``
-    and ``libmx`` by default.
+    and ``libmx`` by default, unless the
+    ``NO_IMPLICIT_LINK_TO_MATLAB_LIBRARIES`` option is passed.
   ``OUTPUT_NAME``
     if given, overrides the default name. The default name is
     the name of the target without any prefix and
@@ -1014,6 +1067,12 @@ endfunction()
     This option has the same meaning as for :prop_tgt:`EXCLUDE_FROM_ALL` and
     is forwarded to :command:`add_library` or :command:`add_executable`
     commands.
+  ``NO_IMPLICIT_LINK_TO_MATLAB_LIBRARIES``
+    .. versionadded:: 3.24
+
+    This option permits to disable the automatic linking of MATLAB
+    libraries, so that only the libraries that are actually required can be
+    linked via the ``LINK_TO`` option.
 
   The documentation file is not processed and should be in the following
   format:
@@ -1040,7 +1099,7 @@ function(matlab_add_mex)
 
   endif()
 
-  set(options EXECUTABLE MODULE SHARED R2017b R2018a EXCLUDE_FROM_ALL)
+  set(options EXECUTABLE MODULE SHARED R2017b R2018a EXCLUDE_FROM_ALL NO_IMPLICIT_LINK_TO_MATLAB_LIBRARIES)
   set(oneValueArgs NAME DOCUMENTATION OUTPUT_NAME)
   set(multiValueArgs LINK_TO SRC)
 
@@ -1112,16 +1171,19 @@ function(matlab_add_mex)
 
   target_include_directories(${${prefix}_NAME} PRIVATE ${Matlab_INCLUDE_DIRS})
 
-  if(Matlab_HAS_CPP_API)
-    if(Matlab_ENGINE_LIBRARY)
-      target_link_libraries(${${prefix}_NAME} ${Matlab_ENGINE_LIBRARY})
+  if(NOT ${prefix}_NO_IMPLICIT_LINK_TO_MATLAB_LIBRARIES)
+    if(Matlab_HAS_CPP_API)
+      if(Matlab_ENGINE_LIBRARY)
+        target_link_libraries(${${prefix}_NAME} ${Matlab_ENGINE_LIBRARY})
+      endif()
+      if(Matlab_DATAARRAY_LIBRARY)
+        target_link_libraries(${${prefix}_NAME} ${Matlab_DATAARRAY_LIBRARY})
+      endif()
     endif()
-    if(Matlab_DATAARRAY_LIBRARY)
-      target_link_libraries(${${prefix}_NAME} ${Matlab_DATAARRAY_LIBRARY})
-    endif()
-  endif()
 
-  target_link_libraries(${${prefix}_NAME} ${Matlab_MEX_LIBRARY} ${Matlab_MX_LIBRARY} ${${prefix}_LINK_TO})
+    target_link_libraries(${${prefix}_NAME} ${Matlab_MEX_LIBRARY} ${Matlab_MX_LIBRARY})
+  endif()
+  target_link_libraries(${${prefix}_NAME} ${${prefix}_LINK_TO})
   set_target_properties(${${prefix}_NAME}
       PROPERTIES
         PREFIX ""

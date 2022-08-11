@@ -97,7 +97,8 @@ void CMakeCommandUsage(std::string const& program)
     << "Available commands: \n"
     << "  capabilities              - Report capabilities built into cmake "
        "in JSON format\n"
-    << "  cat <files>...            - concat the files and print them to the standard output\n"
+    << "  cat [--] <files>...       - concat the files and print them to the "
+       "standard output\n"
     << "  chdir dir cmd [args...]   - run command in a given directory\n"
     << "  compare_files [--ignore-eol] file1 file2\n"
     << "                              - check if file1 is same as file2\n"
@@ -110,7 +111,7 @@ void CMakeCommandUsage(std::string const& program)
     << "  echo [<string>...]        - displays arguments as text\n"
     << "  echo_append [<string>...] - displays arguments as text but no new "
        "line\n"
-    << "  env [--unset=NAME]... [NAME=VALUE]... COMMAND [ARG]...\n"
+    << "  env [--unset=NAME ...] [NAME=VALUE ...] [--] <command> [<arg>...]\n"
     << "                            - run command in a modified environment\n"
     << "  environment               - display the current environment\n"
     << "  make_directory <dir>...   - create parent and <dir> directories\n"
@@ -125,8 +126,9 @@ void CMakeCommandUsage(std::string const& program)
     << "  remove_directory <dir>... - remove directories and their contents (deprecated: use rm instead)\n"
     << "  rename oldname newname    - rename a file or directory "
        "(on one volume)\n"
-    << "  rm [-rRf] <file/dir>...    - remove files or directories, use -f to "
-       "force it, r or R to remove directories and their contents recursively\n"
+    << "  rm [-rRf] [--] <file/dir>... - remove files or directories, use -f "
+       "to force it, r or R to remove directories and their contents "
+       "recursively\n"
     << "  sleep <number>...         - sleep for given number of seconds\n"
     << "  tar [cxt][vf][zjJ] file.tar [file/dir1 file/dir2 ...]\n"
     << "                            - create or extract a tar or zip archive\n"
@@ -793,6 +795,12 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
       auto ae = args.cend();
       for (; ai != ae; ++ai) {
         std::string const& a = *ai;
+        if (a == "--") {
+          // Stop parsing options/environment variables; the next argument
+          // should be the command.
+          ++ai;
+          break;
+        }
         if (cmHasLiteralPrefix(a, "--unset=")) {
           // Unset environment variable.
           cmSystemTools::UnPutEnv(a.substr(8));
@@ -1051,9 +1059,12 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
     // Command to concat files into one
     if (args[1] == "cat" && args.size() >= 3) {
       int return_value = 0;
+      bool doing_options = true;
       for (auto const& arg : cmMakeRange(args).advance(2)) {
-        if (cmHasLiteralPrefix(arg, "-")) {
-          if (arg != "--") {
+        if (doing_options && cmHasLiteralPrefix(arg, "-")) {
+          if (arg == "--") {
+            doing_options = false;
+          } else {
             cmSystemTools::Error(arg + ": option not handled");
             return_value = 1;
           }
@@ -1275,8 +1286,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
         // FIXME: With advanced add_subdirectory usage, these are
         // not necessarily the same as the generator originally used.
         // We should pass all these directories through an info file.
-        lgd->SetRelativePathTopSource(homeDir);
-        lgd->SetRelativePathTopBinary(homeOutDir);
+        lgd->SetRelativePathTop(homeDir, homeOutDir);
 
         // Actually scan dependencies.
         return lgd->UpdateDependencies(depInfo, verbose, color) ? 0 : 2;
@@ -1358,6 +1368,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
       std::vector<std::string> files;
       std::string mtime;
       std::string format;
+      cmSystemTools::cmTarExtractTimestamps extractTimestamps =
+        cmSystemTools::cmTarExtractTimestamps::Yes;
       cmSystemTools::cmTarCompression compress =
         cmSystemTools::TarCompressNone;
       int nCompress = 0;
@@ -1383,6 +1395,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
                                    format);
               return 1;
             }
+          } else if (arg == "--touch") {
+            extractTimestamps = cmSystemTools::cmTarExtractTimestamps::No;
           } else {
             cmSystemTools::Error("Unknown option to -E tar: " + arg);
             return 1;
@@ -1454,7 +1468,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
           return 1;
         }
       } else if (action == cmSystemTools::TarActionExtract) {
-        if (!cmSystemTools::ExtractTar(outFile, files, verbose)) {
+        if (!cmSystemTools::ExtractTar(outFile, files, extractTimestamps,
+                                       verbose)) {
           cmSystemTools::Error("Problem extracting tar: " + outFile);
           return 1;
         }
@@ -1558,8 +1573,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
         // FIXME: With advanced add_subdirectory usage, these are
         // not necessarily the same as the generator originally used.
         // We should pass all these directories through an info file.
-        lgd->SetRelativePathTopSource(homeDir);
-        lgd->SetRelativePathTopBinary(homeOutDir);
+        lgd->SetRelativePathTop(homeDir, homeOutDir);
 
         return cmTransformDepfile(format, *lgd, args[8], args[9]) ? 0 : 2;
       }
@@ -2055,8 +2069,8 @@ class cmVSLink
 {
   int Type;
   bool Verbose;
-  bool Incremental;
-  bool LinkGeneratesManifest;
+  bool Incremental = false;
+  bool LinkGeneratesManifest = true;
   std::vector<std::string> LinkCommand;
   std::vector<std::string> UserManifests;
   std::string LinkerManifestFile;
@@ -2071,8 +2085,6 @@ public:
   cmVSLink(int type, bool verbose)
     : Type(type)
     , Verbose(verbose)
-    , Incremental(false)
-    , LinkGeneratesManifest(true)
   {
   }
   bool Parse(std::vector<std::string>::const_iterator argBeg,

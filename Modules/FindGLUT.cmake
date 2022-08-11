@@ -94,9 +94,26 @@ function(_add_glut_target_simple)
     IMPORTED_LOCATION "${GLUT_glut_LIBRARY}")
 endfunction()
 
-find_package(PkgConfig)
+find_package(PkgConfig QUIET)
 if(PKG_CONFIG_FOUND)
-  pkg_check_modules(GLUT glut)
+  # Tell pkg-config not to strip any -I flags to make sure GLUT_INCLUDE_DIRS
+  # will be defined.
+  if(DEFINED ENV{PKG_CONFIG_ALLOW_SYSTEM_CFLAGS})
+    set(_pkgconfig_allow_system_cflags_old "$ENV{PKG_CONFIG_ALLOW_SYSTEM_CFLAGS}")
+  else()
+    unset(_pkgconfig_allow_system_cflags_old)
+  endif()
+  set(ENV{PKG_CONFIG_ALLOW_SYSTEM_CFLAGS} 1)
+  pkg_check_modules(GLUT QUIET glut)
+  if(DEFINED _pkgconfig_allow_system_cflags_old)
+    set(ENV{PKG_CONFIG_ALLOW_SYSTEM_CFLAGS} "${_pkgconfig_allow_system_cflags_old}")
+    unset(_pkgconfig_allow_system_cflags_old)
+  else()
+    unset(ENV{PKG_CONFIG_ALLOW_SYSTEM_CFLAGS})
+  endif()
+  if(NOT GLUT_FOUND)
+    pkg_check_modules(GLUT QUIET freeglut)
+  endif()
   if(GLUT_FOUND)
     # GLUT_INCLUDE_DIRS is now the official result variable, but
     # older versions of CMake only provided GLUT_INCLUDE_DIR.
@@ -111,7 +128,7 @@ if(WIN32)
   find_path( GLUT_INCLUDE_DIR NAMES GL/glut.h
     PATHS  ${GLUT_ROOT_PATH}/include )
   mark_as_advanced(GLUT_INCLUDE_DIR)
-  find_library( GLUT_glut_LIBRARY_RELEASE NAMES glut glut32 freeglut
+  find_library( GLUT_glut_LIBRARY_RELEASE NAMES freeglut glut glut32
     PATHS
     ${OPENGL_LIBRARY_DIR}
     ${GLUT_ROOT_PATH}/Release
@@ -258,8 +275,4 @@ if (GLUT_FOUND)
         PROPERTY INTERFACE_LINK_LIBRARIES GLUT::Cocoa)
     endif()
   endif()
-
-  #The following deprecated settings are for backwards compatibility with CMake1.4
-  set (GLUT_LIBRARY ${GLUT_LIBRARIES})
-  set (GLUT_INCLUDE_PATH ${GLUT_INCLUDE_DIRS})
 endif()

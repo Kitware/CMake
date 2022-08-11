@@ -115,7 +115,7 @@ private:
 
   void Next()
   {
-    this->C = char(this->Input.get());
+    this->C = static_cast<char>(this->Input.get());
     if (this->Input.bad()) {
       this->ErrorExit("Unexpected end of file.");
     }

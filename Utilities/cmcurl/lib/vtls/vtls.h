@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -33,6 +33,17 @@ struct ssl_connect_data;
 #define SSLSUPP_HTTPS_PROXY  (1<<4) /* supports access via HTTPS proxies */
 #define SSLSUPP_TLS13_CIPHERSUITES (1<<5) /* supports TLS 1.3 ciphersuites */
 #define SSLSUPP_CAINFO_BLOB  (1<<6)
+
+#define ALPN_ACCEPTED "ALPN: server accepted "
+
+#define VTLS_INFOF_NO_ALPN                                      \
+  "ALPN: server did not agree on a protocol. Uses default."
+#define VTLS_INFOF_ALPN_OFFER_1STR              \
+  "ALPN: offers %s"
+#define VTLS_INFOF_ALPN_ACCEPTED_1STR           \
+  ALPN_ACCEPTED "%s"
+#define VTLS_INFOF_ALPN_ACCEPTED_LEN_1STR       \
+  ALPN_ACCEPTED "%.*s"
 
 struct Curl_ssl {
   /*
@@ -85,7 +96,7 @@ struct Curl_ssl {
   CURLcode (*sha256sum)(const unsigned char *input, size_t inputlen,
                     unsigned char *sha256sum, size_t sha256sumlen);
 
-  void (*associate_connection)(struct Curl_easy *data,
+  bool (*associate_connection)(struct Curl_easy *data,
                                struct connectdata *conn,
                                int sockindex);
   void (*disassociate_connection)(struct Curl_easy *data, int sockindex);
@@ -120,7 +131,6 @@ bool Curl_ssl_tls13_ciphersuites(void);
 #include "schannel.h"       /* Schannel SSPI version */
 #include "sectransp.h"      /* SecureTransport (Darwin) version */
 #include "mbedtls.h"        /* mbedTLS versions */
-#include "mesalink.h"       /* MesaLink versions */
 #include "bearssl.h"        /* BearSSL versions */
 #include "rustls.h"         /* rustls versions */
 
@@ -173,6 +183,7 @@ bool Curl_ssl_tls13_ciphersuites(void);
   data->set.str[STRING_SSL_PINNEDPUBLICKEY]
 #endif
 
+char *Curl_ssl_snihost(struct Curl_easy *data, const char *host, size_t *olen);
 bool Curl_ssl_config_matches(struct ssl_primary_config *data,
                              struct ssl_primary_config *needle);
 bool Curl_clone_primary_ssl_config(struct ssl_primary_config *source,

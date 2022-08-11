@@ -1,0 +1,7 @@
+include(${CMAKE_CURRENT_LIST_DIR}/TestVariable.cmake)
+
+if(CMAKE_HOST_WIN32)
+    test_variable(TEST_PATH_LIST_SEP "" "${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_SOURCE_DIR}")
+else()
+    test_variable(TEST_PATH_LIST_SEP "" "${CMAKE_CURRENT_SOURCE_DIR}:${CMAKE_CURRENT_SOURCE_DIR}")
+endif()

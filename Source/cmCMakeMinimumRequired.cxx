@@ -103,7 +103,7 @@ bool cmCMakeMinimumRequired(std::vector<std::string> const& args,
       << " or higher is required.  You are running version "
       << cmVersion::GetCMakeVersion();
     status.GetMakefile().IssueMessage(MessageType::FATAL_ERROR, e.str());
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     return true;
   }
 

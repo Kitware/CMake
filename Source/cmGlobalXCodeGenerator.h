@@ -107,7 +107,8 @@ public:
 
   bool IsXcode() const override { return true; }
 
-  bool HasKnownObjectFileLocation(std::string* reason) const override;
+  bool HasKnownObjectFileLocation(cmTarget const&,
+                                  std::string* reason) const override;
 
   bool IsIPOSupported() const override { return true; }
 
@@ -224,6 +225,12 @@ private:
   void AddPositionIndependentLinkAttribute(cmGeneratorTarget* target,
                                            cmXCodeObject* buildSettings,
                                            const std::string& configName);
+  void CreateGlobalXCConfigSettings(cmLocalGenerator* root,
+                                    cmXCodeObject* config,
+                                    const std::string& configName);
+  void CreateTargetXCConfigSettings(cmGeneratorTarget* target,
+                                    cmXCodeObject* config,
+                                    const std::string& configName);
   void CreateBuildSettings(cmGeneratorTarget* gtgt,
                            cmXCodeObject* buildSettings,
                            const std::string& buildType);
@@ -329,6 +336,8 @@ private:
                            cmValue) const override
   {
   }
+
+  std::string GetLibraryOrFrameworkPath(const std::string& path) const;
 
   std::string GetObjectsDirectory(const std::string& projName,
                                   const std::string& configName,

@@ -49,6 +49,18 @@ function(run_BuildChangeId)
 endfunction()
 run_BuildChangeId()
 
+function(run_SubdirTarget)
+  set(CASE_CMAKELISTS_SUFFIX_CODE [=[
+file(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/subdir/CMakeLists.txt [[
+add_custom_target(target_in_subdir COMMAND ${CMAKE_COMMAND} -E touch target_in_subdir.out VERBATIM)
+]])
+add_subdirectory(subdir)
+]=])
+  set(CASE_CTEST_BUILD_ARGS TARGET target_in_subdir)
+  run_ctest(SubdirTarget)
+endfunction()
+run_SubdirTarget()
+
 set(RunCMake_USE_CUSTOM_BUILD_COMMAND TRUE)
 set(RunCMake_BUILD_COMMAND "${FAKE_BUILD_COMMAND_EXE}")
 run_ctest(BuildCommandFailure)

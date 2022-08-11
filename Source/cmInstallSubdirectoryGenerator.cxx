@@ -7,6 +7,7 @@
 #include <utility>
 #include <vector>
 
+#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmPolicies.h"

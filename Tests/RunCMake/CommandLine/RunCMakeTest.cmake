@@ -52,7 +52,9 @@ run_cmake_command(G_no-arg ${CMAKE_COMMAND} -B DummyBuildDir -G)
 run_cmake_command(G_bad-arg ${CMAKE_COMMAND} -B DummyBuildDir -G NoSuchGenerator)
 run_cmake_command(P_no-arg ${CMAKE_COMMAND} -P)
 run_cmake_command(P_no-file ${CMAKE_COMMAND} -P nosuchscriptfile.cmake)
-run_cmake_command(P_arbitrary_args ${CMAKE_COMMAND} -P "${RunCMake_SOURCE_DIR}/P_arbitrary_args.cmake" -- -DFOO)
+run_cmake_command(P_args ${CMAKE_COMMAND} -P "${RunCMake_SOURCE_DIR}/P_args.cmake" relative/path "${RunCMake_SOURCE_DIR}")
+run_cmake_command(P_arbitrary_args ${CMAKE_COMMAND} -P "${RunCMake_SOURCE_DIR}/P_arbitrary_args.cmake" -- -DFOO -S -B --fresh --version)
+run_cmake_command(P_fresh ${CMAKE_COMMAND} -P "${RunCMake_SOURCE_DIR}/P_fresh.cmake" --fresh)
 
 run_cmake_command(build-no-dir
   ${CMAKE_COMMAND} --build)
@@ -211,6 +213,22 @@ message(STATUS "CMAKE_BINARY_DIR='${CMAKE_BINARY_DIR}'")
   run_cmake_with_options(ExplicitDirs-C_buildsrcdir -B DummyBuildDir ${RunCMake_SOURCE_DIR}/C_buildsrcdir/src -C ${RunCMake_TEST_BINARY_DIR}/initial-cache.txt)
 endfunction()
 run_ExplicitDirs()
+
+function(run_Fresh)
+  set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/Fresh-build")
+
+  set(RunCMake_TEST_VARIANT_DESCRIPTION "-empty")
+  run_cmake_with_options(Fresh --fresh -DFIRST=ON)
+  set(RunCMake_TEST_NO_CLEAN 1)
+
+  set(RunCMake_TEST_VARIANT_DESCRIPTION "-reconfig")
+  run_cmake_with_options(Fresh --fresh)
+
+  set(RunCMake_TEST_VARIANT_DESCRIPTION "-src-from-cache")
+  set(RunCMake_TEST_NO_SOURCE_DIR 1)
+  run_cmake_with_options(Fresh --fresh "${RunCMake_TEST_BINARY_DIR}")
+endfunction()
+run_Fresh()
 
 function(run_Toolchain)
   set(RunCMake_TEST_NO_SOURCE_DIR 1)
@@ -444,6 +462,14 @@ function(run_EnvironmentToolchain)
   unset(RunCMake_TEST_NO_CLEAN)
 endfunction()
 run_EnvironmentToolchain()
+
+function(run_EnvironmentColor)
+  set(ENV{CMAKE_COLOR_DIAGNOSTICS} "ON")
+  run_cmake(EnvColorOn)
+  unset(ENV{CMAKE_COLOR_DIAGNOSTICS})
+  run_cmake(EnvColorDefault)
+endfunction()
+run_EnvironmentColor()
 
 if(RunCMake_GENERATOR STREQUAL "Ninja")
   # Use a single build tree for a few tests without cleaning.
@@ -705,16 +731,32 @@ file(WRITE "${out}/empty_file.txt" "")
 file(WRITE "${out}/unicode_file.txt" "àéùç - 한국어") # Korean in Korean
 run_cmake_command(E_cat_good_cat
   ${CMAKE_COMMAND} -E cat "${out}/first_file.txt" "${out}/second_file.txt" "${out}/empty_file.txt" "${out}/unicode_file.txt")
-unset(out)
 
 run_cmake_command(E_cat_good_binary_cat
   ${CMAKE_COMMAND} -E cat "${RunCMake_SOURCE_DIR}/E_cat_binary_files/binary.obj" "${RunCMake_SOURCE_DIR}/E_cat_binary_files/binary.obj")
+
+# To test whether the double dash (--) works, we need to control the working directory
+# in order to be able to pass a relative path that starts with a dash.
+file(WRITE "${out}/-file-starting-with-dash.txt" "file starting with dash, not an option\n")
+set(RunCMake_TEST_COMMAND_WORKING_DIRECTORY "${out}")
+run_cmake_command(E_cat-with-double-dash ${CMAKE_COMMAND} -E cat -- "-file-starting-with-dash.txt")
+run_cmake_command(E_cat-without-double-dash ${CMAKE_COMMAND} -E cat "-file-starting-with-dash.txt")
+unset(RunCMake_TEST_COMMAND_WORKING_DIRECTORY)
+unset(out)
 
 run_cmake_command(E_env-no-command0 ${CMAKE_COMMAND} -E env)
 run_cmake_command(E_env-no-command1 ${CMAKE_COMMAND} -E env TEST_ENV=1)
 run_cmake_command(E_env-bad-arg1 ${CMAKE_COMMAND} -E env -bad-arg1)
 run_cmake_command(E_env-set   ${CMAKE_COMMAND} -E env TEST_ENV=1 ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/E_env-set.cmake)
 run_cmake_command(E_env-unset ${CMAKE_COMMAND} -E env TEST_ENV=1 ${CMAKE_COMMAND} -E env --unset=TEST_ENV ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/E_env-unset.cmake)
+
+# To test whether the double dash (--) works for the env command, we need a command that e.g. contains an equals sign (=)
+# and would normally be interpreted as an NAME=VALUE environment variable.
+# Ensuring such a command is done by simply copying the trivial exit_code executable with a different name.
+cmake_path(GET EXIT_CODE_EXE FILENAME exit_code)
+file(COPY_FILE "${EXIT_CODE_EXE}" "${RunCMake_BINARY_DIR}/env=${exit_code}")
+run_cmake_command(E_env-with-double-dash ${CMAKE_COMMAND} -E env TEST_ENV=1 -- "${RunCMake_BINARY_DIR}/env=${exit_code}" zero_exit)
+run_cmake_command(E_env-without-double-dash ${CMAKE_COMMAND} -E env TEST_ENV=1 "${RunCMake_BINARY_DIR}/env=${exit_code}" zero_exit)
 
 run_cmake_command(E_md5sum-dir ${CMAKE_COMMAND} -E md5sum .)
 run_cmake_command(E_sha1sum-dir ${CMAKE_COMMAND} -E sha1sum .)

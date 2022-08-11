@@ -66,6 +66,7 @@ for i in 1 2 3 4 5 6 7 8 9 10; do
   fi
 done
 echo 'Gave up waiting for server to start.'
+sed 's/^/  /' '${P4_ROOT}/p4.log'
 "
     )
 endif()

@@ -88,7 +88,6 @@ class cmCTestBZR::InfoParser : public cmCTestVC::LineParser
 public:
   InfoParser(cmCTestBZR* bzr, const char* prefix)
     : BZR(bzr)
-    , CheckOutFound(false)
   {
     this->SetLog(&bzr->Log, prefix);
     this->RegexCheckOut.compile("checkout of branch: *([^\t\r\n]+)$");
@@ -97,7 +96,7 @@ public:
 
 private:
   cmCTestBZR* BZR;
-  bool CheckOutFound;
+  bool CheckOutFound = false;
   cmsys::RegularExpression RegexCheckOut;
   cmsys::RegularExpression RegexParent;
   bool ProcessLine() override
@@ -255,26 +254,26 @@ private:
       this->BZR->DoRevision(this->Rev, this->Changes);
     } else if (!this->CData.empty() &&
                (name == "file" || name == "directory")) {
-      this->CurChange.Path.assign(&this->CData[0], this->CData.size());
+      this->CurChange.Path.assign(this->CData.data(), this->CData.size());
       cmSystemTools::ConvertToUnixSlashes(this->CurChange.Path);
       this->Changes.push_back(this->CurChange);
     } else if (!this->CData.empty() && name == "symlink") {
       // symlinks have an arobase at the end in the log
-      this->CurChange.Path.assign(&this->CData[0], this->CData.size() - 1);
+      this->CurChange.Path.assign(this->CData.data(), this->CData.size() - 1);
       cmSystemTools::ConvertToUnixSlashes(this->CurChange.Path);
       this->Changes.push_back(this->CurChange);
     } else if (!this->CData.empty() && name == "committer") {
-      this->Rev.Author.assign(&this->CData[0], this->CData.size());
+      this->Rev.Author.assign(this->CData.data(), this->CData.size());
       if (this->EmailRegex.find(this->Rev.Author)) {
         this->Rev.Author = this->EmailRegex.match(1);
         this->Rev.EMail = this->EmailRegex.match(2);
       }
     } else if (!this->CData.empty() && name == "timestamp") {
-      this->Rev.Date.assign(&this->CData[0], this->CData.size());
+      this->Rev.Date.assign(this->CData.data(), this->CData.size());
     } else if (!this->CData.empty() && name == "message") {
-      this->Rev.Log.assign(&this->CData[0], this->CData.size());
+      this->Rev.Log.assign(this->CData.data(), this->CData.size());
     } else if (!this->CData.empty() && name == "revno") {
-      this->Rev.Rev.assign(&this->CData[0], this->CData.size());
+      this->Rev.Rev.assign(this->CData.data(), this->CData.size());
     }
     this->CData.clear();
   }
@@ -389,7 +388,7 @@ bool cmCTestBZR::UpdateImpl()
   // For some reason bzr uses stderr to display the update status.
   OutputLogger out(this->Log, "pull-out> ");
   UpdateParser err(this, "pull-err> ");
-  return this->RunUpdateCommand(&bzr_update[0], &out, &err);
+  return this->RunUpdateCommand(bzr_update.data(), &out, &err);
 }
 
 bool cmCTestBZR::LoadRevisions()

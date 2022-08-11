@@ -288,12 +288,12 @@ The options are:
 
   .. productionlist:: depfile
     depfile: `rule`*
-    rule: `targets` (`:` (`separator` `dependencies`?)?)? `eol`
+    rule: `targets` (':' (`separator` `dependencies`?)?)? `eol`
     targets: `target` (`separator` `target`)* `separator`*
     target: `pathname`
     dependencies: `dependency` (`separator` `dependency`)* `separator`*
     dependency: `pathname`
-    separator: (space | line_continue)+
+    separator: (`space` | `line_continue`)+
     line_continue: '\' `eol`
     space: ' ' | '\t'
     pathname: `character`+
@@ -424,6 +424,11 @@ of the following is specified:
   :command:`add_custom_target` command.
 ``POST_BUILD``
   Run after all other rules within the target have been executed.
+
+Projects should always specify one of the above three keywords when using
+the ``TARGET`` form.  For backward compatibility reasons, ``POST_BUILD`` is
+assumed if no such keyword is given, but projects should explicitly provide
+one of the keywords to make clear the behavior they expect.
 
 .. note::
   Because generator expressions can be used in custom commands,

@@ -10,10 +10,6 @@ cmXMLWriter::cmXMLWriter(std::ostream& output, std::size_t level)
   : Output(output)
   , IndentationElement(1, '\t')
   , Level(level)
-  , Indent(0)
-  , ElementOpen(false)
-  , BreakAttrib(false)
-  , IsContent(false)
 {
 }
 

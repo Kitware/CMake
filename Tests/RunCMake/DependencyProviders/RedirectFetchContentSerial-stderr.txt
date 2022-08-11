@@ -1,0 +1,11 @@
+CMake Error at set_provider\.cmake:[0-9]+ \(find_package\):
+  Could not find a package configuration file provided by "SomeDep" with any
+  of the following names:
+
+    SomeDepConfig\.cmake
+    somedep-config\.cmake
+
+  Add the installation prefix of "SomeDep" to CMAKE_PREFIX_PATH or set
+  "SomeDep_DIR" to a directory containing one of the above files\.  If
+  "SomeDep" provides a separate development package or SDK, be sure it has
+  been installed\.

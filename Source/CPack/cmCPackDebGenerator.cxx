@@ -707,7 +707,7 @@ bool cmCPackDebGenerator::createDebPackages()
                           &cmCPackDebGenerator::createDbgsymDDeb) &&
       retval;
   }
-  return int(retval);
+  return static_cast<int>(retval);
 }
 
 bool cmCPackDebGenerator::createDeb()

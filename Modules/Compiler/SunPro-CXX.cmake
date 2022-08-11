@@ -2,6 +2,7 @@
 # file Copyright.txt or https://cmake.org/licensing for details.
 
 include(Compiler/SunPro)
+__compiler_sunpro(CXX)
 
 set(CMAKE_CXX_VERBOSE_FLAG "-v")
 

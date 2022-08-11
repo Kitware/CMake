@@ -1,0 +1,14 @@
+.*Properties for TARGET nothing:.*
+.*nothing.LINKER_LANGUAGE = <NOTFOUND>.*
+.*nothing.TYPE = \"STATIC_LIBRARY\".*
+.*Properties for TARGET something:.*
+.*something.LINKER_LANGUAGE = <NOTFOUND>.*
+.*something.TYPE = \"EXECUTABLE\".*
++
+.*
+.*Properties for SOURCE nothing.c:.*
+.*nothing.c.COMPILE_DEFINITIONS = <NOTFOUND>.*
+.*nothing.c.LANGUAGE = \"C\".*
+.*Properties for SOURCE something.c:.*
+.*something.c.COMPILE_DEFINITIONS = \"SOMETHING=1\".*
+.*something.c.LANGUAGE = \"C\".*

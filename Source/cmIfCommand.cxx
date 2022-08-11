@@ -73,15 +73,15 @@ bool cmIfFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
     }
     // watch for our state change
     if (scopeDepth == 0 && func.LowerCaseName() == "else") {
+      cmListFileBacktrace elseBT = mf.GetBacktrace().Push(
+        cmListFileContext{ func.OriginalName(),
+                           this->GetStartingContext().FilePath, func.Line() });
 
       if (this->ElseSeen) {
-        cmListFileBacktrace elseBT = mf.GetBacktrace().Push(cmListFileContext{
-          func.OriginalName(), this->GetStartingContext().FilePath,
-          func.Line() });
         mf.GetCMakeInstance()->IssueMessage(
           MessageType::FATAL_ERROR,
           "A duplicate ELSE command was found inside an IF block.", elseBT);
-        cmSystemTools::SetFatalErrorOccured();
+        cmSystemTools::SetFatalErrorOccurred();
         return true;
       }
 
@@ -92,7 +92,8 @@ bool cmIfFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
       // if trace is enabled, print a (trivially) evaluated "else"
       // statement
       if (!this->IsBlocking && mf.GetCMakeInstance()->GetTrace()) {
-        mf.PrintCommandTrace(func);
+        mf.PrintCommandTrace(func, elseBT,
+                             cmMakefile::CommandMissingFromStack::Yes);
       }
     } else if (scopeDepth == 0 && func.LowerCaseName() == "elseif") {
       cmListFileBacktrace elseifBT = mf.GetBacktrace().Push(
@@ -102,7 +103,7 @@ bool cmIfFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
         mf.GetCMakeInstance()->IssueMessage(
           MessageType::FATAL_ERROR,
           "An ELSEIF command was found after an ELSE command.", elseifBT);
-        cmSystemTools::SetFatalErrorOccured();
+        cmSystemTools::SetFatalErrorOccurred();
         return true;
       }
 
@@ -111,7 +112,8 @@ bool cmIfFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
       } else {
         // if trace is enabled, print the evaluated "elseif" statement
         if (mf.GetCMakeInstance()->GetTrace()) {
-          mf.PrintCommandTrace(func);
+          mf.PrintCommandTrace(func, elseifBT,
+                               cmMakefile::CommandMissingFromStack::Yes);
         }
 
         std::string errorString;
@@ -131,7 +133,7 @@ bool cmIfFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
             cmStrCat(cmIfCommandError(expandedArguments), errorString);
           mf.GetCMakeInstance()->IssueMessage(messType, err, elseifBT);
           if (messType == MessageType::FATAL_ERROR) {
-            cmSystemTools::SetFatalErrorOccured();
+            cmSystemTools::SetFatalErrorOccurred();
             return true;
           }
         }
@@ -186,7 +188,7 @@ bool cmIfCommand(std::vector<cmListFileArgument> const& args,
       cmStrCat("if ", cmIfCommandError(expandedArguments), errorString);
     if (status == MessageType::FATAL_ERROR) {
       makefile.IssueMessage(MessageType::FATAL_ERROR, err);
-      cmSystemTools::SetFatalErrorOccured();
+      cmSystemTools::SetFatalErrorOccurred();
       return true;
     }
     makefile.IssueMessage(status, err);

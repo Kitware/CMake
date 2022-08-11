@@ -22,9 +22,7 @@ if(WIN32)
 endif()
 
 if(APPLE)
-  # Always expect the *.dmg installer - PackageMaker should always
-  # be installed on a development Mac:
-  #
+  # Always expect the *.dmg installer
   set(expected_file_mask "${CPackComponents_BINARY_DIR}/MyLib-*.dmg")
 endif()
 

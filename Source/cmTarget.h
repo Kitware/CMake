@@ -5,11 +5,14 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
+#include <map>
 #include <memory>
 #include <set>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include <cm/optional>
 
 #include "cmAlgorithms.h"
 #include "cmFileSet.h"
@@ -220,6 +223,8 @@ public:
   //! Return whether this target is a GUI executable on Android.
   bool IsAndroidGuiExecutable() const;
 
+  bool HasKnownObjectFileLocation(std::string* reason = nullptr) const;
+
   //! Get a backtrace from the creation of the target.
   cmListFileBacktrace const& GetBacktrace() const;
 
@@ -231,6 +236,9 @@ public:
   void InsertPrecompileHeader(BT<std::string> const& entry);
 
   void AppendBuildInterfaceIncludes();
+  void FinalizeTargetCompileInfo(
+    const cmBTStringRange& noConfigCompileDefinitions,
+    cm::optional<std::map<std::string, cmValue>>& perConfigCompileDefinitions);
 
   std::string GetDebugGeneratorExpressions(const std::string& value,
                                            cmTargetLinkLibraryType llt) const;
@@ -269,6 +277,8 @@ public:
   cmBTStringRange GetLinkImplementationEntries() const;
 
   cmBTStringRange GetLinkInterfaceEntries() const;
+  cmBTStringRange GetLinkInterfaceDirectEntries() const;
+  cmBTStringRange GetLinkInterfaceDirectExcludeEntries() const;
 
   cmBTStringRange GetHeaderSetsEntries() const;
 
@@ -288,6 +298,7 @@ public:
                                                  const std::string& type,
                                                  cmFileSetVisibility vis);
 
+  std::vector<std::string> GetAllFileSetNames() const;
   std::vector<std::string> GetAllInterfaceFileSets() const;
 
   static std::string GetFileSetsPropertyName(const std::string& type);

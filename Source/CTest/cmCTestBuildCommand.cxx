@@ -84,7 +84,7 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
           std::string e = cmStrCat("could not create generator named \"",
                                    *cmakeGeneratorName, '"');
           this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e);
-          cmSystemTools::SetFatalErrorOccured();
+          cmSystemTools::SetFatalErrorOccurred();
           return nullptr;
         }
       }

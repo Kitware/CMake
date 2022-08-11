@@ -241,14 +241,14 @@ cmListFileBacktrace cmMakefile::GetBacktrace() const
   return this->Backtrace;
 }
 
-void cmMakefile::PrintCommandTrace(
-  cmListFileFunction const& lff,
-  cm::optional<std::string> const& deferId) const
+void cmMakefile::PrintCommandTrace(cmListFileFunction const& lff,
+                                   cmListFileBacktrace const& bt,
+                                   CommandMissingFromStack missing) const
 {
   // Check if current file in the list of requested to trace...
   std::vector<std::string> const& trace_only_this_files =
     this->GetCMakeInstance()->GetTraceSources();
-  std::string const& full_path = this->GetBacktrace().Top().FilePath;
+  std::string const& full_path = bt.Top().FilePath;
   std::string const& only_filename = cmSystemTools::GetFilenameName(full_path);
   bool trace = trace_only_this_files.empty();
   if (!trace) {
@@ -282,6 +282,7 @@ void cmMakefile::PrintCommandTrace(
       args.push_back(arg.Value);
     }
   }
+  cm::optional<std::string> const& deferId = bt.Top().DeferId;
 
   switch (this->GetCMakeInstance()->GetTraceFormat()) {
     case cmake::TraceFormat::TRACE_JSON_V1: {
@@ -291,6 +292,9 @@ void cmMakefile::PrintCommandTrace(
       builder["indentation"] = "";
       val["file"] = full_path;
       val["line"] = static_cast<Json::Value::Int64>(lff.Line());
+      if (lff.Line() != lff.LineEnd()) {
+        val["line_end"] = static_cast<Json::Value::Int64>(lff.LineEnd());
+      }
       if (deferId) {
         val["defer"] = *deferId;
       }
@@ -300,8 +304,10 @@ void cmMakefile::PrintCommandTrace(
         val["args"].append(arg);
       }
       val["time"] = cmSystemTools::GetTime();
-      val["frame"] =
+      val["frame"] = (missing == CommandMissingFromStack::Yes ? 1 : 0) +
         static_cast<Json::Value::UInt64>(this->ExecutionStatusStack.size());
+      val["global_frame"] = (missing == CommandMissingFromStack::Yes ? 1 : 0) +
+        static_cast<Json::Value::UInt64>(this->RecursionDepth);
       msg << Json::writeString(builder, val);
 #endif
       break;
@@ -411,7 +417,7 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
     std::ostringstream e;
     e << "Maximum recursion depth of " << depth << " exceeded";
     this->IssueMessage(MessageType::FATAL_ERROR, e.str());
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
 
@@ -419,10 +425,10 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
   if (cmState::Command command =
         this->GetState()->GetCommandByExactName(lff.LowerCaseName())) {
     // Decide whether to invoke the command.
-    if (!cmSystemTools::GetFatalErrorOccured()) {
+    if (!cmSystemTools::GetFatalErrorOccurred()) {
       // if trace is enabled, print out invoke information
       if (this->GetCMakeInstance()->GetTrace()) {
-        this->PrintCommandTrace(lff, this->Backtrace.Top().DeferId);
+        this->PrintCommandTrace(lff, this->Backtrace);
       }
       // Try invoking the command.
       bool invokeSucceeded = command(lff.Arguments(), status);
@@ -436,21 +442,26 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
         }
         result = false;
         if (this->GetCMakeInstance()->GetWorkingMode() != cmake::NORMAL_MODE) {
-          cmSystemTools::SetFatalErrorOccured();
+          cmSystemTools::SetFatalErrorOccurred();
         }
       }
     }
   } else {
-    if (!cmSystemTools::GetFatalErrorOccured()) {
+    if (!cmSystemTools::GetFatalErrorOccurred()) {
       std::string error =
         cmStrCat("Unknown CMake command \"", lff.OriginalName(), "\".");
       this->IssueMessage(MessageType::FATAL_ERROR, error);
       result = false;
-      cmSystemTools::SetFatalErrorOccured();
+      cmSystemTools::SetFatalErrorOccurred();
     }
   }
 
   return result;
+}
+
+bool cmMakefile::IsImportedTargetGlobalScope() const
+{
+  return this->CurrentImportedTargetScope == ImportedTargetScope::Global;
 }
 
 class cmMakefile::IncludeScope
@@ -467,8 +478,8 @@ public:
 private:
   cmMakefile* Makefile;
   bool NoPolicyScope;
-  bool CheckCMP0011;
-  bool ReportError;
+  bool CheckCMP0011 = false;
+  bool ReportError = true;
   void EnforceCMP0011();
 };
 
@@ -477,10 +488,9 @@ cmMakefile::IncludeScope::IncludeScope(cmMakefile* mf,
                                        bool noPolicyScope)
   : Makefile(mf)
   , NoPolicyScope(noPolicyScope)
-  , CheckCMP0011(false)
-  , ReportError(true)
 {
-  this->Makefile->Backtrace = this->Makefile->Backtrace.Push(filenametoread);
+  this->Makefile->Backtrace = this->Makefile->Backtrace.Push(
+    cmListFileContext::FromListFilePath(filenametoread));
 
   this->Makefile->PushFunctionBlockerBarrier();
 
@@ -600,7 +610,7 @@ bool cmMakefile::ReadDependentFile(const std::string& filename,
   }
 
   this->RunListFile(listFile, filenametoread);
-  if (cmSystemTools::GetFatalErrorOccured()) {
+  if (cmSystemTools::GetFatalErrorOccurred()) {
     incScope.Quiet();
   }
   return true;
@@ -611,9 +621,9 @@ class cmMakefile::ListFileScope
 public:
   ListFileScope(cmMakefile* mf, std::string const& filenametoread)
     : Makefile(mf)
-    , ReportError(true)
   {
-    this->Makefile->Backtrace = this->Makefile->Backtrace.Push(filenametoread);
+    this->Makefile->Backtrace = this->Makefile->Backtrace.Push(
+      cmListFileContext::FromListFilePath(filenametoread));
 
     this->Makefile->StateSnapshot =
       this->Makefile->GetState()->CreateInlineListFileSnapshot(
@@ -637,7 +647,7 @@ public:
 
 private:
   cmMakefile* Makefile;
-  bool ReportError;
+  bool ReportError = true;
 };
 
 class cmMakefile::DeferScope
@@ -701,7 +711,7 @@ bool cmMakefile::ReadListFile(const std::string& filename)
   }
 
   this->RunListFile(listFile, filenametoread);
-  if (cmSystemTools::GetFatalErrorOccured()) {
+  if (cmSystemTools::GetFatalErrorOccurred()) {
     scope.Quiet();
   }
   return true;
@@ -722,7 +732,7 @@ bool cmMakefile::ReadListFileAsString(const std::string& content,
   }
 
   this->RunListFile(listFile, filenametoread);
-  if (cmSystemTools::GetFatalErrorOccured()) {
+  if (cmSystemTools::GetFatalErrorOccurred()) {
     scope.Quiet();
   }
   return true;
@@ -752,7 +762,7 @@ void cmMakefile::RunListFile(cmListFile const& listFile,
   for (size_t i = 0; i < numberFunctions; ++i) {
     cmExecutionStatus status(*this);
     this->ExecuteCommand(listFile.Functions[i], status);
-    if (cmSystemTools::GetFatalErrorOccured()) {
+    if (cmSystemTools::GetFatalErrorOccurred()) {
       break;
     }
     if (status.GetReturnInvoked()) {
@@ -782,7 +792,7 @@ void cmMakefile::RunListFile(cmListFile const& listFile,
 
       cmExecutionStatus status(*this);
       this->ExecuteCommand(d.Command, status, std::move(id));
-      if (cmSystemTools::GetFatalErrorOccured()) {
+      if (cmSystemTools::GetFatalErrorOccurred()) {
         break;
       }
     }
@@ -828,7 +838,7 @@ void cmMakefile::EnforceDirectoryLevelRules() const
         // NEW behavior is to issue an error.
         this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
                                                msg.str(), this->Backtrace);
-        cmSystemTools::SetFatalErrorOccured();
+        cmSystemTools::SetFatalErrorOccurred();
         break;
     }
   }
@@ -1523,7 +1533,6 @@ class cmMakefile::BuildsystemFileScope
 public:
   BuildsystemFileScope(cmMakefile* mf)
     : Makefile(mf)
-    , ReportError(true)
   {
     std::string currentStart =
       cmStrCat(this->Makefile->StateSnapshot.GetDirectory().GetCurrentSource(),
@@ -1565,7 +1574,7 @@ private:
   cmGlobalGenerator* GG;
   cmMakefile* CurrentMakefile;
   cmStateSnapshot Snapshot;
-  bool ReportError;
+  bool ReportError = true;
 };
 
 void cmMakefile::Configure()
@@ -1576,7 +1585,8 @@ void cmMakefile::Configure()
   // Add the bottom of all backtraces within this directory.
   // We will never pop this scope because it should be available
   // for messages during the generate step too.
-  this->Backtrace = this->Backtrace.Push(currentStart);
+  this->Backtrace =
+    this->Backtrace.Push(cmListFileContext::FromListFilePath(currentStart));
 
   BuildsystemFileScope scope(this);
 
@@ -1663,6 +1673,7 @@ void cmMakefile::Configure()
         this->Backtrace);
       cmListFileFunction project{ "project",
                                   0,
+                                  0,
                                   { { "Project", cmListFileArgument::Unquoted,
                                       0 },
                                     { "__CMAKE_INJECTED_PROJECT_COMMAND__",
@@ -1674,7 +1685,7 @@ void cmMakefile::Configure()
   this->Defer = cm::make_unique<DeferCommands>();
   this->RunListFile(listFile, currentStart, this->Defer.get());
   this->Defer.reset();
-  if (cmSystemTools::GetFatalErrorOccured()) {
+  if (cmSystemTools::GetFatalErrorOccurred()) {
     scope.Quiet();
   }
 
@@ -2607,7 +2618,7 @@ const std::string& cmMakefile::ExpandVariablesInString(
   // If it's an error in either case, just report the error...
   if (mtype != MessageType::LOG) {
     if (mtype == MessageType::FATAL_ERROR) {
-      cmSystemTools::SetFatalErrorOccured();
+      cmSystemTools::SetFatalErrorOccurred();
     }
     this->IssueMessage(mtype, errorstr);
   }
@@ -3271,7 +3282,7 @@ bool cmMakefile::ExpandArguments(std::vector<cmListFileArgument> const& inArgs,
       cmExpandList(value, outArgs);
     }
   }
-  return !cmSystemTools::GetFatalErrorOccured();
+  return !cmSystemTools::GetFatalErrorOccurred();
 }
 
 bool cmMakefile::ExpandArguments(
@@ -3303,7 +3314,7 @@ bool cmMakefile::ExpandArguments(
       }
     }
   }
-  return !cmSystemTools::GetFatalErrorOccured();
+  return !cmSystemTools::GetFatalErrorOccurred();
 }
 
 void cmMakefile::AddFunctionBlocker(std::unique_ptr<cmFunctionBlocker> fb)
@@ -3498,7 +3509,7 @@ int cmMakefile::TryCompile(const std::string& srcdir,
     this->IssueMessage(MessageType::FATAL_ERROR,
                        "Failed to set working directory to " + bindir + " : " +
                          std::strerror(workdir.GetLastResult()));
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     this->IsSourceFileTryCompile = false;
     return 1;
   }
@@ -3514,7 +3525,7 @@ int cmMakefile::TryCompile(const std::string& srcdir,
                        "Global generator '" +
                          this->GetGlobalGenerator()->GetName() +
                          "' could not be created.");
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     this->IsSourceFileTryCompile = false;
     return 1;
   }
@@ -3586,7 +3597,7 @@ int cmMakefile::TryCompile(const std::string& srcdir,
   if (cm.Configure() != 0) {
     this->IssueMessage(MessageType::FATAL_ERROR,
                        "Failed to configure test project build system.");
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     this->IsSourceFileTryCompile = false;
     return 1;
   }
@@ -3594,7 +3605,7 @@ int cmMakefile::TryCompile(const std::string& srcdir,
   if (cm.Generate() != 0) {
     this->IssueMessage(MessageType::FATAL_ERROR,
                        "Failed to generate test project build system.");
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     this->IsSourceFileTryCompile = false;
     return 1;
   }
@@ -3974,6 +3985,31 @@ bool cmMakefile::GetPropertyAsBool(const std::string& prop) const
 std::vector<std::string> cmMakefile::GetPropertyKeys() const
 {
   return this->StateSnapshot.GetDirectory().GetPropertyKeys();
+}
+
+void cmMakefile::CheckProperty(const std::string& prop) const
+{
+  // Certain properties need checking.
+  if (prop == "LINK_LIBRARIES") {
+    if (cmValue value = this->GetProperty(prop)) {
+      // Look for <LINK_LIBRARY:> internal pattern
+      static cmsys::RegularExpression linkPattern(
+        "(^|;)(</?LINK_(LIBRARY|GROUP):[^;>]*>)(;|$)");
+      if (!linkPattern.find(value)) {
+        return;
+      }
+
+      // Report an error.
+      this->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("Property ", prop, " contains the invalid item \"",
+                 linkPattern.match(2), "\". The ", prop,
+                 " property may contain the generator-expression \"$<LINK_",
+                 linkPattern.match(3),
+                 ":...>\" which may be used to specify how the libraries are "
+                 "linked."));
+    }
+  }
 }
 
 cmTarget* cmMakefile::FindLocalNonAliasTarget(const std::string& name) const
@@ -4395,12 +4431,14 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
   }
 
   // Deprecate old policies.
-  if (status == cmPolicies::OLD && id <= cmPolicies::CMP0094 &&
+  if (status == cmPolicies::OLD && id <= cmPolicies::CMP0097 &&
       !(this->GetCMakeInstance()->GetIsInTryCompile() &&
         (
           // Policies set by cmCoreTryCompile::TryCompileCode.
           id == cmPolicies::CMP0065 || id == cmPolicies::CMP0083 ||
-          id == cmPolicies::CMP0091))) {
+          id == cmPolicies::CMP0091)) &&
+      (!this->IsSet("CMAKE_WARN_DEPRECATED") ||
+       this->IsOn("CMAKE_WARN_DEPRECATED"))) {
     this->IssueMessage(MessageType::DEPRECATION_WARNING,
                        cmPolicies::GetPolicyDeprecatedWarning(id));
   }
@@ -4469,7 +4507,7 @@ void cmMakefile::RecordPolicies(cmPolicies::PolicyMap& pm) const
   /* Record the setting of every policy.  */
   using PolicyID = cmPolicies::PolicyID;
   for (PolicyID pid = cmPolicies::CMP0000; pid != cmPolicies::CMPCOUNT;
-       pid = PolicyID(pid + 1)) {
+       pid = static_cast<PolicyID>(pid + 1)) {
     pm.Set(pid, this->GetPolicyStatus(pid));
   }
 }
@@ -4496,7 +4534,6 @@ cmMakefile::FunctionPushPop::FunctionPushPop(cmMakefile* mf,
                                              const std::string& fileName,
                                              cmPolicies::PolicyMap const& pm)
   : Makefile(mf)
-  , ReportError(true)
 {
   this->Makefile->PushFunctionScope(fileName, pm);
 }
@@ -4510,7 +4547,6 @@ cmMakefile::MacroPushPop::MacroPushPop(cmMakefile* mf,
                                        const std::string& fileName,
                                        const cmPolicies::PolicyMap& pm)
   : Makefile(mf)
-  , ReportError(true)
 {
   this->Makefile->PushMacroScope(fileName, pm);
 }

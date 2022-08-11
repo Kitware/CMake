@@ -9,6 +9,8 @@
 #  define CMake_HAVE_CXX_STRING_VIEW
 #endif
 
+#include <cm/bits/container_helpers.hxx> // IWYU pragma: export
+
 #ifdef CMake_HAVE_CXX_STRING_VIEW
 #  include <string_view> // IWYU pragma: export
 namespace cm {

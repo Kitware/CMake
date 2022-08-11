@@ -4,6 +4,7 @@ if(CMAKE_XCODE_BUILD_SYSTEM VERSION_GREATER_EQUAL 12)
 else()
   cmake_policy(SET CMP0114 OLD) # Test deprecated behavior.
 endif()
+cmake_policy(SET CMP0135 NEW)
 
 include(ExternalProject)
 

@@ -113,7 +113,7 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
   if (!status.GetMakefile().CanIWriteThisFile(arguments.OutputFile)) {
     status.SetError("attempted to output into a file: " +
                     arguments.OutputFile + " into a source directory.");
-    cmSystemTools::SetFatalErrorOccured();
+    cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
 
@@ -438,7 +438,7 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
     }
 
     if (!ret) {
-      cmSystemTools::SetFatalErrorOccured();
+      cmSystemTools::SetFatalErrorOccurred();
       return false;
     }
   }
@@ -470,7 +470,7 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
         break;
     }
     if (!ret) {
-      cmSystemTools::SetFatalErrorOccured();
+      cmSystemTools::SetFatalErrorOccurred();
       return false;
     }
   }

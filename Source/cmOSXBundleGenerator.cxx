@@ -18,7 +18,6 @@ cmOSXBundleGenerator::cmOSXBundleGenerator(cmGeneratorTarget* target)
   : GT(target)
   , Makefile(target->Target->GetMakefile())
   , LocalGenerator(target->GetLocalGenerator())
-  , MacContentFolders(nullptr)
 {
   if (this->MustSkip()) {
     return;

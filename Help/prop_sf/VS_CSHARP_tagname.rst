@@ -16,7 +16,7 @@ Example usage:
 
 .. code-block:: cmake
 
-  set_source_files_property(<filename>
+  set_source_files_properties(<filename>
            PROPERTIES
            VS_CSHARP_DependentUpon <other file>
            VS_CSHARP_SubType "Form")

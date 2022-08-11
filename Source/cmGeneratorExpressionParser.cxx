@@ -15,7 +15,6 @@
 cmGeneratorExpressionParser::cmGeneratorExpressionParser(
   std::vector<cmGeneratorExpressionToken> tokens)
   : Tokens(std::move(tokens))
-  , NestingLevel(0)
 {
 }
 

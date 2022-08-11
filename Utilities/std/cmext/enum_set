@@ -1,0 +1,397 @@
+// -*-c++-*-
+// vim: set ft=cpp:
+
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
+#pragma once
+
+#include <bitset>
+#include <cstddef>
+#include <initializer_list>
+#include <iterator>
+#include <limits>
+#include <utility>
+
+#include <cm/type_traits>
+
+//
+// Class enum_set offers the capability to manage a set of enum values
+// Only 'enum class' with unsigned base type are supported.
+//
+// The methods offered by 'enum_set' are close as possible to the 'std::set'
+// container plus some useful methods from 'std::bitset' like 'flip'.
+//
+// Internally, this class use 'std::bitset' container to manage the
+// set of enum. The size of the bitset is deduced from the underlying type of
+// the enum.
+//
+
+namespace cm {
+
+template <typename EnumSet>
+class enum_set_iterator
+{
+public:
+  enum_set_iterator() = default;
+  enum_set_iterator(const enum_set_iterator& other) = default;
+
+  using iterator_category = std::bidirectional_iterator_tag;
+  using value_type = typename EnumSet::value_type;
+  using difference_type = typename EnumSet::difference_type;
+  using reference = typename EnumSet::reference;
+  using pointer = typename EnumSet::pointer;
+
+  enum_set_iterator& operator++()
+  {
+    while (++this->Index < this->Set->max_size() &&
+           !this->Set->test(this->Index))
+      ;
+
+    return *this;
+  }
+  enum_set_iterator operator++(int)
+  {
+    auto retval = *this;
+    ++(*this);
+    return retval;
+  }
+
+  enum_set_iterator& operator--()
+  {
+    if (this->Index == 0) {
+      return *this;
+    }
+
+    while (!this->Set->test(--this->Index) && this->Index != 0)
+      ;
+
+    return *this;
+  }
+  enum_set_iterator operator--(int)
+  {
+    auto retval = *this;
+    --(*this);
+    return retval;
+  }
+
+  reference operator*() const { return static_cast<reference>(this->Index); }
+
+  bool operator==(enum_set_iterator other) const
+  {
+    return (this->Set == other.Set) && (this->Index == other.Index);
+  }
+
+  bool operator!=(enum_set_iterator other) const { return !(*this == other); }
+
+private:
+  friend EnumSet;
+
+  using size_type = typename EnumSet::size_type;
+
+  enum_set_iterator(EnumSet* set, bool at_end = false)
+    : Set(set)
+  {
+    if (at_end || this->Set->empty()) {
+      this->Index = this->Set->max_size();
+    } else {
+      while (!this->Set->test(this->Index) &&
+             ++this->Index < this->Set->max_size())
+        ;
+    }
+  }
+  enum_set_iterator(EnumSet* set, size_type pos)
+    : Index(pos)
+    , Set(set)
+  {
+  }
+
+  std::size_t Index = 0;
+  EnumSet* Set = nullptr;
+};
+
+template <
+  typename Enum,
+  typename cm::enable_if_t<
+    std::is_enum<Enum>::value &&
+      std::is_unsigned<typename std::underlying_type<Enum>::type>::value,
+    int> = 0>
+class enum_set
+{
+public:
+  using key_type = Enum;
+  using value_type = Enum;
+  using size_type = typename std::underlying_type<Enum>::type;
+  using difference_type = size_type;
+  using reference = Enum;
+  using const_reference = Enum;
+  using pointer = const Enum*;
+  using const_pointer = const Enum*;
+
+  using iterator = enum_set_iterator<enum_set>;
+  using const_iterator = enum_set_iterator<const enum_set>;
+  using reverse_iterator = std::reverse_iterator<iterator>;
+  using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+
+  constexpr enum_set() noexcept = default;
+  enum_set(const enum_set& other) noexcept { this->insert(other); }
+  enum_set(std::initializer_list<value_type> list) { this->insert(list); }
+
+  enum_set& operator=(const enum_set& other) noexcept
+  {
+    this->Set.reset();
+    this->Set |= other.Set;
+    return *this;
+  }
+  enum_set& operator=(std::initializer_list<value_type> list)
+  {
+    this->Set.reset();
+    this->insert(list);
+  }
+
+  // Iterators
+  iterator begin() noexcept { return iterator(this); }
+  const_iterator begin() const noexcept { return const_iterator(this); }
+  const_iterator cbegin() const noexcept { return const_iterator(this); }
+
+  iterator end() noexcept { return iterator(this, true); }
+  const_iterator end() const noexcept { return const_iterator(this, true); }
+  const_iterator cend() const noexcept { return const_iterator(this, true); }
+
+  reverse_iterator rbegin() noexcept { return reverse_iterator(this->end()); }
+  const_reverse_iterator rbegin() const noexcept
+  {
+    return const_reverse_iterator(this->end());
+  }
+  const_reverse_iterator crbegin() const noexcept
+  {
+    return const_reverse_iterator(this->cend());
+  }
+
+  reverse_iterator rend() noexcept { return reverse_iterator(this->begin()); }
+  const_reverse_iterator rend() const noexcept
+  {
+    return const_reverse_iterator(this->begin());
+  }
+  const_reverse_iterator crend() const noexcept
+  {
+    return const_reverse_iterator(this->cbegin());
+  }
+
+  // Capacity
+  bool empty() const noexcept { return this->Set.none(); }
+
+  size_type size() const noexcept { return this->Set.count(); }
+
+  size_type max_size() const noexcept { return this->Set.size(); }
+
+  // Modifiers
+  void clear() noexcept { this->Set.reset(); }
+
+  enum_set& operator+=(key_type e)
+  {
+    this->insert(e);
+    return *this;
+  }
+  enum_set& operator+=(const enum_set& other) noexcept
+  {
+    this->erase(other);
+    return *this;
+  }
+  enum_set& operator+=(std::initializer_list<value_type> list)
+  {
+    this->insert(list);
+    return *this;
+  }
+
+  enum_set& operator-=(key_type e)
+  {
+    this->erase(e);
+    return *this;
+  }
+  enum_set& operator-=(const enum_set& other) noexcept
+  {
+    this->erase(other);
+    return *this;
+  }
+  enum_set& operator-=(std::initializer_list<value_type> list)
+  {
+    this->erase(list);
+    return *this;
+  }
+
+  std::pair<iterator, bool> insert(value_type value)
+  {
+    auto exist = this->contains(value);
+    if (!exist) {
+      this->Set.set(static_cast<size_type>(value));
+    }
+
+    return { iterator(this, static_cast<size_type>(value)), !exist };
+  }
+  template <typename InputIt>
+  void insert(InputIt first, InputIt last)
+  {
+    for (auto i = first; i != last; i++) {
+      this->insert(*i);
+    }
+  }
+  void insert(const enum_set& other) noexcept { this->Set |= other.Set; }
+  void insert(std::initializer_list<value_type> list)
+  {
+    for (auto e : list) {
+      this->Set.set(static_cast<size_type>(e));
+    }
+  }
+
+  size_type erase(key_type key)
+  {
+    if (this->contains(key)) {
+      this->Set.reset(static_cast<size_type>(key));
+      return 1;
+    }
+
+    return 0;
+  }
+  iterator erase(iterator pos)
+  {
+    this->erase(*pos++);
+    return pos;
+  }
+  iterator erase(const_iterator pos)
+  {
+    this->erase(*pos++);
+
+    return pos == this->cend() ? this->end()
+                               : iterator(this, static_cast<size_type>(*pos));
+  }
+  void erase(const enum_set& other) noexcept { this->Set &= ~other.Set; }
+  void erase(std::initializer_list<value_type> list)
+  {
+    for (auto e : list) {
+      this->Set.reset(static_cast<size_type>(e));
+    }
+  }
+
+  void swap(enum_set& other) noexcept
+  {
+    auto tmp = this->Set;
+    this->Set = other.Set;
+    other.Set = tmp;
+  }
+
+  // toggle the specified enum
+  void flip(key_type key) { this->Set.flip(static_cast<size_type>(key)); }
+  // toggle all the enums stored in the other enum_set
+  void flip(const enum_set& other) noexcept { this->Set ^= other.Set; }
+  // toggle all the enums specified in the list
+  void flip(std::initializer_list<value_type> list)
+  {
+    for (auto e : list) {
+      this->Set.flip(static_cast<size_type>(e));
+    }
+  }
+
+  // Lookup
+  size_type count(key_type e) const { return this->contains(e) ? 1 : 0; }
+
+  iterator find(key_type e)
+  {
+    if (this->contains(e)) {
+      return iterator(this, static_cast<size_type>(e));
+    } else {
+      return this->end();
+    }
+  }
+  const_iterator find(key_type e) const
+  {
+    if (this->contains(e)) {
+      return const_iterator(this, static_cast<size_type>(e));
+    } else {
+      return this->end();
+    }
+  }
+
+  bool contains(key_type e) const
+  {
+    return this->Set.test(static_cast<size_type>(e));
+  }
+
+private:
+  template <typename E, typename Predicate>
+  friend inline void erase_if(enum_set<E>& set, Predicate pred);
+
+  friend class enum_set_iterator<enum_set>;
+  friend class enum_set_iterator<const enum_set>;
+
+  bool test(size_type pos) const { return this->Set.test(pos); }
+
+  std::bitset<std::numeric_limits<size_type>::digits> Set;
+};
+
+// non-member functions for enum_set
+template <typename Enum>
+inline enum_set<Enum> operator+(const enum_set<Enum>& lhs, Enum rhs)
+{
+  return enum_set<Enum>(lhs) += rhs;
+}
+template <typename Enum>
+inline enum_set<Enum> operator+(const enum_set<Enum>& lhs,
+                                const enum_set<Enum>& rhs) noexcept
+{
+  return enum_set<Enum>(lhs) += rhs;
+}
+template <typename Enum>
+inline enum_set<Enum> operator+(const enum_set<Enum>& lhs,
+                                const std::initializer_list<Enum> rhs)
+{
+  return enum_set<Enum>(lhs) += rhs;
+}
+
+template <typename Enum>
+inline enum_set<Enum> operator-(const enum_set<Enum>& lhs, Enum rhs)
+{
+  return enum_set<Enum>(lhs) -= rhs;
+}
+template <typename Enum>
+inline enum_set<Enum> operator-(const enum_set<Enum>& lhs,
+                                const enum_set<Enum>& rhs) noexcept
+{
+  return enum_set<Enum>(lhs) -= rhs;
+}
+template <typename Enum>
+inline enum_set<Enum> operator-(const enum_set<Enum>& lhs,
+                                const std::initializer_list<Enum> rhs)
+{
+  return enum_set<Enum>(lhs) -= rhs;
+}
+
+template <typename Enum>
+inline bool operator==(const enum_set<Enum>& lhs,
+                       const enum_set<Enum>& rhs) noexcept
+{
+  return lhs == rhs;
+}
+
+template <typename Enum>
+inline bool operator!=(const enum_set<Enum>& lhs,
+                       const enum_set<Enum>& rhs) noexcept
+{
+  return !(lhs == rhs);
+}
+
+template <typename Enum>
+inline void erase(enum_set<Enum>& set, Enum value)
+{
+  set.erase(value);
+}
+
+template <typename Enum, typename Predicate>
+inline void erase_if(enum_set<Enum>& set, Predicate pred)
+{
+  for (std::size_t index = 0; index < set.Set.size(); ++index) {
+    if (set.Set.test(index) && pred(static_cast<Enum>(index))) {
+      set.Set.reset(index);
+    }
+  }
+}
+} // namespace cm

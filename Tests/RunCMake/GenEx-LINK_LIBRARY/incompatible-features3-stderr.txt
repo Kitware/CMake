@@ -1,0 +1,6 @@
+CMake Error at incompatible-features3.cmake:[0-9]+ \(add_library\):
+  Impossible to link target 'lib' because the link item 'dep1', specified
+  with the feature 'feat1', has already occurred without any feature or
+  'DEFAULT' feature, which is not allowed.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

@@ -304,14 +304,25 @@ installers.  The most commonly-used variables are:
 
   By default ``CPACK_THREADS`` is set to ``1``.
 
-  Currently only ``xz`` compression *may* take advantage of multiple cores.
+  The following compression methods may take advantage of multiple cores:
+
+  ``xz``
+    Supported if CMake is built with a ``liblzma`` that supports
+    parallel compression.
+
+    .. versionadded:: 3.21
+
+      Official CMake binaries available on ``cmake.org`` now ship
+      with a ``liblzma`` that supports parallel compression.
+      Older versions did not.
+
+  ``zstd``
+    .. versionadded:: 3.24
+
+    Supported if CMake is built with libarchive 3.6 or higher.
+    Official CMake binaries available on ``cmake.org`` support it.
+
   Other compression methods ignore this value and use only one thread.
-
-  .. versionadded:: 3.21
-
-    Official CMake binaries available on ``cmake.org`` now ship
-    with a ``liblzma`` that supports parallel compression.
-    Older versions did not.
 
 Variables for Source Package Generators
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -658,12 +669,10 @@ if(NOT CPACK_GENERATOR)
       if(APPLE)
         option(CPACK_BINARY_BUNDLE       "Enable to build OSX bundles"      OFF)
         option(CPACK_BINARY_DRAGNDROP    "Enable to build OSX Drag And Drop package" OFF)
-        option(CPACK_BINARY_PACKAGEMAKER "Enable to build PackageMaker packages (deprecated)" OFF)
         option(CPACK_BINARY_PRODUCTBUILD "Enable to build productbuild packages" OFF)
         mark_as_advanced(
           CPACK_BINARY_BUNDLE
           CPACK_BINARY_DRAGNDROP
-          CPACK_BINARY_PACKAGEMAKER
           CPACK_BINARY_PRODUCTBUILD
           )
       else()
@@ -715,7 +724,6 @@ if(NOT CPACK_GENERATOR)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_IFW          IFW)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_NSIS         NSIS)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_NUGET        NuGet)
-  cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_PACKAGEMAKER PackageMaker)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_PRODUCTBUILD productbuild)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_RPM          RPM)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_STGZ         STGZ)
@@ -806,8 +814,20 @@ _cpack_set_default(CPACK_NSIS_INSTALLER_ICON_CODE "")
 _cpack_set_default(CPACK_NSIS_INSTALLER_MUI_ICON_CODE "")
 
 # DragNDrop specific variables
-if(CPACK_RESOURCE_FILE_LICENSE AND NOT CPACK_RESOURCE_FILE_LICENSE STREQUAL "${CMAKE_ROOT}/Templates/CPack.GenericLicense.txt")
-  _cpack_set_default(CPACK_DMG_SLA_USE_RESOURCE_FILE_LICENSE ON)
+if(NOT DEFINED CPACK_DMG_SLA_USE_RESOURCE_FILE_LICENSE
+    AND CPACK_RESOURCE_FILE_LICENSE AND NOT CPACK_RESOURCE_FILE_LICENSE STREQUAL "${CMAKE_ROOT}/Templates/CPack.GenericLicense.txt")
+  cmake_policy(GET CMP0133 _CPack_CMP0133)
+  if(NOT "x${_CPack_CMP0133}x" STREQUAL "xNEWx")
+    if(NOT "x${_CPack_CMP0133}x" STREQUAL "xOLDx" AND CMAKE_POLICY_WARNING_CMP0133)
+      cmake_policy(GET_WARNING CMP0133 _CMP0133_warning)
+      message(AUTHOR_WARNING
+        "${_CMP0133_warning}\n"
+        "For compatibility, CMake will enable the SLA in the CPack DragNDrop Generator."
+        )
+    endif()
+    _cpack_set_default(CPACK_DMG_SLA_USE_RESOURCE_FILE_LICENSE ON)
+  endif()
+  unset(_CPack_CMP0133)
 endif()
 
 # WiX specific variables

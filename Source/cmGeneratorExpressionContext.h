@@ -36,9 +36,9 @@ struct cmGeneratorExpressionContext
   // directly or indirectly in the property.
   cmGeneratorTarget const* CurrentTarget;
   bool Quiet;
-  bool HadError;
-  bool HadContextSensitiveCondition;
-  bool HadHeadSensitiveCondition;
-  bool HadLinkLanguageSensitiveCondition;
+  bool HadError = false;
+  bool HadContextSensitiveCondition = false;
+  bool HadHeadSensitiveCondition = false;
+  bool HadLinkLanguageSensitiveCondition = false;
   bool EvaluateForBuildsystem;
 };

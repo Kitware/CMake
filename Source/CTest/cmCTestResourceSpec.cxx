@@ -19,6 +19,8 @@
 #include "cmJSONHelpers.h"
 
 namespace {
+using JSONHelperBuilder =
+  cmJSONHelperBuilder<cmCTestResourceSpec::ReadFileResult>;
 const cmsys::RegularExpression IdentifierRegex{ "^[a-z_][a-z0-9_]*$" };
 const cmsys::RegularExpression IdRegex{ "^[a-z0-9_]+$" };
 
@@ -34,21 +36,19 @@ struct TopVersion
 };
 
 auto const VersionFieldHelper =
-  cmJSONIntHelper<cmCTestResourceSpec::ReadFileResult>(
-    cmCTestResourceSpec::ReadFileResult::READ_OK,
-    cmCTestResourceSpec::ReadFileResult::INVALID_VERSION);
+  JSONHelperBuilder::Int(cmCTestResourceSpec::ReadFileResult::READ_OK,
+                         cmCTestResourceSpec::ReadFileResult::INVALID_VERSION);
 
-auto const VersionHelper =
-  cmJSONRequiredHelper<Version, cmCTestResourceSpec::ReadFileResult>(
-    cmCTestResourceSpec::ReadFileResult::NO_VERSION,
-    cmJSONObjectHelper<Version, cmCTestResourceSpec::ReadFileResult>(
-      cmCTestResourceSpec::ReadFileResult::READ_OK,
-      cmCTestResourceSpec::ReadFileResult::INVALID_VERSION)
-      .Bind("major"_s, &Version::Major, VersionFieldHelper)
-      .Bind("minor"_s, &Version::Minor, VersionFieldHelper));
+auto const VersionHelper = JSONHelperBuilder::Required<Version>(
+  cmCTestResourceSpec::ReadFileResult::NO_VERSION,
+  JSONHelperBuilder::Object<Version>(
+    cmCTestResourceSpec::ReadFileResult::READ_OK,
+    cmCTestResourceSpec::ReadFileResult::INVALID_VERSION)
+    .Bind("major"_s, &Version::Major, VersionFieldHelper)
+    .Bind("minor"_s, &Version::Minor, VersionFieldHelper));
 
 auto const RootVersionHelper =
-  cmJSONObjectHelper<TopVersion, cmCTestResourceSpec::ReadFileResult>(
+  JSONHelperBuilder::Object<TopVersion>(
     cmCTestResourceSpec::ReadFileResult::READ_OK,
     cmCTestResourceSpec::ReadFileResult::INVALID_ROOT)
     .Bind("version"_s, &TopVersion::Version, VersionHelper, false);
@@ -56,7 +56,7 @@ auto const RootVersionHelper =
 cmCTestResourceSpec::ReadFileResult ResourceIdHelper(std::string& out,
                                                      const Json::Value* value)
 {
-  auto result = cmJSONStringHelper(
+  auto result = JSONHelperBuilder::String(
     cmCTestResourceSpec::ReadFileResult::READ_OK,
     cmCTestResourceSpec::ReadFileResult::INVALID_RESOURCE)(out, value);
   if (result != cmCTestResourceSpec::ReadFileResult::READ_OK) {
@@ -70,27 +70,24 @@ cmCTestResourceSpec::ReadFileResult ResourceIdHelper(std::string& out,
 }
 
 auto const ResourceHelper =
-  cmJSONObjectHelper<cmCTestResourceSpec::Resource,
-                     cmCTestResourceSpec::ReadFileResult>(
+  JSONHelperBuilder::Object<cmCTestResourceSpec::Resource>(
     cmCTestResourceSpec::ReadFileResult::READ_OK,
     cmCTestResourceSpec::ReadFileResult::INVALID_RESOURCE)
     .Bind("id"_s, &cmCTestResourceSpec::Resource::Id, ResourceIdHelper)
     .Bind("slots"_s, &cmCTestResourceSpec::Resource::Capacity,
-          cmJSONUIntHelper(
+          JSONHelperBuilder::UInt(
             cmCTestResourceSpec::ReadFileResult::READ_OK,
             cmCTestResourceSpec::ReadFileResult::INVALID_RESOURCE, 1),
           false);
 
 auto const ResourceListHelper =
-  cmJSONVectorHelper<cmCTestResourceSpec::Resource,
-                     cmCTestResourceSpec::ReadFileResult>(
+  JSONHelperBuilder::Vector<cmCTestResourceSpec::Resource>(
     cmCTestResourceSpec::ReadFileResult::READ_OK,
     cmCTestResourceSpec::ReadFileResult::INVALID_RESOURCE_TYPE,
     ResourceHelper);
 
 auto const ResourceMapHelper =
-  cmJSONMapFilterHelper<std::vector<cmCTestResourceSpec::Resource>,
-                        cmCTestResourceSpec::ReadFileResult>(
+  JSONHelperBuilder::MapFilter<std::vector<cmCTestResourceSpec::Resource>>(
     cmCTestResourceSpec::ReadFileResult::READ_OK,
     cmCTestResourceSpec::ReadFileResult::INVALID_SOCKET_SPEC,
     ResourceListHelper, [](const std::string& key) -> bool {
@@ -98,7 +95,7 @@ auto const ResourceMapHelper =
       return IdentifierRegex.find(key.c_str(), match);
     });
 
-auto const SocketSetHelper = cmJSONVectorHelper<
+auto const SocketSetHelper = JSONHelperBuilder::Vector<
   std::map<std::string, std::vector<cmCTestResourceSpec::Resource>>>(
   cmCTestResourceSpec::ReadFileResult::READ_OK,
   cmCTestResourceSpec::ReadFileResult::INVALID_SOCKET_SPEC, ResourceMapHelper);
@@ -125,16 +122,14 @@ cmCTestResourceSpec::ReadFileResult SocketHelper(
 }
 
 auto const LocalRequiredHelper =
-  cmJSONRequiredHelper<cmCTestResourceSpec::Socket,
-                       cmCTestResourceSpec::ReadFileResult>(
+  JSONHelperBuilder::Required<cmCTestResourceSpec::Socket>(
     cmCTestResourceSpec::ReadFileResult::INVALID_SOCKET_SPEC, SocketHelper);
 
-auto const RootHelper =
-  cmJSONObjectHelper<cmCTestResourceSpec, cmCTestResourceSpec::ReadFileResult>(
-    cmCTestResourceSpec::ReadFileResult::READ_OK,
-    cmCTestResourceSpec::ReadFileResult::INVALID_ROOT)
-    .Bind("local", &cmCTestResourceSpec::LocalSocket, LocalRequiredHelper,
-          false);
+auto const RootHelper = JSONHelperBuilder::Object<cmCTestResourceSpec>(
+                          cmCTestResourceSpec::ReadFileResult::READ_OK,
+                          cmCTestResourceSpec::ReadFileResult::INVALID_ROOT)
+                          .Bind("local", &cmCTestResourceSpec::LocalSocket,
+                                LocalRequiredHelper, false);
 }
 
 cmCTestResourceSpec::ReadFileResult cmCTestResourceSpec::ReadFromJSONFile(

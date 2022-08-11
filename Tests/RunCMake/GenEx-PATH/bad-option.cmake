@@ -1,0 +1,2 @@
+
+file(GENERATE OUTPUT result.txt CONTENT "$<PATH:BAD_OPTION,ARG>")

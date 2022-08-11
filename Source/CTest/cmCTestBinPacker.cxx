@@ -34,7 +34,7 @@ namespace {
  * more combinations can be tried.
  */
 template <typename AllocationStrategy>
-static bool AllocateCTestResources(
+bool AllocateCTestResources(
   const std::map<std::string, cmCTestResourceAllocator::Resource>& resources,
   const std::vector<std::string>& resourcesSorted, std::size_t currentIndex,
   std::vector<cmCTestBinPackerAllocation*>& allocations)
@@ -82,7 +82,7 @@ static bool AllocateCTestResources(
 }
 
 template <typename AllocationStrategy>
-static bool AllocateCTestResources(
+bool AllocateCTestResources(
   const std::map<std::string, cmCTestResourceAllocator::Resource>& resources,
   std::vector<cmCTestBinPackerAllocation>& allocations)
 {
@@ -108,7 +108,7 @@ static bool AllocateCTestResources(
 
   // Do the actual allocation
   return AllocateCTestResources<AllocationStrategy>(
-    resources, resourcesSorted, std::size_t(0), allocationsPtr);
+    resources, resourcesSorted, static_cast<std::size_t>(0), allocationsPtr);
 }
 
 class RoundRobinAllocationStrategy

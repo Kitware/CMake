@@ -1,0 +1,6 @@
+^-- CMAKE_ARGC='5'
+-- CMAKE_ARGV1='-P'
+-- CMAKE_ARGV2='[^']*/Tests/RunCMake/CommandLine/P_args.cmake'
+-- CMAKE_ARGV3='relative/path'
+-- CMAKE_ARGV4='[^']*/Tests/RunCMake/CommandLine'
+-- CMAKE_ARGV5=''$

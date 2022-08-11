@@ -1,4 +1,4 @@
-/* A Bison parser, made by GNU Bison 3.7.5.  */
+/* A Bison parser, made by GNU Bison 3.8.2.  */
 
 /* Bison implementation for Yacc-like parsers in C
 
@@ -16,7 +16,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -46,10 +46,10 @@
    USER NAME SPACE" below.  */
 
 /* Identify Bison output, and Bison version.  */
-#define YYBISON 30705
+#define YYBISON 30802
 
 /* Bison version string.  */
-#define YYBISON_VERSION "3.7.5"
+#define YYBISON_VERSION "3.8.2"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -120,8 +120,13 @@ static void cmDependsJava_yyerror(yyscan_t yyscanner, const char* message);
 # pragma GCC diagnostic ignored "-Wconversion"
 # pragma GCC diagnostic ignored "-Wfree-nonheap-object"
 #endif
+#if defined(__clang__) && defined(__has_warning)
+# if __has_warning("-Wunused-but-set-variable")
+#  pragma clang diagnostic ignored "-Wunused-but-set-variable"
+# endif
+#endif
 
-#line 125 "cmDependsJavaParser.cxx"
+#line 130 "cmDependsJavaParser.cxx"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -570,12 +575,18 @@ typedef int yy_state_fast_t;
 # define YY_USE(E) /* empty */
 #endif
 
-#if defined __GNUC__ && ! defined __ICC && 407 <= __GNUC__ * 100 + __GNUC_MINOR__
 /* Suppress an incorrect diagnostic about yylval being uninitialized.  */
-# define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN                            \
+#if defined __GNUC__ && ! defined __ICC && 406 <= __GNUC__ * 100 + __GNUC_MINOR__
+# if __GNUC__ * 100 + __GNUC_MINOR__ < 407
+#  define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN                           \
+    _Pragma ("GCC diagnostic push")                                     \
+    _Pragma ("GCC diagnostic ignored \"-Wuninitialized\"")
+# else
+#  define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN                           \
     _Pragma ("GCC diagnostic push")                                     \
     _Pragma ("GCC diagnostic ignored \"-Wuninitialized\"")              \
     _Pragma ("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")
+# endif
 # define YY_IGNORE_MAYBE_UNINITIALIZED_END      \
     _Pragma ("GCC diagnostic pop")
 #else
@@ -800,45 +811,45 @@ static const yytype_int8 yytranslate[] =
 };
 
 #if YYDEBUG
-  /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
+/* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,   180,   180,   189,   197,   205,   213,   221,   229,   238,
-     246,   255,   263,   272,   277,   282,   287,   292,   297,   302,
-     307,   313,   321,   330,   340,   349,   358,   366,   376,   382,
-     389,   396,   402,   409,   418,   428,   438,   447,   455,   464,
-     473,   479,   488,   494,   503,   509,   518,   530,   538,   547,
-     559,   572,   580,   588,   597,   605,   614,   614,   614,   615,
-     616,   616,   616,   616,   616,   616,   617,   620,   630,   639,
-     648,   657,   667,   673,   682,   691,   700,   708,   717,   726,
-     732,   741,   749,   757,   765,   774,   782,   791,   797,   805,
-     814,   822,   831,   840,   849,   857,   866,   874,   882,   891,
-     900,   910,   917,   927,   937,   944,   951,   954,   960,   970,
-     980,   990,   996,  1006,  1016,  1026,  1035,  1045,  1056,  1066,
-    1073,  1083,  1092,  1102,  1111,  1121,  1127,  1137,  1146,  1156,
-    1166,  1173,  1182,  1191,  1200,  1209,  1217,  1226,  1235,  1245,
-    1255,  1264,  1274,  1284,  1291,  1300,  1310,  1319,  1329,  1338,
-    1345,  1355,  1364,  1374,  1383,  1392,  1402,  1412,  1421,  1431,
-    1440,  1449,  1458,  1467,  1476,  1486,  1495,  1504,  1513,  1522,
-    1532,  1541,  1550,  1559,  1568,  1577,  1586,  1595,  1604,  1613,
-    1622,  1631,  1641,  1651,  1662,  1672,  1682,  1691,  1700,  1709,
-    1718,  1727,  1736,  1746,  1756,  1766,  1776,  1783,  1790,  1797,
-    1807,  1814,  1824,  1834,  1843,  1853,  1862,  1872,  1879,  1886,
-    1893,  1901,  1908,  1918,  1925,  1935,  1945,  1952,  1962,  1971,
-    1981,  1991,  2000,  2010,  2019,  2029,  2040,  2047,  2054,  2065,
-    2075,  2085,  2095,  2104,  2114,  2121,  2131,  2140,  2150,  2157,
-    2167,  2176,  2186,  2195,  2201,  2210,  2219,  2228,  2237,  2247,
-    2257,  2264,  2274,  2281,  2291,  2300,  2310,  2319,  2328,  2337,
-    2347,  2354,  2364,  2373,  2383,  2393,  2399,  2406,  2416,  2426,
-    2436,  2447,  2457,  2468,  2478,  2489,  2499,  2509,  2518,  2527,
-    2536,  2545,  2555,  2565,  2575,  2584,  2593,  2602,  2611,  2621,
-    2631,  2641,  2650,  2659,  2668,  2678,  2687,  2696,  2703,  2712,
-    2721,  2730,  2740,  2749,  2758,  2768,  2777,  2786,  2795,  2805,
-    2814,  2823,  2832,  2841,  2850,  2860,  2869,  2878,  2888,  2897,
-    2907,  2916,  2926,  2935,  2945,  2954,  2964,  2973,  2983,  2992,
-    3002,  3011,  3021,  3031,  3041,  3050,  3060,  3069,  3078,  3087,
-    3096,  3105,  3114,  3123,  3132,  3141,  3150,  3159,  3169,  3179,
-    3189,  3198
+       0,   185,   185,   194,   202,   210,   218,   226,   234,   243,
+     251,   260,   268,   277,   282,   287,   292,   297,   302,   307,
+     312,   318,   326,   335,   345,   354,   363,   371,   381,   387,
+     394,   401,   407,   414,   423,   433,   443,   452,   460,   469,
+     478,   484,   493,   499,   508,   514,   523,   535,   543,   552,
+     564,   577,   585,   593,   602,   610,   619,   619,   619,   620,
+     621,   621,   621,   621,   621,   621,   622,   625,   635,   644,
+     653,   662,   672,   678,   687,   696,   705,   713,   722,   731,
+     737,   746,   754,   762,   770,   779,   787,   796,   802,   810,
+     819,   827,   836,   845,   854,   862,   871,   879,   887,   896,
+     905,   915,   922,   932,   942,   949,   956,   959,   965,   975,
+     985,   995,  1001,  1011,  1021,  1031,  1040,  1050,  1061,  1071,
+    1078,  1088,  1097,  1107,  1116,  1126,  1132,  1142,  1151,  1161,
+    1171,  1178,  1187,  1196,  1205,  1214,  1222,  1231,  1240,  1250,
+    1260,  1269,  1279,  1289,  1296,  1305,  1315,  1324,  1334,  1343,
+    1350,  1360,  1369,  1379,  1388,  1397,  1407,  1417,  1426,  1436,
+    1445,  1454,  1463,  1472,  1481,  1491,  1500,  1509,  1518,  1527,
+    1537,  1546,  1555,  1564,  1573,  1582,  1591,  1600,  1609,  1618,
+    1627,  1636,  1646,  1656,  1667,  1677,  1687,  1696,  1705,  1714,
+    1723,  1732,  1741,  1751,  1761,  1771,  1781,  1788,  1795,  1802,
+    1812,  1819,  1829,  1839,  1848,  1858,  1867,  1877,  1884,  1891,
+    1898,  1906,  1913,  1923,  1930,  1940,  1950,  1957,  1967,  1976,
+    1986,  1996,  2005,  2015,  2024,  2034,  2045,  2052,  2059,  2070,
+    2080,  2090,  2100,  2109,  2119,  2126,  2136,  2145,  2155,  2162,
+    2172,  2181,  2191,  2200,  2206,  2215,  2224,  2233,  2242,  2252,
+    2262,  2269,  2279,  2286,  2296,  2305,  2315,  2324,  2333,  2342,
+    2352,  2359,  2369,  2378,  2388,  2398,  2404,  2411,  2421,  2431,
+    2441,  2452,  2462,  2473,  2483,  2494,  2504,  2514,  2523,  2532,
+    2541,  2550,  2560,  2570,  2580,  2589,  2598,  2607,  2616,  2626,
+    2636,  2646,  2655,  2664,  2673,  2683,  2692,  2701,  2708,  2717,
+    2726,  2735,  2745,  2754,  2763,  2773,  2782,  2791,  2800,  2810,
+    2819,  2828,  2837,  2846,  2855,  2865,  2874,  2883,  2893,  2902,
+    2912,  2921,  2931,  2940,  2950,  2959,  2969,  2978,  2988,  2997,
+    3007,  3016,  3026,  3036,  3046,  3055,  3065,  3074,  3083,  3092,
+    3101,  3110,  3119,  3128,  3137,  3146,  3155,  3164,  3174,  3184,
+    3194,  3203
 };
 #endif
 
@@ -938,25 +949,6 @@ yysymbol_name (yysymbol_kind_t yysymbol)
 }
 #endif
 
-#ifdef YYPRINT
-/* YYTOKNUM[NUM] -- (External) token number corresponding to the
-   (internal) symbol number NUM (which must be that of a token).  */
-static const yytype_int16 yytoknum[] =
-{
-       0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
-     265,   266,   267,   268,   269,   270,   271,   272,   273,   274,
-     275,   276,   277,   278,   279,   280,   281,   282,   283,   284,
-     285,   286,   287,   288,   289,   290,   291,   292,   293,   294,
-     295,   296,   297,   298,   299,   300,   301,   302,   303,   304,
-     305,   306,   307,   308,   309,   310,   311,   312,   313,   314,
-     315,   316,   317,   318,   319,   320,   321,   322,   323,   324,
-     325,   326,   327,   328,   329,   330,   331,   332,   333,   334,
-     335,   336,   337,   338,   339,   340,   341,   342,   343,   344,
-     345,   346,   347,   348,   349,   350,   351,   352,   353,   354,
-     355,   356,   357,   358,   359,   360
-};
-#endif
-
 #define YYPACT_NINF (-503)
 
 #define yypact_value_is_default(Yyn) \
@@ -967,8 +959,8 @@ static const yytype_int16 yytoknum[] =
 #define yytable_value_is_error(Yyn) \
   0
 
-  /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
-     STATE-NUM.  */
+/* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
+   STATE-NUM.  */
 static const yytype_int16 yypact[] =
 {
      159,  1039,   236,  -503,  -503,  -503,  -503,  -503,  -503,  -503,
@@ -1031,9 +1023,9 @@ static const yytype_int16 yypact[] =
     1699,   432,  -503,  1699,  -503
 };
 
-  /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
-     Performed when YYTABLE does not specify something else to do.  Zero
-     means the default is an error.  */
+/* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
+   Performed when YYTABLE does not specify something else to do.  Zero
+   means the default is an error.  */
 static const yytype_int16 yydefact[] =
 {
       40,     0,     0,     2,    42,    41,    20,    13,    17,    19,
@@ -1096,7 +1088,7 @@ static const yytype_int16 yydefact[] =
        0,     0,   195,     0,   215
 };
 
-  /* YYPGOTO[NTERM-NUM].  */
+/* YYPGOTO[NTERM-NUM].  */
 static const yytype_int16 yypgoto[] =
 {
     -503,  -503,  -503,  -503,   -85,     2,   181,   -41,  -198,   -45,
@@ -1117,7 +1109,7 @@ static const yytype_int16 yypgoto[] =
       95,   274,   350,  -503,  -503,   660,  -503,  -503
 };
 
-  /* YYDEFGOTO[NTERM-NUM].  */
+/* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int16 yydefgoto[] =
 {
        0,     2,   156,   157,   158,   229,   112,   113,    75,    78,
@@ -1138,9 +1130,9 @@ static const yytype_int16 yydefgoto[] =
      252,   253,   254,   203,   306,   386,   557,   204
 };
 
-  /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
-     positive, shift that token.  If negative, reduce the rule whose
-     number is the opposite.  If YYTABLE_NINF, syntax error.  */
+/* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
+   positive, shift that token.  If negative, reduce the rule whose
+   number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int16 yytable[] =
 {
       18,    82,    83,    17,   287,    61,   309,    56,   114,   364,
@@ -1593,8 +1585,8 @@ static const yytype_int16 yycheck[] =
       -1,    -1,    -1,    -1,    -1,   104
 };
 
-  /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
-     symbol of state STATE-NUM.  */
+/* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
+   state STATE-NUM.  */
 static const yytype_int16 yystos[] =
 {
        0,    31,   107,   122,   123,   126,     5,     7,    10,    15,
@@ -1657,7 +1649,7 @@ static const yytype_int16 yystos[] =
       16,   205,   184,    90,   184
 };
 
-  /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
+/* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
 static const yytype_int16 yyr1[] =
 {
        0,   106,   107,   108,   108,   108,   108,   108,   108,   109,
@@ -1698,7 +1690,7 @@ static const yytype_int16 yyr1[] =
      263,   263
 };
 
-  /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
+/* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr2[] =
 {
        0,     2,     1,     1,     1,     1,     1,     1,     1,     1,
@@ -1748,6 +1740,7 @@ enum { YYENOMEM = -2 };
 #define YYACCEPT        goto yyacceptlab
 #define YYABORT         goto yyabortlab
 #define YYERROR         goto yyerrorlab
+#define YYNOMEM         goto yyexhaustedlab
 
 
 #define YYRECOVERING()  (!!yyerrstatus)
@@ -1788,10 +1781,7 @@ do {                                            \
     YYFPRINTF Args;                             \
 } while (0)
 
-/* This macro is provided for backward compatibility. */
-# ifndef YY_LOCATION_PRINT
-#  define YY_LOCATION_PRINT(File, Loc) ((void) 0)
-# endif
+
 
 
 # define YY_SYMBOL_PRINT(Title, Kind, Value, Location)                    \
@@ -1819,10 +1809,6 @@ yy_symbol_value_print (FILE *yyo,
   YY_USE (yyscanner);
   if (!yyvaluep)
     return;
-# ifdef YYPRINT
-  if (yykind < YYNTOKENS)
-    YYPRINT (yyo, yytoknum[yykind], *yyvaluep);
-# endif
   YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
   YY_USE (yykind);
   YY_IGNORE_MAYBE_UNINITIALIZED_END
@@ -2284,6 +2270,7 @@ YYSTYPE yylval YY_INITIAL_VALUE (= yyval_default);
   YYDPRINTF ((stderr, "Starting parse\n"));
 
   yychar = YYEMPTY; /* Cause a token to be read.  */
+
   goto yysetstate;
 
 
@@ -2309,7 +2296,7 @@ yysetstate:
 
   if (yyss + yystacksize - 1 <= yyssp)
 #if !defined yyoverflow && !defined YYSTACK_RELOCATE
-    goto yyexhaustedlab;
+    YYNOMEM;
 #else
     {
       /* Get the current used size of the three stacks, in elements.  */
@@ -2337,7 +2324,7 @@ yysetstate:
 # else /* defined YYSTACK_RELOCATE */
       /* Extend the stack our own way.  */
       if (YYMAXDEPTH <= yystacksize)
-        goto yyexhaustedlab;
+        YYNOMEM;
       yystacksize *= 2;
       if (YYMAXDEPTH < yystacksize)
         yystacksize = YYMAXDEPTH;
@@ -2348,7 +2335,7 @@ yysetstate:
           YY_CAST (union yyalloc *,
                    YYSTACK_ALLOC (YY_CAST (YYSIZE_T, YYSTACK_BYTES (yystacksize))));
         if (! yyptr)
-          goto yyexhaustedlab;
+          YYNOMEM;
         YYSTACK_RELOCATE (yyss_alloc, yyss);
         YYSTACK_RELOCATE (yyvs_alloc, yyvs);
 #  undef YYSTACK_RELOCATE
@@ -2369,6 +2356,7 @@ yysetstate:
         YYABORT;
     }
 #endif /* !defined yyoverflow && !defined YYSTACK_RELOCATE */
+
 
   if (yystate == YYFINAL)
     YYACCEPT;
@@ -2482,214 +2470,214 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* Goal: CompilationUnit  */
-#line 181 "cmDependsJavaParser.y"
+#line 186 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 2493 "cmDependsJavaParser.cxx"
+#line 2481 "cmDependsJavaParser.cxx"
     break;
 
   case 3: /* Literal: IntegerLiteral  */
-#line 190 "cmDependsJavaParser.y"
+#line 195 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 2504 "cmDependsJavaParser.cxx"
+#line 2492 "cmDependsJavaParser.cxx"
     break;
 
   case 4: /* Literal: jp_FLOATINGPOINTLITERAL  */
-#line 198 "cmDependsJavaParser.y"
+#line 203 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 2515 "cmDependsJavaParser.cxx"
+#line 2503 "cmDependsJavaParser.cxx"
     break;
 
   case 5: /* Literal: jp_BOOLEANLITERAL  */
-#line 206 "cmDependsJavaParser.y"
+#line 211 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 2526 "cmDependsJavaParser.cxx"
+#line 2514 "cmDependsJavaParser.cxx"
     break;
 
   case 6: /* Literal: jp_CHARACTERLITERAL  */
-#line 214 "cmDependsJavaParser.y"
+#line 219 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 2537 "cmDependsJavaParser.cxx"
+#line 2525 "cmDependsJavaParser.cxx"
     break;
 
   case 7: /* Literal: jp_STRINGLITERAL  */
-#line 222 "cmDependsJavaParser.y"
+#line 227 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 2548 "cmDependsJavaParser.cxx"
+#line 2536 "cmDependsJavaParser.cxx"
     break;
 
   case 8: /* Literal: jp_NULLLITERAL  */
-#line 230 "cmDependsJavaParser.y"
+#line 235 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 2559 "cmDependsJavaParser.cxx"
+#line 2547 "cmDependsJavaParser.cxx"
     break;
 
   case 9: /* IntegerLiteral: jp_DECIMALINTEGERLITERAL  */
-#line 239 "cmDependsJavaParser.y"
+#line 244 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 2570 "cmDependsJavaParser.cxx"
+#line 2558 "cmDependsJavaParser.cxx"
     break;
 
   case 10: /* IntegerLiteral: jp_HEXINTEGERLITERAL  */
-#line 247 "cmDependsJavaParser.y"
+#line 252 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 2581 "cmDependsJavaParser.cxx"
+#line 2569 "cmDependsJavaParser.cxx"
     break;
 
   case 11: /* Type: PrimitiveType  */
-#line 256 "cmDependsJavaParser.y"
+#line 261 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 2592 "cmDependsJavaParser.cxx"
+#line 2580 "cmDependsJavaParser.cxx"
     break;
 
   case 12: /* Type: ReferenceType  */
-#line 264 "cmDependsJavaParser.y"
+#line 269 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 2603 "cmDependsJavaParser.cxx"
+#line 2591 "cmDependsJavaParser.cxx"
     break;
 
   case 13: /* PrimitiveType: jp_BYTE_TYPE  */
-#line 273 "cmDependsJavaParser.y"
-{
-  jpElementStart(0);
-}
-#line 2611 "cmDependsJavaParser.cxx"
-    break;
-
-  case 14: /* PrimitiveType: jp_SHORT_TYPE  */
 #line 278 "cmDependsJavaParser.y"
 {
   jpElementStart(0);
 }
-#line 2619 "cmDependsJavaParser.cxx"
+#line 2599 "cmDependsJavaParser.cxx"
     break;
 
-  case 15: /* PrimitiveType: jp_INT_TYPE  */
+  case 14: /* PrimitiveType: jp_SHORT_TYPE  */
 #line 283 "cmDependsJavaParser.y"
 {
   jpElementStart(0);
 }
-#line 2627 "cmDependsJavaParser.cxx"
+#line 2607 "cmDependsJavaParser.cxx"
     break;
 
-  case 16: /* PrimitiveType: jp_LONG_TYPE  */
+  case 15: /* PrimitiveType: jp_INT_TYPE  */
 #line 288 "cmDependsJavaParser.y"
 {
   jpElementStart(0);
 }
-#line 2635 "cmDependsJavaParser.cxx"
+#line 2615 "cmDependsJavaParser.cxx"
     break;
 
-  case 17: /* PrimitiveType: jp_CHAR_TYPE  */
+  case 16: /* PrimitiveType: jp_LONG_TYPE  */
 #line 293 "cmDependsJavaParser.y"
 {
   jpElementStart(0);
 }
-#line 2643 "cmDependsJavaParser.cxx"
+#line 2623 "cmDependsJavaParser.cxx"
     break;
 
-  case 18: /* PrimitiveType: jp_FLOAT_TYPE  */
+  case 17: /* PrimitiveType: jp_CHAR_TYPE  */
 #line 298 "cmDependsJavaParser.y"
 {
   jpElementStart(0);
 }
-#line 2651 "cmDependsJavaParser.cxx"
+#line 2631 "cmDependsJavaParser.cxx"
     break;
 
-  case 19: /* PrimitiveType: jp_DOUBLE_TYPE  */
+  case 18: /* PrimitiveType: jp_FLOAT_TYPE  */
 #line 303 "cmDependsJavaParser.y"
 {
   jpElementStart(0);
 }
-#line 2659 "cmDependsJavaParser.cxx"
+#line 2639 "cmDependsJavaParser.cxx"
     break;
 
-  case 20: /* PrimitiveType: jp_BOOLEAN_TYPE  */
+  case 19: /* PrimitiveType: jp_DOUBLE_TYPE  */
 #line 308 "cmDependsJavaParser.y"
 {
   jpElementStart(0);
 }
-#line 2667 "cmDependsJavaParser.cxx"
+#line 2647 "cmDependsJavaParser.cxx"
+    break;
+
+  case 20: /* PrimitiveType: jp_BOOLEAN_TYPE  */
+#line 313 "cmDependsJavaParser.y"
+{
+  jpElementStart(0);
+}
+#line 2655 "cmDependsJavaParser.cxx"
     break;
 
   case 21: /* ReferenceType: ClassOrInterfaceType  */
-#line 314 "cmDependsJavaParser.y"
+#line 319 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 2678 "cmDependsJavaParser.cxx"
+#line 2666 "cmDependsJavaParser.cxx"
     break;
 
   case 22: /* ReferenceType: ArrayType  */
-#line 322 "cmDependsJavaParser.y"
+#line 327 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 2689 "cmDependsJavaParser.cxx"
+#line 2677 "cmDependsJavaParser.cxx"
     break;
 
   case 23: /* ClassOrInterfaceType: Name  */
-#line 331 "cmDependsJavaParser.y"
+#line 336 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpStoreClass((yyvsp[0].str));
@@ -2697,44 +2685,44 @@ yyreduce:
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 2701 "cmDependsJavaParser.cxx"
+#line 2689 "cmDependsJavaParser.cxx"
     break;
 
   case 24: /* ClassType: ClassOrInterfaceType  */
-#line 341 "cmDependsJavaParser.y"
+#line 346 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 2712 "cmDependsJavaParser.cxx"
+#line 2700 "cmDependsJavaParser.cxx"
     break;
 
   case 25: /* InterfaceType: ClassOrInterfaceType  */
-#line 350 "cmDependsJavaParser.y"
+#line 355 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 2723 "cmDependsJavaParser.cxx"
+#line 2711 "cmDependsJavaParser.cxx"
     break;
 
   case 26: /* ArrayType: PrimitiveType Dims  */
-#line 359 "cmDependsJavaParser.y"
+#line 364 "cmDependsJavaParser.y"
 {
   jpElementStart(2);
   jpCheckEmpty(2);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 2734 "cmDependsJavaParser.cxx"
+#line 2722 "cmDependsJavaParser.cxx"
     break;
 
   case 27: /* ArrayType: Name Dims  */
-#line 367 "cmDependsJavaParser.y"
+#line 372 "cmDependsJavaParser.y"
 {
   jpElementStart(2);
   jpStoreClass((yyvsp[-1].str));
@@ -2742,56 +2730,56 @@ yyreduce:
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 2746 "cmDependsJavaParser.cxx"
+#line 2734 "cmDependsJavaParser.cxx"
     break;
 
   case 28: /* Name: SimpleName  */
-#line 377 "cmDependsJavaParser.y"
+#line 382 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   (yyval.str) = (yyvsp[0].str);
 }
-#line 2755 "cmDependsJavaParser.cxx"
+#line 2743 "cmDependsJavaParser.cxx"
     break;
 
   case 29: /* Name: QualifiedName  */
-#line 383 "cmDependsJavaParser.y"
+#line 388 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   (yyval.str) = (yyvsp[0].str);
 }
-#line 2764 "cmDependsJavaParser.cxx"
+#line 2752 "cmDependsJavaParser.cxx"
     break;
 
   case 30: /* SimpleName: Identifier  */
-#line 390 "cmDependsJavaParser.y"
+#line 395 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   (yyval.str) = (yyvsp[0].str);
 }
-#line 2773 "cmDependsJavaParser.cxx"
+#line 2761 "cmDependsJavaParser.cxx"
     break;
 
   case 31: /* Identifier: jp_NAME  */
-#line 397 "cmDependsJavaParser.y"
+#line 402 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   (yyval.str) = (yyvsp[0].str);
 }
-#line 2782 "cmDependsJavaParser.cxx"
+#line 2770 "cmDependsJavaParser.cxx"
     break;
 
   case 32: /* Identifier: jp_DOLLAR jp_NAME  */
-#line 403 "cmDependsJavaParser.y"
+#line 408 "cmDependsJavaParser.y"
 {
   jpElementStart(2);
   (yyval.str) = (yyvsp[0].str);
 }
-#line 2791 "cmDependsJavaParser.cxx"
+#line 2779 "cmDependsJavaParser.cxx"
     break;
 
   case 33: /* QualifiedName: Name jp_DOT Identifier  */
-#line 410 "cmDependsJavaParser.y"
+#line 415 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   yyGetParser->AddClassFound((yyvsp[-2].str));
@@ -2799,11 +2787,11 @@ yyreduce:
   yyGetParser->DeallocateParserType(&((yyvsp[-2].str)));
   (yyval.str) = const_cast<char*>(yyGetParser->GetCurrentCombine());
 }
-#line 2803 "cmDependsJavaParser.cxx"
+#line 2791 "cmDependsJavaParser.cxx"
     break;
 
   case 34: /* QualifiedName: Name jp_DOT jp_CLASS  */
-#line 419 "cmDependsJavaParser.y"
+#line 424 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   jpStoreClass((yyvsp[-2].str));
@@ -2812,11 +2800,11 @@ yyreduce:
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 2816 "cmDependsJavaParser.cxx"
+#line 2804 "cmDependsJavaParser.cxx"
     break;
 
   case 35: /* QualifiedName: Name jp_DOT jp_THIS  */
-#line 429 "cmDependsJavaParser.y"
+#line 434 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   jpStoreClass((yyvsp[-2].str));
@@ -2825,118 +2813,118 @@ yyreduce:
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 2829 "cmDependsJavaParser.cxx"
+#line 2817 "cmDependsJavaParser.cxx"
     break;
 
   case 36: /* QualifiedName: SimpleType jp_DOT jp_CLASS  */
-#line 439 "cmDependsJavaParser.y"
+#line 444 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   jpCheckEmpty(3);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 2840 "cmDependsJavaParser.cxx"
+#line 2828 "cmDependsJavaParser.cxx"
     break;
 
   case 37: /* SimpleType: PrimitiveType  */
-#line 448 "cmDependsJavaParser.y"
+#line 453 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 2851 "cmDependsJavaParser.cxx"
+#line 2839 "cmDependsJavaParser.cxx"
     break;
 
   case 38: /* SimpleType: jp_VOID  */
-#line 456 "cmDependsJavaParser.y"
+#line 461 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 2862 "cmDependsJavaParser.cxx"
+#line 2850 "cmDependsJavaParser.cxx"
     break;
 
   case 39: /* CompilationUnit: PackageDeclarationopt ImportDeclarations TypeDeclarations  */
-#line 465 "cmDependsJavaParser.y"
+#line 470 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   jpCheckEmpty(3);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 2873 "cmDependsJavaParser.cxx"
+#line 2861 "cmDependsJavaParser.cxx"
     break;
 
   case 40: /* PackageDeclarationopt: %empty  */
-#line 473 "cmDependsJavaParser.y"
+#line 478 "cmDependsJavaParser.y"
 {
   jpElementStart(0);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 2883 "cmDependsJavaParser.cxx"
+#line 2871 "cmDependsJavaParser.cxx"
     break;
 
   case 41: /* PackageDeclarationopt: PackageDeclaration  */
-#line 480 "cmDependsJavaParser.y"
+#line 485 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 2894 "cmDependsJavaParser.cxx"
+#line 2882 "cmDependsJavaParser.cxx"
     break;
 
   case 42: /* ImportDeclarations: %empty  */
-#line 488 "cmDependsJavaParser.y"
+#line 493 "cmDependsJavaParser.y"
 {
   jpElementStart(0);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 2904 "cmDependsJavaParser.cxx"
+#line 2892 "cmDependsJavaParser.cxx"
     break;
 
   case 43: /* ImportDeclarations: ImportDeclarations ImportDeclaration  */
-#line 495 "cmDependsJavaParser.y"
+#line 500 "cmDependsJavaParser.y"
 {
   jpElementStart(2);
   jpCheckEmpty(2);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 2915 "cmDependsJavaParser.cxx"
+#line 2903 "cmDependsJavaParser.cxx"
     break;
 
   case 44: /* TypeDeclarations: %empty  */
-#line 503 "cmDependsJavaParser.y"
+#line 508 "cmDependsJavaParser.y"
 {
   jpElementStart(0);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 2925 "cmDependsJavaParser.cxx"
+#line 2913 "cmDependsJavaParser.cxx"
     break;
 
   case 45: /* TypeDeclarations: TypeDeclarations TypeDeclaration  */
-#line 510 "cmDependsJavaParser.y"
+#line 515 "cmDependsJavaParser.y"
 {
   jpElementStart(2);
   jpCheckEmpty(2);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 2936 "cmDependsJavaParser.cxx"
+#line 2924 "cmDependsJavaParser.cxx"
     break;
 
   case 46: /* PackageDeclaration: jp_PACKAGE Name jp_SEMICOL  */
-#line 519 "cmDependsJavaParser.y"
+#line 524 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   yyGetParser->SetCurrentPackage((yyvsp[-1].str));
@@ -2946,33 +2934,33 @@ yyreduce:
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 2950 "cmDependsJavaParser.cxx"
+#line 2938 "cmDependsJavaParser.cxx"
     break;
 
   case 47: /* ImportDeclaration: SingleTypeImportDeclaration  */
-#line 531 "cmDependsJavaParser.y"
+#line 536 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 2961 "cmDependsJavaParser.cxx"
+#line 2949 "cmDependsJavaParser.cxx"
     break;
 
   case 48: /* ImportDeclaration: TypeImportOnDemandDeclaration  */
-#line 539 "cmDependsJavaParser.y"
+#line 544 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 2972 "cmDependsJavaParser.cxx"
+#line 2960 "cmDependsJavaParser.cxx"
     break;
 
   case 49: /* SingleTypeImportDeclaration: jp_IMPORT Name jp_SEMICOL  */
-#line 548 "cmDependsJavaParser.y"
+#line 553 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   yyGetParser->AddPackagesImport((yyvsp[-1].str));
@@ -2982,11 +2970,11 @@ yyreduce:
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 2986 "cmDependsJavaParser.cxx"
+#line 2974 "cmDependsJavaParser.cxx"
     break;
 
   case 50: /* TypeImportOnDemandDeclaration: jp_IMPORT Name jp_DOT jp_TIMES jp_SEMICOL  */
-#line 560 "cmDependsJavaParser.y"
+#line 565 "cmDependsJavaParser.y"
 {
   jpElementStart(5);
   std::string str = (yyvsp[-3].str);
@@ -2997,79 +2985,91 @@ yyreduce:
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 3001 "cmDependsJavaParser.cxx"
+#line 2989 "cmDependsJavaParser.cxx"
     break;
 
   case 51: /* TypeDeclaration: ClassDeclaration  */
-#line 573 "cmDependsJavaParser.y"
+#line 578 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 3012 "cmDependsJavaParser.cxx"
+#line 3000 "cmDependsJavaParser.cxx"
     break;
 
   case 52: /* TypeDeclaration: InterfaceDeclaration  */
-#line 581 "cmDependsJavaParser.y"
+#line 586 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 3023 "cmDependsJavaParser.cxx"
+#line 3011 "cmDependsJavaParser.cxx"
     break;
 
   case 53: /* TypeDeclaration: jp_SEMICOL  */
-#line 589 "cmDependsJavaParser.y"
+#line 594 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 3034 "cmDependsJavaParser.cxx"
+#line 3022 "cmDependsJavaParser.cxx"
     break;
 
   case 54: /* Modifiers: Modifier  */
-#line 598 "cmDependsJavaParser.y"
+#line 603 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 3045 "cmDependsJavaParser.cxx"
+#line 3033 "cmDependsJavaParser.cxx"
     break;
 
   case 55: /* Modifiers: Modifiers Modifier  */
-#line 606 "cmDependsJavaParser.y"
+#line 611 "cmDependsJavaParser.y"
 {
   jpElementStart(2);
   jpCheckEmpty(2);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 3056 "cmDependsJavaParser.cxx"
+#line 3044 "cmDependsJavaParser.cxx"
     break;
 
   case 67: /* ClassHeader: Modifiersopt jp_CLASS Identifier  */
-#line 621 "cmDependsJavaParser.y"
+#line 626 "cmDependsJavaParser.y"
 {
   yyGetParser->StartClass((yyvsp[0].str));
   jpElementStart(3);
   yyGetParser->DeallocateParserType(&((yyvsp[0].str)));
   jpCheckEmpty(3);
 }
-#line 3067 "cmDependsJavaParser.cxx"
+#line 3055 "cmDependsJavaParser.cxx"
     break;
 
   case 68: /* ClassDeclaration: ClassHeader ClassBody  */
-#line 631 "cmDependsJavaParser.y"
+#line 636 "cmDependsJavaParser.y"
 {
   jpElementStart(2);
+  jpCheckEmpty(2);
+  (yyval.str) = 0;
+  yyGetParser->SetCurrentCombine("");
+  yyGetParser->EndClass();
+}
+#line 3067 "cmDependsJavaParser.cxx"
+    break;
+
+  case 69: /* ClassDeclaration: ClassHeader Interfaces ClassBody  */
+#line 645 "cmDependsJavaParser.y"
+{
+  jpElementStart(3);
   jpCheckEmpty(2);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
@@ -3078,11 +3078,11 @@ yyreduce:
 #line 3079 "cmDependsJavaParser.cxx"
     break;
 
-  case 69: /* ClassDeclaration: ClassHeader Interfaces ClassBody  */
-#line 640 "cmDependsJavaParser.y"
+  case 70: /* ClassDeclaration: ClassHeader Super ClassBody  */
+#line 654 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
-  jpCheckEmpty(2);
+  jpCheckEmpty(3);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
   yyGetParser->EndClass();
@@ -3090,20 +3090,8 @@ yyreduce:
 #line 3091 "cmDependsJavaParser.cxx"
     break;
 
-  case 70: /* ClassDeclaration: ClassHeader Super ClassBody  */
-#line 649 "cmDependsJavaParser.y"
-{
-  jpElementStart(3);
-  jpCheckEmpty(3);
-  (yyval.str) = 0;
-  yyGetParser->SetCurrentCombine("");
-  yyGetParser->EndClass();
-}
-#line 3103 "cmDependsJavaParser.cxx"
-    break;
-
   case 71: /* ClassDeclaration: ClassHeader Super Interfaces ClassBody  */
-#line 658 "cmDependsJavaParser.y"
+#line 663 "cmDependsJavaParser.y"
 {
   jpElementStart(4);
   jpCheckEmpty(4);
@@ -3111,226 +3099,226 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
   yyGetParser->EndClass();
 }
-#line 3115 "cmDependsJavaParser.cxx"
+#line 3103 "cmDependsJavaParser.cxx"
     break;
 
   case 72: /* Modifiersopt: %empty  */
-#line 667 "cmDependsJavaParser.y"
+#line 672 "cmDependsJavaParser.y"
 {
   jpElementStart(0);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 3125 "cmDependsJavaParser.cxx"
+#line 3113 "cmDependsJavaParser.cxx"
     break;
 
   case 73: /* Modifiersopt: Modifiers  */
-#line 674 "cmDependsJavaParser.y"
+#line 679 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 3136 "cmDependsJavaParser.cxx"
+#line 3124 "cmDependsJavaParser.cxx"
     break;
 
   case 74: /* Super: jp_EXTENDS ClassType  */
-#line 683 "cmDependsJavaParser.y"
+#line 688 "cmDependsJavaParser.y"
 {
   jpElementStart(2);
   jpCheckEmpty(2);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 3147 "cmDependsJavaParser.cxx"
+#line 3135 "cmDependsJavaParser.cxx"
     break;
 
   case 75: /* Interfaces: jp_IMPLEMENTS InterfaceTypeList  */
-#line 692 "cmDependsJavaParser.y"
+#line 697 "cmDependsJavaParser.y"
 {
   jpElementStart(2);
   jpCheckEmpty(2);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 3158 "cmDependsJavaParser.cxx"
+#line 3146 "cmDependsJavaParser.cxx"
     break;
 
   case 76: /* InterfaceTypeList: InterfaceType  */
-#line 701 "cmDependsJavaParser.y"
+#line 706 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 3169 "cmDependsJavaParser.cxx"
+#line 3157 "cmDependsJavaParser.cxx"
     break;
 
   case 77: /* InterfaceTypeList: InterfaceTypeList jp_COMMA InterfaceType  */
-#line 709 "cmDependsJavaParser.y"
+#line 714 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   jpCheckEmpty(3);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 3180 "cmDependsJavaParser.cxx"
+#line 3168 "cmDependsJavaParser.cxx"
     break;
 
   case 78: /* ClassBody: jp_CURLYSTART ClassBodyDeclarations jp_CURLYEND  */
-#line 718 "cmDependsJavaParser.y"
+#line 723 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   jpCheckEmpty(3);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 3191 "cmDependsJavaParser.cxx"
+#line 3179 "cmDependsJavaParser.cxx"
     break;
 
   case 79: /* ClassBodyDeclarations: %empty  */
-#line 726 "cmDependsJavaParser.y"
+#line 731 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 3201 "cmDependsJavaParser.cxx"
+#line 3189 "cmDependsJavaParser.cxx"
     break;
 
   case 80: /* ClassBodyDeclarations: ClassBodyDeclarations ClassBodyDeclaration  */
-#line 733 "cmDependsJavaParser.y"
+#line 738 "cmDependsJavaParser.y"
 {
   jpElementStart(2);
   jpCheckEmpty(2);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 3212 "cmDependsJavaParser.cxx"
+#line 3200 "cmDependsJavaParser.cxx"
     break;
 
   case 81: /* ClassBodyDeclaration: ClassMemberDeclaration  */
-#line 742 "cmDependsJavaParser.y"
+#line 747 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 3223 "cmDependsJavaParser.cxx"
+#line 3211 "cmDependsJavaParser.cxx"
     break;
 
   case 82: /* ClassBodyDeclaration: StaticInitializer  */
-#line 750 "cmDependsJavaParser.y"
+#line 755 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 3234 "cmDependsJavaParser.cxx"
+#line 3222 "cmDependsJavaParser.cxx"
     break;
 
   case 83: /* ClassBodyDeclaration: ConstructorDeclaration  */
-#line 758 "cmDependsJavaParser.y"
+#line 763 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 3245 "cmDependsJavaParser.cxx"
+#line 3233 "cmDependsJavaParser.cxx"
     break;
 
   case 84: /* ClassBodyDeclaration: TypeDeclaration  */
-#line 766 "cmDependsJavaParser.y"
+#line 771 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 3256 "cmDependsJavaParser.cxx"
+#line 3244 "cmDependsJavaParser.cxx"
     break;
 
   case 85: /* ClassMemberDeclaration: FieldDeclaration  */
-#line 775 "cmDependsJavaParser.y"
+#line 780 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 3267 "cmDependsJavaParser.cxx"
+#line 3255 "cmDependsJavaParser.cxx"
     break;
 
   case 86: /* ClassMemberDeclaration: MethodDeclaration  */
-#line 783 "cmDependsJavaParser.y"
+#line 788 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 3278 "cmDependsJavaParser.cxx"
+#line 3266 "cmDependsJavaParser.cxx"
     break;
 
   case 87: /* FieldDeclaration: Modifiersopt Type VariableDeclarators jp_SEMICOL  */
-#line 792 "cmDependsJavaParser.y"
+#line 797 "cmDependsJavaParser.y"
 {
   jpElementStart(4);
 }
-#line 3286 "cmDependsJavaParser.cxx"
+#line 3274 "cmDependsJavaParser.cxx"
     break;
 
   case 88: /* VariableDeclarators: VariableDeclarator  */
-#line 798 "cmDependsJavaParser.y"
+#line 803 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 3297 "cmDependsJavaParser.cxx"
+#line 3285 "cmDependsJavaParser.cxx"
     break;
 
   case 89: /* VariableDeclarators: VariableDeclarators jp_COMMA VariableDeclarator  */
-#line 806 "cmDependsJavaParser.y"
+#line 811 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   jpCheckEmpty(3);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 3308 "cmDependsJavaParser.cxx"
+#line 3296 "cmDependsJavaParser.cxx"
     break;
 
   case 90: /* VariableDeclarator: VariableDeclaratorId  */
-#line 815 "cmDependsJavaParser.y"
+#line 820 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 3319 "cmDependsJavaParser.cxx"
+#line 3307 "cmDependsJavaParser.cxx"
     break;
 
   case 91: /* VariableDeclarator: VariableDeclaratorId jp_EQUALS VariableInitializer  */
-#line 823 "cmDependsJavaParser.y"
+#line 828 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   jpCheckEmpty(3);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 3330 "cmDependsJavaParser.cxx"
+#line 3318 "cmDependsJavaParser.cxx"
     break;
 
   case 92: /* VariableDeclaratorId: Identifier  */
-#line 832 "cmDependsJavaParser.y"
+#line 837 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   yyGetParser->DeallocateParserType(&((yyvsp[0].str)));
@@ -3338,77 +3326,89 @@ yyreduce:
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 3342 "cmDependsJavaParser.cxx"
+#line 3330 "cmDependsJavaParser.cxx"
     break;
 
   case 93: /* VariableDeclaratorId: VariableDeclaratorId jp_BRACKETSTART jp_BRACKETEND  */
-#line 841 "cmDependsJavaParser.y"
+#line 846 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 3353 "cmDependsJavaParser.cxx"
+#line 3341 "cmDependsJavaParser.cxx"
     break;
 
   case 94: /* VariableInitializer: Expression  */
-#line 850 "cmDependsJavaParser.y"
+#line 855 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 3364 "cmDependsJavaParser.cxx"
+#line 3352 "cmDependsJavaParser.cxx"
     break;
 
   case 95: /* VariableInitializer: ArrayInitializer  */
-#line 858 "cmDependsJavaParser.y"
+#line 863 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 3375 "cmDependsJavaParser.cxx"
+#line 3363 "cmDependsJavaParser.cxx"
     break;
 
   case 96: /* MethodDeclaration: MethodHeader jp_SEMICOL  */
-#line 867 "cmDependsJavaParser.y"
+#line 872 "cmDependsJavaParser.y"
 {
   jpElementStart(2);
   jpCheckEmpty(2);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 3386 "cmDependsJavaParser.cxx"
+#line 3374 "cmDependsJavaParser.cxx"
     break;
 
   case 97: /* MethodDeclaration: MethodHeader MethodBody  */
-#line 875 "cmDependsJavaParser.y"
+#line 880 "cmDependsJavaParser.y"
 {
   jpElementStart(2);
   jpCheckEmpty(2);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 3397 "cmDependsJavaParser.cxx"
+#line 3385 "cmDependsJavaParser.cxx"
     break;
 
   case 98: /* MethodDeclaration: MethodHeader MethodBody jp_SEMICOL  */
-#line 883 "cmDependsJavaParser.y"
+#line 888 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   jpCheckEmpty(3);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 3408 "cmDependsJavaParser.cxx"
+#line 3396 "cmDependsJavaParser.cxx"
     break;
 
   case 99: /* MethodHeader: Modifiersopt Type MethodDeclarator Throwsopt  */
-#line 892 "cmDependsJavaParser.y"
+#line 897 "cmDependsJavaParser.y"
+{
+  jpElementStart(4);
+  jpCheckEmpty(4);
+  (yyval.str) = 0;
+  yyGetParser->SetCurrentCombine("");
+
+}
+#line 3408 "cmDependsJavaParser.cxx"
+    break;
+
+  case 100: /* MethodHeader: Modifiersopt jp_VOID MethodDeclarator Throwsopt  */
+#line 906 "cmDependsJavaParser.y"
 {
   jpElementStart(4);
   jpCheckEmpty(4);
@@ -3419,31 +3419,19 @@ yyreduce:
 #line 3420 "cmDependsJavaParser.cxx"
     break;
 
-  case 100: /* MethodHeader: Modifiersopt jp_VOID MethodDeclarator Throwsopt  */
-#line 901 "cmDependsJavaParser.y"
-{
-  jpElementStart(4);
-  jpCheckEmpty(4);
-  (yyval.str) = 0;
-  yyGetParser->SetCurrentCombine("");
-
-}
-#line 3432 "cmDependsJavaParser.cxx"
-    break;
-
   case 101: /* Throwsopt: %empty  */
-#line 910 "cmDependsJavaParser.y"
+#line 915 "cmDependsJavaParser.y"
 {
   jpElementStart(0);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 3443 "cmDependsJavaParser.cxx"
+#line 3431 "cmDependsJavaParser.cxx"
     break;
 
   case 102: /* Throwsopt: Throws  */
-#line 918 "cmDependsJavaParser.y"
+#line 923 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -3451,11 +3439,11 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 3455 "cmDependsJavaParser.cxx"
+#line 3443 "cmDependsJavaParser.cxx"
     break;
 
   case 103: /* MethodDeclarator: Identifier jp_PARESTART FormalParameterListopt jp_PAREEND  */
-#line 928 "cmDependsJavaParser.y"
+#line 933 "cmDependsJavaParser.y"
 {
   jpElementStart(4);
   yyGetParser->DeallocateParserType(&((yyvsp[-3].str)));
@@ -3464,40 +3452,52 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 3468 "cmDependsJavaParser.cxx"
+#line 3456 "cmDependsJavaParser.cxx"
     break;
 
   case 104: /* MethodDeclarator: MethodDeclarator jp_BRACKETSTART jp_BRACKETEND  */
-#line 938 "cmDependsJavaParser.y"
+#line 943 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
 
 }
-#line 3477 "cmDependsJavaParser.cxx"
+#line 3465 "cmDependsJavaParser.cxx"
     break;
 
   case 105: /* FormalParameterListopt: %empty  */
-#line 944 "cmDependsJavaParser.y"
+#line 949 "cmDependsJavaParser.y"
 {
   jpElementStart(0);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 3488 "cmDependsJavaParser.cxx"
+#line 3476 "cmDependsJavaParser.cxx"
     break;
 
   case 107: /* FormalParameterList: FormalParameter  */
-#line 955 "cmDependsJavaParser.y"
+#line 960 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
+
+}
+#line 3485 "cmDependsJavaParser.cxx"
+    break;
+
+  case 108: /* FormalParameterList: FormalParameterList jp_COMMA FormalParameter  */
+#line 966 "cmDependsJavaParser.y"
+{
+  jpElementStart(3);
+  jpCheckEmpty(3);
+  (yyval.str) = 0;
+  yyGetParser->SetCurrentCombine("");
 
 }
 #line 3497 "cmDependsJavaParser.cxx"
     break;
 
-  case 108: /* FormalParameterList: FormalParameterList jp_COMMA FormalParameter  */
-#line 961 "cmDependsJavaParser.y"
+  case 109: /* FormalParameter: Modifiersopt Type VariableDeclaratorId  */
+#line 976 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   jpCheckEmpty(3);
@@ -3508,11 +3508,11 @@ yyreduce:
 #line 3509 "cmDependsJavaParser.cxx"
     break;
 
-  case 109: /* FormalParameter: Modifiersopt Type VariableDeclaratorId  */
-#line 971 "cmDependsJavaParser.y"
+  case 110: /* Throws: jp_THROWS ClassTypeList  */
+#line 986 "cmDependsJavaParser.y"
 {
-  jpElementStart(3);
-  jpCheckEmpty(3);
+  jpElementStart(2);
+  jpCheckEmpty(2);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -3520,29 +3520,17 @@ yyreduce:
 #line 3521 "cmDependsJavaParser.cxx"
     break;
 
-  case 110: /* Throws: jp_THROWS ClassTypeList  */
-#line 981 "cmDependsJavaParser.y"
-{
-  jpElementStart(2);
-  jpCheckEmpty(2);
-  (yyval.str) = 0;
-  yyGetParser->SetCurrentCombine("");
-
-}
-#line 3533 "cmDependsJavaParser.cxx"
-    break;
-
   case 111: /* ClassTypeList: ClassType  */
-#line 991 "cmDependsJavaParser.y"
+#line 996 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
 
 }
-#line 3542 "cmDependsJavaParser.cxx"
+#line 3530 "cmDependsJavaParser.cxx"
     break;
 
   case 112: /* ClassTypeList: ClassTypeList jp_COMMA ClassType  */
-#line 997 "cmDependsJavaParser.y"
+#line 1002 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   jpCheckEmpty(3);
@@ -3550,11 +3538,11 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 3554 "cmDependsJavaParser.cxx"
+#line 3542 "cmDependsJavaParser.cxx"
     break;
 
   case 113: /* MethodBody: Block  */
-#line 1007 "cmDependsJavaParser.y"
+#line 1012 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -3562,11 +3550,11 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 3566 "cmDependsJavaParser.cxx"
+#line 3554 "cmDependsJavaParser.cxx"
     break;
 
   case 114: /* StaticInitializer: jp_STATIC Block  */
-#line 1017 "cmDependsJavaParser.y"
+#line 1022 "cmDependsJavaParser.y"
 {
   jpElementStart(2);
   jpCheckEmpty(2);
@@ -3574,11 +3562,11 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 3578 "cmDependsJavaParser.cxx"
+#line 3566 "cmDependsJavaParser.cxx"
     break;
 
   case 115: /* ConstructorDeclaration: Modifiersopt ConstructorDeclarator Throwsopt ConstructorBody  */
-#line 1027 "cmDependsJavaParser.y"
+#line 1032 "cmDependsJavaParser.y"
 {
   jpElementStart(4);
   jpCheckEmpty(4);
@@ -3586,11 +3574,11 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 3590 "cmDependsJavaParser.cxx"
+#line 3578 "cmDependsJavaParser.cxx"
     break;
 
   case 116: /* ConstructorDeclaration: Modifiersopt ConstructorDeclarator Throwsopt ConstructorBody jp_SEMICOL  */
-#line 1036 "cmDependsJavaParser.y"
+#line 1041 "cmDependsJavaParser.y"
 {
   jpElementStart(5);
   jpCheckEmpty(5);
@@ -3598,11 +3586,11 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 3602 "cmDependsJavaParser.cxx"
+#line 3590 "cmDependsJavaParser.cxx"
     break;
 
   case 117: /* ConstructorDeclarator: SimpleName jp_PARESTART FormalParameterListopt jp_PAREEND  */
-#line 1046 "cmDependsJavaParser.y"
+#line 1051 "cmDependsJavaParser.y"
 {
   jpElementStart(4);
   yyGetParser->DeallocateParserType(&((yyvsp[-3].str)));
@@ -3611,11 +3599,11 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 3615 "cmDependsJavaParser.cxx"
+#line 3603 "cmDependsJavaParser.cxx"
     break;
 
   case 118: /* ConstructorBody: jp_CURLYSTART ExplicitConstructorInvocationopt BlockStatementsopt jp_CURLYEND  */
-#line 1057 "cmDependsJavaParser.y"
+#line 1062 "cmDependsJavaParser.y"
 {
   jpElementStart(4);
   jpCheckEmpty(4);
@@ -3623,22 +3611,22 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 3627 "cmDependsJavaParser.cxx"
+#line 3615 "cmDependsJavaParser.cxx"
     break;
 
   case 119: /* ExplicitConstructorInvocationopt: %empty  */
-#line 1066 "cmDependsJavaParser.y"
+#line 1071 "cmDependsJavaParser.y"
 {
   jpElementStart(0);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 3638 "cmDependsJavaParser.cxx"
+#line 3626 "cmDependsJavaParser.cxx"
     break;
 
   case 120: /* ExplicitConstructorInvocationopt: ExplicitConstructorInvocationopt ExplicitConstructorInvocation  */
-#line 1074 "cmDependsJavaParser.y"
+#line 1079 "cmDependsJavaParser.y"
 {
   jpElementStart(2);
   jpCheckEmpty(2);
@@ -3646,11 +3634,23 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 3650 "cmDependsJavaParser.cxx"
+#line 3638 "cmDependsJavaParser.cxx"
     break;
 
   case 121: /* ExplicitConstructorInvocation: jp_THIS jp_PARESTART ArgumentListopt jp_PAREEND jp_SEMICOL  */
-#line 1084 "cmDependsJavaParser.y"
+#line 1089 "cmDependsJavaParser.y"
+{
+  jpElementStart(5);
+  jpCheckEmpty(5);
+  (yyval.str) = 0;
+  yyGetParser->SetCurrentCombine("");
+
+}
+#line 3650 "cmDependsJavaParser.cxx"
+    break;
+
+  case 122: /* ExplicitConstructorInvocation: jp_SUPER jp_PARESTART ArgumentListopt jp_PAREEND jp_SEMICOL  */
+#line 1098 "cmDependsJavaParser.y"
 {
   jpElementStart(5);
   jpCheckEmpty(5);
@@ -3661,31 +3661,19 @@ yyreduce:
 #line 3662 "cmDependsJavaParser.cxx"
     break;
 
-  case 122: /* ExplicitConstructorInvocation: jp_SUPER jp_PARESTART ArgumentListopt jp_PAREEND jp_SEMICOL  */
-#line 1093 "cmDependsJavaParser.y"
-{
-  jpElementStart(5);
-  jpCheckEmpty(5);
-  (yyval.str) = 0;
-  yyGetParser->SetCurrentCombine("");
-
-}
-#line 3674 "cmDependsJavaParser.cxx"
-    break;
-
   case 123: /* InterfaceHeader: Modifiersopt jp_INTERFACE Identifier  */
-#line 1103 "cmDependsJavaParser.y"
+#line 1108 "cmDependsJavaParser.y"
 {
   yyGetParser->StartClass((yyvsp[0].str));
   jpElementStart(3);
   yyGetParser->DeallocateParserType(&((yyvsp[0].str)));
   jpCheckEmpty(3);
 }
-#line 3685 "cmDependsJavaParser.cxx"
+#line 3673 "cmDependsJavaParser.cxx"
     break;
 
   case 124: /* InterfaceDeclaration: InterfaceHeader ExtendsInterfacesopt InterfaceBody  */
-#line 1112 "cmDependsJavaParser.y"
+#line 1117 "cmDependsJavaParser.y"
 {
   jpElementStart(2);
   jpCheckEmpty(2);
@@ -3693,21 +3681,21 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
   yyGetParser->EndClass();
 }
-#line 3697 "cmDependsJavaParser.cxx"
+#line 3685 "cmDependsJavaParser.cxx"
     break;
 
   case 125: /* ExtendsInterfacesopt: %empty  */
-#line 1121 "cmDependsJavaParser.y"
+#line 1126 "cmDependsJavaParser.y"
 {
   jpElementStart(0);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 }
-#line 3707 "cmDependsJavaParser.cxx"
+#line 3695 "cmDependsJavaParser.cxx"
     break;
 
   case 126: /* ExtendsInterfacesopt: ExtendsInterfaces  */
-#line 1128 "cmDependsJavaParser.y"
+#line 1133 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -3715,11 +3703,11 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 3719 "cmDependsJavaParser.cxx"
+#line 3707 "cmDependsJavaParser.cxx"
     break;
 
   case 127: /* ExtendsInterfaces: jp_EXTENDS InterfaceType  */
-#line 1138 "cmDependsJavaParser.y"
+#line 1143 "cmDependsJavaParser.y"
 {
   jpElementStart(2);
   jpCheckEmpty(2);
@@ -3727,11 +3715,23 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 3731 "cmDependsJavaParser.cxx"
+#line 3719 "cmDependsJavaParser.cxx"
     break;
 
   case 128: /* ExtendsInterfaces: ExtendsInterfaces jp_COMMA InterfaceType  */
-#line 1147 "cmDependsJavaParser.y"
+#line 1152 "cmDependsJavaParser.y"
+{
+  jpElementStart(3);
+  jpCheckEmpty(3);
+  (yyval.str) = 0;
+  yyGetParser->SetCurrentCombine("");
+
+}
+#line 3731 "cmDependsJavaParser.cxx"
+    break;
+
+  case 129: /* InterfaceBody: jp_CURLYSTART InterfaceMemberDeclarations jp_CURLYEND  */
+#line 1162 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   jpCheckEmpty(3);
@@ -3742,33 +3742,33 @@ yyreduce:
 #line 3743 "cmDependsJavaParser.cxx"
     break;
 
-  case 129: /* InterfaceBody: jp_CURLYSTART InterfaceMemberDeclarations jp_CURLYEND  */
-#line 1157 "cmDependsJavaParser.y"
-{
-  jpElementStart(3);
-  jpCheckEmpty(3);
-  (yyval.str) = 0;
-  yyGetParser->SetCurrentCombine("");
-
-}
-#line 3755 "cmDependsJavaParser.cxx"
-    break;
-
   case 130: /* InterfaceMemberDeclarations: %empty  */
-#line 1166 "cmDependsJavaParser.y"
+#line 1171 "cmDependsJavaParser.y"
 {
   jpElementStart(0);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 3766 "cmDependsJavaParser.cxx"
+#line 3754 "cmDependsJavaParser.cxx"
     break;
 
   case 131: /* InterfaceMemberDeclarations: InterfaceMemberDeclarations InterfaceMemberDeclaration  */
-#line 1174 "cmDependsJavaParser.y"
+#line 1179 "cmDependsJavaParser.y"
 {
   jpElementStart(2);
+  (yyval.str) = 0;
+  yyGetParser->SetCurrentCombine("");
+
+}
+#line 3765 "cmDependsJavaParser.cxx"
+    break;
+
+  case 132: /* InterfaceMemberDeclaration: ConstantDeclaration  */
+#line 1188 "cmDependsJavaParser.y"
+{
+  jpElementStart(1);
+  jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -3776,8 +3776,8 @@ yyreduce:
 #line 3777 "cmDependsJavaParser.cxx"
     break;
 
-  case 132: /* InterfaceMemberDeclaration: ConstantDeclaration  */
-#line 1183 "cmDependsJavaParser.y"
+  case 133: /* InterfaceMemberDeclaration: AbstractMethodDeclaration  */
+#line 1197 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -3788,8 +3788,8 @@ yyreduce:
 #line 3789 "cmDependsJavaParser.cxx"
     break;
 
-  case 133: /* InterfaceMemberDeclaration: AbstractMethodDeclaration  */
-#line 1192 "cmDependsJavaParser.y"
+  case 134: /* InterfaceMemberDeclaration: ClassDeclaration  */
+#line 1206 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -3800,22 +3800,22 @@ yyreduce:
 #line 3801 "cmDependsJavaParser.cxx"
     break;
 
-  case 134: /* InterfaceMemberDeclaration: ClassDeclaration  */
-#line 1201 "cmDependsJavaParser.y"
+  case 135: /* InterfaceMemberDeclaration: ClassDeclaration jp_SEMICOL  */
+#line 1215 "cmDependsJavaParser.y"
 {
-  jpElementStart(1);
-  jpCheckEmpty(1);
+  jpElementStart(2);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 3813 "cmDependsJavaParser.cxx"
+#line 3812 "cmDependsJavaParser.cxx"
     break;
 
-  case 135: /* InterfaceMemberDeclaration: ClassDeclaration jp_SEMICOL  */
-#line 1210 "cmDependsJavaParser.y"
+  case 136: /* InterfaceMemberDeclaration: InterfaceDeclaration  */
+#line 1223 "cmDependsJavaParser.y"
 {
-  jpElementStart(2);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -3823,22 +3823,22 @@ yyreduce:
 #line 3824 "cmDependsJavaParser.cxx"
     break;
 
-  case 136: /* InterfaceMemberDeclaration: InterfaceDeclaration  */
-#line 1218 "cmDependsJavaParser.y"
+  case 137: /* InterfaceMemberDeclaration: InterfaceDeclaration jp_SEMICOL  */
+#line 1232 "cmDependsJavaParser.y"
 {
-  jpElementStart(1);
-  jpCheckEmpty(1);
+  jpElementStart(2);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 3836 "cmDependsJavaParser.cxx"
+#line 3835 "cmDependsJavaParser.cxx"
     break;
 
-  case 137: /* InterfaceMemberDeclaration: InterfaceDeclaration jp_SEMICOL  */
-#line 1227 "cmDependsJavaParser.y"
+  case 138: /* ConstantDeclaration: FieldDeclaration  */
+#line 1241 "cmDependsJavaParser.y"
 {
-  jpElementStart(2);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -3846,11 +3846,11 @@ yyreduce:
 #line 3847 "cmDependsJavaParser.cxx"
     break;
 
-  case 138: /* ConstantDeclaration: FieldDeclaration  */
-#line 1236 "cmDependsJavaParser.y"
+  case 139: /* AbstractMethodDeclaration: MethodHeader Semicols  */
+#line 1251 "cmDependsJavaParser.y"
 {
-  jpElementStart(1);
-  jpCheckEmpty(1);
+  jpElementStart(2);
+  jpCheckEmpty(2);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -3858,11 +3858,11 @@ yyreduce:
 #line 3859 "cmDependsJavaParser.cxx"
     break;
 
-  case 139: /* AbstractMethodDeclaration: MethodHeader Semicols  */
-#line 1246 "cmDependsJavaParser.y"
+  case 140: /* Semicols: jp_SEMICOL  */
+#line 1261 "cmDependsJavaParser.y"
 {
-  jpElementStart(2);
-  jpCheckEmpty(2);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -3870,11 +3870,11 @@ yyreduce:
 #line 3871 "cmDependsJavaParser.cxx"
     break;
 
-  case 140: /* Semicols: jp_SEMICOL  */
-#line 1256 "cmDependsJavaParser.y"
+  case 141: /* Semicols: Semicols jp_SEMICOL  */
+#line 1270 "cmDependsJavaParser.y"
 {
-  jpElementStart(1);
-  jpCheckEmpty(1);
+  jpElementStart(2);
+  jpCheckEmpty(2);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -3882,11 +3882,11 @@ yyreduce:
 #line 3883 "cmDependsJavaParser.cxx"
     break;
 
-  case 141: /* Semicols: Semicols jp_SEMICOL  */
-#line 1265 "cmDependsJavaParser.y"
+  case 142: /* ArrayInitializer: jp_CURLYSTART VariableInitializersOptional jp_CURLYEND  */
+#line 1280 "cmDependsJavaParser.y"
 {
-  jpElementStart(2);
-  jpCheckEmpty(2);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -3894,22 +3894,22 @@ yyreduce:
 #line 3895 "cmDependsJavaParser.cxx"
     break;
 
-  case 142: /* ArrayInitializer: jp_CURLYSTART VariableInitializersOptional jp_CURLYEND  */
-#line 1275 "cmDependsJavaParser.y"
+  case 143: /* VariableInitializersOptional: %empty  */
+#line 1289 "cmDependsJavaParser.y"
 {
-  jpElementStart(3);
-  jpCheckEmpty(3);
+  jpElementStart(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 3907 "cmDependsJavaParser.cxx"
+#line 3906 "cmDependsJavaParser.cxx"
     break;
 
-  case 143: /* VariableInitializersOptional: %empty  */
-#line 1284 "cmDependsJavaParser.y"
+  case 144: /* VariableInitializersOptional: VariableInitializers  */
+#line 1297 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
+  jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -3917,20 +3917,8 @@ yyreduce:
 #line 3918 "cmDependsJavaParser.cxx"
     break;
 
-  case 144: /* VariableInitializersOptional: VariableInitializers  */
-#line 1292 "cmDependsJavaParser.y"
-{
-  jpElementStart(1);
-  jpCheckEmpty(1);
-  (yyval.str) = 0;
-  yyGetParser->SetCurrentCombine("");
-
-}
-#line 3930 "cmDependsJavaParser.cxx"
-    break;
-
   case 145: /* VariableInitializersOptional: VariableInitializers jp_COMMA  */
-#line 1301 "cmDependsJavaParser.y"
+#line 1306 "cmDependsJavaParser.y"
 {
   jpElementStart(2);
   jpCheckEmpty(2);
@@ -3938,11 +3926,11 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 3942 "cmDependsJavaParser.cxx"
+#line 3930 "cmDependsJavaParser.cxx"
     break;
 
   case 146: /* VariableInitializers: VariableInitializer  */
-#line 1311 "cmDependsJavaParser.y"
+#line 1316 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -3950,11 +3938,11 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 3954 "cmDependsJavaParser.cxx"
+#line 3942 "cmDependsJavaParser.cxx"
     break;
 
   case 147: /* VariableInitializers: VariableInitializers jp_COMMA VariableInitializer  */
-#line 1320 "cmDependsJavaParser.y"
+#line 1325 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   jpCheckEmpty(3);
@@ -3962,24 +3950,36 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 3966 "cmDependsJavaParser.cxx"
+#line 3954 "cmDependsJavaParser.cxx"
     break;
 
   case 148: /* Block: jp_CURLYSTART BlockStatementsopt jp_CURLYEND  */
-#line 1330 "cmDependsJavaParser.y"
+#line 1335 "cmDependsJavaParser.y"
 {
   jpElementStart(4);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 3977 "cmDependsJavaParser.cxx"
+#line 3965 "cmDependsJavaParser.cxx"
     break;
 
   case 149: /* BlockStatementsopt: %empty  */
-#line 1338 "cmDependsJavaParser.y"
+#line 1343 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
+  (yyval.str) = 0;
+  yyGetParser->SetCurrentCombine("");
+
+}
+#line 3976 "cmDependsJavaParser.cxx"
+    break;
+
+  case 150: /* BlockStatementsopt: BlockStatements  */
+#line 1351 "cmDependsJavaParser.y"
+{
+  jpElementStart(1);
+  jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -3987,8 +3987,8 @@ yyreduce:
 #line 3988 "cmDependsJavaParser.cxx"
     break;
 
-  case 150: /* BlockStatementsopt: BlockStatements  */
-#line 1346 "cmDependsJavaParser.y"
+  case 151: /* BlockStatements: BlockStatement  */
+#line 1361 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -3999,20 +3999,8 @@ yyreduce:
 #line 4000 "cmDependsJavaParser.cxx"
     break;
 
-  case 151: /* BlockStatements: BlockStatement  */
-#line 1356 "cmDependsJavaParser.y"
-{
-  jpElementStart(1);
-  jpCheckEmpty(1);
-  (yyval.str) = 0;
-  yyGetParser->SetCurrentCombine("");
-
-}
-#line 4012 "cmDependsJavaParser.cxx"
-    break;
-
   case 152: /* BlockStatements: BlockStatements BlockStatement  */
-#line 1365 "cmDependsJavaParser.y"
+#line 1370 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(2);
@@ -4020,11 +4008,23 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 4024 "cmDependsJavaParser.cxx"
+#line 4012 "cmDependsJavaParser.cxx"
     break;
 
   case 153: /* BlockStatement: LocalVariableDeclarationStatement  */
-#line 1375 "cmDependsJavaParser.y"
+#line 1380 "cmDependsJavaParser.y"
+{
+  jpElementStart(1);
+  jpCheckEmpty(1);
+  (yyval.str) = 0;
+  yyGetParser->SetCurrentCombine("");
+
+}
+#line 4024 "cmDependsJavaParser.cxx"
+    break;
+
+  case 154: /* BlockStatement: Statement  */
+#line 1389 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -4035,8 +4035,8 @@ yyreduce:
 #line 4036 "cmDependsJavaParser.cxx"
     break;
 
-  case 154: /* BlockStatement: Statement  */
-#line 1384 "cmDependsJavaParser.y"
+  case 155: /* BlockStatement: ClassDeclaration  */
+#line 1398 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -4047,11 +4047,11 @@ yyreduce:
 #line 4048 "cmDependsJavaParser.cxx"
     break;
 
-  case 155: /* BlockStatement: ClassDeclaration  */
-#line 1393 "cmDependsJavaParser.y"
+  case 156: /* LocalVariableDeclarationStatement: LocalVariableDeclaration jp_SEMICOL  */
+#line 1408 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
-  jpCheckEmpty(1);
+  jpCheckEmpty(2);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -4059,20 +4059,8 @@ yyreduce:
 #line 4060 "cmDependsJavaParser.cxx"
     break;
 
-  case 156: /* LocalVariableDeclarationStatement: LocalVariableDeclaration jp_SEMICOL  */
-#line 1403 "cmDependsJavaParser.y"
-{
-  jpElementStart(1);
-  jpCheckEmpty(2);
-  (yyval.str) = 0;
-  yyGetParser->SetCurrentCombine("");
-
-}
-#line 4072 "cmDependsJavaParser.cxx"
-    break;
-
   case 157: /* LocalVariableDeclaration: Modifiers Type VariableDeclarators  */
-#line 1413 "cmDependsJavaParser.y"
+#line 1418 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(3);
@@ -4080,11 +4068,11 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 4084 "cmDependsJavaParser.cxx"
+#line 4072 "cmDependsJavaParser.cxx"
     break;
 
   case 158: /* LocalVariableDeclaration: Type VariableDeclarators  */
-#line 1422 "cmDependsJavaParser.y"
+#line 1427 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(2);
@@ -4092,11 +4080,23 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 4096 "cmDependsJavaParser.cxx"
+#line 4084 "cmDependsJavaParser.cxx"
     break;
 
   case 159: /* Statement: StatementWithoutTrailingSubstatement  */
-#line 1432 "cmDependsJavaParser.y"
+#line 1437 "cmDependsJavaParser.y"
+{
+  jpElementStart(1);
+  jpCheckEmpty(1);
+  (yyval.str) = 0;
+  yyGetParser->SetCurrentCombine("");
+
+}
+#line 4096 "cmDependsJavaParser.cxx"
+    break;
+
+  case 160: /* Statement: LabeledStatement  */
+#line 1446 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -4107,8 +4107,8 @@ yyreduce:
 #line 4108 "cmDependsJavaParser.cxx"
     break;
 
-  case 160: /* Statement: LabeledStatement  */
-#line 1441 "cmDependsJavaParser.y"
+  case 161: /* Statement: IfThenStatement  */
+#line 1455 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -4119,8 +4119,8 @@ yyreduce:
 #line 4120 "cmDependsJavaParser.cxx"
     break;
 
-  case 161: /* Statement: IfThenStatement  */
-#line 1450 "cmDependsJavaParser.y"
+  case 162: /* Statement: IfThenElseStatement  */
+#line 1464 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -4131,8 +4131,8 @@ yyreduce:
 #line 4132 "cmDependsJavaParser.cxx"
     break;
 
-  case 162: /* Statement: IfThenElseStatement  */
-#line 1459 "cmDependsJavaParser.y"
+  case 163: /* Statement: WhileStatement  */
+#line 1473 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -4143,8 +4143,8 @@ yyreduce:
 #line 4144 "cmDependsJavaParser.cxx"
     break;
 
-  case 163: /* Statement: WhileStatement  */
-#line 1468 "cmDependsJavaParser.y"
+  case 164: /* Statement: ForStatement  */
+#line 1482 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -4155,8 +4155,8 @@ yyreduce:
 #line 4156 "cmDependsJavaParser.cxx"
     break;
 
-  case 164: /* Statement: ForStatement  */
-#line 1477 "cmDependsJavaParser.y"
+  case 165: /* StatementNoShortIf: StatementWithoutTrailingSubstatement  */
+#line 1492 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -4167,8 +4167,8 @@ yyreduce:
 #line 4168 "cmDependsJavaParser.cxx"
     break;
 
-  case 165: /* StatementNoShortIf: StatementWithoutTrailingSubstatement  */
-#line 1487 "cmDependsJavaParser.y"
+  case 166: /* StatementNoShortIf: LabeledStatementNoShortIf  */
+#line 1501 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -4179,8 +4179,8 @@ yyreduce:
 #line 4180 "cmDependsJavaParser.cxx"
     break;
 
-  case 166: /* StatementNoShortIf: LabeledStatementNoShortIf  */
-#line 1496 "cmDependsJavaParser.y"
+  case 167: /* StatementNoShortIf: IfThenElseStatementNoShortIf  */
+#line 1510 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -4191,8 +4191,8 @@ yyreduce:
 #line 4192 "cmDependsJavaParser.cxx"
     break;
 
-  case 167: /* StatementNoShortIf: IfThenElseStatementNoShortIf  */
-#line 1505 "cmDependsJavaParser.y"
+  case 168: /* StatementNoShortIf: WhileStatementNoShortIf  */
+#line 1519 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -4203,8 +4203,8 @@ yyreduce:
 #line 4204 "cmDependsJavaParser.cxx"
     break;
 
-  case 168: /* StatementNoShortIf: WhileStatementNoShortIf  */
-#line 1514 "cmDependsJavaParser.y"
+  case 169: /* StatementNoShortIf: ForStatementNoShortIf  */
+#line 1528 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -4215,8 +4215,8 @@ yyreduce:
 #line 4216 "cmDependsJavaParser.cxx"
     break;
 
-  case 169: /* StatementNoShortIf: ForStatementNoShortIf  */
-#line 1523 "cmDependsJavaParser.y"
+  case 170: /* StatementWithoutTrailingSubstatement: Block  */
+#line 1538 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -4227,8 +4227,8 @@ yyreduce:
 #line 4228 "cmDependsJavaParser.cxx"
     break;
 
-  case 170: /* StatementWithoutTrailingSubstatement: Block  */
-#line 1533 "cmDependsJavaParser.y"
+  case 171: /* StatementWithoutTrailingSubstatement: EmptyStatement  */
+#line 1547 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -4239,8 +4239,8 @@ yyreduce:
 #line 4240 "cmDependsJavaParser.cxx"
     break;
 
-  case 171: /* StatementWithoutTrailingSubstatement: EmptyStatement  */
-#line 1542 "cmDependsJavaParser.y"
+  case 172: /* StatementWithoutTrailingSubstatement: ExpressionStatement  */
+#line 1556 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -4251,8 +4251,8 @@ yyreduce:
 #line 4252 "cmDependsJavaParser.cxx"
     break;
 
-  case 172: /* StatementWithoutTrailingSubstatement: ExpressionStatement  */
-#line 1551 "cmDependsJavaParser.y"
+  case 173: /* StatementWithoutTrailingSubstatement: SwitchStatement  */
+#line 1565 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -4263,8 +4263,8 @@ yyreduce:
 #line 4264 "cmDependsJavaParser.cxx"
     break;
 
-  case 173: /* StatementWithoutTrailingSubstatement: SwitchStatement  */
-#line 1560 "cmDependsJavaParser.y"
+  case 174: /* StatementWithoutTrailingSubstatement: DoStatement  */
+#line 1574 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -4275,8 +4275,8 @@ yyreduce:
 #line 4276 "cmDependsJavaParser.cxx"
     break;
 
-  case 174: /* StatementWithoutTrailingSubstatement: DoStatement  */
-#line 1569 "cmDependsJavaParser.y"
+  case 175: /* StatementWithoutTrailingSubstatement: BreakStatement  */
+#line 1583 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -4287,8 +4287,8 @@ yyreduce:
 #line 4288 "cmDependsJavaParser.cxx"
     break;
 
-  case 175: /* StatementWithoutTrailingSubstatement: BreakStatement  */
-#line 1578 "cmDependsJavaParser.y"
+  case 176: /* StatementWithoutTrailingSubstatement: ContinueStatement  */
+#line 1592 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -4299,8 +4299,8 @@ yyreduce:
 #line 4300 "cmDependsJavaParser.cxx"
     break;
 
-  case 176: /* StatementWithoutTrailingSubstatement: ContinueStatement  */
-#line 1587 "cmDependsJavaParser.y"
+  case 177: /* StatementWithoutTrailingSubstatement: ReturnStatement  */
+#line 1601 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -4311,8 +4311,8 @@ yyreduce:
 #line 4312 "cmDependsJavaParser.cxx"
     break;
 
-  case 177: /* StatementWithoutTrailingSubstatement: ReturnStatement  */
-#line 1596 "cmDependsJavaParser.y"
+  case 178: /* StatementWithoutTrailingSubstatement: SynchronizedStatement  */
+#line 1610 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -4323,8 +4323,8 @@ yyreduce:
 #line 4324 "cmDependsJavaParser.cxx"
     break;
 
-  case 178: /* StatementWithoutTrailingSubstatement: SynchronizedStatement  */
-#line 1605 "cmDependsJavaParser.y"
+  case 179: /* StatementWithoutTrailingSubstatement: ThrowStatement  */
+#line 1619 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -4335,8 +4335,8 @@ yyreduce:
 #line 4336 "cmDependsJavaParser.cxx"
     break;
 
-  case 179: /* StatementWithoutTrailingSubstatement: ThrowStatement  */
-#line 1614 "cmDependsJavaParser.y"
+  case 180: /* StatementWithoutTrailingSubstatement: TryStatement  */
+#line 1628 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -4347,8 +4347,8 @@ yyreduce:
 #line 4348 "cmDependsJavaParser.cxx"
     break;
 
-  case 180: /* StatementWithoutTrailingSubstatement: TryStatement  */
-#line 1623 "cmDependsJavaParser.y"
+  case 181: /* StatementWithoutTrailingSubstatement: AssertStatement  */
+#line 1637 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -4359,8 +4359,8 @@ yyreduce:
 #line 4360 "cmDependsJavaParser.cxx"
     break;
 
-  case 181: /* StatementWithoutTrailingSubstatement: AssertStatement  */
-#line 1632 "cmDependsJavaParser.y"
+  case 182: /* EmptyStatement: jp_SEMICOL  */
+#line 1647 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -4371,20 +4371,8 @@ yyreduce:
 #line 4372 "cmDependsJavaParser.cxx"
     break;
 
-  case 182: /* EmptyStatement: jp_SEMICOL  */
-#line 1642 "cmDependsJavaParser.y"
-{
-  jpElementStart(1);
-  jpCheckEmpty(1);
-  (yyval.str) = 0;
-  yyGetParser->SetCurrentCombine("");
-
-}
-#line 4384 "cmDependsJavaParser.cxx"
-    break;
-
   case 183: /* LabeledStatement: Identifier jp_COLON Statement  */
-#line 1652 "cmDependsJavaParser.y"
+#line 1657 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   yyGetParser->DeallocateParserType(&((yyvsp[-2].str)));
@@ -4393,11 +4381,11 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 4397 "cmDependsJavaParser.cxx"
+#line 4385 "cmDependsJavaParser.cxx"
     break;
 
   case 184: /* LabeledStatementNoShortIf: Identifier jp_COLON StatementNoShortIf  */
-#line 1663 "cmDependsJavaParser.y"
+#line 1668 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   jpCheckEmpty(3);
@@ -4405,11 +4393,11 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 4409 "cmDependsJavaParser.cxx"
+#line 4397 "cmDependsJavaParser.cxx"
     break;
 
   case 185: /* ExpressionStatement: StatementExpression jp_SEMICOL  */
-#line 1673 "cmDependsJavaParser.y"
+#line 1678 "cmDependsJavaParser.y"
 {
   jpElementStart(2);
   jpCheckEmpty(2);
@@ -4417,11 +4405,23 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 4421 "cmDependsJavaParser.cxx"
+#line 4409 "cmDependsJavaParser.cxx"
     break;
 
   case 186: /* StatementExpression: Assignment  */
-#line 1683 "cmDependsJavaParser.y"
+#line 1688 "cmDependsJavaParser.y"
+{
+  jpElementStart(1);
+  jpCheckEmpty(1);
+  (yyval.str) = 0;
+  yyGetParser->SetCurrentCombine("");
+
+}
+#line 4421 "cmDependsJavaParser.cxx"
+    break;
+
+  case 187: /* StatementExpression: PreIncrementExpression  */
+#line 1697 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -4432,8 +4432,8 @@ yyreduce:
 #line 4433 "cmDependsJavaParser.cxx"
     break;
 
-  case 187: /* StatementExpression: PreIncrementExpression  */
-#line 1692 "cmDependsJavaParser.y"
+  case 188: /* StatementExpression: PreDecrementExpression  */
+#line 1706 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -4444,8 +4444,8 @@ yyreduce:
 #line 4445 "cmDependsJavaParser.cxx"
     break;
 
-  case 188: /* StatementExpression: PreDecrementExpression  */
-#line 1701 "cmDependsJavaParser.y"
+  case 189: /* StatementExpression: PostIncrementExpression  */
+#line 1715 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -4456,8 +4456,8 @@ yyreduce:
 #line 4457 "cmDependsJavaParser.cxx"
     break;
 
-  case 189: /* StatementExpression: PostIncrementExpression  */
-#line 1710 "cmDependsJavaParser.y"
+  case 190: /* StatementExpression: PostDecrementExpression  */
+#line 1724 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -4468,8 +4468,8 @@ yyreduce:
 #line 4469 "cmDependsJavaParser.cxx"
     break;
 
-  case 190: /* StatementExpression: PostDecrementExpression  */
-#line 1719 "cmDependsJavaParser.y"
+  case 191: /* StatementExpression: MethodInvocation  */
+#line 1733 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -4480,8 +4480,8 @@ yyreduce:
 #line 4481 "cmDependsJavaParser.cxx"
     break;
 
-  case 191: /* StatementExpression: MethodInvocation  */
-#line 1728 "cmDependsJavaParser.y"
+  case 192: /* StatementExpression: ClassInstanceCreationExpression  */
+#line 1742 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -4492,20 +4492,8 @@ yyreduce:
 #line 4493 "cmDependsJavaParser.cxx"
     break;
 
-  case 192: /* StatementExpression: ClassInstanceCreationExpression  */
-#line 1737 "cmDependsJavaParser.y"
-{
-  jpElementStart(1);
-  jpCheckEmpty(1);
-  (yyval.str) = 0;
-  yyGetParser->SetCurrentCombine("");
-
-}
-#line 4505 "cmDependsJavaParser.cxx"
-    break;
-
   case 193: /* IfThenStatement: jp_IF jp_PARESTART Expression jp_PAREEND Statement  */
-#line 1747 "cmDependsJavaParser.y"
+#line 1752 "cmDependsJavaParser.y"
 {
   jpElementStart(5);
   jpCheckEmpty(5);
@@ -4513,11 +4501,23 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 4517 "cmDependsJavaParser.cxx"
+#line 4505 "cmDependsJavaParser.cxx"
     break;
 
   case 194: /* IfThenElseStatement: jp_IF jp_PARESTART Expression jp_PAREEND StatementNoShortIf jp_ELSE Statement  */
-#line 1757 "cmDependsJavaParser.y"
+#line 1762 "cmDependsJavaParser.y"
+{
+  jpElementStart(7);
+  jpCheckEmpty(7);
+  (yyval.str) = 0;
+  yyGetParser->SetCurrentCombine("");
+
+}
+#line 4517 "cmDependsJavaParser.cxx"
+    break;
+
+  case 195: /* IfThenElseStatementNoShortIf: jp_IF jp_PARESTART Expression jp_PAREEND StatementNoShortIf jp_ELSE StatementNoShortIf  */
+#line 1772 "cmDependsJavaParser.y"
 {
   jpElementStart(7);
   jpCheckEmpty(7);
@@ -4528,49 +4528,37 @@ yyreduce:
 #line 4529 "cmDependsJavaParser.cxx"
     break;
 
-  case 195: /* IfThenElseStatementNoShortIf: jp_IF jp_PARESTART Expression jp_PAREEND StatementNoShortIf jp_ELSE StatementNoShortIf  */
-#line 1767 "cmDependsJavaParser.y"
-{
-  jpElementStart(7);
-  jpCheckEmpty(7);
-  (yyval.str) = 0;
-  yyGetParser->SetCurrentCombine("");
-
-}
-#line 4541 "cmDependsJavaParser.cxx"
-    break;
-
   case 196: /* SwitchStatement: jp_SWITCH jp_PARESTART Expression jp_PAREEND SwitchBlock  */
-#line 1777 "cmDependsJavaParser.y"
+#line 1782 "cmDependsJavaParser.y"
 {
   jpElementStart(5);
 
 }
-#line 4550 "cmDependsJavaParser.cxx"
+#line 4538 "cmDependsJavaParser.cxx"
     break;
 
   case 197: /* SwitchBlock: jp_CURLYSTART SwitchBlockStatementGroups SwitchLabelsopt jp_CURLYEND  */
-#line 1784 "cmDependsJavaParser.y"
+#line 1789 "cmDependsJavaParser.y"
 {
   jpElementStart(4);
 
 }
-#line 4559 "cmDependsJavaParser.cxx"
+#line 4547 "cmDependsJavaParser.cxx"
     break;
 
   case 198: /* SwitchLabelsopt: %empty  */
-#line 1790 "cmDependsJavaParser.y"
+#line 1795 "cmDependsJavaParser.y"
 {
   jpElementStart(0);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 4570 "cmDependsJavaParser.cxx"
+#line 4558 "cmDependsJavaParser.cxx"
     break;
 
   case 199: /* SwitchLabelsopt: SwitchLabels  */
-#line 1798 "cmDependsJavaParser.y"
+#line 1803 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -4578,13 +4566,25 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 4582 "cmDependsJavaParser.cxx"
+#line 4570 "cmDependsJavaParser.cxx"
     break;
 
   case 200: /* SwitchBlockStatementGroups: %empty  */
-#line 1807 "cmDependsJavaParser.y"
+#line 1812 "cmDependsJavaParser.y"
 {
   jpElementStart(0);
+  (yyval.str) = 0;
+  yyGetParser->SetCurrentCombine("");
+
+}
+#line 4581 "cmDependsJavaParser.cxx"
+    break;
+
+  case 201: /* SwitchBlockStatementGroups: SwitchBlockStatementGroups SwitchBlockStatementGroup  */
+#line 1820 "cmDependsJavaParser.y"
+{
+  jpElementStart(2);
+  jpCheckEmpty(2);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -4592,8 +4592,8 @@ yyreduce:
 #line 4593 "cmDependsJavaParser.cxx"
     break;
 
-  case 201: /* SwitchBlockStatementGroups: SwitchBlockStatementGroups SwitchBlockStatementGroup  */
-#line 1815 "cmDependsJavaParser.y"
+  case 202: /* SwitchBlockStatementGroup: SwitchLabels BlockStatements  */
+#line 1830 "cmDependsJavaParser.y"
 {
   jpElementStart(2);
   jpCheckEmpty(2);
@@ -4604,11 +4604,11 @@ yyreduce:
 #line 4605 "cmDependsJavaParser.cxx"
     break;
 
-  case 202: /* SwitchBlockStatementGroup: SwitchLabels BlockStatements  */
-#line 1825 "cmDependsJavaParser.y"
+  case 203: /* SwitchLabels: SwitchLabel  */
+#line 1840 "cmDependsJavaParser.y"
 {
-  jpElementStart(2);
-  jpCheckEmpty(2);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -4616,11 +4616,11 @@ yyreduce:
 #line 4617 "cmDependsJavaParser.cxx"
     break;
 
-  case 203: /* SwitchLabels: SwitchLabel  */
-#line 1835 "cmDependsJavaParser.y"
+  case 204: /* SwitchLabels: SwitchLabels SwitchLabel  */
+#line 1849 "cmDependsJavaParser.y"
 {
-  jpElementStart(1);
-  jpCheckEmpty(1);
+  jpElementStart(2);
+  jpCheckEmpty(2);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -4628,20 +4628,8 @@ yyreduce:
 #line 4629 "cmDependsJavaParser.cxx"
     break;
 
-  case 204: /* SwitchLabels: SwitchLabels SwitchLabel  */
-#line 1844 "cmDependsJavaParser.y"
-{
-  jpElementStart(2);
-  jpCheckEmpty(2);
-  (yyval.str) = 0;
-  yyGetParser->SetCurrentCombine("");
-
-}
-#line 4641 "cmDependsJavaParser.cxx"
-    break;
-
   case 205: /* SwitchLabel: jp_CASE ConstantExpression jp_COLON  */
-#line 1854 "cmDependsJavaParser.y"
+#line 1859 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   jpCheckEmpty(3);
@@ -4649,11 +4637,11 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 4653 "cmDependsJavaParser.cxx"
+#line 4641 "cmDependsJavaParser.cxx"
     break;
 
   case 206: /* SwitchLabel: jp_DEFAULT jp_COLON  */
-#line 1863 "cmDependsJavaParser.y"
+#line 1868 "cmDependsJavaParser.y"
 {
   jpElementStart(2);
   jpCheckEmpty(2);
@@ -4661,49 +4649,61 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 4665 "cmDependsJavaParser.cxx"
+#line 4653 "cmDependsJavaParser.cxx"
     break;
 
   case 207: /* WhileStatement: jp_WHILE jp_PARESTART Expression jp_PAREEND Statement  */
-#line 1873 "cmDependsJavaParser.y"
+#line 1878 "cmDependsJavaParser.y"
 {
   jpElementStart(5);
 
 }
-#line 4674 "cmDependsJavaParser.cxx"
+#line 4662 "cmDependsJavaParser.cxx"
     break;
 
   case 208: /* WhileStatementNoShortIf: jp_WHILE jp_PARESTART Expression jp_PAREEND StatementNoShortIf  */
-#line 1880 "cmDependsJavaParser.y"
+#line 1885 "cmDependsJavaParser.y"
 {
   jpElementStart(5);
 
 }
-#line 4683 "cmDependsJavaParser.cxx"
+#line 4671 "cmDependsJavaParser.cxx"
     break;
 
   case 209: /* DoStatement: jp_DO Statement jp_WHILE jp_PARESTART Expression jp_PAREEND jp_SEMICOL  */
-#line 1887 "cmDependsJavaParser.y"
+#line 1892 "cmDependsJavaParser.y"
 {
   jpElementStart(7);
 
 }
-#line 4692 "cmDependsJavaParser.cxx"
+#line 4680 "cmDependsJavaParser.cxx"
     break;
 
   case 210: /* ForStatement: jp_FOR jp_PARESTART ForInitopt jp_SEMICOL Expressionopt jp_SEMICOL ForUpdateopt jp_PAREEND Statement  */
-#line 1895 "cmDependsJavaParser.y"
+#line 1900 "cmDependsJavaParser.y"
 {
   jpElementStart(9);
 
 }
-#line 4701 "cmDependsJavaParser.cxx"
+#line 4689 "cmDependsJavaParser.cxx"
     break;
 
   case 211: /* ForUpdateopt: %empty  */
-#line 1901 "cmDependsJavaParser.y"
+#line 1906 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
+  (yyval.str) = 0;
+  yyGetParser->SetCurrentCombine("");
+
+}
+#line 4700 "cmDependsJavaParser.cxx"
+    break;
+
+  case 212: /* ForUpdateopt: ForUpdate  */
+#line 1914 "cmDependsJavaParser.y"
+{
+  jpElementStart(1);
+  jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -4711,22 +4711,22 @@ yyreduce:
 #line 4712 "cmDependsJavaParser.cxx"
     break;
 
-  case 212: /* ForUpdateopt: ForUpdate  */
-#line 1909 "cmDependsJavaParser.y"
+  case 213: /* ForInitopt: %empty  */
+#line 1923 "cmDependsJavaParser.y"
 {
-  jpElementStart(1);
-  jpCheckEmpty(1);
+  jpElementStart(0);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 4724 "cmDependsJavaParser.cxx"
+#line 4723 "cmDependsJavaParser.cxx"
     break;
 
-  case 213: /* ForInitopt: %empty  */
-#line 1918 "cmDependsJavaParser.y"
+  case 214: /* ForInitopt: ForInit  */
+#line 1931 "cmDependsJavaParser.y"
 {
-  jpElementStart(0);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -4734,8 +4734,30 @@ yyreduce:
 #line 4735 "cmDependsJavaParser.cxx"
     break;
 
-  case 214: /* ForInitopt: ForInit  */
-#line 1926 "cmDependsJavaParser.y"
+  case 215: /* ForStatementNoShortIf: jp_FOR jp_PARESTART ForInitopt jp_SEMICOL Expressionopt jp_SEMICOL ForUpdateopt jp_PAREEND StatementNoShortIf  */
+#line 1942 "cmDependsJavaParser.y"
+{
+  jpElementStart(9);
+  (yyval.str) = 0;
+  yyGetParser->SetCurrentCombine("");
+
+}
+#line 4746 "cmDependsJavaParser.cxx"
+    break;
+
+  case 216: /* Expressionopt: %empty  */
+#line 1950 "cmDependsJavaParser.y"
+{
+  jpElementStart(0);
+  (yyval.str) = 0;
+  yyGetParser->SetCurrentCombine("");
+
+}
+#line 4757 "cmDependsJavaParser.cxx"
+    break;
+
+  case 217: /* Expressionopt: Expression  */
+#line 1958 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -4743,33 +4765,11 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 4747 "cmDependsJavaParser.cxx"
-    break;
-
-  case 215: /* ForStatementNoShortIf: jp_FOR jp_PARESTART ForInitopt jp_SEMICOL Expressionopt jp_SEMICOL ForUpdateopt jp_PAREEND StatementNoShortIf  */
-#line 1937 "cmDependsJavaParser.y"
-{
-  jpElementStart(9);
-  (yyval.str) = 0;
-  yyGetParser->SetCurrentCombine("");
-
-}
-#line 4758 "cmDependsJavaParser.cxx"
-    break;
-
-  case 216: /* Expressionopt: %empty  */
-#line 1945 "cmDependsJavaParser.y"
-{
-  jpElementStart(0);
-  (yyval.str) = 0;
-  yyGetParser->SetCurrentCombine("");
-
-}
 #line 4769 "cmDependsJavaParser.cxx"
     break;
 
-  case 217: /* Expressionopt: Expression  */
-#line 1953 "cmDependsJavaParser.y"
+  case 218: /* ForInit: StatementExpressionList  */
+#line 1968 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -4780,8 +4780,8 @@ yyreduce:
 #line 4781 "cmDependsJavaParser.cxx"
     break;
 
-  case 218: /* ForInit: StatementExpressionList  */
-#line 1963 "cmDependsJavaParser.y"
+  case 219: /* ForInit: LocalVariableDeclaration  */
+#line 1977 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -4792,8 +4792,8 @@ yyreduce:
 #line 4793 "cmDependsJavaParser.cxx"
     break;
 
-  case 219: /* ForInit: LocalVariableDeclaration  */
-#line 1972 "cmDependsJavaParser.y"
+  case 220: /* ForUpdate: StatementExpressionList  */
+#line 1987 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -4804,8 +4804,8 @@ yyreduce:
 #line 4805 "cmDependsJavaParser.cxx"
     break;
 
-  case 220: /* ForUpdate: StatementExpressionList  */
-#line 1982 "cmDependsJavaParser.y"
+  case 221: /* StatementExpressionList: StatementExpression  */
+#line 1997 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -4816,11 +4816,11 @@ yyreduce:
 #line 4817 "cmDependsJavaParser.cxx"
     break;
 
-  case 221: /* StatementExpressionList: StatementExpression  */
-#line 1992 "cmDependsJavaParser.y"
+  case 222: /* StatementExpressionList: StatementExpressionList jp_COMMA StatementExpression  */
+#line 2006 "cmDependsJavaParser.y"
 {
-  jpElementStart(1);
-  jpCheckEmpty(1);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -4828,8 +4828,8 @@ yyreduce:
 #line 4829 "cmDependsJavaParser.cxx"
     break;
 
-  case 222: /* StatementExpressionList: StatementExpressionList jp_COMMA StatementExpression  */
-#line 2001 "cmDependsJavaParser.y"
+  case 223: /* AssertStatement: jp_ASSERT Expression jp_SEMICOL  */
+#line 2016 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   jpCheckEmpty(3);
@@ -4840,20 +4840,8 @@ yyreduce:
 #line 4841 "cmDependsJavaParser.cxx"
     break;
 
-  case 223: /* AssertStatement: jp_ASSERT Expression jp_SEMICOL  */
-#line 2011 "cmDependsJavaParser.y"
-{
-  jpElementStart(3);
-  jpCheckEmpty(3);
-  (yyval.str) = 0;
-  yyGetParser->SetCurrentCombine("");
-
-}
-#line 4853 "cmDependsJavaParser.cxx"
-    break;
-
   case 224: /* AssertStatement: jp_ASSERT Expression jp_COLON Expression jp_SEMICOL  */
-#line 2020 "cmDependsJavaParser.y"
+#line 2025 "cmDependsJavaParser.y"
 {
   jpElementStart(5);
   jpCheckEmpty(5);
@@ -4861,11 +4849,11 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 4865 "cmDependsJavaParser.cxx"
+#line 4853 "cmDependsJavaParser.cxx"
     break;
 
   case 225: /* BreakStatement: jp_BREAK Identifieropt jp_SEMICOL  */
-#line 2030 "cmDependsJavaParser.y"
+#line 2035 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   yyGetParser->DeallocateParserType(&((yyvsp[-1].str)));
@@ -4874,34 +4862,46 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 4878 "cmDependsJavaParser.cxx"
+#line 4866 "cmDependsJavaParser.cxx"
     break;
 
   case 226: /* Identifieropt: %empty  */
-#line 2040 "cmDependsJavaParser.y"
+#line 2045 "cmDependsJavaParser.y"
 {
   jpElementStart(0);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 4889 "cmDependsJavaParser.cxx"
+#line 4877 "cmDependsJavaParser.cxx"
     break;
 
   case 227: /* Identifieropt: Identifier  */
-#line 2048 "cmDependsJavaParser.y"
+#line 2053 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
 
 }
-#line 4898 "cmDependsJavaParser.cxx"
+#line 4886 "cmDependsJavaParser.cxx"
     break;
 
   case 228: /* ContinueStatement: jp_CONTINUE Identifieropt jp_SEMICOL  */
-#line 2055 "cmDependsJavaParser.y"
+#line 2060 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   yyGetParser->DeallocateParserType(&((yyvsp[-1].str)));
+  jpCheckEmpty(3);
+  (yyval.str) = 0;
+  yyGetParser->SetCurrentCombine("");
+
+}
+#line 4899 "cmDependsJavaParser.cxx"
+    break;
+
+  case 229: /* ReturnStatement: jp_RETURN Expressionopt jp_SEMICOL  */
+#line 2071 "cmDependsJavaParser.y"
+{
+  jpElementStart(3);
   jpCheckEmpty(3);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
@@ -4910,8 +4910,8 @@ yyreduce:
 #line 4911 "cmDependsJavaParser.cxx"
     break;
 
-  case 229: /* ReturnStatement: jp_RETURN Expressionopt jp_SEMICOL  */
-#line 2066 "cmDependsJavaParser.y"
+  case 230: /* ThrowStatement: jp_THROW Expression jp_SEMICOL  */
+#line 2081 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   jpCheckEmpty(3);
@@ -4922,20 +4922,8 @@ yyreduce:
 #line 4923 "cmDependsJavaParser.cxx"
     break;
 
-  case 230: /* ThrowStatement: jp_THROW Expression jp_SEMICOL  */
-#line 2076 "cmDependsJavaParser.y"
-{
-  jpElementStart(3);
-  jpCheckEmpty(3);
-  (yyval.str) = 0;
-  yyGetParser->SetCurrentCombine("");
-
-}
-#line 4935 "cmDependsJavaParser.cxx"
-    break;
-
   case 231: /* SynchronizedStatement: jp_SYNCHRONIZED jp_PARESTART Expression jp_PAREEND Block  */
-#line 2086 "cmDependsJavaParser.y"
+#line 2091 "cmDependsJavaParser.y"
 {
   jpElementStart(5);
   jpCheckEmpty(5);
@@ -4943,11 +4931,11 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 4947 "cmDependsJavaParser.cxx"
+#line 4935 "cmDependsJavaParser.cxx"
     break;
 
   case 232: /* TryStatement: jp_TRY Block Catches  */
-#line 2096 "cmDependsJavaParser.y"
+#line 2101 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   jpCheckEmpty(3);
@@ -4955,11 +4943,11 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 4959 "cmDependsJavaParser.cxx"
+#line 4947 "cmDependsJavaParser.cxx"
     break;
 
   case 233: /* TryStatement: jp_TRY Block Catchesopt Finally  */
-#line 2105 "cmDependsJavaParser.y"
+#line 2110 "cmDependsJavaParser.y"
 {
   jpElementStart(4);
   jpCheckEmpty(4);
@@ -4967,13 +4955,25 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 4971 "cmDependsJavaParser.cxx"
+#line 4959 "cmDependsJavaParser.cxx"
     break;
 
   case 234: /* Catchesopt: %empty  */
-#line 2114 "cmDependsJavaParser.y"
+#line 2119 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
+  (yyval.str) = 0;
+  yyGetParser->SetCurrentCombine("");
+
+}
+#line 4970 "cmDependsJavaParser.cxx"
+    break;
+
+  case 235: /* Catchesopt: Catches  */
+#line 2127 "cmDependsJavaParser.y"
+{
+  jpElementStart(1);
+  jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -4981,8 +4981,8 @@ yyreduce:
 #line 4982 "cmDependsJavaParser.cxx"
     break;
 
-  case 235: /* Catchesopt: Catches  */
-#line 2122 "cmDependsJavaParser.y"
+  case 236: /* Catches: CatchClause  */
+#line 2137 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -4993,11 +4993,11 @@ yyreduce:
 #line 4994 "cmDependsJavaParser.cxx"
     break;
 
-  case 236: /* Catches: CatchClause  */
-#line 2132 "cmDependsJavaParser.y"
+  case 237: /* Catches: Catches CatchClause  */
+#line 2146 "cmDependsJavaParser.y"
 {
-  jpElementStart(1);
-  jpCheckEmpty(1);
+  jpElementStart(2);
+  jpCheckEmpty(2);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -5005,8 +5005,17 @@ yyreduce:
 #line 5006 "cmDependsJavaParser.cxx"
     break;
 
-  case 237: /* Catches: Catches CatchClause  */
-#line 2141 "cmDependsJavaParser.y"
+  case 238: /* CatchClause: jp_CATCH jp_PARESTART FormalParameter jp_PAREEND Block  */
+#line 2156 "cmDependsJavaParser.y"
+{
+  jpElementStart(5);
+
+}
+#line 5015 "cmDependsJavaParser.cxx"
+    break;
+
+  case 239: /* Finally: jp_FINALLY Block  */
+#line 2163 "cmDependsJavaParser.y"
 {
   jpElementStart(2);
   jpCheckEmpty(2);
@@ -5014,23 +5023,14 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 5018 "cmDependsJavaParser.cxx"
-    break;
-
-  case 238: /* CatchClause: jp_CATCH jp_PARESTART FormalParameter jp_PAREEND Block  */
-#line 2151 "cmDependsJavaParser.y"
-{
-  jpElementStart(5);
-
-}
 #line 5027 "cmDependsJavaParser.cxx"
     break;
 
-  case 239: /* Finally: jp_FINALLY Block  */
-#line 2158 "cmDependsJavaParser.y"
+  case 240: /* Primary: PrimaryNoNewArray  */
+#line 2173 "cmDependsJavaParser.y"
 {
-  jpElementStart(2);
-  jpCheckEmpty(2);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -5038,8 +5038,8 @@ yyreduce:
 #line 5039 "cmDependsJavaParser.cxx"
     break;
 
-  case 240: /* Primary: PrimaryNoNewArray  */
-#line 2168 "cmDependsJavaParser.y"
+  case 241: /* Primary: ArrayCreationExpression  */
+#line 2182 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -5050,8 +5050,8 @@ yyreduce:
 #line 5051 "cmDependsJavaParser.cxx"
     break;
 
-  case 241: /* Primary: ArrayCreationExpression  */
-#line 2177 "cmDependsJavaParser.y"
+  case 242: /* PrimaryNoNewArray: Literal  */
+#line 2192 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -5062,29 +5062,17 @@ yyreduce:
 #line 5063 "cmDependsJavaParser.cxx"
     break;
 
-  case 242: /* PrimaryNoNewArray: Literal  */
-#line 2187 "cmDependsJavaParser.y"
-{
-  jpElementStart(1);
-  jpCheckEmpty(1);
-  (yyval.str) = 0;
-  yyGetParser->SetCurrentCombine("");
-
-}
-#line 5075 "cmDependsJavaParser.cxx"
-    break;
-
   case 243: /* PrimaryNoNewArray: jp_THIS  */
-#line 2196 "cmDependsJavaParser.y"
+#line 2201 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
 
 }
-#line 5084 "cmDependsJavaParser.cxx"
+#line 5072 "cmDependsJavaParser.cxx"
     break;
 
   case 244: /* PrimaryNoNewArray: jp_PARESTART Expression jp_PAREEND  */
-#line 2202 "cmDependsJavaParser.y"
+#line 2207 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   jpCheckEmpty(3);
@@ -5092,11 +5080,23 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 5096 "cmDependsJavaParser.cxx"
+#line 5084 "cmDependsJavaParser.cxx"
     break;
 
   case 245: /* PrimaryNoNewArray: ClassInstanceCreationExpression  */
-#line 2211 "cmDependsJavaParser.y"
+#line 2216 "cmDependsJavaParser.y"
+{
+  jpElementStart(1);
+  jpCheckEmpty(1);
+  (yyval.str) = 0;
+  yyGetParser->SetCurrentCombine("");
+
+}
+#line 5096 "cmDependsJavaParser.cxx"
+    break;
+
+  case 246: /* PrimaryNoNewArray: FieldAccess  */
+#line 2225 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -5107,8 +5107,8 @@ yyreduce:
 #line 5108 "cmDependsJavaParser.cxx"
     break;
 
-  case 246: /* PrimaryNoNewArray: FieldAccess  */
-#line 2220 "cmDependsJavaParser.y"
+  case 247: /* PrimaryNoNewArray: MethodInvocation  */
+#line 2234 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -5119,8 +5119,8 @@ yyreduce:
 #line 5120 "cmDependsJavaParser.cxx"
     break;
 
-  case 247: /* PrimaryNoNewArray: MethodInvocation  */
-#line 2229 "cmDependsJavaParser.y"
+  case 248: /* PrimaryNoNewArray: ArrayAccess  */
+#line 2243 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -5131,20 +5131,8 @@ yyreduce:
 #line 5132 "cmDependsJavaParser.cxx"
     break;
 
-  case 248: /* PrimaryNoNewArray: ArrayAccess  */
-#line 2238 "cmDependsJavaParser.y"
-{
-  jpElementStart(1);
-  jpCheckEmpty(1);
-  (yyval.str) = 0;
-  yyGetParser->SetCurrentCombine("");
-
-}
-#line 5144 "cmDependsJavaParser.cxx"
-    break;
-
   case 249: /* ClassInstanceCreationExpression: New ClassType jp_PARESTART ArgumentListopt jp_PAREEND ClassBodyOpt  */
-#line 2248 "cmDependsJavaParser.y"
+#line 2253 "cmDependsJavaParser.y"
 {
   jpElementStart(6);
   jpCheckEmpty(6);
@@ -5152,22 +5140,22 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 5156 "cmDependsJavaParser.cxx"
+#line 5144 "cmDependsJavaParser.cxx"
     break;
 
   case 250: /* ClassBodyOpt: %empty  */
-#line 2257 "cmDependsJavaParser.y"
+#line 2262 "cmDependsJavaParser.y"
 {
   jpElementStart(0);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 5167 "cmDependsJavaParser.cxx"
+#line 5155 "cmDependsJavaParser.cxx"
     break;
 
   case 251: /* ClassBodyOpt: ClassBody  */
-#line 2265 "cmDependsJavaParser.y"
+#line 2270 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -5175,13 +5163,25 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 5179 "cmDependsJavaParser.cxx"
+#line 5167 "cmDependsJavaParser.cxx"
     break;
 
   case 252: /* ArgumentListopt: %empty  */
-#line 2274 "cmDependsJavaParser.y"
+#line 2279 "cmDependsJavaParser.y"
 {
   jpElementStart(0);
+  (yyval.str) = 0;
+  yyGetParser->SetCurrentCombine("");
+
+}
+#line 5178 "cmDependsJavaParser.cxx"
+    break;
+
+  case 253: /* ArgumentListopt: ArgumentList  */
+#line 2287 "cmDependsJavaParser.y"
+{
+  jpElementStart(1);
+  jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -5189,8 +5189,8 @@ yyreduce:
 #line 5190 "cmDependsJavaParser.cxx"
     break;
 
-  case 253: /* ArgumentListopt: ArgumentList  */
-#line 2282 "cmDependsJavaParser.y"
+  case 254: /* ArgumentList: Expression  */
+#line 2297 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -5201,20 +5201,8 @@ yyreduce:
 #line 5202 "cmDependsJavaParser.cxx"
     break;
 
-  case 254: /* ArgumentList: Expression  */
-#line 2292 "cmDependsJavaParser.y"
-{
-  jpElementStart(1);
-  jpCheckEmpty(1);
-  (yyval.str) = 0;
-  yyGetParser->SetCurrentCombine("");
-
-}
-#line 5214 "cmDependsJavaParser.cxx"
-    break;
-
   case 255: /* ArgumentList: ArgumentList jp_COMMA Expression  */
-#line 2301 "cmDependsJavaParser.y"
+#line 2306 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   jpCheckEmpty(3);
@@ -5222,11 +5210,23 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 5226 "cmDependsJavaParser.cxx"
+#line 5214 "cmDependsJavaParser.cxx"
     break;
 
   case 256: /* ArrayCreationExpression: New PrimitiveType DimExprs Dimsopt  */
-#line 2311 "cmDependsJavaParser.y"
+#line 2316 "cmDependsJavaParser.y"
+{
+  jpElementStart(4);
+  jpCheckEmpty(4);
+  (yyval.str) = 0;
+  yyGetParser->SetCurrentCombine("");
+
+}
+#line 5226 "cmDependsJavaParser.cxx"
+    break;
+
+  case 257: /* ArrayCreationExpression: New ClassOrInterfaceType DimExprs Dimsopt  */
+#line 2325 "cmDependsJavaParser.y"
 {
   jpElementStart(4);
   jpCheckEmpty(4);
@@ -5237,8 +5237,8 @@ yyreduce:
 #line 5238 "cmDependsJavaParser.cxx"
     break;
 
-  case 257: /* ArrayCreationExpression: New ClassOrInterfaceType DimExprs Dimsopt  */
-#line 2320 "cmDependsJavaParser.y"
+  case 258: /* ArrayCreationExpression: New PrimitiveType Dims ArrayInitializer  */
+#line 2334 "cmDependsJavaParser.y"
 {
   jpElementStart(4);
   jpCheckEmpty(4);
@@ -5249,8 +5249,8 @@ yyreduce:
 #line 5250 "cmDependsJavaParser.cxx"
     break;
 
-  case 258: /* ArrayCreationExpression: New PrimitiveType Dims ArrayInitializer  */
-#line 2329 "cmDependsJavaParser.y"
+  case 259: /* ArrayCreationExpression: New ClassOrInterfaceType Dims ArrayInitializer  */
+#line 2343 "cmDependsJavaParser.y"
 {
   jpElementStart(4);
   jpCheckEmpty(4);
@@ -5261,22 +5261,22 @@ yyreduce:
 #line 5262 "cmDependsJavaParser.cxx"
     break;
 
-  case 259: /* ArrayCreationExpression: New ClassOrInterfaceType Dims ArrayInitializer  */
-#line 2338 "cmDependsJavaParser.y"
+  case 260: /* Dimsopt: %empty  */
+#line 2352 "cmDependsJavaParser.y"
 {
-  jpElementStart(4);
-  jpCheckEmpty(4);
+  jpElementStart(0);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 5274 "cmDependsJavaParser.cxx"
+#line 5273 "cmDependsJavaParser.cxx"
     break;
 
-  case 260: /* Dimsopt: %empty  */
-#line 2347 "cmDependsJavaParser.y"
+  case 261: /* Dimsopt: Dims  */
+#line 2360 "cmDependsJavaParser.y"
 {
-  jpElementStart(0);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -5284,8 +5284,8 @@ yyreduce:
 #line 5285 "cmDependsJavaParser.cxx"
     break;
 
-  case 261: /* Dimsopt: Dims  */
-#line 2355 "cmDependsJavaParser.y"
+  case 262: /* DimExprs: DimExpr  */
+#line 2370 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -5296,20 +5296,8 @@ yyreduce:
 #line 5297 "cmDependsJavaParser.cxx"
     break;
 
-  case 262: /* DimExprs: DimExpr  */
-#line 2365 "cmDependsJavaParser.y"
-{
-  jpElementStart(1);
-  jpCheckEmpty(1);
-  (yyval.str) = 0;
-  yyGetParser->SetCurrentCombine("");
-
-}
-#line 5309 "cmDependsJavaParser.cxx"
-    break;
-
   case 263: /* DimExprs: DimExprs DimExpr  */
-#line 2374 "cmDependsJavaParser.y"
+#line 2379 "cmDependsJavaParser.y"
 {
   jpElementStart(2);
   jpCheckEmpty(2);
@@ -5317,11 +5305,11 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 5321 "cmDependsJavaParser.cxx"
+#line 5309 "cmDependsJavaParser.cxx"
     break;
 
   case 264: /* DimExpr: jp_BRACKETSTART Expression jp_BRACKETEND  */
-#line 2384 "cmDependsJavaParser.y"
+#line 2389 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   jpCheckEmpty(3);
@@ -5329,29 +5317,29 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 5333 "cmDependsJavaParser.cxx"
+#line 5321 "cmDependsJavaParser.cxx"
     break;
 
   case 265: /* Dims: jp_BRACKETSTART jp_BRACKETEND  */
-#line 2394 "cmDependsJavaParser.y"
+#line 2399 "cmDependsJavaParser.y"
 {
   jpElementStart(2);
 
 }
-#line 5342 "cmDependsJavaParser.cxx"
+#line 5330 "cmDependsJavaParser.cxx"
     break;
 
   case 266: /* Dims: Dims jp_BRACKETSTART jp_BRACKETEND  */
-#line 2400 "cmDependsJavaParser.y"
+#line 2405 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
 
 }
-#line 5351 "cmDependsJavaParser.cxx"
+#line 5339 "cmDependsJavaParser.cxx"
     break;
 
   case 267: /* FieldAccess: Primary jp_DOT Identifier  */
-#line 2407 "cmDependsJavaParser.y"
+#line 2412 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   yyGetParser->DeallocateParserType(&((yyvsp[0].str)));
@@ -5360,11 +5348,11 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 5364 "cmDependsJavaParser.cxx"
+#line 5352 "cmDependsJavaParser.cxx"
     break;
 
   case 268: /* FieldAccess: jp_SUPER jp_DOT Identifier  */
-#line 2417 "cmDependsJavaParser.y"
+#line 2422 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   yyGetParser->DeallocateParserType(&((yyvsp[0].str)));
@@ -5373,11 +5361,11 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 5377 "cmDependsJavaParser.cxx"
+#line 5365 "cmDependsJavaParser.cxx"
     break;
 
   case 269: /* FieldAccess: jp_THIS jp_DOT Identifier  */
-#line 2427 "cmDependsJavaParser.y"
+#line 2432 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   yyGetParser->DeallocateParserType(&((yyvsp[0].str)));
@@ -5386,11 +5374,11 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 5390 "cmDependsJavaParser.cxx"
+#line 5378 "cmDependsJavaParser.cxx"
     break;
 
   case 270: /* FieldAccess: Primary jp_DOT jp_THIS  */
-#line 2437 "cmDependsJavaParser.y"
+#line 2442 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   yyGetParser->DeallocateParserType(&((yyvsp[0].str)));
@@ -5399,11 +5387,11 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 5403 "cmDependsJavaParser.cxx"
+#line 5391 "cmDependsJavaParser.cxx"
     break;
 
   case 271: /* MethodInvocation: Name jp_PARESTART ArgumentListopt jp_PAREEND  */
-#line 2448 "cmDependsJavaParser.y"
+#line 2453 "cmDependsJavaParser.y"
 {
   jpElementStart(4);
   yyGetParser->DeallocateParserType(&((yyvsp[-3].str)));
@@ -5412,11 +5400,11 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 5416 "cmDependsJavaParser.cxx"
+#line 5404 "cmDependsJavaParser.cxx"
     break;
 
   case 272: /* MethodInvocation: Primary jp_DOT Identifier jp_PARESTART ArgumentListopt jp_PAREEND  */
-#line 2458 "cmDependsJavaParser.y"
+#line 2463 "cmDependsJavaParser.y"
 {
   jpElementStart(6);
   yyGetParser->DeallocateParserType(&((yyvsp[-5].str)));
@@ -5426,11 +5414,11 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 5430 "cmDependsJavaParser.cxx"
+#line 5418 "cmDependsJavaParser.cxx"
     break;
 
   case 273: /* MethodInvocation: jp_SUPER jp_DOT Identifier jp_PARESTART ArgumentListopt jp_PAREEND  */
-#line 2469 "cmDependsJavaParser.y"
+#line 2474 "cmDependsJavaParser.y"
 {
   jpElementStart(6);
   yyGetParser->DeallocateParserType(&((yyvsp[-3].str)));
@@ -5439,11 +5427,11 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 5443 "cmDependsJavaParser.cxx"
+#line 5431 "cmDependsJavaParser.cxx"
     break;
 
   case 274: /* MethodInvocation: jp_THIS jp_DOT Identifier jp_PARESTART ArgumentListopt jp_PAREEND  */
-#line 2479 "cmDependsJavaParser.y"
+#line 2484 "cmDependsJavaParser.y"
 {
   jpElementStart(6);
   yyGetParser->DeallocateParserType(&((yyvsp[-3].str)));
@@ -5452,14 +5440,26 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 5456 "cmDependsJavaParser.cxx"
+#line 5444 "cmDependsJavaParser.cxx"
     break;
 
   case 275: /* ArrayAccess: Name jp_BRACKETSTART Expression jp_BRACKETEND  */
-#line 2490 "cmDependsJavaParser.y"
+#line 2495 "cmDependsJavaParser.y"
 {
   jpElementStart(4);
   yyGetParser->DeallocateParserType(&((yyvsp[-3].str)));
+  jpCheckEmpty(4);
+  (yyval.str) = 0;
+  yyGetParser->SetCurrentCombine("");
+
+}
+#line 5457 "cmDependsJavaParser.cxx"
+    break;
+
+  case 276: /* ArrayAccess: PrimaryNoNewArray jp_BRACKETSTART Expression jp_BRACKETEND  */
+#line 2505 "cmDependsJavaParser.y"
+{
+  jpElementStart(4);
   jpCheckEmpty(4);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
@@ -5468,20 +5468,8 @@ yyreduce:
 #line 5469 "cmDependsJavaParser.cxx"
     break;
 
-  case 276: /* ArrayAccess: PrimaryNoNewArray jp_BRACKETSTART Expression jp_BRACKETEND  */
-#line 2500 "cmDependsJavaParser.y"
-{
-  jpElementStart(4);
-  jpCheckEmpty(4);
-  (yyval.str) = 0;
-  yyGetParser->SetCurrentCombine("");
-
-}
-#line 5481 "cmDependsJavaParser.cxx"
-    break;
-
   case 277: /* PostfixExpression: Primary  */
-#line 2510 "cmDependsJavaParser.y"
+#line 2515 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -5489,11 +5477,11 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 5493 "cmDependsJavaParser.cxx"
+#line 5481 "cmDependsJavaParser.cxx"
     break;
 
   case 278: /* PostfixExpression: Name  */
-#line 2519 "cmDependsJavaParser.y"
+#line 2524 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   yyGetParser->DeallocateParserType(&((yyvsp[0].str)));
@@ -5501,11 +5489,11 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 5505 "cmDependsJavaParser.cxx"
+#line 5493 "cmDependsJavaParser.cxx"
     break;
 
   case 279: /* PostfixExpression: ArrayType jp_DOT jp_CLASS  */
-#line 2528 "cmDependsJavaParser.y"
+#line 2533 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   jpCheckEmpty(3);
@@ -5513,11 +5501,23 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 5517 "cmDependsJavaParser.cxx"
+#line 5505 "cmDependsJavaParser.cxx"
     break;
 
   case 280: /* PostfixExpression: PostIncrementExpression  */
-#line 2537 "cmDependsJavaParser.y"
+#line 2542 "cmDependsJavaParser.y"
+{
+  jpElementStart(1);
+  jpCheckEmpty(1);
+  (yyval.str) = 0;
+  yyGetParser->SetCurrentCombine("");
+
+}
+#line 5517 "cmDependsJavaParser.cxx"
+    break;
+
+  case 281: /* PostfixExpression: PostDecrementExpression  */
+#line 2551 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -5528,11 +5528,11 @@ yyreduce:
 #line 5529 "cmDependsJavaParser.cxx"
     break;
 
-  case 281: /* PostfixExpression: PostDecrementExpression  */
-#line 2546 "cmDependsJavaParser.y"
+  case 282: /* PostIncrementExpression: PostfixExpression jp_PLUSPLUS  */
+#line 2561 "cmDependsJavaParser.y"
 {
-  jpElementStart(1);
-  jpCheckEmpty(1);
+  jpElementStart(2);
+  jpCheckEmpty(2);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -5540,8 +5540,8 @@ yyreduce:
 #line 5541 "cmDependsJavaParser.cxx"
     break;
 
-  case 282: /* PostIncrementExpression: PostfixExpression jp_PLUSPLUS  */
-#line 2556 "cmDependsJavaParser.y"
+  case 283: /* PostDecrementExpression: PostfixExpression jp_MINUSMINUS  */
+#line 2571 "cmDependsJavaParser.y"
 {
   jpElementStart(2);
   jpCheckEmpty(2);
@@ -5552,11 +5552,11 @@ yyreduce:
 #line 5553 "cmDependsJavaParser.cxx"
     break;
 
-  case 283: /* PostDecrementExpression: PostfixExpression jp_MINUSMINUS  */
-#line 2566 "cmDependsJavaParser.y"
+  case 284: /* UnaryExpression: PreIncrementExpression  */
+#line 2581 "cmDependsJavaParser.y"
 {
-  jpElementStart(2);
-  jpCheckEmpty(2);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -5564,8 +5564,8 @@ yyreduce:
 #line 5565 "cmDependsJavaParser.cxx"
     break;
 
-  case 284: /* UnaryExpression: PreIncrementExpression  */
-#line 2576 "cmDependsJavaParser.y"
+  case 285: /* UnaryExpression: PreDecrementExpression  */
+#line 2590 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -5576,11 +5576,11 @@ yyreduce:
 #line 5577 "cmDependsJavaParser.cxx"
     break;
 
-  case 285: /* UnaryExpression: PreDecrementExpression  */
-#line 2585 "cmDependsJavaParser.y"
+  case 286: /* UnaryExpression: jp_PLUS UnaryExpression  */
+#line 2599 "cmDependsJavaParser.y"
 {
-  jpElementStart(1);
-  jpCheckEmpty(1);
+  jpElementStart(2);
+  jpCheckEmpty(2);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -5588,8 +5588,8 @@ yyreduce:
 #line 5589 "cmDependsJavaParser.cxx"
     break;
 
-  case 286: /* UnaryExpression: jp_PLUS UnaryExpression  */
-#line 2594 "cmDependsJavaParser.y"
+  case 287: /* UnaryExpression: jp_MINUS UnaryExpression  */
+#line 2608 "cmDependsJavaParser.y"
 {
   jpElementStart(2);
   jpCheckEmpty(2);
@@ -5600,20 +5600,8 @@ yyreduce:
 #line 5601 "cmDependsJavaParser.cxx"
     break;
 
-  case 287: /* UnaryExpression: jp_MINUS UnaryExpression  */
-#line 2603 "cmDependsJavaParser.y"
-{
-  jpElementStart(2);
-  jpCheckEmpty(2);
-  (yyval.str) = 0;
-  yyGetParser->SetCurrentCombine("");
-
-}
-#line 5613 "cmDependsJavaParser.cxx"
-    break;
-
   case 288: /* UnaryExpression: UnaryExpressionNotPlusMinus  */
-#line 2612 "cmDependsJavaParser.y"
+#line 2617 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -5621,11 +5609,23 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 5625 "cmDependsJavaParser.cxx"
+#line 5613 "cmDependsJavaParser.cxx"
     break;
 
   case 289: /* PreIncrementExpression: jp_PLUSPLUS UnaryExpression  */
-#line 2622 "cmDependsJavaParser.y"
+#line 2627 "cmDependsJavaParser.y"
+{
+  jpElementStart(2);
+  jpCheckEmpty(2);
+  (yyval.str) = 0;
+  yyGetParser->SetCurrentCombine("");
+
+}
+#line 5625 "cmDependsJavaParser.cxx"
+    break;
+
+  case 290: /* PreDecrementExpression: jp_MINUSMINUS UnaryExpression  */
+#line 2637 "cmDependsJavaParser.y"
 {
   jpElementStart(2);
   jpCheckEmpty(2);
@@ -5636,20 +5636,8 @@ yyreduce:
 #line 5637 "cmDependsJavaParser.cxx"
     break;
 
-  case 290: /* PreDecrementExpression: jp_MINUSMINUS UnaryExpression  */
-#line 2632 "cmDependsJavaParser.y"
-{
-  jpElementStart(2);
-  jpCheckEmpty(2);
-  (yyval.str) = 0;
-  yyGetParser->SetCurrentCombine("");
-
-}
-#line 5649 "cmDependsJavaParser.cxx"
-    break;
-
   case 291: /* UnaryExpressionNotPlusMinus: PostfixExpression  */
-#line 2642 "cmDependsJavaParser.y"
+#line 2647 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -5657,11 +5645,23 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 5661 "cmDependsJavaParser.cxx"
+#line 5649 "cmDependsJavaParser.cxx"
     break;
 
   case 292: /* UnaryExpressionNotPlusMinus: jp_TILDE UnaryExpression  */
-#line 2651 "cmDependsJavaParser.y"
+#line 2656 "cmDependsJavaParser.y"
+{
+  jpElementStart(2);
+  jpCheckEmpty(2);
+  (yyval.str) = 0;
+  yyGetParser->SetCurrentCombine("");
+
+}
+#line 5661 "cmDependsJavaParser.cxx"
+    break;
+
+  case 293: /* UnaryExpressionNotPlusMinus: jp_EXCLAMATION UnaryExpression  */
+#line 2665 "cmDependsJavaParser.y"
 {
   jpElementStart(2);
   jpCheckEmpty(2);
@@ -5672,11 +5672,11 @@ yyreduce:
 #line 5673 "cmDependsJavaParser.cxx"
     break;
 
-  case 293: /* UnaryExpressionNotPlusMinus: jp_EXCLAMATION UnaryExpression  */
-#line 2660 "cmDependsJavaParser.y"
+  case 294: /* UnaryExpressionNotPlusMinus: CastExpression  */
+#line 2674 "cmDependsJavaParser.y"
 {
-  jpElementStart(2);
-  jpCheckEmpty(2);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -5684,20 +5684,8 @@ yyreduce:
 #line 5685 "cmDependsJavaParser.cxx"
     break;
 
-  case 294: /* UnaryExpressionNotPlusMinus: CastExpression  */
-#line 2669 "cmDependsJavaParser.y"
-{
-  jpElementStart(1);
-  jpCheckEmpty(1);
-  (yyval.str) = 0;
-  yyGetParser->SetCurrentCombine("");
-
-}
-#line 5697 "cmDependsJavaParser.cxx"
-    break;
-
   case 295: /* CastExpression: jp_PARESTART PrimitiveType Dimsopt jp_PAREEND UnaryExpression  */
-#line 2679 "cmDependsJavaParser.y"
+#line 2684 "cmDependsJavaParser.y"
 {
   jpElementStart(5);
   jpCheckEmpty(5);
@@ -5705,11 +5693,11 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 5709 "cmDependsJavaParser.cxx"
+#line 5697 "cmDependsJavaParser.cxx"
     break;
 
   case 296: /* CastExpression: jp_PARESTART Expression jp_PAREEND UnaryExpressionNotPlusMinus  */
-#line 2688 "cmDependsJavaParser.y"
+#line 2693 "cmDependsJavaParser.y"
 {
   jpElementStart(4);
   jpCheckEmpty(4);
@@ -5717,20 +5705,20 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 5721 "cmDependsJavaParser.cxx"
+#line 5709 "cmDependsJavaParser.cxx"
     break;
 
   case 297: /* CastExpression: jp_PARESTART Name Dims jp_PAREEND UnaryExpressionNotPlusMinus  */
-#line 2697 "cmDependsJavaParser.y"
+#line 2702 "cmDependsJavaParser.y"
 {
   jpElementStart(5);
 
 }
-#line 5730 "cmDependsJavaParser.cxx"
+#line 5718 "cmDependsJavaParser.cxx"
     break;
 
   case 298: /* MultiplicativeExpression: UnaryExpression  */
-#line 2704 "cmDependsJavaParser.y"
+#line 2709 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -5738,11 +5726,23 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 5742 "cmDependsJavaParser.cxx"
+#line 5730 "cmDependsJavaParser.cxx"
     break;
 
   case 299: /* MultiplicativeExpression: MultiplicativeExpression jp_TIMES UnaryExpression  */
-#line 2713 "cmDependsJavaParser.y"
+#line 2718 "cmDependsJavaParser.y"
+{
+  jpElementStart(3);
+  jpCheckEmpty(3);
+  (yyval.str) = 0;
+  yyGetParser->SetCurrentCombine("");
+
+}
+#line 5742 "cmDependsJavaParser.cxx"
+    break;
+
+  case 300: /* MultiplicativeExpression: MultiplicativeExpression jp_DIVIDE UnaryExpression  */
+#line 2727 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   jpCheckEmpty(3);
@@ -5753,8 +5753,8 @@ yyreduce:
 #line 5754 "cmDependsJavaParser.cxx"
     break;
 
-  case 300: /* MultiplicativeExpression: MultiplicativeExpression jp_DIVIDE UnaryExpression  */
-#line 2722 "cmDependsJavaParser.y"
+  case 301: /* MultiplicativeExpression: MultiplicativeExpression jp_PERCENT UnaryExpression  */
+#line 2736 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   jpCheckEmpty(3);
@@ -5765,20 +5765,8 @@ yyreduce:
 #line 5766 "cmDependsJavaParser.cxx"
     break;
 
-  case 301: /* MultiplicativeExpression: MultiplicativeExpression jp_PERCENT UnaryExpression  */
-#line 2731 "cmDependsJavaParser.y"
-{
-  jpElementStart(3);
-  jpCheckEmpty(3);
-  (yyval.str) = 0;
-  yyGetParser->SetCurrentCombine("");
-
-}
-#line 5778 "cmDependsJavaParser.cxx"
-    break;
-
   case 302: /* AdditiveExpression: MultiplicativeExpression  */
-#line 2741 "cmDependsJavaParser.y"
+#line 2746 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -5786,11 +5774,23 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 5790 "cmDependsJavaParser.cxx"
+#line 5778 "cmDependsJavaParser.cxx"
     break;
 
   case 303: /* AdditiveExpression: AdditiveExpression jp_PLUS MultiplicativeExpression  */
-#line 2750 "cmDependsJavaParser.y"
+#line 2755 "cmDependsJavaParser.y"
+{
+  jpElementStart(3);
+  jpCheckEmpty(3);
+  (yyval.str) = 0;
+  yyGetParser->SetCurrentCombine("");
+
+}
+#line 5790 "cmDependsJavaParser.cxx"
+    break;
+
+  case 304: /* AdditiveExpression: AdditiveExpression jp_MINUS MultiplicativeExpression  */
+#line 2764 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   jpCheckEmpty(3);
@@ -5801,20 +5801,8 @@ yyreduce:
 #line 5802 "cmDependsJavaParser.cxx"
     break;
 
-  case 304: /* AdditiveExpression: AdditiveExpression jp_MINUS MultiplicativeExpression  */
-#line 2759 "cmDependsJavaParser.y"
-{
-  jpElementStart(3);
-  jpCheckEmpty(3);
-  (yyval.str) = 0;
-  yyGetParser->SetCurrentCombine("");
-
-}
-#line 5814 "cmDependsJavaParser.cxx"
-    break;
-
   case 305: /* ShiftExpression: AdditiveExpression  */
-#line 2769 "cmDependsJavaParser.y"
+#line 2774 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -5822,11 +5810,23 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 5826 "cmDependsJavaParser.cxx"
+#line 5814 "cmDependsJavaParser.cxx"
     break;
 
   case 306: /* ShiftExpression: ShiftExpression jp_LTLT AdditiveExpression  */
-#line 2778 "cmDependsJavaParser.y"
+#line 2783 "cmDependsJavaParser.y"
+{
+  jpElementStart(3);
+  jpCheckEmpty(3);
+  (yyval.str) = 0;
+  yyGetParser->SetCurrentCombine("");
+
+}
+#line 5826 "cmDependsJavaParser.cxx"
+    break;
+
+  case 307: /* ShiftExpression: ShiftExpression jp_GTGT AdditiveExpression  */
+#line 2792 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   jpCheckEmpty(3);
@@ -5837,8 +5837,8 @@ yyreduce:
 #line 5838 "cmDependsJavaParser.cxx"
     break;
 
-  case 307: /* ShiftExpression: ShiftExpression jp_GTGT AdditiveExpression  */
-#line 2787 "cmDependsJavaParser.y"
+  case 308: /* ShiftExpression: ShiftExpression jp_GTGTGT AdditiveExpression  */
+#line 2801 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   jpCheckEmpty(3);
@@ -5849,20 +5849,8 @@ yyreduce:
 #line 5850 "cmDependsJavaParser.cxx"
     break;
 
-  case 308: /* ShiftExpression: ShiftExpression jp_GTGTGT AdditiveExpression  */
-#line 2796 "cmDependsJavaParser.y"
-{
-  jpElementStart(3);
-  jpCheckEmpty(3);
-  (yyval.str) = 0;
-  yyGetParser->SetCurrentCombine("");
-
-}
-#line 5862 "cmDependsJavaParser.cxx"
-    break;
-
   case 309: /* RelationalExpression: ShiftExpression  */
-#line 2806 "cmDependsJavaParser.y"
+#line 2811 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -5870,11 +5858,23 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 5874 "cmDependsJavaParser.cxx"
+#line 5862 "cmDependsJavaParser.cxx"
     break;
 
   case 310: /* RelationalExpression: RelationalExpression jp_LESSTHAN ShiftExpression  */
-#line 2815 "cmDependsJavaParser.y"
+#line 2820 "cmDependsJavaParser.y"
+{
+  jpElementStart(3);
+  jpCheckEmpty(3);
+  (yyval.str) = 0;
+  yyGetParser->SetCurrentCombine("");
+
+}
+#line 5874 "cmDependsJavaParser.cxx"
+    break;
+
+  case 311: /* RelationalExpression: RelationalExpression jp_GREATER ShiftExpression  */
+#line 2829 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   jpCheckEmpty(3);
@@ -5885,8 +5885,8 @@ yyreduce:
 #line 5886 "cmDependsJavaParser.cxx"
     break;
 
-  case 311: /* RelationalExpression: RelationalExpression jp_GREATER ShiftExpression  */
-#line 2824 "cmDependsJavaParser.y"
+  case 312: /* RelationalExpression: RelationalExpression jp_LTEQUALS ShiftExpression  */
+#line 2838 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   jpCheckEmpty(3);
@@ -5897,8 +5897,8 @@ yyreduce:
 #line 5898 "cmDependsJavaParser.cxx"
     break;
 
-  case 312: /* RelationalExpression: RelationalExpression jp_LTEQUALS ShiftExpression  */
-#line 2833 "cmDependsJavaParser.y"
+  case 313: /* RelationalExpression: RelationalExpression jp_GTEQUALS ShiftExpression  */
+#line 2847 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   jpCheckEmpty(3);
@@ -5909,8 +5909,8 @@ yyreduce:
 #line 5910 "cmDependsJavaParser.cxx"
     break;
 
-  case 313: /* RelationalExpression: RelationalExpression jp_GTEQUALS ShiftExpression  */
-#line 2842 "cmDependsJavaParser.y"
+  case 314: /* RelationalExpression: RelationalExpression jp_INSTANCEOF ReferenceType  */
+#line 2856 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   jpCheckEmpty(3);
@@ -5921,20 +5921,8 @@ yyreduce:
 #line 5922 "cmDependsJavaParser.cxx"
     break;
 
-  case 314: /* RelationalExpression: RelationalExpression jp_INSTANCEOF ReferenceType  */
-#line 2851 "cmDependsJavaParser.y"
-{
-  jpElementStart(3);
-  jpCheckEmpty(3);
-  (yyval.str) = 0;
-  yyGetParser->SetCurrentCombine("");
-
-}
-#line 5934 "cmDependsJavaParser.cxx"
-    break;
-
   case 315: /* EqualityExpression: RelationalExpression  */
-#line 2861 "cmDependsJavaParser.y"
+#line 2866 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -5942,11 +5930,23 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 5946 "cmDependsJavaParser.cxx"
+#line 5934 "cmDependsJavaParser.cxx"
     break;
 
   case 316: /* EqualityExpression: EqualityExpression jp_EQUALSEQUALS RelationalExpression  */
-#line 2870 "cmDependsJavaParser.y"
+#line 2875 "cmDependsJavaParser.y"
+{
+  jpElementStart(3);
+  jpCheckEmpty(3);
+  (yyval.str) = 0;
+  yyGetParser->SetCurrentCombine("");
+
+}
+#line 5946 "cmDependsJavaParser.cxx"
+    break;
+
+  case 317: /* EqualityExpression: EqualityExpression jp_EXCLAMATIONEQUALS RelationalExpression  */
+#line 2884 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   jpCheckEmpty(3);
@@ -5957,11 +5957,11 @@ yyreduce:
 #line 5958 "cmDependsJavaParser.cxx"
     break;
 
-  case 317: /* EqualityExpression: EqualityExpression jp_EXCLAMATIONEQUALS RelationalExpression  */
-#line 2879 "cmDependsJavaParser.y"
+  case 318: /* AndExpression: EqualityExpression  */
+#line 2894 "cmDependsJavaParser.y"
 {
-  jpElementStart(3);
-  jpCheckEmpty(3);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -5969,11 +5969,11 @@ yyreduce:
 #line 5970 "cmDependsJavaParser.cxx"
     break;
 
-  case 318: /* AndExpression: EqualityExpression  */
-#line 2889 "cmDependsJavaParser.y"
+  case 319: /* AndExpression: AndExpression jp_AND EqualityExpression  */
+#line 2903 "cmDependsJavaParser.y"
 {
-  jpElementStart(1);
-  jpCheckEmpty(1);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -5981,11 +5981,11 @@ yyreduce:
 #line 5982 "cmDependsJavaParser.cxx"
     break;
 
-  case 319: /* AndExpression: AndExpression jp_AND EqualityExpression  */
-#line 2898 "cmDependsJavaParser.y"
+  case 320: /* ExclusiveOrExpression: AndExpression  */
+#line 2913 "cmDependsJavaParser.y"
 {
-  jpElementStart(3);
-  jpCheckEmpty(3);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -5993,11 +5993,11 @@ yyreduce:
 #line 5994 "cmDependsJavaParser.cxx"
     break;
 
-  case 320: /* ExclusiveOrExpression: AndExpression  */
-#line 2908 "cmDependsJavaParser.y"
+  case 321: /* ExclusiveOrExpression: ExclusiveOrExpression jp_CARROT AndExpression  */
+#line 2922 "cmDependsJavaParser.y"
 {
-  jpElementStart(1);
-  jpCheckEmpty(1);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -6005,11 +6005,11 @@ yyreduce:
 #line 6006 "cmDependsJavaParser.cxx"
     break;
 
-  case 321: /* ExclusiveOrExpression: ExclusiveOrExpression jp_CARROT AndExpression  */
-#line 2917 "cmDependsJavaParser.y"
+  case 322: /* InclusiveOrExpression: ExclusiveOrExpression  */
+#line 2932 "cmDependsJavaParser.y"
 {
-  jpElementStart(3);
-  jpCheckEmpty(3);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -6017,11 +6017,11 @@ yyreduce:
 #line 6018 "cmDependsJavaParser.cxx"
     break;
 
-  case 322: /* InclusiveOrExpression: ExclusiveOrExpression  */
-#line 2927 "cmDependsJavaParser.y"
+  case 323: /* InclusiveOrExpression: InclusiveOrExpression jp_PIPE ExclusiveOrExpression  */
+#line 2941 "cmDependsJavaParser.y"
 {
-  jpElementStart(1);
-  jpCheckEmpty(1);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -6029,11 +6029,11 @@ yyreduce:
 #line 6030 "cmDependsJavaParser.cxx"
     break;
 
-  case 323: /* InclusiveOrExpression: InclusiveOrExpression jp_PIPE ExclusiveOrExpression  */
-#line 2936 "cmDependsJavaParser.y"
+  case 324: /* ConditionalAndExpression: InclusiveOrExpression  */
+#line 2951 "cmDependsJavaParser.y"
 {
-  jpElementStart(3);
-  jpCheckEmpty(3);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -6041,11 +6041,11 @@ yyreduce:
 #line 6042 "cmDependsJavaParser.cxx"
     break;
 
-  case 324: /* ConditionalAndExpression: InclusiveOrExpression  */
-#line 2946 "cmDependsJavaParser.y"
+  case 325: /* ConditionalAndExpression: ConditionalAndExpression jp_ANDAND InclusiveOrExpression  */
+#line 2960 "cmDependsJavaParser.y"
 {
-  jpElementStart(1);
-  jpCheckEmpty(1);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -6053,11 +6053,11 @@ yyreduce:
 #line 6054 "cmDependsJavaParser.cxx"
     break;
 
-  case 325: /* ConditionalAndExpression: ConditionalAndExpression jp_ANDAND InclusiveOrExpression  */
-#line 2955 "cmDependsJavaParser.y"
+  case 326: /* ConditionalOrExpression: ConditionalAndExpression  */
+#line 2970 "cmDependsJavaParser.y"
 {
-  jpElementStart(3);
-  jpCheckEmpty(3);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   (yyval.str) = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -6065,20 +6065,8 @@ yyreduce:
 #line 6066 "cmDependsJavaParser.cxx"
     break;
 
-  case 326: /* ConditionalOrExpression: ConditionalAndExpression  */
-#line 2965 "cmDependsJavaParser.y"
-{
-  jpElementStart(1);
-  jpCheckEmpty(1);
-  (yyval.str) = 0;
-  yyGetParser->SetCurrentCombine("");
-
-}
-#line 6078 "cmDependsJavaParser.cxx"
-    break;
-
   case 327: /* ConditionalOrExpression: ConditionalOrExpression jp_PIPEPIPE ConditionalAndExpression  */
-#line 2974 "cmDependsJavaParser.y"
+#line 2979 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   jpCheckEmpty(3);
@@ -6086,11 +6074,11 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 6090 "cmDependsJavaParser.cxx"
+#line 6078 "cmDependsJavaParser.cxx"
     break;
 
   case 328: /* ConditionalExpression: ConditionalOrExpression  */
-#line 2984 "cmDependsJavaParser.y"
+#line 2989 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -6098,11 +6086,11 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 6102 "cmDependsJavaParser.cxx"
+#line 6090 "cmDependsJavaParser.cxx"
     break;
 
   case 329: /* ConditionalExpression: ConditionalOrExpression jp_QUESTION Expression jp_COLON ConditionalExpression  */
-#line 2993 "cmDependsJavaParser.y"
+#line 2998 "cmDependsJavaParser.y"
 {
   jpElementStart(5);
   jpCheckEmpty(5);
@@ -6110,11 +6098,23 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 6114 "cmDependsJavaParser.cxx"
+#line 6102 "cmDependsJavaParser.cxx"
     break;
 
   case 330: /* AssignmentExpression: ConditionalExpression  */
-#line 3003 "cmDependsJavaParser.y"
+#line 3008 "cmDependsJavaParser.y"
+{
+  jpElementStart(1);
+  jpCheckEmpty(1);
+  (yyval.str) = 0;
+  yyGetParser->SetCurrentCombine("");
+
+}
+#line 6114 "cmDependsJavaParser.cxx"
+    break;
+
+  case 331: /* AssignmentExpression: Assignment  */
+#line 3017 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -6125,20 +6125,8 @@ yyreduce:
 #line 6126 "cmDependsJavaParser.cxx"
     break;
 
-  case 331: /* AssignmentExpression: Assignment  */
-#line 3012 "cmDependsJavaParser.y"
-{
-  jpElementStart(1);
-  jpCheckEmpty(1);
-  (yyval.str) = 0;
-  yyGetParser->SetCurrentCombine("");
-
-}
-#line 6138 "cmDependsJavaParser.cxx"
-    break;
-
   case 332: /* Assignment: LeftHandSide AssignmentOperator AssignmentExpression  */
-#line 3022 "cmDependsJavaParser.y"
+#line 3027 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   jpCheckEmpty(3);
@@ -6146,11 +6134,11 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 6150 "cmDependsJavaParser.cxx"
+#line 6138 "cmDependsJavaParser.cxx"
     break;
 
   case 333: /* LeftHandSide: Name  */
-#line 3032 "cmDependsJavaParser.y"
+#line 3037 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   yyGetParser->DeallocateParserType(&((yyvsp[0].str)));
@@ -6159,11 +6147,23 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 6163 "cmDependsJavaParser.cxx"
+#line 6151 "cmDependsJavaParser.cxx"
     break;
 
   case 334: /* LeftHandSide: FieldAccess  */
-#line 3042 "cmDependsJavaParser.y"
+#line 3047 "cmDependsJavaParser.y"
+{
+  jpElementStart(1);
+  jpCheckEmpty(1);
+  (yyval.str) = 0;
+  yyGetParser->SetCurrentCombine("");
+
+}
+#line 6163 "cmDependsJavaParser.cxx"
+    break;
+
+  case 335: /* LeftHandSide: ArrayAccess  */
+#line 3056 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -6174,8 +6174,8 @@ yyreduce:
 #line 6175 "cmDependsJavaParser.cxx"
     break;
 
-  case 335: /* LeftHandSide: ArrayAccess  */
-#line 3051 "cmDependsJavaParser.y"
+  case 336: /* AssignmentOperator: jp_EQUALS  */
+#line 3066 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -6186,8 +6186,8 @@ yyreduce:
 #line 6187 "cmDependsJavaParser.cxx"
     break;
 
-  case 336: /* AssignmentOperator: jp_EQUALS  */
-#line 3061 "cmDependsJavaParser.y"
+  case 337: /* AssignmentOperator: jp_TIMESEQUALS  */
+#line 3075 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -6198,8 +6198,8 @@ yyreduce:
 #line 6199 "cmDependsJavaParser.cxx"
     break;
 
-  case 337: /* AssignmentOperator: jp_TIMESEQUALS  */
-#line 3070 "cmDependsJavaParser.y"
+  case 338: /* AssignmentOperator: jp_DIVIDEEQUALS  */
+#line 3084 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -6210,8 +6210,8 @@ yyreduce:
 #line 6211 "cmDependsJavaParser.cxx"
     break;
 
-  case 338: /* AssignmentOperator: jp_DIVIDEEQUALS  */
-#line 3079 "cmDependsJavaParser.y"
+  case 339: /* AssignmentOperator: jp_PERCENTEQUALS  */
+#line 3093 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -6222,8 +6222,8 @@ yyreduce:
 #line 6223 "cmDependsJavaParser.cxx"
     break;
 
-  case 339: /* AssignmentOperator: jp_PERCENTEQUALS  */
-#line 3088 "cmDependsJavaParser.y"
+  case 340: /* AssignmentOperator: jp_PLUSEQUALS  */
+#line 3102 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -6234,8 +6234,8 @@ yyreduce:
 #line 6235 "cmDependsJavaParser.cxx"
     break;
 
-  case 340: /* AssignmentOperator: jp_PLUSEQUALS  */
-#line 3097 "cmDependsJavaParser.y"
+  case 341: /* AssignmentOperator: jp_MINUSEQUALS  */
+#line 3111 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -6246,8 +6246,8 @@ yyreduce:
 #line 6247 "cmDependsJavaParser.cxx"
     break;
 
-  case 341: /* AssignmentOperator: jp_MINUSEQUALS  */
-#line 3106 "cmDependsJavaParser.y"
+  case 342: /* AssignmentOperator: jp_LESLESEQUALS  */
+#line 3120 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -6258,8 +6258,8 @@ yyreduce:
 #line 6259 "cmDependsJavaParser.cxx"
     break;
 
-  case 342: /* AssignmentOperator: jp_LESLESEQUALS  */
-#line 3115 "cmDependsJavaParser.y"
+  case 343: /* AssignmentOperator: jp_GTGTEQUALS  */
+#line 3129 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -6270,8 +6270,8 @@ yyreduce:
 #line 6271 "cmDependsJavaParser.cxx"
     break;
 
-  case 343: /* AssignmentOperator: jp_GTGTEQUALS  */
-#line 3124 "cmDependsJavaParser.y"
+  case 344: /* AssignmentOperator: jp_GTGTGTEQUALS  */
+#line 3138 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -6282,8 +6282,8 @@ yyreduce:
 #line 6283 "cmDependsJavaParser.cxx"
     break;
 
-  case 344: /* AssignmentOperator: jp_GTGTGTEQUALS  */
-#line 3133 "cmDependsJavaParser.y"
+  case 345: /* AssignmentOperator: jp_ANDEQUALS  */
+#line 3147 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -6294,8 +6294,8 @@ yyreduce:
 #line 6295 "cmDependsJavaParser.cxx"
     break;
 
-  case 345: /* AssignmentOperator: jp_ANDEQUALS  */
-#line 3142 "cmDependsJavaParser.y"
+  case 346: /* AssignmentOperator: jp_CARROTEQUALS  */
+#line 3156 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -6306,8 +6306,8 @@ yyreduce:
 #line 6307 "cmDependsJavaParser.cxx"
     break;
 
-  case 346: /* AssignmentOperator: jp_CARROTEQUALS  */
-#line 3151 "cmDependsJavaParser.y"
+  case 347: /* AssignmentOperator: jp_PIPEEQUALS  */
+#line 3165 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -6318,8 +6318,8 @@ yyreduce:
 #line 6319 "cmDependsJavaParser.cxx"
     break;
 
-  case 347: /* AssignmentOperator: jp_PIPEEQUALS  */
-#line 3160 "cmDependsJavaParser.y"
+  case 348: /* Expression: AssignmentExpression  */
+#line 3175 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -6330,8 +6330,8 @@ yyreduce:
 #line 6331 "cmDependsJavaParser.cxx"
     break;
 
-  case 348: /* Expression: AssignmentExpression  */
-#line 3170 "cmDependsJavaParser.y"
+  case 349: /* ConstantExpression: Expression  */
+#line 3185 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -6342,8 +6342,8 @@ yyreduce:
 #line 6343 "cmDependsJavaParser.cxx"
     break;
 
-  case 349: /* ConstantExpression: Expression  */
-#line 3180 "cmDependsJavaParser.y"
+  case 350: /* New: jp_NEW  */
+#line 3195 "cmDependsJavaParser.y"
 {
   jpElementStart(1);
   jpCheckEmpty(1);
@@ -6354,20 +6354,8 @@ yyreduce:
 #line 6355 "cmDependsJavaParser.cxx"
     break;
 
-  case 350: /* New: jp_NEW  */
-#line 3190 "cmDependsJavaParser.y"
-{
-  jpElementStart(1);
-  jpCheckEmpty(1);
-  (yyval.str) = 0;
-  yyGetParser->SetCurrentCombine("");
-
-}
-#line 6367 "cmDependsJavaParser.cxx"
-    break;
-
   case 351: /* New: Name jp_DOT jp_NEW  */
-#line 3199 "cmDependsJavaParser.y"
+#line 3204 "cmDependsJavaParser.y"
 {
   jpElementStart(3);
   jpStoreClass((yyvsp[-2].str));
@@ -6376,11 +6364,11 @@ yyreduce:
   yyGetParser->SetCurrentCombine("");
 
 }
-#line 6380 "cmDependsJavaParser.cxx"
+#line 6368 "cmDependsJavaParser.cxx"
     break;
 
 
-#line 6384 "cmDependsJavaParser.cxx"
+#line 6372 "cmDependsJavaParser.cxx"
 
       default: break;
     }
@@ -6456,7 +6444,7 @@ yyerrlab:
           }
         yyerror (yyscanner, yymsgp);
         if (yysyntax_error_status == YYENOMEM)
-          goto yyexhaustedlab;
+          YYNOMEM;
       }
     }
 
@@ -6492,6 +6480,7 @@ yyerrorlab:
      label yyerrorlab therefore never appears in user code.  */
   if (0)
     YYERROR;
+  ++yynerrs;
 
   /* Do not reclaim the symbols of the rule whose action triggered
      this YYERROR.  */
@@ -6552,7 +6541,7 @@ yyerrlab1:
 `-------------------------------------*/
 yyacceptlab:
   yyresult = 0;
-  goto yyreturn;
+  goto yyreturnlab;
 
 
 /*-----------------------------------.
@@ -6560,24 +6549,22 @@ yyacceptlab:
 `-----------------------------------*/
 yyabortlab:
   yyresult = 1;
-  goto yyreturn;
+  goto yyreturnlab;
 
 
-#if 1
-/*-------------------------------------------------.
-| yyexhaustedlab -- memory exhaustion comes here.  |
-`-------------------------------------------------*/
+/*-----------------------------------------------------------.
+| yyexhaustedlab -- YYNOMEM (memory exhaustion) comes here.  |
+`-----------------------------------------------------------*/
 yyexhaustedlab:
   yyerror (yyscanner, YY_("memory exhausted"));
   yyresult = 2;
-  goto yyreturn;
-#endif
+  goto yyreturnlab;
 
 
-/*-------------------------------------------------------.
-| yyreturn -- parsing is finished, clean up and return.  |
-`-------------------------------------------------------*/
-yyreturn:
+/*----------------------------------------------------------.
+| yyreturnlab -- parsing is finished, clean up and return.  |
+`----------------------------------------------------------*/
+yyreturnlab:
   if (yychar != YYEMPTY)
     {
       /* Make sure we have latest lookahead translation.  See comments at
@@ -6605,7 +6592,7 @@ yyreturn:
   return yyresult;
 }
 
-#line 3208 "cmDependsJavaParser.y"
+#line 3213 "cmDependsJavaParser.y"
 
 /* End of grammar */
 

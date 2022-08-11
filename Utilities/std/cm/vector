@@ -8,6 +8,8 @@
 #include <algorithm>
 #include <vector> // IWYU pragma: export
 
+#include <cm/bits/container_helpers.hxx> // IWYU pragma: export
+
 namespace cm {
 
 // should be updated when C++20 is finalized

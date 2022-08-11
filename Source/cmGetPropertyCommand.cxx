@@ -71,7 +71,7 @@ bool cmGetPropertyCommand(std::vector<std::string> const& args,
   }
 
   // The cmake variable in which to store the result.
-  const std::string variable = args[0];
+  std::string const& variable = args[0];
 
   std::string name;
   std::string propertyName;

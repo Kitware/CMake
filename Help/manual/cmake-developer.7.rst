@@ -242,6 +242,69 @@ backwards compatibility for any old names that were actually in use.
 Make sure you comment them as deprecated, so that no-one starts using
 them.
 
+.. _`Find Using Windows Registry`:
+
+Find Using Windows Registry
+---------------------------
+
+.. versionchanged:: 3.24
+
+Options ``HINTS`` and ``PATHS`` of :command:`find_file`,
+:command:`find_library`, :command:`find_path`, :command:`find_program`, and
+:command:`find_package` commands offer the possibility, on ``Windows``
+platform, to query the registry.
+
+The formal syntax, as specified using
+`BNF <https://en.wikipedia.org/wiki/Backus%E2%80%93Naur_form>`_ notation with
+the regular extensions, for registry query is the following:
+
+.. raw:: latex
+
+   \begin{small}
+
+.. productionlist::
+  registry_query: '[' `sep_definition`? `root_key`
+                :     ((`key_separator` `sub_key`)? (`value_separator` `value_name`_)?)? ']'
+  sep_definition: '{' `value_separator` '}'
+  root_key: 'HKLM' | 'HKEY_LOCAL_MACHINE' | 'HKCU' | 'HKEY_CURRENT_USER' |
+          : 'HKCR' | 'HKEY_CLASSES_ROOT' | 'HKCC' | 'HKEY_CURRENT_CONFIG' |
+          : 'HKU' | 'HKEY_USERS'
+  sub_key: `element` (`key_separator` `element`)*
+  key_separator: '/' | '\\'
+  value_separator: `element` | ';'
+  value_name: `element` | '(default)'
+  element: `character`\+
+  character: <any character except `key_separator` and `value_separator`>
+
+.. raw:: latex
+
+   \end{small}
+
+The :token:`sep_definition` optional item offers the possibility to specify
+the string used to separate the :token:`sub_key` from the :token:`value_name`
+item. If not specified, the character ``;`` is used. Multiple
+:token:`registry_query` items can be specified as part of a path.
+
+.. code-block:: cmake
+
+  # example using default separator
+  find_file(... PATHS "/root/[HKLM/Stuff;InstallDir]/lib[HKLM\\\\Stuff;Architecture]")
+
+  # example using different specified separators
+  find_library(... HINTS "/root/[{|}HKCU/Stuff|InstallDir]/lib[{@@}HKCU\\\\Stuff@@Architecture]")
+
+If the :token:`value_name` item is not specified or has the special name
+``(default)``, the content of the default value, if any, will be returned. The
+supported types for the :token:`value_name` are:
+
+* ``REG_SZ``.
+* ``REG_EXPAND_SZ``. The returned data is expanded.
+* ``REG_DWORD``.
+* ``REG_QWORD``.
+
+When the registry query failed, typically because the key does not exist or
+the data type is not supported, the string ``/REGISTRY-NOTFOUND`` is substituted
+to the ``[]`` query expression.
 
 A Sample Find Module
 --------------------

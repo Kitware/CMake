@@ -44,6 +44,7 @@ if (NOT CMAKE_FIND_NO_INSTALL_PREFIX)
     )
   endif()
 endif()
+_cmake_record_install_prefix()
 
 # Non "standard" but common install prefixes
 list(APPEND CMAKE_SYSTEM_PREFIX_PATH

@@ -1,0 +1,8 @@
+CMake Error at invalid-feature.cmake:[0-9]+ \(target_link_libraries\):
+  Error evaluating generator expression:
+
+    \$<LINK_GROUP:feat:invalid,dep>
+
+  The feature name 'feat:invalid' contains invalid characters.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

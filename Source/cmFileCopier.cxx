@@ -27,16 +27,6 @@ cmFileCopier::cmFileCopier(cmExecutionStatus& status, const char* name)
   : Status(status)
   , Makefile(&status.GetMakefile())
   , Name(name)
-  , Always(false)
-  , MatchlessFiles(true)
-  , FilePermissions(0)
-  , DirPermissions(0)
-  , CurrentMatchRule(nullptr)
-  , UseGivenPermissionsFile(false)
-  , UseGivenPermissionsDir(false)
-  , UseSourcePermissions(true)
-  , FollowSymlinkChain(false)
-  , Doing(DoingNone)
 {
 }
 

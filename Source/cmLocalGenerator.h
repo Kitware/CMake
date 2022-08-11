@@ -159,6 +159,7 @@ public:
                                   cmGeneratorTarget const* target,
                                   const std::string& lang,
                                   const std::string& config);
+  void AddColorDiagnosticsFlags(std::string& flags, const std::string& lang);
   //! Append flags to a string.
   virtual void AppendFlags(std::string& flags,
                            const std::string& newFlags) const;
@@ -169,6 +170,7 @@ public:
   void AddISPCDependencies(cmGeneratorTarget* target);
   void AddPchDependencies(cmGeneratorTarget* target);
   void AddUnityBuild(cmGeneratorTarget* target);
+  virtual void AddXCConfigSources(cmGeneratorTarget* /* target */) {}
   void AppendIPOLinkerFlags(std::string& flags, cmGeneratorTarget* target,
                             const std::string& config,
                             const std::string& lang);
@@ -176,6 +178,10 @@ public:
                                             cmGeneratorTarget* target,
                                             const std::string& config,
                                             const std::string& lang);
+  void AppendModuleDefinitionFlag(std::string& flags,
+                                  cmGeneratorTarget const* target,
+                                  cmLinkLineComputer* linkLineComputer,
+                                  std::string const& config);
   bool AppendLWYUFlags(std::string& flags, const cmGeneratorTarget* target,
                        const std::string& lang);
 

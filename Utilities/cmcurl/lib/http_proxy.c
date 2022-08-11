@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -35,7 +35,6 @@
 #include "url.h"
 #include "select.h"
 #include "progress.h"
-#include "non-ascii.h"
 #include "connect.h"
 #include "curlx.h"
 #include "vtls/vtls.h"
@@ -173,7 +172,7 @@ static CURLcode connect_init(struct Curl_easy *data, bool reinit)
     s = calloc(1, sizeof(struct http_connect_state));
     if(!s)
       return CURLE_OUT_OF_MEMORY;
-    infof(data, "allocate connect buffer!");
+    infof(data, "allocate connect buffer");
     conn->connect_state = s;
     Curl_dyn_init(&s->rcvbuf, DYN_PROXY_CONNECT_HEADERS);
 
@@ -221,7 +220,7 @@ void Curl_connect_done(struct Curl_easy *data)
 #ifdef USE_HYPER
     data->state.hconnect = FALSE;
 #endif
-    infof(data, "CONNECT phase completed!");
+    infof(data, "CONNECT phase completed");
   }
 }
 
@@ -245,7 +244,7 @@ static CURLcode CONNECT_host(struct Curl_easy *data,
   if(!hostheader)
     return CURLE_OUT_OF_MEMORY;
 
-  if(!Curl_checkProxyheaders(data, conn, "Host")) {
+  if(!Curl_checkProxyheaders(data, conn, STRCONST("Host"))) {
     host = aprintf("Host: %s\r\n", hostheader);
     if(!host) {
       free(hostheader);
@@ -324,25 +323,29 @@ static CURLcode CONNECT(struct Curl_easy *data,
                         data->state.aptr.proxyuserpwd?
                         data->state.aptr.proxyuserpwd:"");
 
-        if(!result && !Curl_checkProxyheaders(data, conn, "User-Agent") &&
+        if(!result && !Curl_checkProxyheaders(data,
+                                              conn, STRCONST("User-Agent")) &&
            data->set.str[STRING_USERAGENT])
           result = Curl_dyn_addf(req, "User-Agent: %s\r\n",
                                  data->set.str[STRING_USERAGENT]);
 
-        if(!result && !Curl_checkProxyheaders(data, conn, "Proxy-Connection"))
-          result = Curl_dyn_add(req, "Proxy-Connection: Keep-Alive\r\n");
+        if(!result && !Curl_checkProxyheaders(data, conn,
+                                              STRCONST("Proxy-Connection")))
+          result = Curl_dyn_addn(req,
+                                 STRCONST("Proxy-Connection: Keep-Alive\r\n"));
 
         if(!result)
           result = Curl_add_custom_headers(data, TRUE, req);
 
         if(!result)
           /* CRLF terminate the request */
-          result = Curl_dyn_add(req, "\r\n");
+          result = Curl_dyn_addn(req, STRCONST("\r\n"));
 
         if(!result) {
           /* Send the connect request to the proxy */
           result = Curl_buffer_send(req, data, &data->info.request_size, 0,
                                     sockindex);
+          s->headerlines = 0;
         }
         if(result)
           failf(data, "Failed sending CONNECT to proxy");
@@ -470,7 +473,7 @@ static CURLcode CONNECT(struct Curl_easy *data,
         }
 
         if(Curl_dyn_addn(&s->rcvbuf, &byte, 1)) {
-          failf(data, "CONNECT response too large!");
+          failf(data, "CONNECT response too large");
           return CURLE_RECV_ERROR;
         }
 
@@ -478,23 +481,18 @@ static CURLcode CONNECT(struct Curl_easy *data,
         if(byte != 0x0a)
           continue;
 
+        s->headerlines++;
         linep = Curl_dyn_ptr(&s->rcvbuf);
         perline = Curl_dyn_len(&s->rcvbuf); /* amount of bytes in this line */
-
-        /* convert from the network encoding */
-        result = Curl_convert_from_network(data, linep, perline);
-        /* Curl_convert_from_network calls failf if unsuccessful */
-        if(result)
-          return result;
 
         /* output debug if that is requested */
         Curl_debug(data, CURLINFO_HEADER_IN, linep, perline);
 
         if(!data->set.suppress_connect_headers) {
           /* send the header to the callback */
-          int writetype = CLIENTWRITE_HEADER;
-          if(data->set.include_header)
-            writetype |= CLIENTWRITE_BODY;
+          int writetype = CLIENTWRITE_HEADER | CLIENTWRITE_CONNECT |
+            (data->set.include_header ? CLIENTWRITE_BODY : 0) |
+            (s->headerlines == 1 ? CLIENTWRITE_STATUS : 0);
 
           result = Curl_client_write(data, writetype, linep, perline);
           if(result)
@@ -596,7 +594,8 @@ static CURLcode CONNECT(struct Curl_easy *data,
                                   strlen("Content-Length:"), NULL, 10, &s->cl);
           }
         }
-        else if(Curl_compareheader(linep, "Connection:", "close"))
+        else if(Curl_compareheader(linep,
+                                   STRCONST("Connection:"), STRCONST("close")))
           s->close_connection = TRUE;
         else if(checkprefix("Transfer-Encoding:", linep)) {
           if(k->httpcode/100 == 2) {
@@ -607,14 +606,17 @@ static CURLcode CONNECT(struct Curl_easy *data,
                   "CONNECT %03d response", k->httpcode);
           }
           else if(Curl_compareheader(linep,
-                                     "Transfer-Encoding:", "chunked")) {
+                                     STRCONST("Transfer-Encoding:"),
+                                     STRCONST("chunked"))) {
             infof(data, "CONNECT responded chunked");
             s->chunked_encoding = TRUE;
             /* init our chunky engine */
             Curl_httpchunk_init(data);
           }
         }
-        else if(Curl_compareheader(linep, "Proxy-Connection:", "close"))
+        else if(Curl_compareheader(linep,
+                                   STRCONST("Proxy-Connection:"),
+                                   STRCONST("close")))
           s->close_connection = TRUE;
         else if(2 == sscanf(linep, "HTTP/1.%d %d",
                             &subversion,
@@ -765,6 +767,9 @@ static CURLcode CONNECT(struct Curl_easy *data,
       }
 
       options = hyper_clientconn_options_new();
+      hyper_clientconn_options_set_preserve_header_case(options, 1);
+      hyper_clientconn_options_set_preserve_header_order(options, 1);
+
       if(!options) {
         failf(data, "Couldn't create hyper client options");
         result = CURLE_OUT_OF_MEMORY;
@@ -877,7 +882,7 @@ static CURLcode CONNECT(struct Curl_easy *data,
           goto error;
       }
 
-      if(!Curl_checkProxyheaders(data, conn, "User-Agent") &&
+      if(!Curl_checkProxyheaders(data, conn, STRCONST("User-Agent")) &&
          data->set.str[STRING_USERAGENT]) {
         struct dynbuf ua;
         Curl_dyn_init(&ua, DYN_HTTP_REQUEST);
@@ -891,7 +896,7 @@ static CURLcode CONNECT(struct Curl_easy *data,
         Curl_dyn_free(&ua);
       }
 
-      if(!Curl_checkProxyheaders(data, conn, "Proxy-Connection")) {
+      if(!Curl_checkProxyheaders(data, conn, STRCONST("Proxy-Connection"))) {
         result = Curl_hyper_header(data, headers,
                                    "Proxy-Connection: Keep-Alive");
         if(result)
@@ -959,6 +964,13 @@ static CURLcode CONNECT(struct Curl_easy *data,
     break;
 
     default:
+      break;
+    }
+
+    if(conn->bits.close && data->req.newurl) {
+      /* Connection closed by server. Don't use it anymore */
+      Curl_closesocket(data, conn, conn->sock[sockindex]);
+      conn->sock[sockindex] = CURL_SOCKET_BAD;
       break;
     }
 

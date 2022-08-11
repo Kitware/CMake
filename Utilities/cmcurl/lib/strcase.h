@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -28,8 +28,9 @@
  * Only "raw" case insensitive strings. This is meant to be locale independent
  * and only compare strings we know are safe for this.
  *
- * The function is capable of comparing a-z case insensitively even for
- * non-ascii.
+ * The function is capable of comparing a-z case insensitively.
+ *
+ * Result is 1 if text matches and 0 if not.
  */
 
 #define strcasecompare(a,b) Curl_strcasecompare(a,b)
@@ -42,10 +43,12 @@ int Curl_strncasecompare(const char *first, const char *second, size_t max);
 char Curl_raw_toupper(char in);
 
 /* checkprefix() is a shorter version of the above, used when the first
-   argument is zero-byte terminated */
-#define checkprefix(a,b)    curl_strnequal(a,b,strlen(a))
+   argument is the string literal */
+#define checkprefix(a,b)    curl_strnequal(b, STRCONST(a))
 
 void Curl_strntoupper(char *dest, const char *src, size_t n);
 void Curl_strntolower(char *dest, const char *src, size_t n);
+
+bool Curl_safecmp(char *a, char *b);
 
 #endif /* HEADER_CURL_STRCASE_H */

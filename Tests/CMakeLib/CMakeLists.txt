@@ -29,6 +29,7 @@ set(CMakeLib_TESTS
   testUVStreambuf.cxx
   testCMExtMemory.cxx
   testCMExtAlgorithm.cxx
+  testCMExtEnumSet.cxx
   )
 if (CMake_TEST_FILESYSTEM_PATH OR NOT CMake_HAVE_CXX_FILESYSTEM)
   list(APPEND CMakeLib_TESTS testCMFilesystemPath.cxx)

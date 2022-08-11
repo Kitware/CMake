@@ -20,7 +20,7 @@ bool cmTryCompileCommand::InitialPass(std::vector<std::string> const& argv,
       cmake::FIND_PACKAGE_MODE) {
     this->Makefile->IssueMessage(
       MessageType::FATAL_ERROR,
-      "The TRY_COMPILE() command is not supported in --find-package mode.");
+      "The try_compile() command is not supported in --find-package mode.");
     return false;
   }
 

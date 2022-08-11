@@ -1,4 +1,4 @@
-CMake Error at do_test.cmake:2 \(find_package\):
+CMake Error at do_test.cmake:16 \(find_package\):
   By not providing "FindNoPrefix.cmake" in CMAKE_MODULE_PATH this project has
   asked CMake to find a package configuration file provided by "NoPrefix",
   but CMake did not find one.

@@ -1,0 +1,15 @@
+if(NOT "$ENV{CC}" STREQUAL "")
+  message(STATUS "Test environment already sets CC, test being SKIPPED")
+  return()
+elseif(CMAKE_GENERATOR MATCHES "Xcode|Visual Studio")
+  message(STATUS "This generator never sets CC, test being SKIPPED")
+  return()
+endif()
+
+enable_language(C)
+
+if("$ENV{CC}" STREQUAL "")
+  message(STATUS "CC was left unset")
+else()
+  message(STATUS "CC was set to $ENV{CC}")
+endif()

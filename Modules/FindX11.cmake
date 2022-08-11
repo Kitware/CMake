@@ -31,8 +31,11 @@ and also the following more fine grained variables and targets:
   X11_xcb_INCLUDE_PATH,          X11_xcb_LIB,        X11_xcb_FOUND,        X11::xcb
   X11_X11_xcb_INCLUDE_PATH,      X11_X11_xcb_LIB,    X11_X11_xcb_FOUND,    X11::X11_xcb
   X11_xcb_icccm_INCLUDE_PATH,    X11_xcb_icccm_LIB,  X11_xcb_icccm_FOUND,  X11::xcb_icccm
+  X11_xcb_randr_INCLUDE_PATH,    X11_xcb_randr_LIB,  X11_xcb_randr_FOUND,  X11::xcb_randr
   X11_xcb_util_INCLUDE_PATH,     X11_xcb_util_LIB,   X11_xcb_util_FOUND,   X11::xcb_util
   X11_xcb_xfixes_INCLUDE_PATH,   X11_xcb_xfixes_LIB, X11_xcb_xfixes_FOUND, X11::xcb_xfixes
+  X11_xcb_xtest_INCLUDE_PATH,    X11_xcb_xtest_LIB,  X11_xcb_xtest_FOUND,  X11::xcb_xtest
+  X11_xcb_keysyms_INCLUDE_PATH,  X11_xcb_keysyms_LIB,X11_xcb_keysyms_FOUND,X11::xcb_keysyms
   X11_xcb_xkb_INCLUDE_PATH,      X11_xcb_xkb_LIB,    X11_xcb_xkb_FOUND,    X11::xcb_xkb
   X11_Xcomposite_INCLUDE_PATH,   X11_Xcomposite_LIB, X11_Xcomposite_FOUND, X11::Xcomposite
   X11_Xcursor_INCLUDE_PATH,      X11_Xcursor_LIB,    X11_Xcursor_FOUND,    X11::Xcursor
@@ -82,6 +85,9 @@ and also the following more fine grained variables and targets:
 .. versionadded:: 3.19
   Added the ``Xaw``, ``xcb_util``, and ``xcb_xfixes`` libraries.
 
+.. versionadded:: 3.24
+  Added the ``xcb_randr``, ``xcb_xtext``, and ``xcb_keysyms`` libraries.
+
 #]=======================================================================]
 
 if (UNIX)
@@ -127,8 +133,11 @@ if (UNIX)
   find_path(X11_xcb_INCLUDE_PATH xcb/xcb.h                           ${X11_INC_SEARCH_PATH})
   find_path(X11_X11_xcb_INCLUDE_PATH X11/Xlib-xcb.h                  ${X11_INC_SEARCH_PATH})
   find_path(X11_xcb_icccm_INCLUDE_PATH xcb/xcb_icccm.h               ${X11_INC_SEARCH_PATH})
+  find_path(X11_xcb_randr_INCLUDE_PATH xcb/randr.h                   ${X11_INC_SEARCH_PATH})
   find_path(X11_xcb_util_INCLUDE_PATH xcb/xcb_aux.h                  ${X11_INC_SEARCH_PATH})
   find_path(X11_xcb_xfixes_INCLUDE_PATH xcb/xfixes.h                 ${X11_INC_SEARCH_PATH})
+  find_path(X11_xcb_xtest_INCLUDE_PATH xcb/xtest.h                   ${X11_INC_SEARCH_PATH})
+  find_path(X11_xcb_keysyms_INCLUDE_PATH xcb/xcb_keysyms.h           ${X11_INC_SEARCH_PATH})
   find_path(X11_Xcomposite_INCLUDE_PATH X11/extensions/Xcomposite.h  ${X11_INC_SEARCH_PATH})
   find_path(X11_Xcursor_INCLUDE_PATH X11/Xcursor/Xcursor.h           ${X11_INC_SEARCH_PATH})
   find_path(X11_Xdamage_INCLUDE_PATH X11/extensions/Xdamage.h        ${X11_INC_SEARCH_PATH})
@@ -180,8 +189,11 @@ if (UNIX)
   find_library(X11_xcb_LIB xcb               ${X11_LIB_SEARCH_PATH})
   find_library(X11_X11_xcb_LIB X11-xcb       ${X11_LIB_SEARCH_PATH})
   find_library(X11_xcb_icccm_LIB xcb-icccm   ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xcb_randr_LIB xcb-randr   ${X11_LIB_SEARCH_PATH})
   find_library(X11_xcb_util_LIB xcb-util     ${X11_LIB_SEARCH_PATH})
   find_library(X11_xcb_xfixes_LIB xcb-xfixes ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xcb_xtest_LIB xcb-xtest   ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xcb_keysyms_LIB xcb-keysyms ${X11_LIB_SEARCH_PATH})
   find_library(X11_xcb_xkb_LIB xcb-xkb       ${X11_LIB_SEARCH_PATH})
   find_library(X11_Xcomposite_LIB Xcomposite ${X11_LIB_SEARCH_PATH})
   find_library(X11_Xcursor_LIB Xcursor       ${X11_LIB_SEARCH_PATH})
@@ -281,12 +293,24 @@ if (UNIX)
     set(X11_xcb_icccm_FOUND TRUE)
   endif ()
 
+  if (X11_xcb_randr_LIB AND X11_xcb_randr_INCLUDE_PATH)
+    set(X11_xcb_randr_FOUND TRUE)
+  endif ()
+
   if (X11_xcb_util_LIB AND X11_xcb_util_INCLUDE_PATH)
     set(X11_xcb_util_FOUND TRUE)
   endif ()
 
   if (X11_xcb_xfixes_LIB)
     set(X11_xcb_xfixes_FOUND TRUE)
+  endif ()
+
+  if (X11_xcb_xtest_LIB)
+    set(X11_xcb_xtest_FOUND TRUE)
+  endif ()
+
+  if (X11_xcb_keysyms_LIB)
+    set(X11_xcb_keysyms_FOUND TRUE)
   endif ()
 
   if (X11_xcb_xkb_LIB)
@@ -600,6 +624,13 @@ if (UNIX)
       INTERFACE_LINK_LIBRARIES "X11::xcb")
   endif ()
 
+  if (X11_xcb_randr_FOUND AND NOT TARGET X11::xcb_randr)
+    add_library(X11::xcb_randr UNKNOWN IMPORTED)
+    set_target_properties(X11::xcb_randr PROPERTIES
+      IMPORTED_LOCATION "${X11_xcb_randr_LIB}"
+      INTERFACE_LINK_LIBRARIES "X11::xcb")
+  endif ()
+
   if (X11_xcb_util_FOUND AND NOT TARGET X11::xcb_util)
     add_library(X11::xcb_util UNKNOWN IMPORTED)
     set_target_properties(X11::xcb_util PROPERTIES
@@ -611,6 +642,20 @@ if (UNIX)
     add_library(X11::xcb_xfixes UNKNOWN IMPORTED)
     set_target_properties(X11::xcb_xfixes PROPERTIES
       IMPORTED_LOCATION "${X11_xcb_xfixes_LIB}"
+      INTERFACE_LINK_LIBRARIES "X11::xcb")
+  endif ()
+
+  if (X11_xcb_xtest_FOUND AND NOT TARGET X11::xcb_xtest)
+  add_library(X11::xcb_xtest UNKNOWN IMPORTED)
+  set_target_properties(X11::xcb_xtest PROPERTIES
+    IMPORTED_LOCATION "${X11_xcb_xtest_LIB}"
+    INTERFACE_LINK_LIBRARIES "X11::xcb")
+  endif ()
+
+  if (X11_xcb_keysyms_FOUND AND NOT TARGET X11::xcb_keysyms)
+    add_library(X11::xcb_keysyms UNKNOWN IMPORTED)
+    set_target_properties(X11::xcb_keysyms PROPERTIES
+      IMPORTED_LOCATION "${X11_xcb_keysyms_LIB}"
       INTERFACE_LINK_LIBRARIES "X11::xcb")
   endif ()
 
@@ -830,10 +875,16 @@ if (UNIX)
     X11_xcb_INCLUDE_PATH
     X11_xcb_icccm_LIB
     X11_xcb_icccm_INCLUDE_PATH
+    X11_xcb_randr_LIB
+    X11_xcb_randr_INCLUDE_PATH
     X11_xcb_util_LIB
     X11_xcb_util_INCLUDE_PATH
     X11_xcb_xfixes_LIB
     X11_xcb_xfixes_INCLUDE_PATH
+    X11_xcb_xtest_LIB
+    X11_xcb_xtest_INCLUDE_PATH
+    X11_xcb_keysyms_LIB
+    X11_xcb_keysyms_INCLUDE_PATH
     X11_xcb_xkb_LIB
     X11_X11_xcb_LIB
     X11_X11_xcb_INCLUDE_PATH

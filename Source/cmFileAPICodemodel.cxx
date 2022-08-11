@@ -1728,7 +1728,7 @@ Json::Value Target::DumpArtifacts()
 
   // Object libraries have only object files as artifacts.
   if (this->GT->GetType() == cmStateEnums::OBJECT_LIBRARY) {
-    if (!this->GT->GetGlobalGenerator()->HasKnownObjectFileLocation(nullptr)) {
+    if (!this->GT->Target->HasKnownObjectFileLocation(nullptr)) {
       return artifacts;
     }
     std::vector<cmSourceFile const*> objectSources;

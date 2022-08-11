@@ -43,32 +43,33 @@ enum class ErrorCode
   MissingRequired,
 };
 
+using JSONHelperBuilder = cmJSONHelperBuilder<ErrorCode>;
+
 auto const IntHelper =
-  cmJSONIntHelper<ErrorCode>(ErrorCode::Success, ErrorCode::InvalidInt, 1);
+  JSONHelperBuilder::Int(ErrorCode::Success, ErrorCode::InvalidInt, 1);
 auto const RequiredIntHelper =
-  cmJSONRequiredHelper<int, ErrorCode>(ErrorCode::MissingRequired, IntHelper);
+  JSONHelperBuilder::Required<int>(ErrorCode::MissingRequired, IntHelper);
 auto const UIntHelper =
-  cmJSONUIntHelper<ErrorCode>(ErrorCode::Success, ErrorCode::InvalidInt, 1);
-auto const BoolHelper = cmJSONBoolHelper<ErrorCode>(
-  ErrorCode::Success, ErrorCode::InvalidBool, false);
-auto const StringHelper = cmJSONStringHelper<ErrorCode>(
+  JSONHelperBuilder::UInt(ErrorCode::Success, ErrorCode::InvalidInt, 1);
+auto const BoolHelper =
+  JSONHelperBuilder::Bool(ErrorCode::Success, ErrorCode::InvalidBool, false);
+auto const StringHelper = JSONHelperBuilder::String(
   ErrorCode::Success, ErrorCode::InvalidString, "default");
-auto const RequiredStringHelper = cmJSONRequiredHelper<std::string, ErrorCode>(
+auto const RequiredStringHelper = JSONHelperBuilder::Required<std::string>(
   ErrorCode::MissingRequired, StringHelper);
-auto const StringVectorHelper = cmJSONVectorHelper<std::string, ErrorCode>(
+auto const StringVectorHelper = JSONHelperBuilder::Vector<std::string>(
   ErrorCode::Success, ErrorCode::InvalidArray, StringHelper);
 auto const StringVectorFilterHelper =
-  cmJSONVectorFilterHelper<std::string, ErrorCode>(
+  JSONHelperBuilder::VectorFilter<std::string>(
     ErrorCode::Success, ErrorCode::InvalidArray, StringHelper,
     [](const std::string& value) { return value != "ignore"; });
-auto const StringMapHelper = cmJSONMapHelper<std::string, ErrorCode>(
+auto const StringMapHelper = JSONHelperBuilder::Map<std::string>(
   ErrorCode::Success, ErrorCode::InvalidObject, StringHelper);
-auto const StringMapFilterHelper =
-  cmJSONMapFilterHelper<std::string, ErrorCode>(
-    ErrorCode::Success, ErrorCode::InvalidObject, StringHelper,
-    [](const std::string& key) { return key != "ignore"; });
+auto const StringMapFilterHelper = JSONHelperBuilder::MapFilter<std::string>(
+  ErrorCode::Success, ErrorCode::InvalidObject, StringHelper,
+  [](const std::string& key) { return key != "ignore"; });
 auto const OptionalStringHelper =
-  cmJSONOptionalHelper<std::string>(ErrorCode::Success, StringHelper);
+  JSONHelperBuilder::Optional<std::string>(ErrorCode::Success, StringHelper);
 
 bool testInt()
 {
@@ -150,10 +151,10 @@ bool testString()
 bool testObject()
 {
   auto const subhelper =
-    cmJSONObjectHelper<ObjectStruct, ErrorCode>(ErrorCode::Success,
-                                                ErrorCode::InvalidSubObject)
+    JSONHelperBuilder::Object<ObjectStruct>(ErrorCode::Success,
+                                            ErrorCode::InvalidSubObject)
       .Bind("subfield"_s, &ObjectStruct::Field2, IntHelper);
-  auto const helper = cmJSONObjectHelper<ObjectStruct, ErrorCode>(
+  auto const helper = JSONHelperBuilder::Object<ObjectStruct>(
                         ErrorCode::Success, ErrorCode::InvalidObject)
                         .Bind("field1"_s, &ObjectStruct::Field1, StringHelper)
                         .Bind("field2"_s, subhelper)
@@ -206,8 +207,8 @@ bool testObject()
 bool testObjectInherited()
 {
   auto const helper =
-    cmJSONObjectHelper<InheritedStruct, ErrorCode>(ErrorCode::Success,
-                                                   ErrorCode::InvalidObject)
+    JSONHelperBuilder::Object<InheritedStruct>(ErrorCode::Success,
+                                               ErrorCode::InvalidObject)
       .Bind("field1"_s, &InheritedStruct::Field1, StringHelper)
       .Bind("field2"_s, &InheritedStruct::Field2, IntHelper)
       .Bind("field3"_s, &InheritedStruct::Field3, StringHelper);
@@ -253,7 +254,7 @@ bool testObjectInherited()
 
 bool testObjectNoExtra()
 {
-  auto const helper = cmJSONObjectHelper<ObjectStruct, ErrorCode>(
+  auto const helper = JSONHelperBuilder::Object<ObjectStruct>(
                         ErrorCode::Success, ErrorCode::InvalidObject, false)
                         .Bind("field1"_s, &ObjectStruct::Field1, StringHelper)
                         .Bind("field2"_s, &ObjectStruct::Field2, IntHelper);
@@ -277,8 +278,8 @@ bool testObjectNoExtra()
 bool testObjectOptional()
 {
   auto const helper =
-    cmJSONObjectHelper<ObjectStruct, ErrorCode>(ErrorCode::Success,
-                                                ErrorCode::InvalidObject)
+    JSONHelperBuilder::Object<ObjectStruct>(ErrorCode::Success,
+                                            ErrorCode::InvalidObject)
       .Bind("field1"_s, &ObjectStruct::Field1, StringHelper, false)
       .Bind("field2"_s, &ObjectStruct::Field2, IntHelper, false)
       .Bind<std::string>("field3_s", nullptr, StringHelper, false);

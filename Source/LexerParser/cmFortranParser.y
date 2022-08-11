@@ -57,6 +57,11 @@ static void cmFortran_yyerror(yyscan_t yyscanner, const char* message)
 # pragma GCC diagnostic ignored "-Wconversion"
 # pragma GCC diagnostic ignored "-Wfree-nonheap-object"
 #endif
+#if defined(__clang__) && defined(__has_warning)
+# if __has_warning("-Wunused-but-set-variable")
+#  pragma clang diagnostic ignored "-Wunused-but-set-variable"
+# endif
+#endif
 %}
 
 /* Generate a reentrant parser object.  */

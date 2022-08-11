@@ -19,10 +19,13 @@
 #include "cmsys/Glob.hxx"
 #include "cmsys/SystemInformation.hxx"
 
+#include "cmArgumentParser.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
+#include "cmRange.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmWindowsRegistry.h"
 
 #ifdef _WIN32
 #  include "cmAlgorithms.h"
@@ -335,7 +338,7 @@ std::map<std::string, std::string> GetOSReleaseVariables(
 
     // include FATAL_ERROR and ERROR in the return status
     if (!makefile.ReadListFile(script) ||
-        cmSystemTools::GetErrorOccuredFlag()) {
+        cmSystemTools::GetErrorOccurredFlag()) {
       // Ok, no worries... go try the next script.
       continue;
     }
@@ -459,6 +462,98 @@ cm::optional<std::string> GetValueChained(GetterFn current, Next... chain)
   }
   return GetValueChained(chain...);
 }
+
+template <typename Range>
+bool QueryWindowsRegistry(Range args, cmExecutionStatus& status,
+                          std::string const& variable)
+{
+  using View = cmWindowsRegistry::View;
+  if (args.empty()) {
+    status.SetError("missing <key> specification.");
+    return false;
+  }
+  std::string const& key = *args.begin();
+
+  struct Arguments
+  {
+    std::string ValueName;
+    bool ValueNames = false;
+    bool SubKeys = false;
+    std::string View;
+    std::string Separator;
+    std::string ErrorVariable;
+  };
+  cmArgumentParser<Arguments> parser;
+  parser.Bind("VALUE"_s, &Arguments::ValueName)
+    .Bind("VALUE_NAMES"_s, &Arguments::ValueNames)
+    .Bind("SUBKEYS"_s, &Arguments::SubKeys)
+    .Bind("VIEW"_s, &Arguments::View)
+    .Bind("SEPARATOR"_s, &Arguments::Separator)
+    .Bind("ERROR_VARIABLE"_s, &Arguments::ErrorVariable);
+  std::vector<std::string> invalidArgs;
+  std::vector<std::string> keywordsMissingValue;
+
+  Arguments const arguments =
+    parser.Parse(args.advance(1), &invalidArgs, &keywordsMissingValue);
+  if (!invalidArgs.empty()) {
+    status.SetError(cmStrCat("given invalid argument(s) \"",
+                             cmJoin(invalidArgs, ", "_s), "\"."));
+    return false;
+  }
+  if (!keywordsMissingValue.empty()) {
+    status.SetError(cmStrCat("missing expected value for argument(s) \"",
+                             cmJoin(keywordsMissingValue, ", "_s), "\"."));
+    return false;
+  }
+  if ((!arguments.ValueName.empty() &&
+       (arguments.ValueNames || arguments.SubKeys)) ||
+      (arguments.ValueName.empty() && arguments.ValueNames &&
+       arguments.SubKeys)) {
+    status.SetError("given mutually exclusive sub-options \"VALUE\", "
+                    "\"VALUE_NAMES\" or \"SUBKEYS\".");
+    return false;
+  }
+
+  if (!arguments.View.empty() && !cmWindowsRegistry::ToView(arguments.View)) {
+    status.SetError(
+      cmStrCat("given invalid value for \"VIEW\": ", arguments.View, '.'));
+    return false;
+  }
+
+  auto& makefile = status.GetMakefile();
+
+  makefile.AddDefinition(variable, ""_s);
+
+  auto view = arguments.View.empty()
+    ? View::Both
+    : *cmWindowsRegistry::ToView(arguments.View);
+  cmWindowsRegistry registry(makefile);
+  if (arguments.ValueNames) {
+    auto result = registry.GetValueNames(key, view);
+    if (result) {
+      makefile.AddDefinition(variable, cmJoin(*result, ";"_s));
+    }
+  } else if (arguments.SubKeys) {
+    auto result = registry.GetSubKeys(key, view);
+    if (result) {
+      makefile.AddDefinition(variable, cmJoin(*result, ";"_s));
+    }
+  } else {
+    auto result =
+      registry.ReadValue(key, arguments.ValueName, view, arguments.Separator);
+    if (result) {
+      makefile.AddDefinition(variable, *result);
+    }
+  }
+
+  // return error message if requested
+  if (!arguments.ErrorVariable.empty()) {
+    makefile.AddDefinition(arguments.ErrorVariable, registry.GetLastError());
+  }
+
+  return true;
+}
+
 // END Private functions
 } // anonymous namespace
 
@@ -479,6 +574,11 @@ bool cmCMakeHostSystemInformationCommand(std::vector<std::string> const& args,
   if (args.size() < (current_index + 2) || args[current_index] != "QUERY"_s) {
     status.SetError("missing QUERY specification");
     return false;
+  }
+
+  if (args[current_index + 1] == "WINDOWS_REGISTRY"_s) {
+    return QueryWindowsRegistry(cmMakeRange(args).advance(current_index + 2),
+                                status, variable);
   }
 
   static cmsys::SystemInformation info;

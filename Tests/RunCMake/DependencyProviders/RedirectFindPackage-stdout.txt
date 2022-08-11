@@ -1,0 +1,7 @@
+-- Before cmake_language
+-- After cmake_language
+-- Redirecting find_package\(AThing\) to FetchContent_MakeAvailable\(\)
+-- Provider invoked for method FIND_PACKAGE with args: QUIET
+-- AThing_FOUND = TRUE
+-- FetchContent_MakeAvailable\(\) succeeded
+-- Configuring done

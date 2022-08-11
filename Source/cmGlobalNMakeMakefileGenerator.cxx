@@ -61,7 +61,7 @@ bool cmGlobalNMakeMakefileGenerator::FindMakeProgram(cmMakefile* mf)
                                 "'\n"
                                 "failed with:\n ",
                                 err));
-      cmSystemTools::SetFatalErrorOccured();
+      cmSystemTools::SetFatalErrorOccurred();
       return false;
     }
     cmsys::RegularExpression regex(

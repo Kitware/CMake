@@ -65,8 +65,8 @@ on macOS:
 
  In a CMake project that uses the :module:`CPack` module to generate
  ``CPackConfig.cmake``, ``CPACK_DMG_SLA_USE_RESOURCE_FILE_LICENSE``
- is automatically enabled by default if it is not set and
- :variable:`CPACK_RESOURCE_FILE_LICENSE` is set to a non-default value.
+ must be explicitly enabled by the project to activate the SLA.
+ See policy :policy:`CMP0133`.
 
  .. note::
 

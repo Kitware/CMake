@@ -33,12 +33,10 @@ protected:
   bool GenerateMainFile(std::ostream& os) override;
 
   void GenerateImportTargetsConfig(std::ostream&, const std::string&,
-                                   std::string const&,
-                                   std::vector<std::string>&) override
+                                   std::string const&) override
   {
   }
-  void HandleMissingTarget(std::string&, std::vector<std::string>&,
-                           cmGeneratorTarget const*,
+  void HandleMissingTarget(std::string&, cmGeneratorTarget const*,
                            cmGeneratorTarget*) override
   {
   }

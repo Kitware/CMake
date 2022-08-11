@@ -90,16 +90,6 @@ static void free_urlhandle(struct Curl_URL *u)
   free(u->temppath);
 }
 
-/* move the full contents of one handle onto another and
-   free the original */
-static void mv_urlhandle(struct Curl_URL *from,
-                         struct Curl_URL *to)
-{
-  free_urlhandle(to);
-  *to = *from;
-  free(from);
-}
-
 /*
  * Find the separator at the end of the host name, or the '?' in cases like
  * http://www.url.com?id=2380
@@ -238,7 +228,7 @@ static void strcpy_url(char *output, const char *url, bool relative)
  */
 bool Curl_is_absolute_url(const char *url, char *buf, size_t buflen)
 {
-  size_t i;
+  int i;
   DEBUGASSERT(!buf || (buflen > MAX_SCHEME_LEN));
   (void)buflen; /* only used in debug-builds */
   if(buf)
@@ -688,8 +678,8 @@ static CURLUcode hostname_check(struct Curl_URL *u, char *hostname)
 #endif
   }
   else {
-    /* letters from the second string is not ok */
-    len = strcspn(hostname, " \r\n");
+    /* letters from the second string are not ok */
+    len = strcspn(hostname, " \r\n\t/:#?!@");
     if(hlen != len)
       /* hostname with bad content */
       return CURLUE_BAD_HOSTNAME;
@@ -804,8 +794,7 @@ static CURLUcode decode_host(char *hostname, char **outp)
   else {
     /* might be encoded */
     size_t dlen;
-    CURLcode result = Curl_urldecode(NULL, hostname, 0,
-                                     outp, &dlen, REJECT_CTRL);
+    CURLcode result = Curl_urldecode(hostname, 0, outp, &dlen, REJECT_CTRL);
     if(result)
       return CURLUE_BAD_HOSTNAME;
   }
@@ -1005,9 +994,7 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
         return CURLUE_NO_HOST;
     }
 
-    len = strlen(p);
-    memcpy(path, p, len);
-    path[len] = 0;
+    strcpy(path, p);
 
     if(schemep) {
       u->scheme = strdup(schemep);
@@ -1153,6 +1140,25 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
     free_urlhandle(u);
     memset(u, 0, sizeof(struct Curl_URL));
   }
+  return result;
+}
+
+/*
+ * Parse the URL and, if successful, replace everything in the Curl_URL struct.
+ */
+static CURLUcode parseurl_and_replace(const char *url, CURLU *u,
+                                      unsigned int flags)
+{
+  CURLUcode result;
+  CURLU tmpurl;
+  memset(&tmpurl, 0, sizeof(tmpurl));
+  result = parseurl(url, &tmpurl, flags);
+  if(!result) {
+    free_urlhandle(u);
+    *u = tmpurl;
+  }
+  else
+    free_urlhandle(&tmpurl);
   return result;
 }
 
@@ -1422,8 +1428,7 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
       size_t dlen;
       /* this unconditional rejection of control bytes is documented
          API behavior */
-      CURLcode res = Curl_urldecode(NULL, *part, 0, &decoded, &dlen,
-                                    REJECT_CTRL);
+      CURLcode res = Curl_urldecode(*part, 0, &decoded, &dlen, REJECT_CTRL);
       free(*part);
       if(res) {
         *part = NULL;
@@ -1564,52 +1569,24 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
     CURLUcode result;
     char *oldurl;
     char *redired_url;
-    CURLU *handle2;
 
-    if(Curl_is_absolute_url(part, NULL, 0)) {
-      handle2 = curl_url();
-      if(!handle2)
-        return CURLUE_OUT_OF_MEMORY;
-      result = parseurl(part, handle2, flags);
-      if(!result)
-        mv_urlhandle(handle2, u);
-      else
-        curl_url_cleanup(handle2);
-      return result;
-    }
-    /* extract the full "old" URL to do the redirect on */
-    result = curl_url_get(u, CURLUPART_URL, &oldurl, flags);
-    if(result) {
-      /* couldn't get the old URL, just use the new! */
-      handle2 = curl_url();
-      if(!handle2)
-        return CURLUE_OUT_OF_MEMORY;
-      result = parseurl(part, handle2, flags);
-      if(!result)
-        mv_urlhandle(handle2, u);
-      else
-        curl_url_cleanup(handle2);
-      return result;
+    /* if the new thing is absolute or the old one is not
+     * (we could not get an absolute url in 'oldurl'),
+     * then replace the existing with the new. */
+    if(Curl_is_absolute_url(part, NULL, 0)
+       || curl_url_get(u, CURLUPART_URL, &oldurl, flags)) {
+      return parseurl_and_replace(part, u, flags);
     }
 
-    /* apply the relative part to create a new URL */
+    /* apply the relative part to create a new URL
+     * and replace the existing one with it. */
     redired_url = concat_url(oldurl, part);
     free(oldurl);
     if(!redired_url)
       return CURLUE_OUT_OF_MEMORY;
 
-    /* now parse the new URL */
-    handle2 = curl_url();
-    if(!handle2) {
-      free(redired_url);
-      return CURLUE_OUT_OF_MEMORY;
-    }
-    result = parseurl(redired_url, handle2, flags);
+    result = parseurl_and_replace(redired_url, u, flags);
     free(redired_url);
-    if(!result)
-      mv_urlhandle(handle2, u);
-    else
-      curl_url_cleanup(handle2);
     return result;
   }
   default:

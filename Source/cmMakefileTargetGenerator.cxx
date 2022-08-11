@@ -305,9 +305,14 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
   std::vector<cmSourceFile const*> objectSources;
   this->GeneratorTarget->GetObjectSources(objectSources,
                                           this->GetConfigName());
-  for (cmSourceFile const* sf : objectSources) {
-    // Generate this object file's rule file.
-    this->WriteObjectRuleFiles(*sf);
+
+  // validate that all languages requested are enabled.
+  std::set<std::string> requiredLangs;
+  if (this->HaveRequiredLanguages(objectSources, requiredLangs)) {
+    for (cmSourceFile const* sf : objectSources) {
+      // Generate this object file's rule file.
+      this->WriteObjectRuleFiles(*sf);
+    }
   }
 }
 
@@ -532,8 +537,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
   cmSourceFile const& source)
 {
   // Identify the language of the source file.
-  const std::string& lang =
-    this->LocalGenerator->GetSourceFileLanguage(source);
+  const std::string& lang = source.GetLanguage();
   if (lang.empty()) {
     // don't know anything about this file so skip it
     return;

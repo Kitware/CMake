@@ -8,12 +8,21 @@ run_cmake(BadObjSource2)
 if(RunCMake_GENERATOR STREQUAL "Xcode" AND "$ENV{CMAKE_OSX_ARCHITECTURES}" MATCHES "[;$]")
   run_cmake(ImportMultiArch)
   run_cmake(InstallNotSupported)
+
+  set(osx_archs $ENV{CMAKE_OSX_ARCHITECTURES})
+  list(GET osx_archs 0 osx_arch)
+  run_cmake_with_options(TargetOverrideSingleArch -Dosx_arch=${osx_arch})
 else()
   run_cmake(Import)
   run_cmake(Install)
   run_cmake(InstallLinkedObj1)
   run_cmake(InstallLinkedObj2)
+
+  if(RunCMake_GENERATOR STREQUAL "Xcode" AND XCODE_VERSION VERSION_GREATER_EQUAL 13)
+    run_cmake(TargetOverrideMultiArch)
+  endif()
 endif()
+
 run_cmake(Export)
 
 function (run_object_lib_build name)

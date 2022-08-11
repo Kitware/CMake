@@ -36,6 +36,7 @@ configure        eol=lf
 *.hpp            our-c-style
 *.hxx            our-c-style
 *.notcu          our-c-style
+*.tcc            our-c-style
 
 *.cmake          whitespace=tab-in-indent
 *.rst            whitespace=tab-in-indent conflict-marker-size=79

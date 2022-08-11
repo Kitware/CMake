@@ -198,14 +198,6 @@ if(CPACK_GENERATOR MATCHES "IFW")
 
 endif()
 
-if("${CPACK_GENERATOR}" STREQUAL "PackageMaker")
-  if(CMAKE_PACKAGE_QTGUI)
-    set(CPACK_PACKAGE_DEFAULT_LOCATION "/Applications")
-  else()
-    set(CPACK_PACKAGE_DEFAULT_LOCATION "/usr")
-  endif()
-endif()
-
 if("${CPACK_GENERATOR}" STREQUAL "DragNDrop")
   set(CPACK_DMG_BACKGROUND_IMAGE
       "@CMake_SOURCE_DIR@/Packaging/CMakeDMGBackground.tif")
@@ -255,6 +247,13 @@ if("${CPACK_GENERATOR}" STREQUAL "WIX")
   )
 
   set(CPACK_WIX_LIGHT_EXTRA_FLAGS "-dcl:high")
+
+  if(NOT "$ENV{CMAKE_CI_PACKAGE}" STREQUAL "")
+    # Suppress validation.  It does not work without
+    # an interactive session or an admin account.
+    # https://github.com/wixtoolset/issues/issues/3968
+    list(APPEND CPACK_WIX_LIGHT_EXTRA_FLAGS "-sval")
+  endif()
 
   set(CPACK_WIX_UI_BANNER
     "@CMake_SOURCE_DIR@/Utilities/Release/WiX/ui_banner.jpg"

@@ -34,6 +34,11 @@ The ``CUDA_ARCHITECTURES`` may be set to one of the following special values:
   Compile for all supported major real architectures, and the highest
   major virtual architecture.
 
+``native``
+  .. versionadded:: 3.24
+
+  Compile for the architecture(s) of the host's GPU(s).
+
 Examples
 ^^^^^^^^
 

@@ -2,6 +2,7 @@
 # file Copyright.txt or https://cmake.org/licensing for details.
 
 include(Compiler/SunPro)
+__compiler_sunpro(C)
 
 set(CMAKE_C_VERBOSE_FLAG "-#")
 
@@ -33,8 +34,13 @@ foreach(type SHARED_LIBRARY SHARED_MODULE EXE)
   set(CMAKE_${type}_LINK_DYNAMIC_C_FLAGS "-Bdynamic")
 endforeach()
 
-set(CMAKE_C_LINKER_WRAPPER_FLAG "-Qoption" "ld" " ")
-set(CMAKE_C_LINKER_WRAPPER_FLAG_SEP ",")
+if (CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL "5.12")
+  set(CMAKE_C_LINKER_WRAPPER_FLAG "-Qoption" "ld" " ")
+  set(CMAKE_C_LINKER_WRAPPER_FLAG_SEP ",")
+else()
+  set(CMAKE_C_LINKER_WRAPPER_FLAG "-Wl,")
+  set(CMAKE_C_LINKER_WRAPPER_FLAG_SEP ",")
+endif()
 
 if (CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 5.13)
   set(CMAKE_C90_STANDARD_COMPILE_OPTION "-std=c89")

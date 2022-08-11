@@ -301,6 +301,28 @@ Windows Store may look like this:
   set(CMAKE_SYSTEM_NAME WindowsStore)
   set(CMAKE_SYSTEM_VERSION 8.1)
 
+.. _`Cross Compiling for ADSP SHARC/Blackfin`:
+
+Cross Compiling for ADSP SHARC/Blackfin
+---------------------------------------
+
+Cross-compiling for ADSP SHARC or Blackfin can be configured
+by setting the :variable:`CMAKE_SYSTEM_NAME` variable to ``ADSP``
+and the :variable:`CMAKE_SYSTEM_PROCESSOR` variable
+to the "part number", excluding the ``ADSP-`` prefix,
+for example, ``21594``, ``SC589``, etc.
+This value is case insensitive.
+
+CMake will automatically search for CCES or VDSP++ installs
+in their default install locations
+and select the most recent version found.
+CCES will be selected over VDSP++ if both are installed.
+Custom install paths can be set via the :variable:`CMAKE_ADSP_ROOT` variable
+or the :envvar:`ADSP_ROOT` environment variable.
+
+The compiler (``cc21k`` vs. ``ccblkfn``) is selected automatically
+based on the :variable:`CMAKE_SYSTEM_PROCESSOR` value provided.
+
 .. _`Cross Compiling for Android`:
 
 Cross Compiling for Android

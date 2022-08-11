@@ -327,32 +327,34 @@ OS X.
 if(NOT CPackComponent_CMake_INCLUDED)
 set(CPackComponent_CMake_INCLUDED 1)
 
-# Macro that appends a SET command for the given variable name (var)
-# to the macro named strvar, but only if the variable named "var"
+# Function that appends a SET command for the given variable name (var)
+# to the string named strvar, but only if the variable named "var"
 # has been defined. The string will eventually be appended to a CPack
 # configuration file.
-macro(cpack_append_variable_set_command var strvar)
+function(cpack_append_variable_set_command var strvar)
   if (DEFINED ${var})
     string(APPEND ${strvar} "set(${var}")
     foreach(APPENDVAL ${${var}})
       string(APPEND ${strvar} " ${APPENDVAL}")
     endforeach()
     string(APPEND ${strvar} ")\n")
+    set(${strvar} "${${strvar}}" PARENT_SCOPE)
   endif ()
-endmacro()
+endfunction()
 
-# Macro that appends a SET command for the given variable name (var)
-# to the macro named strvar, but only if the variable named "var"
+# Function that appends a SET command for the given variable name (var)
+# to the string named strvar, but only if the variable named "var"
 # has been defined and is a string. The string will eventually be
 # appended to a CPack configuration file.
-macro(cpack_append_string_variable_set_command var strvar)
+function(cpack_append_string_variable_set_command var strvar)
   if (DEFINED ${var})
     list(LENGTH ${var} CPACK_APP_VALUE_LEN)
     if(${CPACK_APP_VALUE_LEN} EQUAL 1)
       string(APPEND ${strvar} "set(${var} \"${${var}}\")\n")
     endif()
+    set(${strvar} "${${strvar}}" PARENT_SCOPE)
   endif ()
-endmacro()
+endfunction()
 
 # Macro that appends a SET command for the given list variable name (var)
 # to the macro named strvar, but only if the variable named "var"

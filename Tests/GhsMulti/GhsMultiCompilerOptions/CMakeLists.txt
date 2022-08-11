@@ -27,8 +27,7 @@ try_compile(RESULT
 message("Output from build:\n${OUTPUT}")
 if (RUN_TEST STREQUAL "RELEASE_FLAGS")
   find_file (fileName test_none.gpj
-    ${CMAKE_CURRENT_BINARY_DIR}/build
-    ${CMAKE_CURRENT_BINARY_DIR}/build/test_none
+    ${CMAKE_CURRENT_BINARY_DIR}/build/test_none.dir
     )
   message("Parsing project file: ${fileName}")
   file(STRINGS ${fileName} fileText)
@@ -40,8 +39,7 @@ if (RUN_TEST STREQUAL "RELEASE_FLAGS")
 else()
   unset(fileName CACHE)
   find_file (fileName K1.gpj
-    ${CMAKE_CURRENT_BINARY_DIR}/build
-    ${CMAKE_CURRENT_BINARY_DIR}/build/K1
+    ${CMAKE_CURRENT_BINARY_DIR}/build/K1.dir
     )
   message("Parsing project file: ${fileName}")
   file(STRINGS ${fileName} fileText)
@@ -53,8 +51,7 @@ else()
 
   unset(fileName CACHE)
   find_file (fileName K2.gpj
-    ${CMAKE_CURRENT_BINARY_DIR}/build
-    ${CMAKE_CURRENT_BINARY_DIR}/build/K2
+    ${CMAKE_CURRENT_BINARY_DIR}/build/K2.dir
     )
   message("Parsing project file: ${fileName}")
   file(STRINGS ${fileName} fileText)
@@ -66,8 +63,7 @@ else()
 
   unset(fileName CACHE)
   find_file (fileName K3.gpj
-    ${CMAKE_CURRENT_BINARY_DIR}/build
-    ${CMAKE_CURRENT_BINARY_DIR}/build/K3
+    ${CMAKE_CURRENT_BINARY_DIR}/build/K3.dir
     )
   message("Parsing project file: ${fileName}")
   file(STRINGS ${fileName} fileText)
@@ -79,8 +75,7 @@ else()
 
   unset(fileName CACHE)
   find_file (fileName K4.gpj
-    ${CMAKE_CURRENT_BINARY_DIR}/build
-    ${CMAKE_CURRENT_BINARY_DIR}/build/K4
+    ${CMAKE_CURRENT_BINARY_DIR}/build/K4.dir
     )
   message("Parsing project file: ${fileName}")
   file(STRINGS ${fileName} fileText)

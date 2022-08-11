@@ -49,12 +49,15 @@ set(ENV{PKG_CONFIG_PATH} ${fakePkgDir}/lib/pkgconfig)
 
 # find targets in subdir and check their visibility
 add_subdirectory(target_subdir)
-if (TARGET PkgConfig::FakePackage1_dir)
-  message(FATAL_ERROR "imported target PkgConfig::FakePackage1_dir is visible outside it's directory")
+
+set(tgt PkgConfig::FakePackage1_dir)
+if (TARGET ${tgt})
+  message(FATAL_ERROR "imported target \"${tgt}\" is visible outside its directory")
 endif()
 
-if (NOT TARGET PkgConfig::FakePackage1_global)
-  message(FATAL_ERROR "imported target PkgConfig::FakePackage1_global is not visible outside it's directory")
+set(tgt PkgConfig::FakePackage1_global)
+if (NOT TARGET ${tgt})
+  message(FATAL_ERROR "imported target \"${tgt}\" is not visible outside its directory")
 endif()
 
 # And now do the same for the NO_CMAKE_ENVIRONMENT_PATH - ENV{CMAKE_PREFIX_PATH}
@@ -104,10 +107,13 @@ Cflags: -I/special -isystem /other -isystem/more -DA-isystem/foo
 
 set(expected_link_options -e dummy_main)
 pkg_check_modules(FakeLinkOptionsPackage REQUIRED QUIET IMPORTED_TARGET fakelinkoptionspackage)
-if (NOT TARGET PkgConfig::FakeLinkOptionsPackage)
+
+set(tgt PkgConfig::FakeLinkOptionsPackage)
+message(STATUS "Verifying target \"${tgt}\"")
+if (NOT TARGET ${tgt})
   message(FATAL_ERROR "No import target for fake link options package")
 endif()
-get_target_property(link_options PkgConfig::FakeLinkOptionsPackage INTERFACE_LINK_OPTIONS)
+get_target_property(link_options ${tgt} INTERFACE_LINK_OPTIONS)
 if (NOT link_options STREQUAL expected_link_options)
   message(FATAL_ERROR
     "Additional link options not present in INTERFACE_LINK_OPTIONS property\n"
@@ -115,7 +121,7 @@ if (NOT link_options STREQUAL expected_link_options)
   )
 endif()
 
-get_target_property(inc_dirs PkgConfig::FakeLinkOptionsPackage INTERFACE_INCLUDE_DIRECTORIES)
+get_target_property(inc_dirs ${tgt} INTERFACE_INCLUDE_DIRECTORIES)
 set(expected_inc_dirs "/special" "/other" "/more")
 
 if (NOT inc_dirs STREQUAL expected_inc_dirs)
@@ -125,7 +131,7 @@ if (NOT inc_dirs STREQUAL expected_inc_dirs)
   )
 endif ()
 
-get_target_property(c_opts PkgConfig::FakeLinkOptionsPackage INTERFACE_COMPILE_OPTIONS)
+get_target_property(c_opts ${tgt} INTERFACE_COMPILE_OPTIONS)
 set(expected_c_opts "-DA-isystem/foo") # this is an invalid option, but a good testcase
 if (NOT c_opts STREQUAL expected_c_opts)
     message(FATAL_ERROR

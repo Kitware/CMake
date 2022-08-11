@@ -632,7 +632,7 @@ static int run_arm_filter(struct rar5* rar, struct filter_info* flt) {
 			/* 0xEB = ARM's BL (branch + link) instruction. */
 			offset = read_filter_data(rar,
 			    (rar->cstate.solid_offset + flt->block_start + i) &
-			     rar->cstate.window_mask) & 0x00ffffff;
+			     (uint32_t)rar->cstate.window_mask) & 0x00ffffff;
 
 			offset -= (uint32_t) ((i + flt->block_start) / 4);
 			offset = (offset & 0x00ffffff) | 0xeb000000;
@@ -1117,6 +1117,44 @@ static int bid_standard(struct archive_read* a) {
 	return -1;
 }
 
+static int bid_sfx(struct archive_read *a)
+{
+	const char *p;
+
+	if ((p = __archive_read_ahead(a, 7, NULL)) == NULL)
+		return -1;
+
+	if ((p[0] == 'M' && p[1] == 'Z') || memcmp(p, "\x7F\x45LF", 4) == 0) {
+		/* This is a PE file */
+		char signature[sizeof(rar5_signature_xor)];
+		ssize_t offset = 0x10000;
+		ssize_t window = 4096;
+		ssize_t bytes_avail;
+
+		rar5_signature(signature);
+
+		while (offset + window <= (1024 * 512)) {
+			const char *buff = __archive_read_ahead(a, offset + window, &bytes_avail);
+			if (buff == NULL) {
+				/* Remaining bytes are less than window. */
+				window >>= 1;
+				if (window < 0x40)
+					return 0;
+				continue;
+			}
+			p = buff + offset;
+			while (p + 8 < buff + bytes_avail) {
+				if (memcmp(p, signature, sizeof(signature)) == 0)
+					return 30;
+				p += 0x10;
+			}
+			offset = p - buff;
+		}
+	}
+
+	return 0;
+}
+
 static int rar5_bid(struct archive_read* a, int best_bid) {
 	int my_bid;
 
@@ -1125,6 +1163,10 @@ static int rar5_bid(struct archive_read* a, int best_bid) {
 
 	my_bid = bid_standard(a);
 	if(my_bid > -1) {
+		return my_bid;
+	}
+	my_bid = bid_sfx(a);
+	if (my_bid > -1) {
 		return my_bid;
 	}
 
@@ -2306,6 +2348,62 @@ static int skip_base_block(struct archive_read* a) {
 		return ret;
 }
 
+static int try_skip_sfx(struct archive_read *a)
+{
+	const char *p;
+
+	if ((p = __archive_read_ahead(a, 7, NULL)) == NULL)
+		return ARCHIVE_EOF;
+
+	if ((p[0] == 'M' && p[1] == 'Z') || memcmp(p, "\x7F\x45LF", 4) == 0)
+	{
+		char signature[sizeof(rar5_signature_xor)];
+		const void *h;
+		const char *q;
+		size_t skip, total = 0;
+		ssize_t bytes, window = 4096;
+
+		rar5_signature(signature);
+
+		while (total + window <= (1024 * 512)) {
+			h = __archive_read_ahead(a, window, &bytes);
+			if (h == NULL) {
+				/* Remaining bytes are less than window. */
+				window >>= 1;
+				if (window < 0x40)
+					goto fatal;
+				continue;
+			}
+			if (bytes < 0x40)
+				goto fatal;
+			p = h;
+			q = p + bytes;
+
+			/*
+			 * Scan ahead until we find something that looks
+			 * like the RAR header.
+			 */
+			while (p + 8 < q) {
+				if (memcmp(p, signature, sizeof(signature)) == 0) {
+					skip = p - (const char *)h;
+					__archive_read_consume(a, skip);
+					return (ARCHIVE_OK);
+				}
+				p += 0x10;
+			}
+			skip = p - (const char *)h;
+			__archive_read_consume(a, skip);
+			total += skip;
+		}
+	}
+
+	return ARCHIVE_OK;
+fatal:
+	archive_set_error(&a->archive, ARCHIVE_ERRNO_FILE_FORMAT,
+			"Couldn't find out RAR header");
+	return (ARCHIVE_FATAL);
+}
+
 static int rar5_read_header(struct archive_read *a,
     struct archive_entry *entry)
 {
@@ -2314,6 +2412,8 @@ static int rar5_read_header(struct archive_read *a,
 
 	if(rar->header_initialized == 0) {
 		init_header(a);
+		if ((ret = try_skip_sfx(a)) < ARCHIVE_WARN)
+			return ret;
 		rar->header_initialized = 1;
 	}
 

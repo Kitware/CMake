@@ -80,6 +80,23 @@ add_test(NAME FailingTest COMMAND ${CMAKE_COMMAND} -E no_such_command)
 endfunction()
 run_TestOutputSize()
 
+# Test --test-output-truncation
+function(run_TestOutputTruncation mode expected)
+  set(CASE_CTEST_TEST_ARGS EXCLUDE RunCMakeVersion)
+  set(TRUNCATED_OUTPUT ${expected})  # used in TestOutputTruncation-check.cmake
+  set(CASE_TEST_PREFIX_CODE [[
+set( CTEST_CUSTOM_TEST_OUTPUT_TRUNCATION${mode})
+  ]])
+  set(CASE_CMAKELISTS_SUFFIX_CODE [[
+add_test(NAME Truncation_${mode} COMMAND ${CMAKE_COMMAND} -E echo 123456789)
+  ]])
+
+  run_ctest(TestOutputTruncation)
+endfunction()
+run_TestOutputTruncation("head" "...6789")
+run_TestOutputTruncation("middle" "12....*...89")
+run_TestOutputTruncation("tail" "12345...")
+
 run_ctest_test(TestRepeatBad1 REPEAT UNKNOWN:3)
 run_ctest_test(TestRepeatBad2 REPEAT UNTIL_FAIL:-1)
 

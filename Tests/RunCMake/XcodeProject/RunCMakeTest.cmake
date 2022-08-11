@@ -141,6 +141,16 @@ endfunction()
 
 XcodeRemoveExcessiveISystem()
 
+function(XcodeXCConfig)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/XcodeXCConfig-build)
+  run_cmake(XcodeXCConfig)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(XcodeXCConfig-build ${CMAKE_COMMAND} --build . --config Debug)
+  run_cmake_command(XcodeXCConfig-build ${CMAKE_COMMAND} --build . --config Release)
+endfunction()
+
+XcodeXCConfig()
+
 # Isolate device tests from host architecture selection.
 unset(ENV{CMAKE_OSX_ARCHITECTURES})
 

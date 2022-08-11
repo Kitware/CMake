@@ -1,0 +1,6 @@
+CMake Error at bad-feature3.cmake:[0-9]+ \(add_library\):
+  Feature 'feat', specified by variable 'CMAKE_C_LINK_LIBRARY_USING_feat', is
+  malformed \("<LIBRARY>", "<LIB_ITEM>", or "<LINK_ITEM>" patterns are
+  missing\) and cannot be used to link target 'lib'.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

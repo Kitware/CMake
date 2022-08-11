@@ -2,20 +2,21 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCommonTargetGenerator.h"
 
-#include <set>
+#include <algorithm>
 #include <sstream>
 #include <utility>
 
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalCommonGenerator.h"
-#include "cmLinkLineComputer.h"
 #include "cmLocalCommonGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmOutputConverter.h"
 #include "cmRange.h"
 #include "cmSourceFile.h"
+#include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmTarget.h"
@@ -43,33 +44,6 @@ cmValue cmCommonTargetGenerator::GetFeature(const std::string& feature,
                                             const std::string& config)
 {
   return this->GeneratorTarget->GetFeature(feature, config);
-}
-
-void cmCommonTargetGenerator::AddModuleDefinitionFlag(
-  cmLinkLineComputer* linkLineComputer, std::string& flags,
-  const std::string& config)
-{
-  cmGeneratorTarget::ModuleDefinitionInfo const* mdi =
-    this->GeneratorTarget->GetModuleDefinitionInfo(config);
-  if (!mdi || mdi->DefFile.empty()) {
-    return;
-  }
-
-  // TODO: Create a per-language flag variable.
-  cmValue defFileFlag =
-    this->Makefile->GetDefinition("CMAKE_LINK_DEF_FILE_FLAG");
-  if (!defFileFlag) {
-    return;
-  }
-
-  // Append the flag and value.  Use ConvertToLinkReference to help
-  // vs6's "cl -link" pass it to the linker.
-  std::string flag =
-    cmStrCat(*defFileFlag,
-             this->LocalCommonGenerator->ConvertToOutputFormat(
-               linkLineComputer->ConvertToLinkReference(mdi->DefFile),
-               cmOutputConverter::SHELL));
-  this->LocalCommonGenerator->AppendFlags(flags, flag);
 }
 
 void cmCommonTargetGenerator::AppendFortranFormatFlags(
@@ -320,4 +294,30 @@ std::string cmCommonTargetGenerator::GetLinkerLauncher(
     }
   }
   return std::string();
+}
+
+bool cmCommonTargetGenerator::HaveRequiredLanguages(
+  const std::vector<cmSourceFile const*>& sources,
+  std::set<std::string>& languagesNeeded) const
+{
+  for (cmSourceFile const* sf : sources) {
+    languagesNeeded.insert(sf->GetLanguage());
+  }
+
+  auto* makefile = this->Makefile;
+  auto* state = makefile->GetState();
+  auto unary = [&state, &makefile](const std::string& lang) -> bool {
+    const bool valid = state->GetLanguageEnabled(lang);
+    if (!valid) {
+      makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("The language ", lang,
+                 " was requested for compilation but was not enabled."
+                 " To enable a language it needs to be specified in a"
+                 " 'project' or 'enable_language' command in the root"
+                 " CMakeLists.txt"));
+    }
+    return valid;
+  };
+  return std::all_of(languagesNeeded.cbegin(), languagesNeeded.cend(), unary);
 }

@@ -1,0 +1,8 @@
+CMake Error at CMP0139-OLD.cmake:[0-9]+ \(if\):
+  if given arguments:
+
+    "/path1" "PATH_EQUAL" "/path2"
+
+  Unknown arguments specified
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

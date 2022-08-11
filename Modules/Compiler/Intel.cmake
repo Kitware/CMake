@@ -13,6 +13,7 @@ include(Compiler/CMakeCommonCompilerMacros)
 if(CMAKE_HOST_WIN32)
   # MSVC-like
   macro(__compiler_intel lang)
+    set(CMAKE_${lang}_COMPILE_OPTIONS_WARNING_AS_ERROR "-Werror-all")
   endmacro()
 else()
   # GNU-like
@@ -24,6 +25,7 @@ else()
     string(APPEND CMAKE_${lang}_FLAGS_MINSIZEREL_INIT " -Os")
     string(APPEND CMAKE_${lang}_FLAGS_RELEASE_INIT " -O3")
     string(APPEND CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT " -O2 -g")
+    set(CMAKE_${lang}_COMPILE_OPTIONS_WARNING_AS_ERROR "-Werror-all")
 
     set(CMAKE_${lang}_COMPILER_PREDEFINES_COMMAND "${CMAKE_${lang}_COMPILER}")
     if(CMAKE_${lang}_COMPILER_ARG1)

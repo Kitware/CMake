@@ -26,5 +26,5 @@ compare_file_to_expected(
 "${RunCMake_BINARY_DIR}/AndroidMK-build/Android.mk"
 "${RunCMake_TEST_SOURCE_DIR}/expectedBuildAndroidMK.txt")
 compare_file_to_expected(
-"${RunCMake_BINARY_DIR}/AndroidMK-build/CMakeFiles/Export/share/ndk-modules/Android.mk"
+"${RunCMake_BINARY_DIR}/AndroidMK-build/CMakeFiles/Export/c8a72b7cccded047a31c221a6b84dd48/Android.mk"
 "${RunCMake_TEST_SOURCE_DIR}/expectedInstallAndroidMK.txt")

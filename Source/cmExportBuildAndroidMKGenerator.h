@@ -6,7 +6,6 @@
 
 #include <iosfwd>
 #include <string>
-#include <vector>
 
 #include "cmExportBuildFileGenerator.h"
 #include "cmExportFileGenerator.h"
@@ -21,7 +20,7 @@ class cmGeneratorTarget;
  * a build tree.  This exports the targets to the Android ndk build tool
  * makefile format for prebuilt libraries.
  *
- * This is used to implement the EXPORT() command.
+ * This is used to implement the export() command.
  */
 class cmExportBuildAndroidMKGenerator : public cmExportBuildFileGenerator
 {
@@ -56,8 +55,7 @@ protected:
     std::ostream& os, const std::string& config,
     cmGeneratorTarget const* target,
     ImportPropertyMap const& properties) override;
-  void GenerateMissingTargetsCheckCode(
-    std::ostream& os, const std::vector<std::string>& missingTargets) override;
+  void GenerateMissingTargetsCheckCode(std::ostream& os) override;
   void GenerateInterfaceProperties(
     cmGeneratorTarget const* target, std::ostream& os,
     const ImportPropertyMap& properties) override;
