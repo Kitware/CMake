@@ -2591,7 +2591,9 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
         if (pchSource.empty() || pchHeader.empty()) {
           if (this->GetGlobalGenerator()->IsXcode() && !pchLangSet.empty()) {
             for (auto* sf : sources) {
-              if (pchLangSet.find(sf->GetLanguage()) == pchLangSet.end()) {
+              const auto sourceLanguage = sf->GetLanguage();
+              if (!sourceLanguage.empty() &&
+                  pchLangSet.find(sourceLanguage) == pchLangSet.end()) {
                 sf->SetProperty("SKIP_PRECOMPILE_HEADERS", "ON");
               }
             }
