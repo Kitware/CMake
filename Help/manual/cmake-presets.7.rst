@@ -349,15 +349,17 @@ that may contain the following fields:
 
   ``dev``
 
-    An optional boolean. Equivalent to passing ``-Werror=dev`` or
-    ``-Wno-error=dev`` on the command line. This may not be set to ``true``
-    if ``warnings.dev`` is set to ``false``.
+    An optional boolean. Equivalent to passing :option:`-Werror=dev <cmake -Werror>`
+    or :option:`-Wno-error=dev <cmake -Werror>` on the command line.
+    This may not be set to ``true`` if ``warnings.dev`` is set to ``false``.
 
   ``deprecated``
 
-    An optional boolean. Equivalent to passing ``-Werror=deprecated`` or
-    ``-Wno-error=deprecated`` on the command line. This may not be set to
-    ``true`` if ``warnings.deprecated`` is set to ``false``.
+    An optional boolean. Equivalent to passing
+    :option:`-Werror=deprecated <cmake -Werror>` or
+    :option:`-Wno-error=deprecated <cmake -Werror>` on the command line.
+    This may not be set to ``true`` if ``warnings.deprecated`` is set to
+    ``false``.
 
 ``debug``
 
