@@ -96,7 +96,8 @@ Cross Compiling
 ===============
 
 If :manual:`cmake(1)` is invoked with the command line parameter
-``--toolchain path/to/file`` or ``-DCMAKE_TOOLCHAIN_FILE=path/to/file``, the
+:option:`--toolchain path/to/file <cmake --toolchain>` or
+:option:`-DCMAKE_TOOLCHAIN_FILE=path/to/file <cmake -D>`, the
 file will be loaded early to set values for the compilers.
 The :variable:`CMAKE_CROSSCOMPILING` variable is set to true when CMake is
 cross-compiling.
