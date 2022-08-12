@@ -881,9 +881,10 @@ Overriding Where To Find CMakeLists.txt
 
 If the sub-project's ``CMakeLists.txt`` file is not at the top level of its
 source tree, the ``SOURCE_SUBDIR`` option can be used to tell ``FetchContent``
-where to find it.  The following example shows how to use that option and
+where to find it.  The following example shows how to use that option, and
 it also sets a variable which is meaningful to the subproject before pulling
-it into the main build:
+it into the main build (set as an ``INTERNAL`` cache variable to avoid
+problems with policy :policy:`CMP0077`):
 
 .. code-block:: cmake
 
@@ -894,7 +895,7 @@ it into the main build:
     GIT_TAG        ae50d9b9902526efd6c7a1907d09739f959c6297 # v3.15.0
     SOURCE_SUBDIR  cmake
   )
-  set(protobuf_BUILD_TESTS OFF)
+  set(protobuf_BUILD_TESTS OFF CACHE INTERNAL "")
   FetchContent_MakeAvailable(protobuf)
 
 Complex Dependency Hierarchies
