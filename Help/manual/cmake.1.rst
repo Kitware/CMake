@@ -497,10 +497,12 @@ Options
  a variable called ``MYVAR`` to ``1``, but the user sets it to ``2`` with a
  ``-D`` argument, the value ``2`` is preferred.
 
-.. option:: --list-presets, --list-presets=<[configure | build | test | all]>
+.. option:: --list-presets[=<type>]
 
- Lists the available presets. If no option is specified only configure presets
- will be listed. The current working directory must contain CMake preset files.
+ Lists the available presets of the specified ``<type>``.  Valid values for
+ ``<type>`` are ``configure``, ``build``, ``test``, or ``all``.  If ``<type>``
+ is omitted, ``configure`` is assumed.  The current working directory must
+ contain CMake preset files.
 
 .. _`Build Tool Mode`:
 
@@ -560,14 +562,15 @@ following options:
   Build target ``clean`` first, then build.
   (To clean only, use :option:`--target clean <cmake --target>`.)
 
-.. option:: --resolve-package-references=<on|off|only>
+.. option:: --resolve-package-references=<value>
 
   .. versionadded:: 3.23
 
   Resolve remote package references from external package managers (e.g. NuGet)
-  before build. When set to ``on`` (default), packages will be restored before
-  building a target. When set to ``only``, the packages will be restored, but no
-  build will be performed. When set to ``off``, no packages will be restored.
+  before build. When ``<value>`` is set to ``on`` (default), packages will be
+  restored before building a target.  When ``<value>`` is set to ``only``, the
+  packages will be restored, but no build will be performed.  When
+  ``<value>`` is set to ``off``, no packages will be restored.
 
   If the target does not define any package references, this option does nothing.
 

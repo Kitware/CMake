@@ -71,7 +71,7 @@ const char* cmDocumentationUsageNote[][2] = {
 const char* cmDocumentationOptions[][2] = {
   CMAKE_STANDARD_OPTIONS_TABLE,
   { "--preset <preset>,--preset=<preset>", "Specify a configure preset." },
-  { "--list-presets", "List available presets." },
+  { "--list-presets[=<type>]", "List available presets." },
   { "-E", "CMake command mode." },
   { "-L[A][H]", "List non-advanced cached variables." },
   { "--fresh",
@@ -83,8 +83,8 @@ const char* cmDocumentationOptions[][2] = {
   { "-P <file>", "Process script mode." },
   { "--find-package", "Legacy pkg-config like mode.  Do not use." },
   { "--graphviz=<file>",
-    "Generate graphviz of dependencies, see "
-    "CMakeGraphVizOptions.cmake for more." },
+    "Generate graphviz of dependencies, see CMakeGraphVizOptions.cmake for "
+    "more." },
   { "--system-information [file]", "Dump information about this system." },
   { "--log-level=<ERROR|WARNING|NOTICE|STATUS|VERBOSE|DEBUG|TRACE>",
     "Set the verbosity of messages from CMake files. "
@@ -109,8 +109,7 @@ const char* cmDocumentationOptions[][2] = {
   { "--warn-uninitialized", "Warn about uninitialized values." },
   { "--no-warn-unused-cli", "Don't warn about command line options." },
   { "--check-system-vars",
-    "Find problems with variable usage in system "
-    "files." },
+    "Find problems with variable usage in system files." },
   { "--compile-no-warning-as-error",
     "Ignore COMPILE_WARNING_AS_ERROR property and "
     "CMAKE_COMPILE_WARNING_AS_ERROR variable." },
@@ -616,7 +615,7 @@ int do_build(int ac, char const* const* av)
       "  <dir>          = Project binary directory to be built.\n"
       "  --preset <preset>, --preset=<preset>\n"
       "                 = Specify a build preset.\n"
-      "  --list-presets\n"
+      "  --list-presets[=<type>]\n"
       "                 = List available build presets.\n"
       "  --parallel [<jobs>], -j [<jobs>]\n"
       "                 = Build in parallel using the given number of jobs. \n"

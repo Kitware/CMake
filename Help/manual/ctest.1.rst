@@ -419,9 +419,10 @@ Run Tests
  This option will not run any tests, it will simply print the list of
  all labels associated with the test set.
 
-.. option:: --no-tests=<[error|ignore]>
+.. option:: --no-tests=<action>
 
- Regard no tests found either as error or ignore it.
+ Regard no tests found either as error (when ``<action>`` is set to
+ ``error``) or ignore it (when ``<action>`` is set to ``ignore``).
 
  If no tests were found, the default behavior of CTest is to always log an
  error message but to return an error code in script mode only.  This option
