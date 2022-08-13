@@ -121,6 +121,7 @@ of the following libraries that are part of the CUDAToolkit:
 - :ref:`nvidia-ML<cuda_toolkit_nvML>`
 - :ref:`nvRTC<cuda_toolkit_nvRTC>`
 - :ref:`nvToolsExt<cuda_toolkit_nvToolsExt>`
+- :ref:`nvtx3<cuda_toolkit_nvtx3>`
 - :ref:`OpenCL<cuda_toolkit_opencl>`
 - :ref:`cuLIBOS<cuda_toolkit_cuLIBOS>`
 
@@ -362,12 +363,28 @@ Targets Created:
 nvToolsExt
 """"""""""
 
+.. deprecated:: 3.25 With CUDA 10.0+, use :ref:`nvtx3 <cuda_toolkit_nvtx3>`.
+
 The `NVIDIA Tools Extension <https://docs.nvidia.com/gameworks/content/gameworkslibrary/nvtx/nvidia_tools_extension_library_nvtx.htm>`_.
 This is a shared library only.
 
 Targets Created:
 
 - ``CUDA::nvToolsExt``
+
+.. _`cuda_toolkit_nvtx3`:
+
+nvtx3
+"""""
+
+.. versionadded:: 3.25
+
+The header-only `NVIDIA Tools Extension Library <https://nvidia.github.io/NVTX/doxygen/index.html>`_.
+Introduced in CUDA 10.0.
+
+Targets created:
+
+- ``CUDA::nvtx3``
 
 .. _`cuda_toolkit_opencl`:
 
@@ -1010,6 +1027,21 @@ if(CUDAToolkit_FOUND)
     )
   endif()
   _CUDAToolkit_find_and_add_import_lib(nvToolsExt ALT nvToolsExt64)
+
+  if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 10.0)
+    # nvToolsExt is deprecated since nvtx3 introduction.
+    # Warn only if the project requires a sufficiently new CMake to make migration possible.
+    if(CMAKE_MINIMUM_REQUIRED_VERSION VERSION_GREATER_EQUAL 3.25)
+      set_property(TARGET CUDA::nvToolsExt PROPERTY DEPRECATION "nvToolsExt has been superseded by nvtx3 since CUDA 10.0 and CMake 3.25. Use CUDA::nvtx3 and include <nvtx3/nvToolsExt.h> instead.")
+    endif()
+
+    # Header-only variant. Uses dlopen().
+    if(NOT TARGET CUDA::nvtx3)
+      add_library(CUDA::nvtx3 INTERFACE IMPORTED)
+      target_include_directories(CUDA::nvtx3 SYSTEM INTERFACE "${CUDAToolkit_INCLUDE_DIRS}")
+      target_link_libraries(CUDA::nvtx3 INTERFACE ${CMAKE_DL_LIBS})
+    endif()
+  endif()
 
   _CUDAToolkit_find_and_add_import_lib(OpenCL)
 endif()
