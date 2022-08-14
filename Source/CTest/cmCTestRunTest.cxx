@@ -803,11 +803,7 @@ bool cmCTestRunTest::ForkProcess(
   if (environment_modification && !environment_modification->empty()) {
     std::map<std::string, cm::optional<std::string>> env_application;
 
-#ifdef _WIN32
-    char path_sep = ';';
-#else
-    char path_sep = ':';
-#endif
+    char path_sep = cmSystemTools::GetSystemPathlistSeparator();
 
     auto apply_diff =
       [&env_application](const std::string& name,
