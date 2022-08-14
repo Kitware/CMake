@@ -784,16 +784,15 @@ bool cmCTestRunTest::ForkProcess(
   this->TestProcess->SetTimeout(timeout);
 
   cmSystemTools::SaveRestoreEnvironment sre;
-
   std::ostringstream envMeasurement;
+
+  // We split processing ENVIRONMENT and ENVIRONMENT_MODIFICATION into two
+  // phases to ensure that MYVAR=reset: in the latter phase resets to the
+  // former phase's settings, rather than to the original environment.
   if (environment && !environment->empty()) {
-    // Environment modification works on the assumption that the environment is
-    // actually modified here. If another strategy is used, there will need to
-    // be updates in `EnvDiff::ParseOperation`.
-    cmSystemTools::AppendEnv(*environment);
-    for (auto const& var : *environment) {
-      envMeasurement << var << std::endl;
-    }
+    cmSystemTools::EnvDiff diff;
+    diff.AppendEnv(*environment);
+    diff.ApplyToCurrentEnv(&envMeasurement);
   }
 
   if (environment_modification && !environment_modification->empty()) {

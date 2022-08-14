@@ -388,6 +388,15 @@ public:
   class EnvDiff
   {
   public:
+    /** Append multiple variables to the current environment diff */
+    void AppendEnv(std::vector<std::string> const& env);
+
+    /**
+     * Add a single variable (or remove if no = sign) to the current
+     * environment diff.
+     */
+    void PutEnv(const std::string& env);
+
     /**
      * Apply an ENVIRONMENT_MODIFICATION operation to this diff. Returns
      * false and issues an error on parse failure.

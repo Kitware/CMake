@@ -1564,6 +1564,24 @@ void cmSystemTools::AppendEnv(std::vector<std::string> const& env)
   }
 }
 
+void cmSystemTools::EnvDiff::AppendEnv(std::vector<std::string> const& env)
+{
+  for (std::string const& eit : env) {
+    this->PutEnv(eit);
+  }
+}
+
+void cmSystemTools::EnvDiff::PutEnv(const std::string& env)
+{
+  auto const eq_loc = env.find('=');
+  if (eq_loc != std::string::npos) {
+    std::string name = env.substr(0, eq_loc);
+    diff[name] = env.substr(eq_loc + 1);
+  } else {
+    diff[env] = {};
+  }
+}
+
 bool cmSystemTools::EnvDiff::ParseOperation(const std::string& envmod)
 {
   char path_sep = GetSystemPathlistSeparator();
@@ -1575,11 +1593,6 @@ bool cmSystemTools::EnvDiff::ParseOperation(const std::string& envmod)
     if (old_value) {
       output = *old_value;
     } else {
-      // This only works because the environment is actually modified when
-      // processing the ENVIRONMENT property in CTest and cmake -E env
-      // (`AppendEnv`). If either one ever just creates an environment block
-      // directly, that block will need to be queried for the subprocess'
-      // value instead.
       const char* curval = cmSystemTools::GetEnv(name);
       if (curval) {
         output = curval;
