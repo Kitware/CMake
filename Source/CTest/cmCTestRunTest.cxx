@@ -787,9 +787,7 @@ bool cmCTestRunTest::ForkProcess(
 
   this->TestProcess->SetTimeout(timeout);
 
-#ifndef CMAKE_BOOTSTRAP
   cmSystemTools::SaveRestoreEnvironment sre;
-#endif
 
   std::ostringstream envMeasurement;
   if (environment && !environment->empty()) {
