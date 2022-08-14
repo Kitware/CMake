@@ -1578,8 +1578,13 @@ void cmSystemTools::EnvDiff::PutEnv(const std::string& env)
     std::string name = env.substr(0, eq_loc);
     diff[name] = env.substr(eq_loc + 1);
   } else {
-    diff[env] = {};
+    this->UnPutEnv(env);
   }
+}
+
+void cmSystemTools::EnvDiff::UnPutEnv(const std::string& env)
+{
+  diff[env] = {};
 }
 
 bool cmSystemTools::EnvDiff::ParseOperation(const std::string& envmod)

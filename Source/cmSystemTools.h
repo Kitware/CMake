@@ -397,6 +397,9 @@ public:
      */
     void PutEnv(const std::string& env);
 
+    /** Remove a single variable from the current environment diff. */
+    void UnPutEnv(const std::string& env);
+
     /**
      * Apply an ENVIRONMENT_MODIFICATION operation to this diff. Returns
      * false and issues an error on parse failure.
