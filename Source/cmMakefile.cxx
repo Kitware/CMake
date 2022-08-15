@@ -4543,6 +4543,19 @@ bool cmMakefile::SetPolicyVersion(std::string const& version_min,
                                         cmPolicies::WarnCompat::On);
 }
 
+cmMakefile::VariablePushPop::VariablePushPop(cmMakefile* m)
+  : Makefile(m)
+{
+  this->Makefile->StateSnapshot =
+    this->Makefile->GetState()->CreateVariableScopeSnapshot(
+      this->Makefile->StateSnapshot);
+}
+
+cmMakefile::VariablePushPop::~VariablePushPop()
+{
+  this->Makefile->PopSnapshot();
+}
+
 bool cmMakefile::HasCMP0054AlreadyBeenReported(
   cmListFileContext const& context) const
 {

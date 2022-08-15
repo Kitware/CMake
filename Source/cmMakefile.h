@@ -376,6 +376,20 @@ public:
   };
   friend class PolicyPushPop;
 
+  /** Helper class to push and pop variables scopes automatically. */
+  class VariablePushPop
+  {
+  public:
+    VariablePushPop(cmMakefile* m);
+    ~VariablePushPop();
+
+    VariablePushPop(VariablePushPop const&) = delete;
+    VariablePushPop& operator=(VariablePushPop const&) = delete;
+
+  private:
+    cmMakefile* Makefile;
+  };
+
   /**
    * Determine if the given context, name pair has already been reported
    * in context of CMP0054.
