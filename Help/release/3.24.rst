@@ -348,3 +348,14 @@ Other Changes
 * A precompiled Windows ``arm64`` binary is now provided on `cmake.org`_.
 
 .. _`cmake.org`: https://cmake.org/download/
+
+Updates
+=======
+
+Changes made since CMake 3.24.0 include the following.
+
+3.24.1
+------
+
+* The :prop_tgt:`COMPILE_WARNING_AS_ERROR` target property now supports the
+  TI compiler.
