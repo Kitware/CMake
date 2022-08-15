@@ -117,14 +117,26 @@ As mentioned above, a three line ``CMakeLists.txt`` is all that we need to get
 up and running. The first line is to use :command:`cmake_minimum_required` to
 set the CMake version as follows:
 
+.. raw:: html
+
+  <details><summary>TODO 1: Click to show/hide answer</summary>
+
 .. literalinclude:: Step2/CMakeLists.txt
   :caption: TODO 1: CMakeLists.txt
   :name: CMakeLists.txt-cmake_minimum_required
   :language: cmake
   :end-before: # set the project name and version
 
+.. raw:: html
+
+  </details>
+
 The next step to make a basic project is to use the :command:`project`
 command as follows to set the project name:
+
+.. raw:: html
+
+  <details><summary>TODO 2: Click to show/hide answer</summary>
 
 .. code-block:: cmake
   :caption: TODO 2: CMakeLists.txt
@@ -132,9 +144,16 @@ command as follows to set the project name:
 
   project(Tutorial)
 
+.. raw:: html
+
+  </details>
 
 The last command to call for a basic project is
 :command:`add_executable`. We call it as follows:
+
+.. raw:: html
+
+  <details><summary>TODO 3: Click to show/hide answer</summary>
 
 .. literalinclude:: Step2/CMakeLists.txt
   :caption: TODO 3: CMakeLists.txt
@@ -142,6 +161,10 @@ The last command to call for a basic project is
   :language: cmake
   :start-after: # add the executable
   :end-before: # add the binary tree to the search path for include files
+
+.. raw:: html
+
+  </details>
 
 Exercise 2 - Specifying the C++ Standard
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -208,12 +231,20 @@ We start by adding some C++11 features to our project by replacing
 ``atof`` with ``std::stod`` in ``tutorial.cxx``. This looks like
 the following:
 
+.. raw:: html
+
+  <details><summary>TODO 4: Click to show/hide answer</summary>
+
 .. literalinclude:: Step2/tutorial.cxx
   :caption: TODO 4: tutorial.cxx
   :name: tutorial.cxx-cxx11
   :language: c++
   :start-after: // convert input to double
   :end-before: // calculate square root
+
+.. raw:: html
+
+  </details>
 
 To complete ``TODO 5``, simply remove ``#include <cstdlib>``.
 
@@ -225,12 +256,20 @@ the :variable:`CMAKE_CXX_STANDARD` variable in the ``CMakeLists.txt`` file to
 add the :variable:`CMAKE_CXX_STANDARD` declarations above the call to
 :command:`add_executable`.
 
+.. raw:: html
+
+  <details><summary>TODO 6: Click to show/hide answer</summary>
+
 .. literalinclude:: Step2/CMakeLists.txt
   :caption: TODO 6: CMakeLists.txt
   :name: CMakeLists.txt-CXX_STANDARD
   :language: cmake
   :start-after: # specify the C++ standard
   :end-before: # configure a header file to pass some of the CMake settings
+
+.. raw:: html
+
+  </details>
 
 Exercise 3 - Adding a Version Number and Configured Header File
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -309,6 +348,10 @@ First, we modify the ``CMakeLists.txt`` file to use the
 When the command:`project` command is called, CMake defines
 ``Tutorial_VERSION_MAJOR`` and ``Tutorial_VERSION_MINOR`` behind the scenes.
 
+.. raw:: html
+
+  <details><summary>TODO 7: Click to show/hide answer</summary>
+
 .. literalinclude:: Step2/CMakeLists.txt
   :caption: TODO 7: CMakeLists.txt
   :name: CMakeLists.txt-project-VERSION
@@ -316,8 +359,16 @@ When the command:`project` command is called, CMake defines
   :start-after: # set the project name and version
   :end-before: # specify the C++ standard
 
+.. raw:: html
+
+  </details>
+
 Then we used :command:`configure_file` to copy the input file with the
 specified CMake variables replaced:
+
+.. raw:: html
+
+  <details><summary>TODO 8: Click to show/hide answer</summary>
 
 .. literalinclude:: Step2/CMakeLists.txt
   :caption: TODO 8: CMakeLists.txt
@@ -325,6 +376,10 @@ specified CMake variables replaced:
   :language: cmake
   :start-after: # to the source code
   :end-before: # add the executable
+
+.. raw:: html
+
+  </details>
 
 Since the configured file will be written into the project binary
 directory, we must add that directory to the list of paths to search for
@@ -337,11 +392,19 @@ meant to refer to a `bin/` directory.
 We used :command:`target_include_directories` to specify
 where the executable target should look for include files.
 
+.. raw:: html
+
+  <details><summary>TODO 9: Click to show/hide answer</summary>
+
 .. literalinclude:: Step2/CMakeLists.txt
   :caption: TODO 9: CMakeLists.txt
   :name: CMakeLists.txt-target_include_directories
   :language: cmake
   :start-after: # so that we will find TutorialConfig.h
+
+.. raw:: html
+
+  </details>
 
 ``TutorialConfig.h.in`` is the input header file to be configured.
 When :command:`configure_file` is called from our ``CMakeLists.txt``, the
@@ -349,21 +412,41 @@ values for ``@Tutorial_VERSION_MAJOR@`` and ``@Tutorial_VERSION_MINOR@`` will
 be replaced with the corresponding version numbers from the project in
 ``TutorialConfig.h``.
 
+.. raw:: html
+
+  <details><summary>TODO 10: Click to show/hide answer</summary>
+
 .. literalinclude:: Step2/TutorialConfig.h.in
   :caption: TODO 10: TutorialConfig.h.in
   :name: TutorialConfig.h.in
   :language: c++
 
+.. raw:: html
+
+  </details>
+
 Next, we need to modify ``tutorial.cxx`` to include the configured header file,
 ``TutorialConfig.h``.
+
+.. raw:: html
+
+  <details><summary>TODO 11: Click to show/hide answer</summary>
 
 .. code-block:: c++
   :caption: TODO 11: tutorial.cxx
 
   #include "TutorialConfig.h"
 
+.. raw:: html
+
+  </details>
+
 Finally, we print out the executable name and version number by updating
 ``tutorial.cxx`` as follows:
+
+.. raw:: html
+
+  <details><summary>TODO 12: Click to show/hide answer</summary>
 
 .. literalinclude:: Step2/tutorial.cxx
   :caption: TODO 12 : tutorial.cxx
@@ -371,3 +454,7 @@ Finally, we print out the executable name and version number by updating
   :language: c++
   :start-after: {
   :end-before: // convert input to double
+
+.. raw:: html
+
+  </details>
