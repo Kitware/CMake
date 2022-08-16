@@ -50,7 +50,7 @@ const char* cmDocumentationOptions[][2] = {
   { "-C <Configuration>", "Specify the project configuration" },
   { "-D <var>=<value>", "Set a CPack variable." },
   { "--config <configFile>", "Specify the config file." },
-  { "--verbose,-V", "Enable verbose output" },
+  { "-V,--verbose", "Enable verbose output" },
   { "--trace", "Put underlying cmake scripts in trace mode." },
   { "--trace-expand", "Put underlying cmake scripts in expanded trace mode." },
   { "--debug", "Enable debug output (for CPack developers)" },

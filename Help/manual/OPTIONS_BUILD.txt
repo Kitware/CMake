@@ -109,20 +109,6 @@
  Enable warnings that are meant for the author of the ``CMakeLists.txt``
  files. By default this will also turn on deprecation warnings.
 
-.. option:: -Werror=dev
-
- Make developer warnings errors.
-
- Make warnings that are meant for the author of the ``CMakeLists.txt`` files
- errors. By default this will also turn on deprecated warnings as errors.
-
-.. option:: -Wno-error=dev
-
- Make developer warnings not errors.
-
- Make warnings that are meant for the author of the ``CMakeLists.txt`` files not
- errors. By default this will also turn off deprecated warnings as errors.
-
 .. option:: -Wdeprecated
 
  Enable deprecated functionality warnings.
@@ -137,16 +123,30 @@
  Suppress warnings for usage of deprecated functionality, that are meant
  for the author of the ``CMakeLists.txt`` files.
 
-.. option:: -Werror=deprecated
+.. option:: -Werror=<what>
 
- Make deprecated macro and function warnings errors.
+ Treat CMake warnings as errors. ``<what>`` must be one of the following:
 
- Make warnings for usage of deprecated macros and functions, that are meant
- for the author of the ``CMakeLists.txt`` files, errors.
+ ``dev``
+   Make developer warnings errors.
 
-.. option:: -Wno-error=deprecated
+   Make warnings that are meant for the author of the ``CMakeLists.txt`` files
+   errors. By default this will also turn on deprecated warnings as errors.
 
- Make deprecated macro and function warnings not errors.
+ ``deprecated``
+  Make deprecated macro and function warnings errors.
 
- Make warnings for usage of deprecated macros and functions, that are meant
- for the author of the ``CMakeLists.txt`` files, not errors.
+  Make warnings for usage of deprecated macros and functions, that are meant
+  for the author of the ``CMakeLists.txt`` files, errors.
+
+.. option:: -Wno-error=<what>
+
+ Do not treat CMake warnings as errors. ``<what>`` must be one of the following:
+
+ ``dev``
+  Make warnings that are meant for the author of the ``CMakeLists.txt`` files not
+  errors. By default this will also turn off deprecated warnings as errors.
+
+ ``deprecated``
+  Make warnings for usage of deprecated macros and functions, that are meant
+  for the author of the ``CMakeLists.txt`` files, not errors.

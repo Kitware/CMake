@@ -9,8 +9,7 @@ Synopsis
 .. parsed-literal::
 
  `Generate a Project Buildsystem`_
-  cmake [<options>] <path-to-source>
-  cmake [<options>] <path-to-existing-build>
+  cmake [<options>] <path-to-source | path-to-existing-build>
   cmake [<options>] -S <path-to-source> -B <path-to-build>
 
  `Build a Project`_
@@ -23,7 +22,7 @@ Synopsis
   cmake --open <dir>
 
  `Run a Script`_
-  cmake [{-D <var>=<value>}...] -P <cmake-script-file>
+  cmake [-D <var>=<value>]... -P <cmake-script-file>
 
  `Run a Command-Line Tool`_
   cmake -E <command> [<options>]
@@ -243,12 +242,13 @@ Options
  from the top of a binary tree for a CMake project it will dump
  additional information such as the cache, log files etc.
 
-.. option:: --log-level=<ERROR|WARNING|NOTICE|STATUS|VERBOSE|DEBUG|TRACE>
+.. option:: --log-level=<level>
 
- Set the log level.
+ Set the log ``<level>``.
 
  The :command:`message` command will only output messages of the specified
- log level or higher.  The default log level is ``STATUS``.
+ log level or higher.  The valid log levels are ``ERROR``, ``WARNING``,
+ ``NOTICE``, ``STATUS`` (default), ``VERBOSE``, ``DEBUG``, or ``TRACE``.
 
  To make a log level persist between CMake runs, set
  :variable:`CMAKE_MESSAGE_LOG_LEVEL` as a cache variable instead.
@@ -497,10 +497,12 @@ Options
  a variable called ``MYVAR`` to ``1``, but the user sets it to ``2`` with a
  ``-D`` argument, the value ``2`` is preferred.
 
-.. option:: --list-presets, --list-presets=<[configure | build | test | all]>
+.. option:: --list-presets[=<type>]
 
- Lists the available presets. If no option is specified only configure presets
- will be listed. The current working directory must contain CMake preset files.
+ Lists the available presets of the specified ``<type>``.  Valid values for
+ ``<type>`` are ``configure``, ``build``, ``test``, or ``all``.  If ``<type>``
+ is omitted, ``configure`` is assumed.  The current working directory must
+ contain CMake preset files.
 
 .. _`Build Tool Mode`:
 
@@ -546,7 +548,7 @@ following options:
   Some native build tools always build in parallel.  The use of ``<jobs>``
   value of ``1`` can be used to limit to a single job.
 
-.. option:: --target <tgt>..., -t <tgt>...
+.. option:: -t <tgt>..., --target <tgt>...
 
   Build ``<tgt>`` instead of the default target.  Multiple targets may be
   given, separated by spaces.
@@ -560,14 +562,15 @@ following options:
   Build target ``clean`` first, then build.
   (To clean only, use :option:`--target clean <cmake --target>`.)
 
-.. option:: --resolve-package-references=<on|off|only>
+.. option:: --resolve-package-references=<value>
 
   .. versionadded:: 3.23
 
   Resolve remote package references from external package managers (e.g. NuGet)
-  before build. When set to ``on`` (default), packages will be restored before
-  building a target. When set to ``only``, the packages will be restored, but no
-  build will be performed. When set to ``off``, no packages will be restored.
+  before build. When ``<value>`` is set to ``on`` (default), packages will be
+  restored before building a target.  When ``<value>`` is set to ``only``, the
+  packages will be restored, but no build will be performed.  When
+  ``<value>`` is set to ``off``, no packages will be restored.
 
   If the target does not define any package references, this option does nothing.
 
@@ -669,7 +672,7 @@ Run a Script
 
 .. code-block:: shell
 
-  cmake [{-D <var>=<value>}...] -P <cmake-script-file> [-- <unparsed-options>...]
+  cmake [-D <var>=<value>]... -P <cmake-script-file> [-- <unparsed-options>...]
 
 .. option:: -D <var>=<value>
 

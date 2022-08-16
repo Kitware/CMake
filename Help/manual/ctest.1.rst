@@ -10,12 +10,24 @@ Synopsis
 
 .. parsed-literal::
 
- ctest [<options>]
- ctest --build-and-test <path-to-source> <path-to-build>
-       --build-generator <generator> [<options>...]
-       [--build-options <opts>...] [--test-command <command> [<args>...]]
- ctest {-D <dashboard> | -M <model> -T <action> | -S <script> | -SP <script>}
-       [-- <dashboard-options>...]
+ `Run Tests`_
+  ctest [<options>]
+
+ `Build and Test Mode`_
+  ctest --build-and-test <path-to-source> <path-to-build>
+        --build-generator <generator> [<options>...]
+       [--build-options <opts>...]
+       [--test-command <command> [<args>...]]
+
+ `Dashboard Client`_
+  ctest -D <dashboard>         [-- <dashboard-options>...]
+  ctest -M <model> -T <action> [-- <dashboard-options>...]
+  ctest -S <script>            [-- <dashboard-options>...]
+  ctest -SP <script>           [-- <dashboard-options>...]
+
+ `View Help`_
+  ctest --help[-<topic>]
+
 
 Description
 ===========
@@ -25,13 +37,12 @@ CMake-generated build trees created for projects that use the
 :command:`enable_testing` and :command:`add_test` commands have testing support.
 This program will run the tests and report results.
 
-.. _`CTest Options`:
+.. _`Run Tests`:
 
-Options
-=======
+Run Tests
+=========
 
 .. program:: ctest
-
 
 .. option:: --preset <preset>, --preset=<preset>
 
@@ -76,6 +87,7 @@ Options
  displayed.  This option will show all test output.
 
 .. option:: -VV, --extra-verbose
+
  Enable more verbose output from tests.
 
  Test output is normally suppressed and only summary information is
@@ -138,6 +150,7 @@ Options
  ``TestLoad`` option of the `CTest Test Step`_.
 
 .. option:: -Q, --quiet
+
  Make CTest quiet.
 
  This option will suppress all the output.  The output log file will
@@ -237,73 +250,6 @@ Options
  Same as :option:`-FA <ctest -FA>` except only matching cleanup tests are
  excluded.
 
-.. option:: -D <dashboard>, --dashboard <dashboard>
-
- Execute dashboard test.
-
- This option tells CTest to act as a CDash client and perform a
- dashboard test.  All tests are ``<Mode><Test>``, where ``<Mode>`` can be
- ``Experimental``, ``Nightly``, and ``Continuous``, and ``<Test>`` can be
- ``Start``, ``Update``, ``Configure``, ``Build``, ``Test``,
- ``Coverage``, and ``Submit``.
-
- See `Dashboard Client`_.
-
-.. option:: -D <var>:<type>=<value>
-
- Define a variable for script mode.
-
- Pass in variable values on the command line.  Use in conjunction
- with :option:`-S <ctest -S>` to pass variable values to a dashboard script.
- Parsing ``-D`` arguments as variable values is only attempted if the value
- following ``-D`` does not match any of the known dashboard types.
-
-.. option:: -M <model>, --test-model <model>
-
- Sets the model for a dashboard.
-
- This option tells CTest to act as a CDash client where the ``<model>``
- can be ``Experimental``, ``Nightly``, and ``Continuous``.
- Combining ``-M`` and :option:`-T <ctest -T>` is similar to
- :option:`-D <ctest -D>`.
-
- See `Dashboard Client`_.
-
-.. option:: -T <action>, --test-action <action>
-
- Sets the dashboard action to perform.
-
- This option tells CTest to act as a CDash client and perform some
- action such as ``start``, ``build``, ``test`` etc. See
- `Dashboard Client Steps`_ for the full list of actions.
- Combining :option:`-M <ctest -M>` and ``-T`` is similar to
- :option:`-D <ctest -D>`.
-
- See `Dashboard Client`_.
-
-.. option:: -S <script>, --script <script>
-
- Execute a dashboard for a configuration.
-
- This option tells CTest to load in a configuration script which sets
- a number of parameters such as the binary and source directories.
- Then CTest will do what is required to create and run a dashboard.
- This option basically sets up a dashboard and then runs :option:`ctest -D`
- with the appropriate options.
-
- See `Dashboard Client`_.
-
-.. option:: -SP <script>, --script-new-process <script>
-
- Execute a dashboard for a configuration.
-
- This option does the same operations as :option:`-S <ctest -S>` but it
- will do them in a separate process.  This is primarily useful in cases
- where the script may modify the environment and you do not want the modified
- environment to impact other :option:`-S <ctest -S>` scripts.
-
- See `Dashboard Client`_.
-
 .. option:: -I [Start,End,Stride,test#,test#|Test file], --tests-information
 
  Run a specific number of tests by number.
@@ -400,13 +346,9 @@ Options
 
  See `Label and Subproject Summary`_.
 
-.. option:: --build-and-test
-
- See `Build and Test Mode`_.
-
 .. option:: --test-dir <dir>
 
-Specify the directory in which to look for tests.
+ Specify the directory in which to look for tests.
 
 .. option:: --test-output-size-passed <size>
 
@@ -477,14 +419,21 @@ Specify the directory in which to look for tests.
  This option will not run any tests, it will simply print the list of
  all labels associated with the test set.
 
-.. option:: --no-tests=<[error|ignore]>
+.. option:: --no-tests=<action>
 
- Regard no tests found either as error or ignore it.
+ Regard no tests found either as error (when ``<action>`` is set to
+ ``error``) or ignore it (when ``<action>`` is set to ``ignore``).
 
  If no tests were found, the default behavior of CTest is to always log an
  error message but to return an error code in script mode only.  This option
  unifies the behavior of CTest by either returning an error code if no tests
  were found or by ignoring it.
+
+View Help
+=========
+
+To print version details or selected pages from the CMake documentation,
+use one of the following options:
 
 .. include:: OPTIONS_HELP.txt
 
@@ -595,6 +544,10 @@ be provided to use ``--build-and-test``.  If ``--test-command`` is specified
 then that will be run after the build is complete.  Other options that affect
 this mode include:
 
+.. option:: --build-and-test
+
+ Switch into the build and test mode.
+
 .. option:: --build-target
 
  Specify a specific target to build.  The option can be given multiple times
@@ -682,10 +635,77 @@ application.  As a dashboard client, CTest performs a sequence of steps
 to configure, build, and test software, and then submits the results to
 a `CDash`_ server. The command-line signature used to submit to `CDash`_ is::
 
-  ctest (-D <dashboard> | -M <model> -T <action> | -S <script> | -SP <script>)
-        [-- <dashboard-options>...]
+  ctest -D <dashboard>         [-- <dashboard-options>...]
+  ctest -M <model> -T <action> [-- <dashboard-options>...]
+  ctest -S <script>            [-- <dashboard-options>...]
+  ctest -SP <script>           [-- <dashboard-options>...]
 
 Options for Dashboard Client include:
+
+.. option:: -D <dashboard>, --dashboard <dashboard>
+
+ Execute dashboard test.
+
+ This option tells CTest to act as a CDash client and perform a
+ dashboard test.  All tests are ``<Mode><Test>``, where ``<Mode>`` can be
+ ``Experimental``, ``Nightly``, and ``Continuous``, and ``<Test>`` can be
+ ``Start``, ``Update``, ``Configure``, ``Build``, ``Test``,
+ ``Coverage``, and ``Submit``.
+
+ If ``<dashboard>`` is not one of the recognized ``<Mode><Test>`` values,
+ this will be treated as a variable definition instead (see the
+ :ref:`dashboard-options <Dashboard Options>` further below).
+
+.. option:: -M <model>, --test-model <model>
+
+ Sets the model for a dashboard.
+
+ This option tells CTest to act as a CDash client where the ``<model>``
+ can be ``Experimental``, ``Nightly``, and ``Continuous``.
+ Combining ``-M`` and :option:`-T <ctest -T>` is similar to
+ :option:`-D <ctest -D>`.
+
+.. option:: -T <action>, --test-action <action>
+
+ Sets the dashboard action to perform.
+
+ This option tells CTest to act as a CDash client and perform some
+ action such as ``start``, ``build``, ``test`` etc. See
+ `Dashboard Client Steps`_ for the full list of actions.
+ Combining :option:`-M <ctest -M>` and ``-T`` is similar to
+ :option:`-D <ctest -D>`.
+
+.. option:: -S <script>, --script <script>
+
+ Execute a dashboard for a configuration.
+
+ This option tells CTest to load in a configuration script which sets
+ a number of parameters such as the binary and source directories.
+ Then CTest will do what is required to create and run a dashboard.
+ This option basically sets up a dashboard and then runs :option:`ctest -D`
+ with the appropriate options.
+
+.. option:: -SP <script>, --script-new-process <script>
+
+ Execute a dashboard for a configuration.
+
+ This option does the same operations as :option:`-S <ctest -S>` but it
+ will do them in a separate process.  This is primarily useful in cases
+ where the script may modify the environment and you do not want the modified
+ environment to impact other :option:`-S <ctest -S>` scripts.
+
+.. _`Dashboard Options`:
+
+The available ``<dashboard-options>`` are the following:
+
+.. option:: -D <var>:<type>=<value>
+
+ Define a variable for script mode.
+
+ Pass in variable values on the command line.  Use in conjunction
+ with :option:`-S <ctest -S>` to pass variable values to a dashboard script.
+ Parsing ``-D`` arguments as variable values is only attempted if the value
+ following ``-D`` does not match any of the known dashboard types.
 
 .. option:: --group <group>
 
@@ -810,7 +830,7 @@ Run the ``ctest`` command with the current working directory set
 to the build tree and use one of these signatures::
 
   ctest -D <mode>[<step>]
-  ctest -M <mode> [ -T <step> ]...
+  ctest -M <mode> [-T <step>]...
 
 The ``<mode>`` must be one of the above `Dashboard Client Modes`_,
 and each ``<step>`` must be one of the above `Dashboard Client Steps`_.

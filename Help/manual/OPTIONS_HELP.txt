@@ -1,33 +1,31 @@
-.. |file| replace:: The help is printed to a named <f>ile if given.
+.. |file| replace:: The output is printed to a named ``<file>`` if given.
 
-.. option:: --help, -help, -usage, -h, -H, /?
+.. option:: -version [<file>], --version [<file>], /V [<file>]
+
+ Show program name/version banner and exit.
+ |file|
+
+.. option:: -h, -H, --help, -help, -usage, /?
 
  Print usage information and exit.
 
  Usage describes the basic command line interface and its options.
 
-.. option:: --version, -version, /V [<f>]
-
- Show program name/version banner and exit.
-
- If a file is specified, the version is written into it.
- |file|
-
-.. option:: --help-full [<f>]
+.. option:: --help-full [<file>]
 
  Print all help manuals and exit.
 
  All manuals are printed in a human-readable text format.
  |file|
 
-.. option:: --help-manual <man> [<f>]
+.. option:: --help-manual <man> [<file>]
 
  Print one help manual and exit.
 
  The specified manual is printed in a human-readable text format.
  |file|
 
-.. option:: --help-manual-list [<f>]
+.. option:: --help-manual-list [<file>]
 
  List help manuals available and exit.
 
@@ -35,7 +33,7 @@
  using the ``--help-manual`` option followed by a manual name.
  |file|
 
-.. option:: --help-command <cmd> [<f>]
+.. option:: --help-command <cmd> [<file>]
 
  Print help for one command and exit.
 
@@ -43,7 +41,7 @@
  printed in a human-readable text format.
  |file|
 
-.. option:: --help-command-list [<f>]
+.. option:: --help-command-list [<file>]
 
  List commands with help available and exit.
 
@@ -51,7 +49,7 @@
  using the ``--help-command`` option followed by a command name.
  |file|
 
-.. option:: --help-commands [<f>]
+.. option:: --help-commands [<file>]
 
  Print cmake-commands manual and exit.
 
@@ -59,7 +57,7 @@
  human-readable text format.
  |file|
 
-.. option:: --help-module <mod> [<f>]
+.. option:: --help-module <mod> [<file>]
 
  Print help for one module and exit.
 
@@ -67,7 +65,7 @@
  in a human-readable text format.
  |file|
 
-.. option:: --help-module-list [<f>]
+.. option:: --help-module-list [<file>]
 
  List modules with help available and exit.
 
@@ -75,7 +73,7 @@
  using the ``--help-module`` option followed by a module name.
  |file|
 
-.. option:: --help-modules [<f>]
+.. option:: --help-modules [<file>]
 
  Print cmake-modules manual and exit.
 
@@ -83,7 +81,7 @@
  text format.
  |file|
 
-.. option:: --help-policy <cmp> [<f>]
+.. option:: --help-policy <cmp> [<file>]
 
  Print help for one policy and exit.
 
@@ -91,7 +89,7 @@
  printed in a human-readable text format.
  |file|
 
-.. option:: --help-policy-list [<f>]
+.. option:: --help-policy-list [<file>]
 
  List policies with help available and exit.
 
@@ -99,7 +97,7 @@
  using the ``--help-policy`` option followed by a policy name.
  |file|
 
-.. option:: --help-policies [<f>]
+.. option:: --help-policies [<file>]
 
  Print cmake-policies manual and exit.
 
@@ -107,7 +105,7 @@
  human-readable text format.
  |file|
 
-.. option:: --help-property <prop> [<f>]
+.. option:: --help-property <prop> [<file>]
 
  Print help for one property and exit.
 
@@ -115,7 +113,7 @@
  printed in a human-readable text format.
  |file|
 
-.. option:: --help-property-list [<f>]
+.. option:: --help-property-list [<file>]
 
  List properties with help available and exit.
 
@@ -123,7 +121,7 @@
  using the ``--help-property`` option followed by a property name.
  |file|
 
-.. option:: --help-properties [<f>]
+.. option:: --help-properties [<file>]
 
  Print cmake-properties manual and exit.
 
@@ -131,7 +129,7 @@
  human-readable text format.
  |file|
 
-.. option:: --help-variable <var> [<f>]
+.. option:: --help-variable <var> [<file>]
 
  Print help for one variable and exit.
 
@@ -139,7 +137,7 @@
  printed in a human-readable text format.
  |file|
 
-.. option:: --help-variable-list [<f>]
+.. option:: --help-variable-list [<file>]
 
  List variables with help available and exit.
 
@@ -147,7 +145,7 @@
  using the ``--help-variable`` option followed by a variable name.
  |file|
 
-.. option:: --help-variables [<f>]
+.. option:: --help-variables [<file>]
 
  Print cmake-variables manual and exit.
 
