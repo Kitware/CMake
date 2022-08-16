@@ -6,9 +6,12 @@
 
 #include <cstddef>
 #include <functional>
+#include <map>
+#include <sstream>
 #include <string>
 #include <vector>
 
+#include <cm/optional>
 #include <cm/string_view>
 
 #include "cmsys/Process.h"
@@ -376,6 +379,39 @@ public:
 
   /** Append multiple variables to the current environment. */
   static void AppendEnv(std::vector<std::string> const& env);
+
+  /**
+   * Helper class to represent an environment diff directly. This is to avoid
+   * repeated in-place environment modification (i.e. via setenv/putenv), which
+   * could be slow.
+   */
+  class EnvDiff
+  {
+  public:
+    /** Append multiple variables to the current environment diff */
+    void AppendEnv(std::vector<std::string> const& env);
+
+    /**
+     * Add a single variable (or remove if no = sign) to the current
+     * environment diff.
+     */
+    void PutEnv(const std::string& env);
+
+    /**
+     * Apply an ENVIRONMENT_MODIFICATION operation to this diff. Returns
+     * false and issues an error on parse failure.
+     */
+    bool ParseOperation(const std::string& envmod);
+
+    /**
+     * Apply this diff to the actual environment, optionally writing out the
+     * modifications to a CTest-compatible measurement stream.
+     */
+    void ApplyToCurrentEnv(std::ostringstream* measurement = nullptr);
+
+  private:
+    std::map<std::string, cm::optional<std::string>> diff;
+  };
 
   /** Helper class to save and restore the environment.
       Instantiate this class as an automatic variable on
