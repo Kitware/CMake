@@ -222,6 +222,16 @@ environment.
 cmake_policy(PUSH)
 cmake_policy(SET CMP0057 NEW)
 
+# Provide compatibility with a common invalid component request that
+# was silently ignored prior to CMake 3.24.
+if("FATAL_ERROR" IN_LIST Vulkan_FIND_COMPONENTS)
+  message(AUTHOR_WARNING
+    "Ignoring unknown component 'FATAL_ERROR'.\n"
+    "The find_package() command documents no such argument."
+    )
+  list(REMOVE_ITEM Vulkan_FIND_COMPONENTS "FATAL_ERROR")
+endif()
+
 # For backward compatibility as `FindVulkan` in previous CMake versions allow to retrieve `glslc`
 # and `glslangValidator` without requesting the corresponding component.
 if(NOT glslc IN_LIST Vulkan_FIND_COMPONENTS)
