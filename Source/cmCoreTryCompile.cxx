@@ -165,7 +165,7 @@ Arguments cmCoreTryCompile::ParseArgs(
       !unparsedArguments.empty()) {
     std::string m = "Unknown arguments:";
     for (const auto& i : unparsedArguments) {
-      m = cmStrCat(m, "\n  ", i, "\"");
+      m = cmStrCat(m, "\n  \"", i, "\"");
     }
     this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, m);
   }
