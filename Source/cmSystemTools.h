@@ -4,6 +4,10 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#if !defined(_WIN32)
+#  include <sys/types.h>
+#endif
+
 #include <cstddef>
 #include <functional>
 #include <map>
@@ -150,6 +154,27 @@ public:
     Success,
     Failure,
   };
+
+#if defined(_MSC_VER)
+  /** Visual C++ does not define mode_t. */
+  using mode_t = unsigned short;
+#endif
+
+  /**
+   * Make a new temporary directory.  The path must end in "XXXXXX", and will
+   * be modified to reflect the name of the directory created.  This function
+   * is similar to POSIX mkdtemp (and is implemented using the same where that
+   * function is available).
+   *
+   * This function can make a full path even if none of the directories existed
+   * prior to calling this function.
+   *
+   * Note that this function may modify \p path even if it does not succeed.
+   */
+  static cmsys::Status MakeTempDirectory(char* path,
+                                         const mode_t* mode = nullptr);
+  static cmsys::Status MakeTempDirectory(std::string& path,
+                                         const mode_t* mode = nullptr);
 
   /** Copy a file. */
   static bool CopySingleFile(const std::string& oldname,
