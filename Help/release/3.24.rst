@@ -362,5 +362,6 @@ Changes made since CMake 3.24.0 include the following.
 3.24.1
 ------
 
-* The :prop_tgt:`COMPILE_WARNING_AS_ERROR` target property now supports the
-  TI compiler.
+* This version made no changes to documented features or interfaces.
+  Some implementation updates were made to support ecosystem changes
+  and/or fix regressions.
