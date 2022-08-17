@@ -14,6 +14,20 @@ apt-get install -y \
     curl \
     git
 
+# Install optional external build dependencies.
+apt-get install -y \
+    libarchive-dev \
+    libbz2-dev \
+    libcurl4-gnutls-dev \
+    libexpat1-dev \
+    libjsoncpp-dev \
+    liblzma-dev \
+    libncurses-dev \
+    librhash-dev \
+    libuv1-dev \
+    libzstd-dev \
+    zlib1g-dev
+
 # Install iwyu runtime deps.
 apt-get install -y \
     clang-6.0 \
