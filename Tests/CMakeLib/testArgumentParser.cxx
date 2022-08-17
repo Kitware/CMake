@@ -42,7 +42,9 @@ struct Result : public ArgumentParser::ParseResult
   cm::optional<std::vector<std::vector<std::string>>> Multi3;
   cm::optional<std::vector<std::vector<std::string>>> Multi4;
 
+  cm::optional<std::string> Pos0;
   cm::optional<std::string> Pos1;
+  cm::optional<std::string> Pos2;
 
   bool Func0_ = false;
   ArgumentParser::Continue Func0(cm::string_view)
@@ -97,9 +99,10 @@ struct Result : public ArgumentParser::ParseResult
 
 std::initializer_list<cm::string_view> const args = {
   /* clang-format off */
+  "pos0",                    // position index 0
   "OPTION_1",                // option
+  "pos2",                    // position index 2, ignored because after keyword
   // "OPTION_2",             // option that is not present
-  "pos1",                    // position index 1
   "STRING_1",                // string arg missing value
   "STRING_2", "foo", "bar",  // string arg + unparsed value, presence captured
   // "STRING_3",             // string arg that is not present
@@ -172,8 +175,8 @@ bool verifyResult(Result const& result,
     { "LIST_4"_s, "  missing required value\n" },
     { "FUNC_0"_s, "  missing required value\n" }
   };
-  static std::vector<std::string> const unparsed = { "bar", "ign1", "ign2",
-                                                     "ign4" };
+  static std::vector<std::string> const unparsed = { "pos2", "bar", "ign1",
+                                                     "ign2", "ign4" };
 
 #define ASSERT_TRUE(x)                                                        \
   do {                                                                        \
@@ -215,7 +218,9 @@ bool verifyResult(Result const& result,
   ASSERT_TRUE((*result.Multi3)[1] == barfoo);
   ASSERT_TRUE(!result.Multi4);
 
-  ASSERT_TRUE(result.Pos1 == "pos1");
+  ASSERT_TRUE(result.Pos0 == "pos0");
+  ASSERT_TRUE(!result.Pos1);
+  ASSERT_TRUE(!result.Pos2);
 
   ASSERT_TRUE(result.Func0_ == false);
   ASSERT_TRUE(result.Func1_ == "foo");
@@ -255,6 +260,9 @@ bool testArgumentParserDynamic()
 
   static_cast<ArgumentParser::ParseResult&>(result) =
     cmArgumentParser<void>{}
+      .Bind(0, result.Pos0)
+      .Bind(1, result.Pos1)
+      .Bind(2, result.Pos2)
       .Bind("OPTION_1"_s, result.Option1)
       .Bind("OPTION_2"_s, result.Option2)
       .Bind("STRING_1"_s, result.String1)
@@ -273,7 +281,6 @@ bool testArgumentParserDynamic()
       .Bind("MULTI_2"_s, result.Multi2)
       .Bind("MULTI_3"_s, result.Multi3)
       .Bind("MULTI_4"_s, result.Multi4)
-      .Bind(1, result.Pos1)
       .Bind("FUNC_0"_s,
             [&result](cm::string_view arg) -> ArgumentParser::Continue {
               return result.Func0(arg);
@@ -307,6 +314,9 @@ static auto const parserStaticFunc4 =
 };
 static auto const parserStatic = //
   cmArgumentParser<Result>{}
+    .Bind(0, &Result::Pos0)
+    .Bind(1, &Result::Pos1)
+    .Bind(2, &Result::Pos2)
     .Bind("OPTION_1"_s, &Result::Option1)
     .Bind("OPTION_2"_s, &Result::Option2)
     .Bind("STRING_1"_s, &Result::String1)
@@ -325,7 +335,6 @@ static auto const parserStatic = //
     .Bind("MULTI_2"_s, &Result::Multi2)
     .Bind("MULTI_3"_s, &Result::Multi3)
     .Bind("MULTI_4"_s, &Result::Multi4)
-    .Bind(1, &Result::Pos1)
     .Bind("FUNC_0"_s, &Result::Func0)
     .Bind("FUNC_1"_s, &Result::Func1)
     .Bind("FUNC_2a"_s, &Result::Func2)
