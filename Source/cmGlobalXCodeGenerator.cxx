@@ -2894,8 +2894,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
   }
 
   // Create the INSTALL_PATH attribute.
-  std::string install_name_dir;
   if (gtgt->GetType() == cmStateEnums::SHARED_LIBRARY) {
+    std::string install_name_dir;
     // Get the install_name directory for the build tree.
     install_name_dir = gtgt->GetInstallNameDirForBuildTree(configName);
     // Xcode doesn't create the correct install_name in some cases.
@@ -2917,9 +2917,9 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       extraLinkOptions += " -install_name ";
       extraLinkOptions += XCodeEscapePath(install_name);
     }
+    buildSettings->AddAttribute("INSTALL_PATH",
+                                this->CreateString(install_name_dir));
   }
-  buildSettings->AddAttribute("INSTALL_PATH",
-                              this->CreateString(install_name_dir));
 
   // Create the LD_RUNPATH_SEARCH_PATHS
   cmComputeLinkInformation* pcli = gtgt->GetLinkInformation(configName);
