@@ -34,9 +34,10 @@ set(expected_out
 # then back to relative to get them in canonical form (or maybe this is a bug
 # in how the tarball is generated?)
 function(to_relative_paths real_paths paths)
+  file(REAL_PATH "${CTEST_BINARY_DIRECTORY}" base)
   foreach(file ${paths})
-    file(REAL_PATH "${file}" real_path BASE_DIRECTORY "${CTEST_BINARY_DIRECTORY}")
-    file(RELATIVE_PATH relative_path "${CTEST_BINARY_DIRECTORY}" "${real_path}")
+    file(REAL_PATH "${file}" real_path BASE_DIRECTORY "${base}")
+    file(RELATIVE_PATH relative_path "${base}" "${real_path}")
     list(APPEND local_real_paths "${relative_path}")
     message(DEBUG "${file} -> ${real_path} -> ${relative_path}")
   endforeach()
