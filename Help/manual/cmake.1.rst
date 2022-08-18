@@ -862,11 +862,29 @@ Available commands are:
 
   Displays arguments as text but no new line.
 
-.. option:: env [--unset=NAME ...] [NAME=VALUE ...] [--] <command> [<arg>...]
+.. option:: env [<options>] [--] <command> [<arg>...]
 
   .. versionadded:: 3.1
 
-  Run command in a modified environment.
+  Run command in a modified environment. Options are:
+
+  ``NAME=VALUE``
+    Replaces the current value of ``NAME`` with ``VALUE``.
+
+  ``--unset=NAME``
+    Unsets the current value of ``NAME``.
+
+  ``--modify ENVIRONMENT_MODIFICATION``
+    .. versionadded:: 3.25
+
+    Apply a single :prop_test:`ENVIRONMENT_MODIFICATION` operation to the
+    modified environment.
+
+    The ``NAME=VALUE`` and ``--unset=NAME`` options are equivalent to
+    ``--modify NAME=set:VALUE`` and ``--modify NAME=unset:``, respectively.
+    Note that ``--modify NAME=reset:`` resets ``NAME`` to the value it had
+    when ``cmake`` launched (or unsets it), not to the most recent
+    ``NAME=VALUE`` option.
 
   .. versionadded:: 3.24
     Added support for the double dash argument ``--``. Use ``--`` to stop

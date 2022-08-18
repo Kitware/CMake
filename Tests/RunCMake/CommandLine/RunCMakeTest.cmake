@@ -744,6 +744,10 @@ run_cmake_command(E_cat-without-double-dash ${CMAKE_COMMAND} -E cat "-file-start
 unset(RunCMake_TEST_COMMAND_WORKING_DIRECTORY)
 unset(out)
 
+# Unset environment variables that are used for testing cmake -E
+unset(ENV{TEST_ENV})
+unset(ENV{TEST_ENV_EXPECTED})
+
 run_cmake_command(E_env-no-command0 ${CMAKE_COMMAND} -E env)
 run_cmake_command(E_env-no-command1 ${CMAKE_COMMAND} -E env TEST_ENV=1)
 run_cmake_command(E_env-bad-arg1 ${CMAKE_COMMAND} -E env -bad-arg1)
@@ -757,6 +761,56 @@ cmake_path(GET EXIT_CODE_EXE FILENAME exit_code)
 file(COPY_FILE "${EXIT_CODE_EXE}" "${RunCMake_BINARY_DIR}/env=${exit_code}")
 run_cmake_command(E_env-with-double-dash ${CMAKE_COMMAND} -E env TEST_ENV=1 -- "${RunCMake_BINARY_DIR}/env=${exit_code}" zero_exit)
 run_cmake_command(E_env-without-double-dash ${CMAKE_COMMAND} -E env TEST_ENV=1 "${RunCMake_BINARY_DIR}/env=${exit_code}" zero_exit)
+
+## Tests of env --modify
+# Repeat the same tests as above
+run_cmake_command(E_env_modify-set   ${CMAKE_COMMAND} -E env --modify TEST_ENV=set:1 ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/E_env-set.cmake)
+run_cmake_command(E_env_modify-unset ${CMAKE_COMMAND} -E env --modify TEST_ENV=set:1 ${CMAKE_COMMAND} -E env --modify TEST_ENV=unset: ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/E_env-unset.cmake)
+run_cmake_command(E_env_modify-with-double-dash ${CMAKE_COMMAND} -E env --modify TEST_ENV=set:1 -- "${RunCMake_BINARY_DIR}/env=${exit_code}" zero_exit)
+run_cmake_command(E_env_modify-without-double-dash ${CMAKE_COMMAND} -E env --modify TEST_ENV=set:1 "${RunCMake_BINARY_DIR}/env=${exit_code}" zero_exit)
+
+# Test environment modification commands
+run_cmake_command(E_env_modify-reset
+                  ${CMAKE_COMMAND} -E env TEST_ENV=expected
+                  ${CMAKE_COMMAND} -E env TEST_ENV_EXPECTED=expected TEST_ENV=bad_value --modify TEST_ENV=reset:
+                  ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/E_env-equal.cmake)
+
+run_cmake_command(E_env_modify-reset-to-unset
+                  ${CMAKE_COMMAND} -E env --unset=TEST_ENV --unset=TEST_ENV_EXPECTED
+                  ${CMAKE_COMMAND} -E env TEST_ENV=bad_value --modify TEST_ENV=reset:
+                  ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/E_env-equal.cmake)
+
+run_cmake_command(E_env_modify-string
+                  ${CMAKE_COMMAND} -E env TEST_ENV_EXPECTED=expected
+                  --modify TEST_ENV=unset:
+                  --modify TEST_ENV=string_append:ect
+                  --modify TEST_ENV=string_prepend:exp
+                  --modify TEST_ENV=string_append:ed
+                  ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/E_env-equal.cmake)
+
+if (WIN32)
+  set(SEP "\\;")
+else ()
+  set(SEP ":")
+endif ()
+
+run_cmake_command(E_env_modify-path_list
+                  ${CMAKE_COMMAND} -E env "TEST_ENV_EXPECTED=exp${SEP}ect${SEP}ed"
+                  --modify TEST_ENV=unset:
+                  --modify TEST_ENV=path_list_append:ect
+                  --modify TEST_ENV=path_list_prepend:exp
+                  --modify TEST_ENV=path_list_append:ed
+                  ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/E_env-equal.cmake)
+
+run_cmake_command(E_env_modify-cmake_list
+                  ${CMAKE_COMMAND} -E env "TEST_ENV_EXPECTED=exp\\;ect\\;ed"
+                  --modify TEST_ENV=unset:
+                  --modify TEST_ENV=cmake_list_append:ect
+                  --modify TEST_ENV=cmake_list_prepend:exp
+                  --modify TEST_ENV=cmake_list_append:ed
+                  ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/E_env-equal.cmake)
+
+run_cmake_command(E_env_modify-bad-operation ${CMAKE_COMMAND} -E env --modify TEST_ENV=unknown:)
 
 run_cmake_command(E_md5sum-dir ${CMAKE_COMMAND} -E md5sum .)
 run_cmake_command(E_sha1sum-dir ${CMAKE_COMMAND} -E sha1sum .)
