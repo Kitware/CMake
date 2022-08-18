@@ -15,6 +15,7 @@ set(__COMPILER_TI_SOURCE_FLAG_CXX "--cpp_file")
 set(__COMPILER_TI_SOURCE_FLAG_ASM "--asm_file")
 
 macro(__compiler_ti lang)
+  set(CMAKE_${lang}_COMPILE_OPTIONS_WARNING_AS_ERROR "--emit_warnings_as_errors")
   set(CMAKE_${lang}_RESPONSE_FILE_FLAG "--cmd_file=")
   # Using --cmd_file flag is not possible after the --run_linker flag.
   # By using a whitespace only the filename is used without flag.

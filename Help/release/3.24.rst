@@ -317,6 +317,11 @@ Deprecated and Removed Features
 * The :module:`FindGLUT` module no longer provides the undocumented
   ``GLUT_LIBRARY`` and ``GLUT_INCLUDE_PATH`` result variables.
 
+* The :module:`FindVulkan` module no longer silently ignores unknown
+  components requested by a ``find_package(Vulkan REQUIRED ...)`` call.
+  With the addition of support for components, requests for unknown
+  components now produce an error.
+
 Other Changes
 =============
 
@@ -348,3 +353,15 @@ Other Changes
 * A precompiled Windows ``arm64`` binary is now provided on `cmake.org`_.
 
 .. _`cmake.org`: https://cmake.org/download/
+
+Updates
+=======
+
+Changes made since CMake 3.24.0 include the following.
+
+3.24.1
+------
+
+* This version made no changes to documented features or interfaces.
+  Some implementation updates were made to support ecosystem changes
+  and/or fix regressions.
