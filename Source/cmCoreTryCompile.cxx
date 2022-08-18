@@ -145,6 +145,10 @@ auto const TryCompileArgParser =
     .BIND_LANG_PROPS(HIP)
     .BIND_LANG_PROPS(OBJC)
     .BIND_LANG_PROPS(OBJCXX)
+  /* keep semicolon on own line */;
+
+auto const TryRunArgParser =
+  cmArgumentParser<Arguments>{ TryCompileArgParser }
     .Bind("COMPILE_OUTPUT_VARIABLE"_s, &Arguments::CompileOutputVariable)
     .Bind("RUN_OUTPUT_VARIABLE"_s, &Arguments::RunOutputVariable)
     .Bind("RUN_OUTPUT_STDOUT_VARIABLE"_s, &Arguments::RunOutputStdOutVariable)
@@ -160,12 +164,13 @@ Arguments cmCoreTryCompile::ParseArgs(
   cmRange<std::vector<std::string>::const_iterator> args, bool isTryRun)
 {
   std::vector<std::string> unparsedArguments;
-  auto arguments = TryCompileArgParser.Parse(args, &unparsedArguments, 0);
+  const auto& parser = (isTryRun ? TryRunArgParser : TryCompileArgParser);
+  auto arguments = parser.Parse(args, &unparsedArguments, 0);
   if (!arguments.MaybeReportError(*(this->Makefile)) &&
       !unparsedArguments.empty()) {
     std::string m = "Unknown arguments:";
     for (const auto& i : unparsedArguments) {
-      m = cmStrCat(m, "\n  ", i, "\"");
+      m = cmStrCat(m, "\n  \"", i, "\"");
     }
     this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, m);
   }
@@ -193,31 +198,6 @@ Arguments cmCoreTryCompile::ParseArgs(
     if (arguments.RunWorkingDirectory &&
         arguments.RunWorkingDirectory->empty()) {
       arguments.RunWorkingDirectory = cm::nullopt;
-    }
-  } else {
-    std::string tryRunArgs;
-    if (arguments.CompileOutputVariable) {
-      tryRunArgs = cmStrCat(tryRunArgs, "  COMPILE_OUTPUT_VARIABLE\n");
-    }
-    if (arguments.RunOutputVariable) {
-      tryRunArgs = cmStrCat(tryRunArgs, "  RUN_OUTPUT_VARIABLE\n");
-    }
-    if (arguments.RunOutputStdOutVariable) {
-      tryRunArgs = cmStrCat(tryRunArgs, "  RUN_OUTPUT_STDOUT_VARIABLE\n");
-    }
-    if (arguments.RunOutputStdErrVariable) {
-      tryRunArgs = cmStrCat(tryRunArgs, "  RUN_OUTPUT_STDERR_VARIABLE\n");
-    }
-    if (arguments.RunWorkingDirectory) {
-      tryRunArgs = cmStrCat(tryRunArgs, "  WORKING_DIRECTORY\n");
-    }
-    if (arguments.RunArgs) {
-      tryRunArgs = cmStrCat(tryRunArgs, "  ARGS\n");
-    }
-    if (!tryRunArgs.empty()) {
-      this->Makefile->IssueMessage(
-        MessageType::AUTHOR_WARNING,
-        cmStrCat("Ignoring try_run arguments for try_compile:\n", tryRunArgs));
     }
   }
   return arguments;
