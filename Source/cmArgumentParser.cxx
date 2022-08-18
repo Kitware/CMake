@@ -139,6 +139,7 @@ void Instance::Consume(std::size_t pos, cm::string_view arg)
     this->FinishKeyword();
     this->Keyword = it->first;
     this->KeywordValuesSeen = 0;
+    this->DoneWithPositional = true;
     if (this->Bindings.ParsedKeyword) {
       this->Bindings.ParsedKeyword(*this, it->first);
     }
@@ -158,10 +159,12 @@ void Instance::Consume(std::size_t pos, cm::string_view arg)
     return;
   }
 
-  auto const pit = this->Bindings.Positions.Find(pos);
-  if (pit != this->Bindings.Positions.end()) {
-    pit->second(*this, pos, arg);
-    return;
+  if (!this->DoneWithPositional) {
+    auto const pit = this->Bindings.Positions.Find(pos);
+    if (pit != this->Bindings.Positions.end()) {
+      pit->second(*this, pos, arg);
+      return;
+    }
   }
 
   if (this->UnparsedArguments != nullptr) {

@@ -206,6 +206,7 @@ private:
   std::size_t KeywordValuesSeen = 0;
   std::size_t KeywordValuesExpected = 0;
   std::function<Continue(cm::string_view)> KeywordValueFunc;
+  bool DoneWithPositional = false;
 
   void Consume(std::size_t pos, cm::string_view arg);
   void FinishKeyword();
