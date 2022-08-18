@@ -32,6 +32,8 @@ function(create_scheme_for_property scheme property value)
   set_target_properties(${scheme} PROPERTIES XCODE_SCHEME_${property} "${value}")
 endfunction()
 
+create_scheme_for_property(DISABLE_XCODE_SCHEME_ENABLE_GPU_API_VALIDATION ENABLE_GPU_API_VALIDATION OFF)
+create_scheme_for_property(ENABLE_XCODE_SCHEME_ENABLE_GPU_SHADER_VALIDATION ENABLE_GPU_SHADER_VALIDATION ON)
 create_scheme_for_property(ENABLE_GPU_FRAME_CAPTURE_MODE_1 ENABLE_GPU_FRAME_CAPTURE_MODE 1)
 create_scheme_for_property(ENABLE_GPU_FRAME_CAPTURE_MODE_3 ENABLE_GPU_FRAME_CAPTURE_MODE 3)
 create_scheme_for_property(ENABLE_GPU_FRAME_CAPTURE_MODE_DISABLED ENABLE_GPU_FRAME_CAPTURE_MODE Disabled)

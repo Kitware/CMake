@@ -198,6 +198,23 @@ void cmXCodeScheme::WriteLaunchAction(cmXMLWriter& xout,
 
   WriteLaunchActionAttribute(xout, "enableUBSanitizer",
                              "XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER");
+
+  if (cmValue value = this->Target->GetTarget()->GetProperty(
+        "XCODE_SCHEME_ENABLE_GPU_API_VALIDATION")) {
+    if (value.IsOff()) {
+      xout.Attribute("enableGPUValidationMode",
+                     "1"); // unset means YES, "1" means NO
+    }
+  }
+
+  if (cmValue value = this->Target->GetTarget()->GetProperty(
+        "XCODE_SCHEME_ENABLE_GPU_SHADER_VALIDATION")) {
+    if (value.IsOn()) {
+      xout.Attribute("enableGPUShaderValidationMode",
+                     "2"); // unset means NO, "2" means YES
+    }
+  }
+
   WriteLaunchActionAttribute(
     xout, "stopOnEveryUBSanitizerIssue",
     "XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER_STOP");
