@@ -63,6 +63,7 @@
 #if !defined(CMAKE_BOOTSTRAP)
 #  include <unordered_map>
 
+#  include <cm3p/curl/curl.h>
 #  include <cm3p/json/writer.h>
 
 #  include "cmFileAPI.h"
@@ -252,6 +253,8 @@ Json::Value cmake::ReportCapabilitiesJson() const
   std::vector<cmake::GeneratorInfo> generatorInfoList;
   this->GetRegisteredGenerators(generatorInfoList);
 
+  auto* curlVersion = curl_version_info(CURLVERSION_FIRST);
+
   JsonValueMapType generatorMap;
   for (cmake::GeneratorInfo const& gi : generatorInfoList) {
     if (gi.isAlias) { // skip aliases, they are there for compatibility reasons
@@ -286,6 +289,7 @@ Json::Value cmake::ReportCapabilitiesJson() const
   obj["generators"] = generators;
   obj["fileApi"] = cmFileAPI::ReportCapabilities();
   obj["serverMode"] = false;
+  obj["tls"] = static_cast<bool>(curlVersion->features & CURL_VERSION_SSL);
 
   return obj;
 }

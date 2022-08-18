@@ -773,6 +773,11 @@ Available commands are:
     ``true`` if cmake supports server-mode and ``false`` otherwise.
     Always false since CMake 3.20.
 
+  ``tls``
+    .. versionadded:: 3.25
+
+    ``true`` if TLS support is enabled and ``false`` otherwise.
+
 .. option:: cat [--] <files>...
 
   .. versionadded:: 3.18
