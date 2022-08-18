@@ -67,9 +67,14 @@ void cmXCodeScheme::WriteXCodeXCScheme(std::ostream& fout,
   xout.Attribute("LastUpgradeVersion", WriteVersionString());
   xout.Attribute("version", "1.3");
 
+  cmValue propDftCfg =
+    Target->GetTarget()->GetProperty("XCODE_SCHEME_LAUNCH_CONFIGURATION");
+  std::string launchConfiguration =
+    !propDftCfg.IsEmpty() ? *propDftCfg : "Debug";
+
   WriteBuildAction(xout, container);
   WriteTestAction(xout, FindConfiguration("Debug"), container);
-  WriteLaunchAction(xout, FindConfiguration("Debug"), container);
+  WriteLaunchAction(xout, FindConfiguration(launchConfiguration), container);
   WriteProfileAction(xout, FindConfiguration("Release"));
   WriteAnalyzeAction(xout, FindConfiguration("Debug"));
   WriteArchiveAction(xout, FindConfiguration("Release"));
