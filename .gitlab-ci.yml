@@ -314,6 +314,33 @@ b:debian10-makefiles-inplace:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
+b:debian10-extdeps:
+    extends:
+        - .debian10_extdeps
+        - .cmake_build_linux_standalone
+        - .linux_builder_tags
+        - .run_manually
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
+b:debian10-aarch64-extdeps:
+    extends:
+        - .debian10_aarch64_extdeps
+        - .cmake_build_linux_standalone
+        - .linux_builder_tags_aarch64
+        - .run_manually
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
+b:fedora36-extdeps:
+    extends:
+        - .fedora36_extdeps
+        - .cmake_build_linux_standalone
+        - .linux_builder_tags
+        - .run_manually
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
 t:fedora36-ninja:
     extends:
         - .fedora36_ninja
