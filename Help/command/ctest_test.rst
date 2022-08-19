@@ -175,7 +175,11 @@ The options are:
 
 See also the :variable:`CTEST_CUSTOM_MAXIMUM_PASSED_TEST_OUTPUT_SIZE`,
 :variable:`CTEST_CUSTOM_MAXIMUM_FAILED_TEST_OUTPUT_SIZE` and
-:variable:`CTEST_CUSTOM_TEST_OUTPUT_TRUNCATION` variables.
+:variable:`CTEST_CUSTOM_TEST_OUTPUT_TRUNCATION` variables, along with their
+corresponding :manual:`ctest(1)` command line options
+:option:`--test-output-size-passed <ctest --test-output-size-passed>`,
+:option:`--test-output-size-failed <ctest --test-output-size-failed>`, and
+:option:`--test-output-truncation <ctest --test-output-truncation>`.
 
 .. _`Additional Test Measurements`:
 
