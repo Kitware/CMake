@@ -45,7 +45,7 @@
 ### Debian
 
 .debian10:
-    image: "kitware/cmake:ci-debian10-x86_64-2022-06-21"
+    image: "kitware/cmake:ci-debian10-x86_64-2022-08-17"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
@@ -60,7 +60,7 @@
         CMAKE_CI_NO_INSTALL: 1
 
 .debian10_aarch64:
-    image: "kitware/cmake:ci-debian10-aarch64-2022-06-21"
+    image: "kitware/cmake:ci-debian10-aarch64-2022-08-17"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
@@ -69,7 +69,7 @@
 ### Fedora
 
 .fedora36:
-    image: "kitware/cmake:ci-fedora36-x86_64-2022-06-21"
+    image: "kitware/cmake:ci-fedora36-x86_64-2022-08-17"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci/long file name for testing purposes"
@@ -135,6 +135,30 @@
         CMAKE_CI_BOOTSTRAP: 1
         CMAKE_CI_INPLACE: 1
         CMAKE_CI_NO_INSTALL: 1
+        CTEST_NO_WARNINGS_ALLOWED: 1
+
+.debian10_extdeps:
+    extends: .debian10
+
+    variables:
+        CMAKE_CONFIGURATION: debian10_extdeps
+        CMAKE_CI_BUILD_TYPE: Release
+        CTEST_NO_WARNINGS_ALLOWED: 1
+
+.debian10_aarch64_extdeps:
+    extends: .debian10_aarch64
+
+    variables:
+        CMAKE_CONFIGURATION: debian10_aarch64_extdeps
+        CMAKE_CI_BUILD_TYPE: Release
+        CTEST_NO_WARNINGS_ALLOWED: 1
+
+.fedora36_extdeps:
+    extends: .fedora36
+
+    variables:
+        CMAKE_CONFIGURATION: fedora36_extdeps
+        CMAKE_CI_BUILD_TYPE: Release
         CTEST_NO_WARNINGS_ALLOWED: 1
 
 .fedora36_ninja:

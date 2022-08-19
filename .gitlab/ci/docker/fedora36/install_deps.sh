@@ -17,6 +17,20 @@ dnf install --setopt=install_weak_deps=False -y \
     git-core \
     make
 
+# Install optional external build dependencies.
+dnf install --setopt=install_weak_deps=False -y \
+    bzip2-devel \
+    expat-devel \
+    jsoncpp-devel \
+    libarchive-devel \
+    libcurl-devel \
+    libuv-devel \
+    libuv-devel \
+    libzstd-devel \
+    rhash-devel \
+    xz-devel \
+    zlib-devel
+
 # Install documentation tools.
 dnf install --setopt=install_weak_deps=False -y \
     python3-sphinx \

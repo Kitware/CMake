@@ -108,7 +108,11 @@ def check_query_json_empty(q):
     check_error_re(q, "value, object or array expected")
 
 def check_query_json_extra(q):
-    check_error_re(q, "Extra non-whitespace after JSON value")
+    if bool(os.environ.get("CMake_JSONCPP_PRE_1_7_5", "")) and is_dict(q) and sorted(q.keys()) == ["responses"]:
+        # jsoncpp < 1.7.5 did not diagnose extra non-whitespace characters
+        check_error(q["responses"], "'requests' member missing")
+    else:
+        check_error_re(q, "Extra non-whitespace after JSON value")
 
 def check_query_not_file(q):
     check_error_re(q, "failed to read from file")
