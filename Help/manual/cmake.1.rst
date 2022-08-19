@@ -537,7 +537,7 @@ following options:
   Lists the available build presets. The current working directory must
   contain CMake preset files.
 
-.. option:: --parallel [<jobs>], -j [<jobs>]
+.. option:: -j [<jobs>], --parallel [<jobs>]
 
   The maximum number of concurrent processes to use when building.
   If ``<jobs>`` is omitted the native build tool's default number is used.
