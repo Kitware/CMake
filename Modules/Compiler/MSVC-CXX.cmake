@@ -72,6 +72,7 @@ elseif (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 16.0)
       cxx_std_17
       cxx_std_20
       cxx_std_23
+      cxx_std_26
       )
     _record_compiler_features(CXX "" CMAKE_CXX_COMPILE_FEATURES)
   endmacro()
