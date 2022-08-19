@@ -30,6 +30,15 @@ endmacro()
 
 
 # try to compile a file that should compile
+try_compile(SHOULD_PASS
+    ${TryCompile_BINARY_DIR}
+    ${TryCompile_SOURCE_DIR}/pass.c
+    OUTPUT_VARIABLE TRY_OUT)
+if(NOT SHOULD_PASS)
+  message(SEND_ERROR "should pass failed ${TRY_OUT}")
+endif()
+
+# try to compile a file that should compile
 # also check that COPY_FILE works
 try_compile(SHOULD_PASS
     ${TryCompile_BINARY_DIR}
@@ -62,24 +71,6 @@ if(NOT SHOULD_PASS)
 endif()
 if(NOT _captured MATCHES "Cannot copy output executable.*/invalid/path")
   message(SEND_ERROR "COPY_FILE_ERROR did not capture expected message")
-endif()
-
-# try to compile a file that should not compile
-try_compile(SHOULD_FAIL
-    ${TryCompile_BINARY_DIR}
-    ${TryCompile_SOURCE_DIR}/fail.c
-    OUTPUT_VARIABLE TRY_OUT)
-if(SHOULD_FAIL)
-   message(SEND_ERROR "Should fail passed ${TRY_OUT}")
-endif()
-
-# try to compile a file that should compile
-try_compile(SHOULD_PASS
-    ${TryCompile_BINARY_DIR}
-    ${TryCompile_SOURCE_DIR}/pass.c
-    OUTPUT_VARIABLE TRY_OUT)
-if(NOT SHOULD_PASS)
-  message(SEND_ERROR "should pass failed ${TRY_OUT}")
 endif()
 
 # try to compile a file that should not compile
@@ -125,24 +116,6 @@ if(NOT SHOULD_PASS)
 endif()
 set(CMAKE_C_FLAGS "${_c_flags}")
 
-if(NOT SHOULD_FAIL)
-  if(SHOULD_PASS)
-    message("All Tests passed, ignore all previous output.")
-  else()
-    message("Test failed")
-  endif()
-else()
-  message("Test failed")
-endif()
-try_compile(CMAKE_ANSI_FOR_SCOPE
-  ${TryCompile_BINARY_DIR}
-    ${CMAKE_ROOT}/Modules/TestForAnsiForScope.cxx OUTPUT_VARIABLE OUT)
-if (CMAKE_ANSI_FOR_SCOPE)
-   message("Compiler supports ansi for")
-else()
-   message("Compiler does not support ansi for scope")
-endif()
-
 try_compile(CMAKE_ANSI_FOR_SCOPE
   ${TryCompile_BINARY_DIR}
     ${CMAKE_ROOT}/Modules/TestForAnsiForScope.cxx OUTPUT_VARIABLE OUT)
@@ -160,6 +133,7 @@ else()
    message("Compiler does not support ansi for scope")
 endif()
 
+# try to compile a project
 message("Testing try_compile project mode")
 try_compile(TEST_INNER
   ${TryCompile_BINARY_DIR}/CMakeFiles/Inner
