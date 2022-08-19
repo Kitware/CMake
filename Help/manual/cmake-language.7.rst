@@ -391,8 +391,8 @@ Variable References
 
 A *variable reference* has the form ``${<variable>}`` and is
 evaluated inside a `Quoted Argument`_ or an `Unquoted Argument`_.
-A variable reference is replaced by the value of the variable,
-or by the empty string if the variable is not set.
+A variable reference is replaced by the value of the specified
+variable or cache entry, or if neither is set, by the empty string.
 Variable references can nest and are evaluated from the
 inside out, e.g. ``${outer_${inner_variable}_variable}``.
 
@@ -408,14 +408,16 @@ and how their values are set.
 An *environment variable reference* has the form ``$ENV{<variable>}``.
 See the `Environment Variables`_ section for more information.
 
-A *cache variable reference* has the form ``$CACHE{<variable>}``.
+A *cache variable reference* has the form ``$CACHE{<variable>}``,
+and is replaced by the value of the specified cache entry without
+checking for a normal variable of the same name.  If the cache
+entry does not exist, it is replaced by the empty string.
 See :variable:`CACHE` for more information.
 
 The :command:`if` command has a special condition syntax that
 allows for variable references in the short form ``<variable>``
-instead of ``${<variable>}``.
-However, environment and cache variables always need to be
-referenced as ``$ENV{<variable>}`` or ``$CACHE{<variable>}``.
+instead of ``${<variable>}``.  However, environment variables
+always need to be referenced as ``$ENV{<variable>}``.
 
 Comments
 --------
