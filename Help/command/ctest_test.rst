@@ -237,7 +237,7 @@ The following example demonstrates how to upload test images to CDash.
      "/dir/to/valid_img.gif</CTestMeasurementFile>" << std::endl;
 
    std::cout <<
-     "<CTestMeasurementFile type=\"image/png\" name=\"AlgoResult\"> <<
+     "<CTestMeasurementFile type=\"image/png\" name=\"AlgoResult\">" <<
      "/dir/to/img.png</CTestMeasurementFile>"
      << std::endl;
 
