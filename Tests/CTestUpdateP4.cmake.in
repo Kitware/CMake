@@ -109,7 +109,7 @@ list(APPEND P4CMD ${P4_CLIENT})
 
 message("Adding files to repository")
 file(GLOB_RECURSE files ${TOP}/user-source/*)
-foreach(filename ${files})
+foreach(filename IN LISTS files)
   run_child(
     WORKING_DIRECTORY ${TOP}/user-source
     COMMAND ${P4CMD} add ${filename}
@@ -140,14 +140,14 @@ run_child(
 # Make changes in the working tree.
 message("Changing content...")
 update_content(user-source files_added files_removed dirs_added)
-foreach(filename ${files_added})
+foreach(filename IN LISTS files_added)
   message("add: ${filename}")
   run_child(
     WORKING_DIRECTORY ${TOP}/user-source
     COMMAND ${P4CMD} add ${TOP}/user-source/${filename}
   )
 endforeach()
-foreach(filename ${files_removed})
+foreach(filename IN LISTS files_removed)
   run_child(
     WORKING_DIRECTORY ${TOP}/user-source
     COMMAND ${P4CMD} delete ${TOP}/user-source/${filename}

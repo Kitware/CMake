@@ -1,8 +1,10 @@
-foreach(arg
+foreach(
+  arg
+  IN ITEMS
     RunCMake_GENERATOR
     RunCMake_SOURCE_DIR
     RunCMake_BINARY_DIR
-    )
+  )
   if(NOT DEFINED ${arg})
     message(FATAL_ERROR "${arg} not given!")
   endif()
@@ -31,7 +33,7 @@ function(run_cmake test)
     set(platform_name msys)
   endif()
 
-  foreach(o out err)
+  foreach(o IN ITEMS out err)
     if(RunCMake-std${o}-file AND EXISTS ${top_src}/${RunCMake-std${o}-file})
       file(READ ${top_src}/${RunCMake-std${o}-file} expect_std${o})
       string(REGEX REPLACE "\n+$" "" expect_std${o} "${expect_std${o}}")
@@ -176,7 +178,7 @@ function(run_cmake test)
     "|[^\n]*Bullseye Testing Technology"
     ")[^\n]*\n)+"
     )
-  foreach(o out err)
+  foreach(o IN ITEMS out err)
     string(REGEX REPLACE "\r\n" "\n" actual_std${o} "${actual_std${o}}")
     string(REGEX REPLACE "${ignore_line_regex}" "\\1" actual_std${o} "${actual_std${o}}")
     string(REGEX REPLACE "\n+$" "" actual_std${o} "${actual_std${o}}")

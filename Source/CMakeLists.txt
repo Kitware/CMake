@@ -881,16 +881,13 @@ if(WIN32 AND NOT CYGWIN)
   target_link_libraries(cmcldeps CMakeLib)
 endif()
 
-foreach(v CURL_CA_BUNDLE CURL_CA_PATH)
+foreach(v IN ITEMS CURL_CA_BUNDLE CURL_CA_PATH)
   if(${v})
     set_property(SOURCE cmCurl.cxx APPEND PROPERTY COMPILE_DEFINITIONS ${v}="${${v}}")
   endif()
 endforeach()
 
-foreach(check
-    STAT_HAS_ST_MTIM
-    STAT_HAS_ST_MTIMESPEC
-    )
+foreach(check IN ITEMS STAT_HAS_ST_MTIM STAT_HAS_ST_MTIMESPEC)
   if(KWSYS_CXX_${check}_COMPILED) # abuse KWSys check cache entry
     set(CMake_${check} 1)
   else()
@@ -1217,7 +1214,7 @@ if(WIN32)
   # MinGW's windres tool with spaces in the path to the include directories.
   add_library(CMakeVersion OBJECT "${CMAKE_CURRENT_BINARY_DIR}/CMakeVersion.rc")
   set_property(TARGET CMakeVersion PROPERTY INCLUDE_DIRECTORIES "")
-  foreach(_tool ${_tools})
+  foreach(_tool IN LISTS _tools)
     target_sources(${_tool} PRIVATE $<TARGET_OBJECTS:CMakeVersion>)
   endforeach()
 endif()
@@ -1229,7 +1226,7 @@ endif()
 
 # Install tools
 
-foreach(_tool ${_tools})
+foreach(_tool IN LISTS _tools)
   CMake_OPTIONAL_COMPONENT(${_tool})
   install(TARGETS ${_tool} DESTINATION ${CMAKE_BIN_DIR} ${COMPONENT})
 endforeach()

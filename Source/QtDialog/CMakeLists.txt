@@ -100,13 +100,13 @@ if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32))
     endif()
   endmacro()
   macro(install_qt_plugins _comps _plugins_var)
-    foreach(_qt_comp ${${_comps}})
+    foreach(_qt_comp IN LISTS ${_comps})
       if (INSTALLED_QT_VERSION VERSION_LESS 6)
         set(_qt_module_plugins ${Qt${INSTALLED_QT_VERSION}${_qt_comp}_PLUGINS})
       else()
         get_target_property(_qt_module_plugins Qt${INSTALLED_QT_VERSION}::${_qt_comp} QT_PLUGINS)
       endif()
-      foreach(_qt_plugin ${_qt_module_plugins})
+      foreach(_qt_plugin IN LISTS _qt_module_plugins)
         if (INSTALLED_QT_VERSION VERSION_GREATER_EQUAL 6)
           # Qt6 provides the plugins as individual packages that need to be found.
           find_package(Qt${INSTALLED_QT_VERSION}${_qt_plugin} QUIET
@@ -308,13 +308,13 @@ install(TARGETS cmake-gui
   ${CMAKE_INSTALL_DESTINATION_ARGS})
 
 if(UNIX AND NOT APPLE)
-  foreach (size IN ITEMS 32 128)
+  foreach(size IN ITEMS 32 128)
     install(
       FILES       "${CMAKE_CURRENT_SOURCE_DIR}/CMakeSetup${size}.png"
       DESTINATION "${CMAKE_XDGDATA_DIR}/icons/hicolor/${size}x${size}/apps"
       ${COMPONENT}
       RENAME      "CMakeSetup.png")
-  endforeach ()
+  endforeach()
 
   # install a desktop file so CMake appears in the application start menu
   # with an icon

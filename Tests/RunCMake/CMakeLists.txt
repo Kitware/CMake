@@ -527,7 +527,9 @@ function(add_RunCMake_test_try_compile)
       set(CMAKE_CXX_STANDARD_DEFAULT 14)
     endif()
   endif()
-  foreach(var
+  foreach(
+    var
+    IN ITEMS
       CMAKE_SYSTEM_NAME
       CMAKE_C_COMPILER_ID
       CMAKE_C_COMPILER_VERSION
@@ -541,7 +543,7 @@ function(add_RunCMake_test_try_compile)
       CMake_TEST_FILESYSTEM_1S
       CMAKE_OBJC_STANDARD_DEFAULT
       CMAKE_OBJCXX_STANDARD_DEFAULT
-      )
+    )
     if(DEFINED ${var})
       list(APPEND try_compile_ARGS -D${var}=${${var}})
     endif()
@@ -956,7 +958,7 @@ if(CMake_TEST_ANDROID_NDK OR CMake_TEST_ANDROID_STANDALONE_TOOLCHAIN)
   if(NOT "${CMAKE_GENERATOR}" MATCHES "Make|Ninja|Visual Studio 1[456]")
     message(FATAL_ERROR "Android tests supported only by Makefile, Ninja, and Visual Studio >= 14 generators")
   endif()
-  foreach(v TEST_ANDROID_NDK TEST_ANDROID_STANDALONE_TOOLCHAIN)
+  foreach(v IN ITEMS TEST_ANDROID_NDK TEST_ANDROID_STANDALONE_TOOLCHAIN)
     if(CMake_${v})
       string(REPLACE ";" "|" ${v} "${CMake_${v}}")
       list(APPEND Android_ARGS "-D${v}=${${v}}")

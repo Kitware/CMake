@@ -26,7 +26,7 @@ if(NOT result EQUAL 0)
   message(FATAL_ERROR "Listing app package content failed with: ${error}")
 endif()
 
-foreach(app_pkg_item ${EXPECTED_APP_PKG_CONTENT})
+foreach(app_pkg_item IN LISTS EXPECTED_APP_PKG_CONTENT)
   string(FIND ${APP_PKG_CONTENT_OUTPUT} ${app_pkg_item} _found)
   if(_found EQUAL -1)
     message(FATAL_ERROR "Generated app package is missing an expected item: ${app_pkg_item}")

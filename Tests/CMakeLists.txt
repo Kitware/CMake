@@ -205,7 +205,7 @@ if(BUILD_TESTING)
     select_wince_sdk(reg_wince wince_sdk)
     set(reg_tegra "[HKEY_LOCAL_MACHINE\\SOFTWARE\\NVIDIA Corporation\\Nsight Tegra;sdkRoot]")
     set(reg_nasm "[HKEY_CURRENT_USER\\SOFTWARE\\nasm]")
-    foreach(reg vs10 vs11 vs12 vs14 ws80 ws81 ws10_0 wp80 wp81 wince tegra nasm)
+    foreach(reg IN ITEMS vs10 vs11 vs12 vs14 ws80 ws81 ws10_0 wp80 wp81 wince tegra nasm)
       get_filename_component(r "${reg_${reg}}" ABSOLUTE)
       if(IS_DIRECTORY "${r}" AND NOT "${r}" STREQUAL "/registry")
         set(${reg} 1)
@@ -227,7 +227,7 @@ if(BUILD_TESTING)
           set(vs_versions vs15)
         endif()
       endif()
-      foreach(info ${vs_versions})
+      foreach(info IN LISTS vs_versions)
         cmake_host_system_information(RESULT found QUERY "${info_${info}}")
         if(found)
           set(${info} 1)
@@ -730,13 +730,15 @@ if(BUILD_TESTING)
   # mainly it tests that cmake doesn't crash when generating these project files.
   if(CMAKE_GENERATOR MATCHES "^(Unix Makefiles|Ninja)$"
       AND NOT "${CMAKE_CURRENT_BINARY_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
-    foreach(extraGenerator
+    foreach(
+      extraGenerator
+      IN ITEMS
         "CodeBlocks"
         "CodeLite"
         "Eclipse CDT4"
         "Kate"
         "Sublime Text 2"
-        )
+      )
       string(REPLACE " " "" extraGeneratorTestName "Simple_${extraGenerator}Generator")
       add_test(${extraGeneratorTestName} ${CMAKE_CTEST_COMMAND}
         --build-and-test
@@ -1127,7 +1129,7 @@ if(BUILD_TESTING)
         set(CPACK_GENERATOR_STRING_${CPackGen} ${CPackGen})
       endif()
       set(CPackRun_CPackGen  "-DCPackGen=${CPACK_GENERATOR_STRING_${CPackGen}}")
-      foreach(CPackComponentWay ${CWAYLST})
+      foreach(CPackComponentWay IN LISTS CWAYLST)
         set(CPackRun_CPackComponentWay "-DCPackComponentWay=${CPackComponentWay}")
         add_test(CPackComponentsForAll-${CPackGen}-${CPackComponentWay}
           ${CMAKE_CTEST_COMMAND} -C \${CTEST_CONFIGURATION_TYPE}
@@ -1433,64 +1435,66 @@ if(BUILD_TESTING)
   endif()
 
   # test for Find modules, simple cases
-  foreach(_mod IN ITEMS
-            ALSA
-            Boost
-            BLAS
-            BZip2
-            CURL
-            Cups
-            Doxygen
-            DevIL
-            EnvModules
-            EXPAT
-            Fontconfig
-            Freetype
-            GDAL
-            GIF
-            Git
-            GLEW
-            GLUT
-            GnuTLS
-            GSL
-            GTK2
-            Iconv
-            ICU
-            Intl
-            Jasper
-            JNI
-            JPEG
-            JsonCpp
-            LAPACK
-            LibArchive
-            LibLZMA
-            LibRHash
-            Libinput
-            LibUV
-            LibXml2
-            LibXslt
-            LTTngUST
-            ODBC
-            OpenACC
-            OpenAL
-            OpenCL
-            OpenGL
-            OpenMP
-            OpenSP
-            OpenSSL
-            MPI
-            PNG
-            Patch
-            PostgreSQL
-            Protobuf
-            SDL
-            SQLite3
-            TIFF
-            Vulkan
-            X11
-            XalanC
-            XercesC
-         )
+  foreach(
+  _mod
+  IN ITEMS
+      ALSA
+      BLAS
+      Boost
+      BZip2
+      Cups
+      CURL
+      DevIL
+      Doxygen
+      EnvModules
+      EXPAT
+      Fontconfig
+      Freetype
+      GDAL
+      GIF
+      Git
+      GLEW
+      GLUT
+      GnuTLS
+      GSL
+      GTK2
+      Iconv
+      ICU
+      Intl
+      Jasper
+      JNI
+      JPEG
+      JsonCpp
+      LAPACK
+      LibArchive
+      Libinput
+      LibLZMA
+      LibRHash
+      LibUV
+      LibXml2
+      LibXslt
+      LTTngUST
+      MPI
+      ODBC
+      OpenACC
+      OpenAL
+      OpenCL
+      OpenGL
+      OpenMP
+      OpenSP
+      OpenSSL
+      Patch
+      PNG
+      PostgreSQL
+      Protobuf
+      SDL
+      SQLite3
+      TIFF
+      Vulkan
+      X11
+      XalanC
+      XercesC
+    )
     if(CMake_TEST_Find${_mod})
       add_subdirectory(Find${_mod})
     endif()
@@ -1570,7 +1574,7 @@ if(BUILD_TESTING)
   endif()
 
   set(ExternalProject_BUILD_OPTIONS "")
-  foreach(vcs CVS SVN GIT HG)
+  foreach(vcs IN ITEMS CVS SVN GIT HG)
     if(DEFINED CMake_TEST_ExternalProject_${vcs})
       list(APPEND ExternalProject_BUILD_OPTIONS -DEP_TEST_${vcs}=${CMake_TEST_ExternalProject_${vcs}})
     endif()
@@ -2179,7 +2183,7 @@ if(BUILD_TESTING)
       # The test (and tested property) works with .sln files, so it's skipped when:
       # * cmake --build is set up to use MSBuild, since the MSBuild invocation does not use the .sln file
       set(_last_test "")
-      foreach(config ${CMAKE_CONFIGURATION_TYPES})
+      foreach(config IN LISTS CMAKE_CONFIGURATION_TYPES)
         add_test(NAME VSExcludeFromDefaultBuild-${config} COMMAND ${CMAKE_CTEST_COMMAND}
           --build-and-test
           "${CMake_SOURCE_DIR}/Tests/VSExcludeFromDefaultBuild"
@@ -3539,11 +3543,7 @@ if(BUILD_TESTING)
   # The directory should also contain a Configure.cmake file that
   # sets "CMake_TEST_CONTRACT_<project>_<var>" variables to configure
   # the code below.
-  foreach(project
-      PLplot
-      Trilinos
-      VTK
-      )
+  foreach(project IN ITEMS PLplot Trilinos VTK)
     if(CMake_TEST_CONTRACT_${project})
       include(Contracts/${project}/Configure.cmake)
       ADD_TEST_MACRO(Contracts.${project} ${CMake_TEST_CONTRACT_${project}_RUN_TEST})

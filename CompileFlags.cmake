@@ -98,7 +98,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL SunPro AND
   endif()
 endif()
 
-foreach(lang C CXX)
+foreach(lang IN ITEMS C CXX)
   # Suppress warnings from PGI compiler.
   if (CMAKE_${lang}_COMPILER_ID STREQUAL "PGI")
     set(CMAKE_${lang}_FLAGS "${CMAKE_${lang}_FLAGS} -w")
@@ -138,9 +138,9 @@ OFF to disable /MP completely." )
 endif()
 
 # Get rid of excess -Wunused-but-set-variable on release builds with LCC >= 1.26
-foreach(l C CXX)
+foreach(l IN ITEMS C CXX)
   if(CMAKE_${l}_COMPILER_ID STREQUAL "LCC" AND NOT CMAKE_${l}_COMPILER_VERSION VERSION_LESS 1.26)
-    foreach(c MINSIZEREL RELEASE RELWITHDEBINFO)
+    foreach(c IN ITEMS MINSIZEREL RELEASE RELWITHDEBINFO)
       string(APPEND "CMAKE_${l}_FLAGS_${c}" " -Wno-unused-but-set-variable")
     endforeach()
   endif()
