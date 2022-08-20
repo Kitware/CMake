@@ -4,7 +4,7 @@
 # To ensure maximum portability across various compilers and platforms
 # deactivate any compiler extensions.  Skip this for QNX, where additional
 # work is needed to build without compiler extensions.
-if (NOT CMAKE_SYSTEM_NAME STREQUAL "QNX")
+if(NOT CMAKE_SYSTEM_NAME STREQUAL "QNX")
   set(CMAKE_C_EXTENSIONS FALSE)
   set(CMAKE_CXX_EXTENSIONS FALSE)
 endif()
@@ -760,7 +760,7 @@ if(APPLE)
 endif()
 
 
-if (WIN32)
+if(WIN32)
   set(SRCS ${SRCS}
     cmCallVisualStudioMacro.cxx
     cmCallVisualStudioMacro.h
@@ -824,7 +824,7 @@ if (WIN32)
     # GetVersion to work properly on Windows 8 and above.
     set(MANIFEST_FILE ${CMAKE_CURRENT_SOURCE_DIR}/cmake.version.manifest)
   endif()
-endif ()
+endif()
 
 # Watcom support
 if(WIN32 OR CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
@@ -1084,7 +1084,7 @@ if(UNIX)
       endif()
     endif()
 
-    if (NOT FREEBSD_PKG_INCLUDE_DIRS OR NOT FREEBSD_PKG_LIBRARIES)
+    if(NOT FREEBSD_PKG_INCLUDE_DIRS OR NOT FREEBSD_PKG_LIBRARIES)
       message(FATAL_ERROR "CPack needs libpkg(3) to produce FreeBSD packages natively.")
     endif()
   else()
@@ -1188,8 +1188,8 @@ if(BUILD_QtDialog)
   add_subdirectory(QtDialog)
 endif()
 
-include (${CMake_BINARY_DIR}/Source/LocalUserOptions.cmake OPTIONAL)
-include (${CMake_SOURCE_DIR}/Source/LocalUserOptions.cmake OPTIONAL)
+include(${CMake_BINARY_DIR}/Source/LocalUserOptions.cmake OPTIONAL)
+include(${CMake_SOURCE_DIR}/Source/LocalUserOptions.cmake OPTIONAL)
 
 if(WIN32)
   # Compute the binary version that appears in the RC file. Version

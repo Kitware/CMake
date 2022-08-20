@@ -81,7 +81,7 @@ if(NOT DEFINED CMAKE_C_STANDARD AND NOT CMake_NO_C_STANDARD)
   endif()
 endif()
 if(NOT DEFINED CMAKE_CXX_STANDARD AND NOT CMake_NO_CXX_STANDARD)
-  if (CMAKE_CXX_COMPILER_ID STREQUAL SunPro AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.14)
+  if(CMAKE_CXX_COMPILER_ID STREQUAL SunPro AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.14)
     set(CMAKE_CXX_STANDARD 98)
   else()
     if(NOT CMAKE_VERSION VERSION_LESS 3.8)
@@ -143,7 +143,7 @@ option(CMake_BUILD_DEVELOPER_REFERENCE
 mark_as_advanced(CMake_BUILD_DEVELOPER_REFERENCE)
 
 # option to build using interprocedural optimizations (IPO/LTO)
-if (NOT CMAKE_VERSION VERSION_LESS 3.12.2)
+if(NOT CMAKE_VERSION VERSION_LESS 3.12.2)
   option(CMake_BUILD_LTO "Compile CMake with link-time optimization if supported" OFF)
   if(CMake_BUILD_LTO)
     include(CheckIPOSupported)
@@ -344,7 +344,7 @@ endmacro()
 # a macro to build the utilities used by CMake
 # Simply to improve readability of the main script.
 #-----------------------------------------------------------------------
-macro (CMAKE_BUILD_UTILITIES)
+macro(CMAKE_BUILD_UTILITIES)
   find_package(Threads)
 
   # Suppress unnecessary checks in third-party code.
@@ -400,7 +400,7 @@ macro (CMAKE_BUILD_UTILITIES)
   # Setup third-party libraries.
   # Everything in the tree should be able to include files from the
   # Utilities directory.
-  if ((CMAKE_SYSTEM_NAME STREQUAL "AIX" OR CMAKE_SYSTEM_NAME STREQUAL "OS400") AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  if((CMAKE_SYSTEM_NAME STREQUAL "AIX" OR CMAKE_SYSTEM_NAME STREQUAL "OS400") AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # using -isystem option generate error "template with C linkage"
     include_directories("${CMake_SOURCE_DIR}/Utilities/std")
   else()
@@ -408,7 +408,7 @@ macro (CMAKE_BUILD_UTILITIES)
   endif()
 
   include_directories("${CMake_BINARY_DIR}/Utilities")
-  if ((CMAKE_SYSTEM_NAME STREQUAL "AIX" OR CMAKE_SYSTEM_NAME STREQUAL "OS400") AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  if((CMAKE_SYSTEM_NAME STREQUAL "AIX" OR CMAKE_SYSTEM_NAME STREQUAL "OS400") AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # using -isystem option generate error "template with C linkage"
     include_directories("${CMake_SOURCE_DIR}/Utilities")
   else()
@@ -686,14 +686,14 @@ macro (CMAKE_BUILD_UTILITIES)
   #---------------------------------------------------------------------
   # Use curses?
   if(NOT DEFINED BUILD_CursesDialog)
-    if (UNIX)
+    if(UNIX)
       include(${CMake_SOURCE_DIR}/Source/Checks/Curses.cmake)
       set(BUILD_CursesDialog_DEFAULT "${CMakeCheckCurses_COMPILED}")
     elseif(WIN32)
       set(BUILD_CursesDialog_DEFAULT "OFF")
     endif()
     option(BUILD_CursesDialog "Build the CMake Curses Dialog ccmake" "${BUILD_CursesDialog_DEFAULT}")
-  endif ()
+  endif()
   if(BUILD_CursesDialog)
     if(UNIX)
       set(CURSES_NEED_NCURSES TRUE)
@@ -718,10 +718,10 @@ macro (CMAKE_BUILD_UTILITIES)
     if(NOT CMAKE_USE_SYSTEM_FORM)
       add_subdirectory(Source/CursesDialog/form)
     elseif(NOT CURSES_FORM_LIBRARY)
-      message( FATAL_ERROR "CMAKE_USE_SYSTEM_FORM in ON but CURSES_FORM_LIBRARY is not set!" )
+      message(FATAL_ERROR "CMAKE_USE_SYSTEM_FORM in ON but CURSES_FORM_LIBRARY is not set!")
     endif()
   endif()
-endmacro ()
+endmacro()
 
 #-----------------------------------------------------------------------
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
@@ -749,7 +749,7 @@ include(Source/CMakeVersion.cmake)
 
 # Include the standard Dart testing module
 enable_testing()
-include (${CMAKE_ROOT}/Modules/Dart.cmake)
+include(${CMAKE_ROOT}/Modules/Dart.cmake)
 
 # Set up test-time configuration.
 set_directory_properties(PROPERTIES
@@ -836,7 +836,7 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
   add_custom_target(uninstall
     "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
 
-  include (CMakeCPack.cmake)
+  include(CMakeCPack.cmake)
 
 endif()
 
@@ -891,7 +891,8 @@ endif()
 
 if(BUILD_TESTING)
   add_test(SystemInformationNew "${CMAKE_CMAKE_COMMAND}"
-    --system-information  -G "${CMAKE_GENERATOR}" )
+    --system-information  -G "${CMAKE_GENERATOR}"
+  )
 endif()
 
 if(NOT CMake_TEST_EXTERNAL_CMAKE)

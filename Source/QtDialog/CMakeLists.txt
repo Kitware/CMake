@@ -3,7 +3,7 @@
 
 project(QtDialog)
 CMake_OPTIONAL_COMPONENT(cmake-gui)
-set (QT_COMPONENTS
+set(QT_COMPONENTS
   Core
   Widgets
   Gui
@@ -41,7 +41,7 @@ set(CMake_QT_EXTRA_LIBRARIES)
 # Try to find the package WinExtras for the task bar progress
 if(WIN32)
   find_package(Qt${INSTALLED_QT_VERSION}WinExtras QUIET)
-  if (Qt${INSTALLED_QT_VERSION}WinExtras_FOUND)
+  if(Qt${INSTALLED_QT_VERSION}WinExtras_FOUND)
     add_definitions(-DQT_WINEXTRAS)
     list(APPEND CMake_QT_EXTRA_LIBRARIES Qt${INSTALLED_QT_VERSION}::WinExtras)
     list(APPEND QT_COMPONENTS WinExtras)
@@ -101,13 +101,13 @@ if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32))
   endmacro()
   macro(install_qt_plugins _comps _plugins_var)
     foreach(_qt_comp IN LISTS ${_comps})
-      if (INSTALLED_QT_VERSION VERSION_LESS 6)
+      if(INSTALLED_QT_VERSION VERSION_LESS 6)
         set(_qt_module_plugins ${Qt${INSTALLED_QT_VERSION}${_qt_comp}_PLUGINS})
       else()
         get_target_property(_qt_module_plugins Qt${INSTALLED_QT_VERSION}::${_qt_comp} QT_PLUGINS)
       endif()
       foreach(_qt_plugin IN LISTS _qt_module_plugins)
-        if (INSTALLED_QT_VERSION VERSION_GREATER_EQUAL 6)
+        if(INSTALLED_QT_VERSION VERSION_GREATER_EQUAL 6)
           # Qt6 provides the plugins as individual packages that need to be found.
           find_package(Qt${INSTALLED_QT_VERSION}${_qt_plugin} QUIET
             PATHS ${Qt${INSTALLED_QT_VERSION}${_qt_comp}_DIR})
@@ -117,7 +117,7 @@ if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32))
     endforeach()
   endmacro()
   if(APPLE)
-    if (INSTALLED_QT_VERSION VERSION_EQUAL 5)
+    if(INSTALLED_QT_VERSION VERSION_EQUAL 5)
       install_qt_plugin("Qt5::QCocoaIntegrationPlugin" QT_PLUGINS)
       if(TARGET Qt5::QMacStylePlugin)
         install_qt_plugin("Qt5::QMacStylePlugin" QT_PLUGINS)
@@ -132,7 +132,7 @@ if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32))
       DESTINATION "${CMAKE_INSTALL_PREFIX}/Resources"
       ${COMPONENT})
   elseif(WIN32 AND NOT CMake_QT_STATIC_QWindowsIntegrationPlugin_LIBRARIES)
-    if (INSTALLED_QT_VERSION VERSION_EQUAL 5)
+    if(INSTALLED_QT_VERSION VERSION_EQUAL 5)
       install_qt_plugin("Qt5::QWindowsIntegrationPlugin" QT_PLUGINS)
     else()
       # FIXME: Minimize plugins for Qt6.
@@ -204,7 +204,7 @@ set(MOC_SRCS
   )
 set(QRC_SRCS CMakeSetup.qrc)
 
-if (INSTALLED_QT_VERSION VERSION_LESS 6)
+if(INSTALLED_QT_VERSION VERSION_LESS 6)
   qt5_wrap_ui(UI_BUILT_SRCS ${UI_SRCS})
   qt5_wrap_cpp(MOC_BUILT_SRCS ${MOC_SRCS})
   qt5_add_resources(QRC_BUILT_SRCS ${QRC_SRCS})
@@ -215,15 +215,15 @@ else()
 endif()
 add_library(CMakeGUIQRCLib OBJECT ${QRC_BUILT_SRCS})
 
-if (FALSE) # CMake's bootstrap binary does not support automoc
+if(FALSE) # CMake's bootstrap binary does not support automoc
   set(CMAKE_AUTOMOC 1)
   set(CMAKE_AUTORCC 1)
   set(CMAKE_AUTOUIC 1)
-else ()
+else()
   list(APPEND SRCS
     ${UI_BUILT_SRCS}
     ${MOC_BUILT_SRCS})
-endif ()
+endif()
 
 if(USE_LGPL)
   install(FILES ${CMake_SOURCE_DIR}/Licenses/LGPLv${USE_LGPL}.txt
