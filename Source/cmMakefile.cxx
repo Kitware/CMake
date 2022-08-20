@@ -4188,6 +4188,18 @@ void cmMakefile::RaiseScope(const std::string& var, const char* varDef)
 #endif
 }
 
+void cmMakefile::RaiseScope(const std::vector<std::string>& variables)
+{
+  for (auto const& varName : variables) {
+    if (this->IsNormalDefinitionSet(varName)) {
+      this->RaiseScope(varName, this->GetDefinition(varName));
+    } else {
+      // unset variable in parent scope
+      this->RaiseScope(varName, nullptr);
+    }
+  }
+}
+
 cmTarget* cmMakefile::AddImportedTarget(const std::string& name,
                                         cmStateEnums::TargetType type,
                                         bool global)
