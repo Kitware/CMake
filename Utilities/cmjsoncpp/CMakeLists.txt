@@ -21,5 +21,5 @@ include_directories(
   )
 
 add_library(cmjsoncpp ${JSONCPP_SOURCES})
-target_link_libraries(cmjsoncpp ${CMake_KWIML_LIBRARIES})
+target_link_libraries(cmjsoncpp $<TARGET_NAME_IF_EXISTS:kwiml::kwiml>)
 set_property(TARGET cmjsoncpp PROPERTY CXX_INCLUDE_WHAT_YOU_USE "")

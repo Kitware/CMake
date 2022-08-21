@@ -757,7 +757,7 @@ target_link_libraries(
     JsonCpp::JsonCpp
     LibUV::LibUV
     LibRHash::LibRHash
-    ${CMake_KWIML_LIBRARIES}
+    $<TARGET_NAME_IF_EXISTS:kwiml::kwiml>
     ${CMAKE_THREAD_LIBS_INIT}
   )
 
