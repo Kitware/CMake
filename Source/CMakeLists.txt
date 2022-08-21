@@ -902,12 +902,6 @@ if(WIN32 AND NOT CYGWIN)
   target_link_libraries(cmcldeps PRIVATE CMakeLib)
 endif()
 
-foreach(v IN ITEMS CURL_CA_BUNDLE CURL_CA_PATH)
-  if(${v})
-    set_property(SOURCE cmCurl.cxx APPEND PROPERTY COMPILE_DEFINITIONS ${v}="${${v}}")
-  endif()
-endforeach()
-
 foreach(check IN ITEMS STAT_HAS_ST_MTIM STAT_HAS_ST_MTIMESPEC)
   if(KWSYS_CXX_${check}_COMPILED) # abuse KWSys check cache entry
     set(CMake_${check} 1)
