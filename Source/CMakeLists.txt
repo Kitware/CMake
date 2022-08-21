@@ -754,7 +754,7 @@ target_link_libraries(
     EXPAT::EXPAT
     LibArchive::LibArchive
     ZLIB::ZLIB
-    ${CMAKE_JSONCPP_LIBRARIES}
+    JsonCpp::JsonCpp
     ${CMAKE_LIBUV_LIBRARIES}
     ${CMAKE_LIBRHASH_LIBRARIES}
     ${CMake_KWIML_LIBRARIES}

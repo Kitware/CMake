@@ -318,10 +318,9 @@ if(CMAKE_USE_SYSTEM_JSONCPP)
     set_property(TARGET JsonCpp::JsonCpp APPEND PROPERTY
       INTERFACE_COMPILE_OPTIONS -Wno-deprecated-declarations)
   endif()
-  set(CMAKE_JSONCPP_LIBRARIES JsonCpp::JsonCpp)
 else()
-  set(CMAKE_JSONCPP_LIBRARIES cmjsoncpp)
   add_subdirectory(Utilities/cmjsoncpp)
+  add_library(JsonCpp::JsonCpp ALIAS cmjsoncpp)
   CMAKE_SET_TARGET_FOLDER(cmjsoncpp "Utilities/3rdParty")
 endif()
 
