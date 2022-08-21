@@ -895,7 +895,7 @@ if(WIN32 AND NOT CYGWIN)
   set_source_files_properties(cmcldeps.cxx PROPERTIES COMPILE_DEFINITIONS _WIN32_WINNT=0x0501)
   add_executable(cmcldeps cmcldeps.cxx ${MANIFEST_FILE})
   list(APPEND _tools cmcldeps)
-  target_link_libraries(cmcldeps CMakeLib)
+  target_link_libraries(cmcldeps PRIVATE CMakeLib)
 endif()
 
 foreach(v IN ITEMS CURL_CA_BUNDLE CURL_CA_PATH)
@@ -919,20 +919,20 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SYSTEM_PROCESSOR MATCHES "sparc"
   # so linking to that may be required
   check_library_exists(atomic __atomic_fetch_add_4 "" LIBATOMIC_NEEDED)
   if(LIBATOMIC_NEEDED)
-    target_link_libraries(CMakeLib atomic)
+    target_link_libraries(CMakeLib PUBLIC atomic)
   endif()
 endif()
 
 # On Apple we need CoreFoundation and CoreServices
 if(APPLE)
-  target_link_libraries(CMakeLib "-framework CoreFoundation")
-  target_link_libraries(CMakeLib "-framework CoreServices")
+  target_link_libraries(CMakeLib PUBLIC "-framework CoreFoundation")
+  target_link_libraries(CMakeLib PUBLIC "-framework CoreServices")
 endif()
 
 if(WIN32 AND NOT UNIX)
   # We need the rpcrt4 library on Windows.
   # We need the crypt32 library on Windows for crypto/cert APIs.
-  target_link_libraries(CMakeLib rpcrt4 crypt32)
+  target_link_libraries(CMakeLib PUBLIC rpcrt4 crypt32)
 endif()
 
 target_compile_definitions(CMakeLib PUBLIC ${CLANG_TIDY_DEFINITIONS})
@@ -1015,7 +1015,7 @@ target_include_directories(
     "${CMake_SOURCE_DIR}/Source/CTest"
     ${CMAKE_CURL_INCLUDES}
   )
-target_link_libraries(CTestLib CMakeLib ${CMAKE_CURL_LIBRARIES})
+target_link_libraries(CTestLib PUBLIC CMakeLib ${CMAKE_CURL_LIBRARIES})
 
 #
 # Build CPackLib
@@ -1045,7 +1045,7 @@ add_library(
   CPack/IFW/cmCPackIFWRepository.h
   )
 target_include_directories(CPackLib PUBLIC "${CMake_SOURCE_DIR}/Source/CPack")
-target_link_libraries(CPackLib CMakeLib)
+target_link_libraries(CPackLib PUBLIC CMakeLib)
 
 if(CYGWIN)
   target_sources(
@@ -1142,7 +1142,7 @@ if(APPLE)
   check_include_file("CoreServices/CoreServices.h" HAVE_CoreServices)
   if(HAVE_CoreServices)
     set_property(SOURCE CPack/cmCPackDragNDropGenerator.cxx PROPERTY COMPILE_DEFINITIONS HAVE_CoreServices)
-    target_link_libraries(CPackLib "-framework CoreServices")
+    target_link_libraries(CPackLib PUBLIC "-framework CoreServices")
   else()
     message(WARNING "This compiler does not appear to support\n"
       "  #include <CoreServices/CoreServices.h>\n"
@@ -1152,29 +1152,29 @@ if(APPLE)
 endif()
 if(CYGWIN AND LibUUID_FOUND)
   target_include_directories(CPackLib PUBLIC ${LibUUID_INCLUDE_DIRS})
-  target_link_libraries(CPackLib ${LibUUID_LIBRARIES})
+  target_link_libraries(CPackLib PUBLIC ${LibUUID_LIBRARIES})
   set_property(SOURCE CPack/cmCPackGeneratorFactory.cxx PROPERTY COMPILE_DEFINITIONS HAVE_LIBUUID)
 endif()
 if(CPACK_ENABLE_FREEBSD_PKG AND FREEBSD_PKG_INCLUDE_DIRS AND FREEBSD_PKG_LIBRARIES)
   target_include_directories(CPackLib PUBLIC ${FREEBSD_PKG_INCLUDE_DIRS})
-  target_link_libraries(CPackLib ${FREEBSD_PKG_LIBRARIES})
+  target_link_libraries(CPackLib PUBLIC ${FREEBSD_PKG_LIBRARIES})
   target_compile_definitions(CPackLib PUBLIC HAVE_FREEBSD_PKG)
 endif()
 
 # Build CMake executable
 add_executable(cmake cmakemain.cxx cmcmd.cxx cmcmd.h ${MANIFEST_FILE})
 list(APPEND _tools cmake)
-target_link_libraries(cmake CMakeLib)
+target_link_libraries(cmake PRIVATE CMakeLib)
 
 # Build CTest executable
 add_executable(ctest ctest.cxx ${MANIFEST_FILE})
 list(APPEND _tools ctest)
-target_link_libraries(ctest CTestLib)
+target_link_libraries(ctest PRIVATE CTestLib)
 
 # Build CPack executable
 add_executable(cpack CPack/cpack.cxx ${MANIFEST_FILE})
 list(APPEND _tools cpack)
-target_link_libraries(cpack CPackLib)
+target_link_libraries(cpack PRIVATE CPackLib)
 
 # Curses GUI
 if(BUILD_CursesDialog)
