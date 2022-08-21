@@ -114,9 +114,7 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
 endif()
 
 # Inform STL library header wrappers whether to use system versions.
-configure_file(${CMake_SOURCE_DIR}/Utilities/std/cmSTL.hxx.in
-  ${CMake_BINARY_DIR}/Utilities/cmSTL.hxx
-  @ONLY)
+configure_file(Utilities/std/cmSTL.hxx.in Utilities/cmSTL.hxx @ONLY)
 
 # set the internal encoding of CMake to UTF-8
 set(KWSYS_ENCODING_DEFAULT_CODEPAGE CP_UTF8)
@@ -222,9 +220,7 @@ macro(CMAKE_HANDLE_SYSTEM_LIBRARIES)
   endforeach()
 
   # Inform utility library header wrappers whether to use system versions.
-  configure_file(${CMake_SOURCE_DIR}/Utilities/cmThirdParty.h.in
-    ${CMake_BINARY_DIR}/Utilities/cmThirdParty.h
-    @ONLY)
+  configure_file(Utilities/cmThirdParty.h.in Utilities/cmThirdParty.h @ONLY)
 
 endmacro()
 
@@ -262,18 +258,12 @@ macro(CMAKE_SETUP_TESTING)
   endif()
 
   # configure some files for testing
-  configure_file("${CMAKE_CURRENT_SOURCE_DIR}/Templates/CTestScript.cmake.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/CTestScript.cmake"
-    @ONLY)
-  configure_file(${CMake_SOURCE_DIR}/Tests/.NoDartCoverage
-    ${CMake_BINARY_DIR}/Tests/.NoDartCoverage)
-  configure_file(${CMake_SOURCE_DIR}/Tests/.NoDartCoverage
-    ${CMake_BINARY_DIR}/Modules/.NoDartCoverage)
-  configure_file(${CMake_SOURCE_DIR}/CTestCustom.cmake.in
-    ${CMake_BINARY_DIR}/CTestCustom.cmake @ONLY)
+  configure_file(Templates/CTestScript.cmake.in CTestScript.cmake @ONLY)
+  configure_file(Tests/.NoDartCoverage Tests/.NoDartCoverage)
+  configure_file(Tests/.NoDartCoverage Modules/.NoDartCoverage)
+  configure_file(CTestCustom.cmake.in CTestCustom.cmake @ONLY)
   if(BUILD_TESTING AND DART_ROOT)
-    configure_file(${CMake_SOURCE_DIR}/CMakeLogo.gif
-      ${CMake_BINARY_DIR}/Testing/HTML/TestingResults/Icons/Logo.gif COPYONLY)
+    configure_file(CMakeLogo.gif Testing/HTML/TestingResults/Icons/Logo.gif COPYONLY)
   endif()
   mark_as_advanced(DART_ROOT)
 endmacro()
@@ -829,10 +819,7 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
   endif()
 
   # add the uninstall support
-  configure_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
-    @ONLY)
+  configure_file(cmake_uninstall.cmake.in cmake_uninstall.cmake @ONLY)
   add_custom_target(uninstall
     "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
 

@@ -348,5 +348,4 @@ if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32))
 endif()
 
 set(CMAKE_PACKAGE_QTGUI TRUE)
-configure_file("${QtDialog_SOURCE_DIR}/QtDialogCPack.cmake.in"
-  "${QtDialog_BINARY_DIR}/QtDialogCPack.cmake" @ONLY)
+configure_file(QtDialogCPack.cmake.in QtDialogCPack.cmake @ONLY)

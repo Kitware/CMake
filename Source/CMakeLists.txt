@@ -43,31 +43,19 @@ endif()
 
 # configure the .dox.in file
 if(CMake_BUILD_DEVELOPER_REFERENCE)
-  configure_file(
-    "${CMake_SOURCE_DIR}/Source/dir.dox.in"
-    "${CMake_BINARY_DIR}/Source/dir.dox"
-    @ONLY
-    )
+  configure_file(dir.dox.in dir.dox @ONLY)
 endif()
 
 # configure the .h file
-configure_file(
-  "${CMake_SOURCE_DIR}/Source/cmConfigure.cmake.h.in"
-  "${CMake_BINARY_DIR}/Source/cmConfigure.h"
-  )
-configure_file(
-  "${CMake_SOURCE_DIR}/Source/cmVersionConfig.h.in"
-  "${CMake_BINARY_DIR}/Source/cmVersionConfig.h"
-  )
-configure_file(
-  "${CMake_SOURCE_DIR}/Source/CPack/cmCPackConfigure.h.in"
-  "${CMake_BINARY_DIR}/Source/CPack/cmCPackConfigure.h"
-  )
+configure_file(cmConfigure.cmake.h.in cmConfigure.h)
+configure_file(cmVersionConfig.h.in cmVersionConfig.h)
+configure_file(CPack/cmCPackConfigure.h.in CPack/cmCPackConfigure.h)
 
 # Tell CMake executable in the build tree where to find the source tree.
 configure_file(
-  "${CMake_SOURCE_DIR}/Source/CMakeSourceDir.txt.in"
-  "${CMake_BINARY_DIR}/CMakeFiles/CMakeSourceDir.txt" @ONLY
+  CMakeSourceDir.txt.in
+  "${CMake_BINARY_DIR}/CMakeFiles/CMakeSourceDir.txt"
+  @ONLY
   )
 
 # add the include path to find the .h
@@ -1208,7 +1196,7 @@ if(WIN32)
   set(CMake_RCVERSION_STR ${CMake_VERSION})
 
   # Add Windows executable version information.
-  configure_file("CMakeVersion.rc.in" "CMakeVersion.rc" @ONLY)
+  configure_file(CMakeVersion.rc.in CMakeVersion.rc @ONLY)
 
   # We use a separate object library for this to work around a limitation of
   # MinGW's windres tool with spaces in the path to the include directories.

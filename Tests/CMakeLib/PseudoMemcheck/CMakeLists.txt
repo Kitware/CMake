@@ -1,5 +1,5 @@
 foreach(_retval IN ITEMS 0 1)
-  configure_file("${CMAKE_CURRENT_SOURCE_DIR}/memtester.cxx.in" "${CMAKE_CURRENT_BINARY_DIR}/ret${_retval}.cxx" @ONLY)
+  configure_file(memtester.cxx.in ret${_retval}.cxx @ONLY)
 endforeach()
 
 include_directories(${CMake_SOURCE_DIR}/Source ${CMake_BINARY_DIR}/Source)
