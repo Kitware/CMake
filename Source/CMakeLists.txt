@@ -71,8 +71,12 @@ configure_file(
   @ONLY
   )
 
+# Add a dummy library and add sources later depends on condition
+add_library(ManifestLib INTERFACE)
+
 #
 # create a library used by the command line and the GUI
+#
 add_library(
   CMakeLib
   # Lexers/Parsers
@@ -866,7 +870,7 @@ if(WIN32)
 
     # Add a manifest file to executables on Windows to allow for
     # GetVersion to work properly on Windows 8 and above.
-    set(MANIFEST_FILE ${CMAKE_CURRENT_SOURCE_DIR}/cmake.version.manifest)
+    target_sources(ManifestLib INTERFACE cmake.version.manifest)
   endif()
 endif()
 
@@ -902,9 +906,9 @@ set(_tools)
 
 if(WIN32 AND NOT CYGWIN)
   set_source_files_properties(cmcldeps.cxx PROPERTIES COMPILE_DEFINITIONS _WIN32_WINNT=0x0501)
-  add_executable(cmcldeps cmcldeps.cxx ${MANIFEST_FILE})
+  add_executable(cmcldeps cmcldeps.cxx)
+  target_link_libraries(cmcldeps PRIVATE CMakeLib ManifestLib)
   list(APPEND _tools cmcldeps)
-  target_link_libraries(cmcldeps PRIVATE CMakeLib)
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SYSTEM_PROCESSOR MATCHES "sparc")
@@ -1155,19 +1159,19 @@ if(CPACK_ENABLE_FREEBSD_PKG AND FREEBSD_PKG_INCLUDE_DIRS AND FREEBSD_PKG_LIBRARI
 endif()
 
 # Build CMake executable
-add_executable(cmake cmakemain.cxx cmcmd.cxx cmcmd.h ${MANIFEST_FILE})
+add_executable(cmake cmakemain.cxx cmcmd.cxx cmcmd.h)
+target_link_libraries(cmake PRIVATE CMakeLib ManifestLib)
 list(APPEND _tools cmake)
-target_link_libraries(cmake PRIVATE CMakeLib)
 
 # Build CTest executable
-add_executable(ctest ctest.cxx ${MANIFEST_FILE})
+add_executable(ctest ctest.cxx)
+target_link_libraries(ctest PRIVATE CTestLib ManifestLib)
 list(APPEND _tools ctest)
-target_link_libraries(ctest PRIVATE CTestLib)
 
 # Build CPack executable
-add_executable(cpack CPack/cpack.cxx ${MANIFEST_FILE})
+add_executable(cpack CPack/cpack.cxx)
+target_link_libraries(cpack PRIVATE CPackLib ManifestLib)
 list(APPEND _tools cpack)
-target_link_libraries(cpack PRIVATE CPackLib)
 
 # Curses GUI
 if(BUILD_CursesDialog)

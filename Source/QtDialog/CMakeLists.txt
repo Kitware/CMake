@@ -252,8 +252,8 @@ endif()
 add_library(CMakeGUIMainLib STATIC CMakeSetup.cxx)
 target_link_libraries(CMakeGUIMainLib PUBLIC CMakeGUILib)
 
-add_executable(cmake-gui WIN32 MACOSX_BUNDLE CMakeGUIExec.cxx ${MANIFEST_FILE})
-target_link_libraries(cmake-gui CMakeGUIMainLib Qt${INSTALLED_QT_VERSION}::Core)
+add_executable(cmake-gui WIN32 MACOSX_BUNDLE CMakeGUIExec.cxx)
+target_link_libraries(cmake-gui CMakeGUIMainLib ManifestLib Qt${INSTALLED_QT_VERSION}::Core)
 
 target_sources(CMakeGUIMainLib INTERFACE $<TARGET_OBJECTS:CMakeGUIQRCLib>)
 if(WIN32)
