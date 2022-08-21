@@ -1144,7 +1144,6 @@ if(APPLE)
   # If it does not work, build with reduced functionality and warn.
   check_include_file("CoreServices/CoreServices.h" HAVE_CoreServices)
   if(HAVE_CoreServices)
-    set_property(SOURCE CPack/cmCPackDragNDropGenerator.cxx PROPERTY COMPILE_DEFINITIONS HAVE_CoreServices)
     target_link_libraries(CPackLib PUBLIC "-framework CoreServices")
   else()
     message(WARNING "This compiler does not appear to support\n"
