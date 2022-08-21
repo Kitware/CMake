@@ -6,7 +6,7 @@
 #include <utility>
 
 #include "IFW/cmCPackIFWGenerator.h"
-#ifdef HAVE_FREEBSD_PKG
+#if ENABLE_BUILD_FREEBSD_PKG
 #  include "cmCPackFreeBSDGenerator.h"
 #endif
 #include "cmCPackArchiveGenerator.h"
@@ -119,7 +119,7 @@ cmCPackGeneratorFactory::cmCPackGeneratorFactory()
                             cmCPackRPMGenerator::CreateGenerator);
   }
 #endif
-#ifdef HAVE_FREEBSD_PKG
+#if ENABLE_BUILD_FREEBSD_PKG
   if (cmCPackFreeBSDGenerator::CanGenerate()) {
     this->RegisterGenerator("FREEBSD", "FreeBSD pkg(8) packages",
                             cmCPackFreeBSDGenerator::CreateGenerator);

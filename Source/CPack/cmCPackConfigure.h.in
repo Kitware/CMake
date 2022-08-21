@@ -3,3 +3,4 @@
 #pragma once
 
 #cmakedefine01 ENABLE_BUILD_WIX_GENERATOR
+#cmakedefine01 ENABLE_BUILD_FREEBSD_PKG

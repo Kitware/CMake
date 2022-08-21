@@ -1049,7 +1049,6 @@ target_include_directories(
 target_link_libraries(CPackLib PUBLIC CMakeLib)
 
 option(CPACK_ENABLE_FREEBSD_PKG "Add FreeBSD pkg(8) generator to CPack." OFF)
-
 if(UNIX)
   target_sources(
     CPackLib
@@ -1070,7 +1069,10 @@ if(UNIX)
         pkg
         DOC "FreeBSD pkg(8) library")
       if(FREEBSD_PKG_LIBRARIES)
+        set(ENABLE_BUILD_FREEBSD_PKG 1)
         target_sources(CPackLib PUBLIC CPack/cmCPackFreeBSDGenerator.cxx)
+        target_include_directories(CPackLib PUBLIC ${FREEBSD_PKG_INCLUDE_DIRS})
+        target_link_libraries(CPackLib PUBLIC ${FREEBSD_PKG_LIBRARIES})
       endif()
     endif()
 
@@ -1151,11 +1153,7 @@ if(APPLE)
       "See CMakeFiles/CMakeError.log for details of the failure.")
   endif()
 endif()
-if(CPACK_ENABLE_FREEBSD_PKG AND FREEBSD_PKG_INCLUDE_DIRS AND FREEBSD_PKG_LIBRARIES)
-  target_include_directories(CPackLib PUBLIC ${FREEBSD_PKG_INCLUDE_DIRS})
-  target_link_libraries(CPackLib PUBLIC ${FREEBSD_PKG_LIBRARIES})
-  target_compile_definitions(CPackLib PUBLIC HAVE_FREEBSD_PKG)
-endif()
+
 # Render config header file for CPackLib
 configure_file(CPack/cmCPackConfigure.h.in CPack/cmCPackConfigure.h)
 
