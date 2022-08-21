@@ -336,10 +336,9 @@ if(CMAKE_USE_SYSTEM_LIBUV)
     message(FATAL_ERROR
       "CMAKE_USE_SYSTEM_LIBUV is ON but a libuv is not found!")
   endif()
-  set(CMAKE_LIBUV_LIBRARIES LibUV::LibUV)
 else()
-  set(CMAKE_LIBUV_LIBRARIES cmlibuv)
   add_subdirectory(Utilities/cmlibuv)
+  add_library(LibUV::LibUV ALIAS cmlibuv)
   CMAKE_SET_TARGET_FOLDER(cmlibuv "Utilities/3rdParty")
 endif()
 
