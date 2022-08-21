@@ -9,7 +9,7 @@ set(CMake_VERSION_IS_DIRTY 0)
 set(CMake_VERSION
   "${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}.${CMake_VERSION_PATCH}")
 if(DEFINED CMake_VERSION_RC)
-  set(CMake_VERSION "${CMake_VERSION}-rc${CMake_VERSION_RC}")
+  string(APPEND CMake_VERSION "-rc${CMake_VERSION_RC}")
 endif()
 
 # Releases define a small patch level.
@@ -53,7 +53,7 @@ if(NOT CMake_VERSION_NO_GIT)
 
     # If this is not the exact commit of a release, add dev info.
     if(NOT "${git_subject}" MATCHES "^[Cc][Mm]ake ${CMake_VERSION}$")
-      set(CMake_VERSION "${CMake_VERSION}-g${git_hash}")
+      string(APPEND CMake_VERSION "-g${git_hash}")
     endif()
 
     # If this is a work tree, check whether it is dirty.
@@ -68,7 +68,7 @@ if(NOT CMake_VERSION_NO_GIT)
     # No commit information.
     if(NOT CMake_VERSION_IS_RELEASE)
       # Generic development version.
-      set(CMake_VERSION "${CMake_VERSION}-git")
+      string(APPEND CMake_VERSION "-git")
     endif()
   endif()
 endif()
@@ -80,5 +80,5 @@ else()
   set(CMake_VERSION_SUFFIX "")
 endif()
 if(CMake_VERSION_IS_DIRTY)
-  set(CMake_VERSION ${CMake_VERSION}-dirty)
+  string(APPEND CMake_VERSION "-dirty")
 endif()
