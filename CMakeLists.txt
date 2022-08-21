@@ -407,7 +407,6 @@ macro(CMAKE_BUILD_UTILITIES)
 
   #---------------------------------------------------------------------
   # Build CMake std library for CMake and CTest.
-  set(CMAKE_STD_LIBRARY cmstd)
   add_subdirectory(Utilities/std)
   CMAKE_SET_TARGET_FOLDER(cmstd "Utilities/std")
 
