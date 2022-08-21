@@ -250,14 +250,19 @@ if(USE_LGPL)
 endif()
 
 add_library(CMakeGUIMainLib STATIC CMakeSetup.cxx)
-target_link_libraries(CMakeGUIMainLib PUBLIC CMakeGUILib)
+target_link_libraries(
+  CMakeGUIMainLib
+  PUBLIC
+    CMakeGUILib
+    CMakeGUIQRCLib
+    $<TARGET_NAME_IF_EXISTS:CMakeVersion>
+  )
 
 add_executable(cmake-gui WIN32 MACOSX_BUNDLE CMakeGUIExec.cxx)
 target_link_libraries(cmake-gui CMakeGUIMainLib ManifestLib Qt${INSTALLED_QT_VERSION}::Core)
 
-target_sources(CMakeGUIMainLib INTERFACE $<TARGET_OBJECTS:CMakeGUIQRCLib>)
 if(WIN32)
-  target_sources(CMakeGUIMainLib INTERFACE $<TARGET_OBJECTS:CMakeVersion> CMakeSetup.rc)
+  target_sources(CMakeGUIMainLib INTERFACE CMakeSetup.rc)
 endif()
 if(APPLE)
   target_sources(CMakeGUIMainLib INTERFACE CMakeSetup.icns)

@@ -1211,7 +1211,7 @@ if(WIN32)
   add_library(CMakeVersion OBJECT "${CMAKE_CURRENT_BINARY_DIR}/CMakeVersion.rc")
   set_property(TARGET CMakeVersion PROPERTY INCLUDE_DIRECTORIES "")
   foreach(_tool IN LISTS _tools)
-    target_sources(${_tool} PRIVATE $<TARGET_OBJECTS:CMakeVersion>)
+    target_link_libraries(${_tool} PRIVATE CMakeVersion)
   endforeach()
 endif()
 
