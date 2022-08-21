@@ -740,9 +740,9 @@ target_include_directories(
   CMakeLib
   PUBLIC
     # add the include path to find the .h
-    "${CMake_BINARY_DIR}/Source"
-    "${CMake_SOURCE_DIR}/Source"
-    "${CMake_SOURCE_DIR}/Source/LexerParser"
+    "${CMAKE_CURRENT_BINARY_DIR}"
+    "${CMAKE_CURRENT_SOURCE_DIR}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/LexerParser"
     ${CMake_HAIKU_INCLUDE_DIRS}
   )
 target_link_libraries(
@@ -1001,7 +1001,7 @@ add_library(
 target_include_directories(
   CTestLib
   PUBLIC
-    "${CMake_SOURCE_DIR}/Source/CTest"
+    "${CMAKE_CURRENT_SOURCE_DIR}/CTest"
   )
 target_link_libraries(CTestLib PUBLIC CMakeLib)
 
@@ -1175,8 +1175,8 @@ if(BUILD_QtDialog)
   add_subdirectory(QtDialog)
 endif()
 
-include(${CMake_BINARY_DIR}/Source/LocalUserOptions.cmake OPTIONAL)
-include(${CMake_SOURCE_DIR}/Source/LocalUserOptions.cmake OPTIONAL)
+include(${CMAKE_CURRENT_BINARY_DIR}/LocalUserOptions.cmake OPTIONAL)
+include(${CMAKE_CURRENT_SOURCE_DIR}/LocalUserOptions.cmake OPTIONAL)
 
 if(WIN32)
   # Compute the binary version that appears in the RC file. Version
