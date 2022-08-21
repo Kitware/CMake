@@ -36,13 +36,8 @@ if(WIN32 OR CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Da
   set(CMAKE_USE_WMAKE 1)
 endif()
 
-foreach(check IN ITEMS STAT_HAS_ST_MTIM STAT_HAS_ST_MTIMESPEC)
-  if(KWSYS_CXX_${check}_COMPILED) # abuse KWSys check cache entry
-    set(CMake_${check} 1)
-  else()
-    set(CMake_${check} 0)
-  endif()
-endforeach()
+set(CMake_STAT_HAS_ST_MTIM ${KWSYS_CXX_STAT_HAS_ST_MTIM_COMPILED})
+set(CMake_STAT_HAS_ST_MTIMESPEC ${KWSYS_CXX_STAT_HAS_ST_MTIMESPEC_COMPILED})
 
 set(EXECUTABLE_OUTPUT_PATH ${CMake_BIN_DIR})
 
