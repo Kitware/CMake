@@ -105,10 +105,9 @@ if(CMAKE_USE_SYSTEM_LIBRHASH)
     message(FATAL_ERROR
       "CMAKE_USE_SYSTEM_LIBRHASH is ON but LibRHash is not found!")
   endif()
-  set(CMAKE_LIBRHASH_LIBRARIES LibRHash::LibRHash)
 else()
-  set(CMAKE_LIBRHASH_LIBRARIES cmlibrhash)
   add_subdirectory(Utilities/cmlibrhash)
+  add_library(LibRHash::LibRHash ALIAS cmlibrhash)
   CMAKE_SET_TARGET_FOLDER(cmlibrhash "Utilities/3rdParty")
 endif()
 

@@ -756,7 +756,7 @@ target_link_libraries(
     ZLIB::ZLIB
     JsonCpp::JsonCpp
     LibUV::LibUV
-    ${CMAKE_LIBRHASH_LIBRARIES}
+    LibRHash::LibRHash
     ${CMake_KWIML_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}
   )
