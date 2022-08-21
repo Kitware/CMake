@@ -62,7 +62,6 @@ endif()
 # configure the .h file
 configure_file(cmConfigure.cmake.h.in cmConfigure.h)
 configure_file(cmVersionConfig.h.in cmVersionConfig.h)
-configure_file(CPack/cmCPackConfigure.h.in CPack/cmCPackConfigure.h)
 
 # Tell CMake executable in the build tree where to find the source tree.
 configure_file(
@@ -1041,17 +1040,13 @@ add_library(
   CPack/IFW/cmCPackIFWRepository.cxx
   CPack/IFW/cmCPackIFWRepository.h
   )
-target_include_directories(CPackLib PUBLIC "${CMake_SOURCE_DIR}/Source/CPack")
+target_include_directories(
+  CPackLib
+  PUBLIC
+    "${CMAKE_CURRENT_SOURCE_DIR}/CPack"
+    "${CMAKE_CURRENT_BINARY_DIR}/CPack"
+  )
 target_link_libraries(CPackLib PUBLIC CMakeLib)
-
-if(CYGWIN)
-  target_sources(
-    CPackLib
-    PUBLIC
-      CPack/cmCPackCygwinBinaryGenerator.cxx
-      CPack/cmCPackCygwinSourceGenerator.cxx
-    )
-endif()
 
 option(CPACK_ENABLE_FREEBSD_PKG "Add FreeBSD pkg(8) generator to CPack." OFF)
 
@@ -1089,9 +1084,17 @@ if(UNIX)
 endif()
 
 if(CYGWIN)
+  target_sources(
+    CPackLib
+    PUBLIC
+      CPack/cmCPackCygwinBinaryGenerator.cxx
+      CPack/cmCPackCygwinSourceGenerator.cxx
+    )
   find_package(LibUUID)
 endif()
-if(WIN32 OR (CYGWIN AND LibUUID_FOUND))
+
+if(WIN32 OR (CYGWIN AND TARGET LibUUID::LibUUID))
+  set(ENABLE_BUILD_WIX_GENERATOR 1)
   target_sources(
     CPackLib
     PUBLIC
@@ -1118,6 +1121,7 @@ if(WIN32 OR (CYGWIN AND LibUUID_FOUND))
       CPack/WiX/cmWIXSourceWriter.cxx
       CPack/WiX/cmWIXSourceWriter.h
     )
+  target_link_libraries(CPackLib PUBLIC $<TARGET_NAME_IF_EXISTS:LibUUID::LibUUID>)
 endif()
 
 if(APPLE)
@@ -1147,16 +1151,14 @@ if(APPLE)
       "See CMakeFiles/CMakeError.log for details of the failure.")
   endif()
 endif()
-if(CYGWIN AND LibUUID_FOUND)
-  target_include_directories(CPackLib PUBLIC ${LibUUID_INCLUDE_DIRS})
-  target_link_libraries(CPackLib PUBLIC ${LibUUID_LIBRARIES})
-  set_property(SOURCE CPack/cmCPackGeneratorFactory.cxx PROPERTY COMPILE_DEFINITIONS HAVE_LIBUUID)
-endif()
 if(CPACK_ENABLE_FREEBSD_PKG AND FREEBSD_PKG_INCLUDE_DIRS AND FREEBSD_PKG_LIBRARIES)
   target_include_directories(CPackLib PUBLIC ${FREEBSD_PKG_INCLUDE_DIRS})
   target_link_libraries(CPackLib PUBLIC ${FREEBSD_PKG_LIBRARIES})
   target_compile_definitions(CPackLib PUBLIC HAVE_FREEBSD_PKG)
 endif()
+# Render config header file for CPackLib
+configure_file(CPack/cmCPackConfigure.h.in CPack/cmCPackConfigure.h)
+
 
 # Build CMake executable
 add_executable(cmake cmakemain.cxx cmcmd.cxx cmcmd.h)

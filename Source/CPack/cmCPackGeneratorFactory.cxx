@@ -34,7 +34,7 @@
 #  include "cmCPackRPMGenerator.h"
 #endif
 
-#if defined(_WIN32) || (defined(__CYGWIN__) && defined(HAVE_LIBUUID))
+#if ENABLE_BUILD_WIX_GENERATOR
 #  include "WiX/cmCPackWIXGenerator.h"
 #endif
 
@@ -80,7 +80,7 @@ cmCPackGeneratorFactory::cmCPackGeneratorFactory()
                             cmCPackCygwinSourceGenerator::CreateGenerator);
   }
 #endif
-#if defined(_WIN32) || (defined(__CYGWIN__) && defined(HAVE_LIBUUID))
+#if ENABLE_BUILD_WIX_GENERATOR
   if (cmCPackWIXGenerator::CanGenerate()) {
     this->RegisterGenerator("WIX", "MSI file format via WiX tools",
                             cmCPackWIXGenerator::CreateGenerator);
