@@ -152,7 +152,10 @@ if(APPLE)
   get_filename_component(Qt_BIN_DIR "${Qt_BIN_DIR}" PATH)
 endif()
 
-set(SRCS
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
+add_library(
+  CMakeGUILib STATIC
   AddCacheEntry.cxx
   AddCacheEntry.h
   CMakeSetupDialog.cxx
@@ -179,6 +182,16 @@ set(SRCS
   WarningMessagesDialog.cxx
   WarningMessagesDialog.h
   )
+# CMake_QT_EXTRA_LIBRARIES have to come before the main libraries on the link line
+target_link_libraries(
+  CMakeGUILib
+  PUBLIC
+    CMakeLib
+    ${CMake_QT_EXTRA_LIBRARIES}
+    Qt${INSTALLED_QT_VERSION}::Core
+    Qt${INSTALLED_QT_VERSION}::Widgets
+  )
+
 set(UI_SRCS
   CMakeSetupDialog.ui
   Compilers.ui
@@ -220,9 +233,12 @@ if(FALSE) # CMake's bootstrap binary does not support automoc
   set(CMAKE_AUTORCC 1)
   set(CMAKE_AUTOUIC 1)
 else()
-  list(APPEND SRCS
-    ${UI_BUILT_SRCS}
-    ${MOC_BUILT_SRCS})
+  target_sources(
+    CMakeGUILib
+    PUBLIC
+      ${UI_BUILT_SRCS}
+      ${MOC_BUILT_SRCS}
+  )
 endif()
 
 if(USE_LGPL)
@@ -232,13 +248,6 @@ if(USE_LGPL)
   set_property(SOURCE CMakeSetupDialog.cxx
     PROPERTY COMPILE_DEFINITIONS USE_LGPL="${USE_LGPL}")
 endif()
-
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
-add_library(CMakeGUILib STATIC ${SRCS})
-# CMake_QT_EXTRA_LIBRARIES have to come before the main libraries on the link line
-target_link_libraries(CMakeGUILib PUBLIC CMakeLib ${CMake_QT_EXTRA_LIBRARIES}
-  Qt${INSTALLED_QT_VERSION}::Core Qt${INSTALLED_QT_VERSION}::Widgets)
 
 add_library(CMakeGUIMainLib STATIC CMakeSetup.cxx)
 target_link_libraries(CMakeGUIMainLib PUBLIC CMakeGUILib)

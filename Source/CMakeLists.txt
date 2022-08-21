@@ -69,20 +69,10 @@ include_directories(
   ${CMake_HAIKU_INCLUDE_DIRS}
   )
 
-# Check if we can build the Mach-O parser.
-if(CMake_USE_MACH_PARSER)
-  set(MACH_SRCS cmMachO.h cmMachO.cxx)
-endif()
-
-# Check if we can build the XCOFF parser.
-if(CMake_USE_XCOFF_PARSER)
-  set(XCOFF_SRCS cmXCOFF.h cmXCOFF.cxx)
-endif()
-
 #
-# Sources for CMakeLib
-#
-set(SRCS
+# create a library used by the command line and the GUI
+add_library(
+  CMakeLib
   # Lexers/Parsers
   LexerParser/cmCommandArgumentLexer.cxx
   LexerParser/cmCommandArgumentLexer.h
@@ -358,7 +348,6 @@ set(SRCS
   cmRulePlaceholderExpander.h
   cmLocalUnixMakefileGenerator3.cxx
   cmLocale.h
-  ${MACH_SRCS}
   cmMakefile.cxx
   cmMakefile.h
   cmMakefileTargetGenerator.cxx
@@ -458,7 +447,6 @@ set(SRCS
   cmWorkerPool.h
   cmWorkingDirectory.cxx
   cmWorkingDirectory.h
-  ${XCOFF_SRCS}
   cmXMLParser.cxx
   cmXMLParser.h
   cmXMLSafe.cxx
@@ -718,129 +706,7 @@ set(SRCS
   cmWhileCommand.h
   cmWriteFileCommand.cxx
   cmWriteFileCommand.h
-
-  cm_get_date.h
-  cm_get_date.c
-  cm_utf8.h
-  cm_utf8.c
-  cm_codecvt.hxx
-  cm_codecvt.cxx
-
-  cmDuration.h
-  cmDuration.cxx
-
-  bindexplib.cxx
-  )
-
-SET_PROPERTY(SOURCE cmProcessOutput.cxx cmWindowsRegistry.cxx APPEND PROPERTY COMPILE_DEFINITIONS
-  KWSYS_ENCODING_DEFAULT_CODEPAGE=${KWSYS_ENCODING_DEFAULT_CODEPAGE})
-
-# Xcode only works on Apple
-if(APPLE)
-  set(SRCS ${SRCS}
-    cmXCodeObject.cxx
-    cmXCode21Object.cxx
-    cmXCodeScheme.cxx
-    cmGlobalXCodeGenerator.cxx
-    cmGlobalXCodeGenerator.h
-    cmLocalXCodeGenerator.cxx
-    cmLocalXCodeGenerator.h)
-endif()
-
-
-if(WIN32)
-  set(SRCS ${SRCS}
-    cmCallVisualStudioMacro.cxx
-    cmCallVisualStudioMacro.h
-    )
-
-  if(NOT UNIX)
-    set(SRCS ${SRCS}
-      cmGlobalBorlandMakefileGenerator.cxx
-      cmGlobalBorlandMakefileGenerator.h
-      cmGlobalMSYSMakefileGenerator.cxx
-      cmGlobalMinGWMakefileGenerator.cxx
-      cmGlobalNMakeMakefileGenerator.cxx
-      cmGlobalNMakeMakefileGenerator.h
-      cmGlobalJOMMakefileGenerator.cxx
-      cmGlobalJOMMakefileGenerator.h
-      cmGlobalVisualStudio71Generator.cxx
-      cmGlobalVisualStudio71Generator.h
-      cmGlobalVisualStudio7Generator.cxx
-      cmGlobalVisualStudio7Generator.h
-      cmGlobalVisualStudio8Generator.cxx
-      cmGlobalVisualStudio8Generator.h
-      cmGlobalVisualStudio9Generator.cxx
-      cmGlobalVisualStudio9Generator.h
-      cmVisualStudioGeneratorOptions.h
-      cmVisualStudioGeneratorOptions.cxx
-      cmVsProjectType.h
-      cmVisualStudio10TargetGenerator.h
-      cmVisualStudio10TargetGenerator.cxx
-      cmLocalVisualStudio10Generator.cxx
-      cmLocalVisualStudio10Generator.h
-      cmGlobalVisualStudio10Generator.h
-      cmGlobalVisualStudio10Generator.cxx
-      cmGlobalVisualStudio11Generator.h
-      cmGlobalVisualStudio11Generator.cxx
-      cmGlobalVisualStudio12Generator.h
-      cmGlobalVisualStudio12Generator.cxx
-      cmGlobalVisualStudio14Generator.h
-      cmGlobalVisualStudio14Generator.cxx
-      cmGlobalVisualStudioGenerator.cxx
-      cmGlobalVisualStudioGenerator.h
-      cmGlobalVisualStudioVersionedGenerator.h
-      cmGlobalVisualStudioVersionedGenerator.cxx
-      cmIDEFlagTable.h
-      cmIDEOptions.cxx
-      cmIDEOptions.h
-      cmLocalVisualStudio7Generator.cxx
-      cmLocalVisualStudio7Generator.h
-      cmLocalVisualStudioGenerator.cxx
-      cmLocalVisualStudioGenerator.h
-      cmVisualStudioSlnData.h
-      cmVisualStudioSlnData.cxx
-      cmVisualStudioSlnParser.h
-      cmVisualStudioSlnParser.cxx
-      cmVisualStudioWCEPlatformParser.h
-      cmVisualStudioWCEPlatformParser.cxx
-      cmVSSetupHelper.cxx
-      cmVSSetupHelper.h
-      )
-
-    # Add a manifest file to executables on Windows to allow for
-    # GetVersion to work properly on Windows 8 and above.
-    set(MANIFEST_FILE ${CMAKE_CURRENT_SOURCE_DIR}/cmake.version.manifest)
-  endif()
-endif()
-
-# Watcom support
-if(WIN32 OR CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-  set_property(SOURCE cmake.cxx APPEND PROPERTY COMPILE_DEFINITIONS CMAKE_USE_WMAKE)
-  list(APPEND SRCS
-    cmGlobalWatcomWMakeGenerator.cxx
-    cmGlobalWatcomWMakeGenerator.h
-    )
-endif()
-
-# GHS support
-# Works only for windows and linux
-if(WIN32 OR CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  set(SRCS ${SRCS}
-      cmGlobalGhsMultiGenerator.cxx
-      cmGlobalGhsMultiGenerator.h
-      cmLocalGhsMultiGenerator.cxx
-      cmLocalGhsMultiGenerator.h
-      cmGhsMultiTargetGenerator.cxx
-      cmGhsMultiTargetGenerator.h
-      cmGhsMultiGpj.cxx
-      cmGhsMultiGpj.h
-    )
-endif()
-
-
-# Ninja support
-set(SRCS ${SRCS}
+  # Ninja support
   cmScanDepFormat.cxx
   cmGlobalNinjaGenerator.cxx
   cmGlobalNinjaGenerator.h
@@ -857,7 +723,170 @@ set(SRCS ${SRCS}
   cmNinjaLinkLineComputer.h
   cmNinjaLinkLineDeviceComputer.cxx
   cmNinjaLinkLineDeviceComputer.h
+
+  cm_get_date.h
+  cm_get_date.c
+  cm_utf8.h
+  cm_utf8.c
+  cm_codecvt.hxx
+  cm_codecvt.cxx
+
+  cmDuration.h
+  cmDuration.cxx
+
+  bindexplib.cxx
   )
+
+target_link_libraries(
+  CMakeLib
+  PUBLIC
+    cmsys
+    ${CMAKE_STD_LIBRARY}
+    ${CMAKE_EXPAT_LIBRARIES} ${CMAKE_ZLIB_LIBRARIES}
+    ${CMAKE_TAR_LIBRARIES}
+    ${CMAKE_CURL_LIBRARIES}
+    ${CMAKE_JSONCPP_LIBRARIES}
+    ${CMAKE_LIBUV_LIBRARIES}
+    ${CMAKE_LIBRHASH_LIBRARIES}
+    ${CMake_KWIML_LIBRARIES}
+    ${CMAKE_THREAD_LIBS_INIT}
+  )
+
+SET_PROPERTY(SOURCE cmProcessOutput.cxx cmWindowsRegistry.cxx APPEND PROPERTY COMPILE_DEFINITIONS
+  KWSYS_ENCODING_DEFAULT_CODEPAGE=${KWSYS_ENCODING_DEFAULT_CODEPAGE})
+
+# Check if we can build the Mach-O parser.
+if(CMake_USE_MACH_PARSER)
+  target_sources(
+    CMakeLib
+    PUBLIC
+      cmMachO.h
+      cmMachO.cxx
+    )
+endif()
+
+# Check if we can build the XCOFF parser.
+if(CMake_USE_XCOFF_PARSER)
+  target_sources(
+    CMakeLib
+    PUBLIC
+      cmXCOFF.h
+      cmXCOFF.cxx
+    )
+endif()
+
+# Xcode only works on Apple
+if(APPLE)
+  target_sources(
+    CMakeLib
+    PUBLIC
+      cmXCodeObject.cxx
+      cmXCode21Object.cxx
+      cmXCodeScheme.cxx
+      cmGlobalXCodeGenerator.cxx
+      cmGlobalXCodeGenerator.h
+      cmLocalXCodeGenerator.cxx
+      cmLocalXCodeGenerator.h
+    )
+endif()
+
+if(WIN32)
+  target_sources(
+    CMakeLib
+    PUBLIC
+      cmCallVisualStudioMacro.cxx
+      cmCallVisualStudioMacro.h
+    )
+
+  if(NOT UNIX)
+    target_sources(
+      CMakeLib
+      PUBLIC
+        cmGlobalBorlandMakefileGenerator.cxx
+        cmGlobalBorlandMakefileGenerator.h
+        cmGlobalMSYSMakefileGenerator.cxx
+        cmGlobalMinGWMakefileGenerator.cxx
+        cmGlobalNMakeMakefileGenerator.cxx
+        cmGlobalNMakeMakefileGenerator.h
+        cmGlobalJOMMakefileGenerator.cxx
+        cmGlobalJOMMakefileGenerator.h
+        cmGlobalVisualStudio71Generator.cxx
+        cmGlobalVisualStudio71Generator.h
+        cmGlobalVisualStudio7Generator.cxx
+        cmGlobalVisualStudio7Generator.h
+        cmGlobalVisualStudio8Generator.cxx
+        cmGlobalVisualStudio8Generator.h
+        cmGlobalVisualStudio9Generator.cxx
+        cmGlobalVisualStudio9Generator.h
+        cmVisualStudioGeneratorOptions.h
+        cmVisualStudioGeneratorOptions.cxx
+        cmVsProjectType.h
+        cmVisualStudio10TargetGenerator.h
+        cmVisualStudio10TargetGenerator.cxx
+        cmLocalVisualStudio10Generator.cxx
+        cmLocalVisualStudio10Generator.h
+        cmGlobalVisualStudio10Generator.h
+        cmGlobalVisualStudio10Generator.cxx
+        cmGlobalVisualStudio11Generator.h
+        cmGlobalVisualStudio11Generator.cxx
+        cmGlobalVisualStudio12Generator.h
+        cmGlobalVisualStudio12Generator.cxx
+        cmGlobalVisualStudio14Generator.h
+        cmGlobalVisualStudio14Generator.cxx
+        cmGlobalVisualStudioGenerator.cxx
+        cmGlobalVisualStudioGenerator.h
+        cmGlobalVisualStudioVersionedGenerator.h
+        cmGlobalVisualStudioVersionedGenerator.cxx
+        cmIDEFlagTable.h
+        cmIDEOptions.cxx
+        cmIDEOptions.h
+        cmLocalVisualStudio7Generator.cxx
+        cmLocalVisualStudio7Generator.h
+        cmLocalVisualStudioGenerator.cxx
+        cmLocalVisualStudioGenerator.h
+        cmVisualStudioSlnData.h
+        cmVisualStudioSlnData.cxx
+        cmVisualStudioSlnParser.h
+        cmVisualStudioSlnParser.cxx
+        cmVisualStudioWCEPlatformParser.h
+        cmVisualStudioWCEPlatformParser.cxx
+        cmVSSetupHelper.cxx
+        cmVSSetupHelper.h
+      )
+
+    # Add a manifest file to executables on Windows to allow for
+    # GetVersion to work properly on Windows 8 and above.
+    set(MANIFEST_FILE ${CMAKE_CURRENT_SOURCE_DIR}/cmake.version.manifest)
+  endif()
+endif()
+
+# Watcom support
+if(WIN32 OR CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+  set_property(SOURCE cmake.cxx APPEND PROPERTY COMPILE_DEFINITIONS CMAKE_USE_WMAKE)
+  target_sources(
+    CMakeLib
+    PUBLIC
+      cmGlobalWatcomWMakeGenerator.cxx
+      cmGlobalWatcomWMakeGenerator.h
+    )
+endif()
+
+# GHS support
+# Works only for windows and linux
+if(WIN32 OR CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  target_sources(
+    CMakeLib
+    PUBLIC
+      cmGlobalGhsMultiGenerator.cxx
+      cmGlobalGhsMultiGenerator.h
+      cmLocalGhsMultiGenerator.cxx
+      cmLocalGhsMultiGenerator.h
+      cmGhsMultiTargetGenerator.cxx
+      cmGhsMultiTargetGenerator.h
+      cmGhsMultiGpj.cxx
+      cmGhsMultiGpj.h
+    )
+endif()
 
 # Temporary variable for tools targets
 set(_tools)
@@ -884,20 +913,6 @@ foreach(check IN ITEMS STAT_HAS_ST_MTIM STAT_HAS_ST_MTIMESPEC)
   set_property(SOURCE cmFileTime.cxx APPEND PROPERTY
     COMPILE_DEFINITIONS CMake_${check}=${CMake_${check}})
 endforeach()
-
-# create a library used by the command line and the GUI
-add_library(CMakeLib ${SRCS})
-target_link_libraries(CMakeLib cmsys
-  ${CMAKE_STD_LIBRARY}
-  ${CMAKE_EXPAT_LIBRARIES} ${CMAKE_ZLIB_LIBRARIES}
-  ${CMAKE_TAR_LIBRARIES}
-  ${CMAKE_CURL_LIBRARIES}
-  ${CMAKE_JSONCPP_LIBRARIES}
-  ${CMAKE_LIBUV_LIBRARIES}
-  ${CMAKE_LIBRHASH_LIBRARIES}
-  ${CMake_KWIML_LIBRARIES}
-  ${CMAKE_THREAD_LIBS_INIT}
-  )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SYSTEM_PROCESSOR MATCHES "sparc")
   # the atomic instructions are implemented using libatomic on some platforms,
@@ -929,10 +944,13 @@ include_directories(
   "${CMake_SOURCE_DIR}/Source/CTest"
   ${CMAKE_CURL_INCLUDES}
   )
+
 #
-# Sources for CTestLib
+# Build CTestLib
 #
-set(CTEST_SRCS cmCTest.cxx
+add_library(
+  CTestLib
+  cmCTest.cxx
   CTest/cmProcess.cxx
   CTest/cmCTestBinPacker.cxx
   CTest/cmCTestBuildAndTestHandler.cxx
@@ -999,9 +1017,6 @@ set(CTEST_SRCS cmCTest.cxx
   LexerParser/cmCTestResourceGroupsLexer.h
   LexerParser/cmCTestResourceGroupsLexer.in.l
   )
-
-# Build CTestLib
-add_library(CTestLib ${CTEST_SRCS})
 target_link_libraries(CTestLib CMakeLib ${CMAKE_CURL_LIBRARIES})
 
 #
@@ -1010,10 +1025,10 @@ target_link_libraries(CTestLib CMakeLib ${CMAKE_CURL_LIBRARIES})
 include_directories(
   "${CMake_SOURCE_DIR}/Source/CPack"
   )
-#
-# Sources for CPack
-#
-set(CPACK_SRCS
+
+# Build CPackLib
+add_library(
+  CPackLib
   CPack/cmCPackArchiveGenerator.cxx
   CPack/cmCPackComponentGroup.cxx
   CPack/cmCPackDebGenerator.cxx
@@ -1024,9 +1039,7 @@ set(CPACK_SRCS
   CPack/cmCPackNSISGenerator.cxx
   CPack/cmCPackNuGetGenerator.cxx
   CPack/cmCPackSTGZGenerator.cxx
-  )
-# CPack IFW generator
-set(CPACK_SRCS ${CPACK_SRCS}
+  # CPack IFW generator
   CPack/IFW/cmCPackIFWCommon.cxx
   CPack/IFW/cmCPackIFWCommon.h
   CPack/IFW/cmCPackIFWGenerator.cxx
@@ -1038,19 +1051,24 @@ set(CPACK_SRCS ${CPACK_SRCS}
   CPack/IFW/cmCPackIFWRepository.cxx
   CPack/IFW/cmCPackIFWRepository.h
   )
+target_link_libraries(CPackLib CMakeLib)
 
 if(CYGWIN)
-  set(CPACK_SRCS ${CPACK_SRCS}
-    CPack/cmCPackCygwinBinaryGenerator.cxx
-    CPack/cmCPackCygwinSourceGenerator.cxx
+  target_sources(
+    CPackLib
+    PUBLIC
+      CPack/cmCPackCygwinBinaryGenerator.cxx
+      CPack/cmCPackCygwinSourceGenerator.cxx
     )
 endif()
 
 option(CPACK_ENABLE_FREEBSD_PKG "Add FreeBSD pkg(8) generator to CPack." OFF)
 
 if(UNIX)
-  set(CPACK_SRCS ${CPACK_SRCS}
-    CPack/cmCPackRPMGenerator.cxx
+  target_sources(
+    CPackLib
+    PUBLIC
+      CPack/cmCPackRPMGenerator.cxx
     )
 
   # Optionally, try to use pkg(8)
@@ -1066,8 +1084,10 @@ if(UNIX)
         pkg
         DOC "FreeBSD pkg(8) library")
       if(FREEBSD_PKG_LIBRARIES)
-        set(CPACK_SRCS ${CPACK_SRCS}
-          CPack/cmCPackFreeBSDGenerator.cxx
+        target_sources(
+          CPackLib
+          PUBLIC
+            CPack/cmCPackFreeBSDGenerator.cxx
           )
       endif()
     endif()
@@ -1085,44 +1105,45 @@ if(CYGWIN)
   find_package(LibUUID)
 endif()
 if(WIN32 OR (CYGWIN AND LibUUID_FOUND))
-  set(CPACK_SRCS ${CPACK_SRCS}
-    CPack/WiX/cmCMakeToWixPath.cxx
-    CPack/WiX/cmCMakeToWixPath.h
-    CPack/WiX/cmCPackWIXGenerator.cxx
-    CPack/WiX/cmCPackWIXGenerator.h
-    CPack/WiX/cmWIXAccessControlList.cxx
-    CPack/WiX/cmWIXAccessControlList.h
-    CPack/WiX/cmWIXDirectoriesSourceWriter.cxx
-    CPack/WiX/cmWIXDirectoriesSourceWriter.h
-    CPack/WiX/cmWIXFeaturesSourceWriter.cxx
-    CPack/WiX/cmWIXFeaturesSourceWriter.h
-    CPack/WiX/cmWIXFilesSourceWriter.cxx
-    CPack/WiX/cmWIXFilesSourceWriter.h
-    CPack/WiX/cmWIXPatch.cxx
-    CPack/WiX/cmWIXPatch.h
-    CPack/WiX/cmWIXPatchParser.cxx
-    CPack/WiX/cmWIXPatchParser.h
-    CPack/WiX/cmWIXRichTextFormatWriter.cxx
-    CPack/WiX/cmWIXRichTextFormatWriter.h
-    CPack/WiX/cmWIXShortcut.cxx
-    CPack/WiX/cmWIXShortcut.h
-    CPack/WiX/cmWIXSourceWriter.cxx
-    CPack/WiX/cmWIXSourceWriter.h
+  target_sources(
+    CPackLib
+    PUBLIC
+      CPack/WiX/cmCMakeToWixPath.cxx
+      CPack/WiX/cmCMakeToWixPath.h
+      CPack/WiX/cmCPackWIXGenerator.cxx
+      CPack/WiX/cmCPackWIXGenerator.h
+      CPack/WiX/cmWIXAccessControlList.cxx
+      CPack/WiX/cmWIXAccessControlList.h
+      CPack/WiX/cmWIXDirectoriesSourceWriter.cxx
+      CPack/WiX/cmWIXDirectoriesSourceWriter.h
+      CPack/WiX/cmWIXFeaturesSourceWriter.cxx
+      CPack/WiX/cmWIXFeaturesSourceWriter.h
+      CPack/WiX/cmWIXFilesSourceWriter.cxx
+      CPack/WiX/cmWIXFilesSourceWriter.h
+      CPack/WiX/cmWIXPatch.cxx
+      CPack/WiX/cmWIXPatch.h
+      CPack/WiX/cmWIXPatchParser.cxx
+      CPack/WiX/cmWIXPatchParser.h
+      CPack/WiX/cmWIXRichTextFormatWriter.cxx
+      CPack/WiX/cmWIXRichTextFormatWriter.h
+      CPack/WiX/cmWIXShortcut.cxx
+      CPack/WiX/cmWIXShortcut.h
+      CPack/WiX/cmWIXSourceWriter.cxx
+      CPack/WiX/cmWIXSourceWriter.h
     )
 endif()
 
 if(APPLE)
-  set(CPACK_SRCS ${CPACK_SRCS}
-    CPack/cmCPackBundleGenerator.cxx
-    CPack/cmCPackDragNDropGenerator.cxx
-    CPack/cmCPackPKGGenerator.cxx
-    CPack/cmCPackProductBuildGenerator.cxx
+  target_sources(
+    CPackLib
+    PUBLIC
+      CPack/cmCPackBundleGenerator.cxx
+      CPack/cmCPackDragNDropGenerator.cxx
+      CPack/cmCPackPKGGenerator.cxx
+      CPack/cmCPackProductBuildGenerator.cxx
     )
 endif()
 
-# Build CPackLib
-add_library(CPackLib ${CPACK_SRCS})
-target_link_libraries(CPackLib CMakeLib)
 if(APPLE)
   # Some compilers produce errors in the CoreServices framework headers.
   # Ideally such errors should be fixed by either the compiler vendor
