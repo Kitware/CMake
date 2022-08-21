@@ -197,6 +197,7 @@ else()
   set(CMAKE_EXPAT_INCLUDES)
   set(CMAKE_EXPAT_LIBRARIES cmexpat)
   add_subdirectory(Utilities/cmexpat)
+  add_library(EXPAT::EXPAT ALIAS cmexpat)
   CMAKE_SET_TARGET_FOLDER(cmexpat "Utilities/3rdParty")
 endif()
 
