@@ -765,9 +765,6 @@ target_link_libraries(
     ${CMAKE_THREAD_LIBS_INIT}
   )
 
-set_property(SOURCE cmProcessOutput.cxx cmWindowsRegistry.cxx APPEND PROPERTY COMPILE_DEFINITIONS
-  KWSYS_ENCODING_DEFAULT_CODEPAGE=${KWSYS_ENCODING_DEFAULT_CODEPAGE})
-
 # Check if we can build the Mach-O parser.
 if(CMake_USE_MACH_PARSER)
   target_sources(
