@@ -18,7 +18,7 @@ endif()
 # not hurt other versions, and this will work into the
 # future
 if(MSVC OR _INTEL_WINDOWS OR _CLANG_MSVC_WINDOWS)
-  add_definitions(-D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE)
+  add_compile_definitions(_CRT_SECURE_NO_DEPRECATE _CRT_NONSTDC_NO_DEPRECATE)
 else()
 endif()
 
@@ -62,7 +62,7 @@ endif()
 # Use 64-bit off_t on 32-bit Linux
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SIZEOF_VOID_P EQUAL 4)
   # ensure 64bit offsets are used for filesystem accesses for 32bit compilation
-  add_definitions(-D_FILE_OFFSET_BITS=64)
+  add_compile_definitions(_FILE_OFFSET_BITS=64)
 endif()
 
 # Workaround for TOC Overflow on ppc64

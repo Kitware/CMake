@@ -48,10 +48,10 @@ set(EXECUTABLE_OUTPUT_PATH ${CMake_BIN_DIR})
 
 if(WIN32)
   # ensure Unicode friendly APIs are used on Windows
-  add_definitions(-DUNICODE -D_UNICODE)
+  add_compile_definitions(UNICODE _UNICODE)
 
   # minimize windows.h content
-  add_definitions(-DWIN32_LEAN_AND_MEAN)
+  add_compile_definitions(WIN32_LEAN_AND_MEAN)
 endif()
 
 # configure the .dox.in file
