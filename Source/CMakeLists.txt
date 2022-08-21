@@ -758,7 +758,7 @@ target_link_libraries(
     LibUV::LibUV
     LibRHash::LibRHash
     $<TARGET_NAME_IF_EXISTS:kwiml::kwiml>
-    ${CMAKE_THREAD_LIBS_INIT}
+    Threads::Threads
   )
 
 # Check if we can build the Mach-O parser.
