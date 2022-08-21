@@ -743,7 +743,6 @@ target_include_directories(
     "${CMake_BINARY_DIR}/Source"
     "${CMake_SOURCE_DIR}/Source"
     "${CMake_SOURCE_DIR}/Source/LexerParser"
-    ${CMAKE_TAR_INCLUDES}
     ${CMake_HAIKU_INCLUDE_DIRS}
   )
 target_link_libraries(
@@ -752,8 +751,8 @@ target_link_libraries(
     cmstd
     cmsys
     EXPAT::EXPAT
+    LibArchive::LibArchive
     ZLIB::ZLIB
-    ${CMAKE_TAR_LIBRARIES}
     ${CMAKE_CURL_LIBRARIES}
     ${CMAKE_JSONCPP_LIBRARIES}
     ${CMAKE_LIBUV_LIBRARIES}
