@@ -752,13 +752,13 @@ target_link_libraries(
     cmsys
     CURL::libcurl
     EXPAT::EXPAT
-    LibArchive::LibArchive
-    ZLIB::ZLIB
     JsonCpp::JsonCpp
-    LibUV::LibUV
-    LibRHash::LibRHash
     $<TARGET_NAME_IF_EXISTS:kwiml::kwiml>
+    LibArchive::LibArchive
+    LibRHash::LibRHash
+    LibUV::LibUV
     Threads::Threads
+    ZLIB::ZLIB
   )
 
 # Check if we can build the Mach-O parser.
