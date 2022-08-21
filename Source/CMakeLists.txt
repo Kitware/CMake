@@ -36,6 +36,14 @@ if(WIN32 OR CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Da
   set(CMAKE_USE_WMAKE 1)
 endif()
 
+foreach(check IN ITEMS STAT_HAS_ST_MTIM STAT_HAS_ST_MTIMESPEC)
+  if(KWSYS_CXX_${check}_COMPILED) # abuse KWSys check cache entry
+    set(CMake_${check} 1)
+  else()
+    set(CMake_${check} 0)
+  endif()
+endforeach()
+
 set(EXECUTABLE_OUTPUT_PATH ${CMake_BIN_DIR})
 
 if(WIN32)
@@ -901,16 +909,6 @@ if(WIN32 AND NOT CYGWIN)
   list(APPEND _tools cmcldeps)
   target_link_libraries(cmcldeps PRIVATE CMakeLib)
 endif()
-
-foreach(check IN ITEMS STAT_HAS_ST_MTIM STAT_HAS_ST_MTIMESPEC)
-  if(KWSYS_CXX_${check}_COMPILED) # abuse KWSys check cache entry
-    set(CMake_${check} 1)
-  else()
-    set(CMake_${check} 0)
-  endif()
-  set_property(SOURCE cmFileTime.cxx APPEND PROPERTY
-    COMPILE_DEFINITIONS CMake_${check}=${CMake_${check}})
-endforeach()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SYSTEM_PROCESSOR MATCHES "sparc")
   # the atomic instructions are implemented using libatomic on some platforms,

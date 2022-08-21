@@ -36,3 +36,6 @@
 
 #cmakedefine CURL_CA_BUNDLE "@CURL_CA_BUNDLE@"
 #cmakedefine CURL_CA_PATH "@CURL_CA_PATH@"
+
+#cmakedefine01 CMake_STAT_HAS_ST_MTIM
+#cmakedefine01 CMake_STAT_HAS_ST_MTIMESPEC
