@@ -31,6 +31,11 @@ if(CMAKE_SYSTEM_NAME STREQUAL "AIX")
   set(CMake_USE_XCOFF_PARSER 1)
 endif()
 
+# Watcom support
+if(WIN32 OR CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+  set(CMAKE_USE_WMAKE 1)
+endif()
+
 set(EXECUTABLE_OUTPUT_PATH ${CMake_BIN_DIR})
 
 if(WIN32)
@@ -861,8 +866,7 @@ if(WIN32)
 endif()
 
 # Watcom support
-if(WIN32 OR CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-  set_property(SOURCE cmake.cxx APPEND PROPERTY COMPILE_DEFINITIONS CMAKE_USE_WMAKE)
+if(CMAKE_USE_WMAKE)
   target_sources(
     CMakeLib
     PUBLIC
