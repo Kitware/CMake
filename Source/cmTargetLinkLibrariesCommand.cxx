@@ -625,7 +625,7 @@ bool TLL::HandleLibrary(ProcessingState currentProcessingState,
 void TLL::AppendProperty(std::string const& prop, std::string const& value)
 {
   this->AffectsProperty(prop);
-  this->Target->AppendProperty(prop, value);
+  this->Target->AppendProperty(prop, value, this->Makefile.GetBacktrace());
 }
 
 void TLL::AffectsProperty(std::string const& prop)
@@ -636,14 +636,16 @@ void TLL::AffectsProperty(std::string const& prop)
   // Add a wrapper to the expression to tell LookupLinkItem to look up
   // names in the caller's directory.
   if (this->Props.insert(prop).second) {
-    this->Target->AppendProperty(prop, this->DirectoryId);
+    this->Target->AppendProperty(prop, this->DirectoryId,
+                                 this->Makefile.GetBacktrace());
   }
 }
 
 TLL::~TLL()
 {
   for (std::string const& prop : this->Props) {
-    this->Target->AppendProperty(prop, CMAKE_DIRECTORY_ID_SEP);
+    this->Target->AppendProperty(prop, CMAKE_DIRECTORY_ID_SEP,
+                                 this->Makefile.GetBacktrace());
   }
 }
 

@@ -185,8 +185,10 @@ public:
   {
     this->SetProperty(prop, cmValue(value));
   }
-  void AppendProperty(const std::string& prop, const std::string& value,
-                      bool asString = false);
+  void AppendProperty(
+    const std::string& prop, const std::string& value,
+    cm::optional<cmListFileBacktrace> const& bt = cm::nullopt,
+    bool asString = false);
   //! Might return a nullptr if the property is not set or invalid
   cmValue GetProperty(const std::string& prop) const;
   //! Always returns a valid pointer

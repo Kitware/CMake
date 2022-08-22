@@ -79,7 +79,8 @@ private:
   {
     tgt->AppendProperty("SOURCES",
                         this->Join(this->ConvertToAbsoluteContent(
-                          tgt, content, IsInterface::No, CheckCMP0076::Yes)));
+                          tgt, content, IsInterface::No, CheckCMP0076::Yes)),
+                        this->Makefile->GetBacktrace());
     return true; // Successfully handled.
   }
 
@@ -324,11 +325,13 @@ bool TargetSourcesImpl::HandleOneFileSet(
           cmStrCat("$<BUILD_INTERFACE:", dir, ">");
         if (cmFileSetVisibilityIsForSelf(visibility)) {
           this->Target->AppendProperty("INCLUDE_DIRECTORIES",
-                                       interfaceDirectoriesGenex);
+                                       interfaceDirectoriesGenex,
+                                       this->Makefile->GetBacktrace());
         }
         if (cmFileSetVisibilityIsForInterface(visibility)) {
           this->Target->AppendProperty("INTERFACE_INCLUDE_DIRECTORIES",
-                                       interfaceDirectoriesGenex);
+                                       interfaceDirectoriesGenex,
+                                       this->Makefile->GetBacktrace());
         }
       }
     }
