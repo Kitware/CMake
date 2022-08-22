@@ -14,6 +14,9 @@ add_library(c_static_lib STATIC empty.c)
 add_executable(c_static_exe empty.c)
 target_link_libraries(c_static_exe PRIVATE c_static_lib)
 
+add_library(c_subdir STATIC)
+add_subdirectory(subdir)
+
 add_subdirectory(cxx)
 add_subdirectory(alias)
 add_subdirectory(object)

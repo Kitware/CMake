@@ -96,6 +96,10 @@
             "backtrace": null
         },
         {
+            "id": "^c_subdir::@6890427a1f51a3e7e1df$",
+            "backtrace": null
+        },
+        {
             "id": "^c_static_exe::@6890427a1f51a3e7e1df$",
             "backtrace": null
         },

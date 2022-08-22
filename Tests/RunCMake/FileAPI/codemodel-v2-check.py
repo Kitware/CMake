@@ -664,6 +664,7 @@ def gen_check_directories(c, g):
         read_codemodel_json_data("directories/dir_dir.json"),
         read_codemodel_json_data("directories/external.json"),
         read_codemodel_json_data("directories/fileset.json"),
+        read_codemodel_json_data("directories/subdir.json"),
     ]
 
     if matches(g["name"], "^Visual Studio "):
@@ -722,6 +723,7 @@ def gen_check_targets(c, g, inSource):
         read_codemodel_json_data("targets/c_shared_exe.json"),
         read_codemodel_json_data("targets/c_static_lib.json"),
         read_codemodel_json_data("targets/c_static_exe.json"),
+        read_codemodel_json_data("targets/c_subdir.json"),
 
         read_codemodel_json_data("targets/all_build_cxx.json"),
         read_codemodel_json_data("targets/zero_check_cxx.json"),

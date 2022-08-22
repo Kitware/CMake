@@ -1,7 +1,7 @@
 {
-    "source": "^dir/dir$",
-    "build": "^dir/dir$",
-    "parentSource": "^dir$",
+    "source": "^subdir$",
+    "build": "^subdir$",
+    "parentSource": "^\\.$",
     "childSources": null,
     "targetIds": null,
     "projectName": "codemodel-v2",

@@ -10,7 +10,7 @@
         "^custom_tgt::@c11385ffed57b860da63$"
     ],
     "projectName": "Custom",
-    "minimumCMakeVersion": "3.12",
+    "minimumCMakeVersion": "3.13",
     "hasInstallRule": null,
     "installers": []
 }
