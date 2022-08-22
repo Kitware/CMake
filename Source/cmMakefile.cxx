@@ -789,6 +789,7 @@ void cmMakefile::RunListFile(cmListFile const& listFile,
       break;
     }
     if (status.GetReturnInvoked()) {
+      this->RaiseScope(status.GetReturnVariables());
       // Exit early due to return command.
       break;
     }

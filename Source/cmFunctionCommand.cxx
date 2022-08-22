@@ -120,6 +120,7 @@ bool cmFunctionHelperCommand::operator()(
       return false;
     }
     if (status.GetReturnInvoked()) {
+      makefile.RaiseScope(status.GetReturnVariables());
       break;
     }
   }

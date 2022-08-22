@@ -421,7 +421,9 @@ class cmMakefile;
   SELECT(                                                                     \
     POLICY, CMP0139,                                                          \
     "The if() command supports path comparisons using PATH_EQUAL operator.",  \
-    3, 24, 0, cmPolicies::WARN)
+    3, 24, 0, cmPolicies::WARN)                                               \
+  SELECT(POLICY, CMP0140, "The return() command checks its arguments.", 3,    \
+         25, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \

@@ -71,4 +71,5 @@ See Also
 ^^^^^^^^
 
   * :command:`endblock`
+  * :command:`return`
   * :command:`cmake_policy`

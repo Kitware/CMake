@@ -126,7 +126,7 @@ bool cmMacroHelperCommand::operator()(
       return false;
     }
     if (status.GetReturnInvoked()) {
-      inStatus.SetReturnInvoked();
+      inStatus.SetReturnInvoked(status.GetReturnVariables());
       return true;
     }
     if (status.GetBreakInvoked()) {
