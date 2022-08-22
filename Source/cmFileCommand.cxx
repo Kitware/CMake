@@ -1914,7 +1914,7 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
     std::string msg;
     std::string actualHash = hash->HashFile(file);
     if (actualHash == expectedHash) {
-      msg = cmStrCat("returning early; file already exists with expected ",
+      msg = cmStrCat("skipping download as file already exists with expected ",
                      hashMatchMSG, '"');
       if (!statusVar.empty()) {
         status.GetMakefile().AddDefinition(statusVar, cmStrCat(0, ";\"", msg));
