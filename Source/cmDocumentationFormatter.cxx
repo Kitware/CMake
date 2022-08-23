@@ -102,13 +102,8 @@ void cmDocumentationFormatter::PrintColumn(std::ostream& os, const char* text)
         if (column) {
           // Not first word on line.  Separate from the previous word
           // by a space, or two if this is a new sentence.
-          if (newSentence) {
-            os << "  ";
-            column += 2;
-          } else {
-            os << ' ';
-            column += 1;
-          }
+          os << &("  "[std::size_t(!newSentence)]);
+          column += 1u + std::ptrdiff_t(newSentence);
         } else if (!firstLine && this->TextIndent) {
           // First word on line.  Print indentation unless this is the
           // first line.
