@@ -16,7 +16,8 @@
 #include "cmSystemTools.h"
 #include "cmVersion.h"
 
-static const char* cmDocumentationStandardOptions[][2] = {
+namespace {
+const char* cmDocumentationStandardOptions[][2] = {
   { "-h,-H,--help,-help,-usage,/?", "Print usage information and exit." },
   { "--version,-version,/V [<file>]", "Print version number and exit." },
   { "--help-full [<file>]", "Print all help manuals and exit." },
@@ -46,17 +47,18 @@ static const char* cmDocumentationStandardOptions[][2] = {
   { nullptr, nullptr }
 };
 
-static const char* cmDocumentationCPackGeneratorsHeader[][2] = {
+const char* cmDocumentationCPackGeneratorsHeader[][2] = {
   { nullptr, "The following generators are available on this platform:" },
   { nullptr, nullptr }
 };
 
-static const char* cmDocumentationCMakeGeneratorsHeader[][2] = {
+const char* cmDocumentationCMakeGeneratorsHeader[][2] = {
   { nullptr,
     "The following generators are available on this platform (* marks "
     "default):" },
   { nullptr, nullptr }
 };
+} // anonymous namespace
 
 cmDocumentation::cmDocumentation()
 {
