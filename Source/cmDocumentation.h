@@ -15,9 +15,33 @@
 struct cmDocumentationEntry;
 
 /** Class to generate documentation.  */
-class cmDocumentation : public cmDocumentationEnums
+class cmDocumentation
 {
 public:
+  /** Types of help provided.  */
+  enum Type
+  {
+    None,
+    Version,
+    Usage,
+    Help,
+    Full,
+    ListManuals,
+    ListCommands,
+    ListModules,
+    ListProperties,
+    ListVariables,
+    ListPolicies,
+    ListGenerators,
+    OneManual,
+    OneCommand,
+    OneModule,
+    OneProperty,
+    OneVariable,
+    OnePolicy,
+    OldCustomModules
+  };
+
   cmDocumentation();
 
   /**
@@ -114,7 +138,7 @@ private:
 
   struct RequestedHelpItem
   {
-    cmDocumentationEnums::Type HelpType = None;
+    Type HelpType = None;
     std::string Filename;
     std::string Argument;
   };

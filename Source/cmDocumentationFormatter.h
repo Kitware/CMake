@@ -6,40 +6,6 @@
 
 #include <iosfwd>
 
-/** This is just a helper class to make it build with MSVC 6.0.
-Actually the enums and internal classes could directly go into
-cmDocumentation, but then MSVC6 complains in RequestedHelpItem that
-cmDocumentation is an undefined type and so it doesn't know the enums.
-Moving the enums to a class which is then already completely parsed helps
-against this. */
-class cmDocumentationEnums
-{
-public:
-  /** Types of help provided.  */
-  enum Type
-  {
-    None,
-    Version,
-    Usage,
-    Help,
-    Full,
-    ListManuals,
-    ListCommands,
-    ListModules,
-    ListProperties,
-    ListVariables,
-    ListPolicies,
-    ListGenerators,
-    OneManual,
-    OneCommand,
-    OneModule,
-    OneProperty,
-    OneVariable,
-    OnePolicy,
-    OldCustomModules
-  };
-};
-
 class cmDocumentationSection;
 
 /** Print documentation in a simple text format. */
