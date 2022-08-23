@@ -191,6 +191,15 @@ void testEdition()
       ++failed;
     }
   }
+  {
+    cm::enum_set<Test> testSet1;
+    cm::enum_set<Test> testSet2{ Test::A, Test::C, Test::B };
+
+    testSet1 = { Test::A, Test::C, Test::B };
+    if (testSet1.size() != 3 || testSet1 != testSet2) {
+      ++failed;
+    }
+  }
 }
 }
 

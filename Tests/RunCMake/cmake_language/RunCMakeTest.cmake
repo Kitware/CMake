@@ -8,6 +8,7 @@ foreach(command IN ITEMS
     "if" "elseif" "else" "endif"
     "while" "endwhile"
     "foreach" "endforeach"
+    "block" "endblock"
     )
   message(STATUS "Running call_invalid_command for ${command}...")
   run_cmake_with_options(call_invalid_command -Dcommand=${command})
@@ -42,6 +43,7 @@ foreach(command IN ITEMS
     "if" "elseif" "else" "endif"
     "while" "endwhile"
     "foreach" "endforeach"
+    "block" "endblock"
     "return"
     )
   message(STATUS "Running defer_call_invalid_command for ${command}...")

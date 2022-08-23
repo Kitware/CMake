@@ -3832,6 +3832,7 @@ syn keyword cmakeCommand
             \ add_subdirectory
             \ add_test
             \ aux_source_directory
+            \ block
             \ break
             \ build_command
             \ cmake_host_system_information
@@ -3859,6 +3860,7 @@ syn keyword cmakeCommand
             \ define_property
             \ enable_language
             \ enable_testing
+            \ endblock
             \ endfunction
             \ endmacro
             \ execute_process

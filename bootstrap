@@ -301,6 +301,7 @@ CMAKE_CXX_SOURCES="\
   cmBinUtilsWindowsPEDumpbinGetRuntimeDependenciesTool \
   cmBinUtilsWindowsPELinker \
   cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool \
+  cmBlockCommand \
   cmBreakCommand \
   cmBuildCommand \
   cmCMakeLanguageCommand \

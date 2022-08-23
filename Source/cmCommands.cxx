@@ -14,6 +14,7 @@
 #include "cmAddLibraryCommand.h"
 #include "cmAddSubDirectoryCommand.h"
 #include "cmAddTestCommand.h"
+#include "cmBlockCommand.h"
 #include "cmBreakCommand.h"
 #include "cmBuildCommand.h"
 #include "cmCMakeLanguageCommand.h"
@@ -126,6 +127,7 @@ void GetScriptingCommands(cmState* state)
   state->AddFlowControlCommand("macro", cmMacroCommand);
   state->AddFlowControlCommand("return", cmReturnCommand);
   state->AddFlowControlCommand("while", cmWhileCommand);
+  state->AddFlowControlCommand("block", cmBlockCommand);
 
   state->AddBuiltinCommand("cmake_language", cmCMakeLanguageCommand);
   state->AddBuiltinCommand("cmake_minimum_required", cmCMakeMinimumRequired);
@@ -198,6 +200,10 @@ void GetScriptingCommands(cmState* state)
     "An ENDWHILE command was found outside of a proper "
     "WHILE ENDWHILE structure. Or its arguments did not "
     "match the opening WHILE command.");
+  state->AddUnexpectedFlowControlCommand(
+    "endblock",
+    "An ENDBLOCK command was found outside of a proper "
+    "BLOCK ENDBLOCK structure.");
 
 #if !defined(CMAKE_BOOTSTRAP)
   state->AddBuiltinCommand("cmake_host_system_information",

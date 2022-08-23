@@ -1,0 +1,4 @@
+CMake Error at WrongArgument.cmake:[0-9]+ \(block\):
+  block called with unsupported argument "WRONG_ARG"
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

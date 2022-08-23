@@ -1,0 +1,9 @@
+CMake Warning \(dev\) in EndWithArgument.cmake:
+  A logical block closing on the line
+
+  .+/Tests/RunCMake/block/EndWithArgument.cmake:[0-9]+ \(endblock\)
+
+  has unexpected arguments.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
