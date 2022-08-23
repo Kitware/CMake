@@ -14,14 +14,33 @@
 #include "cmDocumentationSection.h"
 #include "cmSystemTools.h"
 
+namespace {
+const char* skipSpaces(const char* ptr)
+{
+  assert(ptr);
+  for (; *ptr == ' '; ++ptr) {
+    ;
+  }
+  return ptr;
+}
+const char* skipToSpace(const char* ptr)
+{
+  assert(ptr);
+  for (; *ptr && (*ptr != '\n') && (*ptr != ' '); ++ptr) {
+    ;
+  }
+  return ptr;
+}
+}
+
 void cmDocumentationFormatter::PrintFormatted(std::ostream& os,
                                               const char* text)
 {
   if (!text) {
     return;
   }
-  const char* ptr = text;
-  while (*ptr) {
+
+  for (const char* ptr = text; *ptr;) {
     // Any ptrs starting in a space are treated as preformatted text.
     std::string preformatted;
     while (*ptr == ' ') {
@@ -79,7 +98,6 @@ void cmDocumentationFormatter::PrintParagraph(std::ostream& os,
 void cmDocumentationFormatter::PrintColumn(std::ostream& os, const char* text)
 {
   // Print text arranged in an indented column of fixed width.
-  const char* l = text;
   bool newSentence = false;
   bool firstLine = true;
 
@@ -88,13 +106,8 @@ void cmDocumentationFormatter::PrintColumn(std::ostream& os, const char* text)
   std::ptrdiff_t column = 0;
 
   // Loop until the end of the text.
-  while (*l) {
-    // Parse the next word.
-    const char* r = l;
-    while (*r && (*r != '\n') && (*r != ' ')) {
-      ++r;
-    }
-
+  for (const char *l = text, *r = skipToSpace(text); *l;
+       l = skipSpaces(r), r = skipToSpace(l)) {
     // Does it fit on this line?
     if (r - l < width - column - std::ptrdiff_t(newSentence)) {
       // Word fits on this line.
@@ -138,12 +151,7 @@ void cmDocumentationFormatter::PrintColumn(std::ostream& os, const char* text)
         column = 0;
       }
     }
-
     // Move to beginning of next word.  Skip over whitespace.
-    l = r;
-    while (*l == ' ') {
-      ++l;
-    }
   }
 }
 
