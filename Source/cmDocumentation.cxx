@@ -373,14 +373,6 @@ void cmDocumentation::SetSection(const char* name,
   this->SectionAtName(name) = std::move(section);
 }
 
-void cmDocumentation::SetSection(const char* name,
-                                 std::vector<cmDocumentationEntry>& docs)
-{
-  cmDocumentationSection sec{ name };
-  sec.Append(docs);
-  this->SetSection(name, std::move(sec));
-}
-
 void cmDocumentation::SetSection(const char* name, const char* docs[][2])
 {
   cmDocumentationSection sec{ name };
@@ -406,19 +398,7 @@ void cmDocumentation::PrependSection(const char* name, const char* docs[][2])
   this->SectionAtName(name).Prepend(docs);
 }
 
-void cmDocumentation::PrependSection(const char* name,
-                                     std::vector<cmDocumentationEntry>& docs)
-{
-  this->SectionAtName(name).Prepend(docs);
-}
-
 void cmDocumentation::AppendSection(const char* name, const char* docs[][2])
-{
-  this->SectionAtName(name).Append(docs);
-}
-
-void cmDocumentation::AppendSection(const char* name,
-                                    std::vector<cmDocumentationEntry>& docs)
 {
   this->SectionAtName(name).Append(docs);
 }
