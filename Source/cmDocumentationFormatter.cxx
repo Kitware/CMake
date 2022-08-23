@@ -160,14 +160,13 @@ void cmDocumentationFormatter::PrintSection(
   const std::vector<cmDocumentationEntry>& entries = section.GetEntries();
   for (cmDocumentationEntry const& entry : entries) {
     if (!entry.Name.empty()) {
-      os << std::setw(2) << std::left << entry.CustomNamePrefix << entry.Name;
       this->TextIndent = NAME_SIZED_PADDING;
-      int align = static_cast<int>(this->TextIndent.size()) - 4;
-      for (int i = static_cast<int>(entry.Name.size()); i < align; ++i) {
-        os << ' ';
-      }
-      if (static_cast<int>(entry.Name.size()) > align) {
-        os << '\n' << this->TextIndent.substr(0, this->TextIndent.size() - 2);
+      os << std::setw(2) << std::left << entry.CustomNamePrefix
+         << std::setw(
+              int(std::max(this->TextIndent.size() - 4, entry.Name.size())))
+         << entry.Name;
+      if (entry.Name.size() > (this->TextIndent.size() - 4)) {
+        os << '\n' << std::setw(int(this->TextIndent.size() - 2)) << ' ';
       }
       os << "= ";
       this->PrintColumn(os, entry.Brief.c_str());
