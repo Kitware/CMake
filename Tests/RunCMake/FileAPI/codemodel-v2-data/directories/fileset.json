@@ -8,7 +8,7 @@
     "^c_headers_2::@6b8db101d64c125f29fe$"
   ],
   "projectName": "codemodel-v2",
-  "minimumCMakeVersion": "3.12",
+  "minimumCMakeVersion": "3.13",
   "hasInstallRule": true,
   "installers": [
     {

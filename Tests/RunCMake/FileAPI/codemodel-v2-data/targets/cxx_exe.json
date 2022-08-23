@@ -136,7 +136,7 @@
                 "backtrace": [
                     {
                         "file": "^codemodel-v2\\.cmake$",
-                        "line": 39,
+                        "line": 42,
                         "command": "install",
                         "hasParent": true
                     },

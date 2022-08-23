@@ -13,7 +13,7 @@
         "^link_imported_static_exe::@ba7eb709d0b48779c6c8$"
     ],
     "projectName": "Imported",
-    "minimumCMakeVersion": "3.12",
+    "minimumCMakeVersion": "3.13",
     "hasInstallRule": true,
     "installers": [
         {

@@ -15,6 +15,7 @@
 #include <vector>
 
 #include <cm/memory>
+#include <cm/optional>
 #include <cm/string_view>
 #include <cmext/algorithm>
 #include <cmext/string_view>
@@ -2686,7 +2687,7 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
                   cmStrCat(linkerProperty, configUpper),
                   cmStrCat(" ",
                            this->ConvertToOutputFormat(pchSourceObj, SHELL)),
-                  true);
+                  cm::nullopt, true);
               } else if (reuseTarget->GetType() ==
                          cmStateEnums::OBJECT_LIBRARY) {
                 // FIXME: This can propagate more than one level, unlike

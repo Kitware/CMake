@@ -1847,8 +1847,7 @@ void cmQtAutoGenInitializer::AddToSourceGroup(std::string const& fileName,
 
 void cmQtAutoGenInitializer::AddCleanFile(std::string const& fileName)
 {
-  this->GenTarget->Target->AppendProperty("ADDITIONAL_CLEAN_FILES", fileName,
-                                          false);
+  this->GenTarget->Target->AppendProperty("ADDITIONAL_CLEAN_FILES", fileName);
 }
 
 void cmQtAutoGenInitializer::ConfigFileNames(ConfigString& configString,

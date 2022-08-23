@@ -9,7 +9,7 @@
         "^generated_exe::@[0-9a-f]+$"
     ],
     "projectName": "External",
-    "minimumCMakeVersion": "3.12",
+    "minimumCMakeVersion": "3.13",
     "hasInstallRule": true,
     "installers": [
         {
