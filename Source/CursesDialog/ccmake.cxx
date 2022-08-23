@@ -23,12 +23,13 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
-static const char* cmDocumentationName[][2] = {
+namespace {
+const char* cmDocumentationName[][2] = {
   { nullptr, "  ccmake - Curses Interface for CMake." },
   { nullptr, nullptr }
 };
 
-static const char* cmDocumentationUsage[][2] = {
+const char* cmDocumentationUsage[][2] = {
   { nullptr,
     "  ccmake <path-to-source>\n"
     "  ccmake <path-to-existing-build>" },
@@ -39,22 +40,18 @@ static const char* cmDocumentationUsage[][2] = {
   { nullptr, nullptr }
 };
 
-static const char* cmDocumentationUsageNote[][2] = {
+const char* cmDocumentationUsageNote[][2] = {
   { nullptr, "Run 'ccmake --help' for more information." },
   { nullptr, nullptr }
 };
 
-static const char* cmDocumentationOptions[][2] = {
-  CMAKE_STANDARD_OPTIONS_TABLE,
-  { nullptr, nullptr }
-};
-
-cmCursesForm* cmCursesForm::CurrentForm = nullptr;
+const char* cmDocumentationOptions[][2] = { CMAKE_STANDARD_OPTIONS_TABLE,
+                                            { nullptr, nullptr } };
 
 #ifndef _WIN32
 extern "C" {
 
-static void onsig(int /*unused*/)
+void onsig(int /*unused*/)
 {
   if (cmCursesForm::CurrentForm) {
     cmCursesForm::CurrentForm->HandleResize();
@@ -63,6 +60,9 @@ static void onsig(int /*unused*/)
 }
 }
 #endif // _WIN32
+} // anonymous namespace
+
+cmCursesForm* cmCursesForm::CurrentForm = nullptr;
 
 int main(int argc, char const* const* argv)
 {
