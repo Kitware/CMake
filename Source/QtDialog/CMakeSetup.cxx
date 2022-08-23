@@ -22,11 +22,12 @@
 #include "cmSystemTools.h" // IWYU pragma: keep
 #include "cmake.h"
 
-static const char* cmDocumentationName[][2] = { { nullptr,
-                                                  "  cmake-gui - CMake GUI." },
-                                                { nullptr, nullptr } };
+namespace {
+const char* cmDocumentationName[][2] = { { nullptr,
+                                           "  cmake-gui - CMake GUI." },
+                                         { nullptr, nullptr } };
 
-static const char* cmDocumentationUsage[][2] = {
+const char* cmDocumentationUsage[][2] = {
   { nullptr,
     "  cmake-gui [options]\n"
     "  cmake-gui [options] <path-to-source>\n"
@@ -36,12 +37,13 @@ static const char* cmDocumentationUsage[][2] = {
   { nullptr, nullptr }
 };
 
-static const char* cmDocumentationOptions[][2] = {
+const char* cmDocumentationOptions[][2] = {
   { "-S <path-to-source>", "Explicitly specify a source directory." },
   { "-B <path-to-build>", "Explicitly specify a build directory." },
   { "--preset=<preset>", "Specify a configure preset." },
   { nullptr, nullptr }
 };
+} // anonymous namespace
 
 #if defined(Q_OS_MAC)
 static int cmOSXInstall(std::string dir);
@@ -252,6 +254,7 @@ int main(int argc, char** argv)
 #  include <unistd.h>
 
 #  include "cm_sys_stat.h"
+
 static bool cmOSXInstall(std::string const& dir, std::string const& tool)
 {
   if (tool.empty()) {
@@ -277,6 +280,7 @@ static bool cmOSXInstall(std::string const& dir, std::string const& tool)
             << "': " << strerror(err) << "\n";
   return false;
 }
+
 static int cmOSXInstall(std::string dir)
 {
   if (!cmHasLiteralSuffix(dir, "/")) {
