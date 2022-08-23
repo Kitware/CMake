@@ -1033,7 +1033,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
         std::cout << "Running with debug output on for the 'find' commands "
                      "for package(s)";
         for (auto const& v : find_pkgs) {
-          std::cout << " " << v;
+          std::cout << ' ' << v;
           state->SetDebugFindOutputPkgs(v);
         }
         std::cout << ".\n";
@@ -1046,7 +1046,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
         std::vector<std::string> find_vars(cmTokenize(value, ","));
         std::cout << "Running with debug output on for the variable(s)";
         for (auto const& v : find_vars) {
-          std::cout << " " << v;
+          std::cout << ' ' << v;
           state->SetDebugFindOutputVars(v);
         }
         std::cout << ".\n";
@@ -1107,7 +1107,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
                      [](std::string const&, cmake* state) -> bool {
                        std::cout
                          << "Not searching for unused variables given on the "
-                         << "command line.\n";
+                            "command line.\n";
                        state->SetWarnUnusedCli(false);
                        return true;
                      } },
@@ -1115,7 +1115,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       "--check-system-vars", CommandArgument::Values::Zero,
       [](std::string const&, cmake* state) -> bool {
         std::cout << "Also check system files when warning about unused and "
-                  << "uninitialized variables.\n";
+                     "uninitialized variables.\n";
         state->SetCheckSystemVars(true);
         return true;
       } },
@@ -1123,7 +1123,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       "--compile-no-warning-as-error", CommandArgument::Values::Zero,
       [](std::string const&, cmake* state) -> bool {
         std::cout << "Ignoring COMPILE_WARNING_AS_ERROR target property and "
-                  << "CMAKE_COMPILE_WARNING_AS_ERROR variable.\n";
+                     "CMAKE_COMPILE_WARNING_AS_ERROR variable.\n";
         state->SetIgnoreWarningAsError(true);
         return true;
       } }
@@ -1522,7 +1522,7 @@ void cmake::SetTraceFile(const std::string& file)
     cmSystemTools::Error(ss.str());
     return;
   }
-  std::cout << "Trace will be written to " << file << "\n";
+  std::cout << "Trace will be written to " << file << '\n';
 }
 
 void cmake::PrintTraceFormatVersion()
@@ -2045,12 +2045,10 @@ int cmake::HandleDeleteCacheVariables(const std::string& var)
   }
   std::vector<SaveCacheEntry> saved;
   std::ostringstream warning;
-  /* clang-format off */
   warning
     << "You have changed variables that require your cache to be deleted.\n"
-    << "Configure will be re-run and you may have to reset some variables.\n"
-    << "The following variables have changed:\n";
-  /* clang-format on */
+       "Configure will be re-run and you may have to reset some variables.\n"
+       "The following variables have changed:\n";
   for (auto i = argsSplit.begin(); i != argsSplit.end(); ++i) {
     SaveCacheEntry save;
     save.key = *i;
@@ -2058,9 +2056,9 @@ int cmake::HandleDeleteCacheVariables(const std::string& var)
     i++;
     if (i != argsSplit.end()) {
       save.value = *i;
-      warning << *i << "\n";
+      warning << *i << '\n';
     } else {
-      warning << "\n";
+      warning << '\n';
       i -= 1;
     }
     cmValue existingValue = this->State->GetCacheEntryValue(save.key);
@@ -2462,7 +2460,7 @@ void cmake::CreateDefaultGlobalGenerator()
   auto gen = this->EvaluateDefaultGlobalGenerator();
 #if defined(_WIN32) && !defined(__CYGWIN__) && !defined(CMAKE_BOOT_MINGW)
   // This print could be unified for all platforms
-  std::cout << "-- Building for: " << gen->GetName() << "\n";
+  std::cout << "-- Building for: " << gen->GetName() << '\n';
 #endif
   this->SetGlobalGenerator(std::move(gen));
 }
@@ -2621,7 +2619,7 @@ int cmake::Generate()
   }
   this->GlobalGenerator->Generate();
   if (!this->GraphVizFile.empty()) {
-    std::cout << "Generate graphviz: " << this->GraphVizFile << std::endl;
+    std::cout << "Generate graphviz: " << this->GraphVizFile << '\n';
     this->GenerateGraphViz(this->GraphVizFile);
   }
   if (this->WarnUnusedCli) {
@@ -2918,7 +2916,7 @@ void cmake::PrintGeneratorList()
   cmDocumentation doc;
   auto generators = this->GetGeneratorsDocumentation();
   doc.AppendSection("Generators", generators);
-  std::cerr << "\n";
+  std::cerr << '\n';
   doc.PrintDocumentation(cmDocumentation::ListGenerators, std::cerr);
 #endif
 }
@@ -2970,7 +2968,7 @@ int cmake::CheckBuildSystem()
     if (verbose) {
       std::ostringstream msg;
       msg << "Re-run cmake missing file: " << this->CheckBuildSystemArgument
-          << "\n";
+          << '\n';
       cmSystemTools::Stdout(msg.str());
     }
     return 1;
@@ -2990,7 +2988,7 @@ int cmake::CheckBuildSystem()
     if (verbose) {
       std::ostringstream msg;
       msg << "Re-run cmake error reading : " << this->CheckBuildSystemArgument
-          << "\n";
+          << '\n';
       cmSystemTools::Stdout(msg.str());
     }
     // There was an error reading the file.  Just rerun.
@@ -3021,9 +3019,8 @@ int cmake::CheckBuildSystem()
   for (std::string const& p : products) {
     if (!(cmSystemTools::FileExists(p) || cmSystemTools::FileIsSymlink(p))) {
       if (verbose) {
-        std::ostringstream msg;
-        msg << "Re-run cmake, missing byproduct: " << p << "\n";
-        cmSystemTools::Stdout(msg.str());
+        cmSystemTools::Stdout(
+          cmStrCat("Re-run cmake, missing byproduct: ", p, '\n'));
       }
       return 1;
     }
@@ -3088,7 +3085,7 @@ int cmake::CheckBuildSystem()
       if (verbose) {
         std::ostringstream msg;
         msg << "Re-run cmake file: " << out_oldest
-            << " older than: " << dep_newest << "\n";
+            << " older than: " << dep_newest << '\n';
         cmSystemTools::Stdout(msg.str());
       }
       return 1;
@@ -3264,7 +3261,7 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
       // permissions are questionable or some other process has deleted the
       // directory
       std::cerr << "Failed to change to directory " << destPath << " : "
-                << std::strerror(workdir.GetLastResult()) << std::endl;
+                << std::strerror(workdir.GetLastResult()) << '\n';
       return 1;
     }
     std::vector<std::string> args2;
@@ -3332,11 +3329,13 @@ static bool cmakeCheckStampFile(const std::string& stampName)
           (!ftc.Compare(stampDepends, dep, &result) || result < 0)) {
         // The stamp depends file is older than this dependency.  The
         // build system is really out of date.
+        /* clang-format off */
         std::cout << "CMake is re-running because " << stampName
-                  << " is out-of-date.\n";
-        std::cout << "  the file '" << dep << "'\n";
-        std::cout << "  is newer than '" << stampDepends << "'\n";
-        std::cout << "  result='" << result << "'\n";
+                  << " is out-of-date.\n"
+                     "  the file '" << dep << "'\n"
+                     "  is newer than '" << stampDepends << "'\n"
+                     "  result='" << result << "'\n";
+        /* clang-format on */
         return false;
       }
     }
@@ -3371,13 +3370,13 @@ static bool cmakeCheckStampList(const std::string& stampList)
   // If the stamp list does not exist CMake must rerun to generate it.
   if (!cmSystemTools::FileExists(stampList)) {
     std::cout << "CMake is re-running because generate.stamp.list "
-              << "is missing.\n";
+                 "is missing.\n";
     return false;
   }
   cmsys::ifstream fin(stampList.c_str());
   if (!fin) {
     std::cout << "CMake is re-running because generate.stamp.list "
-              << "could not be read.\n";
+                 "could not be read.\n";
     return false;
   }
 
