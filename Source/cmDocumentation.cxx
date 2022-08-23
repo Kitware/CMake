@@ -370,13 +370,6 @@ void cmDocumentation::SetSection(const char* name,
   this->SectionAtName(name) = std::move(section);
 }
 
-void cmDocumentation::SetSections(
-  std::map<std::string, cmDocumentationSection> sections)
-{
-  for (auto& s : sections) {
-    this->SetSection(s.first.c_str(), std::move(s.second));
-  }
-}
 cmDocumentationSection& cmDocumentation::SectionAtName(const char* name)
 {
   return this->AllSections.emplace(name, cmDocumentationSection{ name })

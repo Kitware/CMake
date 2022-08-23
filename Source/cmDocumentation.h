@@ -82,7 +82,6 @@ public:
     sec.Append(docs);
     this->SetSection(sectionName, std::move(sec));
   }
-  void SetSections(std::map<std::string, cmDocumentationSection> sections);
 
   /** Add the documentation to the beginning/end of the section */
   template <typename Iterable>
