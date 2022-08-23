@@ -23,25 +23,23 @@
 #include "cmake.h"
 
 namespace {
-const char* cmDocumentationName[][2] = { { nullptr,
-                                           "  cmake-gui - CMake GUI." },
-                                         { nullptr, nullptr } };
-
-const char* cmDocumentationUsage[][2] = {
-  { nullptr,
-    "  cmake-gui [options]\n"
-    "  cmake-gui [options] <path-to-source>\n"
-    "  cmake-gui [options] <path-to-existing-build>\n"
-    "  cmake-gui [options] -S <path-to-source> -B <path-to-build>\n"
-    "  cmake-gui [options] --browse-manual\n" },
-  { nullptr, nullptr }
+const cmDocumentationEntry cmDocumentationName = {
+  nullptr, "  cmake-gui - CMake GUI."
 };
 
-const char* cmDocumentationOptions[][2] = {
+const cmDocumentationEntry cmDocumentationUsage = {
+  nullptr,
+  "  cmake-gui [options]\n"
+  "  cmake-gui [options] <path-to-source>\n"
+  "  cmake-gui [options] <path-to-existing-build>\n"
+  "  cmake-gui [options] -S <path-to-source> -B <path-to-build>\n"
+  "  cmake-gui [options] --browse-manual"
+};
+
+const cmDocumentationEntry cmDocumentationOptions[3] = {
   { "-S <path-to-source>", "Explicitly specify a source directory." },
   { "-B <path-to-build>", "Explicitly specify a build directory." },
-  { "--preset=<preset>", "Specify a configure preset." },
-  { nullptr, nullptr }
+  { "--preset=<preset>", "Specify a configure preset." }
 };
 } // anonymous namespace
 

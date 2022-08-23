@@ -16,7 +16,7 @@
 #include "cmCursesMainForm.h"
 #include "cmCursesStandardIncludes.h"
 #include "cmDocumentation.h"
-#include "cmDocumentationEntry.h" // IWYU pragma: keep
+#include "cmDocumentationEntry.h"
 #include "cmMessageMetadata.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
@@ -24,12 +24,11 @@
 #include "cmake.h"
 
 namespace {
-const char* cmDocumentationName[][2] = {
-  { nullptr, "  ccmake - Curses Interface for CMake." },
-  { nullptr, nullptr }
+const cmDocumentationEntry cmDocumentationName = {
+  nullptr, "  ccmake - Curses Interface for CMake."
 };
 
-const char* cmDocumentationUsage[][2] = {
+const cmDocumentationEntry cmDocumentationUsage[2] = {
   { nullptr,
     "  ccmake <path-to-source>\n"
     "  ccmake <path-to-existing-build>" },
@@ -37,16 +36,11 @@ const char* cmDocumentationUsage[][2] = {
     "Specify a source directory to (re-)generate a build system for "
     "it in the current working directory.  Specify an existing build "
     "directory to re-generate its build system." },
-  { nullptr, nullptr }
 };
 
-const char* cmDocumentationUsageNote[][2] = {
-  { nullptr, "Run 'ccmake --help' for more information." },
-  { nullptr, nullptr }
+const cmDocumentationEntry cmDocumentationUsageNote = {
+  nullptr, "Run 'ccmake --help' for more information."
 };
-
-const char* cmDocumentationOptions[][2] = { CMAKE_STANDARD_OPTIONS_TABLE,
-                                            { nullptr, nullptr } };
 
 #ifndef _WIN32
 extern "C" {
@@ -89,8 +83,8 @@ int main(int argc, char const* const* argv)
       doc.AppendSection("Usage", cmDocumentationUsageNote);
     }
     doc.AppendSection("Generators", generators);
-    doc.PrependSection("Options", cmDocumentationOptions);
-    return doc.PrintRequestedDocumentation(std::cout) ? 0 : 1;
+    doc.PrependSection("Options", cmake::CMAKE_STANDARD_OPTIONS_TABLE);
+    return !doc.PrintRequestedDocumentation(std::cout);
   }
 
   bool debug = false;

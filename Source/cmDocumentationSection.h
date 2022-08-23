@@ -53,12 +53,12 @@ public:
   }
 
   /** Append an entry to this section using NULL terminated chars */
-  void Append(const char* [][2]);
-  void Append(const char* n, const char* b);
+  void Append(const char* n, const char* b)
+  {
+    this->Entries.emplace_back(n, b);
+  }
 
   /** prepend some documentation to this section */
-  void Prepend(const char* [][2]);
-
   template <typename Iterable>
   void Prepend(const Iterable& entries)
   {

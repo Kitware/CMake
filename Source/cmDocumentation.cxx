@@ -17,7 +17,7 @@
 #include "cmVersion.h"
 
 namespace {
-const char* cmDocumentationStandardOptions[][2] = {
+const cmDocumentationEntry cmDocumentationStandardOptions[20] = {
   { "-h,-H,--help,-help,-usage,/?", "Print usage information and exit." },
   { "--version,-version,/V [<file>]", "Print version number and exit." },
   { "--help-full [<file>]", "Print all help manuals and exit." },
@@ -43,20 +43,17 @@ const char* cmDocumentationStandardOptions[][2] = {
   { "--help-variable var [<file>]", "Print help for one variable and exit." },
   { "--help-variable-list [<file>]",
     "List variables with help available and exit." },
-  { "--help-variables [<file>]", "Print cmake-variables manual and exit." },
-  { nullptr, nullptr }
+  { "--help-variables [<file>]", "Print cmake-variables manual and exit." }
 };
 
-const char* cmDocumentationCPackGeneratorsHeader[][2] = {
-  { nullptr, "The following generators are available on this platform:" },
-  { nullptr, nullptr }
+const cmDocumentationEntry cmDocumentationCPackGeneratorsHeader = {
+  nullptr, "The following generators are available on this platform:"
 };
 
-const char* cmDocumentationCMakeGeneratorsHeader[][2] = {
-  { nullptr,
-    "The following generators are available on this platform (* marks "
-    "default):" },
-  { nullptr, nullptr }
+const cmDocumentationEntry cmDocumentationCMakeGeneratorsHeader = {
+  nullptr,
+  "The following generators are available on this platform (* marks "
+  "default):"
 };
 
 bool isOption(const char* arg)
@@ -373,13 +370,6 @@ void cmDocumentation::SetSection(const char* name,
   this->SectionAtName(name) = std::move(section);
 }
 
-void cmDocumentation::SetSection(const char* name, const char* docs[][2])
-{
-  cmDocumentationSection sec{ name };
-  sec.Append(docs);
-  this->SetSection(name, std::move(sec));
-}
-
 void cmDocumentation::SetSections(
   std::map<std::string, cmDocumentationSection> sections)
 {
@@ -391,16 +381,6 @@ cmDocumentationSection& cmDocumentation::SectionAtName(const char* name)
 {
   return this->AllSections.emplace(name, cmDocumentationSection{ name })
     .first->second;
-}
-
-void cmDocumentation::PrependSection(const char* name, const char* docs[][2])
-{
-  this->SectionAtName(name).Prepend(docs);
-}
-
-void cmDocumentation::AppendSection(const char* name, const char* docs[][2])
-{
-  this->SectionAtName(name).Append(docs);
 }
 
 void cmDocumentation::AppendSection(const char* name,

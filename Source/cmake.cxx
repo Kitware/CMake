@@ -40,7 +40,6 @@
 #include "cmCommands.h"
 #include "cmDocumentation.h"
 #include "cmDocumentationEntry.h"
-#include "cmDocumentationFormatter.h"
 #include "cmDuration.h"
 #include "cmExternalMakefileProjectGenerator.h"
 #include "cmFileTimeCache.h"
@@ -164,6 +163,32 @@ static void cmWarnUnusedCliWarning(const std::string& variable, int /*unused*/,
   cm->MarkCliAsUsed(variable);
 }
 #endif
+
+cmDocumentationEntry cmake::CMAKE_STANDARD_OPTIONS_TABLE[18] = {
+  { "-S <path-to-source>", "Explicitly specify a source directory." },
+  { "-B <path-to-build>", "Explicitly specify a build directory." },
+  { "-C <initial-cache>", "Pre-load a script to populate the cache." },
+  { "-D <var>[:<type>]=<value>", "Create or update a cmake cache entry." },
+  { "-U <globbing_expr>", "Remove matching entries from CMake cache." },
+  { "-G <generator-name>", "Specify a build system generator." },
+  { "-T <toolset-name>", "Specify toolset name if supported by generator." },
+  { "-A <platform-name>", "Specify platform name if supported by generator." },
+  { "--toolchain <file>", "Specify toolchain file [CMAKE_TOOLCHAIN_FILE]." },
+  { "--install-prefix <directory>",
+    "Specify install directory [CMAKE_INSTALL_PREFIX]." },
+  { "-Wdev", "Enable developer warnings." },
+  { "-Wno-dev", "Suppress developer warnings." },
+  { "-Werror=dev", "Make developer warnings errors." },
+  { "-Wno-error=dev", "Make developer warnings not errors." },
+  { "-Wdeprecated", "Enable deprecation warnings." },
+  { "-Wno-deprecated", "Suppress deprecation warnings." },
+  { "-Werror=deprecated",
+    "Make deprecated macro and function warnings "
+    "errors." },
+  { "-Wno-error=deprecated",
+    "Make deprecated macro and function warnings "
+    "not errors." }
+};
 
 cmake::cmake(Role role, cmState::Mode mode, cmState::ProjectKind projectKind)
   : CMakeWorkingDirectory(cmSystemTools::GetCurrentWorkingDirectory())

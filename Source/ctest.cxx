@@ -11,21 +11,21 @@
 #include "cmCTest.h"
 #include "cmConsoleBuf.h"
 #include "cmDocumentation.h"
+#include "cmDocumentationEntry.h"
 #include "cmSystemTools.h"
 
 #include "CTest/cmCTestLaunch.h"
 #include "CTest/cmCTestScriptHandler.h"
 
 namespace {
-const char* cmDocumentationName[][2] = {
-  { nullptr, "  ctest - Testing driver provided by CMake." },
-  { nullptr, nullptr }
+const cmDocumentationEntry cmDocumentationName = {
+  nullptr, "  ctest - Testing driver provided by CMake."
 };
 
-const char* cmDocumentationUsage[][2] = { { nullptr, "  ctest [options]" },
-                                          { nullptr, nullptr } };
+const cmDocumentationEntry cmDocumentationUsage = { nullptr,
+                                                    "  ctest [options]" };
 
-const char* cmDocumentationOptions[][2] = {
+const cmDocumentationEntry cmDocumentationOptions[74] = {
   { "--preset <preset>, --preset=<preset>",
     "Read arguments from a test preset." },
   { "--list-presets", "List available test presets." },
@@ -155,8 +155,7 @@ const char* cmDocumentationOptions[][2] = {
   { "--no-compress-output", "Do not compress test output when submitting." },
   { "--print-labels", "Print all available test labels." },
   { "--no-tests=<[error|ignore]>",
-    "Regard no tests found either as 'error' or 'ignore' it." },
-  { nullptr, nullptr }
+    "Regard no tests found either as 'error' or 'ignore' it." }
 };
 } // anonymous namespace
 

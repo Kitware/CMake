@@ -25,7 +25,6 @@
 #include "cmConsoleBuf.h"
 #include "cmDocumentation.h"
 #include "cmDocumentationEntry.h"
-#include "cmDocumentationFormatter.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmState.h"
@@ -36,19 +35,14 @@
 #include "cmake.h"
 
 namespace {
-const char* cmDocumentationName[][2] = {
-  { nullptr, "  cpack - Packaging driver provided by CMake." },
-  { nullptr, nullptr }
+const cmDocumentationEntry cmDocumentationName = {
+  nullptr, "  cpack - Packaging driver provided by CMake."
 };
 
-const char* cmDocumentationUsage[][2] = {
-  // clang-format off
-  { nullptr, "  cpack [options]" },
-  { nullptr, nullptr }
-  // clang-format on
-};
+const cmDocumentationEntry cmDocumentationUsage = { nullptr,
+                                                    "  cpack [options]" };
 
-const char* cmDocumentationOptions[][2] = {
+const cmDocumentationEntry cmDocumentationOptions[14] = {
   { "-G <generators>", "Override/define CPACK_GENERATOR" },
   { "-C <Configuration>", "Specify the project configuration" },
   { "-D <var>=<value>", "Set a CPack variable." },
@@ -62,8 +56,7 @@ const char* cmDocumentationOptions[][2] = {
   { "-B <packageDirectory>", "Override/define CPACK_PACKAGE_DIRECTORY" },
   { "--vendor <vendorName>", "Override/define CPACK_PACKAGE_VENDOR" },
   { "--preset", "Read arguments from a package preset" },
-  { "--list-presets", "List available package presets" },
-  { nullptr, nullptr }
+  { "--list-presets", "List available package presets" }
 };
 
 void cpackProgressCallback(const std::string& message, float /*unused*/)

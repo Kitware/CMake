@@ -82,18 +82,15 @@ public:
     sec.Append(docs);
     this->SetSection(sectionName, std::move(sec));
   }
-  void SetSection(const char* sectionName, const char* docs[][2]);
   void SetSections(std::map<std::string, cmDocumentationSection> sections);
 
   /** Add the documentation to the beginning/end of the section */
-  void PrependSection(const char* sectionName, const char* docs[][2]);
   template <typename Iterable>
   void PrependSection(const char* sectionName, const Iterable& docs)
   {
     this->SectionAtName(sectionName).Prepend(docs);
   }
   void PrependSection(const char* sectionName, cmDocumentationEntry& docs);
-  void AppendSection(const char* sectionName, const char* docs[][2]);
   template <typename Iterable>
   void AppendSection(const char* sectionName, const Iterable& docs)
   {
