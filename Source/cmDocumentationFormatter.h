@@ -12,14 +12,10 @@ class cmDocumentationSection;
 class cmDocumentationFormatter
 {
 public:
-  cmDocumentationFormatter();
-  virtual ~cmDocumentationFormatter();
   void PrintFormatted(std::ostream& os, const char* text);
-
-  virtual void PrintSection(std::ostream& os,
-                            cmDocumentationSection const& section);
-  virtual void PrintPreformatted(std::ostream& os, const char* text);
-  virtual void PrintParagraph(std::ostream& os, const char* text);
+  void PrintSection(std::ostream& os, cmDocumentationSection const& section);
+  void PrintPreformatted(std::ostream& os, const char* text);
+  void PrintParagraph(std::ostream& os, const char* text);
   void PrintColumn(std::ostream& os, const char* text);
   void SetIndent(const char* indent);
 

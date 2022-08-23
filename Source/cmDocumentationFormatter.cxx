@@ -11,10 +11,6 @@
 #include "cmDocumentationEntry.h"
 #include "cmDocumentationSection.h"
 
-cmDocumentationFormatter::cmDocumentationFormatter() = default;
-
-cmDocumentationFormatter::~cmDocumentationFormatter() = default;
-
 void cmDocumentationFormatter::PrintFormatted(std::ostream& os,
                                               const char* text)
 {
