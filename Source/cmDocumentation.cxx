@@ -605,7 +605,7 @@ bool cmDocumentation::PrintHelpListGenerators(std::ostream& os)
 {
   const auto si = this->AllSections.find("Generators");
   if (si != this->AllSections.end()) {
-    this->Formatter.SetIndent("  ");
+    this->Formatter.SetIndent(2u);
     this->Formatter.PrintSection(os, si->second);
   }
   return true;

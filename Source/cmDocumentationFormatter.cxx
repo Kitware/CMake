@@ -7,16 +7,12 @@
 #include <iomanip>
 #include <ostream>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "cmDocumentationEntry.h"
 #include "cmDocumentationSection.h"
-#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-
-namespace {
-const std::string NAME_SIZED_PADDING = "                                 ";
-}
 
 void cmDocumentationFormatter::PrintFormatted(std::ostream& os,
                                               const char* text)
@@ -59,11 +55,11 @@ void cmDocumentationFormatter::PrintFormatted(std::ostream& os,
 void cmDocumentationFormatter::PrintPreformatted(std::ostream& os,
                                                  std::string const& text) const
 {
-  if (!this->TextIndent.empty()) {
+  if (this->TextIndent) {
     auto indented = text;
-    cmSystemTools::ReplaceString(indented, "\n",
-                                 cmStrCat('\n', this->TextIndent));
-    indented.insert(0u, this->TextIndent);
+    auto padding = std::string(this->TextIndent, ' ');
+    cmSystemTools::ReplaceString(indented, "\n", "\n" + padding);
+    indented = std::move(padding) + indented;
     os << indented << '\n';
   } else {
     os << text << '\n';
@@ -73,7 +69,9 @@ void cmDocumentationFormatter::PrintPreformatted(std::ostream& os,
 void cmDocumentationFormatter::PrintParagraph(std::ostream& os,
                                               const char* text)
 {
-  os << this->TextIndent;
+  if (this->TextIndent) {
+    os << std::string(this->TextIndent, ' ');
+  }
   this->PrintColumn(os, text);
   os << '\n';
 }
@@ -85,7 +83,7 @@ void cmDocumentationFormatter::PrintColumn(std::ostream& os, const char* text)
   long column = 0;
   bool newSentence = false;
   bool firstLine = true;
-  int width = this->TextWidth - static_cast<int>(this->TextIndent.size());
+  int width = this->TextWidth - static_cast<int>(this->TextIndent);
 
   // Loop until the end of the text.
   while (*l) {
@@ -109,10 +107,10 @@ void cmDocumentationFormatter::PrintColumn(std::ostream& os, const char* text)
             os << ' ';
             column += 1;
           }
-        } else if (!firstLine && !this->TextIndent.empty()) {
+        } else if (!firstLine && this->TextIndent) {
           // First word on line.  Print indentation unless this is the
           // first line.
-          os << this->TextIndent;
+          os << std::string(this->TextIndent, ' ');
         }
 
         // Print the word.
@@ -135,7 +133,7 @@ void cmDocumentationFormatter::PrintColumn(std::ostream& os, const char* text)
       os << '\n';
       firstLine = false;
       if (r > l) {
-        os << this->TextIndent;
+        os << std::string(this->TextIndent, ' ');
         os.write(l, static_cast<long>(r - l));
         column = static_cast<long>(r - l);
         newSentence = (*(r - 1) == '.');
@@ -157,23 +155,31 @@ void cmDocumentationFormatter::PrintSection(
 {
   os << section.GetName() << '\n';
 
-  const std::vector<cmDocumentationEntry>& entries = section.GetEntries();
-  for (cmDocumentationEntry const& entry : entries) {
+  const std::size_t PREFIX_SIZE =
+    sizeof(cmDocumentationEntry::CustomNamePrefix) + 1u;
+  // length of the "= " literal (see below)
+  const std::size_t SUFFIX_SIZE = 2u;
+  // legacy magic number ;-)
+  const std::size_t NAME_SIZE = 29u;
+
+  const std::size_t PADDING_SIZE = PREFIX_SIZE + SUFFIX_SIZE;
+  const std::size_t TITLE_SIZE = NAME_SIZE + PADDING_SIZE;
+
+  for (cmDocumentationEntry const& entry : section.GetEntries()) {
     if (!entry.Name.empty()) {
-      this->TextIndent = NAME_SIZED_PADDING;
-      os << std::setw(2) << std::left << entry.CustomNamePrefix
-         << std::setw(
-              int(std::max(this->TextIndent.size() - 4, entry.Name.size())))
+      this->TextIndent = TITLE_SIZE;
+      os << std::setw(PREFIX_SIZE) << std::left << entry.CustomNamePrefix
+         << std::setw(int(std::max(NAME_SIZE, entry.Name.size())))
          << entry.Name;
-      if (entry.Name.size() > (this->TextIndent.size() - 4)) {
-        os << '\n' << std::setw(int(this->TextIndent.size() - 2)) << ' ';
+      if (entry.Name.size() > NAME_SIZE) {
+        os << '\n' << std::setw(int(this->TextIndent - PREFIX_SIZE)) << ' ';
       }
       os << "= ";
       this->PrintColumn(os, entry.Brief.c_str());
       os << '\n';
     } else {
       os << '\n';
-      this->TextIndent = {};
+      this->TextIndent = 0u;
       this->PrintFormatted(os, entry.Brief.c_str());
     }
   }

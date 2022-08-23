@@ -18,9 +18,9 @@ public:
   void PrintSection(std::ostream& os, cmDocumentationSection const& section);
   void PrintParagraph(std::ostream& os, const char* text);
   void PrintColumn(std::ostream& os, const char* text);
-  void SetIndent(std::string indent) { this->TextIndent = std::move(indent); }
+  void SetIndent(std::size_t indent) { this->TextIndent = indent; }
 
 private:
   int TextWidth = 77;
-  std::string TextIndent = {};
+  std::size_t TextIndent = 0u;
 };
