@@ -67,7 +67,7 @@ void cmDocumentationFormatter::PrintPreformatted(std::ostream& os,
       newline = true;
     }
   }
-  os << "\n";
+  os << '\n';
 }
 
 void cmDocumentationFormatter::PrintParagraph(std::ostream& os,
@@ -75,7 +75,7 @@ void cmDocumentationFormatter::PrintParagraph(std::ostream& os,
 {
   os << this->TextIndent;
   this->PrintColumn(os, text);
-  os << "\n";
+  os << '\n';
 }
 
 void cmDocumentationFormatter::SetIndent(const char* indent)
@@ -111,7 +111,7 @@ void cmDocumentationFormatter::PrintColumn(std::ostream& os, const char* text)
             os << "  ";
             column += 2;
           } else {
-            os << " ";
+            os << ' ';
             column += 1;
           }
         } else {
@@ -127,7 +127,7 @@ void cmDocumentationFormatter::PrintColumn(std::ostream& os, const char* text)
 
       if (*r == '\n') {
         // Text provided a newline.  Start a new line.
-        os << "\n";
+        os << '\n';
         ++r;
         column = 0;
         firstLine = false;
@@ -137,7 +137,7 @@ void cmDocumentationFormatter::PrintColumn(std::ostream& os, const char* text)
       }
     } else {
       // Word does not fit on this line.  Start a new line.
-      os << "\n";
+      os << '\n';
       firstLine = false;
       if (r > l) {
         os << this->TextIndent;
@@ -160,7 +160,7 @@ void cmDocumentationFormatter::PrintColumn(std::ostream& os, const char* text)
 void cmDocumentationFormatter::PrintSection(
   std::ostream& os, cmDocumentationSection const& section)
 {
-  os << section.GetName() << "\n";
+  os << section.GetName() << '\n';
 
   const std::vector<cmDocumentationEntry>& entries = section.GetEntries();
   for (cmDocumentationEntry const& entry : entries) {
@@ -169,20 +169,20 @@ void cmDocumentationFormatter::PrintSection(
       this->TextIndent = "                                 ";
       int align = static_cast<int>(strlen(this->TextIndent)) - 4;
       for (int i = static_cast<int>(entry.Name.size()); i < align; ++i) {
-        os << " ";
+        os << ' ';
       }
       if (entry.Name.size() > strlen(this->TextIndent) - 4) {
-        os << "\n";
+        os << '\n';
         os.write(this->TextIndent, strlen(this->TextIndent) - 2);
       }
       os << "= ";
       this->PrintColumn(os, entry.Brief.c_str());
-      os << "\n";
+      os << '\n';
     } else {
-      os << "\n";
+      os << '\n';
       this->TextIndent = "";
       this->PrintFormatted(os, entry.Brief.c_str());
     }
   }
-  os << "\n";
+  os << '\n';
 }

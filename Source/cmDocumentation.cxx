@@ -469,7 +469,7 @@ void cmDocumentation::PrintNames(std::ostream& os, std::string const& pattern)
   }
   std::sort(names.begin(), names.end());
   for (std::string const& n : names) {
-    os << n << "\n";
+    os << n << '\n';
   }
 }
 
@@ -505,7 +505,7 @@ bool cmDocumentation::PrintHelpOneManual(std::ostream& os)
   // Argument was not a manual.  Complain.
   os << "Argument \"" << this->CurrentArgument
      << "\" to --help-manual is not an available manual.  "
-     << "Use --help-manual-list to see all available manuals.\n";
+        "Use --help-manual-list to see all available manuals.\n";
   return false;
 }
 
@@ -524,7 +524,7 @@ bool cmDocumentation::PrintHelpOneCommand(std::ostream& os)
   // Argument was not a command.  Complain.
   os << "Argument \"" << this->CurrentArgument
      << "\" to --help-command is not a CMake command.  "
-     << "Use --help-command-list to see all commands.\n";
+        "Use --help-command-list to see all commands.\n";
   return false;
 }
 
@@ -557,7 +557,7 @@ bool cmDocumentation::PrintHelpListModules(std::ostream& os)
   }
   std::sort(modules.begin(), modules.end());
   for (std::string const& m : modules) {
-    os << m << "\n";
+    os << m << '\n';
   }
   return true;
 }
@@ -571,7 +571,7 @@ bool cmDocumentation::PrintHelpOneProperty(std::ostream& os)
   // Argument was not a property.  Complain.
   os << "Argument \"" << this->CurrentArgument
      << "\" to --help-property is not a CMake property.  "
-     << "Use --help-property-list to see all properties.\n";
+        "Use --help-property-list to see all properties.\n";
   return false;
 }
 
@@ -620,7 +620,7 @@ bool cmDocumentation::PrintHelpOneVariable(std::ostream& os)
   // Argument was not a variable.  Complain.
   os << "Argument \"" << this->CurrentArgument
      << "\" to --help-variable is not a defined variable.  "
-     << "Use --help-variable-list to see all defined variables.\n";
+        "Use --help-variable-list to see all defined variables.\n";
   return false;
 }
 
@@ -689,7 +689,7 @@ bool cmDocumentation::PrintOldCustomModules(std::ostream& os)
   } else if ((ext.length() == 2) && (ext[1] >= '1') && (ext[1] <= '9')) {
     /* clang-format off */
     os <<
-      ".TH " << name << " " << ext[1] << " \"" <<
+      ".TH " << name << ' ' << ext[1] << " \"" <<
       cmSystemTools::GetCurrentDateTime("%B %d, %Y") <<
       "\" \"cmake " << cmVersion::GetCMakeVersion() << "\"\n"
       ".SH NAME\n"
@@ -702,7 +702,7 @@ bool cmDocumentation::PrintOldCustomModules(std::ostream& os)
       ;
     /* clang-format on */
   } else {
-    os << name << "\n\n" << summary << "\n" << detail;
+    os << name << "\n\n" << summary << '\n' << detail;
   }
   return true;
 }
