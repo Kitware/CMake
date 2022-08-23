@@ -13,15 +13,6 @@ struct cmDocumentationEntry
   std::string Brief;
   char CustomNamePrefix = ' ';
   cmDocumentationEntry() = default;
-  cmDocumentationEntry(const char* doc[2])
-  {
-    if (doc[0]) {
-      this->Name = doc[0];
-    }
-    if (doc[1]) {
-      this->Brief = doc[1];
-    }
-  }
   cmDocumentationEntry(const char* n, const char* b)
   {
     if (n) {
