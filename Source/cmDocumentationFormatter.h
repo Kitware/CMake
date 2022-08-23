@@ -21,6 +21,6 @@ public:
   void SetIndent(std::size_t indent) { this->TextIndent = indent; }
 
 private:
-  int TextWidth = 77;
+  std::size_t TextWidth = 77u;
   std::size_t TextIndent = 0u;
 };

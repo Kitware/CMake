@@ -80,10 +80,12 @@ void cmDocumentationFormatter::PrintColumn(std::ostream& os, const char* text)
 {
   // Print text arranged in an indented column of fixed width.
   const char* l = text;
-  long column = 0;
   bool newSentence = false;
   bool firstLine = true;
-  int width = this->TextWidth - static_cast<int>(this->TextIndent);
+
+  assert(this->TextIndent < this->TextWidth);
+  const std::ptrdiff_t width = this->TextWidth - this->TextIndent;
+  std::ptrdiff_t column = 0;
 
   // Loop until the end of the text.
   while (*l) {
@@ -94,7 +96,7 @@ void cmDocumentationFormatter::PrintColumn(std::ostream& os, const char* text)
     }
 
     // Does it fit on this line?
-    if (r - l < (width - column - (newSentence ? 1 : 0))) {
+    if (r - l < width - column - std::ptrdiff_t(newSentence)) {
       // Word fits on this line.
       if (r > l) {
         if (column) {
@@ -114,7 +116,7 @@ void cmDocumentationFormatter::PrintColumn(std::ostream& os, const char* text)
         }
 
         // Print the word.
-        os.write(l, static_cast<long>(r - l));
+        os.write(l, r - l);
         newSentence = (*(r - 1) == '.');
       }
 
@@ -126,7 +128,7 @@ void cmDocumentationFormatter::PrintColumn(std::ostream& os, const char* text)
         firstLine = false;
       } else {
         // No provided newline.  Continue this line.
-        column += static_cast<long>(r - l);
+        column += r - l;
       }
     } else {
       // Word does not fit on this line.  Start a new line.
@@ -134,8 +136,8 @@ void cmDocumentationFormatter::PrintColumn(std::ostream& os, const char* text)
       firstLine = false;
       if (r > l) {
         os << std::string(this->TextIndent, ' ');
-        os.write(l, static_cast<long>(r - l));
-        column = static_cast<long>(r - l);
+        os.write(l, r - l);
+        column = r - l;
         newSentence = (*(r - 1) == '.');
       } else {
         column = 0;
