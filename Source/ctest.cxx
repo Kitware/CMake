@@ -187,8 +187,7 @@ int main(int argc, char const* const* argv)
 
   if (cmSystemTools::GetCurrentWorkingDirectory().empty()) {
     cmCTestLog(&inst, ERROR_MESSAGE,
-               "Current working directory cannot be established."
-                 << std::endl);
+               "Current working directory cannot be established.\n");
     return 1;
   }
 
@@ -200,10 +199,9 @@ int main(int argc, char const* const* argv)
         cmSystemTools::FileExists("DartTestfile.txt"))) {
     if (argc == 1) {
       cmCTestLog(&inst, ERROR_MESSAGE,
-                 "*********************************"
-                   << std::endl
-                   << "No test configuration file found!" << std::endl
-                   << "*********************************" << std::endl);
+                 "*********************************\n"
+                 "No test configuration file found!\n"
+                 "*********************************\n");
     }
     cmDocumentation doc;
     doc.addCTestStandardDocSections();
