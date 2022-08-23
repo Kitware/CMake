@@ -13,11 +13,11 @@ class cmDocumentationSection;
 class cmDocumentationFormatter
 {
 public:
-  void PrintFormatted(std::ostream& os, const char* text);
+  void PrintFormatted(std::ostream& os, std::string const& text) const;
   void PrintPreformatted(std::ostream& os, std::string const& text) const;
   void PrintSection(std::ostream& os, cmDocumentationSection const& section);
-  void PrintParagraph(std::ostream& os, const char* text);
-  void PrintColumn(std::ostream& os, const char* text);
+  void PrintParagraph(std::ostream& os, std::string const& text) const;
+  void PrintColumn(std::ostream& os, std::string const& text) const;
   void SetIndent(std::size_t indent) { this->TextIndent = indent; }
 
 private:

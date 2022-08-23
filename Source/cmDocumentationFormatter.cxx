@@ -34,13 +34,13 @@ const char* skipToSpace(const char* ptr)
 }
 
 void cmDocumentationFormatter::PrintFormatted(std::ostream& os,
-                                              const char* text)
+                                              std::string const& text) const
 {
-  if (!text) {
+  if (text.empty()) {
     return;
   }
 
-  for (const char* ptr = text; *ptr;) {
+  for (const char* ptr = text.c_str(); *ptr;) {
     // Any ptrs starting in a space are treated as preformatted text.
     std::string preformatted;
     while (*ptr == ' ') {
@@ -66,7 +66,7 @@ void cmDocumentationFormatter::PrintFormatted(std::ostream& os,
       paragraph.append(1, '\n');
     }
     if (!paragraph.empty()) {
-      this->PrintParagraph(os, paragraph.c_str());
+      this->PrintParagraph(os, paragraph);
     }
   }
 }
@@ -86,7 +86,7 @@ void cmDocumentationFormatter::PrintPreformatted(std::ostream& os,
 }
 
 void cmDocumentationFormatter::PrintParagraph(std::ostream& os,
-                                              const char* text)
+                                              std::string const& text) const
 {
   if (this->TextIndent) {
     os << std::string(this->TextIndent, ' ');
@@ -95,7 +95,8 @@ void cmDocumentationFormatter::PrintParagraph(std::ostream& os,
   os << '\n';
 }
 
-void cmDocumentationFormatter::PrintColumn(std::ostream& os, const char* text)
+void cmDocumentationFormatter::PrintColumn(std::ostream& os,
+                                           std::string const& text) const
 {
   // Print text arranged in an indented column of fixed width.
   bool newSentence = false;
@@ -106,7 +107,7 @@ void cmDocumentationFormatter::PrintColumn(std::ostream& os, const char* text)
   std::ptrdiff_t column = 0;
 
   // Loop until the end of the text.
-  for (const char *l = text, *r = skipToSpace(text); *l;
+  for (const char *l = text.c_str(), *r = skipToSpace(text.c_str()); *l;
        l = skipSpaces(r), r = skipToSpace(l)) {
     // Does it fit on this line?
     if (r - l < width - column - std::ptrdiff_t(newSentence)) {
@@ -182,12 +183,12 @@ void cmDocumentationFormatter::PrintSection(
         os << '\n' << std::setw(int(this->TextIndent - PREFIX_SIZE)) << ' ';
       }
       os << "= ";
-      this->PrintColumn(os, entry.Brief.c_str());
+      this->PrintColumn(os, entry.Brief);
       os << '\n';
     } else {
       os << '\n';
       this->TextIndent = 0u;
-      this->PrintFormatted(os, entry.Brief.c_str());
+      this->PrintFormatted(os, entry.Brief);
     }
   }
 
