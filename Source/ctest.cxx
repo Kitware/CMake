@@ -16,16 +16,16 @@
 #include "CTest/cmCTestLaunch.h"
 #include "CTest/cmCTestScriptHandler.h"
 
-static const char* cmDocumentationName[][2] = {
+namespace {
+const char* cmDocumentationName[][2] = {
   { nullptr, "  ctest - Testing driver provided by CMake." },
   { nullptr, nullptr }
 };
 
-static const char* cmDocumentationUsage[][2] = { { nullptr,
-                                                   "  ctest [options]" },
-                                                 { nullptr, nullptr } };
+const char* cmDocumentationUsage[][2] = { { nullptr, "  ctest [options]" },
+                                          { nullptr, nullptr } };
 
-static const char* cmDocumentationOptions[][2] = {
+const char* cmDocumentationOptions[][2] = {
   { "--preset <preset>, --preset=<preset>",
     "Read arguments from a test preset." },
   { "--list-presets", "List available test presets." },
@@ -158,6 +158,7 @@ static const char* cmDocumentationOptions[][2] = {
     "Regard no tests found either as 'error' or 'ignore' it." },
   { nullptr, nullptr }
 };
+} // anonymous namespace
 
 // this is a test driver program for cmCTest.
 int main(int argc, char const* const* argv)
