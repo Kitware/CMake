@@ -113,14 +113,12 @@ const char* cmDocumentationOptions[][2] = {
   { "--compile-no-warning-as-error",
     "Ignore COMPILE_WARNING_AS_ERROR property and "
     "CMAKE_COMPILE_WARNING_AS_ERROR variable." },
-#  if !defined(CMAKE_BOOTSTRAP)
   { "--profiling-format=<fmt>",
     "Output data for profiling CMake scripts. Supported formats: "
     "google-trace" },
   { "--profiling-output=<file>",
     "Select an output path for the profiling data enabled through "
     "--profiling-format." },
-#  endif
   { nullptr, nullptr }
 };
 
