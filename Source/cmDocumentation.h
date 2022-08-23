@@ -126,7 +126,6 @@ private:
   bool PrintOldCustomModules(std::ostream& os);
 
   const char* GetNameString() const;
-  bool IsOption(const char* arg) const;
 
   bool ShowGenerators;
 
