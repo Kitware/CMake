@@ -153,8 +153,6 @@ void cmDocumentationFormatter::PrintColumn(std::ostream& os, const char* text)
 void cmDocumentationFormatter::PrintSection(
   std::ostream& os, cmDocumentationSection const& section)
 {
-  os << section.GetName() << '\n';
-
   const std::size_t PREFIX_SIZE =
     sizeof(cmDocumentationEntry::CustomNamePrefix) + 1u;
   // length of the "= " literal (see below)
@@ -164,6 +162,10 @@ void cmDocumentationFormatter::PrintSection(
 
   const std::size_t PADDING_SIZE = PREFIX_SIZE + SUFFIX_SIZE;
   const std::size_t TITLE_SIZE = NAME_SIZE + PADDING_SIZE;
+
+  const auto savedIndent = this->TextIndent;
+
+  os << section.GetName() << '\n';
 
   for (cmDocumentationEntry const& entry : section.GetEntries()) {
     if (!entry.Name.empty()) {
@@ -183,5 +185,8 @@ void cmDocumentationFormatter::PrintSection(
       this->PrintFormatted(os, entry.Brief.c_str());
     }
   }
+
   os << '\n';
+
+  this->TextIndent = savedIndent;
 }
