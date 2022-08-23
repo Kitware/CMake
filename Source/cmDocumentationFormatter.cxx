@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmDocumentationFormatter.h"
 
+#include <cassert>
 #include <cstring>
 #include <iomanip>
 #include <ostream>
@@ -10,6 +11,8 @@
 
 #include "cmDocumentationEntry.h"
 #include "cmDocumentationSection.h"
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 
 void cmDocumentationFormatter::PrintFormatted(std::ostream& os,
                                               const char* text)
@@ -31,7 +34,7 @@ void cmDocumentationFormatter::PrintFormatted(std::ostream& os,
       }
     }
     if (!preformatted.empty()) {
-      this->PrintPreformatted(os, preformatted.c_str());
+      this->PrintPreformatted(os, preformatted);
     }
 
     // Other ptrs are treated as paragraphs.
@@ -50,20 +53,19 @@ void cmDocumentationFormatter::PrintFormatted(std::ostream& os,
 }
 
 void cmDocumentationFormatter::PrintPreformatted(std::ostream& os,
-                                                 const char* text)
+                                                 std::string const& text) const
 {
-  bool newline = true;
-  for (const char* ptr = text; *ptr; ++ptr) {
-    if (newline && *ptr != '\n') {
-      os << this->TextIndent;
-      newline = false;
-    }
-    os << *ptr;
-    if (*ptr == '\n') {
-      newline = true;
-    }
+  assert(this->TextIndent);
+
+  if (this->TextIndent[0]) {
+    auto indented = text;
+    cmSystemTools::ReplaceString(indented, "\n",
+                                 cmStrCat('\n', this->TextIndent));
+    indented.insert(0u, this->TextIndent);
+    os << indented << '\n';
+  } else {
+    os << text << '\n';
   }
-  os << '\n';
 }
 
 void cmDocumentationFormatter::PrintParagraph(std::ostream& os,
