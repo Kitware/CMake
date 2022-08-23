@@ -2,8 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmDocumentationFormatter.h"
 
+#include <algorithm>
 #include <cassert>
-#include <cstring>
 #include <iomanip>
 #include <ostream>
 #include <string>
@@ -13,6 +13,10 @@
 #include "cmDocumentationSection.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+
+namespace {
+const std::string NAME_SIZED_PADDING = "                                 ";
+}
 
 void cmDocumentationFormatter::PrintFormatted(std::ostream& os,
                                               const char* text)
@@ -55,9 +59,7 @@ void cmDocumentationFormatter::PrintFormatted(std::ostream& os,
 void cmDocumentationFormatter::PrintPreformatted(std::ostream& os,
                                                  std::string const& text) const
 {
-  assert(this->TextIndent);
-
-  if (this->TextIndent[0]) {
+  if (!this->TextIndent.empty()) {
     auto indented = text;
     cmSystemTools::ReplaceString(indented, "\n",
                                  cmStrCat('\n', this->TextIndent));
@@ -76,11 +78,6 @@ void cmDocumentationFormatter::PrintParagraph(std::ostream& os,
   os << '\n';
 }
 
-void cmDocumentationFormatter::SetIndent(const char* indent)
-{
-  this->TextIndent = indent;
-}
-
 void cmDocumentationFormatter::PrintColumn(std::ostream& os, const char* text)
 {
   // Print text arranged in an indented column of fixed width.
@@ -88,7 +85,7 @@ void cmDocumentationFormatter::PrintColumn(std::ostream& os, const char* text)
   long column = 0;
   bool newSentence = false;
   bool firstLine = true;
-  int width = this->TextWidth - static_cast<int>(strlen(this->TextIndent));
+  int width = this->TextWidth - static_cast<int>(this->TextIndent.size());
 
   // Loop until the end of the text.
   while (*l) {
@@ -112,10 +109,10 @@ void cmDocumentationFormatter::PrintColumn(std::ostream& os, const char* text)
             os << ' ';
             column += 1;
           }
-        } else {
+        } else if (!firstLine && !this->TextIndent.empty()) {
           // First word on line.  Print indentation unless this is the
           // first line.
-          os << (firstLine ? "" : this->TextIndent);
+          os << this->TextIndent;
         }
 
         // Print the word.
@@ -164,21 +161,20 @@ void cmDocumentationFormatter::PrintSection(
   for (cmDocumentationEntry const& entry : entries) {
     if (!entry.Name.empty()) {
       os << std::setw(2) << std::left << entry.CustomNamePrefix << entry.Name;
-      this->TextIndent = "                                 ";
-      int align = static_cast<int>(strlen(this->TextIndent)) - 4;
+      this->TextIndent = NAME_SIZED_PADDING;
+      int align = static_cast<int>(this->TextIndent.size()) - 4;
       for (int i = static_cast<int>(entry.Name.size()); i < align; ++i) {
         os << ' ';
       }
-      if (entry.Name.size() > strlen(this->TextIndent) - 4) {
-        os << '\n';
-        os.write(this->TextIndent, strlen(this->TextIndent) - 2);
+      if (static_cast<int>(entry.Name.size()) > align) {
+        os << '\n' << this->TextIndent.substr(0, this->TextIndent.size() - 2);
       }
       os << "= ";
       this->PrintColumn(os, entry.Brief.c_str());
       os << '\n';
     } else {
       os << '\n';
-      this->TextIndent = "";
+      this->TextIndent = {};
       this->PrintFormatted(os, entry.Brief.c_str());
     }
   }
