@@ -7,12 +7,10 @@
 #include <iomanip>
 #include <ostream>
 #include <string>
-#include <utility>
 #include <vector>
 
 #include "cmDocumentationEntry.h"
 #include "cmDocumentationSection.h"
-#include "cmSystemTools.h"
 
 namespace {
 const char* skipSpaces(const char* ptr)
@@ -40,33 +38,63 @@ void cmDocumentationFormatter::PrintFormatted(std::ostream& os,
     return;
   }
 
-  for (const char* ptr = text.c_str(); *ptr;) {
-    // Any ptrs starting in a space are treated as preformatted text.
-    std::string preformatted;
-    while (*ptr == ' ') {
-      for (char ch = *ptr; ch && ch != '\n'; ++ptr, ch = *ptr) {
-        preformatted.append(1, ch);
-      }
-      if (*ptr) {
-        ++ptr;
-        preformatted.append(1, '\n');
-      }
-    }
-    if (!preformatted.empty()) {
-      this->PrintPreformatted(os, preformatted);
+  struct Buffer
+  {
+    // clang-format off
+    using PrinterFn = void (cmDocumentationFormatter::*)(
+        std::ostream&, std::string const&
+      ) const;
+    // clang-format on
+    std::string collected;
+    const PrinterFn printer;
+  };
+  // const auto NORMAL_IDX = 0u;
+  const auto PREFORMATTED_IDX = 1u;
+  const auto HANDLERS_SIZE = 2u;
+  Buffer buffers[HANDLERS_SIZE] = {
+    { {}, &cmDocumentationFormatter::PrintParagraph },
+    { {}, &cmDocumentationFormatter::PrintPreformatted }
+  };
+
+  const auto padding = std::string(this->TextIndent, ' ');
+
+  for (std::size_t pos = 0u, eol = 0u; pos < text.size(); pos = eol) {
+    const auto current_idx = std::size_t(text[pos] == ' ');
+    // size_t(!bool(current_idx))
+    const auto other_idx = current_idx ^ 1u;
+
+    // Flush the other buffer if anything has been collected
+    if (!buffers[other_idx].collected.empty()) {
+      // NOTE Whatever the other index is, the current buffered
+      // string expected to be empty.
+      assert(buffers[current_idx].collected.empty());
+
+      (this->*buffers[other_idx].printer)(os, buffers[other_idx].collected);
+      buffers[other_idx].collected.clear();
     }
 
-    // Other ptrs are treated as paragraphs.
-    std::string paragraph;
-    for (char ch = *ptr; ch && ch != '\n'; ++ptr, ch = *ptr) {
-      paragraph.append(1, ch);
+    // ATTENTION The previous implementation had called `PrintParagraph()`
+    // **for every processed (char by char) input line**.
+    // The method unconditionally append the `\n' character after the
+    // printed text. To keep the backward-compatible behavior it's needed to
+    // add the '\n' character to the previously collected line...
+    if (!buffers[current_idx].collected.empty() &&
+        current_idx != PREFORMATTED_IDX) {
+      buffers[current_idx].collected += '\n';
     }
-    if (*ptr) {
-      ++ptr;
-      paragraph.append(1, '\n');
+
+    // Lookup EOL
+    eol = text.find('\n', pos);
+    if (current_idx == PREFORMATTED_IDX) {
+      buffers[current_idx].collected.append(padding);
     }
-    if (!paragraph.empty()) {
-      this->PrintParagraph(os, paragraph);
+    buffers[current_idx].collected.append(
+      text, pos, eol == std::string::npos ? eol : ++eol - pos);
+  }
+
+  for (auto& buf : buffers) {
+    if (!buf.collected.empty()) {
+      (this->*buf.printer)(os, buf.collected);
     }
   }
 }
@@ -74,15 +102,7 @@ void cmDocumentationFormatter::PrintFormatted(std::ostream& os,
 void cmDocumentationFormatter::PrintPreformatted(std::ostream& os,
                                                  std::string const& text) const
 {
-  if (this->TextIndent) {
-    auto indented = text;
-    auto padding = std::string(this->TextIndent, ' ');
-    cmSystemTools::ReplaceString(indented, "\n", "\n" + padding);
-    indented = std::move(padding) + indented;
-    os << indented << '\n';
-  } else {
-    os << text << '\n';
-  }
+  os << text << '\n';
 }
 
 void cmDocumentationFormatter::PrintParagraph(std::ostream& os,
