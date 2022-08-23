@@ -91,7 +91,7 @@ int main(int argc, char** argv)
     doc.AppendSection("Generators", generators);
     doc.PrependSection("Options", cmDocumentationOptions);
 
-    return (doc.PrintRequestedDocumentation(std::cout) ? 0 : 1);
+    return !doc.PrintRequestedDocumentation(std::cout);
   }
 
 #if defined(Q_OS_MAC)

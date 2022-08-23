@@ -227,7 +227,7 @@ int do_cmake(int ac, char const* const* av)
     doc.AppendSection("Generators", generators);
     doc.PrependSection("Options", cmDocumentationOptions);
 
-    return doc.PrintRequestedDocumentation(std::cout) ? 0 : 1;
+    return !doc.PrintRequestedDocumentation(std::cout);
   }
 #else
   if (ac == 1) {

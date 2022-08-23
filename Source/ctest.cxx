@@ -215,7 +215,7 @@ int main(int argc, char const* const* argv)
       doc.SetSection("Name", cmDocumentationName);
       doc.SetSection("Usage", cmDocumentationUsage);
       doc.PrependSection("Options", cmDocumentationOptions);
-      return doc.PrintRequestedDocumentation(std::cout) ? 0 : 1;
+      return !doc.PrintRequestedDocumentation(std::cout);
     }
   }
 
