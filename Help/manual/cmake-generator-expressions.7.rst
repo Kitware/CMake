@@ -594,6 +594,10 @@ Configuration Expressions
   expression when it is evaluated on a property of an :prop_tgt:`IMPORTED`
   target.
 
+  .. versionchanged:: 3.19
+    Multiple configurations can be specified for ``cfgs``.
+    CMake 3.18 and earlier only accepted a single configuration.
+
 .. genex:: $<OUTPUT_CONFIG:...>
 
   .. versionadded:: 3.20
