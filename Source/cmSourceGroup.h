@@ -80,6 +80,12 @@ public:
   cmSourceGroup* MatchChildrenFiles(const std::string& name);
 
   /**
+   * Check if the given name matches this group's explicit file list
+   * in children.
+   */
+  const cmSourceGroup* MatchChildrenFiles(const std::string& name) const;
+
+  /**
    * Check if the given name matches this group's regex in children.
    */
   cmSourceGroup* MatchChildrenRegex(const std::string& name);
