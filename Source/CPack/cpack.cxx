@@ -36,11 +36,11 @@
 
 namespace {
 const cmDocumentationEntry cmDocumentationName = {
-  nullptr, "  cpack - Packaging driver provided by CMake."
+  {},
+  "  cpack - Packaging driver provided by CMake."
 };
 
-const cmDocumentationEntry cmDocumentationUsage = { nullptr,
-                                                    "  cpack [options]" };
+const cmDocumentationEntry cmDocumentationUsage = { {}, "  cpack [options]" };
 
 const cmDocumentationEntry cmDocumentationOptions[14] = {
   { "-G <generators>", "Override/define CPACK_GENERATOR" },

@@ -25,21 +25,23 @@
 
 namespace {
 const cmDocumentationEntry cmDocumentationName = {
-  nullptr, "  ccmake - Curses Interface for CMake."
+  {},
+  "  ccmake - Curses Interface for CMake."
 };
 
 const cmDocumentationEntry cmDocumentationUsage[2] = {
-  { nullptr,
+  { {},
     "  ccmake <path-to-source>\n"
     "  ccmake <path-to-existing-build>" },
-  { nullptr,
+  { {},
     "Specify a source directory to (re-)generate a build system for "
     "it in the current working directory.  Specify an existing build "
     "directory to re-generate its build system." },
 };
 
 const cmDocumentationEntry cmDocumentationUsageNote = {
-  nullptr, "Run 'ccmake --help' for more information."
+  {},
+  "Run 'ccmake --help' for more information."
 };
 
 #ifndef _WIN32

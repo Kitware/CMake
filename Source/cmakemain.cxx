@@ -47,22 +47,24 @@
 namespace {
 #ifndef CMAKE_BOOTSTRAP
 const cmDocumentationEntry cmDocumentationName = {
-  nullptr, "  cmake - Cross-Platform Makefile Generator."
+  {},
+  "  cmake - Cross-Platform Makefile Generator."
 };
 
 const cmDocumentationEntry cmDocumentationUsage[2] = {
-  { nullptr,
+  { {},
     "  cmake [options] <path-to-source>\n"
     "  cmake [options] <path-to-existing-build>\n"
     "  cmake [options] -S <path-to-source> -B <path-to-build>" },
-  { nullptr,
+  { {},
     "Specify a source directory to (re-)generate a build system for "
     "it in the current working directory.  Specify an existing build "
     "directory to re-generate its build system." }
 };
 
 const cmDocumentationEntry cmDocumentationUsageNote = {
-  nullptr, "Run 'cmake --help' for more information."
+  {},
+  "Run 'cmake --help' for more information."
 };
 
 const cmDocumentationEntry cmDocumentationOptions[31] = {

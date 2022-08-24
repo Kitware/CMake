@@ -47,11 +47,12 @@ const cmDocumentationEntry cmDocumentationStandardOptions[20] = {
 };
 
 const cmDocumentationEntry cmDocumentationCPackGeneratorsHeader = {
-  nullptr, "The following generators are available on this platform:"
+  {},
+  "The following generators are available on this platform:"
 };
 
 const cmDocumentationEntry cmDocumentationCMakeGeneratorsHeader = {
-  nullptr,
+  {},
   "The following generators are available on this platform (* marks "
   "default):"
 };

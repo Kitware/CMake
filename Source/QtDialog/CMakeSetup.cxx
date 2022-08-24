@@ -24,11 +24,12 @@
 
 namespace {
 const cmDocumentationEntry cmDocumentationName = {
-  nullptr, "  cmake-gui - CMake GUI."
+  {},
+  "  cmake-gui - CMake GUI."
 };
 
 const cmDocumentationEntry cmDocumentationUsage = {
-  nullptr,
+  {},
   "  cmake-gui [options]\n"
   "  cmake-gui [options] <path-to-source>\n"
   "  cmake-gui [options] <path-to-existing-build>\n"

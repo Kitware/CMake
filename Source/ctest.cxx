@@ -19,11 +19,11 @@
 
 namespace {
 const cmDocumentationEntry cmDocumentationName = {
-  nullptr, "  ctest - Testing driver provided by CMake."
+  {},
+  "  ctest - Testing driver provided by CMake."
 };
 
-const cmDocumentationEntry cmDocumentationUsage = { nullptr,
-                                                    "  ctest [options]" };
+const cmDocumentationEntry cmDocumentationUsage = { {}, "  ctest [options]" };
 
 const cmDocumentationEntry cmDocumentationOptions[74] = {
   { "--preset <preset>, --preset=<preset>",

@@ -9,17 +9,16 @@
 /** Standard documentation entry for cmDocumentation's formatting.  */
 struct cmDocumentationEntry
 {
-  std::string Name;
-  std::string Brief;
-  char CustomNamePrefix = ' ';
+#if __cplusplus <= 201103L
   cmDocumentationEntry() = default;
-  cmDocumentationEntry(const char* const n, const char* const b)
+  cmDocumentationEntry(const std::string& name, const std::string& brief)
+    : Name{ name }
+    , Brief{ brief }
   {
-    if (n) {
-      this->Name = n;
-    }
-    if (b) {
-      this->Brief = b;
-    }
   }
+#endif
+
+  std::string Name = {};
+  std::string Brief = {};
+  char CustomNamePrefix = ' ';
 };
