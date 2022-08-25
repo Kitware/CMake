@@ -94,6 +94,8 @@ std::string const kCMAKE_TRY_COMPILE_PLATFORM_VARIABLES =
 std::string const kCMAKE_WARN_DEPRECATED = "CMAKE_WARN_DEPRECATED";
 std::string const kCMAKE_WATCOM_RUNTIME_LIBRARY_DEFAULT =
   "CMAKE_WATCOM_RUNTIME_LIBRARY_DEFAULT";
+std::string const kCMAKE_MSVC_DEBUG_INFORMATION_FORMAT_DEFAULT =
+  "CMAKE_MSVC_DEBUG_INFORMATION_FORMAT_DEFAULT";
 
 /* GHS Multi platform variables */
 std::set<std::string> const ghs_platform_vars{
@@ -497,6 +499,14 @@ bool cmCoreTryCompile::TryCompileCode(Arguments& arguments,
               *cmp0123 == "NEW"_s ? "NEW" : "OLD");
     }
 
+    /* Set MSVC debug information format policy to match our selection.  */
+    if (cmValue msvcDebugInformationFormatDefault =
+          this->Makefile->GetDefinition(
+            kCMAKE_MSVC_DEBUG_INFORMATION_FORMAT_DEFAULT)) {
+      fprintf(fout, "cmake_policy(SET CMP0141 %s)\n",
+              !msvcDebugInformationFormatDefault->empty() ? "NEW" : "OLD");
+    }
+
     /* Set cache/normal variable policy to match outer project.
        It may affect toolchain files.  */
     if (this->Makefile->GetPolicyStatus(cmPolicies::CMP0126) !=
@@ -849,6 +859,7 @@ bool cmCoreTryCompile::TryCompileCode(Arguments& arguments,
     vars.insert(kCMAKE_WARN_DEPRECATED);
     vars.emplace("CMAKE_MSVC_RUNTIME_LIBRARY"_s);
     vars.emplace("CMAKE_WATCOM_RUNTIME_LIBRARY"_s);
+    vars.emplace("CMAKE_MSVC_DEBUG_INFORMATION_FORMAT"_s);
 
     if (cmValue varListStr = this->Makefile->GetDefinition(
           kCMAKE_TRY_COMPILE_PLATFORM_VARIABLES)) {

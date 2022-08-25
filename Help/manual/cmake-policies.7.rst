@@ -58,6 +58,7 @@ Policies Introduced by CMake 3.25
 .. toctree::
    :maxdepth: 1
 
+   CMP0141: MSVC debug information format flags are selected by an abstraction. </policy/CMP0141>
    CMP0140: The return() command checks its arguments. </policy/CMP0140>
 
 Policies Introduced by CMake 3.24

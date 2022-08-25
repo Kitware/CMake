@@ -563,6 +563,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     initProp("AUTORCC_OPTIONS");
     initProp("LINK_DEPENDS_NO_SHARED");
     initProp("LINK_INTERFACE_LIBRARIES");
+    initProp("MSVC_DEBUG_INFORMATION_FORMAT");
     initProp("MSVC_RUNTIME_LIBRARY");
     initProp("WATCOM_RUNTIME_LIBRARY");
     initProp("WIN32_EXECUTABLE");

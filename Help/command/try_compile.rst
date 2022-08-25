@@ -244,3 +244,8 @@ a build configuration.
 .. versionadded:: 3.24
   The :variable:`CMAKE_TRY_COMPILE_NO_PLATFORM_VARIABLES` variable may be
   set to disable passing platform variables into the test project.
+
+.. versionadded:: 3.25
+  If :policy:`CMP0141` is set to ``NEW``, one can use
+  :variable:`CMAKE_MSVC_DEBUG_INFORMATION_FORMAT` to specify MSVC debug
+  information format.

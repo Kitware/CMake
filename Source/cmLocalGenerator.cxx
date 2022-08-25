@@ -2041,6 +2041,41 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
       }
     }
   }
+
+  // Add MSVC debug information format flags. This is activated by the presence
+  // of a default selection whether or not it is overridden by a property.
+  cmValue msvcDebugInformationFormatDefault = this->Makefile->GetDefinition(
+    "CMAKE_MSVC_DEBUG_INFORMATION_FORMAT_DEFAULT");
+  if (cmNonempty(msvcDebugInformationFormatDefault)) {
+    cmValue msvcDebugInformationFormatValue =
+      target->GetProperty("MSVC_DEBUG_INFORMATION_FORMAT");
+    if (!msvcDebugInformationFormatValue) {
+      msvcDebugInformationFormatValue = msvcDebugInformationFormatDefault;
+    }
+    std::string const msvcDebugInformationFormat =
+      cmGeneratorExpression::Evaluate(*msvcDebugInformationFormatValue, this,
+                                      config, target);
+    if (!msvcDebugInformationFormat.empty()) {
+      if (cmValue msvcDebugInformationFormatOptions =
+            this->Makefile->GetDefinition(
+              cmStrCat("CMAKE_", lang,
+                       "_COMPILE_OPTIONS_MSVC_DEBUG_INFORMATION_FORMAT_",
+                       msvcDebugInformationFormat))) {
+        this->AppendCompileOptions(flags, *msvcDebugInformationFormatOptions);
+      } else if ((this->Makefile->GetSafeDefinition(
+                    cmStrCat("CMAKE_", lang, "_COMPILER_ID")) == "MSVC"_s ||
+                  this->Makefile->GetSafeDefinition(
+                    cmStrCat("CMAKE_", lang, "_SIMULATE_ID")) == "MSVC"_s) &&
+                 !cmSystemTools::GetErrorOccurredFlag()) {
+        // The compiler uses the MSVC ABI so it needs a known runtime library.
+        this->IssueMessage(MessageType::FATAL_ERROR,
+                           cmStrCat("MSVC_DEBUG_INFORMATION_FORMAT value '",
+                                    msvcDebugInformationFormat,
+                                    "' not known for this ", lang,
+                                    " compiler."));
+      }
+    }
+  }
 }
 
 void cmLocalGenerator::AddLanguageFlagsForLinking(
