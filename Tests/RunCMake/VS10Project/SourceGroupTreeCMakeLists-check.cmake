@@ -18,9 +18,9 @@ set(SOURCE_GROUPS_TO_FIND
   "SourcesPrefix\\PrefixedNested"
 )
 
-foreach(GROUP_NAME IN LISTS ${SOURCE_GROUPS_TO_FIND})
+foreach(GROUP_NAME IN LISTS SOURCE_GROUPS_TO_FIND)
   find_source_group("${lines}" ${GROUP_NAME})
-  if(NOT ${FILTER_FOUND})
+  if(NOT FILTER_FOUND)
     return()
   endif()
 endforeach()
