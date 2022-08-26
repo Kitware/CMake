@@ -5,6 +5,6 @@ CMAKE_CPACK_COMMAND
 
 Full path to :manual:`cpack(1)` command installed with CMake.
 
-This is the full path to the CPack executable :manual:`cpack(1)` which is
-useful from custom commands that want to use the :option:`cmake -E <cmake_E -E>`
-option for portable system commands.
+This is the full path to the CPack executable :manual:`cpack(1)`
+that can be used for custom commands or tests to invoke
+CPack commands.
