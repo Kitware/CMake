@@ -1121,8 +1121,11 @@ Additional options to ``DOWNLOAD`` are:
 
   Verify that the downloaded content hash matches the expected value, where
   ``ALGO`` is one of the algorithms supported by ``file(<HASH>)``.
-  If it does not match, the operation fails with an error. It is an error to
-  specify this if ``DOWNLOAD`` is not given a ``<file>``.
+  If the file already exists and matches the hash, the download is skipped.
+  If the file already exists and does not match the hash, the file is
+  downloaded again. If after download the file does not match the hash, the
+  operation fails with an error. It is an error to specify this option if
+  ``DOWNLOAD`` is not given a ``<file>``.
 
 ``EXPECTED_MD5 <value>``
   Historical short-hand for ``EXPECTED_HASH MD5=<value>``. It is an error to
