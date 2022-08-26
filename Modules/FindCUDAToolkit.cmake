@@ -997,7 +997,7 @@ if(CUDAToolkit_FOUND)
   find_path(CUDAToolkit_CUPTI_INCLUDE_DIR cupti.h PATHS
       "${CUDAToolkit_ROOT_DIR}/extras/CUPTI/include"
       "${CUDAToolkit_INCLUDE_DIR}/../extras/CUPTI/include"
-      "${CUDATookit_INCLUDE_DIR}"
+      "${CUDAToolkit_INCLUDE_DIR}"
       NO_DEFAULT_PATH)
 
   if(CUDAToolkit_CUPTI_INCLUDE_DIR)
