@@ -912,8 +912,10 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
        lang == "OBJCXX")) {
     std::string const clauncher_prop = cmStrCat(lang, "_COMPILER_LAUNCHER");
     cmValue clauncher = this->GeneratorTarget->GetProperty(clauncher_prop);
-    if (cmNonempty(clauncher)) {
-      compilerLauncher = *clauncher;
+    std::string evaluatedClauncher = cmGeneratorExpression::Evaluate(
+      *clauncher, this->LocalGenerator, config);
+    if (!evaluatedClauncher.empty()) {
+      compilerLauncher = evaluatedClauncher;
     }
   }
 
