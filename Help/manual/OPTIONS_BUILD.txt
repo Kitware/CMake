@@ -45,6 +45,25 @@
  This option may also be given as a single argument:
  ``-D<var>:<type>=<value>`` or ``-D<var>=<value>``.
 
+ It's important to note that the order of ``-C`` and ``-D`` arguments is
+ significant. They will be carried out in the order they are listed, with the
+ last argument taking precedence over the previous ones. For example, if you
+ specify ``-DCMAKE_BUILD_TYPE=Debug``, followed by a ``-C`` argument with a
+ file that calls:
+
+ .. code-block:: cmake
+
+   set(CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)
+
+ then the ``-C`` argument will take precedence, and ``CMAKE_BUILD_TYPE`` will
+ be set to ``Release``. However, if the ``-D`` argument comes after the ``-C``
+ argument, it will be set to ``Debug``.
+
+ If a ``set(... CACHE ...)`` call in the ``-C`` file does not use ``FORCE``,
+ and a ``-D`` argument sets the same variable, the ``-D`` argument will take
+ precedence regardless of order because of the nature of non-``FORCE``
+ ``set(... CACHE ...)`` calls.
+
 .. option:: -U <globbing_expr>
 
  Remove matching entries from CMake ``CACHE``.
