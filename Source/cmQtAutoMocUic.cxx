@@ -2183,6 +2183,9 @@ void cmQtAutoMocUicT::JobMocsCompilationT::Process()
     content += "// No files found that require moc or the moc files are "
                "included\n"
                "void " +
+      functionName +
+      "();\n"
+      "void " +
       functionName + "() {}\n";
   } else {
     // Valid content
