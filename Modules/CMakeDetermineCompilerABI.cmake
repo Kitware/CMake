@@ -149,7 +149,8 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
       if(CMAKE_${lang}_VERBOSE_FLAG)
         CMAKE_PARSE_IMPLICIT_LINK_INFO("${OUTPUT}" implicit_libs implicit_dirs implicit_fwks log
           "${CMAKE_${lang}_IMPLICIT_OBJECT_REGEX}"
-          COMPUTE_IMPLICIT_OBJECTS implicit_objs)
+          COMPUTE_IMPLICIT_OBJECTS implicit_objs
+          LANGUAGE ${lang})
         file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
           "Parsed ${lang} implicit link information from above output:\n${log}\n\n")
       endif()

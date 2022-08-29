@@ -154,6 +154,7 @@ foreach(t ${targets})
 
   cmake_parse_implicit_link_info("${input}" implicit_libs idirs implicit_fwks log
       "${CMAKE_${lang}_IMPLICIT_OBJECT_REGEX}"
+      LANGUAGE ${lang}
       COMPUTE_IMPLICIT_OBJECTS implicit_objs)
 
   set(library_arch)
