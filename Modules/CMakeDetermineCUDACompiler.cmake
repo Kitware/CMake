@@ -275,7 +275,7 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
   if(DEFINED CMAKE_CUDA_ARCHITECTURES)
     if(CMAKE_CUDA_ARCHITECTURES STREQUAL "")
       message(FATAL_ERROR "CMAKE_CUDA_ARCHITECTURES must be non-empty if set.")
-    elseif(CMAKE_CUDA_ARCHITECTURES AND NOT CMAKE_CUDA_ARCHITECTURES MATCHES "^([0-9]+(-real|-virtual)?(;[0-9]+(-real|-virtual)?|;)*|all|all-major|native)$")
+    elseif(CMAKE_CUDA_ARCHITECTURES AND NOT CMAKE_CUDA_ARCHITECTURES MATCHES "^([0-9]+a?(-real|-virtual)?(;[0-9]+a?(-real|-virtual)?|;)*|all|all-major|native)$")
       message(FATAL_ERROR
         "CMAKE_CUDA_ARCHITECTURES:\n"
         "  ${CMAKE_CUDA_ARCHITECTURES}\n"
