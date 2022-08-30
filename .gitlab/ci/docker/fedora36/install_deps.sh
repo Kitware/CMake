@@ -92,6 +92,7 @@ dnf install --setopt=install_weak_deps=False -y \
     libinput-devel systemd-devel \
     libjpeg-turbo-devel \
     libpng-devel \
+    opensp-devel \
     postgresql-server-devel \
     libtiff-devel \
     libuv-devel \

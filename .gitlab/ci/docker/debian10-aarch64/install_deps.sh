@@ -80,6 +80,7 @@ apt-get install -y \
     liblzma-dev \
     libopenal-dev \
     libopenmpi-dev openmpi-bin \
+    libosp-dev \
     libpng-dev \
     libpq-dev postgresql-server-dev-11 \
     libprotobuf-dev libprotobuf-c-dev libprotoc-dev protobuf-compiler protobuf-compiler-grpc \
