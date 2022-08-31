@@ -2567,6 +2567,8 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
   cm::optional<CxxModuleMapFormat> modmap_fmt;
   if (arg_modmapfmt.empty()) {
     // nothing to do.
+  } else if (arg_modmapfmt == "clang") {
+    modmap_fmt = CxxModuleMapFormat::Clang;
   } else if (arg_modmapfmt == "gcc") {
     modmap_fmt = CxxModuleMapFormat::Gcc;
   } else if (arg_modmapfmt == "msvc") {
