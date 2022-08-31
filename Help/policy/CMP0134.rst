@@ -31,9 +31,6 @@ The ``NEW`` behavior for this policy is to use registry views ``TARGET`` and
 This policy was introduced in CMake version 3.24.  Use the
 :command:`cmake_policy` command to set this policy to ``OLD`` or ``NEW``
 explicitly. Unlike many policies, CMake version |release| does *not* warn
-by default when this policy is not set and simply uses ``OLD`` behavior.
-See documentation of the
-:variable:`CMAKE_POLICY_WARNING_CMP0133 <CMAKE_POLICY_WARNING_CMP<NNNN>>`
-variable to control the warning.
+when this policy is not set and simply uses ``OLD`` behavior.
 
 .. include:: DEPRECATED.txt

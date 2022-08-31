@@ -142,9 +142,9 @@ should find all components, no components or some well-defined subset of the
 available components.
 
 .. versionadded:: 3.24
-  The ``REGISTRY_VIEW`` keyword enables to specify which registry views must be
-  queried. This keyword is only meaningful on ``Windows`` platform and will be
-  ignored on all other ones. Formally, it is up to the target package how to
+  The ``REGISTRY_VIEW`` keyword specifies which registry views should be
+  queried. This keyword is only meaningful on ``Windows`` platforms and will
+  be ignored on all others. Formally, it is up to the target package how to
   interpret the registry view information given to it.
 
 .. versionadded:: 3.24
