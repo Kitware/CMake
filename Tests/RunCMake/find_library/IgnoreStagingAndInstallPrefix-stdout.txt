@@ -1,0 +1,3 @@
+-- CREATED_LIBRARY='CREATED_LIBRARY-NOTFOUND'
+-- CREATED_LIBRARY='[^']*/Tests/RunCMake/find_library/IgnoreStagingAndInstallPrefix-build/lib/libcreated.a'
+-- CREATED_LIBRARY='CREATED_LIBRARY-NOTFOUND'
