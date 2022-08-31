@@ -336,6 +336,43 @@ void cmFindBase::FillSystemEnvironmentPath()
   paths.AddSuffixes(this->SearchPathSuffixes);
 }
 
+namespace {
+struct entry_to_remove
+{
+  entry_to_remove(std::string const& name, cmMakefile* makefile)
+    : value()
+  {
+    if (cmValue to_skip = makefile->GetDefinition(
+          cmStrCat("_CMAKE_SYSTEM_PREFIX_PATH_", name, "_PREFIX_COUNT"))) {
+      cmStrToLong(to_skip, &count);
+    }
+    if (cmValue prefix_value = makefile->GetDefinition(
+          cmStrCat("_CMAKE_SYSTEM_PREFIX_PATH_", name, "_PREFIX_VALUE"))) {
+      value = *prefix_value;
+    }
+  }
+  bool valid() const { return count > 0 && !value.empty(); }
+
+  void remove_self(std::vector<std::string>& entries) const
+  {
+    if (this->valid()) {
+      long to_skip = this->count;
+      long index_to_remove = 0;
+      for (const auto& path : entries) {
+        if (path == this->value && --to_skip == 0) {
+          break;
+        }
+        ++index_to_remove;
+      }
+      entries.erase(entries.begin() + index_to_remove);
+    }
+  }
+
+  long count = -1;
+  std::string value;
+};
+}
+
 void cmFindBase::FillCMakeSystemVariablePath()
 {
   cmSearchPath& paths = this->LabeledPaths[PathLabel::CMakeSystem];
@@ -356,38 +393,25 @@ void cmFindBase::FillCMakeSystemVariablePath()
   // computed by `CMakeSystemSpecificInformation.cmake` while constructing
   // `CMAKE_SYSTEM_PREFIX_PATH`. This ensures that if projects / toolchains
   // have removed `CMAKE_INSTALL_PREFIX` from the list, we don't remove
-  // some other entry by mistake
-  long install_prefix_count = -1;
-  std::string install_path_to_remove;
-  if (cmValue to_skip = this->Makefile->GetDefinition(
-        "_CMAKE_SYSTEM_PREFIX_PATH_INSTALL_PREFIX_COUNT")) {
-    cmStrToLong(to_skip, &install_prefix_count);
-  }
-  if (cmValue install_value = this->Makefile->GetDefinition(
-        "_CMAKE_SYSTEM_PREFIX_PATH_INSTALL_PREFIX_VALUE")) {
-    install_path_to_remove = *install_value;
-  }
+  // some other entry by mistake ( likewise for `CMAKE_STAGING_PREFIX` )
+  entry_to_remove install_entry("INSTALL", this->Makefile);
+  entry_to_remove staging_entry("STAGING", this->Makefile);
 
   if (remove_install_prefix && install_prefix_in_list &&
-      install_prefix_count > 0 && !install_path_to_remove.empty()) {
+      (install_entry.valid() || staging_entry.valid())) {
     cmValue prefix_paths =
       this->Makefile->GetDefinition("CMAKE_SYSTEM_PREFIX_PATH");
 
-    // remove entry from CMAKE_SYSTEM_PREFIX_PATH
+    // remove entries from CMAKE_SYSTEM_PREFIX_PATH
     std::vector<std::string> expanded = cmExpandedList(*prefix_paths);
-    long index_to_remove = 0;
-    for (const auto& path : expanded) {
-      if (path == install_path_to_remove && --install_prefix_count == 0) {
-        break;
-      }
-      ++index_to_remove;
-    }
-    expanded.erase(expanded.begin() + index_to_remove);
+    install_entry.remove_self(expanded);
+    staging_entry.remove_self(expanded);
+
     paths.AddPrefixPaths(expanded,
                          this->Makefile->GetCurrentSourceDirectory().c_str());
   } else if (add_install_prefix && !install_prefix_in_list) {
-
     paths.AddCMakePrefixPath("CMAKE_INSTALL_PREFIX");
+    paths.AddCMakePrefixPath("CMAKE_STAGING_PREFIX");
     paths.AddCMakePrefixPath("CMAKE_SYSTEM_PREFIX_PATH");
   } else {
     // Otherwise the current setup of `CMAKE_SYSTEM_PREFIX_PATH` is correct
