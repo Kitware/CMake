@@ -1067,6 +1067,16 @@ void cmCMakePresetsGraph::ClearPresets()
   this->Files.clear();
 }
 
+void cmCMakePresetsGraph::printPrecedingNewline(PrintPrecedingNewline* newline)
+{
+  if (newline) {
+    if (*newline == PrintPrecedingNewline::True) {
+      std::cout << std::endl;
+    }
+    *newline = PrintPrecedingNewline::True;
+  }
+}
+
 void cmCMakePresetsGraph::PrintPresets(
   const std::vector<const cmCMakePresetsGraph::Preset*>& presets)
 {
@@ -1095,13 +1105,16 @@ void cmCMakePresetsGraph::PrintPresets(
   }
 }
 
-void cmCMakePresetsGraph::PrintConfigurePresetList() const
+void cmCMakePresetsGraph::PrintConfigurePresetList(
+  PrintPrecedingNewline* newline) const
 {
-  PrintConfigurePresetList([](const ConfigurePreset&) { return true; });
+  PrintConfigurePresetList([](const ConfigurePreset&) { return true; },
+                           newline);
 }
 
 void cmCMakePresetsGraph::PrintConfigurePresetList(
-  const std::function<bool(const ConfigurePreset&)>& filter) const
+  const std::function<bool(const ConfigurePreset&)>& filter,
+  PrintPrecedingNewline* newline) const
 {
   std::vector<const cmCMakePresetsGraph::Preset*> presets;
   for (auto const& p : this->ConfigurePresetOrder) {
@@ -1114,12 +1127,14 @@ void cmCMakePresetsGraph::PrintConfigurePresetList(
   }
 
   if (!presets.empty()) {
+    printPrecedingNewline(newline);
     std::cout << "Available configure presets:\n\n";
     cmCMakePresetsGraph::PrintPresets(presets);
   }
 }
 
-void cmCMakePresetsGraph::PrintBuildPresetList() const
+void cmCMakePresetsGraph::PrintBuildPresetList(
+  PrintPrecedingNewline* newline) const
 {
   std::vector<const cmCMakePresetsGraph::Preset*> presets;
   for (auto const& p : this->BuildPresetOrder) {
@@ -1132,12 +1147,14 @@ void cmCMakePresetsGraph::PrintBuildPresetList() const
   }
 
   if (!presets.empty()) {
+    printPrecedingNewline(newline);
     std::cout << "Available build presets:\n\n";
     cmCMakePresetsGraph::PrintPresets(presets);
   }
 }
 
-void cmCMakePresetsGraph::PrintTestPresetList() const
+void cmCMakePresetsGraph::PrintTestPresetList(
+  PrintPrecedingNewline* newline) const
 {
   std::vector<const cmCMakePresetsGraph::Preset*> presets;
   for (auto const& p : this->TestPresetOrder) {
@@ -1150,6 +1167,7 @@ void cmCMakePresetsGraph::PrintTestPresetList() const
   }
 
   if (!presets.empty()) {
+    printPrecedingNewline(newline);
     std::cout << "Available test presets:\n\n";
     cmCMakePresetsGraph::PrintPresets(presets);
   }
@@ -1157,9 +1175,8 @@ void cmCMakePresetsGraph::PrintTestPresetList() const
 
 void cmCMakePresetsGraph::PrintAllPresets() const
 {
-  this->PrintConfigurePresetList();
-  std::cout << std::endl;
-  this->PrintBuildPresetList();
-  std::cout << std::endl;
-  this->PrintTestPresetList();
+  PrintPrecedingNewline newline = PrintPrecedingNewline::False;
+  this->PrintConfigurePresetList(&newline);
+  this->PrintBuildPresetList(&newline);
+  this->PrintTestPresetList(&newline);
 }

@@ -383,13 +383,22 @@ public:
     return "";
   }
 
+  enum class PrintPrecedingNewline
+  {
+    False,
+    True,
+  };
+  static void printPrecedingNewline(PrintPrecedingNewline* p);
+
   static void PrintPresets(
     const std::vector<const cmCMakePresetsGraph::Preset*>& presets);
-  void PrintConfigurePresetList() const;
   void PrintConfigurePresetList(
-    const std::function<bool(const ConfigurePreset&)>& filter) const;
-  void PrintBuildPresetList() const;
-  void PrintTestPresetList() const;
+    PrintPrecedingNewline* newline = nullptr) const;
+  void PrintConfigurePresetList(
+    const std::function<bool(const ConfigurePreset&)>& filter,
+    PrintPrecedingNewline* newline = nullptr) const;
+  void PrintBuildPresetList(PrintPrecedingNewline* newline = nullptr) const;
+  void PrintTestPresetList(PrintPrecedingNewline* newline = nullptr) const;
   void PrintAllPresets() const;
 
 private:

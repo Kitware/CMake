@@ -304,6 +304,12 @@ unset(RunCMake_TEST_BINARY_DIR)
 run_cmake_presets(ListPresetsNoSuchPreset)
 run_cmake_presets(ListPresetsHidden)
 
+set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/ListAllPresetsNoBuild.json.in")
+run_cmake_presets(ListAllPresetsNoBuild --list-presets=all)
+
+set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/ListAllPresetsNoTest.json.in")
+run_cmake_presets(ListAllPresetsNoTest --list-presets=all)
+
 # Test warning and error flags
 set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/Warnings.json.in")
 set(CMakePresets_WARN_UNUSED_CLI 1)
