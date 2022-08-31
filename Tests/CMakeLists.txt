@@ -1476,6 +1476,7 @@ if(BUILD_TESTING)
             OpenCL
             OpenGL
             OpenMP
+            OpenSP
             OpenSSL
             MPI
             PNG
