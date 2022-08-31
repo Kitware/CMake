@@ -19,6 +19,7 @@ out/
 
 # Visual Studio Code
 .vscode/
+.cache/
 
 # CLion work directory
 .idea/

@@ -29,6 +29,8 @@ check_property("UNDEFINED_BEHAVIOUR_SANITIZER" "enableUBSanitizer")
 check_property("UNDEFINED_BEHAVIOUR_SANITIZER_STOP" "stopOnEveryUBSanitizerIssue")
 check_property("DISABLE_MAIN_THREAD_CHECKER" "disableMainThreadChecker")
 check_property("MAIN_THREAD_CHECKER_STOP" "stopOnEveryMainThreadCheckerIssue")
+check_property("DISABLE_XCODE_SCHEME_ENABLE_GPU_API_VALIDATION" "enableGPUValidationMode")
+check_property("ENABLE_XCODE_SCHEME_ENABLE_GPU_SHADER_VALIDATION" "enableGPUShaderValidationMode")
 
 check_property("MALLOC_SCRIBBLE" "MallocScribble")
 check_property("MALLOC_GUARD_EDGES" "MallocGuardEdges")
