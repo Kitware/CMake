@@ -1,5 +1,8 @@
 include(RunCMake)
 
+# Do not let ccache modify paths checked by the test cases.
+unset(ENV{CCACHE_BASEDIR})
+
 function(run_symlink_test_case)
   file(REMOVE_RECURSE
     "${RunCMake_TEST_BINARY_DIR}/CMakeCache.txt"
