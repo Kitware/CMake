@@ -94,8 +94,7 @@ public:
   TryCompileCode. The result is stored in OutputFile. If nothing is found,
   the error message is stored in FindErrorMessage.
    */
-  void FindOutputFile(const std::string& targetName,
-                      cmStateEnums::TargetType targetType);
+  void FindOutputFile(const std::string& targetName);
 
   std::string BinaryDirectory;
   std::string OutputFile;
