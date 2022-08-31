@@ -843,6 +843,15 @@ function(matlab_get_version_from_matlab_run matlab_binary_program matlab_list_ve
     endif()
   endif()
 
+  if(NOT EXISTS "${_matlab_temporary_folder}/matlabVersionLog.cmaketmp")
+    # last resort check as some HPC with "module load matlab" not enacted fail to catch in earlier checks
+    # and error CMake configure even if find_package(Matlab) is not REQUIRED
+    if(MATLAB_FIND_DEBUG)
+      message(WARNING "[MATLAB] Unable to determine the version of Matlab. The version log file does not exist.")
+    endif()
+    return()
+  endif()
+
   # if successful, read back the log
   file(READ "${_matlab_temporary_folder}/matlabVersionLog.cmaketmp" _matlab_version_from_cmd)
   file(REMOVE "${_matlab_temporary_folder}/matlabVersionLog.cmaketmp")
