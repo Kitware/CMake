@@ -46,6 +46,11 @@ but it does not necessarily imply complete conformance to that standard.
 
   Compiler mode is at least C++ 23.
 
+``cxx_std_26``
+  .. versionadded:: 3.25
+
+  Compiler mode is at least C++ 26.
+
 .. include:: CMAKE_LANG_STD_FLAGS.txt
 
 Low level individual compile features

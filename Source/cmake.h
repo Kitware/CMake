@@ -861,6 +861,7 @@ private:
   F(cxx_std_17)                                                               \
   F(cxx_std_20)                                                               \
   F(cxx_std_23)                                                               \
+  F(cxx_std_26)                                                               \
   FOR_EACH_CXX98_FEATURE(F)                                                   \
   FOR_EACH_CXX11_FEATURE(F)                                                   \
   FOR_EACH_CXX14_FEATURE(F)
@@ -871,7 +872,8 @@ private:
   F(cuda_std_14)                                                              \
   F(cuda_std_17)                                                              \
   F(cuda_std_20)                                                              \
-  F(cuda_std_23)
+  F(cuda_std_23)                                                              \
+  F(cuda_std_26)
 
 #define FOR_EACH_HIP_FEATURE(F)                                               \
   F(hip_std_98)                                                               \
@@ -879,4 +881,5 @@ private:
   F(hip_std_14)                                                               \
   F(hip_std_17)                                                               \
   F(hip_std_20)                                                               \
-  F(hip_std_23)
+  F(hip_std_23)                                                               \
+  F(hip_std_26)

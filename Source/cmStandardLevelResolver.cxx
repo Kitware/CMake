@@ -379,25 +379,29 @@ std::unordered_map<std::string, StandardLevelComputer>
         "C", std::vector<int>{ 90, 99, 11, 17, 23 },
         std::vector<std::string>{ "90", "99", "11", "17", "23" } } },
     { "CXX",
-      StandardLevelComputer{
-        "CXX", std::vector<int>{ 98, 11, 14, 17, 20, 23 },
-        std::vector<std::string>{ "98", "11", "14", "17", "20", "23" } } },
+      StandardLevelComputer{ "CXX",
+                             std::vector<int>{ 98, 11, 14, 17, 20, 23, 26 },
+                             std::vector<std::string>{ "98", "11", "14", "17",
+                                                       "20", "23", "26" } } },
     { "CUDA",
-      StandardLevelComputer{
-        "CUDA", std::vector<int>{ 03, 11, 14, 17, 20, 23 },
-        std::vector<std::string>{ "03", "11", "14", "17", "20", "23" } } },
+      StandardLevelComputer{ "CUDA",
+                             std::vector<int>{ 03, 11, 14, 17, 20, 23, 26 },
+                             std::vector<std::string>{ "03", "11", "14", "17",
+                                                       "20", "23", "26" } } },
     { "OBJC",
       StandardLevelComputer{
         "OBJC", std::vector<int>{ 90, 99, 11, 17, 23 },
         std::vector<std::string>{ "90", "99", "11", "17", "23" } } },
     { "OBJCXX",
-      StandardLevelComputer{
-        "OBJCXX", std::vector<int>{ 98, 11, 14, 17, 20, 23 },
-        std::vector<std::string>{ "98", "11", "14", "17", "20", "23" } } },
+      StandardLevelComputer{ "OBJCXX",
+                             std::vector<int>{ 98, 11, 14, 17, 20, 23, 26 },
+                             std::vector<std::string>{ "98", "11", "14", "17",
+                                                       "20", "23", "26" } } },
     { "HIP",
-      StandardLevelComputer{
-        "HIP", std::vector<int>{ 98, 11, 14, 17, 20, 23 },
-        std::vector<std::string>{ "98", "11", "14", "17", "20", "23" } } }
+      StandardLevelComputer{ "HIP",
+                             std::vector<int>{ 98, 11, 14, 17, 20, 23, 26 },
+                             std::vector<std::string>{ "98", "11", "14", "17",
+                                                       "20", "23", "26" } } }
   };
 }
 
