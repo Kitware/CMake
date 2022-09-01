@@ -5,6 +5,14 @@ cmake_minimum_required(VERSION 2.4)
 cmake_policy(SET CMP0054 NEW)
 project (Complex)
 
+# Inform the test if the debug configuration is getting built.
+string(APPEND CMAKE_C_FLAGS_RELEASE " -DCOMPLEX_NDEBUG")
+string(APPEND CMAKE_CXX_FLAGS_RELEASE " -DCOMPLEX_NDEBUG")
+string(APPEND CMAKE_C_FLAGS_RELWITHDEBINFO " -DCOMPLEX_NDEBUG")
+string(APPEND CMAKE_CXX_FLAGS_RELWITHDEBINFO " -DCOMPLEX_NDEBUG")
+string(APPEND CMAKE_C_FLAGS_MINSIZEREL " -DCOMPLEX_NDEBUG")
+string(APPEND CMAKE_CXX_FLAGS_MINSIZEREL " -DCOMPLEX_NDEBUG")
+
 # Test that renaming a built-in works when configured multiple times.
 message("message")
 function(message)

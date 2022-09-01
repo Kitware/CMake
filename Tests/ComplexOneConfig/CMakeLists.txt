@@ -5,6 +5,14 @@ cmake_minimum_required(VERSION 2.4)
 cmake_policy(SET CMP0054 NEW)
 project (Complex)
 
+# Inform the test if the debug configuration is getting built.
+string(APPEND CMAKE_C_FLAGS_RELEASE " -DCOMPLEX_NDEBUG")
+string(APPEND CMAKE_CXX_FLAGS_RELEASE " -DCOMPLEX_NDEBUG")
+string(APPEND CMAKE_C_FLAGS_RELWITHDEBINFO " -DCOMPLEX_NDEBUG")
+string(APPEND CMAKE_CXX_FLAGS_RELWITHDEBINFO " -DCOMPLEX_NDEBUG")
+string(APPEND CMAKE_C_FLAGS_MINSIZEREL " -DCOMPLEX_NDEBUG")
+string(APPEND CMAKE_CXX_FLAGS_MINSIZEREL " -DCOMPLEX_NDEBUG")
+
 # Try setting a new policy.  The IF test is for coverage.
 if(POLICY CMP0003)
   cmake_policy(SET CMP0003 NEW)
