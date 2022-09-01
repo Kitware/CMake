@@ -3650,6 +3650,7 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
         }
       }
     } else {
+      linkDir = cmSystemTools::GetParentDirectory(linkDir);
       if (std::find(linkSearchPaths.begin(), linkSearchPaths.end(), linkDir) ==
           linkSearchPaths.end()) {
         linkSearchPaths.push_back(linkDir);

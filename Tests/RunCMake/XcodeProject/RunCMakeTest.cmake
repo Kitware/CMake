@@ -151,6 +151,16 @@ endfunction()
 
 XcodeXCConfig()
 
+function(BundleLinkBundle)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/BundleLinkBundle-build)
+  run_cmake(BundleLinkBundle)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(BundleLinkBundle-build ${CMAKE_COMMAND} --build .)
+endfunction()
+
+BundleLinkBundle()
+
+
 # Isolate device tests from host architecture selection.
 unset(ENV{CMAKE_OSX_ARCHITECTURES})
 
