@@ -770,12 +770,15 @@ cmGlobalVisualStudioVersionedGenerator::FindAuxToolset(
   cmSystemTools::ConvertToUnixSlashes(instancePath);
 
   // Translate three-component format accepted by "vcvarsall -vcvars_ver=".
-  cmsys::RegularExpression threeComponent(
+  cmsys::RegularExpression threeComponentRegex(
     "^([0-9]+\\.[0-9]+)\\.[0-9][0-9][0-9][0-9][0-9]$");
-  if (threeComponent.find(version)) {
+  // The two-component format represents the two major components of the
+  // three-component format
+  cmsys::RegularExpression twoComponentRegex("^([0-9]+\\.[0-9]+)$");
+  if (threeComponentRegex.find(version)) {
     // Load "VC/Auxiliary/Build/*/Microsoft.VCToolsVersion.*.txt" files
     // with two matching components to check their three-component version.
-    std::string const& twoComponent = threeComponent.match(1);
+    std::string const& twoComponent = threeComponentRegex.match(1);
     std::string pattern =
       cmStrCat(instancePath, "/VC/Auxiliary/Build/"_s, twoComponent,
                "*/Microsoft.VCToolsVersion."_s, twoComponent, "*.txt"_s);
@@ -800,6 +803,34 @@ cmGlobalVisualStudioVersionedGenerator::FindAuxToolset(
           }
         }
       }
+    }
+  } else if (twoComponentRegex.find(version)) {
+    std::string const& twoComponent = twoComponentRegex.match(1);
+    std::string pattern =
+      cmStrCat(instancePath, "/VC/Auxiliary/Build/"_s, twoComponent,
+               "*/Microsoft.VCToolsVersion."_s, twoComponent, "*.txt"_s);
+    cmsys::Glob glob;
+    glob.SetRecurseThroughSymlinks(false);
+    // Since we are only using the first two components of the toolset version,
+    // we require a definite match
+    if (glob.FindFiles(pattern) && glob.GetFiles().size() == 1) {
+      std::string const& txt = glob.GetFiles()[0];
+      std::string ver;
+      cmsys::ifstream fin(txt.c_str());
+      if (fin && std::getline(fin, ver)) {
+        // Strip trailing whitespace.
+        ver = ver.substr(0, ver.find_first_not_of("0123456789."));
+        // We assume the version is correct, since it is the only one that
+        // matched.
+        cmsys::RegularExpression extractVersion(
+          "VCToolsVersion\\.([0-9.]+)\\.txt$");
+        if (extractVersion.find(txt)) {
+          version = extractVersion.match(1);
+        }
+      }
+    } else {
+      props = cmStrCat(instancePath, "/VC/Auxiliary/Build/"_s);
+      return AuxToolset::PropsIndeterminate;
     }
   }
 

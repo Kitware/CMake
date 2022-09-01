@@ -200,7 +200,8 @@ protected:
     None,
     Default,
     PropsExist,
-    PropsMissing
+    PropsMissing,
+    PropsIndeterminate
   };
   virtual AuxToolset FindAuxToolset(std::string& version,
                                     std::string& props) const;

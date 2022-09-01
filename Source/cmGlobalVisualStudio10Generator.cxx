@@ -389,6 +389,27 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
         this->GeneratorToolsetVersion.clear();
         this->GeneratorToolsetVersionProps = {};
       } break;
+      case AuxToolset::PropsIndeterminate: {
+        std::ostringstream e;
+        /* clang-format off */
+        e <<
+          "Generator\n"
+          "  " << this->GetName() << "\n"
+          "given toolset and version specification\n"
+          "  " << this->GetPlatformToolsetString() << ",version=" <<
+          this->GeneratorToolsetVersion << "\n"
+          "has multiple matches installed at\n" <<
+          "  " << auxProps << "\n" <<
+          "The toolset and version specification must resolve \n" <<
+           "to a single installed toolset";
+        ;
+        /* clang-format on */
+        mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+
+        // Clear the configured tool-set
+        this->GeneratorToolsetVersion.clear();
+        this->GeneratorToolsetVersionProps = {};
+      } break;
     }
   }
 
