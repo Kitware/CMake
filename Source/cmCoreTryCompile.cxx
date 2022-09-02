@@ -31,6 +31,7 @@
 #include "cmake.h"
 
 namespace {
+constexpr const char* unique_binary_directory = "CMAKE_BINARY_DIR_USE_MKDTEMP";
 constexpr size_t lang_property_start = 0;
 constexpr size_t lang_property_size = 4;
 constexpr size_t pie_property_start = 4;
@@ -122,13 +123,9 @@ ArgumentParser::Continue TryCompileCompileDefs(Arguments& args,
     .Bind(#lang "_STANDARD_REQUIRED"_s, TryCompileLangProp)                   \
     .Bind(#lang "_EXTENSIONS"_s, TryCompileLangProp)
 
-auto const TryCompileArgParser =
+auto const TryCompileBaseArgParser =
   cmArgumentParser<Arguments>{}
     .Bind(0, &Arguments::CompileResultVariable)
-    .Bind(1, &Arguments::BinaryDirectory)
-    .Bind(2, &Arguments::SourceDirectoryOrFile)
-    .Bind(3, &Arguments::ProjectName)
-    .Bind(4, &Arguments::TargetName)
     .Bind("SOURCES"_s, &Arguments::Sources)
     .Bind("CMAKE_FLAGS"_s, &Arguments::CMakeFlags)
     .Bind("COMPILE_DEFINITIONS"_s, TryCompileCompileDefs,
@@ -136,7 +133,6 @@ auto const TryCompileArgParser =
     .Bind("LINK_LIBRARIES"_s, &Arguments::LinkLibraries)
     .Bind("LINK_OPTIONS"_s, &Arguments::LinkOptions)
     .Bind("__CMAKE_INTERNAL"_s, &Arguments::CMakeInternal)
-    .Bind("OUTPUT_VARIABLE"_s, &Arguments::OutputVariable)
     .Bind("COPY_FILE"_s, &Arguments::CopyFileTo)
     .Bind("COPY_FILE_ERROR"_s, &Arguments::CopyFileError)
     .BIND_LANG_PROPS(C)
@@ -147,8 +143,31 @@ auto const TryCompileArgParser =
     .BIND_LANG_PROPS(OBJCXX)
   /* keep semicolon on own line */;
 
-auto const TryRunArgParser =
+auto const TryCompileArgParser =
+  cmArgumentParser<Arguments>{ TryCompileBaseArgParser }.Bind(
+    "OUTPUT_VARIABLE"_s, &Arguments::OutputVariable)
+  /* keep semicolon on own line */;
+
+auto const TryCompileOldArgParser =
   cmArgumentParser<Arguments>{ TryCompileArgParser }
+    .Bind(1, &Arguments::BinaryDirectory)
+    .Bind(2, &Arguments::SourceDirectoryOrFile)
+    .Bind(3, &Arguments::ProjectName)
+    .Bind(4, &Arguments::TargetName)
+  /* keep semicolon on own line */;
+
+auto const TryRunArgParser =
+  cmArgumentParser<Arguments>{ TryCompileBaseArgParser }
+    .Bind("COMPILE_OUTPUT_VARIABLE"_s, &Arguments::CompileOutputVariable)
+    .Bind("RUN_OUTPUT_VARIABLE"_s, &Arguments::RunOutputVariable)
+    .Bind("RUN_OUTPUT_STDOUT_VARIABLE"_s, &Arguments::RunOutputStdOutVariable)
+    .Bind("RUN_OUTPUT_STDERR_VARIABLE"_s, &Arguments::RunOutputStdErrVariable)
+    .Bind("WORKING_DIRECTORY"_s, &Arguments::RunWorkingDirectory)
+    .Bind("ARGS"_s, &Arguments::RunArgs)
+  /* keep semicolon on own line */;
+
+auto const TryRunOldArgParser =
+  cmArgumentParser<Arguments>{ TryCompileOldArgParser }
     .Bind("COMPILE_OUTPUT_VARIABLE"_s, &Arguments::CompileOutputVariable)
     .Bind("RUN_OUTPUT_VARIABLE"_s, &Arguments::RunOutputVariable)
     .Bind("RUN_OUTPUT_STDOUT_VARIABLE"_s, &Arguments::RunOutputStdOutVariable)
@@ -161,10 +180,10 @@ auto const TryRunArgParser =
 }
 
 Arguments cmCoreTryCompile::ParseArgs(
-  cmRange<std::vector<std::string>::const_iterator> args, bool isTryRun)
+  const cmRange<std::vector<std::string>::const_iterator>& args,
+  const cmArgumentParser<Arguments>& parser,
+  std::vector<std::string>& unparsedArguments)
 {
-  std::vector<std::string> unparsedArguments;
-  const auto& parser = (isTryRun ? TryRunArgParser : TryCompileArgParser);
   auto arguments = parser.Parse(args, &unparsedArguments, 0);
   if (!arguments.MaybeReportError(*(this->Makefile)) &&
       !unparsedArguments.empty()) {
@@ -174,6 +193,26 @@ Arguments cmCoreTryCompile::ParseArgs(
     }
     this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, m);
   }
+  return arguments;
+}
+
+Arguments cmCoreTryCompile::ParseArgs(
+  cmRange<std::vector<std::string>::const_iterator> args, bool isTryRun)
+{
+  std::vector<std::string> unparsedArguments;
+  if (cmHasLiteralPrefix(*(++args.begin()), "SOURCE")) {
+    // New signature.
+    auto arguments =
+      this->ParseArgs(args, isTryRun ? TryRunArgParser : TryCompileArgParser,
+                      unparsedArguments);
+    arguments.BinaryDirectory = unique_binary_directory;
+    return arguments;
+  }
+
+  // Old signature.
+  auto arguments = this->ParseArgs(
+    args, isTryRun ? TryRunOldArgParser : TryCompileOldArgParser,
+    unparsedArguments);
   // For historical reasons, treat some empty-valued keyword
   // arguments as if they were not specified at all.
   if (arguments.OutputVariable && arguments.OutputVariable->empty()) {
@@ -210,6 +249,7 @@ bool cmCoreTryCompile::TryCompileCode(Arguments& arguments,
   // which signature were we called with ?
   this->SrcFileSignature = true;
 
+  bool useUniqueBinaryDirectory = false;
   std::string sourceDirectory;
   std::string projectName;
   std::string targetName;
@@ -230,7 +270,17 @@ bool cmCoreTryCompile::TryCompileCode(Arguments& arguments,
     targetName = targetNameBuf;
   }
 
-  if (arguments.BinaryDirectory && !arguments.BinaryDirectory->empty()) {
+  if (!arguments.BinaryDirectory || arguments.BinaryDirectory->empty()) {
+    this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
+                                 "No <bindir> specified.");
+    return false;
+  }
+  if (*arguments.BinaryDirectory == unique_binary_directory) {
+    // leave empty until we're ready to create it, so we don't try to remove
+    // a non-existing directory if we abort due to e.g. bad arguments
+    this->BinaryDirectory.clear();
+    useUniqueBinaryDirectory = true;
+  } else {
     if (!cmSystemTools::FileIsFullPath(*arguments.BinaryDirectory)) {
       this->Makefile->IssueMessage(
         MessageType::FATAL_ERROR,
@@ -244,10 +294,6 @@ bool cmCoreTryCompile::TryCompileCode(Arguments& arguments,
     if (this->SrcFileSignature) {
       this->BinaryDirectory += "/CMakeFiles/CMakeTmp";
     }
-  } else {
-    this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
-                                 "No <bindir> specified.");
-    return false;
   }
 
   std::vector<std::string> targets;
@@ -331,7 +377,14 @@ bool cmCoreTryCompile::TryCompileCode(Arguments& arguments,
     }
   }
   // make sure the binary directory exists
-  cmSystemTools::MakeDirectory(this->BinaryDirectory);
+  if (useUniqueBinaryDirectory) {
+    this->BinaryDirectory =
+      cmStrCat(this->Makefile->GetHomeOutputDirectory(),
+               "/CMakeFiles/CMakeScratch/TryCompile-XXXXXX");
+    cmSystemTools::MakeTempDirectory(this->BinaryDirectory);
+  } else {
+    cmSystemTools::MakeDirectory(this->BinaryDirectory);
+  }
 
   // do not allow recursive try Compiles
   if (this->BinaryDirectory == this->Makefile->GetHomeOutputDirectory()) {
@@ -635,7 +688,7 @@ bool cmCoreTryCompile::TryCompileCode(Arguments& arguments,
       fprintf(fout, " \"%s\"", si.c_str());
 
       // Add dependencies on any non-temporary sources.
-      if (si.find("CMakeTmp") == std::string::npos) {
+      if (!IsTemporary(si)) {
         this->Makefile->AddCMakeDependFile(si);
       }
     }
@@ -914,17 +967,23 @@ bool cmCoreTryCompile::TryCompileCode(Arguments& arguments,
   return res == 0;
 }
 
+bool cmCoreTryCompile::IsTemporary(std::string const& path)
+{
+  return ((path.find("CMakeTmp") != std::string::npos) ||
+          (path.find("CMakeScratch") != std::string::npos));
+}
+
 void cmCoreTryCompile::CleanupFiles(std::string const& binDir)
 {
   if (binDir.empty()) {
     return;
   }
 
-  if (binDir.find("CMakeTmp") == std::string::npos) {
+  if (!IsTemporary(binDir)) {
     cmSystemTools::Error(
       "TRY_COMPILE attempt to remove -rf directory that does not contain "
-      "CMakeTmp:" +
-      binDir);
+      "CMakeTmp or CMakeScratch: \"" +
+      binDir + "\"");
     return;
   }
 
@@ -969,6 +1028,10 @@ void cmCoreTryCompile::CleanupFiles(std::string const& binDir)
         }
       }
     }
+  }
+
+  if (binDir.find("CMakeScratch") != std::string::npos) {
+    cmSystemTools::RemoveADirectory(binDir);
   }
 }
 

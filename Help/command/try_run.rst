@@ -12,62 +12,68 @@ Try Compiling and Running Source Files
 
 .. code-block:: cmake
 
-  try_run(<runResultVar> <compileResultVar>
-          <bindir> <srcfile> [CMAKE_FLAGS <flags>...]
+  try_run(<runResultVar> <compileResultVar> SOURCES <srcfile...>
+          [CMAKE_FLAGS <flags>...]
           [COMPILE_DEFINITIONS <defs>...]
           [LINK_OPTIONS <options>...]
           [LINK_LIBRARIES <libs>...]
           [COMPILE_OUTPUT_VARIABLE <var>]
+          [COPY_FILE <fileName> [COPY_FILE_ERROR <var>]]
+          [<LANG>_STANDARD <std>]
+          [<LANG>_STANDARD_REQUIRED <bool>]
+          [<LANG>_EXTENSIONS <bool>]
           [RUN_OUTPUT_VARIABLE <var>]
           [RUN_OUTPUT_STDOUT_VARIABLE <var>]
           [RUN_OUTPUT_STDERR_VARIABLE <var>]
           [OUTPUT_VARIABLE <var>]
           [WORKING_DIRECTORY <var>]
-          [ARGS <args>...])
+          [ARGS <args>...]
+          )
+
+.. versionadded:: 3.25
 
 Try compiling a ``<srcfile>``.  Returns ``TRUE`` or ``FALSE`` for success
 or failure in ``<compileResultVar>``.  If the compile succeeded, runs the
 executable and returns its exit code in ``<runResultVar>``.  If the
 executable was built, but failed to run, then ``<runResultVar>`` will be
 set to ``FAILED_TO_RUN``.  See the :command:`try_compile` command for
-information on how the test project is constructed to build the source file.
+documentation of options common to both commands, and for information on how
+the test project is constructed to build the source file.
 
-The options are:
+This command also supports an alternate signature
+which was present in older versions of CMake:
 
-``CMAKE_FLAGS <flags>...``
-  Specify flags of the form :option:`-DVAR:TYPE=VALUE <cmake -D>` to be passed
-  to the :manual:`cmake(1)` command-line used to drive the test build.
-  The example in :command:`try_compile` shows how values for variables
-  ``INCLUDE_DIRECTORIES``, ``LINK_DIRECTORIES``, and ``LINK_LIBRARIES``
-  are used.
+.. code-block:: cmake
 
-``COMPILE_DEFINITIONS <defs>...``
-  Specify ``-Ddefinition`` arguments to pass to :command:`add_definitions`
-  in the generated test project.
+  try_run(<runResultVar> <compileResultVar>
+          <bindir> <srcfile|SOURCES srcfile...>
+          [CMAKE_FLAGS <flags>...]
+          [COMPILE_DEFINITIONS <defs>...]
+          [LINK_OPTIONS <options>...]
+          [LINK_LIBRARIES <libs>...]
+          [COMPILE_OUTPUT_VARIABLE <var>]
+          [COPY_FILE <fileName> [COPY_FILE_ERROR <var>]]
+          [<LANG>_STANDARD <std>]
+          [<LANG>_STANDARD_REQUIRED <bool>]
+          [<LANG>_EXTENSIONS <bool>]
+          [RUN_OUTPUT_VARIABLE <var>]
+          [RUN_OUTPUT_STDOUT_VARIABLE <var>]
+          [RUN_OUTPUT_STDERR_VARIABLE <var>]
+          [OUTPUT_VARIABLE <var>]
+          [WORKING_DIRECTORY <var>]
+          [ARGS <args>...]
+          )
+
+The options specific to ``try_run`` are:
 
 ``COMPILE_OUTPUT_VARIABLE <var>``
   Report the compile step build output in a given variable.
 
-``LINK_LIBRARIES <libs>...``
-  .. versionadded:: 3.2
-
-  Specify libraries to be linked in the generated project.
-  The list of libraries may refer to system libraries and to
-  :ref:`Imported Targets <Imported Targets>` from the calling project.
-
-  If this option is specified, any ``-DLINK_LIBRARIES=...`` value
-  given to the ``CMAKE_FLAGS`` option will be ignored.
-
-``LINK_OPTIONS <options>...``
-  .. versionadded:: 3.14
-
-  Specify link step options to pass to :command:`target_link_options` in the
-  generated project.
-
 ``OUTPUT_VARIABLE <var>``
   Report the compile build output and the output from running the executable
-  in the given variable.  This option exists for legacy reasons.  Prefer
-  ``COMPILE_OUTPUT_VARIABLE`` and ``RUN_OUTPUT_VARIABLE`` instead.
+  in the given variable.  This option exists for legacy reasons and is only
+  supported by the old ``try_run`` signature.
+  Prefer ``COMPILE_OUTPUT_VARIABLE`` and ``RUN_OUTPUT_VARIABLE`` instead.
 
 ``RUN_OUTPUT_VARIABLE <var>``
   Report the output from running the executable in a given variable.
@@ -86,7 +92,11 @@ The options are:
   .. versionadded:: 3.20
 
   Run the executable in the given directory. If no ``WORKING_DIRECTORY`` is
-  specified, the executable will run in ``<bindir>``.
+  specified, the executable will run in ``<bindir>`` or the current build
+  directory.
+
+``ARGS <args>...``
+  Additional arguments to pass to the executable when running it.
 
 Other Behavior Settings
 ^^^^^^^^^^^^^^^^^^^^^^^

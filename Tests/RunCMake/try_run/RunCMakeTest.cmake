@@ -1,8 +1,16 @@
 include(RunCMake)
 
-run_cmake(BadLinkLibraries)
 run_cmake(BinDirEmpty)
 run_cmake(BinDirRelative)
+run_cmake(NoOutputVariable)
+
+set(RunCMake_TEST_OPTIONS -Dtry_compile_DEFS=old_signature.cmake)
+include(${RunCMake_SOURCE_DIR}/old_and_new_signature_tests.cmake)
+unset(RunCMake_TEST_OPTIONS)
+
+set(RunCMake_TEST_OPTIONS -Dtry_compile_DEFS=new_signature.cmake)
+include(${RunCMake_SOURCE_DIR}/old_and_new_signature_tests.cmake)
+unset(RunCMake_TEST_OPTIONS)
 
 if (CMAKE_SYSTEM_NAME MATCHES "^(Linux|Darwin|Windows)$" AND
     CMAKE_C_COMPILER_ID MATCHES "^(MSVC|GNU|LCC|Clang|AppleClang)$")
@@ -10,12 +18,3 @@ if (CMAKE_SYSTEM_NAME MATCHES "^(Linux|Darwin|Windows)$" AND
   run_cmake(LinkOptions)
   unset (RunCMake_TEST_OPTIONS)
 endif()
-
-run_cmake(WorkingDirArg)
-
-run_cmake(NoOutputVariable)
-run_cmake(NoCompileOutputVariable)
-run_cmake(NoRunOutputVariable)
-run_cmake(NoRunStdOutVariable)
-run_cmake(NoRunStdErrVariable)
-run_cmake(NoWorkingDirectory)

@@ -1,3 +1,5 @@
+include(${CMAKE_CURRENT_SOURCE_DIR}/${try_compile_DEFS})
+
 enable_language(C)
 
 set(ENV{CMAKE_BUILD_TYPE} "Bad")
@@ -6,8 +8,8 @@ set(ENV{CMAKE_CONFIGURATION_TYPES} "Bad;Debug")
 add_library(tc_defs INTERFACE IMPORTED)
 target_compile_definitions(tc_defs INTERFACE "TC_CONFIG_$<UPPER_CASE:$<CONFIG>>")
 
-try_compile(ENV_CONFIG_RESULT "${CMAKE_BINARY_DIR}"
-  SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/EnvConfig.c"
+try_compile(ENV_CONFIG_RESULT "${try_compile_bindir_or_SOURCES}"
+  ${try_compile_redundant_SOURCES} "${CMAKE_CURRENT_SOURCE_DIR}/EnvConfig.c"
   COPY_FILE "${CMAKE_CURRENT_BINARY_DIR}/EnvConfig.bin"
   OUTPUT_VARIABLE tc_output
   LINK_LIBRARIES tc_defs

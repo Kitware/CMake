@@ -41,7 +41,7 @@ Try Compiling Source Files
 
 .. code-block:: cmake
 
-  try_compile(<resultVar> <bindir> <srcfile|SOURCES srcfile...>
+  try_compile(<resultVar> SOURCES <srcfile...>
               [CMAKE_FLAGS <flags>...]
               [COMPILE_DEFINITIONS <defs>...]
               [LINK_OPTIONS <options>...]
@@ -52,6 +52,8 @@ Try Compiling Source Files
               [<LANG>_STANDARD_REQUIRED <bool>]
               [<LANG>_EXTENSIONS <bool>]
               )
+
+.. versionadded:: 3.25
 
 Try building an executable or static library from one or more source files
 (which one is determined by the :variable:`CMAKE_TRY_COMPILE_TARGET_TYPE`
@@ -75,6 +77,39 @@ contain something like the following:
   add_executable(cmTryCompileExec <srcfile>...)
   target_link_options(cmTryCompileExec PRIVATE <LINK_OPTIONS from caller>)
   target_link_libraries(cmTryCompileExec ${LINK_LIBRARIES})
+
+CMake will automatically generate a unique directory for each ``try_compile``
+operation in an unspecified location within the project's binary directory.
+These directories will be cleaned automatically unless
+:option:`--debug-trycompile <cmake --debug-trycompile>` is passed to ``cmake``.
+Such directories from previous runs are also unconditionally cleaned at the
+beginning of any ``cmake`` execution.
+
+This command also supports an alternate signature
+which was present in older versions of CMake:
+
+.. code-block:: cmake
+
+  try_compile(<resultVar> <bindir> <srcfile|SOURCES srcfile...>
+              [CMAKE_FLAGS <flags>...]
+              [COMPILE_DEFINITIONS <defs>...]
+              [LINK_OPTIONS <options>...]
+              [LINK_LIBRARIES <libs>...]
+              [OUTPUT_VARIABLE <var>]
+              [COPY_FILE <fileName> [COPY_FILE_ERROR <var>]]
+              [<LANG>_STANDARD <std>]
+              [<LANG>_STANDARD_REQUIRED <bool>]
+              [<LANG>_EXTENSIONS <bool>]
+              )
+
+In this version, ``try_compile`` will use ``<bindir>/CMakeFiles/CMakeTmp`` for
+its operation, and all such files will be cleaned automatically.
+For debugging, :option:`--debug-trycompile <cmake --debug-trycompile>` can be
+passed to ``cmake`` to avoid this clean.  However, multiple sequential
+``try_compile`` operations, if given the same ``<bindir>``, will reuse this
+single output directory, such that you can only debug one such ``try_compile``
+call at a time.  Use of the newer signature is recommended to simplify
+debugging of multiple ``try_compile`` operations.
 
 The options are:
 
@@ -135,18 +170,6 @@ The options are:
   Specify the :prop_tgt:`C_EXTENSIONS`, :prop_tgt:`CXX_EXTENSIONS`,
   :prop_tgt:`OBJC_EXTENSIONS`, :prop_tgt:`OBJCXX_EXTENSIONS`,
   or :prop_tgt:`CUDA_EXTENSIONS` target property of the generated project.
-
-In this version all files in ``<bindir>/CMakeFiles/CMakeTmp`` will be
-cleaned automatically.  For debugging,
-:option:`--debug-trycompile <cmake --debug-trycompile>` can be
-passed to ``cmake`` to avoid this clean.  However, multiple sequential
-``try_compile`` operations reuse this single output directory.  If you use
-:option:`--debug-trycompile <cmake --debug-trycompile>`, you can only debug
-one ``try_compile`` call at a time.  The recommended procedure is to protect
-all ``try_compile`` calls in your project by ``if(NOT DEFINED <resultVar>)``
-logic, configure with cmake all the way through once, then delete the cache
-entry associated with the try_compile call of interest, and then re-run cmake
-again with :option:`--debug-trycompile <cmake --debug-trycompile>`.
 
 Other Behavior Settings
 ^^^^^^^^^^^^^^^^^^^^^^^

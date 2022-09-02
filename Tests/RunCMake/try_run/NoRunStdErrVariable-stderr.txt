@@ -1,4 +1,4 @@
-^CMake Error at NoRunStdErrVariable.cmake:1 \(try_run\):
+^CMake Error at NoRunStdErrVariable.cmake:[0-9]+ \(try_run\):
   Error after keyword "RUN_OUTPUT_STDERR_VARIABLE":
 
     missing required value
