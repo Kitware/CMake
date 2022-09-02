@@ -301,6 +301,9 @@ External Project Definition
         If ``GIT_SHALLOW`` is enabled then ``GIT_TAG`` works only with
         branch names and tags.  A commit hash is not allowed.
 
+        Note that if not provided, ``GIT_TAG`` defaults to ``master``, not the
+        default Git branch name.
+
       ``GIT_REMOTE_NAME <name>``
         The optional name of the remote. If this option is not specified, it
         defaults to ``origin``.
