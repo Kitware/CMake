@@ -97,7 +97,7 @@ function(getMissingShlibsErrorExtra FILE RESULT_VAR)
         string(APPEND error_extra "; errors \"${deb_install_files_errors}\"")
       endif()
 
-      if(READELF_EXECUTABLE)
+      if(CPACK_READELF_EXECUTABLE)
         string(APPEND error_extra "; readelf \"\n")
 
         # Only dynamically linked ELF files are included
@@ -106,7 +106,7 @@ function(getMissingShlibsErrorExtra FILE RESULT_VAR)
           if(_FILE MATCHES "ELF.*shared object")
             string(REGEX MATCH "(^.*):" _FILE_NAME "${_FILE}")
 
-            execute_process(COMMAND ${READELF_EXECUTABLE} -d "${CMAKE_MATCH_1}"
+            execute_process(COMMAND ${CPACK_READELF_EXECUTABLE} -d "${CMAKE_MATCH_1}"
               WORKING_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}"
               RESULT_VARIABLE result
               OUTPUT_VARIABLE output
