@@ -17,12 +17,19 @@ if(NOT CMAKE_FIND_FRAMEWORKS_INCLUDED)
   macro(CMAKE_FIND_FRAMEWORKS fwk)
     set(${fwk}_FRAMEWORKS)
     if(APPLE)
+      # 'Frameworks' directory from Brew (Apple Silicon and Intel)
+      if(CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")
+        set(_brew_framework_path /opt/homebrew/Frameworks)
+      else()
+        set(_brew_framework_path /usr/local/Frameworks)
+      endif()
+
       file(TO_CMAKE_PATH "$ENV{CMAKE_FRAMEWORK_PATH}" _cmff_CMAKE_FRAMEWORK_PATH)
       set(_cmff_search_paths
             ${CMAKE_FRAMEWORK_PATH}
             ${_cmff_CMAKE_FRAMEWORK_PATH}
             ~/Library/Frameworks
-            /usr/local/Frameworks
+            ${_brew_framework_path}
             /Library/Frameworks
             /System/Library/Frameworks
             /Network/Library/Frameworks
