@@ -102,6 +102,7 @@ source file for the library is passed as an argument to
   :caption: TODO 1: MathFunctions/CMakeLists.txt
   :name: MathFunctions/CMakeLists.txt-add_library
   :language: cmake
+  :end-before: # TODO 1
 
 .. raw:: html
 
@@ -351,7 +352,7 @@ library names with ``EXTRA_LIBS``. This looks like the following:
   :name: CMakeLists.txt-target_link_libraries-EXTRA_LIBS
   :language: cmake
   :start-after: add_executable(Tutorial tutorial.cxx)
-  :end-before: # add the binary tree to the search path for include files
+  :end-before: # TODO 3
 
 .. raw:: html
 
