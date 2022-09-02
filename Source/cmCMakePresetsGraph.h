@@ -41,6 +41,7 @@ public:
     CONFIGURE_PRESET_UNREACHABLE_FROM_FILE,
     INVALID_MACRO_EXPANSION,
     BUILD_TEST_PRESETS_UNSUPPORTED,
+    PACKAGE_PRESETS_UNSUPPORTED,
     INCLUDE_UNSUPPORTED,
     INVALID_INCLUDE,
     INVALID_CONFIGURE_PRESET,
@@ -326,6 +327,42 @@ public:
     ReadFileResult VisitPresetAfterInherit(int /* version */) override;
   };
 
+  class PackagePreset : public Preset
+  {
+  public:
+    PackagePreset() = default;
+    PackagePreset(PackagePreset&& /*other*/) = default;
+    PackagePreset(const PackagePreset& /*other*/) = default;
+    PackagePreset& operator=(const PackagePreset& /*other*/) = default;
+    ~PackagePreset() override = default;
+#if __cplusplus >= 201703L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L)
+    PackagePreset& operator=(PackagePreset&& /*other*/) = default;
+#else
+    // The move assignment operators for several STL classes did not become
+    // noexcept until C++17, which causes some tools to warn about this move
+    // assignment operator throwing an exception when it shouldn't.
+    PackagePreset& operator=(PackagePreset&& /*other*/) = delete;
+#endif
+
+    std::string ConfigurePreset;
+    cm::optional<bool> InheritConfigureEnvironment;
+    std::vector<std::string> Generators;
+    std::vector<std::string> Configurations;
+    std::map<std::string, std::string> Variables;
+    std::string ConfigFile;
+
+    cm::optional<bool> DebugOutput;
+    cm::optional<bool> VerboseOutput;
+
+    std::string PackageName;
+    std::string PackageVersion;
+    std::string PackageDirectory;
+    std::string VendorName;
+
+    ReadFileResult VisitPresetInherit(const Preset& parent) override;
+    ReadFileResult VisitPresetAfterInherit(int /* version */) override;
+  };
+
   template <class T>
   class PresetPair
   {
@@ -337,10 +374,12 @@ public:
   std::map<std::string, PresetPair<ConfigurePreset>> ConfigurePresets;
   std::map<std::string, PresetPair<BuildPreset>> BuildPresets;
   std::map<std::string, PresetPair<TestPreset>> TestPresets;
+  std::map<std::string, PresetPair<PackagePreset>> PackagePresets;
 
   std::vector<std::string> ConfigurePresetOrder;
   std::vector<std::string> BuildPresetOrder;
   std::vector<std::string> TestPresetOrder;
+  std::vector<std::string> PackagePresetOrder;
 
   std::string SourceDir;
   std::vector<std::unique_ptr<File>> Files;
@@ -383,13 +422,26 @@ public:
     return "";
   }
 
+  enum class PrintPrecedingNewline
+  {
+    False,
+    True,
+  };
+  static void printPrecedingNewline(PrintPrecedingNewline* p);
+
   static void PrintPresets(
     const std::vector<const cmCMakePresetsGraph::Preset*>& presets);
-  void PrintConfigurePresetList() const;
   void PrintConfigurePresetList(
-    const std::function<bool(const ConfigurePreset&)>& filter) const;
-  void PrintBuildPresetList() const;
-  void PrintTestPresetList() const;
+    PrintPrecedingNewline* newline = nullptr) const;
+  void PrintConfigurePresetList(
+    const std::function<bool(const ConfigurePreset&)>& filter,
+    PrintPrecedingNewline* newline = nullptr) const;
+  void PrintBuildPresetList(PrintPrecedingNewline* newline = nullptr) const;
+  void PrintTestPresetList(PrintPrecedingNewline* newline = nullptr) const;
+  void PrintPackagePresetList(PrintPrecedingNewline* newline = nullptr) const;
+  void PrintPackagePresetList(
+    const std::function<bool(const PackagePreset&)>& filter,
+    PrintPrecedingNewline* newline = nullptr) const;
   void PrintAllPresets() const;
 
 private:

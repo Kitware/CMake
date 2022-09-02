@@ -782,6 +782,7 @@ enum class ListPresets
   Configure,
   Build,
   Test,
+  Package,
   All,
 };
 }
@@ -1137,6 +1138,8 @@ void cmake::SetArgs(const std::vector<std::string>& args)
         listPresets = ListPresets::Build;
       } else if (value == "test") {
         listPresets = ListPresets::Test;
+      } else if (value == "package") {
+        listPresets = ListPresets::Package;
       } else if (value == "all") {
         listPresets = ListPresets::All;
       } else {
@@ -1304,6 +1307,8 @@ void cmake::SetArgs(const std::vector<std::string>& args)
         presetsGraph.PrintBuildPresetList();
       } else if (listPresets == ListPresets::Test) {
         presetsGraph.PrintTestPresetList();
+      } else if (listPresets == ListPresets::Package) {
+        presetsGraph.PrintPackagePresetList();
       } else if (listPresets == ListPresets::All) {
         presetsGraph.PrintAllPresets();
       }

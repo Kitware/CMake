@@ -1,6 +1,7 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
+#include <algorithm>
 #include <cstddef>
 #include <functional>
 #include <iostream>
@@ -11,10 +12,12 @@
 #include <utility>
 #include <vector>
 
+#include <cm/optional>
 #include <cmext/algorithm>
 
 #include "cmsys/Encoding.hxx"
 
+#include "cmCMakePresetsGraph.h"
 #include "cmCPackGenerator.h"
 #include "cmCPackGeneratorFactory.h"
 #include "cmCPackLog.h"
@@ -58,6 +61,8 @@ const char* cmDocumentationOptions[][2] = {
   { "-R <packageVersion>", "Override/define CPACK_PACKAGE_VERSION" },
   { "-B <packageDirectory>", "Override/define CPACK_PACKAGE_DIRECTORY" },
   { "--vendor <vendorName>", "Override/define CPACK_PACKAGE_VENDOR" },
+  { "--preset", "Read arguments from a package preset" },
+  { "--list-presets", "List available package presets" },
   { nullptr, nullptr }
 };
 
@@ -115,6 +120,9 @@ int main(int argc, char const* const* argv)
   std::string cpackProjectPatch;
   std::string cpackProjectVendor;
   std::string cpackConfigFile;
+
+  std::string preset;
+  bool listPresets = false;
 
   std::map<std::string, std::string> definitions;
 
@@ -182,6 +190,10 @@ int main(int argc, char const* const* argv)
                      CommandArgument::setToValue(cpackProjectPatch) },
     CommandArgument{ "--vendor", CommandArgument::Values::One,
                      CommandArgument::setToValue(cpackProjectVendor) },
+    CommandArgument{ "--preset", CommandArgument::Values::One,
+                     CommandArgument::setToValue(preset) },
+    CommandArgument{ "--list-presets", CommandArgument::Values::Zero,
+                     CommandArgument::setToTrue(listPresets) },
     CommandArgument{
       "-D", CommandArgument::Values::One,
       [&log, &definitions](const std::string& arg, cmake*,
@@ -228,6 +240,160 @@ int main(int argc, char const* const* argv)
     }
   }
 
+  cmCPackGeneratorFactory generators;
+  generators.SetLogger(&log);
+
+  // Set up presets
+  if (!preset.empty() || listPresets) {
+    const auto workingDirectory = cmSystemTools::GetCurrentWorkingDirectory();
+
+    auto const presetGeneratorsPresent =
+      [&generators](const cmCMakePresetsGraph::PackagePreset& p) {
+        return std::all_of(p.Generators.begin(), p.Generators.end(),
+                           [&generators](const std::string& gen) {
+                             return generators.GetGeneratorsList().count(
+                                      gen) != 0;
+                           });
+      };
+
+    cmCMakePresetsGraph presetsGraph;
+    auto result = presetsGraph.ReadProjectPresets(workingDirectory);
+    if (result != cmCMakePresetsGraph::ReadFileResult::READ_OK) {
+      cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
+                  "Could not read presets from "
+                    << workingDirectory << ": "
+                    << cmCMakePresetsGraph::ResultToString(result)
+                    << std::endl);
+      return 1;
+    }
+
+    if (listPresets) {
+      presetsGraph.PrintPackagePresetList(presetGeneratorsPresent);
+      return 0;
+    }
+
+    auto presetPair = presetsGraph.PackagePresets.find(preset);
+    if (presetPair == presetsGraph.PackagePresets.end()) {
+      cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
+                  "No such package preset in " << workingDirectory << ": \""
+                                               << preset << '"' << std::endl);
+      presetsGraph.PrintPackagePresetList(presetGeneratorsPresent);
+      return 1;
+    }
+
+    if (presetPair->second.Unexpanded.Hidden) {
+      cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
+                  "Cannot use hidden package preset in "
+                    << workingDirectory << ": \"" << preset << '"'
+                    << std::endl);
+      presetsGraph.PrintPackagePresetList(presetGeneratorsPresent);
+      return 1;
+    }
+
+    auto const& expandedPreset = presetPair->second.Expanded;
+    if (!expandedPreset) {
+      cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
+                  "Could not evaluate package preset \""
+                    << preset << "\": Invalid macro expansion" << std::endl);
+      presetsGraph.PrintPackagePresetList(presetGeneratorsPresent);
+      return 1;
+    }
+
+    if (!expandedPreset->ConditionResult) {
+      cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
+                  "Cannot use disabled package preset in "
+                    << workingDirectory << ": \"" << preset << '"'
+                    << std::endl);
+      presetsGraph.PrintPackagePresetList(presetGeneratorsPresent);
+      return 1;
+    }
+
+    if (!presetGeneratorsPresent(presetPair->second.Unexpanded)) {
+      cmCPack_Log(&log, cmCPackLog::LOG_ERROR, "Cannot use preset");
+      presetsGraph.PrintPackagePresetList(presetGeneratorsPresent);
+      return 1;
+    }
+
+    auto configurePresetPair =
+      presetsGraph.ConfigurePresets.find(expandedPreset->ConfigurePreset);
+    if (configurePresetPair == presetsGraph.ConfigurePresets.end()) {
+      cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
+                  "No such configure preset in "
+                    << workingDirectory << ": \""
+                    << expandedPreset->ConfigurePreset << '"' << std::endl);
+      presetsGraph.PrintConfigurePresetList();
+      return 1;
+    }
+
+    if (configurePresetPair->second.Unexpanded.Hidden) {
+      cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
+                  "Cannot use hidden configure preset in "
+                    << workingDirectory << ": \""
+                    << expandedPreset->ConfigurePreset << '"' << std::endl);
+      presetsGraph.PrintConfigurePresetList();
+      return 1;
+    }
+
+    auto const& expandedConfigurePreset = configurePresetPair->second.Expanded;
+    if (!expandedConfigurePreset) {
+      cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
+                  "Could not evaluate configure preset \""
+                    << expandedPreset->ConfigurePreset
+                    << "\": Invalid macro expansion" << std::endl);
+      return 1;
+    }
+
+    cmSystemTools::ChangeDirectory(expandedConfigurePreset->BinaryDir);
+
+    auto presetEnvironment = expandedPreset->Environment;
+    for (auto const& var : presetEnvironment) {
+      if (var.second) {
+        cmSystemTools::PutEnv(cmStrCat(var.first, '=', *var.second));
+      }
+    }
+
+    if (!expandedPreset->ConfigFile.empty() && cpackConfigFile.empty()) {
+      cpackConfigFile = expandedPreset->ConfigFile;
+    }
+
+    if (!expandedPreset->Generators.empty() && generator.empty()) {
+      generator = cmJoin(expandedPreset->Generators, ";");
+    }
+
+    if (!expandedPreset->Configurations.empty() && cpackBuildConfig.empty()) {
+      cpackBuildConfig = cmJoin(expandedPreset->Configurations, ";");
+    }
+
+    definitions.insert(expandedPreset->Variables.begin(),
+                       expandedPreset->Variables.end());
+
+    if (expandedPreset->DebugOutput == true) {
+      debugLambda("", &cminst, &globalMF);
+    }
+
+    if (expandedPreset->VerboseOutput == true) {
+      verboseLambda("", &cminst, &globalMF);
+    }
+
+    if (!expandedPreset->PackageName.empty() && cpackProjectName.empty()) {
+      cpackProjectName = expandedPreset->PackageName;
+    }
+
+    if (!expandedPreset->PackageVersion.empty() &&
+        cpackProjectVersion.empty()) {
+      cpackProjectVersion = expandedPreset->PackageVersion;
+    }
+
+    if (!expandedPreset->PackageDirectory.empty() &&
+        cpackProjectDirectory.empty()) {
+      cpackProjectDirectory = expandedPreset->PackageDirectory;
+    }
+
+    if (!expandedPreset->VendorName.empty() && cpackProjectVendor.empty()) {
+      cpackProjectVendor = expandedPreset->VendorName;
+    }
+  }
+
   cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE,
               "Read CPack config file: " << cpackConfigFile << std::endl);
 
@@ -237,9 +403,6 @@ int main(int argc, char const* const* argv)
                                "/CPackConfig.cmake");
     cpackConfigFileSpecified = false;
   }
-
-  cmCPackGeneratorFactory generators;
-  generators.SetLogger(&log);
 
   cmDocumentation doc;
   doc.addCPackStandardDocSections();

@@ -34,7 +34,7 @@ using ArchToolsetStrategy = cmCMakePresetsGraph::ArchToolsetStrategy;
 using JSONHelperBuilder = cmJSONHelperBuilder<ReadFileResult>;
 
 constexpr int MIN_VERSION = 1;
-constexpr int MAX_VERSION = 5;
+constexpr int MAX_VERSION = 6;
 
 struct CMakeVersion
 {
@@ -49,6 +49,7 @@ struct RootPresets
   std::vector<cmCMakePresetsGraph::ConfigurePreset> ConfigurePresets;
   std::vector<cmCMakePresetsGraph::BuildPreset> BuildPresets;
   std::vector<cmCMakePresetsGraph::TestPreset> TestPresets;
+  std::vector<cmCMakePresetsGraph::PackagePreset> PackagePresets;
   std::vector<std::string> Include;
 };
 
@@ -281,6 +282,8 @@ auto const RootPresetsHelper =
           cmCMakePresetsGraphInternal::BuildPresetsHelper, false)
     .Bind("testPresets"_s, &RootPresets::TestPresets,
           cmCMakePresetsGraphInternal::TestPresetsHelper, false)
+    .Bind("packagePresets"_s, &RootPresets::PackagePresets,
+          cmCMakePresetsGraphInternal::PackagePresetsHelper, false)
     .Bind("cmakeMinimumRequired"_s, &RootPresets::CMakeMinimumRequired,
           CMakeVersionHelper, false)
     .Bind("include"_s, &RootPresets::Include, IncludeVectorHelper, false)
@@ -458,6 +461,11 @@ cmCMakePresetsGraph::ReadFileResult cmCMakePresetsGraph::ReadJSONFile(
     return ReadFileResult::BUILD_TEST_PRESETS_UNSUPPORTED;
   }
 
+  // Support for package presets added in version 6.
+  if (v < 6 && root.isMember("packagePresets")) {
+    return ReadFileResult::PACKAGE_PRESETS_UNSUPPORTED;
+  }
+
   // Support for include added in version 4.
   if (v < 4 && root.isMember("include")) {
     return ReadFileResult::INCLUDE_UNSUPPORTED;
@@ -571,6 +579,25 @@ cmCMakePresetsGraph::ReadFileResult cmCMakePresetsGraph::ReadJSONFile(
     }
 
     this->TestPresetOrder.push_back(preset.Name);
+  }
+
+  for (auto& preset : presets.PackagePresets) {
+    preset.OriginFile = file;
+    if (preset.Name.empty()) {
+      return ReadFileResult::INVALID_PRESET;
+    }
+
+    PresetPair<PackagePreset> presetPair;
+    presetPair.Unexpanded = preset;
+    presetPair.Expanded = cm::nullopt;
+    if (!this->PackagePresets.emplace(preset.Name, presetPair).second) {
+      return ReadFileResult::DUPLICATE_PRESETS;
+    }
+
+    // Support for conditions added in version 3, but this requires version 5
+    // already, so no action needed.
+
+    this->PackagePresetOrder.push_back(preset.Name);
   }
 
   auto const includeFile = [this, &inProgressFiles, file](

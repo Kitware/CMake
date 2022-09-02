@@ -119,6 +119,14 @@ Options
 
   Override/define :variable:`CPACK_PACKAGE_VENDOR`.
 
+.. option:: --preset <presetName>
+
+  Use a preset from :manual:`cmake-presets(7)`.
+
+.. option:: --list-presets
+
+  List presets from :manual:`cmake-presets(7)`.
+
 .. include:: OPTIONS_HELP.txt
 
 See Also
