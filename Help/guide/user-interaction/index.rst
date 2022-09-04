@@ -675,7 +675,7 @@ and use it as the :variable:`CMAKE_MAKE_PROGRAM`. For
 completeness, ``nmake`` is an alternative tool which
 can process the output of the
 :generator:`NMake Makefiles JOM` generator, but doing
-so would be a pessimisation.
+so would be a pessimization.
 
 Software Installation
 =====================
