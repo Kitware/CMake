@@ -772,7 +772,7 @@ to the declared details and leaving
     googletest
     GIT_REPOSITORY https://github.com/google/googletest.git
     GIT_TAG        703bd9caab50b139428cea1aaff9974ebee5742e # release-1.10.0
-    FIND_PACKAGE_ARGS NAMES gtest
+    FIND_PACKAGE_ARGS NAMES GTest
   )
   FetchContent_Declare(
     Catch2
@@ -786,7 +786,7 @@ to the declared details and leaving
 
 For ``Catch2``, no additional arguments to :command:`find_package` are needed,
 so no additional arguments are provided after the ``FIND_PACKAGE_ARGS``
-keyword.  For ``googletest``, its package is more commonly called ``gtest``,
+keyword.  For ``googletest``, its package is more commonly called ``GTest``,
 so arguments are added to support it being found by that name.
 
 If the user wanted to disable :command:`FetchContent_MakeAvailable` from
