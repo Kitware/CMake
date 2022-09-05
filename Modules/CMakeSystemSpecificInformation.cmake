@@ -16,6 +16,7 @@ set(UNIX   )
 set(CYGWIN )
 set(MSYS )
 set(WIN32  )
+set(BSD )
 
 function(_cmake_record_install_prefix )
   set(_CMAKE_SYSTEM_PREFIX_PATH_INSTALL_PREFIX_VALUE "${CMAKE_INSTALL_PREFIX}" PARENT_SCOPE)
