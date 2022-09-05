@@ -3,8 +3,7 @@
 # see http://archive.netbsd.se/?ml=dfbsd-users&a=2007-07&m=4678361
 
 include(Platform/FreeBSD)
-unset(FREEBSD)
-set(DRAGONFLYBSD 1)
+set(BSD "DragonFlyBSD")
 
 # DragonFly BSD requires -z origin to enable $ORIGIN expansion in RPATH.
 # This is not required for FreeBSD since 10.2-RELEASE.
