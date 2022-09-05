@@ -44,7 +44,7 @@ Let's also add version numbering to the ``MathFunctions`` library. In
   :end-before: # install rules
 
 From the ``Step12`` directory, create ``debug`` and ``release``
-subbdirectories. The layout will look like:
+subdirectories. The layout will look like:
 
 .. code-block:: none
 
