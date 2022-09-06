@@ -726,6 +726,7 @@ void cmGlobalIarGenerator::Generate()
   GLOBALCFG.scanfFmt = globalMakefile->GetSafeDefinition("IAR_GENERAL_SCANF_FORMATTER");
   GLOBALCFG.printfFmt = globalMakefile->GetSafeDefinition("IAR_GENERAL_PRINTF_FORMATTER");
   GLOBALCFG.semihostingEnabled = globalMakefile->GetSafeDefinition("IAR_SEMIHOSTING_ENABLE");
+  GLOBALCFG.jobs = globalMakefile->GetSafeDefinition("IAR_BUILD_JOBS");
 
   for (int i = 0; i < SCANF_FORMATTING_CNT; i++)
   {
@@ -2348,7 +2349,7 @@ void cmGlobalIarGenerator::Project::CreateDebuggerFile()
 void cmGlobalIarGenerator::Workspace::CreateWorkspaceFile()
 {
   const static std::string errorCheck =
-      "if %ERRORLEVEL% NEQ 0 (SET RETURN_VALUE=1)\n";
+      "if %ERRORLEVEL% NEQ 0 exit(1)\n";
   std::string wsFileName = this->workspaceDir + "/" + this->name + ".eww";
   this->workspacePath = wsFileName;
   std::string batFileName = this->workspaceDir + "/BUILD_" + this->name + ".bat";
@@ -2430,7 +2431,13 @@ void cmGlobalIarGenerator::Workspace::CreateWorkspaceFile()
           std::replace( projPathWin.begin(), projPathWin.end(), '/', '\\');
           batchOutput += "\"" + iarBuildCmd + "\" \""
                   + projPathWin + "\" -build "
-                  + cmGlobalIarGenerator::GLOBALCFG.buildType +" -log all\n";
+                  + cmGlobalIarGenerator::GLOBALCFG.buildType + " -log all";
+          if (!cmGlobalIarGenerator::GLOBALCFG.jobs.empty())
+          {
+              batchOutput += " -parallel " + cmGlobalIarGenerator::GLOBALCFG.jobs;
+          }
+
+          batchOutput += "\n";
           batchOutput += errorCheck;
       }
       else
@@ -2464,7 +2471,13 @@ void cmGlobalIarGenerator::Workspace::CreateWorkspaceFile()
       std::replace( projPathWin.begin(), projPathWin.end(), '/', '\\');
       batchOutput += "\"" + iarBuildCmd + "\" \""
               + projPathWin + "\" -build "
-              + cmGlobalIarGenerator::GLOBALCFG.buildType +" -log all\n";
+              + cmGlobalIarGenerator::GLOBALCFG.buildType +" -log all";
+      if (!cmGlobalIarGenerator::GLOBALCFG.jobs.empty())
+      {
+          batchOutput += " -parallel " + cmGlobalIarGenerator::GLOBALCFG.jobs;
+      }
+
+      batchOutput += "\n";
       batchOutput += errorCheck;
     }
 

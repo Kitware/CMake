@@ -363,6 +363,7 @@ private:
     int printfFmtId  ;
     std::string bufferedTermOut;
     std::string semihostingEnabled;
+    std::string jobs  ;
   };
 
   static const char* PROJ_FILE_EXT;
