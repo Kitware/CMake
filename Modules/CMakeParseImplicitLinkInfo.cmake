@@ -22,7 +22,7 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var fwk_var log_var obj
   set(log "")
 
   set(keywordArgs)
-  set(oneValueArgs COMPUTE_IMPLICIT_OBJECTS)
+  set(oneValueArgs COMPUTE_IMPLICIT_OBJECTS LANGUAGE)
   set(multiValueArgs )
   cmake_parse_arguments(EXTRA_PARSE "${keywordArgs}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
@@ -76,6 +76,11 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var fwk_var log_var obj
       endif()
     endif()
     set(is_msvc 0)
+    if(EXTRA_PARSE_LANGUAGE AND
+      ("x${CMAKE_${EXTRA_PARSE_LANGUAGE}_ID}" STREQUAL "xMSVC" OR
+       "x${CMAKE_${EXTRA_PARSE_LANGUAGE}_SIMULATE_ID}" STREQUAL "xMSVC"))
+      set(is_msvc 1)
+    endif()
     set(search_static 0)
     if("${cmd}" MATCHES "${linker_regex}")
       string(APPEND log "  link line: [${line}]\n")
