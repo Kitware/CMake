@@ -794,7 +794,6 @@ public:
   cmValue GetProperty(const std::string& prop, bool chain) const;
   bool GetPropertyAsBool(const std::string& prop) const;
   std::vector<std::string> GetPropertyKeys() const;
-  void CheckProperty(const std::string& prop) const;
 
   //! Initialize a makefile from its parent
   void InitializeFromParent(cmMakefile* parent);

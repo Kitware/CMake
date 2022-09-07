@@ -1881,11 +1881,57 @@ void cmTarget::AppendBuildInterfaceIncludes()
   }
 }
 
+namespace {
+bool CheckLinkLibraryPattern(cm::string_view property,
+                             const std::vector<BT<std::string>>& value,
+                             cmake* context)
+{
+  // Look for <LINK_LIBRARY:> and </LINK_LIBRARY:> internal tags
+  static cmsys::RegularExpression linkPattern(
+    "(^|;)(</?LINK_(LIBRARY|GROUP):[^;>]*>)(;|$)");
+
+  bool isValid = true;
+
+  for (const auto& item : value) {
+    if (!linkPattern.find(item.Value)) {
+      continue;
+    }
+
+    isValid = false;
+
+    // Report an error.
+    context->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat(
+        "Property ", property, " contains the invalid item \"",
+        linkPattern.match(2), "\". The ", property,
+        " property may contain the generator-expression \"$<LINK_",
+        linkPattern.match(3),
+        ":...>\" which may be used to specify how the libraries are linked."),
+      item.Backtrace);
+  }
+
+  return isValid;
+}
+}
+
 void cmTarget::FinalizeTargetConfiguration(
   const cmBTStringRange& noConfigCompileDefinitions,
   cm::optional<std::map<std::string, cmValue>>& perConfigCompileDefinitions)
 {
   if (this->GetType() == cmStateEnums::GLOBAL_TARGET) {
+    return;
+  }
+
+  if (!CheckLinkLibraryPattern("LINK_LIBRARIES"_s,
+                               this->impl->LinkImplementationPropertyEntries,
+                               this->GetMakefile()->GetCMakeInstance()) ||
+      !CheckLinkLibraryPattern("INTERFACE_LINK_LIBRARIES"_s,
+                               this->impl->LinkInterfacePropertyEntries,
+                               this->GetMakefile()->GetCMakeInstance()) ||
+      !CheckLinkLibraryPattern("INTERFACE_LINK_LIBRARIES_DIRECT"_s,
+                               this->impl->LinkInterfaceDirectPropertyEntries,
+                               this->GetMakefile()->GetCMakeInstance())) {
     return;
   }
 
@@ -1969,27 +2015,6 @@ void cmTarget::InsertPrecompileHeader(BT<std::string> const& entry)
 }
 
 namespace {
-void CheckLinkLibraryPattern(const std::string& property,
-                             const std::string& value, cmMakefile* context)
-{
-  // Look for <LINK_LIBRARY:> and </LINK_LIBRARY:> internal tags
-  static cmsys::RegularExpression linkPattern(
-    "(^|;)(</?LINK_(LIBRARY|GROUP):[^;>]*>)(;|$)");
-  if (!linkPattern.find(value)) {
-    return;
-  }
-
-  // Report an error.
-  context->IssueMessage(
-    MessageType::FATAL_ERROR,
-    cmStrCat(
-      "Property ", property, " contains the invalid item \"",
-      linkPattern.match(2), "\". The ", property,
-      " property may contain the generator-expression \"$<LINK_",
-      linkPattern.match(3),
-      ":...>\" which may be used to specify how the libraries are linked."));
-}
-
 void CheckLINK_INTERFACE_LIBRARIES(const std::string& prop,
                                    const std::string& value,
                                    cmMakefile* context, bool imported)
@@ -2024,13 +2049,6 @@ void CheckLINK_INTERFACE_LIBRARIES(const std::string& prop,
     }
     context->IssueMessage(MessageType::FATAL_ERROR, e.str());
   }
-
-  CheckLinkLibraryPattern(base, value, context);
-}
-
-void CheckLINK_LIBRARIES(const std::string& value, cmMakefile* context)
-{
-  CheckLinkLibraryPattern("LINK_LIBRARIES", value, context);
 }
 
 void CheckINTERFACE_LINK_LIBRARIES(const std::string& value,
@@ -2051,8 +2069,6 @@ void CheckINTERFACE_LINK_LIBRARIES(const std::string& value,
 
     context->IssueMessage(MessageType::FATAL_ERROR, e.str());
   }
-
-  CheckLinkLibraryPattern("INTERFACE_LINK_LIBRARIES", value, context);
 }
 
 void CheckIMPORTED_GLOBAL(const cmTarget* target, cmMakefile* context)
@@ -2084,10 +2100,6 @@ void cmTarget::CheckProperty(const std::string& prop,
   } else if (cmHasLiteralPrefix(prop, "IMPORTED_LINK_INTERFACE_LIBRARIES")) {
     if (cmValue value = this->GetProperty(prop)) {
       CheckLINK_INTERFACE_LIBRARIES(prop, *value, context, true);
-    }
-  } else if (prop == "LINK_LIBRARIES") {
-    if (cmValue value = this->GetProperty(prop)) {
-      CheckLINK_LIBRARIES(*value, context);
     }
   } else if (prop == "INTERFACE_LINK_LIBRARIES") {
     if (cmValue value = this->GetProperty(prop)) {
