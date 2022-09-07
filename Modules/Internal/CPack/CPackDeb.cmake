@@ -37,8 +37,8 @@ endfunction()
 
 #extract library name and version for given shared object
 function(extract_so_info shared_object libname version)
-  if(READELF_EXECUTABLE)
-    execute_process(COMMAND "${READELF_EXECUTABLE}" -d "${shared_object}"
+  if(CPACK_READELF_EXECUTABLE)
+    execute_process(COMMAND "${CPACK_READELF_EXECUTABLE}" -d "${shared_object}"
       WORKING_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}"
       RESULT_VARIABLE result
       OUTPUT_VARIABLE output
@@ -197,15 +197,15 @@ function(cpack_deb_prepare_package_vars)
     endforeach()
   endif()
 
-  find_program(READELF_EXECUTABLE NAMES readelf)
+  find_program(CPACK_READELF_EXECUTABLE NAMES readelf)
 
   if(CPACK_DEBIAN_DEBUGINFO_PACKAGE AND CPACK_DEB_UNSTRIPPED_FILES)
-    find_program(OBJCOPY_EXECUTABLE NAMES objcopy)
+    find_program(CPACK_OBJCOPY_EXECUTABLE NAMES objcopy)
 
-    if(NOT OBJCOPY_EXECUTABLE)
+    if(NOT CPACK_OBJCOPY_EXECUTABLE)
       message(FATAL_ERROR "debuginfo packages require the objcopy tool")
     endif()
-    if(NOT READELF_EXECUTABLE)
+    if(NOT CPACK_READELF_EXECUTABLE)
       message(FATAL_ERROR "debuginfo packages require the readelf tool")
     endif()
 
@@ -213,7 +213,7 @@ function(cpack_deb_prepare_package_vars)
     foreach(_FILE IN LISTS CPACK_DEB_UNSTRIPPED_FILES)
 
       # Get the file's Build ID
-      execute_process(COMMAND env LC_ALL=C ${READELF_EXECUTABLE} -n "${_FILE}"
+      execute_process(COMMAND env LC_ALL=C ${CPACK_READELF_EXECUTABLE} -n "${_FILE}"
         WORKING_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}"
         OUTPUT_VARIABLE READELF_OUTPUT
         RESULT_VARIABLE READELF_RESULT
@@ -221,7 +221,7 @@ function(cpack_deb_prepare_package_vars)
         OUTPUT_STRIP_TRAILING_WHITESPACE )
       if(NOT READELF_RESULT EQUAL 0)
         message(FATAL_ERROR "CPackDeb: readelf: '${READELF_ERROR}';\n"
-            "executed command: '${READELF_EXECUTABLE} -n ${_FILE}'")
+            "executed command: '${CPACK_READELF_EXECUTABLE} -n ${_FILE}'")
       endif()
       if(READELF_OUTPUT MATCHES "Build ID: ([0-9a-zA-Z][0-9a-zA-Z])([0-9a-zA-Z]*)")
         set(_BUILD_ID_START ${CMAKE_MATCH_1})
@@ -235,7 +235,7 @@ function(cpack_deb_prepare_package_vars)
       set(_FILE_DBGSYM ${_DBGSYM_ROOT}/usr/lib/debug/.build-id/${_BUILD_ID_START}/${_BUILD_ID_REMAINING}.debug)
       get_filename_component(_OUT_DIR "${_FILE_DBGSYM}" DIRECTORY)
       file(MAKE_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}/${_OUT_DIR}")
-      execute_process(COMMAND ${OBJCOPY_EXECUTABLE} --only-keep-debug "${_FILE}" "${_FILE_DBGSYM}"
+      execute_process(COMMAND ${CPACK_OBJCOPY_EXECUTABLE} --only-keep-debug "${_FILE}" "${_FILE_DBGSYM}"
         WORKING_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}"
         OUTPUT_VARIABLE OBJCOPY_OUTPUT
         RESULT_VARIABLE OBJCOPY_RESULT
@@ -243,9 +243,9 @@ function(cpack_deb_prepare_package_vars)
         OUTPUT_STRIP_TRAILING_WHITESPACE )
       if(NOT OBJCOPY_RESULT EQUAL 0)
         message(FATAL_ERROR "CPackDeb: objcopy: '${OBJCOPY_ERROR}';\n"
-            "executed command: '${OBJCOPY_EXECUTABLE} --only-keep-debug ${_FILE} ${_FILE_DBGSYM}'")
+            "executed command: '${CPACK_OBJCOPY_EXECUTABLE} --only-keep-debug ${_FILE} ${_FILE_DBGSYM}'")
       endif()
-      execute_process(COMMAND ${OBJCOPY_EXECUTABLE} --strip-unneeded ${_FILE}
+      execute_process(COMMAND ${CPACK_OBJCOPY_EXECUTABLE} --strip-unneeded ${_FILE}
         WORKING_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}"
         OUTPUT_VARIABLE OBJCOPY_OUTPUT
         RESULT_VARIABLE OBJCOPY_RESULT
@@ -253,9 +253,9 @@ function(cpack_deb_prepare_package_vars)
         OUTPUT_STRIP_TRAILING_WHITESPACE )
       if(NOT OBJCOPY_RESULT EQUAL 0)
         message(FATAL_ERROR "CPackDeb: objcopy: '${OBJCOPY_ERROR}';\n"
-            "executed command: '${OBJCOPY_EXECUTABLE} --strip-debug ${_FILE}'")
+            "executed command: '${CPACK_OBJCOPY_EXECUTABLE} --strip-debug ${_FILE}'")
       endif()
-      execute_process(COMMAND ${OBJCOPY_EXECUTABLE} --add-gnu-debuglink=${_FILE_DBGSYM} ${_FILE}
+      execute_process(COMMAND ${CPACK_OBJCOPY_EXECUTABLE} --add-gnu-debuglink=${_FILE_DBGSYM} ${_FILE}
         WORKING_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}"
         OUTPUT_VARIABLE OBJCOPY_OUTPUT
         RESULT_VARIABLE OBJCOPY_RESULT
@@ -263,7 +263,7 @@ function(cpack_deb_prepare_package_vars)
         OUTPUT_STRIP_TRAILING_WHITESPACE )
       if(NOT OBJCOPY_RESULT EQUAL 0)
         message(FATAL_ERROR "CPackDeb: objcopy: '${OBJCOPY_ERROR}';\n"
-            "executed command: '${OBJCOPY_EXECUTABLE} --add-gnu-debuglink=${_FILE_DBGSYM} ${_FILE}'")
+            "executed command: '${CPACK_OBJCOPY_EXECUTABLE} --add-gnu-debuglink=${_FILE_DBGSYM} ${_FILE}'")
       endif()
     endforeach()
   endif()
@@ -652,7 +652,7 @@ function(cpack_deb_prepare_package_vars)
   unset(CPACK_DEBIAN_PACKAGE_SHLIBS_LIST)
 
   if(CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS)
-    if(READELF_EXECUTABLE)
+    if(CPACK_READELF_EXECUTABLE)
       foreach(_FILE IN LISTS CPACK_DEB_SHARED_OBJECT_FILES)
         extract_so_info("${_FILE}" libname soversion)
         if(libname AND DEFINED soversion)

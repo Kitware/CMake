@@ -472,6 +472,33 @@ The following variables are for advanced uses of CPack:
   target or when running :manual:`cpack <cpack(1)>` without the
   :option:`-G <cpack -G>` option.
 
+.. variable:: CPACK_READELF_EXECUTABLE
+
+  .. versionadded:: 3.25
+
+  Specify the ``readelf`` executable path used by CPack.
+  The default value will be ``CMAKE_READELF`` when set.  Otherwise,
+  the default value will be empty and CPack will use :command:`find_program`
+  to determine the ``readelf`` path when needed.
+
+.. variable:: CPACK_OBJCOPY_EXECUTABLE
+
+  .. versionadded:: 3.25
+
+  Specify the ``objcopy`` executable path used by CPack.
+  The default value will be ``CMAKE_OBJCOPY`` when set.  Otherwise,
+  the default value will be empty and CPack will use :command:`find_program`
+  to determine the ``objcopy`` path when needed.
+
+.. variable:: CPACK_OBJDUMP_EXECUTABLE
+
+  .. versionadded:: 3.25
+
+  Specify the ``objdump`` executable path used by CPack.
+  The default value will be ``CMAKE_OBJDUMP`` when set.  Otherwise,
+  the default value will be empty and CPack will use :command:`find_program`
+  to determine the ``objdump`` path when needed.
+
 #]=======================================================================]
 
 # Define this var in order to avoid (or warn) concerning multiple inclusion
@@ -590,6 +617,16 @@ _cpack_set_default(CPACK_RESOURCE_FILE_WELCOME
   "${CMAKE_ROOT}/Templates/CPack.GenericWelcome.txt")
 
 _cpack_set_default(CPACK_MODULE_PATH "${CMAKE_MODULE_PATH}")
+
+if(CMAKE_READELF)
+  _cpack_set_default(CPACK_READELF_EXECUTABLE "${CMAKE_READELF}")
+endif()
+if(CMAKE_OBJCOPY)
+  _cpack_set_default(CPACK_OBJCOPY_EXECUTABLE "${CMAKE_OBJCOPY}")
+endif()
+if(CMAKE_OBJDUMP)
+  _cpack_set_default(CPACK_OBJDUMP_EXECUTABLE "${CMAKE_OBJDUMP}")
+endif()
 
 # Set default directory creation permissions mode
 if(CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS)
