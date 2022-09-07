@@ -30,9 +30,9 @@ applicable to the case at hand). The previous state of the variable's value
 stays the same in the current scope (e.g., if it was undefined before, it is
 still undefined and if it had a value, it is still that value).
 
-The :command:`block(PROPAGATE)` command can be used as an alternate method to
-:command:`set(PARENT_SCOPE)` and :command:`unset(PARENT_SCOPE)` commands to
-update the parent scope.
+The :command:`block(PROPAGATE)` and :command:`return(PROPAGATE)` commands can
+be used as an alternate method to the :command:`set(PARENT_SCOPE)` and
+:command:`unset(PARENT_SCOPE)` commands to update the parent scope.
 
 Set Cache Entry
 ^^^^^^^^^^^^^^^

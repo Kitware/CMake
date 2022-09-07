@@ -260,7 +260,7 @@ auto cmForEachFunctionBlocker::invoke(
     cmExecutionStatus status(mf);
     mf.ExecuteCommand(func, status);
     if (status.GetReturnInvoked()) {
-      inStatus.SetReturnInvoked();
+      inStatus.SetReturnInvoked(status.GetReturnVariables());
       result.Break = true;
       break;
     }

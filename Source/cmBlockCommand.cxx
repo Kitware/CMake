@@ -73,6 +73,7 @@ public:
 
 private:
   cmMakefile* Makefile;
+  ScopeSet Scopes;
   BlockScopePushPop BlockScope;
   std::vector<std::string> VariableNames;
 };
@@ -81,6 +82,7 @@ cmBlockFunctionBlocker::cmBlockFunctionBlocker(
   cmMakefile* const mf, const ScopeSet& scopes,
   std::vector<std::string> variableNames)
   : Makefile{ mf }
+  , Scopes{ scopes }
   , BlockScope{ mf, scopes }
   , VariableNames{ std::move(variableNames) }
 {
@@ -88,14 +90,8 @@ cmBlockFunctionBlocker::cmBlockFunctionBlocker(
 
 cmBlockFunctionBlocker::~cmBlockFunctionBlocker()
 {
-  for (auto const& varName : this->VariableNames) {
-    if (this->Makefile->IsNormalDefinitionSet(varName)) {
-      this->Makefile->RaiseScope(varName,
-                                 this->Makefile->GetDefinition(varName));
-    } else {
-      // unset variable in parent scope
-      this->Makefile->RaiseScope(varName, nullptr);
-    }
+  if (this->Scopes.contains(ScopeType::VARIABLES)) {
+    this->Makefile->RaiseScope(this->VariableNames);
   }
 }
 
@@ -118,7 +114,8 @@ bool cmBlockFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
     cmExecutionStatus status(mf);
     mf.ExecuteCommand(fn, status);
     if (status.GetReturnInvoked()) {
-      inStatus.SetReturnInvoked();
+      mf.RaiseScope(status.GetReturnVariables());
+      inStatus.SetReturnInvoked(status.GetReturnVariables());
       return true;
     }
     if (status.GetBreakInvoked()) {

@@ -880,6 +880,7 @@ public:
   {
     this->RaiseScope(var, value.GetCStr());
   }
+  void RaiseScope(const std::vector<std::string>& variables);
 
   // push and pop loop scopes
   void PushLoopBlockBarrier();

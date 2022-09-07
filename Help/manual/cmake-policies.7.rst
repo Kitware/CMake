@@ -52,6 +52,14 @@ to determine whether to report an error on use of deprecated macros or
 functions.
 
 
+Policies Introduced by CMake 3.25
+=================================
+
+.. toctree::
+   :maxdepth: 1
+
+   CMP0140: The return() command checks its arguments. </policy/CMP0140>
+
 Policies Introduced by CMake 3.24
 =================================
 
