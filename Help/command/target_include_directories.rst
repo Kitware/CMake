@@ -18,9 +18,9 @@ By using ``AFTER`` or ``BEFORE`` explicitly, you can select between appending
 and prepending, independent of the default.
 
 The ``INTERFACE``, ``PUBLIC`` and ``PRIVATE`` keywords are required to specify
-the scope of the following arguments.  ``PRIVATE`` and ``PUBLIC`` items will
-populate the :prop_tgt:`INCLUDE_DIRECTORIES` property of ``<target>``.
-``PUBLIC`` and ``INTERFACE`` items will populate the
+the :ref:`scope <Target Usage Requirements>` of the following arguments.
+``PRIVATE`` and ``PUBLIC`` items will populate the :prop_tgt:`INCLUDE_DIRECTORIES`
+property of ``<target>``. ``PUBLIC`` and ``INTERFACE`` items will populate the
 :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` property of ``<target>``.
 The following arguments specify include directories.
 

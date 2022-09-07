@@ -146,8 +146,10 @@ Libraries for a Target and/or its Dependents
                         <PRIVATE|PUBLIC|INTERFACE> <item>...
                        [<PRIVATE|PUBLIC|INTERFACE> <item>...]...)
 
-The ``PUBLIC``, ``PRIVATE`` and ``INTERFACE`` keywords can be used to
+The ``PUBLIC``, ``PRIVATE`` and ``INTERFACE``
+:ref:`scope <Target Usage Requirements>` keywords can be used to
 specify both the link dependencies and the link interface in one command.
+
 Libraries and targets following ``PUBLIC`` are linked to, and are made
 part of the link interface.  Libraries and targets following ``PRIVATE``
 are linked to, but are not made part of the link interface.  Libraries

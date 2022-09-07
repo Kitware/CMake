@@ -257,7 +257,7 @@ targets in multiple different directories convenient through use of the
 Transitive Usage Requirements
 -----------------------------
 
-The usage requirements of a target can transitively propagate to dependents.
+The usage requirements of a target can transitively propagate to the dependents.
 The :command:`target_link_libraries` command has ``PRIVATE``,
 ``INTERFACE`` and ``PUBLIC`` keywords to control the propagation.
 
@@ -279,8 +279,10 @@ The :command:`target_link_libraries` command has ``PRIVATE``,
   # consumer is compiled with -DUSING_ARCHIVE_LIB
   target_link_libraries(consumer archiveExtras)
 
-Because ``archive`` is a ``PUBLIC`` dependency of ``archiveExtras``, the
-usage requirements of it are propagated to ``consumer`` too.  Because
+Because the ``archive`` is a ``PUBLIC`` dependency of ``archiveExtras``, the
+usage requirements of it are propagated to ``consumer`` too.
+
+Because
 ``serialization`` is a ``PRIVATE`` dependency of ``archiveExtras``, the usage
 requirements of it are not propagated to ``consumer``.
 
