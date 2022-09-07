@@ -2139,6 +2139,9 @@ int cmake::ActualConfigure()
   this->UpdateConversionPathTable();
   this->CleanupCommandsAndMacros();
 
+  cmSystemTools::RemoveADirectory(this->GetHomeOutputDirectory() +
+                                  "/CMakeFiles/CMakeScratch");
+
   int res = this->DoPreConfigureChecks();
   if (res < 0) {
     return -2;

@@ -67,12 +67,20 @@ public:
                       bool isTryRun);
 
   /**
-   * This is the core code for try compile. It is here so that other
-   * commands, such as TryRun can access the same logic without
-   * duplication.
+   * This is the core code for try compile. It is here so that other commands,
+   * such as TryRun can access the same logic without duplication.
+   *
+   * This function requires at least two \p arguments and will crash if given
+   * fewer.
    */
   bool TryCompileCode(Arguments& arguments,
                       cmStateEnums::TargetType targetType);
+
+  /**
+   * Returns \c true if \p path resides within a CMake temporary directory,
+   * otherwise returns \c false.
+   */
+  static bool IsTemporary(std::string const& path);
 
   /**
    * This deletes all the files created by TryCompileCode.
@@ -94,4 +102,10 @@ public:
   std::string FindErrorMessage;
   bool SrcFileSignature = false;
   cmMakefile* Makefile;
+
+private:
+  Arguments ParseArgs(
+    const cmRange<std::vector<std::string>::const_iterator>& args,
+    const cmArgumentParser<Arguments>& parser,
+    std::vector<std::string>& unparsedArguments);
 };

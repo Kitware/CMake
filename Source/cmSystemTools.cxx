@@ -11,6 +11,11 @@
 // NOLINTNEXTLINE(bugprone-reserved-identifier)
 #  define _XOPEN_SOURCE 700
 #endif
+#if defined(__APPLE__)
+// Restore Darwin APIs removed by _POSIX_C_SOURCE.
+// NOLINTNEXTLINE(bugprone-reserved-identifier)
+#  define _DARWIN_C_SOURCE
+#endif
 
 #include "cmSystemTools.h"
 
@@ -88,7 +93,6 @@
 #  include <unistd.h>
 
 #  include <sys/time.h>
-#  include <sys/types.h>
 #endif
 
 #if defined(_WIN32) &&                                                        \
@@ -998,6 +1002,93 @@ void cmSystemTools::InitializeLibUV()
 #  endif
   // Replace libuv's report handler with our own to suppress popups.
   cmSystemTools::EnableMSVCDebugHook();
+#endif
+}
+
+#if defined(_WIN32)
+#  include <random>
+
+#  include <wctype.h>
+#  ifdef _MSC_VER
+using mode_t = cmSystemTools::SystemTools::mode_t;
+#  endif
+#else
+#  include <sys/stat.h>
+#endif
+
+inline int Mkdir(const char* dir, const mode_t* mode)
+{
+#if defined(_WIN32)
+  int ret = _wmkdir(cmSystemTools::ConvertToWindowsExtendedPath(dir).c_str());
+  if (ret == 0 && mode)
+    cmSystemTools::SystemTools::SetPermissions(dir, *mode);
+  return ret;
+#else
+  return mkdir(dir, mode ? *mode : 0777);
+#endif
+}
+
+cmsys::Status cmSystemTools::MakeTempDirectory(std::string& path,
+                                               const mode_t* mode)
+{
+  if (path.empty()) {
+    return cmsys::Status::POSIX(EINVAL);
+  }
+  return cmSystemTools::MakeTempDirectory(&path.front(), mode);
+}
+
+cmsys::Status cmSystemTools::MakeTempDirectory(char* path, const mode_t* mode)
+{
+  if (!path) {
+    return cmsys::Status::POSIX(EINVAL);
+  }
+
+  // verify that path ends with "XXXXXX"
+  const auto l = std::strlen(path);
+  if (!cmHasLiteralSuffix(cm::string_view{ path, l }, "XXXXXX")) {
+    return cmsys::Status::POSIX(EINVAL);
+  }
+
+  // create parent directories
+  auto* sep = path;
+  while ((sep = strchr(sep, '/'))) {
+    // all underlying functions use C strings,
+    // so temporarily end the string here
+    *sep = '\0';
+    Mkdir(path, mode);
+
+    *sep = '/';
+    ++sep;
+  }
+
+#ifdef _WIN32
+  const int nchars = 36;
+  const char chars[nchars + 1] = "abcdefghijklmnopqrstuvwxyz0123456789";
+
+  std::random_device rd;
+  std::mt19937 rg{ rd() };
+  std::uniform_int_distribution<int> dist{ 0, nchars - 1 };
+
+  for (auto tries = 100; tries; --tries) {
+    for (auto n = l - 6; n < l; ++n) {
+      path[n] = chars[dist(rg)];
+    }
+    if (Mkdir(path, mode) == 0) {
+      return cmsys::Status::Success();
+    } else if (errno != EEXIST) {
+      return cmsys::Status::POSIX_errno();
+    }
+  }
+  return cmsys::Status::POSIX(EAGAIN);
+#else
+  if (mkdtemp(path)) {
+    if (mode) {
+      chmod(path, *mode);
+    }
+  } else {
+    return cmsys::Status::POSIX_errno();
+  }
+  return cmsys::Status::Success();
 #endif
 }
 

@@ -1,4 +1,4 @@
-CMake Error at NoCopyFile2.cmake:1 \(try_compile\):
+CMake Error at NoCopyFile2.cmake:[0-9]+ \(try_compile\):
   Error after keyword "COPY_FILE":
 
     missing required value
