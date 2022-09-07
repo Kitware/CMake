@@ -1881,7 +1881,7 @@ void cmTarget::AppendBuildInterfaceIncludes()
   }
 }
 
-void cmTarget::FinalizeTargetCompileInfo(
+void cmTarget::FinalizeTargetConfiguration(
   const cmBTStringRange& noConfigCompileDefinitions,
   cm::optional<std::map<std::string, cmValue>>& perConfigCompileDefinitions)
 {
