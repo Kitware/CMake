@@ -20,7 +20,7 @@ find_package(OpenGL QUIET)
 find_package(NotAPackage QUIET)
 
 # Look for a package that has an advanced find module.
-find_package(VTK QUIET)
+find_package(Boost QUIET)
 
 add_executable(FindPackageTest FindPackageTest.cxx)
 
