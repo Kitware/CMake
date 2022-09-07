@@ -57,6 +57,12 @@ Variables specific to CPack Archive generator
   .. versionadded:: 3.9
     Per-component ``CPACK_ARCHIVE_<component>_FILE_NAME`` variables.
 
+.. variable:: CPACK_ARCHIVE_FILE_EXTENSION
+
+  .. versionadded:: 3.25
+
+  Package file extension. Default values are given in the list above.
+
 .. variable:: CPACK_ARCHIVE_COMPONENT_INSTALL
 
   Enable component packaging. If enabled (ON), then the archive generator

@@ -94,6 +94,18 @@ std::string cmCPackArchiveGenerator::GetArchiveComponentFileName(
 int cmCPackArchiveGenerator::InitializeInternal()
 {
   this->SetOptionIfNotSet("CPACK_INCLUDE_TOPLEVEL_DIRECTORY", "1");
+  cmValue newExtensionValue = this->GetOption("CPACK_ARCHIVE_FILE_EXTENSION");
+  if (!newExtensionValue.IsEmpty()) {
+    std::string newExtension = *newExtensionValue;
+    if (!cmHasLiteralPrefix(newExtension, ".")) {
+      newExtension = cmStrCat('.', newExtension);
+    }
+    cmCPackLogger(cmCPackLog::LOG_DEBUG,
+                  "Using user-provided file extension "
+                    << newExtension << " instead of the default "
+                    << this->OutputExtension << std::endl);
+    this->OutputExtension = std::move(newExtension);
+  }
   return this->Superclass::InitializeInternal();
 }
 
