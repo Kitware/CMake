@@ -361,6 +361,7 @@
     stage: test-ext
 
     script:
+        - . .gitlab/ci/env.ps1
         - Invoke-Expression -Command .gitlab/ci/vcvarsall.ps1
         - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake
 
@@ -370,6 +371,7 @@
     stage: test-ext
 
     script:
+        - . .gitlab/ci/env.ps1
         - Invoke-Expression -Command .gitlab/ci/jom.ps1
         - $pwdpath = $pwd.Path
         - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab\jom;$env:PATH"
@@ -382,6 +384,7 @@
     stage: test-ext
 
     script:
+        - . .gitlab/ci/env.ps1
         - Invoke-Expression -Command .gitlab/ci/borland.ps1
         - $pwdpath = $pwd.Path
         - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab\bcc\bin;$env:PATH"
@@ -393,6 +396,7 @@
     stage: test-ext
 
     script:
+        - . .gitlab/ci/env.ps1
         - $pwdpath = $pwd.Path
         - powershell -File ".gitlab/ci/ninja.ps1"
         - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab;$env:PATH"
@@ -407,6 +411,7 @@
     stage: test-ext
 
     script:
+        - . .gitlab/ci/env.ps1
         - Invoke-Expression -Command .gitlab/ci/msvc.ps1
         - Invoke-Expression -Command .gitlab/ci/vcvarsall.ps1
         - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake
@@ -417,6 +422,7 @@
     stage: test-ext
 
     script:
+        - . .gitlab/ci/env.ps1
         - Invoke-Expression -Command .gitlab/ci/openwatcom.ps1
         - $pwdpath = $pwd.Path
         - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab\watcom\binnt;$pwdpath\.gitlab\watcom\binw;$env:PATH"
