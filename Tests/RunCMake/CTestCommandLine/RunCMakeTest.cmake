@@ -294,6 +294,7 @@ endfunction()
 run_TestOutputTruncation("head" "\\.\\.\\.6789")
 run_TestOutputTruncation("middle" "12\\.\\.\\..*\\.\\.\\.89")
 run_TestOutputTruncation("tail" "12345\\.\\.\\.")
+run_TestOutputTruncation("bad" "")
 
 # Test --stop-on-failure
 function(run_stop_on_failure)

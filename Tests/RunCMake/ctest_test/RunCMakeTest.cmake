@@ -95,6 +95,7 @@ endfunction()
 run_TestOutputTruncation("head" "\\.\\.\\.6789")
 run_TestOutputTruncation("middle" "12\\.\\.\\..*\\.\\.\\.89")
 run_TestOutputTruncation("tail" "12345\\.\\.\\.")
+run_TestOutputTruncation("bad" "")
 
 run_ctest_test(TestRepeatBad1 REPEAT UNKNOWN:3)
 run_ctest_test(TestRepeatBad2 REPEAT UNTIL_FAIL:-1)

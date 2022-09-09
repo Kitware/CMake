@@ -1,0 +1,1 @@
+^CMake Error: Invalid value for '--test-output-truncation': bad$
