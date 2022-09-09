@@ -3,7 +3,7 @@ if ("$env:CMAKE_CI_NIGHTLY" -eq "true") {
 }
 
 $pwdpath = $pwd.Path
-powershell -File ".gitlab/ci/ninja.ps1"
+& "$pwsh" -File ".gitlab/ci/ninja.ps1"
 Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab;$env:PATH"
 ninja --version
 
