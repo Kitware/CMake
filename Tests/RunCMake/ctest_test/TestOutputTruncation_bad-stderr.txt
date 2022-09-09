@@ -1,0 +1,1 @@
+^Invalid value for CTEST_CUSTOM_TEST_OUTPUT_TRUNCATION: bad$

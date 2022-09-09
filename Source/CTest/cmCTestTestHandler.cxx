@@ -363,7 +363,11 @@ void cmCTestTestHandler::PopulateCustomVectors(cmMakefile* mf)
 
   cmValue dval = mf->GetDefinition("CTEST_CUSTOM_TEST_OUTPUT_TRUNCATION");
   if (dval) {
-    this->SetTestOutputTruncation(dval);
+    if (!this->SetTestOutputTruncation(dval)) {
+      cmCTestLog(this->CTest, ERROR_MESSAGE,
+                 "Invalid value for CTEST_CUSTOM_TEST_OUTPUT_TRUNCATION: "
+                   << dval << std::endl);
+    }
   }
 }
 
