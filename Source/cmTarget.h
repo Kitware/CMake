@@ -238,7 +238,7 @@ public:
   void InsertPrecompileHeader(BT<std::string> const& entry);
 
   void AppendBuildInterfaceIncludes();
-  void FinalizeTargetCompileInfo(
+  void FinalizeTargetConfiguration(
     const cmBTStringRange& noConfigCompileDefinitions,
     cm::optional<std::map<std::string, cmValue>>& perConfigCompileDefinitions);
 

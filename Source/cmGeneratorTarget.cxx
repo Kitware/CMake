@@ -8666,7 +8666,7 @@ bool cmGeneratorTarget::AddHeaderSetVerification()
             verifyTarget->SetProperty("UNITY_BUILD", "OFF");
             cm::optional<std::map<std::string, cmValue>>
               perConfigCompileDefinitions;
-            verifyTarget->FinalizeTargetCompileInfo(
+            verifyTarget->FinalizeTargetConfiguration(
               this->Makefile->GetCompileDefinitionsEntries(),
               perConfigCompileDefinitions);
 

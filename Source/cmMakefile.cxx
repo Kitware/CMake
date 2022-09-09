@@ -4035,31 +4035,6 @@ std::vector<std::string> cmMakefile::GetPropertyKeys() const
   return this->StateSnapshot.GetDirectory().GetPropertyKeys();
 }
 
-void cmMakefile::CheckProperty(const std::string& prop) const
-{
-  // Certain properties need checking.
-  if (prop == "LINK_LIBRARIES") {
-    if (cmValue value = this->GetProperty(prop)) {
-      // Look for <LINK_LIBRARY:> internal pattern
-      static cmsys::RegularExpression linkPattern(
-        "(^|;)(</?LINK_(LIBRARY|GROUP):[^;>]*>)(;|$)");
-      if (!linkPattern.find(value)) {
-        return;
-      }
-
-      // Report an error.
-      this->IssueMessage(
-        MessageType::FATAL_ERROR,
-        cmStrCat("Property ", prop, " contains the invalid item \"",
-                 linkPattern.match(2), "\". The ", prop,
-                 " property may contain the generator-expression \"$<LINK_",
-                 linkPattern.match(3),
-                 ":...>\" which may be used to specify how the libraries are "
-                 "linked."));
-    }
-  }
-}
-
 cmTarget* cmMakefile::FindLocalNonAliasTarget(const std::string& name) const
 {
   auto i = this->Targets.find(name);

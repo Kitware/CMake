@@ -694,7 +694,7 @@ private:
 
   void WriteSummary();
   void WriteSummary(cmGeneratorTarget* target);
-  void FinalizeTargetCompileInfo();
+  void FinalizeTargetConfiguration();
 
   virtual void ForceLinkerLanguages();
 
