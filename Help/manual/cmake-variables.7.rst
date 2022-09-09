@@ -309,6 +309,7 @@ Variables that Describe the System
    /variable/CMAKE_CL_64
    /variable/CMAKE_COMPILER_2005
    /variable/CMAKE_HOST_APPLE
+   /variable/CMAKE_HOST_BSD
    /variable/CMAKE_HOST_SOLARIS
    /variable/CMAKE_HOST_SYSTEM
    /variable/CMAKE_HOST_SYSTEM_NAME
@@ -324,8 +325,6 @@ Variables that Describe the System
    /variable/CMAKE_SYSTEM_PROCESSOR
    /variable/CMAKE_SYSTEM_VERSION
    /variable/CYGWIN
-   /variable/DRAGONFLYBSD
-   /variable/FREEBSD
    /variable/GHSMULTI
    /variable/IOS
    /variable/LINUX
@@ -344,8 +343,6 @@ Variables that Describe the System
    /variable/MSVC_TOOLSET_VERSION
    /variable/MSVC_VERSION
    /variable/MSYS
-   /variable/NETBSD
-   /variable/OPENBSD
    /variable/UNIX
    /variable/WIN32
    /variable/WINCE
