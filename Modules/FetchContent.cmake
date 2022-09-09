@@ -822,7 +822,7 @@ details:
 
 CMake provides a FindGTest module which defines some variables that older
 projects may use instead of linking to the imported targets.  To support
-those cases, we can provide an extras file.  In keeping with the
+those cases, we can provide an extra file.  In keeping with the
 "first to define, wins" philosophy of ``FetchContent``, we only write out
 that file if something else hasn't already done so.
 
@@ -830,9 +830,9 @@ that file if something else hasn't already done so.
 
   FetchContent_MakeAvailable(googletest)
 
-  if(NOT EXISTS ${CMAKE_FIND_PACKAGE_REDIRECTS_DIR}/googletest-extras.cmake AND
-     NOT EXISTS ${CMAKE_FIND_PACKAGE_REDIRECTS_DIR}/googletestExtras.cmake)
-    file(WRITE ${CMAKE_FIND_PACKAGE_REDIRECTS_DIR}/googletest-extras.cmake
+  if(NOT EXISTS ${CMAKE_FIND_PACKAGE_REDIRECTS_DIR}/googletest-extra.cmake AND
+     NOT EXISTS ${CMAKE_FIND_PACKAGE_REDIRECTS_DIR}/googletestExtra.cmake)
+    file(WRITE ${CMAKE_FIND_PACKAGE_REDIRECTS_DIR}/googletest-extra.cmake
   [=[
   if("${GTEST_LIBRARIES}" STREQUAL "" AND TARGET GTest::gtest)
     set(GTEST_LIBRARIES GTest::gtest)
