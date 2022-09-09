@@ -535,9 +535,10 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
   set(VERSION_MSG "")
   set(VERSION_OK TRUE)
 
-  # check with DEFINED here as the requested or found version may be "0"
+  # check that the version variable is not empty to avoid emitting a misleading
+  # message (i.e. `Found unsuitable version ""`)
   if (DEFINED ${_NAME}_FIND_VERSION)
-    if(DEFINED ${FPHSA_VERSION_VAR})
+    if(NOT "${${FPHSA_VERSION_VAR}}" STREQUAL "")
       set(_FOUND_VERSION ${${FPHSA_VERSION_VAR}})
       if (FPHSA_HANDLE_VERSION_RANGE)
         set (FPCV_HANDLE_VERSION_RANGE HANDLE_VERSION_RANGE)
@@ -547,6 +548,7 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
       find_package_check_version ("${_FOUND_VERSION}" VERSION_OK RESULT_MESSAGE_VARIABLE VERSION_MSG
         ${FPCV_HANDLE_VERSION_RANGE})
     else()
+      set(VERSION_OK FALSE)
       # if the package was not found, but a version was given, add that to the output:
       if(${_NAME}_FIND_VERSION_EXACT)
         set(VERSION_MSG "(Required is exact version \"${${_NAME}_FIND_VERSION}\")")
