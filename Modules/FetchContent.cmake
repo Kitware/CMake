@@ -1894,13 +1894,13 @@ macro(FetchContent_MakeAvailable)
 
         set(__cmake_fcProvider_${__cmake_contentNameLower} YES)
         cmake_language(EVAL CODE "${__cmake_providerCommand}(${__cmake_providerArgs})")
-        unset(__cmake_fcProvider_${__cmake_contentNameLower})
 
         list(POP_BACK __cmake_fcCurrentVarsStack
           __cmake_contentNameLower
           __cmake_contentName
         )
 
+        unset(__cmake_fcProvider_${__cmake_contentNameLower})
         unset(__cmake_providerArgs)
         unset(__cmake_addfpargs)
         unset(__cmake_fpargs)
