@@ -1,5 +1,5 @@
 if ("$env:CMAKE_CI_NIGHTLY" -eq "true") {
-  Invoke-Expression -Command ".gitlab/ci/ispc-env.ps1"
+  . ".gitlab/ci/ispc-env.ps1"
 }
 
 $pwdpath = $pwd.Path
