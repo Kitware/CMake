@@ -11,6 +11,9 @@ run_cmake(BadSources2)
 run_cmake(EmptyValueArgs)
 run_cmake(EmptyListArgs)
 run_cmake(TryRunArgs)
+run_cmake(BuildType)
+run_cmake(BuildTypeAsFlag)
+run_cmake(OutputDirAsFlag)
 
 run_cmake(EnvConfig)
 
