@@ -303,13 +303,16 @@ Commands
       ``<lowercaseName>-extra.cmake`` or ``<name>Extra.cmake`` file with the
       ``OPTIONAL`` flag (so the files can be missing and won't generate a
       warning).  Similarly, if no config version file exists, a very simple
-      one will be written which sets ``PACKAGE_VERSION_COMPATIBLE`` to true.
+      one will be written which sets ``PACKAGE_VERSION_COMPATIBLE`` and
+      ``PACKAGE_VERSION_EXACT`` to true.  This ensures all future calls to
+      :command:`find_package()` for the dependency will use the redirected
+      config file, regardless of any version requirements.
       CMake cannot automatically determine an arbitrary dependency's version,
-      so it cannot set ``PACKAGE_VERSION`` or ``PACKAGE_VERSION_EXACT``.
+      so it cannot set ``PACKAGE_VERSION``.
       When a dependency is pulled in via :command:`add_subdirectory` in the
       next step, it may choose to overwrite the generated config version file
       in :variable:`CMAKE_FIND_PACKAGE_REDIRECTS_DIR` with one that also sets
-      ``PACKAGE_VERSION``, and if appropriate, ``PACKAGE_VERSION_EXACT``.
+      ``PACKAGE_VERSION``.
       The dependency may also write a ``<lowercaseName>-extra.cmake`` or
       ``<name>Extra.cmake`` file to perform custom processing or define any
       variables that their normal (installed) package config file would
