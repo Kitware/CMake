@@ -1131,7 +1131,7 @@ macro(_MPI_assemble_include_dirs LANG)
     ${MPI_${LANG}_COMPILER_INCLUDE_DIRS}
     ${MPI_${LANG}_ADDITIONAL_INCLUDE_DIRS}
     )
-  if("${LANG}" MATCHES "(C|CXX)")
+  if("${LANG}" MATCHES "^(C|CXX)$")
     if(MPI_${LANG}_HEADER_DIR)
       list(APPEND MPI_${LANG}_INCLUDE_DIRS "${MPI_${LANG}_HEADER_DIR}")
     endif()
@@ -1156,7 +1156,7 @@ macro(_MPI_split_include_dirs LANG)
 
   # We try to find the headers/modules among those paths (and system paths)
   # For C/C++, we just need to have a look for mpi.h.
-  if("${LANG}" MATCHES "(C|CXX)")
+  if("${LANG}" MATCHES "^(C|CXX)$")
     find_path(MPI_${LANG}_HEADER_DIR "mpi.h"
       HINTS
         ${MPI_${LANG}_COMPILER_INCLUDE_DIRS}
