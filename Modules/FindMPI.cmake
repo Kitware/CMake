@@ -391,11 +391,11 @@ function (_MPI_check_compiler LANG QUERY_FLAG OUTPUT_VARIABLE RESULT_VARIABLE)
   # library that has invalid or missing version information there would be warning
   # messages emitted by ld.so in the compiler output. In either case, we'll treat
   # the output as invalid.
-  if("${WRAPPER_OUTPUT}" MATCHES "undefined reference|unrecognized|need to set|no version information available|command not found")
+  if(WRAPPER_OUTPUT MATCHES "undefined reference|unrecognized|need to set|no version information available|command not found")
     set(WRAPPER_RETURN 255)
   endif()
   # Ensure that no error output might be passed upwards.
-  if(NOT WRAPPER_RETURN EQUAL 0)
+  if(NOT WRAPPER_RETURN EQUAL "0")
     unset(WRAPPER_OUTPUT)
   else()
     # Strip leading whitespace
@@ -470,10 +470,10 @@ function (_MPI_interrogate_compiler LANG)
   # or a newer version of LAM/MPI, and implies that -showme:link will also work.
   # Open MPI also supports -show, but separates linker and compiler information
   _MPI_check_compiler(${LANG} "-showme:compile" MPI_COMPILE_CMDLINE MPI_COMPILER_RETURN)
-  if (MPI_COMPILER_RETURN EQUAL 0)
+  if (MPI_COMPILER_RETURN EQUAL "0")
     _MPI_check_compiler(${LANG} "-showme:link" MPI_LINK_CMDLINE MPI_COMPILER_RETURN)
 
-    if (NOT MPI_COMPILER_RETURN EQUAL 0)
+    if (NOT MPI_COMPILER_RETURN EQUAL "0")
       unset(MPI_COMPILE_CMDLINE)
     endif()
   endif()
@@ -482,13 +482,13 @@ function (_MPI_interrogate_compiler LANG)
   # For modern versions, both do the same as -show. However, for old versions, they do differ
   # when called for mpicxx and mpif90 and it's necessary to use them over -show in order to find the
   # removed MPI C++ bindings.
-  if (NOT MPI_COMPILER_RETURN EQUAL 0)
+  if (NOT MPI_COMPILER_RETURN EQUAL "0")
     _MPI_check_compiler(${LANG} "-compile-info" MPI_COMPILE_CMDLINE MPI_COMPILER_RETURN)
 
-    if (MPI_COMPILER_RETURN EQUAL 0)
+    if (MPI_COMPILER_RETURN EQUAL "0")
       _MPI_check_compiler(${LANG} "-link-info" MPI_LINK_CMDLINE MPI_COMPILER_RETURN)
 
-      if (NOT MPI_COMPILER_RETURN EQUAL 0)
+      if (NOT MPI_COMPILER_RETURN EQUAL "0")
         unset(MPI_COMPILE_CMDLINE)
       endif()
     endif()
@@ -496,18 +496,18 @@ function (_MPI_interrogate_compiler LANG)
 
   # Cray compiler wrappers come usually without a separate mpicc/c++/ftn, but offer
   # --cray-print-opts=...
-  if (NOT MPI_COMPILER_RETURN EQUAL 0)
+  if (NOT MPI_COMPILER_RETURN EQUAL "0")
     _MPI_check_compiler(${LANG} "--cray-print-opts=cflags"
                         MPI_COMPILE_CMDLINE MPI_COMPILER_RETURN)
 
-    if (MPI_COMPILER_RETURN EQUAL 0)
+    if (MPI_COMPILER_RETURN EQUAL "0")
       # Pass --no-as-needed so the mpi library is always linked. Otherwise, the
       # Cray compiler wrapper puts an --as-needed flag around the mpi library,
       # and it is not linked unless code directly refers to it.
       _MPI_check_compiler(${LANG} "--no-as-needed;--cray-print-opts=libs"
                           MPI_LINK_CMDLINE MPI_COMPILER_RETURN)
 
-      if (NOT MPI_COMPILER_RETURN EQUAL 0)
+      if (NOT MPI_COMPILER_RETURN EQUAL "0")
         unset(MPI_COMPILE_CMDLINE)
         unset(MPI_LINK_CMDLINE)
       endif()
@@ -516,17 +516,17 @@ function (_MPI_interrogate_compiler LANG)
 
   # MPICH, MVAPICH2 and Intel MPI just use "-show". Open MPI also offers this, but the
   # -showme commands are more specialized.
-  if (NOT MPI_COMPILER_RETURN EQUAL 0)
+  if (NOT MPI_COMPILER_RETURN EQUAL "0")
     _MPI_check_compiler(${LANG} "-show" MPI_COMPILE_CMDLINE MPI_COMPILER_RETURN)
   endif()
 
   # Older versions of LAM/MPI have "-showme". Open MPI also supports this.
   # Unknown to MPICH, MVAPICH and Intel MPI.
-  if (NOT MPI_COMPILER_RETURN EQUAL 0)
+  if (NOT MPI_COMPILER_RETURN EQUAL "0")
     _MPI_check_compiler(${LANG} "-showme" MPI_COMPILE_CMDLINE MPI_COMPILER_RETURN)
   endif()
 
-  if (MPI_COMPILER_RETURN EQUAL 0 AND DEFINED MPI_COMPILE_CMDLINE)
+  if (MPI_COMPILER_RETURN EQUAL "0" AND DEFINED MPI_COMPILE_CMDLINE)
     # Intel MPI can be run with -compchk or I_MPI_CHECK_COMPILER set to 1.
     # In this case, -show will be prepended with a line to the compiler checker. This is a script that performs
     # compatibility checks and returns a non-zero exit code together with an error if something fails.
@@ -542,7 +542,7 @@ function (_MPI_interrogate_compiler LANG)
       ERROR_VARIABLE   COMPILER_CHECKER_OUTPUT ERROR_STRIP_TRAILING_WHITESPACE
       RESULT_VARIABLE  MPI_COMPILER_RETURN)
       # If it returned a non-zero value, the check below will fail and cause the interrogation to be aborted.
-      if(NOT MPI_COMPILER_RETURN EQUAL 0)
+      if(NOT MPI_COMPILER_RETURN EQUAL "0")
         if(NOT MPI_FIND_QUIETLY)
           message(STATUS "Intel MPI compiler check failed: ${COMPILER_CHECKER_OUTPUT}")
         endif()
@@ -572,7 +572,7 @@ function (_MPI_interrogate_compiler LANG)
   _MPI_env_unset_ifnot(I_MPI_DEBUG_INFO_STRIP)
   _MPI_env_unset_ifnot(I_MPI_FORT_BIND)
 
-  if (NOT (MPI_COMPILER_RETURN EQUAL 0) OR NOT (DEFINED MPI_COMPILE_CMDLINE))
+  if (NOT (MPI_COMPILER_RETURN EQUAL "0") OR NOT (DEFINED MPI_COMPILE_CMDLINE))
     # Cannot interrogate this compiler, so exit.
     set(MPI_${LANG}_WRAPPER_FOUND FALSE PARENT_SCOPE)
     return()
@@ -845,7 +845,7 @@ function (_MPI_interrogate_compiler LANG)
     foreach(_MPI_LINK_DIRECTORY IN LISTS MPI_LINK_DIRECTORIES_LEFTOVER)
       file(TO_NATIVE_PATH "${_MPI_LINK_DIRECTORY}" _MPI_LINK_DIRECTORY_ACTUAL)
       string(FIND "${_MPI_LINK_DIRECTORY_ACTUAL}" " " _MPI_LINK_DIRECTORY_CONTAINS_SPACE)
-      if(NOT _MPI_LINK_DIRECTORY_CONTAINS_SPACE EQUAL -1)
+      if(NOT _MPI_LINK_DIRECTORY_CONTAINS_SPACE EQUAL "-1")
         set(_MPI_LINK_DIRECTORY_ACTUAL "\"${_MPI_LINK_DIRECTORY_ACTUAL}\"")
       endif()
       if(MPI_LINK_FLAGS_WORK)
@@ -921,7 +921,7 @@ function(_MPI_guess_settings LANG)
     if(NOT MPI_GUESS_LIBRARY_NAME OR "${MPI_GUESS_LIBRARY_NAME}" STREQUAL "MSMPI")
       # We first attempt to locate the msmpi.lib. Should be find it, we'll assume that the MPI present is indeed
       # Microsoft MPI.
-      if("${CMAKE_SIZEOF_VOID_P}" EQUAL 8)
+      if("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
         file(TO_CMAKE_PATH "$ENV{MSMPI_LIB64}" MPI_MSMPI_LIB_PATH)
         file(TO_CMAKE_PATH "$ENV{MSMPI_INC}/x64" MPI_MSMPI_INC_PATH_EXTRA)
       else()
@@ -977,7 +977,7 @@ function(_MPI_guess_settings LANG)
         # have his library found. Still, this should not be necessary outside of exceptional cases, as reasoned.
         if ("${LANG}" STREQUAL "Fortran")
           set(MPI_MSMPI_CALLINGCONVS c)
-          if("${CMAKE_SIZEOF_VOID_P}" EQUAL 4)
+          if("${CMAKE_SIZEOF_VOID_P}" EQUAL "4")
             list(APPEND MPI_MSMPI_CALLINGCONVS s)
           endif()
           foreach(mpistrlenpos IN ITEMS e m)
@@ -1883,7 +1883,7 @@ else()
 endif()
 
 list(LENGTH MPI_LIBRARIES MPI_NUMLIBS)
-if (MPI_NUMLIBS GREATER 1)
+if (MPI_NUMLIBS GREATER "1")
   set(MPI_EXTRA_LIBRARY_WORK "${MPI_LIBRARIES}")
   list(REMOVE_AT MPI_EXTRA_LIBRARY_WORK 0)
   set(MPI_EXTRA_LIBRARY "${MPI_EXTRA_LIBRARY_WORK}")
