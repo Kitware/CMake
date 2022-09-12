@@ -10,6 +10,8 @@ cmake-presets(7)
 Introduction
 ============
 
+.. versionadded:: 3.19
+
 One problem that CMake users often face is sharing settings with other people
 for common ways to configure a project. This may be done to support CI builds,
 or for users who frequently use the same build. CMake supports two main files,
@@ -190,8 +192,12 @@ that may contain the following fields:
 
 ``architecture``, ``toolset``
   Optional fields representing the platform and toolset, respectively, for
-  generators that support them. Each may be either a string or an object
-  with the following fields:
+  :manual:`generators <cmake-generators(7)>` that support them.
+
+  See :option:`cmake -A` option for for possible values for ``architecture``
+  and :option:`cmake -T` for ``toolset``.
+
+  Each may be either a string or an object with the following fields:
 
   ``value``
     An optional string representing the value.
