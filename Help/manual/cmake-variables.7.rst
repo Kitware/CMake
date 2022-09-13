@@ -310,6 +310,7 @@ Variables that Describe the System
    /variable/CMAKE_COMPILER_2005
    /variable/CMAKE_HOST_APPLE
    /variable/CMAKE_HOST_BSD
+   /variable/CMAKE_HOST_LINUX
    /variable/CMAKE_HOST_SOLARIS
    /variable/CMAKE_HOST_SYSTEM
    /variable/CMAKE_HOST_SYSTEM_NAME

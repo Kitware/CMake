@@ -331,6 +331,11 @@ void cmStateSnapshot::SetDefaultDefinitions()
   this->SetDefinition("CMAKE_HOST_BSD", "DragonFlyBSD");
 #endif
 
+#if defined(__linux__)
+  this->SetDefinition("LINUX", "1");
+  this->SetDefinition("CMAKE_HOST_LINUX", "1");
+#endif
+
   this->SetDefinition("CMAKE_MAJOR_VERSION",
                       std::to_string(cmVersion::GetMajorVersion()));
   this->SetDefinition("CMAKE_MINOR_VERSION",
