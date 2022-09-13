@@ -86,8 +86,8 @@ if(NOT CMAKE_CUDA_COMPILER_WORKS)
   unset(CMAKE_CUDA_COMPILER_WORKS)
 
   # Puts test result in cache variable.
-  try_compile(CMAKE_CUDA_COMPILER_WORKS ${CMAKE_BINARY_DIR}
-    ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/main.cu
+  try_compile(CMAKE_CUDA_COMPILER_WORKS
+    SOURCES ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/main.cu
     OUTPUT_VARIABLE __CMAKE_CUDA_COMPILER_OUTPUT)
 
   # Move result from cache to normal variable.

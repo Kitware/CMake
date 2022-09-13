@@ -135,8 +135,7 @@ macro(_threads_check_flag_pthread)
         configure_file(${CMAKE_CURRENT_LIST_DIR}/CheckForPthreads.c "${_threads_src}" COPYONLY)
       endif()
       try_compile(THREADS_HAVE_PTHREAD_ARG
-        ${CMAKE_BINARY_DIR}
-        ${_threads_src}
+        SOURCES ${_threads_src}
         CMAKE_FLAGS -DLINK_LIBRARIES:STRING=-pthread
         OUTPUT_VARIABLE _cmake_check_pthreads_output)
 

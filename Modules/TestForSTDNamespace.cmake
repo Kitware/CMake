@@ -16,8 +16,8 @@ check if the compiler supports std:: on stl classes
 
 if(NOT DEFINED CMAKE_STD_NAMESPACE)
   message(CHECK_START "Check for STD namespace")
-  try_compile(CMAKE_STD_NAMESPACE  ${CMAKE_BINARY_DIR}
-    ${CMAKE_ROOT}/Modules/TestForSTDNamespace.cxx
+  try_compile(CMAKE_STD_NAMESPACE
+    SOURCES ${CMAKE_ROOT}/Modules/TestForSTDNamespace.cxx
     OUTPUT_VARIABLE OUTPUT)
   if (CMAKE_STD_NAMESPACE)
     message(CHECK_PASS "found")

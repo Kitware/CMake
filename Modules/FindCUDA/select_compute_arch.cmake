@@ -135,10 +135,10 @@ function(CUDA_DETECT_INSTALLED_GPUS OUT_VARIABLE)
       "}\n")
 
     if(CMAKE_CUDA_COMPILER_LOADED) # CUDA as a language
-      try_run(run_result compile_result ${PROJECT_BINARY_DIR} ${file}
+      try_run(run_result compile_result SOURCES ${file}
               RUN_OUTPUT_VARIABLE compute_capabilities)
     else()
-      try_run(run_result compile_result ${PROJECT_BINARY_DIR} ${file}
+      try_run(run_result compile_result SOURCES ${file}
               CMAKE_FLAGS "-DINCLUDE_DIRECTORIES=${CUDA_INCLUDE_DIRS}"
               LINK_LIBRARIES ${CUDA_LIBRARIES}
               RUN_OUTPUT_VARIABLE compute_capabilities)

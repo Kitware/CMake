@@ -136,8 +136,7 @@ macro(CHECK_INCLUDE_FILES INCLUDE VARIABLE)
       message(CHECK_START "Looking for ${_description}")
     endif()
     try_compile(${VARIABLE}
-      ${CMAKE_BINARY_DIR}
-      ${src}
+      SOURCES ${src}
       COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
       ${_CIF_LINK_OPTIONS}
       ${_CIF_LINK_LIBRARIES}

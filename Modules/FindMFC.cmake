@@ -34,8 +34,7 @@ if(MFC_ATTEMPT_TRY_COMPILE)
     message(CHECK_START "Looking for MFC")
     # Try both shared and static as the root project may have set the /MT flag
     try_compile(MFC_HAVE_MFC
-      ${CMAKE_BINARY_DIR}
-      ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckIncludeFile.cxx
+      SOURCES ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckIncludeFile.cxx
       CMAKE_FLAGS
       -DCMAKE_MFC_FLAG:STRING=2
       -DCOMPILE_DEFINITIONS:STRING=-D_AFXDLL
@@ -44,8 +43,7 @@ if(MFC_ATTEMPT_TRY_COMPILE)
       configure_file(${CMAKE_ROOT}/Modules/CheckIncludeFile.cxx.in
         ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckIncludeFile.cxx)
       try_compile(MFC_HAVE_MFC
-        ${CMAKE_BINARY_DIR}
-        ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckIncludeFile.cxx
+        SOURCES ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckIncludeFile.cxx
         CMAKE_FLAGS
         -DCMAKE_MFC_FLAG:STRING=1
         OUTPUT_VARIABLE OUTPUT)

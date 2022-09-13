@@ -143,7 +143,7 @@ function(__check_type_size_impl type var map builtin language)
   # Perform the check.
   set(bin ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CheckTypeSize/${var}.bin)
   configure_file(${__check_type_size_dir}/CheckTypeSize.c.in ${src} @ONLY)
-  try_compile(HAVE_${var} ${CMAKE_BINARY_DIR} ${src}
+  try_compile(HAVE_${var} SOURCES ${src}
     COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
     LINK_OPTIONS ${CMAKE_REQUIRED_LINK_OPTIONS}
     LINK_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES}

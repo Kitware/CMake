@@ -17,8 +17,8 @@ for-init-statement to the loop body.
 
 if(NOT DEFINED CMAKE_ANSI_FOR_SCOPE)
   message(CHECK_START "Check for ANSI scope")
-  try_compile(CMAKE_ANSI_FOR_SCOPE  ${CMAKE_BINARY_DIR}
-    ${CMAKE_ROOT}/Modules/TestForAnsiForScope.cxx
+  try_compile(CMAKE_ANSI_FOR_SCOPE
+    SOURCES ${CMAKE_ROOT}/Modules/TestForAnsiForScope.cxx
     OUTPUT_VARIABLE OUTPUT)
   if (CMAKE_ANSI_FOR_SCOPE)
     message(CHECK_PASS "found")

@@ -33,7 +33,8 @@ if(NOT CMAKE_CSharp_COMPILER_WORKS)
   # Clear result from normal variable.
   unset(CMAKE_CSharp_COMPILER_WORKS)
   # Puts test result in cache variable.
-  try_compile(CMAKE_CSharp_COMPILER_WORKS ${CMAKE_BINARY_DIR} "${test_compile_file}"
+  try_compile(CMAKE_CSharp_COMPILER_WORKS
+    SOURCES "${test_compile_file}"
     OUTPUT_VARIABLE __CMAKE_CSharp_COMPILER_OUTPUT
     )
   # Move result from cache to normal variable.

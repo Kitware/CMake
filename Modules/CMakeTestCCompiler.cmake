@@ -53,8 +53,8 @@ if(NOT CMAKE_C_COMPILER_WORKS)
   # Clear result from normal variable.
   unset(CMAKE_C_COMPILER_WORKS)
   # Puts test result in cache variable.
-  try_compile(CMAKE_C_COMPILER_WORKS ${CMAKE_BINARY_DIR}
-    ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCCompiler.c
+  try_compile(CMAKE_C_COMPILER_WORKS
+    SOURCES ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCCompiler.c
     OUTPUT_VARIABLE __CMAKE_C_COMPILER_OUTPUT)
   # Move result from cache to normal variable.
   set(CMAKE_C_COMPILER_WORKS ${CMAKE_C_COMPILER_WORKS})

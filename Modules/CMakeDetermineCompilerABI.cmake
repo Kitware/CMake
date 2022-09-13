@@ -55,7 +55,7 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
     set(ENV{LANG}        C)
 
     try_compile(CMAKE_${lang}_ABI_COMPILED
-      ${CMAKE_BINARY_DIR} ${src}
+      SOURCES ${src}
       CMAKE_FLAGS ${CMAKE_FLAGS}
                   # Ignore unused flags when we are just determining the ABI.
                   "--no-warn-unused-cli"

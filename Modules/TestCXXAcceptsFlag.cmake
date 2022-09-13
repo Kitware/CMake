@@ -25,8 +25,7 @@ macro(CHECK_CXX_ACCEPTS_FLAG FLAGS  VARIABLE)
   if(NOT DEFINED ${VARIABLE})
     message(CHECK_START "Checking to see if CXX compiler accepts flag ${FLAGS}")
     try_compile(${VARIABLE}
-      ${CMAKE_BINARY_DIR}
-      ${CMAKE_ROOT}/Modules/DummyCXXFile.cxx
+      SOURCES ${CMAKE_ROOT}/Modules/DummyCXXFile.cxx
       CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${FLAGS}
       OUTPUT_VARIABLE OUTPUT)
     if(${VARIABLE})

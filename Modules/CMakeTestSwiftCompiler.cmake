@@ -26,8 +26,8 @@ if(NOT CMAKE_Swift_COMPILER_WORKS)
   # Clear result from normal variable.
   unset(CMAKE_Swift_COMPILER_WORKS)
   # Puts test result in cache variable.
-  try_compile(CMAKE_Swift_COMPILER_WORKS ${CMAKE_BINARY_DIR}
-    ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/main.swift
+  try_compile(CMAKE_Swift_COMPILER_WORKS
+    SOURCES ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/main.swift
     OUTPUT_VARIABLE __CMAKE_Swift_COMPILER_OUTPUT)
   # Move result from cache to normal variable.
   set(CMAKE_Swift_COMPILER_WORKS ${CMAKE_Swift_COMPILER_WORKS})

@@ -49,8 +49,8 @@ if(NOT CMAKE_HIP_COMPILER_WORKS)
   # Clear result from normal variable.
   unset(CMAKE_HIP_COMPILER_WORKS)
   # Puts test result in cache variable.
-  try_compile(CMAKE_HIP_COMPILER_WORKS ${CMAKE_BINARY_DIR}
-    ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testHIPCompiler.hip
+  try_compile(CMAKE_HIP_COMPILER_WORKS
+    SOURCES ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testHIPCompiler.hip
     OUTPUT_VARIABLE __CMAKE_HIP_COMPILER_OUTPUT)
   # Move result from cache to normal variable.
   set(CMAKE_HIP_COMPILER_WORKS ${CMAKE_HIP_COMPILER_WORKS})
