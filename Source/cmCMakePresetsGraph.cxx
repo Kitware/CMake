@@ -1115,7 +1115,7 @@ const char* cmCMakePresetsGraph::ResultToString(ReadFileResult result)
       return "File version must be 2 or higher for build and test preset "
              "support.";
     case ReadFileResult::PACKAGE_PRESETS_UNSUPPORTED:
-      return "File version must be 5 or higher for package preset support";
+      return "File version must be 6 or higher for package preset support";
     case ReadFileResult::INCLUDE_UNSUPPORTED:
       return "File version must be 4 or higher for include support";
     case ReadFileResult::INVALID_INCLUDE:
