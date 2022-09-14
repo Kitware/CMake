@@ -31,7 +31,7 @@ macro(_record_compiler_features lang compile_flags feature_list)
   endif()
 
   try_compile(CMAKE_${lang}_FEATURE_TEST
-    ${CMAKE_BINARY_DIR} "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests.${lang_lc}"
+    SOURCES "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests.${lang_lc}"
     COMPILE_DEFINITIONS "${compile_flags}"
     LINK_LIBRARIES "${compile_flags_for_link}"
     OUTPUT_VARIABLE _output

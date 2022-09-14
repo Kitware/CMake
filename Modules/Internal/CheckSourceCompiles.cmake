@@ -93,8 +93,7 @@ function(CMAKE_CHECK_SOURCE_COMPILES _lang _source _var)
       message(CHECK_START "Performing Test ${_var}")
     endif()
     try_compile(${_var}
-      ${CMAKE_BINARY_DIR}
-      ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/src.${_SRC_EXT}
+      SOURCES ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/src.${_SRC_EXT}
       COMPILE_DEFINITIONS -D${_var} ${CMAKE_REQUIRED_DEFINITIONS}
       ${CHECK_${LANG}_SOURCE_COMPILES_ADD_LINK_OPTIONS}
       ${CHECK_${LANG}_SOURCE_COMPILES_ADD_LIBRARIES}

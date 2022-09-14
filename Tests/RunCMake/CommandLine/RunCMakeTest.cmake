@@ -978,6 +978,8 @@ set(RunCMake_TEST_OPTIONS --debug-trycompile)
 run_cmake(debug-trycompile)
 unset(RunCMake_TEST_OPTIONS)
 
+run_cmake(trycompile-clean)
+
 function(run_cmake_depends)
   set(RunCMake_TEST_SOURCE_DIR "${RunCMake_SOURCE_DIR}/cmake_depends")
   set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/cmake_depends-build")

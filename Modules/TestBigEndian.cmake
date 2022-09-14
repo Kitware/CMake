@@ -89,8 +89,7 @@ macro(__TEST_BIG_ENDIAN_LEGACY_IMPL VARIABLE)
      file(READ ${_test_file} TEST_ENDIANESS_FILE_CONTENT)
 
      try_compile(HAVE_${VARIABLE}
-      "${CMAKE_BINARY_DIR}"
-      ${_test_file}
+      SOURCES ${_test_file}
       OUTPUT_VARIABLE OUTPUT
       COPY_FILE "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/TestEndianess.bin" )
 

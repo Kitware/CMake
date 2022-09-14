@@ -146,8 +146,7 @@ int main(int argc, char** argv)
       message(CHECK_START "Looking for ${SYMBOL}")
     endif()
     try_compile(${VARIABLE}
-      ${CMAKE_BINARY_DIR}
-      "${SOURCEFILE}"
+      SOURCES "${SOURCEFILE}"
       COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
       ${CHECK_SYMBOL_EXISTS_LINK_OPTIONS}
       ${CHECK_SYMBOL_EXISTS_LIBS}

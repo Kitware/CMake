@@ -46,8 +46,8 @@ if(NOT CMAKE_Fortran_COMPILER_WORKS)
   # Clear result from normal variable.
   unset(CMAKE_Fortran_COMPILER_WORKS)
   # Puts test result in cache variable.
-  try_compile(CMAKE_Fortran_COMPILER_WORKS ${CMAKE_BINARY_DIR}
-    ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompiler.f
+  try_compile(CMAKE_Fortran_COMPILER_WORKS
+    SOURCES ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompiler.f
     OUTPUT_VARIABLE OUTPUT)
   # Move result from cache to normal variable.
   set(CMAKE_Fortran_COMPILER_WORKS ${CMAKE_Fortran_COMPILER_WORKS})
@@ -77,8 +77,8 @@ if(NOT DEFINED CMAKE_Fortran_COMPILER_SUPPORTS_F90)
     integer stop ; stop = 1 ; do while ( stop .eq. 0 ) ; end do
     END PROGRAM TESTFortran90
 ")
-  try_compile(CMAKE_Fortran_COMPILER_SUPPORTS_F90 ${CMAKE_BINARY_DIR}
-    ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompilerF90.f90
+  try_compile(CMAKE_Fortran_COMPILER_SUPPORTS_F90
+    SOURCES ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompilerF90.f90
     OUTPUT_VARIABLE OUTPUT)
   if(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
     message(CHECK_PASS "yes")

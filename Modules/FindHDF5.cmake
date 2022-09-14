@@ -238,7 +238,7 @@ function(_HDF5_test_regular_compiler_C success version is_parallel)
       "  fid = H5Fcreate(\"foo.h5\",H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT);\n"
       "  return 0;\n"
       "}")
-    try_compile(${success} ${scratch_directory} ${test_file}
+    try_compile(${success} SOURCES ${test_file}
       COPY_FILE ${scratch_directory}/compiler_has_h5_c
     )
   endif()
@@ -286,7 +286,7 @@ function(_HDF5_test_regular_compiler_CXX success version is_parallel)
       "  H5File file(\"foo.h5\", H5F_ACC_TRUNC);\n"
       "  return 0;\n"
       "}")
-    try_compile(${success} ${scratch_directory} ${test_file}
+    try_compile(${success} SOURCES ${test_file}
       COPY_FILE ${scratch_directory}/compiler_has_h5_cxx
     )
   endif()
@@ -323,7 +323,7 @@ function(_HDF5_test_regular_compiler_Fortran success is_parallel)
       "  call h5open_f(error)\n"
       "  call h5close_f(error)\n"
       "end\n")
-    try_compile(${success} ${scratch_directory} ${test_file})
+    try_compile(${success} SOURCES ${test_file})
     if(${success})
       execute_process(COMMAND ${CMAKE_Fortran_COMPILER} -showconfig
         OUTPUT_VARIABLE config_output

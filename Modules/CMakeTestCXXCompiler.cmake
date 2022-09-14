@@ -46,8 +46,8 @@ if(NOT CMAKE_CXX_COMPILER_WORKS)
   # Clear result from normal variable.
   unset(CMAKE_CXX_COMPILER_WORKS)
   # Puts test result in cache variable.
-  try_compile(CMAKE_CXX_COMPILER_WORKS ${CMAKE_BINARY_DIR}
-    ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCXXCompiler.cxx
+  try_compile(CMAKE_CXX_COMPILER_WORKS
+    SOURCES ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCXXCompiler.cxx
     OUTPUT_VARIABLE __CMAKE_CXX_COMPILER_OUTPUT)
   # Move result from cache to normal variable.
   set(CMAKE_CXX_COMPILER_WORKS ${CMAKE_CXX_COMPILER_WORKS})
