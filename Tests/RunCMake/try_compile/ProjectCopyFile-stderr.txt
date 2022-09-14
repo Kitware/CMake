@@ -1,0 +1,7 @@
+CMake Warning \(dev\) at ProjectCopyFile.cmake:[0-9]+ \(try_compile\):
+  Unknown arguments:
+
+    "COPY_FILE"
+    "result"
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)

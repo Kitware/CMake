@@ -14,9 +14,14 @@ Try Compiling Whole Projects
 
 .. code-block:: cmake
 
-  try_compile(<resultVar> <bindir> <srcdir>
-              <projectName> [<targetName>] [CMAKE_FLAGS <flags>...]
+  try_compile(<resultVar> PROJECT <projectName>
+              SOURCE_DIR <srcdir>
+              [BINARY_DIR <bindir>]
+              [TARGET <targetName>]
+              [CMAKE_FLAGS <flags>...]
               [OUTPUT_VARIABLE <var>])
+
+.. versionadded:: 3.25
 
 Try building a project.  The success or failure of the ``try_compile``,
 i.e. ``TRUE`` or ``FALSE`` respectively, is returned in ``<resultVar>``.
@@ -33,6 +38,15 @@ below for the meaning of other options.
   into the project's build configuration.  See policy :policy:`CMP0137`.
   Previously this was only done by the
   :ref:`source file <Try Compiling Source Files>` signature.
+
+This command also supports an alternate signature
+which was present in older versions of CMake:
+
+.. code-block:: cmake
+
+  try_compile(<resultVar> <bindir> <srcdir>
+              <projectName> [<targetName>] [CMAKE_FLAGS <flags>...]
+              [OUTPUT_VARIABLE <var>])
 
 .. _`Try Compiling Source Files`:
 

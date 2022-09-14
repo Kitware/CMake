@@ -121,6 +121,26 @@ ArgumentParser::Continue TryCompileCompileDefs(Arguments& args,
   return ArgumentParser::Continue::Yes;
 }
 
+cmArgumentParser<Arguments> makeTryCompileParser(
+  const cmArgumentParser<Arguments>& base)
+{
+  return cmArgumentParser<Arguments>{ base }.Bind("OUTPUT_VARIABLE"_s,
+                                                  &Arguments::OutputVariable);
+}
+
+cmArgumentParser<Arguments> makeTryRunParser(
+  const cmArgumentParser<Arguments>& base)
+{
+  return cmArgumentParser<Arguments>{ base }
+    .Bind("COMPILE_OUTPUT_VARIABLE"_s, &Arguments::CompileOutputVariable)
+    .Bind("RUN_OUTPUT_VARIABLE"_s, &Arguments::RunOutputVariable)
+    .Bind("RUN_OUTPUT_STDOUT_VARIABLE"_s, &Arguments::RunOutputStdOutVariable)
+    .Bind("RUN_OUTPUT_STDERR_VARIABLE"_s, &Arguments::RunOutputStdErrVariable)
+    .Bind("WORKING_DIRECTORY"_s, &Arguments::RunWorkingDirectory)
+    .Bind("ARGS"_s, &Arguments::RunArgs)
+    /* keep semicolon on own line */;
+}
+
 #define BIND_LANG_PROPS(lang)                                                 \
   Bind(#lang "_STANDARD"_s, TryCompileLangProp)                               \
     .Bind(#lang "_STANDARD_REQUIRED"_s, TryCompileLangProp)                   \
@@ -129,13 +149,17 @@ ArgumentParser::Continue TryCompileCompileDefs(Arguments& args,
 auto const TryCompileBaseArgParser =
   cmArgumentParser<Arguments>{}
     .Bind(0, &Arguments::CompileResultVariable)
-    .Bind("SOURCES"_s, &Arguments::Sources)
     .Bind("CMAKE_FLAGS"_s, &Arguments::CMakeFlags)
+    .Bind("__CMAKE_INTERNAL"_s, &Arguments::CMakeInternal)
+  /* keep semicolon on own line */;
+
+auto const TryCompileBaseNonProjectArgParser =
+  cmArgumentParser<Arguments>{ TryCompileBaseArgParser }
+    .Bind("SOURCES"_s, &Arguments::Sources)
     .Bind("COMPILE_DEFINITIONS"_s, TryCompileCompileDefs,
           ArgumentParser::ExpectAtLeast{ 0 })
     .Bind("LINK_LIBRARIES"_s, &Arguments::LinkLibraries)
     .Bind("LINK_OPTIONS"_s, &Arguments::LinkOptions)
-    .Bind("__CMAKE_INTERNAL"_s, &Arguments::CMakeInternal)
     .Bind("COPY_FILE"_s, &Arguments::CopyFileTo)
     .Bind("COPY_FILE_ERROR"_s, &Arguments::CopyFileError)
     .BIND_LANG_PROPS(C)
@@ -146,38 +170,35 @@ auto const TryCompileBaseArgParser =
     .BIND_LANG_PROPS(OBJCXX)
   /* keep semicolon on own line */;
 
-auto const TryCompileArgParser =
-  cmArgumentParser<Arguments>{ TryCompileBaseArgParser }.Bind(
-    "OUTPUT_VARIABLE"_s, &Arguments::OutputVariable)
+auto const TryCompileBaseProjectArgParser =
+  cmArgumentParser<Arguments>{ TryCompileBaseArgParser }
+    .Bind("PROJECT"_s, &Arguments::ProjectName)
+    .Bind("SOURCE_DIR"_s, &Arguments::SourceDirectoryOrFile)
+    .Bind("BINARY_DIR"_s, &Arguments::BinaryDirectory)
+    .Bind("TARGET"_s, &Arguments::TargetName)
   /* keep semicolon on own line */;
 
+auto const TryCompileProjectArgParser =
+  makeTryCompileParser(TryCompileBaseProjectArgParser);
+
+auto const TryCompileSourcesArgParser =
+  makeTryCompileParser(TryCompileBaseNonProjectArgParser);
+
 auto const TryCompileOldArgParser =
-  cmArgumentParser<Arguments>{ TryCompileArgParser }
+  makeTryCompileParser(TryCompileBaseNonProjectArgParser)
     .Bind(1, &Arguments::BinaryDirectory)
     .Bind(2, &Arguments::SourceDirectoryOrFile)
     .Bind(3, &Arguments::ProjectName)
     .Bind(4, &Arguments::TargetName)
   /* keep semicolon on own line */;
 
-auto const TryRunArgParser =
-  cmArgumentParser<Arguments>{ TryCompileBaseArgParser }
-    .Bind("COMPILE_OUTPUT_VARIABLE"_s, &Arguments::CompileOutputVariable)
-    .Bind("RUN_OUTPUT_VARIABLE"_s, &Arguments::RunOutputVariable)
-    .Bind("RUN_OUTPUT_STDOUT_VARIABLE"_s, &Arguments::RunOutputStdOutVariable)
-    .Bind("RUN_OUTPUT_STDERR_VARIABLE"_s, &Arguments::RunOutputStdErrVariable)
-    .Bind("WORKING_DIRECTORY"_s, &Arguments::RunWorkingDirectory)
-    .Bind("ARGS"_s, &Arguments::RunArgs)
-  /* keep semicolon on own line */;
+auto const TryRunProjectArgParser =
+  makeTryRunParser(TryCompileBaseProjectArgParser);
 
-auto const TryRunOldArgParser =
-  cmArgumentParser<Arguments>{ TryCompileOldArgParser }
-    .Bind("COMPILE_OUTPUT_VARIABLE"_s, &Arguments::CompileOutputVariable)
-    .Bind("RUN_OUTPUT_VARIABLE"_s, &Arguments::RunOutputVariable)
-    .Bind("RUN_OUTPUT_STDOUT_VARIABLE"_s, &Arguments::RunOutputStdOutVariable)
-    .Bind("RUN_OUTPUT_STDERR_VARIABLE"_s, &Arguments::RunOutputStdErrVariable)
-    .Bind("WORKING_DIRECTORY"_s, &Arguments::RunWorkingDirectory)
-    .Bind("ARGS"_s, &Arguments::RunArgs)
-  /* keep semicolon on own line */;
+auto const TryRunSourcesArgParser =
+  makeTryRunParser(TryCompileBaseNonProjectArgParser);
+
+auto const TryRunOldArgParser = makeTryRunParser(TryCompileOldArgParser);
 
 #undef BIND_LANG_PROPS
 }
@@ -203,11 +224,24 @@ Arguments cmCoreTryCompile::ParseArgs(
   cmRange<std::vector<std::string>::const_iterator> args, bool isTryRun)
 {
   std::vector<std::string> unparsedArguments;
-  if (cmHasLiteralPrefix(*(++args.begin()), "SOURCE")) {
-    // New signature.
-    auto arguments =
-      this->ParseArgs(args, isTryRun ? TryRunArgParser : TryCompileArgParser,
-                      unparsedArguments);
+  const auto& second = *(++args.begin());
+
+  if (second == "PROJECT") {
+    // New PROJECT signature.
+    auto arguments = this->ParseArgs(
+      args, isTryRun ? TryRunProjectArgParser : TryCompileProjectArgParser,
+      unparsedArguments);
+    if (!arguments.BinaryDirectory) {
+      arguments.BinaryDirectory = unique_binary_directory;
+    }
+    return arguments;
+  }
+
+  if (cmHasLiteralPrefix(second, "SOURCE")) {
+    // New SOURCES signature.
+    auto arguments = this->ParseArgs(
+      args, isTryRun ? TryRunSourcesArgParser : TryCompileSourcesArgParser,
+      unparsedArguments);
     arguments.BinaryDirectory = unique_binary_directory;
     return arguments;
   }
@@ -256,8 +290,14 @@ bool cmCoreTryCompile::TryCompileCode(Arguments& arguments,
   std::string sourceDirectory;
   std::string projectName;
   std::string targetName;
-  if (arguments.SourceDirectoryOrFile && arguments.ProjectName) {
+  if (arguments.ProjectName) {
     this->SrcFileSignature = false;
+    if (!arguments.SourceDirectoryOrFile ||
+        arguments.SourceDirectoryOrFile->empty()) {
+      this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
+                                   "No <srcdir> specified.");
+      return false;
+    }
     sourceDirectory = *arguments.SourceDirectoryOrFile;
     projectName = *arguments.ProjectName;
     if (arguments.TargetName) {
