@@ -58,6 +58,7 @@ Policies Introduced by CMake 3.25
 .. toctree::
    :maxdepth: 1
 
+   CMP0142: The Xcode generator does not append per-config suffixes to library search paths. </policy/CMP0142>
    CMP0141: MSVC debug information format flags are selected by an abstraction. </policy/CMP0141>
    CMP0140: The return() command checks its arguments. </policy/CMP0140>
 
