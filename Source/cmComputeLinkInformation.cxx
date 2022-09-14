@@ -368,6 +368,10 @@ cmComputeLinkInformation::cmComputeLinkInformation(
       LibraryFeatureDescriptor{ "__CMAKE_LINK_EXECUTABLE",
                                 cmStrCat(this->LoaderFlag, "<LIBRARY>") });
   }
+  // To link framewortk using a full path
+  this->LibraryFeatureDescriptors.emplace(
+    "__CMAKE_LINK_FRAMEWORK",
+    LibraryFeatureDescriptor{ "__CMAKE_LINK_FRAMEWORK", "<LIBRARY>" });
 
   // Check the platform policy for missing soname case.
   this->NoSONameUsesPath =
@@ -1560,12 +1564,6 @@ void cmComputeLinkInformation::AddTargetItem(LinkEntry const& entry)
     this->OldLinkDirItems.push_back(item.Value);
   }
 
-  if (target->IsFrameworkOnApple() && this->GlobalGenerator->IsXcode() &&
-      entry.Feature == DEFAULT) {
-    // ensure FRAMEWORK feature is loaded
-    this->AddLibraryFeature("FRAMEWORK");
-  }
-
   if (target->IsFrameworkOnApple() && !this->GlobalGenerator->IsXcode()) {
     // Add the framework directory and the framework item itself
     auto fwItems = this->GlobalGenerator->SplitFrameworkPath(item.Value, true);
@@ -1597,7 +1595,7 @@ void cmComputeLinkInformation::AddTargetItem(LinkEntry const& entry)
       this->FindLibraryFeature(
         entry.Feature == DEFAULT
           ? (target->IsFrameworkOnApple() && this->GlobalGenerator->IsXcode()
-               ? "FRAMEWORK"
+               ? "__CMAKE_LINK_FRAMEWORK"
                : "__CMAKE_LINK_LIBRARY")
           : entry.Feature));
   }

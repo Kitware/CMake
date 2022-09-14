@@ -3813,9 +3813,17 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
               // an implicit search path, so we need it
               libPaths.Add("-F " + this->XCodeEscapePath(fwItems->first));
             }
-            libPaths.Add(
-              libName.GetFormattedItem(this->XCodeEscapePath(fwItems->second))
-                .Value);
+            if (libName.GetFeatureName() == "__CMAKE_LINK_FRAMEWORK"_s) {
+              // use the full path
+              libPaths.Add(
+                libName.GetFormattedItem(this->XCodeEscapePath(cleanPath))
+                  .Value);
+            } else {
+              libPaths.Add(
+                libName
+                  .GetFormattedItem(this->XCodeEscapePath(fwItems->second))
+                  .Value);
+            }
           } else {
             libPaths.Add(
               libName.GetFormattedItem(this->XCodeEscapePath(cleanPath))
