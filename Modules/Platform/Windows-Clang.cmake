@@ -89,17 +89,27 @@ macro(__windows_compiler_clang_gnu lang)
     set(CMAKE_${lang}_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDebugDLL -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd)
 
     if(CMAKE_MSVC_RUNTIME_LIBRARY_DEFAULT)
-      set(__ADDED_FLAGS "")
-      set(__ADDED_FLAGS_DEBUG "")
+      set(_RTL_FLAGS "")
+      set(_RTL_FLAGS_DEBUG "")
     else()
-      set(__ADDED_FLAGS_DEBUG "-D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd")
-      set(__ADDED_FLAGS "-D_DLL -D_MT -Xclang --dependent-lib=msvcrt")
+      set(_RTL_FLAGS_DEBUG " -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd")
+      set(_RTL_FLAGS " -D_DLL -D_MT -Xclang --dependent-lib=msvcrt")
     endif()
 
-    string(APPEND CMAKE_${lang}_FLAGS_DEBUG_INIT " -g -Xclang -gcodeview -O0 ${__ADDED_FLAGS_DEBUG}")
-    string(APPEND CMAKE_${lang}_FLAGS_MINSIZEREL_INIT " -Os -DNDEBUG ${__ADDED_FLAGS}")
-    string(APPEND CMAKE_${lang}_FLAGS_RELEASE_INIT " -O3 -DNDEBUG ${__ADDED_FLAGS}")
-    string(APPEND CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT " -O2 -g -DNDEBUG -Xclang -gcodeview ${__ADDED_FLAGS}")
+    if(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT_DEFAULT)
+      set(_DBG_FLAGS "")
+    else()
+      set(_DBG_FLAGS " -g -Xclang -gcodeview")
+    endif()
+
+    string(APPEND CMAKE_${lang}_FLAGS_DEBUG_INIT " -O0${_DBG_FLAGS}${_RTL_FLAGS_DEBUG}")
+    string(APPEND CMAKE_${lang}_FLAGS_MINSIZEREL_INIT " -Os -DNDEBUG${_RTL_FLAGS}")
+    string(APPEND CMAKE_${lang}_FLAGS_RELEASE_INIT " -O3 -DNDEBUG${_RTL_FLAGS}")
+    string(APPEND CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT " -O2 -DNDEBUG${_DBG_FLAGS}${_RTL_FLAGS}")
+
+    set(CMAKE_${lang}_COMPILE_OPTIONS_MSVC_DEBUG_INFORMATION_FORMAT_Embedded        -g -Xclang -gcodeview)
+    #set(CMAKE_${lang}_COMPILE_OPTIONS_MSVC_DEBUG_INFORMATION_FORMAT_ProgramDatabase) # not supported by Clang
+    #set(CMAKE_${lang}_COMPILE_OPTIONS_MSVC_DEBUG_INFORMATION_FORMAT_EditAndContinue) # not supported by Clang
   endif()
   set(CMAKE_INCLUDE_SYSTEM_FLAG_${lang} "-isystem ")
   set(CMAKE_${lang}_LINKER_SUPPORTS_PDB ON)
@@ -109,8 +119,9 @@ macro(__windows_compiler_clang_gnu lang)
   set(CMAKE_${lang}_COMPILE_OPTIONS_USE_PCH -Xclang -include-pch -Xclang <PCH_FILE> -Xclang -include -Xclang <PCH_HEADER>)
   set(CMAKE_${lang}_COMPILE_OPTIONS_CREATE_PCH -Xclang -emit-pch -Xclang -include -Xclang <PCH_HEADER> -x ${__pch_header_${lang}})
 
-  unset(__ADDED_FLAGS)
-  unset(__ADDED_FLAGS_DEBUG)
+  unset(_DBG_FLAGS)
+  unset(_RTL_FLAGS)
+  unset(_RTL_FLAGS_DEBUG)
   string(TOLOWER "${CMAKE_BUILD_TYPE}" BUILD_TYPE_LOWER)
   set(CMAKE_${lang}_STANDARD_LIBRARIES_INIT "-lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32 -loldnames")
 
@@ -190,6 +201,7 @@ if("x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC"
     macro(__windows_compiler_clang_base lang)
       set(_COMPILE_${lang} "${_COMPILE_${lang}_MSVC}")
       __windows_compiler_msvc(${lang})
+      unset(CMAKE_${lang}_COMPILE_OPTIONS_MSVC_DEBUG_INFORMATION_FORMAT_EditAndContinue) # -ZI not supported by Clang
       set(CMAKE_${lang}_COMPILE_OPTIONS_WARNING_AS_ERROR "-WX")
       set(CMAKE_INCLUDE_SYSTEM_FLAG_${lang} "-imsvc")
     endmacro()
@@ -201,6 +213,14 @@ if("x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC"
       set(CMAKE_MSVC_RUNTIME_LIBRARY_DEFAULT "")
     endif()
     unset(__WINDOWS_CLANG_CMP0091)
+
+    cmake_policy(GET CMP0141 __WINDOWS_MSVC_CMP0141)
+    if(__WINDOWS_MSVC_CMP0141 STREQUAL "NEW")
+      set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT_DEFAULT "$<$<CONFIG:Debug,RelWithDebInfo>:Embedded>")
+    else()
+      set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT_DEFAULT "")
+    endif()
+    unset(__WINDOWS_MSVC_CMP0141)
 
     set(CMAKE_BUILD_TYPE_INIT Debug)
 

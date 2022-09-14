@@ -57,6 +57,12 @@ else()
   set(_MD "-MD ")
 endif()
 
+if(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT_DEFAULT)
+  set(_Zi "")
+else()
+  set(_Zi " -Zi")
+endif()
+
 cmake_policy(GET CMP0092 _cmp0092)
 if(_cmp0092 STREQUAL "NEW")
   set(_W3 "")
@@ -66,11 +72,12 @@ endif()
 unset(_cmp0092)
 
 string(APPEND CMAKE_CUDA_FLAGS_INIT " ${PLATFORM_DEFINES_CUDA} -D_WINDOWS -Xcompiler=\"${_W3}${_FLAGS_CXX}\"")
-string(APPEND CMAKE_CUDA_FLAGS_DEBUG_INIT " -Xcompiler=\"${_MDd}-Zi -Ob0 -Od ${_RTC1}\"")
+string(APPEND CMAKE_CUDA_FLAGS_DEBUG_INIT " -Xcompiler=\"${_MDd}${_Zi} -Ob0 -Od ${_RTC1}\"")
 string(APPEND CMAKE_CUDA_FLAGS_RELEASE_INIT " -Xcompiler=\"${_MD}-O2 -Ob2\" -DNDEBUG")
-string(APPEND CMAKE_CUDA_FLAGS_RELWITHDEBINFO_INIT " -Xcompiler=\"${_MD}-Zi -O2 -Ob1\" -DNDEBUG")
+string(APPEND CMAKE_CUDA_FLAGS_RELWITHDEBINFO_INIT " -Xcompiler=\"${_MD}${_Zi} -O2 -Ob1\" -DNDEBUG")
 string(APPEND CMAKE_CUDA_FLAGS_MINSIZEREL_INIT " -Xcompiler=\"${_MD}-O1 -Ob1\" -DNDEBUG")
 unset(_W3)
+unset(_Zi)
 unset(_MDd)
 unset(_MD)
 
@@ -78,6 +85,9 @@ set(CMAKE_CUDA_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreaded         -Xcomp
 set(CMAKE_CUDA_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDLL      -Xcompiler=-MD)
 set(CMAKE_CUDA_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDebug    -Xcompiler=-MTd)
 set(CMAKE_CUDA_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDebugDLL -Xcompiler=-MDd)
+set(CMAKE_CUDA_COMPILE_OPTIONS_MSVC_DEBUG_INFORMATION_FORMAT_Embedded        -Xcompiler=-Z7)
+set(CMAKE_CUDA_COMPILE_OPTIONS_MSVC_DEBUG_INFORMATION_FORMAT_ProgramDatabase -Xcompiler=-Zi)
+set(CMAKE_CUDA_COMPILE_OPTIONS_MSVC_DEBUG_INFORMATION_FORMAT_EditAndContinue -Xcompiler=-ZI)
 
 set(CMAKE_CUDA_STANDARD_LIBRARIES_INIT "${CMAKE_C_STANDARD_LIBRARIES_INIT}")
 
