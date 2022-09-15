@@ -1147,10 +1147,12 @@ void cmCMakePresetsGraph::ClearPresets()
   this->ConfigurePresets.clear();
   this->BuildPresets.clear();
   this->TestPresets.clear();
+  this->PackagePresets.clear();
 
   this->ConfigurePresetOrder.clear();
   this->BuildPresetOrder.clear();
   this->TestPresetOrder.clear();
+  this->PackagePresetOrder.clear();
 
   this->Files.clear();
 }
