@@ -17,6 +17,7 @@
 
 #include <cm/optional>
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cm_codecvt.hxx"
 
@@ -367,13 +368,61 @@ public:
   /** Determine if a name resolves to a framework on disk or a built target
       that is a framework. */
   bool NameResolvesToFramework(const std::string& libname) const;
-  /** Split a framework path to the directory and name of the framework
-   * returns std::nullopt if the path does not match with framework format
+  /** Split a framework path to the directory and name of the framework as well
+   * as optiona; suffix.
+   * Returns std::nullopt if the path does not match with framework format
    * when extendedFormat is true, required format is relaxed (i.e. extension
    * `.framework' is optional). Used when FRAMEWORK link feature is
    * specified */
-  cm::optional<std::pair<std::string, std::string>> SplitFrameworkPath(
-    const std::string& path, bool extendedFormat = false) const;
+  struct FrameworkDescriptor
+  {
+    FrameworkDescriptor(std::string directory, std::string name)
+      : Directory(std::move(directory))
+      , Name(std::move(name))
+    {
+    }
+    FrameworkDescriptor(std::string directory, std::string name,
+                        std::string suffix)
+      : Directory(std::move(directory))
+      , Name(std::move(name))
+      , Suffix(std::move(suffix))
+    {
+    }
+    std::string GetLinkName() const
+    {
+      return this->Suffix.empty() ? this->Name
+                                  : cmStrCat(this->Name, ',', this->Suffix);
+    }
+    std::string GetFullName() const
+    {
+      return cmStrCat(this->Name, ".framework/"_s, this->Name, this->Suffix);
+    }
+    std::string GetFrameworkPath() const
+    {
+      return this->Directory.empty()
+        ? cmStrCat(this->Name, ".framework"_s)
+        : cmStrCat(this->Directory, '/', this->Name, ".framework"_s);
+    }
+    std::string GetFullPath() const
+    {
+      return this->Directory.empty()
+        ? this->GetFullName()
+        : cmStrCat(this->Directory, '/', this->GetFullName());
+    }
+
+    const std::string Directory;
+    const std::string Name;
+    const std::string Suffix;
+  };
+  enum class FrameworkFormat
+  {
+    Strict,
+    Relaxed,
+    Extended
+  };
+  cm::optional<FrameworkDescriptor> SplitFrameworkPath(
+    const std::string& path,
+    FrameworkFormat format = FrameworkFormat::Relaxed) const;
 
   cmMakefile* FindMakefile(const std::string& start_dir) const;
   cmLocalGenerator* FindLocalGenerator(cmDirectoryId const& id) const;

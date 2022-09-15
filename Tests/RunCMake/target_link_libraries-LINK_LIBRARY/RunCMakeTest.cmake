@@ -90,12 +90,22 @@ if(APPLE AND (CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID MATCHES 
   run_cmake_target(apple_framework target-framework main-target-framework)
   run_cmake_target(apple_framework target-reexport_framework main-target-reexport_framework)
   run_cmake_target(apple_framework target-weak_framework main-target-weak_framework)
+
+  if(RunCMake_GENERATOR_IS_MULTI_CONFIG AND (NOT XCODE OR XCODE_VERSION GREATER_EQUAL 13))
+    run_cmake_target(apple_framework target-framework-postfix main-target-framework-postfix)
+    run_cmake_target(apple_framework target-reexport_framework-postfix main-target-reexport_framework-postfix)
+    run_cmake_target(apple_framework target-weak_framework-postfix main-target-weak_framework-postfix)
+  endif()
 endif()
 
 if (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION GREATER_EQUAL "12")
   run_cmake_target(apple_framework needed_framework main-needed_framework)
 
   run_cmake_target(apple_framework target-needed_framework main-target-needed_framework)
+
+  if(RunCMake_GENERATOR_IS_MULTI_CONFIG AND (NOT XCODE OR XCODE_VERSION GREATER_EQUAL 13))
+    run_cmake_target(apple_framework target-needed_framework-postfix main-target-needed_framework-postfix)
+  endif()
 endif()
 
 # Apple library features

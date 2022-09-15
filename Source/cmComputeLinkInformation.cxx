@@ -1566,8 +1566,9 @@ void cmComputeLinkInformation::AddTargetItem(LinkEntry const& entry)
 
   if (target->IsFrameworkOnApple() && !this->GlobalGenerator->IsXcode()) {
     // Add the framework directory and the framework item itself
-    auto fwItems = this->GlobalGenerator->SplitFrameworkPath(item.Value, true);
-    if (!fwItems) {
+    auto fwDescriptor = this->GlobalGenerator->SplitFrameworkPath(
+      item.Value, cmGlobalGenerator::FrameworkFormat::Extended);
+    if (!fwDescriptor) {
       this->CMakeInstance->IssueMessage(
         MessageType::FATAL_ERROR,
         cmStrCat("Could not parse framework path \"", item.Value,
@@ -1575,12 +1576,13 @@ void cmComputeLinkInformation::AddTargetItem(LinkEntry const& entry)
         item.Backtrace);
       return;
     }
-    if (!fwItems->first.empty()) {
+    if (!fwDescriptor->Directory.empty()) {
       // Add the directory portion to the framework search path.
-      this->AddFrameworkPath(fwItems->first);
+      this->AddFrameworkPath(fwDescriptor->Directory);
     }
     if (cmHasSuffix(entry.Feature, "FRAMEWORK"_s)) {
-      this->Items.emplace_back(fwItems->second, ItemIsPath::Yes, target,
+      this->Items.emplace_back(fwDescriptor->GetLinkName(), ItemIsPath::Yes,
+                               target,
                                this->FindLibraryFeature(entry.Feature));
     } else {
       this->Items.emplace_back(
@@ -1851,9 +1853,11 @@ void cmComputeLinkInformation::AddFrameworkItem(LinkEntry const& entry)
   std::string const& item = entry.Item.Value;
 
   // Try to separate the framework name and path.
-  auto fwItems =
-    this->GlobalGenerator->SplitFrameworkPath(item, entry.Feature != DEFAULT);
-  if (!fwItems) {
+  auto fwDescriptor = this->GlobalGenerator->SplitFrameworkPath(
+    item,
+    entry.Feature == DEFAULT ? cmGlobalGenerator::FrameworkFormat::Relaxed
+                             : cmGlobalGenerator::FrameworkFormat::Extended);
+  if (!fwDescriptor) {
     std::ostringstream e;
     e << "Could not parse framework path \"" << item << "\" "
       << "linked by target " << this->Target->GetName() << ".";
@@ -1861,18 +1865,14 @@ void cmComputeLinkInformation::AddFrameworkItem(LinkEntry const& entry)
     return;
   }
 
-  std::string fw_path = std::move(fwItems->first);
-  std::string fw = std::move(fwItems->second);
-  std::string full_fw = cmStrCat(fw, ".framework/", fw);
-
+  const std::string& fw_path = fwDescriptor->Directory;
   if (!fw_path.empty()) {
-    full_fw = cmStrCat(fw_path, '/', full_fw);
     // Add the directory portion to the framework search path.
     this->AddFrameworkPath(fw_path);
   }
 
   // add runtime information
-  this->AddLibraryRuntimeInfo(full_fw);
+  this->AddLibraryRuntimeInfo(fwDescriptor->GetFullPath());
 
   if (entry.Feature == DEFAULT) {
     // ensure FRAMEWORK feature is loaded
@@ -1887,9 +1887,9 @@ void cmComputeLinkInformation::AddFrameworkItem(LinkEntry const& entry)
                                                         ? "FRAMEWORK"
                                                         : entry.Feature));
   } else {
-    this->Items.emplace_back(fw, ItemIsPath::Yes, nullptr,
-                             this->FindLibraryFeature(entry.Feature == DEFAULT
-                                                        ? "FRAMEWORK"
+    this->Items.emplace_back(
+      fwDescriptor->GetLinkName(), ItemIsPath::Yes, nullptr,
+      this->FindLibraryFeature(entry.Feature == DEFAULT ? "FRAMEWORK"
                                                         : entry.Feature));
   }
 }
@@ -2252,15 +2252,11 @@ void cmComputeLinkInformation::AddLibraryRuntimeInfo(
 
   // It could be an Apple framework
   if (!is_shared_library) {
-    if (fullPath.find(".framework") != std::string::npos) {
-      static cmsys::RegularExpression splitFramework(
-        "^(.*)/(.*).framework/(.*)$");
-      if (splitFramework.find(fullPath) &&
-          (std::string::npos !=
-           splitFramework.match(3).find(splitFramework.match(2)))) {
-        is_shared_library = true;
-      }
-    }
+    is_shared_library =
+      this->GlobalGenerator
+        ->SplitFrameworkPath(fullPath,
+                             cmGlobalGenerator::FrameworkFormat::Strict)
+        .has_value();
   }
 
   if (!is_shared_library) {
