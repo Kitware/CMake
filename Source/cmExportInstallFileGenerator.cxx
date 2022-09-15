@@ -436,7 +436,10 @@ void cmExportInstallFileGenerator::SetImportLocationProperty(
     // Append the installed file name.
     if (target->IsAppBundleOnApple()) {
       value += cmInstallTargetGenerator::GetInstallFilename(target, config);
-      value += ".app/Contents/MacOS/";
+      value += ".app/";
+      if (!target->Makefile->PlatformIsAppleEmbedded()) {
+        value += "Contents/MacOS/";
+      }
       value += cmInstallTargetGenerator::GetInstallFilename(target, config);
     } else {
       value += cmInstallTargetGenerator::GetInstallFilename(
