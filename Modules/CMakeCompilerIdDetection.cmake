@@ -70,6 +70,7 @@ function(compiler_id_detection outvar lang)
       FujitsuClang
       Fujitsu
       GHS
+      Tasking
     )
     if ("x${lang}" STREQUAL "xC")
       list(APPEND ordered_compilers

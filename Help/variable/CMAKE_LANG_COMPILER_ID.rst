@@ -44,6 +44,7 @@ Value                           Name
 ``XL``, ``VisualAge``, ``zOS``  IBM XL
 ``XLClang``                     IBM Clang-based XL
 ``IBMClang``                    IBM LLVM-based Compiler
+``Tasking``                     `Tasking Compiler Toolsets`_
 =============================== ===============================================
 
 This variable is not guaranteed to be defined for all compilers or
@@ -63,3 +64,4 @@ languages.
 .. _Open Watcom: https://open-watcom.github.io
 .. _Small Device C Compiler: http://sdcc.sourceforge.net
 .. _Tiny C Compiler: https://bellard.org/tcc
+.. _Tasking Compiler Toolsets: https://tasking.com
