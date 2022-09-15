@@ -50,6 +50,7 @@
 #include "cmState.h"
 #include "cmStateDirectory.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
 #include "cmVersion.h"
@@ -2579,7 +2580,7 @@ cmGlobalGenerator::SplitFrameworkPath(const std::string& path,
     auto name = frameworkPath.match(3);
     auto libname =
       cmSystemTools::GetFilenameWithoutExtension(frameworkPath.match(6));
-    if (!libname.empty() && name != libname) {
+    if (!libname.empty() && !cmHasPrefix(libname, name)) {
       return cm::nullopt;
     }
     return std::pair<std::string, std::string>{ frameworkPath.match(2), name };
