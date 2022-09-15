@@ -289,6 +289,7 @@ run_cmake_presets(UserInheritance)
 # Test listing presets
 set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/ListPresets.json.in")
 run_cmake_presets(ListPresets --list-presets)
+run_cmake_presets(ListPresetsInvalidType --list-presets=invalid-type)
 
 set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/ListPresetsWorkingDir")
 set(RunCMake_TEST_NO_CLEAN 1)
