@@ -1145,7 +1145,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       } else {
         cmSystemTools::Error(
           "Invalid value specified for --list-presets.\n"
-          "Valid values are configure, build, test, or all. "
+          "Valid values are configure, build, test, package, or all. "
           "When no value is passed the default is configure.");
         return false;
       }

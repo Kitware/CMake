@@ -1,0 +1,3 @@
+^CMake Error: Invalid value specified for --list-presets\.
+Valid values are configure, build, test, package, or all\. When no value is passed the default is configure\.
+CMake Error: Run 'cmake --help' for all supported options\.$
