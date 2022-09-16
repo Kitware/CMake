@@ -85,6 +85,7 @@
         "buildPresets": { "$ref": "#/definitions/buildPresetsV4"},
         "testPresets": { "$ref": "#/definitions/testPresetsV5"},
         "packagePresets": { "$ref": "#/definitions/packagePresetsV6"},
+        "workflowPresets": { "$ref": "#/definitions/workflowPresetsV6" },
         "include": { "$ref": "#/definitions/include"}
       },
       "additionalProperties": false
@@ -492,7 +493,7 @@
         "properties": {
           "name": {
             "type": "string",
-            "description": "A required string representing the machine-friendly name of the preset. This identifier is used in the --preset argument. There must not be two presets (configure, build, test, or package) in the union of CMakePresets.json and CMakeUserPresets.json in the same directory with the same name.",
+            "description": "A required string representing the machine-friendly name of the preset. This identifier is used in the --preset argument. There must not be two presets (configure, build, test, package, or workflow) in the union of CMakePresets.json and CMakeUserPresets.json in the same directory with the same name.",
             "minLength": 1
           },
           "hidden": {
@@ -744,7 +745,7 @@
         "properties": {
           "name": {
             "type": "string",
-            "description": "A required string representing the machine-friendly name of the preset. This identifier is used in the --preset argument. There must not be two presets (configure, build, test, or package) in the union of CMakePresets.json and CMakeUserPresets.json in the same directory with the same name.",
+            "description": "A required string representing the machine-friendly name of the preset. This identifier is used in the --preset argument. There must not be two presets (configure, build, test, package, or workflow) in the union of CMakePresets.json and CMakeUserPresets.json in the same directory with the same name.",
             "minLength": 1
           },
           "hidden": {
@@ -1153,7 +1154,7 @@
         "properties": {
           "name": {
             "type": "string",
-            "description": "A required string representing the machine-friendly name of the preset. This identifier is used in the --preset argument. There must not be two presets (configure, build, test, or package) in the union of CMakePresets.json and CMakeUserPresets.json in the same directory with the same name.",
+            "description": "A required string representing the machine-friendly name of the preset. This identifier is used in the --preset argument. There must not be two presets (configure, build, test, package, or workflow) in the union of CMakePresets.json and CMakeUserPresets.json in the same directory with the same name.",
             "minLength": 1
           },
           "hidden": {
@@ -1317,6 +1318,84 @@
         },
         "required": [
           "name"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "workflowPresetsItemsV6": {
+      "type": "array",
+      "description": "An optional array of workflow preset objects. Used to execute configure, build, test, and package presets in order. Available in version 6 and higher.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "A required string representing the machine-friendly name of the preset. This identifier is used in the --preset argument. There must not be two presets (configure, build, test, package, or workflow) in the union of CMakePresets.json and CMakeUserPresets.json in the same directory with the same name.",
+            "minLength": 1
+          },
+          "vendor": {
+            "type": "object",
+            "description": "An optional map containing vendor-specific information. CMake does not interpret the contents of this field except to verify that it is a map if it does exist. However, it should follow the same conventions as the root-level vendor field.",
+            "properties": {}
+          },
+          "displayName": {
+            "type": "string",
+            "description": "An optional string with a human-friendly name of the preset."
+          },
+          "description": {
+            "type": "string",
+            "description": "An optional string with a human-friendly description of the preset."
+          },
+          "steps": {
+            "type": "array",
+            "description": "A required array of objects describing the steps of the workflow. The first step must be a configure preset, and all subsequent steps must be non-configure presets whose configurePreset field matches the starting configure preset.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "description": "A required string. The first step must be configure. Subsequent steps must be either build, test, or package.",
+                  "enum": ["configure", "build", "test", "package"]
+                },
+                "name": {
+                  "type": "string",
+                  "description": "A required string representing the name of the configure, build, test, or package preset to run as this workflow step.",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "type",
+                "name"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "name",
+          "steps"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "workflowPresetsV6": {
+      "type": "array",
+      "description": "An optional array of workflow preset objects. Used to execute configure, build, test, and package presets in order. Available in version 6 and higher.",
+      "allOf": [
+        { "$ref": "#/definitions/workflowPresetsItemsV6" }
+      ],
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {},
+          "vendor": {},
+          "displayName": {},
+          "description": {},
+          "steps": {}
+        },
+        "required": [
+          "name",
+          "steps"
         ],
         "additionalProperties": false
       }

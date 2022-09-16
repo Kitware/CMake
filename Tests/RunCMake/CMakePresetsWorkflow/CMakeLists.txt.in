@@ -1,0 +1,3 @@
+cmake_minimum_required(VERSION 3.19)
+project("@CASE_NAME@" NONE)
+include("@CASE_SOURCE_DIR@/@CASE_NAME@.cmake")

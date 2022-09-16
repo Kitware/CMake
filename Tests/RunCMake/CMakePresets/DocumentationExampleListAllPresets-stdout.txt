@@ -15,4 +15,8 @@ Available test presets:
 
 Available package presets:
 
+  "default"
+
+Available workflow presets:
+
   "default"$

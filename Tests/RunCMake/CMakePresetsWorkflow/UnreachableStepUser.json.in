@@ -1,0 +1,8 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "default"
+    }
+  ]
+}

@@ -30,6 +30,9 @@ Synopsis
  `Run the Find-Package Tool`_
   cmake --find-package [<options>]
 
+ `Run a Workflow Preset`_
+  cmake --workflow [<options>]
+
  `View Help`_
   cmake --help[-<topic>]
 
@@ -1177,6 +1180,25 @@ autoconf-based projects (via ``share/aclocal/cmake.m4``).
   This mode is not well-supported due to some technical limitations.
   It is kept for compatibility but should not be used in new projects.
 
+.. _`Workflow Mode`:
+
+Run a Workflow Preset
+=====================
+
+:manual:`CMake Presets <cmake-presets(7)>` provides a way to execute multiple
+build steps in order:
+
+.. option:: --preset <preset>, --preset=<preset>
+
+  Use a workflow preset to specify a workflow. The project binary directory
+  is inferred from the initial configure preset. The current working directory
+  must contain CMake preset files.
+  See :manual:`preset <cmake-presets(7)>` for more details.
+
+.. option:: --list-presets
+
+  Lists the available workflow presets. The current working directory must
+  contain CMake preset files.
 
 View Help
 =========

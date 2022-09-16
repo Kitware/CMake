@@ -1008,6 +1008,10 @@ add_RunCMake_test(CMakePresetsPackage
   -DPython_EXECUTABLE=${Python_EXECUTABLE}
   -DCMake_TEST_JSON_SCHEMA=${CMake_TEST_JSON_SCHEMA}
   )
+add_RunCMake_test(CMakePresetsWorkflow
+  -DPython_EXECUTABLE=${Python_EXECUTABLE}
+  -DCMake_TEST_JSON_SCHEMA=${CMake_TEST_JSON_SCHEMA}
+  )
 
 add_RunCMake_test(VerifyHeaderSets)
 

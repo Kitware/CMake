@@ -23,6 +23,10 @@
 #include <cmext/algorithm>
 #include <cmext/string_view>
 
+#if !defined(CMAKE_BOOTSTRAP) && !defined(_WIN32)
+#  include <unistd.h>
+#endif
+
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
 #include "cmsys/RegularExpression.hxx"
@@ -56,6 +60,7 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetLinkLibraryType.h"
+#include "cmUVProcessChain.h"
 #include "cmUtils.hxx"
 #include "cmVersionConfig.h"
 #include "cmWorkingDirectory.h"
@@ -3663,6 +3668,210 @@ bool cmake::Open(const std::string& dir, bool dryRun)
   }
 
   return gen->Open(dir, *cachedProjectName, dryRun);
+}
+
+#if !defined(CMAKE_BOOTSTRAP)
+template <typename T>
+const T* cmake::FindPresetForWorkflow(
+  cm::static_string_view type,
+  const std::map<std::string, cmCMakePresetsGraph::PresetPair<T>>& presets,
+  const cmCMakePresetsGraph::WorkflowPreset::WorkflowStep& step)
+{
+  auto it = presets.find(step.PresetName);
+  if (it == presets.end()) {
+    cmSystemTools::Error(cmStrCat("No such ", type, " preset in ",
+                                  this->GetHomeDirectory(), ": \"",
+                                  step.PresetName, '"'));
+    return nullptr;
+  }
+
+  if (it->second.Unexpanded.Hidden) {
+    cmSystemTools::Error(cmStrCat("Cannot use hidden ", type, " preset in ",
+                                  this->GetHomeDirectory(), ": \"",
+                                  step.PresetName, '"'));
+    return nullptr;
+  }
+
+  if (!it->second.Expanded) {
+    cmSystemTools::Error(cmStrCat("Could not evaluate ", type, " preset \"",
+                                  step.PresetName,
+                                  "\": Invalid macro expansion"));
+    return nullptr;
+  }
+
+  if (!it->second.Expanded->ConditionResult) {
+    cmSystemTools::Error(cmStrCat("Cannot use disabled ", type, " preset in ",
+                                  this->GetHomeDirectory(), ": \"",
+                                  step.PresetName, '"'));
+    return nullptr;
+  }
+
+  return &*it->second.Expanded;
+}
+
+std::function<int()> cmake::BuildWorkflowStep(
+  const std::vector<std::string>& args)
+{
+  cmUVProcessChainBuilder builder;
+  builder
+    .AddCommand(args)
+#  ifdef _WIN32
+    .SetExternalStream(cmUVProcessChainBuilder::Stream_OUTPUT, _fileno(stdout))
+    .SetExternalStream(cmUVProcessChainBuilder::Stream_ERROR, _fileno(stderr));
+#  else
+    .SetExternalStream(cmUVProcessChainBuilder::Stream_OUTPUT, STDOUT_FILENO)
+    .SetExternalStream(cmUVProcessChainBuilder::Stream_ERROR, STDERR_FILENO);
+#  endif
+  return [builder]() -> int {
+    auto chain = builder.Start();
+    chain.Wait();
+    return static_cast<int>(chain.GetStatus().front()->ExitStatus);
+  };
+}
+#endif
+
+int cmake::Workflow(const std::string& presetName, bool listPresets)
+{
+#ifndef CMAKE_BOOTSTRAP
+  this->SetHomeDirectory(cmSystemTools::GetCurrentWorkingDirectory());
+  this->SetHomeOutputDirectory(cmSystemTools::GetCurrentWorkingDirectory());
+
+  cmCMakePresetsGraph settingsFile;
+  auto result = settingsFile.ReadProjectPresets(this->GetHomeDirectory());
+  if (result != cmCMakePresetsGraph::ReadFileResult::READ_OK) {
+    cmSystemTools::Error(
+      cmStrCat("Could not read presets from ", this->GetHomeDirectory(), ": ",
+               cmCMakePresetsGraph::ResultToString(result)));
+    return 1;
+  }
+
+  if (listPresets) {
+    settingsFile.PrintWorkflowPresetList();
+    return 0;
+  }
+
+  auto presetPair = settingsFile.WorkflowPresets.find(presetName);
+  if (presetPair == settingsFile.WorkflowPresets.end()) {
+    cmSystemTools::Error(cmStrCat("No such workflow preset in ",
+                                  this->GetHomeDirectory(), ": \"", presetName,
+                                  '"'));
+    settingsFile.PrintWorkflowPresetList();
+    return 1;
+  }
+
+  if (presetPair->second.Unexpanded.Hidden) {
+    cmSystemTools::Error(cmStrCat("Cannot use hidden workflow preset in ",
+                                  this->GetHomeDirectory(), ": \"", presetName,
+                                  '"'));
+    settingsFile.PrintWorkflowPresetList();
+    return 1;
+  }
+
+  auto const& expandedPreset = presetPair->second.Expanded;
+  if (!expandedPreset) {
+    cmSystemTools::Error(cmStrCat("Could not evaluate workflow preset \"",
+                                  presetName, "\": Invalid macro expansion"));
+    settingsFile.PrintWorkflowPresetList();
+    return 1;
+  }
+
+  if (!expandedPreset->ConditionResult) {
+    cmSystemTools::Error(cmStrCat("Cannot use disabled workflow preset in ",
+                                  this->GetHomeDirectory(), ": \"", presetName,
+                                  '"'));
+    settingsFile.PrintWorkflowPresetList();
+    return 1;
+  }
+
+  struct CalculatedStep
+  {
+    int StepNumber;
+    cm::static_string_view Type;
+    std::string Name;
+    std::function<int()> Action;
+
+    CalculatedStep(int stepNumber, cm::static_string_view type,
+                   std::string name, std::function<int()> action)
+      : StepNumber(stepNumber)
+      , Type(type)
+      , Name(std::move(name))
+      , Action(std::move(action))
+    {
+    }
+  };
+
+  std::vector<CalculatedStep> steps;
+  steps.reserve(expandedPreset->Steps.size());
+  int stepNumber = 1;
+  for (auto const& step : expandedPreset->Steps) {
+    switch (step.PresetType) {
+      case cmCMakePresetsGraph::WorkflowPreset::WorkflowStep::Type::
+        Configure: {
+        auto const* configurePreset = this->FindPresetForWorkflow(
+          "configure"_s, settingsFile.ConfigurePresets, step);
+        if (!configurePreset) {
+          return 1;
+        }
+        steps.emplace_back(
+          stepNumber, "configure"_s, step.PresetName,
+          this->BuildWorkflowStep({ cmSystemTools::GetCMakeCommand(),
+                                    "--preset", step.PresetName }));
+      } break;
+      case cmCMakePresetsGraph::WorkflowPreset::WorkflowStep::Type::Build: {
+        auto const* buildPreset = this->FindPresetForWorkflow(
+          "build"_s, settingsFile.BuildPresets, step);
+        if (!buildPreset) {
+          return 1;
+        }
+        steps.emplace_back(
+          stepNumber, "build"_s, step.PresetName,
+          this->BuildWorkflowStep({ cmSystemTools::GetCMakeCommand(),
+                                    "--build", "--preset", step.PresetName }));
+      } break;
+      case cmCMakePresetsGraph::WorkflowPreset::WorkflowStep::Type::Test: {
+        auto const* testPreset = this->FindPresetForWorkflow(
+          "test"_s, settingsFile.TestPresets, step);
+        if (!testPreset) {
+          return 1;
+        }
+        steps.emplace_back(
+          stepNumber, "test"_s, step.PresetName,
+          this->BuildWorkflowStep({ cmSystemTools::GetCTestCommand(),
+                                    "--preset", step.PresetName }));
+      } break;
+      case cmCMakePresetsGraph::WorkflowPreset::WorkflowStep::Type::Package: {
+        auto const* packagePreset = this->FindPresetForWorkflow(
+          "package"_s, settingsFile.PackagePresets, step);
+        if (!packagePreset) {
+          return 1;
+        }
+        steps.emplace_back(
+          stepNumber, "package"_s, step.PresetName,
+          this->BuildWorkflowStep({ cmSystemTools::GetCPackCommand(),
+                                    "--preset", step.PresetName }));
+      } break;
+    }
+    stepNumber++;
+  }
+
+  int stepResult;
+  bool first = true;
+  for (auto const& step : steps) {
+    if (!first) {
+      std::cout << "\n";
+    }
+    std::cout << "Executing workflow step " << step.StepNumber << " of "
+              << steps.size() << ": " << step.Type << " preset \"" << step.Name
+              << "\"\n\n"
+              << std::flush;
+    if ((stepResult = step.Action()) != 0) {
+      return stepResult;
+    }
+    first = false;
+  }
+#endif
+
+  return 0;
 }
 
 void cmake::WatchUnusedCli(const std::string& var)

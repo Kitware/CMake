@@ -1,0 +1,20 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "default",
+      "hidden": true
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "WorkflowStepHidden",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "default"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "default",
+      "condition": {
+        "type": "const",
+        "value": false
+      }
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "WorkflowStepDisabled",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "default"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+^Executing workflow step 1 of 4: configure preset "default"
+
+.*Testing the configure step at [^
+]*/Tests/RunCMake/CMakePresetsWorkflow/BadExitCode/build.*
+
+Executing workflow step 2 of 4: build preset "default"
+
+.*Testing the build step at [^
+]*[\\/]Tests[\\/]RunCMake[\\/]CMakePresetsWorkflow[\\/]BadExitCode[\\/]build.*
+
+Executing workflow step 3 of 4: test preset "default"
+
+.*Testing the test step at [^
+]*/Tests/RunCMake/CMakePresetsWorkflow/BadExitCode/build.*
+
+The following tests FAILED:
+.* +1 - EchoTest \(Failed\)$

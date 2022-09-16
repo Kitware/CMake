@@ -1,0 +1,1 @@
+message(STATUS "Testing the package step at @RunCMake_TEST_BINARY_DIR@")

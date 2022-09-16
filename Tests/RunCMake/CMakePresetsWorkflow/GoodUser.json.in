@@ -1,0 +1,14 @@
+{
+  "version": 6,
+  "workflowPresets": [
+    {
+      "name": "GoodUser",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "default"
+        }
+      ]
+    }
+  ]
+}
