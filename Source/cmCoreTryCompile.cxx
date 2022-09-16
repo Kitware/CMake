@@ -403,19 +403,19 @@ bool cmCoreTryCompile::TryCompileCode(Arguments& arguments,
       this->Makefile->IssueMessage(
         MessageType::FATAL_ERROR,
         cmStrCat(arguments.LangProps.begin()->first,
-                 " allowed only in source file signature."));
+                 " allowed only in source file signature"));
       return false;
     }
     if (!arguments.CompileDefs.empty()) {
       this->Makefile->IssueMessage(
         MessageType::FATAL_ERROR,
-        "COMPILE_DEFINITIONS specified on a srcdir type TRY_COMPILE");
+        "COMPILE_DEFINITIONS allowed only in source file signature");
       return false;
     }
     if (arguments.CopyFileTo) {
       this->Makefile->IssueMessage(
         MessageType::FATAL_ERROR,
-        "COPY_FILE specified on a srcdir type TRY_COMPILE");
+        "COPY_FILE allowed only in source file signature");
       return false;
     }
   }
