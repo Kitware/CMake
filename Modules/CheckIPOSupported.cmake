@@ -137,9 +137,9 @@ macro(_ipo_run_language_check language)
 
   try_compile(
       _IPO_LANGUAGE_CHECK_RESULT
-      "${bindir}"
-      "${srcdir}"
-      "${TRY_COMPILE_PROJECT_NAME}"
+      PROJECT "${TRY_COMPILE_PROJECT_NAME}"
+      SOURCE_DIR "${srcdir}"
+      BINARY_DIR "${bindir}"
       CMAKE_FLAGS
       "-DCMAKE_VERBOSE_MAKEFILE=ON"
       "-DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON"

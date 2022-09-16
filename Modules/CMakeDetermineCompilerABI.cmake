@@ -162,8 +162,9 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
         message(CHECK_START "Determine Intel Fortran Compiler Implicit Link Path")
         # Build a sample project which reports symbols.
         try_compile(IFORT_LIB_PATH_COMPILED
-          ${CMAKE_BINARY_DIR}/CMakeFiles/IntelVSImplicitPath
-          ${CMAKE_ROOT}/Modules/IntelVSImplicitPath
+          PROJECT IntelFortranImplicit
+          SOURCE_DIR ${CMAKE_ROOT}/Modules/IntelVSImplicitPath
+          BINARY_DIR ${CMAKE_BINARY_DIR}/CMakeFiles/IntelVSImplicitPath
           IntelFortranImplicit
           CMAKE_FLAGS
           "-DCMAKE_Fortran_FLAGS:STRING=${CMAKE_Fortran_FLAGS}"

@@ -47,10 +47,10 @@ unset(_FortranCInterface_CMP0056)
 # Build a sample project which reports symbols.
 set(CMAKE_TRY_COMPILE_CONFIGURATION Release)
 try_compile(FortranCInterface_COMPILED
-  ${FortranCInterface_BINARY_DIR}
-  ${FortranCInterface_SOURCE_DIR}
-  FortranCInterface # project name
-  FortranCInterface # target name
+  PROJECT FortranCInterface
+  TARGET FortranCInterface
+  SOURCE_DIR ${FortranCInterface_SOURCE_DIR}
+  BINARY_DIR ${FortranCInterface_BINARY_DIR}
   CMAKE_FLAGS
     "-DCMAKE_C_FLAGS:STRING=${CMAKE_C_FLAGS}"
     "-DCMAKE_Fortran_FLAGS:STRING=${CMAKE_Fortran_FLAGS}"
