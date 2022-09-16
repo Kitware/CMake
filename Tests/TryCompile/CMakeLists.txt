@@ -65,11 +65,20 @@ set(try_compile_run_output_var RUN_OUTPUT)
 include(old_and_new_signature_tests.cmake)
 
 # try to compile a project (old signature)
-message("Testing try_compile project mode")
+message("Testing try_compile project mode (old signature)")
 try_compile(TEST_INNER
   ${TryCompile_BINARY_DIR}/CMakeFiles/Inner
   ${TryCompile_SOURCE_DIR}/Inner
   TryCompileInner innerexe
+  OUTPUT_VARIABLE output)
+TEST_ASSERT(TEST_INNER "try_compile project mode failed:\n${output}")
+
+# try to compile a project (new signature)
+message("Testing try_compile project mode (new signature)")
+try_compile(TEST_INNER
+  PROJECT TryCompileInner
+  SOURCE_DIR ${TryCompile_SOURCE_DIR}/Inner
+  TARGET innerexe
   OUTPUT_VARIABLE output)
 TEST_ASSERT(TEST_INNER "try_compile project mode failed:\n${output}")
 

@@ -1,0 +1,4 @@
+CMake Error at OldProjectSrcDirEmpty.cmake:[0-9]+ \(try_compile\):
+  No <srcdir> specified.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
