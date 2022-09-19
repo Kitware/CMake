@@ -42,6 +42,8 @@ The options are:
   Each byproduct file will be marked with the :prop_sf:`GENERATED`
   source file property automatically.
 
+  *See policy* :policy:`CMP0058` *for the motivation behind this feature.*
+
   Explicit specification of byproducts is supported by the
   :generator:`Ninja` generator to tell the ``ninja`` build tool
   how to regenerate byproducts when they are missing.  It is
