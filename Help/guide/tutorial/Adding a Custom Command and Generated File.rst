@@ -62,7 +62,7 @@ directories so that ``Table.h`` can be found and included by ``mysqrt.cxx``.
   :name: MathFunctions/CMakeLists.txt-target_include_directories-Table.h
   :language: cmake
   :start-after: # state that we depend on our bin
-  :end-before: # install rules
+  :end-before: # install libs
 
 Now let's use the generated table. First, modify ``mysqrt.cxx`` to include
 ``Table.h``. Next, we can rewrite the ``mysqrt`` function to use the table:

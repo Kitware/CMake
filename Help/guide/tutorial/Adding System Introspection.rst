@@ -30,7 +30,7 @@ If available, use :command:`target_compile_definitions` to specify
   :name: MathFunctions/CMakeLists.txt-target_compile_definitions
   :language: cmake
   :start-after: # add compile definitions
-  :end-before: # install rules
+  :end-before: # install libs
 
 If ``log`` and ``exp`` are available on the system, then we will use them to
 compute the square root in the ``mysqrt`` function. Add the following code to

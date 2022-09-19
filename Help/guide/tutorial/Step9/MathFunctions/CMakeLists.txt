@@ -27,7 +27,8 @@ target_include_directories(MathFunctions
 # link our compiler flags interface library
 target_link_libraries(MathFunctions tutorial_compiler_flags)
 
-# install rules
+# install libs
 set(installable_libs MathFunctions tutorial_compiler_flags)
 install(TARGETS ${installable_libs} DESTINATION lib)
+# install include headers
 install(FILES MathFunctions.h DESTINATION include)
