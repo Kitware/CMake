@@ -4,15 +4,20 @@ Step 3: Adding Usage Requirements for a Library
 Exercise 1 - Adding Usage Requirements for a Library
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Usage requirements allow for far better control over a library or
-executable's link and include line while also giving more control over the
-transitive property of targets inside CMake. The primary commands that
+:ref:`Usage requirements <Target Usage Requirements>` of a target parameters
+allow for far better control over a library or executable's link and include
+line while also giving more control over the transitive property of targets
+inside CMake. The primary commands that
 leverage usage requirements are:
 
 * :command:`target_compile_definitions`
 * :command:`target_compile_options`
 * :command:`target_include_directories`
-* :command:`target_link_libraries`
+* :command:`target_link_directories`
+* :command:`target_link_options`
+* :command:`target_precompile_headers`
+* :command:`target_sources`
+
 
 Goal
 ----
@@ -22,7 +27,6 @@ Add usage requirements for a library.
 Helpful Materials
 -----------------
 
-* :command:`target_include_directories`
 * :variable:`CMAKE_CURRENT_SOURCE_DIR`
 
 Files to Edit

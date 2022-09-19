@@ -25,9 +25,9 @@ The named ``<target>`` must have been created by a command such as
 :ref:`ALIAS target <Alias Targets>`.
 
 The ``INTERFACE``, ``PUBLIC`` and ``PRIVATE`` keywords are required to
-specify the scope of the following arguments.  ``PRIVATE`` and ``PUBLIC``
-items will populate the :prop_tgt:`PRECOMPILE_HEADERS` property of
-``<target>``.  ``PUBLIC`` and ``INTERFACE`` items will populate the
+specify the :ref:`scope <Target Usage Requirements>` of the following arguments.
+``PRIVATE`` and ``PUBLIC`` items will populate the :prop_tgt:`PRECOMPILE_HEADERS`
+property of ``<target>``.  ``PUBLIC`` and ``INTERFACE`` items will populate the
 :prop_tgt:`INTERFACE_PRECOMPILE_HEADERS` property of ``<target>``
 (:ref:`IMPORTED targets <Imported Targets>` only support ``INTERFACE`` items).
 Repeated calls for the same ``<target>`` will append items in the order called.
