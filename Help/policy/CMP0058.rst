@@ -71,6 +71,9 @@ every custom command dependency, even on source files, needs to
 be treated this way because CMake does not have enough information
 to know which files are generated as byproducts of custom commands.
 
+Introducing Byproducts
+^^^^^^^^^^^^^^^^^^^^^^
+
 CMake 3.2 introduced the ``BYPRODUCTS`` option to the
 :command:`add_custom_command` and :command:`add_custom_target`
 commands.  This option allows byproducts to be specified explicitly:
