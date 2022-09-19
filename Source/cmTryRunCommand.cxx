@@ -469,11 +469,13 @@ void TryRunCommandImpl::DoNotRunExecutable(
 bool cmTryRunCommand(std::vector<std::string> const& args,
                      cmExecutionStatus& status)
 {
+  cmMakefile& mf = status.GetMakefile();
+
   if (args.size() < 4) {
+    mf.IssueMessage(MessageType::FATAL_ERROR,
+                    "The try_run() command requires at least 4 arguments.");
     return false;
   }
-
-  cmMakefile& mf = status.GetMakefile();
 
   if (mf.GetCMakeInstance()->GetWorkingMode() == cmake::FIND_PACKAGE_MODE) {
     mf.IssueMessage(

@@ -16,11 +16,14 @@
 bool cmTryCompileCommand(std::vector<std::string> const& args,
                          cmExecutionStatus& status)
 {
+  cmMakefile& mf = status.GetMakefile();
+
   if (args.size() < 3) {
+    mf.IssueMessage(
+      MessageType::FATAL_ERROR,
+      "The try_compile() command requires at least 3 arguments.");
     return false;
   }
-
-  cmMakefile& mf = status.GetMakefile();
 
   if (mf.GetCMakeInstance()->GetWorkingMode() == cmake::FIND_PACKAGE_MODE) {
     mf.IssueMessage(
