@@ -192,9 +192,6 @@ auto const TryCompileOldArgParser =
     .Bind(4, &Arguments::TargetName)
   /* keep semicolon on own line */;
 
-auto const TryRunProjectArgParser =
-  makeTryRunParser(TryCompileBaseProjectArgParser);
-
 auto const TryRunSourcesArgParser =
   makeTryRunParser(TryCompileBaseNonProjectArgParser);
 
@@ -226,11 +223,10 @@ Arguments cmCoreTryCompile::ParseArgs(
   std::vector<std::string> unparsedArguments;
   const auto& second = *(++args.begin());
 
-  if (second == "PROJECT") {
-    // New PROJECT signature.
-    auto arguments = this->ParseArgs(
-      args, isTryRun ? TryRunProjectArgParser : TryCompileProjectArgParser,
-      unparsedArguments);
+  if (!isTryRun && second == "PROJECT") {
+    // New PROJECT signature (try_compile only).
+    auto arguments =
+      this->ParseArgs(args, TryCompileProjectArgParser, unparsedArguments);
     if (!arguments.BinaryDirectory) {
       arguments.BinaryDirectory = unique_binary_directory;
     }
