@@ -1085,10 +1085,12 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
       this->GetGeneratorTarget()->GetObjectSources(sources, config);
       cmLocalGenerator const* LocalGen = this->GetLocalGenerator();
       for (const auto& source : sources) {
+        const std::string sourcePath = source->GetLanguage() == "Swift"
+          ? this->GetCompiledSourceNinjaPath(source)
+          : this->GetObjectFilePath(source, config);
         oss << " "
-            << LocalGen->ConvertToOutputFormat(
-                 this->GetCompiledSourceNinjaPath(source),
-                 cmOutputConverter::SHELL);
+            << LocalGen->ConvertToOutputFormat(sourcePath,
+                                               cmOutputConverter::SHELL);
       }
       return oss.str();
     }();
@@ -1106,10 +1108,15 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
     std::vector<cmSourceFile const*> sources;
     gt->GetObjectSources(sources, config);
     for (const auto& source : sources) {
-      linkBuild.Outputs.push_back(
-        this->ConvertToNinjaPath(this->GetObjectFilePath(source, config)));
-      linkBuild.ExplicitDeps.emplace_back(
-        this->GetCompiledSourceNinjaPath(source));
+      if (source->GetLanguage() == "Swift") {
+        linkBuild.Outputs.push_back(
+          this->ConvertToNinjaPath(this->GetObjectFilePath(source, config)));
+        linkBuild.ExplicitDeps.emplace_back(
+          this->GetCompiledSourceNinjaPath(source));
+      } else {
+        linkBuild.ExplicitDeps.emplace_back(
+          this->GetObjectFilePath(source, config));
+      }
     }
     linkBuild.Outputs.push_back(vars["SWIFT_MODULE"]);
   } else {
