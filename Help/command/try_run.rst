@@ -12,7 +12,10 @@ Try Compiling and Running Source Files
 
 .. code-block:: cmake
 
-  try_run(<runResultVar> <compileResultVar> SOURCES <srcfile...>
+  try_run(<runResultVar> <compileResultVar>
+          <SOURCES <srcfile...>]             |
+           SOURCE_FROM_ARG <name> <content>] |
+           SOURCE_FROM_VAR <name> <var>]     >...
           [CMAKE_FLAGS <flags>...]
           [COMPILE_DEFINITIONS <defs>...]
           [LINK_OPTIONS <options>...]
@@ -39,6 +42,9 @@ executable was built, but failed to run, then ``<runResultVar>`` will be
 set to ``FAILED_TO_RUN``.  See the :command:`try_compile` command for
 documentation of options common to both commands, and for information on how
 the test project is constructed to build the source file.
+
+One or more source files must be provided. Additionally, one of ``SOURCES``
+and/or ``SOURCE_FROM_*`` must precede other keywords.
 
 This command also supports an alternate signature
 which was present in older versions of CMake:
