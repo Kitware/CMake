@@ -201,13 +201,19 @@ bool HandleReadCommand(std::vector<std::string> const& args,
   // is there a limit?
   std::string::size_type sizeLimit = std::string::npos;
   if (!arguments.Limit.empty()) {
-    std::istringstream(arguments.Limit) >> sizeLimit;
+    unsigned long long limit;
+    if (cmStrToULongLong(arguments.Limit, &limit)) {
+      sizeLimit = static_cast<std::string::size_type>(limit);
+    }
   }
 
   // is there an offset?
   cmsys::ifstream::off_type offset = 0;
   if (!arguments.Offset.empty()) {
-    std::istringstream(arguments.Offset) >> offset;
+    long long off;
+    if (cmStrToLongLong(arguments.Offset, &off)) {
+      offset = static_cast<cmsys::ifstream::off_type>(off);
+    }
   }
 
   file.seekg(offset, std::ios::beg); // explicit ios::beg for IBM VisualAge 6
