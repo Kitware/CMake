@@ -495,7 +495,7 @@ void cmVisualStudio10TargetGenerator::WriteClassicMsBuildProjectFile(
       e1.Element("PreferredToolArchitecture", hostArch);
     }
 
-    // ALL_BUILD and ZERO_CHECK projects transitively include
+    // The ALL_BUILD, PACKAGE, and ZERO_CHECK projects transitively include
     // Microsoft.Common.CurrentVersion.targets which triggers Target
     // ResolveNugetPackageAssets when SDK-style targets are in the project.
     // However, these projects have no nuget packages to reference and the
@@ -503,7 +503,7 @@ void cmVisualStudio10TargetGenerator::WriteClassicMsBuildProjectFile(
     // Setting ResolveNugetPackages to false skips this target and the build
     // succeeds.
     cm::string_view targetName{ this->GeneratorTarget->GetName() };
-    if (targetName == "ALL_BUILD" ||
+    if (targetName == "ALL_BUILD" || targetName == "PACKAGE" ||
         targetName == CMAKE_CHECK_BUILD_SYSTEM_TARGET) {
       Elem e1(e0, "PropertyGroup");
       e1.Element("ResolveNugetPackages", "false");
