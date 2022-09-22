@@ -225,6 +225,8 @@ void GetScriptingCommands(cmState* state)
 
 void GetProjectCommands(cmState* state)
 {
+  state->AddBuiltinCommand("add_compile_definitions",
+                           cmAddCompileDefinitionsCommand);
   state->AddBuiltinCommand("add_custom_command", cmAddCustomCommandCommand);
   state->AddBuiltinCommand("add_custom_target", cmAddCustomTargetCommand);
   state->AddBuiltinCommand("add_definitions", cmAddDefinitionsCommand);
@@ -275,8 +277,6 @@ void GetProjectCommands(cmState* state)
                            cmTargetPrecompileHeadersCommand);
 
 #if !defined(CMAKE_BOOTSTRAP)
-  state->AddBuiltinCommand("add_compile_definitions",
-                           cmAddCompileDefinitionsCommand);
   state->AddBuiltinCommand("add_compile_options", cmAddCompileOptionsCommand);
   state->AddBuiltinCommand("aux_source_directory",
                            cmAuxSourceDirectoryCommand);
