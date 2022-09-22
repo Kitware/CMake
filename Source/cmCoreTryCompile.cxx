@@ -174,6 +174,7 @@ auto const TryCompileBaseNewSourcesArgParser =
   cmArgumentParser<Arguments>{ TryCompileBaseSourcesArgParser }
     .Bind("SOURCE_FROM_ARG"_s, &Arguments::SourceFromArg)
     .Bind("SOURCE_FROM_VAR"_s, &Arguments::SourceFromVar)
+    .Bind("SOURCE_FROM_FILE"_s, &Arguments::SourceFromFile)
   /* keep semicolon on own line */;
 
 auto const TryCompileBaseProjectArgParser =
@@ -416,6 +417,12 @@ bool cmCoreTryCompile::TryCompileCode(Arguments& arguments,
         "SOURCE_FROM_VAR requires exactly two arguments");
       return false;
     }
+    if (arguments.SourceFromFile && arguments.SourceFromFile->size() % 2) {
+      this->Makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        "SOURCE_FROM_FILE requires exactly two arguments");
+      return false;
+    }
   } else {
     // only valid for srcfile signatures
     if (!arguments.LangProps.empty()) {
@@ -495,6 +502,31 @@ bool cmCoreTryCompile::TryCompileCode(Arguments& arguments,
           return false;
         }
         sources.emplace_back(std::move(out));
+      }
+    }
+    if (arguments.SourceFromFile) {
+      auto const k = arguments.SourceFromFile->size();
+      for (auto i = decltype(k){ 0 }; i < k; i += 2) {
+        const auto& dst = (*arguments.SourceFromFile)[i + 0];
+        const auto& src = (*arguments.SourceFromFile)[i + 1];
+
+        if (!cmSystemTools::GetFilenamePath(dst).empty()) {
+          const auto& msg =
+            cmStrCat("SOURCE_FROM_FILE given invalid filename \"", dst, "\"");
+          this->Makefile->IssueMessage(MessageType::FATAL_ERROR, msg);
+          return false;
+        }
+
+        auto dstPath = cmStrCat(this->BinaryDirectory, "/", dst);
+        auto const result = cmSystemTools::CopyFileAlways(src, dstPath);
+        if (!result.IsSuccess()) {
+          const auto& msg = cmStrCat("SOURCE_FROM_FILE failed to copy \"", src,
+                                     "\": ", result.GetString());
+          this->Makefile->IssueMessage(MessageType::FATAL_ERROR, msg);
+          return false;
+        }
+
+        sources.emplace_back(std::move(dstPath));
       }
     }
     // TODO: ensure sources is not empty

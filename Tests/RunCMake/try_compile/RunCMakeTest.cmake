@@ -23,6 +23,7 @@ unset(RunCMake_TEST_OPTIONS)
 run_cmake(SourceFromOneArg)
 run_cmake(SourceFromThreeArgs)
 run_cmake(SourceFromBadName)
+run_cmake(SourceFromBadFile)
 
 run_cmake(ProjectCopyFile)
 run_cmake(NonSourceCopyFile)

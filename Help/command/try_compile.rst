@@ -58,7 +58,8 @@ Try Compiling Source Files
   try_compile(<resultVar>
               <SOURCES <srcfile...>]             |
                SOURCE_FROM_ARG <name> <content>] |
-               SOURCE_FROM_VAR <name> <var>]     >...
+               SOURCE_FROM_VAR <name> <var>]     |
+               SOURCE_FROM_FILE <name> <path>    >...
               [CMAKE_FLAGS <flags>...]
               [COMPILE_DEFINITIONS <defs>...]
               [LINK_OPTIONS <options>...]
@@ -177,6 +178,16 @@ The options are:
   is not allowed to contain path components.
 
   ``SOURCE_FROM_ARG`` may be specified multiple times.
+
+``SOURCE_FROM_FILE <name> <path>``
+  .. versionadded:: 3.25
+
+  Copy ``<path>`` to a file named ``<name>`` in the operation directory. This
+  can be used to consolidate files into the operation directory, which may be
+  useful if a source which already exists (i.e. as a stand-alone file in a
+  project's source repository) needs to refer to other file(s) created by
+  ``SOURCE_FROM_*``. (Otherwise, ``SOURCES`` is usually more convenient.) The
+  specified ``<name>`` is not allowed to contain path components.
 
 ``SOURCE_FROM_VAR <name> <content>``
   .. versionadded:: 3.25

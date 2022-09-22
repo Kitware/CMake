@@ -89,6 +89,12 @@ if(SHOULD_FAIL_DUE_TO_EMPTY_SOURCE)
   message(SEND_ERROR "Trying to compile an empty source succeeded?")
 endif()
 
+# try to compile a copied source
+try_compile(SHOULD_PASS
+  SOURCE_FROM_FILE pass.c ${TryCompile_SOURCE_DIR}/pass.c
+  OUTPUT_VARIABLE TRY_OUT)
+EXPECT_COMPILED("SOURCE_FROM_FILE" SHOULD_PASS "${TRY_OUT}")
+
 # try to run a source specified directly
 set(TRY_RUN_MAIN_CODE
   "extern int answer(); \n"

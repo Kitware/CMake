@@ -44,6 +44,8 @@ public:
       SourceFromArg;
     cm::optional<ArgumentParser::NonEmpty<std::vector<std::string>>>
       SourceFromVar;
+    cm::optional<ArgumentParser::NonEmpty<std::vector<std::string>>>
+      SourceFromFile;
     ArgumentParser::MaybeEmpty<std::vector<std::string>> CMakeFlags{
       1, "CMAKE_FLAGS"
     }; // fake argv[0]

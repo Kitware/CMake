@@ -15,7 +15,8 @@ Try Compiling and Running Source Files
   try_run(<runResultVar> <compileResultVar>
           <SOURCES <srcfile...>]             |
            SOURCE_FROM_ARG <name> <content>] |
-           SOURCE_FROM_VAR <name> <var>]     >...
+           SOURCE_FROM_VAR <name> <var>]     |
+           SOURCE_FROM_FILE <name> <path>    >...
           [CMAKE_FLAGS <flags>...]
           [COMPILE_DEFINITIONS <defs>...]
           [LINK_OPTIONS <options>...]
