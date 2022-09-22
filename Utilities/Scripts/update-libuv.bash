@@ -8,7 +8,7 @@ readonly name="libuv"
 readonly ownership="libuv upstream <libuv@googlegroups.com>"
 readonly subtree="Utilities/cmlibuv"
 readonly repo="https://github.com/libuv/libuv.git"
-readonly tag="v1.x"
+readonly tag="v1.44.2"
 readonly shortlog=false
 readonly paths="
   LICENSE
