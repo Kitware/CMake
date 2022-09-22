@@ -15,7 +15,11 @@
 #include "cmValue.h"
 
 #ifdef _WIN32
+#  include <winerror.h>
+
 #  include "cmsys/FStream.hxx"
+#else
+#  include <cerrno>
 #endif
 
 #include <cstring>
@@ -561,9 +565,20 @@ bool cmFileCopier::InstallSymlink(const std::string& fromFile,
     cmsys::Status status =
       cmSystemTools::CreateSymlinkQuietly(symlinkTarget, toFile);
     if (!status) {
+#ifdef _WIN32
+      bool const errorFileExists = status.GetWindows() == ERROR_FILE_EXISTS;
+#else
+      bool const errorFileExists = status.GetPOSIX() == EEXIST;
+#endif
+      std::string reason;
+      if (errorFileExists && cmSystemTools::FileIsDirectory(toFile)) {
+        reason = "A directory already exists at that location";
+      } else {
+        reason = status.GetString();
+      }
       std::string e =
         cmStrCat(this->Name, " cannot duplicate symlink\n  ", fromFile,
-                 "\nat\n  ", toFile, "\nbecause: ", status.GetString());
+                 "\nat\n  ", toFile, "\nbecause: ", reason);
       this->Status.SetError(e);
       return false;
     }
