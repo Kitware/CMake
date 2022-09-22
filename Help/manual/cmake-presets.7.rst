@@ -102,6 +102,10 @@ The root object recognizes the following fields:
   An optional array of `Test Preset`_ objects.
   This is allowed in preset files specifying version ``2`` or above.
 
+``packagePresets``
+  An optional array of `Package Preset`_ objects.
+  This is allowed in preset files specifying version ``6`` or above.
+
 Includes
 ^^^^^^^^
 
