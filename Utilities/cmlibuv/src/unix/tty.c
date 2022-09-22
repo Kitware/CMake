@@ -62,6 +62,8 @@ static int isreallyatty(int file) {
 #define isatty(fd) isreallyatty(fd)
 #endif
 
+#if !defined(CMAKE_BOOTSTRAP)
+
 static int orig_termios_fd = -1;
 static struct termios orig_termios;
 static uv_spinlock_t termios_spinlock = UV_SPINLOCK_INITIALIZER;
@@ -344,6 +346,7 @@ int uv_tty_get_winsize(uv_tty_t* tty, int* width, int* height) {
   return 0;
 }
 
+#endif
 
 uv_handle_type uv_guess_handle(uv_file file) {
   struct sockaddr_storage ss;
@@ -432,6 +435,7 @@ uv_handle_type uv_guess_handle(uv_file file) {
   return UV_UNKNOWN_HANDLE;
 }
 
+#if !defined(CMAKE_BOOTSTRAP)
 
 /* This function is async signal-safe, meaning that it's safe to call from
  * inside a signal handler _unless_ execution was inside uv_tty_set_mode()'s
@@ -461,3 +465,5 @@ void uv_tty_set_vterm_state(uv_tty_vtermstate_t state) {
 int uv_tty_get_vterm_state(uv_tty_vtermstate_t* state) {
   return UV_ENOTSUP;
 }
+
+#endif
