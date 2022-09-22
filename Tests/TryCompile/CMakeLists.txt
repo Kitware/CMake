@@ -6,13 +6,25 @@ project(TryCompile)
 
 macro(EXPECT_PASS var out)
   if(NOT ${var})
-    message(SEND_ERROR "Should pass failed ${out}")
+    message(SEND_ERROR "Should pass failed:\n${out}")
   endif()
 endmacro()
 
 macro(EXPECT_FAIL var out)
   if(${var})
-    message(SEND_ERROR "Should fail passed ${out}")
+    message(SEND_ERROR "Should fail passed:\n${out}")
+  endif()
+endmacro()
+
+macro(EXPECT_COMPILED name var out)
+  if(NOT ${var})
+    message(SEND_ERROR "${name} failed compiling:\n${out}")
+  endif()
+endmacro()
+
+macro(EXPECT_RUN_RESULT name var expected)
+  if(NOT ${var} EQUAL ${expected})
+    message(SEND_ERROR " ${name} gave unexpected run result: ${${var}} expected: ${expected}")
   endif()
 endmacro()
 
@@ -88,23 +100,15 @@ try_run(SHOULD_EXIT_WITH_ERROR SHOULD_COMPILE
   SOURCE_FROM_ARG main.c "${TRY_RUN_MAIN_CODE}"
   SOURCE_FROM_ARG answer.c "${TRY_RUN_EXT_CODE}"
   COMPILE_OUTPUT_VARIABLE COMPILE_OUTPUT)
-if(NOT SHOULD_COMPILE)
-  message(SEND_ERROR " SOURCE_FROM_ARG failed compiling: ${COMPILE_OUTPUT}")
-endif()
-if(NOT SHOULD_EXIT_WITH_ERROR EQUAL 42)
-  message(SEND_ERROR " SOURCE_FROM_ARG gave unexpected run result: ${SHOULD_EXIT_WITH_ERROR}")
-endif()
+EXPECT_COMPILED("SOURCE_FROM_ARG" SHOULD_COMPILE "${COMPILE_OUTPUT}")
+EXPECT_RUN_RESULT("SOURCE_FROM_ARG" SHOULD_EXIT_WITH_ERROR 42)
 
 try_run(SHOULD_EXIT_WITH_ERROR SHOULD_COMPILE
   SOURCE_FROM_VAR main.c TRY_RUN_MAIN_CODE
   SOURCE_FROM_VAR answer.c TRY_RUN_EXT_CODE
   COMPILE_OUTPUT_VARIABLE COMPILE_OUTPUT)
-if(NOT SHOULD_COMPILE)
-  message(SEND_ERROR " SOURCE_FROM_VAR failed compiling: ${COMPILE_OUTPUT}")
-endif()
-if(NOT SHOULD_EXIT_WITH_ERROR EQUAL 42)
-  message(SEND_ERROR " SOURCE_FROM_VAR gave unexpected run result: ${SHOULD_EXIT_WITH_ERROR}")
-endif()
+EXPECT_COMPILED("SOURCE_FROM_VAR" SHOULD_COMPILE "${COMPILE_OUTPUT}")
+EXPECT_RUN_RESULT("SOURCE_FROM_VAR" SHOULD_EXIT_WITH_ERROR 42)
 
 # try to compile a project (old signature)
 message("Testing try_compile project mode (old signature)")

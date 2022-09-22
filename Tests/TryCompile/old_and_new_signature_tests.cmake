@@ -130,18 +130,14 @@ if(APPLE)
     ${try_compile_bindir_or_SOURCES}
     ${TryCompile_SOURCE_DIR}/pass.m
     OUTPUT_VARIABLE TRY_OUT)
-  if(NOT SHOULD_PASS)
-    message(SEND_ERROR "should pass failed ${TRY_OUT}")
-  endif()
+  EXPECT_PASS(SHOULD_PASS "${TRY_OUT}")
 
   # try to compile a file that should not compile
   try_compile(SHOULD_FAIL
     ${try_compile_bindir_or_SOURCES}
     ${TryCompile_SOURCE_DIR}/fail.m
     OUTPUT_VARIABLE TRY_OUT)
-  if(SHOULD_FAIL)
-    message(SEND_ERROR "Should fail passed ${TRY_OUT}")
-  endif()
+  EXPECT_FAIL(SHOULD_FAIL "${TRY_OUT}")
 endif()
 
 ######################################
@@ -155,14 +151,9 @@ try_run(SHOULD_RUN SHOULD_COMPILE
     ${try_compile_bindir_or_SOURCES}
     ${TryCompile_SOURCE_DIR}/exit_success.c
     ${try_compile_output_vars})
-if(NOT SHOULD_COMPILE)
-  message(SEND_ERROR
-    "exit_success failed compiling: ${${try_compile_compile_output_var}}")
-endif()
-if(NOT "${SHOULD_RUN}" STREQUAL "0")
-  message(SEND_ERROR
-    "exit_success failed running with exit code ${SHOULD_RUN}")
-endif()
+EXPECT_COMPILED("exit_success" SHOULD_COMPILE "${${try_compile_compile_output_var}}")
+EXPECT_RUN_RESULT("exit_success" SHOULD_RUN 0)
+
 # check the compile output for the filename
 if(NOT "${${try_compile_compile_output_var}}" MATCHES "exit_success")
   message(SEND_ERROR
@@ -181,12 +172,8 @@ try_run(ARG_TEST_RUN ARG_TEST_COMPILE
     ${TryCompile_SOURCE_DIR}/expect_arg.c
     COMPILE_OUTPUT_VARIABLE TRY_OUT
     ARGS arg1 arg2)
-if(NOT ARG_TEST_COMPILE)
-  message(SEND_ERROR "expect_arg failed compiling: ${TRY_OUT}")
-endif()
-if(NOT "${ARG_TEST_RUN}" STREQUAL "0")
-  message(SEND_ERROR "expect_arg failed running with exit code ${ARG_TEST_RUN} ${TRY_OUT}")
-endif()
+EXPECT_COMPILED("expect_arg" ARG_TEST_COMPILE "${TRY_OUT}")
+EXPECT_RUN_RESULT("expect_arg" ARG_TEST_RUN 0)
 
 # try to run a file that should compile and run, but return an error
 try_run(SHOULD_EXIT_WITH_ERROR SHOULD_COMPILE
@@ -194,13 +181,8 @@ try_run(SHOULD_EXIT_WITH_ERROR SHOULD_COMPILE
     ${TryCompile_SOURCE_DIR}/exit_with_error.c
     COMPILE_OUTPUT_VARIABLE COMPILE_OUTPUT
     RUN_OUTPUT_VARIABLE RUN_OUTPUT)
-
-if(NOT SHOULD_COMPILE)
-  message(STATUS " exit_with_error failed compiling: ${COMPILE_OUTPUT}")
-endif()
-if("${SHOULD_EXIT_WITH_ERROR}" STREQUAL "0")
-  message(SEND_ERROR " exit_with_error passed with exit code ${SHOULD_EXIT_WITH_ERROR}")
-endif()
+EXPECT_COMPILED("exit_with_error" SHOULD_COMPILE "${COMPILE_OUTPUT}")
+EXPECT_RUN_RESULT("exit_with_error" SHOULD_EXIT_WITH_ERROR 1)
 
 # check the compile output, it should contain the filename
 if(NOT "${COMPILE_OUTPUT}" MATCHES "exit_with_error")
@@ -224,10 +206,7 @@ try_run(SHOULD_EXIT_WITH_ERROR SHOULD_COMPILE
   COMPILE_OUTPUT_VARIABLE COMPILE_OUTPUT
   RUN_OUTPUT_STDOUT_VARIABLE RUN_OUTPUT_STDOUT
   RUN_OUTPUT_STDERR_VARIABLE RUN_OUTPUT_STDERR)
-
-if(NOT SHOULD_COMPILE)
-  message(STATUS " exit_with_error failed compiling: ${COMPILE_OUTPUT}")
-endif()
+EXPECT_PASS(SHOULD_COMPILE "${COMPILE_OUTPUT}")
 
 if(NOT EXISTS "${TryCompile_BINARY_DIR}/CopyOfRun")
   message(SEND_ERROR "COPY_FILE to \"${TryCompile_BINARY_DIR}/CopyOfRun\" failed")
