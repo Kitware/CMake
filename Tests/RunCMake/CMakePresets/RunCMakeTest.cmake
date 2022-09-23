@@ -408,4 +408,5 @@ set(CMakePresets_EXTRA_FILES
   "${RunCMake_SOURCE_DIR}/moreThings.json.in"
 )
 run_cmake_presets(DocumentationExample --preset=default)
+run_cmake_presets(DocumentationExampleListAllPresets --list-presets=all)
 unset(CMakePresets_EXTRA_FILES)
