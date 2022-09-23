@@ -59,3 +59,33 @@ target_link_libraries(main-target-reexport_framework PRIVATE "$<LINK_LIBRARY:FRA
 # feature WEAK_FRAMEWORK
 add_executable(main-target-weak_framework main.mm)
 target_link_libraries(main-target-weak_framework PRIVATE "$<LINK_LIBRARY:FRAMEWORK,Foundation>" "$<LINK_LIBRARY:REEXPORT_FRAMEWORK,target-framework>")
+
+
+
+get_property(IS_MULTI_CONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+if(IS_MULTI_CONFIG)
+  add_library(target-framework-postfix SHARED foo.mm)
+  set_target_properties(target-framework-postfix PROPERTIES FRAMEWORK TRUE
+                                                            FRAMEWORK_MULTI_CONFIG_POSTFIX_RELEASE "_release")
+  target_link_libraries(target-framework-postfix PRIVATE "$<LINK_LIBRARY:FRAMEWORK,Foundation>")
+
+
+  # feature FRAMEWORK
+  add_executable(main-target-framework-postfix main.mm)
+  target_link_libraries(main-target-framework-postfix PRIVATE "$<LINK_LIBRARY:FRAMEWORK,Foundation>" "$<LINK_LIBRARY:FRAMEWORK,target-framework-postfix>")
+
+
+  # feature NEEDED_FRAMEWORK
+  add_executable(main-target-needed_framework-postfix main.mm)
+  target_link_libraries(main-target-needed_framework-postfix PRIVATE "$<LINK_LIBRARY:FRAMEWORK,Foundation>" "$<LINK_LIBRARY:NEEDED_FRAMEWORK,target-framework-postfix>")
+
+
+  # feature REEXPORT_FRAMEWORK
+  add_executable(main-target-reexport_framework-postfix main.mm)
+  target_link_libraries(main-target-reexport_framework-postfix PRIVATE "$<LINK_LIBRARY:FRAMEWORK,Foundation>" "$<LINK_LIBRARY:REEXPORT_FRAMEWORK,target-framework-postfix>")
+
+
+  # feature WEAK_FRAMEWORK
+  add_executable(main-target-weak_framework-postfix main.mm)
+  target_link_libraries(main-target-weak_framework-postfix PRIVATE "$<LINK_LIBRARY:FRAMEWORK,Foundation>" "$<LINK_LIBRARY:REEXPORT_FRAMEWORK,target-framework-postfix>")
+endif()

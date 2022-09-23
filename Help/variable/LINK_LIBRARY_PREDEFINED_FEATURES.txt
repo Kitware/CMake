@@ -45,8 +45,8 @@
   wildcard, and optional parts are shown as ``[...]``):
 
      * ``[/path/to/]FwName[.framework]``
-     * ``[/path/to/]FwName.framework/FwName``
-     * ``[/path/to/]FwName.framework/Versions/*/FwName``
+     * ``[/path/to/]FwName.framework/FwName[suffix]``
+     * ``[/path/to/]FwName.framework/Versions/*/FwName[suffix]``
 
   Note that CMake recognizes and automatically handles framework targets,
   even without using the ``$<LINK_LIBRARY:FRAMEWORK,...>`` expression.
@@ -58,6 +58,11 @@
   automatically, but not all cases.  The project may want to use
   ``$<LINK_LIBRARY:FRAMEWORK,...>`` for file paths so that the expected
   behavior is clear.
+
+  .. versionadded:: 3.25
+    The :prop_tgt:`FRAMEWORK_MULTI_CONFIG_POSTFIX_<CONFIG>` target property as
+    well as the ``suffix`` of the framework library name are now supported by
+    the ``FRAMEWORK`` features.
 
 ``NEEDED_FRAMEWORK``
   This is similar to the ``FRAMEWORK`` feature, except it forces the linker

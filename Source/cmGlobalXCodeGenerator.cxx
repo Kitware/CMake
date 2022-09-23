@@ -1192,13 +1192,9 @@ std::string GetTargetObjectDirArch(T const& target,
 std::string cmGlobalXCodeGenerator::GetLibraryOrFrameworkPath(
   const std::string& path) const
 {
-  auto fwItems = this->SplitFrameworkPath(path);
-  if (fwItems) {
-    if (fwItems->first.empty()) {
-      return cmStrCat(fwItems->second, ".framework");
-    } else {
-      return cmStrCat(fwItems->first, '/', fwItems->second, ".framework");
-    }
+  auto fwDescriptor = this->SplitFrameworkPath(path);
+  if (fwDescriptor) {
+    return fwDescriptor->GetFrameworkPath();
   }
 
   return path;
@@ -3641,9 +3637,10 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
       linkDir = libItem->Value.Value;
     }
     if (cmHasSuffix(libItem->GetFeatureName(), "FRAMEWORK"_s)) {
-      auto fwItems = this->SplitFrameworkPath(linkDir, true);
-      if (fwItems && !fwItems->first.empty()) {
-        linkDir = std::move(fwItems->first);
+      auto fwDescriptor = this->SplitFrameworkPath(
+        linkDir, cmGlobalGenerator::FrameworkFormat::Extended);
+      if (fwDescriptor && !fwDescriptor->Directory.empty()) {
+        linkDir = fwDescriptor->Directory;
         if (std::find(frameworkSearchPaths.begin(), frameworkSearchPaths.end(),
                       linkDir) == frameworkSearchPaths.end()) {
           frameworkSearchPaths.push_back(linkDir);
@@ -3839,13 +3836,14 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
           bool isFramework =
             cmHasSuffix(libName.GetFeatureName(), "FRAMEWORK"_s);
           if (isFramework) {
-            const auto fwItems =
-              this->SplitFrameworkPath(cleanPath, isFramework);
-            if (!fwItems->first.empty() &&
-                emitted.insert(fwItems->first).second) {
+            const auto fwDescriptor = this->SplitFrameworkPath(
+              cleanPath, cmGlobalGenerator::FrameworkFormat::Extended);
+            if (!fwDescriptor->Directory.empty() &&
+                emitted.insert(fwDescriptor->Directory).second) {
               // This is a search path we had not added before and it isn't
               // an implicit search path, so we need it
-              libPaths.Add("-F " + this->XCodeEscapePath(fwItems->first));
+              libPaths.Add("-F " +
+                           this->XCodeEscapePath(fwDescriptor->Directory));
             }
             if (libName.GetFeatureName() == "__CMAKE_LINK_FRAMEWORK"_s) {
               // use the full path
@@ -3853,10 +3851,10 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
                 libName.GetFormattedItem(this->XCodeEscapePath(cleanPath))
                   .Value);
             } else {
-              libPaths.Add(
-                libName
-                  .GetFormattedItem(this->XCodeEscapePath(fwItems->second))
-                  .Value);
+              libPaths.Add(libName
+                             .GetFormattedItem(this->XCodeEscapePath(
+                               fwDescriptor->GetLinkName()))
+                             .Value);
             }
           } else {
             libPaths.Add(
