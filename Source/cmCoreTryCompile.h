@@ -40,6 +40,12 @@ public:
     cm::optional<std::string> ProjectName;
     cm::optional<std::string> TargetName;
     cm::optional<ArgumentParser::NonEmpty<std::vector<std::string>>> Sources;
+    cm::optional<ArgumentParser::NonEmpty<std::vector<std::string>>>
+      SourceFromArg;
+    cm::optional<ArgumentParser::NonEmpty<std::vector<std::string>>>
+      SourceFromVar;
+    cm::optional<ArgumentParser::NonEmpty<std::vector<std::string>>>
+      SourceFromFile;
     ArgumentParser::MaybeEmpty<std::vector<std::string>> CMakeFlags{
       1, "CMAKE_FLAGS"
     }; // fake argv[0]
@@ -103,6 +109,9 @@ public:
   cmMakefile* Makefile;
 
 private:
+  std::string WriteSource(std::string const& name, std::string const& content,
+                          char const* command) const;
+
   Arguments ParseArgs(
     const cmRange<std::vector<std::string>::const_iterator>& args,
     const cmArgumentParser<Arguments>& parser,

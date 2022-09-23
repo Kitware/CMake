@@ -1,0 +1,4 @@
+CMake Error at SourceFromBadFile.cmake:[0-9]+ \(try_compile\):
+  SOURCE_FROM_FILE failed to copy "bad#source.c": No such file or directory
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)

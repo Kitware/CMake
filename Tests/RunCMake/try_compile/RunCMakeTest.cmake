@@ -20,6 +20,11 @@ set(RunCMake_TEST_OPTIONS -Dtry_compile_DEFS=new_signature.cmake)
 include(${RunCMake_SOURCE_DIR}/old_and_new_signature_tests.cmake)
 unset(RunCMake_TEST_OPTIONS)
 
+run_cmake(SourceFromOneArg)
+run_cmake(SourceFromThreeArgs)
+run_cmake(SourceFromBadName)
+run_cmake(SourceFromBadFile)
+
 run_cmake(ProjectCopyFile)
 run_cmake(NonSourceCopyFile)
 run_cmake(NonSourceCompileDefinitions)

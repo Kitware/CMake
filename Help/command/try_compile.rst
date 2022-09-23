@@ -55,7 +55,11 @@ Try Compiling Source Files
 
 .. code-block:: cmake
 
-  try_compile(<resultVar> SOURCES <srcfile...>
+  try_compile(<resultVar>
+              <SOURCES <srcfile...>]             |
+               SOURCE_FROM_ARG <name> <content>] |
+               SOURCE_FROM_VAR <name> <var>]     |
+               SOURCE_FROM_FILE <name> <path>    >...
               [CMAKE_FLAGS <flags>...]
               [COMPILE_DEFINITIONS <defs>...]
               [LINK_OPTIONS <options>...]
@@ -74,10 +78,12 @@ Try building an executable or static library from one or more source files
 variable).  The success or failure of the ``try_compile``, i.e. ``TRUE`` or
 ``FALSE`` respectively, is returned in ``<resultVar>``.
 
-In this form, one or more source files must be provided.  If
-:variable:`CMAKE_TRY_COMPILE_TARGET_TYPE` is unset or is set to ``EXECUTABLE``,
-the sources must include a definition for ``main`` and CMake will create a
-``CMakeLists.txt`` file to build the source(s) as an executable.
+In this form, one or more source files must be provided. Additionally, one of
+``SOURCES`` and/or ``SOURCE_FROM_*`` must precede other keywords.
+
+If :variable:`CMAKE_TRY_COMPILE_TARGET_TYPE` is unset or is set to
+``EXECUTABLE``, the sources must include a definition for ``main`` and CMake
+will create a ``CMakeLists.txt`` file to build the source(s) as an executable.
 If :variable:`CMAKE_TRY_COMPILE_TARGET_TYPE` is set to ``STATIC_LIBRARY``,
 a static library will be built instead and no definition for ``main`` is
 required.  For an executable, the generated ``CMakeLists.txt`` file would
@@ -162,6 +168,37 @@ The options are:
 
 ``OUTPUT_VARIABLE <var>``
   Store the output from the build process in the given variable.
+
+``SOURCE_FROM_ARG <name> <content>``
+  .. versionadded:: 3.25
+
+  Write ``<content>`` to a file named ``<name>`` in the operation directory.
+  This can be used to bypass the need to separately write a source file when
+  the contents of the file are dynamically specified. The specified ``<name>``
+  is not allowed to contain path components.
+
+  ``SOURCE_FROM_ARG`` may be specified multiple times.
+
+``SOURCE_FROM_FILE <name> <path>``
+  .. versionadded:: 3.25
+
+  Copy ``<path>`` to a file named ``<name>`` in the operation directory. This
+  can be used to consolidate files into the operation directory, which may be
+  useful if a source which already exists (i.e. as a stand-alone file in a
+  project's source repository) needs to refer to other file(s) created by
+  ``SOURCE_FROM_*``. (Otherwise, ``SOURCES`` is usually more convenient.) The
+  specified ``<name>`` is not allowed to contain path components.
+
+``SOURCE_FROM_VAR <name> <content>``
+  .. versionadded:: 3.25
+
+  Write the contents of ``<var>`` to a file named ``<name>`` in the operation
+  directory. This is the same as ``SOURCE_FROM_ARG``, but takes the contents
+  from the specified CMake variable, rather than directly, which may be useful
+  when passing arguments through a function which wraps ``try_compile``. The
+  specified ``<name>`` is not allowed to contain path components.
+
+  ``SOURCE_FROM_VAR`` may be specified multiple times.
 
 ``<LANG>_STANDARD <std>``
   .. versionadded:: 3.8
