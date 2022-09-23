@@ -3,7 +3,7 @@
 
 project(QtDialog)
 CMake_OPTIONAL_COMPONENT(cmake-gui)
-set (QT_COMPONENTS
+set(QT_COMPONENTS
   Core
   Widgets
   Gui
@@ -41,8 +41,8 @@ set(CMake_QT_EXTRA_LIBRARIES)
 # Try to find the package WinExtras for the task bar progress
 if(WIN32)
   find_package(Qt${INSTALLED_QT_VERSION}WinExtras QUIET)
-  if (Qt${INSTALLED_QT_VERSION}WinExtras_FOUND)
-    add_definitions(-DQT_WINEXTRAS)
+  if(Qt${INSTALLED_QT_VERSION}WinExtras_FOUND)
+    add_compile_definitions(QT_WINEXTRAS)
     list(APPEND CMake_QT_EXTRA_LIBRARIES Qt${INSTALLED_QT_VERSION}::WinExtras)
     list(APPEND QT_COMPONENTS WinExtras)
   endif()
@@ -100,14 +100,14 @@ if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32))
     endif()
   endmacro()
   macro(install_qt_plugins _comps _plugins_var)
-    foreach(_qt_comp ${${_comps}})
-      if (INSTALLED_QT_VERSION VERSION_LESS 6)
+    foreach(_qt_comp IN LISTS ${_comps})
+      if(INSTALLED_QT_VERSION VERSION_LESS 6)
         set(_qt_module_plugins ${Qt${INSTALLED_QT_VERSION}${_qt_comp}_PLUGINS})
       else()
         get_target_property(_qt_module_plugins Qt${INSTALLED_QT_VERSION}::${_qt_comp} QT_PLUGINS)
       endif()
-      foreach(_qt_plugin ${_qt_module_plugins})
-        if (INSTALLED_QT_VERSION VERSION_GREATER_EQUAL 6)
+      foreach(_qt_plugin IN LISTS _qt_module_plugins)
+        if(INSTALLED_QT_VERSION VERSION_GREATER_EQUAL 6)
           # Qt6 provides the plugins as individual packages that need to be found.
           find_package(Qt${INSTALLED_QT_VERSION}${_qt_plugin} QUIET
             PATHS ${Qt${INSTALLED_QT_VERSION}${_qt_comp}_DIR})
@@ -117,7 +117,7 @@ if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32))
     endforeach()
   endmacro()
   if(APPLE)
-    if (INSTALLED_QT_VERSION VERSION_EQUAL 5)
+    if(INSTALLED_QT_VERSION VERSION_EQUAL 5)
       install_qt_plugin("Qt5::QCocoaIntegrationPlugin" QT_PLUGINS)
       if(TARGET Qt5::QMacStylePlugin)
         install_qt_plugin("Qt5::QMacStylePlugin" QT_PLUGINS)
@@ -132,7 +132,7 @@ if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32))
       DESTINATION "${CMAKE_INSTALL_PREFIX}/Resources"
       ${COMPONENT})
   elseif(WIN32 AND NOT CMake_QT_STATIC_QWindowsIntegrationPlugin_LIBRARIES)
-    if (INSTALLED_QT_VERSION VERSION_EQUAL 5)
+    if(INSTALLED_QT_VERSION VERSION_EQUAL 5)
       install_qt_plugin("Qt5::QWindowsIntegrationPlugin" QT_PLUGINS)
     else()
       # FIXME: Minimize plugins for Qt6.
@@ -152,7 +152,10 @@ if(APPLE)
   get_filename_component(Qt_BIN_DIR "${Qt_BIN_DIR}" PATH)
 endif()
 
-set(SRCS
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
+add_library(
+  CMakeGUILib STATIC
   AddCacheEntry.cxx
   AddCacheEntry.h
   CMakeSetupDialog.cxx
@@ -179,6 +182,16 @@ set(SRCS
   WarningMessagesDialog.cxx
   WarningMessagesDialog.h
   )
+# CMake_QT_EXTRA_LIBRARIES have to come before the main libraries on the link line
+target_link_libraries(
+  CMakeGUILib
+  PUBLIC
+    CMakeLib
+    ${CMake_QT_EXTRA_LIBRARIES}
+    Qt${INSTALLED_QT_VERSION}::Core
+    Qt${INSTALLED_QT_VERSION}::Widgets
+  )
+
 set(UI_SRCS
   CMakeSetupDialog.ui
   Compilers.ui
@@ -204,7 +217,7 @@ set(MOC_SRCS
   )
 set(QRC_SRCS CMakeSetup.qrc)
 
-if (INSTALLED_QT_VERSION VERSION_LESS 6)
+if(INSTALLED_QT_VERSION VERSION_LESS 6)
   qt5_wrap_ui(UI_BUILT_SRCS ${UI_SRCS})
   qt5_wrap_cpp(MOC_BUILT_SRCS ${MOC_SRCS})
   qt5_add_resources(QRC_BUILT_SRCS ${QRC_SRCS})
@@ -215,15 +228,18 @@ else()
 endif()
 add_library(CMakeGUIQRCLib OBJECT ${QRC_BUILT_SRCS})
 
-if (FALSE) # CMake's bootstrap binary does not support automoc
+if(FALSE) # CMake's bootstrap binary does not support automoc
   set(CMAKE_AUTOMOC 1)
   set(CMAKE_AUTORCC 1)
   set(CMAKE_AUTOUIC 1)
-else ()
-  list(APPEND SRCS
-    ${UI_BUILT_SRCS}
-    ${MOC_BUILT_SRCS})
-endif ()
+else()
+  target_sources(
+    CMakeGUILib
+    PUBLIC
+      ${UI_BUILT_SRCS}
+      ${MOC_BUILT_SRCS}
+  )
+endif()
 
 if(USE_LGPL)
   install(FILES ${CMake_SOURCE_DIR}/Licenses/LGPLv${USE_LGPL}.txt
@@ -233,22 +249,20 @@ if(USE_LGPL)
     PROPERTY COMPILE_DEFINITIONS USE_LGPL="${USE_LGPL}")
 endif()
 
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
-add_library(CMakeGUILib STATIC ${SRCS})
-# CMake_QT_EXTRA_LIBRARIES have to come before the main libraries on the link line
-target_link_libraries(CMakeGUILib PUBLIC CMakeLib ${CMake_QT_EXTRA_LIBRARIES}
-  Qt${INSTALLED_QT_VERSION}::Core Qt${INSTALLED_QT_VERSION}::Widgets)
-
 add_library(CMakeGUIMainLib STATIC CMakeSetup.cxx)
-target_link_libraries(CMakeGUIMainLib PUBLIC CMakeGUILib)
+target_link_libraries(
+  CMakeGUIMainLib
+  PUBLIC
+    CMakeGUILib
+    CMakeGUIQRCLib
+    $<TARGET_NAME_IF_EXISTS:CMakeVersion>
+  )
 
-add_executable(cmake-gui WIN32 MACOSX_BUNDLE CMakeGUIExec.cxx ${MANIFEST_FILE})
-target_link_libraries(cmake-gui CMakeGUIMainLib Qt${INSTALLED_QT_VERSION}::Core)
+add_executable(cmake-gui WIN32 MACOSX_BUNDLE CMakeGUIExec.cxx)
+target_link_libraries(cmake-gui CMakeGUIMainLib ManifestLib Qt${INSTALLED_QT_VERSION}::Core)
 
-target_sources(CMakeGUIMainLib INTERFACE $<TARGET_OBJECTS:CMakeGUIQRCLib>)
 if(WIN32)
-  target_sources(CMakeGUIMainLib INTERFACE $<TARGET_OBJECTS:CMakeVersion> CMakeSetup.rc)
+  target_sources(CMakeGUIMainLib INTERFACE CMakeSetup.rc)
 endif()
 if(APPLE)
   target_sources(CMakeGUIMainLib INTERFACE CMakeSetup.icns)
@@ -300,21 +314,19 @@ if(APPLE)
                    $<TARGET_FILE_DIR:cmake>/cmake-gui
     )
 endif()
-set(CMAKE_INSTALL_DESTINATION_ARGS
-  BUNDLE DESTINATION "${CMAKE_BUNDLE_LOCATION}" ${COMPONENT})
 
 install(TARGETS cmake-gui
   RUNTIME DESTINATION bin ${COMPONENT}
-  ${CMAKE_INSTALL_DESTINATION_ARGS})
+  BUNDLE DESTINATION "${CMAKE_BUNDLE_LOCATION}" ${COMPONENT})
 
 if(UNIX AND NOT APPLE)
-  foreach (size IN ITEMS 32 128)
+  foreach(size IN ITEMS 32 128)
     install(
       FILES       "${CMAKE_CURRENT_SOURCE_DIR}/CMakeSetup${size}.png"
       DESTINATION "${CMAKE_XDGDATA_DIR}/icons/hicolor/${size}x${size}/apps"
       ${COMPONENT}
       RENAME      "CMakeSetup.png")
-  endforeach ()
+  endforeach()
 
   # install a desktop file so CMake appears in the application start menu
   # with an icon
@@ -348,5 +360,4 @@ if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32))
 endif()
 
 set(CMAKE_PACKAGE_QTGUI TRUE)
-configure_file("${QtDialog_SOURCE_DIR}/QtDialogCPack.cmake.in"
-  "${QtDialog_BINARY_DIR}/QtDialogCPack.cmake" @ONLY)
+configure_file(QtDialogCPack.cmake.in QtDialogCPack.cmake @ONLY)

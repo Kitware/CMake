@@ -26,6 +26,9 @@ The module defines the following ``IMPORTED`` targets:
 .. versionadded:: 3.6
   Support for new libarchive 3.2 version string format.
 
+.. versionadded:: 3.17
+  Provides an imported target.
+
 #]=======================================================================]
 
 find_path(LibArchive_INCLUDE_DIR

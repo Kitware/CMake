@@ -161,7 +161,7 @@ endif()
 
 set(doc_format_outputs "")
 set(doc_format_last "")
-foreach(format ${doc_formats})
+foreach(format IN LISTS doc_formats)
   set(doc_format_output "doc_format_${format}")
   set(doc_format_log "build-${format}.log")
   if(CMake_SPHINX_CMAKE_ORG)
@@ -219,13 +219,7 @@ endforeach()
 add_custom_target(documentation ALL DEPENDS ${doc_format_outputs})
 
 if(CMake_SPHINX_DEPEND_ON_EXECUTABLES)
-  foreach(t
-      cmake
-      ccmake
-      cmake-gui
-      cpack
-      ctest
-      )
+  foreach(t IN ITEMS cmake ccmake cmake-gui cpack ctest)
     if(TARGET ${t})
       # Build documentation after main executables.
       add_dependencies(documentation ${t})
@@ -248,7 +242,7 @@ endif()
 if(SPHINX_MAN)
   file(GLOB man_rst RELATIVE ${CMake_SOURCE_DIR}/Help/manual
     ${CMake_SOURCE_DIR}/Help/manual/*.[1-9].rst)
-  foreach(m ${man_rst})
+  foreach(m IN LISTS man_rst)
     if("x${m}" MATCHES "^x(.+)\\.([1-9])\\.rst$")
       set(name "${CMAKE_MATCH_1}")
       set(sec "${CMAKE_MATCH_2}")

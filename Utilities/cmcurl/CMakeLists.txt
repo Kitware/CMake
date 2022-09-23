@@ -852,11 +852,11 @@ endif()
 # Check for symbol dlopen (same as HAVE_LIBDL)
 check_library_exists("${CURL_LIBS}" dlopen "" HAVE_DLOPEN)
 
-if(0) # This code not needed for building within CMake.
 set(HAVE_LIBZ OFF)
 set(HAVE_ZLIB_H OFF)
 set(USE_ZLIB OFF)
-optional_dependency(ZLIB)
+#optional_dependency(ZLIB)
+find_package(ZLIB)
 if(ZLIB_FOUND)
   set(HAVE_ZLIB_H ON)
   set(HAVE_LIBZ ON)
@@ -870,19 +870,8 @@ if(ZLIB_FOUND)
   else()
     list(APPEND CURL_LIBS ${ZLIB_LIBRARIES})
     include_directories(${ZLIB_INCLUDE_DIRS})
+    list(APPEND CMAKE_REQUIRED_INCLUDES ${ZLIB_INCLUDE_DIRS})
   endif()
-  list(APPEND CMAKE_REQUIRED_INCLUDES ${ZLIB_INCLUDE_DIRS})
-endif()
-endif()
-
-#-----------------------------------------------------------------------------
-# CMake-specific curl code.
-
-if(CURL_SPECIAL_LIBZ)
-  set(CURL_LIBS ${CURL_LIBS} "${CURL_SPECIAL_LIBZ}")
-  include_directories(${CURL_SPECIAL_LIBZ_INCLUDES})
-  set(HAVE_LIBZ 0)
-  set(HAVE_ZLIB_H 0)
 endif()
 
 option(CURL_BROTLI "Set to ON to enable building curl with brotli support." OFF)

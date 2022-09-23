@@ -22,6 +22,7 @@
 #cmakedefine HAVE_UNSETENV
 #cmakedefine CMake_USE_MACH_PARSER
 #cmakedefine CMake_USE_XCOFF_PARSER
+#cmakedefine CMAKE_USE_WMAKE
 #define CMake_DEFAULT_RECURSION_LIMIT @CMake_DEFAULT_RECURSION_LIMIT@
 #define CMAKE_BIN_DIR "/@CMAKE_BIN_DIR@"
 #define CMAKE_DATA_DIR "/@CMAKE_DATA_DIR@"
@@ -32,3 +33,11 @@
 #if defined(_WIN32) && !defined(NOMINMAX)
 #  define NOMINMAX
 #endif
+
+#cmakedefine CURL_CA_BUNDLE "@CURL_CA_BUNDLE@"
+#cmakedefine CURL_CA_PATH "@CURL_CA_PATH@"
+
+#cmakedefine01 CMake_STAT_HAS_ST_MTIM
+#cmakedefine01 CMake_STAT_HAS_ST_MTIMESPEC
+
+#cmakedefine KWSYS_ENCODING_DEFAULT_CODEPAGE @KWSYS_ENCODING_DEFAULT_CODEPAGE@

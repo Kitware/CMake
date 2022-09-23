@@ -27,7 +27,7 @@
 #include <stddef.h>
 
 #ifdef HAVE_ZLIB_H
-#include <zlib.h>
+#include <cm3p/zlib.h>
 #endif
 
 #ifdef HAVE_BROTLI

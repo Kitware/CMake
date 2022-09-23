@@ -281,6 +281,7 @@ CMAKE_UNUSED_SOURCES="\
 "
 
 CMAKE_CXX_SOURCES="\
+  cmAddCompileDefinitionsCommand \
   cmAddCustomCommandCommand \
   cmAddCustomTargetCommand \
   cmAddDefinitionsCommand \
