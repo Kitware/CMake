@@ -1642,9 +1642,18 @@ std::vector<std::string> cmSystemTools::GetEnvironmentVariables()
 {
   std::vector<std::string> env;
   int cc;
+#  ifdef _WIN32
+  // if program starts with main, _wenviron is initially NULL, call to
+  // _wgetenv and create wide-character string environment
+  _wgetenv(L"");
+  for (cc = 0; _wenviron[cc]; ++cc) {
+    env.emplace_back(cmsys::Encoding::ToNarrow(_wenviron[cc]));
+  }
+#  else
   for (cc = 0; environ[cc]; ++cc) {
     env.emplace_back(environ[cc]);
   }
+#  endif
   return env;
 }
 
