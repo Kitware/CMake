@@ -38,7 +38,7 @@ endif()
 if(NOT CMAKE_CXX_COMPILER_WORKS)
   PrintTestCompilerStatus("CXX")
   __TestCompiler_setTryCompileTargetType()
-  file(WRITE ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCXXCompiler.cxx
+  string(CONCAT __TestCompiler_testCXXCompilerSource
     "#ifndef __cplusplus\n"
     "# error \"The CMAKE_CXX_COMPILER is set to a C compiler\"\n"
     "#endif\n"
@@ -47,8 +47,9 @@ if(NOT CMAKE_CXX_COMPILER_WORKS)
   unset(CMAKE_CXX_COMPILER_WORKS)
   # Puts test result in cache variable.
   try_compile(CMAKE_CXX_COMPILER_WORKS
-    SOURCES ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCXXCompiler.cxx
+    SOURCE_FROM_VAR testCXXCompiler.cxx __TestCompiler_testCXXCompilerSource
     OUTPUT_VARIABLE __CMAKE_CXX_COMPILER_OUTPUT)
+  unset(__TestCompiler_testCXXCompilerSource)
   # Move result from cache to normal variable.
   set(CMAKE_CXX_COMPILER_WORKS ${CMAKE_CXX_COMPILER_WORKS})
   unset(CMAKE_CXX_COMPILER_WORKS CACHE)

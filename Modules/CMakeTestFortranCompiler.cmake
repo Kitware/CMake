@@ -38,7 +38,7 @@ endif()
 # any makefiles or projects.
 if(NOT CMAKE_Fortran_COMPILER_WORKS)
   PrintTestCompilerStatus("Fortran")
-  file(WRITE ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompiler.f "
+  set(__TestCompiler_testFortranCompilerSource "
         PROGRAM TESTFortran
         PRINT *, 'Hello'
         END
@@ -47,8 +47,9 @@ if(NOT CMAKE_Fortran_COMPILER_WORKS)
   unset(CMAKE_Fortran_COMPILER_WORKS)
   # Puts test result in cache variable.
   try_compile(CMAKE_Fortran_COMPILER_WORKS
-    SOURCES ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompiler.f
+    SOURCE_FROM_VAR testFortranCompiler.f __TestCompiler_testFortranCompilerSource
     OUTPUT_VARIABLE OUTPUT)
+  unset(__TestCompiler_testFortranCompilerSource)
   # Move result from cache to normal variable.
   set(CMAKE_Fortran_COMPILER_WORKS ${CMAKE_Fortran_COMPILER_WORKS})
   unset(CMAKE_Fortran_COMPILER_WORKS CACHE)
@@ -72,14 +73,15 @@ endif()
 # Test for Fortran 90 support by using an f90-specific construct.
 if(NOT DEFINED CMAKE_Fortran_COMPILER_SUPPORTS_F90)
   message(CHECK_START "Checking whether ${CMAKE_Fortran_COMPILER} supports Fortran 90")
-  file(WRITE ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompilerF90.f90 "
+  set(__TestCompiler_testFortranCompilerSource "
     PROGRAM TESTFortran90
     integer stop ; stop = 1 ; do while ( stop .eq. 0 ) ; end do
     END PROGRAM TESTFortran90
 ")
   try_compile(CMAKE_Fortran_COMPILER_SUPPORTS_F90
-    SOURCES ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompilerF90.f90
+    SOURCE_FROM_VAR testFortranCompilerF90.f90 __TestCompiler_testFortranCompilerF90Source
     OUTPUT_VARIABLE OUTPUT)
+  unset(__TestCompiler_testFortranCompilerF90Source)
   if(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
     message(CHECK_PASS "yes")
     file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log

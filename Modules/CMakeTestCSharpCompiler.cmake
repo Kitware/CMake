@@ -12,8 +12,6 @@ include(CMakeTestCompilerCommon)
 
 unset(CMAKE_CSharp_COMPILER_WORKS CACHE)
 
-set(test_compile_file "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCSharpCompiler.cs")
-
 # This file is used by EnableLanguage in cmGlobalGenerator to
 # determine that the selected C# compiler can actually compile
 # and link the most basic of programs. If not, a fatal error
@@ -23,20 +21,21 @@ if(NOT CMAKE_CSharp_COMPILER_WORKS)
   # Don't call PrintTestCompilerStatus() because the "C#" we want to pass
   # as the LANG doesn't match with the variable name "CMAKE_CSharp_COMPILER"
   message(CHECK_START "Check for working C# compiler: ${CMAKE_CSharp_COMPILER}")
-  file(WRITE "${test_compile_file}"
-    "namespace Test {"
-    "   public class CSharp {"
-    "       static void Main(string[] args) {}"
-    "   }"
-    "}"
+  string(CONCAT __TestCompiler_testCSharpCompilerSource
+    "namespace Test {\n"
+    "   public class CSharp {\n"
+    "       static void Main(string[] args) {}\n"
+    "   }\n"
+    "}\n"
     )
   # Clear result from normal variable.
   unset(CMAKE_CSharp_COMPILER_WORKS)
   # Puts test result in cache variable.
   try_compile(CMAKE_CSharp_COMPILER_WORKS
-    SOURCES "${test_compile_file}"
+    SOURCE_FROM_VAR testCSharpCompiler.cs __TestCompiler_testCSharpCompilerSource
     OUTPUT_VARIABLE __CMAKE_CSharp_COMPILER_OUTPUT
     )
+  unset(__TestCompiler_testCSharpCompilerSource)
   # Move result from cache to normal variable.
   set(CMAKE_CSharp_COMPILER_WORKS ${CMAKE_CSharp_COMPILER_WORKS})
   unset(CMAKE_CSharp_COMPILER_WORKS CACHE)

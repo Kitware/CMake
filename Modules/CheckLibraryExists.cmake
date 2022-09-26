@@ -61,16 +61,15 @@ macro(CHECK_LIBRARY_EXISTS LIBRARY FUNCTION LOCATION VARIABLE)
     endif()
 
     if(CMAKE_C_COMPILER_LOADED)
-      set(_cle_source ${CMAKE_ROOT}/Modules/CheckFunctionExists.c)
+      set(_cle_source CheckFunctionExists.c)
     elseif(CMAKE_CXX_COMPILER_LOADED)
-      set(_cle_source ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CheckLibraryExists/CheckFunctionExists.cxx)
-      configure_file(${CMAKE_ROOT}/Modules/CheckFunctionExists.c "${_cle_source}" COPYONLY)
+      set(_cle_source CheckFunctionExists.cxx)
     else()
       message(FATAL_ERROR "CHECK_FUNCTION_EXISTS needs either C or CXX language enabled")
     endif()
 
     try_compile(${VARIABLE}
-      SOURCES ${_cle_source}
+      SOURCE_FROM_FILE "${_cle_source}" "${CMAKE_ROOT}/Modules/CheckFunctionExists.c"
       COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
       ${CHECK_LIBRARY_EXISTS_LINK_OPTIONS}
       LINK_LIBRARIES ${CHECK_LIBRARY_EXISTS_LIBRARIES}

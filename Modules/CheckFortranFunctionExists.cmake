@@ -58,8 +58,7 @@ macro(CHECK_FORTRAN_FUNCTION_EXISTS FUNCTION VARIABLE)
     else()
       set(CHECK_FUNCTION_EXISTS_ADD_LIBRARIES)
     endif()
-    file(WRITE
-    ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompiler.f
+    set(__CheckFunction_testFortranCompilerSource
     "
       program TESTFortran
       external ${FUNCTION}
@@ -68,11 +67,12 @@ macro(CHECK_FORTRAN_FUNCTION_EXISTS FUNCTION VARIABLE)
     "
     )
     try_compile(${VARIABLE}
-      SOURCES ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompiler.f
+      SOURCE_FROM_VAR testFortranCompiler.f __CheckFunction_testFortranCompilerSource
       ${CHECK_FUNCTION_EXISTS_ADD_LINK_OPTIONS}
       ${CHECK_FUNCTION_EXISTS_ADD_LIBRARIES}
       OUTPUT_VARIABLE OUTPUT
     )
+    unset(__CheckFunction_testFortranCompilerSource)
     if(${VARIABLE})
       set(${VARIABLE} 1 CACHE INTERNAL "Have Fortran function ${FUNCTION}")
       message(CHECK_PASS "found")

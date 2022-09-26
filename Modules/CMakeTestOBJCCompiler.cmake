@@ -38,7 +38,7 @@ endif()
 if(NOT CMAKE_OBJC_COMPILER_WORKS)
   PrintTestCompilerStatus("OBJC")
   __TestCompiler_setTryCompileTargetType()
-  file(WRITE ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testOBJCCompiler.m
+  string(CONCAT __TestCompiler_testObjCCompilerSource
     "#ifdef __cplusplus\n"
     "# error \"The CMAKE_OBJC_COMPILER is set to a C++ compiler\"\n"
     "#endif\n"
@@ -51,8 +51,9 @@ if(NOT CMAKE_OBJC_COMPILER_WORKS)
   unset(CMAKE_OBJC_COMPILER_WORKS)
   # Puts test result in cache variable.
   try_compile(CMAKE_OBJC_COMPILER_WORKS
-    SOURCES ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testOBJCCompiler.m
+    SOURCE_FROM_VAR testObjCCompiler.m __TestCompiler_testObjCCompilerSource
     OUTPUT_VARIABLE __CMAKE_OBJC_COMPILER_OUTPUT)
+  unset(__TestCompiler_testObjCCompilerSource)
   # Move result from cache to normal variable.
   set(CMAKE_OBJC_COMPILER_WORKS ${CMAKE_OBJC_COMPILER_WORKS})
   unset(CMAKE_OBJC_COMPILER_WORKS CACHE)
