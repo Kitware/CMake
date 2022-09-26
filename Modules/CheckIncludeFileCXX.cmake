@@ -53,8 +53,8 @@ macro(CHECK_INCLUDE_FILE_CXX INCLUDE VARIABLE)
     endif()
     set(MACRO_CHECK_INCLUDE_FILE_FLAGS ${CMAKE_REQUIRED_FLAGS})
     set(CHECK_INCLUDE_FILE_VAR ${INCLUDE})
-    configure_file(${CMAKE_ROOT}/Modules/CheckIncludeFile.cxx.in
-      ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckIncludeFile.cxx)
+    file(READ ${CMAKE_ROOT}/Modules/CheckIncludeFile.cxx.in _CIF_SOURCE_CONTENT)
+    string(CONFIGURE "${_CIF_SOURCE_CONTENT}" _CIF_SOURCE_CONTENT)
     if(NOT CMAKE_REQUIRED_QUIET)
       message(CHECK_START "Looking for C++ include ${INCLUDE}")
     endif()
@@ -92,7 +92,7 @@ macro(CHECK_INCLUDE_FILE_CXX INCLUDE VARIABLE)
     endif()
 
     try_compile(${VARIABLE}
-      SOURCES ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckIncludeFile.cxx
+      SOURCE_FROM_VAR CheckIncludeFile.cxx _CIF_SOURCE_CONTENT
       COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
       ${_CIF_LINK_OPTIONS}
       ${_CIF_LINK_LIBRARIES}

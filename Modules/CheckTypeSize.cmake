@@ -104,9 +104,9 @@ function(__check_type_size_impl type var map builtin language)
 
   # Perform language check
   if(language STREQUAL "C")
-    set(src ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CheckTypeSize/${var}.c)
+    set(src ${var}.c)
   elseif(language STREQUAL "CXX")
-    set(src ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CheckTypeSize/${var}.cpp)
+    set(src ${var}.cpp)
   else()
     message(FATAL_ERROR "Unknown language:\n  ${language}\nSupported languages: C, CXX.\n")
   endif()
@@ -142,8 +142,9 @@ function(__check_type_size_impl type var map builtin language)
 
   # Perform the check.
   set(bin ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CheckTypeSize/${var}.bin)
-  configure_file(${__check_type_size_dir}/CheckTypeSize.c.in ${src} @ONLY)
-  try_compile(HAVE_${var} SOURCES ${src}
+  file(READ ${__check_type_size_dir}/CheckTypeSize.c.in src_content)
+  string(CONFIGURE "${src_content}" src_content @ONLY)
+  try_compile(HAVE_${var} SOURCE_FROM_VAR "${src}" src_content
     COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
     LINK_OPTIONS ${CMAKE_REQUIRED_LINK_OPTIONS}
     LINK_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES}
@@ -209,9 +210,8 @@ function(__check_type_size_impl type var map builtin language)
     if(NOT CMAKE_REQUIRED_QUIET)
       message(CHECK_FAIL "failed")
     endif()
-    file(READ ${src} content)
     file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-      "Determining size of ${type} failed with the following output:\n${output}\n${src}:\n${content}\n\n")
+      "Determining size of ${type} failed with the following output:\n${output}\n${src}:\n${src_content}\n\n")
     set(${var} "" CACHE INTERNAL "CHECK_TYPE_SIZE: ${type} unknown")
     file(REMOVE ${map})
   endif()
