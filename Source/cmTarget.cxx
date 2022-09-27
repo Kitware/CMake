@@ -786,7 +786,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     }
   }
 
-  if (this->IsImported()) {
+  if (this->IsImported() || mf->GetPropertyAsBool("SYSTEM")) {
     this->SetProperty("SYSTEM", "ON");
   }
 

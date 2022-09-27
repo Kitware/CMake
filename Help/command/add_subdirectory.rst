@@ -5,7 +5,7 @@ Add a subdirectory to the build.
 
 .. code-block:: cmake
 
-  add_subdirectory(source_dir [binary_dir] [EXCLUDE_FROM_ALL])
+  add_subdirectory(source_dir [binary_dir] [EXCLUDE_FROM_ALL] [SYSTEM])
 
 Adds a subdirectory to the build.  The source_dir specifies the
 directory in which the source CMakeLists.txt and code files are
@@ -33,3 +33,10 @@ dependencies supersede this exclusion.  If a target built by the
 parent project depends on a target in the subdirectory, the dependee
 target will be included in the parent project build system to satisfy
 the dependency.
+
+If the ``SYSTEM`` argument is provided, the :prop_dir:`SYSTEM` directory
+property of the subdirectory will be set to true.  This property is
+used to initialize the :prop_tgt:`SYSTEM` property of each target
+created in that subdirectory. The include directories of targets with
+:prop_tgt:`SYSTEM` set to true will be treated as ``SYSTEM`` when
+compiling consumers.

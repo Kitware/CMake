@@ -111,6 +111,7 @@ Commands
     FetchContent_Declare(
       <name>
       <contentOptions>...
+      [SYSTEM]
       [OVERRIDE_FIND_PACKAGE |
        FIND_PACKAGE_ARGS args...]
     )
@@ -228,6 +229,16 @@ Commands
       from seeing that call.  Dependency providers always have the opportunity
       to intercept any direct call to :command:`find_package`, except if that
       call contains the ``BYPASS_PROVIDER`` option.
+
+  .. versionadded:: 3.25
+
+    ``SYSTEM``
+      If the ``SYSTEM`` argument is provided, targets created by
+      the dependency will have their :prop_tgt:`SYSTEM` property
+      set to true when populated by :command:`FetchContent_MakeAvailable`.
+      The entries in their  :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES`
+      will be treated as ``SYSTEM`` include directories when
+      compiling consumers.
 
 .. command:: FetchContent_MakeAvailable
 
@@ -1973,13 +1984,17 @@ macro(FetchContent_MakeAvailable)
       if("${__cmake_contentDetails}" STREQUAL "")
         message(FATAL_ERROR "No details have been set for content: ${__cmake_contentName}")
       endif()
-      cmake_parse_arguments(__cmake_arg "" "SOURCE_SUBDIR" "" ${__cmake_contentDetails})
+      cmake_parse_arguments(__cmake_arg "SYSTEM" "SOURCE_SUBDIR" "" ${__cmake_contentDetails})
       if(NOT "${__cmake_arg_SOURCE_SUBDIR}" STREQUAL "")
         string(APPEND __cmake_srcdir "/${__cmake_arg_SOURCE_SUBDIR}")
       endif()
 
       if(EXISTS ${__cmake_srcdir}/CMakeLists.txt)
-        add_subdirectory(${__cmake_srcdir} ${${__cmake_contentNameLower}_BINARY_DIR})
+        if (__cmake_arg_SYSTEM)
+          add_subdirectory(${__cmake_srcdir} ${${__cmake_contentNameLower}_BINARY_DIR} SYSTEM)
+        else()
+          add_subdirectory(${__cmake_srcdir} ${${__cmake_contentNameLower}_BINARY_DIR})
+        endif()
       endif()
 
       unset(__cmake_srcdir)

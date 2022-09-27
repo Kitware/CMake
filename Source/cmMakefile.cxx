@@ -1783,7 +1783,8 @@ void cmMakefile::ConfigureSubDirectory(cmMakefile* mf)
 
 void cmMakefile::AddSubDirectory(const std::string& srcPath,
                                  const std::string& binPath,
-                                 bool excludeFromAll, bool immediate)
+                                 bool excludeFromAll, bool immediate,
+                                 bool system)
 {
   if (this->DeferRunning) {
     this->IssueMessage(
@@ -1812,6 +1813,9 @@ void cmMakefile::AddSubDirectory(const std::string& srcPath,
 
   if (excludeFromAll) {
     subMf->SetProperty("EXCLUDE_FROM_ALL", "TRUE");
+  }
+  if (system) {
+    subMf->SetProperty("SYSTEM", "TRUE");
   }
 
   if (immediate) {

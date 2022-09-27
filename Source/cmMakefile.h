@@ -270,7 +270,7 @@ public:
    */
   void AddSubDirectory(const std::string& fullSrcDir,
                        const std::string& fullBinDir, bool excludeFromAll,
-                       bool immediate);
+                       bool immediate, bool system);
 
   void Configure();
 
