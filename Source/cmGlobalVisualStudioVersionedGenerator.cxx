@@ -127,8 +127,6 @@ static unsigned int VSVersionToMajor(
   switch (v) {
     case cmGlobalVisualStudioGenerator::VSVersion::VS9:
       return 9;
-    case cmGlobalVisualStudioGenerator::VSVersion::VS10:
-      return 10;
     case cmGlobalVisualStudioGenerator::VSVersion::VS11:
       return 11;
     case cmGlobalVisualStudioGenerator::VSVersion::VS12:
@@ -151,8 +149,6 @@ static const char* VSVersionToToolset(
   switch (v) {
     case cmGlobalVisualStudioGenerator::VSVersion::VS9:
       return "v90";
-    case cmGlobalVisualStudioGenerator::VSVersion::VS10:
-      return "v100";
     case cmGlobalVisualStudioGenerator::VSVersion::VS11:
       return "v110";
     case cmGlobalVisualStudioGenerator::VSVersion::VS12:
@@ -175,8 +171,6 @@ static std::string VSVersionToMajorString(
   switch (v) {
     case cmGlobalVisualStudioGenerator::VSVersion::VS9:
       return "9";
-    case cmGlobalVisualStudioGenerator::VSVersion::VS10:
-      return "10";
     case cmGlobalVisualStudioGenerator::VSVersion::VS11:
       return "11";
     case cmGlobalVisualStudioGenerator::VSVersion::VS12:
@@ -198,7 +192,6 @@ static const char* VSVersionToAndroidToolset(
 {
   switch (v) {
     case cmGlobalVisualStudioGenerator::VSVersion::VS9:
-    case cmGlobalVisualStudioGenerator::VSVersion::VS10:
     case cmGlobalVisualStudioGenerator::VSVersion::VS11:
     case cmGlobalVisualStudioGenerator::VSVersion::VS12:
       return "";
@@ -500,7 +493,6 @@ bool cmGlobalVisualStudioVersionedGenerator::MatchesGeneratorName(
   std::string genName;
   switch (this->Version) {
     case cmGlobalVisualStudioGenerator::VSVersion::VS9:
-    case cmGlobalVisualStudioGenerator::VSVersion::VS10:
     case cmGlobalVisualStudioGenerator::VSVersion::VS11:
     case cmGlobalVisualStudioGenerator::VSVersion::VS12:
     case cmGlobalVisualStudioGenerator::VSVersion::VS14:
@@ -743,7 +735,6 @@ cmGlobalVisualStudioVersionedGenerator::GetAndroidApplicationTypeRevision()
 {
   switch (this->Version) {
     case cmGlobalVisualStudioGenerator::VSVersion::VS9:
-    case cmGlobalVisualStudioGenerator::VSVersion::VS10:
     case cmGlobalVisualStudioGenerator::VSVersion::VS11:
     case cmGlobalVisualStudioGenerator::VSVersion::VS12:
       return "";

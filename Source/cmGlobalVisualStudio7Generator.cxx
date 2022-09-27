@@ -303,26 +303,6 @@ void cmGlobalVisualStudio7Generator::Generate()
     this->CallVisualStudioMacro(MacroReload,
                                 GetSLNFile(this->LocalGenerators[0].get()));
   }
-
-  if (this->Version == VSVersion::VS10 &&
-      !this->CMakeInstance->GetIsInTryCompile()) {
-    std::string cmakeWarnVS10;
-    if (cmValue cached = this->CMakeInstance->GetState()->GetCacheEntryValue(
-          "CMAKE_WARN_VS10")) {
-      this->CMakeInstance->MarkCliAsUsed("CMAKE_WARN_VS10");
-      cmakeWarnVS10 = *cached;
-    } else {
-      cmSystemTools::GetEnv("CMAKE_WARN_VS10", cmakeWarnVS10);
-    }
-    if (cmakeWarnVS10.empty() || !cmIsOff(cmakeWarnVS10)) {
-      this->CMakeInstance->IssueMessage(
-        MessageType::WARNING,
-        "The \"Visual Studio 10 2010\" generator is deprecated "
-        "and will be removed in a future version of CMake."
-        "\n"
-        "Add CMAKE_WARN_VS10=OFF to the cache to disable this warning.");
-    }
-  }
 }
 
 void cmGlobalVisualStudio7Generator::OutputSLNFile(

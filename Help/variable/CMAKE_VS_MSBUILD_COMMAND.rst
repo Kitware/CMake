@@ -1,7 +1,7 @@
 CMAKE_VS_MSBUILD_COMMAND
 ------------------------
 
-The generators for :generator:`Visual Studio 10 2010` and above set this
+The generators for :generator:`Visual Studio 11 2012` and above set this
 variable to the ``MSBuild.exe`` command installed with the corresponding
 Visual Studio version.
 

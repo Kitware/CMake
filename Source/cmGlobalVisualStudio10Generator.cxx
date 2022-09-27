@@ -20,7 +20,6 @@
 #include "cmDocumentationEntry.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
-#include "cmGlobalGeneratorFactory.h"
 #include "cmGlobalVisualStudio71Generator.h"
 #include "cmGlobalVisualStudio7Generator.h"
 #include "cmGlobalVisualStudioGenerator.h"
@@ -38,7 +37,6 @@
 #include "cmXMLWriter.h"
 #include "cmake.h"
 
-static const char vs10generatorName[] = "Visual Studio 10 2010";
 static std::map<std::string, std::vector<cmIDEFlagTable>> loadedFlagJsonFiles;
 
 static void ConvertToWindowsSlashes(std::string& s)
@@ -51,137 +49,14 @@ static void ConvertToWindowsSlashes(std::string& s)
   }
 }
 
-// Map generator name without year to name with year.
-static const char* cmVS10GenName(const std::string& name, std::string& genName)
-{
-  if (strncmp(name.c_str(), vs10generatorName,
-              sizeof(vs10generatorName) - 6) != 0) {
-    return 0;
-  }
-  const char* p = name.c_str() + sizeof(vs10generatorName) - 6;
-  if (cmHasLiteralPrefix(p, " 2010")) {
-    p += 5;
-  }
-  genName = std::string(vs10generatorName) + p;
-  return p;
-}
-
-class cmGlobalVisualStudio10Generator::Factory
-  : public cmGlobalGeneratorFactory
-{
-public:
-  std::unique_ptr<cmGlobalGenerator> CreateGlobalGenerator(
-    const std::string& name, bool allowArch, cmake* cm) const override
-  {
-    std::string genName;
-    const char* p = cmVS10GenName(name, genName);
-    if (!p) {
-      return std::unique_ptr<cmGlobalGenerator>();
-    }
-    if (!*p) {
-      return std::unique_ptr<cmGlobalGenerator>(
-        new cmGlobalVisualStudio10Generator(cm, genName, ""));
-    }
-    if (!allowArch || *p++ != ' ') {
-      return std::unique_ptr<cmGlobalGenerator>();
-    }
-    if (strcmp(p, "Win64") == 0) {
-      return std::unique_ptr<cmGlobalGenerator>(
-        new cmGlobalVisualStudio10Generator(cm, genName, "x64"));
-    }
-    if (strcmp(p, "IA64") == 0) {
-      return std::unique_ptr<cmGlobalGenerator>(
-        new cmGlobalVisualStudio10Generator(cm, genName, "Itanium"));
-    }
-    return std::unique_ptr<cmGlobalGenerator>();
-  }
-
-  void GetDocumentation(cmDocumentationEntry& entry) const override
-  {
-    entry.Name = std::string(vs10generatorName) + " [arch]";
-    entry.Brief = "Deprecated.  Generates Visual Studio 2010 project files.  "
-                  "Optional [arch] can be \"Win64\" or \"IA64\".";
-  }
-
-  std::vector<std::string> GetGeneratorNames() const override
-  {
-    std::vector<std::string> names;
-    names.push_back(vs10generatorName);
-    return names;
-  }
-
-  std::vector<std::string> GetGeneratorNamesWithPlatform() const override
-  {
-    std::vector<std::string> names;
-    names.push_back(vs10generatorName + std::string(" IA64"));
-    names.push_back(vs10generatorName + std::string(" Win64"));
-    return names;
-  }
-
-  bool SupportsToolset() const override { return true; }
-  bool SupportsPlatform() const override { return true; }
-
-  std::vector<std::string> GetKnownPlatforms() const override
-  {
-    std::vector<std::string> platforms;
-    platforms.emplace_back("x64");
-    platforms.emplace_back("Win32");
-    platforms.emplace_back("Itanium");
-    return platforms;
-  }
-
-  std::string GetDefaultPlatformName() const override { return "Win32"; }
-};
-
-std::unique_ptr<cmGlobalGeneratorFactory>
-cmGlobalVisualStudio10Generator::NewFactory()
-{
-  return std::unique_ptr<cmGlobalGeneratorFactory>(new Factory);
-}
-
 cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(
   cmake* cm, const std::string& name,
   std::string const& platformInGeneratorName)
   : cmGlobalVisualStudio8Generator(cm, name, platformInGeneratorName)
 {
-  std::string vc10Express;
-  this->ExpressEdition = cmSystemTools::ReadRegistryValue(
-    "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\10.0\\Setup\\VC;"
-    "ProductDir",
-    vc10Express, cmSystemTools::KeyWOW64_32);
-  this->CudaEnabled = false;
-  {
-    std::string envPlatformToolset;
-    if (cmSystemTools::GetEnv("PlatformToolset", envPlatformToolset) &&
-        envPlatformToolset == "Windows7.1SDK") {
-      // We are running from a Windows7.1SDK command prompt.
-      this->DefaultPlatformToolset = "Windows7.1SDK";
-    } else {
-      this->DefaultPlatformToolset = "v100";
-    }
-  }
-  this->DefaultCLFlagTableName = "v10";
-  this->DefaultCSharpFlagTableName = "v10";
-  this->DefaultLibFlagTableName = "v10";
-  this->DefaultLinkFlagTableName = "v10";
   this->DefaultCudaFlagTableName = "v10";
   this->DefaultCudaHostFlagTableName = "v10";
-  this->DefaultMasmFlagTableName = "v10";
   this->DefaultNasmFlagTableName = "v10";
-  this->DefaultRCFlagTableName = "v10";
-
-  this->Version = VSVersion::VS10;
-  this->PlatformToolsetNeedsDebugEnum = false;
-}
-
-bool cmGlobalVisualStudio10Generator::MatchesGeneratorName(
-  const std::string& name) const
-{
-  std::string genName;
-  if (cmVS10GenName(name, genName)) {
-    return genName == this->GetName();
-  }
-  return false;
 }
 
 bool cmGlobalVisualStudio10Generator::SetSystemName(std::string const& s,
@@ -193,21 +68,6 @@ bool cmGlobalVisualStudio10Generator::SetSystemName(std::string const& s,
     return false;
   }
   return this->cmGlobalVisualStudio8Generator::SetSystemName(s, mf);
-}
-
-bool cmGlobalVisualStudio10Generator::SetGeneratorPlatform(
-  std::string const& p, cmMakefile* mf)
-{
-  if (!this->cmGlobalVisualStudio8Generator::SetGeneratorPlatform(p, mf)) {
-    return false;
-  }
-  if (this->GetPlatformName() == "Itanium" ||
-      this->GetPlatformName() == "x64") {
-    if (this->IsExpressEdition() && !this->Find64BitTools(mf)) {
-      return false;
-    }
-  }
-  return true;
 }
 
 static void cmCudaToolVersion(std::string& s)
@@ -1307,44 +1167,6 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
   return makeCommands;
 }
 
-bool cmGlobalVisualStudio10Generator::Find64BitTools(cmMakefile* mf)
-{
-  if (this->DefaultPlatformToolset == "v100") {
-    // The v100 64-bit toolset does not exist in the express edition.
-    this->DefaultPlatformToolset.clear();
-  }
-  if (this->GetPlatformToolset()) {
-    return true;
-  }
-  // This edition does not come with 64-bit tools.  Look for them.
-  //
-  // TODO: Detect available tools?  x64\v100 exists but does not work?
-  // HKLM\\SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\4.0;VCTargetsPath
-  // c:/Program Files (x86)/MSBuild/Microsoft.Cpp/v4.0/Platforms/
-  //   {Itanium,Win32,x64}/PlatformToolsets/{v100,v90,Windows7.1SDK}
-  std::string winSDK_7_1;
-  if (cmSystemTools::ReadRegistryValue(
-        "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SDKs\\"
-        "Windows\\v7.1;InstallationFolder",
-        winSDK_7_1)) {
-    std::ostringstream m;
-    m << "Found Windows SDK v7.1: " << winSDK_7_1;
-    mf->DisplayStatus(m.str(), -1);
-    this->DefaultPlatformToolset = "Windows7.1SDK";
-    return true;
-  } else {
-    std::ostringstream e;
-    /* clang-format off */
-    e << "Cannot enable 64-bit tools with Visual Studio 2010 Express.\n"
-      << "Install the Microsoft Windows SDK v7.1 to get 64-bit tools:\n"
-      << "  http://msdn.microsoft.com/en-us/windows/bb980924.aspx";
-    /* clang-format on */
-    mf->IssueMessage(MessageType::FATAL_ERROR, e.str().c_str());
-    cmSystemTools::SetFatalErrorOccurred();
-    return false;
-  }
-}
-
 std::string cmGlobalVisualStudio10Generator::GenerateRuleFile(
   std::string const& output) const
 {
@@ -1382,7 +1204,6 @@ const char* cmGlobalVisualStudio10Generator::GetToolsVersion() const
 {
   switch (this->Version) {
     case cmGlobalVisualStudioGenerator::VSVersion::VS9:
-    case cmGlobalVisualStudioGenerator::VSVersion::VS10:
     case cmGlobalVisualStudioGenerator::VSVersion::VS11:
       return "4.0";
 

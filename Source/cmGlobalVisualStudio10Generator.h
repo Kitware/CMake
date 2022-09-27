@@ -14,7 +14,6 @@
 #include "cmGlobalVisualStudio8Generator.h"
 
 class cmGeneratorTarget;
-class cmGlobalGeneratorFactory;
 class cmLocalGenerator;
 class cmMakefile;
 class cmSourceFile;
@@ -29,14 +28,9 @@ struct cmIDEFlagTable;
 class cmGlobalVisualStudio10Generator : public cmGlobalVisualStudio8Generator
 {
 public:
-  static std::unique_ptr<cmGlobalGeneratorFactory> NewFactory();
-
   bool IsVisualStudioAtLeast10() const override { return true; }
 
-  bool MatchesGeneratorName(const std::string& name) const override;
-
   bool SetSystemName(std::string const& s, cmMakefile* mf) override;
-  bool SetGeneratorPlatform(std::string const& p, cmMakefile* mf) override;
   bool SetGeneratorToolset(std::string const& ts, bool build,
                            cmMakefile* mf) override;
 
@@ -131,7 +125,6 @@ public:
   bool TargetsAndroid() const { return this->SystemIsAndroid; }
 
   const char* GetCMakeCFGIntDir() const override { return "$(Configuration)"; }
-  bool Find64BitTools(cmMakefile* mf);
 
   /** Generate an <output>.rule file path for a given command output.  */
   std::string GenerateRuleFile(std::string const& output) const override;
@@ -244,9 +237,6 @@ protected:
   bool MSBuildCommandInitialized = false;
 
 private:
-  class Factory;
-  friend class Factory;
-
   struct LongestSourcePath
   {
     LongestSourcePath()
@@ -270,7 +260,7 @@ private:
 
   std::string GeneratorToolsetVersion;
 
-  bool PlatformToolsetNeedsDebugEnum;
+  bool PlatformToolsetNeedsDebugEnum = false;
 
   bool ParseGeneratorToolset(std::string const& ts, cmMakefile* mf);
 
@@ -291,7 +281,7 @@ private:
   std::string VCTargetsPath;
   bool FindVCTargetsPath(cmMakefile* mf);
 
-  bool CudaEnabled;
+  bool CudaEnabled = false;
 
   // We do not use the reload macros for VS >= 10.
   std::string GetUserMacrosDirectory() override { return ""; }
