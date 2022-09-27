@@ -593,6 +593,7 @@ if ${cmake_system_mingw}; then
     src/inet.c \
     src/threadpool.c \
     src/strscpy.c \
+    src/strtok.c \
     src/timer.c \
     src/uv-common.c \
     src/win/async.c \
@@ -623,6 +624,7 @@ if ${cmake_system_mingw}; then
 else
   LIBUV_C_SOURCES="\
     src/strscpy.c \
+    src/strtok.c \
     src/timer.c \
     src/uv-common.c \
     src/unix/cmake-bootstrap.c \
@@ -639,6 +641,7 @@ else
     src/unix/signal.c \
     src/unix/stream.c \
     src/unix/tcp.c \
+    src/unix/tty.c \
     "
 fi
 
