@@ -31,3 +31,7 @@ endif()
 if(CMake_TEST_HIP)
   run_cmake(CheckSourceCompilesHIP)
 endif()
+
+if(CMake_TEST_Swift)
+  run_cmake(CheckSourceCompilesSwift)
+endif()
