@@ -60,17 +60,6 @@ else()
   set(USE_LGPL "")
 endif()
 
-if("${CMake_SOURCE_DIR}" STREQUAL "${CMAKE_SOURCE_DIR}")
-  # Disallow architecture-specific try_run.  It may not run on the host.
-  macro(TRY_RUN)
-    if(CMAKE_TRY_COMPILE_OSX_ARCHITECTURES)
-      message(FATAL_ERROR "TRY_RUN not allowed with CMAKE_TRY_COMPILE_OSX_ARCHITECTURES=[${CMAKE_TRY_COMPILE_OSX_ARCHITECTURES}]")
-    else()
-      _TRY_RUN(${ARGV})
-    endif()
-  endmacro()
-endif()
-
 # Use most-recent available language dialects with GNU and Clang
 if(NOT DEFINED CMAKE_C_STANDARD AND NOT CMake_NO_C_STANDARD)
   include(${CMake_SOURCE_DIR}/Source/Checks/cm_c11_thread_local.cmake)
