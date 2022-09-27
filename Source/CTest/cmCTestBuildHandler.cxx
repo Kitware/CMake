@@ -893,16 +893,31 @@ int cmCTestBuildHandler::RunMakeCommand(const std::string& command,
         // If there was an error running command, report that on the
         // dashboard.
         if (this->UseCTestLaunch) {
-          cmCTestLaunchReporter reporter;
-          reporter.RealArgs = args;
-          reporter.ComputeFileNames();
-          reporter.ExitCode = *retVal;
-          reporter.Process = cp;
-          // Use temporary BuildLog file to populate this error for CDash.
-          ofs.flush();
-          reporter.LogOut = this->LogFileNames["Build"];
-          reporter.LogOut += ".tmp";
-          reporter.WriteXML();
+          // For launchers, do not record this top-level error if other
+          // more granular build errors have already been captured.
+          bool launcherXMLFound = false;
+          cmsys::Directory launchDir;
+          launchDir.Load(this->CTestLaunchDir);
+          unsigned long n = launchDir.GetNumberOfFiles();
+          for (unsigned long i = 0; i < n; ++i) {
+            const char* fname = launchDir.GetFile(i);
+            if (cmHasLiteralSuffix(fname, ".xml")) {
+              launcherXMLFound = true;
+              break;
+            }
+          }
+          if (!launcherXMLFound) {
+            cmCTestLaunchReporter reporter;
+            reporter.RealArgs = args;
+            reporter.ComputeFileNames();
+            reporter.ExitCode = *retVal;
+            reporter.Process = cp;
+            // Use temporary BuildLog file to populate this error for CDash.
+            ofs.flush();
+            reporter.LogOut = this->LogFileNames["Build"];
+            reporter.LogOut += ".tmp";
+            reporter.WriteXML();
+          }
         } else {
           cmCTestBuildErrorWarning errorwarning;
           errorwarning.LineNumber = 0;
