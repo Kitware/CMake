@@ -903,6 +903,7 @@ void cmVisualStudio10TargetGenerator::WriteSdkStyleProjectFile(
     // of the IDE.
     e1.Element("VCProjectUpgraderObjectName", "NoUpgrade");
     e1.Element("ManagedAssembly", "true");
+    e1.Element("AppendTargetFrameworkToOutputPath", "false");
 
     cmValue targetFramework =
       this->GeneratorTarget->GetProperty("DOTNET_TARGET_FRAMEWORK");
