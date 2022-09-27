@@ -77,7 +77,7 @@ public:
   void GetDocumentation(cmDocumentationEntry& entry) const override
   {
     entry.Name = std::string(vs11generatorName) + " [arch]";
-    entry.Brief = "Generates Visual Studio 2012 project files.  "
+    entry.Brief = "Deprecated.  Generates Visual Studio 2012 project files.  "
                   "Optional [arch] can be \"Win64\" or \"ARM\".";
   }
 
