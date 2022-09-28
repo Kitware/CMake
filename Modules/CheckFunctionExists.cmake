@@ -81,16 +81,15 @@ macro(CHECK_FUNCTION_EXISTS FUNCTION VARIABLE)
     endif()
 
     if(CMAKE_C_COMPILER_LOADED)
-      set(_cfe_source ${CMAKE_ROOT}/Modules/CheckFunctionExists.c)
+      set(_cfe_source CheckFunctionExists.c)
     elseif(CMAKE_CXX_COMPILER_LOADED)
-      set(_cfe_source ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CheckFunctionExists/CheckFunctionExists.cxx)
-      configure_file(${CMAKE_ROOT}/Modules/CheckFunctionExists.c "${_cfe_source}" COPYONLY)
+      set(_cfe_source CheckFunctionExists.cxx)
     else()
       message(FATAL_ERROR "CHECK_FUNCTION_EXISTS needs either C or CXX language enabled")
     endif()
 
     try_compile(${VARIABLE}
-      SOURCES ${_cfe_source}
+      SOURCE_FROM_FILE "${_cfe_source}" "${CMAKE_ROOT}/Modules/CheckFunctionExists.c"
       COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
       ${CHECK_FUNCTION_EXISTS_ADD_LINK_OPTIONS}
       ${CHECK_FUNCTION_EXISTS_ADD_LIBRARIES}

@@ -86,14 +86,13 @@ function(CMAKE_CHECK_SOURCE_COMPILES _lang _source _var)
     else()
       set(CHECK_${LANG}_SOURCE_COMPILES_ADD_INCLUDES)
     endif()
-    file(WRITE "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/src.${_SRC_EXT}"
-      "${_source}\n")
 
     if(NOT CMAKE_REQUIRED_QUIET)
       message(CHECK_START "Performing Test ${_var}")
     endif()
+    string(APPEND _source "\n")
     try_compile(${_var}
-      SOURCES ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/src.${_SRC_EXT}
+      SOURCE_FROM_VAR "src.${_SRC_EXT}" _source
       COMPILE_DEFINITIONS -D${_var} ${CMAKE_REQUIRED_DEFINITIONS}
       ${CHECK_${LANG}_SOURCE_COMPILES_ADD_LINK_OPTIONS}
       ${CHECK_${LANG}_SOURCE_COMPILES_ADD_LIBRARIES}

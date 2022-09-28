@@ -41,7 +41,7 @@ endif()
 if(NOT CMAKE_HIP_COMPILER_WORKS)
   PrintTestCompilerStatus("HIP")
   __TestCompiler_setTryCompileTargetType()
-  file(WRITE ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testHIPCompiler.hip
+  string(CONCAT __TestCompiler_testHIPCompilerSource
     "#ifndef __HIP__\n"
     "# error \"The CMAKE_HIP_COMPILER is set to a C/CXX compiler\"\n"
     "#endif\n"
@@ -50,8 +50,9 @@ if(NOT CMAKE_HIP_COMPILER_WORKS)
   unset(CMAKE_HIP_COMPILER_WORKS)
   # Puts test result in cache variable.
   try_compile(CMAKE_HIP_COMPILER_WORKS
-    SOURCES ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testHIPCompiler.hip
+    SOURCE_FROM_VAR testHIPCompiler.hip __TestCompiler_testHIPCompilerSource
     OUTPUT_VARIABLE __CMAKE_HIP_COMPILER_OUTPUT)
+  unset(__TestCompiler_testHIPCompilerSource)
   # Move result from cache to normal variable.
   set(CMAKE_HIP_COMPILER_WORKS ${CMAKE_HIP_COMPILER_WORKS})
   unset(CMAKE_HIP_COMPILER_WORKS CACHE)

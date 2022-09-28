@@ -77,19 +77,16 @@ macro(__TEST_BIG_ENDIAN_LEGACY_IMPL VARIABLE)
     endif()
 
     if(_test_language STREQUAL "CXX")
-      set(_test_file "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/TestEndianess.cpp")
+      set(_test_file TestEndianess.cpp)
     else()
-      set(_test_file "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/TestEndianess.c")
+      set(_test_file TestEndianess.c)
     endif()
 
-    configure_file("${CMAKE_ROOT}/Modules/TestEndianess.c.in"
-                   ${_test_file}
-                   @ONLY)
-
-     file(READ ${_test_file} TEST_ENDIANESS_FILE_CONTENT)
+    file(READ "${CMAKE_ROOT}/Modules/TestEndianess.c.in" TEST_ENDIANESS_FILE_CONTENT)
+    string(CONFIGURE "${TEST_ENDIANESS_FILE_CONTENT}" TEST_ENDIANESS_FILE_CONTENT @ONLY)
 
      try_compile(HAVE_${VARIABLE}
-      SOURCES ${_test_file}
+      SOURCE_FROM_VAR "${_test_file}" TEST_ENDIANESS_FILE_CONTENT
       OUTPUT_VARIABLE OUTPUT
       COPY_FILE "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/TestEndianess.bin" )
 
@@ -130,12 +127,12 @@ macro(__TEST_BIG_ENDIAN_LEGACY_IMPL VARIABLE)
         endif()
 
         file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-          "Determining if the system is big endian passed with the following output:\n${OUTPUT}\nTestEndianess.c:\n${TEST_ENDIANESS_FILE_CONTENT}\n\n")
+          "Determining if the system is big endian passed with the following output:\n${OUTPUT}\n${_test_file}:\n${TEST_ENDIANESS_FILE_CONTENT}\n\n")
 
       else()
         message(CHECK_FAIL "failed")
         file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-          "Determining if the system is big endian failed with the following output:\n${OUTPUT}\nTestEndianess.c:\n${TEST_ENDIANESS_FILE_CONTENT}\n\n")
+          "Determining if the system is big endian failed with the following output:\n${OUTPUT}\n${_test_file}:\n${TEST_ENDIANESS_FILE_CONTENT}\n\n")
         set(${VARIABLE})
       endif()
   endif()

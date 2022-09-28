@@ -94,13 +94,11 @@ function(check_prototype_definition _FUNCTION _PROTOTYPE _RETURN _HEADER _VARIAB
     set(CHECK_PROTOTYPE_DEFINITION_PROTO ${_PROTOTYPE})
     set(CHECK_PROTOTYPE_DEFINITION_RETURN ${_RETURN})
 
-    configure_file("${__check_proto_def_dir}/CheckPrototypeDefinition.c.in"
-      "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckPrototypeDefinition.c" @ONLY)
-
-    file(READ ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckPrototypeDefinition.c _SOURCE)
+    file(READ ${__check_proto_def_dir}/CheckPrototypeDefinition.c.in _SOURCE)
+    string(CONFIGURE "${_SOURCE}" _SOURCE @ONLY)
 
     try_compile(${_VARIABLE}
-      SOURCES ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckPrototypeDefinition.c
+      SOURCE_FROM_VAR CheckPrototypeDefinition.c _SOURCE
       COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
       ${CHECK_PROTOTYPE_DEFINITION_LINK_OPTIONS}
       ${CHECK_PROTOTYPE_DEFINITION_LIBS}

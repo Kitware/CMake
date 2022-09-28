@@ -4,7 +4,7 @@ macro(_record_compiler_features lang compile_flags feature_list)
 
   string(TOLOWER ${lang} lang_lc)
   file(REMOVE "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests.bin")
-  file(WRITE "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests.${lang_lc}" "
+  set(_content "
   const char features[] = {\"\\n\"\n")
 
   get_property(known_features GLOBAL PROPERTY CMAKE_${lang}_KNOWN_FEATURES)
@@ -16,10 +16,11 @@ macro(_record_compiler_features lang compile_flags feature_list)
       else()
         set(_feature_condition "#if ${_cmake_feature_test_${feature}}\n\"1\"\n#else\n\"0\"\n#endif\n")
       endif()
-      file(APPEND "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests.${lang_lc}" "\"${lang}_FEATURE:\"\n${_feature_condition}\"${feature}\\n\"\n")
+      string(APPEND _content
+        "\"${lang}_FEATURE:\"\n${_feature_condition}\"${feature}\\n\"\n")
     endif()
   endforeach()
-  file(APPEND "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests.${lang_lc}"
+  string(APPEND _content
     "\n};\n\nint main(int argc, char** argv) { (void)argv; return features[argc]; }\n")
 
   if(CMAKE_${lang}_LINK_WITH_STANDARD_COMPILE_OPTION)
@@ -31,7 +32,7 @@ macro(_record_compiler_features lang compile_flags feature_list)
   endif()
 
   try_compile(CMAKE_${lang}_FEATURE_TEST
-    SOURCES "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests.${lang_lc}"
+    SOURCE_FROM_VAR "feature_tests.${lang_lc}" _content
     COMPILE_DEFINITIONS "${compile_flags}"
     LINK_LIBRARIES "${compile_flags_for_link}"
     OUTPUT_VARIABLE _output

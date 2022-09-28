@@ -21,13 +21,12 @@ unset(CMAKE_Swift_COMPILER_WORKS CACHE)
 # any makefiles or projects.
 if(NOT CMAKE_Swift_COMPILER_WORKS)
   PrintTestCompilerStatus("Swift")
-  file(WRITE ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/main.swift
-    "print(\"CMake\")\n")
   # Clear result from normal variable.
   unset(CMAKE_Swift_COMPILER_WORKS)
   # Puts test result in cache variable.
+  set(__CMAKE_Swift_TEST_SOURCE "print(\"CMake\")\n")
   try_compile(CMAKE_Swift_COMPILER_WORKS
-    SOURCES ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/main.swift
+    SOURCE_FROM_VAR main.swift __CMAKE_Swift_TEST_SOURCE
     OUTPUT_VARIABLE __CMAKE_Swift_COMPILER_OUTPUT)
   # Move result from cache to normal variable.
   set(CMAKE_Swift_COMPILER_WORKS ${CMAKE_Swift_COMPILER_WORKS})
@@ -64,4 +63,5 @@ else()
   include(${CMAKE_PLATFORM_INFO_DIR}/CMakeSwiftCompiler.cmake)
 endif()
 
+unset(__CMAKE_Swift_TEST_SOURCE)
 unset(__CMAKE_Swift_COMPILER_OUTPUT)
