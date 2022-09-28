@@ -2518,18 +2518,25 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     soName += *soversion;
   }
 
+  if (gtgt->CanCompileSources()) {
+    std::string outDir;
+    if (gtgt->GetType() == cmStateEnums::OBJECT_LIBRARY) {
+      // We cannot suppress the archive, so hide it with intermediate files.
+      outDir = this->GetObjectsDirectory(this->CurrentProject, configName,
+                                         gtgt, OBJECT_LIBRARY_ARTIFACT_DIR);
+    } else {
+      outDir = gtgt->GetDirectory(configName);
+    }
+    buildSettings->AddAttribute("CONFIGURATION_BUILD_DIR",
+                                this->CreateString(outDir));
+  }
+
   // Set attributes to specify the proper name for the target.
   std::string pndir = this->CurrentLocalGenerator->GetCurrentBinaryDirectory();
   if (gtgt->GetType() == cmStateEnums::STATIC_LIBRARY ||
       gtgt->GetType() == cmStateEnums::SHARED_LIBRARY ||
       gtgt->GetType() == cmStateEnums::MODULE_LIBRARY ||
       gtgt->GetType() == cmStateEnums::EXECUTABLE) {
-    if (!gtgt->UsesDefaultOutputDir(configName,
-                                    cmStateEnums::RuntimeBinaryArtifact)) {
-      std::string pncdir = gtgt->GetDirectory(configName);
-      buildSettings->AddAttribute("CONFIGURATION_BUILD_DIR",
-                                  this->CreateString(pncdir));
-    }
 
     if (gtgt->IsFrameworkOnApple() || gtgt->IsCFBundleOnApple()) {
       pnprefix = "";
@@ -2539,11 +2546,6 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
                                 this->CreateString(pnprefix));
     buildSettings->AddAttribute("EXECUTABLE_SUFFIX",
                                 this->CreateString(pnsuffix));
-  } else if (gtgt->GetType() == cmStateEnums::OBJECT_LIBRARY) {
-    std::string pncdir = this->GetObjectsDirectory(
-      this->CurrentProject, configName, gtgt, OBJECT_LIBRARY_ARTIFACT_DIR);
-    buildSettings->AddAttribute("CONFIGURATION_BUILD_DIR",
-                                this->CreateString(pncdir));
   }
 
   // Store the product name for all target types.
