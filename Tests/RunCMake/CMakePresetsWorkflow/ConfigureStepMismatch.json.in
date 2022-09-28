@@ -1,0 +1,32 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "default"
+    },
+    {
+      "name": "mismatch"
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "mismatch",
+      "configurePreset": "mismatch"
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "default",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "default"
+        },
+        {
+          "type": "build",
+          "name": "mismatch"
+        }
+      ]
+    }
+  ]
+}

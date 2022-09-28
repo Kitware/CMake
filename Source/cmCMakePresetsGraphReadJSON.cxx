@@ -30,6 +30,8 @@ using CacheVariable = cmCMakePresetsGraph::CacheVariable;
 using ConfigurePreset = cmCMakePresetsGraph::ConfigurePreset;
 using BuildPreset = cmCMakePresetsGraph::BuildPreset;
 using TestPreset = cmCMakePresetsGraph::TestPreset;
+using PackagePreset = cmCMakePresetsGraph::PackagePreset;
+using WorkflowPreset = cmCMakePresetsGraph::WorkflowPreset;
 using ArchToolsetStrategy = cmCMakePresetsGraph::ArchToolsetStrategy;
 using JSONHelperBuilder = cmJSONHelperBuilder<ReadFileResult>;
 
@@ -46,10 +48,11 @@ struct CMakeVersion
 struct RootPresets
 {
   CMakeVersion CMakeMinimumRequired;
-  std::vector<cmCMakePresetsGraph::ConfigurePreset> ConfigurePresets;
-  std::vector<cmCMakePresetsGraph::BuildPreset> BuildPresets;
-  std::vector<cmCMakePresetsGraph::TestPreset> TestPresets;
-  std::vector<cmCMakePresetsGraph::PackagePreset> PackagePresets;
+  std::vector<ConfigurePreset> ConfigurePresets;
+  std::vector<BuildPreset> BuildPresets;
+  std::vector<TestPreset> TestPresets;
+  std::vector<PackagePreset> PackagePresets;
+  std::vector<WorkflowPreset> WorkflowPresets;
   std::vector<std::string> Include;
 };
 
@@ -284,6 +287,8 @@ auto const RootPresetsHelper =
           cmCMakePresetsGraphInternal::TestPresetsHelper, false)
     .Bind("packagePresets"_s, &RootPresets::PackagePresets,
           cmCMakePresetsGraphInternal::PackagePresetsHelper, false)
+    .Bind("workflowPresets"_s, &RootPresets::WorkflowPresets,
+          cmCMakePresetsGraphInternal::WorkflowPresetsHelper, false)
     .Bind("cmakeMinimumRequired"_s, &RootPresets::CMakeMinimumRequired,
           CMakeVersionHelper, false)
     .Bind("include"_s, &RootPresets::Include, IncludeVectorHelper, false)
@@ -466,6 +471,11 @@ cmCMakePresetsGraph::ReadFileResult cmCMakePresetsGraph::ReadJSONFile(
     return ReadFileResult::PACKAGE_PRESETS_UNSUPPORTED;
   }
 
+  // Support for workflow presets added in version 6.
+  if (v < 6 && root.isMember("workflowPresets")) {
+    return ReadFileResult::WORKFLOW_PRESETS_UNSUPPORTED;
+  }
+
   // Support for include added in version 4.
   if (v < 4 && root.isMember("include")) {
     return ReadFileResult::INCLUDE_UNSUPPORTED;
@@ -598,6 +608,25 @@ cmCMakePresetsGraph::ReadFileResult cmCMakePresetsGraph::ReadJSONFile(
     // already, so no action needed.
 
     this->PackagePresetOrder.push_back(preset.Name);
+  }
+
+  for (auto& preset : presets.WorkflowPresets) {
+    preset.OriginFile = file;
+    if (preset.Name.empty()) {
+      return ReadFileResult::INVALID_PRESET;
+    }
+
+    PresetPair<WorkflowPreset> presetPair;
+    presetPair.Unexpanded = preset;
+    presetPair.Expanded = cm::nullopt;
+    if (!this->WorkflowPresets.emplace(preset.Name, presetPair).second) {
+      return ReadFileResult::DUPLICATE_PRESETS;
+    }
+
+    // Support for conditions added in version 3, but this requires version 6
+    // already, so no action needed.
+
+    this->WorkflowPresetOrder.push_back(preset.Name);
   }
 
   auto const includeFile = [this, &inProgressFiles, file](

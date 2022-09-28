@@ -911,6 +911,68 @@ int do_install(int ac, char const* const* av)
 #endif
 }
 
+int do_workflow(int ac, char const* const* av)
+{
+#ifdef CMAKE_BOOTSTRAP
+  std::cerr << "This cmake does not support --workflow\n";
+  return -1;
+#else
+  std::string presetName;
+  bool listPresets = false;
+
+  using CommandArgument =
+    cmCommandLineArgument<bool(std::string const& value)>;
+
+  std::vector<CommandArgument> arguments = {
+    CommandArgument{ "--preset", CommandArgument::Values::One,
+                     CommandArgument::setToValue(presetName) },
+    CommandArgument{ "--list-presets", CommandArgument::Values::Zero,
+                     CommandArgument::setToTrue(listPresets) }
+  };
+
+  std::vector<std::string> inputArgs;
+
+  inputArgs.reserve(ac - 2);
+  cm::append(inputArgs, av + 2, av + ac);
+
+  decltype(inputArgs.size()) i = 0;
+  for (; i < inputArgs.size(); ++i) {
+    std::string const& arg = inputArgs[i];
+    bool matched = false;
+    bool parsed = false;
+    for (auto const& m : arguments) {
+      matched = m.matches(arg);
+      if (matched) {
+        parsed = m.parse(arg, i, inputArgs);
+        break;
+      }
+    }
+    if (!(matched && parsed)) {
+      if (!matched) {
+        std::cerr << "Unknown argument " << arg << std::endl;
+      }
+      break;
+    }
+  }
+
+  if (presetName.empty() && !listPresets) {
+    std::cerr << "TODO: Usage\n";
+    return 1;
+  }
+
+  cmake cm(cmake::RoleInternal, cmState::Project);
+  cmSystemTools::SetMessageCallback(
+    [&cm](const std::string& msg, const cmMessageMetadata& md) {
+      cmakemainMessageCallback(msg, md, &cm);
+    });
+  cm.SetProgressCallback([&cm](const std::string& msg, float prog) {
+    cmakemainProgressCallback(msg, prog, &cm);
+  });
+
+  return cm.Workflow(presetName, listPresets);
+#endif
+}
+
 int do_open(int ac, char const* const* av)
 {
 #ifdef CMAKE_BOOTSTRAP
@@ -979,6 +1041,9 @@ int main(int ac, char const* const* av)
     }
     if (strcmp(av[1], "--open") == 0) {
       return do_open(ac, av);
+    }
+    if (strcmp(av[1], "--workflow") == 0) {
+      return do_workflow(ac, av);
     }
     if (strcmp(av[1], "-E") == 0) {
       return do_command(ac, av, std::move(consoleBuf));

@@ -16,6 +16,7 @@
 #include <vector>
 
 #include <cm/string_view>
+#include <cmext/string_view>
 
 #include "cmGeneratedFileStream.h"
 #include "cmInstalledFile.h"
@@ -600,6 +601,9 @@ public:
   //! run the --open option
   bool Open(const std::string& dir, bool dryRun);
 
+  //! run the --workflow option
+  int Workflow(const std::string& presetName, bool listPresets);
+
   void UnwatchUnusedCli(const std::string& var);
   void WatchUnusedCli(const std::string& var);
 
@@ -738,6 +742,16 @@ private:
 
   void AppendGlobalGeneratorsDocumentation(std::vector<cmDocumentationEntry>&);
   void AppendExtraGeneratorsDocumentation(std::vector<cmDocumentationEntry>&);
+
+#if !defined(CMAKE_BOOTSTRAP)
+  template <typename T>
+  const T* FindPresetForWorkflow(
+    cm::static_string_view type,
+    const std::map<std::string, cmCMakePresetsGraph::PresetPair<T>>& presets,
+    const cmCMakePresetsGraph::WorkflowPreset::WorkflowStep& step);
+
+  std::function<int()> BuildWorkflowStep(const std::vector<std::string>& args);
+#endif
 
 #if !defined(CMAKE_BOOTSTRAP)
   std::unique_ptr<cmMakefileProfilingData> ProfilingOutput;

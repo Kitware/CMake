@@ -44,6 +44,9 @@ using ConfigurePreset = cmCMakePresetsGraph::ConfigurePreset;
 using BuildPreset = cmCMakePresetsGraph::BuildPreset;
 using TestPreset = cmCMakePresetsGraph::TestPreset;
 using PackagePreset = cmCMakePresetsGraph::PackagePreset;
+using WorkflowPreset = cmCMakePresetsGraph::WorkflowPreset;
+template <typename T>
+using PresetPair = cmCMakePresetsGraph::PresetPair<T>;
 using ExpandMacroResult = cmCMakePresetsGraphInternal::ExpandMacroResult;
 using MacroExpander = cmCMakePresetsGraphInternal::MacroExpander;
 
@@ -324,6 +327,14 @@ bool ExpandMacros(const cmCMakePresetsGraph& graph,
   return true;
 }
 
+bool ExpandMacros(const cmCMakePresetsGraph& /*graph*/,
+                  const WorkflowPreset& /*preset*/,
+                  cm::optional<WorkflowPreset>& /*out*/,
+                  const std::vector<MacroExpander>& /*macroExpanders*/)
+{
+  return true;
+}
+
 template <class T>
 bool ExpandMacros(const cmCMakePresetsGraph& graph, const T& preset,
                   cm::optional<T>& out)
@@ -578,6 +589,42 @@ ExpandMacroResult ExpandMacro(std::string& out,
   }
 
   return ExpandMacroResult::Error;
+}
+
+template <typename T>
+ReadFileResult SetupWorkflowConfigurePreset(
+  const T& preset, const ConfigurePreset*& configurePreset)
+{
+  if (preset.ConfigurePreset != configurePreset->Name) {
+    return ReadFileResult::INVALID_WORKFLOW_STEPS;
+  }
+  return ReadFileResult::READ_OK;
+}
+
+template <>
+ReadFileResult SetupWorkflowConfigurePreset<ConfigurePreset>(
+  const ConfigurePreset& preset, const ConfigurePreset*& configurePreset)
+{
+  configurePreset = &preset;
+  return ReadFileResult::READ_OK;
+}
+
+template <typename T>
+ReadFileResult TryReachPresetFromWorkflow(
+  const WorkflowPreset& origin,
+  const std::map<std::string, PresetPair<T>>& presets, const std::string& name,
+  const ConfigurePreset*& configurePreset)
+{
+  auto it = presets.find(name);
+  if (it == presets.end()) {
+    return ReadFileResult::INVALID_WORKFLOW_STEPS;
+  }
+  if (!origin.OriginFile->ReachableFiles.count(
+        it->second.Unexpanded.OriginFile)) {
+    return ReadFileResult::WORKFLOW_STEP_UNREACHABLE_FROM_FILE;
+  }
+  return SetupWorkflowConfigurePreset<T>(it->second.Unexpanded,
+                                         configurePreset);
 }
 }
 
@@ -929,6 +976,19 @@ cmCMakePresetsGraph::PackagePreset::VisitPresetAfterInherit(int /* version */)
   return ReadFileResult::READ_OK;
 }
 
+cmCMakePresetsGraph::ReadFileResult
+cmCMakePresetsGraph::WorkflowPreset::VisitPresetInherit(
+  const cmCMakePresetsGraph::Preset& /*parentPreset*/)
+{
+  return ReadFileResult::READ_OK;
+}
+
+cmCMakePresetsGraph::ReadFileResult
+cmCMakePresetsGraph::WorkflowPreset::VisitPresetAfterInherit(int /* version */)
+{
+  return ReadFileResult::READ_OK;
+}
+
 std::string cmCMakePresetsGraph::GetFilename(const std::string& sourceDir)
 {
   return cmStrCat(sourceDir, "/CMakePresets.json");
@@ -992,6 +1052,7 @@ cmCMakePresetsGraph::ReadProjectPresetsInternal(bool allowNoFiles)
   CHECK_OK(ComputePresetInheritance(this->BuildPresets, *this));
   CHECK_OK(ComputePresetInheritance(this->TestPresets, *this));
   CHECK_OK(ComputePresetInheritance(this->PackagePresets, *this));
+  CHECK_OK(ComputePresetInheritance(this->WorkflowPresets, *this));
 
   for (auto& it : this->ConfigurePresets) {
     if (!ExpandMacros(*this, it.second.Unexpanded, it.second.Expanded)) {
@@ -1071,6 +1132,55 @@ cmCMakePresetsGraph::ReadProjectPresetsInternal(bool allowNoFiles)
     }
   }
 
+  for (auto& it : this->WorkflowPresets) {
+    using Type = WorkflowPreset::WorkflowStep::Type;
+
+    const ConfigurePreset* configurePreset = nullptr;
+    for (auto const& step : it.second.Unexpanded.Steps) {
+      if (configurePreset == nullptr && step.PresetType != Type::Configure) {
+        return ReadFileResult::INVALID_WORKFLOW_STEPS;
+      }
+      if (configurePreset != nullptr && step.PresetType == Type::Configure) {
+        return ReadFileResult::INVALID_WORKFLOW_STEPS;
+      }
+
+      ReadFileResult result;
+      switch (step.PresetType) {
+        case Type::Configure:
+          result = TryReachPresetFromWorkflow(
+            it.second.Unexpanded, this->ConfigurePresets, step.PresetName,
+            configurePreset);
+          break;
+        case Type::Build:
+          result = TryReachPresetFromWorkflow(
+            it.second.Unexpanded, this->BuildPresets, step.PresetName,
+            configurePreset);
+          break;
+        case Type::Test:
+          result =
+            TryReachPresetFromWorkflow(it.second.Unexpanded, this->TestPresets,
+                                       step.PresetName, configurePreset);
+          break;
+        case Type::Package:
+          result = TryReachPresetFromWorkflow(
+            it.second.Unexpanded, this->PackagePresets, step.PresetName,
+            configurePreset);
+          break;
+      }
+      if (result != ReadFileResult::READ_OK) {
+        return result;
+      }
+    }
+
+    if (configurePreset == nullptr) {
+      return ReadFileResult::INVALID_WORKFLOW_STEPS;
+    }
+
+    if (!ExpandMacros(*this, it.second.Unexpanded, it.second.Expanded)) {
+      return ReadFileResult::INVALID_MACRO_EXPANSION;
+    }
+  }
+
   return ReadFileResult::READ_OK;
 }
 
@@ -1116,6 +1226,8 @@ const char* cmCMakePresetsGraph::ResultToString(ReadFileResult result)
              "support.";
     case ReadFileResult::PACKAGE_PRESETS_UNSUPPORTED:
       return "File version must be 6 or higher for package preset support";
+    case ReadFileResult::WORKFLOW_PRESETS_UNSUPPORTED:
+      return "File version must be 6 or higher for workflow preset support";
     case ReadFileResult::INCLUDE_UNSUPPORTED:
       return "File version must be 4 or higher for include support";
     case ReadFileResult::INVALID_INCLUDE:
@@ -1137,6 +1249,10 @@ const char* cmCMakePresetsGraph::ResultToString(ReadFileResult result)
     case ReadFileResult::TEST_OUTPUT_TRUNCATION_UNSUPPORTED:
       return "File version must be 5 or higher for testOutputTruncation "
              "preset support.";
+    case ReadFileResult::INVALID_WORKFLOW_STEPS:
+      return "Invalid workflow steps";
+    case ReadFileResult::WORKFLOW_STEP_UNREACHABLE_FROM_FILE:
+      return "Workflow step is unreachable from preset's file";
   }
 
   return "Unknown error";
@@ -1148,11 +1264,13 @@ void cmCMakePresetsGraph::ClearPresets()
   this->BuildPresets.clear();
   this->TestPresets.clear();
   this->PackagePresets.clear();
+  this->WorkflowPresets.clear();
 
   this->ConfigurePresetOrder.clear();
   this->BuildPresetOrder.clear();
   this->TestPresetOrder.clear();
   this->PackagePresetOrder.clear();
+  this->WorkflowPresetOrder.clear();
 
   this->Files.clear();
 }
@@ -1291,6 +1409,26 @@ void cmCMakePresetsGraph::PrintPackagePresetList(
   }
 }
 
+void cmCMakePresetsGraph::PrintWorkflowPresetList(
+  PrintPrecedingNewline* newline) const
+{
+  std::vector<const cmCMakePresetsGraph::Preset*> presets;
+  for (auto const& p : this->WorkflowPresetOrder) {
+    auto const& preset = this->WorkflowPresets.at(p);
+    if (!preset.Unexpanded.Hidden && preset.Expanded &&
+        preset.Expanded->ConditionResult) {
+      presets.push_back(
+        static_cast<const cmCMakePresetsGraph::Preset*>(&preset.Unexpanded));
+    }
+  }
+
+  if (!presets.empty()) {
+    printPrecedingNewline(newline);
+    std::cout << "Available workflow presets:\n\n";
+    cmCMakePresetsGraph::PrintPresets(presets);
+  }
+}
+
 void cmCMakePresetsGraph::PrintAllPresets() const
 {
   PrintPrecedingNewline newline = PrintPrecedingNewline::False;
@@ -1298,4 +1436,5 @@ void cmCMakePresetsGraph::PrintAllPresets() const
   this->PrintBuildPresetList(&newline);
   this->PrintTestPresetList(&newline);
   this->PrintPackagePresetList(&newline);
+  this->PrintWorkflowPresetList(&newline);
 }

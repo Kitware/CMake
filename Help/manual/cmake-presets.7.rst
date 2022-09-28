@@ -106,6 +106,10 @@ The root object recognizes the following fields:
   An optional array of `Package Preset`_ objects.
   This is allowed in preset files specifying version ``6`` or above.
 
+``workflowPresets``
+  An optional array of `Workflow Preset`_ objects.
+  This is allowed in preset files specifying version ``6`` or above.
+
 Includes
 ^^^^^^^^
 
@@ -137,8 +141,8 @@ that may contain the following fields:
   This identifier is used in the :ref:`cmake --preset <CMake Options>` option.
   There must not be two configure presets in the union of ``CMakePresets.json``
   and ``CMakeUserPresets.json`` in the same directory with the same name.
-  However, a configure preset may have the same name as a build, test, or
-  package preset.
+  However, a configure preset may have the same name as a build, test,
+  package, or workflow preset.
 
 ``hidden``
   An optional boolean specifying whether or not a preset should be hidden.
@@ -364,8 +368,8 @@ that may contain the following fields:
   :ref:`cmake --build --preset <Build Tool Mode>` option.
   There must not be two build presets in the union of ``CMakePresets.json``
   and ``CMakeUserPresets.json`` in the same directory with the same name.
-  However, a build preset may have the same name as a configure, test, or
-  package preset.
+  However, a build preset may have the same name as a configure, test,
+  package, or workflow preset.
 
 ``hidden``
   An optional boolean specifying whether or not a preset should be hidden.
@@ -525,8 +529,8 @@ that may contain the following fields:
   This identifier is used in the :option:`ctest --preset` option.
   There must not be two test presets in the union of ``CMakePresets.json``
   and ``CMakeUserPresets.json`` in the same directory with the same name.
-  However, a test preset may have the same name as a configure, build, or
-  package preset.
+  However, a test preset may have the same name as a configure, build,
+  package, or workflow preset.
 
 ``hidden``
   An optional boolean specifying whether or not a preset should be hidden.
@@ -861,8 +865,8 @@ fields:
   This identifier is used in the :option:`cpack --preset` option.
   There must not be two package presets in the union of ``CMakePresets.json``
   and ``CMakeUserPresets.json`` in the same directory with the same name.
-  However, a package preset may have the same name as a configure, build, or
-  test preset.
+  However, a package preset may have the same name as a configure, build,
+  test, or workflow preset.
 
 ``hidden``
   An optional boolean specifying whether or not a preset should be hidden.
@@ -976,6 +980,42 @@ fields:
 
 ``vendorName``
   An optional string representing the vendor name.
+
+Workflow Preset
+^^^^^^^^^^^^^^^
+
+Workflow presets may be used in schema version ``6`` or above. Each entry of
+the ``workflowPresets`` array is a JSON object that may contain the following
+fields:
+
+``name``
+  A required string representing the machine-friendly name of the preset.
+  This identifier is used in the
+  :ref:`cmake --workflow --preset <Workflow Mode>` option. There must not be
+  two workflow presets in the union of ``CMakePresets.json`` and
+  ``CMakeUserPresets.json`` in the same directory with the same name. However,
+  a workflow preset may have the same name as a configure, build, test, or
+  package preset.
+
+``displayName``
+  An optional string with a human-friendly name of the preset.
+
+``description``
+  An optional string with a human-friendly description of the preset.
+
+``steps``
+  A required array of objects describing the steps of the workflow. The first
+  step must be a configure preset, and all subsequent steps must be non-
+  configure presets whose ``configurePreset`` field matches the starting
+  configure preset. Each object may contain the following fields:
+
+  ``type``
+    A required string. The first step must be ``configure``. Subsequent steps
+    must be either ``build``, ``test``, or ``package``.
+
+  ``name``
+    A required string representing the name of the configure, build, test, or
+    package preset to run as this workflow step.
 
 Condition
 ^^^^^^^^^
