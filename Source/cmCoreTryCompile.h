@@ -58,6 +58,7 @@ public:
     cm::optional<std::string> OutputVariable;
     cm::optional<std::string> CopyFileTo;
     cm::optional<std::string> CopyFileError;
+    bool NoCache = false;
 
     // Argument for try_run only.
     // Keep in sync with warnings in cmCoreTryCompile::ParseArgs.

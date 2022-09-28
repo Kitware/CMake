@@ -149,6 +149,7 @@ cmArgumentParser<Arguments> makeTryRunParser(
 auto const TryCompileBaseArgParser =
   cmArgumentParser<Arguments>{}
     .Bind(0, &Arguments::CompileResultVariable)
+    .Bind("NO_CACHE"_s, &Arguments::NoCache)
     .Bind("CMAKE_FLAGS"_s, &Arguments::CMakeFlags)
     .Bind("__CMAKE_INTERNAL"_s, &Arguments::CMakeInternal)
   /* keep semicolon on own line */;
@@ -1061,9 +1062,14 @@ bool cmCoreTryCompile::TryCompileCode(Arguments& arguments,
   }
 
   // set the result var to the return value to indicate success or failure
-  this->Makefile->AddCacheDefinition(
-    *arguments.CompileResultVariable, (res == 0 ? "TRUE" : "FALSE"),
-    "Result of TRY_COMPILE", cmStateEnums::INTERNAL);
+  if (arguments.NoCache) {
+    this->Makefile->AddDefinition(*arguments.CompileResultVariable,
+                                  (res == 0 ? "TRUE" : "FALSE"));
+  } else {
+    this->Makefile->AddCacheDefinition(
+      *arguments.CompileResultVariable, (res == 0 ? "TRUE" : "FALSE"),
+      "Result of TRY_COMPILE", cmStateEnums::INTERNAL);
+  }
 
   if (arguments.OutputVariable) {
     this->Makefile->AddDefinition(*arguments.OutputVariable, output);

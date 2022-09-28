@@ -17,6 +17,7 @@ Try Compiling and Running Source Files
            SOURCE_FROM_ARG <name> <content>] |
            SOURCE_FROM_VAR <name> <var>]     |
            SOURCE_FROM_FILE <name> <path>    >...
+          [NO_CACHE]
           [CMAKE_FLAGS <flags>...]
           [COMPILE_DEFINITIONS <defs>...]
           [LINK_OPTIONS <options>...]
@@ -54,6 +55,7 @@ which was present in older versions of CMake:
 
   try_run(<runResultVar> <compileResultVar>
           <bindir> <srcfile|SOURCES srcfile...>
+          [NO_CACHE]
           [CMAKE_FLAGS <flags>...]
           [COMPILE_DEFINITIONS <defs>...]
           [LINK_OPTIONS <options>...]

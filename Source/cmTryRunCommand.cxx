@@ -46,6 +46,7 @@ public:
                           std::string* runOutputStdOutContents,
                           std::string* runOutputStdErrContents);
 
+  bool NoCache;
   std::string RunResultVariable;
 };
 
@@ -57,6 +58,7 @@ bool TryRunCommandImpl::TryRunCode(std::vector<std::string> const& argv)
   if (!arguments) {
     return true;
   }
+  this->NoCache = arguments.NoCache;
 
   // although they could be used together, don't allow it, because
   // using OUTPUT_VARIABLE makes crosscompiling harder
@@ -222,9 +224,13 @@ void TryRunCommandImpl::RunExecutable(const std::string& runArgs,
   } else {
     retStr = "FAILED_TO_RUN";
   }
-  this->Makefile->AddCacheDefinition(this->RunResultVariable, retStr,
-                                     "Result of try_run()",
-                                     cmStateEnums::INTERNAL);
+  if (this->NoCache) {
+    this->Makefile->AddDefinition(this->RunResultVariable, retStr);
+  } else {
+    this->Makefile->AddCacheDefinition(this->RunResultVariable, retStr,
+                                       "Result of try_run()",
+                                       cmStateEnums::INTERNAL);
+  }
 }
 
 /* This is only used when cross compiling. Instead of running the

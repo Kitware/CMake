@@ -18,6 +18,7 @@ Try Compiling Whole Projects
               SOURCE_DIR <srcdir>
               [BINARY_DIR <bindir>]
               [TARGET <targetName>]
+              [NO_CACHE]
               [CMAKE_FLAGS <flags>...]
               [OUTPUT_VARIABLE <var>])
 
@@ -45,7 +46,9 @@ which was present in older versions of CMake:
 .. code-block:: cmake
 
   try_compile(<resultVar> <bindir> <srcdir>
-              <projectName> [<targetName>] [CMAKE_FLAGS <flags>...]
+              <projectName> [<targetName>]
+              [NO_CACHE]
+              [CMAKE_FLAGS <flags>...]
               [OUTPUT_VARIABLE <var>])
 
 .. _`Try Compiling Source Files`:
@@ -60,6 +63,7 @@ Try Compiling Source Files
                SOURCE_FROM_ARG <name> <content>] |
                SOURCE_FROM_VAR <name> <var>]     |
                SOURCE_FROM_FILE <name> <path>    >...
+              [NO_CACHE]
               [CMAKE_FLAGS <flags>...]
               [COMPILE_DEFINITIONS <defs>...]
               [LINK_OPTIONS <options>...]
@@ -111,6 +115,7 @@ which was present in older versions of CMake:
 .. code-block:: cmake
 
   try_compile(<resultVar> <bindir> <srcfile|SOURCES srcfile...>
+              [NO_CACHE]
               [CMAKE_FLAGS <flags>...]
               [COMPILE_DEFINITIONS <defs>...]
               [LINK_OPTIONS <options>...]
@@ -165,6 +170,26 @@ The options are:
   Specify link step options to pass to :command:`target_link_options` or to
   set the :prop_tgt:`STATIC_LIBRARY_OPTIONS` target property in the generated
   project, depending on the :variable:`CMAKE_TRY_COMPILE_TARGET_TYPE` variable.
+
+``NO_CACHE``
+  .. versionadded:: 3.25
+
+  The result will be stored in a normal variable rather than a cache entry.
+
+  The result variable is normally cached so that a simple pattern can be used
+  to avoid repeating the test on subsequent executions of CMake:
+
+  .. code-block:: cmake
+
+    if(NOT DEFINED RESULTVAR)
+      # ...(check-specific setup code)...
+      try_compile(RESULTVAR ...)
+      # ...(check-specific logging and cleanup code)...
+    endif()
+
+  If the guard variable and result variable are not the same (for example, if
+  the test is part of a larger inspection), ``NO_CACHE`` may be useful to avoid
+  leaking the intermediate result variable into the cache.
 
 ``OUTPUT_VARIABLE <var>``
   Store the output from the build process in the given variable.
