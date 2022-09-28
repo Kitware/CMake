@@ -57,7 +57,7 @@ if(NOT CMAKE_CXX_COMPILER_WORKS)
   if(NOT CMAKE_CXX_COMPILER_WORKS)
     PrintTestCompilerResult(CHECK_FAIL "broken")
     file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-      "Determining if the CXX compiler works failed with "
+      "Determining if the C++ compiler works failed with "
       "the following output:\n${__CMAKE_CXX_COMPILER_OUTPUT}\n\n")
     string(REPLACE "\n" "\n  " _output "${__CMAKE_CXX_COMPILER_OUTPUT}")
     message(FATAL_ERROR "The C++ compiler\n  \"${CMAKE_CXX_COMPILER}\"\n"
@@ -67,7 +67,7 @@ if(NOT CMAKE_CXX_COMPILER_WORKS)
   endif()
   PrintTestCompilerResult(CHECK_PASS "works")
   file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-    "Determining if the CXX compiler works passed with "
+    "Determining if the C++ compiler works passed with "
     "the following output:\n${__CMAKE_CXX_COMPILER_OUTPUT}\n\n")
 endif()
 
