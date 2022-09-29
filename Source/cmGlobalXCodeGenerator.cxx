@@ -2540,10 +2540,6 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     buildSettings->AddAttribute("EXECUTABLE_SUFFIX",
                                 this->CreateString(pnsuffix));
   } else if (gtgt->GetType() == cmStateEnums::OBJECT_LIBRARY) {
-    pnprefix = "lib";
-    pnbase = gtgt->GetName();
-    pnsuffix = ".a";
-
     std::string pncdir = this->GetObjectsDirectory(
       this->CurrentProject, configName, gtgt, OBJECT_LIBRARY_ARTIFACT_DIR);
     buildSettings->AddAttribute("CONFIGURATION_BUILD_DIR",
