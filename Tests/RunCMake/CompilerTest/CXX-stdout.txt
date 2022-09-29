@@ -1,0 +1,2 @@
+-- Check for working CXX compiler: [^
+]* - works
