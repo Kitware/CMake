@@ -2552,7 +2552,6 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
 
   // Store the product name for all target types.
   buildSettings->AddAttribute("PRODUCT_NAME", this->CreateString(realName));
-  buildSettings->AddAttribute("SYMROOT", this->CreateString(pndir));
 
   // Handle settings for each target type.
   switch (gtgt->GetType()) {
