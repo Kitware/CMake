@@ -140,6 +140,28 @@ if(APPLE)
   EXPECT_FAIL(SHOULD_FAIL "${TRY_OUT}")
 endif()
 
+# check that try_compile honors NO_CACHE
+function(try_compile_scope_test)
+  try_compile(
+    CACHED_RESULT
+    ${try_compile_bindir_or_SOURCES}
+    ${TryCompile_SOURCE_DIR}/pass.c)
+  try_compile(
+    SHOULD_NOT_ESCAPE_SCOPE_RESULT
+    ${try_compile_bindir_or_SOURCES}
+    ${TryCompile_SOURCE_DIR}/pass.c
+    NO_CACHE)
+endfunction()
+
+try_compile_scope_test()
+
+if(NOT DEFINED CACHE{CACHED_RESULT})
+  message(SEND_ERROR " Result from try_compile was not cached")
+endif()
+if(DEFINED SHOULD_NOT_ESCAPE_SCOPE_RESULT)
+  message(SEND_ERROR " Result from try_compile(NO_CACHE) leaked")
+endif()
+
 ######################################
 
 # now test try_run()
@@ -221,4 +243,34 @@ endif()
 # check the run stderr output
 if(NOT "${RUN_OUTPUT_STDERR}" MATCHES "error")
   message(SEND_ERROR " RUN_OUTPUT_STDERR didn't contain \"error\": \"${RUN_OUTPUT_STDERR}\"")
+endif()
+
+# check that try_run honors NO_CACHE
+function(try_run_scope_test)
+  try_run(
+    CACHED_RUN_RESULT
+    CACHED_COMPILE_RESULT
+    ${try_compile_bindir_or_SOURCES}
+    ${TryCompile_SOURCE_DIR}/exit_success.c)
+  try_run(
+    SHOULD_NOT_ESCAPE_SCOPE_RUN_RESULT
+    SHOULD_NOT_ESCAPE_SCOPE_COMPILE_RESULT
+    ${try_compile_bindir_or_SOURCES}
+    ${TryCompile_SOURCE_DIR}/exit_success.c
+    NO_CACHE)
+endfunction()
+
+try_run_scope_test()
+
+if(NOT DEFINED CACHE{CACHED_COMPILE_RESULT})
+  message(SEND_ERROR " Compile result from try_run was not cached")
+endif()
+if(NOT DEFINED CACHE{CACHED_RUN_RESULT})
+  message(SEND_ERROR " Run result from try_run was not cached")
+endif()
+if(DEFINED SHOULD_NOT_ESCAPE_SCOPE_COMPILE_RESULT)
+  message(SEND_ERROR " Compile result from try_run(NO_CACHE) leaked")
+endif()
+if(DEFINED SHOULD_NOT_ESCAPE_SCOPE_RUN_RESULT)
+  message(SEND_ERROR " Run result from try_run(NO_CACHE) leaked")
 endif()
