@@ -95,7 +95,10 @@ function(_add_glut_target_simple)
 endfunction()
 
 find_package(PkgConfig QUIET)
-if(PKG_CONFIG_FOUND)
+get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+# On WIN32 and when using a multiple config generator, pkg-config
+# is not used as it cannot distinguish between release and debug libraries
+if(PKG_CONFIG_FOUND AND NOT (_isMultiConfig AND WIN32))
   # Tell pkg-config not to strip any -I flags to make sure GLUT_INCLUDE_DIRS
   # will be defined.
   if(DEFINED ENV{PKG_CONFIG_ALLOW_SYSTEM_CFLAGS})
