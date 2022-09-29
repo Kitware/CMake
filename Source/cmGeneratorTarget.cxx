@@ -5454,9 +5454,6 @@ std::string cmGeneratorTarget::GetObjectDirectory(
   std::string obj_dir =
     this->GlobalGenerator->ExpandCFGIntDir(this->ObjectDirectory, config);
 #if defined(__APPLE__)
-  // find and replace $(PROJECT_NAME) xcode placeholder
-  const std::string projectName = this->LocalGenerator->GetProjectName();
-  cmSystemTools::ReplaceString(obj_dir, "$(PROJECT_NAME)", projectName);
   // Replace Xcode's placeholder for the object file directory since
   // installation and export scripts need to know the real directory.
   // Xcode has build-time settings (e.g. for sanitizers) that affect this,

@@ -607,7 +607,6 @@ std::string cmGlobalXCodeGenerator::PostBuildMakeTarget(
 }
 
 #define CMAKE_CHECK_BUILD_SYSTEM_TARGET "ZERO_CHECK"
-#define OBJECT_LIBRARY_ARTIFACT_DIR std::string()
 
 void cmGlobalXCodeGenerator::AddExtraTargets(
   cmLocalGenerator* root, std::vector<cmLocalGenerator*>& gens)
@@ -2519,11 +2518,14 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
   }
 
   if (gtgt->CanCompileSources()) {
+    std::string tmpDir =
+      cmStrCat(gtgt->GetSupportDirectory(), '/', this->GetCMakeCFGIntDir());
+    buildSettings->AddAttribute("TARGET_TEMP_DIR", this->CreateString(tmpDir));
+
     std::string outDir;
     if (gtgt->GetType() == cmStateEnums::OBJECT_LIBRARY) {
       // We cannot suppress the archive, so hide it with intermediate files.
-      outDir = this->GetObjectsDirectory(this->CurrentProject, configName,
-                                         gtgt, OBJECT_LIBRARY_ARTIFACT_DIR);
+      outDir = tmpDir;
     } else {
       outDir = gtgt->GetDirectory(configName);
     }
@@ -4463,16 +4465,6 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
   return true;
 }
 
-std::string cmGlobalXCodeGenerator::GetObjectsDirectory(
-  const std::string& projName, const std::string& configName,
-  const cmGeneratorTarget* t, const std::string& variant) const
-{
-  std::string dir = cmStrCat(
-    t->GetLocalGenerator()->GetCurrentBinaryDirectory(), '/', projName,
-    ".build/", configName, '/', t->GetName(), ".build/", variant);
-  return dir;
-}
-
 void cmGlobalXCodeGenerator::ComputeArchitectures(cmMakefile* mf)
 {
   this->Architectures.clear();
@@ -4596,10 +4588,8 @@ void cmGlobalXCodeGenerator::CreateXCodeDependHackMakefile(
         for (auto objLib : objlibs) {
 
           const std::string objLibName = objLib->GetName();
-          std::string d = cmStrCat(
-            this->GetObjectsDirectory(this->CurrentProject, configName, objLib,
-                                      OBJECT_LIBRARY_ARTIFACT_DIR),
-            "lib", objLibName, ".a");
+          std::string d = cmStrCat(objLib->GetSupportDirectory(), '/',
+                                   configName, "/lib", objLibName, ".a");
 
           std::string dependency = this->ConvertToRelativeForMake(d);
           makefileStream << "\\\n\t" << dependency;
@@ -4613,8 +4603,8 @@ void cmGlobalXCodeGenerator::CreateXCodeDependHackMakefile(
         // if building for more than one architecture
         // then remove those executables as well
         if (this->Architectures.size() > 1) {
-          std::string universal = this->GetObjectsDirectory(
-            this->CurrentProject, configName, gt, "$(OBJDIR)/");
+          std::string universal = cmStrCat(gt->GetSupportDirectory(), '/',
+                                           configName, "/$(OBJDIR)/");
           for (const auto& architecture : this->Architectures) {
             std::string universalFile = cmStrCat(universal, architecture, '/',
                                                  gt->GetFullName(configName));
@@ -5011,14 +5001,10 @@ bool cmGlobalXCodeGenerator::ShouldStripResourcePath(cmMakefile*) const
 void cmGlobalXCodeGenerator::ComputeTargetObjectDirectory(
   cmGeneratorTarget* gt) const
 {
-  std::string configName = this->GetCMakeCFGIntDir();
   auto objectDirArch = GetTargetObjectDirArch(*gt, this->ObjectDirArch);
-
-  std::string dir =
-    cmStrCat(this->GetObjectsDirectory("$(PROJECT_NAME)", configName, gt,
-                                       "$(OBJECT_FILE_DIR_normal:base)/"),
-             objectDirArch, '/');
-  gt->ObjectDirectory = dir;
+  gt->ObjectDirectory =
+    cmStrCat(gt->GetSupportDirectory(), '/', this->GetCMakeCFGIntDir(),
+             "/$(OBJECT_FILE_DIR_normal:base)/", objectDirArch, '/');
 }
 
 std::string cmGlobalXCodeGenerator::GetDeploymentPlatform(const cmMakefile* mf)
