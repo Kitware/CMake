@@ -100,6 +100,7 @@ follows:
   :name: MathFunctions/CMakeLists.txt-target_include_directories-INTERFACE
   :language: cmake
   :start-after: # to find MathFunctions.h
+  :end-before: # TODO 3: Link to
 
 .. raw:: html
 
