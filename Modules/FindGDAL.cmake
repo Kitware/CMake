@@ -160,7 +160,7 @@ unset(_gdal_version)
 unset(_gdal_versions)
 
 find_library(GDAL_LIBRARY
-  NAMES ${_gdal_lib} ${_gdal_libnames} gdal gdal_i gdal1.5.0 gdal1.4.0 gdal1.3.2 GDAL
+  NAMES ${_gdal_lib} ${_gdal_libnames} gdal gdald gdal_i gdal1.5.0 gdal1.4.0 gdal1.3.2 GDAL
   HINTS
      ENV GDAL_DIR
      ENV GDAL_ROOT
