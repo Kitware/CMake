@@ -12,7 +12,11 @@ function(verify_architecture file)
   string(REGEX MATCHALL "is architecture: [^ \n\t]+" architecture "${lipo_out}")
   string(REGEX REPLACE "is architecture: " "" actual "${architecture}")
 
-  set(expected armv7)
+  if(XCODE_VERSION VERSION_GREATER_EQUAL 14)
+    set(expected arm64)
+  else()
+    set(expected armv7)
+  endif()
 
   if(NOT actual STREQUAL expected)
     message(SEND_ERROR

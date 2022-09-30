@@ -290,30 +290,33 @@ if(XCODE_VERSION VERSION_GREATER_EQUAL 6)
   unset(RunCMake_TEST_OPTIONS)
 
   # XcodeIOSInstallCombinedPrune
-  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/XcodeIOSInstallCombinedPrune-build)
-  set(RunCMake_TEST_NO_CLEAN 1)
-  set(RunCMake_TEST_OPTIONS
-    "-DCMAKE_SYSTEM_NAME=iOS"
-    "-DCMAKE_IOS_INSTALL_COMBINED=YES"
-    "-DCMAKE_INSTALL_PREFIX:PATH=${RunCMake_TEST_BINARY_DIR}/_install")
+  # FIXME(#24011): Xcode 14 removed support for older architectures the test needs.
+  if(XCODE_VERSION VERSION_LESS 14)
+    set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/XcodeIOSInstallCombinedPrune-build)
+    set(RunCMake_TEST_NO_CLEAN 1)
+    set(RunCMake_TEST_OPTIONS
+      "-DCMAKE_SYSTEM_NAME=iOS"
+      "-DCMAKE_IOS_INSTALL_COMBINED=YES"
+      "-DCMAKE_INSTALL_PREFIX:PATH=${RunCMake_TEST_BINARY_DIR}/_install")
 
-  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
-  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+    file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+    file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
 
-  run_cmake(XcodeIOSInstallCombinedPrune)
-  run_cmake_command(XcodeIOSInstallCombinedPrune-build ${CMAKE_COMMAND} --build .)
-  if(XCODE_VERSION VERSION_LESS 12)
-    run_cmake_command(XcodeIOSInstallCombinedPrune-install ${CMAKE_COMMAND} --build . --target install)
+    run_cmake(XcodeIOSInstallCombinedPrune)
+    run_cmake_command(XcodeIOSInstallCombinedPrune-build ${CMAKE_COMMAND} --build .)
+    if(XCODE_VERSION VERSION_LESS 12)
+      run_cmake_command(XcodeIOSInstallCombinedPrune-install ${CMAKE_COMMAND} --build . --target install)
+    endif()
+    # --build defaults to Debug, --install defaults to Release, so we have to
+    # specify the configuration explicitly
+    run_cmake_command(XcodeIOSInstallCombinedPrune-cmakeinstall
+      ${CMAKE_COMMAND} --install . --config Debug
+    )
+
+    unset(RunCMake_TEST_BINARY_DIR)
+    unset(RunCMake_TEST_NO_CLEAN)
+    unset(RunCMake_TEST_OPTIONS)
   endif()
-  # --build defaults to Debug, --install defaults to Release, so we have to
-  # specify the configuration explicitly
-  run_cmake_command(XcodeIOSInstallCombinedPrune-cmakeinstall
-    ${CMAKE_COMMAND} --install . --config Debug
-  )
-
-  unset(RunCMake_TEST_BINARY_DIR)
-  unset(RunCMake_TEST_NO_CLEAN)
-  unset(RunCMake_TEST_OPTIONS)
 
   # XcodeIOSInstallCombinedSingleArch
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/XcodeIOSInstallCombinedSingleArch-build)
