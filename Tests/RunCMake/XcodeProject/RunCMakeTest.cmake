@@ -1,5 +1,13 @@
 include(RunCMake)
 
+function(RunClean)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/Clean-build)
+  run_cmake(Clean)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(Clean-build xcodebuild clean)
+endfunction()
+RunClean()
+
 run_cmake(ExplicitCMakeLists)
 run_cmake(ImplicitCMakeLists)
 run_cmake(InterfaceLibSources)
