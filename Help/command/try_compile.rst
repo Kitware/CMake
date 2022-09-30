@@ -214,7 +214,7 @@ The options are:
   ``SOURCE_FROM_*``. (Otherwise, ``SOURCES`` is usually more convenient.) The
   specified ``<name>`` is not allowed to contain path components.
 
-``SOURCE_FROM_VAR <name> <content>``
+``SOURCE_FROM_VAR <name> <var>``
   .. versionadded:: 3.25
 
   Write the contents of ``<var>`` to a file named ``<name>`` in the operation
