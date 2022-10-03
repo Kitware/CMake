@@ -2,7 +2,11 @@ cmake_minimum_required(VERSION 3.3)
 
 project(XcodeIOSInstallCombinedSingleArch CXX)
 
-if(XCODE_VERSION VERSION_GREATER_EQUAL 9)
+set(iphoneos_arch armv7)
+if(XCODE_VERSION VERSION_GREATER_EQUAL 14)
+  set(CMAKE_OSX_DEPLOYMENT_TARGET 16)
+  set(iphoneos_arch arm64)
+elseif(XCODE_VERSION VERSION_GREATER_EQUAL 9)
   set(CMAKE_OSX_DEPLOYMENT_TARGET 10)
 endif()
 
@@ -17,8 +21,8 @@ install(TARGETS foo DESTINATION lib)
 set_target_properties(
   foo
   PROPERTIES
-  XCODE_ATTRIBUTE_ARCHS[sdk=iphoneos*] armv7
-  XCODE_ATTRIBUTE_VALID_ARCHS[sdk=iphoneos*] armv7
+  XCODE_ATTRIBUTE_ARCHS[sdk=iphoneos*] ${iphoneos_arch}
+  XCODE_ATTRIBUTE_VALID_ARCHS[sdk=iphoneos*] ${iphoneos_arch}
   XCODE_ATTRIBUTE_ARCHS[sdk=iphonesimulator*] ""
   XCODE_ATTRIBUTE_VALID_ARCHS[sdk=iphonesimulator*] ""
 )
