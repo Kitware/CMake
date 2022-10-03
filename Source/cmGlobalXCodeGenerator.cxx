@@ -2404,8 +2404,13 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
 
   // Add preprocessor definitions for this target and configuration.
   BuildObjectListOrString ppDefs(this, true);
-  this->AppendDefines(
-    ppDefs, "CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"");
+  if (languages.count("Swift")) {
+    // FIXME: Xcode warns that Swift does not support definition values.
+    // C/CXX sources mixed in Swift targets will not see CMAKE_INTDIR.
+  } else {
+    this->AppendDefines(
+      ppDefs, "CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"");
+  }
   if (const std::string* exportMacro = gtgt->GetExportMacro()) {
     // Add the export symbol definition for shared library objects.
     this->AppendDefines(ppDefs, exportMacro->c_str());
