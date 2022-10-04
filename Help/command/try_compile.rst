@@ -102,9 +102,9 @@ contain something like the following:
   target_link_options(cmTryCompileExec PRIVATE <LINK_OPTIONS from caller>)
   target_link_libraries(cmTryCompileExec ${LINK_LIBRARIES})
 
-CMake will automatically generate a unique directory for each ``try_compile``
-operation in an unspecified location within the project's binary directory.
-These directories will be cleaned automatically unless
+CMake automatically generates, for each ``try_compile`` operation, a
+unique directory under ``${CMAKE_BINARY_DIR}/CMakeFiles/CMakeScratch``
+with an unspecified name.  These directories are cleaned automatically unless
 :option:`--debug-trycompile <cmake --debug-trycompile>` is passed to ``cmake``.
 Such directories from previous runs are also unconditionally cleaned at the
 beginning of any ``cmake`` execution.

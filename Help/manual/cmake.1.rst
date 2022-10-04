@@ -278,15 +278,19 @@ Options
 
 .. option:: --debug-trycompile
 
- Do not delete the :command:`try_compile` build tree.
- Only useful on one :command:`try_compile` at a time.
+ Do not delete the the files and directories created for
+ :command:`try_compile` / :command:`try_run` calls.
+ This is useful in debugging failed checks.
 
- Do not delete the files and directories created for :command:`try_compile`
- calls.  This is useful in debugging failed try_compiles.  It may
- however change the results of the try-compiles as old junk from a
- previous try-compile may cause a different test to either pass or
- fail incorrectly.  This option is best used for one try-compile at a
- time, and only when debugging.
+ Note that some uses of :command:`try_compile` may use the same build tree,
+ which will limit the usefulness of this option if a project executes more
+ than one :command:`try_compile`.  For example, such uses may change results
+ as artifacts from a previous try-compile may cause a different test to either
+ pass or fail incorrectly.  This option is best used only when debugging.
+
+ (With respect to the preceding, the :command:`try_run` command
+ is effectively a :command:`try_compile`.  Any combination of the two
+ is subject to the potential issues described.)
 
 .. option:: --debug-output
 
