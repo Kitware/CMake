@@ -5,7 +5,6 @@
 
 #include <cctype>
 #include <cstdio>
-#include <iostream>
 #include <utility>
 
 #include <cm/optional>
@@ -279,27 +278,6 @@ bool cmScanDepFormat_P1689_Parse(std::string const& arg_pp,
           }
 
           info->Requires.push_back(require_info);
-        }
-      }
-
-      // MSVC 17.3 toolchain bug. Remove when 17.4 is available.
-      if (rule.isMember("is-interface")) {
-        std::cerr
-          << "warning: acknowledging an VS 17.3 toolchain bug; accepting "
-             "until a new release which fixes it is available"
-          << std::endl;
-
-        Json::Value const& is_interface_json = rule["is-interface"];
-        if (!is_interface_json.isBool()) {
-          cmSystemTools::Error(
-            cmStrCat("-E cmake_ninja_dyndep failed to parse ", arg_pp,
-                     ": is-interface is not a boolean"));
-          return false;
-        }
-        bool is_interface = is_interface_json.asBool();
-
-        for (auto& provide : info->Provides) {
-          provide.IsInterface = is_interface;
         }
       }
     }
