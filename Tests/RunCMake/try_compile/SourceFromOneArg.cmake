@@ -1,1 +1,1 @@
-try_compile(RESULT SOURCE_FROM_ARG test.c)
+try_compile(RESULT SOURCE_FROM_CONTENT test.c)

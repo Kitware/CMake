@@ -173,7 +173,7 @@ auto const TryCompileBaseSourcesArgParser =
 
 auto const TryCompileBaseNewSourcesArgParser =
   cmArgumentParser<Arguments>{ TryCompileBaseSourcesArgParser }
-    .Bind("SOURCE_FROM_ARG"_s, &Arguments::SourceFromArg)
+    .Bind("SOURCE_FROM_CONTENT"_s, &Arguments::SourceFromContent)
     .Bind("SOURCE_FROM_VAR"_s, &Arguments::SourceFromVar)
     .Bind("SOURCE_FROM_FILE"_s, &Arguments::SourceFromFile)
   /* keep semicolon on own line */;
@@ -402,10 +402,11 @@ bool cmCoreTryCompile::TryCompileCode(Arguments& arguments,
   }
 
   if (this->SrcFileSignature) {
-    if (arguments.SourceFromArg && arguments.SourceFromArg->size() % 2) {
+    if (arguments.SourceFromContent &&
+        arguments.SourceFromContent->size() % 2) {
       this->Makefile->IssueMessage(
         MessageType::FATAL_ERROR,
-        "SOURCE_FROM_ARG requires exactly two arguments");
+        "SOURCE_FROM_CONTENT requires exactly two arguments");
       return false;
     }
     if (arguments.SourceFromVar && arguments.SourceFromVar->size() % 2) {
@@ -476,12 +477,12 @@ bool cmCoreTryCompile::TryCompileCode(Arguments& arguments,
     } else if (arguments.SourceDirectoryOrFile) {
       sources.emplace_back(*arguments.SourceDirectoryOrFile);
     }
-    if (arguments.SourceFromArg) {
-      auto const k = arguments.SourceFromArg->size();
+    if (arguments.SourceFromContent) {
+      auto const k = arguments.SourceFromContent->size();
       for (auto i = decltype(k){ 0 }; i < k; i += 2) {
-        const auto& name = (*arguments.SourceFromArg)[i + 0];
-        const auto& content = (*arguments.SourceFromArg)[i + 1];
-        auto out = this->WriteSource(name, content, "SOURCES_FROM_ARG");
+        const auto& name = (*arguments.SourceFromContent)[i + 0];
+        const auto& content = (*arguments.SourceFromContent)[i + 1];
+        auto out = this->WriteSource(name, content, "SOURCE_FROM_CONTENT");
         if (out.empty()) {
           return false;
         }
@@ -494,7 +495,7 @@ bool cmCoreTryCompile::TryCompileCode(Arguments& arguments,
         const auto& name = (*arguments.SourceFromVar)[i + 0];
         const auto& var = (*arguments.SourceFromVar)[i + 1];
         const auto& content = this->Makefile->GetDefinition(var);
-        auto out = this->WriteSource(name, content, "SOURCES_FROM_VAR");
+        auto out = this->WriteSource(name, content, "SOURCE_FROM_VAR");
         if (out.empty()) {
           return false;
         }

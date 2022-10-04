@@ -41,7 +41,7 @@ public:
     cm::optional<std::string> TargetName;
     cm::optional<ArgumentParser::NonEmpty<std::vector<std::string>>> Sources;
     cm::optional<ArgumentParser::NonEmpty<std::vector<std::string>>>
-      SourceFromArg;
+      SourceFromContent;
     cm::optional<ArgumentParser::NonEmpty<std::vector<std::string>>>
       SourceFromVar;
     cm::optional<ArgumentParser::NonEmpty<std::vector<std::string>>>
