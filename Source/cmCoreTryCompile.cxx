@@ -1050,6 +1050,13 @@ bool cmCoreTryCompile::TryCompileCode(Arguments& arguments,
     }
   }
 
+  if (this->Makefile->GetCMakeInstance()->GetDebugTryCompile()) {
+    auto msg =
+      cmStrCat("Executing try_compile (", *arguments.CompileResultVariable,
+               ") in:\n  ", this->BinaryDirectory);
+    this->Makefile->IssueMessage(MessageType::LOG, msg);
+  }
+
   bool erroroc = cmSystemTools::GetErrorOccurredFlag();
   cmSystemTools::ResetErrorOccurredFlag();
   std::string output;
