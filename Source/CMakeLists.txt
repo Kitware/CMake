@@ -766,7 +766,7 @@ target_link_libraries(
 if(CMake_USE_MACH_PARSER)
   target_sources(
     CMakeLib
-    PUBLIC
+    PRIVATE
       cmMachO.h
       cmMachO.cxx
     )
@@ -776,7 +776,7 @@ endif()
 if(CMake_USE_XCOFF_PARSER)
   target_sources(
     CMakeLib
-    PUBLIC
+    PRIVATE
       cmXCOFF.h
       cmXCOFF.cxx
     )
@@ -786,7 +786,7 @@ endif()
 if(APPLE)
   target_sources(
     CMakeLib
-    PUBLIC
+    PRIVATE
       cmXCodeObject.cxx
       cmXCode21Object.cxx
       cmXCodeScheme.cxx
@@ -800,7 +800,7 @@ endif()
 if(WIN32)
   target_sources(
     CMakeLib
-    PUBLIC
+    PRIVATE
       cmCallVisualStudioMacro.cxx
       cmCallVisualStudioMacro.h
     )
@@ -808,7 +808,7 @@ if(WIN32)
   if(NOT UNIX)
     target_sources(
       CMakeLib
-      PUBLIC
+      PRIVATE
         cmGlobalBorlandMakefileGenerator.cxx
         cmGlobalBorlandMakefileGenerator.h
         cmGlobalMSYSMakefileGenerator.cxx
@@ -871,7 +871,7 @@ endif()
 if(CMAKE_USE_WMAKE)
   target_sources(
     CMakeLib
-    PUBLIC
+    PRIVATE
       cmGlobalWatcomWMakeGenerator.cxx
       cmGlobalWatcomWMakeGenerator.h
     )
@@ -882,7 +882,7 @@ endif()
 if(WIN32 OR CMAKE_SYSTEM_NAME STREQUAL "Linux")
   target_sources(
     CMakeLib
-    PUBLIC
+    PRIVATE
       cmGlobalGhsMultiGenerator.cxx
       cmGlobalGhsMultiGenerator.h
       cmLocalGhsMultiGenerator.cxx
@@ -1045,7 +1045,7 @@ option(CPACK_ENABLE_FREEBSD_PKG "Add FreeBSD pkg(8) generator to CPack." OFF)
 if(UNIX)
   target_sources(
     CPackLib
-    PUBLIC
+    PRIVATE
       CPack/cmCPackRPMGenerator.cxx
     )
 
@@ -1063,7 +1063,7 @@ if(UNIX)
         DOC "FreeBSD pkg(8) library")
       if(FREEBSD_PKG_LIBRARIES)
         set(ENABLE_BUILD_FREEBSD_PKG 1)
-        target_sources(CPackLib PUBLIC CPack/cmCPackFreeBSDGenerator.cxx)
+        target_sources(CPackLib PRIVATE CPack/cmCPackFreeBSDGenerator.cxx)
         target_include_directories(CPackLib PUBLIC ${FREEBSD_PKG_INCLUDE_DIRS})
         target_link_libraries(CPackLib PUBLIC ${FREEBSD_PKG_LIBRARIES})
       endif()
@@ -1081,7 +1081,7 @@ endif()
 if(CYGWIN)
   target_sources(
     CPackLib
-    PUBLIC
+    PRIVATE
       CPack/cmCPackCygwinBinaryGenerator.cxx
       CPack/cmCPackCygwinSourceGenerator.cxx
     )
@@ -1092,7 +1092,7 @@ if(WIN32 OR (CYGWIN AND TARGET LibUUID::LibUUID))
   set(ENABLE_BUILD_WIX_GENERATOR 1)
   target_sources(
     CPackLib
-    PUBLIC
+    PRIVATE
       CPack/WiX/cmCMakeToWixPath.cxx
       CPack/WiX/cmCMakeToWixPath.h
       CPack/WiX/cmCPackWIXGenerator.cxx
@@ -1122,7 +1122,7 @@ endif()
 if(APPLE)
   target_sources(
     CPackLib
-    PUBLIC
+    PRIVATE
       CPack/cmCPackBundleGenerator.cxx
       CPack/cmCPackDragNDropGenerator.cxx
       CPack/cmCPackPKGGenerator.cxx
