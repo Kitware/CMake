@@ -460,21 +460,21 @@ that may contain the following fields:
 
 ``jobs``
   An optional integer. Equivalent to passing
-  :option:`--parallel <cmake --parallel>` or ``-j`` on the command line.
+  :option:`--parallel <cmake--build --parallel>` or ``-j`` on the command line.
 
 ``targets``
   An optional string or array of strings. Equivalent to passing
-  :option:`--target <cmake --target>` or ``-t`` on the command line.
+  :option:`--target <cmake--build --target>` or ``-t`` on the command line.
   Vendors may ignore the targets property or hide build presets that
   explicitly specify targets. This field supports macro expansion.
 
 ``configuration``
-  An optional string. Equivalent to passing :option:`--config <cmake --config>`
-  on the command line.
+  An optional string. Equivalent to passing
+  :option:`--config <cmake--build --config>` on the command line.
 
 ``cleanFirst``
   An optional bool. If true, equivalent to passing
-  :option:`--clean-first <cmake --clean-first>` on the command line.
+  :option:`--clean-first <cmake--build --clean-first>` on the command line.
 
 ``resolvePackageReferences``
   An optional string that specifies the package resolve mode. This is
@@ -498,7 +498,7 @@ that may contain the following fields:
   .. note::
 
     The command line parameter
-    :option:`--resolve-package-references <cmake --resolve-package-references>`
+    :option:`--resolve-package-references <cmake--build --resolve-package-references>`
     will take priority over this setting. If the command line parameter is not
     provided and this setting is not specified, an environment-specific cache
     variable will be evaluated to decide, if package restoration should be
@@ -512,7 +512,7 @@ that may contain the following fields:
 
 ``verbose``
   An optional bool. If true, equivalent to passing
-  :option:`--verbose <cmake --verbose>` on the command line.
+  :option:`--verbose <cmake--build --verbose>` on the command line.
 
 ``nativeToolOptions``
   An optional array of strings. Equivalent to passing options after ``--``
@@ -980,6 +980,8 @@ fields:
 
 ``vendorName``
   An optional string representing the vendor name.
+
+.. _`Workflow Preset`:
 
 Workflow Preset
 ^^^^^^^^^^^^^^^
