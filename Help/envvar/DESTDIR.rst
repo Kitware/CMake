@@ -22,7 +22,7 @@ See the :variable:`CMAKE_INSTALL_PREFIX` variable to control the
 installation prefix when configuring a build tree.  Or, when using
 the :manual:`cmake(1)` command-line tool's :option:`--install <cmake --install>`
 mode, one may specify a different prefix using the
-:option:`--prefix <cmake --prefix>` option.
+:option:`--prefix <cmake--install --prefix>` option.
 
 .. note::
 

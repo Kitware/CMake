@@ -511,7 +511,7 @@ command associated with the
 the build tool configured by the user.
 
 The :option:`--build <cmake --build>` mode also accepts
-the parameter :option:`--target <cmake --target>` to
+the parameter :option:`--target <cmake--build --target>` to
 specify a particular target to build, for example a
 particular library, executable or custom target, or a
 particular special target like ``install``:
@@ -521,7 +521,7 @@ particular special target like ``install``:
   $ cmake --build . --target myexe
 
 The :option:`--build <cmake --build>` mode also accepts a
-:option:`--config <cmake --config>` parameter
+:option:`--config <cmake--build --config>` parameter
 in the case of multi-config generators to specify which
 particular configuration to build:
 
@@ -529,13 +529,13 @@ particular configuration to build:
 
   $ cmake --build . --target myexe --config Release
 
-The :option:`--config <cmake --config>` option has no
+The :option:`--config <cmake--build --config>` option has no
 effect if the generator generates a buildsystem specific
 to a configuration which is chosen when invoking cmake
 with the :variable:`CMAKE_BUILD_TYPE` variable.
 
 Some buildsystems omit details of command lines invoked
-during the build.  The :option:`-verbose <cmake --verbose>`
+during the build.  The :option:`--verbose <cmake--build --verbose>`
 flag can be used to cause those command lines to be shown:
 
 .. code-block:: console

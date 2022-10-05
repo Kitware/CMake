@@ -516,6 +516,8 @@ Options
 Build a Project
 ===============
 
+.. program:: cmake
+
 CMake provides a command-line signature to build an already-generated
 project binary tree:
 
@@ -531,6 +533,8 @@ following options:
 
   Project binary directory to be built.  This is required (unless a preset
   is specified) and must be first.
+
+.. program:: cmake--build
 
 .. option:: --preset <preset>, --preset=<preset>
 
@@ -567,7 +571,7 @@ following options:
 .. option:: --clean-first
 
   Build target ``clean`` first, then build.
-  (To clean only, use :option:`--target clean <cmake --target>`.)
+  (To clean only, use :option:`--target clean <cmake--build --target>`.)
 
 .. option:: --resolve-package-references=<value>
 
@@ -616,6 +620,8 @@ Run :option:`cmake --build` with no options for quick help.
 Install a Project
 =================
 
+.. program:: cmake
+
 CMake provides a command-line signature to install an already-generated
 project binary tree:
 
@@ -630,6 +636,8 @@ The options are:
 .. option:: --install <dir>
 
   Project binary directory to install. This is required and must be first.
+
+.. program:: cmake--install
 
 .. option:: --config <cfg>
 
@@ -662,6 +670,8 @@ Run :option:`cmake --install` with no options for quick help.
 Open a Project
 ==============
 
+.. program:: cmake
+
 .. code-block:: shell
 
   cmake --open <dir>
@@ -675,15 +685,19 @@ supported by some generators.
 Run a Script
 ============
 
-.. program:: cmake_P
+.. program:: cmake
 
 .. code-block:: shell
 
   cmake [-D <var>=<value>]... -P <cmake-script-file> [-- <unparsed-options>...]
 
+.. program:: cmake-P
+
 .. option:: -D <var>=<value>
 
  Define a variable for script mode.
+
+.. program:: cmake
 
 .. option:: -P <cmake-script-file>
 
@@ -702,7 +716,7 @@ script (including the ``--`` itself).
 Run a Command-Line Tool
 =======================
 
-.. program:: cmake_E
+.. program:: cmake
 
 CMake provides builtin command-line tools through the signature
 
@@ -713,6 +727,8 @@ CMake provides builtin command-line tools through the signature
 .. option:: -E [help]
 
   Run ``cmake -E`` or ``cmake -E help`` for a summary of commands.
+
+.. program:: cmake-E
 
 Available commands are:
 
@@ -1169,6 +1185,8 @@ The following ``cmake -E`` commands are available only on Windows:
 Run the Find-Package Tool
 =========================
 
+.. program:: cmake--find-package
+
 CMake provides a pkg-config like helper for Makefile-based projects:
 
 .. code-block:: shell
@@ -1189,8 +1207,22 @@ autoconf-based projects (via ``share/aclocal/cmake.m4``).
 Run a Workflow Preset
 =====================
 
+.. program:: cmake
+
 :manual:`CMake Presets <cmake-presets(7)>` provides a way to execute multiple
 build steps in order:
+
+.. code-block:: shell
+
+  cmake --workflow [<options>]
+
+The options are:
+
+.. option:: --workflow
+
+  Select a :ref:`Workflow Preset` using one of the following options.
+
+.. program:: cmake--workflow
 
 .. option:: --preset <preset>, --preset=<preset>
 
@@ -1207,6 +1239,8 @@ build steps in order:
 View Help
 =========
 
+.. program:: cmake
+
 To print selected pages from the CMake documentation, use
 
 .. code-block:: shell
@@ -1214,8 +1248,6 @@ To print selected pages from the CMake documentation, use
   cmake --help[-<topic>]
 
 with one of the following options:
-
-.. program:: cmake
 
 .. include:: OPTIONS_HELP.txt
 
