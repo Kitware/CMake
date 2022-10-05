@@ -28,5 +28,5 @@ if(CMake_TEST_HIP)
 endif()
 
 if(APPLE)
-  run_cmake_with_options(HeaderpadWorkaround --debug-trycompile)
+  run_cmake(HeaderpadWorkaround)
 endif()
