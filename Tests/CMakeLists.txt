@@ -3616,6 +3616,14 @@ if(BUILD_TESTING)
     add_subdirectory(CMakeGUI)
   endif()
 
+  # Run CheckSourceTree as the very last test in the CMake/CTest/CPack test
+  # suite. It detects if any changes have been made to the CMake source tree
+  # by any previous configure, build or test steps.
+  if(GIT_EXECUTABLE AND EXISTS "${CMake_SOURCE_DIR}/.git"
+      AND NOT "${CMake_SOURCE_DIR}" STREQUAL "${CMake_BINARY_DIR}")
+    add_subdirectory(CheckSourceTree)
+  endif()
+
   # If this is not an in-source build, provide a target to wipe out
   # all the test build directories. This must come at the end after
   # all the above logic has finished adding to TEST_BUILD_DIRS
