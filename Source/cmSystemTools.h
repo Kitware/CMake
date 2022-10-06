@@ -595,14 +595,16 @@ public:
   /** Create a symbolic link if the platform supports it.  Returns whether
       creation succeeded. */
   static cmsys::Status CreateSymlink(std::string const& origName,
-                                     std::string const& newName,
-                                     std::string* errorMessage = nullptr);
+                                     std::string const& newName);
+  static cmsys::Status CreateSymlinkQuietly(std::string const& origName,
+                                            std::string const& newName);
 
   /** Create a hard link if the platform supports it.  Returns whether
       creation succeeded. */
   static cmsys::Status CreateLink(std::string const& origName,
-                                  std::string const& newName,
-                                  std::string* errorMessage = nullptr);
+                                  std::string const& newName);
+  static cmsys::Status CreateLinkQuietly(std::string const& origName,
+                                         std::string const& newName);
 
   /** Get the system name. */
   static cm::string_view GetSystemName();

@@ -1700,16 +1700,15 @@ cmsys::Status cmcmd::SymlinkInternal(std::string const& file,
   }
   std::string linktext = cmSystemTools::GetFilenameName(file);
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  std::string errorMessage;
-  cmsys::Status status =
-    cmSystemTools::CreateSymlink(linktext, link, &errorMessage);
+  cmsys::Status status = cmSystemTools::CreateSymlinkQuietly(linktext, link);
   // Creating a symlink will fail with ERROR_PRIVILEGE_NOT_HELD if the user
   // does not have SeCreateSymbolicLinkPrivilege, or if developer mode is not
   // active. In that case, we try to copy the file.
   if (status.GetWindows() == ERROR_PRIVILEGE_NOT_HELD) {
     status = cmSystemTools::CopyFileAlways(file, link);
   } else if (!status) {
-    cmSystemTools::Error(errorMessage);
+    cmSystemTools::Error(cmStrCat("failed to create symbolic link '", link,
+                                  "': ", status.GetString()));
   }
   return status;
 #else
