@@ -235,7 +235,7 @@ if(FALSE) # CMake's bootstrap binary does not support automoc
 else()
   target_sources(
     CMakeGUILib
-    PUBLIC
+    PRIVATE
       ${UI_BUILT_SRCS}
       ${MOC_BUILT_SRCS}
   )
