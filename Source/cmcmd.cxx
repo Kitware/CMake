@@ -360,17 +360,29 @@ int HandleIWYU(const std::string& runCmd, const std::string& /* sourceFile */,
 int HandleTidy(const std::string& runCmd, const std::string& sourceFile,
                const std::vector<std::string>& orig_cmd)
 {
-  // Construct the clang-tidy command line by taking what was given
-  // and adding our compiler command line.  The clang-tidy tool will
-  // automatically skip over the compiler itself and extract the
-  // options.
-  int ret;
   std::vector<std::string> tidy_cmd = cmExpandedList(runCmd, true);
   tidy_cmd.push_back(sourceFile);
-  tidy_cmd.emplace_back("--");
-  cm::append(tidy_cmd, orig_cmd);
+
+  // clang-tidy supports working out the compile commands from a
+  // compile_commands.json file in a directory given by a "-p" option, or by
+  // passing the compiler command line arguments after --. When the latter
+  // strategy is used and the build is using a compiler other than the system
+  // default, clang-tidy may erroneously use the system default compiler's
+  // headers instead of those from the custom compiler. It doesn't do that if
+  // given a compile_commands.json to work with instead, so prefer to use the
+  // compile_commands.json file when "-p" is present.
+  if (!cm::contains(tidy_cmd.cbegin(), tidy_cmd.cend() - 1, "-p")) {
+    // Construct the clang-tidy command line by taking what was given
+    // and adding our compiler command line.  The clang-tidy tool will
+    // automatically skip over the compiler itself and extract the
+    // options. If the compiler is a custom compiler, clang-tidy might
+    // not correctly handle that with this approach.
+    tidy_cmd.emplace_back("--");
+    cm::append(tidy_cmd, orig_cmd);
+  }
 
   // Run the tidy command line.  Capture its stdout and hide its stderr.
+  int ret;
   std::string stdOut;
   std::string stdErr;
   if (!cmSystemTools::RunSingleCommand(tidy_cmd, &stdOut, &stdErr, &ret,
