@@ -3584,6 +3584,9 @@ int cmMakefile::TryCompile(const std::string& srcdir,
   gg->RecursionDepth = this->RecursionDepth;
   cm.SetGlobalGenerator(std::move(gg));
 
+  // copy trace state
+  cm.SetTraceRedirect(this->GetCMakeInstance());
+
   // do a configure
   cm.SetHomeDirectory(srcdir);
   cm.SetHomeOutputDirectory(bindir);
