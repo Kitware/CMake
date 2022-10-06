@@ -504,11 +504,12 @@ bool cmFileCopier::InstallSymlinkChain(std::string& fromFile,
       cmSystemTools::RemoveFile(toFile);
       cmSystemTools::MakeDirectory(toFilePath);
 
-      if (!cmSystemTools::CreateSymlink(symlinkTarget, toFile)) {
-        std::ostringstream e;
-        e << this->Name << " cannot create symlink \"" << toFile
-          << "\": " << cmSystemTools::GetLastSystemError() << ".";
-        this->Status.SetError(e.str());
+      cmsys::Status status =
+        cmSystemTools::CreateSymlinkQuietly(symlinkTarget, toFile);
+      if (!status) {
+        std::string e = cmStrCat(this->Name, " cannot create symlink\n  ",
+                                 toFile, "\nbecause: ", status.GetString());
+        this->Status.SetError(e);
         return false;
       }
     }
@@ -557,12 +558,13 @@ bool cmFileCopier::InstallSymlink(const std::string& fromFile,
     cmSystemTools::MakeDirectory(cmSystemTools::GetFilenamePath(toFile));
 
     // Create the symlink.
-    if (!cmSystemTools::CreateSymlink(symlinkTarget, toFile)) {
-      std::ostringstream e;
-      e << this->Name << " cannot duplicate symlink \"" << fromFile
-        << "\" at \"" << toFile
-        << "\": " << cmSystemTools::GetLastSystemError() << ".";
-      this->Status.SetError(e.str());
+    cmsys::Status status =
+      cmSystemTools::CreateSymlinkQuietly(symlinkTarget, toFile);
+    if (!status) {
+      std::string e =
+        cmStrCat(this->Name, " cannot duplicate symlink\n  ", fromFile,
+                 "\nat\n  ", toFile, "\nbecause: ", status.GetString());
+      this->Status.SetError(e);
       return false;
     }
   }
