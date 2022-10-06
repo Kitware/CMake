@@ -1,0 +1,11 @@
+^CMake Debug Log at [^
+]*/Modules/CMakeDetermineCompilerABI.cmake:[0-9]+ \(try_compile\):
+  Executing try_compile \(CMAKE_C_ABI_COMPILED\) in:
+
+    [^
+]*/Tests/RunCMake/try_compile/PlatformVariables-build/CMakeFiles/CMakeScratch/TryCompile-[^/]+
+Call Stack \(most recent call first\):
+  [^
+]*/Modules/CMakeTestCCompiler.cmake:[0-9]+ \(CMAKE_DETERMINE_COMPILER_ABI\)
+  PlatformVariables.cmake:[0-9]+ \(enable_language\)
+  CMakeLists.txt:[0-9]+ \(include\)

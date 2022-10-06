@@ -292,6 +292,11 @@ Options
  is effectively a :command:`try_compile`.  Any combination of the two
  is subject to the potential issues described.)
 
+ .. versionadded:: 3.25
+
+   When this option is enabled, every try-compile check prints a log
+   message reporting the directory in which the check is performed.
+
 .. option:: --debug-output
 
  Put cmake in a debug mode.
