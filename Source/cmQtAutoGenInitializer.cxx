@@ -1792,13 +1792,16 @@ void cmQtAutoGenInitializer::AddGeneratedSource(ConfigString const& filename,
   // XXX(xcode-per-cfg-src): Drop the Xcode-specific part of the condition
   // when the Xcode generator supports per-config sources.
   if (!this->MultiConfig || this->GlobalGen->IsXcode()) {
-    this->AddGeneratedSource(filename.Default, genVars, prepend);
+    cmSourceFile* sf =
+      this->AddGeneratedSource(filename.Default, genVars, prepend);
+    handleSkipPch(sf);
     return;
   }
   for (auto const& cfg : this->ConfigsList) {
     std::string const& filenameCfg = filename.Config.at(cfg);
     // Register source at makefile
-    this->RegisterGeneratedSource(filenameCfg);
+    cmSourceFile* sf = this->RegisterGeneratedSource(filenameCfg);
+    handleSkipPch(sf);
     // Add source file to target for this configuration.
     this->GenTarget->AddSource(
       cmStrCat("$<$<CONFIG:"_s, cfg, ">:"_s, filenameCfg, ">"_s), prepend);
@@ -2157,4 +2160,19 @@ bool cmQtAutoGenInitializer::GetQtExecutable(GenVarsT& genVars,
   }
 
   return true;
+}
+
+void cmQtAutoGenInitializer::handleSkipPch(cmSourceFile* sf)
+{
+  bool skipPch = true;
+  for (auto const& pair : this->AutogenTarget.Sources) {
+    if (!pair.first->GetIsGenerated() &&
+        !pair.first->GetProperty("SKIP_PRECOMPILE_HEADERS")) {
+      skipPch = false;
+    }
+  }
+
+  if (skipPch) {
+    sf->SetProperty("SKIP_PRECOMPILE_HEADERS", "ON");
+  }
 }
