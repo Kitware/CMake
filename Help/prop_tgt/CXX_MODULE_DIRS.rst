@@ -1,6 +1,8 @@
 CXX_MODULE_DIRS
 ---------------
 
+.. versionadded:: 3.25
+
 .. note ::
 
   Experimental. Gated by ``CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API``
