@@ -1,6 +1,0 @@
-p1689r5
--------
-
-* C++ module scanning now supports the latest revision, `P1689R5`_.
-
-.. _`P1689r5`: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p1689r5.html
