@@ -1,14 +1,9 @@
 enable_language (OBJCXX)
-include(CheckOBJCXXSourceCompiles)
+include(CheckSourceRuns)
 
 set(OBJCXX 1) # test that this is tolerated
 
-check_objcxx_source_compiles("I don't build in Objective-C++" SHOULD_FAIL)
-if(SHOULD_FAIL)
-  message(SEND_ERROR "invalid OBJCXX source didn't fail.")
-endif()
-
-check_objcxx_source_compiles([[
+check_source_runs(OBJCXX [[
   #include <vector>
   #import <Foundation/Foundation.h>
   int main() {

@@ -6,24 +6,28 @@ run_cmake(UnknownArgument)
 
 run_cmake(CheckCSourceCompiles)
 run_cmake(CheckCXXSourceCompiles)
+run_cmake(CheckSourceCompilesC)
+run_cmake(CheckSourceCompilesCXX)
 
 if (APPLE)
   run_cmake(CheckOBJCSourceCompiles)
   run_cmake(CheckOBJCXXSourceCompiles)
+  run_cmake(CheckSourceCompilesOBJC)
+  run_cmake(CheckSourceCompilesOBJCXX)
 endif()
 
 if (CMAKE_Fortran_COMPILER_ID)
-  run_cmake(CheckFortranSourceCompiles)
+  run_cmake(CheckSourceCompilesFortran)
 endif()
 
 if (CMake_TEST_CUDA)
-  run_cmake(CheckCUDASourceCompiles)
+  run_cmake(CheckSourceCompilesCUDA)
 endif()
 
 if(CMake_TEST_ISPC)
-  run_cmake(CheckISPCSourceCompiles)
+  run_cmake(CheckSourceCompilesISPC)
 endif()
 
 if(CMake_TEST_HIP)
-  run_cmake(CheckHIPSourceCompiles)
+  run_cmake(CheckSourceCompilesHIP)
 endif()

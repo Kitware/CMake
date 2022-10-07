@@ -1,9 +1,14 @@
 enable_language (OBJC)
-include(CheckSourceCompiles)
+include(CheckOBJCSourceCompiles)
 
 set(OBJC 1) # test that this is tolerated
 
-check_source_compiles(OBJC [[
+check_objc_source_compiles("I don't build in Objective-C" SHOULD_FAIL)
+if(SHOULD_FAIL)
+  message(SEND_ERROR "invalid OBJC source didn't fail.")
+endif()
+
+check_objc_source_compiles([[
   #import <Foundation/Foundation.h>
   int main() {
     NSObject *foo;
