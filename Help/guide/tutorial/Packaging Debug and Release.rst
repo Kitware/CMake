@@ -41,7 +41,7 @@ Let's also add version numbering to the ``MathFunctions`` library. In
   :name: MathFunctions/CMakeLists.txt-VERSION-properties
   :language: cmake
   :start-after: # setup the version numbering
-  :end-before: # install rules
+  :end-before: # install libs
 
 From the ``Step12`` directory, create ``debug`` and ``release``
 subdirectories. The layout will look like:

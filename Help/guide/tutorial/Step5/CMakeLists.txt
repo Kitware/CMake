@@ -38,3 +38,27 @@ target_link_libraries(Tutorial PUBLIC ${EXTRA_LIBS} tutorial_compiler_flags)
 target_include_directories(Tutorial PUBLIC
                            "${PROJECT_BINARY_DIR}"
                            )
+
+# TODO 3: Install Tutorial in the bin directory
+# Hint: Use the TARGETS and DESTINATION parameters
+
+# TODO 4: Install Tutorial.h to the include directory
+# Hint: Use the FILES and DESTINATION parameters
+
+# TODO 5: Enable testing
+
+# TODO 6: Add a test called Runs which runs the following command:
+# $ Tutorial 25
+
+# TODO 7: Add a test called Usage which runs the following command:
+# $ Tutorial
+# Make sure the expected output is displayed.
+# Hint: Use the PASS_REGULAR_EXPRESSION property with "Usage.*number"
+
+# TODO 8: Add a test which runs the following command:
+# $ Tutorial 4
+# Make sure the result is correct.
+# Hint: Use the PASS_REGULAR_EXPRESSION property with "4 is 2"
+
+# TODO 9: Add more tests. Create a function called do_test to avoid copy +
+# paste. Test the following values: 4, 9, 5, 7, 25, -25 and 0.00001.

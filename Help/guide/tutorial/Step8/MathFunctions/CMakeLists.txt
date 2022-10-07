@@ -32,7 +32,8 @@ if(HAVE_LOG AND HAVE_EXP)
                              PRIVATE "HAVE_LOG" "HAVE_EXP")
 endif()
 
-# install rules
+# install libs
 set(installable_libs MathFunctions tutorial_compiler_flags)
 install(TARGETS ${installable_libs} DESTINATION lib)
+# install include headers
 install(FILES MathFunctions.h DESTINATION include)
