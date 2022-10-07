@@ -2960,11 +2960,23 @@ bool HandleCreateLinkCommand(std::vector<std::string> const& args,
 
   // Check if the command requires a symbolic link.
   if (arguments.Symbolic) {
-    completed = static_cast<bool>(
-      cmSystemTools::CreateSymlink(fileName, newFileName, &result));
+    cmsys::Status linked =
+      cmSystemTools::CreateSymlinkQuietly(fileName, newFileName);
+    if (linked) {
+      completed = true;
+    } else {
+      result = cmStrCat("failed to create symbolic link '", newFileName,
+                        "': ", linked.GetString());
+    }
   } else {
-    completed = static_cast<bool>(
-      cmSystemTools::CreateLink(fileName, newFileName, &result));
+    cmsys::Status linked =
+      cmSystemTools::CreateLinkQuietly(fileName, newFileName);
+    if (linked) {
+      completed = true;
+    } else {
+      result = cmStrCat("failed to create link '", newFileName,
+                        "': ", linked.GetString());
+    }
   }
 
   // Check if copy-on-error is enabled in the arguments.

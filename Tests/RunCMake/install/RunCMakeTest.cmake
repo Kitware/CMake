@@ -175,6 +175,10 @@ run_install_test(FILES-PERMISSIONS)
 run_install_test(TARGETS-RPATH)
 run_install_test(InstallRequiredSystemLibraries)
 
+if(UNIX)
+  run_install_test(DIRECTORY-symlink-clobber)
+endif()
+
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
   run_cmake(TARGETS-RUNTIME_DEPENDENCIES-macos-two-bundle)
   run_cmake(TARGETS-RUNTIME_DEPENDENCIES-macos-no-framework)

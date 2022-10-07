@@ -1,0 +1,12 @@
+^CMake Error at cmake_install.cmake:[0-9]+ \(file\):
+  file INSTALL cannot duplicate symlink
+
+    [^
+]*/Tests/RunCMake/install/DIRECTORY-symlink-clobber-build/new/dir
+
+  at
+
+    [^
+]*/Tests/RunCMake/install/DIRECTORY-symlink-clobber-build/root-all/dest/dir
+
+  because: A directory already exists at that location

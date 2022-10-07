@@ -3590,8 +3590,19 @@ std::string cmSystemTools::EncodeURL(std::string const& in, bool escapeSlashes)
 }
 
 cmsys::Status cmSystemTools::CreateSymlink(std::string const& origName,
-                                           std::string const& newName,
-                                           std::string* errorMessage)
+                                           std::string const& newName)
+{
+  cmsys::Status status =
+    cmSystemTools::CreateSymlinkQuietly(origName, newName);
+  if (!status) {
+    cmSystemTools::Error(cmStrCat("failed to create symbolic link '", newName,
+                                  "': ", status.GetString()));
+  }
+  return status;
+}
+
+cmsys::Status cmSystemTools::CreateSymlinkQuietly(std::string const& origName,
+                                                  std::string const& newName)
 {
   uv_fs_t req;
   int flags = 0;
@@ -3611,20 +3622,23 @@ cmsys::Status cmSystemTools::CreateSymlink(std::string const& origName,
 #else
     status = cmsys::Status::POSIX(-err);
 #endif
-    std::string e = cmStrCat("failed to create symbolic link '", newName,
-                             "': ", status.GetString());
-    if (errorMessage) {
-      *errorMessage = std::move(e);
-    } else {
-      cmSystemTools::Error(e);
-    }
   }
   return status;
 }
 
 cmsys::Status cmSystemTools::CreateLink(std::string const& origName,
-                                        std::string const& newName,
-                                        std::string* errorMessage)
+                                        std::string const& newName)
+{
+  cmsys::Status status = cmSystemTools::CreateLinkQuietly(origName, newName);
+  if (!status) {
+    cmSystemTools::Error(
+      cmStrCat("failed to create link '", newName, "': ", status.GetString()));
+  }
+  return status;
+}
+
+cmsys::Status cmSystemTools::CreateLinkQuietly(std::string const& origName,
+                                               std::string const& newName)
 {
   uv_fs_t req;
   int err =
@@ -3638,13 +3652,6 @@ cmsys::Status cmSystemTools::CreateLink(std::string const& origName,
 #else
     status = cmsys::Status::POSIX(-err);
 #endif
-    std::string e =
-      cmStrCat("failed to create link '", newName, "': ", status.GetString());
-    if (errorMessage) {
-      *errorMessage = std::move(e);
-    } else {
-      cmSystemTools::Error(e);
-    }
   }
   return status;
 }
