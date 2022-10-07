@@ -5,6 +5,16 @@ int main(int argc, char* argv[])
 {
   int i;
   for (i = 1; i < argc; ++i) {
+    if (strcmp(argv[i], "-p") == 0) {
+      // Ensure compile commands were not appended after the source file
+      for (++i; i < argc; ++i) {
+        if (strcmp(argv[i], "--") == 0) {
+          fprintf(stderr, "Command line arguments unexpectedly appended\n");
+          return 1;
+        }
+      }
+      return 0;
+    }
     if (strcmp(argv[i], "-bad") == 0) {
       fprintf(stdout, "stdout from bad command line arg '-bad'\n");
       fprintf(stderr, "stderr from bad command line arg '-bad'\n");
