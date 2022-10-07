@@ -21,9 +21,9 @@ function(__tasking_set_processor_list lang out_var)
   execute_process(COMMAND "${CMAKE_${lang}_COMPILER}" --cpu-list
     OUTPUT_VARIABLE processor_list
     ERROR_VARIABLE processor_list)
-  string(REGEX MATCHALL "[ ]+([A-Za-z0-9_]+)[ ]+[^ ]([^ ]+ ?)*[ ]+[A-Za-z0-9\\.]+[ ]+[A-Za-z0-9\.]+\n" processor_list "${processor_list}")
+  string(REGEX MATCHALL "  +([A-Za-z0-9_]+)[^\n]+\n" processor_list "${processor_list}")
   list(POP_FRONT processor_list)
-  string(REGEX REPLACE "[ ]+([A-Za-z0-9_]+)[ ]+[^ ]([^ ]+ ?)*[ ]+[A-Za-z0-9\\.]+[ ]+[A-Za-z0-9\.]+\n" "\\1" processor_list "${processor_list}")
+  string(REGEX REPLACE "  +([A-Za-z0-9_]+)[^\n]+\n" "\\1" processor_list "${processor_list}")
   set(${out_var} "${processor_list}" PARENT_SCOPE)
 endfunction()
 
