@@ -357,6 +357,22 @@ function(run_QtAutoMocDeps)
     run_ninja("${RunCMake_TEST_BINARY_DIR}")
   endif()
 endfunction()
+
+function(run_QtAutoMocSkipPch)
+  set(QtX Qt${CMake_TEST_Qt_version})
+  if(CMake_TEST_${QtX}Core_Version VERSION_GREATER_EQUAL 5.15.0)
+    set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/QtAutoMocSkipPch-build)
+    run_cmake_with_options(QtAutoMocSkipPch
+      "-Dwith_qt_version=${CMake_TEST_Qt_version}"
+      "-D${QtX}_DIR=${${QtX}_DIR}"
+      "-D${QtX}Core_DIR=${${QtX}Core_DIR}"
+      "-DCMAKE_PREFIX_PATH:STRING=${CMAKE_PREFIX_PATH}"
+    )
+    # Build the project.
+    run_ninja("${RunCMake_TEST_BINARY_DIR}")
+  endif()
+endfunction()
 if(CMake_TEST_Qt_version)
   run_QtAutoMocDeps()
+  run_QtAutoMocSkipPch()
 endif()
