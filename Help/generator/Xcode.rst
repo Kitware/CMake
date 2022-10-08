@@ -44,3 +44,13 @@ Swift Support
 When using the :generator:`Xcode` generator with Xcode 6.1 or higher,
 one may enable the ``Swift`` language with the :command:`enable_language`
 command or the :command:`project`.
+
+Limitations
+^^^^^^^^^^^
+
+The Xcode generator does not support per-configuration sources.
+Code like the following will result in a generation error:
+
+.. code-block:: cmake
+
+  add_executable(MyApp mymain-$<CONFIG>.cpp)
