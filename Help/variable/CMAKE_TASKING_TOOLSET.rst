@@ -11,7 +11,7 @@ incompatible versioning schemes.  Set this variable in a
 the compiler and version correctly. If no toolset is specified,
 ``Standalone`` is assumed.
 
-Projects, that can be build with different architectures and/or toolsets, must
+Projects that can be built with different architectures and/or toolsets must
 take :variable:`CMAKE_TASKING_TOOLSET` and
 :variable:`CMAKE_<LANG>_COMPILER_ARCHITECTURE_ID` into account to qualify
 :variable:`CMAKE_<LANG>_COMPILER_VERSION`.

@@ -7,7 +7,7 @@ The :command:`return` command checks its parameters.
 
 The ``OLD`` behavior for this policy is to ignore any parameters given to the
 command.
-The ``NEW`` behavior is to check validity of the parameters.
+The ``NEW`` behavior is to check the validity of the parameters.
 
 This policy was introduced in CMake version 3.25.
 CMake version |release| warns when the policy is not set and uses

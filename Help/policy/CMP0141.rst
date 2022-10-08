@@ -44,7 +44,7 @@ The ``OLD`` behavior for this policy is to place MSVC debug information
 format flags in the default :variable:`CMAKE_<LANG>_FLAGS_<CONFIG>` cache
 entries and ignore the :variable:`CMAKE_MSVC_DEBUG_INFORMATION_FORMAT`
 abstraction.  The ``NEW`` behavior for this policy is to *not* place MSVC
-debug information format flags flags in the default cache entries and use
+debug information format flags in the default cache entries and use
 the abstraction instead.
 
 This policy was introduced in CMake version 3.25.  Use the
