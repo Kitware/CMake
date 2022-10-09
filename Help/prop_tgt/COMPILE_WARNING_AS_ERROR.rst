@@ -26,6 +26,7 @@ implemented :variable:`compiler IDs <CMAKE_<LANG>_COMPILER_ID>` are:
 * ``NVIDIA`` (CUDA)
 * ``QCC``
 * ``SunPro``
+* ``Tasking``
 * ``TI``
 * ``VisualAge``
 * ``XL``
