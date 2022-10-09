@@ -157,24 +157,36 @@ macro(__enable_llvm_rc_preprocessing clang_option_prefix extra_pp_flags)
   endif()
 endmacro()
 
+macro(__verify_same_language_values variable)
+  foreach(lang "C" "CXX" "HIP")
+    if(DEFINED CMAKE_${lang}_${variable})
+      list(APPEND __LANGUAGE_VALUES_${variable} "${CMAKE_${lang}_${variable}}")
+    endif()
+  endforeach()
+  list(REMOVE_DUPLICATES __LANGUAGE_VALUES_${variable})
+  list(LENGTH __LANGUAGE_VALUES_${variable} __NUM_VALUES)
+
+  if(__NUM_VALUES GREATER 1)
+    message(FATAL_ERROR ${ARGN})
+  endif()
+  unset(__NUM_VALUES)
+  unset(__LANGUAGE_VALUES_${variable})
+endmacro()
 
 if("x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC"
-    OR "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC")
+    OR "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC"
+    OR "x${CMAKE_HIP_SIMULATE_ID}" STREQUAL "xMSVC")
 
-  if ( DEFINED CMAKE_C_COMPILER_ID AND DEFINED CMAKE_CXX_COMPILER_ID
-       AND NOT "x${CMAKE_C_COMPILER_ID}" STREQUAL "x${CMAKE_CXX_COMPILER_ID}")
-    message(FATAL_ERROR "The current configuration mixes Clang and MSVC or "
-            "some other CL compatible compiler tool. This is not supported. "
-            "Use either clang or MSVC as both C and C++ compilers.")
-  endif()
+  __verify_same_language_values(COMPILER_ID
+                                "The current configuration mixes Clang and MSVC or "
+                                "some other CL compatible compiler tool. This is not supported. "
+                                "Use either clang or MSVC as both C, C++ and/or HIP compilers.")
 
-  if ( DEFINED CMAKE_C_COMPILER_FRONTEND_VARIANT AND DEFINED CMAKE_CXX_COMPILER_FRONTEND_VARIANT
-       AND NOT "x${CMAKE_C_COMPILER_FRONTEND_VARIANT}" STREQUAL "x${CMAKE_CXX_COMPILER_FRONTEND_VARIANT}")
-    message(FATAL_ERROR "The current configuration uses the Clang compiler "
-            "tool with mixed frontend variants, both the GNU and in MSVC CL "
-            "like variants. This is not supported. Use either clang/clang++ "
-            "or clang-cl as both C and C++ compilers.")
-  endif()
+  __verify_same_language_values(COMPILER_FRONTEND_VARIANT
+                                "The current configuration uses the Clang compiler "
+                                "tool with mixed frontend variants, both the GNU and in MSVC CL "
+                                "like variants. This is not supported. Use either clang/clang++ "
+                                "or clang-cl as both C, C++ and/or HIP compilers.")
 
   if(NOT CMAKE_RC_COMPILER_INIT)
     # Check if rc is already in the path
@@ -194,7 +206,10 @@ if("x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC"
     unset(__RC_COMPILER_PATH CACHE)
   endif()
 
-  if ( "x${CMAKE_CXX_COMPILER_FRONTEND_VARIANT}" STREQUAL "xMSVC" OR "x${CMAKE_C_COMPILER_FRONTEND_VARIANT}" STREQUAL "xMSVC" )
+  if ( "x${CMAKE_CXX_COMPILER_FRONTEND_VARIANT}" STREQUAL "xMSVC"
+      OR "x${CMAKE_C_COMPILER_FRONTEND_VARIANT}" STREQUAL "xMSVC"
+      OR "x${CMAKE_HIP_COMPILER_FRONTEND_VARIANT}" STREQUAL "xMSVC")
+
     include(Platform/Windows-MSVC)
     # Set the clang option forwarding prefix for clang-cl usage in the llvm-rc processing stage
     __enable_llvm_rc_preprocessing("-clang:" "")
