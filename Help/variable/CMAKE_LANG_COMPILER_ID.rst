@@ -39,12 +39,12 @@ Value                           Name
 ``PathScale``                   PathScale
 ``SDCC``                        `Small Device C Compiler`_
 ``SunPro``                      Oracle Solaris Studio
+``Tasking``                     `Tasking Compiler Toolsets`_
 ``TI``                          Texas Instruments
 ``TinyCC``                      `Tiny C Compiler`_
 ``XL``, ``VisualAge``, ``zOS``  IBM XL
 ``XLClang``                     IBM Clang-based XL
 ``IBMClang``                    IBM LLVM-based Compiler
-``Tasking``                     `Tasking Compiler Toolsets`_
 =============================== ===============================================
 
 This variable is not guaranteed to be defined for all compilers or
