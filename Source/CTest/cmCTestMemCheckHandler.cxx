@@ -1177,6 +1177,13 @@ bool cmCTestMemCheckHandler::ProcessMemCheckCudaOutput(
     // generic error: ignore ERROR SUMMARY, CUDA-MEMCHECK and others
     "== ([A-Z][a-z].*)"
   };
+  // matchers for messages that aren't defects, but caught by above matchers
+  std::vector<cmsys::RegularExpression> false_positive_matchers{
+    "== Error: No attachable process found.*timed-out",
+    "== Default timeout can be adjusted with --launch-timeout",
+    "== Error: Target application terminated before first instrumented API",
+    "== Tracking kernels launched by child processes requires"
+  };
 
   std::vector<std::string::size_type> nonMemcheckOutput;
   auto sttime = std::chrono::steady_clock::now();
@@ -1196,11 +1203,17 @@ bool cmCTestMemCheckHandler::ProcessMemCheckCudaOutput(
       if (leakExpr.find(line)) {
         failure = static_cast<int>(this->FindOrAddWarning("Memory leak"));
       } else {
-        for (auto& matcher : matchers) {
-          if (matcher.find(line)) {
+        auto match_predicate =
+          [&line](cmsys::RegularExpression& matcher) -> bool {
+          return matcher.find(line);
+        };
+        auto const pos_matcher =
+          std::find_if(matchers.begin(), matchers.end(), match_predicate);
+        if (pos_matcher != matchers.end()) {
+          if (!std::any_of(false_positive_matchers.begin(),
+                           false_positive_matchers.end(), match_predicate)) {
             failure =
-              static_cast<int>(this->FindOrAddWarning(matcher.match(1)));
-            break;
+              static_cast<int>(this->FindOrAddWarning(pos_matcher->match(1)));
           }
         }
       }

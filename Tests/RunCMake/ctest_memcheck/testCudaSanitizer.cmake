@@ -277,3 +277,12 @@ file(APPEND "${LOG_FILE}"
 =========
 ========= RACECHECK SUMMARY: 12 hazards displayed (0 errors, 12 warnings)
 ")
+
+# false-positives
+file(APPEND "${LOG_FILE}"
+"========= COMPUTE-SANITIZER
+========= Error: Target application terminated before first instrumented API call
+========= Tracking kernels launched by child processes requires the --target-processes all option.
+========= Error: No attachable process found. compute-sanitizer timed-out.
+========= Default timeout can be adjusted with --launch-timeout. Awaiting target completion.
+")
