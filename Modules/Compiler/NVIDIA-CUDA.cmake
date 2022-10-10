@@ -31,7 +31,7 @@ endif()
 
 if (CMAKE_CUDA_COMPILER_VERSION VERSION_GREATER_EQUAL 10.2.89)
   # Starting in 10.2, nvcc supported treating all warnings as errors
-  set(CMAKE_CUDA_COMPILE_OPTIONS_WARNING_AS_ERROR "-Werror all-warnings")
+  set(CMAKE_CUDA_COMPILE_OPTIONS_WARNING_AS_ERROR "-Werror" "all-warnings")
 endif()
 
 if (CMAKE_CUDA_COMPILER_VERSION VERSION_GREATER_EQUAL 10.2.89)
