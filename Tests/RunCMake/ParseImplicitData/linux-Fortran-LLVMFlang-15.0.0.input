@@ -1,0 +1,43 @@
+CMAKE_LANG=Fortran
+CMAKE_LINKER=/usr/bin/ld
+CMAKE_Fortran_COMPILER_ABI=
+CMAKE_Fortran_COMPILER_AR=
+CMAKE_Fortran_COMPILER_ARCHITECTURE_ID=
+CMAKE_Fortran_COMPILER_EXTERNAL_TOOLCHAIN=
+CMAKE_Fortran_COMPILER_ID=LLVMFlang
+CMAKE_Fortran_COMPILER_LAUNCHER=
+CMAKE_Fortran_COMPILER_LOADED=1
+CMAKE_Fortran_COMPILER_RANLIB=
+CMAKE_Fortran_COMPILER_TARGET=
+CMAKE_Fortran_COMPILER_VERSION=15.0.0
+CMAKE_Fortran_COMPILER_VERSION_INTERAL=
+Change Dir: /tmp/ii/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_2e9b9/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_2e9b9.dir/build.make CMakeFiles/cmTC_2e9b9.dir/build
+gmake[1]: Entering directory '/tmp/ii/CMakeFiles/CMakeTmp'
+Building Fortran object CMakeFiles/cmTC_2e9b9.dir/CMakeFortranCompilerABI.F.o
+/usr/bin/flang-new   -v -c /tmp/CMake/Modules/CMakeFortranCompilerABI.F -o CMakeFiles/cmTC_2e9b9.dir/CMakeFortranCompilerABI.F.o
+flang-new version 15.0.0 (Fedora 15.0.0-4.fc38)
+Target: x86_64-redhat-linux-gnu
+Thread model: posix
+InstalledDir: /usr/bin
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-redhat-linux/12
+Selected GCC installation: /usr/bin/../lib/gcc/x86_64-redhat-linux/12
+Candidate multilib: .@m64
+Candidate multilib: 32@m32
+Selected multilib: .@m64
+ "/usr/bin/flang-new" -fc1 -triple x86_64-redhat-linux-gnu -emit-obj -o CMakeFiles/cmTC_2e9b9.dir/CMakeFortranCompilerABI.F.o -x f95-cpp-input /tmp/CMake/Modules/CMakeFortranCompilerABI.F
+Linking Fortran executable cmTC_2e9b9
+/tmp/CMake/bin/cmake -E cmake_link_script CMakeFiles/cmTC_2e9b9.dir/link.txt --verbose=1
+/usr/bin/flang-new  -v CMakeFiles/cmTC_2e9b9.dir/CMakeFortranCompilerABI.F.o -o cmTC_2e9b9
+flang-new version 15.0.0 (Fedora 15.0.0-4.fc38)
+Target: x86_64-redhat-linux-gnu
+Thread model: posix
+InstalledDir: /usr/bin
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-redhat-linux/12
+Selected GCC installation: /usr/bin/../lib/gcc/x86_64-redhat-linux/12
+Candidate multilib: .@m64
+Candidate multilib: 32@m32
+Selected multilib: .@m64
+ "/usr/bin/ld" --hash-style=gnu --build-id --eh-frame-hdr -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_2e9b9 /usr/bin/../lib/gcc/x86_64-redhat-linux/12/../../../../lib64/crt1.o /usr/bin/../lib/gcc/x86_64-redhat-linux/12/../../../../lib64/crti.o /usr/bin/../lib/gcc/x86_64-redhat-linux/12/crtbegin.o -L/usr/bin/../lib/gcc/x86_64-redhat-linux/12 -L/usr/bin/../lib/gcc/x86_64-redhat-linux/12/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/lib -L/usr/lib CMakeFiles/cmTC_2e9b9.dir/CMakeFortranCompilerABI.F.o -lFortran_main -lFortranRuntime -lFortranDecimal -lm -lgcc --as-needed -lgcc_s --no-as-needed -lc -lgcc --as-needed -lgcc_s --no-as-needed /usr/bin/../lib/gcc/x86_64-redhat-linux/12/crtend.o /usr/bin/../lib/gcc/x86_64-redhat-linux/12/../../../../lib64/crtn.o
+gmake[1]: Leaving directory '/tmp/ii/CMakeFiles/CMakeTmp'
