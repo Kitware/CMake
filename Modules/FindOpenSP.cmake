@@ -5,9 +5,9 @@
 FindOpenSP
 ----------
 
-Try to find the OpenSP library.
-
 .. versionadded:: 3.25
+
+Try to find the OpenSP library.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
