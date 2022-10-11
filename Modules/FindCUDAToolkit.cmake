@@ -119,6 +119,7 @@ of the following libraries that are part of the CUDAToolkit:
 - :ref:`nvGRAPH<cuda_toolkit_nvGRAPH>`
 - :ref:`nvJPEG<cuda_toolkit_nvJPEG>`
 - :ref:`nvidia-ML<cuda_toolkit_nvML>`
+- :ref:`nvPTX Compiler<cuda_toolkit_nvptx>`
 - :ref:`nvRTC<cuda_toolkit_nvRTC>`
 - :ref:`nvToolsExt<cuda_toolkit_nvToolsExt>`
 - :ref:`nvtx3<cuda_toolkit_nvtx3>`
@@ -333,6 +334,22 @@ Targets Created:
 
 - ``CUDA::nvjpeg``
 - ``CUDA::nvjpeg_static``
+
+.. _`cuda_toolkit_nvPTX`:
+
+nvPTX Compiler
+""""""""""""""
+
+.. versionadded:: 3.25
+
+The `nvPTX <https://docs.nvidia.com/cuda/ptx-compiler-api/index.html>`_ (PTX Compilation) library.
+The PTX Compiler APIs are a set of APIs which can be used to compile a PTX program into GPU assembly code.
+Introduced in CUDA 11.1
+This is a static library only.
+
+Targets Created:
+
+- ``CUDA::nvptxcompiler`` starting in CUDA 11.1
 
 .. _`cuda_toolkit_nvRTC`:
 
@@ -1015,6 +1032,9 @@ if(CUDAToolkit_FOUND)
   endif()
 
   _CUDAToolkit_find_and_add_import_lib(nvrtc DEPS cuda_driver)
+  if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 11.1.0)
+    _CUDAToolkit_find_and_add_import_lib(nvptxcompiler_static DEPS cuda_driver)
+  endif()
 
   _CUDAToolkit_find_and_add_import_lib(nvml ALT nvidia-ml nvml)
 
