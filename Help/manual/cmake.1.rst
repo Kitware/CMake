@@ -278,7 +278,7 @@ Options
 
 .. option:: --debug-trycompile
 
- Do not delete the the files and directories created for
+ Do not delete the files and directories created for
  :command:`try_compile` / :command:`try_run` calls.
  This is useful in debugging failed checks.
 

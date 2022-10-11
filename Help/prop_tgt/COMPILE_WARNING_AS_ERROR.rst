@@ -26,10 +26,12 @@ implemented :variable:`compiler IDs <CMAKE_<LANG>_COMPILER_ID>` are:
 * ``NVIDIA`` (CUDA)
 * ``QCC``
 * ``SunPro``
+* ``Tasking``
 * ``TI``
 * ``VisualAge``
 * ``XL``
 * ``XLClang``
 
 This property is initialized by the value of the variable
-:variable:`CMAKE_COMPILE_WARNING_AS_ERROR` if it is set when a target is created.
+:variable:`CMAKE_COMPILE_WARNING_AS_ERROR` if it is set when a target is
+created.

@@ -18,7 +18,7 @@ command line.
 .. versionchanged:: 3.25
 
   If the specified ``clang-tidy`` command line includes the ``-p`` option,
-  it will invoked without ``--`` and the full compiler command line.
+  it will be invoked without ``--`` and the full compiler command line.
   ``clang-tidy`` will look up the source file in the specified compiler
   commands database.
 

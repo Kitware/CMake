@@ -3,7 +3,7 @@ MSVC_DEBUG_INFORMATION_FORMAT
 
 .. versionadded:: 3.25
 
-Select debug information format targeting the MSVC ABI.
+Select debug information format when targeting the MSVC ABI.
 
 The allowed values are:
 
