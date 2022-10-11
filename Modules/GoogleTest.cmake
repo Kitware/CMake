@@ -348,7 +348,7 @@ function(gtest_add_tests)
   unset(testList)
 
   set(gtest_case_name_regex ".*\\( *([A-Za-z_0-9]+) *, *([A-Za-z_0-9]+) *\\).*")
-  set(gtest_test_type_regex "(TYPED_TEST|TEST_?[FP]?)")
+  set(gtest_test_type_regex "(TYPED_TEST|TEST)_?[FP]?")
 
   foreach(source IN LISTS ARGS_SOURCES)
     if(NOT ARGS_SKIP_DEPENDENCY)
@@ -361,7 +361,9 @@ function(gtest_add_tests)
 
       # Parameterized tests have a different signature for the filter
       if("x${test_type}" STREQUAL "xTEST_P")
-        string(REGEX REPLACE ${gtest_case_name_regex}  "*/\\1.\\2/*" gtest_test_name ${hit})
+        string(REGEX REPLACE ${gtest_case_name_regex} "*/\\1.\\2/*" gtest_test_name ${hit})
+      elseif("x${test_type}" STREQUAL "xTYPED_TEST_P")
+        string(REGEX REPLACE ${gtest_case_name_regex} "*/\\1/*.\\2" gtest_test_name ${hit})
       elseif("x${test_type}" STREQUAL "xTEST_F" OR "x${test_type}" STREQUAL "xTEST")
         string(REGEX REPLACE ${gtest_case_name_regex} "\\1.\\2" gtest_test_name ${hit})
       elseif("x${test_type}" STREQUAL "xTYPED_TEST")
