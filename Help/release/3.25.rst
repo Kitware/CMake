@@ -38,8 +38,8 @@ Languages
 Command-Line
 ------------
 
-* A :ref:`cmake --workflow --preset <Workflow Mode>` mode was added
-  to drive sequences of configure, build, test, and package operations
+* A :option:`cmake --workflow --preset <cmake--workflow --preset>` mode was
+  added to drive sequences of configure, build, test, and package operations
   through a single command.
 
 * The :option:`cmake -E capabilities <cmake-E capabilities>` command
