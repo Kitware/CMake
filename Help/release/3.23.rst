@@ -43,19 +43,22 @@ Generators
 Command-Line
 ------------
 
-* The :manual:`cmake(1)` ``--build`` command, when used with
+* The :manual:`cmake(1)` :option:`--build <cmake --build>` command, when used with
   :ref:`Visual Studio Generators` on projects that set the
   :prop_tgt:`VS_PACKAGE_REFERENCES` target property, now automatically
   restores package references from NuGet.  The cache variable
   :variable:`CMAKE_VS_NUGET_PACKAGE_RESTORE` may be set to toggle this behavior
-  in a build tree.  Use the ``--resolve-package-references=<on|off|only>``
+  in a build tree.  Use the
+  :option:`--resolve-package-references <cmake--build --resolve-package-references>`
   command-line option to control the behavior on one invocation.
 
-* The :manual:`cmake(1)` command line tool gained a ``--debug-find-pkg=``
+* The :manual:`cmake(1)` command line tool gained a
+  :option:`--debug-find-pkg <cmake --debug-find-pkg>`
   option to enable debug messages under specific :command:`find_package`
   calls.
 
-* The :manual:`cmake(1)` command line tool gained a ``--debug-find-var=``
+* The :manual:`cmake(1)` command line tool gained a
+  :option:`--debug-find-var <cmake --debug-find-var>`
   option to enable debug messages for ``find_*`` calls that use specific
   result variables.
 

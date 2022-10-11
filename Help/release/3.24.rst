@@ -34,25 +34,28 @@ Generators
 Command-Line
 ------------
 
-* :manual:`cmake(1)` gained the ``--fresh`` command-line option to remove
-  any existing ``CMakeCache.txt`` file and associated ``CMakeFiles/``
+* :manual:`cmake(1)` gained the :option:`--fresh <cmake --fresh>` command-line
+  option to remove any existing ``CMakeCache.txt`` file and associated ``CMakeFiles/``
   directory, when configuring a build tree, thus starting a new configuration
   as if the build tree were freshly created.
 
-* :manual:`cmake(1)` gained the ``--compile-no-warning-as-error`` command-line
-  option which causes the effects of the :prop_tgt:`COMPILE_WARNING_AS_ERROR`
-  target property and :variable:`CMAKE_COMPILE_WARNING_AS_ERROR` variable
-  to be ignored.
+* :manual:`cmake(1)` gained the
+  :option:`--compile-no-warning-as-error <cmake --compile-no-warning-as-error>`
+  command-line option which causes the effects of the
+  :prop_tgt:`COMPILE_WARNING_AS_ERROR` target property and
+  :variable:`CMAKE_COMPILE_WARNING_AS_ERROR` variable to be ignored.
 
-* The :manual:`cmake(1)` ``--trace=json-v1`` trace format gained fields
-  ``global_frame`` and ``line_end``.
+* The :manual:`cmake(1)` :option:`--trace=json-v1 <cmake --trace>` trace
+  format gained fields ``global_frame`` and ``line_end``.
 
-* The :manual:`cmake(1)` ``-E`` commands ``cat`` and ``env`` learned to respect
-  a double dash (``--``) argument that acts as a delimiter indicating the end of
-  options. Any following arguments are treated as operands/positional arguments,
-  even if they begin with a dash ``-`` character.
+* The :manual:`cmake(1)` :option:`-E <cmake -E>` commands :option:`cat <cmake-E cat>`
+  and :option:`env <cmake-E env>` learned to respect a double dash
+  (:option:`-- <cmake-E_env -->`) argument that acts as a delimiter indicating
+  the end of options. Any following arguments are treated as operands/positional
+  arguments, even if they begin with a dash ``-`` character.
 
-* The :manual:`cmake(1)` ``-E tar`` command gained the ``--touch`` option
+* The :manual:`cmake(1)` :option:`-E tar <cmake-E tar>` command gained the
+  :option:`--touch <cmake-E_tar --touch>` option
   to keep the current local timestamp instead of extracting file timestamps
   from the archive.
 
@@ -289,9 +292,10 @@ Generator Expressions
 CTest
 -----
 
-* :manual:`ctest(1)` gained a ``--test-output-truncation`` option (and
-  corresponding :variable:`CTEST_CUSTOM_TEST_OUTPUT_TRUNCATION` variable) to
-  specify the truncation mode once the maximum test output size has been
+* :manual:`ctest(1)` gained a
+  :option:`--test-output-truncation <ctest --test-output-truncation>` option
+  (and corresponding :variable:`CTEST_CUSTOM_TEST_OUTPUT_TRUNCATION` variable)
+  to specify the truncation mode once the maximum test output size has been
   reached. Possible values are ``tail`` (default), ``middle`` or ``head``.
 
 CPack
