@@ -1,3 +1,5 @@
+set(CMAKE_Fortran_VERBOSE_FLAG "-v")
+
 set(CMAKE_Fortran_SUBMODULE_SEP "-")
 set(CMAKE_Fortran_SUBMODULE_EXT ".mod")
 
