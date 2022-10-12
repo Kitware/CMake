@@ -631,9 +631,8 @@ Platform
 
 .. genex:: $<PLATFORM_ID:platform_ids>
 
-  where ``platform_ids`` is a comma-separated list.
   ``1`` if CMake's platform id matches any one of the entries in
-  ``platform_ids``, otherwise ``0``.
+  comma-separated list ``platform_ids``, otherwise ``0``.
   See also the :variable:`CMAKE_SYSTEM_NAME` variable.
 
 Compiler Version
@@ -848,10 +847,15 @@ related to most of the expressions in this sub-section.
 
   .. versionadded:: 3.3
 
-  ``1`` when the language used for compilation unit matches any of the entries
-  in ``languages``, otherwise ``0``.  This expression may be used to specify
-  compile options, compile definitions, and include directories for source
-  files of a particular language in a target. For example:
+  .. versionchanged:: 3.15
+    Multiple languages can be specified for ``languages``.
+    CMake 3.14 and earlier only accepted a single language.
+
+  ``1`` when the language used for compilation unit matches any of the
+  comma-separated entries in ``languages``, otherwise ``0``. This expression
+  may be used to specify compile options, compile definitions, and include
+  directories for source files of a particular language in a target. For
+  example:
 
   .. code-block:: cmake
 
@@ -896,8 +900,8 @@ related to most of the expressions in this sub-section.
 
   ``1`` when the language used for compilation unit matches ``language`` and
   CMake's compiler id of the ``language`` compiler matches any one of the
-  entries in ``compiler_ids``, otherwise ``0``. This expression is a short form
-  for the combination of ``$<COMPILE_LANGUAGE:language>`` and
+  comma-separated entries in ``compiler_ids``, otherwise ``0``. This expression
+  is a short form for the combination of ``$<COMPILE_LANGUAGE:language>`` and
   ``$<LANG_COMPILER_ID:compiler_ids>``. This expression may be used to specify
   compile options, compile definitions, and include directories for source
   files of a particular language and compiler combination in a target.
@@ -971,10 +975,10 @@ Linker Language And ID
 
   .. versionadded:: 3.18
 
-  ``1`` when the language used for link step matches any of the entries
-  in ``languages``, otherwise ``0``.  This expression may be used to specify
-  link libraries, link options, link directories and link dependencies of a
-  particular language in a target. For example:
+  ``1`` when the language used for link step matches any of the comma-separated
+  entries in ``languages``, otherwise ``0``.  This expression may be used to
+  specify link libraries, link options, link directories and link dependencies
+  of a particular language in a target. For example:
 
   .. code-block:: cmake
 
@@ -1037,9 +1041,9 @@ Linker Language And ID
   .. versionadded:: 3.18
 
   ``1`` when the language used for link step matches ``language`` and the
-  CMake's compiler id of the language linker matches any one of the entries
-  in ``compiler_ids``, otherwise ``0``. This expression is a short form for the
-  combination of ``$<LINK_LANGUAGE:language>`` and
+  CMake's compiler id of the language linker matches any one of the comma-separated
+  entries in ``compiler_ids``, otherwise ``0``. This expression is a short form
+  for the combination of ``$<LINK_LANGUAGE:language>`` and
   ``$<LANG_COMPILER_ID:compiler_ids>``. This expression may be used to specify
   link libraries, link options, link directories and link dependencies of a
   particular language and linker combination in a target. For example:
