@@ -847,6 +847,10 @@ related to most of the expressions in this sub-section.
 
   .. versionadded:: 3.3
 
+  .. versionchanged:: 3.15
+    Multiple languages can be specified for ``languages``.
+    CMake 3.14 and earlier only accepted a single language.
+
   ``1`` when the language used for compilation unit matches any of the
   comma-separated entries in ``languages``, otherwise ``0``. This expression
   may be used to specify compile options, compile definitions, and include
