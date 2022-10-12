@@ -109,6 +109,7 @@ of the following libraries that are part of the CUDAToolkit:
 - :ref:`CUDA Runtime Library<cuda_toolkit_rt_lib>`
 - :ref:`CUDA Driver Library<cuda_toolkit_driver_lib>`
 - :ref:`cuBLAS<cuda_toolkit_cuBLAS>`
+- :ref:`cuFile<cuda_toolkit_cuFile>`
 - :ref:`cuFFT<cuda_toolkit_cuFFT>`
 - :ref:`cuRAND<cuda_toolkit_cuRAND>`
 - :ref:`cuSOLVER<cuda_toolkit_cuSOLVER>`
@@ -163,6 +164,22 @@ Targets Created:
 - ``CUDA::cublas_static``
 - ``CUDA::cublasLt`` starting in CUDA 10.1
 - ``CUDA::cublasLt_static`` starting in CUDA 10.1
+
+.. _`cuda_toolkit_cuFile`:
+
+cuFile
+""""""
+
+.. versionadded:: 3.25
+
+The NVIDIA GPUDirect Storage `cuFile <https://docs.nvidia.com/cuda/cufile-api/index.html>`_ library.
+
+Targets Created:
+
+- ``CUDA::cuFile`` starting in CUDA 11.4
+- ``CUDA::cuFile_static`` starting in CUDA 11.4
+- ``CUDA::cuFile_rdma`` starting in CUDA 11.4
+- ``CUDA::cuFile_rdma_static`` starting in CUDA 11.4
 
 .. _`cuda_toolkit_cuFFT`:
 
@@ -957,6 +974,14 @@ if(CUDAToolkit_FOUND)
   else()
     _CUDAToolkit_find_and_add_import_lib(cublas DEPS culibos)
     _CUDAToolkit_find_and_add_import_lib(cublas_static DEPS culibos)
+  endif()
+
+  if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 11.4)
+    _CUDAToolkit_find_and_add_import_lib(cuFile DEPS culibos)
+    _CUDAToolkit_find_and_add_import_lib(cuFile_static DEPS culibos)
+
+    _CUDAToolkit_find_and_add_import_lib(cuFile_rdma DEPS cuFile culibos)
+    _CUDAToolkit_find_and_add_import_lib(cuFile_rdma_static DEPS cuFile culibos)
   endif()
 
   # cuFFTW depends on cuFFT
