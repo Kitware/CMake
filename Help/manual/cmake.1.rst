@@ -812,11 +812,18 @@ Available commands are:
 
   Concatenate files and print on the standard output.
 
-  .. versionadded:: 3.24
+  .. program:: cmake-E_cat
+
+  .. option:: --
+
+    .. versionadded:: 3.24
+
     Added support for the double dash argument ``--``. This basic implementation
     of ``cat`` does not support any options, so using a option starting with
     ``-`` will result in an error. Use ``--`` to indicate the end of options, in
     case a file starts with ``-``.
+
+.. program:: cmake-E
 
 .. option:: chdir <dir> <cmd> [<arg>...]
 
@@ -828,9 +835,15 @@ Available commands are:
   then returns ``0``, if not it returns ``1``.  In case of invalid
   arguments, it returns 2.
 
-  .. versionadded:: 3.14
-    The ``--ignore-eol`` option implies line-wise comparison and ignores
-    LF/CRLF differences.
+  .. program:: cmake-E_compare_files
+
+  .. option:: --ignore-eol
+
+    .. versionadded:: 3.14
+
+    The option implies line-wise comparison and ignores LF/CRLF differences.
+
+.. program:: cmake-E
 
 .. option:: copy <file>... <destination>
 
@@ -901,13 +914,18 @@ Available commands are:
 
   Run command in a modified environment. Options are:
 
-  ``NAME=VALUE``
+  .. program:: cmake-E_env
+
+  .. option:: NAME=VALUE
+
     Replaces the current value of ``NAME`` with ``VALUE``.
 
-  ``--unset=NAME``
+  .. option:: --unset=NAME
+
     Unsets the current value of ``NAME``.
 
-  ``--modify ENVIRONMENT_MODIFICATION``
+  .. option:: --modify ENVIRONMENT_MODIFICATION
+
     .. versionadded:: 3.25
 
     Apply a single :prop_test:`ENVIRONMENT_MODIFICATION` operation to the
@@ -919,10 +937,15 @@ Available commands are:
     when ``cmake`` launched (or unsets it), not to the most recent
     ``NAME=VALUE`` option.
 
-  .. versionadded:: 3.24
+  .. option:: --
+
+    .. versionadded:: 3.24
+
     Added support for the double dash argument ``--``. Use ``--`` to stop
     interpreting options/environment variables and treat the next argument as
     the command, even if it start with ``-`` or contains a ``=``.
+
+.. program:: cmake-E
 
 .. option:: environment
 
@@ -1054,11 +1077,15 @@ Available commands are:
 
   Create or extract a tar or zip archive.  Options are:
 
-  ``c``
+  .. program:: cmake-E_tar
+
+  .. option:: c
+
     Create a new archive containing the specified files.
     If used, the ``<pathname>...`` argument is mandatory.
 
-  ``x``
+  .. option:: x
+
     Extract to disk from the archive.
 
     .. versionadded:: 3.15
@@ -1067,33 +1094,40 @@ Available commands are:
       When extracting selected files or directories, you must provide their exact
       names including the path, as printed by list (``-t``).
 
-  ``t``
+  .. option:: t
+
     List archive contents.
 
     .. versionadded:: 3.15
       The ``<pathname>...`` argument could be used to list only selected files
       or directories.
 
-  ``v``
+  .. option:: v
+
     Produce verbose output.
 
-  ``z``
+  .. option:: z
+
     Compress the resulting archive with gzip.
 
-  ``j``
+  .. option:: j
+
     Compress the resulting archive with bzip2.
 
-  ``J``
+  .. option:: J
+
     .. versionadded:: 3.1
 
     Compress the resulting archive with XZ.
 
-  ``--zstd``
+  .. option:: --zstd
+
     .. versionadded:: 3.15
 
     Compress the resulting archive with Zstandard.
 
-  ``--files-from=<file>``
+  .. option:: --files-from=<file>
+
     .. versionadded:: 3.1
 
     Read file names from the given file, one per line.
@@ -1101,25 +1135,29 @@ Available commands are:
     except for ``--add-file=<name>`` to add files whose
     names start in ``-``.
 
-  ``--format=<format>``
+  .. option:: --format=<format>
+
     .. versionadded:: 3.3
 
     Specify the format of the archive to be created.
     Supported formats are: ``7zip``, ``gnutar``, ``pax``,
     ``paxr`` (restricted pax, default), and ``zip``.
 
-  ``--mtime=<date>``
+  .. option:: --mtime=<date>
+
     .. versionadded:: 3.1
 
     Specify modification time recorded in tarball entries.
 
-  ``--touch``
+  .. option:: --touch
+
     .. versionadded:: 3.24
 
     Use current local timestamp instead of extracting file timestamps
     from the archive.
 
-  ``--``
+  .. option:: --
+
     .. versionadded:: 3.1
 
     Stop interpreting options and treat all remaining arguments
@@ -1133,6 +1171,8 @@ Available commands are:
     files are not readable.  This behavior is more consistent with the classic
     ``tar`` tool. The command now also parses all flags, and if an invalid flag
     was provided, a warning is issued.
+
+.. program:: cmake-E
 
 .. option:: time <command> [<args>...]
 
