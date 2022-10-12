@@ -998,7 +998,7 @@ if(CUDAToolkit_FOUND)
     _CUDAToolkit_find_and_add_import_lib(cuFile_static DEPS culibos)
 
     _CUDAToolkit_find_and_add_import_lib(cuFile_rdma DEPS cuFile culibos)
-    _CUDAToolkit_find_and_add_import_lib(cuFile_rdma_static DEPS cuFile culibos)
+    _CUDAToolkit_find_and_add_import_lib(cuFile_rdma_static DEPS cuFile_static culibos)
   endif()
 
   # cuFFTW depends on cuFFT
