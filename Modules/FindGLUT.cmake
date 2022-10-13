@@ -68,14 +68,9 @@ include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 
 find_package(PkgConfig QUIET)
-get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
-# On WIN32 and when using a multiple config generator, pkg-config
-# is not used as it cannot distinguish between release and debug libraries
-if(PKG_CONFIG_FOUND AND NOT (_isMultiConfig AND WIN32))
-  pkg_check_modules(PC_GLUT QUIET glut)
-  if(NOT PC_GLUT_FOUND)
-    pkg_check_modules(PC_GLUT QUIET freeglut)
-  endif()
+pkg_check_modules(PC_GLUT QUIET glut)
+if(NOT PC_GLUT_FOUND)
+  pkg_check_modules(PC_GLUT QUIET freeglut)
 endif()
 
 if(WIN32)
