@@ -13,10 +13,10 @@ Try Compiling and Running Source Files
 .. code-block:: cmake
 
   try_run(<runResultVar> <compileResultVar>
-          <SOURCES <srcfile...>]                 |
-           SOURCE_FROM_CONTENT <name> <content>] |
-           SOURCE_FROM_VAR <name> <var>]         |
-           SOURCE_FROM_FILE <name> <path>        >...
+          <SOURCES <srcfile...>                 |
+           SOURCE_FROM_CONTENT <name> <content> |
+           SOURCE_FROM_VAR <name> <var>         |
+           SOURCE_FROM_FILE <name> <path>       >...
           [NO_CACHE]
           [CMAKE_FLAGS <flags>...]
           [COMPILE_DEFINITIONS <defs>...]
