@@ -72,21 +72,7 @@ get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
 # On WIN32 and when using a multiple config generator, pkg-config
 # is not used as it cannot distinguish between release and debug libraries
 if(PKG_CONFIG_FOUND AND NOT (_isMultiConfig AND WIN32))
-  # Tell pkg-config not to strip any -I flags to make sure GLUT_INCLUDE_DIRS
-  # will be defined.
-  if(DEFINED ENV{PKG_CONFIG_ALLOW_SYSTEM_CFLAGS})
-    set(_pkgconfig_allow_system_cflags_old "$ENV{PKG_CONFIG_ALLOW_SYSTEM_CFLAGS}")
-  else()
-    unset(_pkgconfig_allow_system_cflags_old)
-  endif()
-  set(ENV{PKG_CONFIG_ALLOW_SYSTEM_CFLAGS} 1)
   pkg_check_modules(PC_GLUT QUIET glut)
-  if(DEFINED _pkgconfig_allow_system_cflags_old)
-    set(ENV{PKG_CONFIG_ALLOW_SYSTEM_CFLAGS} "${_pkgconfig_allow_system_cflags_old}")
-    unset(_pkgconfig_allow_system_cflags_old)
-  else()
-    unset(ENV{PKG_CONFIG_ALLOW_SYSTEM_CFLAGS})
-  endif()
   if(NOT PC_GLUT_FOUND)
     pkg_check_modules(PC_GLUT QUIET freeglut)
   endif()
