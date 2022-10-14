@@ -56,6 +56,7 @@ cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(
 {
   this->DefaultCudaFlagTableName = "v10";
   this->DefaultCudaHostFlagTableName = "v10";
+  this->DefaultMarmasmFlagTableName = "v10";
   this->DefaultNasmFlagTableName = "v10";
 }
 
@@ -1464,6 +1465,13 @@ cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetCudaHostFlagTable()
 {
   return LoadFlagTable(std::string(), this->DefaultCudaHostFlagTableName,
                        "CudaHost");
+}
+
+cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetMarmasmFlagTable()
+  const
+{
+  return LoadFlagTable(std::string(), this->DefaultMarmasmFlagTableName,
+                       "MARMASM");
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetMasmFlagTable() const

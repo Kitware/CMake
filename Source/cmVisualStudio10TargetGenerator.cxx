@@ -406,6 +406,9 @@ void cmVisualStudio10TargetGenerator::Generate()
     if (!this->ComputeCudaLinkOptions()) {
       return;
     }
+    if (!this->ComputeMarmasmOptions()) {
+      return;
+    }
     if (!this->ComputeMasmOptions()) {
       return;
     }
@@ -732,6 +735,11 @@ void cmVisualStudio10TargetGenerator::WriteClassicMsBuildProjectFile(
                        this->GlobalGenerator->GetPlatformToolsetCuda() +
                        ".props");
       }
+      if (this->GlobalGenerator->IsMarmasmEnabled()) {
+        Elem(e1, "Import")
+          .Attribute("Project",
+                     "$(VCTargetsPath)\\BuildCustomizations\\marmasm.props");
+      }
       if (this->GlobalGenerator->IsMasmEnabled()) {
         Elem(e1, "Import")
           .Attribute("Project",
@@ -829,6 +837,11 @@ void cmVisualStudio10TargetGenerator::WriteClassicMsBuildProjectFile(
                      std::move(cudaPath) + "CUDA " +
                        this->GlobalGenerator->GetPlatformToolsetCuda() +
                        ".targets");
+      }
+      if (this->GlobalGenerator->IsMarmasmEnabled()) {
+        Elem(e1, "Import")
+          .Attribute("Project",
+                     "$(VCTargetsPath)\\BuildCustomizations\\marmasm.targets");
       }
       if (this->GlobalGenerator->IsMasmEnabled()) {
         Elem(e1, "Import")
@@ -2485,6 +2498,9 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
         const std::string& lang = si.Source->GetLanguage();
         if (lang == "C" || lang == "CXX") {
           tool = "ClCompile";
+        } else if (lang == "ASM_MARMASM" &&
+                   this->GlobalGenerator->IsMarmasmEnabled()) {
+          tool = "MARMASM";
         } else if (lang == "ASM_MASM" &&
                    this->GlobalGenerator->IsMasmEnabled()) {
           tool = "MASM";
@@ -2740,6 +2756,9 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       const std::string& srclang = source->GetLanguage();
       if (srclang == "C" || srclang == "CXX") {
         flagtable = gg->GetClFlagTable();
+      } else if (srclang == "ASM_MARMASM" &&
+                 this->GlobalGenerator->IsMarmasmEnabled()) {
+        flagtable = gg->GetMarmasmFlagTable();
       } else if (srclang == "ASM_MASM" &&
                  this->GlobalGenerator->IsMasmEnabled()) {
         flagtable = gg->GetMasmFlagTable();
@@ -3751,6 +3770,59 @@ void cmVisualStudio10TargetGenerator::WriteCudaLinkOptions(
   cudaLinkOptions.OutputFlagMap();
 }
 
+bool cmVisualStudio10TargetGenerator::ComputeMarmasmOptions()
+{
+  if (!this->GlobalGenerator->IsMarmasmEnabled()) {
+    return true;
+  }
+  for (std::string const& c : this->Configurations) {
+    if (!this->ComputeMarmasmOptions(c)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool cmVisualStudio10TargetGenerator::ComputeMarmasmOptions(
+  std::string const& configName)
+{
+  cmGlobalVisualStudio10Generator* gg = this->GlobalGenerator;
+  auto pOptions = cm::make_unique<Options>(
+    this->LocalGenerator, Options::MarmasmCompiler, gg->GetMarmasmFlagTable());
+  Options& marmasmOptions = *pOptions;
+
+  std::string flags;
+  this->LocalGenerator->AddLanguageFlags(flags, this->GeneratorTarget,
+                                         cmBuildStep::Compile, "ASM_MARMASM",
+                                         configName);
+
+  marmasmOptions.Parse(flags);
+
+  // Get includes for this target
+  marmasmOptions.AddIncludes(this->GetIncludes(configName, "ASM_MARMASM"));
+
+  this->MarmasmOptions[configName] = std::move(pOptions);
+  return true;
+}
+
+void cmVisualStudio10TargetGenerator::WriteMarmasmOptions(
+  Elem& e1, std::string const& configName)
+{
+  if (!this->MSTools || !this->GlobalGenerator->IsMarmasmEnabled()) {
+    return;
+  }
+  Elem e2(e1, "MARMASM");
+
+  // Preprocessor definitions and includes are shared with clOptions.
+  OptionsHelper clOptions(*(this->ClOptions[configName]), e2);
+  clOptions.OutputPreprocessorDefinitions("ASM_MARMASM");
+
+  OptionsHelper marmasmOptions(*(this->MarmasmOptions[configName]), e2);
+  marmasmOptions.OutputAdditionalIncludeDirectories("ASM_MARMASM");
+  marmasmOptions.PrependInheritedString("AdditionalOptions");
+  marmasmOptions.OutputFlagMap();
+}
+
 bool cmVisualStudio10TargetGenerator::ComputeMasmOptions()
 {
   if (!this->GlobalGenerator->IsMasmEnabled()) {
@@ -4451,6 +4523,7 @@ void cmVisualStudio10TargetGenerator::WriteItemDefinitionGroups(Elem& e0)
       //    output rc compile flags <ResourceCompile></ResourceCompile>
       this->WriteRCOptions(e1, c);
       this->WriteCudaOptions(e1, c);
+      this->WriteMarmasmOptions(e1, c);
       this->WriteMasmOptions(e1, c);
       this->WriteNasmOptions(e1, c);
     }

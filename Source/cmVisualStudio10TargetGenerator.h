@@ -132,6 +132,9 @@ private:
   bool ComputeCudaLinkOptions(std::string const& config);
   void WriteCudaLinkOptions(Elem& e1, std::string const& config);
 
+  bool ComputeMarmasmOptions();
+  bool ComputeMarmasmOptions(std::string const& config);
+  void WriteMarmasmOptions(Elem& e1, std::string const& config);
   bool ComputeMasmOptions();
   bool ComputeMasmOptions(std::string const& config);
   void WriteMasmOptions(Elem& e1, std::string const& config);
@@ -208,6 +211,7 @@ private:
   OptionsMap RcOptions;
   OptionsMap CudaOptions;
   OptionsMap CudaLinkOptions;
+  OptionsMap MarmasmOptions;
   OptionsMap MasmOptions;
   OptionsMap NasmOptions;
   OptionsMap LinkOptions;

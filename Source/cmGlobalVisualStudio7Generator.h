@@ -106,6 +106,7 @@ public:
   bool FindMakeProgram(cmMakefile* mf) override;
 
   /** Is the Microsoft Assembler enabled?  */
+  bool IsMarmasmEnabled() const { return this->MarmasmEnabled; }
   bool IsMasmEnabled() const { return this->MasmEnabled; }
   bool IsNasmEnabled() const { return this->NasmEnabled; }
 
@@ -176,6 +177,7 @@ protected:
   // Set during OutputSLNFile with the name of the current project.
   // There is one SLN file per project.
   std::string CurrentProject;
+  bool MarmasmEnabled;
   bool MasmEnabled;
   bool NasmEnabled;
 

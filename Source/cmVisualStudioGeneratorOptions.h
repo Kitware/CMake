@@ -24,6 +24,7 @@ public:
     Compiler,
     ResourceCompiler,
     CudaCompiler,
+    MarmasmCompiler,
     MasmCompiler,
     NasmCompiler,
     Linker,

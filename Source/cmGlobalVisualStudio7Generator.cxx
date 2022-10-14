@@ -70,6 +70,7 @@ cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator(
   : cmGlobalVisualStudioGenerator(cm, platformInGeneratorName)
 {
   this->DevEnvCommandInitialized = false;
+  this->MarmasmEnabled = false;
   this->MasmEnabled = false;
   this->NasmEnabled = false;
   this->ExtraFlagTable = cmVS7ExtraFlagTable;

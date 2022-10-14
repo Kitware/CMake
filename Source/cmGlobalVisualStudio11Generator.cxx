@@ -161,6 +161,18 @@ bool cmGlobalVisualStudio11Generator::MatchesGeneratorName(
   return false;
 }
 
+void cmGlobalVisualStudio11Generator::EnableLanguage(
+  std::vector<std::string> const& lang, cmMakefile* mf, bool optional)
+{
+  for (std::string const& it : lang) {
+    if (it == "ASM_MARMASM") {
+      this->MarmasmEnabled = true;
+    }
+  }
+  this->AddPlatformDefinitions(mf);
+  cmGlobalVisualStudio10Generator::EnableLanguage(lang, mf, optional);
+}
+
 bool cmGlobalVisualStudio11Generator::InitializeWindowsPhone(cmMakefile* mf)
 {
   if (!this->SelectWindowsPhoneToolset(this->DefaultPlatformToolset)) {
