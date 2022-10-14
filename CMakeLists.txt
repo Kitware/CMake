@@ -273,6 +273,16 @@ if(CMake_RUN_CLANG_TIDY)
   endif()
   set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_COMMAND}")
 
+  option(CMake_USE_CLANG_TIDY_MODULE "Use CMake's clang-tidy module." OFF)
+  if(CMake_USE_CLANG_TIDY_MODULE)
+    find_library(CMake_CLANG_TIDY_MODULE NAMES cmake-clang-tidy-module DOC "Location of the clang-tidy module")
+    if(NOT CMake_CLANG_TIDY_MODULE)
+      message(FATAL_ERROR "CMake_USE_CLANG_TIDY_MODULE is ON but cmake-clang-tidy-module is not found!")
+    endif()
+    list(APPEND CMAKE_CXX_CLANG_TIDY "--load=${CMake_CLANG_TIDY_MODULE}")
+    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${CMake_CLANG_TIDY_MODULE}")
+  endif()
+
   # Create a preprocessor definition that depends on .clang-tidy content so
   # the compile command will change when .clang-tidy changes.  This ensures
   # that a subsequent build re-runs clang-tidy on all sources even if they
@@ -282,6 +292,11 @@ if(CMake_RUN_CLANG_TIDY)
   file(SHA1 ${CMAKE_CURRENT_SOURCE_DIR}/.clang-tidy clang_tidy_sha1)
   set(CLANG_TIDY_DEFINITIONS "CLANG_TIDY_SHA1=${clang_tidy_sha1}")
   unset(clang_tidy_sha1)
+  if(CMake_USE_CLANG_TIDY_MODULE)
+    file(SHA1 "${CMake_CLANG_TIDY_MODULE}" clang_tidy_module_sha1)
+    list(APPEND CLANG_TIDY_DEFINITIONS "CLANG_TIDY_MODULE_SHA1=${clang_tidy_module_sha1}")
+    unset(clang_tidy_module_sha1)
+  endif()
 
 endif()
 configure_file(.clang-tidy .clang-tidy COPYONLY)
