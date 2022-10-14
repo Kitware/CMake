@@ -60,6 +60,14 @@ module where to look.
 
 #]=======================================================================]
 
+if(ZLIB_FIND_COMPONENTS AND NOT ZLIB_FIND_QUIETLY)
+  message(AUTHOR_WARNING
+    "ZLIB does not provide any COMPONENTS.  Calling\n"
+    "  find_package(ZLIB COMPONENTS ...)\n"
+    "will always fail."
+    )
+endif()
+
 set(_ZLIB_SEARCHES)
 
 # Search ZLIB_ROOT first if it is set.
@@ -164,7 +172,8 @@ endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(ZLIB REQUIRED_VARS ZLIB_LIBRARY ZLIB_INCLUDE_DIR
-                                       VERSION_VAR ZLIB_VERSION_STRING)
+                                       VERSION_VAR ZLIB_VERSION_STRING
+                                       HANDLE_COMPONENTS)
 
 if(ZLIB_FOUND)
     set(ZLIB_INCLUDE_DIRS ${ZLIB_INCLUDE_DIR})
