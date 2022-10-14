@@ -377,6 +377,8 @@ private:
 #  pragma diag_suppress 1222 // invalid error number (3288, but works anyway)
 #  define CM_LCC_DIAG_SUPPRESS_3288
 #  pragma diag_suppress 3288 // parameter was declared but never referenced
+#  define CM_LCC_DIAG_SUPPRESS_3301
+#  pragma diag_suppress 3301 // parameter was declared but never referenced
 #endif
 
 void ResetGenerator()
@@ -420,6 +422,11 @@ bool TryGeneratedPaths(CallbackFn&& filesCollector,
   }
   return false;
 }
+
+#ifdef CM_LCC_DIAG_SUPPRESS_3301
+#  undef CM_LCC_DIAG_SUPPRESS_3301
+#  pragma diag_default 3301
+#endif
 
 #ifdef CM_LCC_DIAG_SUPPRESS_3288
 #  undef CM_LCC_DIAG_SUPPRESS_3288

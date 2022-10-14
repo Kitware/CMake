@@ -3,6 +3,13 @@ if(DEFINED ENV{CTEST_REAL_HOME})
   set(ENV{HOME} "$ENV{CTEST_REAL_HOME}")
 endif()
 
+file(GLOB known_files
+  "${CMake_SOURCE_DIR}/Tests/JavaExportImport/InstallExport/hs_err_pid*.log"
+  )
+if(known_files)
+  file(REMOVE ${known_files})
+endif()
+
 execute_process(
   COMMAND "${GIT_EXECUTABLE}" status
   WORKING_DIRECTORY "${CMake_SOURCE_DIR}"
