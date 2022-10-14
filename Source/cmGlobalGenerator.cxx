@@ -1855,15 +1855,6 @@ void cmGlobalGenerator::FinalizeTargetConfiguration()
         cmExpandedList(standardIncludesStr);
       standardIncludesSet.insert(standardIncludesVec.begin(),
                                  standardIncludesVec.end());
-      if (li == "CUDA") {
-        std::string const& cudaSystemIncludeVar =
-          mf->GetSafeDefinition("CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES");
-        std::vector<std::string> cudaToolkitIncludeVec =
-          cmExpandedList(cudaSystemIncludeVar);
-        standardIncludesSet.insert(cudaToolkitIncludeVec.begin(),
-                                   cudaToolkitIncludeVec.end());
-        mf->AddIncludeDirectories(cudaToolkitIncludeVec);
-      }
     }
     mf->AddSystemIncludeDirectories(standardIncludesSet);
   }
