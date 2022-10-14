@@ -67,86 +67,39 @@ The following variables may also be provided, for backwards compatibility:
 include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 
-function(_add_glut_target_simple)
-  if(TARGET GLUT::GLUT)
-    return()
-  endif()
-  add_library(GLUT::GLUT INTERFACE IMPORTED)
-  if(GLUT_INCLUDE_DIRS)
-    target_include_directories(GLUT::GLUT SYSTEM
-      INTERFACE "${GLUT_INCLUDE_DIRS}")
-  endif()
-  if(GLUT_LIBRARIES)
-    target_link_libraries(GLUT::GLUT INTERFACE ${GLUT_LIBRARIES})
-  endif()
-  if(GLUT_LIBRARY_DIRS)
-    target_link_directories(GLUT::GLUT INTERFACE ${GLUT_LIBRARY_DIRS})
-  endif()
-  if(GLUT_LDFLAGS)
-    target_link_options(GLUT::GLUT INTERFACE ${GLUT_LDFLAGS})
-  endif()
-  if(GLUT_CFLAGS)
-    separate_arguments(GLUT_CFLAGS_SPLIT UNIX_COMMAND "${GLUT_CFLAGS}")
-    target_compile_options(GLUT::GLUT INTERFACE ${GLUT_CFLAGS_SPLIT})
-  endif()
-
-  set_property(TARGET GLUT::GLUT APPEND PROPERTY
-    IMPORTED_LOCATION "${GLUT_glut_LIBRARY}")
-endfunction()
-
 find_package(PkgConfig QUIET)
-get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
-# On WIN32 and when using a multiple config generator, pkg-config
-# is not used as it cannot distinguish between release and debug libraries
-if(PKG_CONFIG_FOUND AND NOT (_isMultiConfig AND WIN32))
-  # Tell pkg-config not to strip any -I flags to make sure GLUT_INCLUDE_DIRS
-  # will be defined.
-  if(DEFINED ENV{PKG_CONFIG_ALLOW_SYSTEM_CFLAGS})
-    set(_pkgconfig_allow_system_cflags_old "$ENV{PKG_CONFIG_ALLOW_SYSTEM_CFLAGS}")
-  else()
-    unset(_pkgconfig_allow_system_cflags_old)
-  endif()
-  set(ENV{PKG_CONFIG_ALLOW_SYSTEM_CFLAGS} 1)
-  pkg_check_modules(GLUT QUIET glut)
-  if(DEFINED _pkgconfig_allow_system_cflags_old)
-    set(ENV{PKG_CONFIG_ALLOW_SYSTEM_CFLAGS} "${_pkgconfig_allow_system_cflags_old}")
-    unset(_pkgconfig_allow_system_cflags_old)
-  else()
-    unset(ENV{PKG_CONFIG_ALLOW_SYSTEM_CFLAGS})
-  endif()
-  if(NOT GLUT_FOUND)
-    pkg_check_modules(GLUT QUIET freeglut)
-  endif()
-  if(GLUT_FOUND)
-    # GLUT_INCLUDE_DIRS is now the official result variable, but
-    # older versions of CMake only provided GLUT_INCLUDE_DIR.
-    set(GLUT_INCLUDE_DIR "${GLUT_INCLUDE_DIRS}")
-    _add_glut_target_simple()
-    FIND_PACKAGE_HANDLE_STANDARD_ARGS(GLUT REQUIRED_VARS GLUT_FOUND)
-    return()
-  endif()
+pkg_check_modules(PC_GLUT QUIET glut)
+if(NOT PC_GLUT_FOUND)
+  pkg_check_modules(PC_GLUT QUIET freeglut)
 endif()
 
 if(WIN32)
   find_path( GLUT_INCLUDE_DIR NAMES GL/glut.h
-    PATHS  ${GLUT_ROOT_PATH}/include )
+    PATHS  ${GLUT_ROOT_PATH}/include
+    HINTS ${PC_GLUT_INCLUDE_DIRS})
   mark_as_advanced(GLUT_INCLUDE_DIR)
   find_library( GLUT_glut_LIBRARY_RELEASE NAMES freeglut glut glut32
     PATHS
     ${OPENGL_LIBRARY_DIR}
     ${GLUT_ROOT_PATH}/Release
+    HINTS
+    ${PC_GLUT_LIBRARY_DIRS}
     )
+# N.B. As the pkg-config cannot distinguish between release and debug libraries,
+# assume that their hint was the both Debug and Release library.
   find_library( GLUT_glut_LIBRARY_DEBUG NAMES freeglutd
     PATHS
     ${OPENGL_LIBRARY_DIR}
     ${GLUT_ROOT_PATH}/Debug
+    HINTS
+    ${PC_GLUT_LIBRARY_DIRS}
     )
   mark_as_advanced(GLUT_glut_LIBRARY_RELEASE GLUT_glut_LIBRARY_DEBUG)
   select_library_configurations(GLUT_glut)
 elseif(APPLE)
-  find_path(GLUT_INCLUDE_DIR glut.h ${OPENGL_LIBRARY_DIR})
+  find_path(GLUT_INCLUDE_DIR glut.h PATHS ${OPENGL_LIBRARY_DIR} HINTS ${PC_GLUT_INCLUDE_DIRS})
   mark_as_advanced(GLUT_INCLUDE_DIR)
-  find_library(GLUT_glut_LIBRARY GLUT DOC "GLUT library for OSX")
+  find_library(GLUT_glut_LIBRARY GLUT HINTS ${PC_GLUT_LIBRARY_DIRS} DOC "GLUT library for OSX")
   find_library(GLUT_cocoa_LIBRARY Cocoa DOC "Cocoa framework for OSX")
   mark_as_advanced(GLUT_glut_LIBRARY GLUT_cocoa_LIBRARY)
 
@@ -195,18 +148,24 @@ else()
   endif ()
 
   find_path( GLUT_INCLUDE_DIR GL/glut.h
+    PATHS
     /usr/include/GL
     /usr/openwin/share/include
     /usr/openwin/include
     /opt/graphics/OpenGL/include
     /opt/graphics/OpenGL/contrib/libglut
     ${_GLUT_INC_DIR}
+    HINTS
+    ${PC_GLUT_INCLUDE_DIRS}
     )
   mark_as_advanced(GLUT_INCLUDE_DIR)
 
   find_library( GLUT_glut_LIBRARY glut
+    PATHS
     /usr/openwin/lib
     ${_GLUT_glut_LIB_DIR}
+    HINTS
+    ${PC_GLUT_LIBRARY_DIRS}
     )
   mark_as_advanced(GLUT_glut_LIBRARY)
 
