@@ -4,7 +4,9 @@ project(TestBasicPerl CXX)
 
 include(CTest)
 
-set(language "perl")
+if(NOT DEFINED language)
+  set(language "perl")
+endif()
 
 include (../BasicConfiguration.cmake)
 
