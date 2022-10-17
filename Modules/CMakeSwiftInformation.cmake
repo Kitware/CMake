@@ -65,10 +65,22 @@ set(CMAKE_Swift_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDLL -libc MD)
 set(CMAKE_Swift_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDebug -libc MTd)
 set(CMAKE_Swift_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDebugDLL -libc MDd)
 
-set(CMAKE_Swift_FLAGS_DEBUG_INIT "-Onone -g")
-set(CMAKE_Swift_FLAGS_RELEASE_INIT "-O")
-set(CMAKE_Swift_FLAGS_RELWITHDEBINFO_INIT "-O -g")
-set(CMAKE_Swift_FLAGS_MINSIZEREL_INIT "-Osize")
+if(CMAKE_GENERATOR STREQUAL "Xcode")
+  # Xcode has a separate Xcode project option (SWIFT_COMPILATION_MODE) used to set
+  # whether compiling with whole-module optimizations or incrementally. Setting
+  # these options here will have no effect when compiling with the built-in driver,
+  # and will explode violently, leaving build products in the source directory, when
+  # using the old swift driver.
+  set(CMAKE_Swift_FLAGS_DEBUG_INIT "-Onone -g")
+  set(CMAKE_Swift_FLAGS_RELEASE_INIT "-O")
+  set(CMAKE_Swift_FLAGS_RELWITHDEBINFO_INIT "-O -g")
+  set(CMAKE_Swift_FLAGS_MINSIZEREL_INIT "-Osize")
+else()
+  set(CMAKE_Swift_FLAGS_DEBUG_INIT "-Onone -g -incremental")
+  set(CMAKE_Swift_FLAGS_RELEASE_INIT "-O -wmo")
+  set(CMAKE_Swift_FLAGS_RELWITHDEBINFO_INIT "-O -g -wmo")
+  set(CMAKE_Swift_FLAGS_MINSIZEREL_INIT "-Osize -wmo")
+endif()
 
 if(CMAKE_EXECUTABLE_FORMAT STREQUAL "ELF")
   if(NOT DEFINED CMAKE_Swift_LINK_WHAT_YOU_USE_FLAG)
@@ -91,7 +103,7 @@ if(NOT CMAKE_Swift_NUM_THREADS MATCHES "^[0-9]+$")
 endif()
 
 if(NOT CMAKE_Swift_CREATE_SHARED_LIBRARY)
-  set(CMAKE_Swift_CREATE_SHARED_LIBRARY "<CMAKE_Swift_COMPILER> -output-file-map <SWIFT_OUTPUT_FILE_MAP> -incremental -j ${CMAKE_Swift_NUM_THREADS} -emit-library -o <TARGET> -module-name <SWIFT_MODULE_NAME> -module-link-name <SWIFT_LIBRARY_NAME> -emit-module -emit-module-path <SWIFT_MODULE> -emit-dependencies <DEFINES> <FLAGS> <INCLUDES> <SWIFT_SOURCES> <LINK_FLAGS> <SONAME_FLAG> <TARGET_INSTALLNAME_DIR><TARGET_SONAME> ${CMAKE_Swift_IMPLIB_LINKER_FLAGS} <LINK_LIBRARIES>")
+  set(CMAKE_Swift_CREATE_SHARED_LIBRARY "<CMAKE_Swift_COMPILER> -output-file-map <SWIFT_OUTPUT_FILE_MAP> -j ${CMAKE_Swift_NUM_THREADS} -num-threads ${CMAKE_Swift_NUM_THREADS} -emit-library -o <TARGET> -module-name <SWIFT_MODULE_NAME> -module-link-name <SWIFT_LIBRARY_NAME> -emit-module -emit-module-path <SWIFT_MODULE> -emit-dependencies <DEFINES> <FLAGS> <INCLUDES> <SWIFT_SOURCES> <LINK_FLAGS> <SONAME_FLAG> <TARGET_INSTALLNAME_DIR><TARGET_SONAME> ${CMAKE_Swift_IMPLIB_LINKER_FLAGS} <LINK_LIBRARIES>")
 endif()
 
 if(NOT CMAKE_Swift_CREATE_SHARED_MODULE)
@@ -99,11 +111,11 @@ if(NOT CMAKE_Swift_CREATE_SHARED_MODULE)
 endif()
 
 if(NOT CMAKE_Swift_LINK_EXECUTABLE)
-  set(CMAKE_Swift_LINK_EXECUTABLE "<CMAKE_Swift_COMPILER> -output-file-map <SWIFT_OUTPUT_FILE_MAP> -incremental -j ${CMAKE_Swift_NUM_THREADS} -emit-executable -o <TARGET> -emit-dependencies <DEFINES> <FLAGS> <INCLUDES> <SWIFT_SOURCES> <LINK_FLAGS> <LINK_LIBRARIES>")
+  set(CMAKE_Swift_LINK_EXECUTABLE "<CMAKE_Swift_COMPILER> -output-file-map <SWIFT_OUTPUT_FILE_MAP> -j ${CMAKE_Swift_NUM_THREADS} -num-threads ${CMAKE_Swift_NUM_THREADS} -emit-executable -o <TARGET> -emit-dependencies <DEFINES> <FLAGS> <INCLUDES> <SWIFT_SOURCES> <LINK_FLAGS> <LINK_LIBRARIES>")
 endif()
 
 if(NOT CMAKE_Swift_CREATE_STATIC_LIBRARY)
-  set(CMAKE_Swift_CREATE_STATIC_LIBRARY "<CMAKE_Swift_COMPILER> -output-file-map <SWIFT_OUTPUT_FILE_MAP> -incremental -j ${CMAKE_Swift_NUM_THREADS} -emit-library -static -o <TARGET> -module-name <SWIFT_MODULE_NAME> -module-link-name <SWIFT_LIBRARY_NAME> -emit-module -emit-module-path <SWIFT_MODULE> -emit-dependencies <DEFINES> <FLAGS> <INCLUDES> <SWIFT_SOURCES> <LINK_FLAGS> <LINK_LIBRARIES>")
+  set(CMAKE_Swift_CREATE_STATIC_LIBRARY "<CMAKE_Swift_COMPILER> -output-file-map <SWIFT_OUTPUT_FILE_MAP> -j ${CMAKE_Swift_NUM_THREADS} -num-threads ${CMAKE_Swift_NUM_THREADS} -emit-library -static -o <TARGET> -module-name <SWIFT_MODULE_NAME> -module-link-name <SWIFT_LIBRARY_NAME> -emit-module -emit-module-path <SWIFT_MODULE> -emit-dependencies <DEFINES> <FLAGS> <INCLUDES> <SWIFT_SOURCES> <LINK_FLAGS> <LINK_LIBRARIES>")
 
   set(CMAKE_Swift_ARCHIVE_CREATE "<CMAKE_AR> crs <TARGET> <OBJECTS>")
   set(CMAKE_Swift_ARCHIVE_FINISH "")

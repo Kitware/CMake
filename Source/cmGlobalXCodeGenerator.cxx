@@ -4386,11 +4386,19 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
     buildSettings->AddAttribute("CODE_SIGNING_ALLOWED",
                                 this->CreateString("NO"));
   }
+  auto debugConfigs = this->GetCMakeInstance()->GetDebugConfigs();
+  std::set<std::string> debugConfigSet(debugConfigs.begin(),
+                                       debugConfigs.end());
 
   for (auto& config : configs) {
     CreateGlobalXCConfigSettings(root, config.second, config.first);
 
     cmXCodeObject* buildSettingsForCfg = this->CreateFlatClone(buildSettings);
+
+    if (debugConfigSet.count(cmSystemTools::UpperCase(config.first)) == 0) {
+      buildSettingsForCfg->AddAttribute("SWIFT_COMPILATION_MODE",
+                                        this->CreateString("wholemodule"));
+    }
 
     // Put this last so it can override existing settings
     // Convert "CMAKE_XCODE_ATTRIBUTE_*" variables directly.
