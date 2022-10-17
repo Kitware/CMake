@@ -1,0 +1,1 @@
+(Ninja generators)?(build stopped: dependency cycle:)
