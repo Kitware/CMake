@@ -3830,6 +3830,7 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
       const auto& fwPaths = cli->GetFrameworkPaths();
       emitted.insert(fwPaths.begin(), fwPaths.end());
       BuildObjectListOrString libPaths(this, true);
+      BuildObjectListOrString fwSearchPaths(this, true);
       for (auto const& libItem : configItemMap[configName]) {
         auto const& libName = *libItem;
         if (libName.IsPath == cmComputeLinkInformation::ItemIsPath::Yes) {
@@ -3846,8 +3847,8 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
                 emitted.insert(fwDescriptor->Directory).second) {
               // This is a search path we had not added before and it isn't
               // an implicit search path, so we need it
-              libPaths.Add("-F " +
-                           this->XCodeEscapePath(fwDescriptor->Directory));
+              fwSearchPaths.Add(
+                this->XCodeEscapePath(fwDescriptor->Directory));
             }
             if (libName.GetFeatureName() == "__CMAKE_LINK_FRAMEWORK"_s) {
               // use the full path
@@ -3886,9 +3887,16 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
           target->AddDependTarget(configName, libName.Target->GetName());
         }
       }
-      this->AppendBuildSettingAttribute(target,
-                                        this->GetTargetLinkFlagsVar(gt),
-                                        libPaths.CreateList(), configName);
+      if (!libPaths.IsEmpty()) {
+        this->AppendBuildSettingAttribute(target,
+                                          this->GetTargetLinkFlagsVar(gt),
+                                          libPaths.CreateList(), configName);
+      }
+      if (!fwSearchPaths.IsEmpty()) {
+        this->AppendBuildSettingAttribute(target, "FRAMEWORK_SEARCH_PATHS",
+                                          fwSearchPaths.CreateList(),
+                                          configName);
+      }
     }
   }
 }
