@@ -1537,6 +1537,16 @@ void cmake::PrintTraceFormatVersion()
   }
 }
 
+void cmake::SetTraceRedirect(cmake* other)
+{
+  this->Trace = other->Trace;
+  this->TraceExpand = other->TraceExpand;
+  this->TraceFormatVar = other->TraceFormatVar;
+  this->TraceOnlyThisSources = other->TraceOnlyThisSources;
+
+  this->TraceRedirect = other;
+}
+
 bool cmake::SetDirectoriesFromFile(const std::string& arg)
 {
   // Check if the argument refers to a CMakeCache.txt or

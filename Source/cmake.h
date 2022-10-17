@@ -513,9 +513,18 @@ public:
   {
     return this->TraceOnlyThisSources;
   }
-  cmGeneratedFileStream& GetTraceFile() { return this->TraceFile; }
+  cmGeneratedFileStream& GetTraceFile()
+  {
+    if (this->TraceRedirect) {
+      return this->TraceRedirect->GetTraceFile();
+    }
+    return this->TraceFile;
+  }
   void SetTraceFile(std::string const& file);
   void PrintTraceFormatVersion();
+
+  //! Use trace from another ::cmake instance.
+  void SetTraceRedirect(cmake* other);
 
   bool GetWarnUninitialized() const { return this->WarnUninitialized; }
   void SetWarnUninitialized(bool b) { this->WarnUninitialized = b; }
@@ -677,6 +686,7 @@ private:
   bool TraceExpand = false;
   TraceFormat TraceFormatVar = TRACE_HUMAN;
   cmGeneratedFileStream TraceFile;
+  cmake* TraceRedirect = nullptr;
   bool WarnUninitialized = false;
   bool WarnUnusedCli = true;
   bool CheckSystemVars = false;
