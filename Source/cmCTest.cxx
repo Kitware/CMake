@@ -2116,11 +2116,7 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
       return false;
     }
     i++;
-    this->Impl->TestHandler.SetJUnitXMLFileName(std::string(args[i]));
-    // Turn test output compression off.
-    // This makes it easier to include test output in the resulting
-    // JUnit XML report.
-    this->Impl->CompressTestOutput = false;
+    this->SetOutputJUnitFileName(std::string(args[i]));
   }
 
   cm::string_view noTestsPrefix = "--no-tests=";
@@ -2457,6 +2453,9 @@ bool cmCTest::SetArgsFromPreset(const std::string& presetName,
 
     if (!expandedPreset->Output->OutputLogFile.empty()) {
       this->SetOutputLogFileName(expandedPreset->Output->OutputLogFile);
+    }
+    if (!expandedPreset->Output->OutputJUnitFile.empty()) {
+      this->SetOutputJUnitFileName(expandedPreset->Output->OutputJUnitFile);
     }
 
     this->Impl->LabelSummary =
@@ -3539,6 +3538,15 @@ void cmCTest::SetOutputLogFileName(const std::string& name)
   } else {
     this->Impl->OutputLogFile.reset();
   }
+}
+
+void cmCTest::SetOutputJUnitFileName(const std::string& name)
+{
+  this->Impl->TestHandler.SetJUnitXMLFileName(name);
+  // Turn test output compression off.
+  // This makes it easier to include test output in the resulting
+  // JUnit XML report.
+  this->Impl->CompressTestOutput = false;
 }
 
 static const char* cmCTestStringLogType[] = { "DEBUG",

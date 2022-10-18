@@ -1,5 +1,5 @@
 {
-    "version": 5,
+    "version": 6,
     "configurePresets": [
         {
             "name": "default",
@@ -177,6 +177,13 @@
             "inherits": "minimal",
             "output": {
                 "outputLogFile": "${sourceDir}/build/default/output.log"
+            }
+        },
+        {
+            "name": "outputJUnit",
+            "inherits": "minimal",
+            "output": {
+                "outputJUnitFile": "${sourceDir}/build/default/output.xml"
             }
         }
     ]
