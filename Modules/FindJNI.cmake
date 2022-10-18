@@ -107,7 +107,7 @@ include(FindPackageHandleStandardArgs)
 
 if(NOT JNI_FIND_COMPONENTS)
   if(ANDROID)
-    if(CMAKE_ANDROID_API LESS 31)
+    if(CMAKE_SYSTEM_VERSION LESS 31)
       # There are no components for Android NDK
       set(JNI_FIND_COMPONENTS)
     else()
@@ -125,7 +125,7 @@ else()
   # On Android, if JVM was requested we need to find NativeHelper as well which
   # is an implicit dependency of JVM allowing to provide uniform access to basic
   # JVM/DVM functionality.
-  if(ANDROID AND CMAKE_ANDROID_API GREATER_EQUAL 31 AND JVM IN_LIST JNI_FIND_COMPONENTS)
+  if(ANDROID AND CMAKE_SYSTEM_VERSION GREATER_EQUAL 31 AND JVM IN_LIST JNI_FIND_COMPONENTS)
     if(NOT NativeHelper IN_LIST JNI_FIND_COMPONENTS)
       list(APPEND JNI_FIND_COMPONENTS NativeHelper)
       # NativeHelper is required only if JVM was requested as such.
