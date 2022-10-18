@@ -78,7 +78,7 @@ set(CMakePresetsTest_ASSETS "Good-indexFile.txt")
 set(GoodTestPresets
   "minimal;defaults;noEnvironment;withEnvironment"
   "config-debug;config-release"
-  "exclude;index;indexFile;showOnly")
+  "exclude;index;indexFile;showOnly;outputLog")
 run_cmake_test_presets(Good
                        "default"
                        ""

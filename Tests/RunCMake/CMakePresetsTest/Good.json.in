@@ -171,6 +171,13 @@
             "execution": {
                 "showOnly": "human"
             }
+        },
+        {
+            "name": "outputLog",
+            "inherits": "minimal",
+            "output": {
+                "outputLogFile": "${sourceDir}/build/default/output.log"
+            }
         }
     ]
 }
