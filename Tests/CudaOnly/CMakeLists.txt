@@ -27,12 +27,10 @@ if(CMake_TEST_CUDA AND NOT CMake_TEST_CUDA STREQUAL "Clang")
   add_cuda_test_macro(CudaOnly.GPUDebugFlag CudaOnlyGPUDebugFlag)
 endif()
 
+# The CUDA only ships the shared version of the toolkit libraries
+# on windows
 if(NOT WIN32)
-  # The CUDA only ships the shared version of the toolkit libraries
-  # on windows
   add_cuda_test_macro(CudaOnly.StaticRuntimePlusToolkit CudaOnlyStaticRuntimePlusToolkit)
-  # `isystem` behaves differently on windows with nvcc
-  add_cuda_test_macro(CudaOnly.ToolkitIsSystemInclude CudaOnlySystemInclude)
 endif()
 
 add_cuda_test_macro(CudaOnly.DeviceLTO CudaOnlyDeviceLTO)
