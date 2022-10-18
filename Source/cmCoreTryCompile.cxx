@@ -577,6 +577,12 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       fprintf(fout, "cmake_policy(SET CMP0126 OLD)\n");
     }
 
+    /* Set language extensions policy to match outer project.  */
+    if (this->Makefile->GetPolicyStatus(cmPolicies::CMP0128) !=
+        cmPolicies::NEW) {
+      fprintf(fout, "cmake_policy(SET CMP0128 OLD)\n");
+    }
+
     std::string projectLangs;
     for (std::string const& li : testLangs) {
       projectLangs += " " + li;
