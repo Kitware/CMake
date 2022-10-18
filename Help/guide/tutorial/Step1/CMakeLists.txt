@@ -5,7 +5,7 @@
 # TODO 7: Set the project version number as 1.0 in the above project command
 
 # TODO 6: Set the variable CMAKE_CXX_STANDARD to 11
-#         and the variable CMAKE_CXX_REQUIRED_STANDARD to True
+#         and the variable CMAKE_CXX_STANDARD_REQUIRED to True
 
 # TODO 8: Use configure_file to configure and copy TutorialConfig.h.in to
 #         TutorialConfig.h
