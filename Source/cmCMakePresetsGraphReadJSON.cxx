@@ -588,6 +588,11 @@ cmCMakePresetsGraph::ReadFileResult cmCMakePresetsGraph::ReadJSONFile(
       return ReadFileResult::TEST_OUTPUT_TRUNCATION_UNSUPPORTED;
     }
 
+    // Support for outputJUnitFile added in version 6.
+    if (v < 6 && preset.Output && !preset.Output->OutputJUnitFile.empty()) {
+      return ReadFileResult::CTEST_JUNIT_UNSUPPORTED;
+    }
+
     this->TestPresetOrder.push_back(preset.Name);
   }
 

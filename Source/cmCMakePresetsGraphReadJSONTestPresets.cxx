@@ -104,6 +104,8 @@ auto const TestPresetOptionalOutputHelper =
             cmCMakePresetsGraphInternal::PresetOptionalBoolHelper, false)
       .Bind("outputLogFile"_s, &TestPreset::OutputOptions::OutputLogFile,
             cmCMakePresetsGraphInternal::PresetStringHelper, false)
+      .Bind("outputJUnitFile"_s, &TestPreset::OutputOptions::OutputJUnitFile,
+            cmCMakePresetsGraphInternal::PresetStringHelper, false)
       .Bind("labelSummary"_s, &TestPreset::OutputOptions::LabelSummary,
             cmCMakePresetsGraphInternal::PresetOptionalBoolHelper, false)
       .Bind("subprojectSummary"_s,
