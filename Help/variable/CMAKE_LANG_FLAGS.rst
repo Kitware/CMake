@@ -5,7 +5,9 @@ Flags for all build types.
 
 ``<LANG>`` flags used regardless of the value of :variable:`CMAKE_BUILD_TYPE`.
 
-This is initialized for each language from environment variables:
+For each language, if this variable is not defined, it is initialized
+and stored in the cache using values from environment variables in
+combination with CMake's builtin defaults for the toolchain:
 
 * ``CMAKE_C_FLAGS``:
   Initialized by the :envvar:`CFLAGS` environment variable.
@@ -15,6 +17,12 @@ This is initialized for each language from environment variables:
   Initialized by the :envvar:`CUDAFLAGS` environment variable.
 * ``CMAKE_Fortran_FLAGS``:
   Initialized by the :envvar:`FFLAGS` environment variable.
+* ``CMAKE_CSharp_FLAGS``:
+  Initialized by the :envvar:`CSFLAGS` environment variable.
+* ``CMAKE_HIP_FLAGS``:
+  Initialized by the :envvar:`HIPFLAGS` environment variable.
+* ``CMAKE_ISPC_FLAGS``:
+  Initialized by the :envvar:`ISPCFLAGS` environment variable.
 
 This value is a command-line string fragment. Therefore, multiple options
 should be separated by spaces, and options with spaces should be quoted.
