@@ -359,6 +359,9 @@ public:
   /** Set the output log file name */
   void SetOutputLogFileName(const std::string& name);
 
+  /** Set the output JUnit file name */
+  void SetOutputJUnitFileName(const std::string& name);
+
   /** Set the visual studio or Xcode config type */
   void SetConfigType(const std::string& ct);
 

@@ -54,6 +54,7 @@ public:
     TEST_OUTPUT_TRUNCATION_UNSUPPORTED,
     INVALID_WORKFLOW_STEPS,
     WORKFLOW_STEP_UNREACHABLE_FROM_FILE,
+    CTEST_JUNIT_UNSUPPORTED,
   };
 
   std::string errors;
@@ -230,6 +231,7 @@ public:
       cm::optional<bool> OutputOnFailure;
       cm::optional<bool> Quiet;
       std::string OutputLogFile;
+      std::string OutputJUnitFile;
       cm::optional<bool> LabelSummary;
       cm::optional<bool> SubprojectSummary;
       cm::optional<int> MaxPassedTestOutputSize;

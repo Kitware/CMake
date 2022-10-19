@@ -1,0 +1,2 @@
+^CMake Error: Could not read presets from [^
+]*/Tests/RunCMake/CMakePresetsTest/TestOutputTruncationUnsupported: File version must be 5 or higher for testOutputTruncation preset support\.$

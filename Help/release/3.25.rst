@@ -21,6 +21,9 @@ Presets
 * The :manual:`cmake-presets(7)` format now supports a
   ``workflowPresets`` field to specify presets for :option:`cmake --workflow`.
 
+* The :manual:`cmake-presets(7)` format now supports a
+  ``outputJUnitFile`` field to specify JUnit output in test presets.
+
 Languages
 ---------
 
