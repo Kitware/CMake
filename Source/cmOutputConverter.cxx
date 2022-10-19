@@ -527,6 +527,13 @@ bool cmOutputConverter::Shell_ArgumentNeedsQuotes(cm::string_view in,
     }
   }
 
+  /* UNC paths in MinGW Makefiles need quotes.  */
+  if ((flags & Shell_Flag_MinGWMake) && (flags & Shell_Flag_Make)) {
+    if (in.size() > 1 && in[0] == '\\' && in[1] == '\\') {
+      return true;
+    }
+  }
+
   return false;
 }
 
