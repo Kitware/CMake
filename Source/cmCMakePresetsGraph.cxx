@@ -265,6 +265,8 @@ bool ExpandMacros(const cmCMakePresetsGraph& graph, const TestPreset& preset,
   if (out->Output) {
     CHECK_EXPAND(out, out->Output->OutputLogFile, macroExpanders,
                  graph.GetVersion(preset));
+    CHECK_EXPAND(out, out->Output->OutputJUnitFile, macroExpanders,
+                 graph.GetVersion(preset));
   }
 
   if (out->Filter) {
@@ -851,6 +853,7 @@ cmCMakePresetsGraph::TestPreset::VisitPresetInherit(
                            parentOutput.OutputOnFailure);
       InheritOptionalValue(output.Quiet, parentOutput.Quiet);
       InheritString(output.OutputLogFile, parentOutput.OutputLogFile);
+      InheritString(output.OutputJUnitFile, parentOutput.OutputJUnitFile);
       InheritOptionalValue(output.LabelSummary, parentOutput.LabelSummary);
       InheritOptionalValue(output.SubprojectSummary,
                            parentOutput.SubprojectSummary);
@@ -1253,6 +1256,8 @@ const char* cmCMakePresetsGraph::ResultToString(ReadFileResult result)
       return "Invalid workflow steps";
     case ReadFileResult::WORKFLOW_STEP_UNREACHABLE_FROM_FILE:
       return "Workflow step is unreachable from preset's file";
+    case ReadFileResult::CTEST_JUNIT_UNSUPPORTED:
+      return "File version must be 6 or higher for CTest JUnit output support";
   }
 
   return "Unknown error";

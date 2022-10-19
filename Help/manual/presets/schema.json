@@ -83,7 +83,7 @@
         "vendor": { "$ref": "#/definitions/vendor" },
         "configurePresets": { "$ref": "#/definitions/configurePresetsV3"},
         "buildPresets": { "$ref": "#/definitions/buildPresetsV4"},
-        "testPresets": { "$ref": "#/definitions/testPresetsV5"},
+        "testPresets": { "$ref": "#/definitions/testPresetsV6"},
         "packagePresets": { "$ref": "#/definitions/packagePresetsV6"},
         "workflowPresets": { "$ref": "#/definitions/workflowPresetsV6" },
         "include": { "$ref": "#/definitions/include"}
@@ -705,6 +705,25 @@
         "additionalProperties": false
       }
     },
+    "testPresetsItemsV6": {
+      "type": "array",
+      "description": "An optional array of test preset objects. Used to specify arguments to ctest. Available in version 6 and higher.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "output": {
+            "type": "object",
+            "description": "An optional object specifying output options.",
+            "properties": {
+              "outputJUnitFile": {
+                "type": "string",
+                "description": "An optional string specifying a path to a JUnit file. Equivalent to passing --output-junit on the command line."
+              }
+            }
+          }
+        }
+      }
+    },
     "testPresetsItemsV5": {
       "type": "array",
       "description": "An optional array of test preset objects. Used to specify arguments to ctest. Available in version 5 and higher.",
@@ -1051,6 +1070,58 @@
         ]
       }
     },
+    "testPresetsV6": {
+      "type": "array",
+      "description": "An optional array of test preset objects. Used to specify arguments to ctest. Available in version 6 and higher.",
+      "allOf": [
+        { "$ref": "#/definitions/testPresetsItemsV2" },
+        { "$ref": "#/definitions/testPresetsItemsV3" },
+        { "$ref": "#/definitions/testPresetsItemsV5" },
+        { "$ref": "#/definitions/testPresetsItemsV6" }
+      ],
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {},
+          "hidden": {},
+          "inherits": {},
+          "configurePreset": {},
+          "vendor": {},
+          "displayName": {},
+          "description": {},
+          "inheritConfigureEnvironment": {},
+          "environment": {},
+          "configuration": {},
+          "overwriteConfigurationFile": {},
+          "output": {
+            "type": "object",
+            "properties": {
+              "shortProgress": {},
+              "verbosity": {},
+              "debug": {},
+              "outputOnFailure": {},
+              "quiet": {},
+              "outputLogFile": {},
+              "outputJUnitFile": {},
+              "labelSummary": {},
+              "subprojectSummary": {},
+              "maxPassedTestOutputSize": {},
+              "maxFailedTestOutputSize": {},
+              "maxTestNameWidth": {},
+              "testOutputTruncation": {}
+            },
+            "additionalProperties": false
+          },
+          "filter": {},
+          "execution": {},
+          "condition": {}
+        },
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false
+      }
+    },
     "testPresetsV5": {
       "type": "array",
       "description": "An optional array of test preset objects. Used to specify arguments to ctest. Available in version 5 and higher.",
@@ -1073,7 +1144,24 @@
           "environment": {},
           "configuration": {},
           "overwriteConfigurationFile": {},
-          "output": {},
+          "output": {
+            "type": "object",
+            "properties": {
+              "shortProgress": {},
+              "verbosity": {},
+              "debug": {},
+              "outputOnFailure": {},
+              "quiet": {},
+              "outputLogFile": {},
+              "labelSummary": {},
+              "subprojectSummary": {},
+              "maxPassedTestOutputSize": {},
+              "maxFailedTestOutputSize": {},
+              "maxTestNameWidth": {},
+              "testOutputTruncation": {}
+            },
+            "additionalProperties": false
+          },
           "filter": {},
           "execution": {},
           "condition": {}
@@ -1105,7 +1193,23 @@
           "environment": {},
           "configuration": {},
           "overwriteConfigurationFile": {},
-          "output": {},
+          "output": {
+            "type": "object",
+            "properties": {
+              "shortProgress": {},
+              "verbosity": {},
+              "debug": {},
+              "outputOnFailure": {},
+              "quiet": {},
+              "outputLogFile": {},
+              "labelSummary": {},
+              "subprojectSummary": {},
+              "maxPassedTestOutputSize": {},
+              "maxFailedTestOutputSize": {},
+              "maxTestNameWidth": {}
+            },
+            "additionalProperties": false
+          },
           "filter": {},
           "execution": {},
           "condition": {}
@@ -1136,7 +1240,23 @@
           "environment": {},
           "configuration": {},
           "overwriteConfigurationFile": {},
-          "output": {},
+          "output": {
+            "type": "object",
+            "properties": {
+              "shortProgress": {},
+              "verbosity": {},
+              "debug": {},
+              "outputOnFailure": {},
+              "quiet": {},
+              "outputLogFile": {},
+              "labelSummary": {},
+              "subprojectSummary": {},
+              "maxPassedTestOutputSize": {},
+              "maxFailedTestOutputSize": {},
+              "maxTestNameWidth": {}
+            },
+            "additionalProperties": false
+          },
           "filter": {},
           "execution": {}
         },

@@ -657,6 +657,12 @@ that may contain the following fields:
     passing :option:`--output-log <ctest --output-log>` on the command line.
     This field supports macro expansion.
 
+  ``outputJUnitFile``
+    An optional string specifying a path to a JUnit file. Equivalent to
+    passing :option:`--output-junit <ctest --output-junit>` on the command line.
+    This field supports macro expansion. This is allowed in preset files
+    specifying version ``6`` or above.
+
   ``labelSummary``
     An optional bool. If false, equivalent to passing
     :option:`--no-label-summary <ctest --no-label-summary>` on the command
