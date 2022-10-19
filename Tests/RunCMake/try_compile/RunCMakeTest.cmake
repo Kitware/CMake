@@ -88,6 +88,23 @@ if(RunCMake_GENERATOR MATCHES "Make|Ninja")
   unset(RunCMake_TEST_NO_CLEAN)
 endif()
 
+# Lookup CMAKE_CXX_EXTENSIONS_DEFAULT.
+# FIXME: Someday we could move this to the top of the file and use it in
+# place of some of the values passed by 'Tests/RunCMake/CMakeLists.txt'.
+run_cmake(Inspect)
+include("${RunCMake_BINARY_DIR}/Inspect-build/info.cmake")
+
+# FIXME: Support more compilers and default standard levels.
+if (CMAKE_CXX_COMPILER_ID MATCHES "^(GNU|AppleClang)$"
+    AND DEFINED CMAKE_CXX_STANDARD_DEFAULT
+    AND DEFINED CMAKE_CXX_EXTENSIONS_DEFAULT
+    )
+  run_cmake(CMP0128-WARN)
+  if(NOT CMAKE_CXX_STANDARD_DEFAULT EQUAL 11)
+    run_cmake(CMP0128-NEW)
+  endif()
+endif()
+
 if(UNIX)
   run_cmake(CleanupNoFollowSymlink)
 endif()
