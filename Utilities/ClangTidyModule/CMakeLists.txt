@@ -13,6 +13,9 @@ find_package(Clang REQUIRED)
 
 add_library(cmake-clang-tidy-module MODULE
   Module.cxx
+
+  UseCmstrlenCheck.cxx
+  UseCmstrlenCheck.h
   )
 target_include_directories(cmake-clang-tidy-module PRIVATE ${CLANG_INCLUDE_DIRS})
 target_link_libraries(cmake-clang-tidy-module PRIVATE clang-tidy)

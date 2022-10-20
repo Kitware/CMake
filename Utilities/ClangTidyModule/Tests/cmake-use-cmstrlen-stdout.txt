@@ -1,0 +1,20 @@
+cmake-use-cmstrlen.cxx:26:9: warning: use cmStrLen() for string literals [cmake-use-cmstrlen]
+  (void)strlen("Hello");
+        ^~~~~~
+        cmStrLen
+cmake-use-cmstrlen.cxx:26:9: note: FIX-IT applied suggested code changes
+cmake-use-cmstrlen.cxx:27:9: warning: use cmStrLen() for string literals [cmake-use-cmstrlen]
+  (void)::strlen("Goodbye");
+        ^~~~~~~~
+        cmStrLen
+cmake-use-cmstrlen.cxx:27:9: note: FIX-IT applied suggested code changes
+cmake-use-cmstrlen.cxx:28:9: warning: use cmStrLen() for string literals [cmake-use-cmstrlen]
+  (void)std::strlen("Hola");
+        ^~~~~~~~~~~
+        cmStrLen
+cmake-use-cmstrlen.cxx:28:9: note: FIX-IT applied suggested code changes
+cmake-use-cmstrlen.cxx:29:9: warning: use cmStrLen() for string literals [cmake-use-cmstrlen]
+  (void)ns1::strlen("Bonjour");
+        ^~~~~~~~~~~
+        cmStrLen
+cmake-use-cmstrlen.cxx:29:9: note: FIX-IT applied suggested code changes

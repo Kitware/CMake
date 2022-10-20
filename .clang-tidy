@@ -33,6 +33,7 @@ readability-*,\
 -readability-redundant-member-init,\
 -readability-suspicious-call-argument,\
 -readability-uppercase-literal-suffix,\
+cmake-*,\
 "
 HeaderFilterRegex: 'Source/cm[^/]*\.(h|hxx|cxx)$'
 CheckOptions:

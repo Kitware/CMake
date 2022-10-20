@@ -3,6 +3,8 @@
 #include <clang-tidy/ClangTidyModule.h>
 #include <clang-tidy/ClangTidyModuleRegistry.h>
 
+#include "UseCmstrlenCheck.h"
+
 namespace clang {
 namespace tidy {
 namespace cmake {
@@ -11,7 +13,7 @@ class CMakeClangTidyModule : public ClangTidyModule
 public:
   void addCheckFactories(ClangTidyCheckFactories& CheckFactories) override
   {
-    // TODO
+    CheckFactories.registerCheck<UseCmstrlenCheck>("cmake-use-cmstrlen");
   }
 };
 

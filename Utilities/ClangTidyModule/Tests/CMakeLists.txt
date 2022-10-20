@@ -9,3 +9,5 @@ function(add_run_clang_tidy_test check_name)
     -P "${CMAKE_CURRENT_SOURCE_DIR}/RunClangTidy.cmake"
     )
 endfunction()
+
+add_run_clang_tidy_test(cmake-use-cmstrlen)
