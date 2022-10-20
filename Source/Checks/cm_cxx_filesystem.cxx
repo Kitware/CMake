@@ -23,5 +23,16 @@ int main()
   }
 #endif
 
+  // If std::string is copy-on-write, the std::filesystem::path
+  // implementation may accidentally trigger a reallocation and compute
+  // an offset between two allocations, leading to undefined behavior.
+#if defined(__GLIBCXX__) &&                                                   \
+  (!defined(_GLIBCXX_USE_CXX11_ABI) || !_GLIBCXX_USE_CXX11_ABI)
+  std::string p5s1 = "/path";
+  std::string p5s2 = std::move(p5s1);
+  std::filesystem::path p5 = std::string(p5s2);
+  p5.remove_filename();
+#endif
+
   return 0;
 }
