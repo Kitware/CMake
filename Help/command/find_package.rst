@@ -294,7 +294,7 @@ Each entry is meant for installation trees following Windows (``W``), UNIX
  ``<prefix>/(cmake|CMake)/``                                            W
  ``<prefix>/<name>*/``                                                  W
  ``<prefix>/<name>*/(cmake|CMake)/``                                    W
- ``<prefix>/<name>*/(cmake|CMake)/<name>*/``                            W
+ ``<prefix>/<name>*/(cmake|CMake)/<name>*/`` [#]_                       W
  ``<prefix>/(lib/<arch>|lib*|share)/cmake/<name>*/``                    U
  ``<prefix>/(lib/<arch>|lib*|share)/<name>*/``                          U
  ``<prefix>/(lib/<arch>|lib*|share)/<name>*/(cmake|CMake)/``            U
@@ -302,6 +302,8 @@ Each entry is meant for installation trees following Windows (``W``), UNIX
  ``<prefix>/<name>*/(lib/<arch>|lib*|share)/<name>*/``                  W/U
  ``<prefix>/<name>*/(lib/<arch>|lib*|share)/<name>*/(cmake|CMake)/``    W/U
 ==================================================================== ==========
+
+.. [#] .. versionadded:: 3.25
 
 On systems supporting macOS :prop_tgt:`FRAMEWORK` and :prop_tgt:`BUNDLE`, the
 following directories are searched for Frameworks or Application Bundles
