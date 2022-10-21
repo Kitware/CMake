@@ -52,17 +52,18 @@ Make a new directory called ``Step5_build``. Run the
 :manual:`cmake-gui <cmake-gui(1)>` to configure the project and then build it
 with your chosen build tool.
 
-Then, run the install step by using the ``install`` option of the
-:manual:`cmake  <cmake(1)>` command (introduced in 3.15, older versions of
-CMake must use ``make install``) from the command line. This step will
-install the appropriate header files, libraries, and executables. For example:
+Then, run the install step by using the :option:`--install <cmake --install>`
+option of the :manual:`cmake  <cmake(1)>` command (introduced in 3.15, older
+versions of CMake must use ``make install``) from the command line. This step
+will install the appropriate header files, libraries, and executables.
+For example:
 
 .. code-block:: console
 
   cmake --install .
 
-For multi-configuration tools, don't forget to use the ``--config`` argument to
-specify the configuration.
+For multi-configuration tools, don't forget to use the
+:option:`--config <cmake--build --config>` argument to specify the configuration.
 
 .. code-block:: console
 
@@ -76,9 +77,9 @@ install target from the command line like the following:
   cmake --build . --target install --config Debug
 
 The CMake variable :variable:`CMAKE_INSTALL_PREFIX` is used to determine the
-root of where the files will be installed. If using the ``cmake --install``
-command, the installation prefix can be overridden via the ``--prefix``
-argument. For example:
+root of where the files will be installed. If using the :option:`cmake --install`
+command, the installation prefix can be overridden via the
+:option:`--prefix <cmake--install --prefix>` argument. For example:
 
 .. code-block:: console
 
@@ -194,9 +195,9 @@ Build and Run
 -------------
 
 Navigate to the build directory and rebuild the application. Then, run the
-:manual:`ctest <ctest(1)>` executable: ``ctest -N`` and ``ctest -VV``. For
+``ctest`` executable: :option:`ctest -N` and :option:`ctest -VV`. For
 multi-config generators (e.g. Visual Studio), the configuration type must be
-specified with the ``-C <mode>`` flag.  For example, to run tests in Debug
+specified with the :option:`-C \<mode\> <ctest -C>` flag.  For example, to run tests in Debug
 mode use ``ctest -C Debug -VV`` from the build directory
 (not the Debug subdirectory!). Release mode would be executed from the same
 location but with a ``-C Release``. Alternatively, build the ``RUN_TESTS``
