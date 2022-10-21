@@ -343,6 +343,11 @@ if(BUILD_TESTING)
       endif()
     endif()
   endif()
+  if(NOT DEFINED CMake_TEST_Swift)
+    if(CMAKE_Swift_COMPILER OR CMake_TEST_XCODE_SWIFT)
+      set(CMake_TEST_Swift 1)
+    endif()
+  endif()
 
   # Use 1500 or CTEST_TEST_TIMEOUT for long test timeout value,
   # whichever is greater.
@@ -390,7 +395,7 @@ if(BUILD_TESTING)
   ADD_TEST_MACRO(MissingSourceFile MissingSourceFile)
   set_tests_properties(MissingSourceFile PROPERTIES
     PASS_REGULAR_EXPRESSION "CMake Error at CMakeLists.txt:3 \\(add_executable\\):[ \r\n]*Cannot find source file:[ \r\n]*DoesNotExist/MissingSourceFile.c")
-  if(CMAKE_Swift_COMPILER OR CMake_TEST_XCODE_SWIFT)
+  if(CMake_TEST_Swift)
     ADD_TEST_MACRO(SwiftOnly SwiftOnly)
     if(CMake_TEST_XCODE_SWIFT)
       ADD_TEST_MACRO(SwiftMix SwiftMix)
