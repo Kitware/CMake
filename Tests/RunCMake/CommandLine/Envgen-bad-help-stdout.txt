@@ -1,0 +1,2 @@
+Generators.*
+\* (Unix Makefiles|Visual Studio).*

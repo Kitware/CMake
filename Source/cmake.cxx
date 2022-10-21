@@ -196,7 +196,7 @@ cmake::cmake(Role role, cmState::Mode mode, cmState::ProjectKind projectKind)
     this->AddProjectCommands();
   }
 
-  if (mode == cmState::Project) {
+  if (mode == cmState::Project || mode == cmState::Help) {
     this->LoadEnvironmentPresets();
   }
 

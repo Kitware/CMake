@@ -53,6 +53,7 @@ public:
     FindPackage,
     CTest,
     CPack,
+    Help
   };
 
   enum class ProjectKind
