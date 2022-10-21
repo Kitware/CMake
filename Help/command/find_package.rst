@@ -285,30 +285,40 @@ CMake constructs a set of possible installation prefixes for the
 package.  Under each prefix several directories are searched for a
 configuration file.  The tables below show the directories searched.
 Each entry is meant for installation trees following Windows (``W``), UNIX
-(``U``), or Apple (``A``) conventions::
+(``U``), or Apple (``A``) conventions:
 
-  <prefix>/                                                       (W)
-  <prefix>/(cmake|CMake)/                                         (W)
-  <prefix>/<name>*/                                               (W)
-  <prefix>/<name>*/(cmake|CMake)/                                 (W)
-  <prefix>/<name>*/(cmake|CMake)/<name>*/                         (W)
-  <prefix>/(lib/<arch>|lib*|share)/cmake/<name>*/                 (U)
-  <prefix>/(lib/<arch>|lib*|share)/<name>*/                       (U)
-  <prefix>/(lib/<arch>|lib*|share)/<name>*/(cmake|CMake)/         (U)
-  <prefix>/<name>*/(lib/<arch>|lib*|share)/cmake/<name>*/         (W/U)
-  <prefix>/<name>*/(lib/<arch>|lib*|share)/<name>*/               (W/U)
-  <prefix>/<name>*/(lib/<arch>|lib*|share)/<name>*/(cmake|CMake)/ (W/U)
+==================================================================== ==========
+ Entry                                                               Convention
+==================================================================== ==========
+ ``<prefix>/``                                                          W
+ ``<prefix>/(cmake|CMake)/``                                            W
+ ``<prefix>/<name>*/``                                                  W
+ ``<prefix>/<name>*/(cmake|CMake)/``                                    W
+ ``<prefix>/<name>*/(cmake|CMake)/<name>*/`` [#]_                       W
+ ``<prefix>/(lib/<arch>|lib*|share)/cmake/<name>*/``                    U
+ ``<prefix>/(lib/<arch>|lib*|share)/<name>*/``                          U
+ ``<prefix>/(lib/<arch>|lib*|share)/<name>*/(cmake|CMake)/``            U
+ ``<prefix>/<name>*/(lib/<arch>|lib*|share)/cmake/<name>*/``            W/U
+ ``<prefix>/<name>*/(lib/<arch>|lib*|share)/<name>*/``                  W/U
+ ``<prefix>/<name>*/(lib/<arch>|lib*|share)/<name>*/(cmake|CMake)/``    W/U
+==================================================================== ==========
+
+.. [#] .. versionadded:: 3.25
 
 On systems supporting macOS :prop_tgt:`FRAMEWORK` and :prop_tgt:`BUNDLE`, the
 following directories are searched for Frameworks or Application Bundles
-containing a configuration file::
+containing a configuration file:
 
-  <prefix>/<name>.framework/Resources/                    (A)
-  <prefix>/<name>.framework/Resources/CMake/              (A)
-  <prefix>/<name>.framework/Versions/*/Resources/         (A)
-  <prefix>/<name>.framework/Versions/*/Resources/CMake/   (A)
-  <prefix>/<name>.app/Contents/Resources/                 (A)
-  <prefix>/<name>.app/Contents/Resources/CMake/           (A)
+=========================================================== ==========
+ Entry                                                      Convention
+=========================================================== ==========
+ ``<prefix>/<name>.framework/Resources/``                      A
+ ``<prefix>/<name>.framework/Resources/CMake/``                A
+ ``<prefix>/<name>.framework/Versions/*/Resources/``           A
+ ``<prefix>/<name>.framework/Versions/*/Resources/CMake/``     A
+ ``<prefix>/<name>.app/Contents/Resources/``                   A
+ ``<prefix>/<name>.app/Contents/Resources/CMake/``             A
+=========================================================== ==========
 
 In all cases the ``<name>`` is treated as case-insensitive and corresponds
 to any of the names specified (``<PackageName>`` or names given by ``NAMES``).
