@@ -1595,6 +1595,7 @@ if(BUILD_TESTING)
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ExternalProject")
   set_tests_properties(ExternalProject PROPERTIES
+    ENVIRONMENT GIT_ALLOW_PROTOCOL=file
     RUN_SERIAL 1
     TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT})
 
@@ -2684,6 +2685,7 @@ if(BUILD_TESTING)
       -P "${CMake_BINARY_DIR}/Tests/CTestUpdateGIT.cmake"
       )
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${CTestUpdateGIT_DIR}")
+    set_property(TEST CTest.UpdateGIT PROPERTY ENVIRONMENT GIT_ALLOW_PROTOCOL=file)
   endif()
 
   # Test CTest Update with HG
