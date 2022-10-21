@@ -24,12 +24,12 @@ options, if any.  The trailing ``-- -i`` option is added for
 :ref:`Makefile Generators` if policy :policy:`CMP0061` is not set to
 ``NEW``.
 
-When invoked, this ``cmake --build`` command line will launch the
+When invoked, this :option:`cmake --build` command line will launch the
 underlying build system tool.
 
 .. versionadded:: 3.21
-  The ``PARALLEL_LEVEL`` argument can be used to set the ``--parallel``
-  flag.
+  The ``PARALLEL_LEVEL`` argument can be used to set the
+  :option:`--parallel <cmake--build --parallel>` flag.
 
 .. code-block:: cmake
 
@@ -39,7 +39,7 @@ This second signature is deprecated, but still available for backwards
 compatibility.  Use the first signature instead.
 
 It sets the given ``<cachevariable>`` to a command-line string as
-above but without the ``--target`` option.
+above but without the :option:`--target <cmake--build --target>` option.
 The ``<makecommand>`` is ignored but should be the full path to
 devenv, nmake, make or one of the end user build tools
 for legacy invocations.

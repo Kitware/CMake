@@ -63,8 +63,8 @@ Build and Run
 Make a new directory called ``Step3_build``, run the :manual:`cmake
 <cmake(1)>` executable or the :manual:`cmake-gui <cmake-gui(1)>` to
 configure the project and then build it with your chosen build tool or by
-using ``cmake --build .`` from the build directory. Here's a refresher of
-what that looks like from the command line:
+using :option:`cmake --build . <cmake --build>` from the build directory.
+Here's a refresher of what that looks like from the command line:
 
 .. code-block:: console
 
