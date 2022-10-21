@@ -168,6 +168,8 @@ Run Tests
 
 .. option:: --output-junit <file>
 
+ .. versionadded:: 3.21
+
  Write test results in JUnit format.
 
  This option tells CTest to write test results to ``<file>`` in JUnit XML
@@ -182,6 +184,10 @@ Run Tests
  This option tells CTest to list the tests that would be run but not
  actually run them.  Useful in conjunction with the :option:`-R <ctest -R>`
  and :option:`-E <ctest -E>` options.
+
+ .. versionadded:: 3.14
+
+   The ``--show-only`` option accepts a ``<format>`` value.
 
  ``<format>`` can be one of the following values.
 
@@ -1490,6 +1496,8 @@ Configuration settings include:
 
 Show as JSON Object Model
 =========================
+
+.. versionadded:: 3.14
 
 When the ``--show-only=json-v1`` command line option is given, the test
 information is output in JSON format.  Version 1.0 of the JSON object
