@@ -226,6 +226,9 @@ that may contain the following fields:
       ignore the field, but the IDE can use them to set up the environment
       before invoking CMake.
 
+    If no ``strategy`` field is given, or if the field uses the string form
+    rather than the object form, the behavior is the same as ``"set"``.
+
 ``toolchainFile``
   An optional string representing the path to the toolchain file.
   This field supports `macro expansion`_. If a relative path is specified,
