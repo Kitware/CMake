@@ -202,7 +202,7 @@ that may contain the following fields:
   Optional fields representing the platform and toolset, respectively, for
   :manual:`generators <cmake-generators(7)>` that support them.
 
-  See :option:`cmake -A` option for for possible values for ``architecture``
+  See :option:`cmake -A` option for possible values for ``architecture``
   and :option:`cmake -T` for ``toolset``.
 
   Each may be either a string or an object with the following fields:
