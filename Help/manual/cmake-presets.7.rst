@@ -161,7 +161,7 @@ that may contain the following fields:
   presets by default (except ``name``, ``hidden``, ``inherits``,
   ``description``, and ``displayName``), but can override them as
   desired. If multiple ``inherits`` presets provide conflicting values for
-  the same field, the earlier preset in the ``inherits`` list will be
+  the same field, the earlier preset in the ``inherits`` array will be
   preferred.
 
   A preset can only inherit from another preset that is defined in the
@@ -388,7 +388,7 @@ that may contain the following fields:
   ``inherits`` presets by default (except ``name``, ``hidden``,
   ``inherits``, ``description``, and ``displayName``), but can override
   them as desired. If multiple ``inherits`` presets provide conflicting
-  values for the same field, the earlier preset in the ``inherits`` list
+  values for the same field, the earlier preset in the ``inherits`` array
   will be preferred.
 
   A preset can only inherit from another preset that is defined in the
@@ -549,7 +549,7 @@ that may contain the following fields:
   ``inherits`` presets by default (except ``name``, ``hidden``,
   ``inherits``, ``description``, and ``displayName``), but can override
   them as desired. If multiple ``inherits`` presets provide conflicting
-  values for the same field, the earlier preset in the ``inherits`` list
+  values for the same field, the earlier preset in the ``inherits`` array
   will be preferred.
 
   A preset can only inherit from another preset that is defined in the
@@ -891,7 +891,7 @@ fields:
   ``inherits`` presets by default (except ``name``, ``hidden``,
   ``inherits``, ``description``, and ``displayName``), but can override
   them as desired. If multiple ``inherits`` presets provide conflicting
-  values for the same field, the earlier preset in the ``inherits`` list
+  values for the same field, the earlier preset in the ``inherits`` array
   will be preferred.
 
   A preset can only inherit from another preset that is defined in the
@@ -948,10 +948,10 @@ fields:
   explicitly specified in this package preset.
 
 ``generators``
-  An optional list of strings representing generators for CPack to use.
+  An optional array of strings representing generators for CPack to use.
 
 ``configurations``
-  An optional list of strings representing build configurations for CPack to
+  An optional array of strings representing build configurations for CPack to
   package.
 
 ``variables``
@@ -1073,7 +1073,7 @@ object, it has the following fields:
       A required string to search for. This field supports macro expansion.
 
     ``list``
-      A required list of strings to search. This field supports macro
+      A required array of strings to search. This field supports macro
       expansion, and uses short-circuit evaluation.
 
   ``"matches"``
