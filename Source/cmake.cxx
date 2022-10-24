@@ -787,6 +787,7 @@ enum class ListPresets
   Build,
   Test,
   Package,
+  Workflow,
   All,
 };
 }
@@ -1144,6 +1145,8 @@ void cmake::SetArgs(const std::vector<std::string>& args)
         listPresets = ListPresets::Test;
       } else if (value == "package") {
         listPresets = ListPresets::Package;
+      } else if (value == "workflow") {
+        listPresets = ListPresets::Workflow;
       } else if (value == "all") {
         listPresets = ListPresets::All;
       } else {
@@ -1313,6 +1316,8 @@ void cmake::SetArgs(const std::vector<std::string>& args)
         presetsGraph.PrintTestPresetList();
       } else if (listPresets == ListPresets::Package) {
         presetsGraph.PrintPackagePresetList();
+      } else if (listPresets == ListPresets::Workflow) {
+        presetsGraph.PrintWorkflowPresetList();
       } else if (listPresets == ListPresets::All) {
         presetsGraph.PrintAllPresets();
       }
