@@ -208,7 +208,7 @@ int do_cmake(int ac, char const* const* av)
   doc.addCMakeStandardDocSections();
   if (doc.CheckOptions(ac, av, "--")) {
     // Construct and print requested documentation.
-    cmake hcm(cmake::RoleInternal, cmState::Unknown);
+    cmake hcm(cmake::RoleInternal, cmState::Help);
     hcm.SetHomeDirectory("");
     hcm.SetHomeOutputDirectory("");
     hcm.AddCMakePaths();

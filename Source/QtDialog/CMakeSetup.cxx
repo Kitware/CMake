@@ -79,7 +79,7 @@ int main(int argc, char** argv)
   doc.addCMakeStandardDocSections();
   if (argc2 > 1 && doc.CheckOptions(argc2, argv2)) {
     // Construct and print requested documentation.
-    cmake hcm(cmake::RoleInternal, cmState::Unknown);
+    cmake hcm(cmake::RoleInternal, cmState::Help);
     hcm.SetHomeDirectory("");
     hcm.SetHomeOutputDirectory("");
     hcm.AddCMakePaths();
