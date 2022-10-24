@@ -4,6 +4,7 @@
 #include <clang-tidy/ClangTidyModuleRegistry.h>
 
 #include "UseCmstrlenCheck.h"
+#include "UseCmsysFstreamCheck.h"
 
 namespace clang {
 namespace tidy {
@@ -14,6 +15,8 @@ public:
   void addCheckFactories(ClangTidyCheckFactories& CheckFactories) override
   {
     CheckFactories.registerCheck<UseCmstrlenCheck>("cmake-use-cmstrlen");
+    CheckFactories.registerCheck<UseCmsysFstreamCheck>(
+      "cmake-use-cmsys-fstream");
   }
 };
 
