@@ -10,7 +10,9 @@ endfunction()
 
 # Should not throw any errors
 # Regular executable
-get_prerequisites(${CMAKE_COMMAND} cmake_prereqs 1 1 "" "")
+if(SAMPLE_EXE)
+  get_prerequisites("${SAMPLE_EXE}" cmake_prereqs 1 1 "" "")
+endif()
 # Shell script
 check_script(${CMAKE_CURRENT_LIST_DIR}/script.sh)
 # Batch script
