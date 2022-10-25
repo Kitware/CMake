@@ -918,8 +918,10 @@ int do_workflow(int ac, char const* const* av)
   return -1;
 #else
   using WorkflowListPresets = cmake::WorkflowListPresets;
+  using WorkflowFresh = cmake::WorkflowFresh;
   std::string presetName;
   auto listPresets = WorkflowListPresets::No;
+  auto fresh = WorkflowFresh::No;
 
   using CommandArgument =
     cmCommandLineArgument<bool(std::string const& value)>;
@@ -930,6 +932,11 @@ int do_workflow(int ac, char const* const* av)
     CommandArgument{ "--list-presets", CommandArgument::Values::Zero,
                      [&listPresets](const std::string&) -> bool {
                        listPresets = WorkflowListPresets::Yes;
+                       return true;
+                     } },
+    CommandArgument{ "--fresh", CommandArgument::Values::Zero,
+                     [&fresh](const std::string&) -> bool {
+                       fresh = WorkflowFresh::Yes;
                        return true;
                      } },
   };
@@ -968,6 +975,8 @@ int do_workflow(int ac, char const* const* av)
       "Options:\n"
       "  --preset <preset> = Workflow preset to execute.\n"
       "  --list-presets    = List available workflow presets.\n"
+      "  --fresh           = Configure a fresh build tree, removing any "
+                            "existing cache file.\n"
       ;
     /* clang-format on */
     return 1;
@@ -982,7 +991,7 @@ int do_workflow(int ac, char const* const* av)
     cmakemainProgressCallback(msg, prog, &cm);
   });
 
-  return cm.Workflow(presetName, listPresets);
+  return cm.Workflow(presetName, listPresets, fresh);
 #endif
 }
 

@@ -607,7 +607,13 @@ public:
     No,
     Yes,
   };
-  int Workflow(const std::string& presetName, WorkflowListPresets listPresets);
+  enum class WorkflowFresh
+  {
+    No,
+    Yes,
+  };
+  int Workflow(const std::string& presetName, WorkflowListPresets listPresets,
+               WorkflowFresh fresh);
 
   void UnwatchUnusedCli(const std::string& var);
   void WatchUnusedCli(const std::string& var);

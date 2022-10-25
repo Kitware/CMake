@@ -1,0 +1,4 @@
+option(FRESH_CONFIGURE "" ON)
+if(NOT FRESH_CONFIGURE)
+  message(FATAL_ERROR "FRESH_CONFIGURE is ${FRESH_CONFIGURE}, should be ON")
+endif()

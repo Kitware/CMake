@@ -3733,7 +3733,7 @@ std::function<int()> cmake::BuildWorkflowStep(
 #endif
 
 int cmake::Workflow(const std::string& presetName,
-                    WorkflowListPresets listPresets)
+                    WorkflowListPresets listPresets, WorkflowFresh fresh)
 {
 #ifndef CMAKE_BOOTSTRAP
   this->SetHomeDirectory(cmSystemTools::GetCurrentWorkingDirectory());
@@ -3815,10 +3815,13 @@ int cmake::Workflow(const std::string& presetName,
         if (!configurePreset) {
           return 1;
         }
-        steps.emplace_back(
-          stepNumber, "configure"_s, step.PresetName,
-          this->BuildWorkflowStep({ cmSystemTools::GetCMakeCommand(),
-                                    "--preset", step.PresetName }));
+        std::vector<std::string> args{ cmSystemTools::GetCMakeCommand(),
+                                       "--preset", step.PresetName };
+        if (fresh == WorkflowFresh::Yes) {
+          args.emplace_back("--fresh");
+        }
+        steps.emplace_back(stepNumber, "configure"_s, step.PresetName,
+                           this->BuildWorkflowStep(args));
       } break;
       case cmCMakePresetsGraph::WorkflowPreset::WorkflowStep::Type::Build: {
         auto const* buildPreset = this->FindPresetForWorkflow(
