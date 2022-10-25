@@ -217,7 +217,8 @@ installers.  The most commonly-used variables are:
   to the user by the produced installer (often with an explicit "Accept"
   button, for graphical installers) prior to installation.  This license
   file is NOT added to the installed files but is used by some CPack generators
-  like NSIS.  If you want to install a license file (may be the same as this
+  like NSIS.  If you want to use UTF-8 characters, the file needs to be encoded
+  in UTF-8 BOM.  If you want to install a license file (may be the same as this
   one) along with your project, you must add an appropriate CMake
   :command:`install` command in your ``CMakeLists.txt``.
 
