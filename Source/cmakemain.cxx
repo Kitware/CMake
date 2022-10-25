@@ -949,6 +949,8 @@ int do_workflow(int ac, char const* const* av)
     }
     if (!(matched && parsed)) {
       if (!matched) {
+        presetName.clear();
+        listPresets = false;
         std::cerr << "Unknown argument " << arg << std::endl;
       }
       break;

@@ -77,3 +77,4 @@ unset(CMakeUserPresets_FILE)
 unset(CMakePresets_ASSETS)
 
 run_cmake_workflow_presets(ListPresets --list-presets)
+run_cmake_workflow_presets(InvalidOption -DINVALID_OPTION)
