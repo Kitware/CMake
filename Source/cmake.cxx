@@ -3732,7 +3732,8 @@ std::function<int()> cmake::BuildWorkflowStep(
 }
 #endif
 
-int cmake::Workflow(const std::string& presetName, bool listPresets)
+int cmake::Workflow(const std::string& presetName,
+                    WorkflowListPresets listPresets)
 {
 #ifndef CMAKE_BOOTSTRAP
   this->SetHomeDirectory(cmSystemTools::GetCurrentWorkingDirectory());
@@ -3747,7 +3748,7 @@ int cmake::Workflow(const std::string& presetName, bool listPresets)
     return 1;
   }
 
-  if (listPresets) {
+  if (listPresets == WorkflowListPresets::Yes) {
     settingsFile.PrintWorkflowPresetList();
     return 0;
   }
