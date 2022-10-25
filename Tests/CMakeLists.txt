@@ -271,14 +271,6 @@ if(BUILD_TESTING)
     find_package(Qt5Widgets QUIET NO_MODULE)
   endif()
 
-  if(NOT CMake_TEST_EXTERNAL_CMAKE)
-    add_subdirectory(CMakeLib)
-  endif()
-  add_subdirectory(CMakeOnly)
-  add_subdirectory(RunCMake)
-
-  add_subdirectory(FindPackageModeMakefileTest)
-
   # Collect a list of all test build directories.
   set(TEST_BUILD_DIRS)
 
@@ -342,6 +334,21 @@ if(BUILD_TESTING)
     endif()
   endif()
 
+  if(CMake_TEST_XCODE_VERSION AND CMAKE_OSX_SDKVERSION AND CMAKE_OSX_SDKPRODUCT)
+    if((NOT CMake_TEST_XCODE_VERSION VERSION_LESS 6.1) AND
+      ((NOT CMAKE_OSX_SDKPRODUCT STREQUAL "Mac OS X") OR
+      (NOT CMAKE_OSX_SDKVERSION VERSION_LESS 10.10)))
+      if(CMAKE_GENERATOR STREQUAL "Xcode")
+        set(CMake_TEST_XCODE_SWIFT 1)
+      endif()
+    endif()
+  endif()
+  if(NOT DEFINED CMake_TEST_Swift)
+    if(CMAKE_Swift_COMPILER OR CMake_TEST_XCODE_SWIFT)
+      set(CMake_TEST_Swift 1)
+    endif()
+  endif()
+
   # Use 1500 or CTEST_TEST_TIMEOUT for long test timeout value,
   # whichever is greater.
   set(CMAKE_LONG_TEST_TIMEOUT 1500)
@@ -351,6 +358,14 @@ if(BUILD_TESTING)
   if(CMAKE_LONG_TEST_TIMEOUT LESS 1500)
     set(CMAKE_LONG_TEST_TIMEOUT 1500)
   endif()
+
+  if(NOT CMake_TEST_EXTERNAL_CMAKE)
+    add_subdirectory(CMakeLib)
+  endif()
+  add_subdirectory(CMakeOnly)
+  add_subdirectory(RunCMake)
+
+  add_subdirectory(FindPackageModeMakefileTest)
 
   add_test(NAME CMake.Copyright
     COMMAND ${CMAKE_CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/CMakeCopyright.cmake)
@@ -380,16 +395,7 @@ if(BUILD_TESTING)
   ADD_TEST_MACRO(MissingSourceFile MissingSourceFile)
   set_tests_properties(MissingSourceFile PROPERTIES
     PASS_REGULAR_EXPRESSION "CMake Error at CMakeLists.txt:3 \\(add_executable\\):[ \r\n]*Cannot find source file:[ \r\n]*DoesNotExist/MissingSourceFile.c")
-  if(CMake_TEST_XCODE_VERSION AND CMAKE_OSX_SDKVERSION AND CMAKE_OSX_SDKPRODUCT)
-    if((NOT CMake_TEST_XCODE_VERSION VERSION_LESS 6.1) AND
-       ((NOT CMAKE_OSX_SDKPRODUCT STREQUAL "Mac OS X") OR
-        (NOT CMAKE_OSX_SDKVERSION VERSION_LESS 10.10)))
-      if(CMAKE_GENERATOR STREQUAL "Xcode")
-        set(CMake_TEST_XCODE_SWIFT 1)
-      endif()
-    endif()
-  endif()
-  if(CMAKE_Swift_COMPILER OR CMake_TEST_XCODE_SWIFT)
+  if(CMake_TEST_Swift)
     ADD_TEST_MACRO(SwiftOnly SwiftOnly)
     if(CMake_TEST_XCODE_SWIFT)
       ADD_TEST_MACRO(SwiftMix SwiftMix)

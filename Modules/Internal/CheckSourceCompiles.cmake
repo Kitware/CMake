@@ -9,7 +9,7 @@ cmake_policy(SET CMP0057 NEW) # if() supports IN_LIST
 
 function(CMAKE_CHECK_SOURCE_COMPILES _lang _source _var)
   if(NOT DEFINED "${_var}")
-
+    set(_lang_filename "src")
     if(_lang STREQUAL "C")
       set(_lang_textual "C")
       set(_lang_ext "c")
@@ -34,6 +34,13 @@ function(CMAKE_CHECK_SOURCE_COMPILES _lang _source _var)
     elseif(_lang STREQUAL "OBJCXX")
       set(_lang_textual "Objective-C++")
       set(_lang_ext "mm")
+    elseif(_lang STREQUAL "Swift")
+      set(_lang_textual "Swift")
+      set(_lang_ext "swift")
+      if (NOT DEFINED CMAKE_TRY_COMPILE_TARGET_TYPE
+          OR CMAKE_TRY_COMPILE_TARGET_TYPE STREQUAL "EXECUTABLE")
+        set(_lang_filename "main")
+      endif()
     else()
       message (SEND_ERROR "check_source_compiles: ${_lang}: unknown language.")
       return()
@@ -92,7 +99,7 @@ function(CMAKE_CHECK_SOURCE_COMPILES _lang _source _var)
     endif()
     string(APPEND _source "\n")
     try_compile(${_var}
-      SOURCE_FROM_VAR "src.${_SRC_EXT}" _source
+      SOURCE_FROM_VAR "${_lang_filename}.${_SRC_EXT}" _source
       COMPILE_DEFINITIONS -D${_var} ${CMAKE_REQUIRED_DEFINITIONS}
       ${CHECK_${LANG}_SOURCE_COMPILES_ADD_LINK_OPTIONS}
       ${CHECK_${LANG}_SOURCE_COMPILES_ADD_LIBRARIES}
