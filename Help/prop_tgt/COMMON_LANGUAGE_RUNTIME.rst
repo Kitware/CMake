@@ -17,6 +17,13 @@ Not Set (default)
 
   Mixed unmanaged/managed C++ using .NET Framework.
 
+``netcore``
+  .. versionadded:: 3.26
+
+  Mixed unmanaged/managed C++ using .NET Core.
+
+  This required VS 2019's v142 toolset or higher.
+
 ``pure``
 
   Managed C++.

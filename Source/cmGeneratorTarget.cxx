@@ -8515,9 +8515,14 @@ cmGeneratorTarget::ManagedType cmGeneratorTarget::CheckManagedType(
   //                            lib
   // 2. empty propval:          add /clr as flag, mixed unmanaged/managed
   //                            target, has import lib
-  // 3. any value (safe,pure):  add /clr:[propval] as flag, target with
+  // 3. netcore propval:        add /clr:netcore as flag, mixed
+  //                            unmanaged/managed target, has import lib.
+  // 4. any value (safe,pure):  add /clr:[propval] as flag, target with
   //                            managed code only, no import lib
-  return propval.empty() ? ManagedType::Mixed : ManagedType::Managed;
+  if (propval.empty() || propval == "netcore") {
+    return ManagedType::Mixed;
+  }
+  return ManagedType::Managed;
 }
 
 cmGeneratorTarget::ManagedType cmGeneratorTarget::GetManagedType(

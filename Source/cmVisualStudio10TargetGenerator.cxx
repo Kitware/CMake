@@ -3316,9 +3316,12 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
     }
   }
 
-  if (this->ProjectType != VsProjectType::csproj && clOptions.IsManaged()) {
+  if (this->ProjectType != VsProjectType::csproj &&
+      (clOptions.IsManaged() || clOptions.HasFlag("CLRSupport"))) {
     this->Managed = true;
-    std::string managedType = clOptions.GetFlag("CompileAsManaged");
+    std::string managedType = clOptions.HasFlag("CompileAsManaged")
+      ? clOptions.GetFlag("CompileAsManaged")
+      : "Mixed";
     if (managedType == "Safe" || managedType == "Pure") {
       // force empty calling convention if safe clr is used
       clOptions.AddFlag("CallingConvention", "");
