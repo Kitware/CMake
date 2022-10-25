@@ -375,19 +375,15 @@ public:
     ++this->Makefile->RecursionDepth;
     this->Makefile->ExecutionStatusStack.push_back(&status);
 #if !defined(CMAKE_BOOTSTRAP)
-    if (this->Makefile->GetCMakeInstance()->IsProfilingEnabled()) {
-      this->Makefile->GetCMakeInstance()->GetProfilingOutput().StartEntry(lff,
-                                                                          lfc);
-    }
+    this->ProfilingDataRAII =
+      this->Makefile->GetCMakeInstance()->CreateProfilingEntry(lff, lfc);
 #endif
   }
 
   ~cmMakefileCall()
   {
 #if !defined(CMAKE_BOOTSTRAP)
-    if (this->Makefile->GetCMakeInstance()->IsProfilingEnabled()) {
-      this->Makefile->GetCMakeInstance()->GetProfilingOutput().StopEntry();
-    }
+    this->ProfilingDataRAII.reset();
 #endif
     this->Makefile->ExecutionStatusStack.pop_back();
     --this->Makefile->RecursionDepth;
@@ -399,6 +395,9 @@ public:
 
 private:
   cmMakefile* Makefile;
+#if !defined(CMAKE_BOOTSTRAP)
+  cm::optional<cmMakefileProfilingData::RAII> ProfilingDataRAII;
+#endif
 };
 
 void cmMakefile::OnExecuteCommand(std::function<void()> callback)
