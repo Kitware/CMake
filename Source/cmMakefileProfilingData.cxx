@@ -60,7 +60,7 @@ void cmMakefileProfilingData::StartEntry(const cmListFileFunction& lff,
   }
   (*argsValue)["location"] =
     cmStrCat(lfc.FilePath, ':', std::to_string(lfc.Line));
-  this->StartEntry("cmake", lff.LowerCaseName(), std::move(argsValue));
+  this->StartEntry("script", lff.LowerCaseName(), std::move(argsValue));
 }
 
 void cmMakefileProfilingData::StartEntry(const std::string& category,
