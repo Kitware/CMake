@@ -47,7 +47,7 @@ public:
   virtual std::string GetDefaultPlatformName() const = 0;
 };
 
-template <class T>
+template <typename T>
 class cmGlobalGeneratorSimpleFactory : public cmGlobalGeneratorFactory
 {
 public:
@@ -70,13 +70,11 @@ public:
   /** Get the names of the current registered generators */
   std::vector<std::string> GetGeneratorNames() const override
   {
-    std::vector<std::string> names;
-    names.push_back(T::GetActualName());
-    return names;
+    return { T::GetActualName() };
   }
   std::vector<std::string> GetGeneratorNamesWithPlatform() const override
   {
-    return std::vector<std::string>();
+    return {};
   }
 
   /** Determine whether or not this generator supports toolsets */
@@ -89,8 +87,8 @@ public:
   std::vector<std::string> GetKnownPlatforms() const override
   {
     // default is no platform supported
-    return std::vector<std::string>();
+    return {};
   }
 
-  std::string GetDefaultPlatformName() const override { return std::string(); }
+  std::string GetDefaultPlatformName() const override { return {}; }
 };
