@@ -5,10 +5,12 @@
 #include <cstddef>
 #include <functional>
 #include <iostream>
+#include <iterator>
 #include <map>
 #include <memory>
 #include <sstream>
 #include <string>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -63,6 +65,23 @@ void cpackProgressCallback(const std::string& message, float /*unused*/)
 {
   std::cout << "-- " << message << std::endl;
 }
+
+std::vector<cmDocumentationEntry> makeGeneratorDocs(
+  const cmCPackGeneratorFactory& gf)
+{
+  const auto& generators = gf.GetGeneratorsList();
+
+  std::vector<cmDocumentationEntry> docs;
+  docs.reserve(generators.size());
+
+  std::transform(
+    generators.cbegin(), generators.cend(), std::back_inserter(docs),
+    [](const std::decay<decltype(generators)>::type::value_type& gen) {
+      return cmDocumentationEntry{ gen.first, gen.second };
+    });
+  return docs;
+}
+
 } // namespace
 
 // this is CPack.
@@ -536,15 +555,9 @@ int main(int argc, char const* const* argv)
                                                              << std::endl);
             // Print out all the valid generators
             cmDocumentation generatorDocs;
-            std::vector<cmDocumentationEntry> v;
-            for (auto const& g : generators.GetGeneratorsList()) {
-              cmDocumentationEntry e;
-              e.Name = g.first;
-              e.Brief = g.second;
-              v.push_back(std::move(e));
-            }
-            generatorDocs.SetSection("Generators", v);
-            std::cerr << "\n";
+            generatorDocs.SetSection("Generators",
+                                     makeGeneratorDocs(generators));
+            std::cerr << '\n';
             generatorDocs.PrintDocumentation(cmDocumentation::ListGenerators,
                                              std::cerr);
             parsed = false;
@@ -611,22 +624,12 @@ int main(int argc, char const* const* argv)
    */
   if (help) {
     // Construct and print requested documentation.
-
     doc.SetName("cpack");
     doc.SetSection("Name", cmDocumentationName);
     doc.SetSection("Usage", cmDocumentationUsage);
     doc.PrependSection("Options", cmDocumentationOptions);
-
-    std::vector<cmDocumentationEntry> v;
-    for (auto const& g : generators.GetGeneratorsList()) {
-      cmDocumentationEntry e;
-      e.Name = g.first;
-      e.Brief = g.second;
-      v.push_back(std::move(e));
-    }
-    doc.SetSection("Generators", v);
-
-    return doc.PrintRequestedDocumentation(std::cout) ? 0 : 1;
+    doc.SetSection("Generators", makeGeneratorDocs(generators));
+    return !doc.PrintRequestedDocumentation(std::cout);
   }
 
   if (cmSystemTools::GetErrorOccurredFlag()) {
