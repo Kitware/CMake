@@ -163,6 +163,9 @@ protected:
   void EmitSwiftDependencyInfo(cmSourceFile const* source,
                                const std::string& config);
 
+  void GenerateSwiftOutputFileMap(const std::string& config,
+                                  std::string& flags);
+
   void ExportObjectCompileCommand(
     std::string const& language, std::string const& sourceFileName,
     std::string const& objectDir, std::string const& objectFileName,

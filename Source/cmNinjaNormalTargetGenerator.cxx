@@ -372,7 +372,6 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile,
       vars.SwiftLibraryName = "$SWIFT_LIBRARY_NAME";
       vars.SwiftModule = "$SWIFT_MODULE";
       vars.SwiftModuleName = "$SWIFT_MODULE_NAME";
-      vars.SwiftOutputFileMap = "$SWIFT_OUTPUT_FILE_MAP";
       vars.SwiftSources = "$SWIFT_SOURCES";
 
       vars.Defines = "$DEFINES";
@@ -1072,12 +1071,6 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
         cmOutputConverter::SHELL);
     }(vars["SWIFT_MODULE_NAME"]);
 
-    const std::string map = cmStrCat(gt->GetSupportDirectory(), '/', config,
-                                     '/', "output-file-map.json");
-    vars["SWIFT_OUTPUT_FILE_MAP"] =
-      this->GetLocalGenerator()->ConvertToOutputFormat(
-        this->ConvertToNinjaPath(map), cmOutputConverter::SHELL);
-
     vars["SWIFT_SOURCES"] = [this, config]() -> std::string {
       std::vector<cmSourceFile const*> sources;
       std::stringstream oss;
@@ -1101,6 +1094,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
     vars["DEFINES"] = this->GetDefines("Swift", config);
     vars["FLAGS"] = this->GetFlags("Swift", config);
     vars["INCLUDES"] = this->GetIncludes("Swift", config);
+    this->GenerateSwiftOutputFileMap(config, vars["FLAGS"]);
   }
 
   // Compute specific libraries to link with.

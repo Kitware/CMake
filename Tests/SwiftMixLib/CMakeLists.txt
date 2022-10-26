@@ -4,3 +4,6 @@ project(SwiftMixLib C CXX Swift)
 add_library(SwiftMixedLib lib.c lib.cpp lib.swift)
 add_executable(Swifty main.swift)
 target_link_libraries(Swifty PUBLIC SwiftMixedLib)
+
+add_executable(c_main main.c)
+target_link_libraries(c_main PUBLIC SwiftMixedLib)
