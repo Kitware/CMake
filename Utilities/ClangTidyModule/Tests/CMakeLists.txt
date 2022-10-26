@@ -11,3 +11,4 @@ function(add_run_clang_tidy_test check_name)
 endfunction()
 
 add_run_clang_tidy_test(cmake-use-cmstrlen)
+add_run_clang_tidy_test(cmake-use-cmsys-fstream)
