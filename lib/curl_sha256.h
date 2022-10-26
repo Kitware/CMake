@@ -21,9 +21,12 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 
 #ifndef CURL_DISABLE_CRYPTO_AUTH
+#include <curl/curl.h>
 #include "curl_hmac.h"
 
 extern const struct HMAC_params Curl_HMAC_SHA256[1];

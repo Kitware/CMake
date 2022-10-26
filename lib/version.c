@@ -18,6 +18,8 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 
 #include "curl_setup.h"
@@ -29,6 +31,7 @@
 #include "vssh/ssh.h"
 #include "quic.h"
 #include "curl_printf.h"
+#include "easy_lock.h"
 
 #ifdef USE_ARES
 #  if defined(CURL_STATICLIB) && !defined(CARES_STATICLIB) &&   \
@@ -50,7 +53,7 @@
 #include <librtmp/rtmp.h>
 #endif
 
-#ifdef HAVE_ZLIB_H
+#ifdef HAVE_LIBZ
 #include <zlib.h>
 #endif
 
@@ -335,6 +338,11 @@ static const char * const protocols[] = {
 #endif
 #ifdef USE_LIBRTMP
   "rtmp",
+  "rtmpe",
+  "rtmps",
+  "rtmpt",
+  "rtmpte",
+  "rtmpts",
 #endif
 #ifndef CURL_DISABLE_RTSP
   "rtsp",
@@ -363,6 +371,12 @@ static const char * const protocols[] = {
 #endif
 #ifndef CURL_DISABLE_TFTP
   "tftp",
+#endif
+#ifdef USE_WEBSOCKETS
+  "ws",
+#endif
+#if defined(USE_SSL) && defined(USE_WEBSOCKETS)
+  "wss",
 #endif
 
   NULL
@@ -450,6 +464,9 @@ static curl_version_info_data version_info = {
 #endif
 #if defined(USE_GSASL)
   | CURL_VERSION_GSASL
+#endif
+#if defined(GLOBAL_INIT_IS_THREADSAFE)
+  | CURL_VERSION_THREADSAFE
 #endif
   ,
   NULL, /* ssl_version */

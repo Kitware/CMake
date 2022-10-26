@@ -18,6 +18,8 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 
 #include "curl_setup.h"
@@ -210,10 +212,8 @@ void Curl_connect_done(struct Curl_easy *data)
     Curl_dyn_free(&s->rcvbuf);
     Curl_dyn_free(&s->req);
 
-    /* restore the protocol pointer, if not already done */
-    if(s->prot_save)
-      data->req.p.http = s->prot_save;
-    s->prot_save = NULL;
+    /* restore the protocol pointer */
+    data->req.p.http = s->prot_save;
     data->info.httpcode = 0; /* clear it as it might've been used for the
                                 proxy */
     data->req.ignorebody = FALSE;
@@ -391,8 +391,8 @@ static CURLcode CONNECT(struct Curl_easy *data,
 
         if(!result)
           /* send to debug callback! */
-          result = Curl_debug(data, CURLINFO_HEADER_OUT,
-                              k->upload_fromhere, bytes_written);
+          Curl_debug(data, CURLINFO_HEADER_OUT,
+                     k->upload_fromhere, bytes_written);
 
         s->nsend -= bytes_written;
         k->upload_fromhere += bytes_written;
