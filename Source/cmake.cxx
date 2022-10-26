@@ -2972,21 +2972,14 @@ void cmake::AppendExtraGeneratorsDocumentation(
 
     // Aliases:
     for (std::string const& a : eg->Aliases) {
-      cmDocumentationEntry e;
-      e.Name = a;
-      e.Brief = doc;
-      v.push_back(std::move(e));
+      v.emplace_back(cmDocumentationEntry{ a, doc });
     }
 
     // Full names:
-    const std::vector<std::string> generators =
-      eg->GetSupportedGlobalGenerators();
-    for (std::string const& g : generators) {
-      cmDocumentationEntry e;
-      e.Name =
-        cmExternalMakefileProjectGenerator::CreateFullGeneratorName(g, name);
-      e.Brief = doc;
-      v.push_back(std::move(e));
+    for (std::string const& g : eg->GetSupportedGlobalGenerators()) {
+      v.emplace_back(cmDocumentationEntry{
+        cmExternalMakefileProjectGenerator::CreateFullGeneratorName(g, name),
+        doc });
     }
   }
 }
