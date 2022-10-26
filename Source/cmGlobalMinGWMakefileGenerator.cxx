@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalMinGWMakefileGenerator.h"
 
-#include "cmDocumentationEntry.h"
 #include "cmMakefile.h"
 #include "cmState.h"
 #include "cmSystemTools.h"
@@ -19,9 +18,8 @@ cmGlobalMinGWMakefileGenerator::cmGlobalMinGWMakefileGenerator(cmake* cm)
   cm->GetState()->SetMinGWMake(true);
 }
 
-void cmGlobalMinGWMakefileGenerator::GetDocumentation(
-  cmDocumentationEntry& entry)
+cmDocumentationEntry cmGlobalMinGWMakefileGenerator::GetDocumentation()
 {
-  entry.Name = cmGlobalMinGWMakefileGenerator::GetActualName();
-  entry.Brief = "Generates a make file for use with mingw32-make.";
+  return { cmGlobalMinGWMakefileGenerator::GetActualName(),
+           "Generates a make file for use with mingw32-make." };
 }

@@ -2949,17 +2949,15 @@ void cmake::AppendGlobalGeneratorsDocumentation(
   std::vector<cmDocumentationEntry>& v)
 {
   const auto defaultGenerator = this->EvaluateDefaultGlobalGenerator();
-  const std::string defaultName = defaultGenerator->GetName();
-  bool foundDefaultOne = false;
+  const auto defaultName = defaultGenerator->GetName();
+  auto foundDefaultOne = false;
 
   for (const auto& g : this->Generators) {
-    cmDocumentationEntry e;
-    g->GetDocumentation(e);
-    if (!foundDefaultOne && cmHasPrefix(e.Name, defaultName)) {
-      e.CustomNamePrefix = '*';
+    v.emplace_back(g->GetDocumentation());
+    if (!foundDefaultOne && cmHasPrefix(v.back().Name, defaultName)) {
+      v.back().CustomNamePrefix = '*';
       foundDefaultOne = true;
     }
-    v.push_back(std::move(e));
   }
 }
 

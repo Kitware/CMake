@@ -10,7 +10,6 @@
 struct cmDocumentationEntry
 {
 #if __cplusplus <= 201103L
-  cmDocumentationEntry() = default;
   cmDocumentationEntry(const std::string& name, const std::string& brief)
     : Name{ name }
     , Brief{ brief }

@@ -15,7 +15,6 @@
 
 class cmMakefile;
 class cmake;
-struct cmDocumentationEntry;
 
 /** \class cmGlobalNMakeMakefileGenerator
  * \brief Write a NMake makefiles.
@@ -45,7 +44,7 @@ public:
   }
 
   /** Get the documentation entry for this generator.  */
-  static void GetDocumentation(cmDocumentationEntry& entry);
+  static cmDocumentationEntry GetDocumentation();
 
   /**
    * Try to determine system information such as shared library

@@ -24,7 +24,6 @@ class cmLocalUnixMakefileGenerator3;
 class cmMakefile;
 class cmMakefileTargetGenerator;
 class cmake;
-struct cmDocumentationEntry;
 
 /** \class cmGlobalUnixMakefileGenerator3
  * \brief Write a Unix makefiles.
@@ -101,7 +100,7 @@ public:
   bool SupportsCustomCommandDepfile() const override { return true; }
 
   /** Get the documentation entry for this generator.  */
-  static void GetDocumentation(cmDocumentationEntry& entry);
+  static cmDocumentationEntry GetDocumentation();
 
   std::unique_ptr<cmLocalGenerator> CreateLocalGenerator(
     cmMakefile* mf) override;

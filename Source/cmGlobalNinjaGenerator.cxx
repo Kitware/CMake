@@ -25,7 +25,6 @@
 #include "cmsys/FStream.hxx"
 
 #include "cmCxxModuleMapper.h"
-#include "cmDocumentationEntry.h"
 #include "cmFileSet.h"
 #include "cmFortranParser.h"
 #include "cmGeneratedFileStream.h"
@@ -554,10 +553,10 @@ codecvt::Encoding cmGlobalNinjaGenerator::GetMakefileEncoding() const
   return this->NinjaExpectedEncoding;
 }
 
-void cmGlobalNinjaGenerator::GetDocumentation(cmDocumentationEntry& entry)
+cmDocumentationEntry cmGlobalNinjaGenerator::GetDocumentation()
 {
-  entry.Name = cmGlobalNinjaGenerator::GetActualName();
-  entry.Brief = "Generates build.ninja files.";
+  return { cmGlobalNinjaGenerator::GetActualName(),
+           "Generates build.ninja files." };
 }
 
 // Implemented in all cmGlobaleGenerator sub-classes.
@@ -3211,10 +3210,10 @@ cmGlobalNinjaMultiGenerator::cmGlobalNinjaMultiGenerator(cmake* cm)
   cm->GetState()->SetNinjaMulti(true);
 }
 
-void cmGlobalNinjaMultiGenerator::GetDocumentation(cmDocumentationEntry& entry)
+cmDocumentationEntry cmGlobalNinjaMultiGenerator::GetDocumentation()
 {
-  entry.Name = cmGlobalNinjaMultiGenerator::GetActualName();
-  entry.Brief = "Generates build-<Config>.ninja files.";
+  return { cmGlobalNinjaMultiGenerator::GetActualName(),
+           "Generates build-<Config>.ninja files." };
 }
 
 std::string cmGlobalNinjaMultiGenerator::ExpandCFGIntDir(

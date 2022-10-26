@@ -14,7 +14,6 @@
 #include "cmsys/Glob.hxx"
 #include "cmsys/RegularExpression.hxx"
 
-#include "cmDocumentationEntry.h"
 #include "cmGlobalGenerator.h"
 #include "cmGlobalGeneratorFactory.h"
 #include "cmMakefile.h"
@@ -255,11 +254,11 @@ public:
     return std::unique_ptr<cmGlobalGenerator>();
   }
 
-  void GetDocumentation(cmDocumentationEntry& entry) const override
+  cmDocumentationEntry GetDocumentation() const override
   {
-    entry.Name = std::string(vs15generatorName) + " [arch]";
-    entry.Brief = "Generates Visual Studio 2017 project files.  "
-                  "Optional [arch] can be \"Win64\" or \"ARM\".";
+    return { std::string(vs15generatorName) + " [arch]",
+             "Generates Visual Studio 2017 project files.  "
+             "Optional [arch] can be \"Win64\" or \"ARM\"." };
   }
 
   std::vector<std::string> GetGeneratorNames() const override
@@ -351,11 +350,11 @@ public:
     return std::unique_ptr<cmGlobalGenerator>();
   }
 
-  void GetDocumentation(cmDocumentationEntry& entry) const override
+  cmDocumentationEntry GetDocumentation() const override
   {
-    entry.Name = std::string(vs16generatorName);
-    entry.Brief = "Generates Visual Studio 2019 project files.  "
-                  "Use -A option to specify architecture.";
+    return { std::string(vs16generatorName),
+             "Generates Visual Studio 2019 project files.  "
+             "Use -A option to specify architecture." };
   }
 
   std::vector<std::string> GetGeneratorNames() const override
@@ -416,11 +415,11 @@ public:
     return std::unique_ptr<cmGlobalGenerator>();
   }
 
-  void GetDocumentation(cmDocumentationEntry& entry) const override
+  cmDocumentationEntry GetDocumentation() const override
   {
-    entry.Name = std::string(vs17generatorName);
-    entry.Brief = "Generates Visual Studio 2022 project files.  "
-                  "Use -A option to specify architecture.";
+    return { std::string(vs17generatorName),
+             "Generates Visual Studio 2022 project files.  "
+             "Use -A option to specify architecture." };
   }
 
   std::vector<std::string> GetGeneratorNames() const override

@@ -11,7 +11,6 @@
 
 class cmMakefile;
 class cmake;
-struct cmDocumentationEntry;
 
 /** \class cmGlobalMSYSMakefileGenerator
  * \brief Write a NMake makefiles.
@@ -36,7 +35,7 @@ public:
   static std::string GetActualName() { return "MSYS Makefiles"; }
 
   /** Get the documentation entry for this generator.  */
-  static void GetDocumentation(cmDocumentationEntry& entry);
+  static cmDocumentationEntry GetDocumentation();
 
   /**
    * Try to determine system information such as shared library

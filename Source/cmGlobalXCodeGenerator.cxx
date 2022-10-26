@@ -24,7 +24,6 @@
 #include "cmCustomCommandGenerator.h"
 #include "cmCustomCommandLines.h"
 #include "cmCustomCommandTypes.h"
-#include "cmDocumentationEntry.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
@@ -149,9 +148,9 @@ public:
   std::unique_ptr<cmGlobalGenerator> CreateGlobalGenerator(
     const std::string& name, bool allowArch, cmake* cm) const override;
 
-  void GetDocumentation(cmDocumentationEntry& entry) const override
+  cmDocumentationEntry GetDocumentation() const override
   {
-    cmGlobalXCodeGenerator::GetDocumentation(entry);
+    return cmGlobalXCodeGenerator::GetDocumentation();
   }
 
   std::vector<std::string> GetGeneratorNames() const override
@@ -4864,10 +4863,10 @@ std::string cmGlobalXCodeGenerator::ExpandCFGIntDir(
   return tmp;
 }
 
-void cmGlobalXCodeGenerator::GetDocumentation(cmDocumentationEntry& entry)
+cmDocumentationEntry cmGlobalXCodeGenerator::GetDocumentation()
 {
-  entry.Name = cmGlobalXCodeGenerator::GetActualName();
-  entry.Brief = "Generate Xcode project files.";
+  return { cmGlobalXCodeGenerator::GetActualName(),
+           "Generate Xcode project files." };
 }
 
 std::string cmGlobalXCodeGenerator::ConvertToRelativeForMake(
