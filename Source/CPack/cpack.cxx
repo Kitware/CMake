@@ -632,9 +632,5 @@ int main(int argc, char const* const* argv)
     return !doc.PrintRequestedDocumentation(std::cout);
   }
 
-  if (cmSystemTools::GetErrorOccurredFlag()) {
-    return 1;
-  }
-
-  return 0;
+  return int(cmSystemTools::GetErrorOccurredFlag());
 }
