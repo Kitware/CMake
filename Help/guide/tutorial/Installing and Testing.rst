@@ -145,7 +145,7 @@ are similar. To the end of the top-level ``CMakeLists.txt`` we add:
   :name: TODO 3,4: CMakeLists.txt-install-TARGETS
   :language: cmake
   :start-after: # add the install targets
-  :end-before: # enable testing
+  :end-before: # TODO 1: Replace enable_testing() with include(CTest)
 
 .. raw:: html
 
