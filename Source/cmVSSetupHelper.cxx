@@ -300,13 +300,32 @@ bool cmVSSetupAPIHelper::IsEWDKEnabled()
   return false;
 }
 
+#if !defined(CMAKE_BOOTSTRAP)
+namespace {
+std::string FindVsWhereCommand()
+{
+  std::string vswhere;
+  static const char* programFiles[] = { "ProgramFiles(x86)", "ProgramFiles" };
+  for (const char* pf : programFiles) {
+    if (cmSystemTools::GetEnv(pf, vswhere)) {
+      vswhere += "/Microsoft Visual Studio/Installer/vswhere.exe";
+      if (cmSystemTools::FileExists(vswhere)) {
+        return vswhere;
+      }
+    }
+  }
+  vswhere = "vswhere.exe";
+  return vswhere;
+}
+}
+#endif
+
 bool cmVSSetupAPIHelper::EnumerateVSInstancesWithVswhere(
   std::vector<VSInstanceInfo>& VSInstances)
 {
 #if !defined(CMAKE_BOOTSTRAP)
   // Construct vswhere command to get installed VS instances in JSON format
-  std::string vswhereExe = getenv("ProgramFiles(x86)") +
-    std::string(R"(\Microsoft Visual Studio\Installer\vswhere.exe)");
+  std::string vswhereExe = FindVsWhereCommand();
   std::vector<std::string> vswhereCmd = { vswhereExe, "-format", "json" };
 
   // Execute vswhere command and capture JSON output
