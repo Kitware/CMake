@@ -10,10 +10,12 @@ function(run_cmake_workflow_presets name)
   set(RunCMake_TEST_BINARY_DIR "${RunCMake_TEST_SOURCE_DIR}/build")
   set(RunCMake_TEST_COMMAND_WORKING_DIRECTORY "${RunCMake_TEST_SOURCE_DIR}")
 
-  set(RunCMake_TEST_NO_CLEAN TRUE)
+  if(NOT RunCMake_TEST_NO_CLEAN)
+    file(REMOVE_RECURSE "${RunCMake_TEST_SOURCE_DIR}")
+    file(MAKE_DIRECTORY "${RunCMake_TEST_SOURCE_DIR}")
+  endif()
 
-  file(REMOVE_RECURSE "${RunCMake_TEST_SOURCE_DIR}")
-  file(MAKE_DIRECTORY "${RunCMake_TEST_SOURCE_DIR}")
+  set(RunCMake_TEST_NO_CLEAN TRUE)
 
   set(CASE_NAME "${name}")
   set(CASE_SOURCE_DIR "${RunCMake_SOURCE_DIR}")
@@ -77,3 +79,11 @@ unset(CMakeUserPresets_FILE)
 unset(CMakePresets_ASSETS)
 
 run_cmake_workflow_presets(ListPresets --list-presets)
+run_cmake_workflow_presets(InvalidOption -DINVALID_OPTION)
+
+set(RunCMake_TEST_NO_CLEAN TRUE)
+file(REMOVE_RECURSE "${RunCMake_BINARY_DIR}/Fresh")
+file(MAKE_DIRECTORY "${RunCMake_BINARY_DIR}/Fresh/build")
+file(WRITE "${RunCMake_BINARY_DIR}/Fresh/build/CMakeCache.txt" "FRESH_CONFIGURE:BOOL=OFF\n")
+run_cmake_workflow_presets(Fresh --fresh)
+unset(RunCMake_TEST_NO_CLEAN)
