@@ -2387,7 +2387,20 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       gtgt->GetName());
     return;
   }
-  std::string const& langForPreprocessor = llang;
+
+  // Choose a language to use for target-wide preprocessor definitions.
+  static const char* ppLangs[] = { "CXX", "C", "OBJCXX", "OBJC" };
+  std::string langForPreprocessor;
+  if (cm::contains(ppLangs, llang)) {
+    langForPreprocessor = llang;
+  } else {
+    for (const char* l : ppLangs) {
+      if (languages.count(l)) {
+        langForPreprocessor = l;
+        break;
+      }
+    }
+  }
 
   if (gtgt->IsIPOEnabled(llang, configName)) {
     const char* ltoValue =
@@ -2404,13 +2417,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
 
   // Add preprocessor definitions for this target and configuration.
   BuildObjectListOrString ppDefs(this, true);
-  if (languages.count("Swift")) {
-    // FIXME: Xcode warns that Swift does not support definition values.
-    // C/CXX sources mixed in Swift targets will not see CMAKE_INTDIR.
-  } else {
-    this->AppendDefines(
-      ppDefs, "CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"");
-  }
+  this->AppendDefines(
+    ppDefs, "CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"");
   if (const std::string* exportMacro = gtgt->GetExportMacro()) {
     // Add the export symbol definition for shared library objects.
     this->AppendDefines(ppDefs, exportMacro->c_str());
@@ -2424,15 +2432,28 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
   buildSettings->AddAttribute("GCC_PREPROCESSOR_DEFINITIONS",
                               ppDefs.CreateList());
   if (languages.count("Swift")) {
+    // Swift uses a separate attribute for definitions.
+    std::vector<std::string> targetSwiftDefines;
+    gtgt->GetCompileDefinitions(targetSwiftDefines, configName, "Swift");
+    // Remove the '=value' parts, as Swift does not support them.
+    std::for_each(targetSwiftDefines.begin(), targetSwiftDefines.end(),
+                  [](std::string& def) {
+                    std::string::size_type pos = def.find('=');
+                    if (pos != std::string::npos) {
+                      def.erase(pos);
+                    }
+                  });
     if (this->XcodeVersion < 80) {
       std::string defineString;
-      std::set<std::string> defines(targetDefines.begin(),
-                                    targetDefines.end());
+      std::set<std::string> defines(targetSwiftDefines.begin(),
+                                    targetSwiftDefines.end());
       this->CurrentLocalGenerator->JoinDefines(defines, defineString, "Swift");
       cflags["Swift"] += " " + defineString;
     } else {
+      BuildObjectListOrString swiftDefs(this, true);
+      this->AppendDefines(swiftDefs, targetSwiftDefines);
       buildSettings->AddAttribute("SWIFT_ACTIVE_COMPILATION_CONDITIONS",
-                                  ppDefs.CreateList());
+                                  swiftDefs.CreateList());
     }
   }
 
