@@ -1286,6 +1286,12 @@ The options are:
   Lists the available workflow presets. The current working directory must
   contain CMake preset files.
 
+.. option:: --fresh
+
+  Perform a fresh configuration of the build tree.
+  This removes any existing ``CMakeCache.txt`` file and associated
+  ``CMakeFiles/`` directory, and recreates them from scratch.
+
 View Help
 =========
 

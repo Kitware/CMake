@@ -602,7 +602,18 @@ public:
   bool Open(const std::string& dir, bool dryRun);
 
   //! run the --workflow option
-  int Workflow(const std::string& presetName, bool listPresets);
+  enum class WorkflowListPresets
+  {
+    No,
+    Yes,
+  };
+  enum class WorkflowFresh
+  {
+    No,
+    Yes,
+  };
+  int Workflow(const std::string& presetName, WorkflowListPresets listPresets,
+               WorkflowFresh fresh);
 
   void UnwatchUnusedCli(const std::string& var);
   void WatchUnusedCli(const std::string& var);
