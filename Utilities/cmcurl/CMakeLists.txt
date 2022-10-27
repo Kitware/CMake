@@ -5,6 +5,7 @@ set(BUILD_RELEASE_DEBUG_DIRS OFF CACHE INTERNAL "No curl release/debug dirs")
 set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "Build shared libraries")
 set(CURL_USE_BEARSSL OFF)
 set(CURL_USE_GSSAPI OFF)
+set(CURL_USE_LIBPSL OFF)
 set(CURL_USE_LIBSSH2 OFF)
 set(CURL_USE_LIBSSH OFF)
 set(CURL_USE_MBEDTLS OFF)
@@ -65,6 +66,15 @@ set(ENABLE_MANUAL OFF CACHE INTERNAL "No curl built-in manual")
 set(ENABLE_THREADED_RESOLVER OFF CACHE INTERNAL "No curl POSIX threaded DNS lookup")
 set(ENABLE_UNICODE OFF)
 set(ENABLE_UNIX_SOCKETS OFF CACHE INTERNAL "No curl Unix domain sockets support")
+set(ENABLE_WEBSOCKETS OFF)
+set(HAVE_ATOMIC 0)
+set(HAVE_BORINGSSL 0) # we do not need this info
+set(HAVE_MINGW_ORIGINAL 0) # we do not build on original MinGW anyway
+set(HAVE_RECV 1)
+set(HAVE_SEND 1)
+set(HAVE_STDATOMIC_H 0)
+set(HAVE_STRCASECMP 0) # we do not vendor the code that uses this
+set(HAVE_WIN32_WINNT 0) # we do not need this info
 set(HTTP_ONLY OFF CACHE INTERNAL "Curl is not http-only")
 set(PICKY_COMPILER OFF CACHE INTERNAL "Enable picky compiler options")
 set(USE_LIBIDN2 ON)
