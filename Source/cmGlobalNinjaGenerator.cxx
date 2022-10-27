@@ -1030,19 +1030,6 @@ bool cmGlobalNinjaGenerator::OpenBuildFileStreams()
     return false;
   }
 
-  // New buffer size 8 MiB
-  constexpr auto buildFileStreamBufferSize = 8 * 1024 * 1024;
-
-  // Ensure the buffer is allocated
-  if (!this->BuildFileStreamBuffer) {
-    this->BuildFileStreamBuffer =
-      cm::make_unique<char[]>(buildFileStreamBufferSize);
-  }
-
-  // Enlarge the internal buffer of the `BuildFileStream`
-  this->BuildFileStream->rdbuf()->pubsetbuf(this->BuildFileStreamBuffer.get(),
-                                            buildFileStreamBufferSize);
-
   // Write a comment about this file.
   *this->BuildFileStream
     << "# This file contains all the build statements describing the\n"
