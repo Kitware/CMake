@@ -903,7 +903,6 @@ void cmVisualStudio10TargetGenerator::WriteSdkStyleProjectFile(
     // of the IDE.
     e1.Element("VCProjectUpgraderObjectName", "NoUpgrade");
     e1.Element("ManagedAssembly", "true");
-    e1.Element("AppendTargetFrameworkToOutputPath", "false");
 
     cmValue targetFramework =
       this->GeneratorTarget->GetProperty("DOTNET_TARGET_FRAMEWORK");
@@ -912,9 +911,11 @@ void cmVisualStudio10TargetGenerator::WriteSdkStyleProjectFile(
         e1.Element("TargetFrameworks", *targetFramework);
       } else {
         e1.Element("TargetFramework", *targetFramework);
+        e1.Element("AppendTargetFrameworkToOutputPath", "false");
       }
     } else {
       e1.Element("TargetFramework", "net5.0");
+      e1.Element("AppendTargetFrameworkToOutputPath", "false");
     }
 
     std::string outputType;
