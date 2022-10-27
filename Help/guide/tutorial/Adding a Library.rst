@@ -236,11 +236,12 @@ Getting Started
 Start with the resulting files from Exercise 1. Complete ``TODO 7`` through
 ``TODO 13``.
 
-First create a variable ``MY_MATH`` using the :command:`option` command
+First create a variable ``USE_MYMATH`` using the :command:`option` command
 in the top-level ``CMakeLists.txt`` file. In that same file, use that option
 to determine whether to build and use the ``MathFunctions`` library.
 
-Then, update ``tutorial.cxx`` and ``TutorialConfig.h.in`` to use ``MY_MATH``.
+Then, update ``tutorial.cxx`` and ``TutorialConfig.h.in`` to use
+``USE_MYMATH``.
 
 Build and Run
 -------------
@@ -314,9 +315,9 @@ Next, create an :command:`if` statement which checks the value of
 :command:`add_subdirectory` command from Exercise 1 with the additional
 :command:`list` commands.
 
-When ``MY_MATH`` is ``ON``, the lists will be generated and will be added to
-our project. When ``MY_MATH`` is ``OFF``, the lists stay empty. With this
-strategy, we allow users to toggle ``MY_MATH`` to manipulate what library is
+When ``USE_MYMATH`` is ``ON``, the lists will be generated and will be added to
+our project. When ``USE_MYMATH`` is ``OFF``, the lists stay empty. With this
+strategy, we allow users to toggle ``USE_MYMATH`` to manipulate what library is
 used in the build.
 
 The top-level CMakeLists.txt file will now look like the following:
@@ -380,7 +381,7 @@ will cover the modern approach in the Step 3 of the tutorial.
 
 The corresponding changes to the source code are fairly straightforward.
 First, in ``tutorial.cxx``, we include the ``MathFunctions.h`` header if
-``MY_MATH`` is defined.
+``USE_MYMATH`` is defined.
 
 .. raw:: html
 
