@@ -44,6 +44,8 @@ set(TIMESTAMP-IncompleteSpecifier-RESULT 0)
 set(TIMESTAMP-IncompleteSpecifier-STDERR "~foobar%~")
 set(TIMESTAMP-AllSpecifiers-RESULT 0)
 set(TIMESTAMP-AllSpecifiers-STDERR "~[0-9]+(;[0-9]+)*~")
+set(TIMESTAMP-TimeZone-RESULT 0)
+set(TIMESTAMP-TimeZone-STDERR "~[-,+][0-9][0-9][0-9][0-9]~")
 set(TIMESTAMP-MonthWeekNames-RESULT 0)
 set(TIMESTAMP-MonthWeekNames-STDERR "~[^%]+;[^%]+~")
 set(TIMESTAMP-UnixTime-RESULT 0)
@@ -75,6 +77,7 @@ check_cmake_test(String
   TIMESTAMP-IncompleteSpecifier
   TIMESTAMP-AllSpecifiers
   TIMESTAMP-MonthWeekNames
+  TIMESTAMP-TimeZone
   TIMESTAMP-UnixTime
   )
 
