@@ -239,6 +239,20 @@ void cmGeneratedFileStream::SetTempExt(std::string const& ext)
   this->TempExt = ext;
 }
 
+void cmGeneratedFileStream::WriteAltEncoding(std::string const& data,
+                                             Encoding encoding)
+{
+#ifndef CMAKE_BOOTSTRAP
+  std::locale prevLocale =
+    this->imbue(std::locale(this->getloc(), new codecvt(encoding)));
+  this->write(data.data(), data.size());
+  this->imbue(prevLocale);
+#else
+  static_cast<void>(encoding);
+  this->write(data.data(), data.size());
+#endif
+}
+
 void cmGeneratedFileStream::WriteRaw(std::string const& data)
 {
 #ifndef CMAKE_BOOTSTRAP

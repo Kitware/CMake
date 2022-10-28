@@ -148,6 +148,12 @@ public:
   void SetTempExt(std::string const& ext);
 
   /**
+   * Write a specific string using an alternate encoding.
+   * Afterward, the original encoding is restored.
+   */
+  void WriteAltEncoding(std::string const& data, Encoding encoding);
+
+  /**
    * Writes the given string directly to the file without changing the
    * encoding.
    */
