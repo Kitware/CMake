@@ -1998,7 +1998,8 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
   std::string cmdLine = this->GetLocalGenerator()->BuildCommandLine(
     compileCmds, outputConfig, outputConfig);
 
-  this->GetGlobalGenerator()->AddCXXCompileCommand(cmdLine, sourceFileName);
+  this->GetGlobalGenerator()->AddCXXCompileCommand(cmdLine, sourceFileName,
+                                                   objectFileName);
 }
 
 void cmNinjaTargetGenerator::AdditionalCleanFiles(const std::string& config)

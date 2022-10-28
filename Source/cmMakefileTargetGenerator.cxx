@@ -1031,7 +1031,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
       }
 
       this->GlobalGenerator->AddCXXCompileCommand(
-        source.GetFullPath(), workingDirectory, compileCommand);
+        source.GetFullPath(), workingDirectory, compileCommand, relativeObj);
     }
 
     // See if we need to use a compiler launcher like ccache or distcc
