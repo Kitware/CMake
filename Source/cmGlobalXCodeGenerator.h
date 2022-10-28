@@ -339,6 +339,10 @@ private:
 
   std::string GetLibraryOrFrameworkPath(const std::string& path) const;
 
+  std::string GetSymrootDir() const;
+  std::string GetTargetTempDir(cmGeneratorTarget const* gt,
+                               std::string const& configName) const;
+
   static std::string GetDeploymentPlatform(const cmMakefile* mf);
 
   void ComputeArchitectures(cmMakefile* mf);

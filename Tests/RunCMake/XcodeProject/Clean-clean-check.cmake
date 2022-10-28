@@ -1,0 +1,5 @@
+set(pattern "${RunCMake_TEST_BINARY_DIR}/build/empty.build/Debug/Objects-normal/*/empty.o")
+file(GLOB objs "${pattern}")
+if(objs)
+  set(RunCMake_TEST_FAILED "Object file(s) not cleaned:\n ${objs}")
+endif()
