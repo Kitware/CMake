@@ -3642,7 +3642,7 @@ function(_ep_extract_configure_command var name)
       )
     endif()
 
-    list(APPEND cmd "<SOURCE_DIR><SOURCE_SUBDIR>")
+    list(APPEND cmd -S "<SOURCE_DIR><SOURCE_SUBDIR>" -B "<BINARY_DIR>")
   endif()
 
   set("${var}" "${cmd}" PARENT_SCOPE)
