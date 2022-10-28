@@ -2070,6 +2070,10 @@ int cmake::HandleDeleteCacheVariables(const std::string& var)
 
 int cmake::Configure()
 {
+#if !defined(CMAKE_BOOTSTRAP)
+  auto profilingRAII = this->CreateProfilingEntry("project", "configure");
+#endif
+
   DiagLevel diagLevel;
 
   if (this->DiagLevels.count("deprecated") == 1) {
@@ -2582,6 +2586,11 @@ int cmake::Generate()
   if (!this->GlobalGenerator) {
     return -1;
   }
+
+#if !defined(CMAKE_BOOTSTRAP)
+  auto profilingRAII = this->CreateProfilingEntry("project", "generate");
+#endif
+
   if (!this->GlobalGenerator->Compute()) {
     return -1;
   }
