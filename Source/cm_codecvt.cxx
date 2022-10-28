@@ -19,6 +19,12 @@ codecvt::codecvt(Encoding e)
 #endif
 {
   switch (e) {
+    case codecvt::ConsoleOutput:
+#if defined(_WIN32)
+      m_noconv = false;
+      m_codepage = GetConsoleOutputCP();
+      break;
+#endif
     case codecvt::ANSI:
 #if defined(_WIN32)
       m_noconv = false;
