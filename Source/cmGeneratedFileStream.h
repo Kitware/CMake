@@ -152,14 +152,4 @@ public:
    * Afterward, the original encoding is restored.
    */
   void WriteAltEncoding(std::string const& data, Encoding encoding);
-
-  /**
-   * Writes the given string directly to the file without changing the
-   * encoding.
-   */
-  void WriteRaw(std::string const& data);
-
-private:
-  // The original locale of the stream (performs no encoding conversion).
-  std::locale OriginalLocale;
 };

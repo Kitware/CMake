@@ -14,11 +14,10 @@
 #endif
 
 cmGeneratedFileStream::cmGeneratedFileStream(Encoding encoding)
-  : OriginalLocale(this->getloc())
 {
 #ifndef CMAKE_BOOTSTRAP
   if (encoding != codecvt::None) {
-    this->imbue(std::locale(this->OriginalLocale, new codecvt(encoding)));
+    this->imbue(std::locale(this->getloc(), new codecvt(encoding)));
   }
 #else
   static_cast<void>(encoding);
@@ -249,17 +248,6 @@ void cmGeneratedFileStream::WriteAltEncoding(std::string const& data,
   this->imbue(prevLocale);
 #else
   static_cast<void>(encoding);
-  this->write(data.data(), data.size());
-#endif
-}
-
-void cmGeneratedFileStream::WriteRaw(std::string const& data)
-{
-#ifndef CMAKE_BOOTSTRAP
-  std::locale activeLocale = this->imbue(this->OriginalLocale);
-  this->write(data.data(), data.size());
-  this->imbue(activeLocale);
-#else
   this->write(data.data(), data.size());
 #endif
 }
