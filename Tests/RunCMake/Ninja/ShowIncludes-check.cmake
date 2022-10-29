@@ -1,0 +1,17 @@
+set(rules_ninja "${RunCMake_TEST_BINARY_DIR}/CMakeFiles/rules.ninja")
+if(NOT EXISTS "${rules_ninja}")
+  set(RunCMake_TEST_FAILED "Generator output file is missing:\n ${rules_ninja}")
+  return()
+endif()
+
+file(READ "${rules_ninja}" rules_ninja)
+if(rules_ninja MATCHES "msvc_deps_prefix = ([^\r\n]*)\n")
+  set(actual "${CMAKE_MATCH_1}")
+endif()
+
+if(NOT actual STREQUAL expect)
+  string(HEX "${actual}" actual_hex)
+  string(HEX "${expect}" expect_hex)
+  set(RunCMake_TEST_FAILED "Expected byte sequence\n '${expect}' (${expect_hex})\nbut got\n '${actual}' (${actual_hex})")
+  return()
+endif()
