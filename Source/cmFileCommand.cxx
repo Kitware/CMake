@@ -2090,6 +2090,13 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
 
   ::curl_global_cleanup();
 
+  // Ensure requested curl logs are returned (especially in case of failure)
+  //
+  if (!logVar.empty()) {
+    chunkDebug.push_back(0);
+    status.GetMakefile().AddDefinition(logVar, chunkDebug.data());
+  }
+
   // Explicitly flush/close so we can measure the md5 accurately.
   //
   if (!file.empty()) {
@@ -2130,11 +2137,6 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
                                ::curl_easy_strerror(res), "\"]\n"));
       return false;
     }
-  }
-
-  if (!logVar.empty()) {
-    chunkDebug.push_back(0);
-    status.GetMakefile().AddDefinition(logVar, chunkDebug.data());
   }
 
   return true;
