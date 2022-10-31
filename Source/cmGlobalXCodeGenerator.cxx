@@ -2544,8 +2544,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
   }
 
   if (gtgt->CanCompileSources()) {
-    std::string tmpDir =
-      cmStrCat(gtgt->GetSupportDirectory(), '/', this->GetCMakeCFGIntDir());
+    std::string const tmpDir =
+      this->GetTargetTempDir(gtgt, this->GetCMakeCFGIntDir());
     buildSettings->AddAttribute("TARGET_TEMP_DIR", this->CreateString(tmpDir));
 
     std::string outDir;
@@ -4399,7 +4399,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
                                 this->CreateString(swiftVersion));
   }
 
-  std::string symroot = cmStrCat(root->GetCurrentBinaryDirectory(), "/build");
+  std::string const symroot = this->GetSymrootDir();
   buildSettings->AddAttribute("SYMROOT", this->CreateString(symroot));
 
   // Inside a try_compile project, do not require signing on any platform.
@@ -4504,6 +4504,19 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
   }
   this->RootObject->AddAttribute("targets", allTargets);
   return true;
+}
+
+std::string cmGlobalXCodeGenerator::GetSymrootDir() const
+{
+  return cmStrCat(this->CMakeInstance->GetHomeOutputDirectory(), "/build");
+}
+
+std::string cmGlobalXCodeGenerator::GetTargetTempDir(
+  cmGeneratorTarget const* gt, std::string const& configName) const
+{
+  // Use a path inside the SYMROOT.
+  return cmStrCat(this->GetSymrootDir(), '/', gt->GetName(), ".build/",
+                  configName);
 }
 
 void cmGlobalXCodeGenerator::ComputeArchitectures(cmMakefile* mf)
@@ -4629,8 +4642,8 @@ void cmGlobalXCodeGenerator::CreateXCodeDependHackMakefile(
         for (auto objLib : objlibs) {
 
           const std::string objLibName = objLib->GetName();
-          std::string d = cmStrCat(objLib->GetSupportDirectory(), '/',
-                                   configName, "/lib", objLibName, ".a");
+          std::string d = cmStrCat(this->GetTargetTempDir(gt, configName),
+                                   "/lib", objLibName, ".a");
 
           std::string dependency = this->ConvertToRelativeForMake(d);
           makefileStream << "\\\n\t" << dependency;
@@ -4644,8 +4657,8 @@ void cmGlobalXCodeGenerator::CreateXCodeDependHackMakefile(
         // if building for more than one architecture
         // then remove those executables as well
         if (this->Architectures.size() > 1) {
-          std::string universal = cmStrCat(gt->GetSupportDirectory(), '/',
-                                           configName, "/$(OBJDIR)/");
+          std::string universal =
+            cmStrCat(this->GetTargetTempDir(gt, configName), "/$(OBJDIR)/");
           for (const auto& architecture : this->Architectures) {
             std::string universalFile = cmStrCat(universal, architecture, '/',
                                                  gt->GetFullName(configName));
@@ -5044,7 +5057,7 @@ void cmGlobalXCodeGenerator::ComputeTargetObjectDirectory(
 {
   auto objectDirArch = GetTargetObjectDirArch(*gt, this->ObjectDirArch);
   gt->ObjectDirectory =
-    cmStrCat(gt->GetSupportDirectory(), '/', this->GetCMakeCFGIntDir(),
+    cmStrCat(this->GetTargetTempDir(gt, this->GetCMakeCFGIntDir()),
              "/$(OBJECT_FILE_DIR_normal:base)/", objectDirArch, '/');
 }
 

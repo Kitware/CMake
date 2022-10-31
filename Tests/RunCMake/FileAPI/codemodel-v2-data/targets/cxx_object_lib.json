@@ -64,7 +64,7 @@
     "nameOnDisk": null,
     "artifacts": [
         {
-            "path": "^object/.*/empty(\\.cxx)?\\.o(bj)?$",
+            "path": "^(object|build/cxx_object_lib\\.build)/.*/empty(\\.cxx)?\\.o(bj)?$",
             "_dllExtra": false
         }
     ],
