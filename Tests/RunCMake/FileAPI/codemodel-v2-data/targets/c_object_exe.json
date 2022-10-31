@@ -27,7 +27,7 @@
             ]
         },
         {
-            "path": "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/object/.*/empty(\\.c)?\\.o(bj)?$",
+            "path": "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/(object|build/c_object_lib\\.build)/.*/empty(\\.c)?\\.o(bj)?$",
             "isGenerated": true,
             "sourceGroupName": "Object Libraries",
             "compileGroupLanguage": null,
@@ -57,7 +57,7 @@
         {
             "name": "Object Libraries",
             "sourcePaths": [
-                "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/object/.*/empty(\\.c)?\\.o(bj)?$"
+                "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/(object|build/c_object_lib\\.build)/.*/empty(\\.c)?\\.o(bj)?$"
             ]
         }
     ],

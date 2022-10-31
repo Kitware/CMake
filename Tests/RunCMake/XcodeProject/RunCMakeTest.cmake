@@ -2,9 +2,10 @@ include(RunCMake)
 
 function(RunClean)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/Clean-build)
-  run_cmake(Clean)
+  run_cmake(Clean -DCMAKE_CONFIGURATION_TYPES=Debug)
   set(RunCMake_TEST_NO_CLEAN 1)
-  run_cmake_command(Clean-build xcodebuild clean)
+  run_cmake_command(Clean-build xcodebuild)
+  run_cmake_command(Clean-clean xcodebuild clean)
 endfunction()
 RunClean()
 
