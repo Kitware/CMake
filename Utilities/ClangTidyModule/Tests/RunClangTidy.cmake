@@ -13,12 +13,22 @@ endif()
 set(source_file "${RunClangTidy_BINARY_DIR}/${CHECK_NAME}.cxx")
 configure_file("${CMAKE_CURRENT_LIST_DIR}/${CHECK_NAME}.cxx" "${source_file}" COPYONLY)
 
+file(GLOB header_files RELATIVE "${CMAKE_CURRENT_LIST_DIR}/${CHECK_NAME}" "${CMAKE_CURRENT_LIST_DIR}/${CHECK_NAME}/*")
+file(REMOVE_RECURSE "${RunClangTiy_BINARY_DIR}/${CHECK_NAME}")
+foreach(header_file IN LISTS header_files)
+  if(NOT header_file MATCHES "-fixit\\.h\$")
+    file(MAKE_DIRECTORY "${RunClangTidy_BINARY_DIR}/${CHECK_NAME}")
+    configure_file("${CMAKE_CURRENT_LIST_DIR}/${CHECK_NAME}/${header_file}" "${RunClangTidy_BINARY_DIR}/${CHECK_NAME}/${header_file}" COPYONLY)
+  endif()
+endforeach()
+
 set(command
   "${CLANG_TIDY_COMMAND}"
   "--load=${CLANG_TIDY_MODULE}"
   "--checks=-*,${CHECK_NAME}"
   "--fix"
   "--format-style=file"
+  "--header-filter=/${CHECK_NAME}/"
   ${config_arg}
   "${source_file}"
   --
@@ -44,18 +54,38 @@ if(NOT actual_stdout STREQUAL expect_stdout)
   string(APPEND RunClangTidy_TEST_FAILED "Expected stdout:\n${expect_stdout_formatted}\nActual stdout:\n${actual_stdout_formatted}\n")
 endif()
 
-if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/${CHECK_NAME}-fixit.cxx")
-  set(expect_fixit_file "${CMAKE_CURRENT_LIST_DIR}/${CHECK_NAME}-fixit.cxx")
-else()
-  set(expect_fixit_file "${CMAKE_CURRENT_LIST_DIR}/${CHECK_NAME}.cxx")
-endif()
-file(READ "${expect_fixit_file}" expect_fixit)
-file(READ "${source_file}" actual_fixit)
-if(NOT expect_fixit STREQUAL actual_fixit)
-  string(REPLACE "\n" "\n  " expect_fixit_formatted "  ${expect_fixit}")
-  string(REPLACE "\n" "\n  " actual_fixit_formatted "  ${actual_fixit}")
-  string(APPEND RunClangTidy_TEST_FAILED "Expected fixit:\n${expect_fixit_formatted}\nActual fixit:\n${actual_fixit_formatted}\n")
-endif()
+function(check_fixit expected fallback_expected actual)
+  if(EXISTS "${expected}")
+    set(expect_fixit_file "${expected}")
+  else()
+    set(expect_fixit_file "${fallback_expected}")
+  endif()
+  file(READ "${expect_fixit_file}" expect_fixit)
+  file(READ "${actual}" actual_fixit)
+  if(NOT expect_fixit STREQUAL actual_fixit)
+    string(REPLACE "\n" "\n  " expect_fixit_formatted "  ${expect_fixit}")
+    string(REPLACE "\n" "\n  " actual_fixit_formatted "  ${actual_fixit}")
+    string(APPEND RunClangTidy_TEST_FAILED "Expected fixit for ${actual}:\n${expect_fixit_formatted}\nActual fixit:\n${actual_fixit_formatted}\n")
+    set(RunClangTidy_TEST_FAILED "${RunClangTidy_TEST_FAILED}" PARENT_SCOPE)
+  endif()
+endfunction()
+
+check_fixit(
+  "${CMAKE_CURRENT_LIST_DIR}/${CHECK_NAME}-fixit.cxx"
+  "${CMAKE_CURRENT_LIST_DIR}/${CHECK_NAME}.cxx"
+  "${source_file}"
+  )
+
+foreach(header_file IN LISTS header_files)
+  if(NOT header_file MATCHES "-fixit\\.h\$")
+    string(REGEX REPLACE "\\.h\$" "-fixit.h" header_fixit "${header_file}")
+    check_fixit(
+      "${CMAKE_CURRENT_LIST_DIR}/${CHECK_NAME}/${header_fixit}"
+      "${CMAKE_CURRENT_LIST_DIR}/${CHECK_NAME}/${header_file}"
+      "${RunClangTidy_BINARY_DIR}/${CHECK_NAME}/${header_file}"
+      )
+  endif()
+endforeach()
 
 if(RunClangTidy_TEST_FAILED)
   string(REPLACE ";" " " command_formatted "${command}")
