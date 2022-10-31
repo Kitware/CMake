@@ -253,6 +253,31 @@ void nghttp2_frame_origin_free(nghttp2_extension *frame, nghttp2_mem *mem) {
   nghttp2_mem_free(mem, origin->ov);
 }
 
+void nghttp2_frame_priority_update_init(nghttp2_extension *frame,
+                                        int32_t stream_id, uint8_t *field_value,
+                                        size_t field_value_len) {
+  nghttp2_ext_priority_update *priority_update;
+
+  nghttp2_frame_hd_init(&frame->hd, 4 + field_value_len,
+                        NGHTTP2_PRIORITY_UPDATE, NGHTTP2_FLAG_NONE, 0);
+
+  priority_update = frame->payload;
+  priority_update->stream_id = stream_id;
+  priority_update->field_value = field_value;
+  priority_update->field_value_len = field_value_len;
+}
+
+void nghttp2_frame_priority_update_free(nghttp2_extension *frame,
+                                        nghttp2_mem *mem) {
+  nghttp2_ext_priority_update *priority_update;
+
+  priority_update = frame->payload;
+  if (priority_update == NULL) {
+    return;
+  }
+  nghttp2_mem_free(mem, priority_update->field_value);
+}
+
 size_t nghttp2_frame_priority_len(uint8_t flags) {
   if (flags & NGHTTP2_FLAG_PRIORITY) {
     return NGHTTP2_PRIORITY_SPECLEN;
@@ -654,8 +679,6 @@ int nghttp2_frame_unpack_goaway_payload2(nghttp2_goaway *frame,
     var_gift_payloadlen = 0;
   }
 
-  payloadlen -= var_gift_payloadlen;
-
   if (!var_gift_payloadlen) {
     var_gift_payload = NULL;
   } else {
@@ -818,8 +841,10 @@ int nghttp2_frame_unpack_origin_payload(nghttp2_extension *frame,
   size_t len = 0;
 
   origin = frame->payload;
-  p = payload;
-  end = p + payloadlen;
+  p = end = payload;
+  if (payloadlen) {
+    end += payloadlen;
+  }
 
   for (; p != end;) {
     if (end - p < 2) {
@@ -876,6 +901,57 @@ int nghttp2_frame_unpack_origin_payload(nghttp2_extension *frame,
   return 0;
 }
 
+int nghttp2_frame_pack_priority_update(nghttp2_bufs *bufs,
+                                       nghttp2_extension *frame) {
+  int rv;
+  nghttp2_buf *buf;
+  nghttp2_ext_priority_update *priority_update;
+
+  /* This is required with --disable-assert. */
+  (void)rv;
+
+  priority_update = frame->payload;
+
+  buf = &bufs->head->buf;
+
+  assert(nghttp2_buf_avail(buf) >= 4 + priority_update->field_value_len);
+
+  buf->pos -= NGHTTP2_FRAME_HDLEN;
+
+  nghttp2_frame_pack_frame_hd(buf->pos, &frame->hd);
+
+  nghttp2_put_uint32be(buf->last, (uint32_t)priority_update->stream_id);
+  buf->last += 4;
+
+  rv = nghttp2_bufs_add(bufs, priority_update->field_value,
+                        priority_update->field_value_len);
+
+  assert(rv == 0);
+
+  return 0;
+}
+
+void nghttp2_frame_unpack_priority_update_payload(nghttp2_extension *frame,
+                                                  uint8_t *payload,
+                                                  size_t payloadlen) {
+  nghttp2_ext_priority_update *priority_update;
+
+  assert(payloadlen >= 4);
+
+  priority_update = frame->payload;
+
+  priority_update->stream_id =
+      nghttp2_get_uint32(payload) & NGHTTP2_STREAM_ID_MASK;
+
+  if (payloadlen > 4) {
+    priority_update->field_value = payload + 4;
+    priority_update->field_value_len = payloadlen - 4;
+  } else {
+    priority_update->field_value = NULL;
+    priority_update->field_value_len = 0;
+  }
+}
+
 nghttp2_settings_entry *nghttp2_frame_iv_copy(const nghttp2_settings_entry *iv,
                                               size_t niv, nghttp2_mem *mem) {
   nghttp2_settings_entry *iv_copy;
@@ -897,9 +973,25 @@ nghttp2_settings_entry *nghttp2_frame_iv_copy(const nghttp2_settings_entry *iv,
 }
 
 int nghttp2_nv_equal(const nghttp2_nv *a, const nghttp2_nv *b) {
-  return a->namelen == b->namelen && a->valuelen == b->valuelen &&
-         memcmp(a->name, b->name, a->namelen) == 0 &&
-         memcmp(a->value, b->value, a->valuelen) == 0;
+  if (a->namelen != b->namelen || a->valuelen != b->valuelen) {
+    return 0;
+  }
+
+  if (a->name == NULL || b->name == NULL) {
+    assert(a->namelen == 0);
+    assert(b->namelen == 0);
+  } else if (memcmp(a->name, b->name, a->namelen) != 0) {
+    return 0;
+  }
+
+  if (a->value == NULL || b->value == NULL) {
+    assert(a->valuelen == 0);
+    assert(b->valuelen == 0);
+  } else if (memcmp(a->value, b->value, a->valuelen) != 0) {
+    return 0;
+  }
+
+  return 1;
 }
 
 void nghttp2_nv_array_del(nghttp2_nv *nva, nghttp2_mem *mem) {
@@ -1051,6 +1143,11 @@ int nghttp2_iv_check(const nghttp2_settings_entry *iv, size_t niv) {
     case NGHTTP2_SETTINGS_MAX_HEADER_LIST_SIZE:
       break;
     case NGHTTP2_SETTINGS_ENABLE_CONNECT_PROTOCOL:
+      if (iv[i].value != 0 && iv[i].value != 1) {
+        return 0;
+      }
+      break;
+    case NGHTTP2_SETTINGS_NO_RFC7540_PRIORITIES:
       if (iv[i].value != 0 && iv[i].value != 1) {
         return 0;
       }
