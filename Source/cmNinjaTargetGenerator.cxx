@@ -1177,30 +1177,42 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
   }
 
   this->GetImplFileStream(fileConfig) << "\n";
+}
 
-  if (!this->Configs[config].SwiftOutputMap.empty()) {
-    std::string const mapFilePath =
-      cmStrCat(this->GeneratorTarget->GetSupportDirectory(), '/', config, '/',
-               "output-file-map.json");
-    std::string const targetSwiftDepsPath = [this, config]() -> std::string {
-      cmGeneratorTarget const* target = this->GeneratorTarget;
-      if (cmValue name = target->GetProperty("Swift_DEPENDENCIES_FILE")) {
-        return *name;
-      }
-      return this->ConvertToNinjaPath(
-        cmStrCat(target->GetSupportDirectory(), '/', config, '/',
-                 target->GetName(), ".swiftdeps"));
-    }();
-
-    // build the global target dependencies
-    // https://github.com/apple/swift/blob/master/docs/Driver.md#output-file-maps
-    Json::Value deps(Json::objectValue);
-    deps["swift-dependencies"] = targetSwiftDepsPath;
-    this->Configs[config].SwiftOutputMap[""] = deps;
-
-    cmGeneratedFileStream output(mapFilePath);
-    output << this->Configs[config].SwiftOutputMap;
+void cmNinjaTargetGenerator::GenerateSwiftOutputFileMap(
+  const std::string& config, std::string& flags)
+{
+  if (this->Configs[config].SwiftOutputMap.empty()) {
+    return;
   }
+
+  std::string const targetSwiftDepsPath = [this, config]() -> std::string {
+    cmGeneratorTarget const* target = this->GeneratorTarget;
+    if (cmValue name = target->GetProperty("Swift_DEPENDENCIES_FILE")) {
+      return *name;
+    }
+    return this->ConvertToNinjaPath(cmStrCat(target->GetSupportDirectory(),
+                                             '/', config, '/',
+                                             target->GetName(), ".swiftdeps"));
+  }();
+
+  std::string mapFilePath =
+    cmStrCat(this->GeneratorTarget->GetSupportDirectory(), '/', config, '/',
+             "output-file-map.json");
+
+  // build the global target dependencies
+  // https://github.com/apple/swift/blob/master/docs/Driver.md#output-file-maps
+  Json::Value deps(Json::objectValue);
+  deps["swift-dependencies"] = targetSwiftDepsPath;
+  this->Configs[config].SwiftOutputMap[""] = deps;
+
+  cmGeneratedFileStream output(mapFilePath);
+  output << this->Configs[config].SwiftOutputMap;
+
+  // Add flag
+  this->LocalGenerator->AppendFlags(flags, "-output-file-map");
+  this->LocalGenerator->AppendFlagEscape(flags,
+                                         ConvertToNinjaPath(mapFilePath));
 }
 
 namespace {
