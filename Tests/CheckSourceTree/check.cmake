@@ -5,6 +5,7 @@ endif()
 
 file(GLOB known_files
   "${CMake_SOURCE_DIR}/Tests/JavaExportImport/InstallExport/hs_err_pid*.log"
+  "${CMake_SOURCE_DIR}/Tests/JavaNativeHeaders/hs_err_pid*.log"
   )
 if(known_files)
   file(REMOVE ${known_files})
