@@ -557,9 +557,8 @@ function(add_RunCMake_test_try_compile)
       CMake_TEST_CUDA
       CMake_TEST_ISPC
       CMake_TEST_HIP
+      CMake_TEST_OBJC
       CMake_TEST_FILESYSTEM_1S
-      CMAKE_OBJC_STANDARD_DEFAULT
-      CMAKE_OBJCXX_STANDARD_DEFAULT
     )
     if(DEFINED ${var})
       list(APPEND try_compile_ARGS -D${var}=${${var}})
