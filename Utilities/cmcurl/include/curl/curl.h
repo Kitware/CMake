@@ -20,6 +20,8 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 
 /*
@@ -73,7 +75,8 @@
     defined(ANDROID) || defined(__ANDROID__) || defined(__OpenBSD__) || \
     defined(__CYGWIN__) || defined(AMIGA) || defined(__NuttX__) || \
    (defined(__FreeBSD_version) && (__FreeBSD_version < 800000)) || \
-   (defined(__MidnightBSD_version) && (__MidnightBSD_version < 100000))
+   (defined(__MidnightBSD_version) && (__MidnightBSD_version < 100000)) || \
+    defined(__sun__)
 #include <sys/select.h>
 #endif
 
@@ -575,7 +578,7 @@ typedef enum {
   CURLE_TFTP_UNKNOWNID,          /* 72 - Unknown transfer ID */
   CURLE_REMOTE_FILE_EXISTS,      /* 73 - File already exists */
   CURLE_TFTP_NOSUCHUSER,         /* 74 - No such user */
-  CURLE_CONV_FAILED,             /* 75 - conversion failed */
+  CURLE_OBSOLETE75,              /* 75 - NOT IN USE since 7.82.0 */
   CURLE_OBSOLETE76,              /* 76 - NOT IN USE since 7.82.0 */
   CURLE_SSL_CACERT_BADFILE,      /* 77 - could not load CACERT file, missing
                                     or wrong format */
@@ -613,6 +616,7 @@ typedef enum {
   CURLE_QUIC_CONNECT_ERROR,      /* 96 - QUIC connection error */
   CURLE_PROXY,                   /* 97 - proxy handshake error */
   CURLE_SSL_CLIENTCERT,          /* 98 - client-side certificate required */
+  CURLE_UNRECOVERABLE_POLL,      /* 99 - poll/select returned fatal error */
   CURL_LAST /* never use! */
 } CURLcode;
 
@@ -677,6 +681,7 @@ typedef enum {
 #define CURLE_FTP_BAD_DOWNLOAD_RESUME CURLE_BAD_DOWNLOAD_RESUME
 #define CURLE_LDAP_INVALID_URL CURLE_OBSOLETE62
 #define CURLE_CONV_REQD CURLE_OBSOLETE76
+#define CURLE_CONV_FAILED CURLE_OBSOLETE75
 
 /* This was the error code 50 in 7.7.3 and a few earlier versions, this
    is no longer used by libcurl but is instead #defined here only to not
@@ -835,8 +840,8 @@ enum curl_khstat {
   CURLKHSTAT_FINE_ADD_TO_FILE,
   CURLKHSTAT_FINE,
   CURLKHSTAT_REJECT, /* reject the connection, return an error */
-  CURLKHSTAT_DEFER,  /* do not accept it, but we can't answer right now so
-                        this causes a CURLE_DEFER error but otherwise the
+  CURLKHSTAT_DEFER,  /* do not accept it, but we can't answer right now.
+                        Causes a CURLE_PEER_FAILED_VERIFICATION error but the
                         connection will be left intact etc */
   CURLKHSTAT_FINE_REPLACE, /* accept and replace the wrong key*/
   CURLKHSTAT_LAST    /* not for use, only a marker for last-in-list */
@@ -855,7 +860,18 @@ typedef int
                           const struct curl_khkey *knownkey, /* known */
                           const struct curl_khkey *foundkey, /* found */
                           enum curl_khmatch, /* libcurl's view on the keys */
-                          void *clientp); /* custom pointer passed from app */
+                          void *clientp); /* custom pointer passed with */
+                                          /* CURLOPT_SSH_KEYDATA */
+
+typedef int
+  (*curl_sshhostkeycallback) (void *clientp,/* custom pointer passed*/
+                                            /* with CURLOPT_SSH_HOSTKEYDATA */
+                          int keytype, /* CURLKHTYPE */
+                          const char *key, /*hostkey to check*/
+                          size_t keylen); /*length of the key*/
+                          /*return CURLE_OK to accept*/
+                          /*or something else to refuse*/
+
 
 /* parameter for the CURLOPT_USE_SSL option */
 typedef enum {
@@ -995,7 +1011,8 @@ typedef CURLSTScode (*curl_hstswrite_callback)(CURL *easy,
 #define CURLHSTS_ENABLE       (long)(1<<0)
 #define CURLHSTS_READONLYFILE (long)(1<<1)
 
-/* CURLPROTO_ defines are for the CURLOPT_*PROTOCOLS options */
+/* The CURLPROTO_ defines below are for the **deprecated** CURLOPT_*PROTOCOLS
+   options. Do not use. */
 #define CURLPROTO_HTTP   (1<<0)
 #define CURLPROTO_HTTPS  (1<<1)
 #define CURLPROTO_FTP    (1<<2)
@@ -1461,12 +1478,11 @@ typedef enum {
      Note that setting multiple bits may cause extra network round-trips. */
   CURLOPT(CURLOPT_PROXYAUTH, CURLOPTTYPE_VALUES, 111),
 
-  /* FTP option that changes the timeout, in seconds, associated with
-     getting a response.  This is different from transfer timeout time and
-     essentially places a demand on the FTP server to acknowledge commands
-     in a timely manner. */
-  CURLOPT(CURLOPT_FTP_RESPONSE_TIMEOUT, CURLOPTTYPE_LONG, 112),
-#define CURLOPT_SERVER_RESPONSE_TIMEOUT CURLOPT_FTP_RESPONSE_TIMEOUT
+  /* Option that changes the timeout, in seconds, associated with getting a
+     response.  This is different from transfer timeout time and essentially
+     places a demand on the server to acknowledge commands in a timely
+     manner. For FTP, SMTP, IMAP and POP3. */
+  CURLOPT(CURLOPT_SERVER_RESPONSE_TIMEOUT, CURLOPTTYPE_LONG, 112),
 
   /* Set this option to one of the CURL_IPRESOLVE_* defines (see below) to
      tell libcurl to use those IP versions only. This only has effect on
@@ -2122,6 +2138,25 @@ typedef enum {
   /* Set MIME option flags. */
   CURLOPT(CURLOPT_MIME_OPTIONS, CURLOPTTYPE_LONG, 315),
 
+  /* set the SSH host key callback, must point to a curl_sshkeycallback
+     function */
+  CURLOPT(CURLOPT_SSH_HOSTKEYFUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 316),
+
+  /* set the SSH host key callback custom pointer */
+  CURLOPT(CURLOPT_SSH_HOSTKEYDATA, CURLOPTTYPE_CBPOINT, 317),
+
+  /* specify which protocols that are allowed to be used for the transfer,
+     which thus helps the app which takes URLs from users or other external
+     inputs and want to restrict what protocol(s) to deal with. Defaults to
+     all built-in protocols. */
+  CURLOPT(CURLOPT_PROTOCOLS_STR, CURLOPTTYPE_STRINGPOINT, 318),
+
+  /* specify which protocols that libcurl is allowed to follow directs to */
+  CURLOPT(CURLOPT_REDIR_PROTOCOLS_STR, CURLOPTTYPE_STRINGPOINT, 319),
+
+  /* websockets options */
+  CURLOPT(CURLOPT_WS_OPTIONS, CURLOPTTYPE_LONG, 320),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
@@ -2147,6 +2182,9 @@ typedef enum {
 #define CURLOPT_SSLCERTPASSWD CURLOPT_KEYPASSWD
 #define CURLOPT_KRB4LEVEL CURLOPT_KRBLEVEL
 
+/* */
+#define CURLOPT_FTP_RESPONSE_TIMEOUT CURLOPT_SERVER_RESPONSE_TIMEOUT
+
 #else
 /* This is set if CURL_NO_OLDIES is defined at compile-time */
 #undef CURLOPT_DNS_USE_GLOBAL_CACHE /* soon obsolete */
@@ -2161,7 +2199,7 @@ typedef enum {
 #define CURL_IPRESOLVE_V4       1 /* uses only IPv4 addresses/connections */
 #define CURL_IPRESOLVE_V6       2 /* uses only IPv6 addresses/connections */
 
-  /* three convenient "aliases" that follow the name scheme better */
+  /* Convenient "aliases" */
 #define CURLOPT_RTSPHEADER CURLOPT_HTTPHEADER
 
   /* These enums are for use with the CURLOPT_HTTP_VERSION option. */
@@ -2589,8 +2627,10 @@ CURL_EXTERN void curl_free(void *p);
  *
  * curl_global_init() should be invoked exactly once for each application that
  * uses libcurl and before any call of other libcurl functions.
- *
- * This function is not thread-safe!
+
+ * This function is thread-safe if CURL_VERSION_THREADSAFE is set in the
+ * curl_version_info_data.features flag (fetch by curl_version_info()).
+
  */
 CURL_EXTERN CURLcode curl_global_init(long flags);
 
@@ -2799,8 +2839,9 @@ typedef enum {
   CURLINFO_EFFECTIVE_METHOD = CURLINFO_STRING + 58,
   CURLINFO_PROXY_ERROR      = CURLINFO_LONG + 59,
   CURLINFO_REFERER          = CURLINFO_STRING + 60,
-
-  CURLINFO_LASTONE          = 60
+  CURLINFO_CAINFO           = CURLINFO_STRING + 61,
+  CURLINFO_CAPATH           = CURLINFO_STRING + 62,
+  CURLINFO_LASTONE          = 62
 } CURLINFO;
 
 /* CURLINFO_RESPONSE_CODE is the new name for the option previously known as
@@ -3006,6 +3047,7 @@ typedef struct curl_version_info_data curl_version_info_data;
 #define CURL_VERSION_UNICODE      (1<<27) /* Unicode support on Windows */
 #define CURL_VERSION_HSTS         (1<<28) /* HSTS is supported */
 #define CURL_VERSION_GSASL        (1<<29) /* libgsasl is supported */
+#define CURL_VERSION_THREADSAFE   (1<<30) /* libcurl API is thread-safe */
 
  /*
  * NAME curl_version_info()
@@ -3070,6 +3112,7 @@ CURL_EXTERN CURLcode curl_easy_pause(CURL *handle, int bitmask);
 #include "urlapi.h"
 #include "options.h"
 #include "header.h"
+#include "websockets.h"
 
 /* the typechecker doesn't work in C++ (yet) */
 #if defined(__GNUC__) && defined(__GNUC_MINOR__) && \

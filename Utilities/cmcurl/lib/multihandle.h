@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -19,6 +19,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 
@@ -148,11 +150,13 @@ struct Curl_multi {
                                    0 is used for read, 1 is used for write */
 #endif
 #endif
-  /* multiplexing wanted */
-  bool multiplexing;
-  bool recheckstate; /* see Curl_multi_connchanged */
+#define IPV6_UNKNOWN 0
+#define IPV6_DEAD    1
+#define IPV6_WORKS   2
+  unsigned char ipv6_up;       /* IPV6_* defined */
+  bool multiplexing;           /* multiplexing wanted */
+  bool recheckstate;           /* see Curl_multi_connchanged */
   bool in_callback;            /* true while executing a callback */
-  bool ipv6_works;
 #ifdef USE_OPENSSL
   bool ssl_seeded;
 #endif

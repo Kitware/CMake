@@ -18,6 +18,8 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 
 #include "curl_setup.h"
@@ -146,6 +148,40 @@ static CURLcode setstropt_userpwd(char *option, char **userp, char **passwdp)
 #define C_SSLVERSION_VALUE(x) (x & 0xffff)
 #define C_SSLVERSION_MAX_VALUE(x) (x & 0xffff0000)
 
+static CURLcode protocol2num(const char *str, curl_prot_t *val)
+{
+  if(!str)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
+  if(curl_strequal(str, "all")) {
+    *val = ~(curl_prot_t) 0;
+    return CURLE_OK;
+  }
+
+  *val = 0;
+
+  do {
+    const char *token = str;
+    size_t tlen;
+
+    str = strchr(str, ',');
+    tlen = str? (size_t) (str - token): strlen(token);
+    if(tlen) {
+      const struct Curl_handler *h = Curl_builtin_scheme(token, tlen);
+
+      if(!h)
+        return CURLE_UNSUPPORTED_PROTOCOL;
+
+      *val |= h->protocol;
+    }
+  } while(str++);
+
+  if(!*val)
+    /* no protocol listed */
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  return CURLE_OK;
+}
+
 /*
  * Do not make Curl_vsetopt() static: it is called from
  * packages/OS400/ccsidcurl.c.
@@ -155,9 +191,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
   char *argptr;
   CURLcode result = CURLE_OK;
   long arg;
-#ifdef ENABLE_IPV6
   unsigned long uarg;
-#endif
   curl_off_t bigsize;
 
   switch(option) {
@@ -165,7 +199,10 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     arg = va_arg(param, long);
     if(arg < -1)
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.dns_cache_timeout = arg;
+    else if(arg > INT_MAX)
+      arg = INT_MAX;
+
+    data->set.dns_cache_timeout = (int)arg;
     break;
   case CURLOPT_DNS_USE_GLOBAL_CACHE:
     /* deprecated */
@@ -203,19 +240,8 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
 #endif
   case CURLOPT_RANDOM_FILE:
-    /*
-     * This is the path name to a file that contains random data to seed
-     * the random SSL stuff with. The file is only used for reading.
-     */
-    result = Curl_setstropt(&data->set.str[STRING_SSL_RANDOM_FILE],
-                            va_arg(param, char *));
     break;
   case CURLOPT_EGDSOCKET:
-    /*
-     * The Entropy Gathering Daemon socket pathname
-     */
-    result = Curl_setstropt(&data->set.str[STRING_SSL_EGDSOCKET],
-                            va_arg(param, char *));
     break;
   case CURLOPT_MAXCONNECTS:
     /*
@@ -318,12 +344,12 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
   case CURLOPT_SERVER_RESPONSE_TIMEOUT:
     /*
-     * Option that specifies how quickly an server response must be obtained
+     * Option that specifies how quickly a server response must be obtained
      * before it is considered failure. For pingpong protocols.
      */
     arg = va_arg(param, long);
     if((arg >= 0) && (arg <= (INT_MAX/1000)))
-      data->set.server_response_timeout = arg * 1000;
+      data->set.server_response_timeout = (unsigned int)arg * 1000;
     else
       return CURLE_BAD_FUNCTION_ARGUMENT;
     break;
@@ -353,7 +379,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     arg = va_arg(param, long);
     if((arg < CURL_NETRC_IGNORED) || (arg >= CURL_NETRC_LAST))
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.use_netrc = (enum CURL_NETRC_OPTION)arg;
+    data->set.use_netrc = (unsigned char)arg;
     break;
   case CURLOPT_NETRC_FILE:
     /*
@@ -625,8 +651,10 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     }
     else
       data->set.method = HTTPREQ_GET;
+    data->set.upload = FALSE;
     break;
 
+#ifndef CURL_DISABLE_MIME
   case CURLOPT_HTTPPOST:
     /*
      * Set to make us do HTTP POST
@@ -635,6 +663,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.method = HTTPREQ_POST_FORM;
     data->set.opt_no_body = FALSE; /* this is implied */
     break;
+#endif
 
   case CURLOPT_AWS_SIGV4:
     /*
@@ -648,18 +677,6 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      */
     if(data->set.str[STRING_AWS_SIGV4])
       data->set.httpauth = CURLAUTH_AWS_SIGV4;
-    break;
-
-  case CURLOPT_MIMEPOST:
-    /*
-     * Set to make us do MIME/form POST
-     */
-    result = Curl_mime_set_subparts(&data->set.mimepost,
-                                    va_arg(param, curl_mime *), FALSE);
-    if(!result) {
-      data->set.method = HTTPREQ_POST_MIME;
-      data->set.opt_no_body = FALSE; /* this is implied */
-    }
     break;
 
   case CURLOPT_REFERER:
@@ -681,13 +698,6 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      */
     result = Curl_setstropt(&data->set.str[STRING_USERAGENT],
                             va_arg(param, char *));
-    break;
-
-  case CURLOPT_HTTPHEADER:
-    /*
-     * Set a list with HTTP headers to use (or replace internals with)
-     */
-    data->set.headers = va_arg(param, struct curl_slist *);
     break;
 
 #ifndef CURL_DISABLE_PROXY
@@ -927,6 +937,36 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
 #endif   /* CURL_DISABLE_HTTP */
 
+#if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_SMTP) ||       \
+    !defined(CURL_DISABLE_IMAP)
+# if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_MIME)
+  case CURLOPT_HTTPHEADER:
+    /*
+     * Set a list with HTTP headers to use (or replace internals with)
+     */
+    data->set.headers = va_arg(param, struct curl_slist *);
+    break;
+# endif
+
+# ifndef CURL_DISABLE_MIME
+  case CURLOPT_MIMEPOST:
+    /*
+     * Set to make us do MIME POST
+     */
+    result = Curl_mime_set_subparts(&data->set.mimepost,
+                                    va_arg(param, curl_mime *), FALSE);
+    if(!result) {
+      data->set.method = HTTPREQ_POST_MIME;
+      data->set.opt_no_body = FALSE; /* this is implied */
+    }
+    break;
+
+  case CURLOPT_MIME_OPTIONS:
+    data->set.mime_options = (unsigned int)va_arg(param, long);
+    break;
+# endif
+#endif
+
   case CURLOPT_HTTPAUTH:
     /*
      * Set HTTP Authentication type BITMASK.
@@ -1115,13 +1155,14 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       break;
     }
     break;
-#endif   /* CURL_DISABLE_PROXY */
 
   case CURLOPT_SOCKS5_AUTH:
     data->set.socks5auth = va_arg(param, unsigned long);
     if(data->set.socks5auth & ~(CURLAUTH_BASIC | CURLAUTH_GSSAPI))
       result = CURLE_NOT_BUILT_IN;
     break;
+#endif   /* CURL_DISABLE_PROXY */
+
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   case CURLOPT_SOCKS5_GSSAPI_NEC:
     /*
@@ -1270,7 +1311,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
        (arg > CURLFTP_CREATE_DIR_RETRY))
       result = CURLE_BAD_FUNCTION_ARGUMENT;
     else
-      data->set.ftp_create_missing_dirs = (int)arg;
+      data->set.ftp_create_missing_dirs = (unsigned char)arg;
     break;
   case CURLOPT_READDATA:
     /*
@@ -1360,12 +1401,12 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
   case CURLOPT_PORT:
     /*
-     * The port number to use when getting the URL
+     * The port number to use when getting the URL. 0 disables it.
      */
     arg = va_arg(param, long);
     if((arg < 0) || (arg > 65535))
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.use_port = arg;
+    data->set.use_port = (unsigned short)arg;
     break;
   case CURLOPT_TIMEOUT:
     /*
@@ -1374,16 +1415,16 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      */
     arg = va_arg(param, long);
     if((arg >= 0) && (arg <= (INT_MAX/1000)))
-      data->set.timeout = arg * 1000;
+      data->set.timeout = (unsigned int)arg * 1000;
     else
       return CURLE_BAD_FUNCTION_ARGUMENT;
     break;
 
   case CURLOPT_TIMEOUT_MS:
-    arg = va_arg(param, long);
-    if(arg < 0)
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.timeout = arg;
+    uarg = va_arg(param, unsigned long);
+    if(uarg >= UINT_MAX)
+      uarg = UINT_MAX;
+    data->set.timeout = (unsigned int)uarg;
     break;
 
   case CURLOPT_CONNECTTIMEOUT:
@@ -1392,27 +1433,29 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      */
     arg = va_arg(param, long);
     if((arg >= 0) && (arg <= (INT_MAX/1000)))
-      data->set.connecttimeout = arg * 1000;
+      data->set.connecttimeout = (unsigned int)arg * 1000;
     else
       return CURLE_BAD_FUNCTION_ARGUMENT;
     break;
 
   case CURLOPT_CONNECTTIMEOUT_MS:
-    arg = va_arg(param, long);
-    if(arg < 0)
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.connecttimeout = arg;
+    uarg = va_arg(param, unsigned long);
+    if(uarg >= UINT_MAX)
+      uarg = UINT_MAX;
+    data->set.connecttimeout = (unsigned int)uarg;
     break;
 
+#ifndef CURL_DISABLE_FTP
   case CURLOPT_ACCEPTTIMEOUT_MS:
     /*
-     * The maximum time you allow curl to wait for server connect
+     * The maximum time for curl to wait for FTP server connect
      */
-    arg = va_arg(param, long);
-    if(arg < 0)
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.accepttimeout = arg;
+    uarg = va_arg(param, unsigned long);
+    if(uarg >= UINT_MAX)
+      uarg = UINT_MAX;
+    data->set.accepttimeout = (unsigned int)uarg;
     break;
+#endif
 
   case CURLOPT_USERPWD:
     /*
@@ -1612,13 +1655,9 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * Set data write callback
      */
     data->set.fwrite_func = va_arg(param, curl_write_callback);
-    if(!data->set.fwrite_func) {
-      data->set.is_fwrite_set = 0;
+    if(!data->set.fwrite_func)
       /* When set to NULL, reset to our internal default function */
       data->set.fwrite_func = (curl_write_callback)fwrite;
-    }
-    else
-      data->set.is_fwrite_set = 1;
     break;
   case CURLOPT_READFUNCTION:
     /*
@@ -2166,7 +2205,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     else if(arg < READBUFFER_MIN)
       arg = READBUFFER_MIN;
 
-    data->set.buffer_size = arg;
+    data->set.buffer_size = (int)arg;
     break;
 
   case CURLOPT_UPLOAD_BUFFERSIZE:
@@ -2360,9 +2399,14 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 
   case CURLOPT_CONNECT_ONLY:
     /*
-     * No data transfer, set up connection and let application use the socket
+     * No data transfer.
+     * (1) - only do connection
+     * (2) - do first get request but get no content
      */
-    data->set.connect_only = (0 != va_arg(param, long)) ? TRUE : FALSE;
+    arg = va_arg(param, long);
+    if(arg > 2)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.connect_only = (unsigned char)arg;
     break;
 
   case CURLOPT_SOCKOPTFUNCTION:
@@ -2435,7 +2479,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 #ifdef USE_SSH
     /* we only include SSH options if explicitly built to support SSH */
   case CURLOPT_SSH_AUTH_TYPES:
-    data->set.ssh_auth_types = va_arg(param, long);
+    data->set.ssh_auth_types = (unsigned int)va_arg(param, long);
     break;
 
   case CURLOPT_SSH_PUBLIC_KEYFILE:
@@ -2478,7 +2522,19 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     result = Curl_setstropt(&data->set.str[STRING_SSH_KNOWNHOSTS],
                             va_arg(param, char *));
     break;
+#ifdef USE_LIBSSH2
+  case CURLOPT_SSH_HOSTKEYFUNCTION:
+    /* the callback to check the hostkey without the knownhost file */
+    data->set.ssh_hostkeyfunc = va_arg(param, curl_sshhostkeycallback);
+    break;
 
+  case CURLOPT_SSH_HOSTKEYDATA:
+    /*
+     * Custom client data to pass to the SSH keyfunc callback
+     */
+    data->set.ssh_hostkeyfunc_userp = va_arg(param, void *);
+    break;
+#endif
   case CURLOPT_SSH_KEYFUNCTION:
     /* setting to NULL is fine since the ssh.c functions themselves will
        then revert to use the internal default */
@@ -2523,7 +2579,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     arg = va_arg(param, long);
     if((arg < 0) || (arg > 0777))
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.new_file_perms = arg;
+    data->set.new_file_perms = (unsigned int)arg;
     break;
 
   case CURLOPT_NEW_DIRECTORY_PERMS:
@@ -2533,7 +2589,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     arg = va_arg(param, long);
     if((arg < 0) || (arg > 0777))
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.new_directory_perms = arg;
+    data->set.new_directory_perms = (unsigned int)arg;
     break;
 #endif
 
@@ -2558,15 +2614,35 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
        transfer, which thus helps the app which takes URLs from users or other
        external inputs and want to restrict what protocol(s) to deal
        with. Defaults to CURLPROTO_ALL. */
-    data->set.allowed_protocols = va_arg(param, long);
+    data->set.allowed_protocols = (curl_prot_t)va_arg(param, long);
     break;
 
   case CURLOPT_REDIR_PROTOCOLS:
     /* set the bitmask for the protocols that libcurl is allowed to follow to,
        as a subset of the CURLOPT_PROTOCOLS ones. That means the protocol needs
        to be set in both bitmasks to be allowed to get redirected to. */
-    data->set.redir_protocols = va_arg(param, long);
+    data->set.redir_protocols = (curl_prot_t)va_arg(param, long);
     break;
+
+  case CURLOPT_PROTOCOLS_STR: {
+    curl_prot_t prot;
+    argptr = va_arg(param, char *);
+    result = protocol2num(argptr, &prot);
+    if(result)
+      return result;
+    data->set.allowed_protocols = prot;
+    break;
+  }
+
+  case CURLOPT_REDIR_PROTOCOLS_STR: {
+    curl_prot_t prot;
+    argptr = va_arg(param, char *);
+    result = protocol2num(argptr, &prot);
+    if(result)
+      return result;
+    data->set.redir_protocols = prot;
+    break;
+  }
 
   case CURLOPT_DEFAULT_PROTOCOL:
     /* Set the protocol to use when the URL doesn't include any protocol */
@@ -2593,13 +2669,6 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
   case CURLOPT_MAIL_RCPT_ALLLOWFAILS:
     /* allow RCPT TO command to fail for some recipients */
     data->set.mail_rcpt_allowfails = (0 != va_arg(param, long)) ? TRUE : FALSE;
-    break;
-#endif
-
-#if (!defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_MIME)) || \
-  !defined(CURL_DISABLE_SMTP) || !defined(CURL_DISABLE_IMAP)
-  case CURLOPT_MIME_OPTIONS:
-    data->set.mime_options = va_arg(param, long);
     break;
 #endif
 
@@ -2833,13 +2902,17 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     arg = va_arg(param, long);
     if(arg < 0)
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.tcp_keepidle = arg;
+    else if(arg > INT_MAX)
+      arg = INT_MAX;
+    data->set.tcp_keepidle = (int)arg;
     break;
   case CURLOPT_TCP_KEEPINTVL:
     arg = va_arg(param, long);
     if(arg < 0)
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.tcp_keepintvl = arg;
+    else if(arg > INT_MAX)
+      arg = INT_MAX;
+    data->set.tcp_keepintvl = (int)arg;
     break;
   case CURLOPT_TCP_FASTOPEN:
 #if defined(CONNECT_DATA_IDEMPOTENT) || defined(MSG_FASTOPEN) || \
@@ -2850,7 +2923,6 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 #endif
     break;
   case CURLOPT_SSL_ENABLE_NPN:
-    data->set.ssl_enable_npn = (0 != va_arg(param, long)) ? TRUE : FALSE;
     break;
   case CURLOPT_SSL_ENABLE_ALPN:
     data->set.ssl_enable_alpn = (0 != va_arg(param, long)) ? TRUE : FALSE;
@@ -2906,10 +2978,10 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.suppress_connect_headers = (0 != va_arg(param, long))?TRUE:FALSE;
     break;
   case CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS:
-    arg = va_arg(param, long);
-    if(arg < 0)
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.happy_eyeballs_timeout = arg;
+    uarg = va_arg(param, unsigned long);
+    if(uarg >= UINT_MAX)
+      uarg = UINT_MAX;
+    data->set.happy_eyeballs_timeout = (unsigned int)uarg;
     break;
 #ifndef CURL_DISABLE_SHUFFLE_DNS
   case CURLOPT_DNS_SHUFFLE_ADDRESSES:
@@ -3026,6 +3098,15 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
   case CURLOPT_PREREQDATA:
     data->set.prereq_userp = va_arg(param, void *);
     break;
+#ifdef USE_WEBSOCKETS
+  case CURLOPT_WS_OPTIONS: {
+    bool raw;
+    arg = va_arg(param, long);
+    raw = (arg & CURLWS_RAW_MODE);
+    data->set.ws_raw_mode = raw;
+    break;
+  }
+#endif
   default:
     /* unknown tag and its companion, just ignore: */
     result = CURLE_UNKNOWN_OPTION;

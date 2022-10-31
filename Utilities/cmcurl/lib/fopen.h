@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_WOLFSSH_H
-#define HEADER_CURL_WOLFSSH_H
+#ifndef HEADER_CURL_FOPEN_H
+#define HEADER_CURL_FOPEN_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2019 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,8 +20,11 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 
-extern const struct Curl_handler Curl_handler_sftp;
+CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
+                    FILE **fh, char **tempname);
 
-#endif /* HEADER_CURL_WOLFSSH_H */
+#endif

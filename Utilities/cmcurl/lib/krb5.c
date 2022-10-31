@@ -5,6 +5,8 @@
  * Copyright (c) 2004 - 2022 Daniel Stenberg
  * All rights reserved.
  *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -140,11 +142,8 @@ krb5_decode(void *app_data, void *buf, int len,
   enc.value = buf;
   enc.length = len;
   maj = gss_unwrap(&min, *context, &enc, &dec, NULL, NULL);
-  if(maj != GSS_S_COMPLETE) {
-    if(len >= 4)
-      strcpy(buf, "599 ");
+  if(maj != GSS_S_COMPLETE)
     return -1;
-  }
 
   memcpy(buf, dec.value, dec.length);
   len = curlx_uztosi(dec.length);
@@ -506,6 +505,7 @@ static CURLcode read_data(struct connectdata *conn,
 {
   int len;
   CURLcode result;
+  int nread;
 
   result = socket_read(fd, &len, sizeof(len));
   if(result)
@@ -514,7 +514,10 @@ static CURLcode read_data(struct connectdata *conn,
   if(len) {
     /* only realloc if there was a length */
     len = ntohl(len);
-    buf->data = Curl_saferealloc(buf->data, len);
+    if(len > CURL_MAX_INPUT_LENGTH)
+      len = 0;
+    else
+      buf->data = Curl_saferealloc(buf->data, len);
   }
   if(!len || !buf->data)
     return CURLE_OUT_OF_MEMORY;
@@ -522,8 +525,11 @@ static CURLcode read_data(struct connectdata *conn,
   result = socket_read(fd, buf->data, len);
   if(result)
     return result;
-  buf->size = conn->mech->decode(conn->app_data, buf->data, len,
-                                 conn->data_prot, conn);
+  nread = conn->mech->decode(conn->app_data, buf->data, len,
+                             conn->data_prot, conn);
+  if(nread < 0)
+    return CURLE_RECV_ERROR;
+  buf->size = (size_t)nread;
   buf->index = 0;
   return CURLE_OK;
 }

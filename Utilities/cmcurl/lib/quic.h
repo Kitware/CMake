@@ -20,6 +20,8 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 
 #include "curl_setup.h"
@@ -54,6 +56,7 @@ void Curl_quic_done(struct Curl_easy *data, bool premature);
 bool Curl_quic_data_pending(const struct Curl_easy *data);
 void Curl_quic_disconnect(struct Curl_easy *data,
                           struct connectdata *conn, int tempindex);
+CURLcode Curl_quic_idle(struct Curl_easy *data);
 
 #else /* ENABLE_QUIC */
 #define Curl_quic_done_sending(x)
