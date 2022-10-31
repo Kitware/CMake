@@ -2675,12 +2675,22 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
                   this->Makefile->GetSafeDefinition(
                     cmStrCat("CMAKE_", lang, "_FLAGS_", configUpper));
 
-                bool editAndContinueDebugInfo =
-                  langFlags.find("/ZI") != std::string::npos ||
-                  langFlags.find("-ZI") != std::string::npos;
-                bool programDatabaseDebugInfo =
-                  langFlags.find("/Zi") != std::string::npos ||
-                  langFlags.find("-Zi") != std::string::npos;
+                bool editAndContinueDebugInfo = false;
+                bool programDatabaseDebugInfo = false;
+                if (cm::optional<std::string> msvcDebugInformationFormat =
+                      this->GetMSVCDebugFormatName(config, target)) {
+                  editAndContinueDebugInfo =
+                    *msvcDebugInformationFormat == "EditAndContinue";
+                  programDatabaseDebugInfo =
+                    *msvcDebugInformationFormat == "ProgramDatabase";
+                } else {
+                  editAndContinueDebugInfo =
+                    langFlags.find("/ZI") != std::string::npos ||
+                    langFlags.find("-ZI") != std::string::npos;
+                  programDatabaseDebugInfo =
+                    langFlags.find("/Zi") != std::string::npos ||
+                    langFlags.find("-Zi") != std::string::npos;
+                }
 
                 // MSVC 2008 is producing both .pdb and .idb files with /Zi.
                 bool msvc2008OrLess =
