@@ -1,6 +1,5 @@
-cmake_minimum_required(VERSION 3.18)
-
-project(PchReuseFromObjLib)
+enable_language(C)
+enable_language(CXX)
 
 set(CMAKE_PCH_WARN_INVALID OFF)
 

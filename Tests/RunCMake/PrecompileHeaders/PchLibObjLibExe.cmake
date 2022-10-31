@@ -1,5 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
-project(PchLibObjLibExe CXX)
+enable_language(CXX)
 
 foreach(i 1 2 3)
     file(WRITE ${CMAKE_BINARY_DIR}/empty${i}.cpp "void nothing${i}() {}\n")

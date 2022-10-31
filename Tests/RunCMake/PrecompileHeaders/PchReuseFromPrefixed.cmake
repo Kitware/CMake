@@ -1,5 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
-project(PchReuseFromPrefixed C)
+enable_language(C)
 
 if(CMAKE_C_COMPILE_OPTIONS_USE_PCH)
   add_definitions(-DHAVE_PCH_SUPPORT)
