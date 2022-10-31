@@ -1127,7 +1127,7 @@ function(CMAKE_DETERMINE_MSVC_SHOWINCLUDES_PREFIX lang userflags)
     OUTPUT_VARIABLE out
     ERROR_VARIABLE err
     RESULT_VARIABLE res
-    ENCODING AUTO # cl prints in current code page
+    ENCODING AUTO # cl prints in console output code page
     )
   if(res EQUAL 0 AND "${out}" MATCHES "(^|\n)([^:\n]*:[^:\n]*:[ \t]*)")
     set(CMAKE_${lang}_CL_SHOWINCLUDES_PREFIX "${CMAKE_MATCH_2}" PARENT_SCOPE)
