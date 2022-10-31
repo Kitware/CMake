@@ -197,6 +197,10 @@ if(CMAKE_GENERATOR MATCHES "Ninja")
       ${ninja_qt_args}
     )
   endif()
+  if(WIN32)
+    add_executable(showIncludes showIncludes.c)
+    list(APPEND Ninja_ARGS -DshowIncludes=$<TARGET_FILE:showIncludes>)
+  endif()
   add_RunCMake_test(Ninja)
   set(NinjaMultiConfig_ARGS
     -DCYGWIN=${CYGWIN} -DMSYS=${MSYS}

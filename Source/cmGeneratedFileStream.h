@@ -148,12 +148,8 @@ public:
   void SetTempExt(std::string const& ext);
 
   /**
-   * Writes the given string directly to the file without changing the
-   * encoding.
+   * Write a specific string using an alternate encoding.
+   * Afterward, the original encoding is restored.
    */
-  void WriteRaw(std::string const& data);
-
-private:
-  // The original locale of the stream (performs no encoding conversion).
-  std::locale OriginalLocale;
+  void WriteAltEncoding(std::string const& data, Encoding encoding);
 };

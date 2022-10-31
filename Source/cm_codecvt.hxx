@@ -15,7 +15,8 @@ public:
     None,
     UTF8,
     UTF8_WITH_BOM,
-    ANSI
+    ANSI,
+    ConsoleOutput,
   };
 
 #ifndef CMAKE_BOOTSTRAP
