@@ -2678,8 +2678,7 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
                 bool editAndContinueDebugInfo =
                   langFlags.find("/ZI") != std::string::npos ||
                   langFlags.find("-ZI") != std::string::npos;
-
-                bool enableDebuggingInformation =
+                bool programDatabaseDebugInfo =
                   langFlags.find("/Zi") != std::string::npos ||
                   langFlags.find("-Zi") != std::string::npos;
 
@@ -2697,7 +2696,7 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
                 if (editAndContinueDebugInfo || msvc2008OrLess) {
                   this->CopyPchCompilePdb(config, target, *ReuseFrom,
                                           reuseTarget, { ".pdb", ".idb" });
-                } else if (enableDebuggingInformation) {
+                } else if (programDatabaseDebugInfo) {
                   this->CopyPchCompilePdb(config, target, *ReuseFrom,
                                           reuseTarget, { ".pdb" });
                 }
