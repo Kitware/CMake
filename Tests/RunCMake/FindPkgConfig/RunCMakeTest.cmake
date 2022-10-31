@@ -7,13 +7,18 @@ set(ENV{CMAKE_FRAMEWORK_PATH} "")
 
 run_cmake(PkgConfigDoesNotExist)
 
-run_cmake(FindPkgConfig_CMP0126_NEW)
-run_cmake(FindPkgConfig_NO_PKGCONFIG_PATH)
-run_cmake(FindPkgConfig_PKGCONFIG_PATH)
-run_cmake(FindPkgConfig_PKGCONFIG_PATH_NO_CMAKE_PATH)
-run_cmake(FindPkgConfig_PKGCONFIG_PATH_NO_CMAKE_ENVIRONMENT_PATH)
+if(NOT WIN32)
+  # FIXME: The Windows implementation of these tests do not work.
+  #        They are disabled until they can be updated to a working state.
+  run_cmake(FindPkgConfig_CMP0126_NEW)
+  run_cmake(FindPkgConfig_NO_PKGCONFIG_PATH)
+  run_cmake(FindPkgConfig_PKGCONFIG_PATH)
+  run_cmake(FindPkgConfig_PKGCONFIG_PATH_NO_CMAKE_PATH)
+  run_cmake(FindPkgConfig_PKGCONFIG_PATH_NO_CMAKE_ENVIRONMENT_PATH)
+  run_cmake(FindPkgConfig_GET_MATCHING_ARGN)
+endif()
+
 run_cmake(FindPkgConfig_extract_frameworks)
-run_cmake(FindPkgConfig_GET_MATCHING_ARGN)
 
 if(APPLE)
   run_cmake(FindPkgConfig_extract_frameworks_target)
