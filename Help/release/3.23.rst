@@ -313,8 +313,8 @@ Changes made since CMake 3.23.0 include the following.
   The old ``CPACK_PACKAGEMAKER_CHOICES`` variable is now also set to the
   same content as it was before, but it is formally deprecated.
 
-3.23.3, 3.23.4
---------------
+3.23.3, 3.23.4, 3.23.5
+----------------------
 
 * These versions made no changes to documented features or interfaces.
   Some implementation updates were made to support ecosystem changes
