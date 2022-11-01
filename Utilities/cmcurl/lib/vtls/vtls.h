@@ -20,6 +20,8 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 #include "curl_setup.h"
 
@@ -123,6 +125,9 @@ struct curl_slist *Curl_none_engines_list(struct Curl_easy *data);
 bool Curl_none_false_start(void);
 bool Curl_ssl_tls13_ciphersuites(void);
 
+CURLsslset Curl_init_sslset_nolock(curl_sslbackend id, const char *name,
+                                   const curl_ssl_backend ***avail);
+
 #include "openssl.h"        /* OpenSSL versions */
 #include "gtls.h"           /* GnuTLS versions */
 #include "nssg.h"           /* NSS versions */
@@ -195,7 +200,7 @@ void Curl_free_primary_ssl_config(struct ssl_primary_config *sslc);
    ssl_connect_2_writing. */
 int Curl_ssl_getsock(struct connectdata *conn, curl_socket_t *socks);
 
-int Curl_ssl_backend(void);
+curl_sslbackend Curl_ssl_backend(void);
 
 #ifdef USE_SSL
 int Curl_ssl_init(void);
