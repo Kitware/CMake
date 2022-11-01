@@ -369,3 +369,14 @@ Changes made since CMake 3.24.0 include the following.
 * These versions made no changes to documented features or interfaces.
   Some implementation updates were made to support ecosystem changes
   and/or fix regressions.
+
+3.24.3
+------
+
+* The ``LLVMFlang`` Fortran compiler support added in 3.24.0 has been extended:
+
+  * It now supports mixed-language linking between Fortran and C or CXX.
+  * It now supports the GNU ABI (MinGW) on Windows, but not yet the MSVC ABI.
+
+* Some implementation updates were made to support ecosystem changes
+  and/or fix regressions.
