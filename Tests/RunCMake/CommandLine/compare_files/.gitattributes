@@ -1,2 +1,2 @@
-crlf eol=crlf
-lf eol=lf
+crlf -text -whitespace
+lf   -text
