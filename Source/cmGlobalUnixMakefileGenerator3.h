@@ -174,7 +174,8 @@ public:
 
   void AddCXXCompileCommand(const std::string& sourceFile,
                             const std::string& workingDirectory,
-                            const std::string& compileCommand);
+                            const std::string& compileCommand,
+                            const std::string& objPath);
 
   /** Does the make tool tolerate .NOTPARALLEL? */
   virtual bool AllowNotParallel() const { return true; }

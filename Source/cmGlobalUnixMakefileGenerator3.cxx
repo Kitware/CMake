@@ -143,7 +143,7 @@ void cmGlobalUnixMakefileGenerator3::Generate()
 
 void cmGlobalUnixMakefileGenerator3::AddCXXCompileCommand(
   const std::string& sourceFile, const std::string& workingDirectory,
-  const std::string& compileCommand)
+  const std::string& compileCommand, const std::string& objPath)
 {
   if (!this->CommandDatabase) {
     std::string commandDatabaseName =
@@ -164,7 +164,9 @@ void cmGlobalUnixMakefileGenerator3::AddCXXCompileCommand(
                          << "\",\n"
                          << R"(  "file": ")"
                          << cmGlobalGenerator::EscapeJSON(sourceFile)
-                         << "\"\n}";
+                         << "\",\n"
+                         << R"(  "output": ")"
+                         << cmGlobalGenerator::EscapeJSON(objPath) << "\"\n}";
 }
 
 void cmGlobalUnixMakefileGenerator3::WriteMainMakefile2()

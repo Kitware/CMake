@@ -292,7 +292,8 @@ public:
   }
 
   void AddCXXCompileCommand(const std::string& commandLine,
-                            const std::string& sourceFile);
+                            const std::string& sourceFile,
+                            const std::string& objPath);
 
   /**
    * Add a rule to the generated build system.
