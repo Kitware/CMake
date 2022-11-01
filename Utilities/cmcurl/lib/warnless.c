@@ -18,6 +18,8 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 
 #include "curl_setup.h"
@@ -36,6 +38,8 @@
 #define BUILDING_WARNLESS_C 1
 
 #include "warnless.h"
+
+#include <limits.h>
 
 #define CURL_MASK_UCHAR   ((unsigned char)~0)
 #define CURL_MASK_SCHAR   (CURL_MASK_UCHAR >> 1)

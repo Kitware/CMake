@@ -18,6 +18,8 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 
 #include "curl_setup.h"
@@ -792,7 +794,7 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, char *header)
 
     /* Find the first non-space letter */
     start = header + 8;
-    while(*start && ISSPACE(*start))
+    while(*start && ISBLANK(*start))
       start++;
 
     if(!*start) {

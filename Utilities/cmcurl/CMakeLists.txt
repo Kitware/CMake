@@ -5,6 +5,7 @@ set(BUILD_RELEASE_DEBUG_DIRS OFF CACHE INTERNAL "No curl release/debug dirs")
 set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "Build shared libraries")
 set(CURL_USE_BEARSSL OFF)
 set(CURL_USE_GSSAPI OFF)
+set(CURL_USE_LIBPSL OFF)
 set(CURL_USE_LIBSSH2 OFF)
 set(CURL_USE_LIBSSH OFF)
 set(CURL_USE_MBEDTLS OFF)
@@ -65,6 +66,15 @@ set(ENABLE_MANUAL OFF CACHE INTERNAL "No curl built-in manual")
 set(ENABLE_THREADED_RESOLVER OFF CACHE INTERNAL "No curl POSIX threaded DNS lookup")
 set(ENABLE_UNICODE OFF)
 set(ENABLE_UNIX_SOCKETS OFF CACHE INTERNAL "No curl Unix domain sockets support")
+set(ENABLE_WEBSOCKETS OFF)
+set(HAVE_ATOMIC 0)
+set(HAVE_BORINGSSL 0) # we do not need this info
+set(HAVE_MINGW_ORIGINAL 0) # we do not build on original MinGW anyway
+set(HAVE_RECV 1)
+set(HAVE_SEND 1)
+set(HAVE_STDATOMIC_H 0)
+set(HAVE_STRCASECMP 0) # we do not vendor the code that uses this
+set(HAVE_WIN32_WINNT 0) # we do not need this info
 set(HTTP_ONLY OFF CACHE INTERNAL "Curl is not http-only")
 set(PICKY_COMPILER OFF CACHE INTERNAL "Enable picky compiler options")
 set(USE_LIBIDN2 ON)
@@ -153,6 +163,8 @@ endif()
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
+# SPDX-License-Identifier: curl
+#
 ###########################################################################
 # curl/libcurl CMake script
 # by Tetetest and Sukender (Benoit Neil)
@@ -172,6 +184,27 @@ endif()
 # To check:
 # (From Daniel Stenberg) The cmake build selected to run gcc with -fPIC on my box while the plain configure script did not.
 # (From Daniel Stenberg) The gcc command line use neither -g nor any -O options. As a developer, I also treasure our configure scripts's --enable-debug option that sets a long range of "picky" compiler options.
+
+# Note: By default this CMake build script detects the version of some
+# dependencies using `check_symbol_exists`.  Those checks do not work
+# in the case that both CURL and its dependency are included as
+# sub-projects in a larger build using `FetchContent`.  To support
+# that case, additional variables may be defined by the parent
+# project, ideally in the "extra" find package redirect file:
+# https://cmake.org/cmake/help/latest/module/FetchContent.html#integrating-with-find-package
+#
+# The following variables are available:
+#   HAVE_RAND_EGD: `RAND_egd` present in OpenSSL
+#   HAVE_BORINGSSL: OpenSSL is BoringSSL
+#   HAVE_PK11_CREATEMANAGEDGENERICOBJECTL: `PK11_CreateManagedGenericObject` present in NSS
+#   HAVE_SSL_CTX_SET_QUIC_METHOD: `SSL_CTX_set_quic_method` present in OpenSSL
+#   HAVE_QUICHE_CONN_SET_QLOG_FD: `quiche_conn_set_qlog_fd` present in QUICHE
+#   HAVE_ZSTD_CREATEDSTREAM: `ZSTD_createDStream` present in Zstd
+#
+# For each of the above variables, if the variable is DEFINED (either
+# to ON or OFF), the symbol detection will be skipped.  If the
+# variable is NOT DEFINED, the symbol detection will be performed.
+
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
 include(Utilities)
 include(Macros)
@@ -200,7 +233,11 @@ endif()
 # SET(PACKAGE_STRING "curl-")
 # SET(PACKAGE_BUGREPORT "a suitable curl mailing list => https://curl.se/mail/")
 set(OPERATING_SYSTEM "${CMAKE_SYSTEM_NAME}")
-set(OS "\"${CMAKE_SYSTEM_NAME}\"")
+if(CMAKE_C_COMPILER_TARGET)
+  set(OS "\"${CMAKE_C_COMPILER_TARGET}\"")
+else()
+  set(OS "\"${CMAKE_SYSTEM_NAME}\"")
+endif()
 
 include_directories(${CURL_SOURCE_DIR}/include)
 
@@ -211,21 +248,13 @@ option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 option(ENABLE_ARES "Set to ON to enable c-ares support" OFF)
 if(WIN32)
   option(CURL_STATIC_CRT "Set to ON to build libcurl with static CRT on Windows (/MT)." OFF)
-  option(ENABLE_INET_PTON "Set to OFF to prevent usage of inet_pton when building against modern SDKs while still requiring compatibility with older Windows versions, such as Windows XP, Windows Server 2003 etc." ON)
   option(ENABLE_UNICODE "Set to ON to use the Unicode version of the Windows API functions" OFF)
   if(0) # This code not needed for building within CMake.
   set(CURL_TARGET_WINDOWS_VERSION "" CACHE STRING "Minimum target Windows version as hex string")
   if(CURL_TARGET_WINDOWS_VERSION)
     add_definitions(-D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION})
     set(CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION}")
-  elseif(ENABLE_INET_PTON)
-    # _WIN32_WINNT_VISTA (0x0600)
-    add_definitions(-D_WIN32_WINNT=0x0600)
-    set(CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -D_WIN32_WINNT=0x0600")
-  else()
-    # _WIN32_WINNT_WINXP (0x0501)
-    add_definitions(-D_WIN32_WINNT=0x0501)
-    set(CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -D_WIN32_WINNT=0x0501")
+    set(CURL_TEST_DEFINES "${CURL_TEST_DEFINES} -D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION}")
   endif()
   endif()
   if(ENABLE_UNICODE)
@@ -475,19 +504,7 @@ if(ENABLE_THREADED_RESOLVER)
 endif()
 
 # Check for all needed libraries
-if(0) # This code not needed for building within CMake.
-check_library_exists_concat("${CMAKE_DL_LIBS}" dlopen HAVE_LIBDL)
-else()
-  # Use the cmake-defined dl libs as dl is should not be used
-  # on HPUX, but rather dld this avoids a warning
-  list(APPEND CURL_LIBS ${CMAKE_DL_LIBS})
-endif()
 check_library_exists_concat("socket" connect      HAVE_LIBSOCKET)
-check_library_exists("c" gethostbyname "" NOT_NEED_LIBNSL)
-
-if(NOT NOT_NEED_LIBNSL)
-  check_library_exists_concat("nsl"    gethostbyname  HAVE_LIBNSL)
-endif()
 
 check_function_exists(gethostname HAVE_GETHOSTNAME)
 
@@ -598,16 +615,12 @@ if(CURL_USE_OPENSSL)
   include_directories(${OPENSSL_INCLUDE_DIR})
 
   set(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
-  check_include_file("openssl/crypto.h" HAVE_OPENSSL_CRYPTO_H)
-  check_include_file("openssl/err.h"    HAVE_OPENSSL_ERR_H)
-  check_include_file("openssl/pem.h"    HAVE_OPENSSL_PEM_H)
-  check_include_file("openssl/rsa.h"    HAVE_OPENSSL_RSA_H)
-  check_include_file("openssl/ssl.h"    HAVE_OPENSSL_SSL_H)
-  check_include_file("openssl/x509.h"   HAVE_OPENSSL_X509_H)
-  check_include_file("openssl/rand.h"   HAVE_OPENSSL_RAND_H)
-  check_symbol_exists(RAND_status "${CURL_INCLUDES}" HAVE_RAND_STATUS)
-  check_symbol_exists(RAND_screen "${CURL_INCLUDES}" HAVE_RAND_SCREEN)
-  check_symbol_exists(RAND_egd    "${CURL_INCLUDES}" HAVE_RAND_EGD)
+  if(NOT DEFINED HAVE_RAND_EGD)
+    check_symbol_exists(RAND_egd "${CURL_INCLUDES}" HAVE_RAND_EGD)
+  endif()
+  if(NOT DEFINED HAVE_BORINGSSL)
+    check_symbol_exists(OPENSSL_IS_BORINGSSL "openssl/base.h" HAVE_BORINGSSL)
+  endif()
 
   # Optionally build with a specific CA cert bundle.
   if(CURL_CA_BUNDLE)
@@ -651,11 +664,13 @@ if(CURL_USE_NSS)
   list(APPEND CURL_LIBS ${NSS_LIBRARIES})
   set(SSL_ENABLED ON)
   set(USE_NSS ON)
-  cmake_push_check_state()
-  set(CMAKE_REQUIRED_INCLUDES ${NSS_INCLUDE_DIRS})
-  set(CMAKE_REQUIRED_LIBRARIES ${NSS_LIBRARIES})
-  check_symbol_exists(PK11_CreateManagedGenericObject "pk11pub.h" HAVE_PK11_CREATEMANAGEDGENERICOBJECT)
-  cmake_pop_check_state()
+  if(NOT DEFINED HAVE_PK11_CREATEMANAGEDGENERICOBJECT)
+    cmake_push_check_state()
+    set(CMAKE_REQUIRED_INCLUDES ${NSS_INCLUDE_DIRS})
+    set(CMAKE_REQUIRED_LIBRARIES ${NSS_LIBRARIES})
+    check_symbol_exists(PK11_CreateManagedGenericObject "pk11pub.h" HAVE_PK11_CREATEMANAGEDGENERICOBJECT)
+    cmake_pop_check_state()
+  endif()
 endif()
 
 option(USE_NGHTTP2 "Use Nghttp2 library" OFF)
@@ -667,20 +682,26 @@ endif()
 
 function(CheckQuicSupportInOpenSSL)
   # Be sure that the OpenSSL library actually supports QUIC.
-  cmake_push_check_state()
-  set(CMAKE_REQUIRED_INCLUDES   "${OPENSSL_INCLUDE_DIR}")
-  set(CMAKE_REQUIRED_LIBRARIES  "${OPENSSL_LIBRARIES}")
-  check_symbol_exists(SSL_CTX_set_quic_method "openssl/ssl.h" HAVE_SSL_CTX_SET_QUIC_METHOD)
-  if(NOT HAVE_SSL_CTX_SET_QUIC_METHOD)
-    message(FATAL_ERROR "QUIC support is missing in OpenSSL/boringssl. Try setting -DOPENSSL_ROOT_DIR")
+  if(NOT DEFINED HAVE_SSL_CTX_SET_QUIC_METHOD)
+    cmake_push_check_state()
+    set(CMAKE_REQUIRED_INCLUDES   "${OPENSSL_INCLUDE_DIR}")
+    set(CMAKE_REQUIRED_LIBRARIES  "${OPENSSL_LIBRARIES}")
+    check_symbol_exists(SSL_CTX_set_quic_method "openssl/ssl.h" HAVE_SSL_CTX_SET_QUIC_METHOD)
+    cmake_pop_check_state()
   endif()
-  cmake_pop_check_state()
+  if(NOT HAVE_SSL_CTX_SET_QUIC_METHOD)
+    message(FATAL_ERROR "QUIC support is missing in OpenSSL/BoringSSL. Try setting -DOPENSSL_ROOT_DIR")
+  endif()
 endfunction()
 
 option(USE_NGTCP2 "Use ngtcp2 and nghttp3 libraries for HTTP/3 support" OFF)
 if(USE_NGTCP2)
   if(USE_OPENSSL)
-    find_package(NGTCP2 REQUIRED OpenSSL)
+    if(HAVE_BORINGSSL)
+      find_package(NGTCP2 REQUIRED BoringSSL)
+    else()
+      find_package(NGTCP2 REQUIRED OpenSSL)
+    endif()
     CheckQuicSupportInOpenSSL()
   elseif(USE_GNUTLS)
     # TODO add GnuTLS support as vtls library.
@@ -708,11 +729,13 @@ if(USE_QUICHE)
   set(USE_QUICHE ON)
   include_directories(${QUICHE_INCLUDE_DIRS})
   list(APPEND CURL_LIBS ${QUICHE_LIBRARIES})
-  cmake_push_check_state()
-  set(CMAKE_REQUIRED_INCLUDES   "${QUICHE_INCLUDE_DIRS}")
-  set(CMAKE_REQUIRED_LIBRARIES  "${QUICHE_LIBRARIES}")
-  check_symbol_exists(quiche_conn_set_qlog_fd "quiche.h" HAVE_QUICHE_CONN_SET_QLOG_FD)
-  cmake_pop_check_state()
+  if(NOT DEFINED HAVE_QUICHE_CONN_SET_QLOG_FD)
+    cmake_push_check_state()
+    set(CMAKE_REQUIRED_INCLUDES   "${QUICHE_INCLUDE_DIRS}")
+    set(CMAKE_REQUIRED_LIBRARIES  "${QUICHE_LIBRARIES}")
+    check_symbol_exists(quiche_conn_set_qlog_fd "quiche.h" HAVE_QUICHE_CONN_SET_QLOG_FD)
+    cmake_pop_check_state()
+  endif()
 endif()
 
 option(USE_MSH3 "Use msquic library for HTTP/3 support" OFF)
@@ -748,7 +771,6 @@ if(NOT CURL_DISABLE_LDAP)
   # Now that we know, we're not using windows LDAP...
   if(USE_WIN32_LDAP)
     check_include_file_concat("winldap.h" HAVE_WINLDAP_H)
-    check_include_file_concat("winber.h"  HAVE_WINBER_H)
   else()
     # Check for LDAP
     set(CMAKE_REQUIRED_LIBRARIES ${OPENSSL_LIBRARIES})
@@ -831,34 +853,29 @@ endif()
 
 if(NOT CURL_DISABLE_LDAPS)
   check_include_file_concat("ldap_ssl.h" HAVE_LDAP_SSL_H)
-  check_include_file_concat("ldapssl.h"  HAVE_LDAPSSL_H)
 endif()
 
-# Check for idn
+# Check for idn2
 option(USE_LIBIDN2 "Use libidn2 for IDN support" ON)
-set(HAVE_LIBIDN2 OFF)
 if(USE_LIBIDN2)
   check_library_exists_concat("idn2" idn2_lookup_ul HAVE_LIBIDN2)
+else()
+  set(HAVE_LIBIDN2 OFF)
 endif()
 
 if(WIN32)
   option(USE_WIN32_IDN "Use WinIDN for IDN support" OFF)
   if(USE_WIN32_IDN)
-    list(APPEND CURL_LIBS "Normaliz")
+    list(APPEND CURL_LIBS "normaliz")
     set(WANT_IDN_PROTOTYPES ON)
   endif()
 endif()
 
-# Check for symbol dlopen (same as HAVE_LIBDL)
-check_library_exists("${CURL_LIBS}" dlopen "" HAVE_DLOPEN)
-
 set(HAVE_LIBZ OFF)
-set(HAVE_ZLIB_H OFF)
 set(USE_ZLIB OFF)
 #optional_dependency(ZLIB)
 find_package(ZLIB)
 if(ZLIB_FOUND)
-  set(HAVE_ZLIB_H ON)
   set(HAVE_LIBZ ON)
   set(USE_ZLIB ON)
 
@@ -890,11 +907,13 @@ option(CURL_ZSTD "Set to ON to enable building curl with zstd support." OFF)
 set(HAVE_ZSTD OFF)
 if(CURL_ZSTD)
   find_package(Zstd REQUIRED)
-  cmake_push_check_state()
-  set(CMAKE_REQUIRED_INCLUDES ${Zstd_INCLUDE_DIRS})
-  set(CMAKE_REQUIRED_LIBRARIES ${Zstd_LIBRARIES})
-  check_symbol_exists(ZSTD_createDStream "zstd.h" HAVE_ZSTD_CREATEDSTREAM)
-  cmake_pop_check_state()
+  if (NOT DEFINED HAVE_ZSTD_CREATEDSTREAM)
+    cmake_push_check_state()
+    set(CMAKE_REQUIRED_INCLUDES ${Zstd_INCLUDE_DIRS})
+    set(CMAKE_REQUIRED_LIBRARIES ${Zstd_LIBRARIES})
+    check_symbol_exists(ZSTD_createDStream "zstd.h" HAVE_ZSTD_CREATEDSTREAM)
+    cmake_pop_check_state()
+  endif()
   if(Zstd_FOUND AND HAVE_ZSTD_CREATEDSTREAM)
     set(HAVE_ZSTD ON)
     list(APPEND CURL_LIBS ${Zstd_LIBRARIES})
@@ -902,42 +921,46 @@ if(CURL_ZSTD)
   endif()
 endif()
 
+#libpsl
+option(CURL_USE_LIBPSL "Use libPSL" ON)
+mark_as_advanced(CURL_USE_LIBPSL)
+set(USE_LIBPSL OFF)
+
+if(CURL_USE_LIBPSL)
+  find_package(LibPSL)
+  if(LIBPSL_FOUND)
+    list(APPEND CURL_LIBS ${LIBPSL_LIBRARY})
+    list(APPEND CMAKE_REQUIRED_INCLUDES "${LIBPSL_INCLUDE_DIR}")
+    include_directories("${LIBPSL_INCLUDE_DIR}")
+    set(USE_LIBPSL ON)
+  endif()
+endif()
+
 #libSSH2
 option(CURL_USE_LIBSSH2 "Use libSSH2" ON)
 mark_as_advanced(CURL_USE_LIBSSH2)
 set(USE_LIBSSH2 OFF)
-set(HAVE_LIBSSH2 OFF)
-set(HAVE_LIBSSH2_H OFF)
 
 if(CURL_USE_LIBSSH2)
   find_package(LibSSH2)
   if(LIBSSH2_FOUND)
     list(APPEND CURL_LIBS ${LIBSSH2_LIBRARY})
-    set(CMAKE_REQUIRED_LIBRARIES ${LIBSSH2_LIBRARY})
     list(APPEND CMAKE_REQUIRED_INCLUDES "${LIBSSH2_INCLUDE_DIR}")
     include_directories("${LIBSSH2_INCLUDE_DIR}")
-    set(HAVE_LIBSSH2 ON)
     set(USE_LIBSSH2 ON)
-
-    # find_package has already found the headers
-    set(HAVE_LIBSSH2_H ON)
-    set(CURL_INCLUDES ${CURL_INCLUDES} "${LIBSSH2_INCLUDE_DIR}/libssh2.h")
-    set(CURL_TEST_DEFINES "${CURL_TEST_DEFINES} -DHAVE_LIBSSH2_H")
-    unset(CMAKE_REQUIRED_LIBRARIES)
   endif()
 endif()
 
 # libssh
 option(CURL_USE_LIBSSH "Use libSSH" OFF)
 mark_as_advanced(CURL_USE_LIBSSH)
-if(NOT HAVE_LIBSSH2 AND CURL_USE_LIBSSH)
+if(NOT USE_LIBSSH2 AND CURL_USE_LIBSSH)
   find_package(libssh CONFIG)
   if(libssh_FOUND)
     message(STATUS "Found libssh ${libssh_VERSION}")
     # Use imported target for include and library paths.
     list(APPEND CURL_LIBS ssh)
     set(USE_LIBSSH ON)
-    set(HAVE_LIBSSH_LIBSSH_H 1)
   endif()
 endif()
 
@@ -979,14 +1002,15 @@ if(CURL_USE_GSSAPI)
         set(_LINKER_FLAGS_STR "${_LINKER_FLAGS_STR} -L\"${_dir}\"")
       endforeach()
 
-      set(CMAKE_REQUIRED_FLAGS "${_COMPILER_FLAGS_STR} ${_LINKER_FLAGS_STR}")
-      set(CMAKE_REQUIRED_LIBRARIES ${GSS_LIBRARIES})
-      check_symbol_exists("GSS_C_NT_HOSTBASED_SERVICE" ${_INCLUDE_LIST} HAVE_GSS_C_NT_HOSTBASED_SERVICE)
+      if(NOT DEFINED HAVE_GSS_C_NT_HOSTBASED_SERVICE)
+        set(CMAKE_REQUIRED_FLAGS "${_COMPILER_FLAGS_STR} ${_LINKER_FLAGS_STR}")
+        set(CMAKE_REQUIRED_LIBRARIES ${GSS_LIBRARIES})
+        check_symbol_exists("GSS_C_NT_HOSTBASED_SERVICE" ${_INCLUDE_LIST} HAVE_GSS_C_NT_HOSTBASED_SERVICE)
+        unset(CMAKE_REQUIRED_LIBRARIES)
+      endif()
       if(NOT HAVE_GSS_C_NT_HOSTBASED_SERVICE)
         set(HAVE_OLD_GSSMIT ON)
       endif()
-      unset(CMAKE_REQUIRED_LIBRARIES)
-
     endif()
 
     include_directories(${GSS_INCLUDE_DIR})
@@ -1105,7 +1129,6 @@ else()
   set(HAVE_WINSOCK2_H 0)
 endif()
 
-check_include_file_concat("stdio.h"          HAVE_STDIO_H)
 check_include_file_concat("inttypes.h"       HAVE_INTTYPES_H)
 check_include_file_concat("sys/filio.h"      HAVE_SYS_FILIO_H)
 check_include_file_concat("sys/ioctl.h"      HAVE_SYS_IOCTL_H)
@@ -1118,11 +1141,9 @@ check_include_file_concat("sys/sockio.h"     HAVE_SYS_SOCKIO_H)
 check_include_file_concat("sys/stat.h"       HAVE_SYS_STAT_H)
 check_include_file_concat("sys/time.h"       HAVE_SYS_TIME_H)
 check_include_file_concat("sys/types.h"      HAVE_SYS_TYPES_H)
-check_include_file_concat("sys/uio.h"        HAVE_SYS_UIO_H)
 check_include_file_concat("sys/un.h"         HAVE_SYS_UN_H)
 check_include_file_concat("sys/utime.h"      HAVE_SYS_UTIME_H)
 check_include_file_concat("sys/xattr.h"      HAVE_SYS_XATTR_H)
-check_include_file_concat("alloca.h"         HAVE_ALLOCA_H)
 check_include_file_concat("arpa/inet.h"      HAVE_ARPA_INET_H)
 check_include_file_concat("arpa/tftp.h"      HAVE_ARPA_TFTP_H)
 check_include_file_concat("assert.h"         HAVE_ASSERT_H)
@@ -1131,7 +1152,6 @@ check_include_file_concat("fcntl.h"          HAVE_FCNTL_H)
 check_include_file_concat("idn2.h"           HAVE_IDN2_H)
 check_include_file_concat("ifaddrs.h"        HAVE_IFADDRS_H)
 check_include_file_concat("io.h"             HAVE_IO_H)
-check_include_file_concat("krb.h"            HAVE_KRB_H)
 check_include_file_concat("libgen.h"         HAVE_LIBGEN_H)
 check_include_file_concat("locale.h"         HAVE_LOCALE_H)
 check_include_file_concat("net/if.h"         HAVE_NET_IF_H)
@@ -1140,15 +1160,14 @@ check_include_file_concat("netinet/in.h"     HAVE_NETINET_IN_H)
 check_include_file_concat("netinet/tcp.h"    HAVE_NETINET_TCP_H)
 check_include_file("linux/tcp.h"      HAVE_LINUX_TCP_H)
 
-check_include_file_concat("pem.h"            HAVE_PEM_H)
 check_include_file_concat("poll.h"           HAVE_POLL_H)
 check_include_file_concat("pwd.h"            HAVE_PWD_H)
 check_include_file_concat("setjmp.h"         HAVE_SETJMP_H)
 check_include_file_concat("signal.h"         HAVE_SIGNAL_H)
 check_include_file_concat("ssl.h"            HAVE_SSL_H)
+check_include_file_concat("stdatomic.h"      HAVE_STDATOMIC_H)
 check_include_file_concat("stdbool.h"        HAVE_STDBOOL_H)
 check_include_file_concat("stdint.h"         HAVE_STDINT_H)
-check_include_file_concat("stdio.h"          HAVE_STDIO_H)
 check_include_file_concat("stdlib.h"         HAVE_STDLIB_H)
 check_include_file_concat("string.h"         HAVE_STRING_H)
 check_include_file_concat("strings.h"        HAVE_STRINGS_H)
@@ -1158,24 +1177,20 @@ check_include_file_concat("termios.h"        HAVE_TERMIOS_H)
 check_include_file_concat("time.h"           HAVE_TIME_H)
 check_include_file_concat("unistd.h"         HAVE_UNISTD_H)
 check_include_file_concat("utime.h"          HAVE_UTIME_H)
-check_include_file_concat("x509.h"           HAVE_X509_H)
 
 check_include_file_concat("process.h"        HAVE_PROCESS_H)
 check_include_file_concat("stddef.h"         HAVE_STDDEF_H)
-check_include_file_concat("dlfcn.h"          HAVE_DLFCN_H)
-check_include_file_concat("malloc.h"         HAVE_MALLOC_H)
-check_include_file_concat("memory.h"         HAVE_MEMORY_H)
-check_include_file_concat("netinet/if_ether.h" HAVE_NETINET_IF_ETHER_H)
 check_include_file_concat("stdint.h"        HAVE_STDINT_H)
-check_include_file_concat("sockio.h"        HAVE_SOCKIO_H)
 check_include_file_concat("sys/utsname.h"   HAVE_SYS_UTSNAME_H)
 
 check_type_size(size_t  SIZEOF_SIZE_T)
 check_type_size(ssize_t  SIZEOF_SSIZE_T)
 check_type_size("time_t"  SIZEOF_TIME_T)
 
-find_file(RANDOM_FILE urandom /dev)
-mark_as_advanced(RANDOM_FILE)
+if(NOT CMAKE_CROSSCOMPILING)
+  find_file(RANDOM_FILE urandom /dev)
+  mark_as_advanced(RANDOM_FILE)
+endif()
 
 # Check for some functions that are used
 if(HAVE_LIBWS2_32)
@@ -1186,57 +1201,46 @@ elseif(HAVE_LIBNETWORK)
   set(CMAKE_REQUIRED_LIBRARIES network)
 endif()
 
+check_symbol_exists(fchmod        "${CURL_INCLUDES}" HAVE_FCHMOD)
 check_symbol_exists(basename      "${CURL_INCLUDES}" HAVE_BASENAME)
 check_symbol_exists(socket        "${CURL_INCLUDES}" HAVE_SOCKET)
+check_symbol_exists(socketpair    "${CURL_INCLUDES}" HAVE_SOCKETPAIR)
+check_symbol_exists(recv          "${CURL_INCLUDES}" HAVE_RECV)
+check_symbol_exists(send          "${CURL_INCLUDES}" HAVE_SEND)
 check_symbol_exists(select        "${CURL_INCLUDES}" HAVE_SELECT)
-check_symbol_exists(poll          "${CURL_INCLUDES}" HAVE_POLL)
 check_symbol_exists(strdup        "${CURL_INCLUDES}" HAVE_STRDUP)
-check_symbol_exists(strstr        "${CURL_INCLUDES}" HAVE_STRSTR)
 check_symbol_exists(strtok_r      "${CURL_INCLUDES}" HAVE_STRTOK_R)
-check_symbol_exists(strftime      "${CURL_INCLUDES}" HAVE_STRFTIME)
-check_symbol_exists(uname         "${CURL_INCLUDES}" HAVE_UNAME)
 check_symbol_exists(strcasecmp    "${CURL_INCLUDES}" HAVE_STRCASECMP)
 check_symbol_exists(stricmp       "${CURL_INCLUDES}" HAVE_STRICMP)
 check_symbol_exists(strcmpi       "${CURL_INCLUDES}" HAVE_STRCMPI)
-check_symbol_exists(strncmpi      "${CURL_INCLUDES}" HAVE_STRNCMPI)
 check_symbol_exists(alarm         "${CURL_INCLUDES}" HAVE_ALARM)
-if(NOT HAVE_STRNCMPI)
-  set(HAVE_STRCMPI)
-endif()
 check_symbol_exists(getppid       "${CURL_INCLUDES}" HAVE_GETPPID)
 check_symbol_exists(utimes        "${CURL_INCLUDES}" HAVE_UTIMES)
 
 check_symbol_exists(gettimeofday  "${CURL_INCLUDES}" HAVE_GETTIMEOFDAY)
-check_symbol_exists(inet_addr     "${CURL_INCLUDES}" HAVE_INET_ADDR)
 check_symbol_exists(closesocket   "${CURL_INCLUDES}" HAVE_CLOSESOCKET)
 check_symbol_exists(sigsetjmp     "${CURL_INCLUDES}" HAVE_SIGSETJMP)
 check_symbol_exists(getpass_r     "${CURL_INCLUDES}" HAVE_GETPASS_R)
 check_symbol_exists(getpwuid      "${CURL_INCLUDES}" HAVE_GETPWUID)
 check_symbol_exists(getpwuid_r    "${CURL_INCLUDES}" HAVE_GETPWUID_R)
 check_symbol_exists(geteuid       "${CURL_INCLUDES}" HAVE_GETEUID)
-check_symbol_exists(usleep        "${CURL_INCLUDES}" HAVE_USLEEP)
 check_symbol_exists(utime         "${CURL_INCLUDES}" HAVE_UTIME)
 check_symbol_exists(gmtime_r      "${CURL_INCLUDES}" HAVE_GMTIME_R)
-check_symbol_exists(localtime_r   "${CURL_INCLUDES}" HAVE_LOCALTIME_R)
 
-check_symbol_exists(gethostbyname   "${CURL_INCLUDES}" HAVE_GETHOSTBYNAME)
 check_symbol_exists(gethostbyname_r "${CURL_INCLUDES}" HAVE_GETHOSTBYNAME_R)
 
-check_symbol_exists(signal        "${CURL_INCLUDES}" HAVE_SIGNAL_FUNC)
-check_symbol_exists(SIGALRM       "${CURL_INCLUDES}" HAVE_SIGNAL_MACRO)
-if(HAVE_SIGNAL_FUNC AND HAVE_SIGNAL_MACRO)
-  set(HAVE_SIGNAL 1)
-endif()
-check_symbol_exists(uname          "${CURL_INCLUDES}" HAVE_UNAME)
+check_symbol_exists(signal         "${CURL_INCLUDES}" HAVE_SIGNAL)
 check_symbol_exists(strtoll        "${CURL_INCLUDES}" HAVE_STRTOLL)
 check_symbol_exists(_strtoi64      "${CURL_INCLUDES}" HAVE__STRTOI64)
 check_symbol_exists(strerror_r     "${CURL_INCLUDES}" HAVE_STRERROR_R)
 check_symbol_exists(siginterrupt   "${CURL_INCLUDES}" HAVE_SIGINTERRUPT)
 check_symbol_exists(getaddrinfo    "${CURL_INCLUDES}" HAVE_GETADDRINFO)
+if(NOT HAVE_GETADDRINFO)
+  set(HAVE_GETADDRINFO_THREADSAFE OFF)
+endif()
 check_symbol_exists(freeaddrinfo   "${CURL_INCLUDES}" HAVE_FREEADDRINFO)
 check_symbol_exists(pipe           "${CURL_INCLUDES}" HAVE_PIPE)
 check_symbol_exists(ftruncate      "${CURL_INCLUDES}" HAVE_FTRUNCATE)
-check_symbol_exists(getprotobyname "${CURL_INCLUDES}" HAVE_GETPROTOBYNAME)
 check_symbol_exists(getpeername    "${CURL_INCLUDES}" HAVE_GETPEERNAME)
 check_symbol_exists(getsockname    "${CURL_INCLUDES}" HAVE_GETSOCKNAME)
 check_symbol_exists(if_nametoindex "${CURL_INCLUDES}" HAVE_IF_NAMETOINDEX)
@@ -1244,10 +1248,16 @@ check_symbol_exists(getrlimit      "${CURL_INCLUDES}" HAVE_GETRLIMIT)
 check_symbol_exists(setlocale      "${CURL_INCLUDES}" HAVE_SETLOCALE)
 check_symbol_exists(setmode        "${CURL_INCLUDES}" HAVE_SETMODE)
 check_symbol_exists(setrlimit      "${CURL_INCLUDES}" HAVE_SETRLIMIT)
-check_symbol_exists(fcntl          "${CURL_INCLUDES}" HAVE_FCNTL)
-check_symbol_exists(ioctl          "${CURL_INCLUDES}" HAVE_IOCTL)
-check_symbol_exists(setsockopt     "${CURL_INCLUDES}" HAVE_SETSOCKOPT)
+
+if(NOT MSVC OR (MSVC_VERSION GREATER_EQUAL 1900))
+  # earlier MSVC compilers had faulty snprintf implementations
+  check_symbol_exists(snprintf       "${CURL_INCLUDES}" HAVE_SNPRINTF)
+endif()
 check_function_exists(mach_absolute_time HAVE_MACH_ABSOLUTE_TIME)
+check_symbol_exists(inet_ntop      "${CURL_INCLUDES}" HAVE_INET_NTOP)
+if(MSVC AND (MSVC_VERSION LESS_EQUAL 1600))
+  set(HAVE_INET_NTOP OFF)
+endif()
 check_symbol_exists(inet_pton      "${CURL_INCLUDES}" HAVE_INET_PTON)
 
 check_symbol_exists(fsetxattr "${CURL_INCLUDES}" HAVE_FSETXATTR)
@@ -1297,7 +1307,6 @@ foreach(CURL_TEST
     HAVE_IOCTL_FIONBIO
     HAVE_IOCTL_SIOCGIFADDR
     HAVE_SETSOCKOPT_SO_NONBLOCK
-    HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID
     TIME_WITH_SYS_TIME
     HAVE_O_NONBLOCK
     HAVE_GETHOSTBYNAME_R_3
@@ -1309,10 +1318,10 @@ foreach(CURL_TEST
     HAVE_IN_ADDR_T
     HAVE_BOOL_T
     STDC_HEADERS
-    HAVE_GETADDRINFO
     HAVE_FILE_OFFSET_BITS
     HAVE_VARIADIC_MACROS_C99
     HAVE_VARIADIC_MACROS_GCC
+    HAVE_ATOMIC
     )
   curl_internal_test(${CURL_TEST})
 endforeach()
@@ -1329,7 +1338,29 @@ set(CMAKE_EXTRA_INCLUDE_FILES "curl/system.h")
 check_type_size("curl_off_t"  SIZEOF_CURL_OFF_T)
 set(CMAKE_EXTRA_INCLUDE_FILES "")
 
+if(WIN32)
+  # detect actual value of _WIN32_WINNT and store as HAVE_WIN32_WINNT
+  curl_internal_test(HAVE_WIN32_WINNT)
+  if(HAVE_WIN32_WINNT)
+    string(REGEX MATCH ".*_WIN32_WINNT=0x[0-9a-fA-F]+" OUTPUT "${OUTPUT}")
+    string(REGEX REPLACE ".*_WIN32_WINNT=" "" HAVE_WIN32_WINNT "${OUTPUT}")
+    message(STATUS "Found _WIN32_WINNT=${HAVE_WIN32_WINNT}")
+  endif()
+  # avoid storing HAVE_WIN32_WINNT in CMake cache
+  unset(HAVE_WIN32_WINNT CACHE)
+endif()
+
 set(CMAKE_REQUIRED_FLAGS)
+
+option(ENABLE_WEBSOCKETS "Set to ON to enable EXPERIMENTAL websockets" OFF)
+
+if(ENABLE_WEBSOCKETS)
+  if(${SIZEOF_CURL_OFF_T} GREATER "4")
+    set(USE_WEBSOCKETS ON)
+  else()
+    message(WARNING "curl_off_t is too small to enable WebSockets")
+  endif()
+endif()
 
 foreach(CURL_TEST
     HAVE_GLIBC_STRERROR_R
@@ -1372,18 +1403,6 @@ curl_internal_test(HAVE_BUILTIN_AVAILABLE)
 
 if(NOT HAVE_IN_ADDR_T)
   set(in_addr_t "unsigned long")
-endif()
-
-# Fix libz / zlib.h
-
-if(NOT CURL_SPECIAL_LIBZ)
-  if(NOT HAVE_LIBZ)
-    set(HAVE_ZLIB_H 0)
-  endif()
-
-  if(NOT HAVE_ZLIB_H)
-    set(HAVE_LIBZ 0)
-  endif()
 endif()
 
 # Check for nonblocking
@@ -1444,6 +1463,25 @@ if(WIN32)
   # Link required libraries for USE_WIN32_CRYPTO or USE_SCHANNEL
   if(USE_WIN32_CRYPTO OR USE_SCHANNEL)
     list(APPEND CURL_LIBS "advapi32" "crypt32")
+  endif()
+
+  # Matching logic used for Curl_win32_random()
+  if(MINGW)
+    check_c_source_compiles("
+      #include <_mingw.h>
+      #if defined(__MINGW64_VERSION_MAJOR)
+      #error
+      #endif
+      int main(void) {
+        return 0;
+      }"
+      HAVE_MINGW_ORIGINAL)
+  endif()
+
+  if(NOT HAVE_MINGW_ORIGINAL)
+    list(APPEND CURL_LIBS "bcrypt")
+  else()
+    set(HAVE_FTRUNCATE OFF)
   endif()
 endif()
 
@@ -1602,6 +1640,9 @@ _add_if("HTTP3"         USE_NGTCP2 OR USE_QUICHE)
 _add_if("MultiSSL"      CURL_WITH_MULTI_SSL)
 _add_if("HTTPS-proxy"   SSL_ENABLED AND (USE_OPENSSL OR USE_GNUTLS OR USE_NSS))
 _add_if("unicode"       ENABLE_UNICODE)
+_add_if("threadsafe"    HAVE_ATOMIC OR (WIN32 AND
+                        HAVE_WIN32_WINNT GREATER_EQUAL 0x600))
+_add_if("PSL"           USE_LIBPSL)
 string(REPLACE ";" " " SUPPORT_FEATURES "${_items}")
 message(STATUS "Enabled features: ${SUPPORT_FEATURES}")
 
@@ -1638,6 +1679,8 @@ _add_if("SFTP"          USE_LIBSSH2 OR USE_LIBSSH)
 _add_if("RTSP"          NOT CURL_DISABLE_RTSP)
 _add_if("RTMP"          USE_LIBRTMP)
 _add_if("MQTT"          NOT CURL_DISABLE_MQTT)
+_add_if("WS"            USE_WEBSOCKETS)
+_add_if("WSS"           USE_WEBSOCKETS)
 if(_items)
   list(SORT _items)
 endif()
@@ -1771,13 +1814,13 @@ if(MSVC_VERSION EQUAL 1600)
   endif()
 endif()
 
-if(NOT TARGET uninstall)
+if(NOT TARGET curl_uninstall)
   configure_file(
       ${CMAKE_CURRENT_SOURCE_DIR}/CMake/cmake_uninstall.cmake.in
       ${CMAKE_CURRENT_BINARY_DIR}/CMake/cmake_uninstall.cmake
       IMMEDIATE @ONLY)
 
-  add_custom_target(uninstall
+  add_custom_target(curl_uninstall
       COMMAND ${CMAKE_COMMAND} -P
       ${CMAKE_CURRENT_BINARY_DIR}/CMake/cmake_uninstall.cmake)
 endif()

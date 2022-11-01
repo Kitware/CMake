@@ -20,8 +20,11 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 #include "curl_setup.h"
+#include "ws.h"
 
 typedef enum {
   HTTPREQ_GET,
@@ -47,6 +50,15 @@ extern const struct Curl_handler Curl_handler_http;
 #ifdef USE_SSL
 extern const struct Curl_handler Curl_handler_https;
 #endif
+
+#ifdef USE_WEBSOCKETS
+extern const struct Curl_handler Curl_handler_ws;
+
+#ifdef USE_SSL
+extern const struct Curl_handler Curl_handler_wss;
+#endif
+#endif /* websockets */
+
 
 /* Header specific functions */
 bool Curl_compareheader(const char *headerline,  /* line to check */
@@ -216,6 +228,10 @@ struct HTTP {
     HTTPSEND_BODY     /* sending body */
   } sending;
 
+#ifdef USE_WEBSOCKETS
+  struct websocket ws;
+#endif
+
 #ifndef CURL_DISABLE_HTTP
   struct dynbuf send_buffer; /* used if the request couldn't be sent in one
                                 chunk, points to an allocated send_buffer
@@ -225,13 +241,11 @@ struct HTTP {
   /*********** for HTTP/2 we store stream-local data here *************/
   int32_t stream_id; /* stream we are interested in */
 
-  bool bodystarted;
   /* We store non-final and final response headers here, per-stream */
   struct dynbuf header_recvbuf;
   size_t nread_header_recvbuf; /* number of bytes in header_recvbuf fed into
                                   upper layer */
   struct dynbuf trailer_recvbuf;
-  int status_code; /* HTTP status code */
   const uint8_t *pausedata; /* pointer to data received in on_data_chunk */
   size_t pauselen; /* the number of bytes left in data */
   bool close_handled; /* TRUE if stream closure is handled by libcurl */
@@ -242,6 +256,8 @@ struct HTTP {
   uint32_t error; /* HTTP/2 stream error code */
 #endif
 #if defined(USE_NGHTTP2) || defined(USE_NGHTTP3)
+  bool bodystarted;
+  int status_code; /* HTTP status code */
   bool closed; /* TRUE on HTTP2 stream close */
   char *mem;     /* points to a buffer in memory to store received data */
   size_t len;    /* size of the buffer 'mem' points to */
@@ -258,6 +274,7 @@ struct HTTP {
 #ifndef USE_MSH3
   /*********** for HTTP/3 we store stream-local data here *************/
   int64_t stream3_id; /* stream we are interested in */
+  uint64_t error3; /* HTTP/3 stream error code */
   bool firstheader;  /* FALSE until headers arrive */
   bool firstbody;  /* FALSE until body arrives */
   bool h3req;    /* FALSE until request is issued */
@@ -363,11 +380,5 @@ Curl_http_output_auth(struct Curl_easy *data,
                       const char *path,
                       bool proxytunnel); /* TRUE if this is the request setting
                                             up the proxy tunnel */
-
-/*
- * Curl_allow_auth_to_host() tells if authentication, cookies or other
- * "sensitive data" can (still) be sent to this host.
- */
-bool Curl_allow_auth_to_host(struct Curl_easy *data);
 
 #endif /* HEADER_CURL_HTTP_H */

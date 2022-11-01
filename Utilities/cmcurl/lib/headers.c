@@ -18,6 +18,8 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 
 #include "curl_setup.h"
@@ -32,7 +34,7 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#if !defined(CURL_DISABLE_HTTP) && defined(USE_HEADERS_API)
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_HEADERS_API)
 
 /* Generate the curl_header struct for the user. This function MUST assign all
    struct fields in the output struct. */
@@ -72,8 +74,8 @@ CURLHcode curl_easy_header(CURL *easy,
   struct Curl_header_store *hs = NULL;
   struct Curl_header_store *pick = NULL;
   if(!name || !hout || !data ||
-     (type > (CURLH_HEADER|CURLH_TRAILER|CURLH_CONNECT|CURLH_1XX)) ||
-     !type || (request < -1))
+     (type > (CURLH_HEADER|CURLH_TRAILER|CURLH_CONNECT|CURLH_1XX|
+              CURLH_PSEUDO)) || !type || (request < -1))
     return CURLHE_BAD_ARGUMENT;
   if(!Curl_llist_count(&data->state.httphdrs))
     return CURLHE_NOHEADERS; /* no headers available */
@@ -205,7 +207,7 @@ static CURLcode namevalue(char *header, size_t hlen, unsigned int type,
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
   /* skip all leading space letters */
-  while(*header && ISSPACE(*header))
+  while(*header && ISBLANK(*header))
     header++;
 
   *value = header;
@@ -215,6 +217,57 @@ static CURLcode namevalue(char *header, size_t hlen, unsigned int type,
     *end-- = 0; /* nul terminate */
   return CURLE_OK;
 }
+
+static CURLcode unfold_value(struct Curl_easy *data, const char *value,
+                             size_t vlen)  /* length of the incoming header */
+{
+  struct Curl_header_store *hs;
+  struct Curl_header_store *newhs;
+  size_t olen; /* length of the old value */
+  size_t oalloc; /* length of the old name + value + separator */
+  size_t offset;
+  DEBUGASSERT(data->state.prevhead);
+  hs = data->state.prevhead;
+  olen = strlen(hs->value);
+  offset = hs->value - hs->buffer;
+  oalloc = olen + offset + 1;
+
+  /* skip all trailing space letters */
+  while(vlen && ISSPACE(value[vlen - 1]))
+    vlen--;
+
+  /* save only one leading space */
+  while((vlen > 1) && ISBLANK(value[0]) && ISBLANK(value[1])) {
+    vlen--;
+    value++;
+  }
+
+  /* since this header block might move in the realloc below, it needs to
+     first be unlinked from the list and then re-added again after the
+     realloc */
+  Curl_llist_remove(&data->state.httphdrs, &hs->node, NULL);
+
+  /* new size = struct + new value length + old name+value length */
+  newhs = Curl_saferealloc(hs, sizeof(*hs) + vlen + oalloc + 1);
+  if(!newhs)
+    return CURLE_OUT_OF_MEMORY;
+  /* ->name' and ->value point into ->buffer (to keep the header allocation
+     in a single memory block), which now potentially have moved. Adjust
+     them. */
+  newhs->name = newhs->buffer;
+  newhs->value = &newhs->buffer[offset];
+
+  /* put the data at the end of the previous data, not the newline */
+  memcpy(&newhs->value[olen], value, vlen);
+  newhs->value[olen + vlen] = 0; /* null-terminate at newline */
+
+  /* insert this node into the list of headers */
+  Curl_llist_insert_next(&data->state.httphdrs, data->state.httphdrs.tail,
+                         newhs, &newhs->node);
+  data->state.prevhead = newhs;
+  return CURLE_OK;
+}
+
 
 /*
  * Curl_headers_push() gets passed a full HTTP header to store. It gets called
@@ -242,6 +295,15 @@ CURLcode Curl_headers_push(struct Curl_easy *data, const char *header,
   }
   hlen = end - header + 1;
 
+  if((header[0] == ' ') || (header[0] == '\t')) {
+    if(data->state.prevhead)
+      /* line folding, append value to the previous header's value */
+      return unfold_value(data, header, hlen);
+    else
+      /* can't unfold without a previous header */
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+  }
+
   hs = calloc(1, sizeof(*hs) + hlen);
   if(!hs)
     return CURLE_OUT_OF_MEMORY;
@@ -260,7 +322,7 @@ CURLcode Curl_headers_push(struct Curl_easy *data, const char *header,
   /* insert this node into the list of headers */
   Curl_llist_insert_next(&data->state.httphdrs, data->state.httphdrs.tail,
                          hs, &hs->node);
-
+  data->state.prevhead = hs;
   return CURLE_OK;
   fail:
   free(hs);

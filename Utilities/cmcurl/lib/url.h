@@ -20,6 +20,8 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 #include "curl_setup.h"
 
@@ -44,7 +46,8 @@ CURLcode Curl_parse_login_details(const char *login, const size_t len,
                                   char **userptr, char **passwdptr,
                                   char **optionsptr);
 
-const struct Curl_handler *Curl_builtin_scheme(const char *scheme);
+const struct Curl_handler *Curl_builtin_scheme(const char *scheme,
+                                               size_t schemelen);
 
 bool Curl_is_ASCII_name(const char *hostname);
 CURLcode Curl_idnconvert_hostname(struct Curl_easy *data,

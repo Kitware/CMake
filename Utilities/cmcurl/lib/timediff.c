@@ -18,9 +18,13 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 
 #include "timediff.h"
+
+#include <limits.h>
 
 /*
  * Converts number of milliseconds into a timeval structure.

@@ -18,6 +18,8 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl AND ISC
+ *
  ***************************************************************************/
 
 #include "curl_setup.h"
@@ -120,7 +122,8 @@ CURLcode Curl_get_pathname(const char **cpp, char **path, char *homedir)
   bool relativePath = false;
   static const char WHITESPACE[] = " \t\r\n";
 
-  if(!*cp) {
+  DEBUGASSERT(homedir);
+  if(!*cp || !homedir) {
     *cpp = NULL;
     *path = NULL;
     return CURLE_QUOTE_ERROR;
