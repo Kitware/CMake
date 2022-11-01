@@ -8,7 +8,7 @@ readonly name="nghttp2"
 readonly ownership="nghttp2 upstream <kwrobot@kitware.com>"
 readonly subtree="Utilities/cmnghttp2"
 readonly repo="https://github.com/nghttp2/nghttp2.git"
-readonly tag="v1.40.0"
+readonly tag="v1.50.0"
 readonly shortlog=false
 readonly paths="
   COPYING
