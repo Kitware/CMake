@@ -349,6 +349,12 @@ if(BUILD_TESTING)
     endif()
   endif()
 
+  if(NOT DEFINED CMake_TEST_OBJC)
+    if(APPLE AND CMAKE_C_COMPILER_ID MATCHES "Clang|GNU")
+      set(CMake_TEST_OBJC 1)
+    endif()
+  endif()
+
   # Use 1500 or CTEST_TEST_TIMEOUT for long test timeout value,
   # whichever is greater.
   set(CMAKE_LONG_TEST_TIMEOUT 1500)
@@ -436,6 +442,11 @@ if(BUILD_TESTING)
     if(NOT CMAKE_SKIP_VSGNUFortran)
       ADD_TEST_MACRO(VSGNUFortran ${CMAKE_CMAKE_COMMAND} -P runtest.cmake)
     endif()
+  endif()
+
+  if(CMake_TEST_OBJC)
+    add_subdirectory(ObjC)
+    add_subdirectory(ObjCXX)
   endif()
 
   if(${CMAKE_GENERATOR} MATCHES "Visual Studio ([^9]|[9][0-9])")
@@ -2506,9 +2517,6 @@ if(BUILD_TESTING)
         -Dgen=${CMAKE_GENERATOR}
         -P ${CMake_SOURCE_DIR}/Tests/CFBundleTest/VerifyResult.cmake)
       list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CFBundleTest")
-
-      add_subdirectory(ObjC)
-      add_subdirectory(ObjCXX)
     endif()
   endif()
 
