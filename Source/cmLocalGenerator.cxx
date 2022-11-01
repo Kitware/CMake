@@ -2046,25 +2046,15 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
     }
   }
 
-  // Add MSVC debug information format flags. This is activated by the presence
-  // of a default selection whether or not it is overridden by a property.
-  cmValue msvcDebugInformationFormatDefault = this->Makefile->GetDefinition(
-    "CMAKE_MSVC_DEBUG_INFORMATION_FORMAT_DEFAULT");
-  if (cmNonempty(msvcDebugInformationFormatDefault)) {
-    cmValue msvcDebugInformationFormatValue =
-      target->GetProperty("MSVC_DEBUG_INFORMATION_FORMAT");
-    if (!msvcDebugInformationFormatValue) {
-      msvcDebugInformationFormatValue = msvcDebugInformationFormatDefault;
-    }
-    std::string const msvcDebugInformationFormat =
-      cmGeneratorExpression::Evaluate(*msvcDebugInformationFormatValue, this,
-                                      config, target);
-    if (!msvcDebugInformationFormat.empty()) {
+  // Add MSVC debug information format flags if CMP0141 is NEW.
+  if (cm::optional<std::string> msvcDebugInformationFormat =
+        this->GetMSVCDebugFormatName(config, target)) {
+    if (!msvcDebugInformationFormat->empty()) {
       if (cmValue msvcDebugInformationFormatOptions =
             this->Makefile->GetDefinition(
               cmStrCat("CMAKE_", lang,
                        "_COMPILE_OPTIONS_MSVC_DEBUG_INFORMATION_FORMAT_",
-                       msvcDebugInformationFormat))) {
+                       *msvcDebugInformationFormat))) {
         this->AppendCompileOptions(flags, *msvcDebugInformationFormatOptions);
       } else if ((this->Makefile->GetSafeDefinition(
                     cmStrCat("CMAKE_", lang, "_COMPILER_ID")) == "MSVC"_s ||
@@ -2074,7 +2064,7 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
         // The compiler uses the MSVC ABI so it needs a known runtime library.
         this->IssueMessage(MessageType::FATAL_ERROR,
                            cmStrCat("MSVC_DEBUG_INFORMATION_FORMAT value '",
-                                    msvcDebugInformationFormat,
+                                    *msvcDebugInformationFormat,
                                     "' not known for this ", lang,
                                     " compiler."));
       }
@@ -2685,13 +2675,22 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
                   this->Makefile->GetSafeDefinition(
                     cmStrCat("CMAKE_", lang, "_FLAGS_", configUpper));
 
-                bool editAndContinueDebugInfo =
-                  langFlags.find("/ZI") != std::string::npos ||
-                  langFlags.find("-ZI") != std::string::npos;
-
-                bool enableDebuggingInformation =
-                  langFlags.find("/Zi") != std::string::npos ||
-                  langFlags.find("-Zi") != std::string::npos;
+                bool editAndContinueDebugInfo = false;
+                bool programDatabaseDebugInfo = false;
+                if (cm::optional<std::string> msvcDebugInformationFormat =
+                      this->GetMSVCDebugFormatName(config, target)) {
+                  editAndContinueDebugInfo =
+                    *msvcDebugInformationFormat == "EditAndContinue";
+                  programDatabaseDebugInfo =
+                    *msvcDebugInformationFormat == "ProgramDatabase";
+                } else {
+                  editAndContinueDebugInfo =
+                    langFlags.find("/ZI") != std::string::npos ||
+                    langFlags.find("-ZI") != std::string::npos;
+                  programDatabaseDebugInfo =
+                    langFlags.find("/Zi") != std::string::npos ||
+                    langFlags.find("-Zi") != std::string::npos;
+                }
 
                 // MSVC 2008 is producing both .pdb and .idb files with /Zi.
                 bool msvc2008OrLess =
@@ -2707,7 +2706,7 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
                 if (editAndContinueDebugInfo || msvc2008OrLess) {
                   this->CopyPchCompilePdb(config, target, *ReuseFrom,
                                           reuseTarget, { ".pdb", ".idb" });
-                } else if (enableDebuggingInformation) {
+                } else if (programDatabaseDebugInfo) {
                   this->CopyPchCompilePdb(config, target, *ReuseFrom,
                                           reuseTarget, { ".pdb" });
                 }
@@ -2869,6 +2868,26 @@ void cmLocalGenerator::CopyPchCompilePdb(
 
   target->Target->SetProperty("COMPILE_PDB_OUTPUT_DIRECTORY",
                               target_compile_pdb_dir);
+}
+
+cm::optional<std::string> cmLocalGenerator::GetMSVCDebugFormatName(
+  std::string const& config, cmGeneratorTarget const* target)
+{
+  // MSVC debug information format selection is activated by the presence
+  // of a default whether or not it is overridden by a property.
+  cm::optional<std::string> msvcDebugInformationFormat;
+  cmValue msvcDebugInformationFormatDefault = this->Makefile->GetDefinition(
+    "CMAKE_MSVC_DEBUG_INFORMATION_FORMAT_DEFAULT");
+  if (cmNonempty(msvcDebugInformationFormatDefault)) {
+    cmValue msvcDebugInformationFormatValue =
+      target->GetProperty("MSVC_DEBUG_INFORMATION_FORMAT");
+    if (!msvcDebugInformationFormatValue) {
+      msvcDebugInformationFormatValue = msvcDebugInformationFormatDefault;
+    }
+    msvcDebugInformationFormat = cmGeneratorExpression::Evaluate(
+      *msvcDebugInformationFormatValue, this, config, target);
+  }
+  return msvcDebugInformationFormat;
 }
 
 namespace {

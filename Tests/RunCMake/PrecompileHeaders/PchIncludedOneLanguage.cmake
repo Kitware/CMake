@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.16)
-project(PchIncludedAllLanguages C CXX)
+enable_language(C)
+enable_language(CXX)
 
 if(CMAKE_CXX_COMPILE_OPTIONS_USE_PCH)
   add_definitions(-DHAVE_PCH_SUPPORT)

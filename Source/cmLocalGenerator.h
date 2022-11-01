@@ -646,6 +646,10 @@ private:
                          cmGeneratorTarget* reuseTarget,
                          std::vector<std::string> const& extensions);
 
+  // Returns MSVC_DEBUG_INFORMATION_FORMAT value if CMP0141 is NEW.
+  cm::optional<std::string> GetMSVCDebugFormatName(
+    std::string const& config, cmGeneratorTarget const* target);
+
   struct UnityBatchedSource
   {
     cmSourceFile* Source = nullptr;
