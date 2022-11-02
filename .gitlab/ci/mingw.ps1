@@ -21,3 +21,5 @@ Add-Type -AssemblyName System.IO.Compression.FileSystem
 [System.IO.Compression.ZipFile]::ExtractToDirectory("$outdir\$tarball", "$outdir")
 Move-Item -Path "$outdir\$filename" -Destination "$outdir\mingw"
 Remove-Item "$outdir\$tarball"
+
+"$outdir/mingw /mingw" -replace '\\', '/' | Out-File -FilePath "$outdir\mingw\msys\1.0\etc\fstab" -Encoding ASCII
