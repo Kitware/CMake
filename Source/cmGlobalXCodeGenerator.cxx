@@ -2780,6 +2780,9 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
   }
   if (!dirs.IsEmpty()) {
     buildSettings->AddAttribute("HEADER_SEARCH_PATHS", dirs.CreateList());
+    if (languages.count("Swift")) {
+      buildSettings->AddAttribute("SWIFT_INCLUDE_PATHS", dirs.CreateList());
+    }
   }
   if (!sysfdirs.IsEmpty()) {
     buildSettings->AddAttribute("SYSTEM_FRAMEWORK_SEARCH_PATHS",
