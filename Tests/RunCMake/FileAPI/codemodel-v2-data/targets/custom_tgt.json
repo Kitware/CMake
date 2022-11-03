@@ -5,10 +5,12 @@
     "projectName": "Custom",
     "type": "UTILITY",
     "isGeneratorProvided": null,
+    "fileSets": null,
     "sources": [
         {
             "path": "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/custom/CMakeFiles/custom_tgt(-(Debug|Release|RelWithDebInfo|MinSizeRel))?$",
             "isGenerated": true,
+            "fileSetName": null,
             "sourceGroupName": "",
             "compileGroupLanguage": null,
             "backtrace": [
@@ -29,6 +31,7 @@
         {
             "path": "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/(custom/)?CMakeFiles/([0-9a-f]+/)?custom_tgt(-\\(CONFIG\\))?\\.rule$",
             "isGenerated": true,
+            "fileSetName": null,
             "sourceGroupName": "CMake Rules",
             "compileGroupLanguage": null,
             "backtrace": [

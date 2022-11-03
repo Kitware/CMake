@@ -5,10 +5,12 @@
     "projectName": "Interface",
     "type": "INTERFACE_LIBRARY",
     "isGeneratorProvided": null,
+    "fileSets": null,
     "sources": [
         {
             "path": "^empty\\.c$",
             "isGenerated": null,
+            "fileSetName": null,
             "sourceGroupName": "Source Files",
             "compileGroupLanguage": null,
             "backtrace": [
