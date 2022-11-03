@@ -169,6 +169,12 @@ add_dependencies(CustomCommandByproducts Producer2)
 
 target_link_libraries(CustomCommandByproducts ExternalLibrary)
 
+add_executable(ExternalLibraryByproducts ExternalLibraryByproducts.c)
+target_link_libraries(ExternalLibraryByproducts ExternalLibrary)
+
+add_executable(ExternalLibraryByproducts_WithSubstitution ExternalLibraryByproducts.c)
+target_link_libraries(ExternalLibraryByproducts_WithSubstitution ExternalLibraryWithSubstitution)
+
 if(CMAKE_GENERATOR STREQUAL "Ninja")
   add_custom_target(CheckNinja ALL
     COMMENT "Checking build.ninja"
