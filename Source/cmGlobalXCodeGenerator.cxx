@@ -2390,13 +2390,13 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
 
   // Choose a language to use for target-wide preprocessor definitions.
   static const char* ppLangs[] = { "CXX", "C", "OBJCXX", "OBJC" };
-  std::string langForPreprocessor;
+  std::string langForPreprocessorDefinitions;
   if (cm::contains(ppLangs, llang)) {
-    langForPreprocessor = llang;
+    langForPreprocessorDefinitions = llang;
   } else {
     for (const char* l : ppLangs) {
       if (languages.count(l)) {
-        langForPreprocessor = l;
+        langForPreprocessorDefinitions = l;
         break;
       }
     }
@@ -2424,9 +2424,9 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     this->AppendDefines(ppDefs, exportMacro->c_str());
   }
   std::vector<std::string> targetDefines;
-  if (!langForPreprocessor.empty()) {
+  if (!langForPreprocessorDefinitions.empty()) {
     gtgt->GetCompileDefinitions(targetDefines, configName,
-                                langForPreprocessor);
+                                langForPreprocessorDefinitions);
   }
   this->AppendDefines(ppDefs, targetDefines);
   buildSettings->AddAttribute("GCC_PREPROCESSOR_DEFINITIONS",
@@ -2725,10 +2725,12 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
   BuildObjectListOrString sysfdirs(this, true);
   const bool emitSystemIncludes = this->XcodeVersion >= 83;
 
+  // Choose a language to use for target-wide include directories.
+  std::string const& langForIncludes = llang;
   std::vector<std::string> includes;
-  if (!langForPreprocessor.empty()) {
+  if (!langForIncludes.empty()) {
     this->CurrentLocalGenerator->GetIncludeDirectories(
-      includes, gtgt, langForPreprocessor, configName);
+      includes, gtgt, langForIncludes, configName);
   }
   std::set<std::string> emitted;
   emitted.insert("/System/Library/Frameworks");
@@ -2741,7 +2743,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
         std::string incpath = this->XCodeEscapePath(frameworkDir);
         if (emitSystemIncludes &&
             gtgt->IsSystemIncludeDirectory(include, configName,
-                                           langForPreprocessor)) {
+                                           langForIncludes)) {
           sysfdirs.Add(incpath);
         } else {
           fdirs.Add(incpath);
@@ -2751,7 +2753,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       std::string incpath = this->XCodeEscapePath(include);
       if (emitSystemIncludes &&
           gtgt->IsSystemIncludeDirectory(include, configName,
-                                         langForPreprocessor)) {
+                                         langForIncludes)) {
         sysdirs.Add(incpath);
       } else {
         dirs.Add(incpath);
@@ -2765,7 +2767,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
         std::string incpath = this->XCodeEscapePath(fwDir);
         if (emitSystemIncludes &&
             gtgt->IsSystemIncludeDirectory(fwDir, configName,
-                                           langForPreprocessor)) {
+                                           langForIncludes)) {
           sysfdirs.Add(incpath);
         } else {
           fdirs.Add(incpath);
@@ -2778,6 +2780,9 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
   }
   if (!dirs.IsEmpty()) {
     buildSettings->AddAttribute("HEADER_SEARCH_PATHS", dirs.CreateList());
+    if (languages.count("Swift")) {
+      buildSettings->AddAttribute("SWIFT_INCLUDE_PATHS", dirs.CreateList());
+    }
   }
   if (!sysfdirs.IsEmpty()) {
     buildSettings->AddAttribute("SYSTEM_FRAMEWORK_SEARCH_PATHS",
