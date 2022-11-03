@@ -703,7 +703,8 @@ add_RunCMake_test(target_sources)
 add_RunCMake_test(CheckCompilerFlag   -DCMake_TEST_CUDA=${CMake_TEST_CUDA}
                                       -DCMake_TEST_ISPC=${CMake_TEST_ISPC}
                                       -DCMAKE_Fortran_COMPILER_ID=${CMAKE_Fortran_COMPILER_ID}
-                                      -DCMake_TEST_HIP=${CMake_TEST_HIP})
+                                      -DCMake_TEST_HIP=${CMake_TEST_HIP}
+                                      -DCMake_TEST_Swift=${CMake_TEST_Swift})
 add_RunCMake_test(CheckSourceCompiles -DCMake_TEST_CUDA=${CMake_TEST_CUDA}
                                       -DCMake_TEST_ISPC=${CMake_TEST_ISPC}
                                       -DCMAKE_Fortran_COMPILER_ID=${CMAKE_Fortran_COMPILER_ID}
