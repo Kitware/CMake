@@ -361,7 +361,7 @@ if(XCODE_VERSION)
   set(GeneratorToolset_ARGS -DXCODE_VERSION=${XCODE_VERSION})
 endif()
 add_RunCMake_test(GeneratorToolset)
-add_RunCMake_test(GetPrerequisites)
+add_RunCMake_test(GetPrerequisites -DSAMPLE_EXE=$<TARGET_FILE:exit_code>)
 add_RunCMake_test(GNUInstallDirs -DSYSTEM_NAME=${CMAKE_SYSTEM_NAME})
 add_RunCMake_test(GoogleTest) # Note: does not actually depend on Google Test
 add_RunCMake_test(Graphviz)

@@ -5,6 +5,7 @@
 /ispc*
 /jom
 /llvm*
+/mingw
 /msvc*
 /ninja*
 /open-watcom*

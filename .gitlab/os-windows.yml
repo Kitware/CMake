@@ -236,6 +236,29 @@
     variables:
         CMAKE_CONFIGURATION: windows_openwatcom1.9
 
+.mingw_osdn_io:
+    extends: .windows
+
+    variables:
+        # Place MinGW environment in a path without spaces.
+        GIT_CLONE_PATH: "$CI_BUILDS_DIR\\cmake-ci-ext\\$CI_CONCURRENT_ID"
+        CMAKE_CI_BUILD_TYPE: Debug
+        CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
+
+.mingw_osdn_io_mingw_makefiles:
+    extends: .mingw_osdn_io
+
+    variables:
+        CMAKE_CONFIGURATION: mingw_osdn_io_mingw_makefiles
+        CMAKE_GENERATOR: "MinGW Makefiles"
+
+.mingw_osdn_io_msys_makefiles:
+    extends: .mingw_osdn_io
+
+    variables:
+        CMAKE_CONFIGURATION: mingw_osdn_io_msys_makefiles
+        CMAKE_GENERATOR: "MSYS Makefiles"
+
 ## Tags
 
 .windows_tags_nonconcurrent_vs2022:

@@ -1060,6 +1060,34 @@ t:windows-clang13.0-gnu-nmake:
         CMAKE_CI_BUILD_NAME: windows_clang13.0_gnu_nmake
         CMAKE_CI_JOB_NIGHTLY: "true"
 
+t:mingw_osdn_io-mingw_makefiles:
+    extends:
+        - .mingw_osdn_io_mingw_makefiles
+        - .cmake_test_windows_external
+        - .windows_tags_concurrent
+        - .cmake_junit_artifacts
+        - .run_dependent
+    dependencies:
+        - t:windows-vs2022-x64-ninja
+    needs:
+        - t:windows-vs2022-x64-ninja
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
+t:mingw_osdn_io-msys_makefiles:
+    extends:
+        - .mingw_osdn_io_msys_makefiles
+        - .cmake_test_windows_external
+        - .windows_tags_concurrent
+        - .cmake_junit_artifacts
+        - .run_dependent
+    dependencies:
+        - t:windows-vs2022-x64-ninja
+    needs:
+        - t:windows-vs2022-x64-ninja
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
 t:windows-msvc-v71-nmake:
     extends:
         - .windows_msvc_v71_nmake
