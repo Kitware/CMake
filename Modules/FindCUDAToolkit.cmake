@@ -1058,8 +1058,10 @@ if(CUDAToolkit_FOUND)
 
   _CUDAToolkit_find_and_add_import_lib(nvrtc DEPS cuda_driver)
   if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 11.1.0)
-    _CUDAToolkit_find_and_add_import_lib(nvptxcompiler_static DEPS cuda_driver)
-    target_link_libraries(CUDA::nvptxcompiler_static INTERFACE Threads::Threads)
+    if(NOT TARGET CUDA::nvptxcompiler_static)
+      _CUDAToolkit_find_and_add_import_lib(nvptxcompiler_static DEPS cuda_driver)
+      target_link_libraries(CUDA::nvptxcompiler_static INTERFACE Threads::Threads)
+    endif()
   endif()
 
   _CUDAToolkit_find_and_add_import_lib(nvml ALT nvidia-ml nvml)
