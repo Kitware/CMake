@@ -802,26 +802,28 @@ cmGlobalVisualStudioVersionedGenerator::FindAuxToolset(
                "*/Microsoft.VCToolsVersion."_s, twoComponent, "*.txt"_s);
     cmsys::Glob glob;
     glob.SetRecurseThroughSymlinks(false);
-    // Since we are only using the first two components of the toolset version,
-    // we require a definite match
-    if (glob.FindFiles(pattern) && glob.GetFiles().size() == 1) {
-      std::string const& txt = glob.GetFiles()[0];
-      std::string ver;
-      cmsys::ifstream fin(txt.c_str());
-      if (fin && std::getline(fin, ver)) {
-        // Strip trailing whitespace.
-        ver = ver.substr(0, ver.find_first_not_of("0123456789."));
-        // We assume the version is correct, since it is the only one that
-        // matched.
-        cmsys::RegularExpression extractVersion(
-          "VCToolsVersion\\.([0-9.]+)\\.txt$");
-        if (extractVersion.find(txt)) {
-          version = extractVersion.match(1);
+    if (glob.FindFiles(pattern) && !glob.GetFiles().empty()) {
+      // Since we are only using the first two components of the
+      // toolset version, we require a single match.
+      if (glob.GetFiles().size() == 1) {
+        std::string const& txt = glob.GetFiles()[0];
+        std::string ver;
+        cmsys::ifstream fin(txt.c_str());
+        if (fin && std::getline(fin, ver)) {
+          // Strip trailing whitespace.
+          ver = ver.substr(0, ver.find_first_not_of("0123456789."));
+          // We assume the version is correct, since it is the only one that
+          // matched.
+          cmsys::RegularExpression extractVersion(
+            "VCToolsVersion\\.([0-9.]+)\\.txt$");
+          if (extractVersion.find(txt)) {
+            version = extractVersion.match(1);
+          }
         }
+      } else {
+        props = cmStrCat(instancePath, "/VC/Auxiliary/Build/"_s);
+        return AuxToolset::PropsIndeterminate;
       }
-    } else {
-      props = cmStrCat(instancePath, "/VC/Auxiliary/Build/"_s);
-      return AuxToolset::PropsIndeterminate;
     }
   }
 
