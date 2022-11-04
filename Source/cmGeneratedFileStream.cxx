@@ -27,7 +27,7 @@ cmGeneratedFileStream::cmGeneratedFileStream(Encoding encoding)
 cmGeneratedFileStream::cmGeneratedFileStream(std::string const& name,
                                              bool quiet, Encoding encoding)
   : cmGeneratedFileStreamBase(name)
-  , Stream(this->TempName.c_str())
+  , Stream(this->TempName.c_str()) // NOLINT(cmake-use-cmsys-fstream)
 {
   // Check if the file opened.
   if (!*this && !quiet) {
@@ -67,10 +67,11 @@ cmGeneratedFileStream& cmGeneratedFileStream::Open(std::string const& name,
 
   // Open the temporary output file.
   if (binaryFlag) {
-    this->Stream::open(this->TempName.c_str(),
-                       std::ios::out | std::ios::binary);
+    this->Stream::open( // NOLINT(cmake-use-cmsys-fstream)
+      this->TempName.c_str(), std::ios::out | std::ios::binary);
   } else {
-    this->Stream::open(this->TempName.c_str());
+    this->Stream::open( // NOLINT(cmake-use-cmsys-fstream)
+      this->TempName.c_str());
   }
 
   // Check if the file opened.
@@ -87,7 +88,7 @@ bool cmGeneratedFileStream::Close()
   this->Okay = !this->fail();
 
   // Close the temporary output file.
-  this->Stream::close();
+  this->Stream::close(); // NOLINT(cmake-use-cmsys-fstream)
 
   // Remove the temporary file (possibly by renaming to the real file).
   return this->cmGeneratedFileStreamBase::Close();
