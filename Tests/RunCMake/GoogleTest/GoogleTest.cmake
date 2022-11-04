@@ -78,3 +78,7 @@ xcode_sign_adhoc(skip_test)
 gtest_discover_tests(
   skip_test
 )
+
+gtest_add_tests(
+  TARGET skip_test
+)
