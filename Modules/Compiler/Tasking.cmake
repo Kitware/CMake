@@ -56,7 +56,7 @@ macro(__compiler_tasking lang)
   endif()
 
   set(CMAKE_${lang}_VERBOSE_FLAG "-v")
-  set(CMAKE_${lang}_COMPILE_OPTIONS_PIC "-fPIC")
+  set(CMAKE_${lang}_COMPILE_OPTIONS_PIC "--pic")
   set(CMAKE_${lang}_LINKER_WRAPPER_FLAG "-Wl" " ")
   set(CMAKE_${lang}_RESPONSE_FILE_LINK_FLAG "-f ")
   set(CMAKE_DEPFILE_FLAGS_${lang} "--dep-file=<DEP_FILE>")
