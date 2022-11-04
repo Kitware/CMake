@@ -122,8 +122,13 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
         cmakeConfigureCommand += "\"";
       }
 
-      cmakeConfigureCommand += " \"";
+      cmakeConfigureCommand += " \"-S";
       cmakeConfigureCommand += source_dir;
+      cmakeConfigureCommand += "\"";
+
+      cmakeConfigureCommand += " \"-B";
+      cmakeConfigureCommand +=
+        this->CTest->GetCTestConfiguration("BuildDirectory");
       cmakeConfigureCommand += "\"";
 
       this->CTest->SetCTestConfiguration("ConfigureCommand",
