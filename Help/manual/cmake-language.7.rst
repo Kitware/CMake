@@ -206,7 +206,7 @@ enclosed content, such as `Escape Sequences`_ or `Variable References`_,
 is performed.  A bracket argument is always given to the command
 invocation as exactly one argument.
 
-.. No code-block syntax highlighting in the following example
+.. ATTENTION No code-block syntax highlighting in the following example
    (long string literal not supported by our cmake.py)
 
 For example::
@@ -254,7 +254,7 @@ closing quotes.  Both `Escape Sequences`_ and `Variable References`_
 are evaluated.  A quoted argument is always given to the command
 invocation as exactly one argument.
 
-.. No code-block syntax highlighting in the following example
+.. ATTENTION No code-block syntax highlighting in the following example
    (escape \" not supported by our cmake.py)
 
 For example:
@@ -268,7 +268,7 @@ For example:
   It does end in an unescaped double quote.
   ")
 
-.. No code-block syntax highlighting in the following example
+.. ATTENTION No code-block syntax highlighting in the following example
    (for conformity with the two above examples)
 
 The final ``\`` on any line ending in an odd number of backslashes
