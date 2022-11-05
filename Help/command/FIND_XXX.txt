@@ -70,22 +70,27 @@ Options include:
 ``VALIDATOR``
   .. versionadded:: 3.25
 
-  Specify a :command:`function` (a :command:`macro` is not an acceptable
-  choice) which will be called for each found item. The search ends when
-  the validation function returns a successful status.
-
-  The validation function expects two arguments: output variable name and item
-  value. By default, the output variable name already holds a ``TRUE`` value.
+  Specify a :command:`function` to be called for each candidate item found
+  (a :command:`macro` cannot be provided, that will result in an error).
+  Two arguments will be passed to the validator function: the name of a
+  result variable, and the absolute path to the candidate item.  The item
+  will be accepted and the search will end unless the function sets the
+  value in the result variable to false in the calling scope.  The result
+  variable will hold a true value when the validator function is entered.
 
   .. parsed-literal::
 
-     function (MY_CHECK output_status item)
-       if (NOT item MATCHES ...)
-         set(${output_status} FALSE PARENT_SCOPE)
+     function(my_check validator_result_var item)
+       if(NOT item MATCHES ...)
+         set(${validator_result_var} FALSE PARENT_SCOPE)
        endif()
      endfunction()
 
      |FIND_XXX| (result NAMES ... VALIDATOR my_check)
+
+  Note that if a cached result is used, the search is skipped and any
+  ``VALIDATOR`` is ignored.  The cached result is not required to pass the
+  validation function.
 
 ``DOC``
   Specify the documentation string for the ``<VAR>`` cache entry.
