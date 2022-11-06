@@ -36,6 +36,7 @@
 
 #ifdef _WIN32
 #  include <cwchar>
+#  include <unordered_map>
 #endif
 
 // Work-around CMake dependency scanning limitation.  This must
@@ -506,16 +507,39 @@ public:
 };
 
 #ifdef _WIN32
-struct SystemToolsPathCaseCmp
+#  if defined(_WIN64)
+static constexpr size_t FNV_OFFSET_BASIS = 14695981039346656037ULL;
+static constexpr size_t FNV_PRIME = 1099511628211ULL;
+#  else
+static constexpr size_t FNV_OFFSET_BASIS = 2166136261U;
+static constexpr size_t FNV_PRIME = 16777619U;
+#  endif
+
+// Case insensitive Fnv1a hash
+struct SystemToolsPathCaseHash
+{
+  size_t operator()(std::string const& path) const
+  {
+    size_t hash = FNV_OFFSET_BASIS;
+    for (auto c : path) {
+      hash ^= static_cast<size_t>(std::tolower(c));
+      hash *= FNV_PRIME;
+    }
+
+    return hash;
+  }
+};
+
+struct SystemToolsPathCaseEqual
 {
   bool operator()(std::string const& l, std::string const& r) const
   {
 #  ifdef _MSC_VER
-    return _stricmp(l.c_str(), r.c_str()) < 0;
+    return _stricmp(l.c_str(), r.c_str()) == 0;
 #  elif defined(__GNUC__)
-    return strcasecmp(l.c_str(), r.c_str()) < 0;
+    return strcasecmp(l.c_str(), r.c_str()) == 0;
 #  else
-    return SystemTools::Strucmp(l.c_str(), r.c_str()) < 0;
+    return SystemTools::Strucmp(l.c_str(), r.c_str()) == 0;
 #  endif
   }
 };
@@ -540,8 +564,12 @@ public:
                                      bool const cache);
   static std::string GetActualCaseForPathCached(std::string const& path);
   static const char* GetEnvBuffered(const char* key);
-  std::map<std::string, std::string, SystemToolsPathCaseCmp> FindFileMap;
-  std::map<std::string, std::string, SystemToolsPathCaseCmp> PathCaseMap;
+  std::unordered_map<std::string, std::string, SystemToolsPathCaseHash,
+                     SystemToolsPathCaseEqual>
+    FindFileMap;
+  std::unordered_map<std::string, std::string, SystemToolsPathCaseHash,
+                     SystemToolsPathCaseEqual>
+    PathCaseMap;
   std::map<std::string, std::string> EnvMap;
 #endif
 #ifdef __CYGWIN__

@@ -7,6 +7,16 @@
 
 #include <string>
 
+/*
+ * Detect a symbol collision with the name of this class. X11 headers use
+ * `#define Status int` instead of using `typedef` which poisons any other
+ * usage of this name.
+ */
+#if defined(Status) && defined(_X11_XLIB_H_)
+#  error                                                                      \
+    "Status.hxx must be included *before* any X11 headers to avoid a collision with the `Status` define that is made in its API."
+#endif
+
 namespace @KWSYS_NAMESPACE@ {
 
 /** \class Status
