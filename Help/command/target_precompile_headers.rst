@@ -118,8 +118,17 @@ the ``REUSE_FROM`` form is used.
 See Also
 ^^^^^^^^
 
-To disable precompile headers for specific targets, see the
-:prop_tgt:`DISABLE_PRECOMPILE_HEADERS` target property.
+* To disable precompile headers for specific targets, see the
+  :prop_tgt:`DISABLE_PRECOMPILE_HEADERS` target property.
 
-To prevent precompile headers from being used when compiling a specific
-source file, see the :prop_sf:`SKIP_PRECOMPILE_HEADERS` source file property.
+* To prevent precompile headers from being used when compiling a specific
+  source file, see the :prop_sf:`SKIP_PRECOMPILE_HEADERS` source file property.
+
+* :command:`target_compile_definitions`
+* :command:`target_compile_features`
+* :command:`target_compile_options`
+* :command:`target_include_directories`
+* :command:`target_link_libraries`
+* :command:`target_link_directories`
+* :command:`target_link_options`
+* :command:`target_sources`

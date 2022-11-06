@@ -327,3 +327,8 @@ a build configuration.
   If :policy:`CMP0141` is set to ``NEW``, one can use
   :variable:`CMAKE_MSVC_DEBUG_INFORMATION_FORMAT` to specify the MSVC debug
   information format.
+
+See Also
+^^^^^^^^
+
+* :command:`try_run`

@@ -39,3 +39,8 @@ manual for more on defining buildsystem properties.
   Prefer the :command:`target_include_directories` command to add include
   directories to individual targets and optionally propagate/export them
   to dependents.
+
+See Also
+^^^^^^^^
+
+* :command:`target_include_directories`

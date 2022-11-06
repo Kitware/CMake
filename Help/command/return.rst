@@ -52,3 +52,4 @@ See Also
 ^^^^^^^^
 
 * :command:`block`
+* :command:`function`

@@ -48,3 +48,16 @@ Definitions may optionally have values:
 
 Note that many compilers treat ``-DFOO`` as equivalent to ``-DFOO=1``, but
 other tools may not recognize this in all circumstances (e.g. IntelliSense).
+
+See Also
+^^^^^^^^
+
+* :command:`add_compile_definitions`
+* :command:`target_compile_features`
+* :command:`target_compile_options`
+* :command:`target_include_directories`
+* :command:`target_link_libraries`
+* :command:`target_link_directories`
+* :command:`target_link_options`
+* :command:`target_precompile_headers`
+* :command:`target_sources`

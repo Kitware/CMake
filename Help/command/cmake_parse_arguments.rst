@@ -113,3 +113,9 @@ interpreted as the beginning of the new option.  E.g.
 is a keyword itself ``MY_INSTALL_DESTINATION`` will be empty (but added
 to ``MY_INSTALL_KEYWORDS_MISSING_VALUES``) and ``MY_INSTALL_OPTIONAL`` will
 therefore be set to ``TRUE``.
+
+See Also
+^^^^^^^^
+
+* :command:`function`
+* :command:`macro`

@@ -40,12 +40,12 @@ this command is in a compiler-specific conditional clause:
 See Also
 ^^^^^^^^
 
-This command can be used to add any options. However, for
-adding preprocessor definitions and include directories it is recommended
-to use the more specific commands :command:`add_compile_definitions`
-and :command:`include_directories`.
+* This command can be used to add any options. However, for
+  adding preprocessor definitions and include directories it is recommended
+  to use the more specific commands :command:`add_compile_definitions`
+  and :command:`include_directories`.
 
-The command :command:`target_compile_options` adds target-specific options.
+* The command :command:`target_compile_options` adds target-specific options.
 
-The source file property :prop_sf:`COMPILE_OPTIONS` adds options to one
-source file.
+* The source file property :prop_sf:`COMPILE_OPTIONS` adds options to one
+  source file.

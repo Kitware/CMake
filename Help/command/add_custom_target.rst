@@ -181,3 +181,8 @@ Ninja Multi-Config
   ``add_custom_target`` supports the :generator:`Ninja Multi-Config`
   generator's cross-config capabilities. See the generator documentation
   for more information.
+
+See Also
+^^^^^^^^
+
+* :command:`add_custom_command`

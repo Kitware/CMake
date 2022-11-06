@@ -19,4 +19,8 @@ an empty string.
 For a list of standard properties you can type
 :option:`cmake --help-property-list`.
 
-See also the more general :command:`get_property` command.
+See Also
+^^^^^^^^
+
+* :command:`define_property`
+* the more general :command:`get_property` command

@@ -182,3 +182,8 @@ specify the output directory as an include directory:
   include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 so that sources may include the header as ``#include <foo.h>``.
+
+See Also
+^^^^^^^^
+
+* :command:`file(GENERATE)`

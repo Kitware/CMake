@@ -25,3 +25,8 @@ Arguments to ``add_compile_definitions`` may use "generator expressions" with
 the syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)`
 manual for available expressions.  See the :manual:`cmake-buildsystem(7)`
 manual for more on defining buildsystem properties.
+
+See Also
+^^^^^^^^
+
+* The command :command:`target_compile_definitions` adds target-specific definitions.

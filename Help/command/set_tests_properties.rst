@@ -14,6 +14,10 @@ Test property values may be specified using
 :manual:`generator expressions <cmake-generator-expressions(7)>`
 for tests created by the :command:`add_test(NAME)` signature.
 
-See also the :command:`set_property(TEST)` command.
+See Also
+^^^^^^^^
 
-See :ref:`Test Properties` for the list of properties known to CMake.
+* :command:`add_test`
+* :command:`define_property`
+* the more general :command:`set_property` command
+* :ref:`Target Properties` for the list of properties known to CMake
