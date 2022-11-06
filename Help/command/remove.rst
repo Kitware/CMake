@@ -5,7 +5,7 @@ remove
 
   Use the :command:`list(REMOVE_ITEM)` command instead.
 
-::
+.. code-block:: cmake
 
   remove(VAR VALUE VALUE ...)
 

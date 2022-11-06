@@ -5,7 +5,7 @@ Disallowed since version 3.0.  See CMake Policy :policy:`CMP0030`.
 
 Copy mesa headers for use in combination with system GL.
 
-::
+.. code-block:: cmake
 
   use_mangled_mesa(PATH_TO_MESA OUTPUT_DIRECTORY)
 

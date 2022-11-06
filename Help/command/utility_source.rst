@@ -5,7 +5,7 @@ Disallowed since version 3.0.  See CMake Policy :policy:`CMP0034`.
 
 Specify the source tree of a third-party utility.
 
-::
+.. code-block:: cmake
 
   utility_source(cache_entry executable_name
                  path_to_source [file1 file2 ...])

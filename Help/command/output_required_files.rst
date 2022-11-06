@@ -9,7 +9,7 @@ This command exists only because ancient CMake versions provided it.
 CMake handles preprocessor dependency scanning automatically using a
 more advanced scanner.
 
-::
+.. code-block:: cmake
 
   output_required_files(srcfile outputfile)
 
