@@ -85,8 +85,8 @@ Creates an :ref:`Object Library <Object Libraries>`.  An object library
 compiles source files but does not archive or link their object files into a
 library.  Instead other targets created by :command:`add_library` or
 :command:`add_executable` may reference the objects using an expression of the
-form ``$<TARGET_OBJECTS:objlib>`` as a source, where ``objlib`` is the
-object library name.  For example:
+form :genex:`$\<TARGET_OBJECTS:objlib\> <TARGET_OBJECTS>` as a source, where
+``objlib`` is the object library name.  For example:
 
 .. code-block:: cmake
 
@@ -101,7 +101,7 @@ They may contain custom commands generating such sources, but not
 ``PRE_BUILD``, ``PRE_LINK``, or ``POST_BUILD`` commands.  Some native build
 systems (such as Xcode) may not like targets that have only object files, so
 consider adding at least one real source file to any target that references
-``$<TARGET_OBJECTS:objlib>``.
+:genex:`$\<TARGET_OBJECTS:objlib\> <TARGET_OBJECTS>`.
 
 .. versionadded:: 3.12
   Object libraries can be linked to with :command:`target_link_libraries`.

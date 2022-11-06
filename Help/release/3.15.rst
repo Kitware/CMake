@@ -243,46 +243,42 @@ Modules
 Generator Expressions
 ---------------------
 
-* The :manual:`generator expressions <cmake-generator-expressions(7)>`
-  ``C_COMPILER_ID``, ``CXX_COMPILER_ID``, ``CUDA_COMPILER_ID``,
-  ``Fortran_COMPILER_ID``, ``COMPILE_LANGUAGE``, ``COMPILE_LANG_AND_ID``, and
-  ``PLATFORM_ID`` learned to support matching one value from a comma-separated
-  list.
+* The generator expressions :genex:`$<C_COMPILER_ID>`,
+  :genex:`$<CXX_COMPILER_ID>`, :genex:`$<CUDA_COMPILER_ID>`,
+  :genex:`$<Fortran_COMPILER_ID>`, :genex:`$<COMPILE_LANGUAGE>`,
+  :genex:`$<COMPILE_LANG_AND_ID>`, and :genex:`$<PLATFORM_ID>` learned to
+  support matching one value from a comma-separated list.
 
-* The ``$<CUDA_COMPILER_ID:...>`` and ``$<CUDA_COMPILER_VERSION:...>``
-  :manual:`generator expressions <cmake-generator-expressions(7)>` were added.
+* The :genex:`$<CUDA_COMPILER_ID:...>` and :genex:`$<CUDA_COMPILER_VERSION:...>`
+  generator expressions were added.
 
-* The ``$<COMPILE_LANG_AND_ID:...>`` generator expression was introduced to
+* The :genex:`$<COMPILE_LANG_AND_ID:...>` generator expression was introduced to
   allow specification of compile options for target files based on the
   :variable:`CMAKE_<LANG>_COMPILER_ID` and :prop_sf:`LANGUAGE` of
   each source file.
 
-* A ``$<FILTER:list,INCLUDE|EXCLUDE,regex>``
-  :manual:`generator expression <cmake-generator-expressions(7)>`
-  has been added.
+* A :genex:`$<FILTER:list,INCLUDE|EXCLUDE,regex>` generator expression has
+  been added.
 
-* A ``$<REMOVE_DUPLICATES:list>``
-  :manual:`generator expression <cmake-generator-expressions(7)>`
-  has been added.
+* A :genex:`$<REMOVE_DUPLICATES:list>` generator expression has been added.
 
-* The ``$<SHELL_PATH:...>`` :manual:`generator expression
-  <cmake-generator-expressions(7)>` gained support for a list of paths.
+* The :genex:`$<SHELL_PATH:...>` generator expression gained support for a
+  list of paths.
 
 * New ``$<TARGET_FILE*>`` :manual:`generator expressions
   <cmake-generator-expressions(7)>` were added to retrieve the prefix, base
   name, and suffix of the file names of various artifacts:
 
-  * ``$<TARGET_FILE_PREFIX:...>``
-  * ``$<TARGET_FILE_BASE_NAME:...>``
-  * ``$<TARGET_FILE_SUFFIX:...>``
-  * ``$<TARGET_LINKER_FILE_PREFIX:...>``
-  * ``$<TARGET_LINKER_FILE_BASE_NAME:...>``
-  * ``$<TARGET_LINKER_FILE_SUFFIX:...>``
-  * ``$<TARGET_PDB_FILE_BASE_NAME:...>``
+  * :genex:`$<TARGET_FILE_PREFIX:...>`
+  * :genex:`$<TARGET_FILE_BASE_NAME:...>`
+  * :genex:`$<TARGET_FILE_SUFFIX:...>`
+  * :genex:`$<TARGET_LINKER_FILE_PREFIX:...>`
+  * :genex:`$<TARGET_LINKER_FILE_BASE_NAME:...>`
+  * :genex:`$<TARGET_LINKER_FILE_SUFFIX:...>`
+  * :genex:`$<TARGET_PDB_FILE_BASE_NAME:...>`
 
-* The ``$<TARGET_OBJECTS:...>`` :manual:`generator expression
-  <cmake-generator-expressions(7)>` is now supported on ``SHARED``,
-  ``STATIC``, ``MODULE`` libraries and executables.
+* The :genex:`$<TARGET_OBJECTS:...>` generator expression is now supported
+  on ``SHARED``, ``STATIC``, ``MODULE`` libraries and executables.
 
 CTest
 -----

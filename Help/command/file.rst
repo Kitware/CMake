@@ -526,10 +526,10 @@ from the input content to produce the output content.  The options are:
 
 ``OUTPUT <output-file>``
   Specify the output file name to generate.  Use generator expressions
-  such as ``$<CONFIG>`` to specify a configuration-specific output file
-  name.  Multiple configurations may generate the same output file only
-  if the generated content is identical.  Otherwise, the ``<output-file>``
-  must evaluate to an unique name for each configuration.
+  such as :genex:`$<CONFIG>` to specify a configuration-specific
+  output file name.  Multiple configurations may generate the same output
+  file only if the generated content is identical.  Otherwise, the
+  ``<output-file>`` must evaluate to an unique name for each configuration.
 
   .. versionchanged:: 3.10
     A relative path (after evaluating generator expressions) is treated
@@ -540,8 +540,9 @@ from the input content to produce the output content.  The options are:
   .. versionadded:: 3.19
 
   Specify which target to use when evaluating generator expressions that
-  require a target for evaluation (e.g. ``$<COMPILE_FEATURES:...>``,
-  ``$<TARGET_PROPERTY:prop>``).
+  require a target for evaluation (e.g.
+  :genex:`$<COMPILE_FEATURES:...>`,
+  :genex:`$<TARGET_PROPERTY:prop>`).
 
 ``NO_SOURCE_PERMISSIONS``
   .. versionadded:: 3.20

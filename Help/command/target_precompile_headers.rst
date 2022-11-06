@@ -80,7 +80,7 @@ only one language (e.g. ``CXX`` and not ``C``).  In this case, header
 file names that are not explicitly in double quotes or angle brackets
 must be specified by absolute path.  Also, when specifying angle brackets
 inside a generator expression, be sure to encode the closing ``>`` as
-``$<ANGLE-R>``.  For example:
+:genex:`$<ANGLE-R>`.  For example:
 
 .. code-block:: cmake
 

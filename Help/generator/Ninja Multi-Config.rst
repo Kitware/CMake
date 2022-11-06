@@ -106,14 +106,14 @@ If either ``OUTPUT`` or ``BYPRODUCTS`` names a path that is common to
 more than one configuration (e.g. it does not use any generator expressions),
 all arguments are evaluated in the command config by default.
 If all ``OUTPUT`` and ``BYPRODUCTS`` paths are unique to each configuration
-(e.g. by using the ``$<CONFIG>`` generator expression), the first argument of
+(e.g. by using the :genex:`$<CONFIG>` generator expression), the first argument of
 ``COMMAND`` is still evaluated in the command config by default, while all
 subsequent arguments, as well as the arguments to ``DEPENDS`` and
 ``WORKING_DIRECTORY``, are evaluated in the output config. These defaults can
-be overridden with the ``$<OUTPUT_CONFIG:...>`` and ``$<COMMAND_CONFIG:...>``
+be overridden with the :genex:`$<OUTPUT_CONFIG:...>` and :genex:`$<COMMAND_CONFIG:...>`
 generator-expressions. Note that if a target is specified by its name in
 ``DEPENDS``, or as the first argument of ``COMMAND``, it is always evaluated
-in the command config, even if it is wrapped in ``$<OUTPUT_CONFIG:...>``
+in the command config, even if it is wrapped in :genex:`$<OUTPUT_CONFIG:...>`
 (because its plain name is not a generator expression).
 
 As an example, consider the following:
