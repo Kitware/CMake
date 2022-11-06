@@ -2011,6 +2011,14 @@ static int kwsysProcessGetTimeoutTime(kwsysProcess* cp,
   return 0;
 }
 
+#if defined(__clang__) && defined(__has_warning)
+#  if __has_warning("-Wshorten-64-to-32")
+#    pragma clang diagnostic push
+#    pragma clang diagnostic ignored "-Wshorten-64-to-32"
+#    define KWSYSPE_CLANG_DIAG_WSHORTEN
+#  endif
+#endif
+
 /* Get the length of time before the given timeout time arrives.
    Returns 1 if the time has already arrived, and 0 otherwise.  */
 static int kwsysProcessGetTimeoutLeft(kwsysProcessTime* timeoutTime,
@@ -2060,6 +2068,11 @@ static kwsysProcessTime kwsysProcessTimeGetCurrent(void)
   current.tv_usec = (long)current_native.tv_usec;
   return current;
 }
+
+#if defined(KWSYSPE_CLANG_DIAG_WSHORTEN)
+#  undef KWSYSPE_CLANG_DIAG_WSHORTEN
+#  pragma clang diagnostic pop
+#endif
 
 static double kwsysProcessTimeToDouble(kwsysProcessTime t)
 {
