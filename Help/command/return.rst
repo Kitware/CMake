@@ -51,4 +51,4 @@ is expanded in place and therefore cannot handle ``return()``.
 See Also
 ^^^^^^^^
 
-  * :command:`block`
+* :command:`block`

@@ -70,6 +70,6 @@ inside this block.
 See Also
 ^^^^^^^^
 
-  * :command:`endblock`
-  * :command:`return`
-  * :command:`cmake_policy`
+* :command:`endblock`
+* :command:`return`
+* :command:`cmake_policy`
