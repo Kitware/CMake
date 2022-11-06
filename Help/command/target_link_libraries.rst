@@ -293,8 +293,8 @@ will be included in the link too.
 
 .. _`Linking Object Libraries via $<TARGET_OBJECTS>`:
 
-Linking Object Libraries via $<TARGET_OBJECTS>
-""""""""""""""""""""""""""""""""""""""""""""""
+Linking Object Libraries via ``$<TARGET_OBJECTS>``
+""""""""""""""""""""""""""""""""""""""""""""""""""
 
 .. versionadded:: 3.21
 
