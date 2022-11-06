@@ -263,7 +263,7 @@ CPack
     :variable:`CPACK_NUGET_<compName>_PACKAGE_LANGUAGE` allow the locale
     for a package to be specified, for example ``en_CA``.
 
-.. _Software Package Data Exchange: https://spdx.org/
+.. _Software Package Data Exchange: https://spdx.dev/
 
 Deprecated and Removed Features
 ===============================

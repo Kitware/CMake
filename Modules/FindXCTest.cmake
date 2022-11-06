@@ -13,7 +13,7 @@ An XCTest bundle is a CFBundle with a special product-type
 and bundle extension. The Mac Developer Library provides more
 information in the `Testing with Xcode`_ document.
 
-.. _Testing with Xcode: http://developer.apple.com/library/mac/documentation/DeveloperTools/Conceptual/testing_with_xcode/
+.. _Testing with Xcode: https://developer.apple.com/library/mac/documentation/DeveloperTools/Conceptual/testing_with_xcode/
 
 Module Functions
 ^^^^^^^^^^^^^^^^

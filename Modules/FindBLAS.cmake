@@ -12,7 +12,7 @@ This module finds an installed Fortran library that implements the
 
 At least one of the ``C``, ``CXX``, or ``Fortran`` languages must be enabled.
 
-.. _`BLAS linear-algebra interface`: http://www.netlib.org/blas/
+.. _`BLAS linear-algebra interface`: https://netlib.org/blas/
 
 Input Variables
 ^^^^^^^^^^^^^^^
