@@ -159,11 +159,41 @@ if(CMake_SPHINX_CMAKE_ORG)
     )
 endif()
 
+# Redirect `sphinx-build` output to `build-<format>.log` file?
+set(sphinx_use_build_log TRUE)
+set(sphinx_verbose_levels "DEBUG;TRACE")
+set(sphinx_no_redirect_levels "VERBOSE;${sphinx_verbose_levels}")
+# NOTE There is no generic verbosity level for all supported generators,
+# so lets use CMake verbosity level to control if `sphinx-build` should
+# redirect it's output to a file or a user wants to see it at build time.
+if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.25)
+  cmake_language(GET_MESSAGE_LOG_LEVEL verbose_level)
+else()
+  # If building under CMake < 3.25, fallback to `CMAKE_MESSAGE_LOG_LEVEL`
+  # variable.  It was added in 3.17 but it's OK to set it even for older
+  # versions (w/o any effect on `message()` command of course).
+  set(verbose_level ${CMAKE_MESSAGE_LOG_LEVEL})
+endif()
+if(DEFINED ENV{VERBOSE} OR CMAKE_VERBOSE_MAKEFILE OR verbose_level IN_LIST sphinx_no_redirect_levels)
+  set(sphinx_use_build_log FALSE)
+  if(verbose_level IN_LIST sphinx_verbose_levels)
+    # NOTE Sphinx accept multiple `-v` options for more verbosity
+    # but the output mostly for Sphinx developers...
+    list(APPEND sphinx_flags "-v")
+  endif()
+endif()
+
 set(doc_format_outputs "")
 set(doc_format_last "")
 foreach(format IN LISTS doc_formats)
   set(doc_format_output "doc_format_${format}")
-  set(doc_format_log "build-${format}.log")
+  set(doc_format_log "")
+  set(build_comment_tail " ...")
+  if(sphinx_use_build_log)
+    set(doc_format_log "build-${format}.log")
+    set(build_comment_tail ": see Utilities/Sphinx/${doc_format_log}")
+    list(PREPEND doc_format_log ">")
+  endif()
   if(CMake_SPHINX_CMAKE_ORG)
     set(doctrees "doctrees/${format}")
   else()
@@ -193,13 +223,14 @@ foreach(format IN LISTS doc_formats)
         ${CMAKE_CURRENT_BINARY_DIR}/${format}
       )
   endif()
+
   add_custom_command(
     OUTPUT ${doc_format_output}
     ${${format}_pre_commands}
-    COMMAND ${SPHINX_EXECUTABLE} ${_args} > ${doc_format_log} # log stdout, pass stderr
+    COMMAND ${SPHINX_EXECUTABLE} ${_args} ${doc_format_log}
     ${${format}_post_commands}
     DEPENDS ${doc_format_last}
-    COMMENT "sphinx-build ${format}: see Utilities/Sphinx/${doc_format_log}"
+    COMMENT "sphinx-build ${format}${build_comment_tail}"
     VERBATIM
     )
   set_property(SOURCE ${doc_format_output} PROPERTY SYMBOLIC 1)
