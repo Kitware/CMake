@@ -25,10 +25,8 @@ same ``<target>`` append items in the order called.
 .. versionadded:: 3.11
   Allow setting ``INTERFACE`` items on :ref:`IMPORTED targets <Imported Targets>`.
 
-Arguments to ``target_compile_definitions`` may use "generator expressions"
-with the syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)`
-manual for available expressions.  See the :manual:`cmake-buildsystem(7)`
-manual for more on defining buildsystem properties.
+.. |command_name| replace:: ``target_compile_definitions``
+.. include:: GENEX_NOTE.txt
 
 Any leading ``-D`` on an item will be removed.  Empty items are ignored.
 For example, the following are all equivalent:

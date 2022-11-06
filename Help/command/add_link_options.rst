@@ -23,10 +23,8 @@ exist to add libraries (:command:`target_link_libraries` or
   since they do not use a linker.  To add archiver or MSVC librarian flags,
   see the :prop_tgt:`STATIC_LIBRARY_OPTIONS` target property.
 
-Arguments to ``add_link_options`` may use "generator expressions" with
-the syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)`
-manual for available expressions.  See the :manual:`cmake-buildsystem(7)`
-manual for more on defining buildsystem properties.
+.. |command_name| replace:: ``add_link_options``
+.. include:: GENEX_NOTE.txt
 
 .. include:: DEVICE_LINK_OPTIONS.txt
 
