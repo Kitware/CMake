@@ -172,43 +172,36 @@ foreach(format IN LISTS doc_formats)
   if(format STREQUAL "latexpdf")
     # This format does not use builder (-b) but make_mode (-M) which expects
     # arguments in peculiar order
-    add_custom_command(
-      OUTPUT ${doc_format_output}
-      ${${format}_pre_commands}
-      COMMAND ${SPHINX_EXECUTABLE}
-              -M ${format}
-              ${CMake_SOURCE_DIR}/Help
-              ${CMAKE_CURRENT_BINARY_DIR}/${format}
-              -c ${CMAKE_CURRENT_BINARY_DIR}
-              -d ${CMAKE_CURRENT_BINARY_DIR}/${doctrees}
-              ${sphinx_flags}
-              ${doc_${format}_opts}
-              > ${doc_format_log} # log stdout, pass stderr
-      ${${format}_post_commands}
-      DEPENDS ${doc_format_last}
-      COMMENT "sphinx-build ${format}: see Utilities/Sphinx/${doc_format_log}"
-      VERBATIM
+    set(_args
+        -M ${format}
+        ${CMake_SOURCE_DIR}/Help
+        ${CMAKE_CURRENT_BINARY_DIR}/${format}
+        -c ${CMAKE_CURRENT_BINARY_DIR}
+        -d ${CMAKE_CURRENT_BINARY_DIR}/${doctrees}
+        ${sphinx_flags}
+        ${doc_${format}_opts}
       )
   else()
     # other formats use standard builder (-b) mode
-    add_custom_command(
-      OUTPUT ${doc_format_output}
-      ${${format}_pre_commands}
-      COMMAND ${SPHINX_EXECUTABLE}
-              -c ${CMAKE_CURRENT_BINARY_DIR}
-              -d ${CMAKE_CURRENT_BINARY_DIR}/${doctrees}
-              -b ${format}
-              ${sphinx_flags}
-              ${doc_${format}_opts}
-              ${CMake_SOURCE_DIR}/Help
-              ${CMAKE_CURRENT_BINARY_DIR}/${format}
-              > ${doc_format_log} # log stdout, pass stderr
-      ${${format}_post_commands}
-      DEPENDS ${doc_format_last}
-      COMMENT "sphinx-build ${format}: see Utilities/Sphinx/${doc_format_log}"
-      VERBATIM
+    set(_args
+        -c ${CMAKE_CURRENT_BINARY_DIR}
+        -d ${CMAKE_CURRENT_BINARY_DIR}/${doctrees}
+        -b ${format}
+        ${sphinx_flags}
+        ${doc_${format}_opts}
+        ${CMake_SOURCE_DIR}/Help
+        ${CMAKE_CURRENT_BINARY_DIR}/${format}
       )
   endif()
+  add_custom_command(
+    OUTPUT ${doc_format_output}
+    ${${format}_pre_commands}
+    COMMAND ${SPHINX_EXECUTABLE} ${_args} > ${doc_format_log} # log stdout, pass stderr
+    ${${format}_post_commands}
+    DEPENDS ${doc_format_last}
+    COMMENT "sphinx-build ${format}: see Utilities/Sphinx/${doc_format_log}"
+    VERBATIM
+    )
   set_property(SOURCE ${doc_format_output} PROPERTY SYMBOLIC 1)
   list(APPEND doc_format_outputs ${doc_format_output})
   if(NOT CMake_SPHINX_CMAKE_ORG)
