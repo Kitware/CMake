@@ -301,7 +301,7 @@ be built and installed on system using macOS 10.5 or later.
 
 The site argument is a URL where the archives for downloadable
 components will reside, e.g.,
-https://cmake.org/files/2.6.1/installer/ All of the archives
+https://cmake.org/files/v3.25/ All of the archives
 produced by CPack should be uploaded to that location.
 
 UPLOAD_DIRECTORY is the local directory where CPack will create the

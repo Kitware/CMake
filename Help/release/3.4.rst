@@ -227,7 +227,7 @@ Other
   will be merged with linker-generated manifests and embedded in the
   binary.
 
-* The `Concurrent Fortran 77 <https://ccur.com>`__ compiler is now supported.
+* The Concurrent Fortran 77 compiler is now supported.
   Its :variable:`compiler id <CMAKE_<LANG>_COMPILER_ID>` is ``CCur``.
 
 * :manual:`cmake(1)` gained a new ``--trace-expand`` command line option

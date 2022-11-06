@@ -57,7 +57,7 @@ List of CPack DEB generator specific variables:
  .. versionadded:: 3.5
   Per-component ``CPACK_DEBIAN_<COMPONENT>_PACKAGE_NAME`` variables.
 
- See https://www.debian.org/doc/debian-policy/ch-controlfields.html#s-f-Source
+ See https://www.debian.org/doc/debian-policy/ch-controlfields.html#s-f-source
 
 .. variable:: CPACK_DEBIAN_FILE_NAME
               CPACK_DEBIAN_<COMPONENT>_FILE_NAME
@@ -639,7 +639,7 @@ List of CPack DEB generator specific variables:
    - :variable:`CPACK_DEBIAN_PACKAGE_SOURCE` for component-based
      installations.
 
- See https://www.debian.org/doc/debian-policy/ch-controlfields.html#s-f-Source
+ See https://www.debian.org/doc/debian-policy/ch-controlfields.html#s-f-source
 
  .. note::
 
