@@ -2943,19 +2943,18 @@ std::string cmGlobalGenerator::GetPredefinedTargetsFolder() const
 
 bool cmGlobalGenerator::UseFolderProperty() const
 {
-  cmValue prop =
+  const cmValue prop =
     this->GetCMakeInstance()->GetState()->GetGlobalProperty("USE_FOLDERS");
 
-  // If this property is defined, let the setter turn this on or off...
-  //
+  // If this property is defined, let the setter turn this on or off.
   if (prop) {
     return cmIsOn(*prop);
   }
 
-  // By default, this feature is OFF, since it is not supported in the
-  // Visual Studio Express editions until VS11:
-  //
-  return false;
+  // If CMP0143 is NEW `treat` "USE_FOLDERS" as ON. Otherwise `treat` it as OFF
+  assert(!this->Makefiles.empty());
+  return (this->Makefiles[0]->GetPolicyStatus(cmPolicies::CMP0143) ==
+          cmPolicies::NEW);
 }
 
 void cmGlobalGenerator::CreateGlobalTarget(GlobalTargetInfo const& gti,
