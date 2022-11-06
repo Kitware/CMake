@@ -362,9 +362,8 @@ Options
      separated by a newline ( ``\n`` ). It is guaranteed that no
      newline characters will be present inside a JSON document.
 
-     JSON trace format:
-
      .. code-block:: json
+       :caption: JSON trace format
 
        {
          "file": "/full/path/to/the/CMake/file.txt",
@@ -417,9 +416,8 @@ Options
      Additionally, the first JSON document outputted contains the
      ``version`` key for the current major and minor version of the
 
-     JSON trace format:
-
      .. code-block:: json
+       :caption: JSON version format
 
        {
          "version": {
