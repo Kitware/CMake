@@ -22,6 +22,7 @@ option(SPHINX_INFO "Build Info manual with Sphinx" OFF)
 option(SPHINX_MAN "Build man pages with Sphinx" OFF)
 option(SPHINX_HTML "Build html help with Sphinx" OFF)
 option(SPHINX_SINGLEHTML "Build html single page help with Sphinx" OFF)
+option(SPHINX_LINKCHECK "Check external links mentioned in documentation" OFF)
 option(SPHINX_QTHELP "Build Qt help with Sphinx" OFF)
 option(SPHINX_LATEXPDF "Build PDF help with Sphinx using LaTeX" OFF)
 option(SPHINX_TEXT "Build text help with Sphinx (not installed)" OFF)
@@ -35,7 +36,15 @@ separate_arguments(sphinx_flags UNIX_COMMAND "${SPHINX_FLAGS}")
 mark_as_advanced(SPHINX_TEXT)
 mark_as_advanced(SPHINX_FLAGS)
 
-if(NOT SPHINX_INFO AND NOT SPHINX_MAN AND NOT SPHINX_HTML AND NOT SPHINX_SINGLEHTML AND NOT SPHINX_QTHELP AND NOT SPHINX_TEXT AND NOT SPHINX_LATEXPDF)
+if(NOT (SPHINX_INFO
+  OR SPHINX_MAN
+  OR SPHINX_HTML
+  OR SPHINX_SINGLEHTML
+  OR SPHINX_LINKCHECK
+  OR SPHINX_QTHELP
+  OR SPHINX_TEXT
+  OR SPHINX_LATEXPDF
+ ))
   return()
 elseif(NOT SPHINX_EXECUTABLE)
   message(FATAL_ERROR "SPHINX_EXECUTABLE (sphinx-build) is not found!")
@@ -78,6 +87,13 @@ if(SPHINX_MAN)
 endif()
 if(SPHINX_SINGLEHTML)
   list(APPEND doc_formats singlehtml)
+endif()
+if(SPHINX_LINKCHECK)
+  list(APPEND doc_formats linkcheck)
+  #
+  set(linkcheck_post_commands
+    COMMAND ${CMAKE_COMMAND} -E echo "sphinx-build linkcheck: see checking status in file://${CMAKE_CURRENT_BINARY_DIR}/linkcheck/output.txt"
+  )
 endif()
 if(SPHINX_TEXT)
   list(APPEND doc_formats text)
