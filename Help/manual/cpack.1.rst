@@ -13,10 +13,10 @@ Synopsis
 Description
 ===========
 
-The **cpack** executable is the CMake packaging program.  It generates
+The :program:`cpack` executable is the CMake packaging program.  It generates
 installers and source packages in a variety of formats.
 
-For each installer or package format, **cpack** has a specific backend,
+For each installer or package format, :program:`cpack` has a specific backend,
 called "generator". A generator is responsible for generating the required
 inputs and invoking the specific package creation tools. These installer
 or package generators are not to be confused with the makefile generators
@@ -28,7 +28,7 @@ list of generators supported for the target platform.  Which of them are
 to be used can be selected through the :variable:`CPACK_GENERATOR` variable
 or through the command-line option :option:`-G <cpack -G>`.
 
-The **cpack** program is steered by a configuration file written in the
+The :program:`cpack` program is steered by a configuration file written in the
 :manual:`CMake language <cmake-language(7)>`. Unless chosen differently
 through the command-line option :option:`--config <cpack --config>`, the
 file ``CPackConfig.cmake`` in the current directory is used.
@@ -45,7 +45,7 @@ Options
 .. option:: -G <generators>
 
   ``<generators>`` is a :ref:`semicolon-separated list <CMake Language Lists>`
-  of generator names.  ``cpack`` will iterate through this list and produce
+  of generator names.  :program:`cpack` will iterate through this list and produce
   package(s) in that generator's format according to the details provided in
   the ``CPackConfig.cmake`` configuration file.  If this option is not given,
   the :variable:`CPACK_GENERATOR` variable determines the default set of
@@ -58,30 +58,30 @@ Options
   :ref:`semicolon-separated list <CMake Language Lists>`.
   When the CMake project uses a multi-configuration
   generator such as Xcode or Visual Studio, this option is needed to tell
-  ``cpack`` which built executables to include in the package.
+  :program:`cpack` which built executables to include in the package.
   The user is responsible for ensuring that the configuration(s) listed
-  have already been built before invoking ``cpack``.
+  have already been built before invoking :program:`cpack`.
 
 .. option:: -D <var>=<value>
 
   Set a CPack variable.  This will override any value set for ``<var>`` in the
-  input file read by ``cpack``.
+  input file read by :program:`cpack`.
 
 .. option:: --config <configFile>
 
-  Specify the configuration file read by ``cpack`` to provide the packaging
+  Specify the configuration file read by :program:`cpack` to provide the packaging
   details.  By default, ``CPackConfig.cmake`` in the current directory will
   be used.
 
 .. option:: -V, --verbose
 
-  Run ``cpack`` with verbose output.  This can be used to show more details
+  Run :program:`cpack` with verbose output.  This can be used to show more details
   from the package generation tools and is suitable for project developers.
 
 .. option:: --debug
 
-  Run ``cpack`` with debug output.  This option is intended mainly for the
-  developers of ``cpack`` itself and is not normally needed by project
+  Run :program:`cpack` with debug output.  This option is intended mainly for the
+  developers of :program:`cpack` itself and is not normally needed by project
   developers.
 
 .. option:: --trace

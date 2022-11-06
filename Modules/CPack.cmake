@@ -262,7 +262,7 @@ installers.  The most commonly-used variables are:
   Lists each of the executables and associated text label to be used to
   create Start Menu shortcuts.  For example, setting this to the list
   ``ccmake;CMake`` will create a shortcut named "CMake" that will execute the
-  installed executable ``ccmake``.  Not all CPack generators use it (at least
+  installed executable :program:`ccmake`.  Not all CPack generators use it (at least
   NSIS, and WIX do).
 
 .. variable:: CPACK_STRIP_FILES

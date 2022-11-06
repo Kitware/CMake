@@ -1047,7 +1047,7 @@ directory.  The :variable:`CMAKE_TOOLCHAIN_FILE` variable is not used until
 the :command:`project` command is reached, at which point CMake looks for the
 named toolchain file relative to the build directory.  Because the tarball has
 already been downloaded and unpacked by then, the toolchain file will be in
-place, even the very first time that ``cmake`` is run in the build directory.
+place, even the very first time that :program:`cmake` is run in the build directory.
 
 Populating Content In CMake Script Mode
 """""""""""""""""""""""""""""""""""""""
