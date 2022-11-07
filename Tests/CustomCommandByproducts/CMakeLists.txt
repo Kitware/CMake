@@ -149,6 +149,29 @@ set_property(TARGET ExternalLibraryWithSubstitution PROPERTY IMPORTED_LOCATION
   ${binary_dir}${cfg}/${CMAKE_STATIC_LIBRARY_PREFIX}ExternalLibrary${CMAKE_STATIC_LIBRARY_SUFFIX})
 add_dependencies(ExternalLibraryWithSubstitution ExtTargetSubst)
 
+# Generate the library file of an imported target as an install byproduct
+# of an external project. The byproduct uses <INSTALL_DIR> that is substituted
+# by the real install path
+if(_isMultiConfig)
+  set(cfg /${CMAKE_CFG_INTDIR})
+else()
+  set(cfg)
+endif()
+include(ExternalProject)
+ExternalProject_Add(ExtTargetInstallSubst
+  SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/External"
+  DOWNLOAD_COMMAND ""
+  INSTALL_COMMAND
+    "${CMAKE_COMMAND}" -E copy_directory "<BINARY_DIR>${cfg}" "<INSTALL_DIR>${cfg}"
+  BUILD_BYPRODUCTS "<BINARY_DIR>${cfg}/${CMAKE_STATIC_LIBRARY_PREFIX}ExternalLibrary${CMAKE_STATIC_LIBRARY_SUFFIX}"
+  INSTALL_BYPRODUCTS "<INSTALL_DIR>${cfg}/${CMAKE_STATIC_LIBRARY_PREFIX}ExternalLibrary${CMAKE_STATIC_LIBRARY_SUFFIX}"
+  )
+ExternalProject_Get_Property(ExtTargetInstallSubst install_dir)
+add_library(ExternalLibraryWithInstallDirSubstitution STATIC IMPORTED)
+set_property(TARGET ExternalLibraryWithInstallDirSubstitution PROPERTY IMPORTED_LOCATION
+  ${install_dir}${cfg}/${CMAKE_STATIC_LIBRARY_PREFIX}ExternalLibrary${CMAKE_STATIC_LIBRARY_SUFFIX})
+add_dependencies(ExternalLibraryWithInstallDirSubstitution ExtTargetInstallSubst)
+
 # Add an executable consuming all the byproducts.
 add_executable(CustomCommandByproducts
   CustomCommandByproducts.c
@@ -168,6 +191,18 @@ add_executable(CustomCommandByproducts
 add_dependencies(CustomCommandByproducts Producer2)
 
 target_link_libraries(CustomCommandByproducts ExternalLibrary)
+
+add_executable(ExternalLibraryByproducts ExternalLibraryByproducts.c)
+target_link_libraries(ExternalLibraryByproducts ExternalLibrary)
+
+add_executable(ExternalLibraryByproducts_WithSubstitution ExternalLibraryByproducts.c)
+target_link_libraries(ExternalLibraryByproducts_WithSubstitution ExternalLibraryWithSubstitution)
+
+add_executable(ExternalLibraryByproducts_WithInstallDirSubstitution ExternalLibraryByproducts.c)
+target_link_libraries(
+  ExternalLibraryByproducts_WithInstallDirSubstitution
+  ExternalLibraryWithInstallDirSubstitution
+)
 
 if(CMAKE_GENERATOR STREQUAL "Ninja")
   add_custom_target(CheckNinja ALL
