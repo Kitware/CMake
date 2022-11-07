@@ -111,7 +111,7 @@ Windows using WiX.
  simply provide the name of the culture.  If you specify more than one
  culture identifier in a comma or semicolon delimited list, the first one
  that is found will be used.  You can find a list of supported languages at:
- http://wix.sourceforge.net/manual-wix3/WixUI_localization.htm
+ https://wixtoolset.org//documentation/manual/v3/wixui/wixui_localization.html
 
 .. variable:: CPACK_WIX_TEMPLATE
 

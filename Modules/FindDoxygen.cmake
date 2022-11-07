@@ -5,14 +5,14 @@
 FindDoxygen
 -----------
 
-Doxygen is a documentation generation tool (see http://www.doxygen.org).
+Doxygen is a documentation generation tool (see https://www.doxygen.nl).
 This module looks for Doxygen and some optional tools it supports:
 
 ``dot``
-  `Graphviz <http://graphviz.org>`_ ``dot`` utility used to render various
+  `Graphviz <https://graphviz.org>`_ ``dot`` utility used to render various
   graphs.
 ``mscgen``
-  `Message Chart Generator <http://www.mcternan.me.uk/mscgen/>`_ utility used
+  `Message Chart Generator <https://www.mcternan.me.uk/mscgen/>`_ utility used
   by Doxygen's ``\msc`` and ``\mscfile`` commands.
 ``dia``
   `Dia <https://wiki.gnome.org/Apps/Dia>`_ the diagram editor used by Doxygen's
@@ -91,7 +91,7 @@ Functions
   base point. Note also that Doxygen's default behavior is to strip the working
   directory from relative paths in the generated documentation (see the
   ``STRIP_FROM_PATH`` `Doxygen config option
-  <http://www.doxygen.org/manual/config.html>`_ for details).
+  <https://www.doxygen.nl/manual/config.html>`_ for details).
 
   If provided, the optional ``comment`` will be passed as the ``COMMENT`` for
   the :command:`add_custom_target` command used to create the custom target
@@ -117,7 +117,7 @@ Functions
   variables before calling ``doxygen_add_docs()``. Any variable with a name of
   the form ``DOXYGEN_<tag>`` will have its value substituted for the
   corresponding ``<tag>`` configuration option in the ``Doxyfile``. See the
-  `Doxygen documentation <http://www.doxygen.org/manual/config.html>`_ for the
+  `Doxygen documentation <https://www.doxygen.nl/manual/config.html>`_ for the
   full list of supported configuration options.
 
   Some of Doxygen's defaults are overridden to provide more appropriate
@@ -480,7 +480,7 @@ macro(_Doxygen_find_doxygen)
             /Applications/Doxygen.app/Contents/MacOS
             /Applications/Utilities/Doxygen.app/Contents/Resources
             /Applications/Utilities/Doxygen.app/Contents/MacOS
-        DOC "Doxygen documentation generation tool (http://www.doxygen.org)"
+        DOC "Doxygen documentation generation tool (https://www.doxygen.nl)"
         VALIDATOR _Doxygen_version_validator
     )
     mark_as_advanced(DOXYGEN_EXECUTABLE)
@@ -951,7 +951,7 @@ doxygen_add_docs() for target ${targetName}")
     if(NOT DEFINED DOXYGEN_HAVE_DOT)
         # If you set the HAVE_DOT tag to YES then doxygen will assume the dot
         # tool is available from the path. This tool is part of Graphviz (see:
-        # http://www.graphviz.org/), a graph visualization toolkit from AT&T
+        # https://www.graphviz.org/), a graph visualization toolkit from AT&T
         # and Lucent Bell Labs. The other options in this section have no
         # effect if this option is set to NO.
         # Doxygen's default value is: NO.

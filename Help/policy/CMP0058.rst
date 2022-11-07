@@ -50,7 +50,7 @@ that ensure ``byproduct.txt`` will exist before its consumers
 need it.  See discussion of this problem in `Ninja Issue 760`_
 for further details on why Ninja works this way.
 
-.. _`Ninja Issue 760`: https://github.com/martine/ninja/issues/760
+.. _Ninja Issue 760: https://github.com/ninja-build/ninja/issues/760
 
 Instead of leaving byproducts undeclared in the rules that generate
 them, Ninja expects byproducts to be listed along with other outputs.

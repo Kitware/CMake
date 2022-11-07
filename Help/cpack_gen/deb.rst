@@ -57,7 +57,7 @@ List of CPack DEB generator specific variables:
  .. versionadded:: 3.5
   Per-component ``CPACK_DEBIAN_<COMPONENT>_PACKAGE_NAME`` variables.
 
- See https://www.debian.org/doc/debian-policy/ch-controlfields.html#s-f-Source
+ See https://www.debian.org/doc/debian-policy/ch-controlfields.html#s-f-source
 
 .. variable:: CPACK_DEBIAN_FILE_NAME
               CPACK_DEBIAN_<COMPONENT>_FILE_NAME
@@ -399,7 +399,7 @@ List of CPack DEB generator specific variables:
  .. versionadded:: 3.4
   Per-component ``CPACK_DEBIAN_<COMPONENT>_PACKAGE_PREDEPENDS`` variables.
 
- See http://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
+ See https://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
 
 .. variable:: CPACK_DEBIAN_PACKAGE_ENHANCES
               CPACK_DEBIAN_<COMPONENT>_PACKAGE_ENHANCES
@@ -419,7 +419,7 @@ List of CPack DEB generator specific variables:
  .. versionadded:: 3.4
   Per-component ``CPACK_DEBIAN_<COMPONENT>_PACKAGE_ENHANCES`` variables.
 
- See http://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
+ See https://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
 
 .. variable:: CPACK_DEBIAN_PACKAGE_BREAKS
               CPACK_DEBIAN_<COMPONENT>_PACKAGE_BREAKS
@@ -508,7 +508,7 @@ List of CPack DEB generator specific variables:
  .. versionadded:: 3.4
   Per-component ``CPACK_DEBIAN_<COMPONENT>_PACKAGE_REPLACES`` variables.
 
- See http://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
+ See https://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
 
 .. variable:: CPACK_DEBIAN_PACKAGE_RECOMMENDS
               CPACK_DEBIAN_<COMPONENT>_PACKAGE_RECOMMENDS
@@ -527,7 +527,7 @@ List of CPack DEB generator specific variables:
  .. versionadded:: 3.4
   Per-component ``CPACK_DEBIAN_<COMPONENT>_PACKAGE_RECOMMENDS`` variables.
 
- See http://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
+ See https://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
 
 .. variable:: CPACK_DEBIAN_PACKAGE_SUGGESTS
               CPACK_DEBIAN_<COMPONENT>_PACKAGE_SUGGESTS
@@ -545,7 +545,7 @@ List of CPack DEB generator specific variables:
  .. versionadded:: 3.4
   Per-component ``CPACK_DEBIAN_<COMPONENT>_PACKAGE_SUGGESTS`` variables.
 
- See http://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
+ See https://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
 
 .. variable:: CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS
 
@@ -639,7 +639,7 @@ List of CPack DEB generator specific variables:
    - :variable:`CPACK_DEBIAN_PACKAGE_SOURCE` for component-based
      installations.
 
- See https://www.debian.org/doc/debian-policy/ch-controlfields.html#s-f-Source
+ See https://www.debian.org/doc/debian-policy/ch-controlfields.html#s-f-source
 
  .. note::
 

@@ -239,8 +239,8 @@ Hints
 ``Python3_FIND_ABI``
   .. versionadded:: 3.16
 
-  This variable defines which ABIs, as defined in
-  `PEP 3149 <https://www.python.org/dev/peps/pep-3149/>`_, should be searched.
+  This variable defines which ABIs, as defined in :pep:`3149`, should be
+  searched.
 
   .. note::
 
@@ -361,7 +361,7 @@ Hints
     ``Anaconda`` or ``ActivePython``, rely on this implementation.
   * ``IronPython``: This implementation use the ``CSharp`` language for
     ``.NET Framework`` on top of the `Dynamic Language Runtime` (``DLR``).
-    See `IronPython <http://ironpython.net>`_.
+    See `IronPython <https://ironpython.net>`_.
   * ``PyPy``: This implementation use ``RPython`` language and
     ``RPython translation toolchain`` to produce the python interpreter.
     See `PyPy <https://www.pypy.org>`_.

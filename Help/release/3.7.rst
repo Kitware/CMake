@@ -315,5 +315,5 @@ Other Changes
 * Vim support files ``indent/cmake.vim`` and ``syntax/cmake.vim``
   from the `vim-cmake-syntax`_ project are now distributed with CMake.
 
-.. _`Fortran Submodules`: http://fortranwiki.org/fortran/show/Submodules
+.. _`Fortran Submodules`: https://fortranwiki.org/fortran/show/Submodules
 .. _`vim-cmake-syntax`: https://github.com/pboettch/vim-cmake-syntax
