@@ -1,2 +1,0 @@
-4 warnings generated.
-clang-tidy applied 4 of 4 suggested fixes.
