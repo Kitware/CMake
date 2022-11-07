@@ -938,6 +938,7 @@ cmStateSnapshot cmState::CreateVariableScopeSnapshot(
   pos->ScopeParent = originSnapshot.Position;
   pos->SnapshotType = cmStateEnums::VariableScopeType;
   pos->Keep = false;
+  pos->BuildSystemDirectory->DirectoryEnd = pos;
   pos->PolicyScope = originSnapshot.Position->Policies;
   assert(originSnapshot.Position->Vars.IsValid());
 
