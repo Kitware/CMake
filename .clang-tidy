@@ -34,6 +34,7 @@ readability-*,\
 -readability-suspicious-call-argument,\
 -readability-uppercase-literal-suffix,\
 cmake-*,\
+-cmake-use-bespoke-enum-class,\
 "
 HeaderFilterRegex: 'Source/cm[^/]*\.(h|hxx|cxx)$'
 CheckOptions:
