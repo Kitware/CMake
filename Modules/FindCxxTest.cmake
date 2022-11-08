@@ -9,7 +9,7 @@ Find CxxTest unit testing framework.
 
 Find the CxxTest suite and declare a helper macro for creating unit
 tests and integrating them with CTest.  For more details on CxxTest
-see http://cxxtest.tigris.org
+see https://cxxtest.com
 
 INPUT Variables
 

@@ -18,7 +18,7 @@ The CPack RPM generator has specific features which are controlled by the specif
 **grouping name** written in upper case. It may be either a component name or
 a component GROUP name. Usually those variables correspond to RPM spec file
 entities. One may find information about spec files here
-http://www.rpm.org/wiki/Docs
+https://rpm.org/documentation
 
 .. versionchanged:: 3.6
 

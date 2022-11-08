@@ -74,7 +74,7 @@ encoded in UTF-8 on Windows (using UTF-16 to call system APIs).
 Furthermore, CMake 3.0 and above allow a leading UTF-8
 `Byte-Order Mark`_ in source files.
 
-.. _`Byte-Order Mark`: http://en.wikipedia.org/wiki/Byte_order_mark
+.. _Byte-Order Mark: https://en.wikipedia.org/wiki/Byte_order_mark
 
 Source Files
 ------------
