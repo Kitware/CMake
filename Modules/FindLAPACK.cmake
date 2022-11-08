@@ -12,7 +12,7 @@ This module finds an installed Fortran library that implements the
 
 At least one of the ``C``, ``CXX``, or ``Fortran`` languages must be enabled.
 
-.. _`LAPACK linear-algebra interface`: http://www.netlib.org/lapack/
+.. _`LAPACK linear-algebra interface`: https://netlib.org/lapack/
 
 Input Variables
 ^^^^^^^^^^^^^^^

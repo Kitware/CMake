@@ -22,6 +22,7 @@ option(SPHINX_INFO "Build Info manual with Sphinx" OFF)
 option(SPHINX_MAN "Build man pages with Sphinx" OFF)
 option(SPHINX_HTML "Build html help with Sphinx" OFF)
 option(SPHINX_SINGLEHTML "Build html single page help with Sphinx" OFF)
+option(SPHINX_LINKCHECK "Check external links mentioned in documentation" OFF)
 option(SPHINX_QTHELP "Build Qt help with Sphinx" OFF)
 option(SPHINX_LATEXPDF "Build PDF help with Sphinx using LaTeX" OFF)
 option(SPHINX_TEXT "Build text help with Sphinx (not installed)" OFF)
@@ -35,7 +36,15 @@ separate_arguments(sphinx_flags UNIX_COMMAND "${SPHINX_FLAGS}")
 mark_as_advanced(SPHINX_TEXT)
 mark_as_advanced(SPHINX_FLAGS)
 
-if(NOT SPHINX_INFO AND NOT SPHINX_MAN AND NOT SPHINX_HTML AND NOT SPHINX_SINGLEHTML AND NOT SPHINX_QTHELP AND NOT SPHINX_TEXT AND NOT SPHINX_LATEXPDF)
+if(NOT (SPHINX_INFO
+  OR SPHINX_MAN
+  OR SPHINX_HTML
+  OR SPHINX_SINGLEHTML
+  OR SPHINX_LINKCHECK
+  OR SPHINX_QTHELP
+  OR SPHINX_TEXT
+  OR SPHINX_LATEXPDF
+ ))
   return()
 elseif(NOT SPHINX_EXECUTABLE)
   message(FATAL_ERROR "SPHINX_EXECUTABLE (sphinx-build) is not found!")
@@ -78,6 +87,13 @@ if(SPHINX_MAN)
 endif()
 if(SPHINX_SINGLEHTML)
   list(APPEND doc_formats singlehtml)
+endif()
+if(SPHINX_LINKCHECK)
+  list(APPEND doc_formats linkcheck)
+  #
+  set(linkcheck_post_commands
+    COMMAND ${CMAKE_COMMAND} -E echo "sphinx-build linkcheck: see checking status in file://${CMAKE_CURRENT_BINARY_DIR}/linkcheck/output.txt"
+  )
 endif()
 if(SPHINX_TEXT)
   list(APPEND doc_formats text)
@@ -159,11 +175,41 @@ if(CMake_SPHINX_CMAKE_ORG)
     )
 endif()
 
+# Redirect `sphinx-build` output to `build-<format>.log` file?
+set(sphinx_use_build_log TRUE)
+set(sphinx_verbose_levels "DEBUG;TRACE")
+set(sphinx_no_redirect_levels "VERBOSE;${sphinx_verbose_levels}")
+# NOTE There is no generic verbosity level for all supported generators,
+# so lets use CMake verbosity level to control if `sphinx-build` should
+# redirect it's output to a file or a user wants to see it at build time.
+if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.25)
+  cmake_language(GET_MESSAGE_LOG_LEVEL verbose_level)
+else()
+  # If building under CMake < 3.25, fallback to `CMAKE_MESSAGE_LOG_LEVEL`
+  # variable.  It was added in 3.17 but it's OK to set it even for older
+  # versions (w/o any effect on `message()` command of course).
+  set(verbose_level ${CMAKE_MESSAGE_LOG_LEVEL})
+endif()
+if(DEFINED ENV{VERBOSE} OR CMAKE_VERBOSE_MAKEFILE OR verbose_level IN_LIST sphinx_no_redirect_levels)
+  set(sphinx_use_build_log FALSE)
+  if(verbose_level IN_LIST sphinx_verbose_levels)
+    # NOTE Sphinx accept multiple `-v` options for more verbosity
+    # but the output mostly for Sphinx developers...
+    list(APPEND sphinx_flags "-v")
+  endif()
+endif()
+
 set(doc_format_outputs "")
 set(doc_format_last "")
 foreach(format IN LISTS doc_formats)
   set(doc_format_output "doc_format_${format}")
-  set(doc_format_log "build-${format}.log")
+  set(doc_format_log "")
+  set(build_comment_tail " ...")
+  if(sphinx_use_build_log)
+    set(doc_format_log "build-${format}.log")
+    set(build_comment_tail ": see Utilities/Sphinx/${doc_format_log}")
+    list(PREPEND doc_format_log ">")
+  endif()
   if(CMake_SPHINX_CMAKE_ORG)
     set(doctrees "doctrees/${format}")
   else()
@@ -172,43 +218,37 @@ foreach(format IN LISTS doc_formats)
   if(format STREQUAL "latexpdf")
     # This format does not use builder (-b) but make_mode (-M) which expects
     # arguments in peculiar order
-    add_custom_command(
-      OUTPUT ${doc_format_output}
-      ${${format}_pre_commands}
-      COMMAND ${SPHINX_EXECUTABLE}
-              -M ${format}
-              ${CMake_SOURCE_DIR}/Help
-              ${CMAKE_CURRENT_BINARY_DIR}/${format}
-              -c ${CMAKE_CURRENT_BINARY_DIR}
-              -d ${CMAKE_CURRENT_BINARY_DIR}/${doctrees}
-              ${sphinx_flags}
-              ${doc_${format}_opts}
-              > ${doc_format_log} # log stdout, pass stderr
-      ${${format}_post_commands}
-      DEPENDS ${doc_format_last}
-      COMMENT "sphinx-build ${format}: see Utilities/Sphinx/${doc_format_log}"
-      VERBATIM
+    set(_args
+        -M ${format}
+        ${CMake_SOURCE_DIR}/Help
+        ${CMAKE_CURRENT_BINARY_DIR}/${format}
+        -c ${CMAKE_CURRENT_BINARY_DIR}
+        -d ${CMAKE_CURRENT_BINARY_DIR}/${doctrees}
+        ${sphinx_flags}
+        ${doc_${format}_opts}
       )
   else()
     # other formats use standard builder (-b) mode
-    add_custom_command(
-      OUTPUT ${doc_format_output}
-      ${${format}_pre_commands}
-      COMMAND ${SPHINX_EXECUTABLE}
-              -c ${CMAKE_CURRENT_BINARY_DIR}
-              -d ${CMAKE_CURRENT_BINARY_DIR}/${doctrees}
-              -b ${format}
-              ${sphinx_flags}
-              ${doc_${format}_opts}
-              ${CMake_SOURCE_DIR}/Help
-              ${CMAKE_CURRENT_BINARY_DIR}/${format}
-              > ${doc_format_log} # log stdout, pass stderr
-      ${${format}_post_commands}
-      DEPENDS ${doc_format_last}
-      COMMENT "sphinx-build ${format}: see Utilities/Sphinx/${doc_format_log}"
-      VERBATIM
+    set(_args
+        -c ${CMAKE_CURRENT_BINARY_DIR}
+        -d ${CMAKE_CURRENT_BINARY_DIR}/${doctrees}
+        -b ${format}
+        ${sphinx_flags}
+        ${doc_${format}_opts}
+        ${CMake_SOURCE_DIR}/Help
+        ${CMAKE_CURRENT_BINARY_DIR}/${format}
       )
   endif()
+
+  add_custom_command(
+    OUTPUT ${doc_format_output}
+    ${${format}_pre_commands}
+    COMMAND ${SPHINX_EXECUTABLE} ${_args} ${doc_format_log}
+    ${${format}_post_commands}
+    DEPENDS ${doc_format_last}
+    COMMENT "sphinx-build ${format}${build_comment_tail}"
+    VERBATIM
+    )
   set_property(SOURCE ${doc_format_output} PROPERTY SYMBOLIC 1)
   list(APPEND doc_format_outputs ${doc_format_output})
   if(NOT CMake_SPHINX_CMAKE_ORG)

@@ -18,15 +18,16 @@ Compatibility
 ^^^^^^^^^^^^^
 
 This module is able to find a version of DCMTK that does or does not export
-a *DCMTKConfig.cmake* file. It applies a two step process:
+a ``DCMTKConfig.cmake`` file. It applies a two step process:
 
-* Step 1:  Attempt to find DCMTK version providing a *DCMTKConfig.cmake* file.
-* Step 2:  If step 1 failed, rely on *FindDCMTK.cmake* to set `DCMTK_*` variables details below.
+* Step 1:  Attempt to find DCMTK version providing a ``DCMTKConfig.cmake`` file.
+* Step 2:  If step 1 failed, rely on ``FindDCMTK.cmake`` to set ``DCMTK_*``
+  variables details below.
 
 
 `Recent DCMTK
-<http://git.dcmtk.org/web?p=dcmtk.git;a=commit;h=662ae187c493c6b9a73dd5e3875372cebd0c11fe>`_
-provides a *DCMTKConfig.cmake* :manual:`package configuration file
+<https://git.dcmtk.org/?p=dcmtk.git;a=commit;h=662ae187c493c6b9a73dd5e3875372cebd0c11fe>`_
+provides a ``DCMTKConfig.cmake`` :manual:`package configuration file
 <cmake-packages(7)>`. To exclusively use the package configuration file
 (recommended when possible), pass the `NO_MODULE` option to
 :command:`find_package`. For example, `find_package(DCMTK NO_MODULE)`.

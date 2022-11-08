@@ -55,13 +55,13 @@ languages.
 .. _Embarcadero: https://www.embarcadero.com
 .. _Classic Flang Fortran Compiler: https://github.com/flang-compiler/flang
 .. _LLVM Flang Fortran Compiler: https://github.com/llvm/llvm-project/tree/main/flang
-.. _G95 Fortran: http://g95.sourceforge.net
+.. _G95 Fortran: https://g95.sourceforge.net
 .. _GNU Compiler Collection: https://gcc.gnu.org
 .. _Green Hills Software: https://www.ghs.com/products/compiler.html
 .. _Microsoft Visual Studio: https://visualstudio.microsoft.com
 .. _NVIDIA HPC Compiler: https://developer.nvidia.com/hpc-compilers
 .. _NVIDIA CUDA Compiler: https://developer.nvidia.com/cuda-llvm-compiler
 .. _Open Watcom: https://open-watcom.github.io
-.. _Small Device C Compiler: http://sdcc.sourceforge.net
+.. _Small Device C Compiler: https://sdcc.sourceforge.net
 .. _Tiny C Compiler: https://bellard.org/tcc
-.. _Tasking Compiler Toolsets: https://tasking.com
+.. _Tasking Compiler Toolsets: https://www.tasking.com

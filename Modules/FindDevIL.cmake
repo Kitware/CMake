@@ -8,7 +8,7 @@ FindDevIL
 
 
 This module locates the developer's image library.
-http://openil.sourceforge.net/
+https://openil.sourceforge.net/
 
 IMPORTED Targets
 ^^^^^^^^^^^^^^^^
