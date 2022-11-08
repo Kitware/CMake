@@ -7,46 +7,83 @@ Return from a file, directory or function.
 
   return([PROPAGATE <var-name>...])
 
-Returns from a file, directory or function.  When this command is
-encountered in an included file (via :command:`include` or
+When this command is encountered in an included file (via :command:`include` or
 :command:`find_package`), it causes processing of the current file to stop
 and control is returned to the including file.  If it is encountered in a
-file which is not included by another file, e.g.  a ``CMakeLists.txt``,
+file which is not included by another file, e.g. a ``CMakeLists.txt``,
 deferred calls scheduled by :command:`cmake_language(DEFER)` are invoked and
-control is returned to the parent directory if there is one.  If return is
-called in a function, control is returned to the caller of the function.
+control is returned to the parent directory if there is one.
+
+If ``return()`` is called in a function, control is returned to the caller
+of that function.  Note that a :command:`macro`, unlike a :command:`function`,
+is expanded in place and therefore cannot handle ``return()``.
+
+Policy :policy:`CMP0140` controls the behavior regarding the arguments of the
+command.  All arguments are ignored unless that policy is set to ``NEW``.
 
 ``PROPAGATE``
   .. versionadded:: 3.25
 
-  This option set or unset the specified variables in the parent directory or
+  This option sets or unsets the specified variables in the parent directory or
   function caller scope. This is equivalent to :command:`set(PARENT_SCOPE)` or
-  :command:`unset(PARENT_SCOPE)` commands.
+  :command:`unset(PARENT_SCOPE)` commands, except for the way it interacts
+  with the :command:`block` command, as described below.
 
-  The option ``PROPAGATE`` can be very useful in conjunction with the
-  :command:`block` command because the :command:`return` will cross over
-  various scopes created by the :command:`block` commands.
+  The ``PROPAGATE`` option can be very useful in conjunction with the
+  :command:`block` command.  A :command:`return` will propagate the
+  specified variables through any enclosing block scopes created by the
+  :command:`block` commands.  Inside a function, this ensures the variables
+  are propagated to the function's caller, regardless of any blocks within
+  the function.  If not inside a function, it ensures the variables are
+  propagated to the parent file or directory scope. For example:
 
   .. code-block:: cmake
+    :caption: CMakeLists.txt
 
-    function(MULTI_SCOPES RESULT_VARIABLE)
+    cmake_version_required(VERSION 3.25)
+    project(example)
+
+    set(var1 "top-value")
+
+    block(SCOPE_FOR VARIABLES)
+      add_subdirectory(subDir)
+      # var1 has the value "block-nested"
+    endblock()
+
+    # var1 has the value "top-value"
+
+  .. code-block:: cmake
+    :caption: subDir/CMakeLists.txt
+
+    function(multi_scopes result_var1 result_var2)
       block(SCOPE_FOR VARIABLES)
-        # here set(PARENT_SCOPE) is not usable because it will not set the
-        # variable in the caller scope but in the parent scope of the block()
-        set(${RESULT_VARIABLE} "new-value")
-        return(PROPAGATE ${RESULT_VARIABLE})
+        # This would only propagate out of the immediate block, not to
+        # the caller of the function.
+        #set(${result_var1} "new-value" PARENT_SCOPE)
+        #unset(${result_var2} PARENT_SCOPE)
+
+        # This propagates the variables through the enclosing block and
+        # out to the caller of the function.
+        set(${result_var1} "new-value")
+        unset(${result_var2})
+        return(PROPAGATE ${result_var1} ${result_var2})
       endblock()
     endfunction()
 
-    set(MY_VAR "initial-value")
-    multi_scopes(MY_VAR)
-    # here MY_VAR will holds "new-value"
+    set(var1 "some-value")
+    set(var2 "another-value")
 
-Policy :policy:`CMP0140` controls the behavior regarding the arguments of the
-command.
+    multi_scopes(var1 var2)
+    # Now var1 will hold "new-value" and var2 will be unset
 
-Note that a :command:`macro <macro>`, unlike a :command:`function <function>`,
-is expanded in place and therefore cannot handle ``return()``.
+    block(SCOPE_FOR VARIABLES)
+      # This return() will set var1 in the directory scope that included us
+      # via add_subdirectory(). The surrounding block() here does not limit
+      # propagation to the current file, but the block() in the parent
+      # directory scope does prevent propagation going any further.
+      set(var1 "block-nested")
+      return(PROPAGATE var1)
+    endblock()
 
 See Also
 ^^^^^^^^
