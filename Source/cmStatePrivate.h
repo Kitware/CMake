@@ -62,7 +62,7 @@ struct cmStateDetail::PolicyStackEntry : public cmPolicies::PolicyMap
 
 struct cmStateDetail::BuildsystemDirectoryStateType
 {
-  cmStateDetail::PositionType DirectoryEnd;
+  cmStateDetail::PositionType CurrentScope;
 
   std::string Location;
   std::string OutputLocation;
