@@ -87,11 +87,6 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL SunPro AND
   if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.13)
     if (NOT CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD EQUAL 98)
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++03")
-    elseif(CMAKE_VERSION VERSION_LESS 3.8.20170502)
-      # CMake knows how to add this flag for compilation as C++11,
-      # but has not been taught that SunPro needs it for linking too.
-      # Add it in a place that will be used for both.
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
     endif()
   else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -library=stlport4")
