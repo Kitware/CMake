@@ -404,6 +404,7 @@ if(WIN32 AND NOT CYGWIN)
       PATH_SUFFIXES
         "lib/MinGW"
         "lib"
+        "lib64"
     )
 
     find_library(SSL_EAY
@@ -414,6 +415,7 @@ if(WIN32 AND NOT CYGWIN)
       PATH_SUFFIXES
         "lib/MinGW"
         "lib"
+        "lib64"
     )
 
     mark_as_advanced(SSL_EAY LIB_EAY)
