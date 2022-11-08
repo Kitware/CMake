@@ -17,43 +17,11 @@ set(BUILD_SHARED_LIBS FALSE CACHE BOOL "")
 set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
 set(CMAKE_LINK_SEARCH_START_STATIC TRUE)
 
-function(__tasking_set_processor_list lang out_var)
-  execute_process(COMMAND "${CMAKE_${lang}_COMPILER}" --cpu-list
-    OUTPUT_VARIABLE processor_list
-    ERROR_VARIABLE processor_list)
-  string(REGEX MATCHALL "  +([A-Za-z0-9_]+)[^\n]+\n" processor_list "${processor_list}")
-  list(POP_FRONT processor_list)
-  string(REGEX REPLACE "  +([A-Za-z0-9_]+)[^\n]+\n" "\\1" processor_list "${processor_list}")
-  set(${out_var} "${processor_list}" PARENT_SCOPE)
-endfunction()
-
-function(__tasking_check_processor processor list out_var)
-  string(TOLOWER "${processor}" processor)
-  if(processor IN_LIST list)
-    set(${out_var} TRUE PARENT_SCOPE)
-  else()
-    set(${out_var} FALSE PARENT_SCOPE)
-  endif()
-endfunction()
-
 if(NOT CMAKE_TASKING_TOOLSET)
   set(CMAKE_TASKING_TOOLSET "Standalone")
 endif()
 
 macro(__compiler_tasking lang)
-
-  if(CMAKE_SYSTEM_PROCESSOR)
-    if(NOT _TASKING_${lang}_PROCESSOR_LIST)
-      __tasking_set_processor_list(${lang} _TASKING_${lang}_PROCESSOR_LIST)
-    endif()
-    __tasking_check_processor(${CMAKE_SYSTEM_PROCESSOR} "${_TASKING_${lang}_PROCESSOR_LIST}" _TASKING_${lang}_VALID_PROCESSOR)
-    if(${_TASKING_${lang}_VALID_PROCESSOR})
-      string(APPEND CMAKE_${lang}_FLAGS_INIT " -C${CMAKE_SYSTEM_PROCESSOR}")
-    else()
-      message(FATAL_ERROR "Invalid processor ${CMAKE_SYSTEM_PROCESSOR} specified.\n"
-        "Supported processors: ${_TASKING_${lang}_PROCESSOR_LIST}")
-    endif()
-  endif()
 
   set(CMAKE_${lang}_VERBOSE_FLAG "-v")
   set(CMAKE_${lang}_COMPILE_OPTIONS_PIC "--pic")
