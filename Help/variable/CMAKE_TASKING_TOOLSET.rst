@@ -8,12 +8,15 @@ Select the Tasking toolset which provides the compiler
 Architecture compilers are provided by different toolchains with
 incompatible versioning schemes.  Set this variable in a
 :variable:`toolchain file <CMAKE_TOOLCHAIN_FILE>` so CMake can detect
-the compiler and version correctly. If no toolset is specified,
+the compiler features correctly. If no toolset is specified,
 ``Standalone`` is assumed.
 
-Projects that can be built with different architectures and/or toolsets must
-take :variable:`CMAKE_TASKING_TOOLSET` and
-:variable:`CMAKE_<LANG>_COMPILER_ARCHITECTURE_ID` into account to qualify
+Due to the different versioning schemes, the compiler version
+(:variable:`CMAKE_<LANG>_COMPILER_VERSION`) depends on the toolset and
+architecture in use. If projects can be built with multiple toolsets or
+architectures, the specified :variable:`CMAKE_TASKING_TOOLSET` and the
+automatically determined :variable:`CMAKE_<LANG>_COMPILER_ARCHITECTURE_ID`
+must be taken into account when comparing against the
 :variable:`CMAKE_<LANG>_COMPILER_VERSION`.
 
 ``TriCore``
