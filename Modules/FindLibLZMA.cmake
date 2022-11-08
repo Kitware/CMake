@@ -33,6 +33,17 @@ This module will set the following variables in your project:
   True if lzma_easy_encoder() is found (required).
 ``LIBLZMA_HAS_LZMA_PRESET``
   True if lzma_lzma_preset() is found (required).
+``LIBLZMA_VERSION``
+  .. versionadded:: 3.26
+    the version of LZMA found.
+
+  See also legacy variable ``LIBLZMA_VERSION_STRING``.
+
+Legacy Variables
+^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
 ``LIBLZMA_VERSION_MAJOR``
   The major version of lzma
 ``LIBLZMA_VERSION_MINOR``
@@ -41,6 +52,10 @@ This module will set the following variables in your project:
   The patch version of lzma
 ``LIBLZMA_VERSION_STRING``
   version number as a string (ex: "5.0.3")
+
+  .. versionchanged:: 3.26
+    Superseded by ``LIBLZMA_VERSION``.
+
 #]=======================================================================]
 
 find_path(LIBLZMA_INCLUDE_DIR lzma.h )
@@ -61,6 +76,7 @@ if(LIBLZMA_INCLUDE_DIR AND EXISTS "${LIBLZMA_INCLUDE_DIR}/lzma/version.h")
     string(REGEX REPLACE ".*#define LZMA_VERSION_PATCH ([0-9]+).*" "\\1" LIBLZMA_VERSION_PATCH "${LIBLZMA_HEADER_CONTENTS}")
 
     set(LIBLZMA_VERSION_STRING "${LIBLZMA_VERSION_MAJOR}.${LIBLZMA_VERSION_MINOR}.${LIBLZMA_VERSION_PATCH}")
+    set(LIBLZMA_VERSION ${LIBLZMA_VERSION_STRING})
     unset(LIBLZMA_HEADER_CONTENTS)
 endif()
 
@@ -91,7 +107,7 @@ find_package_handle_standard_args(LibLZMA  REQUIRED_VARS  LIBLZMA_LIBRARY
                                                           LIBLZMA_HAS_AUTO_DECODER
                                                           LIBLZMA_HAS_EASY_ENCODER
                                                           LIBLZMA_HAS_LZMA_PRESET
-                                           VERSION_VAR    LIBLZMA_VERSION_STRING
+                                           VERSION_VAR    LIBLZMA_VERSION
                                  )
 mark_as_advanced( LIBLZMA_INCLUDE_DIR LIBLZMA_LIBRARY )
 
