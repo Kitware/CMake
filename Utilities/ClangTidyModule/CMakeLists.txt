@@ -14,6 +14,8 @@ find_package(Clang REQUIRED)
 add_library(cmake-clang-tidy-module MODULE
   Module.cxx
 
+  UseBespokeEnumClassCheck.cxx
+  UseBespokeEnumClassCheck.h
   UseCmstrlenCheck.cxx
   UseCmstrlenCheck.h
   UseCmsysFstreamCheck.cxx
