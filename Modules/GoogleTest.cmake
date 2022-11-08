@@ -405,6 +405,12 @@ function(gtest_add_tests)
                    --gtest_filter=${gtest_test_name}
                    ${ARGS_EXTRA_ARGS}
         )
+        # Makes sure a skipped GTest is reported as so by CTest
+        set_tests_properties(
+          ${ctest_test_name}
+          PROPERTIES
+          SKIP_REGULAR_EXPRESSION "\\[  SKIPPED \\]"
+        )
         list(APPEND testList ${ctest_test_name})
       endif()
     endforeach()
