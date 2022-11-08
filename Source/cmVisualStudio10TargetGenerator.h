@@ -146,7 +146,8 @@ private:
   void WriteLinkOptions(Elem& e1, std::string const& config);
   void WriteMidlOptions(Elem& e1, std::string const& config);
   void WriteAntBuildOptions(Elem& e1, std::string const& config);
-  void OutputLinkIncremental(Elem& e1, std::string const& configName);
+  void OutputLinkIncremental(Elem& e1, std::string const& configName,
+                             std::string const& platName);
   void WriteCustomRule(Elem& e0, cmSourceFile const* source,
                        cmCustomCommand const& command);
   void WriteCustomRuleCpp(Elem& e2, std::string const& config,
