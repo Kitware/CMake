@@ -281,7 +281,7 @@ cmStateSnapshot cmState::Reset()
     it->CompileOptions.clear();
     it->LinkOptions.clear();
     it->LinkDirectories.clear();
-    it->DirectoryEnd = pos;
+    it->CurrentScope = pos;
     it->NormalTargetNames.clear();
     it->ImportedTargetNames.clear();
     it->Properties.Clear();
@@ -821,7 +821,7 @@ cmStateSnapshot cmState::CreateBaseSnapshot()
   pos->CompileOptionsPosition = 0;
   pos->LinkOptionsPosition = 0;
   pos->LinkDirectoriesPosition = 0;
-  pos->BuildSystemDirectory->DirectoryEnd = pos;
+  pos->BuildSystemDirectory->CurrentScope = pos;
   pos->Policies = this->PolicyStack.Root();
   pos->PolicyRoot = this->PolicyStack.Root();
   pos->PolicyScope = this->PolicyStack.Root();
@@ -848,7 +848,7 @@ cmStateSnapshot cmState::CreateBuildsystemDirectorySnapshot(
     originSnapshot.Position->BuildSystemDirectory);
   pos->ExecutionListFile =
     this->ExecutionListFiles.Push(originSnapshot.Position->ExecutionListFile);
-  pos->BuildSystemDirectory->DirectoryEnd = pos;
+  pos->BuildSystemDirectory->CurrentScope = pos;
   pos->Policies = originSnapshot.Position->Policies;
   pos->PolicyRoot = originSnapshot.Position->Policies;
   pos->PolicyScope = originSnapshot.Position->Policies;
@@ -878,7 +878,7 @@ cmStateSnapshot cmState::CreateDeferCallSnapshot(
   pos->ExecutionListFile = this->ExecutionListFiles.Push(
     originSnapshot.Position->ExecutionListFile, fileName);
   assert(originSnapshot.Position->Vars.IsValid());
-  pos->BuildSystemDirectory->DirectoryEnd = pos;
+  pos->BuildSystemDirectory->CurrentScope = pos;
   pos->PolicyScope = originSnapshot.Position->Policies;
   return { this, pos };
 }
@@ -893,7 +893,7 @@ cmStateSnapshot cmState::CreateFunctionCallSnapshot(
   pos->Keep = false;
   pos->ExecutionListFile = this->ExecutionListFiles.Push(
     originSnapshot.Position->ExecutionListFile, fileName);
-  pos->BuildSystemDirectory->DirectoryEnd = pos;
+  pos->BuildSystemDirectory->CurrentScope = pos;
   pos->PolicyScope = originSnapshot.Position->Policies;
   assert(originSnapshot.Position->Vars.IsValid());
   cmLinkedTree<cmDefinitions>::iterator origin = originSnapshot.Position->Vars;
@@ -912,7 +912,7 @@ cmStateSnapshot cmState::CreateMacroCallSnapshot(
   pos->ExecutionListFile = this->ExecutionListFiles.Push(
     originSnapshot.Position->ExecutionListFile, fileName);
   assert(originSnapshot.Position->Vars.IsValid());
-  pos->BuildSystemDirectory->DirectoryEnd = pos;
+  pos->BuildSystemDirectory->CurrentScope = pos;
   pos->PolicyScope = originSnapshot.Position->Policies;
   return { this, pos };
 }
@@ -927,7 +927,7 @@ cmStateSnapshot cmState::CreateIncludeFileSnapshot(
   pos->ExecutionListFile = this->ExecutionListFiles.Push(
     originSnapshot.Position->ExecutionListFile, fileName);
   assert(originSnapshot.Position->Vars.IsValid());
-  pos->BuildSystemDirectory->DirectoryEnd = pos;
+  pos->BuildSystemDirectory->CurrentScope = pos;
   pos->PolicyScope = originSnapshot.Position->Policies;
   return { this, pos };
 }
@@ -940,6 +940,7 @@ cmStateSnapshot cmState::CreateVariableScopeSnapshot(
   pos->ScopeParent = originSnapshot.Position;
   pos->SnapshotType = cmStateEnums::VariableScopeType;
   pos->Keep = false;
+  pos->BuildSystemDirectory->CurrentScope = pos;
   pos->PolicyScope = originSnapshot.Position->Policies;
   assert(originSnapshot.Position->Vars.IsValid());
 
@@ -959,7 +960,7 @@ cmStateSnapshot cmState::CreateInlineListFileSnapshot(
   pos->Keep = true;
   pos->ExecutionListFile = this->ExecutionListFiles.Push(
     originSnapshot.Position->ExecutionListFile, fileName);
-  pos->BuildSystemDirectory->DirectoryEnd = pos;
+  pos->BuildSystemDirectory->CurrentScope = pos;
   pos->PolicyScope = originSnapshot.Position->Policies;
   return { this, pos };
 }
@@ -971,7 +972,7 @@ cmStateSnapshot cmState::CreatePolicyScopeSnapshot(
     this->SnapshotData.Push(originSnapshot.Position, *originSnapshot.Position);
   pos->SnapshotType = cmStateEnums::PolicyScopeType;
   pos->Keep = false;
-  pos->BuildSystemDirectory->DirectoryEnd = pos;
+  pos->BuildSystemDirectory->CurrentScope = pos;
   pos->PolicyScope = originSnapshot.Position->Policies;
   return { this, pos };
 }
@@ -991,7 +992,7 @@ cmStateSnapshot cmState::Pop(cmStateSnapshot const& originSnapshot)
     prevPos->BuildSystemDirectory->LinkOptions.size();
   prevPos->LinkDirectoriesPosition =
     prevPos->BuildSystemDirectory->LinkDirectories.size();
-  prevPos->BuildSystemDirectory->DirectoryEnd = prevPos;
+  prevPos->BuildSystemDirectory->CurrentScope = prevPos;
 
   if (!pos->Keep && this->SnapshotData.IsLast(pos)) {
     if (pos->Vars != prevPos->Vars) {
