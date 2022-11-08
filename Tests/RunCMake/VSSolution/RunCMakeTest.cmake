@@ -15,4 +15,7 @@ run_cmake(AddPackageToDefault)
 
 if(NOT NO_USE_FOLDERS)
   run_cmake(StartupProjectUseFolders)
+  run_cmake(CMP0143-WARN)
+  run_cmake_with_options(CMP0143-OLD "-DCMAKE_POLICY_DEFAULT_CMP0143=OLD")
+  run_cmake_with_options(CMP0143-NEW "-DCMAKE_POLICY_DEFAULT_CMP0143=NEW")
 endif()
