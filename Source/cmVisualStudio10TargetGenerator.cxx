@@ -2999,7 +2999,7 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions(
         }
         e1.WritePlatformConfigTag("TargetExt", cond, ext);
 
-        this->OutputLinkIncremental(e1, config);
+        this->OutputLinkIncremental(e1, config, p);
       }
 
       if (ttype <= cmStateEnums::UTILITY) {
@@ -3040,8 +3040,10 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions(
 }
 
 void cmVisualStudio10TargetGenerator::OutputLinkIncremental(
-  Elem& e1, std::string const& configName)
+  Elem& e1, std::string const& configName, std::string const& platName)
 {
+  bool keepFlags = this->BuildAsX && platName == this->Platform;
+
   if (!this->MSTools) {
     return;
   }
@@ -3055,19 +3057,23 @@ void cmVisualStudio10TargetGenerator::OutputLinkIncremental(
     return;
   }
   Options& linkOptions = *(this->LinkOptions[configName]);
-  const std::string cond = this->CalcCondition(configName);
+  const std::string cond = this->CalcCondition(configName, platName);
 
   if (this->IPOEnabledConfigurations.count(configName) == 0) {
     const char* incremental = linkOptions.GetFlag("LinkIncremental");
     e1.WritePlatformConfigTag("LinkIncremental", cond,
                               (incremental ? incremental : "true"));
   }
-  linkOptions.RemoveFlag("LinkIncremental");
+  if (!keepFlags) {
+    linkOptions.RemoveFlag("LinkIncremental");
+  }
 
   const char* manifest = linkOptions.GetFlag("GenerateManifest");
   e1.WritePlatformConfigTag("GenerateManifest", cond,
                             (manifest ? manifest : "true"));
-  linkOptions.RemoveFlag("GenerateManifest");
+  if (!keepFlags) {
+    linkOptions.RemoveFlag("GenerateManifest");
+  }
 
   // Some link options belong here.  Use them now and remove them so that
   // WriteLinkOptions does not use them.
@@ -3076,7 +3082,9 @@ void cmVisualStudio10TargetGenerator::OutputLinkIncremental(
   for (const std::string& flag : flags) {
     if (const char* value = linkOptions.GetFlag(flag)) {
       e1.WritePlatformConfigTag(flag, cond, value);
-      linkOptions.RemoveFlag(flag);
+      if (!keepFlags) {
+        linkOptions.RemoveFlag(flag);
+      }
     }
   }
 }
