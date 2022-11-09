@@ -254,12 +254,17 @@ target_link_libraries(
   CMakeGUIMainLib
   PUBLIC
     CMakeGUILib
-    CMakeGUIQRCLib
-    $<TARGET_NAME_IF_EXISTS:CMakeVersion>
   )
 
 add_executable(cmake-gui WIN32 MACOSX_BUNDLE CMakeGUIExec.cxx)
-target_link_libraries(cmake-gui CMakeGUIMainLib ManifestLib Qt${INSTALLED_QT_VERSION}::Core)
+target_link_libraries(cmake-gui
+  PRIVATE
+    CMakeGUIMainLib
+    CMakeGUIQRCLib
+    $<TARGET_NAME_IF_EXISTS:CMakeVersion>
+    ManifestLib
+    Qt${INSTALLED_QT_VERSION}::Core
+  )
 
 if(WIN32)
   target_sources(CMakeGUIMainLib INTERFACE CMakeSetup.rc)
