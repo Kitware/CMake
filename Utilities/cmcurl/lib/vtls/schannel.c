@@ -220,6 +220,7 @@ set_ssl_version_min_max(DWORD *enabled_protocols, struct Curl_easy *data,
   case CURL_SSLVERSION_MAX_NONE:
   case CURL_SSLVERSION_MAX_DEFAULT:
 
+#if 0 /* Disabled in CMake due to issue 24147 (curl issue 9431) */
     /* Windows Server 2022 and newer (including Windows 11) support TLS 1.3
        built-in. Previous builds of Windows 10 had broken TLS 1.3
        implementations that could be enabled via registry.
@@ -229,6 +230,7 @@ set_ssl_version_min_max(DWORD *enabled_protocols, struct Curl_easy *data,
       ssl_version_max = CURL_SSLVERSION_MAX_TLSv1_3;
     }
     else /* Windows 10 and older */
+#endif
       ssl_version_max = CURL_SSLVERSION_MAX_TLSv1_2;
 
     break;
@@ -247,6 +249,7 @@ set_ssl_version_min_max(DWORD *enabled_protocols, struct Curl_easy *data,
       break;
     case CURL_SSLVERSION_TLSv1_3:
 
+#if 0 /* Disabled in CMake due to issue 24147 (curl issue 9431) */
       /* Windows Server 2022 and newer */
       if(curlx_verify_windows_version(10, 0, 20348, PLATFORM_WINNT,
                                       VERSION_GREATER_THAN_EQUAL)) {
@@ -257,6 +260,10 @@ set_ssl_version_min_max(DWORD *enabled_protocols, struct Curl_easy *data,
         failf(data, "schannel: TLS 1.3 not supported on Windows prior to 11");
         return CURLE_SSL_CONNECT_ERROR;
       }
+#else
+      failf(data, "schannel: TLS 1.3 is not yet supported");
+      return CURLE_SSL_CONNECT_ERROR;
+#endif
     }
   }
   return CURLE_OK;
