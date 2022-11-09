@@ -2107,6 +2107,14 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
   // Verify MD5 sum if requested:
   //
   if (hash) {
+    if (res != CURLE_OK) {
+      status.SetError(cmStrCat(
+        "DOWNLOAD cannot compute hash on failed download\n"
+        "  status: [",
+        static_cast<int>(res), ";\"", ::curl_easy_strerror(res), "\"]"));
+      return false;
+    }
+
     std::string actualHash = hash->HashFile(file);
     if (actualHash.empty()) {
       status.SetError("DOWNLOAD cannot compute hash on downloaded file");
@@ -2130,11 +2138,7 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
                                expectedHash,
                                "]\n"
                                "      actual hash: [",
-                               actualHash,
-                               "]\n"
-                               "           status: [",
-                               static_cast<int>(res), ";\"",
-                               ::curl_easy_strerror(res), "\"]\n"));
+                               actualHash, "]\n"));
       return false;
     }
   }
