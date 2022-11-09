@@ -5,10 +5,12 @@
     "projectName": "External",
     "type": "EXECUTABLE",
     "isGeneratorProvided": null,
+    "fileSets": null,
     "sources": [
         {
             "path": "^.*/Tests/RunCMake/FileAPIExternalSource/empty\\.c$",
             "isGenerated": null,
+            "fileSetName": null,
             "sourceGroupName": "Source Files",
             "compileGroupLanguage": "C",
             "backtrace": [
@@ -29,6 +31,7 @@
         {
             "path": "^.*/Tests/RunCMake/FileAPI/FileAPIExternalBuild/generated\\.cxx$",
             "isGenerated": true,
+            "fileSetName": null,
             "sourceGroupName": "Generated Source Files",
             "compileGroupLanguage": "CXX",
             "backtrace": [

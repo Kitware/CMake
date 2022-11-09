@@ -425,7 +425,7 @@ Version 1 does not exist to avoid confusion with that from
 
   {
     "kind": "codemodel",
-    "version": { "major": 2, "minor": 4 },
+    "version": { "major": 2, "minor": 5 },
     "paths": {
       "source": "/path/to/top-level-source-dir",
       "build": "/path/to/top-level-build-dir"
@@ -1071,6 +1071,27 @@ with members:
     available.  The value is an unsigned integer 0-based index into
     the ``backtraceGraph`` member's ``nodes`` array.
 
+``fileSets``
+  A JSON array of entries corresponding to the target's file sets. Each entry
+  is a JSON object with members:
+
+  ``name``
+    A string specifying the name of the file set.
+
+  ``type``
+    A string specifying the type of the file set.  See
+    :command:`target_sources` supported file set types.
+
+  ``visibility``
+    A string specifying the visibility of the file set; one of ``PUBLIC``,
+    ``PRIVATE``, or ``INTERFACE``.
+
+  ``baseDirectories``
+    A JSON array of strings specifying the base directories containing sources
+    in the file set.
+
+  This field was added in codemodel version 2.5.
+
 ``sources``
   A JSON array of entries corresponding to the target's source files.
   Each entry is a JSON object with members:
@@ -1095,6 +1116,13 @@ with members:
   ``isGenerated``
     Optional member that is present with boolean value ``true`` if
     the source is :prop_sf:`GENERATED`.
+
+  ``fileSetIndex``
+    Optional member that is present when the source is part of a file set.
+    The value is an unsigned integer 0-based index into the ``fileSets``
+    array.
+
+    This field was added in codemodel version 2.5.
 
   ``backtrace``
     Optional member that is present when a CMake language backtrace to

@@ -5,10 +5,12 @@
     "projectName": "Object",
     "type": "EXECUTABLE",
     "isGeneratorProvided": null,
+    "fileSets": null,
     "sources": [
         {
             "path": "^empty\\.cxx$",
             "isGenerated": null,
+            "fileSetName": null,
             "sourceGroupName": "Source Files",
             "compileGroupLanguage": "CXX",
             "backtrace": [
@@ -29,6 +31,7 @@
         {
             "path": "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/(object|build/cxx_object_lib\\.build)/.*/empty(\\.cxx)?\\.o(bj)?$",
             "isGenerated": true,
+            "fileSetName": null,
             "sourceGroupName": "Object Libraries",
             "compileGroupLanguage": null,
             "backtrace": [

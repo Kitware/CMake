@@ -17,6 +17,7 @@
 
 #include <cm/string_view>
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include <cm3p/json/value.h>
 
@@ -44,6 +45,7 @@
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmSourceFile.h"
 #include "cmSourceGroup.h"
 #include "cmState.h"
@@ -434,6 +436,8 @@ class Target
   std::unordered_map<CompileData, Json::ArrayIndex> CompileGroupMap;
   std::vector<CompileGroup> CompileGroups;
 
+  using FileSetDatabase = std::map<std::string, Json::ArrayIndex>;
+
   template <typename T>
   JBT<T> ToJBT(BT<T> const& bt)
   {
@@ -466,9 +470,12 @@ class Target
   Json::Value DumpPrecompileHeader(JBT<std::string> const& header);
   Json::Value DumpLanguageStandard(JBTs<std::string> const& standard);
   Json::Value DumpDefine(JBT<std::string> const& def);
-  Json::Value DumpSources();
+  std::pair<Json::Value, FileSetDatabase> DumpFileSets();
+  Json::Value DumpFileSet(cmFileSet const* fs,
+                          std::vector<std::string> const& directories);
+  Json::Value DumpSources(FileSetDatabase const& fsdb);
   Json::Value DumpSource(cmGeneratorTarget::SourceAndKind const& sk,
-                         Json::ArrayIndex si);
+                         Json::ArrayIndex si, FileSetDatabase const& fsdb);
   Json::Value DumpSourceGroups();
   Json::Value DumpSourceGroup(SourceGroup& sg);
   Json::Value DumpCompileGroups();
@@ -1216,7 +1223,13 @@ Json::Value Target::Dump()
   {
     this->ProcessLanguages();
 
-    target["sources"] = this->DumpSources();
+    auto fileSetInfo = this->DumpFileSets();
+
+    if (!fileSetInfo.first.isNull()) {
+      target["fileSets"] = fileSetInfo.first;
+    }
+
+    target["sources"] = this->DumpSources(fileSetInfo.second);
 
     Json::Value folder = this->DumpFolder();
     if (!folder.isNull()) {
@@ -1527,28 +1540,112 @@ Json::Value Target::DumpPaths()
   return paths;
 }
 
-Json::Value Target::DumpSources()
+std::pair<Json::Value, Target::FileSetDatabase> Target::DumpFileSets()
+{
+  Json::Value fsJson = Json::nullValue;
+  FileSetDatabase fsdb;
+
+  // Build the fileset database.
+  auto const* tgt = this->GT->Target;
+  auto const& fs_names = tgt->GetAllFileSetNames();
+
+  if (!fs_names.empty()) {
+    fsJson = Json::arrayValue;
+    size_t fsIndex = 0;
+    for (auto const& fs_name : fs_names) {
+      auto const* fs = tgt->GetFileSet(fs_name);
+      if (!fs) {
+        this->GT->Makefile->IssueMessage(
+          MessageType::INTERNAL_ERROR,
+          cmStrCat("Target \"", tgt->GetName(),
+                   "\" is tracked to have file set \"", fs_name,
+                   "\", but it was not found."));
+        continue;
+      }
+
+      auto fileEntries = fs->CompileFileEntries();
+      auto directoryEntries = fs->CompileDirectoryEntries();
+
+      auto directories = fs->EvaluateDirectoryEntries(
+        directoryEntries, this->GT->LocalGenerator, this->Config, this->GT);
+
+      fsJson.append(this->DumpFileSet(fs, directories));
+
+      std::map<std::string, std::vector<std::string>> files_per_dirs;
+      for (auto const& entry : fileEntries) {
+        fs->EvaluateFileEntry(directories, files_per_dirs, entry,
+                              this->GT->LocalGenerator, this->Config,
+                              this->GT);
+      }
+
+      for (auto const& files_per_dir : files_per_dirs) {
+        auto const& dir = files_per_dir.first;
+        for (auto const& file : files_per_dir.second) {
+          std::string sf_path;
+          if (dir.empty()) {
+            sf_path = file;
+          } else {
+            sf_path = cmStrCat(dir, '/', file);
+          }
+          fsdb[sf_path] = static_cast<Json::ArrayIndex>(fsIndex);
+        }
+      }
+
+      ++fsIndex;
+    }
+  }
+
+  return std::make_pair(fsJson, fsdb);
+}
+
+Json::Value Target::DumpFileSet(cmFileSet const* fs,
+                                std::vector<std::string> const& directories)
+{
+  Json::Value fileSet = Json::objectValue;
+
+  fileSet["name"] = fs->GetName();
+  fileSet["type"] = fs->GetType();
+  fileSet["visibility"] =
+    std::string(cmFileSetVisibilityToName(fs->GetVisibility()));
+
+  Json::Value baseDirs = Json::arrayValue;
+  for (auto const& directory : directories) {
+    baseDirs.append(directory);
+  }
+  fileSet["baseDirectories"] = baseDirs;
+
+  return fileSet;
+}
+
+Json::Value Target::DumpSources(FileSetDatabase const& fsdb)
 {
   Json::Value sources = Json::arrayValue;
   cmGeneratorTarget::KindedSources const& kinded =
     this->GT->GetKindedSources(this->Config);
   for (cmGeneratorTarget::SourceAndKind const& sk : kinded.Sources) {
-    sources.append(this->DumpSource(sk, sources.size()));
+    sources.append(this->DumpSource(sk, sources.size(), fsdb));
   }
   return sources;
 }
 
 Json::Value Target::DumpSource(cmGeneratorTarget::SourceAndKind const& sk,
-                               Json::ArrayIndex si)
+                               Json::ArrayIndex si,
+                               FileSetDatabase const& fsdb)
 {
   Json::Value source = Json::objectValue;
 
-  std::string const path = sk.Source.Value->ResolveFullPath();
+  cmSourceFile* sf = sk.Source.Value;
+  std::string const path = sf->ResolveFullPath();
   source["path"] = RelativeIfUnder(this->TopSource, path);
   if (sk.Source.Value->GetIsGenerated()) {
     source["isGenerated"] = true;
   }
   this->AddBacktrace(source, sk.Source.Backtrace);
+
+  auto fsit = fsdb.find(path);
+  if (fsit != fsdb.end()) {
+    source["fileSetIndex"] = fsit->second;
+  }
 
   if (cmSourceGroup* sg =
         this->GT->Makefile->FindSourceGroup(path, this->SourceGroupsLocal)) {
