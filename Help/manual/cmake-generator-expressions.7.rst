@@ -142,9 +142,9 @@ to generate debug messages is to add a custom target:
 
   add_custom_target(genexdebug COMMAND ${CMAKE_COMMAND} -E echo "$<...>")
 
-After running ``cmake``, you can then build the ``genexdebug`` target to print
+After running :program:`cmake`, you can then build the ``genexdebug`` target to print
 the result of the ``$<...>`` expression (i.e. run the command
-``cmake --build ... --target genexdebug``).
+:option:`cmake --build ... --target genexdebug <cmake--build --target>`).
 
 Another way is to write debug messages to a file with :command:`file(GENERATE)`:
 

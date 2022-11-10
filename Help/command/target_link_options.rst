@@ -42,13 +42,23 @@ The following arguments specify link options.  Repeated calls for the same
 .. note::
   :ref:`IMPORTED targets <Imported Targets>` only support ``INTERFACE`` items.
 
-Arguments to ``target_link_options`` may use "generator expressions"
-with the syntax ``$<...>``. See the :manual:`cmake-generator-expressions(7)`
-manual for available expressions.  See the :manual:`cmake-buildsystem(7)`
-manual for more on defining buildsystem properties.
+.. |command_name| replace:: ``target_link_options``
+.. include:: GENEX_NOTE.txt
 
 .. include:: DEVICE_LINK_OPTIONS.txt
 
 .. include:: OPTIONS_SHELL.txt
 
 .. include:: LINK_OPTIONS_LINKER.txt
+
+See Also
+^^^^^^^^
+
+* :command:`target_compile_definitions`
+* :command:`target_compile_features`
+* :command:`target_compile_options`
+* :command:`target_include_directories`
+* :command:`target_link_libraries`
+* :command:`target_link_directories`
+* :command:`target_precompile_headers`
+* :command:`target_sources`

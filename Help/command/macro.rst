@@ -149,3 +149,9 @@ existing variable instead of the arguments. For example:
 Will loop over ``a;b;c`` and not over ``x;y;z`` as one might have expected.
 If you want true CMake variables and/or better CMake scope control you
 should look at the function command.
+
+See Also
+^^^^^^^^
+
+* :command:`cmake_parse_arguments`
+* :command:`endmacro`

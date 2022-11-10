@@ -22,6 +22,10 @@ query the target instead.  This command can get properties for any
 target so far created.  The targets do not need to be in the current
 ``CMakeLists.txt`` file.
 
-See also the more general :command:`get_property` command.
+See Also
+^^^^^^^^
 
-See :ref:`Target Properties` for the list of properties known to CMake.
+* :command:`define_property`
+* the more general :command:`get_property` command
+* :command:`set_target_properties`
+* :ref:`Target Properties` for the list of properties known to CMake

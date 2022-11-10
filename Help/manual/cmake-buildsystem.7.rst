@@ -119,7 +119,7 @@ Object Libraries
 The ``OBJECT`` library type defines a non-archival collection of object files
 resulting from compiling the given source files.  The object files collection
 may be used as source inputs to other targets by using the syntax
-``$<TARGET_OBJECTS:name>``.  This is a
+:genex:`$<TARGET_OBJECTS:name>`.  This is a
 :manual:`generator expression <cmake-generator-expressions(7)>` that can be
 used to supply the ``OBJECT`` library content to other targets:
 
@@ -854,7 +854,7 @@ the generator used.  For example:
 
 In the presence of :prop_tgt:`IMPORTED` targets, the content of
 :prop_tgt:`MAP_IMPORTED_CONFIG_DEBUG <MAP_IMPORTED_CONFIG_<CONFIG>>` is also
-accounted for by the above ``$<CONFIG:Debug>`` expression.
+accounted for by the above :genex:`$<CONFIG:Debug>` expression.
 
 
 Case Sensitivity
@@ -862,7 +862,7 @@ Case Sensitivity
 
 :variable:`CMAKE_BUILD_TYPE` and :variable:`CMAKE_CONFIGURATION_TYPES` are
 just like other variables in that any string comparisons made with their
-values will be case-sensitive.  The ``$<CONFIG>`` generator expression also
+values will be case-sensitive.  The :genex:`$<CONFIG>` generator expression also
 preserves the casing of the configuration as set by the user or CMake defaults.
 For example:
 
@@ -887,7 +887,7 @@ For example:
 
 In contrast, CMake treats the configuration type case-insensitively when
 using it internally in places that modify behavior based on the configuration.
-For example, the ``$<CONFIG:Debug>`` generator expression will evaluate to 1
+For example, the :genex:`$<CONFIG:Debug>` generator expression will evaluate to 1
 for a configuration of not only ``Debug``, but also ``DEBUG``, ``debug`` or
 even ``DeBuG``.  Therefore, you can specify configuration types in
 :variable:`CMAKE_BUILD_TYPE` and :variable:`CMAKE_CONFIGURATION_TYPES` with

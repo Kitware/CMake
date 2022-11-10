@@ -140,7 +140,7 @@ Properties
 
 * The :prop_tgt:`INSTALL_NAME_DIR` target property now supports
   :manual:`generator expressions <cmake-generator-expressions(7)>`.
-  In particular, the ``$<INSTALL_PREFIX>`` generator expression can
+  In particular, the :genex:`$<INSTALL_PREFIX>` generator expression can
   be used to set the directory relative to the install-time prefix.
 
 * Target properties :prop_tgt:`MACHO_COMPATIBILITY_VERSION` and

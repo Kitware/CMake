@@ -39,20 +39,20 @@ Synopsis
 Description
 ===========
 
-The **cmake** executable is the command-line interface of the cross-platform
+The :program:`cmake` executable is the command-line interface of the cross-platform
 buildsystem generator CMake.  The above `Synopsis`_ lists various actions
 the tool can perform as described in sections below.
 
 To build a software project with CMake, `Generate a Project Buildsystem`_.
-Optionally use **cmake** to `Build a Project`_, `Install a Project`_ or just
-run the corresponding build tool (e.g. ``make``) directly.  **cmake** can also
+Optionally use :program:`cmake` to `Build a Project`_, `Install a Project`_ or just
+run the corresponding build tool (e.g. ``make``) directly.  :program:`cmake` can also
 be used to `View Help`_.
 
 The other actions are meant for use by software developers writing
 scripts in the :manual:`CMake language <cmake-language(7)>` to support
 their builds.
 
-For graphical user interfaces that may be used in place of **cmake**,
+For graphical user interfaces that may be used in place of :program:`cmake`,
 see :manual:`ccmake <ccmake(1)>` and :manual:`cmake-gui <cmake-gui(1)>`.
 For command-line interfaces to the CMake testing and packaging facilities,
 see :manual:`ctest <ctest(1)>` and :manual:`cpack <cpack(1)>`.
@@ -193,7 +193,7 @@ build tool to build the project.  For example, after using the
     $ make
     $ make install
 
-Alternatively, one may use **cmake** to `Build a Project`_ by
+Alternatively, one may use :program:`cmake` to `Build a Project`_ by
 automatically choosing and invoking the appropriate native build tool.
 
 .. _`CMake Options`:
@@ -362,9 +362,8 @@ Options
      separated by a newline ( ``\n`` ). It is guaranteed that no
      newline characters will be present inside a JSON document.
 
-     JSON trace format:
-
      .. code-block:: json
+       :caption: JSON trace format
 
        {
          "file": "/full/path/to/the/CMake/file.txt",
@@ -417,9 +416,8 @@ Options
      Additionally, the first JSON document outputted contains the
      ``version`` key for the current major and minor version of the
 
-     JSON trace format:
-
      .. code-block:: json
+       :caption: JSON version format
 
        {
          "version": {
@@ -939,7 +937,7 @@ Available commands are:
     The ``NAME=VALUE`` and ``--unset=NAME`` options are equivalent to
     ``--modify NAME=set:VALUE`` and ``--modify NAME=unset:``, respectively.
     Note that ``--modify NAME=reset:`` resets ``NAME`` to the value it had
-    when ``cmake`` launched (or unsets it), not to the most recent
+    when :program:`cmake` launched (or unsets it), not to the most recent
     ``NAME=VALUE`` option.
 
   .. option:: --
@@ -1319,7 +1317,7 @@ To view the presets available for a project, use
 Return Value (Exit Code)
 ========================
 
-Upon regular termination, the ``cmake`` executable returns the exit code ``0``.
+Upon regular termination, the :program:`cmake` executable returns the exit code ``0``.
 
 If termination is caused by the command :command:`message(FATAL_ERROR)`,
 or another error condition, then a non-zero exit code is returned.

@@ -3,7 +3,7 @@ ctest_submit
 
 Perform the :ref:`CTest Submit Step` as a :ref:`Dashboard Client`.
 
-::
+.. code-block:: cmake
 
   ctest_submit([PARTS <part>...] [FILES <file>...]
                [SUBMIT_URL <url>]
@@ -96,7 +96,7 @@ Submit to CDash Upload API
 
 .. versionadded:: 3.2
 
-::
+.. code-block:: cmake
 
   ctest_submit(CDASH_UPLOAD <file> [CDASH_UPLOAD_TYPE <type>]
                [SUBMIT_URL <url>]

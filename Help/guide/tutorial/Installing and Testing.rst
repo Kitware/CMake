@@ -195,7 +195,7 @@ Build and Run
 -------------
 
 Navigate to the build directory and rebuild the application. Then, run the
-``ctest`` executable: :option:`ctest -N` and :option:`ctest -VV`. For
+:program:`ctest` executable: :option:`ctest -N` and :option:`ctest -VV`. For
 multi-config generators (e.g. Visual Studio), the configuration type must be
 specified with the :option:`-C \<mode\> <ctest -C>` flag.  For example, to run tests in Debug
 mode use ``ctest -C Debug -VV`` from the build directory

@@ -27,7 +27,7 @@ If used, it must be a verbatim repeat of the argument of the opening
 See Also
 ^^^^^^^^
 
-  * :command:`break`
-  * :command:`continue`
-  * :command:`foreach`
-  * :command:`endwhile`
+* :command:`break`
+* :command:`continue`
+* :command:`foreach`
+* :command:`endwhile`

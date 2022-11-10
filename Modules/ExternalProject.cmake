@@ -525,9 +525,9 @@ External Project Definition
       option without the ``CMAKE_GENERATOR`` option.
 
     ``CMAKE_ARGS <arg>...``
-      The specified arguments are passed to the ``cmake`` command line. They
-      can be any argument the ``cmake`` command understands, not just cache
-      values defined by ``-D...`` arguments (see also
+      The specified arguments are passed to the :program:`cmake` command line.
+      They can be any argument the :program:`cmake` command understands, not just
+      cache values defined by ``-D...`` arguments (see also
       :manual:`CMake Options <cmake(1)>`).
 
       .. versionadded:: 3.3
@@ -611,9 +611,9 @@ External Project Definition
       supported). If this option is not given, the default build command will
       be chosen to integrate with the main build in the most appropriate way
       (e.g. using recursive ``make`` for Makefile generators or
-      ``cmake --build`` if the project uses a CMake build). This option can be
-      specified with an empty string as the command to make the build step do
-      nothing.
+      :option:`cmake --build` if the project uses a CMake build). This option
+      can be specified with an empty string as the command to make the build
+      step do nothing.
 
     ``BUILD_IN_SOURCE <bool>``
       When this option is enabled, the build will be done directly within the

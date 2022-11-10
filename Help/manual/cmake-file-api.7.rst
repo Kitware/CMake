@@ -258,8 +258,8 @@ The members are:
 
   ``paths``
     A JSON object specifying paths to things that come with CMake.
-    It has members for ``cmake``, ``ctest``, and ``cpack`` whose values
-    are JSON strings specifying the absolute path to each tool,
+    It has members for :program:`cmake`, :program:`ctest`, and :program:`cpack`
+    whose values are JSON strings specifying the absolute path to each tool,
     represented with forward slashes.  It also has a ``root`` member for
     the absolute path to the directory containing CMake resources like the
     ``Modules/`` directory (see :variable:`CMAKE_ROOT`).

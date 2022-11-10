@@ -3,7 +3,7 @@ ctest_start
 
 Starts the testing for a given model
 
-::
+.. code-block:: cmake
 
   ctest_start(<model> [<source> [<binary>]] [GROUP <group>] [QUIET])
 

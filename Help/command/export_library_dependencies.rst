@@ -15,7 +15,7 @@ The old-style library dependencies file does not take into account
 per-configuration names of libraries or the
 :prop_tgt:`LINK_INTERFACE_LIBRARIES` target property.
 
-::
+.. code-block:: cmake
 
   export_library_dependencies(<file> [APPEND])
 

@@ -11,7 +11,7 @@ directly replaced by the ``FILES`` form of the :command:`install`
 command.  The regexp form can be expressed more clearly using the ``GLOB``
 form of the :command:`file` command.
 
-::
+.. code-block:: cmake
 
   install_files(<dir> extension file file ...)
 
@@ -23,14 +23,14 @@ removed first.  This is useful for providing lists of source files
 such as foo.cxx when you want the corresponding foo.h to be installed.
 A typical extension is ``.h``.
 
-::
+.. code-block:: cmake
 
   install_files(<dir> regexp)
 
 Any files in the current source directory that match the regular
 expression will be installed.
 
-::
+.. code-block:: cmake
 
   install_files(<dir> FILES file file ...)
 

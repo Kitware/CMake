@@ -5,7 +5,7 @@ make_directory
 
   Use the :command:`file(MAKE_DIRECTORY)` command instead.
 
-::
+.. code-block:: cmake
 
   make_directory(directory)
 

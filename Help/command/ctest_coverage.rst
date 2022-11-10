@@ -3,7 +3,7 @@ ctest_coverage
 
 Perform the :ref:`CTest Coverage Step` as a :ref:`Dashboard Client`.
 
-::
+.. code-block:: cmake
 
   ctest_coverage([BUILD <build-dir>] [APPEND]
                  [LABELS <label>...]

@@ -16,7 +16,7 @@ Synopsis
 Description
 ===========
 
-The **cmake-gui** executable is the CMake GUI.  Project configuration
+The :program:`cmake-gui` executable is the CMake GUI.  Project configuration
 settings may be specified interactively.  Brief instructions are
 provided at the bottom of the window when the program is running.
 

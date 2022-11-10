@@ -15,6 +15,10 @@ set next.  You can use any prop value pair you want and extract it
 later with the :command:`get_property` or :command:`get_target_property`
 command.
 
-See also the :command:`set_property(TARGET)` command.
+See Also
+^^^^^^^^
 
-See :ref:`Target Properties` for the list of properties known to CMake.
+* :command:`define_property`
+* :command:`get_target_property`
+* the more general :command:`set_property` command
+* :ref:`Target Properties` for the list of properties known to CMake

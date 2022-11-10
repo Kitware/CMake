@@ -86,8 +86,8 @@ Commands
   in their ``OUTPUT`` and ``BYPRODUCTS`` options.
 
   Their ``COMMAND``, ``WORKING_DIRECTORY``, and ``DEPENDS`` options gained
-  support for new generator expressions ``$<COMMAND_CONFIG:...>`` and
-  ``$<OUTPUT_CONFIG:...>`` that control cross-config handling when using
+  support for new generator expressions :genex:`$<COMMAND_CONFIG:...>` and
+  :genex:`$<OUTPUT_CONFIG:...>` that control cross-config handling when using
   the :generator:`Ninja Multi-Config` generator.
 
 * The :command:`add_custom_command` command gained ``DEPFILE`` support on

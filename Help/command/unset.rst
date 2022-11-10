@@ -39,3 +39,8 @@ Subsequent calls of ``$ENV{<variable>}`` will return the empty string.
 This command affects only the current CMake process, not the process
 from which CMake was called, nor the system environment at large,
 nor the environment of subsequent build or test processes.
+
+See Also
+^^^^^^^^
+
+* :command:`set`

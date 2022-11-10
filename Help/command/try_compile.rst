@@ -105,9 +105,9 @@ contain something like the following:
 CMake automatically generates, for each ``try_compile`` operation, a
 unique directory under ``${CMAKE_BINARY_DIR}/CMakeFiles/CMakeScratch``
 with an unspecified name.  These directories are cleaned automatically unless
-:option:`--debug-trycompile <cmake --debug-trycompile>` is passed to ``cmake``.
+:option:`--debug-trycompile <cmake --debug-trycompile>` is passed to :program:`cmake`.
 Such directories from previous runs are also unconditionally cleaned at the
-beginning of any ``cmake`` execution.
+beginning of any :program:`cmake` execution.
 
 This command also supports an alternate signature
 which was present in older versions of CMake:
@@ -130,7 +130,7 @@ which was present in older versions of CMake:
 In this version, ``try_compile`` will use ``<bindir>/CMakeFiles/CMakeTmp`` for
 its operation, and all such files will be cleaned automatically.
 For debugging, :option:`--debug-trycompile <cmake --debug-trycompile>` can be
-passed to ``cmake`` to avoid this clean.  However, multiple sequential
+passed to :program:`cmake` to avoid this clean.  However, multiple sequential
 ``try_compile`` operations, if given the same ``<bindir>``, will reuse this
 single output directory, such that you can only debug one such ``try_compile``
 call at a time.  Use of the newer signature is recommended to simplify
@@ -327,3 +327,8 @@ a build configuration.
   If :policy:`CMP0141` is set to ``NEW``, one can use
   :variable:`CMAKE_MSVC_DEBUG_INFORMATION_FORMAT` to specify the MSVC debug
   information format.
+
+See Also
+^^^^^^^^
+
+* :command:`try_run`

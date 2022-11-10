@@ -21,7 +21,10 @@ Function-style definitions are not supported. CMake will automatically
 escape the value correctly for the native build system (note that CMake
 language syntax may require escapes to specify some values).
 
-Arguments to ``add_compile_definitions`` may use "generator expressions" with
-the syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)`
-manual for available expressions.  See the :manual:`cmake-buildsystem(7)`
-manual for more on defining buildsystem properties.
+.. |command_name| replace:: ``add_compile_definitions``
+.. include:: GENEX_NOTE.txt
+
+See Also
+^^^^^^^^
+
+* The command :command:`target_compile_definitions` adds target-specific definitions.

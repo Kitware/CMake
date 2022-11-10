@@ -428,6 +428,6 @@ condition syntax accepts ``<variable|string>``.
 See also
 ^^^^^^^^
 
-  * :command:`else`
-  * :command:`elseif`
-  * :command:`endif`
+* :command:`else`
+* :command:`elseif`
+* :command:`endif`

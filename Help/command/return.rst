@@ -88,4 +88,5 @@ command.  All arguments are ignored unless that policy is set to ``NEW``.
 See Also
 ^^^^^^^^
 
-  * :command:`block`
+* :command:`block`
+* :command:`function`

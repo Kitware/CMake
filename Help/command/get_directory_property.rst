@@ -33,4 +33,9 @@ the search will chain to a parent scope as described for the
 Get a variable definition from a directory.  This form is useful to
 get a variable definition from another directory.
 
-See also the more general :command:`get_property` command.
+
+See Also
+^^^^^^^^
+
+* :command:`define_property`
+* the more general :command:`get_property` command

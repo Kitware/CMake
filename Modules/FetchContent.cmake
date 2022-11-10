@@ -923,9 +923,8 @@ it depends directly on projects ``projB`` and ``projC``.  Both ``projB`` and
 that all five projects are available on a company git server.  The
 ``CMakeLists.txt`` of each project might have sections like the following:
 
-*projA*:
-
 .. code-block:: cmake
+  :caption: *projA*
 
   include(FetchContent)
   FetchContent_Declare(
@@ -952,9 +951,9 @@ that all five projects are available on a company git server.  The
   # Order is important, see notes in the discussion further below
   FetchContent_MakeAvailable(projD projB projC)
 
-*projB*:
 
 .. code-block:: cmake
+  :caption: *projB*
 
   include(FetchContent)
   FetchContent_Declare(
@@ -970,9 +969,9 @@ that all five projects are available on a company git server.  The
 
   FetchContent_MakeAvailable(projD projE)
 
-*projC*:
 
 .. code-block:: cmake
+  :caption: *projC*
 
   include(FetchContent)
   FetchContent_Declare(
@@ -1047,7 +1046,7 @@ directory.  The :variable:`CMAKE_TOOLCHAIN_FILE` variable is not used until
 the :command:`project` command is reached, at which point CMake looks for the
 named toolchain file relative to the build directory.  Because the tarball has
 already been downloaded and unpacked by then, the toolchain file will be in
-place, even the very first time that ``cmake`` is run in the build directory.
+place, even the very first time that :program:`cmake` is run in the build directory.
 
 Populating Content In CMake Script Mode
 """""""""""""""""""""""""""""""""""""""
@@ -1058,9 +1057,8 @@ firmware tarball using CMake's :manual:`script mode <cmake(1)>`.  The call to
 unpacked firmware will be placed in a ``firmware`` directory below the
 current working directory.
 
-*getFirmware.cmake*:
-
 .. code-block:: cmake
+  :caption: :file:`getFirmware.cmake`
 
   # NOTE: Intended to be run in script mode with cmake -P
   include(FetchContent)

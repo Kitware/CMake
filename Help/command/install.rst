@@ -379,7 +379,7 @@ top level:
   :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` target property of the
   ``<targets>`` when exported by the `install(EXPORT)`_ command. If a
   relative path is specified, it is treated as relative to the
-  ``$<INSTALL_PREFIX>``.
+  :genex:`$<INSTALL_PREFIX>`.
 
 ``RUNTIME_DEPENDENCY_SET``
   .. versionadded:: 3.21

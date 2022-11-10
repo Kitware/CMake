@@ -32,7 +32,7 @@ Synopsis
 Description
 ===========
 
-The **ctest** executable is the CMake test driver program.
+The :program:`ctest` executable is the CMake test driver program.
 CMake-generated build trees created for projects that use the
 :command:`enable_testing` and :command:`add_test` commands have testing support.
 This program will run the tests and report results.
@@ -69,7 +69,7 @@ Run Tests
 
  Enable short progress output from tests.
 
- When the output of **ctest** is being sent directly to a terminal, the
+ When the output of :program:`ctest` is being sent directly to a terminal, the
  progress through the set of tests is reported by updating the same line
  rather than printing start and end messages for each test on new lines.
  This can significantly reduce the verbosity of the test output.
@@ -137,7 +137,7 @@ Run Tests
  :ref:`resource specification file <ctest-resource-specification-file>`
  specified in ``<file>``.
 
- When ``ctest`` is run as a `Dashboard Client`_ this sets the
+ When :program:`ctest` is run as a `Dashboard Client`_ this sets the
  ``ResourceSpecFile`` option of the `CTest Test Step`_.
 
 .. option:: --test-load <level>
@@ -146,7 +146,7 @@ Run Tests
  not to start tests when they may cause the CPU load to pass above a given
  threshold.
 
- When ``ctest`` is run as a `Dashboard Client`_ this sets the
+ When :program:`ctest` is run as a `Dashboard Client`_ this sets the
  ``TestLoad`` option of the `CTest Test Step`_.
 
 .. option:: -Q, --quiet
@@ -473,7 +473,7 @@ with the following labels:
 * *test4* has label *wednesday*
 * *test5* has labels *friday* and *test*
 
-Running ``ctest`` with ``-L tuesday -L test`` will select *test2*, which has
+Running :program:`ctest` with ``-L tuesday -L test`` will select *test2*, which has
 both labels. Running CTest with ``-L test`` will select *test2* and
 *test5*, because both of them have a label that matches that regular
 expression.
@@ -832,7 +832,7 @@ Dashboard Client via CTest Command-Line
 ---------------------------------------
 
 CTest can perform testing on an already-generated build tree.
-Run the ``ctest`` command with the current working directory set
+Run the :program:`ctest` command with the current working directory set
 to the build tree and use one of these signatures::
 
   ctest -D <mode>[<step>]
@@ -865,7 +865,7 @@ Dashboard Client via CTest Script
 
 CTest can perform testing driven by a :manual:`cmake-language(7)`
 script that creates and maintains the source and build tree as
-well as performing the testing steps.  Run the ``ctest`` command
+well as performing the testing steps.  Run the :program:`ctest` command
 with the current working directory set outside of any build tree
 and use one of these signatures::
 
@@ -1142,7 +1142,7 @@ Configuration settings include:
   When the build system to be launched allows build-time selection
   of the configuration (e.g. ``Debug``, ``Release``), this specifies
   the default configuration to be built when no :option:`-C <ctest -C>`
-  option is given to the ``ctest`` command.  The value will be substituted
+  option is given to the :program:`ctest` command.  The value will be substituted
   into the value of ``MakeCommand`` to replace the literal string
   ``${CTEST_CONFIGURATION_TYPE}`` if it appears.
 
@@ -1624,7 +1624,7 @@ resource allocation feature. Tests should check the
 resource allocation is activated. This variable will always (and only) be
 defined if resource allocation is activated. If resource allocation is not
 activated, then the ``CTEST_RESOURCE_GROUP_COUNT`` variable will not exist,
-even if it exists for the parent ``ctest`` process. If a test absolutely must
+even if it exists for the parent :program:`ctest` process. If a test absolutely must
 have resource allocation, then it can return a failing exit code or use the
 :prop_test:`SKIP_RETURN_CODE` or :prop_test:`SKIP_REGULAR_EXPRESSION`
 properties to indicate a skipped test.
