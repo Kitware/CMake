@@ -1003,7 +1003,7 @@ t:windows-borland5.8:
 t:windows-clang13.0-cl-ninja:
     extends:
         - .windows_clang_ninja
-        - .cmake_test_windows_clang
+        - .cmake_test_windows_external
         - .windows_tags_concurrent
         - .cmake_junit_artifacts
         - .run_dependent
@@ -1018,7 +1018,7 @@ t:windows-clang13.0-cl-ninja:
 t:windows-clang13.0-cl-nmake:
     extends:
         - .windows_clang_nmake
-        - .cmake_test_windows_clang
+        - .cmake_test_windows_external
         - .windows_tags_concurrent
         - .cmake_junit_artifacts
         - .run_dependent
@@ -1033,7 +1033,7 @@ t:windows-clang13.0-cl-nmake:
 t:windows-clang13.0-gnu-ninja:
     extends:
         - .windows_clang_ninja
-        - .cmake_test_windows_clang
+        - .cmake_test_windows_external
         - .windows_tags_concurrent
         - .cmake_junit_artifacts
         - .run_dependent
@@ -1048,7 +1048,7 @@ t:windows-clang13.0-gnu-ninja:
 t:windows-clang13.0-gnu-nmake:
     extends:
         - .windows_clang_nmake
-        - .cmake_test_windows_clang
+        - .cmake_test_windows_external
         - .windows_tags_concurrent
         - .cmake_junit_artifacts
         - .run_dependent

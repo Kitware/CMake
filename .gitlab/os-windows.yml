@@ -390,17 +390,6 @@
 
     interruptible: true
 
-.cmake_test_windows_clang:
-    stage: test-ext
-
-    script:
-        - . .gitlab/ci/env.ps1
-        - . .gitlab/ci/ninja-env.ps1
-        - . .gitlab/ci/clang-env.ps1
-        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake
-
-    interruptible: true
-
 .cmake_test_windows_msvc:
     stage: test-ext
 
