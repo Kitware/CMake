@@ -16,6 +16,7 @@
 #include "cmLocalGenerator.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmake.h"
 
 cmGeneratorExpression::cmGeneratorExpression(cmake& cmakeInstance,
                                              cmListFileBacktrace backtrace)
@@ -43,6 +44,11 @@ std::string cmGeneratorExpression::Evaluate(
   cmGeneratorTarget const* currentTarget, std::string const& language)
 {
   if (Find(input) != std::string::npos) {
+#ifndef CMAKE_BOOTSTRAP
+    auto profilingRAII = lg->GetCMakeInstance()->CreateProfilingEntry(
+      "genex_compile_eval", input);
+#endif
+
     cmCompiledGeneratorExpression cge(*lg->GetCMakeInstance(),
                                       cmListFileBacktrace(), std::move(input));
     return cge.Evaluate(lg, config, headTarget, dagChecker, currentTarget,
@@ -102,10 +108,15 @@ const std::string& cmCompiledGeneratorExpression::EvaluateWithContext(
 }
 
 cmCompiledGeneratorExpression::cmCompiledGeneratorExpression(
-  cmake& /*cmakeInstance*/, cmListFileBacktrace backtrace, std::string input)
+  cmake& cmakeInstance, cmListFileBacktrace backtrace, std::string input)
   : Backtrace(std::move(backtrace))
   , Input(std::move(input))
 {
+#ifndef CMAKE_BOOTSTRAP
+  auto profilingRAII =
+    cmakeInstance.CreateProfilingEntry("genex_compile", this->Input);
+#endif
+
   cmGeneratorExpressionLexer l;
   std::vector<cmGeneratorExpressionToken> tokens = l.Tokenize(this->Input);
   this->NeedsEvaluation = l.GetSawGeneratorExpression();
