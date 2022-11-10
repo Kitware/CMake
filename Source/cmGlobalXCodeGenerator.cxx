@@ -3929,7 +3929,7 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
 void cmGlobalXCodeGenerator::AddEmbeddedObjects(
   cmXCodeObject* target, const std::string& copyFilesBuildPhaseName,
   const std::string& embedPropertyName, const std::string& dstSubfolderSpec,
-  int actionsOnByDefault)
+  int actionsOnByDefault, const std::string& defaultDstPath)
 {
   cmGeneratorTarget* gt = target->GetTarget();
   if (!gt) {
@@ -3965,7 +3965,8 @@ void cmGlobalXCodeGenerator::AddEmbeddedObjects(
     copyFilesBuildPhase->AddAttribute("dstPath",
                                       this->CreateString(*fwEmbedPath));
   } else {
-    copyFilesBuildPhase->AddAttribute("dstPath", this->CreateString(""));
+    copyFilesBuildPhase->AddAttribute("dstPath",
+                                      this->CreateString(defaultDstPath));
   }
   copyFilesBuildPhase->AddAttribute("runOnlyForDeploymentPostprocessing",
                                     this->CreateString("0"));
@@ -4089,6 +4090,17 @@ void cmGlobalXCodeGenerator::AddEmbeddedAppExtensions(cmXCodeObject* target)
   this->AddEmbeddedObjects(target, "Embed App Extensions",
                            "XCODE_EMBED_APP_EXTENSIONS", dstSubfolderSpec,
                            RemoveHeadersOnCopyByDefault);
+}
+
+void cmGlobalXCodeGenerator::AddEmbeddedExtensionKitExtensions(
+  cmXCodeObject* target)
+{
+  static const auto dstSubfolderSpec = "16";
+
+  this->AddEmbeddedObjects(target, "Embed App Extensions",
+                           "XCODE_EMBED_EXTENSIONKIT_EXTENSIONS",
+                           dstSubfolderSpec, RemoveHeadersOnCopyByDefault,
+                           "$(EXTENSIONS_FOLDER_PATH)");
 }
 
 bool cmGlobalXCodeGenerator::CreateGroups(
@@ -4482,6 +4494,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
     this->AddEmbeddedFrameworks(t);
     this->AddEmbeddedPlugIns(t);
     this->AddEmbeddedAppExtensions(t);
+    this->AddEmbeddedExtensionKitExtensions(t);
     // Inherit project-wide values for any target-specific search paths.
     this->InheritBuildSettingAttribute(t, "HEADER_SEARCH_PATHS");
     this->InheritBuildSettingAttribute(t, "SYSTEM_HEADER_SEARCH_PATHS");

@@ -19,5 +19,11 @@ The supported values for ``<type>`` are:
   If the ``XCODE_EMBED_APP_EXTENSIONS_REMOVE_HEADERS_ON_COPY`` property is not
   defined, headers WILL be removed on copy by default.
 
+``EXTENSIONKIT_EXTENSIONS``
+  .. versionadded:: 3.26
+
+  If the ``XCODE_EMBED_APP_EXTENSIONS_REMOVE_HEADERS_ON_COPY`` property is not
+  defined, headers WILL be removed on copy by default.
+
 ``PLUGINS``
   .. versionadded:: 3.23

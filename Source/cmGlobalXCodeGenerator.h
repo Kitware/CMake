@@ -218,10 +218,12 @@ private:
                           const std::string& copyFilesBuildPhaseName,
                           const std::string& embedPropertyName,
                           const std::string& dstSubfolderSpec,
-                          int actionsOnByDefault);
+                          int actionsOnByDefault,
+                          const std::string& defaultDstPath = "");
   void AddEmbeddedFrameworks(cmXCodeObject* target);
   void AddEmbeddedPlugIns(cmXCodeObject* target);
   void AddEmbeddedAppExtensions(cmXCodeObject* target);
+  void AddEmbeddedExtensionKitExtensions(cmXCodeObject* target);
   void AddPositionIndependentLinkAttribute(cmGeneratorTarget* target,
                                            cmXCodeObject* buildSettings,
                                            const std::string& configName);
