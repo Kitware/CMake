@@ -396,10 +396,7 @@
     script:
         - . .gitlab/ci/env.ps1
         - . .gitlab/ci/ninja-env.ps1
-        - Invoke-Expression -Command .gitlab/ci/clang.ps1
-        - Invoke-Expression -Command .gitlab/ci/vcvarsall.ps1
-        - $pwdpath = $pwd.Path
-        - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab\llvm\bin;$env:PATH"
+        - . .gitlab/ci/clang-env.ps1
         - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake
 
     interruptible: true
