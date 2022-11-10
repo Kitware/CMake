@@ -638,13 +638,20 @@ public:
   cmMakefileProfilingData& GetProfilingOutput();
   bool IsProfilingEnabled() const;
 
-  template <typename... Args>
   cm::optional<cmMakefileProfilingData::RAII> CreateProfilingEntry(
-    Args&&... args)
+    const std::string& category, const std::string& name)
+  {
+    return this->CreateProfilingEntry(
+      category, name, []() -> cm::nullopt_t { return cm::nullopt; });
+  }
+
+  template <typename ArgsFunc>
+  cm::optional<cmMakefileProfilingData::RAII> CreateProfilingEntry(
+    const std::string& category, const std::string& name, ArgsFunc&& argsFunc)
   {
     if (this->IsProfilingEnabled()) {
       return cm::make_optional<cmMakefileProfilingData::RAII>(
-        this->GetProfilingOutput(), std::forward<Args>(args)...);
+        this->GetProfilingOutput(), category, name, argsFunc());
     }
     return cm::nullopt;
   }

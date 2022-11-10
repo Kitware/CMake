@@ -376,7 +376,20 @@ public:
     this->Makefile->ExecutionStatusStack.push_back(&status);
 #if !defined(CMAKE_BOOTSTRAP)
     this->ProfilingDataRAII =
-      this->Makefile->GetCMakeInstance()->CreateProfilingEntry(lff, lfc);
+      this->Makefile->GetCMakeInstance()->CreateProfilingEntry(
+        "script", lff.LowerCaseName(), [&lff, &lfc]() -> Json::Value {
+          Json::Value argsValue = Json::objectValue;
+          if (!lff.Arguments().empty()) {
+            std::string args;
+            for (auto const& a : lff.Arguments()) {
+              args = cmStrCat(args, args.empty() ? "" : " ", a.Value);
+            }
+            argsValue["functionArgs"] = args;
+          }
+          argsValue["location"] =
+            cmStrCat(lfc.FilePath, ':', std::to_string(lfc.Line));
+          return argsValue;
+        });
 #endif
   }
 

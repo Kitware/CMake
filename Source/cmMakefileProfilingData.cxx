@@ -6,9 +6,6 @@
 #include <stdexcept>
 #include <type_traits>
 #include <utility>
-#include <vector>
-
-#include <cm/utility>
 
 #include <cm3p/json/value.h>
 #include <cm3p/json/writer.h>
@@ -16,7 +13,6 @@
 #include "cmsys/FStream.hxx"
 #include "cmsys/SystemInformation.hxx"
 
-#include "cmListFileCache.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
@@ -45,22 +41,6 @@ cmMakefileProfilingData::~cmMakefileProfilingData() noexcept
       cmSystemTools::Error("Error writing profiling output!");
     }
   }
-}
-
-void cmMakefileProfilingData::StartEntry(const cmListFileFunction& lff,
-                                         cmListFileContext const& lfc)
-{
-  cm::optional<Json::Value> argsValue(cm::in_place, Json::objectValue);
-  if (!lff.Arguments().empty()) {
-    std::string args;
-    for (auto const& a : lff.Arguments()) {
-      args = cmStrCat(args, args.empty() ? "" : " ", a.Value);
-    }
-    (*argsValue)["functionArgs"] = args;
-  }
-  (*argsValue)["location"] =
-    cmStrCat(lfc.FilePath, ':', std::to_string(lfc.Line));
-  this->StartEntry("script", lff.LowerCaseName(), std::move(argsValue));
 }
 
 void cmMakefileProfilingData::StartEntry(const std::string& category,
@@ -125,6 +105,15 @@ void cmMakefileProfilingData::StopEntry()
   } catch (...) {
     cmSystemTools::Error("Error writing profiling output!");
   }
+}
+
+cmMakefileProfilingData::RAII::RAII(cmMakefileProfilingData& data,
+                                    const std::string& category,
+                                    const std::string& name,
+                                    cm::optional<Json::Value> args)
+  : Data(&data)
+{
+  this->Data->StartEntry(category, name, std::move(args));
 }
 
 cmMakefileProfilingData::RAII::RAII(RAII&& other) noexcept
