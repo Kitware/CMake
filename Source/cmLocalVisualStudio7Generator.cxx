@@ -842,6 +842,24 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
     }
   }
   fout << "/>\n"; // end of <Tool Name=VCCLCompilerTool
+  if (gg->IsMarmasmEnabled() && !this->FortranProject) {
+    Options marmasmOptions(this, Options::MarmasmCompiler, 0, 0);
+    /* clang-format off */
+    fout <<
+      "\t\t\t<Tool\n"
+      "\t\t\t\tName=\"MARMASM\"\n"
+      ;
+    /* clang-format on */
+    targetOptions.OutputAdditionalIncludeDirectories(fout, 4, "ASM_MARMASM");
+    // Use same preprocessor definitions as VCCLCompilerTool.
+    targetOptions.OutputPreprocessorDefinitions(fout, 4, "ASM_MARMASM");
+    marmasmOptions.OutputFlagMap(fout, 4);
+    /* clang-format off */
+    fout <<
+      "\t\t\t\tObjectFile=\"$(IntDir)\\\"\n"
+      "\t\t\t/>\n";
+    /* clang-format on */
+  }
   if (gg->IsMasmEnabled() && !this->FortranProject) {
     Options masmOptions(this, Options::MasmCompiler, 0, 0);
     /* clang-format off */
@@ -1720,6 +1738,10 @@ bool cmLocalVisualStudio7Generator::WriteGroup(
             aCompilerTool = "VFCustomBuildTool";
           }
         }
+        if (gg->IsMarmasmEnabled() && !this->FortranProject &&
+            lang == "ASM_MARMASM") {
+          aCompilerTool = "MARMASM";
+        }
         if (gg->IsMasmEnabled() && !this->FortranProject &&
             lang == "ASM_MASM") {
           aCompilerTool = "MASM";
@@ -2050,6 +2072,17 @@ void cmLocalVisualStudio7Generator::WriteProjectStart(
        << "\t\t<Platform\n\t\t\tName=\"" << gg->GetPlatformName() << "\"/>\n"
        << "\t</Platforms>\n";
   /* clang-format on */
+  if (gg->IsMarmasmEnabled()) {
+    /* clang-format off */
+    fout <<
+      "\t<ToolFiles>\n"
+      "\t\t<DefaultToolFile\n"
+      "\t\t\tFileName=\"marmasm.rules\"\n"
+      "\t\t/>\n"
+      "\t</ToolFiles>\n"
+      ;
+    /* clang-format on */
+  }
   if (gg->IsMasmEnabled()) {
     /* clang-format off */
     fout <<

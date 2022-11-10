@@ -827,7 +827,8 @@ void cmGlobalGenerator::EnableLanguage(
         "No " << compilerName << " could be found.\n"
         ;
       /* clang-format on */
-    } else if ((lang != "RC") && (lang != "ASM_MASM")) {
+    } else if ((lang != "RC") && (lang != "ASM_MARMASM") &&
+               (lang != "ASM_MASM")) {
       if (!cmSystemTools::FileIsFullPath(*compilerFile)) {
         /* clang-format off */
         noCompiler <<

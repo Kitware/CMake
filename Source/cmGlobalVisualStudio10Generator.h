@@ -163,6 +163,7 @@ public:
   cmIDEFlagTable const* GetLinkFlagTable() const;
   cmIDEFlagTable const* GetCudaFlagTable() const;
   cmIDEFlagTable const* GetCudaHostFlagTable() const;
+  cmIDEFlagTable const* GetMarmasmFlagTable() const;
   cmIDEFlagTable const* GetMasmFlagTable() const;
   cmIDEFlagTable const* GetNasmFlagTable() const;
 
@@ -226,6 +227,7 @@ protected:
   std::string DefaultLinkFlagTableName;
   std::string DefaultCudaFlagTableName;
   std::string DefaultCudaHostFlagTableName;
+  std::string DefaultMarmasmFlagTableName;
   std::string DefaultMasmFlagTableName;
   std::string DefaultNasmFlagTableName;
   std::string DefaultRCFlagTableName;
