@@ -1,8 +1,15 @@
 $erroractionpreference = "stop"
 
 $version = "3.24.1"
-$sha256sum = "C1B17431A16337D517F7BA78C7067B6F143A12686CB8087F3DD32F3FA45F5AAE"
-$filename = "cmake-$version-windows-x86_64"
+
+if ("$env:PROCESSOR_ARCHITECTURE" -eq "AMD64") {
+    $sha256sum = "C1B17431A16337D517F7BA78C7067B6F143A12686CB8087F3DD32F3FA45F5AAE"
+    $platform = "windows-x86_64"
+} else {
+    throw ('unknown PROCESSOR_ARCHITECTURE: ' + "$env:PROCESSOR_ARCHITECTURE")
+}
+
+$filename = "cmake-$version-$platform"
 $tarball = "$filename.zip"
 
 $outdir = $pwd.Path
