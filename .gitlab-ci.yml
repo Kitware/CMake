@@ -1093,7 +1093,7 @@ b:windows-x86_64-package:
         - .windows_x86_64_package
         - .cmake_build_windows
         - .cmake_build_package_artifacts
-        - .windows_tags_x86_64_package
+        - .windows_tags_nonconcurrent_vs2022
         - .run_only_for_package
     dependencies:
         - p:doc-package
@@ -1107,7 +1107,7 @@ k:windows-x86_64-package:
         - .windows_x86_64_package
         - .cmake_package_windows
         - .cmake_release_artifacts
-        - .windows_tags_x86_64_package
+        - .windows_tags_nonconcurrent_vs2022
         - .run_only_for_package
     dependencies:
         - b:windows-x86_64-package
@@ -1130,7 +1130,7 @@ b:windows-i386-package:
         - .windows_i386_package
         - .cmake_build_windows
         - .cmake_build_package_artifacts
-        - .windows_tags_x86_64_package
+        - .windows_tags_nonconcurrent_vs2022
         - .run_only_for_package
     dependencies:
         - p:doc-package
@@ -1144,7 +1144,7 @@ k:windows-i386-package:
         - .windows_i386_package
         - .cmake_package_windows
         - .cmake_release_artifacts
-        - .windows_tags_x86_64_package
+        - .windows_tags_nonconcurrent_vs2022
         - .run_only_for_package
     dependencies:
         - b:windows-i386-package
@@ -1167,7 +1167,7 @@ b:windows-arm64-package:
         - .windows_arm64_package
         - .cmake_build_windows
         - .cmake_build_package_artifacts
-        - .windows_tags_arm64_package
+        - .windows_tags_nonconcurrent_vs2022_arm64
         - .run_only_for_package
     dependencies:
         - p:doc-package
@@ -1181,7 +1181,7 @@ k:windows-arm64-package:
         - .windows_arm64_package
         - .cmake_package_windows
         - .cmake_release_artifacts
-        - .windows_tags_arm64_package
+        - .windows_tags_nonconcurrent_vs2022_arm64
         - .run_only_for_package
     dependencies:
         - b:windows-arm64-package
