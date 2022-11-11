@@ -188,5 +188,6 @@ call exists, CMake will issue a warning and pretend there is a
   Call the ``project()`` command near the top of the top-level
   ``CMakeLists.txt``, but *after* calling :command:`cmake_minimum_required`.
   It is important to establish version and policy settings before invoking
-  other commands whose behavior they may affect.
+  other commands whose behavior they may affect and for this reason the
+  ``project()`` command will issue a warning if this order is not kept.
   See also policy :policy:`CMP0000`.
