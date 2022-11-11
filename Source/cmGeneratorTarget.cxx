@@ -8803,11 +8803,18 @@ cmGeneratorTarget::Cxx20SupportLevel cmGeneratorTarget::HaveCxxModuleSupport(
   if (!state->GetLanguageEnabled("CXX")) {
     return Cxx20SupportLevel::MissingCxx;
   }
-  cmStandardLevelResolver standardResolver(this->Makefile);
-  if (!standardResolver.HaveStandardAvailable(this, "CXX", config,
-                                              "cxx_std_20")) {
-    return Cxx20SupportLevel::NoCxx20;
+  cmValue standardDefault =
+    this->Target->GetMakefile()->GetDefinition("CMAKE_CXX_STANDARD_DEFAULT");
+  if (standardDefault && !standardDefault->empty()) {
+    cmStandardLevelResolver standardResolver(this->Makefile);
+    if (!standardResolver.HaveStandardAvailable(this, "CXX", config,
+                                                "cxx_std_20")) {
+      return Cxx20SupportLevel::NoCxx20;
+    }
   }
+  // Else, an empty CMAKE_CXX_STANDARD_DEFAULT means CMake does not detect and
+  // set a default standard level for this compiler, so assume all standards
+  // are available.
   if (!this->Makefile->IsOn("CMAKE_EXPERIMENTAL_CXX_MODULE_DYNDEP")) {
     return Cxx20SupportLevel::MissingExperimentalFlag;
   }
