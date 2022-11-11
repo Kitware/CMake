@@ -34,7 +34,7 @@ endif()
 
 # Adapt to the system default branch name.
 execute_process(
-  COMMAND ${GIT} config --get init.defaultBranch
+  COMMAND ${GIT} --git-dir= config --get init.defaultBranch
   RESULT_VARIABLE defaultBranchFailed
   OUTPUT_VARIABLE defaultBranch
   ERROR_VARIABLE defaultBranchError
