@@ -1,7 +1,0 @@
-if("$ENV{CMAKE_CI_BUILD_NAME}" MATCHES "(^|_)gnu(_|$)")
-  set(ENV{CC} clang)
-  set(ENV{CXX} clang++)
-else()
-  set(ENV{CC} clang-cl)
-  set(ENV{CXX} clang-cl)
-endif()

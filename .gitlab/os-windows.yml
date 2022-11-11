@@ -299,11 +299,9 @@
     - Set-Item -Force -Path "env:WIX" -Value "$pwdpath\.gitlab\wix"
     - (& "$pwsh" -File ".gitlab/ci/cmake.ps1")
     - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab\cmake\bin;$env:PATH"
-    - (& "$pwsh" -File ".gitlab/ci/ninja.ps1")
-    - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab;$env:PATH"
+    - . .gitlab/ci/ninja-env.ps1
     - (& "$env:WIX\bin\light.exe" -help) | Select -First 1
     - cmake --version
-    - ninja --version
     - cmake -P .gitlab/ci/download_qt.cmake
     - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab\qt\bin;$env:PATH"
     - cmake -P .gitlab/ci/download_python3.cmake
@@ -388,21 +386,6 @@
         - Invoke-Expression -Command .gitlab/ci/borland.ps1
         - $pwdpath = $pwd.Path
         - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab\bcc\bin;$env:PATH"
-        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake
-
-    interruptible: true
-
-.cmake_test_windows_clang:
-    stage: test-ext
-
-    script:
-        - . .gitlab/ci/env.ps1
-        - $pwdpath = $pwd.Path
-        - (& "$pwsh" -File ".gitlab/ci/ninja.ps1")
-        - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab;$env:PATH"
-        - Invoke-Expression -Command .gitlab/ci/clang.ps1
-        - Invoke-Expression -Command .gitlab/ci/vcvarsall.ps1
-        - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab\llvm\bin;$env:PATH"
         - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake
 
     interruptible: true
