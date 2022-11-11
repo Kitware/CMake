@@ -13,11 +13,14 @@
 #include "cmGeneratorExpressionEvaluator.h"
 #include "cmGeneratorExpressionLexer.h"
 #include "cmGeneratorExpressionParser.h"
+#include "cmLocalGenerator.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
-cmGeneratorExpression::cmGeneratorExpression(cmListFileBacktrace backtrace)
-  : Backtrace(std::move(backtrace))
+cmGeneratorExpression::cmGeneratorExpression(cmake& cmakeInstance,
+                                             cmListFileBacktrace backtrace)
+  : CMakeInstance(cmakeInstance)
+  , Backtrace(std::move(backtrace))
 {
 }
 
@@ -29,7 +32,8 @@ std::unique_ptr<cmCompiledGeneratorExpression> cmGeneratorExpression::Parse(
   std::string input) const
 {
   return std::unique_ptr<cmCompiledGeneratorExpression>(
-    new cmCompiledGeneratorExpression(this->Backtrace, std::move(input)));
+    new cmCompiledGeneratorExpression(this->CMakeInstance, this->Backtrace,
+                                      std::move(input)));
 }
 
 std::string cmGeneratorExpression::Evaluate(
@@ -39,7 +43,8 @@ std::string cmGeneratorExpression::Evaluate(
   cmGeneratorTarget const* currentTarget, std::string const& language)
 {
   if (Find(input) != std::string::npos) {
-    cmCompiledGeneratorExpression cge(cmListFileBacktrace(), std::move(input));
+    cmCompiledGeneratorExpression cge(*lg->GetCMakeInstance(),
+                                      cmListFileBacktrace(), std::move(input));
     return cge.Evaluate(lg, config, headTarget, dagChecker, currentTarget,
                         language);
   }
@@ -97,7 +102,7 @@ const std::string& cmCompiledGeneratorExpression::EvaluateWithContext(
 }
 
 cmCompiledGeneratorExpression::cmCompiledGeneratorExpression(
-  cmListFileBacktrace backtrace, std::string input)
+  cmake& /*cmakeInstance*/, cmListFileBacktrace backtrace, std::string input)
   : Backtrace(std::move(backtrace))
   , Input(std::move(input))
 {

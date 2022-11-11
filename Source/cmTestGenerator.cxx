@@ -127,7 +127,8 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
   this->TestGenerated = true;
 
   // Set up generator expression evaluation context.
-  cmGeneratorExpression ge(this->Test->GetBacktrace());
+  cmGeneratorExpression ge(*this->Test->GetMakefile()->GetCMakeInstance(),
+                           this->Test->GetBacktrace());
 
   // Determine if policy CMP0110 is set to NEW.
   const bool quote_test_name =

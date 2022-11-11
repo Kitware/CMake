@@ -4503,7 +4503,7 @@ std::vector<std::string> cmLocalGenerator::ExpandCustomCommandOutputGenex(
   std::string const& o, cmListFileBacktrace const& bt)
 {
   std::vector<std::string> allConfigOutputs;
-  cmGeneratorExpression ge(bt);
+  cmGeneratorExpression ge(*this->GetCMakeInstance(), bt);
   std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(o);
   std::vector<std::string> configs =
     this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);

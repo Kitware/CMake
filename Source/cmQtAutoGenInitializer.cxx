@@ -2095,7 +2095,7 @@ bool cmQtAutoGenInitializer::GetQtExecutable(GenVarsT& genVars,
       // Evaluate generator expression
       {
         cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-        cmGeneratorExpression ge(lfbt);
+        cmGeneratorExpression ge(*this->Makefile->GetCMakeInstance(), lfbt);
         std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(val);
         genVars.Executable = cge->Evaluate(this->LocalGen, "");
       }

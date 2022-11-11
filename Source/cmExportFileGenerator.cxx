@@ -379,7 +379,7 @@ void cmExportFileGenerator::PopulateIncludeDirectoriesInterface(
   const char* propName = "INTERFACE_INCLUDE_DIRECTORIES";
   cmValue input = target->GetProperty(propName);
 
-  cmGeneratorExpression ge;
+  cmGeneratorExpression ge(*target->Makefile->GetCMakeInstance());
 
   std::string dirs = cmGeneratorExpression::Preprocess(
     cmJoin(target->Target->GetInstallIncludeDirectoriesEntries(te), ";"),

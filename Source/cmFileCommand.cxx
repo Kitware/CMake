@@ -2462,11 +2462,13 @@ void AddEvaluationFile(const std::string& inputName,
 {
   cmListFileBacktrace lfbt = status.GetMakefile().GetBacktrace();
 
-  cmGeneratorExpression outputGe(lfbt);
+  cmGeneratorExpression outputGe(*status.GetMakefile().GetCMakeInstance(),
+                                 lfbt);
   std::unique_ptr<cmCompiledGeneratorExpression> outputCge =
     outputGe.Parse(outputExpr);
 
-  cmGeneratorExpression conditionGe(lfbt);
+  cmGeneratorExpression conditionGe(*status.GetMakefile().GetCMakeInstance(),
+                                    lfbt);
   std::unique_ptr<cmCompiledGeneratorExpression> conditionCge =
     conditionGe.Parse(condition);
 

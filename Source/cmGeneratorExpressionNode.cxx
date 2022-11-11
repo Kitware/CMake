@@ -57,7 +57,7 @@ std::string cmGeneratorExpressionNode::EvaluateDependentExpression(
   cmGeneratorExpressionDAGChecker* dagChecker,
   cmGeneratorTarget const* currentTarget)
 {
-  cmGeneratorExpression ge(context->Backtrace);
+  cmGeneratorExpression ge(*lg->GetCMakeInstance(), context->Backtrace);
   std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(prop);
   cge->SetEvaluateForBuildsystem(context->EvaluateForBuildsystem);
   cge->SetQuiet(context->Quiet);

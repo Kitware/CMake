@@ -2090,7 +2090,7 @@ void cmVisualStudio10TargetGenerator::ParseSettingsProperty(
   const std::string& settingsPropertyValue, ConfigToSettings& toolSettings)
 {
   if (!settingsPropertyValue.empty()) {
-    cmGeneratorExpression ge;
+    cmGeneratorExpression ge(*this->LocalGenerator->GetCMakeInstance());
 
     std::unique_ptr<cmCompiledGeneratorExpression> cge =
       ge.Parse(settingsPropertyValue);
@@ -2190,7 +2190,7 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(
     }
     // Figure out if there's any additional flags to use
     if (cmValue saf = sf->GetProperty("VS_SHADER_FLAGS")) {
-      cmGeneratorExpression ge;
+      cmGeneratorExpression ge(*this->LocalGenerator->GetCMakeInstance());
       std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(*saf);
 
       for (const std::string& config : this->Configurations) {
@@ -2203,7 +2203,7 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(
     }
     // Figure out if debug information should be generated
     if (cmValue sed = sf->GetProperty("VS_SHADER_ENABLE_DEBUG")) {
-      cmGeneratorExpression ge;
+      cmGeneratorExpression ge(*this->LocalGenerator->GetCMakeInstance());
       std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(*sed);
 
       for (const std::string& config : this->Configurations) {
@@ -2217,7 +2217,7 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(
     }
     // Figure out if optimizations should be disabled
     if (cmValue sdo = sf->GetProperty("VS_SHADER_DISABLE_OPTIMIZATIONS")) {
-      cmGeneratorExpression ge;
+      cmGeneratorExpression ge(*this->LocalGenerator->GetCMakeInstance());
       std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(*sdo);
 
       for (const std::string& config : this->Configurations) {
@@ -2331,7 +2331,7 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(
     this->FinishWritingSource(e2, toolSettings);
 
     if (!deployContent.empty()) {
-      cmGeneratorExpression ge;
+      cmGeneratorExpression ge(*this->LocalGenerator->GetCMakeInstance());
       std::unique_ptr<cmCompiledGeneratorExpression> cge =
         ge.Parse(deployContent);
       // Deployment location cannot be set on a configuration basis

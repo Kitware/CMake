@@ -241,15 +241,16 @@ private:
 
 std::unique_ptr<
   cmGeneratorTarget::
-    TargetPropertyEntry> static CreateTargetPropertyEntry(const BT<std::
-                                                                     string>&
+    TargetPropertyEntry> static CreateTargetPropertyEntry(cmake& cmakeInstance,
+                                                          const BT<
+                                                            std::string>&
                                                             propertyValue,
                                                           bool
                                                             evaluateForBuildsystem =
                                                               false)
 {
   if (cmGeneratorExpression::Find(propertyValue.Value) != std::string::npos) {
-    cmGeneratorExpression ge(propertyValue.Backtrace);
+    cmGeneratorExpression ge(cmakeInstance, propertyValue.Backtrace);
     std::unique_ptr<cmCompiledGeneratorExpression> cge =
       ge.Parse(propertyValue.Value);
     cge->SetEvaluateForBuildsystem(evaluateForBuildsystem);
@@ -262,12 +263,13 @@ std::unique_ptr<
 }
 
 static void CreatePropertyGeneratorExpressions(
-  cmBTStringRange entries,
+  cmake& cmakeInstance, cmBTStringRange entries,
   std::vector<std::unique_ptr<cmGeneratorTarget::TargetPropertyEntry>>& items,
   bool evaluateForBuildsystem = false)
 {
   for (auto const& entry : entries) {
-    items.push_back(CreateTargetPropertyEntry(entry, evaluateForBuildsystem));
+    items.push_back(
+      CreateTargetPropertyEntry(cmakeInstance, entry, evaluateForBuildsystem));
   }
 }
 
@@ -343,29 +345,36 @@ cmGeneratorTarget::cmGeneratorTarget(cmTarget* t, cmLocalGenerator* lg)
 
   this->GlobalGenerator->ComputeTargetObjectDirectory(this);
 
-  CreatePropertyGeneratorExpressions(t->GetIncludeDirectoriesEntries(),
+  CreatePropertyGeneratorExpressions(*lg->GetCMakeInstance(),
+                                     t->GetIncludeDirectoriesEntries(),
                                      this->IncludeDirectoriesEntries);
 
-  CreatePropertyGeneratorExpressions(t->GetCompileOptionsEntries(),
+  CreatePropertyGeneratorExpressions(*lg->GetCMakeInstance(),
+                                     t->GetCompileOptionsEntries(),
                                      this->CompileOptionsEntries);
 
-  CreatePropertyGeneratorExpressions(t->GetCompileFeaturesEntries(),
+  CreatePropertyGeneratorExpressions(*lg->GetCMakeInstance(),
+                                     t->GetCompileFeaturesEntries(),
                                      this->CompileFeaturesEntries);
 
-  CreatePropertyGeneratorExpressions(t->GetCompileDefinitionsEntries(),
+  CreatePropertyGeneratorExpressions(*lg->GetCMakeInstance(),
+                                     t->GetCompileDefinitionsEntries(),
                                      this->CompileDefinitionsEntries);
 
-  CreatePropertyGeneratorExpressions(t->GetLinkOptionsEntries(),
+  CreatePropertyGeneratorExpressions(*lg->GetCMakeInstance(),
+                                     t->GetLinkOptionsEntries(),
                                      this->LinkOptionsEntries);
 
-  CreatePropertyGeneratorExpressions(t->GetLinkDirectoriesEntries(),
+  CreatePropertyGeneratorExpressions(*lg->GetCMakeInstance(),
+                                     t->GetLinkDirectoriesEntries(),
                                      this->LinkDirectoriesEntries);
 
-  CreatePropertyGeneratorExpressions(t->GetPrecompileHeadersEntries(),
+  CreatePropertyGeneratorExpressions(*lg->GetCMakeInstance(),
+                                     t->GetPrecompileHeadersEntries(),
                                      this->PrecompileHeadersEntries);
 
-  CreatePropertyGeneratorExpressions(t->GetSourceEntries(),
-                                     this->SourceEntries, true);
+  CreatePropertyGeneratorExpressions(
+    *lg->GetCMakeInstance(), t->GetSourceEntries(), this->SourceEntries, true);
 
   this->PolicyMap = t->GetPolicyMap();
 
@@ -753,6 +762,7 @@ void cmGeneratorTarget::AddSourceCommon(const std::string& src, bool before)
   this->SourceEntries.insert(
     before ? this->SourceEntries.begin() : this->SourceEntries.end(),
     CreateTargetPropertyEntry(
+      *this->LocalGenerator->GetCMakeInstance(),
       BT<std::string>(src, this->Makefile->GetBacktrace()), true));
   this->ClearSourcesCache();
 }
@@ -780,6 +790,7 @@ void cmGeneratorTarget::AddIncludeDirectory(const std::string& src,
     before ? this->IncludeDirectoriesEntries.begin()
            : this->IncludeDirectoriesEntries.end(),
     CreateTargetPropertyEntry(
+      *this->Makefile->GetCMakeInstance(),
       BT<std::string>(src, this->Makefile->GetBacktrace()), true));
 }
 
@@ -1653,7 +1664,8 @@ void AddObjectEntries(cmGeneratorTarget const* headTarget,
           headTarget->GetGlobalGenerator()->IndexGeneratorTargetUniquely(
             lib.Target);
         std::string genex = "$<TARGET_OBJECTS:" + std::move(uniqueName) + ">";
-        cmGeneratorExpression ge(lib.Backtrace);
+        cmGeneratorExpression ge(*headTarget->Makefile->GetCMakeInstance(),
+                                 lib.Backtrace);
         std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(genex);
         cge->SetEvaluateForBuildsystem(true);
 
@@ -4192,7 +4204,8 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileDefinitions(
         }
         case cmPolicies::OLD: {
           std::unique_ptr<TargetPropertyEntry> entry =
-            CreateTargetPropertyEntry(*configProp);
+            CreateTargetPropertyEntry(
+              *this->LocalGenerator->GetCMakeInstance(), *configProp);
           entries.Entries.emplace_back(EvaluateTargetPropertyEntry(
             this, config, language, &dagChecker, *entry));
         } break;
@@ -4778,8 +4791,8 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetStaticLibraryLinkOptions(
   if (cmValue linkOptions = this->GetProperty("STATIC_LIBRARY_OPTIONS")) {
     std::vector<std::string> options = cmExpandedList(*linkOptions);
     for (const auto& option : options) {
-      std::unique_ptr<TargetPropertyEntry> entry =
-        CreateTargetPropertyEntry(option);
+      std::unique_ptr<TargetPropertyEntry> entry = CreateTargetPropertyEntry(
+        *this->LocalGenerator->GetCMakeInstance(), option);
       entries.Entries.emplace_back(EvaluateTargetPropertyEntry(
         this, config, language, &dagChecker, *entry));
     }
@@ -4931,8 +4944,8 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkDepends(
   if (cmValue linkDepends = this->GetProperty("LINK_DEPENDS")) {
     std::vector<std::string> depends = cmExpandedList(*linkDepends);
     for (const auto& depend : depends) {
-      std::unique_ptr<TargetPropertyEntry> entry =
-        CreateTargetPropertyEntry(depend);
+      std::unique_ptr<TargetPropertyEntry> entry = CreateTargetPropertyEntry(
+        *this->LocalGenerator->GetCMakeInstance(), depend);
       entries.Entries.emplace_back(EvaluateTargetPropertyEntry(
         this, config, language, &dagChecker, *entry));
     }
@@ -6756,7 +6769,8 @@ void cmGeneratorTarget::ExpandLinkItems(
   cmMakefile const* mf = this->LocalGenerator->GetMakefile();
   LookupLinkItemScope scope{ this->LocalGenerator };
   for (BT<std::string> const& entry : entries) {
-    cmGeneratorExpression ge(entry.Backtrace);
+    cmGeneratorExpression ge(*this->LocalGenerator->GetCMakeInstance(),
+                             entry.Backtrace);
     std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(entry.Value);
     cge->SetEvaluateForBuildsystem(true);
     std::vector<std::string> libs = cmExpandedList(
@@ -8195,7 +8209,8 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
           break;
       }
     }
-    cmGeneratorExpression ge(entry.Backtrace);
+    cmGeneratorExpression ge(*this->LocalGenerator->GetCMakeInstance(),
+                             entry.Backtrace);
     std::unique_ptr<cmCompiledGeneratorExpression> const cge =
       ge.Parse(entry.Value);
     cge->SetEvaluateForBuildsystem(true);

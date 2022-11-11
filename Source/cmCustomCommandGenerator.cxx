@@ -172,7 +172,7 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(
     };
   }
 
-  cmGeneratorExpression ge(cc.GetBacktrace());
+  cmGeneratorExpression ge(*lg->GetCMakeInstance(), cc.GetBacktrace());
   cmGeneratorTarget const* target{ lg->FindGeneratorTargetToUse(
     this->Target) };
 
@@ -417,7 +417,8 @@ std::string cmCustomCommandGenerator::GetDepfile() const
     return "";
   }
 
-  cmGeneratorExpression ge(this->CC->GetBacktrace());
+  cmGeneratorExpression ge(*this->LG->GetCMakeInstance(),
+                           this->CC->GetBacktrace());
   return EvaluateDepfile(depfile, ge, this->LG, this->OutputConfig);
 }
 
