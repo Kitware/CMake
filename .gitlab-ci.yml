@@ -880,7 +880,7 @@ u:macos10.10-package:
     needs:
         - b:macos10.10-package
 
-# Windows builds
+# Windows x86_64 jobs
 
 b:windows-vs2022-x64-ninja:
     extends:
@@ -1115,6 +1115,48 @@ t:windows-openwatcom1.9:
         - t:windows-vs2022-x64-ninja
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
+
+# Windows arm64 jobs
+
+b:windows-arm64-vs2022-ninja:
+    extends:
+        - .windows_arm64_vs2022_ninja
+        - .cmake_build_windows
+        - .cmake_build_artifacts
+        - .windows_arm64_tags_nonconcurrent_vs2022
+        - .run_manually
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
+t:windows-arm64-vs2022-ninja:
+    extends:
+        - .windows_arm64_vs2022_ninja
+        - .cmake_test_windows
+        - .windows_arm64_tags_nonconcurrent_vs2022
+        - .cmake_test_artifacts
+        - .run_dependent
+    dependencies:
+        - b:windows-arm64-vs2022-ninja
+    needs:
+        - b:windows-arm64-vs2022-ninja
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
+t:windows-arm64-vs2022:
+    extends:
+        - .windows_arm64_vs2022
+        - .cmake_test_windows_external
+        - .windows_arm64_tags_concurrent_vs2022
+        - .cmake_junit_artifacts
+        - .run_dependent
+    dependencies:
+        - t:windows-arm64-vs2022-ninja
+    needs:
+        - t:windows-arm64-vs2022-ninja
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
+# Windows package jobs
 
 b:windows-x86_64-package:
     extends:
