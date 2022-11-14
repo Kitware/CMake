@@ -1,5 +1,9 @@
 include(RunCMake)
 
+# Isolate our ctest runs from external environment.
+unset(ENV{CTEST_PARALLEL_LEVEL})
+unset(ENV{CTEST_OUTPUT_ON_FAILURE})
+
 # Presets do not support legacy VS generator name architecture suffix.
 if(RunCMake_GENERATOR MATCHES "^(Visual Studio [0-9]+ [0-9]+) ")
   set(RunCMake_GENERATOR "${CMAKE_MATCH_1}")

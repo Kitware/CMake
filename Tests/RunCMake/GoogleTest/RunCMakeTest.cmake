@@ -1,5 +1,9 @@
 include(RunCMake)
 
+# Isolate our ctest runs from external environment.
+unset(ENV{CTEST_PARALLEL_LEVEL})
+unset(ENV{CTEST_OUTPUT_ON_FAILURE})
+
 if(RunCMake_GENERATOR STREQUAL "Borland Makefiles" OR
    RunCMake_GENERATOR STREQUAL "Watcom WMake")
   set(fs_delay 3)
