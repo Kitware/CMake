@@ -3,7 +3,6 @@
 #pragma once
 #include <memory>
 #include <string>
-#include <utility>
 
 #include <cm/optional>
 
@@ -15,15 +14,11 @@ namespace Json {
 class StreamWriter;
 }
 
-class cmListFileContext;
-class cmListFileFunction;
-
 class cmMakefileProfilingData
 {
 public:
   cmMakefileProfilingData(const std::string&);
   ~cmMakefileProfilingData() noexcept;
-  void StartEntry(const cmListFileFunction& lff, cmListFileContext const& lfc);
   void StartEntry(const std::string& category, const std::string& name,
                   cm::optional<Json::Value> args = cm::nullopt);
   void StopEntry();
@@ -35,12 +30,9 @@ public:
     RAII(const RAII&) = delete;
     RAII(RAII&&) noexcept;
 
-    template <typename... Args>
-    RAII(cmMakefileProfilingData& data, Args&&... args)
-      : Data(&data)
-    {
-      this->Data->StartEntry(std::forward<Args>(args)...);
-    }
+    RAII(cmMakefileProfilingData& data, const std::string& category,
+         const std::string& name,
+         cm::optional<Json::Value> args = cm::nullopt);
 
     ~RAII();
 
