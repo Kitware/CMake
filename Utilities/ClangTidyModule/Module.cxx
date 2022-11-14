@@ -3,6 +3,7 @@
 #include <clang-tidy/ClangTidyModule.h>
 #include <clang-tidy/ClangTidyModuleRegistry.h>
 
+#include "OstringstreamUseCmstrcatCheck.h"
 #include "UseBespokeEnumClassCheck.h"
 #include "UseCmstrlenCheck.h"
 #include "UseCmsysFstreamCheck.h"
@@ -20,6 +21,8 @@ public:
       "cmake-use-cmsys-fstream");
     CheckFactories.registerCheck<UseBespokeEnumClassCheck>(
       "cmake-use-bespoke-enum-class");
+    CheckFactories.registerCheck<OstringstreamUseCmstrcatCheck>(
+      "cmake-ostringstream-use-cmstrcat");
   }
 };
 
