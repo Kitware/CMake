@@ -143,7 +143,7 @@
     - ninja --version
     # Download Qt
     - cmake -P .gitlab/ci/download_qt.cmake
-    - export CMAKE_PREFIX_PATH=$PWD/.gitlab/qt
+    - export CMAKE_PREFIX_PATH=$PWD/.gitlab/qt${CMAKE_PREFIX_PATH:+:$CMAKE_PREFIX_PATH}
 
 .cmake_build_macos:
     stage: build

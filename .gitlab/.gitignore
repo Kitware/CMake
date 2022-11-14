@@ -8,6 +8,7 @@
 /mingw
 /msvc*
 /ninja*
+/openmp
 /open-watcom*
 /python*
 /qt*
