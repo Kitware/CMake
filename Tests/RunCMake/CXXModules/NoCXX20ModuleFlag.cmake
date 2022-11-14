@@ -1,5 +1,7 @@
 enable_language(CXX)
 
+unset(CMAKE_EXPERIMENTAL_CXX_MODULE_DYNDEP)
+
 add_library(noexperimentalflag)
 target_sources(noexperimentalflag
   PUBLIC
