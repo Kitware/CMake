@@ -3,9 +3,6 @@ include(RunCTest)
 
 set(RunCMake_TEST_TIMEOUT 60)
 
-unset(ENV{CTEST_PARALLEL_LEVEL})
-unset(ENV{CTEST_OUTPUT_ON_FAILURE})
-
 run_cmake_command(repeat-opt-bad1
   ${CMAKE_CTEST_COMMAND} --repeat until-pass
   )
