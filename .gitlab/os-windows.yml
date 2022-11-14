@@ -49,6 +49,12 @@
         VCVARSPLATFORM: "x64_arm64"
         VCVARSVERSION: "14.34.31933"
 
+.windows_arm64_vcvarsall_vs2022:
+    variables:
+        VCVARSALL: "${VS170COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
+        VCVARSPLATFORM: "arm64"
+        VCVARSVERSION: "14.34.31933"
+
 .windows_vs2022_x64_ninja:
     extends:
         - .windows_build_ninja
@@ -56,6 +62,14 @@
 
     variables:
         CMAKE_CONFIGURATION: windows_vs2022_x64_ninja
+
+.windows_arm64_vs2022_ninja:
+    extends:
+        - .windows_build_ninja
+        - .windows_arm64_vcvarsall_vs2022
+
+    variables:
+        CMAKE_CONFIGURATION: windows_arm64_vs2022_ninja
 
 .windows_package:
     extends:
@@ -224,6 +238,16 @@
     variables:
         CMAKE_CONFIGURATION: windows_openwatcom1.9
 
+.windows_arm64_vs2022:
+    extends: .windows
+
+    variables:
+        CMAKE_CONFIGURATION: windows_arm64_vs2022
+        CMAKE_GENERATOR: "Visual Studio 17 2022"
+        CMAKE_GENERATOR_PLATFORM: "ARM64"
+        CMAKE_GENERATOR_TOOLSET: "v143,version=14.34.31933"
+        CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
+
 .mingw_osdn_io:
     extends: .windows
 
@@ -292,6 +316,24 @@
         - shell
         - concurrent
 
+.windows_arm64_tags_nonconcurrent_vs2022:
+    tags:
+        - cmake # Since this is a bare runner, pin to a project.
+        - windows-arm64
+        - shell
+        - vs2022
+        - msvc-19.34
+        - nonconcurrent
+
+.windows_arm64_tags_concurrent_vs2022:
+    tags:
+        - cmake # Since this is a bare runner, pin to a project.
+        - windows-arm64
+        - shell
+        - vs2022
+        - msvc-19.34
+        - concurrent
+
 ## Windows-specific scripts
 
 .before_script_windows: &before_script_windows
@@ -304,11 +346,8 @@
     - . .gitlab/ci/ninja-env.ps1
     - (& "$env:WIX\bin\light.exe" -help) | Select -First 1
     - cmake --version
-    - cmake -P .gitlab/ci/download_qt.cmake
-    - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab\qt\bin;$env:PATH"
-    - cmake -P .gitlab/ci/download_python3.cmake
-    - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab\python3;$env:PATH"
-    - python --version
+    - . .gitlab/ci/qt-env.ps1
+    - . .gitlab/ci/python-env.ps1
 
 .cmake_build_windows:
     stage: build
