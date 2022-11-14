@@ -574,6 +574,12 @@ run_cmake_command(E_copy-three-source-files-target-is-file
   ${CMAKE_COMMAND} -E copy ${in}/f1.txt ${in}/f2.txt ${in}/f3.txt ${out}/f1.txt)
 run_cmake_command(E_copy-two-good-and-one-bad-source-files-target-is-directory
   ${CMAKE_COMMAND} -E copy ${in}/f1.txt ${in}/not_existing_file.bad ${in}/f3.txt ${out})
+run_cmake_command(E_copy-t-argument
+  ${CMAKE_COMMAND} -E copy ${in}/f1.txt -t ${out} ${in}/f3.txt)
+run_cmake_command(E_copy-t-argument-target-is-file
+  ${CMAKE_COMMAND} -E copy ${in}/f1.txt -t ${out}/f1.txt ${in}/f3.txt)
+run_cmake_command(E_copy-t-argument-no-source-files
+  ${CMAKE_COMMAND} -E copy -t ${out})
 run_cmake_command(E_copy_if_different-one-source-directory-target-is-directory
   ${CMAKE_COMMAND} -E copy_if_different ${in}/f1.txt ${out})
 run_cmake_command(E_copy_if_different-three-source-files-target-is-directory

@@ -848,16 +848,20 @@ Available commands are:
 
 .. program:: cmake-E
 
-.. option:: copy <file>... <destination>
+.. option:: copy <file>... <destination>, copy -t <destination> <file>...
 
   Copy files to ``<destination>`` (either file or directory).
-  If multiple files are specified, the ``<destination>`` must be
-  directory and it must exist. Wildcards are not supported.
-  ``copy`` does follow symlinks. That means it does not copy symlinks,
-  but the files or directories it point to.
+  If multiple files are specified, or if ``-t`` is specified, the
+  ``<destination>`` must be directory and it must exist. If ``-t`` is not
+  specified, the last argument is assumed to be the ``<destination>``.
+  Wildcards are not supported. ``copy`` does follow symlinks. That means it
+  does not copy symlinks, but the files or directories it point to.
 
   .. versionadded:: 3.5
     Support for multiple input files.
+
+  .. versionadded:: 3.26
+    Support for ``-t`` argument.
 
 .. option:: copy_directory <dir>... <destination>
 
