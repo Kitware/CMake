@@ -1,0 +1,14 @@
+^CMake Error at [^
+]*/Tests/RunCMake/file/COPY_FILE-input-missing.cmake:[0-9]+ \(file\):
+  file COPY_FILE failed to copy
+
+    [^
+]*/Tests/RunCMake/file/COPY_FILE-input-missing-build/input-missing
+
+  to
+
+    [^
+]*/Tests/RunCMake/file/COPY_FILE-input-missing-build/output
+
+  because: [^
+]+ \(input\)$

@@ -1140,7 +1140,7 @@ cmSystemTools::CopyResult cmSystemTools::CopySingleFile(
     return CopyResult::Success;
   }
 
-  cmsys::Status status;
+  cmsys::SystemTools::CopyStatus status;
   status = cmsys::SystemTools::CloneFileContent(oldname, newname);
   if (!status) {
     // if cloning did not succeed, fall back to blockwise copy
@@ -1149,14 +1149,24 @@ cmSystemTools::CopyResult cmSystemTools::CopySingleFile(
   if (!status) {
     if (err) {
       *err = status.GetString();
+      switch (status.Path) {
+        case cmsys::SystemTools::CopyStatus::SourcePath:
+          *err = cmStrCat(*err, " (input)");
+          break;
+        case cmsys::SystemTools::CopyStatus::DestPath:
+          *err = cmStrCat(*err, " (output)");
+          break;
+        default:
+          break;
+      }
     }
     return CopyResult::Failure;
   }
   if (perms) {
-    status = SystemTools::SetPermissions(newname, perm);
-    if (!status) {
+    perms = SystemTools::SetPermissions(newname, perm);
+    if (!perms) {
       if (err) {
-        *err = status.GetString();
+        *err = cmStrCat(perms.GetString(), " (output)");
       }
       return CopyResult::Failure;
     }
