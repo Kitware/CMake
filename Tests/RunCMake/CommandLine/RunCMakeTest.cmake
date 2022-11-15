@@ -58,6 +58,8 @@ run_cmake_command(P_fresh ${CMAKE_COMMAND} -P "${RunCMake_SOURCE_DIR}/P_fresh.cm
 
 run_cmake_command(build-no-dir
   ${CMAKE_COMMAND} --build)
+run_cmake_command(build-no-dir2
+  ${CMAKE_COMMAND} --build --target=invalid)
 run_cmake_command(build-no-cache
   ${CMAKE_COMMAND} --build ${RunCMake_SOURCE_DIR})
 run_cmake_command(build-unknown-command-short

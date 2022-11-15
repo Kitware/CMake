@@ -522,25 +522,8 @@ int do_build(int ac, char const* const* av)
   if (ac >= 3) {
     std::vector<std::string> inputArgs;
 
-    bool hasPreset = false;
-    for (int i = 2; i < ac; ++i) {
-      if (strcmp(av[i], "--list-presets") == 0 ||
-          cmHasLiteralPrefix(av[i], "--preset=") ||
-          strcmp(av[i], "--preset") == 0) {
-        hasPreset = true;
-        break;
-      }
-    }
-
-    if (hasPreset) {
-      inputArgs.reserve(ac - 2);
-      cm::append(inputArgs, av + 2, av + ac);
-    } else {
-      dir = cmSystemTools::CollapseFullPath(av[2]);
-
-      inputArgs.reserve(ac - 3);
-      cm::append(inputArgs, av + 3, av + ac);
-    }
+    inputArgs.reserve(ac - 2);
+    cm::append(inputArgs, av + 2, av + ac);
 
     decltype(inputArgs.size()) i = 0;
     for (; i < inputArgs.size() && !nativeOptionsPassed; ++i) {
@@ -554,6 +537,11 @@ int do_build(int ac, char const* const* av)
           parsed = m.parse(arg, i, inputArgs);
           break;
         }
+      }
+      if (!matched && i == 0) {
+        dir = cmSystemTools::CollapseFullPath(arg);
+        matched = true;
+        parsed = true;
       }
       if (!(matched && parsed)) {
         dir.clear();
