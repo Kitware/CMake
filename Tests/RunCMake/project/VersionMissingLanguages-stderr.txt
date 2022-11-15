@@ -2,4 +2,4 @@ CMake Error at VersionMissingLanguages.cmake:2 \(project\):
   project with VERSION, DESCRIPTION or HOMEPAGE_URL must use LANGUAGES before
   language names.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)$
+  CMakeLists.txt:[0-9]+ \(include\)$

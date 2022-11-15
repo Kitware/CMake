@@ -52,3 +52,5 @@ run_cmake(CMP0048-NEW)
 run_cmake(CMP0096-WARN)
 run_cmake(CMP0096-OLD)
 run_cmake(CMP0096-NEW)
+
+run_cmake(NoMinimumRequired)
