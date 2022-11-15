@@ -1,0 +1,6 @@
+cmake-ostringstream-use-cmstrcat.cxx:5:3: warning: use strings and cmStrCat() instead of std::ostringstream [cmake-ostringstream-use-cmstrcat]
+  std::ostringstream test;
+  ^
+cmake-ostringstream-use-cmstrcat.cxx:8:13: warning: use strings and cmStrCat() instead of std::ostringstream [cmake-ostringstream-use-cmstrcat]
+void check2(std::ostringstream& test2)
+            ^
