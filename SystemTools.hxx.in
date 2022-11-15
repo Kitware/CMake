@@ -566,11 +566,34 @@ public:
                               const mode_t* mode = nullptr);
 
   /**
+   * Represent the result of a file copy operation.
+   * This is the result 'Status' and, if the operation failed,
+   * an indication of whether the error occurred on the source
+   * or destination path.
+   */
+  struct CopyStatus : public Status
+  {
+    enum WhichPath
+    {
+      NoPath,
+      SourcePath,
+      DestPath,
+    };
+    CopyStatus() = default;
+    CopyStatus(Status s, WhichPath p)
+      : Status(s)
+      , Path(p)
+    {
+    }
+    WhichPath Path = NoPath;
+  };
+
+  /**
    * Copy the source file to the destination file only
    * if the two files differ.
    */
-  static Status CopyFileIfDifferent(std::string const& source,
-                                    std::string const& destination);
+  static CopyStatus CopyFileIfDifferent(std::string const& source,
+                                        std::string const& destination);
 
   /**
    * Compare the contents of two files.  Return true if different
@@ -588,13 +611,13 @@ public:
   /**
    * Blockwise copy source to destination file
    */
-  static Status CopyFileContentBlockwise(std::string const& source,
-                                         std::string const& destination);
+  static CopyStatus CopyFileContentBlockwise(std::string const& source,
+                                             std::string const& destination);
   /**
    * Clone the source file to the destination file
    */
-  static Status CloneFileContent(std::string const& source,
-                                 std::string const& destination);
+  static CopyStatus CloneFileContent(std::string const& source,
+                                     std::string const& destination);
 
   /**
    * Return true if the two files are the same file
@@ -604,16 +627,17 @@ public:
   /**
    * Copy a file.
    */
-  static Status CopyFileAlways(std::string const& source,
-                               std::string const& destination);
+  static CopyStatus CopyFileAlways(std::string const& source,
+                                   std::string const& destination);
 
   /**
    * Copy a file.  If the "always" argument is true the file is always
    * copied.  If it is false, the file is copied only if it is new or
    * has changed.
    */
-  static Status CopyAFile(std::string const& source,
-                          std::string const& destination, bool always = true);
+  static CopyStatus CopyAFile(std::string const& source,
+                              std::string const& destination,
+                              bool always = true);
 
   /**
    * Copy content directory to another directory with all files and
