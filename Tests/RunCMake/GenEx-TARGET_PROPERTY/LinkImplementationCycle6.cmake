@@ -1,4 +1,4 @@
-
+enable_language(CXX)
 add_library(empty1 SHARED empty.cpp)
 add_library(empty2 SHARED empty.cpp)
 
@@ -12,3 +12,6 @@ target_link_libraries(empty1
 
 add_library(empty3 SHARED empty.cpp)
 target_link_libraries(empty3 empty1)
+
+# Suppress generator-specific targets that might pollute the stderr.
+set(CMAKE_SUPPRESS_REGENERATION TRUE)
