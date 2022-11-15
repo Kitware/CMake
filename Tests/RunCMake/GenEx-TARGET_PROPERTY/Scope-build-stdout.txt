@@ -1,0 +1,6 @@
+.*iface scope1: 'SCOPED_A_1;SCOPED_B_1'
+.*iface scope2: 'SCOPED_A_2'
+.*iface scope2 in scope1: 'SCOPED_A_2'
+.*custom scope1: 'SCOPED_A_1;SCOPED_B_1'
+.*custom scope2: 'SCOPED_A_2'
+.*custom scope2 in scope1: 'SCOPED_A_1'
