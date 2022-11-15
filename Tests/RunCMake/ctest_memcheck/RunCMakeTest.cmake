@@ -4,8 +4,6 @@ set(SITE test-site)
 set(BUILDNAME test-build)
 set(COVERAGE_COMMAND "")
 
-unset(ENV{CTEST_PARALLEL_LEVEL})
-
 function(run_mc_test CASE_NAME CHECKER_COMMAND)
   run_ctest(${CASE_NAME} ${ARGN})
 endfunction()
