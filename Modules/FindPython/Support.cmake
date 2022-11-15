@@ -508,27 +508,50 @@ function (_PYTHON_GET_CONFIG_VAR _PYTHON_PGCV_VALUE NAME)
         list (REMOVE_DUPLICATES _values)
       endif()
     elseif (NAME STREQUAL "SOABI")
+      # first step: compute SOABI form EXT_SUFFIX config variable
       execute_process (COMMAND ${_${_PYTHON_PREFIX}_INTERPRETER_LAUNCHER} "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c
-                               "import sys\ntry:\n   from distutils import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_config_var('SOABI') or '',sysconfig.get_config_var('EXT_SUFFIX') or '',sysconfig.get_config_var('SO') or '']))\nexcept Exception:\n   import sysconfig;sys.stdout.write(';'.join([sysconfig.get_config_var('SOABI') or '',sysconfig.get_config_var('EXT_SUFFIX') or '',sysconfig.get_config_var('SO') or '']))"
+                               "import sys\ntry:\n   from distutils import sysconfig\n   sys.stdout.write(sysconfig.get_config_var('EXT_SUFFIX') or '')\nexcept Exception:\n   import sysconfig;sys.stdout.write(sysconfig.get_config_var('EXT_SUFFIX') or '')"
                        RESULT_VARIABLE _result
-                       OUTPUT_VARIABLE _soabi
+                       OUTPUT_VARIABLE _values
                        ERROR_QUIET
                        OUTPUT_STRIP_TRAILING_WHITESPACE)
       if (_result)
         unset (_values)
       else()
-        foreach (_item IN LISTS _soabi)
-          if (_item)
-            set (_values "${_item}")
-            break()
-          endif()
-        endforeach()
         if (_values)
           # clean-up: remove prefix character and suffix
           if (_values MATCHES "^(\\.${CMAKE_SHARED_LIBRARY_SUFFIX}|\\.so|\\.pyd)$")
             set(_values "")
           else()
             string (REGEX REPLACE "^[.-](.+)(${CMAKE_SHARED_LIBRARY_SUFFIX}|\\.(so|pyd))$" "\\1" _values "${_values}")
+          endif()
+        endif()
+      endif()
+
+      # second step: use SOABI or SO config variables as fallback
+      if (NOT _values)
+        execute_process (COMMAND ${_${_PYTHON_PREFIX}_INTERPRETER_LAUNCHER} "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c
+          "import sys\ntry:\n   from distutils import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_config_var('SOABI') or '',sysconfig.get_config_var('SO') or '']))\nexcept Exception:\n   import sysconfig;sys.stdout.write(';'.join([sysconfig.get_config_var('SOABI') or '',sysconfig.get_config_var('SO') or '']))"
+          RESULT_VARIABLE _result
+          OUTPUT_VARIABLE _soabi
+          ERROR_QUIET
+          OUTPUT_STRIP_TRAILING_WHITESPACE)
+        if (_result)
+          unset (_values)
+        else()
+          foreach (_item IN LISTS _soabi)
+            if (_item)
+              set (_values "${_item}")
+              break()
+            endif()
+          endforeach()
+          if (_values)
+            # clean-up: remove prefix character and suffix
+            if (_values MATCHES "^(\\.${CMAKE_SHARED_LIBRARY_SUFFIX}|\\.so|\\.pyd)$")
+              set(_values "")
+            else()
+              string (REGEX REPLACE "^[.-](.+)(${CMAKE_SHARED_LIBRARY_SUFFIX}|\\.(so|pyd))$" "\\1" _values "${_values}")
+            endif()
           endif()
         endif()
       endif()
