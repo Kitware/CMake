@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGeneratorExpression.h"
 
+#include <algorithm>
 #include <cassert>
 #include <memory>
 #include <utility>
@@ -227,22 +228,26 @@ static std::string stripExportInterface(
     std::string::size_type bPos = input.find("$<BUILD_INTERFACE:", lastPos);
     std::string::size_type iPos = input.find("$<INSTALL_INTERFACE:", lastPos);
 
-    if (bPos == std::string::npos && iPos == std::string::npos) {
+    pos = std::min({ bPos, iPos });
+    if (pos == std::string::npos) {
       break;
     }
 
-    if (bPos == std::string::npos) {
-      pos = iPos;
-    } else if (iPos == std::string::npos) {
-      pos = bPos;
-    } else {
-      pos = (bPos < iPos) ? bPos : iPos;
-    }
-
     result += input.substr(lastPos, pos - lastPos);
-    const bool gotInstallInterface = input[pos + 2] == 'I';
-    pos += gotInstallInterface ? sizeof("$<INSTALL_INTERFACE:") - 1
-                               : sizeof("$<BUILD_INTERFACE:") - 1;
+    enum class FoundGenex
+    {
+      BuildInterface,
+      InstallInterface,
+    } foundGenex = FoundGenex::BuildInterface;
+    if (pos == bPos) {
+      foundGenex = FoundGenex::BuildInterface;
+      pos += cmStrLen("$<BUILD_INTERFACE:");
+    } else if (pos == iPos) {
+      foundGenex = FoundGenex::InstallInterface;
+      pos += cmStrLen("$<INSTALL_INTERFACE:");
+    } else {
+      assert(false && "Invalid position found");
+    }
     nestingLevel = 1;
     const char* c = input.c_str() + pos;
     const char* const cStart = c;
@@ -258,10 +263,10 @@ static std::string stripExportInterface(
           continue;
         }
         if (context == cmGeneratorExpression::BuildInterface &&
-            !gotInstallInterface) {
+            foundGenex == FoundGenex::BuildInterface) {
           result += input.substr(pos, c - cStart);
         } else if (context == cmGeneratorExpression::InstallInterface &&
-                   gotInstallInterface) {
+                   foundGenex == FoundGenex::InstallInterface) {
           const std::string content = input.substr(pos, c - cStart);
           if (resolveRelative) {
             prefixItems(content, result, "${_IMPORT_PREFIX}/");
@@ -274,9 +279,15 @@ static std::string stripExportInterface(
     }
     const std::string::size_type traversed = (c - cStart) + 1;
     if (!*c) {
-      result += std::string(gotInstallInterface ? "$<INSTALL_INTERFACE:"
-                                                : "$<BUILD_INTERFACE:") +
-        input.substr(pos, traversed);
+      auto remaining = input.substr(pos, traversed);
+      switch (foundGenex) {
+        case FoundGenex::BuildInterface:
+          result = cmStrCat(result, "$<BUILD_INTERFACE:", remaining);
+          break;
+        case FoundGenex::InstallInterface:
+          result = cmStrCat(result, "$<INSTALL_INTERFACE:", remaining);
+          break;
+      }
     }
     pos += traversed;
     lastPos = pos;
