@@ -736,6 +736,8 @@ b:macos-x86_64-ninja:
         - .cmake_build_artifacts
         - .macos_x86_64_builder_tags
         - .run_manually
+    variables:
+        CMAKE_CI_JOB_CONTINUOUS: "true"
 
 b:macos-arm64-ninja:
     extends:
@@ -759,6 +761,7 @@ t:macos-x86_64-ninja:
     needs:
         - b:macos-x86_64-ninja
     variables:
+        CMAKE_CI_JOB_CONTINUOUS: "true"
         CMAKE_CI_JOB_NIGHTLY_NINJA: "true"
 
 t:macos-arm64-ninja:
