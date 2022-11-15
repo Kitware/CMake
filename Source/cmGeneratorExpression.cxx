@@ -227,8 +227,10 @@ static std::string stripExportInterface(
   while (true) {
     std::string::size_type bPos = input.find("$<BUILD_INTERFACE:", lastPos);
     std::string::size_type iPos = input.find("$<INSTALL_INTERFACE:", lastPos);
+    std::string::size_type lPos =
+      input.find("$<BUILD_LOCAL_INTERFACE:", lastPos);
 
-    pos = std::min({ bPos, iPos });
+    pos = std::min({ bPos, iPos, lPos });
     if (pos == std::string::npos) {
       break;
     }
@@ -238,6 +240,7 @@ static std::string stripExportInterface(
     {
       BuildInterface,
       InstallInterface,
+      BuildLocalInterface,
     } foundGenex = FoundGenex::BuildInterface;
     if (pos == bPos) {
       foundGenex = FoundGenex::BuildInterface;
@@ -245,6 +248,9 @@ static std::string stripExportInterface(
     } else if (pos == iPos) {
       foundGenex = FoundGenex::InstallInterface;
       pos += cmStrLen("$<INSTALL_INTERFACE:");
+    } else if (pos == lPos) {
+      foundGenex = FoundGenex::BuildLocalInterface;
+      pos += cmStrLen("$<BUILD_LOCAL_INTERFACE:");
     } else {
       assert(false && "Invalid position found");
     }
@@ -286,6 +292,9 @@ static std::string stripExportInterface(
           break;
         case FoundGenex::InstallInterface:
           result = cmStrCat(result, "$<INSTALL_INTERFACE:", remaining);
+          break;
+        case FoundGenex::BuildLocalInterface:
+          result = cmStrCat(result, "$<BUILD_LOCAL_INTERFACE:", remaining);
           break;
       }
     }

@@ -1704,6 +1704,13 @@ Export And Install Expressions
   when the target is used by another target in the same buildsystem. Expands to
   the empty string otherwise.
 
+.. genex:: $<BUILD_LOCAL_INTERFACE:...>
+
+  .. versionadded:: 3.26
+
+  Content of ``...`` when the target is used by another target in the same
+  buildsystem. Expands to the empty string otherwise.
+
 .. genex:: $<INSTALL_PREFIX>
 
   Content of the install prefix when the target is exported via
