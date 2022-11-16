@@ -11,8 +11,11 @@ dnf install --setopt=install_weak_deps=False -y \
 
 # Install development tools.
 dnf install --setopt=install_weak_deps=False -y \
+    clang \
     clang-tools-extra \
     compiler-rt \
+    flang \
+    flang-devel \
     gcc-c++ \
     git-core \
     make
