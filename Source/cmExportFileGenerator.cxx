@@ -669,8 +669,7 @@ void cmExportFileGenerator::ResolveTargetsInGeneratorExpression(
 
   while ((pos = input.find("$<TARGET_PROPERTY:", lastPos)) !=
          std::string::npos) {
-    std::string::size_type nameStartPos =
-      pos + sizeof("$<TARGET_PROPERTY:") - 1;
+    std::string::size_type nameStartPos = pos + cmStrLen("$<TARGET_PROPERTY:");
     std::string::size_type closePos = input.find('>', nameStartPos);
     std::string::size_type commaPos = input.find(',', nameStartPos);
     std::string::size_type nextOpenPos = input.find("$<", nameStartPos);
@@ -696,7 +695,7 @@ void cmExportFileGenerator::ResolveTargetsInGeneratorExpression(
   pos = 0;
   lastPos = pos;
   while ((pos = input.find("$<TARGET_NAME:", lastPos)) != std::string::npos) {
-    std::string::size_type nameStartPos = pos + sizeof("$<TARGET_NAME:") - 1;
+    std::string::size_type nameStartPos = pos + cmStrLen("$<TARGET_NAME:");
     std::string::size_type endPos = input.find('>', nameStartPos);
     if (endPos == std::string::npos) {
       errorString = "$<TARGET_NAME:...> expression incomplete";
@@ -721,7 +720,7 @@ void cmExportFileGenerator::ResolveTargetsInGeneratorExpression(
   lastPos = pos;
   while (errorString.empty() &&
          (pos = input.find("$<LINK_ONLY:", lastPos)) != std::string::npos) {
-    std::string::size_type nameStartPos = pos + sizeof("$<LINK_ONLY:") - 1;
+    std::string::size_type nameStartPos = pos + cmStrLen("$<LINK_ONLY:");
     std::string::size_type endPos = input.find('>', nameStartPos);
     if (endPos == std::string::npos) {
       errorString = "$<LINK_ONLY:...> expression incomplete";
