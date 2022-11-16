@@ -196,6 +196,26 @@ t:debian10-makefiles-clang:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
+t:fedora37-ninja-clang:
+    extends:
+        - .fedora37_ninja_clang
+        - .cmake_test_linux_release
+        - .linux_builder_tags_qt
+        - .run_dependent
+        - .needs_centos6_x86_64
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
+t:fedora37-makefiles-clang:
+    extends:
+        - .fedora37_makefiles_clang
+        - .cmake_test_linux_release
+        - .linux_builder_tags_qt
+        - .run_dependent
+        - .needs_centos6_x86_64
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
 t:fedora37-makefiles:
     extends:
         - .fedora37_makefiles

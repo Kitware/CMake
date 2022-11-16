@@ -200,6 +200,19 @@
     variables:
         CMAKE_CONFIGURATION: debian10_ninja_clang
 
+.fedora37_makefiles_clang:
+    extends: .fedora37
+
+    variables:
+        CMAKE_CONFIGURATION: fedora37_makefiles_clang
+        CMAKE_GENERATOR: "Unix Makefiles"
+
+.fedora37_ninja_clang:
+    extends: .fedora37
+
+    variables:
+        CMAKE_CONFIGURATION: fedora37_ninja_clang
+
 ### Sanitizers
 
 .fedora_memcheck:
