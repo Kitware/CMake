@@ -27,11 +27,16 @@ int main()
   (void)::strlen("Goodbye");
   (void)std::strlen("Hola");
   (void)ns1::strlen("Bonjour");
+  (void)(sizeof("Hallo") - 1);
+  (void)(4 + sizeof("Hallo") - 1);
+  (void)(sizeof "Hallo" - 1);
+  (void)(4 + sizeof "Hallo" - 1);
 
   // No correction needed
   (void)ns2::strlen("Salve");
   (void)cmStrLen("Konnichiwa");
   (void)strlen(s0);
+  (void)(sizeof("Hallo") - 2);
 
   return 0;
 }

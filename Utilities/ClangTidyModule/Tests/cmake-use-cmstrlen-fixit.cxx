@@ -27,11 +27,16 @@ int main()
   (void)cmStrLen("Goodbye");
   (void)cmStrLen("Hola");
   (void)cmStrLen("Bonjour");
+  (void)(cmStrLen("Hallo"));
+  (void)(4 + cmStrLen("Hallo"));
+  (void)(cmStrLen("Hallo"));
+  (void)(4 + cmStrLen("Hallo"));
 
   // No correction needed
   (void)ns2::strlen("Salve");
   (void)cmStrLen("Konnichiwa");
   (void)strlen(s0);
+  (void)(sizeof("Hallo") - 2);
 
   return 0;
 }
