@@ -8,7 +8,7 @@
    loosely into four groups 1) Utility 2) cmMakefile 3) cmSourceFile 4)
    cmSystemTools. Within each grouping functions are listed alphabetically */
 /*=========================================================================*/
-#ifndef cmCPluginAPI_h
+#ifndef cmCPluginAPI_h /* NOLINT(cmake-use-pragma-once) */
 #define cmCPluginAPI_h
 
 #define CMAKE_VERSION_MAJOR 2
