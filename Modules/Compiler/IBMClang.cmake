@@ -36,7 +36,7 @@ macro(__compiler_ibmclang lang)
   set(CMAKE_${lang}_LINKER_WRAPPER_FLAG "-Xlinker" " ")
   set(CMAKE_${lang}_LINKER_WRAPPER_FLAG_SEP)
 
-  if(CMAKE_${lang}_COMPILER_TARGET)
+  if(CMAKE_${lang}_COMPILER_TARGET AND "${lang}" STREQUAL "CXX")
     list(APPEND CMAKE_${lang}_COMPILER_PREDEFINES_COMMAND "--target=${CMAKE_${lang}_COMPILER_TARGET}")
   endif()
 
@@ -66,7 +66,9 @@ macro(__compiler_ibmclang lang)
     "\"${__ranlib}\" <TARGET>"
   )
 
-  list(APPEND CMAKE_${lang}_COMPILER_PREDEFINES_COMMAND "-dM" "-E" "-c" "${CMAKE_ROOT}/Modules/CMakeCXXCompilerABI.cpp")
+  if("${lang}" STREQUAL "CXX")
+    list(APPEND CMAKE_${lang}_COMPILER_PREDEFINES_COMMAND "-dM" "-E" "-c" "${CMAKE_ROOT}/Modules/CMakeCXXCompilerABI.cpp")
+  endif()
 
   set(CMAKE_PCH_EXTENSION .pch)
 
