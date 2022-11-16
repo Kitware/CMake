@@ -2677,8 +2677,10 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
 
                 bool editAndContinueDebugInfo = false;
                 bool programDatabaseDebugInfo = false;
-                if (cm::optional<std::string> msvcDebugInformationFormat =
-                      this->GetMSVCDebugFormatName(config, target)) {
+                cm::optional<std::string> msvcDebugInformationFormat =
+                  this->GetMSVCDebugFormatName(config, target);
+                if (msvcDebugInformationFormat &&
+                    !msvcDebugInformationFormat->empty()) {
                   editAndContinueDebugInfo =
                     *msvcDebugInformationFormat == "EditAndContinue";
                   programDatabaseDebugInfo =
