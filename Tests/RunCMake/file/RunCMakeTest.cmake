@@ -65,6 +65,8 @@ run_cmake_script(COPY_FILE-file-ONLY_IF_DIFFERENT-no-overwrite)
 run_cmake_script(COPY_FILE-link-to-file)
 run_cmake_script(COPY_FILE-arg-missing)
 run_cmake_script(COPY_FILE-arg-unknown)
+run_cmake_script(COPY_FILE-input-missing)
+run_cmake_script(COPY_FILE-output-missing)
 
 run_cmake_script(RENAME-file-replace)
 run_cmake_script(RENAME-file-to-file)
