@@ -1,6 +1,6 @@
-
-add_library(empty1 SHARED empty.cpp)
-add_library(empty2 SHARED empty.cpp)
+enable_language(CXX)
+add_library(empty1 empty.cpp)
+add_library(empty2 empty.cpp)
 
 # The INTERFACE_INCLUDE_DIRECTORIES do not depend on the link interface.
 # On its own, this is fine. It is only when used by empty3 that an error
@@ -10,5 +10,8 @@ target_link_libraries(empty1
     $<$<STREQUAL:$<TARGET_PROPERTY:INTERFACE_INCLUDE_DIRECTORIES>,/foo/bar>:empty2>
 )
 
-add_library(empty3 SHARED empty.cpp)
+add_library(empty3 empty.cpp)
 target_link_libraries(empty3 empty1)
+
+# Suppress generator-specific targets that might pollute the stderr.
+set(CMAKE_SUPPRESS_REGENERATION TRUE)

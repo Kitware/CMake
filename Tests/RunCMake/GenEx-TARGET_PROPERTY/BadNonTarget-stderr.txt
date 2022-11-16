@@ -1,4 +1,4 @@
-CMake Error at BadNonTarget.cmake:7 \(include_directories\):
+CMake Error at BadNonTarget.cmake:6 \(include_directories\):
   Error evaluating generator expression:
 
     \$<TARGET_PROPERTY:NonExistent,INCLUDE_DIRECTORIES>
