@@ -181,7 +181,7 @@ t:debian10-ninja-clang:
         - .debian10_ninja_clang
         - .cmake_test_linux_release
         - .linux_builder_tags_qt
-        - .run_manually
+        - .run_dependent
         - .needs_centos6_x86_64
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
@@ -191,7 +191,7 @@ t:debian10-makefiles-clang:
         - .debian10_makefiles_clang
         - .cmake_test_linux_release
         - .linux_builder_tags_qt
-        - .run_manually
+        - .run_dependent
         - .needs_centos6_x86_64
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
