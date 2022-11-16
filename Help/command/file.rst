@@ -1214,6 +1214,9 @@ directed to do so with the ``COMPRESSION`` option.  Valid values for
   The ``<compression-level>`` should be between 0-9, with the default being 0.
   The ``COMPRESSION`` option must be present when ``COMPRESSION_LEVEL`` is given.
 
+.. versionadded:: 3.26
+  The ``<compression-level>`` of the ``Zstd`` algorithm can be set between 0-19.
+
 .. note::
   With ``FORMAT`` set to ``raw`` only one file will be compressed with the
   compression type specified by ``COMPRESSION``.
