@@ -57,7 +57,7 @@ p:source-package:
 
 p:doc-package:
     extends:
-        - .fedora36_sphinx_package
+        - .fedora37_sphinx_package
         - .cmake_prep_doc_linux
         - .linux_builder_tags_qt
         - .cmake_doc_artifacts
@@ -105,16 +105,16 @@ l:iwyu-debian10:
         - .linux_builder_tags
         - .run_automatically
 
-l:tidy-fedora36:
+l:tidy-fedora37:
     extends:
-        - .fedora36_tidy
+        - .fedora37_tidy
         - .cmake_build_linux
         - .linux_builder_tags_qt
         - .run_automatically
 
-l:sphinx-fedora36:
+l:sphinx-fedora37:
     extends:
-        - .fedora36_sphinx
+        - .fedora37_sphinx
         - .cmake_build_linux
         - .linux_builder_tags_qt
         - .run_automatically
@@ -122,9 +122,9 @@ l:sphinx-fedora36:
         CMAKE_CI_JOB_CONTINUOUS: "true"
         CMAKE_CI_JOB_HELP: "true"
 
-l:clang-analyzer-fedora36:
+l:clang-analyzer-fedora37:
     extends:
-        - .fedora36_clang_analyzer
+        - .fedora37_clang_analyzer
         - .cmake_build_linux
         - .linux_builder_tags_qt
         - .run_automatically
@@ -196,17 +196,17 @@ t:debian10-makefiles-clang:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora36-makefiles:
+t:fedora37-makefiles:
     extends:
-        - .fedora36_makefiles
+        - .fedora37_makefiles
         - .cmake_test_linux_release
         - .linux_builder_tags_qt
         - .run_dependent
         - .needs_centos6_x86_64
 
-t:fedora36-makefiles-nospace:
+t:fedora37-makefiles-nospace:
     extends:
-        - .fedora36_makefiles
+        - .fedora37_makefiles
         - .cmake_test_linux_release
         - .linux_builder_tags_qt
         - .cmake_junit_artifacts
@@ -214,7 +214,7 @@ t:fedora36-makefiles-nospace:
         - .needs_centos6_x86_64
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake-ci"
-        CMAKE_CI_BUILD_NAME: fedora36_makefiles_nospace
+        CMAKE_CI_BUILD_NAME: fedora37_makefiles_nospace
         CMAKE_CI_JOB_NIGHTLY: "true"
 
 t:cuda9.2-nvidia:
@@ -295,9 +295,9 @@ t:linux-gcc-cxx-modules-ninja-multi:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-b:fedora36-ninja:
+b:fedora37-ninja:
     extends:
-        - .fedora36_ninja
+        - .fedora37_ninja
         - .cmake_build_linux
         - .cmake_build_artifacts
         - .linux_builder_tags_qt
@@ -332,40 +332,40 @@ b:debian10-aarch64-extdeps:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-b:fedora36-extdeps:
+b:fedora37-extdeps:
     extends:
-        - .fedora36_extdeps
+        - .fedora37_extdeps
         - .cmake_build_linux_standalone
         - .linux_builder_tags
         - .run_manually
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora36-ninja:
+t:fedora37-ninja:
     extends:
-        - .fedora36_ninja
+        - .fedora37_ninja
         - .cmake_test_linux
         - .linux_builder_tags_x11
         - .cmake_test_artifacts
         - .run_dependent
     dependencies:
-        - b:fedora36-ninja
+        - b:fedora37-ninja
     needs:
-        - b:fedora36-ninja
+        - b:fedora37-ninja
     variables:
         CMAKE_CI_JOB_CONTINUOUS: "true"
 
-t:fedora36-ninja-multi:
+t:fedora37-ninja-multi:
     extends:
-        - .fedora36_ninja_multi
+        - .fedora37_ninja_multi
         - .cmake_test_linux_external
         - .linux_builder_tags_qt
         - .cmake_junit_artifacts
         - .run_dependent
     dependencies:
-        - t:fedora36-ninja
+        - t:fedora37-ninja
     needs:
-        - t:fedora36-ninja
+        - t:fedora37-ninja
 
 t:intel2016-makefiles:
     extends:
@@ -704,9 +704,9 @@ u:linux-aarch64-package:
 
 ## Sanitizer builds
 
-b:fedora36-asan:
+b:fedora37-asan:
     extends:
-        - .fedora36_asan
+        - .fedora37_asan
         - .cmake_build_linux
         - .cmake_build_artifacts
         - .linux_builder_tags_qt
@@ -714,16 +714,16 @@ b:fedora36-asan:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora36-asan:
+t:fedora37-asan:
     extends:
-        - .fedora36_asan
+        - .fedora37_asan
         - .cmake_memcheck_linux
         - .linux_builder_tags_qt
         - .run_dependent
     dependencies:
-        - b:fedora36-asan
+        - b:fedora37-asan
     needs:
-        - b:fedora36-asan
+        - b:fedora37-asan
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
