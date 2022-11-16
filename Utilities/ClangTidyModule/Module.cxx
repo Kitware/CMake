@@ -7,6 +7,7 @@
 #include "UseBespokeEnumClassCheck.h"
 #include "UseCmstrlenCheck.h"
 #include "UseCmsysFstreamCheck.h"
+#include "UsePragmaOnceCheck.h"
 
 namespace clang {
 namespace tidy {
@@ -23,6 +24,7 @@ public:
       "cmake-use-bespoke-enum-class");
     CheckFactories.registerCheck<OstringstreamUseCmstrcatCheck>(
       "cmake-ostringstream-use-cmstrcat");
+    CheckFactories.registerCheck<UsePragmaOnceCheck>("cmake-use-pragma-once");
   }
 };
 
