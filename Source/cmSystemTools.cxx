@@ -1111,13 +1111,6 @@ bool cmMoveFile(std::wstring const& oldname, std::wstring const& newname,
 }
 #endif
 
-bool cmSystemTools::CopySingleFile(const std::string& oldname,
-                                   const std::string& newname)
-{
-  return cmSystemTools::CopySingleFile(oldname, newname, CopyWhen::Always) ==
-    CopyResult::Success;
-}
-
 cmSystemTools::CopyResult cmSystemTools::CopySingleFile(
   std::string const& oldname, std::string const& newname, CopyWhen when,
   std::string* err)
