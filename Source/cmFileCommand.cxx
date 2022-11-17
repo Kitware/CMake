@@ -3404,20 +3404,29 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
   }
 
   int compressionLevel = 0;
+  int minCompressionLevel = 0;
+  int maxCompressionLevel = 9;
+  if (compress == cmSystemTools::TarCompressZstd) {
+    maxCompressionLevel = 19;
+  }
+
   if (!parsedArgs.CompressionLevel.empty()) {
     if (parsedArgs.CompressionLevel.size() != 1 &&
         !std::isdigit(parsedArgs.CompressionLevel[0])) {
-      status.SetError(cmStrCat("compression level ",
-                               parsedArgs.CompressionLevel,
-                               " should be in range 0 to 9"));
+      status.SetError(
+        cmStrCat("compression level ", parsedArgs.CompressionLevel, " for ",
+                 parsedArgs.Compression, " should be in range ",
+                 minCompressionLevel, " to ", maxCompressionLevel));
       cmSystemTools::SetFatalErrorOccurred();
       return false;
     }
     compressionLevel = std::stoi(parsedArgs.CompressionLevel);
-    if (compressionLevel < 0 || compressionLevel > 9) {
-      status.SetError(cmStrCat("compression level ",
-                               parsedArgs.CompressionLevel,
-                               " should be in range 0 to 9"));
+    if (compressionLevel < minCompressionLevel ||
+        compressionLevel > maxCompressionLevel) {
+      status.SetError(
+        cmStrCat("compression level ", parsedArgs.CompressionLevel, " for ",
+                 parsedArgs.Compression, " should be in range ",
+                 minCompressionLevel, " to ", maxCompressionLevel));
       cmSystemTools::SetFatalErrorOccurred();
       return false;
     }
