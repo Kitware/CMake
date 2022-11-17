@@ -1935,7 +1935,19 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
        // selection, this will have to be reconciled with it.
        this->Makefile->IsOn(
          cmStrCat("CMAKE_", lang, "_LINK_WITH_STANDARD_COMPILE_OPTION")))) {
-    this->AddCompilerRequirementFlag(flags, target, lang, config);
+    cmStandardLevelResolver standardResolver(this->Makefile);
+    std::string const& optionFlagDef =
+      standardResolver.GetCompileOptionDef(target, lang, config);
+    if (!optionFlagDef.empty()) {
+      cmValue opt =
+        target->Target->GetMakefile()->GetDefinition(optionFlagDef);
+      if (opt) {
+        std::vector<std::string> optVec = cmExpandedList(*opt);
+        for (std::string const& i : optVec) {
+          this->AppendFlagEscape(flags, i);
+        }
+      }
+    }
   }
 
   std::string compiler = this->Makefile->GetSafeDefinition(
@@ -2218,25 +2230,6 @@ void cmLocalGenerator::AddSharedFlags(std::string& flags,
     this->AppendFlags(flags,
                       this->Makefile->GetSafeDefinition(
                         cmStrCat("CMAKE_SHARED_LIBRARY_", lang, "_FLAGS")));
-  }
-}
-
-void cmLocalGenerator::AddCompilerRequirementFlag(
-  std::string& flags, cmGeneratorTarget const* target, const std::string& lang,
-  const std::string& config)
-{
-  cmStandardLevelResolver standardResolver(this->Makefile);
-
-  std::string const& optionFlagDef =
-    standardResolver.GetCompileOptionDef(target, lang, config);
-  if (!optionFlagDef.empty()) {
-    cmValue opt = target->Target->GetMakefile()->GetDefinition(optionFlagDef);
-    if (opt) {
-      std::vector<std::string> optVec = cmExpandedList(*opt);
-      for (std::string const& i : optVec) {
-        this->AppendFlagEscape(flags, i);
-      }
-    }
   }
 }
 
