@@ -2,7 +2,7 @@ if(NOT "${CMAKE_CURRENT_SOURCE_DIR}" MATCHES "^/")
   set(slash /)
 endif()
 file(DOWNLOAD
-  "file://${slash}${CMAKE_CURRENT_SOURCE_DIR}/DOWNLOAD-no-save-md5.txt"
+  "file://${slash}${CMAKE_CURRENT_SOURCE_DIR}/no-save-md5.txt"
   EXPECTED_HASH MD5=55555555555555555555555555555555
   STATUS status
   )

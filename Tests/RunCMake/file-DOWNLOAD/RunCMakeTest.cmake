@@ -1,0 +1,10 @@
+include(RunCMake)
+
+run_cmake(hash-mismatch)
+run_cmake(unused-argument)
+run_cmake(httpheader-not-set)
+run_cmake(netrc-bad)
+run_cmake(tls-cainfo-not-set)
+run_cmake(tls-verify-not-set)
+run_cmake(pass-not-set)
+run_cmake(no-save-hash)
