@@ -109,12 +109,13 @@ cmGlobalNinjaGenerator* cmNinjaTargetGenerator::GetGlobalGenerator() const
 }
 
 std::string cmNinjaTargetGenerator::LanguageCompilerRule(
-  const std::string& lang, const std::string& config) const
+  const std::string& lang, const std::string& config,
+  WithScanning withScanning) const
 {
   return cmStrCat(
     lang, "_COMPILER__",
     cmGlobalNinjaGenerator::EncodeRuleName(this->GeneratorTarget->GetName()),
-    '_', config);
+    withScanning == WithScanning::Yes ? "_scanned_" : "_unscanned_", config);
 }
 
 std::string cmNinjaTargetGenerator::LanguagePreprocessAndScanRule(
@@ -229,6 +230,32 @@ cmFileSet const* cmNinjaTargetGenerator::GetFileSetForSource(
     return nullptr;
   }
   return fsit->second;
+}
+
+bool cmNinjaTargetGenerator::NeedDyndepForSource(std::string const& lang,
+                                                 std::string const& config,
+                                                 cmSourceFile const* sf)
+{
+  bool const needDyndep = this->NeedDyndep(lang, config);
+  if (!needDyndep) {
+    return false;
+  }
+  auto const* fs = this->GetFileSetForSource(config, sf);
+  if (fs &&
+      (fs->GetType() == "CXX_MODULES"_s ||
+       fs->GetType() == "CXX_MODULE_HEADER_UNITS"_s)) {
+    return true;
+  }
+  auto const sfProp = sf->GetProperty("CXX_SCAN_FOR_MODULES");
+  if (sfProp.IsSet()) {
+    return sfProp.IsOn();
+  }
+  auto const tgtProp =
+    this->GeneratorTarget->GetProperty("CXX_SCAN_FOR_MODULES");
+  if (tgtProp.IsSet()) {
+    return tgtProp.IsOn();
+  }
+  return true;
 }
 
 std::string cmNinjaTargetGenerator::OrderDependsTargetForTarget(
@@ -671,6 +698,19 @@ cmNinjaRule GetScanRule(
 void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
                                               const std::string& config)
 {
+  // For some cases we scan to dynamically discover dependencies.
+  bool const needDyndep = this->NeedDyndep(lang, config);
+
+  if (needDyndep) {
+    this->WriteCompileRule(lang, config, WithScanning::Yes);
+  }
+  this->WriteCompileRule(lang, config, WithScanning::No);
+}
+
+void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
+                                              const std::string& config,
+                                              WithScanning withScanning)
+{
   cmRulePlaceholderExpander::RuleVariables vars;
   vars.CMTargetName = this->GetGeneratorTarget()->GetName().c_str();
   vars.CMTargetType =
@@ -690,7 +730,6 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
   cmMakefile* mf = this->GetMakefile();
 
   // For some cases we scan to dynamically discover dependencies.
-  bool const needDyndep = this->NeedDyndep(lang, config);
   bool const compilationPreprocesses = !this->NeedExplicitPreprocessing(lang);
 
   std::string flags = "$FLAGS";
@@ -728,7 +767,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
     this->GetLocalGenerator()->ConvertToOutputFormat(
       cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
 
-  if (needDyndep) {
+  if (withScanning == WithScanning::Yes) {
     const auto& scanDepType = this->GetMakefile()->GetSafeDefinition(
       cmStrCat("CMAKE_EXPERIMENTAL_", lang, "_SCANDEP_DEPFILE_FORMAT"));
 
@@ -834,7 +873,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
     this->GetGlobalGenerator()->AddRule(rule);
   }
 
-  cmNinjaRule rule(this->LanguageCompilerRule(lang, config));
+  cmNinjaRule rule(this->LanguageCompilerRule(lang, config, withScanning));
   // If using a response file, move defines, includes, and flags into it.
   if (!responseFlag.empty()) {
     rule.RspFile = "$RSP_FILE";
@@ -888,7 +927,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
     }
   }
 
-  if (needDyndep && !modmapFormat.empty()) {
+  if (withScanning == WithScanning::Yes && !modmapFormat.empty()) {
     std::string modmapFlags = mf->GetRequiredDefinition(
       cmStrCat("CMAKE_EXPERIMENTAL_", lang, "_MODULE_MAP_FLAG"));
     cmSystemTools::ReplaceString(modmapFlags, "<MODULE_MAP_FILE>",
@@ -1348,8 +1387,10 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     !(language == "RC" || (language == "CUDA" && !flag));
   int const commandLineLengthLimit =
     ((lang_supports_response && this->ForceResponseFile())) ? -1 : 0;
+  bool const needDyndep = this->NeedDyndepForSource(language, config, source);
 
-  cmNinjaBuild objBuild(this->LanguageCompilerRule(language, config));
+  cmNinjaBuild objBuild(this->LanguageCompilerRule(
+    language, config, needDyndep ? WithScanning::Yes : WithScanning::No));
   cmNinjaVars& vars = objBuild.Variables;
   vars["FLAGS"] = this->ComputeFlagsForObject(source, language, config);
   vars["DEFINES"] = this->ComputeDefines(source, language, config);
@@ -1458,7 +1499,6 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   }
 
   // For some cases we scan to dynamically discover dependencies.
-  bool const needDyndep = this->NeedDyndep(language, config);
   bool const compilationPreprocesses =
     !this->NeedExplicitPreprocessing(language);
 
