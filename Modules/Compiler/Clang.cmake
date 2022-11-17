@@ -44,7 +44,7 @@ else()
     set(CMAKE_${lang}_LINKER_WRAPPER_FLAG "-Xlinker" " ")
     set(CMAKE_${lang}_LINKER_WRAPPER_FLAG_SEP)
 
-    if(CMAKE_${lang}_COMPILER_TARGET)
+    if(CMAKE_${lang}_COMPILER_TARGET AND "${lang}" STREQUAL "CXX")
       if(CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 3.4.0)
         list(APPEND CMAKE_${lang}_COMPILER_PREDEFINES_COMMAND "-target" "${CMAKE_${lang}_COMPILER_TARGET}")
       else()
