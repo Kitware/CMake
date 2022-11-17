@@ -374,3 +374,16 @@ else()
   target_link_libraries(CompileFeaturesGenex3 PRIVATE std_11_iface)
   target_compile_definitions(CompileFeaturesGenex3 PRIVATE ${genex_test_defs} ALLOW_LATER_STANDARDS=1)
 endif()
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC"
+    AND (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.30
+      # The MSVC 14.29.30133 toolset supports C++20,
+      # but MSBuild puts the flags in the wrong order.
+      OR (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.29.30129 AND NOT CMAKE_GENERATOR MATCHES "Visual Studio")
+      )
+    )
+  add_library(msvc_permissive msvc_permissive.cxx)
+  target_compile_features(msvc_permissive PRIVATE cxx_std_20)
+  # The `-std:c++20` flag implies `-permissive-`.  Test passing `-permissive` afterward.
+  target_compile_options(msvc_permissive PRIVATE -permissive)
+endif()
