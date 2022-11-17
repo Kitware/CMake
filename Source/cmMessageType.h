@@ -16,3 +16,19 @@ enum class MessageType
   DEPRECATION_ERROR,
   DEPRECATION_WARNING
 };
+
+namespace Message {
+
+/** \brief Define log level constants. */
+enum class LogLevel
+{
+  LOG_UNDEFINED,
+  LOG_ERROR,
+  LOG_WARNING,
+  LOG_NOTICE,
+  LOG_STATUS,
+  LOG_VERBOSE,
+  LOG_DEBUG,
+  LOG_TRACE
+};
+}

@@ -270,7 +270,7 @@ public:
    */
   void AddSubDirectory(const std::string& fullSrcDir,
                        const std::string& fullBinDir, bool excludeFromAll,
-                       bool immediate);
+                       bool immediate, bool system);
 
   void Configure();
 
@@ -375,6 +375,20 @@ public:
     cmMakefile* Makefile;
   };
   friend class PolicyPushPop;
+
+  /** Helper class to push and pop variables scopes automatically. */
+  class VariablePushPop
+  {
+  public:
+    VariablePushPop(cmMakefile* m);
+    ~VariablePushPop();
+
+    VariablePushPop(VariablePushPop const&) = delete;
+    VariablePushPop& operator=(VariablePushPop const&) = delete;
+
+  private:
+    cmMakefile* Makefile;
+  };
 
   /**
    * Determine if the given context, name pair has already been reported
@@ -794,7 +808,6 @@ public:
   cmValue GetProperty(const std::string& prop, bool chain) const;
   bool GetPropertyAsBool(const std::string& prop) const;
   std::vector<std::string> GetPropertyKeys() const;
-  void CheckProperty(const std::string& prop) const;
 
   //! Initialize a makefile from its parent
   void InitializeFromParent(cmMakefile* parent);
@@ -862,6 +875,11 @@ public:
   void PushScope();
   void PopScope();
   void RaiseScope(const std::string& var, const char* value);
+  void RaiseScope(const std::string& var, cmValue value)
+  {
+    this->RaiseScope(var, value.GetCStr());
+  }
+  void RaiseScope(const std::vector<std::string>& variables);
 
   // push and pop loop scopes
   void PushLoopBlockBarrier();
@@ -925,6 +943,7 @@ public:
   };
 
   void IssueMessage(MessageType t, std::string const& text) const;
+  Message::LogLevel GetCurrentLogLevel() const;
 
   /** Set whether or not to report a CMP0000 violation.  */
   void SetCheckCMP0000(bool b) { this->CheckCMP0000 = b; }

@@ -12,6 +12,11 @@ run_cmake_with_options(CodeInjection
 if(CMake_TEST_RESOURCES)
   run_cmake(ExplicitRC)
 endif()
+
+set(RunCMake_DEFAULT_stderr .)
+run_cmake(LanguagesDuplicate)
+unset(RunCMake_DEFAULT_stderr)
+
 run_cmake(LanguagesImplicit)
 run_cmake(LanguagesEmpty)
 run_cmake(LanguagesNONE)

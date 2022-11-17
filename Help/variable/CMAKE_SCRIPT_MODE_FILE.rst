@@ -1,9 +1,9 @@
 CMAKE_SCRIPT_MODE_FILE
 ----------------------
 
-Full path to the :manual:`cmake(1)` ``-P`` script file currently being
+Full path to the :option:`cmake -P` script file currently being
 processed.
 
-When run in :manual:`cmake(1)` ``-P`` script mode, CMake sets this variable to
+When run in :option:`cmake -P` script mode, CMake sets this variable to
 the full path of the script file.  When run to configure a ``CMakeLists.txt``
 file, this variable is not set.

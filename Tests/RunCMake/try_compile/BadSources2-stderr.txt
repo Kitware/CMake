@@ -1,4 +1,4 @@
-CMake Error at BadSources2.cmake:2 \(try_compile\):
+CMake Error at BadSources2.cmake:[0-9]+ \(try_compile\):
   Unknown extension ".cxx" for file
 
     .*/Tests/RunCMake/try_compile/src.cxx

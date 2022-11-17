@@ -1,0 +1,6 @@
+.*-- once: configure
+.*-- once: build
+.*-- once: install
+.*-- always: configure
+.*-- always: build
+.*-- always: install

@@ -43,6 +43,8 @@ set(module_symbols
   MYMODULE_mp_MYSUB       # Intel on Windows
   mymodule_mysub_         # PGI
   mymodule_MP_mysub       # NAG
+  _QMmy_modulePmy_sub     # LLVMFlang
+  _QMmymodulePmysub       # LLVMFlang
   ${FortranCInterface_MODULE_SYMBOLS}
   )
 list(REMOVE_DUPLICATES module_symbols)

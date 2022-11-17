@@ -339,10 +339,9 @@ private:
 
   std::string GetLibraryOrFrameworkPath(const std::string& path) const;
 
-  std::string GetObjectsDirectory(const std::string& projName,
-                                  const std::string& configName,
-                                  const cmGeneratorTarget* t,
-                                  const std::string& variant) const;
+  std::string GetSymrootDir() const;
+  std::string GetTargetTempDir(cmGeneratorTarget const* gt,
+                               std::string const& configName) const;
 
   static std::string GetDeploymentPlatform(const cmMakefile* mf);
 

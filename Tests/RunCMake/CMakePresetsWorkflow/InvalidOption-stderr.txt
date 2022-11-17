@@ -1,0 +1,6 @@
+^Unknown argument -DINVALID_OPTION
+Usage: cmake --workflow \[options\]
+Options:
+  --preset <preset> = Workflow preset to execute\.
+  --list-presets    = List available workflow presets\.
+  --fresh           = Configure a fresh build tree, removing any existing cache file\.$

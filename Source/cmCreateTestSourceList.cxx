@@ -87,9 +87,7 @@ bool cmCreateTestSourceList(std::vector<std::string> const& args,
       func_name = cmSystemTools::GetFilenameWithoutLastExtension(*i);
     }
     cmSystemTools::ConvertToUnixSlashes(func_name);
-    std::replace(func_name.begin(), func_name.end(), ' ', '_');
-    std::replace(func_name.begin(), func_name.end(), '/', '_');
-    std::replace(func_name.begin(), func_name.end(), ':', '_');
+    func_name = cmSystemTools::MakeCidentifier(func_name);
     bool already_declared =
       std::find(tests_func_name.begin(), tests_func_name.end(), func_name) !=
       tests_func_name.end();

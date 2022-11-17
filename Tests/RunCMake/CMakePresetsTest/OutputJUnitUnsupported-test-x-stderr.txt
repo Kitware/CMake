@@ -1,0 +1,2 @@
+^CMake Error: Could not read presets from [^
+]*/Tests/RunCMake/CMakePresetsTest/OutputJUnitUnsupported: File version must be 6 or higher for CTest JUnit output support$

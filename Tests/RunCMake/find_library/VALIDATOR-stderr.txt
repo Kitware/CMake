@@ -1,0 +1,3 @@
+CHECK='[^']+/Tests/RunCMake/find_library/lib/libPrefixInPATH.a'
+CHECK='[^']+/Tests/RunCMake/find_library/lib/libPrefixInPATH.a'
+CHECK='[^']+/Tests/RunCMake/find_library/lib/libPrefixInPATH.a'

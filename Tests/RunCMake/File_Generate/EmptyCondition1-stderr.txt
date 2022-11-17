@@ -1,4 +1,7 @@
 CMake Error at EmptyCondition1.cmake:2 \(file\):
-  file Incorrect arguments to GENERATE subcommand.
+  Error after keyword "CONDITION":
+
+    missing required value
+
 Call Stack \(most recent call first\):
   CMakeLists.txt:[0-9]+ \(include\)

@@ -64,7 +64,7 @@ bool cmStateSnapshot::IsValid() const
 
 cmStateSnapshot cmStateSnapshot::GetBuildsystemDirectory() const
 {
-  return { this->State, this->Position->BuildSystemDirectory->DirectoryEnd };
+  return { this->State, this->Position->BuildSystemDirectory->CurrentScope };
 }
 
 cmStateSnapshot cmStateSnapshot::GetBuildsystemDirectoryParent() const
@@ -76,7 +76,7 @@ cmStateSnapshot cmStateSnapshot::GetBuildsystemDirectoryParent() const
   cmStateDetail::PositionType parentPos = this->Position->DirectoryParent;
   if (parentPos != this->State->SnapshotData.Root()) {
     snapshot = cmStateSnapshot(this->State,
-                               parentPos->BuildSystemDirectory->DirectoryEnd);
+                               parentPos->BuildSystemDirectory->CurrentScope);
   }
 
   return snapshot;
@@ -177,9 +177,9 @@ cmPolicies::PolicyStatus cmStateSnapshot::GetPolicy(cmPolicies::PolicyID id,
   while (true) {
     assert(dir.IsValid());
     cmLinkedTree<cmStateDetail::PolicyStackEntry>::iterator leaf =
-      dir->DirectoryEnd->Policies;
+      dir->CurrentScope->Policies;
     cmLinkedTree<cmStateDetail::PolicyStackEntry>::iterator root =
-      dir->DirectoryEnd->PolicyRoot;
+      dir->CurrentScope->PolicyRoot;
     for (; leaf != root; ++leaf) {
       if (parent_scope) {
         parent_scope = false;
@@ -190,7 +190,7 @@ cmPolicies::PolicyStatus cmStateSnapshot::GetPolicy(cmPolicies::PolicyID id,
         return status;
       }
     }
-    cmStateDetail::PositionType e = dir->DirectoryEnd;
+    cmStateDetail::PositionType e = dir->CurrentScope;
     cmStateDetail::PositionType p = e->DirectoryParent;
     if (p == this->State->SnapshotData.Root()) {
       break;
@@ -315,6 +315,25 @@ void cmStateSnapshot::SetDefaultDefinitions()
 #endif
 #if defined(__sun__)
   this->SetDefinition("CMAKE_HOST_SOLARIS", "1");
+#endif
+
+#if defined(__OpenBSD__)
+  this->SetDefinition("BSD", "OpenBSD");
+  this->SetDefinition("CMAKE_HOST_BSD", "OpenBSD");
+#elif defined(__FreeBSD__)
+  this->SetDefinition("BSD", "FreeBSD");
+  this->SetDefinition("CMAKE_HOST_BSD", "FreeBSD");
+#elif defined(__NetBSD__)
+  this->SetDefinition("BSD", "NetBSD");
+  this->SetDefinition("CMAKE_HOST_BSD", "NetBSD");
+#elif defined(__DragonFly__)
+  this->SetDefinition("BSD", "DragonFlyBSD");
+  this->SetDefinition("CMAKE_HOST_BSD", "DragonFlyBSD");
+#endif
+
+#if defined(__linux__)
+  this->SetDefinition("LINUX", "1");
+  this->SetDefinition("CMAKE_HOST_LINUX", "1");
 #endif
 
   this->SetDefinition("CMAKE_MAJOR_VERSION",

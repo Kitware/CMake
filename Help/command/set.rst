@@ -22,12 +22,17 @@ Set Normal Variable
 Sets the given ``<variable>`` in the current function or directory scope.
 
 If the ``PARENT_SCOPE`` option is given the variable will be set in
-the scope above the current scope.  Each new directory or function
-creates a new scope.  This command will set the value of a variable
-into the parent directory or calling function (whichever is applicable
-to the case at hand). The previous state of the variable's value stays the
-same in the current scope (e.g., if it was undefined before, it is still
-undefined and if it had a value, it is still that value).
+the scope above the current scope.  Each new directory or :command:`function`
+command creates a new scope.  A scope can also be created with the
+:command:`block` command. This command will set the value of a variable into
+the parent directory, calling function or encompassing scope (whichever is
+applicable to the case at hand). The previous state of the variable's value
+stays the same in the current scope (e.g., if it was undefined before, it is
+still undefined and if it had a value, it is still that value).
+
+The :command:`block(PROPAGATE)` and :command:`return(PROPAGATE)` commands can
+be used as an alternate method to the :command:`set(PARENT_SCOPE)` and
+:command:`unset(PARENT_SCOPE)` commands to update the parent scope.
 
 Set Cache Entry
 ^^^^^^^^^^^^^^^
@@ -78,7 +83,7 @@ option is given then the cache entry will be set to the given value.
 
 It is possible for the cache entry to exist prior to the call but
 have no type set if it was created on the :manual:`cmake(1)` command
-line by a user through the ``-D<var>=<value>`` option without
+line by a user through the :option:`-D\<var\>=\<value\> <cmake -D>` option without
 specifying a type.  In this case the ``set`` command will add the
 type.  Furthermore, if the ``<type>`` is ``PATH`` or ``FILEPATH``
 and the ``<value>`` provided on the command line is a relative path,

@@ -67,6 +67,8 @@ The options are:
   Each byproduct file will be marked with the :prop_sf:`GENERATED`
   source file property automatically.
 
+  *See policy* :policy:`CMP0058` *for the motivation behind this feature.*
+
   Explicit specification of byproducts is supported by the
   :generator:`Ninja` generator to tell the ``ninja`` build tool
   how to regenerate byproducts when they are missing.  It is
@@ -434,7 +436,7 @@ one of the keywords to make clear the behavior they expect.
   Because generator expressions can be used in custom commands,
   it is possible to define ``COMMAND`` lines or whole custom commands
   which evaluate to empty strings for certain configurations.
-  For **Visual Studio 2010 (and newer)** generators these command
+  For **Visual Studio 11 2012 (and newer)** generators these command
   lines or custom commands will be omitted for the specific
   configuration and no "empty-string-command" will be added.
 

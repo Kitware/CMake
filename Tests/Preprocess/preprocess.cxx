@@ -35,7 +35,7 @@ int check_defines_CXX()
       result = 0;
     }
   }
-#ifdef NDEBUG
+#ifdef PREPROCESS_NDEBUG
 #  ifdef FILE_DEF_DEBUG
   {
     fprintf(stderr, "FILE_DEF_DEBUG should not be defined in CXX\n");

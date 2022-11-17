@@ -183,8 +183,8 @@ void cmGhsMultiTargetGenerator::SetCompilerFlags(std::string const& config,
   auto i = this->FlagsByLanguage.find(language);
   if (i == this->FlagsByLanguage.end()) {
     std::string flags;
-    this->LocalGenerator->AddLanguageFlags(flags, this->GeneratorTarget,
-                                           language, config);
+    this->LocalGenerator->AddLanguageFlags(
+      flags, this->GeneratorTarget, cmBuildStep::Compile, language, config);
     this->LocalGenerator->AddCMP0018Flags(flags, this->GeneratorTarget,
                                           language, config);
     this->LocalGenerator->AddVisibilityPresetFlags(

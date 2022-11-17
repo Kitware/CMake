@@ -284,7 +284,7 @@ function(run_TestOutputTruncation mode expected)
   file(WRITE "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" "
   add_test(Truncation_${mode} \"${CMAKE_COMMAND}\" -E echo 123456789)
 ")
-  run_cmake_command(TestOutputTruncation
+  run_cmake_command(TestOutputTruncation_${mode}
     ${CMAKE_CTEST_COMMAND} -M Experimental -T Test
                            --no-compress-output
                            --test-output-size-passed 5
@@ -294,6 +294,7 @@ endfunction()
 run_TestOutputTruncation("head" "\\.\\.\\.6789")
 run_TestOutputTruncation("middle" "12\\.\\.\\..*\\.\\.\\.89")
 run_TestOutputTruncation("tail" "12345\\.\\.\\.")
+run_TestOutputTruncation("bad" "")
 
 # Test --stop-on-failure
 function(run_stop_on_failure)

@@ -7,13 +7,15 @@
 #include <utility>
 
 #include <cm/memory>
-#include <cmext/algorithm>
+#include <cm/optional>
 #include <cmext/string_view>
 
 #include "cmsys/RegularExpression.hxx"
 
 #include "cmArgumentParser.h"
+#include "cmArgumentParserTypes.h"
 #include "cmExecutionStatus.h"
+#include "cmExperimental.h"
 #include "cmExportBuildAndroidMKGenerator.h"
 #include "cmExportBuildFileGenerator.h"
 #include "cmExportSet.h"
@@ -57,10 +59,11 @@ bool cmExportCommand(std::vector<std::string> const& args,
   struct Arguments
   {
     std::string ExportSetName;
-    std::vector<std::string> Targets;
+    cm::optional<ArgumentParser::MaybeEmpty<std::vector<std::string>>> Targets;
     std::string Namespace;
     std::string Filename;
     std::string AndroidMKFile;
+    std::string CxxModulesDirectory;
     bool Append = false;
     bool ExportOld = false;
   };
@@ -68,6 +71,12 @@ bool cmExportCommand(std::vector<std::string> const& args,
   auto parser = cmArgumentParser<Arguments>{}
                   .Bind("NAMESPACE"_s, &Arguments::Namespace)
                   .Bind("FILE"_s, &Arguments::Filename);
+
+  bool const supportCxx20FileSetTypes = cmExperimental::HasSupportEnabled(
+    status.GetMakefile(), cmExperimental::Feature::CxxModuleCMakeApi);
+  if (supportCxx20FileSetTypes) {
+    parser.Bind("CXX_MODULES_DIRECTORY"_s, &Arguments::CxxModulesDirectory);
+  }
 
   if (args[0] == "EXPORT") {
     parser.Bind("EXPORT"_s, &Arguments::ExportSetName);
@@ -79,9 +88,7 @@ bool cmExportCommand(std::vector<std::string> const& args,
   }
 
   std::vector<std::string> unknownArgs;
-  std::vector<std::string> keywordsMissingValue;
-  Arguments const arguments =
-    parser.Parse(args, &unknownArgs, &keywordsMissingValue);
+  Arguments const arguments = parser.Parse(args, &unknownArgs);
 
   if (!unknownArgs.empty()) {
     status.SetError("Unknown argument: \"" + unknownArgs.front() + "\".");
@@ -145,9 +152,8 @@ bool cmExportCommand(std::vector<std::string> const& args,
       return false;
     }
     exportSet = &it->second;
-  } else if (!arguments.Targets.empty() ||
-             cm::contains(keywordsMissingValue, "TARGETS")) {
-    for (std::string const& currentTarget : arguments.Targets) {
+  } else if (arguments.Targets) {
+    for (std::string const& currentTarget : *arguments.Targets) {
       if (mf.IsAlias(currentTarget)) {
         std::ostringstream e;
         e << "given ALIAS target \"" << currentTarget
@@ -214,6 +220,7 @@ bool cmExportCommand(std::vector<std::string> const& args,
   }
   ebfg->SetExportFile(fname.c_str());
   ebfg->SetNamespace(arguments.Namespace);
+  ebfg->SetCxxModuleDirectory(arguments.CxxModulesDirectory);
   ebfg->SetAppendMode(arguments.Append);
   if (exportSet != nullptr) {
     ebfg->SetExportSet(exportSet);

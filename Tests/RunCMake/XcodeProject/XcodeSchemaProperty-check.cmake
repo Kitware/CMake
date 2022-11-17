@@ -29,6 +29,8 @@ check_property("UNDEFINED_BEHAVIOUR_SANITIZER" "enableUBSanitizer")
 check_property("UNDEFINED_BEHAVIOUR_SANITIZER_STOP" "stopOnEveryUBSanitizerIssue")
 check_property("DISABLE_MAIN_THREAD_CHECKER" "disableMainThreadChecker")
 check_property("MAIN_THREAD_CHECKER_STOP" "stopOnEveryMainThreadCheckerIssue")
+check_property("DISABLE_XCODE_SCHEME_ENABLE_GPU_API_VALIDATION" "enableGPUValidationMode")
+check_property("ENABLE_XCODE_SCHEME_ENABLE_GPU_SHADER_VALIDATION" "enableGPUShaderValidationMode")
 
 check_property("MALLOC_SCRIBBLE" "MallocScribble")
 check_property("MALLOC_GUARD_EDGES" "MallocGuardEdges")
@@ -43,6 +45,8 @@ check_property("ENABLE_GPU_FRAME_CAPTURE_MODE_DISABLED" "enableGPUFrameCaptureMo
 check_property("ENABLE_GPU_FRAME_CAPTURE_MODE_METAL" "enableGPUFrameCaptureMode=\"1\"")
 check_property("ENABLE_GPU_FRAME_CAPTURE_MODE_DISABLED_MIXED_CASE" "enableGPUFrameCaptureMode=\"3\"")
 check_property("ENABLE_GPU_FRAME_CAPTURE_MODE_METAL_MIXED_CASE" "enableGPUFrameCaptureMode=\"1\"")
+check_property("LAUNCH_MODE_AUTO" "launchStyle=\"0\"")
+check_property("LAUNCH_MODE_WAIT" "launchStyle=\"1\"")
 
 check_property("EXECUTABLE" "myExecutable")
 check_property("ARGUMENTS" [=["--foo"]=])

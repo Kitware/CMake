@@ -1,0 +1,17 @@
+{
+  "version": 5,
+  "configurePresets": [
+    {
+      "name": "default"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "unsupported",
+      "configurePreset": "default",
+      "output": {
+        "outputJUnitFile": "junit.xml"
+      }
+    }
+  ]
+}

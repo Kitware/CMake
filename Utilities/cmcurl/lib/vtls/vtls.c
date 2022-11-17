@@ -18,6 +18,8 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 
 /* This file is for implementing all "generic" SSL functions that all libcurl
@@ -143,11 +145,9 @@ Curl_ssl_config_matches(struct ssl_primary_config *data,
      Curl_safecmp(data->CAfile, needle->CAfile) &&
      Curl_safecmp(data->issuercert, needle->issuercert) &&
      Curl_safecmp(data->clientcert, needle->clientcert) &&
-     Curl_safecmp(data->random_file, needle->random_file) &&
-     Curl_safecmp(data->egdsocket, needle->egdsocket) &&
 #ifdef USE_TLS_SRP
-     Curl_safecmp(data->username, needle->username) &&
-     Curl_safecmp(data->password, needle->password) &&
+     !Curl_timestrcmp(data->username, needle->username) &&
+     !Curl_timestrcmp(data->password, needle->password) &&
      (data->authtype == needle->authtype) &&
 #endif
      Curl_safe_strcasecompare(data->cipher_list, needle->cipher_list) &&
@@ -182,8 +182,6 @@ Curl_clone_primary_ssl_config(struct ssl_primary_config *source,
   CLONE_STRING(CAfile);
   CLONE_STRING(issuercert);
   CLONE_STRING(clientcert);
-  CLONE_STRING(random_file);
-  CLONE_STRING(egdsocket);
   CLONE_STRING(cipher_list);
   CLONE_STRING(cipher_list13);
   CLONE_STRING(pinned_key);
@@ -203,8 +201,6 @@ void Curl_free_primary_ssl_config(struct ssl_primary_config *sslc)
   Curl_safefree(sslc->CAfile);
   Curl_safefree(sslc->issuercert);
   Curl_safefree(sslc->clientcert);
-  Curl_safefree(sslc->random_file);
-  Curl_safefree(sslc->egdsocket);
   Curl_safefree(sslc->cipher_list);
   Curl_safefree(sslc->cipher_list13);
   Curl_safefree(sslc->pinned_key);
@@ -223,13 +219,13 @@ void Curl_free_primary_ssl_config(struct ssl_primary_config *sslc)
 static int multissl_setup(const struct Curl_ssl *backend);
 #endif
 
-int Curl_ssl_backend(void)
+curl_sslbackend Curl_ssl_backend(void)
 {
 #ifdef USE_SSL
   multissl_setup(NULL);
   return Curl_ssl->info.id;
 #else
-  return (int)CURLSSLBACKEND_NONE;
+  return CURLSSLBACKEND_NONE;
 #endif
 }
 
@@ -903,7 +899,7 @@ char *Curl_ssl_snihost(struct Curl_easy *data, const char *host, size_t *olen)
   size_t len = strlen(host);
   if(len && (host[len-1] == '.'))
     len--;
-  if((long)len >= data->set.buffer_size)
+  if(len >= data->set.buffer_size)
     return NULL;
 
   Curl_strntolower(data->state.buffer, host, len);
@@ -1460,8 +1456,10 @@ static int multissl_setup(const struct Curl_ssl *backend)
   return 0;
 }
 
-CURLsslset curl_global_sslset(curl_sslbackend id, const char *name,
-                              const curl_ssl_backend ***avail)
+/* This function is used to select the SSL backend to use. It is called by
+   curl_global_sslset (easy.c) which uses the global init lock. */
+CURLsslset Curl_init_sslset_nolock(curl_sslbackend id, const char *name,
+                                   const curl_ssl_backend ***avail)
 {
   int i;
 
@@ -1490,8 +1488,8 @@ CURLsslset curl_global_sslset(curl_sslbackend id, const char *name,
 }
 
 #else /* USE_SSL */
-CURLsslset curl_global_sslset(curl_sslbackend id, const char *name,
-                              const curl_ssl_backend ***avail)
+CURLsslset Curl_init_sslset_nolock(curl_sslbackend id, const char *name,
+                                   const curl_ssl_backend ***avail)
 {
   (void)id;
   (void)name;

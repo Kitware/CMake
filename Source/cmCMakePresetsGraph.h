@@ -41,6 +41,8 @@ public:
     CONFIGURE_PRESET_UNREACHABLE_FROM_FILE,
     INVALID_MACRO_EXPANSION,
     BUILD_TEST_PRESETS_UNSUPPORTED,
+    PACKAGE_PRESETS_UNSUPPORTED,
+    WORKFLOW_PRESETS_UNSUPPORTED,
     INCLUDE_UNSUPPORTED,
     INVALID_INCLUDE,
     INVALID_CONFIGURE_PRESET,
@@ -50,8 +52,12 @@ public:
     TOOLCHAIN_FILE_UNSUPPORTED,
     CYCLIC_INCLUDE,
     TEST_OUTPUT_TRUNCATION_UNSUPPORTED,
+    INVALID_WORKFLOW_STEPS,
+    WORKFLOW_STEP_UNREACHABLE_FROM_FILE,
+    CTEST_JUNIT_UNSUPPORTED,
   };
 
+  std::string errors;
   enum class ArchToolsetStrategy
   {
     Set,
@@ -95,7 +101,7 @@ public:
 
     std::string Name;
     std::vector<std::string> Inherits;
-    bool Hidden;
+    bool Hidden = false;
     File* OriginFile;
     std::string DisplayName;
     std::string Description;
@@ -225,6 +231,7 @@ public:
       cm::optional<bool> OutputOnFailure;
       cm::optional<bool> Quiet;
       std::string OutputLogFile;
+      std::string OutputJUnitFile;
       cm::optional<bool> LabelSummary;
       cm::optional<bool> SubprojectSummary;
       cm::optional<int> MaxPassedTestOutputSize;
@@ -325,6 +332,79 @@ public:
     ReadFileResult VisitPresetAfterInherit(int /* version */) override;
   };
 
+  class PackagePreset : public Preset
+  {
+  public:
+    PackagePreset() = default;
+    PackagePreset(PackagePreset&& /*other*/) = default;
+    PackagePreset(const PackagePreset& /*other*/) = default;
+    PackagePreset& operator=(const PackagePreset& /*other*/) = default;
+    ~PackagePreset() override = default;
+#if __cplusplus >= 201703L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L)
+    PackagePreset& operator=(PackagePreset&& /*other*/) = default;
+#else
+    // The move assignment operators for several STL classes did not become
+    // noexcept until C++17, which causes some tools to warn about this move
+    // assignment operator throwing an exception when it shouldn't.
+    PackagePreset& operator=(PackagePreset&& /*other*/) = delete;
+#endif
+
+    std::string ConfigurePreset;
+    cm::optional<bool> InheritConfigureEnvironment;
+    std::vector<std::string> Generators;
+    std::vector<std::string> Configurations;
+    std::map<std::string, std::string> Variables;
+    std::string ConfigFile;
+
+    cm::optional<bool> DebugOutput;
+    cm::optional<bool> VerboseOutput;
+
+    std::string PackageName;
+    std::string PackageVersion;
+    std::string PackageDirectory;
+    std::string VendorName;
+
+    ReadFileResult VisitPresetInherit(const Preset& parent) override;
+    ReadFileResult VisitPresetAfterInherit(int /* version */) override;
+  };
+
+  class WorkflowPreset : public Preset
+  {
+  public:
+    WorkflowPreset() = default;
+    WorkflowPreset(WorkflowPreset&& /*other*/) = default;
+    WorkflowPreset(const WorkflowPreset& /*other*/) = default;
+    WorkflowPreset& operator=(const WorkflowPreset& /*other*/) = default;
+    ~WorkflowPreset() override = default;
+#if __cplusplus >= 201703L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L)
+    WorkflowPreset& operator=(WorkflowPreset&& /*other*/) = default;
+#else
+    // The move assignment operators for several STL classes did not become
+    // noexcept until C++17, which causes some tools to warn about this move
+    // assignment operator throwing an exception when it shouldn't.
+    WorkflowPreset& operator=(WorkflowPreset&& /*other*/) = delete;
+#endif
+
+    class WorkflowStep
+    {
+    public:
+      enum class Type
+      {
+        Configure,
+        Build,
+        Test,
+        Package,
+      };
+      Type PresetType;
+      std::string PresetName;
+    };
+
+    std::vector<WorkflowStep> Steps;
+
+    ReadFileResult VisitPresetInherit(const Preset& parent) override;
+    ReadFileResult VisitPresetAfterInherit(int /* version */) override;
+  };
+
   template <class T>
   class PresetPair
   {
@@ -336,10 +416,14 @@ public:
   std::map<std::string, PresetPair<ConfigurePreset>> ConfigurePresets;
   std::map<std::string, PresetPair<BuildPreset>> BuildPresets;
   std::map<std::string, PresetPair<TestPreset>> TestPresets;
+  std::map<std::string, PresetPair<PackagePreset>> PackagePresets;
+  std::map<std::string, PresetPair<WorkflowPreset>> WorkflowPresets;
 
   std::vector<std::string> ConfigurePresetOrder;
   std::vector<std::string> BuildPresetOrder;
   std::vector<std::string> TestPresetOrder;
+  std::vector<std::string> PackagePresetOrder;
+  std::vector<std::string> WorkflowPresetOrder;
 
   std::string SourceDir;
   std::vector<std::unique_ptr<File>> Files;
@@ -382,13 +466,27 @@ public:
     return "";
   }
 
+  enum class PrintPrecedingNewline
+  {
+    False,
+    True,
+  };
+  static void printPrecedingNewline(PrintPrecedingNewline* p);
+
   static void PrintPresets(
     const std::vector<const cmCMakePresetsGraph::Preset*>& presets);
-  void PrintConfigurePresetList() const;
   void PrintConfigurePresetList(
-    const std::function<bool(const ConfigurePreset&)>& filter) const;
-  void PrintBuildPresetList() const;
-  void PrintTestPresetList() const;
+    PrintPrecedingNewline* newline = nullptr) const;
+  void PrintConfigurePresetList(
+    const std::function<bool(const ConfigurePreset&)>& filter,
+    PrintPrecedingNewline* newline = nullptr) const;
+  void PrintBuildPresetList(PrintPrecedingNewline* newline = nullptr) const;
+  void PrintTestPresetList(PrintPrecedingNewline* newline = nullptr) const;
+  void PrintPackagePresetList(PrintPrecedingNewline* newline = nullptr) const;
+  void PrintPackagePresetList(
+    const std::function<bool(const PackagePreset&)>& filter,
+    PrintPrecedingNewline* newline = nullptr) const;
+  void PrintWorkflowPresetList(PrintPrecedingNewline* newline = nullptr) const;
   void PrintAllPresets() const;
 
 private:
@@ -407,7 +505,7 @@ private:
   ReadFileResult ReadProjectPresetsInternal(bool allowNoFiles);
   ReadFileResult ReadJSONFile(const std::string& filename, RootType rootType,
                               ReadReason readReason,
-                              std::vector<File*>& inProgressFiles,
-                              File*& file);
+                              std::vector<File*>& inProgressFiles, File*& file,
+                              std::string& errMsg);
   void ClearPresets();
 };

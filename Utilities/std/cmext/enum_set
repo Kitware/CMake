@@ -146,6 +146,7 @@ public:
   {
     this->Set.reset();
     this->insert(list);
+    return *this;
   }
 
   // Iterators
@@ -298,17 +299,15 @@ public:
   {
     if (this->contains(e)) {
       return iterator(this, static_cast<size_type>(e));
-    } else {
-      return this->end();
     }
+    return this->end();
   }
   const_iterator find(key_type e) const
   {
     if (this->contains(e)) {
       return const_iterator(this, static_cast<size_type>(e));
-    } else {
-      return this->end();
     }
+    return this->end();
   }
 
   bool contains(key_type e) const
@@ -317,6 +316,10 @@ public:
   }
 
 private:
+  template <typename E>
+  friend inline bool operator==(const enum_set<E>& lhs,
+                                const enum_set<E>& rhs) noexcept;
+
   template <typename E, typename Predicate>
   friend inline void erase_if(enum_set<E>& set, Predicate pred);
 
@@ -369,7 +372,7 @@ template <typename Enum>
 inline bool operator==(const enum_set<Enum>& lhs,
                        const enum_set<Enum>& rhs) noexcept
 {
-  return lhs == rhs;
+  return lhs.Set == rhs.Set;
 }
 
 template <typename Enum>

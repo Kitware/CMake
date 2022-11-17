@@ -71,7 +71,7 @@ const char* cmDocumentationUsageNote[][2] = {
 const char* cmDocumentationOptions[][2] = {
   CMAKE_STANDARD_OPTIONS_TABLE,
   { "--preset <preset>,--preset=<preset>", "Specify a configure preset." },
-  { "--list-presets", "List available presets." },
+  { "--list-presets[=<type>]", "List available presets." },
   { "-E", "CMake command mode." },
   { "-L[A][H]", "List non-advanced cached variables." },
   { "--fresh",
@@ -82,9 +82,9 @@ const char* cmDocumentationOptions[][2] = {
   { "-N", "View mode only." },
   { "-P <file>", "Process script mode." },
   { "--find-package", "Legacy pkg-config like mode.  Do not use." },
-  { "--graphviz=[file]",
-    "Generate graphviz of dependencies, see "
-    "CMakeGraphVizOptions.cmake for more." },
+  { "--graphviz=<file>",
+    "Generate graphviz of dependencies, see CMakeGraphVizOptions.cmake for "
+    "more." },
   { "--system-information [file]", "Dump information about this system." },
   { "--log-level=<ERROR|WARNING|NOTICE|STATUS|VERBOSE|DEBUG|TRACE>",
     "Set the verbosity of messages from CMake files. "
@@ -109,8 +109,7 @@ const char* cmDocumentationOptions[][2] = {
   { "--warn-uninitialized", "Warn about uninitialized values." },
   { "--no-warn-unused-cli", "Don't warn about command line options." },
   { "--check-system-vars",
-    "Find problems with variable usage in system "
-    "files." },
+    "Find problems with variable usage in system files." },
   { "--compile-no-warning-as-error",
     "Ignore COMPILE_WARNING_AS_ERROR property and "
     "CMAKE_COMPILE_WARNING_AS_ERROR variable." },
@@ -616,7 +615,7 @@ int do_build(int ac, char const* const* av)
       "  <dir>          = Project binary directory to be built.\n"
       "  --preset <preset>, --preset=<preset>\n"
       "                 = Specify a build preset.\n"
-      "  --list-presets\n"
+      "  --list-presets[=<type>]\n"
       "                 = List available build presets.\n"
       "  --parallel [<jobs>], -j [<jobs>]\n"
       "                 = Build in parallel using the given number of jobs. \n"
@@ -627,14 +626,14 @@ int do_build(int ac, char const* const* av)
       "                   specifies a default parallel level when this "
       "option\n"
       "                   is not given.\n"
-      "  --target <tgt>..., -t <tgt>... \n"
+      "  -t <tgt>..., --target <tgt>...\n"
       "                 = Build <tgt> instead of default targets.\n"
       "  --config <cfg> = For multi-configuration tools, choose <cfg>.\n"
       "  --clean-first  = Build target 'clean' first, then build.\n"
       "                   (To clean only, use --target 'clean'.)\n"
       "  --resolve-package-references={on|only|off}\n"
       "                 = Restore/resolve package references during build.\n"
-      "  --verbose, -v  = Enable verbose output - if supported - including\n"
+      "  -v, --verbose  = Enable verbose output - if supported - including\n"
       "                   the build commands to be executed. \n"
       "  --             = Pass remaining options to the native tool.\n"
       ;
@@ -912,6 +911,90 @@ int do_install(int ac, char const* const* av)
 #endif
 }
 
+int do_workflow(int ac, char const* const* av)
+{
+#ifdef CMAKE_BOOTSTRAP
+  std::cerr << "This cmake does not support --workflow\n";
+  return -1;
+#else
+  using WorkflowListPresets = cmake::WorkflowListPresets;
+  using WorkflowFresh = cmake::WorkflowFresh;
+  std::string presetName;
+  auto listPresets = WorkflowListPresets::No;
+  auto fresh = WorkflowFresh::No;
+
+  using CommandArgument =
+    cmCommandLineArgument<bool(std::string const& value)>;
+
+  std::vector<CommandArgument> arguments = {
+    CommandArgument{ "--preset", CommandArgument::Values::One,
+                     CommandArgument::setToValue(presetName) },
+    CommandArgument{ "--list-presets", CommandArgument::Values::Zero,
+                     [&listPresets](const std::string&) -> bool {
+                       listPresets = WorkflowListPresets::Yes;
+                       return true;
+                     } },
+    CommandArgument{ "--fresh", CommandArgument::Values::Zero,
+                     [&fresh](const std::string&) -> bool {
+                       fresh = WorkflowFresh::Yes;
+                       return true;
+                     } },
+  };
+
+  std::vector<std::string> inputArgs;
+
+  inputArgs.reserve(ac - 2);
+  cm::append(inputArgs, av + 2, av + ac);
+
+  decltype(inputArgs.size()) i = 0;
+  for (; i < inputArgs.size(); ++i) {
+    std::string const& arg = inputArgs[i];
+    bool matched = false;
+    bool parsed = false;
+    for (auto const& m : arguments) {
+      matched = m.matches(arg);
+      if (matched) {
+        parsed = m.parse(arg, i, inputArgs);
+        break;
+      }
+    }
+    if (!(matched && parsed)) {
+      if (!matched) {
+        presetName.clear();
+        listPresets = WorkflowListPresets::No;
+        std::cerr << "Unknown argument " << arg << std::endl;
+      }
+      break;
+    }
+  }
+
+  if (presetName.empty() && listPresets == WorkflowListPresets::No) {
+    /* clang-format off */
+    std::cerr <<
+      "Usage: cmake --workflow [options]\n"
+      "Options:\n"
+      "  --preset <preset> = Workflow preset to execute.\n"
+      "  --list-presets    = List available workflow presets.\n"
+      "  --fresh           = Configure a fresh build tree, removing any "
+                            "existing cache file.\n"
+      ;
+    /* clang-format on */
+    return 1;
+  }
+
+  cmake cm(cmake::RoleInternal, cmState::Project);
+  cmSystemTools::SetMessageCallback(
+    [&cm](const std::string& msg, const cmMessageMetadata& md) {
+      cmakemainMessageCallback(msg, md, &cm);
+    });
+  cm.SetProgressCallback([&cm](const std::string& msg, float prog) {
+    cmakemainProgressCallback(msg, prog, &cm);
+  });
+
+  return cm.Workflow(presetName, listPresets, fresh);
+#endif
+}
+
 int do_open(int ac, char const* const* av)
 {
 #ifdef CMAKE_BOOTSTRAP
@@ -995,6 +1078,9 @@ int main(int ac, char const* const* av)
     }
     if (strcmp(av[1], "--open") == 0) {
       return do_open(ac, av);
+    }
+    if (strcmp(av[1], "--workflow") == 0) {
+      return do_workflow(ac, av);
     }
     if (strcmp(av[1], "-E") == 0) {
       return do_command(ac, av, std::move(consoleBuf));

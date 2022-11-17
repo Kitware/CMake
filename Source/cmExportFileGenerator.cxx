@@ -939,13 +939,13 @@ void cmExportFileGenerator::GeneratePolicyHeaderCode(std::ostream& os)
 
   // Isolate the file policy level.
   // Support CMake versions as far back as 2.6 but also support using NEW
-  // policy settings for up to CMake 3.22 (this upper limit may be reviewed
+  // policy settings for up to CMake 3.23 (this upper limit may be reviewed
   // and increased from time to time). This reduces the opportunity for CMake
   // warnings when an older export file is later used with newer CMake
   // versions.
   /* clang-format off */
   os << "cmake_policy(PUSH)\n"
-     << "cmake_policy(VERSION 2.8.3...3.22)\n";
+     << "cmake_policy(VERSION 2.8.3...3.23)\n";
   /* clang-format on */
 }
 
@@ -1093,6 +1093,10 @@ void cmExportFileGenerator::GenerateImportTargetCode(
   if (target->GetPropertyAsBool("IMPORTED_NO_SYSTEM")) {
     os << "set_property(TARGET " << targetName
        << " PROPERTY IMPORTED_NO_SYSTEM 1)\n";
+  }
+
+  if (target->GetPropertyAsBool("EXPORT_NO_SYSTEM")) {
+    os << "set_property(TARGET " << targetName << " PROPERTY SYSTEM 0)\n";
   }
 
   os << "\n";
@@ -1307,4 +1311,29 @@ void cmExportFileGenerator::GenerateTargetFileSets(cmGeneratorTarget* gte,
 
     os << "  )\nendif()\n\n";
   }
+}
+
+void cmExportFileGenerator::GenerateCxxModuleInformation(std::ostream& os)
+{
+  auto const cxx_module_dirname = this->GetCxxModulesDirectory();
+  if (cxx_module_dirname.empty()) {
+    return;
+  }
+
+  // Write the include.
+  os << "# Include C++ module properties\n"
+     << "include(\"${CMAKE_CURRENT_LIST_DIR}/" << cxx_module_dirname
+     << "/cxx-modules.cmake\")\n\n";
+
+  // Get the path to the file we're going to write.
+  std::string path = this->MainImportFile;
+  path = cmSystemTools::GetFilenamePath(path);
+  auto trampoline_path =
+    cmStrCat(path, '/', cxx_module_dirname, "/cxx-modules.cmake");
+
+  // Include all configuration-specific include files.
+  cmGeneratedFileStream ap(trampoline_path, true);
+  ap.SetCopyIfDifferent(true);
+
+  this->GenerateCxxModuleConfigInformation(ap);
 }

@@ -54,7 +54,7 @@ optional Fortran support:
      endif()
    endif()
 
-.. _`SWIG`: http://swig.org
+.. _SWIG: https://swig.org
 
 #]=======================================================================]
 

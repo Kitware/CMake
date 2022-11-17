@@ -1,0 +1,9 @@
+^CMake Error at [^
+]*/Modules/FindPackageHandleStandardArgs.cmake:[0-9]+ \(message\):
+  Could NOT find Pseudo: \(Required is at least version "1"\) \(found TRUE\)
+Call Stack \(most recent call first\):
+  [^
+]*/Modules/FindPackageHandleStandardArgs.cmake:[0-9]+ \(_FPHSA_FAILURE_MESSAGE\)
+  FindPseudo.cmake:[0-9]+ \(find_package_handle_standard_args\)
+  empty_version.cmake:[0-9]+ \(find_package\)
+  CMakeLists.txt:[0-9]+ \(include\)$

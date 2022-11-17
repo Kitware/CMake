@@ -272,6 +272,8 @@ public:
   cmListFileBacktrace Backtrace;
 
   FileSetType HeadersFileSets;
+  FileSetType CxxModulesFileSets;
+  FileSetType CxxModuleHeadersFileSets;
 
   cmTargetInternals();
 
@@ -293,6 +295,12 @@ public:
                                 cm::string_view fileSetType) const;
   cmValue GetFileSetPaths(cmTarget const* self, std::string const& fileSetName,
                           cm::string_view fileSetType) const;
+
+  cmListFileBacktrace GetBacktrace(
+    cm::optional<cmListFileBacktrace> const& bt) const
+  {
+    return bt ? *bt : this->Makefile->GetBacktrace();
+  }
 };
 
 cmTargetInternals::cmTargetInternals()
@@ -301,6 +309,19 @@ cmTargetInternals::cmTargetInternals()
                     "The default header set"_s, "Header set"_s,
                     FileSetEntries("HEADER_SETS"_s),
                     FileSetEntries("INTERFACE_HEADER_SETS"_s))
+  , CxxModulesFileSets("CXX_MODULES"_s, "CXX_MODULE_DIRS"_s,
+                       "CXX_MODULE_SET"_s, "CXX_MODULE_DIRS_"_s,
+                       "CXX_MODULE_SET_"_s, "C++ module"_s,
+                       "The default C++ module set"_s, "C++ module set"_s,
+                       FileSetEntries("CXX_MODULE_SETS"_s),
+                       FileSetEntries("INTERFACE_CXX_MODULE_SETS"_s))
+  , CxxModuleHeadersFileSets(
+      "CXX_MODULE_HEADER_UNITS"_s, "CXX_MODULE_HEADER_UNIT_DIRS"_s,
+      "CXX_MODULE_HEADER_UNIT_SET"_s, "CXX_MODULE_HEADER_UNIT_DIRS_"_s,
+      "CXX_MODULE_HEADER_UNIT_SET_"_s, "C++ module header"_s,
+      "The default C++ module header set"_s, "C++ module header set"_s,
+      FileSetEntries("CXX_MODULE_HEADER_UNIT_SETS"_s),
+      FileSetEntries("INTERFACE_CXX_MODULE_HEADER_UNIT_SETS"_s))
 {
 }
 
@@ -542,6 +563,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     initProp("AUTORCC_OPTIONS");
     initProp("LINK_DEPENDS_NO_SHARED");
     initProp("LINK_INTERFACE_LIBRARIES");
+    initProp("MSVC_DEBUG_INFORMATION_FORMAT");
     initProp("MSVC_RUNTIME_LIBRARY");
     initProp("WATCOM_RUNTIME_LIBRARY");
     initProp("WIN32_EXECUTABLE");
@@ -605,12 +627,16 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
       initProp("XCODE_SCHEME_THREAD_SANITIZER_STOP");
       initProp("XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER");
       initProp("XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER_STOP");
+      initProp("XCODE_SCHEME_LAUNCH_CONFIGURATION");
+      initProp("XCODE_SCHEME_ENABLE_GPU_API_VALIDATION");
+      initProp("XCODE_SCHEME_ENABLE_GPU_SHADER_VALIDATION");
       initProp("XCODE_SCHEME_WORKING_DIRECTORY");
       initProp("XCODE_SCHEME_DISABLE_MAIN_THREAD_CHECKER");
       initProp("XCODE_SCHEME_MAIN_THREAD_CHECKER_STOP");
       initProp("XCODE_SCHEME_MALLOC_SCRIBBLE");
       initProp("XCODE_SCHEME_MALLOC_GUARD_EDGES");
       initProp("XCODE_SCHEME_GUARD_MALLOC");
+      initProp("XCODE_SCHEME_LAUNCH_MODE");
       initProp("XCODE_SCHEME_ZOMBIE_OBJECTS");
       initProp("XCODE_SCHEME_MALLOC_STACK");
       initProp("XCODE_SCHEME_DYNAMIC_LINKER_API_USAGE");
@@ -758,6 +784,10 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
         }
       }
     }
+  }
+
+  if (this->IsImported() || mf->GetPropertyAsBool("SYSTEM")) {
+    this->SetProperty("SYSTEM", "ON");
   }
 
   for (auto const& prop : mf->GetState()->GetPropertyDefinitions().GetMap()) {
@@ -1223,7 +1253,8 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf, std::string const& lib,
       ? targetNameGenex(lib)
       : lib;
     this->AppendProperty("LINK_LIBRARIES",
-                         this->GetDebugGeneratorExpressions(libName, llt));
+                         this->GetDebugGeneratorExpressions(libName, llt),
+                         mf.GetBacktrace());
   }
 
   if (cmGeneratorExpression::Find(lib) != std::string::npos ||
@@ -1367,9 +1398,30 @@ cmBTStringRange cmTarget::GetHeaderSetsEntries() const
   return cmMakeRange(this->impl->HeadersFileSets.SelfEntries.Entries);
 }
 
+cmBTStringRange cmTarget::GetCxxModuleSetsEntries() const
+{
+  return cmMakeRange(this->impl->CxxModulesFileSets.SelfEntries.Entries);
+}
+
+cmBTStringRange cmTarget::GetCxxModuleHeaderSetsEntries() const
+{
+  return cmMakeRange(this->impl->CxxModuleHeadersFileSets.SelfEntries.Entries);
+}
+
 cmBTStringRange cmTarget::GetInterfaceHeaderSetsEntries() const
 {
   return cmMakeRange(this->impl->HeadersFileSets.InterfaceEntries.Entries);
+}
+
+cmBTStringRange cmTarget::GetInterfaceCxxModuleSetsEntries() const
+{
+  return cmMakeRange(this->impl->CxxModulesFileSets.InterfaceEntries.Entries);
+}
+
+cmBTStringRange cmTarget::GetInterfaceCxxModuleHeaderSetsEntries() const
+{
+  return cmMakeRange(
+    this->impl->CxxModuleHeadersFileSets.InterfaceEntries.Entries);
 }
 
 namespace {
@@ -1631,13 +1683,21 @@ void cmTarget::StoreProperty(const std::string& prop, ValueType value)
   } else if (this->impl->HeadersFileSets.WriteProperties(
                this, this->impl.get(), prop, value, true)) {
     /* Handled in the `if` condition. */
+  } else if (this->impl->CxxModulesFileSets.WriteProperties(
+               this, this->impl.get(), prop, value, true)) {
+    /* Handled in the `if` condition. */
+  } else if (this->impl->CxxModuleHeadersFileSets.WriteProperties(
+               this, this->impl.get(), prop, value, true)) {
+    /* Handled in the `if` condition. */
   } else {
     this->impl->Properties.SetProperty(prop, value);
   }
 }
 
 void cmTarget::AppendProperty(const std::string& prop,
-                              const std::string& value, bool asString)
+                              const std::string& value,
+                              cm::optional<cmListFileBacktrace> const& bt,
+                              bool asString)
 {
   if (prop == "NAME") {
     this->impl->Makefile->IssueMessage(MessageType::FATAL_ERROR,
@@ -1668,32 +1728,32 @@ void cmTarget::AppendProperty(const std::string& prop,
   }
   if (prop == "INCLUDE_DIRECTORIES") {
     if (!value.empty()) {
-      cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
+      cmListFileBacktrace lfbt = this->impl->GetBacktrace(bt);
       this->impl->IncludeDirectoriesEntries.emplace_back(value, lfbt);
     }
   } else if (prop == "COMPILE_OPTIONS") {
     if (!value.empty()) {
-      cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
+      cmListFileBacktrace lfbt = this->impl->GetBacktrace(bt);
       this->impl->CompileOptionsEntries.emplace_back(value, lfbt);
     }
   } else if (prop == "COMPILE_FEATURES") {
     if (!value.empty()) {
-      cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
+      cmListFileBacktrace lfbt = this->impl->GetBacktrace(bt);
       this->impl->CompileFeaturesEntries.emplace_back(value, lfbt);
     }
   } else if (prop == "COMPILE_DEFINITIONS") {
     if (!value.empty()) {
-      cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
+      cmListFileBacktrace lfbt = this->impl->GetBacktrace(bt);
       this->impl->CompileDefinitionsEntries.emplace_back(value, lfbt);
     }
   } else if (prop == "LINK_OPTIONS") {
     if (!value.empty()) {
-      cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
+      cmListFileBacktrace lfbt = this->impl->GetBacktrace(bt);
       this->impl->LinkOptionsEntries.emplace_back(value, lfbt);
     }
   } else if (prop == "LINK_DIRECTORIES") {
     if (!value.empty()) {
-      cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
+      cmListFileBacktrace lfbt = this->impl->GetBacktrace(bt);
       this->impl->LinkDirectoriesEntries.emplace_back(value, lfbt);
     }
   } else if (prop == "PRECOMPILE_HEADERS") {
@@ -1706,32 +1766,32 @@ void cmTarget::AppendProperty(const std::string& prop,
       return;
     }
     if (!value.empty()) {
-      cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
+      cmListFileBacktrace lfbt = this->impl->GetBacktrace(bt);
       this->impl->PrecompileHeadersEntries.emplace_back(value, lfbt);
     }
   } else if (prop == "LINK_LIBRARIES") {
     if (!value.empty()) {
-      cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
+      cmListFileBacktrace lfbt = this->impl->GetBacktrace(bt);
       this->impl->LinkImplementationPropertyEntries.emplace_back(value, lfbt);
     }
   } else if (prop == propINTERFACE_LINK_LIBRARIES) {
     if (!value.empty()) {
-      cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
+      cmListFileBacktrace lfbt = this->impl->GetBacktrace(bt);
       this->impl->LinkInterfacePropertyEntries.emplace_back(value, lfbt);
     }
   } else if (prop == propINTERFACE_LINK_LIBRARIES_DIRECT) {
     if (!value.empty()) {
-      cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
+      cmListFileBacktrace lfbt = this->impl->GetBacktrace(bt);
       this->impl->LinkInterfaceDirectPropertyEntries.emplace_back(value, lfbt);
     }
   } else if (prop == propINTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE) {
     if (!value.empty()) {
-      cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
+      cmListFileBacktrace lfbt = this->impl->GetBacktrace(bt);
       this->impl->LinkInterfaceDirectExcludePropertyEntries.emplace_back(value,
                                                                          lfbt);
     }
   } else if (prop == "SOURCES") {
-    cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
+    cmListFileBacktrace lfbt = this->impl->GetBacktrace(bt);
     this->impl->SourceEntries.emplace_back(value, lfbt);
   } else if (cmHasLiteralPrefix(prop, "IMPORTED_LIBNAME")) {
     this->impl->Makefile->IssueMessage(
@@ -1742,6 +1802,13 @@ void cmTarget::AppendProperty(const std::string& prop,
     this->impl->Makefile->IssueMessage(
       MessageType::FATAL_ERROR, prop + " property may not be appended.");
   } else if (this->impl->HeadersFileSets.WriteProperties(
+               this, this->impl.get(), prop, value,
+               false)) { // NOLINT(bugprone-branch-clone)
+    /* Handled in the `if` condition. */
+  } else if (this->impl->CxxModulesFileSets.WriteProperties(
+               this, this->impl.get(), prop, value, false)) {
+    /* Handled in the `if` condition. */
+  } else if (this->impl->CxxModuleHeadersFileSets.WriteProperties(
                this, this->impl.get(), prop, value, false)) {
     /* Handled in the `if` condition. */
   } else {
@@ -1881,11 +1948,57 @@ void cmTarget::AppendBuildInterfaceIncludes()
   }
 }
 
-void cmTarget::FinalizeTargetCompileInfo(
+namespace {
+bool CheckLinkLibraryPattern(cm::string_view property,
+                             const std::vector<BT<std::string>>& value,
+                             cmake* context)
+{
+  // Look for <LINK_LIBRARY:> and </LINK_LIBRARY:> internal tags
+  static cmsys::RegularExpression linkPattern(
+    "(^|;)(</?LINK_(LIBRARY|GROUP):[^;>]*>)(;|$)");
+
+  bool isValid = true;
+
+  for (const auto& item : value) {
+    if (!linkPattern.find(item.Value)) {
+      continue;
+    }
+
+    isValid = false;
+
+    // Report an error.
+    context->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat(
+        "Property ", property, " contains the invalid item \"",
+        linkPattern.match(2), "\". The ", property,
+        " property may contain the generator-expression \"$<LINK_",
+        linkPattern.match(3),
+        ":...>\" which may be used to specify how the libraries are linked."),
+      item.Backtrace);
+  }
+
+  return isValid;
+}
+}
+
+void cmTarget::FinalizeTargetConfiguration(
   const cmBTStringRange& noConfigCompileDefinitions,
   cm::optional<std::map<std::string, cmValue>>& perConfigCompileDefinitions)
 {
   if (this->GetType() == cmStateEnums::GLOBAL_TARGET) {
+    return;
+  }
+
+  if (!CheckLinkLibraryPattern("LINK_LIBRARIES"_s,
+                               this->impl->LinkImplementationPropertyEntries,
+                               this->GetMakefile()->GetCMakeInstance()) ||
+      !CheckLinkLibraryPattern("INTERFACE_LINK_LIBRARIES"_s,
+                               this->impl->LinkInterfacePropertyEntries,
+                               this->GetMakefile()->GetCMakeInstance()) ||
+      !CheckLinkLibraryPattern("INTERFACE_LINK_LIBRARIES_DIRECT"_s,
+                               this->impl->LinkInterfaceDirectPropertyEntries,
+                               this->GetMakefile()->GetCMakeInstance())) {
     return;
   }
 
@@ -1969,27 +2082,6 @@ void cmTarget::InsertPrecompileHeader(BT<std::string> const& entry)
 }
 
 namespace {
-void CheckLinkLibraryPattern(const std::string& property,
-                             const std::string& value, cmMakefile* context)
-{
-  // Look for <LINK_LIBRARY:> and </LINK_LIBRARY:> internal tags
-  static cmsys::RegularExpression linkPattern(
-    "(^|;)(</?LINK_(LIBRARY|GROUP):[^;>]*>)(;|$)");
-  if (!linkPattern.find(value)) {
-    return;
-  }
-
-  // Report an error.
-  context->IssueMessage(
-    MessageType::FATAL_ERROR,
-    cmStrCat(
-      "Property ", property, " contains the invalid item \"",
-      linkPattern.match(2), "\". The ", property,
-      " property may contain the generator-expression \"$<LINK_",
-      linkPattern.match(3),
-      ":...>\" which may be used to specify how the libraries are linked."));
-}
-
 void CheckLINK_INTERFACE_LIBRARIES(const std::string& prop,
                                    const std::string& value,
                                    cmMakefile* context, bool imported)
@@ -2024,13 +2116,6 @@ void CheckLINK_INTERFACE_LIBRARIES(const std::string& prop,
     }
     context->IssueMessage(MessageType::FATAL_ERROR, e.str());
   }
-
-  CheckLinkLibraryPattern(base, value, context);
-}
-
-void CheckLINK_LIBRARIES(const std::string& value, cmMakefile* context)
-{
-  CheckLinkLibraryPattern("LINK_LIBRARIES", value, context);
 }
 
 void CheckINTERFACE_LINK_LIBRARIES(const std::string& value,
@@ -2051,8 +2136,6 @@ void CheckINTERFACE_LINK_LIBRARIES(const std::string& value,
 
     context->IssueMessage(MessageType::FATAL_ERROR, e.str());
   }
-
-  CheckLinkLibraryPattern("INTERFACE_LINK_LIBRARIES", value, context);
 }
 
 void CheckIMPORTED_GLOBAL(const cmTarget* target, cmMakefile* context)
@@ -2084,10 +2167,6 @@ void cmTarget::CheckProperty(const std::string& prop,
   } else if (cmHasLiteralPrefix(prop, "IMPORTED_LINK_INTERFACE_LIBRARIES")) {
     if (cmValue value = this->GetProperty(prop)) {
       CheckLINK_INTERFACE_LIBRARIES(prop, *value, context, true);
-    }
-  } else if (prop == "LINK_LIBRARIES") {
-    if (cmValue value = this->GetProperty(prop)) {
-      CheckLINK_LIBRARIES(*value, context);
     }
   } else if (prop == "INTERFACE_LINK_LIBRARIES") {
     if (cmValue value = this->GetProperty(prop)) {
@@ -2294,6 +2373,17 @@ cmValue cmTarget::GetProperty(const std::string& prop) const
       this->impl->HeadersFileSets.ReadProperties(this, this->impl.get(), prop);
     if (headers.first) {
       return headers.second;
+    }
+    auto cxx_modules = this->impl->CxxModulesFileSets.ReadProperties(
+      this, this->impl.get(), prop);
+    if (cxx_modules.first) {
+      return cxx_modules.second;
+    }
+    auto cxx_module_headers =
+      this->impl->CxxModuleHeadersFileSets.ReadProperties(
+        this, this->impl.get(), prop);
+    if (cxx_module_headers.first) {
+      return cxx_module_headers.second;
     }
   }
 
@@ -2572,6 +2662,11 @@ std::pair<cmFileSet*, bool> cmTarget::GetOrCreateFileSet(
     auto bt = this->impl->Makefile->GetBacktrace();
     if (type == this->impl->HeadersFileSets.TypeName) {
       this->impl->HeadersFileSets.AddFileSet(name, vis, std::move(bt));
+    } else if (type == this->impl->CxxModulesFileSets.TypeName) {
+      this->impl->CxxModulesFileSets.AddFileSet(name, vis, std::move(bt));
+    } else if (type == this->impl->CxxModuleHeadersFileSets.TypeName) {
+      this->impl->CxxModuleHeadersFileSets.AddFileSet(name, vis,
+                                                      std::move(bt));
     }
   }
   return std::make_pair(&result.first->second, result.second);
@@ -2582,6 +2677,12 @@ std::string cmTarget::GetFileSetsPropertyName(const std::string& type)
   if (type == "HEADERS") {
     return "HEADER_SETS";
   }
+  if (type == "CXX_MODULES") {
+    return "CXX_MODULE_SETS";
+  }
+  if (type == "CXX_MODULE_HEADER_UNITS") {
+    return "CXX_MODULE_HEADER_UNIT_SETS";
+  }
   return "";
 }
 
@@ -2589,6 +2690,12 @@ std::string cmTarget::GetInterfaceFileSetsPropertyName(const std::string& type)
 {
   if (type == "HEADERS") {
     return "INTERFACE_HEADER_SETS";
+  }
+  if (type == "CXX_MODULES") {
+    return "INTERFACE_CXX_MODULE_SETS";
+  }
+  if (type == "CXX_MODULE_HEADER_UNITS") {
+    return "INTERFACE_CXX_MODULE_HEADER_UNIT_SETS";
   }
   return "";
 }
@@ -2617,6 +2724,8 @@ std::vector<std::string> cmTarget::GetAllInterfaceFileSets() const
   };
 
   appendEntries(this->impl->HeadersFileSets.InterfaceEntries.Entries);
+  appendEntries(this->impl->CxxModulesFileSets.InterfaceEntries.Entries);
+  appendEntries(this->impl->CxxModuleHeadersFileSets.InterfaceEntries.Entries);
 
   return result;
 }

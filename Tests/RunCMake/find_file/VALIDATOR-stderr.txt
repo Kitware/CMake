@@ -1,0 +1,3 @@
+CHECK='[^']+/Tests/RunCMake/find_file/include/PrefixInPATH.h'
+CHECK='[^']+/Tests/RunCMake/find_file/include/PrefixInPATH.h'
+CHECK='[^']+/Tests/RunCMake/find_file/include/PrefixInPATH.h'

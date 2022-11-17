@@ -1,0 +1,6 @@
+^CMake Error at [^
+]*/write-only\.cmake:[0-9]+ \(file\):
+  file failed to open for reading \(Permission denied\):
+
+    [^
+]*/Tests/RunCMake/file-CHMOD/write-only-build/a$

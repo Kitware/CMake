@@ -1,10 +1,10 @@
 $erroractionpreference = "stop"
 
-if ("$env:CMAKE_CI_BUILD_NAME".Contains("clang13.0")) {
-    # LLVM/Clang 13.0
-    # https://github.com/llvm/llvm-project/releases/tag/llvmorg-13.0.0
-    $filename = "llvm-13.0.0-win-x86_64-1"
-    $sha256sum = "F1B7CE360DACBC9776D7F84BE714766D60CF3D47492AFE34C45D574D1C597264"
+if ("$env:CMAKE_CI_BUILD_NAME".Contains("clang15.0")) {
+    # LLVM/Clang 15.0
+    # https://github.com/llvm/llvm-project/releases/tag/llvmorg-15.0.4
+    $filename = "llvm-15.0.4-win-x86_64-1"
+    $sha256sum = "9AA305084C20C27972E103E7B18AAC3F755E0534542AF62FC2F2BF5DDD3C4E1F"
 } else {
     throw ('unknown CMAKE_CI_BUILD_NAME: ' + "$env:CMAKE_CI_BUILD_NAME")
 }
@@ -25,6 +25,7 @@ Add-Type -AssemblyName System.IO.Compression.FileSystem
 Move-Item -Path "$outdir\$filename" -Destination "$outdir\llvm"
 
 $bin = "$outdir\llvm\bin"
+$lib = "$outdir\llvm\lib"
 $null = New-Item -ItemType HardLink -Path "$bin\clang++.exe"      -Target "$bin\clang.exe"
 $null = New-Item -ItemType HardLink -Path "$bin\clang-cl.exe"     -Target "$bin\clang.exe"
 $null = New-Item -ItemType HardLink -Path "$bin\clang-cpp.exe"    -Target "$bin\clang.exe"
@@ -34,4 +35,7 @@ $null = New-Item -ItemType HardLink -Path "$bin\lld-link.exe"     -Target "$bin\
 $null = New-Item -ItemType HardLink -Path "$bin\llvm-lib.exe"     -Target "$bin\llvm-ar.exe"
 $null = New-Item -ItemType HardLink -Path "$bin\llvm-ranlib.exe"  -Target "$bin\llvm-ar.exe"
 $null = New-Item -ItemType HardLink -Path "$bin\llvm-objcopy.exe" -Target "$bin\llvm-strip.exe"
+$null = New-Item -ItemType HardLink -Path "$bin\libiomp5md.dll"   -Target "$bin\libomp.dll"
+$null = New-Item -ItemType HardLink -Path "$lib\libiomp5md.lib"   -Target "$lib\libomp.lib"
 Clear-Variable -Name bin
+Clear-Variable -Name lib

@@ -1,0 +1,4 @@
+CMake Error at EndAloneWithArgument.cmake:[0-9]+ \(endblock\):
+  Flow control statements are not properly nested.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

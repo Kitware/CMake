@@ -1,4 +1,4 @@
-^CMake Error at .*/Tests/RunCMake/try_compile/CudaStandard-build/CMakeFiles/CMakeTmp/CMakeLists.txt:[0-9]+ \(add_executable\):
+^CMake Error at .*/Tests/RunCMake/try_compile/CudaStandard-build/CMakeFiles/CMake(Tmp|Scratch/TryCompile-[^/]+)/CMakeLists.txt:[0-9]+ \(add_executable\):
   CUDA_STANDARD is set to invalid value '4'
 +
 CMake Error at CudaStandard.cmake:[0-9]+ \(try_compile\):

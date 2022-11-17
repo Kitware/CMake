@@ -421,7 +421,17 @@ class cmMakefile;
   SELECT(                                                                     \
     POLICY, CMP0139,                                                          \
     "The if() command supports path comparisons using PATH_EQUAL operator.",  \
-    3, 24, 0, cmPolicies::WARN)
+    3, 24, 0, cmPolicies::WARN)                                               \
+  SELECT(POLICY, CMP0140, "The return() command checks its arguments.", 3,    \
+         25, 0, cmPolicies::WARN)                                             \
+  SELECT(                                                                     \
+    POLICY, CMP0141,                                                          \
+    "MSVC debug information format flags are selected by an abstraction.", 3, \
+    25, 0, cmPolicies::WARN)                                                  \
+  SELECT(POLICY, CMP0142,                                                     \
+         "The Xcode generator does not append per-config suffixes to "        \
+         "library search paths.",                                             \
+         3, 25, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \
@@ -458,7 +468,8 @@ class cmMakefile;
   F(CMP0112)                                                                  \
   F(CMP0113)                                                                  \
   F(CMP0119)                                                                  \
-  F(CMP0131)
+  F(CMP0131)                                                                  \
+  F(CMP0142)
 
 /** \class cmPolicies
  * \brief Handles changes in CMake behavior and policies

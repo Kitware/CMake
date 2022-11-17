@@ -142,9 +142,9 @@ should find all components, no components or some well-defined subset of the
 available components.
 
 .. versionadded:: 3.24
-  The ``REGISTRY_VIEW`` keyword enables to specify which registry views must be
-  queried. This keyword is only meaningful on ``Windows`` platform and will be
-  ignored on all other ones. Formally, it is up to the target package how to
+  The ``REGISTRY_VIEW`` keyword specifies which registry views should be
+  queried. This keyword is only meaningful on ``Windows`` platforms and will
+  be ignored on all others. Formally, it is up to the target package how to
   interpret the registry view information given to it.
 
 .. versionadded:: 3.24
@@ -285,29 +285,40 @@ CMake constructs a set of possible installation prefixes for the
 package.  Under each prefix several directories are searched for a
 configuration file.  The tables below show the directories searched.
 Each entry is meant for installation trees following Windows (``W``), UNIX
-(``U``), or Apple (``A``) conventions::
+(``U``), or Apple (``A``) conventions:
 
-  <prefix>/                                                       (W)
-  <prefix>/(cmake|CMake)/                                         (W)
-  <prefix>/<name>*/                                               (W)
-  <prefix>/<name>*/(cmake|CMake)/                                 (W)
-  <prefix>/(lib/<arch>|lib*|share)/cmake/<name>*/                 (U)
-  <prefix>/(lib/<arch>|lib*|share)/<name>*/                       (U)
-  <prefix>/(lib/<arch>|lib*|share)/<name>*/(cmake|CMake)/         (U)
-  <prefix>/<name>*/(lib/<arch>|lib*|share)/cmake/<name>*/         (W/U)
-  <prefix>/<name>*/(lib/<arch>|lib*|share)/<name>*/               (W/U)
-  <prefix>/<name>*/(lib/<arch>|lib*|share)/<name>*/(cmake|CMake)/ (W/U)
+==================================================================== ==========
+ Entry                                                               Convention
+==================================================================== ==========
+ ``<prefix>/``                                                          W
+ ``<prefix>/(cmake|CMake)/``                                            W
+ ``<prefix>/<name>*/``                                                  W
+ ``<prefix>/<name>*/(cmake|CMake)/``                                    W
+ ``<prefix>/<name>*/(cmake|CMake)/<name>*/`` [#]_                       W
+ ``<prefix>/(lib/<arch>|lib*|share)/cmake/<name>*/``                    U
+ ``<prefix>/(lib/<arch>|lib*|share)/<name>*/``                          U
+ ``<prefix>/(lib/<arch>|lib*|share)/<name>*/(cmake|CMake)/``            U
+ ``<prefix>/<name>*/(lib/<arch>|lib*|share)/cmake/<name>*/``            W/U
+ ``<prefix>/<name>*/(lib/<arch>|lib*|share)/<name>*/``                  W/U
+ ``<prefix>/<name>*/(lib/<arch>|lib*|share)/<name>*/(cmake|CMake)/``    W/U
+==================================================================== ==========
+
+.. [#] .. versionadded:: 3.25
 
 On systems supporting macOS :prop_tgt:`FRAMEWORK` and :prop_tgt:`BUNDLE`, the
 following directories are searched for Frameworks or Application Bundles
-containing a configuration file::
+containing a configuration file:
 
-  <prefix>/<name>.framework/Resources/                    (A)
-  <prefix>/<name>.framework/Resources/CMake/              (A)
-  <prefix>/<name>.framework/Versions/*/Resources/         (A)
-  <prefix>/<name>.framework/Versions/*/Resources/CMake/   (A)
-  <prefix>/<name>.app/Contents/Resources/                 (A)
-  <prefix>/<name>.app/Contents/Resources/CMake/           (A)
+=========================================================== ==========
+ Entry                                                      Convention
+=========================================================== ==========
+ ``<prefix>/<name>.framework/Resources/``                      A
+ ``<prefix>/<name>.framework/Resources/CMake/``                A
+ ``<prefix>/<name>.framework/Versions/*/Resources/``           A
+ ``<prefix>/<name>.framework/Versions/*/Resources/CMake/``     A
+ ``<prefix>/<name>.app/Contents/Resources/``                   A
+ ``<prefix>/<name>.app/Contents/Resources/CMake/``             A
+=========================================================== ==========
 
 In all cases the ``<name>`` is treated as case-insensitive and corresponds
 to any of the names specified (``<PackageName>`` or names given by ``NAMES``).
@@ -368,7 +379,7 @@ enabled.
     See policy :policy:`CMP0074`.
 
 2. Search paths specified in cmake-specific cache variables.  These
-   are intended to be used on the command line with a ``-DVAR=value``.
+   are intended to be used on the command line with a :option:`-DVAR=VALUE <cmake -D>`.
    The values are interpreted as :ref:`semicolon-separated lists <CMake Language Lists>`.
    This can be skipped if ``NO_CMAKE_PATH`` is passed or by setting the
    :variable:`CMAKE_FIND_USE_CMAKE_PATH` to ``FALSE``:
@@ -412,7 +423,8 @@ enabled.
    package registry.
 
 7. Search cmake variables defined in the Platform files for the
-   current system. The searching of :variable:`CMAKE_INSTALL_PREFIX` can be
+   current system. The searching of :variable:`CMAKE_INSTALL_PREFIX` and
+   :variable:`CMAKE_STAGING_PREFIX` can be
    skipped if ``NO_CMAKE_INSTALL_PREFIX`` is passed or by setting the
    :variable:`CMAKE_FIND_USE_INSTALL_PREFIX` to ``FALSE``. All these locations
    can be skipped if ``NO_CMAKE_SYSTEM_PATH`` is passed or by setting the

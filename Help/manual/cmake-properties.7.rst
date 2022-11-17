@@ -90,6 +90,7 @@ Properties on Directories
    /prop_dir/RULE_LAUNCH_LINK
    /prop_dir/SOURCE_DIR
    /prop_dir/SUBDIRECTORIES
+   /prop_dir/SYSTEM
    /prop_dir/TESTS
    /prop_dir/TEST_INCLUDE_FILES
    /prop_dir/VARIABLES
@@ -184,6 +185,16 @@ Properties on Targets
    /prop_tgt/CUDA_STANDARD
    /prop_tgt/CUDA_STANDARD_REQUIRED
    /prop_tgt/CXX_EXTENSIONS
+   /prop_tgt/CXX_MODULE_DIRS
+   /prop_tgt/CXX_MODULE_DIRS_NAME
+   /prop_tgt/CXX_MODULE_HEADER_UNIT_DIRS
+   /prop_tgt/CXX_MODULE_HEADER_UNIT_DIRS_NAME
+   /prop_tgt/CXX_MODULE_HEADER_UNIT_SET
+   /prop_tgt/CXX_MODULE_HEADER_UNIT_SET_NAME
+   /prop_tgt/CXX_MODULE_HEADER_UNIT_SETS
+   /prop_tgt/CXX_MODULE_SET
+   /prop_tgt/CXX_MODULE_SET_NAME
+   /prop_tgt/CXX_MODULE_SETS
    /prop_tgt/CXX_STANDARD
    /prop_tgt/CXX_STANDARD_REQUIRED
    /prop_tgt/DEBUG_POSTFIX
@@ -202,6 +213,7 @@ Properties on Targets
    /prop_tgt/EXCLUDE_FROM_DEFAULT_BUILD_CONFIG
    /prop_tgt/EXPORT_COMPILE_COMMANDS
    /prop_tgt/EXPORT_NAME
+   /prop_tgt/EXPORT_NO_SYSTEM
    /prop_tgt/EXPORT_PROPERTIES
    /prop_tgt/FOLDER
    /prop_tgt/Fortran_BUILDING_INSTRINSIC_MODULES
@@ -262,6 +274,8 @@ Properties on Targets
    /prop_tgt/INTERFACE_COMPILE_DEFINITIONS
    /prop_tgt/INTERFACE_COMPILE_FEATURES
    /prop_tgt/INTERFACE_COMPILE_OPTIONS
+   /prop_tgt/INTERFACE_CXX_MODULE_HEADER_UNIT_SETS
+   /prop_tgt/INTERFACE_CXX_MODULE_SETS
    /prop_tgt/INTERFACE_HEADER_SETS
    /prop_tgt/INTERFACE_HEADER_SETS_TO_VERIFY
    /prop_tgt/INTERFACE_INCLUDE_DIRECTORIES
@@ -327,6 +341,7 @@ Properties on Targets
    /prop_tgt/MACOSX_RPATH
    /prop_tgt/MANUALLY_ADDED_DEPENDENCIES
    /prop_tgt/MAP_IMPORTED_CONFIG_CONFIG
+   /prop_tgt/MSVC_DEBUG_INFORMATION_FORMAT
    /prop_tgt/MSVC_RUNTIME_LIBRARY
    /prop_tgt/NAME
    /prop_tgt/NO_SONAME
@@ -342,8 +357,8 @@ Properties on Targets
    /prop_tgt/OSX_ARCHITECTURES_CONFIG
    /prop_tgt/OUTPUT_NAME
    /prop_tgt/OUTPUT_NAME_CONFIG
-   /prop_tgt/PCH_WARN_INVALID
    /prop_tgt/PCH_INSTANTIATE_TEMPLATES
+   /prop_tgt/PCH_WARN_INVALID
    /prop_tgt/PDB_NAME
    /prop_tgt/PDB_NAME_CONFIG
    /prop_tgt/PDB_OUTPUT_DIRECTORY
@@ -375,6 +390,7 @@ Properties on Targets
    /prop_tgt/Swift_LANGUAGE_VERSION
    /prop_tgt/Swift_MODULE_DIRECTORY
    /prop_tgt/Swift_MODULE_NAME
+   /prop_tgt/SYSTEM
    /prop_tgt/TYPE
    /prop_tgt/UNITY_BUILD
    /prop_tgt/UNITY_BUILD_BATCH_SIZE
@@ -444,13 +460,17 @@ Properties on Targets
    /prop_tgt/XCODE_SCHEME_ARGUMENTS
    /prop_tgt/XCODE_SCHEME_DEBUG_AS_ROOT
    /prop_tgt/XCODE_SCHEME_DEBUG_DOCUMENT_VERSIONING
-   /prop_tgt/XCODE_SCHEME_ENABLE_GPU_FRAME_CAPTURE_MODE
    /prop_tgt/XCODE_SCHEME_DISABLE_MAIN_THREAD_CHECKER
    /prop_tgt/XCODE_SCHEME_DYNAMIC_LIBRARY_LOADS
    /prop_tgt/XCODE_SCHEME_DYNAMIC_LINKER_API_USAGE
+   /prop_tgt/XCODE_SCHEME_ENABLE_GPU_API_VALIDATION
+   /prop_tgt/XCODE_SCHEME_ENABLE_GPU_FRAME_CAPTURE_MODE
+   /prop_tgt/XCODE_SCHEME_ENABLE_GPU_SHADER_VALIDATION
    /prop_tgt/XCODE_SCHEME_ENVIRONMENT
    /prop_tgt/XCODE_SCHEME_EXECUTABLE
    /prop_tgt/XCODE_SCHEME_GUARD_MALLOC
+   /prop_tgt/XCODE_SCHEME_LAUNCH_CONFIGURATION
+   /prop_tgt/XCODE_SCHEME_LAUNCH_MODE
    /prop_tgt/XCODE_SCHEME_MAIN_THREAD_CHECKER_STOP
    /prop_tgt/XCODE_SCHEME_MALLOC_GUARD_EDGES
    /prop_tgt/XCODE_SCHEME_MALLOC_SCRIBBLE

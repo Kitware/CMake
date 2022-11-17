@@ -1,0 +1,6 @@
+^CMake Error at [^
+]*/invalid-path\.cmake:[0-9]+ \(file\):
+  file does not exist:
+
+    [^
+]*/Tests/RunCMake/file-CHMOD/invalid-path-build/I_dont_exist$

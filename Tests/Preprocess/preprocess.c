@@ -33,7 +33,7 @@ int check_defines_C(void)
       result = 0;
     }
   }
-#ifdef NDEBUG
+#ifdef PREPROCESS_NDEBUG
 #  ifdef FILE_DEF_DEBUG
   {
     fprintf(stderr, "FILE_DEF_DEBUG should not be defined in C\n");

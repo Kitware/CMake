@@ -34,3 +34,14 @@ div.outdated {
   text-align: center;
   width: 100%;
 }
+
+/* Revert style to the inherited (normal text) for `:guide:` links */
+code.xref.cmake-guide {
+  font-size: inherit;
+  font-family: inherit;
+  font-weight: inherit;
+  padding: inherit;
+}
+code.xref.cmake-guide span.pre {
+  white-space: inherit;
+}

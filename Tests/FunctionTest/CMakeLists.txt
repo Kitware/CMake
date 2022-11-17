@@ -51,7 +51,7 @@ track_find_variable(testvar is_changed)
 if ("${is_changed}" STREQUAL changed)
   pass("same argument name test")
 else ()
-  pass("same argument name test")
+  fail("same argument name test" "Got: ${is_changed}")
 endif ()
 
 include("Util.cmake")
@@ -59,7 +59,7 @@ tester()
 if (tester_res STREQUAL "${CMAKE_CURRENT_LIST_FILE}")
   pass("CMAKE_CURRENT_LIST_FILE test")
 else ()
-  pass("CMAKE_CURRENT_LIST_FILE test")
+  fail("CMAKE_CURRENT_LIST_FILE test" "Got: ${tester_res}")
 endif ()
 
 

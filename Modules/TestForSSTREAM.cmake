@@ -16,8 +16,8 @@ check if the compiler supports the standard ANSI sstream header
 
 if(NOT DEFINED CMAKE_HAS_ANSI_STRING_STREAM)
   message(CHECK_START "Check for sstream")
-  try_compile(CMAKE_HAS_ANSI_STRING_STREAM  ${CMAKE_BINARY_DIR}
-    ${CMAKE_ROOT}/Modules/TestForSSTREAM.cxx
+  try_compile(CMAKE_HAS_ANSI_STRING_STREAM
+    SOURCES ${CMAKE_ROOT}/Modules/TestForSSTREAM.cxx
     OUTPUT_VARIABLE OUTPUT)
   if (CMAKE_HAS_ANSI_STRING_STREAM)
     message(CHECK_PASS "found")

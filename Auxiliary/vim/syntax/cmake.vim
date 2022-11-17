@@ -436,6 +436,7 @@ syn keyword cmakeProperty contained
             \ XCODE_SCHEME_ENVIRONMENT
             \ XCODE_SCHEME_EXECUTABLE
             \ XCODE_SCHEME_GUARD_MALLOC
+            \ XCODE_SCHEME_LAUNCH_MODE
             \ XCODE_SCHEME_MAIN_THREAD_CHECKER_STOP
             \ XCODE_SCHEME_MALLOC_GUARD_EDGES
             \ XCODE_SCHEME_MALLOC_SCRIBBLE
@@ -444,6 +445,9 @@ syn keyword cmakeProperty contained
             \ XCODE_SCHEME_THREAD_SANITIZER_STOP
             \ XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER
             \ XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER_STOP
+            \ XCODE_SCHEME_ENABLE_GPU_API_VALIDATION
+            \ XCODE_SCHEME_ENABLE_GPU_SHADER_VALIDATION
+            \ XCODE_SCHEME_LAUNCH_CONFIGURATION
             \ XCODE_SCHEME_WORKING_DIRECTORY
             \ XCODE_SCHEME_ZOMBIE_OBJECTS
             \ XCTEST
@@ -1537,6 +1541,7 @@ syn keyword cmakeVariable contained
             \ CMAKE_XCODE_SCHEME_DYNAMIC_LINKER_API_USAGE
             \ CMAKE_XCODE_SCHEME_ENVIRONMENT
             \ CMAKE_XCODE_SCHEME_GUARD_MALLOC
+            \ CMAKE_XCODE_SCHEME_LAUNCH_MODE
             \ CMAKE_XCODE_SCHEME_MAIN_THREAD_CHECKER_STOP
             \ CMAKE_XCODE_SCHEME_MALLOC_GUARD_EDGES
             \ CMAKE_XCODE_SCHEME_MALLOC_SCRIBBLE
@@ -1545,6 +1550,9 @@ syn keyword cmakeVariable contained
             \ CMAKE_XCODE_SCHEME_THREAD_SANITIZER_STOP
             \ CMAKE_XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER
             \ CMAKE_XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER_STOP
+            \ CMAKE_XCODE_SCHEME_ENABLE_GPU_API_VALIDATION
+            \ CMAKE_XCODE_SCHEME_ENABLE_GPU_SHADER_VALIDATION
+            \ CMAKE_XCODE_SCHEME_LAUNCH_CONFIGURATION
             \ CMAKE_XCODE_SCHEME_WORKING_DIRECTORY
             \ CMAKE_XCODE_SCHEME_ZOMBIE_OBJECTS
             \ CPACK_ABSOLUTE_DESTINATION_FILES
@@ -3830,6 +3838,7 @@ syn keyword cmakeCommand
             \ add_subdirectory
             \ add_test
             \ aux_source_directory
+            \ block
             \ break
             \ build_command
             \ cmake_host_system_information
@@ -3857,6 +3866,7 @@ syn keyword cmakeCommand
             \ define_property
             \ enable_language
             \ enable_testing
+            \ endblock
             \ endfunction
             \ endmacro
             \ execute_process

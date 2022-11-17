@@ -301,6 +301,9 @@ External Project Definition
         If ``GIT_SHALLOW`` is enabled then ``GIT_TAG`` works only with
         branch names and tags.  A commit hash is not allowed.
 
+        Note that if not provided, ``GIT_TAG`` defaults to ``master``, not the
+        default Git branch name.
+
       ``GIT_REMOTE_NAME <name>``
         The optional name of the remote. If this option is not specified, it
         defaults to ``origin``.
@@ -1837,7 +1840,11 @@ function(_ep_get_build_command
       else()
         set(cmd "${CMAKE_COMMAND}")
       endif()
-      set(args --build ".")
+      if(step STREQUAL "INSTALL")
+        set(args --install ".")
+      else()
+        set(args --build ".")
+      endif()
       get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
       if(_isMultiConfig)
         if (CMAKE_CFG_INTDIR AND
@@ -1858,9 +1865,6 @@ function(_ep_get_build_command
           set(config $<CONFIG>)
         endif()
         list(APPEND args --config ${config})
-      endif()
-      if(step STREQUAL "INSTALL")
-        list(APPEND args --target install)
       endif()
       # But for "TEST" drive the project with corresponding "ctest".
       if("x${step}x" STREQUAL "xTESTx")
@@ -3829,6 +3833,19 @@ function(_ep_add_install_command name)
     set(uses_terminal "")
   endif()
 
+  # With BUILD_ALWAYS+BUILD_BYPRODUCTS, Ninja restats the
+  # build step outputs and may not consider this step to
+  # be out-of-date.  Explicitly mark it out-of-date too.
+  get_property(build_always
+    TARGET ${name}
+    PROPERTY _EP_BUILD_ALWAYS
+  )
+  if(build_always)
+    set(always 1)
+  else()
+    set(always 0)
+  endif()
+
   set(__cmdQuoted)
   foreach(__item IN LISTS cmd)
     string(APPEND __cmdQuoted " [==[${__item}]==]")
@@ -3839,6 +3856,7 @@ function(_ep_add_install_command name)
       COMMAND ${__cmdQuoted}
       WORKING_DIRECTORY \${binary_dir}
       DEPENDEES build
+      ALWAYS \${always}
       ${log}
       ${uses_terminal}
     )"

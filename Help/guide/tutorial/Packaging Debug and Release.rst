@@ -10,8 +10,8 @@ possible, however, to setup CPack to bundle multiple build directories and
 construct a package that contains multiple configurations of the same project.
 
 First, we want to ensure that the debug and release builds use different names
-for the executables and libraries that will be installed. Let's use `d` as the
-postfix for the debug executable and libraries.
+for the libraries that will be installed. Let's use `d` as the
+postfix for the debug libraries.
 
 Set :variable:`CMAKE_DEBUG_POSTFIX` near the beginning of the top-level
 ``CMakeLists.txt`` file:
@@ -41,10 +41,10 @@ Let's also add version numbering to the ``MathFunctions`` library. In
   :name: MathFunctions/CMakeLists.txt-VERSION-properties
   :language: cmake
   :start-after: # setup the version numbering
-  :end-before: # install rules
+  :end-before: # install libs
 
 From the ``Step12`` directory, create ``debug`` and ``release``
-subbdirectories. The layout will look like:
+subdirectories. The layout will look like:
 
 .. code-block:: none
 

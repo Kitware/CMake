@@ -121,12 +121,66 @@ add_library(ordertest ordertest.cpp)
 target_include_directories(ordertest SYSTEM PUBLIC SystemIncludeDirectories/systemlib)
 target_include_directories(ordertest PUBLIC SystemIncludeDirectories/userlib)
 
+# Test "IMPORTED_NO_SYSTEM" property and its interaction with "SYSTEM"
 add_library(ordertest2 ordertest.cpp)
 target_include_directories(ordertest2 SYSTEM PRIVATE SystemIncludeDirectories/systemlib)
 target_link_libraries(ordertest2 PRIVATE ordertest2_userlib)
 add_library(ordertest2_userlib INTERFACE IMPORTED)
 target_include_directories(ordertest2_userlib INTERFACE SystemIncludeDirectories/userlib)
 set_property(TARGET ordertest2_userlib PROPERTY IMPORTED_NO_SYSTEM 1)
+get_property(system_prop_value TARGET ordertest2_userlib PROPERTY SYSTEM)
+if (NOT system_prop_value)
+  message(SEND_ERROR "ordertest2_userlib SYSTEM property should be ON.")
+endif()
+
+# Test "SYSTEM" property of non-imported libraries
+add_library(ordertest3_systemlib INTERFACE)
+target_include_directories(ordertest3_systemlib INTERFACE SystemIncludeDirectories/systemlib)
+set_property(TARGET ordertest3_systemlib PROPERTY SYSTEM 1)
+add_library(ordertest3_userlib INTERFACE)
+target_include_directories(ordertest3_userlib INTERFACE SystemIncludeDirectories/userlib)
+add_library(ordertest3 ordertest.cpp)
+target_link_libraries(ordertest3 PRIVATE ordertest3_systemlib ordertest3_userlib)
+
+# Test "SYSTEM" property of imported libraries and its interaction with "IMPORTED_NO_SYSTEM"
+add_library(ordertest4 ordertest.cpp)
+target_include_directories(ordertest4 SYSTEM PRIVATE SystemIncludeDirectories/systemlib)
+target_link_libraries(ordertest4 PRIVATE ordertest4_userlib)
+add_library(ordertest4_userlib INTERFACE IMPORTED)
+target_include_directories(ordertest4_userlib INTERFACE SystemIncludeDirectories/userlib)
+set_property(TARGET ordertest4_userlib PROPERTY SYSTEM 0)
+get_property(imported_no_system_prop_value TARGET ordertest4_userlib PROPERTY IMPORTED_NO_SYSTEM)
+if (imported_no_system_prop_value)
+  message(SEND_ERROR "ordertest4_userlib IMPORTED_NO_SYSTEM property should be OFF.")
+endif()
+
+# Test the interaction between "SYSTEM" and "INTERFACE_SYSTEM_INCLUDE_DIRECTORIES"
+add_library(ordertest5_systemlib INTERFACE)
+target_include_directories(ordertest5_systemlib SYSTEM INTERFACE SystemIncludeDirectories/systemlib)
+# The default value of `SYSTEM` is already `OFF`. Here we explicitly set it again.
+set_property(TARGET ordertest5_systemlib PROPERTY SYSTEM 0)
+add_library(ordertest5_userlib INTERFACE)
+target_include_directories(ordertest5_userlib INTERFACE SystemIncludeDirectories/userlib)
+add_library(ordertest5 ordertest.cpp)
+target_link_libraries(ordertest5 PRIVATE ordertest5_systemlib ordertest5_userlib)
+
+# Test that the include of imported executable is treated as system by default.
+add_executable(ordertest6_systemexe IMPORTED)
+target_include_directories(ordertest6_systemexe INTERFACE SystemIncludeDirectories/systemlib)
+set_property(TARGET ordertest6_systemexe PROPERTY ENABLE_EXPORTS 1)
+add_library(ordertest6_userlib INTERFACE)
+target_include_directories(ordertest6_userlib INTERFACE SystemIncludeDirectories/userlib)
+add_library(ordertest6 ordertest.cpp)
+target_link_libraries(ordertest6 PRIVATE ordertest6_systemexe ordertest6_userlib)
+
+# Test that the include of imported executable is not treated as system if "SYSTEM" property is OFF.
+add_library(ordertest7 ordertest.cpp)
+target_include_directories(ordertest7 SYSTEM PRIVATE SystemIncludeDirectories/systemlib)
+target_link_libraries(ordertest7 PRIVATE ordertest7_userexe)
+add_library(ordertest7_userexe INTERFACE IMPORTED)
+target_include_directories(ordertest7_userexe INTERFACE SystemIncludeDirectories/userlib)
+set_property(TARGET ordertest7_userexe PROPERTY ENABLE_EXPORTS 1)
+set_property(TARGET ordertest7_userexe PROPERTY SYSTEM 0)
 
 add_subdirectory(StandardIncludeDirectories)
 add_subdirectory(TargetIncludeDirectories)

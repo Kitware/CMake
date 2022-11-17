@@ -1,0 +1,19 @@
+^CMake Error at create-missing-args.cmake:[0-9]+ \(file\):
+  Error after keyword "COMPRESSION":
+
+    missing required value
+
+  Error after keyword "COMPRESSION_LEVEL":
+
+    missing required value
+
+  Error after keyword "FORMAT":
+
+    missing required value
+
+  Error after keyword "OUTPUT":
+
+    missing required value
+
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)$

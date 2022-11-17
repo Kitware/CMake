@@ -1,5 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
-project(PchDebugGenex C)
+enable_language(C)
 
 add_library(foo foo.c)
 target_include_directories(foo PUBLIC include)

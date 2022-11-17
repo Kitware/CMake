@@ -1,0 +1,4 @@
+CMake Error at VALIDATOR-specify-macro.cmake:[0-9]+ \(find_path\):
+  find_path command specified for "VALIDATOR" is not a function: check.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

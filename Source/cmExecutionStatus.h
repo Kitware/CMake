@@ -5,6 +5,7 @@
 #include <cmConfigure.h> // IWYU pragma: keep
 
 #include <string>
+#include <vector>
 
 class cmMakefile;
 
@@ -27,8 +28,21 @@ public:
   void SetError(std::string const& e) { this->Error = e; }
   std::string const& GetError() const { return this->Error; }
 
-  void SetReturnInvoked() { this->ReturnInvoked = true; }
+  void SetReturnInvoked()
+  {
+    this->Variables.clear();
+    this->ReturnInvoked = true;
+  }
+  void SetReturnInvoked(std::vector<std::string> variables)
+  {
+    this->Variables = std::move(variables);
+    this->ReturnInvoked = true;
+  }
   bool GetReturnInvoked() const { return this->ReturnInvoked; }
+  const std::vector<std::string>& GetReturnVariables() const
+  {
+    return this->Variables;
+  }
 
   void SetBreakInvoked() { this->BreakInvoked = true; }
   bool GetBreakInvoked() const { return this->BreakInvoked; }
@@ -46,4 +60,5 @@ private:
   bool BreakInvoked = false;
   bool ContinueInvoked = false;
   bool NestedError = false;
+  std::vector<std::string> Variables;
 };

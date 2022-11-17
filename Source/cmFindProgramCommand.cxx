@@ -27,6 +27,7 @@ struct cmFindProgramHelper
                       cmFindBase const* base)
     : DebugSearches(std::move(debugName), base)
     , Makefile(makefile)
+    , FindBase(base)
     , PolicyCMP0109(makefile->GetPolicyStatus(cmPolicies::CMP0109))
   {
 #if defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
@@ -56,6 +57,7 @@ struct cmFindProgramHelper
   // Debug state
   cmFindBaseDebugState DebugSearches;
   cmMakefile* Makefile;
+  cmFindBase const* FindBase;
 
   cmPolicies::PolicyStatus PolicyCMP0109;
 
@@ -94,7 +96,7 @@ struct cmFindProgramHelper
                          this->TestNameExt = cmStrCat(name, ext);
                          this->TestPath = cmSystemTools::CollapseFullPath(
                            this->TestNameExt, path);
-                         bool exists = this->FileIsExecutable(this->TestPath);
+                         bool exists = this->FileIsValid(this->TestPath);
                          exists ? this->DebugSearches.FoundAt(this->TestPath)
                                 : this->DebugSearches.FailedAt(this->TestPath);
                          if (exists) {
@@ -104,12 +106,12 @@ struct cmFindProgramHelper
                          return false;
                        });
   }
-  bool FileIsExecutable(std::string const& file) const
+  bool FileIsValid(std::string const& file) const
   {
-#ifdef _WIN32
     if (!this->FileIsExecutableCMP0109(file)) {
       return false;
     }
+#ifdef _WIN32
     // Pretend the Windows "python" app installer alias does not exist.
     if (cmSystemTools::LowerCase(file).find("/windowsapps/python") !=
         std::string::npos) {
@@ -119,10 +121,8 @@ struct cmFindProgramHelper
         return false;
       }
     }
-    return true;
-#else
-    return this->FileIsExecutableCMP0109(file);
 #endif
+    return this->FindBase->Validate(file);
   }
   bool FileIsExecutableCMP0109(std::string const& file) const
   {

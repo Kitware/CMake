@@ -14,15 +14,18 @@
 #include <cmext/string_view>
 
 #include "cmArgumentParser.h"
+#include "cmArgumentParserTypes.h"
 #include "cmDependencyProvider.h"
 #include "cmExecutionStatus.h"
 #include "cmGlobalGenerator.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmRange.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmake.h"
 
 namespace {
 
@@ -33,13 +36,14 @@ bool FatalError(cmExecutionStatus& status, std::string const& error)
   return false;
 }
 
-std::array<cm::static_string_view, 12> InvalidCommands{
+std::array<cm::static_string_view, 14> InvalidCommands{
   { // clang-format off
   "function"_s, "endfunction"_s,
   "macro"_s, "endmacro"_s,
   "if"_s, "elseif"_s, "else"_s, "endif"_s,
   "while"_s, "endwhile"_s,
-  "foreach"_s, "endforeach"_s
+  "foreach"_s, "endforeach"_s,
+  "block"_s, "endblock"_s
   } // clang-format on
 };
 
@@ -235,7 +239,7 @@ bool cmCMakeLanguageCommandSET_DEPENDENCY_PROVIDER(
   struct SetProviderArgs
   {
     std::string Command;
-    std::vector<std::string> Methods;
+    ArgumentParser::NonEmpty<std::vector<std::string>> Methods;
   };
 
   auto const ArgsParser =
@@ -301,6 +305,27 @@ bool cmCMakeLanguageCommandSET_DEPENDENCY_PROVIDER(
     fcmasProperty,
     supportsFetchContentMakeAvailableSerial ? parsedArgs.Command.c_str() : "");
 
+  return true;
+}
+
+bool cmCMakeLanguageCommandGET_MESSAGE_LOG_LEVEL(
+  std::vector<cmListFileArgument> const& args, cmExecutionStatus& status)
+{
+  cmMakefile& makefile = status.GetMakefile();
+  std::vector<std::string> expandedArgs;
+  makefile.ExpandArguments(args, expandedArgs);
+
+  if (args.size() < 2 || expandedArgs.size() > 2) {
+    return FatalError(
+      status,
+      "sub-command GET_MESSAGE_LOG_LEVEL expects exactly one argument");
+  }
+
+  Message::LogLevel logLevel = makefile.GetCurrentLogLevel();
+  std::string outputValue = cmake::LogLevelToString(logLevel);
+
+  const std::string& outputVariable = expandedArgs[1];
+  makefile.AddDefinition(outputVariable, outputValue);
   return true;
 }
 }
@@ -449,6 +474,10 @@ bool cmCMakeLanguageCommand(std::vector<cmListFileArgument> const& args,
 
   if (expArgs[expArg] == "EVAL") {
     return cmCMakeLanguageCommandEVAL(args, status);
+  }
+
+  if (expArgs[expArg] == "GET_MESSAGE_LOG_LEVEL") {
+    return cmCMakeLanguageCommandGET_MESSAGE_LOG_LEVEL(args, status);
   }
 
   return FatalError(status, "called with unknown meta-operation");

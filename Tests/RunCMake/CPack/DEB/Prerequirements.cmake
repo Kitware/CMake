@@ -14,9 +14,9 @@ function(get_test_prerequirements found_var config_file)
   endif()
 
   # optional tool for some tests
-  find_program(READELF_EXECUTABLE NAMES readelf)
-  if(READELF_EXECUTABLE)
+  find_program(CPACK_READELF_EXECUTABLE NAMES readelf)
+  if(CPACK_READELF_EXECUTABLE)
     file(APPEND "${config_file}"
-      "\nset(READELF_EXECUTABLE \"${READELF_EXECUTABLE}\")")
+      "\nset(CPACK_READELF_EXECUTABLE \"${CPACK_READELF_EXECUTABLE}\")")
   endif()
 endfunction()

@@ -74,6 +74,14 @@ foreach (command IN ITEMS APPEND APPEND_STRING REMOVE_FILENAME REPLACE_FILENAME
 endforeach()
 
 
+## BASE_DIRECTORY without argument
+set (RunCMake-stderr-file "BASE_DIRECTORY-no-arg-stderr.txt")
+
+foreach (command IN ITEMS RELATIVE_PATH ABSOLUTE_PATH)
+  run_cmake_command (${command}-OUTPUT_VARIABLE-no-arg "${CMAKE_COMMAND}" "-DCMAKE_PATH_ARGUMENTS=${command} path BASE_DIRECTORY" -P "${RunCMake_SOURCE_DIR}/call-cmake_path.cmake")
+endforeach()
+
+
 ## Invalid output variable
 set (RunCMake-stderr-file "invalid-output-var-stderr.txt")
 
@@ -105,6 +113,9 @@ foreach (command IN ITEMS NATIVE_PATH
   endif()
   run_cmake_command (${command}-invalid-output "${CMAKE_COMMAND}" "-DCMAKE_PATH_ARGUMENTS=${command} path ${extra_args}" -DCHECK_INVALID_OUTPUT=ON -P "${RunCMake_SOURCE_DIR}/call-cmake_path.cmake")
 endforeach()
+
+# OUTPUT_VARIABLE empty name
+set (RunCMake-stderr-file "OUTPUT_VARIABLE-empty-stderr.txt")
 
 foreach (command IN ITEMS APPEND APPEND_STRING REMOVE_FILENAME REPLACE_FILENAME
                           REMOVE_EXTENSION REPLACE_EXTENSION NORMAL_PATH

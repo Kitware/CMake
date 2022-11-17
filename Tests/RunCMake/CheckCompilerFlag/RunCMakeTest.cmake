@@ -5,28 +5,30 @@ run_cmake(NonExistentLanguage)
 
 run_cmake(CheckCCompilerFlag)
 run_cmake(CheckCXXCompilerFlag)
+run_cmake(CheckCompilerFlagC)
+run_cmake(CheckCompilerFlagCXX)
 
 if (APPLE)
-  run_cmake(CheckOBJCCompilerFlag)
-  run_cmake(CheckOBJCXXCompilerFlag)
+  run_cmake(CheckCompilerFlagOBJC)
+  run_cmake(CheckCompilerFlagOBJCXX)
 endif()
 
 if (CMAKE_Fortran_COMPILER_ID)
-  run_cmake(CheckFortranCompilerFlag)
+  run_cmake(CheckCompilerFlagFortran)
 endif()
 
 if (CMake_TEST_CUDA)
-  run_cmake(CheckCUDACompilerFlag)
+  run_cmake(CheckCompilerFlagCUDA)
 endif()
 
 if(CMake_TEST_ISPC)
-  run_cmake(CheckISPCCompilerFlag)
+  run_cmake(CheckCompilerFlagISPC)
 endif()
 
 if(CMake_TEST_HIP)
-  run_cmake(CheckHIPCompilerFlag)
+  run_cmake(CheckCompilerFlagHIP)
 endif()
 
 if(APPLE)
-  run_cmake_with_options(HeaderpadWorkaround --debug-trycompile)
+  run_cmake(HeaderpadWorkaround)
 endif()

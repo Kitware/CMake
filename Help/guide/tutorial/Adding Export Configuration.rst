@@ -21,7 +21,7 @@ in ``MathFunctions/CMakeLists.txt`` to look like:
   :caption: MathFunctions/CMakeLists.txt
   :name: MathFunctions/CMakeLists.txt-install-TARGETS-EXPORT
   :language: cmake
-  :start-after: # install rules
+  :start-after: # install libs
 
 Now that we have ``MathFunctions`` being exported, we also need to explicitly
 install the generated ``MathFunctionsTargets.cmake`` file. This is done by

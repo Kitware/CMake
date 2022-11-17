@@ -625,8 +625,8 @@ function(cpack_rpm_debugsymbol_check INSTALL_FILES WORKING_DIR)
   endif()
 
   # With objdump we should check the debug symbols
-  find_program(OBJDUMP_EXECUTABLE objdump)
-  if(NOT OBJDUMP_EXECUTABLE)
+  find_program(CPACK_OBJDUMP_EXECUTABLE objdump)
+  if(NOT CPACK_OBJDUMP_EXECUTABLE)
     message(FATAL_ERROR "CPackRPM: objdump binary could not be found!"
       " Required for debuginfo packaging. See documentation of"
       " CPACK_RPM_DEBUGINFO_PACKAGE variable for details.")
@@ -649,7 +649,7 @@ function(cpack_rpm_debugsymbol_check INSTALL_FILES WORKING_DIR)
       continue()
     endif()
 
-    execute_process(COMMAND "${OBJDUMP_EXECUTABLE}" -h ${WORKING_DIR}/${F}
+    execute_process(COMMAND "${CPACK_OBJDUMP_EXECUTABLE}" -h ${WORKING_DIR}/${F}
                     WORKING_DIRECTORY "${CPACK_TOPLEVEL_DIRECTORY}"
                     RESULT_VARIABLE OBJDUMP_EXEC_RESULT
                     OUTPUT_VARIABLE OBJDUMP_OUT

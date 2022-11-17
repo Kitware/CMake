@@ -23,7 +23,8 @@ cmInstallExportGenerator::cmInstallExportGenerator(
   cmExportSet* exportSet, std::string const& destination,
   std::string file_permissions, std::vector<std::string> const& configurations,
   std::string const& component, MessageLevel message, bool exclude_from_all,
-  std::string filename, std::string name_space, bool exportOld, bool android,
+  std::string filename, std::string name_space,
+  std::string cxx_modules_directory, bool exportOld, bool android,
   cmListFileBacktrace backtrace)
   : cmInstallGenerator(destination, configurations, component, message,
                        exclude_from_all, false, std::move(backtrace))
@@ -31,6 +32,7 @@ cmInstallExportGenerator::cmInstallExportGenerator(
   , FilePermissions(std::move(file_permissions))
   , FileName(std::move(filename))
   , Namespace(std::move(name_space))
+  , CxxModulesDirectory(std::move(cxx_modules_directory))
   , ExportOld(exportOld)
 {
   if (android) {
@@ -136,6 +138,75 @@ void cmInstallExportGenerator::GenerateScriptConfigs(std::ostream& os,
     std::string config_test = this->CreateConfigTest(i.first);
     os << indent << "if(" << config_test << ")\n";
     this->AddInstallRule(os, this->Destination, cmInstallType_FILES, files,
+                         false, this->FilePermissions.c_str(), nullptr,
+                         nullptr, nullptr, indent.Next());
+    os << indent << "endif()\n";
+    files.clear();
+  }
+
+  // Now create a configuration-specific install rule for the C++ module import
+  // property file of each configuration.
+  auto cxx_module_dest =
+    cmStrCat(this->Destination, '/', this->CxxModulesDirectory);
+  std::string config_file_example;
+  for (auto const& i : this->EFGen->GetConfigCxxModuleFiles()) {
+    config_file_example = i.second;
+    break;
+  }
+  if (!config_file_example.empty()) {
+    // Remove old per-configuration export files if the main changes.
+    std::string installedDir = cmStrCat(
+      "$ENV{DESTDIR}", ConvertToAbsoluteDestination(cxx_module_dest), '/');
+    std::string installedFile = cmStrCat(installedDir, "/cxx-modules.cmake");
+    std::string toInstallFile =
+      cmStrCat(cmSystemTools::GetFilenamePath(config_file_example),
+               "/cxx-modules.cmake");
+    os << indent << "if(EXISTS \"" << installedFile << "\")\n";
+    Indent indentN = indent.Next();
+    Indent indentNN = indentN.Next();
+    Indent indentNNN = indentNN.Next();
+    /* clang-format off */
+    os << indentN << "file(DIFFERENT _cmake_export_file_changed FILES\n"
+       << indentN << "     \"" << installedFile << "\"\n"
+       << indentN << "     \"" << toInstallFile << "\")\n";
+    os << indentN << "if(_cmake_export_file_changed)\n";
+    os << indentNN << "file(GLOB _cmake_old_config_files \"" << installedDir
+       << this->EFGen->GetConfigImportFileGlob() << "\")\n";
+    os << indentNN << "if(_cmake_old_config_files)\n";
+    os << indentNNN << "string(REPLACE \";\" \", \" _cmake_old_config_files_text \"${_cmake_old_config_files}\")\n";
+    os << indentNNN << R"(message(STATUS "Old C++ module export file \")" << installedFile
+       << "\\\" will be replaced.  Removing files [${_cmake_old_config_files_text}].\")\n";
+    os << indentNNN << "unset(_cmake_old_config_files_text)\n";
+    os << indentNNN << "file(REMOVE ${_cmake_old_config_files})\n";
+    os << indentNN << "endif()\n";
+    os << indentNN << "unset(_cmake_old_config_files)\n";
+    os << indentN << "endif()\n";
+    os << indentN << "unset(_cmake_export_file_changed)\n";
+    os << indent << "endif()\n";
+    /* clang-format on */
+
+    // All of these files are siblings; get its location to know where the
+    // "anchor" file is.
+    files.push_back(toInstallFile);
+    this->AddInstallRule(os, cxx_module_dest, cmInstallType_FILES, files,
+                         false, this->FilePermissions.c_str(), nullptr,
+                         nullptr, nullptr, indent);
+    files.clear();
+  }
+  for (auto const& i : this->EFGen->GetConfigCxxModuleFiles()) {
+    files.push_back(i.second);
+    std::string config_test = this->CreateConfigTest(i.first);
+    os << indent << "if(" << config_test << ")\n";
+    this->AddInstallRule(os, cxx_module_dest, cmInstallType_FILES, files,
+                         false, this->FilePermissions.c_str(), nullptr,
+                         nullptr, nullptr, indent.Next());
+    os << indent << "endif()\n";
+    files.clear();
+  }
+  for (auto const& i : this->EFGen->GetConfigCxxModuleTargetFiles()) {
+    std::string config_test = this->CreateConfigTest(i.first);
+    os << indent << "if(" << config_test << ")\n";
+    this->AddInstallRule(os, cxx_module_dest, cmInstallType_FILES, i.second,
                          false, this->FilePermissions.c_str(), nullptr,
                          nullptr, nullptr, indent.Next());
     os << indent << "endif()\n";

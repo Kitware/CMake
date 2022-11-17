@@ -149,6 +149,29 @@ void cmMakefile::IssueMessage(MessageType t, std::string const& text) const
   this->GetCMakeInstance()->IssueMessage(t, text, this->Backtrace);
 }
 
+Message::LogLevel cmMakefile::GetCurrentLogLevel() const
+{
+  const cmake* cmakeInstance = this->GetCMakeInstance();
+
+  const Message::LogLevel logLevelCliOrDefault = cmakeInstance->GetLogLevel();
+  assert("Expected a valid log level here" &&
+         logLevelCliOrDefault != Message::LogLevel::LOG_UNDEFINED);
+
+  Message::LogLevel result = logLevelCliOrDefault;
+
+  // If the log-level was set via the command line option, it takes precedence
+  // over the CMAKE_MESSAGE_LOG_LEVEL variable.
+  if (!cmakeInstance->WasLogLevelSetViaCLI()) {
+    const Message::LogLevel logLevelFromVar = cmake::StringToLogLevel(
+      this->GetSafeDefinition("CMAKE_MESSAGE_LOG_LEVEL"));
+    if (logLevelFromVar != Message::LogLevel::LOG_UNDEFINED) {
+      result = logLevelFromVar;
+    }
+  }
+
+  return result;
+}
+
 bool cmMakefile::CheckCMP0037(std::string const& targetName,
                               cmStateEnums::TargetType targetType) const
 {
@@ -766,6 +789,7 @@ void cmMakefile::RunListFile(cmListFile const& listFile,
       break;
     }
     if (status.GetReturnInvoked()) {
+      this->RaiseScope(status.GetReturnVariables());
       // Exit early due to return command.
       break;
     }
@@ -1759,7 +1783,8 @@ void cmMakefile::ConfigureSubDirectory(cmMakefile* mf)
 
 void cmMakefile::AddSubDirectory(const std::string& srcPath,
                                  const std::string& binPath,
-                                 bool excludeFromAll, bool immediate)
+                                 bool excludeFromAll, bool immediate,
+                                 bool system)
 {
   if (this->DeferRunning) {
     this->IssueMessage(
@@ -1788,6 +1813,9 @@ void cmMakefile::AddSubDirectory(const std::string& srcPath,
 
   if (excludeFromAll) {
     subMf->SetProperty("EXCLUDE_FROM_ALL", "TRUE");
+  }
+  if (system) {
+    subMf->SetProperty("SYSTEM", "TRUE");
   }
 
   if (immediate) {
@@ -3456,7 +3484,7 @@ void cmMakefile::AddTargetObject(std::string const& tgtName,
 #endif
 }
 
-void cmMakefile::EnableLanguage(std::vector<std::string> const& lang,
+void cmMakefile::EnableLanguage(std::vector<std::string> const& languages,
                                 bool optional)
 {
   if (this->DeferRunning) {
@@ -3468,24 +3496,48 @@ void cmMakefile::EnableLanguage(std::vector<std::string> const& lang,
   if (const char* def = this->GetGlobalGenerator()->GetCMakeCFGIntDir()) {
     this->AddDefinition("CMAKE_CFG_INTDIR", def);
   }
+
+  std::vector<std::string> unique_languages;
+  {
+    std::vector<std::string> duplicate_languages;
+    for (std::string const& language : languages) {
+      if (!cm::contains(unique_languages, language)) {
+        unique_languages.push_back(language);
+      } else if (!cm::contains(duplicate_languages, language)) {
+        duplicate_languages.push_back(language);
+      }
+    }
+    if (!duplicate_languages.empty()) {
+      auto quantity = duplicate_languages.size() == 1 ? std::string(" has")
+                                                      : std::string("s have");
+      this->IssueMessage(MessageType::AUTHOR_WARNING,
+                         "Languages to be enabled may not be specified more "
+                         "than once at the same time. The following language" +
+                           quantity + " been specified multiple times: " +
+                           cmJoin(duplicate_languages, ", "));
+    }
+  }
+
   // If RC is explicitly listed we need to do it after other languages.
   // On some platforms we enable RC implicitly while enabling others.
   // Do not let that look like recursive enable_language(RC).
-  std::vector<std::string> langs;
-  std::vector<std::string> langsRC;
-  langs.reserve(lang.size());
-  for (std::string const& i : lang) {
-    if (i == "RC") {
-      langsRC.push_back(i);
+  std::vector<std::string> languages_without_RC;
+  std::vector<std::string> languages_for_RC;
+  languages_without_RC.reserve(unique_languages.size());
+  for (std::string const& language : unique_languages) {
+    if (language == "RC") {
+      languages_for_RC.push_back(language);
     } else {
-      langs.push_back(i);
+      languages_without_RC.push_back(language);
     }
   }
-  if (!langs.empty()) {
-    this->GetGlobalGenerator()->EnableLanguage(langs, this, optional);
+  if (!languages_without_RC.empty()) {
+    this->GetGlobalGenerator()->EnableLanguage(languages_without_RC, this,
+                                               optional);
   }
-  if (!langsRC.empty()) {
-    this->GetGlobalGenerator()->EnableLanguage(langsRC, this, optional);
+  if (!languages_for_RC.empty()) {
+    this->GetGlobalGenerator()->EnableLanguage(languages_for_RC, this,
+                                               optional);
   }
 }
 
@@ -3987,31 +4039,6 @@ std::vector<std::string> cmMakefile::GetPropertyKeys() const
   return this->StateSnapshot.GetDirectory().GetPropertyKeys();
 }
 
-void cmMakefile::CheckProperty(const std::string& prop) const
-{
-  // Certain properties need checking.
-  if (prop == "LINK_LIBRARIES") {
-    if (cmValue value = this->GetProperty(prop)) {
-      // Look for <LINK_LIBRARY:> internal pattern
-      static cmsys::RegularExpression linkPattern(
-        "(^|;)(</?LINK_(LIBRARY|GROUP):[^;>]*>)(;|$)");
-      if (!linkPattern.find(value)) {
-        return;
-      }
-
-      // Report an error.
-      this->IssueMessage(
-        MessageType::FATAL_ERROR,
-        cmStrCat("Property ", prop, " contains the invalid item \"",
-                 linkPattern.match(2), "\". The ", prop,
-                 " property may contain the generator-expression \"$<LINK_",
-                 linkPattern.match(3),
-                 ":...>\" which may be used to specify how the libraries are "
-                 "linked."));
-    }
-  }
-}
-
 cmTarget* cmMakefile::FindLocalNonAliasTarget(const std::string& name) const
 {
   auto i = this->Targets.find(name);
@@ -4139,6 +4166,18 @@ void cmMakefile::RaiseScope(const std::string& var, const char* varDef)
                          varDef, this);
   }
 #endif
+}
+
+void cmMakefile::RaiseScope(const std::vector<std::string>& variables)
+{
+  for (auto const& varName : variables) {
+    if (this->IsNormalDefinitionSet(varName)) {
+      this->RaiseScope(varName, this->GetDefinition(varName));
+    } else {
+      // unset variable in parent scope
+      this->RaiseScope(varName, nullptr);
+    }
+  }
 }
 
 cmTarget* cmMakefile::AddImportedTarget(const std::string& name,
@@ -4431,7 +4470,7 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
   }
 
   // Deprecate old policies.
-  if (status == cmPolicies::OLD && id <= cmPolicies::CMP0097 &&
+  if (status == cmPolicies::OLD && id <= cmPolicies::CMP0102 &&
       !(this->GetCMakeInstance()->GetIsInTryCompile() &&
         (
           // Policies set by cmCoreTryCompile::TryCompileCode.
@@ -4494,6 +4533,19 @@ bool cmMakefile::SetPolicyVersion(std::string const& version_min,
 {
   return cmPolicies::ApplyPolicyVersion(this, version_min, version_max,
                                         cmPolicies::WarnCompat::On);
+}
+
+cmMakefile::VariablePushPop::VariablePushPop(cmMakefile* m)
+  : Makefile(m)
+{
+  this->Makefile->StateSnapshot =
+    this->Makefile->GetState()->CreateVariableScopeSnapshot(
+      this->Makefile->StateSnapshot);
+}
+
+cmMakefile::VariablePushPop::~VariablePushPop()
+{
+  this->Makefile->PopSnapshot();
 }
 
 bool cmMakefile::HasCMP0054AlreadyBeenReported(

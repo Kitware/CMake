@@ -33,6 +33,8 @@ set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreaded         -th
 set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDLL      -threads -libs:dll)
 set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDebug    -threads -libs:static -dbglibs)
 set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDebugDLL -threads -libs:dll    -dbglibs)
+set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_DEBUG_INFORMATION_FORMAT_Embedded        -Z7)
+set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_DEBUG_INFORMATION_FORMAT_ProgramDatabase -Zi)
 
 # Intel Fortran for Windows supports single-threaded RTL but it is
 # not implemented by the Visual Studio integration.

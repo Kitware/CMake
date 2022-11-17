@@ -1,0 +1,87 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "default",
+      "binaryDir": "${sourceDir}/build",
+      "generator": "@RunCMake_GENERATOR@"
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "default",
+      "configurePreset": "default",
+      "configuration": "Debug"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "default",
+      "configurePreset": "default",
+      "output": {
+        "verbosity": "verbose"
+      },
+      "configuration": "Debug"
+    }
+  ],
+  "packagePresets": [
+    {
+      "name": "default",
+      "configurePreset": "default",
+      "generators": [
+        "External"
+      ],
+      "variables": {
+        "CPACK_EXTERNAL_PACKAGE_SCRIPT": "${sourceDir}/cpack_staging.cmake"
+      },
+      "configurations": ["Debug"]
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "Good",
+      "displayName": "Good Workflow Preset",
+      "description": "This workflow preset works properly.",
+      "vendor": {},
+      "steps": [
+        {
+          "type": "configure",
+          "name": "default"
+        },
+        {
+          "type": "build",
+          "name": "default"
+        },
+        {
+          "type": "test",
+          "name": "default"
+        },
+        {
+          "type": "package",
+          "name": "default"
+        }
+      ]
+    },
+    {
+      "name": "BadExitCode",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "default"
+        },
+        {
+          "type": "build",
+          "name": "default"
+        },
+        {
+          "type": "test",
+          "name": "default"
+        },
+        {
+          "type": "package",
+          "name": "default"
+        }
+      ]
+    }
+  ]
+}

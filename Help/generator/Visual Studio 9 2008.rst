@@ -10,7 +10,7 @@ The default target platform name (architecture) is ``Win32``.
 
 .. versionadded:: 3.1
   The :variable:`CMAKE_GENERATOR_PLATFORM` variable may be set, perhaps
-  via the :manual:`cmake(1)` ``-A`` option, to specify a target platform
+  via the :option:`cmake -A` option, to specify a target platform
   name (architecture).  For example:
 
   * ``cmake -G "Visual Studio 9 2008" -A Win32``

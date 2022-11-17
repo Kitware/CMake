@@ -1,0 +1,7 @@
+^CMake Error at NoRunStdOutVariable.cmake:[0-9]+ \(try_run\):
+  Error after keyword "RUN_OUTPUT_STDOUT_VARIABLE":
+
+    missing required value
+
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)$

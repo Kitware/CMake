@@ -47,8 +47,9 @@ does, and present the user with the presets listed in the file. Users should be
 able to see (and possibly edit) the CMake cache variables, environment
 variables, and command line options that are defined for a given preset. The
 IDE should then construct the list of appropriate :manual:`cmake(1)` command
-line arguments based on these settings, rather than using the ``--preset=``
-option directly. The ``--preset=`` option is intended only as a convenient
+line arguments based on these settings, rather than using the
+:option:`--preset= <cmake --preset>` option directly. The
+:option:`--preset= <cmake --preset>` option is intended only as a convenient
 frontend for command line users, and should not be used by the IDE.
 
 For example, if a preset named ``ninja`` specifies ``Ninja`` as the generator
@@ -66,10 +67,9 @@ run:
   cmake -S /path/to/source -B /path/to/source/build -G Ninja
 
 In cases where a preset contains lots of cache variables, and passing all of
-them as ``-D`` flags would cause the command line length limit of the platform
-to be exceeded, the IDE should instead construct a temporary cache script and
-pass it with the ``-C`` flag. See :ref:`CMake Options` for details on how the
-``-C`` flag is used.
+them as :option:`-D <cmake -D>` flags would cause the command line length limit
+of the platform to be exceeded, the IDE should instead construct a temporary
+cache script and pass it with the :option:`-C <cmake -C>` flag.
 
 While reading, parsing, and evaluating the contents of ``CMakePresets.json`` is
 straightforward, it is not trivial. In addition to the documentation, IDE
@@ -110,8 +110,9 @@ Building
 
 If a Makefile or Ninja generator is used to generate the build tree, it is not
 recommended to invoke ``make`` or ``ninja`` directly. Instead, it is
-recommended that the IDE invoke :manual:`cmake(1)` with the ``--build``
-argument, which will in turn invoke the appropriate build tool.
+recommended that the IDE invoke :manual:`cmake(1)` with the
+:option:`--build <cmake --build>` argument, which will in turn invoke the
+appropriate build tool.
 
 If an IDE project generator is used, such as :generator:`Xcode` or one of the
 Visual Studio generators, and the IDE understands the project format used, the

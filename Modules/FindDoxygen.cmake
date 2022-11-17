@@ -5,14 +5,14 @@
 FindDoxygen
 -----------
 
-Doxygen is a documentation generation tool (see http://www.doxygen.org).
+Doxygen is a documentation generation tool (see https://www.doxygen.nl).
 This module looks for Doxygen and some optional tools it supports:
 
 ``dot``
-  `Graphviz <http://graphviz.org>`_ ``dot`` utility used to render various
+  `Graphviz <https://graphviz.org>`_ ``dot`` utility used to render various
   graphs.
 ``mscgen``
-  `Message Chart Generator <http://www.mcternan.me.uk/mscgen/>`_ utility used
+  `Message Chart Generator <https://www.mcternan.me.uk/mscgen/>`_ utility used
   by Doxygen's ``\msc`` and ``\mscfile`` commands.
 ``dia``
   `Dia <https://wiki.gnome.org/Apps/Dia>`_ the diagram editor used by Doxygen's
@@ -91,7 +91,7 @@ Functions
   base point. Note also that Doxygen's default behavior is to strip the working
   directory from relative paths in the generated documentation (see the
   ``STRIP_FROM_PATH`` `Doxygen config option
-  <http://www.doxygen.org/manual/config.html>`_ for details).
+  <https://www.doxygen.nl/manual/config.html>`_ for details).
 
   If provided, the optional ``comment`` will be passed as the ``COMMENT`` for
   the :command:`add_custom_target` command used to create the custom target
@@ -117,7 +117,7 @@ Functions
   variables before calling ``doxygen_add_docs()``. Any variable with a name of
   the form ``DOXYGEN_<tag>`` will have its value substituted for the
   corresponding ``<tag>`` configuration option in the ``Doxyfile``. See the
-  `Doxygen documentation <http://www.doxygen.org/manual/config.html>`_ for the
+  `Doxygen documentation <https://www.doxygen.nl/manual/config.html>`_ for the
   full list of supported configuration options.
 
   Some of Doxygen's defaults are overridden to provide more appropriate
@@ -432,9 +432,44 @@ endif()
 # or use something like homebrew.
 # ============== End OSX stuff ================
 
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+
 #
 # Find Doxygen...
 #
+function(_Doxygen_get_version doxy_version result_var doxy_path)
+        execute_process(
+            COMMAND "${doxy_path}" --version
+            OUTPUT_VARIABLE full_doxygen_version
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            RESULT_VARIABLE version_result
+        )
+
+        # Ignore any commit hashes, etc.
+        string(REGEX MATCH [[^[0-9]+\.[0-9]+\.[0-9]+]] sem_doxygen_version "${full_doxygen_version}")
+
+        set(${result_var} ${version_result} PARENT_SCOPE)
+        set(${doxy_version} ${sem_doxygen_version} PARENT_SCOPE)
+endfunction()
+
+function(_Doxygen_version_validator version_match doxy_path)
+    if(NOT DEFINED Doxygen_FIND_VERSION)
+        set(${is_valid_version} TRUE PARENT_SCOPE)
+    else()
+        _Doxygen_get_version(candidate_version version_result "${doxy_path}")
+
+        if(version_result)
+            message(DEBUG "Unable to determine candidate doxygen version at ${doxy_path}: ${version_result}")
+        endif()
+
+        find_package_check_version("${candidate_version}" valid_doxy_version
+            HANDLE_VERSION_RANGE
+        )
+
+        set(${version_match} "${valid_doxy_version}" PARENT_SCOPE)
+    endif()
+endfunction()
+
 macro(_Doxygen_find_doxygen)
     find_program(
         DOXYGEN_EXECUTABLE
@@ -445,17 +480,14 @@ macro(_Doxygen_find_doxygen)
             /Applications/Doxygen.app/Contents/MacOS
             /Applications/Utilities/Doxygen.app/Contents/Resources
             /Applications/Utilities/Doxygen.app/Contents/MacOS
-        DOC "Doxygen documentation generation tool (http://www.doxygen.org)"
+        DOC "Doxygen documentation generation tool (https://www.doxygen.nl)"
+        VALIDATOR _Doxygen_version_validator
     )
     mark_as_advanced(DOXYGEN_EXECUTABLE)
 
     if(DOXYGEN_EXECUTABLE)
-        execute_process(
-            COMMAND "${DOXYGEN_EXECUTABLE}" --version
-            OUTPUT_VARIABLE DOXYGEN_VERSION
-            OUTPUT_STRIP_TRAILING_WHITESPACE
-            RESULT_VARIABLE _Doxygen_version_result
-        )
+        _Doxygen_get_version(DOXYGEN_VERSION _Doxygen_version_result "${DOXYGEN_EXECUTABLE}")
+
         if(_Doxygen_version_result)
             message(WARNING "Unable to determine doxygen version: ${_Doxygen_version_result}")
         endif()
@@ -642,11 +674,11 @@ endforeach()
 unset(_comp)
 
 # Verify find results
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 find_package_handle_standard_args(
     Doxygen
     REQUIRED_VARS DOXYGEN_EXECUTABLE
     VERSION_VAR DOXYGEN_VERSION
+    HANDLE_VERSION_RANGE
     HANDLE_COMPONENTS
 )
 
@@ -919,7 +951,7 @@ doxygen_add_docs() for target ${targetName}")
     if(NOT DEFINED DOXYGEN_HAVE_DOT)
         # If you set the HAVE_DOT tag to YES then doxygen will assume the dot
         # tool is available from the path. This tool is part of Graphviz (see:
-        # http://www.graphviz.org/), a graph visualization toolkit from AT&T
+        # https://www.graphviz.org/), a graph visualization toolkit from AT&T
         # and Lucent Bell Labs. The other options in this section have no
         # effect if this option is set to NO.
         # Doxygen's default value is: NO.

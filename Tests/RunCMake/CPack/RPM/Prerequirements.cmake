@@ -15,9 +15,9 @@ function(get_test_prerequirements found_var config_file)
   endif()
 
   # optional tool for some tests
-  find_program(OBJDUMP_EXECUTABLE objdump)
-  if(OBJDUMP_EXECUTABLE)
+  find_program(CPACK_OBJDUMP_EXECUTABLE objdump)
+  if(CPACK_OBJDUMP_EXECUTABLE)
     file(APPEND "${config_file}"
-      "\nset(OBJDUMP_EXECUTABLE \"${OBJDUMP_EXECUTABLE}\")")
+      "\nset(CPACK_OBJDUMP_EXECUTABLE \"${CPACK_OBJDUMP_EXECUTABLE}\")")
   endif()
 endfunction()

@@ -57,7 +57,6 @@ bool cmLinkLineDeviceComputer::ComputeRequiresDeviceLinking(
   // For this we only consider targets
   using ItemVector = cmComputeLinkInformation::ItemVector;
   ItemVector const& items = cli.GetItems();
-  std::string config = cli.GetConfig();
   return std::any_of(
     items.begin(), items.end(),
     [](cmComputeLinkInformation::Item const& item) -> bool {
@@ -66,6 +65,26 @@ bool cmLinkLineDeviceComputer::ComputeRequiresDeviceLinking(
         // this dependency requires us to device link it
         !item.Target->GetPropertyAsBool("CUDA_RESOLVE_DEVICE_SYMBOLS") &&
         item.Target->GetPropertyAsBool("CUDA_SEPARABLE_COMPILATION");
+    });
+}
+
+bool cmLinkLineDeviceComputer::ComputeRequiresDeviceLinkingIPOFlag(
+  cmComputeLinkInformation& cli)
+{
+  // Determine if this item might requires device linking.
+  // For this we only consider targets
+  using ItemVector = cmComputeLinkInformation::ItemVector;
+  ItemVector const& items = cli.GetItems();
+  std::string config = cli.GetConfig();
+  return std::any_of(
+    items.begin(), items.end(),
+    [config](cmComputeLinkInformation::Item const& item) -> bool {
+      return item.Target &&
+        item.Target->GetType() == cmStateEnums::STATIC_LIBRARY &&
+        // this dependency requires us to device link it
+        !item.Target->GetPropertyAsBool("CUDA_RESOLVE_DEVICE_SYMBOLS") &&
+        item.Target->GetPropertyAsBool("CUDA_SEPARABLE_COMPILATION") &&
+        item.Target->IsIPOEnabled("CUDA", config);
     });
 }
 

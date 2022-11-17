@@ -1,4 +1,4 @@
-CMake Error at BadSources1.cmake:1 \(try_compile\):
+CMake Error at BadSources1.cmake:[0-9]+ \(try_compile\):
   Unknown extension ".c" for file
 
     .*/Tests/RunCMake/try_compile/src.c

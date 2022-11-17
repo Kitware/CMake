@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 
@@ -30,7 +32,8 @@
 
 #ifdef USE_OPENSSL
 #include <openssl/opensslconf.h>
-#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
+#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3) && \
+   !defined(USE_AMISSL)
 /* OpenSSL 3.0.0 marks the MD4 functions as deprecated */
 #define OPENSSL_NO_MD4
 #endif
@@ -39,7 +42,7 @@
 #ifdef USE_WOLFSSL
 #include <wolfssl/options.h>
 #ifdef NO_MD4
-#define OPENSSL_NO_MD4
+#define WOLFSSL_NO_MD4
 #endif
 #endif
 
@@ -82,9 +85,11 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
   md4_digest(ctx, MD4_DIGEST_SIZE, result);
 }
 
-#elif (defined(USE_OPENSSL) || defined(USE_WOLFSSL)) && \
-      !defined(OPENSSL_NO_MD4)
 /* When OpenSSL or wolfSSL is available, we use their MD4 functions. */
+#elif defined(USE_WOLFSSL) && !defined(WOLFSSL_NO_MD4)
+#include <wolfssl/openssl/md4.h>
+
+#elif defined(USE_OPENSSL) && !defined(OPENSSL_NO_MD4)
 #include <openssl/md4.h>
 
 #elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \

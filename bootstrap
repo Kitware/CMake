@@ -281,6 +281,7 @@ CMAKE_UNUSED_SOURCES="\
 "
 
 CMAKE_CXX_SOURCES="\
+  cmAddCompileDefinitionsCommand \
   cmAddCustomCommandCommand \
   cmAddCustomTargetCommand \
   cmAddDefinitionsCommand \
@@ -301,6 +302,7 @@ CMAKE_CXX_SOURCES="\
   cmBinUtilsWindowsPEDumpbinGetRuntimeDependenciesTool \
   cmBinUtilsWindowsPELinker \
   cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool \
+  cmBlockCommand \
   cmBreakCommand \
   cmBuildCommand \
   cmCMakeLanguageCommand \
@@ -328,6 +330,7 @@ CMAKE_CXX_SOURCES="\
   cmCustomCommand \
   cmCustomCommandGenerator \
   cmCustomCommandLines \
+  cmCxxModuleMapper \
   cmDefinePropertyCommand \
   cmDefinitions \
   cmDocumentationFormatter \
@@ -337,6 +340,7 @@ CMAKE_CXX_SOURCES="\
   cmExecProgramCommand \
   cmExecuteProcessCommand \
   cmExpandedCommandArgument \
+  cmExperimental \
   cmExportBuildFileGenerator \
   cmExportFileGenerator \
   cmExportInstallFileGenerator \
@@ -391,6 +395,7 @@ CMAKE_CXX_SOURCES="\
   cmIncludeRegularExpressionCommand \
   cmInstallCommand \
   cmInstallCommandArguments \
+  cmInstallCxxModuleBmiGenerator \
   cmInstallDirectoryGenerator \
   cmInstallExportGenerator \
   cmInstallFileSetGenerator \
@@ -589,6 +594,7 @@ if ${cmake_system_mingw}; then
     src/inet.c \
     src/threadpool.c \
     src/strscpy.c \
+    src/strtok.c \
     src/timer.c \
     src/uv-common.c \
     src/win/async.c \
@@ -619,6 +625,7 @@ if ${cmake_system_mingw}; then
 else
   LIBUV_C_SOURCES="\
     src/strscpy.c \
+    src/strtok.c \
     src/timer.c \
     src/uv-common.c \
     src/unix/cmake-bootstrap.c \
@@ -635,6 +642,7 @@ else
     src/unix/signal.c \
     src/unix/stream.c \
     src/unix/tcp.c \
+    src/unix/tty.c \
     "
 fi
 

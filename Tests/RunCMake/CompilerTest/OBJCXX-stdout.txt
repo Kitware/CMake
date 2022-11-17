@@ -1,0 +1,2 @@
+-- Check for working OBJCXX compiler: [^
+]* - works

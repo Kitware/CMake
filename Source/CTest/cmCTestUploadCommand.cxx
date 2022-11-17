@@ -21,7 +21,7 @@ void cmCTestUploadCommand::BindArguments()
   this->Bind("CAPTURE_CMAKE_ERROR"_s, this->CaptureCMakeError);
 }
 
-void cmCTestUploadCommand::CheckArguments(std::vector<std::string> const&)
+void cmCTestUploadCommand::CheckArguments()
 {
   cm::erase_if(this->Files, [this](std::string const& arg) -> bool {
     if (!cmSystemTools::FileExists(arg)) {

@@ -6,7 +6,7 @@
 #include <utility>
 
 #include "IFW/cmCPackIFWGenerator.h"
-#ifdef HAVE_FREEBSD_PKG
+#if ENABLE_BUILD_FREEBSD_PKG
 #  include "cmCPackFreeBSDGenerator.h"
 #endif
 #include "cmCPackArchiveGenerator.h"
@@ -34,7 +34,7 @@
 #  include "cmCPackRPMGenerator.h"
 #endif
 
-#if defined(_WIN32) || (defined(__CYGWIN__) && defined(HAVE_LIBUUID))
+#if ENABLE_BUILD_WIX_GENERATOR
 #  include "WiX/cmCPackWIXGenerator.h"
 #endif
 
@@ -80,7 +80,7 @@ cmCPackGeneratorFactory::cmCPackGeneratorFactory()
                             cmCPackCygwinSourceGenerator::CreateGenerator);
   }
 #endif
-#if defined(_WIN32) || (defined(__CYGWIN__) && defined(HAVE_LIBUUID))
+#if ENABLE_BUILD_WIX_GENERATOR
   if (cmCPackWIXGenerator::CanGenerate()) {
     this->RegisterGenerator("WIX", "MSI file format via WiX tools",
                             cmCPackWIXGenerator::CreateGenerator);
@@ -119,7 +119,7 @@ cmCPackGeneratorFactory::cmCPackGeneratorFactory()
                             cmCPackRPMGenerator::CreateGenerator);
   }
 #endif
-#ifdef HAVE_FREEBSD_PKG
+#if ENABLE_BUILD_FREEBSD_PKG
   if (cmCPackFreeBSDGenerator::CanGenerate()) {
     this->RegisterGenerator("FREEBSD", "FreeBSD pkg(8) packages",
                             cmCPackFreeBSDGenerator::CreateGenerator);

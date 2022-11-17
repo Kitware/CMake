@@ -18,6 +18,7 @@
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
+#include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
@@ -378,25 +379,29 @@ std::unordered_map<std::string, StandardLevelComputer>
         "C", std::vector<int>{ 90, 99, 11, 17, 23 },
         std::vector<std::string>{ "90", "99", "11", "17", "23" } } },
     { "CXX",
-      StandardLevelComputer{
-        "CXX", std::vector<int>{ 98, 11, 14, 17, 20, 23 },
-        std::vector<std::string>{ "98", "11", "14", "17", "20", "23" } } },
+      StandardLevelComputer{ "CXX",
+                             std::vector<int>{ 98, 11, 14, 17, 20, 23, 26 },
+                             std::vector<std::string>{ "98", "11", "14", "17",
+                                                       "20", "23", "26" } } },
     { "CUDA",
-      StandardLevelComputer{
-        "CUDA", std::vector<int>{ 03, 11, 14, 17, 20, 23 },
-        std::vector<std::string>{ "03", "11", "14", "17", "20", "23" } } },
+      StandardLevelComputer{ "CUDA",
+                             std::vector<int>{ 03, 11, 14, 17, 20, 23, 26 },
+                             std::vector<std::string>{ "03", "11", "14", "17",
+                                                       "20", "23", "26" } } },
     { "OBJC",
       StandardLevelComputer{
         "OBJC", std::vector<int>{ 90, 99, 11, 17, 23 },
         std::vector<std::string>{ "90", "99", "11", "17", "23" } } },
     { "OBJCXX",
-      StandardLevelComputer{
-        "OBJCXX", std::vector<int>{ 98, 11, 14, 17, 20, 23 },
-        std::vector<std::string>{ "98", "11", "14", "17", "20", "23" } } },
+      StandardLevelComputer{ "OBJCXX",
+                             std::vector<int>{ 98, 11, 14, 17, 20, 23, 26 },
+                             std::vector<std::string>{ "98", "11", "14", "17",
+                                                       "20", "23", "26" } } },
     { "HIP",
-      StandardLevelComputer{
-        "HIP", std::vector<int>{ 98, 11, 14, 17, 20, 23 },
-        std::vector<std::string>{ "98", "11", "14", "17", "20", "23" } } }
+      StandardLevelComputer{ "HIP",
+                             std::vector<int>{ 98, 11, 14, 17, 20, 23, 26 },
+                             std::vector<std::string>{ "98", "11", "14", "17",
+                                                       "20", "23", "26" } } }
   };
 }
 
@@ -416,7 +421,8 @@ bool cmStandardLevelResolver::AddRequiredTargetFeature(
   cmTarget* target, const std::string& feature, std::string* error) const
 {
   if (cmGeneratorExpression::Find(feature) != std::string::npos) {
-    target->AppendProperty("COMPILE_FEATURES", feature);
+    target->AppendProperty("COMPILE_FEATURES", feature,
+                           this->Makefile->GetBacktrace());
     return true;
   }
 
@@ -426,7 +432,8 @@ bool cmStandardLevelResolver::AddRequiredTargetFeature(
     return false;
   }
 
-  target->AppendProperty("COMPILE_FEATURES", feature);
+  target->AppendProperty("COMPILE_FEATURES", feature,
+                         this->Makefile->GetBacktrace());
 
   // FIXME: Add a policy to avoid updating the <LANG>_STANDARD target
   // property due to COMPILE_FEATURES.  The language standard selection

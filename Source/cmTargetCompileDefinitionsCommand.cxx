@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmTargetCompileDefinitionsCommand.h"
 
+#include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmStringAlgorithms.h"
@@ -28,7 +29,8 @@ private:
                            const std::vector<std::string>& content,
                            bool /*prepend*/, bool /*system*/) override
   {
-    tgt->AppendProperty("COMPILE_DEFINITIONS", this->Join(content));
+    tgt->AppendProperty("COMPILE_DEFINITIONS", this->Join(content),
+                        this->Makefile->GetBacktrace());
     return true; // Successfully handled.
   }
 

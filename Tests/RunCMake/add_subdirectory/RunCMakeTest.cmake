@@ -3,6 +3,7 @@ include(RunCMake)
 run_cmake(DoesNotExist)
 run_cmake(Missing)
 run_cmake(Function)
+run_cmake(System)
 
 macro(run_cmake_install case)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${case}-build)

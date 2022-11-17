@@ -1150,8 +1150,8 @@ struct uv_interface_address_s {
 
 struct uv_passwd_s {
   char* username;
-  long uid;
-  long gid;
+  unsigned long uid;
+  unsigned long gid;
   char* shell;
   char* homedir;
 };
@@ -1259,6 +1259,7 @@ UV_EXTERN uv_pid_t uv_os_getppid(void);
 UV_EXTERN int uv_os_getpriority(uv_pid_t pid, int* priority);
 UV_EXTERN int uv_os_setpriority(uv_pid_t pid, int priority);
 
+UV_EXTERN unsigned int uv_available_parallelism(void);
 UV_EXTERN int uv_cpu_info(uv_cpu_info_t** cpu_infos, int* count);
 UV_EXTERN void uv_free_cpu_info(uv_cpu_info_t* cpu_infos, int count);
 UV_EXTERN int uv_cpumask_size(void);

@@ -275,6 +275,26 @@ t:hip4.2-radeon:
     variables:
         CMAKE_CI_NO_MR: "true"
 
+t:linux-gcc-cxx-modules-ninja:
+    extends:
+        - .gcc_cxx_modules_ninja
+        - .cmake_test_linux_release
+        - .linux_builder_tags
+        - .run_dependent
+        - .needs_centos6_x86_64
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
+t:linux-gcc-cxx-modules-ninja-multi:
+    extends:
+        - .gcc_cxx_modules_ninja_multi
+        - .cmake_test_linux_release
+        - .linux_builder_tags
+        - .run_dependent
+        - .needs_centos6_x86_64
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
 b:fedora36-ninja:
     extends:
         - .fedora36_ninja
@@ -288,6 +308,33 @@ b:fedora36-ninja:
 b:debian10-makefiles-inplace:
     extends:
         - .debian10_makefiles_inplace
+        - .cmake_build_linux_standalone
+        - .linux_builder_tags
+        - .run_manually
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
+b:debian10-extdeps:
+    extends:
+        - .debian10_extdeps
+        - .cmake_build_linux_standalone
+        - .linux_builder_tags
+        - .run_manually
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
+b:debian10-aarch64-extdeps:
+    extends:
+        - .debian10_aarch64_extdeps
+        - .cmake_build_linux_standalone
+        - .linux_builder_tags_aarch64
+        - .run_manually
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
+b:fedora36-extdeps:
+    extends:
+        - .fedora36_extdeps
         - .cmake_build_linux_standalone
         - .linux_builder_tags
         - .run_manually
@@ -544,6 +591,13 @@ t:intel2021.6.0-makefiles:
         CMAKE_CI_BUILD_NAME: intel2021.6.0_makefiles
         CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2022.1.0-el8
 
+t:intel2021.7.0-makefiles:
+    extends:
+        - .cmake_test_linux_intelclassic_makefiles
+    variables:
+        CMAKE_CI_BUILD_NAME: intel2021.7.0_makefiles
+        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2022.2.0-el8
+
 t:oneapi2021.1.1-makefiles:
     extends:
         - .cmake_test_linux_inteloneapi_makefiles
@@ -592,6 +646,13 @@ t:oneapi2022.1.0-makefiles:
     variables:
         CMAKE_CI_BUILD_NAME: oneapi2022.1.0_makefiles
         CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2022.1.0-el8
+
+t:oneapi2022.2.0-makefiles:
+    extends:
+        - .cmake_test_linux_inteloneapi_makefiles
+    variables:
+        CMAKE_CI_BUILD_NAME: oneapi2022.2.0_makefiles
+        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2022.2.0-el8
 
 b:linux-x86_64-package:
     extends:
@@ -939,10 +1000,10 @@ t:windows-borland5.8:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:windows-clang13.0-cl-ninja:
+t:windows-clang15.0-cl-ninja:
     extends:
         - .windows_clang_ninja
-        - .cmake_test_windows_clang
+        - .cmake_test_windows_external
         - .windows_tags_concurrent
         - .cmake_junit_artifacts
         - .run_dependent
@@ -951,13 +1012,13 @@ t:windows-clang13.0-cl-ninja:
     needs:
         - t:windows-vs2022-x64-ninja
     variables:
-        CMAKE_CI_BUILD_NAME: windows_clang13.0_cl_ninja
+        CMAKE_CI_BUILD_NAME: windows_clang15.0_cl_ninja
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:windows-clang13.0-cl-nmake:
+t:windows-clang15.0-cl-nmake:
     extends:
         - .windows_clang_nmake
-        - .cmake_test_windows_clang
+        - .cmake_test_windows_external
         - .windows_tags_concurrent
         - .cmake_junit_artifacts
         - .run_dependent
@@ -966,13 +1027,13 @@ t:windows-clang13.0-cl-nmake:
     needs:
         - t:windows-vs2022-x64-ninja
     variables:
-        CMAKE_CI_BUILD_NAME: windows_clang13.0_cl_nmake
+        CMAKE_CI_BUILD_NAME: windows_clang15.0_cl_nmake
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:windows-clang13.0-gnu-ninja:
+t:windows-clang15.0-gnu-ninja:
     extends:
         - .windows_clang_ninja
-        - .cmake_test_windows_clang
+        - .cmake_test_windows_external
         - .windows_tags_concurrent
         - .cmake_junit_artifacts
         - .run_dependent
@@ -981,13 +1042,13 @@ t:windows-clang13.0-gnu-ninja:
     needs:
         - t:windows-vs2022-x64-ninja
     variables:
-        CMAKE_CI_BUILD_NAME: windows_clang13.0_gnu_ninja
+        CMAKE_CI_BUILD_NAME: windows_clang15.0_gnu_ninja
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:windows-clang13.0-gnu-nmake:
+t:windows-clang15.0-gnu-nmake:
     extends:
         - .windows_clang_nmake
-        - .cmake_test_windows_clang
+        - .cmake_test_windows_external
         - .windows_tags_concurrent
         - .cmake_junit_artifacts
         - .run_dependent
@@ -996,7 +1057,7 @@ t:windows-clang13.0-gnu-nmake:
     needs:
         - t:windows-vs2022-x64-ninja
     variables:
-        CMAKE_CI_BUILD_NAME: windows_clang13.0_gnu_nmake
+        CMAKE_CI_BUILD_NAME: windows_clang15.0_gnu_nmake
         CMAKE_CI_JOB_NIGHTLY: "true"
 
 t:windows-msvc-v71-nmake:

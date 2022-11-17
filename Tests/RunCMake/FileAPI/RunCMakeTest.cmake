@@ -39,6 +39,10 @@ if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
   set(RunCMake_TEST_OPTIONS "-DCMAKE_CONFIGURATION_TYPES=Debug\\;Release\\;MinSizeRel\\;RelWithDebInfo")
 endif()
 
+if(JsonCpp_VERSION_STRING AND JsonCpp_VERSION_STRING VERSION_LESS 1.7.5)
+  set(ENV{CMake_JSONCPP_PRE_1_7_5} 1)
+endif()
+
 run_cmake(Nothing)
 run_cmake(Empty)
 run_cmake(EmptyClient)

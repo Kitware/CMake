@@ -132,7 +132,7 @@ Installing Targets
   install(TARGETS targets... [EXPORT <export-name>]
           [RUNTIME_DEPENDENCIES args...|RUNTIME_DEPENDENCY_SET <set-name>]
           [[ARCHIVE|LIBRARY|RUNTIME|OBJECTS|FRAMEWORK|BUNDLE|
-            PRIVATE_HEADER|PUBLIC_HEADER|RESOURCE|FILE_SET <set-name>]
+            PRIVATE_HEADER|PUBLIC_HEADER|RESOURCE|FILE_SET <set-name>|CXX_MODULES_BMI]
            [DESTINATION <dir>]
            [PERMISSIONS permissions...]
            [CONFIGURATIONS [Debug|Release|...]]
@@ -215,11 +215,21 @@ that may be installed:
   ``/blah/include/myproj/here.h`` with a base directory ``/blah/include``
   would be installed to ``myproj/here.h`` below the destination.
 
+``CXX_MODULES_BMI``
+
+  .. note ::
+
+    Experimental. Gated by ``CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API``
+
+  Any module files from C++ modules from ``PUBLIC`` sources in a file set of
+  type ``CXX_MODULES`` will be installed to the given ``DESTINATION``. All
+  modules are placed directly in the destination as no directory structure is
+  derived from the names of the modules. An empty ``DESTINATION`` may be used
+  to suppress installing these files (for use in generic code).
+
 For each of these arguments given, the arguments following them only apply
 to the target or file type specified in the argument. If none is given, the
-installation properties apply to all target types. If only one is given then
-only targets of that type will be installed (which can be used to install
-just a DLL or just an import library.)
+installation properties apply to all target types.
 
 For regular executables, static libraries and shared libraries, the
 ``DESTINATION`` argument is not required.  For these target types, when
@@ -232,6 +242,14 @@ target properties. A destination must always be provided for module libraries,
 Apple bundles and frameworks.  A destination can be omitted for interface and
 object libraries, but they are handled differently (see the discussion of this
 topic toward the end of this section).
+
+For shared libraries on DLL platforms, if neither ``RUNTIME`` nor ``ARCHIVE``
+destinations are specified, both the ``RUNTIME`` and ``ARCHIVE`` components are
+installed to their default destinations. If either a ``RUNTIME`` or ``ARCHIVE``
+destination is specified, the component is installed to that destination, and
+the other component is not installed. If both ``RUNTIME`` and ``ARCHIVE``
+destinations are specified, then both components are installed to their
+respective destinations.
 
 The following table shows the target types with their associated variables and
 built-in defaults that apply when no destination is given:
@@ -778,9 +796,10 @@ Installing Exports
 .. code-block:: cmake
 
   install(EXPORT <export-name> DESTINATION <dir>
-          [NAMESPACE <namespace>] [[FILE <name>.cmake]|
+          [NAMESPACE <namespace>] [FILE <name>.cmake]
           [PERMISSIONS permissions...]
-          [CONFIGURATIONS [Debug|Release|...]]
+          [CONFIGURATIONS [Debug|Release|...]
+          [CXX_MODULES_DIRECTORY <directory>]
           [EXPORT_LINK_INTERFACE_LIBRARIES]
           [COMPONENT <component>]
           [EXCLUDE_FROM_ALL])
@@ -835,6 +854,18 @@ library is always installed if the headers and CMake export file are present.
   allows cmake to build the libraries of a project and make them available
   to an ndk build system complete with transitive dependencies, include flags
   and defines required to use the libraries.
+
+``CXX_MODULES_DIRECTORY``
+
+  .. note ::
+
+    Experimental. Gated by ``CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API``
+
+  Specify a subdirectory to store C++ module information for targets in the
+  export set. This directory will be populated with files which add the
+  necessary target property information to the relevant targets. Note that
+  without this information, none of the C++ modules which are part of the
+  targets in the export set will support being imported in consuming targets.
 
 The ``EXPORT`` form is useful to help outside projects use targets built
 and installed by the current project.  For example, the code
@@ -932,12 +963,12 @@ Generated Installation Script
 .. note::
 
   Use of this feature is not recommended. Please consider using the
-  ``--install`` argument of :manual:`cmake(1)` instead.
+  :option:`cmake --install` instead.
 
 The ``install()`` command generates a file, ``cmake_install.cmake``, inside
 the build directory, which is used internally by the generated install target
-and by CPack. You can also invoke this script manually with ``cmake -P``. This
-script accepts several variables:
+and by CPack. You can also invoke this script manually with
+:option:`cmake -P`. This script accepts several variables:
 
 ``COMPONENT``
   Set this variable to install only a single CPack component as opposed to all

@@ -16,6 +16,7 @@
 #include <vector>
 
 #include <cm/string_view>
+#include <cmext/string_view>
 
 #include "cmGeneratedFileStream.h"
 #include "cmInstalledFile.h"
@@ -117,19 +118,6 @@ public:
      * via --find-package.
      */
     FIND_PACKAGE_MODE
-  };
-
-  /** \brief Define log level constants. */
-  enum LogLevel
-  {
-    LOG_UNDEFINED,
-    LOG_ERROR,
-    LOG_WARNING,
-    LOG_NOTICE,
-    LOG_STATUS,
-    LOG_VERBOSE,
-    LOG_DEBUG,
-    LOG_TRACE
   };
 
   /** \brief Define supported trace formats **/
@@ -475,9 +463,10 @@ public:
   bool WasLogLevelSetViaCLI() const { return this->LogLevelWasSetViaCLI; }
 
   //! Get the selected log level for `message()` commands during the cmake run.
-  LogLevel GetLogLevel() const { return this->MessageLogLevel; }
-  void SetLogLevel(LogLevel level) { this->MessageLogLevel = level; }
-  static LogLevel StringToLogLevel(const std::string& levelStr);
+  Message::LogLevel GetLogLevel() const { return this->MessageLogLevel; }
+  void SetLogLevel(Message::LogLevel level) { this->MessageLogLevel = level; }
+  static Message::LogLevel StringToLogLevel(cm::string_view levelStr);
+  static std::string LogLevelToString(Message::LogLevel level);
   static TraceFormat StringToTraceFormat(const std::string& levelStr);
 
   bool HasCheckInProgress() const
@@ -618,6 +607,20 @@ public:
   //! run the --open option
   bool Open(const std::string& dir, bool dryRun);
 
+  //! run the --workflow option
+  enum class WorkflowListPresets
+  {
+    No,
+    Yes,
+  };
+  enum class WorkflowFresh
+  {
+    No,
+    Yes,
+  };
+  int Workflow(const std::string& presetName, WorkflowListPresets listPresets,
+               WorkflowFresh fresh);
+
   void UnwatchUnusedCli(const std::string& var);
   void WatchUnusedCli(const std::string& var);
 
@@ -739,7 +742,7 @@ private:
   std::set<std::string> DebugFindPkgs;
   std::set<std::string> DebugFindVars;
 
-  LogLevel MessageLogLevel = LogLevel::LOG_STATUS;
+  Message::LogLevel MessageLogLevel = Message::LogLevel::LOG_STATUS;
   bool LogLevelWasSetViaCLI = false;
   bool LogContext = false;
 
@@ -757,6 +760,16 @@ private:
 
   void AppendGlobalGeneratorsDocumentation(std::vector<cmDocumentationEntry>&);
   void AppendExtraGeneratorsDocumentation(std::vector<cmDocumentationEntry>&);
+
+#if !defined(CMAKE_BOOTSTRAP)
+  template <typename T>
+  const T* FindPresetForWorkflow(
+    cm::static_string_view type,
+    const std::map<std::string, cmCMakePresetsGraph::PresetPair<T>>& presets,
+    const cmCMakePresetsGraph::WorkflowPreset::WorkflowStep& step);
+
+  std::function<int()> BuildWorkflowStep(const std::vector<std::string>& args);
+#endif
 
 #if !defined(CMAKE_BOOTSTRAP)
   std::unique_ptr<cmMakefileProfilingData> ProfilingOutput;
@@ -880,6 +893,7 @@ private:
   F(cxx_std_17)                                                               \
   F(cxx_std_20)                                                               \
   F(cxx_std_23)                                                               \
+  F(cxx_std_26)                                                               \
   FOR_EACH_CXX98_FEATURE(F)                                                   \
   FOR_EACH_CXX11_FEATURE(F)                                                   \
   FOR_EACH_CXX14_FEATURE(F)
@@ -890,7 +904,8 @@ private:
   F(cuda_std_14)                                                              \
   F(cuda_std_17)                                                              \
   F(cuda_std_20)                                                              \
-  F(cuda_std_23)
+  F(cuda_std_23)                                                              \
+  F(cuda_std_26)
 
 #define FOR_EACH_HIP_FEATURE(F)                                               \
   F(hip_std_98)                                                               \
@@ -898,4 +913,5 @@ private:
   F(hip_std_14)                                                               \
   F(hip_std_17)                                                               \
   F(hip_std_20)                                                               \
-  F(hip_std_23)
+  F(hip_std_23)                                                               \
+  F(hip_std_26)

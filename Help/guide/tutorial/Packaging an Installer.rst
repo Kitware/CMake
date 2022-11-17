@@ -1,4 +1,4 @@
-Step 7: Packaging an Installer
+Step 9: Packaging an Installer
 ==============================
 
 Next suppose that we want to distribute our project to other people so that
@@ -11,7 +11,7 @@ installations and package management features. To accomplish this we will use
 CPack to create platform specific installers. Specifically we need to add a
 few lines to the bottom of our top-level ``CMakeLists.txt`` file.
 
-.. literalinclude:: Step8/CMakeLists.txt
+.. literalinclude:: Step10/CMakeLists.txt
   :caption: CMakeLists.txt
   :name: CMakeLists.txt-include-CPack
   :language: cmake
@@ -38,15 +38,15 @@ binary directory run:
 
   cpack
 
-To specify the generator, use the ``-G`` option. For multi-config builds, use
-``-C`` to specify the configuration. For example:
+To specify the generator, use the :option:`-G <cpack -G>` option. For multi-config builds,
+use :option:`-C <cpack -C>` to specify the configuration. For example:
 
 .. code-block:: console
 
   cpack -G ZIP -C Debug
 
 For a list of available generators, see :manual:`cpack-generators(7)` or call
-``cpack --help``. An :cpack_gen:`archive generator <CPack Archive Generator>`
+:option:`cpack --help`. An :cpack_gen:`archive generator <CPack Archive Generator>`
 like ZIP creates a compressed archive of all *installed* files.
 
 To create an archive of the *full* source tree you would type:

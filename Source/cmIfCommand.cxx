@@ -150,7 +150,7 @@ bool cmIfFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
       cmExecutionStatus status(mf);
       mf.ExecuteCommand(func, status);
       if (status.GetReturnInvoked()) {
-        inStatus.SetReturnInvoked();
+        inStatus.SetReturnInvoked(status.GetReturnVariables());
         return true;
       }
       if (status.GetBreakInvoked()) {

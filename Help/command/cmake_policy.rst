@@ -103,6 +103,47 @@ Calls to the :command:`cmake_minimum_required(VERSION)`,
 ``cmake_policy(VERSION)``, or ``cmake_policy(SET)`` commands
 influence only the current top of the policy stack.
 
+.. versionadded:: 3.25
+  The :command:`block` and :command:`endblock` commands offer a more flexible
+  and more secure way to manage the policy stack. The pop action is done
+  automatically when the :command:`endblock` command is executed, so it avoid
+  to call the :command:`cmake_policy(POP)` command before each
+  :command:`return` command.
+
+  .. code-block:: cmake
+
+    # stack management with cmake_policy()
+    function(my_func)
+      cmake_policy(PUSH)
+      cmake_policy(SET ...)
+      if (<cond1>)
+        ...
+        cmake_policy(POP)
+        return()
+      elseif(<cond2>)
+        ...
+        cmake_policy(POP)
+        return()
+      endif()
+      ...
+      cmake_policy(POP)
+    endfunction()
+
+    # stack management with block()/endblock()
+    function(my_func)
+      block(SCOPE_FOR POLICIES)
+        cmake_policy(SET ...)
+        if (<cond1>)
+          ...
+          return()
+        elseif(<cond2>)
+          ...
+          return()
+        endif()
+        ...
+      endblock()
+    endfunction()
+
 Commands created by the :command:`function` and :command:`macro`
 commands record policy settings when they are created and
 use the pre-record policies when they are invoked.  If the function or

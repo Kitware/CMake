@@ -33,7 +33,7 @@ file at the top of the project with content such as::
 (the CDash server can provide the file to a project administrator who
 configures ``MyProject``).  Settings in the config file are shared by
 both this ``CTest`` module and the :manual:`ctest(1)` command-line
-:ref:`Dashboard Client` mode (``ctest -S``).
+:ref:`Dashboard Client` mode (:option:`ctest -S`).
 
 While building a project for submission to CDash, CTest scans the
 build output for errors and warnings and reports them with surrounding

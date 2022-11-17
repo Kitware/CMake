@@ -47,13 +47,14 @@ endif()
 target_link_libraries(MathFunctions PUBLIC tutorial_compiler_flags)
 
 # define the symbol stating we are using the declspec(dllexport) when
-#building on windows
+# building on windows
 target_compile_definitions(MathFunctions PRIVATE "EXPORTING_MYMATH")
 
-# install rules
+# install libs
 set(installable_libs MathFunctions tutorial_compiler_flags)
 if(TARGET SqrtLibrary)
   list(APPEND installable_libs SqrtLibrary)
 endif()
 install(TARGETS ${installable_libs} DESTINATION lib)
+# install include headers
 install(FILES MathFunctions.h DESTINATION include)

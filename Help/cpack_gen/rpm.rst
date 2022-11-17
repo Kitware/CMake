@@ -18,7 +18,7 @@ The CPack RPM generator has specific features which are controlled by the specif
 **grouping name** written in upper case. It may be either a component name or
 a component GROUP name. Usually those variables correspond to RPM spec file
 entities. One may find information about spec files here
-http://www.rpm.org/wiki/Docs
+https://rpm.org/documentation
 
 .. versionchanged:: 3.6
 
@@ -972,7 +972,7 @@ For CMake projects SRPM package would be produced by executing::
  Produced SRPM package is expected to be built with :manual:`cmake(1)` executable
  and packaged with :manual:`cpack(1)` executable so CMakeLists.txt has to be
  located in root source directory and must be able to generate binary rpm
- packages by executing ``cpack -G`` command. The two executables as well as
+ packages by executing :option:`cpack -G` command. The two executables as well as
  rpmbuild must also be present when generating binary rpm packages from the
  produced SRPM package.
 

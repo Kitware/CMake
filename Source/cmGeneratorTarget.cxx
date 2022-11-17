@@ -808,11 +808,16 @@ void handleSystemIncludesDep(cmLocalGenerator* lg,
                                                  dagChecker, depTgt, language),
                  result);
   }
-  if (!depTgt->IsImported() || excludeImported) {
+  if (!depTgt->GetPropertyAsBool("SYSTEM")) {
     return;
   }
-  if (depTgt->GetPropertyAsBool("IMPORTED_NO_SYSTEM")) {
-    return;
+  if (depTgt->IsImported()) {
+    if (excludeImported) {
+      return;
+    }
+    if (depTgt->GetPropertyAsBool("IMPORTED_NO_SYSTEM")) {
+      return;
+    }
   }
 
   if (cmValue dirs = depTgt->GetProperty("INTERFACE_INCLUDE_DIRECTORIES")) {
@@ -912,9 +917,17 @@ bool cmGeneratorTarget::IsIPOEnabled(std::string const& lang,
     return false;
   }
 
-  if (lang != "C" && lang != "CXX" && lang != "Fortran") {
+  if (lang != "C" && lang != "CXX" && lang != "CUDA" && lang != "Fortran") {
     // We do not define IPO behavior for other languages.
     return false;
+  }
+
+  if (lang == "CUDA") {
+    // CUDA IPO requires both CUDA_ARCHITECTURES and CUDA_SEPARABLE_COMPILATION
+    if (cmIsOff(this->GetSafeProperty("CUDA_ARCHITECTURES")) ||
+        cmIsOff(this->GetSafeProperty("CUDA_SEPARABLE_COMPILATION"))) {
+      return false;
+    }
   }
 
   cmPolicies::PolicyStatus cmp0069 = this->GetPolicyStatusCMP0069();
@@ -1702,13 +1715,14 @@ void addFileSetEntry(cmGeneratorTarget const* headTarget,
       }
       bool found = false;
       for (auto const& sg : headTarget->Makefile->GetSourceGroups()) {
-        if (sg.MatchesFiles(path)) {
+        if (sg.MatchChildrenFiles(path)) {
           found = true;
           break;
         }
       }
       if (!found) {
-        if (fileSet->GetType() == "HEADERS"_s) {
+        if (fileSet->GetType() == "HEADERS"_s ||
+            fileSet->GetType() == "CXX_MODULE_HEADER_UNITS"_s) {
           headTarget->Makefile->GetOrCreateSourceGroup("Header Files")
             ->AddGroupFile(path);
         }
@@ -1727,6 +1741,20 @@ void AddFileSetEntries(cmGeneratorTarget const* headTarget,
     for (auto const& name : cmExpandedList(entry.Value)) {
       auto const* headerSet = headTarget->Target->GetFileSet(name);
       addFileSetEntry(headTarget, config, dagChecker, headerSet, entries);
+    }
+  }
+  for (auto const& entry : headTarget->Target->GetCxxModuleSetsEntries()) {
+    for (auto const& name : cmExpandedList(entry.Value)) {
+      auto const* cxxModuleSet = headTarget->Target->GetFileSet(name);
+      addFileSetEntry(headTarget, config, dagChecker, cxxModuleSet, entries);
+    }
+  }
+  for (auto const& entry :
+       headTarget->Target->GetCxxModuleHeaderSetsEntries()) {
+    for (auto const& name : cmExpandedList(entry.Value)) {
+      auto const* cxxModuleHeaderSet = headTarget->Target->GetFileSet(name);
+      addFileSetEntry(headTarget, config, dagChecker, cxxModuleHeaderSet,
+                      entries);
     }
   }
 }
@@ -3409,7 +3437,9 @@ void cmGeneratorTarget::AddExplicitLanguageFlags(std::string& flags,
                                              "EXPLICIT_LANGUAGE");
 }
 
-void cmGeneratorTarget::AddCUDAArchitectureFlags(std::string& flags) const
+void cmGeneratorTarget::AddCUDAArchitectureFlags(cmBuildStep compileOrLink,
+                                                 const std::string& config,
+                                                 std::string& flags) const
 {
   std::string property = this->GetSafeProperty("CUDA_ARCHITECTURES");
 
@@ -3441,6 +3471,7 @@ void cmGeneratorTarget::AddCUDAArchitectureFlags(std::string& flags) const
 
   std::string const& compiler =
     this->Makefile->GetSafeDefinition("CMAKE_CUDA_COMPILER_ID");
+  const bool ipoEnabled = this->IsIPOEnabled("CUDA", config);
 
   // Check for special modes: `all`, `all-major`.
   if (property == "all" || property == "all-major") {
@@ -3520,6 +3551,13 @@ void cmGeneratorTarget::AddCUDAArchitectureFlags(std::string& flags) const
   }
 
   if (compiler == "NVIDIA") {
+    if (ipoEnabled && compileOrLink == cmBuildStep::Link) {
+      if (cmValue cudaIPOFlags =
+            this->Makefile->GetDefinition("CMAKE_CUDA_LINK_OPTIONS_IPO")) {
+        flags += cudaIPOFlags;
+      }
+    }
+
     for (CudaArchitecture& architecture : architectures) {
       flags +=
         " --generate-code=arch=compute_" + architecture.name + ",code=[";
@@ -3532,7 +3570,13 @@ void cmGeneratorTarget::AddCUDAArchitectureFlags(std::string& flags) const
         }
       }
 
-      if (architecture.real) {
+      if (ipoEnabled) {
+        if (compileOrLink == cmBuildStep::Compile) {
+          flags += "lto_" + architecture.name;
+        } else if (compileOrLink == cmBuildStep::Link) {
+          flags += "sm_" + architecture.name;
+        }
+      } else if (architecture.real) {
         flags += "sm_" + architecture.name;
       }
 
@@ -5410,9 +5454,6 @@ std::string cmGeneratorTarget::GetObjectDirectory(
   std::string obj_dir =
     this->GlobalGenerator->ExpandCFGIntDir(this->ObjectDirectory, config);
 #if defined(__APPLE__)
-  // find and replace $(PROJECT_NAME) xcode placeholder
-  const std::string projectName = this->LocalGenerator->GetProjectName();
-  cmSystemTools::ReplaceString(obj_dir, "$(PROJECT_NAME)", projectName);
   // Replace Xcode's placeholder for the object file directory since
   // installation and export scripts need to know the real directory.
   // Xcode has build-time settings (e.g. for sanitizers) that affect this,
@@ -8622,7 +8663,7 @@ bool cmGeneratorTarget::AddHeaderSetVerification()
             verifyTarget->SetProperty("UNITY_BUILD", "OFF");
             cm::optional<std::map<std::string, cmValue>>
               perConfigCompileDefinitions;
-            verifyTarget->FinalizeTargetCompileInfo(
+            verifyTarget->FinalizeTargetConfiguration(
               this->Makefile->GetCompileDefinitionsEntries(),
               perConfigCompileDefinitions);
 
@@ -8719,8 +8760,92 @@ std::string cmGeneratorTarget::GenerateHeaderSetVerificationFile(
 
   cmGeneratedFileStream fout(filename);
   fout.SetCopyIfDifferent(true);
-  fout << "#include <" << headerFilename << ">\n";
+  // IWYU pragma: associated allows include what you use to
+  // consider the headerFile as part of the entire language
+  // unit within include-what-you-use and as a result allows
+  // one to get IWYU advice for headers :)
+  fout << "#include <" << headerFilename << "> // IWYU pragma: associated\n";
   fout.close();
 
   return filename;
+}
+
+bool cmGeneratorTarget::HaveCxx20ModuleSources() const
+{
+  auto const& fs_names = this->Target->GetAllFileSetNames();
+  return std::any_of(fs_names.begin(), fs_names.end(),
+                     [this](std::string const& name) -> bool {
+                       auto const* file_set = this->Target->GetFileSet(name);
+                       if (!file_set) {
+                         this->Makefile->IssueMessage(
+                           MessageType::INTERNAL_ERROR,
+                           cmStrCat("Target \"", this->Target->GetName(),
+                                    "\" is tracked to have file set \"", name,
+                                    "\", but it was not found."));
+                         return false;
+                       }
+
+                       auto const& fs_type = file_set->GetType();
+                       return fs_type == "CXX_MODULES"_s ||
+                         fs_type == "CXX_MODULE_HEADER_UNITS"_s;
+                     });
+}
+
+cmGeneratorTarget::Cxx20SupportLevel cmGeneratorTarget::HaveCxxModuleSupport(
+  std::string const& config) const
+{
+  auto const* state = this->Makefile->GetState();
+  if (!state->GetLanguageEnabled("CXX")) {
+    return Cxx20SupportLevel::MissingCxx;
+  }
+  cmValue standardDefault =
+    this->Target->GetMakefile()->GetDefinition("CMAKE_CXX_STANDARD_DEFAULT");
+  if (standardDefault && !standardDefault->empty()) {
+    cmStandardLevelResolver standardResolver(this->Makefile);
+    if (!standardResolver.HaveStandardAvailable(this, "CXX", config,
+                                                "cxx_std_20")) {
+      return Cxx20SupportLevel::NoCxx20;
+    }
+  }
+  // Else, an empty CMAKE_CXX_STANDARD_DEFAULT means CMake does not detect and
+  // set a default standard level for this compiler, so assume all standards
+  // are available.
+  if (!this->Makefile->IsOn("CMAKE_EXPERIMENTAL_CXX_MODULE_DYNDEP")) {
+    return Cxx20SupportLevel::MissingExperimentalFlag;
+  }
+  return Cxx20SupportLevel::Supported;
+}
+
+void cmGeneratorTarget::CheckCxxModuleStatus(std::string const& config) const
+{
+  // Check for `CXX_MODULE*` file sets and a lack of support.
+  if (this->HaveCxx20ModuleSources()) {
+    switch (this->HaveCxxModuleSupport(config)) {
+      case cmGeneratorTarget::Cxx20SupportLevel::MissingCxx:
+        this->Makefile->IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmStrCat("The \"", this->GetName(),
+                   "\" target has C++ module sources but the \"CXX\" language "
+                   "has not been enabled"));
+        break;
+      case cmGeneratorTarget::Cxx20SupportLevel::MissingExperimentalFlag:
+        this->Makefile->IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmStrCat("The \"", this->GetName(),
+                   "\" target has C++ module sources but its experimental "
+                   "support has not been requested"));
+        break;
+      case cmGeneratorTarget::Cxx20SupportLevel::NoCxx20:
+        this->Makefile->IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmStrCat(
+            "The \"", this->GetName(),
+            "\" target has C++ module sources but is not using at least "
+            "\"cxx_std_20\""));
+        break;
+      case cmGeneratorTarget::Cxx20SupportLevel::Supported:
+        // All is well.
+        break;
+    }
+  }
 }

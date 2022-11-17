@@ -1,0 +1,6 @@
+^CMake Error at BinDirRelative.cmake:[0-9]+ \(try_compile\):
+  <bindir> is not an absolute path:
+
+   'bin_dir_relative'
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)$

@@ -358,6 +358,18 @@ std::ostream& cmVisualStudio10TargetGenerator::Elem::WriteString(
 
 void cmVisualStudio10TargetGenerator::Generate()
 {
+  for (std::string const& config : this->Configurations) {
+    this->GeneratorTarget->CheckCxxModuleStatus(config);
+  }
+
+  if (this->GeneratorTarget->HaveCxx20ModuleSources()) {
+    this->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("The \"", this->GeneratorTarget->GetName(),
+               "\" target contains C++ module sources which are not supported "
+               "by the generator"));
+  }
+
   this->ProjectType = computeProjectType(this->GeneratorTarget);
   this->Managed = this->ProjectType == VsProjectType::csproj;
   const std::string ProjectFileExtension =
@@ -487,7 +499,7 @@ void cmVisualStudio10TargetGenerator::WriteClassicMsBuildProjectFile(
       e1.Element("PreferredToolArchitecture", hostArch);
     }
 
-    // ALL_BUILD and ZERO_CHECK projects transitively include
+    // The ALL_BUILD, PACKAGE, and ZERO_CHECK projects transitively include
     // Microsoft.Common.CurrentVersion.targets which triggers Target
     // ResolveNugetPackageAssets when SDK-style targets are in the project.
     // However, these projects have no nuget packages to reference and the
@@ -495,7 +507,7 @@ void cmVisualStudio10TargetGenerator::WriteClassicMsBuildProjectFile(
     // Setting ResolveNugetPackages to false skips this target and the build
     // succeeds.
     cm::string_view targetName{ this->GeneratorTarget->GetName() };
-    if (targetName == "ALL_BUILD" ||
+    if (targetName == "ALL_BUILD" || targetName == "PACKAGE" ||
         targetName == CMAKE_CHECK_BUILD_SYSTEM_TARGET) {
       Elem e1(e0, "PropertyGroup");
       e1.Element("ResolveNugetPackages", "false");
@@ -906,9 +918,11 @@ void cmVisualStudio10TargetGenerator::WriteSdkStyleProjectFile(
         e1.Element("TargetFrameworks", *targetFramework);
       } else {
         e1.Element("TargetFramework", *targetFramework);
+        e1.Element("AppendTargetFrameworkToOutputPath", "false");
       }
     } else {
       e1.Element("TargetFramework", "net5.0");
+      e1.Element("AppendTargetFrameworkToOutputPath", "false");
     }
 
     std::string outputType;
@@ -964,6 +978,10 @@ void cmVisualStudio10TargetGenerator::WriteSdkStyleProjectFile(
     std::string outDir = this->GeneratorTarget->GetDirectory(config) + "/";
     ConvertToWindowsSlash(outDir);
     e1.Element("OutputPath", outDir);
+
+    Options& o = *(this->ClOptions[config]);
+    OptionsHelper oh(o, e1);
+    oh.OutputFlagMap();
   }
 
   this->WriteDotNetDocumentationFile(e0);
@@ -1525,6 +1543,10 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValues(
       this->ASanEnabledConfigurations.end()) {
     e1.Element("EnableAsan", "true");
   }
+  if (this->FuzzerEnabledConfigurations.find(config) !=
+      this->FuzzerEnabledConfigurations.end()) {
+    e1.Element("EnableFuzzer", "true");
+  }
   {
     auto s = this->SpectreMitigation.find(config);
     if (s != this->SpectreMitigation.end()) {
@@ -1811,11 +1833,8 @@ void cmVisualStudio10TargetGenerator::WriteCustomRuleCpp(
     e2.WritePlatformConfigTag("Command", cond, script);
     e2.WritePlatformConfigTag("AdditionalInputs", cond, additional_inputs);
     e2.WritePlatformConfigTag("Outputs", cond, outputs);
-    if (this->LocalGenerator->GetVersion() >
-        cmGlobalVisualStudioGenerator::VSVersion::VS10) {
-      // VS >= 11 let us turn off linking of custom command outputs.
-      e2.WritePlatformConfigTag("LinkObjects", cond, "false");
-    }
+    // Turn off linking of custom command outputs.
+    e2.WritePlatformConfigTag("LinkObjects", cond, "false");
     if (symbolic &&
         this->LocalGenerator->GetVersion() >=
           cmGlobalVisualStudioGenerator::VSVersion::VS16) {
@@ -2381,28 +2400,6 @@ void cmVisualStudio10TargetGenerator::WriteSource(Elem& e2,
   // we must use relative paths.
   bool forceRelative = sf->GetLanguage() == "CUDA";
   std::string sourceFile = this->ConvertPath(sf->GetFullPath(), forceRelative);
-  if (this->LocalGenerator->GetVersion() ==
-        cmGlobalVisualStudioGenerator::VSVersion::VS10 &&
-      cmSystemTools::FileIsFullPath(sourceFile)) {
-    // Normal path conversion resulted in a full path.  VS 10 (but not 11)
-    // refuses to show the property page in the IDE for a source file with a
-    // full path (not starting in a '.' or '/' AFAICT).  CMake <= 2.8.4 used a
-    // relative path but to allow deeper build trees CMake 2.8.[5678] used a
-    // full path except for custom commands.  Custom commands do not work
-    // without a relative path, but they do not seem to be involved in tools
-    // with the above behavior.  For other sources we now use a relative path
-    // when the combined path will not be too long so property pages appear.
-    std::string sourceRel = this->ConvertPath(sf->GetFullPath(), true);
-    size_t const maxLen = 250;
-    if (sf->GetCustomCommand() ||
-        ((this->LocalGenerator->GetCurrentBinaryDirectory().length() + 1 +
-          sourceRel.length()) <= maxLen)) {
-      forceRelative = true;
-      sourceFile = sourceRel;
-    } else {
-      this->GlobalGenerator->PathTooLong(this->GeneratorTarget, sf, sourceRel);
-    }
-  }
   ConvertToWindowsSlash(sourceFile);
   e2.Attribute("Include", sourceFile);
 
@@ -2901,7 +2898,7 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions(
   Elem& e0)
 {
   cmStateEnums::TargetType ttype = this->GeneratorTarget->GetType();
-  if (ttype > cmStateEnums::GLOBAL_TARGET) {
+  if (ttype > cmStateEnums::INTERFACE_LIBRARY) {
     return;
   }
   if (this->ProjectType == VsProjectType::csproj) {
@@ -3164,6 +3161,7 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   this->LangForClCompile = langForClCompile;
   if (!langForClCompile.empty()) {
     this->LocalGenerator->AddLanguageFlags(flags, this->GeneratorTarget,
+                                           cmBuildStep::Compile,
                                            langForClCompile, configName);
     this->LocalGenerator->AddCompileOptions(flags, this->GeneratorTarget,
                                             langForClCompile, configName);
@@ -3175,8 +3173,15 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   }
 
   // Check if ASan is enabled.
-  if (flags.find("/fsanitize=address") != std::string::npos) {
+  if (flags.find("/fsanitize=address") != std::string::npos ||
+      flags.find("-fsanitize=address") != std::string::npos) {
     this->ASanEnabledConfigurations.insert(configName);
+  }
+
+  // Check if (lib)Fuzzer is enabled.
+  if (flags.find("/fsanitize=fuzzer") != std::string::npos ||
+      flags.find("-fsanitize=fuzzer") != std::string::npos) {
+    this->FuzzerEnabledConfigurations.insert(configName);
   }
 
   // Precompile Headers
@@ -3220,7 +3225,9 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
     // anymore, because cmGeneratorTarget may not be aware that the
     // target uses C++/CLI.
     if (flags.find("/clr") != std::string::npos ||
-        defineFlags.find("/clr") != std::string::npos) {
+        flags.find("-clr") != std::string::npos ||
+        defineFlags.find("/clr") != std::string::npos ||
+        defineFlags.find("-clr") != std::string::npos) {
       if (configName == this->Configurations[0]) {
         std::string message = "For the target \"" +
           this->GeneratorTarget->GetName() +
@@ -3539,8 +3546,8 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaOptions(
 
   // Get compile flags for CUDA in this directory.
   std::string flags;
-  this->LocalGenerator->AddLanguageFlags(flags, this->GeneratorTarget, "CUDA",
-                                         configName);
+  this->LocalGenerator->AddLanguageFlags(
+    flags, this->GeneratorTarget, cmBuildStep::Compile, "CUDA", configName);
   this->LocalGenerator->AddCompileOptions(flags, this->GeneratorTarget, "CUDA",
                                           configName);
 
@@ -3732,21 +3739,28 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaLinkOptions(
   this->GeneratorTarget->GetLinkOptions(linkOpts, configName, "CUDA");
   // LINK_OPTIONS are escaped.
   this->LocalGenerator->AppendCompileOptions(linkFlags, linkOpts);
+
+  cmComputeLinkInformation* pcli =
+    this->GeneratorTarget->GetLinkInformation(configName);
+  if (doDeviceLinking && pcli) {
+
+    cmLinkLineDeviceComputer computer(
+      this->LocalGenerator,
+      this->LocalGenerator->GetStateSnapshot().GetDirectory());
+    std::string ignored_;
+    this->LocalGenerator->GetDeviceLinkFlags(computer, configName, ignored_,
+                                             linkFlags, ignored_, ignored_,
+                                             this->GeneratorTarget);
+
+    this->LocalGenerator->AddLanguageFlagsForLinking(
+      linkFlags, this->GeneratorTarget, "CUDA", configName);
+  }
   cudaLinkOptions.AppendFlagString("AdditionalOptions", linkFlags);
 
   // For static libraries that have device linking enabled compute
   // the  libraries
   if (this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY &&
       doDeviceLinking) {
-    cmComputeLinkInformation* pcli =
-      this->GeneratorTarget->GetLinkInformation(configName);
-    if (!pcli) {
-      cmSystemTools::Error(
-        "CMake can not compute cmComputeLinkInformation for target: " +
-        this->Name);
-      return false;
-    }
-
     cmComputeLinkInformation& cli = *pcli;
     cmLinkLineDeviceComputer computer(
       this->LocalGenerator,
@@ -3804,7 +3818,8 @@ bool cmVisualStudio10TargetGenerator::ComputeMasmOptions(
 
   std::string flags;
   this->LocalGenerator->AddLanguageFlags(flags, this->GeneratorTarget,
-                                         "ASM_MASM", configName);
+                                         cmBuildStep::Compile, "ASM_MASM",
+                                         configName);
 
   masmOptions.Parse(flags);
 
@@ -3856,7 +3871,8 @@ bool cmVisualStudio10TargetGenerator::ComputeNasmOptions(
 
   std::string flags;
   this->LocalGenerator->AddLanguageFlags(flags, this->GeneratorTarget,
-                                         "ASM_NASM", configName);
+                                         cmBuildStep::Compile, "ASM_NASM",
+                                         configName);
   flags += " -f";
   flags += this->Makefile->GetSafeDefinition("CMAKE_ASM_NASM_OBJECT_FORMAT");
   nasmOptions.Parse(flags);

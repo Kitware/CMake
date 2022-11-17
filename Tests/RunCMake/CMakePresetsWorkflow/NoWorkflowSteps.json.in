@@ -1,0 +1,9 @@
+{
+  "version": 6,
+  "workflowPresets": [
+    {
+      "name": "default",
+      "steps": []
+    }
+  ]
+}

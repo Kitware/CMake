@@ -360,17 +360,29 @@ int HandleIWYU(const std::string& runCmd, const std::string& /* sourceFile */,
 int HandleTidy(const std::string& runCmd, const std::string& sourceFile,
                const std::vector<std::string>& orig_cmd)
 {
-  // Construct the clang-tidy command line by taking what was given
-  // and adding our compiler command line.  The clang-tidy tool will
-  // automatically skip over the compiler itself and extract the
-  // options.
-  int ret;
   std::vector<std::string> tidy_cmd = cmExpandedList(runCmd, true);
   tidy_cmd.push_back(sourceFile);
-  tidy_cmd.emplace_back("--");
-  cm::append(tidy_cmd, orig_cmd);
+
+  // clang-tidy supports working out the compile commands from a
+  // compile_commands.json file in a directory given by a "-p" option, or by
+  // passing the compiler command line arguments after --. When the latter
+  // strategy is used and the build is using a compiler other than the system
+  // default, clang-tidy may erroneously use the system default compiler's
+  // headers instead of those from the custom compiler. It doesn't do that if
+  // given a compile_commands.json to work with instead, so prefer to use the
+  // compile_commands.json file when "-p" is present.
+  if (!cm::contains(tidy_cmd.cbegin(), tidy_cmd.cend() - 1, "-p")) {
+    // Construct the clang-tidy command line by taking what was given
+    // and adding our compiler command line.  The clang-tidy tool will
+    // automatically skip over the compiler itself and extract the
+    // options. If the compiler is a custom compiler, clang-tidy might
+    // not correctly handle that with this approach.
+    tidy_cmd.emplace_back("--");
+    cm::append(tidy_cmd, orig_cmd);
+  }
 
   // Run the tidy command line.  Capture its stdout and hide its stderr.
+  int ret;
   std::string stdOut;
   std::string stdErr;
   if (!cmSystemTools::RunSingleCommand(tidy_cmd, &stdOut, &stdErr, &ret,
@@ -791,6 +803,10 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
     }
 
     if (args[1] == "env") {
+#ifndef CMAKE_BOOTSTRAP
+      cmSystemTools::EnvDiff env;
+#endif
+
       auto ai = args.cbegin() + 2;
       auto ae = args.cend();
       for (; ai != ae; ++ai) {
@@ -803,16 +819,40 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
         }
         if (cmHasLiteralPrefix(a, "--unset=")) {
           // Unset environment variable.
+#ifdef CMAKE_BOOTSTRAP
           cmSystemTools::UnPutEnv(a.substr(8));
+#else
+          env.UnPutEnv(a.substr(8));
+#endif
+        } else if (a == "--modify") {
+#ifdef CMAKE_BOOTSTRAP
+          std::cerr
+            << "cmake -E env: --modify not available during bootstrapping\n";
+          return 1;
+#else
+          if (++ai == ae) {
+            std::cerr << "cmake -E env: --modify missing a parameter\n";
+            return 1;
+          }
+          std::string const& op = *ai;
+          if (!env.ParseOperation(op)) {
+            std::cerr << "cmake -E env: invalid parameter to --modify: " << op
+                      << '\n';
+            return 1;
+          }
+#endif
         } else if (!a.empty() && a[0] == '-') {
           // Environment variable and command names cannot start in '-',
           // so this must be an unknown option.
-          std::cerr << "cmake -E env: unknown option '" << a << '\''
-                    << std::endl;
+          std::cerr << "cmake -E env: unknown option '" << a << "'\n";
           return 1;
         } else if (a.find('=') != std::string::npos) {
           // Set environment variable.
+#ifdef CMAKE_BOOTSTRAP
           cmSystemTools::PutEnv(a);
+#else
+          env.PutEnv(a);
+#endif
         } else {
           // This is the beginning of the command.
           break;
@@ -820,9 +860,13 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
       }
 
       if (ai == ae) {
-        std::cerr << "cmake -E env: no command given" << std::endl;
+        std::cerr << "cmake -E env: no command given\n";
         return 1;
       }
+
+#ifndef CMAKE_BOOTSTRAP
+      env.ApplyToCurrentEnv();
+#endif
 
       // Execute command from remaining arguments.
       std::vector<std::string> cmd(ai, ae);
@@ -1668,16 +1712,15 @@ cmsys::Status cmcmd::SymlinkInternal(std::string const& file,
   }
   std::string linktext = cmSystemTools::GetFilenameName(file);
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  std::string errorMessage;
-  cmsys::Status status =
-    cmSystemTools::CreateSymlink(linktext, link, &errorMessage);
+  cmsys::Status status = cmSystemTools::CreateSymlinkQuietly(linktext, link);
   // Creating a symlink will fail with ERROR_PRIVILEGE_NOT_HELD if the user
   // does not have SeCreateSymbolicLinkPrivilege, or if developer mode is not
   // active. In that case, we try to copy the file.
   if (status.GetWindows() == ERROR_PRIVILEGE_NOT_HELD) {
     status = cmSystemTools::CopyFileAlways(file, link);
   } else if (!status) {
-    cmSystemTools::Error(errorMessage);
+    cmSystemTools::Error(cmStrCat("failed to create symbolic link '", link,
+                                  "': ", status.GetString()));
   }
   return status;
 #else
@@ -2242,13 +2285,18 @@ bool cmVSLink::Parse(std::vector<std::string>::const_iterator argBeg,
   // Parse the link command to extract information we need.
   for (; arg != argEnd; ++arg) {
     if (cmSystemTools::Strucmp(arg->c_str(), "/INCREMENTAL:YES") == 0 ||
-        cmSystemTools::Strucmp(arg->c_str(), "/INCREMENTAL") == 0) {
+        cmSystemTools::Strucmp(arg->c_str(), "-INCREMENTAL:YES") == 0 ||
+        cmSystemTools::Strucmp(arg->c_str(), "/INCREMENTAL") == 0 ||
+        cmSystemTools::Strucmp(arg->c_str(), "-INCREMENTAL") == 0) {
       this->Incremental = true;
-    } else if (cmSystemTools::Strucmp(arg->c_str(), "/MANIFEST:NO") == 0) {
+    } else if (cmSystemTools::Strucmp(arg->c_str(), "/MANIFEST:NO") == 0 ||
+               cmSystemTools::Strucmp(arg->c_str(), "-MANIFEST:NO") == 0) {
       this->LinkGeneratesManifest = false;
-    } else if (cmHasLiteralPrefix(*arg, "/Fe")) {
+    } else if (cmHasLiteralPrefix(*arg, "/Fe") ||
+               cmHasLiteralPrefix(*arg, "-Fe")) {
       this->TargetFile = arg->substr(3);
-    } else if (cmHasLiteralPrefix(*arg, "/out:")) {
+    } else if (cmHasLiteralPrefix(*arg, "/out:") ||
+               cmHasLiteralPrefix(*arg, "-out:")) {
       this->TargetFile = arg->substr(5);
     }
   }

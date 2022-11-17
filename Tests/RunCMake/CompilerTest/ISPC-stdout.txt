@@ -1,0 +1,3 @@
+-- The ISPC compiler identification is [^
+]*
+-- Configuring done

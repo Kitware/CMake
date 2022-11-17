@@ -242,7 +242,7 @@ CPack
 * A :cpack_gen:`CPack NuGet Generator` was was added with basic
   support for `NuGet`_.
 
-.. _NuGet: https://docs.microsoft.com/en-us/nuget/what-is-nuget
+.. _NuGet: https://learn.microsoft.com/en-us/nuget/what-is-nuget
 
 Other
 -----
@@ -302,4 +302,4 @@ Other Changes
   (and legacy ``swig_add_module`` command) now set the prefix of
   Java modules to ``""`` for MINGW, MSYS, and CYGWIN environments.
 
-.. _`Fortran Submodules`: http://fortranwiki.org/fortran/show/Submodules
+.. _Fortran Submodules: https://fortranwiki.org/fortran/show/Submodules

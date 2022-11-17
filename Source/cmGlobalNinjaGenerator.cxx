@@ -3,8 +3,10 @@
 #include "cmGlobalNinjaGenerator.h"
 
 #include <algorithm>
+#include <cassert>
 #include <cctype>
 #include <cstdio>
+#include <functional>
 #include <sstream>
 #include <utility>
 
@@ -14,6 +16,7 @@
 #include <cm/string_view>
 #include <cmext/algorithm>
 #include <cmext/memory>
+#include <cmext/string_view>
 
 #include <cm3p/json/reader.h>
 #include <cm3p/json/value.h>
@@ -21,7 +24,9 @@
 
 #include "cmsys/FStream.hxx"
 
+#include "cmCxxModuleMapper.h"
 #include "cmDocumentationEntry.h"
+#include "cmFileSet.h"
 #include "cmFortranParser.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpressionEvaluationFile.h"
@@ -1024,19 +1029,6 @@ bool cmGlobalNinjaGenerator::OpenBuildFileStreams()
                             cmGlobalNinjaGenerator::NINJA_BUILD_FILE)) {
     return false;
   }
-
-  // New buffer size 8 MiB
-  constexpr auto buildFileStreamBufferSize = 8 * 1024 * 1024;
-
-  // Ensure the buffer is allocated
-  if (!this->BuildFileStreamBuffer) {
-    this->BuildFileStreamBuffer =
-      cm::make_unique<char[]>(buildFileStreamBufferSize);
-  }
-
-  // Enlarge the internal buffer of the `BuildFileStream`
-  this->BuildFileStream->rdbuf()->pubsetbuf(this->BuildFileStreamBuffer.get(),
-                                            buildFileStreamBufferSize);
 
   // Write a comment about this file.
   *this->BuildFileStream
@@ -2480,13 +2472,53 @@ cm::optional<cmSourceInfo> cmcmd_cmake_ninja_depends_fortran(
 }
 }
 
+struct CxxModuleFileSet
+{
+  std::string Name;
+  std::string RelativeDirectory;
+  std::string SourcePath;
+  std::string Type;
+  cmFileSetVisibility Visibility;
+  cm::optional<std::string> Destination;
+};
+
+struct CxxModuleBmiInstall
+{
+  std::string Component;
+  std::string Destination;
+  bool ExcludeFromAll;
+  bool Optional;
+  std::string Permissions;
+  std::string MessageLevel;
+  std::string ScriptLocation;
+};
+
+struct CxxModuleExport
+{
+  std::string Name;
+  std::string Destination;
+  std::string Prefix;
+  std::string CxxModuleInfoDir;
+  std::string Namespace;
+  bool Install;
+};
+
+struct cmGlobalNinjaGenerator::CxxModuleExportInfo
+{
+  std::map<std::string, CxxModuleFileSet> ObjectToFileSet;
+  cm::optional<CxxModuleBmiInstall> BmiInstallation;
+  std::vector<CxxModuleExport> Exports;
+  std::string Config;
+};
+
 bool cmGlobalNinjaGenerator::WriteDyndepFile(
   std::string const& dir_top_src, std::string const& dir_top_bld,
   std::string const& dir_cur_src, std::string const& dir_cur_bld,
   std::string const& arg_dd, std::vector<std::string> const& arg_ddis,
   std::string const& module_dir,
   std::vector<std::string> const& linked_target_dirs,
-  std::string const& arg_lang, std::string const& arg_modmapfmt)
+  std::string const& arg_lang, std::string const& arg_modmapfmt,
+  CxxModuleExportInfo const& export_info)
 {
   // Setup path conversions.
   {
@@ -2511,13 +2543,15 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
     objects.push_back(std::move(info));
   }
 
+  CxxModuleUsage usages;
+
   // Map from module name to module file path, if known.
   std::map<std::string, std::string> mod_files;
 
   // Populate the module map with those provided by linked targets first.
   for (std::string const& linked_target_dir : linked_target_dirs) {
     std::string const ltmn =
-      cmStrCat(linked_target_dir, "/", arg_lang, "Modules.json");
+      cmStrCat(linked_target_dir, '/', arg_lang, "Modules.json");
     Json::Value ltm;
     cmsys::ifstream ltmf(ltmn.c_str(), std::ios::in | std::ios::binary);
     Json::Reader reader;
@@ -2528,21 +2562,71 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
       return false;
     }
     if (ltm.isObject()) {
-      for (Json::Value::iterator i = ltm.begin(); i != ltm.end(); ++i) {
-        mod_files[i.key().asString()] = i->asString();
+      Json::Value const& target_modules = ltm["modules"];
+      if (target_modules.isObject()) {
+        for (auto i = target_modules.begin(); i != target_modules.end(); ++i) {
+          mod_files[i.key().asString()] = i->asString();
+        }
+      }
+      Json::Value const& target_modules_references = ltm["references"];
+      if (target_modules_references.isObject()) {
+        for (auto i = target_modules_references.begin();
+             i != target_modules_references.end(); ++i) {
+          if (i->isObject()) {
+            Json::Value const& reference_path = (*i)["path"];
+            CxxModuleReference module_reference;
+            if (reference_path.isString()) {
+              module_reference.Path = reference_path.asString();
+            }
+            Json::Value const& reference_method = (*i)["lookup-method"];
+            if (reference_method.isString()) {
+              std::string reference = reference_method.asString();
+              if (reference == "by-name") {
+                module_reference.Method = LookupMethod::ByName;
+              } else if (reference == "include-angle") {
+                module_reference.Method = LookupMethod::IncludeAngle;
+              } else if (reference == "include-quote") {
+                module_reference.Method = LookupMethod::IncludeQuote;
+              }
+            }
+            usages.Reference[i.key().asString()] = module_reference;
+          }
+        }
+      }
+      Json::Value const& target_modules_usage = ltm["usages"];
+      if (target_modules_usage.isObject()) {
+        for (auto i = target_modules_usage.begin();
+             i != target_modules_usage.end(); ++i) {
+          if (i->isArray()) {
+            for (auto j = i->begin(); j != i->end(); ++j) {
+              usages.Usage[i.key().asString()].insert(j->asString());
+            }
+          }
+        }
       }
     }
   }
 
-  const char* module_ext = "";
-  if (arg_modmapfmt == "gcc") {
-    module_ext = ".gcm";
+  cm::optional<CxxModuleMapFormat> modmap_fmt;
+  if (arg_modmapfmt.empty()) {
+    // nothing to do.
+  } else if (arg_modmapfmt == "gcc") {
+    modmap_fmt = CxxModuleMapFormat::Gcc;
+  } else if (arg_modmapfmt == "msvc") {
+    modmap_fmt = CxxModuleMapFormat::Msvc;
+  } else {
+    cmSystemTools::Error(
+      cmStrCat("-E cmake_ninja_dyndep does not understand the ", arg_modmapfmt,
+               " module map format"));
+    return false;
   }
+
+  auto module_ext = CxxModuleMapExtension(modmap_fmt);
 
   // Extend the module map with those provided by this target.
   // We do this after loading the modules provided by linked targets
   // in case we have one of the same name that must be preferred.
-  Json::Value tm = Json::objectValue;
+  Json::Value target_modules = Json::objectValue;
   for (cmScanDepInfo const& object : objects) {
     for (auto const& p : object.Provides) {
       std::string mod;
@@ -2555,12 +2639,13 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
         }
       } else {
         // Assume the module file path matches the logical module name.
-        std::string safe_logical_name = p.LogicalName;
+        std::string safe_logical_name =
+          p.LogicalName; // TODO: needs fixing for header units
         cmSystemTools::ReplaceString(safe_logical_name, ":", "-");
         mod = cmStrCat(module_dir, safe_logical_name, module_ext);
       }
       mod_files[p.LogicalName] = mod;
-      tm[p.LogicalName] = mod;
+      target_modules[p.LogicalName] = mod;
     }
   }
 
@@ -2568,6 +2653,32 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
   ddf << "ninja_dyndep_version = 1.0\n";
 
   {
+    CxxModuleLocations locs;
+    locs.RootDirectory = ".";
+    locs.PathForGenerator = [this](std::string const& path) -> std::string {
+      return this->ConvertToNinjaPath(path);
+    };
+    locs.BmiLocationForModule =
+      [&mod_files](std::string const& logical) -> cm::optional<std::string> {
+      auto m = mod_files.find(logical);
+      if (m != mod_files.end()) {
+        return m->second;
+      }
+      return {};
+    };
+
+    // Insert information about the current target's modules.
+    if (modmap_fmt) {
+      auto cycle_modules = CxxModuleUsageSeed(locs, objects, usages);
+      if (!cycle_modules.empty()) {
+        cmSystemTools::Error(
+          cmStrCat("Circular dependency detected in the C++ module import "
+                   "graph. See modules named: \"",
+                   cmJoin(cycle_modules, R"(", ")"_s), '"'));
+        return false;
+      }
+    }
+
     cmNinjaBuild build("dyndep");
     build.Outputs.emplace_back("");
     for (cmScanDepInfo const& object : objects) {
@@ -2589,50 +2700,50 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
         build.Variables.emplace("restat", "1");
       }
 
-      if (arg_modmapfmt.empty()) {
-        // nothing to do.
-      } else {
-        std::stringstream mm;
-        if (arg_modmapfmt == "gcc") {
-          // Documented in GCC's documentation. The format is a series of lines
-          // with a module name and the associated filename separated by
-          // spaces. The first line may use `$root` as the module name to
-          // specify a "repository root". That is used to anchor any relative
-          // paths present in the file (CMake should never generate any).
-
-          // Write the root directory to use for module paths.
-          mm << "$root .\n";
-
-          for (auto const& l : object.Provides) {
-            auto m = mod_files.find(l.LogicalName);
-            if (m != mod_files.end()) {
-              mm << l.LogicalName << " " << this->ConvertToNinjaPath(m->second)
-                 << "\n";
-            }
-          }
-          for (auto const& r : object.Requires) {
-            auto m = mod_files.find(r.LogicalName);
-            if (m != mod_files.end()) {
-              mm << r.LogicalName << " " << this->ConvertToNinjaPath(m->second)
-                 << "\n";
-            }
-          }
-        } else {
-          cmSystemTools::Error(
-            cmStrCat("-E cmake_ninja_dyndep does not understand the ",
-                     arg_modmapfmt, " module map format"));
-          return false;
-        }
+      if (modmap_fmt) {
+        auto mm = CxxModuleMapContent(*modmap_fmt, locs, object, usages);
 
         // XXX(modmap): If changing this path construction, change
         // `cmNinjaTargetGenerator::WriteObjectBuildStatements` to generate the
         // corresponding file path.
         cmGeneratedFileStream mmf(cmStrCat(object.PrimaryOutput, ".modmap"));
-        mmf << mm.str();
+        mmf << mm;
       }
 
       this->WriteBuild(ddf, build);
     }
+  }
+
+  Json::Value target_module_info = Json::objectValue;
+  target_module_info["modules"] = target_modules;
+
+  auto& target_usages = target_module_info["usages"] = Json::objectValue;
+  for (auto const& u : usages.Usage) {
+    auto& mod_usage = target_usages[u.first] = Json::arrayValue;
+    for (auto const& v : u.second) {
+      mod_usage.append(v);
+    }
+  }
+
+  auto name_for_method = [](LookupMethod method) -> cm::static_string_view {
+    switch (method) {
+      case LookupMethod::ByName:
+        return "by-name"_s;
+      case LookupMethod::IncludeAngle:
+        return "include-angle"_s;
+      case LookupMethod::IncludeQuote:
+        return "include-quote"_s;
+    }
+    assert(false && "unsupported lookup method");
+    return ""_s;
+  };
+
+  auto& target_references = target_module_info["references"] =
+    Json::objectValue;
+  for (auto const& r : usages.Reference) {
+    auto& mod_ref = target_references[r.first] = Json::objectValue;
+    mod_ref["path"] = r.second.Path;
+    mod_ref["lookup-method"] = std::string(name_for_method(r.second.Method));
   }
 
   // Store the map of modules provided by this target in a file for
@@ -2640,9 +2751,281 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
   std::string const target_mods_file = cmStrCat(
     cmSystemTools::GetFilenamePath(arg_dd), '/', arg_lang, "Modules.json");
   cmGeneratedFileStream tmf(target_mods_file);
-  tmf << tm;
+  tmf << target_module_info;
 
-  return true;
+  bool result = true;
+
+  // Fortran doesn't support any of the file-set or BMI installation considered
+  // below.
+  if (arg_lang != "Fortran"_s) {
+    // Prepare the export information blocks.
+    std::string const config_upper =
+      cmSystemTools::UpperCase(export_info.Config);
+    std::vector<std::pair<std::unique_ptr<cmGeneratedFileStream>,
+                          CxxModuleExport const*>>
+      exports;
+    for (auto const& exp : export_info.Exports) {
+      std::unique_ptr<cmGeneratedFileStream> properties;
+
+      std::string const export_dir =
+        cmStrCat(exp.Prefix, '/', exp.CxxModuleInfoDir, '/');
+      std::string const property_file_path = cmStrCat(
+        export_dir, "target-", exp.Name, '-', export_info.Config, ".cmake");
+      properties = cm::make_unique<cmGeneratedFileStream>(property_file_path);
+
+      // Set up the preamble.
+      *properties << "set_property(TARGET \"" << exp.Namespace << exp.Name
+                  << "\"\n"
+                  << "  PROPERTY IMPORTED_CXX_MODULES_" << config_upper
+                  << '\n';
+
+      exports.emplace_back(std::move(properties), &exp);
+    }
+
+    std::unique_ptr<cmGeneratedFileStream> bmi_install_script;
+    if (export_info.BmiInstallation) {
+      bmi_install_script = cm::make_unique<cmGeneratedFileStream>(
+        export_info.BmiInstallation->ScriptLocation);
+    }
+
+    auto cmEscape = [](cm::string_view str) {
+      return cmOutputConverter::EscapeForCMake(
+        str, cmOutputConverter::WrapQuotes::NoWrap);
+    };
+    auto install_destination =
+      [&cmEscape](std::string const& dest) -> std::pair<bool, std::string> {
+      if (cmSystemTools::FileIsFullPath(dest)) {
+        return std::make_pair(true, cmEscape(dest));
+      }
+      return std::make_pair(false,
+                            cmStrCat("${_IMPORT_PREFIX}/", cmEscape(dest)));
+    };
+
+    // public/private requirement tracking.
+    std::set<std::string> private_modules;
+    std::map<std::string, std::set<std::string>> public_source_requires;
+
+    for (cmScanDepInfo const& object : objects) {
+      // Convert to forward slashes.
+      auto output_path = object.PrimaryOutput;
+#  ifdef _WIN32
+      cmSystemTools::ConvertToUnixSlashes(output_path);
+#  endif
+      // Find the fileset for this object.
+      auto fileset_info_itr = export_info.ObjectToFileSet.find(output_path);
+      bool const has_provides = !object.Provides.empty();
+      if (fileset_info_itr == export_info.ObjectToFileSet.end()) {
+        // If it provides anything, it should have a `CXX_MODULES` or
+        // `CXX_MODULE_INTERNAL_PARTITIONS` type and be present.
+        if (has_provides) {
+          // Take the first module provided to provide context.
+          auto const& provides = object.Provides[0];
+          char const* ok_types = "`CXX_MODULES`";
+          if (provides.LogicalName.find(':') != std::string::npos) {
+            ok_types = "`CXX_MODULES` (or `CXX_MODULE_INTERNAL_PARTITIONS` if "
+                       "it is not `export`ed)";
+          }
+          cmSystemTools::Error(
+            cmStrCat("Output ", object.PrimaryOutput, " provides the `",
+                     provides.LogicalName,
+                     "` module but it is not found in a `FILE_SET` of type ",
+                     ok_types));
+          result = false;
+        }
+
+        // This object file does not provide anything, so nothing more needs to
+        // be done.
+        continue;
+      }
+
+      auto const& file_set = fileset_info_itr->second;
+
+      // Verify the fileset type for the object.
+      if (file_set.Type == "CXX_MODULES"_s) {
+        if (!has_provides) {
+          cmSystemTools::Error(cmStrCat(
+            "Output ", object.PrimaryOutput,
+            " is of type `CXX_MODULES` but does not provide a module"));
+          result = false;
+          continue;
+        }
+      } else if (file_set.Type == "CXX_MODULE_INTERNAL_PARTITIONS"_s) {
+        if (!has_provides) {
+          cmSystemTools::Error(cmStrCat(
+            "Source ", file_set.SourcePath,
+            " is of type `CXX_MODULE_INTERNAL_PARTITIONS` but does not "
+            "provide a module"));
+          result = false;
+          continue;
+        }
+        auto const& provides = object.Provides[0];
+        if (provides.LogicalName.find(':') == std::string::npos) {
+          cmSystemTools::Error(cmStrCat(
+            "Source ", file_set.SourcePath,
+            " is of type `CXX_MODULE_INTERNAL_PARTITIONS` but does not "
+            "provide a module partition"));
+          result = false;
+          continue;
+        }
+      } else if (file_set.Type == "CXX_MODULE_HEADERS"_s) {
+        // TODO.
+      } else {
+        if (has_provides) {
+          auto const& provides = object.Provides[0];
+          char const* ok_types = "`CXX_MODULES`";
+          if (provides.LogicalName.find(':') != std::string::npos) {
+            ok_types = "`CXX_MODULES` (or `CXX_MODULE_INTERNAL_PARTITIONS` if "
+                       "it is not `export`ed)";
+          }
+          cmSystemTools::Error(cmStrCat(
+            "Source ", file_set.SourcePath, " provides the `",
+            provides.LogicalName, "` C++ module but is of type `",
+            file_set.Type, "` module but must be of type ", ok_types));
+          result = false;
+        }
+
+        // Not a C++ module; ignore.
+        continue;
+      }
+
+      if (!cmFileSetVisibilityIsForInterface(file_set.Visibility)) {
+        // Nothing needs to be conveyed about non-`PUBLIC` modules.
+        for (auto const& p : object.Provides) {
+          private_modules.insert(p.LogicalName);
+        }
+        continue;
+      }
+
+      // The module is public. Record what it directly requires.
+      {
+        auto& reqs = public_source_requires[file_set.SourcePath];
+        for (auto const& r : object.Requires) {
+          reqs.insert(r.LogicalName);
+        }
+      }
+
+      // Write out properties and install rules for any exports.
+      for (auto const& p : object.Provides) {
+        bool bmi_dest_is_abs = false;
+        std::string bmi_destination;
+        if (export_info.BmiInstallation) {
+          auto dest =
+            install_destination(export_info.BmiInstallation->Destination);
+          bmi_dest_is_abs = dest.first;
+          bmi_destination = cmStrCat(dest.second, '/');
+        }
+
+        std::string install_bmi_path;
+        std::string build_bmi_path;
+        auto m = mod_files.find(p.LogicalName);
+        if (m != mod_files.end()) {
+          install_bmi_path =
+            cmStrCat(bmi_destination,
+                     cmEscape(cmSystemTools::GetFilenameName(m->second)));
+          build_bmi_path = cmEscape(m->second);
+        }
+
+        for (auto const& exp : exports) {
+          std::string iface_source;
+          if (exp.second->Install && file_set.Destination) {
+            auto dest = install_destination(*file_set.Destination);
+            iface_source = cmStrCat(
+              dest.second, '/', cmEscape(file_set.RelativeDirectory),
+              cmEscape(cmSystemTools::GetFilenameName(file_set.SourcePath)));
+          } else {
+            iface_source = cmEscape(file_set.SourcePath);
+          }
+
+          std::string bmi_path;
+          if (exp.second->Install && export_info.BmiInstallation) {
+            bmi_path = install_bmi_path;
+          } else if (!exp.second->Install) {
+            bmi_path = build_bmi_path;
+          }
+
+          if (iface_source.empty()) {
+            // No destination for the C++ module source; ignore this property
+            // value.
+            continue;
+          }
+
+          *exp.first << "    \"" << cmEscape(p.LogicalName) << '='
+                     << iface_source;
+          if (!bmi_path.empty()) {
+            *exp.first << ',' << bmi_path;
+          }
+          *exp.first << "\"\n";
+        }
+
+        if (bmi_install_script) {
+          auto const& bmi_install = *export_info.BmiInstallation;
+
+          *bmi_install_script << "if (CMAKE_INSTALL_COMPONENT STREQUAL \""
+                              << cmEscape(bmi_install.Component) << '\"';
+          if (!bmi_install.ExcludeFromAll) {
+            *bmi_install_script << " OR NOT CMAKE_INSTALL_COMPONENT";
+          }
+          *bmi_install_script << ")\n";
+          *bmi_install_script << "  file(INSTALL\n"
+                                 "    DESTINATION \"";
+          if (!bmi_dest_is_abs) {
+            *bmi_install_script << "${CMAKE_INSTALL_PREFIX}/";
+          }
+          *bmi_install_script << cmEscape(bmi_install.Destination)
+                              << "\"\n"
+                                 "    TYPE FILE\n";
+          if (bmi_install.Optional) {
+            *bmi_install_script << "    OPTIONAL\n";
+          }
+          if (!bmi_install.MessageLevel.empty()) {
+            *bmi_install_script << "    " << bmi_install.MessageLevel << "\n";
+          }
+          if (!bmi_install.Permissions.empty()) {
+            *bmi_install_script << "    PERMISSIONS" << bmi_install.Permissions
+                                << "\n";
+          }
+          *bmi_install_script << "    FILES \"" << m->second << "\")\n";
+          if (bmi_dest_is_abs) {
+            *bmi_install_script
+              << "  list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES\n"
+                 "    \""
+              << cmEscape(cmSystemTools::GetFilenameName(m->second))
+              << "\")\n"
+                 "  if (CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)\n"
+                 "    message(WARNING\n"
+                 "      \"ABSOLUTE path INSTALL DESTINATION : "
+                 "${CMAKE_ABSOLUTE_DESTINATION_FILES}\")\n"
+                 "  endif ()\n"
+                 "  if (CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)\n"
+                 "    message(FATAL_ERROR\n"
+                 "      \"ABSOLUTE path INSTALL DESTINATION forbidden (by "
+                 "caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}\")\n"
+                 "  endif ()\n";
+          }
+          *bmi_install_script << "endif ()\n";
+        }
+      }
+    }
+
+    // Add trailing parenthesis for the `set_property` call.
+    for (auto const& exp : exports) {
+      *exp.first << ")\n";
+    }
+
+    // Check that public sources only require public modules.
+    for (auto const& pub_reqs : public_source_requires) {
+      for (auto const& req : pub_reqs.second) {
+        if (private_modules.count(req)) {
+          cmSystemTools::Error(cmStrCat(
+            "Public C++ module source `", pub_reqs.first, "` requires the `",
+            req, "` C++ module which is provided by a private source"));
+          result = false;
+        }
+      }
+    }
+  }
+
+  return result;
 }
 
 int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
@@ -2716,6 +3099,59 @@ int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
     }
   }
 
+  cmGlobalNinjaGenerator::CxxModuleExportInfo export_info;
+  export_info.Config = tdi["config"].asString();
+  if (export_info.Config.empty()) {
+    export_info.Config = "noconfig";
+  }
+  Json::Value const& tdi_exports = tdi["exports"];
+  if (tdi_exports.isArray()) {
+    for (auto const& tdi_export : tdi_exports) {
+      CxxModuleExport exp;
+      exp.Install = tdi_export["install"].asBool();
+      exp.Name = tdi_export["export-name"].asString();
+      exp.Destination = tdi_export["destination"].asString();
+      exp.Prefix = tdi_export["export-prefix"].asString();
+      exp.CxxModuleInfoDir = tdi_export["cxx-module-info-dir"].asString();
+      exp.Namespace = tdi_export["namespace"].asString();
+
+      export_info.Exports.push_back(exp);
+    }
+  }
+  auto const& bmi_installation = tdi["bmi-installation"];
+  if (bmi_installation.isObject()) {
+    CxxModuleBmiInstall bmi_install;
+
+    bmi_install.Component = bmi_installation["component"].asString();
+    bmi_install.Destination = bmi_installation["destination"].asString();
+    bmi_install.ExcludeFromAll = bmi_installation["exclude-from-all"].asBool();
+    bmi_install.Optional = bmi_installation["optional"].asBool();
+    bmi_install.Permissions = bmi_installation["permissions"].asString();
+    bmi_install.MessageLevel = bmi_installation["message-level"].asString();
+    bmi_install.ScriptLocation =
+      bmi_installation["script-location"].asString();
+
+    export_info.BmiInstallation = bmi_install;
+  }
+  Json::Value const& tdi_cxx_modules = tdi["cxx-modules"];
+  if (tdi_cxx_modules.isObject()) {
+    for (auto i = tdi_cxx_modules.begin(); i != tdi_cxx_modules.end(); ++i) {
+      CxxModuleFileSet& fsi = export_info.ObjectToFileSet[i.key().asString()];
+      auto const& tdi_cxx_module_info = *i;
+      fsi.Name = tdi_cxx_module_info["name"].asString();
+      fsi.RelativeDirectory =
+        tdi_cxx_module_info["relative-directory"].asString();
+      fsi.SourcePath = tdi_cxx_module_info["source"].asString();
+      fsi.Type = tdi_cxx_module_info["type"].asString();
+      fsi.Visibility = cmFileSetVisibilityFromName(
+        tdi_cxx_module_info["visibility"].asString(), nullptr);
+      auto const& tdi_fs_dest = tdi_cxx_module_info["destination"];
+      if (tdi_fs_dest.isString()) {
+        fsi.Destination = tdi_fs_dest.asString();
+      }
+    }
+  }
+
   cmake cm(cmake::RoleInternal, cmState::Unknown);
   cm.SetHomeDirectory(dir_top_src);
   cm.SetHomeOutputDirectory(dir_top_bld);
@@ -2723,7 +3159,8 @@ int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
   if (!ggd ||
       !cm::static_reference_cast<cmGlobalNinjaGenerator>(ggd).WriteDyndepFile(
         dir_top_src, dir_top_bld, dir_cur_src, dir_cur_bld, arg_dd, arg_ddis,
-        module_dir, linked_target_dirs, arg_lang, arg_modmapfmt)) {
+        module_dir, linked_target_dirs, arg_lang, arg_modmapfmt,
+        export_info)) {
     return 1;
   }
   return 0;

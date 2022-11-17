@@ -25,4 +25,4 @@ CMake configures the project.
 
 ``CMAKE_FIND_PACKAGE_REDIRECTS_DIR`` is only set in CMake project mode.
 It is not set when CMake is run in script mode
-(i.e. :manual:`cmake -P ... <cmake(1)>`).
+(i.e. :option:`cmake -P`).

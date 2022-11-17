@@ -213,6 +213,16 @@ def check_directory(c):
                 assert is_int(at["index"])
                 assert c["targets"][at["index"]]["name"] == et["index"]
 
+            if e.get("cxxModuleBmiTarget", None) is not None:
+                expected_keys.append("cxxModuleBmiTarget")
+                et = e["cxxModuleBmiTarget"]
+                at = a["cxxModuleBmiTarget"]
+                assert is_dict(at)
+                assert sorted(at.keys()) == ["id", "index"]
+                assert matches(at["id"], et["id"])
+                assert is_int(at["index"])
+                assert c["targets"][at["index"]]["name"] == et["index"]
+
             if e["backtrace"] is not None:
                 expected_keys.append("backtrace")
                 check_backtrace(d, a["backtrace"], e["backtrace"])
@@ -654,6 +664,7 @@ def gen_check_directories(c, g):
         read_codemodel_json_data("directories/dir_dir.json"),
         read_codemodel_json_data("directories/external.json"),
         read_codemodel_json_data("directories/fileset.json"),
+        read_codemodel_json_data("directories/subdir.json"),
     ]
 
     if matches(g["name"], "^Visual Studio "):
@@ -712,6 +723,7 @@ def gen_check_targets(c, g, inSource):
         read_codemodel_json_data("targets/c_shared_exe.json"),
         read_codemodel_json_data("targets/c_static_lib.json"),
         read_codemodel_json_data("targets/c_static_exe.json"),
+        read_codemodel_json_data("targets/c_subdir.json"),
 
         read_codemodel_json_data("targets/all_build_cxx.json"),
         read_codemodel_json_data("targets/zero_check_cxx.json"),

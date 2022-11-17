@@ -22,10 +22,10 @@ The named ``<target>`` must have been created by a command such as
   ``<target>`` can be a custom target.
 
 The ``INTERFACE``, ``PUBLIC`` and ``PRIVATE`` keywords are required to
-specify the scope of the source file paths (``<items>``) that follow
-them.  ``PRIVATE`` and ``PUBLIC`` items will populate the :prop_tgt:`SOURCES`
-property of ``<target>``, which are used when building the target itself.
-``PUBLIC`` and ``INTERFACE`` items will populate the
+specify the :ref:`scope <Target Usage Requirements>` of the source file paths
+(``<items>``) that follow them.  ``PRIVATE`` and ``PUBLIC`` items will
+populate the :prop_tgt:`SOURCES` property of ``<target>``, which are used when
+building the target itself. ``PUBLIC`` and ``INTERFACE`` items will populate the
 :prop_tgt:`INTERFACE_SOURCES` property of ``<target>``, which are used
 when building dependents.  A target created by :command:`add_custom_target`
 can only have ``PRIVATE`` scope.
@@ -75,9 +75,33 @@ File Sets
 Adds a file set to a target, or adds files to an existing file set. Targets
 have zero or more named file sets. Each file set has a name, a type, a scope of
 ``INTERFACE``, ``PUBLIC``, or ``PRIVATE``, one or more base directories, and
-files within those directories. The only acceptable type is ``HEADERS``. The
-optional default file sets are named after their type. The target may not be a
-custom target or :prop_tgt:`FRAMEWORK` target.
+files within those directories. The acceptable types include:
+
+``HEADERS``
+
+  Sources intended to be used via a language's ``#include`` mechanism.
+
+``CXX_MODULES``
+
+  .. note ::
+
+    Experimental. Gated by ``CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API``
+
+  Sources which contain C++ interface module or partition units (i.e., those
+  using the ``export`` keyword). This file set type may not have an
+  ``INTERFACE`` scope except on ``IMPORTED`` targets.
+
+``CXX_MODULE_HEADER_UNITS``
+
+  .. note ::
+
+    Experimental. Gated by ``CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API``
+
+  C++ header sources which may be imported by other C++ source code. This file
+  set type may not have an ``INTERFACE`` scope except on ``IMPORTED`` targets.
+
+The optional default file sets are named after their type. The target may not
+be a custom target or :prop_tgt:`FRAMEWORK` target.
 
 Files in a ``PRIVATE`` or ``PUBLIC`` file set are marked as source files for
 the purposes of IDE integration. Additionally, files in ``HEADERS`` file sets
@@ -93,16 +117,17 @@ Each ``target_sources(FILE_SET)`` entry starts with ``INTERFACE``, ``PUBLIC``, o
 
   The name of the file set to create or add to. It must contain only letters,
   numbers and underscores. Names starting with a capital letter are reserved
-  for built-in file sets predefined by CMake. The only predefined set name is
-  ``HEADERS``. All other set names must not start with a capital letter or
+  for built-in file sets predefined by CMake. The only predefined set names
+  are those matching the acceptable types. All other set names must not start
+  with a capital letter or
   underscore.
 
 ``TYPE <type>``
 
-  Every file set is associated with a particular type of file. ``HEADERS``
-  is currently the only defined type and it is an error to specify anything
-  else. As a special case, if the name of the file set is ``HEADERS``, the
-  type does not need to be specified and the ``TYPE <type>`` arguments can be
+  Every file set is associated with a particular type of file. Only types
+  specified above may be used and it is an error to specify anything else. As
+  a special case, if the name of the file set is one of the types, the type
+  does not need to be specified and the ``TYPE <type>`` arguments can be
   omitted. For all other file set names, ``TYPE`` is required.
 
 ``BASE_DIRS <dirs>...``
@@ -134,6 +159,8 @@ Each ``target_sources(FILE_SET)`` entry starts with ``INTERFACE``, ``PUBLIC``, o
 The following target properties are set by ``target_sources(FILE_SET)``,
 but they should not generally be manipulated directly:
 
+For file sets of type ``HEADERS``:
+
 * :prop_tgt:`HEADER_SETS`
 * :prop_tgt:`INTERFACE_HEADER_SETS`
 * :prop_tgt:`HEADER_SET`
@@ -141,17 +168,37 @@ but they should not generally be manipulated directly:
 * :prop_tgt:`HEADER_DIRS`
 * :prop_tgt:`HEADER_DIRS_<NAME>`
 
+For file sets of type ``CXX_MODULES``:
+
+* :prop_tgt:`CXX_MODULE_SETS`
+* :prop_tgt:`INTERFACE_CXX_MODULE_SETS`
+* :prop_tgt:`CXX_MODULE_SET`
+* :prop_tgt:`CXX_MODULE_SET_<NAME>`
+* :prop_tgt:`CXX_MODULE_DIRS`
+* :prop_tgt:`CXX_MODULE_DIRS_<NAME>`
+
+For file sets of type ``CXX_MODULE_HEADER_UNITS``:
+
+* :prop_tgt:`CXX_MODULE_HEADER_UNIT_SETS`
+* :prop_tgt:`INTERFACE_CXX_MODULE_HEADER_UNIT_SETS`
+* :prop_tgt:`CXX_MODULE_HEADER_UNIT_SET`
+* :prop_tgt:`CXX_MODULE_HEADER_UNIT_SET_<NAME>`
+* :prop_tgt:`CXX_MODULE_HEADER_UNIT_DIRS`
+* :prop_tgt:`CXX_MODULE_HEADER_UNIT_DIRS_<NAME>`
+
 Target properties related to include directories are also modified by
 ``target_sources(FILE_SET)`` as follows:
 
 :prop_tgt:`INCLUDE_DIRECTORIES`
 
-  If the ``TYPE`` is ``HEADERS``, and the scope of the file set is ``PRIVATE``
-  or ``PUBLIC``, all of the ``BASE_DIRS`` of the file set are wrapped in
-  :genex:`$<BUILD_INTERFACE>` and appended to this property.
+  If the ``TYPE`` is ``HEADERS`` or ``CXX_MODULE_HEADER_UNITS``, and the scope
+  of the file set is ``PRIVATE`` or ``PUBLIC``, all of the ``BASE_DIRS`` of
+  the file set are wrapped in :genex:`$<BUILD_INTERFACE>` and appended to this
+  property.
 
 :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES`
 
-  If the ``TYPE`` is ``HEADERS``, and the scope of the file set is
-  ``INTERFACE`` or ``PUBLIC``, all of the ``BASE_DIRS`` of the file set are
-  wrapped in :genex:`$<BUILD_INTERFACE>` and appended to this property.
+  If the ``TYPE`` is ``HEADERS`` or ``CXX_MODULE_HEADER_UNITS``, and the scope
+  of the file set is ``INTERFACE`` or ``PUBLIC``, all of the ``BASE_DIRS`` of
+  the file set are wrapped in :genex:`$<BUILD_INTERFACE>` and appended to this
+  property.

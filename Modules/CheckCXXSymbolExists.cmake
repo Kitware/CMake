@@ -74,5 +74,5 @@ include_guard(GLOBAL)
 include(CheckSymbolExists)
 
 macro(CHECK_CXX_SYMBOL_EXISTS SYMBOL FILES VARIABLE)
-  __CHECK_SYMBOL_EXISTS_IMPL("${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckSymbolExists.cxx" "${SYMBOL}" "${FILES}" "${VARIABLE}" )
+  __CHECK_SYMBOL_EXISTS_IMPL(CheckSymbolExists.cxx "${SYMBOL}" "${FILES}" "${VARIABLE}" )
 endmacro()

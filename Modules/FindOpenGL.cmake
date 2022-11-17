@@ -377,7 +377,7 @@ else()
      (NOT OPENGL_USE_EGL AND
       NOT OPENGL_glx_LIBRARY AND
           OPENGL_gl_LIBRARY))
-    list(APPEND _OpenGL_REQUIRED_VARS OPENGL_gl_LIBRARY)
+    list(PREPEND _OpenGL_REQUIRED_VARS OPENGL_gl_LIBRARY)
   endif()
 
   # We always need the 'gl.h' include dir.

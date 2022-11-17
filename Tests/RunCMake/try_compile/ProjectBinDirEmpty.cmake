@@ -1,0 +1,4 @@
+try_compile(RESULT PROJECT Foo
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/proj
+  BINARY_DIR ""
+  )

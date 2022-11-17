@@ -11,11 +11,17 @@
 // NOLINTNEXTLINE(bugprone-reserved-identifier)
 #  define _XOPEN_SOURCE 700
 #endif
+#if defined(__APPLE__)
+// Restore Darwin APIs removed by _POSIX_C_SOURCE.
+// NOLINTNEXTLINE(bugprone-reserved-identifier)
+#  define _DARWIN_C_SOURCE
+#endif
 
 #include "cmSystemTools.h"
 
 #include <cm/optional>
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include <cm3p/uv.h>
 
@@ -87,7 +93,6 @@
 #  include <unistd.h>
 
 #  include <sys/time.h>
-#  include <sys/types.h>
 #endif
 
 #if defined(_WIN32) &&                                                        \
@@ -1000,6 +1005,93 @@ void cmSystemTools::InitializeLibUV()
 #endif
 }
 
+#if defined(_WIN32)
+#  include <random>
+
+#  include <wctype.h>
+#  ifdef _MSC_VER
+using mode_t = cmSystemTools::SystemTools::mode_t;
+#  endif
+#else
+#  include <sys/stat.h>
+#endif
+
+inline int Mkdir(const char* dir, const mode_t* mode)
+{
+#if defined(_WIN32)
+  int ret = _wmkdir(cmSystemTools::ConvertToWindowsExtendedPath(dir).c_str());
+  if (ret == 0 && mode)
+    cmSystemTools::SystemTools::SetPermissions(dir, *mode);
+  return ret;
+#else
+  return mkdir(dir, mode ? *mode : 0777);
+#endif
+}
+
+cmsys::Status cmSystemTools::MakeTempDirectory(std::string& path,
+                                               const mode_t* mode)
+{
+  if (path.empty()) {
+    return cmsys::Status::POSIX(EINVAL);
+  }
+  return cmSystemTools::MakeTempDirectory(&path.front(), mode);
+}
+
+cmsys::Status cmSystemTools::MakeTempDirectory(char* path, const mode_t* mode)
+{
+  if (!path) {
+    return cmsys::Status::POSIX(EINVAL);
+  }
+
+  // verify that path ends with "XXXXXX"
+  const auto l = std::strlen(path);
+  if (!cmHasLiteralSuffix(cm::string_view{ path, l }, "XXXXXX")) {
+    return cmsys::Status::POSIX(EINVAL);
+  }
+
+  // create parent directories
+  auto* sep = path;
+  while ((sep = strchr(sep, '/'))) {
+    // all underlying functions use C strings,
+    // so temporarily end the string here
+    *sep = '\0';
+    Mkdir(path, mode);
+
+    *sep = '/';
+    ++sep;
+  }
+
+#ifdef _WIN32
+  const int nchars = 36;
+  const char chars[nchars + 1] = "abcdefghijklmnopqrstuvwxyz0123456789";
+
+  std::random_device rd;
+  std::mt19937 rg{ rd() };
+  std::uniform_int_distribution<int> dist{ 0, nchars - 1 };
+
+  for (auto tries = 100; tries; --tries) {
+    for (auto n = l - 6; n < l; ++n) {
+      path[n] = chars[dist(rg)];
+    }
+    if (Mkdir(path, mode) == 0) {
+      return cmsys::Status::Success();
+    } else if (errno != EEXIST) {
+      return cmsys::Status::POSIX_errno();
+    }
+  }
+  return cmsys::Status::POSIX(EAGAIN);
+#else
+  if (mkdtemp(path)) {
+    if (mode) {
+      chmod(path, *mode);
+    }
+  } else {
+    return cmsys::Status::POSIX_errno();
+  }
+  return cmsys::Status::Success();
+#endif
+}
+
 #ifdef _WIN32
 namespace {
 bool cmMoveFile(std::wstring const& oldname, std::wstring const& newname,
@@ -1256,7 +1348,7 @@ std::string cmSystemTools::ComputeCertificateThumbprint(
                       certContext, CERT_HASH_PROP_ID, hashData, &hashLength)) {
                   for (DWORD i = 0; i < hashLength; i++) {
                     // Convert each byte to hexadecimal
-                    sprintf(pHashPrint, "%02X", hashData[i]);
+                    snprintf(pHashPrint, 3, "%02X", hashData[i]);
                     pHashPrint += 2;
                   }
                   *pHashPrint = '\0';
@@ -1539,8 +1631,7 @@ std::string cmSystemTools::RelativeIfUnder(std::string const& top,
 bool cmSystemTools::UnsetEnv(const char* value)
 {
 #  if !defined(HAVE_UNSETENV)
-  std::string var = cmStrCat(value, '=');
-  return cmSystemTools::PutEnv(var);
+  return cmSystemTools::UnPutEnv(value);
 #  else
   unsetenv(value);
   return true;
@@ -1551,9 +1642,18 @@ std::vector<std::string> cmSystemTools::GetEnvironmentVariables()
 {
   std::vector<std::string> env;
   int cc;
+#  ifdef _WIN32
+  // if program starts with main, _wenviron is initially NULL, call to
+  // _wgetenv and create wide-character string environment
+  _wgetenv(L"");
+  for (cc = 0; _wenviron[cc]; ++cc) {
+    env.emplace_back(cmsys::Encoding::ToNarrow(_wenviron[cc]));
+  }
+#  else
   for (cc = 0; environ[cc]; ++cc) {
     env.emplace_back(environ[cc]);
   }
+#  endif
   return env;
 }
 
@@ -1561,6 +1661,144 @@ void cmSystemTools::AppendEnv(std::vector<std::string> const& env)
 {
   for (std::string const& eit : env) {
     cmSystemTools::PutEnv(eit);
+  }
+}
+
+void cmSystemTools::EnvDiff::AppendEnv(std::vector<std::string> const& env)
+{
+  for (std::string const& eit : env) {
+    this->PutEnv(eit);
+  }
+}
+
+void cmSystemTools::EnvDiff::PutEnv(const std::string& env)
+{
+  auto const eq_loc = env.find('=');
+  if (eq_loc != std::string::npos) {
+    std::string name = env.substr(0, eq_loc);
+    diff[name] = env.substr(eq_loc + 1);
+  } else {
+    this->UnPutEnv(env);
+  }
+}
+
+void cmSystemTools::EnvDiff::UnPutEnv(const std::string& env)
+{
+  diff[env] = {};
+}
+
+bool cmSystemTools::EnvDiff::ParseOperation(const std::string& envmod)
+{
+  char path_sep = GetSystemPathlistSeparator();
+
+  auto apply_diff = [this](const std::string& name,
+                           std::function<void(std::string&)> const& apply) {
+    cm::optional<std::string> old_value = diff[name];
+    std::string output;
+    if (old_value) {
+      output = *old_value;
+    } else {
+      const char* curval = cmSystemTools::GetEnv(name);
+      if (curval) {
+        output = curval;
+      }
+    }
+    apply(output);
+    diff[name] = output;
+  };
+
+  // Split on `=`
+  auto const eq_loc = envmod.find_first_of('=');
+  if (eq_loc == std::string::npos) {
+    cmSystemTools::Error(cmStrCat(
+      "Error: Missing `=` after the variable name in: ", envmod, '\n'));
+    return false;
+  }
+
+  auto const name = envmod.substr(0, eq_loc);
+
+  // Split value on `:`
+  auto const op_value_start = eq_loc + 1;
+  auto const colon_loc = envmod.find_first_of(':', op_value_start);
+  if (colon_loc == std::string::npos) {
+    cmSystemTools::Error(
+      cmStrCat("Error: Missing `:` after the operation in: ", envmod, '\n'));
+    return false;
+  }
+  auto const op = envmod.substr(op_value_start, colon_loc - op_value_start);
+
+  auto const value_start = colon_loc + 1;
+  auto const value = envmod.substr(value_start);
+
+  // Determine what to do with the operation.
+  if (op == "reset"_s) {
+    auto entry = diff.find(name);
+    if (entry != diff.end()) {
+      diff.erase(entry);
+    }
+  } else if (op == "set"_s) {
+    diff[name] = value;
+  } else if (op == "unset"_s) {
+    diff[name] = {};
+  } else if (op == "string_append"_s) {
+    apply_diff(name, [&value](std::string& output) { output += value; });
+  } else if (op == "string_prepend"_s) {
+    apply_diff(name,
+               [&value](std::string& output) { output.insert(0, value); });
+  } else if (op == "path_list_append"_s) {
+    apply_diff(name, [&value, path_sep](std::string& output) {
+      if (!output.empty()) {
+        output += path_sep;
+      }
+      output += value;
+    });
+  } else if (op == "path_list_prepend"_s) {
+    apply_diff(name, [&value, path_sep](std::string& output) {
+      if (!output.empty()) {
+        output.insert(output.begin(), path_sep);
+      }
+      output.insert(0, value);
+    });
+  } else if (op == "cmake_list_append"_s) {
+    apply_diff(name, [&value](std::string& output) {
+      if (!output.empty()) {
+        output += ';';
+      }
+      output += value;
+    });
+  } else if (op == "cmake_list_prepend"_s) {
+    apply_diff(name, [&value](std::string& output) {
+      if (!output.empty()) {
+        output.insert(output.begin(), ';');
+      }
+      output.insert(0, value);
+    });
+  } else {
+    cmSystemTools::Error(cmStrCat(
+      "Error: Unrecognized environment manipulation argument: ", op, '\n'));
+    return false;
+  }
+
+  return true;
+}
+
+void cmSystemTools::EnvDiff::ApplyToCurrentEnv(std::ostringstream* measurement)
+{
+  for (auto const& env_apply : diff) {
+    if (env_apply.second) {
+      auto const env_update =
+        cmStrCat(env_apply.first, '=', *env_apply.second);
+      cmSystemTools::PutEnv(env_update);
+      if (measurement) {
+        *measurement << env_update << std::endl;
+      }
+    } else {
+      cmSystemTools::UnsetEnv(env_apply.first.c_str());
+      if (measurement) {
+        // Signify that this variable is being actively unset
+        *measurement << '#' << env_apply.first << "=\n";
+      }
+    }
   }
 }
 
@@ -3352,8 +3590,19 @@ std::string cmSystemTools::EncodeURL(std::string const& in, bool escapeSlashes)
 }
 
 cmsys::Status cmSystemTools::CreateSymlink(std::string const& origName,
-                                           std::string const& newName,
-                                           std::string* errorMessage)
+                                           std::string const& newName)
+{
+  cmsys::Status status =
+    cmSystemTools::CreateSymlinkQuietly(origName, newName);
+  if (!status) {
+    cmSystemTools::Error(cmStrCat("failed to create symbolic link '", newName,
+                                  "': ", status.GetString()));
+  }
+  return status;
+}
+
+cmsys::Status cmSystemTools::CreateSymlinkQuietly(std::string const& origName,
+                                                  std::string const& newName)
 {
   uv_fs_t req;
   int flags = 0;
@@ -3373,20 +3622,23 @@ cmsys::Status cmSystemTools::CreateSymlink(std::string const& origName,
 #else
     status = cmsys::Status::POSIX(-err);
 #endif
-    std::string e = cmStrCat("failed to create symbolic link '", newName,
-                             "': ", status.GetString());
-    if (errorMessage) {
-      *errorMessage = std::move(e);
-    } else {
-      cmSystemTools::Error(e);
-    }
   }
   return status;
 }
 
 cmsys::Status cmSystemTools::CreateLink(std::string const& origName,
-                                        std::string const& newName,
-                                        std::string* errorMessage)
+                                        std::string const& newName)
+{
+  cmsys::Status status = cmSystemTools::CreateLinkQuietly(origName, newName);
+  if (!status) {
+    cmSystemTools::Error(
+      cmStrCat("failed to create link '", newName, "': ", status.GetString()));
+  }
+  return status;
+}
+
+cmsys::Status cmSystemTools::CreateLinkQuietly(std::string const& origName,
+                                               std::string const& newName)
 {
   uv_fs_t req;
   int err =
@@ -3400,13 +3652,6 @@ cmsys::Status cmSystemTools::CreateLink(std::string const& origName,
 #else
     status = cmsys::Status::POSIX(-err);
 #endif
-    std::string e =
-      cmStrCat("failed to create link '", newName, "': ", status.GetString());
-    if (errorMessage) {
-      *errorMessage = std::move(e);
-    } else {
-      cmSystemTools::Error(e);
-    }
   }
   return status;
 }

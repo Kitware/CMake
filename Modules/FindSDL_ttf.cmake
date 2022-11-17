@@ -30,10 +30,6 @@ For backward compatibility the following variables are also set:
 
 $SDLDIR is an environment variable that would correspond to the
 ./configure --prefix=$SDLDIR used in building SDL.
-
-Created by Eric Wing.  This was influenced by the FindSDL.cmake
-module, but with modifications to recognize OS X frameworks and
-additional Unix paths (FreeBSD, etc).
 #]=======================================================================]
 
 if(NOT SDL_TTF_INCLUDE_DIR AND SDLTTF_INCLUDE_DIR)

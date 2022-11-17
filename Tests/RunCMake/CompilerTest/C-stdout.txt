@@ -1,0 +1,2 @@
+-- Check for working C compiler: [^
+]* - works

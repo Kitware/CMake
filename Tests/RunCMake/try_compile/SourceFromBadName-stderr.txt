@@ -1,0 +1,4 @@
+CMake Error at SourceFromBadName.cmake:[0-9]+ \(try_compile\):
+  SOURCE_FROM_CONTENT given invalid filename "bad/name.c"
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)

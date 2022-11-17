@@ -55,6 +55,22 @@ run_cmake(REGISTRY_VIEW-no-view)
 run_cmake(REGISTRY_VIEW-wrong-view)
 run_cmake(REGISTRY_VIEW-propagated)
 
+file(
+    GLOB SearchPaths_TEST_CASE_LIST
+    LIST_DIRECTORIES TRUE
+    "${RunCMake_SOURCE_DIR}/SearchPaths/*"
+  )
+foreach(TestCasePrefix IN LISTS SearchPaths_TEST_CASE_LIST)
+  if(IS_DIRECTORY "${TestCasePrefix}")
+    cmake_path(GET TestCasePrefix FILENAME TestSuffix)
+    run_cmake_with_options(
+      SearchPaths_${TestSuffix}
+        "-DSearchPaths_ROOT=${TestCasePrefix}"
+        "--debug-find-pkg=SearchPaths"
+      )
+  endif()
+endforeach()
+
 if(UNIX
     AND NOT MSYS # FIXME: This works on CYGWIN but not on MSYS
     )

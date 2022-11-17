@@ -931,11 +931,20 @@ Function .onInit
 ;Run the uninstaller
 uninst:
   ClearErrors
-  StrCpy $2 $0 1
-  StrCmp '"' $2 0 +3 ; checks if string is quoted (CPack before v3.20.6 did not quote it)
-  ExecWait '$0 /S'
-  Goto +2
-  ExecWait '"$0" /S'
+  # $0 should _always_ be quoted, however older versions of CMake did not
+  # do this.  We'll conditionally remove the begin/end quotes.
+  # Remove first char if quote
+  StrCpy $2 $0 1 0      # copy first char
+  StrCmp $2 "$\"" 0 +2  # if char is quote
+  StrCpy $0 $0 "" 1     # remove first char
+  # Remove last char if quote
+  StrCpy $2 $0 1 -1     # copy last char
+  StrCmp $2 "$\"" 0 +2  # if char is quote
+  StrCpy $0 $0 -1       # remove last char
+
+  StrLen $2 "\@CPACK_NSIS_UNINSTALL_NAME@.exe"
+  StrCpy $3 $0 -$2 # remove "\@CPACK_NSIS_UNINSTALL_NAME@.exe" from UninstallString to get path
+  ExecWait '"$0" /S _?=$3' ;Do not copy the uninstaller to a temp file
 
   IfErrors uninst_failed inst
 uninst_failed:

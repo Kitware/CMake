@@ -1,0 +1,12 @@
+CMake Warning \(dev\) at CMP0140-WARN.cmake:[0-9]+ \(return\):
+  Policy CMP0140 is not set: The return\(\) command checks its arguments.  Run
+  "cmake --help-policy CMP0140" for policy details.  Use the cmake_policy
+  command to set the policy and suppress this warning.
+
+  return\(\) checks its arguments when the policy is set to NEW.  Since the
+  policy is not set the OLD behavior will be used so the arguments will be
+  ignored.
+Call Stack \(most recent call first\):
+  CMP0140-WARN.cmake:[0-9]+ \(func\)
+  CMakeLists.txt:[0-9]+ \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.

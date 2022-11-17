@@ -14,6 +14,7 @@
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
 
+#include "cmCPackConfigure.h"
 #include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
 #include "cmDuration.h"
@@ -23,7 +24,7 @@
 #include "cmValue.h"
 #include "cmXMLWriter.h"
 
-#ifdef HAVE_CoreServices
+#if HAVE_CoreServices
 // For the old LocaleStringToLangAndRegionCodes() function, to convert
 // to the old Script Manager RegionCode values needed for the 'LPic' data
 // structure used for generating multi-lingual SLAs.
@@ -590,7 +591,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
                            kCFStringEncodingMacRoman);
         LangCode lang = 0;
         RegionCode region = 0;
-#ifdef HAVE_CoreServices
+#if HAVE_CoreServices
         OSStatus err =
           LocaleStringToLangAndRegionCodes(iso_language_cstr, &lang, &region);
         if (err != noErr)
@@ -601,7 +602,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
                           << iso_language_cstr << std::endl);
           return 0;
         }
-#ifdef HAVE_CoreServices
+#if HAVE_CoreServices
         header_data.push_back(region);
         header_data.push_back(i);
         header_data.push_back(0);

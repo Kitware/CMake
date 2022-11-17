@@ -14,11 +14,10 @@
 #endif
 
 cmGeneratedFileStream::cmGeneratedFileStream(Encoding encoding)
-  : OriginalLocale(this->getloc())
 {
 #ifndef CMAKE_BOOTSTRAP
   if (encoding != codecvt::None) {
-    this->imbue(std::locale(this->OriginalLocale, new codecvt(encoding)));
+    this->imbue(std::locale(this->getloc(), new codecvt(encoding)));
   }
 #else
   static_cast<void>(encoding);
@@ -124,10 +123,10 @@ cmGeneratedFileStreamBase::~cmGeneratedFileStreamBase()
 void cmGeneratedFileStreamBase::Open(std::string const& name)
 {
   // Save the original name of the file.
-  this->Name = name;
+  this->Name = cmSystemTools::CollapseFullPath(name);
 
   // Create the name of the temporary file.
-  this->TempName = name;
+  this->TempName = this->Name;
 #if defined(__VMS)
   this->TempName += "_";
 #else
@@ -231,7 +230,7 @@ int cmGeneratedFileStreamBase::RenameFile(std::string const& oldname,
 
 void cmGeneratedFileStream::SetName(const std::string& fname)
 {
-  this->Name = fname;
+  this->Name = cmSystemTools::CollapseFullPath(fname);
 }
 
 void cmGeneratedFileStream::SetTempExt(std::string const& ext)
@@ -239,13 +238,16 @@ void cmGeneratedFileStream::SetTempExt(std::string const& ext)
   this->TempExt = ext;
 }
 
-void cmGeneratedFileStream::WriteRaw(std::string const& data)
+void cmGeneratedFileStream::WriteAltEncoding(std::string const& data,
+                                             Encoding encoding)
 {
 #ifndef CMAKE_BOOTSTRAP
-  std::locale activeLocale = this->imbue(this->OriginalLocale);
+  std::locale prevLocale =
+    this->imbue(std::locale(this->getloc(), new codecvt(encoding)));
   this->write(data.data(), data.size());
-  this->imbue(activeLocale);
+  this->imbue(prevLocale);
 #else
+  static_cast<void>(encoding);
   this->write(data.data(), data.size());
 #endif
 }

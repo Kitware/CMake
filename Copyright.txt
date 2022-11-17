@@ -53,6 +53,7 @@ The following individuals and institutions are among the Contributors:
 * Clement Creusot <creusot@cs.york.ac.uk>
 * Daniel Blezek <blezek@gmail.com>
 * Daniel Pfeifer <daniel@pfeifer-mail.de>
+* Dawid Wróbel <me@dawidwrobel.com>
 * Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de>
 * Eran Ifrah <eran.ifrah@gmail.com>
 * Esben Mose Hansen, Ange Optimization ApS

@@ -27,6 +27,8 @@ set(uv_sources
   src/queue.h
   src/strscpy.c
   src/strscpy.h
+  src/strtok.c
+  src/strtok.h
   src/threadpool.c
   src/timer.c
   src/uv-common.c

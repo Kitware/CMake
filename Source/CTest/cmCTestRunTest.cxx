@@ -8,16 +8,12 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
-#include <functional>
 #include <iomanip>
 #include <ratio>
 #include <sstream>
 #include <utility>
 
 #include <cm/memory>
-#include <cm/optional>
-#include <cm/string_view>
-#include <cmext/string_view>
 
 #include "cmsys/RegularExpression.hxx"
 
@@ -787,149 +783,31 @@ bool cmCTestRunTest::ForkProcess(
 
   this->TestProcess->SetTimeout(timeout);
 
-#ifndef CMAKE_BOOTSTRAP
   cmSystemTools::SaveRestoreEnvironment sre;
-#endif
-
   std::ostringstream envMeasurement;
+
+  // We split processing ENVIRONMENT and ENVIRONMENT_MODIFICATION into two
+  // phases to ensure that MYVAR=reset: in the latter phase resets to the
+  // former phase's settings, rather than to the original environment.
   if (environment && !environment->empty()) {
-    // Environment modification works on the assumption that the environment is
-    // actually modified here. If another strategy is used, there will need to
-    // be updates below in `apply_diff`.
-    cmSystemTools::AppendEnv(*environment);
-    for (auto const& var : *environment) {
-      envMeasurement << var << std::endl;
-    }
+    cmSystemTools::EnvDiff diff;
+    diff.AppendEnv(*environment);
+    diff.ApplyToCurrentEnv(&envMeasurement);
   }
 
   if (environment_modification && !environment_modification->empty()) {
-    std::map<std::string, cm::optional<std::string>> env_application;
-
-#ifdef _WIN32
-    char path_sep = ';';
-#else
-    char path_sep = ':';
-#endif
-
-    auto apply_diff =
-      [&env_application](const std::string& name,
-                         std::function<void(std::string&)> const& apply) {
-        cm::optional<std::string> old_value = env_application[name];
-        std::string output;
-        if (old_value) {
-          output = *old_value;
-        } else {
-          // This only works because the environment is actually modified above
-          // (`AppendEnv`). If CTest ever just creates an environment block
-          // directly, that block will need to be queried for the subprocess'
-          // value instead.
-          const char* curval = cmSystemTools::GetEnv(name);
-          if (curval) {
-            output = curval;
-          }
-        }
-        apply(output);
-        env_application[name] = output;
-      };
-
-    bool err_occurred = false;
+    cmSystemTools::EnvDiff diff;
+    bool env_ok = true;
 
     for (auto const& envmod : *environment_modification) {
-      // Split on `=`
-      auto const eq_loc = envmod.find_first_of('=');
-      if (eq_loc == std::string::npos) {
-        cmCTestLog(this->CTest, ERROR_MESSAGE,
-                   "Error: Missing `=` after the variable name in: "
-                     << envmod << std::endl);
-        err_occurred = true;
-        continue;
-      }
-      auto const name = envmod.substr(0, eq_loc);
-
-      // Split value on `:`
-      auto const op_value_start = eq_loc + 1;
-      auto const colon_loc = envmod.find_first_of(':', op_value_start);
-      if (colon_loc == std::string::npos) {
-        cmCTestLog(this->CTest, ERROR_MESSAGE,
-                   "Error: Missing `:` after the operation in: " << envmod
-                                                                 << std::endl);
-        err_occurred = true;
-        continue;
-      }
-      auto const op =
-        envmod.substr(op_value_start, colon_loc - op_value_start);
-
-      auto const value_start = colon_loc + 1;
-      auto const value = envmod.substr(value_start);
-
-      // Determine what to do with the operation.
-      if (op == "reset"_s) {
-        auto entry = env_application.find(name);
-        if (entry != env_application.end()) {
-          env_application.erase(entry);
-        }
-      } else if (op == "set"_s) {
-        env_application[name] = value;
-      } else if (op == "unset"_s) {
-        env_application[name] = {};
-      } else if (op == "string_append"_s) {
-        apply_diff(name, [&value](std::string& output) { output += value; });
-      } else if (op == "string_prepend"_s) {
-        apply_diff(name,
-                   [&value](std::string& output) { output.insert(0, value); });
-      } else if (op == "path_list_append"_s) {
-        apply_diff(name, [&value, path_sep](std::string& output) {
-          if (!output.empty()) {
-            output += path_sep;
-          }
-          output += value;
-        });
-      } else if (op == "path_list_prepend"_s) {
-        apply_diff(name, [&value, path_sep](std::string& output) {
-          if (!output.empty()) {
-            output.insert(output.begin(), path_sep);
-          }
-          output.insert(0, value);
-        });
-      } else if (op == "cmake_list_append"_s) {
-        apply_diff(name, [&value](std::string& output) {
-          if (!output.empty()) {
-            output += ';';
-          }
-          output += value;
-        });
-      } else if (op == "cmake_list_prepend"_s) {
-        apply_diff(name, [&value](std::string& output) {
-          if (!output.empty()) {
-            output.insert(output.begin(), ';');
-          }
-          output.insert(0, value);
-        });
-      } else {
-        cmCTestLog(this->CTest, ERROR_MESSAGE,
-                   "Error: Unrecognized environment manipulation argument: "
-                     << op << std::endl);
-        err_occurred = true;
-        continue;
-      }
+      env_ok &= diff.ParseOperation(envmod);
     }
 
-    if (err_occurred) {
+    if (!env_ok) {
       return false;
     }
 
-    for (auto const& env_apply : env_application) {
-      if (env_apply.second) {
-        auto const env_update =
-          cmStrCat(env_apply.first, '=', *env_apply.second);
-        cmSystemTools::PutEnv(env_update);
-        envMeasurement << env_update << std::endl;
-      } else {
-        cmSystemTools::UnsetEnv(env_apply.first.c_str());
-        // Signify that this variable is being actively unset
-        envMeasurement << "#" << env_apply.first << "=" << std::endl;
-      }
-    }
+    diff.ApplyToCurrentEnv(&envMeasurement);
   }
 
   if (this->UseAllocatedResources) {

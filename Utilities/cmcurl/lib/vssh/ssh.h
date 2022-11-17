@@ -20,14 +20,16 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 
 #include "curl_setup.h"
 
-#if defined(HAVE_LIBSSH2_H)
+#if defined(USE_LIBSSH2)
 #include <libssh2.h>
 #include <libssh2_sftp.h>
-#elif defined(HAVE_LIBSSH_LIBSSH_H)
+#elif defined(USE_LIBSSH)
 #include <libssh/libssh.h>
 #include <libssh/sftp.h>
 #elif defined(USE_WOLFSSH)
@@ -209,11 +211,7 @@ struct ssh_conn {
 #endif /* USE_LIBSSH */
 };
 
-#if defined(USE_LIBSSH)
-
-#define CURL_LIBSSH_VERSION ssh_version(0)
-
-#elif defined(USE_LIBSSH2)
+#if defined(USE_LIBSSH2)
 
 /* Feature detection based on version numbers to better work with
    non-configure platforms */

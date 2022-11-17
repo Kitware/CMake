@@ -32,7 +32,7 @@ bool cmSubdirCommand(std::vector<std::string> const& args,
     std::string srcPath = mf.GetCurrentSourceDirectory() + "/" + i;
     if (cmSystemTools::FileIsDirectory(srcPath)) {
       std::string binPath = mf.GetCurrentBinaryDirectory() + "/" + i;
-      mf.AddSubDirectory(srcPath, binPath, excludeFromAll, false);
+      mf.AddSubDirectory(srcPath, binPath, excludeFromAll, false, false);
     }
     // otherwise it is a full path
     else if (cmSystemTools::FileIsDirectory(i)) {
@@ -40,7 +40,7 @@ bool cmSubdirCommand(std::vector<std::string> const& args,
       // element from the source path and use that
       std::string binPath = mf.GetCurrentBinaryDirectory() + "/" +
         cmSystemTools::GetFilenameName(i);
-      mf.AddSubDirectory(i, binPath, excludeFromAll, false);
+      mf.AddSubDirectory(i, binPath, excludeFromAll, false, false);
     } else {
       status.SetError(cmStrCat("Incorrect SUBDIRS command. Directory: ", i,
                                " does not exist."));

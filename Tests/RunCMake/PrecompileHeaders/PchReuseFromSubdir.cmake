@@ -1,5 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
-project(PchReuseFromSubdir C)
+enable_language(C)
 
 add_library(empty empty.c)
 target_precompile_headers(empty PUBLIC
