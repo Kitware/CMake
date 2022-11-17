@@ -63,6 +63,10 @@ protected:
 
   cmMakefile* GetMakefile() const { return this->Makefile; }
 
+  void BuildFileSetInfoCache(std::string const& config);
+  cmFileSet const* GetFileSetForSource(std::string const& config,
+                                       cmSourceFile const* sf);
+
   std::string LanguageCompilerRule(const std::string& lang,
                                    const std::string& config) const;
   std::string LanguagePreprocessAndScanRule(std::string const& lang,
@@ -223,6 +227,8 @@ private:
     std::vector<cmCustomCommand const*> CustomCommands;
     cmNinjaDeps ExtraFiles;
     std::unique_ptr<MacOSXContentGeneratorType> MacOSXContentGenerator;
+    bool BuiltFileSetCache = false;
+    std::map<std::string, cmFileSet const*> FileSetCache;
   };
 
   std::map<std::string, ByConfig> Configs;

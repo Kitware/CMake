@@ -173,6 +173,64 @@ bool cmNinjaTargetGenerator::NeedDyndep(std::string const& lang,
   return lang == "Fortran" || this->NeedCxxModuleSupport(lang, config);
 }
 
+void cmNinjaTargetGenerator::BuildFileSetInfoCache(std::string const& config)
+{
+  auto& per_config = this->Configs[config];
+
+  if (per_config.BuiltFileSetCache) {
+    return;
+  }
+
+  auto const* tgt = this->GeneratorTarget->Target;
+
+  for (auto const& name : tgt->GetAllFileSetNames()) {
+    auto const* file_set = tgt->GetFileSet(name);
+    if (!file_set) {
+      this->GetMakefile()->IssueMessage(
+        MessageType::INTERNAL_ERROR,
+        cmStrCat("Target \"", tgt->GetName(),
+                 "\" is tracked to have file set \"", name,
+                 "\", but it was not found."));
+      continue;
+    }
+
+    auto fileEntries = file_set->CompileFileEntries();
+    auto directoryEntries = file_set->CompileDirectoryEntries();
+    auto directories = file_set->EvaluateDirectoryEntries(
+      directoryEntries, this->LocalGenerator, config, this->GeneratorTarget);
+
+    std::map<std::string, std::vector<std::string>> files;
+    for (auto const& entry : fileEntries) {
+      file_set->EvaluateFileEntry(directories, files, entry,
+                                  this->LocalGenerator, config,
+                                  this->GeneratorTarget);
+    }
+
+    for (auto const& it : files) {
+      for (auto const& filename : it.second) {
+        per_config.FileSetCache[filename] = file_set;
+      }
+    }
+  }
+
+  per_config.BuiltFileSetCache = true;
+}
+
+cmFileSet const* cmNinjaTargetGenerator::GetFileSetForSource(
+  std::string const& config, cmSourceFile const* sf)
+{
+  this->BuildFileSetInfoCache(config);
+
+  auto const& path = sf->GetFullPath();
+  auto const& per_config = this->Configs[config];
+
+  auto const fsit = per_config.FileSetCache.find(path);
+  if (fsit == per_config.FileSetCache.end()) {
+    return nullptr;
+  }
+  return fsit->second;
+}
+
 std::string cmNinjaTargetGenerator::OrderDependsTargetForTarget(
   const std::string& config)
 {
@@ -256,54 +314,17 @@ std::string cmNinjaTargetGenerator::ComputeFlagsForObject(
       flags, genexInterpreter.Evaluate(pchOptions, COMPILE_OPTIONS));
   }
 
-  auto const& path = source->GetFullPath();
-  auto const* tgt = this->GeneratorTarget->Target;
-
-  std::string file_set_type;
-
-  for (auto const& name : tgt->GetAllFileSetNames()) {
-    auto const* file_set = tgt->GetFileSet(name);
-    if (!file_set) {
+  auto const* fs = this->GetFileSetForSource(config, source);
+  if (fs &&
+      (fs->GetType() == "CXX_MODULES"_s ||
+       fs->GetType() == "CXX_MODULE_HEADER_UNITS"_s)) {
+    if (source->GetLanguage() != "CXX"_s) {
       this->GetMakefile()->IssueMessage(
-        MessageType::INTERNAL_ERROR,
-        cmStrCat("Target \"", tgt->GetName(),
-                 "\" is tracked to have file set \"", name,
-                 "\", but it was not found."));
-      continue;
-    }
-
-    auto fileEntries = file_set->CompileFileEntries();
-    auto directoryEntries = file_set->CompileDirectoryEntries();
-    auto directories = file_set->EvaluateDirectoryEntries(
-      directoryEntries, this->LocalGenerator, config, this->GeneratorTarget);
-
-    std::map<std::string, std::vector<std::string>> files;
-    for (auto const& entry : fileEntries) {
-      file_set->EvaluateFileEntry(directories, files, entry,
-                                  this->LocalGenerator, config,
-                                  this->GeneratorTarget);
-    }
-
-    for (auto const& it : files) {
-      for (auto const& filename : it.second) {
-        if (filename == path) {
-          file_set_type = file_set->GetType();
-          break;
-        }
-      }
-    }
-
-    if (file_set_type == "CXX_MODULES"_s ||
-        file_set_type == "CXX_MODULE_HEADER_UNITS"_s) {
-      if (source->GetLanguage() != "CXX"_s) {
-        this->GetMakefile()->IssueMessage(
-          MessageType::FATAL_ERROR,
-          cmStrCat(
-            "Target \"", tgt->GetName(), "\" contains the source\n  ", path,
-            "\nin a file set of type \"", file_set_type,
-            R"(" but the source is not classified as a "CXX" source.)"));
-        continue;
-      }
+        MessageType::FATAL_ERROR,
+        cmStrCat("Target \"", this->GeneratorTarget->Target->GetName(),
+                 "\" contains the source\n  ", source->GetFullPath(),
+                 "\nin a file set of type \"", fs->GetType(),
+                 R"(" but the source is not classified as a "CXX" source.)"));
     }
   }
 
