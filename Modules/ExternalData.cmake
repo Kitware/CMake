@@ -945,7 +945,7 @@ function(_ExternalData_link_or_copy src dst)
     file(CREATE_LINK "${tgt}" "${tmp}" RESULT result COPY_ON_ERROR SYMBOLIC)
   else()
     # Create a copy.
-    file(COPY_FILE "${src}" "${tmp}" RESULT result)
+    file(COPY_FILE "${src}" "${tmp}" RESULT result INPUT_MAY_BE_RECENT)
   endif()
   if(result)
     file(REMOVE "${tmp}")
