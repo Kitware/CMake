@@ -1,8 +1,5 @@
-if(NOT "${CMAKE_CURRENT_SOURCE_DIR}" MATCHES "^/")
-  set(slash /)
-endif()
-file(DOWNLOAD
-  "file://${slash}${CMAKE_CURRENT_SOURCE_DIR}/no-save-md5.txt"
-  EXPECTED_HASH MD5=55555555555555555555555555555555
-  STATUS status
-  )
+include(common.cmake)
+
+# Test downloading without saving to a file.
+set(file "")
+file_download(EXPECTED_HASH MD5=55555555555555555555555555555555)
