@@ -12,6 +12,43 @@ if(DEFINED CMake_VERSION_RC)
   string(APPEND CMake_VERSION "-rc${CMake_VERSION_RC}")
 endif()
 
+# Append Microsoft version suffix if enabled.
+# Microsoft version looks like 3.25.0-msvc1, the -msvc1 indicates the revision.
+# The corresponding git tag is v3.25.0-msvc1, this would be created in the pipeline.
+# To determine the revision, first check if tags like v3.25.0-msvc* exist or not
+#   - none: we will start with 1.
+#   - 1 or more exist: the revision would be the max(revisions) + 1.
+if(CMake_VERSION_MICROSOFT_SCHEME)
+    find_package(Git QUIET)
+    if(GIT_FOUND)
+      macro(_git)
+        execute_process(
+          COMMAND ${GIT_EXECUTABLE} ${ARGN}
+          WORKING_DIRECTORY ${CMake_SOURCE_DIR}
+          RESULT_VARIABLE _git_res
+          OUTPUT_VARIABLE _git_out OUTPUT_STRIP_TRAILING_WHITESPACE
+          ERROR_VARIABLE _git_err ERROR_STRIP_TRAILING_WHITESPACE
+          )
+      endmacro()
+    endif()
+    if(COMMAND _git)
+      # Get the Microsoft tags if any, and sort the tags so that the most recent tag listed first.
+      _git(tag --list "v${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}.${CMake_VERSION_PATCH}-msvc*" --sort -v:refname)
+      set(microsoft_tags "${_git_out}")
+    endif()
+
+    # Revision starts with 1 by default.
+    set(MICROSOFT_REVISION "1")
+
+    if(microsoft_tags MATCHES "^v${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}.${CMake_VERSION_PATCH}-msvc([0-9]*)")
+      # Increase revision if previous ones exist.
+      math(EXPR MICROSOFT_REVISION "${CMAKE_MATCH_1} + 1")
+    endif()
+
+    # Append the suffix.
+    string(APPEND CMake_VERSION "-msvc${MICROSOFT_REVISION}")
+endif()
+
 # Releases define a small patch level.
 if("${CMake_VERSION_PATCH}" VERSION_LESS 20000000)
   set(CMake_VERSION_IS_RELEASE 1)
