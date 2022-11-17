@@ -10,6 +10,7 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cm/optional>
 #include <cmext/algorithm>
 
 #include <windows.h>
@@ -592,9 +593,8 @@ public:
   {
     cmCustomCommandGenerator ccg(cc, this->Config, this->LG);
     if (this->First) {
-      const char* comment = ccg.GetComment();
-      if (comment && *comment) {
-        this->Stream << "\nDescription=\"" << this->LG->EscapeForXML(comment)
+      if (cm::optional<std::string> comment = ccg.GetComment()) {
+        this->Stream << "\nDescription=\"" << this->LG->EscapeForXML(*comment)
                      << "\"";
       }
       this->Stream << "\nCommandLine=\"";

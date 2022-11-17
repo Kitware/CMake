@@ -463,9 +463,12 @@ std::string cmCustomCommandGenerator::GetInternalDepfile() const
   return this->ComputeInternalDepfile(this->OutputConfig, depfile);
 }
 
-const char* cmCustomCommandGenerator::GetComment() const
+cm::optional<std::string> cmCustomCommandGenerator::GetComment() const
 {
-  return this->CC->GetComment();
+  if (const char* comment = this->CC->GetComment()) {
+    return comment;
+  }
+  return cm::nullopt;
 }
 
 std::string cmCustomCommandGenerator::GetWorkingDirectory() const

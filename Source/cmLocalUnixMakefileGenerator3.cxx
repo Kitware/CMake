@@ -10,6 +10,7 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cm/optional>
 #include <cm/string_view>
 #include <cm/vector>
 #include <cmext/algorithm>
@@ -945,9 +946,8 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
   // post-build command comments.  Custom build step commands have
   // their comments generated elsewhere.
   if (echo_comment) {
-    const char* comment = ccg.GetComment();
-    if (comment && *comment) {
-      this->AppendEcho(commands, comment,
+    if (cm::optional<std::string> comment = ccg.GetComment()) {
+      this->AppendEcho(commands, *comment,
                        cmLocalUnixMakefileGenerator3::EchoGenerate);
     }
   }

@@ -13,6 +13,7 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cm/optional>
 #include <cmext/algorithm>
 #include <cmext/string_view>
 
@@ -2280,11 +2281,11 @@ void cmGlobalXCodeGenerator::CreateCustomRulesMakefile(
       }
       makefileStream << "\n";
 
-      if (const char* comment = ccg.GetComment()) {
+      if (cm::optional<std::string> comment = ccg.GetComment()) {
         std::string echo_cmd =
           cmStrCat("echo ",
                    (this->CurrentLocalGenerator->EscapeForShell(
-                     comment, ccg.GetCC().GetEscapeAllowMakeVars())));
+                     *comment, ccg.GetCC().GetEscapeAllowMakeVars())));
         makefileStream << "\t" << echo_cmd << "\n";
       }
 
