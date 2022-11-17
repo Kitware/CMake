@@ -3293,6 +3293,8 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
     this->GeneratorTarget->GetLanguages(languages, configName);
     if (languages.count("C")) {
       std::string flagsC;
+      this->LocalGenerator->AddLanguageFlags(
+        flagsC, this->GeneratorTarget, cmBuildStep::Compile, "C", configName);
       this->LocalGenerator->AddCompileOptions(flagsC, this->GeneratorTarget,
                                               "C", configName);
       Options optC(this->LocalGenerator, Options::Compiler,
