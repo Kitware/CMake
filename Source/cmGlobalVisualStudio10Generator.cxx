@@ -1155,8 +1155,6 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
       } else {
         makeCommand.Add(cmStrCat("/m:", std::to_string(jobs)));
       }
-      // Having msbuild.exe and cl.exe using multiple jobs is discouraged
-      makeCommand.Add("/p:CL_MPCount=1");
     }
 
     // Respect the verbosity: 'n' normal will show build commands
