@@ -32,16 +32,6 @@ AddCMakeTest(ProcessorCount "-DKWSYS_TEST_EXE=$<TARGET_FILE:cmsysTestsCxx>")
 AddCMakeTest(PushCheckState "")
 AddCMakeTest(While "")
 
-AddCMakeTest(FileDownload "")
-set_tests_properties(CMake.FileDownload PROPERTIES
-  PASS_REGULAR_EXPRESSION "file already exists with expected MD5 sum"
-  FAIL_REGULAR_EXPRESSION "Unexpected status|incorrectly interpreted"
-  )
-AddCMakeTest(FileDownloadBadHash "")
-set_property(TEST CMake.FileDownloadBadHash PROPERTY
-  WILL_FAIL TRUE
-  )
-
 AddCMakeTest(FileUpload "")
 
 set(EndStuff_PreArgs
