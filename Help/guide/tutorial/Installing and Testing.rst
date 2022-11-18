@@ -1,8 +1,6 @@
 Step 5: Installing and Testing
 ==============================
 
-.. _`Tutorial Testing Support`:
-
 Exercise 1 - Install Rules
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -153,6 +151,8 @@ are similar. To the end of the top-level ``CMakeLists.txt`` we add:
 
 That is all that is needed to create a basic local
 install of the tutorial.
+
+.. _`Tutorial Testing Support`:
 
 Exercise 2 - Testing Support
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
