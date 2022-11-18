@@ -1112,7 +1112,9 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
           this->GetObjectFilePath(source, config));
       }
     }
-    linkBuild.Outputs.push_back(vars["SWIFT_MODULE"]);
+    if (targetType != cmStateEnums::EXECUTABLE) {
+      linkBuild.Outputs.push_back(vars["SWIFT_MODULE"]);
+    }
   } else {
     linkBuild.ExplicitDeps = this->GetObjects(config);
   }
