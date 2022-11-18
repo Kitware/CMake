@@ -750,7 +750,8 @@ The options are:
 
   file(COPY_FILE <oldname> <newname>
        [RESULT <result>]
-       [ONLY_IF_DIFFERENT])
+       [ONLY_IF_DIFFERENT]
+       [INPUT_MAY_BE_RECENT])
 
 .. versionadded:: 3.21
 
@@ -768,6 +769,14 @@ The options are:
   If the ``<newname>`` path already exists, do not replace it if the file's
   contents are already the same as ``<oldname>`` (this avoids updating
   ``<newname>``'s timestamp).
+
+``INPUT_MAY_BE_RECENT``
+  .. versionadded:: 3.26
+
+  Tell CMake that the input file may have been recently created.  This is
+  meaningful only on Windows, where files may be inaccessible for a short
+  time after they are created.  With this option, if permission is denied,
+  CMake will retry reading the input a few times.
 
 This sub-command has some similarities to :command:`configure_file` with the
 ``COPYONLY`` option.  An important difference is that :command:`configure_file`

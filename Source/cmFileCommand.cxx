@@ -1408,12 +1408,14 @@ bool HandleCopyFile(std::vector<std::string> const& args,
 
   struct Arguments
   {
+    bool InputMayBeRecent = false;
     bool OnlyIfDifferent = false;
     std::string Result;
   };
 
   static auto const parser =
     cmArgumentParser<Arguments>{}
+      .Bind("INPUT_MAY_BE_RECENT"_s, &Arguments::InputMayBeRecent)
       .Bind("ONLY_IF_DIFFERENT"_s, &Arguments::OnlyIfDifferent)
       .Bind("RESULT"_s, &Arguments::Result);
 
@@ -1456,9 +1458,13 @@ bool HandleCopyFile(std::vector<std::string> const& args,
   } else {
     when = cmSystemTools::CopyWhen::Always;
   }
+  cmSystemTools::CopyInputRecent const inputRecent = arguments.InputMayBeRecent
+    ? cmSystemTools::CopyInputRecent::Yes
+    : cmSystemTools::CopyInputRecent::No;
 
   std::string err;
-  if (cmSystemTools::CopySingleFile(oldname, newname, when, &err) ==
+  if (cmSystemTools::CopySingleFile(oldname, newname, when, inputRecent,
+                                    &err) ==
       cmSystemTools::CopyResult::Success) {
     if (!arguments.Result.empty()) {
       status.GetMakefile().AddDefinition(arguments.Result, "0");

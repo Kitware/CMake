@@ -1111,16 +1111,9 @@ bool cmMoveFile(std::wstring const& oldname, std::wstring const& newname,
 }
 #endif
 
-bool cmSystemTools::CopySingleFile(const std::string& oldname,
-                                   const std::string& newname)
-{
-  return cmSystemTools::CopySingleFile(oldname, newname, CopyWhen::Always) ==
-    CopyResult::Success;
-}
-
 cmSystemTools::CopyResult cmSystemTools::CopySingleFile(
   std::string const& oldname, std::string const& newname, CopyWhen when,
-  std::string* err)
+  CopyInputRecent inputRecent, std::string* err)
 {
   switch (when) {
     case CopyWhen::Always:
@@ -1144,7 +1137,24 @@ cmSystemTools::CopyResult cmSystemTools::CopySingleFile(
   status = cmsys::SystemTools::CloneFileContent(oldname, newname);
   if (!status) {
     // if cloning did not succeed, fall back to blockwise copy
+#ifdef _WIN32
+    if (inputRecent == CopyInputRecent::Yes) {
+      // Windows sometimes locks a file immediately after creation.
+      // Retry a few times.
+      WindowsFileRetry retry = cmSystemTools::GetWindowsFileRetry();
+      while ((status =
+                cmsys::SystemTools::CopyFileContentBlockwise(oldname, newname),
+              status.Path == cmsys::SystemTools::CopyStatus::SourcePath &&
+                status.GetPOSIX() == EACCES && --retry.Count)) {
+        cmSystemTools::Delay(retry.Delay);
+      }
+    } else {
+      status = cmsys::SystemTools::CopyFileContentBlockwise(oldname, newname);
+    }
+#else
+    static_cast<void>(inputRecent);
     status = cmsys::SystemTools::CopyFileContentBlockwise(oldname, newname);
+#endif
   }
   if (!status) {
     if (err) {
