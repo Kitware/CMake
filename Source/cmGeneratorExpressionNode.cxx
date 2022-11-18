@@ -114,6 +114,8 @@ static const struct OneNode buildInterfaceNode;
 
 static const struct ZeroNode installInterfaceNode;
 
+static const struct OneNode buildLocalInterfaceNode;
+
 struct BooleanOpNode : public cmGeneratorExpressionNode
 {
   BooleanOpNode(const char* op_, const char* successVal_,
@@ -3323,6 +3325,7 @@ const cmGeneratorExpressionNode* cmGeneratorExpressionNode::GetNode(
     { "GENEX_EVAL", &genexEvalNode },
     { "BUILD_INTERFACE", &buildInterfaceNode },
     { "INSTALL_INTERFACE", &installInterfaceNode },
+    { "BUILD_LOCAL_INTERFACE", &buildLocalInterfaceNode },
     { "INSTALL_PREFIX", &installPrefixNode },
     { "JOIN", &joinNode },
     { "LINK_ONLY", &linkOnlyNode },
