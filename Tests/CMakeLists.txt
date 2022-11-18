@@ -1538,8 +1538,11 @@ if(BUILD_TESTING)
     add_subdirectory(GoogleTest)
   endif()
 
-  if(CMake_TEST_FindPython OR CMake_TEST_FindPython_NumPy
+  if(CMake_TEST_FindPython OR CMake_TEST_FindPython_SABIModule OR CMake_TEST_FindPython_NumPy
       OR CMake_TEST_FindPython_Conda OR CMake_TEST_FindPython_IronPython OR CMake_TEST_FindPython_PyPy)
+    if (CMake_TEST_FindPython AND CMAKE_SYSTEM_NAME MATCHES "Linux|Darwin")
+      set(CMake_TEST_FindPython_SABIModule TRUE)
+    endif()
     add_subdirectory(FindPython)
   endif()
 

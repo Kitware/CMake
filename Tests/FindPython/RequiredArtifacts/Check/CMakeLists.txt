@@ -16,6 +16,10 @@ if (CHECK_LIBRARY OR CHECK_INCLUDE)
     set (required_include "${Python3_INCLUDE_DIR}")
   endif()
 endif()
+if (CHECK_SABI_LIBRARY)
+  list (APPEND components Development.SABIModule)
+  set (required_sabi_library "${Python3_SABI_LIBRARY}")
+endif()
 
 find_package (Python3 COMPONENTS ${components})
 
@@ -38,4 +42,8 @@ endif()
 
 if (CHECK_INCLUDE AND NOT Python3_INCLUDE_DIRS STREQUAL required_include)
   message (FATAL_ERROR "Failed to use input variable Python3_INCLUDE_DIR")
+endif()
+
+if (CHECK_SABI_LIBRARY AND NOT Python3_SABI_LIBRARY_RELEASE STREQUAL required_sabi_library)
+  message (FATAL_ERROR "Failed to use input variable Python3_SABI_LIBRARY")
 endif()

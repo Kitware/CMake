@@ -377,6 +377,7 @@ if(CMake_TEST_FindPython)
     --build-options ${build_options} "-Dbuild_generator_args=${build_generator_args}"
     "-DCMake_SOURCE_DIR=${CMake_SOURCE_DIR}"
     "-DCMake_BINARY_DIR=${CMake_BINARY_DIR}"
+    "-DCMake_TEST_FindPython_SABIModule=${CMake_TEST_FindPython_SABIModule}"
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
 
@@ -476,6 +477,35 @@ if(CMake_TEST_FindPython)
       --build-options ${build_options}
     )
   endif()
+endif()
+
+if(CMake_TEST_FindPython_SABIModule)
+  add_test(NAME FindPython.Python2.Development.SABIModule COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/Python2SABIModule"
+    "${CMake_BINARY_DIR}/Tests/FindPython/Python2SABIModule"
+    ${build_generator_args}
+    --build-project TestPython2SABIModule
+    --build-options ${build_options}
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+    set_tests_properties(FindPython.Python2.Development.SABIModule PROPERTIES
+      PASS_REGULAR_EXPRESSION "Could NOT find Python2 \\(missing: .*Development\\.SABIModule")
+
+  # Use exclusively Release configuration because Debug is, on Windows with MSVC,
+  # unusable with SABI: Python force link with debug version of full versioned library rather than
+  # the stable ABI one.
+  add_test(NAME FindPython.Python3.Development.SABIModule COMMAND
+    ${CMAKE_CTEST_COMMAND} -C Release
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/Python3SABIModule"
+    "${CMake_BINARY_DIR}/Tests/FindPython/Python3SABIModule"
+    ${build_generator_args}
+    --build-project TestPython3SABIModule
+    --build-options ${build_options}
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C Release
+    )
 endif()
 
 if(CMake_TEST_FindPython_NumPy)

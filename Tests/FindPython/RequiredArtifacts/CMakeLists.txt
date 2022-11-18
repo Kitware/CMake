@@ -8,7 +8,12 @@ find_package(Python2 REQUIRED COMPONENTS Interpreter Development)
 if (NOT Python2_FOUND)
   message (FATAL_ERROR "Failed to find Python 2")
 endif()
-find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
+
+set(components Interpreter Development)
+if (CMake_TEST_FindPython_SABIModule AND WIN32)
+  list (APPEND components Development.SABIModule)
+endif()
+find_package(Python3 REQUIRED COMPONENTS ${components})
 if (NOT Python3_FOUND)
   message (FATAL_ERROR "Failed to find Python 3")
 endif()
@@ -108,3 +113,28 @@ add_test(NAME FindPython.RequiredArtifacts.Library-Include.INVALID COMMAND
                   "-DPython3_INCLUDE_DIR=${Python2_INCLUDE_DIRS}"
   --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
   )
+
+if (CMake_TEST_FindPython_SABIModule AND WIN32)
+  add_test(NAME FindPython.RequiredArtifacts.SABILibrary.VALID COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/RequiredArtifacts/Check"
+    "${CMake_BINARY_DIR}/Tests/FindPython/RequiredArtifacts/SABILibrary.VALID"
+    ${build_generator_args}
+    --build-project TestRequiredArtifacts.Check
+    --build-options -DPYTHON_IS_FOUND=TRUE -DCHECK_SABI_LIBRARY=ON
+    "-DPython3_SABI_LIBRARY=${Python3_SABI_LIBRARY_RELEASE}"
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+  )
+  add_test(NAME FindPython.RequiredArtifacts.SABILibrary.INVALID COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/RequiredArtifacts/Check"
+    "${CMake_BINARY_DIR}/Tests/FindPython/RequiredArtifacts/SABILibrary.INVALID"
+    ${build_generator_args}
+    --build-project TestRequiredArtifacts.Check
+    --build-options -DPYTHON_IS_FOUND=FALSE -DCHECK_SABI_LIBRARY=ON
+    "-DPython3_SABI_LIBRARY=${Python2_LIBRARY_RELEASE}"
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+  )
+endif()
