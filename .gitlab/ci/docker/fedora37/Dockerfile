@@ -1,22 +1,22 @@
-FROM fedora:36 as rvm-build
+FROM fedora:37 as rvm-build
 MAINTAINER Ben Boeckel <ben.boeckel@kitware.com>
 
 COPY install_rvm.sh /root/install_rvm.sh
 RUN sh /root/install_rvm.sh
 
-FROM fedora:36 AS clang-tidy-headers
+FROM fedora:37 AS clang-tidy-headers
 MAINTAINER Kyle Edwards <kyle.edwards@kitware.com>
 
 COPY install_clang_tidy_headers.sh /root/install_clang_tidy_headers.sh
 RUN sh /root/install_clang_tidy_headers.sh
 
-FROM fedora:36 AS iwyu
+FROM fedora:37 AS iwyu
 MAINTAINER Kyle Edwards <kyle.edwards@kitware.com>
 
 COPY install_iwyu.sh /root/install_iwyu.sh
 RUN sh /root/install_iwyu.sh
 
-FROM fedora:36
+FROM fedora:37
 MAINTAINER Ben Boeckel <ben.boeckel@kitware.com>
 
 COPY install_deps.sh /root/install_deps.sh
