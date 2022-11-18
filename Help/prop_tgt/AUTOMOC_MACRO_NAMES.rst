@@ -10,7 +10,7 @@ This property is only used if the :prop_tgt:`AUTOMOC` property is ``ON``
 for this target.
 
 When running :prop_tgt:`AUTOMOC`, CMake searches for the strings listed in
-:prop_tgt:`AUTOMOC_MACRO_NAMES` in C++ source and header files.
+``AUTOMOC_MACRO_NAMES`` in C++ source and header files.
 If any of the strings is found
 
 - as the first non space string on a new line or
@@ -18,7 +18,7 @@ If any of the strings is found
 
 then the file will be processed by ``moc``.
 
-By default :prop_tgt:`AUTOMOC_MACRO_NAMES` is initialized from
+By default ``AUTOMOC_MACRO_NAMES`` is initialized from
 :variable:`CMAKE_AUTOMOC_MACRO_NAMES`.
 
 See the :manual:`cmake-qt(7)` manual for more information on using CMake

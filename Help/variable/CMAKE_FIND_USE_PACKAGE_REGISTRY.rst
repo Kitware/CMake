@@ -18,7 +18,7 @@ This variable takes precedence over
 
 In some cases, for example to locate only system wide installations, it
 is not desirable to use the :ref:`User Package Registry` when searching
-for packages.  If the :variable:`CMAKE_FIND_USE_PACKAGE_REGISTRY`
+for packages.  If the ``CMAKE_FIND_USE_PACKAGE_REGISTRY``
 variable is ``FALSE``, all the :command:`find_package` commands will skip
 the :ref:`User Package Registry` as if they were called with the
 ``NO_CMAKE_PACKAGE_REGISTRY`` argument.

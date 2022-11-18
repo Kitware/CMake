@@ -13,7 +13,7 @@ When unset or empty the directory ``<dir>/<target-name>_autogen`` is used where
 ``<dir>`` is :variable:`CMAKE_CURRENT_BINARY_DIR` and ``<target-name>``
 is :prop_tgt:`NAME`.
 
-By default :prop_tgt:`AUTOGEN_BUILD_DIR` is unset.
+By default ``AUTOGEN_BUILD_DIR`` is unset.
 
 See the :manual:`cmake-qt(7)` manual for more information on using CMake
 with Qt.

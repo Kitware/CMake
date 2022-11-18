@@ -83,7 +83,7 @@ Object Libraries
 
 Creates an :ref:`Object Library <Object Libraries>`.  An object library
 compiles source files but does not archive or link their object files into a
-library.  Instead other targets created by :command:`add_library` or
+library.  Instead other targets created by ``add_library`` or
 :command:`add_executable` may reference the objects using an expression of the
 form :genex:`$\<TARGET_OBJECTS:objlib\> <TARGET_OBJECTS>` as a source, where
 ``objlib`` is the object library name.  For example:

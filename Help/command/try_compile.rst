@@ -271,7 +271,7 @@ Other Behavior Settings
   If :policy:`CMP0083` is set to ``NEW``, then in order to obtain correct
   behavior at link time, the ``check_pie_supported()`` command from the
   :module:`CheckPIESupported` module must be called before using the
-  :command:`try_compile` command.
+  ``try_compile`` command.
 
 The current settings of :policy:`CMP0065` and :policy:`CMP0083` are propagated
 through to the generated test project.

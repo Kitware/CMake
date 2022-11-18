@@ -3,7 +3,7 @@ AUTOUIC
 
 Should the target be processed with auto-uic (for Qt projects).
 
-:prop_tgt:`AUTOUIC` is a boolean specifying whether CMake will handle
+``AUTOUIC`` is a boolean specifying whether CMake will handle
 the Qt ``uic`` code generator automatically, i.e. without having to use
 commands like :module:`QT4_WRAP_UI() <FindQt4>`, ``QT5_WRAP_UI()``, etc.
 Currently, Qt versions 4 to 6 are supported.
@@ -59,22 +59,22 @@ can be used to specify options to be applied only to a specific
 ``<base_name>.ui`` file.
 
 :prop_sf:`SKIP_AUTOUIC`:
-Source files can be excluded from :prop_tgt:`AUTOUIC` processing by setting
+Source files can be excluded from ``AUTOUIC`` processing by setting
 this source file property.
 
 :prop_sf:`SKIP_AUTOGEN`:
 Source files can be excluded from :prop_tgt:`AUTOMOC`,
-:prop_tgt:`AUTOUIC` and :prop_tgt:`AUTORCC` processing by
+``AUTOUIC`` and :prop_tgt:`AUTORCC` processing by
 setting this source file property.
 
 :prop_gbl:`AUTOGEN_TARGETS_FOLDER`:
 This global property can be used to group :prop_tgt:`AUTOMOC`,
-:prop_tgt:`AUTOUIC` and :prop_tgt:`AUTORCC` targets together in an IDE,
+``AUTOUIC`` and :prop_tgt:`AUTORCC` targets together in an IDE,
 e.g.  in MSVS.
 
 :variable:`CMAKE_GLOBAL_AUTOGEN_TARGET`:
 A global ``autogen`` target, that depends on all :prop_tgt:`AUTOMOC` or
-:prop_tgt:`AUTOUIC` generated ``<ORIGIN>_autogen`` targets in the project,
+``AUTOUIC`` generated ``<ORIGIN>_autogen`` targets in the project,
 will be generated when this variable is ``ON``.
 
 :prop_tgt:`AUTOGEN_PARALLEL`:
