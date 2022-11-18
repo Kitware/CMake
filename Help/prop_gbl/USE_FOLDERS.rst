@@ -11,7 +11,7 @@ folders.
 
 CMake generators that are capable of organizing into a hierarchy of folders
 use the values of the :prop_tgt:`FOLDER` target property to name those
-folders. (i.e.: Visual Studio / XCode)
+folders. (i.e.: ``Visual Studio`` or ``XCode``)
 
 IDE's can also take advantage of this property to organize CMake targets.
 Regardless of generator support.

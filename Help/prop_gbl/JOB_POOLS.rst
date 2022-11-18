@@ -6,7 +6,7 @@ Ninja only: List of available pools.
 A pool is a named integer property and defines the maximum number
 of concurrent jobs which can be started by a rule assigned to the pool.
 The :prop_gbl:`JOB_POOLS` property is a semicolon-separated list of
-pairs using the syntax NAME=integer (without a space after the equality sign).
+pairs using the syntax ``NAME=integer`` (without a space after the equality sign).
 
 For instance:
 
