@@ -15,7 +15,6 @@
 
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
-#include "cmDocumentationEntry.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmGhsMultiGpj.h"
@@ -58,11 +57,12 @@ cmGlobalGhsMultiGenerator::CreateLocalGenerator(cmMakefile* mf)
     cm::make_unique<cmLocalGhsMultiGenerator>(this, mf));
 }
 
-void cmGlobalGhsMultiGenerator::GetDocumentation(cmDocumentationEntry& entry)
+cmDocumentationEntry cmGlobalGhsMultiGenerator::GetDocumentation()
 {
-  entry.Name = GetActualName();
-  entry.Brief =
-    "Generates Green Hills MULTI files (experimental, work-in-progress).";
+  return {
+    GetActualName(),
+    "Generates Green Hills MULTI files (experimental, work-in-progress)."
+  };
 }
 
 void cmGlobalGhsMultiGenerator::ComputeTargetObjectDirectory(

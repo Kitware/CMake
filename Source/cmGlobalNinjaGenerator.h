@@ -35,7 +35,6 @@ class cmMakefile;
 class cmOutputConverter;
 class cmStateDirectory;
 class cmake;
-struct cmDocumentationEntry;
 
 /**
  * \class cmGlobalNinjaGenerator
@@ -193,7 +192,7 @@ public:
   /** Get encoding used by generator for ninja files */
   codecvt::Encoding GetMakefileEncoding() const override;
 
-  static void GetDocumentation(cmDocumentationEntry& entry);
+  static cmDocumentationEntry GetDocumentation();
 
   void EnableLanguage(std::vector<std::string> const& languages,
                       cmMakefile* mf, bool optional) override;
@@ -656,7 +655,7 @@ public:
       new cmGlobalGeneratorSimpleFactory<cmGlobalNinjaMultiGenerator>());
   }
 
-  static void GetDocumentation(cmDocumentationEntry& entry);
+  static cmDocumentationEntry GetDocumentation();
 
   std::string GetName() const override
   {

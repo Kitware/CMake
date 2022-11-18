@@ -24,7 +24,7 @@
 #include "cmBuildOptions.h"
 #include "cmCommandLineArgument.h"
 #include "cmConsoleBuf.h"
-#include "cmDocumentationEntry.h" // IWYU pragma: keep
+#include "cmDocumentationEntry.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageMetadata.h"
@@ -46,30 +46,28 @@
 
 namespace {
 #ifndef CMAKE_BOOTSTRAP
-const char* cmDocumentationName[][2] = {
-  { nullptr, "  cmake - Cross-Platform Makefile Generator." },
-  { nullptr, nullptr }
+const cmDocumentationEntry cmDocumentationName = {
+  {},
+  "  cmake - Cross-Platform Makefile Generator."
 };
 
-const char* cmDocumentationUsage[][2] = {
-  { nullptr,
+const cmDocumentationEntry cmDocumentationUsage[2] = {
+  { {},
     "  cmake [options] <path-to-source>\n"
     "  cmake [options] <path-to-existing-build>\n"
     "  cmake [options] -S <path-to-source> -B <path-to-build>" },
-  { nullptr,
+  { {},
     "Specify a source directory to (re-)generate a build system for "
     "it in the current working directory.  Specify an existing build "
-    "directory to re-generate its build system." },
-  { nullptr, nullptr }
+    "directory to re-generate its build system." }
 };
 
-const char* cmDocumentationUsageNote[][2] = {
-  { nullptr, "Run 'cmake --help' for more information." },
-  { nullptr, nullptr }
+const cmDocumentationEntry cmDocumentationUsageNote = {
+  {},
+  "Run 'cmake --help' for more information."
 };
 
-const char* cmDocumentationOptions[][2] = {
-  CMAKE_STANDARD_OPTIONS_TABLE,
+const cmDocumentationEntry cmDocumentationOptions[31] = {
   { "--preset <preset>,--preset=<preset>", "Specify a configure preset." },
   { "--list-presets[=<type>]", "List available presets." },
   { "-E", "CMake command mode." },
@@ -113,15 +111,12 @@ const char* cmDocumentationOptions[][2] = {
   { "--compile-no-warning-as-error",
     "Ignore COMPILE_WARNING_AS_ERROR property and "
     "CMAKE_COMPILE_WARNING_AS_ERROR variable." },
-#  if !defined(CMAKE_BOOTSTRAP)
   { "--profiling-format=<fmt>",
     "Output data for profiling CMake scripts. Supported formats: "
     "google-trace" },
   { "--profiling-output=<file>",
     "Select an output path for the profiling data enabled through "
-    "--profiling-format." },
-#  endif
-  { nullptr, nullptr }
+    "--profiling-format." }
 };
 
 #endif
@@ -228,8 +223,9 @@ int do_cmake(int ac, char const* const* av)
     }
     doc.AppendSection("Generators", generators);
     doc.PrependSection("Options", cmDocumentationOptions);
+    doc.PrependSection("Options", cmake::CMAKE_STANDARD_OPTIONS_TABLE);
 
-    return doc.PrintRequestedDocumentation(std::cout) ? 0 : 1;
+    return !doc.PrintRequestedDocumentation(std::cout);
   }
 #else
   if (ac == 1) {

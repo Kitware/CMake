@@ -8,7 +8,6 @@
 
 #include "cmsys/RegularExpression.hxx"
 
-#include "cmDocumentationEntry.h"
 #include "cmDuration.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
@@ -80,11 +79,10 @@ void cmGlobalNMakeMakefileGenerator::CheckNMakeFeatures()
     cmSystemTools::OP_LESS, this->NMakeVersion, "9");
 }
 
-void cmGlobalNMakeMakefileGenerator::GetDocumentation(
-  cmDocumentationEntry& entry)
+cmDocumentationEntry cmGlobalNMakeMakefileGenerator::GetDocumentation()
 {
-  entry.Name = cmGlobalNMakeMakefileGenerator::GetActualName();
-  entry.Brief = "Generates NMake makefiles.";
+  return { cmGlobalNMakeMakefileGenerator::GetActualName(),
+           "Generates NMake makefiles." };
 }
 
 void cmGlobalNMakeMakefileGenerator::PrintCompilerAdvice(
@@ -128,12 +126,8 @@ void cmGlobalNMakeMakefileGenerator::PrintBuildCommandAdvice(std::ostream& os,
   if (jobs != cmake::NO_BUILD_PARALLEL_LEVEL) {
     // nmake does not support parallel build level
     // see https://msdn.microsoft.com/en-us/library/afyyse50.aspx
-
-    /* clang-format off */
-    os <<
-      "Warning: NMake does not support parallel builds. "
-      "Ignoring parallel build command line option.\n";
-    /* clang-format on */
+    os << "Warning: NMake does not support parallel builds. "
+          "Ignoring parallel build command line option.\n";
   }
 
   this->cmGlobalUnixMakefileGenerator3::PrintBuildCommandAdvice(

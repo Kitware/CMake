@@ -13,7 +13,6 @@
 
 class cmMakefile;
 class cmake;
-struct cmDocumentationEntry;
 
 /** \class cmGlobalJOMMakefileGenerator
  * \brief Write a JOM makefiles.
@@ -39,7 +38,7 @@ public:
   static std::string GetActualName() { return "NMake Makefiles JOM"; }
 
   /** Get the documentation entry for this generator.  */
-  static void GetDocumentation(cmDocumentationEntry& entry);
+  static cmDocumentationEntry GetDocumentation();
 
   /**
    * Try to determine system information such as shared library

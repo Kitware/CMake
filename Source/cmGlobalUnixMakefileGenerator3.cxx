@@ -11,7 +11,6 @@
 #include <cmext/algorithm>
 #include <cmext/memory>
 
-#include "cmDocumentationEntry.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -71,11 +70,10 @@ cmGlobalUnixMakefileGenerator3::CreateLocalGenerator(cmMakefile* mf)
     cm::make_unique<cmLocalUnixMakefileGenerator3>(this, mf));
 }
 
-void cmGlobalUnixMakefileGenerator3::GetDocumentation(
-  cmDocumentationEntry& entry)
+cmDocumentationEntry cmGlobalUnixMakefileGenerator3::GetDocumentation()
 {
-  entry.Name = cmGlobalUnixMakefileGenerator3::GetActualName();
-  entry.Brief = "Generates standard UNIX makefiles.";
+  return { cmGlobalUnixMakefileGenerator3::GetActualName(),
+           "Generates standard UNIX makefiles." };
 }
 
 void cmGlobalUnixMakefileGenerator3::ComputeTargetObjectDirectory(

@@ -5,40 +5,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
-
-/** This is just a helper class to make it build with MSVC 6.0.
-Actually the enums and internal classes could directly go into
-cmDocumentation, but then MSVC6 complains in RequestedHelpItem that
-cmDocumentation is an undefined type and so it doesn't know the enums.
-Moving the enums to a class which is then already completely parsed helps
-against this. */
-class cmDocumentationEnums
-{
-public:
-  /** Types of help provided.  */
-  enum Type
-  {
-    None,
-    Version,
-    Usage,
-    Help,
-    Full,
-    ListManuals,
-    ListCommands,
-    ListModules,
-    ListProperties,
-    ListVariables,
-    ListPolicies,
-    ListGenerators,
-    OneManual,
-    OneCommand,
-    OneModule,
-    OneProperty,
-    OneVariable,
-    OnePolicy,
-    OldCustomModules
-  };
-};
+#include <string>
 
 class cmDocumentationSection;
 
@@ -46,18 +13,15 @@ class cmDocumentationSection;
 class cmDocumentationFormatter
 {
 public:
-  cmDocumentationFormatter();
-  virtual ~cmDocumentationFormatter();
-  void PrintFormatted(std::ostream& os, const char* text);
-
-  virtual void PrintSection(std::ostream& os,
-                            cmDocumentationSection const& section);
-  virtual void PrintPreformatted(std::ostream& os, const char* text);
-  virtual void PrintParagraph(std::ostream& os, const char* text);
-  void PrintColumn(std::ostream& os, const char* text);
-  void SetIndent(const char* indent);
+  void SetIndent(std::size_t indent) { this->TextIndent = indent; }
+  void PrintFormatted(std::ostream& os, std::string const& text) const;
+  void PrintSection(std::ostream& os, cmDocumentationSection const& section);
 
 private:
-  int TextWidth = 77;
-  const char* TextIndent = "";
+  void PrintPreformatted(std::ostream& os, std::string const&) const;
+  void PrintParagraph(std::ostream& os, std::string const&) const;
+  void PrintColumn(std::ostream& os, std::string const&) const;
+
+  std::size_t TextWidth = 77u;
+  std::size_t TextIndent = 0u;
 };

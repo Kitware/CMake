@@ -16,45 +16,38 @@
 #include "cmCursesMainForm.h"
 #include "cmCursesStandardIncludes.h"
 #include "cmDocumentation.h"
-#include "cmDocumentationEntry.h" // IWYU pragma: keep
+#include "cmDocumentationEntry.h"
 #include "cmMessageMetadata.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 
-static const char* cmDocumentationName[][2] = {
-  { nullptr, "  ccmake - Curses Interface for CMake." },
-  { nullptr, nullptr }
+namespace {
+const cmDocumentationEntry cmDocumentationName = {
+  {},
+  "  ccmake - Curses Interface for CMake."
 };
 
-static const char* cmDocumentationUsage[][2] = {
-  { nullptr,
+const cmDocumentationEntry cmDocumentationUsage[2] = {
+  { {},
     "  ccmake <path-to-source>\n"
     "  ccmake <path-to-existing-build>" },
-  { nullptr,
+  { {},
     "Specify a source directory to (re-)generate a build system for "
     "it in the current working directory.  Specify an existing build "
     "directory to re-generate its build system." },
-  { nullptr, nullptr }
 };
 
-static const char* cmDocumentationUsageNote[][2] = {
-  { nullptr, "Run 'ccmake --help' for more information." },
-  { nullptr, nullptr }
+const cmDocumentationEntry cmDocumentationUsageNote = {
+  {},
+  "Run 'ccmake --help' for more information."
 };
-
-static const char* cmDocumentationOptions[][2] = {
-  CMAKE_STANDARD_OPTIONS_TABLE,
-  { nullptr, nullptr }
-};
-
-cmCursesForm* cmCursesForm::CurrentForm = nullptr;
 
 #ifndef _WIN32
 extern "C" {
 
-static void onsig(int /*unused*/)
+void onsig(int /*unused*/)
 {
   if (cmCursesForm::CurrentForm) {
     cmCursesForm::CurrentForm->HandleResize();
@@ -63,6 +56,9 @@ static void onsig(int /*unused*/)
 }
 }
 #endif // _WIN32
+} // anonymous namespace
+
+cmCursesForm* cmCursesForm::CurrentForm = nullptr;
 
 int main(int argc, char const* const* argv)
 {
@@ -89,8 +85,8 @@ int main(int argc, char const* const* argv)
       doc.AppendSection("Usage", cmDocumentationUsageNote);
     }
     doc.AppendSection("Generators", generators);
-    doc.PrependSection("Options", cmDocumentationOptions);
-    return doc.PrintRequestedDocumentation(std::cout) ? 0 : 1;
+    doc.PrependSection("Options", cmake::CMAKE_STANDARD_OPTIONS_TABLE);
+    return !doc.PrintRequestedDocumentation(std::cout);
   }
 
   bool debug = false;

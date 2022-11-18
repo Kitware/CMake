@@ -18,6 +18,7 @@
 #include <cm/string_view>
 #include <cmext/string_view>
 
+#include "cmDocumentationEntry.h"
 #include "cmGeneratedFileStream.h"
 #include "cmInstalledFile.h"
 #include "cmListFileCache.h"
@@ -45,7 +46,6 @@ class cmMakefile;
 class cmMessenger;
 class cmVariableWatch;
 struct cmBuildOptions;
-struct cmDocumentationEntry;
 
 /** \brief Represents a cmake invocation.
  *
@@ -793,37 +793,10 @@ private:
 #if !defined(CMAKE_BOOTSTRAP)
   std::unique_ptr<cmMakefileProfilingData> ProfilingOutput;
 #endif
-};
 
-#define CMAKE_STANDARD_OPTIONS_TABLE                                          \
-  { "-S <path-to-source>", "Explicitly specify a source directory." },        \
-    { "-B <path-to-build>", "Explicitly specify a build directory." },        \
-    { "-C <initial-cache>", "Pre-load a script to populate the cache." },     \
-    { "-D <var>[:<type>]=<value>", "Create or update a cmake cache entry." }, \
-    { "-U <globbing_expr>", "Remove matching entries from CMake cache." },    \
-    { "-G <generator-name>", "Specify a build system generator." },           \
-    { "-T <toolset-name>",                                                    \
-      "Specify toolset name if supported by generator." },                    \
-    { "-A <platform-name>",                                                   \
-      "Specify platform name if supported by generator." },                   \
-    { "--toolchain <file>",                                                   \
-      "Specify toolchain file [CMAKE_TOOLCHAIN_FILE]." },                     \
-    { "--install-prefix <directory>",                                         \
-      "Specify install directory [CMAKE_INSTALL_PREFIX]." },                  \
-    { "-Wdev", "Enable developer warnings." },                                \
-    { "-Wno-dev", "Suppress developer warnings." },                           \
-    { "-Werror=dev", "Make developer warnings errors." },                     \
-    { "-Wno-error=dev", "Make developer warnings not errors." },              \
-    { "-Wdeprecated", "Enable deprecation warnings." },                       \
-    { "-Wno-deprecated", "Suppress deprecation warnings." },                  \
-    { "-Werror=deprecated",                                                   \
-      "Make deprecated macro and function warnings "                          \
-      "errors." },                                                            \
-  {                                                                           \
-    "-Wno-error=deprecated",                                                  \
-      "Make deprecated macro and function warnings "                          \
-      "not errors."                                                           \
-  }
+public:
+  static cmDocumentationEntry CMAKE_STANDARD_OPTIONS_TABLE[18];
+};
 
 #define FOR_EACH_C90_FEATURE(F) F(c_function_prototypes)
 

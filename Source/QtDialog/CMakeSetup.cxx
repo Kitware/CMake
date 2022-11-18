@@ -22,26 +22,27 @@
 #include "cmSystemTools.h" // IWYU pragma: keep
 #include "cmake.h"
 
-static const char* cmDocumentationName[][2] = { { nullptr,
-                                                  "  cmake-gui - CMake GUI." },
-                                                { nullptr, nullptr } };
-
-static const char* cmDocumentationUsage[][2] = {
-  { nullptr,
-    "  cmake-gui [options]\n"
-    "  cmake-gui [options] <path-to-source>\n"
-    "  cmake-gui [options] <path-to-existing-build>\n"
-    "  cmake-gui [options] -S <path-to-source> -B <path-to-build>\n"
-    "  cmake-gui [options] --browse-manual\n" },
-  { nullptr, nullptr }
+namespace {
+const cmDocumentationEntry cmDocumentationName = {
+  {},
+  "  cmake-gui - CMake GUI."
 };
 
-static const char* cmDocumentationOptions[][2] = {
+const cmDocumentationEntry cmDocumentationUsage = {
+  {},
+  "  cmake-gui [options]\n"
+  "  cmake-gui [options] <path-to-source>\n"
+  "  cmake-gui [options] <path-to-existing-build>\n"
+  "  cmake-gui [options] -S <path-to-source> -B <path-to-build>\n"
+  "  cmake-gui [options] --browse-manual"
+};
+
+const cmDocumentationEntry cmDocumentationOptions[3] = {
   { "-S <path-to-source>", "Explicitly specify a source directory." },
   { "-B <path-to-build>", "Explicitly specify a build directory." },
-  { "--preset=<preset>", "Specify a configure preset." },
-  { nullptr, nullptr }
+  { "--preset=<preset>", "Specify a configure preset." }
 };
+} // anonymous namespace
 
 #if defined(Q_OS_MAC)
 static int cmOSXInstall(std::string dir);
@@ -91,7 +92,7 @@ int main(int argc, char** argv)
     doc.AppendSection("Generators", generators);
     doc.PrependSection("Options", cmDocumentationOptions);
 
-    return (doc.PrintRequestedDocumentation(std::cout) ? 0 : 1);
+    return !doc.PrintRequestedDocumentation(std::cout);
   }
 
 #if defined(Q_OS_MAC)
@@ -252,6 +253,7 @@ int main(int argc, char** argv)
 #  include <unistd.h>
 
 #  include "cm_sys_stat.h"
+
 static bool cmOSXInstall(std::string const& dir, std::string const& tool)
 {
   if (tool.empty()) {
@@ -277,6 +279,7 @@ static bool cmOSXInstall(std::string const& dir, std::string const& tool)
             << "': " << strerror(err) << "\n";
   return false;
 }
+
 static int cmOSXInstall(std::string dir)
 {
   if (!cmHasLiteralSuffix(dir, "/")) {

@@ -6,7 +6,6 @@
 #include <utility>
 #include <vector>
 
-#include "cmDocumentationEntry.h"
 #include "cmGlobalGenerator.h"
 #include "cmGlobalGeneratorFactory.h"
 #include "cmGlobalVisualStudioGenerator.h"
@@ -62,11 +61,11 @@ public:
     return std::unique_ptr<cmGlobalGenerator>(std::move(ret));
   }
 
-  void GetDocumentation(cmDocumentationEntry& entry) const override
+  cmDocumentationEntry GetDocumentation() const override
   {
-    entry.Name = std::string(vs9generatorName) + " [arch]";
-    entry.Brief = "Generates Visual Studio 2008 project files.  "
-                  "Optional [arch] can be \"Win64\" or \"IA64\".";
+    return { std::string(vs9generatorName) + " [arch]",
+             "Generates Visual Studio 2008 project files.  "
+             "Optional [arch] can be \"Win64\" or \"IA64\"." };
   }
 
   std::vector<std::string> GetGeneratorNames() const override

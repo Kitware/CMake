@@ -14,6 +14,7 @@
 #include <cm/optional>
 #include <cm/string_view>
 
+#include "cmDocumentationEntry.h"
 #include "cmGlobalGenerator.h"
 #include "cmTransformDepfile.h"
 #include "cmValue.h"
@@ -28,7 +29,6 @@ class cmMakefile;
 class cmSourceFile;
 class cmSourceGroup;
 class cmake;
-struct cmDocumentationEntry;
 
 /** \class cmGlobalXCodeGenerator
  * \brief Write a Unix makefiles.
@@ -54,7 +54,7 @@ public:
   static std::string GetActualName() { return "Xcode"; }
 
   /** Get the documentation entry for this generator.  */
-  static void GetDocumentation(cmDocumentationEntry& entry);
+  static cmDocumentationEntry GetDocumentation();
 
   //! Create a local generator appropriate to this Global Generator
   std::unique_ptr<cmLocalGenerator> CreateLocalGenerator(
