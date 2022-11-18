@@ -60,3 +60,12 @@ function(test_genex name)
 endfunction()
 
 test_genex(TargetGenexEvent)
+
+if(NOT RunCMake_GENERATOR STREQUAL "Xcode")
+  block()
+    run_cmake(CommentGenex)
+    set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/CommentGenex-build)
+    set(RunCMake_TEST_NO_CLEAN 1)
+    run_cmake_command(CommentGenex-build ${CMAKE_COMMAND} --build .)
+  endblock()
+endif()
