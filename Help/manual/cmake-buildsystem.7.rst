@@ -99,7 +99,7 @@ target property to create an macOS or iOS Framework Bundle.
 A library with the ``FRAMEWORK`` target property should also set the
 :prop_tgt:`FRAMEWORK_VERSION` target property.  This property is typically
 set to the value of "A" by macOS conventions.
-The ``MACOSX_FRAMEWORK_IDENTIFIER`` sets ``CFBundleIdentifier`` key
+The ``MACOSX_FRAMEWORK_IDENTIFIER`` sets the ``CFBundleIdentifier`` key
 and it uniquely identifies the bundle.
 
 .. code-block:: cmake
