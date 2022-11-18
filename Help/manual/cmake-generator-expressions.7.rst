@@ -1401,6 +1401,13 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on.
 
+  .. versionchanged:: 3.26
+    When encountered during evaluation of :ref:`Target Usage Requirements`,
+    typically in an ``INTERFACE_*`` target property, lookup of the ``tgt``
+    name occurs in the directory of the target specifying the requirement,
+    rather than the directory of the consuming target for which the
+    expression is being evaluated.
+
 .. genex:: $<TARGET_PROPERTY:prop>
 
   Value of the property ``prop`` on the target for which the expression
