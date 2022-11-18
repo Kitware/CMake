@@ -834,8 +834,9 @@ endif()
 # The NVHPC layout moves math library headers and libraries to a sibling directory.
 # Create a separate variable so this directory can be selectively added to math targets.
 if(NOT EXISTS "${CUDAToolkit_INCLUDE_DIR}/cublas_v2.h")
-  file(REAL_PATH "${CUDAToolkit_TARGET_DIR}/../../" CUDAToolkit_MATH_INCLUDE_DIR)
-  cmake_path(APPEND CUDAToolkit_MATH_INCLUDE_DIR "math_libs/include")
+  file(REAL_PATH "${CUDAToolkit_TARGET_DIR}" CUDAToolkit_MATH_INCLUDE_DIR)
+  cmake_path(APPEND CUDAToolkit_MATH_INCLUDE_DIR "../../math_libs/include")
+  cmake_path(NORMAL_PATH CUDAToolkit_MATH_INCLUDE_DIR)
   if(NOT EXISTS "${CUDAToolkit_MATH_INCLUDE_DIR}/cublas_v2.h")
     if(NOT CUDAToolkit_FIND_QUIETLY)
       message(STATUS "Unable to find cublas_v2.h in either \"${CUDAToolkit_INCLUDE_DIR}\" or \"${CUDAToolkit_MATH_INCLUDE_DIR}\"")
