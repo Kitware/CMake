@@ -22,6 +22,8 @@ add_library(cmake-clang-tidy-module MODULE
   UseCmstrlenCheck.h
   UseCmsysFstreamCheck.cxx
   UseCmsysFstreamCheck.h
+  UsePragmaOnceCheck.cxx
+  UsePragmaOnceCheck.h
   )
 target_include_directories(cmake-clang-tidy-module PRIVATE ${CLANG_INCLUDE_DIRS})
 target_link_libraries(cmake-clang-tidy-module PRIVATE clang-tidy)
