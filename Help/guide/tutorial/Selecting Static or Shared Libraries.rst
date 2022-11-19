@@ -65,7 +65,7 @@ At this point, if you build everything, you may notice that linking fails
 as we are combining a static library without position independent code with a
 library that has position independent code. The solution to this is to
 explicitly set the :prop_tgt:`POSITION_INDEPENDENT_CODE` target property of
-SqrtLibrary to be ``True`` no matter the build type.
+SqrtLibrary to be ``True`` when building shared libraries.
 
 .. literalinclude:: Step11/MathFunctions/CMakeLists.txt
   :caption: MathFunctions/CMakeLists.txt
