@@ -1,0 +1,30 @@
+CMake Warning \(dev\) at NoDyndepSupport.cmake:10 \(target_sources\):
+  CMake's C\+\+ module support is experimental.  It is meant only for
+  experimentation and feedback to CMake developers.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:6 \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+(CMake Warning \(dev\):
+  C\+\+20 modules support via CMAKE_EXPERIMENTAL_CXX_MODULE_DYNDEP is
+  experimental.  It is meant only for compiler developers to try.
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+CMake Error:
+  The Ninja generator does not support C\+\+20 modules using Ninja version
+
+    .*
+
+  due to lack of required features.  Ninja 1.10 or higher is required.
+
+|CMake Error in CMakeLists.txt:
+  The "nodyndep" target contains C\+\+ module sources which are not supported
+  by the generator
+
+(
+CMake Error in CMakeLists.txt:
+  The "nodyndep" target contains C\+\+ module sources which are not supported
+  by the generator
+
+)*)
+CMake Generate step failed.  Build files cannot be regenerated correctly.

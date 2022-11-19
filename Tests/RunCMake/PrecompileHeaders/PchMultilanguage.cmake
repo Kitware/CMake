@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.15)
-project(PchMultilanguage C CXX)
+enable_language(C)
+enable_language(CXX)
 
 add_executable(foobar
   foo.c

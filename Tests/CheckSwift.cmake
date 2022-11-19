@@ -14,6 +14,7 @@ if(NOT DEFINED CMAKE_Swift_COMPILER)
 project(CheckSwift Swift)
 file(WRITE \"\${CMAKE_CURRENT_BINARY_DIR}/result.cmake\"
   \"set(CMAKE_Swift_COMPILER \\\"\${CMAKE_Swift_COMPILER}\\\")\\n\"
+  \"set(CMAKE_Swift_COMPILER_VERSION \\\"\${CMAKE_Swift_COMPILER_VERSION}\\\")\\n\"
   \"set(CMAKE_Swift_FLAGS \\\"\${CMAKE_Swift_FLAGS}\\\")\\n\")
 ")
 
@@ -54,6 +55,7 @@ file(WRITE \"\${CMAKE_CURRENT_BINARY_DIR}/result.cmake\"
   message(STATUS "${_desc} - ${CMAKE_Swift_COMPILER}")
 
   set(CMAKE_Swift_COMPILER "${CMAKE_Swift_COMPILER}" CACHE FILEPATH "Swift compiler")
+  set(CMAKE_Swift_COMPILER_VERSION "${CMAKE_Swift_COMPILER_VERSION}" CACHE FILEPATH "Swift compiler version")
   set(CMAKE_Swift_FLAGS "${CMAKE_Swift_FLAGS}" CACHE STRING "Swift flags")
 
   mark_as_advanced(CMAKE_Swift_COMPILER)

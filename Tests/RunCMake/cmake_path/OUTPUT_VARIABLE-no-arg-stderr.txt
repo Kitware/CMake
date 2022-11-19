@@ -1,2 +1,4 @@
 CMake Error at .+/cmake_path/call-cmake_path.cmake:[0-9]+ \(cmake_path\):
-  cmake_path OUTPUT_VARIABLE requires an argument.
+  Error after keyword "OUTPUT_VARIABLE":
+
+    missing required value

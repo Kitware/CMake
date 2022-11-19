@@ -35,19 +35,19 @@
     variables:
         VCVARSALL: "${VS170COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
         VCVARSPLATFORM: "x64"
-        VCVARSVERSION: "14.32.31326"
+        VCVARSVERSION: "14.34.31933"
 
 .windows_vcvarsall_vs2022_x86:
     variables:
         VCVARSALL: "${VS170COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
         VCVARSPLATFORM: "x86"
-        VCVARSVERSION: "14.32.31326"
+        VCVARSVERSION: "14.34.31933"
 
 .windows_vcvarsall_vs2022_x64_arm64:
     variables:
         VCVARSALL: "${VS170COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
         VCVARSPLATFORM: "x64_arm64"
-        VCVARSVERSION: "14.32.31326"
+        VCVARSVERSION: "14.34.31933"
 
 .windows_vs2022_x64_ninja:
     extends:
@@ -98,7 +98,7 @@
         CMAKE_CONFIGURATION: windows_vs2022_x64
         CMAKE_GENERATOR: "Visual Studio 17 2022"
         CMAKE_GENERATOR_PLATFORM: "x64"
-        CMAKE_GENERATOR_TOOLSET: "v143,version=14.32.31326"
+        CMAKE_GENERATOR_TOOLSET: "v143,version=14.34.31933"
         CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
 
 .windows_vs2019_x64:
@@ -232,7 +232,7 @@
         - windows
         - shell
         - vs2022
-        - msvc-19.32
+        - msvc-19.34
         - nonconcurrent
 
 .windows_tags_nonconcurrent_vs2022_arm64:
@@ -241,7 +241,7 @@
         - windows
         - shell
         - vs2022
-        - msvc-19.32-arm64
+        - msvc-19.34-arm64
         - nonconcurrent
 
 .windows_tags_concurrent_vs2022:
@@ -250,7 +250,7 @@
         - windows
         - shell
         - vs2022
-        - msvc-19.32
+        - msvc-19.34
         - concurrent
 
 .windows_tags_concurrent_vs2019:
@@ -272,17 +272,15 @@
 ## Windows-specific scripts
 
 .before_script_windows: &before_script_windows
-    - Invoke-Expression -Command .gitlab/ci/env.ps1
+    - . .gitlab/ci/env.ps1
     - $pwdpath = $pwd.Path
-    - powershell -File ".gitlab/ci/wix.ps1"
+    - (& "$pwsh" -File ".gitlab/ci/wix.ps1")
     - Set-Item -Force -Path "env:WIX" -Value "$pwdpath\.gitlab\wix"
-    - powershell -File ".gitlab/ci/cmake.ps1"
+    - (& "$pwsh" -File ".gitlab/ci/cmake.ps1")
     - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab\cmake\bin;$env:PATH"
-    - powershell -File ".gitlab/ci/ninja.ps1"
-    - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab;$env:PATH"
+    - . .gitlab/ci/ninja-env.ps1
     - (& "$env:WIX\bin\light.exe" -help) | Select -First 1
     - cmake --version
-    - ninja --version
     - cmake -P .gitlab/ci/download_qt.cmake
     - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab\qt\bin;$env:PATH"
     - cmake -P .gitlab/ci/download_python3.cmake
@@ -331,7 +329,7 @@
     stage: test-ext
 
     script:
-        - Invoke-Expression -Command .gitlab/ci/env.ps1
+        - . .gitlab/ci/env.ps1
         - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake
 
     interruptible: true
@@ -340,6 +338,7 @@
     stage: test-ext
 
     script:
+        - . .gitlab/ci/env.ps1
         - Invoke-Expression -Command .gitlab/ci/vcvarsall.ps1
         - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake
 
@@ -349,6 +348,7 @@
     stage: test-ext
 
     script:
+        - . .gitlab/ci/env.ps1
         - Invoke-Expression -Command .gitlab/ci/jom.ps1
         - $pwdpath = $pwd.Path
         - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab\jom;$env:PATH"
@@ -361,23 +361,10 @@
     stage: test-ext
 
     script:
+        - . .gitlab/ci/env.ps1
         - Invoke-Expression -Command .gitlab/ci/borland.ps1
         - $pwdpath = $pwd.Path
         - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab\bcc\bin;$env:PATH"
-        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake
-
-    interruptible: true
-
-.cmake_test_windows_clang:
-    stage: test-ext
-
-    script:
-        - $pwdpath = $pwd.Path
-        - powershell -File ".gitlab/ci/ninja.ps1"
-        - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab;$env:PATH"
-        - Invoke-Expression -Command .gitlab/ci/clang.ps1
-        - Invoke-Expression -Command .gitlab/ci/vcvarsall.ps1
-        - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab\llvm\bin;$env:PATH"
         - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake
 
     interruptible: true
@@ -386,6 +373,7 @@
     stage: test-ext
 
     script:
+        - . .gitlab/ci/env.ps1
         - Invoke-Expression -Command .gitlab/ci/msvc.ps1
         - Invoke-Expression -Command .gitlab/ci/vcvarsall.ps1
         - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake
@@ -396,6 +384,7 @@
     stage: test-ext
 
     script:
+        - . .gitlab/ci/env.ps1
         - Invoke-Expression -Command .gitlab/ci/openwatcom.ps1
         - $pwdpath = $pwd.Path
         - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab\watcom\binnt;$pwdpath\.gitlab\watcom\binw;$env:PATH"

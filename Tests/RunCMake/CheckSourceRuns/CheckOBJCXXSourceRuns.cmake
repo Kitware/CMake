@@ -1,9 +1,14 @@
 enable_language (OBJCXX)
-include(CheckSourceRuns)
+include(CheckOBJCXXSourceRuns)
 
 set(OBJCXX 1) # test that this is tolerated
 
-check_source_runs(OBJCXX [[
+check_objcxx_source_runs("int main() {return 2;}" SHOULD_FAIL)
+if(SHOULD_FAIL)
+  message(SEND_ERROR "check_objcxx_source_runs succeeded, but should have failed.")
+endif()
+
+check_objcxx_source_runs([[
   #include <vector>
   #import <Foundation/Foundation.h>
   int main() {

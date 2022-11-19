@@ -10,6 +10,7 @@
 #include <cm/string_view>
 
 #include "cmArgumentParser.h"
+#include "cmArgumentParserTypes.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -41,11 +42,18 @@ namespace {
 
 using options_map = std::map<std::string, bool>;
 using single_map = std::map<std::string, std::string>;
-using multi_map = std::map<std::string, std::vector<std::string>>;
-using options_set = std::set<std::string>;
+using multi_map =
+  std::map<std::string, ArgumentParser::NonEmpty<std::vector<std::string>>>;
+using options_set = std::set<cm::string_view>;
 
 struct UserArgumentParser : public cmArgumentParser<void>
 {
+  void BindKeywordsMissingValue(std::vector<cm::string_view>& ref)
+  {
+    this->cmArgumentParser<void>::BindKeywordMissingValue(
+      [&ref](Instance&, cm::string_view arg) { ref.emplace_back(arg); });
+  }
+
   template <typename T, typename H>
   void Bind(std::vector<std::string> const& names,
             std::map<std::string, T>& ref, H duplicateKey)
@@ -208,9 +216,10 @@ bool cmParseArgumentsCommand(std::vector<std::string> const& args,
     }
   }
 
-  std::vector<std::string> keywordsMissingValues;
+  std::vector<cm::string_view> keywordsMissingValues;
+  parser.BindKeywordsMissingValue(keywordsMissingValues);
 
-  parser.Parse(list, &unparsed, &keywordsMissingValues);
+  parser.Parse(list, &unparsed);
 
   PassParsedArguments(
     prefix, status.GetMakefile(), options, singleValArgs, multiValArgs,

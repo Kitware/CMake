@@ -1,0 +1,4 @@
+^CMake Error at BinDirEmpty.cmake:[0-9]+ \(try_run\):
+  No <bindir> specified.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)$

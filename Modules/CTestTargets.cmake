@@ -86,7 +86,7 @@ if(NOT _CTEST_TARGETS_ADDED)
   # or "RUN_TESTS" target:
   if(CTEST_TEST_TARGET_ALIAS)
     add_custom_target(${CTEST_TEST_TARGET_ALIAS}
-      ${CMAKE_CTEST_COMMAND} ${__conf_types}
+      ${CMAKE_CTEST_COMMAND} ${CMAKE_CTEST_ARGUMENTS} ${__conf_types}
       USES_TERMINAL
       )
   endif()

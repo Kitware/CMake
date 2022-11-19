@@ -9,5 +9,5 @@ The property value may use
 This is defined in ``<LocalDebuggerEnvironment>`` in the Visual Studio
 project file.
 
-This property only works for Visual Studio 2010 and above;
+This property only works for Visual Studio 11 2012 and above;
 it is ignored on other generators.

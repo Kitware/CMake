@@ -76,7 +76,6 @@ void cmVisualStudioGeneratorOptions::FixExceptionHandlingDefault()
   // the flag to disable exception handling.  When the user does
   // remove the flag we need to override the IDE default of on.
   switch (this->Version) {
-    case cmGlobalVisualStudioGenerator::VSVersion::VS10:
     case cmGlobalVisualStudioGenerator::VSVersion::VS11:
     case cmGlobalVisualStudioGenerator::VSVersion::VS12:
     case cmGlobalVisualStudioGenerator::VSVersion::VS14:
@@ -102,14 +101,12 @@ void cmVisualStudioGeneratorOptions::SetVerboseMakefile(bool verbose)
   // to the generated project to disable logo suppression.  Otherwise
   // the GUI default is to enable suppression.
   //
-  // On Visual Studio 10 (and later!), the value of this attribute should be
-  // an empty string, instead of "FALSE", in order to avoid a warning:
-  //   "cl ... warning D9035: option 'nologo-' has been deprecated"
-  //
+  // On Visual Studio 9, the value of this attribute should be
+  // "FALSE", instead of an empty string.
   if (verbose &&
       this->FlagMap.find("SuppressStartupBanner") == this->FlagMap.end()) {
     this->FlagMap["SuppressStartupBanner"] =
-      this->Version < cmGlobalVisualStudioGenerator::VSVersion::VS10 ? "FALSE"
+      this->Version == cmGlobalVisualStudioGenerator::VSVersion::VS9 ? "FALSE"
                                                                      : "";
   }
 }
@@ -162,71 +159,12 @@ bool cmVisualStudioGeneratorOptions::UsingSBCS() const
 
 void cmVisualStudioGeneratorOptions::FixCudaCodeGeneration()
 {
-  // Extract temporary values stored by our flag table.
-  FlagValue arch = this->TakeFlag("cmake-temp-arch");
-  FlagValue code = this->TakeFlag("cmake-temp-code");
-  FlagValue gencode = this->TakeFlag("cmake-temp-gencode");
-
-  // No -code allowed without -arch.
-  if (arch.empty()) {
-    code.clear();
-  }
-
-  // Create a CodeGeneration field with [arch],[code] syntax in each entry.
-  // CUDA will convert it to `-gencode=arch=[arch],code="[code],[arch]"`.
-  FlagValue& result = this->FlagMap["CodeGeneration"];
-
-  // If there are no flags, leave the CodeGeneration field empty.
-  if (arch.empty() && gencode.empty()) {
-    return;
-  }
-
-  // First entries for the -arch=<arch> [-code=<code>,...] pair.
-  if (!arch.empty()) {
-    std::string arch_name = arch[0];
-    if (arch_name == "all" || arch_name == "all-major" ||
-        arch_name == "native") {
-      AppendFlagString("AdditionalOptions", "-arch=" + arch_name);
-      return;
-    }
-    std::vector<std::string> codes;
-    if (!code.empty()) {
-      codes = cmTokenize(code[0], ",");
-    }
-    if (codes.empty()) {
-      codes.push_back(arch_name);
-      // nvcc -arch=<arch> has a special case that allows a real
-      // architecture to be specified instead of a virtual arch.
-      // It translates to -arch=<virtual> -code=<real>.
-      cmSystemTools::ReplaceString(arch_name, "sm_", "compute_");
-    }
-    for (std::string const& c : codes) {
-      std::string entry = arch_name + "," + c;
-      result.push_back(entry);
-    }
-  }
-
-  // Now add entries for the following signatures:
-  // -gencode=<arch>,<code>
-  // -gencode=<arch>,[<code1>,<code2>]
-  // -gencode=<arch>,"<code1>,<code2>"
-  for (std::string const& e : gencode) {
-    std::string entry = e;
-    cmSystemTools::ReplaceString(entry, "arch=", "");
-    cmSystemTools::ReplaceString(entry, "code=", "");
-    cmSystemTools::ReplaceString(entry, "[", "");
-    cmSystemTools::ReplaceString(entry, "]", "");
-    cmSystemTools::ReplaceString(entry, "\"", "");
-
-    std::vector<std::string> codes = cmTokenize(entry, ",");
-    if (codes.size() >= 2) {
-      auto gencode_arch = cm::cbegin(codes);
-      for (auto ci = gencode_arch + 1; ci != cm::cend(codes); ++ci) {
-        std::string code_entry = *gencode_arch + "," + *ci;
-        result.push_back(code_entry);
-      }
-    }
-  }
+  // Create an empty CodeGeneration field, and pass the the actual
+  // compile flags via additional options so that we have consistent
+  // behavior and avoid issues with MSBuild extensions injecting
+  // virtual code when we request real only.
+  FlagValue& code_gen_flag = this->FlagMap["CodeGeneration"];
+  code_gen_flag = "";
 }
 
 void cmVisualStudioGeneratorOptions::FixManifestUACFlags()
@@ -439,7 +377,7 @@ void cmVisualStudioGeneratorOptions::OutputPreprocessorDefinitions(
   }
 
   std::ostringstream oss;
-  if (this->Version >= cmGlobalVisualStudioGenerator::VSVersion::VS10) {
+  if (this->Version != cmGlobalVisualStudioGenerator::VSVersion::VS9) {
     oss << "%(" << tag << ")";
   }
   std::vector<std::string>::const_iterator de =
@@ -447,13 +385,13 @@ void cmVisualStudioGeneratorOptions::OutputPreprocessorDefinitions(
   for (std::string const& di : cmMakeRange(this->Defines.cbegin(), de)) {
     // Escape the definition for the compiler.
     std::string define;
-    if (this->Version < cmGlobalVisualStudioGenerator::VSVersion::VS10) {
+    if (this->Version == cmGlobalVisualStudioGenerator::VSVersion::VS9) {
       define = this->LocalGenerator->EscapeForShell(di, true);
     } else {
       define = di;
     }
     // Escape this flag for the MSBuild.
-    if (this->Version >= cmGlobalVisualStudioGenerator::VSVersion::VS10) {
+    if (this->Version != cmGlobalVisualStudioGenerator::VSVersion::VS9) {
       cmVS10EscapeForMSBuild(define);
       if (lang == "RC") {
         cmSystemTools::ReplaceString(define, "\"", "\\\"");
@@ -498,7 +436,7 @@ void cmVisualStudioGeneratorOptions::OutputAdditionalIncludeDirectories(
     }
 
     // Escape this include for the MSBuild.
-    if (this->Version >= cmGlobalVisualStudioGenerator::VSVersion::VS10) {
+    if (this->Version != cmGlobalVisualStudioGenerator::VSVersion::VS9) {
       cmVS10EscapeForMSBuild(include);
     }
     oss << sep << include;
@@ -510,7 +448,7 @@ void cmVisualStudioGeneratorOptions::OutputAdditionalIncludeDirectories(
     }
   }
 
-  if (this->Version >= cmGlobalVisualStudioGenerator::VSVersion::VS10) {
+  if (this->Version != cmGlobalVisualStudioGenerator::VSVersion::VS9) {
     oss << sep << "%(" << tag << ")";
   }
 
@@ -524,7 +462,7 @@ void cmVisualStudioGeneratorOptions::OutputFlagMap(std::ostream& fout,
     std::ostringstream oss;
     const char* sep = "";
     for (std::string i : m.second) {
-      if (this->Version >= cmGlobalVisualStudioGenerator::VSVersion::VS10) {
+      if (this->Version != cmGlobalVisualStudioGenerator::VSVersion::VS9) {
         cmVS10EscapeForMSBuild(i);
       }
       oss << sep << i;

@@ -1,0 +1,7 @@
+CMake Error at NoCStandard.cmake:[0-9]+ \(try_compile\):
+  Error after keyword "C_STANDARD":
+
+    missing required value
+
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)

@@ -244,7 +244,8 @@ void StartCompilerSetup::onGeneratorChanged(int index)
     if (!DefaultGeneratorPlatform.isEmpty()) {
       int platform_index = platforms.indexOf(DefaultGeneratorPlatform);
       if (platform_index != -1) {
-        this->PlatformOptions->setCurrentIndex(platform_index);
+        // The index is off-by-one due to the first empty item added above.
+        this->PlatformOptions->setCurrentIndex(platform_index + 1);
       }
     }
   } else {

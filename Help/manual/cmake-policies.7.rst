@@ -52,6 +52,16 @@ to determine whether to report an error on use of deprecated macros or
 functions.
 
 
+Policies Introduced by CMake 3.25
+=================================
+
+.. toctree::
+   :maxdepth: 1
+
+   CMP0142: The Xcode generator does not append per-config suffixes to library search paths. </policy/CMP0142>
+   CMP0141: MSVC debug information format flags are selected by an abstraction. </policy/CMP0141>
+   CMP0140: The return() command checks its arguments. </policy/CMP0140>
+
 Policies Introduced by CMake 3.24
 =================================
 
@@ -63,7 +73,7 @@ Policies Introduced by CMake 3.24
    CMP0137: try_compile() passes platform variables in project mode. </policy/CMP0137>
    CMP0136: Watcom runtime library flags are selected by an abstraction. </policy/CMP0136>
    CMP0135: ExternalProject ignores timestamps in archives by default for the URL download method. </policy/CMP0135>
-   CMP0134: Fallback to \"HOST\" Windows registry view when \"TARGET\" view is not usable. </policy/CMP0134>
+   CMP0134: Fallback to "HOST" Windows registry view when "TARGET" view is not usable. </policy/CMP0134>
    CMP0133: The CPack module disables SLA by default in the CPack DragNDrop Generator. </policy/CMP0133>
    CMP0132: Do not set compiler environment variables on first run. </policy/CMP0132>
    CMP0131: LINK_LIBRARIES supports the LINK_ONLY generator expression. </policy/CMP0131>

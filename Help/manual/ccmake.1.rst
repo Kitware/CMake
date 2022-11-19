@@ -8,7 +8,7 @@ Synopsis
 
 .. parsed-literal::
 
- ccmake [<options>] {<path-to-source> | <path-to-existing-build>}
+ ccmake [<options>] <path-to-source | path-to-existing-build>
 
 Description
 ===========
@@ -26,6 +26,8 @@ native tool on their platform.
 
 Options
 =======
+
+.. program:: ccmake
 
 .. include:: OPTIONS_BUILD.txt
 

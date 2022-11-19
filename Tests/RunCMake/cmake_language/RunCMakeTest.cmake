@@ -8,6 +8,7 @@ foreach(command IN ITEMS
     "if" "elseif" "else" "endif"
     "while" "endwhile"
     "foreach" "endforeach"
+    "block" "endblock"
     )
   message(STATUS "Running call_invalid_command for ${command}...")
   run_cmake_with_options(call_invalid_command -Dcommand=${command})
@@ -42,6 +43,7 @@ foreach(command IN ITEMS
     "if" "elseif" "else" "endif"
     "while" "endwhile"
     "foreach" "endforeach"
+    "block" "endblock"
     "return"
     )
   message(STATUS "Running defer_call_invalid_command for ${command}...")
@@ -82,3 +84,61 @@ run_cmake(defer_get_call_id_var)
 run_cmake(defer_missing_arg)
 run_cmake(defer_missing_call)
 run_cmake(defer_unknown_option)
+
+# Default log level
+run_cmake_command(
+    get_message_log_level_none
+    ${CMAKE_COMMAND}
+    -P ${RunCMake_SOURCE_DIR}/get_message_log_level.cmake
+  )
+
+# Log level from cache
+run_cmake_command(
+    get_message_log_level_cache
+    ${CMAKE_COMMAND}
+    -DCMAKE_MESSAGE_LOG_LEVEL=TRACE
+    -P ${RunCMake_SOURCE_DIR}/get_message_log_level.cmake
+  )
+
+# Log level from regular variable
+run_cmake_command(
+    get_message_log_level_var
+    ${CMAKE_COMMAND}
+    -DNEW_LOG_LEVEL=TRACE
+    -P ${RunCMake_SOURCE_DIR}/get_message_log_level.cmake
+  )
+
+# Log level from command line
+run_cmake_command(
+    get_message_log_level_cli
+    ${CMAKE_COMMAND}
+    --log-level=DEBUG
+    -P ${RunCMake_SOURCE_DIR}/get_message_log_level.cmake
+  )
+
+# Log level from command line, it has higher priority over a cache variable
+run_cmake_command(
+    get_message_log_level_cli_and_cache
+    ${CMAKE_COMMAND}
+    --log-level=DEBUG
+    -DCMAKE_MESSAGE_LOG_LEVEL=TRACE
+    -P ${RunCMake_SOURCE_DIR}/get_message_log_level.cmake
+  )
+
+# Log level from command line, it has higher priority over a regular variable
+run_cmake_command(
+    get_message_log_level_cli_and_var
+    ${CMAKE_COMMAND}
+    --log-level=DEBUG
+    -DNEW_LOG_LEVEL=TRACE
+    -P ${RunCMake_SOURCE_DIR}/get_message_log_level.cmake
+  )
+
+# Log level from variable, it has higher priority over a cache variable
+run_cmake_command(
+    get_message_log_level_var_and_cache
+    ${CMAKE_COMMAND}
+    -DNEW_LOG_LEVEL=DEBUG
+    -DCMAKE_MESSAGE_LOG_LEVEL=TRACE
+    -P ${RunCMake_SOURCE_DIR}/get_message_log_level.cmake
+  )

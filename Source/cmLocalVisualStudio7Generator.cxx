@@ -195,10 +195,10 @@ void cmLocalVisualStudio7Generator::GenerateTarget(cmGeneratorTarget* target)
   this->FortranProject = gg->TargetIsFortranOnly(target);
   this->WindowsCEProject = gg->TargetsWindowsCE();
 
-  // Intel Fortran for VS10 uses VS9 format ".vfproj" files.
+  // Intel Fortran always uses VS9 format ".vfproj" files.
   cmGlobalVisualStudioGenerator::VSVersion realVersion = gg->GetVersion();
   if (this->FortranProject &&
-      gg->GetVersion() >= cmGlobalVisualStudioGenerator::VSVersion::VS10) {
+      gg->GetVersion() >= cmGlobalVisualStudioGenerator::VSVersion::VS11) {
     gg->SetVersion(cmGlobalVisualStudioGenerator::VSVersion::VS9);
   }
 
@@ -680,7 +680,8 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
     langForClCompile = linkLanguage;
     if (langForClCompile == "C" || langForClCompile == "CXX" ||
         langForClCompile == "Fortran") {
-      this->AddLanguageFlags(flags, target, langForClCompile, configName);
+      this->AddLanguageFlags(flags, target, cmBuildStep::Compile,
+                             langForClCompile, configName);
     }
     // set the correct language
     if (linkLanguage == "C") {

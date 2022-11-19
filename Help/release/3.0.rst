@@ -11,7 +11,7 @@ Documentation Changes
 =====================
 
 * The CMake documentation has been converted to reStructuredText and
-  now transforms via Sphinx (`<http://sphinx-doc.org>`__) into man and
+  now transforms via Sphinx (`<https://www.sphinx-doc.org>`__) into man and
   html pages.  This allows the documentation to be properly indexed
   and to contain cross-references.
 

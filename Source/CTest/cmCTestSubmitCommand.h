@@ -8,6 +8,9 @@
 #include <string>
 #include <vector>
 
+#include <cm/optional>
+
+#include "cmArgumentParserTypes.h"
 #include "cmCTestHandlerCommand.h"
 
 class cmCommand;
@@ -35,13 +38,11 @@ public:
 
 protected:
   void BindArguments() override;
-  void CheckArguments(std::vector<std::string> const& keywords) override;
+  void CheckArguments() override;
   cmCTestGenericHandler* InitializeHandler() override;
 
   bool CDashUpload = false;
-  bool FilesMentioned = false;
   bool InternalTest = false;
-  bool PartsMentioned = false;
 
   std::string BuildID;
   std::string CDashUploadFile;
@@ -50,7 +51,7 @@ protected:
   std::string RetryDelay;
   std::string SubmitURL;
 
-  std::vector<std::string> Files;
-  std::vector<std::string> HttpHeaders;
-  std::vector<std::string> Parts;
+  cm::optional<ArgumentParser::MaybeEmpty<std::vector<std::string>>> Files;
+  ArgumentParser::MaybeEmpty<std::vector<std::string>> HttpHeaders;
+  cm::optional<ArgumentParser::MaybeEmpty<std::vector<std::string>>> Parts;
 };

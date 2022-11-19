@@ -1,0 +1,20 @@
+CMake Warning \(dev\) at NoCXX20ModuleFlag.cmake:6 \(target_sources\):
+  CMake's C\+\+ module support is experimental.  It is meant only for
+  experimentation and feedback to CMake developers.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:6 \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+CMake Error in CMakeLists.txt:
+  The "noexperimentalflag" target has C\+\+ module sources but its experimental
+  support has not been requested
+
+(
+CMake Error in CMakeLists.txt:
+(  The "noexperimentalflag" target has C\+\+ module sources but its experimental
+  support has not been requested
+|  The "noexperimentalflag" target contains C\+\+ module sources which are not
+  supported by the generator
+)
+)*
+CMake Generate step failed.  Build files cannot be regenerated correctly.

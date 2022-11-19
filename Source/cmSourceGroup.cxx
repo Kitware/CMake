@@ -124,6 +124,21 @@ cmSourceGroup* cmSourceGroup::MatchChildrenFiles(const std::string& name)
   return nullptr;
 }
 
+const cmSourceGroup* cmSourceGroup::MatchChildrenFiles(
+  const std::string& name) const
+{
+  if (this->MatchesFiles(name)) {
+    return this;
+  }
+  for (const cmSourceGroup& group : this->Internal->GroupChildren) {
+    const cmSourceGroup* result = group.MatchChildrenFiles(name);
+    if (result) {
+      return result;
+    }
+  }
+  return nullptr;
+}
+
 cmSourceGroup* cmSourceGroup::MatchChildrenRegex(const std::string& name)
 {
   for (cmSourceGroup& group : this->Internal->GroupChildren) {

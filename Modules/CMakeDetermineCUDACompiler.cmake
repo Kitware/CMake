@@ -275,7 +275,7 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
   if(DEFINED CMAKE_CUDA_ARCHITECTURES)
     if(CMAKE_CUDA_ARCHITECTURES STREQUAL "")
       message(FATAL_ERROR "CMAKE_CUDA_ARCHITECTURES must be non-empty if set.")
-    elseif(CMAKE_CUDA_ARCHITECTURES AND NOT CMAKE_CUDA_ARCHITECTURES MATCHES "^([0-9]+(-real|-virtual)?(;[0-9]+(-real|-virtual)?|;)*|all|all-major|native)$")
+    elseif(CMAKE_CUDA_ARCHITECTURES AND NOT CMAKE_CUDA_ARCHITECTURES MATCHES "^([0-9]+a?(-real|-virtual)?(;[0-9]+a?(-real|-virtual)?|;)*|all|all-major|native)$")
       message(FATAL_ERROR
         "CMAKE_CUDA_ARCHITECTURES:\n"
         "  ${CMAKE_CUDA_ARCHITECTURES}\n"
@@ -503,7 +503,8 @@ elseif(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA")
                                    CMAKE_CUDA_HOST_IMPLICIT_LINK_DIRECTORIES
                                    CMAKE_CUDA_HOST_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES
                                    log
-                                   "${CMAKE_CUDA_IMPLICIT_OBJECT_REGEX}")
+                                   "${CMAKE_CUDA_IMPLICIT_OBJECT_REGEX}"
+                                   LANGUAGE CUDA)
 
     # Detect CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT from the compiler by looking at which
     # cudart library exists in the implicit link libraries passed to the host linker.

@@ -9,6 +9,7 @@
 #include "cmExecutionStatus.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstalledFile.h"
+#include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
@@ -561,7 +562,8 @@ bool HandleTarget(cmTarget* target, cmMakefile& makefile,
 {
   // Set or append the property.
   if (appendMode) {
-    target->AppendProperty(propertyName, propertyValue, appendAsString);
+    target->AppendProperty(propertyName, propertyValue,
+                           makefile.GetBacktrace(), appendAsString);
   } else {
     if (remove) {
       target->SetProperty(propertyName, nullptr);

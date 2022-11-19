@@ -1,0 +1,5 @@
+^CMake Warning:
+  The "Visual Studio 11 2012" generator is deprecated and will be removed in
+  a future version of CMake.
+
+  Add CMAKE_WARN_VS11=OFF to the cache to disable this warning.$

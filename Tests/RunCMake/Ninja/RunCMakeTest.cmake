@@ -33,6 +33,24 @@ function(run_NinjaToolMissing)
 endfunction()
 run_NinjaToolMissing()
 
+function(run_Intl)
+  run_cmake(Intl)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/Intl-build)
+  set(RunCMake_TEST_OUTPUT_MERGE 1)
+  run_cmake_command(Intl-build ${CMAKE_COMMAND} --build .)
+endfunction()
+run_Intl()
+
+if(WIN32)
+  if(RunCMake_MAKE_PROGRAM)
+    set(maybe_MAKE_PROGRAM "-DRunCMake_MAKE_PROGRAM=${RunCMake_MAKE_PROGRAM}")
+  endif()
+  run_cmake_script(ShowIncludes-54936 -DshowIncludes=${showIncludes} ${maybe_MAKE_PROGRAM})
+  run_cmake_script(ShowIncludes-65001 -DshowIncludes=${showIncludes} ${maybe_MAKE_PROGRAM})
+  unset(maybe_MAKE_PROGRAM)
+endif()
+
 function(run_NoWorkToDo)
   run_cmake(NoWorkToDo)
   set(RunCMake_TEST_NO_CLEAN 1)
@@ -357,6 +375,22 @@ function(run_QtAutoMocDeps)
     run_ninja("${RunCMake_TEST_BINARY_DIR}")
   endif()
 endfunction()
+
+function(run_QtAutoMocSkipPch)
+  set(QtX Qt${CMake_TEST_Qt_version})
+  if(CMake_TEST_${QtX}Core_Version VERSION_GREATER_EQUAL 5.15.0)
+    set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/QtAutoMocSkipPch-build)
+    run_cmake_with_options(QtAutoMocSkipPch
+      "-Dwith_qt_version=${CMake_TEST_Qt_version}"
+      "-D${QtX}_DIR=${${QtX}_DIR}"
+      "-D${QtX}Core_DIR=${${QtX}Core_DIR}"
+      "-DCMAKE_PREFIX_PATH:STRING=${CMAKE_PREFIX_PATH}"
+    )
+    # Build the project.
+    run_ninja("${RunCMake_TEST_BINARY_DIR}")
+  endif()
+endfunction()
 if(CMake_TEST_Qt_version)
   run_QtAutoMocDeps()
+  run_QtAutoMocSkipPch()
 endif()

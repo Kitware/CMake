@@ -1,9 +1,14 @@
 enable_language (OBJC)
-include(CheckSourceRuns)
+include(CheckOBJCSourceRuns)
 
 set(OBJC 1) # test that this is tolerated
 
-check_source_runs(OBJC [[
+check_objc_source_runs("int main() {return 2;}" SHOULD_FAIL)
+if(SHOULD_FAIL)
+  message(SEND_ERROR "check_objc_source_runs succeeded, but should have failed.")
+endif()
+
+check_objc_source_runs([[
   #import <Foundation/Foundation.h>
   int main() {
     NSObject *foo;

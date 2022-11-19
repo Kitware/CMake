@@ -304,23 +304,23 @@ void cmGlobalVisualStudio7Generator::Generate()
                                 GetSLNFile(this->LocalGenerators[0].get()));
   }
 
-  if (this->Version == VSVersion::VS10 &&
+  if (this->Version == VSVersion::VS11 &&
       !this->CMakeInstance->GetIsInTryCompile()) {
-    std::string cmakeWarnVS10;
+    std::string cmakeWarnVS11;
     if (cmValue cached = this->CMakeInstance->GetState()->GetCacheEntryValue(
-          "CMAKE_WARN_VS10")) {
-      this->CMakeInstance->MarkCliAsUsed("CMAKE_WARN_VS10");
-      cmakeWarnVS10 = *cached;
+          "CMAKE_WARN_VS11")) {
+      this->CMakeInstance->MarkCliAsUsed("CMAKE_WARN_VS11");
+      cmakeWarnVS11 = *cached;
     } else {
-      cmSystemTools::GetEnv("CMAKE_WARN_VS10", cmakeWarnVS10);
+      cmSystemTools::GetEnv("CMAKE_WARN_VS11", cmakeWarnVS11);
     }
-    if (cmakeWarnVS10.empty() || !cmIsOff(cmakeWarnVS10)) {
+    if (cmakeWarnVS11.empty() || !cmIsOff(cmakeWarnVS11)) {
       this->CMakeInstance->IssueMessage(
         MessageType::WARNING,
-        "The \"Visual Studio 10 2010\" generator is deprecated "
+        "The \"Visual Studio 11 2012\" generator is deprecated "
         "and will be removed in a future version of CMake."
         "\n"
-        "Add CMAKE_WARN_VS10=OFF to the cache to disable this warning.");
+        "Add CMAKE_WARN_VS11=OFF to the cache to disable this warning.");
     }
   }
 }
@@ -395,11 +395,26 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
 {
   VisualStudioFolders.clear();
 
+  std::vector<std::string> configs =
+    root->GetMakefile()->GetGeneratorConfigs(cmMakefile::ExcludeEmptyConfig);
+
   for (cmGeneratorTarget const* target : projectTargets) {
     if (!this->IsInSolution(target)) {
       continue;
     }
     bool written = false;
+
+    for (auto const& c : configs) {
+      target->CheckCxxModuleStatus(c);
+    }
+
+    if (target->HaveCxx20ModuleSources() && !this->SupportsCxxModuleDyndep()) {
+      root->GetMakefile()->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("The \"", target->GetName(),
+                 "\" target contains C++ module sources which are not "
+                 "supported by the generator"));
+    }
 
     // handle external vc project files
     cmValue expath = target->GetProperty("EXTERNAL_MSPROJECT");

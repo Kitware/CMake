@@ -19,6 +19,8 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * SPDX-License-Identifier: curl
+ *
  ***************************************************************************/
 
 #include "curl_setup.h"
@@ -32,7 +34,7 @@
 #include <process.h>
 #ifdef CURL_WINDOWS_APP
 #define getpid GetCurrentProcessId
-#elif !defined(MSDOS)
+#elif defined(WIN32)
 #define getpid _getpid
 #endif
 #endif

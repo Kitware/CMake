@@ -1,4 +1,4 @@
-^CMake Error at .*/Tests/RunCMake/try_compile/ObjCStandard-build/CMakeFiles/CMakeTmp/CMakeLists.txt:[0-9]+ \(add_executable\):
+^CMake Error at .*/Tests/RunCMake/try_compile/ObjCStandard-build/CMakeFiles/CMake(Tmp|Scratch/TryCompile-[^/]+)/CMakeLists.txt:[0-9]+ \(add_executable\):
   OBJC_STANDARD is set to invalid value '3'
 +
 CMake Error at ObjCStandard.cmake:[0-9]+ \(try_compile\):

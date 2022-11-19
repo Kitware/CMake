@@ -127,8 +127,6 @@ static unsigned int VSVersionToMajor(
   switch (v) {
     case cmGlobalVisualStudioGenerator::VSVersion::VS9:
       return 9;
-    case cmGlobalVisualStudioGenerator::VSVersion::VS10:
-      return 10;
     case cmGlobalVisualStudioGenerator::VSVersion::VS11:
       return 11;
     case cmGlobalVisualStudioGenerator::VSVersion::VS12:
@@ -151,8 +149,6 @@ static const char* VSVersionToToolset(
   switch (v) {
     case cmGlobalVisualStudioGenerator::VSVersion::VS9:
       return "v90";
-    case cmGlobalVisualStudioGenerator::VSVersion::VS10:
-      return "v100";
     case cmGlobalVisualStudioGenerator::VSVersion::VS11:
       return "v110";
     case cmGlobalVisualStudioGenerator::VSVersion::VS12:
@@ -175,8 +171,6 @@ static std::string VSVersionToMajorString(
   switch (v) {
     case cmGlobalVisualStudioGenerator::VSVersion::VS9:
       return "9";
-    case cmGlobalVisualStudioGenerator::VSVersion::VS10:
-      return "10";
     case cmGlobalVisualStudioGenerator::VSVersion::VS11:
       return "11";
     case cmGlobalVisualStudioGenerator::VSVersion::VS12:
@@ -198,7 +192,6 @@ static const char* VSVersionToAndroidToolset(
 {
   switch (v) {
     case cmGlobalVisualStudioGenerator::VSVersion::VS9:
-    case cmGlobalVisualStudioGenerator::VSVersion::VS10:
     case cmGlobalVisualStudioGenerator::VSVersion::VS11:
     case cmGlobalVisualStudioGenerator::VSVersion::VS12:
       return "";
@@ -500,7 +493,6 @@ bool cmGlobalVisualStudioVersionedGenerator::MatchesGeneratorName(
   std::string genName;
   switch (this->Version) {
     case cmGlobalVisualStudioGenerator::VSVersion::VS9:
-    case cmGlobalVisualStudioGenerator::VSVersion::VS10:
     case cmGlobalVisualStudioGenerator::VSVersion::VS11:
     case cmGlobalVisualStudioGenerator::VSVersion::VS12:
     case cmGlobalVisualStudioGenerator::VSVersion::VS14:
@@ -743,7 +735,6 @@ cmGlobalVisualStudioVersionedGenerator::GetAndroidApplicationTypeRevision()
 {
   switch (this->Version) {
     case cmGlobalVisualStudioGenerator::VSVersion::VS9:
-    case cmGlobalVisualStudioGenerator::VSVersion::VS10:
     case cmGlobalVisualStudioGenerator::VSVersion::VS11:
     case cmGlobalVisualStudioGenerator::VSVersion::VS12:
       return "";
@@ -770,12 +761,15 @@ cmGlobalVisualStudioVersionedGenerator::FindAuxToolset(
   cmSystemTools::ConvertToUnixSlashes(instancePath);
 
   // Translate three-component format accepted by "vcvarsall -vcvars_ver=".
-  cmsys::RegularExpression threeComponent(
+  cmsys::RegularExpression threeComponentRegex(
     "^([0-9]+\\.[0-9]+)\\.[0-9][0-9][0-9][0-9][0-9]$");
-  if (threeComponent.find(version)) {
+  // The two-component format represents the two major components of the
+  // three-component format
+  cmsys::RegularExpression twoComponentRegex("^([0-9]+\\.[0-9]+)$");
+  if (threeComponentRegex.find(version)) {
     // Load "VC/Auxiliary/Build/*/Microsoft.VCToolsVersion.*.txt" files
     // with two matching components to check their three-component version.
-    std::string const& twoComponent = threeComponent.match(1);
+    std::string const& twoComponent = threeComponentRegex.match(1);
     std::string pattern =
       cmStrCat(instancePath, "/VC/Auxiliary/Build/"_s, twoComponent,
                "*/Microsoft.VCToolsVersion."_s, twoComponent, "*.txt"_s);
@@ -799,6 +793,36 @@ cmGlobalVisualStudioVersionedGenerator::FindAuxToolset(
             }
           }
         }
+      }
+    }
+  } else if (twoComponentRegex.find(version)) {
+    std::string const& twoComponent = twoComponentRegex.match(1);
+    std::string pattern =
+      cmStrCat(instancePath, "/VC/Auxiliary/Build/"_s, twoComponent,
+               "*/Microsoft.VCToolsVersion."_s, twoComponent, "*.txt"_s);
+    cmsys::Glob glob;
+    glob.SetRecurseThroughSymlinks(false);
+    if (glob.FindFiles(pattern) && !glob.GetFiles().empty()) {
+      // Since we are only using the first two components of the
+      // toolset version, we require a single match.
+      if (glob.GetFiles().size() == 1) {
+        std::string const& txt = glob.GetFiles()[0];
+        std::string ver;
+        cmsys::ifstream fin(txt.c_str());
+        if (fin && std::getline(fin, ver)) {
+          // Strip trailing whitespace.
+          ver = ver.substr(0, ver.find_first_not_of("0123456789."));
+          // We assume the version is correct, since it is the only one that
+          // matched.
+          cmsys::RegularExpression extractVersion(
+            "VCToolsVersion\\.([0-9.]+)\\.txt$");
+          if (extractVersion.find(txt)) {
+            version = extractVersion.match(1);
+          }
+        }
+      } else {
+        props = cmStrCat(instancePath, "/VC/Auxiliary/Build/"_s);
+        return AuxToolset::PropsIndeterminate;
       }
     }
   }

@@ -1,4 +1,4 @@
-Step 6: Adding a Custom Command and Generated File
+Step 8: Adding a Custom Command and Generated File
 ==================================================
 
 Suppose, for the purpose of this tutorial, we decide that we never want to use
@@ -26,7 +26,7 @@ accomplish this.
 First, at the top of ``MathFunctions/CMakeLists.txt``, the executable for
 ``MakeTable`` is added as any other executable would be added.
 
-.. literalinclude:: Step7/MathFunctions/CMakeLists.txt
+.. literalinclude:: Step9/MathFunctions/CMakeLists.txt
   :caption: MathFunctions/CMakeLists.txt
   :name: MathFunctions/CMakeLists.txt-add_executable-MakeTable
   :language: cmake
@@ -36,7 +36,7 @@ First, at the top of ``MathFunctions/CMakeLists.txt``, the executable for
 Then we add a custom command that specifies how to produce ``Table.h``
 by running MakeTable.
 
-.. literalinclude:: Step7/MathFunctions/CMakeLists.txt
+.. literalinclude:: Step9/MathFunctions/CMakeLists.txt
   :caption: MathFunctions/CMakeLists.txt
   :name: MathFunctions/CMakeLists.txt-add_custom_command-Table.h
   :language: cmake
@@ -47,7 +47,7 @@ Next we have to let CMake know that ``mysqrt.cxx`` depends on the generated
 file ``Table.h``. This is done by adding the generated ``Table.h`` to the list
 of sources for the library MathFunctions.
 
-.. literalinclude:: Step7/MathFunctions/CMakeLists.txt
+.. literalinclude:: Step9/MathFunctions/CMakeLists.txt
   :caption: MathFunctions/CMakeLists.txt
   :name: MathFunctions/CMakeLists.txt-add_library-Table.h
   :language: cmake
@@ -57,17 +57,17 @@ of sources for the library MathFunctions.
 We also have to add the current binary directory to the list of include
 directories so that ``Table.h`` can be found and included by ``mysqrt.cxx``.
 
-.. literalinclude:: Step7/MathFunctions/CMakeLists.txt
+.. literalinclude:: Step9/MathFunctions/CMakeLists.txt
   :caption: MathFunctions/CMakeLists.txt
   :name: MathFunctions/CMakeLists.txt-target_include_directories-Table.h
   :language: cmake
   :start-after: # state that we depend on our bin
-  :end-before: # install rules
+  :end-before: # install libs
 
 Now let's use the generated table. First, modify ``mysqrt.cxx`` to include
 ``Table.h``. Next, we can rewrite the ``mysqrt`` function to use the table:
 
-.. literalinclude:: Step7/MathFunctions/mysqrt.cxx
+.. literalinclude:: Step9/MathFunctions/mysqrt.cxx
   :caption: MathFunctions/mysqrt.cxx
   :name: MathFunctions/mysqrt.cxx
   :language: c++

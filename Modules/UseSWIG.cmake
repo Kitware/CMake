@@ -377,6 +377,7 @@ set(SWIG_EXTRA_LIBRARIES "")
 set(SWIG_PYTHON_EXTRA_FILE_EXTENSIONS ".py")
 set(SWIG_JAVA_EXTRA_FILE_EXTENSIONS ".java" "JNI.java")
 set(SWIG_CSHARP_EXTRA_FILE_EXTENSIONS ".cs" "PINVOKE.cs")
+set(SWIG_PERL_EXTRA_FILE_EXTENSIONS ".pm")
 
 set(SWIG_MANAGE_SUPPORT_FILES_SCRIPT "${CMAKE_CURRENT_LIST_DIR}/UseSWIG/ManageSupportFiles.cmake")
 
@@ -989,6 +990,9 @@ function(SWIG_ADD_LIBRARY name)
       endif()
       set_target_properties (${target_name} PROPERTIES PREFIX "")
     endif()
+    if (APPLE)
+      set_target_properties (${target_name} PROPERTIES SUFFIX ".dylib")
+    endif ()
   else()
     # assume empty prefix because we expect the module to be dynamically loaded
     set_target_properties (${target_name} PROPERTIES PREFIX "")

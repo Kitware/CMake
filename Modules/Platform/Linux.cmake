@@ -1,3 +1,4 @@
+set(LINUX 1)
 set(CMAKE_DL_LIBS "dl")
 set(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG "-Wl,-rpath,")
 set(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG_SEP ":")
@@ -86,7 +87,12 @@ include(Platform/UnixPaths)
 
 # Debian has lib32 and lib64 paths only for compatibility so they should not be
 # searched.
-if(NOT CMAKE_CROSSCOMPILING AND EXISTS "/etc/debian_version")
-  set_property(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB32_PATHS FALSE)
-  set_property(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS FALSE)
+if(NOT CMAKE_CROSSCOMPILING)
+  if (EXISTS "/etc/debian_version")
+    set_property(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB32_PATHS FALSE)
+    set_property(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS FALSE)
+  endif()
+  if (EXISTS "/etc/arch-release")
+    set_property(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS FALSE)
+  endif()
 endif()

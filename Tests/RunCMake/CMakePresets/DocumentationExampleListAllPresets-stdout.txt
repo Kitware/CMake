@@ -1,0 +1,22 @@
+^Not searching for unused variables given on the command line\.
+Available configure presets:
+
+  "default"      ?- Default Config
+  "ninja-multi"  ?- Ninja Multi-Config(
+  "windows-only" - Windows-only configuration)?
+
+Available build presets:
+
+  "default"
+
+Available test presets:
+
+  "default"
+
+Available package presets:
+
+  "default"
+
+Available workflow presets:
+
+  "default"$

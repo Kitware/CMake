@@ -21,6 +21,8 @@ Environment Variables that Change Behavior
    :maxdepth: 1
 
    /envvar/CMAKE_PREFIX_PATH
+   /envvar/SSL_CERT_DIR
+   /envvar/SSL_CERT_FILE
 
 Environment Variables that Control the Build
 ============================================

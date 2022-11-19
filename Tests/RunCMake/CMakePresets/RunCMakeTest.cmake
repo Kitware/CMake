@@ -289,6 +289,7 @@ run_cmake_presets(UserInheritance)
 # Test listing presets
 set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/ListPresets.json.in")
 run_cmake_presets(ListPresets --list-presets)
+run_cmake_presets(ListPresetsInvalidType --list-presets=invalid-type)
 
 set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/ListPresetsWorkingDir")
 set(RunCMake_TEST_NO_CLEAN 1)
@@ -303,6 +304,12 @@ unset(RunCMake_TEST_BINARY_DIR)
 
 run_cmake_presets(ListPresetsNoSuchPreset)
 run_cmake_presets(ListPresetsHidden)
+
+set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/ListAllPresetsNoBuild.json.in")
+run_cmake_presets(ListAllPresetsNoBuild --list-presets=all)
+
+set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/ListAllPresetsNoTest.json.in")
+run_cmake_presets(ListAllPresetsNoTest --list-presets=all)
 
 # Test warning and error flags
 set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/Warnings.json.in")
@@ -401,4 +408,5 @@ set(CMakePresets_EXTRA_FILES
   "${RunCMake_SOURCE_DIR}/moreThings.json.in"
 )
 run_cmake_presets(DocumentationExample --preset=default)
+run_cmake_presets(DocumentationExampleListAllPresets --list-presets=all)
 unset(CMakePresets_EXTRA_FILES)

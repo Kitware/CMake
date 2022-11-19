@@ -16,7 +16,7 @@
         "^cxx_static_lib::@a56b12a3f5c0529fb296$"
     ],
     "projectName": "Cxx",
-    "minimumCMakeVersion": "3.12",
+    "minimumCMakeVersion": "3.13",
     "hasInstallRule": true,
     "installers": [
         {

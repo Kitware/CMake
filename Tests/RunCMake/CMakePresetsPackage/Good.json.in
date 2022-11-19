@@ -1,0 +1,135 @@
+{
+    "version": 6,
+    "configurePresets": [
+        {
+            "name": "default",
+            "generator": "@RunCMake_GENERATOR@",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "environment": {
+                "TEST_ENV": "Environment variable",
+                "TEST_ENV_OVERRIDE": "Overridden environment variable"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "build-default-debug",
+            "configurePreset": "default",
+            "configuration": "Debug"
+        },
+        {
+            "name": "build-default-release",
+            "inherits": "build-default-debug",
+            "configuration": "Release"
+        }
+    ],
+    "packagePresets": [
+        {
+            "name": "minimal",
+            "configurePreset": "default"
+        },
+        {
+            "name": "defaults",
+            "hidden": false,
+            "inherits": [],
+            "vendor": {},
+            "displayName": "",
+            "description": "",
+            "environment": {},
+            "configurePreset": "default",
+            "inheritConfigureEnvironment": true
+        },
+        {
+            "name": "no-environment",
+            "configurePreset": "default",
+            "inheritConfigureEnvironment": false,
+            "environment": {
+                "TEST_ENV_REF": "x$env{TEST_ENV}x"
+            }
+        },
+        {
+            "name": "with-environment",
+            "inherits": "no-environment",
+            "inheritConfigureEnvironment": true,
+            "environment": {
+                "TEST_ENV_OVERRIDE": "Override",
+                "TEST_ENV_OVERRIDE_REF": "x$env{TEST_ENV_OVERRIDE}x",
+                "TEST_ENV_REF": "x$env{TEST_ENV}x"
+            }
+        },
+        {
+            "name": "generators",
+            "inherits": "minimal",
+            "generators": [
+                "TBZ2",
+                "TXZ"
+            ]
+        },
+        {
+            "name": "configurations",
+            "inherits": "minimal",
+            "configurations": [
+                "Debug",
+                "Release"
+            ]
+        },
+        {
+            "name": "variables",
+            "inherits": "minimal",
+            "variables": {
+                "CPACK_PACKAGE_FILE_NAME": "variables-package"
+            }
+        },
+        {
+            "name": "config-file",
+            "inherits": "minimal",
+            "configFile": "CPackConfigAlt.cmake"
+        },
+        {
+            "name": "debug",
+            "inherits": "minimal",
+            "output": {
+                "debug": true
+            }
+        },
+        {
+            "name": "verbose",
+            "inherits": "minimal",
+            "output": {
+                "verbose": true
+            }
+        },
+        {
+            "name": "package-name",
+            "inherits": "minimal",
+            "generators": [
+                "External"
+            ],
+            "packageName": "package-name"
+        },
+        {
+            "name": "package-version",
+            "inherits": "minimal",
+            "generators": [
+                "External"
+            ],
+            "packageVersion": "1.0"
+        },
+        {
+            "name": "package-directory",
+            "inherits": "minimal",
+            "packageDirectory": "${sourceDir}/build/default/package-directory"
+        },
+        {
+            "name": "vendor-name",
+            "inherits": "minimal",
+            "generators": [
+                "External"
+            ],
+            "variables": {
+                "CPACK_EXTERNAL_PACKAGE_SCRIPT": "${sourceDir}/build/default/external_package.cmake"
+            },
+            "vendorName": "some-vendor"
+        }
+    ]
+}

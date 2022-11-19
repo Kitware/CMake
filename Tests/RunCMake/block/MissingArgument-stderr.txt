@@ -1,0 +1,7 @@
+CMake Error at MissingArgument.cmake:[0-9]+ \(block\):
+  Error after keyword "SCOPE_FOR":
+
+    missing required value
+
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

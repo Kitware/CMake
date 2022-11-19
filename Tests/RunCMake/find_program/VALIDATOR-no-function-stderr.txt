@@ -1,0 +1,4 @@
+CMake Error at VALIDATOR-no-function.cmake:[0-9]+ \(find_program\):
+  find_program missing required argument for "VALIDATOR"
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

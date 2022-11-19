@@ -1,0 +1,5 @@
+
+add_library(LibBundle lib_bundle.cpp)
+
+set_target_properties(LibBundle PROPERTIES
+      MACOSX_BUNDLE YES)

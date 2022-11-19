@@ -13,7 +13,7 @@ error:
 * :command:`find_package`
 
 Output is designed for human consumption and not for parsing.
-Enabling this variable is equivalent to using :manual:`cmake <cmake(1)>` ``--debug-find``
+Enabling this variable is equivalent to using :option:`cmake --debug-find`
 with the added ability to enable debugging for a subset of find calls.
 
 .. code-block:: cmake

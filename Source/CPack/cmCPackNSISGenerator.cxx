@@ -242,6 +242,33 @@ int cmCPackNSISGenerator::PackageFiles()
     this->SetOptionIfNotSet("CPACK_NSIS_LICENSE_PAGE", licenceCode);
   }
 
+  std::string nsisPreArguments;
+  if (cmValue nsisArguments =
+        this->GetOption("CPACK_NSIS_EXECUTABLE_PRE_ARGUMENTS")) {
+    std::vector<std::string> expandedArguments;
+    cmExpandList(nsisArguments, expandedArguments);
+
+    for (auto& arg : expandedArguments) {
+      if (!cmHasPrefix(arg, NSIS_OPT)) {
+        nsisPreArguments = cmStrCat(nsisPreArguments, NSIS_OPT);
+      }
+      nsisPreArguments = cmStrCat(nsisPreArguments, arg, ' ');
+    }
+  }
+
+  std::string nsisPostArguments;
+  if (cmValue nsisArguments =
+        this->GetOption("CPACK_NSIS_EXECUTABLE_POST_ARGUMENTS")) {
+    std::vector<std::string> expandedArguments;
+    cmExpandList(nsisArguments, expandedArguments);
+    for (auto& arg : expandedArguments) {
+      if (!cmHasPrefix(arg, NSIS_OPT)) {
+        nsisPostArguments = cmStrCat(nsisPostArguments, NSIS_OPT);
+      }
+      nsisPostArguments = cmStrCat(nsisPostArguments, arg, ' ');
+    }
+  }
+
   // Setup all of the component sections
   if (this->Components.empty()) {
     this->SetOptionIfNotSet("CPACK_NSIS_INSTALLATION_TYPES", "");
@@ -358,8 +385,11 @@ int cmCPackNSISGenerator::PackageFiles()
   this->ConfigureFile(nsisInInstallOptions, nsisInstallOptions);
   this->ConfigureFile(nsisInFileName, nsisFileName);
   std::string nsisCmd =
-    cmStrCat('"', this->GetOption("CPACK_INSTALLER_PROGRAM"), "\" \"",
-             nsisFileName, '"');
+    cmStrCat('"', this->GetOption("CPACK_INSTALLER_PROGRAM"), "\" ",
+             nsisPreArguments, " \"", nsisFileName, '"');
+  if (!nsisPostArguments.empty()) {
+    nsisCmd = cmStrCat(nsisCmd, " ", nsisPostArguments);
+  }
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Execute: " << nsisCmd << std::endl);
   std::string output;
   int retVal = 1;

@@ -16,6 +16,7 @@
 add_executable(submod
   main.f90
   parent.f90
+  obfuscated_parent.f90
   child.f90
   grandchild.f90
   greatgrandchild.f90

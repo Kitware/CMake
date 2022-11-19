@@ -4,7 +4,6 @@
 
 #include <set>
 
-#include <cmext/algorithm>
 #include <cmext/string_view>
 
 #include "cmCTest.h"
@@ -18,13 +17,6 @@ void cmCTestCoverageCommand::BindArguments()
   this->Bind("LABELS"_s, this->Labels);
 }
 
-void cmCTestCoverageCommand::CheckArguments(
-  std::vector<std::string> const& keywords)
-{
-  this->LabelsMentioned =
-    !this->Labels.empty() || cm::contains(keywords, "LABELS");
-}
-
 cmCTestGenericHandler* cmCTestCoverageCommand::InitializeHandler()
 {
   this->CTest->SetCTestConfigurationFromCMakeVariable(
@@ -36,9 +28,9 @@ cmCTestGenericHandler* cmCTestCoverageCommand::InitializeHandler()
   handler->Initialize();
 
   // If a LABELS option was given, select only files with the labels.
-  if (this->LabelsMentioned) {
+  if (this->Labels) {
     handler->SetLabelFilter(
-      std::set<std::string>(this->Labels.begin(), this->Labels.end()));
+      std::set<std::string>(this->Labels->begin(), this->Labels->end()));
   }
 
   handler->SetQuiet(this->Quiet);

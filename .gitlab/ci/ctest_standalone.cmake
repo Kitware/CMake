@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 3.8)
 include("${CMAKE_CURRENT_LIST_DIR}/gitlab_ci.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/env_$ENV{CMAKE_CONFIGURATION}.cmake" OPTIONAL)
 
-set(cmake_args
-  -C "${CMAKE_CURRENT_LIST_DIR}/configure_$ENV{CMAKE_CONFIGURATION}.cmake")
+set(initial_cache "${CMAKE_CURRENT_LIST_DIR}/configure_$ENV{CMAKE_CONFIGURATION}.cmake")
+set(cmake_args -C "${initial_cache}")
 
 include(ProcessorCount)
 ProcessorCount(nproc)
@@ -25,6 +25,8 @@ ctest_update()
 
 if("$ENV{CMAKE_CI_BOOTSTRAP}")
   set(CTEST_CONFIGURE_COMMAND "\"${CTEST_SOURCE_DIRECTORY}/bootstrap\" --parallel=${nproc}")
+elseif("$ENV{CMAKE_CONFIGURATION}" MATCHES "extdeps")
+  set(CTEST_CONFIGURE_COMMAND "/opt/extdeps/bin/cmake -C \"${initial_cache}\" -G \"${CTEST_CMAKE_GENERATOR}\" \"${CTEST_SOURCE_DIRECTORY}\"")
 endif()
 
 # Configure the project.

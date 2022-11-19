@@ -15,6 +15,7 @@ The general signature is:
              [PATHS [path | ENV var]... ]
              [REGISTRY_VIEW (64|32|64_32|32_64|HOST|TARGET|BOTH)]
              [PATH_SUFFIXES suffix1 [suffix2 ...]]
+             [VALIDATOR function]
              [DOC "cache documentation string"]
              [NO_CACHE]
              [REQUIRED]
@@ -65,6 +66,31 @@ Options include:
 ``PATH_SUFFIXES``
   Specify additional subdirectories to check below each directory
   location otherwise considered.
+
+``VALIDATOR``
+  .. versionadded:: 3.25
+
+  Specify a :command:`function` to be called for each candidate item found
+  (a :command:`macro` cannot be provided, that will result in an error).
+  Two arguments will be passed to the validator function: the name of a
+  result variable, and the absolute path to the candidate item.  The item
+  will be accepted and the search will end unless the function sets the
+  value in the result variable to false in the calling scope.  The result
+  variable will hold a true value when the validator function is entered.
+
+  .. parsed-literal::
+
+     function(my_check validator_result_var item)
+       if(NOT item MATCHES ...)
+         set(${validator_result_var} FALSE PARENT_SCOPE)
+       endif()
+     endfunction()
+
+     |FIND_XXX| (result NAMES ... VALIDATOR my_check)
+
+  Note that if a cached result is used, the search is skipped and any
+  ``VALIDATOR`` is ignored.  The cached result is not required to pass the
+  validation function.
 
 ``DOC``
   Specify the documentation string for the ``<VAR>`` cache entry.
@@ -166,7 +192,8 @@ If ``NO_DEFAULT_PATH`` is not specified, the search process is as follows:
    * |SYSTEM_ENVIRONMENT_PATH_WINDOWS_XXX|
 
 6. Search cmake variables defined in the Platform files
-   for the current system.  The searching of ``CMAKE_INSTALL_PREFIX`` can be
+   for the current system.  The searching of ``CMAKE_INSTALL_PREFIX`` and
+   ``CMAKE_STAGING_PREFIX`` can be
    skipped if ``NO_CMAKE_INSTALL_PREFIX`` is passed or by setting the
    :variable:`CMAKE_FIND_USE_INSTALL_PREFIX` to ``FALSE``. All these locations
    can be skipped if ``NO_CMAKE_SYSTEM_PATH`` is passed or by setting the

@@ -143,7 +143,8 @@ bool HandleHexCommand(std::vector<std::string> const& args,
 
   std::string::size_type hexIndex = 0;
   for (auto const& c : instr) {
-    sprintf(&output[hexIndex], "%.2x", static_cast<unsigned char>(c) & 0xFF);
+    snprintf(&output[hexIndex], 3, "%.2x",
+             static_cast<unsigned char>(c) & 0xFF);
     hexIndex += 2;
   }
 
@@ -1013,7 +1014,7 @@ int ParseIndex(
   Json::ArrayIndex index = static_cast<Json::ArrayIndex>(lindex);
   if (index >= max) {
     cmAlphaNum sizeStr{ max };
-    throw json_error({ "expected an index less then "_s, sizeStr.View(),
+    throw json_error({ "expected an index less than "_s, sizeStr.View(),
                        " got '"_s, str, "'"_s },
                      progress);
   }

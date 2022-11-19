@@ -53,9 +53,9 @@ Here's how it works:
 
 * :manual:`cpack <cpack(1)>` runs
 * it includes ``CPackConfig.cmake``
-* it iterates over the generators given by the ``-G`` command line option,
-  or if no such option was specified, over the list of generators given by
-  the :variable:`CPACK_GENERATOR` variable set in the ``CPackConfig.cmake``
+* it iterates over the generators given by the :option:`-G <cpack -G>` command
+  line option, or if no such option was specified, over the list of generators
+  given by the :variable:`CPACK_GENERATOR` variable set in the ``CPackConfig.cmake``
   input file.
 * foreach generator, it then
 
@@ -217,7 +217,8 @@ installers.  The most commonly-used variables are:
   to the user by the produced installer (often with an explicit "Accept"
   button, for graphical installers) prior to installation.  This license
   file is NOT added to the installed files but is used by some CPack generators
-  like NSIS.  If you want to install a license file (may be the same as this
+  like NSIS.  If you want to use UTF-8 characters, the file needs to be encoded
+  in UTF-8 BOM.  If you want to install a license file (may be the same as this
   one) along with your project, you must add an appropriate CMake
   :command:`install` command in your ``CMakeLists.txt``.
 
@@ -246,9 +247,9 @@ installers.  The most commonly-used variables are:
   List of CPack generators to use.  If not specified, CPack will create a
   set of options following the naming pattern
   :variable:`CPACK_BINARY_<GENNAME>` (e.g. ``CPACK_BINARY_NSIS``) allowing
-  the user to enable/disable individual generators.  If the ``-G`` option is
-  given on the :manual:`cpack <cpack(1)>` command line, it will override this
-  variable and any ``CPACK_BINARY_<GENNAME>`` options.
+  the user to enable/disable individual generators.  If the :option:`-G <cpack -G>`
+  option is given on the :manual:`cpack <cpack(1)>` command line, it will override
+  this variable and any ``CPACK_BINARY_<GENNAME>`` options.
 
 .. variable:: CPACK_OUTPUT_CONFIG_FILE
 
@@ -469,7 +470,35 @@ The following variables are for advanced uses of CPack:
   generates (when :variable:`CPACK_GENERATOR` is not set) a set of CMake
   options (see CMake :command:`option` command) which may then be used to
   select the CPack generator(s) to be used when building the ``package``
-  target or when running :manual:`cpack <cpack(1)>` without the ``-G`` option.
+  target or when running :manual:`cpack <cpack(1)>` without the
+  :option:`-G <cpack -G>` option.
+
+.. variable:: CPACK_READELF_EXECUTABLE
+
+  .. versionadded:: 3.25
+
+  Specify the ``readelf`` executable path used by CPack.
+  The default value will be ``CMAKE_READELF`` when set.  Otherwise,
+  the default value will be empty and CPack will use :command:`find_program`
+  to determine the ``readelf`` path when needed.
+
+.. variable:: CPACK_OBJCOPY_EXECUTABLE
+
+  .. versionadded:: 3.25
+
+  Specify the ``objcopy`` executable path used by CPack.
+  The default value will be ``CMAKE_OBJCOPY`` when set.  Otherwise,
+  the default value will be empty and CPack will use :command:`find_program`
+  to determine the ``objcopy`` path when needed.
+
+.. variable:: CPACK_OBJDUMP_EXECUTABLE
+
+  .. versionadded:: 3.25
+
+  Specify the ``objdump`` executable path used by CPack.
+  The default value will be ``CMAKE_OBJDUMP`` when set.  Otherwise,
+  the default value will be empty and CPack will use :command:`find_program`
+  to determine the ``objdump`` path when needed.
 
 #]=======================================================================]
 
@@ -589,6 +618,16 @@ _cpack_set_default(CPACK_RESOURCE_FILE_WELCOME
   "${CMAKE_ROOT}/Templates/CPack.GenericWelcome.txt")
 
 _cpack_set_default(CPACK_MODULE_PATH "${CMAKE_MODULE_PATH}")
+
+if(CMAKE_READELF)
+  _cpack_set_default(CPACK_READELF_EXECUTABLE "${CMAKE_READELF}")
+endif()
+if(CMAKE_OBJCOPY)
+  _cpack_set_default(CPACK_OBJCOPY_EXECUTABLE "${CMAKE_OBJCOPY}")
+endif()
+if(CMAKE_OBJDUMP)
+  _cpack_set_default(CPACK_OBJDUMP_EXECUTABLE "${CMAKE_OBJDUMP}")
+endif()
 
 # Set default directory creation permissions mode
 if(CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS)

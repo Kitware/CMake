@@ -155,6 +155,15 @@ target_include_directories(testInterfaceIncludeUser
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/testInterfaceIncludeUser>"
 )
 set_property(TARGET testInterfaceIncludeUser PROPERTY IMPORTED_NO_SYSTEM 1)
+
+add_library(testInterfaceIncludeUser2 INTERFACE)
+target_include_directories(testInterfaceIncludeUser2
+  INTERFACE
+    "$<INSTALL_INTERFACE:include/testInterfaceIncludeUser>"
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/testInterfaceIncludeUser>"
+)
+set_property(TARGET testInterfaceIncludeUser2 PROPERTY EXPORT_NO_SYSTEM 1)
+
 install(
   FILES
     "${CMAKE_CURRENT_SOURCE_DIR}/include/testInterfaceIncludeUser/testInterfaceInclude.h"
@@ -562,6 +571,7 @@ install(
   TopDirLib SubDirLinkA
   systemlib
   testInterfaceIncludeUser
+  testInterfaceIncludeUser2
   EXPORT exp
   RUNTIME DESTINATION $<1:bin>$<0:/wrong>
   LIBRARY DESTINATION $<1:lib>$<0:/wrong> NAMELINK_SKIP
@@ -622,6 +632,7 @@ export(TARGETS testExe1 testLib1 testLib2 testLib3
   TopDirLib SubDirLinkA
   systemlib
   testInterfaceIncludeUser
+  testInterfaceIncludeUser2
   NAMESPACE bld_
   FILE ExportBuildTree.cmake
   )

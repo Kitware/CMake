@@ -30,6 +30,7 @@ public:
     delete;
 
   bool ComputeRequiresDeviceLinking(cmComputeLinkInformation& cli);
+  bool ComputeRequiresDeviceLinkingIPOFlag(cmComputeLinkInformation& cli);
 
   void ComputeLinkLibraries(
     cmComputeLinkInformation& cli, std::string const& stdLibString,

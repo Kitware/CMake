@@ -1,4 +1,5 @@
 include(Platform/NetBSD)
+set(BSD "OpenBSD")
 
 # On OpenBSD, the compile time linker does not share it's configuration with
 # the runtime linker.  This will extract the library search paths from the

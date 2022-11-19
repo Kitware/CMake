@@ -23,3 +23,8 @@ string(APPEND content
        "set(target_file_name ${target_name})\n")
 file(GENERATE OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/FrameworkMultiConfigPostfixInfo.cmake
      CONTENT "${content}")
+
+
+# Try to link this framework to ensure postfix is correctly handled
+add_library(otherlib SHARED foo.c)
+target_link_libraries(otherlib PRIVATE ${target_name})

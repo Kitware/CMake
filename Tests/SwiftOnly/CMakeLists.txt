@@ -22,9 +22,13 @@ elseif(NOT XCODE_VERSION VERSION_LESS 8.0)
   set(CMAKE_Swift_LANGUAGE_VERSION 3.0)
 endif()
 
+add_subdirectory(SubA)
+add_subdirectory(SubB)
+
 set(CMAKE_Swift_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/swift)
 
 add_executable(SwiftOnly main.swift)
+target_compile_definitions(SwiftOnly PRIVATE SWIFTONLY)
 
 add_library(L L.swift)
 

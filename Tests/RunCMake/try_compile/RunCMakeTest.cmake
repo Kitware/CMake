@@ -1,72 +1,44 @@
 include(RunCMake)
 
-run_cmake(CopyFileErrorNoCopyFile)
 run_cmake(NoArgs)
 run_cmake(OneArg)
 run_cmake(TwoArgs)
-run_cmake(NoCopyFile)
-run_cmake(NoCopyFile2)
-run_cmake(NoCopyFileError)
-run_cmake(NoOutputVariable)
-run_cmake(NoOutputVariable2)
 run_cmake(NoSources)
-run_cmake(BadLinkLibraries)
-run_cmake(BadSources1)
-run_cmake(BadSources2)
+run_cmake(BinDirEmpty)
+run_cmake(BinDirRelative)
+run_cmake(ProjectSrcDirMissing)
+run_cmake(ProjectSrcDirEmpty)
+run_cmake(ProjectBinDirEmpty)
+run_cmake(OldProjectSrcDirEmpty)
+run_cmake(OldProjectBinDirEmpty)
+
+set(RunCMake_TEST_OPTIONS -Dtry_compile_DEFS=old_signature.cmake)
+include(${RunCMake_SOURCE_DIR}/old_and_new_signature_tests.cmake)
+unset(RunCMake_TEST_OPTIONS)
+
+set(RunCMake_TEST_OPTIONS -Dtry_compile_DEFS=new_signature.cmake)
+include(${RunCMake_SOURCE_DIR}/old_and_new_signature_tests.cmake)
+unset(RunCMake_TEST_OPTIONS)
+
+run_cmake(SourceFromOneArg)
+run_cmake(SourceFromThreeArgs)
+run_cmake(SourceFromBadName)
+run_cmake(SourceFromBadFile)
+
+run_cmake(ProjectCopyFile)
 run_cmake(NonSourceCopyFile)
 run_cmake(NonSourceCompileDefinitions)
-
-run_cmake(EnvConfig)
 
 set(RunCMake_TEST_OPTIONS --debug-trycompile)
 run_cmake(PlatformVariables)
 run_cmake(WarnDeprecated)
 unset(RunCMake_TEST_OPTIONS)
 
-run_cmake(TargetTypeExe)
-run_cmake(TargetTypeInvalid)
-run_cmake(TargetTypeStatic)
-
 if (CMAKE_SYSTEM_NAME MATCHES "^(Linux|Darwin|Windows)$" AND
     CMAKE_C_COMPILER_ID MATCHES "^(MSVC|GNU|LCC|Clang|AppleClang)$")
   set (RunCMake_TEST_OPTIONS -DRunCMake_C_COMPILER_ID=${CMAKE_C_COMPILER_ID})
   run_cmake(LinkOptions)
   unset (RunCMake_TEST_OPTIONS)
-endif()
-
-if(CMAKE_C_STANDARD_DEFAULT)
-  run_cmake(CStandard)
-elseif(DEFINED CMAKE_C_STANDARD_DEFAULT)
-  run_cmake(CStandardNoDefault)
-endif()
-if(CMAKE_OBJC_STANDARD_DEFAULT)
-  run_cmake(ObjCStandard)
-endif()
-if(CMAKE_CXX_STANDARD_DEFAULT)
-  run_cmake(CxxStandard)
-elseif(DEFINED CMAKE_CXX_STANDARD_DEFAULT)
-  run_cmake(CxxStandardNoDefault)
-endif()
-if(CMAKE_OBJCXX_STANDARD_DEFAULT)
-  run_cmake(ObjCxxStandard)
-endif()
-if(CMake_TEST_CUDA)
-  run_cmake(CudaStandard)
-endif()
-if(CMake_TEST_ISPC)
-  run_cmake(ISPCTargets)
-  run_cmake(ISPCInvalidTarget)
-  set(ninja "")
-  if(RunCMake_GENERATOR MATCHES "Ninja")
-    set(ninja "Ninja")
-  endif()
-  run_cmake(ISPCDuplicateTarget${ninja})
-endif()
-if((CMAKE_C_COMPILER_ID MATCHES "GNU" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.4) OR CMAKE_C_COMPILER_ID MATCHES "LCC")
-  run_cmake(CStandardGNU)
-endif()
-if((CMAKE_CXX_COMPILER_ID MATCHES "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.4) OR CMAKE_C_COMPILER_ID MATCHES "LCC")
-  run_cmake(CxxStandardGNU)
 endif()
 
 run_cmake(CMP0056)
@@ -114,6 +86,24 @@ if(RunCMake_GENERATOR MATCHES "Make|Ninja")
 
   unset(RunCMake_TEST_BINARY_DIR)
   unset(RunCMake_TEST_NO_CLEAN)
+endif()
+
+# Lookup CMAKE_CXX_EXTENSIONS_DEFAULT.
+# FIXME: Someday we could move this to the top of the file and use it in
+# place of some of the values passed by 'Tests/RunCMake/CMakeLists.txt'.
+run_cmake(Inspect)
+include("${RunCMake_BINARY_DIR}/Inspect-build/info.cmake")
+
+# FIXME: Support more compilers and default standard levels.
+if (DEFINED CMAKE_CXX_STANDARD_DEFAULT AND
+    DEFINED CMAKE_CXX_EXTENSIONS_DEFAULT AND (
+    (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 4.7) OR
+    (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+    ))
+  run_cmake(CMP0128-WARN)
+  if(NOT CMAKE_CXX_STANDARD_DEFAULT EQUAL 11)
+    run_cmake(CMP0128-NEW)
+  endif()
 endif()
 
 if(UNIX)

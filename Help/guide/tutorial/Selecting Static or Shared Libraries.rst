@@ -1,5 +1,5 @@
-Step 9: Selecting Static or Shared Libraries
-============================================
+Step 10: Selecting Static or Shared Libraries
+=============================================
 
 In this section we will show how the :variable:`BUILD_SHARED_LIBS` variable can
 be used to control the default behavior of :command:`add_library`,
@@ -19,7 +19,7 @@ library.
 The first step is to update the starting section of the top-level
 ``CMakeLists.txt`` to look like:
 
-.. literalinclude:: Step10/CMakeLists.txt
+.. literalinclude:: Step11/CMakeLists.txt
   :caption: CMakeLists.txt
   :name: CMakeLists.txt-option-BUILD_SHARED_LIBS
   :language: cmake
@@ -33,7 +33,7 @@ explicitly require that SqrtLibrary is built statically.
 
 The end result is that ``MathFunctions/CMakeLists.txt`` should look like:
 
-.. literalinclude:: Step10/MathFunctions/CMakeLists.txt
+.. literalinclude:: Step11/MathFunctions/CMakeLists.txt
   :caption: MathFunctions/CMakeLists.txt
   :name: MathFunctions/CMakeLists.txt-add_library-STATIC
   :language: cmake
@@ -42,7 +42,7 @@ The end result is that ``MathFunctions/CMakeLists.txt`` should look like:
 Next, update ``MathFunctions/mysqrt.cxx`` to use the ``mathfunctions`` and
 ``detail`` namespaces:
 
-.. literalinclude:: Step10/MathFunctions/mysqrt.cxx
+.. literalinclude:: Step11/MathFunctions/mysqrt.cxx
   :caption: MathFunctions/mysqrt.cxx
   :name: MathFunctions/mysqrt.cxx-namespace
   :language: c++
@@ -56,7 +56,7 @@ uses ``USE_MYMATH``:
 
 Finally, update ``MathFunctions/MathFunctions.h`` to use dll export defines:
 
-.. literalinclude:: Step10/MathFunctions/MathFunctions.h
+.. literalinclude:: Step11/MathFunctions/MathFunctions.h
   :caption: MathFunctions/MathFunctions.h
   :name: MathFunctions/MathFunctions.h
   :language: c++
@@ -67,7 +67,7 @@ library that has position independent code. The solution to this is to
 explicitly set the :prop_tgt:`POSITION_INDEPENDENT_CODE` target property of
 SqrtLibrary to be ``True`` no matter the build type.
 
-.. literalinclude:: Step10/MathFunctions/CMakeLists.txt
+.. literalinclude:: Step11/MathFunctions/CMakeLists.txt
   :caption: MathFunctions/CMakeLists.txt
   :name: MathFunctions/CMakeLists.txt-POSITION_INDEPENDENT_CODE
   :language: cmake

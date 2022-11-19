@@ -477,21 +477,21 @@
     "flags": []
   },
   {
-    "name":  "NoStandardLib",
+    "name":  "NoStdLib",
     "switch": "nostdlib",
     "comment": "",
     "value": "true",
     "flags": []
   },
   {
-    "name":  "NoStandardLib",
+    "name":  "NoStdLib",
     "switch": "nostdlib-",
     "comment": "",
     "value": "false",
     "flags": []
   },
   {
-    "name":  "NoStandardLib",
+    "name":  "NoStdLib",
     "switch": "nostdlib+",
     "comment": "",
     "value": "true",

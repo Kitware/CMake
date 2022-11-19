@@ -188,6 +188,19 @@ bool cmScanDepFormat_P1689_Parse(std::string const& arg_pp,
             return false;
           }
 
+          if (provide.isMember("is-interface")) {
+            Json::Value const& is_interface = provide["is-interface"];
+            if (!is_interface.isBool()) {
+              cmSystemTools::Error(
+                cmStrCat("-E cmake_ninja_dyndep failed to parse ", arg_pp,
+                         ": is-interface is not a boolean"));
+              return false;
+            }
+            provide_info.IsInterface = is_interface.asBool();
+          } else {
+            provide_info.IsInterface = true;
+          }
+
           info->Provides.push_back(provide_info);
         }
       }
@@ -307,6 +320,8 @@ bool cmScanDepFormat_P1689_Write(std::string const& path,
     } else if (!provide.SourcePath.empty()) {
       provide_obj["source-path"] = EncodeFilename(provide.SourcePath);
     }
+
+    provide_obj["is-interface"] = provide.IsInterface;
 
     provides.append(provide_obj);
   }

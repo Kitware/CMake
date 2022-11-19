@@ -38,6 +38,8 @@ private:
   virtual cm::string_view StartCommandName() const = 0;
   virtual cm::string_view EndCommandName() const = 0;
 
+  virtual bool EndCommandSupportsArguments() const { return true; }
+
   virtual bool ArgumentsMatch(cmListFileFunction const& lff,
                               cmMakefile& mf) const = 0;
 

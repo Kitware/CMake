@@ -105,8 +105,7 @@ function(_DetermineVSServicePack_CheckVersionWithTryCompile _SUCCESS_VAR  _VERSI
 
     try_compile(
       _CompileResult
-      "${CMAKE_BINARY_DIR}"
-      "${CMAKE_BINARY_DIR}/return0.cc"
+      SOURCES "${CMAKE_BINARY_DIR}/return0.cc"
       OUTPUT_VARIABLE _output
       COPY_FILE "${CMAKE_BINARY_DIR}/return0.cc")
 
@@ -128,8 +127,7 @@ function(_DetermineVSServicePack_CheckVersionWithTryRun _SUCCESS_VAR  _VERSION_V
     try_run(
         _RunResult
         _CompileResult
-        "${CMAKE_BINARY_DIR}"
-        "${CMAKE_BINARY_DIR}/return0.cc"
+        SOURCES "${CMAKE_BINARY_DIR}/return0.cc"
         RUN_OUTPUT_VARIABLE  _runoutput
         )
 

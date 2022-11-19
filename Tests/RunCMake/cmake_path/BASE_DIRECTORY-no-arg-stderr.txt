@@ -1,0 +1,4 @@
+CMake Error at .+/cmake_path/call-cmake_path.cmake:[0-9]+ \(cmake_path\):
+  Error after keyword "BASE_DIRECTORY":
+
+    missing required value

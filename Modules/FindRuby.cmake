@@ -369,56 +369,17 @@ if(Ruby_EXECUTABLE AND NOT Ruby_VERSION_MAJOR)
     set(Ruby_VERSION_MAJOR 1)
     set(Ruby_VERSION_MINOR 9)
   endif()
-  # check whether we found 2.0.x
-  if(${Ruby_EXECUTABLE} MATCHES "ruby2\\.?0")
+  # check whether we found 2.[0-7].x
+  if(${Ruby_EXECUTABLE} MATCHES "ruby2")
     set(Ruby_VERSION_MAJOR 2)
-    set(Ruby_VERSION_MINOR 0)
+    string(REGEX_REPLACE ${Ruby_EXECUTABLE} "ruby2\\.?([0-7])" "\\1" Ruby_VERSION_MINOR)
   endif()
-  # check whether we found 2.1.x
-  if(${Ruby_EXECUTABLE} MATCHES "ruby2\\.?1")
-    set(Ruby_VERSION_MAJOR 2)
-    set(Ruby_VERSION_MINOR 1)
-  endif()
-  # check whether we found 2.2.x
-  if(${Ruby_EXECUTABLE} MATCHES "ruby2\\.?2")
-    set(Ruby_VERSION_MAJOR 2)
-    set(Ruby_VERSION_MINOR 2)
-  endif()
-  # check whether we found 2.3.x
-  if(${Ruby_EXECUTABLE} MATCHES "ruby2\\.?3")
-    set(Ruby_VERSION_MAJOR 2)
-    set(Ruby_VERSION_MINOR 3)
-  endif()
-  # check whether we found 2.4.x
-  if(${Ruby_EXECUTABLE} MATCHES "ruby2\\.?4")
-    set(Ruby_VERSION_MAJOR 2)
-    set(Ruby_VERSION_MINOR 4)
-  endif()
-  # check whether we found 2.5.x
-  if(${Ruby_EXECUTABLE} MATCHES "ruby2\\.?5")
-    set(Ruby_VERSION_MAJOR 2)
-    set(Ruby_VERSION_MINOR 5)
-  endif()
-  # check whether we found 2.6.x
-  if(${Ruby_EXECUTABLE} MATCHES "ruby2\\.?6")
-    set(Ruby_VERSION_MAJOR 2)
-    set(Ruby_VERSION_MINOR 6)
-  endif()
-  # check whether we found 2.7.x
-  if(${Ruby_EXECUTABLE} MATCHES "ruby2\\.?7")
-    set(Ruby_VERSION_MAJOR 2)
-    set(Ruby_VERSION_MINOR 7)
-  endif()
-  # check whether we found 3.0.x
-  if(${Ruby_EXECUTABLE} MATCHES "ruby3\\.?0")
+  # check whether we found 3.[0-1].x
+  if(${Ruby_EXECUTABLE} MATCHES "ruby3")
     set(Ruby_VERSION_MAJOR 3)
-    set(Ruby_VERSION_MINOR 0)
+    string(REGEX_REPLACE ${Ruby_EXECUTABLE} "ruby3\\.?([0-1])" "\\1" Ruby_VERSION_MINOR)
   endif()
-  # check whether we found 3.1.x
-  if(${Ruby_EXECUTABLE} MATCHES "ruby3\\.?1")
-    set(Ruby_VERSION_MAJOR 3)
-    set(Ruby_VERSION_MINOR 1)
-  endif()
+
 endif()
 
 if(Ruby_VERSION_MAJOR)

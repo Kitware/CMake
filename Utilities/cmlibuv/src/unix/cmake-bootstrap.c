@@ -135,7 +135,9 @@ int uv__statx(int dirfd,
   errno = ENOSYS;
   return -1;
 }
+#endif
 
+#if defined(__linux__) || defined(__FreeBSD__)
 ssize_t uv__fs_copy_file_range(int fd_in, off_t* off_in,
                                int fd_out, off_t* off_out,
                                size_t len, unsigned int flags)

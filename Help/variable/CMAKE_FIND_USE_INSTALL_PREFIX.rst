@@ -4,7 +4,8 @@ CMAKE_FIND_USE_INSTALL_PREFIX
 .. versionadded:: 3.24
 
 Controls the default behavior of the following commands for whether or not to
-search the install location:
+search the locations in the :variable:`CMAKE_INSTALL_PREFIX` and
+:variable:`CMAKE_STAGING_PREFIX` variables.
 
 * :command:`find_program`
 * :command:`find_library`

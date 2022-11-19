@@ -1,0 +1,20 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "default"
+    }
+  ],
+  "packagePresets": [
+    {
+      "name": "default",
+      "configurePreset": "default"
+    },
+    {
+      "name": "with-description",
+      "displayName": "With Description",
+      "description": "This preset has a description",
+      "configurePreset": "default"
+    }
+  ]
+}

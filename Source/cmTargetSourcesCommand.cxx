@@ -9,6 +9,8 @@
 #include <cmext/string_view>
 
 #include "cmArgumentParser.h"
+#include "cmArgumentParserTypes.h"
+#include "cmExperimental.h"
 #include "cmFileSet.h"
 #include "cmGeneratorExpression.h"
 #include "cmListFileCache.h"
@@ -27,8 +29,8 @@ struct FileSetArgs
 {
   std::string Type;
   std::string FileSet;
-  std::vector<std::string> BaseDirs;
-  std::vector<std::string> Files;
+  ArgumentParser::MaybeEmpty<std::vector<std::string>> BaseDirs;
+  ArgumentParser::MaybeEmpty<std::vector<std::string>> Files;
 };
 
 auto const FileSetArgsParser = cmArgumentParser<FileSetArgs>()
@@ -77,7 +79,8 @@ private:
   {
     tgt->AppendProperty("SOURCES",
                         this->Join(this->ConvertToAbsoluteContent(
-                          tgt, content, IsInterface::No, CheckCMP0076::Yes)));
+                          tgt, content, IsInterface::No, CheckCMP0076::Yes)),
+                        this->Makefile->GetBacktrace());
     return true; // Successfully handled.
   }
 
@@ -196,7 +199,7 @@ std::vector<std::string> TargetSourcesImpl::ConvertToAbsoluteContent(
 bool TargetSourcesImpl::HandleFileSetMode(
   const std::string& scope, const std::vector<std::string>& content)
 {
-  auto args = FileSetsArgsParser.Parse(content);
+  auto args = FileSetsArgsParser.Parse(content, /*unparsedArguments=*/nullptr);
 
   for (auto& argList : args.FileSets) {
     argList.emplace(argList.begin(), "FILE_SET"_s);
@@ -256,9 +259,31 @@ bool TargetSourcesImpl::HandleOneFileSet(
       this->SetError("Must specify a TYPE when creating file set");
       return false;
     }
-    if (type != "HEADERS"_s) {
-      this->SetError("File set TYPE may only be \"HEADERS\"");
-      return false;
+    bool const supportCxx20FileSetTypes = cmExperimental::HasSupportEnabled(
+      *this->Makefile, cmExperimental::Feature::CxxModuleCMakeApi);
+
+    if (supportCxx20FileSetTypes) {
+      if (type != "HEADERS"_s && type != "CXX_MODULES"_s &&
+          type != "CXX_MODULE_HEADER_UNITS"_s) {
+        this->SetError(
+          R"(File set TYPE may only be "HEADERS", "CXX_MODULES", or "CXX_MODULE_HEADER_UNITS")");
+        return false;
+      }
+
+      if (cmFileSetVisibilityIsForInterface(visibility) &&
+          !cmFileSetVisibilityIsForSelf(visibility) &&
+          !this->Target->IsImported()) {
+        if (type == "CXX_MODULES"_s || type == "CXX_MODULE_HEADER_UNITS"_s) {
+          this->SetError(
+            R"(File set TYPEs "CXX_MODULES" and "CXX_MODULE_HEADER_UNITS" may not have "INTERFACE" visibility)");
+          return false;
+        }
+      }
+    } else {
+      if (type != "HEADERS"_s) {
+        this->SetError("File set TYPE may only be \"HEADERS\"");
+        return false;
+      }
     }
 
     if (args.BaseDirs.empty()) {
@@ -294,17 +319,19 @@ bool TargetSourcesImpl::HandleOneFileSet(
   if (!baseDirectories.empty()) {
     fileSet.first->AddDirectoryEntry(
       BT<std::string>(baseDirectories, this->Makefile->GetBacktrace()));
-    if (type == "HEADERS"_s) {
+    if (type == "HEADERS"_s || type == "CXX_MODULE_HEADER_UNITS"_s) {
       for (auto const& dir : cmExpandedList(baseDirectories)) {
         auto interfaceDirectoriesGenex =
           cmStrCat("$<BUILD_INTERFACE:", dir, ">");
         if (cmFileSetVisibilityIsForSelf(visibility)) {
           this->Target->AppendProperty("INCLUDE_DIRECTORIES",
-                                       interfaceDirectoriesGenex);
+                                       interfaceDirectoriesGenex,
+                                       this->Makefile->GetBacktrace());
         }
         if (cmFileSetVisibilityIsForInterface(visibility)) {
           this->Target->AppendProperty("INTERFACE_INCLUDE_DIRECTORIES",
-                                       interfaceDirectoriesGenex);
+                                       interfaceDirectoriesGenex,
+                                       this->Makefile->GetBacktrace());
         }
       }
     }

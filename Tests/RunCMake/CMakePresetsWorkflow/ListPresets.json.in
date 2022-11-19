@@ -1,0 +1,30 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "default"
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "default",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "default"
+        }
+      ]
+    },
+    {
+      "name": "with-description",
+      "displayName": "With Description",
+      "description": "This preset has a description.",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "default"
+        }
+      ]
+    }
+  ]
+}

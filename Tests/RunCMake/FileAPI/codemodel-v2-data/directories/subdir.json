@@ -1,0 +1,11 @@
+{
+    "source": "^subdir$",
+    "build": "^subdir$",
+    "parentSource": "^\\.$",
+    "childSources": null,
+    "targetIds": null,
+    "projectName": "codemodel-v2",
+    "minimumCMakeVersion": "3.13",
+    "hasInstallRule": null,
+    "installers": []
+}

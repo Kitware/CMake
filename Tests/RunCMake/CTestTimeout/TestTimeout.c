@@ -1,6 +1,7 @@
 #if defined(_WIN32)
 #  include <windows.h>
 #else
+#  include <sched.h>
 #  include <unistd.h>
 #endif
 

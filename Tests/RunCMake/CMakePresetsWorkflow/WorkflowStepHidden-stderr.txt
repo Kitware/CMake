@@ -1,0 +1,2 @@
+^CMake Error: Cannot use hidden configure preset in [^
+]*/Tests/RunCMake/CMakePresetsWorkflow/WorkflowStepHidden: "default"$

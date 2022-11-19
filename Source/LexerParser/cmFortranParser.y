@@ -115,34 +115,30 @@ stmt:
     cmFortranParser_RuleUse(parser, $2);
     free($2);
   }
-| MODULE WORD other EOSTMT {
+| MODULE WORD EOSTMT {
     cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
-    if (cmsysString_strcasecmp($2, "function") != 0 &&
-        cmsysString_strcasecmp($2, "procedure") != 0 &&
-        cmsysString_strcasecmp($2, "subroutine") != 0) {
-      cmFortranParser_RuleModule(parser, $2);
-    }
+    cmFortranParser_RuleModule(parser, $2);
     free($2);
   }
-| SUBMODULE LPAREN WORD RPAREN WORD other EOSTMT {
+| SUBMODULE LPAREN WORD RPAREN WORD EOSTMT {
     cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
     cmFortranParser_RuleSubmodule(parser, $3, $5);
     free($3);
     free($5);
   }
-| SUBMODULE LPAREN WORD COLON WORD RPAREN WORD other EOSTMT {
+| SUBMODULE LPAREN WORD COLON WORD RPAREN WORD EOSTMT {
     cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
     cmFortranParser_RuleSubmoduleNested(parser, $3, $5, $7);
     free($3);
     free($5);
     free($7);
   }
-| INTERFACE WORD other EOSTMT {
+| INTERFACE WORD EOSTMT {
     cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
     cmFortranParser_SetInInterface(parser, true);
     free($2);
   }
-| END INTERFACE other EOSTMT {
+| END INTERFACE EOSTMT {
     cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
     cmFortranParser_SetInInterface(parser, false);
   }
@@ -163,7 +159,7 @@ stmt:
     free($3);
     free($5);
   }
-| INCLUDE STRING other EOSTMT {
+| INCLUDE STRING EOSTMT {
     cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
     cmFortranParser_RuleInclude(parser, $2);
     free($2);

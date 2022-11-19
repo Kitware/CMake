@@ -4,9 +4,14 @@
 
 #include <algorithm>
 
+#include "cmArgumentParserTypes.h"
+#include "cmMakefile.h"
+#include "cmMessageType.h"
+#include "cmStringAlgorithms.h"
+
 namespace ArgumentParser {
 
-auto ActionMap::Emplace(cm::string_view name, Action action)
+auto KeywordActionMap::Emplace(cm::string_view name, KeywordAction action)
   -> std::pair<iterator, bool>
 {
   auto const it =
@@ -19,7 +24,7 @@ auto ActionMap::Emplace(cm::string_view name, Action action)
     : std::make_pair(this->emplace(it, name, std::move(action)), true);
 }
 
-auto ActionMap::Find(cm::string_view name) const -> const_iterator
+auto KeywordActionMap::Find(cm::string_view name) const -> const_iterator
 {
   auto const it =
     std::lower_bound(this->begin(), this->end(), name,
@@ -29,68 +34,171 @@ auto ActionMap::Find(cm::string_view name) const -> const_iterator
   return (it != this->end() && it->first == name) ? it : this->end();
 }
 
+auto PositionActionMap::Emplace(std::size_t pos, PositionAction action)
+  -> std::pair<iterator, bool>
+{
+  auto const it = std::lower_bound(
+    this->begin(), this->end(), pos,
+    [](value_type const& elem, std::size_t k) { return elem.first < k; });
+  return (it != this->end() && it->first == pos)
+    ? std::make_pair(it, false)
+    : std::make_pair(this->emplace(it, pos, std::move(action)), true);
+}
+
+auto PositionActionMap::Find(std::size_t pos) const -> const_iterator
+{
+  auto const it = std::lower_bound(
+    this->begin(), this->end(), pos,
+    [](value_type const& elem, std::size_t k) { return elem.first < k; });
+  return (it != this->end() && it->first == pos) ? it : this->end();
+}
+
+void Instance::Bind(std::function<Continue(cm::string_view)> f,
+                    ExpectAtLeast expect)
+{
+  this->KeywordValueFunc = std::move(f);
+  this->KeywordValuesExpected = expect.Count;
+}
+
 void Instance::Bind(bool& val)
 {
   val = true;
-  this->CurrentString = nullptr;
-  this->CurrentList = nullptr;
-  this->ExpectValue = false;
+  this->Bind(nullptr, ExpectAtLeast{ 0 });
 }
 
 void Instance::Bind(std::string& val)
 {
-  this->CurrentString = &val;
-  this->CurrentList = nullptr;
-  this->ExpectValue = true;
+  this->Bind(
+    [&val](cm::string_view arg) -> Continue {
+      val = std::string(arg);
+      return Continue::No;
+    },
+    ExpectAtLeast{ 1 });
 }
 
-void Instance::Bind(StringList& val)
+void Instance::Bind(NonEmpty<std::string>& val)
 {
-  this->CurrentString = nullptr;
-  this->CurrentList = &val;
-  this->ExpectValue = true;
+  this->Bind(
+    [this, &val](cm::string_view arg) -> Continue {
+      if (arg.empty() && this->ParseResults) {
+        this->ParseResults->AddKeywordError(this->Keyword,
+                                            "  empty string not allowed\n");
+      }
+      val.assign(std::string(arg));
+      return Continue::No;
+    },
+    ExpectAtLeast{ 1 });
 }
 
-void Instance::Bind(MultiStringList& val)
+void Instance::Bind(Maybe<std::string>& val)
 {
-  this->CurrentString = nullptr;
-  this->CurrentList = (static_cast<void>(val.emplace_back()), &val.back());
-  this->ExpectValue = false;
+  this->Bind(
+    [&val](cm::string_view arg) -> Continue {
+      static_cast<std::string&>(val) = std::string(arg);
+      return Continue::No;
+    },
+    ExpectAtLeast{ 0 });
 }
 
-void Instance::Consume(cm::string_view arg, void* result,
-                       std::vector<std::string>* unparsedArguments,
-                       std::vector<std::string>* keywordsMissingValue,
-                       std::vector<std::string>* parsedKeywords)
+void Instance::Bind(MaybeEmpty<std::vector<std::string>>& val)
 {
-  auto const it = this->Bindings.Find(arg);
-  if (it != this->Bindings.end()) {
-    if (parsedKeywords != nullptr) {
-      parsedKeywords->emplace_back(arg);
+  this->Bind(
+    [&val](cm::string_view arg) -> Continue {
+      val.emplace_back(arg);
+      return Continue::Yes;
+    },
+    ExpectAtLeast{ 0 });
+}
+
+void Instance::Bind(NonEmpty<std::vector<std::string>>& val)
+{
+  this->Bind(
+    [&val](cm::string_view arg) -> Continue {
+      val.emplace_back(arg);
+      return Continue::Yes;
+    },
+    ExpectAtLeast{ 1 });
+}
+
+void Instance::Bind(std::vector<std::vector<std::string>>& multiVal)
+{
+  multiVal.emplace_back();
+  std::vector<std::string>& val = multiVal.back();
+  this->Bind(
+    [&val](cm::string_view arg) -> Continue {
+      val.emplace_back(arg);
+      return Continue::Yes;
+    },
+    ExpectAtLeast{ 0 });
+}
+
+void Instance::Consume(std::size_t pos, cm::string_view arg)
+{
+  auto const it = this->Bindings.Keywords.Find(arg);
+  if (it != this->Bindings.Keywords.end()) {
+    this->FinishKeyword();
+    this->Keyword = it->first;
+    this->KeywordValuesSeen = 0;
+    this->DoneWithPositional = true;
+    if (this->Bindings.ParsedKeyword) {
+      this->Bindings.ParsedKeyword(*this, it->first);
     }
-    it->second(*this, result);
-    if (this->ExpectValue && keywordsMissingValue != nullptr) {
-      keywordsMissingValue->emplace_back(arg);
-    }
+    it->second(*this);
     return;
   }
 
-  if (this->CurrentString != nullptr) {
-    this->CurrentString->assign(std::string(arg));
-    this->CurrentString = nullptr;
-    this->CurrentList = nullptr;
-  } else if (this->CurrentList != nullptr) {
-    this->CurrentList->emplace_back(arg);
-  } else if (unparsedArguments != nullptr) {
-    unparsedArguments->emplace_back(arg);
+  if (this->KeywordValueFunc) {
+    switch (this->KeywordValueFunc(arg)) {
+      case Continue::Yes:
+        break;
+      case Continue::No:
+        this->KeywordValueFunc = nullptr;
+        break;
+    }
+    ++this->KeywordValuesSeen;
+    return;
   }
 
-  if (this->ExpectValue) {
-    if (keywordsMissingValue != nullptr) {
-      keywordsMissingValue->pop_back();
+  if (!this->DoneWithPositional) {
+    auto const pit = this->Bindings.Positions.Find(pos);
+    if (pit != this->Bindings.Positions.end()) {
+      pit->second(*this, pos, arg);
+      return;
     }
-    this->ExpectValue = false;
   }
+
+  if (this->UnparsedArguments != nullptr) {
+    this->UnparsedArguments->emplace_back(arg);
+  }
+}
+
+void Instance::FinishKeyword()
+{
+  if (this->Keyword.empty()) {
+    return;
+  }
+  if (this->KeywordValuesSeen < this->KeywordValuesExpected) {
+    if (this->ParseResults != nullptr) {
+      this->ParseResults->AddKeywordError(this->Keyword,
+                                          "  missing required value\n");
+    }
+    if (this->Bindings.KeywordMissingValue) {
+      this->Bindings.KeywordMissingValue(*this, this->Keyword);
+    }
+  }
+}
+
+bool ParseResult::MaybeReportError(cmMakefile& mf) const
+{
+  if (*this) {
+    return false;
+  }
+  std::string e;
+  for (auto const& ke : this->KeywordErrors) {
+    e = cmStrCat(e, "Error after keyword \"", ke.first, "\":\n", ke.second);
+  }
+  mf.IssueMessage(MessageType::FATAL_ERROR, e);
+  return true;
 }
 
 } // namespace ArgumentParser

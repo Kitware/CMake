@@ -14,7 +14,8 @@ This variable can be set by the user during the first time a build tree is confi
 If a non-full path value is supplied then CMake will resolve the full path of
 the compiler.
 
-The variable could be set in a user supplied toolchain file or via `-D` on the command line.
+The variable could be set in a user supplied toolchain file or via
+:option:`-D <cmake -D>` on the command line.
 
 .. note::
   Options that are required to make the compiler work correctly can be included

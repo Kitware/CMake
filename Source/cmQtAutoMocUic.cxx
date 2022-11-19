@@ -2175,15 +2175,9 @@ void cmQtAutoMocUicT::JobMocsCompilationT::Process()
 
   if (this->MocEval().CompFiles.empty()) {
     // Placeholder content
-    cmCryptoHash hash(cmCryptoHash::AlgoSHA256);
-    const std::string hashedPath = hash.HashString(compAbs);
-    const std::string functionName =
-      "cmake_automoc_silence_linker_warning" + hashedPath;
-
     content += "// No files found that require moc or the moc files are "
                "included\n"
-               "void " +
-      functionName + "() {}\n";
+               "enum some_compilers { need_more_than_nothing };\n";
   } else {
     // Valid content
     const bool mc = this->BaseConst().MultiConfig;

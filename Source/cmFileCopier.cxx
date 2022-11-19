@@ -15,7 +15,11 @@
 #include "cmValue.h"
 
 #ifdef _WIN32
+#  include <winerror.h>
+
 #  include "cmsys/FStream.hxx"
+#else
+#  include <cerrno>
 #endif
 
 #include <cstring>
@@ -504,11 +508,12 @@ bool cmFileCopier::InstallSymlinkChain(std::string& fromFile,
       cmSystemTools::RemoveFile(toFile);
       cmSystemTools::MakeDirectory(toFilePath);
 
-      if (!cmSystemTools::CreateSymlink(symlinkTarget, toFile)) {
-        std::ostringstream e;
-        e << this->Name << " cannot create symlink \"" << toFile
-          << "\": " << cmSystemTools::GetLastSystemError() << ".";
-        this->Status.SetError(e.str());
+      cmsys::Status status =
+        cmSystemTools::CreateSymlinkQuietly(symlinkTarget, toFile);
+      if (!status) {
+        std::string e = cmStrCat(this->Name, " cannot create symlink\n  ",
+                                 toFile, "\nbecause: ", status.GetString());
+        this->Status.SetError(e);
         return false;
       }
     }
@@ -557,12 +562,24 @@ bool cmFileCopier::InstallSymlink(const std::string& fromFile,
     cmSystemTools::MakeDirectory(cmSystemTools::GetFilenamePath(toFile));
 
     // Create the symlink.
-    if (!cmSystemTools::CreateSymlink(symlinkTarget, toFile)) {
-      std::ostringstream e;
-      e << this->Name << " cannot duplicate symlink \"" << fromFile
-        << "\" at \"" << toFile
-        << "\": " << cmSystemTools::GetLastSystemError() << ".";
-      this->Status.SetError(e.str());
+    cmsys::Status status =
+      cmSystemTools::CreateSymlinkQuietly(symlinkTarget, toFile);
+    if (!status) {
+#ifdef _WIN32
+      bool const errorFileExists = status.GetWindows() == ERROR_FILE_EXISTS;
+#else
+      bool const errorFileExists = status.GetPOSIX() == EEXIST;
+#endif
+      std::string reason;
+      if (errorFileExists && cmSystemTools::FileIsDirectory(toFile)) {
+        reason = "A directory already exists at that location";
+      } else {
+        reason = status.GetString();
+      }
+      std::string e =
+        cmStrCat(this->Name, " cannot duplicate symlink\n  ", fromFile,
+                 "\nat\n  ", toFile, "\nbecause: ", reason);
+      this->Status.SetError(e);
       return false;
     }
   }
@@ -630,7 +647,10 @@ bool cmFileCopier::InstallDirectory(const std::string& source,
 {
   // Inform the user about this directory installation.
   this->ReportCopy(destination, TypeDir,
-                   !cmSystemTools::FileIsDirectory(destination));
+                   !( // Report "Up-to-date:" for existing directories,
+                      // but not symlinks to them.
+                     cmSystemTools::FileIsDirectory(destination) &&
+                     !cmSystemTools::FileIsSymlink(destination)));
 
   // check if default dir creation permissions were set
   mode_t default_dir_mode_v = 0;

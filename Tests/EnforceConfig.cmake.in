@@ -10,7 +10,7 @@ if(NOT CTEST_CONFIGURATION_TYPE)
   set(CTEST_CMD "@CMAKE_CTEST_COMMAND@@CMAKE_EXECUTABLE_SUFFIX@")
   get_filename_component(CTEST_DIR "${CTEST_CMD}" PATH)
   get_filename_component(CTEST_EXE "${CTEST_CMD}" NAME)
-  foreach(cfg Release Debug MinSizeRel RelWithDebInfo)
+  foreach(cfg IN ITEMS Release Debug MinSizeRel RelWithDebInfo)
     if(NOT CTEST_CONFIGURATION_TYPE)
       if(EXISTS "${CTEST_DIR}/${cfg}/${CTEST_EXE}")
         set(CTEST_CONFIGURATION_TYPE ${cfg})
@@ -36,4 +36,4 @@ unset(ENV{CMAKE_GENERATOR_TOOLSET})
 unset(ENV{CMAKE_EXPORT_COMPILE_COMMANDS})
 
 @TEST_HOME_ENV_CODE@
-@TEST_WARN_VS10_CODE@
+@TEST_WARN_VS11_CODE@

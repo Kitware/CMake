@@ -8,7 +8,6 @@
 
 #include <cm/memory>
 #include <cm/vector>
-#include <cmext/algorithm>
 #include <cmext/string_view>
 
 #include "cmCTest.h"
@@ -87,7 +86,7 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
   // If FILES are given, but not PARTS, only the FILES are submitted
   // and *no* PARTS are submitted.
   //  (This is why we select the empty "noParts" set in the
-  //   FilesMentioned block below...)
+  //   if(this->Files) block below...)
   //
   // If PARTS are given, only the selected PARTS are submitted.
   //
@@ -96,7 +95,7 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
 
   // If given explicit FILES to submit, pass them to the handler.
   //
-  if (this->FilesMentioned) {
+  if (this->Files) {
     // Intentionally select *no* PARTS. (Pass an empty set.) If PARTS
     // were also explicitly mentioned, they will be selected below...
     // But FILES with no PARTS mentioned should just submit the FILES
@@ -104,14 +103,14 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
     //
     handler->SelectParts(std::set<cmCTest::Part>());
     handler->SelectFiles(
-      std::set<std::string>(this->Files.begin(), this->Files.end()));
+      std::set<std::string>(this->Files->begin(), this->Files->end()));
   }
 
   // If a PARTS option was given, select only the named parts for submission.
   //
-  if (this->PartsMentioned) {
+  if (this->Parts) {
     auto parts =
-      cmMakeRange(this->Parts).transform([this](std::string const& arg) {
+      cmMakeRange(*(this->Parts)).transform([this](std::string const& arg) {
         return this->CTest->GetPartFromName(arg);
       });
     handler->SelectParts(std::set<cmCTest::Part>(parts.begin(), parts.end()));
@@ -172,33 +171,31 @@ void cmCTestSubmitCommand::BindArguments()
   this->cmCTestHandlerCommand::BindArguments();
 }
 
-void cmCTestSubmitCommand::CheckArguments(
-  std::vector<std::string> const& keywords)
+void cmCTestSubmitCommand::CheckArguments()
 {
-  this->PartsMentioned =
-    !this->Parts.empty() || cm::contains(keywords, "PARTS");
-  this->FilesMentioned =
-    !this->Files.empty() || cm::contains(keywords, "FILES");
+  if (this->Parts) {
+    cm::erase_if(*(this->Parts), [this](std::string const& arg) -> bool {
+      cmCTest::Part p = this->CTest->GetPartFromName(arg);
+      if (p == cmCTest::PartCount) {
+        std::ostringstream e;
+        e << "Part name \"" << arg << "\" is invalid.";
+        this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+        return true;
+      }
+      return false;
+    });
+  }
 
-  cm::erase_if(this->Parts, [this](std::string const& arg) -> bool {
-    cmCTest::Part p = this->CTest->GetPartFromName(arg);
-    if (p == cmCTest::PartCount) {
-      std::ostringstream e;
-      e << "Part name \"" << arg << "\" is invalid.";
-      this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
-      return true;
-    }
-    return false;
-  });
-
-  cm::erase_if(this->Files, [this](std::string const& arg) -> bool {
-    if (!cmSystemTools::FileExists(arg)) {
-      std::ostringstream e;
-      e << "File \"" << arg << "\" does not exist. Cannot submit "
-        << "a non-existent file.";
-      this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
-      return true;
-    }
-    return false;
-  });
+  if (this->Files) {
+    cm::erase_if(*(this->Files), [this](std::string const& arg) -> bool {
+      if (!cmSystemTools::FileExists(arg)) {
+        std::ostringstream e;
+        e << "File \"" << arg << "\" does not exist. Cannot submit "
+          << "a non-existent file.";
+        this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+        return true;
+      }
+      return false;
+    });
+  }
 }

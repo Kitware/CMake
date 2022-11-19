@@ -1,0 +1,18 @@
+^CMake Warning \(dev\) at TryRunArgs.cmake:[0-9]+ \(try_compile\):
+  Unknown arguments:
+
+    "COMPILE_OUTPUT_VARIABLE"
+    "compOutputVar"
+    "RUN_OUTPUT_VARIABLE"
+    "runOutputVar"
+    "RUN_OUTPUT_STDOUT_VARIABLE"
+    "runOutputStdOutVar"
+    "RUN_OUTPUT_STDERR_VARIABLE"
+    "runOutputStdErrVar"
+    "WORKING_DIRECTORY"
+    "runWorkDir"
+    "ARGS"
+    "runArgs"
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.$

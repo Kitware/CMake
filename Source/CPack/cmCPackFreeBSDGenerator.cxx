@@ -23,8 +23,6 @@
 
 // Suffix used to tell libpkg what compression to use
 static const char FreeBSDPackageCompression[] = "txz";
-// Resulting package file-suffix, for < 1.17 and >= 1.17 versions of libpkg
-static const char FreeBSDPackageSuffix_10[] = ".txz";
 static const char FreeBSDPackageSuffix_17[] = ".pkg";
 
 cmCPackFreeBSDGenerator::cmCPackFreeBSDGenerator()
@@ -83,6 +81,14 @@ public:
   {
     if (!isValid())
       return false;
+    // The API in the FreeBSD sources (the header has no documentation),
+    // is as follows:
+    //
+    // int pkg_create(struct pkg_create *pc, const char *metadata, const char
+    // *plist, bool hash)
+    //
+    // We let the plist be determined from what is installed, and all
+    // the rest comes from the manifest data.
     int r = pkg_create(d, manifest.c_str(), nullptr, false);
     return r == 0;
   }
@@ -402,7 +408,8 @@ int cmCPackFreeBSDGenerator::PackageFiles()
     return 0;
   }
 
-  std::string output_dir = cmSystemTools::CollapseFullPath("../", toplevel);
+  const std::string output_dir =
+    cmSystemTools::CollapseFullPath("../", toplevel);
   PkgCreate package(output_dir, toplevel, manifestname);
   if (package.isValid()) {
     if (!package.Create()) {
@@ -416,40 +423,33 @@ int cmCPackFreeBSDGenerator::PackageFiles()
     return 0;
   }
 
-  // Specifically looking for packages suffixed with the TAG, either extension
-  std::string broken_suffix_10 =
-    cmStrCat('-', var_lookup("CPACK_TOPLEVEL_TAG"), FreeBSDPackageSuffix_10);
+  // Specifically looking for packages suffixed with the TAG
   std::string broken_suffix_17 =
     cmStrCat('-', var_lookup("CPACK_TOPLEVEL_TAG"), FreeBSDPackageSuffix_17);
   for (std::string& name : packageFileNames) {
     cmCPackLogger(cmCPackLog::LOG_DEBUG, "Packagefile " << name << std::endl);
-    if (cmHasSuffix(name, broken_suffix_10)) {
-      name.replace(name.size() - broken_suffix_10.size(), std::string::npos,
-                   FreeBSDPackageSuffix_10);
-      break;
-    }
     if (cmHasSuffix(name, broken_suffix_17)) {
       name.replace(name.size() - broken_suffix_17.size(), std::string::npos,
                    FreeBSDPackageSuffix_17);
       break;
     }
   }
-  // If the name uses a *new* style name, which doesn't exist, but there
-  // is an *old* style name, then use that instead. This indicates we used
-  // an older libpkg, which still creates .txz instead of .pkg files.
-  for (std::string& name : packageFileNames) {
-    if (cmHasSuffix(name, FreeBSDPackageSuffix_17) &&
-        !cmSystemTools::FileExists(name)) {
-      const std::string badSuffix(FreeBSDPackageSuffix_17);
-      const std::string goodSuffix(FreeBSDPackageSuffix_10);
-      std::string repairedName(name);
-      repairedName.replace(repairedName.size() - badSuffix.size(),
-                           std::string::npos, goodSuffix);
-      if (cmSystemTools::FileExists(repairedName)) {
-        name = repairedName;
-        cmCPackLogger(cmCPackLog::LOG_DEBUG,
-                      "Repaired packagefile " << name << std::endl);
-      }
+
+  const std::string packageFileName =
+    var_lookup("CPACK_PACKAGE_FILE_NAME") + FreeBSDPackageSuffix_17;
+  if (packageFileNames.size() == 1 && !packageFileName.empty() &&
+      packageFileNames[0] != packageFileName) {
+    // Since libpkg always writes <name>-<version>.<suffix>,
+    // if there is a CPACK_PACKAGE_FILE_NAME set, we need to
+    // rename, and then re-set the name.
+    const std::string sourceFile = packageFileNames[0];
+    const std::string packageSubDirectory =
+      cmSystemTools::GetParentDirectory(sourceFile);
+    const std::string targetFileName =
+      packageSubDirectory + '/' + packageFileName;
+    if (cmSystemTools::RenameFile(sourceFile, targetFileName)) {
+      this->packageFileNames.clear();
+      this->packageFileNames.emplace_back(targetFileName);
     }
   }
 

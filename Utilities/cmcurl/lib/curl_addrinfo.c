@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 
@@ -277,7 +279,7 @@ Curl_he2ai(const struct hostent *he, int port)
 
   for(i = 0; (curr = he->h_addr_list[i]) != NULL; i++) {
     size_t ss_size;
-    size_t namelen = strlen(he->h_name) + 1; /* include zero termination */
+    size_t namelen = strlen(he->h_name) + 1; /* include null-terminatior */
 #ifdef ENABLE_IPV6
     if(he->h_addrtype == AF_INET6)
       ss_size = sizeof(struct sockaddr_in6);

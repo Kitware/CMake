@@ -1,0 +1,73 @@
+{
+  "bmi-installation": null,
+  "compiler-id": "<IGNORE>",
+  "config": "<CONFIG>",
+  "cxx-modules": {
+    "CMakeFiles/ninja-exports-public.dir/sources/module-internal-part.cxx.o": {
+      "destination": "lib/cxx/internals",
+      "name": "internal_partitions",
+      "relative-directory": "sources",
+      "source": "<SOURCE_DIR>/sources/module-internal-part.cxx",
+      "type": "CXX_MODULES",
+      "visibility": "PUBLIC"
+    },
+    "CMakeFiles/ninja-exports-public.dir/sources/module-part.cxx.o": {
+      "destination": "lib/cxx",
+      "name": "modules",
+      "relative-directory": "",
+      "source": "<SOURCE_DIR>/sources/module-part.cxx",
+      "type": "CXX_MODULES",
+      "visibility": "PUBLIC"
+    },
+    "CMakeFiles/ninja-exports-public.dir/sources/module.cxx.o": {
+      "destination": "lib/cxx",
+      "name": "modules",
+      "relative-directory": "",
+      "source": "<SOURCE_DIR>/sources/module.cxx",
+      "type": "CXX_MODULES",
+      "visibility": "PUBLIC"
+    }
+  },
+  "dir-cur-bld": "<BINARY_DIR>",
+  "dir-cur-src": "<SOURCE_DIR>",
+  "dir-top-bld": "<BINARY_DIR>",
+  "dir-top-src": "<SOURCE_DIR>",
+  "exports": [
+    {
+      "cxx-module-info-dir" : "cxx-modules",
+      "destination" : "lib/cmake/export1",
+      "export-name" : "with-public",
+      "export-prefix" : "<BINARY_DIR>/CMakeFiles/Export/d2e2673818fd2bd8c45c0e3ed0e38fcd",
+      "install" : true,
+      "namespace" : "export1::"
+    },
+    {
+      "cxx-module-info-dir" : "cxx-modules",
+      "destination" : "lib/cmake/export2",
+      "export-name" : "with-public",
+      "export-prefix" : "<BINARY_DIR>/CMakeFiles/Export/28cd47cb4c96ad5cadaa3fb1b0201ae8",
+      "install" : true,
+      "namespace" : ""
+    },
+    {
+      "cxx-module-info-dir" : "cxx-modules",
+      "destination" : "<BINARY_DIR>/lib/cmake/export1",
+      "export-name" : "with-public",
+      "export-prefix" : "<BINARY_DIR>/lib/cmake/export1",
+      "install" : false,
+      "namespace" : "export1::"
+    },
+    {
+      "cxx-module-info-dir" : "cxx-modules",
+      "destination" : "<BINARY_DIR>/lib/cmake/export2",
+      "export-name" : "with-public",
+      "export-prefix" : "<BINARY_DIR>/lib/cmake/export2",
+      "install" : false,
+      "namespace" : ""
+    }
+  ],
+  "include-dirs": [],
+  "language": "CXX",
+  "linked-target-dirs": [],
+  "module-dir": "<BINARY_DIR>/CMakeFiles/ninja-exports-public.dir"
+}

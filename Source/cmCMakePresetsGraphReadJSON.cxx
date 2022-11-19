@@ -30,11 +30,13 @@ using CacheVariable = cmCMakePresetsGraph::CacheVariable;
 using ConfigurePreset = cmCMakePresetsGraph::ConfigurePreset;
 using BuildPreset = cmCMakePresetsGraph::BuildPreset;
 using TestPreset = cmCMakePresetsGraph::TestPreset;
+using PackagePreset = cmCMakePresetsGraph::PackagePreset;
+using WorkflowPreset = cmCMakePresetsGraph::WorkflowPreset;
 using ArchToolsetStrategy = cmCMakePresetsGraph::ArchToolsetStrategy;
 using JSONHelperBuilder = cmJSONHelperBuilder<ReadFileResult>;
 
 constexpr int MIN_VERSION = 1;
-constexpr int MAX_VERSION = 5;
+constexpr int MAX_VERSION = 6;
 
 struct CMakeVersion
 {
@@ -46,9 +48,11 @@ struct CMakeVersion
 struct RootPresets
 {
   CMakeVersion CMakeMinimumRequired;
-  std::vector<cmCMakePresetsGraph::ConfigurePreset> ConfigurePresets;
-  std::vector<cmCMakePresetsGraph::BuildPreset> BuildPresets;
-  std::vector<cmCMakePresetsGraph::TestPreset> TestPresets;
+  std::vector<ConfigurePreset> ConfigurePresets;
+  std::vector<BuildPreset> BuildPresets;
+  std::vector<TestPreset> TestPresets;
+  std::vector<PackagePreset> PackagePresets;
+  std::vector<WorkflowPreset> WorkflowPresets;
   std::vector<std::string> Include;
 };
 
@@ -281,6 +285,10 @@ auto const RootPresetsHelper =
           cmCMakePresetsGraphInternal::BuildPresetsHelper, false)
     .Bind("testPresets"_s, &RootPresets::TestPresets,
           cmCMakePresetsGraphInternal::TestPresetsHelper, false)
+    .Bind("packagePresets"_s, &RootPresets::PackagePresets,
+          cmCMakePresetsGraphInternal::PackagePresetsHelper, false)
+    .Bind("workflowPresets"_s, &RootPresets::WorkflowPresets,
+          cmCMakePresetsGraphInternal::WorkflowPresetsHelper, false)
     .Bind("cmakeMinimumRequired"_s, &RootPresets::CMakeMinimumRequired,
           CMakeVersionHelper, false)
     .Bind("include"_s, &RootPresets::Include, IncludeVectorHelper, false)
@@ -411,7 +419,7 @@ cmCMakePresetsGraph::ReadFileResult EnvironmentMapHelper(
 
 cmCMakePresetsGraph::ReadFileResult cmCMakePresetsGraph::ReadJSONFile(
   const std::string& filename, RootType rootType, ReadReason readReason,
-  std::vector<File*>& inProgressFiles, File*& file)
+  std::vector<File*>& inProgressFiles, File*& file, std::string& errMsg)
 {
   ReadFileResult result;
 
@@ -430,6 +438,7 @@ cmCMakePresetsGraph::ReadFileResult cmCMakePresetsGraph::ReadJSONFile(
 
   cmsys::ifstream fin(filename.c_str());
   if (!fin) {
+    errMsg = cmStrCat(filename, ": Failed to read file\n", errMsg);
     return ReadFileResult::FILE_NOT_FOUND;
   }
   // If there's a BOM, toss it.
@@ -438,7 +447,8 @@ cmCMakePresetsGraph::ReadFileResult cmCMakePresetsGraph::ReadJSONFile(
   Json::Value root;
   Json::CharReaderBuilder builder;
   Json::CharReaderBuilder::strictMode(&builder.settings_);
-  if (!Json::parseFromStream(builder, fin, &root, nullptr)) {
+  if (!Json::parseFromStream(builder, fin, &root, &errMsg)) {
+    errMsg = cmStrCat(filename, ":\n", errMsg);
     return ReadFileResult::JSON_PARSE_ERROR;
   }
 
@@ -454,6 +464,16 @@ cmCMakePresetsGraph::ReadFileResult cmCMakePresetsGraph::ReadJSONFile(
   if (v < 2 &&
       (root.isMember("buildPresets") || root.isMember("testPresets"))) {
     return ReadFileResult::BUILD_TEST_PRESETS_UNSUPPORTED;
+  }
+
+  // Support for package presets added in version 6.
+  if (v < 6 && root.isMember("packagePresets")) {
+    return ReadFileResult::PACKAGE_PRESETS_UNSUPPORTED;
+  }
+
+  // Support for workflow presets added in version 6.
+  if (v < 6 && root.isMember("workflowPresets")) {
+    return ReadFileResult::WORKFLOW_PRESETS_UNSUPPORTED;
   }
 
   // Support for include added in version 4.
@@ -490,6 +510,8 @@ cmCMakePresetsGraph::ReadFileResult cmCMakePresetsGraph::ReadJSONFile(
   for (auto& preset : presets.ConfigurePresets) {
     preset.OriginFile = file;
     if (preset.Name.empty()) {
+      errMsg += R"(\n\t)";
+      errMsg += filename;
       return ReadFileResult::INVALID_PRESET;
     }
 
@@ -523,6 +545,8 @@ cmCMakePresetsGraph::ReadFileResult cmCMakePresetsGraph::ReadJSONFile(
   for (auto& preset : presets.BuildPresets) {
     preset.OriginFile = file;
     if (preset.Name.empty()) {
+      errMsg += R"(\n\t)";
+      errMsg += filename;
       return ReadFileResult::INVALID_PRESET;
     }
 
@@ -564,17 +588,61 @@ cmCMakePresetsGraph::ReadFileResult cmCMakePresetsGraph::ReadJSONFile(
       return ReadFileResult::TEST_OUTPUT_TRUNCATION_UNSUPPORTED;
     }
 
+    // Support for outputJUnitFile added in version 6.
+    if (v < 6 && preset.Output && !preset.Output->OutputJUnitFile.empty()) {
+      return ReadFileResult::CTEST_JUNIT_UNSUPPORTED;
+    }
+
     this->TestPresetOrder.push_back(preset.Name);
+  }
+
+  for (auto& preset : presets.PackagePresets) {
+    preset.OriginFile = file;
+    if (preset.Name.empty()) {
+      return ReadFileResult::INVALID_PRESET;
+    }
+
+    PresetPair<PackagePreset> presetPair;
+    presetPair.Unexpanded = preset;
+    presetPair.Expanded = cm::nullopt;
+    if (!this->PackagePresets.emplace(preset.Name, presetPair).second) {
+      return ReadFileResult::DUPLICATE_PRESETS;
+    }
+
+    // Support for conditions added in version 3, but this requires version 5
+    // already, so no action needed.
+
+    this->PackagePresetOrder.push_back(preset.Name);
+  }
+
+  for (auto& preset : presets.WorkflowPresets) {
+    preset.OriginFile = file;
+    if (preset.Name.empty()) {
+      return ReadFileResult::INVALID_PRESET;
+    }
+
+    PresetPair<WorkflowPreset> presetPair;
+    presetPair.Unexpanded = preset;
+    presetPair.Expanded = cm::nullopt;
+    if (!this->WorkflowPresets.emplace(preset.Name, presetPair).second) {
+      return ReadFileResult::DUPLICATE_PRESETS;
+    }
+
+    // Support for conditions added in version 3, but this requires version 6
+    // already, so no action needed.
+
+    this->WorkflowPresetOrder.push_back(preset.Name);
   }
 
   auto const includeFile = [this, &inProgressFiles, file](
                              const std::string& include, RootType rootType2,
-                             ReadReason readReason2) -> ReadFileResult {
+                             ReadReason readReason2,
+                             std::string& FailureMessage) -> ReadFileResult {
     ReadFileResult r;
     File* includedFile;
     if ((r = this->ReadJSONFile(include, rootType2, readReason2,
-                                inProgressFiles, includedFile)) !=
-        ReadFileResult::READ_OK) {
+                                inProgressFiles, includedFile,
+                                FailureMessage)) != ReadFileResult::READ_OK) {
       return r;
     }
 
@@ -589,8 +657,8 @@ cmCMakePresetsGraph::ReadFileResult cmCMakePresetsGraph::ReadJSONFile(
       include = cmStrCat(directory, '/', include);
     }
 
-    if ((result = includeFile(include, rootType, ReadReason::Included)) !=
-        ReadFileResult::READ_OK) {
+    if ((result = includeFile(include, rootType, ReadReason::Included,
+                              errMsg)) != ReadFileResult::READ_OK) {
       return result;
     }
   }
@@ -599,7 +667,7 @@ cmCMakePresetsGraph::ReadFileResult cmCMakePresetsGraph::ReadJSONFile(
     auto cmakePresetsFilename = GetFilename(this->SourceDir);
     if (cmSystemTools::FileExists(cmakePresetsFilename)) {
       if ((result = includeFile(cmakePresetsFilename, RootType::Project,
-                                ReadReason::Root)) !=
+                                ReadReason::Root, errMsg)) !=
           ReadFileResult::READ_OK) {
         return result;
       }

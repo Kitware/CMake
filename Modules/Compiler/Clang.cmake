@@ -80,7 +80,7 @@ else()
       set(CMAKE_${lang}_COMPILE_OPTIONS_IPO "-flto")
     endif()
 
-    if(ANDROID AND NOT CMAKE_ANDROID_NDK_VERSION VERSION_GREATER_EQUAL "22")
+    if(ANDROID AND CMAKE_ANDROID_NDK_VERSION VERSION_LESS "22")
       # https://github.com/android-ndk/ndk/issues/242
       set(CMAKE_${lang}_LINK_OPTIONS_IPO "-fuse-ld=gold")
     endif()
@@ -255,6 +255,7 @@ macro(__compiler_clang_cxx_standards lang)
         cxx_std_17
         cxx_std_20
         cxx_std_23
+        cxx_std_26
         )
       _record_compiler_features(${lang} "" CMAKE_${lang}_COMPILE_FEATURES)
     endmacro()

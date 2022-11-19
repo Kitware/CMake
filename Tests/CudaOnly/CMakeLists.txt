@@ -7,13 +7,13 @@ endmacro ()
 add_cuda_test_macro(CudaOnly.Architecture Architecture)
 add_cuda_test_macro(CudaOnly.ArchSpecial CudaOnlyArchSpecial)
 add_cuda_test_macro(CudaOnly.CompileFlags CudaOnlyCompileFlags)
-
 add_cuda_test_macro(CudaOnly.EnableStandard CudaOnlyEnableStandard)
 add_cuda_test_macro(CudaOnly.ExportPTX CudaOnlyExportPTX)
 add_cuda_test_macro(CudaOnly.SharedRuntimePlusToolkit CudaOnlySharedRuntimePlusToolkit)
 add_cuda_test_macro(CudaOnly.Standard98 CudaOnlyStandard98)
 add_cuda_test_macro(CudaOnly.Toolkit CudaOnlyToolkit)
 add_cuda_test_macro(CudaOnly.ToolkitBeforeLang CudaOnlyToolkitBeforeLang)
+add_cuda_test_macro(CudaOnly.ToolkitMultipleDirs CudaOnlyToolkitMultipleDirs)
 add_cuda_test_macro(CudaOnly.WithDefs CudaOnlyWithDefs)
 add_cuda_test_macro(CudaOnly.CircularLinkLine CudaOnlyCircularLinkLine)
 add_cuda_test_macro(CudaOnly.ResolveDeviceSymbols CudaOnlyResolveDeviceSymbols)
@@ -28,6 +28,19 @@ if(CMake_TEST_CUDA AND NOT CMake_TEST_CUDA STREQUAL "Clang")
   add_cuda_test_macro(CudaOnly.GPUDebugFlag CudaOnlyGPUDebugFlag)
 endif()
 
+# The CUDA only ships the shared version of the toolkit libraries
+# on windows
+if(NOT WIN32)
+  add_cuda_test_macro(CudaOnly.StaticRuntimePlusToolkit CudaOnlyStaticRuntimePlusToolkit)
+endif()
+
+add_cuda_test_macro(CudaOnly.DeviceLTO CudaOnlyDeviceLTO)
+
+if(MSVC)
+  # Tests for features that only work with MSVC
+  add_cuda_test_macro(CudaOnly.PDB CudaOnlyPDB)
+endif()
+
 add_test(NAME CudaOnly.DontResolveDeviceSymbols COMMAND
   ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
   --build-and-test
@@ -40,16 +53,6 @@ add_test(NAME CudaOnly.DontResolveDeviceSymbols COMMAND
 )
 set_property(TEST "CudaOnly.DontResolveDeviceSymbols" APPEND
   PROPERTY LABELS "CUDA")
-
-# The CUDA only ships the shared version of the toolkit libraries
-# on windows
-if(NOT WIN32)
-  add_cuda_test_macro(CudaOnly.StaticRuntimePlusToolkit CudaOnlyStaticRuntimePlusToolkit)
-endif()
-
-if(MSVC)
-  add_cuda_test_macro(CudaOnly.PDB CudaOnlyPDB)
-endif()
 
 add_test(NAME CudaOnly.RuntimeControls COMMAND
   ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>

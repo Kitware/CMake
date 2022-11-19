@@ -391,11 +391,11 @@ function (_MPI_check_compiler LANG QUERY_FLAG OUTPUT_VARIABLE RESULT_VARIABLE)
   # library that has invalid or missing version information there would be warning
   # messages emitted by ld.so in the compiler output. In either case, we'll treat
   # the output as invalid.
-  if("${WRAPPER_OUTPUT}" MATCHES "undefined reference|unrecognized|need to set|no version information available|command not found")
+  if(WRAPPER_OUTPUT MATCHES "undefined reference|unrecognized|need to set|no version information available|command not found")
     set(WRAPPER_RETURN 255)
   endif()
   # Ensure that no error output might be passed upwards.
-  if(NOT WRAPPER_RETURN EQUAL 0)
+  if(NOT WRAPPER_RETURN EQUAL "0")
     unset(WRAPPER_OUTPUT)
   else()
     # Strip leading whitespace
@@ -441,13 +441,13 @@ function (_MPI_interrogate_compiler LANG)
   if(MSVC)
     get_filename_component(_MPI_UNDERLAYING_COMPILER "${_MPI_UNDERLAYING_COMPILER}" NAME)
   endif()
-  if("${LANG}" STREQUAL "C")
+  if(LANG STREQUAL "C")
     _MPI_env_set_ifnot(I_MPI_CC _MPI_UNDERLAYING_COMPILER)
     _MPI_env_set_ifnot(MPICH_CC _MPI_UNDERLAYING_COMPILER)
-  elseif("${LANG}" STREQUAL "CXX")
+  elseif(LANG STREQUAL "CXX")
     _MPI_env_set_ifnot(I_MPI_CXX _MPI_UNDERLAYING_COMPILER)
     _MPI_env_set_ifnot(MPICH_CXX _MPI_UNDERLAYING_COMPILER)
-  elseif("${LANG}" STREQUAL "Fortran")
+  elseif(LANG STREQUAL "Fortran")
     _MPI_env_set_ifnot(I_MPI_FC _MPI_UNDERLAYING_COMPILER)
     _MPI_env_set_ifnot(MPICH_FC _MPI_UNDERLAYING_COMPILER)
     _MPI_env_set_ifnot(I_MPI_F77 _MPI_UNDERLAYING_COMPILER)
@@ -470,10 +470,10 @@ function (_MPI_interrogate_compiler LANG)
   # or a newer version of LAM/MPI, and implies that -showme:link will also work.
   # Open MPI also supports -show, but separates linker and compiler information
   _MPI_check_compiler(${LANG} "-showme:compile" MPI_COMPILE_CMDLINE MPI_COMPILER_RETURN)
-  if (MPI_COMPILER_RETURN EQUAL 0)
+  if (MPI_COMPILER_RETURN EQUAL "0")
     _MPI_check_compiler(${LANG} "-showme:link" MPI_LINK_CMDLINE MPI_COMPILER_RETURN)
 
-    if (NOT MPI_COMPILER_RETURN EQUAL 0)
+    if (NOT MPI_COMPILER_RETURN EQUAL "0")
       unset(MPI_COMPILE_CMDLINE)
     endif()
   endif()
@@ -482,13 +482,13 @@ function (_MPI_interrogate_compiler LANG)
   # For modern versions, both do the same as -show. However, for old versions, they do differ
   # when called for mpicxx and mpif90 and it's necessary to use them over -show in order to find the
   # removed MPI C++ bindings.
-  if (NOT MPI_COMPILER_RETURN EQUAL 0)
+  if (NOT MPI_COMPILER_RETURN EQUAL "0")
     _MPI_check_compiler(${LANG} "-compile-info" MPI_COMPILE_CMDLINE MPI_COMPILER_RETURN)
 
-    if (MPI_COMPILER_RETURN EQUAL 0)
+    if (MPI_COMPILER_RETURN EQUAL "0")
       _MPI_check_compiler(${LANG} "-link-info" MPI_LINK_CMDLINE MPI_COMPILER_RETURN)
 
-      if (NOT MPI_COMPILER_RETURN EQUAL 0)
+      if (NOT MPI_COMPILER_RETURN EQUAL "0")
         unset(MPI_COMPILE_CMDLINE)
       endif()
     endif()
@@ -496,18 +496,18 @@ function (_MPI_interrogate_compiler LANG)
 
   # Cray compiler wrappers come usually without a separate mpicc/c++/ftn, but offer
   # --cray-print-opts=...
-  if (NOT MPI_COMPILER_RETURN EQUAL 0)
+  if (NOT MPI_COMPILER_RETURN EQUAL "0")
     _MPI_check_compiler(${LANG} "--cray-print-opts=cflags"
                         MPI_COMPILE_CMDLINE MPI_COMPILER_RETURN)
 
-    if (MPI_COMPILER_RETURN EQUAL 0)
+    if (MPI_COMPILER_RETURN EQUAL "0")
       # Pass --no-as-needed so the mpi library is always linked. Otherwise, the
       # Cray compiler wrapper puts an --as-needed flag around the mpi library,
       # and it is not linked unless code directly refers to it.
       _MPI_check_compiler(${LANG} "--no-as-needed;--cray-print-opts=libs"
                           MPI_LINK_CMDLINE MPI_COMPILER_RETURN)
 
-      if (NOT MPI_COMPILER_RETURN EQUAL 0)
+      if (NOT MPI_COMPILER_RETURN EQUAL "0")
         unset(MPI_COMPILE_CMDLINE)
         unset(MPI_LINK_CMDLINE)
       endif()
@@ -516,24 +516,24 @@ function (_MPI_interrogate_compiler LANG)
 
   # MPICH, MVAPICH2 and Intel MPI just use "-show". Open MPI also offers this, but the
   # -showme commands are more specialized.
-  if (NOT MPI_COMPILER_RETURN EQUAL 0)
+  if (NOT MPI_COMPILER_RETURN EQUAL "0")
     _MPI_check_compiler(${LANG} "-show" MPI_COMPILE_CMDLINE MPI_COMPILER_RETURN)
   endif()
 
   # Older versions of LAM/MPI have "-showme". Open MPI also supports this.
   # Unknown to MPICH, MVAPICH and Intel MPI.
-  if (NOT MPI_COMPILER_RETURN EQUAL 0)
+  if (NOT MPI_COMPILER_RETURN EQUAL "0")
     _MPI_check_compiler(${LANG} "-showme" MPI_COMPILE_CMDLINE MPI_COMPILER_RETURN)
   endif()
 
-  if (MPI_COMPILER_RETURN EQUAL 0 AND DEFINED MPI_COMPILE_CMDLINE)
+  if (MPI_COMPILER_RETURN EQUAL "0" AND DEFINED MPI_COMPILE_CMDLINE)
     # Intel MPI can be run with -compchk or I_MPI_CHECK_COMPILER set to 1.
     # In this case, -show will be prepended with a line to the compiler checker. This is a script that performs
     # compatibility checks and returns a non-zero exit code together with an error if something fails.
     # It has to be called as "compchk.sh <arch> <compiler>". Here, <arch> is one out of 32 (i686), 64 (ia64) or 32e (x86_64).
     # The compiler is identified by filename, and can be either the MPI compiler or the underlying compiler.
     # NOTE: It is vital to run this script while the environment variables are set up, otherwise it can check the wrong compiler.
-    if("${MPI_COMPILE_CMDLINE}" MATCHES "^([^\" ]+/compchk.sh|\"[^\"]+/compchk.sh\") +([^ ]+)")
+    if(MPI_COMPILE_CMDLINE MATCHES "^([^\" ]+/compchk.sh|\"[^\"]+/compchk.sh\") +([^ ]+)")
       # Now CMAKE_MATCH_1 contains the path to the compchk.sh file and CMAKE_MATCH_2 the architecture flag.
       unset(COMPILER_CHECKER_OUTPUT)
       execute_process(
@@ -542,7 +542,7 @@ function (_MPI_interrogate_compiler LANG)
       ERROR_VARIABLE   COMPILER_CHECKER_OUTPUT ERROR_STRIP_TRAILING_WHITESPACE
       RESULT_VARIABLE  MPI_COMPILER_RETURN)
       # If it returned a non-zero value, the check below will fail and cause the interrogation to be aborted.
-      if(NOT MPI_COMPILER_RETURN EQUAL 0)
+      if(NOT MPI_COMPILER_RETURN EQUAL "0")
         if(NOT MPI_FIND_QUIETLY)
           message(STATUS "Intel MPI compiler check failed: ${COMPILER_CHECKER_OUTPUT}")
         endif()
@@ -554,13 +554,13 @@ function (_MPI_interrogate_compiler LANG)
   endif()
 
   # Revert changes to the environment made previously
-  if("${LANG}" STREQUAL "C")
+  if(LANG STREQUAL "C")
     _MPI_env_unset_ifnot(I_MPI_CC)
     _MPI_env_unset_ifnot(MPICH_CC)
-  elseif("${LANG}" STREQUAL "CXX")
+  elseif(LANG STREQUAL "CXX")
     _MPI_env_unset_ifnot(I_MPI_CXX)
     _MPI_env_unset_ifnot(MPICH_CXX)
-  elseif("${LANG}" STREQUAL "Fortran")
+  elseif(LANG STREQUAL "Fortran")
     _MPI_env_unset_ifnot(I_MPI_FC)
     _MPI_env_unset_ifnot(MPICH_FC)
     _MPI_env_unset_ifnot(I_MPI_F77)
@@ -572,7 +572,7 @@ function (_MPI_interrogate_compiler LANG)
   _MPI_env_unset_ifnot(I_MPI_DEBUG_INFO_STRIP)
   _MPI_env_unset_ifnot(I_MPI_FORT_BIND)
 
-  if (NOT (MPI_COMPILER_RETURN EQUAL 0) OR NOT (DEFINED MPI_COMPILE_CMDLINE))
+  if (NOT (MPI_COMPILER_RETURN EQUAL "0") OR NOT (DEFINED MPI_COMPILE_CMDLINE))
     # Cannot interrogate this compiler, so exit.
     set(MPI_${LANG}_WRAPPER_FOUND FALSE PARENT_SCOPE)
     return()
@@ -613,13 +613,13 @@ function (_MPI_interrogate_compiler LANG)
   if(UNIX)
     # At this point, we obtained some output from a compiler wrapper that works.
     # We'll now try to parse it into variables with meaning to us.
-    if("${LANG}" STREQUAL "Fortran")
+    if(LANG STREQUAL "Fortran")
       # If MPICH (and derivates) didn't recognize the Fortran compiler include flag during configuration,
       # they'll return a set of three commands, consisting out of a symlink command for mpif.h,
       # the actual compiler command and deletion of the created symlink.
       # Especially with M(VA)PICH-1, this appears to happen erroneously, and therefore we should translate
       # this output into an additional include directory and then drop it from the output.
-      if("${MPI_COMPILE_CMDLINE}" MATCHES "^ln -s ([^\" ]+|\"[^\"]+\") mpif.h")
+      if(MPI_COMPILE_CMDLINE MATCHES "^ln -s ([^\" ]+|\"[^\"]+\") mpif.h")
         get_filename_component(MPI_INCLUDE_DIRS_WORK "${CMAKE_MATCH_1}" DIRECTORY)
         string(REGEX REPLACE "^ln -s ([^\" ]+|\"[^\"]+\") mpif.h\n" "" MPI_COMPILE_CMDLINE "${MPI_COMPILE_CMDLINE}")
         string(REGEX REPLACE "^ln -s ([^\" ]+|\"[^\"]+\") mpif.h\n" "" MPI_LINK_CMDLINE "${MPI_LINK_CMDLINE}")
@@ -651,7 +651,7 @@ function (_MPI_interrogate_compiler LANG)
       # produce inconsistent results with the regularly flags.
       # Similarly, aliasing flags do not belong into our flag array.
       # Also strip out `-framework` flags.
-      if(NOT "${_MPI_COMPILE_OPTION}" MATCHES "^-f((no-|)(stack-protector|strict-aliasing)|PI[CE]|pi[ce]|ramework)")
+      if(NOT _MPI_COMPILE_OPTION MATCHES "^-f((no-|)(stack-protector|strict-aliasing)|PI[CE]|pi[ce]|ramework)")
         list(APPEND MPI_COMPILE_OPTIONS_WORK "${_MPI_COMPILE_OPTION}")
       endif()
     endforeach()
@@ -673,7 +673,7 @@ function (_MPI_interrogate_compiler LANG)
   foreach(_MPI_COMPILE_DEFINITION IN LISTS MPI_ALL_COMPILE_DEFINITIONS)
     string(REGEX REPLACE "^ ?${_MPI_PREPROCESSOR_FLAG_REGEX}-D *" "" _MPI_COMPILE_DEFINITION "${_MPI_COMPILE_DEFINITION}")
     string(REPLACE "\"" "" _MPI_COMPILE_DEFINITION "${_MPI_COMPILE_DEFINITION}")
-    if(NOT "${_MPI_COMPILE_DEFINITION}" MATCHES "^_FORTIFY_SOURCE.*")
+    if(NOT _MPI_COMPILE_DEFINITION MATCHES "^_FORTIFY_SOURCE.*")
       list(APPEND MPI_COMPILE_DEFINITIONS_WORK "${_MPI_COMPILE_DEFINITION}")
     endif()
   endforeach()
@@ -788,7 +788,7 @@ function (_MPI_interrogate_compiler LANG)
   # decide how to link it based on file type, not based on a prefix like 'lib'.
   set(_MPI_LIB_SUFFIX_REGEX "${CMAKE_STATIC_LIBRARY_SUFFIX}")
   if(DEFINED CMAKE_IMPORT_LIBRARY_SUFFIX)
-    if(NOT ("${CMAKE_IMPORT_LIBRARY_SUFFIX}" STREQUAL "${CMAKE_STATIC_LIBRARY_SUFFIX}"))
+    if(NOT (CMAKE_IMPORT_LIBRARY_SUFFIX STREQUAL CMAKE_STATIC_LIBRARY_SUFFIX))
       string(APPEND _MPI_LIB_SUFFIX_REGEX "|${CMAKE_IMPORT_LIBRARY_SUFFIX}")
     endif()
   else()
@@ -804,7 +804,7 @@ function (_MPI_interrogate_compiler LANG)
     if(_MPI_LIB_NAME_TEST STREQUAL "")
       string(REGEX REPLACE "^ +\"?|\"? +$" "" _MPI_LIB_NAME "${_MPI_LIB_NAME}")
       get_filename_component(_MPI_LIB_PATH "${_MPI_LIB_NAME}" DIRECTORY)
-      if(NOT "${_MPI_LIB_PATH}" STREQUAL "")
+      if(NOT _MPI_LIB_PATH STREQUAL "")
         list(APPEND MPI_LIB_FULLPATHS_WORK "${_MPI_LIB_NAME}")
       else()
         list(APPEND MPI_LIB_NAMES_WORK "${_MPI_LIB_NAME}")
@@ -845,7 +845,7 @@ function (_MPI_interrogate_compiler LANG)
     foreach(_MPI_LINK_DIRECTORY IN LISTS MPI_LINK_DIRECTORIES_LEFTOVER)
       file(TO_NATIVE_PATH "${_MPI_LINK_DIRECTORY}" _MPI_LINK_DIRECTORY_ACTUAL)
       string(FIND "${_MPI_LINK_DIRECTORY_ACTUAL}" " " _MPI_LINK_DIRECTORY_CONTAINS_SPACE)
-      if(NOT _MPI_LINK_DIRECTORY_CONTAINS_SPACE EQUAL -1)
+      if(NOT _MPI_LINK_DIRECTORY_CONTAINS_SPACE EQUAL "-1")
         set(_MPI_LINK_DIRECTORY_ACTUAL "\"${_MPI_LINK_DIRECTORY_ACTUAL}\"")
       endif()
       if(MPI_LINK_FLAGS_WORK)
@@ -871,7 +871,7 @@ function (_MPI_interrogate_compiler LANG)
 
   # MPI might require pthread to work. The above mechanism wouldn't detect it, but we need to
   # link it in that case. -lpthread is covered by the normal library treatment on the other hand.
-  if("${MPI_COMPILE_CMDLINE}" MATCHES "-pthread")
+  if(MPI_COMPILE_CMDLINE MATCHES "-pthread")
     list(APPEND MPI_COMPILE_OPTIONS_WORK "-pthread")
     if(MPI_LINK_FLAGS_WORK)
       string(APPEND MPI_LINK_FLAGS_WORK " -pthread")
@@ -918,10 +918,10 @@ function(_MPI_guess_settings LANG)
     # The environment variables MSMPI_INC and MSMPILIB32/64 are the only ways of locating the MSMPI_SDK,
     # which is installed separately from the runtime. Thus it's possible to have mpiexec but not MPI headers
     # or import libraries and vice versa.
-    if(NOT MPI_GUESS_LIBRARY_NAME OR "${MPI_GUESS_LIBRARY_NAME}" STREQUAL "MSMPI")
+    if(NOT MPI_GUESS_LIBRARY_NAME OR MPI_GUESS_LIBRARY_NAME STREQUAL "MSMPI")
       # We first attempt to locate the msmpi.lib. Should be find it, we'll assume that the MPI present is indeed
       # Microsoft MPI.
-      if("${CMAKE_SIZEOF_VOID_P}" EQUAL 8)
+      if(CMAKE_SIZEOF_VOID_P EQUAL "8")
         file(TO_CMAKE_PATH "$ENV{MSMPI_LIB64}" MPI_MSMPI_LIB_PATH)
         file(TO_CMAKE_PATH "$ENV{MSMPI_INC}/x64" MPI_MSMPI_INC_PATH_EXTRA)
       else()
@@ -975,9 +975,9 @@ function(_MPI_guess_settings LANG)
         # Our strategy is now to locate all libraries, but enter msmpifec into the LIB_NAMES array.
         # Should this not be adequate it's a straightforward way for a user to change the LIB_NAMES array and
         # have his library found. Still, this should not be necessary outside of exceptional cases, as reasoned.
-        if ("${LANG}" STREQUAL "Fortran")
+        if (LANG STREQUAL "Fortran")
           set(MPI_MSMPI_CALLINGCONVS c)
-          if("${CMAKE_SIZEOF_VOID_P}" EQUAL 4)
+          if(CMAKE_SIZEOF_VOID_P EQUAL "4")
             list(APPEND MPI_MSMPI_CALLINGCONVS s)
           endif()
           foreach(mpistrlenpos IN ITEMS e m)
@@ -1025,7 +1025,7 @@ function(_MPI_guess_settings LANG)
     # At this point there's not many MPIs that we could still consider.
     # OpenMPI 1.6.x and below supported Windows, but these ship compiler wrappers that still work.
     # The only other relevant MPI implementation without a wrapper is MPICH2, which had Windows support in 1.4.1p1 and older.
-    if(NOT MPI_GUESS_FOUND AND (NOT MPI_GUESS_LIBRARY_NAME OR "${MPI_GUESS_LIBRARY_NAME}" STREQUAL "MPICH2"))
+    if(NOT MPI_GUESS_FOUND AND (NOT MPI_GUESS_LIBRARY_NAME OR MPI_GUESS_LIBRARY_NAME STREQUAL "MPICH2"))
       set(MPI_MPICH_PREFIX_PATHS
         "$ENV{ProgramW6432}/MPICH2/lib"
         "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MPICH\\SMPD;binary]/../lib"
@@ -1042,7 +1042,7 @@ function(_MPI_guess_settings LANG)
         set(MPI_MPICH_LIB_NAMES "mpi")
         # If MPI-2 C++ bindings are requested, we need to locate cxx.lib as well.
         # Otherwise, MPICH_SKIP_MPICXX will be defined and these bindings aren't needed.
-        if("${LANG}" STREQUAL "CXX" AND NOT MPI_CXX_SKIP_MPICXX)
+        if(LANG STREQUAL "CXX" AND NOT MPI_CXX_SKIP_MPICXX)
           find_library(MPI_cxx_LIBRARY
             NAMES cxx
             HINTS ${MPI_MPICH_PREFIX_PATHS})
@@ -1055,7 +1055,7 @@ function(_MPI_guess_settings LANG)
         # fmpich2s.lib would be useful for Compaq Visual Fortran, fmpich2g.lib has to be used with GNU g77 and is also
         # provided in the form of an .a archive for MinGW and Cygwin. From our perspective, fmpich2.lib is the only one
         # we need to try, and if it doesn't work with the given Fortran compiler we'd find out later on during validation
-        elseif("${LANG}" STREQUAL "Fortran")
+        elseif(LANG STREQUAL "Fortran")
           find_library(MPI_fmpich2_LIBRARY
             NAMES fmpich2
             HINTS ${MPI_MPICH_PREFIX_PATHS})
@@ -1103,7 +1103,7 @@ function(_MPI_guess_settings LANG)
 endfunction()
 
 function(_MPI_adjust_compile_definitions LANG)
-  if("${LANG}" STREQUAL "CXX")
+  if(LANG STREQUAL "CXX")
     # To disable the C++ bindings, we need to pass some definitions since the mpi.h header has to deal with both C and C++
     # bindings in MPI-2.
     if(MPI_CXX_SKIP_MPICXX AND NOT MPI_${LANG}_COMPILE_DEFINITIONS MATCHES "SKIP_MPICXX")
@@ -1119,7 +1119,7 @@ endfunction()
 macro(_MPI_assemble_libraries LANG)
   set(MPI_${LANG}_LIBRARIES "")
   # Only for libraries do we need to check whether the compiler's linking stage is separate.
-  if(NOT "${MPI_${LANG}_COMPILER}" STREQUAL "${CMAKE_${LANG}_COMPILER}" OR NOT MPI_${LANG}_WORKS_IMPLICIT)
+  if(NOT MPI_${LANG}_COMPILER STREQUAL CMAKE_${LANG}_COMPILER OR NOT MPI_${LANG}_WORKS_IMPLICIT)
     foreach(mpilib IN LISTS MPI_${LANG}_LIB_NAMES)
       list(APPEND MPI_${LANG}_LIBRARIES ${MPI_${mpilib}_LIBRARY})
     endforeach()
@@ -1131,7 +1131,7 @@ macro(_MPI_assemble_include_dirs LANG)
     ${MPI_${LANG}_COMPILER_INCLUDE_DIRS}
     ${MPI_${LANG}_ADDITIONAL_INCLUDE_DIRS}
     )
-  if("${LANG}" MATCHES "(C|CXX)")
+  if(LANG MATCHES "^(C|CXX)$")
     if(MPI_${LANG}_HEADER_DIR)
       list(APPEND MPI_${LANG}_INCLUDE_DIRS "${MPI_${LANG}_HEADER_DIR}")
     endif()
@@ -1156,7 +1156,7 @@ macro(_MPI_split_include_dirs LANG)
 
   # We try to find the headers/modules among those paths (and system paths)
   # For C/C++, we just need to have a look for mpi.h.
-  if("${LANG}" MATCHES "(C|CXX)")
+  if(LANG MATCHES "^(C|CXX)$")
     find_path(MPI_${LANG}_HEADER_DIR "mpi.h"
       HINTS
         ${MPI_${LANG}_COMPILER_INCLUDE_DIRS}
@@ -1171,7 +1171,7 @@ macro(_MPI_split_include_dirs LANG)
   # any of the Fortran 77/90/2008 APIs for MPI. For example, MSMPI
   # only provides Fortran 77 and - if mpi.f90 is built - potentially
   # a Fortran 90 module.
-  elseif("${LANG}" STREQUAL "Fortran")
+  elseif(LANG STREQUAL "Fortran")
     find_path(MPI_${LANG}_F77_HEADER_DIR "mpif.h"
       HINTS
         ${MPI_${LANG}_COMPILER_INCLUDE_DIRS}
@@ -1238,28 +1238,30 @@ function(_MPI_try_staged_settings LANG MPI_TEST_FILE_NAME MODE RUN_BINARY SUPPRE
   set(SRC_DIR "${CMAKE_ROOT}/Modules/FindMPI")
   set(BIN_FILE "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/FindMPI/${MPI_TEST_FILE_NAME}_${LANG}.bin")
   unset(MPI_TEST_COMPILE_DEFINITIONS)
-  if("${LANG}" STREQUAL "Fortran")
-    if("${MODE}" STREQUAL "F90_MODULE")
+  if(LANG STREQUAL "Fortran")
+    if(MODE STREQUAL "F90_MODULE")
       set(MPI_Fortran_INCLUDE_LINE "use mpi\n      implicit none")
-    elseif("${MODE}" STREQUAL "F08_MODULE")
+    elseif(MODE STREQUAL "F08_MODULE")
       set(MPI_Fortran_INCLUDE_LINE "use mpi_f08\n      implicit none")
     else() # F77 header
       set(MPI_Fortran_INCLUDE_LINE "implicit none\n      include 'mpif.h'")
     endif()
-    configure_file("${SRC_DIR}/${MPI_TEST_FILE_NAME}.f90.in" "${WORK_DIR}/${MPI_TEST_FILE_NAME}.f90" @ONLY)
-    set(MPI_TEST_SOURCE_FILE "${WORK_DIR}/${MPI_TEST_FILE_NAME}.f90")
-  elseif("${LANG}" STREQUAL "CXX")
-    configure_file("${SRC_DIR}/${MPI_TEST_FILE_NAME}.c" "${WORK_DIR}/${MPI_TEST_FILE_NAME}.cpp" COPYONLY)
-    set(MPI_TEST_SOURCE_FILE "${WORK_DIR}/${MPI_TEST_FILE_NAME}.cpp")
-    if("${MODE}" STREQUAL "TEST_MPICXX")
+    file(READ "${SRC_DIR}/${MPI_TEST_FILE_NAME}.f90.in" MPI_TEST_SOURCE_CONTENT)
+    string(CONFIGURE "${MPI_TEST_SOURCE_CONTENT}" MPI_TEST_SOURCE_CONTENT)
+    set(MPI_TEST_SOURCE_FILE "${MPI_TEST_FILE_NAME}.f90")
+  elseif(LANG STREQUAL "CXX")
+    file(READ "${SRC_DIR}/${MPI_TEST_FILE_NAME}.c" MPI_TEST_SOURCE_CONTENT)
+    set(MPI_TEST_SOURCE_FILE "${MPI_TEST_FILE_NAME}.cpp")
+    if(MODE STREQUAL "TEST_MPICXX")
       set(MPI_TEST_COMPILE_DEFINITIONS TEST_MPI_MPICXX)
     endif()
   else() # C
-    set(MPI_TEST_SOURCE_FILE "${SRC_DIR}/${MPI_TEST_FILE_NAME}.c")
+    file(READ "${SRC_DIR}/${MPI_TEST_FILE_NAME}.c" MPI_TEST_SOURCE_CONTENT)
+    set(MPI_TEST_SOURCE_FILE "${MPI_TEST_FILE_NAME}.c")
   endif()
   if(RUN_BINARY)
     try_run(MPI_RUN_RESULT_${LANG}_${MPI_TEST_FILE_NAME}_${MODE} MPI_RESULT_${LANG}_${MPI_TEST_FILE_NAME}_${MODE}
-     "${CMAKE_BINARY_DIR}" SOURCES "${MPI_TEST_SOURCE_FILE}"
+      SOURCE_FROM_VAR "${MPI_TEST_SOURCE_FILE}" MPI_TEST_SOURCE_CONTENT
       COMPILE_DEFINITIONS ${MPI_TEST_COMPILE_DEFINITIONS}
       LINK_LIBRARIES MPI::MPI_${LANG}
       RUN_OUTPUT_VARIABLE MPI_RUN_OUTPUT_${LANG}_${MPI_TEST_FILE_NAME}_${MODE}
@@ -1267,7 +1269,7 @@ function(_MPI_try_staged_settings LANG MPI_TEST_FILE_NAME MODE RUN_BINARY SUPPRE
     set(MPI_RUN_OUTPUT_${LANG}_${MPI_TEST_FILE_NAME}_${MODE} "${MPI_RUN_OUTPUT_${LANG}_${MPI_TEST_FILE_NAME}_${MODE}}" PARENT_SCOPE)
   else()
     try_compile(MPI_RESULT_${LANG}_${MPI_TEST_FILE_NAME}_${MODE}
-      "${CMAKE_BINARY_DIR}" SOURCES "${MPI_TEST_SOURCE_FILE}"
+      SOURCE_FROM_VAR "${MPI_TEST_SOURCE_FILE}" MPI_TEST_SOURCE_CONTENT
       COMPILE_DEFINITIONS ${MPI_TEST_COMPILE_DEFINITIONS}
       LINK_LIBRARIES MPI::MPI_${LANG}
       COPY_FILE "${BIN_FILE}"
@@ -1290,7 +1292,7 @@ macro(_MPI_check_lang_works LANG SUPPRESS_ERRORS)
   #   - *both*, the mpi module and 'mpif.h'
   # Since older MPI standards (MPI-1) did not define anything but 'mpif.h', we need to check all three individually.
   if( NOT MPI_${LANG}_WORKS )
-    if("${LANG}" STREQUAL "Fortran")
+    if(LANG STREQUAL "Fortran")
       set(MPI_Fortran_INTEGER_LINE "(kind=MPI_INTEGER_KIND)")
       _MPI_try_staged_settings(${LANG} test_mpi F77_HEADER FALSE ${SUPPRESS_ERRORS})
       _MPI_try_staged_settings(${LANG} test_mpi F90_MODULE FALSE ${SUPPRESS_ERRORS})
@@ -1339,11 +1341,11 @@ macro(MPI_search_mpi_prefix_folder PREFIX_FOLDER)
 endmacro()
 
 set(MPI_HINT_DIRS ${MPI_HOME} $ENV{MPI_HOME} $ENV{I_MPI_ROOT})
-if("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Linux")
+if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
   # SUSE Linux Enterprise Server stores its MPI implementations under /usr/lib64/mpi/gcc/<name>
   # We enumerate the subfolders and append each as a prefix
   MPI_search_mpi_prefix_folder("/usr/lib64/mpi/gcc")
-elseif("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "FreeBSD")
+elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "FreeBSD")
   # FreeBSD ships mpich under the normal system paths - but available openmpi implementations
   # will be found in /usr/local/mpi/<name>
   MPI_search_mpi_prefix_folder("/usr/local/mpi")
@@ -1410,7 +1412,7 @@ if(NOT MPI_IGNORE_LEGACY_VARIABLES)
     if(MPI_${LANG}_COMPILE_FLAGS)
       separate_arguments(MPI_SEPARATE_FLAGS NATIVE_COMMAND "${MPI_${LANG}_COMPILE_FLAGS}")
       foreach(_MPI_FLAG IN LISTS MPI_SEPARATE_FLAGS)
-        if("${_MPI_FLAG}" MATCHES "^ *-D([^ ]+)")
+        if(_MPI_FLAG MATCHES "^ *-D([^ ]+)")
           list(APPEND MPI_${LANG}_EXTRA_COMPILE_DEFINITIONS "${CMAKE_MATCH_1}")
         else()
           list(APPEND MPI_${LANG}_EXTRA_COMPILE_OPTIONS "${_MPI_FLAG}")
@@ -1459,7 +1461,7 @@ foreach(LANG IN ITEMS C CXX Fortran)
       set(_MPI_FIND_${LANG} TRUE)
     elseif( LANG IN_LIST MPI_FIND_COMPONENTS)
       set(_MPI_FIND_${LANG} TRUE)
-    elseif( "${LANG}" STREQUAL "CXX" AND NOT MPI_CXX_SKIP_MPICXX AND MPICXX IN_LIST MPI_FIND_COMPONENTS )
+    elseif( LANG STREQUAL "CXX" AND NOT MPI_CXX_SKIP_MPICXX AND MPICXX IN_LIST MPI_FIND_COMPONENTS )
       set(_MPI_FIND_${LANG} TRUE)
     else()
       set(_MPI_FIND_${LANG} FALSE)
@@ -1471,7 +1473,7 @@ foreach(LANG IN ITEMS C CXX Fortran)
     endif()
   endif()
   if(_MPI_FIND_${LANG})
-    if( "${LANG}" STREQUAL "CXX" AND NOT MPICXX IN_LIST MPI_FIND_COMPONENTS )
+    if( LANG STREQUAL "CXX" AND NOT MPICXX IN_LIST MPI_FIND_COMPONENTS )
       option(MPI_CXX_SKIP_MPICXX "If true, the MPI-2 C++ bindings are disabled using definitions." FALSE)
       mark_as_advanced(MPI_CXX_SKIP_MPICXX)
     endif()
@@ -1493,7 +1495,7 @@ foreach(LANG IN ITEMS C CXX Fortran)
         set(MPI_${LANG}_TRIED_IMPLICIT TRUE)
       endif()
 
-      if(NOT "${MPI_${LANG}_COMPILER}" STREQUAL "${CMAKE_${LANG}_COMPILER}" OR NOT MPI_${LANG}_WORKS)
+      if(NOT MPI_${LANG}_COMPILER STREQUAL CMAKE_${LANG}_COMPILER OR NOT MPI_${LANG}_WORKS)
         set(MPI_${LANG}_WRAPPER_FOUND FALSE)
         set(MPI_PINNED_COMPILER FALSE)
 
@@ -1529,7 +1531,7 @@ foreach(LANG IN ITEMS C CXX Fortran)
             DOC    "MPI compiler for ${LANG}"
           )
 
-          if("${MPI_${LANG}_COMPILER}" STREQUAL "${CMAKE_${LANG}_COMPILER}")
+          if(MPI_${LANG}_COMPILER STREQUAL CMAKE_${LANG}_COMPILER)
             set(MPI_PINNED_COMPILER TRUE)
 
             # If we haven't made the implicit compiler test yet, perform it now.
@@ -1590,7 +1592,7 @@ foreach(LANG IN ITEMS C CXX Fortran)
           endif()
           if(_MPI_PKG AND PKG_CONFIG_FOUND)
             pkg_check_modules("MPI_${LANG}_PKG" "${_MPI_PKG}")
-            if("${MPI_${LANG}_PKG_FOUND}")
+            if(MPI_${LANG}_PKG_FOUND)
               set(MPI_${LANG}_COMPILE_OPTIONS  ${MPI_${LANG}_PKG_CFLAGS}        CACHE STRING "MPI ${LANG} compilation options"       FORCE)
               set(MPI_${LANG}_INCLUDE_PATH     ${MPI_${LANG}_PKG_INCLUDE_DIRS}  CACHE STRING "MPI ${LANG} include directories"       FORCE)
               set(MPI_${LANG}_LINK_FLAGS       ${MPI_${LANG}_PKG_LDFLAGS}       CACHE STRING "MPI ${LANG} linker flags"              FORCE)
@@ -1611,10 +1613,10 @@ foreach(LANG IN ITEMS C CXX Fortran)
             endif()
           endif()
 
-          if(NOT MPI_SKIP_GUESSING AND NOT "${MPI_${LANG}_PKG_FOUND}")
+          if(NOT MPI_SKIP_GUESSING AND NOT MPI_${LANG}_PKG_FOUND)
             # For C++, we may use the settings for C. Should a given compiler wrapper for C++ not exist, but one for C does, we copy over the
             # settings for C. An MPI distribution that is in this situation would be IBM Platform MPI.
-            if("${LANG}" STREQUAL "CXX" AND MPI_C_WRAPPER_FOUND)
+            if(LANG STREQUAL "CXX" AND MPI_C_WRAPPER_FOUND)
               set(MPI_${LANG}_COMPILE_OPTIONS          ${MPI_C_COMPILE_OPTIONS}     CACHE STRING "MPI ${LANG} compilation options"           )
               set(MPI_${LANG}_COMPILE_DEFINITIONS      ${MPI_C_COMPILE_DEFINITIONS} CACHE STRING "MPI ${LANG} compilation definitions"       )
               set(MPI_${LANG}_COMPILER_INCLUDE_DIRS    ${MPI_C_INCLUDE_DIRS}        CACHE STRING "MPI ${LANG} compiler wrapper include directories")
@@ -1628,7 +1630,7 @@ foreach(LANG IN ITEMS C CXX Fortran)
       endif()
     endif()
 
-    if(NOT "${MPI_${LANG}_COMPILER}" STREQUAL "${CMAKE_${LANG}_COMPILER}")
+    if(NOT MPI_${LANG}_COMPILER STREQUAL CMAKE_${LANG}_COMPILER)
       _MPI_split_include_dirs(${LANG})
       _MPI_assemble_include_dirs(${LANG})
     else()
@@ -1665,7 +1667,7 @@ foreach(LANG IN ITEMS C CXX Fortran)
     # If we've found MPI, then we'll perform additional analysis: Determine the MPI version, MPI library version, supported
     # MPI APIs (i.e. MPI-2 C++ bindings). For Fortran we also need to find specific parameters if we're under MPI-3.
     if(MPI_${LANG}_WORKS)
-      if("${LANG}" STREQUAL "CXX" AND NOT DEFINED MPI_MPICXX_FOUND)
+      if(LANG STREQUAL "CXX" AND NOT DEFINED MPI_MPICXX_FOUND)
         if(NOT MPI_CXX_SKIP_MPICXX AND NOT MPI_CXX_VALIDATE_SKIP_MPICXX)
           _MPI_try_staged_settings(${LANG} test_mpi MPICXX FALSE FALSE)
           if(MPI_RESULT_${LANG}_test_mpi_MPICXX)
@@ -1689,7 +1691,7 @@ foreach(LANG IN ITEMS C CXX Fortran)
       # Fortran parameters, since those depend on the method of consumption.
       # For C++, we can always use the C bindings, and should do so, since the C++ bindings do not exist in MPI-3
       # whereas the C bindings do, and the C++ bindings never offered any feature advantage over their C counterparts.
-      if("${LANG}" STREQUAL "Fortran")
+      if(LANG STREQUAL "Fortran")
         if(MPI_${LANG}_HAVE_F08_MODULE)
           set(MPI_${LANG}_HIGHEST_METHOD F08_MODULE)
         elseif(MPI_${LANG}_HAVE_F90_MODULE)
@@ -1705,7 +1707,7 @@ foreach(LANG IN ITEMS C CXX Fortran)
           _MPI_try_staged_settings(${LANG} mpiver ${MPI_${LANG}_HIGHEST_METHOD} FALSE FALSE)
           if(MPI_RESULT_${LANG}_mpiver_${MPI_${LANG}_HIGHEST_METHOD})
             file(STRINGS ${MPI_BIN_FOLDER}/mpiver_${LANG}.bin _MPI_VERSION_STRING LIMIT_COUNT 1 REGEX "INFO:MPI-VER")
-            if("${_MPI_VERSION_STRING}" MATCHES ".*INFO:MPI-VER\\[([0-9]+)\\.([0-9]+)\\].*")
+            if(_MPI_VERSION_STRING MATCHES ".*INFO:MPI-VER\\[([0-9]+)\\.([0-9]+)\\].*")
               set(MPI_${LANG}_VERSION_MAJOR "${CMAKE_MATCH_1}")
               set(MPI_${LANG}_VERSION_MINOR "${CMAKE_MATCH_2}")
               set(MPI_${LANG}_VERSION "${MPI_${LANG}_VERSION_MAJOR}.${MPI_${LANG}_VERSION_MINOR}")
@@ -1724,12 +1726,12 @@ foreach(LANG IN ITEMS C CXX Fortran)
               _MPI_try_staged_settings(${LANG} fortranparam_mpi ${mpimethod} TRUE FALSE)
               if(MPI_RESULT_${LANG}_fortranparam_mpi_${mpimethod} AND
                 NOT "${MPI_RUN_RESULT_${LANG}_fortranparam_mpi_${mpimethod}}" STREQUAL "FAILED_TO_RUN")
-                if("${MPI_RUN_OUTPUT_${LANG}_fortranparam_mpi_${mpimethod}}" MATCHES
+                if(MPI_RUN_OUTPUT_${LANG}_fortranparam_mpi_${mpimethod} MATCHES
                   ".*INFO:SUBARRAYS\\[ *([TF]) *\\]-ASYNCPROT\\[ *([TF]) *\\].*")
-                  if("${CMAKE_MATCH_1}" STREQUAL "T")
+                  if(CMAKE_MATCH_1 STREQUAL "T")
                     set(MPI_${LANG}_${mpimethod}_SUBARRAYS TRUE)
                   endif()
-                  if("${CMAKE_MATCH_2}" STREQUAL "T")
+                  if(CMAKE_MATCH_2 STREQUAL "T")
                     set(MPI_${LANG}_${mpimethod}_ASYNCPROT TRUE)
                   endif()
                 endif()
@@ -1744,7 +1746,7 @@ foreach(LANG IN ITEMS C CXX Fortran)
         # By the MPI-2 standard, MPI_VERSION and MPI_SUBVERSION are valid for both C and C++ bindings.
         if(NOT DEFINED MPI_${LANG}_VERSION)
           file(STRINGS ${MPI_BIN_FOLDER}/test_mpi_${LANG}.bin _MPI_VERSION_STRING LIMIT_COUNT 1 REGEX "INFO:MPI-VER")
-          if("${_MPI_VERSION_STRING}" MATCHES ".*INFO:MPI-VER\\[([0-9]+)\\.([0-9]+)\\].*")
+          if(_MPI_VERSION_STRING MATCHES ".*INFO:MPI-VER\\[([0-9]+)\\.([0-9]+)\\].*")
             set(MPI_${LANG}_VERSION_MAJOR "${CMAKE_MATCH_1}")
             set(MPI_${LANG}_VERSION_MINOR "${CMAKE_MATCH_2}")
             set(MPI_${LANG}_VERSION "${MPI_${LANG}_VERSION_MAJOR}.${MPI_${LANG}_VERSION_MINOR}")
@@ -1764,7 +1766,7 @@ foreach(LANG IN ITEMS C CXX Fortran)
       if(MPI_DETERMINE_LIBRARY_VERSION AND NOT MPI_${LANG}_LIBRARY_VERSION_STRING)
         _MPI_try_staged_settings(${LANG} libver_mpi ${MPI_${LANG}_HIGHEST_METHOD} TRUE FALSE)
         if(MPI_RESULT_${LANG}_libver_mpi_${MPI_${LANG}_HIGHEST_METHOD} AND
-          "${MPI_RUN_RESULT_${LANG}_libver_mpi_${MPI_${LANG}_HIGHEST_METHOD}}" EQUAL "0")
+          MPI_RUN_RESULT_${LANG}_libver_mpi_${MPI_${LANG}_HIGHEST_METHOD} EQUAL "0")
           string(STRIP "${MPI_RUN_OUTPUT_${LANG}_libver_mpi_${MPI_${LANG}_HIGHEST_METHOD}}"
             MPI_${LANG}_LIBRARY_VERSION_STRING)
         else()
@@ -1778,12 +1780,12 @@ foreach(LANG IN ITEMS C CXX Fortran)
     set(MPI_${LANG}_FIND_VERSION_EXACT ${MPI_FIND_VERSION_EXACT})
 
     unset(MPI_${LANG}_REQUIRED_VARS)
-    if (NOT "${MPI_${LANG}_COMPILER}" STREQUAL "${CMAKE_${LANG}_COMPILER}")
+    if (NOT MPI_${LANG}_COMPILER STREQUAL CMAKE_${LANG}_COMPILER)
       foreach(mpilibname IN LISTS MPI_${LANG}_LIB_NAMES)
         list(APPEND MPI_${LANG}_REQUIRED_VARS "MPI_${mpilibname}_LIBRARY")
       endforeach()
       list(APPEND MPI_${LANG}_REQUIRED_VARS "MPI_${LANG}_LIB_NAMES")
-      if("${LANG}" STREQUAL "Fortran")
+      if(LANG STREQUAL "Fortran")
         # For Fortran we only need one of the module or header directories to have *some* support for MPI.
         if(NOT MPI_${LANG}_MODULE_DIR)
           list(APPEND MPI_${LANG}_REQUIRED_VARS "MPI_${LANG}_F77_HEADER_DIR")
@@ -1883,7 +1885,7 @@ else()
 endif()
 
 list(LENGTH MPI_LIBRARIES MPI_NUMLIBS)
-if (MPI_NUMLIBS GREATER 1)
+if (MPI_NUMLIBS GREATER "1")
   set(MPI_EXTRA_LIBRARY_WORK "${MPI_LIBRARIES}")
   list(REMOVE_AT MPI_EXTRA_LIBRARY_WORK 0)
   set(MPI_EXTRA_LIBRARY "${MPI_EXTRA_LIBRARY_WORK}")

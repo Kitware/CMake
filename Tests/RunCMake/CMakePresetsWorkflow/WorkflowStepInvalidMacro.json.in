@@ -1,0 +1,20 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "default",
+      "binaryDir": "$vendor{invalidMacro}"
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "WorkflowStepInvalidMacro",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "default"
+        }
+      ]
+    }
+  ]
+}

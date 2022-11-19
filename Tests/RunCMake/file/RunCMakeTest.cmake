@@ -47,6 +47,7 @@ run_cmake(GLOB_RECURSE)
 run_cmake(GLOB_RECURSE-noexp-FOLLOW_SYMLINKS)
 run_cmake(SIZE)
 run_cmake(SIZE-error-does-not-exist)
+run_cmake(TIMESTAMP)
 
 run_cmake(REMOVE-empty)
 

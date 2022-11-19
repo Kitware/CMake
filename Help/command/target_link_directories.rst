@@ -21,11 +21,12 @@ The named ``<target>`` must have been created by a command such as
 :ref:`ALIAS target <Alias Targets>`.
 
 The ``INTERFACE``, ``PUBLIC`` and ``PRIVATE`` keywords are required to
-specify the scope of the items that follow them.  ``PRIVATE`` and
-``PUBLIC`` items will populate the :prop_tgt:`LINK_DIRECTORIES` property
-of ``<target>``.  ``PUBLIC`` and ``INTERFACE`` items will populate the
-:prop_tgt:`INTERFACE_LINK_DIRECTORIES` property of ``<target>``
-(:ref:`IMPORTED targets <Imported Targets>` only support ``INTERFACE`` items).
+specify the :ref:`scope <Target Usage Requirements>` of the items that follow
+them. ``PRIVATE`` and ``PUBLIC`` items will populate the
+:prop_tgt:`LINK_DIRECTORIES` property of ``<target>``.  ``PUBLIC`` and
+``INTERFACE`` items will populate the :prop_tgt:`INTERFACE_LINK_DIRECTORIES`
+property of ``<target>`` (:ref:`IMPORTED targets <Imported Targets>` only
+support ``INTERFACE`` items).
 Each item specifies a link directory and will be converted to an absolute
 path if necessary before adding it to the relevant property.  Repeated
 calls for the same ``<target>`` append items in the order called.

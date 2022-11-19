@@ -74,6 +74,7 @@ list(APPEND CTEST_CUSTOM_WARNING_EXCEPTION
   "cm(StringCommand|CTestTestHandler)\\.cxx.*warning.*rand.*may return deterministic values"
   "cm(StringCommand|CTestTestHandler)\\.cxx.*warning.*rand.*isn.*t random" # we do not do crypto
   "cm(StringCommand|CTestTestHandler)\\.cxx.*warning.*srand.*seed choices are.*poor" # we do not do crypto
+  "cmFindPackageCommand.cxx.*: warning #177-D: parameter .* was declared but never referenced"
   "IPA warning: function.*multiply defined in"
   "LICENSE WARNING" # PGI license expiry.  Not useful in nightly testing.
 
@@ -82,6 +83,11 @@ list(APPEND CTEST_CUSTOM_WARNING_EXCEPTION
   "[0-9,]+ warnings? generated." # Clang
   "compilation completed with warnings" # PGI
   "[0-9]+ Warning\\(s\\) detected" # SunPro
+
+  # Ignore false positive on `cm::optional` usage from GCC
+  "cmGlobalNinjaGenerator.cxx:[0-9]*:[0-9]*: warning: '.*cm::optional<CxxModuleMapFormat>::_mem\\)\\)' may be used uninitialized \\[-Wmaybe-uninitialized\\]"
+  "cmGlobalNinjaGenerator.cxx:[0-9]*:[0-9]*: note: '.*cm::optional<CxxModuleMapFormat>::_mem\\)\\)' was declared here"
+  "cmGlobalNinjaGenerator.cxx:[0-9]*:[0-9]*: warning: '\\*\\(\\(void\\*\\)& modmap_fmt \\+4\\)' may be used uninitialized in this function \\[-Wmaybe-uninitialized\\]"
 
   # clang-analyzer exceptions
   "cmListFileLexer.c:[0-9]+:[0-9]+: warning: Array subscript is undefined"

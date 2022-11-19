@@ -4,11 +4,18 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#if !defined(_WIN32)
+#  include <sys/types.h>
+#endif
+
 #include <cstddef>
 #include <functional>
+#include <map>
+#include <sstream>
 #include <string>
 #include <vector>
 
+#include <cm/optional>
 #include <cm/string_view>
 
 #include "cmsys/Process.h"
@@ -147,6 +154,27 @@ public:
     Success,
     Failure,
   };
+
+#if defined(_MSC_VER)
+  /** Visual C++ does not define mode_t. */
+  using mode_t = unsigned short;
+#endif
+
+  /**
+   * Make a new temporary directory.  The path must end in "XXXXXX", and will
+   * be modified to reflect the name of the directory created.  This function
+   * is similar to POSIX mkdtemp (and is implemented using the same where that
+   * function is available).
+   *
+   * This function can make a full path even if none of the directories existed
+   * prior to calling this function.
+   *
+   * Note that this function may modify \p path even if it does not succeed.
+   */
+  static cmsys::Status MakeTempDirectory(char* path,
+                                         const mode_t* mode = nullptr);
+  static cmsys::Status MakeTempDirectory(std::string& path,
+                                         const mode_t* mode = nullptr);
 
   /** Copy a file. */
   static bool CopySingleFile(const std::string& oldname,
@@ -377,6 +405,42 @@ public:
   /** Append multiple variables to the current environment. */
   static void AppendEnv(std::vector<std::string> const& env);
 
+  /**
+   * Helper class to represent an environment diff directly. This is to avoid
+   * repeated in-place environment modification (i.e. via setenv/putenv), which
+   * could be slow.
+   */
+  class EnvDiff
+  {
+  public:
+    /** Append multiple variables to the current environment diff */
+    void AppendEnv(std::vector<std::string> const& env);
+
+    /**
+     * Add a single variable (or remove if no = sign) to the current
+     * environment diff.
+     */
+    void PutEnv(const std::string& env);
+
+    /** Remove a single variable from the current environment diff. */
+    void UnPutEnv(const std::string& env);
+
+    /**
+     * Apply an ENVIRONMENT_MODIFICATION operation to this diff. Returns
+     * false and issues an error on parse failure.
+     */
+    bool ParseOperation(const std::string& envmod);
+
+    /**
+     * Apply this diff to the actual environment, optionally writing out the
+     * modifications to a CTest-compatible measurement stream.
+     */
+    void ApplyToCurrentEnv(std::ostringstream* measurement = nullptr);
+
+  private:
+    std::map<std::string, cm::optional<std::string>> diff;
+  };
+
   /** Helper class to save and restore the environment.
       Instantiate this class as an automatic variable on
       the stack. Its constructor saves a copy of the current
@@ -531,14 +595,16 @@ public:
   /** Create a symbolic link if the platform supports it.  Returns whether
       creation succeeded. */
   static cmsys::Status CreateSymlink(std::string const& origName,
-                                     std::string const& newName,
-                                     std::string* errorMessage = nullptr);
+                                     std::string const& newName);
+  static cmsys::Status CreateSymlinkQuietly(std::string const& origName,
+                                            std::string const& newName);
 
   /** Create a hard link if the platform supports it.  Returns whether
       creation succeeded. */
   static cmsys::Status CreateLink(std::string const& origName,
-                                  std::string const& newName,
-                                  std::string* errorMessage = nullptr);
+                                  std::string const& newName);
+  static cmsys::Status CreateLinkQuietly(std::string const& origName,
+                                         std::string const& newName);
 
   /** Get the system name. */
   static cm::string_view GetSystemName();

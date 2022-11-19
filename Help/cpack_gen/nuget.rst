@@ -110,7 +110,7 @@ List of CPack NuGet generator specific variables:
  .. deprecated:: 3.20
   Use a local license file
   (:variable:`CPACK_NUGET_PACKAGE_LICENSE_FILE_NAME`)
-  or a `(SPDX) license identifier`_
+  or a `SPDX license identifier`_
   (:variable:`CPACK_NUGET_PACKAGE_LICENSE_EXPRESSION`) instead.
 
  An URL for the package's license, often shown in UI displays as well
@@ -124,7 +124,7 @@ List of CPack NuGet generator specific variables:
 
  .. versionadded:: 3.20
 
- A Software Package Data Exchange `(SPDX) license identifier`_ such as
+ A Software Package Data Exchange `SPDX license identifier`_ such as
  ``MIT``, ``BSD-3-Clause``, or ``LGPL-3.0-or-later``. In the case of a
  choice of licenses or more complex restrictions, compound license
  expressions may be formed using boolean operators, for example
@@ -158,6 +158,14 @@ List of CPack NuGet generator specific variables:
 
  An URL for a 64x64 image with transparency background to use as the
  icon for the package in UI display.
+
+ * Mandatory : NO
+ * Default   : -
+
+.. variable:: CPACK_NUGET_PACKAGE_REQUIRE_LICENSE_ACCEPTANCE
+
+ When set to a true value, the user will be prompted to accept the license
+ before installing the package.
 
  * Mandatory : NO
  * Default   : -
@@ -247,9 +255,9 @@ List of CPack NuGet generator specific variables:
  * Default   : OFF
 
 
-.. _nuget.org: http://nuget.org
-.. _version specification: https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-ranges-and-wildcards
-.. _(SPDX) license identifier: https://spdx.org/licenses/
-.. _SPDX specification: https://spdx.github.io/spdx-spec/appendix-IV-SPDX-license-expressions/
+.. _nuget.org: https://www.nuget.org
+.. _version specification: https://learn.microsoft.com/en-us/nuget/concepts/package-versioning#version-ranges
+.. _SPDX license identifier: https://spdx.github.io/spdx-spec/SPDX-license-list
+.. _SPDX specification: https://spdx.github.io/spdx-spec/SPDX-license-expressions
 
 .. NuGet spec docs https://docs.microsoft.com/en-us/nuget/reference/nuspec

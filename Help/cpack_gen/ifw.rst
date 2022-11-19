@@ -14,7 +14,7 @@ Overview
 
 This :manual:`cpack generator <cpack-generators(7)>` generates
 configuration and meta information for the `Qt Installer Framework
-<http://doc.qt.io/qtinstallerframework/index.html>`_ (QtIFW),
+<https://doc.qt.io/qtinstallerframework/index.html>`_ (QtIFW),
 and runs QtIFW tools to generate a Qt installer.
 
 QtIFW provides tools and utilities to create installers for

@@ -23,6 +23,7 @@
 #include "cmStateTypes.h"
 #include "cmValue.h"
 
+enum class cmBuildStep;
 class cmComputeLinkInformation;
 class cmCustomCommand;
 class cmGlobalGenerator;
@@ -471,7 +472,9 @@ public:
   void AddExplicitLanguageFlags(std::string& flags,
                                 cmSourceFile const& sf) const;
 
-  void AddCUDAArchitectureFlags(std::string& flags) const;
+  void AddCUDAArchitectureFlags(cmBuildStep compileOrLink,
+                                const std::string& config,
+                                std::string& flags) const;
   void AddCUDAToolkitFlags(std::string& flags) const;
 
   void AddHIPArchitectureFlags(std::string& flags) const;
@@ -1196,4 +1199,34 @@ public:
     bool operator()(cmGeneratorTarget const* t1,
                     cmGeneratorTarget const* t2) const;
   };
+
+  // C++20 module support queries.
+
+  /**
+   * Query whether the target expects C++20 module support.
+   *
+   * This will inspect the target itself to see if C++20 module
+   * support is expected to work based on its sources.
+   */
+  bool HaveCxx20ModuleSources() const;
+
+  enum class Cxx20SupportLevel
+  {
+    // C++ is not available.
+    MissingCxx,
+    // The experimental feature is not available.
+    MissingExperimentalFlag,
+    // The target does not require at least C++20.
+    NoCxx20,
+    // C++20 modules are available and working.
+    Supported,
+  };
+  /**
+   * Query whether the target has C++20 module support available (regardless of
+   * whether it is required or not).
+   */
+  Cxx20SupportLevel HaveCxxModuleSupport(std::string const& config) const;
+
+  // Check C++ module status for the target.
+  void CheckCxxModuleStatus(std::string const& config) const;
 };

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -17,6 +17,8 @@
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
 
@@ -31,6 +33,7 @@
 #include "netrc.h"
 #include "strtok.h"
 #include "strcase.h"
+#include "curl_get_line.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -56,8 +59,6 @@ enum host_lookup_state {
 static int parsenetrc(const char *host,
                       char **loginp,
                       char **passwordp,
-                      bool *login_changed,
-                      bool *password_changed,
                       char *netrcfile)
 {
   FILE *file;
@@ -71,31 +72,87 @@ static int parsenetrc(const char *host,
 
   char state_login = 0;      /* Found a login keyword */
   char state_password = 0;   /* Found a password keyword */
-  int state_our_login = FALSE;  /* With specific_login, found *our* login
-                                   name */
+  int state_our_login = TRUE;  /* With specific_login, found *our* login
+                                  name (or login-less line) */
 
   DEBUGASSERT(netrcfile);
 
   file = fopen(netrcfile, FOPEN_READTEXT);
   if(file) {
-    char *tok;
-    char *tok_buf;
     bool done = FALSE;
     char netrcbuffer[4096];
     int  netrcbuffsize = (int)sizeof(netrcbuffer);
 
-    while(!done && fgets(netrcbuffer, netrcbuffsize, file)) {
+    while(!done && Curl_get_line(netrcbuffer, netrcbuffsize, file)) {
+      char *tok;
+      char *tok_end;
+      bool quoted;
       if(state == MACDEF) {
         if((netrcbuffer[0] == '\n') || (netrcbuffer[0] == '\r'))
           state = NOTHING;
         else
           continue;
       }
-      tok = strtok_r(netrcbuffer, " \t\n", &tok_buf);
-      if(tok && *tok == '#')
-        /* treat an initial hash as a comment line */
-        continue;
+      tok = netrcbuffer;
       while(tok) {
+        while(ISBLANK(*tok))
+          tok++;
+        /* tok is first non-space letter */
+        if(!*tok || (*tok == '#'))
+          /* end of line or the rest is a comment */
+          break;
+
+        /* leading double-quote means quoted string */
+        quoted = (*tok == '\"');
+
+        tok_end = tok;
+        if(!quoted) {
+          while(!ISSPACE(*tok_end))
+            tok_end++;
+          *tok_end = 0;
+        }
+        else {
+          bool escape = FALSE;
+          bool endquote = FALSE;
+          char *store = tok;
+          tok_end++; /* pass the leading quote */
+          while(*tok_end) {
+            char s = *tok_end;
+            if(escape) {
+              escape = FALSE;
+              switch(s) {
+              case 'n':
+                s = '\n';
+                break;
+              case 'r':
+                s = '\r';
+                break;
+              case 't':
+                s = '\t';
+                break;
+              }
+            }
+            else if(s == '\\') {
+              escape = TRUE;
+              tok_end++;
+              continue;
+            }
+            else if(s == '\"') {
+              tok_end++; /* pass the ending quote */
+              endquote = TRUE;
+              break;
+            }
+            *store++ = s;
+            tok_end++;
+          }
+          *store = 0;
+          if(escape || !endquote) {
+            /* bad syntax, get out */
+            retcode = NETRC_FAILED;
+            goto out;
+          }
+        }
+
         if((login && *login) && (password && *password)) {
           done = TRUE;
           break;
@@ -140,9 +197,9 @@ static int parsenetrc(const char *host,
           /* we are now parsing sub-keywords concerning "our" host */
           if(state_login) {
             if(specific_login) {
-              state_our_login = strcasecompare(login, tok);
+              state_our_login = !Curl_timestrcmp(login, tok);
             }
-            else if(!login || strcmp(login, tok)) {
+            else if(!login || Curl_timestrcmp(login, tok)) {
               if(login_alloc) {
                 free(login);
                 login_alloc = FALSE;
@@ -158,7 +215,7 @@ static int parsenetrc(const char *host,
           }
           else if(state_password) {
             if((state_our_login || !specific_login)
-                && (!password || strcmp(password, tok))) {
+               && (!password || Curl_timestrcmp(password, tok))) {
               if(password_alloc) {
                 free(password);
                 password_alloc = FALSE;
@@ -183,27 +240,22 @@ static int parsenetrc(const char *host,
           }
           break;
         } /* switch (state) */
-
-        tok = strtok_r(NULL, " \t\n", &tok_buf);
-      } /* while(tok) */
-    } /* while fgets() */
+        tok = ++tok_end;
+      }
+    } /* while Curl_get_line() */
 
     out:
     if(!retcode) {
       /* success */
-      *login_changed = FALSE;
-      *password_changed = FALSE;
       if(login_alloc) {
         if(*loginp)
           free(*loginp);
         *loginp = login;
-        *login_changed = TRUE;
       }
       if(password_alloc) {
         if(*passwordp)
           free(*passwordp);
         *passwordp = password;
-        *password_changed = TRUE;
       }
     }
     else {
@@ -224,17 +276,16 @@ static int parsenetrc(const char *host,
  * *loginp and *passwordp MUST be allocated if they aren't NULL when passed
  * in.
  */
-int Curl_parsenetrc(const char *host,
-                    char **loginp,
-                    char **passwordp,
-                    bool *login_changed,
-                    bool *password_changed,
+int Curl_parsenetrc(const char *host, char **loginp, char **passwordp,
                     char *netrcfile)
 {
   int retcode = 1;
   char *filealloc = NULL;
 
   if(!netrcfile) {
+#if defined(HAVE_GETPWUID_R) && defined(HAVE_GETEUID)
+    char pwbuf[1024];
+#endif
     char *home = NULL;
     char *homea = curl_getenv("HOME"); /* portable environment reader */
     if(homea) {
@@ -243,7 +294,6 @@ int Curl_parsenetrc(const char *host,
     }
     else {
       struct passwd pw, *pw_res;
-      char pwbuf[1024];
       if(!getpwuid_r(geteuid(), &pw, pwbuf, sizeof(pwbuf), &pw_res)
          && pw_res) {
         home = pw.pw_dir;
@@ -255,6 +305,13 @@ int Curl_parsenetrc(const char *host,
       pw = getpwuid(geteuid());
       if(pw) {
         home = pw->pw_dir;
+      }
+#elif defined(_WIN32)
+    }
+    else {
+      homea = curl_getenv("USERPROFILE");
+      if(homea) {
+        home = homea;
       }
 #endif
     }
@@ -268,8 +325,7 @@ int Curl_parsenetrc(const char *host,
       free(homea);
       return -1;
     }
-    retcode = parsenetrc(host, loginp, passwordp, login_changed,
-                         password_changed, filealloc);
+    retcode = parsenetrc(host, loginp, passwordp, filealloc);
     free(filealloc);
 #ifdef WIN32
     if(retcode == NETRC_FILE_MISSING) {
@@ -279,16 +335,14 @@ int Curl_parsenetrc(const char *host,
         free(homea);
         return -1;
       }
-      retcode = parsenetrc(host, loginp, passwordp, login_changed,
-                           password_changed, filealloc);
+      retcode = parsenetrc(host, loginp, passwordp, filealloc);
       free(filealloc);
     }
 #endif
     free(homea);
   }
   else
-    retcode = parsenetrc(host, loginp, passwordp, login_changed,
-                         password_changed, netrcfile);
+    retcode = parsenetrc(host, loginp, passwordp, netrcfile);
   return retcode;
 }
 

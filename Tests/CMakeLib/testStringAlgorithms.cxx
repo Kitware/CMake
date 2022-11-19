@@ -227,6 +227,41 @@ int testStringAlgorithms(int /*unused*/, char* /*unused*/ [])
   }
 
   // ----------------------------------------------------------------------
+  // Test cmStrToLongLong
+  {
+    long long value;
+    assert_ok(cmStrToLongLong("1", &value) && value == 1,
+              "cmStrToLongLong parses a positive decimal integer.");
+    assert_ok(cmStrToLongLong(" 1", &value) && value == 1,
+              "cmStrToLongLong parses a decimal integer after whitespace.");
+
+    assert_ok(cmStrToLongLong("-1", &value) && value == -1,
+              "cmStrToLongLong parses a negative decimal integer.");
+    assert_ok(
+      cmStrToLongLong(" -1", &value) && value == -1,
+      "cmStrToLongLong parses a negative decimal integer after whitespace.");
+
+    assert_ok(!cmStrToLongLong("1x", &value),
+              "cmStrToLongLong rejects trailing content.");
+  }
+
+  // ----------------------------------------------------------------------
+  // Test cmStrToULongLong
+  {
+    unsigned long long value;
+    assert_ok(cmStrToULongLong("1", &value) && value == 1,
+              "cmStrToULongLong parses a decimal integer.");
+    assert_ok(cmStrToULongLong(" 1", &value) && value == 1,
+              "cmStrToULongLong parses a decimal integer after whitespace.");
+    assert_ok(!cmStrToULongLong("-1", &value),
+              "cmStrToULongLong rejects a negative number.");
+    assert_ok(!cmStrToULongLong(" -1", &value),
+              "cmStrToULongLong rejects a negative number after whitespace.");
+    assert_ok(!cmStrToULongLong("1x", &value),
+              "cmStrToULongLong rejects trailing content.");
+  }
+
+  // ----------------------------------------------------------------------
   // Test cmStrLen
   {
     constexpr auto len = cmStrLen("Hello world!");

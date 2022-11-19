@@ -31,6 +31,12 @@ Supported values are:
 
   Objective C++23
 
+``26``
+  .. versionadded:: 3.25
+
+  Objective C++26. CMake 3.25 and later *recognize* ``26`` as a valid value,
+  no version has support for any compiler.
+
 If the value requested does not result in a compile flag being added for
 the compiler in use, a previous standard flag will be added instead.  This
 means that using:

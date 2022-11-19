@@ -1,0 +1,4 @@
+^CMake Error at [^
+]*/all-perms\.cmake:[0-9]+ \(file\):
+  file Remove either PERMISSIONS or FILE_PERMISSIONS or DIRECTORY_PERMISSIONS
+  from the invocation$

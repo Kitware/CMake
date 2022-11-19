@@ -7,6 +7,10 @@ run_cmake(Required)
 run_cmake(NO_CACHE)
 run_cmake(REGISTRY_VIEW-no-view)
 run_cmake(REGISTRY_VIEW-wrong-view)
+run_cmake(VALIDATOR-no-function)
+run_cmake(VALIDATOR-undefined-function)
+run_cmake(VALIDATOR-specify-macro)
+run_cmake(VALIDATOR)
 
 run_cmake_with_options(FromPATHEnvDebugVar --debug-find-var=PrefixInPATH_File)
 

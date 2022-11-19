@@ -50,6 +50,7 @@
 #include "cmState.h"
 #include "cmStateDirectory.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
 #include "cmVersion.h"
@@ -1501,7 +1502,7 @@ bool cmGlobalGenerator::Compute()
   if (!this->CheckALLOW_DUPLICATE_CUSTOM_TARGETS()) {
     return false;
   }
-  this->FinalizeTargetCompileInfo();
+  this->FinalizeTargetConfiguration();
 
   this->CreateGenerationObjects();
 
@@ -1825,7 +1826,7 @@ cmGlobalGenerator::CreateMSVC60LinkLineComputer(
     cm::make_unique<cmMSVC60LinkLineComputer>(outputConverter, stateDir));
 }
 
-void cmGlobalGenerator::FinalizeTargetCompileInfo()
+void cmGlobalGenerator::FinalizeTargetConfiguration()
 {
   std::vector<std::string> const langs =
     this->CMakeInstance->GetState()->GetEnabledLanguages();
@@ -1838,8 +1839,8 @@ void cmGlobalGenerator::FinalizeTargetCompileInfo()
 
     for (auto& target : mf->GetTargets()) {
       cmTarget* t = &target.second;
-      t->FinalizeTargetCompileInfo(noConfigCompileDefinitions,
-                                   perConfigCompileDefinitions);
+      t->FinalizeTargetConfiguration(noConfigCompileDefinitions,
+                                     perConfigCompileDefinitions);
     }
 
     // The standard include directories for each language
@@ -2553,9 +2554,9 @@ bool cmGlobalGenerator::NameResolvesToFramework(
 // This is where we change the path to point to the framework directory.
 // .tbd files also can be located in SDK frameworks (they are
 // placeholders for actual libraries shipped with the OS)
-cm::optional<std::pair<std::string, std::string>>
+cm::optional<cmGlobalGenerator::FrameworkDescriptor>
 cmGlobalGenerator::SplitFrameworkPath(const std::string& path,
-                                      bool extendedFormat) const
+                                      FrameworkFormat format) const
 {
   // Check for framework structure:
   //    (/path/to/)?FwName.framework
@@ -2570,20 +2571,29 @@ cmGlobalGenerator::SplitFrameworkPath(const std::string& path,
     auto name = frameworkPath.match(3);
     auto libname =
       cmSystemTools::GetFilenameWithoutExtension(frameworkPath.match(6));
-    if (!libname.empty() && name != libname) {
+    if (format == FrameworkFormat::Strict && libname.empty()) {
       return cm::nullopt;
     }
-    return std::pair<std::string, std::string>{ frameworkPath.match(2), name };
+    if (!libname.empty() && !cmHasPrefix(libname, name)) {
+      return cm::nullopt;
+    }
+
+    if (libname.empty() || name.size() == libname.size()) {
+      return FrameworkDescriptor{ frameworkPath.match(2), name };
+    }
+
+    return FrameworkDescriptor{ frameworkPath.match(2), name,
+                                libname.substr(name.size()) };
   }
 
-  if (extendedFormat) {
+  if (format == FrameworkFormat::Extended) {
     // path format can be more flexible: (/path/to/)?fwName(.framework)?
     auto fwDir = cmSystemTools::GetParentDirectory(path);
     auto name = cmSystemTools::GetFilenameLastExtension(path) == ".framework"
       ? cmSystemTools::GetFilenameWithoutExtension(path)
       : cmSystemTools::GetFilenameName(path);
 
-    return std::pair<std::string, std::string>{ fwDir, name };
+    return FrameworkDescriptor{ fwDir, name };
   }
 
   return cm::nullopt;

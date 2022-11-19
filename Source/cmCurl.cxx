@@ -34,8 +34,19 @@
 std::string cmCurlSetCAInfo(::CURL* curl, const std::string& cafile)
 {
   std::string e;
+  std::string env_ca;
   if (!cafile.empty()) {
     ::CURLcode res = ::curl_easy_setopt(curl, CURLOPT_CAINFO, cafile.c_str());
+    check_curl_result(res, "Unable to set TLS/SSL Verify CAINFO: ");
+  }
+  /* Honor the user-configurable OpenSSL environment variables. */
+  else if (cmSystemTools::GetEnv("SSL_CERT_FILE", env_ca) &&
+           cmSystemTools::FileExists(env_ca, true)) {
+    ::CURLcode res = ::curl_easy_setopt(curl, CURLOPT_CAINFO, env_ca.c_str());
+    check_curl_result(res, "Unable to set TLS/SSL Verify CAINFO: ");
+  } else if (cmSystemTools::GetEnv("SSL_CERT_DIR", env_ca) &&
+             cmSystemTools::FileIsDirectory(env_ca)) {
+    ::CURLcode res = ::curl_easy_setopt(curl, CURLOPT_CAPATH, env_ca.c_str());
     check_curl_result(res, "Unable to set TLS/SSL Verify CAINFO: ");
   }
 #ifdef CMAKE_FIND_CAFILE

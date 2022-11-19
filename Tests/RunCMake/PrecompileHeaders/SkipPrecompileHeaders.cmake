@@ -1,6 +1,5 @@
-cmake_minimum_required(VERSION 3.15)
-
-project(SkipPrecompileHeaders)
+enable_language(C)
+enable_language(CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 

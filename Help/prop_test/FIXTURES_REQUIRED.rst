@@ -19,10 +19,11 @@ be executed. The cleanup tests for the fixture will always be executed, even if
 some setup tests fail.
 
 When CTest is asked to execute only a subset of tests (e.g. by the use of
-regular expressions or when run with the ``--rerun-failed`` command line
-option), it will automatically add any setup or cleanup tests for fixtures
-required by any of the tests that are in the execution set. This behavior can
-be overridden with the ``-FS``, ``-FC`` and ``-FA`` command line options to
+regular expressions or when run with the :option:`--rerun-failed <ctest --rerun-failed>`
+command line option), it will automatically add any setup or cleanup tests for
+fixtures required by any of the tests that are in the execution set. This
+behavior can be overridden with the :option:`-FS <ctest -FS>`,
+:option:`-FC <ctest -FC>` and :option:`-FA <ctest -FA>` command line options to
 :manual:`ctest(1)` if desired.
 
 Since setup and cleanup tasks are also tests, they can have an ordering

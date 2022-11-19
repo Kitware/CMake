@@ -9,11 +9,18 @@ function(verify_architectures file)
     return()
   endif()
 
-  string(REGEX MATCHALL "\narchitecture [^ \n\t()]+" architectures ${otool_out})
+  string(REGEX MATCHALL "\narchitecture [^ \n\t()]+" architectures "${otool_out}")
   string(REPLACE "\narchitecture " "" actual "${architectures}")
   list(SORT actual)
 
-  set(expected arm64 armv7 i386 x86_64)
+  if(XCODE_VERSION VERSION_LESS 14)
+    set(maybe_armv7 armv7)
+    set(maybe_i386 i386)
+  else()
+    set(maybe_armv7 "")
+    set(maybe_i386 "")
+  endif()
+  set(expected arm64 ${maybe_armv7} ${maybe_i386} x86_64)
 
   if(NOT actual STREQUAL expected)
     message(SEND_ERROR

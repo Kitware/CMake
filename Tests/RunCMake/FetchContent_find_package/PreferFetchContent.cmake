@@ -18,3 +18,7 @@ message(STATUS "Lowercase extra file was read")
 
 # This is expected to be re-routed to a FetchContent_MakeAvailable() call
 find_package(AddedProject REQUIRED)
+
+# Verify that find_package() version constraints are fully ignored by the
+# default-generated config version file
+find_package(AddedProject 1.2.3 EXACT REQUIRED)

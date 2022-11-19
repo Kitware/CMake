@@ -1,0 +1,12 @@
+-- Installing: [^
+]*/Tests/RunCMake/install/DIRECTORY-symlink-clobber-build/root-all/dest/dir
+-- Installing: [^
+]*/Tests/RunCMake/install/DIRECTORY-symlink-clobber-build/root-all/dest/dir/file
+-- Installing: [^
+]*/Tests/RunCMake/install/DIRECTORY-symlink-clobber-build/root-all/dest/lnk
+-- Installing: [^
+]*/Tests/RunCMake/install/DIRECTORY-symlink-clobber-build/root-all/dest/lnk
+-- (Up-to-date|Installing): [^
+]*/Tests/RunCMake/install/DIRECTORY-symlink-clobber-build/root-all/dest/lnk/file
+-- Installing: [^
+]*/Tests/RunCMake/install/DIRECTORY-symlink-clobber-build/root-all/dest/dir

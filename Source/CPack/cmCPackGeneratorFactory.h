@@ -8,6 +8,8 @@
 #include <memory>
 #include <string>
 
+#include "cmCPackConfigure.h" // IWYU pragma: keep
+
 class cmCPackGenerator;
 class cmCPackLog;
 

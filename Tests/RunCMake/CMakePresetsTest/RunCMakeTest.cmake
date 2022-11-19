@@ -78,7 +78,7 @@ set(CMakePresetsTest_ASSETS "Good-indexFile.txt")
 set(GoodTestPresets
   "minimal;defaults;noEnvironment;withEnvironment"
   "config-debug;config-release"
-  "exclude;index;indexFile;showOnly")
+  "exclude;index;indexFile;showOnly;outputLog;outputJUnit")
 run_cmake_test_presets(Good
                        "default"
                        ""
@@ -105,6 +105,8 @@ run_cmake_test_presets(Invalid "" "" "hidden;vendorMacro")
 set(CMakePresets_SCHEMA_EXPECTED_RESULT 1)
 run_cmake_test_presets(PresetsUnsupported "" "" "x")
 run_cmake_test_presets(ConditionFuture "" "" "x")
+run_cmake_test_presets(TestOutputTruncationUnsupported "" "" "x")
+run_cmake_test_presets(OutputJUnitUnsupported "" "" "x")
 set(CMakePresets_SCHEMA_EXPECTED_RESULT 0)
 run_cmake_test_presets(ConfigurePresetUnreachable "" "" "x")
 set(CMakePresetsTest_NO_CONFIGURE 0)

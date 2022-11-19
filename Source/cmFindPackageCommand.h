@@ -153,8 +153,6 @@ private:
   bool SearchFrameworkPrefix(std::string const& prefix_in);
   bool SearchAppBundlePrefix(std::string const& prefix_in);
 
-  friend class cmFindPackageFileList;
-
   struct OriginalDef
   {
     bool exists;

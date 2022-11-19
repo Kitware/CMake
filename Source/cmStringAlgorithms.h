@@ -303,3 +303,13 @@ bool cmStrToLong(std::string const& str, long* value);
  * integer */
 bool cmStrToULong(const char* str, unsigned long* value);
 bool cmStrToULong(std::string const& str, unsigned long* value);
+
+/** Converts a string to long long. Expects that the whole string
+ * is an integer */
+bool cmStrToLongLong(const char* str, long long* value);
+bool cmStrToLongLong(std::string const& str, long long* value);
+
+/** Converts a string to unsigned long long. Expects that the whole string
+ * is an integer */
+bool cmStrToULongLong(const char* str, unsigned long long* value);
+bool cmStrToULongLong(std::string const& str, unsigned long long* value);

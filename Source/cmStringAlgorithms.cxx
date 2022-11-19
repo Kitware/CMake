@@ -250,6 +250,38 @@ bool cmStrToULong(std::string const& str, unsigned long* value)
   return cmStrToULong(str.c_str(), value);
 }
 
+bool cmStrToLongLong(const char* str, long long* value)
+{
+  errno = 0;
+  char* endp;
+  *value = strtoll(str, &endp, 10);
+  return (*endp == '\0') && (endp != str) && (errno == 0);
+}
+
+bool cmStrToLongLong(std::string const& str, long long* value)
+{
+  return cmStrToLongLong(str.c_str(), value);
+}
+
+bool cmStrToULongLong(const char* str, unsigned long long* value)
+{
+  errno = 0;
+  char* endp;
+  while (cmIsSpace(*str)) {
+    ++str;
+  }
+  if (*str == '-') {
+    return false;
+  }
+  *value = strtoull(str, &endp, 10);
+  return (*endp == '\0') && (endp != str) && (errno == 0);
+}
+
+bool cmStrToULongLong(std::string const& str, unsigned long long* value)
+{
+  return cmStrToULongLong(str.c_str(), value);
+}
+
 template <typename Range>
 std::size_t getJoinedLength(Range const& rng, cm::string_view separator)
 {

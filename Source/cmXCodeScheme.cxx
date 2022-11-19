@@ -67,9 +67,14 @@ void cmXCodeScheme::WriteXCodeXCScheme(std::ostream& fout,
   xout.Attribute("LastUpgradeVersion", WriteVersionString());
   xout.Attribute("version", "1.3");
 
+  cmValue propDftCfg =
+    Target->GetTarget()->GetProperty("XCODE_SCHEME_LAUNCH_CONFIGURATION");
+  std::string launchConfiguration =
+    !propDftCfg.IsEmpty() ? *propDftCfg : "Debug";
+
   WriteBuildAction(xout, container);
   WriteTestAction(xout, FindConfiguration("Debug"), container);
-  WriteLaunchAction(xout, FindConfiguration("Debug"), container);
+  WriteLaunchAction(xout, FindConfiguration(launchConfiguration), container);
   WriteProfileAction(xout, FindConfiguration("Release"));
   WriteAnalyzeAction(xout, FindConfiguration("Debug"));
   WriteArchiveAction(xout, FindConfiguration("Release"));
@@ -147,7 +152,15 @@ void cmXCodeScheme::WriteLaunchAction(cmXMLWriter& xout,
                  "Xcode.DebuggerFoundation.Debugger.LLDB");
   xout.Attribute("selectedLauncherIdentifier",
                  "Xcode.DebuggerFoundation.Launcher.LLDB");
-  xout.Attribute("launchStyle", "0");
+  {
+    cmValue launchMode =
+      this->Target->GetTarget()->GetProperty("XCODE_SCHEME_LAUNCH_MODE");
+    std::string value = "0"; // == 'AUTO'
+    if (launchMode && *launchMode == "WAIT") {
+      value = "1";
+    }
+    xout.Attribute("launchStyle", value);
+  }
   WriteCustomWorkingDirectory(xout, configuration);
 
   xout.Attribute("ignoresPersistentStateOnLaunch", "NO");
@@ -190,6 +203,23 @@ void cmXCodeScheme::WriteLaunchAction(cmXMLWriter& xout,
 
   WriteLaunchActionAttribute(xout, "enableUBSanitizer",
                              "XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER");
+
+  if (cmValue value = this->Target->GetTarget()->GetProperty(
+        "XCODE_SCHEME_ENABLE_GPU_API_VALIDATION")) {
+    if (value.IsOff()) {
+      xout.Attribute("enableGPUValidationMode",
+                     "1"); // unset means YES, "1" means NO
+    }
+  }
+
+  if (cmValue value = this->Target->GetTarget()->GetProperty(
+        "XCODE_SCHEME_ENABLE_GPU_SHADER_VALIDATION")) {
+    if (value.IsOn()) {
+      xout.Attribute("enableGPUShaderValidationMode",
+                     "2"); // unset means NO, "2" means YES
+    }
+  }
+
   WriteLaunchActionAttribute(
     xout, "stopOnEveryUBSanitizerIssue",
     "XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER_STOP");

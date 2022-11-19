@@ -36,6 +36,11 @@ There are corresponding imported targets for each of these.
 ``MoltenVK``
   On macOS, an additional component ``MoltenVK`` is available.
 
+``dxc``
+  .. versionadded:: 3.25
+
+  The DirectX Shader Compiler.
+
 The ``glslc`` and ``glslangValidator`` components are provided even
 if not explicitly requested (for backward compatibility).
 
@@ -89,6 +94,21 @@ This module defines :prop_tgt:`IMPORTED` targets if Vulkan has been found:
   Defined if SDK has the Khronos library which implement a subset of Vulkan API
   over Apple Metal graphics framework. (MoltenVK).
 
+``Vulkan::volk``
+  .. versionadded:: 3.25
+
+  Defined if SDK has the Vulkan meta-loader (volk).
+
+``Vulkan::dxc_lib``
+  .. versionadded:: 3.25
+
+  Defined if SDK has the DirectX shader compiler library.
+
+``Vulkan::dxc_exe``
+  .. versionadded:: 3.25
+
+  Defined if SDK has the DirectX shader compiler CLI tool.
+
 Result Variables
 ^^^^^^^^^^^^^^^^
 
@@ -128,6 +148,21 @@ This module defines the following variables:
   .. versionadded:: 3.24
 
   True, if the SDK has the MoltenVK library.
+``Vulkan_volk_FOUND``
+  .. versionadded:: 3.25
+
+  True, if the SDK has the volk library.
+
+``Vulkan_dxc_lib_FOUND``
+  .. versionadded:: 3.25
+
+  True, if the SDK has the DirectX shader compiler library.
+
+``Vulkan_dxc_exe_FOUND``
+  .. versionadded:: 3.25
+
+  True, if the SDK has the DirectX shader compiler CLI tool.
+
 
 The module will also defines these cache variables:
 
@@ -155,6 +190,21 @@ The module will also defines these cache variables:
   .. versionadded:: 3.24
 
   Path to the MoltenVK library.
+
+``Vulkan_volk_LIBRARY``
+  .. versionadded:: 3.25
+
+  Path to the volk library.
+
+``Vulkan_dxc_LIBRARY``
+  .. versionadded:: 3.25
+
+  Path to the DirectX shader compiler library.
+
+``Vulkan_dxc_EXECUTABLE``
+  .. versionadded:: 3.25
+
+  Path to the DirectX shader compiler CLI tool.
 
 Hints
 ^^^^^
@@ -403,6 +453,27 @@ if(MoltenVK IN_LIST Vulkan_FIND_COMPONENTS)
     )
   mark_as_advanced(Vulkan_MoltenVK_INCLUDE_DIR)
 endif()
+if(volk IN_LIST Vulkan_FIND_COMPONENTS)
+  find_library(Vulkan_volk_LIBRARY
+          NAMES volk
+          HINTS
+            ${_Vulkan_hint_library_search_paths})
+  mark_as_advanced(Vulkan_Volk_LIBRARY)
+endif()
+
+if (dxc IN_LIST Vulkan_FIND_COMPONENTS)
+  find_library(Vulkan_dxc_LIBRARY
+          NAMES dxcompiler
+          HINTS
+            ${_Vulkan_hint_library_search_paths})
+  mark_as_advanced(Vulkan_dxc_LIBRARY)
+
+  find_program(Vulkan_dxc_EXECUTABLE
+          NAMES dxc
+          HINTS
+            ${_Vulkan_hint_executable_search_paths})
+  mark_as_advanced(Vulkan_dxc_EXECUTABLE)
+endif()
 
 if(Vulkan_GLSLC_EXECUTABLE)
   set(Vulkan_glslc_FOUND TRUE)
@@ -414,6 +485,12 @@ if(Vulkan_GLSLANG_VALIDATOR_EXECUTABLE)
   set(Vulkan_glslangValidator_FOUND TRUE)
 else()
   set(Vulkan_glslangValidator_FOUND FALSE)
+endif()
+
+if (Vulkan_dxc_EXECUTABLE)
+  set(Vulkan_dxc_exe_FOUND TRUE)
+else()
+  set(Vulkan_dxc_exe_FOUND FALSE)
 endif()
 
 function(_Vulkan_set_library_component_found component)
@@ -466,6 +543,8 @@ _Vulkan_set_library_component_found(glslang
     glslang-genericcodegen)
 _Vulkan_set_library_component_found(shaderc_combined)
 _Vulkan_set_library_component_found(SPIRV-Tools)
+_Vulkan_set_library_component_found(volk)
+_Vulkan_set_library_component_found(dxc)
 
 if(Vulkan_MoltenVK_INCLUDE_DIR AND Vulkan_MoltenVK_LIBRARY)
   set(Vulkan_MoltenVK_FOUND TRUE)
@@ -752,6 +831,44 @@ if(Vulkan_FOUND)
           IMPORTED_LOCATION_DEBUG "${Vulkan_SPIRV-Tools_DEBUG_LIBRARY}")
     endif()
   endif()
+
+  if(Vulkan_volk_LIBRARY AND NOT TARGET Vulkan::volk)
+    add_library(Vulkan::volk STATIC IMPORTED)
+    set_property(TARGET Vulkan::volk
+            PROPERTY
+              INTERFACE_INCLUDE_DIRECTORIES "${Vulkan_INCLUDE_DIRS}")
+    set_property(TARGET Vulkan::volk APPEND
+            PROPERTY
+              IMPORTED_CONFIGURATIONS Release)
+    set_property(TARGET Vulkan::volk APPEND
+            PROPERTY
+              IMPORTED_LOCATION_RELEASE "${Vulkan_volk_LIBRARY}")
+
+    if (NOT WIN32)
+      set_property(TARGET Vulkan::volk APPEND
+              PROPERTY
+                IMPORTED_LINK_INTERFACE_LIBRARIES dl)
+    endif()
+  endif()
+
+  if (Vulkan_dxc_LIBRARY AND NOT TARGET Vulkan::dxc_lib)
+    add_library(Vulkan::dxc_lib STATIC IMPORTED)
+    set_property(TARGET Vulkan::dxc_lib
+      PROPERTY
+        INTERFACE_INCLUDE_DIRECTORIES "${Vulkan_INCLUDE_DIRS}")
+    set_property(TARGET Vulkan::dxc_lib APPEND
+      PROPERTY
+        IMPORTED_CONFIGURATIONS Release)
+    set_property(TARGET Vulkan::dxc_lib APPEND
+      PROPERTY
+        IMPORTED_LOCATION_RELEASE "${Vulkan_dxc_LIBRARY}")
+  endif()
+
+  if(Vulkan_dxc_EXECUTABLE AND NOT TARGET Vulkan::dxc_exe)
+    add_executable(Vulkan::dxc_exe IMPORTED)
+    set_property(TARGET Vulkan::dxc_exe PROPERTY IMPORTED_LOCATION "${Vulkan_dxc_EXECUTABLE}")
+  endif()
+
 endif()
 
 if(Vulkan_MoltenVK_FOUND)

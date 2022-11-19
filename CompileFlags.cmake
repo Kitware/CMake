@@ -18,12 +18,12 @@ endif()
 # not hurt other versions, and this will work into the
 # future
 if(MSVC OR _INTEL_WINDOWS OR _CLANG_MSVC_WINDOWS)
-  add_definitions(-D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE)
+  add_compile_definitions(_CRT_SECURE_NO_DEPRECATE _CRT_NONSTDC_NO_DEPRECATE)
 else()
 endif()
 
 if(MSVC)
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stack:10000000")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${CMAKE_CXX_LINKER_WRAPPER_FLAG}-stack:10000000")
 endif()
 
 # MSVC 14.28 enables C5105, but the Windows SDK 10.0.18362.0 triggers it.
@@ -62,7 +62,7 @@ endif()
 # Use 64-bit off_t on 32-bit Linux
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SIZEOF_VOID_P EQUAL 4)
   # ensure 64bit offsets are used for filesystem accesses for 32bit compilation
-  add_definitions(-D_FILE_OFFSET_BITS=64)
+  add_compile_definitions(_FILE_OFFSET_BITS=64)
 endif()
 
 # Workaround for TOC Overflow on ppc64
@@ -98,7 +98,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL SunPro AND
   endif()
 endif()
 
-foreach(lang C CXX)
+foreach(lang IN ITEMS C CXX)
   # Suppress warnings from PGI compiler.
   if (CMAKE_${lang}_COMPILER_ID STREQUAL "PGI")
     set(CMAKE_${lang}_FLAGS "${CMAKE_${lang}_FLAGS} -w")
@@ -136,3 +136,12 @@ OFF to disable /MP completely." )
     endif()
   endif()
 endif()
+
+# Get rid of excess -Wunused-but-set-variable on release builds with LCC >= 1.26
+foreach(l IN ITEMS C CXX)
+  if(CMAKE_${l}_COMPILER_ID STREQUAL "LCC" AND NOT CMAKE_${l}_COMPILER_VERSION VERSION_LESS 1.26)
+    foreach(c IN ITEMS MINSIZEREL RELEASE RELWITHDEBINFO)
+      string(APPEND "CMAKE_${l}_FLAGS_${c}" " -Wno-unused-but-set-variable")
+    endforeach()
+  endif()
+endforeach()

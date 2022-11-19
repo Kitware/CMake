@@ -234,7 +234,7 @@ typedef struct _AFD_POLL_INFO {
   AFD_POLL_HANDLE_INFO Handles[1];
 } AFD_POLL_INFO, *PAFD_POLL_INFO;
 
-#define UV_MSAFD_PROVIDER_COUNT 3
+#define UV_MSAFD_PROVIDER_COUNT 4
 
 
 /**
@@ -388,6 +388,12 @@ typedef struct {
       OVERLAPPED overlapped;                                                  \
       size_t queued_bytes;                                                    \
     } io;                                                                     \
+    /* in v2, we can move these to the UV_CONNECT_PRIVATE_FIELDS */           \
+    struct {                                                                  \
+      ULONG_PTR result; /* overlapped.Internal is reused to hold the result */\
+      HANDLE pipeHandle;                                                      \
+      DWORD duplex_flags;                                                     \
+    } connect;                                                                \
   } u;                                                                        \
   struct uv_req_s* next_req;
 
