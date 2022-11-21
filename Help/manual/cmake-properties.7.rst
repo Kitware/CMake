@@ -195,6 +195,7 @@ Properties on Targets
    /prop_tgt/CXX_MODULE_SET
    /prop_tgt/CXX_MODULE_SET_NAME
    /prop_tgt/CXX_MODULE_SETS
+   /prop_tgt/CXX_SCAN_FOR_MODULES
    /prop_tgt/CXX_STANDARD
    /prop_tgt/CXX_STANDARD_REQUIRED
    /prop_tgt/DEBUG_POSTFIX
@@ -533,6 +534,7 @@ Properties on Source Files
    /prop_sf/COMPILE_DEFINITIONS
    /prop_sf/COMPILE_FLAGS
    /prop_sf/COMPILE_OPTIONS
+   /prop_sf/CXX_SCAN_FOR_MODULES
    /prop_sf/EXTERNAL_OBJECT
    /prop_sf/Fortran_FORMAT
    /prop_sf/Fortran_PREPROCESS

@@ -19,6 +19,7 @@
 #include "cmOSXBundleGenerator.h"
 
 class cmCustomCommand;
+class cmFileSet;
 class cmGeneratedFileStream;
 class cmGeneratorTarget;
 class cmLocalNinjaGenerator;
@@ -63,8 +64,18 @@ protected:
 
   cmMakefile* GetMakefile() const { return this->Makefile; }
 
+  void BuildFileSetInfoCache(std::string const& config);
+  cmFileSet const* GetFileSetForSource(std::string const& config,
+                                       cmSourceFile const* sf);
+
+  enum class WithScanning
+  {
+    No,
+    Yes,
+  };
   std::string LanguageCompilerRule(const std::string& lang,
-                                   const std::string& config) const;
+                                   const std::string& config,
+                                   WithScanning withScanning) const;
   std::string LanguagePreprocessAndScanRule(std::string const& lang,
                                             const std::string& config) const;
   std::string LanguageScanRule(std::string const& lang,
@@ -72,6 +83,8 @@ protected:
   std::string LanguageDyndepRule(std::string const& lang,
                                  const std::string& config) const;
   bool NeedDyndep(std::string const& lang, std::string const& config) const;
+  bool NeedDyndepForSource(std::string const& lang, std::string const& config,
+                           cmSourceFile const* sf);
   bool NeedExplicitPreprocessing(std::string const& lang) const;
   bool CompileWithDefines(std::string const& lang) const;
   bool NeedCxxModuleSupport(std::string const& lang,
@@ -150,6 +163,8 @@ protected:
                           const std::string& config);
   void WriteCompileRule(const std::string& language,
                         const std::string& config);
+  void WriteCompileRule(const std::string& language, const std::string& config,
+                        WithScanning withScanning);
   void WriteObjectBuildStatements(const std::string& config,
                                   const std::string& fileConfig,
                                   bool firstForConfig);
@@ -223,6 +238,8 @@ private:
     std::vector<cmCustomCommand const*> CustomCommands;
     cmNinjaDeps ExtraFiles;
     std::unique_ptr<MacOSXContentGeneratorType> MacOSXContentGenerator;
+    bool BuiltFileSetCache = false;
+    std::map<std::string, cmFileSet const*> FileSetCache;
   };
 
   std::map<std::string, ByConfig> Configs;
