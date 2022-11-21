@@ -1021,12 +1021,6 @@ void cmLocalGenerator::AddCompileOptions(std::vector<BT<std::string>>& flags,
     }
   }
 
-  std::string compReqFlag;
-  this->AddCompilerRequirementFlag(compReqFlag, target, lang, config);
-  if (!compReqFlag.empty()) {
-    flags.emplace_back(std::move(compReqFlag));
-  }
-
   // Add Warning as errors flags
   if (!this->GetCMakeInstance()->GetIgnoreWarningAsError()) {
     const cmValue wError = target->GetProperty("COMPILE_WARNING_AS_ERROR");
@@ -1932,6 +1926,30 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
   this->AddConfigVariableFlags(flags, cmStrCat("CMAKE_", lang, "_FLAGS"),
                                config);
 
+  // Add the language standard flag for compiling, and sometimes linking.
+  if (compileOrLink == cmBuildStep::Compile ||
+      (compileOrLink == cmBuildStep::Link &&
+       // Some toolchains require use of the language standard flag
+       // when linking in order to use the matching standard library.
+       // FIXME: If CMake gains an abstraction for standard library
+       // selection, this will have to be reconciled with it.
+       this->Makefile->IsOn(
+         cmStrCat("CMAKE_", lang, "_LINK_WITH_STANDARD_COMPILE_OPTION")))) {
+    cmStandardLevelResolver standardResolver(this->Makefile);
+    std::string const& optionFlagDef =
+      standardResolver.GetCompileOptionDef(target, lang, config);
+    if (!optionFlagDef.empty()) {
+      cmValue opt =
+        target->Target->GetMakefile()->GetDefinition(optionFlagDef);
+      if (opt) {
+        std::vector<std::string> optVec = cmExpandedList(*opt);
+        for (std::string const& i : optVec) {
+          this->AppendFlagEscape(flags, i);
+        }
+      }
+    }
+  }
+
   std::string compiler = this->Makefile->GetSafeDefinition(
     cmStrCat("CMAKE_", lang, "_COMPILER_ID"));
 
@@ -2076,15 +2094,6 @@ void cmLocalGenerator::AddLanguageFlagsForLinking(
   std::string& flags, cmGeneratorTarget const* target, const std::string& lang,
   const std::string& config)
 {
-  if (this->Makefile->IsOn("CMAKE_" + lang +
-                           "_LINK_WITH_STANDARD_COMPILE_OPTION")) {
-    // This toolchain requires use of the language standard flag
-    // when linking in order to use the matching standard library.
-    // FIXME: If CMake gains an abstraction for standard library
-    // selection, this will have to be reconciled with it.
-    this->AddCompilerRequirementFlag(flags, target, lang, config);
-  }
-
   this->AddLanguageFlags(flags, target, cmBuildStep::Link, lang, config);
 
   if (target->IsIPOEnabled(lang, config)) {
@@ -2221,25 +2230,6 @@ void cmLocalGenerator::AddSharedFlags(std::string& flags,
     this->AppendFlags(flags,
                       this->Makefile->GetSafeDefinition(
                         cmStrCat("CMAKE_SHARED_LIBRARY_", lang, "_FLAGS")));
-  }
-}
-
-void cmLocalGenerator::AddCompilerRequirementFlag(
-  std::string& flags, cmGeneratorTarget const* target, const std::string& lang,
-  const std::string& config)
-{
-  cmStandardLevelResolver standardResolver(this->Makefile);
-
-  std::string const& optionFlagDef =
-    standardResolver.GetCompileOptionDef(target, lang, config);
-  if (!optionFlagDef.empty()) {
-    cmValue opt = target->Target->GetMakefile()->GetDefinition(optionFlagDef);
-    if (opt) {
-      std::vector<std::string> optVec = cmExpandedList(*opt);
-      for (std::string const& i : optVec) {
-        this->AppendFlagEscape(flags, i);
-      }
-    }
   }
 }
 
