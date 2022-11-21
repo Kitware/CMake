@@ -9,7 +9,7 @@ endif()
 
 file(MAKE_DIRECTORY "@CMAKE_CURRENT_BINARY_DIR@/uploads")
 
-set(filename "@CMAKE_CURRENT_SOURCE_DIR@/FileDownloadInput.png")
+set(filename "@CMAKE_CURRENT_SOURCE_DIR@/FileUploadInput.png")
 if(NOT "@CMAKE_CURRENT_BINARY_DIR@" MATCHES "^/")
   set(slash /)
 endif()

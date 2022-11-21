@@ -1,0 +1,11 @@
+^CMake Error at hash-mismatch.cmake:[0-9]+ \(file\):
+  file DOWNLOAD HASH mismatch
+
+    for file: \[.*/Tests/RunCMake/file-DOWNLOAD/hash-mismatch-build/output.png\]
+      expected hash: \[0123456789abcdef0123456789abcdef01234567\]
+        actual hash: \[67eee17f79d9ac557284fc0b8ad19f25723fb578\]
+
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
++
+status='1;HASH mismatch: expected: 0123456789abcdef0123456789abcdef01234567 actual: 67eee17f79d9ac557284fc0b8ad19f25723fb578'$

@@ -1,0 +1,8 @@
+-- status='0;"No error"'
+-- status='0;"skipping download as file already exists with expected MD5 sum"'
+-- status='0;"skipping download as file already exists with expected MD5 hash"'
+-- status='0;"skipping download as file already exists with expected SHA1 hash"'
+-- status='0;"skipping download as file already exists with expected SHA224 hash"'
+-- status='0;"skipping download as file already exists with expected SHA256 hash"'
+-- status='0;"skipping download as file already exists with expected SHA384 hash"'
+-- status='0;"skipping download as file already exists with expected SHA512 hash"'
