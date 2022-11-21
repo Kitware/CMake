@@ -117,7 +117,7 @@ void cmNinjaNormalTargetGenerator::WriteLanguagesRules(
 #ifdef NINJA_GEN_VERBOSE_FILES
   cmGlobalNinjaGenerator::WriteDivider(this->GetRulesFileStream());
   this->GetRulesFileStream()
-    << "# Rules for each languages for "
+    << "# Rules for each language for "
     << cmState::GetTargetTypeName(this->GetGeneratorTarget()->GetType())
     << " target " << this->GetTargetName() << "\n\n";
 #endif
