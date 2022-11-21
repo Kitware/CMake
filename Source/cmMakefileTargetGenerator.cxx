@@ -2249,6 +2249,7 @@ void cmMakefileTargetGenerator::CreateObjectLists(
       std::string responseFileName =
         (responseMode == Link) ? "objects" : "deviceObjects";
       responseFileName += std::to_string(i + 1);
+      responseFileName += ".rsp";
 
       // Create this response file.
       std::string objects_rsp = this->CreateResponseFile(
