@@ -1,4 +1,4 @@
-add_library(module-header SHARED IMPORTED)
+add_library(module-header INTERFACE IMPORTED)
 target_sources(module-header
   INTERFACE
     FILE_SET fs TYPE CXX_MODULE_HEADER_UNITS FILES
