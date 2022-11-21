@@ -14,7 +14,7 @@ the compiler features correctly. If no toolset is specified,
 Due to the different versioning schemes, the compiler version
 (:variable:`CMAKE_<LANG>_COMPILER_VERSION`) depends on the toolset and
 architecture in use. If projects can be built with multiple toolsets or
-architectures, the specified :variable:`CMAKE_TASKING_TOOLSET` and the
+architectures, the specified ``CMAKE_TASKING_TOOLSET`` and the
 automatically determined :variable:`CMAKE_<LANG>_COMPILER_ARCHITECTURE_ID`
 must be taken into account when comparing against the
 :variable:`CMAKE_<LANG>_COMPILER_VERSION`.

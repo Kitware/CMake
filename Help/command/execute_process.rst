@@ -52,7 +52,7 @@ Options:
  redirect stdin, stdout, and stderr.)
 
  If a sequential execution of multiple commands is required, use multiple
- :command:`execute_process` calls with a single ``COMMAND`` argument.
+ ``execute_process`` calls with a single ``COMMAND`` argument.
 
 ``WORKING_DIRECTORY``
  The named directory will be set as the current working directory of

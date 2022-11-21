@@ -371,7 +371,7 @@ v1 Reply Files
 Reply files containing specific `Object Kinds`_ are written by CMake.
 The names of these files are unspecified and must not be interpreted
 by clients.  Clients must first read the `v1 Reply Index File`_ and
-and follow references to the names of the desired response objects.
+follow references to the names of the desired response objects.
 
 Reply files (including the index file) will never be replaced by
 files of the same name but different content.  This allows a client

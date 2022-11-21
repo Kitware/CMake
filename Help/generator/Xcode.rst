@@ -41,7 +41,7 @@ Swift Support
 
 .. versionadded:: 3.4
 
-When using the :generator:`Xcode` generator with Xcode 6.1 or higher,
+When using the ``Xcode`` generator with Xcode 6.1 or higher,
 one may enable the ``Swift`` language with the :command:`enable_language`
 command or the :command:`project`.
 

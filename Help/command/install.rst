@@ -32,7 +32,7 @@ are executed in order during installation.
 
 .. versionchanged:: 3.22
   The environment variable :envvar:`CMAKE_INSTALL_MODE` can override the
-  default copying behavior of :command:`install()`.
+  default copying behavior of ``install()``.
 
 There are multiple signatures for this command.  Some of them define
 installation options for files and targets.  Options common to

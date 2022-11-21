@@ -30,7 +30,7 @@ command.  All arguments are ignored unless that policy is set to ``NEW``.
   with the :command:`block` command, as described below.
 
   The ``PROPAGATE`` option can be very useful in conjunction with the
-  :command:`block` command.  A :command:`return` will propagate the
+  :command:`block` command.  A ``return`` will propagate the
   specified variables through any enclosing block scopes created by the
   :command:`block` commands.  Inside a function, this ensures the variables
   are propagated to the function's caller, regardless of any blocks within

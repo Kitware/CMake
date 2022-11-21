@@ -28,14 +28,14 @@ variable if either of these are set.  Because the test's start time is
 reset, its execution time will not include any time that was spent
 waiting for the matching output.
 
-:prop_test:`TIMEOUT_AFTER_MATCH` is useful for avoiding spurious
+``TIMEOUT_AFTER_MATCH`` is useful for avoiding spurious
 timeouts when your test must wait for some system resource to become
 available before it can execute.  Set :prop_test:`TIMEOUT` to a longer
 duration that accounts for resource acquisition and use
-:prop_test:`TIMEOUT_AFTER_MATCH` to control how long the actual test
+``TIMEOUT_AFTER_MATCH`` to control how long the actual test
 is allowed to run.
 
 If the required resource can be controlled by CTest you should use
-:prop_test:`RESOURCE_LOCK` instead of :prop_test:`TIMEOUT_AFTER_MATCH`.
+:prop_test:`RESOURCE_LOCK` instead of ``TIMEOUT_AFTER_MATCH``.
 This property should be used when only the test itself can determine
 when its required resources are available.
