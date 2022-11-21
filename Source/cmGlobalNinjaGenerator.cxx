@@ -1256,7 +1256,7 @@ void cmGlobalNinjaGenerator::AppendTargetOutputs(
   cmGeneratorTarget const* target, cmNinjaDeps& outputs,
   const std::string& config, cmNinjaTargetDepends depends) const
 {
-  // for frameworks, we want the real name, not smple name
+  // for frameworks, we want the real name, not sample name
   // frameworks always appear versioned, and the build.ninja
   // will always attempt to manage symbolic links instead
   // of letting cmOSXBundleGenerator do it.
