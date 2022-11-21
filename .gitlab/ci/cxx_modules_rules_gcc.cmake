@@ -17,3 +17,4 @@ string(CONCAT CMAKE_EXPERIMENTAL_CXX_MODULE_MAP_FLAG
   " -fdeps-format=p1689r5"
   # Force C++ as a language.
   " -x c++")
+set(CMAKE_EXPERIMENTAL_CXX_MODULE_BMI_ONLY_FLAG "-fmodule-only")
