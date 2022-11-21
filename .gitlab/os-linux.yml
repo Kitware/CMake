@@ -255,6 +255,18 @@
         CMAKE_CONFIGURATION: inteloneapi_makefiles
         CMAKE_GENERATOR: "Unix Makefiles"
 
+### NVHPC Compiler
+
+.nvhpc:
+    image: "kitware/cmake:ci-nvhpc22.9-x86_64-2022-11-22"
+    variables:
+        CMAKE_ARCH: x86_64
+
+.nvhpc_ninja:
+    extends: .nvhpc
+    variables:
+        CMAKE_CONFIGURATION: nvhpc_ninja
+
 ### CUDA builds
 
 .cuda9.2:
@@ -391,6 +403,13 @@
         - cuda-rt
         - docker
         - linux
+
+.linux_x86_64_v3_builder_tags_cuda:
+    tags:
+        - cmake
+        - cuda-rt
+        - docker
+        - linux-x86_64-v3
 
 .linux_builder_tags_radeon:
     tags:

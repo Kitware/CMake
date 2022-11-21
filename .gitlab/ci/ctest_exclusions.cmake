@@ -27,6 +27,16 @@ if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "_jom")
     )
 endif()
 
+if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "nvhpc_")
+  list(APPEND test_exclusions
+    # FIXME(#24187): This test fails with NVHPC as the CUDA host compiler.
+    "^CudaOnly.SeparateCompilationPTX$"
+
+    # FIXME(#24188): FindCUDAToolkit breaks on some symlink layouts.
+    "^Cuda.Toolkit$"
+    )
+endif()
+
 string(REPLACE ";" "|" test_exclusions "${test_exclusions}")
 if (test_exclusions)
   set(test_exclusions "(${test_exclusions})")
