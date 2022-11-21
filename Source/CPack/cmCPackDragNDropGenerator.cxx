@@ -451,7 +451,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
     mountpoint_regex.find(attach_output.c_str());
     std::string const temp_mount = mountpoint_regex.match(1);
     std::string const temp_mount_name =
-      temp_mount.substr(sizeof("/Volumes/") - 1);
+      temp_mount.substr(cmStrLen("/Volumes/"));
 
     // Remove dummy padding file so we have enough space on RW image ...
     std::ostringstream dummy_padding;

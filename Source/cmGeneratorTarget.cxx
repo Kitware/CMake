@@ -6718,7 +6718,7 @@ bool cmGeneratorTarget::IsLinkLookupScope(std::string const& n,
                                           cmLocalGenerator const*& lg) const
 {
   if (cmHasLiteralPrefix(n, CMAKE_DIRECTORY_ID_SEP)) {
-    cmDirectoryId const dirId = n.substr(sizeof(CMAKE_DIRECTORY_ID_SEP) - 1);
+    cmDirectoryId const dirId = n.substr(cmStrLen(CMAKE_DIRECTORY_ID_SEP));
     if (dirId.String.empty()) {
       lg = this->LocalGenerator;
       return true;

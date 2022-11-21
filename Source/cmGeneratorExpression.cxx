@@ -406,7 +406,7 @@ void cmGeneratorExpression::ReplaceInstallPrefix(
 
   while ((pos = input.find("$<INSTALL_PREFIX>", lastPos)) !=
          std::string::npos) {
-    std::string::size_type endPos = pos + sizeof("$<INSTALL_PREFIX>") - 1;
+    std::string::size_type endPos = pos + cmStrLen("$<INSTALL_PREFIX>");
     input.replace(pos, endPos - pos, replacement);
     lastPos = endPos;
   }
