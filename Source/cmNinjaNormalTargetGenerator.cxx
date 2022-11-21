@@ -64,9 +64,9 @@ void cmNinjaNormalTargetGenerator::Generate(const std::string& config)
 {
   std::string lang = this->GeneratorTarget->GetLinkerLanguage(config);
   if (this->TargetLinkLanguage(config).empty()) {
-    cmSystemTools::Error("CMake can not determine linker language for "
-                         "target: " +
-                         this->GetGeneratorTarget()->GetName());
+    cmSystemTools::Error(
+      cmStrCat("CMake can not determine linker language for target: ",
+               this->GetGeneratorTarget()->GetName()));
     return;
   }
 
