@@ -56,10 +56,10 @@ public:
     minimumVisualStudioVersion = version;
   }
 
-  const cm::optional<cmSlnProjectEntry> GetProjectByGUID(
+  cm::optional<cmSlnProjectEntry> GetProjectByGUID(
     const std::string& projectGUID) const;
 
-  const cm::optional<cmSlnProjectEntry> GetProjectByName(
+  cm::optional<cmSlnProjectEntry> GetProjectByName(
     const std::string& projectName) const;
 
   std::vector<cmSlnProjectEntry> GetProjects() const;

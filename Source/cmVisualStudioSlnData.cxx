@@ -20,7 +20,7 @@ std::string cmSlnProjectEntry::GetProjectConfiguration(
   return projectConfigurationMap[solutionConfiguration];
 }
 
-const cm::optional<cmSlnProjectEntry> cmSlnData::GetProjectByGUID(
+cm::optional<cmSlnProjectEntry> cmSlnData::GetProjectByGUID(
   const std::string& projectGUID) const
 {
   auto it(ProjectsByGUID.find(projectGUID));
@@ -30,7 +30,7 @@ const cm::optional<cmSlnProjectEntry> cmSlnData::GetProjectByGUID(
   return cm::nullopt;
 }
 
-const cm::optional<cmSlnProjectEntry> cmSlnData::GetProjectByName(
+cm::optional<cmSlnProjectEntry> cmSlnData::GetProjectByName(
   const std::string& projectName) const
 {
   auto it(ProjectNameIndex.find(projectName));
