@@ -1140,7 +1140,7 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
       std::string extension =
         cmSystemTools::GetFilenameLastExtension(proj->GetRelativePath());
       extension = cmSystemTools::LowerCase(extension);
-      if (extension.compare(".csproj") == 0) {
+      if (extension == ".csproj") {
         // Use correct platform name
         platform =
           slnData.GetConfigurationTarget(tname, plainConfig, platform);

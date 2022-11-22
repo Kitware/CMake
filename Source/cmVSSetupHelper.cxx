@@ -159,12 +159,12 @@ bool cmVSSetupAPIHelper::CheckInstalledComponent(
   // the
   // component name ex: Microsoft.VisualStudio.Component.Windows10SDK.10240
   if (id.find(Win10SDKComponent) != std::wstring::npos &&
-      type.compare(ComponentType) == 0) {
+      type == ComponentType) {
     bWin10SDK = true;
     ret = true;
   }
 
-  if (id.compare(Win81SDKComponent) == 0 && type.compare(ComponentType) == 0) {
+  if (id == Win81SDKComponent && type == ComponentType) {
     bWin81SDK = true;
     ret = true;
   }
@@ -405,7 +405,7 @@ bool cmVSSetupAPIHelper::EnumerateVSInstancesWithCOM(
 bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
 {
   bool isVSInstanceExists = false;
-  if (chosenInstanceInfo.VSInstallLocation.compare("") != 0) {
+  if (!chosenInstanceInfo.VSInstallLocation.empty()) {
     return true;
   }
 
