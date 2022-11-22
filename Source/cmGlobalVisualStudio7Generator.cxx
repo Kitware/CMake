@@ -426,7 +426,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
     cmValue expath = target->GetProperty("EXTERNAL_MSPROJECT");
     if (expath) {
       std::string project = target->GetName();
-      std::string location = *expath;
+      std::string const& location = *expath;
 
       this->WriteExternalProject(fout, project, location,
                                  target->GetProperty("VS_PROJECT_TYPE"),
@@ -506,7 +506,7 @@ void cmGlobalVisualStudio7Generator::WriteFoldersContent(std::ostream& fout)
     std::string guidParent(this->GetGUID(key));
 
     for (std::string const& it : iter.second) {
-      std::string value(it);
+      std::string const& value(it);
       std::string guid(this->GetGUID(value));
 
       fout << "\t\t{" << guid << "} = {" << guidParent << "}\n";

@@ -424,7 +424,7 @@ void cmVisualStudio10TargetGenerator::Generate()
     cmStrCat(this->LocalGenerator->GetCurrentBinaryDirectory(), '/',
              this->Name, ProjectFileExtension);
   cmGeneratedFileStream BuildFileStream(path);
-  const std::string PathToProjectFile = path;
+  const std::string& PathToProjectFile = path;
   BuildFileStream.SetCopyIfDifferent(true);
 
   // Write the encoding header into the file
