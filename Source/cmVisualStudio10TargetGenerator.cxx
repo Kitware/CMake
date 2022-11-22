@@ -1233,7 +1233,7 @@ void cmVisualStudio10TargetGenerator::WriteEmbeddedResourceGroup(Elem& e0)
       e2.Attribute("Include", obj);
 
       if (this->ProjectType != VsProjectType::csproj) {
-        std::string hFileName = obj.substr(0, obj.find_last_of(".")) + ".h";
+        std::string hFileName = obj.substr(0, obj.find_last_of('.')) + ".h";
         e2.Element("DependentUpon", hFileName);
 
         for (std::string const& c : this->Configurations) {
@@ -2081,7 +2081,7 @@ void cmVisualStudio10TargetGenerator::WriteHeaderSource(
     e2.Element("FileType", "CppForm");
   } else if (this->IsXamlHeader(fileName)) {
     e2.Element("DependentUpon",
-               fileName.substr(0, fileName.find_last_of(".")));
+               fileName.substr(0, fileName.find_last_of('.')));
   }
   this->FinishWritingSource(e2, toolSettings);
 }
@@ -2862,7 +2862,7 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
   if (this->IsXamlSource(source->GetFullPath())) {
     const std::string& fileName = source->GetFullPath();
     e2.Element("DependentUpon",
-               fileName.substr(0, fileName.find_last_of(".")));
+               fileName.substr(0, fileName.find_last_of('.')));
   }
   if (this->ProjectType == VsProjectType::csproj) {
     using CsPropMap = std::map<std::string, std::string>;
