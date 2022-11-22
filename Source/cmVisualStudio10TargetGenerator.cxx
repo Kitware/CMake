@@ -3426,7 +3426,7 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
     // add AdditionalUsingDirectories
     if (this->AdditionalUsingDirectories.count(configName) > 0) {
       std::string dirs;
-      for (auto u : this->AdditionalUsingDirectories[configName]) {
+      for (auto const& u : this->AdditionalUsingDirectories[configName]) {
         if (!dirs.empty()) {
           dirs.append(";");
         }
