@@ -13,7 +13,7 @@
 class cmSlnProjectEntry
 {
 public:
-  cmSlnProjectEntry() {}
+  cmSlnProjectEntry() = default;
   cmSlnProjectEntry(const std::string& guid, const std::string& name,
                     const std::string& relativePath)
     : Guid(guid)

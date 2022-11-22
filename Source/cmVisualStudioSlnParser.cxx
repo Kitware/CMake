@@ -384,9 +384,7 @@ void cmVisualStudioSlnParser::State::IgnoreUntilTag(const std::string& endTag)
   this->EndIgnoreTag = endTag;
 }
 
-cmVisualStudioSlnParser::ResultData::ResultData()
-{
-}
+cmVisualStudioSlnParser::ResultData::ResultData() = default;
 
 void cmVisualStudioSlnParser::ResultData::Clear()
 {

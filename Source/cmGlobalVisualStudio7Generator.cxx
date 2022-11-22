@@ -76,9 +76,7 @@ cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator(
   this->ExtraFlagTable = cmVS7ExtraFlagTable;
 }
 
-cmGlobalVisualStudio7Generator::~cmGlobalVisualStudio7Generator()
-{
-}
+cmGlobalVisualStudio7Generator::~cmGlobalVisualStudio7Generator() = default;
 
 // Package GUID of Intel Visual Fortran plugin to VS IDE
 #define CM_INTEL_PLUGIN_GUID "{B68A201D-CB9B-47AF-A52F-7EEC72E217E4}"

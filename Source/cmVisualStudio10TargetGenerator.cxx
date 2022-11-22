@@ -293,9 +293,7 @@ cmVisualStudio10TargetGenerator::cmVisualStudio10TargetGenerator(
   this->ClassifyAllConfigSources();
 }
 
-cmVisualStudio10TargetGenerator::~cmVisualStudio10TargetGenerator()
-{
-}
+cmVisualStudio10TargetGenerator::~cmVisualStudio10TargetGenerator() = default;
 
 std::string cmVisualStudio10TargetGenerator::CalcCondition(
   const std::string& config) const

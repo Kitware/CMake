@@ -24,9 +24,7 @@ cmLocalVisualStudioGenerator::cmLocalVisualStudioGenerator(
 {
 }
 
-cmLocalVisualStudioGenerator::~cmLocalVisualStudioGenerator()
-{
-}
+cmLocalVisualStudioGenerator::~cmLocalVisualStudioGenerator() = default;
 
 cmGlobalVisualStudioGenerator::VSVersion
 cmLocalVisualStudioGenerator::GetVersion() const

@@ -17,7 +17,7 @@ template <class T>
 class SmartCOMPtr
 {
 public:
-  SmartCOMPtr() {}
+  SmartCOMPtr() = default;
   SmartCOMPtr(T* p)
   {
     ptr = p;
@@ -71,7 +71,7 @@ private:
 class SmartBSTR
 {
 public:
-  SmartBSTR() {}
+  SmartBSTR() = default;
   SmartBSTR(const SmartBSTR& src) = delete;
   SmartBSTR& operator=(const SmartBSTR& src) = delete;
   operator BSTR() const { return str; }

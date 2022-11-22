@@ -63,9 +63,7 @@ cmLocalVisualStudio10Generator::cmLocalVisualStudio10Generator(
 {
 }
 
-cmLocalVisualStudio10Generator::~cmLocalVisualStudio10Generator()
-{
-}
+cmLocalVisualStudio10Generator::~cmLocalVisualStudio10Generator() = default;
 
 void cmLocalVisualStudio10Generator::GenerateTarget(cmGeneratorTarget* target)
 {

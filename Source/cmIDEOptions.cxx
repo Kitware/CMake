@@ -26,9 +26,7 @@ cmIDEOptions::cmIDEOptions()
   }
 }
 
-cmIDEOptions::~cmIDEOptions()
-{
-}
+cmIDEOptions::~cmIDEOptions() = default;
 
 void cmIDEOptions::HandleFlag(std::string const& flag)
 {

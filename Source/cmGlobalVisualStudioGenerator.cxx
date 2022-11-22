@@ -51,9 +51,7 @@ cmGlobalVisualStudioGenerator::cmGlobalVisualStudioGenerator(
   }
 }
 
-cmGlobalVisualStudioGenerator::~cmGlobalVisualStudioGenerator()
-{
-}
+cmGlobalVisualStudioGenerator::~cmGlobalVisualStudioGenerator() = default;
 
 cmGlobalVisualStudioGenerator::VSVersion
 cmGlobalVisualStudioGenerator::GetVersion() const
