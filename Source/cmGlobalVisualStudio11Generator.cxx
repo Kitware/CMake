@@ -243,6 +243,7 @@ bool cmGlobalVisualStudio11Generator::UseFolderProperty() const
   // Intentionally skip up to the top-level class implementation.
   // Folders are not supported by the Express editions in VS10 and earlier,
   // but they are in VS11 Express and above.
+  // NOLINTNEXTLINE(bugprone-parent-virtual-call)
   return cmGlobalGenerator::UseFolderProperty();
 }
 

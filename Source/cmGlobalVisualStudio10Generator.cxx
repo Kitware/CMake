@@ -799,6 +799,7 @@ std::string cmGlobalVisualStudio10Generator::FindDevEnvCommand()
   }
   // Skip over the cmGlobalVisualStudio8Generator implementation because
   // we expect a real devenv and do not want to look for VCExpress.
+  // NOLINTNEXTLINE(bugprone-parent-virtual-call)
   return this->cmGlobalVisualStudio71Generator::FindDevEnvCommand();
 }
 

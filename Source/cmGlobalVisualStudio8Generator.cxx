@@ -150,6 +150,7 @@ void cmGlobalVisualStudio8Generator::Configure()
 
 bool cmGlobalVisualStudio8Generator::UseFolderProperty() const
 {
+  // NOLINTNEXTLINE(bugprone-parent-virtual-call)
   return IsExpressEdition() ? false : cmGlobalGenerator::UseFolderProperty();
 }
 
@@ -381,6 +382,7 @@ bool cmGlobalVisualStudio8Generator::ComputeTargetDepends()
 {
   // Skip over the cmGlobalVisualStudioGenerator implementation!
   // We do not need the support that VS <= 7.1 needs.
+  // NOLINTNEXTLINE(bugprone-parent-virtual-call)
   return this->cmGlobalGenerator::ComputeTargetDepends();
 }
 
