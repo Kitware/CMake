@@ -44,7 +44,7 @@ public:
     VS17 = 170
   };
 
-  virtual ~cmGlobalVisualStudioGenerator();
+  ~cmGlobalVisualStudioGenerator() override;
 
   VSVersion GetVersion() const;
   void SetVersion(VSVersion v);

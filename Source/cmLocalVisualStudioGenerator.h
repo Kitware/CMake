@@ -29,7 +29,7 @@ class cmLocalVisualStudioGenerator : public cmLocalGenerator
 {
 public:
   cmLocalVisualStudioGenerator(cmGlobalGenerator* gg, cmMakefile* mf);
-  virtual ~cmLocalVisualStudioGenerator();
+  ~cmLocalVisualStudioGenerator() override;
 
   std::string ConstructScript(cmCustomCommandGenerator const& ccg,
                               const std::string& newline = "\n");

@@ -41,9 +41,9 @@ public:
   }
 
 protected:
-  virtual void StartElement(const std::string& name, const char** attributes);
-  void EndElement(const std::string& name);
-  void CharacterDataHandler(const char* data, int length);
+  void StartElement(const std::string& name, const char** attributes) override;
+  void EndElement(const std::string& name) override;
+  void CharacterDataHandler(const char* data, int length) override;
 
 private:
   std::string FixPaths(const std::string& paths) const;

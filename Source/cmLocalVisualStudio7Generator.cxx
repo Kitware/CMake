@@ -2165,8 +2165,8 @@ void cmVS7GeneratorOptions::OutputFlag(std::ostream& fout, int indent,
 class cmVS7XMLParser : public cmXMLParser
 {
 public:
-  virtual void EndElement(const std::string& /* name */) {}
-  virtual void StartElement(const std::string& name, const char** atts)
+  void EndElement(const std::string& /* name */) override {}
+  void StartElement(const std::string& name, const char** atts) override
   {
     // once the GUID is found do nothing
     if (!this->GUID.empty()) {
@@ -2191,7 +2191,7 @@ public:
       }
     }
   }
-  int InitializeParser()
+  int InitializeParser() override
   {
     int ret = cmXMLParser::InitializeParser();
     if (ret == 0) {

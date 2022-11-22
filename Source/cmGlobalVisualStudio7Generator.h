@@ -31,7 +31,7 @@ class BT;
 class cmGlobalVisualStudio7Generator : public cmGlobalVisualStudioGenerator
 {
 public:
-  ~cmGlobalVisualStudio7Generator();
+  ~cmGlobalVisualStudio7Generator() override;
 
   //! Create a local generator appropriate to this Global Generator
   std::unique_ptr<cmLocalGenerator> CreateLocalGenerator(

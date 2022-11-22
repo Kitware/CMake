@@ -48,7 +48,7 @@ public:
   //! Set cache only and recurse to false by default.
   cmLocalVisualStudio7Generator(cmGlobalGenerator* gg, cmMakefile* mf);
 
-  virtual ~cmLocalVisualStudio7Generator();
+  ~cmLocalVisualStudio7Generator() override;
 
   cmLocalVisualStudio7Generator(const cmLocalVisualStudio7Generator&) = delete;
   const cmLocalVisualStudio7Generator& operator=(
