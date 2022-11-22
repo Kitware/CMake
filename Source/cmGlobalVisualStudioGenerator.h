@@ -193,7 +193,6 @@ protected:
   using UtilityDependsMap = std::map<cmGeneratorTarget const*, std::string>;
   UtilityDependsMap UtilityDepends;
 
-protected:
   VSVersion Version;
   bool ExpressEdition;
 

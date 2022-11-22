@@ -203,7 +203,6 @@ private:
   void WriteStdOutEncodingUtf8(Elem& e1);
   void UpdateCache();
 
-private:
   friend class cmVS10GeneratorOptions;
   using Options = cmVS10GeneratorOptions;
   using OptionsMap = std::map<std::string, std::unique_ptr<Options>>;
