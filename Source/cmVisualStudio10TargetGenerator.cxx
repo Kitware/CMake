@@ -1056,14 +1056,11 @@ bool cmVisualStudio10TargetGenerator::HasCustomCommands() const
     return true;
   }
 
-  for (cmGeneratorTarget::AllConfigSource const& si :
-       this->GeneratorTarget->GetAllConfigSources()) {
-    if (si.Source->GetCustomCommand()) {
-      return true;
-    }
-  }
-
-  return false;
+  auto const& config_sources = this->GeneratorTarget->GetAllConfigSources();
+  return std::any_of(config_sources.begin(), config_sources.end(),
+                     [](cmGeneratorTarget::AllConfigSource const& si) {
+                       return si.Source->GetCustomCommand();
+                     });
 }
 
 void cmVisualStudio10TargetGenerator::WritePackageReferences(Elem& e0)
@@ -3069,12 +3066,9 @@ std::vector<std::string> cmVisualStudio10TargetGenerator::GetIncludes(
 
 bool cmVisualStudio10TargetGenerator::ComputeClOptions()
 {
-  for (std::string const& c : this->Configurations) {
-    if (!this->ComputeClOptions(c)) {
-      return false;
-    }
-  }
-  return true;
+  return std::all_of(
+    this->Configurations.begin(), this->Configurations.end(),
+    [this](std::string const& c) { return this->ComputeClOptions(c); });
 }
 
 bool cmVisualStudio10TargetGenerator::ComputeClOptions(
@@ -3445,12 +3439,9 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
 
 bool cmVisualStudio10TargetGenerator::ComputeRcOptions()
 {
-  for (std::string const& c : this->Configurations) {
-    if (!this->ComputeRcOptions(c)) {
-      return false;
-    }
-  }
-  return true;
+  return std::all_of(
+    this->Configurations.begin(), this->Configurations.end(),
+    [this](std::string const& c) { return this->ComputeRcOptions(c); });
 }
 
 bool cmVisualStudio10TargetGenerator::ComputeRcOptions(
@@ -3499,13 +3490,12 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaOptions()
   if (!this->GlobalGenerator->IsCudaEnabled()) {
     return true;
   }
-  for (std::string const& c : this->Configurations) {
-    if (this->GeneratorTarget->IsLanguageUsed("CUDA", c) &&
-        !this->ComputeCudaOptions(c)) {
-      return false;
-    }
-  }
-  return true;
+  return std::all_of(this->Configurations.begin(), this->Configurations.end(),
+                     [this](std::string const& c) {
+                       return !this->GeneratorTarget->IsLanguageUsed("CUDA",
+                                                                     c) ||
+                         this->ComputeCudaOptions(c);
+                     });
 }
 
 bool cmVisualStudio10TargetGenerator::ComputeCudaOptions(
@@ -3675,12 +3665,9 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaLinkOptions()
   if (!this->GlobalGenerator->IsCudaEnabled()) {
     return true;
   }
-  for (std::string const& c : this->Configurations) {
-    if (!this->ComputeCudaLinkOptions(c)) {
-      return false;
-    }
-  }
-  return true;
+  return std::all_of(
+    this->Configurations.begin(), this->Configurations.end(),
+    [this](std::string const& c) { return this->ComputeCudaLinkOptions(c); });
 }
 
 bool cmVisualStudio10TargetGenerator::ComputeCudaLinkOptions(
@@ -3774,12 +3761,9 @@ bool cmVisualStudio10TargetGenerator::ComputeMarmasmOptions()
   if (!this->GlobalGenerator->IsMarmasmEnabled()) {
     return true;
   }
-  for (std::string const& c : this->Configurations) {
-    if (!this->ComputeMarmasmOptions(c)) {
-      return false;
-    }
-  }
-  return true;
+  return std::all_of(
+    this->Configurations.begin(), this->Configurations.end(),
+    [this](std::string const& c) { return this->ComputeMarmasmOptions(c); });
 }
 
 bool cmVisualStudio10TargetGenerator::ComputeMarmasmOptions(
@@ -3827,12 +3811,9 @@ bool cmVisualStudio10TargetGenerator::ComputeMasmOptions()
   if (!this->GlobalGenerator->IsMasmEnabled()) {
     return true;
   }
-  for (std::string const& c : this->Configurations) {
-    if (!this->ComputeMasmOptions(c)) {
-      return false;
-    }
-  }
-  return true;
+  return std::all_of(
+    this->Configurations.begin(), this->Configurations.end(),
+    [this](std::string const& c) { return this->ComputeMasmOptions(c); });
 }
 
 bool cmVisualStudio10TargetGenerator::ComputeMasmOptions(
@@ -3880,12 +3861,9 @@ bool cmVisualStudio10TargetGenerator::ComputeNasmOptions()
   if (!this->GlobalGenerator->IsNasmEnabled()) {
     return true;
   }
-  for (std::string const& c : this->Configurations) {
-    if (!this->ComputeNasmOptions(c)) {
-      return false;
-    }
-  }
-  return true;
+  return std::all_of(
+    this->Configurations.begin(), this->Configurations.end(),
+    [this](std::string const& c) { return this->ComputeNasmOptions(c); });
 }
 
 bool cmVisualStudio10TargetGenerator::ComputeNasmOptions(

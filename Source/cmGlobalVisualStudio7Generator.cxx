@@ -737,13 +737,12 @@ std::set<std::string> cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(
 bool cmGlobalVisualStudio7Generator::IsDependedOn(
   OrderedTargetDependSet const& projectTargets, cmGeneratorTarget const* gtIn)
 {
-  for (cmTargetDepend const& l : projectTargets) {
-    TargetDependSet const& tgtdeps = this->GetTargetDirectDepends(l);
-    if (tgtdeps.count(gtIn)) {
-      return true;
-    }
-  }
-  return false;
+  return std::any_of(projectTargets.begin(), projectTargets.end(),
+                     [this, gtIn](cmTargetDepend const& l) {
+                       TargetDependSet const& tgtdeps =
+                         this->GetTargetDirectDepends(l);
+                       return tgtdeps.count(gtIn);
+                     });
 }
 
 std::string cmGlobalVisualStudio7Generator::Encoding()

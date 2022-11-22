@@ -405,20 +405,23 @@ bool cmGlobalVisualStudio8Generator::NeedLinkLibraryDependencies(
   cmGeneratorTarget* target)
 {
   // Look for utility dependencies that magically link.
-  for (BT<std::pair<std::string, bool>> const& ui : target->GetUtilities()) {
-    if (cmGeneratorTarget* depTarget =
-          target->GetLocalGenerator()->FindGeneratorTargetToUse(
-            ui.Value.first)) {
-      if (depTarget->IsInBuildSystem() &&
-          depTarget->GetProperty("EXTERNAL_MSPROJECT")) {
-        // This utility dependency names an external .vcproj target.
-        // We use LinkLibraryDependencies="true" to link to it without
-        // predicting the .lib file location or name.
-        return true;
+  auto const& utilities = target->GetUtilities();
+  return std::any_of(
+    utilities.begin(), utilities.end(),
+    [target](BT<std::pair<std::string, bool>> const& ui) {
+      if (cmGeneratorTarget* depTarget =
+            target->GetLocalGenerator()->FindGeneratorTargetToUse(
+              ui.Value.first)) {
+        if (depTarget->IsInBuildSystem() &&
+            depTarget->GetProperty("EXTERNAL_MSPROJECT")) {
+          // This utility dependency names an external .vcproj target.
+          // We use LinkLibraryDependencies="true" to link to it without
+          // predicting the .lib file location or name.
+          return true;
+        }
       }
-    }
-  }
-  return false;
+      return false;
+    });
 }
 
 static cmVS7FlagTable cmVS8ExtraFlagTable[] = {
