@@ -278,10 +278,9 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
     // the generator validated all project-named sources.
     file->ResolveFullPath();
     return file;
-  } else {
-    cmSystemTools::Error("Error adding rule for " + makefileIn);
-    return nullptr;
   }
+  cmSystemTools::Error("Error adding rule for " + makefileIn);
+  return nullptr;
 }
 
 void cmLocalVisualStudio7Generator::WriteConfigurations(

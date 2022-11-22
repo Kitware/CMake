@@ -1503,19 +1503,23 @@ std::string cmGlobalVisualStudio10Generator::GetClFlagTableName() const
 
   if (toolset == "v142") {
     return "v142";
-  } else if (toolset == "v141") {
-    return "v141";
-  } else if (useToolset == "v140") {
-    return "v140";
-  } else if (useToolset == "v120") {
-    return "v12";
-  } else if (useToolset == "v110") {
-    return "v11";
-  } else if (useToolset == "v100") {
-    return "v10";
-  } else {
-    return "";
   }
+  if (toolset == "v141") {
+    return "v141";
+  }
+  if (useToolset == "v140") {
+    return "v140";
+  }
+  if (useToolset == "v120") {
+    return "v12";
+  }
+  if (useToolset == "v110") {
+    return "v11";
+  }
+  if (useToolset == "v100") {
+    return "v10";
+  }
+  return "";
 }
 
 std::string cmGlobalVisualStudio10Generator::GetCSharpFlagTableName() const
@@ -1525,19 +1529,23 @@ std::string cmGlobalVisualStudio10Generator::GetCSharpFlagTableName() const
 
   if (useToolset == "v142") {
     return "v142";
-  } else if (useToolset == "v141") {
-    return "v141";
-  } else if (useToolset == "v140") {
-    return "v140";
-  } else if (useToolset == "v120") {
-    return "v12";
-  } else if (useToolset == "v110") {
-    return "v11";
-  } else if (useToolset == "v100") {
-    return "v10";
-  } else {
-    return "";
   }
+  if (useToolset == "v141") {
+    return "v141";
+  }
+  if (useToolset == "v140") {
+    return "v140";
+  }
+  if (useToolset == "v120") {
+    return "v12";
+  }
+  if (useToolset == "v110") {
+    return "v11";
+  }
+  if (useToolset == "v100") {
+    return "v10";
+  }
+  return "";
 }
 
 std::string cmGlobalVisualStudio10Generator::GetRcFlagTableName() const
@@ -1548,15 +1556,17 @@ std::string cmGlobalVisualStudio10Generator::GetRcFlagTableName() const
   if ((useToolset == "v140") || (useToolset == "v141") ||
       (useToolset == "v142")) {
     return "v14";
-  } else if (useToolset == "v120") {
-    return "v12";
-  } else if (useToolset == "v110") {
-    return "v11";
-  } else if (useToolset == "v100") {
-    return "v10";
-  } else {
-    return "";
   }
+  if (useToolset == "v120") {
+    return "v12";
+  }
+  if (useToolset == "v110") {
+    return "v11";
+  }
+  if (useToolset == "v100") {
+    return "v10";
+  }
+  return "";
 }
 
 std::string cmGlobalVisualStudio10Generator::GetLibFlagTableName() const
@@ -1567,15 +1577,17 @@ std::string cmGlobalVisualStudio10Generator::GetLibFlagTableName() const
   if ((useToolset == "v140") || (useToolset == "v141") ||
       (useToolset == "v142")) {
     return "v14";
-  } else if (useToolset == "v120") {
-    return "v12";
-  } else if (useToolset == "v110") {
-    return "v11";
-  } else if (useToolset == "v100") {
-    return "v10";
-  } else {
-    return "";
   }
+  if (useToolset == "v120") {
+    return "v12";
+  }
+  if (useToolset == "v110") {
+    return "v11";
+  }
+  if (useToolset == "v100") {
+    return "v10";
+  }
+  return "";
 }
 
 std::string cmGlobalVisualStudio10Generator::GetLinkFlagTableName() const
@@ -1585,19 +1597,23 @@ std::string cmGlobalVisualStudio10Generator::GetLinkFlagTableName() const
 
   if (useToolset == "v142") {
     return "v142";
-  } else if (useToolset == "v141") {
-    return "v141";
-  } else if (useToolset == "v140") {
-    return "v140";
-  } else if (useToolset == "v120") {
-    return "v12";
-  } else if (useToolset == "v110") {
-    return "v11";
-  } else if (useToolset == "v100") {
-    return "v10";
-  } else {
-    return "";
   }
+  if (useToolset == "v141") {
+    return "v141";
+  }
+  if (useToolset == "v140") {
+    return "v140";
+  }
+  if (useToolset == "v120") {
+    return "v12";
+  }
+  if (useToolset == "v110") {
+    return "v11";
+  }
+  if (useToolset == "v100") {
+    return "v10";
+  }
+  return "";
 }
 
 std::string cmGlobalVisualStudio10Generator::GetMasmFlagTableName() const
@@ -1608,15 +1624,17 @@ std::string cmGlobalVisualStudio10Generator::GetMasmFlagTableName() const
   if ((useToolset == "v140") || (useToolset == "v141") ||
       (useToolset == "v142")) {
     return "v14";
-  } else if (useToolset == "v120") {
-    return "v12";
-  } else if (useToolset == "v110") {
-    return "v11";
-  } else if (useToolset == "v100") {
-    return "v10";
-  } else {
-    return "";
   }
+  if (useToolset == "v120") {
+    return "v12";
+  }
+  if (useToolset == "v110") {
+    return "v11";
+  }
+  if (useToolset == "v100") {
+    return "v10";
+  }
+  return "";
 }
 
 std::string cmGlobalVisualStudio10Generator::CanonicalToolsetName(

@@ -187,21 +187,19 @@ bool cmVSSetupAPIHelper::GetVSInstanceInfo(
   SmartBSTR bstrVersion;
   if (FAILED(pInstance->GetInstallationVersion(&bstrVersion))) {
     return false;
-  } else {
-    vsInstanceInfo.Version =
-      cmsys::Encoding::ToNarrow(std::wstring(bstrVersion));
   }
+  vsInstanceInfo.Version =
+    cmsys::Encoding::ToNarrow(std::wstring(bstrVersion));
 
   // Reboot may have been required before the installation path was created.
   SmartBSTR bstrInstallationPath;
   if ((eLocal & state) == eLocal) {
     if (FAILED(pInstance->GetInstallationPath(&bstrInstallationPath))) {
       return false;
-    } else {
-      vsInstanceInfo.VSInstallLocation =
-        cmsys::Encoding::ToNarrow(std::wstring(bstrInstallationPath));
-      cmSystemTools::ConvertToUnixSlashes(vsInstanceInfo.VSInstallLocation);
     }
+    vsInstanceInfo.VSInstallLocation =
+      cmsys::Encoding::ToNarrow(std::wstring(bstrInstallationPath));
+    cmSystemTools::ConvertToUnixSlashes(vsInstanceInfo.VSInstallLocation);
   }
 
   // Check if a compiler is installed with this instance.

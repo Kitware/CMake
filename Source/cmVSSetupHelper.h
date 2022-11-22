@@ -47,9 +47,8 @@ public:
   {
     if (pp != nullptr) {
       return ptr->QueryInterface(rclsid, (void**)pp);
-    } else {
-      return E_FAIL;
     }
+    return E_FAIL;
   }
   HRESULT CoCreateInstance(REFCLSID clsid, IUnknown* pUnknown,
                            REFIID interfaceId, DWORD dwClsContext = CLSCTX_ALL)

@@ -85,19 +85,19 @@ static std::string VSHostPlatformName()
 {
   if (VSIsArm64Host()) {
     return "ARM64";
-  } else if (VSIsWow64()) {
-    return "x64";
-  } else {
-#if defined(_M_ARM)
-    return "ARM";
-#elif defined(_M_IA64)
-    return "Itanium";
-#elif defined(_WIN64)
-    return "x64";
-#else
-    return "Win32";
-#endif
   }
+  if (VSIsWow64()) {
+    return "x64";
+  }
+#if defined(_M_ARM)
+  return "ARM";
+#elif defined(_M_IA64)
+  return "Itanium";
+#elif defined(_WIN64)
+  return "x64";
+#else
+  return "Win32";
+#endif
 }
 
 static std::string VSHostArchitecture(
@@ -105,19 +105,19 @@ static std::string VSHostArchitecture(
 {
   if (VSIsArm64Host()) {
     return v >= cmGlobalVisualStudioGenerator::VSVersion::VS17 ? "ARM64" : "";
-  } else if (VSIsWow64()) {
-    return "x64";
-  } else {
-#if defined(_M_ARM)
-    return "";
-#elif defined(_M_IA64)
-    return "";
-#elif defined(_WIN64)
-    return "x64";
-#else
-    return "x86";
-#endif
   }
+  if (VSIsWow64()) {
+    return "x64";
+  }
+#if defined(_M_ARM)
+  return "";
+#elif defined(_M_IA64)
+  return "";
+#elif defined(_WIN64)
+  return "x64";
+#else
+  return "x86";
+#endif
 }
 
 static unsigned int VSVersionToMajor(
@@ -900,9 +900,8 @@ bool cmGlobalVisualStudioVersionedGenerator::SelectWindowsStoreToolset(
         this->IsWindowsDesktopToolsetInstalled()) {
       toolset = VSVersionToToolset(this->Version);
       return true;
-    } else {
-      return false;
     }
+    return false;
   }
   return this->cmGlobalVisualStudio14Generator::SelectWindowsStoreToolset(
     toolset);

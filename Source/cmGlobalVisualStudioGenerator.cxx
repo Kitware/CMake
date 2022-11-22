@@ -518,13 +518,12 @@ std::string cmGlobalVisualStudioGenerator::GetStartupProjectName(
     std::string startup = *n;
     if (this->FindTarget(startup)) {
       return startup;
-    } else {
-      root->GetMakefile()->IssueMessage(
-        MessageType::AUTHOR_WARNING,
-        "Directory property VS_STARTUP_PROJECT specifies target "
-        "'" +
-          startup + "' that does not exist.  Ignoring.");
     }
+    root->GetMakefile()->IssueMessage(
+      MessageType::AUTHOR_WARNING,
+      "Directory property VS_STARTUP_PROJECT specifies target "
+      "'" +
+        startup + "' that does not exist.  Ignoring.");
   }
 
   // default, if not specified

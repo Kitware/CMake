@@ -213,9 +213,8 @@ bool cmGlobalVisualStudio14Generator::SelectWindowsStoreToolset(
         this->IsWindowsDesktopToolsetInstalled()) {
       toolset = "v140";
       return true;
-    } else {
-      return false;
     }
+    return false;
   }
   return this->cmGlobalVisualStudio12Generator::SelectWindowsStoreToolset(
     toolset);
@@ -255,7 +254,7 @@ std::string cmGlobalVisualStudio14Generator::GetWindows10SDKMaxVersion(
       return std::string();
     }
     // If the value is something else, trust that it is a valid SDK value.
-    else if (value) {
+    if (value) {
       return *value;
     }
     // If value is an invalid pointer, leave result unchanged.

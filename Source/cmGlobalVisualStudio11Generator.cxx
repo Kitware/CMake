@@ -216,9 +216,8 @@ bool cmGlobalVisualStudio11Generator::SelectWindowsPhoneToolset(
         this->IsWindowsDesktopToolsetInstalled()) {
       toolset = "v110_wp80";
       return true;
-    } else {
-      return false;
     }
+    return false;
   }
   return this->cmGlobalVisualStudio10Generator::SelectWindowsPhoneToolset(
     toolset);
@@ -232,9 +231,8 @@ bool cmGlobalVisualStudio11Generator::SelectWindowsStoreToolset(
         this->IsWindowsDesktopToolsetInstalled()) {
       toolset = "v110";
       return true;
-    } else {
-      return false;
     }
+    return false;
   }
   return this->cmGlobalVisualStudio10Generator::SelectWindowsStoreToolset(
     toolset);

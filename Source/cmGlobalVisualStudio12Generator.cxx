@@ -194,9 +194,8 @@ bool cmGlobalVisualStudio12Generator::SelectWindowsPhoneToolset(
         this->IsWindowsDesktopToolsetInstalled()) {
       toolset = "v120_wp81";
       return true;
-    } else {
-      return false;
     }
+    return false;
   }
   return this->cmGlobalVisualStudio11Generator::SelectWindowsPhoneToolset(
     toolset);
@@ -210,9 +209,8 @@ bool cmGlobalVisualStudio12Generator::SelectWindowsStoreToolset(
         this->IsWindowsDesktopToolsetInstalled()) {
       toolset = "v120";
       return true;
-    } else {
-      return false;
     }
+    return false;
   }
   return this->cmGlobalVisualStudio11Generator::SelectWindowsStoreToolset(
     toolset);

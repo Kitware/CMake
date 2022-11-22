@@ -82,8 +82,7 @@ std::string cmVisualStudioSlnParser::ParsedLine::GetArgVerbatim() const
 {
   if (this->Arg.second)
     return Quote + this->Arg.first + Quote;
-  else
-    return this->Arg.first;
+  return this->Arg.first;
 }
 
 const std::string& cmVisualStudioSlnParser::ParsedLine::GetValue(
@@ -91,8 +90,7 @@ const std::string& cmVisualStudioSlnParser::ParsedLine::GetValue(
 {
   if (idxValue < this->Values.size())
     return this->Values[idxValue].first;
-  else
-    return BadString;
+  return BadString;
 }
 
 std::string cmVisualStudioSlnParser::ParsedLine::GetValueVerbatim(
@@ -102,10 +100,9 @@ std::string cmVisualStudioSlnParser::ParsedLine::GetValueVerbatim(
     const StringData& data = this->Values[idxValue];
     if (data.second)
       return Quote + data.first + Quote;
-    else
-      return data.first;
-  } else
-    return BadString;
+    return data.first;
+  }
+  return BadString;
 }
 
 class cmVisualStudioSlnParser::State

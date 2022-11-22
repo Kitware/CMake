@@ -26,8 +26,7 @@ const cm::optional<cmSlnProjectEntry> cmSlnData::GetProjectByGUID(
   auto it(ProjectsByGUID.find(projectGUID));
   if (it != ProjectsByGUID.end())
     return it->second;
-  else
-    return cm::nullopt;
+  return cm::nullopt;
 }
 
 const cm::optional<cmSlnProjectEntry> cmSlnData::GetProjectByName(
@@ -36,8 +35,7 @@ const cm::optional<cmSlnProjectEntry> cmSlnData::GetProjectByName(
   auto it(ProjectNameIndex.find(projectName));
   if (it != ProjectNameIndex.end())
     return it->second->second;
-  else
-    return cm::nullopt;
+  return cm::nullopt;
 }
 
 std::vector<cmSlnProjectEntry> cmSlnData::GetProjects() const
