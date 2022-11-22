@@ -73,8 +73,8 @@ protected:
 
   struct ResultData
   {
-    ParseResult Result;
-    size_t ResultLine;
+    ParseResult Result = ResultOK;
+    size_t ResultLine = 0;
     bool HadBOM;
 
     ResultData();

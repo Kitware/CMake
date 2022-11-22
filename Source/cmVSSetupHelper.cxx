@@ -90,7 +90,6 @@ cmVSSetupAPIHelper::cmVSSetupAPIHelper(unsigned int version)
   , setupConfig(NULL)
   , setupConfig2(NULL)
   , setupHelper(NULL)
-  , initializationFailure(false)
 {
   comInitialized = CoInitializeEx(NULL, 0);
   if (SUCCEEDED(comInitialized)) {

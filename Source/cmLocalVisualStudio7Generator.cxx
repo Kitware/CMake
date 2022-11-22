@@ -564,7 +564,6 @@ public:
     : LG(lg)
     , Config(config)
     , Stream(os)
-    , First(true)
   {
   }
   void Start(const char* tool)
@@ -610,7 +609,7 @@ private:
   cmLocalVisualStudio7Generator* LG;
   std::string Config;
   std::ostream& Stream;
-  bool First;
+  bool First = true;
 };
 
 void cmLocalVisualStudio7Generator::WriteConfiguration(

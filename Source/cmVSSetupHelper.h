@@ -17,7 +17,7 @@ template <class T>
 class SmartCOMPtr
 {
 public:
-  SmartCOMPtr() { ptr = NULL; }
+  SmartCOMPtr() {}
   SmartCOMPtr(T* p)
   {
     ptr = p;
@@ -65,13 +65,13 @@ public:
   }
 
 private:
-  T* ptr;
+  T* ptr = NULL;
 };
 
 class SmartBSTR
 {
 public:
-  SmartBSTR() { str = NULL; }
+  SmartBSTR() {}
   SmartBSTR(const SmartBSTR& src) = delete;
   SmartBSTR& operator=(const SmartBSTR& src) = delete;
   operator BSTR() const { return str; }
@@ -79,7 +79,7 @@ public:
   ~SmartBSTR() throw() { ::SysFreeString(str); }
 
 private:
-  BSTR str;
+  BSTR str = NULL;
 };
 
 struct VSInstanceInfo
@@ -129,7 +129,7 @@ private:
   SmartCOMPtr<ISetupConfiguration2> setupConfig2;
   SmartCOMPtr<ISetupHelper> setupHelper;
   // used to indicate failure in Initialize(), so we don't have to call again
-  bool initializationFailure;
+  bool initializationFailure = false;
   // indicated if COM initialization is successful
   HRESULT comInitialized;
   // current best instance of VS selected

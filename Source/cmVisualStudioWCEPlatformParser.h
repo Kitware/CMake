@@ -18,7 +18,6 @@ class cmVisualStudioWCEPlatformParser : public cmXMLParser
 public:
   cmVisualStudioWCEPlatformParser(const char* name = NULL)
     : RequiredName(name)
-    , FoundRequiredName(false)
   {
   }
 
@@ -61,7 +60,7 @@ private:
   std::vector<std::string> AvailablePlatforms;
 
   const char* RequiredName;
-  bool FoundRequiredName;
+  bool FoundRequiredName = false;
   std::string VcInstallDir;
   std::string VsInstallDir;
 };

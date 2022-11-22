@@ -140,14 +140,13 @@ private:
   std::stack<FileState> Stack;
   std::string EndIgnoreTag;
   DataGroupSet RequestedData;
-  size_t CurrentLine;
+  size_t CurrentLine = 0;
 
   void IgnoreUntilTag(const std::string& endTag);
 };
 
 cmVisualStudioSlnParser::State::State(DataGroupSet requestedData)
   : RequestedData(requestedData)
-  , CurrentLine(0)
 {
   if (this->RequestedData.test(DataGroupProjectDependenciesBit))
     this->RequestedData.set(DataGroupProjectsBit);
@@ -386,8 +385,6 @@ void cmVisualStudioSlnParser::State::IgnoreUntilTag(const std::string& endTag)
 }
 
 cmVisualStudioSlnParser::ResultData::ResultData()
-  : Result(ResultOK)
-  , ResultLine(0)
 {
 }
 
