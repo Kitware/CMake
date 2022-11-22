@@ -158,7 +158,7 @@ std::string cmGlobalVisualStudio7Generator::FindDevEnvCommand()
 
   // Search in standard location.
   vskey = this->GetRegistryBase() + ";InstallDir";
-  if (cmSystemTools::ReadRegistryValue(vskey.c_str(), vscmd,
+  if (cmSystemTools::ReadRegistryValue(vskey, vscmd,
                                        cmSystemTools::KeyWOW64_32)) {
     cmSystemTools::ConvertToUnixSlashes(vscmd);
     vscmd += "/devenv.com";
@@ -171,7 +171,7 @@ std::string cmGlobalVisualStudio7Generator::FindDevEnvCommand()
   vskey = cmStrCat(
     "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\SxS\\VS7;",
     this->GetIDEVersion());
-  if (cmSystemTools::ReadRegistryValue(vskey.c_str(), vscmd,
+  if (cmSystemTools::ReadRegistryValue(vskey, vscmd,
                                        cmSystemTools::KeyWOW64_32)) {
     cmSystemTools::ConvertToUnixSlashes(vscmd);
     vscmd += "/Common7/IDE/devenv.com";
@@ -332,7 +332,7 @@ void cmGlobalVisualStudio7Generator::OutputSLNFile(
   }
   this->CurrentProject = root->GetProjectName();
   std::string fname = GetSLNFile(root);
-  cmGeneratedFileStream fout(fname.c_str());
+  cmGeneratedFileStream fout(fname);
   fout.SetCopyIfDifferent(true);
   if (!fout) {
     return;
@@ -600,9 +600,9 @@ std::string cmGlobalVisualStudio7Generator::WriteUtilityDepend(
   std::string fname =
     cmStrCat(target->GetLocalGenerator()->GetCurrentBinaryDirectory(), '/',
              pname, ".vcproj");
-  cmGeneratedFileStream fout(fname.c_str());
+  cmGeneratedFileStream fout(fname);
   fout.SetCopyIfDifferent(true);
-  std::string guid = this->GetGUID(pname.c_str());
+  std::string guid = this->GetGUID(pname);
 
   /* clang-format off */
   fout <<

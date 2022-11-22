@@ -55,7 +55,7 @@ std::string cmGlobalVisualStudio8Generator::FindDevEnvCommand()
   std::string vsxkey =
     cmStrCat("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\",
              this->GetIDEVersion(), ";InstallDir");
-  if (cmSystemTools::ReadRegistryValue(vsxkey.c_str(), vsxcmd,
+  if (cmSystemTools::ReadRegistryValue(vsxkey, vsxcmd,
                                        cmSystemTools::KeyWOW64_32)) {
     cmSystemTools::ConvertToUnixSlashes(vsxcmd);
     vsxcmd += "/VCExpress.exe";
@@ -191,7 +191,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
       cmStrCat(generators[0]->GetMakefile()->GetCurrentBinaryDirectory(), '/',
                stampList);
     std::string stampFile;
-    cmGeneratedFileStream fout(stampListFile.c_str());
+    cmGeneratedFileStream fout(stampListFile);
     for (const auto& gi : generators) {
       stampFile = cmStrCat(gi->GetMakefile()->GetCurrentBinaryDirectory(),
                            "/CMakeFiles/generate.stamp");

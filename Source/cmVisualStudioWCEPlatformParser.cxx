@@ -16,9 +16,9 @@ int cmVisualStudioWCEPlatformParser::ParseVersion(const char* version)
   const std::string vckey = registryBase + "\\Setup\\VC;ProductDir";
   const std::string vskey = registryBase + "\\Setup\\VS;ProductDir";
 
-  if (!cmSystemTools::ReadRegistryValue(vckey.c_str(), this->VcInstallDir,
+  if (!cmSystemTools::ReadRegistryValue(vckey, this->VcInstallDir,
                                         cmSystemTools::KeyWOW64_32) ||
-      !cmSystemTools::ReadRegistryValue(vskey.c_str(), this->VsInstallDir,
+      !cmSystemTools::ReadRegistryValue(vskey, this->VsInstallDir,
                                         cmSystemTools::KeyWOW64_32)) {
     return 0;
   }

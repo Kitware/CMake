@@ -216,7 +216,7 @@ void cmLocalVisualStudio7Generator::GenerateTarget(cmGeneratorTarget* target)
   // Generate the project file and replace it atomically with
   // copy-if-different.  We use a separate timestamp so that the IDE
   // does not reload project files unnecessarily.
-  cmGeneratedFileStream fout(fname.c_str());
+  cmGeneratedFileStream fout(fname);
   fout.SetCopyIfDifferent(true);
   this->WriteVCProjFile(fout, lname, target);
   if (fout.Close()) {
