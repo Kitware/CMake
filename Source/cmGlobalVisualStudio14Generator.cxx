@@ -372,6 +372,7 @@ std::string cmGlobalVisualStudio14Generator::GetWindows10SDKVersion(
     return sdks.at(0);
   }
 #endif
+  (void)mf;
   // Return an empty string
   return std::string();
 }
