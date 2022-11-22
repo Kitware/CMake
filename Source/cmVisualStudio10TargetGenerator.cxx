@@ -2114,7 +2114,7 @@ void cmVisualStudio10TargetGenerator::ParseSettingsProperty(
 bool cmVisualStudio10TargetGenerator::PropertyIsSameInAllConfigs(
   const ConfigToSettings& toolSettings, const std::string& propName)
 {
-  std::string firstPropValue = "";
+  std::string firstPropValue;
   for (const auto& configToSettings : toolSettings) {
     const std::unordered_map<std::string, std::string>& settings =
       configToSettings.second;
