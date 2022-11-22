@@ -958,7 +958,7 @@ void cmGlobalVisualStudioGenerator::AddSymbolExportCommand(
   commands.push_back(std::move(command));
 }
 
-static bool OpenSolution(std::string sln)
+static bool OpenSolution(std::string const& sln)
 {
   HRESULT comInitialized =
     CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);

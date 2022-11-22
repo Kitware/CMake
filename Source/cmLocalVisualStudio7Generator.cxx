@@ -953,7 +953,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
 }
 
 std::string cmLocalVisualStudio7Generator::GetBuildTypeLinkerFlags(
-  std::string rootLinkerFlags, const std::string& configName)
+  std::string const& rootLinkerFlags, const std::string& configName)
 {
   std::string configTypeUpper = cmSystemTools::UpperCase(configName);
   std::string extraLinkOptionsBuildTypeDef =

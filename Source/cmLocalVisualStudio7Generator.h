@@ -97,7 +97,7 @@ protected:
 private:
   using Options = cmVS7GeneratorOptions;
   using FCInfo = cmLocalVisualStudio7GeneratorFCInfo;
-  std::string GetBuildTypeLinkerFlags(std::string rootLinkerFlags,
+  std::string GetBuildTypeLinkerFlags(std::string const& rootLinkerFlags,
                                       const std::string& configName);
   void FixGlobalTargets();
   void WriteVCProjHeader(std::ostream& fout, const std::string& libName,

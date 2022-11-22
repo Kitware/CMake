@@ -200,7 +200,7 @@ struct cmVisualStudio10TargetGenerator::OptionsHelper
   }
 };
 
-static std::string cmVS10EscapeComment(std::string comment)
+static std::string cmVS10EscapeComment(std::string const& comment)
 {
   // MSBuild takes the CDATA of a <Message></Message> element and just
   // does "echo $CDATA" with no escapes.  We must encode the string.
