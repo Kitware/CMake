@@ -108,8 +108,8 @@ void cmLocalVisualStudio7Generator::Generate()
     }
 
     auto& gtVisited = this->GetSourcesVisited(gt);
-    auto& deps = this->GlobalGenerator->GetTargetDirectDepends(gt);
-    for (auto& d : deps) {
+    auto const& deps = this->GlobalGenerator->GetTargetDirectDepends(gt);
+    for (auto const& d : deps) {
       // Take the union of visited source files of custom commands
       auto depVisited = this->GetSourcesVisited(d);
       gtVisited.insert(depVisited.begin(), depVisited.end());
@@ -127,7 +127,7 @@ void cmLocalVisualStudio7Generator::FixGlobalTargets()
   // commands for targets in which no sources are built.  Add dummy
   // rules to force these targets to build.
   const auto& tgts = this->GetGeneratorTargets();
-  for (auto& l : tgts) {
+  for (auto const& l : tgts) {
     if (l->GetType() == cmStateEnums::GLOBAL_TARGET) {
       cmCustomCommandLines force_commands =
         cmMakeSingleCommandLine({ "cd", "." });

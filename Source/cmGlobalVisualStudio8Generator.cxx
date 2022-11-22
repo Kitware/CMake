@@ -174,7 +174,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
                                        std::move(cc));
 
   auto ptr = cm::make_unique<cmGeneratorTarget>(tgt, &lg);
-  auto gt = ptr.get();
+  auto* gt = ptr.get();
   lg.AddGeneratorTarget(std::move(ptr));
 
   // Organize in the "predefined targets" folder:
