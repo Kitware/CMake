@@ -109,6 +109,10 @@ The options are:
   Display the given message before the commands are executed at
   build time.
 
+  .. versionadded:: 3.26
+    Arguments to ``COMMENT`` may use
+    :manual:`generator expressions <cmake-generator-expressions(7)>`.
+
 ``DEPENDS``
   Reference files and outputs of custom commands created with
   :command:`add_custom_command` command calls in the same directory

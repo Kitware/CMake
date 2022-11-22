@@ -3474,8 +3474,8 @@ std::string cmLocalGenerator::ConstructComment(
   cmCustomCommandGenerator const& ccg, const char* default_comment) const
 {
   // Check for a comment provided with the command.
-  if (ccg.GetComment()) {
-    return ccg.GetComment();
+  if (cm::optional<std::string> comment = ccg.GetComment()) {
+    return *comment;
   }
 
   // Construct a reasonable default comment if possible.

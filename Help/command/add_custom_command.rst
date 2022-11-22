@@ -140,6 +140,10 @@ The options are:
   Display the given message before the commands are executed at
   build time.
 
+  .. versionadded:: 3.26
+    Arguments to ``COMMENT`` may use
+    :manual:`generator expressions <cmake-generator-expressions(7)>`.
+
 ``DEPENDS``
   Specify files on which the command depends.  Each argument is converted
   to a dependency as follows:

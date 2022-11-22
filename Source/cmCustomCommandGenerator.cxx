@@ -148,6 +148,14 @@ std::string EvaluateDepfile(std::string const& path,
   std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(path);
   return cge->Evaluate(lg, config);
 }
+
+std::string EvaluateComment(const char* comment,
+                            cmGeneratorExpression const& ge,
+                            cmLocalGenerator* lg, std::string const& config)
+{
+  std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(comment);
+  return cge->Evaluate(lg, config);
+}
 }
 
 cmCustomCommandGenerator::cmCustomCommandGenerator(
@@ -463,9 +471,19 @@ std::string cmCustomCommandGenerator::GetInternalDepfile() const
   return this->ComputeInternalDepfile(this->OutputConfig, depfile);
 }
 
-const char* cmCustomCommandGenerator::GetComment() const
+cm::optional<std::string> cmCustomCommandGenerator::GetComment() const
 {
-  return this->CC->GetComment();
+  const char* comment = this->CC->GetComment();
+  if (!comment) {
+    return cm::nullopt;
+  }
+  if (!*comment) {
+    return std::string();
+  }
+
+  cmGeneratorExpression ge(*this->LG->GetCMakeInstance(),
+                           this->CC->GetBacktrace());
+  return EvaluateComment(comment, ge, this->LG, this->OutputConfig);
 }
 
 std::string cmCustomCommandGenerator::GetWorkingDirectory() const
