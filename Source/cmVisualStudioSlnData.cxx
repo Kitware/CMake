@@ -42,7 +42,8 @@ const cm::optional<cmSlnProjectEntry> cmSlnData::GetProjectByName(
 
 std::vector<cmSlnProjectEntry> cmSlnData::GetProjects() const
 {
-  auto it(this->ProjectNameIndex.begin()), itEnd(this->ProjectNameIndex.end());
+  auto it(this->ProjectNameIndex.begin());
+  auto itEnd(this->ProjectNameIndex.end());
   std::vector<cmSlnProjectEntry> result;
   for (; it != itEnd; ++it) {
     result.push_back(it->second->second);

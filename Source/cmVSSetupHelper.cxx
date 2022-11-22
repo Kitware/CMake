@@ -289,7 +289,8 @@ bool cmVSSetupAPIHelper::GetVCToolsetVersion(std::string& vsToolsetVersion)
 
 bool cmVSSetupAPIHelper::IsEWDKEnabled()
 {
-  std::string envEnterpriseWDK, envDisableRegistryUse;
+  std::string envEnterpriseWDK;
+  std::string envDisableRegistryUse;
   cmSystemTools::GetEnv("EnterpriseWDK", envEnterpriseWDK);
   cmSystemTools::GetEnv("DisableRegistryUse", envDisableRegistryUse);
   if (!cmSystemTools::Strucmp(envEnterpriseWDK.c_str(), "True") &&
@@ -410,7 +411,9 @@ bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
   }
 
   if (this->IsEWDKEnabled()) {
-    std::string envWindowsSdkDir81, envVSVersion, envVsInstallDir;
+    std::string envWindowsSdkDir81;
+    std::string envVSVersion;
+    std::string envVsInstallDir;
 
     cmSystemTools::GetEnv("WindowsSdkDir_81", envWindowsSdkDir81);
     cmSystemTools::GetEnv("VisualStudioVersion", envVSVersion);

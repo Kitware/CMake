@@ -53,7 +53,8 @@ static bool VSIsArm64Host()
 #  undef CM_VS_GCC_DIAGNOSTIC_PUSHED
 #endif
 
-  USHORT processMachine, nativeMachine;
+  USHORT processMachine;
+  USHORT nativeMachine;
 
   return s_IsWow64Process2Impl != nullptr &&
     s_IsWow64Process2Impl(GetCurrentProcess(), &processMachine,
