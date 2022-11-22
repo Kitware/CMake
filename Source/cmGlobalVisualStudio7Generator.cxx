@@ -378,7 +378,8 @@ void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
         // On VS 19 and above, always map .NET SDK projects to "Any CPU".
         if (target->IsDotNetSdkTarget() &&
             this->GetVersion() >= VSVersion::VS16 &&
-            !this->IsReservedTarget(target->GetName())) {
+            !cmGlobalVisualStudio7Generator::IsReservedTarget(
+              target->GetName())) {
           mapping = "Any CPU";
         }
         this->WriteProjectConfigurations(fout, *vcprojName, *target, configs,
@@ -515,7 +516,7 @@ std::string cmGlobalVisualStudio7Generator::ConvertToSolutionPath(
   // use windows slashes.
   std::string d = path;
   std::string::size_type pos = 0;
-  while ((pos = d.find('/', pos)) != d.npos) {
+  while ((pos = d.find('/', pos)) != std::string::npos) {
     d[pos++] = '\\';
   }
   return d;

@@ -169,7 +169,9 @@ void cmGlobalVisualStudio71Generator::WriteExternalProject(
 {
   fout << "Project(\"{"
        << (typeGuid ? typeGuid
-                    : std::string(this->ExternalProjectType(location)))
+                    : std::string(
+                        cmGlobalVisualStudio71Generator::ExternalProjectType(
+                          location)))
        << "}\") = \"" << name << "\", \""
        << this->ConvertToSolutionPath(location) << "\", \"{"
        << this->GetGUID(name) << "}\"\n";

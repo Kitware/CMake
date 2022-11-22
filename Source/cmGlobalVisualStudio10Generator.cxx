@@ -501,7 +501,8 @@ bool cmGlobalVisualStudio10Generator::InitializeWindowsStore(cmMakefile* mf)
 
 bool cmGlobalVisualStudio10Generator::InitializeTegraAndroid(cmMakefile* mf)
 {
-  std::string v = this->GetInstalledNsightTegraVersion();
+  std::string v =
+    cmGlobalVisualStudio10Generator::GetInstalledNsightTegraVersion();
   if (v.empty()) {
     mf->IssueMessage(MessageType::FATAL_ERROR,
                      "CMAKE_SYSTEM_NAME is 'Android' but "

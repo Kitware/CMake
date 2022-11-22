@@ -44,7 +44,8 @@ cmGlobalVisualStudio8Generator::cmGlobalVisualStudio8Generator(
 {
   this->ProjectConfigurationSectionName = "ProjectConfigurationPlatforms";
   this->Name = name;
-  this->ExtraFlagTable = this->GetExtraFlagTableVS8();
+  this->ExtraFlagTable =
+    cmGlobalVisualStudio8Generator::GetExtraFlagTableVS8();
 }
 
 std::string cmGlobalVisualStudio8Generator::FindDevEnvCommand()

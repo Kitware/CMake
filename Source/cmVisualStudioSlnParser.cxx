@@ -541,7 +541,7 @@ bool cmVisualStudioSlnParser::ParseMultiValueTag(const std::string& line,
   auto fullTag = cm::string_view(line).substr(0, idxEqualSign);
   if (!this->ParseTag(fullTag, parsedLine, state))
     return false;
-  if (idxEqualSign != line.npos) {
+  if (idxEqualSign != std::string::npos) {
     size_t idxFieldStart = idxEqualSign + 1;
     if (idxFieldStart < line.size()) {
       size_t idxParsing = idxFieldStart;
@@ -549,7 +549,7 @@ bool cmVisualStudioSlnParser::ParseMultiValueTag(const std::string& line,
       for (;;) {
         idxParsing = line.find_first_of(",\"", idxParsing);
         bool fieldOver = false;
-        if (idxParsing == line.npos) {
+        if (idxParsing == std::string::npos) {
           fieldOver = true;
           if (inQuotes) {
             this->LastResult.SetError(ResultErrorInputStructure,
@@ -565,7 +565,7 @@ bool cmVisualStudioSlnParser::ParseMultiValueTag(const std::string& line,
                 line.substr(idxFieldStart, idxParsing - idxFieldStart),
                 parsedLine))
             return false;
-          if (idxParsing == line.npos)
+          if (idxParsing == std::string::npos)
             break; // end of last field
           idxFieldStart = idxParsing + 1;
         }
@@ -584,7 +584,7 @@ bool cmVisualStudioSlnParser::ParseSingleValueTag(const std::string& line,
   auto fullTag = cm::string_view(line).substr(0, idxEqualSign);
   if (!this->ParseTag(fullTag, parsedLine, state))
     return false;
-  if (idxEqualSign != line.npos) {
+  if (idxEqualSign != std::string::npos) {
     if (!this->ParseValue(line.substr(idxEqualSign + 1), parsedLine))
       return false;
   }
@@ -596,7 +596,7 @@ bool cmVisualStudioSlnParser::ParseKeyValuePair(const std::string& line,
                                                 State& /*state*/)
 {
   size_t idxEqualSign = line.find('=');
-  if (idxEqualSign == line.npos) {
+  if (idxEqualSign == std::string::npos) {
     parsedLine.CopyVerbatim(line);
     return true;
   }
