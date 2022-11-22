@@ -1935,7 +1935,7 @@ void cmLocalVisualStudio7Generator::OutputTargetRules(
   }
   std::unique_ptr<cmCustomCommand> pcc(
     this->MaybeCreateImplibDir(target, configName, this->FortranProject));
-  if (pcc.get()) {
+  if (pcc) {
     event.Write(*pcc);
   }
   event.Finish();
