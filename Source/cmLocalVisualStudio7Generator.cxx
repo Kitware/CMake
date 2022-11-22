@@ -57,7 +57,7 @@ public:
   using ItemVector = cmComputeLinkInformation::ItemVector;
   void OutputLibraries(std::ostream& fout, ItemVector const& libs);
   void OutputObjects(std::ostream& fout, cmGeneratorTarget* t,
-                     std::string const& config, const char* isep = 0);
+                     std::string const& config, const char* isep = nullptr);
 
 private:
   cmLocalVisualStudio7Generator* LocalGenerator;
@@ -633,7 +633,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
   // 1 == executable
   // 10 == utility
   const char* configType = "10";
-  const char* projectType = 0;
+  const char* projectType = nullptr;
   bool targetBuilds = true;
 
   switch (target->GetType()) {
@@ -842,7 +842,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
   }
   fout << "/>\n"; // end of <Tool Name=VCCLCompilerTool
   if (gg->IsMarmasmEnabled() && !this->FortranProject) {
-    Options marmasmOptions(this, Options::MarmasmCompiler, 0, 0);
+    Options marmasmOptions(this, Options::MarmasmCompiler, nullptr, nullptr);
     /* clang-format off */
     fout <<
       "\t\t\t<Tool\n"
@@ -860,7 +860,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
     /* clang-format on */
   }
   if (gg->IsMasmEnabled() && !this->FortranProject) {
-    Options masmOptions(this, Options::MasmCompiler, 0, 0);
+    Options masmOptions(this, Options::MasmCompiler, nullptr, nullptr);
     /* clang-format off */
     fout <<
       "\t\t\t<Tool\n"
@@ -1993,7 +1993,7 @@ void cmLocalVisualStudio7Generator::WriteProjectStartFortran(
   /* clang-format on */
   cmValue p = target->GetProperty("VS_KEYWORD");
   const char* keyword = p ? p->c_str() : "Console Application";
-  const char* projectType = 0;
+  const char* projectType = nullptr;
   switch (target->GetType()) {
     case cmStateEnums::OBJECT_LIBRARY:
     case cmStateEnums::STATIC_LIBRARY:
@@ -2013,7 +2013,7 @@ void cmLocalVisualStudio7Generator::WriteProjectStartFortran(
       if (!keyword) {
         keyword = "Console Application";
       }
-      projectType = 0;
+      projectType = nullptr;
       break;
     case cmStateEnums::UTILITY:
     case cmStateEnums::GLOBAL_TARGET:
@@ -2234,7 +2234,7 @@ static bool cmLVS7G_IsFAT(const char* dir)
     volRoot[0] = dir[0];
     char fsName[16];
     if (GetVolumeInformationA(volRoot, 0, 0, 0, 0, 0, fsName, 16) &&
-        strstr(fsName, "FAT") != 0) {
+        strstr(fsName, "FAT") != nullptr) {
       return true;
     }
   }

@@ -23,7 +23,7 @@ static const char* cmVS14GenName(const std::string& name, std::string& genName)
 {
   if (strncmp(name.c_str(), vs14generatorName,
               sizeof(vs14generatorName) - 6) != 0) {
-    return 0;
+    return nullptr;
   }
   const char* p = name.c_str() + sizeof(vs14generatorName) - 6;
   if (cmHasLiteralPrefix(p, " 2015")) {

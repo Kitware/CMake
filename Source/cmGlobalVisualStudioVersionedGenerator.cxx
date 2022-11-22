@@ -211,7 +211,7 @@ static const char* cmVS15GenName(const std::string& name, std::string& genName)
 {
   if (strncmp(name.c_str(), vs15generatorName,
               sizeof(vs15generatorName) - 6) != 0) {
-    return 0;
+    return nullptr;
   }
   const char* p = name.c_str() + sizeof(vs15generatorName) - 6;
   if (cmHasLiteralPrefix(p, " 2017")) {
@@ -306,7 +306,7 @@ static const char* cmVS16GenName(const std::string& name, std::string& genName)
 {
   if (strncmp(name.c_str(), vs16generatorName,
               sizeof(vs16generatorName) - 6) != 0) {
-    return 0;
+    return nullptr;
   }
   const char* p = name.c_str() + sizeof(vs16generatorName) - 6;
   if (cmHasLiteralPrefix(p, " 2019")) {
@@ -320,7 +320,7 @@ static const char* cmVS17GenName(const std::string& name, std::string& genName)
 {
   if (strncmp(name.c_str(), vs17generatorName,
               sizeof(vs17generatorName) - 6) != 0) {
-    return 0;
+    return nullptr;
   }
   const char* p = name.c_str() + sizeof(vs17generatorName) - 6;
   if (cmHasLiteralPrefix(p, " 2022")) {

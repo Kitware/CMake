@@ -56,7 +56,7 @@ cmSlnProjectEntry* cmSlnData::AddProject(
 {
   ProjectStorage::iterator it(ProjectsByGUID.find(projectGUID));
   if (it != ProjectsByGUID.end())
-    return NULL;
+    return nullptr;
   it = ProjectsByGUID
          .insert(ProjectStorage::value_type(
            projectGUID,

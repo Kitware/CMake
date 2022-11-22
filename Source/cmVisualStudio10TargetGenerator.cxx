@@ -2675,7 +2675,7 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
     ? "C"
     : this->GlobalGenerator->GetLanguageFromExtension(ext.c_str());
   std::string lang = this->LocalGenerator->GetSourceFileLanguage(sf);
-  const char* compileAs = 0;
+  const char* compileAs = nullptr;
   if (lang != extLang) {
     if (lang == "CXX") {
       // force a C++ file type

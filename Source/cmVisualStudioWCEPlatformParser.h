@@ -16,7 +16,7 @@
 class cmVisualStudioWCEPlatformParser : public cmXMLParser
 {
 public:
-  cmVisualStudioWCEPlatformParser(const char* name = NULL)
+  cmVisualStudioWCEPlatformParser(const char* name = nullptr)
     : RequiredName(name)
   {
   }

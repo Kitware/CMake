@@ -47,7 +47,7 @@ public:
 
   void ComputeObjectFilenames(
     std::map<cmSourceFile const*, std::string>& mapping,
-    cmGeneratorTarget const* = 0) override;
+    cmGeneratorTarget const* = nullptr) override;
 
 protected:
   virtual const char* ReportErrorLabel() const;

@@ -243,8 +243,8 @@ private:
   {
     LongestSourcePath() = default;
     size_t Length = 0;
-    cmGeneratorTarget* Target = 0;
-    cmSourceFile const* SourceFile = 0;
+    cmGeneratorTarget* Target = nullptr;
+    cmSourceFile const* SourceFile = nullptr;
     std::string SourceRel;
   };
   LongestSourcePath LongestSource;

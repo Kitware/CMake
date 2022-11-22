@@ -50,7 +50,7 @@ const char* cmVisualStudioWCEPlatformParser::GetArchitectureFamily() const
     return it->second.c_str();
   }
 
-  return 0;
+  return nullptr;
 }
 
 void cmVisualStudioWCEPlatformParser::StartElement(const std::string& name,

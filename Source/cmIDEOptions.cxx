@@ -20,9 +20,9 @@ cmIDEOptions::cmIDEOptions()
   this->AllowDefine = true;
   this->DoingInclude = false;
   this->AllowSlash = false;
-  this->DoingFollowing = 0;
+  this->DoingFollowing = nullptr;
   for (int i = 0; i < FlagTableCount; ++i) {
-    this->FlagTable[i] = 0;
+    this->FlagTable[i] = nullptr;
   }
 }
 
@@ -47,7 +47,7 @@ void cmIDEOptions::HandleFlag(std::string const& flag)
   // If the last option expected a following value, this is it.
   if (this->DoingFollowing) {
     this->FlagMapUpdate(this->DoingFollowing, flag);
-    this->DoingFollowing = 0;
+    this->DoingFollowing = nullptr;
     return;
   }
 

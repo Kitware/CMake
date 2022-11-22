@@ -87,11 +87,11 @@ std::string VSInstanceInfo::GetInstallLocation() const
 
 cmVSSetupAPIHelper::cmVSSetupAPIHelper(unsigned int version)
   : Version(version)
-  , setupConfig(NULL)
-  , setupConfig2(NULL)
-  , setupHelper(NULL)
+  , setupConfig(nullptr)
+  , setupConfig2(nullptr)
+  , setupHelper(nullptr)
 {
-  comInitialized = CoInitializeEx(NULL, 0);
+  comInitialized = CoInitializeEx(nullptr, 0);
   if (SUCCEEDED(comInitialized)) {
     Initialize();
   } else {
@@ -101,9 +101,9 @@ cmVSSetupAPIHelper::cmVSSetupAPIHelper(unsigned int version)
 
 cmVSSetupAPIHelper::~cmVSSetupAPIHelper()
 {
-  setupHelper = NULL;
-  setupConfig2 = NULL;
-  setupConfig = NULL;
+  setupHelper = nullptr;
+  setupConfig2 = nullptr;
+  setupConfig = nullptr;
   if (SUCCEEDED(comInitialized))
     CoUninitialize();
 }
@@ -176,7 +176,7 @@ bool cmVSSetupAPIHelper::CheckInstalledComponent(
 bool cmVSSetupAPIHelper::GetVSInstanceInfo(
   SmartCOMPtr<ISetupInstance2> pInstance, VSInstanceInfo& vsInstanceInfo)
 {
-  if (pInstance == NULL)
+  if (pInstance == nullptr)
     return false;
 
   InstanceState state;
@@ -219,7 +219,7 @@ bool cmVSSetupAPIHelper::GetVSInstanceInfo(
 
     LPSAFEARRAY lpsaPackages;
     if (FAILED(pInstance->GetPackages(&lpsaPackages)) ||
-        lpsaPackages == NULL) {
+        lpsaPackages == nullptr) {
       return false;
     }
 
@@ -228,10 +228,10 @@ bool cmVSSetupAPIHelper::GetVSInstanceInfo(
 
     IUnknown** ppData = (IUnknown**)lpsaPackages->pvData;
     for (int i = lower; i < upper; i++) {
-      SmartCOMPtr<ISetupPackageReference> package = NULL;
+      SmartCOMPtr<ISetupPackageReference> package = nullptr;
       if (FAILED(ppData[i]->QueryInterface(IID_ISetupPackageReference,
                                            (void**)&package)) ||
-          package == NULL)
+          package == nullptr)
         continue;
 
       bool win10SDKInstalled = false;
@@ -369,11 +369,11 @@ bool cmVSSetupAPIHelper::EnumerateVSInstancesWithVswhere(
 bool cmVSSetupAPIHelper::EnumerateVSInstancesWithCOM(
   std::vector<VSInstanceInfo>& VSInstances)
 {
-  if (initializationFailure || setupConfig == NULL || setupConfig2 == NULL ||
-      setupHelper == NULL)
+  if (initializationFailure || setupConfig == nullptr ||
+      setupConfig2 == nullptr || setupHelper == nullptr)
     return false;
 
-  SmartCOMPtr<IEnumSetupInstances> enumInstances = NULL;
+  SmartCOMPtr<IEnumSetupInstances> enumInstances = nullptr;
   if (FAILED(
         setupConfig2->EnumInstances((IEnumSetupInstances**)&enumInstances)) ||
       !enumInstances) {
@@ -381,18 +381,18 @@ bool cmVSSetupAPIHelper::EnumerateVSInstancesWithCOM(
   }
 
   SmartCOMPtr<ISetupInstance> instance;
-  while (SUCCEEDED(enumInstances->Next(1, &instance, NULL)) && instance) {
-    SmartCOMPtr<ISetupInstance2> instance2 = NULL;
+  while (SUCCEEDED(enumInstances->Next(1, &instance, nullptr)) && instance) {
+    SmartCOMPtr<ISetupInstance2> instance2 = nullptr;
     if (FAILED(
           instance->QueryInterface(IID_ISetupInstance2, (void**)&instance2)) ||
         !instance2) {
-      instance = NULL;
+      instance = nullptr;
       continue;
     }
 
     VSInstanceInfo instanceInfo;
     bool isInstalled = GetVSInstanceInfo(instance2, instanceInfo);
-    instance = instance2 = NULL;
+    instance = instance2 = nullptr;
     if (isInstalled)
       VSInstances.push_back(instanceInfo);
   }
@@ -596,24 +596,24 @@ bool cmVSSetupAPIHelper::Initialize()
     return false;
   }
 
-  if (FAILED(setupConfig.CoCreateInstance(CLSID_SetupConfiguration, NULL,
+  if (FAILED(setupConfig.CoCreateInstance(CLSID_SetupConfiguration, nullptr,
                                           IID_ISetupConfiguration,
                                           CLSCTX_INPROC_SERVER)) ||
-      setupConfig == NULL) {
+      setupConfig == nullptr) {
     initializationFailure = true;
     return false;
   }
 
   if (FAILED(setupConfig.QueryInterface(IID_ISetupConfiguration2,
                                         (void**)&setupConfig2)) ||
-      setupConfig2 == NULL) {
+      setupConfig2 == nullptr) {
     initializationFailure = true;
     return false;
   }
 
   if (FAILED(
         setupConfig.QueryInterface(IID_ISetupHelper, (void**)&setupHelper)) ||
-      setupHelper == NULL) {
+      setupHelper == nullptr) {
     initializationFailure = true;
     return false;
   }

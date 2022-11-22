@@ -21,13 +21,13 @@ public:
   SmartCOMPtr(T* p)
   {
     ptr = p;
-    if (ptr != NULL)
+    if (ptr != nullptr)
       ptr->AddRef();
   }
   SmartCOMPtr(const SmartCOMPtr<T>& sptr)
   {
     ptr = sptr.ptr;
-    if (ptr != NULL)
+    if (ptr != nullptr)
       ptr->AddRef();
   }
   T** operator&() { return &ptr; }
@@ -36,7 +36,7 @@ public:
   {
     if (*this != p) {
       ptr = p;
-      if (ptr != NULL)
+      if (ptr != nullptr)
         ptr->AddRef();
     }
     return *this;
@@ -45,7 +45,7 @@ public:
   template <class I>
   HRESULT QueryInterface(REFCLSID rclsid, I** pp)
   {
-    if (pp != NULL) {
+    if (pp != nullptr) {
       return ptr->QueryInterface(rclsid, (void**)pp);
     } else {
       return E_FAIL;
@@ -60,12 +60,12 @@ public:
   }
   ~SmartCOMPtr()
   {
-    if (ptr != NULL)
+    if (ptr != nullptr)
       ptr->Release();
   }
 
 private:
-  T* ptr = NULL;
+  T* ptr = nullptr;
 };
 
 class SmartBSTR
@@ -79,7 +79,7 @@ public:
   ~SmartBSTR() throw() { ::SysFreeString(str); }
 
 private:
-  BSTR str = NULL;
+  BSTR str = nullptr;
 };
 
 struct VSInstanceInfo
