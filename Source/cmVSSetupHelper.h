@@ -21,14 +21,16 @@ public:
   SmartCOMPtr(T* p)
   {
     ptr = p;
-    if (ptr != nullptr)
+    if (ptr != nullptr) {
       ptr->AddRef();
+    }
   }
   SmartCOMPtr(const SmartCOMPtr<T>& sptr)
   {
     ptr = sptr.ptr;
-    if (ptr != nullptr)
+    if (ptr != nullptr) {
       ptr->AddRef();
+    }
   }
   T** operator&() { return &ptr; }
   T* operator->() { return ptr; }
@@ -36,8 +38,9 @@ public:
   {
     if (*this != p) {
       ptr = p;
-      if (ptr != nullptr)
+      if (ptr != nullptr) {
         ptr->AddRef();
+      }
     }
     return *this;
   }
@@ -59,8 +62,9 @@ public:
   }
   ~SmartCOMPtr()
   {
-    if (ptr != nullptr)
+    if (ptr != nullptr) {
       ptr->Release();
+    }
   }
 
 private:

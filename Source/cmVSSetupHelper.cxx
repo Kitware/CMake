@@ -104,8 +104,9 @@ cmVSSetupAPIHelper::~cmVSSetupAPIHelper()
   setupHelper = nullptr;
   setupConfig2 = nullptr;
   setupConfig = nullptr;
-  if (SUCCEEDED(comInitialized))
+  if (SUCCEEDED(comInitialized)) {
     CoUninitialize();
+  }
 }
 
 bool cmVSSetupAPIHelper::SetVSInstance(std::string const& vsInstallLocation,
@@ -176,8 +177,9 @@ bool cmVSSetupAPIHelper::CheckInstalledComponent(
 bool cmVSSetupAPIHelper::GetVSInstanceInfo(
   SmartCOMPtr<ISetupInstance2> pInstance, VSInstanceInfo& vsInstanceInfo)
 {
-  if (pInstance == nullptr)
+  if (pInstance == nullptr) {
     return false;
+  }
 
   InstanceState state;
   if (FAILED(pInstance->GetState(&state))) {
@@ -229,8 +231,9 @@ bool cmVSSetupAPIHelper::GetVSInstanceInfo(
       SmartCOMPtr<ISetupPackageReference> package = nullptr;
       if (FAILED(ppData[i]->QueryInterface(IID_ISetupPackageReference,
                                            (void**)&package)) ||
-          package == nullptr)
+          package == nullptr) {
         continue;
+      }
 
       bool win10SDKInstalled = false;
       bool win81SDkInstalled = false;
@@ -368,8 +371,9 @@ bool cmVSSetupAPIHelper::EnumerateVSInstancesWithCOM(
   std::vector<VSInstanceInfo>& VSInstances)
 {
   if (initializationFailure || setupConfig == nullptr ||
-      setupConfig2 == nullptr || setupHelper == nullptr)
+      setupConfig2 == nullptr || setupHelper == nullptr) {
     return false;
+  }
 
   SmartCOMPtr<IEnumSetupInstances> enumInstances = nullptr;
   if (FAILED(
@@ -391,8 +395,9 @@ bool cmVSSetupAPIHelper::EnumerateVSInstancesWithCOM(
     VSInstanceInfo instanceInfo;
     bool isInstalled = GetVSInstanceInfo(instance2, instanceInfo);
     instance = instance2 = nullptr;
-    if (isInstalled)
+    if (isInstalled) {
       VSInstances.push_back(instanceInfo);
+    }
   }
   return true;
 }
@@ -410,8 +415,9 @@ bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
     cmSystemTools::GetEnv("WindowsSdkDir_81", envWindowsSdkDir81);
     cmSystemTools::GetEnv("VisualStudioVersion", envVSVersion);
     cmSystemTools::GetEnv("VSINSTALLDIR", envVsInstallDir);
-    if (envVSVersion.empty() || envVsInstallDir.empty())
+    if (envVSVersion.empty() || envVsInstallDir.empty()) {
       return false;
+    }
 
     chosenInstanceInfo.VSInstallLocation = envVsInstallDir;
     chosenInstanceInfo.Version = envVSVersion;
@@ -508,11 +514,13 @@ bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
 int cmVSSetupAPIHelper::ChooseVSInstance(
   const std::vector<VSInstanceInfo>& vecVSInstances)
 {
-  if (vecVSInstances.empty())
+  if (vecVSInstances.empty()) {
     return -1;
+  }
 
-  if (vecVSInstances.size() == 1)
+  if (vecVSInstances.size() == 1) {
     return 0;
+  }
 
   unsigned int chosenIndex = 0;
   for (unsigned int i = 1; i < vecVSInstances.size(); i++) {
@@ -586,8 +594,9 @@ bool cmVSSetupAPIHelper::LoadSpecifiedVSInstanceFromDisk()
 
 bool cmVSSetupAPIHelper::Initialize()
 {
-  if (initializationFailure)
+  if (initializationFailure) {
     return false;
+  }
 
   if (FAILED(comInitialized)) {
     initializationFailure = true;

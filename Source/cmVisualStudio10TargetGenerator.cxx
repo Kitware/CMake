@@ -1031,8 +1031,9 @@ void cmVisualStudio10TargetGenerator::WriteCommonPropertyGroupGlobals(Elem& e1)
   std::vector<std::string> keys = this->GeneratorTarget->GetPropertyKeys();
   for (std::string const& keyIt : keys) {
     static const cm::string_view prefix = "VS_GLOBAL_";
-    if (!cmHasPrefix(keyIt, prefix))
+    if (!cmHasPrefix(keyIt, prefix)) {
       continue;
+    }
     cm::string_view globalKey = cm::string_view(keyIt).substr(prefix.length());
     // Skip invalid or separately-handled properties.
     if (globalKey.empty() || globalKey == "PROJECT_TYPES" ||
@@ -1040,8 +1041,9 @@ void cmVisualStudio10TargetGenerator::WriteCommonPropertyGroupGlobals(Elem& e1)
       continue;
     }
     cmValue value = this->GeneratorTarget->GetProperty(keyIt);
-    if (!value)
+    if (!value) {
       continue;
+    }
     e1.Element(globalKey, *value);
   }
 }
@@ -2399,8 +2401,9 @@ void cmVisualStudio10TargetGenerator::WriteSource(Elem& e2,
     // added with the plain filename without any path. This means the file will
     // show up at root-level of the csproj (where CMakeLists.txt etc. are).
     std::string link = this->GetCSharpSourceLink(sf);
-    if (link.empty())
+    if (link.empty()) {
       link = cmsys::SystemTools::GetFilenameName(sf->GetFullPath());
+    }
     e2.Element("Link", link);
   }
 

@@ -546,8 +546,9 @@ void cmGlobalVisualStudio7Generator::WriteSLNGlobalSections(
       } else if (cmHasLiteralPrefix(name, "POST_")) {
         name = name.substr(5);
         sectionType = "postSolution";
-      } else
+      } else {
         continue;
+      }
       if (!name.empty()) {
         bool addGuid = false;
         if (name == "ExtensibilityGlobals" && sectionType == "postSolution") {
@@ -585,9 +586,10 @@ void cmGlobalVisualStudio7Generator::WriteSLNGlobalSections(
          << "\t\tSolutionGuid = {" << guid << "}\n"
          << "\tEndGlobalSection\n";
   }
-  if (!extensibilityAddInsOverridden)
+  if (!extensibilityAddInsOverridden) {
     fout << "\tGlobalSection(ExtensibilityAddIns) = postSolution\n"
          << "\tEndGlobalSection\n";
+  }
 }
 
 // Standard end of dsw file

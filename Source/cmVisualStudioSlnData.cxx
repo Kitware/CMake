@@ -24,8 +24,9 @@ const cm::optional<cmSlnProjectEntry> cmSlnData::GetProjectByGUID(
   const std::string& projectGUID) const
 {
   auto it(ProjectsByGUID.find(projectGUID));
-  if (it != ProjectsByGUID.end())
+  if (it != ProjectsByGUID.end()) {
     return it->second;
+  }
   return cm::nullopt;
 }
 
@@ -33,8 +34,9 @@ const cm::optional<cmSlnProjectEntry> cmSlnData::GetProjectByName(
   const std::string& projectName) const
 {
   auto it(ProjectNameIndex.find(projectName));
-  if (it != ProjectNameIndex.end())
+  if (it != ProjectNameIndex.end()) {
     return it->second->second;
+  }
   return cm::nullopt;
 }
 
@@ -42,8 +44,9 @@ std::vector<cmSlnProjectEntry> cmSlnData::GetProjects() const
 {
   auto it(this->ProjectNameIndex.begin()), itEnd(this->ProjectNameIndex.end());
   std::vector<cmSlnProjectEntry> result;
-  for (; it != itEnd; ++it)
+  for (; it != itEnd; ++it) {
     result.push_back(it->second->second);
+  }
   return result;
 }
 
@@ -52,8 +55,9 @@ cmSlnProjectEntry* cmSlnData::AddProject(
   const std::string& projectRelativePath)
 {
   auto it(ProjectsByGUID.find(projectGUID));
-  if (it != ProjectsByGUID.end())
+  if (it != ProjectsByGUID.end()) {
     return nullptr;
+  }
   it = ProjectsByGUID
          .insert(ProjectStorage::value_type(
            projectGUID,
@@ -69,17 +73,20 @@ std::string cmSlnData::GetConfigurationTarget(
 {
   std::string solutionTarget = solutionConfiguration + "|" + platformName;
   cm::optional<cmSlnProjectEntry> project = GetProjectByName(projectName);
-  if (!project)
+  if (!project) {
     return platformName;
+  }
 
   std::string projectTarget = project->GetProjectConfiguration(solutionTarget);
-  if (projectTarget.empty())
+  if (projectTarget.empty()) {
     return platformName;
+  }
 
   std::vector<std::string> targetElements =
     cmSystemTools::SplitString(projectTarget, '|');
-  if (targetElements.size() != 2)
+  if (targetElements.size() != 2) {
     return platformName;
+  }
 
   return targetElements[1];
 }

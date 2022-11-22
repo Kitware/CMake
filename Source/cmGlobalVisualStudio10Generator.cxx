@@ -1109,8 +1109,9 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
             // Decide if a restore is performed, based on a cache variable.
             if (cmValue cached =
                   this->CMakeInstance->GetState()->GetCacheEntryValue(
-                    "CMAKE_VS_NUGET_PACKAGE_RESTORE"))
+                    "CMAKE_VS_NUGET_PACKAGE_RESTORE")) {
               restorePackages = cached.IsOn();
+            }
           }
 
           if (restorePackages) {
