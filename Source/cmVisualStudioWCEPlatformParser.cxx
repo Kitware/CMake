@@ -44,8 +44,7 @@ std::string cmVisualStudioWCEPlatformParser::GetOSVersion() const
 
 const char* cmVisualStudioWCEPlatformParser::GetArchitectureFamily() const
 {
-  std::map<std::string, std::string>::const_iterator it =
-    this->Macros.find("ARCHFAM");
+  auto it = this->Macros.find("ARCHFAM");
   if (it != this->Macros.end()) {
     return it->second.c_str();
   }

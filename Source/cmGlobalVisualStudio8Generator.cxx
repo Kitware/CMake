@@ -238,8 +238,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
 
     // Sort the list of input files and remove duplicates.
     std::sort(listFiles.begin(), listFiles.end(), std::less<std::string>());
-    std::vector<std::string>::iterator new_end =
-      std::unique(listFiles.begin(), listFiles.end());
+    auto new_end = std::unique(listFiles.begin(), listFiles.end());
     listFiles.erase(new_end, listFiles.end());
 
     // Create a rule to re-run CMake.
@@ -325,8 +324,7 @@ void cmGlobalVisualStudio8Generator::WriteProjectConfigurations(
          << (!platformMapping.empty() ? platformMapping
                                       : this->GetPlatformName())
          << "\n";
-    std::set<std::string>::const_iterator ci =
-      configsPartOfDefaultBuild.find(i);
+    auto ci = configsPartOfDefaultBuild.find(i);
     if (!(ci == configsPartOfDefaultBuild.end())) {
       fout << "\t\t{" << guid << "}." << i << "|" << this->GetPlatformName()
            << ".Build.0 = " << dstConfig << "|"

@@ -246,8 +246,7 @@ bool cmIDEOptions::HasFlag(std::string const& flag) const
 const char* cmIDEOptions::GetFlag(std::string const& flag) const
 {
   // This method works only for single-valued flags!
-  std::map<std::string, FlagValue>::const_iterator i =
-    this->FlagMap.find(flag);
+  auto i = this->FlagMap.find(flag);
   if (i != this->FlagMap.cend() && i->second.size() == 1) {
     return i->second[0].c_str();
   }

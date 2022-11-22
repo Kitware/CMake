@@ -125,7 +125,7 @@ void cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
 
   fout << "EndProject\n";
 
-  UtilityDependsMap::iterator ui = this->UtilityDepends.find(t);
+  auto ui = this->UtilityDepends.find(t);
   if (ui != this->UtilityDepends.end()) {
     const char* uname = ui->second.c_str();
     /* clang-format off */
@@ -218,8 +218,7 @@ void cmGlobalVisualStudio71Generator::WriteProjectConfigurations(
     }
     fout << "\t\t{" << guid << "}." << i << ".ActiveCfg = " << dstConfig << "|"
          << platformName << std::endl;
-    std::set<std::string>::const_iterator ci =
-      configsPartOfDefaultBuild.find(i);
+    auto ci = configsPartOfDefaultBuild.find(i);
     if (!(ci == configsPartOfDefaultBuild.end())) {
       fout << "\t\t{" << guid << "}." << i << ".Build.0 = " << dstConfig << "|"
            << platformName << std::endl;

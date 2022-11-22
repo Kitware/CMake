@@ -179,8 +179,7 @@ void cmLocalVisualStudio7Generator::WriteStampFiles()
 
   // Sort the list of input files and remove duplicates.
   std::sort(listFiles.begin(), listFiles.end(), std::less<std::string>());
-  std::vector<std::string>::iterator new_end =
-    std::unique(listFiles.begin(), listFiles.end());
+  auto new_end = std::unique(listFiles.begin(), listFiles.end());
   listFiles.erase(new_end, listFiles.end());
 
   for (const std::string& lf : listFiles) {
@@ -253,8 +252,7 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
 
   // Sort the list of input files and remove duplicates.
   std::sort(listFiles.begin(), listFiles.end(), std::less<std::string>());
-  std::vector<std::string>::iterator new_end =
-    std::unique(listFiles.begin(), listFiles.end());
+  auto new_end = std::unique(listFiles.begin(), listFiles.end());
   listFiles.erase(new_end, listFiles.end());
 
   std::string argS = cmStrCat("-S", this->GetSourceDirectory());
@@ -1633,8 +1631,7 @@ std::string cmLocalVisualStudio7Generator::ComputeLongestObjectDirectory(
 
   // Compute the maximum length configuration name.
   std::string config_max;
-  for (std::vector<std::string>::iterator i = configs.begin();
-       i != configs.end(); ++i) {
+  for (auto i = configs.begin(); i != configs.end(); ++i) {
     if (i->size() > config_max.size()) {
       config_max = *i;
     }
@@ -1690,8 +1687,7 @@ bool cmLocalVisualStudio7Generator::WriteGroup(
         target->GetType() == cmStateEnums::GLOBAL_TARGET ||
         target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       // Look up the source kind and configs.
-      std::map<cmSourceFile const*, size_t>::const_iterator map_it =
-        sources.Index.find(sf);
+      auto map_it = sources.Index.find(sf);
       // The map entry must exist because we populated it earlier.
       assert(map_it != sources.Index.end());
       cmGeneratorTarget::AllConfigSource const& acs =

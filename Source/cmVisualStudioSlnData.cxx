@@ -23,7 +23,7 @@ std::string cmSlnProjectEntry::GetProjectConfiguration(
 const cm::optional<cmSlnProjectEntry> cmSlnData::GetProjectByGUID(
   const std::string& projectGUID) const
 {
-  ProjectStorage::const_iterator it(ProjectsByGUID.find(projectGUID));
+  auto it(ProjectsByGUID.find(projectGUID));
   if (it != ProjectsByGUID.end())
     return it->second;
   else
@@ -33,7 +33,7 @@ const cm::optional<cmSlnProjectEntry> cmSlnData::GetProjectByGUID(
 const cm::optional<cmSlnProjectEntry> cmSlnData::GetProjectByName(
   const std::string& projectName) const
 {
-  ProjectStringIndex::const_iterator it(ProjectNameIndex.find(projectName));
+  auto it(ProjectNameIndex.find(projectName));
   if (it != ProjectNameIndex.end())
     return it->second->second;
   else
@@ -42,8 +42,7 @@ const cm::optional<cmSlnProjectEntry> cmSlnData::GetProjectByName(
 
 std::vector<cmSlnProjectEntry> cmSlnData::GetProjects() const
 {
-  ProjectStringIndex::const_iterator it(this->ProjectNameIndex.begin()),
-    itEnd(this->ProjectNameIndex.end());
+  auto it(this->ProjectNameIndex.begin()), itEnd(this->ProjectNameIndex.end());
   std::vector<cmSlnProjectEntry> result;
   for (; it != itEnd; ++it)
     result.push_back(it->second->second);
@@ -54,7 +53,7 @@ cmSlnProjectEntry* cmSlnData::AddProject(
   const std::string& projectGUID, const std::string& projectName,
   const std::string& projectRelativePath)
 {
-  ProjectStorage::iterator it(ProjectsByGUID.find(projectGUID));
+  auto it(ProjectsByGUID.find(projectGUID));
   if (it != ProjectsByGUID.end())
     return nullptr;
   it = ProjectsByGUID

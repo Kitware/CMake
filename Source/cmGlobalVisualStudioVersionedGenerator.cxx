@@ -606,7 +606,7 @@ bool cmGlobalVisualStudioVersionedGenerator::ParseGeneratorInstance(
   this->GeneratorInstanceVersion.clear();
 
   std::vector<std::string> const fields = cmTokenize(is, ",");
-  std::vector<std::string>::const_iterator fi = fields.begin();
+  auto fi = fields.begin();
   if (fi == fields.end()) {
     return true;
   }
