@@ -169,7 +169,7 @@ std::string cmGlobalVisualStudio7Generator::FindDevEnvCommand()
 
   // Search where VS15Preview places it.
   vskey = cmStrCat(
-    "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\SxS\\VS7;",
+    R"(HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\SxS\VS7;)",
     this->GetIDEVersion());
   if (cmSystemTools::ReadRegistryValue(vskey, vscmd,
                                        cmSystemTools::KeyWOW64_32)) {
@@ -614,7 +614,7 @@ std::string cmGlobalVisualStudio7Generator::WriteUtilityDepend(
 
   /* clang-format off */
   fout <<
-    "<?xml version=\"1.0\" encoding = \""
+    R"(<?xml version="1.0" encoding = ")"
     << this->Encoding() << "\"?>\n"
     "<VisualStudioProject\n"
     "\tProjectType=\"Visual C++\"\n"

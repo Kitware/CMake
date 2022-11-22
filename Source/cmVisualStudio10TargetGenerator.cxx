@@ -454,7 +454,7 @@ void cmVisualStudio10TargetGenerator::Generate()
 void cmVisualStudio10TargetGenerator::WriteClassicMsBuildProjectFile(
   cmGeneratedFileStream& BuildFileStream)
 {
-  BuildFileStream << "<?xml version=\"1.0\" encoding=\""
+  BuildFileStream << R"(<?xml version="1.0" encoding=")"
                   << this->GlobalGenerator->Encoding() << "\"?>";
   {
     Elem e0(BuildFileStream, "Project");
@@ -726,7 +726,7 @@ void cmVisualStudio10TargetGenerator::WriteClassicMsBuildProjectFile(
           : customDir +
             this->GlobalGenerator
               ->GetPlatformToolsetCudaVSIntegrationSubdirString() +
-            "extras\\visual_studio_integration\\MSBuildExtensions\\";
+            R"(extras\visual_studio_integration\MSBuildExtensions\)";
         Elem(e1, "Import")
           .Attribute("Project",
                      std::move(cudaPath) + "CUDA " +
@@ -829,7 +829,7 @@ void cmVisualStudio10TargetGenerator::WriteClassicMsBuildProjectFile(
           : customDir +
             this->GlobalGenerator
               ->GetPlatformToolsetCudaVSIntegrationSubdirString() +
-            "extras\\visual_studio_integration\\MSBuildExtensions\\";
+            R"(extras\visual_studio_integration\MSBuildExtensions\)";
         Elem(e1, "Import")
           .Attribute("Project",
                      std::move(cudaPath) + "CUDA " +
@@ -1925,7 +1925,7 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
   char magic[] = { char(0xEF), char(0xBB), char(0xBF) };
   fout.write(magic, 3);
 
-  fout << "<?xml version=\"1.0\" encoding=\""
+  fout << R"(<?xml version="1.0" encoding=")"
        << this->GlobalGenerator->Encoding() << "\"?>";
   {
     Elem e0(fout, "Project");
@@ -2905,7 +2905,7 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions(
 
     if (ttype >= cmStateEnums::UTILITY) {
       e1.WritePlatformConfigTag(
-        "IntDir", cond, "$(Platform)\\$(Configuration)\\$(ProjectName)\\");
+        "IntDir", cond, R"($(Platform)\$(Configuration)\$(ProjectName)\)");
     } else {
       std::string intermediateDir = cmStrCat(
         this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget), '/',
@@ -3594,7 +3594,7 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaOptions(
       // limitation by creating the directory and passing the flag ourselves.
       pdb = this->ConvertPath(pdb, true);
       ConvertToWindowsSlash(pdb);
-      std::string const clFd = "-Xcompiler=\"-Fd\\\"" + pdb + "\\\"\"";
+      std::string const clFd = R"(-Xcompiler="-Fd\")" + pdb + R"(\"")";
       cudaOptions.AppendFlagString("AdditionalOptions", clFd);
     }
   }

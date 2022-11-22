@@ -101,14 +101,14 @@ void cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
   // check to see if this is a fortran build
   std::string ext = ".vcproj";
   const char* project =
-    "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"";
+    R"(Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = ")";
   if (this->TargetIsFortranOnly(t)) {
     ext = ".vfproj";
-    project = "Project(\"{6989167D-11E4-40FE-8C1A-2192A86A7E90}\") = \"";
+    project = R"(Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = ")";
   }
   if (t->IsCSharpOnly()) {
     ext = ".csproj";
-    project = "Project(\"{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}\") = \"";
+    project = R"(Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = ")";
   }
   cmValue targetExt = t->GetProperty("GENERATOR_FILE_NAME_EXT");
   if (targetExt) {
@@ -129,7 +129,7 @@ void cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
   if (ui != this->UtilityDepends.end()) {
     const char* uname = ui->second.c_str();
     /* clang-format off */
-    fout << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \""
+    fout << R"(Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = ")"
          << uname << "\", \""
          << this->ConvertToSolutionPath(dir) << (dir[0]? "\\":"")
          << uname << ".vcproj" << "\", \"{"

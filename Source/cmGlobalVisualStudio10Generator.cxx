@@ -774,7 +774,7 @@ std::string cmGlobalVisualStudio10Generator::FindMSBuildCommand()
 
   // Search in standard location.
   mskey = cmStrCat(
-    "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\",
+    R"(HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\MSBuild\ToolsVersions\)",
     this->GetToolsVersion(), ";MSBuildToolsPath");
   if (cmSystemTools::ReadRegistryValue(mskey, msbuild,
                                        cmSystemTools::KeyWOW64_32)) {

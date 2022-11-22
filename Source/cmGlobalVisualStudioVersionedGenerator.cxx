@@ -65,7 +65,7 @@ static bool VSHasDotNETFrameworkArm64()
 {
   std::string dotNetArm64;
   return cmSystemTools::ReadRegistryValue(
-    "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\.NETFramework;InstallRootArm64",
+    R"(HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\.NETFramework;InstallRootArm64)",
     dotNetArm64, cmSystemTools::KeyWOW64_64);
 }
 
@@ -530,7 +530,7 @@ bool cmGlobalVisualStudioVersionedGenerator::SetGeneratorInstance(
   if (!this->GeneratorInstanceVersion.empty()) {
     std::string const majorStr = VSVersionToMajorString(this->Version);
     cmsys::RegularExpression versionRegex(
-      cmStrCat("^", majorStr, "\\.[0-9]+\\.[0-9]+\\.[0-9]+$"));
+      cmStrCat("^", majorStr, R"(\.[0-9]+\.[0-9]+\.[0-9]+$)"));
     if (!versionRegex.find(this->GeneratorInstanceVersion)) {
       std::ostringstream e;
       /* clang-format off */

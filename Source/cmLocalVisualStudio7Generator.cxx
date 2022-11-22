@@ -1980,7 +1980,7 @@ void cmLocalVisualStudio7Generator::WriteProjectStartFortran(
   cmGlobalVisualStudio7Generator* gg =
     static_cast<cmGlobalVisualStudio7Generator*>(this->GlobalGenerator);
   /* clang-format off */
-  fout << "<?xml version=\"1.0\" encoding = \""
+  fout << R"(<?xml version="1.0" encoding = ")"
        << gg->Encoding() << "\"?>\n"
        << "<VisualStudioProject\n"
        << "\tProjectCreator=\"Intel Fortran\"\n"
@@ -2042,7 +2042,7 @@ void cmLocalVisualStudio7Generator::WriteProjectStart(
     static_cast<cmGlobalVisualStudio7Generator*>(this->GlobalGenerator);
 
   /* clang-format off */
-  fout << "<?xml version=\"1.0\" encoding = \""
+  fout << R"(<?xml version="1.0" encoding = ")"
        << gg->Encoding() << "\"?>\n"
        << "<VisualStudioProject\n"
        << "\tProjectType=\"Visual C++\"\n";

@@ -158,5 +158,5 @@ std::string cmGlobalVisualStudio9Generator::GetUserMacrosDirectory()
 
 std::string cmGlobalVisualStudio9Generator::GetUserMacrosRegKeyBase()
 {
-  return "Software\\Microsoft\\VisualStudio\\9.0\\vsmacros";
+  return R"(Software\Microsoft\VisualStudio\9.0\vsmacros)";
 }

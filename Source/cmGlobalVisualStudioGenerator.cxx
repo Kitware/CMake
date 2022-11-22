@@ -186,7 +186,7 @@ std::string cmGlobalVisualStudioGenerator::GetRegistryBase()
 
 std::string cmGlobalVisualStudioGenerator::GetRegistryBase(const char* version)
 {
-  std::string key = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\";
+  std::string key = R"(HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\)";
   return key + version;
 }
 

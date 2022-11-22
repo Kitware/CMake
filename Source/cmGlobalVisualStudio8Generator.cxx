@@ -53,7 +53,7 @@ std::string cmGlobalVisualStudio8Generator::FindDevEnvCommand()
   // First look for VCExpress.
   std::string vsxcmd;
   std::string vsxkey =
-    cmStrCat("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\",
+    cmStrCat(R"(HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VCExpress\)",
              this->GetIDEVersion(), ";InstallDir");
   if (cmSystemTools::ReadRegistryValue(vsxkey, vsxcmd,
                                        cmSystemTools::KeyWOW64_32)) {
