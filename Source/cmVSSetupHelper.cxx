@@ -496,7 +496,7 @@ bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
     return this->LoadSpecifiedVSInstanceFromDisk();
   }
 
-  if (vecVSInstances.size() > 0) {
+  if (!vecVSInstances.empty()) {
     isVSInstanceExists = true;
     int index = ChooseVSInstance(vecVSInstances);
     chosenInstanceInfo = vecVSInstances[index];
@@ -508,7 +508,7 @@ bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
 int cmVSSetupAPIHelper::ChooseVSInstance(
   const std::vector<VSInstanceInfo>& vecVSInstances)
 {
-  if (vecVSInstances.size() == 0)
+  if (vecVSInstances.empty())
     return -1;
 
   if (vecVSInstances.size() == 1)

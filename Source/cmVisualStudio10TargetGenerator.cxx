@@ -2533,7 +2533,7 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
 
       Elem e2(e1, tool);
       bool isCSharp = (si.Source->GetLanguage() == "CSharp");
-      if (isCSharp && exclude_configs.size() > 0) {
+      if (isCSharp && !exclude_configs.empty()) {
         std::stringstream conditions;
         bool firstConditionSet{ false };
         for (const auto& ci : include_configs) {

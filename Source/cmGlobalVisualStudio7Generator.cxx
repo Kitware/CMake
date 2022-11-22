@@ -457,7 +457,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
         std::string cumulativePath;
 
         for (std::string const& iter : tokens) {
-          if (!iter.size()) {
+          if (iter.empty()) {
             continue;
           }
 
