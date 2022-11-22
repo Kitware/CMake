@@ -14,11 +14,11 @@ class cmSlnProjectEntry
 {
 public:
   cmSlnProjectEntry() = default;
-  cmSlnProjectEntry(const std::string& guid, const std::string& name,
-                    const std::string& relativePath)
-    : Guid(guid)
-    , Name(name)
-    , RelativePath(relativePath)
+  cmSlnProjectEntry(std::string guid, std::string name,
+                    std::string relativePath)
+    : Guid(std::move(guid))
+    , Name(std::move(name))
+    , RelativePath(std::move(relativePath))
   {
   }
 

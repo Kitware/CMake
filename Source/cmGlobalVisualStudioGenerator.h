@@ -133,8 +133,8 @@ public:
     std::string First;
 
   public:
-    TargetCompare(std::string const& first)
-      : First(first)
+    TargetCompare(std::string first)
+      : First(std::move(first))
     {
     }
     bool operator()(cmGeneratorTarget const* l,

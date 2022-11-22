@@ -80,10 +80,10 @@ struct cmVisualStudio10TargetGenerator::Elem
   bool HasContent = false;
   std::string Tag;
 
-  Elem(std::ostream& s, const std::string& tag)
+  Elem(std::ostream& s, std::string tag)
     : S(s)
     , Indent(0)
-    , Tag(tag)
+    , Tag(std::move(tag))
   {
     this->StartElement();
   }

@@ -559,10 +559,10 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFortranLinkFlagTable[] = {
 class cmLocalVisualStudio7Generator::EventWriter
 {
 public:
-  EventWriter(cmLocalVisualStudio7Generator* lg, const std::string& config,
+  EventWriter(cmLocalVisualStudio7Generator* lg, std::string config,
               std::ostream& os)
     : LG(lg)
-    , Config(config)
+    , Config(std::move(config))
     , Stream(os)
   {
   }
