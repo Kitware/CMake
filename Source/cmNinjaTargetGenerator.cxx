@@ -157,23 +157,6 @@ std::string cmNinjaTargetGenerator::LanguageDyndepRule(
     '_', config);
 }
 
-bool cmNinjaTargetGenerator::NeedCxxModuleSupport(
-  std::string const& lang, std::string const& config) const
-{
-  if (lang != "CXX"_s) {
-    return false;
-  }
-  return this->GetGeneratorTarget()->HaveCxxModuleSupport(config) ==
-    cmGeneratorTarget::Cxx20SupportLevel::Supported &&
-    this->GetGlobalGenerator()->CheckCxxModuleSupport();
-}
-
-bool cmNinjaTargetGenerator::NeedDyndep(std::string const& lang,
-                                        std::string const& config) const
-{
-  return lang == "Fortran" || this->NeedCxxModuleSupport(lang, config);
-}
-
 void cmNinjaTargetGenerator::BuildFileSetInfoCache(std::string const& config)
 {
   auto& per_config = this->Configs[config];
@@ -236,7 +219,7 @@ bool cmNinjaTargetGenerator::NeedDyndepForSource(std::string const& lang,
                                                  std::string const& config,
                                                  cmSourceFile const* sf)
 {
-  bool const needDyndep = this->NeedDyndep(lang, config);
+  bool const needDyndep = this->GetGeneratorTarget()->NeedDyndep(lang, config);
   if (!needDyndep) {
     return false;
   }
@@ -699,7 +682,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
                                               const std::string& config)
 {
   // For some cases we scan to dynamically discover dependencies.
-  bool const needDyndep = this->NeedDyndep(lang, config);
+  bool const needDyndep = this->GetGeneratorTarget()->NeedDyndep(lang, config);
 
   if (needDyndep) {
     this->WriteCompileRule(lang, config, WithScanning::Yes);

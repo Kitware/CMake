@@ -1229,4 +1229,8 @@ public:
 
   // Check C++ module status for the target.
   void CheckCxxModuleStatus(std::string const& config) const;
+
+  bool NeedCxxModuleSupport(std::string const& lang,
+                            std::string const& config) const;
+  bool NeedDyndep(std::string const& lang, std::string const& config) const;
 };

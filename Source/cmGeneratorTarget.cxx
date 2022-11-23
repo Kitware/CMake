@@ -8869,3 +8869,19 @@ void cmGeneratorTarget::CheckCxxModuleStatus(std::string const& config) const
     }
   }
 }
+
+bool cmGeneratorTarget::NeedCxxModuleSupport(std::string const& lang,
+                                             std::string const& config) const
+{
+  if (lang != "CXX"_s) {
+    return false;
+  }
+  return this->HaveCxxModuleSupport(config) == Cxx20SupportLevel::Supported &&
+    this->GetGlobalGenerator()->CheckCxxModuleSupport();
+}
+
+bool cmGeneratorTarget::NeedDyndep(std::string const& lang,
+                                   std::string const& config) const
+{
+  return lang == "Fortran"_s || this->NeedCxxModuleSupport(lang, config);
+}
