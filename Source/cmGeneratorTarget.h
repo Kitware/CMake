@@ -489,6 +489,18 @@ public:
   std::string GetCreateRuleVariable(std::string const& lang,
                                     std::string const& config) const;
 
+private:
+  using ConfigAndLanguage = std::pair<std::string, std::string>;
+  using ConfigAndLanguageToBTStrings =
+    std::map<ConfigAndLanguage, std::vector<BT<std::string>>>;
+  mutable ConfigAndLanguageToBTStrings IncludeDirectoriesCache;
+  mutable ConfigAndLanguageToBTStrings CompileOptionsCache;
+  mutable ConfigAndLanguageToBTStrings CompileDefinitionsCache;
+  mutable ConfigAndLanguageToBTStrings PrecompileHeadersCache;
+  mutable ConfigAndLanguageToBTStrings LinkOptionsCache;
+  mutable ConfigAndLanguageToBTStrings LinkDirectoriesCache;
+
+public:
   /** Get the include directories for this target.  */
   std::vector<BT<std::string>> GetIncludeDirectories(
     const std::string& config, const std::string& lang) const;
