@@ -157,6 +157,8 @@ public:
 
   virtual bool InspectConfigTypeVariables() { return true; }
 
+  virtual bool CheckCxxModuleSupport() { return false; }
+
   bool Compute();
   virtual void AddExtraIDETargets() {}
 
@@ -621,6 +623,8 @@ protected:
 
   virtual bool CheckALLOW_DUPLICATE_CUSTOM_TARGETS() const;
 
+  void CxxModuleSupportCheck() const;
+
   /// @brief Qt AUTOMOC/UIC/RCC target generation
   /// @return true on success
   bool QtAutoGen();
@@ -727,6 +731,8 @@ private:
   std::map<std::string, std::string> ExtensionToLanguage;
   std::map<std::string, int> LanguageToLinkerPreference;
   std::map<std::string, std::string> LanguageToOriginalSharedLibFlags;
+
+  mutable bool DiagnosedCxxModuleSupport = false;
 
   // Deferral id generation.
   size_t NextDeferId = 0;
