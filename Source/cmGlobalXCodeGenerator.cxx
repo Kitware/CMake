@@ -3581,27 +3581,36 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
             libItem.IsPath == cmComputeLinkInformation::ItemIsPath::Yes &&
             forceLinkPhase))) {
         std::string libName;
-        bool canUseLinkPhase = true;
-        if (libItem.Target) {
-          if (libItem.Target->GetType() == cmStateEnums::UNKNOWN_LIBRARY) {
-            canUseLinkPhase = canUseLinkPhase && forceLinkPhase;
-          } else {
-            // If a library target uses custom build output directory Xcode
-            // won't pick it up so we have to resort back to linker flags, but
-            // that's OK as long as the custom output dir is absolute path.
-            for (auto const& libConfigName : this->CurrentConfigurationTypes) {
-              canUseLinkPhase = canUseLinkPhase &&
-                libItem.Target->UsesDefaultOutputDir(
-                  libConfigName, cmStateEnums::RuntimeBinaryArtifact);
+        bool canUseLinkPhase = !libItem.HasFeature() ||
+          libItem.GetFeatureName() == "__CMAKE_LINK_FRAMEWORK"_s ||
+          libItem.GetFeatureName() == "FRAMEWORK"_s ||
+          libItem.GetFeatureName() == "WEAK_FRAMEWORK"_s ||
+          libItem.GetFeatureName() == "WEAK_LIBRARY"_s;
+        if (canUseLinkPhase) {
+          if (libItem.Target) {
+            if (libItem.Target->GetType() == cmStateEnums::UNKNOWN_LIBRARY) {
+              canUseLinkPhase = canUseLinkPhase && forceLinkPhase;
+            } else {
+              // If a library target uses custom build output directory Xcode
+              // won't pick it up so we have to resort back to linker flags,
+              // but that's OK as long as the custom output dir is absolute
+              // path.
+              for (auto const& libConfigName :
+                   this->CurrentConfigurationTypes) {
+                canUseLinkPhase = canUseLinkPhase &&
+                  libItem.Target->UsesDefaultOutputDir(
+                    libConfigName, cmStateEnums::RuntimeBinaryArtifact);
+              }
             }
-          }
-          libName = libItem.Target->GetName();
-        } else {
-          libName = cmSystemTools::GetFilenameName(libItem.Value.Value);
-          // We don't want all the possible files here, just standard libraries
-          const auto libExt = cmSystemTools::GetFilenameExtension(libName);
-          if (!IsLinkPhaseLibraryExtension(libExt)) {
-            canUseLinkPhase = false;
+            libName = libItem.Target->GetName();
+          } else {
+            libName = cmSystemTools::GetFilenameName(libItem.Value.Value);
+            // We don't want all the possible files here, just standard
+            // libraries
+            const auto libExt = cmSystemTools::GetFilenameExtension(libName);
+            if (!IsLinkPhaseLibraryExtension(libExt)) {
+              canUseLinkPhase = false;
+            }
           }
         }
         if (canUseLinkPhase) {
@@ -3658,6 +3667,7 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
   // separately.
   std::vector<std::string> linkSearchPaths;
   std::vector<std::string> frameworkSearchPaths;
+  std::set<std::pair<cmXCodeObject*, std::string>> linkBuildFileSet;
   for (auto const& libItem : linkPhaseTargetVector) {
     // Add target output directory as a library search path
     std::string linkDir;
@@ -3760,8 +3770,30 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
       cmSystemTools::Error("Missing files of PBXFrameworksBuildPhase");
       continue;
     }
-    if (buildFile && !buildFiles->HasObject(buildFile)) {
-      buildFiles->AddObject(buildFile);
+    if (buildFile) {
+      if (cmHasPrefix(libItem->GetFeatureName(), "WEAK_"_s)) {
+        auto key = std::make_pair(buildFile->GetAttribute("fileRef"),
+                                  libItem->GetFeatureName());
+        if (linkBuildFileSet.find(key) != linkBuildFileSet.end()) {
+          continue;
+        }
+        linkBuildFileSet.insert(key);
+
+        cmXCodeObject* buildObject =
+          this->CreateObject(cmXCodeObject::PBXBuildFile);
+        buildObject->AddAttribute("fileRef", key.first);
+        // Add settings, ATTRIBUTES, Weak flag
+        cmXCodeObject* settings =
+          this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
+        cmXCodeObject* attrs = this->CreateObject(cmXCodeObject::OBJECT_LIST);
+        attrs->AddObject(this->CreateString("Weak"));
+        settings->AddAttribute("ATTRIBUTES", attrs);
+        buildObject->AddAttribute("settings", settings);
+        buildFile = buildObject;
+      }
+      if (!buildFiles->HasObject(buildFile)) {
+        buildFiles->AddObject(buildFile);
+      }
     }
   }
 
