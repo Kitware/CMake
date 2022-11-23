@@ -51,9 +51,9 @@ cmVisualStudioGeneratorOptions::cmVisualStudioGeneratorOptions(
 void cmVisualStudioGeneratorOptions::AddTable(cmVS7FlagTable const* table)
 {
   if (table) {
-    for (int i = 0; i < FlagTableCount; ++i) {
-      if (!this->FlagTable[i]) {
-        this->FlagTable[i] = table;
+    for (auto& flag : this->FlagTable) {
+      if (!flag) {
+        flag = table;
         break;
       }
     }
@@ -62,8 +62,8 @@ void cmVisualStudioGeneratorOptions::AddTable(cmVS7FlagTable const* table)
 
 void cmVisualStudioGeneratorOptions::ClearTables()
 {
-  for (int i = 0; i < FlagTableCount; ++i) {
-    this->FlagTable[i] = nullptr;
+  for (auto& flag : this->FlagTable) {
+    flag = nullptr;
   }
 }
 

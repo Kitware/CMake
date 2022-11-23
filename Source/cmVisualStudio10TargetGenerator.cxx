@@ -275,8 +275,8 @@ cmVisualStudio10TargetGenerator::cmVisualStudio10TargetGenerator(
     this->Makefile->GetGeneratorConfigs(cmMakefile::ExcludeEmptyConfig);
   this->NsightTegra = gg->IsNsightTegra();
   this->Android = gg->TargetsAndroid();
-  for (int i = 0; i < 4; ++i) {
-    this->NsightTegraVersion[i] = 0;
+  for (unsigned int& version : this->NsightTegraVersion) {
+    version = 0;
   }
   sscanf(gg->GetNsightTegraVersion().c_str(), "%u.%u.%u.%u",
          &this->NsightTegraVersion[0], &this->NsightTegraVersion[1],
@@ -2338,19 +2338,16 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(
       if (!deployLocation.empty()) {
         e2.Element("Link", deployLocation + "\\%(FileName)%(Extension)");
       }
-      for (size_t i = 0; i != this->Configurations.size(); ++i) {
-        if (cge->Evaluate(this->LocalGenerator, this->Configurations[i]) ==
-            "1") {
+      for (auto& config : this->Configurations) {
+        if (cge->Evaluate(this->LocalGenerator, config) == "1") {
           e2.WritePlatformConfigTag("DeploymentContent",
                                     "'$(Configuration)|$(Platform)'=='" +
-                                      this->Configurations[i] + "|" +
-                                      this->Platform + "'",
+                                      config + "|" + this->Platform + "'",
                                     "true");
         } else {
           e2.WritePlatformConfigTag("ExcludedFromBuild",
                                     "'$(Configuration)|$(Platform)'=='" +
-                                      this->Configurations[i] + "|" +
-                                      this->Platform + "'",
+                                      config + "|" + this->Platform + "'",
                                     "true");
         }
       }

@@ -1435,8 +1435,7 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
   fout << "\t<Files>\n";
 
   // Loop through every source group.
-  for (unsigned int i = 0; i < sourceGroups.size(); ++i) {
-    cmSourceGroup sg = sourceGroups[i];
+  for (auto const& sg : sourceGroups) {
     this->WriteGroup(&sg, target, fout, libName, configs, sources);
   }
 
@@ -1630,9 +1629,9 @@ std::string cmLocalVisualStudio7Generator::ComputeLongestObjectDirectory(
 
   // Compute the maximum length configuration name.
   std::string config_max;
-  for (auto i = configs.begin(); i != configs.end(); ++i) {
-    if (i->size() > config_max.size()) {
-      config_max = *i;
+  for (auto& config : configs) {
+    if (config.size() > config_max.size()) {
+      config_max = config;
     }
   }
 
@@ -1658,9 +1657,8 @@ bool cmLocalVisualStudio7Generator::WriteGroup(
   // Write the children to temporary output.
   bool hasChildrenWithSources = false;
   std::ostringstream tmpOut;
-  for (unsigned int i = 0; i < children.size(); ++i) {
-    if (this->WriteGroup(&children[i], target, tmpOut, libName, configs,
-                         sources)) {
+  for (const auto& child : children) {
+    if (this->WriteGroup(&child, target, tmpOut, libName, configs, sources)) {
       hasChildrenWithSources = true;
     }
   }

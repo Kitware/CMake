@@ -278,8 +278,8 @@ void cmGlobalVisualStudio8Generator::AddExtraIDETargets()
 {
   cmGlobalVisualStudio7Generator::AddExtraIDETargets();
   if (this->AddCheckTarget()) {
-    for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i) {
-      const auto& tgts = this->LocalGenerators[i]->GetGeneratorTargets();
+    for (auto& LocalGenerator : this->LocalGenerators) {
+      const auto& tgts = LocalGenerator->GetGeneratorTargets();
       // All targets depend on the build-system check target.
       for (const auto& ti : tgts) {
         if (ti->GetName() != CMAKE_CHECK_BUILD_SYSTEM_TARGET) {

@@ -21,8 +21,8 @@ cmIDEOptions::cmIDEOptions()
   this->DoingInclude = false;
   this->AllowSlash = false;
   this->DoingFollowing = nullptr;
-  for (int i = 0; i < FlagTableCount; ++i) {
-    this->FlagTable[i] = nullptr;
+  for (auto& flag : this->FlagTable) {
+    flag = nullptr;
   }
 }
 
