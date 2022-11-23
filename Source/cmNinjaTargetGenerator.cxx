@@ -157,90 +157,6 @@ std::string cmNinjaTargetGenerator::LanguageDyndepRule(
     '_', config);
 }
 
-void cmNinjaTargetGenerator::BuildFileSetInfoCache(std::string const& config)
-{
-  auto& per_config = this->Configs[config];
-
-  if (per_config.BuiltFileSetCache) {
-    return;
-  }
-
-  auto const* tgt = this->GeneratorTarget->Target;
-
-  for (auto const& name : tgt->GetAllFileSetNames()) {
-    auto const* file_set = tgt->GetFileSet(name);
-    if (!file_set) {
-      this->GetMakefile()->IssueMessage(
-        MessageType::INTERNAL_ERROR,
-        cmStrCat("Target \"", tgt->GetName(),
-                 "\" is tracked to have file set \"", name,
-                 "\", but it was not found."));
-      continue;
-    }
-
-    auto fileEntries = file_set->CompileFileEntries();
-    auto directoryEntries = file_set->CompileDirectoryEntries();
-    auto directories = file_set->EvaluateDirectoryEntries(
-      directoryEntries, this->LocalGenerator, config, this->GeneratorTarget);
-
-    std::map<std::string, std::vector<std::string>> files;
-    for (auto const& entry : fileEntries) {
-      file_set->EvaluateFileEntry(directories, files, entry,
-                                  this->LocalGenerator, config,
-                                  this->GeneratorTarget);
-    }
-
-    for (auto const& it : files) {
-      for (auto const& filename : it.second) {
-        per_config.FileSetCache[filename] = file_set;
-      }
-    }
-  }
-
-  per_config.BuiltFileSetCache = true;
-}
-
-cmFileSet const* cmNinjaTargetGenerator::GetFileSetForSource(
-  std::string const& config, cmSourceFile const* sf)
-{
-  this->BuildFileSetInfoCache(config);
-
-  auto const& path = sf->GetFullPath();
-  auto const& per_config = this->Configs[config];
-
-  auto const fsit = per_config.FileSetCache.find(path);
-  if (fsit == per_config.FileSetCache.end()) {
-    return nullptr;
-  }
-  return fsit->second;
-}
-
-bool cmNinjaTargetGenerator::NeedDyndepForSource(std::string const& lang,
-                                                 std::string const& config,
-                                                 cmSourceFile const* sf)
-{
-  bool const needDyndep = this->GetGeneratorTarget()->NeedDyndep(lang, config);
-  if (!needDyndep) {
-    return false;
-  }
-  auto const* fs = this->GetFileSetForSource(config, sf);
-  if (fs &&
-      (fs->GetType() == "CXX_MODULES"_s ||
-       fs->GetType() == "CXX_MODULE_HEADER_UNITS"_s)) {
-    return true;
-  }
-  auto const sfProp = sf->GetProperty("CXX_SCAN_FOR_MODULES");
-  if (sfProp.IsSet()) {
-    return sfProp.IsOn();
-  }
-  auto const tgtProp =
-    this->GeneratorTarget->GetProperty("CXX_SCAN_FOR_MODULES");
-  if (tgtProp.IsSet()) {
-    return tgtProp.IsOn();
-  }
-  return true;
-}
-
 std::string cmNinjaTargetGenerator::OrderDependsTargetForTarget(
   const std::string& config)
 {
@@ -324,7 +240,7 @@ std::string cmNinjaTargetGenerator::ComputeFlagsForObject(
       flags, genexInterpreter.Evaluate(pchOptions, COMPILE_OPTIONS));
   }
 
-  auto const* fs = this->GetFileSetForSource(config, source);
+  auto const* fs = this->GeneratorTarget->GetFileSetForSource(config, source);
   if (fs &&
       (fs->GetType() == "CXX_MODULES"_s ||
        fs->GetType() == "CXX_MODULE_HEADER_UNITS"_s)) {
@@ -1370,7 +1286,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     !(language == "RC" || (language == "CUDA" && !flag));
   int const commandLineLengthLimit =
     ((lang_supports_response && this->ForceResponseFile())) ? -1 : 0;
-  bool const needDyndep = this->NeedDyndepForSource(language, config, source);
+  bool const needDyndep =
+    this->GeneratorTarget->NeedDyndepForSource(language, config, source);
 
   cmNinjaBuild objBuild(this->LanguageCompilerRule(
     language, config, needDyndep ? WithScanning::Yes : WithScanning::No));
