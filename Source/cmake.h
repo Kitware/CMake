@@ -37,6 +37,7 @@
 #  include "cmMakefileProfilingData.h"
 #endif
 
+class cmConfigureLog;
 class cmExternalMakefileProjectGeneratorFactory;
 class cmFileAPI;
 class cmFileTimeCache;
@@ -521,6 +522,10 @@ public:
   void SetTraceFile(std::string const& file);
   void PrintTraceFormatVersion();
 
+#ifndef CMAKE_BOOTSTRAP
+  cmConfigureLog* GetConfigureLog() const { return this->ConfigureLog.get(); }
+#endif
+
   //! Use trace from another ::cmake instance.
   void SetTraceRedirect(cmake* other);
 
@@ -714,6 +719,9 @@ private:
   TraceFormat TraceFormatVar = TRACE_HUMAN;
   cmGeneratedFileStream TraceFile;
   cmake* TraceRedirect = nullptr;
+#ifndef CMAKE_BOOTSTRAP
+  std::unique_ptr<cmConfigureLog> ConfigureLog;
+#endif
   bool WarnUninitialized = false;
   bool WarnUnusedCli = true;
   bool CheckSystemVars = false;
