@@ -23,6 +23,7 @@ run_cmake(TryRunArgs)
 run_cmake(BuildType)
 run_cmake(BuildTypeAsFlag)
 run_cmake(OutputDirAsFlag)
+run_cmake(CopyFileConfig)
 
 run_cmake(EnvConfig)
 
