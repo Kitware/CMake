@@ -43,10 +43,10 @@ step finished normally, ends with a ``...`` document marker line:
     minor: 0
   events:
     -
-      kind: "..."
+      kind: "try_compile"
       # (other fields omitted)
     -
-      kind: "..."
+      kind: "try_compile"
       # (other fields omitted)
   ...
 
@@ -99,4 +99,135 @@ The keys common to all events are:
   locations at which the event occurred.  Each node is a string
   specifying one location formatted as ``<file>:<line> (<function>)``.
 
-Additional mapping keys are specific to each event kind.
+Additional mapping keys are specific to each event kind,
+described below.
+
+.. _`try_compile event`:
+
+Event Kind ``try_compile``
+--------------------------
+
+The :command:`try_compile` command logs ``try_compile`` events.
+
+A ``try_compile`` event is a YAML mapping:
+
+.. code-block:: yaml
+
+  kind: "try_compile"
+  backtrace:
+    - "CMakeLists.txt:123 (try_compile)"
+  directories:
+    source: "/path/to/.../TryCompile-01234"
+    binary: "/path/to/.../TryCompile-01234"
+  buildResult:
+    variable: "COMPILE_RESULT"
+    cached: true
+    stdout: |
+      # ...
+    exitCode: 0
+
+The keys specific to ``try_compile`` mappings are:
+
+``directories``
+  A mapping describing the directories associated with the
+  compilation attempt.  It has the following keys:
+
+  ``source``
+    String specifying the source directory of the
+    :command:`try_compile` project.
+
+  ``binary``
+    String specifying the binary directory of the
+    :command:`try_compile` project.
+    For non-project invocations, this is often the same as
+    the source directory.
+
+``buildResult``
+  A mapping describing the result of compiling the test code.
+  It has the following keys:
+
+  ``variable``
+    A string specifying the name of the CMake variable
+    storing the result of trying to build the test project.
+
+  ``cached``
+    A boolean indicating whether the above result ``variable``
+    is stored in the CMake cache.
+
+  ``stdout``
+    A YAML literal block scalar containing the output from building
+    the test project, represented using our `Text Block Encoding`_.
+    This contains build output from both stdout and stderr.
+
+  ``exitCode``
+    An integer specifying the build tool exit code from trying
+    to build the test project.
+
+Event Kind ``try_run``
+----------------------
+
+The :command:`try_run` command logs ``try_run`` events.
+
+A ``try_run`` event is a YAML mapping:
+
+.. code-block:: yaml
+
+  kind: "try_run"
+  backtrace:
+    - "CMakeLists.txt:456 (try_run)"
+  directories:
+    source: "/path/to/.../TryCompile-56789"
+    binary: "/path/to/.../TryCompile-56789"
+  buildResult:
+    variable: "COMPILE_RESULT"
+    cached: true
+    stdout: |
+      # ...
+    exitCode: 0
+  runResult:
+    variable: "RUN_RESULT"
+    cached: true
+    stdout: |
+      # ...
+    stderr: |
+      # ...
+    exitCode: 0
+
+The keys specific to ``try_run`` mappings include those
+documented by the `try_compile event`_, plus:
+
+``runResult``
+  A mapping describing the result of running the test code.
+  It has the following keys:
+
+  ``variable``
+    A string specifying the name of the CMake variable
+    storing the result of trying to run the test executable.
+
+  ``cached``
+    A boolean indicating whether the above result ``variable``
+    is stored in the CMake cache.
+
+  ``stdout``
+    An optional key that is present when the test project built successfully.
+    Its value is a YAML literal block scalar containing output from running
+    the test executable, represented using our `Text Block Encoding`_.
+
+    If ``RUN_OUTPUT_VARIABLE`` was used, stdout and stderr are captured
+    together, so this will contain both.  Otherwise, this will contain
+    only the stdout output.
+
+  ``stderr``
+    An optional key that is present when the test project built successfully
+    and the ``RUN_OUTPUT_VARIABLE`` option was not used.
+    Its value is a YAML literal block scalar containing output from running
+    the test executable, represented using our `Text Block Encoding`_.
+
+    If ``RUN_OUTPUT_VARIABLE`` was used, stdout and stderr are captured
+    together in the ``stdout`` key, and this key will not be present.
+    Otherwise, this will contain the stderr output.
+
+  ``exitCode``
+    An optional key that is present when the test project built successfully.
+    Its value is an integer specifying the exit code, or a string containing
+    an error message, from trying to run the test executable.

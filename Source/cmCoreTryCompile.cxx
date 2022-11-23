@@ -16,6 +16,7 @@
 #include "cmsys/FStream.hxx"
 
 #include "cmArgumentParser.h"
+#include "cmConfigureLog.h"
 #include "cmExportTryCompileFileGenerator.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
@@ -1124,6 +1125,11 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
   }
 
   cmTryCompileResult result;
+  result.SourceDirectory = sourceDirectory;
+  result.BinaryDirectory = this->BinaryDirectory;
+  result.Variable = *arguments.CompileResultVariable;
+  result.VariableCached = !arguments.NoCache;
+  result.Output = std::move(output);
   result.ExitCode = res;
   return result;
 }
@@ -1265,4 +1271,21 @@ std::string cmCoreTryCompile::WriteSource(std::string const& filename,
 
   file.close();
   return filepath;
+}
+
+void cmCoreTryCompile::WriteTryCompileEventFields(
+  cmConfigureLog& log, cmTryCompileResult const& compileResult)
+{
+#ifndef CMAKE_BOOTSTRAP
+  log.BeginObject("directories"_s);
+  log.WriteValue("source"_s, compileResult.SourceDirectory);
+  log.WriteValue("binary"_s, compileResult.BinaryDirectory);
+  log.EndObject();
+  log.BeginObject("buildResult"_s);
+  log.WriteValue("variable"_s, compileResult.Variable);
+  log.WriteValue("cached"_s, compileResult.VariableCached);
+  log.WriteLiteralTextBlock("stdout"_s, compileResult.Output);
+  log.WriteValue("exitCode"_s, compileResult.ExitCode);
+  log.EndObject();
+#endif
 }
