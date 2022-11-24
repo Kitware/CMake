@@ -2711,6 +2711,8 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
   }
 
   for (std::string const& config : this->Configurations) {
+    this->GeneratorTarget->NeedCxxModuleSupport(lang, config);
+
     std::string configUpper = cmSystemTools::UpperCase(config);
     std::string configDefines = defines;
     std::string defPropName = cmStrCat("COMPILE_DEFINITIONS_", configUpper);
@@ -2721,6 +2723,31 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       configDependentDefines |=
         cmGeneratorExpression::Find(*ccdefs) != std::string::npos;
       configDefines += *ccdefs;
+    }
+
+    bool const shouldScanForModules = lang == "CXX"_s &&
+      this->GeneratorTarget->NeedDyndepForSource(lang, config, source);
+    auto const* fs =
+      this->GeneratorTarget->GetFileSetForSource(config, source);
+    const char* compileAsPerConfig = compileAs;
+    if (fs &&
+        (fs->GetType() == "CXX_MODULES"_s ||
+         fs->GetType() == "CXX_MODULE_HEADER_UNITS"_s)) {
+      if (lang == "CXX"_s) {
+        if (fs->GetType() == "CXX_MODULES"_s) {
+          compileAsPerConfig = "CompileAsCppModule";
+        } else {
+          compileAsPerConfig = "CompileAsHeaderUnit";
+        }
+      } else {
+        this->Makefile->IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmStrCat(
+            "Target \"", this->GeneratorTarget->Target->GetName(),
+            "\" contains the source\n  ", source->GetFullPath(),
+            "\nin a file set of type \"", fs->GetType(),
+            R"(" but the source is not classified as a "CXX" source.)"));
+      }
     }
 
     // We have pch state in the following situation:
@@ -2745,8 +2772,8 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
     // if we have flags or defines for this config then
     // use them
     if (!flags.empty() || !options.empty() || !configDefines.empty() ||
-        !includes.empty() || compileAs || noWinRT || !options.empty() ||
-        needsPCHFlags) {
+        !includes.empty() || compileAsPerConfig || noWinRT ||
+        !options.empty() || needsPCHFlags) {
       cmGlobalVisualStudio10Generator* gg = this->GlobalGenerator;
       cmIDEFlagTable const* flagtable = nullptr;
       const std::string& srclang = source->GetLanguage();
@@ -2771,8 +2798,13 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       cmVS10GeneratorOptions clOptions(
         this->LocalGenerator, cmVisualStudioGeneratorOptions::Compiler,
         flagtable, this);
-      if (compileAs) {
-        clOptions.AddFlag("CompileAs", compileAs);
+      if (compileAsPerConfig) {
+        clOptions.AddFlag("CompileAs", compileAsPerConfig);
+      }
+      if (shouldScanForModules) {
+        clOptions.AddFlag("ScanSourceforModuleDependencies", "true");
+      } else {
+        clOptions.AddFlag("ScanSourceforModuleDependencies", "false");
       }
       if (noWinRT) {
         clOptions.AddFlag("CompileAsWinRT", "false");
