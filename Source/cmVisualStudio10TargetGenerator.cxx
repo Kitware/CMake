@@ -356,7 +356,8 @@ void cmVisualStudio10TargetGenerator::Generate()
     this->GeneratorTarget->CheckCxxModuleStatus(config);
   }
 
-  if (this->GeneratorTarget->HaveCxx20ModuleSources()) {
+  if (this->GeneratorTarget->HaveCxx20ModuleSources() &&
+      !this->GlobalGenerator->SupportsCxxModuleDyndep()) {
     this->Makefile->IssueMessage(
       MessageType::FATAL_ERROR,
       cmStrCat("The \"", this->GeneratorTarget->GetName(),
