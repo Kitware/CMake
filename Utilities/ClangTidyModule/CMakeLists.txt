@@ -16,6 +16,8 @@ add_library(cmake-clang-tidy-module MODULE
 
   OstringstreamUseCmstrcatCheck.cxx
   OstringstreamUseCmstrcatCheck.h
+  StringConcatenationUseCmstrcatCheck.cxx
+  StringConcatenationUseCmstrcatCheck.h
   UseBespokeEnumClassCheck.cxx
   UseBespokeEnumClassCheck.h
   UseCmstrlenCheck.cxx
