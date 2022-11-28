@@ -103,10 +103,11 @@ function(__check_type_size_impl type var map builtin language)
   endif()
 
   # Perform language check
+  string(MAKE_C_IDENTIFIER ${var} _var_escaped)
   if(language STREQUAL "C")
-    set(src ${var}.c)
+    set(src ${_var_escaped}.c)
   elseif(language STREQUAL "CXX")
-    set(src ${var}.cpp)
+    set(src ${_var_escaped}.cpp)
   else()
     message(FATAL_ERROR "Unknown language:\n  ${language}\nSupported languages: C, CXX.\n")
   endif()
