@@ -5,6 +5,7 @@ if(CMAKE_ANDROID_NDK)
 endif()
 
 include(Platform/Linux)
+unset(LINUX)
 
 set(ANDROID 1)
 
