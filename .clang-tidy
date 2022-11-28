@@ -44,6 +44,7 @@ readability-*,\
 -readability-uppercase-literal-suffix,\
 cmake-*,\
 -cmake-ostringstream-use-cmstrcat,\
+-cmake-string-concatenation-use-cmstrcat,\
 -cmake-use-bespoke-enum-class,\
 "
 HeaderFilterRegex: 'Source/cm[^/]*\.(h|hxx|cxx)$'
