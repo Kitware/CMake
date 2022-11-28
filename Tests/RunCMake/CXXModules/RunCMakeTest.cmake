@@ -36,10 +36,15 @@ if (RunCMake_GENERATOR MATCHES "Ninja")
   endif ()
 endif ()
 
+set(generator_supports_cxx_modules 0)
+if (RunCMake_GENERATOR MATCHES "Ninja" AND
+    ninja_version VERSION_GREATER_EQUAL "1.10" AND
+    "cxx_std_20" IN_LIST CMAKE_CXX_COMPILE_FEATURES)
+  set(generator_supports_cxx_modules 1)
+endif ()
+
 # Test behavior when the generator does not support C++20 modules.
-if (NOT RunCMake_GENERATOR MATCHES "Ninja" OR
-    ninja_version VERSION_LESS "1.10" OR
-    NOT "cxx_std_20" IN_LIST CMAKE_CXX_COMPILE_FEATURES)
+if (NOT generator_supports_cxx_modules)
   if ("cxx_std_20" IN_LIST CMAKE_CXX_COMPILE_FEATURES)
     run_cmake(NoDyndepSupport)
   endif ()
