@@ -24,6 +24,31 @@ In order to support C++20 modules, there are a number of behaviors that have
 CMake APIs to provide the required features to build and export them from a
 project.
 
+Limitations
+-----------
+
+There are a number of known limitations of the current C++20 module support in
+CMake.  This does not document known limitations or bugs in compilers as these
+can change over time.
+
+For all generators:
+
+- Only in-project modules may be used.  While there is some support for
+  exporting module information, there is no mechanism for using it at the
+  moment.
+
+For the Ninja Generators:
+
+- ``ninja`` 1.10 or newer is required.
+
+For the Visual Studio Generators:
+
+- Only Visual Studio 2022 and toolchains newer than 19.34 (Visual Studio
+  17.4).
+- No support for exporting or installing BMI or module information.
+- No diagnosis of using modules provided by ``PRIVATE`` sources from
+  ``PUBLIC`` module sources.
+
 C++20 Module Dependencies
 =========================
 
