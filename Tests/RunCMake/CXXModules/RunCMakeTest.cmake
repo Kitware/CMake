@@ -43,6 +43,11 @@ if (RunCMake_GENERATOR MATCHES "Ninja" AND
   set(generator_supports_cxx_modules 1)
 endif ()
 
+if (RunCMake_GENERATOR MATCHES "Visual Studio" AND
+    CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "19.34")
+  set(generator_supports_cxx_modules 1)
+endif ()
+
 # Test behavior when the generator does not support C++20 modules.
 if (NOT generator_supports_cxx_modules)
   if ("cxx_std_20" IN_LIST CMAKE_CXX_COMPILE_FEATURES)
@@ -84,6 +89,8 @@ if (RunCMake_GENERATOR MATCHES "Ninja")
   run_cmake(NinjaDependInfoFileSet)
   run_cmake(NinjaDependInfoExport)
   run_cmake(NinjaDependInfoBMIInstall)
+elseif (RunCMake_GENERATOR MATCHES "Visual Studio")
+  # Not supported yet.
 else ()
   message(FATAL_ERROR
     "Please add 'DependInfo' tests for the '${RunCMake_GENERATOR}' generator.")
