@@ -137,13 +137,17 @@ if ("named" IN_LIST CMake_TEST_MODULE_COMPILATION)
   run_cxx_module_test(simple)
   run_cxx_module_test(library library-static -DBUILD_SHARED_LIBS=OFF)
   run_cxx_module_test(generated)
-  run_cxx_module_test(public-req-private)
   run_cxx_module_test(deep-chain)
   run_cxx_module_test(duplicate)
   set(RunCMake_CXXModules_NO_TEST 1)
   run_cxx_module_test(circular)
   unset(RunCMake_CXXModules_NO_TEST)
   run_cxx_module_test(scan_properties)
+endif ()
+
+# Tests which require collation work.
+if ("collation" IN_LIST CMake_TEST_MODULE_COMPILATION)
+  run_cxx_module_test(public-req-private)
 endif ()
 
 # Tests which use named modules in shared libraries.
