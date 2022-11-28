@@ -1,6 +1,7 @@
 include(RunCMake)
 
 run_cmake(empty_keyword_args)
+run_cmake(bad_keyword)
 
 if (CMAKE_C_COMPILER_ID MATCHES "GNU|LCC|Clang")
   macro(run_cmake_target test subtest target)

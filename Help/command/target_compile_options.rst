@@ -19,7 +19,8 @@ Arguments
 ^^^^^^^^^
 
 If ``BEFORE`` is specified, the content will be prepended to the property
-instead of being appended.
+instead of being appended.  See policy :policy:`CMP0101` which affects
+whether ``BEFORE`` will be ignored in certain cases.
 
 The ``INTERFACE``, ``PUBLIC`` and ``PRIVATE`` keywords are required to
 specify the :ref:`scope <Target Usage Requirements>` of the following arguments.
