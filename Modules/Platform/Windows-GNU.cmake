@@ -157,7 +157,8 @@ macro(__windows_compiler_gnu lang)
   endif()
 
   if(NOT CMAKE_RC_COMPILER_INIT AND NOT CMAKE_GENERATOR_RC)
-    set(CMAKE_RC_COMPILER_INIT ${_CMAKE_TOOLCHAIN_PREFIX}windres windres)
+    set(_CMAKE_RC_COMPILER_LIST ${_CMAKE_TOOLCHAIN_PREFIX}windres windres)
+    set(_CMAKE_RC_COMPILER_FALLBACK windres)
   endif()
 
   enable_language(RC)
