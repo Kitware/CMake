@@ -1,6 +1,12 @@
 // Comes from:
 // https://docs.nvidia.com/cuda/curand/host-api-overview.html#host-api-example
 
+#ifdef _WIN32
+#  define EXPORT __declspec(dllexport)
+#else
+#  define EXPORT
+#endif
+
 /*
  * This program uses the host CURAND API to generate 100
  * pseudorandom floats.
@@ -25,7 +31,7 @@
     }                                                                         \
   } while (0)
 
-int curand_main()
+EXPORT int curand_main()
 {
   size_t n = 100;
   size_t i;
