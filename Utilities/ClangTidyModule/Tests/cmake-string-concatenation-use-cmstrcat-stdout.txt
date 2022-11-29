@@ -1,0 +1,113 @@
+cmake-string-concatenation-use-cmstrcat.cxx:16:12: warning: use cmStrCat() instead of string concatenation [cmake-string-concatenation-use-cmstrcat]
+  concat = a + b;
+           ^ ~
+           cmStrCat( , )
+cmake-string-concatenation-use-cmstrcat.cxx:16:12: note: FIX-IT applied suggested code changes
+cmake-string-concatenation-use-cmstrcat.cxx:16:14: note: FIX-IT applied suggested code changes
+  concat = a + b;
+             ^
+cmake-string-concatenation-use-cmstrcat.cxx:16:17: note: FIX-IT applied suggested code changes
+  concat = a + b;
+                ^
+cmake-string-concatenation-use-cmstrcat.cxx:17:12: warning: use cmStrCat() instead of string concatenation [cmake-string-concatenation-use-cmstrcat]
+  concat = a + " and this is a string literal";
+           ^ ~
+           cmStrCat( ,                        )
+cmake-string-concatenation-use-cmstrcat.cxx:17:12: note: FIX-IT applied suggested code changes
+cmake-string-concatenation-use-cmstrcat.cxx:17:14: note: FIX-IT applied suggested code changes
+  concat = a + " and this is a string literal";
+             ^
+cmake-string-concatenation-use-cmstrcat.cxx:17:47: note: FIX-IT applied suggested code changes
+  concat = a + " and this is a string literal";
+                                              ^
+cmake-string-concatenation-use-cmstrcat.cxx:18:12: warning: use cmStrCat() instead of string concatenation [cmake-string-concatenation-use-cmstrcat]
+  concat = a + 'O';
+           ^ ~
+           cmStrCat( , )
+cmake-string-concatenation-use-cmstrcat.cxx:18:12: note: FIX-IT applied suggested code changes
+cmake-string-concatenation-use-cmstrcat.cxx:18:14: note: FIX-IT applied suggested code changes
+  concat = a + 'O';
+             ^
+cmake-string-concatenation-use-cmstrcat.cxx:18:19: note: FIX-IT applied suggested code changes
+  concat = a + 'O';
+                  ^
+cmake-string-concatenation-use-cmstrcat.cxx:19:12: warning: use cmStrCat() instead of string concatenation [cmake-string-concatenation-use-cmstrcat]
+  concat = "This is a string literal" + b;
+           ^                          ~
+           cmStrCat(                  ,  )
+cmake-string-concatenation-use-cmstrcat.cxx:19:12: note: FIX-IT applied suggested code changes
+cmake-string-concatenation-use-cmstrcat.cxx:19:39: note: FIX-IT applied suggested code changes
+  concat = "This is a string literal" + b;
+                                      ^
+cmake-string-concatenation-use-cmstrcat.cxx:19:42: note: FIX-IT applied suggested code changes
+  concat = "This is a string literal" + b;
+                                         ^
+cmake-string-concatenation-use-cmstrcat.cxx:20:12: warning: use cmStrCat() instead of string concatenation [cmake-string-concatenation-use-cmstrcat]
+  concat = 'O' + a;
+           ^   ~
+           cmStrCat( , )
+cmake-string-concatenation-use-cmstrcat.cxx:20:12: note: FIX-IT applied suggested code changes
+cmake-string-concatenation-use-cmstrcat.cxx:20:16: note: FIX-IT applied suggested code changes
+  concat = 'O' + a;
+               ^
+cmake-string-concatenation-use-cmstrcat.cxx:20:19: note: FIX-IT applied suggested code changes
+  concat = 'O' + a;
+                  ^
+cmake-string-concatenation-use-cmstrcat.cxx:21:12: warning: use cmStrCat() instead of string concatenation [cmake-string-concatenation-use-cmstrcat]
+  concat = a + " and this is a string literal" + 'O' + b;
+           ^ ~                                 ~     ~
+           cmStrCat( ,                         ,     ,  )
+cmake-string-concatenation-use-cmstrcat.cxx:21:12: note: FIX-IT applied suggested code changes
+cmake-string-concatenation-use-cmstrcat.cxx:21:14: note: FIX-IT applied suggested code changes
+  concat = a + " and this is a string literal" + 'O' + b;
+             ^
+cmake-string-concatenation-use-cmstrcat.cxx:21:48: note: FIX-IT applied suggested code changes
+  concat = a + " and this is a string literal" + 'O' + b;
+                                               ^
+cmake-string-concatenation-use-cmstrcat.cxx:21:54: note: FIX-IT applied suggested code changes
+  concat = a + " and this is a string literal" + 'O' + b;
+                                                     ^
+cmake-string-concatenation-use-cmstrcat.cxx:21:57: note: FIX-IT applied suggested code changes
+  concat = a + " and this is a string literal" + 'O' + b;
+                                                        ^
+cmake-string-concatenation-use-cmstrcat.cxx:23:10: warning: use cmStrCat() instead of string append [cmake-string-concatenation-use-cmstrcat]
+  concat += b;
+         ^~
+         = cmStrCat(concat, )
+cmake-string-concatenation-use-cmstrcat.cxx:23:10: note: FIX-IT applied suggested code changes
+cmake-string-concatenation-use-cmstrcat.cxx:23:14: note: FIX-IT applied suggested code changes
+  concat += b;
+             ^
+cmake-string-concatenation-use-cmstrcat.cxx:24:10: warning: use cmStrCat() instead of string append [cmake-string-concatenation-use-cmstrcat]
+  concat += " and this is a string literal";
+         ^~
+         = cmStrCat(concat,                )
+cmake-string-concatenation-use-cmstrcat.cxx:24:10: note: FIX-IT applied suggested code changes
+cmake-string-concatenation-use-cmstrcat.cxx:24:44: note: FIX-IT applied suggested code changes
+  concat += " and this is a string literal";
+                                           ^
+cmake-string-concatenation-use-cmstrcat.cxx:25:10: warning: use cmStrCat() instead of string append [cmake-string-concatenation-use-cmstrcat]
+  concat += 'o';
+         ^~
+         = cmStrCat(concat, )
+cmake-string-concatenation-use-cmstrcat.cxx:25:10: note: FIX-IT applied suggested code changes
+cmake-string-concatenation-use-cmstrcat.cxx:25:16: note: FIX-IT applied suggested code changes
+  concat += 'o';
+               ^
+cmake-string-concatenation-use-cmstrcat.cxx:26:10: warning: use cmStrCat() instead of string append [cmake-string-concatenation-use-cmstrcat]
+  concat += b + " and this is a string literal " + 'o' + b;
+         ^~   ~                                  ~     ~
+         = cmStrCat(concat, ,                    ,     ,  )
+cmake-string-concatenation-use-cmstrcat.cxx:26:10: note: FIX-IT applied suggested code changes
+cmake-string-concatenation-use-cmstrcat.cxx:26:15: note: FIX-IT applied suggested code changes
+  concat += b + " and this is a string literal " + 'o' + b;
+              ^
+cmake-string-concatenation-use-cmstrcat.cxx:26:50: note: FIX-IT applied suggested code changes
+  concat += b + " and this is a string literal " + 'o' + b;
+                                                 ^
+cmake-string-concatenation-use-cmstrcat.cxx:26:56: note: FIX-IT applied suggested code changes
+  concat += b + " and this is a string literal " + 'o' + b;
+                                                       ^
+cmake-string-concatenation-use-cmstrcat.cxx:26:59: note: FIX-IT applied suggested code changes
+  concat += b + " and this is a string literal " + 'o' + b;
+                                                          ^

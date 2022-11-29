@@ -4,6 +4,7 @@
 #include <clang-tidy/ClangTidyModuleRegistry.h>
 
 #include "OstringstreamUseCmstrcatCheck.h"
+#include "StringConcatenationUseCmstrcatCheck.h"
 #include "UseBespokeEnumClassCheck.h"
 #include "UseCmstrlenCheck.h"
 #include "UseCmsysFstreamCheck.h"
@@ -25,6 +26,8 @@ public:
     CheckFactories.registerCheck<OstringstreamUseCmstrcatCheck>(
       "cmake-ostringstream-use-cmstrcat");
     CheckFactories.registerCheck<UsePragmaOnceCheck>("cmake-use-pragma-once");
+    CheckFactories.registerCheck<StringConcatenationUseCmstrcatCheck>(
+      "cmake-string-concatenation-use-cmstrcat");
   }
 };
 
