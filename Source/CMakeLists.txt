@@ -198,6 +198,8 @@ add_library(
   cmDocumentationFormatter.cxx
   cmDynamicLoader.cxx
   cmDynamicLoader.h
+  cmDyndepCollation.cxx
+  cmDyndepCollation.h
   cmELF.h
   cmELF.cxx
   cmExprParserHelper.cxx
