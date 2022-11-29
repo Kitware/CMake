@@ -4,10 +4,8 @@ include(RunCMake)
 # Function to build and install a project.
 function(run_install_test case)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${case}-build)
-  set(RunCMake_TEST_NO_CLEAN 1)
-  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
-  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
   run_cmake(${case})
+  set(RunCMake_TEST_NO_CLEAN 1)
   run_cmake_command(${case}-build ${CMAKE_COMMAND} --build . --config Debug)
   # Check "all" components.
   set(CMAKE_INSTALL_PREFIX ${RunCMake_TEST_BINARY_DIR}/root-all)
