@@ -2864,7 +2864,6 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
                fileName.substr(0, fileName.find_last_of(".")));
   }
   if (this->ProjectType == VsProjectType::csproj) {
-    std::string f = source->GetFullPath();
     using CsPropMap = std::map<std::string, std::string>;
     CsPropMap sourceFileTags;
     this->GetCSharpSourceProperties(&sf, sourceFileTags);
