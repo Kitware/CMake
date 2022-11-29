@@ -28,12 +28,15 @@ this command is in a compiler-specific conditional clause:
 .. code-block:: cmake
 
   if (MSVC)
-      # warning level 4 and all warnings as errors
-      add_compile_options(/W4 /WX)
+      # warning level 4
+      add_compile_options(/W4)
   else()
-      # lots of warnings and all warnings as errors
-      add_compile_options(-Wall -Wextra -pedantic -Werror)
+      # additional warnings
+      add_compile_options(-Wall -Wextra -Wpedantic)
   endif()
+
+To set per-language options, use the :genex:`$<COMPILE_LANGUAGE>`
+or :genex:`$<COMPILE_LANGUAGE:languages>` generator expressions.
 
 See Also
 ^^^^^^^^
