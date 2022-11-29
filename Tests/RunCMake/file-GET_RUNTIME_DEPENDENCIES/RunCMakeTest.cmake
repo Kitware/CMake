@@ -61,6 +61,7 @@ elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
 
   if(NOT CMAKE_C_COMPILER_ID MATCHES "^XL")
     run_install_test(linux)
+    run_install_test(linux-parent-rpath-propagation)
     run_install_test(file-filter)
   endif()
   run_install_test(linux-unresolved)
