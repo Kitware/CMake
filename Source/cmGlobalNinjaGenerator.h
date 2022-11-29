@@ -469,7 +469,7 @@ public:
 
   bool IsSingleConfigUtility(cmGeneratorTarget const* target) const;
 
-  bool CheckCxxModuleSupport();
+  bool CheckCxxModuleSupport() override;
 
 protected:
   void Generate() override;
@@ -592,7 +592,7 @@ private:
 
   codecvt::Encoding NinjaExpectedEncoding = codecvt::None;
 
-  bool DiagnosedCxxModuleSupport = false;
+  bool DiagnosedCxxModuleNinjaSupport = false;
 
   void InitOutputPathPrefix();
 

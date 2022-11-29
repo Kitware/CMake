@@ -591,7 +591,7 @@ void cmGlobalNinjaGenerator::Generate()
   this->TargetAll = this->NinjaOutputPath("all");
   this->CMakeCacheFile = this->NinjaOutputPath("CMakeCache.txt");
   this->DisableCleandead = false;
-  this->DiagnosedCxxModuleSupport = false;
+  this->DiagnosedCxxModuleNinjaSupport = false;
 
   this->PolicyCMP0058 =
     this->LocalGenerators[0]->GetMakefile()->GetPolicyStatus(
@@ -850,18 +850,12 @@ bool cmGlobalNinjaGenerator::CheckLanguages(
 
 bool cmGlobalNinjaGenerator::CheckCxxModuleSupport()
 {
-  bool const diagnose = !this->DiagnosedCxxModuleSupport &&
-    !this->CMakeInstance->GetIsInTryCompile();
-  if (diagnose) {
-    this->DiagnosedCxxModuleSupport = true;
-    this->GetCMakeInstance()->IssueMessage(
-      MessageType::AUTHOR_WARNING,
-      "C++20 modules support via CMAKE_EXPERIMENTAL_CXX_MODULE_DYNDEP "
-      "is experimental.  It is meant only for compiler developers to try.");
-  }
+  this->CxxModuleSupportCheck();
   if (this->NinjaSupportsDyndeps) {
     return true;
   }
+  bool const diagnose = !this->DiagnosedCxxModuleNinjaSupport &&
+    !this->CMakeInstance->GetIsInTryCompile();
   if (diagnose) {
     std::ostringstream e;
     /* clang-format off */

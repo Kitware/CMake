@@ -26,6 +26,7 @@
 enum class cmBuildStep;
 class cmComputeLinkInformation;
 class cmCustomCommand;
+class cmFileSet;
 class cmGlobalGenerator;
 class cmLocalGenerator;
 class cmMakefile;
@@ -1229,4 +1230,21 @@ public:
 
   // Check C++ module status for the target.
   void CheckCxxModuleStatus(std::string const& config) const;
+
+  bool NeedCxxModuleSupport(std::string const& lang,
+                            std::string const& config) const;
+  bool NeedDyndep(std::string const& lang, std::string const& config) const;
+  cmFileSet const* GetFileSetForSource(std::string const& config,
+                                       cmSourceFile const* sf) const;
+  bool NeedDyndepForSource(std::string const& lang, std::string const& config,
+                           cmSourceFile const* sf) const;
+
+private:
+  void BuildFileSetInfoCache(std::string const& config) const;
+  struct InfoByConfig
+  {
+    bool BuiltFileSetCache = false;
+    std::map<std::string, cmFileSet const*> FileSetCache;
+  };
+  mutable std::map<std::string, InfoByConfig> Configs;
 };

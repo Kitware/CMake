@@ -1439,6 +1439,19 @@ bool cmGlobalGenerator::CheckALLOW_DUPLICATE_CUSTOM_TARGETS() const
   return false;
 }
 
+void cmGlobalGenerator::CxxModuleSupportCheck() const
+{
+  bool const diagnose = !this->DiagnosedCxxModuleSupport &&
+    !this->CMakeInstance->GetIsInTryCompile();
+  if (diagnose) {
+    this->DiagnosedCxxModuleSupport = true;
+    this->GetCMakeInstance()->IssueMessage(
+      MessageType::AUTHOR_WARNING,
+      "C++20 modules support via CMAKE_EXPERIMENTAL_CXX_MODULE_DYNDEP "
+      "is experimental.  It is meant only for compiler developers to try.");
+  }
+}
+
 void cmGlobalGenerator::ComputeBuildFileGenerators()
 {
   for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i) {
@@ -1596,6 +1609,8 @@ void cmGlobalGenerator::Generate()
   // Create a map from local generator to the complete set of targets
   // it builds by default.
   this->InitializeProgressMarks();
+
+  this->DiagnosedCxxModuleSupport = false;
 
   this->ProcessEvaluationFiles();
 

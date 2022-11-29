@@ -8869,3 +8869,101 @@ void cmGeneratorTarget::CheckCxxModuleStatus(std::string const& config) const
     }
   }
 }
+
+bool cmGeneratorTarget::NeedCxxModuleSupport(std::string const& lang,
+                                             std::string const& config) const
+{
+  if (lang != "CXX"_s) {
+    return false;
+  }
+  return this->HaveCxxModuleSupport(config) == Cxx20SupportLevel::Supported &&
+    this->GetGlobalGenerator()->CheckCxxModuleSupport();
+}
+
+bool cmGeneratorTarget::NeedDyndep(std::string const& lang,
+                                   std::string const& config) const
+{
+  return lang == "Fortran"_s || this->NeedCxxModuleSupport(lang, config);
+}
+
+cmFileSet const* cmGeneratorTarget::GetFileSetForSource(
+  std::string const& config, cmSourceFile const* sf) const
+{
+  this->BuildFileSetInfoCache(config);
+
+  auto const& path = sf->GetFullPath();
+  auto const& per_config = this->Configs[config];
+
+  auto const fsit = per_config.FileSetCache.find(path);
+  if (fsit == per_config.FileSetCache.end()) {
+    return nullptr;
+  }
+  return fsit->second;
+}
+
+bool cmGeneratorTarget::NeedDyndepForSource(std::string const& lang,
+                                            std::string const& config,
+                                            cmSourceFile const* sf) const
+{
+  bool const needDyndep = this->NeedDyndep(lang, config);
+  if (!needDyndep) {
+    return false;
+  }
+  auto const* fs = this->GetFileSetForSource(config, sf);
+  if (fs &&
+      (fs->GetType() == "CXX_MODULES"_s ||
+       fs->GetType() == "CXX_MODULE_HEADER_UNITS"_s)) {
+    return true;
+  }
+  auto const sfProp = sf->GetProperty("CXX_SCAN_FOR_MODULES");
+  if (sfProp.IsSet()) {
+    return sfProp.IsOn();
+  }
+  auto const tgtProp = this->GetProperty("CXX_SCAN_FOR_MODULES");
+  if (tgtProp.IsSet()) {
+    return tgtProp.IsOn();
+  }
+  return true;
+}
+
+void cmGeneratorTarget::BuildFileSetInfoCache(std::string const& config) const
+{
+  auto& per_config = this->Configs[config];
+
+  if (per_config.BuiltFileSetCache) {
+    return;
+  }
+
+  auto const* tgt = this->Target;
+
+  for (auto const& name : tgt->GetAllFileSetNames()) {
+    auto const* file_set = tgt->GetFileSet(name);
+    if (!file_set) {
+      tgt->GetMakefile()->IssueMessage(
+        MessageType::INTERNAL_ERROR,
+        cmStrCat("Target \"", tgt->GetName(),
+                 "\" is tracked to have file set \"", name,
+                 "\", but it was not found."));
+      continue;
+    }
+
+    auto fileEntries = file_set->CompileFileEntries();
+    auto directoryEntries = file_set->CompileDirectoryEntries();
+    auto directories = file_set->EvaluateDirectoryEntries(
+      directoryEntries, this->LocalGenerator, config, this);
+
+    std::map<std::string, std::vector<std::string>> files;
+    for (auto const& entry : fileEntries) {
+      file_set->EvaluateFileEntry(directories, files, entry,
+                                  this->LocalGenerator, config, this);
+    }
+
+    for (auto const& it : files) {
+      for (auto const& filename : it.second) {
+        per_config.FileSetCache[filename] = file_set;
+      }
+    }
+  }
+
+  per_config.BuiltFileSetCache = true;
+}
