@@ -6,6 +6,8 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <type_traits>
+#include <utility>
 #include <vector>
 
 #include <cm/string_view>
@@ -143,6 +145,18 @@ int testStringAlgorithms(int /*unused*/, char* /*unused*/ [])
     std::istringstream(cmStrCat("", val)) >> d;
     d -= val;
     assert_ok((d < div) && (d > -div), "cmStrCat double");
+  }
+  {
+    std::string val;
+    std::string expect;
+    val.reserve(120 * cmStrLen("cmStrCat move"));
+    auto data = val.data();
+    for (int i = 0; i < 100; i++) {
+      val = cmStrCat(std::move(val), "cmStrCat move");
+      expect += "cmStrCat move";
+    }
+    assert_ok((val.data() == data), "cmStrCat move");
+    assert_string(val, expect, "cmStrCat move");
   }
 
   // ----------------------------------------------------------------------
