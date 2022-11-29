@@ -19,8 +19,8 @@ set(CMAKE_LINK_LIBRARY_SUFFIX ".lib")
 set(CMAKE_DL_LIBS "")
 set(CMAKE_EXTRA_LINK_EXTENSIONS ".targets")
 
-set(CMAKE_FIND_LIBRARY_PREFIXES "" "lib")
-set(CMAKE_FIND_LIBRARY_SUFFIXES ".lib" ".a")
+set(CMAKE_FIND_LIBRARY_PREFIXES "")
+set(CMAKE_FIND_LIBRARY_SUFFIXES ".lib")
 
 # for borland make long command lines are redirected to a file
 # with the following syntax, see Windows-bcc32.cmake for use

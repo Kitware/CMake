@@ -223,11 +223,6 @@ Deprecated and Removed Features
 Other Changes
 =============
 
-* On Windows, when targeting the MSVC ABI, the :command:`find_library` command
-  now accepts ``.a`` file names after first considering ``.lib``.  This is
-  symmetric with existing behavior when targeting the GNU ABI, in which the
-  command accepts ``.lib`` file names after first considering ``.a``.
-
 * The :envvar:`SSL_CERT_FILE` and :envvar:`SSL_CERT_DIR` environment
   variables can now be used to override where to find certificate
   authorities for TLS/SSL operations.
@@ -238,3 +233,16 @@ Other Changes
 * The :generator:`Xcode` generator no longer adds the per-config suffix
   ``$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)`` to library search paths.
   See policy :policy:`CMP0142`.
+
+Updates
+=======
+
+Changes made since CMake 3.25.0 include the following.
+
+3.25.1
+------
+
+* On Windows, when targeting the MSVC ABI, the :command:`find_library`
+  command no longer accepts ``.a`` file names.  This behavior was added
+  in CMake 3.25.0, but has been reverted due finding GNU-ABI libraries
+  in cases we did not previously.
