@@ -47,6 +47,7 @@ run_cmake_command(E___run_co_compile-no-iwyu ${CMAKE_COMMAND} -E __run_co_compil
 run_cmake_command(E___run_co_compile-bad-iwyu ${CMAKE_COMMAND} -E __run_co_compile --iwyu=iwyu-does-not-exist -- command-does-not-exist)
 run_cmake_command(E___run_co_compile-no--- ${CMAKE_COMMAND} -E __run_co_compile --iwyu=iwyu-does-not-exist command-does-not-exist)
 run_cmake_command(E___run_co_compile-no-cc ${CMAKE_COMMAND} -E __run_co_compile --iwyu=iwyu-does-not-exist --)
+run_cmake_command(E___run_co_compile-tidy-remove-fixes ${CMAKE_COMMAND} -E __run_co_compile "--tidy=${CMAKE_COMMAND}\\;-E\\;true\\;--export-fixes=${RunCMake_BINARY_DIR}/tidy-fixes.yaml" -- ${CMAKE_COMMAND} -E true)
 
 run_cmake_command(G_no-arg ${CMAKE_COMMAND} -B DummyBuildDir -G)
 run_cmake_command(G_bad-arg ${CMAKE_COMMAND} -B DummyBuildDir -G NoSuchGenerator)

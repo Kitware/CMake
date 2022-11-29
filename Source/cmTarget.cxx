@@ -573,12 +573,14 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     initProp("NO_SYSTEM_FROM_IMPORTED");
     initProp("BUILD_WITH_INSTALL_NAME_DIR");
     initProp("C_CLANG_TIDY");
+    initProp("C_CLANG_TIDY_EXPORT_FIXES_DIR");
     initProp("C_CPPLINT");
     initProp("C_CPPCHECK");
     initProp("C_INCLUDE_WHAT_YOU_USE");
     initProp("C_LINKER_LAUNCHER");
     initProp("LINK_WHAT_YOU_USE");
     initProp("CXX_CLANG_TIDY");
+    initProp("CXX_CLANG_TIDY_EXPORT_FIXES_DIR");
     initProp("CXX_CPPLINT");
     initProp("CXX_CPPCHECK");
     initProp("CXX_INCLUDE_WHAT_YOU_USE");
@@ -600,8 +602,10 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     initProp("LINK_SEARCH_START_STATIC");
     initProp("LINK_SEARCH_END_STATIC");
     initProp("OBJC_CLANG_TIDY");
+    initProp("OBJC_CLANG_TIDY_EXPORT_FIXES_DIR");
     initProp("OBJC_LINKER_LAUNCHER");
     initProp("OBJCXX_CLANG_TIDY");
+    initProp("OBJCXX_CLANG_TIDY_EXPORT_FIXES_DIR");
     initProp("OBJCXX_LINKER_LAUNCHER");
     initProp("Swift_LANGUAGE_VERSION");
     initProp("Swift_MODULE_DIRECTORY");

@@ -2,10 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalCommonGenerator.h"
 
+#include <algorithm>
 #include <memory>
 #include <utility>
 
 #include <cmext/algorithm>
+
+#include <cmsys/Glob.hxx>
 
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
@@ -14,6 +17,7 @@
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
 #include "cmake.h"
@@ -123,4 +127,24 @@ std::string cmGlobalCommonGenerator::GetEditCacheCommand() const
   }
   cmValue edit_cmd = cm->GetCacheDefinition("CMAKE_EDIT_COMMAND");
   return edit_cmd ? *edit_cmd : std::string();
+}
+
+void cmGlobalCommonGenerator::RemoveUnknownClangTidyExportFixesFiles() const
+{
+  for (auto const& dir : this->ClangTidyExportFixesDirs) {
+    cmsys::Glob g;
+    g.SetRecurse(true);
+    g.SetListDirs(false);
+    g.FindFiles(cmStrCat(dir, "/*.yaml"));
+    for (auto const& file : g.GetFiles()) {
+      if (!this->ClangTidyExportFixesFiles.count(file) &&
+          !std::any_of(this->ClangTidyExportFixesFiles.begin(),
+                       this->ClangTidyExportFixesFiles.end(),
+                       [&file](const std::string& knownFile) -> bool {
+                         return cmSystemTools::SameFile(file, knownFile);
+                       })) {
+        cmSystemTools::RemoveFile(file);
+      }
+    }
+  }
 }

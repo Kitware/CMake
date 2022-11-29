@@ -102,6 +102,9 @@ void cmGlobalUnixMakefileGenerator3::Configure()
 
 void cmGlobalUnixMakefileGenerator3::Generate()
 {
+  this->ClangTidyExportFixesDirs.clear();
+  this->ClangTidyExportFixesFiles.clear();
+
   // first do superclass method
   this->cmGlobalGenerator::Generate();
 
@@ -137,6 +140,8 @@ void cmGlobalUnixMakefileGenerator3::Generate()
     *this->CommandDatabase << "\n]";
     this->CommandDatabase.reset();
   }
+
+  this->RemoveUnknownClangTidyExportFixesFiles();
 }
 
 void cmGlobalUnixMakefileGenerator3::AddCXXCompileCommand(

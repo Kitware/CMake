@@ -490,6 +490,8 @@ public:
   std::string GetCreateRuleVariable(std::string const& lang,
                                     std::string const& config) const;
 
+  std::string GetClangTidyExportFixesDirectory(const std::string& lang) const;
+
 private:
   using ConfigAndLanguage = std::pair<std::string, std::string>;
   using ConfigAndLanguageToBTStrings =
