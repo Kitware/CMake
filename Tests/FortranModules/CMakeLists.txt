@@ -42,6 +42,16 @@ add_executable(test_module
   test_module_implementation.f90
   test_module_interface.f90)
 
+add_executable(test_multi_module
+  # Place this first so that we do not get "lucky" and find the module provided
+  # by compiling `test_multi_module.f90` first.
+  test_multi_module_main.f90
+  test_multi_module.f90)
+set_property(TARGET test_multi_module PROPERTY
+  JOB_POOL_COMPILE multi_module_serial)
+set_property(GLOBAL APPEND PROPERTY
+  JOB_POOLS multi_module_serial=1)
+
 add_executable(test_use_in_comment_fixedform
   test_use_in_comment_fixedform.f)
 set_property(SOURCE test_use_in_comment_fixedform.f PROPERTY Fortran_FORMAT FIXED)
