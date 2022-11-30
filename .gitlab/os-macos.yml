@@ -107,7 +107,7 @@
         - nonconcurrent
         - finder
 
-.macos_x86_64_ext_tags:
+.macos_x86_64_tags_ext:
     tags:
         - cmake # Since this is a bare runner, pin to a project.
         - macos
@@ -123,7 +123,7 @@
         - xcode-14.1
         - nonconcurrent
 
-.macos_arm64_ext_tags:
+.macos_arm64_tags_ext:
     tags:
         - cmake # Since this is a bare runner, pin to a project.
         - macos-arm64
