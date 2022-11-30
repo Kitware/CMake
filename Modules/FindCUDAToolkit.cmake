@@ -894,7 +894,24 @@ mark_as_advanced(CUDA_CUDART
 if(CUDAToolkit_FOUND)
   set(CUDAToolkit_INCLUDE_DIRS ${CUDAToolkit_INCLUDE_DIR})
   get_filename_component(CUDAToolkit_LIBRARY_DIR ${CUDA_CUDART} DIRECTORY ABSOLUTE)
+
+  # Build search paths without any symlinks
+  file(REAL_PATH "${CUDAToolkit_LIBRARY_DIR}" _cmake_search_dir)
+  set(CUDAToolkit_LIBRARY_SEARCH_DIRS "${_cmake_search_dir}")
+
+  # Detect we are in a splayed nvhpc toolkit layout and add extra
+  # search paths without symlinks
+  if(CUDAToolkit_LIBRARY_DIR  MATCHES ".*/cuda/${CUDAToolkit_VERSION_MAJOR}.${CUDAToolkit_VERSION_MINOR}/lib64$")
+    # Search location for math_libs/
+    file(REAL_PATH "${CUDAToolkit_LIBRARY_DIR}/../../../" _cmake_search_dir)
+    list(APPEND CUDAToolkit_LIBRARY_SEARCH_DIRS "${_cmake_search_dir}")
+
+    # Search location for extras like cupti
+    file(REAL_PATH "${CUDAToolkit_LIBRARY_DIR}/../" _cmake_search_dir)
+    list(APPEND CUDAToolkit_LIBRARY_SEARCH_DIRS "${_cmake_search_dir}")
+  endif()
 endif()
+
 
 #-----------------------------------------------------------------------------
 # Construct import targets
@@ -907,21 +924,21 @@ if(CUDAToolkit_FOUND)
 
     find_library(CUDA_${lib_name}_LIBRARY
       NAMES ${search_names}
-      HINTS ${CUDAToolkit_LIBRARY_DIR}
+      HINTS ${CUDAToolkit_LIBRARY_SEARCH_DIRS}
             ENV CUDA_PATH
       PATH_SUFFIXES nvidia/current lib64 lib/x64 lib
+                    # Support NVHPC splayed math library layout
+                    math_libs/${CUDAToolkit_VERSION_MAJOR}.${CUDAToolkit_VERSION_MINOR}/lib64
+                    math_libs/lib64
                     ${arg_EXTRA_PATH_SUFFIXES}
     )
     # Don't try any stub directories until we have exhausted all other
     # search locations.
     find_library(CUDA_${lib_name}_LIBRARY
       NAMES ${search_names}
-      HINTS ${CUDAToolkit_LIBRARY_DIR}
+      HINTS ${CUDAToolkit_LIBRARY_SEARCH_DIRS}
             ENV CUDA_PATH
       PATH_SUFFIXES lib64/stubs lib/x64/stubs lib/stubs stubs
-                    # Support NVHPC splayed math library layout
-                    ../../math_libs/${CUDAToolkit_VERSION_MAJOR}.${CUDAToolkit_VERSION_MINOR}/lib64
-                    ../../math_libs/lib64
     )
 
     mark_as_advanced(CUDA_${lib_name}_LIBRARY)
@@ -1054,11 +1071,15 @@ if(CUDAToolkit_FOUND)
 
   if(CUDAToolkit_CUPTI_INCLUDE_DIR)
     _CUDAToolkit_find_and_add_import_lib(cupti
-                                        EXTRA_PATH_SUFFIXES ../extras/CUPTI/lib64/
+                                        EXTRA_PATH_SUFFIXES extras/CUPTI/lib64/
+                                                            extras/CUPTI/lib/
+                                                            ../extras/CUPTI/lib64/
                                                             ../extras/CUPTI/lib/
                                         EXTRA_INCLUDE_DIRS "${CUDAToolkit_CUPTI_INCLUDE_DIR}")
     _CUDAToolkit_find_and_add_import_lib(cupti_static
-                                        EXTRA_PATH_SUFFIXES ../extras/CUPTI/lib64/
+                                        EXTRA_PATH_SUFFIXES extras/CUPTI/lib64/
+                                                            extras/CUPTI/lib/
+                                                            ../extras/CUPTI/lib64/
                                                             ../extras/CUPTI/lib/
                                         EXTRA_INCLUDE_DIRS "${CUDAToolkit_CUPTI_INCLUDE_DIR}")
   endif()
