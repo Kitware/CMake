@@ -374,14 +374,14 @@
 
 ## Tags
 
-.linux_builder_tags:
+.linux_tags:
     tags:
         - cmake
         - build
         - docker
         - linux
 
-.linux_builder_tags_qt:
+.linux_tags_qt:
     tags:
         - cmake
         - build
@@ -389,7 +389,7 @@
         - linux
         - linux-3.17 # Needed to be able to load Fedora's Qt libraries.
 
-.linux_builder_tags_x11:
+.linux_tags_x11:
     tags:
         - cmake
         - docker
@@ -397,35 +397,35 @@
         - linux-3.17 # Needed to be able to load Fedora's Qt libraries.
         - x11
 
-.linux_builder_tags_cuda:
+.linux_tags_cuda:
     tags:
         - cmake
         - cuda-rt
         - docker
         - linux
 
-.linux_x86_64_v3_builder_tags_cuda:
+.linux_x86_64_v3_tags_cuda:
     tags:
         - cmake
         - cuda-rt
         - docker
         - linux-x86_64-v3
 
-.linux_builder_tags_radeon:
+.linux_tags_radeon:
     tags:
         - cmake
         - radeon
         - docker
         - linux
 
-.linux_builder_tags_aarch64:
+.linux_tags_aarch64:
     tags:
         - cmake
         - build
         - docker
         - linux-aarch64
 
-.linux_builder_tags_aarch64_qt:
+.linux_tags_aarch64_qt:
     tags:
         - cmake
         - build
@@ -591,7 +591,7 @@
     extends:
         - .intelclassic_makefiles
         - .cmake_test_linux_release
-        - .linux_builder_tags_qt
+        - .linux_tags_qt
         - .run_manually
         - .needs_centos6_x86_64
     variables:
@@ -601,7 +601,7 @@
     extends:
         - .inteloneapi_makefiles
         - .cmake_test_linux_release
-        - .linux_builder_tags_qt
+        - .linux_tags_qt
         - .run_manually
         - .needs_centos6_x86_64
     variables:
@@ -613,7 +613,7 @@
     stage: build
     extends:
         - .fedora37
-        - .linux_builder_tags
+        - .linux_tags
         - .cmake_org_help_artifacts
     script:
         - *before_script_linux

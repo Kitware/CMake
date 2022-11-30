@@ -49,7 +49,7 @@ p:source-package:
     extends:
         - .linux_prep_source
         - .cmake_prep_source_linux
-        - .linux_builder_tags
+        - .linux_tags
         - .cmake_release_artifacts
         - .run_only_for_package
     variables:
@@ -59,7 +59,7 @@ p:doc-package:
     extends:
         - .fedora37_sphinx_package
         - .cmake_prep_doc_linux
-        - .linux_builder_tags_qt
+        - .linux_tags_qt
         - .cmake_doc_artifacts
         - .run_only_for_package
 
@@ -95,28 +95,28 @@ u:cmake.org-help:
 l:codespell:
     extends:
         - .cmake_codespell_linux
-        - .linux_builder_tags
+        - .linux_tags
         - .run_automatically
 
 l:iwyu-debian10:
     extends:
         - .debian10_iwyu
         - .cmake_build_linux
-        - .linux_builder_tags
+        - .linux_tags
         - .run_automatically
 
 l:tidy-fedora37:
     extends:
         - .fedora37_tidy
         - .cmake_build_linux
-        - .linux_builder_tags_qt
+        - .linux_tags_qt
         - .run_automatically
 
 l:sphinx-fedora37:
     extends:
         - .fedora37_sphinx
         - .cmake_build_linux
-        - .linux_builder_tags_qt
+        - .linux_tags_qt
         - .run_automatically
     variables:
         CMAKE_CI_JOB_CONTINUOUS: "true"
@@ -126,7 +126,7 @@ l:clang-analyzer-fedora37:
     extends:
         - .fedora37_clang_analyzer
         - .cmake_build_linux
-        - .linux_builder_tags_qt
+        - .linux_tags_qt
         - .run_automatically
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
@@ -138,7 +138,7 @@ b:centos6-x86_64:
         - .linux_release_x86_64
         - .cmake_build_linux_release
         - .cmake_release_artifacts
-        - .linux_builder_tags
+        - .linux_tags
         - .run_manually
     variables:
         CMAKE_CI_ARTIFACTS_NAME: "artifacts-centos6-x86_64"
@@ -148,7 +148,7 @@ b:centos7-aarch64:
         - .linux_release_aarch64
         - .cmake_build_linux_release
         - .cmake_release_artifacts
-        - .linux_builder_tags_aarch64
+        - .linux_tags_aarch64
         - .run_manually
     variables:
         CMAKE_CI_ARTIFACTS_NAME: "artifacts-centos7-aarch64"
@@ -158,7 +158,7 @@ t:debian10-ninja:
     extends:
         - .debian10_ninja
         - .cmake_test_linux_release
-        - .linux_builder_tags_qt
+        - .linux_tags_qt
         - .cmake_junit_artifacts
         - .run_dependent
         - .needs_centos6_x86_64
@@ -169,7 +169,7 @@ t:debian10-aarch64-ninja:
     extends:
         - .debian10_aarch64_ninja
         - .cmake_test_linux_release
-        - .linux_builder_tags_aarch64_qt
+        - .linux_tags_aarch64_qt
         - .cmake_junit_artifacts
         - .run_dependent
         - .needs_centos7_aarch64
@@ -180,7 +180,7 @@ t:debian10-ninja-clang:
     extends:
         - .debian10_ninja_clang
         - .cmake_test_linux_release
-        - .linux_builder_tags_qt
+        - .linux_tags_qt
         - .run_dependent
         - .needs_centos6_x86_64
     variables:
@@ -190,7 +190,7 @@ t:debian10-makefiles-clang:
     extends:
         - .debian10_makefiles_clang
         - .cmake_test_linux_release
-        - .linux_builder_tags_qt
+        - .linux_tags_qt
         - .run_dependent
         - .needs_centos6_x86_64
     variables:
@@ -200,7 +200,7 @@ t:fedora37-ninja-clang:
     extends:
         - .fedora37_ninja_clang
         - .cmake_test_linux_release
-        - .linux_builder_tags_qt
+        - .linux_tags_qt
         - .run_dependent
         - .needs_centos6_x86_64
     variables:
@@ -210,7 +210,7 @@ t:fedora37-makefiles-clang:
     extends:
         - .fedora37_makefiles_clang
         - .cmake_test_linux_release
-        - .linux_builder_tags_qt
+        - .linux_tags_qt
         - .run_dependent
         - .needs_centos6_x86_64
     variables:
@@ -220,7 +220,7 @@ t:fedora37-makefiles:
     extends:
         - .fedora37_makefiles
         - .cmake_test_linux_release
-        - .linux_builder_tags_qt
+        - .linux_tags_qt
         - .run_dependent
         - .needs_centos6_x86_64
 
@@ -228,7 +228,7 @@ t:fedora37-makefiles-nospace:
     extends:
         - .fedora37_makefiles
         - .cmake_test_linux_release
-        - .linux_builder_tags_qt
+        - .linux_tags_qt
         - .cmake_junit_artifacts
         - .run_dependent
         - .needs_centos6_x86_64
@@ -241,7 +241,7 @@ t:nvhpc22.9-ninja:
     extends:
         - .nvhpc_ninja
         - .cmake_test_linux_release
-        - .linux_x86_64_v3_builder_tags_cuda
+        - .linux_x86_64_v3_tags_cuda
         - .run_dependent
         - .needs_centos6_x86_64
     variables:
@@ -251,7 +251,7 @@ t:cuda9.2-nvidia:
     extends:
         - .cuda9.2_nvidia
         - .cmake_test_linux_release
-        - .linux_builder_tags_cuda
+        - .linux_tags_cuda
         - .run_dependent
         - .needs_centos6_x86_64
     variables:
@@ -261,7 +261,7 @@ t:cuda10.2-nvidia:
     extends:
         - .cuda10.2_nvidia
         - .cmake_test_linux_release
-        - .linux_builder_tags_cuda
+        - .linux_tags_cuda
         - .cmake_junit_artifacts
         - .run_dependent
         - .needs_centos6_x86_64
@@ -270,7 +270,7 @@ t:cuda10.2-clang:
     extends:
         - .cuda10.2_clang
         - .cmake_test_linux_release
-        - .linux_builder_tags_cuda
+        - .linux_tags_cuda
         - .run_dependent
         - .needs_centos6_x86_64
     variables:
@@ -280,7 +280,7 @@ t:cuda11.6-nvidia:
     extends:
         - .cuda11.6_nvidia
         - .cmake_test_linux_release
-        - .linux_builder_tags_cuda
+        - .linux_tags_cuda
         - .cmake_junit_artifacts
         - .run_dependent
         - .needs_centos6_x86_64
@@ -289,7 +289,7 @@ t:cuda11.6-clang:
     extends:
         - .cuda11.6_clang
         - .cmake_test_linux_release
-        - .linux_builder_tags_cuda
+        - .linux_tags_cuda
         - .run_dependent
         - .needs_centos6_x86_64
     variables:
@@ -299,7 +299,7 @@ t:hip4.2-radeon:
     extends:
         - .hip4.2_radeon
         - .cmake_test_linux_release
-        - .linux_builder_tags_radeon
+        - .linux_tags_radeon
         - .run_dependent
         - .needs_centos6_x86_64
     variables:
@@ -309,7 +309,7 @@ t:linux-gcc-cxx-modules-ninja:
     extends:
         - .gcc_cxx_modules_ninja
         - .cmake_test_linux_release
-        - .linux_builder_tags
+        - .linux_tags
         - .run_dependent
         - .needs_centos6_x86_64
     variables:
@@ -319,7 +319,7 @@ t:linux-gcc-cxx-modules-ninja-multi:
     extends:
         - .gcc_cxx_modules_ninja_multi
         - .cmake_test_linux_release
-        - .linux_builder_tags
+        - .linux_tags
         - .run_dependent
         - .needs_centos6_x86_64
     variables:
@@ -330,7 +330,7 @@ b:fedora37-ninja:
         - .fedora37_ninja
         - .cmake_build_linux
         - .cmake_build_artifacts
-        - .linux_builder_tags_qt
+        - .linux_tags_qt
         - .run_manually
     variables:
         CMAKE_CI_JOB_CONTINUOUS: "true"
@@ -339,7 +339,7 @@ b:debian10-makefiles-inplace:
     extends:
         - .debian10_makefiles_inplace
         - .cmake_build_linux_standalone
-        - .linux_builder_tags
+        - .linux_tags
         - .run_manually
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
@@ -348,7 +348,7 @@ b:debian10-extdeps:
     extends:
         - .debian10_extdeps
         - .cmake_build_linux_standalone
-        - .linux_builder_tags
+        - .linux_tags
         - .run_manually
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
@@ -357,7 +357,7 @@ b:debian10-aarch64-extdeps:
     extends:
         - .debian10_aarch64_extdeps
         - .cmake_build_linux_standalone
-        - .linux_builder_tags_aarch64
+        - .linux_tags_aarch64
         - .run_manually
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
@@ -366,7 +366,7 @@ b:fedora37-extdeps:
     extends:
         - .fedora37_extdeps
         - .cmake_build_linux_standalone
-        - .linux_builder_tags
+        - .linux_tags
         - .run_manually
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
@@ -375,7 +375,7 @@ t:fedora37-ninja:
     extends:
         - .fedora37_ninja
         - .cmake_test_linux
-        - .linux_builder_tags_x11
+        - .linux_tags_x11
         - .cmake_test_artifacts
         - .run_dependent
     dependencies:
@@ -389,7 +389,7 @@ t:fedora37-ninja-multi:
     extends:
         - .fedora37_ninja_multi
         - .cmake_test_linux_external
-        - .linux_builder_tags_qt
+        - .linux_tags_qt
         - .cmake_junit_artifacts
         - .run_dependent
     dependencies:
@@ -690,7 +690,7 @@ b:linux-x86_64-package:
         - .linux_release_x86_64
         - .cmake_build_linux_release
         - .cmake_release_artifacts
-        - .linux_builder_tags
+        - .linux_tags
         - .run_only_for_package
     dependencies:
         - p:doc-package
@@ -714,7 +714,7 @@ b:linux-aarch64-package:
         - .linux_release_aarch64
         - .cmake_build_linux_release
         - .cmake_release_artifacts
-        - .linux_builder_tags_aarch64
+        - .linux_tags_aarch64
         - .run_only_for_package
     dependencies:
         - p:doc-package
@@ -739,7 +739,7 @@ b:fedora37-asan:
         - .fedora37_asan
         - .cmake_build_linux
         - .cmake_build_artifacts
-        - .linux_builder_tags_qt
+        - .linux_tags_qt
         - .run_manually
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
@@ -748,7 +748,7 @@ t:fedora37-asan:
     extends:
         - .fedora37_asan
         - .cmake_memcheck_linux
-        - .linux_builder_tags_qt
+        - .linux_tags_qt
         - .run_dependent
     dependencies:
         - b:fedora37-asan
@@ -764,7 +764,7 @@ b:macos-x86_64-ninja:
         - .macos_x86_64_ninja
         - .cmake_build_macos
         - .cmake_build_artifacts
-        - .macos_x86_64_builder_tags
+        - .macos_x86_64_tags
         - .run_manually
     variables:
         CMAKE_CI_JOB_CONTINUOUS: "true"
@@ -774,7 +774,7 @@ b:macos-arm64-ninja:
         - .macos_arm64_ninja
         - .cmake_build_macos
         - .cmake_build_artifacts
-        - .macos_arm64_builder_tags
+        - .macos_arm64_tags
         - .run_manually
     variables:
         CMAKE_CI_NO_MR: "true"
@@ -784,7 +784,7 @@ t:macos-x86_64-ninja:
         - .macos_x86_64_ninja
         - .cmake_test_macos
         - .cmake_test_artifacts
-        - .macos_x86_64_builder_tags
+        - .macos_x86_64_tags
         - .run_dependent
     dependencies:
         - b:macos-x86_64-ninja
@@ -799,7 +799,7 @@ t:macos-arm64-ninja:
         - .macos_arm64_ninja
         - .cmake_test_macos
         - .cmake_test_artifacts
-        - .macos_arm64_builder_tags
+        - .macos_arm64_tags
         - .run_dependent
     dependencies:
         - b:macos-arm64-ninja
@@ -813,14 +813,14 @@ b:macos-x86_64-makefiles:
         - .macos_x86_64_makefiles
         - .cmake_build_macos
         - .cmake_build_artifacts
-        - .macos_x86_64_builder_tags
+        - .macos_x86_64_tags
         - .run_manually
 
 t:macos-x86_64-makefiles:
     extends:
         - .macos_x86_64_makefiles
         - .cmake_test_macos
-        - .macos_x86_64_builder_tags
+        - .macos_x86_64_tags
         - .run_dependent
     dependencies:
         - b:macos-x86_64-makefiles
@@ -831,7 +831,7 @@ t:macos-x86_64-ninja-multi:
     extends:
         - .macos_x86_64_ninja_multi
         - .cmake_test_macos_external
-        - .macos_x86_64_builder_ext_tags
+        - .macos_x86_64_ext_tags
         - .cmake_junit_artifacts
         - .run_dependent
     dependencies:
@@ -845,7 +845,7 @@ t:macos-x86_64-xcode:
     extends:
         - .macos_x86_64_xcode
         - .cmake_test_macos_external
-        - .macos_x86_64_builder_ext_tags
+        - .macos_x86_64_ext_tags
         - .cmake_junit_artifacts
         - .run_dependent
     dependencies:
@@ -857,7 +857,7 @@ t:macos-arm64-xcode:
     extends:
         - .macos_arm64_xcode
         - .cmake_test_macos_external
-        - .macos_arm64_builder_ext_tags
+        - .macos_arm64_ext_tags
         - .cmake_junit_artifacts
         - .run_dependent
     dependencies:
@@ -872,7 +872,7 @@ b:macos-package:
         - .macos_package
         - .cmake_build_macos_package
         - .cmake_release_artifacts
-        - .macos_x86_64_builder_tags_package
+        - .macos_x86_64_tags_package
         - .run_only_for_package
     dependencies:
         - p:doc-package
@@ -895,7 +895,7 @@ b:macos10.10-package:
         - .macos10.10_package
         - .cmake_build_macos_package
         - .cmake_release_artifacts
-        - .macos_x86_64_builder_tags_package
+        - .macos_x86_64_tags_package
         - .run_only_for_package
     dependencies:
         - p:doc-package
