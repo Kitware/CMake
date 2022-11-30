@@ -379,22 +379,22 @@
         - cmake
         - build
         - docker
-        - linux
+        - linux-x86_64
 
 .linux_x86_64_tags_qt:
     tags:
         - cmake
         - build
         - docker
-        - linux
         - linux-3.17 # Needed to be able to load Fedora's Qt libraries.
+        - linux-x86_64
 
 .linux_x86_64_tags_x11:
     tags:
         - cmake
         - docker
-        - linux
         - linux-3.17 # Needed to be able to load Fedora's Qt libraries.
+        - linux-x86_64
         - x11
 
 .linux_x86_64_tags_cuda:
@@ -402,7 +402,7 @@
         - cmake
         - cuda-rt
         - docker
-        - linux
+        - linux-x86_64
 
 .linux_x86_64_v3_tags_cuda:
     tags:
@@ -416,7 +416,7 @@
         - cmake
         - radeon
         - docker
-        - linux
+        - linux-x86_64
 
 .linux_aarch64_tags:
     tags:
