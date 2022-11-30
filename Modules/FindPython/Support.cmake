@@ -14,6 +14,8 @@ cmake_policy(PUSH)
 cmake_policy (SET CMP0012 NEW)
 # IN_LIST operator
 cmake_policy (SET CMP0057 NEW)
+# foreach loop variable scope
+cmake_policy (SET CMP0124 NEW)
 # registry view behavior
 cmake_policy (SET CMP0134 NEW)
 
@@ -51,6 +53,18 @@ macro (_PYTHON_DISPLAY_FAILURE _PYTHON_MSG)
   string (TOUPPER "${_PYTHON_PREFIX}" _${_PYTHON_PREFIX}_UPPER_PREFIX)
   set (${_PYTHON_UPPER_PREFIX}_FOUND FALSE)
 endmacro()
+
+
+function (_PYTHON_ADD_REASON_FAILURE module message)
+  if (_${_PYTHON_PREFIX}_${module}_REASON_FAILURE)
+    string (LENGTH "${_${_PYTHON_PREFIX}_${module}_REASON_FAILURE}" length)
+    math (EXPR length "${length} + 10")
+    string (REPEAT " " ${length} shift)
+    set_property (CACHE _${_PYTHON_PREFIX}_${module}_REASON_FAILURE PROPERTY VALUE "${_${_PYTHON_PREFIX}_${module}_REASON_FAILURE}\n${shift}${message}")
+  else()
+    set_property (CACHE _${_PYTHON_PREFIX}_${module}_REASON_FAILURE PROPERTY VALUE "${message}")
+  endif()
+endfunction()
 
 
 function (_PYTHON_MARK_AS_INTERNAL)
@@ -443,11 +457,18 @@ endfunction()
 function (_PYTHON_GET_CONFIG_VAR _PYTHON_PGCV_VALUE NAME)
   unset (${_PYTHON_PGCV_VALUE} PARENT_SCOPE)
 
-  if (NOT NAME MATCHES "^(PREFIX|ABIFLAGS|CONFIGDIR|INCLUDES|LIBS|SOABI)$")
+  if (NOT NAME MATCHES "^(PREFIX|ABIFLAGS|CONFIGDIR|INCLUDES|LIBS|SOABI|SOSABI)$")
     return()
   endif()
 
-  if (_${_PYTHON_PREFIX}_CONFIG)
+  if (NAME STREQUAL "SOSABI")
+    # assume some default
+    if (CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME MATCHES "MSYS|CYGWIN")
+      set (_values "")
+    else()
+      set (_values "abi${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR}")
+    endif()
+  elseif (_${_PYTHON_PREFIX}_CONFIG)
     if (NAME STREQUAL "SOABI")
       set (config_flag "--extension-suffix")
     else()
@@ -555,6 +576,17 @@ function (_PYTHON_GET_CONFIG_VAR _PYTHON_PGCV_VALUE NAME)
           endif()
         endif()
       endif()
+    elseif (NAME STREQUAL "SOSABI")
+      execute_process (COMMAND ${_${_PYTHON_PREFIX}_INTERPRETER_LAUNCHER} "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c "import sys\nimport re\nimport importlib\nsys.stdout.write(next(filter(lambda x: re.search('^\\.abi', x), importlib.machinery.EXTENSION_SUFFIXES)))"
+                       RESULT_VARIABLE _result
+                       OUTPUT_VARIABLE _values
+                       ERROR_QUIET
+                       OUTPUT_STRIP_TRAILING_WHITESPACE)
+      if (_result)
+        unset (_values)
+      else()
+        string (REGEX REPLACE "^\\.(.+)\\.[^.]+$" "\\1" _values "${_values}")
+      endif()
     else()
       set (config_flag "${NAME}")
       if (NAME STREQUAL "CONFIGDIR")
@@ -572,7 +604,7 @@ function (_PYTHON_GET_CONFIG_VAR _PYTHON_PGCV_VALUE NAME)
     endif()
   endif()
 
-  if (NAME STREQUAL "ABIFLAGS" OR NAME STREQUAL "SOABI")
+  if (NAME STREQUAL "ABIFLAGS" OR NAME STREQUAL "SOABI" OR NAME STREQUAL "SOSABI")
     set (${_PYTHON_PGCV_VALUE} "${_values}" PARENT_SCOPE)
     return()
   endif()
@@ -597,7 +629,7 @@ function (_PYTHON_GET_CONFIG_VAR _PYTHON_PGCV_VALUE NAME)
 endfunction()
 
 function (_PYTHON_GET_VERSION)
-  cmake_parse_arguments (PARSE_ARGV 0 _PGV "LIBRARY;INCLUDE" "PREFIX" "")
+  cmake_parse_arguments (PARSE_ARGV 0 _PGV "LIBRARY;SABI_LIBRARY;INCLUDE" "PREFIX" "")
 
   unset (${_PGV_PREFIX}VERSION PARENT_SCOPE)
   unset (${_PGV_PREFIX}VERSION_MAJOR PARENT_SCOPE)
@@ -639,6 +671,29 @@ function (_PYTHON_GET_VERSION)
         else()
           set (${_PGV_PREFIX}VERSION_MAJOR "2" PARENT_SCOPE)
           set (${_PGV_PREFIX}VERSION "2" PARENT_SCOPE)
+        endif()
+        set (${_PGV_PREFIX}ABI "" PARENT_SCOPE)
+      endif()
+    endif()
+  elseif (_PGV_SABI_LIBRARY)
+    # retrieve version and abi from library name
+    if (_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE)
+      get_filename_component (library_name "${_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE}" NAME)
+      # extract version from library name
+      if (library_name MATCHES "python([23])([dmu]*)")
+        set (${_PGV_PREFIX}VERSION_MAJOR "${CMAKE_MATCH_1}" PARENT_SCOPE)
+        set (${_PGV_PREFIX}VERSION "${CMAKE_MATCH_1}" PARENT_SCOPE)
+        set (${_PGV_PREFIX}ABI "${CMAKE_MATCH_2}" PARENT_SCOPE)
+      elseif (library_name MATCHES "pypy([23])-c")
+        set (${_PGV_PREFIX}VERSION_MAJOR "${CMAKE_MATCH_1}" PARENT_SCOPE)
+        set (${_PGV_PREFIX}VERSION "${CMAKE_MATCH_1}" PARENT_SCOPE)
+        set (${_PGV_PREFIX}ABI "" PARENT_SCOPE)
+      elseif (library_name MATCHES "pypy-c")
+        # try to pick-up a more precise version from the path
+        get_filename_component (library_dir "${_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE}" DIRECTORY)
+        if (library_dir MATCHES "/pypy([23])\\.([0-9]+)/")
+          set (${_PGV_PREFIX}VERSION_MAJOR "${CMAKE_MATCH_1}" PARENT_SCOPE)
+          set (${_PGV_PREFIX}VERSION "${CMAKE_MATCH_1}" PARENT_SCOPE)
         endif()
         set (${_PGV_PREFIX}ABI "" PARENT_SCOPE)
       endif()
@@ -850,6 +905,7 @@ function (_PYTHON_VALIDATE_INTERPRETER)
   endif()
 
   if (CMAKE_SIZEOF_VOID_P AND ("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
+        OR "Development.SABIModule" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
         OR "Development.Embed" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
       AND NOT CMAKE_CROSSCOMPILING)
     # In this case, interpreter must have same architecture as environment
@@ -999,7 +1055,7 @@ function (_PYTHON_VALIDATE_LIBRARY)
 
   if (_PVL_CHECK_EXISTS AND NOT EXISTS "${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}")
     # library does not exist anymore
-    set_property (CACHE _${_PYTHON_PREFIX}_Development_REASON_FAILURE PROPERTY VALUE "Cannot find the library \"${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}\"")
+    set_property (CACHE _${_PYTHON_PREFIX}_Development_LIBRARY_REASON_FAILURE PROPERTY VALUE "Cannot find the library \"${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}\"")
     set_property (CACHE _${_PYTHON_PREFIX}_LIBRARY_RELEASE PROPERTY VALUE "${_PYTHON_PREFIX}_LIBRARY_RELEASE-NOTFOUND")
     if (WIN32)
       set_property (CACHE _${_PYTHON_PREFIX}_LIBRARY_DEBUG PROPERTY VALUE "${_PYTHON_PREFIX}_LIBRARY_DEBUG-NOTFOUND")
@@ -1013,7 +1069,7 @@ function (_PYTHON_VALIDATE_LIBRARY)
 
   if (DEFINED _${_PYTHON_PREFIX}_FIND_ABI AND NOT lib_ABI IN_LIST _${_PYTHON_PREFIX}_ABIFLAGS)
     # incompatible ABI
-    set_property (CACHE _${_PYTHON_PREFIX}_Development_REASON_FAILURE PROPERTY VALUE "Wrong ABI for the library \"${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}\"")
+    set_property (CACHE _${_PYTHON_PREFIX}_Development_LIBRARY_REASON_FAILURE PROPERTY VALUE "Wrong ABI for the library \"${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}\"")
     set_property (CACHE _${_PYTHON_PREFIX}_LIBRARY_RELEASE PROPERTY VALUE "${_PYTHON_PREFIX}_LIBRARY_RELEASE-NOTFOUND")
   else()
     if (_PVL_VERSION OR _PVL_IN_RANGE)
@@ -1022,7 +1078,7 @@ function (_PYTHON_VALIDATE_LIBRARY)
         string (REGEX MATCH "[0-9](\\.[0-9]+)?" version "${_PVL_VERSION}")
         if ((_PVL_EXACT AND NOT lib_VERSION VERSION_EQUAL version) OR (lib_VERSION VERSION_LESS version))
           # library has wrong version
-          set_property (CACHE _${_PYTHON_PREFIX}_Development_REASON_FAILURE PROPERTY VALUE "Wrong version for the library \"${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}\"")
+          set_property (CACHE _${_PYTHON_PREFIX}_Development_LIBRARY_REASON_FAILURE PROPERTY VALUE "Wrong version for the library \"${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}\"")
           set_property (CACHE _${_PYTHON_PREFIX}_LIBRARY_RELEASE PROPERTY VALUE "${_PYTHON_PREFIX}_LIBRARY_RELEASE-NOTFOUND")
         endif()
       endif()
@@ -1032,14 +1088,14 @@ function (_PYTHON_VALIDATE_LIBRARY)
         find_package_check_version ("${lib_VERSION}" in_range HANDLE_VERSION_RANGE)
         if (NOT in_range)
           # library has wrong version
-          set_property (CACHE _${_PYTHON_PREFIX}_Development_REASON_FAILURE PROPERTY VALUE "Wrong version for the library \"${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}\"")
+          set_property (CACHE _${_PYTHON_PREFIX}_Development_LIBRARY_REASON_FAILURE PROPERTY VALUE "Wrong version for the library \"${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}\"")
           set_property (CACHE _${_PYTHON_PREFIX}_LIBRARY_RELEASE PROPERTY VALUE "${_PYTHON_PREFIX}_LIBRARY_RELEASE-NOTFOUND")
         endif()
       endif()
     else()
       if (NOT lib_VERSION_MAJOR VERSION_EQUAL _${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR)
         # library has wrong major version
-        set_property (CACHE _${_PYTHON_PREFIX}_Development_REASON_FAILURE PROPERTY VALUE "Wrong major version for the library \"${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}\"")
+        set_property (CACHE _${_PYTHON_PREFIX}_Development_LIBRARY_REASON_FAILURE PROPERTY VALUE "Wrong major version for the library \"${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}\"")
         set_property (CACHE _${_PYTHON_PREFIX}_LIBRARY_RELEASE PROPERTY VALUE "${_PYTHON_PREFIX}_LIBRARY_RELEASE-NOTFOUND")
       endif()
     endif()
@@ -1056,6 +1112,51 @@ function (_PYTHON_VALIDATE_LIBRARY)
 endfunction()
 
 
+function (_PYTHON_VALIDATE_SABI_LIBRARY)
+  if (NOT _${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE)
+    unset (_${_PYTHON_PREFIX}_SABI_LIBRARY_DEBUG)
+    return()
+  endif()
+
+  cmake_parse_arguments (PARSE_ARGV 0 _PVL "CHECK_EXISTS" "" "")
+
+  if (_PVL_CHECK_EXISTS AND NOT EXISTS "${_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE}")
+    # library does not exist anymore
+    set_property (CACHE _${_PYTHON_PREFIX}_Development_SABI_LIBRARY_REASON_FAILURE PROPERTY VALUE "Cannot find the library \"${_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE}\"")
+    set_property (CACHE _${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE PROPERTY VALUE "${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE-NOTFOUND")
+    if (WIN32)
+      set_property (CACHE _${_PYTHON_PREFIX}_SABI_LIBRARY_DEBUG PROPERTY VALUE "${_PYTHON_PREFIX}_SABI_LIBRARY_DEBUG-NOTFOUND")
+    endif()
+    set_property (CACHE _${_PYTHON_PREFIX}_INCLUDE_DIR PROPERTY VALUE "${_PYTHON_PREFIX}_INCLUDE_DIR-NOTFOUND")
+    return()
+  endif()
+
+  # retrieve version and abi from library name
+  _python_get_version (SABI_LIBRARY PREFIX lib_)
+
+  if (DEFINED _${_PYTHON_PREFIX}_FIND_ABI AND NOT lib_ABI IN_LIST _${_PYTHON_PREFIX}_ABIFLAGS)
+    # incompatible ABI
+    set_property (CACHE _${_PYTHON_PREFIX}_Development_SABI_LIBRARY_REASON_FAILURE PROPERTY VALUE "Wrong ABI for the library \"${_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE}\"")
+    set_property (CACHE _${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE PROPERTY VALUE "${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE-NOTFOUND")
+  else()
+    if (NOT lib_VERSION_MAJOR VERSION_EQUAL _${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR)
+      # library has wrong major version
+      set_property (CACHE _${_PYTHON_PREFIX}_Development_SABI_LIBRARY_REASON_FAILURE PROPERTY VALUE "Wrong major version for the library \"${_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE}\"")
+      set_property (CACHE _${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE PROPERTY VALUE "${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE-NOTFOUND")
+    endif()
+  endif()
+
+  if (NOT _${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE)
+    if (WIN32)
+      set_property (CACHE _${_PYTHON_PREFIX}_SABI_LIBRARY_DEBUG PROPERTY VALUE "${_PYTHON_PREFIX}_LIBRARY_DEBUG-NOTFOUND")
+    endif()
+    unset (_${_PYTHON_PREFIX}_RUNTIME_SABI_LIBRARY_RELEASE CACHE)
+    unset (_${_PYTHON_PREFIX}_RUNTIME_SABI_LIBRARY_DEBUG CACHE)
+    set_property (CACHE _${_PYTHON_PREFIX}_INCLUDE_DIR PROPERTY VALUE "${_PYTHON_PREFIX}_INCLUDE_DIR-NOTFOUND")
+  endif()
+endfunction()
+
+
 function (_PYTHON_VALIDATE_INCLUDE_DIR)
   if (NOT _${_PYTHON_PREFIX}_INCLUDE_DIR)
     return()
@@ -1065,7 +1166,7 @@ function (_PYTHON_VALIDATE_INCLUDE_DIR)
 
   if (_PVID_CHECK_EXISTS AND NOT EXISTS "${_${_PYTHON_PREFIX}_INCLUDE_DIR}")
     # include file does not exist anymore
-    set_property (CACHE _${_PYTHON_PREFIX}_Development_REASON_FAILURE PROPERTY VALUE "Cannot find the directory \"${_${_PYTHON_PREFIX}_INCLUDE_DIR}\"")
+    set_property (CACHE _${_PYTHON_PREFIX}_Development_INCLUDE_DIR_REASON_FAILURE PROPERTY VALUE "Cannot find the directory \"${_${_PYTHON_PREFIX}_INCLUDE_DIR}\"")
     set_property (CACHE _${_PYTHON_PREFIX}_INCLUDE_DIR PROPERTY VALUE "${_PYTHON_PREFIX}_INCLUDE_DIR-NOTFOUND")
     return()
   endif()
@@ -1075,14 +1176,14 @@ function (_PYTHON_VALIDATE_INCLUDE_DIR)
 
   if (DEFINED _${_PYTHON_PREFIX}_FIND_ABI AND NOT inc_ABI IN_LIST _${_PYTHON_PREFIX}_ABIFLAGS)
     # incompatible ABI
-    set_property (CACHE _${_PYTHON_PREFIX}_Development_REASON_FAILURE PROPERTY VALUE "Wrong ABI for the directory \"${_${_PYTHON_PREFIX}_INCLUDE_DIR}\"")
+    set_property (CACHE _${_PYTHON_PREFIX}_Development_INCLUDE_DIR_REASON_FAILURE PROPERTY VALUE "Wrong ABI for the directory \"${_${_PYTHON_PREFIX}_INCLUDE_DIR}\"")
     set_property (CACHE _${_PYTHON_PREFIX}_INCLUDE_DIR PROPERTY VALUE "${_PYTHON_PREFIX}_INCLUDE_DIR-NOTFOUND")
   else()
     if (_PVID_VERSION OR _PVID_IN_RANGE)
       if (_PVID_VERSION)
         if ((_PVID_EXACT AND NOT inc_VERSION VERSION_EQUAL expected_version) OR (inc_VERSION VERSION_LESS expected_version))
           # include dir has wrong version
-          set_property (CACHE _${_PYTHON_PREFIX}_Development_REASON_FAILURE PROPERTY VALUE "Wrong version for the directory \"${_${_PYTHON_PREFIX}_INCLUDE_DIR}\"")
+          set_property (CACHE _${_PYTHON_PREFIX}_Development_INCLUDE_DIR_REASON_FAILURE PROPERTY VALUE "Wrong version for the directory \"${_${_PYTHON_PREFIX}_INCLUDE_DIR}\"")
           set_property (CACHE _${_PYTHON_PREFIX}_INCLUDE_DIR PROPERTY VALUE "${_PYTHON_PREFIX}_INCLUDE_DIR-NOTFOUND")
         endif()
       endif()
@@ -1092,14 +1193,14 @@ function (_PYTHON_VALIDATE_INCLUDE_DIR)
         find_package_check_version ("${inc_VERSION}" in_range HANDLE_VERSION_RANGE)
         if (NOT in_range)
           # include dir has wrong version
-          set_property (CACHE _${_PYTHON_PREFIX}_Development_REASON_FAILURE PROPERTY VALUE "Wrong version for the directory \"${_${_PYTHON_PREFIX}_INCLUDE_DIR}\"")
+          set_property (CACHE _${_PYTHON_PREFIX}_Development_INCLUDE_DIR_REASON_FAILURE PROPERTY VALUE "Wrong version for the directory \"${_${_PYTHON_PREFIX}_INCLUDE_DIR}\"")
           set_property (CACHE _${_PYTHON_PREFIX}_INCLUDE_DIR PROPERTY VALUE "${_PYTHON_PREFIX}_INCLUDE_DIR-NOTFOUND")
         endif()
       endif()
     else()
       if (NOT inc_VERSION_MAJOR VERSION_EQUAL _${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR)
         # include dir has wrong major version
-        set_property (CACHE _${_PYTHON_PREFIX}_Development_REASON_FAILURE PROPERTY VALUE "Wrong major version for the directory \"${_${_PYTHON_PREFIX}_INCLUDE_DIR}\"")
+        set_property (CACHE _${_PYTHON_PREFIX}_Development_INCLUDE_DIR_REASON_FAILURE PROPERTY VALUE "Wrong major version for the directory \"${_${_PYTHON_PREFIX}_INCLUDE_DIR}\"")
         set_property (CACHE _${_PYTHON_PREFIX}_INCLUDE_DIR PROPERTY VALUE "${_PYTHON_PREFIX}_INCLUDE_DIR-NOTFOUND")
       endif()
     endif()
@@ -1139,11 +1240,23 @@ endfunction()
 
 function (_PYTHON_SET_DEVELOPMENT_MODULE_FOUND module)
   if ("Development.${module}" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
+    if (module STREQUAL "SABIModule"
+        AND "${_${_PYTHON_PREFIX}_VERSION_MAJOR}.${_${_PYTHON_PREFIX}_VERSION_MINOR}" VERSION_LESS "3.2")
+      # Stable API was introduced in version 3.2
+      set (${_PYTHON_PREFIX}_Development.SABIModule_FOUND FALSE PARENT_SCOPE)
+      _python_add_reason_failure ("Development" "SABIModule requires version 3.2 or upper.")
+      return()
+    endif()
+
     string(TOUPPER "${module}" id)
     set (module_found TRUE)
 
     if ("LIBRARY" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_${id}_ARTIFACTS
         AND NOT _${_PYTHON_PREFIX}_LIBRARY_RELEASE)
+      set (module_found FALSE)
+    endif()
+    if ("SABI_LIBRARY" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_${id}_ARTIFACTS
+        AND NOT _${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE)
       set (module_found FALSE)
     endif()
     if ("INCLUDE_DIR" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_${id}_ARTIFACTS
@@ -1192,7 +1305,7 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
   list (APPEND ${_PYTHON_PREFIX}_FIND_COMPONENTS "Development.Module" "Development.Embed")
 endif()
 list (REMOVE_DUPLICATES ${_PYTHON_PREFIX}_FIND_COMPONENTS)
-foreach (_${_PYTHON_PREFIX}_COMPONENT IN ITEMS Interpreter Compiler Development Development.Module Development.Embed NumPy)
+foreach (_${_PYTHON_PREFIX}_COMPONENT IN ITEMS Interpreter Compiler Development Development.Module Development.SABIModule Development.Embed NumPy)
   set (${_PYTHON_PREFIX}_${_${_PYTHON_PREFIX}_COMPONENT}_FOUND FALSE)
 endforeach()
 if (${_PYTHON_PREFIX}_FIND_REQUIRED_Development)
@@ -1202,6 +1315,7 @@ endif()
 
 unset (_${_PYTHON_PREFIX}_FIND_DEVELOPMENT_ARTIFACTS)
 unset (_${_PYTHON_PREFIX}_FIND_DEVELOPMENT_MODULE_ARTIFACTS)
+unset (_${_PYTHON_PREFIX}_FIND_DEVELOPMENT_SABIMODULE_ARTIFACTS)
 unset (_${_PYTHON_PREFIX}_FIND_DEVELOPMENT_EMBED_ARTIFACTS)
 if ("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
   if (CMAKE_SYSTEM_NAME MATCHES "^(Windows.*|CYGWIN|MSYS)$")
@@ -1209,10 +1323,16 @@ if ("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
   endif()
   list (APPEND _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_MODULE_ARTIFACTS "INCLUDE_DIR")
 endif()
+if ("Development.SABIModule" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
+  if (CMAKE_SYSTEM_NAME MATCHES "^(Windows.*|CYGWIN|MSYS)$")
+    list (APPEND _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_SABIMODULE_ARTIFACTS "SABI_LIBRARY")
+  endif()
+  list (APPEND _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_SABIMODULE_ARTIFACTS "INCLUDE_DIR")
+endif()
 if ("Development.Embed" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
   list (APPEND _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_EMBED_ARTIFACTS "LIBRARY" "INCLUDE_DIR")
 endif()
-set (_${_PYTHON_PREFIX}_FIND_DEVELOPMENT_ARTIFACTS ${_${_PYTHON_PREFIX}_FIND_DEVELOPMENT_MODULE_ARTIFACTS} ${_${_PYTHON_PREFIX}_FIND_DEVELOPMENT_EMBED_ARTIFACTS})
+set (_${_PYTHON_PREFIX}_FIND_DEVELOPMENT_ARTIFACTS ${_${_PYTHON_PREFIX}_FIND_DEVELOPMENT_MODULE_ARTIFACTS} ${_${_PYTHON_PREFIX}_FIND_DEVELOPMENT_SABIMODULE_ARTIFACTS} ${_${_PYTHON_PREFIX}_FIND_DEVELOPMENT_EMBED_ARTIFACTS})
 list (REMOVE_DUPLICATES _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_ARTIFACTS)
 
 # Set versions to search
@@ -1271,6 +1391,7 @@ else()
   endif()
 endif()
 unset (${_PYTHON_PREFIX}_SOABI)
+unset (${_PYTHON_PREFIX}_SOSABI)
 
 # Define lookup strategy
 cmake_policy (GET CMP0094 _${_PYTHON_PREFIX}_LOOKUP_POLICY)
@@ -1293,6 +1414,7 @@ unset (_${_PYTHON_PREFIX}_REGISTRY_VIEW)
 if (CMAKE_SIZEOF_VOID_P)
   math (EXPR _${_PYTHON_PREFIX}_ARCH "${CMAKE_SIZEOF_VOID_P} * 8")
   if ("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
+      OR "Development.SABIModule" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
       OR "Development.Embed" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
     # In this case, search only for 64bit or 32bit
     set (_${_PYTHON_PREFIX}_ARCH2 ${_${_PYTHON_PREFIX}_ARCH})
@@ -1483,6 +1605,9 @@ function (_PYTHON_CHECK_DEVELOPMENT_SIGNATURE module)
     if ("LIBRARY" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_${id}_ARTIFACTS)
       list (APPEND signature "${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}:")
     endif()
+    if ("SABI_LIBRARY" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_${id}_ARTIFACTS)
+      list (APPEND signature "${_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE}:")
+    endif()
     if ("INCLUDE_DIR" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_${id}_ARTIFACTS)
       list (APPEND signature "${_${_PYTHON_PREFIX}_INCLUDE_DIR}:")
     endif()
@@ -1498,6 +1623,9 @@ function (_PYTHON_CHECK_DEVELOPMENT_SIGNATURE module)
         else()
           _python_validate_library (CHECK_EXISTS)
         endif()
+      endif()
+      if ("SABI_LIBRARY" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_${id}_ARTIFACTS)
+          _python_validate_sabi_library (CHECK_EXISTS)
       endif()
       if ("INCLUDE_DIR" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_${id}_ARTIFACTS)
         if (${_PYTHON_PREFIX}_FIND_VERSION_EXACT)
@@ -1515,12 +1643,18 @@ function (_PYTHON_CHECK_DEVELOPMENT_SIGNATURE module)
         unset (_${_PYTHON_PREFIX}_LIBRARY_RELEASE CACHE)
         unset (_${_PYTHON_PREFIX}_LIBRARY_DEBUG CACHE)
       endif()
+      if ("SABI_LIBRARY" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_${id}_ARTIFACTS)
+        unset (_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE CACHE)
+        unset (_${_PYTHON_PREFIX}_SABI_LIBRARY_DEBUG CACHE)
+      endif()
       if ("INCLUDE_DIR" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_${id}_ARTIFACTS)
         unset (_${_PYTHON_PREFIX}_INCLUDE_DIR CACHE)
       endif()
     endif()
     if (("LIBRARY" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_${id}_ARTIFACTS
           AND NOT _${_PYTHON_PREFIX}_LIBRARY_RELEASE)
+        OR ("SABI_LIBRARY" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_${id}_ARTIFACTS
+          AND NOT _${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE)
         OR ("INCLUDE_DIR" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_${id}_ARTIFACTS
           AND NOT _${_PYTHON_PREFIX}_INCLUDE_DIR))
       unset (_${_PYTHON_PREFIX}_CONFIG CACHE)
@@ -1536,6 +1670,9 @@ function (_PYTHON_COMPUTE_DEVELOPMENT_SIGNATURE module)
     if ("LIBRARY" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_${id}_ARTIFACTS)
       list (APPEND signature "${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}:")
     endif()
+    if ("SABI_LIBRARY" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_${id}_ARTIFACTS)
+      list (APPEND signature "${_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE}:")
+    endif()
     if ("INCLUDE_DIR" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_${id}_ARTIFACTS)
       list (APPEND signature "${_${_PYTHON_PREFIX}_INCLUDE_DIR}:")
     endif()
@@ -1546,13 +1683,16 @@ function (_PYTHON_COMPUTE_DEVELOPMENT_SIGNATURE module)
   endif()
 endfunction()
 
-
 unset (_${_PYTHON_PREFIX}_REQUIRED_VARS)
 unset (_${_PYTHON_PREFIX}_CACHED_VARS)
 unset (_${_PYTHON_PREFIX}_Interpreter_REASON_FAILURE)
 set (_${_PYTHON_PREFIX}_Interpreter_REASON_FAILURE CACHE INTERNAL "Interpreter reason failure")
 unset (_${_PYTHON_PREFIX}_Compiler_REASON_FAILURE)
 set (_${_PYTHON_PREFIX}_Compiler_REASON_FAILURE CACHE INTERNAL "Compiler reason failure")
+foreach (artifact IN LISTS _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_ARTIFACTS)
+  unset (_${_PYTHON_PREFIX}_Development_${artifact}_REASON_FAILURE)
+  set (_${_PYTHON_PREFIX}_Development_${artifact}_REASON_FAILURE CACHE INTERNAL "Development ${artifact} reason failure")
+endforeach()
 unset (_${_PYTHON_PREFIX}_Development_REASON_FAILURE)
 set (_${_PYTHON_PREFIX}_Development_REASON_FAILURE CACHE INTERNAL "Development reason failure")
 unset (_${_PYTHON_PREFIX}_NumPy_REASON_FAILURE)
@@ -1889,6 +2029,13 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
   endif()
 
   if (_${_PYTHON_PREFIX}_EXECUTABLE AND _${_PYTHON_PREFIX}_EXECUTABLE_USABLE)
+    list (LENGTH _${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES _properties_length)
+    if (NOT _properties_length EQUAL "12")
+      # cache variable comes from some older Python module version: not usable
+      unset (_${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES CACHE)
+    endif()
+    unset (_properties_length)
+
     if (_${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES)
       set (${_PYTHON_PREFIX}_Interpreter_FOUND TRUE)
 
@@ -1903,11 +2050,12 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
 
       list (GET _${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES 5 _${_PYTHON_PREFIX}_ABIFLAGS)
       list (GET _${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES 6 ${_PYTHON_PREFIX}_SOABI)
+      list (GET _${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES 7 ${_PYTHON_PREFIX}_SOSABI)
 
-      list (GET _${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES 7 ${_PYTHON_PREFIX}_STDLIB)
-      list (GET _${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES 8 ${_PYTHON_PREFIX}_STDARCH)
-      list (GET _${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES 9 ${_PYTHON_PREFIX}_SITELIB)
-      list (GET _${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES 10 ${_PYTHON_PREFIX}_SITEARCH)
+      list (GET _${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES 8 ${_PYTHON_PREFIX}_STDLIB)
+      list (GET _${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES 9 ${_PYTHON_PREFIX}_STDARCH)
+      list (GET _${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES 10 ${_PYTHON_PREFIX}_SITELIB)
+      list (GET _${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES 11 ${_PYTHON_PREFIX}_SITEARCH)
     else()
       string (REGEX MATCHALL "[0-9]+" _${_PYTHON_PREFIX}_VERSIONS "${${_PYTHON_PREFIX}_VERSION}")
       list (GET _${_PYTHON_PREFIX}_VERSIONS 0 ${_PYTHON_PREFIX}_VERSION_MAJOR)
@@ -2006,10 +2154,11 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
         endif()
 
         _python_get_config_var (${_PYTHON_PREFIX}_SOABI SOABI)
+        _python_get_config_var (${_PYTHON_PREFIX}_SOSABI SOSABI)
 
         # store properties in the cache to speed-up future searches
         set (_${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES
-          "${${_PYTHON_PREFIX}_INTERPRETER_ID};${${_PYTHON_PREFIX}_VERSION_MAJOR};${${_PYTHON_PREFIX}_VERSION_MINOR};${${_PYTHON_PREFIX}_VERSION_PATCH};${_${_PYTHON_PREFIX}_ARCH};${_${_PYTHON_PREFIX}_ABIFLAGS};${${_PYTHON_PREFIX}_SOABI};${${_PYTHON_PREFIX}_STDLIB};${${_PYTHON_PREFIX}_STDARCH};${${_PYTHON_PREFIX}_SITELIB};${${_PYTHON_PREFIX}_SITEARCH}" CACHE INTERNAL "${_PYTHON_PREFIX} Properties")
+          "${${_PYTHON_PREFIX}_INTERPRETER_ID};${${_PYTHON_PREFIX}_VERSION_MAJOR};${${_PYTHON_PREFIX}_VERSION_MINOR};${${_PYTHON_PREFIX}_VERSION_PATCH};${_${_PYTHON_PREFIX}_ARCH};${_${_PYTHON_PREFIX}_ABIFLAGS};${${_PYTHON_PREFIX}_SOABI};${${_PYTHON_PREFIX}_SOSABI};${${_PYTHON_PREFIX}_STDLIB};${${_PYTHON_PREFIX}_STDARCH};${${_PYTHON_PREFIX}_SITELIB};${${_PYTHON_PREFIX}_SITEARCH}" CACHE INTERNAL "${_PYTHON_PREFIX} Properties")
       else()
         unset (_${_PYTHON_PREFIX}_INTERPRETER_SIGNATURE CACHE)
         unset (${_PYTHON_PREFIX}_INTERPRETER_ID)
@@ -2390,6 +2539,14 @@ if (${_PYTHON_PREFIX}_FIND_REQUIRED_Development.Module)
     list (APPEND _${_PYTHON_PREFIX}_REQUIRED_VARS ${_PYTHON_PREFIX}_INCLUDE_DIRS)
   endif()
 endif()
+if (${_PYTHON_PREFIX}_FIND_REQUIRED_Development.SABIModule)
+  if ("SABI_LIBRARY" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_SABIMODULE_ARTIFACTS)
+    list (APPEND _${_PYTHON_PREFIX}_REQUIRED_VARS ${_PYTHON_PREFIX}_SABI_LIBRARIES)
+  endif()
+  if ("INCLUDE_DIR" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_SABIMODULE_ARTIFACTS)
+    list (APPEND _${_PYTHON_PREFIX}_REQUIRED_VARS ${_PYTHON_PREFIX}_INCLUDE_DIRS)
+  endif()
+endif()
 if (${_PYTHON_PREFIX}_FIND_REQUIRED_Development.Embed)
   if ("LIBRARY" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_EMBED_ARTIFACTS)
     list (APPEND _${_PYTHON_PREFIX}_REQUIRED_VARS ${_PYTHON_PREFIX}_LIBRARIES)
@@ -2401,6 +2558,7 @@ endif()
 list (REMOVE_DUPLICATES _${_PYTHON_PREFIX}_REQUIRED_VARS)
 ## Development environment is not compatible with IronPython interpreter
 if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
+      OR "Development.SABIModule" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
       OR "Development.Embed" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
     AND ((${_PYTHON_PREFIX}_Interpreter_FOUND
         AND NOT ${_PYTHON_PREFIX}_INTERPRETER_ID STREQUAL "IronPython")
@@ -2421,17 +2579,30 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
                                               _${_PYTHON_PREFIX}_LIBRARY_DEBUG
                                               _${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG)
   endif()
+  if ("SABI_LIBRARY" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_ARTIFACTS)
+  list (APPEND _${_PYTHON_PREFIX}_CACHED_VARS _${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE
+                                              _${_PYTHON_PREFIX}_RUNTIME_SABI_LIBRARY_RELEASE
+                                              _${_PYTHON_PREFIX}_SABI_LIBRARY_DEBUG
+                                              _${_PYTHON_PREFIX}_RUNTIME_SABI_LIBRARY_DEBUG)
+  endif()
   if ("INCLUDE_DIR" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_ARTIFACTS)
     list (APPEND _${_PYTHON_PREFIX}_CACHED_VARS _${_PYTHON_PREFIX}_INCLUDE_DIR)
   endif()
 
   _python_check_development_signature (Module)
+  _python_check_development_signature (SABIModule)
   _python_check_development_signature (Embed)
 
   if (DEFINED ${_PYTHON_PREFIX}_LIBRARY
       AND IS_ABSOLUTE "${${_PYTHON_PREFIX}_LIBRARY}")
     set (_${_PYTHON_PREFIX}_LIBRARY_RELEASE "${${_PYTHON_PREFIX}_LIBRARY}" CACHE INTERNAL "")
     unset (_${_PYTHON_PREFIX}_LIBRARY_DEBUG CACHE)
+    unset (_${_PYTHON_PREFIX}_INCLUDE_DIR CACHE)
+  endif()
+  if (DEFINED ${_PYTHON_PREFIX}_SABI_LIBRARY
+      AND IS_ABSOLUTE "${${_PYTHON_PREFIX}_SABI_LIBRARY}")
+    set (_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE "${${_PYTHON_PREFIX}_SABI_LIBRARY}" CACHE INTERNAL "")
+    unset (_${_PYTHON_PREFIX}_SABI_LIBRARY_DEBUG CACHE)
     unset (_${_PYTHON_PREFIX}_INCLUDE_DIR CACHE)
   endif()
   if (DEFINED ${_PYTHON_PREFIX}_INCLUDE_DIR
@@ -2450,7 +2621,8 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
     endif()
   endif()
 
-  if (NOT _${_PYTHON_PREFIX}_LIBRARY_RELEASE OR NOT _${_PYTHON_PREFIX}_INCLUDE_DIR)
+  if (NOT _${_PYTHON_PREFIX}_LIBRARY_RELEASE OR NOT _${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE
+      OR NOT _${_PYTHON_PREFIX}_INCLUDE_DIR)
     # if python interpreter is found, use it to look-up for artifacts
     # to ensure consistency between interpreter and development environments.
     # If not, try to locate a compatible config tool
@@ -2843,8 +3015,10 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
     set (${_PYTHON_PREFIX}_LIBRARY_RELEASE "${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}")
 
     if (_${_PYTHON_PREFIX}_LIBRARY_RELEASE AND NOT EXISTS "${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}")
-      set_property (CACHE _${_PYTHON_PREFIX}_Development_REASON_FAILURE PROPERTY VALUE "Cannot find the library \"${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}\"")
+      set_property (CACHE _${_PYTHON_PREFIX}_Development_LIBRARY_REASON_FAILURE PROPERTY VALUE "Cannot find the library \"${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}\"")
       set_property (CACHE _${_PYTHON_PREFIX}_LIBRARY_RELEASE PROPERTY VALUE "${_PYTHON_PREFIX}_LIBRARY_RELEASE-NOTFOUND")
+    else()
+      unset (_${_PYTHON_PREFIX}_Development_LIBRARY_REASON_FAILURE CACHE)
     endif()
 
     set (_${_PYTHON_PREFIX}_HINTS "${${_PYTHON_PREFIX}_ROOT_DIR}" ENV ${_PYTHON_PREFIX}_ROOT_DIR)
@@ -2892,18 +3066,280 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
     endif()
   endif()
 
+  if ("SABI_LIBRARY" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_ARTIFACTS)
+    if (NOT _${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE)
+      ## compute artifact names
+      _python_get_names (_${_PYTHON_PREFIX}_LIB_NAMES VERSION ${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR} WIN32 POSIX LIBRARY)
+      _python_get_names (_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG VERSION ${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR} WIN32 DEBUG)
+
+      if ("LIBRARY" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_ARTIFACTS
+          AND _${_PYTHON_PREFIX}_LIBRARY_RELEASE)
+        # SABI_LIBRARY_RELEASE search is based on LIBRARY_RELEASE
+        set (_${_PYTHON_PREFIX}_HINTS "${${_PYTHON_PREFIX}_ROOT_DIR}" ENV ${_PYTHON_PREFIX}_ROOT_DIR)
+
+        get_filename_component (_${_PYTHON_PREFIX}_PATH "${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}" DIRECTORY)
+
+        find_library (_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE
+          NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES}
+          HINTS "${_${_PYTHON_PREFIX}_PATH}" ${_${_PYTHON_PREFIX}_HINTS}
+          NO_DEFAULT_PATH)
+      else()
+        if ((${_PYTHON_PREFIX}_Interpreter_FOUND AND NOT CMAKE_CROSSCOMPILING) OR _${_PYTHON_PREFIX}_CONFIG)
+          # retrieve root install directory
+          _python_get_config_var (_${_PYTHON_PREFIX}_PREFIX PREFIX)
+
+          # enforce current ABI
+          _python_get_config_var (_${_PYTHON_PREFIX}_ABIFLAGS ABIFLAGS)
+
+          set (_${_PYTHON_PREFIX}_HINTS "${_${_PYTHON_PREFIX}_PREFIX}")
+
+          # retrieve SABI library
+          ## compute some paths
+          if (_${_PYTHON_PREFIX}_CONFIG)
+            string (REGEX REPLACE "^.+python([0-9.]+)[a-z]*-config" "\\1" _${_PYTHON_PREFIX}_VERSION "${_${_PYTHON_PREFIX}_CONFIG}")
+          else()
+            set (_${_PYTHON_PREFIX}_VERSION "${${_PYTHON_PREFIX}_VERSION_MAJOR}.${${_PYTHON_PREFIX}_VERSION_MINOR}")
+          endif()
+          _python_get_path_suffixes (_${_PYTHON_PREFIX}_PATH_SUFFIXES VERSION ${_${_PYTHON_PREFIX}_VERSION} LIBRARY)
+
+          _python_get_config_var (_${_PYTHON_PREFIX}_CONFIGDIR CONFIGDIR)
+          list (APPEND _${_PYTHON_PREFIX}_HINTS "${_${_PYTHON_PREFIX}_CONFIGDIR}")
+
+          list (APPEND _${_PYTHON_PREFIX}_HINTS "${${_PYTHON_PREFIX}_ROOT_DIR}" ENV ${_PYTHON_PREFIX}_ROOT_DIR)
+
+          find_library (_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE
+                        NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES}
+                        NAMES_PER_DIR
+                        HINTS ${_${_PYTHON_PREFIX}_HINTS}
+                        PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
+                        NO_SYSTEM_ENVIRONMENT_PATH
+                        NO_CMAKE_SYSTEM_PATH)
+        endif()
+
+        # Rely on HINTS and standard paths if interpreter or config tool failed to locate artifacts
+        if (NOT _${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE)
+          set (_${_PYTHON_PREFIX}_HINTS "${${_PYTHON_PREFIX}_ROOT_DIR}" ENV ${_PYTHON_PREFIX}_ROOT_DIR)
+
+          unset (_${_PYTHON_PREFIX}_VIRTUALENV_PATHS)
+          if (_${_PYTHON_PREFIX}_FIND_VIRTUALENV MATCHES "^(FIRST|ONLY)$")
+            set (_${_PYTHON_PREFIX}_VIRTUALENV_PATHS ENV VIRTUAL_ENV ENV CONDA_PREFIX)
+          endif()
+
+          if (_${_PYTHON_PREFIX}_FIND_STRATEGY STREQUAL "LOCATION")
+            # Paths suffixes
+            _python_get_path_suffixes (_${_PYTHON_PREFIX}_PATH_SUFFIXES VERSION ${_${_PYTHON_PREFIX}_FIND_VERSIONS} LIBRARY)
+
+            # Framework Paths
+            _python_get_frameworks (_${_PYTHON_PREFIX}_FRAMEWORK_PATHS VERSION ${_${_PYTHON_PREFIX}_LIB_FIND_VERSIONS})
+            # Registry Paths
+            _python_get_registries (_${_PYTHON_PREFIX}_REGISTRY_PATHS VERSION ${_${_PYTHON_PREFIX}_FIND_VERSIONS} )
+
+            if (APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "FIRST")
+              find_library (_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE
+                            NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES}
+                            NAMES_PER_DIR
+                            HINTS ${_${_PYTHON_PREFIX}_HINTS}
+                            PATHS ${_${_PYTHON_PREFIX}_VIRTUALENV_PATHS}
+                                  ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
+                            PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
+                            NO_CMAKE_PATH
+                            NO_CMAKE_ENVIRONMENT_PATH
+                            NO_SYSTEM_ENVIRONMENT_PATH
+                            NO_CMAKE_SYSTEM_PATH)
+            endif()
+
+            if (WIN32 AND _${_PYTHON_PREFIX}_FIND_REGISTRY STREQUAL "FIRST")
+              find_library (_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE
+                            NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES}
+                            NAMES_PER_DIR
+                            HINTS ${_${_PYTHON_PREFIX}_HINTS}
+                            PATHS ${_${_PYTHON_PREFIX}_VIRTUALENV_PATHS}
+                                  ${_${_PYTHON_PREFIX}_REGISTRY_PATHS}
+                            PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
+                            NO_SYSTEM_ENVIRONMENT_PATH
+                            NO_CMAKE_SYSTEM_PATH)
+            endif()
+
+            # search in HINTS locations
+            find_library (_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE
+                          NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES}
+                          NAMES_PER_DIR
+                          HINTS ${_${_PYTHON_PREFIX}_HINTS}
+                          PATHS ${_${_PYTHON_PREFIX}_VIRTUALENV_PATHS}
+                          PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
+                          NO_SYSTEM_ENVIRONMENT_PATH
+                          NO_CMAKE_SYSTEM_PATH)
+
+            if (APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "LAST")
+              set (__${_PYTHON_PREFIX}_FRAMEWORK_PATHS ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS})
+            else()
+              unset (__${_PYTHON_PREFIX}_FRAMEWORK_PATHS)
+            endif()
+
+            if (WIN32 AND _${_PYTHON_PREFIX}_FIND_REGISTRY STREQUAL "LAST")
+              set (__${_PYTHON_PREFIX}_REGISTRY_PATHS ${_${_PYTHON_PREFIX}_REGISTRY_PATHS})
+            else()
+              unset (__${_PYTHON_PREFIX}_REGISTRY_PATHS)
+            endif()
+
+            # search in all default paths
+            find_library (_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE
+                          NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES}
+                          NAMES_PER_DIR
+                          PATHS ${__${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
+                                ${__${_PYTHON_PREFIX}_REGISTRY_PATHS}
+                          PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES})
+          else()
+            foreach (_${_PYTHON_PREFIX}_LIB_VERSION IN LISTS _${_PYTHON_PREFIX}_FIND_VERSIONS)
+              _python_get_frameworks (_${_PYTHON_PREFIX}_FRAMEWORK_PATHS VERSION ${_${_PYTHON_PREFIX}_LIB_VERSION})
+              _python_get_registries (_${_PYTHON_PREFIX}_REGISTRY_PATHS VERSION ${_${_PYTHON_PREFIX}_LIB_VERSION})
+
+              _python_get_path_suffixes (_${_PYTHON_PREFIX}_PATH_SUFFIXES VERSION ${_${_PYTHON_PREFIX}_LIB_VERSION} LIBRARY)
+
+              if (APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "FIRST")
+                find_library (_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE
+                              NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES}
+                              NAMES_PER_DIR
+                              HINTS ${_${_PYTHON_PREFIX}_HINTS}
+                              PATHS ${_${_PYTHON_PREFIX}_VIRTUALENV_PATHS}
+                                    ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
+                              PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
+                              NO_CMAKE_PATH
+                              NO_CMAKE_ENVIRONMENT_PATH
+                              NO_SYSTEM_ENVIRONMENT_PATH
+                              NO_CMAKE_SYSTEM_PATH)
+              endif()
+
+              if (WIN32 AND _${_PYTHON_PREFIX}_FIND_REGISTRY STREQUAL "FIRST")
+                find_library (_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE
+                              NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES}
+                              NAMES_PER_DIR
+                              HINTS ${_${_PYTHON_PREFIX}_HINTS}
+                              PATHS ${_${_PYTHON_PREFIX}_VIRTUALENV_PATHS}
+                                    ${_${_PYTHON_PREFIX}_REGISTRY_PATHS}
+                              PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
+                              NO_SYSTEM_ENVIRONMENT_PATH
+                              NO_CMAKE_SYSTEM_PATH)
+              endif()
+
+              # search in HINTS locations
+              find_library (_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE
+                            NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES}
+                            NAMES_PER_DIR
+                            HINTS ${_${_PYTHON_PREFIX}_HINTS}
+                            PATHS ${_${_PYTHON_PREFIX}_VIRTUALENV_PATHS}
+                            PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
+                            NO_SYSTEM_ENVIRONMENT_PATH
+                            NO_CMAKE_SYSTEM_PATH)
+
+              if (APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "LAST")
+                set (__${_PYTHON_PREFIX}_FRAMEWORK_PATHS ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS})
+              else()
+                unset (__${_PYTHON_PREFIX}_FRAMEWORK_PATHS)
+              endif()
+
+              if (WIN32 AND _${_PYTHON_PREFIX}_FIND_REGISTRY STREQUAL "LAST")
+                set (__${_PYTHON_PREFIX}_REGISTRY_PATHS ${_${_PYTHON_PREFIX}_REGISTRY_PATHS})
+              else()
+                unset (__${_PYTHON_PREFIX}_REGISTRY_PATHS)
+              endif()
+
+              # search in all default paths
+              find_library (_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE
+                            NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES}
+                            NAMES_PER_DIR
+                            PATHS ${__${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
+                                  ${__${_PYTHON_PREFIX}_REGISTRY_PATHS}
+                            PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES})
+
+              if (_${_PYTHON_PREFIX}_LIBRARY_RELEASE)
+                break()
+              endif()
+            endforeach()
+          endif()
+        endif()
+      endif()
+    endif()
+
+    # finalize library version information
+    _python_get_version (SABI_LIBRARY PREFIX _${_PYTHON_PREFIX}_)
+    # ABI library does not have the full version information
+    if (${_PYTHON_PREFIX}_Interpreter_FOUND OR _${_PYTHON_PREFIX}_LIBRARY_RELEASE)
+      # update from interpreter or library
+      set (_${_PYTHON_PREFIX}_VERSION ${${_PYTHON_PREFIX}_VERSION})
+      set (_${_PYTHON_PREFIX}_VERSION_MAJOR ${${_PYTHON_PREFIX}_VERSION_MAJOR})
+      set (_${_PYTHON_PREFIX}_VERSION_MINOR ${${_PYTHON_PREFIX}_VERSION_MINOR})
+      set (_${_PYTHON_PREFIX}_VERSION_PATCH ${${_PYTHON_PREFIX}_VERSION_PATCH})
+    endif()
+
+    set (${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE "${_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE}")
+
+    if (_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE AND NOT EXISTS "${_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE}")
+      set_property (CACHE _${_PYTHON_PREFIX}_Development_SABI_LIBRARY_REASON_FAILURE PROPERTY VALUE "Cannot find the library \"${_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE}\"")
+      set_property (CACHE _${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE PROPERTY VALUE "${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE-NOTFOUND")
+    else()
+      unset (_${_PYTHON_PREFIX}_Development_SABI_LIBRARY_REASON_FAILURE CACHE)
+    endif()
+
+    if (WIN32 AND _${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE)
+      # search for debug library
+      get_filename_component (_${_PYTHON_PREFIX}_PATH "${_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE}" DIRECTORY)
+      find_library (_${_PYTHON_PREFIX}_SABI_LIBRARY_DEBUG
+                    NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG}
+                    NAMES_PER_DIR
+                    HINTS "${_${_PYTHON_PREFIX}_PATH}" ${_${_PYTHON_PREFIX}_HINTS}
+                    NO_DEFAULT_PATH)
+      # second try including CMAKE variables to catch-up non conventional layouts
+      find_library (_${_PYTHON_PREFIX}_SABI_LIBRARY_DEBUG
+                    NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG}
+                    NAMES_PER_DIR
+                    NO_SYSTEM_ENVIRONMENT_PATH
+                    NO_CMAKE_SYSTEM_PATH)
+    endif()
+
+    # retrieve runtime libraries
+    if (_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE)
+      get_filename_component (_${_PYTHON_PREFIX}_PATH "${_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE}" DIRECTORY)
+      get_filename_component (_${_PYTHON_PREFIX}_PATH2 "${_${_PYTHON_PREFIX}_PATH}" DIRECTORY)
+      _python_find_runtime_library (_${_PYTHON_PREFIX}_RUNTIME_SABI_LIBRARY_RELEASE
+                                    NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES}
+                                    NAMES_PER_DIR
+                                    HINTS "${_${_PYTHON_PREFIX}_PATH}"
+                                          "${_${_PYTHON_PREFIX}_PATH2}" ${_${_PYTHON_PREFIX}_HINTS}
+                                    PATH_SUFFIXES bin)
+    endif()
+
+    if (_${_PYTHON_PREFIX}_SABI_LIBRARY_DEBUG)
+      get_filename_component (_${_PYTHON_PREFIX}_PATH "${_${_PYTHON_PREFIX}_SABI_LIBRARY_DEBUG}" DIRECTORY)
+      get_filename_component (_${_PYTHON_PREFIX}_PATH2 "${_${_PYTHON_PREFIX}_PATH}" DIRECTORY)
+      _python_find_runtime_library (_${_PYTHON_PREFIX}_RUNTIME_SABI_LIBRARY_DEBUG
+                                    NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG}
+                                    NAMES_PER_DIR
+                                    HINTS "${_${_PYTHON_PREFIX}_PATH}"
+                                          "${_${_PYTHON_PREFIX}_PATH2}" ${_${_PYTHON_PREFIX}_HINTS}
+                                    PATH_SUFFIXES bin)
+    endif()
+  endif()
+
   if ("INCLUDE_DIR" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_ARTIFACTS)
     while (NOT _${_PYTHON_PREFIX}_INCLUDE_DIR)
-      set (_${_PYTHON_PREFIX}_LIBRARY_REQUIRED TRUE)
-      foreach (_${_PYTHON_PREFIX}_COMPONENT IN ITEMS Module Embed)
+      set (_${_PYTHON_PREFIX}_LIBRARY_REQUIRED FALSE)
+      set (_${_PYTHON_PREFIX}_SABI_LIBRARY_REQUIRED FALSE)
+      foreach (_${_PYTHON_PREFIX}_COMPONENT IN ITEMS Module SABIModule Embed)
         string (TOUPPER "${_${_PYTHON_PREFIX}_COMPONENT}" _${_PYTHON_PREFIX}_ID)
         if ("Development.${_${_PYTHON_PREFIX}_COMPONENT}" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
-            AND NOT "LIBRARY" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_${_${_PYTHON_PREFIX}_ID}_ARTIFACTS)
-          set (_${_PYTHON_PREFIX}_LIBRARY_REQUIRED FALSE)
+            AND "LIBRARY" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_${_${_PYTHON_PREFIX}_ID}_ARTIFACTS)
+          set (_${_PYTHON_PREFIX}_LIBRARY_REQUIRED TRUE)
+        endif()
+        if ("Development.${_${_PYTHON_PREFIX}_COMPONENT}" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
+            AND "SABI_LIBRARY" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_${_${_PYTHON_PREFIX}_ID}_ARTIFACTS)
+          set (_${_PYTHON_PREFIX}_SABI_LIBRARY_REQUIRED TRUE)
         endif()
       endforeach()
-      if (_${_PYTHON_PREFIX}_LIBRARY_REQUIRED
+      if ((_${_PYTHON_PREFIX}_LIBRARY_REQUIRED
           AND NOT _${_PYTHON_PREFIX}_LIBRARY_RELEASE)
+        AND (_${_PYTHON_PREFIX}_SABI_LIBRARY_REQUIRED
+          AND NOT _${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE))
         # Don't search for include dir if no library was founded
         break()
       endif()
@@ -2938,6 +3374,21 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
           else()
             # assume library is in a directory under root
             get_filename_component (_${_PYTHON_PREFIX}_PREFIX "${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}" DIRECTORY)
+            get_filename_component (_${_PYTHON_PREFIX}_PREFIX "${_${_PYTHON_PREFIX}_PREFIX}" DIRECTORY)
+            list (APPEND _${_PYTHON_PREFIX}_INCLUDE_HINTS "${_${_PYTHON_PREFIX}_PREFIX}")
+          endif()
+        elseif ("SABI_LIBRARY" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_ARTIFACTS
+            AND _${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE)
+          # Use the library's install prefix as a hint
+          if (_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE MATCHES "^(.+/Frameworks/Python.framework/Versions/[0-9.]+)")
+            list (APPEND _${_PYTHON_PREFIX}_INCLUDE_HINTS "${CMAKE_MATCH_1}")
+          elseif (_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE MATCHES "^(.+)/lib(64|32)?/python[0-9.]+/config")
+            list (APPEND _${_PYTHON_PREFIX}_INCLUDE_HINTS "${CMAKE_MATCH_1}")
+          elseif (DEFINED CMAKE_LIBRARY_ARCHITECTURE AND ${_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE} MATCHES "^(.+)/lib/${CMAKE_LIBRARY_ARCHITECTURE}")
+            list (APPEND _${_PYTHON_PREFIX}_INCLUDE_HINTS "${CMAKE_MATCH_1}")
+          else()
+            # assume library is in a directory under root
+            get_filename_component (_${_PYTHON_PREFIX}_PREFIX "${_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE}" DIRECTORY)
             get_filename_component (_${_PYTHON_PREFIX}_PREFIX "${_${_PYTHON_PREFIX}_PREFIX}" DIRECTORY)
             list (APPEND _${_PYTHON_PREFIX}_INCLUDE_HINTS "${_${_PYTHON_PREFIX}_PREFIX}")
           endif()
@@ -3004,8 +3455,10 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
     set (${_PYTHON_PREFIX}_INCLUDE_DIRS "${_${_PYTHON_PREFIX}_INCLUDE_DIR}")
 
     if (_${_PYTHON_PREFIX}_INCLUDE_DIR AND NOT EXISTS "${_${_PYTHON_PREFIX}_INCLUDE_DIR}")
-      set_property (CACHE _${_PYTHON_PREFIX}_Development_REASON_FAILURE PROPERTY VALUE "Cannot find the directory \"${_${_PYTHON_PREFIX}_INCLUDE_DIR}\"")
+      set_property (CACHE _${_PYTHON_PREFIX}_Development_INCLUDE_DIR_REASON_FAILURE PROPERTY VALUE "Cannot find the directory \"${_${_PYTHON_PREFIX}_INCLUDE_DIR}\"")
       set_property (CACHE _${_PYTHON_PREFIX}_INCLUDE_DIR PROPERTY VALUE "${_PYTHON_PREFIX}_INCLUDE_DIR-NOTFOUND")
+    else()
+      unset (_${_PYTHON_PREFIX}_Development_INCLUDE_DIR_REASON_FAILURE CACHE)
     endif()
 
     if (_${_PYTHON_PREFIX}_INCLUDE_DIR)
@@ -3071,34 +3524,57 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
     endif()
   endif()
 
-  if (_${_PYTHON_PREFIX}_LIBRARY_RELEASE OR _${_PYTHON_PREFIX}_INCLUDE_DIR)
+  if ("SABI_LIBRARY" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_ARTIFACTS)
+    set (${_PYTHON_PREFIX}_SABI_LIBRARY_DEBUG "${_${_PYTHON_PREFIX}_SABI_LIBRARY_DEBUG}")
+    _python_select_library_configurations (${_PYTHON_PREFIX}_SABI)
+
+    set (${_PYTHON_PREFIX}_RUNTIME_SABI_LIBRARY_RELEASE "${_${_PYTHON_PREFIX}_RUNTIME_SABI_LIBRARY_RELEASE}")
+    set (${_PYTHON_PREFIX}_RUNTIME_SABI_LIBRARY_DEBUG "${_${_PYTHON_PREFIX}_RUNTIME_SABI_LIBRARY_DEBUG}")
+
+    if (_${_PYTHON_PREFIX}_RUNTIME_SABI_LIBRARY_RELEASE)
+      set (${_PYTHON_PREFIX}_RUNTIME_SABI_LIBRARY "${_${_PYTHON_PREFIX}_RUNTIME_SABI_LIBRARY_RELEASE}")
+    elseif (_${_PYTHON_PREFIX}_RUNTIME_SABI_LIBRARY_DEBUG)
+      set (${_PYTHON_PREFIX}_RUNTIME_SABI_LIBRARY "${_${_PYTHON_PREFIX}_RUNTIME_SABI_LIBRARY_DEBUG}")
+    else()
+      set (${_PYTHON_PREFIX}_RUNTIME_SABI_LIBRARY "${_PYTHON_PREFIX}_RUNTIME_SABI_LIBRARY-NOTFOUND")
+    endif()
+
+    _python_set_library_dirs (${_PYTHON_PREFIX}_SABI_LIBRARY_DIRS
+                              _${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE
+                              _${_PYTHON_PREFIX}_SABI_LIBRARY_DEBUG)
+    if (UNIX)
+      if (_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE MATCHES "${CMAKE_SHARED_LIBRARY_SUFFIX}$")
+        set (${_PYTHON_PREFIX}_RUNTIME_SABI_LIBRARY_DIRS ${${_PYTHON_PREFIX}_LIBRARY_DIRS})
+      endif()
+    else()
+      _python_set_library_dirs (${_PYTHON_PREFIX}_RUNTIME_SABI_LIBRARY_DIRS
+                                _${_PYTHON_PREFIX}_RUNTIME_SABI_LIBRARY_RELEASE
+                                _${_PYTHON_PREFIX}_RUNTIME_SABI_LIBRARY_DEBUG)
+    endif()
+  endif()
+
+  if (_${_PYTHON_PREFIX}_LIBRARY_RELEASE OR _${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE OR _${_PYTHON_PREFIX}_INCLUDE_DIR)
     if (${_PYTHON_PREFIX}_Interpreter_FOUND OR ${_PYTHON_PREFIX}_Compiler_FOUND)
       # development environment must be compatible with interpreter/compiler
       if ("${_${_PYTHON_PREFIX}_VERSION_MAJOR}.${_${_PYTHON_PREFIX}_VERSION_MINOR}" VERSION_EQUAL "${${_PYTHON_PREFIX}_VERSION_MAJOR}.${${_PYTHON_PREFIX}_VERSION_MINOR}"
           AND "${_${_PYTHON_PREFIX}_INC_VERSION_MAJOR}.${_${_PYTHON_PREFIX}_INC_VERSION_MINOR}" VERSION_EQUAL "${_${_PYTHON_PREFIX}_VERSION_MAJOR}.${_${_PYTHON_PREFIX}_VERSION_MINOR}")
         _python_set_development_module_found (Module)
+        _python_set_development_module_found (SABIModule)
         _python_set_development_module_found (Embed)
       endif()
     elseif (${_PYTHON_PREFIX}_VERSION_MAJOR VERSION_EQUAL _${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR
         AND "${_${_PYTHON_PREFIX}_INC_VERSION_MAJOR}.${_${_PYTHON_PREFIX}_INC_VERSION_MINOR}" VERSION_EQUAL "${_${_PYTHON_PREFIX}_VERSION_MAJOR}.${_${_PYTHON_PREFIX}_VERSION_MINOR}")
       _python_set_development_module_found (Module)
+      _python_set_development_module_found (SABIModule)
       _python_set_development_module_found (Embed)
     endif()
     if (DEFINED _${_PYTHON_PREFIX}_FIND_ABI AND
         (NOT _${_PYTHON_PREFIX}_ABI IN_LIST _${_PYTHON_PREFIX}_ABIFLAGS
           OR NOT _${_PYTHON_PREFIX}_INC_ABI IN_LIST _${_PYTHON_PREFIX}_ABIFLAGS))
       set (${_PYTHON_PREFIX}_Development.Module_FOUND FALSE)
+      set (${_PYTHON_PREFIX}_Development.SABIModule_FOUND FALSE)
       set (${_PYTHON_PREFIX}_Development.Embed_FOUND FALSE)
     endif()
-  endif()
-
-  if (( ${_PYTHON_PREFIX}_Development.Module_FOUND
-        AND ${_PYTHON_PREFIX}_Development.Embed_FOUND)
-      OR (NOT "Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
-        AND ${_PYTHON_PREFIX}_Development.Embed_FOUND)
-      OR (NOT "Development.Embed" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
-        AND ${_PYTHON_PREFIX}_Development.Module_FOUND))
-    unset (_${_PYTHON_PREFIX}_Development_REASON_FAILURE CACHE)
   endif()
 
   if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
@@ -3108,13 +3584,14 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
   endif()
 
   if ((${_PYTHON_PREFIX}_Development.Module_FOUND
-      OR ${_PYTHON_PREFIX}_Development.Embed_FOUND)
-    AND EXISTS "${_${_PYTHON_PREFIX}_INCLUDE_DIR}/PyPy.h")
-  # retrieve PyPy version
-  file (STRINGS "${_${_PYTHON_PREFIX}_INCLUDE_DIR}/patchlevel.h" ${_PYTHON_PREFIX}_PyPy_VERSION
-                REGEX "^#define[ \t]+PYPY_VERSION[ \t]+\"[^\"]+\"")
-  string (REGEX REPLACE "^#define[ \t]+PYPY_VERSION[ \t]+\"([^\"]+)\".*" "\\1"
-                ${_PYTHON_PREFIX}_PyPy_VERSION "${${_PYTHON_PREFIX}_PyPy_VERSION}")
+        OR ${_PYTHON_PREFIX}_Development.SABIModule_FOUND
+        OR ${_PYTHON_PREFIX}_Development.Embed_FOUND)
+      AND EXISTS "${_${_PYTHON_PREFIX}_INCLUDE_DIR}/PyPy.h")
+    # retrieve PyPy version
+    file (STRINGS "${_${_PYTHON_PREFIX}_INCLUDE_DIR}/patchlevel.h" ${_PYTHON_PREFIX}_PyPy_VERSION
+          REGEX "^#define[ \t]+PYPY_VERSION[ \t]+\"[^\"]+\"")
+    string (REGEX REPLACE "^#define[ \t]+PYPY_VERSION[ \t]+\"([^\"]+)\".*" "\\1"
+            ${_PYTHON_PREFIX}_PyPy_VERSION "${${_PYTHON_PREFIX}_PyPy_VERSION}")
   endif()
 
   unset(${_PYTHON_PREFIX}_LINK_OPTIONS)
@@ -3144,7 +3621,12 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
     _python_get_config_var (${_PYTHON_PREFIX}_SOABI SOABI)
   endif()
 
+  if (NOT DEFINED ${_PYTHON_PREFIX}_SOSABI)
+    _python_get_config_var (${_PYTHON_PREFIX}_SOSABI SOSABI)
+  endif()
+
   _python_compute_development_signature (Module)
+  _python_compute_development_signature (SABIModule)
   _python_compute_development_signature (Embed)
 
   # Restore the original find library ordering
@@ -3156,6 +3638,9 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
     if ("LIBRARY" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_ARTIFACTS)
       set (${_PYTHON_PREFIX}_LIBRARY "${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}" CACHE FILEPATH "${_PYTHON_PREFIX} Library")
     endif()
+    if ("SABI_LIBRARY" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_ARTIFACTS)
+      set (${_PYTHON_PREFIX}_SABI_LIBRARY "${_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE}" CACHE FILEPATH "${_PYTHON_PREFIX} ABI Library")
+    endif()
     if ("INCLUDE_DIR" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_ARTIFACTS)
       set (${_PYTHON_PREFIX}_INCLUDE_DIR "${_${_PYTHON_PREFIX}_INCLUDE_DIR}" CACHE FILEPATH "${_PYTHON_PREFIX} Include Directory")
     endif()
@@ -3165,6 +3650,10 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
                             _${_PYTHON_PREFIX}_LIBRARY_DEBUG
                             _${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE
                             _${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG
+                            _${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE
+                            _${_PYTHON_PREFIX}_SABI_LIBRARY_DEBUG
+                            _${_PYTHON_PREFIX}_RUNTIME_SABI_LIBRARY_RELEASE
+                            _${_PYTHON_PREFIX}_RUNTIME_SABI_LIBRARY_DEBUG
                             _${_PYTHON_PREFIX}_INCLUDE_DIR
                             _${_PYTHON_PREFIX}_CONFIG
                             _${_PYTHON_PREFIX}_DEVELOPMENT_MODULE_SIGNATURE
@@ -3259,6 +3748,13 @@ endif()
 
 unset (_${_PYTHON_PREFIX}_REASON_FAILURE)
 foreach (_${_PYTHON_PREFIX}_COMPONENT IN ITEMS Interpreter Compiler Development NumPy)
+  if (_${_PYTHON_PREFIX}_COMPONENT STREQUAL "Development")
+    foreach (artifact IN LISTS _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_ARTIFACTS)
+      if (_${_PYTHON_PREFIX}_Development_${artifact}_REASON_FAILURE)
+        _python_add_reason_failure ("Development" "${_${_PYTHON_PREFIX}_Development_${artifact}_REASON_FAILURE}")
+      endif()
+    endforeach()
+  endif()
   if (_${_PYTHON_PREFIX}_${_${_PYTHON_PREFIX}_COMPONENT}_REASON_FAILURE)
     string (APPEND _${_PYTHON_PREFIX}_REASON_FAILURE "\n        ${_${_PYTHON_PREFIX}_COMPONENT}: ${_${_PYTHON_PREFIX}_${_${_PYTHON_PREFIX}_COMPONENT}_REASON_FAILURE}")
     unset (_${_PYTHON_PREFIX}_${_${_PYTHON_PREFIX}_COMPONENT}_REASON_FAILURE CACHE)
@@ -3292,12 +3788,19 @@ if(_${_PYTHON_PREFIX}_CMAKE_ROLE STREQUAL "PROJECT")
 
   if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
         AND ${_PYTHON_PREFIX}_Development.Module_FOUND)
+      OR ("Development.SABIModule" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
+        AND ${_PYTHON_PREFIX}_Development.SABIModule_FOUND)
       OR ("Development.Embed" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
         AND ${_PYTHON_PREFIX}_Development.Embed_FOUND))
 
     macro (__PYTHON_IMPORT_LIBRARY __name)
-      if (${_PYTHON_PREFIX}_LIBRARY_RELEASE MATCHES "${CMAKE_SHARED_LIBRARY_SUFFIX}$"
-          OR ${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE)
+      if (${ARGC} GREATER 1)
+        set (_PREFIX "${ARGV1}_")
+      else()
+        set (_PREFIX "")
+      endif()
+      if (${_PYTHON_PREFIX}_${_PREFIX}LIBRARY_RELEASE MATCHES "${CMAKE_SHARED_LIBRARY_SUFFIX}$"
+          OR ${_PYTHON_PREFIX}_RUNTIME_${_PREFIX}LIBRARY_RELEASE)
         set (_${_PYTHON_PREFIX}_LIBRARY_TYPE SHARED)
       else()
         set (_${_PYTHON_PREFIX}_LIBRARY_TYPE STATIC)
@@ -3310,37 +3813,37 @@ if(_${_PYTHON_PREFIX}_CMAKE_ROLE STREQUAL "PROJECT")
       set_property (TARGET ${__name}
                     PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${${_PYTHON_PREFIX}_INCLUDE_DIRS}")
 
-      if (${_PYTHON_PREFIX}_LIBRARY_RELEASE AND ${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE)
+      if (${_PYTHON_PREFIX}_${_PREFIX}LIBRARY_RELEASE AND ${_PYTHON_PREFIX}_RUNTIME_${_PREFIX}LIBRARY_RELEASE)
         # System manage shared libraries in two parts: import and runtime
-        if (${_PYTHON_PREFIX}_LIBRARY_RELEASE AND ${_PYTHON_PREFIX}_LIBRARY_DEBUG)
+        if (${_PYTHON_PREFIX}_${_PREFIX}LIBRARY_RELEASE AND ${_PYTHON_PREFIX}_${_PREFIX}LIBRARY_DEBUG)
           set_property (TARGET ${__name} PROPERTY IMPORTED_CONFIGURATIONS RELEASE DEBUG)
           set_target_properties (${__name}
                                  PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "C"
-                                            IMPORTED_IMPLIB_RELEASE "${${_PYTHON_PREFIX}_LIBRARY_RELEASE}"
-                                            IMPORTED_LOCATION_RELEASE "${${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE}")
+                                            IMPORTED_IMPLIB_RELEASE "${${_PYTHON_PREFIX}_${_PREFIX}LIBRARY_RELEASE}"
+                                            IMPORTED_LOCATION_RELEASE "${${_PYTHON_PREFIX}_${_PREFIX}RUNTIME_LIBRARY_RELEASE}")
           set_target_properties (${__name}
                                  PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "C"
-                                            IMPORTED_IMPLIB_DEBUG "${${_PYTHON_PREFIX}_LIBRARY_DEBUG}"
-                                            IMPORTED_LOCATION_DEBUG "${${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG}")
+                                            IMPORTED_IMPLIB_DEBUG "${${_PYTHON_PREFIX}_${_PREFIX}LIBRARY_DEBUG}"
+                                            IMPORTED_LOCATION_DEBUG "${${_PYTHON_PREFIX}_RUNTIME_${_PREFIX}LIBRARY_DEBUG}")
         else()
           set_target_properties (${__name}
                                  PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES "C"
-                                            IMPORTED_IMPLIB "${${_PYTHON_PREFIX}_LIBRARIES}"
-                                            IMPORTED_LOCATION "${${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE}")
+                                            IMPORTED_IMPLIB "${${_PYTHON_PREFIX}_${_PREFIX}LIBRARIES}"
+                                            IMPORTED_LOCATION "${${_PYTHON_PREFIX}_RUNTIME_${_PREFIX}LIBRARY_RELEASE}")
         endif()
       else()
-        if (${_PYTHON_PREFIX}_LIBRARY_RELEASE AND ${_PYTHON_PREFIX}_LIBRARY_DEBUG)
+        if (${_PYTHON_PREFIX}_${_PREFIX}LIBRARY_RELEASE AND ${_PYTHON_PREFIX}_${_PREFIX}LIBRARY_DEBUG)
           set_property (TARGET ${__name} PROPERTY IMPORTED_CONFIGURATIONS RELEASE DEBUG)
           set_target_properties (${__name}
                                  PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "C"
-                                            IMPORTED_LOCATION_RELEASE "${${_PYTHON_PREFIX}_LIBRARY_RELEASE}")
+                                            IMPORTED_LOCATION_RELEASE "${${_PYTHON_PREFIX}_${_PREFIX}LIBRARY_RELEASE}")
           set_target_properties (${__name}
                                  PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "C"
-                                            IMPORTED_LOCATION_DEBUG "${${_PYTHON_PREFIX}_LIBRARY_DEBUG}")
+                                            IMPORTED_LOCATION_DEBUG "${${_PYTHON_PREFIX}_${_PREFIX}LIBRARY_DEBUG}")
         else()
           set_target_properties (${__name}
                                  PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES "C"
-                                            IMPORTED_LOCATION "${${_PYTHON_PREFIX}_LIBRARY_RELEASE}")
+                                            IMPORTED_LOCATION "${${_PYTHON_PREFIX}_${_PREFIX}LIBRARY_RELEASE}")
         endif()
       endif()
 
@@ -3359,6 +3862,28 @@ if(_${_PYTHON_PREFIX}_CMAKE_ROLE STREQUAL "PROJECT")
       endif()
     endmacro()
 
+    macro (__PYTHON_IMPORT_MODULE __name)
+      if (NOT TARGET ${__name})
+        add_library (${__name} INTERFACE IMPORTED)
+      endif()
+      set_property (TARGET ${__name}
+                    PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${${_PYTHON_PREFIX}_INCLUDE_DIRS}")
+
+      # When available, enforce shared library generation with undefined symbols
+      if (APPLE)
+        set_property (TARGET ${__name}
+                      PROPERTY INTERFACE_LINK_OPTIONS "LINKER:-undefined,dynamic_lookup")
+      endif()
+      if (CMAKE_SYSTEM_NAME STREQUAL "SunOS")
+        set_property (TARGET ${__name}
+                      PROPERTY INTERFACE_LINK_OPTIONS "LINKER:-z,nodefs")
+      endif()
+      if (CMAKE_SYSTEM_NAME STREQUAL "AIX")
+        set_property (TARGET ${__name}
+                      PROPERTY INTERFACE_LINK_OPTIONS "LINKER:-b,erok")
+      endif()
+    endmacro()
+
     if (${_PYTHON_PREFIX}_Development.Embed_FOUND)
       __python_import_library (${_PYTHON_PREFIX}::Python)
     endif()
@@ -3369,25 +3894,15 @@ if(_${_PYTHON_PREFIX}_CMAKE_ROLE STREQUAL "PROJECT")
         # but ALIAS cannot be used because the imported library is not GLOBAL.
         __python_import_library (${_PYTHON_PREFIX}::Module)
       else()
-        if (NOT TARGET ${_PYTHON_PREFIX}::Module)
-          add_library (${_PYTHON_PREFIX}::Module INTERFACE IMPORTED)
-        endif()
-        set_property (TARGET ${_PYTHON_PREFIX}::Module
-                      PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${${_PYTHON_PREFIX}_INCLUDE_DIRS}")
+        __python_import_module (${_PYTHON_PREFIX}::Module)
+      endif()
+    endif()
 
-        # When available, enforce shared library generation with undefined symbols
-        if (APPLE)
-          set_property (TARGET ${_PYTHON_PREFIX}::Module
-                        PROPERTY INTERFACE_LINK_OPTIONS "LINKER:-undefined,dynamic_lookup")
-        endif()
-        if (CMAKE_SYSTEM_NAME STREQUAL "SunOS")
-          set_property (TARGET ${_PYTHON_PREFIX}::Module
-                        PROPERTY INTERFACE_LINK_OPTIONS "LINKER:-z,nodefs")
-        endif()
-        if (CMAKE_SYSTEM_NAME STREQUAL "AIX")
-          set_property (TARGET ${_PYTHON_PREFIX}::Module
-                        PROPERTY INTERFACE_LINK_OPTIONS "LINKER:-b,erok")
-        endif()
+    if (${_PYTHON_PREFIX}_Development.SABIModule_FOUND)
+      if ("SABI_LIBRARY" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_SABIMODULE_ARTIFACTS)
+        __python_import_library (${_PYTHON_PREFIX}::SABIModule SABI)
+      else()
+        __python_import_module (${_PYTHON_PREFIX}::SABIModule)
       endif()
     endif()
 
@@ -3396,7 +3911,7 @@ if(_${_PYTHON_PREFIX}_CMAKE_ROLE STREQUAL "PROJECT")
     # It is used to build modules for python.
     #
     function (__${_PYTHON_PREFIX}_ADD_LIBRARY prefix name)
-      cmake_parse_arguments (PARSE_ARGV 2 PYTHON_ADD_LIBRARY "STATIC;SHARED;MODULE;WITH_SOABI" "" "")
+      cmake_parse_arguments (PARSE_ARGV 2 PYTHON_ADD_LIBRARY "STATIC;SHARED;MODULE;WITH_SOABI" "USE_SABI" "")
 
       if (PYTHON_ADD_LIBRARY_STATIC)
         set (type STATIC)
@@ -3406,9 +3921,51 @@ if(_${_PYTHON_PREFIX}_CMAKE_ROLE STREQUAL "PROJECT")
         set (type MODULE)
       endif()
 
-      if (type STREQUAL "MODULE" AND NOT TARGET ${prefix}::Module)
-        message (SEND_ERROR "${prefix}_ADD_LIBRARY: dependent target '${prefix}::Module' is not defined.\n   Did you miss to request COMPONENT 'Development.Module'?")
-        return()
+      if (PYTHON_ADD_LIBRARY_USE_SABI)
+        if (NOT type STREQUAL MODULE)
+          message (SEND_ERROR "${prefix}_ADD_LIBRARY: 'USE_SABI' option is only valid for 'MODULE' type.")
+          return()
+        endif()
+        if (NOT PYTHON_ADD_LIBRARY_USE_SABI MATCHES "^(3)(\\.([0-9]+))?$")
+          message (SEND_ERROR "${prefix}_ADD_LIBRARY: ${PYTHON_ADD_LIBRARY_USE_SABI}: wrong version specified for 'USE_SABI'.")
+          return()
+        endif()
+        # compute value for Py_LIMITED_API macro
+        set (major_version "${CMAKE_MATCH_1}")
+        unset (minor_version)
+        if (CMAKE_MATCH_3)
+          set (minor_version "${CMAKE_MATCH_3}")
+        endif()
+        if (major_version EQUAL "3" AND NOT minor_version)
+          set (Py_LIMITED_API "3")
+        elseif ("${major_version}.${minor_version}" VERSION_LESS "3.2")
+          message (SEND_ERROR "${prefix}_ADD_LIBRARY: ${PYTHON_ADD_LIBRARY_USE_SABI}: invalid version. Version must be '3.2' or upper.")
+          return()
+        else()
+          set (Py_LIMITED_API "0x0${major_version}")
+          if (NOT minor_version)
+            string (APPEND Py_LIMITED_API "00")
+          else()
+            if (minor_version LESS 16)
+              string (APPEND Py_LIMITED_API "0")
+            endif()
+            math (EXPR minor_version "${minor_version}" OUTPUT_FORMAT HEXADECIMAL)
+            string (REGEX REPLACE "^0x(.+)$" "\\1" minor_version "${minor_version}")
+            string (APPEND Py_LIMITED_API "${minor_version}")
+          endif()
+          string (APPEND Py_LIMITED_API "0000")
+        endif()
+      endif()
+
+      if (type STREQUAL "MODULE")
+        if (PYTHON_ADD_LIBRARY_USE_SABI AND NOT TARGET ${prefix}::SABIModule)
+          message (SEND_ERROR "${prefix}_ADD_LIBRARY: dependent target '${prefix}::SABIModule' is not defined.\n   Did you miss to request COMPONENT 'Development.SABIModule'?")
+          return()
+        endif()
+        if (NOT PYTHON_ADD_LIBRARY_USE_SABI AND NOT TARGET ${prefix}::Module)
+          message (SEND_ERROR "${prefix}_ADD_LIBRARY: dependent target '${prefix}::Module' is not defined.\n   Did you miss to request COMPONENT 'Development.Module'?")
+          return()
+        endif()
       endif()
       if (NOT type STREQUAL "MODULE" AND NOT TARGET ${prefix}::Python)
         message (SEND_ERROR "${prefix}_ADD_LIBRARY: dependent target '${prefix}::Python' is not defined.\n   Did you miss to request COMPONENT 'Development.Embed'?")
@@ -3420,23 +3977,37 @@ if(_${_PYTHON_PREFIX}_CMAKE_ROLE STREQUAL "PROJECT")
       get_property (type TARGET ${name} PROPERTY TYPE)
 
       if (type STREQUAL "MODULE_LIBRARY")
-        target_link_libraries (${name} PRIVATE ${prefix}::Module)
+        if (PYTHON_ADD_LIBRARY_USE_SABI)
+          target_compile_definitions (${name} PRIVATE Py_LIMITED_API=${Py_LIMITED_API})
+          target_link_libraries (${name} PRIVATE ${prefix}::SABIModule)
+        else()
+          target_link_libraries (${name} PRIVATE ${prefix}::Module)
+        endif()
         # customize library name to follow module name rules
         set_property (TARGET ${name} PROPERTY PREFIX "")
         if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
           set_property (TARGET ${name} PROPERTY SUFFIX ".pyd")
         endif()
 
-        if (PYTHON_ADD_LIBRARY_WITH_SOABI AND ${prefix}_SOABI)
-          get_property (suffix TARGET ${name} PROPERTY SUFFIX)
-          if (NOT suffix)
-            set (suffix "${CMAKE_SHARED_MODULE_SUFFIX}")
+        if (PYTHON_ADD_LIBRARY_WITH_SOABI)
+          if (NOT PYTHON_ADD_LIBRARY_USE_SABI AND ${prefix}_SOABI)
+            get_property (suffix TARGET ${name} PROPERTY SUFFIX)
+            if (NOT suffix)
+              set (suffix "${CMAKE_SHARED_MODULE_SUFFIX}")
+            endif()
+            set_property (TARGET ${name} PROPERTY SUFFIX ".${${prefix}_SOABI}${suffix}")
           endif()
-          set_property (TARGET ${name} PROPERTY SUFFIX ".${${prefix}_SOABI}${suffix}")
+          if (PYTHON_ADD_LIBRARY_USE_SABI AND ${prefix}_SOSABI)
+            get_property (suffix TARGET ${name} PROPERTY SUFFIX)
+            if (NOT suffix)
+              set (suffix "${CMAKE_SHARED_MODULE_SUFFIX}")
+            endif()
+            set_property (TARGET ${name} PROPERTY SUFFIX ".${${prefix}_SOSABI}${suffix}")
+          endif()
         endif()
       else()
-        if (PYTHON_ADD_LIBRARY_WITH_SOABI)
-          message (AUTHOR_WARNING "Find${prefix}: Option `WITH_SOABI` is only supported for `MODULE` library type.")
+        if (PYTHON_ADD_LIBRARY_WITH_SOABI OR PYTHON_ADD_LIBRARY_USE_SABI)
+          message (AUTHOR_WARNING "Find${prefix}: Options 'WITH_SOABI' and 'USE_SABI' are only supported for `MODULE` library type.")
         endif()
         target_link_libraries (${name} PRIVATE ${prefix}::Python)
       endif()
