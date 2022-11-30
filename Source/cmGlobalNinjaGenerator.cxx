@@ -25,6 +25,7 @@
 #include "cmsys/FStream.hxx"
 
 #include "cmCxxModuleMapper.h"
+#include "cmDyndepCollation.h"
 #include "cmFileSet.h"
 #include "cmFortranParser.h"
 #include "cmGeneratedFileStream.h"
@@ -2468,45 +2469,6 @@ cm::optional<cmSourceInfo> cmcmd_cmake_ninja_depends_fortran(
 }
 }
 
-struct CxxModuleFileSet
-{
-  std::string Name;
-  std::string RelativeDirectory;
-  std::string SourcePath;
-  std::string Type;
-  cmFileSetVisibility Visibility;
-  cm::optional<std::string> Destination;
-};
-
-struct CxxModuleBmiInstall
-{
-  std::string Component;
-  std::string Destination;
-  bool ExcludeFromAll;
-  bool Optional;
-  std::string Permissions;
-  std::string MessageLevel;
-  std::string ScriptLocation;
-};
-
-struct CxxModuleExport
-{
-  std::string Name;
-  std::string Destination;
-  std::string Prefix;
-  std::string CxxModuleInfoDir;
-  std::string Namespace;
-  bool Install;
-};
-
-struct cmGlobalNinjaGenerator::CxxModuleExportInfo
-{
-  std::map<std::string, CxxModuleFileSet> ObjectToFileSet;
-  cm::optional<CxxModuleBmiInstall> BmiInstallation;
-  std::vector<CxxModuleExport> Exports;
-  std::string Config;
-};
-
 bool cmGlobalNinjaGenerator::WriteDyndepFile(
   std::string const& dir_top_src, std::string const& dir_top_bld,
   std::string const& dir_cur_src, std::string const& dir_cur_bld,
@@ -2514,7 +2476,7 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
   std::string const& module_dir,
   std::vector<std::string> const& linked_target_dirs,
   std::string const& arg_lang, std::string const& arg_modmapfmt,
-  CxxModuleExportInfo const& export_info)
+  cmCxxModuleExportInfo const& export_info)
 {
   // Setup path conversions.
   {
@@ -3095,58 +3057,7 @@ int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
     }
   }
 
-  cmGlobalNinjaGenerator::CxxModuleExportInfo export_info;
-  export_info.Config = tdi["config"].asString();
-  if (export_info.Config.empty()) {
-    export_info.Config = "noconfig";
-  }
-  Json::Value const& tdi_exports = tdi["exports"];
-  if (tdi_exports.isArray()) {
-    for (auto const& tdi_export : tdi_exports) {
-      CxxModuleExport exp;
-      exp.Install = tdi_export["install"].asBool();
-      exp.Name = tdi_export["export-name"].asString();
-      exp.Destination = tdi_export["destination"].asString();
-      exp.Prefix = tdi_export["export-prefix"].asString();
-      exp.CxxModuleInfoDir = tdi_export["cxx-module-info-dir"].asString();
-      exp.Namespace = tdi_export["namespace"].asString();
-
-      export_info.Exports.push_back(exp);
-    }
-  }
-  auto const& bmi_installation = tdi["bmi-installation"];
-  if (bmi_installation.isObject()) {
-    CxxModuleBmiInstall bmi_install;
-
-    bmi_install.Component = bmi_installation["component"].asString();
-    bmi_install.Destination = bmi_installation["destination"].asString();
-    bmi_install.ExcludeFromAll = bmi_installation["exclude-from-all"].asBool();
-    bmi_install.Optional = bmi_installation["optional"].asBool();
-    bmi_install.Permissions = bmi_installation["permissions"].asString();
-    bmi_install.MessageLevel = bmi_installation["message-level"].asString();
-    bmi_install.ScriptLocation =
-      bmi_installation["script-location"].asString();
-
-    export_info.BmiInstallation = bmi_install;
-  }
-  Json::Value const& tdi_cxx_modules = tdi["cxx-modules"];
-  if (tdi_cxx_modules.isObject()) {
-    for (auto i = tdi_cxx_modules.begin(); i != tdi_cxx_modules.end(); ++i) {
-      CxxModuleFileSet& fsi = export_info.ObjectToFileSet[i.key().asString()];
-      auto const& tdi_cxx_module_info = *i;
-      fsi.Name = tdi_cxx_module_info["name"].asString();
-      fsi.RelativeDirectory =
-        tdi_cxx_module_info["relative-directory"].asString();
-      fsi.SourcePath = tdi_cxx_module_info["source"].asString();
-      fsi.Type = tdi_cxx_module_info["type"].asString();
-      fsi.Visibility = cmFileSetVisibilityFromName(
-        tdi_cxx_module_info["visibility"].asString(), nullptr);
-      auto const& tdi_fs_dest = tdi_cxx_module_info["destination"];
-      if (tdi_fs_dest.isString()) {
-        fsi.Destination = tdi_fs_dest.asString();
-      }
-    }
-  }
+  auto export_info = cmDyndepCollation::ParseExportInfo(tdi);
 
   cmake cm(cmake::RoleInternal, cmState::Unknown);
   cm.SetHomeDirectory(dir_top_src);
@@ -3156,7 +3067,7 @@ int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
       !cm::static_reference_cast<cmGlobalNinjaGenerator>(ggd).WriteDyndepFile(
         dir_top_src, dir_top_bld, dir_cur_src, dir_cur_bld, arg_dd, arg_ddis,
         module_dir, linked_target_dirs, arg_lang, arg_modmapfmt,
-        export_info)) {
+        *export_info)) {
     return 1;
   }
   return 0;

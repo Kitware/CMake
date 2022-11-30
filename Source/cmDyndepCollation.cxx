@@ -5,10 +5,10 @@
 
 #include <algorithm>
 #include <map>
-#include <memory>
 #include <utility>
 #include <vector>
 
+#include <cm/memory>
 #include <cm/string_view>
 #include <cmext/string_view>
 
@@ -259,4 +259,64 @@ void cmDyndepCollation::AddCollationInformation(
   tdi["bmi-installation"] = CollationInformationBmiInstallation(gt, config);
   tdi["exports"] = CollationInformationExports(gt);
   tdi["config"] = config;
+}
+
+std::unique_ptr<cmCxxModuleExportInfo> cmDyndepCollation::ParseExportInfo(
+  Json::Value const& tdi)
+{
+  auto export_info = cm::make_unique<cmCxxModuleExportInfo>();
+
+  export_info->Config = tdi["config"].asString();
+  if (export_info->Config.empty()) {
+    export_info->Config = "noconfig";
+  }
+  Json::Value const& tdi_exports = tdi["exports"];
+  if (tdi_exports.isArray()) {
+    for (auto const& tdi_export : tdi_exports) {
+      CxxModuleExport exp;
+      exp.Install = tdi_export["install"].asBool();
+      exp.Name = tdi_export["export-name"].asString();
+      exp.Destination = tdi_export["destination"].asString();
+      exp.Prefix = tdi_export["export-prefix"].asString();
+      exp.CxxModuleInfoDir = tdi_export["cxx-module-info-dir"].asString();
+      exp.Namespace = tdi_export["namespace"].asString();
+
+      export_info->Exports.push_back(exp);
+    }
+  }
+  auto const& bmi_installation = tdi["bmi-installation"];
+  if (bmi_installation.isObject()) {
+    CxxModuleBmiInstall bmi_install;
+
+    bmi_install.Component = bmi_installation["component"].asString();
+    bmi_install.Destination = bmi_installation["destination"].asString();
+    bmi_install.ExcludeFromAll = bmi_installation["exclude-from-all"].asBool();
+    bmi_install.Optional = bmi_installation["optional"].asBool();
+    bmi_install.Permissions = bmi_installation["permissions"].asString();
+    bmi_install.MessageLevel = bmi_installation["message-level"].asString();
+    bmi_install.ScriptLocation =
+      bmi_installation["script-location"].asString();
+
+    export_info->BmiInstallation = bmi_install;
+  }
+  Json::Value const& tdi_cxx_modules = tdi["cxx-modules"];
+  if (tdi_cxx_modules.isObject()) {
+    for (auto i = tdi_cxx_modules.begin(); i != tdi_cxx_modules.end(); ++i) {
+      CxxModuleFileSet& fsi = export_info->ObjectToFileSet[i.key().asString()];
+      auto const& tdi_cxx_module_info = *i;
+      fsi.Name = tdi_cxx_module_info["name"].asString();
+      fsi.RelativeDirectory =
+        tdi_cxx_module_info["relative-directory"].asString();
+      fsi.SourcePath = tdi_cxx_module_info["source"].asString();
+      fsi.Type = tdi_cxx_module_info["type"].asString();
+      fsi.Visibility = cmFileSetVisibilityFromName(
+        tdi_cxx_module_info["visibility"].asString(), nullptr);
+      auto const& tdi_fs_dest = tdi_cxx_module_info["destination"];
+      if (tdi_fs_dest.isString()) {
+        fsi.Destination = tdi_fs_dest.asString();
+      }
+    }
+  }
+
+  return export_info;
 }
