@@ -57,7 +57,7 @@ public:
   using ItemVector = cmComputeLinkInformation::ItemVector;
   void OutputLibraries(std::ostream& fout, ItemVector const& libs);
   void OutputObjects(std::ostream& fout, cmGeneratorTarget* t,
-                     std::string const& config, const char* isep = 0);
+                     std::string const& config, const char* isep = nullptr);
 
 private:
   cmLocalVisualStudio7Generator* LocalGenerator;
@@ -108,8 +108,8 @@ void cmLocalVisualStudio7Generator::Generate()
     }
 
     auto& gtVisited = this->GetSourcesVisited(gt);
-    auto& deps = this->GlobalGenerator->GetTargetDirectDepends(gt);
-    for (auto& d : deps) {
+    auto const& deps = this->GlobalGenerator->GetTargetDirectDepends(gt);
+    for (auto const& d : deps) {
       // Take the union of visited source files of custom commands
       auto depVisited = this->GetSourcesVisited(d);
       gtVisited.insert(depVisited.begin(), depVisited.end());
@@ -127,7 +127,7 @@ void cmLocalVisualStudio7Generator::FixGlobalTargets()
   // commands for targets in which no sources are built.  Add dummy
   // rules to force these targets to build.
   const auto& tgts = this->GetGeneratorTargets();
-  for (auto& l : tgts) {
+  for (auto const& l : tgts) {
     if (l->GetType() == cmStateEnums::GLOBAL_TARGET) {
       cmCustomCommandLines force_commands =
         cmMakeSingleCommandLine({ "cd", "." });
@@ -179,8 +179,7 @@ void cmLocalVisualStudio7Generator::WriteStampFiles()
 
   // Sort the list of input files and remove duplicates.
   std::sort(listFiles.begin(), listFiles.end(), std::less<std::string>());
-  std::vector<std::string>::iterator new_end =
-    std::unique(listFiles.begin(), listFiles.end());
+  auto new_end = std::unique(listFiles.begin(), listFiles.end());
   listFiles.erase(new_end, listFiles.end());
 
   for (const std::string& lf : listFiles) {
@@ -217,7 +216,7 @@ void cmLocalVisualStudio7Generator::GenerateTarget(cmGeneratorTarget* target)
   // Generate the project file and replace it atomically with
   // copy-if-different.  We use a separate timestamp so that the IDE
   // does not reload project files unnecessarily.
-  cmGeneratedFileStream fout(fname.c_str());
+  cmGeneratedFileStream fout(fname);
   fout.SetCopyIfDifferent(true);
   this->WriteVCProjFile(fout, lname, target);
   if (fout.Close()) {
@@ -253,8 +252,7 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
 
   // Sort the list of input files and remove duplicates.
   std::sort(listFiles.begin(), listFiles.end(), std::less<std::string>());
-  std::vector<std::string>::iterator new_end =
-    std::unique(listFiles.begin(), listFiles.end());
+  auto new_end = std::unique(listFiles.begin(), listFiles.end());
   listFiles.erase(new_end, listFiles.end());
 
   std::string argS = cmStrCat("-S", this->GetSourceDirectory());
@@ -280,10 +278,9 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
     // the generator validated all project-named sources.
     file->ResolveFullPath();
     return file;
-  } else {
-    cmSystemTools::Error("Error adding rule for " + makefileIn);
-    return nullptr;
   }
+  cmSystemTools::Error("Error adding rule for " + makefileIn);
+  return nullptr;
 }
 
 void cmLocalVisualStudio7Generator::WriteConfigurations(
@@ -559,12 +556,11 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFortranLinkFlagTable[] = {
 class cmLocalVisualStudio7Generator::EventWriter
 {
 public:
-  EventWriter(cmLocalVisualStudio7Generator* lg, const std::string& config,
+  EventWriter(cmLocalVisualStudio7Generator* lg, std::string config,
               std::ostream& os)
     : LG(lg)
-    , Config(config)
+    , Config(std::move(config))
     , Stream(os)
-    , First(true)
   {
   }
   void Start(const char* tool)
@@ -610,7 +606,7 @@ private:
   cmLocalVisualStudio7Generator* LG;
   std::string Config;
   std::ostream& Stream;
-  bool First;
+  bool First = true;
 };
 
 void cmLocalVisualStudio7Generator::WriteConfiguration(
@@ -634,7 +630,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
   // 1 == executable
   // 10 == utility
   const char* configType = "10";
-  const char* projectType = 0;
+  const char* projectType = nullptr;
   bool targetBuilds = true;
 
   switch (target->GetType()) {
@@ -843,7 +839,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
   }
   fout << "/>\n"; // end of <Tool Name=VCCLCompilerTool
   if (gg->IsMarmasmEnabled() && !this->FortranProject) {
-    Options marmasmOptions(this, Options::MarmasmCompiler, 0, 0);
+    Options marmasmOptions(this, Options::MarmasmCompiler, nullptr, nullptr);
     /* clang-format off */
     fout <<
       "\t\t\t<Tool\n"
@@ -861,7 +857,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
     /* clang-format on */
   }
   if (gg->IsMasmEnabled() && !this->FortranProject) {
-    Options masmOptions(this, Options::MasmCompiler, 0, 0);
+    Options masmOptions(this, Options::MasmCompiler, nullptr, nullptr);
     /* clang-format off */
     fout <<
       "\t\t\t<Tool\n"
@@ -957,7 +953,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
 }
 
 std::string cmLocalVisualStudio7Generator::GetBuildTypeLinkerFlags(
-  std::string rootLinkerFlags, const std::string& configName)
+  std::string const& rootLinkerFlags, const std::string& configName)
 {
   std::string configTypeUpper = cmSystemTools::UpperCase(configName);
   std::string extraLinkOptionsBuildTypeDef =
@@ -1439,8 +1435,7 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
   fout << "\t<Files>\n";
 
   // Loop through every source group.
-  for (unsigned int i = 0; i < sourceGroups.size(); ++i) {
-    cmSourceGroup sg = sourceGroups[i];
+  for (auto const& sg : sourceGroups) {
     this->WriteGroup(&sg, target, fout, libName, configs, sources);
   }
 
@@ -1634,10 +1629,9 @@ std::string cmLocalVisualStudio7Generator::ComputeLongestObjectDirectory(
 
   // Compute the maximum length configuration name.
   std::string config_max;
-  for (std::vector<std::string>::iterator i = configs.begin();
-       i != configs.end(); ++i) {
-    if (i->size() > config_max.size()) {
-      config_max = *i;
+  for (auto& config : configs) {
+    if (config.size() > config_max.size()) {
+      config_max = config;
     }
   }
 
@@ -1663,9 +1657,8 @@ bool cmLocalVisualStudio7Generator::WriteGroup(
   // Write the children to temporary output.
   bool hasChildrenWithSources = false;
   std::ostringstream tmpOut;
-  for (unsigned int i = 0; i < children.size(); ++i) {
-    if (this->WriteGroup(&children[i], target, tmpOut, libName, configs,
-                         sources)) {
+  for (const auto& child : children) {
+    if (this->WriteGroup(&child, target, tmpOut, libName, configs, sources)) {
       hasChildrenWithSources = true;
     }
   }
@@ -1691,8 +1684,7 @@ bool cmLocalVisualStudio7Generator::WriteGroup(
         target->GetType() == cmStateEnums::GLOBAL_TARGET ||
         target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       // Look up the source kind and configs.
-      std::map<cmSourceFile const*, size_t>::const_iterator map_it =
-        sources.Index.find(sf);
+      auto map_it = sources.Index.find(sf);
       // The map entry must exist because we populated it earlier.
       assert(map_it != sources.Index.end());
       cmGeneratorTarget::AllConfigSource const& acs =
@@ -1943,7 +1935,7 @@ void cmLocalVisualStudio7Generator::OutputTargetRules(
   }
   std::unique_ptr<cmCustomCommand> pcc(
     this->MaybeCreateImplibDir(target, configName, this->FortranProject));
-  if (pcc.get()) {
+  if (pcc) {
     event.Write(*pcc);
   }
   event.Finish();
@@ -1986,7 +1978,7 @@ void cmLocalVisualStudio7Generator::WriteProjectStartFortran(
   cmGlobalVisualStudio7Generator* gg =
     static_cast<cmGlobalVisualStudio7Generator*>(this->GlobalGenerator);
   /* clang-format off */
-  fout << "<?xml version=\"1.0\" encoding = \""
+  fout << R"(<?xml version="1.0" encoding = ")"
        << gg->Encoding() << "\"?>\n"
        << "<VisualStudioProject\n"
        << "\tProjectCreator=\"Intel Fortran\"\n"
@@ -1994,7 +1986,7 @@ void cmLocalVisualStudio7Generator::WriteProjectStartFortran(
   /* clang-format on */
   cmValue p = target->GetProperty("VS_KEYWORD");
   const char* keyword = p ? p->c_str() : "Console Application";
-  const char* projectType = 0;
+  const char* projectType = nullptr;
   switch (target->GetType()) {
     case cmStateEnums::OBJECT_LIBRARY:
     case cmStateEnums::STATIC_LIBRARY:
@@ -2014,7 +2006,7 @@ void cmLocalVisualStudio7Generator::WriteProjectStartFortran(
       if (!keyword) {
         keyword = "Console Application";
       }
-      projectType = 0;
+      projectType = nullptr;
       break;
     case cmStateEnums::UTILITY:
     case cmStateEnums::GLOBAL_TARGET:
@@ -2048,7 +2040,7 @@ void cmLocalVisualStudio7Generator::WriteProjectStart(
     static_cast<cmGlobalVisualStudio7Generator*>(this->GlobalGenerator);
 
   /* clang-format off */
-  fout << "<?xml version=\"1.0\" encoding = \""
+  fout << R"(<?xml version="1.0" encoding = ")"
        << gg->Encoding() << "\"?>\n"
        << "<VisualStudioProject\n"
        << "\tProjectType=\"Visual C++\"\n";
@@ -2166,8 +2158,8 @@ void cmVS7GeneratorOptions::OutputFlag(std::ostream& fout, int indent,
 class cmVS7XMLParser : public cmXMLParser
 {
 public:
-  virtual void EndElement(const std::string& /* name */) {}
-  virtual void StartElement(const std::string& name, const char** atts)
+  void EndElement(const std::string& /* name */) override {}
+  void StartElement(const std::string& name, const char** atts) override
   {
     // once the GUID is found do nothing
     if (!this->GUID.empty()) {
@@ -2192,7 +2184,7 @@ public:
       }
     }
   }
-  int InitializeParser()
+  int InitializeParser() override
   {
     int ret = cmXMLParser::InitializeParser();
     if (ret == 0) {
@@ -2235,7 +2227,7 @@ static bool cmLVS7G_IsFAT(const char* dir)
     volRoot[0] = dir[0];
     char fsName[16];
     if (GetVolumeInformationA(volRoot, 0, 0, 0, 0, 0, fsName, 16) &&
-        strstr(fsName, "FAT") != 0) {
+        strstr(fsName, "FAT") != nullptr) {
       return true;
     }
   }

@@ -44,7 +44,7 @@ public:
     VS17 = 170
   };
 
-  virtual ~cmGlobalVisualStudioGenerator();
+  ~cmGlobalVisualStudioGenerator() override;
 
   VSVersion GetVersion() const;
   void SetVersion(VSVersion v);
@@ -133,8 +133,8 @@ public:
     std::string First;
 
   public:
-    TargetCompare(std::string const& first)
-      : First(first)
+    TargetCompare(std::string first)
+      : First(std::move(first))
     {
     }
     bool operator()(cmGeneratorTarget const* l,
@@ -193,7 +193,6 @@ protected:
   using UtilityDependsMap = std::map<cmGeneratorTarget const*, std::string>;
   UtilityDependsMap UtilityDepends;
 
-protected:
   VSVersion Version;
   bool ExpressEdition;
 

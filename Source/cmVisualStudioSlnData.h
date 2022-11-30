@@ -13,12 +13,12 @@
 class cmSlnProjectEntry
 {
 public:
-  cmSlnProjectEntry() {}
-  cmSlnProjectEntry(const std::string& guid, const std::string& name,
-                    const std::string& relativePath)
-    : Guid(guid)
-    , Name(name)
-    , RelativePath(relativePath)
+  cmSlnProjectEntry() = default;
+  cmSlnProjectEntry(std::string guid, std::string name,
+                    std::string relativePath)
+    : Guid(std::move(guid))
+    , Name(std::move(name))
+    , RelativePath(std::move(relativePath))
   {
   }
 
@@ -56,10 +56,10 @@ public:
     minimumVisualStudioVersion = version;
   }
 
-  const cm::optional<cmSlnProjectEntry> GetProjectByGUID(
+  cm::optional<cmSlnProjectEntry> GetProjectByGUID(
     const std::string& projectGUID) const;
 
-  const cm::optional<cmSlnProjectEntry> GetProjectByName(
+  cm::optional<cmSlnProjectEntry> GetProjectByName(
     const std::string& projectName) const;
 
   std::vector<cmSlnProjectEntry> GetProjects() const;

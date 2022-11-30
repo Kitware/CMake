@@ -44,7 +44,8 @@ cmGlobalVisualStudio8Generator::cmGlobalVisualStudio8Generator(
 {
   this->ProjectConfigurationSectionName = "ProjectConfigurationPlatforms";
   this->Name = name;
-  this->ExtraFlagTable = this->GetExtraFlagTableVS8();
+  this->ExtraFlagTable =
+    cmGlobalVisualStudio8Generator::GetExtraFlagTableVS8();
 }
 
 std::string cmGlobalVisualStudio8Generator::FindDevEnvCommand()
@@ -52,9 +53,9 @@ std::string cmGlobalVisualStudio8Generator::FindDevEnvCommand()
   // First look for VCExpress.
   std::string vsxcmd;
   std::string vsxkey =
-    cmStrCat("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\",
+    cmStrCat(R"(HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VCExpress\)",
              this->GetIDEVersion(), ";InstallDir");
-  if (cmSystemTools::ReadRegistryValue(vsxkey.c_str(), vsxcmd,
+  if (cmSystemTools::ReadRegistryValue(vsxkey, vsxcmd,
                                        cmSystemTools::KeyWOW64_32)) {
     cmSystemTools::ConvertToUnixSlashes(vsxcmd);
     vsxcmd += "/VCExpress.exe";
@@ -149,6 +150,7 @@ void cmGlobalVisualStudio8Generator::Configure()
 
 bool cmGlobalVisualStudio8Generator::UseFolderProperty() const
 {
+  // NOLINTNEXTLINE(bugprone-parent-virtual-call)
   return IsExpressEdition() ? false : cmGlobalGenerator::UseFolderProperty();
 }
 
@@ -172,7 +174,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
                                        std::move(cc));
 
   auto ptr = cm::make_unique<cmGeneratorTarget>(tgt, &lg);
-  auto gt = ptr.get();
+  auto* gt = ptr.get();
   lg.AddGeneratorTarget(std::move(ptr));
 
   // Organize in the "predefined targets" folder:
@@ -190,7 +192,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
       cmStrCat(generators[0]->GetMakefile()->GetCurrentBinaryDirectory(), '/',
                stampList);
     std::string stampFile;
-    cmGeneratedFileStream fout(stampListFile.c_str());
+    cmGeneratedFileStream fout(stampListFile);
     for (const auto& gi : generators) {
       stampFile = cmStrCat(gi->GetMakefile()->GetCurrentBinaryDirectory(),
                            "/CMakeFiles/generate.stamp");
@@ -237,8 +239,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
 
     // Sort the list of input files and remove duplicates.
     std::sort(listFiles.begin(), listFiles.end(), std::less<std::string>());
-    std::vector<std::string>::iterator new_end =
-      std::unique(listFiles.begin(), listFiles.end());
+    auto new_end = std::unique(listFiles.begin(), listFiles.end());
     listFiles.erase(new_end, listFiles.end());
 
     // Create a rule to re-run CMake.
@@ -277,8 +278,8 @@ void cmGlobalVisualStudio8Generator::AddExtraIDETargets()
 {
   cmGlobalVisualStudio7Generator::AddExtraIDETargets();
   if (this->AddCheckTarget()) {
-    for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i) {
-      const auto& tgts = this->LocalGenerators[i]->GetGeneratorTargets();
+    for (auto& LocalGenerator : this->LocalGenerators) {
+      const auto& tgts = LocalGenerator->GetGeneratorTargets();
       // All targets depend on the build-system check target.
       for (const auto& ti : tgts) {
         if (ti->GetName() != CMAKE_CHECK_BUILD_SYSTEM_TARGET) {
@@ -324,8 +325,7 @@ void cmGlobalVisualStudio8Generator::WriteProjectConfigurations(
          << (!platformMapping.empty() ? platformMapping
                                       : this->GetPlatformName())
          << "\n";
-    std::set<std::string>::const_iterator ci =
-      configsPartOfDefaultBuild.find(i);
+    auto ci = configsPartOfDefaultBuild.find(i);
     if (!(ci == configsPartOfDefaultBuild.end())) {
       fout << "\t\t{" << guid << "}." << i << "|" << this->GetPlatformName()
            << ".Build.0 = " << dstConfig << "|"
@@ -382,6 +382,7 @@ bool cmGlobalVisualStudio8Generator::ComputeTargetDepends()
 {
   // Skip over the cmGlobalVisualStudioGenerator implementation!
   // We do not need the support that VS <= 7.1 needs.
+  // NOLINTNEXTLINE(bugprone-parent-virtual-call)
   return this->cmGlobalGenerator::ComputeTargetDepends();
 }
 
@@ -404,20 +405,23 @@ bool cmGlobalVisualStudio8Generator::NeedLinkLibraryDependencies(
   cmGeneratorTarget* target)
 {
   // Look for utility dependencies that magically link.
-  for (BT<std::pair<std::string, bool>> const& ui : target->GetUtilities()) {
-    if (cmGeneratorTarget* depTarget =
-          target->GetLocalGenerator()->FindGeneratorTargetToUse(
-            ui.Value.first)) {
-      if (depTarget->IsInBuildSystem() &&
-          depTarget->GetProperty("EXTERNAL_MSPROJECT")) {
-        // This utility dependency names an external .vcproj target.
-        // We use LinkLibraryDependencies="true" to link to it without
-        // predicting the .lib file location or name.
-        return true;
+  auto const& utilities = target->GetUtilities();
+  return std::any_of(
+    utilities.begin(), utilities.end(),
+    [target](BT<std::pair<std::string, bool>> const& ui) {
+      if (cmGeneratorTarget* depTarget =
+            target->GetLocalGenerator()->FindGeneratorTargetToUse(
+              ui.Value.first)) {
+        if (depTarget->IsInBuildSystem() &&
+            depTarget->GetProperty("EXTERNAL_MSPROJECT")) {
+          // This utility dependency names an external .vcproj target.
+          // We use LinkLibraryDependencies="true" to link to it without
+          // predicting the .lib file location or name.
+          return true;
+        }
       }
-    }
-  }
-  return false;
+      return false;
+    });
 }
 
 static cmVS7FlagTable cmVS8ExtraFlagTable[] = {

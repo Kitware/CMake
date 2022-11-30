@@ -302,7 +302,7 @@ bool cmGlobalVisualStudio10Generator::ParseGeneratorToolset(
   std::string const& ts, cmMakefile* mf)
 {
   std::vector<std::string> const fields = cmTokenize(ts, ",");
-  std::vector<std::string>::const_iterator fi = fields.begin();
+  auto fi = fields.begin();
   if (fi == fields.end()) {
     return true;
   }
@@ -501,7 +501,8 @@ bool cmGlobalVisualStudio10Generator::InitializeWindowsStore(cmMakefile* mf)
 
 bool cmGlobalVisualStudio10Generator::InitializeTegraAndroid(cmMakefile* mf)
 {
-  std::string v = this->GetInstalledNsightTegraVersion();
+  std::string v =
+    cmGlobalVisualStudio10Generator::GetInstalledNsightTegraVersion();
   if (v.empty()) {
     mf->IssueMessage(MessageType::FATAL_ERROR,
                      "CMAKE_SYSTEM_NAME is 'Android' but "
@@ -773,9 +774,9 @@ std::string cmGlobalVisualStudio10Generator::FindMSBuildCommand()
 
   // Search in standard location.
   mskey = cmStrCat(
-    "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\",
+    R"(HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\MSBuild\ToolsVersions\)",
     this->GetToolsVersion(), ";MSBuildToolsPath");
-  if (cmSystemTools::ReadRegistryValue(mskey.c_str(), msbuild,
+  if (cmSystemTools::ReadRegistryValue(mskey, msbuild,
                                        cmSystemTools::KeyWOW64_32)) {
     cmSystemTools::ConvertToUnixSlashes(msbuild);
     msbuild += "/MSBuild.exe";
@@ -798,6 +799,7 @@ std::string cmGlobalVisualStudio10Generator::FindDevEnvCommand()
   }
   // Skip over the cmGlobalVisualStudio8Generator implementation because
   // we expect a real devenv and do not want to look for VCExpress.
+  // NOLINTNEXTLINE(bugprone-parent-virtual-call)
   return this->cmGlobalVisualStudio71Generator::FindDevEnvCommand();
 }
 
@@ -1108,8 +1110,9 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
             // Decide if a restore is performed, based on a cache variable.
             if (cmValue cached =
                   this->CMakeInstance->GetState()->GetCacheEntryValue(
-                    "CMAKE_VS_NUGET_PACKAGE_RESTORE"))
+                    "CMAKE_VS_NUGET_PACKAGE_RESTORE")) {
               restorePackages = cached.IsOn();
+            }
           }
 
           if (restorePackages) {
@@ -1137,7 +1140,7 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
       std::string extension =
         cmSystemTools::GetFilenameLastExtension(proj->GetRelativePath());
       extension = cmSystemTools::LowerCase(extension);
-      if (extension.compare(".csproj") == 0) {
+      if (extension == ".csproj") {
         // Use correct platform name
         platform =
           slnData.GetConfigurationTarget(tname, plainConfig, platform);
@@ -1502,19 +1505,23 @@ std::string cmGlobalVisualStudio10Generator::GetClFlagTableName() const
 
   if (toolset == "v142") {
     return "v142";
-  } else if (toolset == "v141") {
-    return "v141";
-  } else if (useToolset == "v140") {
-    return "v140";
-  } else if (useToolset == "v120") {
-    return "v12";
-  } else if (useToolset == "v110") {
-    return "v11";
-  } else if (useToolset == "v100") {
-    return "v10";
-  } else {
-    return "";
   }
+  if (toolset == "v141") {
+    return "v141";
+  }
+  if (useToolset == "v140") {
+    return "v140";
+  }
+  if (useToolset == "v120") {
+    return "v12";
+  }
+  if (useToolset == "v110") {
+    return "v11";
+  }
+  if (useToolset == "v100") {
+    return "v10";
+  }
+  return "";
 }
 
 std::string cmGlobalVisualStudio10Generator::GetCSharpFlagTableName() const
@@ -1524,19 +1531,23 @@ std::string cmGlobalVisualStudio10Generator::GetCSharpFlagTableName() const
 
   if (useToolset == "v142") {
     return "v142";
-  } else if (useToolset == "v141") {
-    return "v141";
-  } else if (useToolset == "v140") {
-    return "v140";
-  } else if (useToolset == "v120") {
-    return "v12";
-  } else if (useToolset == "v110") {
-    return "v11";
-  } else if (useToolset == "v100") {
-    return "v10";
-  } else {
-    return "";
   }
+  if (useToolset == "v141") {
+    return "v141";
+  }
+  if (useToolset == "v140") {
+    return "v140";
+  }
+  if (useToolset == "v120") {
+    return "v12";
+  }
+  if (useToolset == "v110") {
+    return "v11";
+  }
+  if (useToolset == "v100") {
+    return "v10";
+  }
+  return "";
 }
 
 std::string cmGlobalVisualStudio10Generator::GetRcFlagTableName() const
@@ -1547,15 +1558,17 @@ std::string cmGlobalVisualStudio10Generator::GetRcFlagTableName() const
   if ((useToolset == "v140") || (useToolset == "v141") ||
       (useToolset == "v142")) {
     return "v14";
-  } else if (useToolset == "v120") {
-    return "v12";
-  } else if (useToolset == "v110") {
-    return "v11";
-  } else if (useToolset == "v100") {
-    return "v10";
-  } else {
-    return "";
   }
+  if (useToolset == "v120") {
+    return "v12";
+  }
+  if (useToolset == "v110") {
+    return "v11";
+  }
+  if (useToolset == "v100") {
+    return "v10";
+  }
+  return "";
 }
 
 std::string cmGlobalVisualStudio10Generator::GetLibFlagTableName() const
@@ -1566,15 +1579,17 @@ std::string cmGlobalVisualStudio10Generator::GetLibFlagTableName() const
   if ((useToolset == "v140") || (useToolset == "v141") ||
       (useToolset == "v142")) {
     return "v14";
-  } else if (useToolset == "v120") {
-    return "v12";
-  } else if (useToolset == "v110") {
-    return "v11";
-  } else if (useToolset == "v100") {
-    return "v10";
-  } else {
-    return "";
   }
+  if (useToolset == "v120") {
+    return "v12";
+  }
+  if (useToolset == "v110") {
+    return "v11";
+  }
+  if (useToolset == "v100") {
+    return "v10";
+  }
+  return "";
 }
 
 std::string cmGlobalVisualStudio10Generator::GetLinkFlagTableName() const
@@ -1584,19 +1599,23 @@ std::string cmGlobalVisualStudio10Generator::GetLinkFlagTableName() const
 
   if (useToolset == "v142") {
     return "v142";
-  } else if (useToolset == "v141") {
-    return "v141";
-  } else if (useToolset == "v140") {
-    return "v140";
-  } else if (useToolset == "v120") {
-    return "v12";
-  } else if (useToolset == "v110") {
-    return "v11";
-  } else if (useToolset == "v100") {
-    return "v10";
-  } else {
-    return "";
   }
+  if (useToolset == "v141") {
+    return "v141";
+  }
+  if (useToolset == "v140") {
+    return "v140";
+  }
+  if (useToolset == "v120") {
+    return "v12";
+  }
+  if (useToolset == "v110") {
+    return "v11";
+  }
+  if (useToolset == "v100") {
+    return "v10";
+  }
+  return "";
 }
 
 std::string cmGlobalVisualStudio10Generator::GetMasmFlagTableName() const
@@ -1607,15 +1626,17 @@ std::string cmGlobalVisualStudio10Generator::GetMasmFlagTableName() const
   if ((useToolset == "v140") || (useToolset == "v141") ||
       (useToolset == "v142")) {
     return "v14";
-  } else if (useToolset == "v120") {
-    return "v12";
-  } else if (useToolset == "v110") {
-    return "v11";
-  } else if (useToolset == "v100") {
-    return "v10";
-  } else {
-    return "";
   }
+  if (useToolset == "v120") {
+    return "v12";
+  }
+  if (useToolset == "v110") {
+    return "v11";
+  }
+  if (useToolset == "v100") {
+    return "v10";
+  }
+  return "";
 }
 
 std::string cmGlobalVisualStudio10Generator::CanonicalToolsetName(

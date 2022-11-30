@@ -241,15 +241,10 @@ protected:
 private:
   struct LongestSourcePath
   {
-    LongestSourcePath()
-      : Length(0)
-      , Target(0)
-      , SourceFile(0)
-    {
-    }
-    size_t Length;
-    cmGeneratorTarget* Target;
-    cmSourceFile const* SourceFile;
+    LongestSourcePath() = default;
+    size_t Length = 0;
+    cmGeneratorTarget* Target = nullptr;
+    cmSourceFile const* SourceFile = nullptr;
     std::string SourceRel;
   };
   LongestSourcePath LongestSource;

@@ -51,9 +51,7 @@ cmGlobalVisualStudioGenerator::cmGlobalVisualStudioGenerator(
   }
 }
 
-cmGlobalVisualStudioGenerator::~cmGlobalVisualStudioGenerator()
-{
-}
+cmGlobalVisualStudioGenerator::~cmGlobalVisualStudioGenerator() = default;
 
 cmGlobalVisualStudioGenerator::VSVersion
 cmGlobalVisualStudioGenerator::GetVersion() const
@@ -188,7 +186,7 @@ std::string cmGlobalVisualStudioGenerator::GetRegistryBase()
 
 std::string cmGlobalVisualStudioGenerator::GetRegistryBase(const char* version)
 {
-  std::string key = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\";
+  std::string key = R"(HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\)";
   return key + version;
 }
 
@@ -520,13 +518,12 @@ std::string cmGlobalVisualStudioGenerator::GetStartupProjectName(
     std::string startup = *n;
     if (this->FindTarget(startup)) {
       return startup;
-    } else {
-      root->GetMakefile()->IssueMessage(
-        MessageType::AUTHOR_WARNING,
-        "Directory property VS_STARTUP_PROJECT specifies target "
-        "'" +
-          startup + "' that does not exist.  Ignoring.");
     }
+    root->GetMakefile()->IssueMessage(
+      MessageType::AUTHOR_WARNING,
+      "Directory property VS_STARTUP_PROJECT specifies target "
+      "'" +
+        startup + "' that does not exist.  Ignoring.");
   }
 
   // default, if not specified
@@ -961,7 +958,7 @@ void cmGlobalVisualStudioGenerator::AddSymbolExportCommand(
   commands.push_back(std::move(command));
 }
 
-static bool OpenSolution(std::string sln)
+static bool OpenSolution(std::string const& sln)
 {
   HRESULT comInitialized =
     CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);

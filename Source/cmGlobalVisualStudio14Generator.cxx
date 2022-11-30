@@ -23,7 +23,7 @@ static const char* cmVS14GenName(const std::string& name, std::string& genName)
 {
   if (strncmp(name.c_str(), vs14generatorName,
               sizeof(vs14generatorName) - 6) != 0) {
-    return 0;
+    return nullptr;
   }
   const char* p = name.c_str() + sizeof(vs14generatorName) - 6;
   if (cmHasLiteralPrefix(p, " 2015")) {
@@ -213,9 +213,8 @@ bool cmGlobalVisualStudio14Generator::SelectWindowsStoreToolset(
         this->IsWindowsDesktopToolsetInstalled()) {
       toolset = "v140";
       return true;
-    } else {
-      return false;
     }
+    return false;
   }
   return this->cmGlobalVisualStudio12Generator::SelectWindowsStoreToolset(
     toolset);
@@ -255,7 +254,7 @@ std::string cmGlobalVisualStudio14Generator::GetWindows10SDKMaxVersion(
       return std::string();
     }
     // If the value is something else, trust that it is a valid SDK value.
-    else if (value) {
+    if (value) {
       return *value;
     }
     // If value is an invalid pointer, leave result unchanged.
@@ -373,6 +372,7 @@ std::string cmGlobalVisualStudio14Generator::GetWindows10SDKVersion(
     return sdks.at(0);
   }
 #endif
+  (void)mf;
   // Return an empty string
   return std::string();
 }

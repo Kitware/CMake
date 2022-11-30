@@ -21,7 +21,7 @@ static const char* cmVS12GenName(const std::string& name, std::string& genName)
 {
   if (strncmp(name.c_str(), vs12generatorName,
               sizeof(vs12generatorName) - 6) != 0) {
-    return 0;
+    return nullptr;
   }
   const char* p = name.c_str() + sizeof(vs12generatorName) - 6;
   if (cmHasLiteralPrefix(p, " 2013")) {
@@ -194,9 +194,8 @@ bool cmGlobalVisualStudio12Generator::SelectWindowsPhoneToolset(
         this->IsWindowsDesktopToolsetInstalled()) {
       toolset = "v120_wp81";
       return true;
-    } else {
-      return false;
     }
+    return false;
   }
   return this->cmGlobalVisualStudio11Generator::SelectWindowsPhoneToolset(
     toolset);
@@ -210,9 +209,8 @@ bool cmGlobalVisualStudio12Generator::SelectWindowsStoreToolset(
         this->IsWindowsDesktopToolsetInstalled()) {
       toolset = "v120";
       return true;
-    } else {
-      return false;
     }
+    return false;
   }
   return this->cmGlobalVisualStudio11Generator::SelectWindowsStoreToolset(
     toolset);

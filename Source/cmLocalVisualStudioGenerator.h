@@ -29,7 +29,7 @@ class cmLocalVisualStudioGenerator : public cmLocalGenerator
 {
 public:
   cmLocalVisualStudioGenerator(cmGlobalGenerator* gg, cmMakefile* mf);
-  virtual ~cmLocalVisualStudioGenerator();
+  ~cmLocalVisualStudioGenerator() override;
 
   std::string ConstructScript(cmCustomCommandGenerator const& ccg,
                               const std::string& newline = "\n");
@@ -47,7 +47,7 @@ public:
 
   void ComputeObjectFilenames(
     std::map<cmSourceFile const*, std::string>& mapping,
-    cmGeneratorTarget const* = 0) override;
+    cmGeneratorTarget const* = nullptr) override;
 
 protected:
   virtual const char* ReportErrorLabel() const;
