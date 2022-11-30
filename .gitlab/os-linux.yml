@@ -381,19 +381,10 @@
         - docker
         - linux-x86_64
 
-.linux_x86_64_tags_qt:
-    tags:
-        - cmake
-        - build
-        - docker
-        - linux-3.17 # Needed to be able to load Fedora's Qt libraries.
-        - linux-x86_64
-
 .linux_x86_64_tags_x11:
     tags:
         - cmake
         - docker
-        - linux-3.17 # Needed to be able to load Fedora's Qt libraries.
         - linux-x86_64
         - x11
 
@@ -424,14 +415,6 @@
         - build
         - docker
         - linux-aarch64
-
-.linux_aarch64_tags_qt:
-    tags:
-        - cmake
-        - build
-        - docker
-        - linux-aarch64
-        - linux-3.17 # Needed to be able to load Fedora's Qt libraries.
 
 ## Linux-specific scripts
 
@@ -591,7 +574,7 @@
     extends:
         - .intelclassic_makefiles
         - .cmake_test_linux_release
-        - .linux_x86_64_tags_qt
+        - .linux_x86_64_tags
         - .run_manually
         - .needs_centos6_x86_64
     variables:
@@ -601,7 +584,7 @@
     extends:
         - .inteloneapi_makefiles
         - .cmake_test_linux_release
-        - .linux_x86_64_tags_qt
+        - .linux_x86_64_tags
         - .run_manually
         - .needs_centos6_x86_64
     variables:

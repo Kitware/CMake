@@ -59,7 +59,7 @@ p:doc-package:
     extends:
         - .fedora37_sphinx_package
         - .cmake_prep_doc_linux
-        - .linux_x86_64_tags_qt
+        - .linux_x86_64_tags
         - .cmake_doc_artifacts
         - .run_only_for_package
 
@@ -109,14 +109,14 @@ l:tidy-fedora37:
     extends:
         - .fedora37_tidy
         - .cmake_build_linux
-        - .linux_x86_64_tags_qt
+        - .linux_x86_64_tags
         - .run_automatically
 
 l:sphinx-fedora37:
     extends:
         - .fedora37_sphinx
         - .cmake_build_linux
-        - .linux_x86_64_tags_qt
+        - .linux_x86_64_tags
         - .run_automatically
     variables:
         CMAKE_CI_JOB_CONTINUOUS: "true"
@@ -126,7 +126,7 @@ l:clang-analyzer-fedora37:
     extends:
         - .fedora37_clang_analyzer
         - .cmake_build_linux
-        - .linux_x86_64_tags_qt
+        - .linux_x86_64_tags
         - .run_automatically
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
@@ -158,7 +158,7 @@ t:debian10-ninja:
     extends:
         - .debian10_ninja
         - .cmake_test_linux_release
-        - .linux_x86_64_tags_qt
+        - .linux_x86_64_tags
         - .cmake_junit_artifacts
         - .run_dependent
         - .needs_centos6_x86_64
@@ -169,7 +169,7 @@ t:debian10-aarch64-ninja:
     extends:
         - .debian10_aarch64_ninja
         - .cmake_test_linux_release
-        - .linux_aarch64_tags_qt
+        - .linux_aarch64_tags
         - .cmake_junit_artifacts
         - .run_dependent
         - .needs_centos7_aarch64
@@ -180,7 +180,7 @@ t:debian10-ninja-clang:
     extends:
         - .debian10_ninja_clang
         - .cmake_test_linux_release
-        - .linux_x86_64_tags_qt
+        - .linux_x86_64_tags
         - .run_dependent
         - .needs_centos6_x86_64
     variables:
@@ -190,7 +190,7 @@ t:debian10-makefiles-clang:
     extends:
         - .debian10_makefiles_clang
         - .cmake_test_linux_release
-        - .linux_x86_64_tags_qt
+        - .linux_x86_64_tags
         - .run_dependent
         - .needs_centos6_x86_64
     variables:
@@ -200,7 +200,7 @@ t:fedora37-ninja-clang:
     extends:
         - .fedora37_ninja_clang
         - .cmake_test_linux_release
-        - .linux_x86_64_tags_qt
+        - .linux_x86_64_tags
         - .run_dependent
         - .needs_centos6_x86_64
     variables:
@@ -210,7 +210,7 @@ t:fedora37-makefiles-clang:
     extends:
         - .fedora37_makefiles_clang
         - .cmake_test_linux_release
-        - .linux_x86_64_tags_qt
+        - .linux_x86_64_tags
         - .run_dependent
         - .needs_centos6_x86_64
     variables:
@@ -220,7 +220,7 @@ t:fedora37-makefiles:
     extends:
         - .fedora37_makefiles
         - .cmake_test_linux_release
-        - .linux_x86_64_tags_qt
+        - .linux_x86_64_tags
         - .run_dependent
         - .needs_centos6_x86_64
 
@@ -228,7 +228,7 @@ t:fedora37-makefiles-nospace:
     extends:
         - .fedora37_makefiles
         - .cmake_test_linux_release
-        - .linux_x86_64_tags_qt
+        - .linux_x86_64_tags
         - .cmake_junit_artifacts
         - .run_dependent
         - .needs_centos6_x86_64
@@ -330,7 +330,7 @@ b:fedora37-ninja:
         - .fedora37_ninja
         - .cmake_build_linux
         - .cmake_build_artifacts
-        - .linux_x86_64_tags_qt
+        - .linux_x86_64_tags
         - .run_manually
     variables:
         CMAKE_CI_JOB_CONTINUOUS: "true"
@@ -389,7 +389,7 @@ t:fedora37-ninja-multi:
     extends:
         - .fedora37_ninja_multi
         - .cmake_test_linux_external
-        - .linux_x86_64_tags_qt
+        - .linux_x86_64_tags
         - .cmake_junit_artifacts
         - .run_dependent
     dependencies:
@@ -739,7 +739,7 @@ b:fedora37-asan:
         - .fedora37_asan
         - .cmake_build_linux
         - .cmake_build_artifacts
-        - .linux_x86_64_tags_qt
+        - .linux_x86_64_tags
         - .run_manually
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
@@ -748,7 +748,7 @@ t:fedora37-asan:
     extends:
         - .fedora37_asan
         - .cmake_memcheck_linux
-        - .linux_x86_64_tags_qt
+        - .linux_x86_64_tags
         - .run_dependent
     dependencies:
         - b:fedora37-asan
