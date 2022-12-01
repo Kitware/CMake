@@ -19,11 +19,12 @@ if (WIN32)
   find_program(MSYS_CMD
     NAMES msys2_shell.cmd
     PATHS
-      "C:/msys64"
+      # Typical install path for MSYS2 (https://repo.msys2.org/distrib/msys2-i686-latest.sfx.exe)
       "C:/msys32"
-      "C:/MSYS"
-      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MSYS\\setup;rootdir]"
-      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Cygnus Solutions\\MSYS\\mounts v2\\/;native]"
+      # Typical install path for MSYS2 (https://repo.msys2.org/distrib/msys2-x86_64-latest.sfx.exe)
+      "C:/msys64"
+      # Git for Windows (https://gitforwindows.org/)
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\GitForWindows;InstallPath]"
   )
   get_filename_component(MSYS_INSTALL_PATH "${MSYS_CMD}" DIRECTORY)
   mark_as_advanced(MSYS_CMD)
