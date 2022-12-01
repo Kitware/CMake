@@ -12,6 +12,7 @@
 #include <utility>
 #include <vector>
 
+#include <cm/optional>
 #include <cm/string_view>
 
 #include "cmRange.h"
@@ -146,7 +147,8 @@ std::vector<std::string> cmExpandedLists(InputIt first, InputIt last)
 }
 
 /** Concatenate string pieces into a single string.  */
-std::string cmCatViews(std::initializer_list<cm::string_view> views);
+std::string cmCatViews(cm::optional<std::string>&& first,
+                       std::initializer_list<cm::string_view> views);
 
 /** Utility class for cmStrCat.  */
 class cmAlphaNum
@@ -189,13 +191,38 @@ private:
   char Digits_[32];
 };
 
-/** Concatenate string pieces and numbers into a single string.  */
-template <typename... AV>
-inline std::string cmStrCat(cmAlphaNum const& a, cmAlphaNum const& b,
-                            AV const&... args)
+template <typename A, typename B, typename... AV>
+class cmStrCatHelper
 {
-  return cmCatViews(
-    { a.View(), b.View(), static_cast<cmAlphaNum const&>(args).View()... });
+public:
+  static std::string Compute(cmAlphaNum const& a, cmAlphaNum const& b,
+                             AV const&... args)
+  {
+    return cmCatViews(
+      cm::nullopt,
+      { a.View(), b.View(), static_cast<cmAlphaNum const&>(args).View()... });
+  }
+};
+
+template <typename B, typename... AV>
+class cmStrCatHelper<std::string, B, AV...>
+{
+public:
+  static std::string Compute(std::string&& a, cmAlphaNum const& b,
+                             AV const&... args)
+  {
+    return cmCatViews(
+      std::move(a),
+      { b.View(), static_cast<cmAlphaNum const&>(args).View()... });
+  }
+};
+
+/** Concatenate string pieces and numbers into a single string.  */
+template <typename A, typename B, typename... AV>
+inline std::string cmStrCat(A&& a, B&& b, AV&&... args)
+{
+  return cmStrCatHelper<A, B, AV...>::Compute(
+    std::forward<A>(a), std::forward<B>(b), std::forward<AV>(args)...);
 }
 
 /** Joins wrapped elements of a range with separator into a single string.  */
@@ -207,7 +234,9 @@ std::string cmWrap(cm::string_view prefix, Range const& rng,
     return std::string();
   }
   return cmCatViews(
-    { prefix, cmJoin(rng, cmCatViews({ suffix, sep, prefix })), suffix });
+    cm::nullopt,
+    { prefix, cmJoin(rng, cmCatViews(cm::nullopt, { suffix, sep, prefix })),
+      suffix });
 }
 
 /** Joins wrapped elements of a range with separator into a single string.  */

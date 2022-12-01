@@ -203,15 +203,23 @@ cmAlphaNum::cmAlphaNum(double val)
   MakeDigits(this->View_, this->Digits_, "%g", val);
 }
 
-std::string cmCatViews(std::initializer_list<cm::string_view> views)
+std::string cmCatViews(cm::optional<std::string>&& first,
+                       std::initializer_list<cm::string_view> views)
 {
-  std::size_t total_size = 0;
+  std::size_t totalSize = 0;
   for (cm::string_view const& view : views) {
-    total_size += view.size();
+    totalSize += view.size();
   }
 
-  std::string result(total_size, '\0');
-  std::string::iterator sit = result.begin();
+  std::string result;
+  std::string::size_type initialLen = 0;
+  if (first) {
+    totalSize += first->length();
+    initialLen = first->length();
+    result = std::move(*first);
+  }
+  result.resize(totalSize);
+  std::string::iterator sit = result.begin() + initialLen;
   for (cm::string_view const& view : views) {
     sit = std::copy_n(view.data(), view.size(), sit);
   }
