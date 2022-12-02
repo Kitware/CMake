@@ -543,6 +543,9 @@ cmNinjaRule GetScanRule(
   if (deptype == "msvc"_s) {
     rule.DepType = deptype;
     rule.DepFile.clear();
+  } else if (deptype == "none"_s) {
+    rule.DepType.clear(); // no deps= for multiple outputs
+    rule.DepFile.clear();
   } else {
     rule.DepType.clear(); // no deps= for multiple outputs
     rule.DepFile = "$DEP_FILE";
