@@ -1427,6 +1427,9 @@ function(__FetchContent_directPopulate contentName)
 
   set(options
       QUIET
+      # SYSTEM has no meaning for ExternalProject, it is only used by us in
+      # FetchContent_MakeAvailable(). We need to parse and discard it here.
+      SYSTEM
   )
   set(oneValueArgs
       SUBBUILD_DIR
