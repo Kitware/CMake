@@ -46,6 +46,16 @@ public:
 
   const char* GetAndroidApplicationTypeRevision() const override;
 
+  bool CheckCxxModuleSupport() override
+  {
+    this->CxxModuleSupportCheck();
+    return this->SupportsCxxModuleDyndep();
+  }
+  bool SupportsCxxModuleDyndep() const override
+  {
+    return this->Version >= cmGlobalVisualStudioGenerator::VSVersion::VS17;
+  }
+
 protected:
   cmGlobalVisualStudioVersionedGenerator(
     VSVersion version, cmake* cm, const std::string& name,

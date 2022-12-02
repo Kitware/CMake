@@ -115,6 +115,8 @@ public:
 
   cmIDEFlagTable const* ExtraFlagTable;
 
+  virtual bool SupportsCxxModuleDyndep() const { return false; }
+
 protected:
   cmGlobalVisualStudio7Generator(cmake* cm,
                                  std::string const& platformInGeneratorName);
@@ -157,8 +159,6 @@ protected:
     std::ostream& fout, const std::string& name, const std::string& path,
     cmValue typeGuid,
     const std::set<BT<std::pair<std::string, bool>>>& dependencies) = 0;
-
-  virtual bool SupportsCxxModuleDyndep() const { return false; }
 
   std::string ConvertToSolutionPath(const std::string& path);
 

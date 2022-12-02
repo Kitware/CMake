@@ -36,10 +36,20 @@ if (RunCMake_GENERATOR MATCHES "Ninja")
   endif ()
 endif ()
 
+set(generator_supports_cxx_modules 0)
+if (RunCMake_GENERATOR MATCHES "Ninja" AND
+    ninja_version VERSION_GREATER_EQUAL "1.10" AND
+    "cxx_std_20" IN_LIST CMAKE_CXX_COMPILE_FEATURES)
+  set(generator_supports_cxx_modules 1)
+endif ()
+
+if (RunCMake_GENERATOR MATCHES "Visual Studio" AND
+    CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "19.34")
+  set(generator_supports_cxx_modules 1)
+endif ()
+
 # Test behavior when the generator does not support C++20 modules.
-if (NOT RunCMake_GENERATOR MATCHES "Ninja" OR
-    ninja_version VERSION_LESS "1.10" OR
-    NOT "cxx_std_20" IN_LIST CMAKE_CXX_COMPILE_FEATURES)
+if (NOT generator_supports_cxx_modules)
   if ("cxx_std_20" IN_LIST CMAKE_CXX_COMPILE_FEATURES)
     run_cmake(NoDyndepSupport)
   endif ()
@@ -79,6 +89,8 @@ if (RunCMake_GENERATOR MATCHES "Ninja")
   run_cmake(NinjaDependInfoFileSet)
   run_cmake(NinjaDependInfoExport)
   run_cmake(NinjaDependInfoBMIInstall)
+elseif (RunCMake_GENERATOR MATCHES "Visual Studio")
+  # Not supported yet.
 else ()
   message(FATAL_ERROR
     "Please add 'DependInfo' tests for the '${RunCMake_GENERATOR}' generator.")
@@ -132,13 +144,17 @@ if ("named" IN_LIST CMake_TEST_MODULE_COMPILATION)
   run_cxx_module_test(simple)
   run_cxx_module_test(library library-static -DBUILD_SHARED_LIBS=OFF)
   run_cxx_module_test(generated)
-  run_cxx_module_test(public-req-private)
   run_cxx_module_test(deep-chain)
   run_cxx_module_test(duplicate)
   set(RunCMake_CXXModules_NO_TEST 1)
   run_cxx_module_test(circular)
   unset(RunCMake_CXXModules_NO_TEST)
   run_cxx_module_test(scan_properties)
+endif ()
+
+# Tests which require collation work.
+if ("collation" IN_LIST CMake_TEST_MODULE_COMPILATION)
+  run_cxx_module_test(public-req-private)
 endif ()
 
 # Tests which use named modules in shared libraries.
