@@ -130,3 +130,4 @@ Contributing
 See `CONTRIBUTING.rst`_ for instructions to contribute.
 
 .. _`CONTRIBUTING.rst`: CONTRIBUTING.rst
+
