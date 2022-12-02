@@ -542,9 +542,9 @@ cmNinjaRule GetScanRule(
   // Scanning always uses a depfile for preprocessor dependencies.
   if (deptype == "msvc"_s) {
     rule.DepType = deptype;
-    rule.DepFile = "";
+    rule.DepFile.clear();
   } else {
-    rule.DepType = ""; // no deps= for multiple outputs
+    rule.DepType.clear(); // no deps= for multiple outputs
     rule.DepFile = "$DEP_FILE";
   }
 
