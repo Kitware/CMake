@@ -156,7 +156,8 @@ void StringConcatenationUseCmstrcatCheck::issueCorrection(
   ExprNode = *It;
 
   StringRef LastToken = Lexer::getSourceText(
-    CharSourceRange::getTokenRange(ExprNode->getArg(1)->getSourceRange()),
+    CharSourceRange::getTokenRange(
+      ExprNode->getArg(1)->getSourceRange().getEnd()),
     Result.Context->getSourceManager(), Result.Context->getLangOpts());
   FixIts.push_back(FixItHint::CreateInsertion(
     ExprNode->getEndLoc().getLocWithOffset(LastToken.str().size()), ")"));
