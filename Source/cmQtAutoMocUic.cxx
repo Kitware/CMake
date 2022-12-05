@@ -1981,6 +1981,9 @@ void cmQtAutoMocUicT::JobCompileMocT::Process()
   std::string const& sourceFile = this->Mapping->SourceFile->FileName;
   std::string const& outputFile = this->Mapping->OutputFile;
 
+  // Remove output file in case the case of the source file has changed
+  cmSystemTools::RemoveFile(outputFile);
+
   // Compose moc command
   std::vector<std::string> cmd;
   {
