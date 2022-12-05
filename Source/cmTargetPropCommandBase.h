@@ -29,8 +29,7 @@ public:
   };
 
   bool HandleArguments(std::vector<std::string> const& args,
-                       const std::string& prop,
-                       ArgumentFlags flags = NO_FLAGS);
+                       const std::string& prop, unsigned int flags = NO_FLAGS);
 
 protected:
   std::string Property;
