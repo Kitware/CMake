@@ -4651,7 +4651,8 @@ void cmGeneratorTarget::GetLinkOptions(std::vector<std::string>& result,
 std::vector<BT<std::string>> cmGeneratorTarget::GetLinkOptions(
   std::string const& config, std::string const& language) const
 {
-  ConfigAndLanguage cacheKey(config, language);
+  ConfigAndLanguage cacheKey(
+    config, cmStrCat(language, this->IsDeviceLink() ? "-device" : ""));
   {
     auto it = this->LinkOptionsCache.find(cacheKey);
     if (it != this->LinkOptionsCache.end()) {
@@ -4937,7 +4938,8 @@ void cmGeneratorTarget::GetLinkDirectories(std::vector<std::string>& result,
 std::vector<BT<std::string>> cmGeneratorTarget::GetLinkDirectories(
   std::string const& config, std::string const& language) const
 {
-  ConfigAndLanguage cacheKey(config, language);
+  ConfigAndLanguage cacheKey(
+    config, cmStrCat(language, this->IsDeviceLink() ? "-device" : ""));
   {
     auto it = this->LinkDirectoriesCache.find(cacheKey);
     if (it != this->LinkDirectoriesCache.end()) {
