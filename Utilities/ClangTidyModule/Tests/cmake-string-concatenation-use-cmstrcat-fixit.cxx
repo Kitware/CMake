@@ -1,4 +1,5 @@
 #include <string>
+#include <utility>
 
 template <typename... Args>
 std::string cmStrCat(Args&&... args)
@@ -24,6 +25,9 @@ void test1()
   concat = cmStrCat(concat, " and this is a string literal");
   concat = cmStrCat(concat, 'o');
   concat = cmStrCat(concat, b, " and this is a string literal ", 'o', b);
+
+  std::pair<std::string, std::string> p;
+  concat = cmStrCat(p.first, p.second);
 }
 
 // No correction needed
