@@ -59,7 +59,7 @@ elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
     set(ENV{LDFLAGS} "${new_ldflags}")
   endif()
 
-  if(NOT CMAKE_C_COMPILER_ID MATCHES "^XL")
+  if(NOT CMake_COMPILER_FORCES_NEW_DTAGS)
     run_install_test(linux)
     run_install_test(linux-parent-rpath-propagation)
     run_install_test(file-filter)
