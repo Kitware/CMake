@@ -487,8 +487,10 @@
         - .gitlab/ci/sccache.sh
         - sccache --start-server
         - sccache --show-stats
+        - .gitlab/ci/pre_build.sh
         - "$LAUNCHER ctest -VV -S .gitlab/ci/ctest_configure.cmake"
         - "$LAUNCHER ctest -VV -S .gitlab/ci/ctest_build.cmake"
+        - .gitlab/ci/post_build.sh
         - sccache --show-stats
 
     interruptible: true
