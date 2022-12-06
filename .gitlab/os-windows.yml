@@ -229,7 +229,7 @@
 .windows_tags_nonconcurrent_vs2022:
     tags:
         - cmake # Since this is a bare runner, pin to a project.
-        - windows
+        - windows-x86_64
         - shell
         - vs2022
         - msvc-19.34
@@ -238,7 +238,7 @@
 .windows_tags_nonconcurrent_vs2022_arm64:
     tags:
         - cmake # Since this is a bare runner, pin to a project.
-        - windows
+        - windows-x86_64
         - shell
         - vs2022
         - msvc-19.34-arm64
@@ -247,7 +247,7 @@
 .windows_tags_concurrent_vs2022:
     tags:
         - cmake # Since this is a bare runner, pin to a project.
-        - windows
+        - windows-x86_64
         - shell
         - vs2022
         - msvc-19.34
@@ -256,7 +256,7 @@
 .windows_tags_concurrent_vs2019:
     tags:
         - cmake # Since this is a bare runner, pin to a project.
-        - windows
+        - windows-x86_64
         - shell
         - vs2019
         - msvc-19.29-16.11
@@ -265,7 +265,7 @@
 .windows_tags_concurrent:
     tags:
         - cmake # Since this is a bare runner, pin to a project.
-        - windows
+        - windows-x86_64
         - shell
         - concurrent
 

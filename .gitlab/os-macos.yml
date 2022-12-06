@@ -93,7 +93,7 @@
 .macos_x86_64_builder_tags:
     tags:
         - cmake # Since this is a bare runner, pin to a project.
-        - macos
+        - macos-x86_64
         - shell
         - xcode-14.1
         - nonconcurrent
@@ -101,7 +101,7 @@
 .macos_x86_64_builder_tags_package:
     tags:
         - cmake # Since this is a bare runner, pin to a project.
-        - macos
+        - macos-x86_64
         - shell
         - xcode-14.1
         - nonconcurrent
@@ -110,7 +110,7 @@
 .macos_x86_64_builder_ext_tags:
     tags:
         - cmake # Since this is a bare runner, pin to a project.
-        - macos
+        - macos-x86_64
         - shell
         - xcode-14.1
         - concurrent
