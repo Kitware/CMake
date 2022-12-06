@@ -149,13 +149,23 @@ int testStringAlgorithms(int /*unused*/, char* /*unused*/ [])
   {
     std::string val;
     std::string expect;
-    val.reserve(120 * cmStrLen("cmStrCat move"));
+    val.reserve(50 * cmStrLen("cmStrCat move ") + 1);
     auto data = val.data();
+    auto capacity = val.capacity();
+    bool moved = true;
     for (int i = 0; i < 100; i++) {
-      val = cmStrCat(std::move(val), "cmStrCat move");
-      expect += "cmStrCat move";
+      if (i % 2 == 0) {
+        val = cmStrCat(std::move(val), "move ");
+        expect += "move ";
+      } else {
+        val = cmStrCat("cmStrCat ", std::move(val));
+        expect = "cmStrCat " + std::move(expect);
+      }
+      if (val.data() != data || val.capacity() != capacity) {
+        moved = false;
+      }
     }
-    assert_ok((val.data() == data), "cmStrCat move");
+    assert_ok(moved, "cmStrCat move");
     assert_string(val, expect, "cmStrCat move");
   }
 
