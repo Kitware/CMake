@@ -36,7 +36,7 @@ the dependency.
 
 If the ``SYSTEM`` argument is provided, the :prop_dir:`SYSTEM` directory
 property of the subdirectory will be set to true.  This property is
-used to initialize the :prop_tgt:`SYSTEM` property of each target
-created in that subdirectory. The include directories of targets with
-:prop_tgt:`SYSTEM` set to true will be treated as ``SYSTEM`` when
+used to initialize the :prop_tgt:`SYSTEM` property of each non-imported
+target created in that subdirectory.  The include directories of targets
+with :prop_tgt:`SYSTEM` set to true will be treated as ``SYSTEM`` when
 compiling consumers.
