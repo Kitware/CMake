@@ -258,7 +258,7 @@
 ### NVHPC Compiler
 
 .nvhpc:
-    image: "kitware/cmake:ci-nvhpc22.9-x86_64-2022-11-22"
+    image: "kitware/cmake:ci-nvhpc22.11-x86_64-2022-12-06"
     variables:
         CMAKE_ARCH: x86_64
 
