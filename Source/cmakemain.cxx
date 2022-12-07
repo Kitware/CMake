@@ -311,6 +311,11 @@ int do_cmake(int ac, char const* const* av)
         }
         return 1; // failed to parse
       }
+      // Only in script mode do we stop parsing instead
+      // of preferring the last mode flag provided
+      if (arg == "--" && workingMode == cmake::SCRIPT_MODE) {
+        break;
+      }
     }
     if (!matched) {
       parsedArgs.emplace_back(av[i]);
