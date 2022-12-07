@@ -27,6 +27,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
+#include "cmGlobalCommonGenerator.h"
 #include "cmGlobalNinjaGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmLocalNinjaGenerator.h"
@@ -391,6 +392,24 @@ std::string cmNinjaTargetGenerator::GetObjectFilePath(
   path += cmStrCat(
     this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget),
     this->GetGlobalGenerator()->ConfigDirectory(config), '/', objectName);
+  return path;
+}
+
+std::string cmNinjaTargetGenerator::GetClangTidyReplacementsFilePath(
+  const std::string& directory, cmSourceFile const* source,
+  const std::string& config) const
+{
+  std::string path = this->LocalGenerator->GetHomeRelativeOutputPath();
+  if (!path.empty()) {
+    path += '/';
+  }
+  path = cmStrCat(directory, '/', path);
+  std::string const& objectName = this->GeneratorTarget->GetObjectName(source);
+  path =
+    cmStrCat(std::move(path),
+             this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget),
+             this->GetGlobalGenerator()->ConfigDirectory(config), '/',
+             objectName, ".yaml");
   return path;
 }
 
@@ -935,8 +954,24 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
         } else {
           driverMode = lang == "C" ? "gcc" : "g++";
         }
+        const bool haveClangTidyExportFixesDir =
+          !this->GeneratorTarget->GetClangTidyExportFixesDirectory(lang)
+             .empty();
+        std::string exportFixes;
+        if (haveClangTidyExportFixesDir) {
+          exportFixes = ";--export-fixes=$CLANG_TIDY_EXPORT_FIXES";
+        }
         run_iwyu += this->GetLocalGenerator()->EscapeForShell(
-          cmStrCat(*tidy, ";--extra-arg-before=--driver-mode=", driverMode));
+          cmStrCat(*tidy, ";--extra-arg-before=--driver-mode=", driverMode,
+                   exportFixes));
+        if (haveClangTidyExportFixesDir) {
+          std::string search = cmStrCat(
+            this->GetLocalGenerator()->GetState()->UseWindowsShell() ? ""
+                                                                     : "\\",
+            "$$CLANG_TIDY_EXPORT_FIXES");
+          auto loc = run_iwyu.rfind(search);
+          run_iwyu.replace(loc, search.length(), "$CLANG_TIDY_EXPORT_FIXES");
+        }
       }
       if (cmNonempty(cpplint)) {
         run_iwyu += cmStrCat(
@@ -1315,6 +1350,18 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
         cmStrCat(objectFileDir, '/', dependFileName),
         cmOutputConverter::SHELL);
     }
+  }
+
+  std::string d =
+    this->GeneratorTarget->GetClangTidyExportFixesDirectory(language);
+  if (!d.empty()) {
+    this->GlobalCommonGenerator->AddClangTidyExportFixesDir(d);
+    std::string fixesFile =
+      this->GetClangTidyReplacementsFilePath(d, source, config);
+    this->GlobalCommonGenerator->AddClangTidyExportFixesFile(fixesFile);
+    cmSystemTools::MakeDirectory(cmSystemTools::GetFilenamePath(fixesFile));
+    fixesFile = this->ConvertToNinjaPath(fixesFile);
+    vars["CLANG_TIDY_EXPORT_FIXES"] = fixesFile;
   }
 
   if (firstForConfig) {

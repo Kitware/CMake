@@ -592,6 +592,8 @@ void cmGlobalNinjaGenerator::Generate()
   this->CMakeCacheFile = this->NinjaOutputPath("CMakeCache.txt");
   this->DisableCleandead = false;
   this->DiagnosedCxxModuleNinjaSupport = false;
+  this->ClangTidyExportFixesDirs.clear();
+  this->ClangTidyExportFixesFiles.clear();
 
   this->PolicyCMP0058 =
     this->LocalGenerators[0]->GetMakefile()->GetPolicyStatus(
@@ -632,6 +634,8 @@ void cmGlobalNinjaGenerator::Generate()
   {
     this->CleanMetaData();
   }
+
+  this->RemoveUnknownClangTidyExportFixesFiles();
 }
 
 void cmGlobalNinjaGenerator::CleanMetaData()

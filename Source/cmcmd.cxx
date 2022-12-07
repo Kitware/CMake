@@ -367,6 +367,12 @@ int HandleTidy(const std::string& runCmd, const std::string& sourceFile,
   std::vector<std::string> tidy_cmd = cmExpandedList(runCmd, true);
   tidy_cmd.push_back(sourceFile);
 
+  for (auto const& arg : tidy_cmd) {
+    if (cmHasLiteralPrefix(arg, "--export-fixes=")) {
+      cmSystemTools::RemoveFile(arg.substr(cmStrLen("--export-fixes=")));
+    }
+  }
+
   // clang-tidy supports working out the compile commands from a
   // compile_commands.json file in a directory given by a "-p" option, or by
   // passing the compiler command line arguments after --. When the latter

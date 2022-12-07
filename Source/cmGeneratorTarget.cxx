@@ -3726,6 +3726,24 @@ std::string cmGeneratorTarget::GetCreateRuleVariable(
   return "";
 }
 
+//----------------------------------------------------------------------------
+std::string cmGeneratorTarget::GetClangTidyExportFixesDirectory(
+  const std::string& lang) const
+{
+  cmValue val =
+    this->GetProperty(cmStrCat(lang, "_CLANG_TIDY_EXPORT_FIXES_DIR"));
+  if (!cmNonempty(val)) {
+    return {};
+  }
+
+  std::string path = *val;
+  if (!cmSystemTools::FileIsFullPath(path)) {
+    path =
+      cmStrCat(this->LocalGenerator->GetCurrentBinaryDirectory(), '/', path);
+  }
+  return cmSystemTools::CollapseFullPath(path);
+}
+
 namespace {
 void processIncludeDirectories(cmGeneratorTarget const* tgt,
                                EvaluatedTargetPropertyEntries& entries,

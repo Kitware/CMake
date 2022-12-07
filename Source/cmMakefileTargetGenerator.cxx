@@ -25,6 +25,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
+#include "cmGlobalCommonGenerator.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
 #include "cmLinkLineComputer.h" // IWYU pragma: keep
 #include "cmLocalCommonGenerator.h"
@@ -1107,8 +1108,29 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
           } else {
             driverMode = lang == "C" ? "gcc" : "g++";
           }
+          std::string d =
+            this->GeneratorTarget->GetClangTidyExportFixesDirectory(lang);
+          std::string exportFixes;
+          if (!d.empty()) {
+            this->GlobalCommonGenerator->AddClangTidyExportFixesDir(d);
+            std::string fixesFile = cmSystemTools::CollapseFullPath(cmStrCat(
+              d, '/',
+              this->LocalGenerator->MaybeRelativeToTopBinDir(cmStrCat(
+                this->LocalGenerator->GetCurrentBinaryDirectory(), '/',
+                this->LocalGenerator->GetTargetDirectory(
+                  this->GeneratorTarget),
+                '/', objectName, ".yaml"))));
+            this->GlobalCommonGenerator->AddClangTidyExportFixesFile(
+              fixesFile);
+            cmSystemTools::MakeDirectory(
+              cmSystemTools::GetFilenamePath(fixesFile));
+            fixesFile =
+              this->LocalGenerator->MaybeRelativeToCurBinDir(fixesFile);
+            exportFixes = cmStrCat(";--export-fixes=", fixesFile);
+          }
           run_iwyu += this->LocalGenerator->EscapeForShell(
-            cmStrCat(*tidy, ";--extra-arg-before=--driver-mode=", driverMode));
+            cmStrCat(*tidy, ";--extra-arg-before=--driver-mode=", driverMode,
+                     exportFixes));
         }
         if (cmNonempty(cpplint)) {
           run_iwyu += " --cpplint=";

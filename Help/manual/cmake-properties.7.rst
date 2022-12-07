@@ -301,6 +301,7 @@ Properties on Targets
    /prop_tgt/JOB_POOL_PRECOMPILE_HEADER
    /prop_tgt/LABELS
    /prop_tgt/LANG_CLANG_TIDY
+   /prop_tgt/LANG_CLANG_TIDY_EXPORT_FIXES_DIR
    /prop_tgt/LANG_COMPILER_LAUNCHER
    /prop_tgt/LANG_CPPCHECK
    /prop_tgt/LANG_CPPLINT

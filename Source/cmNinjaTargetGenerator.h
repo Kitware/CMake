@@ -134,6 +134,11 @@ protected:
   std::string GetPreprocessedFilePath(cmSourceFile const* source,
                                       const std::string& config) const;
 
+  /// @return the clang-tidy replacements file path for the given @a source.
+  std::string GetClangTidyReplacementsFilePath(
+    const std::string& directory, cmSourceFile const* source,
+    const std::string& config) const;
+
   /// @return the dyndep file path for this target.
   std::string GetDyndepFilePath(std::string const& lang,
                                 const std::string& config) const;

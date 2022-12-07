@@ -5,6 +5,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -42,9 +43,21 @@ public:
   std::map<std::string, DirectoryTarget> ComputeDirectoryTargets() const;
   bool IsExcludedFromAllInConfig(const DirectoryTarget::Target& t,
                                  const std::string& config);
+  void AddClangTidyExportFixesDir(const std::string& dir)
+  {
+    this->ClangTidyExportFixesDirs.insert(dir);
+  }
+  void AddClangTidyExportFixesFile(const std::string& file)
+  {
+    this->ClangTidyExportFixesFiles.insert(file);
+  }
 
 protected:
   virtual bool SupportsDirectConsole() const { return true; }
   const char* GetEditCacheTargetName() const override { return "edit_cache"; }
   std::string GetEditCacheCommand() const override;
+
+  std::set<std::string> ClangTidyExportFixesDirs;
+  std::set<std::string> ClangTidyExportFixesFiles;
+  void RemoveUnknownClangTidyExportFixesFiles() const;
 };
