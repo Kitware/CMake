@@ -82,7 +82,6 @@
 
     variables:
         CMAKE_CONFIGURATION: fedora39_tidy
-        CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_CI_NO_INSTALL: 1
 
 .fedora39_clang_analyzer:
