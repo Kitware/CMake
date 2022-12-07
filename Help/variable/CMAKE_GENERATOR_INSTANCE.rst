@@ -59,3 +59,6 @@ to hold the value persistently.  If an environment variable of the form
 is set and points to the ``Common7/Tools`` directory within one of the
 VS instances, that instance will be used.  Otherwise, if more than one
 VS instance is installed we do not define which one is chosen by default.
+
+The VS version build number of the selected VS instance is provided in
+the :variable:`CMAKE_VS_VERSION_BUILD_NUMBER` variable.
