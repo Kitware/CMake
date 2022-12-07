@@ -331,6 +331,21 @@
         CMAKE_CONFIGURATION: cuda11.6_clang
         CTEST_NO_WARNINGS_ALLOWED: 1
 
+.cuda11.8_minimal:
+    image: "kitware/cmake:ci-cuda11.8-minimal-x86_64-2022-12-06"
+
+    variables:
+        GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
+        CMAKE_ARCH: x86_64
+        CTEST_LABELS: "CUDA"
+        CMAKE_CUDA_ARCHITECTURES_NATIVE_CLAMP: 1
+
+.cuda11.8_minimal_nvidia:
+    extends: .cuda11.8_minimal
+    variables:
+        CMAKE_CONFIGURATION: cuda11.8_minimal_nvidia
+        CTEST_NO_WARNINGS_ALLOWED: 1
+
 ### HIP builds
 
 .hip4.2:
