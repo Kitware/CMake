@@ -203,25 +203,45 @@ cmAlphaNum::cmAlphaNum(double val)
   MakeDigits(this->View_, this->Digits_, "%g", val);
 }
 
-std::string cmCatViews(cm::optional<std::string>&& first,
-                       std::initializer_list<cm::string_view> views)
+std::string cmCatViews(
+  std::initializer_list<std::pair<cm::string_view, std::string*>> views)
 {
   std::size_t totalSize = 0;
-  for (cm::string_view const& view : views) {
-    totalSize += view.size();
+  std::string* rvalueString = nullptr;
+  std::size_t rvalueStringLength = 0;
+  std::size_t rvalueStringOffset = 0;
+  for (auto const& view : views) {
+    // Find the rvalue string with the largest capacity.
+    if (view.second &&
+        (!rvalueString ||
+         view.second->capacity() > rvalueString->capacity())) {
+      rvalueString = view.second;
+      rvalueStringLength = rvalueString->length();
+      rvalueStringOffset = totalSize;
+    }
+    totalSize += view.first.size();
   }
 
   std::string result;
   std::string::size_type initialLen = 0;
-  if (first) {
-    totalSize += first->length();
-    initialLen = first->length();
-    result = std::move(*first);
+  if (rvalueString && rvalueString->capacity() >= totalSize) {
+    result = std::move(*rvalueString);
+  } else {
+    rvalueString = nullptr;
   }
   result.resize(totalSize);
+  if (rvalueString && rvalueStringOffset > 0) {
+    std::copy_backward(result.begin(), result.begin() + rvalueStringLength,
+                       result.begin() + rvalueStringOffset +
+                         rvalueStringLength);
+  }
   std::string::iterator sit = result.begin() + initialLen;
-  for (cm::string_view const& view : views) {
-    sit = std::copy_n(view.data(), view.size(), sit);
+  for (auto const& view : views) {
+    if (rvalueString && view.second == rvalueString) {
+      sit += rvalueStringLength;
+    } else {
+      sit = std::copy_n(view.first.data(), view.first.size(), sit);
+    }
   }
   return result;
 }
