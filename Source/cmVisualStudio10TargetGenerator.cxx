@@ -991,6 +991,8 @@ void cmVisualStudio10TargetGenerator::WriteSdkStyleProjectFile(
 
   this->WriteDotNetDocumentationFile(e0);
   this->WriteAllSources(e0);
+  this->WriteEmbeddedResourceGroup(e0);
+  this->WriteXamlFilesGroup(e0);
   this->WriteDotNetReferences(e0);
   this->WritePackageReferences(e0);
   this->WriteProjectReferences(e0);
