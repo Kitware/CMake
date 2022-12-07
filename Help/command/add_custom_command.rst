@@ -35,10 +35,6 @@ Do not list the output in more than one independent target that
 may build in parallel or the two instances of the rule may conflict
 (instead use the :command:`add_custom_target` command to drive the
 command and make the other targets depend on that one).
-In makefile terms this creates a new target in the following form::
-
-  OUTPUT: MAIN_DEPENDENCY DEPENDS
-          COMMAND
 
 The options are:
 
