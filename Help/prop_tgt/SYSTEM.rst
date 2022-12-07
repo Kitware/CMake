@@ -18,5 +18,5 @@ then their :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` will not be
 treated as ``SYSTEM``, regardless of the value of the
 :prop_tgt:`IMPORTED_NO_SYSTEM` property.
 
-This target property is initialized from the :prop_dir:`SYSTEM`
-directory property when the target is created.
+For non-imported targets, this target property is initialized from
+the :prop_dir:`SYSTEM` directory property when the target is created.
