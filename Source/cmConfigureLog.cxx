@@ -8,6 +8,7 @@
 #include <sstream>
 #include <utility>
 
+#include <cmext/algorithm>
 #include <cmext/string_view>
 
 #include <cm3p/json/writer.h>
@@ -20,9 +21,17 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
-cmConfigureLog::cmConfigureLog(std::string logDir)
+cmConfigureLog::cmConfigureLog(std::string logDir,
+                               std::vector<unsigned long> logVersions)
   : LogDir(std::move(logDir))
+  , LogVersions(std::move(logVersions))
 {
+  // Always emit events for the latest log version.
+  static const unsigned long LatestLogVersion = 1;
+  if (!cm::contains(this->LogVersions, LatestLogVersion)) {
+    this->LogVersions.emplace_back(LatestLogVersion);
+  }
+
   Json::StreamWriterBuilder builder;
   this->Encoder.reset(builder.newStreamWriter());
 }
@@ -33,6 +42,24 @@ cmConfigureLog::~cmConfigureLog()
     this->EndObject();
     this->Stream << "...\n";
   }
+}
+
+bool cmConfigureLog::IsAnyLogVersionEnabled(
+  std::vector<unsigned long> const& v) const
+{
+  // Both input lists are sorted.  Look for a matching element.
+  auto i1 = v.cbegin();
+  auto i2 = this->LogVersions.cbegin();
+  while (i1 != v.cend() && i2 != this->LogVersions.cend()) {
+    if (*i1 < *i2) {
+      ++i1;
+    } else if (*i2 < *i1) {
+      ++i2;
+    } else {
+      return true;
+    }
+  }
+  return false;
 }
 
 void cmConfigureLog::WriteBacktrace(cmMakefile const& mf)
@@ -64,10 +91,6 @@ void cmConfigureLog::EnsureInit()
   this->Opened = true;
 
   this->Stream << "\n---\n";
-  this->BeginObject("version"_s);
-  this->WriteValue("major"_s, 1);
-  this->WriteValue("minor"_s, 0);
-  this->EndObject();
   this->BeginObject("events"_s);
 }
 

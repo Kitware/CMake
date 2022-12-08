@@ -2428,7 +2428,8 @@ int cmake::ActualConfigure()
   if (!this->GetIsInTryCompile()) {
     this->TruncateOutputLog("CMakeConfigureLog.yaml");
     this->ConfigureLog = cm::make_unique<cmConfigureLog>(
-      cmStrCat(this->GetHomeOutputDirectory(), "/CMakeFiles"_s));
+      cmStrCat(this->GetHomeOutputDirectory(), "/CMakeFiles"_s),
+      std::vector<unsigned long>());
   }
 #endif
 

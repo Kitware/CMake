@@ -38,15 +38,12 @@ step finished normally, ends with a ``...`` document marker line:
 .. code-block:: yaml
 
   ---
-  version:
-    major: 1
-    minor: 0
   events:
     -
-      kind: "try_compile"
+      kind: "try_compile-v1"
       # (other fields omitted)
     -
-      kind: "try_compile"
+      kind: "try_compile-v1"
       # (other fields omitted)
   ...
 
@@ -55,14 +52,26 @@ the build tree and logs new events.
 
 The keys of the each document root mapping are:
 
-``version``
-  A YAML mapping that describes the schema version of the log document.
-  It has keys ``major`` and ``minor`` holding non-negative integer values.
-
 ``events``
   A YAML block sequence of nodes corresponding to events logged during
   one CMake "configure" step.  Each event is a YAML node containing one
   of the `Event Kinds`_ documented below.
+
+Log Versioning
+--------------
+
+Each of the `Event Kinds`_ is versioned independently.  The set of
+keys an event's log entry provides is specific to its major version.
+When an event is logged, the latest version of its event kind that is
+known to the running version of CMake is always written to the log.
+
+Tools reading the configure log must ignore event kinds and versions
+they do not understand:
+
+* A future version of CMake may introduce a new event kind or version.
+
+* If an existing build tree is re-configured with a different version of
+  CMake, the log may contain different versions of the same event kind.
 
 Text Block Encoding
 -------------------
@@ -84,7 +93,7 @@ Every event kind is represented by a YAML mapping of the form:
 
 .. code-block:: yaml
 
-  kind: "<kind>"
+  kind: "<kind>-v<major>"
   backtrace:
     - "<file>:<line> (<function>)"
   #...event-specific keys...
@@ -92,28 +101,33 @@ Every event kind is represented by a YAML mapping of the form:
 The keys common to all events are:
 
 ``kind``
-  A string identifying the event kind.
+  A string identifying the event kind and major version.
 
 ``backtrace``
   A YAML block sequence reporting the call stack of CMake source
   locations at which the event occurred.  Each node is a string
   specifying one location formatted as ``<file>:<line> (<function>)``.
 
-Additional mapping keys are specific to each event kind,
+Additional mapping keys are specific to each (versioned) event kind,
 described below.
-
-.. _`try_compile event`:
 
 Event Kind ``try_compile``
 --------------------------
 
 The :command:`try_compile` command logs ``try_compile`` events.
 
-A ``try_compile`` event is a YAML mapping:
+There is only one ``try_compile`` event major version, version 1.
+
+.. _`try_compile-v1 event`:
+
+``try_compile-v1`` Event
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+A ``try_compile-v1`` event is a YAML mapping:
 
 .. code-block:: yaml
 
-  kind: "try_compile"
+  kind: "try_compile-v1"
   backtrace:
     - "CMakeLists.txt:123 (try_compile)"
   directories:
@@ -126,7 +140,7 @@ A ``try_compile`` event is a YAML mapping:
       # ...
     exitCode: 0
 
-The keys specific to ``try_compile`` mappings are:
+The keys specific to ``try_compile-v1`` mappings are:
 
 ``directories``
   A mapping describing the directories associated with the
@@ -168,11 +182,18 @@ Event Kind ``try_run``
 
 The :command:`try_run` command logs ``try_run`` events.
 
-A ``try_run`` event is a YAML mapping:
+There is only one ``try_run`` event major version, version 1.
+
+.. _`try_run-v1 event`:
+
+``try_run-v1`` Event
+^^^^^^^^^^^^^^^^^^^^
+
+A ``try_run-v1`` event is a YAML mapping:
 
 .. code-block:: yaml
 
-  kind: "try_run"
+  kind: "try_run-v1"
   backtrace:
     - "CMakeLists.txt:456 (try_run)"
   directories:
@@ -193,8 +214,8 @@ A ``try_run`` event is a YAML mapping:
       # ...
     exitCode: 0
 
-The keys specific to ``try_run`` mappings include those
-documented by the `try_compile event`_, plus:
+The keys specific to ``try_run-v1`` mappings include those
+documented by the `try_compile-v1 event`_, plus:
 
 ``runResult``
   A mapping describing the result of running the test code.

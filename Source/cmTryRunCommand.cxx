@@ -40,28 +40,32 @@ void WriteTryRunEvent(cmConfigureLog& log, cmMakefile const& mf,
                       cmTryCompileResult const& compileResult,
                       cmTryRunResult const& runResult)
 {
-  log.BeginEvent("try_run");
-  log.WriteBacktrace(mf);
-  cmCoreTryCompile::WriteTryCompileEventFields(log, compileResult);
+  static const std::vector<unsigned long> LogVersionsWithTryRunV1{ 1 };
 
-  log.BeginObject("runResult"_s);
-  log.WriteValue("variable"_s, runResult.Variable);
-  log.WriteValue("cached"_s, runResult.VariableCached);
-  if (runResult.Stdout) {
-    log.WriteLiteralTextBlock("stdout"_s, *runResult.Stdout);
-  }
-  if (runResult.Stderr) {
-    log.WriteLiteralTextBlock("stderr"_s, *runResult.Stderr);
-  }
-  if (runResult.ExitCode) {
-    try {
-      log.WriteValue("exitCode"_s, std::stoi(*runResult.ExitCode));
-    } catch (std::invalid_argument const&) {
-      log.WriteValue("exitCode"_s, *runResult.ExitCode);
+  if (log.IsAnyLogVersionEnabled(LogVersionsWithTryRunV1)) {
+    log.BeginEvent("try_run-v1");
+    log.WriteBacktrace(mf);
+    cmCoreTryCompile::WriteTryCompileEventFields(log, compileResult);
+
+    log.BeginObject("runResult"_s);
+    log.WriteValue("variable"_s, runResult.Variable);
+    log.WriteValue("cached"_s, runResult.VariableCached);
+    if (runResult.Stdout) {
+      log.WriteLiteralTextBlock("stdout"_s, *runResult.Stdout);
     }
+    if (runResult.Stderr) {
+      log.WriteLiteralTextBlock("stderr"_s, *runResult.Stderr);
+    }
+    if (runResult.ExitCode) {
+      try {
+        log.WriteValue("exitCode"_s, std::stoi(*runResult.ExitCode));
+      } catch (std::invalid_argument const&) {
+        log.WriteValue("exitCode"_s, *runResult.ExitCode);
+      }
+    }
+    log.EndObject();
+    log.EndEvent();
   }
-  log.EndObject();
-  log.EndEvent();
 }
 #endif
 

@@ -1,11 +1,8 @@
 ^
 ---
-version:
-  major: 1
-  minor: 0
 events:
   -
-    kind: "try_compile"
+    kind: "try_compile-v1"
     backtrace:
       - "[^"]*/Modules/CMakeDetermineCompilerABI.cmake:[0-9]+ \(try_compile\)"
       - "[^"]*/Modules/CMakeTestCCompiler.cmake:[0-9]+ \(CMAKE_DETERMINE_COMPILER_ABI\)"
@@ -20,7 +17,7 @@ events:
       stdout: \|.*
       exitCode: 0
   -
-    kind: "try_compile"
+    kind: "try_compile-v1"
     backtrace:
       - "[^"]*/Modules/CMakeDetermineCompilerABI.cmake:[0-9]+ \(try_compile\)"
       - "[^"]*/Modules/CMakeTestCXXCompiler.cmake:[0-9]+ \(CMAKE_DETERMINE_COMPILER_ABI\)"

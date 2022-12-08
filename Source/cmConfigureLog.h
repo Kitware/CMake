@@ -19,8 +19,14 @@ class cmMakefile;
 class cmConfigureLog
 {
 public:
-  cmConfigureLog(std::string logDir);
+  /** Construct with the log directory and a sorted list of enabled log
+      versions.  The latest log version will be enabled regardless.  */
+  cmConfigureLog(std::string logDir, std::vector<unsigned long> logVersions);
   ~cmConfigureLog();
+
+  /** Return true if at least one of the log versions in the given sorted
+      list is enabled.  */
+  bool IsAnyLogVersionEnabled(std::vector<unsigned long> const& v) const;
 
   void WriteBacktrace(cmMakefile const& mf);
 
@@ -49,6 +55,7 @@ public:
 
 private:
   std::string LogDir;
+  std::vector<unsigned long> LogVersions;
   cmsys::ofstream Stream;
   unsigned Indent = 0;
   bool Opened = false;

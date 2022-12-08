@@ -21,10 +21,14 @@ namespace {
 void WriteTryCompileEvent(cmConfigureLog& log, cmMakefile const& mf,
                           cmTryCompileResult const& compileResult)
 {
-  log.BeginEvent("try_compile");
-  log.WriteBacktrace(mf);
-  cmCoreTryCompile::WriteTryCompileEventFields(log, compileResult);
-  log.EndEvent();
+  static const std::vector<unsigned long> LogVersionsWithTryCompileV1{ 1 };
+
+  if (log.IsAnyLogVersionEnabled(LogVersionsWithTryCompileV1)) {
+    log.BeginEvent("try_compile-v1");
+    log.WriteBacktrace(mf);
+    cmCoreTryCompile::WriteTryCompileEventFields(log, compileResult);
+    log.EndEvent();
+  }
 }
 #endif
 }
