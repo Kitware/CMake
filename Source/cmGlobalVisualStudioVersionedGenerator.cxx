@@ -521,6 +521,7 @@ bool cmGlobalVisualStudioVersionedGenerator::SetGeneratorInstance(
 {
   if (this->LastGeneratorInstanceString &&
       i == *(this->LastGeneratorInstanceString)) {
+    this->SetVSVersionVar(mf);
     return true;
   }
 
@@ -591,6 +592,8 @@ bool cmGlobalVisualStudioVersionedGenerator::SetGeneratorInstance(
                                        "Generator instance identifier.",
                                        cmStateEnums::INTERNAL);
   }
+
+  this->SetVSVersionVar(mf);
 
   // The selected instance may have a different MSBuild than previously found.
   this->MSBuildCommandInitialized = false;
@@ -670,6 +673,13 @@ bool cmGlobalVisualStudioVersionedGenerator::ParseGeneratorInstance(
   }
 
   return true;
+}
+
+void cmGlobalVisualStudioVersionedGenerator::SetVSVersionVar(cmMakefile* mf)
+{
+  if (cm::optional<std::string> vsVer = this->GetVSInstanceVersion()) {
+    mf->AddDefinition("CMAKE_VS_VERSION_BUILD_NUMBER", *vsVer);
+  }
 }
 
 bool cmGlobalVisualStudioVersionedGenerator::ProcessGeneratorInstanceField(

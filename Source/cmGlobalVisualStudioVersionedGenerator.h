@@ -93,6 +93,7 @@ private:
   mutable cmVSSetupAPIHelper vsSetupAPIHelper;
 
   bool ParseGeneratorInstance(std::string const& is, cmMakefile* mf);
+  void SetVSVersionVar(cmMakefile* mf);
 
   std::string GeneratorInstance;
   std::string GeneratorInstanceVersion;
