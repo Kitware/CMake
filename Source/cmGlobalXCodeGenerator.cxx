@@ -4995,7 +4995,13 @@ void cmGlobalXCodeGenerator::AppendDefines(
   std::string def;
   for (auto const& define : defines) {
     // Start with -D if requested.
-    def = cmStrCat(dflag ? "-D" : "", define);
+    if (dflag && !cmHasLiteralPrefix(define, "-D")) {
+      def = cmStrCat("-D", define);
+    } else if (!dflag && cmHasLiteralPrefix(define, "-D")) {
+      def = define.substr(2);
+    } else {
+      def = define;
+    }
 
     // Append the flag with needed escapes.
     std::string tmp;

@@ -1,9 +1,5 @@
 include(RunCMake)
 
-run_cmake(empty_keyword_args)
-run_cmake(unknown_imported_target)
-
-
 macro(run_cmake_build test)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${test}-build)
   set(RunCMake_TEST_NO_CLEAN 1)

@@ -16,6 +16,9 @@ CMake will automatically drop some definitions that are not supported
 by the native build tool.  Xcode does not support per-configuration
 definitions on source files.
 
+.. versionadded:: 3.26
+  Any leading ``-D`` on an item will be removed.
+
 .. include:: /include/COMPILE_DEFINITIONS_DISCLAIMER.txt
 
 Contents of ``COMPILE_DEFINITIONS`` may use :manual:`cmake-generator-expressions(7)`

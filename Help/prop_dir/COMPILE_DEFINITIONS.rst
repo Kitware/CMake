@@ -19,6 +19,9 @@ directory's parent.
 CMake will automatically drop some definitions that are not supported
 by the native build tool.
 
+.. versionadded:: 3.26
+  Any leading ``-D`` on an item will be removed.
+
 .. include:: /include/COMPILE_DEFINITIONS_DISCLAIMER.txt
 
 Contents of ``COMPILE_DEFINITIONS`` may use "generator expressions" with

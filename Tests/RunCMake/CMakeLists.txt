@@ -693,6 +693,7 @@ add_RunCMake_test(target_link_options -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_I
 set_property(TEST RunCMake.target_link_options APPEND
   PROPERTY LABELS "CUDA")
 
+add_RunCMake_test(add_compile_definitions)
 add_RunCMake_test(target_compile_definitions)
 add_RunCMake_test(target_compile_features)
 add_RunCMake_test(target_compile_options
