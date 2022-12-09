@@ -61,6 +61,8 @@ run_cmake_script(COPY_FILE-arg-unknown)
 run_cmake_script(COPY_FILE-input-missing)
 run_cmake_script(COPY_FILE-output-missing)
 
+run_cmake_script(MAKE_DIRECTORY-fail)
+
 run_cmake_script(RENAME-file-replace)
 run_cmake_script(RENAME-file-to-file)
 run_cmake_script(RENAME-file-to-dir-capture)

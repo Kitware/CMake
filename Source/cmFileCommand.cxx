@@ -845,8 +845,10 @@ bool HandleMakeDirectoryCommand(std::vector<std::string> const& args,
       cmSystemTools::SetFatalErrorOccurred();
       return false;
     }
-    if (!cmSystemTools::MakeDirectory(*cdir)) {
-      std::string error = "problem creating directory: " + *cdir;
+    cmsys::Status mkdirStatus = cmSystemTools::MakeDirectory(*cdir);
+    if (!mkdirStatus) {
+      std::string error = cmStrCat("failed to create directory:\n  ", *cdir,
+                                   "\nbecause: ", mkdirStatus.GetString());
       status.SetError(error);
       return false;
     }
