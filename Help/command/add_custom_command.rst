@@ -31,14 +31,12 @@ This defines a command to generate specified ``OUTPUT`` file(s).
 A target created in the same directory (``CMakeLists.txt`` file)
 that specifies any output of the custom command as a source file
 is given a rule to generate the file using the command at build time.
-Do not list the output in more than one independent target that
-may build in parallel or the two instances of the rule may conflict
-(instead use the :command:`add_custom_target` command to drive the
-command and make the other targets depend on that one).
-In makefile terms this creates a new target in the following form::
 
-  OUTPUT: MAIN_DEPENDENCY DEPENDS
-          COMMAND
+Do not list the output in more than one independent target that
+may build in parallel or the instances of the rule may conflict.
+Instead, use the :command:`add_custom_target` command to drive the
+command and make the other targets depend on that one.  See the
+`Example: Generating Files for Multiple Targets`_ below.
 
 The options are:
 
@@ -388,6 +386,49 @@ will re-run whenever ``in.txt`` changes.
   adds a custom command to run ``someTool`` to generate ``out-<config>.c``,
   where ``<config>`` is the build configuration, and then compile the generated
   source as part of a library.
+
+Example: Generating Files for Multiple Targets
+""""""""""""""""""""""""""""""""""""""""""""""
+
+If multiple independent targets need the same custom command output,
+it must be attached to a single custom target on which they all depend.
+Consider the following example:
+
+.. code-block:: cmake
+
+  add_custom_command(
+    OUTPUT table.csv
+    COMMAND makeTable -i ${CMAKE_CURRENT_SOURCE_DIR}/input.dat
+                      -o table.csv
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/input.dat
+    VERBATIM)
+  add_custom_target(generate_table_csv DEPENDS table.csv)
+
+  add_custom_command(
+    OUTPUT foo.cxx
+    COMMAND genFromTable -i table.csv -case foo -o foo.cxx
+    DEPENDS table.csv           # file-level dependency
+            generate_table_csv  # target-level dependency
+    VERBATIM)
+  add_library(foo foo.cxx)
+
+  add_custom_command(
+    OUTPUT bar.cxx
+    COMMAND genFromTable -i table.csv -case bar -o bar.cxx
+    DEPENDS table.csv           # file-level dependency
+            generate_table_csv  # target-level dependency
+    VERBATIM)
+  add_library(bar bar.cxx)
+
+Output ``foo.cxx`` is needed only by target ``foo`` and output ``bar.cxx``
+is needed only by target ``bar``, but *both* targets need ``table.csv``,
+transitively.  Since ``foo`` and ``bar`` are independent targets that may
+build concurrently, we prevent them from racing to generate ``table.csv``
+by placing its custom command in a separate target, ``generate_table_csv``.
+The custom commands generating ``foo.cxx`` and ``bar.cxx`` each specify a
+target-level dependency on ``generate_table_csv``, so the targets using them,
+``foo`` and ``bar``, will not build until after target ``generate_table_csv``
+is built.
 
 .. _`add_custom_command(TARGET)`:
 
