@@ -277,6 +277,15 @@ if(CMake_RUN_CLANG_TIDY)
     set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${CMake_CLANG_TIDY_MODULE}")
   endif()
 
+  set(CMake_CLANG_TIDY_EXPORT_FIXES_DIR "" CACHE PATH "Directory to put clang-tidy fix files in.")
+  mark_as_advanced(CMake_CLANG_TIDY_EXPORT_FIXES_DIR)
+  if(CMake_CLANG_TIDY_EXPORT_FIXES_DIR)
+    if(NOT IS_ABSOLUTE "${CMake_CLANG_TIDY_EXPORT_FIXES_DIR}")
+      message(FATAL_ERROR "CMake_CLANG_TIDY_EXPORT_FIXES_DIR must be an absolute path!")
+    endif()
+    set(CMAKE_CXX_CLANG_TIDY_EXPORT_FIXES_DIR "${CMake_CLANG_TIDY_EXPORT_FIXES_DIR}")
+  endif()
+
   # Create a preprocessor definition that depends on .clang-tidy content so
   # the compile command will change when .clang-tidy changes.  This ensures
   # that a subsequent build re-runs clang-tidy on all sources even if they
