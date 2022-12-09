@@ -287,6 +287,7 @@ struct _7zip {
 		const unsigned char	*next_in;
 		int64_t			 avail_in;
 		int64_t			 total_in;
+		int64_t			 stream_in;
 		unsigned char		*next_out;
 		int64_t			 avail_out;
 		int64_t			 total_out;
@@ -775,7 +776,7 @@ archive_read_format_7zip_read_header(struct archive_read *a,
 	}
 
 	/* Set up a more descriptive format name. */
-	sprintf(zip->format_name, "7-Zip");
+	snprintf(zip->format_name, sizeof(zip->format_name), "7-Zip");
 	a->archive.archive_format_name = zip->format_name;
 
 	return (ret);
@@ -986,15 +987,30 @@ ppmd_read(void *p)
 	struct _7zip *zip = (struct _7zip *)(a->format->data);
 	Byte b;
 
-	if (zip->ppstream.avail_in == 0) {
-		archive_set_error(&a->archive, ARCHIVE_ERRNO_FILE_FORMAT,
-		    "Truncated RAR file data");
-		zip->ppstream.overconsumed = 1;
-		return (0);
+	if (zip->ppstream.avail_in <= 0) {
+		/*
+		 * Ppmd7_DecodeSymbol might require reading multiple bytes
+		 * and we are on boundary;
+		 * last resort to read using __archive_read_ahead.
+		 */
+		ssize_t bytes_avail = 0;
+		const uint8_t* data = __archive_read_ahead(a,
+		    zip->ppstream.stream_in+1, &bytes_avail);
+		if(bytes_avail < zip->ppstream.stream_in+1) {
+			archive_set_error(&a->archive,
+			    ARCHIVE_ERRNO_FILE_FORMAT,
+			    "Truncated 7z file data");
+			zip->ppstream.overconsumed = 1;
+			return (0);
+		}
+		zip->ppstream.next_in++;
+		b = data[zip->ppstream.stream_in];
+	} else {
+		b = *zip->ppstream.next_in++;
 	}
-	b = *zip->ppstream.next_in++;
 	zip->ppstream.avail_in--;
 	zip->ppstream.total_in++;
+	zip->ppstream.stream_in++;
 	return (b);
 }
 
@@ -1485,6 +1501,7 @@ decompress(struct archive_read *a, struct _7zip *zip,
 		}
 		zip->ppstream.next_in = t_next_in;
 		zip->ppstream.avail_in = t_avail_in;
+		zip->ppstream.stream_in = 0;
 		zip->ppstream.next_out = t_next_out;
 		zip->ppstream.avail_out = t_avail_out;
 		if (zip->ppmd7_stat == 0) {
@@ -2840,8 +2857,10 @@ slurp_central_directory(struct archive_read *a, struct _7zip *zip,
 	/* CRC check. */
 	if (crc32(0, (const unsigned char *)p + 12, 20)
 	    != archive_le32dec(p + 8)) {
+#ifdef DONT_FAIL_ON_CRC_ERROR
 		archive_set_error(&a->archive, -1, "Header CRC error");
 		return (ARCHIVE_FATAL);
+#endif
 	}
 
 	next_header_offset = archive_le64dec(p + 12);
@@ -2891,8 +2910,10 @@ slurp_central_directory(struct archive_read *a, struct _7zip *zip,
 		/* Check the EncodedHeader CRC.*/
 		if (r == 0 && zip->header_crc32 != next_header_crc) {
 			archive_set_error(&a->archive, -1,
+#ifndef DONT_FAIL_ON_CRC_ERROR
 			    "Damaged 7-Zip archive");
 			r = -1;
+#endif
 		}
 		if (r == 0) {
 			if (zip->si.ci.folders[0].digest_defined)
@@ -2943,9 +2964,11 @@ slurp_central_directory(struct archive_read *a, struct _7zip *zip,
 
 		/* Check the Header CRC.*/
 		if (check_header_crc && zip->header_crc32 != next_header_crc) {
+#ifndef DONT_FAIL_ON_CRC_ERROR
 			archive_set_error(&a->archive, -1,
 			    "Malformed 7-Zip archive");
 			return (ARCHIVE_FATAL);
+#endif
 		}
 		break;
 	default:

@@ -430,7 +430,7 @@ static int new_node(struct huffman_code *);
 static int make_table(struct archive_read *, struct huffman_code *);
 static int make_table_recurse(struct archive_read *, struct huffman_code *, int,
                               struct huffman_table_entry *, int, int);
-static int64_t expand(struct archive_read *, int64_t);
+static int expand(struct archive_read *, int64_t *);
 static int copy_from_lzss_window_to_unp(struct archive_read *, const void **,
                                         int64_t, int);
 static const void *rar_read_ahead(struct archive_read *, size_t, ssize_t *);
@@ -1007,9 +1007,11 @@ archive_read_format_rar_read_header(struct archive_read *a,
 
       crc32_val = crc32(0, (const unsigned char *)p + 2, (unsigned)skip - 2);
       if ((crc32_val & 0xffff) != archive_le16dec(p)) {
+#ifndef DONT_FAIL_ON_CRC_ERROR
         archive_set_error(&a->archive, ARCHIVE_ERRNO_FILE_FORMAT,
           "Header CRC error");
         return (ARCHIVE_FATAL);
+#endif
       }
       __archive_read_consume(a, skip);
       break;
@@ -1065,9 +1067,11 @@ archive_read_format_rar_read_header(struct archive_read *a,
 	      skip -= to_read;
       }
       if ((crc32_val & 0xffff) != crc32_expected) {
+#ifndef DONT_FAIL_ON_CRC_ERROR
 	      archive_set_error(&a->archive, ARCHIVE_ERRNO_FILE_FORMAT,
 		  "Header CRC error");
 	      return (ARCHIVE_FATAL);
+#endif
       }
       if (head_type == ENDARC_HEAD)
 	      return (ARCHIVE_EOF);
@@ -1432,9 +1436,11 @@ read_header(struct archive_read *a, struct archive_entry *entry,
   /* File Header CRC check. */
   crc32_val = crc32(crc32_val, h, (unsigned)(header_size - 7));
   if ((crc32_val & 0xffff) != archive_le16dec(rar_header.crc)) {
+#ifndef DONT_FAIL_ON_CRC_ERROR
     archive_set_error(&a->archive, ARCHIVE_ERRNO_FILE_FORMAT,
       "Header CRC error");
     return (ARCHIVE_FATAL);
+#endif
   }
   /* If no CRC error, Go on parsing File Header. */
   p = h;
@@ -1952,9 +1958,11 @@ read_data_stored(struct archive_read *a, const void **buff, size_t *size,
     *size = 0;
     *offset = rar->offset;
     if (rar->file_crc != rar->crc_calculated) {
+#ifndef DONT_FAIL_ON_CRC_ERROR
       archive_set_error(&a->archive, ARCHIVE_ERRNO_FILE_FORMAT,
                         "File CRC error");
       return (ARCHIVE_FATAL);
+#endif
     }
     rar->entry_eof = 1;
     return (ARCHIVE_EOF);
@@ -1988,7 +1996,7 @@ read_data_compressed(struct archive_read *a, const void **buff, size_t *size,
     return (ARCHIVE_FATAL);
 
   struct rar *rar;
-  int64_t start, end, actualend;
+  int64_t start, end;
   size_t bs;
   int ret = (ARCHIVE_OK), sym, code, lzss_offset, length, i;
 
@@ -2045,9 +2053,11 @@ read_data_compressed(struct archive_read *a, const void **buff, size_t *size,
       *size = 0;
       *offset = rar->offset;
       if (rar->file_crc != rar->crc_calculated) {
+#ifndef DONT_FAIL_ON_CRC_ERROR
         archive_set_error(&a->archive, ARCHIVE_ERRNO_FILE_FORMAT,
                           "File CRC error");
         return (ARCHIVE_FATAL);
+#endif
       }
       rar->entry_eof = 1;
       return (ARCHIVE_EOF);
@@ -2179,11 +2189,12 @@ read_data_compressed(struct archive_read *a, const void **buff, size_t *size,
         end = rar->filters.filterstart;
       }
 
-      if ((actualend = expand(a, end)) < 0)
-        return ((int)actualend);
+      ret = expand(a, &end);
+      if (ret != ARCHIVE_OK)
+	      return (ret);
 
-      rar->bytes_uncopied = actualend - start;
-      rar->filters.lastend = actualend;
+      rar->bytes_uncopied = end - start;
+      rar->filters.lastend = end;
       if (rar->filters.lastend != rar->filters.filterstart && rar->bytes_uncopied == 0) {
           /* Broken RAR files cause this case.
           * NOTE: If this case were possible on a normal RAR file
@@ -2825,8 +2836,8 @@ make_table_recurse(struct archive_read *a, struct huffman_code *code, int node,
   return ret;
 }
 
-static int64_t
-expand(struct archive_read *a, int64_t end)
+static int
+expand(struct archive_read *a, int64_t *end)
 {
   static const unsigned char lengthbases[] =
     {   0,   1,   2,   3,   4,   5,   6,
@@ -2873,16 +2884,19 @@ expand(struct archive_read *a, int64_t end)
   struct rar *rar = (struct rar *)(a->format->data);
   struct rar_br *br = &(rar->br);
 
-  if (rar->filters.filterstart < end)
-    end = rar->filters.filterstart;
+  if (rar->filters.filterstart < *end)
+    *end = rar->filters.filterstart;
 
   while (1)
   {
-    if(lzss_position(&rar->lzss) >= end)
-      return end;
+    if(lzss_position(&rar->lzss) >= *end) {
+      return (ARCHIVE_OK);
+    }
 
-    if(rar->is_ppmd_block)
-      return lzss_position(&rar->lzss);
+    if(rar->is_ppmd_block) {
+      *end = lzss_position(&rar->lzss);
+      return (ARCHIVE_OK);
+    }
 
     if ((symbol = read_next_symbol(a, &rar->maincode)) < 0)
       return (ARCHIVE_FATAL);
@@ -2906,7 +2920,8 @@ expand(struct archive_read *a, int64_t end)
           goto truncated_data;
         rar->start_new_table = rar_br_bits(br, 1);
         rar_br_consume(br, 1);
-        return lzss_position(&rar->lzss);
+        *end = lzss_position(&rar->lzss);
+        return (ARCHIVE_OK);
       }
       else
       {
@@ -2917,7 +2932,7 @@ expand(struct archive_read *a, int64_t end)
     }
     else if(symbol==257)
     {
-      if (!read_filter(a, &end))
+      if (!read_filter(a, end))
           return (ARCHIVE_FATAL);
       continue;
     }
@@ -3323,14 +3338,43 @@ run_filters(struct archive_read *a)
   struct rar *rar = (struct rar *)(a->format->data);
   struct rar_filters *filters = &rar->filters;
   struct rar_filter *filter = filters->stack;
-  size_t start = filters->filterstart;
-  size_t end = start + filter->blocklength;
+  struct rar_filter *f;
+  size_t start, end;
+  int64_t tend;
   uint32_t lastfilteraddress;
   uint32_t lastfilterlength;
   int ret;
 
+  if (filters == NULL || filter == NULL)
+    return (0);
+
+  start = filters->filterstart;
+  end = start + filter->blocklength;
+
   filters->filterstart = INT64_MAX;
-  end = (size_t)expand(a, end);
+  tend = (int64_t)end;
+  ret = expand(a, &tend);
+  if (ret != ARCHIVE_OK)
+    return 0;
+
+  /* Check if filter stack was modified in expand() */
+  ret = ARCHIVE_FATAL;
+  f = filters->stack;
+  while (f)
+  {
+    if (f == filter)
+    {
+      ret = ARCHIVE_OK;
+      break;
+    }
+    f = f->next;
+  }
+  if (ret != ARCHIVE_OK)
+    return 0;
+
+  if (tend < 0)
+    return 0;
+  end = (size_t)tend;
   if (end != start + filter->blocklength)
     return 0;
 
