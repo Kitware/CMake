@@ -2098,6 +2098,7 @@ void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
       }
 
       std::vector<std::string> byproducts;
+      byproducts.reserve(this->CrossConfigs.size());
       for (auto const& config : this->CrossConfigs) {
         byproducts.push_back(
           this->BuildAlias(GetByproductsForCleanTargetName(), config));

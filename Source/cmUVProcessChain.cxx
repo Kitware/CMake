@@ -241,6 +241,7 @@ bool cmUVProcessChain::InternalData::AddCommand(
   options.file = config.Arguments[0].c_str();
 
   std::vector<const char*> arguments;
+  arguments.reserve(config.Arguments.size());
   for (auto const& arg : config.Arguments) {
     arguments.push_back(arg.c_str());
   }
