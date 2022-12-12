@@ -40,6 +40,7 @@ void WriteTryRunEvent(cmConfigureLog& log, cmMakefile const& mf,
                       cmTryCompileResult const& compileResult,
                       cmTryRunResult const& runResult)
 {
+  // Keep in sync with cmFileAPIConfigureLog's DumpEventKindNames.
   static const std::vector<unsigned long> LogVersionsWithTryRunV1{ 1 };
 
   if (log.IsAnyLogVersionEnabled(LogVersionsWithTryRunV1)) {
