@@ -109,10 +109,11 @@ bool TryRunCommandImpl::TryRunCode(std::vector<std::string> const& argv)
   }
 
   // do the try compile
-  bool compiled = this->TryCompileCode(arguments, cmStateEnums::EXECUTABLE);
+  cm::optional<cmTryCompileResult> compileResult =
+    this->TryCompileCode(arguments, cmStateEnums::EXECUTABLE);
 
   // now try running the command if it compiled
-  if (compiled) {
+  if (compileResult && compileResult->ExitCode == 0) {
     if (this->OutputFile.empty()) {
       cmSystemTools::Error(this->FindErrorMessage);
     } else {

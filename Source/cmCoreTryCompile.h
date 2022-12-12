@@ -18,6 +18,11 @@ class cmMakefile;
 template <typename Iter>
 class cmRange;
 
+struct cmTryCompileResult
+{
+  int ExitCode = 1;
+};
+
 /** \class cmCoreTryCompile
  * \brief Base class for cmTryCompileCommand and cmTryRunCommand
  *
@@ -80,8 +85,8 @@ public:
    * This function requires at least two \p arguments and will crash if given
    * fewer.
    */
-  bool TryCompileCode(Arguments& arguments,
-                      cmStateEnums::TargetType targetType);
+  cm::optional<cmTryCompileResult> TryCompileCode(
+    Arguments& arguments, cmStateEnums::TargetType targetType);
 
   /**
    * Returns \c true if \p path resides within a CMake temporary directory,
