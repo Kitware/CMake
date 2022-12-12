@@ -380,6 +380,18 @@ Targets Created:
 
 - ``CUDA::nvrtc``
 
+.. _`cuda_toolkit_nvjitlink`:
+
+nvJitLink
+"""""""""
+
+The `nvJItLink <https://docs.nvidia.com/cuda/>`_ (Runtime LTO Linking) library.
+
+Targets Created:
+
+- ``CUDA::nvJitLink`` starting in CUDA 12.0
+- ``CUDA::nvJitLink_static``  starting in CUDA 12.0
+
 .. _`cuda_toolkit_nvml`:
 
 nvidia-ML
@@ -1092,6 +1104,11 @@ if(CUDAToolkit_FOUND)
         target_link_libraries(CUDA::nvptxcompiler_static INTERFACE Threads::Threads)
       endif()
     endif()
+  endif()
+
+  if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 12.0.0)
+    _CUDAToolkit_find_and_add_import_lib(nvJitLink DEPS cuda_driver)
+    _CUDAToolkit_find_and_add_import_lib(nvJitLink_static DEPS cuda_driver)
   endif()
 
   _CUDAToolkit_find_and_add_import_lib(nvml ALT nvidia-ml nvml)

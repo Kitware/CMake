@@ -20,9 +20,13 @@ set(cuda_libs cudart cuda_driver cublas cufft cufftw curand cusolver cusparse)
 if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 10.1)
   list(APPEND cuda_libs cublasLt)
 endif()
+if(CUDAToolkit_VERSION_MAJOR VERSION_GREATER 11)
+  list(APPEND cuda_libs nvJitLink)
+endif()
 if(CUDAToolkit_VERSION_MAJOR VERSION_LESS 11)
   list(APPEND cuda_libs nvgraph)
 endif()
+
 
 # Verify that all the CUDA:: targets and variables exist
 foreach (cuda_lib IN LISTS cuda_libs)
