@@ -96,14 +96,16 @@ bool TryRunCommandImpl::TryRunCode(std::vector<std::string> const& argv)
   }
 
   bool captureRunOutput = false;
-  bool captureRunOutputStdOutErr = false;
+  bool captureRunOutputStdOut = false;
+  bool captureRunOutputStdErr = false;
   if (arguments.OutputVariable) {
     captureRunOutput = true;
   } else if (arguments.CompileOutputVariable) {
     arguments.OutputVariable = arguments.CompileOutputVariable;
   }
   if (arguments.RunOutputStdOutVariable || arguments.RunOutputStdErrVariable) {
-    captureRunOutputStdOutErr = true;
+    captureRunOutputStdOut = arguments.RunOutputStdOutVariable.has_value();
+    captureRunOutputStdErr = arguments.RunOutputStdErrVariable.has_value();
   } else if (arguments.RunOutputVariable) {
     captureRunOutput = true;
   }
@@ -132,22 +134,14 @@ bool TryRunCommandImpl::TryRunCode(std::vector<std::string> const& argv)
           runArgs, *arguments.SourceDirectoryOrFile,
           *arguments.CompileResultVariable,
           captureRunOutput ? &runOutputContents : nullptr,
-          captureRunOutputStdOutErr && arguments.RunOutputStdOutVariable
-            ? &runOutputStdOutContents
-            : nullptr,
-          captureRunOutputStdOutErr && arguments.RunOutputStdErrVariable
-            ? &runOutputStdErrContents
-            : nullptr);
+          captureRunOutputStdOut ? &runOutputStdOutContents : nullptr,
+          captureRunOutputStdErr ? &runOutputStdErrContents : nullptr);
       } else {
         this->RunExecutable(
           runArgs, arguments.RunWorkingDirectory,
           captureRunOutput ? &runOutputContents : nullptr,
-          captureRunOutputStdOutErr && arguments.RunOutputStdOutVariable
-            ? &runOutputStdOutContents
-            : nullptr,
-          captureRunOutputStdOutErr && arguments.RunOutputStdErrVariable
-            ? &runOutputStdErrContents
-            : nullptr);
+          captureRunOutputStdOut ? &runOutputStdOutContents : nullptr,
+          captureRunOutputStdErr ? &runOutputStdErrContents : nullptr);
       }
 
       // now put the output into the variables
