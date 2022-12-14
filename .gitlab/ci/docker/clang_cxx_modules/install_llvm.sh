@@ -2,7 +2,7 @@
 
 set -e
 
-readonly revision="p1689r5-cmake-ci-20221201" # ae3b5489585b60a2b7f090ebb9e1e8729b811253
+readonly revision="p1689r5-cmake-ci-20221215" # a0acf2c9285e848b65ec7336e185888163949490
 readonly tarball="https://github.com/mathstuf/llvm-project/archive/$revision.tar.gz"
 
 readonly workdir="$HOME/llvm"
