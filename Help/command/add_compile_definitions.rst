@@ -21,6 +21,9 @@ Function-style definitions are not supported. CMake will automatically
 escape the value correctly for the native build system (note that CMake
 language syntax may require escapes to specify some values).
 
+.. versionadded:: 3.26
+  Any leading ``-D`` on an item will be removed.
+
 .. |command_name| replace:: ``add_compile_definitions``
 .. include:: GENEX_NOTE.txt
 

@@ -3377,7 +3377,12 @@ void cmLocalGenerator::AppendDefines(
     if (!this->CheckDefinition(d.Value)) {
       continue;
     }
-    defines.insert(d);
+    // remove any leading -D
+    if (cmHasLiteralPrefix(d.Value, "-D")) {
+      defines.emplace(d.Value.substr(2), d.Backtrace);
+    } else {
+      defines.insert(d);
+    }
   }
 }
 
