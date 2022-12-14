@@ -246,3 +246,9 @@ Changes made since CMake 3.25.0 include the following.
   command no longer accepts ``.a`` file names.  This behavior was added
   in CMake 3.25.0, but has been reverted due finding GNU-ABI libraries
   in cases we did not previously.
+
+3.25.2
+------
+
+* CUDA language level 20 (corresponding to C++20) is now supported with
+  NVCC 12.0 and above.
