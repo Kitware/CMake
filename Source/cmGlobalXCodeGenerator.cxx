@@ -3623,7 +3623,7 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
           }
           // Add a pair of config and item to target-item map
           auto& itemVector = targetItemMap[libName];
-          itemVector.emplace_back(ConfigItemPair(configName, &libItem));
+          itemVector.emplace_back(configName, &libItem);
           // Add product file-name to a lib-product map
           auto productName =
             cmSystemTools::GetFilenameName(libItem.Value.Value);
@@ -4381,7 +4381,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
     cmXCodeObject* config =
       this->CreateObject(cmXCodeObject::XCBuildConfiguration);
     config->AddAttribute("name", this->CreateString(name));
-    configs.push_back(std::make_pair(name, config));
+    configs.emplace_back(name, config);
   }
   if (defaultConfigName.empty()) {
     defaultConfigName = "Debug";

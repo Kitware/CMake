@@ -970,8 +970,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
             uiHeader, uiHeaderGenex, cmStrCat(this->Dir.Build, "/include"_s),
             uiHeaderFilePath);
 
-          this->Uic.UiHeaders.emplace_back(
-            std::make_pair(uiHeader, uiHeaderGenex));
+          this->Uic.UiHeaders.emplace_back(uiHeader, uiHeaderGenex);
         } else {
           // Register skipped .ui file
           this->Uic.SkipUi.insert(fullPath);

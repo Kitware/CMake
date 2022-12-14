@@ -448,6 +448,7 @@ class Target
   JBTs<T> ToJBTs(BTs<T> const& bts)
   {
     std::vector<JBTIndex> ids;
+    ids.reserve(bts.Backtraces.size());
     for (cmListFileBacktrace const& backtrace : bts.Backtraces) {
       ids.emplace_back(this->Backtraces.Add(backtrace));
     }
