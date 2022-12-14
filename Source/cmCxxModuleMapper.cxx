@@ -47,7 +47,7 @@ std::string CxxModuleMapContentClang(CxxModuleLocations const& loc,
       // extension.
       mm << "-x c++-module\n";
 
-      mm << "-fsave-std-c++-module-file=" << *bmi_loc << '\n';
+      mm << "-fmodule-output=" << *bmi_loc << '\n';
       break;
     }
   }
