@@ -480,7 +480,7 @@
     stage: build
     extends: .fedora37
     script:
-        - codespell
+        - .gitlab/ci/codespell.sh
     interruptible: true
 
 .cmake_build_linux:
