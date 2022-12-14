@@ -1344,7 +1344,8 @@ void CMakeSetupDialog::showUserChanges()
 void CMakeSetupDialog::setSearchFilter(const QString& str)
 {
   this->CacheValues->selectionModel()->clear();
-  this->CacheValues->setSearchFilter(str);
+  const bool valid = this->CacheValues->setSearchFilter(str);
+  QtCMake::setSearchFilterColor(this->Search, valid);
 }
 
 void CMakeSetupDialog::doOutputContextMenu(QPoint pt)

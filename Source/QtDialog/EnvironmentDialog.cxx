@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "EnvironmentDialog.h"
 
+#include "QCMakeWidgets.h"
 #include <QDialogButtonBox>
 #include <QGridLayout>
 #include <QItemSelectionModel>
@@ -110,14 +111,11 @@ EnvironmentDialog::EnvironmentDialog(const QProcessEnvironment& environment,
                    &EnvironmentDialog::addEntry);
   QObject::connect(this->RemoveEntry, &QAbstractButton::clicked, this,
                    &EnvironmentDialog::removeSelectedEntries);
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
-  QObject::connect(this->Search, &QLineEdit::textChanged, this->m_filter,
-                   QOverload<const QString&>::of(
-                     &EnvironmentSearchFilter::setFilterRegularExpression));
-#else
-  QObject::connect(this->Search, &QLineEdit::textChanged, this->m_filter,
-                   &EnvironmentSearchFilter::setFilterFixedString);
-#endif
+  QObject::connect(
+    this->Search, &QLineEdit::textChanged, [this](const QString& text) {
+      const bool valid = QtCMake::setSearchFilter(this->m_filter, text);
+      QtCMake::setSearchFilterColor(this->Search, valid);
+    });
   QObject::connect(this->Environment->selectionModel(),
                    &QItemSelectionModel::selectionChanged, this,
                    &EnvironmentDialog::selectionChanged);
