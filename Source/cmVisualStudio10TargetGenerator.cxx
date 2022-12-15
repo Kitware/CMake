@@ -3769,6 +3769,10 @@ bool cmVisualStudio10TargetGenerator::ComputeMasmOptions(
     this->LocalGenerator, Options::MasmCompiler, gg->GetMasmFlagTable());
   Options& masmOptions = *pOptions;
 
+  // MSBuild enables debug information by default.
+  // Disable it explicitly unless a flag parsed below re-enables it.
+  masmOptions.AddFlag("GenerateDebugInformation", "false");
+
   std::string flags;
   this->LocalGenerator->AddLanguageFlags(flags, this->GeneratorTarget,
                                          cmBuildStep::Compile, "ASM_MASM",
