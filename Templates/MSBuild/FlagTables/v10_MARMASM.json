@@ -67,7 +67,7 @@
     ]
   },
   {
-    "name": "DebugInformation",
+    "name": "GenerateDebugInformation",
     "switch": "g",
     "comment": "Generate debugging information.",
     "value": "true",
