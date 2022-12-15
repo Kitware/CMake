@@ -200,6 +200,12 @@ set_property(TARGET importedFallback PROPERTY IMPORTED_LOCATION fallback_loc)
 set_property(TARGET importedFallback PROPERTY MAP_IMPORTED_CONFIG_DEBUG "" DEBUG)
 set_property(TARGET importedFallback PROPERTY MAP_IMPORTED_CONFIG_RELEASE "")
 
+add_library(importedFallback_genex STATIC IMPORTED)
+set_property(TARGET importedFallback_genex PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+set_property(TARGET importedFallback_genex PROPERTY IMPORTED_LOCATION_RELEASE release_loc)
+set_property(TARGET importedFallback_genex PROPERTY
+  INTERFACE_COMPILE_DEFINITIONS $<$<CONFIG:Release>:FOOBAR=1>)
+
 add_custom_target(check-part3 ALL
   COMMAND ${msys2_no_conv} ${CMAKE_COMMAND}
     -Dtest_version_greater_1=$<VERSION_GREATER:1.0,1.1.1>
@@ -211,6 +217,7 @@ add_custom_target(check-part3 ALL
     -Dconfig=$<CONFIGURATION>
     -Dtest_imported_includes=$<TARGET_PROPERTY:imported4,INCLUDE_DIRECTORIES>
     -Dtest_imported_fallback=$<STREQUAL:$<TARGET_FILE_NAME:importedFallback>,fallback_loc>
+    -Dtest_imported_fallback_genex=$<STREQUAL:$<TARGET_PROPERTY:importedFallback_genex,INTERFACE_COMPILE_DEFINITIONS>,FOOBAR=1>
     -Dtest_alias_file_exe=$<STREQUAL:$<TARGET_FILE:Alias::SomeExe>,$<TARGET_FILE:someexe>>
     -Dtest_alias_file_lib=$<STREQUAL:$<TARGET_FILE:Alias::SomeLib>,$<TARGET_FILE:empty1>>
     -Dtest_alias_target_name=$<STREQUAL:$<TARGET_PROPERTY:Alias::SomeLib,NAME>,$<TARGET_PROPERTY:empty1,NAME>>

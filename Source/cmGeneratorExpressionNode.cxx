@@ -1388,6 +1388,14 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
               return "1";
             }
           }
+        } else if (!suffix.empty()) {
+          // There is no explicit mapping for the tested config, so use
+          // the configuration of the imported location that was selected.
+          for (auto const& param : parameters) {
+            if (cmStrCat('_', cmSystemTools::UpperCase(param)) == suffix) {
+              return "1";
+            }
+          }
         }
       }
     }
