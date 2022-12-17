@@ -368,7 +368,7 @@ cmComputeLinkInformation::cmComputeLinkInformation(
       LibraryFeatureDescriptor{ "__CMAKE_LINK_EXECUTABLE",
                                 cmStrCat(this->LoaderFlag, "<LIBRARY>") });
   }
-  // To link framewortk using a full path
+  // To link framework using a full path
   this->LibraryFeatureDescriptors.emplace(
     "__CMAKE_LINK_FRAMEWORK",
     LibraryFeatureDescriptor{ "__CMAKE_LINK_FRAMEWORK", "<LIBRARY>" });
