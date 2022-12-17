@@ -7,16 +7,16 @@ Add a subdirectory to the build.
 
   add_subdirectory(source_dir [binary_dir] [EXCLUDE_FROM_ALL] [SYSTEM])
 
-Adds a subdirectory to the build.  The source_dir specifies the
-directory in which the source CMakeLists.txt and code files are
-located.  If it is a relative path it will be evaluated with respect
+Adds a subdirectory to the build.  The ``source_dir`` specifies the
+directory in which the source ``CMakeLists.txt`` and code files are
+located.  If it is a relative path, it will be evaluated with respect
 to the current directory (the typical usage), but it may also be an
 absolute path.  The ``binary_dir`` specifies the directory in which to
-place the output files.  If it is a relative path it will be evaluated
+place the output files.  If it is a relative path, it will be evaluated
 with respect to the current output directory, but it may also be an
 absolute path.  If ``binary_dir`` is not specified, the value of
 ``source_dir``, before expanding any relative path, will be used (the
-typical usage).  The CMakeLists.txt file in the specified source
+typical usage).  The ``CMakeLists.txt`` file in the specified source
 directory will be processed immediately by CMake before processing in
 the current input file continues beyond this command.
 
@@ -28,9 +28,9 @@ meant for use when the subdirectory contains a separate part of the
 project that is useful but not necessary, such as a set of examples.
 Typically the subdirectory should contain its own :command:`project`
 command invocation so that a full build system will be generated in the
-subdirectory (such as a VS IDE solution file).  Note that inter-target
-dependencies supersede this exclusion.  If a target built by the
-parent project depends on a target in the subdirectory, the dependee
+subdirectory (such as a Visual Studio IDE solution file).  Note that
+inter-target dependencies supersede this exclusion.  If a target built by
+the parent project depends on a target in the subdirectory, the dependee
 target will be included in the parent project build system to satisfy
 the dependency.
 
@@ -38,6 +38,4 @@ the dependency.
   If the ``SYSTEM`` argument is provided, the :prop_dir:`SYSTEM` directory
   property of the subdirectory will be set to true.  This property is
   used to initialize the :prop_tgt:`SYSTEM` property of each non-imported
-  target created in that subdirectory.  The include directories of targets
-  with :prop_tgt:`SYSTEM` set to true will be treated as ``SYSTEM`` when
-  compiling consumers.
+  target created in that subdirectory.

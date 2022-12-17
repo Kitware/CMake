@@ -233,12 +233,12 @@ Commands
   .. versionadded:: 3.25
 
     ``SYSTEM``
-      If the ``SYSTEM`` argument is provided, targets created by
-      the dependency will have their :prop_tgt:`SYSTEM` property
-      set to true when populated by :command:`FetchContent_MakeAvailable`.
-      The entries in their  :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES`
-      will be treated as ``SYSTEM`` include directories when
-      compiling consumers.
+      If the ``SYSTEM`` argument is provided, the :prop_dir:`SYSTEM` directory
+      property of a subdirectory added by
+      :command:`FetchContent_MakeAvailable` will be set to true.  This will
+      affect non-imported targets created as part of that command.
+      See the :prop_tgt:`SYSTEM` target property documentation for a more
+      detailed discussion of the effects.
 
 .. command:: FetchContent_MakeAvailable
 
@@ -352,6 +352,11 @@ Commands
       or even to a directory that doesn't exist.  This can be used to avoid
       adding a project that contains a ``CMakeLists.txt`` file in its top
       directory.
+
+    .. versionadded:: 3.25
+      If the ``SYSTEM`` keyword was included in the call to
+      :command:`FetchContent_Declare`, the ``SYSTEM`` keyword will be
+      added to the :command:`add_subdirectory` command as well.
 
   Projects should aim to declare the details of all dependencies they might
   use before they call ``FetchContent_MakeAvailable()`` for any of them.
