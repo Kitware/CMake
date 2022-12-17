@@ -167,13 +167,9 @@ bool QCMakeCacheView::showAdvanced() const
   return this->AdvancedFilter->showAdvanced();
 }
 
-void QCMakeCacheView::setSearchFilter(const QString& s)
+bool QCMakeCacheView::setSearchFilter(const QString& s)
 {
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
-  this->SearchFilter->setFilterRegularExpression(s);
-#else
-  this->SearchFilter->setFilterFixedString(s);
-#endif
+  return QtCMake::setSearchFilter(this->SearchFilter, s);
 }
 
 QCMakeCacheModel::QCMakeCacheModel(QObject* p)
