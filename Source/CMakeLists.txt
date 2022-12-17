@@ -160,6 +160,8 @@ add_library(
   cmComputeLinkInformation.h
   cmComputeTargetDepends.h
   cmComputeTargetDepends.cxx
+  cmConfigureLog.h
+  cmConfigureLog.cxx
   cmConsoleBuf.h
   cmConsoleBuf.cxx
   cmConstStack.h

@@ -3,6 +3,7 @@ include(RunCMake)
 run_cmake(BinDirEmpty)
 run_cmake(BinDirRelative)
 run_cmake(NoOutputVariable)
+run_cmake(ConfigureLog)
 
 set(RunCMake_TEST_OPTIONS -Dtry_compile_DEFS=old_signature.cmake)
 include(${RunCMake_SOURCE_DIR}/old_and_new_signature_tests.cmake)

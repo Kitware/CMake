@@ -2,6 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmTryCompileCommand.h"
 
+#include <cm/optional>
+
+#include "cmConfigureLog.h"
 #include "cmCoreTryCompile.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
@@ -12,6 +15,23 @@
 #include "cmStringAlgorithms.h"
 #include "cmValue.h"
 #include "cmake.h"
+
+namespace {
+#ifndef CMAKE_BOOTSTRAP
+void WriteTryCompileEvent(cmConfigureLog& log, cmMakefile const& mf,
+                          cmTryCompileResult const& compileResult)
+{
+  static const std::vector<unsigned long> LogVersionsWithTryCompileV1{ 1 };
+
+  if (log.IsAnyLogVersionEnabled(LogVersionsWithTryCompileV1)) {
+    log.BeginEvent("try_compile-v1");
+    log.WriteBacktrace(mf);
+    cmCoreTryCompile::WriteTryCompileEventFields(log, compileResult);
+    log.EndEvent();
+  }
+}
+#endif
+}
 
 bool cmTryCompileCommand(std::vector<std::string> const& args,
                          cmExecutionStatus& status)
@@ -59,7 +79,15 @@ bool cmTryCompileCommand(std::vector<std::string> const& args,
   if (!arguments) {
     return true;
   }
-  tc.TryCompileCode(arguments, targetType);
+
+  if (cm::optional<cmTryCompileResult> compileResult =
+        tc.TryCompileCode(arguments, targetType)) {
+#ifndef CMAKE_BOOTSTRAP
+    if (cmConfigureLog* log = mf.GetCMakeInstance()->GetConfigureLog()) {
+      WriteTryCompileEvent(*log, mf, *compileResult);
+    }
+#endif
+  }
 
   // if They specified clean then we clean up what we can
   if (tc.SrcFileSignature) {

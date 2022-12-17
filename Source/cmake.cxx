@@ -70,6 +70,7 @@
 #  include <cm3p/curl/curl.h>
 #  include <cm3p/json/writer.h>
 
+#  include "cmConfigureLog.h"
 #  include "cmFileAPI.h"
 #  include "cmGraphVizWriter.h"
 #  include "cmVariableWatch.h"
@@ -2423,10 +2424,22 @@ int cmake::ActualConfigure()
 #if !defined(CMAKE_BOOTSTRAP)
   this->FileAPI = cm::make_unique<cmFileAPI>(this);
   this->FileAPI->ReadQueries();
+
+  if (!this->GetIsInTryCompile()) {
+    this->TruncateOutputLog("CMakeConfigureLog.yaml");
+    this->ConfigureLog = cm::make_unique<cmConfigureLog>(
+      cmStrCat(this->GetHomeOutputDirectory(), "/CMakeFiles"_s),
+      std::vector<unsigned long>());
+  }
 #endif
 
   // actually do the configure
   this->GlobalGenerator->Configure();
+
+#if !defined(CMAKE_BOOTSTRAP)
+  this->ConfigureLog.reset();
+#endif
+
   // Before saving the cache
   // if the project did not define one of the entries below, add them now
   // so users can edit the values in the cache:

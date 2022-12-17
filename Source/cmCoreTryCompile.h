@@ -14,9 +14,22 @@
 #include "cmArgumentParserTypes.h"
 #include "cmStateTypes.h"
 
+class cmConfigureLog;
 class cmMakefile;
 template <typename Iter>
 class cmRange;
+
+struct cmTryCompileResult
+{
+  std::string SourceDirectory;
+  std::string BinaryDirectory;
+
+  bool VariableCached = true;
+  std::string Variable;
+
+  std::string Output;
+  int ExitCode = 1;
+};
 
 /** \class cmCoreTryCompile
  * \brief Base class for cmTryCompileCommand and cmTryRunCommand
@@ -80,8 +93,8 @@ public:
    * This function requires at least two \p arguments and will crash if given
    * fewer.
    */
-  bool TryCompileCode(Arguments& arguments,
-                      cmStateEnums::TargetType targetType);
+  cm::optional<cmTryCompileResult> TryCompileCode(
+    Arguments& arguments, cmStateEnums::TargetType targetType);
 
   /**
    * Returns \c true if \p path resides within a CMake temporary directory,
@@ -102,6 +115,9 @@ public:
   the error message is stored in FindErrorMessage.
    */
   void FindOutputFile(const std::string& targetName);
+
+  static void WriteTryCompileEventFields(
+    cmConfigureLog& log, cmTryCompileResult const& compileResult);
 
   std::string BinaryDirectory;
   std::string OutputFile;
