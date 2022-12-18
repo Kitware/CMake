@@ -45,16 +45,16 @@ Synopsis
 
   `JSON`_
     string(JSON <out-var> [ERROR_VARIABLE <error-var>]
-           {`GET`_ | `TYPE`_ | :ref:`LENGTH <JSONLENGTH>` | `REMOVE`_}
+           {:ref:`GET <JSON_GET>` | :ref:`TYPE <JSON_TYPE>` | :ref:`LENGTH <JSON_LENGTH>` | :ref:`REMOVE <JSON_REMOVE>`}
            <json-string> <member|index> [<member|index> ...])
     string(JSON <out-var> [ERROR_VARIABLE <error-var>]
-           `MEMBER`_ <json-string>
+           :ref:`MEMBER <JSON_MEMBER>` <json-string>
            [<member|index> ...] <index>)
     string(JSON <out-var> [ERROR_VARIABLE <error-var>]
-           `SET`_ <json-string>
+           :ref:`SET <JSON_SET>` <json-string>
            <member|index> [<member|index> ...] <value>)
     string(JSON <out-var> [ERROR_VARIABLE <error-var>]
-           `EQUAL`_ <json-string1> <json-string2>)
+           :ref:`EQUAL <JSON_EQUAL>` <json-string1> <json-string2>)
 
 Search and Replace
 ^^^^^^^^^^^^^^^^^^
@@ -586,7 +586,7 @@ Functionality for querying a JSON string.
   option is not present, a fatal error message is generated.  If no error
   occurs, the ``<error-variable>`` will be set to ``NOTFOUND``.
 
-.. _GET:
+.. _JSON_GET:
 .. code-block:: cmake
 
   string(JSON <out-var> [ERROR_VARIABLE <error-variable>]
@@ -599,7 +599,7 @@ Boolean elements will be returned as ``ON`` or ``OFF``.
 Null elements will be returned as an empty string.
 Number and string types will be returned as strings.
 
-.. _TYPE:
+.. _JSON_TYPE:
 .. code-block:: cmake
 
   string(JSON <out-var> [ERROR_VARIABLE <error-variable>]
@@ -610,7 +610,7 @@ given by the list of ``<member|index>`` arguments. The ``<out-var>``
 will be set to one of ``NULL``, ``NUMBER``, ``STRING``, ``BOOLEAN``,
 ``ARRAY``, or ``OBJECT``.
 
-.. _MEMBER:
+.. _JSON_MEMBER:
 .. code-block:: cmake
 
   string(JSON <out-var> [ERROR_VARIABLE <error-var>]
@@ -621,7 +621,7 @@ Get the name of the ``<index>``-th member in ``<json-string>`` at the location
 given by the list of ``<member|index>`` arguments.
 Requires an element of object type.
 
-.. _JSONLENGTH:
+.. _JSON_LENGTH:
 .. code-block:: cmake
 
   string(JSON <out-var> [ERROR_VARIABLE <error-variable>]
@@ -631,7 +631,7 @@ Get the length of an element in ``<json-string>`` at the location
 given by the list of ``<member|index>`` arguments.
 Requires an element of array or object type.
 
-.. _REMOVE:
+.. _JSON_REMOVE:
 .. code-block:: cmake
 
   string(JSON <out-var> [ERROR_VARIABLE <error-variable>]
@@ -641,7 +641,7 @@ Remove an element from ``<json-string>`` at the location
 given by the list of ``<member|index>`` arguments. The JSON string
 without the removed element will be stored in ``<out-var>``.
 
-.. _SET:
+.. _JSON_SET:
 .. code-block:: cmake
 
   string(JSON <out-var> [ERROR_VARIABLE <error-variable>]
@@ -651,7 +651,7 @@ Set an element in ``<json-string>`` at the location
 given by the list of ``<member|index>`` arguments to ``<value>``.
 The contents of ``<value>`` should be valid JSON.
 
-.. _EQUAL:
+.. _JSON_EQUAL:
 .. code-block:: cmake
 
   string(JSON <out-var> [ERROR_VARIABLE <error-var>]
