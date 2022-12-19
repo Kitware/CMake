@@ -672,14 +672,14 @@ This is equivalent to appending ``${CMAKE_INSTALL_PREFIX}/include`` to the
 
 When the :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` of an
 :ref:`imported target <Imported targets>` is consumed, the entries in the
-property are treated as ``SYSTEM`` include directories, as if they were
-listed in the :prop_tgt:`INTERFACE_SYSTEM_INCLUDE_DIRECTORIES` of the
-dependency. This can result in omission of compiler warnings for headers
-found in those directories.  This behavior for :ref:`imported targets` may
-be controlled by setting the :prop_tgt:`NO_SYSTEM_FROM_IMPORTED` target
-property on the *consumers* of imported targets, or by setting the
-:prop_tgt:`IMPORTED_NO_SYSTEM` target property on the imported targets
-themselves.
+property may be treated as system include directories.  The effects of that
+are toolchain-dependent, but one common effect is to omit compiler warnings
+for headers found in those directories.  The :prop_tgt:`SYSTEM` property of
+the installed target determines this behavior (see the
+:prop_tgt:`EXPORT_NO_SYSTEM` property for how to modify the installed value
+for a target).  It is also possible to change how consumers interpret the
+system behavior of consumed imported targets by setting the
+:prop_tgt:`NO_SYSTEM_FROM_IMPORTED` target property on the *consumer*.
 
 If a binary target is linked transitively to a macOS :prop_tgt:`FRAMEWORK`, the
 ``Headers`` directory of the framework is also treated as a usage requirement.
