@@ -237,6 +237,8 @@ add_library(
   cmFileAPICache.h
   cmFileAPICodemodel.cxx
   cmFileAPICodemodel.h
+  cmFileAPIConfigureLog.cxx
+  cmFileAPIConfigureLog.h
   cmFileAPICMakeFiles.cxx
   cmFileAPICMakeFiles.h
   cmFileAPIToolchains.cxx

@@ -1298,6 +1298,45 @@ elsewhere in the containing object.  The backtrace graph object members are:
   directory then the path is specified relative to that directory.
   Otherwise the path is absolute.
 
+.. _`file-api configureLog`:
+
+Object Kind "configureLog"
+--------------------------
+
+The ``configureLog`` object kind describes the location and contents of
+a :manual:`cmake-configure-log(7)` file.
+
+There is only one ``configureLog`` object major version, version 1.
+
+"configureLog" version 1
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+``configureLog`` object version 1 is a JSON object:
+
+.. code-block:: json
+
+  {
+    "kind": "configureLog",
+    "version": { "major": 1, "minor": 0 },
+    "path": "/path/to/top-level-build-dir/CMakeFiles/CMakeConfigureLog.yaml",
+    "eventKindNames": [ "try_compile-v1", "try_run-v1" ]
+  }
+
+The members specific to ``configureLog`` objects are:
+
+``path``
+  A string specifying the path to the configure log file.
+  Clients must read the log file from this path, which may be
+  different than the path documented by :manual:`cmake-configure-log(7)`.
+  The log file may not exist if no events are logged.
+
+``eventKindNames``
+  A JSON array whose entries are each a JSON string naming one
+  of the :manual:`cmake-configure-log(7)` versioned event kinds.
+  At most one version of each configure log event kind will be listed.
+  Although the configure log may contain other (versioned) event kinds,
+  clients must ignore those that are not listed in this field.
+
 Object Kind "cache"
 -------------------
 

@@ -73,6 +73,16 @@ they do not understand:
 * If an existing build tree is re-configured with a different version of
   CMake, the log may contain different versions of the same event kind.
 
+* If :manual:`cmake-file-api(7)` queries request one or more
+  :ref:`configureLog <file-api configureLog>` object versions,
+  the log may contain multiple entries for the same event, each
+  with a different version of its event kind.
+
+IDEs should write a :manual:`cmake-file-api(7)` query requesting a
+specific :ref:`configureLog <file-api configureLog>` object version,
+before running CMake, and then read the configure log only as described
+by the file-api reply.
+
 Text Block Encoding
 -------------------
 

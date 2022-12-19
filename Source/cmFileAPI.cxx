@@ -18,6 +18,7 @@
 #include "cmFileAPICMakeFiles.h"
 #include "cmFileAPICache.h"
 #include "cmFileAPICodemodel.h"
+#include "cmFileAPIConfigureLog.h"
 #include "cmFileAPIToolchains.h"
 #include "cmGlobalGenerator.h"
 #include "cmStringAlgorithms.h"
@@ -64,6 +65,26 @@ void cmFileAPI::ReadQueries()
       this->TopQuery.Unknown.push_back(std::move(query));
     }
   }
+}
+
+std::vector<unsigned long> cmFileAPI::GetConfigureLogVersions()
+{
+  std::vector<unsigned long> versions;
+  auto getConfigureLogVersions = [&versions](Query const& q) {
+    for (Object const& o : q.Known) {
+      if (o.Kind == ObjectKind::ConfigureLog) {
+        versions.emplace_back(o.Version);
+      }
+    }
+  };
+  getConfigureLogVersions(this->TopQuery);
+  for (auto const& client : this->ClientQueries) {
+    getConfigureLogVersions(client.second.DirQuery);
+  }
+  std::sort(versions.begin(), versions.end());
+  versions.erase(std::unique(versions.begin(), versions.end()),
+                 versions.end());
+  return versions;
 }
 
 void cmFileAPI::WriteReplies()
@@ -241,6 +262,17 @@ bool cmFileAPI::ReadQuery(std::string const& query,
     objects.push_back(o);
     return true;
   }
+  if (kindName == ObjectKindName(ObjectKind::ConfigureLog)) {
+    Object o;
+    o.Kind = ObjectKind::ConfigureLog;
+    if (verStr == "v1") {
+      o.Version = 1;
+    } else {
+      return false;
+    }
+    objects.push_back(o);
+    return true;
+  }
   if (kindName == ObjectKindName(ObjectKind::Cache)) {
     Object o;
     o.Kind = ObjectKind::Cache;
@@ -411,11 +443,12 @@ const char* cmFileAPI::ObjectKindName(ObjectKind kind)
 {
   // Keep in sync with ObjectKind enum.
   static const char* objectKindNames[] = {
-    "codemodel",  //
-    "cache",      //
-    "cmakeFiles", //
-    "toolchains", //
-    "__test"      //
+    "codemodel",    //
+    "configureLog", //
+    "cache",        //
+    "cmakeFiles",   //
+    "toolchains",   //
+    "__test"        //
   };
   return objectKindNames[static_cast<size_t>(kind)];
 }
@@ -441,6 +474,9 @@ Json::Value cmFileAPI::BuildObject(Object const& object)
   switch (object.Kind) {
     case ObjectKind::CodeModel:
       value = this->BuildCodeModel(object);
+      break;
+    case ObjectKind::ConfigureLog:
+      value = this->BuildConfigureLog(object);
       break;
     case ObjectKind::Cache:
       value = this->BuildCache(object);
@@ -503,6 +539,8 @@ cmFileAPI::ClientRequest cmFileAPI::BuildClientRequest(
 
   if (kindName == this->ObjectKindName(ObjectKind::CodeModel)) {
     r.Kind = ObjectKind::CodeModel;
+  } else if (kindName == this->ObjectKindName(ObjectKind::ConfigureLog)) {
+    r.Kind = ObjectKind::ConfigureLog;
   } else if (kindName == this->ObjectKindName(ObjectKind::Cache)) {
     r.Kind = ObjectKind::Cache;
   } else if (kindName == this->ObjectKindName(ObjectKind::CMakeFiles)) {
@@ -529,6 +567,9 @@ cmFileAPI::ClientRequest cmFileAPI::BuildClientRequest(
   switch (r.Kind) {
     case ObjectKind::CodeModel:
       this->BuildClientRequestCodeModel(r, versions);
+      break;
+    case ObjectKind::ConfigureLog:
+      this->BuildClientRequestConfigureLog(r, versions);
       break;
     case ObjectKind::Cache:
       this->BuildClientRequestCache(r, versions);
@@ -719,6 +760,41 @@ Json::Value cmFileAPI::BuildCodeModel(Object const& object)
   return codemodel;
 }
 
+// The "configureLog" object kind.
+
+// Update Help/manual/cmake-file-api.7.rst when updating this constant.
+static unsigned int const ConfigureLogV1Minor = 0;
+
+void cmFileAPI::BuildClientRequestConfigureLog(
+  ClientRequest& r, std::vector<RequestVersion> const& versions)
+{
+  // Select a known version from those requested.
+  for (RequestVersion const& v : versions) {
+    if ((v.Major == 1 && v.Minor <= ConfigureLogV1Minor)) {
+      r.Version = v.Major;
+      break;
+    }
+  }
+  if (!r.Version) {
+    r.Error = NoSupportedVersion(versions);
+  }
+}
+
+Json::Value cmFileAPI::BuildConfigureLog(Object const& object)
+{
+  Json::Value configureLog = cmFileAPIConfigureLogDump(*this, object.Version);
+  configureLog["kind"] = this->ObjectKindName(object.Kind);
+
+  Json::Value& version = configureLog["version"];
+  if (object.Version == 1) {
+    version = BuildVersion(1, ConfigureLogV1Minor);
+  } else {
+    return configureLog; // should be unreachable
+  }
+
+  return configureLog;
+}
+
 // The "cache" object kind.
 
 static unsigned int const CacheV2Minor = 0;
@@ -865,6 +941,14 @@ Json::Value cmFileAPI::ReportCapabilities()
     request["kind"] = ObjectKindName(ObjectKind::CodeModel);
     Json::Value& versions = request["version"] = Json::arrayValue;
     versions.append(BuildVersion(2, CodeModelV2Minor));
+    requests.append(std::move(request)); // NOLINT(*)
+  }
+
+  {
+    Json::Value request = Json::objectValue;
+    request["kind"] = ObjectKindName(ObjectKind::ConfigureLog);
+    Json::Value& versions = request["version"] = Json::arrayValue;
+    versions.append(BuildVersion(1, ConfigureLogV1Minor));
     requests.append(std::move(request)); // NOLINT(*)
   }
 

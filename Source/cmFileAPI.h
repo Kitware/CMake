@@ -24,6 +24,9 @@ public:
   /** Read fileapi queries from disk.  */
   void ReadQueries();
 
+  /** Get the list of configureLog object kind versions requested.  */
+  std::vector<unsigned long> GetConfigureLogVersions();
+
   /** Write fileapi replies to disk.  */
   void WriteReplies();
 
@@ -54,6 +57,7 @@ private:
   enum class ObjectKind
   {
     CodeModel,
+    ConfigureLog,
     Cache,
     CMakeFiles,
     Toolchains,
@@ -192,6 +196,10 @@ private:
   void BuildClientRequestCodeModel(
     ClientRequest& r, std::vector<RequestVersion> const& versions);
   Json::Value BuildCodeModel(Object const& object);
+
+  void BuildClientRequestConfigureLog(
+    ClientRequest& r, std::vector<RequestVersion> const& versions);
+  Json::Value BuildConfigureLog(Object const& object);
 
   void BuildClientRequestCache(ClientRequest& r,
                                std::vector<RequestVersion> const& versions);
