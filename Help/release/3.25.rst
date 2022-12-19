@@ -159,9 +159,10 @@ Properties
 Modules
 -------
 
-* The :module:`FetchContent` module :command:`FetchContent_Declare`
-  command gained a ``SYSTEM`` option to enable the :prop_dir:`SYSTEM`
-  directory property in the subdirectory.
+* The :module:`FetchContent` module's :command:`FetchContent_Declare`
+  command gained a ``SYSTEM`` option which sets the :prop_dir:`SYSTEM`
+  directory property on subdirectories created by
+  :command:`FetchContent_MakeAvailable`.
 
 * The :module:`FindCUDAToolkit` module now provides a target for
   :ref:`nvtx3 <cuda_toolkit_nvtx3>` for CUDA 10.0+, which supersedes
