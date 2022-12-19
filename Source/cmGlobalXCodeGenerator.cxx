@@ -2516,10 +2516,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
   }
 
   // Get the product name components.
-  std::string pnprefix;
-  std::string pnbase;
-  std::string pnsuffix;
-  gtgt->GetFullNameComponents(pnprefix, pnbase, pnsuffix, configName);
+  cmGeneratorTarget::NameComponents const& components =
+    gtgt->GetFullNameComponents(configName);
 
   cmValue version = gtgt->GetProperty("VERSION");
   cmValue soversion = gtgt->GetProperty("SOVERSION");
@@ -2534,8 +2532,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     version = soversion;
   }
 
-  std::string realName = pnbase;
-  std::string soName = pnbase;
+  std::string realName = components.base;
+  std::string soName = components.base;
   if (version && soversion) {
     realName += ".";
     realName += *version;
@@ -2565,15 +2563,15 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       gtgt->GetType() == cmStateEnums::SHARED_LIBRARY ||
       gtgt->GetType() == cmStateEnums::MODULE_LIBRARY ||
       gtgt->GetType() == cmStateEnums::EXECUTABLE) {
-
+    std::string prefix = components.prefix;
     if (gtgt->IsFrameworkOnApple() || gtgt->IsCFBundleOnApple()) {
-      pnprefix = "";
+      prefix = "";
     }
 
     buildSettings->AddAttribute("EXECUTABLE_PREFIX",
-                                this->CreateString(pnprefix));
+                                this->CreateString(prefix));
     buildSettings->AddAttribute("EXECUTABLE_SUFFIX",
-                                this->CreateString(pnsuffix));
+                                this->CreateString(components.suffix));
   }
 
   // Store the product name for all target types.

@@ -348,10 +348,16 @@ public:
   /** Get the soname of the target.  Allowed only for a shared library.  */
   std::string GetSOName(const std::string& config) const;
 
-  void GetFullNameComponents(std::string& prefix, std::string& base,
-                             std::string& suffix, const std::string& config,
-                             cmStateEnums::ArtifactType artifact =
-                               cmStateEnums::RuntimeBinaryArtifact) const;
+  struct NameComponents
+  {
+    std::string prefix;
+    std::string base;
+    std::string suffix;
+  };
+  NameComponents const& GetFullNameComponents(
+    std::string const& config,
+    cmStateEnums::ArtifactType artifact =
+      cmStateEnums::RuntimeBinaryArtifact) const;
 
   /** Append to @a base the bundle directory hierarchy up to a certain @a level
    * and return it. */
@@ -940,10 +946,14 @@ private:
 
   std::string GetFullNameInternal(const std::string& config,
                                   cmStateEnums::ArtifactType artifact) const;
-  void GetFullNameInternal(const std::string& config,
-                           cmStateEnums::ArtifactType artifact,
-                           std::string& outPrefix, std::string& outBase,
-                           std::string& outSuffix) const;
+
+  using FullNameCache = std::map<std::string, NameComponents>;
+
+  mutable FullNameCache RuntimeBinaryFullNameCache;
+  mutable FullNameCache ImportLibraryFullNameCache;
+
+  NameComponents const& GetFullNameInternalComponents(
+    std::string const& config, cmStateEnums::ArtifactType artifact) const;
 
   mutable std::string LinkerLanguage;
   using LinkClosureMapType = std::map<std::string, LinkClosure>;

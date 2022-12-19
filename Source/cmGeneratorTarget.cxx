@@ -572,12 +572,7 @@ std::string cmGeneratorTarget::GetFilePrefix(
     cmValue prefix = this->GetFilePrefixInternal(config, artifact);
     return prefix ? *prefix : std::string();
   }
-
-  std::string prefix;
-  std::string suffix;
-  std::string base;
-  this->GetFullNameInternal(config, artifact, prefix, base, suffix);
-  return prefix;
+  return this->GetFullNameInternalComponents(config, artifact).prefix;
 }
 std::string cmGeneratorTarget::GetFileSuffix(
   const std::string& config, cmStateEnums::ArtifactType artifact) const
@@ -586,12 +581,7 @@ std::string cmGeneratorTarget::GetFileSuffix(
     cmValue suffix = this->GetFileSuffixInternal(config, artifact);
     return suffix ? *suffix : std::string();
   }
-
-  std::string prefix;
-  std::string suffix;
-  std::string base;
-  this->GetFullNameInternal(config, artifact, prefix, base, suffix);
-  return suffix;
+  return this->GetFullNameInternalComponents(config, artifact).suffix;
 }
 
 std::string cmGeneratorTarget::GetFilePostfix(const std::string& config) const
@@ -755,6 +745,8 @@ void cmGeneratorTarget::ClearSourcesCache()
   this->PrecompileHeadersCache.clear();
   this->LinkOptionsCache.clear();
   this->LinkDirectoriesCache.clear();
+  this->RuntimeBinaryFullNameCache.clear();
+  this->ImportLibraryFullNameCache.clear();
 }
 
 void cmGeneratorTarget::ClearLinkInterfaceCache()
@@ -2180,23 +2172,21 @@ std::set<std::string> cmGeneratorTarget::GetAllConfigCompileLanguages() const
 std::string cmGeneratorTarget::GetCompilePDBName(
   const std::string& config) const
 {
-  std::string prefix;
-  std::string base;
-  std::string suffix;
-  this->GetFullNameInternal(config, cmStateEnums::RuntimeBinaryArtifact,
-                            prefix, base, suffix);
-
   // Check for a per-configuration output directory target property.
   std::string configUpper = cmSystemTools::UpperCase(config);
   std::string configProp = cmStrCat("COMPILE_PDB_NAME_", configUpper);
   cmValue config_name = this->GetProperty(configProp);
   if (cmNonempty(config_name)) {
-    return prefix + *config_name + ".pdb";
+    NameComponents const& components = GetFullNameInternalComponents(
+      config, cmStateEnums::RuntimeBinaryArtifact);
+    return components.prefix + *config_name + ".pdb";
   }
 
   cmValue name = this->GetProperty("COMPILE_PDB_NAME");
   if (cmNonempty(name)) {
-    return prefix + *name + ".pdb";
+    NameComponents const& components = GetFullNameInternalComponents(
+      config, cmStateEnums::RuntimeBinaryArtifact);
+    return components.prefix + *name + ".pdb";
   }
 
   return "";
@@ -2939,11 +2929,11 @@ void cmGeneratorTarget::ComputeLinkClosure(const std::string& config,
   }
 }
 
-void cmGeneratorTarget::GetFullNameComponents(
-  std::string& prefix, std::string& base, std::string& suffix,
-  const std::string& config, cmStateEnums::ArtifactType artifact) const
+cmGeneratorTarget::NameComponents const&
+cmGeneratorTarget::GetFullNameComponents(
+  std::string const& config, cmStateEnums::ArtifactType artifact) const
 {
-  this->GetFullNameInternal(config, artifact, prefix, base, suffix);
+  return this->GetFullNameInternalComponents(config, artifact);
 }
 
 std::string cmGeneratorTarget::BuildBundleDirectory(
@@ -5264,32 +5254,33 @@ cmGeneratorTarget::Names cmGeneratorTarget::GetLibraryNames(
   }
 
   // Get the components of the library name.
-  std::string prefix;
-  std::string suffix;
-  this->GetFullNameInternal(config, cmStateEnums::RuntimeBinaryArtifact,
-                            prefix, targetNames.Base, suffix);
+  NameComponents const& components = this->GetFullNameInternalComponents(
+    config, cmStateEnums::RuntimeBinaryArtifact);
 
   // The library name.
-  targetNames.Output = prefix + targetNames.Base + suffix;
+  targetNames.Base = components.base;
+  targetNames.Output =
+    components.prefix + targetNames.Base + components.suffix;
 
   if (this->IsFrameworkOnApple()) {
-    targetNames.Real = prefix;
+    targetNames.Real = components.prefix;
     if (!this->Makefile->PlatformIsAppleEmbedded()) {
       targetNames.Real += "Versions/";
       targetNames.Real += this->GetFrameworkVersion();
       targetNames.Real += "/";
     }
-    targetNames.Real += targetNames.Base + suffix;
-    targetNames.SharedObject = targetNames.Real + suffix;
+    targetNames.Real += targetNames.Base + components.suffix;
+    targetNames.SharedObject = targetNames.Real + components.suffix;
   } else {
     // The library's soname.
-    this->ComputeVersionedName(targetNames.SharedObject, prefix,
-                               targetNames.Base, suffix, targetNames.Output,
-                               soversion);
+    this->ComputeVersionedName(targetNames.SharedObject, components.prefix,
+                               targetNames.Base, components.suffix,
+                               targetNames.Output, soversion);
 
     // The library's real name on disk.
-    this->ComputeVersionedName(targetNames.Real, prefix, targetNames.Base,
-                               suffix, targetNames.Output, version);
+    this->ComputeVersionedName(targetNames.Real, components.prefix,
+                               targetNames.Base, components.suffix,
+                               targetNames.Output, version);
   }
 
   // The import library name.
@@ -5333,17 +5324,17 @@ cmGeneratorTarget::Names cmGeneratorTarget::GetExecutableNames(
 #endif
 
   // Get the components of the executable name.
-  std::string prefix;
-  std::string suffix;
-  this->GetFullNameInternal(config, cmStateEnums::RuntimeBinaryArtifact,
-                            prefix, targetNames.Base, suffix);
+  NameComponents const& components = this->GetFullNameInternalComponents(
+    config, cmStateEnums::RuntimeBinaryArtifact);
 
   // The executable name.
-  targetNames.Output = prefix + targetNames.Base + suffix;
+  targetNames.Base = components.base;
+  targetNames.Output =
+    components.prefix + targetNames.Base + components.suffix;
 
 // The executable's real name on disk.
 #if defined(__CYGWIN__)
-  targetNames.Real = prefix + targetNames.Base;
+  targetNames.Real = components.prefix + targetNames.Base;
 #else
   targetNames.Real = targetNames.Output;
 #endif
@@ -5352,7 +5343,7 @@ cmGeneratorTarget::Names cmGeneratorTarget::GetExecutableNames(
     targetNames.Real += *version;
   }
 #if defined(__CYGWIN__)
-  targetNames.Real += suffix;
+  targetNames.Real += components.suffix;
 #endif
 
   // The import library name.
@@ -5368,11 +5359,9 @@ cmGeneratorTarget::Names cmGeneratorTarget::GetExecutableNames(
 std::string cmGeneratorTarget::GetFullNameInternal(
   const std::string& config, cmStateEnums::ArtifactType artifact) const
 {
-  std::string prefix;
-  std::string base;
-  std::string suffix;
-  this->GetFullNameInternal(config, artifact, prefix, base, suffix);
-  return prefix + base + suffix;
+  NameComponents const& components =
+    this->GetFullNameInternalComponents(config, artifact);
+  return components.prefix + components.base + components.suffix;
 }
 
 std::string cmGeneratorTarget::ImportedGetLocation(
@@ -5390,19 +5379,27 @@ std::string cmGeneratorTarget::GetFullNameImported(
     this->Target->ImportedGetFullPath(config, artifact));
 }
 
-void cmGeneratorTarget::GetFullNameInternal(
-  const std::string& config, cmStateEnums::ArtifactType artifact,
-  std::string& outPrefix, std::string& outBase, std::string& outSuffix) const
+cmGeneratorTarget::NameComponents const&
+cmGeneratorTarget::GetFullNameInternalComponents(
+  std::string const& config, cmStateEnums::ArtifactType artifact) const
 {
+  assert(artifact == cmStateEnums::RuntimeBinaryArtifact ||
+         artifact == cmStateEnums::ImportLibraryArtifact);
+  FullNameCache& cache = artifact == cmStateEnums::RuntimeBinaryArtifact
+    ? RuntimeBinaryFullNameCache
+    : ImportLibraryFullNameCache;
+  auto search = cache.find(config);
+  if (search != cache.end()) {
+    return search->second;
+  }
   // Use just the target name for non-main target types.
   if (this->GetType() != cmStateEnums::STATIC_LIBRARY &&
       this->GetType() != cmStateEnums::SHARED_LIBRARY &&
       this->GetType() != cmStateEnums::MODULE_LIBRARY &&
       this->GetType() != cmStateEnums::EXECUTABLE) {
-    outPrefix.clear();
-    outBase = this->GetName();
-    outSuffix.clear();
-    return;
+    NameComponents components;
+    components.base = this->GetName();
+    return cache.emplace(config, std::move(components)).first->second;
   }
 
   const bool isImportedLibraryArtifact =
@@ -5411,11 +5408,13 @@ void cmGeneratorTarget::GetFullNameInternal(
   // Return an empty name for the import library if this platform
   // does not support import libraries.
   if (isImportedLibraryArtifact && !this->NeedImportLibraryName(config)) {
-    outPrefix.clear();
-    outBase.clear();
-    outSuffix.clear();
-    return;
+    return cache.emplace(config, NameComponents()).first->second;
   }
+
+  NameComponents parts;
+  std::string& outPrefix = parts.prefix;
+  std::string& outBase = parts.base;
+  std::string& outSuffix = parts.suffix;
 
   // retrieve prefix and suffix
   std::string ll = this->GetLinkerLanguage(config);
@@ -5477,6 +5476,8 @@ void cmGeneratorTarget::GetFullNameInternal(
 
   // Append the suffix.
   outSuffix = targetSuffix ? *targetSuffix : "";
+
+  return cache.emplace(config, std::move(parts)).first->second;
 }
 
 std::string cmGeneratorTarget::GetLinkerLanguage(
@@ -5512,11 +5513,8 @@ std::string cmGeneratorTarget::GetPDBOutputName(
 
 std::string cmGeneratorTarget::GetPDBName(const std::string& config) const
 {
-  std::string prefix;
-  std::string base;
-  std::string suffix;
-  this->GetFullNameInternal(config, cmStateEnums::RuntimeBinaryArtifact,
-                            prefix, base, suffix);
+  NameComponents const& parts = this->GetFullNameInternalComponents(
+    config, cmStateEnums::RuntimeBinaryArtifact);
 
   std::vector<std::string> props;
   std::string configUpper = cmSystemTools::UpperCase(config);
@@ -5530,11 +5528,10 @@ std::string cmGeneratorTarget::GetPDBName(const std::string& config) const
 
   for (std::string const& p : props) {
     if (cmValue outName = this->GetProperty(p)) {
-      base = *outName;
-      break;
+      return parts.prefix + *outName + ".pdb";
     }
   }
-  return prefix + base + ".pdb";
+  return parts.prefix + parts.base + ".pdb";
 }
 
 std::string cmGeneratorTarget::GetObjectDirectory(
