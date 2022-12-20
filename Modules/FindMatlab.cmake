@@ -1187,7 +1187,7 @@ function(matlab_add_mex)
       ${${prefix}_UNPARSED_ARGUMENTS})
   endif()
 
-  target_include_directories(${${prefix}_NAME} PRIVATE ${Matlab_INCLUDE_DIRS})
+  target_include_directories(${${prefix}_NAME} SYSTEM PRIVATE ${Matlab_INCLUDE_DIRS})
 
   if(NOT ${prefix}_NO_IMPLICIT_LINK_TO_MATLAB_LIBRARIES)
     if(Matlab_HAS_CPP_API)
