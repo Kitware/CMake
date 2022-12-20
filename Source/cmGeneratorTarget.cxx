@@ -4856,13 +4856,10 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetStaticLibraryLinkOptions(
 
   EvaluatedTargetPropertyEntries entries;
   if (cmValue linkOptions = this->GetProperty("STATIC_LIBRARY_OPTIONS")) {
-    std::vector<std::string> options = cmExpandedList(*linkOptions);
-    for (const auto& option : options) {
-      std::unique_ptr<TargetPropertyEntry> entry = CreateTargetPropertyEntry(
-        *this->LocalGenerator->GetCMakeInstance(), option);
-      entries.Entries.emplace_back(EvaluateTargetPropertyEntry(
-        this, config, language, &dagChecker, *entry));
-    }
+    std::unique_ptr<TargetPropertyEntry> entry = CreateTargetPropertyEntry(
+      *this->LocalGenerator->GetCMakeInstance(), *linkOptions);
+    entries.Entries.emplace_back(EvaluateTargetPropertyEntry(
+      this, config, language, &dagChecker, *entry));
   }
   processOptions(this, entries, result, uniqueOptions, false,
                  "static library link options", OptionsParse::Shell);
