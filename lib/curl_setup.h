@@ -92,7 +92,7 @@
 #  endif
 #endif
 
-#if defined(macintosh) && defined(__MRC__)
+#ifdef macintosh
 #  include "config-mac.h"
 #endif
 
@@ -110,6 +110,10 @@
 
 #ifdef __PLAN9__
 #  include "config-plan9.h"
+#endif
+
+#ifdef MSDOS
+#  include "config-dos.h"
 #endif
 
 #endif /* HAVE_CONFIG_H */
@@ -318,9 +322,7 @@
 #endif
 
 #include <stdio.h>
-#ifdef HAVE_ASSERT_H
 #include <assert.h>
-#endif
 
 #ifdef __TANDEM /* for ns*-tandem-nsk systems */
 # if ! defined __LP64
@@ -693,7 +695,7 @@
 #  define UNUSED_PARAM __attribute__((__unused__))
 #  define WARN_UNUSED_RESULT __attribute__((warn_unused_result))
 #else
-#  define UNUSED_PARAM /*NOTHING*/
+#  define UNUSED_PARAM /* NOTHING */
 #  define WARN_UNUSED_RESULT
 #endif
 
