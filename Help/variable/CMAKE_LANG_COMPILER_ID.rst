@@ -28,8 +28,8 @@ Value                           Name
 ``GHS``                         `Green Hills Software`_
 ``HP``                          Hewlett-Packard Compiler
 ``IAR``                         IAR Systems
-``Intel``                       Intel Compiler
-``IntelLLVM``                   Intel LLVM-Based Compiler
+``Intel``                       Intel Classic Compiler
+``IntelLLVM``                   `Intel LLVM-Based Compiler`_
 ``LCC``                         MCST Elbrus C/C++/Fortran Compiler
 ``MSVC``                        `Microsoft Visual Studio`_
 ``NVHPC``                       `NVIDIA HPC Compiler`_
@@ -58,6 +58,7 @@ languages.
 .. _G95 Fortran: https://g95.sourceforge.net
 .. _GNU Compiler Collection: https://gcc.gnu.org
 .. _Green Hills Software: https://www.ghs.com/products/compiler.html
+.. _Intel LLVM-Based Compiler:  https://www.intel.com/content/www/us/en/developer/tools/oneapi/overview.html
 .. _Microsoft Visual Studio: https://visualstudio.microsoft.com
 .. _NVIDIA HPC Compiler: https://developer.nvidia.com/hpc-compilers
 .. _NVIDIA CUDA Compiler: https://developer.nvidia.com/cuda-llvm-compiler
