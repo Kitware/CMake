@@ -206,6 +206,8 @@ auto const TryRunSourcesArgParser =
 auto const TryRunOldArgParser = makeTryRunParser(TryCompileOldArgParser);
 
 #undef BIND_LANG_PROPS
+
+std::string const TryCompileDefaultConfig = "DEBUG";
 }
 
 Arguments cmCoreTryCompile::ParseArgs(
@@ -706,9 +708,9 @@ bool cmCoreTryCompile::TryCompileCode(Arguments& arguments,
         CM_FALLTHROUGH;
       case cmPolicies::NEW: {
         // NEW behavior is to pass config-specific compiler flags.
-        static std::string const cfgDefault = "DEBUG";
-        std::string const cfg =
-          !tcConfig.empty() ? cmSystemTools::UpperCase(tcConfig) : cfgDefault;
+        std::string const cfg = !tcConfig.empty()
+          ? cmSystemTools::UpperCase(tcConfig)
+          : TryCompileDefaultConfig;
         for (std::string const& li : testLangs) {
           std::string const langFlagsCfg =
             cmStrCat("CMAKE_", li, "_FLAGS_", cfg);
@@ -1199,7 +1201,12 @@ void cmCoreTryCompile::FindOutputFile(const std::string& targetName)
   tmpOutputFile += targetName;
 
   if (this->Makefile->GetGlobalGenerator()->IsMultiConfig()) {
-    tmpOutputFile += "_DEBUG";
+    std::string const tcConfig =
+      this->Makefile->GetSafeDefinition("CMAKE_TRY_COMPILE_CONFIGURATION");
+    std::string const cfg = !tcConfig.empty()
+      ? cmSystemTools::UpperCase(tcConfig)
+      : TryCompileDefaultConfig;
+    tmpOutputFile = cmStrCat(tmpOutputFile, '_', cfg);
   }
   tmpOutputFile += "_loc";
 

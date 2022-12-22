@@ -65,8 +65,12 @@ add_custom_target(prebuildDependencies ALL
     COMMAND ${CMAKE_COMMAND} --build ${CMAKE_CURRENT_BINARY_DIR}/ExternalFrameworks/build --target staticFrameworkExt sharedFrameworkExt --config Debug
 )
 add_executable(app1 mainOuter.m)
+add_executable(app2 mainOuter.m)
+add_executable(app3 mainOuter.m)
 add_library(static1 STATIC funcOuter.c)
 add_library(shared1 SHARED funcOuter.c)
+add_library(shared3 SHARED funcOuter.c)
+add_library(shared4 SHARED funcOuter.c)
 add_library(module1 MODULE funcOuter.c)
 add_library(obj1    OBJECT funcOuter.c)
 add_library(staticFramework1 STATIC funcOuter.c)
@@ -74,8 +78,12 @@ add_library(sharedFramework1 SHARED funcOuter.c)
 set_target_properties(staticFramework1 PROPERTIES FRAMEWORK TRUE)
 set_target_properties(sharedFramework1 PROPERTIES FRAMEWORK TRUE)
 add_dependencies(app1 prebuildDependencies)
+add_dependencies(app2 prebuildDependencies)
+add_dependencies(app3 prebuildDependencies)
 add_dependencies(static1 prebuildDependencies)
 add_dependencies(shared1 prebuildDependencies)
+add_dependencies(shared3 prebuildDependencies)
+add_dependencies(shared4 prebuildDependencies)
 add_dependencies(module1 prebuildDependencies)
 add_dependencies(obj1 prebuildDependencies)
 add_dependencies(staticFramework1 prebuildDependencies)
@@ -103,6 +111,14 @@ set(libresolv \"${libresolv}\")
 set(CoreFoundation \"${CoreFoundation}\")
 ")
 
+macro(SET_LINK_LIBRARIES)
+  foreach(mainTarget IN LISTS mainTargets)
+    foreach(linkTo IN LISTS linkToThings)
+      target_link_libraries(${mainTarget} PRIVATE ${linkTo})
+    endforeach()
+  endforeach()
+endmacro()
+
 set(mainTargets
     app1
     static1
@@ -125,8 +141,44 @@ set(linkToThings
     "${CMAKE_CURRENT_BINARY_DIR}/ExternalFrameworks/build/Debug/staticFrameworkExt.framework"
 )
 
-foreach(mainTarget IN LISTS mainTargets)
-  foreach(linkTo IN LISTS linkToThings)
-    target_link_libraries(${mainTarget} PRIVATE ${linkTo})
-  endforeach()
-endforeach()
+set_link_libraries()
+
+set(mainTargets
+    app2
+    shared3
+)
+
+set(linkToThings
+    static2
+    "$<LINK_LIBRARY:WEAK_LIBRARY,shared2>"
+    obj2
+    staticFramework2
+    "$<LINK_LIBRARY:WEAK_FRAMEWORK,sharedFramework2>"
+    imported2
+    ${libresolv}
+    ${CoreFoundation}
+    "$<LINK_LIBRARY:WEAK_FRAMEWORK,${CMAKE_CURRENT_BINARY_DIR}/ExternalFrameworks/build/Debug/sharedFrameworkExt.framework>"
+    "${CMAKE_CURRENT_BINARY_DIR}/ExternalFrameworks/build/Debug/staticFrameworkExt.framework"
+)
+
+set_link_libraries()
+
+set(mainTargets
+    app3
+    shared4
+)
+
+set(linkToThings
+    static2
+    "$<LINK_LIBRARY:REEXPORT_LIBRARY,shared2>"
+    obj2
+    staticFramework2
+    "$<LINK_LIBRARY:REEXPORT_FRAMEWORK,sharedFramework2>"
+    imported2
+    ${libresolv}
+    ${CoreFoundation}
+    "$<LINK_LIBRARY:REEXPORT_FRAMEWORK,${CMAKE_CURRENT_BINARY_DIR}/ExternalFrameworks/build/Debug/sharedFrameworkExt.framework>"
+    "${CMAKE_CURRENT_BINARY_DIR}/ExternalFrameworks/build/Debug/staticFrameworkExt.framework"
+)
+
+set_link_libraries()
