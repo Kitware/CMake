@@ -41,7 +41,8 @@ to tell CMake how to invoke the C++20 module dependency scanning tool.
 
 MSVC 19.34 (provided with Visual Studio 17.4) and above contains the support
 that CMake needs and has these variables already set up as required and only
-the UUID variable needs to be set.
+the UUID and the ``CMAKE_EXPERIMENTAL_CXX_MODULE_DYNDEP`` variables need to be
+set.
 
 For example, add code like the following to a test project:
 
@@ -76,8 +77,9 @@ For compilers that generate module maps, tell CMake as follows:
   set(CMAKE_EXPERIMENTAL_CXX_MODULE_MAP_FLAG
     "${compiler_flags_for_module_map} -fmodule-mapper=<MODULE_MAP_FILE>")
 
-Currently, the only supported format is ``gcc``.  The format is described in
-the GCC documentation, but the relevant section for the purposes of CMake is:
+Currently, the only supported formats are ``gcc`` and ``msvc``.  The ``gcc``
+format is described in the GCC documentation, but the relevant section for the
+purposes of CMake is:
 
     A mapping file consisting of space-separated module-name, filename
     pairs, one per line.  Only the mappings for the direct imports and any
@@ -87,6 +89,10 @@ the GCC documentation, but the relevant section for the purposes of CMake is:
     module name in the first active line.
 
     -- GCC module mapper documentation
+
+The ``msvc`` format is a response file containing flags required to compile
+any module interfaces properly as well as find any required files to satisfy
+``import`` statements as required for Microsoft's Visual Studio toolchains.
 
 .. _`D1483r1`: https://mathstuf.fedorapeople.org/fortran-modules/fortran-modules.html
 .. _`P1689r5`: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p1689r5.html

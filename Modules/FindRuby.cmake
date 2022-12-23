@@ -71,9 +71,6 @@ Hints
 
 .. versionadded:: 3.18
 
-``Ruby_ROOT_DIR``
-  Define the root directory of a Ruby installation.
-
 ``Ruby_FIND_VIRTUALENV``
   This variable defines the handling of virtual environments managed by
   ``rvm``. It is meaningful only when a virtual environment
