@@ -389,6 +389,14 @@ function(run_NoTests)
   run_cmake_command(no-tests_error ${CMAKE_CTEST_COMMAND} --no-tests=error)
   run_cmake_command(no-tests_bad ${CMAKE_CTEST_COMMAND} --no-tests=bad)
   run_cmake_command(no-tests_legacy ${CMAKE_CTEST_COMMAND})
+
+  run_cmake_command(no-tests_env_ignore ${CMAKE_COMMAND} -E env CTEST_NO_TESTS_ACTION=ignore ${CMAKE_CTEST_COMMAND})
+  run_cmake_command(no-tests_env_error ${CMAKE_COMMAND} -E env CTEST_NO_TESTS_ACTION=error ${CMAKE_CTEST_COMMAND})
+  run_cmake_command(no-tests_env_bad ${CMAKE_COMMAND} -E env CTEST_NO_TESTS_ACTION=bad ${CMAKE_CTEST_COMMAND})
+  run_cmake_command(no-tests_env_empty_legacy ${CMAKE_COMMAND} -E env CTEST_NO_TESTS_ACTION= ${CMAKE_CTEST_COMMAND})
+
+  run_cmake_command(no-tests_env_bad_with_cli_error ${CMAKE_COMMAND} -E env CTEST_NO_TESTS_ACTION=bad ${CMAKE_CTEST_COMMAND} --no-tests=error)
+
   file(WRITE "${RunCMake_TEST_BINARY_DIR}/NoTestsScript.cmake" "
     set(CTEST_COMMAND \"${CMAKE_CTEST_COMMAND}\")
     set(CTEST_SOURCE_DIRECTORY \"${RunCMake_SOURCE_DIR}\")
