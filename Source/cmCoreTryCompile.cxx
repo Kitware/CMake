@@ -7,6 +7,7 @@
 #include <cstring>
 #include <set>
 #include <sstream>
+#include <type_traits>
 #include <utility>
 
 #include <cm/string_view>
@@ -1131,7 +1132,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
   result.VariableCached = !arguments.NoCache;
   result.Output = std::move(output);
   result.ExitCode = res;
-  return result;
+  return cm::optional<cmTryCompileResult>(std::move(result));
 }
 
 bool cmCoreTryCompile::IsTemporary(std::string const& path)
