@@ -1396,6 +1396,23 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
     }
   }
 
+  // Add dependencies on swiftmodule files when using the swift linker
+  if (this->TargetLinkLanguage(config) == "Swift") {
+    if (cmComputeLinkInformation* cli =
+          this->GeneratorTarget->GetLinkInformation(config)) {
+      for (auto const& dependency : cli->GetItems()) {
+        // Both the current target and the linked target must be swift targets
+        // in order for there to be a swiftmodule to depend on
+        if (dependency.Target &&
+            dependency.Target->GetLinkerLanguage(config) == "Swift") {
+          std::string swiftmodule =
+            this->ConvertToNinjaPath(GetSwiftModulePath(dependency.Target));
+          linkBuild.ImplicitDeps.emplace_back(swiftmodule);
+        }
+      }
+    }
+  }
+
   // Ninja should restat after linking if and only if there are byproducts.
   vars["RESTAT"] = byproducts.ExplicitOuts.empty() ? "" : "1";
 
