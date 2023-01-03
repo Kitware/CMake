@@ -121,7 +121,7 @@ bool cmCTestGenericHandler::StartResultingXML(cmCTest::Part part,
   if (!name) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Cannot create resulting XML file without providing the name"
-                 << std::endl;);
+                 << std::endl);
     return false;
   }
   std::ostringstream ostr;
@@ -157,7 +157,7 @@ bool cmCTestGenericHandler::StartLogFile(const char* name,
   if (!name) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Cannot create log file without providing the name"
-                 << std::endl;);
+                 << std::endl);
     return false;
   }
   std::ostringstream ostr;

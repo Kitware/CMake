@@ -1691,7 +1691,7 @@ bool cmCTest::SubmitExtraFiles(std::vector<std::string> const& files)
     if (!cmSystemTools::FileExists(file)) {
       cmCTestLog(this, ERROR_MESSAGE,
                  "Cannot find extra file: " << file << " to submit."
-                                            << std::endl;);
+                                            << std::endl);
       return false;
     }
     this->AddSubmitFile(PartExtraFiles, file);
@@ -2758,8 +2758,9 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
     // intended
     for (auto& handler : this->Impl->GetTestingHandlers()) {
       if (!handler->ProcessCommandLineArguments(arg, i, args)) {
-        cmCTestLog(this, ERROR_MESSAGE,
-                   "Problem parsing command line arguments within a handler");
+        cmCTestLog(
+          this, ERROR_MESSAGE,
+          "Problem parsing command line arguments within a handler\n");
         return 0;
       }
     }

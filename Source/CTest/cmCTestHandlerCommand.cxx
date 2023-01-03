@@ -143,7 +143,7 @@ bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
         "BuildDirectory", cmSystemTools::CollapseFullPath(bdir), this->Quiet);
     } else {
       cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "CTEST_BINARY_DIRECTORY not set" << std::endl;);
+                 "CTEST_BINARY_DIRECTORY not set" << std::endl);
     }
   }
   if (!this->Source.empty()) {
@@ -164,7 +164,7 @@ bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
     this->CTest->SetCTestConfiguration("ChangeId", *changeId, this->Quiet);
   }
 
-  cmCTestLog(this->CTest, DEBUG, "Initialize handler" << std::endl;);
+  cmCTestLog(this->CTest, DEBUG, "Initialize handler" << std::endl);
   cmCTestGenericHandler* handler = this->InitializeHandler();
   if (!handler) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,

@@ -112,7 +112,7 @@ bool cmCTestCurl::UploadFile(std::string const& local_file,
 {
   response.clear();
   if (!this->InitCurl()) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "Initialization of curl failed");
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "Initialization of curl failed\n");
     return false;
   }
   /* enable uploading */
@@ -176,7 +176,7 @@ bool cmCTestCurl::UploadFile(std::string const& local_file,
   if (response.empty()) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "No response from server.\n"
-                 << curlDebug);
+                 << curlDebug << std::endl);
     return false;
   }
   return true;
@@ -192,7 +192,7 @@ bool cmCTestCurl::HttpRequest(std::string const& url,
                        << "fields " << fields << "\n",
                      this->Quiet);
   if (!this->InitCurl()) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "Initialization of curl failed");
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "Initialization of curl failed\n");
     return false;
   }
   curl_easy_setopt(this->Curl, CURLOPT_POST, 1);
