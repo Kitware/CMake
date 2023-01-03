@@ -410,7 +410,8 @@ cmCTest::Part cmCTest::GetPartFromName(const std::string& name)
   return PartCount;
 }
 
-int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
+int cmCTest::Initialize(const std::string& binary_dir,
+                        cmCTestStartCommand* command)
 {
   bool quiet = false;
   if (command && command->ShouldBeQuiet()) {
@@ -683,7 +684,7 @@ bool cmCTest::InitializeFromCommand(cmCTestStartCommand* command)
   this->SetCTestConfigurationFromCMakeVariable(
     mf, "BuildName", "CTEST_BUILD_NAME", command->ShouldBeQuiet());
 
-  if (!this->Initialize(bld_dir.c_str(), command)) {
+  if (!this->Initialize(bld_dir, command)) {
     return false;
   }
   cmCTestOptionalLog(this, OUTPUT,
@@ -943,8 +944,7 @@ int cmCTest::ProcessSteps()
       (this->GetRemainingTimeAllowed() > std::chrono::minutes(2))) {
     cmCTestUpdateHandler* uphandler = this->GetUpdateHandler();
     uphandler->SetPersistentOption(
-      "SourceDirectory",
-      this->GetCTestConfiguration("SourceDirectory").c_str());
+      "SourceDirectory", this->GetCTestConfiguration("SourceDirectory"));
     update_count = uphandler->ProcessHandler();
     if (update_count < 0) {
       res |= cmCTest::UPDATE_ERRORS;
@@ -2139,9 +2139,9 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
            i < args.size() - 1) {
     i++;
     this->GetTestHandler()->SetPersistentOption("TestsToRunInformation",
-                                                args[i].c_str());
+                                                args[i]);
     this->GetMemCheckHandler()->SetPersistentOption("TestsToRunInformation",
-                                                    args[i].c_str());
+                                                    args[i]);
   } else if (this->CheckArgument(arg, "-U"_s, "--union")) {
     this->GetTestHandler()->SetPersistentOption("UseUnion", "true");
     this->GetMemCheckHandler()->SetPersistentOption("UseUnion", "true");
@@ -2149,9 +2149,9 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
              i < args.size() - 1) {
     i++;
     this->GetTestHandler()->SetPersistentOption("IncludeRegularExpression",
-                                                args[i].c_str());
+                                                args[i]);
     this->GetMemCheckHandler()->SetPersistentOption("IncludeRegularExpression",
-                                                    args[i].c_str());
+                                                    args[i]);
   } else if (this->CheckArgument(arg, "-L"_s, "--label-regex") &&
              i < args.size() - 1) {
     i++;
@@ -2172,41 +2172,40 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
            i < args.size() - 1) {
     i++;
     this->GetTestHandler()->SetPersistentOption("ExcludeRegularExpression",
-                                                args[i].c_str());
+                                                args[i]);
     this->GetMemCheckHandler()->SetPersistentOption("ExcludeRegularExpression",
-                                                    args[i].c_str());
+                                                    args[i]);
   }
 
   else if (this->CheckArgument(arg, "-FA"_s, "--fixture-exclude-any") &&
            i < args.size() - 1) {
     i++;
     this->GetTestHandler()->SetPersistentOption(
-      "ExcludeFixtureRegularExpression", args[i].c_str());
+      "ExcludeFixtureRegularExpression", args[i]);
     this->GetMemCheckHandler()->SetPersistentOption(
-      "ExcludeFixtureRegularExpression", args[i].c_str());
+      "ExcludeFixtureRegularExpression", args[i]);
   } else if (this->CheckArgument(arg, "-FS"_s, "--fixture-exclude-setup") &&
              i < args.size() - 1) {
     i++;
     this->GetTestHandler()->SetPersistentOption(
-      "ExcludeFixtureSetupRegularExpression", args[i].c_str());
+      "ExcludeFixtureSetupRegularExpression", args[i]);
     this->GetMemCheckHandler()->SetPersistentOption(
-      "ExcludeFixtureSetupRegularExpression", args[i].c_str());
+      "ExcludeFixtureSetupRegularExpression", args[i]);
   } else if (this->CheckArgument(arg, "-FC"_s, "--fixture-exclude-cleanup") &&
              i < args.size() - 1) {
     i++;
     this->GetTestHandler()->SetPersistentOption(
-      "ExcludeFixtureCleanupRegularExpression", args[i].c_str());
+      "ExcludeFixtureCleanupRegularExpression", args[i]);
     this->GetMemCheckHandler()->SetPersistentOption(
-      "ExcludeFixtureCleanupRegularExpression", args[i].c_str());
+      "ExcludeFixtureCleanupRegularExpression", args[i]);
   }
 
   else if (this->CheckArgument(arg, "--resource-spec-file"_s) &&
            i < args.size() - 1) {
     i++;
-    this->GetTestHandler()->SetPersistentOption("ResourceSpecFile",
-                                                args[i].c_str());
+    this->GetTestHandler()->SetPersistentOption("ResourceSpecFile", args[i]);
     this->GetMemCheckHandler()->SetPersistentOption("ResourceSpecFile",
-                                                    args[i].c_str());
+                                                    args[i]);
   }
 
   else if (this->CheckArgument(arg, "--rerun-failed"_s)) {
@@ -2314,8 +2313,8 @@ void cmCTest::SetPersistentOptionIfNotEmpty(const std::string& value,
                                             const std::string& optionName)
 {
   if (!value.empty()) {
-    this->GetTestHandler()->SetPersistentOption(optionName, value.c_str());
-    this->GetMemCheckHandler()->SetPersistentOption(optionName, value.c_str());
+    this->GetTestHandler()->SetPersistentOption(optionName, value);
+    this->GetMemCheckHandler()->SetPersistentOption(optionName, value);
   }
 }
 
@@ -2903,7 +2902,7 @@ int cmCTest::ExecuteTests()
       }
     }
 
-    if (!this->Initialize(workDir.c_str(), nullptr)) {
+    if (!this->Initialize(workDir, nullptr)) {
       res = 12;
       cmCTestLog(this, ERROR_MESSAGE,
                  "Problem initializing the dashboard." << std::endl);
