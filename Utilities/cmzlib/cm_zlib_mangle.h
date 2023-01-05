@@ -19,7 +19,7 @@
 #  define compress2             cm_zlib_compress2
 #  define compressBound         cm_zlib_compressBound
 #endif
-#define crc32                 z_crc32
+#define crc32                 cm_zlib_crc32
 #define crc32_combine         cm_zlib_crc32_combine
 #define crc32_combine64       cm_zlib_crc32_combine64
 #define crc32_z               cm_zlib_crc32_z
@@ -126,7 +126,6 @@
 #define crc32_combine_gen    cm_zlib_crc32_combine_gen
 #define crc32_combine_op     cm_zlib_crc32_combine_op
 #define gz_error             cm_zlib_gz_error
-#define z_crc32              cm_zlib_z_crc32
 #define z_errmsg             cm_zlib_z_errmsg
 
 #endif
