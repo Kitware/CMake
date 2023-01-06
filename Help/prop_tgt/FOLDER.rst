@@ -11,3 +11,6 @@ separating folder levels.
 
 This property is initialized by the value of the variable
 :variable:`CMAKE_FOLDER` if it is set when a target is created.
+
+The global property :prop_gbl:`USE_FOLDERS` must be set to ON, otherwise
+the ``FOLDER`` property is ignored.
