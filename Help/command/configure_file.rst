@@ -58,7 +58,7 @@ or
   #define VAR 1
 
 Input lines of the form ``#cmakedefine01 VAR ...`` will expand
-as ``#cmakedefine01 VAR ... 0`` or ``#cmakedefine01 VAR ... 0``,
+as ``#cmakedefine01 VAR ... 0`` or ``#cmakedefine01 VAR ... 1``,
 which may lead to undefined behavior.
 
 .. versionadded:: 3.10
