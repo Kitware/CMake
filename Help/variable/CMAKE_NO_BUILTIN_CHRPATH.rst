@@ -10,6 +10,9 @@ a builtin editor to change the runtime search path in the installed copy.
 If this variable is set to true then CMake will relink the binary before
 installation instead of using its builtin editor.
 
+For more information on RPATH handling see
+the :prop_tgt:`INSTALL_RPATH` and :prop_tgt:`BUILD_RPATH` target properties.
+
 .. versionadded:: 3.20
 
   This variable also applies to XCOFF binaries' LIBPATH.  Prior to the
