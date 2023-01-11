@@ -22,6 +22,8 @@ the :prop_tgt:`BUILD_WITH_INSTALL_RPATH` target property.
 
 For handling toolchain-dependent RPATH entries the
 :prop_tgt:`INSTALL_REMOVE_ENVIRONMENT_RPATH` can be used.
+Runtime paths can be disabled completely via the :variable:`CMAKE_SKIP_RPATH`
+variable.
 
 Because the rpath may contain ``${ORIGIN}``, which coincides with CMake syntax,
 the contents of ``INSTALL_RPATH`` are properly escaped in the

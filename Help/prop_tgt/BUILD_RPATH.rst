@@ -23,6 +23,9 @@ This property supports
 
 Other settings that affect the build-tree runtime path include:
 
+* The :variable:`CMAKE_SKIP_RPATH` variable completely disables runtime
+  paths in both the build tree and install tree.
+
 * The :prop_tgt:`SKIP_BUILD_RPATH` target property disables setting any
   runtime path in the build tree.
 
