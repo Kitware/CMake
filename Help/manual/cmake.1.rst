@@ -876,6 +876,16 @@ Available commands are:
     The command now fails when the source directory does not exist.
     Previously it succeeded by creating an empty destination directory.
 
+.. option:: copy_directory_if_different <dir>... <destination>
+
+  .. versionadded:: 3.26
+
+  Copy changed content of ``<dir>...`` directories to ``<destination>`` directory.
+  If ``<destination>`` directory does not exist it will be created.
+
+  ``copy_directory_if_different`` does follow symlinks.
+  The command fails when the source directory does not exist.
+
 .. option:: copy_if_different <file>... <destination>
 
   Copy files to ``<destination>`` (either file or directory) if

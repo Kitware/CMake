@@ -594,6 +594,15 @@ unset(in)
 unset(out)
 
 set(in ${RunCMake_SOURCE_DIR}/copy_input)
+set(out ${RunCMake_BINARY_DIR}/copy_directory_different_output)
+file(REMOVE_RECURSE "${out}")
+file(MAKE_DIRECTORY ${out})
+run_cmake_command(E_copy_directory_if_different
+  ${CMAKE_COMMAND} -E copy_directory_if_different ${in} ${out})
+unset(in)
+unset(out)
+
+set(in ${RunCMake_SOURCE_DIR}/copy_input)
 set(out ${RunCMake_BINARY_DIR}/copy_directory_output)
 set(outfile ${out}/file_for_test.txt)
 file(REMOVE_RECURSE "${out}")
