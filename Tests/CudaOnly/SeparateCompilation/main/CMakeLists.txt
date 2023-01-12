@@ -1,5 +1,5 @@
 add_executable(CudaOnlySeparateCompilation main.cu)
-target_link_libraries(CudaOnlySeparateCompilation PRIVATE CUDASeparateLibB)
+target_link_libraries(CudaOnlySeparateCompilation PRIVATE CUDASeparateLibB CUDASeparateLibC)
 set_target_properties(CudaOnlySeparateCompilation PROPERTIES
   CUDA_STANDARD 11
   CUDA_STANDARD_REQUIRED TRUE

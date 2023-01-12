@@ -15,7 +15,7 @@ static __global__ void file4_kernel(result_type& r, int x)
   result_type_dynamic rd = file2_func(x);
 }
 
-int file4_launch_kernel(int x)
+EXPORT int file4_launch_kernel(int x)
 {
   result_type r;
   file4_kernel<<<1, 1>>>(r, x);
