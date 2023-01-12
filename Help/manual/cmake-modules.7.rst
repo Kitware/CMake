@@ -251,7 +251,6 @@ They are normally called through the :command:`find_package` command.
    /module/FindTclStub
    /module/FindThreads
    /module/FindTIFF
-   /module/FindUnixCommands
    /module/FindVulkan
    /module/FindWget
    /module/FindWish
@@ -298,6 +297,7 @@ Deprecated Find Modules
    /module/FindPythonInterp
    /module/FindPythonLibs
    /module/FindQt
+   /module/FindUnixCommands
    /module/FindVTK
    /module/FindwxWindows
 
