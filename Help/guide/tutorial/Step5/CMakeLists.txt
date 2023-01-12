@@ -42,7 +42,7 @@ target_include_directories(Tutorial PUBLIC
 # TODO 3: Install Tutorial in the bin directory
 # Hint: Use the TARGETS and DESTINATION parameters
 
-# TODO 4: Install Tutorial.h to the include directory
+# TODO 4: Install TutorialConfig.h to the include directory
 # Hint: Use the FILES and DESTINATION parameters
 
 # TODO 5: Enable testing
