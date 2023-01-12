@@ -3867,6 +3867,8 @@ bool cmVisualStudio10TargetGenerator::ComputeMasmOptions(
   this->LocalGenerator->AddLanguageFlags(flags, this->GeneratorTarget,
                                          cmBuildStep::Compile, "ASM_MASM",
                                          configName);
+  this->LocalGenerator->AddCompileOptions(flags, this->GeneratorTarget,
+                                          "ASM_MASM", configName);
 
   masmOptions.Parse(flags);
 
