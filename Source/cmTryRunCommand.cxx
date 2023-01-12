@@ -86,7 +86,7 @@ public:
                      std::string* runOutputStdOutContents,
                      std::string* runOutputStdErrContents);
   void DoNotRunExecutable(const std::string& runArgs,
-                          const std::string& srcFile,
+                          cm::optional<std::string> const& srcFile,
                           std::string const& compileResultVariable,
                           std::string* runOutputContents,
                           std::string* runOutputStdOutContents,
@@ -191,7 +191,7 @@ bool TryRunCommandImpl::TryRunCode(std::vector<std::string> const& argv)
         bool const stdOutErrRequired = (arguments.RunOutputStdOutVariable ||
                                         arguments.RunOutputStdErrVariable);
         this->DoNotRunExecutable(
-          runArgs, *arguments.SourceDirectoryOrFile,
+          runArgs, arguments.SourceDirectoryOrFile,
           *arguments.CompileResultVariable,
           captureRunOutput ? &runOutputContents : nullptr,
           captureRunOutputStdOutErr ? &runOutputStdOutContents : nullptr,
@@ -315,7 +315,7 @@ void TryRunCommandImpl::RunExecutable(const std::string& runArgs,
  the executable would have produced.
 */
 void TryRunCommandImpl::DoNotRunExecutable(
-  const std::string& runArgs, const std::string& srcFile,
+  const std::string& runArgs, cm::optional<std::string> const& srcFile,
   std::string const& compileResultVariable, std::string* out,
   std::string* stdOut, std::string* stdErr, bool stdOutErrRequired)
 {
@@ -498,9 +498,11 @@ void TryRunCommandImpl::DoNotRunExecutable(
 
       comment += "The ";
       comment += compileResultVariable;
-      comment += " variable holds the build result for this try_run().\n\n"
-                 "Source file   : ";
-      comment += srcFile + "\n";
+      comment += " variable holds the build result for this try_run().\n\n";
+      if (srcFile) {
+        comment += "Source file   : ";
+        comment += *srcFile + "\n";
+      }
       comment += "Executable    : ";
       comment += copyDest + "\n";
       comment += "Run arguments : ";
