@@ -1696,6 +1696,9 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
     section for details.  Many :ref:`Find Modules` produce imported targets
     with the ``UNKNOWN`` type and therefore will be ignored.
 
+On platforms that support runtime paths (``RPATH``), refer to the
+:prop_tgt:`INSTALL_RPATH` target property.
+On Apple platforms, refer to the :prop_tgt:`INSTALL_NAME_DIR` target property.
 
 Export And Install Expressions
 ------------------------------
