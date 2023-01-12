@@ -41,6 +41,9 @@ if(NOT "x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC")
 
   set(CMAKE_C17_STANDARD_COMPILE_OPTION "-std=c17")
   set(CMAKE_C17_EXTENSION_COMPILE_OPTION "-std=gnu17")
+
+  set(CMAKE_C23_STANDARD_COMPILE_OPTION "-std=c2x")
+  set(CMAKE_C23_EXTENSION_COMPILE_OPTION "-std=gnu2x")
 else()
   # clang-cl doesn't have any of these
   set(CMAKE_C90_STANDARD_COMPILE_OPTION "")
@@ -54,6 +57,9 @@ else()
 
   set(CMAKE_C17_STANDARD_COMPILE_OPTION "")
   set(CMAKE_C17_EXTENSION_COMPILE_OPTION "")
+
+  set(CMAKE_C23_STANDARD_COMPILE_OPTION "")
+  set(CMAKE_C23_EXTENSION_COMPILE_OPTION "")
 endif()
 
 __compiler_check_default_language_standard(C 2020 17)
