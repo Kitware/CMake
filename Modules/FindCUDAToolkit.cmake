@@ -795,32 +795,35 @@ endif()
 if(CMAKE_CROSSCOMPILING)
   if(CMAKE_SYSTEM_PROCESSOR STREQUAL "armv7-a")
     # Support for NVPACK
-    set(CUDAToolkit_TARGET_NAME "armv7-linux-androideabi")
+    set(CUDAToolkit_TARGET_NAMES "armv7-linux-androideabi")
   elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "arm")
-    set(CUDAToolkit_TARGET_NAME "armv7-linux-gnueabihf")
+    set(CUDAToolkit_TARGET_NAMES "armv7-linux-gnueabihf")
   elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
     if(ANDROID_ARCH_NAME STREQUAL "arm64")
-      set(CUDAToolkit_TARGET_NAME "aarch64-linux-androideabi")
+      set(CUDAToolkit_TARGET_NAMES "aarch64-linux-androideabi")
     elseif (CMAKE_SYSTEM_NAME STREQUAL "QNX")
-      set(CUDAToolkit_TARGET_NAME "aarch64-qnx")
+      set(CUDAToolkit_TARGET_NAMES "aarch64-qnx")
     else()
-      set(CUDAToolkit_TARGET_NAME "aarch64-linux")
-    endif(ANDROID_ARCH_NAME STREQUAL "arm64")
+      set(CUDAToolkit_TARGET_NAMES "aarch64-linux" "sbsa-linux")
+    endif()
   elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
-    set(CUDAToolkit_TARGET_NAME "x86_64-linux")
+    set(CUDAToolkit_TARGET_NAMES "x86_64-linux")
   endif()
 
-  if(EXISTS "${CUDAToolkit_ROOT_DIR}/targets/${CUDAToolkit_TARGET_NAME}")
-    set(CUDAToolkit_TARGET_DIR "${CUDAToolkit_ROOT_DIR}/targets/${CUDAToolkit_TARGET_NAME}")
-    # add known CUDA target root path to the set of directories we search for programs, libraries and headers
-    list(PREPEND CMAKE_FIND_ROOT_PATH "${CUDAToolkit_TARGET_DIR}")
+  foreach(CUDAToolkit_TARGET_NAME IN LISTS CUDAToolkit_TARGET_NAMES)
+    if(EXISTS "${CUDAToolkit_ROOT_DIR}/targets/${CUDAToolkit_TARGET_NAME}")
+      set(CUDAToolkit_TARGET_DIR "${CUDAToolkit_ROOT_DIR}/targets/${CUDAToolkit_TARGET_NAME}")
+      # add known CUDA target root path to the set of directories we search for programs, libraries and headers
+      list(PREPEND CMAKE_FIND_ROOT_PATH "${CUDAToolkit_TARGET_DIR}")
 
-    # Mark that we need to pop the root search path changes after we have
-    # found all cuda libraries so that searches for our cross-compilation
-    # libraries work when another cuda sdk is in CMAKE_PREFIX_PATH or
-    # PATh
-    set(_CUDAToolkit_Pop_ROOT_PATH True)
-  endif()
+      # Mark that we need to pop the root search path changes after we have
+      # found all cuda libraries so that searches for our cross-compilation
+      # libraries work when another cuda sdk is in CMAKE_PREFIX_PATH or
+      # PATh
+      set(_CUDAToolkit_Pop_ROOT_PATH True)
+      break()
+    endif()
+  endforeach()
 endif()
 
 # If not already set we can simply use the toolkit root or it's a scattered installation.
@@ -1129,7 +1132,7 @@ if(CUDAToolkit_FOUND)
   if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 10.0)
     # nvToolsExt is deprecated since nvtx3 introduction.
     # Warn only if the project requires a sufficiently new CMake to make migration possible.
-    if(CMAKE_MINIMUM_REQUIRED_VERSION VERSION_GREATER_EQUAL 3.25)
+    if(TARGET CUDA::nvToolsExt AND CMAKE_MINIMUM_REQUIRED_VERSION VERSION_GREATER_EQUAL 3.25)
       set_property(TARGET CUDA::nvToolsExt PROPERTY DEPRECATION "nvToolsExt has been superseded by nvtx3 since CUDA 10.0 and CMake 3.25. Use CUDA::nvtx3 and include <nvtx3/nvToolsExt.h> instead.")
     endif()
 
