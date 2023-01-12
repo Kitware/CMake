@@ -16,3 +16,7 @@ the compiler whose frontend it resembles.
 .. note::
   In other words, this variable describes what command line options
   and language extensions the compiler frontend expects.
+
+.. versionchanged:: 3.26
+  This variable is set for ``GNU``, ``MSVC``, and ``AppleClang``
+  compilers that have only one frontend variant.
