@@ -86,11 +86,12 @@ public:
                      std::string* runOutputStdOutContents,
                      std::string* runOutputStdErrContents);
   void DoNotRunExecutable(const std::string& runArgs,
-                          const std::string& srcFile,
+                          cm::optional<std::string> const& srcFile,
                           std::string const& compileResultVariable,
                           std::string* runOutputContents,
                           std::string* runOutputStdOutContents,
-                          std::string* runOutputStdErrContents);
+                          std::string* runOutputStdErrContents,
+                          bool stdOutErrRequired);
 
   bool NoCache;
   std::string RunResultVariable;
@@ -185,12 +186,17 @@ bool TryRunCommandImpl::TryRunCode(std::vector<std::string> const& argv)
       std::string runOutputStdErrContents;
       if (this->Makefile->IsOn("CMAKE_CROSSCOMPILING") &&
           !this->Makefile->IsDefinitionSet("CMAKE_CROSSCOMPILING_EMULATOR")) {
+        // We only require the stdout/stderr cache entries if the project
+        // actually asked for the values, not just for logging.
+        bool const stdOutErrRequired = (arguments.RunOutputStdOutVariable ||
+                                        arguments.RunOutputStdErrVariable);
         this->DoNotRunExecutable(
-          runArgs, *arguments.SourceDirectoryOrFile,
+          runArgs, arguments.SourceDirectoryOrFile,
           *arguments.CompileResultVariable,
           captureRunOutput ? &runOutputContents : nullptr,
           captureRunOutputStdOutErr ? &runOutputStdOutContents : nullptr,
-          captureRunOutputStdOutErr ? &runOutputStdErrContents : nullptr);
+          captureRunOutputStdOutErr ? &runOutputStdErrContents : nullptr,
+          stdOutErrRequired);
       } else {
         this->RunExecutable(
           runArgs, arguments.RunWorkingDirectory,
@@ -309,9 +315,9 @@ void TryRunCommandImpl::RunExecutable(const std::string& runArgs,
  the executable would have produced.
 */
 void TryRunCommandImpl::DoNotRunExecutable(
-  const std::string& runArgs, const std::string& srcFile,
+  const std::string& runArgs, cm::optional<std::string> const& srcFile,
   std::string const& compileResultVariable, std::string* out,
-  std::string* stdOut, std::string* stdErr)
+  std::string* stdOut, std::string* stdErr, bool stdOutErrRequired)
 {
   // copy the executable out of the CMakeFiles/ directory, so it is not
   // removed at the end of try_run() and the user can run it manually
@@ -357,7 +363,7 @@ void TryRunCommandImpl::DoNotRunExecutable(
   }
 
   // is the output from the executable used ?
-  if (stdOut || stdErr) {
+  if (stdOutErrRequired) {
     if (!this->Makefile->GetDefinition(internalRunOutputStdOutName)) {
       // if the variables doesn't exist, create it with a helpful error text
       // and mark it as advanced
@@ -492,9 +498,11 @@ void TryRunCommandImpl::DoNotRunExecutable(
 
       comment += "The ";
       comment += compileResultVariable;
-      comment += " variable holds the build result for this try_run().\n\n"
-                 "Source file   : ";
-      comment += srcFile + "\n";
+      comment += " variable holds the build result for this try_run().\n\n";
+      if (srcFile) {
+        comment += "Source file   : ";
+        comment += *srcFile + "\n";
+      }
       comment += "Executable    : ";
       comment += copyDest + "\n";
       comment += "Run arguments : ";
