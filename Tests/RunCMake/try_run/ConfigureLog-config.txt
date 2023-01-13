@@ -20,6 +20,7 @@ events:
     backtrace:
       - "ConfigureLog.cmake:[0-9]+ \(try_run\)"
       - "CMakeLists.txt:[0-9]+ \(include\)"
+    description: "Source that should not compile\."
     directories:
       source: "[^"]*/Tests/RunCMake/try_run/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/]+"
       binary: "[^"]*/Tests/RunCMake/try_run/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/]+"
@@ -36,6 +37,7 @@ events:
     backtrace:
       - "ConfigureLog.cmake:[0-9]+ \(try_run\)"
       - "CMakeLists.txt:[0-9]+ \(include\)"
+    description: "Source that should compile\."
     directories:
       source: "[^"]*/Tests/RunCMake/try_run/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/]+"
       binary: "[^"]*/Tests/RunCMake/try_run/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/]+"

@@ -1,9 +1,11 @@
 try_run(RUN_RESULT COMPILE_RESULT
   SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ConfigureLog-bad.c
+  LOG_DESCRIPTION "Source that should not compile."
   )
 
 try_run(RUN_RESULT COMPILE_RESULT
   SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ConfigureLog-test.c
+  LOG_DESCRIPTION "Source that should compile."
   )
 
 try_run(RUN_RESULT COMPILE_RESULT

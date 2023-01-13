@@ -151,6 +151,7 @@ cmArgumentParser<Arguments> makeTryRunParser(
 auto const TryCompileBaseArgParser =
   cmArgumentParser<Arguments>{}
     .Bind(0, &Arguments::CompileResultVariable)
+    .Bind("LOG_DESCRIPTION"_s, &Arguments::LogDescription)
     .Bind("NO_CACHE"_s, &Arguments::NoCache)
     .Bind("CMAKE_FLAGS"_s, &Arguments::CMakeFlags)
     .Bind("__CMAKE_INTERNAL"_s, &Arguments::CMakeInternal)
@@ -1138,6 +1139,9 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
   }
 
   cmTryCompileResult result;
+  if (arguments.LogDescription) {
+    result.LogDescription = *arguments.LogDescription;
+  }
   result.SourceDirectory = sourceDirectory;
   result.BinaryDirectory = this->BinaryDirectory;
   result.Variable = *arguments.CompileResultVariable;
@@ -1290,6 +1294,9 @@ void cmCoreTryCompile::WriteTryCompileEventFields(
   cmConfigureLog& log, cmTryCompileResult const& compileResult)
 {
 #ifndef CMAKE_BOOTSTRAP
+  if (compileResult.LogDescription) {
+    log.WriteValue("description"_s, *compileResult.LogDescription);
+  }
   log.BeginObject("directories"_s);
   log.WriteValue("source"_s, compileResult.SourceDirectory);
   log.WriteValue("binary"_s, compileResult.BinaryDirectory);

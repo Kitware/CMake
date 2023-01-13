@@ -18,6 +18,7 @@ Try Compiling Whole Projects
               SOURCE_DIR <srcdir>
               [BINARY_DIR <bindir>]
               [TARGET <targetName>]
+              [LOG_DESCRIPTION <text>]
               [NO_CACHE]
               [CMAKE_FLAGS <flags>...]
               [OUTPUT_VARIABLE <var>])
@@ -47,6 +48,7 @@ which was present in older versions of CMake:
 
   try_compile(<resultVar> <bindir> <srcdir>
               <projectName> [<targetName>]
+              [LOG_DESCRIPTION <text>]
               [NO_CACHE]
               [CMAKE_FLAGS <flags>...]
               [OUTPUT_VARIABLE <var>])
@@ -63,6 +65,7 @@ Try Compiling Source Files
                SOURCE_FROM_CONTENT <name> <content> |
                SOURCE_FROM_VAR <name> <var>         |
                SOURCE_FROM_FILE <name> <path>       >...
+              [LOG_DESCRIPTION <text>]
               [NO_CACHE]
               [CMAKE_FLAGS <flags>...]
               [COMPILE_DEFINITIONS <defs>...]
@@ -115,6 +118,7 @@ which was present in older versions of CMake:
 .. code-block:: cmake
 
   try_compile(<resultVar> <bindir> <srcfile|SOURCES srcfile...>
+              [LOG_DESCRIPTION <text>]
               [NO_CACHE]
               [CMAKE_FLAGS <flags>...]
               [COMPILE_DEFINITIONS <defs>...]
@@ -170,6 +174,12 @@ The options are:
   Specify link step options to pass to :command:`target_link_options` or to
   set the :prop_tgt:`STATIC_LIBRARY_OPTIONS` target property in the generated
   project, depending on the :variable:`CMAKE_TRY_COMPILE_TARGET_TYPE` variable.
+
+``LOG_DESCRIPTION <text>``
+  .. versionadded:: 3.26
+
+  Specify a non-empty text description of the purpose of the check.
+  This is recorded in the :manual:`cmake-configure-log(7)` entry.
 
 ``NO_CACHE``
   .. versionadded:: 3.25

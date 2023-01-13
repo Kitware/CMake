@@ -141,6 +141,7 @@ A ``try_compile-v1`` event is a YAML mapping:
   kind: "try_compile-v1"
   backtrace:
     - "CMakeLists.txt:123 (try_compile)"
+  description: "Explicit LOG_DESCRIPTION"
   directories:
     source: "/path/to/.../TryCompile-01234"
     binary: "/path/to/.../TryCompile-01234"
@@ -152,6 +153,10 @@ A ``try_compile-v1`` event is a YAML mapping:
     exitCode: 0
 
 The keys specific to ``try_compile-v1`` mappings are:
+
+``description``
+  An optional key that is present when the ``LOG_DESCRIPTION <text>`` option
+  was used.  Its value is a string containing the description ``<text>``.
 
 ``directories``
   A mapping describing the directories associated with the
@@ -207,6 +212,7 @@ A ``try_run-v1`` event is a YAML mapping:
   kind: "try_run-v1"
   backtrace:
     - "CMakeLists.txt:456 (try_run)"
+  description: "Explicit LOG_DESCRIPTION"
   directories:
     source: "/path/to/.../TryCompile-56789"
     binary: "/path/to/.../TryCompile-56789"
