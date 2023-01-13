@@ -115,8 +115,9 @@ The keys common to all events are:
 
 ``backtrace``
   A YAML block sequence reporting the call stack of CMake source
-  locations at which the event occurred.  Each node is a string
-  specifying one location formatted as ``<file>:<line> (<function>)``.
+  locations at which the event occurred, from most-recent to
+  least-recent.  Each node is a string specifying one location
+  formatted as ``<file>:<line> (<function>)``.
 
 Additional mapping keys are specific to each (versioned) event kind,
 described below.
