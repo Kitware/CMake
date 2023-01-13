@@ -20,13 +20,14 @@ endif()
 set(CMAKE_EXE_EXPORTS_Swift_FLAG "-emit-module -emit-module-path <SWIFT_MODULE> ${CMAKE_Swift_IMPLIB_LINKER_FLAGS}")
 
 set(CMAKE_INCLUDE_FLAG_Swift "-I ")
+
+# FIXME: Move compiler- and platform-specific flags to the above-included modules.
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR CMAKE_SYSTEM_NAME STREQUAL "iOS"
     OR CMAKE_SYSTEM_NAME STREQUAL "tvOS" OR CMAKE_SYSTEM_NAME STREQUAL "watchOS")
   set(CMAKE_SHARED_LIBRARY_SONAME_Swift_FLAG "-Xlinker -install_name -Xlinker ")
 elseif(NOT CMAKE_SYSTEM_NAME STREQUAL Windows)
   set(CMAKE_SHARED_LIBRARY_SONAME_Swift_FLAG "-Xlinker -soname -Xlinker ")
 endif()
-
 if(NOT CMAKE_SYSTEM_NAME STREQUAL Windows)
   set(CMAKE_EXECUTABLE_RUNTIME_Swift_FLAG "-Xlinker -rpath -Xlinker ")
   set(CMAKE_SHARED_LIBRARY_RUNTIME_Swift_FLAG "-Xlinker -rpath -Xlinker ")
