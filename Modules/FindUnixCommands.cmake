@@ -5,6 +5,10 @@
 FindUnixCommands
 ----------------
 
+.. deprecated:: 3.26
+
+  Use :option:`${CMAKE_COMMAND} -E <cmake -E>` subcommands instead.
+
 Find Unix commands, including the ones from Cygwin
 
 This module looks for the Unix commands ``bash``, ``cp``, ``gzip``,
