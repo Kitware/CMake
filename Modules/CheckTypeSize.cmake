@@ -152,7 +152,6 @@ function(__check_type_size_impl type var map builtin language)
     CMAKE_FLAGS
       "-DCOMPILE_DEFINITIONS:STRING=${CMAKE_REQUIRED_FLAGS}"
       "-DINCLUDE_DIRECTORIES:STRING=${CMAKE_REQUIRED_INCLUDES}"
-    OUTPUT_VARIABLE output
     COPY_FILE ${bin}
     )
 
@@ -203,16 +202,12 @@ function(__check_type_size_impl type var map builtin language)
     if(NOT CMAKE_REQUIRED_QUIET)
       message(CHECK_PASS "done")
     endif()
-    file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-      "Determining size of ${type} passed with the following output:\n${output}\n\n")
     set(${var} "${${var}}" CACHE INTERNAL "CHECK_TYPE_SIZE: sizeof(${type})")
   else()
     # The check failed to compile.
     if(NOT CMAKE_REQUIRED_QUIET)
       message(CHECK_FAIL "failed")
     endif()
-    file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-      "Determining size of ${type} failed with the following output:\n${output}\n${src}:\n${src_content}\n\n")
     set(${var} "" CACHE INTERNAL "CHECK_TYPE_SIZE: ${type} unknown")
     file(REMOVE ${map})
   endif()

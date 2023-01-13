@@ -104,24 +104,18 @@ function(check_prototype_definition _FUNCTION _PROTOTYPE _RETURN _HEADER _VARIAB
       ${CHECK_PROTOTYPE_DEFINITION_LIBS}
       CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${CHECK_PROTOTYPE_DEFINITION_FLAGS}
       "${CMAKE_SYMBOL_EXISTS_INCLUDES}"
-      OUTPUT_VARIABLE OUTPUT)
+      )
 
     if (${_VARIABLE})
       set(${_VARIABLE} 1 CACHE INTERNAL "Have correct prototype for ${_FUNCTION}")
       if(NOT CMAKE_REQUIRED_QUIET)
         message(CHECK_PASS "True")
       endif()
-      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-        "Determining if the prototype ${_FUNCTION} exists for ${_VARIABLE} passed with the following output:\n"
-        "${OUTPUT}\n\n")
     else ()
       if(NOT CMAKE_REQUIRED_QUIET)
         message(CHECK_FAIL "False")
       endif()
       set(${_VARIABLE} 0 CACHE INTERNAL "Have correct prototype for ${_FUNCTION}")
-      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-        "Determining if the prototype ${_FUNCTION} exists for ${_VARIABLE} failed with the following output:\n"
-        "${OUTPUT}\n\n${_SOURCE}\n\n")
     endif ()
   endif()
 

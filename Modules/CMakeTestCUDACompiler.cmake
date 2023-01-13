@@ -96,9 +96,6 @@ if(NOT CMAKE_CUDA_COMPILER_WORKS)
   unset(CMAKE_CUDA_COMPILER_WORKS CACHE)
   if(NOT CMAKE_CUDA_COMPILER_WORKS)
     PrintTestCompilerResult(CHECK_FAIL "broken")
-    file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-      "Determining if the CUDA compiler works failed with "
-      "the following output:\n${__CMAKE_CUDA_COMPILER_OUTPUT}\n\n")
     string(REPLACE "\n" "\n  " _output "${__CMAKE_CUDA_COMPILER_OUTPUT}")
     message(FATAL_ERROR "The CUDA compiler\n  \"${CMAKE_CUDA_COMPILER}\"\n"
       "is not able to compile a simple test program.\nIt fails "
@@ -106,9 +103,6 @@ if(NOT CMAKE_CUDA_COMPILER_WORKS)
       "CMake will not be able to correctly generate this project.")
   endif()
   PrintTestCompilerResult(CHECK_PASS "works")
-  file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-    "Determining if the CUDA compiler works passed with "
-    "the following output:\n${__CMAKE_CUDA_COMPILER_OUTPUT}\n\n")
 endif()
 
 # Try to identify the compiler features

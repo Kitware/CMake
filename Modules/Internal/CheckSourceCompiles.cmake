@@ -122,19 +122,11 @@ function(CMAKE_CHECK_SOURCE_COMPILES _lang _source _var)
       if(NOT CMAKE_REQUIRED_QUIET)
         message(CHECK_PASS "Success")
       endif()
-      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-        "Performing ${_lang_textual} SOURCE FILE Test ${_var} succeeded with the following output:\n"
-        "${OUTPUT}\n"
-        "Source file was:\n${_source}\n")
     else()
       if(NOT CMAKE_REQUIRED_QUIET)
         message(CHECK_FAIL "Failed")
       endif()
       set(${_var} "" CACHE INTERNAL "Test ${_var}")
-      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-        "Performing ${_lang_textual} SOURCE FILE Test ${_var} failed with the following output:\n"
-        "${OUTPUT}\n"
-        "Source file was:\n${_source}\n")
     endif()
   endif()
 endfunction()

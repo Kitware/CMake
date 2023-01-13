@@ -35,7 +35,6 @@ macro(_record_compiler_features lang compile_flags feature_list)
     SOURCE_FROM_VAR "feature_tests.${lang_lc}" _content
     COMPILE_DEFINITIONS "${compile_flags}"
     LINK_LIBRARIES "${compile_flags_for_link}"
-    OUTPUT_VARIABLE _output
     COPY_FILE "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests.bin"
     COPY_FILE_ERROR _copy_error
     )
@@ -51,14 +50,10 @@ macro(_record_compiler_features lang compile_flags feature_list)
   unset(compile_flags_for_link)
 
   if (_result EQUAL 0)
-    file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-      "\n\nDetecting ${lang} [${compile_flags}] compiler features compiled with the following output:\n${_output}\n\n")
     if(EXISTS "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests.bin")
       file(STRINGS "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests.bin"
         features REGEX "${lang}_FEATURE:.*")
       foreach(info ${features})
-        file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-          "    Feature record: ${info}\n")
         string(REPLACE "${lang}_FEATURE:" "" info ${info})
         string(SUBSTRING ${info} 0 1 has_feature)
         if(has_feature)
@@ -67,9 +62,6 @@ macro(_record_compiler_features lang compile_flags feature_list)
         endif()
       endforeach()
     endif()
-  else()
-    file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-      "Detecting ${lang} [${compile_flags}] compiler features failed to compile with the following output:\n${_output}\n\n")
   endif()
 endmacro()
 
