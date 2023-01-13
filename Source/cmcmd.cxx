@@ -110,6 +110,8 @@ void CMakeCommandUsage(std::string const& program)
        "(either file or directory)\n"
     << "  copy_directory <dir>... destination   - copy content of <dir>... "
        "directories to 'destination' directory\n"
+    << "  copy_directory_if_different <dir>... destination   - copy changed content of <dir>... "
+       "directories to 'destination' directory\n"
     << "  copy_if_different <file>... destination  - copy files if it has "
        "changed\n"
     << "  echo [<string>...]        - displays arguments as text\n"
@@ -731,12 +733,15 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
       return return_value;
     }
 
-    // Copy directory content
-    if (args[1] == "copy_directory" && args.size() > 3) {
+    // Copy directory contents
+    if ((args[1] == "copy_directory" ||
+         args[1] == "copy_directory_if_different") &&
+        args.size() > 3) {
       // If error occurs we want to continue copying next files.
       bool return_value = false;
+      const bool copy_always = (args[1] == "copy_directory");
       for (auto const& arg : cmMakeRange(args).advance(2).retreat(1)) {
-        if (!cmSystemTools::CopyADirectory(arg, args.back())) {
+        if (!cmSystemTools::CopyADirectory(arg, args.back(), copy_always)) {
           std::cerr << "Error copying directory from \"" << arg << "\" to \""
                     << args.back() << "\".\n";
           return_value = true;
