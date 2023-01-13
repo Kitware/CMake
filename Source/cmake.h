@@ -9,7 +9,6 @@
 #include <map>
 #include <memory>
 #include <set>
-#include <stack>
 #include <string>
 #include <unordered_set>
 #include <utility>
@@ -472,13 +471,13 @@ public:
   }
   std::string GetTopCheckInProgressMessage()
   {
-    auto message = this->CheckInProgressMessages.top();
-    this->CheckInProgressMessages.pop();
+    auto message = this->CheckInProgressMessages.back();
+    this->CheckInProgressMessages.pop_back();
     return message;
   }
   void PushCheckInProgressMessage(std::string message)
   {
-    this->CheckInProgressMessages.emplace(std::move(message));
+    this->CheckInProgressMessages.emplace_back(std::move(message));
   }
 
   //! Should `message` command display context.
@@ -773,7 +772,7 @@ private:
   bool LogLevelWasSetViaCLI = false;
   bool LogContext = false;
 
-  std::stack<std::string> CheckInProgressMessages;
+  std::vector<std::string> CheckInProgressMessages;
 
   std::unique_ptr<cmGlobalGenerator> GlobalGenerator;
 
