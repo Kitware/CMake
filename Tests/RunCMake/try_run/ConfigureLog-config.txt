@@ -7,6 +7,8 @@ events:
       - "[^"]*/Modules/CMakeDetermineCompilerABI.cmake:[0-9]+ \(try_compile\)"
       - "[^"]*/Modules/CMakeTestCCompiler.cmake:[0-9]+ \(CMAKE_DETERMINE_COMPILER_ABI\)"
       - "CMakeLists.txt:[0-9]+ \(project\)"
+    checks:
+      - "Detecting C compiler ABI info"
     directories:
       source: "[^"]*/Tests/RunCMake/try_run/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/]+"
       binary: "[^"]*/Tests/RunCMake/try_run/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/]+"
@@ -37,6 +39,8 @@ events:
     backtrace:
       - "ConfigureLog.cmake:[0-9]+ \(try_run\)"
       - "CMakeLists.txt:[0-9]+ \(include\)"
+    checks:
+      - "Check 1"
     description: "Source that should compile\."
     directories:
       source: "[^"]*/Tests/RunCMake/try_run/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/]+"
@@ -59,6 +63,9 @@ events:
     backtrace:
       - "ConfigureLog.cmake:[0-9]+ \(try_run\)"
       - "CMakeLists.txt:[0-9]+ \(include\)"
+    checks:
+      - "Check 2"
+      - "Check 1"
     directories:
       source: "[^"]*/Tests/RunCMake/try_run/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/]+"
       binary: "[^"]*/Tests/RunCMake/try_run/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/]+"

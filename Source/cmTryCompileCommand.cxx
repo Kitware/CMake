@@ -27,6 +27,7 @@ void WriteTryCompileEvent(cmConfigureLog& log, cmMakefile const& mf,
   if (log.IsAnyLogVersionEnabled(LogVersionsWithTryCompileV1)) {
     log.BeginEvent("try_compile-v1");
     log.WriteBacktrace(mf);
+    log.WriteChecks(mf);
     cmCoreTryCompile::WriteTryCompileEventFields(log, compileResult);
     log.EndEvent();
   }

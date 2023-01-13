@@ -29,6 +29,7 @@ public:
   bool IsAnyLogVersionEnabled(std::vector<unsigned long> const& v) const;
 
   void WriteBacktrace(cmMakefile const& mf);
+  void WriteChecks(cmMakefile const& mf);
 
   void EnsureInit();
 

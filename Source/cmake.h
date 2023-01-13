@@ -479,6 +479,10 @@ public:
   {
     this->CheckInProgressMessages.emplace_back(std::move(message));
   }
+  std::vector<std::string> const& GetCheckInProgressMessages() const
+  {
+    return this->CheckInProgressMessages;
+  }
 
   //! Should `message` command display context.
   bool GetShowLogContext() const { return this->LogContext; }

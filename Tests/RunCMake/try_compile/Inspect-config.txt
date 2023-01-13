@@ -8,6 +8,8 @@ events:
       - "[^"]*/Modules/CMakeTestCCompiler.cmake:[0-9]+ \(CMAKE_DETERMINE_COMPILER_ABI\)"
       - "Inspect.cmake:[0-9]+ \(enable_language\)"
       - "CMakeLists.txt:[0-9]+ \(include\)"
+    checks:
+      - "Detecting C compiler ABI info"
     directories:
       source: "[^"]*/Tests/RunCMake/try_compile/Inspect-build/CMakeFiles/CMakeScratch/TryCompile-[^/]+"
       binary: "[^"]*/Tests/RunCMake/try_compile/Inspect-build/CMakeFiles/CMakeScratch/TryCompile-[^/]+"
@@ -23,6 +25,8 @@ events:
       - "[^"]*/Modules/CMakeTestCXXCompiler.cmake:[0-9]+ \(CMAKE_DETERMINE_COMPILER_ABI\)"
       - "Inspect.cmake:[0-9]+ \(enable_language\)"
       - "CMakeLists.txt:[0-9]+ \(include\)"
+    checks:
+      - "Detecting CXX compiler ABI info"
     directories:
       source: "[^"]*/Tests/RunCMake/try_compile/Inspect-build/CMakeFiles/CMakeScratch/TryCompile-[^/]+"
       binary: "[^"]*/Tests/RunCMake/try_compile/Inspect-build/CMakeFiles/CMakeScratch/TryCompile-[^/]+"

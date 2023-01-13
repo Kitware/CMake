@@ -106,6 +106,8 @@ Every event kind is represented by a YAML mapping of the form:
   kind: "<kind>-v<major>"
   backtrace:
     - "<file>:<line> (<function>)"
+  checks:
+    - "Checking for something"
   #...event-specific keys...
 
 The keys common to all events are:
@@ -118,6 +120,13 @@ The keys common to all events are:
   locations at which the event occurred, from most-recent to
   least-recent.  Each node is a string specifying one location
   formatted as ``<file>:<line> (<function>)``.
+
+``checks``
+  An optional key that is present when the event occurred with
+  at least one pending :command:`message(CHECK_START)`.  Its value
+  is a YAML block sequence reporting the stack of pending checks,
+  from most-recent to least-recent.  Each node is a string containing
+  a pending check message.
 
 Additional mapping keys are specific to each (versioned) event kind,
 described below.
@@ -141,6 +150,8 @@ A ``try_compile-v1`` event is a YAML mapping:
   kind: "try_compile-v1"
   backtrace:
     - "CMakeLists.txt:123 (try_compile)"
+  checks:
+    - "Checking for something"
   description: "Explicit LOG_DESCRIPTION"
   directories:
     source: "/path/to/.../TryCompile-01234"
@@ -212,6 +223,8 @@ A ``try_run-v1`` event is a YAML mapping:
   kind: "try_run-v1"
   backtrace:
     - "CMakeLists.txt:456 (try_run)"
+  checks:
+    - "Checking for something"
   description: "Explicit LOG_DESCRIPTION"
   directories:
     source: "/path/to/.../TryCompile-56789"

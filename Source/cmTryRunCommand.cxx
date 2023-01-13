@@ -46,6 +46,7 @@ void WriteTryRunEvent(cmConfigureLog& log, cmMakefile const& mf,
   if (log.IsAnyLogVersionEnabled(LogVersionsWithTryRunV1)) {
     log.BeginEvent("try_run-v1");
     log.WriteBacktrace(mf);
+    log.WriteChecks(mf);
     cmCoreTryCompile::WriteTryCompileEventFields(log, compileResult);
 
     log.BeginObject("runResult"_s);
