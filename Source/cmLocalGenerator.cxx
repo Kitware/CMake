@@ -430,7 +430,7 @@ void cmLocalGenerator::GenerateInstallRules()
   // Compute the install prefix.
   cmValue installPrefix =
     this->Makefile->GetDefinition("CMAKE_INSTALL_PREFIX");
-  std::string prefix = installPrefix;
+  std::string prefix = *installPrefix;
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
   if (!installPrefix) {
@@ -869,7 +869,7 @@ std::string cmLocalGenerator::GetIncludeFlags(
         cmStrCat("CMAKE_INCLUDE_FLAG_SEP_", lang))) {
     // if there is a separator then the flag is not repeated but is only
     // given once i.e.  -classpath a:b:c
-    sep = incSep;
+    sep = *incSep;
     repeatFlag = false;
   }
 
@@ -1397,7 +1397,7 @@ void cmLocalGenerator::GetDeviceLinkFlags(
   if (ipoEnabled) {
     if (cmValue cudaIPOFlags = this->Makefile->GetDefinition(
           "CMAKE_CUDA_DEVICE_LINK_OPTIONS_IPO")) {
-      linkFlags += cudaIPOFlags;
+      linkFlags += *cudaIPOFlags;
     }
   }
 
@@ -1848,7 +1848,7 @@ bool cmLocalGenerator::AllAppleArchSysrootsAreTheSame(
                      [this, sysroot](std::string const& arch) -> bool {
                        std::string const& archSysroot =
                          this->AppleArchSysroots[arch];
-                       return cmIsOff(archSysroot) || sysroot == archSysroot;
+                       return cmIsOff(archSysroot) || *sysroot == archSysroot;
                      });
 }
 

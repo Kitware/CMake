@@ -2204,7 +2204,7 @@ void cmFindPackageCommand::FillPrefixesCMakeSystemVariable()
   std::string install_path_to_remove;
   if (cmValue to_skip = this->Makefile->GetDefinition(
         "_CMAKE_SYSTEM_PREFIX_PATH_INSTALL_PREFIX_COUNT")) {
-    cmStrToLong(to_skip, &install_prefix_count);
+    cmStrToLong(*to_skip, &install_prefix_count);
   }
   if (cmValue install_value = this->Makefile->GetDefinition(
         "_CMAKE_SYSTEM_PREFIX_PATH_INSTALL_PREFIX_VALUE")) {

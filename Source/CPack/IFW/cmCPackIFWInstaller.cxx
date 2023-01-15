@@ -77,19 +77,20 @@ void cmCPackIFWInstaller::ConfigureFromOptions()
 
   // ApplicationIcon
   if (cmValue option = this->GetOption("CPACK_IFW_PACKAGE_ICON")) {
-    if (cmSystemTools::FileExists(option)) {
+    if (cmSystemTools::FileExists(*option)) {
       this->InstallerApplicationIcon = *option;
     } else {
-      this->printSkippedOptionWarning("CPACK_IFW_PACKAGE_ICON", option);
+      this->printSkippedOptionWarning("CPACK_IFW_PACKAGE_ICON", *option);
     }
   }
 
   // WindowIcon
   if (cmValue option = this->GetOption("CPACK_IFW_PACKAGE_WINDOW_ICON")) {
-    if (cmSystemTools::FileExists(option)) {
+    if (cmSystemTools::FileExists(*option)) {
       this->InstallerWindowIcon = *option;
     } else {
-      this->printSkippedOptionWarning("CPACK_IFW_PACKAGE_WINDOW_ICON", option);
+      this->printSkippedOptionWarning("CPACK_IFW_PACKAGE_WINDOW_ICON",
+                                      *option);
     }
   }
 
@@ -104,37 +105,37 @@ void cmCPackIFWInstaller::ConfigureFromOptions()
 
   // Logo
   if (cmValue option = this->GetOption("CPACK_IFW_PACKAGE_LOGO")) {
-    if (cmSystemTools::FileExists(option)) {
+    if (cmSystemTools::FileExists(*option)) {
       this->Logo = *option;
     } else {
-      this->printSkippedOptionWarning("CPACK_IFW_PACKAGE_LOGO", option);
+      this->printSkippedOptionWarning("CPACK_IFW_PACKAGE_LOGO", *option);
     }
   }
 
   // Watermark
   if (cmValue option = this->GetOption("CPACK_IFW_PACKAGE_WATERMARK")) {
-    if (cmSystemTools::FileExists(option)) {
+    if (cmSystemTools::FileExists(*option)) {
       this->Watermark = *option;
     } else {
-      this->printSkippedOptionWarning("CPACK_IFW_PACKAGE_WATERMARK", option);
+      this->printSkippedOptionWarning("CPACK_IFW_PACKAGE_WATERMARK", *option);
     }
   }
 
   // Banner
   if (cmValue option = this->GetOption("CPACK_IFW_PACKAGE_BANNER")) {
-    if (cmSystemTools::FileExists(option)) {
+    if (cmSystemTools::FileExists(*option)) {
       this->Banner = *option;
     } else {
-      this->printSkippedOptionWarning("CPACK_IFW_PACKAGE_BANNER", option);
+      this->printSkippedOptionWarning("CPACK_IFW_PACKAGE_BANNER", *option);
     }
   }
 
   // Background
   if (cmValue option = this->GetOption("CPACK_IFW_PACKAGE_BACKGROUND")) {
-    if (cmSystemTools::FileExists(option)) {
+    if (cmSystemTools::FileExists(*option)) {
       this->Background = *option;
     } else {
-      this->printSkippedOptionWarning("CPACK_IFW_PACKAGE_BACKGROUND", option);
+      this->printSkippedOptionWarning("CPACK_IFW_PACKAGE_BACKGROUND", *option);
     }
   }
 
@@ -155,10 +156,11 @@ void cmCPackIFWInstaller::ConfigureFromOptions()
 
   // StyleSheet
   if (cmValue option = this->GetOption("CPACK_IFW_PACKAGE_STYLE_SHEET")) {
-    if (cmSystemTools::FileExists(option)) {
+    if (cmSystemTools::FileExists(*option)) {
       this->StyleSheet = *option;
     } else {
-      this->printSkippedOptionWarning("CPACK_IFW_PACKAGE_STYLE_SHEET", option);
+      this->printSkippedOptionWarning("CPACK_IFW_PACKAGE_STYLE_SHEET",
+                                      *option);
     }
   }
 
@@ -276,9 +278,9 @@ void cmCPackIFWInstaller::ConfigureFromOptions()
   // Control script
   if (cmValue optIFW_CONTROL_SCRIPT =
         this->GetOption("CPACK_IFW_PACKAGE_CONTROL_SCRIPT")) {
-    if (!cmSystemTools::FileExists(optIFW_CONTROL_SCRIPT)) {
+    if (!cmSystemTools::FileExists(*optIFW_CONTROL_SCRIPT)) {
       this->printSkippedOptionWarning("CPACK_IFW_PACKAGE_CONTROL_SCRIPT",
-                                      optIFW_CONTROL_SCRIPT);
+                                      *optIFW_CONTROL_SCRIPT);
     } else {
       this->ControlScript = *optIFW_CONTROL_SCRIPT;
     }
@@ -653,9 +655,9 @@ void cmCPackIFWInstaller::GeneratePackageFiles()
     package.Installer = this;
     // Check package group
     if (cmValue option = this->GetOption("CPACK_IFW_PACKAGE_GROUP")) {
-      package.ConfigureFromGroup(option);
+      package.ConfigureFromGroup(*option);
       std::string forcedOption = "CPACK_IFW_COMPONENT_GROUP_" +
-        cmsys::SystemTools::UpperCase(option) + "_FORCED_INSTALLATION";
+        cmsys::SystemTools::UpperCase(*option) + "_FORCED_INSTALLATION";
       if (!this->GetOption(forcedOption)) {
         package.ForcedInstallation = "true";
       }

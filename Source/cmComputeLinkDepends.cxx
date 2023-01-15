@@ -260,8 +260,8 @@ cmComputeLinkDepends::cmComputeLinkDepends(const cmGeneratorTarget* target,
                                                  "LINK_LIBRARY_OVERRIDE",
                                                  nullptr, nullptr };
             auto overrideFeature = cmGeneratorExpression::Evaluate(
-              feature, this->Target->GetLocalGenerator(), config, this->Target,
-              &dag, this->Target, linkLanguage);
+              *feature, this->Target->GetLocalGenerator(), config,
+              this->Target, &dag, this->Target, linkLanguage);
             this->LinkLibraryOverride.emplace(item, overrideFeature);
           }
         }
@@ -274,7 +274,7 @@ cmComputeLinkDepends::cmComputeLinkDepends(const cmGeneratorTarget* target,
                                          "LINK_LIBRARY_OVERRIDE", nullptr,
                                          nullptr };
     auto overrideValue = cmGeneratorExpression::Evaluate(
-      linkLibraryOverride, target->GetLocalGenerator(), config, target, &dag,
+      *linkLibraryOverride, target->GetLocalGenerator(), config, target, &dag,
       target, linkLanguage);
 
     auto overrideList = cmTokenize(overrideValue, ","_s);

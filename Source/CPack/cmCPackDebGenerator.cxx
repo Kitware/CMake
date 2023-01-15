@@ -124,8 +124,8 @@ DebGenerator::DebGenerator(
                     << debianCompressionType << std::endl);
   }
 
-  if (numThreads != nullptr) {
-    if (!cmStrToLong(numThreads, &this->NumThreads)) {
+  if (numThreads) {
+    if (!cmStrToLong(*numThreads, &this->NumThreads)) {
       this->NumThreads = 1;
       cmCPackLogger(cmCPackLog::LOG_ERROR,
                     "Unrecognized number of threads: " << numThreads
@@ -703,7 +703,7 @@ bool cmCPackDebGenerator::createDebPackages()
                  &cmCPackDebGenerator::createDeb);
   cmValue dbgsymdir_path = this->GetOption("GEN_DBGSYMDIR");
   if (this->IsOn("GEN_CPACK_DEBIAN_DEBUGINFO_PACKAGE") && dbgsymdir_path) {
-    retval = make_package(dbgsymdir_path, "GEN_CPACK_DBGSYM_OUTPUT_FILE_NAME",
+    retval = make_package(*dbgsymdir_path, "GEN_CPACK_DBGSYM_OUTPUT_FILE_NAME",
                           &cmCPackDebGenerator::createDbgsymDDeb) &&
       retval;
   }

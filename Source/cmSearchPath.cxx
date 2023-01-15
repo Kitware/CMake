@@ -179,7 +179,7 @@ void cmSearchPath::AddPrefixPaths(const std::vector<std::string>& paths,
       cmValue arch =
         this->FC->Makefile->GetDefinition("CMAKE_LIBRARY_ARCHITECTURE");
       if (cmNonempty(arch)) {
-        std::string archNoUnknown = arch;
+        std::string archNoUnknown = *arch;
         auto unknownAtPos = archNoUnknown.find("-unknown-");
         bool foundUnknown = unknownAtPos != std::string::npos;
         if (foundUnknown) {

@@ -80,10 +80,10 @@ std::string cmCPackArchiveGenerator::GetArchiveComponentFileName(
       *this->GetOption("CPACK_ARCHIVE_" + componentUpper + "_FILE_NAME");
   } else if (this->IsSet("CPACK_ARCHIVE_FILE_NAME")) {
     packageFileName += this->GetComponentPackageFileName(
-      this->GetOption("CPACK_ARCHIVE_FILE_NAME"), component, isGroupName);
+      *this->GetOption("CPACK_ARCHIVE_FILE_NAME"), component, isGroupName);
   } else {
     packageFileName += this->GetComponentPackageFileName(
-      this->GetOption("CPACK_PACKAGE_FILE_NAME"), component, isGroupName);
+      *this->GetOption("CPACK_PACKAGE_FILE_NAME"), component, isGroupName);
   }
 
   packageFileName += this->GetOutputExtension();
@@ -357,9 +357,9 @@ int cmCPackArchiveGenerator::GetThreadCount() const
 
   // CPACK_ARCHIVE_THREADS overrides CPACK_THREADS
   if (this->IsSet("CPACK_ARCHIVE_THREADS")) {
-    threads = std::stoi(this->GetOption("CPACK_ARCHIVE_THREADS"));
+    threads = std::stoi(*this->GetOption("CPACK_ARCHIVE_THREADS"));
   } else if (this->IsSet("CPACK_THREADS")) {
-    threads = std::stoi(this->GetOption("CPACK_THREADS"));
+    threads = std::stoi(*this->GetOption("CPACK_THREADS"));
   }
 
   return threads;

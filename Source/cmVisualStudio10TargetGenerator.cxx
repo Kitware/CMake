@@ -550,7 +550,7 @@ void cmVisualStudio10TargetGenerator::WriteClassicMsBuildProjectFile(
 
       e1.Element("Platform", this->Platform);
       cmValue projLabel = this->GeneratorTarget->GetProperty("PROJECT_LABEL");
-      e1.Element("ProjectName", projLabel ? projLabel : this->Name);
+      e1.Element("ProjectName", projLabel ? *projLabel : this->Name);
       {
         cm::optional<std::string> targetFramework;
         cm::optional<std::string> targetFrameworkVersion;
