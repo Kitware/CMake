@@ -552,6 +552,7 @@ bool TLL::HandleLibrary(ProcessingState currentProcessingState,
       currentProcessingState == ProcessingPlainPrivateInterface) {
     if (this->Target->GetType() == cmStateEnums::STATIC_LIBRARY ||
         this->Target->GetType() == cmStateEnums::OBJECT_LIBRARY) {
+      // TODO: Detect and no-op `$<COMPILE_ONLY>` genexes here.
       std::string configLib =
         this->Target->GetDebugGeneratorExpressions(lib, llt);
       if (cmGeneratorExpression::IsValidTargetName(lib) ||

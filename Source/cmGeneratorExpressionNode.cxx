@@ -1351,6 +1351,29 @@ static const VersionNode<cmSystemTools::OP_LESS> versionLessNode;
 static const VersionNode<cmSystemTools::OP_LESS_EQUAL> versionLessEqNode;
 static const VersionNode<cmSystemTools::OP_EQUAL> versionEqualNode;
 
+static const struct CompileOnlyNode : public cmGeneratorExpressionNode
+{
+  CompileOnlyNode() {} // NOLINT(modernize-use-equals-default)
+
+  std::string Evaluate(
+    const std::vector<std::string>& parameters,
+    cmGeneratorExpressionContext* context,
+    const GeneratorExpressionContent* content,
+    cmGeneratorExpressionDAGChecker* dagChecker) const override
+  {
+    if (!dagChecker) {
+      reportError(context, content->GetOriginalExpression(),
+                  "$<COMPILE_ONLY:...> may only be used via linking");
+      return std::string();
+    }
+    // Linking checks for the inverse, so compiling is the opposite.
+    if (dagChecker->GetTransitivePropertiesOnly()) {
+      return parameters.front();
+    }
+    return std::string();
+  }
+} compileOnlyNode;
+
 static const struct LinkOnlyNode : public cmGeneratorExpressionNode
 {
   LinkOnlyNode() {} // NOLINT(modernize-use-equals-default)
@@ -1366,6 +1389,7 @@ static const struct LinkOnlyNode : public cmGeneratorExpressionNode
                   "$<LINK_ONLY:...> may only be used for linking");
       return std::string();
     }
+    // Compile-only checks for the inverse, so linking is the opposite.
     if (!dagChecker->GetTransitivePropertiesOnly()) {
       return parameters.front();
     }
@@ -3805,6 +3829,7 @@ const cmGeneratorExpressionNode* cmGeneratorExpressionNode::GetNode(
     { "BUILD_LOCAL_INTERFACE", &buildLocalInterfaceNode },
     { "INSTALL_PREFIX", &installPrefixNode },
     { "JOIN", &joinNode },
+    { "COMPILE_ONLY", &compileOnlyNode },
     { "LINK_ONLY", &linkOnlyNode },
     { "COMPILE_LANG_AND_ID", &languageAndIdNode },
     { "COMPILE_LANGUAGE", &languageNode },

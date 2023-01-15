@@ -959,6 +959,22 @@ Compile Features
   :manual:`cmake-compile-features(7)` manual for information on
   compile features and a list of supported compilers.
 
+Compile Context
+^^^^^^^^^^^^^^^
+
+.. genex:: $<COMPILE_ONLY:...>
+
+  .. versionadded:: 3.27
+
+  Content of ``...``, except while collecting :ref:`Target Usage Requirements`,
+  in which case it is the empty string.  This is intended for use in an
+  :prop_tgt:`INTERFACE_LINK_LIBRARIES` target property, typically populated
+  via the :command:`target_link_libraries` command, to specify private
+  compilation requirements without other usage requirements.
+
+  Use cases include header-only usage where all usages are known to not have
+  linking requirements (e.g., all-``inline`` or C++ template libraries).
+
 Linker Language And ID
 ^^^^^^^^^^^^^^^^^^^^^^
 
@@ -1339,7 +1355,8 @@ Link Context
   in which case it is the empty string.  This is intended for use in an
   :prop_tgt:`INTERFACE_LINK_LIBRARIES` target property, typically populated
   via the :command:`target_link_libraries` command, to specify private link
-  dependencies without other usage requirements.
+  dependencies without other usage requirements such as include directories or
+  compile options.
 
   .. versionadded:: 3.24
     ``LINK_ONLY`` may also be used in a :prop_tgt:`LINK_LIBRARIES` target
