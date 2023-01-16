@@ -85,8 +85,6 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
   # If the compiler is still unknown, fallback to GHS
   if(NOT CMAKE_${lang}_COMPILER_ID  AND "${CMAKE_GENERATOR}" MATCHES "Green Hills MULTI")
     set(CMAKE_${lang}_COMPILER_ID GHS)
-    file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-        "The ${lang} compiler identification is falling back to GHS.\n\n")
   endif()
 
   # CUDA < 7.5 is missing version macros
