@@ -1099,23 +1099,35 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
 
     if ((res == 0) && arguments.CopyFileTo) {
       std::string const& copyFile = *arguments.CopyFileTo;
-      if (this->OutputFile.empty() ||
-          !cmSystemTools::CopyFileAlways(this->OutputFile, copyFile)) {
-        std::ostringstream emsg;
-        /* clang-format off */
-        emsg << "Cannot copy output executable\n"
-             << "  '" << this->OutputFile << "'\n"
-             << "to destination specified by COPY_FILE:\n"
-             << "  '" << copyFile << "'\n";
-        /* clang-format on */
-        if (!this->FindErrorMessage.empty()) {
-          emsg << this->FindErrorMessage;
+      cmsys::SystemTools::CopyStatus status =
+        cmSystemTools::CopyFileAlways(this->OutputFile, copyFile);
+      if (!status) {
+        std::string err = status.GetString();
+        switch (status.Path) {
+          case cmsys::SystemTools::CopyStatus::SourcePath:
+            err = cmStrCat(err, " (input)");
+            break;
+          case cmsys::SystemTools::CopyStatus::DestPath:
+            err = cmStrCat(err, " (output)");
+            break;
+          default:
+            break;
         }
+        /* clang-format off */
+        err = cmStrCat(
+          "Cannot copy output executable\n",
+          "  '", this->OutputFile, "'\n",
+          "to destination specified by COPY_FILE:\n",
+          "  '", copyFile, "'\n",
+          "because:\n",
+          "  ", err, "\n",
+          this->FindErrorMessage);
+        /* clang-format on */
         if (!arguments.CopyFileError) {
-          this->Makefile->IssueMessage(MessageType::FATAL_ERROR, emsg.str());
+          this->Makefile->IssueMessage(MessageType::FATAL_ERROR, err);
           return cm::nullopt;
         }
-        copyFileErrorMessage = emsg.str();
+        copyFileErrorMessage = std::move(err);
       }
     }
 
