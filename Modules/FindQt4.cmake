@@ -623,7 +623,7 @@ if (QT_QMAKE_EXECUTABLE AND
     endif()
     set(Qt4_FOUND FALSE)
     if(Qt4_FIND_REQUIRED)
-      message( FATAL_ERROR "Could NOT find QtCore. Check ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log for more details.")
+      message( FATAL_ERROR "Could NOT find QtCore.")
     else()
       return()
     endif()
