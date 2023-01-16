@@ -1,6 +1,13 @@
 ^
 ---
-events:
+events:(
+  -
+    kind: "message-v1"
+    backtrace:(
+      - "[^"]+")+
+    message: \|(
++      [^
+]*)*)+
   -
     kind: "try_compile-v1"
     backtrace:
@@ -17,7 +24,14 @@ events:
       variable: "CMAKE_C_ABI_COMPILED"
       cached: true
       stdout: \|.*
-      exitCode: 0
+      exitCode: 0(
+  -
+    kind: "message-v1"
+    backtrace:(
+      - "[^"]+")+
+    message: \|(
++      [^
+]*)*)+
   -
     kind: "try_compile-v1"
     backtrace:
@@ -34,5 +48,12 @@ events:
       variable: "CMAKE_CXX_ABI_COMPILED"
       cached: true
       stdout: \|.*
-      exitCode: 0
+      exitCode: 0(
+  -
+    kind: "message-v1"
+    backtrace:(
+      - "[^"]+")+
+    message: \|(
++      [^
+]*)*)*
 \.\.\.$

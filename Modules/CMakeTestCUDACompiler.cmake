@@ -60,7 +60,7 @@ if(CMAKE_CUDA_ABI_COMPILED)
       set(_CUDA_ARCHS_STATUS "")
     endif()
     string(REPLACE "\n" "\n  " _CUDA_ARCHS_OUTPUT "  ${_CUDA_ARCHS_OUTPUT}")
-    file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+    message(CONFIGURE_LOG
       "Detecting the CUDA native architecture(s) failed with "
       "the following output:\n${_CUDA_ARCHS_OUTPUT}\n\n")
   endif()

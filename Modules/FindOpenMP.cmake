@@ -238,9 +238,6 @@ function(_OPENMP_GET_FLAGS LANG FLAG_MODE OPENMP_FLAG_VAR OPENMP_LIB_NAMES_VAR)
           LANGUAGE ${LANG}
         )
 
-        file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-        "Parsed ${LANG} OpenMP implicit link information from above output:\n${OpenMP_${LANG}_LOG_VAR}\n\n")
-
         # For LCC we should additionally alanyze -print-search-dirs output
         # to check for additional implicit_dirs.
         # Note: This won't work if CMP0129 policy is set to OLD!
@@ -253,10 +250,13 @@ function(_OPENMP_GET_FLAGS LANG FLAG_MODE OPENMP_FLAG_VAR OPENMP_LIB_NAMES_VAR)
           if("${output_lines}" MATCHES ".*\nlibraries:[ \t]+(.*:)\n.*")
             string(REPLACE ":" ";" implicit_dirs_addon "${CMAKE_MATCH_1}")
             list(PREPEND OpenMP_${LANG}_IMPLICIT_LINK_DIRS ${implicit_dirs_addon})
-            file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+            string(APPEND OpenMP_${LANG}_LOG_VAR
               "  Extended OpenMP library search paths: [${implicit_dirs}]\n")
           endif()
         endif()
+
+        message(CONFIGURE_LOG
+          "Parsed ${LANG} OpenMP implicit link information from above output:\n${OpenMP_${LANG}_LOG_VAR}\n\n")
 
         unset(_OPENMP_LIB_NAMES)
         foreach(_OPENMP_IMPLICIT_LIB IN LISTS OpenMP_${LANG}_IMPLICIT_LIBRARIES)

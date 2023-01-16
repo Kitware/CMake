@@ -124,8 +124,8 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
         set (implicit_incdirs "")
         cmake_parse_implicit_include_info("${OUTPUT}" "${lang}"
           implicit_incdirs log rv)
-        file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-          "Parsed ${lang} implicit include dir info from above output: rv=${rv}\n${log}\n\n")
+        message(CONFIGURE_LOG
+          "Parsed ${lang} implicit include dir info: rv=${rv}\n${log}\n\n")
         if("${rv}" STREQUAL "done")
           # Entries that we have been told to explicitly pass as standard include
           # directories will not be implicitly added by the compiler.
@@ -149,8 +149,8 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
           "${CMAKE_${lang}_IMPLICIT_OBJECT_REGEX}"
           COMPUTE_IMPLICIT_OBJECTS implicit_objs
           LANGUAGE ${lang})
-        file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-          "Parsed ${lang} implicit link information from above output:\n${log}\n\n")
+        message(CONFIGURE_LOG
+          "Parsed ${lang} implicit link information:\n${log}\n\n")
       endif()
       # for VS IDE Intel Fortran we have to figure out the
       # implicit link path for the fortran run time using

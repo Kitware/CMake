@@ -187,11 +187,11 @@ if(NOT CMAKE_Fortran_COMPILER_ID_RUN)
     if(NOT CMAKE_COMPILER_RETURN)
       if(CMAKE_COMPILER_OUTPUT MATCHES "THIS_IS_GNU")
         set(CMAKE_Fortran_COMPILER_ID "GNU")
-        file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+        message(CONFIGURE_LOG
           "Determining if the Fortran compiler is GNU succeeded with "
           "the following output:\n${CMAKE_COMPILER_OUTPUT}\n\n")
       else()
-        file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+        message(CONFIGURE_LOG
           "Determining if the Fortran compiler is GNU failed with "
           "the following output:\n${CMAKE_COMPILER_OUTPUT}\n\n")
       endif()
