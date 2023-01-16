@@ -19,6 +19,7 @@ Try Compiling and Running Source Files
            SOURCE_FROM_FILE <name> <path>       >...
           [LOG_DESCRIPTION <text>]
           [NO_CACHE]
+          [NO_LOG]
           [CMAKE_FLAGS <flags>...]
           [COMPILE_DEFINITIONS <defs>...]
           [LINK_OPTIONS <options>...]
@@ -58,6 +59,7 @@ which was present in older versions of CMake:
           <bindir> <srcfile|SOURCES srcfile...>
           [LOG_DESCRIPTION <text>]
           [NO_CACHE]
+          [NO_LOG]
           [CMAKE_FLAGS <flags>...]
           [COMPILE_DEFINITIONS <defs>...]
           [LINK_OPTIONS <options>...]

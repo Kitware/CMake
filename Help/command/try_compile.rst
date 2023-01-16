@@ -20,6 +20,7 @@ Try Compiling Whole Projects
               [TARGET <targetName>]
               [LOG_DESCRIPTION <text>]
               [NO_CACHE]
+              [NO_LOG]
               [CMAKE_FLAGS <flags>...]
               [OUTPUT_VARIABLE <var>])
 
@@ -50,6 +51,7 @@ which was present in older versions of CMake:
               <projectName> [<targetName>]
               [LOG_DESCRIPTION <text>]
               [NO_CACHE]
+              [NO_LOG]
               [CMAKE_FLAGS <flags>...]
               [OUTPUT_VARIABLE <var>])
 
@@ -67,6 +69,7 @@ Try Compiling Source Files
                SOURCE_FROM_FILE <name> <path>       >...
               [LOG_DESCRIPTION <text>]
               [NO_CACHE]
+              [NO_LOG]
               [CMAKE_FLAGS <flags>...]
               [COMPILE_DEFINITIONS <defs>...]
               [LINK_OPTIONS <options>...]
@@ -120,6 +123,7 @@ which was present in older versions of CMake:
   try_compile(<resultVar> <bindir> <srcfile|SOURCES srcfile...>
               [LOG_DESCRIPTION <text>]
               [NO_CACHE]
+              [NO_LOG]
               [CMAKE_FLAGS <flags>...]
               [COMPILE_DEFINITIONS <defs>...]
               [LINK_OPTIONS <options>...]
@@ -200,6 +204,11 @@ The options are:
   If the guard variable and result variable are not the same (for example, if
   the test is part of a larger inspection), ``NO_CACHE`` may be useful to avoid
   leaking the intermediate result variable into the cache.
+
+``NO_LOG``
+  .. versionadded:: 3.26
+
+  Do not record a :manual:`cmake-configure-log(7)` entry for this call.
 
 ``OUTPUT_VARIABLE <var>``
   Store the output from the build process in the given variable.

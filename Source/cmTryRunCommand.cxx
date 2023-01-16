@@ -246,7 +246,7 @@ bool TryRunCommandImpl::TryRunCode(std::vector<std::string> const& argv)
   }
 
 #ifndef CMAKE_BOOTSTRAP
-  if (compileResult) {
+  if (compileResult && !arguments.NoLog) {
     cmMakefile const& mf = *(this->Makefile);
     if (cmConfigureLog* log = mf.GetCMakeInstance()->GetConfigureLog()) {
       WriteTryRunEvent(*log, mf, *compileResult, runResult);

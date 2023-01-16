@@ -153,6 +153,7 @@ auto const TryCompileBaseArgParser =
     .Bind(0, &Arguments::CompileResultVariable)
     .Bind("LOG_DESCRIPTION"_s, &Arguments::LogDescription)
     .Bind("NO_CACHE"_s, &Arguments::NoCache)
+    .Bind("NO_LOG"_s, &Arguments::NoLog)
     .Bind("CMAKE_FLAGS"_s, &Arguments::CMakeFlags)
     .Bind("__CMAKE_INTERNAL"_s, &Arguments::CMakeInternal)
   /* keep semicolon on own line */;

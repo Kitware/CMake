@@ -5,6 +5,11 @@ try_run(RUN_RESULT COMPILE_RESULT
 
 try_run(RUN_RESULT COMPILE_RESULT
   SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ConfigureLog-test.c
+  NO_LOG
+  )
+
+try_run(RUN_RESULT COMPILE_RESULT
+  SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ConfigureLog-test.c
   LOG_DESCRIPTION "Source that should compile."
   )
 

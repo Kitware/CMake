@@ -10,3 +10,7 @@ Configure Log
 * The :command:`try_compile` and :command:`try_run` commands gained
   a ``LOG_DESCRIPTION`` option specifying text to be recorded in the
   :manual:`cmake-configure-log(7)`.
+
+* The :command:`try_compile` and :command:`try_run` commands gained a
+  ``NO_LOG`` option to skip recording a :manual:`cmake-configure-log(7)`
+  entry.

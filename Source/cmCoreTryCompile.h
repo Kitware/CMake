@@ -75,6 +75,7 @@ public:
     cm::optional<std::string> CopyFileError;
     cm::optional<ArgumentParser::NonEmpty<std::string>> LogDescription;
     bool NoCache = false;
+    bool NoLog = false;
 
     // Argument for try_run only.
     // Keep in sync with warnings in cmCoreTryCompile::ParseArgs.
