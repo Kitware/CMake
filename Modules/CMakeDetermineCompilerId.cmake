@@ -724,7 +724,7 @@ Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
      OR CMAKE_${lang}_COMPILER_ID_OUTPUT MATCHES "warning #5117: Bad # preprocessor line"
      )
     # Compilation failed.
-    string(APPEND _CMAKE_DETERMINE_COMPILER_ID_BUILD_MSG
+    set(MSG
       "Compiling the ${lang} compiler identification source file \"${src}\" failed.
 ${COMPILER_DESCRIPTION}
 The output was:
@@ -737,11 +737,13 @@ ${CMAKE_${lang}_COMPILER_ID_OUTPUT}
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log "${MSG}")
     endif()
 
+    string(APPEND _CMAKE_DETERMINE_COMPILER_ID_BUILD_MSG "${MSG}")
+
     # Some languages may know the correct/desired set of flags and want to fail right away if they don't work.
     # This is currently only used by CUDA.
     if(__compiler_id_require_success)
       message(FATAL_ERROR "${_CMAKE_DETERMINE_COMPILER_ID_BUILD_MSG}")
-    else()
+    elseif(CMAKE_${lang}_COMPILER_ID_REQUIRE_SUCCESS)
       # Build up the outputs for compiler detection attempts so that users
       # can see all set of flags tried, instead of just last
       set(_CMAKE_DETERMINE_COMPILER_ID_BUILD_MSG "${_CMAKE_DETERMINE_COMPILER_ID_BUILD_MSG}" PARENT_SCOPE)
