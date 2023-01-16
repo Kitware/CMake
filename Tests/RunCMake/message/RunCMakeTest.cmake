@@ -1,7 +1,9 @@
 include(RunCMake)
 
+run_cmake_script(ConfigureLogScript)
 run_cmake_script(newline)
 
+run_cmake(ConfigureLog)
 run_cmake(defaultmessage)
 run_cmake(nomessage)
 run_cmake(message-internal-warning)

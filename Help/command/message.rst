@@ -14,6 +14,8 @@ Synopsis
   `Reporting checks`_
     message(<checkState> "message text" ...)
 
+  `Configure Log`_
+    message(CONFIGURE_LOG <text>...)
 
 General messages
 ^^^^^^^^^^^^^^^^
@@ -193,6 +195,54 @@ Output from the above would appear something like the following::
   --   Finding partB
   --   Finding partB - not found
   -- Finding my things - missing components: B
+
+Configure Log
+^^^^^^^^^^^^^
+
+.. versionadded:: 3.26
+
+.. code-block:: cmake
+
+  message(CONFIGURE_LOG <text>...)
+
+Record a :ref:`configure-log message event <message configure-log event>`
+with the specified ``<text>``.  By convention, if the text contains more
+than one line, the first line should be a summary of the event.
+
+This mode is intended to record the details of a system inspection check
+or other one-time operation guarded by a cache entry, but that is not
+performed using :command:`try_compile` or :command:`try_run`, which
+automatically log their details.  Projects should avoid calling it every
+time CMake runs.  For example:
+
+.. code-block:: cmake
+
+  if (NOT DEFINED MY_CHECK_RESULT)
+    # Print check summary in configure output.
+    message(CHECK_START "My Check")
+
+    # ... perform system inspection, e.g., with execute_process ...
+
+    # Cache the result so we do not run the check again.
+    set(MY_CHECK_RESULT "${MY_CHECK_RESULT}" CACHE INTERNAL "My Check")
+
+    # Record the check details in the cmake-configure-log.
+    message(CONFIGURE_LOG
+      "My Check Result: ${MY_CHECK_RESULT}\n"
+      "${details}"
+    )
+
+    # Print check result in configure output.
+    if(MY_CHECK_RESULT)
+      message(CHECK_PASS "passed")
+    else()
+      message(CHECK_FAIL "failed")
+    endif()
+  endif()
+
+If no project is currently being configured, such as in
+:ref:`cmake -P <Script Processing Mode>` script mode,
+this command does nothing.
 
 See Also
 ^^^^^^^^

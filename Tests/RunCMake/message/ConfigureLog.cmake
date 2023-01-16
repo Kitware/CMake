@@ -1,0 +1,7 @@
+message(CONFIGURE_LOG "Message 0")
+message(CHECK_START "Check 1")
+message(CONFIGURE_LOG "Message 1")
+message(CHECK_START "Check 2")
+message(CONFIGURE_LOG "Message 2")
+message(CHECK_PASS "passed")
+message(CHECK_PASS "passed")

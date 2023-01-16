@@ -8,6 +8,7 @@
 #include <cm/string_view>
 #include <cmext/string_view>
 
+#include "cmConfigureLog.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -62,6 +63,25 @@ void ReportCheckResult(cm::string_view what, std::string result,
       cmStrCat("Ignored "_s, what, " without CHECK_START"_s),
       mf.GetBacktrace());
   }
+}
+
+namespace {
+#ifndef CMAKE_BOOTSTRAP
+void WriteMessageEvent(cmConfigureLog& log, cmMakefile const& mf,
+                       std::string const& message)
+{
+  // Keep in sync with cmFileAPIConfigureLog's DumpEventKindNames.
+  static const std::vector<unsigned long> LogVersionsWithMessageV1{ 1 };
+
+  if (log.IsAnyLogVersionEnabled(LogVersionsWithMessageV1)) {
+    log.BeginEvent("message-v1");
+    log.WriteBacktrace(mf);
+    log.WriteChecks(mf);
+    log.WriteLiteralTextBlock("message"_s, message);
+    log.EndEvent();
+  }
+}
+#endif
 }
 
 } // anonymous namespace
@@ -121,6 +141,14 @@ bool cmMessageCommand(std::vector<std::string> const& args,
     level = Message::LogLevel::LOG_STATUS;
     checkingType = CheckingType::CHECK_FAIL;
     ++i;
+  } else if (*i == "CONFIGURE_LOG") {
+#ifndef CMAKE_BOOTSTRAP
+    if (cmConfigureLog* log = mf.GetCMakeInstance()->GetConfigureLog()) {
+      ++i;
+      WriteMessageEvent(*log, mf, cmJoin(cmMakeRange(i, args.cend()), ""_s));
+    }
+#endif
+    return true;
   } else if (*i == "STATUS") {
     level = Message::LogLevel::LOG_STATUS;
     ++i;

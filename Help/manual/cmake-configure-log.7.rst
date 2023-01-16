@@ -131,6 +131,38 @@ The keys common to all events are:
 Additional mapping keys are specific to each (versioned) event kind,
 described below.
 
+.. _`message configure-log event`:
+
+Event Kind ``message``
+----------------------
+
+The :command:`message(CONFIGURE_LOG)` command logs ``message`` events.
+
+There is only one ``message`` event major version, version 1.
+
+.. _`message-v1 event`:
+
+``message-v1`` Event
+^^^^^^^^^^^^^^^^^^^^
+
+A ``message-v1`` event is a YAML mapping:
+
+.. code-block:: yaml
+
+  kind: "message-v1"
+  backtrace:
+    - "CMakeLists.txt:123 (message)"
+  checks:
+    - "Checking for something"
+  message: |
+    # ...
+
+The keys specific to ``message-v1`` mappings are:
+
+``message``
+  A YAML literal block scalar containing the message text,
+  represented using our `Text Block Encoding`_.
+
 .. _`try_compile configure-log event`:
 
 Event Kind ``try_compile``
