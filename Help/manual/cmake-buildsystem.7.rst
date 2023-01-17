@@ -1049,7 +1049,7 @@ them to a header set using the :command:`target_sources` command:
 
   add_library(Eigen INTERFACE)
 
-  target_sources(Eigen INTERFACE
+  target_sources(Eigen PUBLIC
     FILE_SET HEADERS
       BASE_DIRS src
       FILES src/eigen.h src/vector.h src/matrix.h
