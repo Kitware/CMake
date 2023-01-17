@@ -4,11 +4,13 @@
 
 #include <algorithm>
 #include <cassert>
+#include <chrono>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <functional>
 #include <initializer_list>
+#include <iomanip>
 #include <iterator>
 #include <sstream>
 #include <utility>
@@ -1303,6 +1305,8 @@ void cmGlobalGenerator::CreateLocalGenerators()
 
 void cmGlobalGenerator::Configure()
 {
+  auto startTime = std::chrono::steady_clock::now();
+
   this->FirstTimeProgress = 0.0f;
   this->ClearGeneratorMembers();
   this->NextDeferId = 0;
@@ -1350,6 +1354,8 @@ void cmGlobalGenerator::Configure()
                                           "number of local generators",
                                           cmStateEnums::INTERNAL);
 
+  auto endTime = std::chrono::steady_clock::now();
+
   if (this->CMakeInstance->GetWorkingMode() == cmake::NORMAL_MODE) {
     std::ostringstream msg;
     if (cmSystemTools::GetErrorOccurredFlag()) {
@@ -1363,7 +1369,10 @@ void cmGlobalGenerator::Configure()
         }
       }
     } else {
-      msg << "Configuring done";
+      auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+        endTime - startTime);
+      msg << "Configuring done (" << std::fixed << std::setprecision(1)
+          << ms.count() / 1000.0L << "s)";
     }
     this->CMakeInstance->UpdateProgress(msg.str(), -1);
   }
@@ -1606,6 +1615,8 @@ bool cmGlobalGenerator::Compute()
 
 void cmGlobalGenerator::Generate()
 {
+  auto startTime = std::chrono::steady_clock::now();
+
   // Create a map from local generator to the complete set of targets
   // it builds by default.
   this->InitializeProgressMarks();
@@ -1688,7 +1699,13 @@ void cmGlobalGenerator::Generate()
                                            w.str());
   }
 
-  this->CMakeInstance->UpdateProgress("Generating done", -1);
+  auto endTime = std::chrono::steady_clock::now();
+  auto ms =
+    std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+  std::ostringstream msg;
+  msg << "Generating done (" << std::fixed << std::setprecision(1)
+      << ms.count() / 1000.0L << "s)";
+  this->CMakeInstance->UpdateProgress(msg.str(), -1);
 }
 
 bool cmGlobalGenerator::ComputeTargetDepends()
