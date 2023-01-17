@@ -354,11 +354,6 @@ public:
                                   const std::string& config,
                                   const std::string& fileConfig,
                                   bool genexOutput);
-  void AppendTargetDependsClosure(cmGeneratorTarget const* target,
-                                  cmNinjaOuts& outputs,
-                                  const std::string& config,
-                                  const std::string& fileConfig,
-                                  bool genexOutput, bool omit_self);
 
   void AppendDirectoryForConfig(const std::string& prefix,
                                 const std::string& config,
@@ -615,7 +610,8 @@ private:
       bool GenexOutput;
     };
 
-    std::map<TargetDependsClosureKey, cmNinjaOuts> TargetDependsClosures;
+    std::map<TargetDependsClosureKey, cmNinjaDeps>
+      TargetDependsClosureLocalOutputs;
 
     TargetAliasMap TargetAliases;
 
