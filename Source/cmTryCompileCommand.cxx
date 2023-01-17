@@ -27,6 +27,7 @@ void WriteTryCompileEvent(cmConfigureLog& log, cmMakefile const& mf,
   if (log.IsAnyLogVersionEnabled(LogVersionsWithTryCompileV1)) {
     log.BeginEvent("try_compile-v1");
     log.WriteBacktrace(mf);
+    log.WriteChecks(mf);
     cmCoreTryCompile::WriteTryCompileEventFields(log, compileResult);
     log.EndEvent();
   }
@@ -81,14 +82,15 @@ bool cmTryCompileCommand(std::vector<std::string> const& args,
     return true;
   }
 
-  if (cm::optional<cmTryCompileResult> compileResult =
-        tc.TryCompileCode(arguments, targetType)) {
+  cm::optional<cmTryCompileResult> compileResult =
+    tc.TryCompileCode(arguments, targetType);
 #ifndef CMAKE_BOOTSTRAP
+  if (compileResult && !arguments.NoLog) {
     if (cmConfigureLog* log = mf.GetCMakeInstance()->GetConfigureLog()) {
       WriteTryCompileEvent(*log, mf, *compileResult);
     }
-#endif
   }
+#endif
 
   // if They specified clean then we clean up what we can
   if (tc.SrcFileSignature) {

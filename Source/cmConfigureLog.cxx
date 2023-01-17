@@ -17,6 +17,7 @@
 
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
+#include "cmRange.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
@@ -76,6 +77,21 @@ void cmConfigureLog::WriteBacktrace(cmMakefile const& mf)
     }
   }
   this->WriteValue("backtrace"_s, backtrace);
+}
+
+void cmConfigureLog::WriteChecks(cmMakefile const& mf)
+{
+  if (!mf.GetCMakeInstance()->HasCheckInProgress()) {
+    return;
+  }
+  this->BeginObject("checks"_s);
+  for (auto const& value :
+       cmReverseRange(mf.GetCMakeInstance()->GetCheckInProgressMessages())) {
+    this->BeginLine() << "- ";
+    this->Encoder->write(value, &this->Stream);
+    this->EndLine();
+  }
+  this->EndObject();
 }
 
 void cmConfigureLog::EnsureInit()

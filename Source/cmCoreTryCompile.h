@@ -21,6 +21,8 @@ class cmRange;
 
 struct cmTryCompileResult
 {
+  cm::optional<std::string> LogDescription;
+
   std::string SourceDirectory;
   std::string BinaryDirectory;
 
@@ -71,7 +73,9 @@ public:
     cm::optional<std::string> OutputVariable;
     cm::optional<std::string> CopyFileTo;
     cm::optional<std::string> CopyFileError;
+    cm::optional<ArgumentParser::NonEmpty<std::string>> LogDescription;
     bool NoCache = false;
+    bool NoLog = false;
 
     // Argument for try_run only.
     // Keep in sync with warnings in cmCoreTryCompile::ParseArgs.
