@@ -217,6 +217,7 @@ struct cmCTest::Private
   std::map<std::string, std::string> Definitions;
 
   cmCTest::NoTests NoTestsMode = cmCTest::NoTests::Legacy;
+  bool NoTestsModeSetInCli = false;
 };
 
 struct tm* cmCTest::GetNightlyTime(std::string const& str, bool tomorrowtag)
@@ -2132,6 +2133,7 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
     } else {
       this->Impl->NoTestsMode = cmCTest::NoTests::Ignore;
     }
+    this->Impl->NoTestsModeSetInCli = true;
   }
 
   // options that control what tests are run
@@ -2771,6 +2773,24 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
     if (cmSystemTools::GetEnv("CTEST_PARALLEL_LEVEL", parallel)) {
       int plevel = atoi(parallel.c_str());
       this->SetParallelLevel(plevel);
+    }
+  }
+
+  // handle CTEST_NO_TESTS_ACTION environment variable
+  if (!this->Impl->NoTestsModeSetInCli) {
+    std::string action;
+    if (cmSystemTools::GetEnv("CTEST_NO_TESTS_ACTION", action) &&
+        !action.empty()) {
+      if (action == "error"_s) {
+        this->Impl->NoTestsMode = cmCTest::NoTests::Error;
+      } else if (action == "ignore"_s) {
+        this->Impl->NoTestsMode = cmCTest::NoTests::Ignore;
+      } else {
+        cmCTestLog(this, ERROR_MESSAGE,
+                   "Unknown value for CTEST_NO_TESTS_ACTION: '" << action
+                                                                << '\'');
+        return 1;
+      }
     }
   }
 

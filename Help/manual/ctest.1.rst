@@ -435,6 +435,11 @@ Run Tests
  unifies the behavior of CTest by either returning an error code if no tests
  were found or by ignoring it.
 
+ .. versionadded:: 3.26
+
+ This option can also be set by setting the :envvar:`CTEST_NO_TESTS_ACTION`
+ environment variable.
+
 View Help
 =========
 
