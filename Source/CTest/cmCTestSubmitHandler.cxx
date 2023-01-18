@@ -718,7 +718,7 @@ int cmCTestSubmitHandler::ProcessHandler()
   cmValue cdashUploadFile = this->GetOption("CDashUploadFile");
   cmValue cdashUploadType = this->GetOption("CDashUploadType");
   if (cdashUploadFile && cdashUploadType) {
-    return this->HandleCDashUploadFile(cdashUploadFile, cdashUploadType);
+    return this->HandleCDashUploadFile(*cdashUploadFile, *cdashUploadType);
   }
 
   const std::string& buildDirectory =

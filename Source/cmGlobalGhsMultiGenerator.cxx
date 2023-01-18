@@ -100,10 +100,10 @@ bool cmGlobalGhsMultiGenerator::SetGeneratorToolset(std::string const& ts,
   cmValue prevTool = mf->GetDefinition("CMAKE_MAKE_PROGRAM");
 
   /* check if the toolset changed from last generate */
-  if (cmNonempty(prevTool) && !cmSystemTools::ComparePath(gbuild, prevTool)) {
+  if (cmNonempty(prevTool) && !cmSystemTools::ComparePath(gbuild, *prevTool)) {
     std::string const& e =
       cmStrCat("toolset build tool: ", gbuild,
-               "\nDoes not match the previously used build tool: ", prevTool,
+               "\nDoes not match the previously used build tool: ", *prevTool,
                "\nEither remove the CMakeCache.txt file and CMakeFiles "
                "directory or choose a different binary directory.");
     mf->IssueMessage(MessageType::FATAL_ERROR, e);
@@ -354,7 +354,7 @@ void cmGlobalGhsMultiGenerator::WriteProjectLine(
    * unsupported target type and should be skipped.
    */
   if (projFile && projType) {
-    std::string path = cmSystemTools::RelativePath(rootBinaryDir, projFile);
+    std::string path = cmSystemTools::RelativePath(rootBinaryDir, *projFile);
 
     fout << path;
     fout << ' ' << *projType << '\n';

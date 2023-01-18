@@ -363,10 +363,10 @@ void cmCTestTestHandler::PopulateCustomVectors(cmMakefile* mf)
 
   cmValue dval = mf->GetDefinition("CTEST_CUSTOM_TEST_OUTPUT_TRUNCATION");
   if (dval) {
-    if (!this->SetTestOutputTruncation(dval)) {
+    if (!this->SetTestOutputTruncation(*dval)) {
       cmCTestLog(this->CTest, ERROR_MESSAGE,
                  "Invalid value for CTEST_CUSTOM_TEST_OUTPUT_TRUNCATION: "
-                   << dval << std::endl);
+                   << *dval << std::endl);
     }
   }
 }
@@ -520,7 +520,7 @@ bool cmCTestTestHandler::ProcessOptions()
   if (cmValue repeat = this->GetOption("Repeat")) {
     cmsys::RegularExpression repeatRegex(
       "^(UNTIL_FAIL|UNTIL_PASS|AFTER_TIMEOUT):([0-9]+)$");
-    if (repeatRegex.find(repeat)) {
+    if (repeatRegex.find(*repeat)) {
       std::string const& count = repeatRegex.match(2);
       unsigned long n = 1;
       cmStrToULong(count, &n); // regex guarantees success
@@ -537,12 +537,13 @@ bool cmCTestTestHandler::ProcessOptions()
       }
     } else {
       cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "Repeat option invalid value: " << repeat << std::endl);
+                 "Repeat option invalid value: " << *repeat << std::endl);
       return false;
     }
   }
   if (this->GetOption("ParallelLevel")) {
-    this->CTest->SetParallelLevel(std::stoi(this->GetOption("ParallelLevel")));
+    this->CTest->SetParallelLevel(
+      std::stoi(*this->GetOption("ParallelLevel")));
   }
 
   if (this->GetOption("StopOnFailure")) {
@@ -556,12 +557,12 @@ bool cmCTestTestHandler::ProcessOptions()
   cmValue val = this->GetOption("IncludeRegularExpression");
   if (val) {
     this->UseIncludeRegExp();
-    this->SetIncludeRegExp(val);
+    this->SetIncludeRegExp(*val);
   }
   val = this->GetOption("ExcludeRegularExpression");
   if (val) {
     this->UseExcludeRegExp();
-    this->SetExcludeRegExp(val);
+    this->SetExcludeRegExp(*val);
   }
   val = this->GetOption("ExcludeFixtureRegularExpression");
   if (val) {
@@ -2110,9 +2111,9 @@ void cmCTestTestHandler::SetTestsToRunInformation(cmValue in)
   this->TestsToRunString = *in;
   // if the argument is a file, then read it and use the contents as the
   // string
-  if (cmSystemTools::FileExists(in)) {
+  if (cmSystemTools::FileExists(*in)) {
     cmsys::ifstream fin(in->c_str());
-    unsigned long filelen = cmSystemTools::FileLength(in);
+    unsigned long filelen = cmSystemTools::FileLength(*in);
     auto buff = cm::make_unique<char[]>(filelen + 1);
     fin.getline(buff.get(), filelen);
     buff[fin.gcount()] = 0;

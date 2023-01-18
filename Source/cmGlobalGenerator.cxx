@@ -947,7 +947,7 @@ void cmGlobalGenerator::PrintCompilerAdvice(std::ostream& os,
   // Subclasses override this method if they do not support this advice.
   os << "Tell CMake where to find the compiler by setting ";
   if (envVar) {
-    os << "either the environment variable \"" << envVar << "\" or ";
+    os << "either the environment variable \"" << *envVar << "\" or ";
   }
   os << "the CMake cache entry CMAKE_" << lang
      << "_COMPILER "

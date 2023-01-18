@@ -168,7 +168,7 @@ void cmGlobalVisualStudio71Generator::WriteExternalProject(
   cmValue typeGuid, const std::set<BT<std::pair<std::string, bool>>>& depends)
 {
   fout << "Project(\"{"
-       << (typeGuid ? typeGuid
+       << (typeGuid ? *typeGuid
                     : std::string(
                         cmGlobalVisualStudio71Generator::ExternalProjectType(
                           location)))

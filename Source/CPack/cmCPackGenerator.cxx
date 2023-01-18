@@ -91,7 +91,7 @@ int cmCPackGenerator::PrepareNames()
                   "CPACK_PACKAGE_FILE_NAME not specified" << std::endl);
     return 0;
   }
-  std::string outName = pfname;
+  std::string outName = *pfname;
   tempDirectory += "/" + outName;
   if (!this->GetOutputExtension()) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -106,7 +106,7 @@ int cmCPackGenerator::PrepareNames()
     return 0;
   }
 
-  std::string destFile = pdir;
+  std::string destFile = *pdir;
   this->SetOptionIfNotSet("CPACK_OUTPUT_FILE_PREFIX", destFile);
   destFile += "/" + outName;
   std::string outFile = topDirectory + "/" + outName;
@@ -126,17 +126,17 @@ int cmCPackGenerator::PrepareNames()
   cmValue descFileName = this->GetOption("CPACK_PACKAGE_DESCRIPTION_FILE");
   if (descFileName && !this->GetOption("CPACK_PACKAGE_DESCRIPTION")) {
     cmCPackLogger(cmCPackLog::LOG_DEBUG,
-                  "Look for: " << descFileName << std::endl);
-    if (!cmSystemTools::FileExists(descFileName)) {
+                  "Look for: " << *descFileName << std::endl);
+    if (!cmSystemTools::FileExists(*descFileName)) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
                     "Cannot find description file name: ["
-                      << descFileName << "]" << std::endl);
+                      << *descFileName << "]" << std::endl);
       return 0;
     }
     cmsys::ifstream ifs(descFileName->c_str());
     if (!ifs) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
-                    "Cannot open description file name: " << descFileName
+                    "Cannot open description file name: " << *descFileName
                                                           << std::endl);
       return 0;
     }
@@ -144,14 +144,14 @@ int cmCPackGenerator::PrepareNames()
     std::string line;
 
     cmCPackLogger(cmCPackLog::LOG_VERBOSE,
-                  "Read description file: " << descFileName << std::endl);
+                  "Read description file: " << *descFileName << std::endl);
     while (ifs && cmSystemTools::GetLineFromStream(ifs, line)) {
       ostr << cmXMLSafe(line) << std::endl;
     }
     this->SetOption("CPACK_PACKAGE_DESCRIPTION", ostr.str());
     cmValue defFileName =
       this->GetOption("CPACK_DEFAULT_PACKAGE_DESCRIPTION_FILE");
-    if (defFileName && (defFileName == descFileName)) {
+    if (defFileName && (*defFileName == *descFileName)) {
       this->SetOption("CPACK_USED_DEFAULT_PACKAGE_DESCRIPTION_FILE", "ON");
     }
   }
@@ -636,7 +636,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
 
       std::unique_ptr<cmGlobalGenerator> globalGenerator =
         this->MakefileMap->GetCMakeInstance()->CreateGlobalGenerator(
-          cmakeGenerator);
+          *cmakeGenerator);
       if (!globalGenerator) {
         cmCPackLogger(cmCPackLog::LOG_ERROR,
                       "Specified package generator not found. "
@@ -1050,14 +1050,14 @@ int cmCPackGenerator::DoPackage()
 
   if (cmIsOn(this->GetOption("CPACK_REMOVE_TOPLEVEL_DIRECTORY"))) {
     cmValue toplevelDirectory = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
-    if (cmSystemTools::FileExists(toplevelDirectory)) {
+    if (toplevelDirectory && cmSystemTools::FileExists(*toplevelDirectory)) {
       cmCPackLogger(cmCPackLog::LOG_VERBOSE,
-                    "Remove toplevel directory: " << toplevelDirectory
+                    "Remove toplevel directory: " << *toplevelDirectory
                                                   << std::endl);
-      if (!cmSystemTools::RepeatedRemoveDirectory(toplevelDirectory)) {
+      if (!cmSystemTools::RepeatedRemoveDirectory(*toplevelDirectory)) {
         cmCPackLogger(cmCPackLog::LOG_ERROR,
                       "Problem removing toplevel directory: "
-                        << toplevelDirectory << std::endl);
+                        << *toplevelDirectory << std::endl);
         return 0;
       }
     }
@@ -1091,10 +1091,10 @@ int cmCPackGenerator::DoPackage()
                 "Package files to: "
                   << (tempPackageFileName ? *tempPackageFileName : "(NULL)")
                   << std::endl);
-  if (cmSystemTools::FileExists(tempPackageFileName)) {
+  if (tempPackageFileName && cmSystemTools::FileExists(*tempPackageFileName)) {
     cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                   "Remove old package file" << std::endl);
-    cmSystemTools::RemoveFile(tempPackageFileName);
+    cmSystemTools::RemoveFile(*tempPackageFileName);
   }
   if (cmIsOn(this->GetOption("CPACK_INCLUDE_TOPLEVEL_DIRECTORY"))) {
     tempDirectory = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
@@ -1211,7 +1211,7 @@ int cmCPackGenerator::Initialize(const std::string& name, cmMakefile* mf)
   // Load the project specific config file
   cmValue config = this->GetOption("CPACK_PROJECT_CONFIG_FILE");
   if (config) {
-    mf->ReadListFile(config);
+    mf->ReadListFile(*config);
   }
   int result = this->InitializeInternal();
   if (cmSystemTools::GetErrorOccurredFlag()) {
@@ -1581,7 +1581,7 @@ cmCPackComponent* cmCPackGenerator::GetComponent(
 
     cmValue groupName = this->GetOption(macroPrefix + "_GROUP");
     if (cmNonempty(groupName)) {
-      component->Group = this->GetComponentGroup(projectName, groupName);
+      component->Group = this->GetComponentGroup(projectName, *groupName);
       component->Group->Components.push_back(component);
     } else {
       component->Group = nullptr;
@@ -1644,7 +1644,7 @@ cmCPackComponentGroup* cmCPackGenerator::GetComponentGroup(
     cmValue parentGroupName = this->GetOption(macroPrefix + "_PARENT_GROUP");
     if (cmNonempty(parentGroupName)) {
       group->ParentGroup =
-        this->GetComponentGroup(projectName, parentGroupName);
+        this->GetComponentGroup(projectName, *parentGroupName);
       group->ParentGroup->Subgroups.push_back(group);
     } else {
       group->ParentGroup = nullptr;
