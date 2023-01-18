@@ -40,7 +40,7 @@ Example to format files modified by the most recent commit:
 
     Utilities/Scripts/clang-format.bash --amend
 
-Example to format all files:
+Example to format all files tracked by Git:
 
     Utilities/Scripts/clang-format.bash --tracked
 
@@ -115,10 +115,8 @@ esac
 $git_ls |
 
   # Select sources with our attribute.
-  git check-attr --stdin format.clang-format-6.0 |
-  grep -e ': format\.clang-format-6\.0: set$'     |
-  sed -n 's/:[^:]*:[^:]*$//p'                |
+  git check-attr --stdin format.clang-format |
+    sed -n '/: format\.clang-format: \(set\|6\.0\)$/ {s/:[^:]*:[^:]*$//p}'  |
 
   # Update sources in-place.
-  tr '\n' '\0'                               |
-  xargs -0 "$clang_format" -i
+  xargs -d '\n' "$clang_format" -i
