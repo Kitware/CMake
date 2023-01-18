@@ -42,6 +42,11 @@ below for the meaning of other options.
   Previously this was only done by the
   :ref:`source file <Try Compiling Source Files>` signature.
 
+.. versionadded:: 3.26
+  This command records a
+  :ref:`configure-log try_compile event <try_compile configure-log event>`
+  if the ``NO_LOG`` option is not specified.
+
 This command also supports an alternate signature
 which was present in older versions of CMake:
 

@@ -131,6 +131,8 @@ The keys common to all events are:
 Additional mapping keys are specific to each (versioned) event kind,
 described below.
 
+.. _`try_compile configure-log event`:
+
 Event Kind ``try_compile``
 --------------------------
 
@@ -203,6 +205,8 @@ The keys specific to ``try_compile-v1`` mappings are:
   ``exitCode``
     An integer specifying the build tool exit code from trying
     to build the test project.
+
+.. _`try_run configure-log event`:
 
 Event Kind ``try_run``
 ----------------------
