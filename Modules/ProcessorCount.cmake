@@ -22,9 +22,17 @@ This function is guaranteed to return a positive integer (>=1) if it
 succeeds.  It returns 0 if there's a problem determining the processor
 count.
 
+More generally accurate physical CPU count can be obtained via
+:command:`cmake_host_system_information`:
+
+.. code-block:: cmake
+
+  cmake_host_system_information(RESULT N
+                                QUERY NUMBER_OF_PHYSICAL_CORES)
+
 Example use, in a ctest -S dashboard script:
 
-::
+.. code-block:: cmake
 
    include(ProcessorCount)
    ProcessorCount(N)
@@ -32,8 +40,6 @@ Example use, in a ctest -S dashboard script:
      set(CTEST_BUILD_FLAGS -j${N})
      set(ctest_test_args ${ctest_test_args} PARALLEL_LEVEL ${N})
    endif()
-
-
 
 This function is intended to offer an approximation of the value of
 the number of compute cores available on the current machine, such
