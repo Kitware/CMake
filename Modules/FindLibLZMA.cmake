@@ -117,7 +117,7 @@ if (LIBLZMA_FOUND)
     if(NOT TARGET LibLZMA::LibLZMA)
         add_library(LibLZMA::LibLZMA UNKNOWN IMPORTED)
         set_target_properties(LibLZMA::LibLZMA PROPERTIES
-                              INTERFACE_INCLUDE_DIRECTORIES ${LIBLZMA_INCLUDE_DIR}
+                              INTERFACE_INCLUDE_DIRECTORIES "${LIBLZMA_INCLUDE_DIR}"
                               IMPORTED_LINK_INTERFACE_LANGUAGES C)
 
         if(LIBLZMA_LIBRARY_RELEASE)
