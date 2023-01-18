@@ -56,8 +56,6 @@ add_custom_target(checksayhello ALL
   )
 add_dependencies(checksayhello sayhello)
 
-set(err_log ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log)
-file(REMOVE "${err_log}")
 include(CheckFortranSourceCompiles)
 unset(HAVE_PRINT CACHE)
 CHECK_Fortran_SOURCE_COMPILES([[
@@ -66,10 +64,24 @@ CHECK_Fortran_SOURCE_COMPILES([[
       END
 ]] HAVE_PRINT)
 if(NOT HAVE_PRINT)
-  if(EXISTS "${err_log}")
-    file(READ "${err_log}" err)
+  set(configure_log "${CMAKE_BINARY_DIR}/CMakeFiles/CMakeConfigureLog.yaml")
+  if(EXISTS "${configure_log}")
+    file(READ "${configure_log}" log_content)
+  else()
+    set(log_content "")
   endif()
-  string(REPLACE "\n" "\n  " err "  ${err}")
+  if(log_content MATCHES [[(  -
+    kind: "try_compile-v1"(
++    [^
+]+)+
+    checks:
+      - "Performing Test HAVE_PRINT"(
++    [^
+]+)+)]])
+    set(err "${CMAKE_MATCH_1}")
+  else()
+    set(err "")
+  endif()
   message(SEND_ERROR "CHECK_Fortran_SOURCE_COMPILES for HAVE_PRINT failed:\n"
     "${err}")
 endif()
