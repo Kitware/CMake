@@ -45,6 +45,8 @@ run_cmake(ProjectCopyFile)
 run_cmake(NonSourceCopyFile)
 run_cmake(NonSourceCompileDefinitions)
 
+run_cmake(Verbose)
+
 set(RunCMake_TEST_OPTIONS --debug-trycompile)
 run_cmake(PlatformVariables)
 run_cmake(WarnDeprecated)
