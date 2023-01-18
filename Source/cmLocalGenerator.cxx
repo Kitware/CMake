@@ -1408,7 +1408,7 @@ void cmLocalGenerator::GetDeviceLinkFlags(
                               linkPath);
   }
 
-  // iterate link deps and see if any of them need IPO
+  this->AddVisibilityPresetFlags(linkFlags, target, "CUDA");
 
   std::vector<std::string> linkOpts;
   target->GetLinkOptions(linkOpts, config, "CUDA");
