@@ -30,12 +30,13 @@ void CatchShow::setCallback(F&& func)
   this->m_callback = [this, func](QObject* obj) {
     auto* d = qobject_cast<T*>(obj);
     if (d) {
-      QMetaObject::invokeMethod(obj,
-                                [this, func, d]() {
-                                  ++this->m_count;
-                                  func(d);
-                                },
-                                Qt::QueuedConnection);
+      QMetaObject::invokeMethod(
+        obj,
+        [this, func, d]() {
+          ++this->m_count;
+          func(d);
+        },
+        Qt::QueuedConnection);
     }
   };
 }

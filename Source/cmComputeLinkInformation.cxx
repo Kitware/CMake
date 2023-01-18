@@ -30,7 +30,7 @@
 #include "cmValue.h"
 #include "cmake.h"
 
-//#define CM_COMPUTE_LINK_INFO_DEBUG
+// #define CM_COMPUTE_LINK_INFO_DEBUG
 
 /*
 Notes about linking on various platforms:

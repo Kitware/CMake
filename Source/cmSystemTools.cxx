@@ -3044,7 +3044,7 @@ static cm::optional<bool> SetRPathELF(std::string const& file,
 {
   auto adjustCallback = [newRPath](cm::optional<std::string>& outRPath,
                                    const std::string& inRPath,
-                                   const char* /*se_name*/, std::string *
+                                   const char* /*se_name*/, std::string*
                                    /*emsg*/) -> bool {
     if (inRPath != newRPath) {
       outRPath = newRPath;

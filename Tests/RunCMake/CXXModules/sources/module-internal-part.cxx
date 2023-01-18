@@ -1,3 +1,3 @@
-module M : internal_part;
+module M:internal_part;
 
 int i();

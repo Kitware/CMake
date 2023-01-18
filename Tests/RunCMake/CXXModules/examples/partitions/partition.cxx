@@ -1,4 +1,4 @@
-export module importable : partition;
+export module importable:partition;
 
 #include "partitions_export.h"
 

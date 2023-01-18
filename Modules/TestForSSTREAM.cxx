@@ -1,5 +1,5 @@
 #include <sstream>
-int main(int, char* [])
+int main(int, char*[])
 {
   std::ostringstream os;
   os << "12345";

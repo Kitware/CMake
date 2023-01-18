@@ -14,7 +14,7 @@
   std::cout << "FAILED: " << (m) << "\n";                                     \
   failed = 1
 
-int testFindPackageCommand(int /*unused*/, char* /*unused*/ [])
+int testFindPackageCommand(int /*unused*/, char* /*unused*/[])
 {
   int failed = 0;
 

@@ -969,7 +969,7 @@ bool testNonMemberFunctions()
 }
 }
 
-int testCMFilesystemPath(int /*unused*/, char* /*unused*/ [])
+int testCMFilesystemPath(int /*unused*/, char* /*unused*/[])
 {
   int result = 0;
 

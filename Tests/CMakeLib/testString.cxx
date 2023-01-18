@@ -1163,7 +1163,7 @@ static bool testStability()
   return true;
 }
 
-int testString(int /*unused*/, char* /*unused*/ [])
+int testString(int /*unused*/, char* /*unused*/[])
 {
   if (!testConstructDefault()) {
     return 1;

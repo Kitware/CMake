@@ -15,7 +15,7 @@
     }                                                                         \
   } while (false)
 
-int testRange(int /*unused*/, char* /*unused*/ [])
+int testRange(int /*unused*/, char* /*unused*/[])
 {
   std::vector<int> const testData = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 

@@ -168,9 +168,9 @@ std::string cmGlobalVisualStudio7Generator::FindDevEnvCommand()
   }
 
   // Search where VS15Preview places it.
-  vskey = cmStrCat(
-    R"(HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\SxS\VS7;)",
-    this->GetIDEVersion());
+  vskey =
+    cmStrCat(R"(HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\SxS\VS7;)",
+             this->GetIDEVersion());
   if (cmSystemTools::ReadRegistryValue(vskey, vscmd,
                                        cmSystemTools::KeyWOW64_32)) {
     cmSystemTools::ConvertToUnixSlashes(vscmd);

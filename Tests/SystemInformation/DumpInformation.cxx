@@ -53,7 +53,7 @@ void cmDumpInformationPrintFile(const char* name, FILE* fout)
   }
 }
 
-int main(int, char* [])
+int main(int, char*[])
 {
   const char* files[] = {
     DumpInformation_BINARY_DIR "/SystemInformation.out",

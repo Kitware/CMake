@@ -760,7 +760,7 @@ static bool testMemoryRange(std::vector<Event>& expected)
   return true;
 }
 
-int testOptional(int /*unused*/, char* /*unused*/ [])
+int testOptional(int /*unused*/, char* /*unused*/[])
 {
   int retval = 0;
 
