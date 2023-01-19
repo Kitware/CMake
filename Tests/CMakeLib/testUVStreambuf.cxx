@@ -404,12 +404,13 @@ static bool testUVStreambufRead(
               << std::endl;
     goto end;
   }
-  uv_timer_start(timer,
-                 [](uv_timer_t* handle) {
-                   auto buf = static_cast<cmUVStreambuf*>(handle->data);
-                   buf->close();
-                 },
-                 0, 0);
+  uv_timer_start(
+    timer,
+    [](uv_timer_t* handle) {
+      auto buf = static_cast<cmUVStreambuf*>(handle->data);
+      buf->close();
+    },
+    0, 0);
   if ((readLen = inputBuf.sgetn(inputData.data(), 128)) != 0) {
     std::cout << "sgetn() returned " << readLen << ", should be 0"
               << std::endl;

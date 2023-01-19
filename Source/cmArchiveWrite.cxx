@@ -68,7 +68,7 @@ public:
   ~Entry() { archive_entry_free(this->Object); }
   Entry(const Entry&) = delete;
   Entry& operator=(const Entry&) = delete;
-  operator struct archive_entry*() { return this->Object; }
+  operator struct archive_entry *() { return this->Object; }
 };
 
 struct cmArchiveWrite::Callback

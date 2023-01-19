@@ -55,7 +55,7 @@ bool testReferenceCast()
 }
 }
 
-int testCMExtMemory(int /*unused*/, char* /*unused*/ [])
+int testCMExtMemory(int /*unused*/, char* /*unused*/[])
 {
   if (!testReferenceCast()) {
     return 1;

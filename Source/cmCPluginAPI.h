@@ -201,7 +201,7 @@ typedef const char*(CCONV* CM_DOC_FUNCTION)();
 
 /* NOLINTNEXTLINE(modernize-use-using) */
 typedef int(CCONV* CM_INITIAL_PASS_FUNCTION)(void* info, void* mf, int argc,
-                                             char* []);
+                                             char*[]);
 
 /* NOLINTNEXTLINE(modernize-use-using) */
 typedef void(CCONV* CM_FINAL_PASS_FUNCTION)(void* info, void* mf);

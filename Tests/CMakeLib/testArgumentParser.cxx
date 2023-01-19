@@ -365,7 +365,7 @@ bool testArgumentParserStaticBool()
 
 } // namespace
 
-int testArgumentParser(int /*unused*/, char* /*unused*/ [])
+int testArgumentParser(int /*unused*/, char* /*unused*/[])
 {
   if (!testArgumentParserDynamic()) {
     std::cout << "While executing testArgumentParserDynamic().\n";

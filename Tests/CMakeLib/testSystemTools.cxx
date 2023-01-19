@@ -25,7 +25,7 @@
     }                                                                         \
   } while (false)
 
-int testSystemTools(int /*unused*/, char* /*unused*/ [])
+int testSystemTools(int /*unused*/, char* /*unused*/[])
 {
   int failed = 0;
   // ----------------------------------------------------------------------

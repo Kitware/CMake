@@ -1,3 +1,3 @@
-export module M : part;
+export module M:part;
 
 int p();

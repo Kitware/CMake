@@ -433,4 +433,4 @@ QComboBox* Window::createColorComboBox()
   return comboBox;
 }
 
-//#include "moc_calwidget.cpp"
+// #include "moc_calwidget.cpp"

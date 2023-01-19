@@ -14,7 +14,7 @@
 
 #include "cmStringAlgorithms.h"
 
-int testStringAlgorithms(int /*unused*/, char* /*unused*/ [])
+int testStringAlgorithms(int /*unused*/, char* /*unused*/[])
 {
   int failed = 0;
 

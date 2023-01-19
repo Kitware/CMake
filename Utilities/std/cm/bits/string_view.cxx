@@ -82,8 +82,8 @@ int string_view::compare(size_type pos1, size_type count1, const char* s,
   return substr(pos1, count1).compare(string_view(s, count2));
 }
 
-string_view::size_type string_view::find(string_view v, size_type pos) const
-  noexcept
+string_view::size_type string_view::find(string_view v,
+                                         size_type pos) const noexcept
 {
   for (; pos + v.size_ <= size_; ++pos) {
     if (std::char_traits<char>::compare(data_ + pos, v.data_, v.size_) == 0) {
@@ -109,8 +109,8 @@ string_view::size_type string_view::find(const char* s, size_type pos) const
   return find(string_view(s), pos);
 }
 
-string_view::size_type string_view::rfind(string_view v, size_type pos) const
-  noexcept
+string_view::size_type string_view::rfind(string_view v,
+                                          size_type pos) const noexcept
 {
   if (size_ >= v.size_) {
     for (pos = std::min(pos, size_ - v.size_) + 1; pos > 0;) {
@@ -151,8 +151,8 @@ string_view::size_type string_view::find_first_of(string_view v,
   return npos;
 }
 
-string_view::size_type string_view::find_first_of(char c, size_type pos) const
-  noexcept
+string_view::size_type string_view::find_first_of(char c,
+                                                  size_type pos) const noexcept
 {
   return find_first_of(string_view(&c, 1), pos);
 }
@@ -183,8 +183,8 @@ string_view::size_type string_view::find_last_of(string_view v,
   return npos;
 }
 
-string_view::size_type string_view::find_last_of(char c, size_type pos) const
-  noexcept
+string_view::size_type string_view::find_last_of(char c,
+                                                 size_type pos) const noexcept
 {
   return find_last_of(string_view(&c, 1), pos);
 }
@@ -201,9 +201,8 @@ string_view::size_type string_view::find_last_of(const char* s,
   return find_last_of(string_view(s), pos);
 }
 
-string_view::size_type string_view::find_first_not_of(string_view v,
-                                                      size_type pos) const
-  noexcept
+string_view::size_type string_view::find_first_not_of(
+  string_view v, size_type pos) const noexcept
 {
   for (; pos < size_; ++pos) {
     if (!traits_type::find(v.data_, v.size_, data_[pos])) {
@@ -213,9 +212,8 @@ string_view::size_type string_view::find_first_not_of(string_view v,
   return npos;
 }
 
-string_view::size_type string_view::find_first_not_of(char c,
-                                                      size_type pos) const
-  noexcept
+string_view::size_type string_view::find_first_not_of(
+  char c, size_type pos) const noexcept
 {
   return find_first_not_of(string_view(&c, 1), pos);
 }
@@ -233,9 +231,8 @@ string_view::size_type string_view::find_first_not_of(const char* s,
   return find_first_not_of(string_view(s), pos);
 }
 
-string_view::size_type string_view::find_last_not_of(string_view v,
-                                                     size_type pos) const
-  noexcept
+string_view::size_type string_view::find_last_not_of(
+  string_view v, size_type pos) const noexcept
 {
   if (size_ > 0) {
     for (pos = std::min(pos, size_ - 1) + 1; pos > 0;) {
@@ -248,9 +245,8 @@ string_view::size_type string_view::find_last_not_of(string_view v,
   return npos;
 }
 
-string_view::size_type string_view::find_last_not_of(char c,
-                                                     size_type pos) const
-  noexcept
+string_view::size_type string_view::find_last_not_of(
+  char c, size_type pos) const noexcept
 {
   return find_last_not_of(string_view(&c, 1), pos);
 }

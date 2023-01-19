@@ -39,12 +39,14 @@ constexpr size_t lang_property_start = 0;
 constexpr size_t lang_property_size = 4;
 constexpr size_t pie_property_start = 4;
 constexpr size_t pie_property_size = 2;
+/* clang-format off */
 #define SETUP_LANGUAGE(name, lang)                                            \
   static const std::string name[lang_property_size + pie_property_size + 1] = \
     { "CMAKE_" #lang "_COMPILER_EXTERNAL_TOOLCHAIN",                          \
       "CMAKE_" #lang "_COMPILER_TARGET",                                      \
       "CMAKE_" #lang "_LINK_NO_PIE_SUPPORTED",                                \
       "CMAKE_" #lang "_PIE_SUPPORTED", "" }
+/* clang-format on */
 
 // NOLINTNEXTLINE(bugprone-suspicious-missing-comma)
 SETUP_LANGUAGE(c_properties, C);
