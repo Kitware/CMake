@@ -233,9 +233,6 @@ int main(int argc, char const* const* argv)
   cminst.GetCurrentSnapshot().SetDefaultDefinitions();
   cmGlobalGenerator cmgg(&cminst);
   cmMakefile globalMF(&cmgg, cminst.GetCurrentSnapshot());
-#if defined(__CYGWIN__)
-  globalMF.AddDefinition("CMAKE_LEGACY_CYGWIN_WIN32", "0");
-#endif
 
   bool parsed = true;
   for (std::size_t i = 0; i < inputArgs.size(); i++) {
