@@ -366,9 +366,9 @@ bool RegularExpression::compile(const char* exp)
   }
 
   // Allocate space.
-  //#ifndef _WIN32
+  // #ifndef _WIN32
   delete[] this->program;
-  //#endif
+  // #endif
   this->program = new char[comp.regsize];
   this->progsize = static_cast<int>(comp.regsize);
 
