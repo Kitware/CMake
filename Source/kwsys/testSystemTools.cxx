@@ -1209,7 +1209,7 @@ static bool CheckSplitString()
   return ret;
 }
 
-int testSystemTools(int, char* [])
+int testSystemTools(int, char*[])
 {
   bool res = true;
 

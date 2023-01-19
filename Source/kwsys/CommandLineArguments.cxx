@@ -319,7 +319,7 @@ void CommandLineArguments::DeleteRemainingArguments(int argc, char*** argv)
 {
   int cc;
   for (cc = 0; cc < argc; ++cc) {
-    delete[](*argv)[cc];
+    delete[] (*argv)[cc];
   }
   delete[] * argv;
 }

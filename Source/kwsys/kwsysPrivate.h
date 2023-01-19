@@ -27,7 +27,7 @@
 */
 #  define KWSYS_NAMESPACE_STRING KWSYS_NAMESPACE_STRING0(KWSYS_NAMESPACE)
 #  define KWSYS_NAMESPACE_STRING0(x) KWSYS_NAMESPACE_STRING1(x)
-#  define KWSYS_NAMESPACE_STRING1(x) #  x
+#  define KWSYS_NAMESPACE_STRING1(x) #x
 
 #else
 #  error "kwsysPrivate.h included multiple times."
