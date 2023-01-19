@@ -14,7 +14,7 @@ if(NOT CMAKE_Fortran_COMPILER_WORKS AND NOT CMAKE_Fortran_COMPILER_FORCED)
     string(REGEX REPLACE "/[^/]*$" "" _nag_dir "${_nag_obj}")
     string(REGEX REPLACE "([][+.*()^])" "\\\\\\1" _nag_regex "${_nag_dir}")
     set(CMAKE_Fortran_IMPLICIT_OBJECT_REGEX "^${_nag_regex}/")
-    file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+    message(CONFIGURE_LOG
       "Detecting NAG Fortran directory with -dryrun found\n"
       "  object: ${_nag_obj}\n"
       "  directory: ${_nag_dir}\n"
@@ -22,7 +22,7 @@ if(NOT CMAKE_Fortran_COMPILER_WORKS AND NOT CMAKE_Fortran_COMPILER_FORCED)
       "from output:\n${_dryrun}\n\n")
     message(CHECK_PASS "${_nag_dir}")
   else()
-    file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+    message(CONFIGURE_LOG
       "Detecting NAG Fortran directory with -dryrun failed:\n${_dryrun}\n\n")
     message(CHECK_FAIL "failed")
   endif()

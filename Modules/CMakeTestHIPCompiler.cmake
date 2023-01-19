@@ -59,9 +59,6 @@ if(NOT CMAKE_HIP_COMPILER_WORKS)
   __TestCompiler_restoreTryCompileTargetType()
   if(NOT CMAKE_HIP_COMPILER_WORKS)
     PrintTestCompilerResult(CHECK_FAIL "broken")
-    file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-      "Determining if the HIP compiler works failed with "
-      "the following output:\n${__CMAKE_HIP_COMPILER_OUTPUT}\n\n")
     string(REPLACE "\n" "\n  " _output "${__CMAKE_HIP_COMPILER_OUTPUT}")
     message(FATAL_ERROR "The HIP compiler\n  \"${CMAKE_HIP_COMPILER}\"\n"
       "is not able to compile a simple test program.\nIt fails "
@@ -69,9 +66,6 @@ if(NOT CMAKE_HIP_COMPILER_WORKS)
       "CMake will not be able to correctly generate this project.")
   endif()
   PrintTestCompilerResult(CHECK_PASS "works")
-  file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-    "Determining if the HIP compiler works passed with "
-    "the following output:\n${__CMAKE_HIP_COMPILER_OUTPUT}\n\n")
 endif()
 
 set(CMAKE_HIP_FLAGS "${__CMAKE_HIP_FLAGS}")

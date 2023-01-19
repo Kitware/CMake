@@ -136,10 +136,8 @@ macro(_threads_check_flag_pthread)
       try_compile(THREADS_HAVE_PTHREAD_ARG
         SOURCE_FROM_FILE "${_threads_src}" "${CMAKE_CURRENT_LIST_DIR}/CheckForPthreads.c"
         CMAKE_FLAGS -DLINK_LIBRARIES:STRING=-pthread
-        OUTPUT_VARIABLE _cmake_check_pthreads_output)
+        )
 
-      string(APPEND _cmake_find_threads_output "${_cmake_check_pthreads_output}")
-      unset(_cmake_check_pthreads_output)
       unset(_threads_src)
 
       if(THREADS_HAVE_PTHREAD_ARG)
@@ -239,10 +237,4 @@ if(THREADS_FOUND AND NOT TARGET Threads::Threads)
   if(CMAKE_THREAD_LIBS_INIT)
     set_property(TARGET Threads::Threads PROPERTY INTERFACE_LINK_LIBRARIES "${CMAKE_THREAD_LIBS_INIT}")
   endif()
-elseif(NOT THREADS_FOUND AND _cmake_find_threads_output)
-  file(APPEND
-    ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-    "Determining if compiler accepts -pthread failed with the following output:\n${_cmake_find_threads_output}\n\n")
 endif()
-
-unset(_cmake_find_threads_output)

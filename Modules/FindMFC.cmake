@@ -49,15 +49,9 @@ if(MFC_ATTEMPT_TRY_COMPILE)
     if(MFC_HAVE_MFC)
       message(CHECK_PASS "found")
       set(MFC_HAVE_MFC 1 CACHE INTERNAL "Have MFC?")
-      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-        "Determining if MFC exists passed with the following output:\n"
-        "${OUTPUT}\n\n")
     else()
       message(CHECK_FAIL "not found")
       set(MFC_HAVE_MFC 0 CACHE INTERNAL "Have MFC?")
-      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-        "Determining if MFC exists failed with the following output:\n"
-        "${OUTPUT}\n\n")
     endif()
   endif()
 

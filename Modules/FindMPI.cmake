@@ -1259,9 +1259,16 @@ function(_MPI_try_staged_settings LANG MPI_TEST_FILE_NAME MODE RUN_BINARY SUPPRE
     file(READ "${SRC_DIR}/${MPI_TEST_FILE_NAME}.c" MPI_TEST_SOURCE_CONTENT)
     set(MPI_TEST_SOURCE_FILE "${MPI_TEST_FILE_NAME}.c")
   endif()
+  if(SUPPRESS_ERRORS)
+    set(maybe_no_log NO_LOG)
+  else()
+    set(maybe_no_log "")
+  endif()
   if(RUN_BINARY)
     try_run(MPI_RUN_RESULT_${LANG}_${MPI_TEST_FILE_NAME}_${MODE} MPI_RESULT_${LANG}_${MPI_TEST_FILE_NAME}_${MODE}
       SOURCE_FROM_VAR "${MPI_TEST_SOURCE_FILE}" MPI_TEST_SOURCE_CONTENT
+      ${maybe_no_log}
+      LOG_DESCRIPTION "The MPI test ${MPI_TEST_FILE_NAME} for ${LANG} in mode ${MODE}"
       COMPILE_DEFINITIONS ${MPI_TEST_COMPILE_DEFINITIONS}
       LINK_LIBRARIES MPI::MPI_${LANG}
       RUN_OUTPUT_VARIABLE MPI_RUN_OUTPUT_${LANG}_${MPI_TEST_FILE_NAME}_${MODE}
@@ -1270,19 +1277,12 @@ function(_MPI_try_staged_settings LANG MPI_TEST_FILE_NAME MODE RUN_BINARY SUPPRE
   else()
     try_compile(MPI_RESULT_${LANG}_${MPI_TEST_FILE_NAME}_${MODE}
       SOURCE_FROM_VAR "${MPI_TEST_SOURCE_FILE}" MPI_TEST_SOURCE_CONTENT
+      ${maybe_no_log}
+      LOG_DESCRIPTION "The MPI test ${MPI_TEST_FILE_NAME} for ${LANG} in mode ${MODE}"
       COMPILE_DEFINITIONS ${MPI_TEST_COMPILE_DEFINITIONS}
       LINK_LIBRARIES MPI::MPI_${LANG}
       COPY_FILE "${BIN_FILE}"
       OUTPUT_VARIABLE _MPI_TRY_${MPI_TEST_FILE_NAME}_${MODE}_OUTPUT)
-  endif()
-  if(NOT SUPPRESS_ERRORS)
-    if(NOT MPI_RESULT_${LANG}_${MPI_TEST_FILE_NAME}_${MODE})
-      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-          "The MPI test ${MPI_TEST_FILE_NAME} for ${LANG} in mode ${MODE} failed to compile with the following output:\n${_MPI_TRY_${MPI_TEST_FILE_NAME}_${MODE}_OUTPUT}\n\n")
-    elseif(DEFINED MPI_RUN_RESULT_${LANG}_${MPI_TEST_FILE_NAME}_${MODE} AND MPI_RUN_RESULT_${LANG}_${MPI_TEST_FILE_NAME}_${MODE})
-        file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-          "The MPI test ${MPI_TEST_FILE_NAME} for ${LANG} in mode ${MODE} failed to run with the following output:\n${MPI_RUN_OUTPUT_${LANG}_${MPI_TEST_FILE_NAME}_${MODE}}\n\n")
-    endif()
   endif()
 endfunction()
 

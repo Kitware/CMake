@@ -82,8 +82,6 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
     # Load the resulting information strings.
     if(CMAKE_${lang}_ABI_COMPILED)
       message(CHECK_PASS "done")
-      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-        "Detecting ${lang} compiler ABI info compiled with the following output:\n${OUTPUT}\n\n")
       file(STRINGS "${BIN}" ABI_STRINGS LIMIT_COUNT 32 REGEX "INFO:[A-Za-z0-9_]+\\[[^]]*\\]")
       set(ABI_SIZEOF_DPTR "NOTFOUND")
       set(ABI_BYTE_ORDER "NOTFOUND")
@@ -126,8 +124,8 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
         set (implicit_incdirs "")
         cmake_parse_implicit_include_info("${OUTPUT}" "${lang}"
           implicit_incdirs log rv)
-        file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-          "Parsed ${lang} implicit include dir info from above output: rv=${rv}\n${log}\n\n")
+        message(CONFIGURE_LOG
+          "Parsed ${lang} implicit include dir info: rv=${rv}\n${log}\n\n")
         if("${rv}" STREQUAL "done")
           # Entries that we have been told to explicitly pass as standard include
           # directories will not be implicitly added by the compiler.
@@ -151,8 +149,8 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
           "${CMAKE_${lang}_IMPLICIT_OBJECT_REGEX}"
           COMPUTE_IMPLICIT_OBJECTS implicit_objs
           LANGUAGE ${lang})
-        file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-          "Parsed ${lang} implicit link information from above output:\n${log}\n\n")
+        message(CONFIGURE_LOG
+          "Parsed ${lang} implicit link information:\n${log}\n\n")
       endif()
       # for VS IDE Intel Fortran we have to figure out the
       # implicit link path for the fortran run time using
@@ -195,8 +193,6 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
 
     else()
       message(CHECK_FAIL "failed")
-      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-        "Detecting ${lang} compiler ABI info failed to compile with the following output:\n${OUTPUT}\n${_copy_error}\n\n")
     endif()
   endif()
 endfunction()

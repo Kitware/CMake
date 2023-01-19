@@ -214,6 +214,7 @@ function(_OPENMP_GET_FLAGS LANG FLAG_MODE OPENMP_FLAG_VAR OPENMP_LIB_NAMES_VAR)
     string(REGEX REPLACE "[-/=+]" "" OPENMP_PLAIN_FLAG "${OPENMP_FLAG}")
     try_compile( OpenMP_COMPILE_RESULT_${FLAG_MODE}_${OPENMP_PLAIN_FLAG}
       SOURCE_FROM_VAR "${_OPENMP_TEST_SRC_NAME}" _OPENMP_TEST_SRC_CONTENT
+      LOG_DESCRIPTION "Detecting ${LANG} OpenMP compiler info"
       CMAKE_FLAGS "-DCOMPILE_DEFINITIONS:STRING=${OPENMP_FLAGS_TEST}"
       LINK_LIBRARIES ${CMAKE_${LANG}_VERBOSE_FLAG}
       OUTPUT_VARIABLE OpenMP_TRY_COMPILE_OUTPUT
@@ -228,9 +229,6 @@ function(_OPENMP_GET_FLAGS LANG FLAG_MODE OPENMP_FLAG_VAR OPENMP_LIB_NAMES_VAR)
         unset(OpenMP_${LANG}_IMPLICIT_FWK_DIRS)
         unset(OpenMP_${LANG}_LOG_VAR)
 
-        file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-        "Detecting ${LANG} OpenMP compiler ABI info compiled with the following output:\n${OpenMP_TRY_COMPILE_OUTPUT}\n\n")
-
         cmake_parse_implicit_link_info("${OpenMP_TRY_COMPILE_OUTPUT}"
           OpenMP_${LANG}_IMPLICIT_LIBRARIES
           OpenMP_${LANG}_IMPLICIT_LINK_DIRS
@@ -239,9 +237,6 @@ function(_OPENMP_GET_FLAGS LANG FLAG_MODE OPENMP_FLAG_VAR OPENMP_LIB_NAMES_VAR)
           "${CMAKE_${LANG}_IMPLICIT_OBJECT_REGEX}"
           LANGUAGE ${LANG}
         )
-
-        file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-        "Parsed ${LANG} OpenMP implicit link information from above output:\n${OpenMP_${LANG}_LOG_VAR}\n\n")
 
         # For LCC we should additionally alanyze -print-search-dirs output
         # to check for additional implicit_dirs.
@@ -255,10 +250,13 @@ function(_OPENMP_GET_FLAGS LANG FLAG_MODE OPENMP_FLAG_VAR OPENMP_LIB_NAMES_VAR)
           if("${output_lines}" MATCHES ".*\nlibraries:[ \t]+(.*:)\n.*")
             string(REPLACE ":" ";" implicit_dirs_addon "${CMAKE_MATCH_1}")
             list(PREPEND OpenMP_${LANG}_IMPLICIT_LINK_DIRS ${implicit_dirs_addon})
-            file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+            string(APPEND OpenMP_${LANG}_LOG_VAR
               "  Extended OpenMP library search paths: [${implicit_dirs}]\n")
           endif()
         endif()
+
+        message(CONFIGURE_LOG
+          "Parsed ${LANG} OpenMP implicit link information from above output:\n${OpenMP_${LANG}_LOG_VAR}\n\n")
 
         unset(_OPENMP_LIB_NAMES)
         foreach(_OPENMP_IMPLICIT_LIB IN LISTS OpenMP_${LANG}_IMPLICIT_LIBRARIES)
@@ -312,9 +310,9 @@ function(_OPENMP_GET_FLAGS LANG FLAG_MODE OPENMP_FLAG_VAR OPENMP_LIB_NAMES_VAR)
         # default header search path already.
         try_compile( OpenMP_COMPILE_RESULT_${FLAG_MODE}_${OPENMP_PLAIN_FLAG}
           SOURCE_FROM_VAR "${_OPENMP_TEST_SRC_NAME}" _OPENMP_TEST_SRC_CONTENT
+          LOG_DESCRIPTION "Trying ${LANG} OpenMP compiler with '${OpenMP_libomp_LIBRARY}'"
           CMAKE_FLAGS "-DCOMPILE_DEFINITIONS:STRING=${OPENMP_FLAGS_TEST}"
           LINK_LIBRARIES ${CMAKE_${LANG}_VERBOSE_FLAG} ${OpenMP_libomp_LIBRARY}
-          OUTPUT_VARIABLE OpenMP_TRY_COMPILE_OUTPUT
         )
         if(NOT OpenMP_COMPILE_RESULT_${FLAG_MODE}_${OPENMP_PLAIN_FLAG})
           find_path(OpenMP_${LANG}_INCLUDE_DIR omp.h)
@@ -323,10 +321,10 @@ function(_OPENMP_GET_FLAGS LANG FLAG_MODE OPENMP_FLAG_VAR OPENMP_LIB_NAMES_VAR)
           if(OpenMP_${LANG}_INCLUDE_DIR)
             try_compile( OpenMP_COMPILE_RESULT_${FLAG_MODE}_${OPENMP_PLAIN_FLAG}
               SOURCE_FROM_VAR "${_OPENMP_TEST_SRC_NAME}" _OPENMP_TEST_SRC_CONTENT
+              LOG_DESCRIPTION "Trying ${LANG} OpenMP compiler with '${OpenMP_libomp_LIBRARY}' and '${OpenMP_${LANG}_INCLUDE_DIR}'"
               CMAKE_FLAGS "-DCOMPILE_DEFINITIONS:STRING=${OPENMP_FLAGS_TEST}"
                           "-DINCLUDE_DIRECTORIES:STRING=${OpenMP_${LANG}_INCLUDE_DIR}"
               LINK_LIBRARIES ${CMAKE_${LANG}_VERBOSE_FLAG} ${OpenMP_libomp_LIBRARY}
-              OUTPUT_VARIABLE OpenMP_TRY_COMPILE_OUTPUT
             )
           endif()
         endif()
@@ -346,9 +344,9 @@ function(_OPENMP_GET_FLAGS LANG FLAG_MODE OPENMP_FLAG_VAR OPENMP_LIB_NAMES_VAR)
       if(OpenMP_libomp_LIBRARY)
         try_compile( OpenMP_COMPILE_RESULT_${FLAG_MODE}_${OPENMP_PLAIN_FLAG}
           SOURCE_FROM_VAR "${_OPENMP_TEST_SRC_NAME}" _OPENMP_TEST_SRC_CONTENT
+          LOG_DESCRIPTION "Trying ${LANG} OpenMP compiler with '${OpenMP_libomp_LIBRARY}'"
           CMAKE_FLAGS "-DCOMPILE_DEFINITIONS:STRING=${OPENMP_FLAGS_TEST}"
           LINK_LIBRARIES ${CMAKE_${LANG}_VERBOSE_FLAG} ${OpenMP_libomp_LIBRARY}
-          OUTPUT_VARIABLE OpenMP_TRY_COMPILE_OUTPUT
         )
         if(OpenMP_COMPILE_RESULT_${FLAG_MODE}_${OPENMP_PLAIN_FLAG})
           set("${OPENMP_FLAG_VAR}" "${OPENMP_FLAG}" PARENT_SCOPE)
@@ -356,9 +354,6 @@ function(_OPENMP_GET_FLAGS LANG FLAG_MODE OPENMP_FLAG_VAR OPENMP_LIB_NAMES_VAR)
           break()
         endif()
       endif()
-    else()
-      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-        "Detecting ${LANG} OpenMP failed with the following output:\n${OpenMP_TRY_COMPILE_OUTPUT}\n\n")
     endif()
     set("${OPENMP_LIB_NAMES_VAR}" "NOTFOUND" PARENT_SCOPE)
     set("${OPENMP_FLAG_VAR}" "NOTFOUND" PARENT_SCOPE)
@@ -419,9 +414,10 @@ function(_OPENMP_GET_SPEC_DATE LANG SPEC_DATE)
   string(REGEX REPLACE "[-/=+]" "" OPENMP_PLAIN_FLAG "${OPENMP_FLAG}")
   try_compile(OpenMP_SPECTEST_${LANG}_${OPENMP_PLAIN_FLAG}
     SOURCE_FROM_VAR "${_OPENMP_TEST_SRC_NAME}" _OPENMP_TEST_SRC_CONTENT
+    LOG_DESCRIPTION "Detecting ${LANG} OpenMP version"
     CMAKE_FLAGS "-DCOMPILE_DEFINITIONS:STRING=${OpenMP_${LANG}_FLAGS}" ${_includeDirFlags}
     COPY_FILE "${BIN_FILE}"
-    OUTPUT_VARIABLE OpenMP_TRY_COMPILE_OUTPUT)
+    )
 
   if(${OpenMP_SPECTEST_${LANG}_${OPENMP_PLAIN_FLAG}})
     file(STRINGS ${BIN_FILE} specstr LIMIT_COUNT 1 REGEX "INFO:OpenMP-date")
@@ -429,9 +425,6 @@ function(_OPENMP_GET_SPEC_DATE LANG SPEC_DATE)
     if("${specstr}" MATCHES "${regex_spec_date}")
       set(${SPEC_DATE} "${CMAKE_MATCH_1}" PARENT_SCOPE)
     endif()
-  else()
-    file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-        "Detecting ${LANG} OpenMP version failed with the following output:\n${OpenMP_TRY_COMPILE_OUTPUT}\n\n")
   endif()
 endfunction()
 
