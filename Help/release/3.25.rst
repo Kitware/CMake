@@ -253,3 +253,7 @@ Changes made since CMake 3.25.0 include the following.
 
 * CUDA language level 20 (corresponding to C++20) is now supported with
   NVCC 12.0 and above.
+
+* On Windows, the ``icpx`` compiler now provided by Intel oneAPI 2023.0
+  and above is no longer selected because its GNU-like command-line is
+  not yet supported by CMake.
