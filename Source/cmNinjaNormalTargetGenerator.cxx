@@ -1228,16 +1228,14 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
   if (!this->SetMsvcTargetPdbVariable(vars, config)) {
     // It is common to place debug symbols at a specific place,
     // so we need a plain target name in the rule available.
-    std::string prefix;
-    std::string base;
-    std::string suffix;
-    gt->GetFullNameComponents(prefix, base, suffix, config);
+    cmGeneratorTarget::NameComponents const& components =
+      gt->GetFullNameComponents(config);
     std::string dbg_suffix = ".dbg";
     // TODO: Where to document?
     if (cmValue d = mf->GetDefinition("CMAKE_DEBUG_SYMBOL_SUFFIX")) {
       dbg_suffix = *d;
     }
-    vars["TARGET_PDB"] = base + suffix + dbg_suffix;
+    vars["TARGET_PDB"] = components.base + components.suffix + dbg_suffix;
   }
 
   const std::string objPath =
