@@ -157,7 +157,8 @@ private:
                           std::string const& additional_inputs,
                           std::string const& outputs,
                           std::string const& comment,
-                          cmCustomCommandGenerator const& ccg, bool symbolic);
+                          cmCustomCommandGenerator const& ccg, bool symbolic,
+                          bool uses_terminal);
   void WriteCustomRuleCSharp(Elem& e0, std::string const& config,
                              std::string const& commandName,
                              std::string const& script,

@@ -1498,6 +1498,17 @@ bool cmGlobalVisualStudio10Generator::IsMsBuildRestoreSupported() const
           cmSystemTools::VersionCompareGreaterEq(*vsVer, vsVer15_7_5));
 }
 
+bool cmGlobalVisualStudio10Generator::IsBuildInParallelSupported() const
+{
+  if (this->Version >= VSVersion::VS16) {
+    return true;
+  }
+
+  static std::string const vsVer15_8_0 = "15.8.27705.0";
+  cm::optional<std::string> vsVer = this->GetVSInstanceVersion();
+  return (vsVer &&
+          cmSystemTools::VersionCompareGreaterEq(*vsVer, vsVer15_8_0));
+}
 std::string cmGlobalVisualStudio10Generator::GetClFlagTableName() const
 {
   std::string const& toolset = this->GetPlatformToolsetString();
