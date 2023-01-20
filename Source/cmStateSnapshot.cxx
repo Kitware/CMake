@@ -301,14 +301,6 @@ void cmStateSnapshot::SetDefaultDefinitions()
     this->SetDefinition("UNIX", "1");
     this->SetDefinition("CMAKE_HOST_UNIX", "1");
   }
-#if defined(__CYGWIN__)
-  std::string legacy;
-  if (cmSystemTools::GetEnv("CMAKE_LEGACY_CYGWIN_WIN32", legacy) &&
-      cmIsOn(legacy)) {
-    this->SetDefinition("WIN32", "1");
-    this->SetDefinition("CMAKE_HOST_WIN32", "1");
-  }
-#endif
 #if defined(__APPLE__)
   this->SetDefinition("APPLE", "1");
   this->SetDefinition("CMAKE_HOST_APPLE", "1");
