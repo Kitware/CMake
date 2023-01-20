@@ -1,4 +1,4 @@
-FROM nvidia/cuda:11.6.0-devel-ubuntu20.04
+FROM kitware/nvidia-cuda:11.6.0-devel-ubuntu20.04
 MAINTAINER Ben Boeckel <ben.boeckel@kitware.com>
 
 COPY llvm.list /etc/apt/sources.list.d/llvm.list
