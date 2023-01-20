@@ -644,14 +644,7 @@ std::vector<std::string> cmNinjaNormalTargetGenerator::ComputeLinkCmd(
     } break;
     case cmStateEnums::SHARED_LIBRARY:
     case cmStateEnums::MODULE_LIBRARY:
-      break;
     case cmStateEnums::EXECUTABLE:
-      if (this->TargetLinkLanguage(config) == "Swift") {
-        if (this->GeneratorTarget->IsExecutableWithExports()) {
-          this->Makefile->GetDefExpandList("CMAKE_EXE_EXPORTS_Swift_FLAG",
-                                           linkCmds);
-        }
-      }
       break;
     default:
       assert(false && "Unexpected target type");
@@ -1112,7 +1105,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
           this->GetObjectFilePath(source, config));
       }
     }
-    if (targetType != cmStateEnums::EXECUTABLE) {
+    if (targetType != cmStateEnums::EXECUTABLE ||
+        gt->IsExecutableWithExports()) {
       linkBuild.Outputs.push_back(vars["SWIFT_MODULE"]);
     }
   } else {

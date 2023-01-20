@@ -43,3 +43,14 @@ target_link_libraries(N PUBLIC
 # Dummy to make sure generation works with such targets.
 add_library(SwiftIface INTERFACE)
 target_link_libraries(SwiftOnly PRIVATE SwiftIface)
+
+# @_alwaysEmitIntoClient ensures that the function body is inserted into the
+# swiftmodule instead of as a symbol in the binary itself. I'm doing this to
+# avoid having to link the executable. There are some flags required in order to
+# link an executable into a library that I didn't see CMake emitting for Swift
+# on macOS. AEIC is the easiest workaround that still tests this functionality.
+# Unfortunately, AEIC was only added recently (~Swift 5.2), so we need to check
+# that it is available before using it.
+if(CMAKE_Swift_COMPILER_VERSION VERSION_GREATER_EQUAL 5.2)
+  add_subdirectory("SwiftPlugin")
+endif()
