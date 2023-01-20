@@ -38,7 +38,7 @@ endif ()
 
 # Test behavior when the generator does not support C++20 modules.
 if (NOT RunCMake_GENERATOR MATCHES "Ninja" OR
-    ninja_version VERSION_LESS "1.10" OR
+    ninja_version VERSION_LESS "1.11" OR
     NOT "cxx_std_20" IN_LIST CMAKE_CXX_COMPILE_FEATURES)
   if ("cxx_std_20" IN_LIST CMAKE_CXX_COMPILE_FEATURES)
     run_cmake(NoDyndepSupport)
