@@ -102,23 +102,9 @@ The options are:
   Can also be specified without ``LANGUAGES`` keyword per the first, short signature.
 
   Selects which programming languages are needed to build the project.
-  Supported languages include ``C``, ``CXX`` (i.e.  C++), ``CUDA``,
-  ``OBJC`` (i.e. Objective-C), ``OBJCXX``, ``Fortran``, ``HIP``, ``ISPC``, and ``ASM``.
-  By default ``C`` and ``CXX`` are enabled if no language options are given.
-  Specify language ``NONE``, or use the ``LANGUAGES`` keyword and list no languages,
-  to skip enabling any languages.
 
-  .. versionadded:: 3.8
-    Added ``CUDA`` support.
+.. include:: SUPPORTED_LANGUAGES.txt
 
-  .. versionadded:: 3.16
-    Added ``OBJC`` and ``OBJCXX`` support.
-
-  .. versionadded:: 3.18
-    Added ``ISPC`` support.
-
-  If enabling ``ASM``, list it last so that CMake can check whether
-  compilers for other languages like ``C`` work for assembly too.
 
 The variables set through the ``VERSION``, ``DESCRIPTION`` and ``HOMEPAGE_URL``
 options are intended for use as default values in package metadata and documentation.
