@@ -38,7 +38,7 @@ endif ()
 
 set(generator_supports_cxx_modules 0)
 if (RunCMake_GENERATOR MATCHES "Ninja" AND
-    ninja_version VERSION_GREATER_EQUAL "1.10" AND
+    ninja_version VERSION_GREATER_EQUAL "1.11" AND
     "cxx_std_20" IN_LIST CMAKE_CXX_COMPILE_FEATURES)
   set(generator_supports_cxx_modules 1)
 endif ()

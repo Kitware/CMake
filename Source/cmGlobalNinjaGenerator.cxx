@@ -742,10 +742,13 @@ void cmGlobalNinjaGenerator::CheckNinjaFeatures()
   this->NinjaSupportsMultilineDepfile =
     !cmSystemTools::VersionCompare(cmSystemTools::OP_LESS, this->NinjaVersion,
                                    RequiredNinjaVersionForMultilineDepfile());
-  this->NinjaSupportsDyndeps =
+  this->NinjaSupportsDyndepsCxx =
     !cmSystemTools::VersionCompare(cmSystemTools::OP_LESS, this->NinjaVersion,
-                                   RequiredNinjaVersionForDyndeps());
-  if (!this->NinjaSupportsDyndeps) {
+                                   RequiredNinjaVersionForDyndepsCxx());
+  this->NinjaSupportsDyndepsFortran =
+    !cmSystemTools::VersionCompare(cmSystemTools::OP_LESS, this->NinjaVersion,
+                                   RequiredNinjaVersionForDyndepsFortran());
+  if (!this->NinjaSupportsDyndepsFortran) {
     // The ninja version number is not new enough to have upstream support.
     // Our ninja branch adds ".dyndep-#" to its version number,
     // where '#' is a feature-specific version number.  Extract it.
@@ -756,7 +759,7 @@ void cmGlobalNinjaGenerator::CheckNinjaFeatures()
       unsigned long dyndep = 0;
       cmStrToULong(fv, &dyndep);
       if (dyndep == 1) {
-        this->NinjaSupportsDyndeps = true;
+        this->NinjaSupportsDyndepsFortran = true;
       }
     }
   }
@@ -856,7 +859,7 @@ bool cmGlobalNinjaGenerator::CheckLanguages(
 bool cmGlobalNinjaGenerator::CheckCxxModuleSupport()
 {
   this->CxxModuleSupportCheck();
-  if (this->NinjaSupportsDyndeps) {
+  if (this->NinjaSupportsDyndepsCxx) {
     return true;
   }
   bool const diagnose = !this->DiagnosedCxxModuleNinjaSupport &&
@@ -869,7 +872,8 @@ bool cmGlobalNinjaGenerator::CheckCxxModuleSupport()
       "using Ninja version \n"
       "  " << this->NinjaVersion << "\n"
       "due to lack of required features.  "
-      "Ninja " << RequiredNinjaVersionForDyndeps() << " or higher is required."
+      "Ninja " << RequiredNinjaVersionForDyndepsCxx() <<
+      " or higher is required."
       ;
     /* clang-format on */
     this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR, e.str());
@@ -880,7 +884,7 @@ bool cmGlobalNinjaGenerator::CheckCxxModuleSupport()
 
 bool cmGlobalNinjaGenerator::CheckFortran(cmMakefile* mf) const
 {
-  if (this->NinjaSupportsDyndeps) {
+  if (this->NinjaSupportsDyndepsFortran) {
     return true;
   }
 
@@ -890,7 +894,8 @@ bool cmGlobalNinjaGenerator::CheckFortran(cmMakefile* mf) const
     "The Ninja generator does not support Fortran using Ninja version\n"
     "  " << this->NinjaVersion << "\n"
     "due to lack of required features.  "
-    "Ninja " << RequiredNinjaVersionForDyndeps() << " or higher is required."
+    "Ninja " << RequiredNinjaVersionForDyndepsFortran() <<
+    " or higher is required."
     ;
   /* clang-format on */
   mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
