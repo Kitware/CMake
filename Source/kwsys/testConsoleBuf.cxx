@@ -743,7 +743,7 @@ static int testConsole()
 
 #endif
 
-int testConsoleBuf(int, char* [])
+int testConsoleBuf(int, char*[])
 {
   int ret = 0;
 

@@ -456,9 +456,9 @@ inline RegularExpression::RegularExpression(const std::string& s)
  */
 inline RegularExpression::~RegularExpression()
 {
-  //#ifndef _WIN32
+  // #ifndef _WIN32
   delete[] this->program;
-  //#endif
+  // #endif
 }
 
 /**
@@ -556,9 +556,9 @@ inline bool RegularExpression::is_valid() const
 
 inline void RegularExpression::set_invalid()
 {
-  //#ifndef _WIN32
+  // #ifndef _WIN32
   delete[] this->program;
-  //#endif
+  // #endif
   this->program = nullptr;
 }
 
