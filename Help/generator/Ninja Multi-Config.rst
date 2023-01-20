@@ -122,8 +122,15 @@ As an example, consider the following:
 
   add_custom_command(
     OUTPUT "$<CONFIG>.txt"
-    COMMAND generator "$<CONFIG>.txt" "$<OUTPUT_CONFIG:$<CONFIG>>" "$<COMMAND_CONFIG:$<CONFIG>>"
-    DEPENDS tgt1 "$<TARGET_FILE:tgt2>" "$<OUTPUT_CONFIG:$<TARGET_FILE:tgt3>>" "$<COMMAND_CONFIG:$<TARGET_FILE:tgt4>>"
+    COMMAND
+      generator "$<CONFIG>.txt"
+                "$<OUTPUT_CONFIG:$<CONFIG>>"
+                "$<COMMAND_CONFIG:$<CONFIG>>"
+    DEPENDS
+      tgt1
+      "$<TARGET_FILE:tgt2>"
+      "$<OUTPUT_CONFIG:$<TARGET_FILE:tgt3>>"
+      "$<COMMAND_CONFIG:$<TARGET_FILE:tgt4>>"
     )
 
 Assume that ``generator``, ``tgt1``, ``tgt2``, ``tgt3``, and ``tgt4`` are all
@@ -144,18 +151,23 @@ the ``build-Release.ninja`` file) unless they have no ``BYPRODUCTS`` or their
   add_custom_command(
     TARGET exe
     POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E echo "Running no-byproduct command"
+    COMMAND
+      ${CMAKE_COMMAND} -E echo "Running no-byproduct command"
     )
   add_custom_command(
     TARGET exe
     POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E echo "Running separate-byproduct command for $<CONFIG>"
+    COMMAND
+      ${CMAKE_COMMAND} -E echo
+      "Running separate-byproduct command for $<CONFIG>"
     BYPRODUCTS $<CONFIG>.txt
     )
   add_custom_command(
     TARGET exe
     POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E echo "Running common-byproduct command for $<CONFIG>"
+    COMMAND
+      ${CMAKE_COMMAND} -E echo
+      "Running common-byproduct command for $<CONFIG>"
     BYPRODUCTS exe.txt
     )
 
