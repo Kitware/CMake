@@ -2416,9 +2416,6 @@ int cmake::ActualConfigure()
   // info to save time
   if (!this->GetIsInTryCompile()) {
     this->GlobalGenerator->ClearEnabledLanguages();
-
-    this->TruncateOutputLog("CMakeOutput.log");
-    this->TruncateOutputLog("CMakeError.log");
   }
 
 #if !defined(CMAKE_BOOTSTRAP)

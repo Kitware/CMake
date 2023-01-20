@@ -1360,14 +1360,6 @@ void cmGlobalGenerator::Configure()
     std::ostringstream msg;
     if (cmSystemTools::GetErrorOccurredFlag()) {
       msg << "Configuring incomplete, errors occurred!";
-      const char* logs[] = { "CMakeOutput.log", "CMakeError.log", nullptr };
-      for (const char** log = logs; *log; ++log) {
-        std::string f = cmStrCat(this->CMakeInstance->GetHomeOutputDirectory(),
-                                 "/CMakeFiles/", *log);
-        if (cmSystemTools::FileExists(f)) {
-          msg << "\nSee also \"" << f << "\".";
-        }
-      }
     } else {
       auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
         endTime - startTime);

@@ -1,4 +1,0 @@
-CMake Error at ErrorLogs.cmake:[0-9]+ \(message\):
-  Some error!
-Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)

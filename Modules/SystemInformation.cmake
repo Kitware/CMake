@@ -83,8 +83,6 @@ macro(DUMP_FILE THE_FILE)
 endmacro()
 
 DUMP_FILE("../CMakeCache.txt")
-DUMP_FILE("../CMakeFiles/CMakeOutput.log")
-DUMP_FILE("../CMakeFiles/CMakeError.log")
 DUMP_FILE("../CMakeFiles/CMakeSystem.cmake")
 
 foreach (EXTRA_FILE ${EXTRA_DUMP_FILES})
