@@ -1807,7 +1807,8 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
                                   outputs.str(), comment, ccg);
     } else {
       this->WriteCustomRuleCpp(*spe2, c, script, additional_inputs.str(),
-                               outputs.str(), comment, ccg, symbolic);
+                               outputs.str(), comment, ccg, symbolic,
+                               command.GetUsesTerminal());
     }
   }
 }
@@ -1816,9 +1817,12 @@ void cmVisualStudio10TargetGenerator::WriteCustomRuleCpp(
   Elem& e2, std::string const& config, std::string const& script,
   std::string const& additional_inputs, std::string const& outputs,
   std::string const& comment, cmCustomCommandGenerator const& ccg,
-  bool symbolic)
+  bool symbolic, bool uses_terminal)
 {
   const std::string cond = this->CalcCondition(config);
+  if (this->GlobalGenerator->IsBuildInParallelSupported() && !uses_terminal) {
+    e2.WritePlatformConfigTag("BuildInParallel", cond, "true");
+  }
   e2.WritePlatformConfigTag("Message", cond, comment);
   e2.WritePlatformConfigTag("Command", cond, script);
   e2.WritePlatformConfigTag("AdditionalInputs", cond, additional_inputs);

@@ -168,6 +168,7 @@ public:
   cmIDEFlagTable const* GetNasmFlagTable() const;
 
   bool IsMsBuildRestoreSupported() const;
+  bool IsBuildInParallelSupported() const;
 
 protected:
   cmGlobalVisualStudio10Generator(cmake* cm, const std::string& name,
