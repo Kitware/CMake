@@ -380,6 +380,12 @@ Targets Created:
 
 - ``CUDA::nvrtc``
 
+.. versionadded:: 3.26
+
+  - ``CUDA::nvrtc_builtins``
+  - ``CUDA::nvrtc_static`` starting in CUDA 11.5
+  - ``CUDA::nvrtc_builtins_static`` starting in CUDA 11.5
+
 .. _`cuda_toolkit_nvjitlink`:
 
 nvJitLink
@@ -1099,7 +1105,6 @@ if(CUDAToolkit_FOUND)
                                         EXTRA_INCLUDE_DIRS "${CUDAToolkit_CUPTI_INCLUDE_DIR}")
   endif()
 
-  _CUDAToolkit_find_and_add_import_lib(nvrtc DEPS cuda_driver)
   if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 11.1.0)
     if(NOT TARGET CUDA::nvptxcompiler_static)
       _CUDAToolkit_find_and_add_import_lib(nvptxcompiler_static DEPS cuda_driver)
@@ -1112,6 +1117,13 @@ if(CUDAToolkit_FOUND)
   if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 12.0.0)
     _CUDAToolkit_find_and_add_import_lib(nvJitLink DEPS cuda_driver)
     _CUDAToolkit_find_and_add_import_lib(nvJitLink_static DEPS cuda_driver)
+  endif()
+
+  _CUDAToolkit_find_and_add_import_lib(nvrtc_builtins DEPS cuda_driver)
+  _CUDAToolkit_find_and_add_import_lib(nvrtc DEPS nvrtc_builtins nvJitLink)
+  if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 11.5.0)
+    _CUDAToolkit_find_and_add_import_lib(nvrtc_builtins_static DEPS cuda_driver)
+    _CUDAToolkit_find_and_add_import_lib(nvrtc_static DEPS nvrtc_builtins_static nvptxcompiler_static nvJitLink_static)
   endif()
 
   _CUDAToolkit_find_and_add_import_lib(nvml ALT nvidia-ml nvml)
