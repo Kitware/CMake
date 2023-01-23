@@ -1352,12 +1352,30 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
     }
     static cmsys::RegularExpression configValidator("^[A-Za-z0-9_]*$");
     if (!configValidator.find(parameters.front())) {
-      reportError(context, content->GetOriginalExpression(),
-                  "Expression syntax not recognized.");
-      return std::string();
     }
+
     context->HadContextSensitiveCondition = true;
+    bool firstParam = true;
     for (auto const& param : parameters) {
+      if (!configValidator.find(param)) {
+        if (firstParam) {
+          reportError(context, content->GetOriginalExpression(),
+                      "Expression syntax not recognized.");
+          return std::string();
+        }
+        // for backwards compat invalid config names are only errors as
+        // the first parameter
+        std::ostringstream e;
+        /* clang-format off */
+        e << "Warning evaluating generator expression:\n"
+          << "  " << content->GetOriginalExpression() << "\n"
+          << "The config name of \"" << param << "\" is invalid";
+        /* clang-format on */
+        context->LG->GetCMakeInstance()->IssueMessage(
+          MessageType::WARNING, e.str(), context->Backtrace);
+      }
+
+      firstParam = false;
       if (context->Config.empty()) {
         if (param.empty()) {
           return "1";
