@@ -2049,7 +2049,7 @@ int cmGlobalGenerator::TryCompile(int jobs, const std::string& srcdir,
   cmBuildOptions defaultBuildOptions(false, fast, PackageResolveMode::Disable);
 
   return this->Build(jobs, srcdir, bindir, projectName, newTarget, output, "",
-                     config, defaultBuildOptions, false,
+                     config, defaultBuildOptions, true,
                      this->TryCompileTimeout);
 }
 
