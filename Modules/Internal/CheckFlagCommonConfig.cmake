@@ -22,30 +22,26 @@ macro(CMAKE_CHECK_FLAG_COMMON_INIT _FUNC _LANG _SRC _PATTERNS)
       FAIL_REGEX "-Werror=.* argument .* is not valid for C\\+\\+")
   elseif("${_LANG}" STREQUAL "CUDA")
     set(${_SRC} "__host__ int main() { return 0; }")
-    set(${_PATTERNS} FAIL_REGEX "command[ -]line option .* is valid for .* but not for C\\+\\+" # Host GNU
-      FAIL_REGEX "argument unused during compilation: .*") # Clang
+    set(${_PATTERNS} FAIL_REGEX "command[ -]line option .* is valid for .* but not for C\\+\\+") # Host GNU
   elseif("${_LANG}" STREQUAL "Fortran")
     set(${_SRC} "       program test\n       stop\n       end program")
     set(${_PATTERNS} FAIL_REGEX "command[ -]line option .* is valid for .* but not for Fortran")
   elseif("${_LANG}" STREQUAL "HIP")
     set(${_SRC} "__host__ int main() { return 0; }")
-    set(${_PATTERNS} FAIL_REGEX "argument unused during compilation: .*") # Clang
   elseif("${_LANG}" STREQUAL "OBJC")
     set(${_SRC} [=[
       #ifndef __OBJC__
       #  error "Not an Objective-C compiler"
       #endif
       int main(void) { return 0; }]=])
-    set(${_PATTERNS} FAIL_REGEX "command[ -]line option .* is valid for .* but not for Objective-C" # GNU
-      FAIL_REGEX "argument unused during compilation: .*") # Clang
+    set(${_PATTERNS} FAIL_REGEX "command[ -]line option .* is valid for .* but not for Objective-C") # GNU
   elseif("${_LANG}" STREQUAL "OBJCXX")
     set(${_SRC} [=[
       #ifndef __OBJC__
       #  error "Not an Objective-C++ compiler"
       #endif
       int main(void) { return 0; }]=])
-    set(${_PATTERNS} FAIL_REGEX "command[ -]line option .* is valid for .* but not for Objective-C\\+\\+" # GNU
-      FAIL_REGEX "argument unused during compilation: .*") # Clang
+    set(${_PATTERNS} FAIL_REGEX "command[ -]line option .* is valid for .* but not for Objective-C\\+\\+") # GNU
   elseif("${_LANG}" STREQUAL "ISPC")
     set(${_SRC} "float func(uniform int32, float a) { return a / 2.25; }")
   elseif("${_LANG}" STREQUAL "Swift")
