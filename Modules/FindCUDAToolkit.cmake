@@ -1084,7 +1084,7 @@ if(CUDAToolkit_FOUND)
   if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 10.0)
     # nvToolsExt is deprecated since nvtx3 introduction.
     # Warn only if the project requires a sufficiently new CMake to make migration possible.
-    if(CMAKE_MINIMUM_REQUIRED_VERSION VERSION_GREATER_EQUAL 3.25)
+    if(TARGET CUDA::nvToolsExt AND CMAKE_MINIMUM_REQUIRED_VERSION VERSION_GREATER_EQUAL 3.25)
       set_property(TARGET CUDA::nvToolsExt PROPERTY DEPRECATION "nvToolsExt has been superseded by nvtx3 since CUDA 10.0 and CMake 3.25. Use CUDA::nvtx3 and include <nvtx3/nvToolsExt.h> instead.")
     endif()
 

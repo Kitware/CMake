@@ -11,6 +11,8 @@ run_cmake(BadLinkLibraries)
 run_cmake(BinDirEmpty)
 run_cmake(BinDirRelative)
 
+run_cmake(CrossCompile)
+
 run_cmake(WorkingDirArg)
 
 run_cmake(NoCompileOutputVariable)
