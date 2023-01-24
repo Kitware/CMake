@@ -8,17 +8,17 @@ which contain system headers, and therefore should not result in
 compiler warnings.  Additionally, system include directories are searched
 after normal include directories regardless of the order specified.
 
-The :command:`target_include_directories(SYSTEM)` command signature
-populates this property with values given to the ``PUBLIC`` and
-``INTERFACE`` keywords.
+When the :command:`target_include_directories` command is given the
+``SYSTEM`` keyword, it populates this property with values provided after the
+``PUBLIC`` and ``INTERFACE`` keywords.
 
 Projects may also get and set the property directly, but must be aware that
 adding directories to this property does not make those directories used
 during compilation.  Adding directories to this property marks directories
-as ``SYSTEM`` which otherwise would be used in a non-``SYSTEM`` manner.  This
-can appear similar to 'duplication', so prefer the
-high-level :command:`target_include_directories(SYSTEM)` command and avoid
-setting the property by low-level means.
+as system directories which otherwise would be used in a non-system manner.
+This can appear similar to duplication, so prefer the high-level
+:command:`target_include_directories` command with the ``SYSTEM`` keyword
+and avoid setting the property directly.
 
 When target dependencies are specified using :command:`target_link_libraries`,
 CMake will read this property from all target dependencies to mark the

@@ -159,9 +159,10 @@ Properties
 Modules
 -------
 
-* The :module:`FetchContent` module :command:`FetchContent_Declare`
-  command gained a ``SYSTEM`` option to enable the :prop_dir:`SYSTEM`
-  directory property in the subdirectory.
+* The :module:`FetchContent` module's :command:`FetchContent_Declare`
+  command gained a ``SYSTEM`` option which sets the :prop_dir:`SYSTEM`
+  directory property on subdirectories created by
+  :command:`FetchContent_MakeAvailable`.
 
 * The :module:`FindCUDAToolkit` module now provides a target for
   :ref:`nvtx3 <cuda_toolkit_nvtx3>` for CUDA 10.0+, which supersedes
@@ -246,3 +247,13 @@ Changes made since CMake 3.25.0 include the following.
   command no longer accepts ``.a`` file names.  This behavior was added
   in CMake 3.25.0, but has been reverted due finding GNU-ABI libraries
   in cases we did not previously.
+
+3.25.2
+------
+
+* CUDA language level 20 (corresponding to C++20) is now supported with
+  NVCC 12.0 and above.
+
+* On Windows, the ``icpx`` compiler now provided by Intel oneAPI 2023.0
+  and above is no longer selected because its GNU-like command-line is
+  not yet supported by CMake.

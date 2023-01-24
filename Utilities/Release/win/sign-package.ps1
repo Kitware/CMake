@@ -16,7 +16,7 @@ if ($trace -eq $true) {
 $ErrorActionPreference = 'Stop'
 
 # Sign binaries with SHA-1 for Windows 7 and below.
-& $signtool sign -v -a -t http://timestamp.digicert.com bin\*.exe
+& $signtool sign -v -a -t http://timestamp.digicert.com -fd sha1 bin\*.exe
 
 # Sign binaries with SHA-256 for Windows 8 and above.
 & $signtool sign -v -a -tr http://timestamp.digicert.com -fd sha256 -td sha256 -as bin\*.exe

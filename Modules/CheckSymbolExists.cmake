@@ -136,7 +136,7 @@ int main(int argc, char** argv)
   ${_CSE_CHECK_NON_MACRO}")
     endif()
     string(APPEND _CSE_SOURCE "
-}")
+}\n")
     unset(_CSE_CHECK_NON_MACRO)
 
     if(NOT CMAKE_REQUIRED_QUIET)

@@ -54,6 +54,9 @@
 #  if defined(__hpux) && !defined(HAVE__XOPEN_SOURCE_EXTENDED)
 #   undef _XOPEN_SOURCE_EXTENDED
 #  endif
+   /* Some curses/term headers define lower-case macros that
+      conflict with our source code.  Undefine them. */
+#  undef newline
 # endif
 
 #include <eti.h>

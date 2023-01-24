@@ -16,8 +16,8 @@ This is a hand-written test case.
 #include "..." search starts here:
 #include <...> search starts here:
  /usr/local/include
- ../../../adaptive/relative/include
+ ../../../../adaptive/relative/include
  /usr/include
 End of search list.
 
-/usr/bin/ld -L/usr/lib64 -L../../../adaptive/relative/lib
+/usr/bin/ld -L/usr/lib64 -L../../../../adaptive/relative/lib
