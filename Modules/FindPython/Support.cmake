@@ -10,6 +10,8 @@
 #
 
 cmake_policy(PUSH)
+# list supports empty elements
+cmake_policy (SET CMP0007 NEW)
 # numbers and boolean constants
 cmake_policy (SET CMP0012 NEW)
 # IN_LIST operator
