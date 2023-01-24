@@ -18,8 +18,8 @@ events:(
     checks:
       - "Detecting C compiler ABI info"
     directories:
-      source: "[^"]*/Tests/RunCMake/try_compile/Inspect-build/CMakeFiles/CMakeScratch/TryCompile-[^/]+"
-      binary: "[^"]*/Tests/RunCMake/try_compile/Inspect-build/CMakeFiles/CMakeScratch/TryCompile-[^/]+"
+      source: "[^"]*/Tests/RunCMake/try_compile/Inspect-build/CMakeFiles/CMakeScratch/TryCompile-[^/"]+"
+      binary: "[^"]*/Tests/RunCMake/try_compile/Inspect-build/CMakeFiles/CMakeScratch/TryCompile-[^/"]+"
     buildResult:
       variable: "CMAKE_C_ABI_COMPILED"
       cached: true
@@ -42,8 +42,8 @@ events:(
     checks:
       - "Detecting CXX compiler ABI info"
     directories:
-      source: "[^"]*/Tests/RunCMake/try_compile/Inspect-build/CMakeFiles/CMakeScratch/TryCompile-[^/]+"
-      binary: "[^"]*/Tests/RunCMake/try_compile/Inspect-build/CMakeFiles/CMakeScratch/TryCompile-[^/]+"
+      source: "[^"]*/Tests/RunCMake/try_compile/Inspect-build/CMakeFiles/CMakeScratch/TryCompile-[^/"]+"
+      binary: "[^"]*/Tests/RunCMake/try_compile/Inspect-build/CMakeFiles/CMakeScratch/TryCompile-[^/"]+"
     buildResult:
       variable: "CMAKE_CXX_ABI_COMPILED"
       cached: true
