@@ -200,14 +200,16 @@ Example using both :command:`configure_package_config_file` and
 
 .. code-block:: cmake
 
-   set(INCLUDE_INSTALL_DIR include/ ... CACHE )
-   set(LIB_INSTALL_DIR lib/ ... CACHE )
-   set(SYSCONFIG_INSTALL_DIR etc/foo/ ... CACHE )
+   include(GNUInstallDirs)
+   set(INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR}/Foo
+       CACHE PATH "Location of header files" )
+   set(SYSCONFIG_INSTALL_DIR ${CMAKE_INSTALL_SYSCONFDIR}/foo
+       CACHE PATH "Location of configuration files" )
    #...
    include(CMakePackageConfigHelpers)
    configure_package_config_file(FooConfig.cmake.in
      ${CMAKE_CURRENT_BINARY_DIR}/FooConfig.cmake
-     INSTALL_DESTINATION ${LIB_INSTALL_DIR}/Foo/cmake
+     INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Foo
      PATH_VARS INCLUDE_INSTALL_DIR SYSCONFIG_INSTALL_DIR)
    write_basic_package_version_file(
      ${CMAKE_CURRENT_BINARY_DIR}/FooConfigVersion.cmake
@@ -215,7 +217,7 @@ Example using both :command:`configure_package_config_file` and
      COMPATIBILITY SameMajorVersion )
    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/FooConfig.cmake
                  ${CMAKE_CURRENT_BINARY_DIR}/FooConfigVersion.cmake
-           DESTINATION ${LIB_INSTALL_DIR}/Foo/cmake )
+           DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Foo )
 
 ``FooConfig.cmake.in``:
 
