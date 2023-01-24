@@ -15,7 +15,7 @@ CMake Error:
 
     .*
 
-  due to lack of required features.  Ninja 1.10 or higher is required.
+  due to lack of required features.  Ninja 1.11 or higher is required.
 
 |CMake Error in CMakeLists.txt:
   The "nodyndep" target contains C\+\+ module sources which are not supported

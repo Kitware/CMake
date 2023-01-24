@@ -393,7 +393,8 @@ public:
   {
     return "1.9";
   }
-  static std::string RequiredNinjaVersionForDyndeps() { return "1.10"; }
+  static std::string RequiredNinjaVersionForDyndepsCxx() { return "1.11"; }
+  static std::string RequiredNinjaVersionForDyndepsFortran() { return "1.10"; }
   static std::string RequiredNinjaVersionForRestatTool() { return "1.10"; }
   static std::string RequiredNinjaVersionForUnconditionalRecompactTool()
   {
@@ -583,7 +584,8 @@ private:
   bool NinjaSupportsImplicitOuts = false;
   bool NinjaSupportsManifestRestat = false;
   bool NinjaSupportsMultilineDepfile = false;
-  bool NinjaSupportsDyndeps = false;
+  bool NinjaSupportsDyndepsCxx = false;
+  bool NinjaSupportsDyndepsFortran = false;
   bool NinjaSupportsRestatTool = false;
   bool NinjaSupportsUnconditionalRecompactTool = false;
   bool NinjaSupportsMultipleOutputs = false;
