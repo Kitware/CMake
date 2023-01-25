@@ -18,8 +18,8 @@ events:(
     checks:
       - "Detecting C compiler ABI info"
     directories:
-      source: "[^"]*/Tests/RunCMake/try_compile/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/]+"
-      binary: "[^"]*/Tests/RunCMake/try_compile/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/]+"
+      source: "[^"]*/Tests/RunCMake/try_compile/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/"]+"
+      binary: "[^"]*/Tests/RunCMake/try_compile/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/"]+"
     buildResult:
       variable: "CMAKE_C_ABI_COMPILED"
       cached: true
@@ -39,8 +39,8 @@ events:(
       - "CMakeLists.txt:[0-9]+ \(include\)"
     description: "Source that should not compile\."
     directories:
-      source: "[^"]*/Tests/RunCMake/try_compile/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/]+"
-      binary: "[^"]*/Tests/RunCMake/try_compile/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/]+"
+      source: "[^"]*/Tests/RunCMake/try_compile/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/"]+"
+      binary: "[^"]*/Tests/RunCMake/try_compile/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/"]+"
     buildResult:
       variable: "COMPILE_RESULT"
       cached: true
@@ -56,8 +56,8 @@ events:(
       - "Check 1"
     description: "Source that should compile\."
     directories:
-      source: "[^"]*/Tests/RunCMake/try_compile/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/]+"
-      binary: "[^"]*/Tests/RunCMake/try_compile/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/]+"
+      source: "[^"]*/Tests/RunCMake/try_compile/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/"]+"
+      binary: "[^"]*/Tests/RunCMake/try_compile/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/"]+"
     buildResult:
       variable: "COMPILE_RESULT"
       cached: true
