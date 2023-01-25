@@ -165,6 +165,8 @@ File Operations
  Resolves symbolic links, i.e. if the named file or directory is a
  symbolic link, returns true if the target of the symbolic link exists.
 
+ False if the given path is an empty string.
+
 ``if(file1 IS_NEWER_THAN file2)``
  True if ``file1`` is newer than ``file2`` or if one of the two files doesn't
  exist.  Behavior is well-defined only for full paths.  If the file
@@ -173,9 +175,11 @@ File Operations
  of a tie.  This includes the case of passing the same file name for
  both file1 and file2.
 
-``if(IS_DIRECTORY path-to-directory)``
- True if the given name is a directory.  Behavior is well-defined only
+``if(IS_DIRECTORY path)``
+ True if ``path`` is a directory.  Behavior is well-defined only
  for full paths.
+
+ False if the given path is an empty string.
 
 ``if(IS_SYMLINK file-name)``
  True if the given name is a symbolic link.  Behavior is well-defined
