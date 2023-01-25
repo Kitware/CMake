@@ -1888,10 +1888,12 @@ class cmMakefileTargetGeneratorObjectStrings
 public:
   cmMakefileTargetGeneratorObjectStrings(std::vector<std::string>& strings,
                                          cmOutputConverter* outputConverter,
+                                         bool useWatcomQuote,
                                          cmStateDirectory const& stateDir,
                                          std::string::size_type limit)
     : Strings(strings)
     , OutputConverter(outputConverter)
+    , UseWatcomQuote(useWatcomQuote)
     , StateDir(stateDir)
     , LengthLimit(limit)
   {
@@ -1902,7 +1904,7 @@ public:
     // Construct the name of the next object.
     this->NextObject = this->OutputConverter->ConvertToOutputFormat(
       this->OutputConverter->MaybeRelativeToCurBinDir(obj),
-      cmOutputConverter::RESPONSE);
+      cmOutputConverter::RESPONSE, this->UseWatcomQuote);
 
     // Roll over to next string if the limit will be exceeded.
     if (this->LengthLimit != std::string::npos &&
@@ -1925,6 +1927,7 @@ public:
 private:
   std::vector<std::string>& Strings;
   cmOutputConverter* OutputConverter;
+  bool UseWatcomQuote;
   cmStateDirectory StateDir;
   std::string::size_type LengthLimit;
   std::string CurrentString;
@@ -1933,12 +1936,13 @@ private:
 };
 
 void cmMakefileTargetGenerator::WriteObjectsStrings(
-  std::vector<std::string>& objStrings, std::string::size_type limit)
+  std::vector<std::string>& objStrings, bool useWatcomQuote,
+  std::string::size_type limit)
 {
   cmValue pchExtension = this->Makefile->GetDefinition("CMAKE_PCH_EXTENSION");
 
   cmMakefileTargetGeneratorObjectStrings helper(
-    objStrings, this->LocalGenerator,
+    objStrings, this->LocalGenerator, useWatcomQuote,
     this->LocalGenerator->GetStateSnapshot().GetDirectory(), limit);
   for (std::string const& obj : this->Objects) {
     if (cmHasSuffix(obj, pchExtension)) {
@@ -2259,7 +2263,8 @@ void cmMakefileTargetGenerator::CreateObjectLists(
 
     // Construct the individual object list strings.
     std::vector<std::string> object_strings;
-    this->WriteObjectsStrings(object_strings, responseFileLimit);
+    this->WriteObjectsStrings(object_strings, useWatcomQuote,
+                              responseFileLimit);
 
     // Lookup the response file reference flag.
     std::string responseFlag = this->GetResponseFlag(responseMode);
@@ -2289,7 +2294,7 @@ void cmMakefileTargetGenerator::CreateObjectLists(
   } else if (useLinkScript) {
     if (!useArchiveRules) {
       std::vector<std::string> objStrings;
-      this->WriteObjectsStrings(objStrings);
+      this->WriteObjectsStrings(objStrings, useWatcomQuote);
       buildObjs = objStrings[0];
     }
   } else {
