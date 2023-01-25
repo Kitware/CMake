@@ -636,7 +636,8 @@ if(CMAKE_GENERATOR MATCHES "^Visual Studio (1[6-9]|[2-9][0-9])")
 endif()
 
 if(XCODE_VERSION)
-  add_RunCMake_test(XcodeProject -DXCODE_VERSION=${XCODE_VERSION})
+  add_RunCMake_test(XcodeProject -DXCODE_VERSION=${XCODE_VERSION}
+                                 -DCMake_TEST_Swift=${CMake_TEST_Swift})
   add_RunCMake_test(XcodeProject-Embed -DXCODE_VERSION=${XCODE_VERSION})
 
   # This test can take a very long time due to lots of combinations.
