@@ -175,6 +175,9 @@ protected:
   virtual void GenerateRequiredCMakeVersion(std::ostream& os,
                                             const char* versionString);
 
+  bool PopulateCxxModuleExportProperties(
+    cmGeneratorTarget const* gte, ImportPropertyMap& properties,
+    cmGeneratorExpression::PreprocessContext ctx, std::string& errorMessage);
   bool PopulateExportProperties(cmGeneratorTarget const* gte,
                                 ImportPropertyMap& properties,
                                 std::string& errorMessage);
