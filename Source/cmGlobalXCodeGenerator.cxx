@@ -4536,6 +4536,9 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
     this->InheritBuildSettingAttribute(t, "GCC_PREPROCESSOR_DEFINITIONS");
     this->InheritBuildSettingAttribute(t, "OTHER_CFLAGS");
     this->InheritBuildSettingAttribute(t, "OTHER_LDFLAGS");
+    this->InheritBuildSettingAttribute(t, "OTHER_SWIFT_FLAGS");
+    this->InheritBuildSettingAttribute(t,
+                                       "SWIFT_ACTIVE_COMPILATION_CONDITIONS");
   }
 
   if (this->XcodeBuildSystem == BuildSystem::One) {
