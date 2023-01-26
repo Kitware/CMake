@@ -53,6 +53,13 @@ int main()
     }
   }
 
+  if (strcmp(vslang, "1040") == 0) {
+    if (cp == 437 || cp == 65001) {
+      printf("Nota: file incluso  C:\\foo.h\n");
+      return 0;
+    }
+  }
+
   if (strcmp(vslang, "1041") == 0) {
     if (cp == 932) {
       printf("\x83\x81\x83\x82: "
