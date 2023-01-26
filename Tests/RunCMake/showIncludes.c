@@ -28,6 +28,46 @@ int main()
   printf("OEM code page: %u\n", GetOEMCP());
   printf("VSLANG: %s\n", vslang);
 
+  if (strcmp(vslang, "1031") == 0) {
+    if (cp == 437 || cp == 65001) {
+      printf("Hinweis: Einlesen der Datei: C:\\foo.h\n");
+      return 0;
+    }
+  }
+
+  if (strcmp(vslang, "1033") == 0) {
+    if (cp == 437 || cp == 65001) {
+      printf("Note: including file: C:\\foo.h\n");
+      return 0;
+    }
+  }
+
+  if (strcmp(vslang, "1036") == 0) {
+    if (cp == 437 || cp == 863) {
+      printf("Remarque\xff: inclusion du fichier\xff:  C:\\foo.h\n");
+      return 0;
+    }
+    if (cp == 65001) {
+      printf("Remarque\xc2\xa0: inclusion du fichier\xc2\xa0:  C:\\foo.h\n");
+      return 0;
+    }
+  }
+
+  if (strcmp(vslang, "1041") == 0) {
+    if (cp == 932) {
+      printf("\x83\x81\x83\x82: "
+             "\x83\x43\x83\x93\x83\x4e\x83\x8b\x81\x5b\x83\x68 "
+             "\x83\x74\x83\x40\x83\x43\x83\x8b:  C:\\foo.h\n");
+      return 0;
+    }
+    if (cp == 65001) {
+      printf("\xe3\x83\xa1\xe3\x83\xa2: \xe3\x82\xa4\xe3\x83\xb3"
+             "\xe3\x82\xaf\xe3\x83\xab\xe3\x83\xbc\xe3\x83\x89 "
+             "\xe3\x83\x95\xe3\x82\xa1\xe3\x82\xa4\xe3\x83\xab:  C:\\foo.h\n");
+      return 0;
+    }
+  }
+
   if (strcmp(vslang, "2052") == 0) {
     if (cp == 54936 || cp == 936) {
       printf("\xd7\xa2\xd2\xe2: "
