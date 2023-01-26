@@ -4,6 +4,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <cstddef>
 #include <map>
 #include <set>
 #include <string>
@@ -51,28 +52,31 @@ private:
 
   void CollectTargets();
   void CollectDepends();
-  void CollectTargetDepends(int depender_index);
-  void AddTargetDepend(int depender_index, cmLinkItem const& dependee_name,
+  void CollectTargetDepends(size_t depender_index);
+  void AddTargetDepend(size_t depender_index, cmLinkItem const& dependee_name,
                        bool linking, bool cross);
-  void AddTargetDepend(int depender_index, cmGeneratorTarget const* dependee,
+  void AddTargetDepend(size_t depender_index,
+                       cmGeneratorTarget const* dependee,
                        cmListFileBacktrace const& dependee_backtrace,
                        bool linking, bool cross);
   void CollectSideEffects();
-  void CollectSideEffectsForTarget(std::set<int>& visited, int depender_index);
+  void CollectSideEffectsForTarget(std::set<size_t>& visited,
+                                   size_t depender_index);
   void ComputeIntermediateGraph();
   void OptimizeLinkDependencies(cmGeneratorTarget const* gt,
                                 cmGraphEdgeList& outputEdges,
                                 cmGraphEdgeList const& inputEdges);
   bool ComputeFinalDepends(cmComputeComponentGraph const& ccg);
-  void AddInterfaceDepends(int depender_index, cmLinkItem const& dependee_name,
+  void AddInterfaceDepends(size_t depender_index,
+                           cmLinkItem const& dependee_name,
                            const std::string& config,
                            std::set<cmLinkItem>& emitted);
-  void AddInterfaceDepends(int depender_index,
+  void AddInterfaceDepends(size_t depender_index,
                            cmGeneratorTarget const* dependee,
                            cmListFileBacktrace const& dependee_backtrace,
                            const std::string& config,
                            std::set<cmLinkItem>& emitted);
-  void AddObjectDepends(int depender_index, cmSourceFile const* o,
+  void AddObjectDepends(size_t depender_index, cmSourceFile const* o,
                         std::set<cmLinkItem>& emitted);
   cmGlobalGenerator* GlobalGenerator;
   bool DebugMode;
@@ -80,7 +84,7 @@ private:
 
   // Collect all targets.
   std::vector<cmGeneratorTarget const*> Targets;
-  std::map<cmGeneratorTarget const*, int> TargetIndex;
+  std::map<cmGeneratorTarget const*, size_t> TargetIndex;
 
   // Represent the target dependency graph.  The entry at each
   // top-level index corresponds to a depender whose dependencies are
@@ -99,11 +103,12 @@ private:
   void DisplayComponents(cmComputeComponentGraph const& ccg,
                          const std::string& name);
   bool CheckComponents(cmComputeComponentGraph const& ccg);
-  void ComplainAboutBadComponent(cmComputeComponentGraph const& ccg, int c,
+  void ComplainAboutBadComponent(cmComputeComponentGraph const& ccg, size_t c,
                                  bool strong = false);
 
-  std::vector<int> ComponentHead;
-  std::vector<int> ComponentTail;
-  bool IntraComponent(std::vector<int> const& cmap, int c, int i, int* head,
-                      std::set<int>& emitted, std::set<int>& visited);
+  std::vector<size_t> ComponentHead;
+  std::vector<size_t> ComponentTail;
+  bool IntraComponent(std::vector<size_t> const& cmap, size_t c, size_t i,
+                      size_t* head, std::set<size_t>& emitted,
+                      std::set<size_t>& visited);
 };
