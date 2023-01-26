@@ -17,14 +17,14 @@ int main()
   if (cp == 54936 || cp == 936) {
     /* VSLANG=2052 */
     printf("\xd7\xa2\xd2\xe2: "
-           "\xb0\xfc\xba\xac\xce\xc4\xbc\xfe:\n");
+           "\xb0\xfc\xba\xac\xce\xc4\xbc\xfe:  C:\\foo.h\n");
     return 0;
   }
 
   if (cp == 65001) {
     /* VSLANG=2052  */
     printf("\xe6\xb3\xa8\xe6\x84\x8f: "
-           "\xe5\x8c\x85\xe5\x90\xab\xe6\x96\x87\xe4\xbb\xb6:\n");
+           "\xe5\x8c\x85\xe5\x90\xab\xe6\x96\x87\xe4\xbb\xb6:  C:\\foo.h\n");
     return 0;
   }
 
