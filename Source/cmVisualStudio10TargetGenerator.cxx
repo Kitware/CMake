@@ -1806,9 +1806,13 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
       this->WriteCustomRuleCSharp(e0, c, name, script, additional_inputs.str(),
                                   outputs.str(), comment, ccg);
     } else {
-      this->WriteCustomRuleCpp(*spe2, c, script, additional_inputs.str(),
-                               outputs.str(), comment, ccg, symbolic,
-                               command.GetUsesTerminal());
+      this->WriteCustomRuleCpp(
+        *spe2, c, script, additional_inputs.str(), outputs.str(), comment, ccg,
+        symbolic,
+        (command.GetUsesTerminal() ||
+         (command.HasMainDependency() && source->GetIsGenerated()))
+          ? BuildInParallel::No
+          : BuildInParallel::Yes);
     }
   }
 }
@@ -1817,10 +1821,11 @@ void cmVisualStudio10TargetGenerator::WriteCustomRuleCpp(
   Elem& e2, std::string const& config, std::string const& script,
   std::string const& additional_inputs, std::string const& outputs,
   std::string const& comment, cmCustomCommandGenerator const& ccg,
-  bool symbolic, bool uses_terminal)
+  bool symbolic, BuildInParallel buildInParallel)
 {
   const std::string cond = this->CalcCondition(config);
-  if (this->GlobalGenerator->IsBuildInParallelSupported() && !uses_terminal) {
+  if (buildInParallel == BuildInParallel::Yes &&
+      this->GlobalGenerator->IsBuildInParallelSupported()) {
     e2.WritePlatformConfigTag("BuildInParallel", cond, "true");
   }
   e2.WritePlatformConfigTag("Message", cond, comment);
