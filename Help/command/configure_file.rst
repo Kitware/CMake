@@ -174,12 +174,12 @@ Otherwise it will contain:
   /* #undef FOO_ENABLE */
   /* #undef FOO_STRING */
 
-One may then use the :command:`include_directories` command to
+One may then use the :command:`target_include_directories` command to
 specify the output directory as an include directory:
 
 .. code-block:: cmake
 
-  include_directories(${CMAKE_CURRENT_BINARY_DIR})
+  target_include_directories(<target> [SYSTEM] <INTERFACE|PUBLIC|PRIVATE> "${CMAKE_CURRENT_BINARY_DIR}")
 
 so that sources may include the header as ``#include <foo.h>``.
 
