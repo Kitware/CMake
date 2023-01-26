@@ -87,13 +87,12 @@ std::string cmLinkLineComputer::ConvertToOutputFormat(std::string const& input)
   cmOutputConverter::OutputFormat shellFormat = cmOutputConverter::SHELL;
   if (this->ForResponse) {
     shellFormat = cmOutputConverter::RESPONSE;
-  } else if (this->UseWatcomQuote) {
-    shellFormat = cmOutputConverter::WATCOMQUOTE;
   } else if (this->UseNinjaMulti) {
     shellFormat = cmOutputConverter::NINJAMULTI;
   }
 
-  return this->OutputConverter->ConvertToOutputFormat(input, shellFormat);
+  return this->OutputConverter->ConvertToOutputFormat(input, shellFormat,
+                                                      this->UseWatcomQuote);
 }
 
 std::string cmLinkLineComputer::ConvertToOutputForExisting(
@@ -102,13 +101,12 @@ std::string cmLinkLineComputer::ConvertToOutputForExisting(
   cmOutputConverter::OutputFormat shellFormat = cmOutputConverter::SHELL;
   if (this->ForResponse) {
     shellFormat = cmOutputConverter::RESPONSE;
-  } else if (this->UseWatcomQuote) {
-    shellFormat = cmOutputConverter::WATCOMQUOTE;
   } else if (this->UseNinjaMulti) {
     shellFormat = cmOutputConverter::NINJAMULTI;
   }
 
-  return this->OutputConverter->ConvertToOutputForExisting(input, shellFormat);
+  return this->OutputConverter->ConvertToOutputForExisting(
+    input, shellFormat, this->UseWatcomQuote);
 }
 
 std::string cmLinkLineComputer::ComputeLinkPath(

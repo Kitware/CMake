@@ -35,17 +35,18 @@ public:
   enum OutputFormat
   {
     SHELL,
-    WATCOMQUOTE,
     NINJAMULTI,
     RESPONSE
   };
   std::string ConvertToOutputFormat(cm::string_view source,
-                                    OutputFormat output) const;
+                                    OutputFormat output,
+                                    bool useWatcomQuote = false) const;
   std::string ConvertDirectorySeparatorsForShell(cm::string_view source) const;
 
   //! for existing files convert to output path and short path if spaces
   std::string ConvertToOutputForExisting(const std::string& remote,
-                                         OutputFormat format = SHELL) const;
+                                         OutputFormat format = SHELL,
+                                         bool useWatcomQuote = false) const;
 
   void SetLinkScriptShell(bool linkScriptShell);
 
