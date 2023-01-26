@@ -86,6 +86,7 @@ dnf install --setopt=install_weak_deps=False -y \
     gsl-devel \
     gtest-devel \
     gtk2-devel \
+    ImageMagick-c++-devel \
     java-11-openjdk-devel \
     jsoncpp-devel \
     lapack-devel \
