@@ -93,8 +93,9 @@ private:
 
   std::pair<std::map<cmLinkItem, int>::iterator, bool> AllocateLinkEntry(
     cmLinkItem const& item);
-  std::pair<int, bool> AddLinkEntry(cmLinkItem const& item,
-                                    int groupIndex = -1);
+  std::pair<int, bool> AddLinkEntry(
+    cmLinkItem const& item,
+    int groupIndex = cmComputeComponentGraph::INVALID_COMPONENT);
   void AddLinkObject(cmLinkItem const& item);
   void AddVarLinkEntries(int depender_index, const char* value);
   void AddDirectLinkEntries();

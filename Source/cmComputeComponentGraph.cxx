@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <cassert>
 
+const int cmComputeComponentGraph::INVALID_COMPONENT = -1;
+
 cmComputeComponentGraph::cmComputeComponentGraph(Graph const& input)
   : InputGraph(input)
 {
@@ -30,7 +32,7 @@ void cmComputeComponentGraph::Tarjan()
   this->TarjanEntries.resize(0);
   this->TarjanEntries.resize(n, entry);
   this->TarjanComponents.resize(0);
-  this->TarjanComponents.resize(n, -1);
+  this->TarjanComponents.resize(n, INVALID_COMPONENT);
   this->TarjanWalkId = 0;
   this->TarjanVisited.resize(0);
   this->TarjanVisited.resize(n, 0);
@@ -52,7 +54,7 @@ void cmComputeComponentGraph::TarjanVisit(int i)
 
   // Initialize the entry.
   this->TarjanEntries[i].Root = i;
-  this->TarjanComponents[i] = -1;
+  this->TarjanComponents[i] = INVALID_COMPONENT;
   this->TarjanEntries[i].VisitIndex = ++this->TarjanIndex;
   this->TarjanStack.push(i);
 
@@ -77,7 +79,7 @@ void cmComputeComponentGraph::TarjanVisit(int i)
 
     // If the destination has not yet been assigned to a component,
     // check if it has a better root for the current object.
-    if (this->TarjanComponents[j] < 0) {
+    if (this->TarjanComponents[j] == INVALID_COMPONENT) {
       if (this->TarjanEntries[this->TarjanEntries[j].Root].VisitIndex <
           this->TarjanEntries[this->TarjanEntries[i].Root].VisitIndex) {
         this->TarjanEntries[i].Root = this->TarjanEntries[j].Root;

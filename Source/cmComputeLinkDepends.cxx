@@ -518,7 +518,10 @@ void cmComputeLinkDepends::AddLinkObject(cmLinkItem const& item)
 void cmComputeLinkDepends::FollowLinkEntry(BFSEntry qe)
 {
   // Get this entry representation.
-  int depender_index = qe.GroupIndex == -1 ? qe.Index : qe.GroupIndex;
+  int depender_index =
+    qe.GroupIndex == cmComputeComponentGraph::INVALID_COMPONENT
+    ? qe.Index
+    : qe.GroupIndex;
   LinkEntry const& entry = this->EntryList[qe.Index];
 
   // Follow the item's dependencies.
@@ -679,13 +682,15 @@ void cmComputeLinkDepends::AddDirectLinkEntries()
   // Add direct link dependencies in this configuration.
   cmLinkImplementation const* impl = this->Target->GetLinkImplementation(
     this->Config, cmGeneratorTarget::LinkInterfaceFor::Link);
-  this->AddLinkEntries(-1, impl->Libraries);
+  this->AddLinkEntries(cmComputeComponentGraph::INVALID_COMPONENT,
+                       impl->Libraries);
   this->AddLinkObjects(impl->Objects);
 
   for (auto const& language : impl->Languages) {
     auto runtimeEntries = impl->LanguageRuntimeLibraries.find(language);
     if (runtimeEntries != impl->LanguageRuntimeLibraries.end()) {
-      this->AddLinkEntries(-1, runtimeEntries->second);
+      this->AddLinkEntries(cmComputeComponentGraph::INVALID_COMPONENT,
+                           runtimeEntries->second);
     }
   }
   for (cmLinkItem const& wi : impl->WrongConfigLibraries) {
@@ -702,7 +707,8 @@ void cmComputeLinkDepends::AddLinkEntries(int depender_index,
   std::string feature = LinkEntry::DEFAULT;
 
   bool inGroup = false;
-  std::pair<int, bool> groupIndex{ -1, false };
+  std::pair<int, bool> groupIndex{ cmComputeComponentGraph::INVALID_COMPONENT,
+                                   false };
   std::vector<int> groupItems;
 
   // Loop over the libraries linked directly by the depender.
@@ -719,7 +725,7 @@ void cmComputeLinkDepends::AddLinkEntries(int depender_index,
       feature = ExtractFeature(item.AsStr());
       // emit a warning if an undefined feature is used as part of
       // an imported target
-      if (depender_index >= 0) {
+      if (depender_index != cmComputeComponentGraph::INVALID_COMPONENT) {
         const auto& depender = this->EntryList[depender_index];
         if (depender.Target != nullptr && depender.Target->IsImported() &&
             !IsFeatureSupported(this->Makefile, this->LinkLanguage, feature)) {
@@ -752,7 +758,7 @@ void cmComputeLinkDepends::AddLinkEntries(int depender_index,
         entry.Feature = ExtractGroupFeature(item.AsStr());
       }
       inGroup = true;
-      if (depender_index >= 0) {
+      if (depender_index != cmComputeComponentGraph::INVALID_COMPONENT) {
         this->EntryConstraintGraph[depender_index].emplace_back(
           groupIndex.first, false, false, cmListFileBacktrace());
       } else {
@@ -775,7 +781,8 @@ void cmComputeLinkDepends::AddLinkEntries(int depender_index,
       continue;
     }
 
-    if (depender_index >= 0 && inGroup) {
+    if (depender_index != cmComputeComponentGraph::INVALID_COMPONENT &&
+        inGroup) {
       const auto& depender = this->EntryList[depender_index];
       const auto& groupFeature = this->EntryList[groupIndex.first].Feature;
       if (depender.Target != nullptr && depender.Target->IsImported() &&
@@ -913,7 +920,7 @@ void cmComputeLinkDepends::AddLinkEntries(int depender_index,
 
       for (auto index : indexes) {
         // The dependee must come after the depender.
-        if (depender_index >= 0) {
+        if (depender_index != cmComputeComponentGraph::INVALID_COMPONENT) {
           this->EntryConstraintGraph[depender_index].emplace_back(
             index, false, false, cmListFileBacktrace());
         } else {
@@ -962,7 +969,7 @@ cmLinkItem cmComputeLinkDepends::ResolveLinkItem(int depender_index,
 {
   // Look for a target in the scope of the depender.
   cmGeneratorTarget const* from = this->Target;
-  if (depender_index >= 0) {
+  if (depender_index != cmComputeComponentGraph::INVALID_COMPONENT) {
     if (cmGeneratorTarget const* depender =
           this->EntryList[depender_index].Target) {
       from = depender;
@@ -1140,7 +1147,7 @@ void cmComputeLinkDepends::OrderLinkEntries()
   this->ComponentOrderId = n;
   // Run in reverse order so the topological order will preserve the
   // original order where there are no constraints.
-  for (int c = n - 1; c >= 0; --c) {
+  for (int c = n - 1; c != cmComputeComponentGraph::INVALID_COMPONENT; --c) {
     this->VisitComponent(c);
   }
 

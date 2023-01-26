@@ -693,7 +693,7 @@ bool cmComputeTargetDepends::IntraComponent(std::vector<int> const& cmap,
     }
 
     // Prepend to a linear linked-list of intra-component edges.
-    if (*head >= 0) {
+    if (*head != cmComputeComponentGraph::INVALID_COMPONENT) {
       this->FinalGraph[i].emplace_back(*head, false, false,
                                        cmListFileBacktrace());
     } else {
@@ -721,7 +721,7 @@ bool cmComputeTargetDepends::ComputeFinalDepends(
   this->ComponentTail.resize(components.size());
   int nc = static_cast<int>(components.size());
   for (int c = 0; c < nc; ++c) {
-    int head = -1;
+    int head = cmComputeComponentGraph::INVALID_COMPONENT;
     std::set<int> emitted;
     NodeList const& nl = components[c];
     for (int ni : cmReverseRange(nl)) {

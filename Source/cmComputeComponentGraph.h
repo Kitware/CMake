@@ -53,6 +53,8 @@ public:
     return this->TarjanComponents;
   }
 
+  static const int INVALID_COMPONENT;
+
 private:
   void TransferEdges();
 
