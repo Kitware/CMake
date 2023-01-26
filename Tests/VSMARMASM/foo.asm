@@ -3,7 +3,7 @@
     EXPORT foo
 
 foo PROC
-    mov w0, #0
+    mov w0, #zero
     ret
     ENDP
 

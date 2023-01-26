@@ -3822,6 +3822,8 @@ bool cmVisualStudio10TargetGenerator::ComputeMarmasmOptions(
   this->LocalGenerator->AddLanguageFlags(flags, this->GeneratorTarget,
                                          cmBuildStep::Compile, "ASM_MARMASM",
                                          configName);
+  this->LocalGenerator->AddCompileOptions(flags, this->GeneratorTarget,
+                                          "ASM_MARMASM", configName);
 
   marmasmOptions.Parse(flags);
 

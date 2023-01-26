@@ -120,15 +120,6 @@
     "flags": []
   },
   {
-    "name": "PredefineDirective",
-    "switch": "predefine",
-    "comment": "Specify a SETA, SETL, or SETS directive to predefine a symbol.",
-    "value": "",
-    "flags": [
-      "UserValue"
-    ]
-  },
-  {
     "name": "SourceLink",
     "switch": "sourcelink",
     "comment": "Specify the configuration file that contains a simple mapping of local file paths to URLs for source files to display in the debugger.",
