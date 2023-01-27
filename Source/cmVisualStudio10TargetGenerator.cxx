@@ -3822,6 +3822,8 @@ bool cmVisualStudio10TargetGenerator::ComputeMarmasmOptions(
   this->LocalGenerator->AddLanguageFlags(flags, this->GeneratorTarget,
                                          cmBuildStep::Compile, "ASM_MARMASM",
                                          configName);
+  this->LocalGenerator->AddCompileOptions(flags, this->GeneratorTarget,
+                                          "ASM_MARMASM", configName);
 
   marmasmOptions.Parse(flags);
 
@@ -3928,6 +3930,8 @@ bool cmVisualStudio10TargetGenerator::ComputeNasmOptions(
   this->LocalGenerator->AddLanguageFlags(flags, this->GeneratorTarget,
                                          cmBuildStep::Compile, "ASM_NASM",
                                          configName);
+  this->LocalGenerator->AddCompileOptions(flags, this->GeneratorTarget,
+                                          "ASM_NASM", configName);
   flags += " -f";
   flags += this->Makefile->GetSafeDefinition("CMAKE_ASM_NASM_OBJECT_FORMAT");
   nasmOptions.Parse(flags);
