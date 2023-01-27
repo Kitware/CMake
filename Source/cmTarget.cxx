@@ -1492,26 +1492,6 @@ std::string ConvertToString<cmValue>(cmValue value)
   return std::string(*value);
 }
 
-template <typename ValueType>
-bool StringIsEmpty(ValueType const& value);
-
-template <>
-bool StringIsEmpty<const char*>(const char* const& value)
-{
-  return cmValue::IsEmpty(value);
-}
-
-template <>
-bool StringIsEmpty<cmValue>(cmValue const& value)
-{
-  return value.IsEmpty();
-}
-
-template <>
-bool StringIsEmpty<std::string>(std::string const& value)
-{
-  return value.empty();
-}
 }
 
 template <typename ValueType>
@@ -1874,7 +1854,7 @@ void cmTargetInternals::AddDirectoryToFileSet(cmTarget* self,
   if (action == FileSetType::Action::Set) {
     fileSet->ClearDirectoryEntries();
   }
-  if (!StringIsEmpty(value)) {
+  if (cmNonempty(value)) {
     fileSet->AddDirectoryEntry(
       BT<std::string>(value, this->Makefile->GetBacktrace()));
   }
@@ -1905,7 +1885,7 @@ void cmTargetInternals::AddPathToFileSet(cmTarget* self,
   if (action == FileSetType::Action::Set) {
     fileSet->ClearFileEntries();
   }
-  if (!StringIsEmpty(value)) {
+  if (cmNonempty(value)) {
     fileSet->AddFileEntry(
       BT<std::string>(value, this->Makefile->GetBacktrace()));
   }
