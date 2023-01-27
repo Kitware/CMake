@@ -79,6 +79,7 @@
   # Use '-Xiwyu -v7' to see the fully qualified names that need this.
   # TODO: Can this be simplified with an @-expression?
   #{ symbol: [ "@std::__decay_and_strip<.*>::__type", private, "\"cmConfigure.h\"", public ] },
+  { symbol: [ "std::__decay_and_strip<int>::__type", private, "\"cmConfigure.h\"", public ] },
   { symbol: [ "std::__decay_and_strip<bool>::__type", private, "\"cmConfigure.h\"", public ] },
   { symbol: [ "std::__decay_and_strip<char const (&)[1]>::__type", private, "\"cmConfigure.h\"", public ] },
   { symbol: [ "std::__decay_and_strip<cmCommand *&>::__type", private, "\"cmConfigure.h\"", public ] },
