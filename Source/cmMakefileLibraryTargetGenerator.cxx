@@ -821,7 +821,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     if (useArchiveRules) {
       // Construct the individual object list strings.
       std::vector<std::string> object_strings;
-      this->WriteObjectsStrings(object_strings, archiveCommandLimit);
+      this->WriteObjectsStrings(object_strings, false, archiveCommandLimit);
 
       // Add the cuda device object to the list of archive files. This will
       // only occur on archives which have CUDA_RESOLVE_DEVICE_SYMBOLS enabled
