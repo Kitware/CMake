@@ -128,7 +128,10 @@ syn keyword cmakeProperty contained
             \ CPACK_WIX_ACL
             \ CROSSCOMPILING_EMULATOR
             \ CUDA_ARCHITECTURES
+            \ CUDA_CUBIN_COMPILATION
             \ CUDA_EXTENSIONS
+            \ CUDA_FATBIN_COMPILATION
+            \ CUDA_OPTIX_COMPILATION
             \ CUDA_PTX_COMPILATION
             \ CUDA_RESOLVE_DEVICE_SYMBOLS
             \ CUDA_RUNTIME_LIBRARY

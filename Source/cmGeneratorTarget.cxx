@@ -3,6 +3,7 @@
 #include "cmGeneratorTarget.h"
 
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <cerrno>
 #include <cstddef>
@@ -1000,12 +1001,27 @@ const std::string& cmGeneratorTarget::GetObjectName(cmSourceFile const* file)
 
 const char* cmGeneratorTarget::GetCustomObjectExtension() const
 {
-  static std::string extension;
-  const bool has_ptx_extension =
-    this->GetPropertyAsBool("CUDA_PTX_COMPILATION");
-  if (has_ptx_extension) {
-    extension = ".ptx";
-    return extension.c_str();
+  struct compiler_mode
+  {
+    std::string variable;
+    std::string extension;
+  };
+  static std::array<compiler_mode, 4> const modes{
+    { { "CUDA_PTX_COMPILATION", ".ptx" },
+      { "CUDA_CUBIN_COMPILATION", ".cubin" },
+      { "CUDA_FATBIN_COMPILATION", ".fatbin" },
+      { "CUDA_OPTIX_COMPILATION", ".optixir" } }
+  };
+
+  std::string const& compiler =
+    this->Makefile->GetSafeDefinition("CMAKE_CUDA_COMPILER_ID");
+  if (!compiler.empty()) {
+    for (const auto& m : modes) {
+      const bool has_extension = this->GetPropertyAsBool(m.variable);
+      if (has_extension) {
+        return m.extension.c_str();
+      }
+    }
   }
   return nullptr;
 }
