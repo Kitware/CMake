@@ -213,9 +213,16 @@ struct FileSetType
   FileSetEntries SelfEntries;
   FileSetEntries InterfaceEntries;
 
+  enum class Action
+  {
+    Set,
+    Append,
+  };
+
   template <typename ValueType>
   bool WriteProperties(cmTarget* tgt, cmTargetInternals* impl,
-                       const std::string& prop, ValueType value, bool clear);
+                       const std::string& prop, ValueType value,
+                       Action action);
   std::pair<bool, cmValue> ReadProperties(cmTarget const* tgt,
                                           cmTargetInternals const* impl,
                                           const std::string& prop) const;
@@ -285,11 +292,13 @@ public:
   template <typename ValueType>
   void AddDirectoryToFileSet(cmTarget* self, std::string const& fileSetName,
                              ValueType value, cm::string_view fileSetType,
-                             cm::string_view description, bool clear);
+                             cm::string_view description,
+                             FileSetType::Action action);
   template <typename ValueType>
   void AddPathToFileSet(cmTarget* self, std::string const& fileSetName,
                         ValueType value, cm::string_view fileSetType,
-                        cm::string_view description, bool clear);
+                        cm::string_view description,
+                        FileSetType::Action action);
   cmValue GetFileSetDirectories(cmTarget const* self,
                                 std::string const& fileSetName,
                                 cm::string_view fileSetType) const;
@@ -328,17 +337,17 @@ cmTargetInternals::cmTargetInternals()
 template <typename ValueType>
 bool FileSetType::WriteProperties(cmTarget* tgt, cmTargetInternals* impl,
                                   const std::string& prop, ValueType value,
-                                  bool clear)
+                                  Action action)
 {
   if (prop == this->DefaultDirectoryProperty) {
     impl->AddDirectoryToFileSet(tgt, std::string(this->TypeName), value,
                                 this->TypeName, this->DefaultDescription,
-                                clear);
+                                action);
     return true;
   }
   if (prop == this->DefaultPathProperty) {
     impl->AddPathToFileSet(tgt, std::string(this->TypeName), value,
-                           this->TypeName, this->DefaultDescription, clear);
+                           this->TypeName, this->DefaultDescription, action);
     return true;
   }
   if (cmHasPrefix(prop, this->DirectoryPrefix)) {
@@ -350,7 +359,8 @@ bool FileSetType::WriteProperties(cmTarget* tgt, cmTargetInternals* impl,
     } else {
       impl->AddDirectoryToFileSet(
         tgt, fileSetName, value, this->TypeName,
-        cmStrCat(this->ArbitraryDescription, " \"", fileSetName, "\""), clear);
+        cmStrCat(this->ArbitraryDescription, " \"", fileSetName, "\""),
+        action);
     }
     return true;
   }
@@ -363,7 +373,8 @@ bool FileSetType::WriteProperties(cmTarget* tgt, cmTargetInternals* impl,
     } else {
       impl->AddPathToFileSet(
         tgt, fileSetName, value, this->TypeName,
-        cmStrCat(this->ArbitraryDescription, " \"", fileSetName, "\""), clear);
+        cmStrCat(this->ArbitraryDescription, " \"", fileSetName, "\""),
+        action);
     }
     return true;
   }
@@ -1552,7 +1563,7 @@ void cmTarget::StoreProperty(const std::string& prop, ValueType value)
 
   for (auto* fileSetType : fileSetTypes) {
     if (fileSetType->WriteProperties(this, this->impl.get(), prop, value,
-                                     true)) {
+                                     FileSetType::Action::Set)) {
       return;
     }
   }
@@ -1744,7 +1755,7 @@ void cmTarget::AppendProperty(const std::string& prop,
 
   for (auto* fileSetType : fileSetTypes) {
     if (fileSetType->WriteProperties(this, this->impl.get(), prop, value,
-                                     false)) {
+                                     FileSetType::Action::Append)) {
       return;
     }
   }
@@ -1839,9 +1850,12 @@ void cmTarget::SetProperty(const std::string& prop, cmValue value)
 }
 
 template <typename ValueType>
-void cmTargetInternals::AddDirectoryToFileSet(
-  cmTarget* self, std::string const& fileSetName, ValueType value,
-  cm::string_view fileSetType, cm::string_view description, bool clear)
+void cmTargetInternals::AddDirectoryToFileSet(cmTarget* self,
+                                              std::string const& fileSetName,
+                                              ValueType value,
+                                              cm::string_view fileSetType,
+                                              cm::string_view description,
+                                              FileSetType::Action action)
 {
   auto* fileSet = self->GetFileSet(fileSetName);
   if (!fileSet) {
@@ -1857,7 +1871,7 @@ void cmTargetInternals::AddDirectoryToFileSet(
                                           "\"."));
     return;
   }
-  if (clear) {
+  if (action == FileSetType::Action::Set) {
     fileSet->ClearDirectoryEntries();
   }
   if (!StringIsEmpty(value)) {
@@ -1867,9 +1881,12 @@ void cmTargetInternals::AddDirectoryToFileSet(
 }
 
 template <typename ValueType>
-void cmTargetInternals::AddPathToFileSet(
-  cmTarget* self, std::string const& fileSetName, ValueType value,
-  cm::string_view fileSetType, cm::string_view description, bool clear)
+void cmTargetInternals::AddPathToFileSet(cmTarget* self,
+                                         std::string const& fileSetName,
+                                         ValueType value,
+                                         cm::string_view fileSetType,
+                                         cm::string_view description,
+                                         FileSetType::Action action)
 {
   auto* fileSet = self->GetFileSet(fileSetName);
   if (!fileSet) {
@@ -1885,7 +1902,7 @@ void cmTargetInternals::AddPathToFileSet(
                                           "\"."));
     return;
   }
-  if (clear) {
+  if (action == FileSetType::Action::Set) {
     fileSet->ClearFileEntries();
   }
   if (!StringIsEmpty(value)) {
