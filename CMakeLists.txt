@@ -313,6 +313,11 @@ if(CMake_RUN_IWYU)
   endif()
   set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE
     "${IWYU_COMMAND};-Xiwyu;--mapping_file=${CMake_SOURCE_DIR}/Utilities/IWYU/mapping.imp;-w")
+  option(CMake_IWYU_VERBOSE "Run include-what-you-use in verbose mode" OFF)
+  if (CMake_IWYU_VERBOSE)
+    list(APPEND CMAKE_CXX_INCLUDE_WHAT_YOU_USE
+      -Xiwyu -v7)
+  endif ()
   list(APPEND CMAKE_CXX_INCLUDE_WHAT_YOU_USE ${CMake_IWYU_OPTIONS})
 endif()
 
