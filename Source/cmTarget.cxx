@@ -1544,6 +1544,19 @@ void cmTarget::StoreProperty(const std::string& prop, ValueType value)
     return;
   }
 
+  FileSetType* fileSetTypes[] = {
+    &this->impl->HeadersFileSets,
+    &this->impl->CxxModulesFileSets,
+    &this->impl->CxxModuleHeadersFileSets,
+  };
+
+  for (auto* fileSetType : fileSetTypes) {
+    if (fileSetType->WriteProperties(this, this->impl.get(), prop, value,
+                                     true)) {
+      return;
+    }
+  }
+
   if (prop == propINCLUDE_DIRECTORIES) {
     this->impl->IncludeDirectoriesEntries.clear();
     if (value) {
@@ -1685,15 +1698,6 @@ void cmTarget::StoreProperty(const std::string& prop, ValueType value)
     } else {
       this->impl->LanguageStandardProperties.erase(prop);
     }
-  } else if (this->impl->HeadersFileSets.WriteProperties(
-               this, this->impl.get(), prop, value, true)) {
-    /* Handled in the `if` condition. */
-  } else if (this->impl->CxxModulesFileSets.WriteProperties(
-               this, this->impl.get(), prop, value, true)) {
-    /* Handled in the `if` condition. */
-  } else if (this->impl->CxxModuleHeadersFileSets.WriteProperties(
-               this, this->impl.get(), prop, value, true)) {
-    /* Handled in the `if` condition. */
   } else {
     this->impl->Properties.SetProperty(prop, value);
   }
@@ -1731,6 +1735,20 @@ void cmTarget::AppendProperty(const std::string& prop,
     this->impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return;
   }
+
+  FileSetType* fileSetTypes[] = {
+    &this->impl->HeadersFileSets,
+    &this->impl->CxxModulesFileSets,
+    &this->impl->CxxModuleHeadersFileSets,
+  };
+
+  for (auto* fileSetType : fileSetTypes) {
+    if (fileSetType->WriteProperties(this, this->impl.get(), prop, value,
+                                     false)) {
+      return;
+    }
+  }
+
   if (prop == "INCLUDE_DIRECTORIES") {
     if (!value.empty()) {
       cmListFileBacktrace lfbt = this->impl->GetBacktrace(bt);
@@ -1806,16 +1824,6 @@ void cmTarget::AppendProperty(const std::string& prop,
              prop == "OBJC_STANDARD" || prop == "OBJCXX_STANDARD") {
     this->impl->Makefile->IssueMessage(
       MessageType::FATAL_ERROR, prop + " property may not be appended.");
-  } else if (this->impl->HeadersFileSets.WriteProperties(
-               this, this->impl.get(), prop, value,
-               false)) { // NOLINT(bugprone-branch-clone)
-    /* Handled in the `if` condition. */
-  } else if (this->impl->CxxModulesFileSets.WriteProperties(
-               this, this->impl.get(), prop, value, false)) {
-    /* Handled in the `if` condition. */
-  } else if (this->impl->CxxModuleHeadersFileSets.WriteProperties(
-               this, this->impl.get(), prop, value, false)) {
-    /* Handled in the `if` condition. */
   } else {
     this->impl->Properties.AppendProperty(prop, value, asString);
   }
@@ -2374,21 +2382,17 @@ cmValue cmTarget::GetProperty(const std::string& prop) const
 
   // Check fileset properties.
   {
-    auto headers =
-      this->impl->HeadersFileSets.ReadProperties(this, this->impl.get(), prop);
-    if (headers.first) {
-      return headers.second;
-    }
-    auto cxx_modules = this->impl->CxxModulesFileSets.ReadProperties(
-      this, this->impl.get(), prop);
-    if (cxx_modules.first) {
-      return cxx_modules.second;
-    }
-    auto cxx_module_headers =
-      this->impl->CxxModuleHeadersFileSets.ReadProperties(
-        this, this->impl.get(), prop);
-    if (cxx_module_headers.first) {
-      return cxx_module_headers.second;
+    FileSetType* fileSetTypes[] = {
+      &this->impl->HeadersFileSets,
+      &this->impl->CxxModulesFileSets,
+      &this->impl->CxxModuleHeadersFileSets,
+    };
+
+    for (auto* fileSetType : fileSetTypes) {
+      auto value = fileSetType->ReadProperties(this, this->impl.get(), prop);
+      if (value.first) {
+        return value.second;
+      }
     }
   }
 
