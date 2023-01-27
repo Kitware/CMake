@@ -223,8 +223,6 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
                            submitInactivityTimeout);
       }
 
-      /* HTTP PUT please */
-      ::curl_easy_setopt(curl, CURLOPT_PUT, 1);
       ::curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
 
       ::curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);

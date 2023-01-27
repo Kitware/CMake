@@ -118,8 +118,6 @@ bool cmCTestCurl::UploadFile(std::string const& local_file,
   /* enable uploading */
   curl_easy_setopt(this->Curl, CURLOPT_UPLOAD, 1);
 
-  /* HTTP PUT please */
-  ::curl_easy_setopt(this->Curl, CURLOPT_PUT, 1);
   ::curl_easy_setopt(this->Curl, CURLOPT_VERBOSE, 1);
 
   FILE* ftpfile = cmsys::SystemTools::Fopen(local_file, "rb");
