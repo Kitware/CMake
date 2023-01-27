@@ -29,11 +29,6 @@
 #include "sockaddr.h"
 #include "timeval.h"
 
-CURLcode Curl_is_connected(struct Curl_easy *data,
-                           struct connectdata *conn,
-                           int sockindex,
-                           bool *connected);
-
 CURLcode Curl_connecthost(struct Curl_easy *data,
                           struct connectdata *conn,
                           const struct Curl_dns_entry *host);
@@ -61,7 +56,7 @@ bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
 /*
  * Check if a connection seems to be alive.
  */
-bool Curl_connalive(struct connectdata *conn);
+bool Curl_connalive(struct Curl_easy *data, struct connectdata *conn);
 
 #ifdef USE_WINSOCK
 /* When you run a program that uses the Windows Sockets API, you may
@@ -153,6 +148,13 @@ void Curl_conncontrol(struct connectdata *conn,
 #define connkeep(x,y) Curl_conncontrol(x, CONNCTRL_KEEP)
 #endif
 
-bool Curl_conn_data_pending(struct connectdata *conn, int sockindex);
+CURLcode Curl_conn_socket_set(struct Curl_easy *data,
+                              struct connectdata *conn,
+                              int sockindex);
+
+CURLcode Curl_conn_socket_accepted_set(struct Curl_easy *data,
+                                       struct connectdata *conn,
+                                       int sockindex,
+                                       curl_socket_t *s);
 
 #endif /* HEADER_CURL_CONNECT_H */

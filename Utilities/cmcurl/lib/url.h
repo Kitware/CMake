@@ -49,11 +49,6 @@ CURLcode Curl_parse_login_details(const char *login, const size_t len,
 const struct Curl_handler *Curl_builtin_scheme(const char *scheme,
                                                size_t schemelen);
 
-bool Curl_is_ASCII_name(const char *hostname);
-CURLcode Curl_idnconvert_hostname(struct Curl_easy *data,
-                                  struct hostname *host);
-void Curl_free_idnconverted_hostname(struct hostname *host);
-
 #define CURL_DEFAULT_PROXY_PORT 1080 /* default proxy port unless specified */
 #define CURL_DEFAULT_HTTPS_PROXY_PORT 443 /* default https proxy port unless
                                              specified */
@@ -63,22 +58,5 @@ void Curl_free_idnconverted_hostname(struct hostname *host);
 #else
 void Curl_verboseconnect(struct Curl_easy *data, struct connectdata *conn);
 #endif
-
-#ifdef CURL_DISABLE_PROXY
-#define CONNECT_PROXY_SSL() FALSE
-#else
-
-#define CONNECT_PROXY_SSL()\
-  (conn->http_proxy.proxytype == CURLPROXY_HTTPS &&\
-  !conn->bits.proxy_ssl_connected[sockindex])
-
-#define CONNECT_FIRSTSOCKET_PROXY_SSL()\
-  (conn->http_proxy.proxytype == CURLPROXY_HTTPS &&\
-  !conn->bits.proxy_ssl_connected[FIRSTSOCKET])
-
-#define CONNECT_SECONDARYSOCKET_PROXY_SSL()\
-  (conn->http_proxy.proxytype == CURLPROXY_HTTPS &&\
-  !conn->bits.proxy_ssl_connected[SECONDARYSOCKET])
-#endif /* !CURL_DISABLE_PROXY */
 
 #endif /* HEADER_CURL_URL_H */

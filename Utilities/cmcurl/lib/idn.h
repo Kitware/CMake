@@ -1,5 +1,5 @@
-#ifndef CURLINC_MPRINTF_H
-#define CURLINC_MPRINTF_H
+#ifndef HEADER_CURL_IDN_H
+#define HEADER_CURL_IDN_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -24,29 +24,15 @@
  *
  ***************************************************************************/
 
-#include <stdarg.h>
-#include <stdio.h> /* needed for FILE */
-#include "curl.h"  /* for CURL_EXTERN */
-
-#ifdef  __cplusplus
-extern "C" {
+#ifdef USE_WIN32_IDN
+bool Curl_win32_idn_to_ascii(const char *in, char **out);
+#endif /* USE_WIN32_IDN */
+bool Curl_is_ASCII_name(const char *hostname);
+CURLcode Curl_idnconvert_hostname(struct hostname *host);
+#if defined(USE_LIBIDN2) || defined(USE_WIN32_IDN)
+#define USE_IDN
+void Curl_free_idnconverted_hostname(struct hostname *host);
+#else
+#define Curl_free_idnconverted_hostname(x)
 #endif
-
-CURL_EXTERN int curl_mprintf(const char *format, ...);
-CURL_EXTERN int curl_mfprintf(FILE *fd, const char *format, ...);
-CURL_EXTERN int curl_msprintf(char *buffer, const char *format, ...);
-CURL_EXTERN int curl_msnprintf(char *buffer, size_t maxlength,
-                               const char *format, ...);
-CURL_EXTERN int curl_mvprintf(const char *format, va_list args);
-CURL_EXTERN int curl_mvfprintf(FILE *fd, const char *format, va_list args);
-CURL_EXTERN int curl_mvsprintf(char *buffer, const char *format, va_list args);
-CURL_EXTERN int curl_mvsnprintf(char *buffer, size_t maxlength,
-                                const char *format, va_list args);
-CURL_EXTERN char *curl_maprintf(const char *format, ...);
-CURL_EXTERN char *curl_mvaprintf(const char *format, va_list args);
-
-#ifdef  __cplusplus
-} /* end of extern "C" */
-#endif
-
-#endif /* CURLINC_MPRINTF_H */
+#endif /* HEADER_CURL_IDN_H */
