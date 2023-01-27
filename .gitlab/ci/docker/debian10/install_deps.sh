@@ -82,6 +82,7 @@ apt-get install -y \
     libjsoncpp-dev \
     liblapack-dev \
     liblzma-dev \
+    libmagick++-dev \
     libopenal-dev \
     libopenmpi-dev openmpi-bin \
     libosp-dev \
