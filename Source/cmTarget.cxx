@@ -305,7 +305,6 @@ public:
   std::map<std::string, BTs<std::string>> LanguageStandardProperties;
   std::map<cmTargetExport const*, std::vector<std::string>>
     InstallIncludeDirectoriesEntries;
-  std::vector<BT<std::string>> CompileOptionsEntries;
   std::vector<BT<std::string>> CompileFeaturesEntries;
   std::vector<BT<std::string>> CompileDefinitionsEntries;
   std::vector<BT<std::string>> PrecompileHeadersEntries;
@@ -322,6 +321,7 @@ public:
   cmListFileBacktrace Backtrace;
 
   UsageRequirementProperty IncludeDirectories;
+  UsageRequirementProperty CompileOptions;
 
   FileSetType HeadersFileSets;
   FileSetType CxxModulesFileSets;
@@ -359,6 +359,7 @@ public:
 
 cmTargetInternals::cmTargetInternals()
   : IncludeDirectories("INCLUDE_DIRECTORIES"_s)
+  , CompileOptions("COMPILE_OPTIONS"_s)
   , HeadersFileSets("HEADERS"_s, "HEADER_DIRS"_s, "HEADER_SET"_s,
                     "HEADER_DIRS_"_s, "HEADER_SET_"_s, "Header"_s,
                     "The default header set"_s, "Header set"_s,
@@ -842,8 +843,8 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
                                                   sysInc.end());
     }
 
-    cm::append(this->impl->CompileOptionsEntries,
-               this->impl->Makefile->GetCompileOptionsEntries());
+    this->impl->CompileOptions.CopyFromDirectory(
+      this->impl->Makefile->GetCompileOptionsEntries());
 
     cm::append(this->impl->LinkOptionsEntries,
                this->impl->Makefile->GetLinkOptionsEntries());
@@ -1463,7 +1464,7 @@ cmBTStringRange cmTarget::GetIncludeDirectoriesEntries() const
 
 cmBTStringRange cmTarget::GetCompileOptionsEntries() const
 {
-  return cmMakeRange(this->impl->CompileOptionsEntries);
+  return cmMakeRange(this->impl->CompileOptions.Entries);
 }
 
 cmBTStringRange cmTarget::GetCompileFeaturesEntries() const
@@ -1644,6 +1645,7 @@ void cmTarget::StoreProperty(const std::string& prop, ValueType value)
 
   UsageRequirementProperty* usageRequirements[] = {
     &this->impl->IncludeDirectories,
+    &this->impl->CompileOptions,
   };
 
   for (auto* usageRequirement : usageRequirements) {
@@ -1666,13 +1668,7 @@ void cmTarget::StoreProperty(const std::string& prop, ValueType value)
     }
   }
 
-  if (prop == propCOMPILE_OPTIONS) {
-    this->impl->CompileOptionsEntries.clear();
-    if (value) {
-      cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
-      this->impl->CompileOptionsEntries.emplace_back(value, lfbt);
-    }
-  } else if (prop == propCOMPILE_FEATURES) {
+  if (prop == propCOMPILE_FEATURES) {
     this->impl->CompileFeaturesEntries.clear();
     if (value) {
       cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
@@ -1841,6 +1837,7 @@ void cmTarget::AppendProperty(const std::string& prop,
 
   UsageRequirementProperty* usageRequirements[] = {
     &this->impl->IncludeDirectories,
+    &this->impl->CompileOptions,
   };
 
   for (auto* usageRequirement : usageRequirements) {
@@ -1863,12 +1860,7 @@ void cmTarget::AppendProperty(const std::string& prop,
     }
   }
 
-  if (prop == "COMPILE_OPTIONS") {
-    if (!value.empty()) {
-      cmListFileBacktrace lfbt = this->impl->GetBacktrace(bt);
-      this->impl->CompileOptionsEntries.emplace_back(value, lfbt);
-    }
-  } else if (prop == "COMPILE_FEATURES") {
+  if (prop == "COMPILE_FEATURES") {
     if (!value.empty()) {
       cmListFileBacktrace lfbt = this->impl->GetBacktrace(bt);
       this->impl->CompileFeaturesEntries.emplace_back(value, lfbt);
@@ -2177,10 +2169,10 @@ void cmTarget::InsertInclude(BT<std::string> const& entry, bool before)
 
 void cmTarget::InsertCompileOption(BT<std::string> const& entry, bool before)
 {
-  auto position = before ? this->impl->CompileOptionsEntries.begin()
-                         : this->impl->CompileOptionsEntries.end();
-
-  this->impl->CompileOptionsEntries.insert(position, entry);
+  this->impl->CompileOptions.WriteDirect(
+    entry,
+    before ? UsageRequirementProperty::Action::Prepend
+           : UsageRequirementProperty::Action::Append);
 }
 
 void cmTarget::InsertCompileDefinition(BT<std::string> const& entry)
@@ -2354,6 +2346,7 @@ cmValue cmTarget::GetProperty(const std::string& prop) const
 
     UsageRequirementProperty const* usageRequirements[] = {
       &this->impl->IncludeDirectories,
+      &this->impl->CompileOptions,
     };
 
     for (auto const* usageRequirement : usageRequirements) {
@@ -2411,15 +2404,6 @@ cmValue cmTarget::GetProperty(const std::string& prop) const
 
       static std::string output;
       output = cmJoin(this->impl->CompileFeaturesEntries, ";");
-      return cmValue(output);
-    }
-    if (prop == propCOMPILE_OPTIONS) {
-      if (this->impl->CompileOptionsEntries.empty()) {
-        return nullptr;
-      }
-
-      static std::string output;
-      output = cmJoin(this->impl->CompileOptionsEntries, ";");
       return cmValue(output);
     }
     if (prop == propCOMPILE_DEFINITIONS) {
