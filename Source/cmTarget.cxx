@@ -305,7 +305,6 @@ public:
   std::map<std::string, BTs<std::string>> LanguageStandardProperties;
   std::map<cmTargetExport const*, std::vector<std::string>>
     InstallIncludeDirectoriesEntries;
-  std::vector<BT<std::string>> SourceEntries;
   std::vector<BT<std::string>> LinkOptionsEntries;
   std::vector<BT<std::string>> LinkDirectoriesEntries;
   std::vector<BT<std::string>> LinkImplementationPropertyEntries;
@@ -322,6 +321,7 @@ public:
   UsageRequirementProperty CompileFeatures;
   UsageRequirementProperty CompileDefinitions;
   UsageRequirementProperty PrecompileHeaders;
+  UsageRequirementProperty Sources;
 
   FileSetType HeadersFileSets;
   FileSetType CxxModulesFileSets;
@@ -363,6 +363,7 @@ cmTargetInternals::cmTargetInternals()
   , CompileFeatures("COMPILE_FEATURES"_s)
   , CompileDefinitions("COMPILE_DEFINITIONS"_s)
   , PrecompileHeaders("PRECOMPILE_HEADERS"_s)
+  , Sources("SOURCES"_s, UsageRequirementProperty::AppendEmpty::Yes)
   , HeadersFileSets("HEADERS"_s, "HEADER_DIRS"_s, "HEADER_SET"_s,
                     "HEADER_DIRS_"_s, "HEADER_SET_"_s, "Header"_s,
                     "The default header set"_s, "Header set"_s,
@@ -1098,15 +1099,15 @@ void cmTarget::AddPostBuildCommand(cmCustomCommand&& cmd)
 void cmTarget::AddTracedSources(std::vector<std::string> const& srcs)
 {
   if (!srcs.empty()) {
-    cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
-    this->impl->SourceEntries.emplace_back(cmJoin(srcs, ";"), lfbt);
+    this->impl->Sources.WriteDirect(this->impl.get(), {},
+                                    cmValue(cmJoin(srcs, ";")),
+                                    UsageRequirementProperty::Action::Append);
   }
 }
 
 void cmTarget::AddSources(std::vector<std::string> const& srcs)
 {
-  std::string srcFiles;
-  const char* sep = "";
+  std::vector<std::string> srcFiles;
   for (auto filename : srcs) {
     if (!cmGeneratorExpression::StartsWithGeneratorExpression(filename)) {
       if (!filename.empty()) {
@@ -1117,14 +1118,9 @@ void cmTarget::AddSources(std::vector<std::string> const& srcs)
       }
       this->impl->Makefile->GetOrCreateSource(filename);
     }
-    srcFiles += sep;
-    srcFiles += filename;
-    sep = ";";
+    srcFiles.emplace_back(filename);
   }
-  if (!srcFiles.empty()) {
-    cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
-    this->impl->SourceEntries.emplace_back(std::move(srcFiles), lfbt);
-  }
+  this->AddTracedSources(srcFiles);
 }
 
 std::string cmTargetInternals::ProcessSourceItemCMP0049(
@@ -1228,13 +1224,13 @@ cmSourceFile* cmTarget::AddSource(const std::string& src, bool before)
 {
   cmSourceFileLocation sfl(this->impl->Makefile, src,
                            cmSourceFileLocationKind::Known);
-  if (std::find_if(
-        this->impl->SourceEntries.begin(), this->impl->SourceEntries.end(),
-        TargetPropertyEntryFinder(sfl)) == this->impl->SourceEntries.end()) {
-    cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
-    this->impl->SourceEntries.insert(before ? this->impl->SourceEntries.begin()
-                                            : this->impl->SourceEntries.end(),
-                                     BT<std::string>(src, lfbt));
+  auto const& sources = this->impl->Sources.Entries;
+  if (std::find_if(sources.begin(), sources.end(),
+                   TargetPropertyEntryFinder(sfl)) == sources.end()) {
+    this->impl->Sources.WriteDirect(
+      this->impl.get(), {}, cmValue(src),
+      before ? UsageRequirementProperty::Action::Prepend
+             : UsageRequirementProperty::Action::Append);
   }
   if (cmGeneratorExpression::Find(src) != std::string::npos) {
     return nullptr;
@@ -1487,7 +1483,7 @@ cmBTStringRange cmTarget::GetPrecompileHeadersEntries() const
 
 cmBTStringRange cmTarget::GetSourceEntries() const
 {
-  return cmMakeRange(this->impl->SourceEntries);
+  return cmMakeRange(this->impl->Sources.Entries);
 }
 
 cmBTStringRange cmTarget::GetLinkOptionsEntries() const
@@ -1649,7 +1645,7 @@ void cmTarget::StoreProperty(const std::string& prop, ValueType value)
   UsageRequirementProperty* usageRequirements[] = {
     &this->impl->IncludeDirectories, &this->impl->CompileOptions,
     &this->impl->CompileFeatures,    &this->impl->CompileDefinitions,
-    &this->impl->PrecompileHeaders,
+    &this->impl->PrecompileHeaders,  &this->impl->Sources,
   };
 
   for (auto* usageRequirement : usageRequirements) {
@@ -1708,12 +1704,6 @@ void cmTarget::StoreProperty(const std::string& prop, ValueType value)
       cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
       this->impl->LinkInterfaceDirectExcludePropertyEntries.emplace_back(value,
                                                                          lfbt);
-    }
-  } else if (prop == propSOURCES) {
-    this->impl->SourceEntries.clear();
-    if (value) {
-      cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
-      this->impl->SourceEntries.emplace_back(value, lfbt);
     }
   } else if (prop == propIMPORTED_GLOBAL) {
     if (!cmIsOn(value)) {
@@ -1833,7 +1823,7 @@ void cmTarget::AppendProperty(const std::string& prop,
   UsageRequirementProperty* usageRequirements[] = {
     &this->impl->IncludeDirectories, &this->impl->CompileOptions,
     &this->impl->CompileFeatures,    &this->impl->CompileDefinitions,
-    &this->impl->PrecompileHeaders,
+    &this->impl->PrecompileHeaders,  &this->impl->Sources,
   };
 
   for (auto* usageRequirement : usageRequirements) {
@@ -1887,9 +1877,6 @@ void cmTarget::AppendProperty(const std::string& prop,
       this->impl->LinkInterfaceDirectExcludePropertyEntries.emplace_back(value,
                                                                          lfbt);
     }
-  } else if (prop == "SOURCES") {
-    cmListFileBacktrace lfbt = this->impl->GetBacktrace(bt);
-    this->impl->SourceEntries.emplace_back(value, lfbt);
   } else if (cmHasLiteralPrefix(prop, "IMPORTED_LIBNAME")) {
     this->impl->Makefile->IssueMessage(
       MessageType::FATAL_ERROR, prop + " property may not be APPENDed.");
@@ -2322,7 +2309,7 @@ cmValue cmTarget::GetProperty(const std::string& prop) const
     UsageRequirementProperty const* usageRequirements[] = {
       &this->impl->IncludeDirectories, &this->impl->CompileOptions,
       &this->impl->CompileFeatures,    &this->impl->CompileDefinitions,
-      &this->impl->PrecompileHeaders,
+      &this->impl->PrecompileHeaders,  &this->impl->Sources,
     };
 
     for (auto const* usageRequirement : usageRequirements) {
