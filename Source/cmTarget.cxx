@@ -305,7 +305,6 @@ public:
   std::map<std::string, BTs<std::string>> LanguageStandardProperties;
   std::map<cmTargetExport const*, std::vector<std::string>>
     InstallIncludeDirectoriesEntries;
-  std::vector<BT<std::string>> LinkInterfacePropertyEntries;
   std::vector<BT<std::string>> LinkInterfaceDirectPropertyEntries;
   std::vector<BT<std::string>> LinkInterfaceDirectExcludePropertyEntries;
   std::vector<std::pair<cmTarget::TLLSignature, cmListFileContext>>
@@ -322,6 +321,7 @@ public:
   UsageRequirementProperty LinkOptions;
   UsageRequirementProperty LinkDirectories;
   UsageRequirementProperty LinkLibraries;
+  UsageRequirementProperty InterfaceLinkLibraries;
 
   FileSetType HeadersFileSets;
   FileSetType CxxModulesFileSets;
@@ -367,6 +367,7 @@ cmTargetInternals::cmTargetInternals()
   , LinkOptions("LINK_OPTIONS"_s)
   , LinkDirectories("LINK_DIRECTORIES"_s)
   , LinkLibraries("LINK_LIBRARIES"_s)
+  , InterfaceLinkLibraries("INTERFACE_LINK_LIBRARIES"_s)
   , HeadersFileSets("HEADERS"_s, "HEADER_DIRS"_s, "HEADER_SET"_s,
                     "HEADER_DIRS_"_s, "HEADER_SET_"_s, "Header"_s,
                     "The default header set"_s, "Header set"_s,
@@ -1504,7 +1505,7 @@ cmBTStringRange cmTarget::GetLinkImplementationEntries() const
 
 cmBTStringRange cmTarget::GetLinkInterfaceEntries() const
 {
-  return cmMakeRange(this->impl->LinkInterfacePropertyEntries);
+  return cmMakeRange(this->impl->InterfaceLinkLibraries.Entries);
 }
 
 cmBTStringRange cmTarget::GetLinkInterfaceDirectEntries() const
@@ -1648,7 +1649,7 @@ void cmTarget::StoreProperty(const std::string& prop, ValueType value)
     &this->impl->CompileFeatures,    &this->impl->CompileDefinitions,
     &this->impl->PrecompileHeaders,  &this->impl->Sources,
     &this->impl->LinkOptions,        &this->impl->LinkDirectories,
-    &this->impl->LinkLibraries,
+    &this->impl->LinkLibraries,      &this->impl->InterfaceLinkLibraries,
   };
 
   for (auto* usageRequirement : usageRequirements) {
@@ -1671,13 +1672,7 @@ void cmTarget::StoreProperty(const std::string& prop, ValueType value)
     }
   }
 
-  if (prop == propINTERFACE_LINK_LIBRARIES) {
-    this->impl->LinkInterfacePropertyEntries.clear();
-    if (value) {
-      cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
-      this->impl->LinkInterfacePropertyEntries.emplace_back(value, lfbt);
-    }
-  } else if (prop == propINTERFACE_LINK_LIBRARIES_DIRECT) {
+  if (prop == propINTERFACE_LINK_LIBRARIES_DIRECT) {
     this->impl->LinkInterfaceDirectPropertyEntries.clear();
     if (value) {
       cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
@@ -1810,7 +1805,7 @@ void cmTarget::AppendProperty(const std::string& prop,
     &this->impl->CompileFeatures,    &this->impl->CompileDefinitions,
     &this->impl->PrecompileHeaders,  &this->impl->Sources,
     &this->impl->LinkOptions,        &this->impl->LinkDirectories,
-    &this->impl->LinkLibraries,
+    &this->impl->LinkLibraries,      &this->impl->InterfaceLinkLibraries,
   };
 
   for (auto* usageRequirement : usageRequirements) {
@@ -1833,12 +1828,7 @@ void cmTarget::AppendProperty(const std::string& prop,
     }
   }
 
-  if (prop == propINTERFACE_LINK_LIBRARIES) {
-    if (!value.empty()) {
-      cmListFileBacktrace lfbt = this->impl->GetBacktrace(bt);
-      this->impl->LinkInterfacePropertyEntries.emplace_back(value, lfbt);
-    }
-  } else if (prop == propINTERFACE_LINK_LIBRARIES_DIRECT) {
+  if (prop == propINTERFACE_LINK_LIBRARIES_DIRECT) {
     if (!value.empty()) {
       cmListFileBacktrace lfbt = this->impl->GetBacktrace(bt);
       this->impl->LinkInterfaceDirectPropertyEntries.emplace_back(value, lfbt);
@@ -2046,7 +2036,7 @@ void cmTarget::FinalizeTargetConfiguration(
                                this->impl->LinkLibraries.Entries,
                                this->GetMakefile()->GetCMakeInstance()) ||
       !CheckLinkLibraryPattern("INTERFACE_LINK_LIBRARIES"_s,
-                               this->impl->LinkInterfacePropertyEntries,
+                               this->impl->InterfaceLinkLibraries.Entries,
                                this->GetMakefile()->GetCMakeInstance()) ||
       !CheckLinkLibraryPattern("INTERFACE_LINK_LIBRARIES_DIRECT"_s,
                                this->impl->LinkInterfaceDirectPropertyEntries,
@@ -2283,7 +2273,7 @@ cmValue cmTarget::GetProperty(const std::string& prop) const
       &this->impl->CompileFeatures,    &this->impl->CompileDefinitions,
       &this->impl->PrecompileHeaders,  &this->impl->Sources,
       &this->impl->LinkOptions,        &this->impl->LinkDirectories,
-      &this->impl->LinkLibraries,
+      &this->impl->LinkLibraries,      &this->impl->InterfaceLinkLibraries,
     };
 
     for (auto const* usageRequirement : usageRequirements) {
@@ -2293,15 +2283,6 @@ cmValue cmTarget::GetProperty(const std::string& prop) const
       }
     }
 
-    if (prop == propINTERFACE_LINK_LIBRARIES) {
-      if (this->impl->LinkInterfacePropertyEntries.empty()) {
-        return nullptr;
-      }
-
-      static std::string output;
-      output = cmJoin(this->impl->LinkInterfacePropertyEntries, ";");
-      return cmValue(output);
-    }
     if (prop == propINTERFACE_LINK_LIBRARIES_DIRECT) {
       if (this->impl->LinkInterfaceDirectPropertyEntries.empty()) {
         return nullptr;
