@@ -305,7 +305,6 @@ public:
   std::map<std::string, BTs<std::string>> LanguageStandardProperties;
   std::map<cmTargetExport const*, std::vector<std::string>>
     InstallIncludeDirectoriesEntries;
-  std::vector<BT<std::string>> CompileDefinitionsEntries;
   std::vector<BT<std::string>> PrecompileHeadersEntries;
   std::vector<BT<std::string>> SourceEntries;
   std::vector<BT<std::string>> LinkOptionsEntries;
@@ -322,6 +321,7 @@ public:
   UsageRequirementProperty IncludeDirectories;
   UsageRequirementProperty CompileOptions;
   UsageRequirementProperty CompileFeatures;
+  UsageRequirementProperty CompileDefinitions;
 
   FileSetType HeadersFileSets;
   FileSetType CxxModulesFileSets;
@@ -361,6 +361,7 @@ cmTargetInternals::cmTargetInternals()
   : IncludeDirectories("INCLUDE_DIRECTORIES"_s)
   , CompileOptions("COMPILE_OPTIONS"_s)
   , CompileFeatures("COMPILE_FEATURES"_s)
+  , CompileDefinitions("COMPILE_DEFINITIONS"_s)
   , HeadersFileSets("HEADERS"_s, "HEADER_DIRS"_s, "HEADER_SET"_s,
                     "HEADER_DIRS_"_s, "HEADER_SET_"_s, "Header"_s,
                     "The default header set"_s, "Header set"_s,
@@ -1475,7 +1476,7 @@ cmBTStringRange cmTarget::GetCompileFeaturesEntries() const
 
 cmBTStringRange cmTarget::GetCompileDefinitionsEntries() const
 {
-  return cmMakeRange(this->impl->CompileDefinitionsEntries);
+  return cmMakeRange(this->impl->CompileDefinitions.Entries);
 }
 
 cmBTStringRange cmTarget::GetPrecompileHeadersEntries() const
@@ -1648,6 +1649,7 @@ void cmTarget::StoreProperty(const std::string& prop, ValueType value)
     &this->impl->IncludeDirectories,
     &this->impl->CompileOptions,
     &this->impl->CompileFeatures,
+    &this->impl->CompileDefinitions,
   };
 
   for (auto* usageRequirement : usageRequirements) {
@@ -1670,13 +1672,7 @@ void cmTarget::StoreProperty(const std::string& prop, ValueType value)
     }
   }
 
-  if (prop == propCOMPILE_DEFINITIONS) {
-    this->impl->CompileDefinitionsEntries.clear();
-    if (value) {
-      cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
-      this->impl->CompileDefinitionsEntries.emplace_back(value, lfbt);
-    }
-  } else if (prop == propLINK_OPTIONS) {
+  if (prop == propLINK_OPTIONS) {
     this->impl->LinkOptionsEntries.clear();
     if (value) {
       cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
@@ -1835,6 +1831,7 @@ void cmTarget::AppendProperty(const std::string& prop,
     &this->impl->IncludeDirectories,
     &this->impl->CompileOptions,
     &this->impl->CompileFeatures,
+    &this->impl->CompileDefinitions,
   };
 
   for (auto* usageRequirement : usageRequirements) {
@@ -1857,12 +1854,7 @@ void cmTarget::AppendProperty(const std::string& prop,
     }
   }
 
-  if (prop == "COMPILE_DEFINITIONS") {
-    if (!value.empty()) {
-      cmListFileBacktrace lfbt = this->impl->GetBacktrace(bt);
-      this->impl->CompileDefinitionsEntries.emplace_back(value, lfbt);
-    }
-  } else if (prop == "LINK_OPTIONS") {
+  if (prop == "LINK_OPTIONS") {
     if (!value.empty()) {
       cmListFileBacktrace lfbt = this->impl->GetBacktrace(bt);
       this->impl->LinkOptionsEntries.emplace_back(value, lfbt);
@@ -2169,7 +2161,8 @@ void cmTarget::InsertCompileOption(BT<std::string> const& entry, bool before)
 
 void cmTarget::InsertCompileDefinition(BT<std::string> const& entry)
 {
-  this->impl->CompileDefinitionsEntries.push_back(entry);
+  this->impl->CompileDefinitions.WriteDirect(
+    entry, UsageRequirementProperty::Action::Append);
 }
 
 void cmTarget::InsertLinkOption(BT<std::string> const& entry, bool before)
@@ -2340,6 +2333,7 @@ cmValue cmTarget::GetProperty(const std::string& prop) const
       &this->impl->IncludeDirectories,
       &this->impl->CompileOptions,
       &this->impl->CompileFeatures,
+      &this->impl->CompileDefinitions,
     };
 
     for (auto const* usageRequirement : usageRequirements) {
@@ -2389,15 +2383,6 @@ cmValue cmTarget::GetProperty(const std::string& prop) const
     // the type property returns what type the target is
     if (prop == propTYPE) {
       return cmValue(cmState::GetTargetTypeName(this->GetType()));
-    }
-    if (prop == propCOMPILE_DEFINITIONS) {
-      if (this->impl->CompileDefinitionsEntries.empty()) {
-        return nullptr;
-      }
-
-      static std::string output;
-      output = cmJoin(this->impl->CompileDefinitionsEntries, ";");
-      return cmValue(output);
     }
     if (prop == propLINK_OPTIONS) {
       if (this->impl->LinkOptionsEntries.empty()) {
