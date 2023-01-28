@@ -246,9 +246,9 @@ struct UsageRequirementProperty
   {
   }
 
-  void CopyFromDirectory(cmBTStringRange directoryEntries)
+  void CopyFromEntries(cmBTStringRange entries)
   {
-    return cm::append(this->Entries, directoryEntries);
+    return cm::append(this->Entries, entries);
   }
 
   enum class Action
@@ -964,7 +964,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   if (this->IsNormal()) {
     // Initialize the INCLUDE_DIRECTORIES property based on the current value
     // of the same directory property:
-    this->impl->IncludeDirectories.CopyFromDirectory(
+    this->impl->IncludeDirectories.CopyFromEntries(
       this->impl->Makefile->GetIncludeDirectoriesEntries());
 
     {
@@ -973,11 +973,11 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
                                                   sysInc.end());
     }
 
-    this->impl->CompileOptions.CopyFromDirectory(
+    this->impl->CompileOptions.CopyFromEntries(
       this->impl->Makefile->GetCompileOptionsEntries());
-    this->impl->LinkOptions.CopyFromDirectory(
+    this->impl->LinkOptions.CopyFromEntries(
       this->impl->Makefile->GetLinkOptionsEntries());
-    this->impl->LinkDirectories.CopyFromDirectory(
+    this->impl->LinkDirectories.CopyFromEntries(
       this->impl->Makefile->GetLinkDirectoriesEntries());
   }
 
