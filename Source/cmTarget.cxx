@@ -230,6 +230,50 @@ struct FileSetType
   void AddFileSet(const std::string& name, cmFileSetVisibility vis,
                   cmListFileBacktrace bt);
 };
+
+struct UsageRequirementProperty
+{
+  enum class AppendEmpty
+  {
+    Yes,
+    No,
+  };
+
+  UsageRequirementProperty(cm::static_string_view name,
+                           AppendEmpty appendEmpty = AppendEmpty::No)
+    : Name(name)
+    , AppendBehavior(appendEmpty)
+  {
+  }
+
+  void CopyFromDirectory(cmBTStringRange directoryEntries)
+  {
+    return cm::append(this->Entries, directoryEntries);
+  }
+
+  enum class Action
+  {
+    Set,
+    Prepend,
+    Append,
+  };
+
+  template <typename ValueType>
+  bool Write(cmTargetInternals const* impl,
+             cm::optional<cmListFileBacktrace> const& bt,
+             const std::string& prop, ValueType value, Action action);
+  template <typename ValueType>
+  void WriteDirect(cmTargetInternals const* impl,
+                   cm::optional<cmListFileBacktrace> const& bt,
+                   ValueType value, Action action);
+  void WriteDirect(BT<std::string> value, Action action);
+  std::pair<bool, cmValue> Read(const std::string& prop) const;
+
+  cm::static_string_view const Name;
+  AppendEmpty const AppendBehavior;
+
+  std::vector<BT<std::string>> Entries;
+};
 }
 
 class cmTargetInternals
@@ -442,6 +486,67 @@ void FileSetType::AddFileSet(const std::string& name, cmFileSetVisibility vis,
   if (cmFileSetVisibilityIsForInterface(vis)) {
     this->InterfaceEntries.Entries.emplace_back(name, std::move(bt));
   }
+}
+
+template <typename ValueType>
+bool UsageRequirementProperty::Write(
+  cmTargetInternals const* impl, cm::optional<cmListFileBacktrace> const& bt,
+  const std::string& prop, ValueType value, Action action)
+{
+  if (prop == this->Name) {
+    this->WriteDirect(impl, bt, value, action);
+    return true;
+  }
+  return false;
+}
+
+template <typename ValueType>
+void UsageRequirementProperty::WriteDirect(
+  cmTargetInternals const* impl, cm::optional<cmListFileBacktrace> const& bt,
+  ValueType value, Action action)
+{
+  if (action == Action::Set) {
+    this->Entries.clear();
+  }
+  if (value) {
+    cmListFileBacktrace lfbt = impl->GetBacktrace(bt);
+    if (action == Action::Prepend) {
+      this->Entries.emplace(this->Entries.begin(), value, lfbt);
+    } else if (action == Action::Set || cmNonempty(value) ||
+               this->AppendBehavior == AppendEmpty::Yes) {
+      this->Entries.emplace_back(value, lfbt);
+    }
+  }
+}
+
+void UsageRequirementProperty::WriteDirect(BT<std::string> value,
+                                           Action action)
+{
+  if (action == Action::Set) {
+    this->Entries.clear();
+  }
+  if (action == Action::Prepend) {
+    this->Entries.emplace(this->Entries.begin(), std::move(value));
+  } else {
+    this->Entries.emplace_back(std::move(value));
+  }
+}
+
+std::pair<bool, cmValue> UsageRequirementProperty::Read(
+  const std::string& prop) const
+{
+  bool did_read = false;
+  cmValue value = nullptr;
+  if (prop == this->Name) {
+    if (!this->Entries.empty()) {
+      // Storage to back the returned `cmValue`.
+      static std::string output;
+      output = cmJoin(this->Entries, ";");
+      value = cmValue(output);
+    }
+    did_read = true;
+  }
+  return { did_read, value };
 }
 
 namespace {
