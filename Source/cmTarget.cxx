@@ -673,6 +673,11 @@ public:
   UsageRequirementProperty InterfaceLinkLibraries;
   UsageRequirementProperty InterfaceLinkLibrariesDirect;
   UsageRequirementProperty InterfaceLinkLibrariesDirectExclude;
+  UsageRequirementProperty ImportedCxxModulesIncludeDirectories;
+  UsageRequirementProperty ImportedCxxModulesCompileDefinitions;
+  UsageRequirementProperty ImportedCxxModulesCompileFeatures;
+  UsageRequirementProperty ImportedCxxModulesCompileOptions;
+  UsageRequirementProperty ImportedCxxModulesLinkLibraries;
 
   FileSetType HeadersFileSets;
   FileSetType CxxModulesFileSets;
@@ -723,6 +728,14 @@ cmTargetInternals::cmTargetInternals()
   , InterfaceLinkLibrariesDirect("INTERFACE_LINK_LIBRARIES_DIRECT"_s)
   , InterfaceLinkLibrariesDirectExclude(
       "INTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE"_s)
+  , ImportedCxxModulesIncludeDirectories(
+      "IMPORTED_CXX_MODULES_INCLUDE_DIRECTORIES"_s)
+  , ImportedCxxModulesCompileDefinitions(
+      "IMPORTED_CXX_MODULES_COMPILE_DEFINITIONS"_s)
+  , ImportedCxxModulesCompileFeatures(
+      "IMPORTED_CXX_MODULES_COMPILE_FEATURES"_s)
+  , ImportedCxxModulesCompileOptions("IMPORTED_CXX_MODULES_COMPILE_OPTIONS"_s)
+  , ImportedCxxModulesLinkLibraries("IMPORTED_CXX_MODULES_LINK_LIBRARIES"_s)
   , HeadersFileSets("HEADERS"_s, "HEADER_DIRS"_s, "HEADER_SET"_s,
                     "HEADER_DIRS_"_s, "HEADER_SET_"_s, "Header"_s,
                     "The default header set"_s, "Header set"_s,
@@ -1777,6 +1790,11 @@ MAKE_PROP(IMPORTED);
 MAKE_PROP(IMPORTED_GLOBAL);
 MAKE_PROP(INCLUDE_DIRECTORIES);
 MAKE_PROP(LINK_OPTIONS);
+MAKE_PROP(IMPORTED_CXX_MODULES_INCLUDE_DIRECTORIES);
+MAKE_PROP(IMPORTED_CXX_MODULES_COMPILE_DEFINITIONS);
+MAKE_PROP(IMPORTED_CXX_MODULES_COMPILE_FEATURES);
+MAKE_PROP(IMPORTED_CXX_MODULES_COMPILE_OPTIONS);
+MAKE_PROP(IMPORTED_CXX_MODULES_LINK_LIBRARIES);
 MAKE_PROP(LINK_DIRECTORIES);
 MAKE_PROP(LINK_LIBRARIES);
 MAKE_PROP(MANUALLY_ADDED_DEPENDENCIES);
@@ -1846,6 +1864,11 @@ void cmTarget::SetProperty(const std::string& prop, cmValue value)
     &this->impl->InterfaceLinkLibraries,
     &this->impl->InterfaceLinkLibrariesDirect,
     &this->impl->InterfaceLinkLibrariesDirectExclude,
+    &this->impl->ImportedCxxModulesIncludeDirectories,
+    &this->impl->ImportedCxxModulesCompileDefinitions,
+    &this->impl->ImportedCxxModulesCompileFeatures,
+    &this->impl->ImportedCxxModulesCompileOptions,
+    &this->impl->ImportedCxxModulesLinkLibraries,
   };
 
   for (auto* usageRequirement : usageRequirements) {
@@ -2019,6 +2042,11 @@ void cmTarget::AppendProperty(const std::string& prop,
     &this->impl->InterfaceLinkLibraries,
     &this->impl->InterfaceLinkLibrariesDirect,
     &this->impl->InterfaceLinkLibrariesDirectExclude,
+    &this->impl->ImportedCxxModulesIncludeDirectories,
+    &this->impl->ImportedCxxModulesCompileDefinitions,
+    &this->impl->ImportedCxxModulesCompileFeatures,
+    &this->impl->ImportedCxxModulesCompileOptions,
+    &this->impl->ImportedCxxModulesLinkLibraries,
   };
 
   for (auto* usageRequirement : usageRequirements) {
@@ -2445,6 +2473,11 @@ cmValue cmTarget::GetProperty(const std::string& prop) const
     propINTERFACE_LINK_LIBRARIES,
     propINTERFACE_LINK_LIBRARIES_DIRECT,
     propINTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE,
+    propIMPORTED_CXX_MODULES_INCLUDE_DIRECTORIES,
+    propIMPORTED_CXX_MODULES_COMPILE_DEFINITIONS,
+    propIMPORTED_CXX_MODULES_COMPILE_FEATURES,
+    propIMPORTED_CXX_MODULES_COMPILE_OPTIONS,
+    propIMPORTED_CXX_MODULES_LINK_LIBRARIES,
   };
   if (specialProps.count(prop)) {
     if (prop == propC_STANDARD || prop == propCXX_STANDARD ||
@@ -2470,6 +2503,11 @@ cmValue cmTarget::GetProperty(const std::string& prop) const
       &this->impl->InterfaceLinkLibraries,
       &this->impl->InterfaceLinkLibrariesDirect,
       &this->impl->InterfaceLinkLibrariesDirectExclude,
+      &this->impl->ImportedCxxModulesIncludeDirectories,
+      &this->impl->ImportedCxxModulesCompileDefinitions,
+      &this->impl->ImportedCxxModulesCompileFeatures,
+      &this->impl->ImportedCxxModulesCompileOptions,
+      &this->impl->ImportedCxxModulesLinkLibraries,
     };
 
     for (auto const* usageRequirement : usageRequirements) {
