@@ -46,6 +46,21 @@ function(WRITE_BASIC_CONFIG_VERSION_FILE _filename)
     endif()
   endif()
 
+  if(NOT CVF_ARCH_INDEPENDENT)
+    set(CVF_ARCH_INDEPENDENT_CHECK "
+# if the installed or the using project don't have CMAKE_SIZEOF_VOID_P set, ignore it:
+if(CMAKE_SIZEOF_VOID_P STREQUAL \"\" OR \"${CMAKE_SIZEOF_VOID_P}\" STREQUAL \"\")
+  return()
+endif()
+
+# check that the installed version has the same 32/64bit-ness as the one which is currently searching:
+if(NOT CMAKE_SIZEOF_VOID_P STREQUAL \"${CMAKE_SIZEOF_VOID_P}\")
+  math(EXPR installedBits \"${CMAKE_SIZEOF_VOID_P} * 8\")
+  set(PACKAGE_VERSION \"\${PACKAGE_VERSION} (\${installedBits}bit)\")
+  set(PACKAGE_VERSION_UNSUITABLE TRUE)
+endif()")
+  endif()
+
   configure_file("${versionTemplateFile}" "${_filename}" @ONLY)
 
 endfunction()
