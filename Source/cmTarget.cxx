@@ -273,6 +273,64 @@ struct UsageRequirementProperty
 
   std::vector<BT<std::string>> Entries;
 };
+
+struct TargetProperty
+{
+  enum class InitCondition
+  {
+    // Always initialize the property.
+    Always,
+    // Never initialize the property.
+    Never,
+  };
+
+  enum class Repetition
+  {
+    Once,
+    PerConfig,
+    PerConfigPrefix,
+  };
+
+  TargetProperty(cm::static_string_view name)
+    : Name(name)
+  {
+  }
+
+  TargetProperty(cm::static_string_view name, cm::static_string_view dflt)
+    : Name(name)
+    , Default(dflt)
+  {
+  }
+
+  TargetProperty(cm::static_string_view name, InitCondition init)
+    : Name(name)
+    , InitConditional(init)
+  {
+  }
+
+  TargetProperty(cm::static_string_view name, InitCondition init,
+                 Repetition repeat)
+    : Name(name)
+    , InitConditional(init)
+    , Repeat(repeat)
+  {
+  }
+
+  cm::static_string_view const Name;
+  cm::optional<cm::static_string_view> const Default = {};
+  InitCondition const InitConditional = InitCondition::Always;
+  Repetition const Repeat = Repetition::Once;
+};
+
+#define IC TargetProperty::InitCondition
+#define R TargetProperty::Repetition
+
+TargetProperty const StaticTargetProperties[] = {};
+
+#undef COMMON_LANGUAGE_PROPERTIES
+#undef IC
+#undef R
+
 }
 
 class cmTargetInternals
@@ -956,6 +1014,54 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   if (this->impl->TargetType <= cmStateEnums::GLOBAL_TARGET) {
     initProp("DOTNET_TARGET_FRAMEWORK");
     initProp("DOTNET_TARGET_FRAMEWORK_VERSION");
+  }
+
+  std::set<TargetProperty::InitCondition> metConditions;
+  metConditions.insert(TargetProperty::InitCondition::Always);
+
+  std::vector<std::string> configNames =
+    mf->GetGeneratorConfigs(cmMakefile::ExcludeEmptyConfig);
+  for (auto& config : configNames) {
+    config = cmSystemTools::UpperCase(config);
+  }
+
+  auto initProperty = [this, mf, &defKey](const std::string& property,
+                                          const char* default_value) {
+    // Replace everything after "CMAKE_"
+    defKey.replace(defKey.begin() + 6, defKey.end(), property);
+    if (cmValue value = mf->GetDefinition(defKey)) {
+      this->SetProperty(property, value);
+    } else if (default_value) {
+      this->SetProperty(property, default_value);
+    }
+  };
+
+  std::string dflt_storage;
+  for (auto const& tp : StaticTargetProperties) {
+    // Ignore properties that we have not met the condition for.
+    if (!metConditions.count(tp.InitConditional)) {
+      continue;
+    }
+
+    const char* dflt = nullptr;
+    if (tp.Default) {
+      dflt_storage = std::string(*tp.Default);
+      dflt = dflt_storage.c_str();
+    }
+
+    if (tp.Repeat == TargetProperty::Repetition::Once) {
+      initProperty(std::string(tp.Name), dflt);
+    } else {
+      std::string propertyName;
+      for (auto const& configName : configNames) {
+        if (tp.Repeat == TargetProperty::Repetition::PerConfig) {
+          propertyName = cmStrCat(tp.Name, configName);
+        } else if (tp.Repeat == TargetProperty::Repetition::PerConfigPrefix) {
+          propertyName = cmStrCat(configName, tp.Name);
+        }
+        initProperty(propertyName, dflt);
+      }
+    }
   }
 
   // check for "CMAKE_VS_GLOBALS" variable and set up target properties
