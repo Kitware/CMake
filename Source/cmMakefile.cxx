@@ -2115,12 +2115,21 @@ cmTarget* cmMakefile::AddNewTarget(cmStateEnums::TargetType type,
   return &this->CreateNewTarget(name, type).first;
 }
 
+cmTarget* cmMakefile::AddSynthesizedTarget(cmStateEnums::TargetType type,
+                                           const std::string& name)
+{
+  return &this
+            ->CreateNewTarget(name, type, cmTarget::PerConfig::Yes,
+                              cmTarget::Visibility::Generated)
+            .first;
+}
+
 std::pair<cmTarget&, bool> cmMakefile::CreateNewTarget(
   const std::string& name, cmStateEnums::TargetType type,
-  cmTarget::PerConfig perConfig)
+  cmTarget::PerConfig perConfig, cmTarget::Visibility vis)
 {
-  auto ib = this->Targets.emplace(
-    name, cmTarget(name, type, cmTarget::Visibility::Normal, this, perConfig));
+  auto ib =
+    this->Targets.emplace(name, cmTarget(name, type, vis, this, perConfig));
   auto it = ib.first;
   if (!ib.second) {
     return std::make_pair(std::ref(it->second), false);

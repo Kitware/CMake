@@ -1242,6 +1242,11 @@ bool cmGeneratorTarget::IsNormal() const
   return this->Target->IsNormal();
 }
 
+bool cmGeneratorTarget::IsSynthetic() const
+{
+  return this->Target->IsSynthetic();
+}
+
 bool cmGeneratorTarget::IsImported() const
 {
   return this->Target->IsImported();

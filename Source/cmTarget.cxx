@@ -2559,11 +2559,26 @@ bool cmTarget::IsNormal() const
   switch (this->impl->TargetVisibility) {
     case Visibility::Normal:
       return true;
+    case Visibility::Generated:
     case Visibility::Imported:
     case Visibility::ImportedGlobally:
       return false;
   }
   assert(false && "unknown visibility (IsNormal)");
+  return false;
+}
+
+bool cmTarget::IsSynthetic() const
+{
+  switch (this->impl->TargetVisibility) {
+    case Visibility::Generated:
+      return true;
+    case Visibility::Normal:
+    case Visibility::Imported:
+    case Visibility::ImportedGlobally:
+      return false;
+  }
+  assert(false && "unknown visibility (IsSynthetic)");
   return false;
 }
 
@@ -2574,6 +2589,7 @@ bool cmTargetInternals::IsImported() const
     case cmTarget::Visibility::ImportedGlobally:
       return true;
     case cmTarget::Visibility::Normal:
+    case cmTarget::Visibility::Generated:
       return false;
   }
   assert(false && "unknown visibility (IsImported)");
@@ -2591,6 +2607,7 @@ bool cmTarget::IsImportedGloballyVisible() const
     case Visibility::ImportedGlobally:
       return true;
     case Visibility::Normal:
+    case Visibility::Generated:
     case Visibility::Imported:
       return false;
   }

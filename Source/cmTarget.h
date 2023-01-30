@@ -49,6 +49,7 @@ public:
   enum class Visibility
   {
     Normal,
+    Generated,
     Imported,
     ImportedGlobally,
   };
@@ -206,6 +207,7 @@ public:
   bool IsAIX() const;
 
   bool IsNormal() const;
+  bool IsSynthetic() const;
   bool IsImported() const;
   bool IsImportedGloballyVisible() const;
   bool IsPerConfig() const;
