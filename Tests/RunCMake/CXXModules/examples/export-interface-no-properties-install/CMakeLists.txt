@@ -3,8 +3,8 @@ project(cxx_modules_export_interfaces CXX)
 
 include("${CMAKE_SOURCE_DIR}/../cxx-modules-rules.cmake")
 
-add_library(export_interfaces STATIC)
-target_sources(export_interfaces
+add_library(export_interfaces_no_properties STATIC)
+target_sources(export_interfaces_no_properties
   PRIVATE
     forward.cxx
   PRIVATE
@@ -19,19 +19,21 @@ target_sources(export_interfaces
         "${CMAKE_CURRENT_SOURCE_DIR}"
       FILES
         importable.cxx)
-target_compile_features(export_interfaces PUBLIC cxx_std_20)
+target_compile_features(export_interfaces_no_properties PUBLIC cxx_std_20)
 
-install(TARGETS export_interfaces
+install(TARGETS export_interfaces_no_properties
   EXPORT CXXModules
   FILE_SET modules DESTINATION "lib/cxx/miu")
-export(EXPORT CXXModules
+install(EXPORT CXXModules
   NAMESPACE CXXModules::
-  FILE "${CMAKE_CURRENT_BINARY_DIR}/export_interfaces-targets.cmake"
-  CXX_MODULES_DIRECTORY "export_interfaces-cxx-modules")
-file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/export_interfaces-config.cmake"
-  "include(\"\${CMAKE_CURRENT_LIST_DIR}/export_interfaces-targets.cmake\")
+  DESTINATION "lib/cmake/export_interfaces_no_properties"
+  FILE "export_interfaces_no_properties-targets.cmake")
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/export_interfaces_no_properties-config.cmake"
+  "include(\"\${CMAKE_CURRENT_LIST_DIR}/export_interfaces_no_properties-targets.cmake\")
 set(\${CMAKE_FIND_PACKAGE_NAME}_FOUND 1)
 ")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/export_interfaces_no_properties-config.cmake"
+  DESTINATION "lib/cmake/export_interfaces_no_properties")
 
 set(generator
   -G "${CMAKE_GENERATOR}")
@@ -47,9 +49,8 @@ endif ()
 add_test(NAME export_interfaces_build
   COMMAND
     "${CMAKE_COMMAND}"
-    "-Dexpected_source_dir=${CMAKE_CURRENT_SOURCE_DIR}"
-    "-Dexpected_binary_dir=${CMAKE_CURRENT_BINARY_DIR}"
-    "-Dexport_interfaces_DIR=${CMAKE_CURRENT_BINARY_DIR}"
+    "-Dexpected_dir=${CMAKE_INSTALL_PREFIX}/lib/cxx/miu"
+    "-Dexport_interfaces_no_properties_DIR=${CMAKE_INSTALL_PREFIX}/lib/cmake/export_interfaces_no_properties"
     ${generator}
     -S "${CMAKE_CURRENT_SOURCE_DIR}/test"
     -B "${CMAKE_CURRENT_BINARY_DIR}/test")

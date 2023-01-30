@@ -19,14 +19,14 @@ endif ()
 
 get_property(file_set_files TARGET CXXModules::export_interfaces
   PROPERTY CXX_MODULE_SET_modules)
-if (NOT file_set_files STREQUAL "${expected_dir}/importable.cxx")
+if (NOT file_set_files STREQUAL "${expected_source_dir}/importable.cxx")
   message(FATAL_ERROR
     "Incorrect exported file set paths in CXXModules::export_interfaces`: `${file_set_files}`")
 endif ()
 
-get_property(imported_modules_set TARGET CXXModules::export_interfaces
-  PROPERTY IMPORTED_CXX_MODULES_DEBUG SET)
-if (imported_modules_set)
+get_property(imported_modules TARGET CXXModules::export_interfaces
+  PROPERTY IMPORTED_CXX_MODULES_DEBUG)
+if (NOT imported_modules MATCHES "importable=${expected_source_dir}/importable.cxx,${expected_binary_dir}/CMakeFiles/export_interfaces.dir(/Debug)?/importable.(gcm|pcm|ifc)")
   message(FATAL_ERROR
-    "Unexpected C++ modules specified.")
+    "Incorrect exported modules in CXXModules::export_interfaces`: `${imported_modules}`\n`importable=${expected_source_dir}/importable.cxx,${expected_binary_dir}/CMakeFiles/export_interfaces.dir(/Debug)?/importable.(gcm|pcm|ifc)`")
 endif ()

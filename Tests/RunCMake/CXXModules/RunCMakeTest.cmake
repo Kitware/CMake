@@ -174,6 +174,7 @@ endif ()
 
 # Tests which install BMIs
 if ("export_bmi" IN_LIST CMake_TEST_MODULE_COMPILATION)
+  run_cxx_module_test(export-interface-no-properties-build)
   run_cxx_module_test(export-interface-build)
   run_cxx_module_test(export-bmi-and-interface-build)
 endif ()
@@ -187,6 +188,7 @@ if ("install_bmi" IN_LIST CMake_TEST_MODULE_COMPILATION)
   run_cxx_module_test(install-bmi-and-interfaces)
 
   if ("export_bmi" IN_LIST CMake_TEST_MODULE_COMPILATION)
+    run_cxx_module_test(export-interface-no-properties-install)
     run_cxx_module_test(export-interface-install)
     run_cxx_module_test(export-bmi-and-interface-install)
   endif ()
