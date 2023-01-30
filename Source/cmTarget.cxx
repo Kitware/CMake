@@ -617,6 +617,28 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     // ---- Objective C++
     initProp("OBJCXX_LINKER_LAUNCHER");
 
+    // Static analysis
+    // -- C
+    initProp("C_CLANG_TIDY");
+    initProp("C_CLANG_TIDY_EXPORT_FIXES_DIR");
+    initProp("C_CPPLINT");
+    initProp("C_CPPCHECK");
+    initProp("C_INCLUDE_WHAT_YOU_USE");
+    // -- C++
+    initProp("CXX_CLANG_TIDY");
+    initProp("CXX_CLANG_TIDY_EXPORT_FIXES_DIR");
+    initProp("CXX_CPPLINT");
+    initProp("CXX_CPPCHECK");
+    initProp("CXX_INCLUDE_WHAT_YOU_USE");
+    // -- Objective C
+    initProp("OBJC_CLANG_TIDY");
+    initProp("OBJC_CLANG_TIDY_EXPORT_FIXES_DIR");
+    // -- Objective C++
+    initProp("OBJCXX_CLANG_TIDY");
+    initProp("OBJCXX_CLANG_TIDY_EXPORT_FIXES_DIR");
+    // -- Linking
+    initProp("LINK_WHAT_YOU_USE");
+
     initProp("ANDROID_SKIP_ANT_STEP");
     initProp("ANDROID_PROCESS_MAX");
     initProp("ANDROID_ANT_ADDITIONAL_OPTIONS");
@@ -634,24 +656,9 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     initProp("LINK_DEPENDS_NO_SHARED");
     initProp("LINK_INTERFACE_LIBRARIES");
     initProp("MACOSX_BUNDLE");
-    initProp("C_CLANG_TIDY");
-    initProp("C_CLANG_TIDY_EXPORT_FIXES_DIR");
-    initProp("C_CPPLINT");
-    initProp("C_CPPCHECK");
-    initProp("C_INCLUDE_WHAT_YOU_USE");
-    initProp("LINK_WHAT_YOU_USE");
-    initProp("CXX_CLANG_TIDY");
-    initProp("CXX_CLANG_TIDY_EXPORT_FIXES_DIR");
-    initProp("CXX_CPPLINT");
-    initProp("CXX_CPPCHECK");
-    initProp("CXX_INCLUDE_WHAT_YOU_USE");
     initProp("JOB_POOL_COMPILE");
     initProp("JOB_POOL_LINK");
     initProp("JOB_POOL_PRECOMPILE_HEADER");
-    initProp("OBJC_CLANG_TIDY");
-    initProp("OBJC_CLANG_TIDY_EXPORT_FIXES_DIR");
-    initProp("OBJCXX_CLANG_TIDY");
-    initProp("OBJCXX_CLANG_TIDY_EXPORT_FIXES_DIR");
     initProp("VS_NO_COMPILE_BATCHING");
     initProp("UNITY_BUILD");
     initProp("UNITY_BUILD_UNIQUE_ID");
