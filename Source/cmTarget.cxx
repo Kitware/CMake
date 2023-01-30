@@ -4,7 +4,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cstring>
 #include <initializer_list>
 #include <iterator>
 #include <map>
@@ -724,10 +723,10 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
       this->GetType() != cmStateEnums::GLOBAL_TARGET) {
     static const auto configProps = {
       /* clang-format needs this comment to break after the opening brace */
-      "ARCHIVE_OUTPUT_DIRECTORY_",     "LIBRARY_OUTPUT_DIRECTORY_",
-      "RUNTIME_OUTPUT_DIRECTORY_",     "PDB_OUTPUT_DIRECTORY_",
-      "COMPILE_PDB_OUTPUT_DIRECTORY_", "MAP_IMPORTED_CONFIG_",
-      "INTERPROCEDURAL_OPTIMIZATION_"
+      "ARCHIVE_OUTPUT_DIRECTORY_"_s,     "LIBRARY_OUTPUT_DIRECTORY_"_s,
+      "RUNTIME_OUTPUT_DIRECTORY_"_s,     "PDB_OUTPUT_DIRECTORY_"_s,
+      "COMPILE_PDB_OUTPUT_DIRECTORY_"_s, "MAP_IMPORTED_CONFIG_"_s,
+      "INTERPROCEDURAL_OPTIMIZATION_"_s
     };
     // Collect the set of configuration types.
     std::vector<std::string> configNames =
@@ -738,7 +737,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
         // Interface libraries have no output locations, so honor only
         // the configuration map.
         if (this->impl->TargetType == cmStateEnums::INTERFACE_LIBRARY &&
-            strcmp(prop, "MAP_IMPORTED_CONFIG_") != 0) {
+            prop != "MAP_IMPORTED_CONFIG_") {
           continue;
         }
         std::string property = cmStrCat(prop, configUpper);
