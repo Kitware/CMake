@@ -170,6 +170,8 @@ add_library(
   cmCustomCommandTypes.h
   cmCxxModuleMapper.cxx
   cmCxxModuleMapper.h
+  cmCxxModuleUsageEffects.cxx
+  cmCxxModuleUsageEffects.h
   cmDefinitions.cxx
   cmDefinitions.h
   cmDependencyProvider.h

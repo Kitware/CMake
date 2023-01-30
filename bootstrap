@@ -333,6 +333,7 @@ CMAKE_CXX_SOURCES="\
   cmCustomCommandGenerator \
   cmCustomCommandLines \
   cmCxxModuleMapper \
+  cmCxxModuleUsageEffects \
   cmDefinePropertyCommand \
   cmDefinitions \
   cmDocumentationFormatter \
