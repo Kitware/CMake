@@ -271,6 +271,12 @@
 #define HAVE_SSL_X509_STORE_SHARE
 #endif
 
+/* FIXME: On a specific machine using LCC 1.23, OpenSSL 2.0.0
+ * is found but does not seem to have X509_STORE_up_ref. */
+#if defined(__LCC__) && defined(__EDG__) && (__LCC__ == 123)
+#undef HAVE_SSL_X509_STORE_SHARE
+#endif
+
 /* What API version do we use? */
 #if defined(LIBRESSL_VERSION_NUMBER)
 #define USE_PRE_1_1_API (LIBRESSL_VERSION_NUMBER < 0x2070000f)
