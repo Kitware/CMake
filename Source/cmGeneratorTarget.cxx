@@ -1237,6 +1237,11 @@ bool cmGeneratorTarget::IsInBuildSystem() const
   return false;
 }
 
+bool cmGeneratorTarget::IsNormal() const
+{
+  return this->Target->IsNormal();
+}
+
 bool cmGeneratorTarget::IsImported() const
 {
   return this->Target->IsImported();

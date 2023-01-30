@@ -50,6 +50,7 @@ public:
   cmGlobalGenerator* GetGlobalGenerator() const;
 
   bool IsInBuildSystem() const;
+  bool IsNormal() const;
   bool IsImported() const;
   bool IsImportedGloballyVisible() const;
   bool CanCompileSources() const;

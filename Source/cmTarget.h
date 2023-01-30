@@ -205,6 +205,7 @@ public:
   //! Return whether or not we are targeting AIX.
   bool IsAIX() const;
 
+  bool IsNormal() const;
   bool IsImported() const;
   bool IsImportedGloballyVisible() const;
   bool IsPerConfig() const;
