@@ -639,10 +639,31 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     // -- Linking
     initProp("LINK_WHAT_YOU_USE");
 
-    initProp("ANDROID_SKIP_ANT_STEP");
-    initProp("ANDROID_PROCESS_MAX");
+    // Build graph properties
+    initProp("LINK_DEPENDS_NO_SHARED");
+    initProp("UNITY_BUILD");
+    initProp("UNITY_BUILD_UNIQUE_ID");
+    initPropValue("UNITY_BUILD_BATCH_SIZE", "8");
+    initPropValue("UNITY_BUILD_MODE", "BATCH");
+    initProp("OPTIMIZE_DEPENDENCIES");
+    // -- Android
     initProp("ANDROID_ANT_ADDITIONAL_OPTIONS");
+    initProp("ANDROID_PROCESS_MAX");
+    initProp("ANDROID_SKIP_ANT_STEP");
+    // -- Autogen
+    initProp("AUTOGEN_ORIGIN_DEPENDS");
+    initProp("AUTOGEN_PARALLEL");
+    // -- moc
+    initProp("AUTOMOC_DEPEND_FILTERS");
+    // -- C++
     initProp("CXX_SCAN_FOR_MODULES");
+    // -- Ninja
+    initProp("JOB_POOL_COMPILE");
+    initProp("JOB_POOL_LINK");
+    initProp("JOB_POOL_PRECOMPILE_HEADER");
+    // -- Visual Studio
+    initProp("VS_NO_COMPILE_BATCHING");
+
     initProp("ARCHIVE_OUTPUT_DIRECTORY");
     initProp("LIBRARY_OUTPUT_DIRECTORY");
     initProp("RUNTIME_OUTPUT_DIRECTORY");
@@ -650,22 +671,9 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     initProp("COMPILE_PDB_OUTPUT_DIRECTORY");
     initProp("FRAMEWORK");
     initProp("FRAMEWORK_MULTI_CONFIG_POSTFIX");
-    initProp("AUTOGEN_ORIGIN_DEPENDS");
-    initProp("AUTOGEN_PARALLEL");
-    initProp("AUTOMOC_DEPEND_FILTERS");
-    initProp("LINK_DEPENDS_NO_SHARED");
     initProp("LINK_INTERFACE_LIBRARIES");
     initProp("MACOSX_BUNDLE");
-    initProp("JOB_POOL_COMPILE");
-    initProp("JOB_POOL_LINK");
-    initProp("JOB_POOL_PRECOMPILE_HEADER");
-    initProp("VS_NO_COMPILE_BATCHING");
-    initProp("UNITY_BUILD");
-    initProp("UNITY_BUILD_UNIQUE_ID");
-    initProp("OPTIMIZE_DEPENDENCIES");
     initProp("EXPORT_COMPILE_COMMANDS");
-    initPropValue("UNITY_BUILD_BATCH_SIZE", "8");
-    initPropValue("UNITY_BUILD_MODE", "BATCH");
 
 #ifdef __APPLE__
     if (this->GetGlobalGenerator()->IsXcode()) {
