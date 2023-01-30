@@ -193,6 +193,30 @@ void cmConfigureLog::WriteValue(cm::string_view key,
   this->EndObject();
 }
 
+void cmConfigureLog::WriteValue(cm::string_view key,
+                                std::map<std::string, std::string> const& map)
+{
+  static const std::string rawKeyChars = //
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"         //
+    "abcdefghijklmnopqrstuvwxyz"         //
+    "0123456789"                         //
+    "-_"                                 //
+    ;
+  this->BeginObject(key);
+  for (auto const& entry : map) {
+    if (entry.first.find_first_not_of(rawKeyChars) == std::string::npos) {
+      this->WriteValue(entry.first, entry.second);
+    } else {
+      this->BeginLine();
+      this->Encoder->write(entry.first, &this->Stream);
+      this->Stream << ": ";
+      this->Encoder->write(entry.second, &this->Stream);
+      this->EndLine();
+    }
+  }
+  this->EndObject();
+}
+
 void cmConfigureLog::WriteLiteralTextBlock(cm::string_view key,
                                            cm::string_view text)
 {

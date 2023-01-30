@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #pragma once
 
+#include <map>
 #include <memory>
 #include <string>
 #include <vector>
@@ -42,6 +43,8 @@ public:
   void WriteValue(cm::string_view key, int value);
   void WriteValue(cm::string_view key, std::string const& value);
   void WriteValue(cm::string_view key, std::vector<std::string> const& list);
+  void WriteValue(cm::string_view key,
+                  std::map<std::string, std::string> const& map);
 
   void WriteTextBlock(cm::string_view key, cm::string_view text);
   void WriteLiteralTextBlock(cm::string_view key, cm::string_view text);

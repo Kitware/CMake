@@ -19,6 +19,9 @@ events:(
     directories:
       source: "[^"]*/Tests/RunCMake/try_run/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/"]+"
       binary: "[^"]*/Tests/RunCMake/try_run/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/"]+"
+    cmakeVariables:(
+      CMAKE_[^
+]*)+
     buildResult:
       variable: "CMAKE_C_ABI_COMPILED"
       cached: true
@@ -40,6 +43,9 @@ events:(
     directories:
       source: "[^"]*/Tests/RunCMake/try_run/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/"]+"
       binary: "[^"]*/Tests/RunCMake/try_run/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/"]+"
+    cmakeVariables:(
+      CMAKE_[^
+]*)+
     buildResult:
       variable: "COMPILE_RESULT"
       cached: true
@@ -59,6 +65,9 @@ events:(
     directories:
       source: "[^"]*/Tests/RunCMake/try_run/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/"]+"
       binary: "[^"]*/Tests/RunCMake/try_run/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/"]+"
+    cmakeVariables:(
+      CMAKE_[^
+]*)+
     buildResult:
       variable: "COMPILE_RESULT"
       cached: true
@@ -83,6 +92,9 @@ events:(
     directories:
       source: "[^"]*/Tests/RunCMake/try_run/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/"]+"
       binary: "[^"]*/Tests/RunCMake/try_run/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/"]+"
+    cmakeVariables:(
+      CMAKE_[^
+]*)+
     buildResult:
       variable: "COMPILE_RESULT"
       cached: true
@@ -103,6 +115,9 @@ events:(
     directories:
       source: "[^"]*/Tests/RunCMake/try_run/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/"]+"
       binary: "[^"]*/Tests/RunCMake/try_run/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/"]+"
+    cmakeVariables:(
+      CMAKE_[^
+]*)+
     buildResult:
       variable: "COMPILE_RESULT"
       cached: true

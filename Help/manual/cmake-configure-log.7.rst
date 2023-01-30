@@ -190,6 +190,8 @@ A ``try_compile-v1`` event is a YAML mapping:
   directories:
     source: "/path/to/.../TryCompile-01234"
     binary: "/path/to/.../TryCompile-01234"
+  cmakeVariables:
+    SOME_VARIABLE: "Some Value"
   buildResult:
     variable: "COMPILE_RESULT"
     cached: true
@@ -216,6 +218,12 @@ The keys specific to ``try_compile-v1`` mappings are:
     :command:`try_compile` project.
     For non-project invocations, this is often the same as
     the source directory.
+
+``cmakeVariables``
+  An optional key that is present when CMake propagates variables
+  into the test project, either automatically or due to the
+  :variable:`CMAKE_TRY_COMPILE_PLATFORM_VARIABLES` variable.
+  Its value is a mapping from variable names to their values.
 
 ``buildResult``
   A mapping describing the result of compiling the test code.

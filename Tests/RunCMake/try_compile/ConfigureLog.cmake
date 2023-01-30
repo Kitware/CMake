@@ -1,9 +1,22 @@
 enable_language(C)
 
+set(CMAKE_TRY_COMPILE_PLATFORM_VARIABLES
+  ABCDEFGHIJKLMNOPQRSTUVWXYZ
+  abcdefghijklmnopqrstuvwxyz
+  _-0123456789
+  "WITH SPACE"
+  )
+set(ABCDEFGHIJKLMNOPQRSTUVWXYZ "Upper case")
+set(abcdefghijklmnopqrstuvwxyz "Lower case")
+set(_-0123456789 "Other chars")
+set("WITH SPACE" "Space")
+
 try_compile(COMPILE_RESULT
   SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ConfigureLog-bad.c
   LOG_DESCRIPTION "Source that should not compile."
   )
+
+unset(CMAKE_TRY_COMPILE_PLATFORM_VARIABLES)
 
 try_compile(COMPILE_RESULT
   SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ConfigureLog-test.c

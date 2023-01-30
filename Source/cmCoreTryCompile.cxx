@@ -471,6 +471,8 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
     return cm::nullopt;
   }
 
+  std::map<std::string, std::string> cmakeVariables;
+
   std::string outFileName = this->BinaryDirectory + "/CMakeLists.txt";
   // which signature are we using? If we are using var srcfile bindir
   if (this->SrcFileSignature) {
@@ -592,6 +594,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
             cmVersion::GetPatchVersion(), cmVersion::GetTweakVersion());
     if (def) {
       fprintf(fout, "set(CMAKE_MODULE_PATH \"%s\")\n", def->c_str());
+      cmakeVariables.emplace("CMAKE_MODULE_PATH", *def);
     }
 
     /* Set MSVC runtime library policy to match our selection.  */
@@ -653,10 +656,12 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
             this->Makefile->GetDefinition(rulesOverrideLang)) {
         fprintf(fout, "set(%s \"%s\")\n", rulesOverrideLang.c_str(),
                 rulesOverridePath->c_str());
+        cmakeVariables.emplace(rulesOverrideLang, *rulesOverridePath);
       } else if (cmValue rulesOverridePath2 =
                    this->Makefile->GetDefinition(rulesOverrideBase)) {
         fprintf(fout, "set(%s \"%s\")\n", rulesOverrideBase.c_str(),
                 rulesOverridePath2->c_str());
+        cmakeVariables.emplace(rulesOverrideBase, *rulesOverridePath2);
       }
     }
     fprintf(fout, "project(CMAKE_TRY_COMPILE%s)\n", projectLangs.c_str());
@@ -687,6 +692,9 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
               "set(CMAKE_%s_FLAGS \"${CMAKE_%s_FLAGS}"
               " ${COMPILE_DEFINITIONS}\")\n",
               li.c_str(), li.c_str());
+      if (flags) {
+        cmakeVariables.emplace(langFlags, *flags);
+      }
     }
     switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0066)) {
       case cmPolicies::WARN:
@@ -723,6 +731,9 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
           cmValue flagsCfg = this->Makefile->GetDefinition(langFlagsCfg);
           fprintf(fout, "set(%s %s)\n", langFlagsCfg.c_str(),
                   cmOutputConverter::EscapeForCMake(*flagsCfg).c_str());
+          if (flagsCfg) {
+            cmakeVariables.emplace(langFlagsCfg, *flagsCfg);
+          }
         }
       } break;
     }
@@ -757,6 +768,9 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
             this->Makefile->GetDefinition("CMAKE_EXE_LINKER_FLAGS");
           fprintf(fout, "set(CMAKE_EXE_LINKER_FLAGS %s)\n",
                   cmOutputConverter::EscapeForCMake(*exeLinkFlags).c_str());
+          if (exeLinkFlags) {
+            cmakeVariables.emplace("CMAKE_EXE_LINKER_FLAGS", *exeLinkFlags);
+          }
         }
         break;
     }
@@ -1044,12 +1058,14 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
       vars.erase(kCMAKE_OSX_ARCHITECTURES);
       std::string flag = "-DCMAKE_OSX_ARCHITECTURES=" + *tcArchs;
       arguments.CMakeFlags.emplace_back(std::move(flag));
+      cmakeVariables.emplace("CMAKE_OSX_ARCHITECTURES", *tcArchs);
     }
 
     for (std::string const& var : vars) {
       if (cmValue val = this->Makefile->GetDefinition(var)) {
         std::string flag = "-D" + var + "=" + *val;
         arguments.CMakeFlags.emplace_back(std::move(flag));
+        cmakeVariables.emplace(var, *val);
       }
     }
   }
@@ -1060,6 +1076,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
       if (cmValue val = this->Makefile->GetDefinition(var)) {
         std::string flag = "-D" + var + "=" + "'" + *val + "'";
         arguments.CMakeFlags.emplace_back(std::move(flag));
+        cmakeVariables.emplace(var, *val);
       }
     }
   }
@@ -1145,6 +1162,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
   if (arguments.LogDescription) {
     result.LogDescription = *arguments.LogDescription;
   }
+  result.CMakeVariables = std::move(cmakeVariables);
   result.SourceDirectory = sourceDirectory;
   result.BinaryDirectory = this->BinaryDirectory;
   result.Variable = *arguments.CompileResultVariable;
@@ -1304,6 +1322,9 @@ void cmCoreTryCompile::WriteTryCompileEventFields(
   log.WriteValue("source"_s, compileResult.SourceDirectory);
   log.WriteValue("binary"_s, compileResult.BinaryDirectory);
   log.EndObject();
+  if (!compileResult.CMakeVariables.empty()) {
+    log.WriteValue("cmakeVariables"_s, compileResult.CMakeVariables);
+  }
   log.BeginObject("buildResult"_s);
   log.WriteValue("variable"_s, compileResult.Variable);
   log.WriteValue("cached"_s, compileResult.VariableCached);

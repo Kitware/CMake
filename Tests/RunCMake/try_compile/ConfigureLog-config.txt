@@ -20,6 +20,9 @@ events:(
     directories:
       source: "[^"]*/Tests/RunCMake/try_compile/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/"]+"
       binary: "[^"]*/Tests/RunCMake/try_compile/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/"]+"
+    cmakeVariables:(
+      CMAKE_[^
+]*)+
     buildResult:
       variable: "CMAKE_C_ABI_COMPILED"
       cached: true
@@ -41,6 +44,13 @@ events:(
     directories:
       source: "[^"]*/Tests/RunCMake/try_compile/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/"]+"
       binary: "[^"]*/Tests/RunCMake/try_compile/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/"]+"
+    cmakeVariables:
+      ABCDEFGHIJKLMNOPQRSTUVWXYZ: "Upper case"(
+      CMAKE_[^
+]*)+
+      "WITH SPACE": "Space"
+      _-0123456789: "Other chars"
+      abcdefghijklmnopqrstuvwxyz: "Lower case"
     buildResult:
       variable: "COMPILE_RESULT"
       cached: true
@@ -58,6 +68,9 @@ events:(
     directories:
       source: "[^"]*/Tests/RunCMake/try_compile/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/"]+"
       binary: "[^"]*/Tests/RunCMake/try_compile/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/"]+"
+    cmakeVariables:(
+      CMAKE_[^
+]*)+
     buildResult:
       variable: "COMPILE_RESULT"
       cached: true
