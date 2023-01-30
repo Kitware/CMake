@@ -1480,6 +1480,7 @@ if(BUILD_TESTING)
       GTK2
       Iconv
       ICU
+      ImageMagick
       Intl
       Jasper
       JNI
