@@ -28,12 +28,9 @@ public:
       list is enabled.  */
   bool IsAnyLogVersionEnabled(std::vector<unsigned long> const& v) const;
 
-  void WriteBacktrace(cmMakefile const& mf);
-  void WriteChecks(cmMakefile const& mf);
-
   void EnsureInit();
 
-  void BeginEvent(std::string const& kind);
+  void BeginEvent(std::string const& kind, cmMakefile const& mf);
   void EndEvent();
 
   void BeginObject(cm::string_view key);
@@ -62,6 +59,9 @@ private:
   bool Opened = false;
 
   std::unique_ptr<Json::StreamWriter> Encoder;
+
+  void WriteBacktrace(cmMakefile const& mf);
+  void WriteChecks(cmMakefile const& mf);
 
   cmsys::ofstream& BeginLine();
   void EndLine();

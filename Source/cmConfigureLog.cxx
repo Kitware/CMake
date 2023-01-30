@@ -136,7 +136,7 @@ void cmConfigureLog::EndObject()
   --this->Indent;
 }
 
-void cmConfigureLog::BeginEvent(std::string const& kind)
+void cmConfigureLog::BeginEvent(std::string const& kind, cmMakefile const& mf)
 {
   this->EnsureInit();
 
@@ -146,6 +146,8 @@ void cmConfigureLog::BeginEvent(std::string const& kind)
   ++this->Indent;
 
   this->WriteValue("kind"_s, kind);
+  this->WriteBacktrace(mf);
+  this->WriteChecks(mf);
 }
 
 void cmConfigureLog::EndEvent()

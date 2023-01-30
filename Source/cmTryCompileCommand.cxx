@@ -25,9 +25,7 @@ void WriteTryCompileEvent(cmConfigureLog& log, cmMakefile const& mf,
   static const std::vector<unsigned long> LogVersionsWithTryCompileV1{ 1 };
 
   if (log.IsAnyLogVersionEnabled(LogVersionsWithTryCompileV1)) {
-    log.BeginEvent("try_compile-v1");
-    log.WriteBacktrace(mf);
-    log.WriteChecks(mf);
+    log.BeginEvent("try_compile-v1", mf);
     cmCoreTryCompile::WriteTryCompileEventFields(log, compileResult);
     log.EndEvent();
   }

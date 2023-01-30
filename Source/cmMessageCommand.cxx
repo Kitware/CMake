@@ -74,9 +74,7 @@ void WriteMessageEvent(cmConfigureLog& log, cmMakefile const& mf,
   static const std::vector<unsigned long> LogVersionsWithMessageV1{ 1 };
 
   if (log.IsAnyLogVersionEnabled(LogVersionsWithMessageV1)) {
-    log.BeginEvent("message-v1");
-    log.WriteBacktrace(mf);
-    log.WriteChecks(mf);
+    log.BeginEvent("message-v1", mf);
     log.WriteLiteralTextBlock("message"_s, message);
     log.EndEvent();
   }
