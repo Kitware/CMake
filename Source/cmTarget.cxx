@@ -664,15 +664,22 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     // -- Visual Studio
     initProp("VS_NO_COMPILE_BATCHING");
 
+    // Output location properties
     initProp("ARCHIVE_OUTPUT_DIRECTORY");
     initProp("LIBRARY_OUTPUT_DIRECTORY");
     initProp("RUNTIME_OUTPUT_DIRECTORY");
     initProp("PDB_OUTPUT_DIRECTORY");
     initProp("COMPILE_PDB_OUTPUT_DIRECTORY");
+
+    // -- macOS bundle properties
     initProp("FRAMEWORK");
     initProp("FRAMEWORK_MULTI_CONFIG_POSTFIX");
-    initProp("LINK_INTERFACE_LIBRARIES");
     initProp("MACOSX_BUNDLE");
+
+    // Usage requirement properties
+    initProp("LINK_INTERFACE_LIBRARIES");
+
+    // Metadata
     initProp("EXPORT_COMPILE_COMMANDS");
 
 #ifdef __APPLE__
