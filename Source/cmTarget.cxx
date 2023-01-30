@@ -572,25 +572,55 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     initProp("AUTORCC");
     initProp("AUTORCC_OPTIONS");
 
-    initProp("ANDROID_SKIP_ANT_STEP");
-    initProp("ANDROID_PROCESS_MAX");
-    initProp("ANDROID_PROGUARD");
-    initProp("ANDROID_PROGUARD_CONFIG_PATH");
-    initProp("ANDROID_SECURE_PROPS_PATH");
-    initProp("ANDROID_NATIVE_LIB_DIRECTORIES");
-    initProp("ANDROID_NATIVE_LIB_DEPENDENCIES");
-    initProp("ANDROID_JAR_DIRECTORIES");
-    initProp("ANDROID_JAR_DEPENDENCIES");
-    initProp("ANDROID_ANT_ADDITIONAL_OPTIONS");
+    // Linking properties
+    initProp("LINK_SEARCH_START_STATIC");
+    initProp("LINK_SEARCH_END_STATIC");
+    // -- Dependent library lookup
+    initProp("MACOSX_RPATH");
+    // ---- Build
     initProp("BUILD_RPATH");
     initProp("BUILD_RPATH_USE_ORIGIN");
-    initProp("CXX_SCAN_FOR_MODULES");
+    initPropValue("SKIP_BUILD_RPATH", "OFF");
+    initPropValue("BUILD_WITH_INSTALL_RPATH", "OFF");
+    initProp("BUILD_WITH_INSTALL_NAME_DIR");
+    // ---- Install
     initProp("INSTALL_NAME_DIR");
     initProp("INSTALL_REMOVE_ENVIRONMENT_RPATH");
     initPropValue("INSTALL_RPATH", "");
     initPropValue("INSTALL_RPATH_USE_LINK_PATH", "OFF");
-    initPropValue("SKIP_BUILD_RPATH", "OFF");
-    initPropValue("BUILD_WITH_INSTALL_RPATH", "OFF");
+    // -- Platforms
+    // ---- Android
+    initProp("ANDROID_JAR_DIRECTORIES");
+    initProp("ANDROID_JAR_DEPENDENCIES");
+    initProp("ANDROID_NATIVE_LIB_DIRECTORIES");
+    initProp("ANDROID_NATIVE_LIB_DEPENDENCIES");
+    initProp("ANDROID_PROGUARD");
+    initProp("ANDROID_PROGUARD_CONFIG_PATH");
+    initProp("ANDROID_SECURE_PROPS_PATH");
+    // ---- iOS
+    initProp("IOS_INSTALL_COMBINED");
+    // ---- Windows
+    initProp("GNUtoMS");
+    initProp("WIN32_EXECUTABLE");
+    // -- Languages
+    // ---- C
+    initProp("C_LINKER_LAUNCHER");
+    // ---- C++
+    initProp("CXX_LINKER_LAUNCHER");
+    // ---- CUDA
+    initProp("CUDA_RESOLVE_DEVICE_SYMBOLS");
+    initProp("CUDA_RUNTIME_LIBRARY");
+    // ---- HIP
+    initProp("HIP_RUNTIME_LIBRARY");
+    // ---- Objective C
+    initProp("OBJC_LINKER_LAUNCHER");
+    // ---- Objective C++
+    initProp("OBJCXX_LINKER_LAUNCHER");
+
+    initProp("ANDROID_SKIP_ANT_STEP");
+    initProp("ANDROID_PROCESS_MAX");
+    initProp("ANDROID_ANT_ADDITIONAL_OPTIONS");
+    initProp("CXX_SCAN_FOR_MODULES");
     initProp("ARCHIVE_OUTPUT_DIRECTORY");
     initProp("LIBRARY_OUTPUT_DIRECTORY");
     initProp("RUNTIME_OUTPUT_DIRECTORY");
@@ -598,44 +628,30 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     initProp("COMPILE_PDB_OUTPUT_DIRECTORY");
     initProp("FRAMEWORK");
     initProp("FRAMEWORK_MULTI_CONFIG_POSTFIX");
-    initProp("GNUtoMS");
-    initProp("IOS_INSTALL_COMBINED");
     initProp("AUTOGEN_ORIGIN_DEPENDS");
     initProp("AUTOGEN_PARALLEL");
     initProp("AUTOMOC_DEPEND_FILTERS");
     initProp("LINK_DEPENDS_NO_SHARED");
     initProp("LINK_INTERFACE_LIBRARIES");
-    initProp("WIN32_EXECUTABLE");
     initProp("MACOSX_BUNDLE");
-    initProp("MACOSX_RPATH");
-    initProp("BUILD_WITH_INSTALL_NAME_DIR");
     initProp("C_CLANG_TIDY");
     initProp("C_CLANG_TIDY_EXPORT_FIXES_DIR");
     initProp("C_CPPLINT");
     initProp("C_CPPCHECK");
     initProp("C_INCLUDE_WHAT_YOU_USE");
-    initProp("C_LINKER_LAUNCHER");
     initProp("LINK_WHAT_YOU_USE");
     initProp("CXX_CLANG_TIDY");
     initProp("CXX_CLANG_TIDY_EXPORT_FIXES_DIR");
     initProp("CXX_CPPLINT");
     initProp("CXX_CPPCHECK");
     initProp("CXX_INCLUDE_WHAT_YOU_USE");
-    initProp("CXX_LINKER_LAUNCHER");
-    initProp("CUDA_RESOLVE_DEVICE_SYMBOLS");
-    initProp("CUDA_RUNTIME_LIBRARY");
-    initProp("HIP_RUNTIME_LIBRARY");
     initProp("JOB_POOL_COMPILE");
     initProp("JOB_POOL_LINK");
     initProp("JOB_POOL_PRECOMPILE_HEADER");
-    initProp("LINK_SEARCH_START_STATIC");
-    initProp("LINK_SEARCH_END_STATIC");
     initProp("OBJC_CLANG_TIDY");
     initProp("OBJC_CLANG_TIDY_EXPORT_FIXES_DIR");
-    initProp("OBJC_LINKER_LAUNCHER");
     initProp("OBJCXX_CLANG_TIDY");
     initProp("OBJCXX_CLANG_TIDY_EXPORT_FIXES_DIR");
-    initProp("OBJCXX_LINKER_LAUNCHER");
     initProp("VS_NO_COMPILE_BATCHING");
     initProp("UNITY_BUILD");
     initProp("UNITY_BUILD_UNIQUE_ID");
