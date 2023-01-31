@@ -14,8 +14,13 @@ executable is generated, allowing for multiple static libraries to resolve
 device symbols at the same time when they are used by a shared library or
 executable.
 
-By default static library targets have this property is disabled,
-while shared, module, and executable targets have this property enabled.
+If this property or :variable:`CMAKE_CUDA_RESOLVE_DEVICE_SYMBOLS` is unset,
+static libraries are treated as if it is disabled while shared, module,
+and executable targets behave as if it is on.
+
+If :variable:`CMAKE_CUDA_RESOLVE_DEVICE_SYMBOLS` has been defined,
+this property is initialized to the value the variable and overriding
+the default behavior.
 
 Note that device linking is not supported for :ref:`Object Libraries`.
 
