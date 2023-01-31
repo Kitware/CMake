@@ -231,14 +231,23 @@ The options are:
 
 ``OUTPUT``
   Specify the output files the command is expected to produce.
-  If an output name is a relative path it will be interpreted
-  relative to the build tree directory corresponding to the
-  current source directory.
   Each output file will be marked with the :prop_sf:`GENERATED`
   source file property automatically.
   If the output of the custom command is not actually created
   as a file on disk it should be marked with the :prop_sf:`SYMBOLIC`
   source file property.
+
+  If an output file name is a relative path, its absolute path is
+  determined by interpreting it relative to:
+
+  1. the build directory corresponding to the current source directory
+     (:variable:`CMAKE_CURRENT_BINARY_DIR`), or
+
+  2. the current source directory (:variable:`CMAKE_CURRENT_SOURCE_DIR`).
+
+  The path in the build directory is preferred unless the path in the
+  source tree is mentioned as an absolute source file path elsewhere
+  in the current directory.
 
   .. versionadded:: 3.20
     Arguments to ``OUTPUT`` may use a restricted set of
