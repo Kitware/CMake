@@ -231,7 +231,7 @@ if(THREADS_FOUND AND NOT TARGET Threads::Threads)
   if(THREADS_HAVE_PTHREAD_ARG)
     set_property(TARGET Threads::Threads
                  PROPERTY INTERFACE_COMPILE_OPTIONS "$<$<COMPILE_LANG_AND_ID:CUDA,NVIDIA>:SHELL:-Xcompiler -pthread>"
-                                                    "$<$<NOT:$<COMPILE_LANG_AND_ID:CUDA,NVIDIA>>:-pthread>")
+                                                    "$<$<AND:$<NOT:$<COMPILE_LANG_AND_ID:CUDA,NVIDIA>>,$<NOT:$<COMPILE_LANGUAGE:Swift>>>:-pthread>")
   endif()
 
   if(CMAKE_THREAD_LIBS_INIT)
