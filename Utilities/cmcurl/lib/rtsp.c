@@ -141,7 +141,7 @@ static CURLcode rtsp_setup_connection(struct Curl_easy *data,
  * Instead, if it is readable, run Curl_connalive() to peek at the socket
  * and distinguish between closed and data.
  */
-static bool rtsp_connisdead(struct connectdata *check)
+static bool rtsp_connisdead(struct Curl_easy *data, struct connectdata *check)
 {
   int sval;
   bool ret_val = TRUE;
@@ -157,7 +157,7 @@ static bool rtsp_connisdead(struct connectdata *check)
   }
   else if(sval & CURL_CSELECT_IN) {
     /* readable with no error. could still be closed */
-    ret_val = !Curl_connalive(check);
+    ret_val = !Curl_connalive(data, check);
   }
 
   return ret_val;
@@ -174,7 +174,7 @@ static unsigned int rtsp_conncheck(struct Curl_easy *data,
   (void)data;
 
   if(checks_to_perform & CONNCHECK_ISDEAD) {
-    if(rtsp_connisdead(conn))
+    if(rtsp_connisdead(data, conn))
       ret_val |= CONNRESULT_DEAD;
   }
 
@@ -267,11 +267,23 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   rtsp->CSeq_sent = data->state.rtsp_next_client_CSeq;
   rtsp->CSeq_recv = 0;
 
+  /* Setup the first_* fields to allow auth details get sent
+     to this origin */
+
+  if(!data->state.first_host) {
+    data->state.first_host = strdup(conn->host.name);
+    if(!data->state.first_host)
+      return CURLE_OUT_OF_MEMORY;
+
+    data->state.first_remote_port = conn->remote_port;
+    data->state.first_remote_protocol = conn->handler->protocol;
+  }
+
   /* Setup the 'p_request' pointer to the proper p_request string
    * Since all RTSP requests are included here, there is no need to
    * support custom requests like HTTP.
    **/
-  data->set.opt_no_body = TRUE; /* most requests don't contain a body */
+  data->req.no_body = TRUE; /* most requests don't contain a body */
   switch(rtspreq) {
   default:
     failf(data, "Got invalid RTSP request");
@@ -281,7 +293,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
     break;
   case RTSPREQ_DESCRIBE:
     p_request = "DESCRIBE";
-    data->set.opt_no_body = FALSE;
+    data->req.no_body = FALSE;
     break;
   case RTSPREQ_ANNOUNCE:
     p_request = "ANNOUNCE";
@@ -301,7 +313,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   case RTSPREQ_GET_PARAMETER:
     /* GET_PARAMETER's no_body status is determined later */
     p_request = "GET_PARAMETER";
-    data->set.opt_no_body = FALSE;
+    data->req.no_body = FALSE;
     break;
   case RTSPREQ_SET_PARAMETER:
     p_request = "SET_PARAMETER";
@@ -311,8 +323,8 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
     break;
   case RTSPREQ_RECEIVE:
     p_request = "";
-    /* Treat interleaved RTP as body*/
-    data->set.opt_no_body = FALSE;
+    /* Treat interleaved RTP as body */
+    data->req.no_body = FALSE;
     break;
   case RTSPREQ_LAST:
     failf(data, "Got invalid RTSP request: RTSPREQ_LAST");
@@ -561,7 +573,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
     else if(rtspreq == RTSPREQ_GET_PARAMETER) {
       /* Check for an empty GET_PARAMETER (heartbeat) request */
       data->state.httpreq = HTTPREQ_HEAD;
-      data->set.opt_no_body = TRUE;
+      data->req.no_body = TRUE;
     }
   }
 
@@ -650,7 +662,7 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
       rtp_length = RTP_PKT_LENGTH(rtp);
 
       if(rtp_dataleft < rtp_length + 4) {
-        /* Need more - incomplete payload*/
+        /* Need more - incomplete payload */
         *readmore = TRUE;
         break;
       }

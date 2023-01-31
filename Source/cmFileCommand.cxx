@@ -1629,6 +1629,14 @@ int cmFileCommandCurlDebugCallback(CURL*, curl_infotype type, char* chPtr,
   return 0;
 }
 
+#  if defined(LIBCURL_VERSION_NUM) && LIBCURL_VERSION_NUM >= 0x072000
+const CURLoption CM_CURLOPT_XFERINFOFUNCTION = CURLOPT_XFERINFOFUNCTION;
+using cm_curl_off_t = curl_off_t;
+#  else
+const CURLoption CM_CURLOPT_XFERINFOFUNCTION = CURLOPT_PROGRESSFUNCTION;
+using cm_curl_off_t = double;
+#  endif
+
 class cURLProgressHelper
 {
 public:
@@ -1638,12 +1646,14 @@ public:
   {
   }
 
-  bool UpdatePercentage(double value, double total, std::string& status)
+  bool UpdatePercentage(cm_curl_off_t value, cm_curl_off_t total,
+                        std::string& status)
   {
     long OldPercentage = this->CurrentPercentage;
 
-    if (total > 0.0) {
-      this->CurrentPercentage = std::lround(value / total * 100.0);
+    if (total > 0) {
+      this->CurrentPercentage = std::lround(
+        static_cast<double>(value) / static_cast<double>(total) * 100.0);
       if (this->CurrentPercentage > 100) {
         // Avoid extra progress reports for unexpected data beyond total.
         this->CurrentPercentage = 100;
@@ -1668,8 +1678,9 @@ private:
   std::string Text;
 };
 
-int cmFileDownloadProgressCallback(void* clientp, double dltotal, double dlnow,
-                                   double ultotal, double ulnow)
+int cmFileDownloadProgressCallback(void* clientp, cm_curl_off_t dltotal,
+                                   cm_curl_off_t dlnow, cm_curl_off_t ultotal,
+                                   cm_curl_off_t ulnow)
 {
   cURLProgressHelper* helper = reinterpret_cast<cURLProgressHelper*>(clientp);
 
@@ -1685,8 +1696,9 @@ int cmFileDownloadProgressCallback(void* clientp, double dltotal, double dlnow,
   return 0;
 }
 
-int cmFileUploadProgressCallback(void* clientp, double dltotal, double dlnow,
-                                 double ultotal, double ulnow)
+int cmFileUploadProgressCallback(void* clientp, cm_curl_off_t dltotal,
+                                 cm_curl_off_t dlnow, cm_curl_off_t ultotal,
+                                 cm_curl_off_t ulnow)
 {
   cURLProgressHelper* helper = reinterpret_cast<cURLProgressHelper*>(clientp);
 
@@ -2062,7 +2074,7 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
     res = ::curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0);
     check_curl_result(res, "DOWNLOAD cannot set noprogress value: ");
 
-    res = ::curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION,
+    res = ::curl_easy_setopt(curl, CM_CURLOPT_XFERINFOFUNCTION,
                              cmFileDownloadProgressCallback);
     check_curl_result(res, "DOWNLOAD cannot set progress function: ");
 
@@ -2376,7 +2388,7 @@ bool HandleUploadCommand(std::vector<std::string> const& args,
     res = ::curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0);
     check_curl_result(res, "UPLOAD cannot set noprogress value: ");
 
-    res = ::curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION,
+    res = ::curl_easy_setopt(curl, CM_CURLOPT_XFERINFOFUNCTION,
                              cmFileUploadProgressCallback);
     check_curl_result(res, "UPLOAD cannot set progress function: ");
 

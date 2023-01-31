@@ -205,9 +205,9 @@ CURLcode Curl_ftp_parselist_geterror(struct ftp_parselist_data *pl_data)
 
 #define FTP_LP_MALFORMATED_PERM 0x01000000
 
-static int ftp_pl_get_permission(const char *str)
+static unsigned int ftp_pl_get_permission(const char *str)
 {
-  int permissions = 0;
+  unsigned int permissions = 0;
   /* USER */
   if(str[0] == 'r')
     permissions |= 1 << 8;
@@ -334,7 +334,7 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
   struct ftp_parselist_data *parser = ftpwc->parser;
   struct fileinfo *infop;
   struct curl_fileinfo *finfo;
-  unsigned long i = 0;
+  size_t i = 0;
   CURLcode result;
   size_t retsize = bufflen;
 
