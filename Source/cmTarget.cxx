@@ -372,6 +372,8 @@ TargetProperty const StaticTargetProperties[] = {
   { "INTERPROCEDURAL_OPTIMIZATION"_s, IC::CanCompileSources },
   { "INTERPROCEDURAL_OPTIMIZATION_"_s, IC::TargetWithArtifact, R::PerConfig },
   { "NO_SYSTEM_FROM_IMPORTED"_s, IC::CanCompileSources },
+  // Set to `True` for `SHARED` and `MODULE` targets.
+  { "POSITION_INDEPENDENT_CODE"_s, IC::CanCompileSources },
   { "VISIBILITY_INLINES_HIDDEN"_s, IC::CanCompileSources },
   // -- Features
   // ---- PCH
@@ -937,13 +939,6 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   std::string defKey;
   defKey.reserve(128);
   defKey += "CMAKE_";
-  auto initProp = [this, mf, &defKey](const std::string& property) {
-    // Replace everything after "CMAKE_"
-    defKey.replace(defKey.begin() + 6, defKey.end(), property);
-    if (cmValue value = mf->GetDefinition(defKey)) {
-      this->SetProperty(property, value);
-    }
-  };
   auto initPropValue = [this, mf, &defKey](const std::string& property,
                                            const char* default_value) {
     // Replace everything after "CMAKE_"
@@ -976,13 +971,6 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
       this->impl->Makefile->GetLinkOptionsEntries());
     this->impl->LinkDirectories.CopyFromDirectory(
       this->impl->Makefile->GetLinkDirectoriesEntries());
-  }
-
-  if (this->impl->TargetType == cmStateEnums::SHARED_LIBRARY ||
-      this->impl->TargetType == cmStateEnums::MODULE_LIBRARY) {
-    this->SetProperty("POSITION_INDEPENDENT_CODE", "True");
-  } else if (this->CanCompileSources()) {
-    initProp("POSITION_INDEPENDENT_CODE");
   }
 
   // Record current policies for later use.
@@ -1086,6 +1074,12 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
         initProperty(propertyName, dflt);
       }
     }
+  }
+
+  // Clean up some property defaults.
+  if (this->impl->TargetType == cmStateEnums::SHARED_LIBRARY ||
+      this->impl->TargetType == cmStateEnums::MODULE_LIBRARY) {
+    this->SetProperty("POSITION_INDEPENDENT_CODE", "True");
   }
 
   // check for "CMAKE_VS_GLOBALS" variable and set up target properties
