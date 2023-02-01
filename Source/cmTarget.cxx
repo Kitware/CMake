@@ -305,6 +305,9 @@ struct TargetProperty
     LinkableLibraryTarget,
     // Needs to be an executable.
     ExecutableTarget,
+    // Needs to be a target with meaningful symbol exports (`SHARED` or
+    // `EXECUTABLE`).
+    TargetWithSymbolExports,
   };
 
   enum class Repetition
@@ -458,6 +461,8 @@ TargetProperty const StaticTargetProperties[] = {
   { "INSTALL_RPATH"_s, ""_s, IC::CanCompileSources },
   { "INSTALL_RPATH_USE_LINK_PATH"_s, "OFF"_s, IC::CanCompileSources },
   // -- Platforms
+  // ---- AIX
+  { "AIX_EXPORT_ALL_SYMBOLS"_s, IC::TargetWithSymbolExports },
   // ---- Android
   { "ANDROID_GUI"_s, IC::ExecutableTarget },
   { "ANDROID_JAR_DIRECTORIES"_s, IC::CanCompileSources },
@@ -474,6 +479,7 @@ TargetProperty const StaticTargetProperties[] = {
   // ---- Windows
   { "GNUtoMS"_s, IC::CanCompileSources },
   { "WIN32_EXECUTABLE"_s, IC::CanCompileSources },
+  { "WINDOWS_EXPORT_ALL_SYMBOLS"_s, IC::TargetWithSymbolExports },
   // -- Languages
   // ---- C
   { "C_LINKER_LAUNCHER"_s, IC::CanCompileSources },
@@ -973,11 +979,6 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   } else if (this->CanCompileSources()) {
     initProp("POSITION_INDEPENDENT_CODE");
   }
-  if (this->impl->TargetType == cmStateEnums::SHARED_LIBRARY ||
-      this->impl->TargetType == cmStateEnums::EXECUTABLE) {
-    initProp("AIX_EXPORT_ALL_SYMBOLS");
-    initProp("WINDOWS_EXPORT_ALL_SYMBOLS");
-  }
 
   // Record current policies for later use.
   this->impl->Makefile->RecordPolicies(this->impl->PolicyMap);
@@ -1032,6 +1033,11 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   }
   if (this->impl->TargetType == cmStateEnums::EXECUTABLE) {
     metConditions.insert(TargetProperty::InitCondition::ExecutableTarget);
+  }
+  if (this->impl->TargetType == cmStateEnums::SHARED_LIBRARY ||
+      this->impl->TargetType == cmStateEnums::EXECUTABLE) {
+    metConditions.insert(
+      TargetProperty::InitCondition::TargetWithSymbolExports);
   }
 
   std::vector<std::string> configNames =
