@@ -325,7 +325,15 @@ struct TargetProperty
 #define IC TargetProperty::InitCondition
 #define R TargetProperty::Repetition
 
-TargetProperty const StaticTargetProperties[] = {};
+TargetProperty const StaticTargetProperties[] = {
+  /* clang-format off */
+  // Build graph properties
+  { "VERIFY_INTERFACE_HEADER_SETS"_s },
+
+  // Metadata
+  { "FOLDER"_s },
+  /* clang-format on */
+};
 
 #undef COMMON_LANGUAGE_PROPERTIES
 #undef IC
@@ -898,9 +906,6 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     }
 #endif
   }
-
-  initProp("FOLDER");
-  initProp("VERIFY_INTERFACE_HEADER_SETS");
 
   if (this->GetGlobalGenerator()->IsXcode()) {
     initProp("XCODE_GENERATE_SCHEME");
