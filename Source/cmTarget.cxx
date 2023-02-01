@@ -303,6 +303,8 @@ struct TargetProperty
     // Needs to be a linkable library target (no `OBJECT` or `MODULE`
     // libraries).
     LinkableLibraryTarget,
+    // Needs to be an executable.
+    ExecutableTarget,
   };
 
   enum class Repetition
@@ -433,6 +435,7 @@ TargetProperty const StaticTargetProperties[] = {
   { "AUTORCC_OPTIONS"_s, IC::CanCompileSources },
 
   // Linking properties
+  { "ENABLE_EXPORTS"_s, IC::ExecutableTarget },
   { "LINK_LIBRARIES_ONLY_TARGETS"_s, IC::NormalNonImportedTarget },
   { "LINK_SEARCH_START_STATIC"_s, IC::CanCompileSources },
   { "LINK_SEARCH_END_STATIC"_s, IC::CanCompileSources },
@@ -456,6 +459,7 @@ TargetProperty const StaticTargetProperties[] = {
   { "INSTALL_RPATH_USE_LINK_PATH"_s, "OFF"_s, IC::CanCompileSources },
   // -- Platforms
   // ---- Android
+  { "ANDROID_GUI"_s, IC::ExecutableTarget },
   { "ANDROID_JAR_DIRECTORIES"_s, IC::CanCompileSources },
   { "ANDROID_JAR_DEPENDENCIES"_s, IC::CanCompileSources },
   { "ANDROID_NATIVE_LIB_DIRECTORIES"_s, IC::CanCompileSources },
@@ -555,6 +559,7 @@ TargetProperty const StaticTargetProperties[] = {
   { "MAP_IMPORTED_CONFIG_"_s, IC::NormalTarget, R::PerConfig },
 
   // Metadata
+  { "CROSSCOMPILING_EMULATOR"_s, IC::ExecutableTarget },
   { "EXPORT_COMPILE_COMMANDS"_s, IC::CanCompileSources },
   { "FOLDER"_s },
 
@@ -962,11 +967,6 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
       this->impl->Makefile->GetLinkDirectoriesEntries());
   }
 
-  if (this->impl->TargetType == cmStateEnums::EXECUTABLE) {
-    initProp("ANDROID_GUI");
-    initProp("CROSSCOMPILING_EMULATOR");
-    initProp("ENABLE_EXPORTS");
-  }
   if (this->impl->TargetType == cmStateEnums::SHARED_LIBRARY ||
       this->impl->TargetType == cmStateEnums::MODULE_LIBRARY) {
     this->SetProperty("POSITION_INDEPENDENT_CODE", "True");
@@ -1029,6 +1029,9 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
       metConditions.insert(
         TargetProperty::InitCondition::LinkableLibraryTarget);
     }
+  }
+  if (this->impl->TargetType == cmStateEnums::EXECUTABLE) {
+    metConditions.insert(TargetProperty::InitCondition::ExecutableTarget);
   }
 
   std::vector<std::string> configNames =
