@@ -4,7 +4,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <initializer_list>
 #include <iterator>
 #include <map>
 #include <set>
@@ -295,6 +294,9 @@ struct TargetProperty
     // Needs to be a "normal" target (any non-global, non-utility target) that
     // is not `IMPORTED`.
     NormalNonImportedTarget,
+    // Needs to be a "normal" target with an artifact (no `INTERFACE`
+    // libraries).
+    TargetWithArtifact,
   };
 
   enum class Repetition
@@ -354,6 +356,7 @@ TargetProperty const StaticTargetProperties[] = {
   // Compilation properties
   { "COMPILE_WARNING_AS_ERROR"_s, IC::CanCompileSources },
   { "INTERPROCEDURAL_OPTIMIZATION"_s, IC::CanCompileSources },
+  { "INTERPROCEDURAL_OPTIMIZATION_"_s, IC::TargetWithArtifact, R::PerConfig },
   { "NO_SYSTEM_FROM_IMPORTED"_s, IC::CanCompileSources },
   { "VISIBILITY_INLINES_HIDDEN"_s, IC::CanCompileSources },
   // -- Features
@@ -519,10 +522,15 @@ TargetProperty const StaticTargetProperties[] = {
 
   // Output location properties
   { "ARCHIVE_OUTPUT_DIRECTORY"_s, IC::CanCompileSources },
+  { "ARCHIVE_OUTPUT_DIRECTORY_"_s, IC::TargetWithArtifact, R::PerConfig },
   { "COMPILE_PDB_OUTPUT_DIRECTORY"_s, IC::CanCompileSources },
+  { "COMPILE_PDB_OUTPUT_DIRECTORY_"_s, IC::TargetWithArtifact, R::PerConfig },
   { "LIBRARY_OUTPUT_DIRECTORY"_s, IC::CanCompileSources },
+  { "LIBRARY_OUTPUT_DIRECTORY_"_s, IC::TargetWithArtifact, R::PerConfig },
   { "PDB_OUTPUT_DIRECTORY"_s, IC::CanCompileSources },
+  { "PDB_OUTPUT_DIRECTORY_"_s, IC::TargetWithArtifact, R::PerConfig },
   { "RUNTIME_OUTPUT_DIRECTORY"_s, IC::CanCompileSources },
+  { "RUNTIME_OUTPUT_DIRECTORY_"_s, IC::TargetWithArtifact, R::PerConfig },
 
   // macOS bundle properties
   { "FRAMEWORK"_s, IC::CanCompileSources },
@@ -918,37 +926,14 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     }
   };
 
-  // Setup default property values.
-  if (this->CanCompileSources()) {
-
-    // Compilation properties
-    // initProp("INTERPROCEDURAL_OPTIMIZATION_<CONFIG>"); (per-config block)
-  }
-
   // Setup per-configuration property default values.
   if (this->GetType() != cmStateEnums::UTILITY &&
       this->GetType() != cmStateEnums::GLOBAL_TARGET) {
-    static const auto configProps = {
-      /* clang-format needs this comment to break after the opening brace */
-      "ARCHIVE_OUTPUT_DIRECTORY_"_s,     "LIBRARY_OUTPUT_DIRECTORY_"_s,
-      "RUNTIME_OUTPUT_DIRECTORY_"_s,     "PDB_OUTPUT_DIRECTORY_"_s,
-      "COMPILE_PDB_OUTPUT_DIRECTORY_"_s, "INTERPROCEDURAL_OPTIMIZATION_"_s
-    };
     // Collect the set of configuration types.
     std::vector<std::string> configNames =
       mf->GetGeneratorConfigs(cmMakefile::ExcludeEmptyConfig);
     for (std::string const& configName : configNames) {
       std::string configUpper = cmSystemTools::UpperCase(configName);
-      for (auto const& prop : configProps) {
-        // Interface libraries have no output locations, so honor only
-        // the configuration map.
-        if (this->impl->TargetType == cmStateEnums::INTERFACE_LIBRARY) {
-          continue;
-        }
-        std::string property = cmStrCat(prop, configUpper);
-        initProp(property);
-      }
-
       // Initialize per-configuration name postfix property from the
       // variable only for non-executable targets.  This preserves
       // compatibility with previous CMake versions in which executables
@@ -1047,6 +1032,9 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     if (!this->IsImported()) {
       metConditions.insert(
         TargetProperty::InitCondition::NormalNonImportedTarget);
+    }
+    if (this->impl->TargetType != cmStateEnums::INTERFACE_LIBRARY) {
+      metConditions.insert(TargetProperty::InitCondition::TargetWithArtifact);
     }
   }
 
