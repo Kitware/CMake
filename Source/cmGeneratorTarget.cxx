@@ -7115,6 +7115,11 @@ cmGeneratorTarget::OutputInfo const* cmGeneratorTarget::GetOutputInfo(
     return nullptr;
   }
 
+  // Synthetic targets don't have output.
+  if (this->IsSynthetic()) {
+    return nullptr;
+  }
+
   // Only libraries and executables have well-defined output files.
   if (!this->HaveWellDefinedOutputFiles()) {
     std::string msg = cmStrCat("cmGeneratorTarget::GetOutputInfo called for ",
