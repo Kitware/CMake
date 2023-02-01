@@ -77,8 +77,6 @@ Properties on Directories
    /prop_dir/IMPORTED_TARGETS
    /prop_dir/INCLUDE_DIRECTORIES
    /prop_dir/INCLUDE_REGULAR_EXPRESSION
-   /prop_dir/INTERPROCEDURAL_OPTIMIZATION
-   /prop_dir/INTERPROCEDURAL_OPTIMIZATION_CONFIG
    /prop_dir/LABELS
    /prop_dir/LINK_DIRECTORIES
    /prop_dir/LINK_OPTIONS
@@ -621,6 +619,8 @@ Deprecated Properties on Directories
 
    /prop_dir/ADDITIONAL_MAKE_CLEAN_FILES
    /prop_dir/COMPILE_DEFINITIONS_CONFIG
+   /prop_dir/INTERPROCEDURAL_OPTIMIZATION
+   /prop_dir/INTERPROCEDURAL_OPTIMIZATION_CONFIG
    /prop_dir/TEST_INCLUDE_FILE
 
 

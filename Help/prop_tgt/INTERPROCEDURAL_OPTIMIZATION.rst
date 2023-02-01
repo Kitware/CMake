@@ -11,3 +11,7 @@ if interprocedural optimization is enabled but not supported.
 This property is initialized by the
 :variable:`CMAKE_INTERPROCEDURAL_OPTIMIZATION` variable if it is set when a
 target is created.
+
+There is also the per-configuration :prop_tgt:`INTERPROCEDURAL_OPTIMIZATION_<CONFIG>`
+target property, which overrides :prop_tgt:`INTERPROCEDURAL_OPTIMIZATION`
+if it is set.
