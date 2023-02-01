@@ -90,7 +90,7 @@ It must be one of the following:
   for tests created by the :command:`add_test(NAME)` signature.
 
 ``CACHE``
-  Scope must name zero or more cache existing entries.
+  Scope must name zero or more existing cache entries.
 
 The required ``PROPERTY`` option is immediately followed by the name of
 the property to set.  Remaining arguments are used to compose the
