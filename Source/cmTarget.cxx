@@ -308,6 +308,9 @@ struct TargetProperty
     // Needs to be a target with meaningful symbol exports (`SHARED` or
     // `EXECUTABLE`).
     TargetWithSymbolExports,
+    // Targets with "commands" associated with them. Basically everything
+    // except global and `INTERFACE` targets.
+    TargetWithCommands,
   };
 
   enum class Repetition
@@ -398,6 +401,8 @@ TargetProperty const StaticTargetProperties[] = {
   COMMON_LANGUAGE_PROPERTIES(CXX),
   // ---- CSharp
   { "DOTNET_SDK"_s, IC::NonImportedTarget },
+  { "DOTNET_TARGET_FRAMEWORK"_s, IC::TargetWithCommands },
+  { "DOTNET_TARGET_FRAMEWORK_VERSION"_s, IC::TargetWithCommands },
   // ---- CUDA
   COMMON_LANGUAGE_PROPERTIES(CUDA),
   { "CUDA_SEPARABLE_COMPILATION"_s, IC::CanCompileSources },
@@ -991,11 +996,6 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     this->impl->PolicyMap.Set(cmPolicies::CMP0022, cmPolicies::NEW);
   }
 
-  if (this->impl->TargetType <= cmStateEnums::GLOBAL_TARGET) {
-    initProp("DOTNET_TARGET_FRAMEWORK");
-    initProp("DOTNET_TARGET_FRAMEWORK_VERSION");
-  }
-
   std::set<TargetProperty::InitCondition> metConditions;
   metConditions.insert(TargetProperty::InitCondition::Always);
   if (this->CanCompileSources()) {
@@ -1038,6 +1038,9 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
       this->impl->TargetType == cmStateEnums::EXECUTABLE) {
     metConditions.insert(
       TargetProperty::InitCondition::TargetWithSymbolExports);
+  }
+  if (this->impl->TargetType <= cmStateEnums::GLOBAL_TARGET) {
+    metConditions.insert(TargetProperty::InitCondition::TargetWithCommands);
   }
 
   std::vector<std::string> configNames =
