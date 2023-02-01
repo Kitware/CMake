@@ -62,12 +62,15 @@ cmNinjaNormalTargetGenerator::~cmNinjaNormalTargetGenerator() = default;
 
 void cmNinjaNormalTargetGenerator::Generate(const std::string& config)
 {
-  std::string lang = this->GeneratorTarget->GetLinkerLanguage(config);
-  if (this->TargetLinkLanguage(config).empty()) {
-    cmSystemTools::Error(
-      cmStrCat("CMake can not determine linker language for target: ",
-               this->GetGeneratorTarget()->GetName()));
-    return;
+  if (this->GetGeneratorTarget()->GetType() !=
+      cmStateEnums::INTERFACE_LIBRARY) {
+    std::string lang = this->GeneratorTarget->GetLinkerLanguage(config);
+    if (this->TargetLinkLanguage(config).empty()) {
+      cmSystemTools::Error(
+        cmStrCat("CMake can not determine linker language for target: ",
+                 this->GetGeneratorTarget()->GetName()));
+      return;
+    }
   }
 
   // Write the rules for each language.
@@ -87,6 +90,34 @@ void cmNinjaNormalTargetGenerator::Generate(const std::string& config)
 
   if (this->GetGeneratorTarget()->GetType() == cmStateEnums::OBJECT_LIBRARY) {
     this->WriteObjectLibStatement(config);
+  } else if (this->GetGeneratorTarget()->GetType() ==
+             cmStateEnums::INTERFACE_LIBRARY) {
+    bool haveCxxModuleSources = false;
+    if (this->GetGeneratorTarget()->HaveCxx20ModuleSources()) {
+      haveCxxModuleSources = true;
+    }
+
+    if (!haveCxxModuleSources) {
+      cmSystemTools::Error(cmStrCat(
+        "Ninja does not support INTERFACE libraries without C++ module "
+        "sources as a normal target: ",
+        this->GetGeneratorTarget()->GetName()));
+      return;
+    }
+
+    firstForConfig = true;
+    for (auto const& fileConfig : this->GetConfigNames()) {
+      if (!this->GetGlobalGenerator()
+             ->GetCrossConfigs(fileConfig)
+             .count(config)) {
+        continue;
+      }
+      if (haveCxxModuleSources) {
+        this->WriteCxxModuleLibraryStatement(config, fileConfig,
+                                             firstForConfig);
+      }
+      firstForConfig = false;
+    }
   } else {
     firstForConfig = true;
     for (auto const& fileConfig : this->GetConfigNames()) {
@@ -123,12 +154,26 @@ void cmNinjaNormalTargetGenerator::WriteLanguagesRules(
 #endif
 
   // Write rules for languages compiled in this target.
-  std::set<std::string> languages;
-  std::vector<cmSourceFile const*> sourceFiles;
-  this->GetGeneratorTarget()->GetObjectSources(sourceFiles, config);
-  if (this->HaveRequiredLanguages(sourceFiles, languages)) {
-    for (std::string const& language : languages) {
-      this->WriteLanguageRules(language, config);
+  {
+    std::set<std::string> languages;
+    std::vector<cmSourceFile const*> sourceFiles;
+    this->GetGeneratorTarget()->GetObjectSources(sourceFiles, config);
+    if (this->HaveRequiredLanguages(sourceFiles, languages)) {
+      for (std::string const& language : languages) {
+        this->WriteLanguageRules(language, config);
+      }
+    }
+  }
+
+  // Write rules for languages in BMI-only rules.
+  {
+    std::set<std::string> languages;
+    std::vector<cmSourceFile const*> sourceFiles;
+    this->GetGeneratorTarget()->GetCxxModuleSources(sourceFiles, config);
+    if (this->HaveRequiredLanguages(sourceFiles, languages)) {
+      for (std::string const& language : languages) {
+        this->WriteLanguageRules(language, config);
+      }
     }
   }
 }
@@ -1629,6 +1674,34 @@ void cmNinjaNormalTargetGenerator::WriteObjectLibStatement(
       this->GetGeneratorTarget(),
       this->GetGlobalGenerator()->GetByproductsForCleanTarget(config), config);
     build.ExplicitDeps = this->GetObjects(config);
+    this->GetGlobalGenerator()->WriteBuild(this->GetCommonFileStream(), build);
+  }
+
+  // Add aliases for the target name.
+  this->GetGlobalGenerator()->AddTargetAlias(
+    this->GetTargetName(), this->GetGeneratorTarget(), config);
+}
+
+void cmNinjaNormalTargetGenerator::WriteCxxModuleLibraryStatement(
+  const std::string& config, const std::string& /*fileConfig*/,
+  bool firstForConfig)
+{
+  // TODO: How to use `fileConfig` properly?
+
+  // Write a phony output that depends on the scanning output.
+  {
+    cmNinjaBuild build("phony");
+    build.Comment =
+      cmStrCat("Imported C++ module library ", this->GetTargetName());
+    this->GetLocalGenerator()->AppendTargetOutputs(this->GetGeneratorTarget(),
+                                                   build.Outputs, config);
+    if (firstForConfig) {
+      this->GetLocalGenerator()->AppendTargetOutputs(
+        this->GetGeneratorTarget(),
+        this->GetGlobalGenerator()->GetByproductsForCleanTarget(config),
+        config);
+    }
+    build.ExplicitDeps.emplace_back(this->GetDyndepFilePath("CXX", config));
     this->GetGlobalGenerator()->WriteBuild(this->GetCommonFileStream(), build);
   }
 
