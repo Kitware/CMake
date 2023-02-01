@@ -284,6 +284,8 @@ struct TargetProperty
     Never,
     // Only initialize if the target can compile sources.
     CanCompileSources,
+    // Only apply to Xcode generators.
+    NeedsXcode,
   };
 
   enum class Repetition
@@ -521,6 +523,9 @@ TargetProperty const StaticTargetProperties[] = {
   // Metadata
   { "EXPORT_COMPILE_COMMANDS"_s, IC::CanCompileSources },
   { "FOLDER"_s },
+
+  // Xcode properties
+  { "XCODE_GENERATE_SCHEME"_s, IC::NeedsXcode },
   /* clang-format on */
 };
 
@@ -909,10 +914,6 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
 #endif
   }
 
-  if (this->GetGlobalGenerator()->IsXcode()) {
-    initProp("XCODE_GENERATE_SCHEME");
-  }
-
   // Setup per-configuration property default values.
   if (this->GetType() != cmStateEnums::UTILITY &&
       this->GetType() != cmStateEnums::GLOBAL_TARGET) {
@@ -1027,6 +1028,9 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   metConditions.insert(TargetProperty::InitCondition::Always);
   if (this->CanCompileSources()) {
     metConditions.insert(TargetProperty::InitCondition::CanCompileSources);
+  }
+  if (this->GetGlobalGenerator()->IsXcode()) {
+    metConditions.insert(TargetProperty::InitCondition::NeedsXcode);
   }
 
   std::vector<std::string> configNames =
