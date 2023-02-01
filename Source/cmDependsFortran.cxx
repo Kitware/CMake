@@ -243,7 +243,7 @@ void cmDependsFortran::LocateModules()
   // Load information about other targets.
   cmMakefile* mf = this->LocalGenerator->GetMakefile();
   std::vector<std::string> infoFiles;
-  mf->GetDefExpandList("CMAKE_TARGET_LINKED_INFO_FILES", infoFiles);
+  mf->GetDefExpandList("CMAKE_Fortran_TARGET_LINKED_INFO_FILES", infoFiles);
   for (std::string const& i : infoFiles) {
     std::string targetDir = cmSystemTools::GetFilenamePath(i);
     std::string fname = targetDir + "/fortran.internal";
