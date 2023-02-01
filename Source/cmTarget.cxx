@@ -936,20 +936,6 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   this->impl->IsAndroid = (this->impl->Makefile->GetSafeDefinition(
                              "CMAKE_SYSTEM_NAME") == "Android");
 
-  std::string defKey;
-  defKey.reserve(128);
-  defKey += "CMAKE_";
-  auto initPropValue = [this, mf, &defKey](const std::string& property,
-                                           const char* default_value) {
-    // Replace everything after "CMAKE_"
-    defKey.replace(defKey.begin() + 6, defKey.end(), property);
-    if (cmValue value = mf->GetDefinition(defKey)) {
-      this->SetProperty(property, value);
-    } else if (default_value) {
-      this->SetProperty(property, default_value);
-    }
-  };
-
   // Save the backtrace of target construction.
   this->impl->Backtrace = this->impl->Makefile->GetBacktrace();
 
@@ -1037,6 +1023,9 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     config = cmSystemTools::UpperCase(config);
   }
 
+  std::string defKey;
+  defKey.reserve(128);
+  defKey += "CMAKE_";
   auto initProperty = [this, mf, &defKey](const std::string& property,
                                           const char* default_value) {
     // Replace everything after "CMAKE_"
@@ -1096,7 +1085,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
         if (assignment != std::string::npos) {
           const std::string propName = vsGlobal + i.substr(0, assignment);
           const std::string propValue = i.substr(assignment + 1);
-          initPropValue(propName, propValue.c_str());
+          initProperty(propName, propValue.c_str());
         }
       }
     }
