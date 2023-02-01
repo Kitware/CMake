@@ -218,7 +218,7 @@ bool RegularExpression::deep_equal(const RegularExpression& rxp) const
   20 // no   Mark this point in input as start of
      // #n.
 // OPEN+1 is number 1, etc.
-#define CLOSE 30 // no   Analogous to OPEN.
+#define CLOSE 52 // no   Analogous to OPEN.
 
 /*
  * Opcode notes:
@@ -1018,7 +1018,30 @@ int RegExpFind::regmatch(const char* prog)
       case OPEN + 6:
       case OPEN + 7:
       case OPEN + 8:
-      case OPEN + 9: {
+      case OPEN + 9:
+      case OPEN + 10:
+      case OPEN + 11:
+      case OPEN + 12:
+      case OPEN + 13:
+      case OPEN + 14:
+      case OPEN + 15:
+      case OPEN + 16:
+      case OPEN + 17:
+      case OPEN + 18:
+      case OPEN + 19:
+      case OPEN + 20:
+      case OPEN + 21:
+      case OPEN + 22:
+      case OPEN + 23:
+      case OPEN + 24:
+      case OPEN + 25:
+      case OPEN + 26:
+      case OPEN + 27:
+      case OPEN + 28:
+      case OPEN + 29:
+      case OPEN + 30:
+      case OPEN + 31:
+      case OPEN + 32: {
         int no;
         const char* save;
 
@@ -1046,7 +1069,30 @@ int RegExpFind::regmatch(const char* prog)
       case CLOSE + 6:
       case CLOSE + 7:
       case CLOSE + 8:
-      case CLOSE + 9: {
+      case CLOSE + 9:
+      case CLOSE + 10:
+      case CLOSE + 11:
+      case CLOSE + 12:
+      case CLOSE + 13:
+      case CLOSE + 14:
+      case CLOSE + 15:
+      case CLOSE + 16:
+      case CLOSE + 17:
+      case CLOSE + 18:
+      case CLOSE + 19:
+      case CLOSE + 20:
+      case CLOSE + 21:
+      case CLOSE + 22:
+      case CLOSE + 23:
+      case CLOSE + 24:
+      case CLOSE + 25:
+      case CLOSE + 26:
+      case CLOSE + 27:
+      case CLOSE + 28:
+      case CLOSE + 29:
+      case CLOSE + 30:
+      case CLOSE + 31:
+      case CLOSE + 32: {
         int no;
         const char* save;
 
