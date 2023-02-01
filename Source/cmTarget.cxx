@@ -300,6 +300,9 @@ struct TargetProperty
     // Needs to be a "normal" target with an artifact that is not an
     // executable.
     NonExecutableWithArtifact,
+    // Needs to be a linkable library target (no `OBJECT` or `MODULE`
+    // libraries).
+    LinkableLibraryTarget,
   };
 
   enum class Repetition
@@ -462,6 +465,8 @@ TargetProperty const StaticTargetProperties[] = {
   { "ANDROID_SECURE_PROPS_PATH"_s, IC::CanCompileSources },
   // ---- iOS
   { "IOS_INSTALL_COMBINED"_s, IC::CanCompileSources },
+  // ---- macOS
+  { "FRAMEWORK_MULTI_CONFIG_POSTFIX_"_s, IC::LinkableLibraryTarget, R::PerConfig },
   // ---- Windows
   { "GNUtoMS"_s, IC::CanCompileSources },
   { "WIN32_EXECUTABLE"_s, IC::CanCompileSources },
@@ -934,23 +939,6 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     }
   };
 
-  // Setup per-configuration property default values.
-  if (this->GetType() != cmStateEnums::UTILITY &&
-      this->GetType() != cmStateEnums::GLOBAL_TARGET) {
-    // Collect the set of configuration types.
-    std::vector<std::string> configNames =
-      mf->GetGeneratorConfigs(cmMakefile::ExcludeEmptyConfig);
-    for (std::string const& configName : configNames) {
-      std::string configUpper = cmSystemTools::UpperCase(configName);
-      if (this->impl->TargetType == cmStateEnums::SHARED_LIBRARY ||
-          this->impl->TargetType == cmStateEnums::STATIC_LIBRARY) {
-        std::string property = cmStrCat("FRAMEWORK_MULTI_CONFIG_POSTFIX_",
-                                        cmSystemTools::UpperCase(configName));
-        initProp(property);
-      }
-    }
-  }
-
   // Save the backtrace of target construction.
   this->impl->Backtrace = this->impl->Makefile->GetBacktrace();
 
@@ -1035,6 +1023,11 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
         metConditions.insert(
           TargetProperty::InitCondition::NonExecutableWithArtifact);
       }
+    }
+    if (this->impl->TargetType == cmStateEnums::SHARED_LIBRARY ||
+        this->impl->TargetType == cmStateEnums::STATIC_LIBRARY) {
+      metConditions.insert(
+        TargetProperty::InitCondition::LinkableLibraryTarget);
     }
   }
 
