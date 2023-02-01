@@ -288,6 +288,8 @@ struct TargetProperty
     NeedsXcode,
     // Only apply to Xcode generators on targets that can compile sources.
     NeedsXcodeAndCanCompileSources,
+    // Needs to be a "normal" target (any non-global, non-utility target).
+    NormalTarget,
   };
 
   enum class Repetition
@@ -521,6 +523,7 @@ TargetProperty const StaticTargetProperties[] = {
 
   // Usage requirement properties
   { "LINK_INTERFACE_LIBRARIES"_s, IC::CanCompileSources },
+  { "MAP_IMPORTED_CONFIG_"_s, IC::NormalTarget, R::PerConfig },
 
   // Metadata
   { "EXPORT_COMPILE_COMMANDS"_s, IC::CanCompileSources },
@@ -921,8 +924,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
       /* clang-format needs this comment to break after the opening brace */
       "ARCHIVE_OUTPUT_DIRECTORY_"_s,     "LIBRARY_OUTPUT_DIRECTORY_"_s,
       "RUNTIME_OUTPUT_DIRECTORY_"_s,     "PDB_OUTPUT_DIRECTORY_"_s,
-      "COMPILE_PDB_OUTPUT_DIRECTORY_"_s, "MAP_IMPORTED_CONFIG_"_s,
-      "INTERPROCEDURAL_OPTIMIZATION_"_s
+      "COMPILE_PDB_OUTPUT_DIRECTORY_"_s, "INTERPROCEDURAL_OPTIMIZATION_"_s
     };
     // Collect the set of configuration types.
     std::vector<std::string> configNames =
@@ -932,8 +934,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
       for (auto const& prop : configProps) {
         // Interface libraries have no output locations, so honor only
         // the configuration map.
-        if (this->impl->TargetType == cmStateEnums::INTERFACE_LIBRARY &&
-            prop != "MAP_IMPORTED_CONFIG_") {
+        if (this->impl->TargetType == cmStateEnums::INTERFACE_LIBRARY) {
           continue;
         }
         std::string property = cmStrCat(prop, configUpper);
@@ -1035,6 +1036,10 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
       metConditions.insert(
         TargetProperty::InitCondition::NeedsXcodeAndCanCompileSources);
     }
+  }
+  if (this->impl->TargetType != cmStateEnums::UTILITY &&
+      this->impl->TargetType != cmStateEnums::GLOBAL_TARGET) {
+    metConditions.insert(TargetProperty::InitCondition::NormalTarget);
   }
 
   std::vector<std::string> configNames =
