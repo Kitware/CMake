@@ -292,6 +292,9 @@ struct TargetProperty
     NormalTarget,
     // Any non-imported target.
     NonImportedTarget,
+    // Needs to be a "normal" target (any non-global, non-utility target) that
+    // is not `IMPORTED`.
+    NormalNonImportedTarget,
   };
 
   enum class Repetition
@@ -421,6 +424,7 @@ TargetProperty const StaticTargetProperties[] = {
   { "AUTORCC_OPTIONS"_s, IC::CanCompileSources },
 
   // Linking properties
+  { "LINK_LIBRARIES_ONLY_TARGETS"_s, IC::NormalNonImportedTarget },
   { "LINK_SEARCH_START_STATIC"_s, IC::CanCompileSources },
   { "LINK_SEARCH_END_STATIC"_s, IC::CanCompileSources },
   // -- Dependent library lookup
@@ -964,9 +968,6 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
         initProp(property);
       }
     }
-    if (!this->IsImported()) {
-      initProp("LINK_LIBRARIES_ONLY_TARGETS");
-    }
   }
 
   // Save the backtrace of target construction.
@@ -1043,6 +1044,10 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   if (this->impl->TargetType != cmStateEnums::UTILITY &&
       this->impl->TargetType != cmStateEnums::GLOBAL_TARGET) {
     metConditions.insert(TargetProperty::InitCondition::NormalTarget);
+    if (!this->IsImported()) {
+      metConditions.insert(
+        TargetProperty::InitCondition::NormalNonImportedTarget);
+    }
   }
 
   std::vector<std::string> configNames =
