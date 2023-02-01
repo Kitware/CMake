@@ -297,6 +297,9 @@ struct TargetProperty
     // Needs to be a "normal" target with an artifact (no `INTERFACE`
     // libraries).
     TargetWithArtifact,
+    // Needs to be a "normal" target with an artifact that is not an
+    // executable.
+    NonExecutableWithArtifact,
   };
 
   enum class Repetition
@@ -430,6 +433,11 @@ TargetProperty const StaticTargetProperties[] = {
   { "LINK_LIBRARIES_ONLY_TARGETS"_s, IC::NormalNonImportedTarget },
   { "LINK_SEARCH_START_STATIC"_s, IC::CanCompileSources },
   { "LINK_SEARCH_END_STATIC"_s, IC::CanCompileSources },
+  // Initialize per-configuration name postfix property from the variable only
+  // for non-executable targets.  This preserves compatibility with previous
+  // CMake versions in which executables did not support this variable.
+  // Projects may still specify the property directly.
+  { "_POSTFIX"_s, IC::NonExecutableWithArtifact, R::PerConfigPrefix },
   // -- Dependent library lookup
   { "MACOSX_RPATH"_s, IC::CanCompileSources },
   // ---- Build
@@ -934,18 +942,6 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
       mf->GetGeneratorConfigs(cmMakefile::ExcludeEmptyConfig);
     for (std::string const& configName : configNames) {
       std::string configUpper = cmSystemTools::UpperCase(configName);
-      // Initialize per-configuration name postfix property from the
-      // variable only for non-executable targets.  This preserves
-      // compatibility with previous CMake versions in which executables
-      // did not support this variable.  Projects may still specify the
-      // property directly.
-      if (this->impl->TargetType != cmStateEnums::EXECUTABLE &&
-          this->impl->TargetType != cmStateEnums::INTERFACE_LIBRARY) {
-        std::string property =
-          cmStrCat(cmSystemTools::UpperCase(configName), "_POSTFIX");
-        initProp(property);
-      }
-
       if (this->impl->TargetType == cmStateEnums::SHARED_LIBRARY ||
           this->impl->TargetType == cmStateEnums::STATIC_LIBRARY) {
         std::string property = cmStrCat("FRAMEWORK_MULTI_CONFIG_POSTFIX_",
@@ -1035,6 +1031,10 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     }
     if (this->impl->TargetType != cmStateEnums::INTERFACE_LIBRARY) {
       metConditions.insert(TargetProperty::InitCondition::TargetWithArtifact);
+      if (this->impl->TargetType != cmStateEnums::EXECUTABLE) {
+        metConditions.insert(
+          TargetProperty::InitCondition::NonExecutableWithArtifact);
+      }
     }
   }
 
