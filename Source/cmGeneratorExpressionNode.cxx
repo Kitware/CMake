@@ -2658,10 +2658,14 @@ static const struct InstallPrefixNode : public cmGeneratorExpressionNode
 
 class ArtifactDirTag;
 class ArtifactLinkerTag;
+class ArtifactLinkerLibraryTag;
+class ArtifactLinkerImportTag;
 class ArtifactNameTag;
+class ArtifactImportTag;
 class ArtifactPathTag;
 class ArtifactPdbTag;
 class ArtifactSonameTag;
+class ArtifactSonameImportTag;
 class ArtifactBundleDirTag;
 class ArtifactBundleDirNameTag;
 class ArtifactBundleContentDirTag;
@@ -2771,6 +2775,38 @@ struct TargetFilesystemArtifactResultCreator<ArtifactSonameTag>
 };
 
 template <>
+struct TargetFilesystemArtifactResultCreator<ArtifactSonameImportTag>
+{
+  static std::string Create(cmGeneratorTarget* target,
+                            cmGeneratorExpressionContext* context,
+                            const GeneratorExpressionContent* content)
+  {
+    // The target soname file (.so.1).
+    if (target->IsDLLPlatform()) {
+      ::reportError(context, content->GetOriginalExpression(),
+                    "TARGET_SONAME_IMPORT_FILE is not allowed "
+                    "for DLL target platforms.");
+      return std::string();
+    }
+    if (target->GetType() != cmStateEnums::SHARED_LIBRARY) {
+      ::reportError(context, content->GetOriginalExpression(),
+                    "TARGET_SONAME_IMPORT_FILE is allowed only for "
+                    "SHARED libraries.");
+      return std::string();
+    }
+
+    if (target->HasImportLibrary(context->Config)) {
+      return cmStrCat(target->GetDirectory(
+                        context->Config, cmStateEnums::ImportLibraryArtifact),
+                      '/',
+                      target->GetSOName(context->Config,
+                                        cmStateEnums::ImportLibraryArtifact));
+    }
+    return std::string{};
+  }
+};
+
+template <>
 struct TargetFilesystemArtifactResultCreator<ArtifactPdbTag>
 {
   static std::string Create(cmGeneratorTarget* target,
@@ -2817,7 +2853,8 @@ struct TargetFilesystemArtifactResultCreator<ArtifactLinkerTag>
                             cmGeneratorExpressionContext* context,
                             const GeneratorExpressionContent* content)
   {
-    // The file used to link to the target (.so, .lib, .a).
+    // The file used to link to the target (.so, .lib, .a) or import file
+    // (.lib,  .tbd).
     if (!target->IsLinkable()) {
       ::reportError(context, content->GetOriginalExpression(),
                     "TARGET_LINKER_FILE is allowed only for libraries and "
@@ -2829,6 +2866,55 @@ struct TargetFilesystemArtifactResultCreator<ArtifactLinkerTag>
       ? cmStateEnums::ImportLibraryArtifact
       : cmStateEnums::RuntimeBinaryArtifact;
     return target->GetFullPath(context->Config, artifact);
+  }
+};
+
+template <>
+struct TargetFilesystemArtifactResultCreator<ArtifactLinkerLibraryTag>
+{
+  static std::string Create(cmGeneratorTarget* target,
+                            cmGeneratorExpressionContext* context,
+                            const GeneratorExpressionContent* content)
+  {
+    // The file used to link to the target (.dylib, .so, .a).
+    if (!target->IsLinkable() ||
+        target->GetType() == cmStateEnums::EXECUTABLE) {
+      ::reportError(context, content->GetOriginalExpression(),
+                    "TARGET_LINKER_LIBRARY_FILE is allowed only for libraries "
+                    "with ENABLE_EXPORTS.");
+      return std::string();
+    }
+
+    if (!target->IsDLLPlatform() ||
+        target->GetType() == cmStateEnums::STATIC_LIBRARY) {
+      return target->GetFullPath(context->Config,
+                                 cmStateEnums::RuntimeBinaryArtifact);
+    }
+    return std::string{};
+  }
+};
+
+template <>
+struct TargetFilesystemArtifactResultCreator<ArtifactLinkerImportTag>
+{
+  static std::string Create(cmGeneratorTarget* target,
+                            cmGeneratorExpressionContext* context,
+                            const GeneratorExpressionContent* content)
+  {
+    // The file used to link to the target (.lib, .tbd).
+    if (!target->IsLinkable()) {
+      ::reportError(
+        context, content->GetOriginalExpression(),
+        "TARGET_LINKER_IMPORT_FILE is allowed only for libraries and "
+        "executables with ENABLE_EXPORTS.");
+      return std::string();
+    }
+
+    if (target->HasImportLibrary(context->Config)) {
+      return target->GetFullPath(context->Config,
+                                 cmStateEnums::ImportLibraryArtifact);
+    }
+    return std::string{};
   }
 };
 
@@ -2926,6 +3012,21 @@ struct TargetFilesystemArtifactResultCreator<ArtifactNameTag>
   {
     return target->GetFullPath(context->Config,
                                cmStateEnums::RuntimeBinaryArtifact, true);
+  }
+};
+
+template <>
+struct TargetFilesystemArtifactResultCreator<ArtifactImportTag>
+{
+  static std::string Create(cmGeneratorTarget* target,
+                            cmGeneratorExpressionContext* context,
+                            const GeneratorExpressionContent* /*unused*/)
+  {
+    if (target->HasImportLibrary(context->Config)) {
+      return target->GetFullPath(context->Config,
+                                 cmStateEnums::ImportLibraryArtifact, true);
+    }
+    return std::string{};
   }
 };
 
@@ -3054,11 +3155,23 @@ struct TargetFilesystemArtifactNodeGroup
 static const TargetFilesystemArtifactNodeGroup<ArtifactNameTag>
   targetNodeGroup;
 
+static const TargetFilesystemArtifactNodeGroup<ArtifactImportTag>
+  targetImportNodeGroup;
+
 static const TargetFilesystemArtifactNodeGroup<ArtifactLinkerTag>
   targetLinkerNodeGroup;
 
+static const TargetFilesystemArtifactNodeGroup<ArtifactLinkerLibraryTag>
+  targetLinkerLibraryNodeGroup;
+
+static const TargetFilesystemArtifactNodeGroup<ArtifactLinkerImportTag>
+  targetLinkerImportNodeGroup;
+
 static const TargetFilesystemArtifactNodeGroup<ArtifactSonameTag>
   targetSoNameNodeGroup;
+
+static const TargetFilesystemArtifactNodeGroup<ArtifactSonameImportTag>
+  targetSoNameImportNodeGroup;
 
 static const TargetFilesystemArtifactNodeGroup<ArtifactPdbTag>
   targetPdbNodeGroup;
@@ -3099,13 +3212,30 @@ struct TargetOutputNameArtifactResultGetter<ArtifactNameTag>
 };
 
 template <>
+struct TargetOutputNameArtifactResultGetter<ArtifactImportTag>
+{
+  static std::string Get(cmGeneratorTarget* target,
+                         cmGeneratorExpressionContext* context,
+                         const GeneratorExpressionContent* /*unused*/)
+  {
+    if (target->HasImportLibrary(context->Config)) {
+      return target->GetOutputName(context->Config,
+                                   cmStateEnums::ImportLibraryArtifact) +
+        target->GetFilePostfix(context->Config);
+    }
+    return std::string{};
+  }
+};
+
+template <>
 struct TargetOutputNameArtifactResultGetter<ArtifactLinkerTag>
 {
   static std::string Get(cmGeneratorTarget* target,
                          cmGeneratorExpressionContext* context,
                          const GeneratorExpressionContent* content)
   {
-    // The file used to link to the target (.so, .lib, .a).
+    // The library file used to link to the target (.so, .lib, .a) or import
+    // file (.lin,  .tbd).
     if (!target->IsLinkable()) {
       ::reportError(context, content->GetOriginalExpression(),
                     "TARGET_LINKER_FILE_BASE_NAME is allowed only for "
@@ -3118,6 +3248,56 @@ struct TargetOutputNameArtifactResultGetter<ArtifactLinkerTag>
       : cmStateEnums::RuntimeBinaryArtifact;
     return target->GetOutputName(context->Config, artifact) +
       target->GetFilePostfix(context->Config);
+  }
+};
+
+template <>
+struct TargetOutputNameArtifactResultGetter<ArtifactLinkerLibraryTag>
+{
+  static std::string Get(cmGeneratorTarget* target,
+                         cmGeneratorExpressionContext* context,
+                         const GeneratorExpressionContent* content)
+  {
+    // The library file used to link to the target (.so, .lib, .a).
+    if (!target->IsLinkable() ||
+        target->GetType() == cmStateEnums::EXECUTABLE) {
+      ::reportError(context, content->GetOriginalExpression(),
+                    "TARGET_LINKER_LIBRARY_FILE_BASE_NAME is allowed only for "
+                    "libraries with ENABLE_EXPORTS.");
+      return std::string();
+    }
+
+    if (!target->IsDLLPlatform() ||
+        target->GetType() == cmStateEnums::STATIC_LIBRARY) {
+      return target->GetOutputName(context->Config,
+                                   cmStateEnums::ImportLibraryArtifact) +
+        target->GetFilePostfix(context->Config);
+    }
+    return std::string{};
+  }
+};
+
+template <>
+struct TargetOutputNameArtifactResultGetter<ArtifactLinkerImportTag>
+{
+  static std::string Get(cmGeneratorTarget* target,
+                         cmGeneratorExpressionContext* context,
+                         const GeneratorExpressionContent* content)
+  {
+    // The import file used to link to the target (.lib, .tbd).
+    if (!target->IsLinkable()) {
+      ::reportError(context, content->GetOriginalExpression(),
+                    "TARGET_LINKER_IMPORT_FILE_BASE_NAME is allowed only for "
+                    "libraries and executables with ENABLE_EXPORTS.");
+      return std::string();
+    }
+
+    if (target->HasImportLibrary(context->Config)) {
+      return target->GetOutputName(context->Config,
+                                   cmStateEnums::ImportLibraryArtifact) +
+        target->GetFilePostfix(context->Config);
+    }
+    return std::string{};
   }
 };
 
@@ -3192,15 +3372,27 @@ struct TargetFileBaseNameArtifact : public TargetArtifactBase
 
 static const TargetFileBaseNameArtifact<ArtifactNameTag>
   targetFileBaseNameNode;
+static const TargetFileBaseNameArtifact<ArtifactImportTag>
+  targetImportFileBaseNameNode;
 static const TargetFileBaseNameArtifact<ArtifactLinkerTag>
   targetLinkerFileBaseNameNode;
+static const TargetFileBaseNameArtifact<ArtifactLinkerLibraryTag>
+  targetLinkerLibraryFileBaseNameNode;
+static const TargetFileBaseNameArtifact<ArtifactLinkerImportTag>
+  targetLinkerImportFileBaseNameNode;
 static const TargetFileBaseNameArtifact<ArtifactPdbTag>
   targetPdbFileBaseNameNode;
 
 class ArtifactFilePrefixTag;
+class ArtifactImportFilePrefixTag;
 class ArtifactLinkerFilePrefixTag;
+class ArtifactLinkerLibraryFilePrefixTag;
+class ArtifactLinkerImportFilePrefixTag;
 class ArtifactFileSuffixTag;
+class ArtifactImportFileSuffixTag;
 class ArtifactLinkerFileSuffixTag;
+class ArtifactLinkerLibraryFileSuffixTag;
+class ArtifactLinkerImportFileSuffixTag;
 
 template <typename ArtifactT>
 struct TargetFileArtifactResultGetter
@@ -3221,6 +3413,20 @@ struct TargetFileArtifactResultGetter<ArtifactFilePrefixTag>
   }
 };
 template <>
+struct TargetFileArtifactResultGetter<ArtifactImportFilePrefixTag>
+{
+  static std::string Get(cmGeneratorTarget* target,
+                         cmGeneratorExpressionContext* context,
+                         const GeneratorExpressionContent*)
+  {
+    if (target->HasImportLibrary(context->Config)) {
+      return target->GetFilePrefix(context->Config,
+                                   cmStateEnums::ImportLibraryArtifact);
+    }
+    return std::string{};
+  }
+};
+template <>
 struct TargetFileArtifactResultGetter<ArtifactLinkerFilePrefixTag>
 {
   static std::string Get(cmGeneratorTarget* target,
@@ -3228,9 +3434,10 @@ struct TargetFileArtifactResultGetter<ArtifactLinkerFilePrefixTag>
                          const GeneratorExpressionContent* content)
   {
     if (!target->IsLinkable()) {
-      ::reportError(context, content->GetOriginalExpression(),
-                    "TARGET_LINKER_PREFIX is allowed only for libraries and "
-                    "executables with ENABLE_EXPORTS.");
+      ::reportError(
+        context, content->GetOriginalExpression(),
+        "TARGET_LINKER_FILE_PREFIX is allowed only for libraries and "
+        "executables with ENABLE_EXPORTS.");
       return std::string();
     }
 
@@ -3240,6 +3447,52 @@ struct TargetFileArtifactResultGetter<ArtifactLinkerFilePrefixTag>
       : cmStateEnums::RuntimeBinaryArtifact;
 
     return target->GetFilePrefix(context->Config, artifact);
+  }
+};
+template <>
+struct TargetFileArtifactResultGetter<ArtifactLinkerLibraryFilePrefixTag>
+{
+  static std::string Get(cmGeneratorTarget* target,
+                         cmGeneratorExpressionContext* context,
+                         const GeneratorExpressionContent* content)
+  {
+    if (!target->IsLinkable() ||
+        target->GetType() == cmStateEnums::EXECUTABLE) {
+      ::reportError(
+        context, content->GetOriginalExpression(),
+        "TARGET_LINKER_LIBRARY_FILE_PREFIX is allowed only for libraries "
+        "with ENABLE_EXPORTS.");
+      return std::string();
+    }
+
+    if (!target->IsDLLPlatform() ||
+        target->GetType() == cmStateEnums::STATIC_LIBRARY) {
+      return target->GetFilePrefix(context->Config,
+                                   cmStateEnums::RuntimeBinaryArtifact);
+    }
+    return std::string{};
+  }
+};
+template <>
+struct TargetFileArtifactResultGetter<ArtifactLinkerImportFilePrefixTag>
+{
+  static std::string Get(cmGeneratorTarget* target,
+                         cmGeneratorExpressionContext* context,
+                         const GeneratorExpressionContent* content)
+  {
+    if (!target->IsLinkable()) {
+      ::reportError(
+        context, content->GetOriginalExpression(),
+        "TARGET_LINKER_IMPORT_FILE_PREFIX is allowed only for libraries and "
+        "executables with ENABLE_EXPORTS.");
+      return std::string();
+    }
+
+    if (target->HasImportLibrary(context->Config)) {
+      return target->GetFilePrefix(context->Config,
+                                   cmStateEnums::ImportLibraryArtifact);
+    }
+    return std::string{};
   }
 };
 template <>
@@ -3253,6 +3506,20 @@ struct TargetFileArtifactResultGetter<ArtifactFileSuffixTag>
   }
 };
 template <>
+struct TargetFileArtifactResultGetter<ArtifactImportFileSuffixTag>
+{
+  static std::string Get(cmGeneratorTarget* target,
+                         cmGeneratorExpressionContext* context,
+                         const GeneratorExpressionContent*)
+  {
+    if (target->HasImportLibrary(context->Config)) {
+      return target->GetFileSuffix(context->Config,
+                                   cmStateEnums::ImportLibraryArtifact);
+    }
+    return std::string{};
+  }
+};
+template <>
 struct TargetFileArtifactResultGetter<ArtifactLinkerFileSuffixTag>
 {
   static std::string Get(cmGeneratorTarget* target,
@@ -3260,9 +3527,10 @@ struct TargetFileArtifactResultGetter<ArtifactLinkerFileSuffixTag>
                          const GeneratorExpressionContent* content)
   {
     if (!target->IsLinkable()) {
-      ::reportError(context, content->GetOriginalExpression(),
-                    "TARGET_LINKER_SUFFIX is allowed only for libraries and "
-                    "executables with ENABLE_EXPORTS.");
+      ::reportError(
+        context, content->GetOriginalExpression(),
+        "TARGET_LINKER_FILE_SUFFIX is allowed only for libraries and "
+        "executables with ENABLE_EXPORTS.");
       return std::string();
     }
 
@@ -3272,6 +3540,51 @@ struct TargetFileArtifactResultGetter<ArtifactLinkerFileSuffixTag>
       : cmStateEnums::RuntimeBinaryArtifact;
 
     return target->GetFileSuffix(context->Config, artifact);
+  }
+};
+template <>
+struct TargetFileArtifactResultGetter<ArtifactLinkerLibraryFileSuffixTag>
+{
+  static std::string Get(cmGeneratorTarget* target,
+                         cmGeneratorExpressionContext* context,
+                         const GeneratorExpressionContent* content)
+  {
+    if (!target->IsLinkable() ||
+        target->GetType() == cmStateEnums::STATIC_LIBRARY) {
+      ::reportError(context, content->GetOriginalExpression(),
+                    "TARGET_LINKER_LIBRARY_FILE_SUFFIX is allowed only for "
+                    "libraries with ENABLE_EXPORTS.");
+      return std::string();
+    }
+
+    if (!target->IsDLLPlatform() ||
+        target->GetType() == cmStateEnums::STATIC_LIBRARY) {
+      return target->GetFileSuffix(context->Config,
+                                   cmStateEnums::RuntimeBinaryArtifact);
+    }
+    return std::string{};
+  }
+};
+template <>
+struct TargetFileArtifactResultGetter<ArtifactLinkerImportFileSuffixTag>
+{
+  static std::string Get(cmGeneratorTarget* target,
+                         cmGeneratorExpressionContext* context,
+                         const GeneratorExpressionContent* content)
+  {
+    if (!target->IsLinkable()) {
+      ::reportError(
+        context, content->GetOriginalExpression(),
+        "TARGET_LINKER_IMPORT_FILE_SUFFIX is allowed only for libraries and "
+        "executables with ENABLE_EXPORTS.");
+      return std::string();
+    }
+
+    if (target->HasImportLibrary(context->Config)) {
+      return target->GetFileSuffix(context->Config,
+                                   cmStateEnums::ImportLibraryArtifact);
+    }
+    return std::string{};
   }
 };
 
@@ -3304,11 +3617,23 @@ struct TargetFileArtifact : public TargetArtifactBase
 };
 
 static const TargetFileArtifact<ArtifactFilePrefixTag> targetFilePrefixNode;
+static const TargetFileArtifact<ArtifactImportFilePrefixTag>
+  targetImportFilePrefixNode;
 static const TargetFileArtifact<ArtifactLinkerFilePrefixTag>
   targetLinkerFilePrefixNode;
+static const TargetFileArtifact<ArtifactLinkerLibraryFilePrefixTag>
+  targetLinkerLibraryFilePrefixNode;
+static const TargetFileArtifact<ArtifactLinkerImportFilePrefixTag>
+  targetLinkerImportFilePrefixNode;
 static const TargetFileArtifact<ArtifactFileSuffixTag> targetFileSuffixNode;
+static const TargetFileArtifact<ArtifactImportFileSuffixTag>
+  targetImportFileSuffixNode;
 static const TargetFileArtifact<ArtifactLinkerFileSuffixTag>
   targetLinkerFileSuffixNode;
+static const TargetFileArtifact<ArtifactLinkerLibraryFileSuffixTag>
+  targetLinkerLibraryFileSuffixNode;
+static const TargetFileArtifact<ArtifactLinkerImportFileSuffixTag>
+  targetLinkerImportFileSuffixNode;
 
 static const struct ShellPathNode : public cmGeneratorExpressionNode
 {
@@ -3376,23 +3701,52 @@ const cmGeneratorExpressionNode* cmGeneratorExpressionNode::GetNode(
     { "CONFIGURATION", &configurationNode },
     { "CONFIG", &configurationTestNode },
     { "TARGET_FILE", &targetNodeGroup.File },
+    { "TARGET_IMPORT_FILE", &targetImportNodeGroup.File },
     { "TARGET_LINKER_FILE", &targetLinkerNodeGroup.File },
+    { "TARGET_LINKER_LIBRARY_FILE", &targetLinkerLibraryNodeGroup.File },
+    { "TARGET_LINKER_IMPORT_FILE", &targetLinkerImportNodeGroup.File },
     { "TARGET_SONAME_FILE", &targetSoNameNodeGroup.File },
+    { "TARGET_SONAME_IMPORT_FILE", &targetSoNameImportNodeGroup.File },
     { "TARGET_PDB_FILE", &targetPdbNodeGroup.File },
     { "TARGET_FILE_BASE_NAME", &targetFileBaseNameNode },
+    { "TARGET_IMPORT_FILE_BASE_NAME", &targetImportFileBaseNameNode },
     { "TARGET_LINKER_FILE_BASE_NAME", &targetLinkerFileBaseNameNode },
+    { "TARGET_LINKER_LIBRARY_FILE_BASE_NAME",
+      &targetLinkerLibraryFileBaseNameNode },
+    { "TARGET_LINKER_IMPORT_FILE_BASE_NAME",
+      &targetLinkerImportFileBaseNameNode },
     { "TARGET_PDB_FILE_BASE_NAME", &targetPdbFileBaseNameNode },
     { "TARGET_FILE_PREFIX", &targetFilePrefixNode },
+    { "TARGET_IMPORT_FILE_PREFIX", &targetImportFilePrefixNode },
     { "TARGET_LINKER_FILE_PREFIX", &targetLinkerFilePrefixNode },
+    { "TARGET_LINKER_LIBRARY_FILE_PREFIX",
+      &targetLinkerLibraryFilePrefixNode },
+    { "TARGET_LINKER_IMPORT_FILE_PREFIX", &targetLinkerImportFilePrefixNode },
     { "TARGET_FILE_SUFFIX", &targetFileSuffixNode },
+    { "TARGET_IMPORT_FILE_SUFFIX", &targetImportFileSuffixNode },
     { "TARGET_LINKER_FILE_SUFFIX", &targetLinkerFileSuffixNode },
+    { "TARGET_LINKER_LIBRARY_FILE_SUFFIX",
+      &targetLinkerLibraryFileSuffixNode },
+    { "TARGET_LINKER_IMPORT_FILE_SUFFIX", &targetLinkerImportFileSuffixNode },
     { "TARGET_FILE_NAME", &targetNodeGroup.FileName },
+    { "TARGET_IMPORT_FILE_NAME", &targetImportNodeGroup.FileName },
     { "TARGET_LINKER_FILE_NAME", &targetLinkerNodeGroup.FileName },
+    { "TARGET_LINKER_LIBRARY_FILE_NAME",
+      &targetLinkerLibraryNodeGroup.FileName },
+    { "TARGET_LINKER_IMPORT_FILE_NAME",
+      &targetLinkerImportNodeGroup.FileName },
     { "TARGET_SONAME_FILE_NAME", &targetSoNameNodeGroup.FileName },
+    { "TARGET_SONAME_IMPORT_FILE_NAME",
+      &targetSoNameImportNodeGroup.FileName },
     { "TARGET_PDB_FILE_NAME", &targetPdbNodeGroup.FileName },
     { "TARGET_FILE_DIR", &targetNodeGroup.FileDir },
+    { "TARGET_IMPORT_FILE_DIR", &targetImportNodeGroup.FileDir },
     { "TARGET_LINKER_FILE_DIR", &targetLinkerNodeGroup.FileDir },
+    { "TARGET_LINKER_LIBRARY_FILE_DIR",
+      &targetLinkerLibraryNodeGroup.FileDir },
+    { "TARGET_LINKER_IMPORT_FILE_DIR", &targetLinkerImportNodeGroup.FileDir },
     { "TARGET_SONAME_FILE_DIR", &targetSoNameNodeGroup.FileDir },
+    { "TARGET_SONAME_IMPORT_FILE_DIR", &targetSoNameImportNodeGroup.FileDir },
     { "TARGET_PDB_FILE_DIR", &targetPdbNodeGroup.FileDir },
     { "TARGET_BUNDLE_DIR", &targetBundleDirNode },
     { "TARGET_BUNDLE_DIR_NAME", &targetBundleDirNameNode },

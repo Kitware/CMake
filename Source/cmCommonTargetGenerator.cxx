@@ -25,7 +25,6 @@
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
-#include "cmTarget.h"
 #include "cmValue.h"
 
 cmCommonTargetGenerator::cmCommonTargetGenerator(cmGeneratorTarget* gt)

@@ -1503,6 +1503,76 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on (see policy :policy:`CMP0112`).
 
+.. genex:: $<TARGET_IMPORT_FILE:tgt>
+
+  .. versionadded:: 3.27
+
+  Full path to the linker import file. On DLL platforms, it would be the
+  ``.lib`` file. On AIX, for the executables, and on macOS, for the shared
+  libraries, it could be, respectively, the ``.imp`` or ``.tbd`` import file,
+  depending of the value of :prop_tgt:`ENABLE_EXPORTS` property.
+
+  An empty string is returned when there is no import file associated with the
+  target.
+
+.. genex:: $<TARGET_IMPORT_FILE_BASE_NAME:tgt>
+
+  .. versionadded:: 3.27
+
+  Base name of file linker import file of the target ``tgt`` without prefix and
+  suffix. For example, if target file name is ``libbase.tbd``, the base name is
+  ``base``.
+
+  See also the :prop_tgt:`OUTPUT_NAME` and :prop_tgt:`ARCHIVE_OUTPUT_NAME`
+  target properties and their configuration specific variants
+  :prop_tgt:`OUTPUT_NAME_<CONFIG>` and :prop_tgt:`ARCHIVE_OUTPUT_NAME_<CONFIG>`.
+
+  The :prop_tgt:`<CONFIG>_POSTFIX` and :prop_tgt:`DEBUG_POSTFIX` target
+  properties can also be considered.
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on.
+
+.. genex:: $<TARGET_IMPORT_FILE_PREFIX:tgt>
+
+  .. versionadded:: 3.27
+
+  Prefix of the import file of the target ``tgt``.
+
+  See also the :prop_tgt:`IMPORT_PREFIX` target property.
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on.
+
+.. genex:: $<TARGET_IMPORT_FILE_SUFFIX:tgt>
+
+  .. versionadded:: 3.27
+
+  Suffix of the import file of the target ``tgt``.
+
+  The suffix corresponds to the file extension (such as ".lib" or ".tbd").
+
+  See also the :prop_tgt:`IMPORT_SUFFIX` target property.
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on.
+
+.. genex:: $<TARGET_IMPORT_FILE_NAME:tgt>
+
+  .. versionadded:: 3.27
+
+  Name of the import file of the target target ``tgt``.
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on.
+
+.. genex:: $<TARGET_IMPORT_FILE_DIR:tgt>
+
+  Directory of the import file of the target ``tgt``.
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on.
+
 .. genex:: $<TARGET_LINKER_FILE:tgt>
 
   File used when linking to the ``tgt`` target.  This will usually
@@ -1510,13 +1580,22 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
   but for a shared library on DLL platforms, it would be the ``.lib``
   import library associated with the DLL.
 
+  .. versionadded:: 3.27
+    On macOS, it could be the ``.tbd`` import file associated with the shared
+    library, depending of the value of :prop_tgt:`ENABLE_EXPORTS` property.
+
+  This generator expression is equivalent to
+  :genex:`$<TARGET_LINKER_LIBRARY_FILE>` or
+  :genex:`$<TARGET_LINKER_IMPORT_FILE>` generator expressions, depending of the
+  characteristics of the target and the platform.
+
 .. genex:: $<TARGET_LINKER_FILE_BASE_NAME:tgt>
 
   .. versionadded:: 3.15
 
   Base name of file used to link the target ``tgt``, i.e.
-  ``$<TARGET_LINKER_FILE_NAME:tgt>`` without prefix and suffix. For example,
-  if target file name is ``libbase.a``, the base name is ``base``.
+  :genex:`$<TARGET_LINKER_FILE_NAME:tgt>` without prefix and suffix. For
+  example, if target file name is ``libbase.a``, the base name is ``base``.
 
   See also the :prop_tgt:`OUTPUT_NAME`, :prop_tgt:`ARCHIVE_OUTPUT_NAME`,
   and :prop_tgt:`LIBRARY_OUTPUT_NAME` target properties and their configuration
@@ -1570,9 +1649,151 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on (see policy :policy:`CMP0112`).
 
+.. genex:: $<TARGET_LINKER_LIBRARY_FILE:tgt>
+
+  .. versionadded:: 3.27
+
+  File used when linking o the ``tgt`` target is done using directly the
+  library, and not an import file. This will usually be the library that
+  ``tgt`` represents (``.a``, ``.so``, ``.dylib``). So, on DLL platforms, it
+  will be an empty string.
+
+.. genex:: $<TARGET_LINKER_LIBRARY_FILE_BASE_NAME:tgt>
+
+  .. versionadded:: 3.27
+
+  Base name of library file used to link the target ``tgt``, i.e.
+  :genex:`$<TARGET_LINKER_LIBRARY_FILE_NAME:tgt>` without prefix and suffix.
+  For example, if target file name is ``libbase.a``, the base name is ``base``.
+
+  See also the :prop_tgt:`OUTPUT_NAME`, :prop_tgt:`ARCHIVE_OUTPUT_NAME`,
+  and :prop_tgt:`LIBRARY_OUTPUT_NAME` target properties and their configuration
+  specific variants :prop_tgt:`OUTPUT_NAME_<CONFIG>`,
+  :prop_tgt:`ARCHIVE_OUTPUT_NAME_<CONFIG>` and
+  :prop_tgt:`LIBRARY_OUTPUT_NAME_<CONFIG>`.
+
+  The :prop_tgt:`<CONFIG>_POSTFIX` and :prop_tgt:`DEBUG_POSTFIX` target
+  properties can also be considered.
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on.
+
+.. genex:: $<TARGET_LINKER_LIBRARY_FILE_PREFIX:tgt>
+
+  .. versionadded:: 3.27
+
+  Prefix of the library file used to link target ``tgt``.
+
+  See also the :prop_tgt:`PREFIX` target property.
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on.
+
+.. genex:: $<TARGET_LINKER_LIBRARY_FILE_SUFFIX:tgt>
+
+  .. versionadded:: 3.27
+
+  Suffix of the library file used to link target ``tgt``.
+
+  The suffix corresponds to the file extension (such as ".a" or ".dylib").
+
+  See also the :prop_tgt:`SUFFIX` target property.
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on.
+
+.. genex:: $<TARGET_LINKER_LIBRARY_FILE_NAME:tgt>
+
+  .. versionadded:: 3.27
+
+  Name of the library file used to link target ``tgt``.
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on.
+
+.. genex:: $<TARGET_LINKER_LIBRARY_FILE_DIR:tgt>
+
+  .. versionadded:: 3.27
+
+  Directory of the library file used to link target ``tgt``.
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on.
+
+.. genex:: $<TARGET_LINKER_IMPORT_FILE:tgt>
+
+  .. versionadded:: 3.27
+
+  File used when linking to the ``tgt`` target is done using an import
+  file.  This will usually be the import file that ``tgt`` represents
+  (``.lib``, ``.tbd``). So, when no import file is involved in the link step,
+  an empty string is returned.
+
+.. genex:: $<TARGET_LINKER_IMPORT_FILE_BASE_NAME:tgt>
+
+  .. versionadded:: 3.27
+
+  Base name of the import file used to link the target ``tgt``, i.e.
+  :genex:`$<TARGET_LINKER_IMPORT_FILE_NAME:tgt>` without prefix and suffix.
+  For example, if target file name is ``libbase.tbd``, the base name is ``base``.
+
+  See also the :prop_tgt:`OUTPUT_NAME` and :prop_tgt:`ARCHIVE_OUTPUT_NAME`,
+  target properties and their configuration
+  specific variants :prop_tgt:`OUTPUT_NAME_<CONFIG>` and
+  :prop_tgt:`ARCHIVE_OUTPUT_NAME_<CONFIG>`.
+
+  The :prop_tgt:`<CONFIG>_POSTFIX` and :prop_tgt:`DEBUG_POSTFIX` target
+  properties can also be considered.
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on.
+
+.. genex:: $<TARGET_LINKER_IMPORT_FILE_PREFIX:tgt>
+
+  .. versionadded:: 3.27
+
+  Prefix of the import file used to link target ``tgt``.
+
+  See also the :prop_tgt:`IMPORT_PREFIX` target property.
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on.
+
+.. genex:: $<TARGET_LINKER_IMPORT_FILE_SUFFIX:tgt>
+
+  .. versionadded:: 3.27
+
+  Suffix of the import file used to link target ``tgt``.
+
+  The suffix corresponds to the file extension (such as ".lib" or ".tbd").
+
+  See also the :prop_tgt:`IMPORT_SUFFIX` target property.
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on.
+
+.. genex:: $<TARGET_LINKER_IMPORT_FILE_NAME:tgt>
+
+  .. versionadded:: 3.27
+
+  Name of the import file used to link target ``tgt``.
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on.
+
+.. genex:: $<TARGET_LINKER_IMPORT_FILE_DIR:tgt>
+
+  .. versionadded:: 3.27
+
+  Directory of the import file used to link target ``tgt``.
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on.
+
 .. genex:: $<TARGET_SONAME_FILE:tgt>
 
   File with soname (``.so.3``) where ``tgt`` is the name of a target.
+
 .. genex:: $<TARGET_SONAME_FILE_NAME:tgt>
 
   Name of file with soname (``.so.3``).
@@ -1582,10 +1803,34 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
 
 .. genex:: $<TARGET_SONAME_FILE_DIR:tgt>
 
-  Directory of with soname (``.so.3``).
+  Directory of file with soname (``.so.3``).
 
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on (see policy :policy:`CMP0112`).
+
+.. genex:: $<TARGET_SONAME_IMPORT_FILE:tgt>
+
+  .. versionadded:: 3.27
+
+  Import file with soname (``.3.tbd``) where ``tgt`` is the name of a target.
+
+.. genex:: $<TARGET_SONAME_IMPORT_FILE_NAME:tgt>
+
+  .. versionadded:: 3.27
+
+  Name of the import file with soname (``.3.tbd``).
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on.
+
+.. genex:: $<TARGET_SONAME_IMPORT_FILE_DIR:tgt>
+
+  .. versionadded:: 3.27
+
+  Directory of the import file with soname (``.3.tbd``).
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on.
 
 .. genex:: $<TARGET_PDB_FILE:tgt>
 

@@ -5,4 +5,7 @@ ARCHIVE_OUTPUT_NAME
 .. |xxx| replace:: archive
 .. include:: XXX_OUTPUT_NAME.txt
 
+.. |IDEM| replace:: with the same name
+.. include:: MACOS_IMPORT_FILES.txt
+
 See also the :prop_tgt:`ARCHIVE_OUTPUT_NAME_<CONFIG>` target property.

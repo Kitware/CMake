@@ -2493,6 +2493,11 @@ bool cmMakefile::PlatformIsAppleEmbedded() const
   return this->GetAppleSDKType() != AppleSDK::MacOS;
 }
 
+bool cmMakefile::PlatformSupportsAppleTextStubs() const
+{
+  return this->IsOn("APPLE") && this->IsSet("CMAKE_TAPI");
+}
+
 const char* cmMakefile::GetSONameFlag(const std::string& language) const
 {
   std::string name = "CMAKE_SHARED_LIBRARY_SONAME";

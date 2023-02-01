@@ -221,6 +221,10 @@ public:
   //! Return whether this target is an executable with symbol exports enabled.
   bool IsExecutableWithExports() const;
 
+  //! Return whether this target is a shared library with symbol exports
+  //! enabled.
+  bool IsSharedLibraryWithExports() const;
+
   //! Return whether this target is a shared library Framework on Apple.
   bool IsFrameworkOnApple() const;
 

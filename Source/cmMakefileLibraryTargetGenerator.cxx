@@ -465,9 +465,20 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   std::string outpathImp;
   if (this->GeneratorTarget->IsFrameworkOnApple()) {
     outpath = this->GeneratorTarget->GetDirectory(this->GetConfigName());
+    cmOSXBundleGenerator::SkipParts bundleSkipParts;
+    if (this->GeneratorTarget->HasImportLibrary(this->GetConfigName())) {
+      bundleSkipParts.TextStubs = false;
+    }
     this->OSXBundleGenerator->CreateFramework(this->TargetNames.Output,
-                                              outpath, this->GetConfigName());
+                                              outpath, this->GetConfigName(),
+                                              bundleSkipParts);
     outpath += '/';
+    if (!this->TargetNames.ImportLibrary.empty()) {
+      outpathImp = this->GeneratorTarget->GetDirectory(
+        this->GetConfigName(), cmStateEnums::ImportLibraryArtifact);
+      cmSystemTools::MakeDirectory(outpathImp);
+      outpathImp += '/';
+    }
   } else if (this->GeneratorTarget->IsCFBundleOnApple()) {
     outpath = this->GeneratorTarget->GetDirectory(this->GetConfigName());
     this->OSXBundleGenerator->CreateCFBundle(this->TargetNames.Output, outpath,
@@ -679,11 +690,12 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   }
 
   // Expand the rule variables.
+  std::unique_ptr<cmRulePlaceholderExpander> rulePlaceholderExpander(
+    this->LocalGenerator->CreateRulePlaceholderExpander());
+  bool useWatcomQuote =
+    this->Makefile->IsOn(linkRuleVar + "_USE_WATCOM_QUOTE");
   std::vector<std::string> real_link_commands;
   {
-    bool useWatcomQuote =
-      this->Makefile->IsOn(linkRuleVar + "_USE_WATCOM_QUOTE");
-
     // Set path conversion for link script shells.
     this->LocalGenerator->SetLinkScriptShell(useLinkScript);
 
@@ -816,8 +828,6 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
       launcher = cmStrCat(val, ' ');
     }
 
-    std::unique_ptr<cmRulePlaceholderExpander> rulePlaceholderExpander(
-      this->LocalGenerator->CreateRulePlaceholderExpander());
     // Construct the main link rule and expand placeholders.
     rulePlaceholderExpander->SetTargetImpLib(targetOutPathImport);
     if (useArchiveRules) {
@@ -949,6 +959,86 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   // Write the build rule.
   this->WriteMakeRule(*this->BuildFileStream, nullptr, outputs, depends,
                       commands, false);
+
+  // Add rule to generate text-based stubs, if required
+  if (this->GeneratorTarget->IsApple() &&
+      this->GeneratorTarget->HasImportLibrary(this->GetConfigName())) {
+    auto genStubsRule =
+      this->Makefile->GetDefinition("CMAKE_CREATE_TEXT_STUBS");
+    auto genStubs_commands = cmExpandedList(genStubsRule);
+
+    std::string TBDFullPath =
+      cmStrCat(outpathImp, this->TargetNames.ImportOutput);
+    std::string TBDFullPathReal =
+      cmStrCat(outpathImp, this->TargetNames.ImportReal);
+    std::string TBDFullPathSO =
+      cmStrCat(outpathImp, this->TargetNames.ImportLibrary);
+
+    // Expand placeholders.
+    cmRulePlaceholderExpander::RuleVariables vars;
+    std::string target = this->LocalGenerator->ConvertToOutputFormat(
+      this->LocalGenerator->MaybeRelativeToCurBinDir(targetFullPathReal),
+      cmOutputConverter::SHELL, useWatcomQuote);
+    vars.Target = target.c_str();
+    std::string TBDOutPathReal = this->LocalGenerator->ConvertToOutputFormat(
+      this->LocalGenerator->MaybeRelativeToCurBinDir(TBDFullPathReal),
+      cmOutputConverter::SHELL, useWatcomQuote);
+    rulePlaceholderExpander->SetTargetImpLib(TBDOutPathReal);
+    for (std::string& command : genStubs_commands) {
+      rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator,
+                                                   command, vars);
+    }
+    outputs.clear();
+    outputs.push_back(TBDFullPathReal);
+    if (this->TargetNames.ImportLibrary != this->TargetNames.ImportReal) {
+      outputs.push_back(TBDFullPathSO);
+    }
+    if (this->TargetNames.ImportOutput != this->TargetNames.ImportLibrary &&
+        this->TargetNames.ImportOutput != this->TargetNames.ImportReal) {
+      outputs.push_back(TBDFullPath);
+    }
+    this->ExtraFiles.insert(TBDFullPath);
+
+    depends.clear();
+    depends.push_back(targetFullPathReal);
+
+    // Add a rule to create necessary symlinks for the library.
+    // Frameworks are handled by cmOSXBundleGenerator.
+    if (TBDFullPath != TBDFullPathReal &&
+        !this->GeneratorTarget->IsFrameworkOnApple()) {
+      auto TBDOutPathSO = this->LocalGenerator->ConvertToOutputFormat(
+        this->LocalGenerator->MaybeRelativeToCurBinDir(TBDFullPathSO),
+        cmOutputConverter::SHELL, useWatcomQuote);
+      auto TBDOutPath = this->LocalGenerator->ConvertToOutputFormat(
+        this->LocalGenerator->MaybeRelativeToCurBinDir(TBDFullPath),
+        cmOutputConverter::SHELL, useWatcomQuote);
+
+      std::string symlink =
+        cmStrCat("$(CMAKE_COMMAND) -E cmake_symlink_library ", TBDOutPathReal,
+                 ' ', TBDOutPathSO, ' ', TBDOutPath);
+      commands1.push_back(std::move(symlink));
+      this->LocalGenerator->CreateCDCommand(
+        commands1, this->Makefile->GetCurrentBinaryDirectory(),
+        this->LocalGenerator->GetBinaryDirectory());
+      cm::append(genStubs_commands, commands1);
+      commands1.clear();
+    }
+
+    this->WriteMakeRule(*this->BuildFileStream, nullptr, outputs, depends,
+                        genStubs_commands, false);
+
+    // clean actions for apple specific outputs
+    // clean actions for ImportLibrary are already specified
+    if (this->TargetNames.ImportReal != this->TargetNames.ImportLibrary) {
+      libCleanFiles.insert(
+        this->LocalGenerator->MaybeRelativeToCurBinDir(TBDFullPathReal));
+    }
+    if (this->TargetNames.ImportOutput != this->TargetNames.ImportReal &&
+        this->TargetNames.ImportOutput != this->TargetNames.ImportLibrary) {
+      libCleanFiles.insert(
+        this->LocalGenerator->MaybeRelativeToCurBinDir(TBDFullPath));
+    }
+  }
 
   // Write the main driver rule to build everything in this target.
   this->WriteTargetDriverRule(targetFullPath, relink);

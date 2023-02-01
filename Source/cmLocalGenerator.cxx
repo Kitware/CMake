@@ -85,6 +85,7 @@ static auto ruleReplaceVars = { "CMAKE_${LANG}_COMPILER",
                                 "CMAKE_RANLIB",
                                 "CMAKE_LINKER",
                                 "CMAKE_MT",
+                                "CMAKE_TAPI",
                                 "CMAKE_CUDA_HOST_COMPILER",
                                 "CMAKE_CUDA_HOST_LINK_LAUNCHER",
                                 "CMAKE_CL_SHOWINCLUDES_PREFIX" };
@@ -132,6 +133,13 @@ cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg, cmMakefile* makefile)
     this->LinkerSysroot = *sysrootLink;
   } else {
     this->LinkerSysroot = this->Makefile->GetSafeDefinition("CMAKE_SYSROOT");
+  }
+
+  // OSX SYSROOT can be required by some tools, like tapi
+  {
+    cmValue osxSysroot = this->Makefile->GetDefinition("CMAKE_OSX_SYSROOT");
+    this->VariableMappings["CMAKE_OSX_SYSROOT"] =
+      osxSysroot.IsEmpty() ? "/" : this->EscapeForShell(*osxSysroot, true);
   }
 
   if (cmValue appleArchSysroots =
