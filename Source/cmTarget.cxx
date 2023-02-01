@@ -4,7 +4,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cstring>
 #include <initializer_list>
 #include <iterator>
 #include <map>
@@ -501,126 +500,186 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   // Setup default property values.
   if (this->CanCompileSources()) {
 
-    SETUP_COMMON_LANGUAGE_PROPERTIES(C);
-    SETUP_COMMON_LANGUAGE_PROPERTIES(OBJC);
-    SETUP_COMMON_LANGUAGE_PROPERTIES(CXX);
-    SETUP_COMMON_LANGUAGE_PROPERTIES(OBJCXX);
-    SETUP_COMMON_LANGUAGE_PROPERTIES(CUDA);
-    SETUP_COMMON_LANGUAGE_PROPERTIES(HIP);
-
+    // Compilation properties
+    initProp("INTERPROCEDURAL_OPTIMIZATION");
+    // initProp("INTERPROCEDURAL_OPTIMIZATION_<CONFIG>"); (per-config block)
+    initProp("NO_SYSTEM_FROM_IMPORTED");
+    initProp("VISIBILITY_INLINES_HIDDEN");
+    initProp("COMPILE_WARNING_AS_ERROR");
+    // -- Features
+    // ---- PCH
+    initProp("DISABLE_PRECOMPILE_HEADERS");
+    initPropValue("PCH_WARN_INVALID", "ON");
+    initPropValue("PCH_INSTANTIATE_TEMPLATES", "ON");
+    // -- Platforms
+    // ---- Android
     initProp("ANDROID_API");
     initProp("ANDROID_API_MIN");
     initProp("ANDROID_ARCH");
-    initProp("ANDROID_STL_TYPE");
-    initProp("ANDROID_SKIP_ANT_STEP");
-    initProp("ANDROID_PROCESS_MAX");
-    initProp("ANDROID_PROGUARD");
-    initProp("ANDROID_PROGUARD_CONFIG_PATH");
-    initProp("ANDROID_SECURE_PROPS_PATH");
-    initProp("ANDROID_NATIVE_LIB_DIRECTORIES");
-    initProp("ANDROID_NATIVE_LIB_DEPENDENCIES");
-    initProp("ANDROID_JAVA_SOURCE_DIR");
-    initProp("ANDROID_JAR_DIRECTORIES");
-    initProp("ANDROID_JAR_DEPENDENCIES");
     initProp("ANDROID_ASSETS_DIRECTORIES");
-    initProp("ANDROID_ANT_ADDITIONAL_OPTIONS");
-    initProp("BUILD_RPATH");
-    initProp("BUILD_RPATH_USE_ORIGIN");
-    initProp("CXX_SCAN_FOR_MODULES");
-    initProp("INSTALL_NAME_DIR");
-    initProp("INSTALL_REMOVE_ENVIRONMENT_RPATH");
-    initPropValue("INSTALL_RPATH", "");
-    initPropValue("INSTALL_RPATH_USE_LINK_PATH", "OFF");
-    initProp("INTERPROCEDURAL_OPTIMIZATION");
-    initPropValue("SKIP_BUILD_RPATH", "OFF");
-    initPropValue("BUILD_WITH_INSTALL_RPATH", "OFF");
-    initProp("ARCHIVE_OUTPUT_DIRECTORY");
-    initProp("LIBRARY_OUTPUT_DIRECTORY");
-    initProp("RUNTIME_OUTPUT_DIRECTORY");
-    initProp("PDB_OUTPUT_DIRECTORY");
-    initProp("COMPILE_PDB_OUTPUT_DIRECTORY");
-    initProp("FRAMEWORK");
-    initProp("FRAMEWORK_MULTI_CONFIG_POSTFIX");
+    initProp("ANDROID_JAVA_SOURCE_DIR");
+    initProp("ANDROID_STL_TYPE");
+    // ---- macOS
+    initProp("OSX_ARCHITECTURES");
+    // ---- Windows
+    initProp("MSVC_DEBUG_INFORMATION_FORMAT");
+    initProp("MSVC_RUNTIME_LIBRARY");
+    initProp("VS_JUST_MY_CODE_DEBUGGING");
+    // ---- OpenWatcom
+    initProp("WATCOM_RUNTIME_LIBRARY");
+    // -- Language
+    // ---- C
+    SETUP_COMMON_LANGUAGE_PROPERTIES(C);
+    // ---- C++
+    SETUP_COMMON_LANGUAGE_PROPERTIES(CXX);
+    // ---- CUDA
+    SETUP_COMMON_LANGUAGE_PROPERTIES(CUDA);
+    initProp("CUDA_SEPARABLE_COMPILATION");
+    initProp("CUDA_ARCHITECTURES");
+    // ---- Fortran
     initProp("Fortran_FORMAT");
     initProp("Fortran_MODULE_DIRECTORY");
     initProp("Fortran_COMPILER_LAUNCHER");
     initProp("Fortran_PREPROCESS");
     initProp("Fortran_VISIBILITY_PRESET");
-    initProp("GNUtoMS");
-    initProp("OSX_ARCHITECTURES");
-    initProp("IOS_INSTALL_COMBINED");
+    // ---- HIP
+    SETUP_COMMON_LANGUAGE_PROPERTIES(HIP);
+    initProp("HIP_ARCHITECTURES");
+    // ---- ISPC
+    initProp("ISPC_COMPILER_LAUNCHER");
+    initProp("ISPC_HEADER_DIRECTORY");
+    initPropValue("ISPC_HEADER_SUFFIX", "_ispc.h");
+    initProp("ISPC_INSTRUCTION_SETS");
+    // ---- Objective C
+    SETUP_COMMON_LANGUAGE_PROPERTIES(OBJC);
+    // ---- Objective C++
+    SETUP_COMMON_LANGUAGE_PROPERTIES(OBJCXX);
+    // ---- Swift
+    initProp("Swift_LANGUAGE_VERSION");
+    initProp("Swift_MODULE_DIRECTORY");
+    // ---- moc
     initProp("AUTOMOC");
-    initProp("AUTOUIC");
-    initProp("AUTORCC");
-    initProp("AUTOGEN_ORIGIN_DEPENDS");
-    initProp("AUTOGEN_PARALLEL");
     initProp("AUTOMOC_COMPILER_PREDEFINES");
-    initProp("AUTOMOC_DEPEND_FILTERS");
     initProp("AUTOMOC_MACRO_NAMES");
     initProp("AUTOMOC_MOC_OPTIONS");
-    initProp("AUTOUIC_OPTIONS");
     initProp("AUTOMOC_PATH_PREFIX");
+    // ---- uic
+    initProp("AUTOUIC");
+    initProp("AUTOUIC_OPTIONS");
     initProp("AUTOUIC_SEARCH_PATHS");
+    // ---- rcc
+    initProp("AUTORCC");
     initProp("AUTORCC_OPTIONS");
-    initProp("LINK_DEPENDS_NO_SHARED");
-    initProp("LINK_INTERFACE_LIBRARIES");
-    initProp("MSVC_DEBUG_INFORMATION_FORMAT");
-    initProp("MSVC_RUNTIME_LIBRARY");
-    initProp("WATCOM_RUNTIME_LIBRARY");
-    initProp("WIN32_EXECUTABLE");
-    initProp("MACOSX_BUNDLE");
+
+    // Linking properties
+    initProp("LINK_SEARCH_START_STATIC");
+    initProp("LINK_SEARCH_END_STATIC");
+    // -- Dependent library lookup
     initProp("MACOSX_RPATH");
-    initProp("NO_SYSTEM_FROM_IMPORTED");
+    // ---- Build
+    initProp("BUILD_RPATH");
+    initProp("BUILD_RPATH_USE_ORIGIN");
+    initPropValue("SKIP_BUILD_RPATH", "OFF");
+    initPropValue("BUILD_WITH_INSTALL_RPATH", "OFF");
     initProp("BUILD_WITH_INSTALL_NAME_DIR");
+    // ---- Install
+    initProp("INSTALL_NAME_DIR");
+    initProp("INSTALL_REMOVE_ENVIRONMENT_RPATH");
+    initPropValue("INSTALL_RPATH", "");
+    initPropValue("INSTALL_RPATH_USE_LINK_PATH", "OFF");
+    // -- Platforms
+    // ---- Android
+    initProp("ANDROID_JAR_DIRECTORIES");
+    initProp("ANDROID_JAR_DEPENDENCIES");
+    initProp("ANDROID_NATIVE_LIB_DIRECTORIES");
+    initProp("ANDROID_NATIVE_LIB_DEPENDENCIES");
+    initProp("ANDROID_PROGUARD");
+    initProp("ANDROID_PROGUARD_CONFIG_PATH");
+    initProp("ANDROID_SECURE_PROPS_PATH");
+    // ---- iOS
+    initProp("IOS_INSTALL_COMBINED");
+    // ---- Windows
+    initProp("GNUtoMS");
+    initProp("WIN32_EXECUTABLE");
+    // -- Languages
+    // ---- C
+    initProp("C_LINKER_LAUNCHER");
+    // ---- C++
+    initProp("CXX_LINKER_LAUNCHER");
+    // ---- CUDA
+    initProp("CUDA_RESOLVE_DEVICE_SYMBOLS");
+    initProp("CUDA_RUNTIME_LIBRARY");
+    // ---- HIP
+    initProp("HIP_RUNTIME_LIBRARY");
+    // ---- Objective C
+    initProp("OBJC_LINKER_LAUNCHER");
+    // ---- Objective C++
+    initProp("OBJCXX_LINKER_LAUNCHER");
+
+    // Static analysis
+    // -- C
     initProp("C_CLANG_TIDY");
     initProp("C_CLANG_TIDY_EXPORT_FIXES_DIR");
     initProp("C_CPPLINT");
     initProp("C_CPPCHECK");
     initProp("C_INCLUDE_WHAT_YOU_USE");
-    initProp("C_LINKER_LAUNCHER");
-    initProp("LINK_WHAT_YOU_USE");
+    // -- C++
     initProp("CXX_CLANG_TIDY");
     initProp("CXX_CLANG_TIDY_EXPORT_FIXES_DIR");
     initProp("CXX_CPPLINT");
     initProp("CXX_CPPCHECK");
     initProp("CXX_INCLUDE_WHAT_YOU_USE");
-    initProp("CXX_LINKER_LAUNCHER");
-    initProp("CUDA_SEPARABLE_COMPILATION");
-    initProp("CUDA_RESOLVE_DEVICE_SYMBOLS");
-    initProp("CUDA_RUNTIME_LIBRARY");
-    initProp("CUDA_ARCHITECTURES");
-    initProp("HIP_RUNTIME_LIBRARY");
-    initProp("HIP_ARCHITECTURES");
-    initProp("VISIBILITY_INLINES_HIDDEN");
+    // -- Objective C
+    initProp("OBJC_CLANG_TIDY");
+    initProp("OBJC_CLANG_TIDY_EXPORT_FIXES_DIR");
+    // -- Objective C++
+    initProp("OBJCXX_CLANG_TIDY");
+    initProp("OBJCXX_CLANG_TIDY_EXPORT_FIXES_DIR");
+    // -- Linking
+    initProp("LINK_WHAT_YOU_USE");
+
+    // Build graph properties
+    initProp("LINK_DEPENDS_NO_SHARED");
+    initProp("UNITY_BUILD");
+    initProp("UNITY_BUILD_UNIQUE_ID");
+    initPropValue("UNITY_BUILD_BATCH_SIZE", "8");
+    initPropValue("UNITY_BUILD_MODE", "BATCH");
+    initProp("OPTIMIZE_DEPENDENCIES");
+    // -- Android
+    initProp("ANDROID_ANT_ADDITIONAL_OPTIONS");
+    initProp("ANDROID_PROCESS_MAX");
+    initProp("ANDROID_SKIP_ANT_STEP");
+    // -- Autogen
+    initProp("AUTOGEN_ORIGIN_DEPENDS");
+    initProp("AUTOGEN_PARALLEL");
+    // -- moc
+    initProp("AUTOMOC_DEPEND_FILTERS");
+    // -- C++
+    initProp("CXX_SCAN_FOR_MODULES");
+    // -- Ninja
     initProp("JOB_POOL_COMPILE");
     initProp("JOB_POOL_LINK");
     initProp("JOB_POOL_PRECOMPILE_HEADER");
-    initProp("ISPC_COMPILER_LAUNCHER");
-    initProp("ISPC_HEADER_DIRECTORY");
-    initPropValue("ISPC_HEADER_SUFFIX", "_ispc.h");
-    initProp("ISPC_INSTRUCTION_SETS");
-    initProp("LINK_SEARCH_START_STATIC");
-    initProp("LINK_SEARCH_END_STATIC");
-    initProp("OBJC_CLANG_TIDY");
-    initProp("OBJC_CLANG_TIDY_EXPORT_FIXES_DIR");
-    initProp("OBJC_LINKER_LAUNCHER");
-    initProp("OBJCXX_CLANG_TIDY");
-    initProp("OBJCXX_CLANG_TIDY_EXPORT_FIXES_DIR");
-    initProp("OBJCXX_LINKER_LAUNCHER");
-    initProp("Swift_LANGUAGE_VERSION");
-    initProp("Swift_MODULE_DIRECTORY");
-    initProp("VS_JUST_MY_CODE_DEBUGGING");
+    // -- Visual Studio
     initProp("VS_NO_COMPILE_BATCHING");
-    initProp("DISABLE_PRECOMPILE_HEADERS");
-    initProp("UNITY_BUILD");
-    initProp("UNITY_BUILD_UNIQUE_ID");
-    initProp("OPTIMIZE_DEPENDENCIES");
+
+    // Output location properties
+    initProp("ARCHIVE_OUTPUT_DIRECTORY");
+    initProp("LIBRARY_OUTPUT_DIRECTORY");
+    initProp("RUNTIME_OUTPUT_DIRECTORY");
+    initProp("PDB_OUTPUT_DIRECTORY");
+    initProp("COMPILE_PDB_OUTPUT_DIRECTORY");
+
+    // -- macOS bundle properties
+    initProp("FRAMEWORK");
+    initProp("FRAMEWORK_MULTI_CONFIG_POSTFIX");
+    initProp("MACOSX_BUNDLE");
+
+    // Usage requirement properties
+    initProp("LINK_INTERFACE_LIBRARIES");
+
+    // Metadata
     initProp("EXPORT_COMPILE_COMMANDS");
-    initProp("COMPILE_WARNING_AS_ERROR");
-    initPropValue("UNITY_BUILD_BATCH_SIZE", "8");
-    initPropValue("UNITY_BUILD_MODE", "BATCH");
-    initPropValue("PCH_WARN_INVALID", "ON");
-    initPropValue("PCH_INSTANTIATE_TEMPLATES", "ON");
 
 #ifdef __APPLE__
     if (this->GetGlobalGenerator()->IsXcode()) {
@@ -664,10 +723,10 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
       this->GetType() != cmStateEnums::GLOBAL_TARGET) {
     static const auto configProps = {
       /* clang-format needs this comment to break after the opening brace */
-      "ARCHIVE_OUTPUT_DIRECTORY_",     "LIBRARY_OUTPUT_DIRECTORY_",
-      "RUNTIME_OUTPUT_DIRECTORY_",     "PDB_OUTPUT_DIRECTORY_",
-      "COMPILE_PDB_OUTPUT_DIRECTORY_", "MAP_IMPORTED_CONFIG_",
-      "INTERPROCEDURAL_OPTIMIZATION_"
+      "ARCHIVE_OUTPUT_DIRECTORY_"_s,     "LIBRARY_OUTPUT_DIRECTORY_"_s,
+      "RUNTIME_OUTPUT_DIRECTORY_"_s,     "PDB_OUTPUT_DIRECTORY_"_s,
+      "COMPILE_PDB_OUTPUT_DIRECTORY_"_s, "MAP_IMPORTED_CONFIG_"_s,
+      "INTERPROCEDURAL_OPTIMIZATION_"_s
     };
     // Collect the set of configuration types.
     std::vector<std::string> configNames =
@@ -678,7 +737,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
         // Interface libraries have no output locations, so honor only
         // the configuration map.
         if (this->impl->TargetType == cmStateEnums::INTERFACE_LIBRARY &&
-            strcmp(prop, "MAP_IMPORTED_CONFIG_") != 0) {
+            prop != "MAP_IMPORTED_CONFIG_") {
           continue;
         }
         std::string property = cmStrCat(prop, configUpper);
