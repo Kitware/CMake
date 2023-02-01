@@ -2975,7 +2975,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
                               this->CreateString(extraLinkOptions));
   buildSettings->AddAttribute("OTHER_REZFLAGS", this->CreateString(""));
   buildSettings->AddAttribute("SECTORDER_FLAGS", this->CreateString(""));
-  buildSettings->AddAttribute("USE_HEADERMAP", this->CreateString("NO"));
+  buildSettings->AddAttribute("ALWAYS_SEARCH_USER_PATHS",
+                              this->CreateString("NO"));
   cmXCodeObject* group = this->CreateObject(cmXCodeObject::OBJECT_LIST);
   group->AddObject(this->CreateString("$(inherited)"));
   buildSettings->AddAttribute("WARNING_CFLAGS", group);
