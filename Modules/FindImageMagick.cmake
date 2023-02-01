@@ -96,19 +96,13 @@ Result Variables
   Full path to <component> libraries.
 
 
-Example Usages:
-^^^^^^^^^^^^^^^
+Example Usage
+^^^^^^^^^^^^^
 
-  find_package(ImageMagick)
-  find_package(ImageMagick COMPONENTS convert)
-  find_package(ImageMagick COMPONENTS convert mogrify display)
+.. code-block:: cmake
+
   find_package(ImageMagick COMPONENTS Magick++)
-  find_package(ImageMagick COMPONENTS Magick++ convert)
-
   target_link_libraries(example PRIVATE ImageMagick::Magick++)
-
-Note that the standard :command:`find_package` features are supported (i.e.,
-``QUIET``, ``REQUIRED``, etc.).
 #]=======================================================================]
 
 find_package(PkgConfig QUIET)
