@@ -4,6 +4,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <cstddef>
 #include <stack>
 #include <vector>
 
@@ -35,7 +36,7 @@ public:
 
   /** Get the adjacency list of the component graph.  */
   Graph const& GetComponentGraph() const { return this->ComponentGraph; }
-  EdgeList const& GetComponentGraphEdges(int c) const
+  EdgeList const& GetComponentGraphEdges(size_t c) const
   {
     return this->ComponentGraph[c];
   }
@@ -45,13 +46,15 @@ public:
   {
     return this->Components;
   }
-  NodeList const& GetComponent(int c) const { return this->Components[c]; }
+  NodeList const& GetComponent(size_t c) const { return this->Components[c]; }
 
   /** Get map from original node index to component index.  */
-  std::vector<int> const& GetComponentMap() const
+  std::vector<size_t> const& GetComponentMap() const
   {
     return this->TarjanComponents;
   }
+
+  static const size_t INVALID_COMPONENT;
 
 private:
   void TransferEdges();
@@ -62,18 +65,18 @@ private:
   // Tarjan's algorithm.
   struct TarjanEntry
   {
-    int Root;
-    int VisitIndex;
+    size_t Root;
+    size_t VisitIndex;
   };
-  std::vector<int> TarjanVisited;
-  std::vector<int> TarjanComponents;
+  std::vector<size_t> TarjanVisited;
+  std::vector<size_t> TarjanComponents;
   std::vector<TarjanEntry> TarjanEntries;
   std::vector<NodeList> Components;
-  std::stack<int> TarjanStack;
-  int TarjanWalkId;
-  int TarjanIndex;
+  std::stack<size_t> TarjanStack;
+  size_t TarjanWalkId;
+  size_t TarjanIndex;
   void Tarjan();
-  void TarjanVisit(int i);
+  void TarjanVisit(size_t i);
 
   // Connected components.
 };
