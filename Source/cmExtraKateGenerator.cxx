@@ -220,14 +220,32 @@ void cmExtraKateGenerator::CreateDummyKateProjectFile(
 std::string cmExtraKateGenerator::GenerateFilesString(
   const cmLocalGenerator& lg) const
 {
-  std::string s = cmStrCat(lg.GetSourceDirectory(), "/.git");
-  if (cmSystemTools::FileExists(s)) {
-    return "\"git\": 1 ";
+  const cmMakefile* mf = lg.GetMakefile();
+  std::string mode =
+    cmSystemTools::UpperCase(mf->GetSafeDefinition("CMAKE_KATE_FILES_MODE"));
+  static const std::string gitString = "\"git\": 1 ";
+  static const std::string svnString = "\"svn\": 1 ";
+
+  if (mode == "SVN") {
+    return svnString;
+  }
+  if (mode == "GIT") {
+    return gitString;
   }
 
-  s = cmStrCat(lg.GetSourceDirectory(), "/.svn");
-  if (cmSystemTools::FileExists(s)) {
-    return "\"svn\": 1 ";
+  std::string s;
+
+  // check for the VCS files except when "forced" to "FILES" mode:
+  if (mode != "LIST") {
+    s = cmStrCat(lg.GetSourceDirectory(), "/.git");
+    if (cmSystemTools::FileExists(s)) {
+      return gitString;
+    }
+
+    s = cmStrCat(lg.GetSourceDirectory(), "/.svn");
+    if (cmSystemTools::FileExists(s)) {
+      return svnString;
+    }
   }
 
   s = cmStrCat(lg.GetSourceDirectory(), '/');
