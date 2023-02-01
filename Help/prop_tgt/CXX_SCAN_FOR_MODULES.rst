@@ -20,3 +20,8 @@ scan the target's ``CXX`` sources at build time.
 Note that scanning is only performed if C++20 or higher is enabled for the
 target.  Scanning for modules in the target's sources belonging to file sets
 of type ``CXX_MODULES`` and ``CXX_MODULES_HEADER_UNITS`` is always performed.
+
+.. note ::
+
+  This setting is meaningful only when experimental support for C++ modules
+  has been enabled by the ``CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API`` gate.
