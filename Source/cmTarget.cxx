@@ -286,6 +286,8 @@ struct TargetProperty
     CanCompileSources,
     // Only apply to Xcode generators.
     NeedsXcode,
+    // Only apply to Xcode generators on targets that can compile sources.
+    NeedsXcodeAndCanCompileSources,
   };
 
   enum class Repetition
@@ -526,6 +528,33 @@ TargetProperty const StaticTargetProperties[] = {
 
   // Xcode properties
   { "XCODE_GENERATE_SCHEME"_s, IC::NeedsXcode },
+
+#ifdef __APPLE__
+  { "XCODE_SCHEME_ADDRESS_SANITIZER"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_ADDRESS_SANITIZER_USE_AFTER_RETURN"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_DEBUG_DOCUMENT_VERSIONING"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_ENABLE_GPU_FRAME_CAPTURE_MODE"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_THREAD_SANITIZER"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_THREAD_SANITIZER_STOP"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER_STOP"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_LAUNCH_CONFIGURATION"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_ENABLE_GPU_API_VALIDATION"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_ENABLE_GPU_SHADER_VALIDATION"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_WORKING_DIRECTORY"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_DISABLE_MAIN_THREAD_CHECKER"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_MAIN_THREAD_CHECKER_STOP"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_MALLOC_SCRIBBLE"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_MALLOC_GUARD_EDGES"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_GUARD_MALLOC"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_LAUNCH_MODE"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_ZOMBIE_OBJECTS"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_MALLOC_STACK"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_DYNAMIC_LINKER_API_USAGE"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_DYNAMIC_LIBRARY_LOADS"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_ENVIRONMENT"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_LINK_BUILD_PHASE_MODE"_s, "NONE"_s, IC::NeedsXcodeAndCanCompileSources },
+#endif
   /* clang-format on */
 };
 
@@ -883,35 +912,6 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
 
     // Compilation properties
     // initProp("INTERPROCEDURAL_OPTIMIZATION_<CONFIG>"); (per-config block)
-
-#ifdef __APPLE__
-    if (this->GetGlobalGenerator()->IsXcode()) {
-      initProp("XCODE_SCHEME_ADDRESS_SANITIZER");
-      initProp("XCODE_SCHEME_ADDRESS_SANITIZER_USE_AFTER_RETURN");
-      initProp("XCODE_SCHEME_DEBUG_DOCUMENT_VERSIONING");
-      initProp("XCODE_SCHEME_ENABLE_GPU_FRAME_CAPTURE_MODE");
-      initProp("XCODE_SCHEME_THREAD_SANITIZER");
-      initProp("XCODE_SCHEME_THREAD_SANITIZER_STOP");
-      initProp("XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER");
-      initProp("XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER_STOP");
-      initProp("XCODE_SCHEME_LAUNCH_CONFIGURATION");
-      initProp("XCODE_SCHEME_ENABLE_GPU_API_VALIDATION");
-      initProp("XCODE_SCHEME_ENABLE_GPU_SHADER_VALIDATION");
-      initProp("XCODE_SCHEME_WORKING_DIRECTORY");
-      initProp("XCODE_SCHEME_DISABLE_MAIN_THREAD_CHECKER");
-      initProp("XCODE_SCHEME_MAIN_THREAD_CHECKER_STOP");
-      initProp("XCODE_SCHEME_MALLOC_SCRIBBLE");
-      initProp("XCODE_SCHEME_MALLOC_GUARD_EDGES");
-      initProp("XCODE_SCHEME_GUARD_MALLOC");
-      initProp("XCODE_SCHEME_LAUNCH_MODE");
-      initProp("XCODE_SCHEME_ZOMBIE_OBJECTS");
-      initProp("XCODE_SCHEME_MALLOC_STACK");
-      initProp("XCODE_SCHEME_DYNAMIC_LINKER_API_USAGE");
-      initProp("XCODE_SCHEME_DYNAMIC_LIBRARY_LOADS");
-      initProp("XCODE_SCHEME_ENVIRONMENT");
-      initPropValue("XCODE_LINK_BUILD_PHASE_MODE", "NONE");
-    }
-#endif
   }
 
   // Setup per-configuration property default values.
@@ -1031,6 +1031,10 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   }
   if (this->GetGlobalGenerator()->IsXcode()) {
     metConditions.insert(TargetProperty::InitCondition::NeedsXcode);
+    if (this->CanCompileSources()) {
+      metConditions.insert(
+        TargetProperty::InitCondition::NeedsXcodeAndCanCompileSources);
+    }
   }
 
   std::vector<std::string> configNames =
