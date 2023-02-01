@@ -290,6 +290,8 @@ struct TargetProperty
     NeedsXcodeAndCanCompileSources,
     // Needs to be a "normal" target (any non-global, non-utility target).
     NormalTarget,
+    // Any non-imported target.
+    NonImportedTarget,
   };
 
   enum class Repetition
@@ -377,6 +379,8 @@ TargetProperty const StaticTargetProperties[] = {
   COMMON_LANGUAGE_PROPERTIES(C),
   // ---- C++
   COMMON_LANGUAGE_PROPERTIES(CXX),
+  // ---- CSharp
+  { "DOTNET_SDK"_s, IC::NonImportedTarget },
   // ---- CUDA
   COMMON_LANGUAGE_PROPERTIES(CUDA),
   { "CUDA_SEPARABLE_COMPILATION"_s, IC::CanCompileSources },
@@ -1016,10 +1020,6 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     this->impl->PolicyMap.Set(cmPolicies::CMP0022, cmPolicies::NEW);
   }
 
-  if (!this->IsImported()) {
-    initProp("DOTNET_SDK");
-  }
-
   if (this->impl->TargetType <= cmStateEnums::GLOBAL_TARGET) {
     initProp("DOTNET_TARGET_FRAMEWORK");
     initProp("DOTNET_TARGET_FRAMEWORK_VERSION");
@@ -1036,6 +1036,9 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
       metConditions.insert(
         TargetProperty::InitCondition::NeedsXcodeAndCanCompileSources);
     }
+  }
+  if (!this->IsImported()) {
+    metConditions.insert(TargetProperty::InitCondition::NonImportedTarget);
   }
   if (this->impl->TargetType != cmStateEnums::UTILITY &&
       this->impl->TargetType != cmStateEnums::GLOBAL_TARGET) {
