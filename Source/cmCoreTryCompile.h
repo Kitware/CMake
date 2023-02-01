@@ -22,6 +22,7 @@ class cmRange;
 struct cmTryCompileResult
 {
   cm::optional<std::string> LogDescription;
+  std::map<std::string, std::string> CMakeVariables;
 
   std::string SourceDirectory;
   std::string BinaryDirectory;

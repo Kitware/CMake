@@ -136,7 +136,7 @@ void cmConfigureLog::EndObject()
   --this->Indent;
 }
 
-void cmConfigureLog::BeginEvent(std::string const& kind)
+void cmConfigureLog::BeginEvent(std::string const& kind, cmMakefile const& mf)
 {
   this->EnsureInit();
 
@@ -146,6 +146,8 @@ void cmConfigureLog::BeginEvent(std::string const& kind)
   ++this->Indent;
 
   this->WriteValue("kind"_s, kind);
+  this->WriteBacktrace(mf);
+  this->WriteChecks(mf);
 }
 
 void cmConfigureLog::EndEvent()
@@ -187,6 +189,30 @@ void cmConfigureLog::WriteValue(cm::string_view key,
     this->BeginLine() << "- ";
     this->Encoder->write(value, &this->Stream);
     this->EndLine();
+  }
+  this->EndObject();
+}
+
+void cmConfigureLog::WriteValue(cm::string_view key,
+                                std::map<std::string, std::string> const& map)
+{
+  static const std::string rawKeyChars = //
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"         //
+    "abcdefghijklmnopqrstuvwxyz"         //
+    "0123456789"                         //
+    "-_"                                 //
+    ;
+  this->BeginObject(key);
+  for (auto const& entry : map) {
+    if (entry.first.find_first_not_of(rawKeyChars) == std::string::npos) {
+      this->WriteValue(entry.first, entry.second);
+    } else {
+      this->BeginLine();
+      this->Encoder->write(entry.first, &this->Stream);
+      this->Stream << ": ";
+      this->Encoder->write(entry.second, &this->Stream);
+      this->EndLine();
+    }
   }
   this->EndObject();
 }

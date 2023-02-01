@@ -44,9 +44,7 @@ void WriteTryRunEvent(cmConfigureLog& log, cmMakefile const& mf,
   static const std::vector<unsigned long> LogVersionsWithTryRunV1{ 1 };
 
   if (log.IsAnyLogVersionEnabled(LogVersionsWithTryRunV1)) {
-    log.BeginEvent("try_run-v1");
-    log.WriteBacktrace(mf);
-    log.WriteChecks(mf);
+    log.BeginEvent("try_run-v1", mf);
     cmCoreTryCompile::WriteTryCompileEventFields(log, compileResult);
 
     log.BeginObject("runResult"_s);

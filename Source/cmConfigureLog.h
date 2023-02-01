@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #pragma once
 
+#include <map>
 #include <memory>
 #include <string>
 #include <vector>
@@ -28,12 +29,9 @@ public:
       list is enabled.  */
   bool IsAnyLogVersionEnabled(std::vector<unsigned long> const& v) const;
 
-  void WriteBacktrace(cmMakefile const& mf);
-  void WriteChecks(cmMakefile const& mf);
-
   void EnsureInit();
 
-  void BeginEvent(std::string const& kind);
+  void BeginEvent(std::string const& kind, cmMakefile const& mf);
   void EndEvent();
 
   void BeginObject(cm::string_view key);
@@ -45,6 +43,8 @@ public:
   void WriteValue(cm::string_view key, int value);
   void WriteValue(cm::string_view key, std::string const& value);
   void WriteValue(cm::string_view key, std::vector<std::string> const& list);
+  void WriteValue(cm::string_view key,
+                  std::map<std::string, std::string> const& map);
 
   void WriteTextBlock(cm::string_view key, cm::string_view text);
   void WriteLiteralTextBlock(cm::string_view key, cm::string_view text);
@@ -62,6 +62,9 @@ private:
   bool Opened = false;
 
   std::unique_ptr<Json::StreamWriter> Encoder;
+
+  void WriteBacktrace(cmMakefile const& mf);
+  void WriteChecks(cmMakefile const& mf);
 
   cmsys::ofstream& BeginLine();
   void EndLine();

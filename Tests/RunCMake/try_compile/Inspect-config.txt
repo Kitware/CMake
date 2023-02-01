@@ -20,6 +20,9 @@ events:(
     directories:
       source: "[^"]*/Tests/RunCMake/try_compile/Inspect-build/CMakeFiles/CMakeScratch/TryCompile-[^/"]+"
       binary: "[^"]*/Tests/RunCMake/try_compile/Inspect-build/CMakeFiles/CMakeScratch/TryCompile-[^/"]+"
+    cmakeVariables:(
+      CMAKE_[^
+]*)+
     buildResult:
       variable: "CMAKE_C_ABI_COMPILED"
       cached: true
@@ -44,6 +47,9 @@ events:(
     directories:
       source: "[^"]*/Tests/RunCMake/try_compile/Inspect-build/CMakeFiles/CMakeScratch/TryCompile-[^/"]+"
       binary: "[^"]*/Tests/RunCMake/try_compile/Inspect-build/CMakeFiles/CMakeScratch/TryCompile-[^/"]+"
+    cmakeVariables:(
+      CMAKE_[^
+]*)+
     buildResult:
       variable: "CMAKE_CXX_ABI_COMPILED"
       cached: true
