@@ -298,6 +298,8 @@ add_library(
   cmGraphAdjacencyList.h
   cmGraphVizWriter.cxx
   cmGraphVizWriter.h
+  cmImportedCxxModuleInfo.cxx
+  cmImportedCxxModuleInfo.h
   cmInstallGenerator.h
   cmInstallGenerator.cxx
   cmInstallGetRuntimeDependenciesGenerator.h

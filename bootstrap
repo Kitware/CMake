@@ -392,6 +392,7 @@ CMAKE_CXX_SOURCES="\
   cmGlobVerificationManager \
   cmHexFileConverter \
   cmIfCommand \
+  cmImportedCxxModuleInfo \
   cmIncludeCommand \
   cmIncludeGuardCommand \
   cmIncludeDirectoryCommand \
