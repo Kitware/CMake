@@ -8,6 +8,7 @@
 #include <set>
 #include <vector>
 
+#include "cmCMakePath.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -241,30 +242,37 @@ std::string cmExtraKateGenerator::GenerateFilesString(
     return fossilString;
   }
 
-  std::string s;
-
   // check for the VCS files except when "forced" to "FILES" mode:
   if (mode != "LIST") {
-    s = cmStrCat(lg.GetSourceDirectory(), "/.git");
-    if (cmSystemTools::FileExists(s)) {
-      return gitString;
-    }
+    cmCMakePath startDir(lg.GetSourceDirectory(), cmCMakePath::auto_format);
+    // move the directories up to the root directory to see whether we are in
+    // a subdir of a svn, git, hg or fossil checkout
+    for (;;) {
+      std::string s = startDir.String() + "/.git";
+      if (cmSystemTools::FileExists(s)) {
+        return gitString;
+      }
 
-    s = cmStrCat(lg.GetSourceDirectory(), "/.svn");
-    if (cmSystemTools::FileExists(s)) {
-      return svnString;
-    }
-    s = cmStrCat(lg.GetSourceDirectory(), "/.hg");
-    if (cmSystemTools::FileExists(s)) {
-      return hgString;
-    }
-    s = cmStrCat(lg.GetSourceDirectory(), "/.fslckout");
-    if (cmSystemTools::FileExists(s)) {
-      return fossilString;
+      s = startDir.String() + "/.svn";
+      if (cmSystemTools::FileExists(s)) {
+        return svnString;
+      }
+
+      s = startDir.String() + "/.hg";
+      if (cmSystemTools::FileExists(s)) {
+        return hgString;
+      }
+      s = startDir.String() + "/.fslckout";
+      if (cmSystemTools::FileExists(s)) {
+        return fossilString;
+      }
+
+      if (!startDir.HasRelativePath()) { // have we reached the root dir ?
+        break;
+      }
+      startDir = startDir.GetParentPath();
     }
   }
-
-  s = cmStrCat(lg.GetSourceDirectory(), '/');
 
   std::set<std::string> files;
   std::string tmp;
