@@ -1003,7 +1003,9 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
 
       std::string launcher;
       // Short-circuit if there is no launcher.
-      cmValue val = this->GetRuleLauncher(target, "RULE_LAUNCH_CUSTOM");
+      std::string val = this->GetRuleLauncher(
+        target, "RULE_LAUNCH_CUSTOM",
+        this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
       if (cmNonempty(val)) {
         // Expand rule variables referenced in the given launcher command.
         cmRulePlaceholderExpander::RuleVariables vars;
@@ -1022,7 +1024,7 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
         }
         vars.Output = output.c_str();
 
-        launcher = *val;
+        launcher = val;
         rulePlaceholderExpander->ExpandRuleVariables(this, launcher, vars);
         if (!launcher.empty()) {
           launcher += " ";

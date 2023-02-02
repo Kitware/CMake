@@ -532,7 +532,9 @@ public:
   void CreateEvaluationFileOutputs(const std::string& config);
   void ProcessEvaluationFiles(std::vector<std::string>& generatedFiles);
 
-  cmValue GetRuleLauncher(cmGeneratorTarget* target, const std::string& prop);
+  std::string GetRuleLauncher(cmGeneratorTarget* target,
+                              const std::string& prop,
+                              const std::string& config);
 
 protected:
   // The default implementation converts to a Windows shortpath to
