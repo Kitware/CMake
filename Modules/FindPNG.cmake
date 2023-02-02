@@ -48,18 +48,35 @@ Since PNG depends on the ZLib compression library, none of the above
 will be defined unless ZLib can be found.
 #]=======================================================================]
 
+# Default install location on windows when installing from included cmake build
+# From FindZLIB.cmake
+set(_PNG_x86 "(x86)")
+set(_PNG_INCLUDE_SEARCH_NORMAL
+  "$ENV{ProgramFiles}/libpng"
+  "$ENV{ProgramFiles${_PNG_x86}}/libpng")
+set(_PNG_LIB_SEARCH_NORMAL
+  "$ENV{ProgramFiles}/libpng/lib"
+  "$ENV{ProgramFiles${_PNG_x86}}/libpng/lib")
+unset(_PNG_x86)
+
 if(PNG_FIND_QUIETLY)
   set(_FIND_ZLIB_ARG QUIET)
 endif()
 find_package(ZLIB ${_FIND_ZLIB_ARG})
 
 if(ZLIB_FOUND)
-  find_path(PNG_PNG_INCLUDE_DIR png.h PATH_SUFFIXES include/libpng)
+  set(_PNG_VERSION_SUFFIXES 17 16 15 14 12)
+
+  list(APPEND _PNG_INCLUDE_PATH_SUFFIXES include/libpng)
+  foreach(v IN LISTS _PNG_VERSION_SUFFIXES)
+    list(APPEND _PNG_INCLUDE_PATH_SUFFIXES include/libpng${v})
+  endforeach()
+
+  find_path(PNG_PNG_INCLUDE_DIR png.h PATH_SUFFIXES ${_PNG_INCLUDE_PATH_SUFFIXES} PATHS ${_PNG_INCLUDE_SEARCH_NORMAL} )
   mark_as_advanced(PNG_PNG_INCLUDE_DIR)
 
   list(APPEND PNG_NAMES png libpng)
   unset(PNG_NAMES_DEBUG)
-  set(_PNG_VERSION_SUFFIXES 17 16 15 14 12)
   if (PNG_FIND_VERSION MATCHES "^([0-9]+)\\.([0-9]+)(\\..*)?$")
     set(_PNG_VERSION_SUFFIX_MIN "${CMAKE_MATCH_1}${CMAKE_MATCH_2}")
     if (PNG_FIND_VERSION_EXACT)
@@ -79,14 +96,15 @@ if(ZLIB_FOUND)
   # For compatibility with versions prior to this multi-config search, honor
   # any PNG_LIBRARY that is already specified and skip the search.
   if(NOT PNG_LIBRARY)
-    find_library(PNG_LIBRARY_RELEASE NAMES ${PNG_NAMES} NAMES_PER_DIR)
-    find_library(PNG_LIBRARY_DEBUG NAMES ${PNG_NAMES_DEBUG} NAMES_PER_DIR)
+    find_library(PNG_LIBRARY_RELEASE NAMES ${PNG_NAMES} NAMES_PER_DIR PATHS ${_PNG_LIB_SEARCH_NORMAL})
+    find_library(PNG_LIBRARY_DEBUG NAMES ${PNG_NAMES_DEBUG} NAMES_PER_DIR PATHS ${_PNG_LIB_SEARCH_NORMAL})
     include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
     select_library_configurations(PNG)
     mark_as_advanced(PNG_LIBRARY_RELEASE PNG_LIBRARY_DEBUG)
   endif()
   unset(PNG_NAMES)
   unset(PNG_NAMES_DEBUG)
+  unset(_PNG_INCLUDE_PATH_SUFFIXES)
 
   # Set by select_library_configurations(), but we want the one from
   # find_package_handle_standard_args() below.
