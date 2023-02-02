@@ -23,6 +23,8 @@ struct cmDyndepGeneratorCallbacks
 {
   std::function<std::string(cmSourceFile const* sf, std::string const& config)>
     ObjectFilePath;
+  std::function<std::string(cmSourceFile const* sf, std::string const& config)>
+    BmiFilePath;
 };
 
 struct cmDyndepMetadataCallbacks
