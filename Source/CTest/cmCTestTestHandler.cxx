@@ -2569,7 +2569,7 @@ bool cmCTestTestHandler::WriteJUnitXML()
       xml.EndElement(); // </skipped>
     } else if (status == "fail") {
       xml.StartElement("failure");
-      xml.Attribute("message", result.Reason);
+      xml.Attribute("message", this->GetTestStatus(result));
       xml.EndElement(); // </failure>
     }
 
