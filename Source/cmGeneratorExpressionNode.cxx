@@ -1548,7 +1548,8 @@ static const struct LinkLanguageNode : public cmGeneratorExpressionNode
   {
     if (!context->HeadTarget || !dagChecker ||
         !(dagChecker->EvaluatingLinkExpression() ||
-          dagChecker->EvaluatingLinkLibraries())) {
+          dagChecker->EvaluatingLinkLibraries() ||
+          dagChecker->EvaluatingLinkerLauncher())) {
       reportError(context, content->GetOriginalExpression(),
                   "$<LINK_LANGUAGE:...> may only be used with binary targets "
                   "to specify link libraries, link directories, link options "
@@ -1641,7 +1642,8 @@ static const struct LinkLanguageAndIdNode : public cmGeneratorExpressionNode
   {
     if (!context->HeadTarget || !dagChecker ||
         !(dagChecker->EvaluatingLinkExpression() ||
-          dagChecker->EvaluatingLinkLibraries())) {
+          dagChecker->EvaluatingLinkLibraries() ||
+          dagChecker->EvaluatingLinkerLauncher())) {
       reportError(
         context, content->GetOriginalExpression(),
         "$<LINK_LANG_AND_ID:lang,id> may only be used with binary targets "
@@ -2098,7 +2100,8 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 
     if (dagCheckerParent) {
       if (dagCheckerParent->EvaluatingGenexExpression() ||
-          dagCheckerParent->EvaluatingPICExpression()) {
+          dagCheckerParent->EvaluatingPICExpression() ||
+          dagCheckerParent->EvaluatingLinkerLauncher()) {
         // No check required.
       } else if (dagCheckerParent->EvaluatingLinkLibraries()) {
         evaluatingLinkLibraries = true;

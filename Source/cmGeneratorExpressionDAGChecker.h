@@ -70,6 +70,7 @@ struct cmGeneratorExpressionDAGChecker
   bool EvaluatingCompileExpression() const;
   bool EvaluatingLinkExpression() const;
   bool EvaluatingLinkOptionsExpression() const;
+  bool EvaluatingLinkerLauncher() const;
 
   enum class ForGenex
   {
