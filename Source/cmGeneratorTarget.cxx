@@ -8860,6 +8860,15 @@ std::string cmGeneratorTarget::GenerateHeaderSetVerificationFile(
   return filename;
 }
 
+bool cmGeneratorTarget::HaveFortranSources(std::string const& config) const
+{
+  auto sources = cmGeneratorTarget::GetSourceFiles(config);
+  return std::any_of(sources.begin(), sources.end(),
+                     [](BT<cmSourceFile*> const& sf) -> bool {
+                       return sf.Value->GetLanguage() == "Fortran"_s;
+                     });
+}
+
 bool cmGeneratorTarget::HaveCxx20ModuleSources() const
 {
   auto const& fs_names = this->Target->GetAllFileSetNames();

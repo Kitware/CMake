@@ -1494,11 +1494,11 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
     /* clang-format off */
   *this->InfoFileStream
     << "\n"
-    << "# Targets to which this target links.\n"
-    << "set(CMAKE_TARGET_LINKED_INFO_FILES\n";
+       "# Targets to which this target links which contain Fortran sources.\n"
+       "set(CMAKE_Fortran_TARGET_LINKED_INFO_FILES\n";
     /* clang-format on */
     std::vector<std::string> dirs =
-      this->GetLinkedTargetDirectories(this->GetConfigName());
+      this->GetLinkedTargetDirectories("Fortran", this->GetConfigName());
     for (std::string const& d : dirs) {
       *this->InfoFileStream << "  \"" << d << "/DependInfo.cmake\"\n";
     }

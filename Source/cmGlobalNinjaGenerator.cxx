@@ -2537,8 +2537,13 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
       cmStrCat(linked_target_dir, '/', arg_lang, "Modules.json");
     Json::Value ltm;
     cmsys::ifstream ltmf(ltmn.c_str(), std::ios::in | std::ios::binary);
+    if (!ltmf) {
+      cmSystemTools::Error(cmStrCat("-E cmake_ninja_dyndep failed to open ",
+                                    ltmn, " for module information"));
+      return false;
+    }
     Json::Reader reader;
-    if (ltmf && !reader.parse(ltmf, ltm, false)) {
+    if (!reader.parse(ltmf, ltm, false)) {
       cmSystemTools::Error(cmStrCat("-E cmake_ninja_dyndep failed to parse ",
                                     linked_target_dir,
                                     reader.getFormattedErrorMessages()));

@@ -1675,7 +1675,7 @@ void cmNinjaTargetGenerator::WriteTargetDependInfo(std::string const& lang,
 
   Json::Value& tdi_linked_target_dirs = tdi["linked-target-dirs"] =
     Json::arrayValue;
-  for (std::string const& l : this->GetLinkedTargetDirectories(config)) {
+  for (std::string const& l : this->GetLinkedTargetDirectories(lang, config)) {
     tdi_linked_target_dirs.append(l);
   }
 
