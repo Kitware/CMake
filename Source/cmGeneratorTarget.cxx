@@ -1071,6 +1071,12 @@ void cmGeneratorTarget::GetHeaderSources(
   IMPLEMENT_VISIT(SourceKindHeader);
 }
 
+void cmGeneratorTarget::GetCxxModuleSources(
+  std::vector<cmSourceFile const*>& data, const std::string& config) const
+{
+  IMPLEMENT_VISIT(SourceKindCxxModuleSource);
+}
+
 void cmGeneratorTarget::GetExtraSources(std::vector<cmSourceFile const*>& data,
                                         const std::string& config) const
 {
@@ -1953,8 +1959,12 @@ void cmGeneratorTarget::ComputeKindedSources(KindedSources& files,
     // Compute the kind (classification) of this source file.
     SourceKind kind;
     std::string ext = cmSystemTools::LowerCase(sf->GetExtension());
+    cmFileSet const* fs = this->GetFileSetForSource(config, sf);
     if (sf->GetCustomCommand()) {
       kind = SourceKindCustomCommand;
+    } else if (!this->Target->IsNormal() && !this->Target->IsImported() &&
+               fs && (fs->GetType() == "CXX_MODULES"_s)) {
+      kind = SourceKindCxxModuleSource;
     } else if (this->Target->GetType() == cmStateEnums::UTILITY ||
                this->Target->GetType() == cmStateEnums::INTERFACE_LIBRARY
                // XXX(clang-tidy): https://bugs.llvm.org/show_bug.cgi?id=44165
