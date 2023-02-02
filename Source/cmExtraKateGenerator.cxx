@@ -225,12 +225,20 @@ std::string cmExtraKateGenerator::GenerateFilesString(
     cmSystemTools::UpperCase(mf->GetSafeDefinition("CMAKE_KATE_FILES_MODE"));
   static const std::string gitString = "\"git\": 1 ";
   static const std::string svnString = "\"svn\": 1 ";
+  static const std::string hgString = "\"hg\": 1 ";
+  static const std::string fossilString = "\"fossil\": 1 ";
 
   if (mode == "SVN") {
     return svnString;
   }
   if (mode == "GIT") {
     return gitString;
+  }
+  if (mode == "HG") {
+    return hgString;
+  }
+  if (mode == "FOSSIL") {
+    return fossilString;
   }
 
   std::string s;
@@ -245,6 +253,14 @@ std::string cmExtraKateGenerator::GenerateFilesString(
     s = cmStrCat(lg.GetSourceDirectory(), "/.svn");
     if (cmSystemTools::FileExists(s)) {
       return svnString;
+    }
+    s = cmStrCat(lg.GetSourceDirectory(), "/.hg");
+    if (cmSystemTools::FileExists(s)) {
+      return hgString;
+    }
+    s = cmStrCat(lg.GetSourceDirectory(), "/.fslckout");
+    if (cmSystemTools::FileExists(s)) {
+      return fossilString;
     }
   }
 
