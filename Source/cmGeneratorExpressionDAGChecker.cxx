@@ -177,6 +177,15 @@ bool cmGeneratorExpressionDAGChecker::EvaluatingLinkOptionsExpression() const
   return property == "LINK_OPTIONS"_s;
 }
 
+bool cmGeneratorExpressionDAGChecker::EvaluatingLinkerLauncher() const
+{
+  cm::string_view property(this->Top()->Property);
+
+  return property.length() > cmStrLen("_LINKER_LAUNCHER") &&
+    property.substr(property.length() - cmStrLen("_LINKER_LAUNCHER")) ==
+    "_LINKER_LAUNCHER"_s;
+}
+
 bool cmGeneratorExpressionDAGChecker::EvaluatingLinkLibraries(
   cmGeneratorTarget const* tgt, ForGenex genex) const
 {
