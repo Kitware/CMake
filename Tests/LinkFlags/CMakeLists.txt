@@ -32,6 +32,11 @@ add_executable(LinkFlags_exe_config LinkFlagsExe.c)
 set_property(TARGET LinkFlags_exe_config PROPERTY LINK_FLAGS_${TEST_CONFIG_UPPER} ${pre}BADFLAG_${TEST_CONFIG}${obj})
 
 add_executable(LinkFlags LinkFlags.c)
+if("x${CMAKE_C_COMPILER_ID}" STREQUAL "xMSVC")
+  set_property(TARGET LinkFlags PROPERTY
+    LINK_FLAGS "/NODEFAULTLIB:\"libcdg.lib\" /NODEFAULTLIB:\"libcmtg.lib\" /NODEFAULTLIB:\"foomsvcrt.lib\" /NODEFAULTLIB:\"libbar.lib\" /NODEFAULTLIB:\"libfooba.lib\""
+    )
+endif()
 
 add_subdirectory(LinkerFlags)
 add_subdirectory(LinkerFlagsConfig)
