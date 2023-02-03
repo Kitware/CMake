@@ -1399,7 +1399,7 @@ void cmComputeLinkInformation::ComputeItemParserInfo()
   reg = "^(";
   for (std::string const& p : this->LinkPrefixes) {
     reg += p;
-    reg += "|";
+    reg += '|';
   }
   reg += ")([^/:]*)";
 
@@ -1478,14 +1478,14 @@ std::string cmComputeLinkInformation::CreateExtensionRegex(
   }
 
   // Finish the list.
-  libext += ")";
+  libext += ')';
 
   // Add an optional OpenBSD-style version or major.minor.version component.
   if (this->OpenBSD || type == LinkShared) {
     libext += "(\\.[0-9]+)*";
   }
 
-  libext += "$";
+  libext += '$';
   return libext;
 }
 
@@ -1860,7 +1860,7 @@ void cmComputeLinkInformation::AddFrameworkItem(LinkEntry const& entry)
   if (!fwDescriptor) {
     std::ostringstream e;
     e << "Could not parse framework path \"" << item << "\" linked by target "
-      << this->Target->GetName() << ".";
+      << this->Target->GetName() << '.';
     cmSystemTools::Error(e.str());
     return;
   }
@@ -2055,7 +2055,7 @@ bool cmComputeLinkInformation::FinishLinkerSearchDirectories()
     case cmPolicies::REQUIRED_IF_USED:
     case cmPolicies::REQUIRED_ALWAYS: {
       std::ostringstream e;
-      e << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0003) << "\n";
+      e << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0003) << '\n';
       this->PrintLinkPolicyDiagnosis(e);
       this->CMakeInstance->IssueMessage(MessageType::FATAL_ERROR, e.str(),
                                         this->Target->GetBacktrace());
@@ -2098,7 +2098,7 @@ void cmComputeLinkInformation::PrintLinkPolicyDiagnosis(std::ostream& os)
       // output the current line and reset it.  Note that the separator
       // is either " " or ", " which is always 2 characters.
       if (!line.empty() && (line.size() + i.size() + 2) > max_size) {
-        os << line << "\n";
+        os << line << '\n';
         sep = "  ";
         line.clear();
       }
@@ -2108,7 +2108,7 @@ void cmComputeLinkInformation::PrintLinkPolicyDiagnosis(std::ostream& os)
       sep = ", ";
     }
     if (!line.empty()) {
-      os << line << "\n";
+      os << line << '\n';
     }
   }
 
@@ -2117,7 +2117,7 @@ void cmComputeLinkInformation::PrintLinkPolicyDiagnosis(std::ostream& os)
   std::set<std::string> emitted;
   for (std::string const& i : this->OldLinkDirItems) {
     if (emitted.insert(cmSystemTools::GetFilenamePath(i)).second) {
-      os << "  " << i << "\n";
+      os << "  " << i << '\n';
     }
   }
 
