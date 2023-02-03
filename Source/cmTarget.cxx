@@ -4,7 +4,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <initializer_list>
 #include <iterator>
 #include <map>
 #include <set>
@@ -273,6 +272,346 @@ struct UsageRequirementProperty
 
   std::vector<BT<std::string>> Entries;
 };
+
+struct TargetProperty
+{
+  enum class InitCondition
+  {
+    // Always initialize the property.
+    Always,
+    // Never initialize the property.
+    Never,
+    // Only initialize if the target can compile sources.
+    CanCompileSources,
+    // Only apply to Xcode generators.
+    NeedsXcode,
+    // Only apply to Xcode generators on targets that can compile sources.
+    NeedsXcodeAndCanCompileSources,
+    // Needs to be a "normal" target (any non-global, non-utility target).
+    NormalTarget,
+    // Any non-imported target.
+    NonImportedTarget,
+    // Needs to be a "normal" target (any non-global, non-utility target) that
+    // is not `IMPORTED`.
+    NormalNonImportedTarget,
+    // Needs to be a "normal" target with an artifact (no `INTERFACE`
+    // libraries).
+    TargetWithArtifact,
+    // Needs to be a "normal" target with an artifact that is not an
+    // executable.
+    NonExecutableWithArtifact,
+    // Needs to be a linkable library target (no `OBJECT` or `MODULE`
+    // libraries).
+    LinkableLibraryTarget,
+    // Needs to be an executable.
+    ExecutableTarget,
+    // Needs to be a target with meaningful symbol exports (`SHARED` or
+    // `EXECUTABLE`).
+    TargetWithSymbolExports,
+    // Targets with "commands" associated with them. Basically everything
+    // except global and `INTERFACE` targets.
+    TargetWithCommands,
+  };
+
+  enum class Repetition
+  {
+    Once,
+    PerConfig,
+    PerConfigPrefix,
+  };
+
+  TargetProperty(cm::static_string_view name)
+    : Name(name)
+  {
+  }
+
+  TargetProperty(cm::static_string_view name, cm::static_string_view dflt,
+                 InitCondition init)
+    : Name(name)
+    , Default(dflt)
+    , InitConditional(init)
+  {
+  }
+
+  TargetProperty(cm::static_string_view name, InitCondition init)
+    : Name(name)
+    , InitConditional(init)
+  {
+  }
+
+  TargetProperty(cm::static_string_view name, InitCondition init,
+                 Repetition repeat)
+    : Name(name)
+    , InitConditional(init)
+    , Repeat(repeat)
+  {
+  }
+
+  cm::static_string_view const Name;
+  cm::optional<cm::static_string_view> const Default = {};
+  InitCondition const InitConditional = InitCondition::Always;
+  Repetition const Repeat = Repetition::Once;
+};
+
+#define IC TargetProperty::InitCondition
+#define R TargetProperty::Repetition
+
+/* clang-format off */
+#define COMMON_LANGUAGE_PROPERTIES(lang)                                      \
+  { #lang "_COMPILER_LAUNCHER"_s, IC::CanCompileSources },                    \
+  { #lang "_STANDARD"_s, IC::CanCompileSources },                             \
+  { #lang "_STANDARD_REQUIRED"_s, IC::CanCompileSources },                    \
+  { #lang "_EXTENSIONS"_s, IC::CanCompileSources },                           \
+  { #lang "_VISIBILITY_PRESET"_s, IC::CanCompileSources }
+/* clang-format on */
+
+TargetProperty const StaticTargetProperties[] = {
+  /* clang-format off */
+  // Compilation properties
+  { "COMPILE_WARNING_AS_ERROR"_s, IC::CanCompileSources },
+  { "INTERPROCEDURAL_OPTIMIZATION"_s, IC::CanCompileSources },
+  { "INTERPROCEDURAL_OPTIMIZATION_"_s, IC::TargetWithArtifact, R::PerConfig },
+  { "NO_SYSTEM_FROM_IMPORTED"_s, IC::CanCompileSources },
+  // Set to `True` for `SHARED` and `MODULE` targets.
+  { "POSITION_INDEPENDENT_CODE"_s, IC::CanCompileSources },
+  { "VISIBILITY_INLINES_HIDDEN"_s, IC::CanCompileSources },
+  // -- Features
+  // ---- PCH
+  { "DISABLE_PRECOMPILE_HEADERS"_s, IC::CanCompileSources },
+  { "PCH_WARN_INVALID"_s, "ON"_s, IC::CanCompileSources },
+  { "PCH_INSTANTIATE_TEMPLATES"_s, "ON"_s, IC::CanCompileSources },
+  // -- Platforms
+  // ---- Android
+  { "ANDROID_API"_s, IC::CanCompileSources },
+  { "ANDROID_API_MIN"_s, IC::CanCompileSources },
+  { "ANDROID_ARCH"_s, IC::CanCompileSources },
+  { "ANDROID_ASSETS_DIRECTORIES"_s, IC::CanCompileSources },
+  { "ANDROID_JAVA_SOURCE_DIR"_s, IC::CanCompileSources },
+  { "ANDROID_STL_TYPE"_s, IC::CanCompileSources },
+  // ---- macOS
+  { "OSX_ARCHITECTURES"_s, IC::CanCompileSources },
+  // ---- Windows
+  { "MSVC_DEBUG_INFORMATION_FORMAT"_s, IC::CanCompileSources },
+  { "MSVC_RUNTIME_LIBRARY"_s, IC::CanCompileSources },
+  { "VS_JUST_MY_CODE_DEBUGGING"_s, IC::CanCompileSources },
+  // ---- OpenWatcom
+  { "WATCOM_RUNTIME_LIBRARY"_s, IC::CanCompileSources },
+  // -- Language
+  // ---- C
+  COMMON_LANGUAGE_PROPERTIES(C),
+  // ---- C++
+  COMMON_LANGUAGE_PROPERTIES(CXX),
+  // ---- CSharp
+  { "DOTNET_SDK"_s, IC::NonImportedTarget },
+  { "DOTNET_TARGET_FRAMEWORK"_s, IC::TargetWithCommands },
+  { "DOTNET_TARGET_FRAMEWORK_VERSION"_s, IC::TargetWithCommands },
+  // ---- CUDA
+  COMMON_LANGUAGE_PROPERTIES(CUDA),
+  { "CUDA_SEPARABLE_COMPILATION"_s, IC::CanCompileSources },
+  { "CUDA_ARCHITECTURES"_s, IC::CanCompileSources },
+  // ---- Fortran
+  { "Fortran_FORMAT"_s, IC::CanCompileSources },
+  { "Fortran_MODULE_DIRECTORY"_s, IC::CanCompileSources },
+  { "Fortran_COMPILER_LAUNCHER"_s, IC::CanCompileSources },
+  { "Fortran_PREPRPOCESS"_s, IC::CanCompileSources },
+  { "Fortran_VISIBILITY_PRESET"_s, IC::CanCompileSources },
+  // ---- HIP
+  COMMON_LANGUAGE_PROPERTIES(HIP),
+  { "HIP_ARCHITECTURES"_s, IC::CanCompileSources },
+  // ---- ISPC
+  { "ISPC_COMPILER_LAUNCHER"_s, IC::CanCompileSources },
+  { "ISPC_HEADER_DIRECTORY"_s, IC::CanCompileSources },
+  { "ISPC_HEADER_SUFFIX"_s, "_ispc.h"_s, IC::CanCompileSources },
+  { "ISPC_INSTRUCTION_SETS"_s, IC::CanCompileSources },
+  // ---- Objective C
+  COMMON_LANGUAGE_PROPERTIES(OBJC),
+  // ---- Objective C++
+  COMMON_LANGUAGE_PROPERTIES(OBJCXX),
+  // ---- Swift
+  { "Swift_LANGUAGE_VERSION"_s, IC::CanCompileSources },
+  { "Swift_MODULE_DIRECTORY"_s, IC::CanCompileSources },
+  // ---- moc
+  { "AUTOMOC"_s, IC::CanCompileSources },
+  { "AUTOMOC_COMPILER_PREDEFINES"_s, IC::CanCompileSources },
+  { "AUTOMOC_MACRO_NAMES"_s, IC::CanCompileSources },
+  { "AUTOMOC_MOC_OPTIONS"_s, IC::CanCompileSources },
+  { "AUTOMOC_PATH_PREFIX"_s, IC::CanCompileSources },
+  // ---- uic
+  { "AUTOUIC"_s, IC::CanCompileSources },
+  { "AUTOUIC_OPTIONS"_s, IC::CanCompileSources },
+  { "AUTOUIC_SEARCH_PATHS"_s, IC::CanCompileSources },
+  // ---- rcc
+  { "AUTORCC"_s, IC::CanCompileSources },
+  { "AUTORCC_OPTIONS"_s, IC::CanCompileSources },
+
+  // Linking properties
+  { "ENABLE_EXPORTS"_s, IC::ExecutableTarget },
+  { "LINK_LIBRARIES_ONLY_TARGETS"_s, IC::NormalNonImportedTarget },
+  { "LINK_SEARCH_START_STATIC"_s, IC::CanCompileSources },
+  { "LINK_SEARCH_END_STATIC"_s, IC::CanCompileSources },
+  // Initialize per-configuration name postfix property from the variable only
+  // for non-executable targets.  This preserves compatibility with previous
+  // CMake versions in which executables did not support this variable.
+  // Projects may still specify the property directly.
+  { "_POSTFIX"_s, IC::NonExecutableWithArtifact, R::PerConfigPrefix },
+  // -- Dependent library lookup
+  { "MACOSX_RPATH"_s, IC::CanCompileSources },
+  // ---- Build
+  { "BUILD_RPATH"_s, IC::CanCompileSources },
+  { "BUILD_RPATH_USE_ORIGIN"_s, IC::CanCompileSources },
+  { "SKIP_BUILD_RPATH"_s, "OFF"_s, IC::CanCompileSources },
+  { "BUILD_WITH_INSTALL_RPATH"_s, "OFF"_s, IC::CanCompileSources },
+  { "BUILD_WITH_INSTALL_NAME_DIR"_s, IC::CanCompileSources },
+  // ---- Install
+  { "INSTALL_NAME_DIR"_s, IC::CanCompileSources },
+  { "INSTALL_REMOVE_ENVIRONMENT_RPATH"_s, IC::CanCompileSources },
+  { "INSTALL_RPATH"_s, ""_s, IC::CanCompileSources },
+  { "INSTALL_RPATH_USE_LINK_PATH"_s, "OFF"_s, IC::CanCompileSources },
+  // -- Platforms
+  // ---- AIX
+  { "AIX_EXPORT_ALL_SYMBOLS"_s, IC::TargetWithSymbolExports },
+  // ---- Android
+  { "ANDROID_GUI"_s, IC::ExecutableTarget },
+  { "ANDROID_JAR_DIRECTORIES"_s, IC::CanCompileSources },
+  { "ANDROID_JAR_DEPENDENCIES"_s, IC::CanCompileSources },
+  { "ANDROID_NATIVE_LIB_DIRECTORIES"_s, IC::CanCompileSources },
+  { "ANDROID_NATIVE_LIB_DEPENDENCIES"_s, IC::CanCompileSources },
+  { "ANDROID_PROGUARD"_s, IC::CanCompileSources },
+  { "ANDROID_PROGUARD_CONFIG_PATH"_s, IC::CanCompileSources },
+  { "ANDROID_SECURE_PROPS_PATH"_s, IC::CanCompileSources },
+  // ---- iOS
+  { "IOS_INSTALL_COMBINED"_s, IC::CanCompileSources },
+  // ---- macOS
+  { "FRAMEWORK_MULTI_CONFIG_POSTFIX_"_s, IC::LinkableLibraryTarget, R::PerConfig },
+  // ---- Windows
+  { "GNUtoMS"_s, IC::CanCompileSources },
+  { "WIN32_EXECUTABLE"_s, IC::CanCompileSources },
+  { "WINDOWS_EXPORT_ALL_SYMBOLS"_s, IC::TargetWithSymbolExports },
+  // -- Languages
+  // ---- C
+  { "C_LINKER_LAUNCHER"_s, IC::CanCompileSources },
+  // ---- C++
+  { "CXX_LINKER_LAUNCHER"_s, IC::CanCompileSources },
+  // ---- CUDA
+  { "CUDA_RESOLVE_DEVICE_SYMBOLS"_s, IC::CanCompileSources },
+  { "CUDA_RUNTIME_LIBRARY"_s, IC::CanCompileSources },
+  // ---- HIP
+  { "HIP_RUNTIME_LIBRARY"_s, IC::CanCompileSources },
+  // ---- Objective C
+  { "OBJC_LINKER_LAUNCHER"_s, IC::CanCompileSources },
+  // ---- Objective C++
+  { "OBJCXX_LINKER_LAUNCHER"_s, IC::CanCompileSources },
+
+  // Static analysis
+  // -- C
+  { "C_CLANG_TIDY"_s, IC::CanCompileSources },
+  { "C_CLANG_TIDY_EXPORT_FIXES_DIR"_s, IC::CanCompileSources },
+  { "C_CPPLINT"_s, IC::CanCompileSources },
+  { "C_CPPCHECK"_s, IC::CanCompileSources },
+  { "C_INCLUDE_WHAT_YOU_USE"_s, IC::CanCompileSources },
+  // -- C++
+  { "CXX_CLANG_TIDY"_s, IC::CanCompileSources },
+  { "CXX_CLANG_TIDY_EXPORT_FIXES_DIR"_s, IC::CanCompileSources },
+  { "CXX_CPPLINT"_s, IC::CanCompileSources },
+  { "CXX_CPPCHECK"_s, IC::CanCompileSources },
+  { "CXX_INCLUDE_WHAT_YOU_USE"_s, IC::CanCompileSources },
+  // -- Objective C
+  { "OBJC_CLANG_TIDY"_s, IC::CanCompileSources },
+  { "OBJC_CLANG_TIDY_EXPORT_FIXES_DIR"_s, IC::CanCompileSources },
+  // -- Objective C++
+  { "OBJCXX_CLANG_TIDY"_s, IC::CanCompileSources },
+  { "OBJCXX_CLANG_TIDY_EXPORT_FIXES_DIR"_s, IC::CanCompileSources },
+  // -- Linking
+  { "LINK_WHAT_YOU_USE"_s, IC::CanCompileSources },
+
+  // Build graph properties
+  { "LINK_DEPENDS_NO_SHARED"_s, IC::CanCompileSources },
+  { "UNITY_BUILD"_s, IC::CanCompileSources },
+  { "UNITY_BUILD_UNIQUE_ID"_s, IC::CanCompileSources },
+  { "UNITY_BUILD_BATCH_SIZE"_s, "8"_s, IC::CanCompileSources },
+  { "UNITY_BUILD_MODE"_s, "BATCH"_s, IC::CanCompileSources },
+  { "OPTIMIZE_DEPENDENCIES"_s, IC::CanCompileSources },
+  { "VERIFY_INTERFACE_HEADER_SETS"_s },
+  // -- Android
+  { "ANDROID_ANT_ADDITIONAL_OPTIONS"_s, IC::CanCompileSources },
+  { "ANDROID_PROCESS_MAX"_s, IC::CanCompileSources },
+  { "ANDROID_SKIP_ANT_STEP"_s, IC::CanCompileSources },
+  // -- Autogen
+  { "AUTOGEN_ORIGIN_DEPENDS"_s, IC::CanCompileSources },
+  { "AUTOGEN_PARALLEL"_s, IC::CanCompileSources },
+  // -- moc
+  { "AUTOMOC_DEPEND_FILTERS"_s, IC::CanCompileSources },
+  // -- C++
+  { "CXX_SCAN_FOR_MODULES"_s, IC::CanCompileSources },
+  // -- Ninja
+  { "JOB_POOL_COMPILE"_s, IC::CanCompileSources },
+  { "JOB_POOL_LINK"_s, IC::CanCompileSources },
+  { "JOB_POOL_PRECOMPILE_HEADER"_s, IC::CanCompileSources },
+  // -- Visual Studio
+  { "VS_NO_COMPILE_BATCHING"_s, IC::CanCompileSources },
+
+  // Output location properties
+  { "ARCHIVE_OUTPUT_DIRECTORY"_s, IC::CanCompileSources },
+  { "ARCHIVE_OUTPUT_DIRECTORY_"_s, IC::TargetWithArtifact, R::PerConfig },
+  { "COMPILE_PDB_OUTPUT_DIRECTORY"_s, IC::CanCompileSources },
+  { "COMPILE_PDB_OUTPUT_DIRECTORY_"_s, IC::TargetWithArtifact, R::PerConfig },
+  { "LIBRARY_OUTPUT_DIRECTORY"_s, IC::CanCompileSources },
+  { "LIBRARY_OUTPUT_DIRECTORY_"_s, IC::TargetWithArtifact, R::PerConfig },
+  { "PDB_OUTPUT_DIRECTORY"_s, IC::CanCompileSources },
+  { "PDB_OUTPUT_DIRECTORY_"_s, IC::TargetWithArtifact, R::PerConfig },
+  { "RUNTIME_OUTPUT_DIRECTORY"_s, IC::CanCompileSources },
+  { "RUNTIME_OUTPUT_DIRECTORY_"_s, IC::TargetWithArtifact, R::PerConfig },
+
+  // macOS bundle properties
+  { "FRAMEWORK"_s, IC::CanCompileSources },
+  { "FRAMEWORK_MULTI_CONFIG_POSTFIX"_s, IC::CanCompileSources },
+  { "MACOSX_BUNDLE"_s, IC::CanCompileSources },
+
+  // Usage requirement properties
+  { "LINK_INTERFACE_LIBRARIES"_s, IC::CanCompileSources },
+  { "MAP_IMPORTED_CONFIG_"_s, IC::NormalTarget, R::PerConfig },
+
+  // Metadata
+  { "CROSSCOMPILING_EMULATOR"_s, IC::ExecutableTarget },
+  { "EXPORT_COMPILE_COMMANDS"_s, IC::CanCompileSources },
+  { "FOLDER"_s },
+
+  // Xcode properties
+  { "XCODE_GENERATE_SCHEME"_s, IC::NeedsXcode },
+
+#ifdef __APPLE__
+  { "XCODE_SCHEME_ADDRESS_SANITIZER"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_ADDRESS_SANITIZER_USE_AFTER_RETURN"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_DEBUG_DOCUMENT_VERSIONING"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_ENABLE_GPU_FRAME_CAPTURE_MODE"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_THREAD_SANITIZER"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_THREAD_SANITIZER_STOP"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER_STOP"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_LAUNCH_CONFIGURATION"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_ENABLE_GPU_API_VALIDATION"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_ENABLE_GPU_SHADER_VALIDATION"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_WORKING_DIRECTORY"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_DISABLE_MAIN_THREAD_CHECKER"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_MAIN_THREAD_CHECKER_STOP"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_MALLOC_SCRIBBLE"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_MALLOC_GUARD_EDGES"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_GUARD_MALLOC"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_LAUNCH_MODE"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_ZOMBIE_OBJECTS"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_MALLOC_STACK"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_DYNAMIC_LINKER_API_USAGE"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_DYNAMIC_LIBRARY_LOADS"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_SCHEME_ENVIRONMENT"_s, IC::NeedsXcodeAndCanCompileSources },
+  { "XCODE_LINK_BUILD_PHASE_MODE"_s, "NONE"_s, IC::NeedsXcodeAndCanCompileSources },
+#endif
+  /* clang-format on */
+};
+
+#undef COMMON_LANGUAGE_PROPERTIES
+#undef IC
+#undef R
+
 }
 
 class cmTargetInternals
@@ -562,15 +901,6 @@ std::pair<bool, cmValue> UsageRequirementProperty::Read(
   return { did_read, value };
 }
 
-namespace {
-#define SETUP_COMMON_LANGUAGE_PROPERTIES(lang)                                \
-  initProp(#lang "_COMPILER_LAUNCHER");                                       \
-  initProp(#lang "_STANDARD");                                                \
-  initProp(#lang "_STANDARD_REQUIRED");                                       \
-  initProp(#lang "_EXTENSIONS");                                              \
-  initProp(#lang "_VISIBILITY_PRESET")
-}
-
 cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
                    Visibility vis, cmMakefile* mf, PerConfig perConfig)
   : impl(cm::make_unique<cmTargetInternals>())
@@ -606,298 +936,6 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   this->impl->IsAndroid = (this->impl->Makefile->GetSafeDefinition(
                              "CMAKE_SYSTEM_NAME") == "Android");
 
-  std::string defKey;
-  defKey.reserve(128);
-  defKey += "CMAKE_";
-  auto initProp = [this, mf, &defKey](const std::string& property) {
-    // Replace everything after "CMAKE_"
-    defKey.replace(defKey.begin() + 6, defKey.end(), property);
-    if (cmValue value = mf->GetDefinition(defKey)) {
-      this->SetProperty(property, value);
-    }
-  };
-  auto initPropValue = [this, mf, &defKey](const std::string& property,
-                                           const char* default_value) {
-    // Replace everything after "CMAKE_"
-    defKey.replace(defKey.begin() + 6, defKey.end(), property);
-    if (cmValue value = mf->GetDefinition(defKey)) {
-      this->SetProperty(property, value);
-    } else if (default_value) {
-      this->SetProperty(property, default_value);
-    }
-  };
-
-  // Setup default property values.
-  if (this->CanCompileSources()) {
-
-    // Compilation properties
-    initProp("INTERPROCEDURAL_OPTIMIZATION");
-    // initProp("INTERPROCEDURAL_OPTIMIZATION_<CONFIG>"); (per-config block)
-    initProp("NO_SYSTEM_FROM_IMPORTED");
-    initProp("VISIBILITY_INLINES_HIDDEN");
-    initProp("COMPILE_WARNING_AS_ERROR");
-    // -- Features
-    // ---- PCH
-    initProp("DISABLE_PRECOMPILE_HEADERS");
-    initPropValue("PCH_WARN_INVALID", "ON");
-    initPropValue("PCH_INSTANTIATE_TEMPLATES", "ON");
-    // -- Platforms
-    // ---- Android
-    initProp("ANDROID_API");
-    initProp("ANDROID_API_MIN");
-    initProp("ANDROID_ARCH");
-    initProp("ANDROID_ASSETS_DIRECTORIES");
-    initProp("ANDROID_JAVA_SOURCE_DIR");
-    initProp("ANDROID_STL_TYPE");
-    // ---- macOS
-    initProp("OSX_ARCHITECTURES");
-    // ---- Windows
-    initProp("MSVC_DEBUG_INFORMATION_FORMAT");
-    initProp("MSVC_RUNTIME_LIBRARY");
-    initProp("VS_JUST_MY_CODE_DEBUGGING");
-    // ---- OpenWatcom
-    initProp("WATCOM_RUNTIME_LIBRARY");
-    // -- Language
-    // ---- C
-    SETUP_COMMON_LANGUAGE_PROPERTIES(C);
-    // ---- C++
-    SETUP_COMMON_LANGUAGE_PROPERTIES(CXX);
-    // ---- CUDA
-    SETUP_COMMON_LANGUAGE_PROPERTIES(CUDA);
-    initProp("CUDA_SEPARABLE_COMPILATION");
-    initProp("CUDA_ARCHITECTURES");
-    // ---- Fortran
-    initProp("Fortran_FORMAT");
-    initProp("Fortran_MODULE_DIRECTORY");
-    initProp("Fortran_COMPILER_LAUNCHER");
-    initProp("Fortran_PREPROCESS");
-    initProp("Fortran_VISIBILITY_PRESET");
-    // ---- HIP
-    SETUP_COMMON_LANGUAGE_PROPERTIES(HIP);
-    initProp("HIP_ARCHITECTURES");
-    // ---- ISPC
-    initProp("ISPC_COMPILER_LAUNCHER");
-    initProp("ISPC_HEADER_DIRECTORY");
-    initPropValue("ISPC_HEADER_SUFFIX", "_ispc.h");
-    initProp("ISPC_INSTRUCTION_SETS");
-    // ---- Objective C
-    SETUP_COMMON_LANGUAGE_PROPERTIES(OBJC);
-    // ---- Objective C++
-    SETUP_COMMON_LANGUAGE_PROPERTIES(OBJCXX);
-    // ---- Swift
-    initProp("Swift_LANGUAGE_VERSION");
-    initProp("Swift_MODULE_DIRECTORY");
-    // ---- moc
-    initProp("AUTOMOC");
-    initProp("AUTOMOC_COMPILER_PREDEFINES");
-    initProp("AUTOMOC_MACRO_NAMES");
-    initProp("AUTOMOC_MOC_OPTIONS");
-    initProp("AUTOMOC_PATH_PREFIX");
-    // ---- uic
-    initProp("AUTOUIC");
-    initProp("AUTOUIC_OPTIONS");
-    initProp("AUTOUIC_SEARCH_PATHS");
-    // ---- rcc
-    initProp("AUTORCC");
-    initProp("AUTORCC_OPTIONS");
-
-    // Linking properties
-    initProp("LINK_SEARCH_START_STATIC");
-    initProp("LINK_SEARCH_END_STATIC");
-    // -- Dependent library lookup
-    initProp("MACOSX_RPATH");
-    // ---- Build
-    initProp("BUILD_RPATH");
-    initProp("BUILD_RPATH_USE_ORIGIN");
-    initPropValue("SKIP_BUILD_RPATH", "OFF");
-    initPropValue("BUILD_WITH_INSTALL_RPATH", "OFF");
-    initProp("BUILD_WITH_INSTALL_NAME_DIR");
-    // ---- Install
-    initProp("INSTALL_NAME_DIR");
-    initProp("INSTALL_REMOVE_ENVIRONMENT_RPATH");
-    initPropValue("INSTALL_RPATH", "");
-    initPropValue("INSTALL_RPATH_USE_LINK_PATH", "OFF");
-    // -- Platforms
-    // ---- Android
-    initProp("ANDROID_JAR_DIRECTORIES");
-    initProp("ANDROID_JAR_DEPENDENCIES");
-    initProp("ANDROID_NATIVE_LIB_DIRECTORIES");
-    initProp("ANDROID_NATIVE_LIB_DEPENDENCIES");
-    initProp("ANDROID_PROGUARD");
-    initProp("ANDROID_PROGUARD_CONFIG_PATH");
-    initProp("ANDROID_SECURE_PROPS_PATH");
-    // ---- iOS
-    initProp("IOS_INSTALL_COMBINED");
-    // ---- Windows
-    initProp("GNUtoMS");
-    initProp("WIN32_EXECUTABLE");
-    // -- Languages
-    // ---- C
-    initProp("C_LINKER_LAUNCHER");
-    // ---- C++
-    initProp("CXX_LINKER_LAUNCHER");
-    // ---- CUDA
-    initProp("CUDA_RESOLVE_DEVICE_SYMBOLS");
-    initProp("CUDA_RUNTIME_LIBRARY");
-    // ---- HIP
-    initProp("HIP_RUNTIME_LIBRARY");
-    // ---- Objective C
-    initProp("OBJC_LINKER_LAUNCHER");
-    // ---- Objective C++
-    initProp("OBJCXX_LINKER_LAUNCHER");
-
-    // Static analysis
-    // -- C
-    initProp("C_CLANG_TIDY");
-    initProp("C_CLANG_TIDY_EXPORT_FIXES_DIR");
-    initProp("C_CPPLINT");
-    initProp("C_CPPCHECK");
-    initProp("C_INCLUDE_WHAT_YOU_USE");
-    // -- C++
-    initProp("CXX_CLANG_TIDY");
-    initProp("CXX_CLANG_TIDY_EXPORT_FIXES_DIR");
-    initProp("CXX_CPPLINT");
-    initProp("CXX_CPPCHECK");
-    initProp("CXX_INCLUDE_WHAT_YOU_USE");
-    // -- Objective C
-    initProp("OBJC_CLANG_TIDY");
-    initProp("OBJC_CLANG_TIDY_EXPORT_FIXES_DIR");
-    // -- Objective C++
-    initProp("OBJCXX_CLANG_TIDY");
-    initProp("OBJCXX_CLANG_TIDY_EXPORT_FIXES_DIR");
-    // -- Linking
-    initProp("LINK_WHAT_YOU_USE");
-
-    // Build graph properties
-    initProp("LINK_DEPENDS_NO_SHARED");
-    initProp("UNITY_BUILD");
-    initProp("UNITY_BUILD_UNIQUE_ID");
-    initPropValue("UNITY_BUILD_BATCH_SIZE", "8");
-    initPropValue("UNITY_BUILD_MODE", "BATCH");
-    initProp("OPTIMIZE_DEPENDENCIES");
-    // -- Android
-    initProp("ANDROID_ANT_ADDITIONAL_OPTIONS");
-    initProp("ANDROID_PROCESS_MAX");
-    initProp("ANDROID_SKIP_ANT_STEP");
-    // -- Autogen
-    initProp("AUTOGEN_ORIGIN_DEPENDS");
-    initProp("AUTOGEN_PARALLEL");
-    // -- moc
-    initProp("AUTOMOC_DEPEND_FILTERS");
-    // -- C++
-    initProp("CXX_SCAN_FOR_MODULES");
-    // -- Ninja
-    initProp("JOB_POOL_COMPILE");
-    initProp("JOB_POOL_LINK");
-    initProp("JOB_POOL_PRECOMPILE_HEADER");
-    // -- Visual Studio
-    initProp("VS_NO_COMPILE_BATCHING");
-
-    // Output location properties
-    initProp("ARCHIVE_OUTPUT_DIRECTORY");
-    initProp("LIBRARY_OUTPUT_DIRECTORY");
-    initProp("RUNTIME_OUTPUT_DIRECTORY");
-    initProp("PDB_OUTPUT_DIRECTORY");
-    initProp("COMPILE_PDB_OUTPUT_DIRECTORY");
-
-    // -- macOS bundle properties
-    initProp("FRAMEWORK");
-    initProp("FRAMEWORK_MULTI_CONFIG_POSTFIX");
-    initProp("MACOSX_BUNDLE");
-
-    // Usage requirement properties
-    initProp("LINK_INTERFACE_LIBRARIES");
-
-    // Metadata
-    initProp("EXPORT_COMPILE_COMMANDS");
-
-#ifdef __APPLE__
-    if (this->GetGlobalGenerator()->IsXcode()) {
-      initProp("XCODE_SCHEME_ADDRESS_SANITIZER");
-      initProp("XCODE_SCHEME_ADDRESS_SANITIZER_USE_AFTER_RETURN");
-      initProp("XCODE_SCHEME_DEBUG_DOCUMENT_VERSIONING");
-      initProp("XCODE_SCHEME_ENABLE_GPU_FRAME_CAPTURE_MODE");
-      initProp("XCODE_SCHEME_THREAD_SANITIZER");
-      initProp("XCODE_SCHEME_THREAD_SANITIZER_STOP");
-      initProp("XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER");
-      initProp("XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER_STOP");
-      initProp("XCODE_SCHEME_LAUNCH_CONFIGURATION");
-      initProp("XCODE_SCHEME_ENABLE_GPU_API_VALIDATION");
-      initProp("XCODE_SCHEME_ENABLE_GPU_SHADER_VALIDATION");
-      initProp("XCODE_SCHEME_WORKING_DIRECTORY");
-      initProp("XCODE_SCHEME_DISABLE_MAIN_THREAD_CHECKER");
-      initProp("XCODE_SCHEME_MAIN_THREAD_CHECKER_STOP");
-      initProp("XCODE_SCHEME_MALLOC_SCRIBBLE");
-      initProp("XCODE_SCHEME_MALLOC_GUARD_EDGES");
-      initProp("XCODE_SCHEME_GUARD_MALLOC");
-      initProp("XCODE_SCHEME_LAUNCH_MODE");
-      initProp("XCODE_SCHEME_ZOMBIE_OBJECTS");
-      initProp("XCODE_SCHEME_MALLOC_STACK");
-      initProp("XCODE_SCHEME_DYNAMIC_LINKER_API_USAGE");
-      initProp("XCODE_SCHEME_DYNAMIC_LIBRARY_LOADS");
-      initProp("XCODE_SCHEME_ENVIRONMENT");
-      initPropValue("XCODE_LINK_BUILD_PHASE_MODE", "NONE");
-    }
-#endif
-  }
-
-  initProp("FOLDER");
-  initProp("VERIFY_INTERFACE_HEADER_SETS");
-
-  if (this->GetGlobalGenerator()->IsXcode()) {
-    initProp("XCODE_GENERATE_SCHEME");
-  }
-
-  // Setup per-configuration property default values.
-  if (this->GetType() != cmStateEnums::UTILITY &&
-      this->GetType() != cmStateEnums::GLOBAL_TARGET) {
-    static const auto configProps = {
-      /* clang-format needs this comment to break after the opening brace */
-      "ARCHIVE_OUTPUT_DIRECTORY_"_s,     "LIBRARY_OUTPUT_DIRECTORY_"_s,
-      "RUNTIME_OUTPUT_DIRECTORY_"_s,     "PDB_OUTPUT_DIRECTORY_"_s,
-      "COMPILE_PDB_OUTPUT_DIRECTORY_"_s, "MAP_IMPORTED_CONFIG_"_s,
-      "INTERPROCEDURAL_OPTIMIZATION_"_s
-    };
-    // Collect the set of configuration types.
-    std::vector<std::string> configNames =
-      mf->GetGeneratorConfigs(cmMakefile::ExcludeEmptyConfig);
-    for (std::string const& configName : configNames) {
-      std::string configUpper = cmSystemTools::UpperCase(configName);
-      for (auto const& prop : configProps) {
-        // Interface libraries have no output locations, so honor only
-        // the configuration map.
-        if (this->impl->TargetType == cmStateEnums::INTERFACE_LIBRARY &&
-            prop != "MAP_IMPORTED_CONFIG_") {
-          continue;
-        }
-        std::string property = cmStrCat(prop, configUpper);
-        initProp(property);
-      }
-
-      // Initialize per-configuration name postfix property from the
-      // variable only for non-executable targets.  This preserves
-      // compatibility with previous CMake versions in which executables
-      // did not support this variable.  Projects may still specify the
-      // property directly.
-      if (this->impl->TargetType != cmStateEnums::EXECUTABLE &&
-          this->impl->TargetType != cmStateEnums::INTERFACE_LIBRARY) {
-        std::string property =
-          cmStrCat(cmSystemTools::UpperCase(configName), "_POSTFIX");
-        initProp(property);
-      }
-
-      if (this->impl->TargetType == cmStateEnums::SHARED_LIBRARY ||
-          this->impl->TargetType == cmStateEnums::STATIC_LIBRARY) {
-        std::string property = cmStrCat("FRAMEWORK_MULTI_CONFIG_POSTFIX_",
-                                        cmSystemTools::UpperCase(configName));
-        initProp(property);
-      }
-    }
-    if (!this->IsImported()) {
-      initProp("LINK_LIBRARIES_ONLY_TARGETS");
-    }
-  }
-
   // Save the backtrace of target construction.
   this->impl->Backtrace = this->impl->Makefile->GetBacktrace();
 
@@ -921,23 +959,6 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
       this->impl->Makefile->GetLinkDirectoriesEntries());
   }
 
-  if (this->impl->TargetType == cmStateEnums::EXECUTABLE) {
-    initProp("ANDROID_GUI");
-    initProp("CROSSCOMPILING_EMULATOR");
-    initProp("ENABLE_EXPORTS");
-  }
-  if (this->impl->TargetType == cmStateEnums::SHARED_LIBRARY ||
-      this->impl->TargetType == cmStateEnums::MODULE_LIBRARY) {
-    this->SetProperty("POSITION_INDEPENDENT_CODE", "True");
-  } else if (this->CanCompileSources()) {
-    initProp("POSITION_INDEPENDENT_CODE");
-  }
-  if (this->impl->TargetType == cmStateEnums::SHARED_LIBRARY ||
-      this->impl->TargetType == cmStateEnums::EXECUTABLE) {
-    initProp("AIX_EXPORT_ALL_SYMBOLS");
-    initProp("WINDOWS_EXPORT_ALL_SYMBOLS");
-  }
-
   // Record current policies for later use.
   this->impl->Makefile->RecordPolicies(this->impl->PolicyMap);
 
@@ -949,13 +970,105 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     this->impl->PolicyMap.Set(cmPolicies::CMP0022, cmPolicies::NEW);
   }
 
+  std::set<TargetProperty::InitCondition> metConditions;
+  metConditions.insert(TargetProperty::InitCondition::Always);
+  if (this->CanCompileSources()) {
+    metConditions.insert(TargetProperty::InitCondition::CanCompileSources);
+  }
+  if (this->GetGlobalGenerator()->IsXcode()) {
+    metConditions.insert(TargetProperty::InitCondition::NeedsXcode);
+    if (this->CanCompileSources()) {
+      metConditions.insert(
+        TargetProperty::InitCondition::NeedsXcodeAndCanCompileSources);
+    }
+  }
   if (!this->IsImported()) {
-    initProp("DOTNET_SDK");
+    metConditions.insert(TargetProperty::InitCondition::NonImportedTarget);
+  }
+  if (this->impl->TargetType != cmStateEnums::UTILITY &&
+      this->impl->TargetType != cmStateEnums::GLOBAL_TARGET) {
+    metConditions.insert(TargetProperty::InitCondition::NormalTarget);
+    if (!this->IsImported()) {
+      metConditions.insert(
+        TargetProperty::InitCondition::NormalNonImportedTarget);
+    }
+    if (this->impl->TargetType != cmStateEnums::INTERFACE_LIBRARY) {
+      metConditions.insert(TargetProperty::InitCondition::TargetWithArtifact);
+      if (this->impl->TargetType != cmStateEnums::EXECUTABLE) {
+        metConditions.insert(
+          TargetProperty::InitCondition::NonExecutableWithArtifact);
+      }
+    }
+    if (this->impl->TargetType == cmStateEnums::SHARED_LIBRARY ||
+        this->impl->TargetType == cmStateEnums::STATIC_LIBRARY) {
+      metConditions.insert(
+        TargetProperty::InitCondition::LinkableLibraryTarget);
+    }
+  }
+  if (this->impl->TargetType == cmStateEnums::EXECUTABLE) {
+    metConditions.insert(TargetProperty::InitCondition::ExecutableTarget);
+  }
+  if (this->impl->TargetType == cmStateEnums::SHARED_LIBRARY ||
+      this->impl->TargetType == cmStateEnums::EXECUTABLE) {
+    metConditions.insert(
+      TargetProperty::InitCondition::TargetWithSymbolExports);
+  }
+  if (this->impl->TargetType <= cmStateEnums::GLOBAL_TARGET) {
+    metConditions.insert(TargetProperty::InitCondition::TargetWithCommands);
   }
 
-  if (this->impl->TargetType <= cmStateEnums::GLOBAL_TARGET) {
-    initProp("DOTNET_TARGET_FRAMEWORK");
-    initProp("DOTNET_TARGET_FRAMEWORK_VERSION");
+  std::vector<std::string> configNames =
+    mf->GetGeneratorConfigs(cmMakefile::ExcludeEmptyConfig);
+  for (auto& config : configNames) {
+    config = cmSystemTools::UpperCase(config);
+  }
+
+  std::string defKey;
+  defKey.reserve(128);
+  defKey += "CMAKE_";
+  auto initProperty = [this, mf, &defKey](const std::string& property,
+                                          const char* default_value) {
+    // Replace everything after "CMAKE_"
+    defKey.replace(defKey.begin() + 6, defKey.end(), property);
+    if (cmValue value = mf->GetDefinition(defKey)) {
+      this->SetProperty(property, value);
+    } else if (default_value) {
+      this->SetProperty(property, default_value);
+    }
+  };
+
+  std::string dflt_storage;
+  for (auto const& tp : StaticTargetProperties) {
+    // Ignore properties that we have not met the condition for.
+    if (!metConditions.count(tp.InitConditional)) {
+      continue;
+    }
+
+    const char* dflt = nullptr;
+    if (tp.Default) {
+      dflt_storage = std::string(*tp.Default);
+      dflt = dflt_storage.c_str();
+    }
+
+    if (tp.Repeat == TargetProperty::Repetition::Once) {
+      initProperty(std::string(tp.Name), dflt);
+    } else {
+      std::string propertyName;
+      for (auto const& configName : configNames) {
+        if (tp.Repeat == TargetProperty::Repetition::PerConfig) {
+          propertyName = cmStrCat(tp.Name, configName);
+        } else if (tp.Repeat == TargetProperty::Repetition::PerConfigPrefix) {
+          propertyName = cmStrCat(configName, tp.Name);
+        }
+        initProperty(propertyName, dflt);
+      }
+    }
+  }
+
+  // Clean up some property defaults.
+  if (this->impl->TargetType == cmStateEnums::SHARED_LIBRARY ||
+      this->impl->TargetType == cmStateEnums::MODULE_LIBRARY) {
+    this->SetProperty("POSITION_INDEPENDENT_CODE", "True");
   }
 
   // check for "CMAKE_VS_GLOBALS" variable and set up target properties
@@ -972,7 +1085,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
         if (assignment != std::string::npos) {
           const std::string propName = vsGlobal + i.substr(0, assignment);
           const std::string propValue = i.substr(assignment + 1);
-          initPropValue(propName, propValue.c_str());
+          initProperty(propName, propValue.c_str());
         }
       }
     }
