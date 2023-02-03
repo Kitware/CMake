@@ -35,7 +35,7 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
   else(CMAKE_${lang}_FLAGS_INIT)
     set(CMAKE_${lang}_COMPILER_ID_FLAGS ${CMAKE_${lang}_FLAGS_INIT})
   endif()
-  string(REPLACE " " ";" CMAKE_${lang}_COMPILER_ID_FLAGS_LIST "${CMAKE_${lang}_COMPILER_ID_FLAGS}")
+  separate_arguments(CMAKE_${lang}_COMPILER_ID_FLAGS_LIST NATIVE_COMMAND "${CMAKE_${lang}_COMPILER_ID_FLAGS}")
 
   # Compute the directory in which to run the test.
   set(CMAKE_${lang}_COMPILER_ID_DIR ${CMAKE_PLATFORM_INFO_DIR}/CompilerId${lang})
