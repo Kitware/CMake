@@ -2911,7 +2911,7 @@ void cmGlobalGenerator::AddGlobalTarget_Install(
         singleLine.push_back(cfgArg);
         cfgArg = "-DEFFECTIVE_PLATFORM_NAME=$(EFFECTIVE_PLATFORM_NAME)";
       } else {
-        cfgArg += *mf->GetDefinition("CMAKE_CFG_INTDIR");
+        cfgArg += this->GetCMakeCFGIntDir();
       }
       singleLine.push_back(cfgArg);
     }
