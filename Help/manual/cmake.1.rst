@@ -1080,10 +1080,6 @@ Available commands are:
   situations instead. Use ``--`` to stop interpreting options and treat all
   remaining arguments as paths, even if they start with ``-``.
 
-.. option:: server
-
-  Launch :manual:`cmake-server(7)` mode.
-
 .. option:: sleep <number>...
 
   .. versionadded:: 3.0
