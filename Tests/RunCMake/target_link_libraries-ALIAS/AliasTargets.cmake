@@ -1,6 +1,3 @@
-
-cmake_minimum_required(VERSION 3.16...3.17)
-
 enable_language(C)
 
 add_library (func SHARED func.c)

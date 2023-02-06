@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 3.3)
 enable_language(CXX)
 
 set_property(GLOBAL PROPERTY XCODE_EMIT_EFFECTIVE_PLATFORM_NAME ON)

@@ -1,6 +1,4 @@
-cmake_minimum_required(VERSION 3.3)
-
-project(XcodeIOSInstallCombinedSingleArch CXX)
+enable_language(CXX)
 
 set(iphoneos_arch armv7)
 if(XCODE_VERSION VERSION_GREATER_EQUAL 14)

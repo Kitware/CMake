@@ -1,5 +1,4 @@
-
-cmake_minimum_required(VERSION 3.3)
+cmake_minimum_required(VERSION 3.5)
 project(${RunCMake_TEST} CXX)
 
 # MSVC creates extra targets which pollute the stderr unless we set this.

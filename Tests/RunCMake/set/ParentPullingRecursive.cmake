@@ -1,6 +1,3 @@
-cmake_minimum_required(VERSION 3.0)
-project(Minimal NONE)
-
 function(report where)
     message("----------")
     message("variable values at ${where}:")

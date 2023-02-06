@@ -1,6 +1,3 @@
-cmake_minimum_required(VERSION 3.14)
-project(Minimal NONE)
-
 #
 # list of targets to test.  to add a target: put its files in the data
 # subdirectory and add it to this list...  we run each target's

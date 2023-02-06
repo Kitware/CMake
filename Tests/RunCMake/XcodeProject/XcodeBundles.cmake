@@ -1,6 +1,5 @@
 # check if Xcode and CMake have the same understanding of Bundle layout
 
-cmake_minimum_required(VERSION 3.3)
 enable_language(C)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "iOS")

@@ -1,5 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
-project(hello C)
+enable_language(C)
 add_library(greeting SHARED greeting.c)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 add_executable(hello hello_with_greeting.c)

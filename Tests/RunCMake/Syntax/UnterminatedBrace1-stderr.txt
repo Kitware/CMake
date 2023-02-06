@@ -1,7 +1,7 @@
-CMake Warning \(dev\) at UnterminatedBrace1.cmake:3 \(set\):
+CMake Warning \(dev\) at UnterminatedBrace1.cmake:2 \(set\):
   Syntax error in cmake code at
 
-    .*/Tests/RunCMake/Syntax/UnterminatedBrace1.cmake:3
+    .*/Tests/RunCMake/Syntax/UnterminatedBrace1.cmake:2
 
   when parsing string
 

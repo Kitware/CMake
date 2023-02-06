@@ -1,6 +1,6 @@
-cmake_minimum_required (VERSION 2.8.12)
+enable_language(C)
+enable_language(CXX)
 enable_testing()
-project(findmatlab_runcmake_test2)
 
 if(NOT DEFINED matlab_required)
   set(matlab_required REQUIRED)

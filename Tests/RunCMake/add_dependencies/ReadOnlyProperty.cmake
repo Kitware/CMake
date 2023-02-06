@@ -1,5 +1,4 @@
-cmake_minimum_required(VERSION 3.7)
-project(ReadOnlyProperty C)
+enable_language(C)
 
 add_library(a a.c)
 

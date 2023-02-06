@@ -1,6 +1,4 @@
-cmake_minimum_required(VERSION 3.3)
-
-project(XcodeIOSInstallCombinedPrune CXX)
+enable_language(CXX)
 
 if(XCODE_VERSION VERSION_GREATER_EQUAL 9)
   set(CMAKE_OSX_DEPLOYMENT_TARGET 10)

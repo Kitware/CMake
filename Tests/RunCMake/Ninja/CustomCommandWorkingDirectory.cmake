@@ -1,6 +1,3 @@
-cmake_minimum_required(VERSION 3.5)
-project(hello NONE)
-
 add_custom_command(
   OUTPUT hello.copy.c
   COMMAND "${CMAKE_COMMAND}" -E copy

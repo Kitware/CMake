@@ -1,5 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
-project(DeploymentTarget C)
+enable_language(C)
 
 # using Xcode 7.1 SDK versions for deployment targets
 

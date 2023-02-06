@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 3.4)
 enable_language(C)
 
 set(CMAKE_CONFIGURATION_TYPES "Debug" CACHE INTERNAL "Supported configuration types")

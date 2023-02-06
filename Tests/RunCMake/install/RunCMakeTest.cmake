@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 3.4)
 include(RunCMake)
 
 # Function to build and install a project.  The latter step *-check.cmake

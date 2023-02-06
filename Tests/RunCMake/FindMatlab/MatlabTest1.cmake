@@ -1,7 +1,6 @@
-
-cmake_minimum_required (VERSION 2.8.12)
+enable_language(C)
+enable_language(CXX)
 enable_testing()
-project(test_should_fail)
 
 if(NOT "${matlab_root}" STREQUAL "")
   set(Matlab_ROOT_DIR ${matlab_root})

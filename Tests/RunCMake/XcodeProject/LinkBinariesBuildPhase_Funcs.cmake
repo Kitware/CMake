@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 3.18...3.19)
 
 macro(returnOnError errorMsg)
   if(NOT "${errorMsg}" STREQUAL "")

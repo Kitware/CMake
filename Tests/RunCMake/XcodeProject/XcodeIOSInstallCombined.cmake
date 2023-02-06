@@ -1,6 +1,4 @@
-cmake_minimum_required(VERSION 3.3)
-
-project(IOSInstallCombined CXX)
+enable_language(CXX)
 
 set(maybe_armv7 armv7)
 set(maybe_i386 i386)
