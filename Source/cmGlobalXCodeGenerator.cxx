@@ -615,7 +615,6 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
   auto cc = cm::make_unique<cmCustomCommand>();
   cc->SetCommandLines(
     cmMakeSingleCommandLine({ "echo", "Build all projects" }));
-  cc->SetCMP0116Status(cmPolicies::NEW);
   cmTarget* allbuild =
     root->AddUtilityCommand("ALL_BUILD", true, std::move(cc));
 
@@ -655,7 +654,6 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
     cmSystemTools::ReplaceString(file, "\\ ", " ");
     cc = cm::make_unique<cmCustomCommand>();
     cc->SetCommandLines(cmMakeSingleCommandLine({ "make", "-f", file }));
-    cc->SetCMP0116Status(cmPolicies::NEW);
     cmTarget* check = root->AddUtilityCommand(CMAKE_CHECK_BUILD_SYSTEM_TARGET,
                                               true, std::move(cc));
 
@@ -687,7 +685,6 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
         cc->SetCommandLines(legacyDependHelperCommandLines);
         cc->SetComment("Depend check for xcode");
         cc->SetWorkingDirectory(legacyDependHelperDir.c_str());
-        cc->SetCMP0116Status(cmPolicies::NEW);
         gen->AddCustomCommandToTarget(
           target->GetName(), cmCustomCommandType::POST_BUILD, std::move(cc),
           cmObjectLibraryCommands::Accept);

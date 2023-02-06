@@ -1238,7 +1238,6 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
       cc->SetDepends(uicDependencies);
       cc->SetComment("");
       cc->SetWorkingDirectory(this->Dir.Work.c_str());
-      cc->SetCMP0116Status(cmPolicies::NEW);
       cc->SetEscapeOldStyle(false);
       cc->SetStdPipesUTF8(stdPipesUTF8);
       this->LocalGen->AddCustomCommandToOutput(std::move(cc));
@@ -1332,7 +1331,6 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
       cc->SetByproducts(timestampTargetProvides);
       cc->SetDepends(dependencies);
       cc->SetCommandLines(timestampTargetCommandLines);
-      cc->SetCMP0116Status(cmPolicies::NEW);
       cc->SetEscapeOldStyle(false);
       cmTarget* timestampTarget = this->LocalGen->AddUtilityCommand(
         timestampTargetName, true, std::move(cc));
@@ -1371,7 +1369,6 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
       cc->SetCommandLines(commandLines);
       cc->SetComment(autogenComment.c_str());
       cc->SetWorkingDirectory(this->Dir.Work.c_str());
-      cc->SetCMP0116Status(cmPolicies::NEW);
       cc->SetEscapeOldStyle(false);
       cc->SetDepfile(this->AutogenTarget.DepFile);
       cc->SetStdPipesUTF8(stdPipesUTF8);
@@ -1391,7 +1388,6 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
     cc->SetByproducts(autogenByproducts);
     cc->SetDepends(dependencies);
     cc->SetCommandLines(commandLines);
-    cc->SetCMP0116Status(cmPolicies::NEW);
     cc->SetEscapeOldStyle(false);
     cc->SetComment(autogenComment.c_str());
     cmTarget* autogenTarget = this->LocalGen->AddUtilityCommand(
@@ -1472,7 +1468,6 @@ bool cmQtAutoGenInitializer::InitRccTargets()
     auto cc = cm::make_unique<cmCustomCommand>();
     cc->SetWorkingDirectory(this->Dir.Work.c_str());
     cc->SetCommandLines(commandLines);
-    cc->SetCMP0116Status(cmPolicies::NEW);
     cc->SetComment(ccComment.c_str());
     cc->SetStdPipesUTF8(true);
 

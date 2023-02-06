@@ -7,6 +7,8 @@
 
 #include <cmext/algorithm>
 
+#include "cmStateSnapshot.h"
+
 const std::vector<std::string>& cmCustomCommand::GetOutputs() const
 {
   return this->Outputs;
@@ -182,14 +184,19 @@ void cmCustomCommand::SetJobPool(const std::string& job_pool)
   this->JobPool = job_pool;
 }
 
-cmPolicies::PolicyStatus cmCustomCommand::GetCMP0116Status() const
-{
-  return this->CMP0116Status;
-}
+#define DEFINE_CC_POLICY_ACCESSOR(P)                                          \
+  cmPolicies::PolicyStatus cmCustomCommand::Get##P##Status() const            \
+  {                                                                           \
+    return this->P##Status;                                                   \
+  }
+CM_FOR_EACH_CUSTOM_COMMAND_POLICY(DEFINE_CC_POLICY_ACCESSOR)
+#undef DEFINE_CC_POLICY_ACCESSOR
 
-void cmCustomCommand::SetCMP0116Status(cmPolicies::PolicyStatus cmp0116)
+void cmCustomCommand::RecordPolicyValues(const cmStateSnapshot& snapshot)
 {
-  this->CMP0116Status = cmp0116;
+#define SET_CC_POLICY(P) this->P##Status = snapshot.GetPolicy(cmPolicies::P);
+  CM_FOR_EACH_CUSTOM_COMMAND_POLICY(SET_CC_POLICY)
+#undef SET_CC_POLICY
 }
 
 const std::string& cmCustomCommand::GetTarget() const

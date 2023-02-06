@@ -474,6 +474,8 @@ class cmMakefile;
   F(CMP0131)                                                                  \
   F(CMP0142)
 
+#define CM_FOR_EACH_CUSTOM_COMMAND_POLICY(F) F(CMP0116)
+
 /** \class cmPolicies
  * \brief Handles changes in CMake behavior and policies
  *

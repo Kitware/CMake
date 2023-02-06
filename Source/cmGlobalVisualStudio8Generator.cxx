@@ -169,7 +169,6 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     cm::static_reference_cast<cmLocalVisualStudio7Generator>(generators[0]);
 
   auto cc = cm::make_unique<cmCustomCommand>();
-  cc->SetCMP0116Status(cmPolicies::NEW);
   cmTarget* tgt = lg.AddUtilityCommand(CMAKE_CHECK_BUILD_SYSTEM_TARGET, false,
                                        std::move(cc));
 
@@ -225,7 +224,6 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
       cc->SetByproducts(byproducts);
       cc->SetCommandLines(verifyCommandLines);
       cc->SetComment("Checking File Globs");
-      cc->SetCMP0116Status(cmPolicies::NEW);
       cc->SetStdPipesUTF8(stdPipesUTF8);
       lg.AddCustomCommandToTarget(CMAKE_CHECK_BUILD_SYSTEM_TARGET,
                                   cmCustomCommandType::PRE_BUILD,
@@ -260,7 +258,6 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     cc->SetDepends(listFiles);
     cc->SetCommandLines(commandLines);
     cc->SetComment("Checking Build System");
-    cc->SetCMP0116Status(cmPolicies::NEW);
     cc->SetEscapeOldStyle(false);
     cc->SetStdPipesUTF8(stdPipesUTF8);
     if (cmSourceFile* file =
