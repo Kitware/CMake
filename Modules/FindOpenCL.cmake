@@ -39,6 +39,8 @@ The module will also define two cache variables::
 
 #]=======================================================================]
 
+set(_OPENCL_x86 "(x86)")
+
 function(_FIND_OPENCL_VERSION)
   include(CheckSymbolExists)
   include(CMakePushCheckState)
@@ -79,6 +81,9 @@ find_path(OpenCL_INCLUDE_DIR
     CL/cl.h OpenCL/cl.h
   PATHS
     ENV "PROGRAMFILES(X86)"
+    ENV "PROGRAMFILES"
+    $ENV{PROGRAMFILES${_OPENCL_x86}}/OpenCLHeaders
+    $ENV{PROGRAMFILES}/OpenCLHeaders
     ENV AMDAPPSDKROOT
     ENV INTELOCLSDKROOT
     ENV NVSDKCOMPUTE_ROOT
@@ -100,6 +105,9 @@ if(WIN32)
       NAMES OpenCL
       PATHS
         ENV "PROGRAMFILES(X86)"
+        ENV "PROGRAMFILES"
+        $ENV{PROGRAMFILES${_OPENCL_x86}}/OpenCL-ICD-Loader
+        $ENV{PROGRAMFILES}/OpenCL-ICD-Loader
         ENV AMDAPPSDKROOT
         ENV INTELOCLSDKROOT
         ENV CUDA_PATH
@@ -116,6 +124,9 @@ if(WIN32)
       NAMES OpenCL
       PATHS
         ENV "PROGRAMFILES(X86)"
+        ENV "PROGRAMFILES"
+        $ENV{PROGRAMFILES${_OPENCL_x86}}/OpenCL-ICD-Loader
+        $ENV{PROGRAMFILES}/OpenCL-ICD-Loader
         ENV AMDAPPSDKROOT
         ENV INTELOCLSDKROOT
         ENV CUDA_PATH
@@ -126,6 +137,7 @@ if(WIN32)
         "AMD APP/lib/x86_64"
         lib/x86_64
         lib/x64
+        lib
         OpenCL/common/lib/x64)
   endif()
 else()
@@ -155,6 +167,8 @@ else()
         lib64)
   endif()
 endif()
+
+unset(_OPENCL_x86)
 
 set(OpenCL_LIBRARIES ${OpenCL_LIBRARY})
 set(OpenCL_INCLUDE_DIRS ${OpenCL_INCLUDE_DIR})
