@@ -964,7 +964,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
     return true;
   };
 
-  auto ToolsetLamda = [&](std::string const& value, cmake* state) -> bool {
+  auto ToolsetLambda = [&](std::string const& value, cmake* state) -> bool {
     if (haveToolset) {
       cmSystemTools::Error("Multiple -T options not allowed");
       return false;
@@ -1016,7 +1016,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
                      CommandArgument::RequiresSeparator::No, PlatformLambda },
     CommandArgument{ "-T", "No toolset specified for -T",
                      CommandArgument::Values::One,
-                     CommandArgument::RequiresSeparator::No, ToolsetLamda },
+                     CommandArgument::RequiresSeparator::No, ToolsetLambda },
     CommandArgument{ "--toolchain", "No file specified for --toolchain",
                      CommandArgument::Values::One, IgnoreAndTrueLambda },
     CommandArgument{ "--install-prefix",
