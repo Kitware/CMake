@@ -41,6 +41,8 @@ public:
   const std::string& GetType() const { return this->Type; }
   cmFileSetVisibility GetVisibility() const { return this->Visibility; }
 
+  void CopyEntries(cmFileSet const* fs);
+
   void ClearDirectoryEntries();
   void AddDirectoryEntry(BT<std::string> directories);
   const std::vector<BT<std::string>>& GetDirectoryEntries() const

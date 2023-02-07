@@ -7,6 +7,7 @@
 #include <utility>
 #include <vector>
 
+#include <cmext/algorithm>
 #include <cmext/string_view>
 
 #include "cmsys/RegularExpression.hxx"
@@ -86,6 +87,12 @@ cmFileSet::cmFileSet(cmake& cmakeInstance, std::string name, std::string type,
   , Type(std::move(type))
   , Visibility(visibility)
 {
+}
+
+void cmFileSet::CopyEntries(cmFileSet const* fs)
+{
+  cm::append(this->DirectoryEntries, fs->DirectoryEntries);
+  cm::append(this->FileEntries, fs->FileEntries);
 }
 
 void cmFileSet::ClearDirectoryEntries()

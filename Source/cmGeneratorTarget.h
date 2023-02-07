@@ -31,6 +31,7 @@ class cmGlobalGenerator;
 class cmLocalGenerator;
 class cmMakefile;
 class cmSourceFile;
+struct cmSyntheticTargetCache;
 class cmTarget;
 
 struct cmGeneratorExpressionContext;
@@ -932,6 +933,9 @@ public:
 
   std::string GetImportedXcFrameworkPath(const std::string& config) const;
 
+  bool DiscoverSyntheticTargets(cmSyntheticTargetCache& cache,
+                                std::string const& config);
+
 private:
   void AddSourceCommon(const std::string& src, bool before = false);
 
@@ -1307,6 +1311,8 @@ private:
   {
     bool BuiltFileSetCache = false;
     std::map<std::string, cmFileSet const*> FileSetCache;
+    std::map<cmGeneratorTarget const*, std::vector<cmGeneratorTarget const*>>
+      SyntheticDeps;
   };
   mutable std::map<std::string, InfoByConfig> Configs;
 };

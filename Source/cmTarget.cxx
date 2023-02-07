@@ -1748,6 +1748,186 @@ cmBTStringRange cmTarget::GetLinkInterfaceDirectExcludeEntries() const
   return cmMakeRange(this->impl->InterfaceLinkLibrariesDirectExclude.Entries);
 }
 
+void cmTarget::CopyPolicyStatuses(cmTarget const* tgt)
+{
+  // Normal targets cannot be the target of a copy.
+  assert(!this->IsNormal());
+  // Imported targets cannot be the target of a copy.
+  assert(!this->IsImported());
+  // Only imported targets can be the source of a copy.
+  assert(tgt->IsImported());
+
+  this->impl->PolicyMap = tgt->impl->PolicyMap;
+}
+
+void cmTarget::CopyImportedCxxModulesEntries(cmTarget const* tgt)
+{
+  // Normal targets cannot be the target of a copy.
+  assert(!this->IsNormal());
+  // Imported targets cannot be the target of a copy.
+  assert(!this->IsImported());
+  // Only imported targets can be the source of a copy.
+  assert(tgt->IsImported());
+
+  this->impl->IncludeDirectories.Entries.clear();
+  this->impl->IncludeDirectories.CopyFromEntries(
+    cmMakeRange(tgt->impl->ImportedCxxModulesIncludeDirectories.Entries));
+  this->impl->CompileDefinitions.Entries.clear();
+  this->impl->CompileDefinitions.CopyFromEntries(
+    cmMakeRange(tgt->impl->ImportedCxxModulesCompileDefinitions.Entries));
+  this->impl->CompileFeatures.Entries.clear();
+  this->impl->CompileFeatures.CopyFromEntries(
+    cmMakeRange(tgt->impl->ImportedCxxModulesCompileFeatures.Entries));
+  this->impl->CompileOptions.Entries.clear();
+  this->impl->CompileOptions.CopyFromEntries(
+    cmMakeRange(tgt->impl->ImportedCxxModulesCompileOptions.Entries));
+  this->impl->LinkLibraries.Entries.clear();
+  this->impl->LinkLibraries.CopyFromEntries(
+    cmMakeRange(tgt->impl->LinkLibraries.Entries));
+
+  // Copy the C++ module fileset entries from `tgt`'s `INTERFACE` to this
+  // target's `PRIVATE`.
+  this->impl->CxxModulesFileSets.SelfEntries.Entries.clear();
+  this->impl->CxxModulesFileSets.SelfEntries.Entries =
+    tgt->impl->CxxModulesFileSets.InterfaceEntries.Entries;
+}
+
+void cmTarget::CopyImportedCxxModulesProperties(cmTarget const* tgt)
+{
+  // Normal targets cannot be the target of a copy.
+  assert(!this->IsNormal());
+  // Imported targets cannot be the target of a copy.
+  assert(!this->IsImported());
+  // Only imported targets can be the source of a copy.
+  assert(tgt->IsImported());
+
+  // The list of properties that are relevant here include:
+  // - compilation-specific properties for any language or platform
+  // - compilation-specific properties for C++
+  // - build graph-specific properties that affect compilation
+  // - IDE metadata properties
+  // - static analysis properties
+
+  static const std::string propertiesToCopy[] = {
+    // Compilation properties
+    "DEFINE_SYMBOL",
+    "DEPRECATION",
+    "NO_SYSTEM_FROM_IMPORTED",
+    "POSITION_INDEPENDENT_CODE",
+    "VISIBILITY_INLINES_HIDDEN",
+    // -- Platforms
+    // ---- Android
+    "ANDROID_API",
+    "ANDROID_API_MIN",
+    "ANDROID_ARCH",
+    "ANDROID_STL_TYPE",
+    // ---- macOS
+    "OSX_ARCHITECTURES",
+    // ---- Windows
+    "MSVC_DEBUG_INFORMATION_FORMAT",
+    "MSVC_RUNTIME_LIBRARY",
+    "VS_PLATFORM_TOOLSET",
+    // ---- OpenWatcom
+    "WATCOM_RUNTIME_LIBRARY",
+    // -- Language
+    // ---- C++
+    "CXX_COMPILER_LAUNCHER",
+    "CXX_STANDARD",
+    "CXX_STANDARD_REQUIRED",
+    "CXX_EXTENSIONS",
+    "CXX_VISIBILITY_PRESET",
+
+    // Static analysis
+    "CXX_CLANG_TIDY",
+    "CXX_CLANG_TIDY_EXPORT_FIXES_DIR",
+    "CXX_CPPLINT",
+    "CXX_CPPCHECK",
+    "CXX_INCLUDE_WHAT_YOU_USE",
+
+    // Build graph properties
+    "EXCLUDE_FROM_ALL",
+    "EXCLUDE_FROM_DEFAULT_BUILD",
+    "OPTIMIZE_DEPENDENCIES",
+    // -- Ninja
+    "JOB_POOL_COMPILE",
+    // -- Visual Studio
+    "VS_NO_COMPILE_BATCHING",
+    "VS_PROJECT_IMPORT",
+
+    // Metadata
+    "EchoString",
+    "EXPORT_COMPILE_COMMANDS",
+    "FOLDER",
+    "LABELS",
+    "PROJECT_LABEL",
+    "SYSTEM",
+  };
+
+  auto copyProperty = [this, tgt](std::string const& prop) -> cmValue {
+    cmValue value = tgt->GetProperty(prop);
+    // Always set the property; it may have been explicitly unset.
+    this->SetProperty(prop, value);
+    return value;
+  };
+
+  for (auto const& prop : propertiesToCopy) {
+    copyProperty(prop);
+  }
+
+  static const cm::static_string_view perConfigPropertiesToCopy[] = {
+    "EXCLUDE_FROM_DEFAULT_BUILD_"_s,
+    "IMPORTED_CXX_MODULES_"_s,
+    "MAP_IMPORTED_CONFIG_"_s,
+    "OSX_ARCHITECTURES_"_s,
+  };
+
+  std::vector<std::string> configNames =
+    this->impl->Makefile->GetGeneratorConfigs(cmMakefile::ExcludeEmptyConfig);
+  for (std::string const& configName : configNames) {
+    std::string configUpper = cmSystemTools::UpperCase(configName);
+    for (auto const& perConfigProp : perConfigPropertiesToCopy) {
+      copyProperty(cmStrCat(perConfigProp, configUpper));
+    }
+  }
+
+  if (this->GetGlobalGenerator()->IsXcode()) {
+    cmValue xcodeGenerateScheme = copyProperty("XCODE_GENERATE_SCHEME");
+
+    // TODO: Make sure these show up on the imported target in the first place
+    // XCODE_ATTRIBUTE_???
+
+    if (xcodeGenerateScheme.IsOn()) {
+#ifdef __APPLE__
+      static const std::string xcodeSchemePropertiesToCopy[] = {
+        // FIXME: Do all of these apply? Do they matter?
+        "XCODE_SCHEME_ADDRESS_SANITIZER",
+        "XCODE_SCHEME_ADDRESS_SANITIZER_USE_AFTER_RETURN",
+        "XCODE_SCHEME_DISABLE_MAIN_THREAD_CHECKER",
+        "XCODE_SCHEME_DYNAMIC_LIBRARY_LOADS",
+        "XCODE_SCHEME_DYNAMIC_LINKER_API_USAGE",
+        "XCODE_SCHEME_ENABLE_GPU_API_VALIDATION",
+        "XCODE_SCHEME_ENABLE_GPU_SHADER_VALIDATION",
+        "XCODE_SCHEME_GUARD_MALLOC",
+        "XCODE_SCHEME_LAUNCH_CONFIGURATION",
+        "XCODE_SCHEME_MAIN_THREAD_CHECKER_STOP",
+        "XCODE_SCHEME_MALLOC_GUARD_EDGES",
+        "XCODE_SCHEME_MALLOC_SCRIBBLE",
+        "XCODE_SCHEME_MALLOC_STACK",
+        "XCODE_SCHEME_THREAD_SANITIZER",
+        "XCODE_SCHEME_THREAD_SANITIZER_STOP",
+        "XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER",
+        "XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER_STOP",
+        "XCODE_SCHEME_ZOMBIE_OBJECTS",
+      };
+
+      for (auto const& xcodeProperty : xcodeSchemePropertiesToCopy) {
+        copyProperty(xcodeProperty);
+      }
+#endif
+    }
+  }
+}
+
 cmBTStringRange cmTarget::GetHeaderSetsEntries() const
 {
   return cmMakeRange(this->impl->HeadersFileSets.SelfEntries.Entries);
