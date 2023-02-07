@@ -17,12 +17,15 @@
 #include "cmCMakePresetsGraphInternal.h"
 #include "cmJSONHelpers.h"
 #include "cmJSONState.h"
+#include "cmStateTypes.h"
 
 namespace {
 using CacheVariable = cmCMakePresetsGraph::CacheVariable;
 using ConfigurePreset = cmCMakePresetsGraph::ConfigurePreset;
 using ArchToolsetStrategy = cmCMakePresetsGraph::ArchToolsetStrategy;
 using JSONHelperBuilder = cmJSONHelperBuilder;
+using TraceEnableMode = cmCMakePresetsGraph::TraceEnableMode;
+using TraceOutputFormat = cmTraceEnums::TraceOutputFormat;
 
 bool ArchToolsetStrategyHelper(cm::optional<ArchToolsetStrategy>& out,
                                const Json::Value* value, cmJSONState* state)
@@ -90,6 +93,58 @@ auto const ArchitectureHelper = ArchToolsetHelper(
   &ConfigurePreset::Architecture, &ConfigurePreset::ArchitectureStrategy);
 auto const ToolsetHelper = ArchToolsetHelper(
   &ConfigurePreset::Toolset, &ConfigurePreset::ToolsetStrategy);
+
+bool TraceEnableModeHelper(cm::optional<TraceEnableMode>& out,
+                           const Json::Value* value, cmJSONState* state)
+{
+  if (!value) {
+    out = cm::nullopt;
+    return true;
+  }
+
+  if (!value->isString()) {
+    cmCMakePresetErrors::INVALID_PRESET(value, state);
+    return false;
+  }
+
+  if (value->asString() == "on") {
+    out = TraceEnableMode::Default;
+  } else if (value->asString() == "off") {
+    out = TraceEnableMode::Disable;
+  } else if (value->asString() == "expand") {
+    out = TraceEnableMode::Expand;
+  } else {
+    cmCMakePresetErrors::INVALID_PRESET(value, state);
+    return false;
+  }
+
+  return true;
+}
+
+bool TraceOutputFormatHelper(cm::optional<TraceOutputFormat>& out,
+                             const Json::Value* value, cmJSONState* state)
+{
+  if (!value) {
+    out = cm::nullopt;
+    return true;
+  }
+
+  if (!value->isString()) {
+    cmCMakePresetErrors::INVALID_PRESET(value, state);
+    return false;
+  }
+
+  if (value->asString() == "human") {
+    out = TraceOutputFormat::Human;
+  } else if (value->asString() == "json-v1") {
+    out = TraceOutputFormat::JSONv1;
+  } else {
+    cmCMakePresetErrors::INVALID_PRESET(value, state);
+    return false;
+  }
+
+  return true;
+}
 
 auto const VariableStringHelper = JSONHelperBuilder::String();
 
@@ -180,6 +235,18 @@ auto const PresetDebugHelper =
     .Bind("find"_s, &ConfigurePreset::DebugFind,
           cmCMakePresetsGraphInternal::PresetOptionalBoolHelper, false);
 
+auto const PresetTraceHelper =
+  JSONHelperBuilder::Object<ConfigurePreset>(
+    cmCMakePresetErrors::INVALID_PRESET_OBJECT, false)
+    .Bind("mode"_s, &ConfigurePreset::TraceMode, TraceEnableModeHelper, false)
+    .Bind("format"_s, &ConfigurePreset::TraceFormat, TraceOutputFormatHelper,
+          false)
+    .Bind("source"_s, &ConfigurePreset::TraceSource,
+          cmCMakePresetsGraphInternal::PresetVectorOneOrMoreStringHelper,
+          false)
+    .Bind("redirect"_s, &ConfigurePreset::TraceRedirect,
+          cmCMakePresetsGraphInternal::PresetStringHelper, false);
+
 auto const ConfigurePresetHelper =
   JSONHelperBuilder::Object<ConfigurePreset>(
     cmCMakePresetErrors::INVALID_PRESET_OBJECT, false)
@@ -217,6 +284,7 @@ auto const ConfigurePresetHelper =
     .Bind("warnings"_s, PresetWarningsHelper, false)
     .Bind("errors"_s, PresetErrorsHelper, false)
     .Bind("debug"_s, PresetDebugHelper, false)
+    .Bind("trace"_s, PresetTraceHelper, false)
     .Bind("condition"_s, &ConfigurePreset::ConditionEvaluator,
           cmCMakePresetsGraphInternal::PresetConditionHelper, false);
 }

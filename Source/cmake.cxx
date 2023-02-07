@@ -1143,47 +1143,62 @@ void cmake::SetArgs(const std::vector<std::string>& args)
         std::cout << ".\n";
         return true;
       } },
+    CommandArgument{ "--trace", CommandArgument::Values::Zero,
+                     [](std::string const&, cmake* state) -> bool {
+                       std::cout << "Put cmake in trace mode.\n";
+                       state->SetTrace(true);
+                       state->SetTraceExpand(false);
+                       return true;
+                     } },
     CommandArgument{ "--trace-expand", CommandArgument::Values::Zero,
                      [](std::string const&, cmake* state) -> bool {
-                       std::cout << "Running with expanded trace output on.\n";
+                       std::cout << "Put cmake in trace mode, but with "
+                                    "variables expanded.\n";
                        state->SetTrace(true);
                        state->SetTraceExpand(true);
                        return true;
                      } },
-    CommandArgument{ "--trace-format", CommandArgument::Values::One,
-                     [](std::string const& value, cmake* state) -> bool {
-                       state->SetTrace(true);
-                       const auto traceFormat = StringToTraceFormat(value);
-                       if (traceFormat == TraceFormat::TRACE_UNDEFINED) {
-                         cmSystemTools::Error(
-                           "Invalid format specified for --trace-format. "
-                           "Valid formats are human, json-v1.");
-                         return false;
+    CommandArgument{
+      "--trace-format", "Invalid format specified for --trace-format",
+      CommandArgument::Values::One,
+      [](std::string const& value, cmake* state) -> bool {
+        std::cout << "Put cmake in trace mode and sets the "
+                     "trace output format.\n";
+        state->SetTrace(true);
+        const auto traceFormat = StringToTraceFormat(value);
+        if (traceFormat == TraceFormat::Undefined) {
+          cmSystemTools::Error("Invalid format specified for --trace-format. "
+                               "Valid formats are human, json-v1.");
+          return false;
+        }
+        state->SetTraceFormat(traceFormat);
+        return true;
+      } },
+    CommandArgument{ "--trace-source", "No file specified for --trace-source",
+                     CommandArgument::Values::OneOrMore,
+                     [](std::string const& values, cmake* state) -> bool {
+                       std::cout << "Put cmake in trace mode, but output only "
+                                    "lines of a specified file. Multiple "
+                                    "options are allowed.\n";
+                       for (auto file :
+                            cmSystemTools::SplitString(values, ';')) {
+                         cmSystemTools::ConvertToUnixSlashes(file);
+                         state->AddTraceSource(file);
                        }
-                       state->SetTraceFormat(traceFormat);
-                       return true;
-                     } },
-    CommandArgument{ "--trace-source", CommandArgument::Values::One,
-                     [](std::string const& value, cmake* state) -> bool {
-                       std::string file(value);
-                       cmSystemTools::ConvertToUnixSlashes(file);
-                       state->AddTraceSource(file);
                        state->SetTrace(true);
                        return true;
                      } },
-    CommandArgument{ "--trace-redirect", CommandArgument::Values::One,
+    CommandArgument{ "--trace-redirect",
+                     "No file specified for --trace-redirect",
+                     CommandArgument::Values::One,
                      [](std::string const& value, cmake* state) -> bool {
+                       std::cout
+                         << "Put cmake in trace mode and redirect trace "
+                            "output to a file instead of stderr.\n";
                        std::string file(value);
                        cmSystemTools::ConvertToUnixSlashes(file);
                        state->SetTraceFile(file);
                        state->SetTrace(true);
-                       return true;
-                     } },
-    CommandArgument{ "--trace", CommandArgument::Values::Zero,
-                     [](std::string const&, cmake* state) -> bool {
-                       std::cout << "Running with trace output on.\n";
-                       state->SetTrace(true);
-                       state->SetTraceExpand(false);
                        return true;
                      } },
     CommandArgument{ "--warn-uninitialized", CommandArgument::Values::Zero,
@@ -1530,6 +1545,29 @@ void cmake::SetArgs(const std::vector<std::string>& args)
     if (expandedPreset->DebugFind == true) {
       this->SetDebugFindOutput(true);
     }
+    if (expandedPreset->TraceMode &&
+        expandedPreset->TraceMode !=
+          cmCMakePresetsGraph::TraceEnableMode::Disable) {
+      this->SetTrace(true);
+      if (expandedPreset->TraceMode ==
+          cmCMakePresetsGraph::TraceEnableMode::Expand) {
+        this->SetTraceExpand(true);
+      }
+    }
+    if (expandedPreset->TraceFormat) {
+      this->SetTrace(true);
+      this->SetTraceFormat(*expandedPreset->TraceFormat);
+    }
+    if (!expandedPreset->TraceSource.empty()) {
+      this->SetTrace(true);
+      for (std::string const& filePaths : expandedPreset->TraceSource) {
+        this->AddTraceSource(filePaths);
+      }
+    }
+    if (!expandedPreset->TraceRedirect.empty()) {
+      this->SetTrace(true);
+      this->SetTraceFile(expandedPreset->TraceRedirect);
+    }
   }
 #endif
 }
@@ -1586,8 +1624,8 @@ cmake::TraceFormat cmake::StringToTraceFormat(const std::string& traceStr)
 {
   using TracePair = std::pair<std::string, TraceFormat>;
   static const std::vector<TracePair> levels = {
-    { "human", TraceFormat::TRACE_HUMAN },
-    { "json-v1", TraceFormat::TRACE_JSON_V1 },
+    { "human", TraceFormat::Human },
+    { "json-v1", TraceFormat::JSONv1 },
   };
 
   const auto traceStrLowCase = cmSystemTools::LowerCase(traceStr);
@@ -1596,7 +1634,7 @@ cmake::TraceFormat cmake::StringToTraceFormat(const std::string& traceStr)
                                [&traceStrLowCase](const TracePair& p) {
                                  return p.first == traceStrLowCase;
                                });
-  return (it != levels.cend()) ? it->second : TraceFormat::TRACE_UNDEFINED;
+  return (it != levels.cend()) ? it->second : TraceFormat::Undefined;
 }
 
 void cmake::SetTraceFile(const std::string& file)
@@ -1622,7 +1660,7 @@ void cmake::PrintTraceFormatVersion()
   std::string msg;
 
   switch (this->GetTraceFormat()) {
-    case TraceFormat::TRACE_JSON_V1: {
+    case TraceFormat::JSONv1: {
 #ifndef CMAKE_BOOTSTRAP
       Json::Value val;
       Json::Value version;
@@ -1635,11 +1673,11 @@ void cmake::PrintTraceFormatVersion()
 #endif
       break;
     }
-    case TraceFormat::TRACE_HUMAN:
+    case TraceFormat::Human:
       msg = "";
       break;
-    case TraceFormat::TRACE_UNDEFINED:
-      msg = "INTERNAL ERROR: Trace format is TRACE_UNDEFINED";
+    case TraceFormat::Undefined:
+      msg = "INTERNAL ERROR: Trace format is Undefined";
       break;
   }
 

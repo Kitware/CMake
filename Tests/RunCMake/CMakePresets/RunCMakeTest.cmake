@@ -150,6 +150,7 @@ run_cmake_presets(InvalidRegex)
 set(CMakePresets_SCHEMA_EXPECTED_RESULT 1)
 run_cmake_presets(ConditionFuture)
 run_cmake_presets(SubConditionNull)
+run_cmake_presets(TraceNotSupported)
 
 # Test cmakeMinimumRequired field
 run_cmake_presets(MinimumRequiredInvalid)
@@ -325,6 +326,18 @@ unset(CMakePresets_WARN_UNUSED_CLI)
 set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/Debug.json.in")
 run_cmake_presets(NoDebug)
 run_cmake_presets(Debug)
+
+# Test trace
+set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/Trace.json.in")
+run_cmake_presets(NoTrace)
+run_cmake_presets(ExplicitNoTrace)
+run_cmake_presets(Trace)
+run_cmake_presets(TraceExpand)
+run_cmake_presets(TraceFormatJSON)
+run_cmake_presets(TraceFormatHuman)
+run_cmake_presets(TraceSource)
+run_cmake_presets(TraceRedirect)
+run_cmake_presets(TraceAll)
 
 # Test ${hostSystemName} macro
 set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/HostSystemName.json.in")
