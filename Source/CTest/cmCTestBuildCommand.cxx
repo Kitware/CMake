@@ -89,11 +89,7 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
         }
       }
       if (cmakeBuildConfiguration.empty()) {
-#ifdef CMAKE_INTDIR
-        cmakeBuildConfiguration = CMAKE_INTDIR;
-#else
         cmakeBuildConfiguration = "Debug";
-#endif
       }
 
       std::string dir = this->CTest->GetCTestConfiguration("BuildDirectory");
