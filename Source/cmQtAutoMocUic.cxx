@@ -1756,7 +1756,7 @@ bool cmQtAutoMocUicT::JobProbeDepsMocT::Probe(MappingT const& mapping,
   if (this->MocConst().SettingsChanged) {
     if (reason != nullptr) {
       *reason = cmStrCat("Generating ", this->MessagePath(outputFile),
-                         ", because the uic settings changed, from ",
+                         ", because the moc settings changed, from ",
                          this->MessagePath(sourceFile));
     }
     return true;
