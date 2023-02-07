@@ -29,4 +29,4 @@ cmake -GNinja \
     ..
 ninja
 DESTDIR=/root/iwyu-destdir ninja install
-tar -C /root/iwyu-destdir -cf /root/iwyu.tar.gz .
+tar -C /root/iwyu-destdir -cf /root/iwyu.tar .
