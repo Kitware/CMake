@@ -18,12 +18,16 @@ subsequently be run.
         [SRC_EXT <extension>])
 
   Check that the source supplied in ``<code>`` can be compiled as a Fortran source
-  file, linked as an executable and then run. The ``<code>`` must be a Fortran program
-  containing at least an ``end`` statement--for example:
+  file, linked as an executable and then run. The ``<code>`` must be a Fortran
+  ``program``.
 
   .. code-block:: cmake
 
-    check_fortran_source_runs("real :: x[*]; call co_sum(x); end" F2018coarrayOK)
+    check_fortran_source_runs("program test
+    real :: x[*]
+    call co_sum(x)
+    end program"
+    HAVE_COARRAY)
 
   This command can help avoid costly build processes when a compiler lacks support
   for a necessary feature, or a particular vendor library is not compatible with
