@@ -27,8 +27,11 @@ desired (i.e., these are the only variables you should change to
 select a configuration):
 
 ::
-
-  wxWidgets_ROOT_DIR      - Base wxWidgets directory
+  wxWidgets_CUSTOM_ROOT_DIR
+                          - Base wxWidgets directory
+                            (e.g., C:/ to search C:/wxWidgets-3.2.0).
+  wxWidgets_ROOT_DIR      - Envoirment variable for
+                            base wxWidgets directory
                             (e.g., C:/wxWidgets-3.2.0).
   wxWidgets_LIB_DIR       - Path to wxWidgets libraries
                             (e.g., C:/wxWidgets-3.2.0/lib/vc_x64_lib).
@@ -62,7 +65,17 @@ to use the base toolkit found in the /usr/local path, set the variable
 
   set(wxWidgets_CONFIG_OPTIONS --toolkit=base --prefix=/usr)
 
+Optionally, you can choose to search for a preferred version over
+the rest that you can have installed or even to look only for one. This 
+can make fail the search if the desired version isn't found.
 
+::
+  wxWidgets_PREFERRED_VERSION
+                          - Version to be search over the rest
+                            (e.g., 2.9 or 3.2).
+  wxWidgets_SEARCH_EXACT  - If set to ON only searcher for the 
+                            preferred version and fails if not
+                            found.
 
 The following are set after the configuration is done for both windows
 and unix style:
@@ -213,8 +226,19 @@ else()
   set(wxWidgets_USE_FILE UsewxWidgets)
 endif()
 
-# Known wxWidgets versions.
-set(wx_versions 3.3 3.2 3.1 3.0 2.9 2.8 2.7 2.6 2.5)
+# wxWidgets versions.
+option(wxWidgets_PREFERRED_VERSION "Optional preferred search version (e.g. 2.9 or 3.2)" "")
+option(wxWidgets_SEARCH_EXACT 
+  "Set to ON to only search for the wxWidgets_PREFERRED_VERSION if any selected" OFF)
+
+if(wxWidgets_PREFERRED_VERSION)
+  set(wx_versions ${wxWidgets_PREFERRED_VERSION})
+  if(NOT wxWidgets_SEARCH_EXACT)
+    list(APPEND wx_versions 3.3 3.2 3.1 3.0 2.9 2.8 2.7 2.6 2.5)
+  endif()
+else()
+  set(wx_versions 3.3 3.2 3.1 3.0 2.9 2.8 2.7 2.6 2.5)
+endif()
 
 macro(wx_extract_version)
   unset(_wx_filename)
@@ -451,10 +475,12 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
     endforeach()
   endforeach()
 
+  option(wxWidgets_CUSTOM_ROOT_DIR "Use a custom directory to find wxWidgets installation" "")
   # Look for an installation tree.
   find_path(wxWidgets_ROOT_DIR
     NAMES include/wx/wx.h
     PATHS
+      ${wxWidgets_CUSTOM_ROOT_DIR}
       ENV wxWidgets_ROOT_DIR
       ENV WXWIN
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\wxWidgets_is1;Inno Setup: App Path]"  # WX 2.6.x
@@ -462,7 +488,7 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
       D:/
       ENV ProgramFiles
     PATH_SUFFIXES
-      ${wx_paths}
+      ${wx_paths}/
     DOC "wxWidgets base/installation directory"
     )
 
