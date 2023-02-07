@@ -3418,9 +3418,7 @@ bool SystemTools::SplitProgramPath(const std::string& in_name,
 }
 
 bool SystemTools::FindProgramPath(const char* argv0, std::string& pathOut,
-                                  std::string& errorMsg, const char* exeName,
-                                  const char* buildDir,
-                                  const char* installPrefix)
+                                  std::string& errorMsg)
 {
   std::vector<std::string> failures;
   std::string self = argv0 ? argv0 : "";
@@ -3428,34 +3426,9 @@ bool SystemTools::FindProgramPath(const char* argv0, std::string& pathOut,
   SystemTools::ConvertToUnixSlashes(self);
   self = SystemTools::FindProgram(self);
   if (!SystemTools::FileIsExecutable(self)) {
-    if (buildDir) {
-      std::string intdir = ".";
-#ifdef CMAKE_INTDIR
-      intdir = CMAKE_INTDIR;
-#endif
-      self = buildDir;
-      self += "/bin/";
-      self += intdir;
-      self += "/";
-      self += exeName;
-      self += SystemTools::GetExecutableExtension();
-    }
-  }
-  if (installPrefix) {
-    if (!SystemTools::FileIsExecutable(self)) {
-      failures.push_back(self);
-      self = installPrefix;
-      self += "/bin/";
-      self += exeName;
-    }
-  }
-  if (!SystemTools::FileIsExecutable(self)) {
     failures.push_back(self);
     std::ostringstream msg;
     msg << "Can not find the command line program ";
-    if (exeName) {
-      msg << exeName;
-    }
     msg << "\n";
     if (argv0) {
       msg << "  argv[0] = \"" << argv0 << "\"\n";
