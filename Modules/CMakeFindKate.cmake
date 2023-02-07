@@ -3,7 +3,7 @@
 
 
 # This file is included in CMakeSystemSpecificInformation.cmake if
-# the Eclipse CDT4 extra generator has been selected.
+# the Kate extra generator has been selected.
 
 
 # Try to find out how many CPUs we have and set the -j argument for make accordingly
@@ -17,5 +17,9 @@ if("${_CMAKE_KATE_PROCESSOR_COUNT}" GREATER 1  AND  CMAKE_HOST_UNIX  AND  "${CMA
   set(_CMAKE_KATE_INITIAL_MAKE_ARGS "-j${_CMAKE_KATE_PROCESSOR_COUNT}")
 endif()
 
-# This variable is used by the Eclipse generator and appended to the make invocation commands.
+# This variable is used by the Kate generator and appended to the make invocation commands.
 set(CMAKE_KATE_MAKE_ARGUMENTS "${_CMAKE_KATE_INITIAL_MAKE_ARGS}" CACHE STRING "Additional command line arguments when Kate invokes make. Enter e.g. -j<some_number> to get parallel builds")
+
+
+set(CMAKE_KATE_FILES_MODE "AUTO" CACHE STRING "Option to override the version control detection and force a mode for the Kate project.")
+set_property(CACHE CMAKE_KATE_FILES_MODE PROPERTY STRINGS "AUTO;SVN;GIT;LIST")

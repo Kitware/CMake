@@ -8,6 +8,7 @@
 #include <set>
 #include <vector>
 
+#include "cmCMakePath.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -220,17 +221,58 @@ void cmExtraKateGenerator::CreateDummyKateProjectFile(
 std::string cmExtraKateGenerator::GenerateFilesString(
   const cmLocalGenerator& lg) const
 {
-  std::string s = cmStrCat(lg.GetSourceDirectory(), "/.git");
-  if (cmSystemTools::FileExists(s)) {
-    return "\"git\": 1 ";
+  const cmMakefile* mf = lg.GetMakefile();
+  std::string mode =
+    cmSystemTools::UpperCase(mf->GetSafeDefinition("CMAKE_KATE_FILES_MODE"));
+  static const std::string gitString = "\"git\": 1 ";
+  static const std::string svnString = "\"svn\": 1 ";
+  static const std::string hgString = "\"hg\": 1 ";
+  static const std::string fossilString = "\"fossil\": 1 ";
+
+  if (mode == "SVN") {
+    return svnString;
+  }
+  if (mode == "GIT") {
+    return gitString;
+  }
+  if (mode == "HG") {
+    return hgString;
+  }
+  if (mode == "FOSSIL") {
+    return fossilString;
   }
 
-  s = cmStrCat(lg.GetSourceDirectory(), "/.svn");
-  if (cmSystemTools::FileExists(s)) {
-    return "\"svn\": 1 ";
-  }
+  // check for the VCS files except when "forced" to "FILES" mode:
+  if (mode != "LIST") {
+    cmCMakePath startDir(lg.GetSourceDirectory(), cmCMakePath::auto_format);
+    // move the directories up to the root directory to see whether we are in
+    // a subdir of a svn, git, hg or fossil checkout
+    for (;;) {
+      std::string s = startDir.String() + "/.git";
+      if (cmSystemTools::FileExists(s)) {
+        return gitString;
+      }
 
-  s = cmStrCat(lg.GetSourceDirectory(), '/');
+      s = startDir.String() + "/.svn";
+      if (cmSystemTools::FileExists(s)) {
+        return svnString;
+      }
+
+      s = startDir.String() + "/.hg";
+      if (cmSystemTools::FileExists(s)) {
+        return hgString;
+      }
+      s = startDir.String() + "/.fslckout";
+      if (cmSystemTools::FileExists(s)) {
+        return fossilString;
+      }
+
+      if (!startDir.HasRelativePath()) { // have we reached the root dir ?
+        break;
+      }
+      startDir = startDir.GetParentPath();
+    }
+  }
 
   std::set<std::string> files;
   std::string tmp;
