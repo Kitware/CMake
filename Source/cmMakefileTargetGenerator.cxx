@@ -1167,10 +1167,11 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
 
     std::string launcher;
     {
-      cmValue val = this->LocalGenerator->GetRuleLauncher(
-        this->GeneratorTarget, "RULE_LAUNCH_COMPILE");
+      std::string val = this->LocalGenerator->GetRuleLauncher(
+        this->GeneratorTarget, "RULE_LAUNCH_COMPILE",
+        this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
       if (cmNonempty(val)) {
-        launcher = cmStrCat(*val, ' ');
+        launcher = cmStrCat(val, ' ');
       }
     }
 

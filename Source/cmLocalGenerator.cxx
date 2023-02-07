@@ -827,13 +827,18 @@ cmStateSnapshot cmLocalGenerator::GetStateSnapshot() const
   return this->Makefile->GetStateSnapshot();
 }
 
-cmValue cmLocalGenerator::GetRuleLauncher(cmGeneratorTarget* target,
-                                          const std::string& prop)
+std::string cmLocalGenerator::GetRuleLauncher(cmGeneratorTarget* target,
+                                              const std::string& prop,
+                                              const std::string& config)
 {
+  cmValue value = this->Makefile->GetProperty(prop);
   if (target) {
-    return target->GetProperty(prop);
+    value = target->GetProperty(prop);
   }
-  return this->Makefile->GetProperty(prop);
+  if (value) {
+    return cmGeneratorExpression::Evaluate(*value, this, config, target);
+  }
+  return "";
 }
 
 std::string cmLocalGenerator::ConvertToIncludeReference(
