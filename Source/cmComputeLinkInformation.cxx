@@ -289,28 +289,28 @@ cmComputeLinkInformation::cmComputeLinkInformation(
 
   // Get options needed to link libraries.
   if (cmValue flag = this->Makefile->GetDefinition(
-        "CMAKE_" + this->LinkLanguage + "_LINK_LIBRARY_FLAG")) {
+        cmStrCat("CMAKE_", this->LinkLanguage, "_LINK_LIBRARY_FLAG"))) {
     this->LibLinkFlag = *flag;
   } else {
     this->LibLinkFlag =
       this->Makefile->GetSafeDefinition("CMAKE_LINK_LIBRARY_FLAG");
   }
   if (cmValue flag = this->Makefile->GetDefinition(
-        "CMAKE_" + this->LinkLanguage + "_LINK_LIBRARY_FILE_FLAG")) {
+        cmStrCat("CMAKE_", this->LinkLanguage, "_LINK_LIBRARY_FILE_FLAG"))) {
     this->LibLinkFileFlag = *flag;
   } else {
     this->LibLinkFileFlag =
       this->Makefile->GetSafeDefinition("CMAKE_LINK_LIBRARY_FILE_FLAG");
   }
   if (cmValue suffix = this->Makefile->GetDefinition(
-        "CMAKE_" + this->LinkLanguage + "_LINK_LIBRARY_SUFFIX")) {
+        cmStrCat("CMAKE_", this->LinkLanguage, "_LINK_LIBRARY_SUFFIX"))) {
     this->LibLinkSuffix = *suffix;
   } else {
     this->LibLinkSuffix =
       this->Makefile->GetSafeDefinition("CMAKE_LINK_LIBRARY_SUFFIX");
   }
   if (cmValue flag = this->Makefile->GetDefinition(
-        "CMAKE_" + this->LinkLanguage + "_LINK_OBJECT_FILE_FLAG")) {
+        cmStrCat("CMAKE_", this->LinkLanguage, "_LINK_OBJECT_FILE_FLAG"))) {
     this->ObjLinkFileFlag = *flag;
   } else {
     this->ObjLinkFileFlag =
@@ -325,7 +325,7 @@ cmComputeLinkInformation::cmComputeLinkInformation(
                            : "SHARED_LIBRARY");
     std::string rtVar =
       cmStrCat("CMAKE_", tType, "_RUNTIME_", this->LinkLanguage, "_FLAG");
-    std::string rtSepVar = rtVar + "_SEP";
+    std::string rtSepVar = cmStrCat(rtVar, "_SEP");
     this->RuntimeFlag = this->Makefile->GetSafeDefinition(rtVar);
     this->RuntimeSep = this->Makefile->GetSafeDefinition(rtSepVar);
     this->RuntimeAlways = (this->Makefile->GetSafeDefinition(
@@ -1070,8 +1070,8 @@ void cmComputeLinkInformation::AddRuntimeLinkLibrary(std::string const& lang)
   if (runtimeLibrary.empty()) {
     return;
   }
-  if (cmValue runtimeLinkOptions = this->Makefile->GetDefinition(
-        "CMAKE_" + lang + "_RUNTIME_LIBRARY_LINK_OPTIONS_" + runtimeLibrary)) {
+  if (cmValue runtimeLinkOptions = this->Makefile->GetDefinition(cmStrCat(
+        "CMAKE_", lang, "_RUNTIME_LIBRARY_LINK_OPTIONS_", runtimeLibrary))) {
     std::vector<std::string> libsVec = cmExpandedList(*runtimeLinkOptions);
     for (std::string const& i : libsVec) {
       if (!cm::contains(this->ImplicitLinkLibs, i)) {
@@ -1399,10 +1399,9 @@ void cmComputeLinkInformation::ComputeItemParserInfo()
   reg = "^(";
   for (std::string const& p : this->LinkPrefixes) {
     reg += p;
-    reg += "|";
+    reg += '|';
   }
-  reg += ")";
-  reg += "([^/:]*)";
+  reg += ")([^/:]*)";
 
   // Create a regex to match any library name.
   std::string reg_any = cmStrCat(reg, libext);
@@ -1479,14 +1478,14 @@ std::string cmComputeLinkInformation::CreateExtensionRegex(
   }
 
   // Finish the list.
-  libext += ")";
+  libext += ')';
 
   // Add an optional OpenBSD-style version or major.minor.version component.
   if (this->OpenBSD || type == LinkShared) {
     libext += "(\\.[0-9]+)*";
   }
 
-  libext += "$";
+  libext += '$';
   return libext;
 }
 
@@ -1697,7 +1696,8 @@ bool cmComputeLinkInformation::CheckImplicitDirItem(LinkEntry const& entry)
     case cmPolicies::WARN:
       if (this->CMP0060Warn) {
         // Print the warning at most once for this item.
-        std::string const& wid = "CMP0060-WARNING-GIVEN-" + item.Value;
+        std::string const& wid =
+          cmStrCat("CMP0060-WARNING-GIVEN-", item.Value);
         if (!this->CMakeInstance->GetPropertyAsBool(wid)) {
           this->CMakeInstance->SetProperty(wid, "1");
           this->CMP0060WarnItems.insert(item.Value);
@@ -1859,8 +1859,8 @@ void cmComputeLinkInformation::AddFrameworkItem(LinkEntry const& entry)
                              : cmGlobalGenerator::FrameworkFormat::Extended);
   if (!fwDescriptor) {
     std::ostringstream e;
-    e << "Could not parse framework path \"" << item << "\" "
-      << "linked by target " << this->Target->GetName() << ".";
+    e << "Could not parse framework path \"" << item << "\" linked by target "
+      << this->Target->GetName() << '.';
     cmSystemTools::Error(e.str());
     return;
   }
@@ -1994,9 +1994,9 @@ void cmComputeLinkInformation::HandleBadFullItem(LinkEntry const& entry,
         std::ostringstream w;
         /* clang-format off */
         w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0008) << "\n"
-          << "Target \"" << this->Target->GetName() << "\" links to item\n"
-          << "  " << item << "\n"
-          << "which is a full-path but not a valid library file name.";
+             "Target \"" << this->Target->GetName() << "\" links to item\n"
+             "  " << item << "\n"
+             "which is a full-path but not a valid library file name.";
         /* clang-format on */
         this->CMakeInstance->IssueMessage(MessageType::AUTHOR_WARNING, w.str(),
                                           this->Target->GetBacktrace());
@@ -2014,9 +2014,9 @@ void cmComputeLinkInformation::HandleBadFullItem(LinkEntry const& entry,
       std::ostringstream e;
       /* clang-format off */
       e << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0008) << "\n"
-          << "Target \"" << this->Target->GetName() << "\" links to item\n"
-          << "  " << item << "\n"
-          << "which is a full-path but not a valid library file name.";
+             "Target \"" << this->Target->GetName() << "\" links to item\n"
+             "  " << item << "\n"
+             "which is a full-path but not a valid library file name.";
       /* clang-format on */
       this->CMakeInstance->IssueMessage(MessageType::FATAL_ERROR, e.str(),
                                         this->Target->GetBacktrace());
@@ -2055,7 +2055,7 @@ bool cmComputeLinkInformation::FinishLinkerSearchDirectories()
     case cmPolicies::REQUIRED_IF_USED:
     case cmPolicies::REQUIRED_ALWAYS: {
       std::ostringstream e;
-      e << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0003) << "\n";
+      e << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0003) << '\n';
       this->PrintLinkPolicyDiagnosis(e);
       this->CMakeInstance->IssueMessage(MessageType::FATAL_ERROR, e.str(),
                                         this->Target->GetBacktrace());
@@ -2075,18 +2075,17 @@ void cmComputeLinkInformation::PrintLinkPolicyDiagnosis(std::ostream& os)
   // Tell the user what to do.
   /* clang-format off */
   os << "Policy CMP0003 should be set before this line.  "
-     << "Add code such as\n"
-     << "  if(COMMAND cmake_policy)\n"
-     << "    cmake_policy(SET CMP0003 NEW)\n"
-     << "  endif(COMMAND cmake_policy)\n"
-     << "as early as possible but after the most recent call to "
-     << "cmake_minimum_required or cmake_policy(VERSION).  ";
+        "Add code such as\n"
+        "  if(COMMAND cmake_policy)\n"
+        "    cmake_policy(SET CMP0003 NEW)\n"
+        "  endif(COMMAND cmake_policy)\n"
+        "as early as possible but after the most recent call to "
+        "cmake_minimum_required or cmake_policy(VERSION).  ";
   /* clang-format on */
 
   // List the items that might need the old-style paths.
   os << "This warning appears because target \"" << this->Target->GetName()
-     << "\" "
-     << "links to some libraries for which the linker must search:\n";
+     << "\" links to some libraries for which the linker must search:\n";
   {
     // Format the list of unknown items to be as short as possible while
     // still fitting in the allowed width (a true solution would be the
@@ -2099,7 +2098,7 @@ void cmComputeLinkInformation::PrintLinkPolicyDiagnosis(std::ostream& os)
       // output the current line and reset it.  Note that the separator
       // is either " " or ", " which is always 2 characters.
       if (!line.empty() && (line.size() + i.size() + 2) > max_size) {
-        os << line << "\n";
+        os << line << '\n';
         sep = "  ";
         line.clear();
       }
@@ -2109,7 +2108,7 @@ void cmComputeLinkInformation::PrintLinkPolicyDiagnosis(std::ostream& os)
       sep = ", ";
     }
     if (!line.empty()) {
-      os << line << "\n";
+      os << line << '\n';
     }
   }
 
@@ -2118,17 +2117,17 @@ void cmComputeLinkInformation::PrintLinkPolicyDiagnosis(std::ostream& os)
   std::set<std::string> emitted;
   for (std::string const& i : this->OldLinkDirItems) {
     if (emitted.insert(cmSystemTools::GetFilenamePath(i)).second) {
-      os << "  " << i << "\n";
+      os << "  " << i << '\n';
     }
   }
 
   // Explain.
   os << "CMake is adding directories in the second list to the linker "
-     << "search path in case they are needed to find libraries from the "
-     << "first list (for backwards compatibility with CMake 2.4).  "
-     << "Set policy CMP0003 to OLD or NEW to enable or disable this "
-     << "behavior explicitly.  "
-     << "Run \"cmake --help-policy CMP0003\" for more information.";
+        "search path in case they are needed to find libraries from the "
+        "first list (for backwards compatibility with CMake 2.4).  "
+        "Set policy CMP0003 to OLD or NEW to enable or disable this "
+        "behavior explicitly.  "
+        "Run \"cmake --help-policy CMP0003\" for more information.";
 }
 
 void cmComputeLinkInformation::LoadImplicitLinkInfo()
@@ -2144,7 +2143,7 @@ void cmComputeLinkInformation::LoadImplicitLinkInfo()
   if (cmValue libraryArch =
         this->Makefile->GetDefinition("CMAKE_LIBRARY_ARCHITECTURE")) {
     for (std::string const& i : implicitDirVec) {
-      this->ImplicitLinkDirs.insert(i + "/" + *libraryArch);
+      this->ImplicitLinkDirs.insert(cmStrCat(i, '/', *libraryArch));
     }
   }
 
@@ -2400,10 +2399,11 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
     cmGeneratorTarget::LinkClosure const* lc =
       this->Target->GetLinkClosure(this->Config);
     for (std::string const& li : lc->Languages) {
-      std::string useVar =
-        "CMAKE_" + li + "_USE_IMPLICIT_LINK_DIRECTORIES_IN_RUNTIME_PATH";
+      std::string useVar = cmStrCat(
+        "CMAKE_", li, "_USE_IMPLICIT_LINK_DIRECTORIES_IN_RUNTIME_PATH");
       if (this->Makefile->IsOn(useVar)) {
-        std::string dirVar = "CMAKE_" + li + "_IMPLICIT_LINK_DIRECTORIES";
+        std::string dirVar =
+          cmStrCat("CMAKE_", li, "_IMPLICIT_LINK_DIRECTORIES");
         if (cmValue dirs = this->Makefile->GetDefinition(dirVar)) {
           cmCLI_ExpandListUnique(*dirs, runtimeDirs, emitted);
         }
