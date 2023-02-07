@@ -426,6 +426,7 @@ add_library(
   cmStateTypes.h
   cmStringAlgorithms.cxx
   cmStringAlgorithms.h
+  cmSyntheticTargetCache.h
   cmSystemTools.cxx
   cmSystemTools.h
   cmTarget.cxx
