@@ -20,22 +20,40 @@ subsequently be run.
 
   Check that the source supplied in ``<code>`` can be compiled as a source
   file for the requested language, linked as an executable and then run.
-  The ``<code>`` must contain at least a ``main()`` function. If the ``<code>``
-  could be built and run successfully, the internal cache variable specified by
-  ``<resultVar>`` will be set to 1, otherwise it will be set to an value that
-  evaluates to boolean false (e.g. an empty string or an error message).
+  If the ``<code>`` could be built and run successfully, the internal cache variable
+  specified by ``<resultVar>`` will be set to 1, otherwise it will be set to
+  a value that evaluates to boolean false (e.g. an empty string or an error
+  message).
 
   By default, the test source file will be given a file extension that matches
   the requested language. The ``SRC_EXT`` option can be used to override this
   with ``.<extension>`` instead.
 
+  The ``<code>`` must contain a valid main program. For example:
+
+  .. code-block:: cmake
+
+    check_source_runs(C
+    "#include <stdlib.h>
+    #include <stdnoreturn.h>
+    noreturn void f(){ exit(0); }
+    int main(void) { f(); return 1; }"
+    HAVE_NORETURN)
+
+    check_source_runs(Fortran
+    "program test
+    real :: x[*]
+    call co_sum(x)
+    end program"
+    HAVE_COARRAY)
+
   The underlying check is performed by the :command:`try_run` command. The
   compile and link commands can be influenced by setting any of the following
-  variables prior to calling ``check_objc_source_runs()``:
+  variables prior to calling ``check_source_runs()``:
 
   ``CMAKE_REQUIRED_FLAGS``
     Additional flags to pass to the compiler. Note that the contents of
-    :variable:`CMAKE_OBJC_FLAGS <CMAKE_<LANG>_FLAGS>` and its associated
+    :variable:`CMAKE_<LANG>_FLAGS <CMAKE_<LANG>_FLAGS>` and its associated
     configuration-specific variable are automatically added to the compiler
     command before the contents of ``CMAKE_REQUIRED_FLAGS``.
 
