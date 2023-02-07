@@ -1122,7 +1122,7 @@ if(CUDAToolkit_FOUND)
   _CUDAToolkit_find_and_add_import_lib(nvrtc_builtins DEPS cuda_driver)
   _CUDAToolkit_find_and_add_import_lib(nvrtc DEPS nvrtc_builtins nvJitLink)
   if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 11.5.0)
-    _CUDAToolkit_find_and_add_import_lib(nvrtc_builtins_static DEPS cuda_driver)
+    _CUDAToolkit_find_and_add_import_lib(nvrtc_builtins_static ALT nvrtc-builtins_static DEPS cuda_driver)
     _CUDAToolkit_find_and_add_import_lib(nvrtc_static DEPS nvrtc_builtins_static nvptxcompiler_static nvJitLink_static)
   endif()
 
