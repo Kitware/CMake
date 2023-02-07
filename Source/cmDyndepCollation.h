@@ -53,4 +53,7 @@ struct cmDyndepCollation
                                   cmDyndepMetadataCallbacks const& cb);
   static bool IsObjectPrivate(std::string const& object,
                               cmCxxModuleExportInfo const& export_info);
+
+  static bool IsBmiOnly(cmCxxModuleExportInfo const& exportInfo,
+                        std::string const& object);
 };

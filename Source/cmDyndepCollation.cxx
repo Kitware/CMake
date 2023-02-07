@@ -666,3 +666,16 @@ bool cmDyndepCollation::IsObjectPrivate(
   auto const& file_set = fileset_info_itr->second;
   return !cmFileSetVisibilityIsForInterface(file_set.Visibility);
 }
+
+bool cmDyndepCollation::IsBmiOnly(cmCxxModuleExportInfo const& exportInfo,
+                                  std::string const& object)
+{
+#ifdef _WIN32
+  auto object_path = object;
+  cmSystemTools::ConvertToUnixSlashes(object_path);
+#else
+  auto const& object_path = object;
+#endif
+  auto fs = exportInfo.ObjectToFileSet.find(object_path);
+  return (fs != exportInfo.ObjectToFileSet.end()) && fs->second.BmiOnly;
+}
