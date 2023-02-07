@@ -201,7 +201,6 @@ void cmGlobalVisualStudioGenerator::AddExtraIDETargets()
       // Use no actual command lines so that the target itself is not
       // considered always out of date.
       auto cc = cm::make_unique<cmCustomCommand>();
-      cc->SetCMP0116Status(cmPolicies::NEW);
       cc->SetEscapeOldStyle(false);
       cc->SetComment("Build all projects");
       cmTarget* allBuild =

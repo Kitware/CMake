@@ -22,7 +22,6 @@
 #include "cmLocalGhsMultiGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
-#include "cmPolicies.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
@@ -717,7 +716,6 @@ bool cmGlobalGhsMultiGenerator::AddCheckTarget()
     cc->SetDepends(listFiles);
     cc->SetCommandLines(commandLines);
     cc->SetComment("Checking Build System");
-    cc->SetCMP0116Status(cmPolicies::NEW);
     cc->SetEscapeOldStyle(false);
     cc->SetStdPipesUTF8(true);
 
@@ -747,7 +745,6 @@ void cmGlobalGhsMultiGenerator::AddAllTarget()
       // Use no actual command lines so that the target itself is not
       // considered always out of date.
       auto cc = cm::make_unique<cmCustomCommand>();
-      cc->SetCMP0116Status(cmPolicies::NEW);
       cc->SetEscapeOldStyle(false);
       cc->SetComment("Build all projects");
       cmTarget* allBuild = gen[0]->AddUtilityCommand(this->GetAllTargetName(),

@@ -141,7 +141,6 @@ void cmLocalVisualStudio7Generator::FixGlobalTargets()
       cc->SetOutputs(force);
       cc->SetCommandLines(force_commands);
       cc->SetComment(" ");
-      cc->SetCMP0116Status(cmPolicies::NEW);
       if (cmSourceFile* file =
             this->AddCustomCommandToOutput(std::move(cc), true)) {
         l->AddSource(file->ResolveFullPath());
@@ -269,7 +268,6 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
   cc->SetDepends(listFiles);
   cc->SetCommandLines(commandLines);
   cc->SetComment(comment.c_str());
-  cc->SetCMP0116Status(cmPolicies::NEW);
   cc->SetEscapeOldStyle(false);
   cc->SetStdPipesUTF8(true);
   this->AddCustomCommandToOutput(std::move(cc), true);

@@ -1117,7 +1117,7 @@ cmTarget* cmMakefile::AddCustomCommandToTarget(
   // Always create the byproduct sources and mark them generated.
   this->CreateGeneratedOutputs(byproducts);
 
-  cc->SetCMP0116Status(this->GetPolicyStatus(cmPolicies::CMP0116));
+  cc->RecordPolicyValues(this->GetStateSnapshot());
 
   // Dispatch command creation to allow generator expressions in outputs.
   this->AddGeneratorAction(
@@ -1156,7 +1156,7 @@ void cmMakefile::AddCustomCommandToOutput(
   this->CreateGeneratedOutputs(outputs);
   this->CreateGeneratedOutputs(byproducts);
 
-  cc->SetCMP0116Status(this->GetPolicyStatus(cmPolicies::CMP0116));
+  cc->RecordPolicyValues(this->GetStateSnapshot());
 
   // Dispatch command creation to allow generator expressions in outputs.
   this->AddGeneratorAction(
@@ -1274,7 +1274,7 @@ cmTarget* cmMakefile::AddUtilityCommand(const std::string& utilityName,
   // Always create the byproduct sources and mark them generated.
   this->CreateGeneratedOutputs(byproducts);
 
-  cc->SetCMP0116Status(this->GetPolicyStatus(cmPolicies::CMP0116));
+  cc->RecordPolicyValues(this->GetStateSnapshot());
 
   // Dispatch command creation to allow generator expressions in outputs.
   this->AddGeneratorAction(

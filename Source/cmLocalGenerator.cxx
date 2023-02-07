@@ -2841,7 +2841,6 @@ void cmLocalGenerator::CopyPchCompilePdb(
   auto cc = cm::make_unique<cmCustomCommand>();
   cc->SetCommandLines(commandLines);
   cc->SetComment(no_message);
-  cc->SetCMP0116Status(cmPolicies::NEW);
   cc->SetStdPipesUTF8(true);
 
   if (this->GetGlobalGenerator()->IsVisualStudio()) {
