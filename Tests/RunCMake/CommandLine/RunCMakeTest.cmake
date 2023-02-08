@@ -1100,6 +1100,13 @@ set(RunCMake_TEST_OPTIONS --profiling-format=google-trace --profiling-output=${P
 run_cmake(ProfilingTest)
 unset(RunCMake_TEST_OPTIONS)
 
+if(RunCMake_GENERATOR MATCHES "^Visual Studio 9 2008")
+  run_cmake_with_options(DeprecateVS9-WARN-ON -DCMAKE_WARN_VS9=ON)
+  unset(ENV{CMAKE_WARN_VS9})
+  run_cmake(DeprecateVS9-WARN-ON)
+  run_cmake_with_options(DeprecateVS9-WARN-OFF -DCMAKE_WARN_VS9=OFF)
+endif()
+
 if(RunCMake_GENERATOR MATCHES "^Visual Studio 11 2012")
   run_cmake_with_options(DeprecateVS11-WARN-ON -DCMAKE_WARN_VS11=ON)
   unset(ENV{CMAKE_WARN_VS11})
