@@ -1,26 +1,67 @@
-FROM fedora:37 AS rvm-build
-MAINTAINER Ben Boeckel <ben.boeckel@kitware.com>
+# syntax=docker/dockerfile:1
 
-COPY install_rvm.sh /root/install_rvm.sh
-RUN sh /root/install_rvm.sh
+ARG BASE_IMAGE=fedora:37
 
-FROM fedora:37 AS clang-tidy-headers
-MAINTAINER Kyle Edwards <kyle.edwards@kitware.com>
+FROM ${BASE_IMAGE} AS dnf-cache
+# Populate DNF cache w/ the fresh metadata and prefetch packages.
+RUN --mount=type=bind,source=clang_tidy_headers_packages.lst,target=/root/clang_tidy_headers_packages.lst \
+    --mount=type=bind,source=deps_packages.lst,target=/root/deps_packages.lst \
+    --mount=type=bind,source=iwyu_packages.lst,target=/root/iwyu_packages.lst \
+    --mount=type=bind,source=rvm_packages.lst,target=/root/rvm_packages.lst \
+    --mount=type=tmpfs,target=/var/log \
+    --mount=type=tmpfs,target=/tmp \
+    dnf install \
+        --setopt=install_weak_deps=False \
+        --setopt=fastestmirror=True \
+        --setopt=max_parallel_downloads=10 \
+        --downloadonly \
+        -y \
+        $(grep -h '^[^#]\+$' /root/*.lst)
 
-COPY install_clang_tidy_headers.sh /root/install_clang_tidy_headers.sh
-RUN sh /root/install_clang_tidy_headers.sh
 
-FROM fedora:37 AS iwyu-build
-MAINTAINER Kyle Edwards <kyle.edwards@kitware.com>
+FROM ${BASE_IMAGE} AS rvm-build
+LABEL maintainer="Ben Boeckel <ben.boeckel@kitware.com>"
 
-COPY install_iwyu.sh /root/install_iwyu.sh
-RUN sh /root/install_iwyu.sh
+RUN --mount=type=bind,source=install_rvm.sh,target=/root/install_rvm.sh \
+    --mount=type=bind,source=rvm_packages.lst,target=/root/rvm_packages.lst \
+    --mount=type=cache,from=dnf-cache,source=/var/cache/dnf,target=/var/cache/dnf,sharing=private \
+    --mount=type=tmpfs,target=/var/log \
+    --mount=type=tmpfs,target=/tmp \
+    sh /root/install_rvm.sh
 
-FROM fedora:37
-MAINTAINER Ben Boeckel <ben.boeckel@kitware.com>
 
-COPY install_deps.sh /root/install_deps.sh
-RUN sh /root/install_deps.sh
+FROM ${BASE_IMAGE} AS clang-tidy-headers
+LABEL maintainer="Kyle Edwards <kyle.edwards@kitware.com>"
+
+RUN --mount=type=bind,source=install_clang_tidy_headers.sh,target=/root/install_clang_tidy_headers.sh \
+    --mount=type=bind,source=clang_tidy_headers_packages.lst,target=/root/clang_tidy_headers_packages.lst \
+    --mount=type=cache,from=dnf-cache,source=/var/cache/dnf,target=/var/cache/dnf,sharing=private \
+    --mount=type=tmpfs,target=/var/log \
+    --mount=type=tmpfs,target=/tmp \
+    sh /root/install_clang_tidy_headers.sh
+
+
+FROM ${BASE_IMAGE} AS iwyu-build
+LABEL maintainer="Kyle Edwards <kyle.edwards@kitware.com>"
+
+RUN --mount=type=bind,source=install_iwyu.sh,target=/root/install_iwyu.sh \
+    --mount=type=bind,source=iwyu_packages.lst,target=/root/iwyu_packages.lst \
+    --mount=type=cache,from=dnf-cache,source=/var/cache/dnf,target=/var/cache/dnf,sharing=private \
+    --mount=type=tmpfs,target=/var/log \
+    --mount=type=tmpfs,target=/tmp \
+    sh /root/install_iwyu.sh
+
+
+FROM ${BASE_IMAGE}
+LABEL maintainer="Ben Boeckel <ben.boeckel@kitware.com>"
+
+RUN --mount=type=bind,source=install_deps.sh,target=/root/install_deps.sh \
+    --mount=type=bind,source=deps_packages.lst,target=/root/deps_packages.lst \
+    --mount=type=cache,from=dnf-cache,source=/var/cache/dnf,target=/var/cache/dnf,sharing=private \
+    --mount=type=cache,target=/var/cache/pip \
+    --mount=type=tmpfs,target=/var/log \
+    --mount=type=tmpfs,target=/tmp \
+    sh /root/install_deps.sh
 
 RUN --mount=type=bind,from=rvm-build,source=/root,target=/root \
     tar -C /usr/local -xf /root/rvm.tar

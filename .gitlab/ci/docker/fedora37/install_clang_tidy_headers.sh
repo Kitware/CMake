@@ -4,11 +4,13 @@ set -e
 
 # Packages for building the clang-tidy plugin.
 # TODO: Upstream this as a proper Fedora package.
-dnf install --setopt=install_weak_deps=False -y \
-    'dnf-command(download)' \
-    rpm-build \
-    python3-devel \
-    clang-tools-extra
+dnf install \
+    --setopt=install_weak_deps=False \
+    --setopt=fastestmirror=True \
+    --setopt=max_parallel_downloads=10 \
+    -y \
+    $(grep '^[^#]\+$' /root/clang_tidy_headers_packages.lst)
+
 clang_source_rpm=$(rpm -q --queryformat '%{SOURCERPM}' clang-tools-extra)
 clang_version=$(rpm -q --queryformat '%{VERSION}' clang-tools-extra)
 dnf download --source -y clang

@@ -1,0 +1,7 @@
+clang-devel
+llvm-devel
+zlib-devel
+g++
+cmake
+ninja-build
+git
