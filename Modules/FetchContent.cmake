@@ -762,7 +762,7 @@ frameworks are available to the main build:
   FetchContent_Declare(
     Catch2
     GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-    GIT_TAG        de6fe184a9ac1a06895cdd1c9b437f0a0bdf14ad # v2.13.4
+    GIT_TAG        605a34765aa5d5ecbf476b4598a862ada971b0cc # v3.0.1
   )
 
   # After the following call, the CMake targets defined by googletest and
@@ -796,7 +796,7 @@ to the declared details and leaving
   FetchContent_Declare(
     Catch2
     GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-    GIT_TAG        de6fe184a9ac1a06895cdd1c9b437f0a0bdf14ad # v2.13.4
+    GIT_TAG        605a34765aa5d5ecbf476b4598a862ada971b0cc # v3.0.1
     FIND_PACKAGE_ARGS
   )
 
@@ -831,7 +831,7 @@ details:
   FetchContent_Declare(
     Catch2
     GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-    GIT_TAG        de6fe184a9ac1a06895cdd1c9b437f0a0bdf14ad # v2.13.4
+    GIT_TAG        605a34765aa5d5ecbf476b4598a862ada971b0cc # v3.0.1
     OVERRIDE_FIND_PACKAGE
   )
 
