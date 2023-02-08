@@ -1673,8 +1673,8 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
   **On non-DLL platforms, this expression always evaluates to an empty string**.
 
   This generator expression can be used to copy all of the DLLs that a target
-  depends on into its output directory in a ``POST_BUILD`` custom command. For
-  example:
+  depends on into its output directory in a ``POST_BUILD`` custom command using
+  the :option:`cmake -E copy -t <cmake-E copy>` command. For example:
 
   .. code-block:: cmake
 
@@ -1683,7 +1683,7 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
     add_executable(exe main.c)
     target_link_libraries(exe PRIVATE foo::foo foo::bar)
     add_custom_command(TARGET exe POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:exe> $<TARGET_FILE_DIR:exe>
+      COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:exe> $<TARGET_RUNTIME_DLLS:exe>
       COMMAND_EXPAND_LISTS
     )
 
