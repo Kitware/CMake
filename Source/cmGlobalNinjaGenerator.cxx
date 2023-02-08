@@ -318,12 +318,6 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
     }
   }
 
-  if (build.Variables.count("dyndep") > 0) {
-    // The ninja 'cleandead' operation does not account for outputs
-    // discovered by 'dyndep' bindings.  Avoid removing them.
-    this->DisableCleandead = true;
-  }
-
   os << buildStr << arguments << assignments << "\n";
 }
 
@@ -591,7 +585,6 @@ void cmGlobalNinjaGenerator::Generate()
   this->InitOutputPathPrefix();
   this->TargetAll = this->NinjaOutputPath("all");
   this->CMakeCacheFile = this->NinjaOutputPath("CMakeCache.txt");
-  this->DisableCleandead = false;
   this->DiagnosedCxxModuleNinjaSupport = false;
   this->ClangTidyExportFixesDirs.clear();
   this->ClangTidyExportFixesFiles.clear();

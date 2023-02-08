@@ -596,7 +596,6 @@ private:
   std::string OutputPathPrefix;
   std::string TargetAll;
   std::string CMakeCacheFile;
-  bool DisableCleandead = false;
 
   struct ByConfig
   {
