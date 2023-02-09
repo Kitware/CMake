@@ -12,17 +12,23 @@ cmake-configure-log(7)
 Introduction
 ============
 
-CMake writes a running log, known as the configure log,
-of certain events that occur during the "configure" step.
-The log file is located at::
-
-  ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeConfigureLog.yaml
-
+CMake writes a running log, known as the *configure log*,
+of certain events that occur during the Configure step.
 The configure log does *not* contain a log of all output, errors,
 or messages printed while configuring a project.  It is a log of
 detailed information about specific events, such as toolchain inspection
 by :command:`try_compile`, meant for use in debugging the configuration
 of a build tree.
+
+For human use, this version of CMake writes the configure log to the file::
+
+  ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeConfigureLog.yaml
+
+However, the *location and name of the log file may change* in future
+versions of CMake.  Tools that read the configure log should get its
+location using a :ref:`configureLog <file-api configureLog>` query to
+the :manual:`cmake-file-api(7)`.
+See the `Log Versioning`_ section below for details.
 
 Log Structure
 =============
