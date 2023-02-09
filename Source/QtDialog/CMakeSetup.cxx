@@ -34,7 +34,7 @@ const cmDocumentationEntry cmDocumentationUsage = {
   "  cmake-gui [options] <path-to-source>\n"
   "  cmake-gui [options] <path-to-existing-build>\n"
   "  cmake-gui [options] -S <path-to-source> -B <path-to-build>\n"
-  "  cmake-gui [options] --browse-manual"
+  "  cmake-gui [options] --browse-manual [<filename>]"
 };
 
 const cmDocumentationEntry cmDocumentationOptions[3] = {
@@ -62,7 +62,7 @@ Q_IMPORT_PLUGIN(QWindowsVistaStylePlugin);
 
 int CMakeGUIExec(CMakeSetupDialog* window);
 void SetupDefaultQSettings();
-void OpenReferenceManual();
+void OpenReferenceManual(const QString& filename);
 
 int main(int argc, char** argv)
 {
@@ -199,7 +199,12 @@ int main(int argc, char** argv)
       }
       presetName = preset.toStdString();
     } else if (arg == "--browse-manual") {
-      OpenReferenceManual();
+      ++i;
+      if (i >= args.size()) {
+        OpenReferenceManual("index.html");
+      } else {
+        OpenReferenceManual(args[i]);
+      }
       return 0;
     }
   }
