@@ -631,7 +631,7 @@ endif()
 # selected components.  Initialize with required components.
 set(KWSYS_CLASSES)
 set(KWSYS_H_FILES Configure)
-set(KWSYS_HXX_FILES Configure String)
+set(KWSYS_HXX_FILES Configure)
 
 # Add selected C++ classes.
 set(cppclasses
