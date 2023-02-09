@@ -370,7 +370,8 @@ enabled.
 1. .. versionadded:: 3.12
     Search paths specified in the :variable:`<PackageName>_ROOT` CMake
     variable and the :envvar:`<PackageName>_ROOT` environment variable,
-    where ``<PackageName>`` is the package to be found.
+    where ``<PackageName>`` is the package to be found
+    (the case-preserved first argument to ``find_package``).
     The package root variables are maintained as a stack so if
     called from within a find module, root paths from the parent's find
     module will also be searched after paths for the current package.
