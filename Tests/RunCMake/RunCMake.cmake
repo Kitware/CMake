@@ -190,7 +190,7 @@ function(run_cmake test)
     string(REGEX REPLACE [[
 ^CMake Deprecation Warning at [^
 ]*CMakeLists.txt:1 \(cmake_minimum_required\):
-  Compatibility with CMake < 2\.8\.12 will be removed from a future version of
+  Compatibility with CMake < 3\.5 will be removed from a future version of
   CMake.
 
   Update the VERSION argument <min> value or use a \.\.\.<max> suffix to tell
