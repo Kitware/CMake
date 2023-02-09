@@ -40,10 +40,12 @@ set(ENV{HOME} \"${TEST_HOME}\")
 endif()
 
 # Suppress generator deprecation warnings in test suite.
-if(CMAKE_GENERATOR MATCHES "^Visual Studio 11 2012")
-  set(TEST_WARN_VS11_CODE "set(ENV{CMAKE_WARN_VS11} OFF)")
+if(CMAKE_GENERATOR MATCHES "^Visual Studio 9 2008")
+  set(TEST_WARN_VS_CODE "set(ENV{CMAKE_WARN_VS9} OFF)")
+elseif(CMAKE_GENERATOR MATCHES "^Visual Studio 11 2012")
+  set(TEST_WARN_VS_CODE "set(ENV{CMAKE_WARN_VS11} OFF)")
 else()
-  set(TEST_WARN_VS11_CODE "")
+  set(TEST_WARN_VS_CODE "")
 endif()
 
 # 3.9 or later provides a definitive answer to whether we are multi-config

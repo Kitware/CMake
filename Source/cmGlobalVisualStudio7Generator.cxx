@@ -309,6 +309,26 @@ void cmGlobalVisualStudio7Generator::Generate()
                                 GetSLNFile(this->LocalGenerators[0].get()));
   }
 
+  if (this->Version == VSVersion::VS9 &&
+      !this->CMakeInstance->GetIsInTryCompile()) {
+    std::string cmakeWarnVS9;
+    if (cmValue cached = this->CMakeInstance->GetState()->GetCacheEntryValue(
+          "CMAKE_WARN_VS9")) {
+      this->CMakeInstance->MarkCliAsUsed("CMAKE_WARN_VS9");
+      cmakeWarnVS9 = *cached;
+    } else {
+      cmSystemTools::GetEnv("CMAKE_WARN_VS9", cmakeWarnVS9);
+    }
+    if (cmakeWarnVS9.empty() || !cmIsOff(cmakeWarnVS9)) {
+      this->CMakeInstance->IssueMessage(
+        MessageType::WARNING,
+        "The \"Visual Studio 9 2008\" generator is deprecated "
+        "and will be removed in a future version of CMake."
+        "\n"
+        "Add CMAKE_WARN_VS9=OFF to the cache to disable this warning.");
+    }
+  }
+
   if (this->Version == VSVersion::VS11 &&
       !this->CMakeInstance->GetIsInTryCompile()) {
     std::string cmakeWarnVS11;

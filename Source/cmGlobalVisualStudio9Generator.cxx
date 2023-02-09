@@ -64,7 +64,7 @@ public:
   cmDocumentationEntry GetDocumentation() const override
   {
     return { std::string(vs9generatorName) + " [arch]",
-             "Generates Visual Studio 2008 project files.  "
+             "Deprecated.  Generates Visual Studio 2008 project files.  "
              "Optional [arch] can be \"Win64\" or \"IA64\"." };
   }
 
