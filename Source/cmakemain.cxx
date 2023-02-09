@@ -303,6 +303,13 @@ int do_cmake(int ac, char const* const* av)
   for (decltype(inputArgs.size()) i = 0; i < inputArgs.size(); ++i) {
     std::string const& arg = inputArgs[i];
     bool matched = false;
+
+    // Only in script mode do we stop parsing instead
+    // of preferring the last mode flag provided
+    if (arg == "--" && workingMode == cmake::SCRIPT_MODE) {
+      parsedArgs = inputArgs;
+      break;
+    }
     for (auto const& m : arguments) {
       if (m.matches(arg)) {
         matched = true;
@@ -310,11 +317,6 @@ int do_cmake(int ac, char const* const* av)
           break;
         }
         return 1; // failed to parse
-      }
-      // Only in script mode do we stop parsing instead
-      // of preferring the last mode flag provided
-      if (arg == "--" && workingMode == cmake::SCRIPT_MODE) {
-        break;
       }
     }
     if (!matched) {
