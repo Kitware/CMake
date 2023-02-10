@@ -569,7 +569,6 @@ KWSYS_FILES="\
   RegularExpression.hxx \
   Status.hxx \
   String.h \
-  String.hxx \
   System.h \
   SystemTools.hxx \
   Terminal.h"
