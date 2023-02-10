@@ -1536,7 +1536,9 @@ ExternalProject_Add_Step(${contentName}-populate copyfile
     if(CMAKE_GENERATOR_TOOLSET)
       list(APPEND subCMakeOpts "-T${CMAKE_GENERATOR_TOOLSET}")
     endif()
-
+    if(CMAKE_GENERATOR_INSTANCE)
+      list(APPEND subCMakeOpts "-DCMAKE_GENERATOR_INSTANCE:INTERNAL=${CMAKE_GENERATOR_INSTANCE}")
+    endif()
     if(CMAKE_MAKE_PROGRAM)
       list(APPEND subCMakeOpts "-DCMAKE_MAKE_PROGRAM:FILEPATH=${CMAKE_MAKE_PROGRAM}")
     endif()
