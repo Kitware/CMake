@@ -299,7 +299,7 @@ condition. The resulting full code looks like the following:
   :name: CMakeLists.txt-target_compile_options-genex
   :language: cmake
   :start-after: set(msvc_cxx "$<COMPILE_LANG_AND_ID:CXX,MSVC>")
-  :end-before: # should we use our own math functions
+  :end-before: # configure a header file to pass some of the CMake settings
 
 .. raw:: html
 

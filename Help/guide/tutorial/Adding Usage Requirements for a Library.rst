@@ -100,7 +100,7 @@ follows:
   :name: MathFunctions/CMakeLists.txt-target_include_directories-INTERFACE
   :language: cmake
   :start-after: # to find MathFunctions.h
-  :end-before: # TODO 3: Link to
+  :end-before: option
 
 .. raw:: html
 
@@ -119,7 +119,7 @@ safely remove our uses of the ``EXTRA_INCLUDES`` variable from the top-level
   :name: CMakeLists.txt-remove-EXTRA_INCLUDES
   :language: cmake
   :start-after: # add the MathFunctions library
-  :end-before: # add the executable
+  :end-before: # TODO 2: Link to tutorial_compiler_flags
 
 .. raw:: html
 

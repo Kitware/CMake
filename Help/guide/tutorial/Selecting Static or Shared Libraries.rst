@@ -10,49 +10,22 @@ To accomplish this we need to add :variable:`BUILD_SHARED_LIBS` to the
 top-level ``CMakeLists.txt``. We use the :command:`option` command as it allows
 users to optionally select if the value should be ``ON`` or ``OFF``.
 
-Next we are going to refactor ``MathFunctions`` to become a real library that
-encapsulates using ``mysqrt`` or ``sqrt``, instead of requiring the calling
-code to do this logic. This will also mean that ``USE_MYMATH`` will not control
-building ``MathFunctions``, but instead will control the behavior of this
-library.
-
-The first step is to update the starting section of the top-level
-``CMakeLists.txt`` to look like:
-
 .. literalinclude:: Step11/CMakeLists.txt
   :caption: CMakeLists.txt
   :name: CMakeLists.txt-option-BUILD_SHARED_LIBS
   :language: cmake
-  :end-before: # add the binary tree
+  :start-after: set(CMAKE_RUNTIME_OUTPUT_DIRECTORY
+  :end-before: # configure a header file to pass the version number only
 
-Now that we have made ``MathFunctions`` always be used, we will need to update
-the logic of that library. So, in ``MathFunctions/CMakeLists.txt`` we need to
-create a SqrtLibrary that will conditionally be built and installed when
-``USE_MYMATH`` is enabled. Now, since this is a tutorial, we are going to
-explicitly require that SqrtLibrary is built statically.
+Next, we need to specify output directories for our static and shared
+libraries.
 
-The end result is that ``MathFunctions/CMakeLists.txt`` should look like:
-
-.. literalinclude:: Step11/MathFunctions/CMakeLists.txt
-  :caption: MathFunctions/CMakeLists.txt
-  :name: MathFunctions/CMakeLists.txt-add_library-STATIC
+.. literalinclude:: Step11/CMakeLists.txt
+  :caption: CMakeLists.txt
+  :name: CMakeLists.txt-cmake-output-directories
   :language: cmake
-  :lines: 1-36,42-
-
-Next, update ``MathFunctions/mysqrt.cxx`` to use the ``mathfunctions`` and
-``detail`` namespaces:
-
-.. literalinclude:: Step11/MathFunctions/mysqrt.cxx
-  :caption: MathFunctions/mysqrt.cxx
-  :name: MathFunctions/mysqrt.cxx-namespace
-  :language: c++
-
-We also need to make some changes in ``tutorial.cxx``, so that it no longer
-uses ``USE_MYMATH``:
-
-#. Always include ``MathFunctions.h``
-#. Always use ``mathfunctions::sqrt``
-#. Don't include ``cmath``
+  :start-after: # we don't need to tinker with the path to run the executable
+  :end-before: # configure a header file to pass the version number only
 
 Finally, update ``MathFunctions/MathFunctions.h`` to use dll export defines:
 
