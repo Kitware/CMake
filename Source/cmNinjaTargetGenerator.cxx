@@ -1210,7 +1210,6 @@ cmNinjaBuild GetScanBuildStatement(const std::string& ruleName,
                                    const std::string& ppFileName,
                                    bool compilePP, bool compilePPWithDefines,
                                    cmNinjaBuild& objBuild, cmNinjaVars& vars,
-                                   std::string const& modmapFormat,
                                    const std::string& objectFileName,
                                    cmLocalGenerator* lg)
 {
@@ -1277,15 +1276,6 @@ cmNinjaBuild GetScanBuildStatement(const std::string& ruleName,
     // The actual compilation does not need a depfile because it
     // depends on the already-preprocessed source.
     vars.erase("DEP_FILE");
-  }
-
-  if (!modmapFormat.empty()) {
-    // XXX(modmap): If changing this path construction, change
-    // `cmGlobalNinjaGenerator::WriteDyndep` to expect the corresponding
-    // file path.
-    std::string const ddModmapFile = cmStrCat(objectFileName, ".modmap");
-    scanBuild.Variables["DYNDEP_MODULE_MAP_FILE"] = ddModmapFile;
-    scanBuild.ImplicitOuts.push_back(ddModmapFile);
   }
 
   return scanBuild;
@@ -1482,7 +1472,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
 
     cmNinjaBuild ppBuild = GetScanBuildStatement(
       scanRuleName, ppFileName, compilePP, compilePPWithDefines, objBuild,
-      vars, modmapFormat, objectFileName, this->LocalGenerator);
+      vars, objectFileName, this->LocalGenerator);
 
     if (compilePP) {
       // In case compilation requires flags that are incompatible with
@@ -1519,6 +1509,9 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     vars["dyndep"] = dyndep;
 
     if (!modmapFormat.empty()) {
+      // XXX(modmap): If changing this path construction, change
+      // `cmGlobalNinjaGenerator::WriteDyndep` to expect the corresponding file
+      // path.
       std::string const ddModmapFile = cmStrCat(objectFileName, ".modmap");
       vars["DYNDEP_MODULE_MAP_FILE"] = ddModmapFile;
       objBuild.OrderOnlyDeps.push_back(ddModmapFile);
