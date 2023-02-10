@@ -469,7 +469,15 @@ add_RunCMake_test(ctest_fixtures)
 add_RunCMake_test(define_property)
 add_RunCMake_test(file -DCYGWIN=${CYGWIN} -DMSYS=${MSYS})
 add_RunCMake_test(file-CHMOD -DMSYS=${MSYS})
-add_RunCMake_test(file-DOWNLOAD -DCMake_TEST_NO_NETWORK=${CMake_TEST_NO_NETWORK})
+foreach(var
+    CMake_TEST_NO_NETWORK
+    CMake_TEST_TLS_VERIFY_URL
+    )
+  if(DEFINED ${var})
+    list(APPEND file-DOWNLOAD_ARGS -D${var}=${${var}})
+  endif()
+endforeach()
+add_RunCMake_test(file-DOWNLOAD)
 add_RunCMake_test(file-RPATH -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME})
 add_RunCMake_test(find_file)
 add_RunCMake_test(find_library -DCYGWIN=${CYGWIN} -DMSYS=${MSYS})
