@@ -1140,13 +1140,20 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
     }
   }
 
-  for (auto const& langDDIFiles : this->Configs[config].DDIFiles) {
-    std::string const& language = langDDIFiles.first;
-    cmNinjaDeps const& ddiFiles = langDDIFiles.second;
+  for (auto const& langScanningFiles : this->Configs[config].ScanningInfo) {
+    std::string const& language = langScanningFiles.first;
+    std::vector<ScanningFiles> const& scanningFiles = langScanningFiles.second;
 
     cmNinjaBuild build(this->LanguageDyndepRule(language, config));
     build.Outputs.push_back(this->GetDyndepFilePath(language, config));
-    build.ExplicitDeps = ddiFiles;
+    for (auto const& scanFiles : scanningFiles) {
+      if (!scanFiles.ScanningOutput.empty()) {
+        build.ExplicitDeps.push_back(scanFiles.ScanningOutput);
+      }
+      if (!scanFiles.ModuleMapFile.empty()) {
+        build.ImplicitOuts.push_back(scanFiles.ModuleMapFile);
+      }
+    }
 
     this->WriteTargetDependInfo(language, config);
 
@@ -1493,9 +1500,10 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
       vars["INCLUDES"] = cmStrCat(sourceDirectoryFlag, ' ', vars["INCLUDES"]);
     }
 
+    ScanningFiles scanningFiles;
+
     if (firstForConfig) {
-      std::string const ddiFile = cmStrCat(objectFileName, ".ddi");
-      this->Configs[config].DDIFiles[language].push_back(ddiFile);
+      scanningFiles.ScanningOutput = cmStrCat(objectFileName, ".ddi");
     }
 
     this->addPoolNinjaVariable("JOB_POOL_COMPILE", this->GetGeneratorTarget(),
@@ -1512,9 +1520,14 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
       // XXX(modmap): If changing this path construction, change
       // `cmGlobalNinjaGenerator::WriteDyndep` to expect the corresponding file
       // path.
-      std::string const ddModmapFile = cmStrCat(objectFileName, ".modmap");
+      std::string ddModmapFile = cmStrCat(objectFileName, ".modmap");
       vars["DYNDEP_MODULE_MAP_FILE"] = ddModmapFile;
       objBuild.OrderOnlyDeps.push_back(ddModmapFile);
+      scanningFiles.ModuleMapFile = std::move(ddModmapFile);
+    }
+
+    if (!scanningFiles.IsEmpty()) {
+      this->Configs[config].ScanningInfo[language].emplace_back(scanningFiles);
     }
   }
 
