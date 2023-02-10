@@ -42,7 +42,7 @@
 #include "RegexExplorer.h"
 #include "WarningMessagesDialog.h"
 
-void OpenReferenceManual()
+void OpenReferenceManual(const QString& filename)
 {
   QString urlFormat("https://cmake.org/cmake/help/v%1.%2/");
   QUrl url(urlFormat.arg(QString::number(cmVersion::GetMajorVersion()),
@@ -51,7 +51,7 @@ void OpenReferenceManual()
   if (!cmSystemTools::GetHTMLDoc().empty()) {
     url = QUrl::fromLocalFile(
       QDir(QString::fromStdString(cmSystemTools::GetHTMLDoc()))
-        .filePath("index.html"));
+        .filePath(filename));
   }
 
   QDesktopServices::openUrl(url);
@@ -212,7 +212,8 @@ CMakeSetupDialog::CMakeSetupDialog()
   QObject::connect(a, &QAction::triggered, this, &CMakeSetupDialog::doHelp);
   a->setShortcut(QKeySequence::HelpContents);
   a = HelpMenu->addAction(tr("CMake Reference Manual"));
-  QObject::connect(a, &QAction::triggered, this, OpenReferenceManual);
+  QObject::connect(a, &QAction::triggered, this,
+                   [] { OpenReferenceManual("index.html"); });
   a = HelpMenu->addAction(tr("About"));
   QObject::connect(a, &QAction::triggered, this, &CMakeSetupDialog::doAbout);
 
