@@ -164,6 +164,16 @@ void cmCustomCommand::SetCommandExpandLists(bool b)
   this->CommandExpandLists = b;
 }
 
+bool cmCustomCommand::GetDependsExplicitOnly() const
+{
+  return this->DependsExplicitOnly;
+}
+
+void cmCustomCommand::SetDependsExplicitOnly(bool b)
+{
+  this->DependsExplicitOnly = b;
+}
+
 const std::string& cmCustomCommand::GetDepfile() const
 {
   return this->Depfile;

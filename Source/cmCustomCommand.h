@@ -102,6 +102,11 @@ public:
   bool GetCommandExpandLists() const;
   void SetCommandExpandLists(bool b);
 
+  /** Set/Get whether to use additional dependencies coming from
+      users of OUTPUT of the custom command. */
+  bool GetDependsExplicitOnly() const;
+  void SetDependsExplicitOnly(bool b);
+
   /** Set/Get the depfile (used by the Ninja generator) */
   const std::string& GetDepfile() const;
   void SetDepfile(const std::string& depfile);
@@ -141,6 +146,7 @@ private:
   bool CommandExpandLists = false;
   bool StdPipesUTF8 = false;
   bool HasMainDependency_ = false;
+  bool DependsExplicitOnly = false;
 
 // Policies are NEW for synthesized custom commands, and set by cmMakefile for
 // user-created custom commands.
