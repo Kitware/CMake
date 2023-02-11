@@ -80,6 +80,7 @@ if (NOT "$ENV{CMAKE_CI_NIGHTLY}" STREQUAL "")
   set(CMake_TEST_ISPC "ON" CACHE STRING "")
 endif()
 set(CMake_TEST_Qt5 "ON" CACHE BOOL "")
+set(CMake_TEST_TLS_VERIFY_URL "https://gitlab.kitware.com" CACHE STRING "")
 set(CMake_TEST_UseSWIG "ON" CACHE BOOL "")
 
 include("${CMAKE_CURRENT_LIST_DIR}/configure_external_test.cmake")
