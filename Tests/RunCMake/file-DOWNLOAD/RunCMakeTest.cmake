@@ -24,3 +24,8 @@ run_cmake(SHOW_PROGRESS)
 if(NOT CMake_TEST_NO_NETWORK)
   run_cmake(bad-hostname)
 endif()
+
+if(CMake_TEST_TLS_VERIFY_URL)
+  run_cmake(TLS_VERIFY-bad)
+  run_cmake_with_options(TLS_VERIFY-good -Durl=${CMake_TEST_TLS_VERIFY_URL})
+endif()
