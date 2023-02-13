@@ -746,36 +746,6 @@ if(BUILD_TESTING)
   ADD_LINK_FLAGS_TEST(mod_flags_config dll_flags_config)
   ADD_LINK_FLAGS_TEST(exe_flags_config mod_flags_config)
 
-  # If we are running right now with a Unix Makefiles or Ninja based generator,
-  # build the "Simple" test with the ExtraGenerators, if available
-  # This doesn't test whether the generated project files work (unfortunately),
-  # mainly it tests that cmake doesn't crash when generating these project files.
-  if(CMAKE_GENERATOR MATCHES "^(Unix Makefiles|Ninja)$"
-      AND NOT "${CMAKE_CURRENT_BINARY_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
-    foreach(
-      extraGenerator
-      IN ITEMS
-        "CodeBlocks"
-        "CodeLite"
-        "Eclipse CDT4"
-        "Kate"
-        "Sublime Text 2"
-      )
-      string(REPLACE " " "" extraGeneratorTestName "Simple_${extraGenerator}Generator")
-      add_test(${extraGeneratorTestName} ${CMAKE_CTEST_COMMAND}
-        --build-and-test
-        "${CMake_SOURCE_DIR}/Tests/Simple"
-        "${CMake_BINARY_DIR}/Tests/${extraGeneratorTestName}"
-        --build-two-config
-        --build-generator "${extraGenerator} - ${CMAKE_GENERATOR}"
-        --build-generator-platform "${CMAKE_GENERATOR_PLATFORM}"
-        --build-generator-toolset "${CMAKE_GENERATOR_TOOLSET}"
-        --build-project Simple
-        --test-command Simple)
-      list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${extraGeneratorTestName}")
-    endforeach()
-  endif()
-
   # test for correct sub-project generation
   # not implemented in Xcode or Ninja
   if(NOT CMAKE_GENERATOR MATCHES "Xcode|Ninja")
