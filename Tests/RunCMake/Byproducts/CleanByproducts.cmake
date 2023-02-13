@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.10)
-project(CleanByproducts)
+enable_language(C)
+enable_language(CXX)
 
 # Configurable parameters
 set(TEST_CLEAN_NO_CUSTOM FALSE CACHE BOOL "Value for the CLEAN_NO_CUSTOM PROPERTY")

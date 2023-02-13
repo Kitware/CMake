@@ -1,5 +1,3 @@
-
-cmake_minimum_required(VERSION 3.22...3.24)
 enable_language(C)
 
 # Create framework and ensure header is placed in Headers

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_policy(VERSION 2.8.11)
 project(CMP0022-WARN)
 
 add_library(foo SHARED empty_vs6_1.cpp)

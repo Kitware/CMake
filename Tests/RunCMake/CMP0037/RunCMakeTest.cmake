@@ -1,4 +1,5 @@
 include(RunCMake)
+set(RunCMake_IGNORE_POLICY_VERSION_DEPRECATION ON)
 
 if(RunCMake_GENERATOR MATCHES "^Ninja")
   # Detect ninja version so we know what tests can be supported.

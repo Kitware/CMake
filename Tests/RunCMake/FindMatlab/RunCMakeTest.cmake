@@ -1,6 +1,4 @@
-
 include(RunCMake)
-
 
 if(NOT "${MCR_ROOT}" STREQUAL "")
     if(NOT EXISTS "${MCR_ROOT}")

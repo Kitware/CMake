@@ -1,6 +1,3 @@
-
-cmake_minimum_required(VERSION 2.8.4)
-
 cmake_policy(SET CMP0004 NEW)
 
 add_library(foo SHARED empty.cpp)

@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.7)
-project(concat_cmd NONE)
 set(output1 ${CMAKE_BINARY_DIR}/out1.txt)
 set(output2 ${CMAKE_BINARY_DIR}/out2.txt)
 file(REMOVE ${output1} ${output2})

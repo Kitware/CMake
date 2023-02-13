@@ -186,6 +186,18 @@ function(run_cmake test)
     "|[^\n]*Bullseye Testing Technology"
     ")[^\n]*\n)+"
     )
+  if(RunCMake_IGNORE_POLICY_VERSION_DEPRECATION)
+    string(REGEX REPLACE [[
+^CMake Deprecation Warning at [^
+]*CMakeLists.txt:1 \(cmake_minimum_required\):
+  Compatibility with CMake < 3\.5 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value or use a \.\.\.<max> suffix to tell
+  CMake that the project does not need compatibility with older versions\.
++
+]] "" actual_stderr "${actual_stderr}")
+  endif()
   foreach(o IN ITEMS stdout stderr config)
     string(REGEX REPLACE "\r\n" "\n" actual_${o} "${actual_${o}}")
     string(REGEX REPLACE "${ignore_line_regex}" "\\1" actual_${o} "${actual_${o}}")

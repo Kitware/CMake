@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 3.14)
 enable_language(C)
 
 add_library(utils SHARED obj1.c)

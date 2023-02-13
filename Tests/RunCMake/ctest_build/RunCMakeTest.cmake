@@ -35,7 +35,9 @@ endif()
   run_ctest(BuildFailure)
 
   if (RunCMake_GENERATOR MATCHES "Makefiles")
-    set(CASE_TEST_PREFIX_CODE "")
+    set(CASE_TEST_PREFIX_CODE [[
+cmake_policy(VERSION 3.2)
+]])
     run_ctest(BuildFailure-CMP0061-OLD)
   endif()
 endfunction()

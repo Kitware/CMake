@@ -1,5 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
-project(hello C)
+enable_language(C)
 add_definitions(-DGREETING_STATIC)
 add_library(greeting STATIC greeting.c)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})

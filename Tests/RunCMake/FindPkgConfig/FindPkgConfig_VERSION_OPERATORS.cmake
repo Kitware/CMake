@@ -1,6 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
-
-project(FindPkgConfig_IMPORTED_TARGET C)
+enable_language(C)
 
 find_package(PkgConfig REQUIRED)
 

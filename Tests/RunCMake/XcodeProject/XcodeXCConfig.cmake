@@ -1,6 +1,4 @@
-cmake_minimum_required(VERSION 3.23)
-
-project(XcodeXCConfig C)
+enable_language(C)
 
 set(CMAKE_XCODE_XCCONFIG "$<IF:$<CONFIG:Debug>,XcodeXCConfig.global.debug.xcconfig,XcodeXCConfig.global.release.xcconfig>")
 

@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.3)
-
 # If we are using the Ninja generator, we can check and verify that the
 # USES_TERMINAL option actually works by examining the Ninja build file.
 # This is the only way, since CMake doesn't offer a way to examine the
