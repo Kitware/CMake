@@ -53,5 +53,8 @@ int main()
 #ifdef HAS_JUSTNOP
   justnop();
 #endif
+#ifdef HELLO_VFTABLE
+  HelloVFTable helloVFTable(1);
+#endif
   return 0;
 }
