@@ -131,12 +131,12 @@ std::string cmCurlFixFileURL(std::string url)
   // Convert string from UTF-8 to ACP if this is a file:// URL.
   std::wstring wurl = cmsys::Encoding::ToWide(url);
   if (!wurl.empty()) {
-    int mblen =
-      WideCharToMultiByte(CP_ACP, 0, wurl.c_str(), -1, NULL, 0, NULL, NULL);
+    int mblen = WideCharToMultiByte(CP_ACP, 0, wurl.c_str(), -1, nullptr, 0,
+                                    nullptr, nullptr);
     if (mblen > 0) {
       std::vector<char> chars(mblen);
       mblen = WideCharToMultiByte(CP_ACP, 0, wurl.c_str(), -1, &chars[0],
-                                  mblen, NULL, NULL);
+                                  mblen, nullptr, nullptr);
       if (mblen > 0) {
         url = &chars[0];
       }

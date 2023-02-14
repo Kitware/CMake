@@ -263,7 +263,7 @@ cmGeneratedFileStream& operator<<(cmGeneratedFileStream& s,
 }
 
 // Look up variable; if no value is set, returns an empty string;
-// basically a wrapper that handles the NULL-ptr return from GetOption().
+// basically a wrapper that handles the nullptr return from GetOption().
 std::string cmCPackFreeBSDGenerator::var_lookup(const char* var_name)
 {
   cmValue pv = this->GetOption(var_name);
@@ -402,7 +402,7 @@ int cmCPackFreeBSDGenerator::PackageFiles()
     this->packageFileNames.emplace_back(actualPackage);
   }
 
-  if (!pkg_initialized() && pkg_init(NULL, NULL) != EPKG_OK) {
+  if (!pkg_initialized() && pkg_init(nullptr, nullptr) != EPKG_OK) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Can not initialize FreeBSD libpkg." << std::endl);
     return 0;

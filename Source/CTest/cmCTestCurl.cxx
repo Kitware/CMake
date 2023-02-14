@@ -157,7 +157,7 @@ bool cmCTestCurl::UploadFile(std::string const& local_file,
   // Now run off and do what you've been told!
   ::curl_easy_perform(this->Curl);
   ::fclose(ftpfile);
-  ::curl_easy_setopt(this->Curl, CURLOPT_HTTPHEADER, NULL);
+  ::curl_easy_setopt(this->Curl, CURLOPT_HTTPHEADER, nullptr);
   ::curl_slist_free_all(headers);
 
   if (!responseData.empty()) {
