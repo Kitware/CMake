@@ -1,3 +1,4 @@
+cmake_policy(SET CMP0140 NEW)
 
 include ("${RunCMake_SOURCE_DIR}/check_errors.cmake")
 unset (errors)
@@ -57,6 +58,41 @@ endif()
 set (reference "a/b/.")
 cmake_path (REMOVE_EXTENSION reference LAST_ONLY)
 set(output "$<PATH:REMOVE_EXTENSION,LAST_ONLY,a/b/.>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "EXTENSION: '${output}' instead of '${reference}'")
+endif()
+
+
+######################################
+## tests with list of paths
+######################################
+function (compute_reference action)
+  unset(reference)
+  foreach (path IN LISTS paths)
+    cmake_path(${action} path ${ARGN})
+    list(APPEND reference "${path}")
+  endforeach()
+
+  return(PROPAGATE reference)
+endfunction()
+
+set (paths "a/b/c.e.f" "g/h/i.j.k")
+compute_reference(REMOVE_FILENAME)
+set(output "$<PATH:REMOVE_FILENAME,a/b/c.e.f;g/h/i.j.k>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "FILENAME: '${output}' instead of '${reference}'")
+endif()
+
+set (paths "a/b/c.e.f" "g/h/i.j.k")
+compute_reference(REMOVE_EXTENSION)
+set(output "$<PATH:REMOVE_EXTENSION,a/b/c.e.f;g/h/i.j.k>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "EXTENSION: '${output}' instead of '${reference}'")
+endif()
+
+set (reference "a/b/c.e.f" "g/h/i.j.k")
+compute_reference(REMOVE_EXTENSION LAST_ONLY)
+set(output "$<PATH:REMOVE_EXTENSION,LAST_ONLY,a/b/c.e.f;g/h/i.j.k>")
 if (NOT output STREQUAL reference)
   list (APPEND errors "EXTENSION: '${output}' instead of '${reference}'")
 endif()

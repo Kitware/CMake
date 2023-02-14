@@ -446,16 +446,20 @@ command.  All paths are expected to be in cmake-style format.
   components from a path. See :ref:`Path Structure And Terminology` for the
   meaning of each path component.
 
+  .. versionchanged:: 3.27
+    All operations now accept a list of paths as argument. When a list of paths
+    is specified, the operation will be applied to each path.
+
   ::
 
-    $<PATH:GET_ROOT_NAME,path>
-    $<PATH:GET_ROOT_DIRECTORY,path>
-    $<PATH:GET_ROOT_PATH,path>
-    $<PATH:GET_FILENAME,path>
-    $<PATH:GET_EXTENSION[,LAST_ONLY],path>
-    $<PATH:GET_STEM[,LAST_ONLY],path>
-    $<PATH:GET_RELATIVE_PART,path>
-    $<PATH:GET_PARENT_PATH,path>
+    $<PATH:GET_ROOT_NAME,path...>
+    $<PATH:GET_ROOT_DIRECTORY,path...>
+    $<PATH:GET_ROOT_PATH,path...>
+    $<PATH:GET_FILENAME,path...>
+    $<PATH:GET_EXTENSION[,LAST_ONLY],path...>
+    $<PATH:GET_STEM[,LAST_ONLY],path...>
+    $<PATH:GET_RELATIVE_PART,path...>
+    $<PATH:GET_PARENT_PATH,path...>
 
   If a requested component is not present in the path, an empty string is
   returned.
@@ -470,9 +474,14 @@ These expressions provide the generation-time capabilities equivalent to the
 options of the :command:`cmake_path` command.  All paths are expected to be
 in cmake-style format.
 
+.. versionchanged:: 3.27
+  All operations now accept a list of paths as argument. When a list of paths
+  is specified, the operation will be applied to each path.
+
+
 .. _GenEx PATH-CMAKE_PATH:
 
-.. genex:: $<PATH:CMAKE_PATH[,NORMALIZE],path>
+.. genex:: $<PATH:CMAKE_PATH[,NORMALIZE],path...>
 
   .. versionadded:: 3.24
 
@@ -483,7 +492,7 @@ in cmake-style format.
   When the ``NORMALIZE`` option is specified, the path is :ref:`normalized
   <Normalization>` after the conversion.
 
-.. genex:: $<PATH:APPEND,path,input,...>
+.. genex:: $<PATH:APPEND,path...,input,...>
 
   .. versionadded:: 3.24
 
@@ -493,7 +502,7 @@ in cmake-style format.
 
   See :ref:`cmake_path(APPEND) <APPEND>` for more details.
 
-.. genex:: $<PATH:REMOVE_FILENAME,path>
+.. genex:: $<PATH:REMOVE_FILENAME,path...>
 
   .. versionadded:: 3.24
 
@@ -503,7 +512,7 @@ in cmake-style format.
 
   See :ref:`cmake_path(REMOVE_FILENAME) <REMOVE_FILENAME>` for more details.
 
-.. genex:: $<PATH:REPLACE_FILENAME,path,input>
+.. genex:: $<PATH:REPLACE_FILENAME,path...,input>
 
   .. versionadded:: 3.24
 
@@ -513,7 +522,7 @@ in cmake-style format.
 
   See :ref:`cmake_path(REPLACE_FILENAME) <REPLACE_FILENAME>` for more details.
 
-.. genex:: $<PATH:REMOVE_EXTENSION[,LAST_ONLY],path>
+.. genex:: $<PATH:REMOVE_EXTENSION[,LAST_ONLY],path...>
 
   .. versionadded:: 3.24
 
@@ -521,7 +530,7 @@ in cmake-style format.
 
   See :ref:`cmake_path(REMOVE_EXTENSION) <REMOVE_EXTENSION>` for more details.
 
-.. genex:: $<PATH:REPLACE_EXTENSION[,LAST_ONLY],path,input>
+.. genex:: $<PATH:REPLACE_EXTENSION[,LAST_ONLY],path...,input>
 
   .. versionadded:: 3.24
 
@@ -530,14 +539,14 @@ in cmake-style format.
 
   See :ref:`cmake_path(REPLACE_EXTENSION) <REPLACE_EXTENSION>` for more details.
 
-.. genex:: $<PATH:NORMAL_PATH,path>
+.. genex:: $<PATH:NORMAL_PATH,path...>
 
   .. versionadded:: 3.24
 
   Returns ``path`` normalized according to the steps described in
   :ref:`Normalization`.
 
-.. genex:: $<PATH:RELATIVE_PATH,path,base_directory>
+.. genex:: $<PATH:RELATIVE_PATH,path...,base_directory>
 
   .. versionadded:: 3.24
 
@@ -547,7 +556,7 @@ in cmake-style format.
   See :ref:`cmake_path(RELATIVE_PATH) <cmake_path-RELATIVE_PATH>` for more
   details.
 
-.. genex:: $<PATH:ABSOLUTE_PATH[,NORMALIZE],path,base_directory>
+.. genex:: $<PATH:ABSOLUTE_PATH[,NORMALIZE],path...,base_directory>
 
   .. versionadded:: 3.24
 
