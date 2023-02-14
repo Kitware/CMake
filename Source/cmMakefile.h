@@ -1011,7 +1011,8 @@ public:
 
   bool GetDebugFindPkgMode() const;
 
-  void MaybeWarnCMP0074(std::string const& pkg);
+  void MaybeWarnCMP0074(std::string const& rootVar, cmValue rootDef,
+                        cm::optional<std::string> const& rootEnv);
   void MaybeWarnUninitialized(std::string const& variable,
                               const char* sourceFilename) const;
   bool IsProjectFile(const char* filename) const;

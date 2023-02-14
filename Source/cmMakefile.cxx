@@ -208,26 +208,20 @@ bool cmMakefile::CheckCMP0037(std::string const& targetName,
   return true;
 }
 
-void cmMakefile::MaybeWarnCMP0074(std::string const& pkg)
+void cmMakefile::MaybeWarnCMP0074(std::string const& rootVar, cmValue rootDef,
+                                  cm::optional<std::string> const& rootEnv)
 {
-  // Warn if a <pkg>_ROOT variable we may use is set.
-  std::string const varName = pkg + "_ROOT";
-  cmValue var = this->GetDefinition(varName);
-  std::string env;
-  cmSystemTools::GetEnv(varName, env);
-
-  bool const haveVar = cmNonempty(var);
-  bool const haveEnv = !env.empty();
-  if ((haveVar || haveEnv) && this->WarnedCMP0074.insert(varName).second) {
+  // Warn if a <PackageName>_ROOT variable we may use is set.
+  if ((rootDef || rootEnv) && this->WarnedCMP0074.insert(rootVar).second) {
     std::ostringstream w;
     w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0074) << "\n";
-    if (haveVar) {
-      w << "CMake variable " << varName << " is set to:\n"
-        << "  " << *var << "\n";
+    if (rootDef) {
+      w << "CMake variable " << rootVar << " is set to:\n"
+        << "  " << *rootDef << "\n";
     }
-    if (haveEnv) {
-      w << "Environment variable " << varName << " is set to:\n"
-        << "  " << env << "\n";
+    if (rootEnv) {
+      w << "Environment variable " << rootVar << " is set to:\n"
+        << "  " << *rootEnv << "\n";
     }
     w << "For compatibility, CMake is ignoring the variable.";
     this->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
