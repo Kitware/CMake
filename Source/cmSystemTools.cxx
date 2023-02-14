@@ -1648,6 +1648,32 @@ std::string cmSystemTools::RelativeIfUnder(std::string const& top,
   return out;
 }
 
+cm::optional<std::string> cmSystemTools::GetEnvVar(std::string const& var)
+{
+  cm::optional<std::string> result;
+  {
+    std::string value;
+    if (cmSystemTools::GetEnv(var, value)) {
+      result = std::move(value);
+    }
+  }
+  return result;
+}
+
+std::vector<std::string> cmSystemTools::SplitEnvPath(std::string const& value)
+{
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  static cm::string_view sep = ";"_s;
+#else
+  static cm::string_view sep = ":"_s;
+#endif
+  std::vector<std::string> paths = cmTokenize(value, sep);
+  for (std::string& p : paths) {
+    SystemTools::ConvertToUnixSlashes(p);
+  }
+  return paths;
+}
+
 #ifndef CMAKE_BOOTSTRAP
 bool cmSystemTools::UnsetEnv(const char* value)
 {
