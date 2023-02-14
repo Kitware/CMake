@@ -46,11 +46,11 @@ class BTs;
 class cmTarget
 {
 public:
-  enum Visibility
+  enum class Visibility
   {
-    VisibilityNormal,
-    VisibilityImported,
-    VisibilityImportedGlobally
+    Normal,
+    Imported,
+    ImportedGlobally,
   };
 
   enum class PerConfig

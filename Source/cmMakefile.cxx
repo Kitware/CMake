@@ -2120,7 +2120,7 @@ std::pair<cmTarget&, bool> cmMakefile::CreateNewTarget(
   cmTarget::PerConfig perConfig)
 {
   auto ib = this->Targets.emplace(
-    name, cmTarget(name, type, cmTarget::VisibilityNormal, this, perConfig));
+    name, cmTarget(name, type, cmTarget::Visibility::Normal, this, perConfig));
   auto it = ib.first;
   if (!ib.second) {
     return std::make_pair(std::ref(it->second), false);
@@ -4203,8 +4203,8 @@ cmTarget* cmMakefile::AddImportedTarget(const std::string& name,
   // Create the target.
   std::unique_ptr<cmTarget> target(
     new cmTarget(name, type,
-                 global ? cmTarget::VisibilityImportedGlobally
-                        : cmTarget::VisibilityImported,
+                 global ? cmTarget::Visibility::ImportedGlobally
+                        : cmTarget::Visibility::Imported,
                  this, cmTarget::PerConfig::Yes));
 
   // Add to the set of available imported targets.

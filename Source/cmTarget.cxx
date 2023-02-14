@@ -1863,7 +1863,7 @@ void cmTarget::StoreProperty(const std::string& prop, ValueType value)
     }
     /* no need to change anything if value does not change */
     if (!this->IsImportedGloballyVisible()) {
-      this->impl->TargetVisibility = VisibilityImportedGlobally;
+      this->impl->TargetVisibility = Visibility::ImportedGlobally;
       this->GetGlobalGenerator()->IndexTarget(this);
     }
   } else if (cmHasLiteralPrefix(prop, "IMPORTED_LIBNAME") &&
@@ -2557,10 +2557,10 @@ bool cmTarget::IsAIX() const
 bool cmTarget::IsNormal() const
 {
   switch (this->impl->TargetVisibility) {
-    case VisibilityNormal:
+    case Visibility::Normal:
       return true;
-    case VisibilityImported:
-    case VisibilityImportedGlobally:
+    case Visibility::Imported:
+    case Visibility::ImportedGlobally:
       return false;
   }
   assert(false && "unknown visibility (IsNormal)");
@@ -2570,10 +2570,10 @@ bool cmTarget::IsNormal() const
 bool cmTargetInternals::IsImported() const
 {
   switch (this->TargetVisibility) {
-    case cmTarget::VisibilityImported:
-    case cmTarget::VisibilityImportedGlobally:
+    case cmTarget::Visibility::Imported:
+    case cmTarget::Visibility::ImportedGlobally:
       return true;
-    case cmTarget::VisibilityNormal:
+    case cmTarget::Visibility::Normal:
       return false;
   }
   assert(false && "unknown visibility (IsImported)");
@@ -2588,10 +2588,10 @@ bool cmTarget::IsImported() const
 bool cmTarget::IsImportedGloballyVisible() const
 {
   switch (this->impl->TargetVisibility) {
-    case VisibilityImportedGlobally:
+    case Visibility::ImportedGlobally:
       return true;
-    case VisibilityNormal:
-    case VisibilityImported:
+    case Visibility::Normal:
+    case Visibility::Imported:
       return false;
   }
   assert(false && "unknown visibility (IsImportedGloballyVisible)");
