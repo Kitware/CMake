@@ -2,10 +2,8 @@
 set(_compiler_id_pp_test "defined(__LCC__) && (defined(__GNUC__) || defined(__GNUG__) || defined(__MCST__))")
 
 set(_compiler_id_version_compute "
-# define @PREFIX@COMPILER_VERSION_MAJOR @MACRO_DEC@(1)
-# if defined(__LCC__)
-#  define @PREFIX@COMPILER_VERSION_MINOR @MACRO_DEC@(__LCC__- 100)
-# endif
+# define @PREFIX@COMPILER_VERSION_MAJOR @MACRO_DEC@(__LCC__ / 100)
+# define @PREFIX@COMPILER_VERSION_MINOR @MACRO_DEC@(__LCC__ % 100)
 # if defined(__LCC_MINOR__)
 #  define @PREFIX@COMPILER_VERSION_PATCH @MACRO_DEC@(__LCC_MINOR__)
 # endif
