@@ -1140,27 +1140,32 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
     }
   }
 
-  for (auto const& langDDIFiles : this->Configs[config].DDIFiles) {
-    std::string const& language = langDDIFiles.first;
-    cmNinjaDeps const& ddiFiles = langDDIFiles.second;
+  for (auto const& langScanningFiles : this->Configs[config].ScanningInfo) {
+    std::string const& language = langScanningFiles.first;
+    std::vector<ScanningFiles> const& scanningFiles = langScanningFiles.second;
 
     cmNinjaBuild build(this->LanguageDyndepRule(language, config));
     build.Outputs.push_back(this->GetDyndepFilePath(language, config));
-    build.ExplicitDeps = ddiFiles;
+    build.ImplicitOuts.push_back(
+      cmStrCat(this->Makefile->GetCurrentBinaryDirectory(), '/',
+               this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget),
+               this->GetGlobalGenerator()->ConfigDirectory(config), '/',
+               language, "Modules.json"));
+    for (auto const& scanFiles : scanningFiles) {
+      if (!scanFiles.ScanningOutput.empty()) {
+        build.ExplicitDeps.push_back(scanFiles.ScanningOutput);
+      }
+      if (!scanFiles.ModuleMapFile.empty()) {
+        build.ImplicitOuts.push_back(scanFiles.ModuleMapFile);
+      }
+    }
 
     this->WriteTargetDependInfo(language, config);
 
-    // Make sure dyndep files for all our dependencies have already
-    // been generated so that the '<LANG>Modules.json' files they
-    // produced as side-effects are available for us to read.
-    // Ideally we should depend on the '<LANG>Modules.json' files
-    // from our dependencies directly, but we don't know which of
-    // our dependencies produces them.  Fixing this will require
-    // refactoring the Ninja generator to generate targets in
-    // dependency order so that we can collect the needed information.
-    this->GetLocalGenerator()->AppendTargetDepends(
-      this->GeneratorTarget, build.OrderOnlyDeps, config, fileConfig,
-      DependOnTargetArtifact);
+    for (std::string const& l :
+         this->GetLinkedTargetDirectories(language, config)) {
+      build.ImplicitDeps.push_back(cmStrCat(l, '/', language, "Modules.json"));
+    }
 
     this->GetGlobalGenerator()->WriteBuild(this->GetImplFileStream(fileConfig),
                                            build);
@@ -1210,7 +1215,6 @@ cmNinjaBuild GetScanBuildStatement(const std::string& ruleName,
                                    const std::string& ppFileName,
                                    bool compilePP, bool compilePPWithDefines,
                                    cmNinjaBuild& objBuild, cmNinjaVars& vars,
-                                   std::string const& modmapFormat,
                                    const std::string& objectFileName,
                                    cmLocalGenerator* lg)
 {
@@ -1277,15 +1281,6 @@ cmNinjaBuild GetScanBuildStatement(const std::string& ruleName,
     // The actual compilation does not need a depfile because it
     // depends on the already-preprocessed source.
     vars.erase("DEP_FILE");
-  }
-
-  if (!modmapFormat.empty()) {
-    // XXX(modmap): If changing this path construction, change
-    // `cmGlobalNinjaGenerator::WriteDyndep` to expect the corresponding
-    // file path.
-    std::string const ddModmapFile = cmStrCat(objectFileName, ".modmap");
-    scanBuild.Variables["DYNDEP_MODULE_MAP_FILE"] = ddModmapFile;
-    scanBuild.ImplicitOuts.push_back(ddModmapFile);
   }
 
   return scanBuild;
@@ -1482,7 +1477,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
 
     cmNinjaBuild ppBuild = GetScanBuildStatement(
       scanRuleName, ppFileName, compilePP, compilePPWithDefines, objBuild,
-      vars, modmapFormat, objectFileName, this->LocalGenerator);
+      vars, objectFileName, this->LocalGenerator);
 
     if (compilePP) {
       // In case compilation requires flags that are incompatible with
@@ -1503,9 +1498,10 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
       vars["INCLUDES"] = cmStrCat(sourceDirectoryFlag, ' ', vars["INCLUDES"]);
     }
 
+    ScanningFiles scanningFiles;
+
     if (firstForConfig) {
-      std::string const ddiFile = cmStrCat(objectFileName, ".ddi");
-      this->Configs[config].DDIFiles[language].push_back(ddiFile);
+      scanningFiles.ScanningOutput = cmStrCat(objectFileName, ".ddi");
     }
 
     this->addPoolNinjaVariable("JOB_POOL_COMPILE", this->GetGeneratorTarget(),
@@ -1519,9 +1515,17 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     vars["dyndep"] = dyndep;
 
     if (!modmapFormat.empty()) {
-      std::string const ddModmapFile = cmStrCat(objectFileName, ".modmap");
+      // XXX(modmap): If changing this path construction, change
+      // `cmGlobalNinjaGenerator::WriteDyndep` to expect the corresponding file
+      // path.
+      std::string ddModmapFile = cmStrCat(objectFileName, ".modmap");
       vars["DYNDEP_MODULE_MAP_FILE"] = ddModmapFile;
       objBuild.OrderOnlyDeps.push_back(ddModmapFile);
+      scanningFiles.ModuleMapFile = std::move(ddModmapFile);
+    }
+
+    if (!scanningFiles.IsEmpty()) {
+      this->Configs[config].ScanningInfo[language].emplace_back(scanningFiles);
     }
   }
 
