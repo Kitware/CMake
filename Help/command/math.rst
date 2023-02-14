@@ -9,7 +9,8 @@ Evaluate a mathematical expression.
 
 Evaluates a mathematical ``<expression>`` and sets ``<variable>`` to the
 resulting value.  The result of the expression must be representable as a
-64-bit signed integer.
+64-bit signed integer. Floating point inputs are invalid e.g. ``1.1 * 10``.
+Non-integer results e.g. ``3 / 2`` are truncated.
 
 The mathematical expression must be given as a string (i.e. enclosed in
 double quotation marks). An example is ``"5 * (10 + 13)"``.
