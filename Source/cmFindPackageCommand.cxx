@@ -975,35 +975,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
     }
   }
 
-  {
-    // Allocate a PACKAGE_ROOT_PATH for the current find_package call.
-    this->Makefile->FindPackageRootPathStack.emplace_back();
-    std::vector<std::string>& rootPaths =
-      this->Makefile->FindPackageRootPathStack.back();
-
-    // Add root paths from <PackageName>_ROOT CMake and environment variables,
-    // subject to CMP0074.
-    switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0074)) {
-      case cmPolicies::WARN:
-        this->Makefile->MaybeWarnCMP0074(this->Name);
-        CM_FALLTHROUGH;
-      case cmPolicies::OLD:
-        // OLD behavior is to ignore the <pkg>_ROOT variables.
-        break;
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS:
-        this->Makefile->IssueMessage(
-          MessageType::FATAL_ERROR,
-          cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0074));
-        break;
-      case cmPolicies::NEW: {
-        // NEW behavior is to honor the <pkg>_ROOT variables.
-        std::string const rootVar = this->Name + "_ROOT";
-        this->Makefile->GetDefExpandList(rootVar, rootPaths, false);
-        cmSystemTools::GetPath(rootPaths, rootVar.c_str());
-      } break;
-    }
-  }
+  this->PushFindPackageRootPathStack();
 
   this->SetModuleVariables(components, componentVarDefs);
 
@@ -1129,8 +1101,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
   // Restore original state of "_FIND_" variables set in SetModuleVariables()
   this->RestoreFindDefinitions();
 
-  // Pop the package stack
-  this->Makefile->FindPackageRootPathStack.pop_back();
+  this->PopFindPackageRootPathStack();
 
   if (!this->DebugBuffer.empty()) {
     this->DebugMessage(this->DebugBuffer);
@@ -1832,6 +1803,42 @@ void cmFindPackageCommand::AppendSuccessInformation()
     this->Makefile->GetState()->SetGlobalProperty(requiredInfoPropName,
                                                   "REQUIRED");
   }
+}
+
+void cmFindPackageCommand::PushFindPackageRootPathStack()
+{
+  // Allocate a PACKAGE_ROOT_PATH for the current find_package call.
+  this->Makefile->FindPackageRootPathStack.emplace_back();
+  std::vector<std::string>& rootPaths =
+    this->Makefile->FindPackageRootPathStack.back();
+
+  // Add root paths from <PackageName>_ROOT CMake and environment variables,
+  // subject to CMP0074.
+  switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0074)) {
+    case cmPolicies::WARN:
+      this->Makefile->MaybeWarnCMP0074(this->Name);
+      CM_FALLTHROUGH;
+    case cmPolicies::OLD:
+      // OLD behavior is to ignore the <pkg>_ROOT variables.
+      break;
+    case cmPolicies::REQUIRED_IF_USED:
+    case cmPolicies::REQUIRED_ALWAYS:
+      this->Makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0074));
+      break;
+    case cmPolicies::NEW: {
+      // NEW behavior is to honor the <pkg>_ROOT variables.
+      std::string const rootVar = this->Name + "_ROOT";
+      this->Makefile->GetDefExpandList(rootVar, rootPaths, false);
+      cmSystemTools::GetPath(rootPaths, rootVar.c_str());
+    } break;
+  }
+}
+
+void cmFindPackageCommand::PopFindPackageRootPathStack()
+{
+  this->Makefile->FindPackageRootPathStack.pop_back();
 }
 
 void cmFindPackageCommand::ComputePrefixes()

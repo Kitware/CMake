@@ -125,6 +125,9 @@ private:
   void StoreVersionFound();
   void SetConfigDirCacheVariable(const std::string& value);
 
+  void PushFindPackageRootPathStack();
+  void PopFindPackageRootPathStack();
+
   void ComputePrefixes();
   void FillPrefixesPackageRedirect();
   void FillPrefixesPackageRoot();
