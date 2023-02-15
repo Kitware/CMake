@@ -82,8 +82,8 @@ It must be one of the following:
   to the installation prefix.
 
 ``TEST``
-  Scope may name zero or more existing tests.
-  See also the :command:`set_tests_properties` command.
+  Scope is limited to the directory the command is called in. It may name zero
+  or more existing tests. See also command :command:`set_tests_properties`.
 
   Test property values may be specified using
   :manual:`generator expressions <cmake-generator-expressions(7)>`
