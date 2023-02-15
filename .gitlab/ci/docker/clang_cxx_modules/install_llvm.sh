@@ -2,8 +2,8 @@
 
 set -e
 
-readonly revision="p1689r5-cmake-ci-20221215" # a0acf2c9285e848b65ec7336e185888163949490
-readonly tarball="https://github.com/mathstuf/llvm-project/archive/$revision.tar.gz"
+readonly revision="6d859df46e93e04bd7a4f90d9a9056763998f638" # llvmorg-16.0.0-rc2-31-g6d859df46e93
+readonly tarball="https://github.com/llvm/llvm-project/archive/$revision.tar.gz"
 
 readonly workdir="$HOME/llvm"
 readonly srcdir="$workdir/llvm"
