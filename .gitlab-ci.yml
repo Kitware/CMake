@@ -116,6 +116,7 @@ l:sphinx-fedora37:
     extends:
         - .fedora37_sphinx
         - .cmake_build_linux
+        - .cmake_sphinx_artifacts
         - .linux_x86_64_tags
         - .run_automatically
     variables:

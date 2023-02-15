@@ -118,6 +118,15 @@
             junit:
                 - build/junit.xml
 
+.cmake_sphinx_artifacts:
+    artifacts:
+        expire_in: 1d
+        when: always
+        paths:
+            # Take the sphinx logs.
+            - build/build-*.log
+            - build/linkcheck/output.*
+
 .cmake_test_artifacts:
     artifacts:
         expire_in: 1d
