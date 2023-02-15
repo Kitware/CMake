@@ -49,6 +49,7 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
   bool append = false;
   bool uses_terminal = false;
   bool command_expand_lists = false;
+  bool depends_explicit_only = false;
   std::string implicit_depends_lang;
   cmImplicitDependsList implicit_depends;
 
@@ -104,6 +105,7 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
   MAKE_STATIC_KEYWORD(USES_TERMINAL);
   MAKE_STATIC_KEYWORD(VERBATIM);
   MAKE_STATIC_KEYWORD(WORKING_DIRECTORY);
+  MAKE_STATIC_KEYWORD(DEPENDS_EXPLICIT_ONLY);
 #undef MAKE_STATIC_KEYWORD
   static std::unordered_set<std::string> const keywords{
     keyAPPEND,
@@ -126,7 +128,8 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
     keyTARGET,
     keyUSES_TERMINAL,
     keyVERBATIM,
-    keyWORKING_DIRECTORY
+    keyWORKING_DIRECTORY,
+    keyDEPENDS_EXPLICIT_ONLY
   };
 
   for (std::string const& copy : args) {
@@ -155,6 +158,8 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
         uses_terminal = true;
       } else if (copy == keyCOMMAND_EXPAND_LISTS) {
         command_expand_lists = true;
+      } else if (copy == keyDEPENDS_EXPLICIT_ONLY) {
+        depends_explicit_only = true;
       } else if (copy == keyTARGET) {
         doing = doing_target;
       } else if (copy == keyARGS) {
@@ -329,6 +334,7 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
   cc->SetDepfile(depfile);
   cc->SetJobPool(job_pool);
   cc->SetCommandExpandLists(command_expand_lists);
+  cc->SetDependsExplicitOnly(depends_explicit_only);
   if (source.empty() && output.empty()) {
     // Source is empty, use the target.
     mf.AddCustomCommandToTarget(target, cctype, std::move(cc));

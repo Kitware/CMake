@@ -25,7 +25,8 @@ The first signature is for adding a custom command to produce an output:
                      [DEPFILE depfile]
                      [JOB_POOL job_pool]
                      [VERBATIM] [APPEND] [USES_TERMINAL]
-                     [COMMAND_EXPAND_LISTS])
+                     [COMMAND_EXPAND_LISTS]
+                     [DEPENDS_EXPLICIT_ONLY])
 
 This defines a command to generate specified ``OUTPUT`` file(s).
 A target created in the same directory (``CMakeLists.txt`` file)
@@ -356,6 +357,21 @@ The options are:
   See policy :policy:`CMP0116`, which is always ``NEW`` for
   :ref:`Makefile Generators`, :ref:`Visual Studio Generators`,
   and the :generator:`Xcode` generator.
+
+``DEPENDS_EXPLICIT_ONLY``
+
+  .. versionadded:: 3.27
+
+  Indicate that the command's ``DEPENDS`` argument represents all files
+  required by the command and implicit dependencies are not required.
+
+  Without this option, if any target uses the output of the custom command,
+  CMake will consider that target's dependencies as implicit dependencies for
+  the custom command in case this custom command requires files implicitly
+  created by those targets.
+
+  Only the :ref:`Ninja Generators` actually use this information to remove
+  unnecessary implicit dependencies.
 
 Examples: Generating Files
 ^^^^^^^^^^^^^^^^^^^^^^^^^^

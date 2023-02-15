@@ -586,32 +586,34 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
 
     cmNinjaDeps orderOnlyDeps;
 
-    // A custom command may appear on multiple targets.  However, some build
-    // systems exist where the target dependencies on some of the targets are
-    // overspecified, leading to a dependency cycle.  If we assume all target
-    // dependencies are a superset of the true target dependencies for this
-    // custom command, we can take the set intersection of all target
-    // dependencies to obtain a correct dependency list.
-    //
-    // FIXME: This won't work in certain obscure scenarios involving indirect
-    // dependencies.
-    auto j = targets.begin();
-    assert(j != targets.end());
-    this->GetGlobalNinjaGenerator()->AppendTargetDependsClosure(
-      *j, orderOnlyDeps, ccg.GetOutputConfig(), fileConfig, ccgs.size() > 1);
-    std::sort(orderOnlyDeps.begin(), orderOnlyDeps.end());
-    ++j;
-
-    for (; j != targets.end(); ++j) {
-      std::vector<std::string> jDeps;
-      std::vector<std::string> depsIntersection;
+    if (!cc->GetDependsExplicitOnly()) {
+      // A custom command may appear on multiple targets.  However, some build
+      // systems exist where the target dependencies on some of the targets are
+      // overspecified, leading to a dependency cycle.  If we assume all target
+      // dependencies are a superset of the true target dependencies for this
+      // custom command, we can take the set intersection of all target
+      // dependencies to obtain a correct dependency list.
+      //
+      // FIXME: This won't work in certain obscure scenarios involving indirect
+      // dependencies.
+      auto j = targets.begin();
+      assert(j != targets.end());
       this->GetGlobalNinjaGenerator()->AppendTargetDependsClosure(
-        *j, jDeps, ccg.GetOutputConfig(), fileConfig, ccgs.size() > 1);
-      std::sort(jDeps.begin(), jDeps.end());
-      std::set_intersection(orderOnlyDeps.begin(), orderOnlyDeps.end(),
-                            jDeps.begin(), jDeps.end(),
-                            std::back_inserter(depsIntersection));
-      orderOnlyDeps = depsIntersection;
+        *j, orderOnlyDeps, ccg.GetOutputConfig(), fileConfig, ccgs.size() > 1);
+      std::sort(orderOnlyDeps.begin(), orderOnlyDeps.end());
+      ++j;
+
+      for (; j != targets.end(); ++j) {
+        std::vector<std::string> jDeps;
+        std::vector<std::string> depsIntersection;
+        this->GetGlobalNinjaGenerator()->AppendTargetDependsClosure(
+          *j, jDeps, ccg.GetOutputConfig(), fileConfig, ccgs.size() > 1);
+        std::sort(jDeps.begin(), jDeps.end());
+        std::set_intersection(orderOnlyDeps.begin(), orderOnlyDeps.end(),
+                              jDeps.begin(), jDeps.end(),
+                              std::back_inserter(depsIntersection));
+        orderOnlyDeps = depsIntersection;
+      }
     }
 
     const std::vector<std::string>& outputs = ccg.GetOutputs();
