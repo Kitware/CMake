@@ -1,6 +1,12 @@
 CodeBlocks
 ----------
 
+.. deprecated:: 3.27
+
+  Support for :ref:`Extra Generators` is deprecated and will be removed from
+  a future version of CMake.  IDEs may use the :manual:`cmake-file-api(7)`
+  to view CMake-generated project build trees.
+
 Generates CodeBlocks project files.
 
 Project files for CodeBlocks will be created in the top directory and

@@ -25,7 +25,7 @@ cmExtraKateGenerator::cmExtraKateGenerator() = default;
 cmExternalMakefileProjectGeneratorFactory* cmExtraKateGenerator::GetFactory()
 {
   static cmExternalMakefileProjectGeneratorSimpleFactory<cmExtraKateGenerator>
-    factory("Kate", "Generates Kate project files.");
+    factory("Kate", "Generates Kate project files (deprecated).");
 
   if (factory.GetSupportedGlobalGenerators().empty()) {
 #if defined(_WIN32)

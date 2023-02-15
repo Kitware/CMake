@@ -1,6 +1,12 @@
 Eclipse CDT4
 ------------
 
+.. deprecated:: 3.27
+
+  Support for :ref:`Extra Generators` is deprecated and will be removed from
+  a future version of CMake.  IDEs may use the :manual:`cmake-file-api(7)`
+  to view CMake-generated project build trees.
+
 Generates Eclipse CDT 4.0 project files.
 
 Project files for Eclipse will be created in the top directory.  In

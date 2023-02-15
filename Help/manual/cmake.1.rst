@@ -781,7 +781,7 @@ Available commands are:
       (:option:`-A ... <cmake -A>`).  The value is a list of platforms known to
       be supported.
     ``extraGenerators``
-      A list of strings with all the extra generators compatible with
+      A list of strings with all the :ref:`Extra Generators` compatible with
       the generator.
 
   ``fileApi``

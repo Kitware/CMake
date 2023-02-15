@@ -63,7 +63,8 @@ cmExtraEclipseCDT4Generator::GetFactory()
 {
   static cmExternalMakefileProjectGeneratorSimpleFactory<
     cmExtraEclipseCDT4Generator>
-    factory("Eclipse CDT4", "Generates Eclipse CDT 4.0 project files.");
+    factory("Eclipse CDT4",
+            "Generates Eclipse CDT 4.0 project files (deprecated).");
 
   if (factory.GetSupportedGlobalGenerators().empty()) {
 // TODO: Verify if __CYGWIN__ should be checked.
