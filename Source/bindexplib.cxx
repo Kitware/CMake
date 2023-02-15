@@ -281,6 +281,7 @@ public:
           // the symbol
           const char* scalarPrefix = "??_G";
           const char* vectorPrefix = "??_E";
+          const char* vftablePrefix = "??_7";
           // The original code had a check for
           //     symbol.find("real@") == std::string::npos)
           // but this disallows member functions with the name "real".
@@ -302,7 +303,8 @@ public:
                   this->DataSymbols.insert(symbol);
                 } else {
                   if (pSymbolTable->Type || !(SectChar & IMAGE_SCN_MEM_READ) ||
-                      (SectChar & IMAGE_SCN_MEM_EXECUTE)) {
+                      (SectChar & IMAGE_SCN_MEM_EXECUTE) ||
+                      (symbol.compare(0, 4, vftablePrefix) == 0)) {
                     this->Symbols.insert(symbol);
                   }
                 }
