@@ -956,7 +956,7 @@ std::string cmSystemTools::GetRealPathResolvingWindowsSubst(
   // uv_fs_realpath uses Windows Vista API so fallback to kwsys if not found
   std::string resolved_path;
   uv_fs_t req;
-  int err = uv_fs_realpath(NULL, &req, path.c_str(), NULL);
+  int err = uv_fs_realpath(nullptr, &req, path.c_str(), nullptr);
   if (!err) {
     resolved_path = std::string((char*)req.ptr);
     cmSystemTools::ConvertToUnixSlashes(resolved_path);
@@ -967,12 +967,12 @@ std::string cmSystemTools::GetRealPathResolvingWindowsSubst(
   } else if (err == UV_ENOSYS) {
     resolved_path = cmsys::SystemTools::GetRealPath(path, errorMessage);
   } else if (errorMessage) {
-    LPSTR message = NULL;
+    LPSTR message = nullptr;
     DWORD size = FormatMessageA(
       FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
         FORMAT_MESSAGE_IGNORE_INSERTS,
-      NULL, err, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&message, 0,
-      NULL);
+      nullptr, err, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&message,
+      0, nullptr);
     *errorMessage = std::string(message, size);
     LocalFree(message);
 
@@ -1329,32 +1329,33 @@ std::string cmSystemTools::ComputeCertificateThumbprint(
   std::string thumbprint;
 
   CRYPT_INTEGER_BLOB cryptBlob;
-  HCERTSTORE certStore = NULL;
-  PCCERT_CONTEXT certContext = NULL;
+  HCERTSTORE certStore = nullptr;
+  PCCERT_CONTEXT certContext = nullptr;
 
   HANDLE certFile = CreateFileW(
     cmsys::Encoding::ToWide(source.c_str()).c_str(), GENERIC_READ,
-    FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
 
-  if (certFile != INVALID_HANDLE_VALUE && certFile != NULL) {
-    DWORD fileSize = GetFileSize(certFile, NULL);
+  if (certFile != INVALID_HANDLE_VALUE && certFile != nullptr) {
+    DWORD fileSize = GetFileSize(certFile, nullptr);
     if (fileSize != INVALID_FILE_SIZE) {
       auto certData = cm::make_unique<BYTE[]>(fileSize);
-      if (certData != NULL) {
+      if (certData != nullptr) {
         DWORD dwRead = 0;
-        if (ReadFile(certFile, certData.get(), fileSize, &dwRead, NULL)) {
+        if (ReadFile(certFile, certData.get(), fileSize, &dwRead, nullptr)) {
           cryptBlob.cbData = fileSize;
           cryptBlob.pbData = certData.get();
 
           // Verify that this is a valid cert
           if (PFXIsPFXBlob(&cryptBlob)) {
             // Open the certificate as a store
-            certStore = PFXImportCertStore(&cryptBlob, NULL, CRYPT_EXPORTABLE);
-            if (certStore != NULL) {
+            certStore =
+              PFXImportCertStore(&cryptBlob, nullptr, CRYPT_EXPORTABLE);
+            if (certStore != nullptr) {
               // There should only be 1 cert.
               certContext =
                 CertEnumCertificatesInStore(certStore, certContext);
-              if (certContext != NULL) {
+              if (certContext != nullptr) {
                 // The hash is 20 bytes
                 BYTE hashData[20];
                 DWORD hashLength = 20;
@@ -2375,22 +2376,22 @@ static void EnsureStdPipe(DWORD fd)
   }
   SECURITY_ATTRIBUTES sa;
   sa.nLength = sizeof(sa);
-  sa.lpSecurityDescriptor = NULL;
+  sa.lpSecurityDescriptor = nullptr;
   sa.bInheritHandle = TRUE;
 
   HANDLE h = CreateFileW(
     L"NUL",
     fd == STD_INPUT_HANDLE ? FILE_GENERIC_READ
                            : FILE_GENERIC_WRITE | FILE_READ_ATTRIBUTES,
-    FILE_SHARE_READ | FILE_SHARE_WRITE, &sa, OPEN_EXISTING, 0, NULL);
+    FILE_SHARE_READ | FILE_SHARE_WRITE, &sa, OPEN_EXISTING, 0, nullptr);
 
   if (h == INVALID_HANDLE_VALUE) {
-    LPSTR message = NULL;
+    LPSTR message = nullptr;
     DWORD size = FormatMessageA(
       FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
         FORMAT_MESSAGE_IGNORE_INSERTS,
-      NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-      (LPSTR)&message, 0, NULL);
+      nullptr, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+      (LPSTR)&message, 0, nullptr);
     std::string msg = std::string(message, size);
     LocalFree(message);
     std::cerr << "failed to open NUL for missing stdio pipe: " << msg;
@@ -2535,10 +2536,10 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
 #if defined(_WIN32) && !defined(__CYGWIN__)
   (void)argv0; // ignore this on windows
   wchar_t modulepath[_MAX_PATH];
-  ::GetModuleFileNameW(NULL, modulepath, sizeof(modulepath));
+  ::GetModuleFileNameW(nullptr, modulepath, sizeof(modulepath));
   std::string path = cmsys::Encoding::ToNarrow(modulepath);
   std::string realPath =
-    cmSystemTools::GetRealPathResolvingWindowsSubst(path, NULL);
+    cmSystemTools::GetRealPathResolvingWindowsSubst(path, nullptr);
   if (realPath.empty()) {
     realPath = path;
   }

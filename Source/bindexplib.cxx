@@ -406,7 +406,7 @@ static bool DumpFile(std::string const& nmPath, const char* filename,
   LPVOID lpFileBase;
 
   hFile = CreateFileW(cmsys::Encoding::ToWide(filename).c_str(), GENERIC_READ,
-                      FILE_SHARE_READ, NULL, OPEN_EXISTING,
+                      FILE_SHARE_READ, nullptr, OPEN_EXISTING,
                       FILE_ATTRIBUTE_NORMAL, 0);
 
   if (hFile == INVALID_HANDLE_VALUE) {
@@ -414,7 +414,8 @@ static bool DumpFile(std::string const& nmPath, const char* filename,
     return false;
   }
 
-  hFileMapping = CreateFileMapping(hFile, NULL, PAGE_READONLY, 0, 0, NULL);
+  hFileMapping =
+    CreateFileMapping(hFile, nullptr, PAGE_READONLY, 0, 0, nullptr);
   if (hFileMapping == 0) {
     CloseHandle(hFile);
     fprintf(stderr, "Couldn't open file mapping with CreateFileMapping()\n");
