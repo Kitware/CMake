@@ -236,7 +236,7 @@ Targets Created:
 cupti
 """""
 
-The `NVIDIA CUDA Profiling Tools Interface <https://developer.nvidia.com/CUPTI>`_.
+The `NVIDIA CUDA Profiling Tools Interface <https://developer.nvidia.com/cupti>`_.
 
 Targets Created:
 
