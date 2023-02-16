@@ -629,10 +629,9 @@ public:
   bool IsDLLPlatform;
   bool IsAIX;
   bool IsAndroid;
-  bool IsImportedTarget;
-  bool ImportedGloballyVisible;
   bool BuildInterfaceIncludesAppended;
   bool PerConfig;
+  cmTarget::Visibility TargetVisibility;
   std::set<BT<std::pair<std::string, bool>>> Utilities;
   std::vector<cmCustomCommand> PreBuildCommands;
   std::vector<cmCustomCommand> PreLinkCommands;
@@ -666,6 +665,8 @@ public:
   FileSetType CxxModuleHeadersFileSets;
 
   cmTargetInternals();
+
+  bool IsImported() const;
 
   bool CheckImportedLibName(std::string const& prop,
                             std::string const& value) const;
@@ -914,9 +915,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   this->impl->IsDLLPlatform = false;
   this->impl->IsAIX = false;
   this->impl->IsAndroid = false;
-  this->impl->IsImportedTarget =
-    (vis == VisibilityImported || vis == VisibilityImportedGlobally);
-  this->impl->ImportedGloballyVisible = vis == VisibilityImportedGlobally;
+  this->impl->TargetVisibility = vis;
   this->impl->BuildInterfaceIncludesAppended = false;
   this->impl->PerConfig = (perConfig == PerConfig::Yes);
 
@@ -939,7 +938,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   // Save the backtrace of target construction.
   this->impl->Backtrace = this->impl->Makefile->GetBacktrace();
 
-  if (!this->IsImported()) {
+  if (this->IsNormal()) {
     // Initialize the INCLUDE_DIRECTORIES property based on the current value
     // of the same directory property:
     this->impl->IncludeDirectories.CopyFromDirectory(
@@ -988,7 +987,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   if (this->impl->TargetType != cmStateEnums::UTILITY &&
       this->impl->TargetType != cmStateEnums::GLOBAL_TARGET) {
     metConditions.insert(TargetProperty::InitCondition::NormalTarget);
-    if (!this->IsImported()) {
+    if (this->IsNormal()) {
       metConditions.insert(
         TargetProperty::InitCondition::NormalNonImportedTarget);
     }
@@ -1091,7 +1090,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     }
   }
 
-  if (this->IsImported() || mf->GetPropertyAsBool("SYSTEM")) {
+  if (!this->IsNormal() || mf->GetPropertyAsBool("SYSTEM")) {
     this->SetProperty("SYSTEM", "ON");
   }
 
@@ -1863,8 +1862,8 @@ void cmTarget::StoreProperty(const std::string& prop, ValueType value)
       return;
     }
     /* no need to change anything if value does not change */
-    if (!this->impl->ImportedGloballyVisible) {
-      this->impl->ImportedGloballyVisible = true;
+    if (!this->IsImportedGloballyVisible()) {
+      this->impl->TargetVisibility = Visibility::ImportedGlobally;
       this->GetGlobalGenerator()->IndexTarget(this);
     }
   } else if (cmHasLiteralPrefix(prop, "IMPORTED_LIBNAME") &&
@@ -2555,14 +2554,65 @@ bool cmTarget::IsAIX() const
   return this->impl->IsAIX;
 }
 
+bool cmTarget::IsNormal() const
+{
+  switch (this->impl->TargetVisibility) {
+    case Visibility::Normal:
+      return true;
+    case Visibility::Generated:
+    case Visibility::Imported:
+    case Visibility::ImportedGlobally:
+      return false;
+  }
+  assert(false && "unknown visibility (IsNormal)");
+  return false;
+}
+
+bool cmTarget::IsSynthetic() const
+{
+  switch (this->impl->TargetVisibility) {
+    case Visibility::Generated:
+      return true;
+    case Visibility::Normal:
+    case Visibility::Imported:
+    case Visibility::ImportedGlobally:
+      return false;
+  }
+  assert(false && "unknown visibility (IsSynthetic)");
+  return false;
+}
+
+bool cmTargetInternals::IsImported() const
+{
+  switch (this->TargetVisibility) {
+    case cmTarget::Visibility::Imported:
+    case cmTarget::Visibility::ImportedGlobally:
+      return true;
+    case cmTarget::Visibility::Normal:
+    case cmTarget::Visibility::Generated:
+      return false;
+  }
+  assert(false && "unknown visibility (IsImported)");
+  return false;
+}
+
 bool cmTarget::IsImported() const
 {
-  return this->impl->IsImportedTarget;
+  return this->impl->IsImported();
 }
 
 bool cmTarget::IsImportedGloballyVisible() const
 {
-  return this->impl->ImportedGloballyVisible;
+  switch (this->impl->TargetVisibility) {
+    case Visibility::ImportedGlobally:
+      return true;
+    case Visibility::Normal:
+    case Visibility::Generated:
+    case Visibility::Imported:
+      return false;
+  }
+  assert(false && "unknown visibility (IsImportedGloballyVisible)");
+  return false;
 }
 
 bool cmTarget::IsPerConfig() const
@@ -2858,7 +2908,7 @@ bool cmTargetInternals::CheckImportedLibName(std::string const& prop,
                                              std::string const& value) const
 {
   if (this->TargetType != cmStateEnums::INTERFACE_LIBRARY ||
-      !this->IsImportedTarget) {
+      !this->IsImported()) {
     this->Makefile->IssueMessage(
       MessageType::FATAL_ERROR,
       prop +

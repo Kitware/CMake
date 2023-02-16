@@ -46,11 +46,12 @@ class BTs;
 class cmTarget
 {
 public:
-  enum Visibility
+  enum class Visibility
   {
-    VisibilityNormal,
-    VisibilityImported,
-    VisibilityImportedGlobally
+    Normal,
+    Generated,
+    Imported,
+    ImportedGlobally,
   };
 
   enum class PerConfig
@@ -205,6 +206,8 @@ public:
   //! Return whether or not we are targeting AIX.
   bool IsAIX() const;
 
+  bool IsNormal() const;
+  bool IsSynthetic() const;
   bool IsImported() const;
   bool IsImportedGloballyVisible() const;
   bool IsPerConfig() const;

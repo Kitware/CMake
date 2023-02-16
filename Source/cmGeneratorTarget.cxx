@@ -1237,6 +1237,16 @@ bool cmGeneratorTarget::IsInBuildSystem() const
   return false;
 }
 
+bool cmGeneratorTarget::IsNormal() const
+{
+  return this->Target->IsNormal();
+}
+
+bool cmGeneratorTarget::IsSynthetic() const
+{
+  return this->Target->IsSynthetic();
+}
+
 bool cmGeneratorTarget::IsImported() const
 {
   return this->Target->IsImported();
@@ -7102,6 +7112,11 @@ cmGeneratorTarget::OutputInfo const* cmGeneratorTarget::GetOutputInfo(
 {
   // There is no output information for imported targets.
   if (this->IsImported()) {
+    return nullptr;
+  }
+
+  // Synthetic targets don't have output.
+  if (this->IsSynthetic()) {
     return nullptr;
   }
 

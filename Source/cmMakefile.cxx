@@ -2115,12 +2115,21 @@ cmTarget* cmMakefile::AddNewTarget(cmStateEnums::TargetType type,
   return &this->CreateNewTarget(name, type).first;
 }
 
+cmTarget* cmMakefile::AddSynthesizedTarget(cmStateEnums::TargetType type,
+                                           const std::string& name)
+{
+  return &this
+            ->CreateNewTarget(name, type, cmTarget::PerConfig::Yes,
+                              cmTarget::Visibility::Generated)
+            .first;
+}
+
 std::pair<cmTarget&, bool> cmMakefile::CreateNewTarget(
   const std::string& name, cmStateEnums::TargetType type,
-  cmTarget::PerConfig perConfig)
+  cmTarget::PerConfig perConfig, cmTarget::Visibility vis)
 {
-  auto ib = this->Targets.emplace(
-    name, cmTarget(name, type, cmTarget::VisibilityNormal, this, perConfig));
+  auto ib =
+    this->Targets.emplace(name, cmTarget(name, type, vis, this, perConfig));
   auto it = ib.first;
   if (!ib.second) {
     return std::make_pair(std::ref(it->second), false);
@@ -4203,8 +4212,8 @@ cmTarget* cmMakefile::AddImportedTarget(const std::string& name,
   // Create the target.
   std::unique_ptr<cmTarget> target(
     new cmTarget(name, type,
-                 global ? cmTarget::VisibilityImportedGlobally
-                        : cmTarget::VisibilityImported,
+                 global ? cmTarget::Visibility::ImportedGlobally
+                        : cmTarget::Visibility::Imported,
                  this, cmTarget::PerConfig::Yes));
 
   // Add to the set of available imported targets.

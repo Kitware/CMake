@@ -176,7 +176,9 @@ std::vector<std::string> cmCommonTargetGenerator::GetLinkedTargetDirectories(
           // We can ignore the INTERFACE_LIBRARY items because
           // Target->GetLinkInformation already processed their
           // link interface and they don't have any output themselves.
-          && linkee->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
+          && (linkee->GetType() != cmStateEnums::INTERFACE_LIBRARY
+              // Synthesized targets may have relevant rules.
+              || linkee->IsSynthetic()) &&
           ((lang == "CXX"_s && linkee->HaveCxx20ModuleSources()) ||
            (lang == "Fortran"_s && linkee->HaveFortranSources(config))) &&
           emitted.insert(linkee).second) {

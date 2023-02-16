@@ -241,10 +241,13 @@ public:
 
   std::pair<cmTarget&, bool> CreateNewTarget(
     const std::string& name, cmStateEnums::TargetType type,
-    cmTarget::PerConfig perConfig = cmTarget::PerConfig::Yes);
+    cmTarget::PerConfig perConfig = cmTarget::PerConfig::Yes,
+    cmTarget::Visibility vis = cmTarget::Visibility::Normal);
 
   cmTarget* AddNewTarget(cmStateEnums::TargetType type,
                          const std::string& name);
+  cmTarget* AddSynthesizedTarget(cmStateEnums::TargetType type,
+                                 const std::string& name);
 
   /** Create a target instance for the utility.  */
   cmTarget* AddNewUtilityTarget(const std::string& utilityName,
