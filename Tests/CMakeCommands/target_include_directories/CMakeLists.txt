@@ -83,3 +83,8 @@ get_target_property(_res imp INCLUDE_DIRECTORIES)
 if (_res)
   message(SEND_ERROR "include_directories populated the INCLUDE_DIRECTORIES target property")
 endif()
+
+# Test selecting lexicographically-later header of same name via include order.
+# Xcode 'USE_HEADERMAP = YES' breaks this.
+add_library(same STATIC same.c same_one/same.h same_two/same.h)
+target_include_directories(same PRIVATE same_two)
