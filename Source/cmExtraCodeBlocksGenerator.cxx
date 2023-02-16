@@ -45,7 +45,7 @@ cmExtraCodeBlocksGenerator::GetFactory()
 {
   static cmExternalMakefileProjectGeneratorSimpleFactory<
     cmExtraCodeBlocksGenerator>
-    factory("CodeBlocks", "Generates CodeBlocks project files.");
+    factory("CodeBlocks", "Generates CodeBlocks project files (deprecated).");
 
   if (factory.GetSupportedGlobalGenerators().empty()) {
 #if defined(_WIN32)

@@ -43,7 +43,8 @@ cmExtraSublimeTextGenerator::GetFactory()
 {
   static cmExternalMakefileProjectGeneratorSimpleFactory<
     cmExtraSublimeTextGenerator>
-    factory("Sublime Text 2", "Generates Sublime Text 2 project files.");
+    factory("Sublime Text 2",
+            "Generates Sublime Text 2 project files (deprecated).");
 
   if (factory.GetSupportedGlobalGenerators().empty()) {
 #if defined(_WIN32)

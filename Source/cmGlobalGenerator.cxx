@@ -1327,6 +1327,16 @@ void cmGlobalGenerator::Configure()
   this->BinaryDirectories.insert(
     this->CMakeInstance->GetHomeOutputDirectory());
 
+  if (this->ExtraGenerator && !this->CMakeInstance->GetIsInTryCompile()) {
+    this->CMakeInstance->IssueMessage(
+      MessageType::DEPRECATION_WARNING,
+      cmStrCat("Support for \"Extra Generators\" like\n  ",
+               this->ExtraGenerator->GetName(),
+               "\nis deprecated and will be removed from a future version "
+               "of CMake.  IDEs may use the cmake-file-api(7) to view "
+               "CMake-generated project build trees."));
+  }
+
   // now do it
   this->ConfigureDoneCMP0026AndCMP0024 = false;
   dirMf->Configure();
