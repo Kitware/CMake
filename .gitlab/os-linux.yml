@@ -377,7 +377,7 @@
         CMAKE_GENERATOR: "Ninja Multi-Config"
 
 .clang_cxx_modules_x86_64:
-    image: "kitware/cmake:ci-clang_cxx_modules-x86_64-2022-12-15"
+    image: "kitware/cmake:ci-clang_cxx_modules-x86_64-2023-02-15"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
