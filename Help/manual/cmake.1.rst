@@ -1196,7 +1196,7 @@ Available commands are:
 
 .. option:: time <command> [<args>...]
 
-  Run command and display elapsed time.
+  Run ``<command>`` and display elapsed time (including overhead of CMake frontend).
 
   .. versionadded:: 3.5
     The command now properly passes arguments with spaces or special characters

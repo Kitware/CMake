@@ -50,10 +50,10 @@
 #endif
 
 #include <array>
+#include <chrono>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <ctime>
 #include <iostream>
 #include <memory>
 #include <sstream>
@@ -1104,27 +1104,13 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
     if (args[1] == "time" && args.size() > 2) {
       std::vector<std::string> command(args.begin() + 2, args.end());
 
-      clock_t clock_start;
-      clock_t clock_finish;
-      time_t time_start;
-      time_t time_finish;
-
-      time(&time_start);
-      clock_start = clock();
       int ret = 0;
+      auto time_start = std::chrono::steady_clock::now();
       cmSystemTools::RunSingleCommand(command, nullptr, nullptr, &ret);
+      auto time_finish = std::chrono::steady_clock::now();
 
-      clock_finish = clock();
-      time(&time_finish);
-
-      double clocks_per_sec = static_cast<double>(CLOCKS_PER_SEC);
-      std::cout << "Elapsed time: "
-                << static_cast<long>(time_finish - time_start) << " s. (time)"
-                << ", "
-                << static_cast<double>(clock_finish - clock_start) /
-          clocks_per_sec
-                << " s. (clock)"
-                << "\n";
+      std::chrono::duration<double> time_elapsed = time_finish - time_start;
+      std::cout << "Elapsed time (seconds): " << time_elapsed.count() << "\n";
       return ret;
     }
 
