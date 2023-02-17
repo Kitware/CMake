@@ -1157,7 +1157,7 @@ void cmComputeLinkInformation::AddItem(LinkEntry const& entry)
       // Pass the full path to the target file.
       BT<std::string> lib = BT<std::string>(
         tgt->GetFullPath(config, artifact, true), item.Backtrace);
-      if (tgt->Target->IsAIX() && cmHasLiteralSuffix(lib.Value, "-NOTFOUND") &&
+      if (tgt->IsAIX() && cmHasLiteralSuffix(lib.Value, "-NOTFOUND") &&
           artifact == cmStateEnums::ImportLibraryArtifact) {
         // This is an imported executable on AIX that has ENABLE_EXPORTS
         // but not IMPORTED_IMPLIB.  CMake used to produce and accept such
@@ -1185,7 +1185,7 @@ void cmComputeLinkInformation::AddItem(LinkEntry const& entry)
     if (cmHasSuffix(entry.Feature, "FRAMEWORK"_s) ||
         (entry.Feature == DEFAULT &&
          cmSystemTools::IsPathToFramework(item.Value) &&
-         this->Makefile->IsOn("APPLE"))) {
+         this->Target->IsApple())) {
       // This is a framework.
       this->AddFrameworkItem(entry);
     } else if (cmSystemTools::FileIsFullPath(item.Value)) {

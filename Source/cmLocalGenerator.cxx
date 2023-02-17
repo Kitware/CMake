@@ -1644,7 +1644,7 @@ static std::string GetFrameworkFlags(const std::string& lang,
   cmLocalGenerator* lg = target->GetLocalGenerator();
   cmMakefile* mf = lg->GetMakefile();
 
-  if (!mf->IsOn("APPLE")) {
+  if (!target->IsApple()) {
     return std::string();
   }
 
@@ -1818,7 +1818,7 @@ std::string cmLocalGenerator::GetLinkLibsCMP0065(
         // OLD behavior is to always add the flags, except on AIX where
         // we compute symbol exports if ENABLE_EXPORTS is on.
         add_shlib_flags =
-          !(tgt.Target->IsAIX() && tgt.GetPropertyAsBool("ENABLE_EXPORTS"));
+          !(tgt.IsAIX() && tgt.GetPropertyAsBool("ENABLE_EXPORTS"));
         break;
       case cmPolicies::REQUIRED_IF_USED:
       case cmPolicies::REQUIRED_ALWAYS:
@@ -1830,7 +1830,7 @@ std::string cmLocalGenerator::GetLinkLibsCMP0065(
         // NEW behavior is to only add the flags if ENABLE_EXPORTS is on,
         // except on AIX where we compute symbol exports.
         add_shlib_flags =
-          !tgt.Target->IsAIX() && tgt.GetPropertyAsBool("ENABLE_EXPORTS");
+          !tgt.IsAIX() && tgt.GetPropertyAsBool("ENABLE_EXPORTS");
         break;
     }
 
@@ -1864,7 +1864,7 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
                                             const std::string& filterArch)
 {
   // Only add Apple specific flags on Apple platforms
-  if (this->Makefile->IsOn("APPLE") && this->EmitUniversalBinaryFlags) {
+  if (target->IsApple() && this->EmitUniversalBinaryFlags) {
     std::vector<std::string> archs;
     target->GetAppleArchs(config, archs);
     if (!archs.empty() &&

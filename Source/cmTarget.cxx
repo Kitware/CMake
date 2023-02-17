@@ -611,7 +611,6 @@ TargetProperty const StaticTargetProperties[] = {
 #undef COMMON_LANGUAGE_PROPERTIES
 #undef IC
 #undef R
-
 }
 
 class cmTargetInternals
@@ -628,6 +627,7 @@ public:
   bool HaveInstallRule;
   bool IsDLLPlatform;
   bool IsAIX;
+  bool IsApple;
   bool IsAndroid;
   bool BuildInterfaceIncludesAppended;
   bool PerConfig;
@@ -914,6 +914,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   this->impl->HaveInstallRule = false;
   this->impl->IsDLLPlatform = false;
   this->impl->IsAIX = false;
+  this->impl->IsApple = false;
   this->impl->IsAndroid = false;
   this->impl->TargetVisibility = vis;
   this->impl->BuildInterfaceIncludesAppended = false;
@@ -930,6 +931,9 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
       this->impl->Makefile->GetSafeDefinition("CMAKE_SYSTEM_NAME");
     this->impl->IsAIX = (systemName == "AIX" || systemName == "OS400");
   }
+
+  // Check whether we are targeting Apple.
+  this->impl->IsApple = this->impl->Makefile->IsOn("APPLE");
 
   // Check whether we are targeting an Android platform.
   this->impl->IsAndroid = (this->impl->Makefile->GetSafeDefinition(
@@ -1205,14 +1209,12 @@ bool cmTarget::IsFrameworkOnApple() const
 {
   return ((this->GetType() == cmStateEnums::SHARED_LIBRARY ||
            this->GetType() == cmStateEnums::STATIC_LIBRARY) &&
-          this->impl->Makefile->IsOn("APPLE") &&
-          this->GetPropertyAsBool("FRAMEWORK"));
+          this->IsApple() && this->GetPropertyAsBool("FRAMEWORK"));
 }
 
 bool cmTarget::IsAppBundleOnApple() const
 {
-  return (this->GetType() == cmStateEnums::EXECUTABLE &&
-          this->impl->Makefile->IsOn("APPLE") &&
+  return (this->GetType() == cmStateEnums::EXECUTABLE && this->IsApple() &&
           this->GetPropertyAsBool("MACOSX_BUNDLE"));
 }
 
@@ -1774,7 +1776,6 @@ std::string ConvertToString<cmValue>(cmValue value)
 {
   return std::string(*value);
 }
-
 }
 
 template <typename ValueType>
@@ -2552,6 +2553,10 @@ bool cmTarget::IsDLLPlatform() const
 bool cmTarget::IsAIX() const
 {
   return this->impl->IsAIX;
+}
+bool cmTarget::IsApple() const
+{
+  return this->impl->IsApple;
 }
 
 bool cmTarget::IsNormal() const

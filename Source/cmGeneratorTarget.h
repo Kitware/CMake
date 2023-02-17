@@ -389,6 +389,11 @@ public:
   ModuleDefinitionInfo const* GetModuleDefinitionInfo(
     std::string const& config) const;
 
+  /** Return whether or not we are targeting AIX. */
+  bool IsAIX() const;
+  /** Return whether or not we are targeting Apple. */
+  bool IsApple() const;
+
   /** Return whether or not the target is for a DLL platform.  */
   bool IsDLLPlatform() const;
 

@@ -784,7 +784,7 @@ void cmInstallTargetGenerator::AddStripRule(std::ostream& os, Indent indent,
   }
 
   // Don't handle OSX Bundles.
-  if (this->Target->Target->GetMakefile()->IsOn("APPLE") &&
+  if (this->Target->IsApple() &&
       this->Target->GetPropertyAsBool("MACOSX_BUNDLE")) {
     return;
   }
@@ -796,7 +796,7 @@ void cmInstallTargetGenerator::AddStripRule(std::ostream& os, Indent indent,
   std::string stripArgs;
 
   // macOS 'strip' is picky, executables need '-u -r' and dylibs need '-x'.
-  if (this->Target->Target->GetMakefile()->IsOn("APPLE")) {
+  if (this->Target->IsApple()) {
     if (this->Target->GetType() == cmStateEnums::SHARED_LIBRARY ||
         this->Target->GetType() == cmStateEnums::MODULE_LIBRARY) {
       stripArgs = "-x ";
@@ -822,7 +822,7 @@ void cmInstallTargetGenerator::AddRanlibRule(std::ostream& os, Indent indent,
 
   // Perform post-installation processing on the file depending
   // on its type.
-  if (!this->Target->Target->GetMakefile()->IsOn("APPLE")) {
+  if (!this->Target->IsApple()) {
     return;
   }
 

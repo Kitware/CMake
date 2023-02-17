@@ -205,6 +205,8 @@ public:
 
   //! Return whether or not we are targeting AIX.
   bool IsAIX() const;
+  //! Return whether or not we are targeting Apple.
+  bool IsApple() const;
 
   bool IsNormal() const;
   bool IsSynthetic() const;

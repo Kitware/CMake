@@ -248,7 +248,7 @@ std::string cmCommonTargetGenerator::GetManifests(const std::string& config)
 std::string cmCommonTargetGenerator::GetAIXExports(std::string const&)
 {
   std::string aixExports;
-  if (this->GeneratorTarget->Target->IsAIX()) {
+  if (this->GeneratorTarget->IsAIX()) {
     if (cmValue exportAll =
           this->GeneratorTarget->GetProperty("AIX_EXPORT_ALL_SYMBOLS")) {
       if (cmIsOff(*exportAll)) {
