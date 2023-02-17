@@ -53,7 +53,7 @@ std::string CxxModuleMapContentClang(CxxModuleLocations const& loc,
   }
   for (auto const& r : obj.Requires) {
     if (auto bmi_loc = loc.BmiGeneratorPathForModule(r.LogicalName)) {
-      mm << "-fmodule-file=" << *bmi_loc << '\n';
+      mm << "-fmodule-file=" << r.LogicalName << "=" << *bmi_loc << '\n';
     }
   }
 
