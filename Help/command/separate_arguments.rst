@@ -69,7 +69,7 @@ be one of the following keywords:
 
   The contents of ``out`` will be: ``/path/to/cc;-c;main.c``
 
-.. _`Parsing C Command-Line Arguments`: https://msdn.microsoft.com/library/a1y7w461.aspx
+.. _`Parsing C Command-Line Arguments`: https://learn.microsoft.com/en-us/cpp/c-language/parsing-c-command-line-arguments
 
 .. code-block:: cmake
 

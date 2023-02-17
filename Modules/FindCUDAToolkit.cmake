@@ -173,7 +173,7 @@ cuFile
 
 .. versionadded:: 3.25
 
-The NVIDIA GPUDirect Storage `cuFile <https://docs.nvidia.com/cuda/cufile-api/index.html>`_ library.
+The NVIDIA GPUDirect Storage `cuFile <https://docs.nvidia.com/gpudirect-storage/api-reference-guide/index.html>`_ library.
 
 Targets Created:
 
@@ -236,7 +236,7 @@ Targets Created:
 cupti
 """""
 
-The `NVIDIA CUDA Profiling Tools Interface <https://developer.nvidia.com/CUPTI>`_.
+The `NVIDIA CUDA Profiling Tools Interface <https://developer.nvidia.com/cupti>`_.
 
 Targets Created:
 
@@ -330,7 +330,7 @@ Targets Created:
 nvGRAPH
 """""""
 
-The `nvGRAPH <https://docs.nvidia.com/cuda/nvgraph/index.html>`_ library.
+The `nvGRAPH <https://web.archive.org/web/20201111171403/https://docs.nvidia.com/cuda/nvgraph/index.html>`_ library.
 Removed starting in CUDA 11.0
 
 Targets Created:
@@ -417,7 +417,7 @@ nvToolsExt
 
 .. deprecated:: 3.25 With CUDA 10.0+, use :ref:`nvtx3 <cuda_toolkit_nvtx3>`.
 
-The `NVIDIA Tools Extension <https://docs.nvidia.com/gameworks/content/gameworkslibrary/nvtx/nvidia_tools_extension_library_nvtx.htm>`_.
+The `NVIDIA Tools Extension <https://docs.nvidia.com/nvtx/>`_.
 This is a shared library only.
 
 Targets Created:
