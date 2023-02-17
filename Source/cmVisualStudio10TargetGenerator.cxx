@@ -3108,6 +3108,17 @@ std::vector<std::string> cmVisualStudio10TargetGenerator::GetIncludes(
   return includes;
 }
 
+std::string cmVisualStudio10TargetGenerator::GetTargetOutputName() const
+{
+  std::string config;
+  if (!this->Configurations.empty()) {
+    config = this->Configurations[0];
+  }
+  const auto& nameComponents =
+    this->GeneratorTarget->GetFullNameComponents(config);
+  return nameComponents.prefix + nameComponents.base;
+}
+
 bool cmVisualStudio10TargetGenerator::ComputeClOptions()
 {
   return std::all_of(
@@ -5057,8 +5068,7 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWP80(Elem& e1)
     this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
   ConvertToWindowsSlash(artifactDir);
   std::string artifactDirXML = cmVS10EscapeXML(artifactDir);
-  std::string targetNameXML =
-    cmVS10EscapeXML(this->GeneratorTarget->GetName());
+  const std::string& targetNameXML = cmVS10EscapeXML(GetTargetOutputName());
 
   cmGeneratedFileStream fout(manifestFile);
   fout.SetCopyIfDifferent(true);
@@ -5140,8 +5150,7 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWP81(Elem& e1)
     this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
   ConvertToWindowsSlash(artifactDir);
   std::string artifactDirXML = cmVS10EscapeXML(artifactDir);
-  std::string targetNameXML =
-    cmVS10EscapeXML(this->GeneratorTarget->GetName());
+  const std::string& targetNameXML = cmVS10EscapeXML(GetTargetOutputName());
 
   cmGeneratedFileStream fout(manifestFile);
   fout.SetCopyIfDifferent(true);
@@ -5203,8 +5212,7 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWS80(Elem& e1)
     this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
   ConvertToWindowsSlash(artifactDir);
   std::string artifactDirXML = cmVS10EscapeXML(artifactDir);
-  std::string targetNameXML =
-    cmVS10EscapeXML(this->GeneratorTarget->GetName());
+  const std::string& targetNameXML = cmVS10EscapeXML(GetTargetOutputName());
 
   cmGeneratedFileStream fout(manifestFile);
   fout.SetCopyIfDifferent(true);
@@ -5258,8 +5266,7 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWS81(Elem& e1)
     this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
   ConvertToWindowsSlash(artifactDir);
   std::string artifactDirXML = cmVS10EscapeXML(artifactDir);
-  std::string targetNameXML =
-    cmVS10EscapeXML(this->GeneratorTarget->GetName());
+  const std::string& targetNameXML = cmVS10EscapeXML(GetTargetOutputName());
 
   cmGeneratedFileStream fout(manifestFile);
   fout.SetCopyIfDifferent(true);
@@ -5318,8 +5325,7 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWS10_0(Elem& e1)
     this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
   ConvertToWindowsSlash(artifactDir);
   std::string artifactDirXML = cmVS10EscapeXML(artifactDir);
-  std::string targetNameXML =
-    cmVS10EscapeXML(this->GeneratorTarget->GetName());
+  const std::string& targetNameXML = cmVS10EscapeXML(GetTargetOutputName());
 
   cmGeneratedFileStream fout(manifestFile);
   fout.SetCopyIfDifferent(true);
