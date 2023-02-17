@@ -71,9 +71,9 @@ STIN uint16_t htons(uint16_t hostshort) {
 STIN uint32_t ntohl(uint32_t netlong) {
   uint32_t res;
   unsigned char *p = (unsigned char *)&netlong;
-  res = *p++ << 24;
-  res += *p++ << 16;
-  res += *p++ << 8;
+  res = (uint32_t)(*p++ << 24);
+  res += (uint32_t)(*p++ << 16);
+  res += (uint32_t)(*p++ << 8);
   res += *p;
   return res;
 }
@@ -81,7 +81,7 @@ STIN uint32_t ntohl(uint32_t netlong) {
 STIN uint16_t ntohs(uint16_t netshort) {
   uint16_t res;
   unsigned char *p = (unsigned char *)&netshort;
-  res = *p++ << 8;
+  res = (uint16_t)(*p++ << 8);
   res += *p;
   return res;
 }

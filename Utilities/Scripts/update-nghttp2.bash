@@ -8,7 +8,7 @@ readonly name="nghttp2"
 readonly ownership="nghttp2 upstream <kwrobot@kitware.com>"
 readonly subtree="Utilities/cmnghttp2"
 readonly repo="https://github.com/nghttp2/nghttp2.git"
-readonly tag="v1.50.0"
+readonly tag="v1.52.0" # When updating, sync PACKAGE_VERSION below!
 readonly shortlog=false
 readonly paths="
   COPYING
@@ -23,7 +23,7 @@ extract_source () {
     pushd "${extractdir}/${name}-reduced"
     echo "* -whitespace" > .gitattributes
     mv lib/includes/nghttp2/nghttp2ver.h.in lib/includes/nghttp2/nghttp2ver.h
-    sed -i 's/@PACKAGE_VERSION@/1.40.0/;s/@PACKAGE_VERSION_NUM@/0x012800/' lib/includes/nghttp2/nghttp2ver.h
+    sed -i 's/@PACKAGE_VERSION@/1.52.0/;s/@PACKAGE_VERSION_NUM@/0x013400/' lib/includes/nghttp2/nghttp2ver.h
     popd
 }
 

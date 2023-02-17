@@ -1430,12 +1430,6 @@ typedef ssize_t (*nghttp2_recv_callback)(nghttp2_session *session, uint8_t *buf,
  * respectively.  The header name/value pairs are emitted via
  * :type:`nghttp2_on_header_callback`.
  *
- * For HEADERS, PUSH_PROMISE and DATA frames, this callback may be
- * called after stream is closed (see
- * :type:`nghttp2_on_stream_close_callback`).  The application should
- * check that stream is still alive using its own stream management or
- * :func:`nghttp2_session_get_stream_user_data()`.
- *
  * Only HEADERS and DATA frame can signal the end of incoming data.
  * If ``frame->hd.flags & NGHTTP2_FLAG_END_STREAM`` is nonzero, the
  * |frame| is the last frame from the remote peer in this stream.
