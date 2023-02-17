@@ -9,8 +9,8 @@ Synopsis
 .. parsed-literal::
 
  cmake-gui [<options>]
+ cmake-gui [<options>] -B <path-to-build> [-S <path-to-source>]
  cmake-gui [<options>] <path-to-source | path-to-existing-build>
- cmake-gui [<options>] -S <path-to-source> -B <path-to-build>
  cmake-gui [<options>] --browse-manual [<filename>]
 
 Description
