@@ -152,13 +152,16 @@ if(CMAKE_Fortran_COMPILE_OPTIONS_PREPROCESS_ON AND
   set_property(SOURCE preprocess3.f PROPERTY Fortran_PREPROCESS ON)
 endif()
 
-# Test that neither the compiler nor CMake performs unnecessary preprocessing.
-add_library(no_preprocess_target_lower STATIC no_preprocess_target_lower.f)
-target_compile_options(no_preprocess_target_lower PRIVATE -DINTEGER=nonsense)
-set_property(TARGET no_preprocess_target_lower PROPERTY Fortran_PREPROCESS OFF)
-add_library(no_preprocess_source_lower STATIC no_preprocess_source_lower.f)
-target_compile_options(no_preprocess_source_lower PRIVATE -DINTEGER=nonsense)
-set_property(SOURCE no_preprocess_source_lower.f PROPERTY Fortran_PREPROCESS OFF)
+# LCC < 1.24 has no way to disable Fortran preprocessor
+if(NOT CMAKE_Fortran_COMPILER_ID STREQUAL "LCC" OR CMAKE_Fortran_COMPILER_VERSION VERSION_GREATER_EQUAL "1.24.00")
+  # Test that neither the compiler nor CMake performs unnecessary preprocessing.
+  add_library(no_preprocess_target_lower STATIC no_preprocess_target_lower.f)
+  target_compile_options(no_preprocess_target_lower PRIVATE -DINTEGER=nonsense)
+  set_property(TARGET no_preprocess_target_lower PROPERTY Fortran_PREPROCESS OFF)
+  add_library(no_preprocess_source_lower STATIC no_preprocess_source_lower.f)
+  target_compile_options(no_preprocess_source_lower PRIVATE -DINTEGER=nonsense)
+  set_property(SOURCE no_preprocess_source_lower.f PROPERTY Fortran_PREPROCESS OFF)
+endif()
 
 # Test that we can explicitly not preprocess a target or source.
 # This will not work on certain compilers due to either missing a

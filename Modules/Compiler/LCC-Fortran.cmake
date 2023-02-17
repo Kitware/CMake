@@ -10,8 +10,11 @@ set(CMAKE_Fortran_PREPROCESS_SOURCE
 set(CMAKE_Fortran_FORMAT_FIXED_FLAG "-ffixed-form")
 set(CMAKE_Fortran_FORMAT_FREE_FLAG "-ffree-form")
 
-set(CMAKE_Fortran_COMPILE_OPTIONS_PREPROCESS_ON "-cpp")
-set(CMAKE_Fortran_COMPILE_OPTIONS_PREPROCESS_OFF "-nocpp")
+# LCC < 1.24.00 has a broken Fortran preprocessor
+if(CMAKE_Fortran_COMPILER_VERSION VERSION_GREATER_EQUAL "1.24.00")
+  set(CMAKE_Fortran_COMPILE_OPTIONS_PREPROCESS_ON "-cpp")
+  set(CMAKE_Fortran_COMPILE_OPTIONS_PREPROCESS_OFF "-nocpp")
+endif()
 
 set(CMAKE_Fortran_POSTPROCESS_FLAG "-fpreprocessed")
 
