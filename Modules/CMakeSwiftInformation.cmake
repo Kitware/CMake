@@ -72,9 +72,9 @@ if(CMAKE_GENERATOR STREQUAL "Xcode")
   # these options here will have no effect when compiling with the built-in driver,
   # and will explode violently, leaving build products in the source directory, when
   # using the old swift driver.
-  set(CMAKE_Swift_FLAGS_DEBUG_INIT "-Onone -g")
+  set(CMAKE_Swift_FLAGS_DEBUG_INIT "-Onone -g ${CMAKE_Swift_FLAGS_DEBUG_LINKER_FLAGS}")
   set(CMAKE_Swift_FLAGS_RELEASE_INIT "-O")
-  set(CMAKE_Swift_FLAGS_RELWITHDEBINFO_INIT "-O -g")
+  set(CMAKE_Swift_FLAGS_RELWITHDEBINFO_INIT "-O -g ${CMAKE_Swift_FLAGS_RELWITHDEBINFO_LINKER_FLAGS}")
   set(CMAKE_Swift_FLAGS_MINSIZEREL_INIT "-Osize")
 else()
   set(CMAKE_Swift_FLAGS_DEBUG_INIT "-Onone -g -incremental")
