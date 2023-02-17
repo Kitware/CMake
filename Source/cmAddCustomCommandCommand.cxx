@@ -49,7 +49,8 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
   bool append = false;
   bool uses_terminal = false;
   bool command_expand_lists = false;
-  bool depends_explicit_only = false;
+  bool depends_explicit_only =
+    mf.IsOn("CMAKE_ADD_CUSTOM_COMMAND_DEPENDS_EXPLICIT_ONLY");
   std::string implicit_depends_lang;
   cmImplicitDependsList implicit_depends;
 
