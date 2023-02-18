@@ -35,6 +35,7 @@ cmExternalMakefileProjectGeneratorFactory* cmExtraKateGenerator::GetFactory()
 // factory.AddSupportedGlobalGenerator("MSYS Makefiles");
 #endif
     factory.AddSupportedGlobalGenerator("Ninja");
+    factory.AddSupportedGlobalGenerator("Ninja Multi-Config");
     factory.AddSupportedGlobalGenerator("Unix Makefiles");
   }
 
@@ -48,7 +49,9 @@ void cmExtraKateGenerator::Generate()
   this->ProjectName = this->GenerateProjectName(
     lg->GetProjectName(), mf->GetSafeDefinition("CMAKE_BUILD_TYPE"),
     this->GetPathBasename(lg->GetBinaryDirectory()));
-  this->UseNinja = (this->GlobalGenerator->GetName() == "Ninja");
+  this->UseNinja =
+    ((this->GlobalGenerator->GetName() == "Ninja") ||
+     (this->GlobalGenerator->GetName() == "Ninja Multi-Config"));
 
   this->CreateKateProjectFile(*lg);
   this->CreateDummyKateProjectFile(*lg);
@@ -164,9 +167,11 @@ void cmExtraKateGenerator::WriteTargets(const cmLocalGenerator& lg,
         case cmStateEnums::OBJECT_LIBRARY: {
           this->AppendTarget(fout, targetName, make, makeArgs, currentDir,
                              homeOutputDir);
-          std::string fastTarget = cmStrCat(targetName, "/fast");
-          this->AppendTarget(fout, fastTarget, make, makeArgs, currentDir,
-                             homeOutputDir);
+          if (!this->UseNinja) {
+            std::string fastTarget = cmStrCat(targetName, "/fast");
+            this->AppendTarget(fout, fastTarget, make, makeArgs, currentDir,
+                               homeOutputDir);
+          }
 
         } break;
         default:
