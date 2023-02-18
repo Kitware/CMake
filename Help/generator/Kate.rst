@@ -28,5 +28,8 @@ This "extra" generator may be specified as:
 ``Kate - Ninja``
  Generate with :generator:`Ninja`.
 
+``Kate - Ninja Multi-Config``
+ Generate with :generator:`Ninja Multi-Config`.
+
 ``Kate - Unix Makefiles``
  Generate with :generator:`Unix Makefiles`.
