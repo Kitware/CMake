@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -655,6 +655,9 @@ static CURLcode multi_done(struct Curl_easy *data,
       result = CURLE_ABORTED_BY_CALLBACK;
   }
 
+  /* Inform connection filters that this transfer is done */
+  Curl_conn_ev_data_done(data, premature);
+
   process_pending_handles(data->multi); /* connection / multiplex */
 
   CONNCACHE_LOCK(data);
@@ -709,12 +712,12 @@ static CURLcode multi_done(struct Curl_easy *data,
            conn->proxy_negotiate_state == GSS_AUTHRECV)
 #endif
      ) || conn->bits.close
-       || (premature && !(conn->handler->flags & PROTOPT_STREAM))) {
+       || (premature && !Curl_conn_is_multiplex(conn, FIRSTSOCKET))) {
     DEBUGF(infof(data, "multi_done, not re-using connection=%ld, forbid=%d"
-                 ", close=%d, premature=%d, stream=%d",
+                 ", close=%d, premature=%d, conn_multiplex=%d",
                  conn->connection_id,
                  data->set.reuse_forbid, conn->bits.close, premature,
-                 (conn->handler->flags & PROTOPT_STREAM)));
+                 Curl_conn_is_multiplex(conn, FIRSTSOCKET)));
     connclose(conn, "disconnecting");
     Curl_conncache_remove_conn(data, conn, FALSE);
     CONNCACHE_UNLOCK(data);
@@ -954,7 +957,7 @@ void Curl_detach_connection(struct Curl_easy *data)
 {
   struct connectdata *conn = data->conn;
   if(conn) {
-    Curl_conn_detach_data(conn, data);
+    Curl_conn_ev_data_detach(conn, data);
     Curl_llist_remove(&conn->easyq, &data->conn_queue, NULL);
   }
   data->conn = NULL;
@@ -973,9 +976,9 @@ void Curl_attach_connection(struct Curl_easy *data,
   data->conn = conn;
   Curl_llist_insert_next(&conn->easyq, conn->easyq.tail, data,
                          &data->conn_queue);
-  Curl_conn_attach_data(conn, data);
   if(conn->handler->attach)
     conn->handler->attach(data, conn);
+  Curl_conn_ev_data_attach(conn, data);
 }
 
 static int domore_getsock(struct Curl_easy *data,
@@ -1002,11 +1005,7 @@ static int protocol_getsock(struct Curl_easy *data,
 {
   if(conn->handler->proto_getsock)
     return conn->handler->proto_getsock(data, conn, socks);
-  /* Backup getsock logic. Since there is a live socket in use, we must wait
-     for it or it will be removed from watching when the multi_socket API is
-     used. */
-  socks[0] = conn->sock[FIRSTSOCKET];
-  return GETSOCK_READSOCK(0) | GETSOCK_WRITESOCK(0);
+  return Curl_conn_get_select_socks(data, FIRSTSOCKET, socks);
 }
 
 /* returns bitmapped flags for this handle and its sockets. The 'socks[]'
@@ -1110,6 +1109,22 @@ CURLMcode curl_multi_fdset(struct Curl_multi *multi,
 
   return CURLM_OK;
 }
+
+#ifdef USE_WINSOCK
+/* Reset FD_WRITE for TCP sockets. Nothing is actually sent. UDP sockets can't
+ * be reset this way because an empty datagram would be sent. #9203
+ *
+ * "On Windows the internal state of FD_WRITE as returned from
+ * WSAEnumNetworkEvents is only reset after successful send()."
+ */
+static void reset_socket_fdwrite(curl_socket_t s)
+{
+  int t;
+  int l = (int)sizeof(t);
+  if(!getsockopt(s, SOL_SOCKET, SO_TYPE, (char *)&t, &l) && t == SOCK_STREAM)
+    send(s, NULL, 0, 0);
+}
+#endif
 
 #define NUM_POLLS_ON_STACK 10
 
@@ -1232,7 +1247,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
           s = sockbunch[i];
 #ifdef USE_WINSOCK
           mask |= FD_WRITE|FD_CONNECT|FD_CLOSE;
-          send(s, NULL, 0, 0); /* reset FD_WRITE */
+          reset_socket_fdwrite(s);
 #endif
           ufds[nfds].fd = s;
           ufds[nfds].events = POLLOUT;
@@ -1266,7 +1281,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
       mask |= FD_OOB;
     if(extra_fds[i].events & CURL_WAIT_POLLOUT) {
       mask |= FD_WRITE|FD_CONNECT|FD_CLOSE;
-      send(extra_fds[i].fd, NULL, 0, 0); /* reset FD_WRITE */
+      reset_socket_fdwrite(extra_fds[i].fd);
     }
     if(WSAEventSelect(extra_fds[i].fd, multi->wsa_event, mask) != 0) {
       if(ufds_malloc)
@@ -1861,6 +1876,15 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     multi_done(data, result, FALSE);
     multistate(data, MSTATE_COMPLETED);
   }
+
+#ifdef DEBUGBUILD
+  if(!multi->warned) {
+    infof(data, "!!! WARNING !!!");
+    infof(data, "This is a debug build of libcurl, "
+          "do not use in production.");
+    multi->warned = true;
+  }
+#endif
 
   do {
     /* A "stream" here is a logical stream if the protocol can handle that
@@ -3248,7 +3272,7 @@ CURLMcode curl_multi_setopt(struct Curl_multi *multi,
     multi->push_userp = va_arg(param, void *);
     break;
   case CURLMOPT_PIPELINING:
-    multi->multiplexing = va_arg(param, long) & CURLPIPE_MULTIPLEX;
+    multi->multiplexing = va_arg(param, long) & CURLPIPE_MULTIPLEX ? 1 : 0;
     break;
   case CURLMOPT_TIMERFUNCTION:
     multi->timer_cb = va_arg(param, curl_multi_timer_callback);

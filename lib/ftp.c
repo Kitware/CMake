@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -61,6 +61,7 @@
 #include "strcase.h"
 #include "vtls/vtls.h"
 #include "cfilters.h"
+#include "cf-socket.h"
 #include "connect.h"
 #include "strerror.h"
 #include "inet_ntop.h"
@@ -285,8 +286,8 @@ static CURLcode AcceptServerConnect(struct Curl_easy *data)
   conn->bits.do_more = FALSE;
 
   (void)curlx_nonblock(s, TRUE); /* enable non-blocking */
-  /* Replace any filter on SECONDARY with one listeing on this socket */
-  result = Curl_conn_socket_accepted_set(data, conn, SECONDARYSOCKET, &s);
+  /* Replace any filter on SECONDARY with one listening on this socket */
+  result = Curl_conn_tcp_accepted_set(data, conn, SECONDARYSOCKET, &s);
   if(result)
     return result;
 
@@ -819,26 +820,11 @@ static int ftp_domore_getsock(struct Curl_easy *data,
 
   if(FTP_STOP == ftpc->state) {
     int bits = GETSOCK_READSOCK(0);
-    bool any = FALSE;
 
     /* if stopped and still in this state, then we're also waiting for a
        connect on the secondary connection */
     socks[0] = conn->sock[FIRSTSOCKET];
-
-    if(!data->set.ftp_use_port) {
-      int s;
-      int i;
-      /* PORT is used to tell the server to connect to us, and during that we
-         don't do happy eyeballs, but we do if we connect to the server */
-      for(s = 1, i = 0; i<2; i++) {
-        if(conn->tempsock[i] != CURL_SOCKET_BAD) {
-          socks[s] = conn->tempsock[i];
-          bits |= GETSOCK_WRITESOCK(s++);
-          any = TRUE;
-        }
-      }
-    }
-    if(!any) {
+    if(conn->sock[SECONDARYSOCKET] != CURL_SOCKET_BAD) {
       socks[1] = conn->sock[SECONDARYSOCKET];
       bits |= GETSOCK_WRITESOCK(1) | GETSOCK_READSOCK(1);
     }
@@ -1024,9 +1010,9 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
 
     if(*addr != '\0') {
       /* attempt to get the address of the given interface name */
-      switch(Curl_if2ip(conn->ip_addr->ai_family,
+      switch(Curl_if2ip(conn->remote_addr->family,
 #ifdef ENABLE_IPV6
-                        Curl_ipv6_scope(conn->ip_addr->ai_addr),
+                        Curl_ipv6_scope(&conn->remote_addr->sa_addr),
                         conn->scope_id,
 #endif
                         addr, hbuf, sizeof(hbuf))) {
@@ -1097,7 +1083,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
   portsock = CURL_SOCKET_BAD;
   error = 0;
   for(ai = res; ai; ai = ai->ai_next) {
-    if(Curl_socket(data, ai, NULL, &portsock)) {
+    if(Curl_socket_open(data, ai, NULL, conn->transport, &portsock)) {
       error = SOCKERRNO;
       continue;
     }
@@ -1266,9 +1252,8 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
   /* store which command was sent */
   ftpc->count1 = fcmd;
 
-  /* Replace any filter on SECONDARY with one listeing on this socket */
-  result = Curl_conn_socket_accepted_set(data, conn, SECONDARYSOCKET,
-                                         &portsock);
+  /* Replace any filter on SECONDARY with one listening on this socket */
+  result = Curl_conn_tcp_listen_set(data, conn, SECONDARYSOCKET, &portsock);
   if(result)
     goto out;
   portsock = CURL_SOCKET_BAD; /* now held in filter */
@@ -1279,7 +1264,7 @@ out:
     state(data, FTP_STOP);
   }
   if(portsock != CURL_SOCKET_BAD)
-    Curl_closesocket(data, conn, portsock);
+    Curl_socket_close(data, conn, portsock);
   free(addr);
   return result;
 }
@@ -1954,7 +1939,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
 
     /* postponed address resolution in case of tcp fastopen */
     if(conn->bits.tcp_fastopen && !conn->bits.reuse && !ftpc->newhost[0]) {
-      Curl_conninfo_remote(data, conn, conn->sock[FIRSTSOCKET]);
+      Curl_conn_ev_update_info(data, conn);
       Curl_safefree(ftpc->newhost);
       ftpc->newhost = strdup(control_address(conn));
       if(!ftpc->newhost)
@@ -2569,13 +2554,11 @@ static CURLcode ftp_state_loggedin(struct Curl_easy *data)
 
 /* for USER and PASS responses */
 static CURLcode ftp_state_user_resp(struct Curl_easy *data,
-                                    int ftpcode,
-                                    ftpstate instate)
+                                    int ftpcode)
 {
   CURLcode result = CURLE_OK;
   struct connectdata *conn = data->conn;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
-  (void)instate; /* no use for this yet */
 
   /* some need password anyway, and others just return 2xx ignored */
   if((ftpcode == 331) && (ftpc->state == FTP_USER)) {
@@ -2670,7 +2653,7 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
         /* 230 User logged in - already! Take as 220 if TLS required. */
         if(data->set.use_ssl <= CURLUSESSL_TRY ||
            conn->bits.ftp_use_control_ssl)
-          return ftp_state_user_resp(data, ftpcode, ftpc->state);
+          return ftp_state_user_resp(data, ftpcode);
       }
       else if(ftpcode != 220) {
         failf(data, "Got a %03d ftp-server response when 220 was expected",
@@ -2742,7 +2725,7 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
       if((ftpcode == 234) || (ftpcode == 334)) {
         /* this was BLOCKING, keep it so for now */
         bool done;
-        if(!Curl_conn_is_ssl(data, FIRSTSOCKET)) {
+        if(!Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
           result = Curl_ssl_cfilter_add(data, conn, FIRSTSOCKET);
           if(result) {
             /* we failed and bail out */
@@ -2775,7 +2758,7 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
 
     case FTP_USER:
     case FTP_PASS:
-      result = ftp_state_user_resp(data, ftpcode, ftpc->state);
+      result = ftp_state_user_resp(data, ftpcode);
       break;
 
     case FTP_ACCT:

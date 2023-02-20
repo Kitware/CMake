@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_VQUIC_NGTCP2_H
-#define HEADER_CURL_VQUIC_NGTCP2_H
+#ifndef HEADER_CURL_VQUIC_QUIC_INT_H
+#define HEADER_CURL_VQUIC_QUIC_INT_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,68 +26,47 @@
 
 #include "curl_setup.h"
 
-#ifdef USE_NGTCP2
+#ifdef ENABLE_QUIC
 
-#ifdef HAVE_NETINET_UDP_H
-#include <netinet/udp.h>
-#endif
-
-#include <ngtcp2/ngtcp2_crypto.h>
-#include <nghttp3/nghttp3.h>
-#ifdef USE_OPENSSL
-#include <openssl/ssl.h>
-#elif defined(USE_WOLFSSL)
-#include <wolfssl/options.h>
-#include <wolfssl/ssl.h>
-#include <wolfssl/quic.h>
-#endif
-
-struct gtls_instance;
-
-struct blocked_pkt {
+struct vquic_blocked_pkt {
   const uint8_t *pkt;
   size_t pktlen;
   size_t gsolen;
 };
 
-struct quicsocket {
-  struct connectdata *conn; /* point back to the connection */
-  ngtcp2_conn *qconn;
-  ngtcp2_cid dcid;
-  ngtcp2_cid scid;
-  uint32_t version;
-  ngtcp2_settings settings;
-  ngtcp2_transport_params transport_params;
-  ngtcp2_connection_close_error last_error;
-  ngtcp2_crypto_conn_ref conn_ref;
-#ifdef USE_OPENSSL
-  SSL_CTX *sslctx;
-  SSL *ssl;
-#elif defined(USE_GNUTLS)
-  struct gtls_instance *gtls;
-#elif defined(USE_WOLFSSL)
-  WOLFSSL_CTX *sslctx;
-  WOLFSSL *ssl;
-#endif
+struct cf_quic_ctx {
+  curl_socket_t sockfd;
   struct sockaddr_storage local_addr;
   socklen_t local_addrlen;
-  bool no_gso;
+  struct vquic_blocked_pkt blocked_pkt[2];
   uint8_t *pktbuf;
-  size_t pktbuflen;
   /* the number of entries in blocked_pkt */
   size_t num_blocked_pkt;
-  /* the number of processed entries in blocked_pkt */
   size_t num_blocked_pkt_sent;
   /* the packets blocked by sendmsg (EAGAIN or EWOULDBLOCK) */
-  struct blocked_pkt blocked_pkt[2];
-
-  nghttp3_conn *h3conn;
-  nghttp3_settings h3settings;
-  int qlogfd;
+  size_t pktbuflen;
+  /* the number of processed entries in blocked_pkt */
+  bool no_gso;
 };
 
-#include "urldata.h"
+CURLcode vquic_ctx_init(struct cf_quic_ctx *qctx, size_t pktbuflen);
+void vquic_ctx_free(struct cf_quic_ctx *qctx);
 
-#endif
+CURLcode vquic_send_packet(struct Curl_cfilter *cf,
+                           struct Curl_easy *data,
+                           struct cf_quic_ctx *qctx,
+                           const uint8_t *pkt, size_t pktlen, size_t gsolen,
+                           size_t *psent);
 
-#endif /* HEADER_CURL_VQUIC_NGTCP2_H */
+void vquic_push_blocked_pkt(struct Curl_cfilter *cf,
+                            struct cf_quic_ctx *qctx,
+                            const uint8_t *pkt, size_t pktlen, size_t gsolen);
+
+CURLcode vquic_send_blocked_pkt(struct Curl_cfilter *cf,
+                                struct Curl_easy *data,
+                                struct cf_quic_ctx *qctx);
+
+
+#endif /* !ENABLE_QUIC */
+
+#endif /* HEADER_CURL_VQUIC_QUIC_INT_H */

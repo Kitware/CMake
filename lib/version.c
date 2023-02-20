@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -24,12 +24,16 @@
 
 #include "curl_setup.h"
 
+#ifdef USE_NGHTTP2
+#include <nghttp2/nghttp2.h>
+#endif
+
 #include <curl/curl.h>
 #include "urldata.h"
 #include "vtls/vtls.h"
 #include "http2.h"
 #include "vssh/ssh.h"
-#include "quic.h"
+#include "vquic/vquic.h"
 #include "curl_printf.h"
 #include "easy_lock.h"
 

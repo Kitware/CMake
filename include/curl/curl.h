@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -167,7 +167,7 @@ typedef enum {
   CURLSSLBACKEND_SECURETRANSPORT = 9,
   CURLSSLBACKEND_AXTLS                  CURL_DEPRECATED(7.61.0, "") = 10,
   CURLSSLBACKEND_MBEDTLS = 11,
-  CURLSSLBACKEND_MESALINK = 12,
+  CURLSSLBACKEND_MESALINK               CURL_DEPRECATED(7.82.0, "") = 12,
   CURLSSLBACKEND_BEARSSL = 13,
   CURLSSLBACKEND_RUSTLS = 14
 } curl_sslbackend;
@@ -248,7 +248,7 @@ typedef int (*curl_xferinfo_callback)(void *clientp,
 
 #ifndef CURL_MAX_READ_SIZE
   /* The maximum receive buffer size configurable via CURLOPT_BUFFERSIZE. */
-#define CURL_MAX_READ_SIZE 524288
+#define CURL_MAX_READ_SIZE (10*1024*1024)
 #endif
 
 #ifndef CURL_MAX_WRITE_SIZE
@@ -2259,8 +2259,13 @@ enum {
   CURL_HTTP_VERSION_2TLS, /* use version 2 for HTTPS, version 1.1 for HTTP */
   CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE,  /* please use HTTP 2 without HTTP/1.1
                                            Upgrade */
-  CURL_HTTP_VERSION_3 = 30, /* Makes use of explicit HTTP/3 without fallback.
-                               Use CURLOPT_ALTSVC to enable HTTP/3 upgrade */
+  CURL_HTTP_VERSION_3 = 30, /* Use HTTP/3, fallback to HTTP/2 or HTTP/1 if
+                               needed. For HTTPS only. For HTTP, this option
+                               makes libcurl return error. */
+  CURL_HTTP_VERSION_3ONLY = 31, /* Use HTTP/3 without fallback. For HTTPS
+                                   only. For HTTP, this makes libcurl
+                                   return error. */
+
   CURL_HTTP_VERSION_LAST /* *ILLEGAL* http version */
 };
 
@@ -2953,6 +2958,7 @@ typedef enum {
   CURL_LOCK_DATA_SSL_SESSION,
   CURL_LOCK_DATA_CONNECT,
   CURL_LOCK_DATA_PSL,
+  CURL_LOCK_DATA_HSTS,
   CURL_LOCK_DATA_LAST
 } curl_lock_data;
 

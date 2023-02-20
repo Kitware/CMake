@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -62,6 +62,7 @@
 #include "cookie.h"
 #include "vauth/vauth.h"
 #include "vtls/vtls.h"
+#include "vquic/vquic.h"
 #include "http_digest.h"
 #include "http_ntlm.h"
 #include "curl_ntlm_wb.h"
@@ -150,7 +151,7 @@ const struct Curl_handler Curl_handler_ws = {
   http_getsock_do,                      /* doing_getsock */
   ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
-  ZERO_NULL,                            /* disconnect */
+  Curl_ws_disconnect,                   /* disconnect */
   ZERO_NULL,                            /* readwrite */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
@@ -204,7 +205,7 @@ const struct Curl_handler Curl_handler_wss = {
   http_getsock_do,                      /* doing_getsock */
   ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
-  ZERO_NULL,                            /* disconnect */
+  Curl_ws_disconnect,                   /* disconnect */
   ZERO_NULL,                            /* readwrite */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
@@ -217,41 +218,6 @@ const struct Curl_handler Curl_handler_wss = {
 #endif
 
 #endif
-
-static CURLcode h3_setup_conn(struct Curl_easy *data,
-                              struct connectdata *conn)
-{
-#ifdef ENABLE_QUIC
-  /* We want HTTP/3 directly, setup the filter chain ourself,
-   * overriding the default behaviour. */
-  DEBUGASSERT(conn->transport == TRNSPRT_QUIC);
-
-  if(!(conn->handler->flags & PROTOPT_SSL)) {
-    failf(data, "HTTP/3 requested for non-HTTPS URL");
-    return CURLE_URL_MALFORMAT;
-  }
-#ifndef CURL_DISABLE_PROXY
-  if(conn->bits.socksproxy) {
-    failf(data, "HTTP/3 is not supported over a SOCKS proxy");
-    return CURLE_URL_MALFORMAT;
-  }
-  if(conn->bits.httpproxy && conn->bits.tunnel_proxy) {
-    failf(data, "HTTP/3 is not supported over a HTTP proxy");
-    return CURLE_URL_MALFORMAT;
-  }
-#endif
-
-  DEBUGF(infof(data, "HTTP/3 direct conn setup(conn #%ld, index=%d)",
-         conn->connection_id, FIRSTSOCKET));
-  return Curl_conn_socket_set(data, conn, FIRSTSOCKET);
-
-#else /* ENABLE_QUIC */
-  (void)conn;
-  (void)data;
-  DEBUGF(infof(data, "QUIC is not supported in this build"));
-  return CURLE_NOT_BUILT_IN;
-#endif /* !ENABLE_QUIC */
-}
 
 static CURLcode http_setup_conn(struct Curl_easy *data,
                                 struct connectdata *conn)
@@ -268,19 +234,16 @@ static CURLcode http_setup_conn(struct Curl_easy *data,
   Curl_mime_initpart(&http->form);
   data->req.p.http = http;
 
-  if(data->state.httpwant == CURL_HTTP_VERSION_3) {
+  if((data->state.httpwant == CURL_HTTP_VERSION_3)
+     || (data->state.httpwant == CURL_HTTP_VERSION_3ONLY)) {
+    CURLcode result = Curl_conn_may_http3(data, conn);
+    if(result)
+      return result;
+
+     /* TODO: HTTP lower version eyeballing */
     conn->transport = TRNSPRT_QUIC;
   }
 
-  if(conn->transport == TRNSPRT_QUIC) {
-    return h3_setup_conn(data, conn);
-  }
-  else {
-    if(!CONN_INUSE(conn))
-      /* if not already multi-using, setup connection details */
-      Curl_http2_setup_conn(conn);
-    Curl_http2_setup_req(data);
-  }
   return CURLE_OK;
 }
 
@@ -1256,8 +1219,8 @@ static size_t readmoredata(char *buffer,
                            size_t nitems,
                            void *userp)
 {
-  struct Curl_easy *data = (struct Curl_easy *)userp;
-  struct HTTP *http = data->req.p.http;
+  struct HTTP *http = (struct HTTP *)userp;
+  struct Curl_easy *data = http->backup.data;
   size_t fullsize = size * nitems;
 
   if(!http->postsize)
@@ -1309,6 +1272,7 @@ static size_t readmoredata(char *buffer,
  */
 CURLcode Curl_buffer_send(struct dynbuf *in,
                           struct Curl_easy *data,
+                          struct HTTP *http,
                           /* add the number of sent bytes to this
                              counter */
                           curl_off_t *bytes_written,
@@ -1321,14 +1285,13 @@ CURLcode Curl_buffer_send(struct dynbuf *in,
   char *ptr;
   size_t size;
   struct connectdata *conn = data->conn;
-  struct HTTP *http = data->req.p.http;
   size_t sendsize;
   curl_socket_t sockfd;
   size_t headersize;
 
   DEBUGASSERT(socketindex <= SECONDARYSOCKET);
 
-  sockfd = conn->sock[socketindex];
+  sockfd = Curl_conn_get_socket(data, socketindex);
 
   /* The looping below is required since we use non-blocking sockets, but due
      to the circumstances we will just loop and try again and again etc */
@@ -1456,10 +1419,11 @@ CURLcode Curl_buffer_send(struct dynbuf *in,
         http->backup.fread_in = data->state.in;
         http->backup.postdata = http->postdata;
         http->backup.postsize = http->postsize;
+        http->backup.data = data;
 
         /* set the new pointers for the request-sending */
         data->state.fread_func = (curl_read_callback)readmoredata;
-        data->state.in = (void *)data;
+        data->state.in = (void *)http;
         http->postdata = ptr;
         http->postsize = (curl_off_t)size;
 
@@ -1468,7 +1432,6 @@ CURLcode Curl_buffer_send(struct dynbuf *in,
 
         http->send_buffer = *in; /* copy the whole struct */
         http->sending = HTTPSEND_REQUEST;
-
         return CURLE_OK;
       }
       http->sending = HTTPSEND_BODY;
@@ -1579,8 +1542,8 @@ static int http_getsock_do(struct Curl_easy *data,
                            curl_socket_t *socks)
 {
   /* write mode */
-  (void)data;
-  socks[0] = conn->sock[FIRSTSOCKET];
+  (void)conn;
+  socks[0] = Curl_conn_get_socket(data, FIRSTSOCKET);
   return GETSOCK_WRITESOCK(0);
 }
 
@@ -1610,8 +1573,6 @@ CURLcode Curl_http_done(struct Curl_easy *data,
     return CURLE_OK;
 
   Curl_dyn_free(&http->send_buffer);
-  Curl_http2_done(data, premature);
-  Curl_quic_done(data, premature);
   Curl_mime_cleanpart(&http->form);
   Curl_dyn_reset(&data->state.headerb);
   Curl_hyper_done(data);
@@ -1664,17 +1625,10 @@ bool Curl_use_http_1_1plus(const struct Curl_easy *data,
 static const char *get_http_string(const struct Curl_easy *data,
                                    const struct connectdata *conn)
 {
-#ifdef ENABLE_QUIC
-  if((data->state.httpwant == CURL_HTTP_VERSION_3) ||
-     (conn->httpversion == 30))
+  if(Curl_conn_is_http3(data, conn, FIRSTSOCKET))
     return "3";
-#endif
-
-#ifdef USE_NGHTTP2
-  if(conn->proto.httpc.h2)
+  if(Curl_conn_is_http2(data, conn, FIRSTSOCKET))
     return "2";
-#endif
-
   if(Curl_use_http_1_1plus(data, conn))
     return "1.1";
 
@@ -2359,7 +2313,7 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
   curl_off_t included_body = 0;
 #else
   /* from this point down, this function should not be used */
-#define Curl_buffer_send(a,b,c,d,e) CURLE_OK
+#define Curl_buffer_send(a,b,c,d,e,f) CURLE_OK
 #endif
   CURLcode result = CURLE_OK;
   struct HTTP *http = data->req.p.http;
@@ -2403,7 +2357,8 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
     Curl_pgrsSetUploadSize(data, http->postsize);
 
     /* this sends the buffer and frees all the buffer resources */
-    result = Curl_buffer_send(r, data, &data->info.request_size, 0,
+    result = Curl_buffer_send(r, data, data->req.p.http,
+                              &data->info.request_size, 0,
                               FIRSTSOCKET);
     if(result)
       failf(data, "Failed sending PUT request");
@@ -2424,7 +2379,8 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
       if(result)
         return result;
 
-      result = Curl_buffer_send(r, data, &data->info.request_size, 0,
+      result = Curl_buffer_send(r, data, data->req.p.http,
+                                &data->info.request_size, 0,
                                 FIRSTSOCKET);
       if(result)
         failf(data, "Failed sending POST request");
@@ -2440,8 +2396,7 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
        we don't upload data chunked, as RFC2616 forbids us to set both
        kinds of headers (Transfer-Encoding: chunked and Content-Length) */
     if(http->postsize != -1 && !data->req.upload_chunky &&
-       (conn->bits.authneg ||
-        !Curl_checkheaders(data, STRCONST("Content-Length")))) {
+       (!Curl_checkheaders(data, STRCONST("Content-Length")))) {
       /* we allow replacing this header if not during auth negotiation,
          although it isn't very wise to actually set your own */
       result = Curl_dyn_addf(r,
@@ -2495,7 +2450,8 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
     http->sending = HTTPSEND_BODY;
 
     /* this sends the buffer and frees all the buffer resources */
-    result = Curl_buffer_send(r, data, &data->info.request_size, 0,
+    result = Curl_buffer_send(r, data, data->req.p.http,
+                              &data->info.request_size, 0,
                               FIRSTSOCKET);
     if(result)
       failf(data, "Failed sending POST request");
@@ -2561,7 +2517,7 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
 
       /* In HTTP2, we send request body in DATA frame regardless of
          its size. */
-      if(conn->httpversion != 20 &&
+      if(conn->httpversion < 20 &&
          !data->state.expect100header &&
          (http->postsize < MAX_INITIAL_POST_SIZE)) {
         /* if we don't use expect: 100  AND
@@ -2612,11 +2568,10 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
       else {
         /* A huge POST coming up, do data separate from the request */
         http->postdata = data->set.postfields;
-
         http->sending = HTTPSEND_BODY;
-
+        http->backup.data = data;
         data->state.fread_func = (curl_read_callback)readmoredata;
-        data->state.in = (void *)data;
+        data->state.in = (void *)http;
 
         /* set the upload size to the progress meter */
         Curl_pgrsSetUploadSize(data, http->postsize);
@@ -2655,7 +2610,8 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
       }
     }
     /* issue the request */
-    result = Curl_buffer_send(r, data, &data->info.request_size, included_body,
+    result = Curl_buffer_send(r, data, data->req.p.http,
+                              &data->info.request_size, included_body,
                               FIRSTSOCKET);
 
     if(result)
@@ -2671,7 +2627,8 @@ CURLcode Curl_http_bodysend(struct Curl_easy *data, struct connectdata *conn,
       return result;
 
     /* issue the request */
-    result = Curl_buffer_send(r, data, &data->info.request_size, 0,
+    result = Curl_buffer_send(r, data, data->req.p.http,
+                              &data->info.request_size, 0,
                               FIRSTSOCKET);
     if(result)
       failf(data, "Failed sending HTTP request");
@@ -3021,50 +2978,27 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
      the rest of the request in the PERFORM phase. */
   *done = TRUE;
 
-  if(conn->transport != TRNSPRT_QUIC) {
-    if(conn->httpversion < 20) { /* unless the connection is re-used and
-                                    already http2 */
-      switch(conn->alpn) {
-      case CURL_HTTP_VERSION_2:
-        conn->httpversion = 20; /* we know we're on HTTP/2 now */
-
-        result = Curl_http2_switched(data, NULL, 0);
-        if(result)
-          return result;
-        break;
-      case CURL_HTTP_VERSION_1_1:
-        /* continue with HTTP/1.1 when explicitly requested */
-        break;
-      default:
-        /* Check if user wants to use HTTP/2 with clear TCP */
-#ifdef USE_NGHTTP2
-        if(data->state.httpwant == CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE) {
-#ifndef CURL_DISABLE_PROXY
-          if(conn->bits.httpproxy && !conn->bits.tunnel_proxy) {
-            /* We don't support HTTP/2 proxies yet. Also it's debatable
-               whether or not this setting should apply to HTTP/2 proxies. */
-            infof(data, "Ignoring HTTP/2 prior knowledge due to proxy");
-            break;
-          }
-#endif
-          DEBUGF(infof(data, "HTTP/2 over clean TCP"));
-          conn->httpversion = 20;
-
-          result = Curl_http2_switched(data, NULL, 0);
-          if(result)
-            return result;
-        }
-#endif
-        break;
-      }
-    }
-    else {
-      /* prepare for an http2 request */
-      result = Curl_http2_setup(data, conn);
+  switch(conn->alpn) {
+  case CURL_HTTP_VERSION_3:
+    DEBUGASSERT(Curl_conn_is_http3(data, conn, FIRSTSOCKET));
+    break;
+  case CURL_HTTP_VERSION_2:
+    DEBUGASSERT(Curl_conn_is_http2(data, conn, FIRSTSOCKET));
+    break;
+  case CURL_HTTP_VERSION_1_1:
+    /* continue with HTTP/1.1 when explicitly requested */
+    break;
+  default:
+    /* Check if user wants to use HTTP/2 with clear TCP */
+    if(Curl_http2_may_switch(data, conn, FIRSTSOCKET)) {
+      DEBUGF(infof(data, "HTTP/2 over clean TCP"));
+      result = Curl_http2_switch(data, conn, FIRSTSOCKET);
       if(result)
         return result;
     }
+    break;
   }
+
   http = data->req.p.http;
   DEBUGASSERT(http);
 
@@ -3224,7 +3158,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   }
 
   if(!(conn->handler->flags&PROTOPT_SSL) &&
-     conn->httpversion != 20 &&
+     conn->httpversion < 20 &&
      (data->state.httpwant == CURL_HTTP_VERSION_2)) {
     /* append HTTP2 upgrade magic stuff to the HTTP request if it isn't done
        over SSL */
@@ -3236,8 +3170,10 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   }
 
   result = Curl_http_cookies(data, conn, &req);
+#ifdef USE_WEBSOCKETS
   if(!result && conn->handler->protocol&(CURLPROTO_WS|CURLPROTO_WSS))
     result = Curl_ws_request(data, &req);
+#endif
   if(!result)
     result = Curl_add_timecondition(data, &req);
   if(!result)
@@ -3282,7 +3218,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     }
   }
 
-  if((conn->httpversion == 20) && data->req.upload_chunky)
+  if((conn->httpversion >= 20) && data->req.upload_chunky)
     /* upload_chunky was set above to set up the request in a chunky fashion,
        but is disabled here again to avoid that the chunked encoded version is
        actually used when sending the request body over h2 */
@@ -3669,7 +3605,8 @@ CURLcode Curl_http_header(struct Curl_easy *data, struct connectdata *conn,
 #endif
             )) {
     /* the ALPN of the current request */
-    enum alpnid id = (conn->httpversion == 20) ? ALPN_h2 : ALPN_h1;
+    enum alpnid id = (conn->httpversion == 30)? ALPN_h3 :
+                       (conn->httpversion == 20) ? ALPN_h2 : ALPN_h1;
     result = Curl_altsvc_parse(data, data->asi,
                                headp + strlen("Alt-Svc:"),
                                id, conn->host.name,
@@ -3963,7 +3900,8 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
 
             /* switch to http2 now. The bytes after response headers
                are also processed here, otherwise they are lost. */
-            result = Curl_http2_switched(data, k->str, *nread);
+            result = Curl_http2_upgrade(data, conn, FIRSTSOCKET,
+                                        k->str, *nread);
             if(result)
               return result;
             *nread = 0;
@@ -3971,7 +3909,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
 #ifdef USE_WEBSOCKETS
           else if(k->upgr101 == UPGR101_WS) {
             /* verify the response */
-            result = Curl_ws_accept(data);
+            result = Curl_ws_accept(data, k->str, *nread);
             if(result)
               return result;
             k->header = FALSE; /* no more header to parse! */
@@ -4191,11 +4129,8 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
            stream.  In order to do this, we keep reading until we
            close the stream. */
         if(0 == k->maxdownload
-#if defined(USE_NGHTTP2)
-           && !((conn->handler->protocol & PROTO_FAMILY_HTTP) &&
-                conn->httpversion == 20)
-#endif
-           )
+           && !Curl_conn_is_http2(data, conn, FIRSTSOCKET)
+           && !Curl_conn_is_http3(data, conn, FIRSTSOCKET))
           *stop_reading = TRUE;
 
         if(*stop_reading) {
@@ -4290,7 +4225,6 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
           }
           if(conn->httpversion < 20) {
             conn->bundle->multiuse = BUNDLE_NO_MULTIUSE;
-            infof(data, "Mark bundle as not supporting multiuse");
           }
         }
         else if(!nc) {

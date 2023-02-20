@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -84,7 +84,7 @@ static ssize_t gtls_push(void *s, const void *buf, size_t blen)
 {
   struct Curl_cfilter *cf = s;
   struct ssl_connect_data *connssl = cf->ctx;
-  struct Curl_easy *data = connssl->call_data;
+  struct Curl_easy *data = CF_DATA_CURRENT(cf);
   ssize_t nwritten;
   CURLcode result;
 
@@ -102,7 +102,7 @@ static ssize_t gtls_pull(void *s, void *buf, size_t blen)
 {
   struct Curl_cfilter *cf = s;
   struct ssl_connect_data *connssl = cf->ctx;
-  struct Curl_easy *data = connssl->call_data;
+  struct Curl_easy *data = CF_DATA_CURRENT(cf);
   ssize_t nread;
   CURLcode result;
 
@@ -214,7 +214,7 @@ static CURLcode handshake(struct Curl_cfilter *cf,
   struct ssl_connect_data *connssl = cf->ctx;
   struct ssl_backend_data *backend = connssl->backend;
   gnutls_session_t session;
-  curl_socket_t sockfd = cf->conn->sock[cf->sockindex];
+  curl_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
 
   DEBUGASSERT(backend);
   session = backend->gtls.session;
@@ -434,12 +434,10 @@ CURLcode gtls_client_init(struct Curl_easy *data,
   }
 
 #ifdef USE_GNUTLS_SRP
-  if((config->authtype == CURL_TLSAUTH_SRP) &&
-     Curl_auth_allowed_to_host(data)) {
+  if(config->username && Curl_auth_allowed_to_host(data)) {
     infof(data, "Using TLS-SRP username: %s", config->username);
 
-    rc = gnutls_srp_allocate_client_credentials(
-           &gtls->srp_client_cred);
+    rc = gnutls_srp_allocate_client_credentials(&gtls->srp_client_cred);
     if(rc != GNUTLS_E_SUCCESS) {
       failf(data, "gnutls_srp_allocate_client_cred() failed: %s",
             gnutls_strerror(rc));
@@ -581,7 +579,7 @@ CURLcode gtls_client_init(struct Curl_easy *data,
 #ifdef USE_GNUTLS_SRP
   /* Only add SRP to the cipher list if SRP is requested. Otherwise
    * GnuTLS will disable TLS 1.3 support. */
-  if(config->authtype == CURL_TLSAUTH_SRP) {
+  if(config->username) {
     size_t len = strlen(prioritylist);
 
     char *prioritysrp = malloc(len + sizeof(GNUTLS_SRP) + 1);
@@ -646,7 +644,7 @@ CURLcode gtls_client_init(struct Curl_easy *data,
 
 #ifdef USE_GNUTLS_SRP
   /* put the credentials to the current session */
-  if(config->authtype == CURL_TLSAUTH_SRP) {
+  if(config->username) {
     rc = gnutls_credentials_set(gtls->session, GNUTLS_CRD_SRP,
                                 gtls->srp_client_cred);
     if(rc != GNUTLS_E_SUCCESS) {
@@ -700,32 +698,22 @@ gtls_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   if(result)
     return result;
 
-  if(cf->conn->bits.tls_enable_alpn) {
-    int cur = 0;
-    gnutls_datum_t protocols[2];
+  if(connssl->alpn) {
+    struct alpn_proto_buf proto;
+    gnutls_datum_t alpn[ALPN_ENTRIES_MAX];
+    size_t i;
 
-#ifdef USE_HTTP2
-    if(data->state.httpwant >= CURL_HTTP_VERSION_2
-#ifndef CURL_DISABLE_PROXY
-       && (!Curl_ssl_cf_is_proxy(cf) || !cf->conn->bits.tunnel_proxy)
-#endif
-       ) {
-      protocols[cur].data = (unsigned char *)ALPN_H2;
-      protocols[cur].size = ALPN_H2_LENGTH;
-      cur++;
-      infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_H2);
+    for(i = 0; i < connssl->alpn->count; ++i) {
+      alpn[i].data = (unsigned char *)connssl->alpn->entries[i];
+      alpn[i].size = (unsigned)strlen(connssl->alpn->entries[i]);
     }
-#endif
-
-    protocols[cur].data = (unsigned char *)ALPN_HTTP_1_1;
-    protocols[cur].size = ALPN_HTTP_1_1_LENGTH;
-    cur++;
-    infof(data, VTLS_INFOF_ALPN_OFFER_1STR, ALPN_HTTP_1_1);
-
-    if(gnutls_alpn_set_protocols(backend->gtls.session, protocols, cur, 0)) {
+    if(gnutls_alpn_set_protocols(backend->gtls.session, alpn,
+                                 (unsigned)connssl->alpn->count, 0)) {
       failf(data, "failed setting ALPN");
       return CURLE_SSL_CONNECT_ERROR;
     }
+    Curl_alpn_to_proto_str(&proto, connssl->alpn);
+    infof(data, VTLS_INFOF_ALPN_OFFER_1STR, proto.data);
   }
 
   /* This might be a reconnect, so we check for a session ID in the cache
@@ -860,10 +848,8 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
        config->verifyhost ||
        config->issuercert) {
 #ifdef USE_GNUTLS_SRP
-      if(ssl_config->primary.authtype == CURL_TLSAUTH_SRP
-         && ssl_config->primary.username
-         && !config->verifypeer
-         && gnutls_cipher_get(session)) {
+      if(ssl_config->primary.username && !config->verifypeer &&
+         gnutls_cipher_get(session)) {
         /* no peer cert, but auth is ok if we have SRP user and cipher and no
            peer verify */
       }
@@ -1271,28 +1257,10 @@ static CURLcode gtls_verifyserver(struct Curl_cfilter *cf,
     int rc;
 
     rc = gnutls_alpn_get_selected_protocol(session, &proto);
-    if(rc == 0) {
-      infof(data, VTLS_INFOF_ALPN_ACCEPTED_LEN_1STR, proto.size,
-            proto.data);
-
-#ifdef USE_HTTP2
-      if(proto.size == ALPN_H2_LENGTH &&
-         !memcmp(ALPN_H2, proto.data,
-                 ALPN_H2_LENGTH)) {
-        cf->conn->alpn = CURL_HTTP_VERSION_2;
-      }
-      else
-#endif
-      if(proto.size == ALPN_HTTP_1_1_LENGTH &&
-         !memcmp(ALPN_HTTP_1_1, proto.data, ALPN_HTTP_1_1_LENGTH)) {
-        cf->conn->alpn = CURL_HTTP_VERSION_1_1;
-      }
-    }
+    if(rc == 0)
+      Curl_alpn_set_negotiated(cf, data, proto.data, proto.size);
     else
-      infof(data, VTLS_INFOF_NO_ALPN);
-
-    Curl_multiuse_state(data, cf->conn->alpn == CURL_HTTP_VERSION_2 ?
-                        BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
+      Curl_alpn_set_negotiated(cf, data, NULL, 0);
   }
 
   if(ssl_config->primary.sessionid) {
@@ -1516,7 +1484,7 @@ static int gtls_shutdown(struct Curl_cfilter *cf,
     char buf[120];
 
     while(!done) {
-      int what = SOCKET_READABLE(cf->conn->sock[cf->sockindex],
+      int what = SOCKET_READABLE(Curl_conn_cf_get_socket(cf, data),
                                  SSL_SHUTDOWN_TIMEOUT);
       if(what > 0) {
         /* Something to read, let's do it and hope that it is the close
@@ -1556,8 +1524,7 @@ static int gtls_shutdown(struct Curl_cfilter *cf,
   gnutls_certificate_free_credentials(backend->gtls.cred);
 
 #ifdef USE_GNUTLS_SRP
-  if(ssl_config->primary.authtype == CURL_TLSAUTH_SRP
-     && ssl_config->primary.username != NULL)
+  if(ssl_config->primary.username)
     gnutls_srp_free_client_credentials(backend->gtls.srp_client_cred);
 #endif
 

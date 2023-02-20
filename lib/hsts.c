@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2020 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -39,6 +39,7 @@
 #include "parsedate.h"
 #include "fopen.h"
 #include "rename.h"
+#include "share.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -425,14 +426,23 @@ static CURLcode hsts_add(struct hsts *h, char *line)
   if(2 == rc) {
     time_t expires = strcmp(date, UNLIMITED) ? Curl_getdate_capped(date) :
       TIME_T_MAX;
-    CURLcode result;
+    CURLcode result = CURLE_OK;
     char *p = host;
     bool subdomain = FALSE;
+    struct stsentry *e;
     if(p[0] == '.') {
       p++;
       subdomain = TRUE;
     }
-    result = hsts_create(h, p, subdomain, expires);
+    /* only add it if not already present */
+    e = Curl_hsts(h, p, subdomain);
+    if(!e)
+      result = hsts_create(h, p, subdomain, expires);
+    else {
+      /* the same host name, use the largest expire time */
+      if(expires > e->expires)
+        e->expires = expires;
+    }
     if(result)
       return result;
   }
@@ -549,6 +559,20 @@ CURLcode Curl_hsts_loadcb(struct Curl_easy *data, struct hsts *h)
   if(h)
     return hsts_pull(data, h);
   return CURLE_OK;
+}
+
+void Curl_hsts_loadfiles(struct Curl_easy *data)
+{
+  struct curl_slist *l = data->set.hstslist;
+  if(l) {
+    Curl_share_lock(data, CURL_LOCK_DATA_HSTS, CURL_LOCK_ACCESS_SINGLE);
+
+    while(l) {
+      (void)Curl_hsts_loadfile(data, data->hsts, l->data);
+      l = l->next;
+    }
+    Curl_share_unlock(data, CURL_LOCK_DATA_HSTS);
+  }
 }
 
 #endif /* CURL_DISABLE_HTTP || CURL_DISABLE_HSTS */

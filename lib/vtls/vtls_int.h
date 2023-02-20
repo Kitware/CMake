@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -33,16 +33,18 @@
 struct ssl_connect_data {
   ssl_connection_state state;
   ssl_connect_state connecting_state;
-  const char *hostname;             /* hostnaem for verification */
-  const char *dispname;             /* display version of hostname */
+  char *hostname;                   /* hostname for verification */
+  char *dispname;                   /* display version of hostname */
   int port;                         /* remote port at origin */
+  const struct alpn_spec *alpn;     /* ALPN to use or NULL for none */
   struct ssl_backend_data *backend; /* vtls backend specific props */
-  struct Curl_easy *call_data;      /* data handle used in current call,
-                                     * same as parameter passed, but available
-                                     * here for backend internal callbacks
-                                     * that need it. NULLed after at the
-                                     * end of each vtls filter invcocation. */
+  struct cf_call_data call_data;    /* data handle used in current call */
+  struct curltime handshake_done;   /* time when handshake finished */
 };
+
+
+#define CF_CTX_CALL_DATA(cf)  \
+  ((struct ssl_connect_data *)(cf)->ctx)->call_data
 
 
 /* Definitions for SSL Implementations */

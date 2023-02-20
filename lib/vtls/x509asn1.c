@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -48,6 +48,7 @@
 #include "curl_ctype.h"
 #include "hostcheck.h"
 #include "vtls/vtls.h"
+#include "vtls/vtls_int.h"
 #include "sendf.h"
 #include "inet_pton.h"
 #include "curl_base64.h"
@@ -1313,7 +1314,8 @@ CURLcode Curl_verifyhost(struct Curl_cfilter *cf,
 
   /* Get the server IP address. */
 #ifdef ENABLE_IPV6
-  if(conn->bits.ipv6_ip && Curl_inet_pton(AF_INET6, connssl->hostname, &addr))
+  if(cf->conn->bits.ipv6_ip &&
+     Curl_inet_pton(AF_INET6, connssl->hostname, &addr))
     addrlen = sizeof(struct in6_addr);
   else
 #endif
@@ -1348,19 +1350,18 @@ CURLcode Curl_verifyhost(struct Curl_cfilter *cf,
           break;
         switch(name.tag) {
         case 2: /* DNS name. */
-          matched = 0;
           len = utf8asn1str(&dnsname, CURL_ASN1_IA5_STRING,
                             name.beg, name.end);
-          if(len > 0) {
-            if(size_t)len == strlen(dnsname)
-              matched = Curl_cert_hostcheck(dnsname, (size_t)len,
-                                            connssl->hostname, hostlen);
-            free(dnsname);
-          }
+          if(len > 0 && (size_t)len == strlen(dnsname))
+            matched = Curl_cert_hostcheck(dnsname, (size_t)len,
+                                          connssl->hostname, hostlen);
+          else
+            matched = 0;
+          free(dnsname);
           break;
 
         case 7: /* IP address. */
-          matched = (name.end - name.beg) == addrlen &&
+          matched = (size_t)(name.end - name.beg) == addrlen &&
             !memcmp(&addr, name.beg, addrlen);
           break;
         }
@@ -1406,8 +1407,10 @@ CURLcode Curl_verifyhost(struct Curl_cfilter *cf,
     failf(data, "SSL: unable to obtain common name from peer certificate");
   else {
     len = utf8asn1str(&dnsname, elem.tag, elem.beg, elem.end);
-    if(len < 0)
+    if(len < 0) {
+      free(dnsname);
       return CURLE_OUT_OF_MEMORY;
+    }
     if(strlen(dnsname) != (size_t) len)         /* Nul byte in string ? */
       failf(data, "SSL: illegal cert name field");
     else if(Curl_cert_hostcheck((const char *) dnsname,

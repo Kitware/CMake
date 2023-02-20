@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -65,6 +65,7 @@
 #include "easyif.h"
 #include "multiif.h"
 #include "select.h"
+#include "cfilters.h"
 #include "sendf.h" /* for failf function prototype */
 #include "connect.h" /* for Curl_getconnectinfo */
 #include "slist.h"
@@ -113,7 +114,7 @@ static curl_simple_lock s_lock = CURL_SIMPLE_LOCK_INIT;
 #if defined(_WIN32_WCE)
 #define system_strdup _strdup
 #elif !defined(HAVE_STRDUP)
-#define system_strdup curlx_strdup
+#define system_strdup Curl_strdup
 #else
 #define system_strdup strdup
 #endif
@@ -162,6 +163,11 @@ static CURLcode global_init(long flags, bool memoryfuncs)
 #if defined(WIN32) && defined(UNICODE)
     Curl_cwcsdup = (curl_wcsdup_callback)_wcsdup;
 #endif
+  }
+
+  if(Curl_log_init()) {
+    DEBUGF(fprintf(stderr, "Error: Curl_log_init failed\n"));
+    goto fail;
   }
 
   if(!Curl_ssl_init()) {
@@ -913,11 +919,9 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
       goto fail;
   }
 
-  /* duplicate all values in 'change' */
-  if(data->state.cookielist) {
-    outcurl->state.cookielist =
-      Curl_slist_duplicate(data->state.cookielist);
-    if(!outcurl->state.cookielist)
+  if(data->set.cookielist) {
+    outcurl->set.cookielist = Curl_slist_duplicate(data->set.cookielist);
+    if(!outcurl->set.cookielist)
       goto fail;
   }
 #endif
@@ -1003,8 +1007,8 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
 
   if(outcurl) {
 #ifndef CURL_DISABLE_COOKIES
-    curl_slist_free_all(outcurl->state.cookielist);
-    outcurl->state.cookielist = NULL;
+    curl_slist_free_all(outcurl->set.cookielist);
+    outcurl->set.cookielist = NULL;
 #endif
     Curl_safefree(outcurl->state.buffer);
     Curl_dyn_free(&outcurl->state.headerb);
@@ -1101,7 +1105,7 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
   k->keepon = newstate;
 
   if(!(newstate & KEEP_RECV_PAUSE)) {
-    Curl_http2_stream_pause(data, FALSE);
+    Curl_conn_ev_data_pause(data, FALSE);
 
     if(data->state.tempcount) {
       /* there are buffers for sending that can be delivered as the receive
@@ -1224,7 +1228,7 @@ CURLcode curl_easy_recv(struct Curl_easy *data, void *buffer, size_t buflen,
     return result;
 
   *n = (size_t)n1;
-
+  infof(data, "reached %s:%d", __FILE__, __LINE__);
   return CURLE_OK;
 }
 
@@ -1294,29 +1298,34 @@ static int conn_upkeep(struct Curl_easy *data,
                        struct connectdata *conn,
                        void *param)
 {
-  /* Param is unused. */
-  (void)param;
+  struct curltime *now = param;
 
+  if(Curl_timediff(*now, conn->keepalive) <= data->set.upkeep_interval_ms)
+    return 0;
+
+  /* briefly attach for action */
+  Curl_attach_connection(data, conn);
   if(conn->handler->connection_check) {
-    /* briefly attach the connection to this transfer for the purpose of
-       checking it */
-    Curl_attach_connection(data, conn);
-
     /* Do a protocol-specific keepalive check on the connection. */
     conn->handler->connection_check(data, conn, CONNCHECK_KEEPALIVE);
-    /* detach the connection again */
-    Curl_detach_connection(data);
   }
+  else {
+    /* Do the generic action on the FIRSTSOCKE filter chain */
+    Curl_conn_keep_alive(data, conn, FIRSTSOCKET);
+  }
+  Curl_detach_connection(data);
 
+  conn->keepalive = *now;
   return 0; /* continue iteration */
 }
 
 static CURLcode upkeep(struct conncache *conn_cache, void *data)
 {
+  struct curltime now = Curl_now();
   /* Loop over every connection and make connection alive. */
   Curl_conncache_foreach(data,
                          conn_cache,
-                         data,
+                         &now,
                          conn_upkeep);
   return CURLE_OK;
 }

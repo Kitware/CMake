@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -32,7 +32,15 @@ CURLcode Curl_idnconvert_hostname(struct hostname *host);
 #if defined(USE_LIBIDN2) || defined(USE_WIN32_IDN)
 #define USE_IDN
 void Curl_free_idnconverted_hostname(struct hostname *host);
+char *Curl_idn_decode(const char *input);
+#ifdef USE_LIBIDN2
+#define Curl_idn_free(x) idn2_free(x)
+#else
+#define Curl_idn_free(x) free(x)
+#endif
+
 #else
 #define Curl_free_idnconverted_hostname(x)
+#define Curl_idn_decode(x) NULL
 #endif
 #endif /* HEADER_CURL_IDN_H */

@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -55,6 +55,15 @@ CURLcode Curl_ossl_set_client_cert(struct Curl_easy *data,
                                    const char *key_type, char *key_passwd);
 
 CURLcode Curl_ossl_certchain(struct Curl_easy *data, SSL *ssl);
+
+/**
+ * Setup the OpenSSL X509_STORE in `ssl_ctx` for the cfilter `cf` and
+ * easy handle `data`. Will allow reuse of a shared cache if suitable
+ * and configured.
+ */
+CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data,
+                                   SSL_CTX *ssl_ctx);
 
 #endif /* USE_OPENSSL */
 #endif /* HEADER_CURL_SSLUSE_H */
