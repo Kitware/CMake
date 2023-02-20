@@ -36,6 +36,35 @@ int testSystemTools(int /*unused*/, char* /*unused*/[])
            "cmSystemTools::UpperCase");
 
   // ----------------------------------------------------------------------
+  // Test cmSystemTools::VersionCompare
+  cmAssert(cmSystemTools::VersionCompareEqual("", ""),
+           "VersionCompareEqual empty string");
+  cmAssert(!cmSystemTools::VersionCompareGreater("", ""),
+           "VersionCompareGreater empty string");
+  cmAssert(cmSystemTools::VersionCompareEqual("1", "1a"),
+           "VersionCompareEqual letters");
+  cmAssert(!cmSystemTools::VersionCompareGreater("1", "1a"),
+           "VersionCompareGreater letters");
+  cmAssert(cmSystemTools::VersionCompareEqual("001", "1"),
+           "VersionCompareEqual leading zeros equal");
+  cmAssert(!cmSystemTools::VersionCompareGreater("001", "1"),
+           "VersionCompareGreater leading zeros equal");
+  cmAssert(!cmSystemTools::VersionCompareEqual("002", "1"),
+           "VersionCompareEqual leading zeros greater");
+  cmAssert(cmSystemTools::VersionCompareGreater("002", "1"),
+           "VersionCompareGreater leading zeros greater");
+  cmAssert(!cmSystemTools::VersionCompareEqual("6.2.1", "6.3.1"),
+           "VersionCompareEqual components less");
+  cmAssert(!cmSystemTools::VersionCompareGreater("6.2.1", "6.3.1"),
+           "VersionCompareGreater components less");
+  cmAssert(!cmSystemTools::VersionCompareEqual("6.2.1", "6.2"),
+           "VersionCompareEqual different length");
+  cmAssert(cmSystemTools::VersionCompareGreater("6.2.1", "6.2"),
+           "VersionCompareGreater different length");
+  cmAssert(cmSystemTools::VersionCompareGreater("3.141592653", "3.14159265"),
+           "VersionCompareGreater more digits");
+
+  // ----------------------------------------------------------------------
   // Test cmSystemTools::strverscmp
   cmAssert(cmSystemTools::strverscmp("", "") == 0, "strverscmp empty string");
   cmAssert(cmSystemTools::strverscmp("abc", "") > 0,
