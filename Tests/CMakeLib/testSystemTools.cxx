@@ -61,8 +61,26 @@ int testSystemTools(int /*unused*/, char* /*unused*/[])
            "VersionCompareEqual different length");
   cmAssert(cmSystemTools::VersionCompareGreater("6.2.1", "6.2"),
            "VersionCompareGreater different length");
-  cmAssert(cmSystemTools::VersionCompareGreater("3.141592653", "3.14159265"),
-           "VersionCompareGreater more digits");
+  cmAssert(
+    !cmSystemTools::VersionCompareEqual(
+      "3.14159265358979323846264338327950288419716939937510582097494459230",
+      "3.14159265358979323846264338327950288419716939937510582097494459231"),
+    "VersionCompareEqual long number");
+  cmAssert(
+    !cmSystemTools::VersionCompareGreater(
+      "3.14159265358979323846264338327950288419716939937510582097494459230",
+      "3.14159265358979323846264338327950288419716939937510582097494459231"),
+    "VersionCompareGreater long number");
+  cmAssert(
+    !cmSystemTools::VersionCompareEqual(
+      "3.141592653589793238462643383279502884197169399375105820974944592307",
+      "3.14159265358979323846264338327950288419716939937510582097494459231"),
+    "VersionCompareEqual more digits");
+  cmAssert(
+    cmSystemTools::VersionCompareGreater(
+      "3.141592653589793238462643383279502884197169399375105820974944592307",
+      "3.14159265358979323846264338327950288419716939937510582097494459231"),
+    "VersionCompareGreater more digits");
 
   // ----------------------------------------------------------------------
   // Test cmSystemTools::strverscmp
