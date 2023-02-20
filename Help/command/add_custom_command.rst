@@ -370,6 +370,9 @@ The options are:
   the custom command in case this custom command requires files implicitly
   created by those targets.
 
+  This option can be enabled on all custom commands by setting
+  :variable:`CMAKE_ADD_CUSTOM_COMMAND_DEPENDS_EXPLICIT_ONLY` to ``ON``.
+
   Only the :ref:`Ninja Generators` actually use this information to remove
   unnecessary implicit dependencies.
 
