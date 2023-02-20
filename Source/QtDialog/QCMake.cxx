@@ -6,6 +6,7 @@
 
 #include <cm/memory>
 
+#include "QCMakeSizeType.h"
 #include <QCoreApplication>
 #include <QDir>
 #include <QString>
@@ -326,7 +327,7 @@ void QCMake::setProperties(const QCMakePropertyList& newProps)
 
     QCMakeProperty prop;
     prop.Key = QString::fromStdString(key);
-    int idx = props.indexOf(prop);
+    cm_qsizetype idx = props.indexOf(prop);
     if (idx == -1) {
       toremove.append(QString::fromStdString(key));
     } else {

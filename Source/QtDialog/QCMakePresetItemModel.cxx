@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "QCMakePresetItemModel.h"
 
+#include "QCMakeSizeType.h"
 #include <QFont>
 
 QCMakePresetItemModel::QCMakePresetItemModel(QObject* parent)
@@ -27,7 +28,8 @@ QVariant QCMakePresetItemModel::data(const QModelIndex& index, int role) const
       if (index.internalId() == SEPARATOR_INDEX) {
         return QVariant{};
       }
-      auto const& preset = this->m_presets[index.internalId()];
+      auto const& preset =
+        this->m_presets[static_cast<cm_qsizetype>(index.internalId())];
       return preset.displayName.isEmpty() ? preset.name : preset.displayName;
     }
     case Qt::ToolTipRole:
@@ -37,7 +39,8 @@ QVariant QCMakePresetItemModel::data(const QModelIndex& index, int role) const
       if (index.internalId() == SEPARATOR_INDEX) {
         return QVariant{};
       }
-      return this->m_presets[index.internalId()].description;
+      return this->m_presets[static_cast<cm_qsizetype>(index.internalId())]
+        .description;
     case Qt::UserRole:
       if (index.internalId() == CUSTOM_INDEX) {
         return QVariant{};
@@ -45,7 +48,8 @@ QVariant QCMakePresetItemModel::data(const QModelIndex& index, int role) const
       if (index.internalId() == SEPARATOR_INDEX) {
         return QVariant{};
       }
-      return QVariant::fromValue(this->m_presets[index.internalId()]);
+      return QVariant::fromValue(
+        this->m_presets[static_cast<cm_qsizetype>(index.internalId())]);
     case Qt::FontRole:
       if (index.internalId() == CUSTOM_INDEX) {
         QFont font;
@@ -64,7 +68,8 @@ Qt::ItemFlags QCMakePresetItemModel::flags(const QModelIndex& index) const
     Qt::ItemIsEditable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled;
   if (index.internalId() != SEPARATOR_INDEX &&
       (index.internalId() == CUSTOM_INDEX ||
-       this->m_presets[index.internalId()].enabled)) {
+       this->m_presets[static_cast<cm_qsizetype>(index.internalId())]
+         .enabled)) {
     flags |= Qt::ItemIsSelectable | Qt::ItemIsEnabled;
   }
   return flags;
@@ -78,7 +83,7 @@ int QCMakePresetItemModel::rowCount(const QModelIndex& parent) const
   if (this->m_presets.empty()) {
     return 1;
   }
-  return this->m_presets.size() + 2;
+  return static_cast<int>(this->m_presets.size() + 2);
 }
 
 int QCMakePresetItemModel::columnCount(const QModelIndex& parent) const
@@ -139,5 +144,5 @@ int QCMakePresetItemModel::presetNameToRow(const QString& name) const
     index++;
   }
 
-  return this->m_presets.size() + 1;
+  return static_cast<int>(this->m_presets.size() + 1);
 }
