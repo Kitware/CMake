@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "AddCacheEntry.h"
 
+#include "QCMakeSizeType.h"
 #include <QCompleter>
 #include <QMetaProperty>
 
@@ -88,7 +89,7 @@ QString AddCacheEntry::typeString() const
 
 void AddCacheEntry::onCompletionActivated(const QString& text)
 {
-  int idx = this->VarNames.indexOf(text);
+  cm_qsizetype idx = this->VarNames.indexOf(text);
   if (idx != -1) {
     QString vartype = this->VarTypes[idx];
     for (int i = 0; i < NumTypes; i++) {

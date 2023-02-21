@@ -175,6 +175,7 @@ add_library(
   QCMakePresetComboBox.h
   QCMakePresetItemModel.cxx
   QCMakePresetItemModel.h
+  QCMakeSizeType.h
   QCMakeWidgets.cxx
   QCMakeWidgets.h
   RegexExplorer.cxx

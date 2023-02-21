@@ -32,6 +32,7 @@
 
 #include "QCMake.h"
 #include "QCMakeCacheView.h"
+#include "QCMakeSizeType.h"
 
 #include "cmSystemTools.h"
 #include "cmVersion.h"
@@ -1120,12 +1121,12 @@ void CMakeSetupDialog::saveBuildPaths(const QStringList& paths)
   QSettings settings;
   settings.beginGroup("Settings/StartPath");
 
-  int num = paths.count();
+  cm_qsizetype num = paths.count();
   if (num > 10) {
     num = 10;
   }
 
-  for (int i = 0; i < num; i++) {
+  for (cm_qsizetype i = 0; i < num; i++) {
     settings.setValue(QString("WhereBuild%1").arg(i), paths[i]);
   }
 }
