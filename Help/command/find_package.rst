@@ -378,8 +378,20 @@ enabled.
    a. :variable:`<PackageName>_ROOT` CMake variable,
       where ``<PackageName>`` is the case-preserved package name.
 
-   b. :envvar:`<PackageName>_ROOT` environment variable,
+   b. :variable:`<PACKAGENAME>_ROOT` CMake variable,
+      where ``<PACKAGENAME>`` is the upper-cased package name.
+      See policy :policy:`CMP0144`.
+
+      .. versionadded:: 3.27
+
+   c. :envvar:`<PackageName>_ROOT` environment variable,
       where ``<PackageName>`` is the case-preserved package name.
+
+   d. :envvar:`<PACKAGENAME>_ROOT` environment variable,
+      where ``<PACKAGENAME>`` is the upper-cased package name.
+      See policy :policy:`CMP0144`.
+
+      .. versionadded:: 3.27
 
    The package root variables are maintained as a stack so if
    called from within a find module, root paths from the parent's find

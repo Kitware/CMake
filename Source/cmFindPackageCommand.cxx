@@ -1841,11 +1841,54 @@ void cmFindPackageCommand::PushFindPackageRootPathStack()
     } break;
   }
 
+  // Add root paths from <PACKAGENAME>_ROOT CMake and environment variables,
+  // if they are different than <PackageName>_ROOT, and subject to CMP0144.
+  std::string const rootVAR = cmSystemTools::UpperCase(rootVar);
+  cmValue rootDEF;
+  cm::optional<std::string> rootENV;
+  if (rootVAR != rootVar) {
+    rootDEF = this->Makefile->GetDefinition(rootVAR);
+    if (rootDEF && (rootDEF.IsEmpty() || rootDEF == rootDef)) {
+      rootDEF = nullptr;
+    }
+    rootENV = cmSystemTools::GetEnvVar(rootVAR);
+    if (rootENV && (rootENV->empty() || rootENV == rootEnv)) {
+      rootENV = cm::nullopt;
+    }
+  }
+
+  switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0144)) {
+    case cmPolicies::WARN:
+      this->Makefile->MaybeWarnCMP0144(rootVAR, rootDEF, rootENV);
+      CM_FALLTHROUGH;
+    case cmPolicies::OLD:
+      // OLD behavior is to ignore the <PACKAGENAME>_ROOT variables.
+      rootDEF = nullptr;
+      rootENV = cm::nullopt;
+      break;
+    case cmPolicies::REQUIRED_IF_USED:
+    case cmPolicies::REQUIRED_ALWAYS:
+      this->Makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0144));
+      return;
+    case cmPolicies::NEW: {
+      // NEW behavior is to honor the <PACKAGENAME>_ROOT variables.
+    } break;
+  }
+
   if (rootDef) {
     cmExpandList(*rootDef, rootPaths);
   }
+  if (rootDEF) {
+    cmExpandList(*rootDEF, rootPaths);
+  }
   if (rootEnv) {
     std::vector<std::string> p = cmSystemTools::SplitEnvPath(*rootEnv);
+    std::move(p.begin(), p.end(), std::back_inserter(rootPaths));
+  }
+  if (rootENV) {
+    std::vector<std::string> p = cmSystemTools::SplitEnvPath(*rootENV);
     std::move(p.begin(), p.end(), std::back_inserter(rootPaths));
   }
 }

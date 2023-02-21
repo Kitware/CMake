@@ -228,6 +228,27 @@ void cmMakefile::MaybeWarnCMP0074(std::string const& rootVar, cmValue rootDef,
   }
 }
 
+void cmMakefile::MaybeWarnCMP0144(std::string const& rootVAR, cmValue rootDEF,
+                                  cm::optional<std::string> const& rootENV)
+{
+  // Warn if a <PACKAGENAME>_ROOT variable we may use is set.
+  if ((rootDEF || rootENV) && this->WarnedCMP0144.insert(rootVAR).second) {
+    std::ostringstream w;
+    w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0144) << "\n";
+    if (rootDEF) {
+      w << "CMake variable " << rootVAR << " is set to:\n"
+        << "  " << *rootDEF << "\n";
+    }
+    if (rootENV) {
+      w << "Environment variable " << rootVAR << " is set to:\n"
+        << "  " << *rootENV << "\n";
+    }
+    w << "For compatibility, find_package is ignoring the variable, but "
+         "code in a .cmake module might still use it.";
+    this->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
+  }
+}
+
 cmBTStringRange cmMakefile::GetIncludeDirectoriesEntries() const
 {
   return this->StateSnapshot.GetDirectory().GetIncludeDirectoriesEntries();

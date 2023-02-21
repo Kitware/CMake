@@ -55,6 +55,17 @@ run_cmake(REGISTRY_VIEW-no-view)
 run_cmake(REGISTRY_VIEW-wrong-view)
 run_cmake(REGISTRY_VIEW-propagated)
 
+if(CMAKE_HOST_WIN32)
+  run_cmake(CMP0144-WARN-CaseInsensitive)
+  run_cmake(CMP0144-OLD-CaseInsensitive)
+  run_cmake(CMP0144-NEW-CaseInsensitive)
+else()
+  run_cmake(CMP0144-WARN-CaseSensitive)
+  run_cmake(CMP0144-WARN-CaseSensitive-Mixed)
+  run_cmake(CMP0144-OLD-CaseSensitive)
+  run_cmake(CMP0144-NEW-CaseSensitive)
+endif()
+
 file(
     GLOB SearchPaths_TEST_CASE_LIST
     LIST_DIRECTORIES TRUE
