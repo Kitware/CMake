@@ -9,8 +9,8 @@ Synopsis
 .. parsed-literal::
 
  `Generate a Project Buildsystem`_
+  cmake [<options>] -B <path-to-build> [-S <path-to-source>]
   cmake [<options>] <path-to-source | path-to-existing-build>
-  cmake [<options>] -S <path-to-source> -B <path-to-build>
 
  `Build a Project`_
   cmake --build <dir> [<options>] [-- <build-tool-options>]
@@ -116,6 +116,20 @@ Generate a Project Buildsystem
 Run CMake with one of the following command signatures to specify the
 source and build trees and generate a buildsystem:
 
+``cmake [<options>] -B <path-to-build> [-S <path-to-source>]``
+
+  .. versionadded:: 3.13
+
+  Uses ``<path-to-build>`` as the build tree and ``<path-to-source>``
+  as the source tree.  The specified paths may be absolute or relative
+  to the current working directory.  The source tree must contain a
+  ``CMakeLists.txt`` file.  The build tree will be created automatically
+  if it does not already exist.  For example:
+
+  .. code-block:: console
+
+    $ cmake -S src -B build
+
 ``cmake [<options>] <path-to-source>``
   Uses the current working directory as the build tree, and
   ``<path-to-source>`` as the source tree.  The specified path may
@@ -141,20 +155,6 @@ source and build trees and generate a buildsystem:
     $ cd build
     $ cmake .
 
-``cmake [<options>] -S <path-to-source> -B <path-to-build>``
-
-  .. versionadded:: 3.13
-
-  Uses ``<path-to-build>`` as the build tree and ``<path-to-source>``
-  as the source tree.  The specified paths may be absolute or relative
-  to the current working directory.  The source tree must contain a
-  ``CMakeLists.txt`` file.  The build tree will be created automatically
-  if it does not already exist.  For example:
-
-  .. code-block:: console
-
-    $ cmake -S src -B build
-
 In all cases the ``<options>`` may be zero or more of the `Options`_ below.
 
 The above styles for specifying the source and build trees may be mixed.
@@ -167,14 +167,14 @@ the current working directory (cwd) is used for the other.  For example:
 ============================== ============ ===========
  Command Line                   Source Dir   Build Dir
 ============================== ============ ===========
+ ``cmake -B build``             `cwd`        ``build``
+ ``cmake -B build src``         ``src``      ``build``
+ ``cmake -B build -S src``      ``src``      ``build``
  ``cmake src``                  ``src``      `cwd`
  ``cmake build`` (existing)     `loaded`     ``build``
  ``cmake -S src``               ``src``      `cwd`
  ``cmake -S src build``         ``src``      ``build``
  ``cmake -S src -B build``      ``src``      ``build``
- ``cmake -B build``             `cwd`        ``build``
- ``cmake -B build src``         ``src``      ``build``
- ``cmake -B build -S src``      ``src``      ``build``
 ============================== ============ ===========
 
 .. versionchanged:: 3.23
