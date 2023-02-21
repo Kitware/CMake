@@ -3197,20 +3197,41 @@ bool VersionCompare(cmSystemTools::CompareOp op, const char* lhss,
 {
   const char* endl = lhss;
   const char* endr = rhss;
-  unsigned long lhs;
-  unsigned long rhs;
 
   while (((*endl >= '0') && (*endl <= '9')) ||
          ((*endr >= '0') && (*endr <= '9'))) {
-    // Do component-wise comparison.
-    lhs = strtoul(endl, const_cast<char**>(&endl), 10);
-    rhs = strtoul(endr, const_cast<char**>(&endr), 10);
+    // Do component-wise comparison, ignoring leading zeros
+    // (components are treated as integers, not as mantissas)
+    while (*endl == '0') {
+      endl++;
+    }
+    while (*endr == '0') {
+      endr++;
+    }
 
-    if (lhs < rhs) {
+    const char* beginl = endl;
+    const char* beginr = endr;
+
+    // count significant digits
+    while ((*endl >= '0') && (*endl <= '9')) {
+      endl++;
+    }
+    while ((*endr >= '0') && (*endr <= '9')) {
+      endr++;
+    }
+
+    // compare number of digits first
+    ptrdiff_t r = ((endl - beginl) - (endr - beginr));
+    if (r == 0) {
+      // compare the digits if number of digits is equal
+      r = strncmp(beginl, beginr, endl - beginl);
+    }
+
+    if (r < 0) {
       // lhs < rhs, so true if operation is LESS
       return (op & cmSystemTools::OP_LESS) != 0;
     }
-    if (lhs > rhs) {
+    if (r > 0) {
       // lhs > rhs, so true if operation is GREATER
       return (op & cmSystemTools::OP_GREATER) != 0;
     }

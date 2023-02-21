@@ -36,6 +36,53 @@ int testSystemTools(int /*unused*/, char* /*unused*/[])
            "cmSystemTools::UpperCase");
 
   // ----------------------------------------------------------------------
+  // Test cmSystemTools::VersionCompare
+  cmAssert(cmSystemTools::VersionCompareEqual("", ""),
+           "VersionCompareEqual empty string");
+  cmAssert(!cmSystemTools::VersionCompareGreater("", ""),
+           "VersionCompareGreater empty string");
+  cmAssert(cmSystemTools::VersionCompareEqual("1", "1a"),
+           "VersionCompareEqual letters");
+  cmAssert(!cmSystemTools::VersionCompareGreater("1", "1a"),
+           "VersionCompareGreater letters");
+  cmAssert(cmSystemTools::VersionCompareEqual("001", "1"),
+           "VersionCompareEqual leading zeros equal");
+  cmAssert(!cmSystemTools::VersionCompareGreater("001", "1"),
+           "VersionCompareGreater leading zeros equal");
+  cmAssert(!cmSystemTools::VersionCompareEqual("002", "1"),
+           "VersionCompareEqual leading zeros greater");
+  cmAssert(cmSystemTools::VersionCompareGreater("002", "1"),
+           "VersionCompareGreater leading zeros greater");
+  cmAssert(!cmSystemTools::VersionCompareEqual("6.2.1", "6.3.1"),
+           "VersionCompareEqual components less");
+  cmAssert(!cmSystemTools::VersionCompareGreater("6.2.1", "6.3.1"),
+           "VersionCompareGreater components less");
+  cmAssert(!cmSystemTools::VersionCompareEqual("6.2.1", "6.2"),
+           "VersionCompareEqual different length");
+  cmAssert(cmSystemTools::VersionCompareGreater("6.2.1", "6.2"),
+           "VersionCompareGreater different length");
+  cmAssert(
+    !cmSystemTools::VersionCompareEqual(
+      "3.14159265358979323846264338327950288419716939937510582097494459230",
+      "3.14159265358979323846264338327950288419716939937510582097494459231"),
+    "VersionCompareEqual long number");
+  cmAssert(
+    !cmSystemTools::VersionCompareGreater(
+      "3.14159265358979323846264338327950288419716939937510582097494459230",
+      "3.14159265358979323846264338327950288419716939937510582097494459231"),
+    "VersionCompareGreater long number");
+  cmAssert(
+    !cmSystemTools::VersionCompareEqual(
+      "3.141592653589793238462643383279502884197169399375105820974944592307",
+      "3.14159265358979323846264338327950288419716939937510582097494459231"),
+    "VersionCompareEqual more digits");
+  cmAssert(
+    cmSystemTools::VersionCompareGreater(
+      "3.141592653589793238462643383279502884197169399375105820974944592307",
+      "3.14159265358979323846264338327950288419716939937510582097494459231"),
+    "VersionCompareGreater more digits");
+
+  // ----------------------------------------------------------------------
   // Test cmSystemTools::strverscmp
   cmAssert(cmSystemTools::strverscmp("", "") == 0, "strverscmp empty string");
   cmAssert(cmSystemTools::strverscmp("abc", "") > 0,
