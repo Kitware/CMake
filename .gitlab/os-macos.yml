@@ -80,12 +80,27 @@
         CMAKE_GENERATOR: Xcode
         CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
 
+.macos_x86_64_xcode_ub:
+    extends: .macos
+
+    variables:
+        CMAKE_CONFIGURATION: macos_x86_64_xcode_ub
+        CMAKE_GENERATOR: Xcode
+        CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
+
 .macos_x86_64_ninja_multi:
     extends: .macos
 
     variables:
         CMAKE_CONFIGURATION: macos_x86_64_ninja_multi
         CMAKE_GENERATOR: "Ninja Multi-Config"
+        CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
+
+.macos_x86_64_ninja_ub:
+    extends: .macos
+
+    variables:
+        CMAKE_CONFIGURATION: macos_x86_64_ninja_ub
         CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
 
 ## Tags

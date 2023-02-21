@@ -912,6 +912,34 @@ t:macos-arm64-xcode:
     variables:
         CMAKE_CI_NO_MR: "true"
 
+t:macos-x86_64-ninja-ub:
+    extends:
+        - .macos_x86_64_ninja_ub
+        - .cmake_test_macos_external
+        - .macos_x86_64_tags_ext
+        - .cmake_junit_artifacts
+        - .run_dependent
+    dependencies:
+        - t:macos-x86_64-ninja
+    needs:
+        - t:macos-x86_64-ninja
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
+t:macos-x86_64-xcode-ub:
+    extends:
+        - .macos_x86_64_xcode_ub
+        - .cmake_test_macos_external
+        - .macos_x86_64_tags_ext
+        - .cmake_junit_artifacts
+        - .run_dependent
+    dependencies:
+        - t:macos-x86_64-ninja
+    needs:
+        - t:macos-x86_64-ninja
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
 b:macos-package:
     extends:
         - .macos_package
