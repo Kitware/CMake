@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,7 +26,7 @@
 
 #include "http_proxy.h"
 
-#if !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
+#if !defined(CURL_DISABLE_PROXY)
 
 #include <curl/curl.h>
 #ifdef USE_HYPER
@@ -49,6 +49,9 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+
+#if !defined(CURL_DISABLE_HTTP)
+
 typedef enum {
     TUNNEL_INIT,     /* init/default/no tunnel state */
     TUNNEL_CONNECT,  /* CONNECT request is being send */
@@ -63,8 +66,7 @@ struct tunnel_state {
   int sockindex;
   const char *hostname;
   int remote_port;
-  struct HTTP http_proxy;
-  struct HTTP *prot_save;
+  struct HTTP CONNECT;
   struct dynbuf rcvbuf;
   struct dynbuf req;
   size_t nsend;
@@ -149,17 +151,6 @@ static CURLcode tunnel_init(struct tunnel_state **pts,
   Curl_dyn_init(&ts->rcvbuf, DYN_PROXY_CONNECT_HEADERS);
   Curl_dyn_init(&ts->req, DYN_HTTP_REQUEST);
 
-  /* Curl_proxyCONNECT is based on a pointer to a struct HTTP at the
-   * member conn->proto.http; we want [protocol] through HTTP and we have
-   * to change the member temporarily for connecting to the HTTP
-   * proxy. After Curl_proxyCONNECT we have to set back the member to the
-   * original pointer
-   *
-   * This function might be called several times in the multi interface case
-   * if the proxy's CONNECT response is not instant.
-   */
-  ts->prot_save = data->req.p.http;
-  data->req.p.http = &ts->http_proxy;
   *pts =  ts;
   connkeep(conn, "HTTP proxy CONNECT");
   return tunnel_reinit(ts, conn, data);
@@ -183,34 +174,39 @@ static void tunnel_go_state(struct Curl_cfilter *cf,
   /* entering this one */
   switch(new_state) {
   case TUNNEL_INIT:
+    DEBUGF(LOG_CF(data, cf, "new tunnel state 'init'"));
     tunnel_reinit(ts, cf->conn, data);
     break;
 
   case TUNNEL_CONNECT:
+    DEBUGF(LOG_CF(data, cf, "new tunnel state 'connect'"));
     ts->tunnel_state = TUNNEL_CONNECT;
     ts->keepon = KEEPON_CONNECT;
     Curl_dyn_reset(&ts->rcvbuf);
     break;
 
   case TUNNEL_RECEIVE:
+    DEBUGF(LOG_CF(data, cf, "new tunnel state 'receive'"));
     ts->tunnel_state = TUNNEL_RECEIVE;
     break;
 
   case TUNNEL_RESPONSE:
+    DEBUGF(LOG_CF(data, cf, "new tunnel state 'response'"));
     ts->tunnel_state = TUNNEL_RESPONSE;
     break;
 
   case TUNNEL_ESTABLISHED:
+    DEBUGF(LOG_CF(data, cf, "new tunnel state 'established'"));
     infof(data, "CONNECT phase completed");
     data->state.authproxy.done = TRUE;
     data->state.authproxy.multipass = FALSE;
     /* FALLTHROUGH */
   case TUNNEL_FAILED:
+    DEBUGF(LOG_CF(data, cf, "new tunnel state 'failed'"));
     ts->tunnel_state = new_state;
     Curl_dyn_reset(&ts->rcvbuf);
     Curl_dyn_reset(&ts->req);
     /* restore the protocol pointer */
-    data->req.p.http = ts->prot_save;
     data->info.httpcode = 0; /* clear it as it might've been used for the
                                 proxy */
     /* If a proxy-authorization header was used for the proxy, then we should
@@ -271,10 +267,11 @@ static CURLcode CONNECT_host(struct Curl_easy *data,
 }
 
 #ifndef USE_HYPER
-static CURLcode start_CONNECT(struct Curl_easy *data,
-                              struct connectdata *conn,
+static CURLcode start_CONNECT(struct Curl_cfilter *cf,
+                              struct Curl_easy *data,
                               struct tunnel_state *ts)
 {
+  struct connectdata *conn = cf->conn;
   char *hostheader = NULL;
   char *host = NULL;
   const char *httpv;
@@ -338,7 +335,8 @@ static CURLcode start_CONNECT(struct Curl_easy *data,
     goto out;
 
   /* Send the connect request to the proxy */
-  result = Curl_buffer_send(&ts->req, data, &data->info.request_size, 0,
+  result = Curl_buffer_send(&ts->req, data, &ts->CONNECT,
+                            &data->info.request_size, 0,
                             ts->sockindex);
   ts->headerlines = 0;
 
@@ -356,7 +354,7 @@ static CURLcode send_CONNECT(struct Curl_easy *data,
                              bool *done)
 {
   struct SingleRequest *k = &data->req;
-  struct HTTP *http = data->req.p.http;
+  struct HTTP *http = &ts->CONNECT;
   CURLcode result = CURLE_OK;
 
   if(http->sending != HTTPSEND_REQUEST)
@@ -377,7 +375,7 @@ static CURLcode send_CONNECT(struct Curl_easy *data,
     result = Curl_write(data,
                         conn->writesockfd,  /* socket to send to */
                         k->upload_fromhere, /* buffer pointer */
-                        ts->nsend,           /* buffer size */
+                        ts->nsend,          /* buffer size */
                         &bytes_written);    /* actually sent */
     if(result)
       goto out;
@@ -398,13 +396,15 @@ out:
   return result;
 }
 
-static CURLcode on_resp_header(struct Curl_easy *data,
+static CURLcode on_resp_header(struct Curl_cfilter *cf,
+                               struct Curl_easy *data,
                                struct tunnel_state *ts,
                                const char *header)
 {
   CURLcode result = CURLE_OK;
   struct SingleRequest *k = &data->req;
   int subversion = 0;
+  (void)cf;
 
   if((checkprefix("WWW-Authenticate:", header) &&
       (401 == k->httpcode)) ||
@@ -416,8 +416,7 @@ static CURLcode on_resp_header(struct Curl_easy *data,
     if(!auth)
       return CURLE_OUT_OF_MEMORY;
 
-    DEBUGF(infof(data, "CONNECT: fwd auth header '%s'",
-           header));
+    DEBUGF(LOG_CF(data, cf, "CONNECT: fwd auth header '%s'", header));
     result = Curl_http_input_auth(data, proxy, auth);
 
     free(auth);
@@ -471,14 +470,14 @@ static CURLcode on_resp_header(struct Curl_easy *data,
   return result;
 }
 
-static CURLcode recv_CONNECT_resp(struct Curl_easy *data,
-                                  struct connectdata *conn,
+static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data,
                                   struct tunnel_state *ts,
                                   bool *done)
 {
   CURLcode result = CURLE_OK;
   struct SingleRequest *k = &data->req;
-  curl_socket_t tunnelsocket = conn->sock[ts->sockindex];
+  curl_socket_t tunnelsocket = Curl_conn_cf_get_socket(cf, data);
   char *linep;
   size_t perline;
   int error;
@@ -634,7 +633,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_easy *data,
           /* without content-length or chunked encoding, we
              can't keep the connection alive since the close is
              the end signal so we bail out at once instead */
-          DEBUGF(infof(data, "CONNECT: no content-length or chunked"));
+          DEBUGF(LOG_CF(data, cf, "CONNECT: no content-length or chunked"));
           ts->keepon = KEEPON_DONE;
         }
       }
@@ -647,7 +646,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_easy *data,
       continue;
     }
 
-    result = on_resp_header(data, ts, linep);
+    result = on_resp_header(cf, data, ts, linep);
     if(result)
       return result;
 
@@ -667,12 +666,13 @@ static CURLcode recv_CONNECT_resp(struct Curl_easy *data,
 
 #else /* USE_HYPER */
 /* The Hyper version of CONNECT */
-static CURLcode start_CONNECT(struct Curl_easy *data,
-                              struct connectdata *conn,
+static CURLcode start_CONNECT(struct Curl_cfilter *cf,
+                              struct Curl_easy *data,
                               struct tunnel_state *ts)
 {
+  struct connectdata *conn = cf->conn;
   struct hyptransfer *h = &data->hyp;
-  curl_socket_t tunnelsocket = conn->sock[ts->sockindex];
+  curl_socket_t tunnelsocket = Curl_conn_cf_get_socket(cf, data);
   hyper_io *io = NULL;
   hyper_request *req = NULL;
   hyper_headers *headers = NULL;
@@ -914,8 +914,8 @@ error:
   return result;
 }
 
-static CURLcode recv_CONNECT_resp(struct Curl_easy *data,
-                                  struct connectdata *conn,
+static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data,
                                   struct tunnel_state *ts,
                                   bool *done)
 {
@@ -925,7 +925,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_easy *data,
 
   (void)ts;
   *done = FALSE;
-  result = Curl_hyper_stream(data, conn, &didwhat, done,
+  result = Curl_hyper_stream(data, cf->conn, &didwhat, done,
                              CURL_CSELECT_IN | CURL_CSELECT_OUT);
   if(result || !*done)
     return result;
@@ -972,7 +972,8 @@ static CURLcode CONNECT(struct Curl_cfilter *cf,
     switch(ts->tunnel_state) {
     case TUNNEL_INIT:
       /* Prepare the CONNECT request and make a first attempt to send. */
-      result = start_CONNECT(data, cf->conn, ts);
+      DEBUGF(LOG_CF(data, cf, "CONNECT start"));
+      result = start_CONNECT(cf, data, ts);
       if(result)
         goto out;
       tunnel_go_state(cf, ts, TUNNEL_CONNECT, data);
@@ -980,6 +981,7 @@ static CURLcode CONNECT(struct Curl_cfilter *cf,
 
     case TUNNEL_CONNECT:
       /* see that the request is completely sent */
+      DEBUGF(LOG_CF(data, cf, "CONNECT send"));
       result = send_CONNECT(data, cf->conn, ts, &done);
       if(result || !done)
         goto out;
@@ -988,7 +990,8 @@ static CURLcode CONNECT(struct Curl_cfilter *cf,
 
     case TUNNEL_RECEIVE:
       /* read what is there */
-      result = recv_CONNECT_resp(data, cf->conn, ts, &done);
+      DEBUGF(LOG_CF(data, cf, "CONNECT receive"));
+      result = recv_CONNECT_resp(cf, data, ts, &done);
       if(Curl_pgrsUpdate(data)) {
         result = CURLE_ABORTED_BY_CALLBACK;
         goto out;
@@ -1001,24 +1004,29 @@ static CURLcode CONNECT(struct Curl_cfilter *cf,
       /* FALLTHROUGH */
 
     case TUNNEL_RESPONSE:
+      DEBUGF(LOG_CF(data, cf, "CONNECT response"));
       if(data->req.newurl) {
         /* not the "final" response, we need to do a follow up request.
          * If the other side indicated a connection close, or if someone
-         * else told us to close this connection, do so now. */
+         * else told us to close this connection, do so now.
+         */
         if(ts->close_connection || conn->bits.close) {
-          /* Close the filter chain and trigger connect, non-blocking
-           * again, so the process is ongoing. This will
-           * a) the close resets our tunnel state
-           * b) the connect makes sure that there will be a socket
-           *    to select on again.
-           * We return and expect to be called again. */
+          /* Close this filter and the sub-chain, re-connect the
+           * sub-chain and continue. Closing this filter will
+           * reset our tunnel state. To avoid recursion, we return
+           * and expect to be called again.
+           */
+          DEBUGF(LOG_CF(data, cf, "CONNECT need to close+open"));
           infof(data, "Connect me again please");
-          Curl_conn_close(data, cf->sockindex);
-          result = cf->next->cft->connect(cf->next, data, FALSE, &done);
+          Curl_conn_cf_close(cf, data);
+          connkeep(conn, "HTTP proxy CONNECT");
+          result = Curl_conn_cf_connect(cf->next, data, FALSE, &done);
           goto out;
         }
-        /* staying on this connection, reset state */
-        tunnel_go_state(cf, ts, TUNNEL_INIT, data);
+        else {
+          /* staying on this connection, reset state */
+          tunnel_go_state(cf, ts, TUNNEL_INIT, data);
+        }
       }
       break;
 
@@ -1063,10 +1071,12 @@ static CURLcode http_proxy_cf_connect(struct Curl_cfilter *cf,
     return CURLE_OK;
   }
 
+  DEBUGF(LOG_CF(data, cf, "connect"));
   result = cf->next->cft->connect(cf->next, data, blocking, done);
   if(result || !*done)
     return result;
 
+  DEBUGF(LOG_CF(data, cf, "subchain is connected"));
   /* TODO: can we do blocking? */
   /* We want "seamless" operations through HTTP proxy tunnel */
 
@@ -1117,22 +1127,21 @@ static int http_proxy_cf_get_select_socks(struct Curl_cfilter *cf,
                                           curl_socket_t *socks)
 {
   struct tunnel_state *ts = cf->ctx;
-  struct connectdata *conn = cf->conn;
   int fds;
 
-  DEBUGASSERT(conn);
   fds = cf->next->cft->get_select_socks(cf->next, data, socks);
   if(!fds && cf->next->connected && !cf->connected) {
     /* If we are not connected, but the filter "below" is
      * and not waiting on something, we are tunneling. */
-    socks[0] = conn->sock[cf->sockindex];
+    socks[0] = Curl_conn_cf_get_socket(cf, data);
     if(ts) {
       /* when we've sent a CONNECT to a proxy, we should rather either
          wait for the socket to become readable to be able to get the
          response headers or if we're still sending the request, wait
          for write. */
-      if(ts->http_proxy.sending == HTTPSEND_REQUEST)
+      if(ts->CONNECT.sending == HTTPSEND_REQUEST) {
         return GETSOCK_WRITESOCK(0);
+      }
       return GETSOCK_READSOCK(0);
     }
     return GETSOCK_WRITESOCK(0);
@@ -1140,24 +1149,18 @@ static int http_proxy_cf_get_select_socks(struct Curl_cfilter *cf,
   return fds;
 }
 
-static void http_proxy_cf_detach_data(struct Curl_cfilter *cf,
-                                      struct Curl_easy *data)
-{
-  if(cf->ctx) {
-    tunnel_free(cf, data);
-  }
-}
-
 static void http_proxy_cf_destroy(struct Curl_cfilter *cf,
                                   struct Curl_easy *data)
 {
-  http_proxy_cf_detach_data(cf, data);
+  DEBUGF(LOG_CF(data, cf, "destroy"));
+  tunnel_free(cf, data);
 }
 
 static void http_proxy_cf_close(struct Curl_cfilter *cf,
                                 struct Curl_easy *data)
 {
   DEBUGASSERT(cf->next);
+  DEBUGF(LOG_CF(data, cf, "close"));
   cf->connected = FALSE;
   cf->next->cft->close(cf->next, data);
   if(cf->ctx) {
@@ -1166,11 +1169,11 @@ static void http_proxy_cf_close(struct Curl_cfilter *cf,
 }
 
 
-static const struct Curl_cftype cft_http_proxy = {
+struct Curl_cftype Curl_cft_http_proxy = {
   "HTTP-PROXY",
   CF_TYPE_IP_CONNECT,
+  0,
   http_proxy_cf_destroy,
-  Curl_cf_def_setup,
   http_proxy_cf_connect,
   http_proxy_cf_close,
   http_proxy_cf_get_host,
@@ -1178,8 +1181,10 @@ static const struct Curl_cftype cft_http_proxy = {
   Curl_cf_def_data_pending,
   Curl_cf_def_send,
   Curl_cf_def_recv,
-  Curl_cf_def_attach_data,
-  http_proxy_cf_detach_data,
+  Curl_cf_def_cntrl,
+  Curl_cf_def_conn_is_alive,
+  Curl_cf_def_conn_keep_alive,
+  Curl_cf_def_query,
 };
 
 CURLcode Curl_conn_http_proxy_add(struct Curl_easy *data,
@@ -1189,31 +1194,73 @@ CURLcode Curl_conn_http_proxy_add(struct Curl_easy *data,
   struct Curl_cfilter *cf;
   CURLcode result;
 
-  result = Curl_cf_create(&cf, &cft_http_proxy, NULL);
+  result = Curl_cf_create(&cf, &Curl_cft_http_proxy, NULL);
   if(!result)
     Curl_conn_cf_add(data, conn, sockindex, cf);
   return result;
 }
 
-
-static CURLcode send_haproxy_header(struct Curl_cfilter*cf,
-                                    struct Curl_easy *data)
+CURLcode Curl_cf_http_proxy_insert_after(struct Curl_cfilter *cf_at,
+                                         struct Curl_easy *data)
 {
-  struct dynbuf req;
+  struct Curl_cfilter *cf;
+  CURLcode result;
+
+  (void)data;
+  result = Curl_cf_create(&cf, &Curl_cft_http_proxy, NULL);
+  if(!result)
+    Curl_conn_cf_insert_after(cf_at, cf);
+  return result;
+}
+
+#endif /* ! CURL_DISABLE_HTTP */
+
+
+typedef enum {
+    HAPROXY_INIT,     /* init/default/no tunnel state */
+    HAPROXY_SEND,     /* data_out being sent */
+    HAPROXY_DONE      /* all work done */
+} haproxy_state;
+
+struct cf_haproxy_ctx {
+  int state;
+  struct dynbuf data_out;
+};
+
+static void cf_haproxy_ctx_reset(struct cf_haproxy_ctx *ctx)
+{
+  DEBUGASSERT(ctx);
+  ctx->state = HAPROXY_INIT;
+  Curl_dyn_reset(&ctx->data_out);
+}
+
+static void cf_haproxy_ctx_free(struct cf_haproxy_ctx *ctx)
+{
+  if(ctx) {
+    Curl_dyn_free(&ctx->data_out);
+    free(ctx);
+  }
+}
+
+static CURLcode cf_haproxy_date_out_set(struct Curl_cfilter*cf,
+                                        struct Curl_easy *data)
+{
+  struct cf_haproxy_ctx *ctx = cf->ctx;
   CURLcode result;
   const char *tcp_version;
-  Curl_dyn_init(&req, DYN_HAXPROXY);
 
+  DEBUGASSERT(ctx);
+  DEBUGASSERT(ctx->state == HAPROXY_INIT);
 #ifdef USE_UNIX_SOCKETS
   if(cf->conn->unix_domain_socket)
     /* the buffer is large enough to hold this! */
-    result = Curl_dyn_addn(&req, STRCONST("PROXY UNKNOWN\r\n"));
+    result = Curl_dyn_addn(&ctx->data_out, STRCONST("PROXY UNKNOWN\r\n"));
   else {
 #endif /* USE_UNIX_SOCKETS */
   /* Emit the correct prefix for IPv6 */
   tcp_version = cf->conn->bits.ipv6 ? "TCP6" : "TCP4";
 
-  result = Curl_dyn_addf(&req, "PROXY %s %s %s %i %i\r\n",
+  result = Curl_dyn_addf(&ctx->data_out, "PROXY %s %s %s %i %i\r\n",
                          tcp_version,
                          data->info.conn_local_ip,
                          data->info.conn_primary_ip,
@@ -1223,19 +1270,18 @@ static CURLcode send_haproxy_header(struct Curl_cfilter*cf,
 #ifdef USE_UNIX_SOCKETS
   }
 #endif /* USE_UNIX_SOCKETS */
-
-  if(!result)
-    result = Curl_buffer_send(&req, data, &data->info.request_size,
-                              0, FIRSTSOCKET);
   return result;
 }
 
-static CURLcode haproxy_cf_connect(struct Curl_cfilter *cf,
+static CURLcode cf_haproxy_connect(struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
                                    bool blocking, bool *done)
 {
+  struct cf_haproxy_ctx *ctx = cf->ctx;
   CURLcode result;
+  size_t len;
 
+  DEBUGASSERT(ctx);
   if(cf->connected) {
     *done = TRUE;
     return CURLE_OK;
@@ -1245,27 +1291,119 @@ static CURLcode haproxy_cf_connect(struct Curl_cfilter *cf,
   if(result || !*done)
     return result;
 
-  result = send_haproxy_header(cf, data);
-  *done = (!result);
+  switch(ctx->state) {
+  case HAPROXY_INIT:
+    result = cf_haproxy_date_out_set(cf, data);
+    if(result)
+      goto out;
+    ctx->state = HAPROXY_SEND;
+    /* FALLTHROUGH */
+  case HAPROXY_SEND:
+    len = Curl_dyn_len(&ctx->data_out);
+    if(len > 0) {
+      ssize_t written = Curl_conn_send(data, cf->sockindex,
+                                       Curl_dyn_ptr(&ctx->data_out),
+                                       len, &result);
+      if(written < 0)
+        goto out;
+      Curl_dyn_tail(&ctx->data_out, len - (size_t)written);
+      if(Curl_dyn_len(&ctx->data_out) > 0) {
+        result = CURLE_OK;
+        goto out;
+      }
+    }
+    ctx->state = HAPROXY_DONE;
+    /* FALLTHROUGH */
+  default:
+    Curl_dyn_free(&ctx->data_out);
+    break;
+  }
+
+out:
+  *done = (!result) && (ctx->state == HAPROXY_DONE);
   cf->connected = *done;
   return result;
 }
 
-static const struct Curl_cftype cft_haproxy = {
+static void cf_haproxy_destroy(struct Curl_cfilter *cf,
+                               struct Curl_easy *data)
+{
+  (void)data;
+  DEBUGF(LOG_CF(data, cf, "destroy"));
+  cf_haproxy_ctx_free(cf->ctx);
+}
+
+static void cf_haproxy_close(struct Curl_cfilter *cf,
+                             struct Curl_easy *data)
+{
+  DEBUGF(LOG_CF(data, cf, "close"));
+  cf->connected = FALSE;
+  cf_haproxy_ctx_reset(cf->ctx);
+  if(cf->next)
+    cf->next->cft->close(cf->next, data);
+}
+
+static int cf_haproxy_get_select_socks(struct Curl_cfilter *cf,
+                                       struct Curl_easy *data,
+                                       curl_socket_t *socks)
+{
+  int fds;
+
+  fds = cf->next->cft->get_select_socks(cf->next, data, socks);
+  if(!fds && cf->next->connected && !cf->connected) {
+    /* If we are not connected, but the filter "below" is
+     * and not waiting on something, we are sending. */
+    socks[0] = Curl_conn_cf_get_socket(cf, data);
+    return GETSOCK_WRITESOCK(0);
+  }
+  return fds;
+}
+
+
+struct Curl_cftype Curl_cft_haproxy = {
   "HAPROXY",
   0,
-  Curl_cf_def_destroy_this,
-  Curl_cf_def_setup,
-  haproxy_cf_connect,
-  Curl_cf_def_close,
+  0,
+  cf_haproxy_destroy,
+  cf_haproxy_connect,
+  cf_haproxy_close,
   Curl_cf_def_get_host,
-  Curl_cf_def_get_select_socks,
+  cf_haproxy_get_select_socks,
   Curl_cf_def_data_pending,
   Curl_cf_def_send,
   Curl_cf_def_recv,
-  Curl_cf_def_attach_data,
-  Curl_cf_def_detach_data,
+  Curl_cf_def_cntrl,
+  Curl_cf_def_conn_is_alive,
+  Curl_cf_def_conn_keep_alive,
+  Curl_cf_def_query,
 };
+
+static CURLcode cf_haproxy_create(struct Curl_cfilter **pcf,
+                                  struct Curl_easy *data)
+{
+  struct Curl_cfilter *cf = NULL;
+  struct cf_haproxy_ctx *ctx;
+  CURLcode result;
+
+  (void)data;
+  ctx = calloc(sizeof(*ctx), 1);
+  if(!ctx) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
+  ctx->state = HAPROXY_INIT;
+  Curl_dyn_init(&ctx->data_out, DYN_HAXPROXY);
+
+  result = Curl_cf_create(&cf, &Curl_cft_haproxy, ctx);
+  if(result)
+    goto out;
+  ctx = NULL;
+
+out:
+  cf_haproxy_ctx_free(ctx);
+  *pcf = result? NULL : cf;
+  return result;
+}
 
 CURLcode Curl_conn_haproxy_add(struct Curl_easy *data,
                                struct connectdata *conn,
@@ -1274,10 +1412,28 @@ CURLcode Curl_conn_haproxy_add(struct Curl_easy *data,
   struct Curl_cfilter *cf;
   CURLcode result;
 
-  result = Curl_cf_create(&cf, &cft_haproxy, NULL);
-  if(!result)
-    Curl_conn_cf_add(data, conn, sockindex, cf);
+  result = cf_haproxy_create(&cf, data);
+  if(result)
+    goto out;
+  Curl_conn_cf_add(data, conn, sockindex, cf);
+
+out:
   return result;
 }
 
-#endif /* !CURL_DISABLE_PROXY &6 ! CURL_DISABLE_HTTP */
+CURLcode Curl_cf_haproxy_insert_after(struct Curl_cfilter *cf_at,
+                                      struct Curl_easy *data)
+{
+  struct Curl_cfilter *cf;
+  CURLcode result;
+
+  result = cf_haproxy_create(&cf, data);
+  if(result)
+    goto out;
+  Curl_conn_cf_insert_after(cf_at, cf);
+
+out:
+  return result;
+}
+
+#endif /* !CURL_DISABLE_PROXY */

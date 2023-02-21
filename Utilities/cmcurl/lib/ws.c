@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -115,12 +115,18 @@ CURLcode Curl_ws_request(struct Curl_easy *data, REQTYPE *req)
   return result;
 }
 
-CURLcode Curl_ws_accept(struct Curl_easy *data)
+/*
+ * 'nread' is number of bytes of websocket data already in the buffer at
+ * 'mem'.
+ */
+CURLcode Curl_ws_accept(struct Curl_easy *data,
+                        const char *mem, size_t nread)
 {
   struct SingleRequest *k = &data->req;
   struct HTTP *ws = data->req.p.http;
   struct connectdata *conn = data->conn;
   struct websocket *wsp = &data->req.p.http->ws;
+  struct ws_conn *wsc = &conn->proto.ws;
   CURLcode result;
 
   /* Verify the Sec-WebSocket-Accept response.
@@ -149,13 +155,21 @@ CURLcode Curl_ws_accept(struct Curl_easy *data)
 
   infof(data, "Received 101, switch to WebSocket; mask %02x%02x%02x%02x",
         ws->ws.mask[0], ws->ws.mask[1], ws->ws.mask[2], ws->ws.mask[3]);
+  Curl_dyn_init(&wsc->early, data->set.buffer_size);
+  if(nread) {
+    result = Curl_dyn_addn(&wsc->early, mem, nread);
+    if(result)
+      return result;
+    infof(data, "%zu bytes websocket payload", nread);
+    wsp->stillb = Curl_dyn_ptr(&wsc->early);
+    wsp->stillblen = Curl_dyn_len(&wsc->early);
+  }
   k->upgr101 = UPGR101_RECEIVED;
 
   if(data->set.connect_only)
     /* switch off non-blocking sockets */
     (void)curlx_nonblock(conn->sock[FIRSTSOCKET], FALSE);
 
-  wsp->oleft = 0;
   return result;
 }
 
@@ -183,12 +197,12 @@ static void ws_decode_shift(struct Curl_easy *data, size_t spent)
 
 /* ws_decode() decodes a binary frame into structured WebSocket data,
 
-   wpkt - the incoming raw data. If NULL, work on the already buffered data.
-   ilen - the size of the provided data, perhaps too little, perhaps too much
-   out - stored pointed to extracted data
+   data - the transfer
+   inbuf - incoming raw data. If NULL, work on the already buffered data.
+   inlen - size of the provided data, perhaps too little, perhaps too much
+   headlen - stored length of the frame header
    olen - stored length of the extracted data
    oleft - number of unread bytes pending to that belongs to this frame
-   more - if there is more data in there
    flags - stored bitmask about the frame
 
    Returns CURLE_AGAIN if there is only a partial frame in the buffer. Then it
@@ -246,6 +260,9 @@ static CURLcode ws_decode(struct Curl_easy *data,
     infof(data, "WS: received OPCODE PONG");
     *flags |= CURLWS_PONG;
     break;
+  default:
+    failf(data, "WS: unknown opcode: %x", opcode);
+    return CURLE_RECV_ERROR;
   }
 
   if(inbuf[1] & WSBIT_MASK) {
@@ -296,7 +313,7 @@ static CURLcode ws_decode(struct Curl_easy *data,
     *oleft = 0;             /* bytes yet to come (for this frame) */
   }
 
-  infof(data, "WS: received %zu bytes payload (%zu left, buflen was %zu)",
+  infof(data, "WS: received %Ou bytes payload (%Ou left, buflen was %zu)",
         payloadsize, *oleft, inlen);
   return CURLE_OK;
 }
@@ -339,9 +356,6 @@ size_t Curl_ws_writecb(char *buffer, size_t size /* 1 */,
 
         result = ws_decode(data, wsbuf, buflen,
                            &headlen, &write_len, &fb_left, &recvflags);
-        consumed += headlen;
-        wsbuf += headlen;
-        buflen -= headlen;
         if(result == CURLE_AGAIN)
           /* insufficient amount of data, keep it for later.
            * we pretend to have written all since we have a copy */
@@ -350,6 +364,10 @@ size_t Curl_ws_writecb(char *buffer, size_t size /* 1 */,
           infof(data, "WS: decode error %d", (int)result);
           return nitems - 1;
         }
+        consumed += headlen;
+        wsbuf += headlen;
+        buflen -= headlen;
+
         /* New frame. store details about the frame to be reachable with
            curl_ws_meta() from within the write callback */
         ws->ws.frame.age = 0;
@@ -392,7 +410,6 @@ size_t Curl_ws_writecb(char *buffer, size_t size /* 1 */,
   return nitems;
 }
 
-
 CURL_EXTERN CURLcode curl_ws_recv(struct Curl_easy *data, void *buffer,
                                   size_t buflen, size_t *nread,
                                   struct curl_ws_frame **metap)
@@ -409,7 +426,7 @@ CURL_EXTERN CURLcode curl_ws_recv(struct Curl_easy *data, void *buffer,
     return result;
 
   while(!done) {
-    size_t write_len;
+    size_t datalen;
     unsigned int recvflags;
 
     if(!wsp->stillblen) {
@@ -419,26 +436,32 @@ CURL_EXTERN CURLcode curl_ws_recv(struct Curl_easy *data, void *buffer,
                               data->set.buffer_size, &n);
       if(result)
         return result;
-      if(!n)
+      if(!n) {
         /* connection closed */
+        infof(data, "connection expectedly closed?");
         return CURLE_GOT_NOTHING;
+      }
       wsp->stillb = data->state.buffer;
       wsp->stillblen = n;
     }
 
-    infof(data, "WS: got %u websocket bytes to decode",
-          (int)wsp->stillblen);
+    infof(data, "WS: %u bytes left to decode", (int)wsp->stillblen);
     if(!wsp->frame.bytesleft) {
       size_t headlen;
       curl_off_t oleft;
       /* detect new frame */
       result = ws_decode(data, (unsigned char *)wsp->stillb, wsp->stillblen,
-                         &headlen, &write_len, &oleft, &recvflags);
+                         &headlen, &datalen, &oleft, &recvflags);
       if(result == CURLE_AGAIN)
         /* a packet fragment only */
         break;
       else if(result)
         return result;
+      if(datalen > buflen) {
+        size_t diff = datalen - buflen;
+        datalen = buflen;
+        oleft += diff;
+      }
       wsp->stillb += headlen;
       wsp->stillblen -= headlen;
       wsp->frame.offset = 0;
@@ -447,40 +470,45 @@ CURL_EXTERN CURLcode curl_ws_recv(struct Curl_easy *data, void *buffer,
     }
     else {
       /* existing frame, remaining payload handling */
-      write_len = wsp->frame.bytesleft;
-      if(write_len > wsp->stillblen)
-        write_len = wsp->stillblen;
+      datalen = wsp->frame.bytesleft;
+      if(datalen > wsp->stillblen)
+        datalen = wsp->stillblen;
+      if(datalen > buflen)
+        datalen = buflen;
+
+      wsp->frame.offset += wsp->frame.len;
+      wsp->frame.bytesleft -= datalen;
     }
+    wsp->frame.len = datalen;
 
     /* auto-respond to PINGs */
     if((wsp->frame.flags & CURLWS_PING) && !wsp->frame.bytesleft) {
-      infof(data, "WS: auto-respond to PING with a PONG");
+      size_t nsent = 0;
+      infof(data, "WS: auto-respond to PING with a PONG, %zu bytes payload",
+            datalen);
       /* send back the exact same content as a PONG */
-      result = curl_ws_send(data, wsp->stillb, write_len,
-                            &write_len, 0, CURLWS_PONG);
+      result = curl_ws_send(data, wsp->stillb, datalen, &nsent, 0,
+                            CURLWS_PONG);
       if(result)
         return result;
+      infof(data, "WS: bytesleft %zu datalen %zu",
+            wsp->frame.bytesleft, datalen);
+      /* we handled the data part of the PING, advance over that */
+      wsp->stillb += nsent;
+      wsp->stillblen -= nsent;
     }
-    else if(write_len || !wsp->frame.bytesleft) {
-      if(write_len > buflen)
-        write_len = buflen;
+    else if(datalen) {
       /* copy the payload to the user buffer */
-      memcpy(buffer, wsp->stillb, write_len);
-      *nread = write_len;
+      memcpy(buffer, wsp->stillb, datalen);
+      *nread = datalen;
       done = TRUE;
-    }
-    if(write_len) {
-      /* update buffer and frame info */
-      wsp->frame.offset += write_len;
-      DEBUGASSERT(wsp->frame.bytesleft >= (curl_off_t)write_len);
-      if(wsp->frame.bytesleft)
-        wsp->frame.bytesleft -= write_len;
-      DEBUGASSERT(write_len <= wsp->stillblen);
-      wsp->stillblen -= write_len;
+
+      wsp->stillblen -= datalen;
       if(wsp->stillblen)
-        wsp->stillb += write_len;
-      else
+        wsp->stillb += datalen;
+      else {
         wsp->stillb = NULL;
+      }
     }
   }
   *metap = &wsp->frame;
@@ -555,17 +583,27 @@ static size_t ws_packethead(struct Curl_easy *data,
   }
 
   if(!(flags & CURLWS_CONT)) {
-    /* if not marked as continuing, assume this is the final fragment */
-    firstbyte |= WSBIT_FIN | opcode;
+    if(!ws->ws.contfragment)
+      /* not marked as continuing, this is the final fragment */
+      firstbyte |= WSBIT_FIN | opcode;
+    else
+      /* marked as continuing, this is the final fragment; set CONT
+         opcode and FIN bit */
+      firstbyte |= WSBIT_FIN | WSBIT_OPCODE_CONT;
+
     ws->ws.contfragment = FALSE;
+    infof(data, "WS: set FIN");
   }
   else if(ws->ws.contfragment) {
     /* the previous fragment was not a final one and this isn't either, keep a
        CONT opcode and no FIN bit */
     firstbyte |= WSBIT_OPCODE_CONT;
+    infof(data, "WS: keep CONT, no FIN");
   }
   else {
+    firstbyte = opcode;
     ws->ws.contfragment = TRUE;
+    infof(data, "WS: set CONT, no FIN");
   }
   out[0] = firstbyte;
   if(len > 65535) {
@@ -686,8 +724,14 @@ CURL_EXTERN CURLcode curl_ws_send(struct Curl_easy *data, const void *buffer,
 
   infof(data, "WS: wanted to send %zu bytes, sent %zu bytes",
         headlen + buflen, written);
-  *sent = written;
 
+  if(!result) {
+    /* the *sent number only counts "payload", excluding the header */
+    if((size_t)written > headlen)
+      *sent = written - headlen;
+    else
+      *sent = 0;
+  }
   return result;
 }
 
@@ -696,6 +740,20 @@ void Curl_ws_done(struct Curl_easy *data)
   struct websocket *wsp = &data->req.p.http->ws;
   DEBUGASSERT(wsp);
   Curl_dyn_free(&wsp->buf);
+}
+
+CURLcode Curl_ws_disconnect(struct Curl_easy *data,
+                            struct connectdata *conn,
+                            bool dead_connection)
+{
+  struct ws_conn *wsc = &conn->proto.ws;
+  (void)data;
+  (void)dead_connection;
+  Curl_dyn_free(&wsc->early);
+
+  /* make sure this is non-blocking to avoid getting stuck in shutdown */
+  (void)curlx_nonblock(conn->sock[FIRSTSOCKET], TRUE);
+  return CURLE_OK;
 }
 
 CURL_EXTERN struct curl_ws_frame *curl_ws_meta(struct Curl_easy *data)

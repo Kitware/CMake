@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2018 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -62,6 +62,7 @@ typedef enum {
   CURLUE_BAD_SCHEME,          /* 27 */
   CURLUE_BAD_SLASHES,         /* 28 */
   CURLUE_BAD_USER,            /* 29 */
+  CURLUE_LACKS_IDN,           /* 30 */
   CURLUE_LAST
 } CURLUcode;
 
@@ -95,6 +96,7 @@ typedef enum {
 #define CURLU_NO_AUTHORITY (1<<10)      /* Allow empty authority when the
                                            scheme is unknown. */
 #define CURLU_ALLOW_SPACE (1<<11)       /* Allow spaces in the URL */
+#define CURLU_PUNYCODE (1<<12)          /* get the host name in pynycode */
 
 typedef struct Curl_URL CURLU;
 

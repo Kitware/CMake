@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -370,16 +370,18 @@ static CURLcode pop3_perform_upgrade_tls(struct Curl_easy *data,
   /* Start the SSL connection */
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   CURLcode result;
+  bool ssldone = FALSE;
 
-  if(!Curl_conn_is_ssl(data, FIRSTSOCKET)) {
+  if(!Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
     result = Curl_ssl_cfilter_add(data, conn, FIRSTSOCKET);
     if(result)
       goto out;
   }
 
-  result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &pop3c->ssldone);
+  result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &ssldone);
 
   if(!result) {
+    pop3c->ssldone = ssldone;
     if(pop3c->state != POP3_UPGRADETLS)
       state(data, POP3_UPGRADETLS);
 
@@ -769,7 +771,7 @@ static CURLcode pop3_state_capa_resp(struct Curl_easy *data, int pop3code,
     if(pop3code != '+')
       pop3c->authtypes |= POP3_TYPE_CLEARTEXT;
 
-    if(!data->set.use_ssl || Curl_conn_is_ssl(data, FIRSTSOCKET))
+    if(!data->set.use_ssl || Curl_conn_is_ssl(conn, FIRSTSOCKET))
       result = pop3_perform_authentication(data, conn);
     else if(pop3code == '+' && pop3c->tls_supported)
       /* Switch to TLS connection now */
@@ -1056,7 +1058,9 @@ static CURLcode pop3_multi_statemach(struct Curl_easy *data, bool *done)
   struct pop3_conn *pop3c = &conn->proto.pop3c;
 
   if((conn->handler->flags & PROTOPT_SSL) && !pop3c->ssldone) {
-    result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &pop3c->ssldone);
+    bool ssldone = FALSE;
+    result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &ssldone);
+    pop3c->ssldone = ssldone;
     if(result || !pop3c->ssldone)
       return result;
   }

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -873,11 +873,11 @@ static void HandshakeCallback(PRFileDesc *sock, void *arg)
 #endif
     case SSL_NEXT_PROTO_NO_SUPPORT:
     case SSL_NEXT_PROTO_NO_OVERLAP:
-      infof(data, VTLS_INFOF_NO_ALPN);
+      Curl_alpn_set_negotiated(cf, data, NULL, 0);
       return;
 #ifdef SSL_ENABLE_ALPN
     case SSL_NEXT_PROTO_SELECTED:
-      infof(data, VTLS_INFOF_ALPN_ACCEPTED_LEN_1STR, buflen, buf);
+      Curl_alpn_set_negotiated(cf, data, buf, buflen);
       break;
 #endif
     default:
@@ -885,25 +885,6 @@ static void HandshakeCallback(PRFileDesc *sock, void *arg)
       break;
     }
 
-#ifdef USE_HTTP2
-    if(buflen == ALPN_H2_LENGTH &&
-       !memcmp(ALPN_H2, buf, ALPN_H2_LENGTH)) {
-      cf->conn->alpn = CURL_HTTP_VERSION_2;
-    }
-    else
-#endif
-    if(buflen == ALPN_HTTP_1_1_LENGTH &&
-       !memcmp(ALPN_HTTP_1_1, buf, ALPN_HTTP_1_1_LENGTH)) {
-      cf->conn->alpn = CURL_HTTP_VERSION_1_1;
-    }
-
-    /* This callback might get called when PR_Recv() is used within
-     * close_one() during a connection shutdown. At that point there might not
-     * be any "bundle" associated with the connection anymore.
-     */
-    if(conn->bundle)
-      Curl_multiuse_state(data, cf->conn->alpn == CURL_HTTP_VERSION_2 ?
-                          BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
   }
 }
 
@@ -1897,7 +1878,7 @@ static CURLcode nss_setup_connect(struct Curl_cfilter *cf,
   PRFileDesc *nspr_io_stub = NULL;
   PRBool ssl_no_cache;
   PRBool ssl_cbc_random_iv;
-  curl_socket_t sockfd = cf->conn->sock[cf->sockindex];
+  curl_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
   struct ssl_connect_data *connssl = cf->ctx;
   struct ssl_backend_data *backend = connssl->backend;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
@@ -2163,27 +2144,17 @@ static CURLcode nss_setup_connect(struct Curl_cfilter *cf,
 #endif
 
 #if defined(SSL_ENABLE_ALPN)
-  if(cf->conn->bits.tls_enable_alpn) {
-    int cur = 0;
-    unsigned char protocols[128];
+  if(connssl->alpn) {
+    struct alpn_proto_buf proto;
 
-#ifdef USE_HTTP2
-    if(data->state.httpwant >= CURL_HTTP_VERSION_2
-#ifndef CURL_DISABLE_PROXY
-       && (!Curl_ssl_cf_is_proxy(cf) || !cf->conn->bits.tunnel_proxy)
-#endif
-      ) {
-      protocols[cur++] = ALPN_H2_LENGTH;
-      memcpy(&protocols[cur], ALPN_H2, ALPN_H2_LENGTH);
-      cur += ALPN_H2_LENGTH;
-    }
-#endif
-    protocols[cur++] = ALPN_HTTP_1_1_LENGTH;
-    memcpy(&protocols[cur], ALPN_HTTP_1_1, ALPN_HTTP_1_1_LENGTH);
-    cur += ALPN_HTTP_1_1_LENGTH;
-
-    if(SSL_SetNextProtoNego(backend->handle, protocols, cur) != SECSuccess)
+    result = Curl_alpn_to_proto_buf(&proto, connssl->alpn);
+    if(result || SSL_SetNextProtoNego(backend->handle, proto.data, proto.len)
+                   != SECSuccess) {
+      failf(data, "Error setting ALPN");
       goto error;
+    }
+    Curl_alpn_to_proto_str(&proto, connssl->alpn);
+    infof(data, VTLS_INFOF_ALPN_OFFER_1STR, proto.data);
   }
 #endif
 
@@ -2393,6 +2364,19 @@ static ssize_t nss_send(struct Curl_cfilter *cf,
   return rc; /* number of bytes */
 }
 
+static bool
+nss_data_pending(struct Curl_cfilter *cf, const struct Curl_easy *data)
+{
+  struct ssl_connect_data *connssl = cf->ctx;
+  PRFileDesc *fd = connssl->backend->handle->lower;
+  char buf;
+
+  (void) data;
+
+  /* Returns true in case of error to force reading. */
+  return PR_Recv(fd, (void *) &buf, 1, PR_MSG_PEEK, PR_INTERVAL_NO_WAIT) != 0;
+}
+
 static ssize_t nss_recv(struct Curl_cfilter *cf,
                         struct Curl_easy *data,    /* transfer */
                         char *buf,             /* store read data here */
@@ -2543,7 +2527,7 @@ const struct Curl_ssl Curl_ssl_nss = {
   nss_check_cxn,                /* check_cxn */
   /* NSS has no shutdown function provided and thus always fail */
   Curl_none_shutdown,           /* shutdown */
-  Curl_none_data_pending,       /* data_pending */
+  nss_data_pending,             /* data_pending */
   nss_random,                   /* random */
   nss_cert_status_request,      /* cert_status_request */
   nss_connect,                  /* connect */
