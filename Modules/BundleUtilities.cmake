@@ -870,10 +870,6 @@ function(fixup_bundle_item resolved_embedded_item exepath dirs)
     endif()
   endforeach()
 
-  if(BU_CHMOD_BUNDLE_ITEMS)
-    execute_process(COMMAND chmod u+w "${resolved_embedded_item}")
-  endif()
-
   # CMAKE_INSTALL_NAME_TOOL may not be set if executed in script mode
   # Duplicated from CMakeFindBinUtils.cmake
   find_program(CMAKE_INSTALL_NAME_TOOL NAMES install_name_tool HINTS ${_CMAKE_TOOLCHAIN_LOCATION})
@@ -903,6 +899,9 @@ function(fixup_bundle_item resolved_embedded_item exepath dirs)
     if(NOT "${resolved_embedded_item}" MATCHES "\\.(bat|c?sh|bash|ksh|cmd)$" AND
        NOT file_contents MATCHES "^#!")
       set(cmd ${CMAKE_INSTALL_NAME_TOOL} ${changes} "${resolved_embedded_item}")
+      if(BU_CHMOD_BUNDLE_ITEMS)
+        execute_process(COMMAND chmod u+w "${resolved_embedded_item}")
+      endif()
       execute_process(COMMAND ${cmd} RESULT_VARIABLE install_name_tool_result)
       if(NOT install_name_tool_result EQUAL 0)
         string(REPLACE ";" "' '" msg "'${cmd}'")
