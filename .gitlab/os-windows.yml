@@ -35,25 +35,25 @@
     variables:
         VCVARSALL: "${VS170COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
         VCVARSPLATFORM: "x64"
-        VCVARSVERSION: "14.34.31933"
+        VCVARSVERSION: "14.35.32215"
 
 .windows_vcvarsall_vs2022_x86:
     variables:
         VCVARSALL: "${VS170COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
         VCVARSPLATFORM: "x86"
-        VCVARSVERSION: "14.34.31933"
+        VCVARSVERSION: "14.35.32215"
 
 .windows_vcvarsall_vs2022_x64_arm64:
     variables:
         VCVARSALL: "${VS170COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
         VCVARSPLATFORM: "x64_arm64"
-        VCVARSVERSION: "14.34.31933"
+        VCVARSVERSION: "14.35.32215"
 
 .windows_arm64_vcvarsall_vs2022:
     variables:
         VCVARSALL: "${VS170COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
         VCVARSPLATFORM: "arm64"
-        VCVARSVERSION: "14.34.31933"
+        VCVARSVERSION: "14.35.32215"
 
 .windows_vs2022_x64_ninja:
     extends:
@@ -112,7 +112,7 @@
         CMAKE_CONFIGURATION: windows_vs2022_x64
         CMAKE_GENERATOR: "Visual Studio 17 2022"
         CMAKE_GENERATOR_PLATFORM: "x64"
-        CMAKE_GENERATOR_TOOLSET: "v143,version=14.34.31933"
+        CMAKE_GENERATOR_TOOLSET: "v143,version=14.35.32215"
         CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
 
 .windows_vs2019_x64:
@@ -245,7 +245,7 @@
         CMAKE_CONFIGURATION: windows_arm64_vs2022
         CMAKE_GENERATOR: "Visual Studio 17 2022"
         CMAKE_GENERATOR_PLATFORM: "ARM64"
-        CMAKE_GENERATOR_TOOLSET: "v143,version=14.34.31933"
+        CMAKE_GENERATOR_TOOLSET: "v143,version=14.35.32215"
         CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
 
 .mingw_osdn_io:
@@ -279,7 +279,7 @@
         - windows-x86_64
         - shell
         - vs2022
-        - msvc-19.34
+        - msvc-19.35
         - nonconcurrent
 
 .windows_x86_64_tags_nonconcurrent_vs2022_arm64:
@@ -288,7 +288,7 @@
         - windows-x86_64
         - shell
         - vs2022
-        - msvc-19.34-arm64
+        - msvc-19.35-arm64
         - nonconcurrent
 
 .windows_x86_64_tags_concurrent_vs2022:
@@ -297,7 +297,7 @@
         - windows-x86_64
         - shell
         - vs2022
-        - msvc-19.34
+        - msvc-19.35
         - concurrent
 
 .windows_x86_64_tags_concurrent_vs2019:
@@ -322,7 +322,7 @@
         - windows-arm64
         - shell
         - vs2022
-        - msvc-19.34
+        - msvc-19.35
         - nonconcurrent
 
 .windows_arm64_tags_concurrent_vs2022:
@@ -331,7 +331,7 @@
         - windows-arm64
         - shell
         - vs2022
-        - msvc-19.34
+        - msvc-19.35
         - concurrent
 
 ## Windows-specific scripts
