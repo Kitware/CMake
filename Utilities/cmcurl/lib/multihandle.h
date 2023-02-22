@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -162,14 +162,17 @@ struct Curl_multi {
 #define IPV6_DEAD    1
 #define IPV6_WORKS   2
   unsigned char ipv6_up;       /* IPV6_* defined */
-  bool multiplexing;           /* multiplexing wanted */
-  bool recheckstate;           /* see Curl_multi_connchanged */
-  bool in_callback;            /* true while executing a callback */
+  BIT(multiplexing);           /* multiplexing wanted */
+  BIT(recheckstate);           /* see Curl_multi_connchanged */
+  BIT(in_callback);            /* true while executing a callback */
 #ifdef USE_OPENSSL
-  bool ssl_seeded;
+  BIT(ssl_seeded);
 #endif
-  bool dead; /* a callback returned error, everything needs to crash and
+  BIT(dead); /* a callback returned error, everything needs to crash and
                 burn */
+#ifdef DEBUGBUILD
+  BIT(warned);                 /* true after user warned of DEBUGBUILD */
+#endif
 };
 
 #endif /* HEADER_CURL_MULTIHANDLE_H */

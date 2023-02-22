@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2004 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -549,6 +549,9 @@ curl_url_strerror(CURLUcode error)
 
   case CURLUE_BAD_USER:
     return "Bad user";
+
+  case CURLUE_LACKS_IDN:
+    return "libcurl lacks IDN support";
 
   case CURLUE_LAST:
     break;

@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_VQUIC_MSH3_H
-#define HEADER_CURL_VQUIC_MSH3_H
+#ifndef HEADER_CURL_VQUIC_CURL_NGTCP2_H
+#define HEADER_CURL_VQUIC_CURL_NGTCP2_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,15 +26,36 @@
 
 #include "curl_setup.h"
 
-#ifdef USE_MSH3
+#ifdef USE_NGTCP2
 
-#include <msh3.h>
+#ifdef HAVE_NETINET_UDP_H
+#include <netinet/udp.h>
+#endif
 
-struct quicsocket {
-  MSH3_API* api;
-  MSH3_CONNECTION* conn;
-};
+#include <ngtcp2/ngtcp2_crypto.h>
+#include <nghttp3/nghttp3.h>
+#ifdef USE_OPENSSL
+#include <openssl/ssl.h>
+#elif defined(USE_WOLFSSL)
+#include <wolfssl/options.h>
+#include <wolfssl/ssl.h>
+#include <wolfssl/quic.h>
+#endif
 
-#endif /* USE_MSQUIC */
+struct Curl_cfilter;
 
-#endif /* HEADER_CURL_VQUIC_MSH3_H */
+#include "urldata.h"
+
+void Curl_ngtcp2_ver(char *p, size_t len);
+
+CURLcode Curl_cf_ngtcp2_create(struct Curl_cfilter **pcf,
+                             struct Curl_easy *data,
+                             struct connectdata *conn,
+                             const struct Curl_addrinfo *ai);
+
+bool Curl_conn_is_ngtcp2(const struct Curl_easy *data,
+                         const struct connectdata *conn,
+                         int sockindex);
+#endif
+
+#endif /* HEADER_CURL_VQUIC_CURL_NGTCP2_H */

@@ -150,7 +150,7 @@ endif()
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -253,7 +253,7 @@ if(WIN32)
   set(CURL_TARGET_WINDOWS_VERSION "" CACHE STRING "Minimum target Windows version as hex string")
   if(CURL_TARGET_WINDOWS_VERSION)
     add_definitions(-D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION})
-    set(CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION}")
+    list(APPEND CMAKE_REQUIRED_DEFINITIONS -D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION})
     set(CURL_TEST_DEFINES "${CURL_TEST_DEFINES} -D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION}")
   endif()
   endif()
@@ -488,7 +488,7 @@ include(CheckCSourceCompiles)
 
 # On windows preload settings
 if(WIN32)
-  set(CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -D_WINSOCKAPI_=")
+  list(APPEND CMAKE_REQUIRED_DEFINITIONS -D_WINSOCKAPI_=)
   include(${CMAKE_CURRENT_SOURCE_DIR}/CMake/Platforms/WindowsCache.cmake)
 endif()
 
@@ -514,24 +514,6 @@ if(WIN32)
 endif()
 
 if(0) # This code not needed for building within CMake.
-# This check below for use of deprecated symbols is only temporary and is to
-# be removed again after a year's service. Remove after November 25, 2022.
-set(CURL_RECONFIG_REQUIRED 0)
-foreach(_LIB GSSAPI OPENLDAP LIBSSH LIBSSH2 BEARSSL MBEDTLS NSS OPENSSL
-        SCHANNEL SECTRANSP WOLFSSL)
-  if(CMAKE_USE_${_LIB})
-    set(CURL_RECONFIG_REQUIRED 1)
-    message(SEND_ERROR "The option CMAKE_USE_${_LIB} was renamed to CURL_USE_${_LIB}.")
-  endif()
-endforeach()
-if(CMAKE_USE_WINSSL)
-  set(CURL_RECONFIG_REQUIRED 1)
-  message(SEND_ERROR "The option CMAKE_USE_WINSSL was renamed to CURL_USE_SCHANNEL.")
-endif()
-if(CURL_RECONFIG_REQUIRED)
-  message(FATAL_ERROR "Reconfig required")
-endif()
-
 # check SSL libraries
 # TODO support GnuTLS
 option(CURL_ENABLE_SSL "Enable SSL support" ON)
@@ -577,7 +559,6 @@ if(CURL_USE_SCHANNEL)
 endif()
 if(CURL_WINDOWS_SSPI)
   set(USE_WINDOWS_SSPI ON)
-  set(CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -DSECURITY_WIN32")
 endif()
 
 if(CURL_USE_SECTRANSP)
@@ -630,8 +611,6 @@ if(CURL_USE_OPENSSL)
   if(CURL_CA_PATH)
     add_definitions(-DCURL_CA_PATH="${CURL_CA_PATH}")
   endif()
-
-  add_definitions(-DOPENSSL_SUPPRESS_DEPRECATED)
 endif()
 
 if(CURL_USE_MBEDTLS)
@@ -826,7 +805,7 @@ if(NOT CURL_DISABLE_LDAP)
           return 0;
         }"
       )
-      set(CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -DLDAP_DEPRECATED=1")
+      list(APPEND CMAKE_REQUIRED_DEFINITIONS -DLDAP_DEPRECATED=1)
       list(APPEND CMAKE_REQUIRED_LIBRARIES ${CMAKE_LDAP_LIB})
       if(HAVE_LIBLBER)
         list(APPEND CMAKE_REQUIRED_LIBRARIES ${CMAKE_LBER_LIB})
@@ -1204,6 +1183,7 @@ check_symbol_exists(socket        "${CURL_INCLUDES}" HAVE_SOCKET)
 check_symbol_exists(socketpair    "${CURL_INCLUDES}" HAVE_SOCKETPAIR)
 check_symbol_exists(recv          "${CURL_INCLUDES}" HAVE_RECV)
 check_symbol_exists(send          "${CURL_INCLUDES}" HAVE_SEND)
+check_symbol_exists(sendmsg       "${CURL_INCLUDES}" HAVE_SENDMSG)
 check_symbol_exists(select        "${CURL_INCLUDES}" HAVE_SELECT)
 check_symbol_exists(strdup        "${CURL_INCLUDES}" HAVE_STRDUP)
 check_symbol_exists(strtok_r      "${CURL_INCLUDES}" HAVE_STRTOK_R)
@@ -1248,7 +1228,7 @@ check_symbol_exists(setrlimit      "${CURL_INCLUDES}" HAVE_SETRLIMIT)
 
 if(NOT MSVC OR (MSVC_VERSION GREATER_EQUAL 1900))
   # earlier MSVC compilers had faulty snprintf implementations
-  check_symbol_exists(snprintf       "${CURL_INCLUDES}" HAVE_SNPRINTF)
+  check_symbol_exists(snprintf       "stdio.h" HAVE_SNPRINTF)
 endif()
 check_function_exists(mach_absolute_time HAVE_MACH_ABSOLUTE_TIME)
 check_symbol_exists(inet_ntop      "${CURL_INCLUDES}" HAVE_INET_NTOP)
@@ -1451,7 +1431,7 @@ if(WIN32)
 
   # Check if crypto functions in wincrypt.h are actually available
   if(HAVE_WINCRYPT_H)
-    check_symbol_exists(CryptAcquireContext "${CURL_INCLUDES}" USE_WINCRYPT)
+    check_symbol_exists(CryptAcquireContext "windows.h;wincrypt.h" USE_WINCRYPT)
   endif()
   if(USE_WINCRYPT)
     set(USE_WIN32_CRYPTO ON)
