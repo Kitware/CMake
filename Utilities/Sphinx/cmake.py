@@ -412,18 +412,7 @@ class CMakeDomain(Domain):
         'envvar':     CMakeObject,
         'genex':      CMakeObject,
         'variable':   CMakeObject,
-        # Other object types cannot be created except by the CMakeTransform
-        # 'generator':  CMakeObject,
-        # 'module':     CMakeObject,
-        # 'policy':     CMakeObject,
-        # 'prop_cache': CMakeObject,
-        # 'prop_dir':   CMakeObject,
-        # 'prop_gbl':   CMakeObject,
-        # 'prop_inst':  CMakeObject,
-        # 'prop_sf':    CMakeObject,
-        # 'prop_test':  CMakeObject,
-        # 'prop_tgt':   CMakeObject,
-        # 'manual':     CMakeObject,
+        # Other `object_types` cannot be created except by the `CMakeTransform`
     }
     roles = {
         'command':    CMakeXRefRole(fix_parens = True, lowercase = True),
