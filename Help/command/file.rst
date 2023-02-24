@@ -1077,7 +1077,14 @@ Options to both ``DOWNLOAD`` and ``UPLOAD`` are:
 ``HTTPHEADER <HTTP-header>``
   .. versionadded:: 3.7
 
-  HTTP header for operation. Suboption can be repeated several times.
+  HTTP header for ``DOWNLOAD`` and ``UPLOAD`` operations. ``HTTPHEADER`` can be
+  repeated for multiple options:
+
+  .. code-block:: cmake
+
+    file(DOWNLOAD <url>
+         HTTPHEADER "Authorization: Bearer <auth-token>"
+         HTTPHEADER "UserAgent: Mozilla/5.0")
 
 ``NETRC <level>``
   .. versionadded:: 3.11
