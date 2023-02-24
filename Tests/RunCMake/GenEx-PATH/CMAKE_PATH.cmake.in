@@ -50,4 +50,46 @@ if (WIN32)
 endif()
 
 
+######################################
+## tests with list of paths
+######################################
+set(reference "/x/y/z/../../a/d;/x/y/z/../../b/e")
+set(output "$<PATH:CMAKE_PATH,/x/y/z/../../a/d;/x/y/z/../../b/e>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "'${output}' instead of '${reference}'")
+endif()
+
+unset(reference)
+foreach(path IN ITEMS "/x/y/z/../../a/d" "/x/y/z/../../b/e")
+  cmake_path(SET result NORMALIZE "${path}")
+  list(APPEND reference "${result}")
+endforeach()
+set(output "$<PATH:CMAKE_PATH,NORMALIZE,/x/y/z/../../a/d;/x/y/z/../../b/e>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "'${output}' instead of '${reference}'")
+endif()
+
+if (WIN32)
+  unset(reference)
+  foreach(path IN ITEMS "/x\\y/z\\..\\../a/d" "/x\\y/z\\..\\../b/e")
+    cmake_path(SET result "${path}")
+    list(APPEND reference "${result}")
+  endforeach()
+  set(output "$<PATH:CMAKE_PATH,/x\y/z\..\../a/d;/x\y/z\..\../b/e>")
+  if (NOT output STREQUAL reference)
+    list (APPEND errors "'${output}' instead of '${reference}'")
+  endif()
+
+  unset(reference)
+  foreach(path IN ITEMS "/x\\y/z\\..\\../a/d" "/x\\y/z\\..\\../b/e")
+    cmake_path(SET result NORMALIZE "${path}")
+    list(APPEND reference "${result}")
+  endforeach()
+  set(output "$<PATH:CMAKE_PATH,NORMALIZE,/x\y/z\..\../a/d;/x\y/z\..\../b/e>")
+  if (NOT output STREQUAL reference)
+    list (APPEND errors "'${output}' instead of '${reference}'")
+  endif()
+endif()
+
+
 check_errors("PATH:CMAKE_PATH" ${errors})

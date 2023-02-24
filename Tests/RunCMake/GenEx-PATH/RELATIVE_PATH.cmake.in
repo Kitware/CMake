@@ -61,4 +61,18 @@ if (WIN32)
 endif()
 
 
+######################################
+## tests with list of paths
+######################################
+unset (reference)
+foreach(item IN ITEMS "/a//d" "/a/b/e")
+  cmake_path(RELATIVE_PATH item BASE_DIRECTORY "/a/b/c")
+  list(APPEND reference "${item}")
+endforeach()
+set(output "$<PATH:RELATIVE_PATH,/a//d;/a/b/e,/a/b/c>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "'${output}' instead of '${reference}'")
+endif()
+
+
 check_errors("PATH:RELATIVE_PATH" ${errors})

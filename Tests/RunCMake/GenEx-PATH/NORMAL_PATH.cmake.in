@@ -40,4 +40,18 @@ if (WIN32)
 endif()
 
 
+######################################
+## tests with list of paths
+######################################
+unset (reference)
+foreach(item IN ITEMS "a/./b/.." "x/.//y/z//..")
+  cmake_path(NORMAL_PATH item)
+  list(APPEND reference "${item}")
+endforeach()
+set(output "$<PATH:NORMAL_PATH,a/./b/..;x/.//y/z//..>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "'${output}' instead of '${reference}'")
+endif()
+
+
 check_errors("PATH:NORMAL_PATH" ${errors})
