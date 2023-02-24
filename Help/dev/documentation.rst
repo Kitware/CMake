@@ -168,46 +168,91 @@ documentation:
  See the `cmake-variables(7)`_ manual
  and the `set()`_ command.
 
-Documentation objects in the CMake Domain come from two sources.
-First, the CMake extension to Sphinx transforms every document named
-with the form ``Help/<type>/<file-name>.rst`` to a domain object with
-type ``<type>``.  The object name is extracted from the document title,
-which is expected to be of the form::
+Documentation objects in the CMake Domain come from two sources:
 
- <object-name>
- -------------
+1. The CMake extension to Sphinx transforms every document named
+   with the form ``Help/<type>/<file-name>.rst`` to a domain object with
+   type ``<type>``.  The object name is extracted from the document title,
+   which is expected to be of the form::
 
-and to appear at or near the top of the ``.rst`` file before any other
-lines starting in a letter, digit, ``<``, or ``$``.  If no such title appears
-literally in the ``.rst`` file, the object name is the ``<file-name>``.
-If a title does appear, it is expected that ``<file-name>`` is equal
-to ``<object-name>`` with any ``<`` and ``>`` characters removed,
-or in the case of a ``$<genex-name>`` or ``$<genex-name:...>``, the
-``genex-name``.
+    <object-name>
+    -------------
 
-Second, the CMake Domain provides directives to define objects inside
-other documents:
+   and to appear at or near the top of the ``.rst`` file before any other lines
+   starting in a letter, digit, ``<``, or ``$``.  If no such title appears
+   literally in the ``.rst`` file, the object name is the ``<file-name>``.
+   If a title does appear, it is expected that ``<file-name>`` is equal
+   to ``<object-name>`` with any ``<`` and ``>`` characters removed,
+   or in the case of a ``$<genex-name>`` or ``$<genex-name:...>``, the
+   ``genex-name``.
+
+2. `CMake Domain directives`_ may be used in documents to explicitly define
+   some object types:
+
+   * `command directive`_
+   * `envvar directive`_
+   * `genex directive`_
+   * `variable directive`_
+
+   Object types for which no directive is available must be defined using
+   the document transform above.
+
+CMake Domain Directives
+-----------------------
+
+The CMake Domain provides the following directives.
+
+``command`` directive
+^^^^^^^^^^^^^^^^^^^^^
+
+Document a "command" object:
 
 .. code-block:: rst
 
- .. command:: <command-name>
+  .. command:: <command-name>
 
-  This indented block documents <command-name>.
+    This indented block documents <command-name>.
 
- .. envvar:: <envvar-name>
+The directive requires a single argument, the command name.
 
-  This indented block documents <envvar-name>.
+``envvar`` directive
+^^^^^^^^^^^^^^^^^^^^
+
+Document an "envvar" object:
+
+.. code-block:: rst
+
+  .. envvar:: <envvar-name>
+
+    This indented block documents <envvar-name>.
+
+The directive requires a single argument, the environment variable name.
+
+``genex`` directive
+^^^^^^^^^^^^^^^^^^^
+
+Document a "genex" object:
+
+.. code-block:: rst
 
  .. genex:: <genex-name>
 
   This indented block documents <genex-name>.
 
+The directive requires a single argument, the generator expression name.
+
+``variable`` directive
+^^^^^^^^^^^^^^^^^^^^^^
+
+Document a "variable" object:
+
+.. code-block:: rst
+
  .. variable:: <variable-name>
 
   This indented block documents <variable-name>.
 
-Object types for which no directive is available must be defined using
-the first approach above.
+The directive requires a single argument, the variable name.
 
 .. _`Sphinx Domain`: http://sphinx-doc.org/domains.html
 .. _`cmake(1)`: https://cmake.org/cmake/help/latest/manual/cmake.1.html
