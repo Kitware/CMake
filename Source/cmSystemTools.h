@@ -399,6 +399,9 @@ public:
   static std::string RelativeIfUnder(std::string const& top,
                                      std::string const& in);
 
+  static cm::optional<std::string> GetEnvVar(std::string const& var);
+  static std::vector<std::string> SplitEnvPath(std::string const& value);
+
 #ifndef CMAKE_BOOTSTRAP
   /** Remove an environment variable */
   static bool UnsetEnv(const char* value);

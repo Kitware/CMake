@@ -140,21 +140,40 @@ If ``NO_DEFAULT_PATH`` is not specified, the search process is as follows:
    |prefix_XXX_SUBDIR| for each ``<prefix>`` in
    :variable:`CMAKE_SYSTEM_PREFIX_PATH`
 
-1. .. versionadded:: 3.12
-    If called from within a find module or any other script loaded by a call to
-    :command:`find_package(<PackageName>)`, search prefixes unique to the
-    current package being found.  Specifically, look in the
-    :variable:`<PackageName>_ROOT` CMake variable and the
-    :envvar:`<PackageName>_ROOT` environment variable.
-    The package root variables are maintained as a stack, so if called from
-    nested find modules or config packages, root paths from the parent's find
-    module or config package will be searched after paths from the current
-    module or package.  In other words, the search order would be
-    ``<CurrentPackage>_ROOT``, ``ENV{<CurrentPackage>_ROOT}``,
-    ``<ParentPackage>_ROOT``, ``ENV{<ParentPackage>_ROOT}``, etc.
-    This can be skipped if ``NO_PACKAGE_ROOT_PATH`` is passed or by setting
-    the :variable:`CMAKE_FIND_USE_PACKAGE_ROOT_PATH` to ``FALSE``.
-    See policy :policy:`CMP0074`.
+1. If called from within a find module or any other script loaded by a call to
+   :command:`find_package(<PackageName>)`, search prefixes unique to the
+   current package being found.  See policy :policy:`CMP0074`.
+
+   .. versionadded:: 3.12
+
+   Specifically, search paths specified by the following variables, in order:
+
+   a. :variable:`<PackageName>_ROOT` CMake variable,
+      where ``<PackageName>`` is the case-preserved package name.
+
+   b. :variable:`<PACKAGENAME>_ROOT` CMake variable,
+      where ``<PACKAGENAME>`` is the upper-cased package name.
+      See policy :policy:`CMP0144`.
+
+      .. versionadded:: 3.27
+
+   c. :envvar:`<PackageName>_ROOT` environment variable,
+      where ``<PackageName>`` is the case-preserved package name.
+
+   d. :envvar:`<PACKAGENAME>_ROOT` environment variable,
+      where ``<PACKAGENAME>`` is the upper-cased package name.
+      See policy :policy:`CMP0144`.
+
+      .. versionadded:: 3.27
+
+   The package root variables are maintained as a stack, so if called from
+   nested find modules or config packages, root paths from the parent's find
+   module or config package will be searched after paths from the current
+   module or package.  In other words, the search order would be
+   ``<CurrentPackage>_ROOT``, ``ENV{<CurrentPackage>_ROOT}``,
+   ``<ParentPackage>_ROOT``, ``ENV{<ParentPackage>_ROOT}``, etc.
+   This can be skipped if ``NO_PACKAGE_ROOT_PATH`` is passed or by setting
+   the :variable:`CMAKE_FIND_USE_PACKAGE_ROOT_PATH` to ``FALSE``.
 
    * |FIND_PACKAGE_ROOT_PREFIX_PATH_XXX|
 

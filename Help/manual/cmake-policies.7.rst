@@ -51,6 +51,14 @@ The :variable:`CMAKE_MINIMUM_REQUIRED_VERSION` variable may also be used
 to determine whether to report an error on use of deprecated macros or
 functions.
 
+Policies Introduced by CMake 3.27
+=================================
+
+.. toctree::
+   :maxdepth: 1
+
+   CMP0144: find_package uses upper-case PACKAGENAME_ROOT variables. </policy/CMP0144>
+
 Policies Introduced by CMake 3.26
 =================================
 

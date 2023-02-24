@@ -1011,7 +1011,10 @@ public:
 
   bool GetDebugFindPkgMode() const;
 
-  void MaybeWarnCMP0074(std::string const& pkg);
+  void MaybeWarnCMP0074(std::string const& rootVar, cmValue rootDef,
+                        cm::optional<std::string> const& rootEnv);
+  void MaybeWarnCMP0144(std::string const& rootVAR, cmValue rootDEF,
+                        cm::optional<std::string> const& rootENV);
   void MaybeWarnUninitialized(std::string const& variable,
                               const char* sourceFilename) const;
   bool IsProjectFile(const char* filename) const;
@@ -1189,6 +1192,7 @@ private:
   bool CheckSystemVars;
   bool CheckCMP0000;
   std::set<std::string> WarnedCMP0074;
+  std::set<std::string> WarnedCMP0144;
   bool IsSourceFileTryCompile;
   mutable bool SuppressSideEffects;
   ImportedTargetScope CurrentImportedTargetScope = ImportedTargetScope::Local;
