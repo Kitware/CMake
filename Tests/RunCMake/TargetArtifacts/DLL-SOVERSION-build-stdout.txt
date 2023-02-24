@@ -1,0 +1,2 @@
+.*exA_name="(libexA\.so\.2|libexA\.2\.dylib|(lib|cyg|msys-|)exA-2\.dll)"
+.*exB_name="(libexB\.so\.2|libexB\.2\.dylib|(lib|cyg|msys-|)exB-2\.dll)"
