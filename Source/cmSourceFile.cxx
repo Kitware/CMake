@@ -4,6 +4,9 @@
 
 #include <utility>
 
+#include <cm/string_view>
+#include <cmext/string_view>
+
 #include "cmGlobalGenerator.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
@@ -220,6 +223,11 @@ bool cmSourceFile::FindFullPath(std::string* error,
     case cmPolicies::REQUIRED_ALWAYS:
     case cmPolicies::NEW:
       break;
+  }
+  if (lPath == "FILE_SET"_s) {
+    err += "\nHint: the FILE_SET keyword may only appear after a visibility "
+           "specifier or another FILE_SET within the target_sources() "
+           "command.";
   }
   if (error != nullptr) {
     *error = std::move(err);
