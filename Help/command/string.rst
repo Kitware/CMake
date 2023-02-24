@@ -45,16 +45,16 @@ Synopsis
 
   `JSON`_
     string(JSON <out-var> [ERROR_VARIABLE <error-var>]
-           {:ref:`GET <JSON_GET>` | :ref:`TYPE <JSON_TYPE>` | :ref:`LENGTH <JSON_LENGTH>` | :ref:`REMOVE <JSON_REMOVE>`}
+           {`GET <JSON GET_>`_ | `TYPE <JSON TYPE_>`_ | `LENGTH <JSON LENGTH_>`_ | `REMOVE <JSON REMOVE_>`_}
            <json-string> <member|index> [<member|index> ...])
     string(JSON <out-var> [ERROR_VARIABLE <error-var>]
-           :ref:`MEMBER <JSON_MEMBER>` <json-string>
+           `MEMBER <JSON MEMBER_>`_ <json-string>
            [<member|index> ...] <index>)
     string(JSON <out-var> [ERROR_VARIABLE <error-var>]
-           :ref:`SET <JSON_SET>` <json-string>
+           `SET <JSON SET_>`_ <json-string>
            <member|index> [<member|index> ...] <value>)
     string(JSON <out-var> [ERROR_VARIABLE <error-var>]
-           :ref:`EQUAL <JSON_EQUAL>` <json-string1> <json-string2>)
+           `EQUAL <JSON EQUAL_>`_ <json-string1> <json-string2>)
 
 Search and Replace
 ^^^^^^^^^^^^^^^^^^
@@ -62,75 +62,60 @@ Search and Replace
 Search and Replace With Plain Strings
 """""""""""""""""""""""""""""""""""""
 
-.. _FIND:
-
-.. code-block:: cmake
-
+.. signature::
   string(FIND <string> <substring> <output_variable> [REVERSE])
 
-Return the position where the given ``<substring>`` was found in
-the supplied ``<string>``.  If the ``REVERSE`` flag was used, the command will
-search for the position of the last occurrence of the specified
-``<substring>``.  If the ``<substring>`` is not found, a position of -1 is
-returned.
+  Return the position where the given ``<substring>`` was found in
+  the supplied ``<string>``.  If the ``REVERSE`` flag was used, the command
+  will search for the position of the last occurrence of the specified
+  ``<substring>``.  If the ``<substring>`` is not found, a position of -1 is
+  returned.
 
-The ``string(FIND)`` subcommand treats all strings as ASCII-only characters.
-The index stored in ``<output_variable>`` will also be counted in bytes,
-so strings containing multi-byte characters may lead to unexpected results.
+  The ``string(FIND)`` subcommand treats all strings as ASCII-only characters.
+  The index stored in ``<output_variable>`` will also be counted in bytes,
+  so strings containing multi-byte characters may lead to unexpected results.
 
-.. _REPLACE:
-
-.. code-block:: cmake
-
+.. signature::
   string(REPLACE <match_string>
          <replace_string> <output_variable>
          <input> [<input>...])
 
-Replace all occurrences of ``<match_string>`` in the ``<input>``
-with ``<replace_string>`` and store the result in the ``<output_variable>``.
+  Replace all occurrences of ``<match_string>`` in the ``<input>``
+  with ``<replace_string>`` and store the result in the ``<output_variable>``.
 
 Search and Replace With Regular Expressions
 """""""""""""""""""""""""""""""""""""""""""
 
-.. _`REGEX MATCH`:
-
-.. code-block:: cmake
-
+.. signature::
   string(REGEX MATCH <regular_expression>
          <output_variable> <input> [<input>...])
 
-Match the ``<regular_expression>`` once and store the match in the
-``<output_variable>``.
-All ``<input>`` arguments are concatenated before matching.
-Regular expressions are specified in the subsection just below.
+  Match the ``<regular_expression>`` once and store the match in the
+  ``<output_variable>``.
+  All ``<input>`` arguments are concatenated before matching.
+  Regular expressions are specified in the subsection just below.
 
-.. _`REGEX MATCHALL`:
-
-.. code-block:: cmake
-
+.. signature::
   string(REGEX MATCHALL <regular_expression>
          <output_variable> <input> [<input>...])
 
-Match the ``<regular_expression>`` as many times as possible and store the
-matches in the ``<output_variable>`` as a list.
-All ``<input>`` arguments are concatenated before matching.
+  Match the ``<regular_expression>`` as many times as possible and store the
+  matches in the ``<output_variable>`` as a list.
+  All ``<input>`` arguments are concatenated before matching.
 
-.. _`REGEX REPLACE`:
-
-.. code-block:: cmake
-
+.. signature::
   string(REGEX REPLACE <regular_expression>
          <replacement_expression> <output_variable>
          <input> [<input>...])
 
-Match the ``<regular_expression>`` as many times as possible and substitute
-the ``<replacement_expression>`` for the match in the output.
-All ``<input>`` arguments are concatenated before matching.
+  Match the ``<regular_expression>`` as many times as possible and substitute
+  the ``<replacement_expression>`` for the match in the output.
+  All ``<input>`` arguments are concatenated before matching.
 
-The ``<replacement_expression>`` may refer to parenthesis-delimited
-subexpressions of the match using ``\1``, ``\2``, ..., ``\9``.  Note that
-two backslashes (``\\1``) are required in CMake code to get a backslash
-through argument parsing.
+  The ``<replacement_expression>`` may refer to parenthesis-delimited
+  subexpressions of the match using ``\1``, ``\2``, ..., ``\9``.  Note that
+  two backslashes (``\\1``) are required in CMake code to get a backslash
+  through argument parsing.
 
 .. _`Regex Specification`:
 
@@ -201,130 +186,100 @@ newlines, and backslashes (respectively) to pass in a regex.  For example:
 Manipulation
 ^^^^^^^^^^^^
 
-.. _APPEND:
-
-.. code-block:: cmake
-
+.. signature::
   string(APPEND <string_variable> [<input>...])
 
-.. versionadded:: 3.4
+  .. versionadded:: 3.4
 
-Append all the ``<input>`` arguments to the string.
+  Append all the ``<input>`` arguments to the string.
 
-.. _PREPEND:
-
-.. code-block:: cmake
-
+.. signature::
   string(PREPEND <string_variable> [<input>...])
 
-.. versionadded:: 3.10
+  .. versionadded:: 3.10
 
-Prepend all the ``<input>`` arguments to the string.
+  Prepend all the ``<input>`` arguments to the string.
 
-.. _CONCAT:
-
-.. code-block:: cmake
-
+.. signature::
   string(CONCAT <output_variable> [<input>...])
 
-Concatenate all the ``<input>`` arguments together and store
-the result in the named ``<output_variable>``.
+  Concatenate all the ``<input>`` arguments together and store
+  the result in the named ``<output_variable>``.
 
-.. _JOIN:
-
-.. code-block:: cmake
-
+.. signature::
   string(JOIN <glue> <output_variable> [<input>...])
 
-.. versionadded:: 3.12
+  .. versionadded:: 3.12
 
-Join all the ``<input>`` arguments together using the ``<glue>``
-string and store the result in the named ``<output_variable>``.
+  Join all the ``<input>`` arguments together using the ``<glue>``
+  string and store the result in the named ``<output_variable>``.
 
-To join a list's elements, prefer to use the ``JOIN`` operator
-from the :command:`list` command.  This allows for the elements to have
-special characters like ``;`` in them.
+  To join a list's elements, prefer to use the ``JOIN`` operator
+  from the :command:`list` command.  This allows for the elements to have
+  special characters like ``;`` in them.
 
-.. _TOLOWER:
-
-.. code-block:: cmake
-
+.. signature::
   string(TOLOWER <string> <output_variable>)
 
-Convert ``<string>`` to lower characters.
+  Convert ``<string>`` to lower characters.
 
-.. _TOUPPER:
-
-.. code-block:: cmake
-
+.. signature::
   string(TOUPPER <string> <output_variable>)
 
-Convert ``<string>`` to upper characters.
+  Convert ``<string>`` to upper characters.
 
-.. _LENGTH:
-
-.. code-block:: cmake
-
+.. signature::
   string(LENGTH <string> <output_variable>)
 
-Store in an ``<output_variable>`` a given string's length in bytes.
-Note that this means if ``<string>`` contains multi-byte characters, the
-result stored in ``<output_variable>`` will *not* be the number of characters.
+  Store in an ``<output_variable>`` a given string's length in bytes.
+  Note that this means if ``<string>`` contains multi-byte characters,
+  the result stored in ``<output_variable>`` will *not* be
+  the number of characters.
 
-.. _SUBSTRING:
-
-.. code-block:: cmake
-
+.. signature::
   string(SUBSTRING <string> <begin> <length> <output_variable>)
 
-Store in an ``<output_variable>`` a substring of a given ``<string>``.  If
-``<length>`` is ``-1`` the remainder of the string starting at ``<begin>``
-will be returned.
+  Store in an ``<output_variable>`` a substring of a given ``<string>``.  If
+  ``<length>`` is ``-1`` the remainder of the string starting at ``<begin>``
+  will be returned.
 
-.. versionchanged:: 3.2
-  If ``<string>`` is shorter than ``<length>`` then the end of the string
-  is used instead.  Previous versions of CMake reported an error in this case.
+  .. versionchanged:: 3.2
+    If ``<string>`` is shorter than ``<length>``
+    then the end of the string is used instead.
+    Previous versions of CMake reported an error in this case.
 
-Both ``<begin>`` and ``<length>`` are counted in bytes, so care must
-be exercised if ``<string>`` could contain multi-byte characters.
+  Both ``<begin>`` and ``<length>`` are counted in bytes, so care must
+  be exercised if ``<string>`` could contain multi-byte characters.
 
-.. _STRIP:
-
-.. code-block:: cmake
-
+.. signature::
   string(STRIP <string> <output_variable>)
 
-Store in an ``<output_variable>`` a substring of a given ``<string>`` with
-leading and trailing spaces removed.
+  Store in an ``<output_variable>`` a substring of a given ``<string>``
+  with leading and trailing spaces removed.
 
-.. _GENEX_STRIP:
-
-.. code-block:: cmake
-
+.. signature::
   string(GENEX_STRIP <string> <output_variable>)
 
-.. versionadded:: 3.1
+  .. versionadded:: 3.1
 
-Strip any :manual:`generator expressions <cmake-generator-expressions(7)>`
-from the input ``<string>`` and store the result in the ``<output_variable>``.
+  Strip any :manual:`generator expressions <cmake-generator-expressions(7)>`
+  from the input ``<string>`` and store the result
+  in the ``<output_variable>``.
 
-.. _REPEAT:
-
-.. code-block:: cmake
-
+.. signature::
   string(REPEAT <string> <count> <output_variable>)
 
-.. versionadded:: 3.15
+  .. versionadded:: 3.15
 
-Produce the output string as the input ``<string>`` repeated ``<count>`` times.
+  Produce the output string as the input ``<string>``
+  repeated ``<count>`` times.
 
 Comparison
 ^^^^^^^^^^
 
 .. _COMPARE:
 
-.. code-block:: cmake
-
+.. signature::
   string(COMPARE LESS <string1> <string2> <output_variable>)
   string(COMPARE GREATER <string1> <string2> <output_variable>)
   string(COMPARE EQUAL <string1> <string2> <output_variable>)
@@ -332,240 +287,217 @@ Comparison
   string(COMPARE LESS_EQUAL <string1> <string2> <output_variable>)
   string(COMPARE GREATER_EQUAL <string1> <string2> <output_variable>)
 
-Compare the strings and store true or false in the ``<output_variable>``.
+  Compare the strings and store true or false in the ``<output_variable>``.
 
-.. versionadded:: 3.7
-  Added the ``LESS_EQUAL`` and ``GREATER_EQUAL`` options.
+  .. versionadded:: 3.7
+    Added the ``LESS_EQUAL`` and ``GREATER_EQUAL`` options.
 
 .. _`Supported Hash Algorithms`:
 
 Hashing
 ^^^^^^^
 
-.. _`HASH`:
-
-.. code-block:: cmake
-
+.. signature::
   string(<HASH> <output_variable> <input>)
+  :target: HASH
 
-Compute a cryptographic hash of the ``<input>`` string.
-The supported ``<HASH>`` algorithm names are:
+  Compute a cryptographic hash of the ``<input>`` string.
+  The supported ``<HASH>`` algorithm names are:
 
-``MD5``
-  Message-Digest Algorithm 5, RFC 1321.
-``SHA1``
-  US Secure Hash Algorithm 1, RFC 3174.
-``SHA224``
-  US Secure Hash Algorithms, RFC 4634.
-``SHA256``
-  US Secure Hash Algorithms, RFC 4634.
-``SHA384``
-  US Secure Hash Algorithms, RFC 4634.
-``SHA512``
-  US Secure Hash Algorithms, RFC 4634.
-``SHA3_224``
-  Keccak SHA-3.
-``SHA3_256``
-  Keccak SHA-3.
-``SHA3_384``
-  Keccak SHA-3.
-``SHA3_512``
-  Keccak SHA-3.
+  ``MD5``
+    Message-Digest Algorithm 5, RFC 1321.
+  ``SHA1``
+    US Secure Hash Algorithm 1, RFC 3174.
+  ``SHA224``
+    US Secure Hash Algorithms, RFC 4634.
+  ``SHA256``
+    US Secure Hash Algorithms, RFC 4634.
+  ``SHA384``
+    US Secure Hash Algorithms, RFC 4634.
+  ``SHA512``
+    US Secure Hash Algorithms, RFC 4634.
+  ``SHA3_224``
+    Keccak SHA-3.
+  ``SHA3_256``
+    Keccak SHA-3.
+  ``SHA3_384``
+    Keccak SHA-3.
+  ``SHA3_512``
+    Keccak SHA-3.
 
-.. versionadded:: 3.8
-  Added the ``SHA3_*`` hash algorithms.
+  .. versionadded:: 3.8
+    Added the ``SHA3_*`` hash algorithms.
 
 Generation
 ^^^^^^^^^^
 
-.. _ASCII:
-
-.. code-block:: cmake
-
+.. signature::
   string(ASCII <number> [<number> ...] <output_variable>)
 
-Convert all numbers into corresponding ASCII characters.
+  Convert all numbers into corresponding ASCII characters.
 
-.. _HEX:
-
-.. code-block:: cmake
-
+.. signature::
   string(HEX <string> <output_variable>)
 
-.. versionadded:: 3.18
+  .. versionadded:: 3.18
 
-Convert each byte in the input ``<string>`` to its hexadecimal representation
-and store the concatenated hex digits in the ``<output_variable>``. Letters in
-the output (``a`` through ``f``) are in lowercase.
+  Convert each byte in the input ``<string>`` to its hexadecimal representation
+  and store the concatenated hex digits in the ``<output_variable>``.
+  Letters in the output (``a`` through ``f``) are in lowercase.
 
-.. _CONFIGURE:
-
-.. code-block:: cmake
-
+.. signature::
   string(CONFIGURE <string> <output_variable>
          [@ONLY] [ESCAPE_QUOTES])
 
-Transform a ``<string>`` like :command:`configure_file` transforms a file.
+  Transform a ``<string>`` like :command:`configure_file` transforms a file.
 
-.. _MAKE_C_IDENTIFIER:
-
-.. code-block:: cmake
-
+.. signature::
   string(MAKE_C_IDENTIFIER <string> <output_variable>)
 
-Convert each non-alphanumeric character in the input ``<string>`` to an
-underscore and store the result in the ``<output_variable>``.  If the first
-character of the ``<string>`` is a digit, an underscore will also be prepended
-to the result.
+  Convert each non-alphanumeric character in the input ``<string>`` to an
+  underscore and store the result in the ``<output_variable>``.  If the first
+  character of the ``<string>`` is a digit, an underscore will also be
+  prepended to the result.
 
-.. _RANDOM:
-
-.. code-block:: cmake
-
+.. signature::
   string(RANDOM [LENGTH <length>] [ALPHABET <alphabet>]
          [RANDOM_SEED <seed>] <output_variable>)
 
-Return a random string of given ``<length>`` consisting of
-characters from the given ``<alphabet>``.  Default length is 5 characters
-and default alphabet is all numbers and upper and lower case letters.
-If an integer ``RANDOM_SEED`` is given, its value will be used to seed the
-random number generator.
+  Return a random string of given ``<length>`` consisting of
+  characters from the given ``<alphabet>``.  Default length is 5 characters
+  and default alphabet is all numbers and upper and lower case letters.
+  If an integer ``RANDOM_SEED`` is given, its value will be used to seed the
+  random number generator.
 
-.. _TIMESTAMP:
-
-.. code-block:: cmake
-
+.. signature::
   string(TIMESTAMP <output_variable> [<format_string>] [UTC])
 
-Write a string representation of the current date
-and/or time to the ``<output_variable>``.
+  Write a string representation of the current date
+  and/or time to the ``<output_variable>``.
 
-If the command is unable to obtain a timestamp, the ``<output_variable>``
-will be set to the empty string ``""``.
+  If the command is unable to obtain a timestamp, the ``<output_variable>``
+  will be set to the empty string ``""``.
 
-The optional ``UTC`` flag requests the current date/time representation to
-be in Coordinated Universal Time (UTC) rather than local time.
+  The optional ``UTC`` flag requests the current date/time representation to
+  be in Coordinated Universal Time (UTC) rather than local time.
 
-The optional ``<format_string>`` may contain the following format
-specifiers:
+  The optional ``<format_string>`` may contain the following format
+  specifiers:
 
-``%%``
+  ``%%``
+    .. versionadded:: 3.8
+
+    A literal percent sign (%).
+
+  ``%d``
+    The day of the current month (01-31).
+
+  ``%H``
+    The hour on a 24-hour clock (00-23).
+
+  ``%I``
+    The hour on a 12-hour clock (01-12).
+
+  ``%j``
+    The day of the current year (001-366).
+
+  ``%m``
+    The month of the current year (01-12).
+
+  ``%b``
+    .. versionadded:: 3.7
+
+    Abbreviated month name (e.g. Oct).
+
+  ``%B``
+    .. versionadded:: 3.10
+
+    Full month name (e.g. October).
+
+  ``%M``
+    The minute of the current hour (00-59).
+
+  ``%s``
+    .. versionadded:: 3.6
+
+    Seconds since midnight (UTC) 1-Jan-1970 (UNIX time).
+
+  ``%S``
+    The second of the current minute.  60 represents a leap second. (00-60)
+
+  ``%f``
+    .. versionadded:: 3.23
+
+    The microsecond of the current second (000000-999999).
+
+  ``%U``
+    The week number of the current year (00-53).
+
+  ``%V``
+    .. versionadded:: 3.22
+
+    The ISO 8601 week number of the current year (01-53).
+
+  ``%w``
+    The day of the current week. 0 is Sunday. (0-6)
+
+  ``%a``
+    .. versionadded:: 3.7
+
+    Abbreviated weekday name (e.g. Fri).
+
+  ``%A``
+    .. versionadded:: 3.10
+
+    Full weekday name (e.g. Friday).
+
+  ``%y``
+    The last two digits of the current year (00-99).
+
+  ``%Y``
+    The current year.
+
+  ``%z``
+    .. versionadded:: 3.26
+
+    The offset of the time zone from UTC, in hours and minutes,
+    with format ``+hhmm`` or ``-hhmm``.
+
+  ``%Z``
+    .. versionadded:: 3.26
+
+    The time zone name.
+
+  Unknown format specifiers will be ignored and copied to the output
+  as-is.
+
+  If no explicit ``<format_string>`` is given, it will default to:
+
+  ::
+
+    %Y-%m-%dT%H:%M:%S    for local time.
+    %Y-%m-%dT%H:%M:%SZ   for UTC.
+
   .. versionadded:: 3.8
+    If the ``SOURCE_DATE_EPOCH`` environment variable is set,
+    its value will be used instead of the current time.
+    See https://reproducible-builds.org/specs/source-date-epoch/ for details.
 
-  A literal percent sign (%).
-
-``%d``
-  The day of the current month (01-31).
-
-``%H``
-  The hour on a 24-hour clock (00-23).
-
-``%I``
-  The hour on a 12-hour clock (01-12).
-
-``%j``
-  The day of the current year (001-366).
-
-``%m``
-  The month of the current year (01-12).
-
-``%b``
-  .. versionadded:: 3.7
-
-  Abbreviated month name (e.g. Oct).
-
-``%B``
-  .. versionadded:: 3.10
-
-  Full month name (e.g. October).
-
-``%M``
-  The minute of the current hour (00-59).
-
-``%s``
-  .. versionadded:: 3.6
-
-  Seconds since midnight (UTC) 1-Jan-1970 (UNIX time).
-
-``%S``
-  The second of the current minute.  60 represents a leap second. (00-60)
-
-``%f``
-  .. versionadded:: 3.23
-
-  The microsecond of the current second (000000-999999).
-
-``%U``
-  The week number of the current year (00-53).
-
-``%V``
-  .. versionadded:: 3.22
-
-  The ISO 8601 week number of the current year (01-53).
-
-``%w``
-  The day of the current week. 0 is Sunday. (0-6)
-
-``%a``
-  .. versionadded:: 3.7
-
-  Abbreviated weekday name (e.g. Fri).
-
-``%A``
-  .. versionadded:: 3.10
-
-  Full weekday name (e.g. Friday).
-
-``%y``
-  The last two digits of the current year (00-99).
-
-``%Y``
-  The current year.
-
-``%z``
-  .. versionadded:: 3.26
-
-  The offset of the time zone from UTC, in hours and minutes,
-  with format ``+hhmm`` or ``-hhmm``.
-
-``%Z``
-  .. versionadded:: 3.26
-
-  The time zone name.
-
-Unknown format specifiers will be ignored and copied to the output
-as-is.
-
-If no explicit ``<format_string>`` is given, it will default to:
-
-::
-
-   %Y-%m-%dT%H:%M:%S    for local time.
-   %Y-%m-%dT%H:%M:%SZ   for UTC.
-
-.. versionadded:: 3.8
-  If the ``SOURCE_DATE_EPOCH`` environment variable is set,
-  its value will be used instead of the current time.
-  See https://reproducible-builds.org/specs/source-date-epoch/ for details.
-
-.. _UUID:
-
-.. code-block:: cmake
-
+.. signature::
   string(UUID <output_variable> NAMESPACE <namespace> NAME <name>
          TYPE <MD5|SHA1> [UPPER])
 
-.. versionadded:: 3.1
+  .. versionadded:: 3.1
 
-Create a universally unique identifier (aka GUID) as per RFC4122
-based on the hash of the combined values of ``<namespace>``
-(which itself has to be a valid UUID) and ``<name>``.
-The hash algorithm can be either ``MD5`` (Version 3 UUID) or
-``SHA1`` (Version 5 UUID).
-A UUID has the format ``xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx``
-where each ``x`` represents a lower case hexadecimal character.
-Where required, an uppercase representation can be requested
-with the optional ``UPPER`` flag.
+  Create a universally unique identifier (aka GUID) as per RFC4122
+  based on the hash of the combined values of ``<namespace>``
+  (which itself has to be a valid UUID) and ``<name>``.
+  The hash algorithm can be either ``MD5`` (Version 3 UUID) or
+  ``SHA1`` (Version 5 UUID).
+  A UUID has the format ``xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx``
+  where each ``x`` represents a lower case hexadecimal character.
+  Where required, an uppercase representation can be requested
+  with the optional ``UPPER`` flag.
 
 .. _JSON:
 
@@ -586,78 +518,72 @@ Functionality for querying a JSON string.
   option is not present, a fatal error message is generated.  If no error
   occurs, the ``<error-variable>`` will be set to ``NOTFOUND``.
 
-.. _JSON_GET:
-.. code-block:: cmake
-
+.. signature::
   string(JSON <out-var> [ERROR_VARIABLE <error-variable>]
          GET <json-string> <member|index> [<member|index> ...])
+  :target: JSON GET
 
-Get an element from ``<json-string>`` at the location given
-by the list of ``<member|index>`` arguments.
-Array and object elements will be returned as a JSON string.
-Boolean elements will be returned as ``ON`` or ``OFF``.
-Null elements will be returned as an empty string.
-Number and string types will be returned as strings.
+  Get an element from ``<json-string>`` at the location given
+  by the list of ``<member|index>`` arguments.
+  Array and object elements will be returned as a JSON string.
+  Boolean elements will be returned as ``ON`` or ``OFF``.
+  Null elements will be returned as an empty string.
+  Number and string types will be returned as strings.
 
-.. _JSON_TYPE:
-.. code-block:: cmake
-
+.. signature::
   string(JSON <out-var> [ERROR_VARIABLE <error-variable>]
          TYPE <json-string> <member|index> [<member|index> ...])
+  :target: JSON TYPE
 
-Get the type of an element in ``<json-string>`` at the location
-given by the list of ``<member|index>`` arguments. The ``<out-var>``
-will be set to one of ``NULL``, ``NUMBER``, ``STRING``, ``BOOLEAN``,
-``ARRAY``, or ``OBJECT``.
+  Get the type of an element in ``<json-string>`` at the location
+  given by the list of ``<member|index>`` arguments. The ``<out-var>``
+  will be set to one of ``NULL``, ``NUMBER``, ``STRING``, ``BOOLEAN``,
+  ``ARRAY``, or ``OBJECT``.
 
-.. _JSON_MEMBER:
-.. code-block:: cmake
-
+.. signature::
   string(JSON <out-var> [ERROR_VARIABLE <error-var>]
          MEMBER <json-string>
          [<member|index> ...] <index>)
+  :target: JSON MEMBER
 
-Get the name of the ``<index>``-th member in ``<json-string>`` at the location
-given by the list of ``<member|index>`` arguments.
-Requires an element of object type.
+  Get the name of the ``<index>``-th member in ``<json-string>``
+  at the location given by the list of ``<member|index>`` arguments.
+  Requires an element of object type.
 
-.. _JSON_LENGTH:
-.. code-block:: cmake
-
+.. signature::
   string(JSON <out-var> [ERROR_VARIABLE <error-variable>]
          LENGTH <json-string> [<member|index> ...])
+  :target: JSON LENGTH
 
-Get the length of an element in ``<json-string>`` at the location
-given by the list of ``<member|index>`` arguments.
-Requires an element of array or object type.
+  Get the length of an element in ``<json-string>`` at the location
+  given by the list of ``<member|index>`` arguments.
+  Requires an element of array or object type.
 
-.. _JSON_REMOVE:
-.. code-block:: cmake
-
+.. signature::
   string(JSON <out-var> [ERROR_VARIABLE <error-variable>]
          REMOVE <json-string> <member|index> [<member|index> ...])
+  :target: JSON REMOVE
 
-Remove an element from ``<json-string>`` at the location
-given by the list of ``<member|index>`` arguments. The JSON string
-without the removed element will be stored in ``<out-var>``.
+  Remove an element from ``<json-string>`` at the location
+  given by the list of ``<member|index>`` arguments. The JSON string
+  without the removed element will be stored in ``<out-var>``.
 
-.. _JSON_SET:
-.. code-block:: cmake
-
+.. signature::
   string(JSON <out-var> [ERROR_VARIABLE <error-variable>]
          SET <json-string> <member|index> [<member|index> ...] <value>)
+  :target: JSON SET
 
-Set an element in ``<json-string>`` at the location
-given by the list of ``<member|index>`` arguments to ``<value>``.
-The contents of ``<value>`` should be valid JSON.
+  Set an element in ``<json-string>`` at the location
+  given by the list of ``<member|index>`` arguments to ``<value>``.
+  The contents of ``<value>`` should be valid JSON.
 
-.. _JSON_EQUAL:
-.. code-block:: cmake
-
+.. signature::
   string(JSON <out-var> [ERROR_VARIABLE <error-var>]
          EQUAL <json-string1> <json-string2>)
+  :target: JSON EQUAL
 
-Compare the two JSON objects given by ``<json-string1>`` and ``<json-string2>``
-for equality.  The contents of ``<json-string1>`` and ``<json-string2>``
-should be valid JSON.  The ``<out-var>`` will be set to a true value if the
-JSON objects are considered equal, or a false value otherwise.
+  Compare the two JSON objects given by ``<json-string1>``
+  and ``<json-string2>`` for equality.  The contents of ``<json-string1>``
+  and ``<json-string2>`` should be valid JSON.  The ``<out-var>``
+  will be set to a true value if the JSON objects are considered equal,
+  or a false value otherwise.
