@@ -359,13 +359,15 @@ bool HandleScriptMode(std::vector<std::string> const& args,
     } else if (doing_script) {
       doing_script = false;
       std::string script = arg;
-      if (!cmSystemTools::FileIsFullPath(script)) {
-        script =
-          cmStrCat(helper.Makefile->GetCurrentSourceDirectory(), '/', arg);
-      }
-      if (cmSystemTools::FileIsDirectory(script)) {
-        status.SetError("given a directory as value of SCRIPT argument.");
-        return false;
+      if (!cmHasLiteralPrefix(script, "$<INSTALL_PREFIX>")) {
+        if (!cmSystemTools::FileIsFullPath(script)) {
+          script =
+            cmStrCat(helper.Makefile->GetCurrentSourceDirectory(), '/', arg);
+        }
+        if (cmSystemTools::FileIsDirectory(script)) {
+          status.SetError("given a directory as value of SCRIPT argument.");
+          return false;
+        }
       }
       helper.Makefile->AddInstallGenerator(
         cm::make_unique<cmInstallScriptGenerator>(
