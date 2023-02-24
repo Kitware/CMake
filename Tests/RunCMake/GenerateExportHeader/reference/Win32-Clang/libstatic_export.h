@@ -22,7 +22,7 @@
 #endif
 
 #ifndef LIBSTATIC_DEPRECATED
-#  define LIBSTATIC_DEPRECATED __attribute__ ((__deprecated__))
+#  define LIBSTATIC_DEPRECATED __declspec(deprecated)
 #endif
 
 #ifndef LIBSTATIC_DEPRECATED_EXPORT
