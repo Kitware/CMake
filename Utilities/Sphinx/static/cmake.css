@@ -17,6 +17,29 @@ div.sphinxsidebarwrapper {
   background-color: #dfdfdf;
 }
 
+/* Apply <pre> style (from classic.css) to signature directive argument. */
+.signature .sig {
+  padding: 5px;
+  background-color: #eeeeee;
+  color: #333333;
+  line-height: 120%;
+  border: 1px solid #ac9;
+  border-left: none;
+  border-right: none;
+}
+
+/* Add additional styling to signature directive argument. */
+.signature .sig {
+  margin-bottom: 5px;
+  padding-left: calc(5px + 3em);
+  text-indent: -3em;
+  font-family: monospace;
+}
+
+.signature .sig .code.sig-name {
+  font-weight: normal;
+}
+
 /* Remove unwanted margin in case list item contains a div-wrapping
    directive like `.. versionadded` or `.. deprecated`. */
 dd > :first-child > p {

@@ -16,6 +16,9 @@ from pygments.lexers import CMakeLexer
 from pygments.token import Name, Operator, Punctuation, String, Text, Comment, Generic, Whitespace, Number
 from pygments.lexer import bygroups
 
+# RE to split multiple command signatures
+sig_end_re = re.compile(r'(?<=[)])\n')
+
 # Notes on regular expressions below:
 # - [\.\+-] are needed for string constants like gtk+-2.0
 # - Unix paths are recognized by '/'; support for Windows paths may be added if needed
@@ -57,14 +60,16 @@ CMakeLexer.tokens["root"] = [
   #  (r'[^<>\])\}\|$"# \t\n]+', Name.Exception),            # fallback, for debugging only
 ]
 
+from docutils.utils.code_analyzer import Lexer, LexerError
 from docutils.parsers.rst import Directive, directives
 from docutils.transforms import Transform
 from docutils import io, nodes
 
-from sphinx.directives import ObjectDescription
+from sphinx.directives import ObjectDescription, nl_escape_re
 from sphinx.domains import Domain, ObjType
 from sphinx.roles import XRefRole
 from sphinx.util.nodes import make_refnode
+from sphinx.util import ws_re
 from sphinx import addnodes
 
 sphinx_before_1_4 = False
@@ -286,9 +291,9 @@ class CMakeObject(ObjectDescription):
 
     def add_target_and_index(self, name, sig, signode):
         if self.objtype == 'command':
-           targetname = name.lower()
+            targetname = name.lower()
         else:
-           targetname = name
+            targetname = name
         targetid = '%s:%s' % (self.objtype, targetname)
         if targetid not in self.state.document.ids:
             signode['names'].append(targetid)
@@ -301,6 +306,79 @@ class CMakeObject(ObjectDescription):
         make_index_entry = _cmake_index_objs.get(self.objtype)
         if make_index_entry:
             self.indexnode['entries'].append(make_index_entry(name, targetid))
+
+class CMakeSignatureObject(CMakeObject):
+    object_type = 'signature'
+
+    option_spec = {
+        'target': directives.unchanged,
+    }
+
+    def get_signatures(self):
+        content = nl_escape_re.sub('', self.arguments[0])
+        lines = sig_end_re.split(content)
+        return [ws_re.sub(' ', line.strip()) for line in lines]
+
+    def handle_signature(self, sig, signode):
+        language = 'cmake'
+        classes = ['code', 'cmake', 'highlight']
+
+        node = addnodes.desc_name(sig, '', classes=classes)
+
+        try:
+            tokens = Lexer(sig, language, 'short')
+        except LexerError as error:
+            if self.state.document.settings.report_level > 2:
+                # Silently insert without syntax highlighting.
+                tokens = Lexer(sig, language, 'none')
+            else:
+                raise self.warning(error)
+
+        for classes, value in tokens:
+            if classes:
+                node += nodes.inline(value, value, classes=classes)
+            else:
+                node += nodes.Text(value)
+
+        signode.clear()
+        signode += node
+
+        return sig
+
+    def __init__(self, *args, **kwargs):
+        self.targetnames = {}
+        super().__init__(*args, **kwargs)
+
+    def add_target_and_index(self, name, sig, signode):
+        if name in self.targetnames:
+            targetname = self.targetnames[name].lower()
+        else:
+            def extract_keywords(params):
+                for p in params:
+                    if p[0].isalpha():
+                        yield p
+                    else:
+                        return
+
+            keywords = extract_keywords(name.split('(')[1].split())
+            targetname = ' '.join(keywords).lower()
+        targetid = nodes.make_id(targetname)
+
+        if targetid not in self.state.document.ids:
+            signode['names'].append(targetname)
+            signode['ids'].append(targetid)
+            signode['first'] = (not self.names)
+            self.state.document.note_explicit_target(signode)
+
+    def run(self):
+        targets = self.options.get('target')
+        if targets is not None:
+            signatures = self.get_signatures()
+            targets = [t.strip() for t in targets.split('\n')]
+            for signature, target in zip(signatures, targets):
+                self.targetnames[signature] = target
+
+        return super().run()
 
 class CMakeXRefRole(XRefRole):
 
@@ -411,6 +489,7 @@ class CMakeDomain(Domain):
         'command':    CMakeObject,
         'envvar':     CMakeObject,
         'genex':      CMakeObject,
+        'signature':  CMakeSignatureObject,
         'variable':   CMakeObject,
         # Other `object_types` cannot be created except by the `CMakeTransform`
     }
