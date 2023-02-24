@@ -16,4 +16,4 @@ function(run_cmake_and_verify_after_build case)
   unset(RunCMake_TEST_BINARY_DIR)
 endfunction()
 
-run_cmake_and_verify_after_build(ArtifactOutputDirs)
+run_cmake_and_verify_after_build(OutputDirs)

@@ -270,8 +270,6 @@ if(want_NoQt_test)
   add_RunCMake_test(AutogenNoQt TEST_DIR Autogen)
 endif()
 
-add_RunCMake_test(ArtifactOutputDirs)
-
 if(NOT DEFINED CMake_TEST_BuildDepends_GNU_AS
     AND (CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID STREQUAL "LCC")
     AND CMAKE_GENERATOR MATCHES "^Ninja"
@@ -396,6 +394,7 @@ if(UNIX AND CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG AND CMAKE_EXECUTABLE_FORMAT STRE
 endif()
 add_RunCMake_test(ScriptMode)
 add_RunCMake_test(Swift -DCMAKE_Swift_COMPILER=${CMAKE_Swift_COMPILER} -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME})
+add_RunCMake_test(TargetArtifacts)
 add_RunCMake_test(TargetObjects)
 add_RunCMake_test(TargetProperties)
 add_RunCMake_test(ToolchainFile)
