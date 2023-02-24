@@ -31,25 +31,19 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # build-tree
 # Hint: Use BUILD_INTERFACE
 
-# should we use our own math functions
-option(USE_MYMATH "Use tutorial provided math implementation" ON)
-
 # configure a header file to pass some of the CMake settings
 # to the source code
 configure_file(TutorialConfig.h.in TutorialConfig.h)
 
 # add the MathFunctions library
-if(USE_MYMATH)
-  add_subdirectory(MathFunctions)
-  list(APPEND EXTRA_LIBS MathFunctions)
-endif()
+add_subdirectory(MathFunctions)
 
 # add the executable
 add_executable(Tutorial tutorial.cxx)
 
 # TODO 2: Link to tutorial_compiler_flags
 
-target_link_libraries(Tutorial PUBLIC ${EXTRA_LIBS})
+target_link_libraries(Tutorial PUBLIC MathFunctions)
 
 # add the binary tree to the search path for include files
 # so that we will find TutorialConfig.h

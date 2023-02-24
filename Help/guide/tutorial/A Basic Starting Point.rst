@@ -160,7 +160,7 @@ The last command to call for a basic project is
   :name: CMakeLists.txt-add_executable
   :language: cmake
   :start-after: # add the executable
-  :end-before: # TODO 9:
+  :end-before: # TODO 3:
 
 .. raw:: html
 
@@ -240,7 +240,7 @@ the following:
   :name: tutorial.cxx-cxx11
   :language: c++
   :start-after: // convert input to double
-  :end-before: // TODO 12:
+  :end-before: // TODO 6:
 
 .. raw:: html
 
@@ -265,7 +265,7 @@ add the :variable:`CMAKE_CXX_STANDARD` declarations above the call to
   :name: CMakeLists.txt-CXX_STANDARD
   :language: cmake
   :start-after: # specify the C++ standard
-  :end-before: # TODO 7:
+  :end-before: # configure a header file
 
 .. raw:: html
 
@@ -375,7 +375,7 @@ specified CMake variables replaced:
   :name: CMakeLists.txt-configure_file
   :language: cmake
   :start-after: # to the source code
-  :end-before: # TODO 8:
+  :end-before: # TODO 2:
 
 .. raw:: html
 
@@ -420,7 +420,6 @@ be replaced with the corresponding version numbers from the project in
   :caption: TODO 10: TutorialConfig.h.in
   :name: TutorialConfig.h.in
   :language: c++
-  :end-before: // TODO 13:
 
 .. raw:: html
 

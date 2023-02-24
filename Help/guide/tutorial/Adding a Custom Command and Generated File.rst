@@ -23,15 +23,25 @@ The next step is to add the appropriate commands to the
 then run it as part of the build process. A few commands are needed to
 accomplish this.
 
-First, at the top of ``MathFunctions/CMakeLists.txt``, the executable for
-``MakeTable`` is added as any other executable would be added.
+First, in the ``USE_MYMATH`` section of ``MathFunctions/CMakeLists.txt``,
+we add an executable for ``MakeTable``.
 
 .. literalinclude:: Step9/MathFunctions/CMakeLists.txt
   :caption: MathFunctions/CMakeLists.txt
   :name: MathFunctions/CMakeLists.txt-add_executable-MakeTable
   :language: cmake
   :start-after: # first we add the executable that generates the table
-  :end-before: # add the command to generate the source code
+  :end-before: target_link_libraries
+
+After creating the executable, we add the ``tutorial_compiler_flags`` to our
+executable using :command:`target_link_libraries`.
+
+.. literalinclude:: Step9/MathFunctions/CMakeLists.txt
+  :caption: MathFunctions/CMakeLists.txt
+  :name: MathFunctions/CMakeLists.txt-link-tutorial-compiler-flags
+  :language: cmake
+  :start-after: add_executable
+  :end-before: # add the command to generate
 
 Then we add a custom command that specifies how to produce ``Table.h``
 by running MakeTable.
@@ -41,7 +51,7 @@ by running MakeTable.
   :name: MathFunctions/CMakeLists.txt-add_custom_command-Table.h
   :language: cmake
   :start-after: # add the command to generate the source code
-  :end-before: # add the main library
+  :end-before: # library that just does sqrt
 
 Next we have to let CMake know that ``mysqrt.cxx`` depends on the generated
 file ``Table.h``. This is done by adding the generated ``Table.h`` to the list
@@ -51,8 +61,8 @@ of sources for the library MathFunctions.
   :caption: MathFunctions/CMakeLists.txt
   :name: MathFunctions/CMakeLists.txt-add_library-Table.h
   :language: cmake
-  :start-after: # add the main library
-  :end-before: # state that anybody linking
+  :start-after:   # library that just does sqrt
+  :end-before: # state that we depend on
 
 We also have to add the current binary directory to the list of include
 directories so that ``Table.h`` can be found and included by ``mysqrt.cxx``.
@@ -62,7 +72,19 @@ directories so that ``Table.h`` can be found and included by ``mysqrt.cxx``.
   :name: MathFunctions/CMakeLists.txt-target_include_directories-Table.h
   :language: cmake
   :start-after: # state that we depend on our bin
-  :end-before: # install libs
+  :end-before: target_link_libraries
+
+As the last thing in our ``USE_MYMATH`` section, we need to link the our
+flags onto ``SqrtLibrary`` and then link ``SqrtLibrary`` onto
+``MathFunctions``. This makes the resulting ``USE_MYMATH`` section look like
+the following:
+
+.. literalinclude:: Step9/MathFunctions/CMakeLists.txt
+  :caption: MathFunctions/CMakeLists.txt
+  :name: MathFunctions/CMakeLists.txt-full_USE_MYMATH-section
+  :language: cmake
+  :start-after: if (USE_MYMATH)
+  :end-before: endif()
 
 Now let's use the generated table. First, modify ``mysqrt.cxx`` to include
 ``Table.h``. Next, we can rewrite the ``mysqrt`` function to use the table:

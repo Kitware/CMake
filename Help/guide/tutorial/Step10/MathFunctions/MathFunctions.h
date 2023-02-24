@@ -1,1 +1,3 @@
-double mysqrt(double x);
+namespace mathfunctions {
+double sqrt(double x);
+}

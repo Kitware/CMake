@@ -1,8 +1,9 @@
+#include "mysqrt.h"
+
 #include <iostream>
 
-// TODO 4: include cmath
-#include "MathFunctions.h"
-
+namespace mathfunctions {
+namespace detail {
 // a hack square root calculation using simple operations
 double mysqrt(double x)
 {
@@ -31,4 +32,6 @@ double mysqrt(double x)
   }
 
   return result;
+}
+}
 }
