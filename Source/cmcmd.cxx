@@ -2329,6 +2329,9 @@ bool cmVSLink::Parse(std::vector<std::string>::const_iterator argBeg,
         cmSystemTools::Strucmp(arg->c_str(), "/INCREMENTAL") == 0 ||
         cmSystemTools::Strucmp(arg->c_str(), "-INCREMENTAL") == 0) {
       this->Incremental = true;
+    } else if (cmSystemTools::Strucmp(arg->c_str(), "/INCREMENTAL:NO") == 0 ||
+               cmSystemTools::Strucmp(arg->c_str(), "-INCREMENTAL:NO") == 0) {
+      this->Incremental = false;
     } else if (cmSystemTools::Strucmp(arg->c_str(), "/MANIFEST:NO") == 0 ||
                cmSystemTools::Strucmp(arg->c_str(), "-MANIFEST:NO") == 0) {
       this->LinkGeneratesManifest = false;
@@ -2353,17 +2356,11 @@ bool cmVSLink::Parse(std::vector<std::string>::const_iterator argBeg,
     // pass it to the link command.
     this->ManifestFileRC = intDir + "/manifest.rc";
     this->ManifestFileRes = intDir + "/manifest.res";
-  } else if (this->UserManifests.empty()) {
-    // Prior to support for user-specified manifests CMake placed the
-    // linker-generated manifest next to the binary (as if it were not to be
-    // embedded) when not linking incrementally.  Preserve this behavior.
-    this->ManifestFile = this->TargetFile + ".manifest";
-    this->LinkerManifestFile = this->ManifestFile;
-  }
 
-  if (this->LinkGeneratesManifest) {
-    this->LinkCommand.emplace_back("/MANIFEST");
-    this->LinkCommand.push_back("/MANIFESTFILE:" + this->LinkerManifestFile);
+    if (this->LinkGeneratesManifest) {
+      this->LinkCommand.emplace_back("/MANIFEST");
+      this->LinkCommand.push_back("/MANIFESTFILE:" + this->LinkerManifestFile);
+    }
   }
 
   return true;
@@ -2497,20 +2494,23 @@ int cmVSLink::LinkIncremental()
 
 int cmVSLink::LinkNonIncremental()
 {
-  // Run the link command (possibly generates intermediate manifest).
+  // Sort out any manifests.
+  if (this->LinkGeneratesManifest || !this->UserManifests.empty()) {
+    std::string opt =
+      std::string("/MANIFEST:EMBED,ID=") + (this->Type == 1 ? '1' : '2');
+    this->LinkCommand.emplace_back(opt);
+
+    for (auto const& m : this->UserManifests) {
+      opt = "/MANIFESTINPUT:" + m;
+      this->LinkCommand.emplace_back(opt);
+    }
+  }
+
+  // Run the link command.
   if (!RunCommand("LINK", this->LinkCommand, this->Verbose, FORMAT_DECIMAL)) {
     return -1;
   }
-
-  // If we have no manifest files we are done.
-  if (!this->LinkGeneratesManifest && this->UserManifests.empty()) {
-    return 0;
-  }
-
-  // Run the manifest tool to embed the final manifest in the binary.
-  std::string mtOut =
-    "/outputresource:" + this->TargetFile + (this->Type == 1 ? ";#1" : ";#2");
-  return this->RunMT(mtOut, false);
+  return 0;
 }
 
 int cmVSLink::RunMT(std::string const& out, bool notify)
