@@ -1598,7 +1598,9 @@ set_property(GLOBAL PROPERTY _CMAKE_FindGit_GIT_EXECUTABLE_VERSION
   # has this set to something not findable on the PATH. We also ensured above
   # that the Debug config will be defined for multi-config generators.
   configure_file("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/FetchContent/CMakeLists.cmake.in"
-                 "${ARG_SUBBUILD_DIR}/CMakeLists.txt")
+                 "${ARG_SUBBUILD_DIR}/CMakeLists.txt"
+                 @ONLY
+  )
   execute_process(
     COMMAND ${CMAKE_COMMAND} ${subCMakeOpts} .
     RESULT_VARIABLE result
