@@ -2337,15 +2337,12 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
   }
 } targetObjectsNode;
 
-static const struct TargetRuntimeDllsNode : public cmGeneratorExpressionNode
+struct TargetRuntimeDllsBaseNode : public cmGeneratorExpressionNode
 {
-  TargetRuntimeDllsNode() {} // NOLINT(modernize-use-equals-default)
-
-  std::string Evaluate(
+  std::vector<std::string> CollectDlls(
     const std::vector<std::string>& parameters,
     cmGeneratorExpressionContext* context,
-    const GeneratorExpressionContent* content,
-    cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
+    const GeneratorExpressionContent* content) const
   {
     std::string const& tgtName = parameters.front();
     cmGeneratorTarget* gt = context->LG->FindGeneratorTargetToUse(tgtName);
@@ -2354,7 +2351,7 @@ static const struct TargetRuntimeDllsNode : public cmGeneratorExpressionNode
       e << "Objects of target \"" << tgtName
         << "\" referenced but no such target exists.";
       reportError(context, content->GetOriginalExpression(), e.str());
-      return std::string();
+      return std::vector<std::string>();
     }
     cmStateEnums::TargetType type = gt->GetType();
     if (type != cmStateEnums::EXECUTABLE &&
@@ -2365,7 +2362,7 @@ static const struct TargetRuntimeDllsNode : public cmGeneratorExpressionNode
         << "\" referenced but is not one of the allowed target types "
         << "(EXECUTABLE, SHARED, MODULE).";
       reportError(context, content->GetOriginalExpression(), e.str());
-      return std::string();
+      return std::vector<std::string>();
     }
 
     if (auto* cli = gt->GetLinkInformation(context->Config)) {
@@ -2378,12 +2375,50 @@ static const struct TargetRuntimeDllsNode : public cmGeneratorExpressionNode
         }
       }
 
-      return cmJoin(dllPaths, ";");
+      return dllPaths;
     }
 
-    return "";
+    return std::vector<std::string>();
+  }
+};
+
+static const struct TargetRuntimeDllsNode : public TargetRuntimeDllsBaseNode
+{
+  TargetRuntimeDllsNode() {} // NOLINT(modernize-use-equals-default)
+
+  std::string Evaluate(
+    const std::vector<std::string>& parameters,
+    cmGeneratorExpressionContext* context,
+    const GeneratorExpressionContent* content,
+    cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
+  {
+    std::vector<std::string> dlls = CollectDlls(parameters, context, content);
+    return cmJoin(dlls, ";");
   }
 } targetRuntimeDllsNode;
+
+static const struct TargetRuntimeDllDirsNode : public TargetRuntimeDllsBaseNode
+{
+  TargetRuntimeDllDirsNode() {} // NOLINT(modernize-use-equals-default)
+
+  std::string Evaluate(
+    const std::vector<std::string>& parameters,
+    cmGeneratorExpressionContext* context,
+    const GeneratorExpressionContent* content,
+    cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
+  {
+    std::vector<std::string> dlls = CollectDlls(parameters, context, content);
+    std::vector<std::string> dllDirs;
+    for (const std::string& dll : dlls) {
+      std::string directory = cmSystemTools::GetFilenamePath(dll);
+      if (std::find(dllDirs.begin(), dllDirs.end(), directory) ==
+          dllDirs.end()) {
+        dllDirs.push_back(directory);
+      }
+    }
+    return cmJoin(dllDirs, ";");
+  }
+} targetRuntimeDllDirsNode;
 
 static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
 {
@@ -3355,6 +3390,7 @@ const cmGeneratorExpressionNode* cmGeneratorExpressionNode::GetNode(
     { "TARGET_NAME_IF_EXISTS", &targetNameIfExistsNode },
     { "TARGET_GENEX_EVAL", &targetGenexEvalNode },
     { "TARGET_RUNTIME_DLLS", &targetRuntimeDllsNode },
+    { "TARGET_RUNTIME_DLL_DIRS", &targetRuntimeDllDirsNode },
     { "GENEX_EVAL", &genexEvalNode },
     { "BUILD_INTERFACE", &buildInterfaceNode },
     { "INSTALL_INTERFACE", &installInterfaceNode },
