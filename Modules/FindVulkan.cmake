@@ -244,23 +244,26 @@ endif()
 if(WIN32)
   set(_Vulkan_library_name vulkan-1)
   set(_Vulkan_hint_include_search_paths
-    "$ENV{VULKAN_SDK}/Include"
+    "$ENV{VULKAN_SDK}/include"
   )
   if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     set(_Vulkan_hint_executable_search_paths
-      "$ENV{VULKAN_SDK}/Bin"
+      "$ENV{VULKAN_SDK}/bin"
     )
     set(_Vulkan_hint_library_search_paths
-      "$ENV{VULKAN_SDK}/Lib"
-      "$ENV{VULKAN_SDK}/Bin"
+      "$ENV{VULKAN_SDK}/lib"
+      "$ENV{VULKAN_SDK}/bin"
     )
   else()
     set(_Vulkan_hint_executable_search_paths
-      "$ENV{VULKAN_SDK}/Bin32"
+      "$ENV{VULKAN_SDK}/bin32"
+      "$ENV{VULKAN_SDK}/bin"
     )
     set(_Vulkan_hint_library_search_paths
-      "$ENV{VULKAN_SDK}/Lib32"
-      "$ENV{VULKAN_SDK}/Bin32"
+      "$ENV{VULKAN_SDK}/lib32"
+      "$ENV{VULKAN_SDK}/bin32"
+      "$ENV{VULKAN_SDK}/lib"
+      "$ENV{VULKAN_SDK}/bin"
     )
   endif()
 else()
