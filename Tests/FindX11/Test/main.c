@@ -496,7 +496,7 @@ int main(int argc, char* argv[])
 #ifdef HAVE_xcb
     test_xcb,
 #endif
-#ifdef HAVE_xcb_util
+#ifdef HAVE_xcb_randr
     test_xcb_randr,
 #endif
 #ifdef HAVE_xcb_util
