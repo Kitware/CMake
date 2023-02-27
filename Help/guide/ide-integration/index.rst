@@ -145,7 +145,7 @@ The following IDEs support CMake natively:
 * `VSCode`_ (via a plugin)
 
 .. _CLion: https://www.jetbrains.com/clion/
-.. _KDevelop: https://www.kdevelop.org/
+.. _KDevelop: https://kdevelop.org/
 .. _QtCreator: https://www.qt.io/product/development-tools
 .. _Vim: https://www.vim.org/
 .. _Visual Studio: https://visualstudio.microsoft.com/
