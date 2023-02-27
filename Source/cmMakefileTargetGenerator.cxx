@@ -2176,16 +2176,16 @@ bool cmMakefileTargetGenerator::CheckUseResponseFileForLibraries(
 
 std::string cmMakefileTargetGenerator::CreateResponseFile(
   const std::string& name, std::string const& options,
-  std::vector<std::string>& makefile_depends)
+  std::vector<std::string>& makefile_depends, std::string const& language)
 {
   // FIXME: Find a better way to determine the response file encoding,
   // perhaps using tool-specific platform information variables.
   // For now, use the makefile encoding as a heuristic.
   codecvt::Encoding responseEncoding =
     this->GlobalGenerator->GetMakefileEncoding();
-  // Non-MSVC tooling may not understand a BOM.
+  // Non-MSVC tooling doesn't understand BOM encoded files.
   if (responseEncoding == codecvt::UTF8_WITH_BOM &&
-      !this->Makefile->IsOn("MSVC")) {
+      (language == "CUDA" || !this->Makefile->IsOn("MSVC"))) {
     responseEncoding = codecvt::UTF8;
   }
 
@@ -2222,7 +2222,7 @@ cmMakefileTargetGenerator::CreateLinkLineComputer(
 void cmMakefileTargetGenerator::CreateLinkLibs(
   cmLinkLineComputer* linkLineComputer, std::string& linkLibs,
   bool useResponseFile, std::vector<std::string>& makefile_depends,
-  ResponseFlagFor responseMode)
+  std::string const& linkLanguage, ResponseFlagFor responseMode)
 {
   std::string frameworkPath;
   std::string linkPath;
@@ -2240,8 +2240,9 @@ void cmMakefileTargetGenerator::CreateLinkLibs(
     // Create this response file.
     std::string responseFileName =
       (responseMode == Link) ? "linkLibs.rsp" : "deviceLinkLibs.rsp";
-    std::string link_rsp =
-      this->CreateResponseFile(responseFileName, linkLibs, makefile_depends);
+    std::string responseLang = (responseMode == Link) ? linkLanguage : "CUDA";
+    std::string link_rsp = this->CreateResponseFile(
+      responseFileName, linkLibs, makefile_depends, responseLang);
 
     // Reference the response file.
     linkLibs = cmStrCat(responseFlag,
@@ -2253,7 +2254,8 @@ void cmMakefileTargetGenerator::CreateLinkLibs(
 void cmMakefileTargetGenerator::CreateObjectLists(
   bool useLinkScript, bool useArchiveRules, bool useResponseFile,
   std::string& buildObjs, std::vector<std::string>& makefile_depends,
-  bool useWatcomQuote, ResponseFlagFor responseMode)
+  bool useWatcomQuote, std::string const& linkLanguage,
+  ResponseFlagFor responseMode)
 {
   std::string variableName;
   std::string variableNameExternal;
@@ -2282,7 +2284,7 @@ void cmMakefileTargetGenerator::CreateObjectLists(
 
       // Create this response file.
       std::string objects_rsp = this->CreateResponseFile(
-        responseFileName, object_strings[i], makefile_depends);
+        responseFileName, object_strings[i], makefile_depends, linkLanguage);
 
       // Separate from previous response file references.
       buildObjs += sep;
@@ -2334,8 +2336,8 @@ void cmMakefileTargetGenerator::AddIncludeFlags(std::string& flags,
     }
     std::string name = cmStrCat("includes_", lang, ".rsp");
     std::string arg = std::move(responseFlag) +
-      this->CreateResponseFile(name, includeFlags,
-                               this->FlagFileDepends[lang]);
+      this->CreateResponseFile(name, includeFlags, this->FlagFileDepends[lang],
+                               lang);
     this->LocalGenerator->AppendFlags(flags, arg);
   } else {
     this->LocalGenerator->AppendFlags(flags, includeFlags);

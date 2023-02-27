@@ -327,14 +327,14 @@ void cmMakefileLibraryTargetGenerator::WriteNvidiaDeviceLibraryRules(
 
     this->CreateLinkLibs(
       linkLineComputer.get(), linkLibs, useResponseFileForLibs, depends,
-      cmMakefileTargetGenerator::ResponseFlagFor::DeviceLink);
+      linkLanguage, cmMakefileTargetGenerator::ResponseFlagFor::DeviceLink);
 
     // Construct object file lists that may be needed to expand the
     // rule.
     std::string buildObjs;
     this->CreateObjectLists(
       useLinkScript, false, // useArchiveRules
-      useResponseFileForObjects, buildObjs, depends, false,
+      useResponseFileForObjects, buildObjs, depends, false, linkLanguage,
       cmMakefileTargetGenerator::ResponseFlagFor::DeviceLink);
 
     std::string objectDir = this->GeneratorTarget->GetSupportDirectory();
@@ -700,7 +700,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
       linkLineComputer->SetRelink(relink);
 
       this->CreateLinkLibs(linkLineComputer.get(), linkLibs,
-                           useResponseFileForLibs, depends);
+                           useResponseFileForLibs, depends, linkLanguage);
     }
 
     // Construct object file lists that may be needed to expand the
@@ -708,7 +708,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     std::string buildObjs;
     this->CreateObjectLists(useLinkScript, useArchiveRules,
                             useResponseFileForObjects, buildObjs, depends,
-                            useWatcomQuote);
+                            useWatcomQuote, linkLanguage);
     if (!this->DeviceLinkObject.empty()) {
       buildObjs += " " +
         this->LocalGenerator->ConvertToOutputFormat(
