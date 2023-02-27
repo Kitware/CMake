@@ -66,7 +66,7 @@
     rules:
         - if: '$CMAKE_CI_PACKAGE == "dev"'
           variables:
-              RSYNC_DESTINATION: "dev"
+              RSYNC_DESTINATION: "kitware@cmake.org:dev/"
           when: on_success
         - if: '$CMAKE_CI_PACKAGE != null && $CI_JOB_STAGE == "prep"'
           when: manual
@@ -78,19 +78,19 @@
     rules:
         - if: '$CMAKE_CI_PACKAGE =~ /v[0-9]+\.[0-9]+/'
           variables:
-              RSYNC_DESTINATION: "$CMAKE_CI_PACKAGE"
+              RSYNC_DESTINATION: "kitware@cmake.org:$CMAKE_CI_PACKAGE/"
               CMAKE_CI_SPHINX_QTHELP: "ON"
               CMAKE_CI_VERSION_NO_GIT: "ON"
           when: manual
         - if: '$CMAKE_CI_PROJECT_MAIN_BRANCH != null && $CI_COMMIT_BRANCH != null && $CMAKE_CI_PROJECT_MAIN_BRANCH == $CI_COMMIT_BRANCH'
           variables:
-              RSYNC_DESTINATION: "git-master"
+              RSYNC_DESTINATION: "kitware@cmake.org:git-master/"
               CMAKE_CI_SPHINX_QTHELP: "OFF"
               CMAKE_CI_VERSION_NO_GIT: "OFF"
           when: on_success
         - if: '$CMAKE_CI_PROJECT_CONTINUOUS_BRANCH != null && $CI_COMMIT_BRANCH != null && $CMAKE_CI_PROJECT_CONTINUOUS_BRANCH == $CI_COMMIT_BRANCH'
           variables:
-              RSYNC_DESTINATION: "git-stage"
+              RSYNC_DESTINATION: "kitware@cmake.org:git-stage/"
               CMAKE_CI_SPHINX_QTHELP: "OFF"
               CMAKE_CI_VERSION_NO_GIT: "OFF"
           when: on_success

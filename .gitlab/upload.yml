@@ -17,7 +17,7 @@
         - chmod 400 $RSYNC_BINARY_KEY
         - ssh-keygen -y -f $RSYNC_BINARY_KEY > $RSYNC_BINARY_KEY.pub
         - test -n "$RSYNC_DESTINATION"
-        - rsync -tv --recursive -e "ssh -i $RSYNC_BINARY_KEY -o StrictHostKeyChecking=no -o LogLevel=ERROR" build/ kitware@cmake.org:$RSYNC_DESTINATION/
+        - rsync -tv --recursive -e "ssh -i $RSYNC_BINARY_KEY -o StrictHostKeyChecking=no -o LogLevel=ERROR" build/ "$RSYNC_DESTINATION"
 
 .rsync_upload_help:
     stage: upload
@@ -36,4 +36,4 @@
         - chmod 400 $RSYNC_HELP_KEY
         - ssh-keygen -y -f $RSYNC_HELP_KEY > $RSYNC_HELP_KEY.pub
         - test -n "$RSYNC_DESTINATION"
-        - rsync -tv --recursive --delete -e "ssh -i $RSYNC_HELP_KEY -o StrictHostKeyChecking=no -o LogLevel=ERROR" build/html/ kitware@cmake.org:$RSYNC_DESTINATION/
+        - rsync -tv --recursive --delete -e "ssh -i $RSYNC_HELP_KEY -o StrictHostKeyChecking=no -o LogLevel=ERROR" build/html/ "$RSYNC_DESTINATION"
