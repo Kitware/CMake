@@ -5,11 +5,19 @@
 FindDart
 --------
 
+.. deprecated:: 3.27
+  This module is available only if policy :policy:`CMP0145` is not set to ``NEW``.
+
 Find DART
 
 This module looks for the dart testing software and sets DART_ROOT to
 point to where it found it.
 #]=======================================================================]
+
+if(_FindDart_testing)
+  set(_FindDart_included TRUE)
+  return()
+endif()
 
 find_path(DART_ROOT README.INSTALL
     HINTS

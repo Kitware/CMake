@@ -5,6 +5,11 @@
 Dart
 ----
 
+.. deprecated:: 3.27
+  This module is available only if policy :policy:`CMP0145`
+  is not set to ``NEW``.  Do not use it in new code.
+  Use the :module:`CTest` module instead.
+
 Configure a project for testing with CTest or old Dart Tcl Client
 
 This file is the backwards-compatibility version of the CTest module.
@@ -33,10 +38,24 @@ whether testing support should be enabled.  The default is ON.
 #
 #
 
+# include(Dart) already warns about CMP0145, but back when this module was in
+# common use, it was often loaded via include(${CMAKE_ROOT}/Modules/Dart.cmake)
+# which will not warn.  Warn again just in case.
+cmake_policy(GET CMP0145 cmp0145)
+if(cmp0145 STREQUAL "")
+  cmake_policy(GET_WARNING CMP0145 _cmp0145_warning)
+  message(AUTHOR_WARNING "${_cmp0145_warning}")
+endif()
+
 option(BUILD_TESTING "Build the testing tree." ON)
 
 if(BUILD_TESTING)
+  # We only get here if a project already ran include(Dart),
+  # so avoid warning about CMP0145 again.
+  cmake_policy(PUSH)
+  cmake_policy(SET CMP0145 OLD)
   find_package(Dart QUIET)
+  cmake_policy(POP)
 
   #
   # Section #1:
