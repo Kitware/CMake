@@ -4,6 +4,8 @@
 cmake_minimum_required (VERSION 2.7)
 project (Testing)
 
+include (CTest)
+
 #
 # Lib and exe path
 #
@@ -23,12 +25,6 @@ if (EXECUTABLE_OUTPUT_PATH)
 else ()
   set (CXX_TEST_PATH .)
 endif ()
-
-#
-# Include Dart
-# (will also set NSLOOKUP, HOSTNAME, etc.)
-#
-include (${CMAKE_ROOT}/Modules/Dart.cmake)
 
 #
 # Extra coverage
