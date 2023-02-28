@@ -5475,9 +5475,15 @@ cmGeneratorTarget::GetFullNameInternalComponents(
 
   // Name shared libraries with their version number on some platforms.
   if (cmValue soversion = this->GetProperty("SOVERSION")) {
+    cmValue dllProp;
+    if (this->IsDLLPlatform()) {
+      dllProp = this->GetProperty("DLL_NAME_WITH_SOVERSION");
+    }
     if (this->GetType() == cmStateEnums::SHARED_LIBRARY &&
         !isImportedLibraryArtifact &&
-        this->Makefile->IsOn("CMAKE_SHARED_LIBRARY_NAME_WITH_VERSION")) {
+        (dllProp.IsOn() ||
+         (!dllProp.IsSet() &&
+          this->Makefile->IsOn("CMAKE_SHARED_LIBRARY_NAME_WITH_VERSION")))) {
       outBase += "-";
       outBase += *soversion;
     }

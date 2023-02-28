@@ -305,6 +305,8 @@ struct TargetProperty
     LinkableLibraryTarget,
     // Needs to be an executable.
     ExecutableTarget,
+    // Needs to be a shared library (`SHARED`).
+    SharedLibraryTarget,
     // Needs to be a target with meaningful symbol exports (`SHARED` or
     // `EXECUTABLE`).
     TargetWithSymbolExports,
@@ -484,6 +486,7 @@ TargetProperty const StaticTargetProperties[] = {
   // ---- macOS
   { "FRAMEWORK_MULTI_CONFIG_POSTFIX_"_s, IC::LinkableLibraryTarget, R::PerConfig },
   // ---- Windows
+  { "DLL_NAME_WITH_SOVERSION"_s, IC::SharedLibraryTarget },
   { "GNUtoMS"_s, IC::CanCompileSources },
   { "WIN32_EXECUTABLE"_s, IC::CanCompileSources },
   { "WINDOWS_EXPORT_ALL_SYMBOLS"_s, IC::TargetWithSymbolExports },
@@ -1002,6 +1005,9 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
         this->impl->TargetType == cmStateEnums::STATIC_LIBRARY) {
       metConditions.insert(
         TargetProperty::InitCondition::LinkableLibraryTarget);
+    }
+    if (this->impl->TargetType == cmStateEnums::SHARED_LIBRARY) {
+      metConditions.insert(TargetProperty::InitCondition::SharedLibraryTarget);
     }
   }
   if (this->impl->TargetType == cmStateEnums::EXECUTABLE) {
