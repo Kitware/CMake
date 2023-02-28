@@ -72,6 +72,10 @@
           when: manual
         - if: '$CMAKE_CI_PACKAGE != null && $CI_JOB_STAGE != "upload"'
           when: on_success
+        - if: '$CMAKE_CI_PACKAGE != null && $CI_JOB_STAGE == "upload" && $CMAKE_CI_PACKAGE_URL != null'
+          variables:
+              RSYNC_DESTINATION: "$CMAKE_CI_PACKAGE_URL"
+          when: on_success
         - when: never
 
 .run_cmake_org_help:
