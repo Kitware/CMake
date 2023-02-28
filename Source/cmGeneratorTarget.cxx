@@ -1714,7 +1714,8 @@ void addFileSetEntry(cmGeneratorTarget const* headTarget,
                                    std::move(entryCge), fileSet);
     entries.Entries.emplace_back(
       EvaluateTargetPropertyEntry(headTarget, config, "", dagChecker, tpe));
-    for (auto const& file : entries.Entries.back().Values) {
+    EvaluatedTargetPropertyEntry const& entry = entries.Entries.back();
+    for (auto const& file : entry.Values) {
       auto* sf = headTarget->Makefile->GetOrCreateSource(file);
       if (fileSet->GetType() == "HEADERS"_s) {
         sf->SetProperty("HEADER_FILE_ONLY", "TRUE");
@@ -1725,13 +1726,11 @@ void addFileSetEntry(cmGeneratorTarget const* headTarget,
       std::string w;
       auto path = sf->ResolveFullPath(&e, &w);
       if (!w.empty()) {
-        cm->IssueMessage(MessageType::AUTHOR_WARNING, w,
-                         headTarget->GetBacktrace());
+        cm->IssueMessage(MessageType::AUTHOR_WARNING, w, entry.Backtrace);
       }
       if (path.empty()) {
         if (!e.empty()) {
-          cm->IssueMessage(MessageType::FATAL_ERROR, e,
-                           headTarget->GetBacktrace());
+          cm->IssueMessage(MessageType::FATAL_ERROR, e, entry.Backtrace);
         }
         return;
       }
@@ -1806,11 +1805,11 @@ bool processSources(cmGeneratorTarget const* tgt,
       std::string fullPath = sf->ResolveFullPath(&e, &w);
       cmake* cm = tgt->GetLocalGenerator()->GetCMakeInstance();
       if (!w.empty()) {
-        cm->IssueMessage(MessageType::AUTHOR_WARNING, w, tgt->GetBacktrace());
+        cm->IssueMessage(MessageType::AUTHOR_WARNING, w, entry.Backtrace);
       }
       if (fullPath.empty()) {
         if (!e.empty()) {
-          cm->IssueMessage(MessageType::FATAL_ERROR, e, tgt->GetBacktrace());
+          cm->IssueMessage(MessageType::FATAL_ERROR, e, entry.Backtrace);
         }
         return contextDependent;
       }

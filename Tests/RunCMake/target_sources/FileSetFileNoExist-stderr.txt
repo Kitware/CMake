@@ -1,4 +1,4 @@
-^CMake Error at FileSetFileNoExist\.cmake:[0-9]+ \(add_library\):
+^CMake Error at FileSetFileNoExist\.cmake:[0-9]+ \(target_sources\):
   Cannot find source file:
 
     [^
