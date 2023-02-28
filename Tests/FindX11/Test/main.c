@@ -336,6 +336,22 @@ static void test_xcb(void)
   xcb_disconnect(connection);
 }
 
+#  ifdef HAVE_xcb_cursor
+#    include <xcb/xcb_cursor.h>
+
+static void test_xcb_cursor(void)
+{
+  int screen_nbr;
+  xcb_connection_t* connection = xcb_connect(NULL, &screen_nbr);
+  xcb_screen_t* screen = xcb_aux_get_screen(conn, screen_nbr);
+  xcb_cursor_context_t* ctx;
+  xcb_cursor_context_new(connection, screen, &ctx);
+  xcb_cursor_context_free(ctx);
+  xcb_disconnect(connection);
+}
+
+#  endif
+
 #  ifdef HAVE_xcb_randr
 #    include <xcb/randr.h>
 
@@ -345,6 +361,20 @@ static void test_xcb_randr(void)
   xcb_connection_t* connection = xcb_connect(NULL, &screen_nbr);
   xcb_randr_query_version_cookie_t cookie =
     xcb_randr_query_version(connection, 0, 0);
+  xcb_disconnect(connection);
+}
+
+#  endif
+
+#  ifdef HAVE_xcb_shape
+#    include <xcb/shape.h>
+
+static void test_xcb_shape(void)
+{
+  int screen_nbr;
+  xcb_connection_t* connection = xcb_connect(NULL, &screen_nbr);
+  xcb_shape_query_version_cookie_t cookie =
+    xcb_shape_query_version(connection);
   xcb_disconnect(connection);
 }
 
@@ -371,6 +401,20 @@ static void test_xcb_xfixes(void)
   int screen_nbr;
   xcb_connection_t* connection = xcb_connect(NULL, &screen_nbr);
   xcb_xfixes_query_version(connection, 1, 0);
+  xcb_disconnect(connection);
+}
+
+#  endif
+
+#  ifdef HAVE_xcb_xrm
+#    include <xcb/xcb_xrm.h>
+
+static void test_xcb_xrm(void)
+{
+  int screen_nbr;
+  xcb_connection_t* connection = xcb_connect(NULL, &screen_nbr);
+  xcb_xrm_database_t* db = xcb_xrm_database_from_default(connection);
+  xcb_xrm_database_free(db);
   xcb_disconnect(connection);
 }
 
@@ -496,14 +540,23 @@ int main(int argc, char* argv[])
 #ifdef HAVE_xcb
     test_xcb,
 #endif
-#ifdef HAVE_xcb_util
+#ifdef HAVE_xcb_cursor
+    test_xcb_cursor,
+#endif
+#ifdef HAVE_xcb_randr
     test_xcb_randr,
+#endif
+#ifdef HAVE_xcb_shape
+    test_xcb_shape,
 #endif
 #ifdef HAVE_xcb_util
     test_xcb_util,
 #endif
 #ifdef HAVE_xcb_xfixes
     test_xcb_xfixes,
+#endif
+#ifdef HAVE_xcb_xrm
+    test_xcb_xrm,
 #endif
 
     NULL,

@@ -32,10 +32,13 @@ test_x11_component(x11_components Xau)
 test_x11_component(x11_components Xaw)
 test_x11_component(x11_components xcb)
 test_x11_component(x11_components X11_xcb)
+test_x11_component(x11_components xcb_cursor)
 test_x11_component(x11_components xcb_icccm)
 test_x11_component(x11_components xcb_randr)
+test_x11_component(x11_components xcb_shape)
 test_x11_component(x11_components xcb_util)
 test_x11_component(x11_components xcb_xfixes)
+test_x11_component(x11_components xcb_xrm)
 test_x11_component(x11_components xcb_xtest)
 test_x11_component(x11_components xcb_keysyms)
 test_x11_component(x11_components xcb_xkb)
@@ -76,10 +79,13 @@ foreach(lib
     Xaw
     xcb
     X11_xcb
+    xcb_cursor
     xcb_icccm
     xcb_randr
+    xcb_shape
     xcb_util
     xcb_xfixes
+    xcb_xrm
     Xcomposite
     Xdamage
     Xdmcp
