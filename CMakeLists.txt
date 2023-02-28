@@ -201,11 +201,7 @@ endif()
 
 # Enable testing if building standalone.
 if(KWSYS_STANDALONE)
-  include(Dart)
-  mark_as_advanced(BUILD_TESTING DART_ROOT TCL_TCLSH)
-  if(BUILD_TESTING)
-    enable_testing()
-  endif()
+  include(CTest)
 endif()
 
 # Choose default shared/static build if not specified.
