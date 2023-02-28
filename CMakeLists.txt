@@ -241,10 +241,6 @@ macro(CMAKE_SETUP_TESTING)
   configure_file(Tests/.NoDartCoverage Tests/.NoDartCoverage)
   configure_file(Tests/.NoDartCoverage Modules/.NoDartCoverage)
   configure_file(CTestCustom.cmake.in CTestCustom.cmake @ONLY)
-  if(BUILD_TESTING AND DART_ROOT)
-    configure_file(CMakeLogo.gif Testing/HTML/TestingResults/Icons/Logo.gif COPYONLY)
-  endif()
-  mark_as_advanced(DART_ROOT)
 endmacro()
 
 
@@ -361,9 +357,7 @@ endif()
 #-----------------------------------------------------------------------
 include(Source/CMakeVersion.cmake)
 
-# Include the standard Dart testing module
-enable_testing()
-include(${CMAKE_ROOT}/Modules/Dart.cmake)
+include(CTest)
 
 # Set up test-time configuration.
 set_directory_properties(PROPERTIES
