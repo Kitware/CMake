@@ -955,7 +955,11 @@ void cmVisualStudio10TargetGenerator::WriteSdkStyleProjectFile(
                      "executables."));
           return;
         }
-        outputType = "Exe";
+        if (cmIsOn(win32)) {
+          outputType = "WinExe";
+        } else {
+          outputType = "Exe";
+        }
       } break;
       case cmStateEnums::UTILITY:
       case cmStateEnums::INTERFACE_LIBRARY:
