@@ -80,6 +80,8 @@
             # Any source packages made.
             - build/cmake-*.tar.gz
             - build/cmake-*.zip
+            # Any unsigned packages made.
+            - build/unsigned/cmake-*
 
 .cmake_junit_artifacts:
     artifacts:

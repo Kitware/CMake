@@ -33,8 +33,9 @@ file(GLOB_RECURSE paths_recurse RELATIVE "${CMAKE_CURRENT_BINARY_DIR}"
   )
 
 # Create a "package" containing the build-tree files needed to build a package.
+file(MAKE_DIRECTORY build/unsigned)
 file(ARCHIVE_CREATE
-  OUTPUT build/${CPACK_PACKAGE_FILE_NAME}.build.zip
+  OUTPUT build/unsigned/${CPACK_PACKAGE_FILE_NAME}.build.zip
   PATHS ${paths} ${paths_recurse}
   FORMAT zip
   )
