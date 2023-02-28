@@ -1,7 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
-if(POLICY CMP0060)
-  cmake_policy(SET CMP0060 NEW)
-endif()
+cmake_minimum_required(VERSION 3.13...3.24 FATAL_ERROR)
 project(CheckCurses C)
 
 set(CURSES_NEED_NCURSES TRUE)
