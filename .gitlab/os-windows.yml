@@ -367,18 +367,6 @@
 
     interruptible: true
 
-.cmake_package_windows:
-    stage: package
-
-    script:
-        - *before_script_windows
-        - Invoke-Expression -Command .gitlab/ci/vcvarsall.ps1
-        - cd build
-        - cpack -G ZIP
-        - cpack -G WIX
-
-    interruptible: true
-
 .cmake_test_windows:
     stage: test
 
