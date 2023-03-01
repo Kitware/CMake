@@ -693,12 +693,12 @@ void cmVisualStudio10TargetGenerator::WriteClassicMsBuildProjectFile(
 
     switch (this->ProjectType) {
       case VsProjectType::vcxproj: {
+        Elem(e0, "Import").Attribute("Project", VS10_CXX_DEFAULT_PROPS);
         std::string const& props =
           this->GlobalGenerator->GetPlatformToolsetVersionProps();
         if (!props.empty()) {
           Elem(e0, "Import").Attribute("Project", props);
         }
-        Elem(e0, "Import").Attribute("Project", VS10_CXX_DEFAULT_PROPS);
       } break;
       case VsProjectType::csproj:
         Elem(e0, "Import")
