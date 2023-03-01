@@ -108,7 +108,7 @@ message(STATUS "Downloading...
    timeout='@TIMEOUT_MSG@'
    inactivity timeout='@INACTIVITY_TIMEOUT_MSG@'"
 )
-set(download_retry_codes 7 6 8 15)
+set(download_retry_codes 7 6 8 15 28)
 set(skip_url_list)
 set(status_code)
 foreach(i RANGE ${retry_number})
