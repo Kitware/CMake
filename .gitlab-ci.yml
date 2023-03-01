@@ -16,7 +16,6 @@ stages:
     - build
     - test
     - test-ext
-    - package
     - upload
 
 ################################################################################
@@ -37,7 +36,6 @@ stages:
 
 # Job prefixes:
 #   - `b:` build
-#   - `k:` package
 #   - `l:` lint
 #   - `p:` prep
 #   - `t:` test
@@ -943,7 +941,7 @@ t:macos-x86_64-xcode-ub:
 b:macos-package:
     extends:
         - .macos_package
-        - .cmake_build_macos_package
+        - .cmake_build_macos
         - .cmake_release_artifacts
         - .macos_x86_64_tags_package
         - .run_only_for_package
@@ -966,7 +964,7 @@ u:macos-package:
 b:macos10.10-package:
     extends:
         - .macos10.10_package
-        - .cmake_build_macos_package
+        - .cmake_build_macos
         - .cmake_release_artifacts
         - .macos_x86_64_tags_package
         - .run_only_for_package
@@ -1268,27 +1266,13 @@ b:windows-x86_64-package:
     extends:
         - .windows_x86_64_package
         - .cmake_build_windows
-        - .cmake_build_package_artifacts
-        - .windows_x86_64_tags_nonconcurrent_vs2022
-        - .run_only_for_package
-    dependencies:
-        - p:doc-package
-    needs:
-        - p:doc-package
-    variables:
-        CMAKE_CI_ARTIFACTS_NAME: "artifacts-windows-x86_64-build"
-
-k:windows-x86_64-package:
-    extends:
-        - .windows_x86_64_package
-        - .cmake_package_windows
         - .cmake_release_artifacts
         - .windows_x86_64_tags_nonconcurrent_vs2022
         - .run_only_for_package
     dependencies:
-        - b:windows-x86_64-package
+        - p:doc-package
     needs:
-        - b:windows-x86_64-package
+        - p:doc-package
     variables:
         CMAKE_CI_ARTIFACTS_NAME: "artifacts-windows-x86_64"
 
@@ -1297,35 +1281,21 @@ u:windows-x86_64-package:
         - .rsync_upload_package
         - .run_only_for_package
     dependencies:
-        - k:windows-x86_64-package
+        - b:windows-x86_64-package
     needs:
-        - k:windows-x86_64-package
+        - b:windows-x86_64-package
 
 b:windows-i386-package:
     extends:
         - .windows_i386_package
         - .cmake_build_windows
-        - .cmake_build_package_artifacts
-        - .windows_x86_64_tags_nonconcurrent_vs2022
-        - .run_only_for_package
-    dependencies:
-        - p:doc-package
-    needs:
-        - p:doc-package
-    variables:
-        CMAKE_CI_ARTIFACTS_NAME: "artifacts-windows-i386-build"
-
-k:windows-i386-package:
-    extends:
-        - .windows_i386_package
-        - .cmake_package_windows
         - .cmake_release_artifacts
         - .windows_x86_64_tags_nonconcurrent_vs2022
         - .run_only_for_package
     dependencies:
-        - b:windows-i386-package
+        - p:doc-package
     needs:
-        - b:windows-i386-package
+        - p:doc-package
     variables:
         CMAKE_CI_ARTIFACTS_NAME: "artifacts-windows-i386"
 
@@ -1334,35 +1304,21 @@ u:windows-i386-package:
         - .rsync_upload_package
         - .run_only_for_package
     dependencies:
-        - k:windows-i386-package
+        - b:windows-i386-package
     needs:
-        - k:windows-i386-package
+        - b:windows-i386-package
 
 b:windows-arm64-package:
     extends:
         - .windows_arm64_package
         - .cmake_build_windows
-        - .cmake_build_package_artifacts
-        - .windows_x86_64_tags_nonconcurrent_vs2022_arm64
-        - .run_only_for_package
-    dependencies:
-        - p:doc-package
-    needs:
-        - p:doc-package
-    variables:
-        CMAKE_CI_ARTIFACTS_NAME: "artifacts-windows-arm64-build"
-
-k:windows-arm64-package:
-    extends:
-        - .windows_arm64_package
-        - .cmake_package_windows
         - .cmake_release_artifacts
         - .windows_x86_64_tags_nonconcurrent_vs2022_arm64
         - .run_only_for_package
     dependencies:
-        - b:windows-arm64-package
+        - p:doc-package
     needs:
-        - b:windows-arm64-package
+        - p:doc-package
     variables:
         CMAKE_CI_ARTIFACTS_NAME: "artifacts-windows-arm64"
 
@@ -1371,6 +1327,6 @@ u:windows-arm64-package:
         - .rsync_upload_package
         - .run_only_for_package
     dependencies:
-        - k:windows-arm64-package
+        - b:windows-arm64-package
     needs:
-        - k:windows-arm64-package
+        - b:windows-arm64-package

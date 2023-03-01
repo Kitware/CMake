@@ -63,35 +63,6 @@
             - build/DartConfiguation.tcl
             - build/CTestCustom.cmake
 
-.cmake_build_package_artifacts:
-    artifacts:
-        expire_in: 1d
-        name: "$CMAKE_CI_ARTIFACTS_NAME"
-        paths:
-            # Allow CPack to find CMAKE_ROOT.
-            - build/CMakeFiles/CMakeSourceDir.txt
-
-            # Install rules.
-            - build/**/cmake_install.cmake
-
-            # We need the main binaries.
-            - build/bin/
-
-            # Pass through the documentation.
-            - build/install-doc/
-
-            # CPack configuration.
-            - build/CPackConfig.cmake
-            - build/CMakeCPackOptions.cmake
-            - build/Source/QtDialog/QtDialogCPack.cmake
-
-            # CPack/IFW packaging files.
-            - build/CMake*.qs
-
-            # CPack/WIX packaging files.
-            - build/Utilities/Release/WiX/custom_action_dll*.wxs
-            - build/Utilities/Release/WiX/CustomAction/CMakeWiXCustomActions.*
-
 .cmake_release_artifacts:
     artifacts:
         expire_in: 5d
@@ -109,6 +80,8 @@
             # Any source packages made.
             - build/cmake-*.tar.gz
             - build/cmake-*.zip
+            # Any unsigned packages made.
+            - build/unsigned/cmake-*
 
 .cmake_junit_artifacts:
     artifacts:

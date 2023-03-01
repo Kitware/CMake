@@ -169,22 +169,11 @@
         # Allow the server to already be running.
         - "sccache --start-server || :"
         - sccache --show-stats
+        - .gitlab/ci/pre_build.sh
         - ctest -VV -S .gitlab/ci/ctest_configure.cmake
         - ctest -VV -S .gitlab/ci/ctest_build.cmake
+        - .gitlab/ci/post_build.sh
         - sccache --show-stats
-
-    interruptible: true
-
-.cmake_build_macos_package:
-    stage: build
-
-    script:
-        - *before_script_macos
-        - ctest -VV -S .gitlab/ci/ctest_configure.cmake
-        - ctest -VV -S .gitlab/ci/ctest_build.cmake
-        - cd build
-        - cpack -G TGZ
-        - cpack -G DragNDrop
 
     interruptible: true
 
