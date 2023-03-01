@@ -1,6 +1,6 @@
 # Using 2.8 will trigger a deprecation warning.  In this case it's explicitly
 # intentional since the tests checks various policy implementations prior to
-# 2.8.12
+# 3.5
 cmake_minimum_required(VERSION 2.8)
 
 if(POLICY CMP0129)

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.5)
 project(VSNASM C ASM_NASM)
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
