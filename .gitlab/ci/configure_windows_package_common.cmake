@@ -19,4 +19,6 @@ set(CMake_TEST_Qt5 OFF CACHE BOOL "")
 set(CMake_TEST_Qt6 OFF CACHE BOOL "")
 set(Python_FIND_REGISTRY NEVER CACHE STRING "")
 
+set(CMake_CPACK_CUSTOM_SCRIPT "${CMAKE_CURRENT_LIST_DIR}/CMakeCPack.cmake" CACHE FILEPATH "")
+
 include("${CMAKE_CURRENT_LIST_DIR}/configure_common.cmake")

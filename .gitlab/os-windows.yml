@@ -358,22 +358,12 @@
         - Invoke-Expression -Command .gitlab/ci/vcvarsall.ps1
         - sccache --start-server
         - sccache --show-stats
+        - (& "$pwsh" -File ".gitlab/ci/pre_build.ps1")
         - ctest -VV -S .gitlab/ci/ctest_configure.cmake
         - ctest -VV -S .gitlab/ci/ctest_build.cmake
+        - (& "$pwsh" -File ".gitlab/ci/post_build.ps1")
         - sccache --show-stats
         - sccache --stop-server
-
-    interruptible: true
-
-.cmake_package_windows:
-    stage: package
-
-    script:
-        - *before_script_windows
-        - Invoke-Expression -Command .gitlab/ci/vcvarsall.ps1
-        - cd build
-        - cpack -G ZIP
-        - cpack -G WIX
 
     interruptible: true
 
