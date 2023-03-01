@@ -14,7 +14,7 @@ Try Compiling Whole Projects
 
 .. code-block:: cmake
 
-  try_compile(<resultVar> PROJECT <projectName>
+  try_compile(<compileResultVar> PROJECT <projectName>
               SOURCE_DIR <srcdir>
               [BINARY_DIR <bindir>]
               [TARGET <targetName>]
@@ -26,8 +26,8 @@ Try Compiling Whole Projects
 
 .. versionadded:: 3.25
 
-Try building a project.  The success or failure of the ``try_compile``,
-i.e. ``TRUE`` or ``FALSE`` respectively, is returned in ``<resultVar>``.
+Try building a project.  Build success returns ``TRUE`` and build failure
+returns ``FALSE`` in ``<compileResultVar>``.
 
 In this form, ``<srcdir>`` should contain a complete CMake project with a
 ``CMakeLists.txt`` file and all sources.  The ``<bindir>`` and ``<srcdir>``
@@ -47,16 +47,13 @@ below for the meaning of other options.
   :ref:`configure-log try_compile event <try_compile configure-log event>`
   if the ``NO_LOG`` option is not specified.
 
-This command also supports an alternate signature
-which was present in older versions of CMake:
+This command supports an alternate signature for CMake older than 3.25.
+The signature above is recommended for clarity.
 
 .. code-block:: cmake
 
-  try_compile(<resultVar> <bindir> <srcdir>
+  try_compile(<compileResultVar> <bindir> <srcdir>
               <projectName> [<targetName>]
-              [LOG_DESCRIPTION <text>]
-              [NO_CACHE]
-              [NO_LOG]
               [CMAKE_FLAGS <flags>...]
               [OUTPUT_VARIABLE <var>])
 
@@ -67,7 +64,7 @@ Try Compiling Source Files
 
 .. code-block:: cmake
 
-  try_compile(<resultVar>
+  try_compile(<compileResultVar>
               <SOURCES <srcfile...>                 |
                SOURCE_FROM_CONTENT <name> <content> |
                SOURCE_FROM_VAR <name> <var>         |
@@ -90,8 +87,8 @@ Try Compiling Source Files
 
 Try building an executable or static library from one or more source files
 (which one is determined by the :variable:`CMAKE_TRY_COMPILE_TARGET_TYPE`
-variable).  The success or failure of the ``try_compile``, i.e. ``TRUE`` or
-``FALSE`` respectively, is returned in ``<resultVar>``.
+variable). Build success returns ``TRUE`` and build failure returns ``FALSE``
+in ``<compileResultVar>``.
 
 In this form, one or more source files must be provided. Additionally, one of
 ``SOURCES`` and/or ``SOURCE_FROM_*`` must precede other keywords.
@@ -120,15 +117,12 @@ with an unspecified name.  These directories are cleaned automatically unless
 Such directories from previous runs are also unconditionally cleaned at the
 beginning of any :program:`cmake` execution.
 
-This command also supports an alternate signature
-which was present in older versions of CMake:
+This command supports an alternate signature for CMake older than 3.25.
+The signature above is recommended for clarity.
 
 .. code-block:: cmake
 
-  try_compile(<resultVar> <bindir> <srcfile|SOURCES srcfile...>
-              [LOG_DESCRIPTION <text>]
-              [NO_CACHE]
-              [NO_LOG]
+  try_compile(<compileResultVar> <bindir> <srcfile|SOURCES srcfile...>
               [CMAKE_FLAGS <flags>...]
               [COMPILE_DEFINITIONS <defs>...]
               [LINK_OPTIONS <options>...]
@@ -300,8 +294,13 @@ Other Behavior Settings
 The current settings of :policy:`CMP0065` and :policy:`CMP0083` are propagated
 through to the generated test project.
 
-Set the :variable:`CMAKE_TRY_COMPILE_CONFIGURATION` variable to choose
-a build configuration.
+Set variable :variable:`CMAKE_TRY_COMPILE_CONFIGURATION` to choose a build
+configuration:
+
+* For multi-config generators, this selects which configuration to build.
+
+* For single-config generators, this sets :variable:`CMAKE_BUILD_TYPE` in
+  the test project.
 
 .. versionadded:: 3.6
   Set the :variable:`CMAKE_TRY_COMPILE_TARGET_TYPE` variable to specify
