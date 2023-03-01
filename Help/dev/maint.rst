@@ -345,6 +345,7 @@ policies added for that version.  Commit with a message such as::
 Update the ``cmake_minimum_required`` version range in CMake itself:
 
 * ``CMakeLists.txt``
+* ``Source/Checks/Curses/CMakeLists.txt``
 * ``Utilities/Doxygen/CMakeLists.txt``
 * ``Utilities/Sphinx/CMakeLists.txt``
 
