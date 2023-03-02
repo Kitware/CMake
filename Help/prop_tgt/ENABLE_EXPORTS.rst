@@ -1,7 +1,7 @@
 ENABLE_EXPORTS
 --------------
 
-Specify whether an executable exports symbols for loadable modules.
+Specify whether an executable or a shared library exports symbols.
 
 Normally an executable does not export any symbols because it is the
 final program.  It is possible for an executable to export symbols to
@@ -28,4 +28,29 @@ varies by platform:
   automatically bind symbols when the module is loaded.
 
 This property is initialized by the value of the variable
-:variable:`CMAKE_ENABLE_EXPORTS` if it is set when a target is created.
+:variable:`CMAKE_EXECUTABLE_ENABLE_EXPORTS` if it is set when an executable
+target is created.
+
+.. versionadded:: 3.27
+  On macOS, to link with a shared library (standard one as well as framework),
+  a linker import file (e.g. a text-based stubs file, with ``.tbd`` extension)
+  can be used instead of the shared library itself.
+
+The generation of these linker import files, as well as the consumption, is
+controlled by this property. When this property is set to true, CMake will
+generate a ``.tbd`` file for each shared library created by
+:command:`add_library` command. This allow other targets to use this ``.tbd``
+file to link to the library with the :command:`target_link_libraries`
+command.
+
+.. note::
+
+  For compatibility purpose, this property will be ignored if
+  :prop_tgt:`XCODE_ATTRIBUTE_GENERATE_TEXT_BASED_STUBS <XCODE_ATTRIBUTE_<an-attribute>>`
+  target property or the
+  :variable:`CMAKE_XCODE_ATTRIBUTE_GENERATE_TEXT_BASED_STUBS <CMAKE_XCODE_ATTRIBUTE_<an-attribute>>`
+  variable is set to ``NO``.
+
+This property is initialized by the value of the variable
+:variable:`CMAKE_SHARED_LIBRARY_ENABLE_EXPORTS` if it is set when a shared
+library target is created.

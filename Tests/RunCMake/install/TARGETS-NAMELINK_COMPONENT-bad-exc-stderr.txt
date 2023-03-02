@@ -1,5 +1,6 @@
 ^CMake Error at TARGETS-NAMELINK_COMPONENT-bad-exc\.cmake:5 \(install\):
-  install TARGETS given NAMELINK_COMPONENT option not in LIBRARY group\.  The
-  NAMELINK_COMPONENT option may be specified only following LIBRARY\.
+  install TARGETS given NAMELINK_COMPONENT option not in LIBRARY or ARCHIVE
+  group\.  The NAMELINK_COMPONENT option may be specified only following
+  LIBRARY or ARCHIVE\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)$

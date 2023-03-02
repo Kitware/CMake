@@ -447,7 +447,7 @@ TargetProperty const StaticTargetProperties[] = {
   { "AUTORCC_OPTIONS"_s, IC::CanCompileSources },
 
   // Linking properties
-  { "ENABLE_EXPORTS"_s, IC::ExecutableTarget },
+  { "ENABLE_EXPORTS"_s, IC::TargetWithSymbolExports },
   { "LINK_LIBRARIES_ONLY_TARGETS"_s, IC::NormalNonImportedTarget },
   { "LINK_SEARCH_START_STATIC"_s, IC::CanCompileSources },
   { "LINK_SEARCH_END_STATIC"_s, IC::CanCompileSources },
@@ -614,7 +614,6 @@ TargetProperty const StaticTargetProperties[] = {
 #undef COMMON_LANGUAGE_PROPERTIES
 #undef IC
 #undef R
-
 }
 
 class cmTargetInternals
@@ -631,6 +630,7 @@ public:
   bool HaveInstallRule;
   bool IsDLLPlatform;
   bool IsAIX;
+  bool IsApple;
   bool IsAndroid;
   bool BuildInterfaceIncludesAppended;
   bool PerConfig;
@@ -917,6 +917,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   this->impl->HaveInstallRule = false;
   this->impl->IsDLLPlatform = false;
   this->impl->IsAIX = false;
+  this->impl->IsApple = false;
   this->impl->IsAndroid = false;
   this->impl->TargetVisibility = vis;
   this->impl->BuildInterfaceIncludesAppended = false;
@@ -933,6 +934,9 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
       this->impl->Makefile->GetSafeDefinition("CMAKE_SYSTEM_NAME");
     this->impl->IsAIX = (systemName == "AIX" || systemName == "OS400");
   }
+
+  // Check whether we are targeting Apple.
+  this->impl->IsApple = this->impl->Makefile->IsOn("APPLE");
 
   // Check whether we are targeting an Android platform.
   this->impl->IsAndroid = (this->impl->Makefile->GetSafeDefinition(
@@ -1033,6 +1037,31 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   defKey += "CMAKE_";
   auto initProperty = [this, mf, &defKey](const std::string& property,
                                           const char* default_value) {
+    // special init for ENABLE_EXPORTS
+    // For SHARED_LIBRARY, only CMAKE_SHARED_LIBRARY_ENABLE_EXPORTS variable
+    // is used
+    // For EXECUTABLE, CMAKE_EXECUTABLE_ENABLE_EXPORTS or else
+    // CMAKE_ENABLE_EXPORTS variables are used
+    if (property == "ENABLE_EXPORTS"_s) {
+      // Replace everything after "CMAKE_"
+      defKey.replace(
+        defKey.begin() + 6, defKey.end(),
+        cmStrCat(this->impl->TargetType == cmStateEnums::EXECUTABLE
+                   ? "EXECUTABLE"
+                   : "SHARED_LIBRARY",
+                 '_', property));
+      if (cmValue value = mf->GetDefinition(defKey)) {
+        this->SetProperty(property, value);
+        return;
+      }
+      if (this->impl->TargetType == cmStateEnums::SHARED_LIBRARY) {
+        if (default_value) {
+          this->SetProperty(property, default_value);
+        }
+        return;
+      }
+    }
+
     // Replace everything after "CMAKE_"
     defKey.replace(defKey.begin() + 6, defKey.end(), property);
     if (cmValue value = mf->GetDefinition(defKey)) {
@@ -1207,18 +1236,22 @@ bool cmTarget::IsExecutableWithExports() const
           this->GetPropertyAsBool("ENABLE_EXPORTS"));
 }
 
+bool cmTarget::IsSharedLibraryWithExports() const
+{
+  return (this->GetType() == cmStateEnums::SHARED_LIBRARY &&
+          this->GetPropertyAsBool("ENABLE_EXPORTS"));
+}
+
 bool cmTarget::IsFrameworkOnApple() const
 {
   return ((this->GetType() == cmStateEnums::SHARED_LIBRARY ||
            this->GetType() == cmStateEnums::STATIC_LIBRARY) &&
-          this->impl->Makefile->IsOn("APPLE") &&
-          this->GetPropertyAsBool("FRAMEWORK"));
+          this->IsApple() && this->GetPropertyAsBool("FRAMEWORK"));
 }
 
 bool cmTarget::IsAppBundleOnApple() const
 {
-  return (this->GetType() == cmStateEnums::EXECUTABLE &&
-          this->impl->Makefile->IsOn("APPLE") &&
+  return (this->GetType() == cmStateEnums::EXECUTABLE && this->IsApple() &&
           this->GetPropertyAsBool("MACOSX_BUNDLE"));
 }
 
@@ -1780,7 +1813,6 @@ std::string ConvertToString<cmValue>(cmValue value)
 {
   return std::string(*value);
 }
-
 }
 
 template <typename ValueType>
@@ -2559,6 +2591,10 @@ bool cmTarget::IsAIX() const
 {
   return this->impl->IsAIX;
 }
+bool cmTarget::IsApple() const
+{
+  return this->impl->IsApple;
+}
 
 bool cmTarget::IsNormal() const
 {
@@ -2658,7 +2694,8 @@ const char* cmTarget::GetSuffixVariableInternal(
         case cmStateEnums::RuntimeBinaryArtifact:
           return "CMAKE_SHARED_LIBRARY_SUFFIX";
         case cmStateEnums::ImportLibraryArtifact:
-          return "CMAKE_IMPORT_LIBRARY_SUFFIX";
+          return this->IsApple() ? "CMAKE_APPLE_IMPORT_FILE_SUFFIX"
+                                 : "CMAKE_IMPORT_LIBRARY_SUFFIX";
       }
       break;
     case cmStateEnums::MODULE_LIBRARY:
@@ -2699,7 +2736,8 @@ const char* cmTarget::GetPrefixVariableInternal(
         case cmStateEnums::RuntimeBinaryArtifact:
           return "CMAKE_SHARED_LIBRARY_PREFIX";
         case cmStateEnums::ImportLibraryArtifact:
-          return "CMAKE_IMPORT_LIBRARY_PREFIX";
+          return this->IsApple() ? "CMAKE_APPLE_IMPORT_FILE_PREFIX"
+                                 : "CMAKE_IMPORT_LIBRARY_PREFIX";
       }
       break;
     case cmStateEnums::MODULE_LIBRARY:

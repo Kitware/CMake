@@ -165,6 +165,7 @@ else()
   set(_CMAKE_READELF_NAMES "readelf")
   set(_CMAKE_DLLTOOL_NAMES "dlltool")
   set(_CMAKE_ADDR2LINE_NAMES "addr2line")
+  set(_CMAKE_TAPI_NAMES "tapi")
 
   # Prepend toolchain-specific names.
   if("${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ID}" STREQUAL Clang)
@@ -201,7 +202,7 @@ else()
     list(PREPEND _CMAKE_LINKER_NAMES "armlink")
   endif()
 
-  list(APPEND _CMAKE_TOOL_VARS AR RANLIB STRIP LINKER NM OBJDUMP OBJCOPY READELF DLLTOOL ADDR2LINE)
+  list(APPEND _CMAKE_TOOL_VARS AR RANLIB STRIP LINKER NM OBJDUMP OBJCOPY READELF DLLTOOL ADDR2LINE TAPI)
 endif()
 
 foreach(_CMAKE_TOOL IN LISTS _CMAKE_TOOL_VARS)
@@ -223,6 +224,20 @@ endforeach()
 
 if(NOT CMAKE_RANLIB)
     set(CMAKE_RANLIB : CACHE INTERNAL "noop for ranlib")
+endif()
+
+if(NOT CMAKE_TAPI)
+  # try to pick-up from Apple toolchain
+  execute_process(COMMAND xcrun --find tapi
+    OUTPUT_VARIABLE _xcrun_out
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
+    RESULT_VARIABLE _xcrun_failed)
+  if(NOT _xcrun_failed AND EXISTS "${_xcrun_out}")
+    set_property(CACHE CMAKE_TAPI PROPERTY VALUE "${_xcrun_out}")
+  endif()
+  unset(_xcrun_out)
+  unset(_xcrun_failed)
 endif()
 
 

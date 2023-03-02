@@ -1063,7 +1063,8 @@ void cmExportFileGenerator::GenerateImportTargetCode(
   }
 
   // Mark the imported executable if it has exports.
-  if (target->IsExecutableWithExports()) {
+  if (target->IsExecutableWithExports() ||
+      (target->IsSharedLibraryWithExports() && target->HasImportLibrary(""))) {
     os << "set_property(TARGET " << targetName
        << " PROPERTY ENABLE_EXPORTS 1)\n";
   }

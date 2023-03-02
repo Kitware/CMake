@@ -4,11 +4,14 @@
 
 #include <algorithm>
 #include <cassert>
+#include <functional>
 #include <map>
 #include <set>
 #include <sstream>
 #include <utility>
 #include <vector>
+
+#include <cm/optional>
 
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratorExpression.h"
@@ -40,6 +43,84 @@ std::string computeInstallObjectDir(cmGeneratorTarget* gt,
   objectDir += gt->GetName();
   return objectDir;
 }
+
+void computeFilesToInstall(
+  cmInstallTargetGenerator::Files& files,
+  cmInstallTargetGenerator::NamelinkModeType namelinkMode,
+  std::string const& fromDirConfig, std::string const& output,
+  std::string const& library, std::string const& real,
+  cm::optional<std::function<void(std::string const&)>> GNUToMS = cm::nullopt)
+{
+  bool haveNamelink = false;
+  auto convert = [&GNUToMS](std::string const& file) {
+    if (GNUToMS) {
+      (*GNUToMS)(file);
+    }
+  };
+
+  // Library link name.
+  std::string fromName = cmStrCat(fromDirConfig, output);
+  std::string toName = output;
+
+  // Library interface name.
+  std::string fromSOName;
+  std::string toSOName;
+  if (library != output) {
+    haveNamelink = true;
+    fromSOName = cmStrCat(fromDirConfig, library);
+    toSOName = library;
+  }
+
+  // Library implementation name.
+  std::string fromRealName;
+  std::string toRealName;
+  if (real != output && real != library) {
+    haveNamelink = true;
+    fromRealName = cmStrCat(fromDirConfig, real);
+    toRealName = real;
+  }
+
+  // Add the names based on the current namelink mode.
+  if (haveNamelink) {
+    files.NamelinkMode = namelinkMode;
+    // With a namelink we need to check the mode.
+    if (namelinkMode == cmInstallTargetGenerator::NamelinkModeOnly) {
+      // Install the namelink only.
+      files.From.emplace_back(fromName);
+      files.To.emplace_back(toName);
+      convert(output);
+    } else {
+      // Install the real file if it has its own name.
+      if (!fromRealName.empty()) {
+        files.From.emplace_back(fromRealName);
+        files.To.emplace_back(toRealName);
+        convert(real);
+      }
+
+      // Install the soname link if it has its own name.
+      if (!fromSOName.empty()) {
+        files.From.emplace_back(fromSOName);
+        files.To.emplace_back(toSOName);
+        convert(library);
+      }
+
+      // Install the namelink if it is not to be skipped.
+      if (namelinkMode != cmInstallTargetGenerator::NamelinkModeSkip) {
+        files.From.emplace_back(fromName);
+        files.To.emplace_back(toName);
+        convert(output);
+      }
+    }
+  } else {
+    // Without a namelink there will be only one file.  Install it
+    // if this is not a namelink-only rule.
+    if (namelinkMode != cmInstallTargetGenerator::NamelinkModeOnly) {
+      files.From.emplace_back(fromName);
+      files.To.emplace_back(toName);
+      convert(output);
+    }
+  }
+}
 }
 
 cmInstallTargetGenerator::cmInstallTargetGenerator(
@@ -56,6 +137,7 @@ cmInstallTargetGenerator::cmInstallTargetGenerator(
 {
   this->ActionsPerConfig = true;
   this->NamelinkMode = NamelinkModeNone;
+  this->ImportlinkMode = NamelinkModeNone;
 }
 
 cmInstallTargetGenerator::~cmInstallTargetGenerator() = default;
@@ -247,18 +329,21 @@ cmInstallTargetGenerator::Files cmInstallTargetGenerator::GetFiles(
       this->Target->GetLibraryNames(config);
     if (this->ImportLibrary) {
       // There is a bug in cmInstallCommand if this fails.
-      assert(this->NamelinkMode == NamelinkModeNone);
+      assert(this->Target->Makefile->PlatformSupportsAppleTextStubs() ||
+             this->ImportlinkMode == NamelinkModeNone);
 
-      std::string from1 = fromDirConfig + targetNames.ImportLibrary;
-      std::string to1 = targetNames.ImportLibrary;
-      files.From.emplace_back(std::move(from1));
-      files.To.emplace_back(std::move(to1));
-      std::string targetNameImportLib;
-      if (this->Target->GetImplibGNUtoMS(config, targetNames.ImportLibrary,
-                                         targetNameImportLib)) {
-        files.From.emplace_back(fromDirConfig + targetNameImportLib);
-        files.To.emplace_back(targetNameImportLib);
-      }
+      auto GNUToMS = [this, &config, &files,
+                      &fromDirConfig](const std::string& lib) {
+        std::string importLib;
+        if (this->Target->GetImplibGNUtoMS(config, lib, importLib)) {
+          files.From.emplace_back(fromDirConfig + importLib);
+          files.To.emplace_back(importLib);
+        }
+      };
+
+      computeFilesToInstall(
+        files, this->ImportlinkMode, fromDirConfig, targetNames.ImportOutput,
+        targetNames.ImportLibrary, targetNames.ImportReal, GNUToMS);
 
       // An import library looks like a static library.
       files.Type = cmInstallType_STATIC_LIBRARY;
@@ -318,66 +403,9 @@ cmInstallTargetGenerator::Files cmInstallTargetGenerator::GetFiles(
       files.From.emplace_back(std::move(from1));
       files.To.emplace_back(std::move(to1));
     } else {
-      bool haveNamelink = false;
-
-      // Library link name.
-      std::string fromName = fromDirConfig + targetNames.Output;
-      std::string toName = targetNames.Output;
-
-      // Library interface name.
-      std::string fromSOName;
-      std::string toSOName;
-      if (targetNames.SharedObject != targetNames.Output) {
-        haveNamelink = true;
-        fromSOName = fromDirConfig + targetNames.SharedObject;
-        toSOName = targetNames.SharedObject;
-      }
-
-      // Library implementation name.
-      std::string fromRealName;
-      std::string toRealName;
-      if (targetNames.Real != targetNames.Output &&
-          targetNames.Real != targetNames.SharedObject) {
-        haveNamelink = true;
-        fromRealName = fromDirConfig + targetNames.Real;
-        toRealName = targetNames.Real;
-      }
-
-      // Add the names based on the current namelink mode.
-      if (haveNamelink) {
-        files.NamelinkMode = this->NamelinkMode;
-        // With a namelink we need to check the mode.
-        if (this->NamelinkMode == NamelinkModeOnly) {
-          // Install the namelink only.
-          files.From.emplace_back(fromName);
-          files.To.emplace_back(toName);
-        } else {
-          // Install the real file if it has its own name.
-          if (!fromRealName.empty()) {
-            files.From.emplace_back(fromRealName);
-            files.To.emplace_back(toRealName);
-          }
-
-          // Install the soname link if it has its own name.
-          if (!fromSOName.empty()) {
-            files.From.emplace_back(fromSOName);
-            files.To.emplace_back(toSOName);
-          }
-
-          // Install the namelink if it is not to be skipped.
-          if (this->NamelinkMode != NamelinkModeSkip) {
-            files.From.emplace_back(fromName);
-            files.To.emplace_back(toName);
-          }
-        }
-      } else {
-        // Without a namelink there will be only one file.  Install it
-        // if this is not a namelink-only rule.
-        if (this->NamelinkMode != NamelinkModeOnly) {
-          files.From.emplace_back(fromName);
-          files.To.emplace_back(toName);
-        }
-      }
+      computeFilesToInstall(files, this->NamelinkMode, fromDirConfig,
+                            targetNames.Output, targetNames.SharedObject,
+                            targetNames.Real);
     }
   }
 
@@ -425,6 +453,12 @@ std::string cmInstallTargetGenerator::GetInstallFilename(
                                     "${CMAKE_IMPORT_LIBRARY_SUFFIX}")) {
         fname = targetNames.ImportLibrary;
       }
+    } else if (nameType == NameImplibReal) {
+      // Use the import library name.
+      if (!target->GetImplibGNUtoMS(config, targetNames.ImportReal, fname,
+                                    "${CMAKE_IMPORT_LIBRARY_SUFFIX}")) {
+        fname = targetNames.ImportReal;
+      }
     } else if (nameType == NameReal) {
       // Use the canonical name.
       fname = targetNames.Real;
@@ -434,11 +468,14 @@ std::string cmInstallTargetGenerator::GetInstallFilename(
     }
   } else {
     cmGeneratorTarget::Names targetNames = target->GetLibraryNames(config);
-    if (nameType == NameImplib) {
+    if (nameType == NameImplib || nameType == NameImplibReal) {
+      const auto& importName = nameType == NameImplib
+        ? targetNames.ImportLibrary
+        : targetNames.ImportReal;
       // Use the import library name.
-      if (!target->GetImplibGNUtoMS(config, targetNames.ImportLibrary, fname,
+      if (!target->GetImplibGNUtoMS(config, importName, fname,
                                     "${CMAKE_IMPORT_LIBRARY_SUFFIX}")) {
-        fname = targetNames.ImportLibrary;
+        fname = importName;
       }
     } else if (nameType == NameSO) {
       // Use the soname.
@@ -784,7 +821,7 @@ void cmInstallTargetGenerator::AddStripRule(std::ostream& os, Indent indent,
   }
 
   // Don't handle OSX Bundles.
-  if (this->Target->Target->GetMakefile()->IsOn("APPLE") &&
+  if (this->Target->IsApple() &&
       this->Target->GetPropertyAsBool("MACOSX_BUNDLE")) {
     return;
   }
@@ -796,7 +833,7 @@ void cmInstallTargetGenerator::AddStripRule(std::ostream& os, Indent indent,
   std::string stripArgs;
 
   // macOS 'strip' is picky, executables need '-u -r' and dylibs need '-x'.
-  if (this->Target->Target->GetMakefile()->IsOn("APPLE")) {
+  if (this->Target->IsApple()) {
     if (this->Target->GetType() == cmStateEnums::SHARED_LIBRARY ||
         this->Target->GetType() == cmStateEnums::MODULE_LIBRARY) {
       stripArgs = "-x ";
@@ -822,7 +859,7 @@ void cmInstallTargetGenerator::AddRanlibRule(std::ostream& os, Indent indent,
 
   // Perform post-installation processing on the file depending
   // on its type.
-  if (!this->Target->Target->GetMakefile()->IsOn("APPLE")) {
+  if (!this->Target->IsApple()) {
     return;
   }
 

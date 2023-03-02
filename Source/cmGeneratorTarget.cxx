@@ -458,6 +458,11 @@ std::string const& cmGeneratorTarget::GetSafeProperty(
 const char* cmGeneratorTarget::GetOutputTargetType(
   cmStateEnums::ArtifactType artifact) const
 {
+  if (this->IsFrameworkOnApple() || this->GetGlobalGenerator()->IsXcode()) {
+    // import file (i.e. .tbd file) is always in same location as library
+    artifact = cmStateEnums::RuntimeBinaryArtifact;
+  }
+
   switch (this->GetType()) {
     case cmStateEnums::SHARED_LIBRARY:
       if (this->IsDLLPlatform()) {
@@ -470,9 +475,15 @@ const char* cmGeneratorTarget::GetOutputTargetType(
             return "ARCHIVE";
         }
       } else {
-        // For non-DLL platforms shared libraries are treated as
-        // library targets.
-        return "LIBRARY";
+        switch (artifact) {
+          case cmStateEnums::RuntimeBinaryArtifact:
+            // For non-DLL platforms shared libraries are treated as
+            // library targets.
+            return "LIBRARY";
+          case cmStateEnums::ImportLibraryArtifact:
+            // Library import libraries are treated as archive targets.
+            return "ARCHIVE";
+        }
       }
       break;
     case cmStateEnums::STATIC_LIBRARY:
@@ -2518,7 +2529,8 @@ bool cmGeneratorTarget::CanGenerateInstallNameDir(
   return !skip;
 }
 
-std::string cmGeneratorTarget::GetSOName(const std::string& config) const
+std::string cmGeneratorTarget::GetSOName(
+  const std::string& config, cmStateEnums::ArtifactType artifact) const
 {
   if (this->IsImported()) {
     // Lookup the imported soname.
@@ -2546,7 +2558,9 @@ std::string cmGeneratorTarget::GetSOName(const std::string& config) const
     return "";
   }
   // Compute the soname that will be built.
-  return this->GetLibraryNames(config).SharedObject;
+  return artifact == cmStateEnums::RuntimeBinaryArtifact
+    ? this->GetLibraryNames(config).SharedObject
+    : this->GetLibraryNames(config).ImportLibrary;
 }
 
 namespace {
@@ -3074,6 +3088,16 @@ void cmGeneratorTarget::ComputeModuleDefinitionInfo(
   }
 }
 
+bool cmGeneratorTarget::IsAIX() const
+{
+  return this->Target->IsAIX();
+}
+
+bool cmGeneratorTarget::IsApple() const
+{
+  return this->Target->IsApple();
+}
+
 bool cmGeneratorTarget::IsDLLPlatform() const
 {
   return this->Target->IsDLLPlatform();
@@ -3412,7 +3436,7 @@ std::string cmGeneratorTarget::GetCompilePDBDirectory(
 void cmGeneratorTarget::GetAppleArchs(const std::string& config,
                                       std::vector<std::string>& archVec) const
 {
-  if (!this->Makefile->IsOn("APPLE")) {
+  if (!this->IsApple()) {
     return;
   }
   cmValue archs = nullptr;
@@ -3910,7 +3934,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetIncludeDirectories(
   AddInterfaceEntries(this, config, "INTERFACE_INCLUDE_DIRECTORIES", lang,
                       &dagChecker, entries, IncludeRuntimeInterface::Yes);
 
-  if (this->Makefile->IsOn("APPLE")) {
+  if (this->IsApple()) {
     if (cmLinkImplementationLibraries const* impl =
           this->GetLinkImplementationLibraries(config,
                                                LinkInterfaceFor::Usage)) {
@@ -5078,10 +5102,18 @@ void cmGeneratorTarget::ComputeTargetManifest(const std::string& config) const
     f = cmStrCat(dir, '/', targetNames.PDB);
     gg->AddToManifest(f);
   }
+
+  dir = this->GetDirectory(config, cmStateEnums::ImportLibraryArtifact);
+  if (!targetNames.ImportOutput.empty()) {
+    f = cmStrCat(dir, '/', targetNames.ImportOutput);
+    gg->AddToManifest(f);
+  }
   if (!targetNames.ImportLibrary.empty()) {
-    f =
-      cmStrCat(this->GetDirectory(config, cmStateEnums::ImportLibraryArtifact),
-               '/', targetNames.ImportLibrary);
+    f = cmStrCat(dir, '/', targetNames.ImportLibrary);
+    gg->AddToManifest(f);
+  }
+  if (!targetNames.ImportReal.empty()) {
+    f = cmStrCat(dir, '/', targetNames.ImportReal);
     gg->AddToManifest(f);
   }
 }
@@ -5201,14 +5233,20 @@ std::string cmGeneratorTarget::NormalGetFullPath(
       }
       break;
     case cmStateEnums::ImportLibraryArtifact:
-      fpath += this->GetFullName(config, cmStateEnums::ImportLibraryArtifact);
+      if (realname) {
+        fpath +=
+          this->NormalGetRealName(config, cmStateEnums::ImportLibraryArtifact);
+      } else {
+        fpath +=
+          this->GetFullName(config, cmStateEnums::ImportLibraryArtifact);
+      }
       break;
   }
   return fpath;
 }
 
 std::string cmGeneratorTarget::NormalGetRealName(
-  const std::string& config) const
+  const std::string& config, cmStateEnums::ArtifactType artifact) const
 {
   // This should not be called for imported targets.
   // TODO: Split cmTarget into a class hierarchy to get compile-time
@@ -5219,12 +5257,13 @@ std::string cmGeneratorTarget::NormalGetRealName(
     this->LocalGenerator->IssueMessage(MessageType::INTERNAL_ERROR, msg);
   }
 
-  if (this->GetType() == cmStateEnums::EXECUTABLE) {
-    // Compute the real name that will be built.
-    return this->GetExecutableNames(config).Real;
-  }
+  Names names = this->GetType() == cmStateEnums::EXECUTABLE
+    ? this->GetExecutableNames(config)
+    : this->GetLibraryNames(config);
+
   // Compute the real name that will be built.
-  return this->GetLibraryNames(config).Real;
+  return artifact == cmStateEnums::RuntimeBinaryArtifact ? names.Real
+                                                         : names.ImportReal;
 }
 
 cmGeneratorTarget::Names cmGeneratorTarget::GetLibraryNames(
@@ -5269,17 +5308,16 @@ cmGeneratorTarget::Names cmGeneratorTarget::GetLibraryNames(
   // The library name.
   targetNames.Base = components.base;
   targetNames.Output =
-    components.prefix + targetNames.Base + components.suffix;
+    cmStrCat(components.prefix, targetNames.Base, components.suffix);
 
   if (this->IsFrameworkOnApple()) {
     targetNames.Real = components.prefix;
     if (!this->Makefile->PlatformIsAppleEmbedded()) {
-      targetNames.Real += "Versions/";
-      targetNames.Real += this->GetFrameworkVersion();
-      targetNames.Real += "/";
+      targetNames.Real +=
+        cmStrCat("Versions/", this->GetFrameworkVersion(), '/');
     }
-    targetNames.Real += targetNames.Base + components.suffix;
-    targetNames.SharedObject = targetNames.Real + components.suffix;
+    targetNames.Real += cmStrCat(targetNames.Base, components.suffix);
+    targetNames.SharedObject = targetNames.Real;
   } else {
     // The library's soname.
     this->ComputeVersionedName(targetNames.SharedObject, components.prefix,
@@ -5292,11 +5330,36 @@ cmGeneratorTarget::Names cmGeneratorTarget::GetLibraryNames(
                                targetNames.Output, version);
   }
 
-  // The import library name.
+  // The import library names.
   if (this->GetType() == cmStateEnums::SHARED_LIBRARY ||
       this->GetType() == cmStateEnums::MODULE_LIBRARY) {
-    targetNames.ImportLibrary =
-      this->GetFullNameInternal(config, cmStateEnums::ImportLibraryArtifact);
+    NameComponents const& importComponents =
+      this->GetFullNameInternalComponents(config,
+                                          cmStateEnums::ImportLibraryArtifact);
+    targetNames.ImportOutput = cmStrCat(
+      importComponents.prefix, importComponents.base, importComponents.suffix);
+
+    if (this->IsFrameworkOnApple() && this->IsSharedLibraryWithExports()) {
+      targetNames.ImportReal = components.prefix;
+      if (!this->Makefile->PlatformIsAppleEmbedded()) {
+        targetNames.ImportReal +=
+          cmStrCat("Versions/", this->GetFrameworkVersion(), '/');
+      }
+      targetNames.ImportReal +=
+        cmStrCat(importComponents.base, importComponents.suffix);
+      targetNames.ImportLibrary = targetNames.ImportOutput;
+    } else {
+      // The import library's soname.
+      this->ComputeVersionedName(
+        targetNames.ImportLibrary, importComponents.prefix,
+        importComponents.base, importComponents.suffix,
+        targetNames.ImportOutput, soversion);
+
+      // The import library's real name on disk.
+      this->ComputeVersionedName(
+        targetNames.ImportReal, importComponents.prefix, importComponents.base,
+        importComponents.suffix, targetNames.ImportOutput, version);
+    }
   }
 
   // The program database file name.
@@ -5358,6 +5421,8 @@ cmGeneratorTarget::Names cmGeneratorTarget::GetExecutableNames(
   // The import library name.
   targetNames.ImportLibrary =
     this->GetFullNameInternal(config, cmStateEnums::ImportLibraryArtifact);
+  targetNames.ImportReal = targetNames.ImportLibrary;
+  targetNames.ImportOutput = targetNames.ImportLibrary;
 
   // The program database file name.
   targetNames.PDB = this->GetPDBName(config);
@@ -5439,15 +5504,18 @@ cmGeneratorTarget::GetFullNameInternalComponents(
   }
 
   // Compute the full name for main target types.
-  const std::string configPostfix = this->GetFilePostfix(config);
+  std::string configPostfix = this->GetFilePostfix(config);
 
-  // frameworks have directory prefix but no suffix
+  // frameworks have directory prefix
   std::string fw_prefix;
   if (this->IsFrameworkOnApple()) {
     fw_prefix =
       cmStrCat(this->GetFrameworkDirectory(config, ContentLevel), '/');
     targetPrefix = cmValue(fw_prefix);
-    targetSuffix = nullptr;
+    if (!isImportedLibraryArtifact) {
+      // no suffix
+      targetSuffix = nullptr;
+    }
   }
 
   if (this->IsCFBundleOnApple()) {
@@ -5466,8 +5534,8 @@ cmGeneratorTarget::GetFullNameInternalComponents(
   // When using Xcode, the postfix should be part of the suffix rather than
   // the base, because the suffix ends up being used in Xcode's
   // EXECUTABLE_SUFFIX attribute.
-  if (this->IsFrameworkOnApple() &&
-      this->GetGlobalGenerator()->GetName() == "Xcode") {
+  if (this->IsFrameworkOnApple() && this->GetGlobalGenerator()->IsXcode()) {
+    configPostfix += *targetSuffix;
     targetSuffix = cmValue(configPostfix);
   } else {
     outBase += configPostfix;
@@ -6763,12 +6831,12 @@ void cmGeneratorTarget::ComputeVersionedName(
   std::string& vName, std::string const& prefix, std::string const& base,
   std::string const& suffix, std::string const& name, cmValue version) const
 {
-  vName = this->Makefile->IsOn("APPLE") ? (prefix + base) : name;
+  vName = this->IsApple() ? (prefix + base) : name;
   if (version) {
     vName += ".";
     vName += *version;
   }
-  vName += this->Makefile->IsOn("APPLE") ? suffix : std::string();
+  vName += this->IsApple() ? suffix : std::string();
 }
 
 std::vector<std::string> cmGeneratorTarget::GetPropertyKeys() const
@@ -8537,19 +8605,38 @@ bool cmGeneratorTarget::HasContextDependentSources() const
 
 bool cmGeneratorTarget::IsExecutableWithExports() const
 {
-  return (this->GetType() == cmStateEnums::EXECUTABLE &&
-          this->GetPropertyAsBool("ENABLE_EXPORTS"));
+  return this->Target->IsExecutableWithExports();
+}
+
+bool cmGeneratorTarget::IsSharedLibraryWithExports() const
+{
+  return this->Target->IsSharedLibraryWithExports();
 }
 
 bool cmGeneratorTarget::HasImportLibrary(std::string const& config) const
 {
+  bool generate_Stubs = true;
+  if (this->GetGlobalGenerator()->IsXcode()) {
+    // take care of CMAKE_XCODE_ATTRIBUTE_GENERATE_TEXT_BASED_STUBS variable
+    // as well as XCODE_ATTRIBUTE_GENERATE_TEXT_BASED_STUBS property
+    if (cmValue propGenStubs =
+          this->GetProperty("XCODE_ATTRIBUTE_GENERATE_TEXT_BASED_STUBS")) {
+      generate_Stubs = propGenStubs == "YES";
+    } else if (cmValue varGenStubs = this->Makefile->GetDefinition(
+                 "CMAKE_XCODE_ATTRIBUTE_GENERATE_TEXT_BASED_STUBS")) {
+      generate_Stubs = varGenStubs == "YES";
+    }
+  }
+
   return (this->IsDLLPlatform() &&
           (this->GetType() == cmStateEnums::SHARED_LIBRARY ||
            this->IsExecutableWithExports()) &&
           // Assemblies which have only managed code do not have
           // import libraries.
           this->GetManagedType(config) != ManagedType::Managed) ||
-    (this->Target->IsAIX() && this->IsExecutableWithExports());
+    (this->IsAIX() && this->IsExecutableWithExports()) ||
+    (this->Makefile->PlatformSupportsAppleTextStubs() &&
+     this->IsSharedLibraryWithExports() && generate_Stubs);
 }
 
 bool cmGeneratorTarget::NeedImportLibraryName(std::string const& config) const
@@ -8587,17 +8674,12 @@ bool cmGeneratorTarget::IsLinkable() const
 
 bool cmGeneratorTarget::IsFrameworkOnApple() const
 {
-  return ((this->GetType() == cmStateEnums::SHARED_LIBRARY ||
-           this->GetType() == cmStateEnums::STATIC_LIBRARY) &&
-          this->Makefile->IsOn("APPLE") &&
-          this->GetPropertyAsBool("FRAMEWORK"));
+  return this->Target->IsFrameworkOnApple();
 }
 
 bool cmGeneratorTarget::IsAppBundleOnApple() const
 {
-  return (this->GetType() == cmStateEnums::EXECUTABLE &&
-          this->Makefile->IsOn("APPLE") &&
-          this->GetPropertyAsBool("MACOSX_BUNDLE"));
+  return this->Target->IsAppBundleOnApple();
 }
 
 bool cmGeneratorTarget::IsXCTestOnApple() const
@@ -8607,8 +8689,8 @@ bool cmGeneratorTarget::IsXCTestOnApple() const
 
 bool cmGeneratorTarget::IsCFBundleOnApple() const
 {
-  return (this->GetType() == cmStateEnums::MODULE_LIBRARY &&
-          this->Makefile->IsOn("APPLE") && this->GetPropertyAsBool("BUNDLE"));
+  return (this->GetType() == cmStateEnums::MODULE_LIBRARY && this->IsApple() &&
+          this->GetPropertyAsBool("BUNDLE"));
 }
 
 cmGeneratorTarget::ManagedType cmGeneratorTarget::CheckManagedType(

@@ -273,7 +273,9 @@ public:
   std::string NormalGetFullPath(const std::string& config,
                                 cmStateEnums::ArtifactType artifact,
                                 bool realname) const;
-  std::string NormalGetRealName(const std::string& config) const;
+  std::string NormalGetRealName(const std::string& config,
+                                cmStateEnums::ArtifactType artifact =
+                                  cmStateEnums::RuntimeBinaryArtifact) const;
 
   /** Get the names of an object library's object files underneath
       its object file directory.  */
@@ -348,7 +350,9 @@ public:
   const std::string* GetExportMacro() const;
 
   /** Get the soname of the target.  Allowed only for a shared library.  */
-  std::string GetSOName(const std::string& config) const;
+  std::string GetSOName(const std::string& config,
+                        cmStateEnums::ArtifactType artifact =
+                          cmStateEnums::RuntimeBinaryArtifact) const;
 
   struct NameComponents
   {
@@ -388,6 +392,11 @@ public:
   };
   ModuleDefinitionInfo const* GetModuleDefinitionInfo(
     std::string const& config) const;
+
+  /** Return whether or not we are targeting AIX. */
+  bool IsAIX() const;
+  /** Return whether or not we are targeting Apple. */
+  bool IsApple() const;
 
   /** Return whether or not the target is for a DLL platform.  */
   bool IsDLLPlatform() const;
@@ -735,6 +744,8 @@ public:
     std::string Base;
     std::string Output;
     std::string Real;
+    std::string ImportOutput;
+    std::string ImportReal;
     std::string ImportLibrary;
     std::string PDB;
     std::string SharedObject;
@@ -780,6 +791,10 @@ public:
   bool HasContextDependentSources() const;
 
   bool IsExecutableWithExports() const;
+
+  /* Return whether this target is a shared library with capability to generate
+   * a file describing symbols exported (for example, .tbd file on Apple). */
+  bool IsSharedLibraryWithExports() const;
 
   /** Return whether or not the target has a DLL import library.  */
   bool HasImportLibrary(std::string const& config) const;

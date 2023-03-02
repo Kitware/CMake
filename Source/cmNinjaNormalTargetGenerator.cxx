@@ -204,6 +204,15 @@ std::string cmNinjaNormalTargetGenerator::LanguageLinkerCudaFatbinaryRule(
     '_', config);
 }
 
+std::string cmNinjaNormalTargetGenerator::TextStubsGeneratorRule(
+  const std::string& config) const
+{
+  return cmStrCat(
+    "TEXT_STUBS_GENERATOR__",
+    cmGlobalNinjaGenerator::EncodeRuleName(this->GeneratorTarget->GetName()),
+    '_', config);
+}
+
 struct cmNinjaRemoveNoOpCommands
 {
   bool operator()(std::string const& cmd)
@@ -525,6 +534,45 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile,
       rule.Description = "Creating library symlink $out";
       rule.Comment = "Rule for creating library symlink.";
       this->GetGlobalGenerator()->AddRule(rule);
+    }
+  }
+
+  if (this->GetGeneratorTarget()->IsApple() &&
+      this->GetGeneratorTarget()->HasImportLibrary(config)) {
+    cmNinjaRule rule(this->TextStubsGeneratorRule(config));
+    rule.Comment = cmStrCat("Rule for generating text-based stubs for ",
+                            this->GetVisibleTypeName(), '.');
+    rule.Description = "Creating text-based stubs $out";
+
+    std::string cmd =
+      this->GetMakefile()->GetDefinition("CMAKE_CREATE_TEXT_STUBS");
+    std::unique_ptr<cmRulePlaceholderExpander> rulePlaceholderExpander(
+      this->GetLocalGenerator()->CreateRulePlaceholderExpander());
+    cmRulePlaceholderExpander::RuleVariables vars;
+    vars.Target = "$in";
+    rulePlaceholderExpander->SetTargetImpLib("$out");
+    rulePlaceholderExpander->ExpandRuleVariables(this->GetLocalGenerator(),
+                                                 cmd, vars);
+
+    rule.Command =
+      this->GetLocalGenerator()->BuildCommandLine({ cmd }, config, config);
+    this->GetGlobalGenerator()->AddRule(rule);
+
+    if (tgtNames.ImportOutput != tgtNames.ImportReal &&
+        !this->GetGeneratorTarget()->IsFrameworkOnApple()) {
+      cmNinjaRule slRule("CMAKE_SYMLINK_IMPORT_LIBRARY");
+      {
+        std::string cmakeCommand =
+          this->GetLocalGenerator()->ConvertToOutputFormat(
+            cmSystemTools::GetCMakeCommand(), cmOutputConverter::SHELL);
+        std::string slCmd =
+          cmStrCat(cmakeCommand, " -E cmake_symlink_library $in $SONAME $out");
+        slRule.Command = this->GetLocalGenerator()->BuildCommandLine(
+          { slCmd }, config, config);
+      }
+      slRule.Description = "Creating import library symlink $out";
+      slRule.Comment = "Rule for creating import library symlink.";
+      this->GetGlobalGenerator()->AddRule(slRule);
     }
   }
 }
@@ -1030,8 +1078,11 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
       // the current configuration has a postfix. The non-postfix configuration
       // Info.plist can be used by all the other configurations.
       if (!postFix.empty()) {
-        bundleSkipParts.infoPlist = true;
+        bundleSkipParts.InfoPlist = true;
       }
+    }
+    if (gt->HasImportLibrary(config)) {
+      bundleSkipParts.TextStubs = false;
     }
 
     this->OSXBundleGenerator->CreateFramework(
@@ -1214,7 +1265,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
 
   cmGlobalNinjaGenerator::CCOutputs byproducts(this->GetGlobalGenerator());
 
-  if (!tgtNames.ImportLibrary.empty()) {
+  if (!gt->IsApple() && !tgtNames.ImportLibrary.empty()) {
     const std::string impLibPath = localGen.ConvertToOutputFormat(
       targetOutputImplib, cmOutputConverter::SHELL);
     vars["TARGET_IMPLIB"] = impLibPath;
@@ -1471,6 +1522,55 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
   // Add aliases for the file name and the target name.
   globalGen->AddTargetAlias(tgtNames.Output, gt, config);
   globalGen->AddTargetAlias(this->GetTargetName(), gt, config);
+
+  if (this->GetGeneratorTarget()->IsApple() &&
+      this->GetGeneratorTarget()->HasImportLibrary(config)) {
+    auto dirTBD =
+      gt->GetDirectory(config, cmStateEnums::ImportLibraryArtifact);
+    auto targetTBD =
+      this->ConvertToNinjaPath(cmStrCat(dirTBD, '/', tgtNames.ImportReal));
+    this->EnsureParentDirectoryExists(targetTBD);
+    cmNinjaBuild build(this->TextStubsGeneratorRule(config));
+    build.Comment = cmStrCat("Generate the text-based stubs file ", targetTBD);
+    build.Outputs.push_back(targetTBD);
+    build.ExplicitDeps.push_back(targetOutputReal);
+    globalGen->WriteBuild(this->GetImplFileStream(fileConfig), build);
+
+    if (tgtNames.ImportOutput != tgtNames.ImportReal &&
+        !this->GetGeneratorTarget()->IsFrameworkOnApple()) {
+      auto outputTBD =
+        this->ConvertToNinjaPath(cmStrCat(dirTBD, '/', tgtNames.ImportOutput));
+      std::string const soNameTBD = this->ConvertToNinjaPath(
+        cmStrCat(dirTBD, '/', tgtNames.ImportLibrary));
+
+      cmNinjaBuild slBuild("CMAKE_SYMLINK_IMPORT_LIBRARY");
+      slBuild.Comment = cmStrCat("Create import library symlink ", outputTBD);
+      cmNinjaVars slVars;
+
+      // If one link has to be created.
+      if (targetTBD == soNameTBD || outputTBD == soNameTBD) {
+        slVars["SONAME"] = this->GetLocalGenerator()->ConvertToOutputFormat(
+          soNameTBD, cmOutputConverter::SHELL);
+      } else {
+        slVars["SONAME"].clear();
+        slBuild.Outputs.push_back(soNameTBD);
+        if (firstForConfig) {
+          globalGen->GetByproductsForCleanTarget(config).push_back(soNameTBD);
+        }
+      }
+      slBuild.Outputs.push_back(outputTBD);
+      if (firstForConfig) {
+        globalGen->GetByproductsForCleanTarget(config).push_back(outputTBD);
+      }
+      slBuild.ExplicitDeps.push_back(targetTBD);
+      slBuild.Variables = std::move(slVars);
+
+      globalGen->WriteBuild(this->GetImplFileStream(fileConfig), slBuild);
+    }
+
+    // Add alias for the import file name
+    globalGen->AddTargetAlias(tgtNames.ImportOutput, gt, config);
+  }
 }
 
 void cmNinjaNormalTargetGenerator::WriteObjectLibStatement(

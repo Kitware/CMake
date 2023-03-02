@@ -409,7 +409,7 @@ void cmExportInstallFileGenerator::SetImportLocationProperty(
 
     // Append the installed file name.
     value += cmInstallTargetGenerator::GetInstallFilename(
-      target, config, cmInstallTargetGenerator::NameImplib);
+      target, config, cmInstallTargetGenerator::NameImplibReal);
 
     // Store the property.
     properties[prop] = value;
@@ -430,6 +430,19 @@ void cmExportInstallFileGenerator::SetImportLocationProperty(
     properties[prop] = cmJoin(objects, ";");
     importedLocations.insert(prop);
   } else {
+    if (target->IsFrameworkOnApple() && target->HasImportLibrary(config)) {
+      // store as well IMPLIB value
+      auto importProp = cmStrCat("IMPORTED_IMPLIB", suffix);
+      auto importValue =
+        cmStrCat(value,
+                 cmInstallTargetGenerator::GetInstallFilename(
+                   target, config, cmInstallTargetGenerator::NameImplibReal));
+
+      // Store the property.
+      properties[importProp] = importValue;
+      importedLocations.insert(importProp);
+    }
+
     // Construct the property name.
     std::string prop = cmStrCat("IMPORTED_LOCATION", suffix);
 

@@ -1270,6 +1270,10 @@ void cmGlobalNinjaGenerator::AppendTargetOutputs(
     }
       CM_FALLTHROUGH;
     case cmStateEnums::EXECUTABLE: {
+      if (target->IsApple() && target->HasImportLibrary(config)) {
+        outputs.push_back(this->ConvertToNinjaPath(target->GetFullPath(
+          config, cmStateEnums::ImportLibraryArtifact, realname)));
+      }
       outputs.push_back(this->ConvertToNinjaPath(target->GetFullPath(
         config, cmStateEnums::RuntimeBinaryArtifact, realname)));
       break;

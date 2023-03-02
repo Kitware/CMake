@@ -158,6 +158,9 @@ that may be installed:
     ``.lib``, in contrast to the ``.dll`` libraries that go to ``RUNTIME``);
   * On AIX, the *linker import file* created for executables with
     :prop_tgt:`ENABLE_EXPORTS` enabled.
+  * On macOS, the *linker import file* created for shared libraries with
+    :prop_tgt:`ENABLE_EXPORTS` enabled (except when marked as ``FRAMEWORK``,
+    see below).
 
 ``LIBRARY``
   Target artifacts of this kind include:
@@ -308,6 +311,11 @@ the following additional arguments:
   value of ``COMPONENT``. It is an error to use this parameter outside of a
   ``LIBRARY`` block.
 
+  .. versionchanged:: 3.27
+    This parameter is also usable for an ``ARCHIVE`` block to manage
+    the linker import file created, on macOS, for shared libraries with
+    :prop_tgt:`ENABLE_EXPORTS` enabled.
+
   Consider the following example:
 
   .. code-block:: cmake
@@ -342,6 +350,11 @@ the following additional arguments:
   option installs nothing. It is an error to use this parameter outside of a
   ``LIBRARY`` block.
 
+  .. versionchanged:: 3.27
+    This parameter is also usable for an ``ARCHIVE`` block to manage
+    the linker import file created, on macOS, for shared libraries with
+    :prop_tgt:`ENABLE_EXPORTS` enabled.
+
   When ``NAMELINK_ONLY`` is given, either ``NAMELINK_COMPONENT`` or
   ``COMPONENT`` may be used to specify the installation component of the
   namelink, but ``COMPONENT`` should generally be preferred.
@@ -354,6 +367,11 @@ the following additional arguments:
   do not have symlinks or when a library is not versioned, ``NAMELINK_SKIP``
   installs the library. It is an error to use this parameter outside of a
   ``LIBRARY`` block.
+
+  .. versionchanged:: 3.27
+    This parameter is also usable for an ``ARCHIVE`` block to manage
+    the linker import file created, on macOS, for shared libraries with
+    :prop_tgt:`ENABLE_EXPORTS` enabled.
 
   If ``NAMELINK_SKIP`` is specified, ``NAMELINK_COMPONENT`` has no effect. It
   is not recommended to use ``NAMELINK_SKIP`` in conjunction with

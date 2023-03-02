@@ -1739,7 +1739,7 @@ void cmGlobalXCodeGenerator::CreateCustomCommands(
     std::string str_so_file =
       cmStrCat("$<TARGET_SONAME_FILE:", gtgt->GetName(), '>');
     std::string str_link_file =
-      cmStrCat("$<TARGET_LINKER_FILE:", gtgt->GetName(), '>');
+      cmStrCat("$<TARGET_LINKER_LIBRARY_FILE:", gtgt->GetName(), '>');
     cmCustomCommandLines cmd = cmMakeSingleCommandLine(
       { cmSystemTools::GetCMakeCommand(), "-E", "cmake_symlink_library",
         str_file, str_so_file, str_link_file });
@@ -1747,6 +1747,27 @@ void cmGlobalXCodeGenerator::CreateCustomCommands(
     cmCustomCommand command;
     command.SetCommandLines(cmd);
     command.SetComment("Creating symlinks");
+    command.SetWorkingDirectory("");
+    command.SetBacktrace(this->CurrentMakefile->GetBacktrace());
+    command.SetStdPipesUTF8(true);
+
+    postbuild.push_back(std::move(command));
+  }
+
+  if (gtgt->HasImportLibrary("") && !gtgt->IsFrameworkOnApple()) {
+    // create symbolic links for .tbd file
+    std::string file = cmStrCat("$<TARGET_IMPORT_FILE:", gtgt->GetName(), '>');
+    std::string soFile =
+      cmStrCat("$<TARGET_SONAME_IMPORT_FILE:", gtgt->GetName(), '>');
+    std::string linkFile =
+      cmStrCat("$<TARGET_LINKER_IMPORT_FILE:", gtgt->GetName(), '>');
+    cmCustomCommandLines symlink_command = cmMakeSingleCommandLine(
+      { cmSystemTools::GetCMakeCommand(), "-E", "cmake_symlink_library", file,
+        soFile, linkFile });
+
+    cmCustomCommand command;
+    command.SetCommandLines(symlink_command);
+    command.SetComment("Creating import symlinks");
     command.SetWorkingDirectory("");
     command.SetBacktrace(this->CurrentMakefile->GetBacktrace());
     command.SetStdPipesUTF8(true);
@@ -2682,6 +2703,12 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
 
       buildSettings->AddAttribute("LIBRARY_STYLE",
                                   this->CreateString("DYNAMIC"));
+
+      if (gtgt->HasImportLibrary(configName)) {
+        // Request .tbd file generation
+        buildSettings->AddAttribute("GENERATE_TEXT_BASED_STUBS",
+                                    this->CreateString("YES"));
+      }
       break;
     }
     case cmStateEnums::EXECUTABLE: {

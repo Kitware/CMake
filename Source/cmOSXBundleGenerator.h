@@ -20,11 +20,10 @@ public:
 
   struct SkipParts
   {
-    SkipParts()
-      : infoPlist(false)
-    {
-    }
-    bool infoPlist; // NOLINT(modernize-use-default-member-init)
+    SkipParts() {} // NOLINT(modernize-use-equals-default)
+
+    bool InfoPlist = false;
+    bool TextStubs = true;
   };
 
   // create an app bundle at a given root, and return
@@ -35,7 +34,7 @@ public:
   // create a framework at a given root
   void CreateFramework(const std::string& targetName, const std::string& root,
                        const std::string& config,
-                       const SkipParts& skipParts = SkipParts());
+                       const SkipParts& skipParts = SkipParts{});
 
   // create a cf bundle at a given root
   void CreateCFBundle(const std::string& targetName, const std::string& root,
