@@ -1922,7 +1922,9 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
 
   List of DLLs that the target depends on at runtime. This is determined by
   the locations of all the ``SHARED`` targets in the target's transitive
-  dependencies. Using this generator expression on targets other than
+  dependencies. If only the directories of the DLLs are needed, see the
+  :genex:`TARGET_RUNTIME_DLL_DIRS` generator expression.
+  Using this generator expression on targets other than
   executables, ``SHARED`` libraries, and ``MODULE`` libraries is an error.
   **On non-DLL platforms, this expression always evaluates to an empty string**.
 
@@ -1953,6 +1955,20 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
 On platforms that support runtime paths (``RPATH``), refer to the
 :prop_tgt:`INSTALL_RPATH` target property.
 On Apple platforms, refer to the :prop_tgt:`INSTALL_NAME_DIR` target property.
+
+.. genex:: $<TARGET_RUNTIME_DLL_DIRS:tgt>
+
+  .. versionadded:: 3.27
+
+  List of the directories which contain the DLLs that the target depends on at
+  runtime (see :genex:`TARGET_RUNTIME_DLLS`). This is determined by
+  the locations of all the ``SHARED`` targets in the target's transitive
+  dependencies. Using this generator expression on targets other than
+  executables, ``SHARED`` libraries, and ``MODULE`` libraries is an error.
+  **On non-DLL platforms, this expression always evaluates to an empty string**.
+
+  This generator expression can e.g. be used to create a batch file using
+  :command:`file(GENERATE)` which sets the PATH environment variable accordingly.
 
 Export And Install Expressions
 ------------------------------
