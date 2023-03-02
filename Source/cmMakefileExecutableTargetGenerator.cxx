@@ -185,14 +185,15 @@ void cmMakefileExecutableTargetGenerator::WriteNvidiaDeviceExecutableRule(
     std::string linkLibs;
     this->CreateLinkLibs(
       linkLineComputer.get(), linkLibs, useResponseFileForLibs, depends,
-      cmMakefileTargetGenerator::ResponseFlagFor::DeviceLink);
+      linkLanguage, cmMakefileTargetGenerator::ResponseFlagFor::DeviceLink);
 
     // Construct object file lists that may be needed to expand the
     // rule.
     std::string buildObjs;
     this->CreateObjectLists(
       useLinkScript, false, useResponseFileForObjects, buildObjs, depends,
-      false, cmMakefileTargetGenerator::ResponseFlagFor::DeviceLink);
+      false, linkLanguage,
+      cmMakefileTargetGenerator::ResponseFlagFor::DeviceLink);
 
     cmRulePlaceholderExpander::RuleVariables vars;
     std::string objectDir = this->GeneratorTarget->GetSupportDirectory();
@@ -503,13 +504,13 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     // Collect up flags to link in needed libraries.
     std::string linkLibs;
     this->CreateLinkLibs(linkLineComputer.get(), linkLibs,
-                         useResponseFileForLibs, depends);
+                         useResponseFileForLibs, depends, linkLanguage);
 
     // Construct object file lists that may be needed to expand the
     // rule.
     std::string buildObjs;
     this->CreateObjectLists(useLinkScript, false, useResponseFileForObjects,
-                            buildObjs, depends, useWatcomQuote);
+                            buildObjs, depends, useWatcomQuote, linkLanguage);
     if (!this->DeviceLinkObject.empty()) {
       buildObjs += " " +
         this->LocalGenerator->ConvertToOutputFormat(
