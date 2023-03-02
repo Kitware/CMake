@@ -147,6 +147,7 @@ endfunction()
 __ep_test_with_build(MultiCommand)
 
 set(RunCMake_TEST_OUTPUT_MERGE 1)
+__ep_test_with_build(InstallBuilds)
 __ep_test_with_build(PreserveEmptyArgs)
 set(RunCMake_TEST_OUTPUT_MERGE 0)
 
