@@ -1,5 +1,5 @@
 ^prop: `0`
-CMake Error at CMP0118-Common-Test1\.cmake:[0-9]+ \(add_custom_target\):
+CMake Error at CMP0118-Common-Test1\.cmake:[0-9]+ \(target_sources\):
   Cannot find source file:
 
 [ \t]*.*Tests/RunCMake/CMP0118/CMP0118-NEW-Test1-build/GeneratedMain\.txt
