@@ -530,6 +530,9 @@ of alphanumeric characters plus ``_`` and ``-``.
 Variables have dynamic scope.  Each variable "set" or "unset"
 creates a binding in the current scope:
 
+Block Scope
+ The :command:`block` command may create a new scope for variable bindings.
+
 Function Scope
  `Command Definitions`_ created by the :command:`function` command
  create commands that, when invoked, process the recorded commands
