@@ -11,6 +11,12 @@ Test project .*
  *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.typed\.case<float>!4 \.+ +Passed +[0-9.]+ sec
  *Start +[0-9]+: TEST:ns\.typed\.case<char>!4
  *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.typed\.case<char>!4 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:prefix/typed\.case<short>!4
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:prefix/typed\.case<short>!4 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:prefix/typed\.case<float>!4
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:prefix/typed\.case<float>!4 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:prefix/typed\.case<char>!4
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:prefix/typed\.case<char>!4 \.+ +Passed +[0-9.]+ sec
 
 100% tests passed, 0 tests failed out of [0-9]+
 
