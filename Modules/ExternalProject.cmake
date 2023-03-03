@@ -1857,11 +1857,7 @@ function(_ep_get_build_command
       else()
         set(cmd "${CMAKE_COMMAND}")
       endif()
-      if(step STREQUAL "INSTALL")
-        set(args --install ".")
-      else()
-        set(args --build ".")
-      endif()
+      set(args --build ".")
       get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
       if(_isMultiConfig)
         if (CMAKE_CFG_INTDIR AND
@@ -1882,6 +1878,9 @@ function(_ep_get_build_command
           set(config $<CONFIG>)
         endif()
         list(APPEND args --config ${config})
+      endif()
+      if(step STREQUAL "INSTALL")
+        list(APPEND args --target install)
       endif()
       # But for "TEST" drive the project with corresponding "ctest".
       if("x${step}x" STREQUAL "xTESTx")
