@@ -100,11 +100,11 @@ source files for the library are passed as an argument to
 
   <details><summary>TODO 1: Click to show/hide answer</summary>
 
-.. literalinclude:: Step3/MathFunctions/CMakeLists.txt
+.. code-block:: cmake
   :caption: TODO 1: MathFunctions/CMakeLists.txt
   :name: MathFunctions/CMakeLists.txt-add_library
-  :language: cmake
-  :end-before: # TODO 1
+
+  add_library(MathFunctions MathFunctions.cxx mysqrt.cxx)
 
 .. raw:: html
 
@@ -191,7 +191,7 @@ Lastly, replace ``sqrt`` with our library function ``mathfunctions::mysqrt``.
   <details><summary>TODO 6: Click to show/hide answer</summary>
 
 .. literalinclude:: Step3/tutorial.cxx
-  :caption: TODO 7: tutorial.cxx
+  :caption: TODO 6: tutorial.cxx
   :name: CMakeLists.txt-option
   :language: cmake
   :start-after:   const double inputValue = std::stod(argv[1]);
@@ -238,7 +238,7 @@ Getting Started
 ---------------
 
 Start with the resulting files from Exercise 1. Complete ``TODO 7`` through
-``TODO 9``.
+``TODO 14``.
 
 First create a variable ``USE_MYMATH`` using the :command:`option` command
 in ``MathFunctions/CMakeLists.txt``. In that same file, use that option
@@ -246,6 +246,10 @@ to pass a compile definition to the ``MathFunctions`` library.
 
 Then, update ``MathFunctions.cxx`` to redirect compilation based on
 ``USE_MYMATH``.
+
+Lastly, prevent ``mysqrt.cxx`` from being compiled when ``USE_MYMATH`` is on
+by making it its own library inside of the ``USE_MYMATH`` block of
+``MathFunctions/CMakeLists.txt``.
 
 Build and Run
 -------------
@@ -315,15 +319,21 @@ definition ``USE_MYMATH``.
 
   <details><summary>TODO 8: Click to show/hide answer</summary>
 
-.. literalinclude:: Step3/MathFunctions/CMakeLists.txt
+.. code-block:: cmake
   :caption: TODO 8: MathFunctions/CMakeLists.txt
   :name: CMakeLists.txt-USE_MYMATH
-  :language: cmake
-  :start-after: USE_MYMATH "Use tutorial provided math implementation" ON)
+
+  if (USE_MYMATH)
+    target_compile_definitions(MathFunctions PRIVATE "USE_MYMATH")
+  endif()
 
 .. raw:: html
 
   </details>
+
+When ``USE_MYMATH`` is ``ON``, the compile definition ``USE_MYMATH`` will
+be set. We can then use this compile definition to enable or disable
+sections of our source code.
 
 The corresponding changes to the source code are fairly straightforward.
 In ``MathFunctions.cxx``, we make ``USE_MYMATH`` control which square root
@@ -377,10 +387,68 @@ Finally, we need to include ``cmath`` now that we are using ``std::sqrt``.
 
   </details>
 
-When ``USE_MYMATH`` is ``ON``, the compile definition ``USE_MYMATH`` will
-be set. We can then use this compile definition to enable or disable
-sections of our source code. With this strategy, we allow users to
-toggle ``USE_MYMATH`` to manipulate what library is used in the build.
+At this point, if ``USE_MYMATH`` is ``OFF``, ``mysqrt.cxx`` would not be used
+but it will still be compiled because the ``MathFunctions`` target has
+``mysqrt.cxx`` listed under sources.
+
+There are a few ways to fix this. The first option is to use
+:command:`target_sources` to add ``mysqrt.cxx`` from within the ``USE_MYMATH``
+block. Another option is to create an additional library within the
+``USE_MYMATH`` block which is responsible for compiling ``mysqrt.cxx``. For
+the sake of this tutorial, we are going to create an additional library.
+
+First, from within ``USE_MYMATH`` create a library called ``SqrtLibrary``
+that has sources ``mysqrt.cxx``.
+
+.. raw:: html
+
+  <details><summary>TODO 12: Click to show/hide answer</summary>
+
+.. literalinclude:: Step3/MathFunctions/CMakeLists.txt
+  :caption: TODO 12 : MathFunctions/CMakeLists.txt
+  :name: MathFunctions/CMakeLists.txt-add_library-SqrtLibrary
+  :language: cmake
+  :start-after: # library that just does sqrt
+  :end-before: target_link_libraries(MathFunctions
+
+.. raw:: html
+
+  </details>
+
+Next, we link ``SqrtLibrary`` onto ``MathFunctions`` when ``USE_MYMATH`` is
+enabled.
+
+.. raw:: html
+
+  <details><summary>TODO 13: Click to show/hide answer</summary>
+
+.. literalinclude:: Step3/MathFunctions/CMakeLists.txt
+  :caption: TODO 13 : MathFunctions/CMakeLists.txt
+  :name: MathFunctions/CMakeLists.txt-target_link_libraries-SqrtLibrary
+  :language: cmake
+  :lines: 16-18
+
+.. raw:: html
+
+  </details>
+
+Finally, we can remove ``mysqrt.cxx`` from our ``MathFunctions`` library
+source list because it will be pulled in when ``SqrtLibrary`` is included.
+
+.. raw:: html
+
+  <details><summary>TODO 14: Click to show/hide answer</summary>
+
+.. literalinclude:: Step3/MathFunctions/CMakeLists.txt
+  :caption: TODO 14 : MathFunctions/CMakeLists.txt
+  :name: MathFunctions/CMakeLists.txt-remove-mysqrt.cxx-MathFunctions
+  :language: cmake
+  :end-before: # TODO 1:
+
+.. raw:: html
+
+  </details>
 
 With these changes, the ``mysqrt`` function is now completely optional to
-whoever is building and using the ``MathFunctions`` library.
+whoever is building and using the ``MathFunctions`` library. Users can toggle
+``USE_MYMATH`` to manipulate what library is used in the build.
