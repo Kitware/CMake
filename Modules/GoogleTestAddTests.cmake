@@ -134,7 +134,7 @@ function(gtest_discover_tests_impl)
         # Module; remove trailing '.' to get just the name...
         string(REGEX REPLACE "\\.( *#.*)?$" "" suite "${line}")
         if(line MATCHES "#")
-          string(REGEX REPLACE "/.*" "" pretty_suite "${line}")
+          string(REGEX REPLACE "/[0-9].*" "" pretty_suite "${line}")
           if(NOT _NO_PRETTY_TYPES)
             string(REGEX REPLACE ".*/[0-9]+[ .#]+TypeParam = (.*)" "\\1" type_parameter "${line}")
           else()
