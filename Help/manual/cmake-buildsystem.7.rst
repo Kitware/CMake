@@ -37,6 +37,8 @@ is defined as an executable formed by compiling and linking ``zipapp.cpp``.
 When linking the ``zipapp`` executable, the ``archive`` static library is
 linked in.
 
+.. _`Binary Executables`:
+
 Binary Executables
 ------------------
 
