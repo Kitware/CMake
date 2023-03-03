@@ -137,6 +137,12 @@ Result variables
 ``Matlab_FOUND``
   ``TRUE`` if the Matlab installation is found, ``FALSE``
   otherwise. All variable below are defined if Matlab is found.
+``Matlab_VERSION``
+  .. versionadded:: 3.27
+
+  the numerical version (e.g. 9.13) of Matlab found. Not to be confused with
+  Matlab release name (e.g. R2022b) that can be obtained with
+  :command:`matlab_get_release_name_from_version`.
 ``Matlab_ROOT_DIR``
   the final root of the Matlab installation determined by the FindMatlab
   module.
@@ -2020,11 +2026,13 @@ _Matlab_add_imported_target(MAT mat)
 _Matlab_add_imported_target(ENGINE MatlabEngine)
 _Matlab_add_imported_target(DATAARRAY MatlabDataArray)
 
+set(Matlab_VERSION ${Matlab_VERSION_STRING})
+
 find_package_handle_standard_args(
   Matlab
   FOUND_VAR Matlab_FOUND
   REQUIRED_VARS ${_matlab_required_variables}
-  VERSION_VAR Matlab_VERSION_STRING
+  VERSION_VAR Matlab_VERSION
   HANDLE_COMPONENTS)
 
 unset(_matlab_required_variables)
