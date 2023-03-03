@@ -571,6 +571,7 @@ void cmGlobalNinjaGenerator::Generate()
                                            msg.str());
     return;
   }
+  this->InitOutputPathPrefix();
   if (!this->OpenBuildFileStreams()) {
     return;
   }
@@ -582,7 +583,6 @@ void cmGlobalNinjaGenerator::Generate()
     it.second.TargetDependsClosureLocalOutputs.clear();
   }
 
-  this->InitOutputPathPrefix();
   this->TargetAll = this->NinjaOutputPath("all");
   this->CMakeCacheFile = this->NinjaOutputPath("CMakeCache.txt");
   this->DiagnosedCxxModuleNinjaSupport = false;
@@ -2079,9 +2079,10 @@ void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
       build.Outputs.front() = this->BuildAlias(
         this->NinjaOutputPath(this->GetCleanTargetName()), config);
       if (this->IsMultiConfig()) {
-        build.Variables["TARGETS"] =
-          cmStrCat(this->BuildAlias(GetByproductsForCleanTargetName(), config),
-                   " ", GetByproductsForCleanTargetName());
+        build.Variables["TARGETS"] = cmStrCat(
+          this->BuildAlias(
+            this->NinjaOutputPath(GetByproductsForCleanTargetName()), config),
+          " ", this->NinjaOutputPath(GetByproductsForCleanTargetName()));
       }
       build.ExplicitDeps.clear();
       if (additionalFiles) {
@@ -2096,7 +2097,8 @@ void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
         if (this->IsMultiConfig()) {
           build.Variables["FILE_ARG"] = cmStrCat(
             "-f ",
-            cmGlobalNinjaMultiGenerator::GetNinjaImplFilename(fileConfig));
+            this->NinjaOutputPath(
+              cmGlobalNinjaMultiGenerator::GetNinjaImplFilename(fileConfig)));
         }
         this->WriteBuild(*this->GetImplFileStream(fileConfig), build);
       }
@@ -2118,8 +2120,8 @@ void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
       std::vector<std::string> byproducts;
       byproducts.reserve(this->CrossConfigs.size());
       for (auto const& config : this->CrossConfigs) {
-        byproducts.push_back(
-          this->BuildAlias(GetByproductsForCleanTargetName(), config));
+        byproducts.push_back(this->BuildAlias(
+          this->NinjaOutputPath(GetByproductsForCleanTargetName()), config));
       }
       byproducts.emplace_back(GetByproductsForCleanTargetName());
       build.Variables["TARGETS"] = cmJoin(byproducts, " ");
@@ -2127,7 +2129,8 @@ void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
       for (auto const& fileConfig : configs) {
         build.Variables["FILE_ARG"] = cmStrCat(
           "-f ",
-          cmGlobalNinjaMultiGenerator::GetNinjaImplFilename(fileConfig));
+          this->NinjaOutputPath(
+            cmGlobalNinjaMultiGenerator::GetNinjaImplFilename(fileConfig)));
         this->WriteBuild(*this->GetImplFileStream(fileConfig), build);
       }
     }
@@ -2910,7 +2913,8 @@ bool cmGlobalNinjaMultiGenerator::OpenBuildFileStreams()
   *this->DefaultFileStream << "# Build using rules for '"
                            << this->DefaultFileConfig << "'.\n\n"
                            << "include "
-                           << GetNinjaImplFilename(this->DefaultFileConfig)
+                           << this->NinjaOutputPath(
+                                GetNinjaImplFilename(this->DefaultFileConfig))
                            << "\n\n";
 
   // Write a comment about this file.
@@ -2943,7 +2947,8 @@ bool cmGlobalNinjaMultiGenerator::OpenBuildFileStreams()
       *this->ConfigFileStreams[config]
         << "# This file contains aliases specific to the \"" << config
         << "\"\n# configuration.\n\n"
-        << "include " << GetNinjaImplFilename(config) << "\n\n";
+        << "include " << this->NinjaOutputPath(GetNinjaImplFilename(config))
+        << "\n\n";
 
       return true;
     });

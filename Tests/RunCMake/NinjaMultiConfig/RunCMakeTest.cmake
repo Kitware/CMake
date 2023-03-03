@@ -459,6 +459,15 @@ set(RunCMake_TEST_OPTIONS "-DCMAKE_CONFIGURATION_TYPES=Debug\\;Release;-DCMAKE_C
 run_cmake(CompileCommands)
 unset(RunCMake_TEST_OPTIONS)
 
+set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/OutputPathPrefix-build)
+run_cmake_with_options(OutputPathPrefix "-DCMAKE_NINJA_OUTPUT_PATH_PREFIX=OutputPathPrefix-build")
+set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR})
+set(RunCMake_TEST_NO_CLEAN 1)
+run_cmake_command(OutputPathPrefix-all-ninja "${RunCMake_MAKE_PROGRAM}" -f OutputPathPrefix-build/build.ninja OutputPathPrefix-build/all)
+run_cmake_command(OutputPathPrefix-clean-ninja "${RunCMake_MAKE_PROGRAM}" -f OutputPathPrefix-build/build.ninja OutputPathPrefix-build/clean)
+unset(RunCMake_TEST_NO_CLEAN)
+unset(RunCMake_TEST_BINARY_DIR)
+
 # CudaSimple uses separable compilation, which is currently only supported on NVCC.
 if(CMake_TEST_CUDA)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/CudaSimple-build)
