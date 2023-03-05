@@ -1191,18 +1191,17 @@ function(matlab_add_mex)
 
     if (MSVC)
 
-      set(_link_flags "${_link_flags} /EXPORT:mexFunction")
+      string(APPEND _link_flags " /EXPORT:mexFunction")
       if(NOT Matlab_VERSION_STRING VERSION_LESS "9.1") # For 9.1 (R2016b) and newer, export version
-        set(_link_flags "${_link_flags} /EXPORT:mexfilerequiredapiversion")
+        string(APPEND _link_flags " /EXPORT:mexfilerequiredapiversion")
       endif()
 
       set_property(TARGET ${${prefix}_NAME} APPEND PROPERTY LINK_FLAGS ${_link_flags})
 
     endif() # No other compiler currently supported on Windows.
 
-    set_target_properties(${${prefix}_NAME}
-      PROPERTIES
-        DEFINE_SYMBOL "DLL_EXPORT_SYM=__declspec(dllexport)")
+    set_property(TARGET ${${prefix}_NAME} PROPERTY
+      DEFINE_SYMBOL "DLL_EXPORT_SYM=__declspec(dllexport)")
 
   else()
 
@@ -1228,7 +1227,7 @@ function(matlab_add_mex)
 
       if(Matlab_HAS_CPP_API)
         list(APPEND _ver_map_files ${Matlab_EXTERN_LIBRARY_DIR}/cppMexFunction.map) # This one doesn't exist on Linux
-        set(_link_flags "${_link_flags} -Wl,-U,_mexCreateMexFunction -Wl,-U,_mexDestroyMexFunction -Wl,-U,_mexFunctionAdapter")
+        string(APPEND _link_flags " -Wl,-U,_mexCreateMexFunction -Wl,-U,_mexDestroyMexFunction -Wl,-U,_mexFunctionAdapter")
         # On MacOS, the MEX command adds the above, without it the link breaks
         # because we indiscriminately use "cppMexFunction.map" even for C API MEX-files.
       endif()
@@ -1243,14 +1242,14 @@ function(matlab_add_mex)
         target_compile_options(${${prefix}_NAME} PRIVATE "-pthread")
       endif()
 
-      set(_link_flags "${_link_flags} -Wl,--as-needed")
+      string(APPEND _link_flags " -Wl,--as-needed")
 
       set(_export_flag_name --version-script)
 
     endif()
 
     foreach(_file IN LISTS _ver_map_files)
-      set(_link_flags "${_link_flags} -Wl,${_export_flag_name},${_file}")
+      string(APPEND _link_flags " -Wl,${_export_flag_name},${_file}")
     endforeach()
 
     # The `mex` command doesn't add this define. It is specified here in order
