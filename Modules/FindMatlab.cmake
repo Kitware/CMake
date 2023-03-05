@@ -342,7 +342,14 @@ endif()
 #[=======================================================================[.rst:
 .. command:: matlab_get_version_from_release_name
 
-  Returns the version of Matlab (17.58) from a release name (R2017k)
+  .. code-block:: cmake
+
+    matlab_get_version_from_release_name(release version)
+
+  * Input: ``release`` is the release name (R2022b)
+  * Output: ``version`` is the version of Matlab (9.13)
+
+  Returns the version of Matlab from a release name
 #]=======================================================================]
 macro(matlab_get_version_from_release_name release_name version_name)
 
@@ -359,13 +366,17 @@ macro(matlab_get_version_from_release_name release_name version_name)
 endmacro()
 
 
-
-
-
 #[=======================================================================[.rst:
 .. command:: matlab_get_release_name_from_version
 
-  Returns the release name (R2017k) from the version of Matlab (17.58)
+  .. code-block:: cmake
+
+    matlab_get_release_name_from_version(version release_name)
+
+  * Input: ``version`` is the version of Matlab (9.13)
+  * Output: ``release_name`` is the release name (R2022b)
+
+  Returns the release name from the version of Matlab
 #]=======================================================================]
 macro(matlab_get_release_name_from_version version release_name)
 
@@ -387,10 +398,7 @@ macro(matlab_get_release_name_from_version version release_name)
 endmacro()
 
 
-
-
-
-# extracts all the supported release names (R2017k...) of Matlab
+# extracts all the supported release names (R2022b...) of Matlab
 # internal use
 macro(matlab_get_supported_releases list_releases)
   set(${list_releases})
@@ -426,8 +434,15 @@ endmacro()
 #[=======================================================================[.rst:
 .. command:: matlab_extract_all_installed_versions_from_registry
 
-  This function parses the registry and founds the Matlab versions that are
-  installed. The found versions are returned in `matlab_versions`.
+  .. code-block:: cmake
+
+    matlab_extract_all_installed_versions_from_registry(win64 matlab_versions)
+
+  * Input: ``win64`` is a boolean to search for the 64 bit version of Matlab
+  * Output: ``matlab_versions`` is a list of all the versions of Matlab found
+
+  This function parses the Windows registry and founds the Matlab versions that
+  are installed. The found versions are returned in `matlab_versions`.
   Set `win64` to `TRUE` if the 64 bit version of Matlab should be looked for
   The returned list contains all versions under
   ``HKLM\\SOFTWARE\\Mathworks\\MATLAB`` and
@@ -546,8 +561,6 @@ macro(extract_matlab_versions_from_registry_brute_force matlab_versions)
 endmacro()
 
 
-
-
 #[=======================================================================[.rst:
 .. command:: matlab_get_all_valid_matlab_roots_from_registry
 
@@ -557,16 +570,12 @@ endmacro()
   ``(type,version_number,matlab_root_path)``, where ``type``
   indicates either ``MATLAB`` or ``MCR``.
 
-  ::
+  .. code-block:: cmake
 
-    matlab_get_all_valid_matlab_roots_from_registry(
-        matlab_versions
-        matlab_roots)
+    matlab_get_all_valid_matlab_roots_from_registry(matlab_versions matlab_roots)
 
-  ``matlab_versions``
-    the versions of each of the Matlab or MCR installations
-  ``matlab_roots``
-    the location of each of the Matlab or MCR installations
+  * Input: ``matlab_versions`` of each of the Matlab or MCR installations
+  * Output: ``matlab_roots`` location of each of the Matlab or MCR installations
 #]=======================================================================]
 function(matlab_get_all_valid_matlab_roots_from_registry matlab_versions matlab_roots)
 
@@ -629,16 +638,12 @@ endfunction()
   This function should not be called before the appropriate Matlab root has
   been found.
 
-  ::
+  .. code-block:: cmake
 
-    matlab_get_mex_suffix(
-        matlab_root
-        mex_suffix)
+    matlab_get_mex_suffix(matlab_root mex_suffix)
 
-  ``matlab_root``
-    the root of the Matlab/MCR installation
-  ``mex_suffix``
-    the variable name in which the suffix will be returned.
+  * Input: ``matlab_root`` root of Matlab/MCR install e.g. ``Matlab_ROOT_DIR``
+  * Output: ``mex_suffix`` variable name in which the suffix will be returned.
 #]=======================================================================]
 function(matlab_get_mex_suffix matlab_root mex_suffix)
 
@@ -716,8 +721,6 @@ function(matlab_get_mex_suffix matlab_root mex_suffix)
 endfunction()
 
 
-
-
 #[=======================================================================[.rst:
 .. command:: matlab_get_version_from_matlab_run
 
@@ -725,16 +728,12 @@ endfunction()
   version. If the path provided for the Matlab installation points to an MCR
   installation, the version is extracted from the installed files.
 
-  ::
+  .. code-block:: cmake
 
-    matlab_get_version_from_matlab_run(
-        matlab_binary_path
-        matlab_list_versions)
+    matlab_get_version_from_matlab_run(matlab_binary_path matlab_list_versions)
 
-  ``matlab_binary_path``
-    the location of the `matlab` binary executable
-  ``matlab_list_versions``
-    the version extracted from Matlab
+  * Input: ``matlab_binary_path`` path of the `matlab` binary executable
+  * Output: ``matlab_list_versions`` the version extracted from Matlab
 #]=======================================================================]
 function(matlab_get_version_from_matlab_run matlab_binary_program matlab_list_versions)
 
@@ -904,7 +903,7 @@ endfunction()
   non 0 failure). Additional arguments accepted by :command:`add_test` can be
   passed through ``TEST_ARGS`` (eg. ``CONFIGURATION <config> ...``).
 
-  ::
+  .. code-block:: cmake
 
     matlab_add_unit_test(
         NAME <name>
@@ -918,7 +917,7 @@ endfunction()
         [NO_UNITTEST_FRAMEWORK]
         )
 
-  The function arguments are:
+  Function Parameters:
 
   ``NAME``
     name of the unittest in ctest.
@@ -1016,7 +1015,7 @@ endfunction()
   for the MEX file. Remaining arguments of the call are passed to the
   :command:`add_library` or :command:`add_executable` command.
 
-  ::
+  .. code-block:: cmake
 
      matlab_add_mex(
          NAME <name>
@@ -1030,6 +1029,8 @@ endfunction()
          [NO_IMPLICIT_LINK_TO_MATLAB_LIBRARIES]
          [...]
      )
+
+  Function Parameters:
 
   ``NAME``
     name of the target.
