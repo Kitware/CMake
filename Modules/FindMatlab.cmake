@@ -387,7 +387,7 @@ macro(matlab_get_release_name_from_version version release_name)
       set(${release_name} ${CMAKE_MATCH_1})
       break()
     endif()
-  endforeach(_var)
+  endforeach()
 
   unset(_var)
   unset(_matched)
@@ -409,7 +409,7 @@ macro(matlab_get_supported_releases list_releases)
     endif()
     unset(_matched)
     unset(CMAKE_MATCH_1)
-  endforeach(_var)
+  endforeach()
   unset(_var)
 endmacro()
 
@@ -426,7 +426,7 @@ macro(matlab_get_supported_versions list_versions)
     endif()
     unset(_matched)
     unset(CMAKE_MATCH_1)
-  endforeach(_var)
+  endforeach()
   unset(_var)
 endmacro()
 
@@ -525,31 +525,6 @@ macro(extract_matlab_versions_from_registry_brute_force matlab_versions)
   set(matlab_supported_versions)
   matlab_get_supported_versions(matlab_supported_versions)
 
-
-  # this is a manual population of the versions we want to look for
-  # this can be done as is, but preferably with the call to
-  # matlab_get_supported_versions and variable
-
-  # populating the versions we want to look for
-  # set(matlab_supported_versions)
-
-  # # Matlab 7
-  # set(matlab_major 7)
-  # foreach(current_matlab_minor RANGE 4 20)
-    # list(APPEND matlab_supported_versions "${matlab_major}.${current_matlab_minor}")
-  # endforeach(current_matlab_minor)
-
-  # # Matlab 8
-  # set(matlab_major 8)
-  # foreach(current_matlab_minor RANGE 0 5)
-    # list(APPEND matlab_supported_versions "${matlab_major}.${current_matlab_minor}")
-  # endforeach(current_matlab_minor)
-
-  # # taking into account the possible additional versions provided by the user
-  # if(DEFINED MATLAB_ADDITIONAL_VERSIONS)
-    # list(APPEND matlab_supported_versions MATLAB_ADDITIONAL_VERSIONS)
-  # endif()
-
   # we order from more recent to older
   if(matlab_supported_versions)
     list(REMOVE_DUPLICATES matlab_supported_versions)
@@ -585,7 +560,7 @@ function(matlab_get_all_valid_matlab_roots_from_registry matlab_versions matlab_
 
   set(_matlab_roots_list )
   # check for Matlab installations
-  foreach(_matlab_current_version ${matlab_versions})
+  foreach(_matlab_current_version IN LISTS matlab_versions)
     get_filename_component(
       current_MATLAB_ROOT
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MathWorks\\MATLAB\\${_matlab_current_version};MATLABROOT]"
@@ -598,7 +573,7 @@ function(matlab_get_all_valid_matlab_roots_from_registry matlab_versions matlab_
   endforeach()
 
   # Check for MCR installations
-  foreach(_matlab_current_version ${matlab_versions})
+  foreach(_matlab_current_version IN LISTS matlab_versions)
     get_filename_component(
       current_MATLAB_ROOT
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MathWorks\\MATLAB Runtime\\${_matlab_current_version};MATLABROOT]"
@@ -614,7 +589,7 @@ function(matlab_get_all_valid_matlab_roots_from_registry matlab_versions matlab_
   endforeach()
 
   # Check for old MCR installations
-  foreach(_matlab_current_version ${matlab_versions})
+  foreach(_matlab_current_version IN LISTS matlab_versions)
     get_filename_component(
       current_MATLAB_ROOT
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MathWorks\\MATLAB Compiler Runtime\\${_matlab_current_version};MATLABROOT]"
@@ -1274,7 +1249,7 @@ function(matlab_add_mex)
 
     endif()
 
-    foreach(_file ${_ver_map_files})
+    foreach(_file IN LISTS _ver_map_files)
       set(_link_flags "${_link_flags} -Wl,${_export_flag_name},${_file}")
     endforeach()
 
