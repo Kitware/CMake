@@ -3012,7 +3012,9 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config, cmValue& loc,
   bool allowImp = (this->IsDLLPlatform() &&
                    (this->GetType() == cmStateEnums::SHARED_LIBRARY ||
                     this->IsExecutableWithExports())) ||
-    (this->IsAIX() && this->IsExecutableWithExports());
+    (this->IsAIX() && this->IsExecutableWithExports()) ||
+    (this->GetMakefile()->PlatformSupportsAppleTextStubs() &&
+     this->IsSharedLibraryWithExports());
 
   // If a mapping was found, check its configurations.
   for (auto mci = mappedConfigs.begin();
