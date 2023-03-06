@@ -31,6 +31,12 @@ Test project .*
  *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.typed\.case<float>!2 \.+ +Passed +[0-9.]+ sec
  *Start +[0-9]+: TEST:ns\.typed\.case<char>!2
  *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.typed\.case<char>!2 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:prefix/typed\.case<short>!2
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:prefix/typed\.case<short>!2 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:prefix/typed\.case<float>!2
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:prefix/typed\.case<float>!2 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:prefix/typed\.case<char>!2
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:prefix/typed\.case<char>!2 \.+ +Passed +[0-9.]+ sec
  *Start +[0-9]+: TEST:value/test\.case/1!2
  *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:value/test\.case/1!2 \.+ +Passed +[0-9.]+ sec
  *Start +[0-9]+: TEST:value/test\.case/"foo"!2
@@ -39,6 +45,10 @@ Test project .*
  *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.value/test\.case/1!2 \.+ +Passed +[0-9.]+ sec
  *Start +[0-9]+: TEST:ns\.value/test\.case/"foo"!2
  *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.value/test\.case/"foo"!2 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:prefix/value/test\.case/1!2
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:prefix/value/test\.case/1!2 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:prefix/value/test\.case/"foo"!2
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:prefix/value/test\.case/"foo"!2 \.+ +Passed +[0-9.]+ sec
  *Start +[0-9]+: TEST:param/special\.case/"semicolon;"!2
  *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:param/special\.case/"semicolon;"!2 \.+ +Passed +[0-9.]+ sec
  *Start +[0-9]+: TEST:param/special\.case/"backslash\\"!2
@@ -71,6 +81,22 @@ Test project .*
  *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.param/special\.case/"__csb___text"!2 \.+ +Passed +[0-9.]+ sec
  *Start +[0-9]+: TEST:ns\.param/special\.case/"S o m  e   "!2
  *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.param/special\.case/"S o m  e   "!2 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:prefix/param/special\.case/"semicolon;"!2
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:prefix/param/special\.case/"semicolon;"!2 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:prefix/param/special\.case/"backslash\\"!2
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:prefix/param/special\.case/"backslash\\"!2 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:prefix/param/special\.case/"\${var}"!2
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:prefix/param/special\.case/"\${var}"!2 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:prefix/param/special\.case/'\['!2
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:prefix/param/special\.case/'\['!2 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:prefix/param/special\.case/"\]\]=\]"!2
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:prefix/param/special\.case/"\]\]=\]"!2 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:prefix/param/special\.case/"__osbtext"!2
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:prefix/param/special\.case/"__osbtext"!2 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:prefix/param/special\.case/"__csb___text"!2
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:prefix/param/special\.case/"__csb___text"!2 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:prefix/param/special\.case/"S o m  e   "!2
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:prefix/param/special\.case/"S o m  e   "!2 \.+ +Passed +[0-9.]+ sec
 
 100% tests passed, 0 tests failed out of [0-9]+
 
