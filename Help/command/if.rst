@@ -39,7 +39,7 @@ the ``if``, ``elseif`` and :command:`while` clauses.
 
 Compound conditions are evaluated in the following order of precedence:
 
-1. Parentheses.
+1. `Parentheses`_.
 
 2. Unary tests such as `EXISTS`_, `COMMAND`_, and `DEFINED`_.
 
@@ -100,6 +100,8 @@ Logic Operators
 
 ``if(<cond1> OR <cond2>)``
   True if either condition would be considered true individually.
+
+.. _parentheses:
 
 ``if((condition) AND (condition OR (condition)))``
   The conditions inside the parenthesis are evaluated first and then
@@ -386,34 +388,34 @@ constant.
 Automatic evaluation applies in the other cases whenever the
 above-documented condition syntax accepts ``<variable|string>``:
 
-* The left hand argument to ``MATCHES`` is first checked to see if it is
+* The left hand argument to `MATCHES`_ is first checked to see if it is
   a defined variable, if so the variable's value is used, otherwise the
   original value is used.
 
-* If the left hand argument to ``MATCHES`` is missing it returns false
+* If the left hand argument to `MATCHES`_ is missing it returns false
   without error
 
-* Both left and right hand arguments to ``LESS``, ``GREATER``, ``EQUAL``,
-  ``LESS_EQUAL``, and ``GREATER_EQUAL``, are independently tested to see if
+* Both left and right hand arguments to `LESS`_, `GREATER`_, `EQUAL`_,
+  `LESS_EQUAL`_, and `GREATER_EQUAL`_, are independently tested to see if
   they are defined variables, if so their defined values are used otherwise
   the original value is used.
 
-* Both left and right hand arguments to ``STRLESS``, ``STRGREATER``,
-  ``STREQUAL``, ``STRLESS_EQUAL``, and ``STRGREATER_EQUAL`` are independently
+* Both left and right hand arguments to `STRLESS`_, `STRGREATER`_,
+  `STREQUAL`_, `STRLESS_EQUAL`_, and `STRGREATER_EQUAL`_ are independently
   tested to see if they are defined variables, if so their defined values are
   used otherwise the original value is used.
 
-* Both left and right hand arguments to ``VERSION_LESS``,
-  ``VERSION_GREATER``, ``VERSION_EQUAL``, ``VERSION_LESS_EQUAL``, and
-  ``VERSION_GREATER_EQUAL`` are independently tested to see if they are defined
+* Both left and right hand arguments to `VERSION_LESS`_,
+  `VERSION_GREATER`_, `VERSION_EQUAL`_, `VERSION_LESS_EQUAL`_, and
+  `VERSION_GREATER_EQUAL`_ are independently tested to see if they are defined
   variables, if so their defined values are used otherwise the original value
   is used.
 
-* The right hand argument to ``NOT`` is tested to see if it is a boolean
+* The right hand argument to `NOT`_ is tested to see if it is a boolean
   constant, if so the value is used, otherwise it is assumed to be a
   variable and it is dereferenced.
 
-* The left and right hand arguments to ``AND`` and ``OR`` are independently
+* The left and right hand arguments to `AND`_ and `OR`_ are independently
   tested to see if they are boolean constants, if so they are used as
   such, otherwise they are assumed to be variables and are dereferenced.
 
