@@ -57,17 +57,36 @@ dependency scanning.  This is similar to the Fortran modules support, but
 relies on external tools to scan C++20 translation units for module
 dependencies.  The approach is described by Kitware's `D1483r1`_ paper.
 
-The ``CMAKE_EXPERIMENTAL_CXX_MODULE_DYNDEP`` variable can be set to ``1``
-in order to activate this undocumented experimental infrastructure.  This
-is **intended to make the functionality available to compiler writers** so
-they can use it to develop and test their dependency scanning tool.
-The ``CMAKE_EXPERIMENTAL_CXX_SCANDEP_SOURCE`` variable must also be set
-to tell CMake how to invoke the C++20 module dependency scanning tool.
+In order to activate CMake's experimental support for C++20 module
+dependencies, set the following variables:
 
-MSVC 19.34 (provided with Visual Studio 17.4) and above contains the support
-that CMake needs and has these variables already set up as required and only
-the UUID and the ``CMAKE_EXPERIMENTAL_CXX_MODULE_DYNDEP`` variables need to be
-set.
+``CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API``
+  Set this to the UUID documented above.
+
+``CMAKE_EXPERIMENTAL_CXX_MODULE_DYNDEP``
+  Set this to ``1`` in order to activate this undocumented experimental
+  infrastructure.  This is **intended to make the functionality available
+  to compiler writers** so they can use it to develop and test their
+  dependency scanning tool.
+
+Some compilers already have support for module dependency scanning:
+
+* MSVC 19.34 and newer (provided with Visual Studio 17.4 and newer)
+* LLVM/Clang 16.0 and newer
+
+For those, only the above variables need to be set by project code.
+For compilers with in-development support, additional variables must
+be set as follows.
+
+``CMAKE_EXPERIMENTAL_CXX_SCANDEP_SOURCE``
+  Set this to tell CMake how to invoke the C++20 module dependency
+  scanning tool.
+
+``CMAKE_EXPERIMENTAL_CXX_MODULE_MAP_FORMAT``
+  Set this for compilers that generate module maps.  See below.
+
+``CMAKE_EXPERIMENTAL_CXX_MODULE_MAP_FLAG``
+  Set this for compilers that generate module maps.  See below.
 
 For example, add code like the following to a test project:
 
