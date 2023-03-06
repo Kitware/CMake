@@ -1,6 +1,7 @@
 set(_check
   [=[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/windows-build/root-all/bin/\.conflict/\.\./(lib)?libdir\.dll]=]
   [=[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/windows-build/root-all/bin/\.search/(lib)?search\.dll]=]
+  [=[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/windows-build/root-all/bin/(lib)?mixedcase\.dll]=]
   [=[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/windows-build/root-all/bin/(lib)?testlib\.dll]=]
   )
 check_contents(deps/deps1.txt "^${_check}$")
