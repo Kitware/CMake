@@ -57,7 +57,9 @@ Compound conditions are evaluated in the following order of precedence:
 Basic Expressions
 """""""""""""""""
 
-``if(<constant>)``
+.. signature:: if(<constant>)
+  :target: constant
+
   True if the constant is ``1``, ``ON``, ``YES``, ``TRUE``, ``Y``,
   or a non-zero number (including floating point numbers).
   False if the constant is ``0``, ``OFF``,
@@ -67,7 +69,9 @@ Basic Expressions
   constants, it is treated as a variable or string (see `Variable Expansion`_
   further below) and one of the following two forms applies.
 
-``if(<variable>)``
+.. signature:: if(<variable>)
+  :target: variable
+
   True if given a variable that is defined to a value that is not a false
   constant.  False otherwise, including if the variable is undefined.
   Note that macro arguments are not variables.
@@ -75,7 +79,9 @@ Basic Expressions
   cannot be tested this way, e.g. ``if(ENV{some_var})`` will always evaluate
   to false.
 
-``if(<string>)``
+.. signature:: if(<string>)
+  :target: string
+
   A quoted string always evaluates to false unless:
 
   * The string's value is one of the true constants, or
@@ -86,24 +92,23 @@ Basic Expressions
 Logic Operators
 """""""""""""""
 
-.. _NOT:
+.. signature:: if(NOT <condition>)
 
-``if(NOT <condition>)``
   True if the condition is not true.
 
-.. _AND:
+.. signature:: if(<cond1> AND <cond2>)
+  :target: AND
 
-``if(<cond1> AND <cond2>)``
   True if both conditions would be considered true individually.
 
-.. _OR:
+.. signature:: if(<cond1> OR <cond2>)
+  :target: OR
 
-``if(<cond1> OR <cond2>)``
   True if either condition would be considered true individually.
 
-.. _parentheses:
+.. signature:: if((condition) AND (condition OR (condition)))
+  :target: parentheses
 
-``if((condition) AND (condition OR (condition)))``
   The conditions inside the parenthesis are evaluated first and then
   the remaining condition is evaluated as in the other examples.
   Where there are nested parenthesis the innermost are evaluated as part
@@ -112,29 +117,31 @@ Logic Operators
 Existence Checks
 """"""""""""""""
 
-.. _COMMAND:
+.. signature:: if(COMMAND <command-name>)
 
-``if(COMMAND command-name)``
   True if the given name is a command, macro or function that can be
   invoked.
 
-``if(POLICY policy-id)``
+.. signature:: if(POLICY <policy-id>)
+
   True if the given name is an existing policy (of the form ``CMP<NNNN>``).
 
-``if(TARGET target-name)``
+.. signature:: if(TARGET <target-name>)
+
   True if the given name is an existing logical target name created
   by a call to the :command:`add_executable`, :command:`add_library`,
   or :command:`add_custom_target` command that has already been invoked
   (in any directory).
 
-``if(TEST test-name)``
- .. versionadded:: 3.3
+.. signature:: if(TEST <test-name>)
+
+  .. versionadded:: 3.3
+
   True if the given name is an existing test name created by the
   :command:`add_test` command.
 
-.. _DEFINED:
+.. signature:: if(DEFINED <name>|CACHE{<name>}|ENV{<name>})
 
-``if(DEFINED <name>|CACHE{<name>}|ENV{<name>})``
   True if a variable, cache variable or environment variable
   with given ``<name>`` is defined. The value of the variable
   does not matter. Note the following caveats:
@@ -148,19 +155,21 @@ Existence Checks
     need to be tested if you need to know whether a non-cache variable exists:
     ``if(DEFINED someName AND NOT DEFINED CACHE{someName})``.
 
-  .. versionadded:: 3.14
-   Added support for ``CACHE{<name>}`` variables.
+ .. versionadded:: 3.14
+  Added support for ``CACHE{<name>}`` variables.
 
-``if(<variable|string> IN_LIST <variable>)``
- .. versionadded:: 3.3
+.. signature:: if(<variable|string> IN_LIST <variable>)
+  :target: IN_LIST
+
+  .. versionadded:: 3.3
+
   True if the given element is contained in the named list variable.
 
 File Operations
 """""""""""""""
 
-.. _EXISTS:
+.. signature:: if(EXISTS <path-to-file-or-directory>)
 
-``if(EXISTS path-to-file-or-directory)``
   True if the named file or directory exists.  Behavior is well-defined
   only for explicit full paths (a leading ``~/`` is not expanded as
   a home directory and is considered a relative path).
@@ -169,7 +178,9 @@ File Operations
 
   False if the given path is an empty string.
 
-``if(file1 IS_NEWER_THAN file2)``
+.. signature:: if(<file1> IS_NEWER_THAN <file2>)
+  :target: IS_NEWER_THAN
+
   True if ``file1`` is newer than ``file2`` or if one of the two files doesn't
   exist.  Behavior is well-defined only for full paths.  If the file
   time stamps are exactly the same, an ``IS_NEWER_THAN`` comparison returns
@@ -177,17 +188,20 @@ File Operations
   of a tie.  This includes the case of passing the same file name for
   both file1 and file2.
 
-``if(IS_DIRECTORY path)``
+.. signature:: if(IS_DIRECTORY <path>)
+
   True if ``path`` is a directory.  Behavior is well-defined only
   for full paths.
 
   False if the given path is an empty string.
 
-``if(IS_SYMLINK file-name)``
-  True if the given name is a symbolic link.  Behavior is well-defined
+.. signature:: if(IS_SYMLINK <path>)
+
+  True if the given path is a symbolic link.  Behavior is well-defined
   only for full paths.
 
-``if(IS_ABSOLUTE path)``
+.. signature:: if(IS_ABSOLUTE <path>)
+
   True if the given path is an absolute path.  Note the following special
   cases:
 
@@ -202,119 +216,125 @@ File Operations
 Comparisons
 """""""""""
 
-.. _MATCHES:
+.. signature:: if(<variable|string> MATCHES <regex>)
+  :target: MATCHES
 
-``if(<variable|string> MATCHES regex)``
   True if the given string or variable's value matches the given regular
   expression.  See :ref:`Regex Specification` for regex format.
 
   .. versionadded:: 3.9
    ``()`` groups are captured in :variable:`CMAKE_MATCH_<n>` variables.
 
-.. _LESS:
+.. signature:: if(<variable|string> LESS <variable|string>)
+  :target: LESS
 
-``if(<variable|string> LESS <variable|string>)``
   True if the given string or variable's value is a valid number and less
   than that on the right.
 
-.. _GREATER:
+.. signature:: if(<variable|string> GREATER <variable|string>)
+  :target: GREATER
 
-``if(<variable|string> GREATER <variable|string>)``
   True if the given string or variable's value is a valid number and greater
   than that on the right.
 
-.. _EQUAL:
+.. signature:: if(<variable|string> EQUAL <variable|string>)
+  :target: EQUAL
 
-``if(<variable|string> EQUAL <variable|string>)``
   True if the given string or variable's value is a valid number and equal
   to that on the right.
 
-.. _LESS_EQUAL:
+.. signature:: if(<variable|string> LESS_EQUAL <variable|string>)
+  :target: LESS_EQUAL
 
-``if(<variable|string> LESS_EQUAL <variable|string>)``
- .. versionadded:: 3.7
+  .. versionadded:: 3.7
+
   True if the given string or variable's value is a valid number and less
   than or equal to that on the right.
 
-.. _GREATER_EQUAL:
+.. signature:: if(<variable|string> GREATER_EQUAL <variable|string>)
+  :target: GREATER_EQUAL
 
-``if(<variable|string> GREATER_EQUAL <variable|string>)``
- .. versionadded:: 3.7
+  .. versionadded:: 3.7
+
   True if the given string or variable's value is a valid number and greater
   than or equal to that on the right.
 
-.. _STRLESS:
+.. signature:: if(<variable|string> STRLESS <variable|string>)
+  :target: STRLESS
 
-``if(<variable|string> STRLESS <variable|string>)``
   True if the given string or variable's value is lexicographically less
   than the string or variable on the right.
 
-.. _STRGREATER:
+.. signature:: if(<variable|string> STRGREATER <variable|string>)
+  :target: STRGREATER
 
-``if(<variable|string> STRGREATER <variable|string>)``
   True if the given string or variable's value is lexicographically greater
   than the string or variable on the right.
 
-.. _STREQUAL:
+.. signature:: if(<variable|string> STREQUAL <variable|string>)
+  :target: STREQUAL
 
-``if(<variable|string> STREQUAL <variable|string>)``
   True if the given string or variable's value is lexicographically equal
   to the string or variable on the right.
 
-.. _STRLESS_EQUAL:
+.. signature:: if(<variable|string> STRLESS_EQUAL <variable|string>)
+  :target: STRLESS_EQUAL
 
-``if(<variable|string> STRLESS_EQUAL <variable|string>)``
- .. versionadded:: 3.7
+  .. versionadded:: 3.7
+
   True if the given string or variable's value is lexicographically less
   than or equal to the string or variable on the right.
 
-.. _STRGREATER_EQUAL:
+.. signature:: if(<variable|string> STRGREATER_EQUAL <variable|string>)
+  :target: STRGREATER_EQUAL
 
-``if(<variable|string> STRGREATER_EQUAL <variable|string>)``
- .. versionadded:: 3.7
+  .. versionadded:: 3.7
+
   True if the given string or variable's value is lexicographically greater
   than or equal to the string or variable on the right.
 
 Version Comparisons
 """""""""""""""""""
 
-.. _VERSION_LESS:
+.. signature:: if(<variable|string> VERSION_LESS <variable|string>)
+  :target: VERSION_LESS
 
-``if(<variable|string> VERSION_LESS <variable|string>)``
   Component-wise integer version number comparison (version format is
   ``major[.minor[.patch[.tweak]]]``, omitted components are treated as zero).
   Any non-integer version component or non-integer trailing part of a version
   component effectively truncates the string at that point.
 
-.. _VERSION_GREATER:
+.. signature:: if(<variable|string> VERSION_GREATER <variable|string>)
+  :target: VERSION_GREATER
 
-``if(<variable|string> VERSION_GREATER <variable|string>)``
   Component-wise integer version number comparison (version format is
   ``major[.minor[.patch[.tweak]]]``, omitted components are treated as zero).
   Any non-integer version component or non-integer trailing part of a version
   component effectively truncates the string at that point.
 
-.. _VERSION_EQUAL:
+.. signature:: if(<variable|string> VERSION_EQUAL <variable|string>)
+  :target: VERSION_EQUAL
 
-``if(<variable|string> VERSION_EQUAL <variable|string>)``
   Component-wise integer version number comparison (version format is
   ``major[.minor[.patch[.tweak]]]``, omitted components are treated as zero).
   Any non-integer version component or non-integer trailing part of a version
   component effectively truncates the string at that point.
 
-.. _VERSION_LESS_EQUAL:
+.. signature:: if(<variable|string> VERSION_LESS_EQUAL <variable|string>)
+  :target: VERSION_LESS_EQUAL
 
-``if(<variable|string> VERSION_LESS_EQUAL <variable|string>)``
- .. versionadded:: 3.7
+  .. versionadded:: 3.7
+
   Component-wise integer version number comparison (version format is
   ``major[.minor[.patch[.tweak]]]``, omitted components are treated as zero).
   Any non-integer version component or non-integer trailing part of a version
   component effectively truncates the string at that point.
 
-.. _VERSION_GREATER_EQUAL:
+.. signature:: if(<variable|string> VERSION_GREATER_EQUAL <variable|string>)
+  :target: VERSION_GREATER_EQUAL
 
-``if(<variable|string> VERSION_GREATER_EQUAL <variable|string>)``
- .. versionadded:: 3.7
+  .. versionadded:: 3.7
+
   Component-wise integer version number comparison (version format is
   ``major[.minor[.patch[.tweak]]]``, omitted components are treated as zero).
   Any non-integer version component or non-integer trailing part of a version
@@ -323,9 +343,9 @@ Version Comparisons
 Path Comparisons
 """"""""""""""""
 
-.. _PATH_EQUAL:
+.. signature:: if(<variable|string> PATH_EQUAL <variable|string>)
+  :target: PATH_EQUAL
 
-``if(<variable|string> PATH_EQUAL <variable|string>)``
   .. versionadded:: 3.24
 
   Compares the two paths component-by-component.  Only if every component of
