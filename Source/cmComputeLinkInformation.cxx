@@ -1563,7 +1563,7 @@ void cmComputeLinkInformation::AddTargetItem(LinkEntry const& entry)
     this->OldLinkDirItems.push_back(item.Value);
   }
 
-  if (target->IsFrameworkOnApple() && !this->GlobalGenerator->IsXcode()) {
+  if (target->IsFrameworkOnApple()) {
     // Add the framework directory and the framework item itself
     auto fwDescriptor = this->GlobalGenerator->SplitFrameworkPath(
       item.Value, cmGlobalGenerator::FrameworkFormat::Extended);
@@ -1579,26 +1579,32 @@ void cmComputeLinkInformation::AddTargetItem(LinkEntry const& entry)
       // Add the directory portion to the framework search path.
       this->AddFrameworkPath(fwDescriptor->Directory);
     }
-    if (cmHasSuffix(entry.Feature, "FRAMEWORK"_s)) {
-      this->Items.emplace_back(fwDescriptor->GetLinkName(), ItemIsPath::Yes,
-                               target,
-                               this->FindLibraryFeature(entry.Feature));
-    } else {
+
+    if (this->GlobalGenerator->IsXcode()) {
       this->Items.emplace_back(
         item, ItemIsPath::Yes, target,
-        this->FindLibraryFeature(
-          entry.Feature == DEFAULT ? "__CMAKE_LINK_LIBRARY" : entry.Feature));
+        this->FindLibraryFeature(entry.Feature == DEFAULT
+                                   ? "__CMAKE_LINK_FRAMEWORK"
+                                   : entry.Feature));
+    } else {
+      if (cmHasSuffix(entry.Feature, "FRAMEWORK"_s)) {
+        this->Items.emplace_back(fwDescriptor->GetLinkName(), ItemIsPath::Yes,
+                                 target,
+                                 this->FindLibraryFeature(entry.Feature));
+      } else {
+        this->Items.emplace_back(
+          item, ItemIsPath::Yes, target,
+          this->FindLibraryFeature(entry.Feature == DEFAULT
+                                     ? "__CMAKE_LINK_LIBRARY"
+                                     : entry.Feature));
+      }
     }
   } else {
     // Now add the full path to the library.
     this->Items.emplace_back(
       item, ItemIsPath::Yes, target,
       this->FindLibraryFeature(
-        entry.Feature == DEFAULT
-          ? (target->IsFrameworkOnApple() && this->GlobalGenerator->IsXcode()
-               ? "__CMAKE_LINK_FRAMEWORK"
-               : "__CMAKE_LINK_LIBRARY")
-          : entry.Feature));
+        entry.Feature == DEFAULT ? "__CMAKE_LINK_LIBRARY" : entry.Feature));
   }
 }
 
