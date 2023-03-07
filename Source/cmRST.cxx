@@ -20,7 +20,7 @@ cmRST::cmRST(std::ostream& os, std::string docroot)
   : OS(os)
   , DocRoot(std::move(docroot))
   , CMakeDirective("^.. (cmake:)?("
-                   "command|envvar|genex|variable"
+                   "command|envvar|genex|signature|variable"
                    ")::[ \t]+([^ \t\n]+)$")
   , CMakeModuleDirective("^.. cmake-module::[ \t]+([^ \t\n]+)$")
   , ParsedLiteralDirective("^.. parsed-literal::[ \t]*(.*)$")

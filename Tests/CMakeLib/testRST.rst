@@ -73,6 +73,14 @@ Inline literal ``__`` followed by inline link `Link Text <InternalDest_>`_.
 
    Generator expression $<OTHER_GENEX> description.
 
+.. cmake:signature:: some_command(SOME_SIGNATURE)
+
+   Command some_command SOME_SIGNATURE description.
+
+.. signature:: other_command(OTHER_SIGNATURE)
+
+   Command other_command OTHER_SIGNATURE description.
+
 .. cmake:variable:: some_var
 
    Variable some_var description.
