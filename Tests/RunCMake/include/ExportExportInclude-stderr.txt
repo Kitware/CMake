@@ -1,6 +1,7 @@
-CMake Error at ExportExportInclude.cmake:6 \(include\):
+^CMake Error at ExportExportInclude.cmake:6 \(include\):
   include could not find requested file:
 
-    .*/Tests/RunCMake/include/ExportExportInclude-build/theTargets.cmake
+    [^
+]*/Tests/RunCMake/include/ExportExportInclude-build/theTargets\.cmake
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)$
