@@ -389,7 +389,7 @@ Automatic evaluation applies in the other cases whenever the
 above-documented condition syntax accepts ``<variable|string>``:
 
 * The left hand argument to `MATCHES`_ is first checked to see if it is
-  a defined variable, if so the variable's value is used, otherwise the
+  a defined variable.  If so, the variable's value is used, otherwise the
   original value is used.
 
 * If the left hand argument to `MATCHES`_ is missing it returns false
@@ -397,26 +397,26 @@ above-documented condition syntax accepts ``<variable|string>``:
 
 * Both left and right hand arguments to `LESS`_, `GREATER`_, `EQUAL`_,
   `LESS_EQUAL`_, and `GREATER_EQUAL`_, are independently tested to see if
-  they are defined variables, if so their defined values are used otherwise
+  they are defined variables.  If so, their defined values are used otherwise
   the original value is used.
 
 * Both left and right hand arguments to `STRLESS`_, `STRGREATER`_,
   `STREQUAL`_, `STRLESS_EQUAL`_, and `STRGREATER_EQUAL`_ are independently
-  tested to see if they are defined variables, if so their defined values are
+  tested to see if they are defined variables.  If so, their defined values are
   used otherwise the original value is used.
 
 * Both left and right hand arguments to `VERSION_LESS`_,
   `VERSION_GREATER`_, `VERSION_EQUAL`_, `VERSION_LESS_EQUAL`_, and
   `VERSION_GREATER_EQUAL`_ are independently tested to see if they are defined
-  variables, if so their defined values are used otherwise the original value
+  variables.  If so, their defined values are used otherwise the original value
   is used.
 
 * The right hand argument to `NOT`_ is tested to see if it is a boolean
-  constant, if so the value is used, otherwise it is assumed to be a
+  constant.  If so, the value is used, otherwise it is assumed to be a
   variable and it is dereferenced.
 
 * The left and right hand arguments to `AND`_ and `OR`_ are independently
-  tested to see if they are boolean constants, if so they are used as
+  tested to see if they are boolean constants.  If so, they are used as
   such, otherwise they are assumed to be variables and are dereferenced.
 
 .. versionchanged:: 3.1
