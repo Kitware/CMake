@@ -109,6 +109,7 @@ of the following libraries that are part of the CUDAToolkit:
 - :ref:`CUDA Runtime Library<cuda_toolkit_rt_lib>`
 - :ref:`CUDA Driver Library<cuda_toolkit_driver_lib>`
 - :ref:`cuBLAS<cuda_toolkit_cuBLAS>`
+- :ref:`cuDLA<cuda_toolkit_cuDLA>`
 - :ref:`cuFile<cuda_toolkit_cuFile>`
 - :ref:`cuFFT<cuda_toolkit_cuFFT>`
 - :ref:`cuRAND<cuda_toolkit_cuRAND>`
@@ -165,6 +166,19 @@ Targets Created:
 - ``CUDA::cublas_static``
 - ``CUDA::cublasLt`` starting in CUDA 10.1
 - ``CUDA::cublasLt_static`` starting in CUDA 10.1
+
+.. _`cuda_toolkit_cuDLA`:
+
+cuDLA
+""""""
+
+.. versionadded:: 3.27
+
+The NVIDIA Tegra Deep Learning Accelerator `cuDLA <https://docs.nvidia.com/cuda/cublas/index.html>`_ library.
+
+Targets Created:
+
+- ``CUDA::cudla`` starting in CUDA 11.6
 
 .. _`cuda_toolkit_cuFile`:
 
@@ -1045,6 +1059,11 @@ if(CUDAToolkit_FOUND)
     _CUDAToolkit_find_and_add_import_lib(cuFile_rdma DEPS cuFile culibos)
     _CUDAToolkit_find_and_add_import_lib(cuFile_rdma_static DEPS cuFile_static culibos)
   endif()
+
+    if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 11.6)
+    _CUDAToolkit_find_and_add_import_lib(cudla)
+  endif()
+
 
   # cuFFTW depends on cuFFT
   _CUDAToolkit_find_and_add_import_lib(cufftw DEPS cufft)
