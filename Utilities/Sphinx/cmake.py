@@ -4,6 +4,9 @@
 import os
 import re
 
+from dataclasses import dataclass
+from typing import Any, cast
+
 # Override much of pygments' CMakeLexer.
 # We need to parse CMake syntax definitions, not CMake code.
 
@@ -69,8 +72,10 @@ from sphinx.directives import ObjectDescription, nl_escape_re
 from sphinx.domains import Domain, ObjType
 from sphinx.roles import XRefRole
 from sphinx.util.nodes import make_refnode
-from sphinx.util import ws_re
+from sphinx.util import logging, ws_re
 from sphinx import addnodes
+
+logger = logging.getLogger(__name__)
 
 sphinx_before_1_4 = False
 sphinx_before_1_7_2 = False
@@ -103,6 +108,14 @@ if sphinx_before_1_7_2:
         new_items.append(item)
     return new_items
   QtHelpBuilder.build_keywords = new_build_keywords
+
+@dataclass
+class ObjectEntry:
+    docname: str
+    objtype: str
+    node_id: str
+    name: str
+
 
 class CMakeModule(Directive):
     required_arguments = 1
@@ -205,14 +218,6 @@ _cmake_index_objs = {
     'variable':   _cmake_index_entry('variable'),
     }
 
-def _cmake_object_inventory(env, document, line, objtype, targetid):
-    inv = env.domaindata['cmake']['objects']
-    if targetid in inv:
-        document.reporter.warning(
-            'CMake object "%s" also described in "%s".' %
-            (targetid, env.doc2path(inv[targetid][0])), line=line)
-    inv[targetid] = (env.docname, objtype)
-
 class CMakeTransform(Transform):
 
     # Run this transform early since we insert nodes we want
@@ -275,8 +280,10 @@ class CMakeTransform(Transform):
             indexnode = addnodes.index()
             indexnode['entries'] = [make_index_entry(title, targetid)]
             self.document.insert(0, indexnode)
+
             # Add to cmake domain object inventory
-            _cmake_object_inventory(env, self.document, 1, objtype, targetid)
+            domain = cast(CMakeDomain, env.get_domain('cmake'))
+            domain.note_object(objtype, targetname, targetid, targetid)
 
 class CMakeObject(ObjectDescription):
 
@@ -300,8 +307,10 @@ class CMakeObject(ObjectDescription):
             signode['ids'].append(targetid)
             signode['first'] = (not self.names)
             self.state.document.note_explicit_target(signode)
-            _cmake_object_inventory(self.env, self.state.document,
-                                    self.lineno, self.objtype, targetid)
+
+            domain = cast(CMakeDomain, self.env.get_domain('cmake'))
+            domain.note_object(self.objtype, targetname, targetid, targetid,
+                               location=signode)
 
         make_index_entry = _cmake_index_objs.get(self.objtype)
         if make_index_entry:
@@ -518,25 +527,37 @@ class CMakeDomain(Domain):
 
     def clear_doc(self, docname):
         to_clear = set()
-        for fullname, (fn, _) in self.data['objects'].items():
-            if fn == docname:
+        for fullname, obj in self.data['objects'].items():
+            if obj.docname == docname:
                 to_clear.add(fullname)
         for fullname in to_clear:
             del self.data['objects'][fullname]
 
     def resolve_xref(self, env, fromdocname, builder,
                      typ, target, node, contnode):
-        targetid = '%s:%s' % (typ, target)
+        targetid = f'{typ}:{target}'
         obj = self.data['objects'].get(targetid)
         if obj is None:
             # TODO: warn somehow?
             return None
-        return make_refnode(builder, fromdocname, obj[0], targetid,
+
+        return make_refnode(builder, fromdocname, obj.docname, obj.node_id,
                             contnode, target)
 
+    def note_object(self, objtype: str, name: str, target_id: str,
+                    node_id: str, location: Any = None):
+        if target_id in self.data['objects']:
+            other = self.data['objects'][target_id].docname
+            logger.warning(
+                f'CMake object {target_id!r} also described in {other!r}',
+                location=location)
+
+        self.data['objects'][target_id] = ObjectEntry(
+            self.env.docname, objtype, node_id, name)
+
     def get_objects(self):
-        for refname, (docname, type) in self.data['objects'].items():
-            yield (refname, refname, type, docname, refname, 1)
+        for refname, obj in self.data['objects'].items():
+            yield (refname, obj.name, obj.objtype, obj.docname, obj.node_id, 1)
 
 def setup(app):
     app.add_directive('cmake-module', CMakeModule)
