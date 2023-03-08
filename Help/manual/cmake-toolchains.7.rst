@@ -84,7 +84,7 @@ Toolchain Features
 ==================
 
 CMake provides the :command:`try_compile` command and wrapper macros such as
-:module:`CheckCXXSourceCompiles`, :module:`CheckCXXSymbolExists` and
+:module:`CheckSourceCompiles`, :module:`CheckCXXSymbolExists` and
 :module:`CheckIncludeFile` to test capability and availability of various
 toolchain features. These APIs test the toolchain in some way and cache the
 result so that the test does not have to be performed again the next time
