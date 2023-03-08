@@ -1,6 +1,7 @@
-CMake Error at IncludeIsDirectory.cmake:1 \(include\):
+^CMake Error at IncludeIsDirectory.cmake:1 \(include\):
   include requested file is a directory:
 
-    .*/Tests/RunCMake/include/IncludeIsDirectory-build
+    [^
+]*/Tests/RunCMake/include/IncludeIsDirectory-build
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)$
