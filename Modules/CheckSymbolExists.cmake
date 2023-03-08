@@ -62,7 +62,7 @@ For example:
 
 include_guard(GLOBAL)
 
-cmake_policy(PUSH)
+block(SCOPE_FOR POLICIES)
 cmake_policy(SET CMP0054 NEW) # if() quoted variables not dereferenced
 
 macro(CHECK_SYMBOL_EXISTS SYMBOL FILES VARIABLE)
@@ -166,4 +166,4 @@ int main(int argc, char** argv)
   endif()
 endmacro()
 
-cmake_policy(POP)
+endblock()

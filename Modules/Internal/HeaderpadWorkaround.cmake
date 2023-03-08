@@ -9,7 +9,7 @@ if(NOT APPLE)
   return()
 endif()
 
-cmake_policy(PUSH)
+block(SCOPE_FOR POLICIES)
 cmake_policy(SET CMP0054 NEW) # if() quoted variables not dereferenced
 
 function(__cmake_internal_workaround_headerpad_flag_conflict _LANG)
@@ -66,4 +66,4 @@ endforeach()
 unset(__lang)
 unset(__enabled_languages)
 
-cmake_policy(POP)
+endblock()
