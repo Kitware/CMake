@@ -1806,13 +1806,10 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
       this->WriteCustomRuleCSharp(e0, c, name, script, additional_inputs.str(),
                                   outputs.str(), comment, ccg);
     } else {
-      this->WriteCustomRuleCpp(
-        *spe2, c, script, additional_inputs.str(), outputs.str(), comment, ccg,
-        symbolic,
-        (command.GetUsesTerminal() ||
-         (command.HasMainDependency() && source->GetIsGenerated()))
-          ? BuildInParallel::No
-          : BuildInParallel::Yes);
+      // FIXME(#18405): Enable BuildInParallel::Yes via an option or policy.
+      this->WriteCustomRuleCpp(*spe2, c, script, additional_inputs.str(),
+                               outputs.str(), comment, ccg, symbolic,
+                               BuildInParallel::No);
     }
   }
 }
