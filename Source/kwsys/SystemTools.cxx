@@ -2528,6 +2528,12 @@ SystemTools::CopyStatus SystemTools::CloneFileContent(
   return status;
 #elif defined(__APPLE__) &&                                                   \
   defined(KWSYS_SYSTEMTOOLS_HAVE_MACOS_COPYFILE_CLONE)
+  // When running as root, copyfile() copies more metadata than we
+  // want, such as ownership.  Pretend it is not available.
+  if (getuid() == 0) {
+    return CopyStatus{ Status::POSIX(ENOSYS), CopyStatus::NoPath };
+  }
+
   // NOTE: we cannot use `clonefile` as the {a,c,m}time for the file needs to
   // be updated by `copy_file_if_different` and `copy_file`.
   if (copyfile(source.c_str(), destination.c_str(), nullptr,
