@@ -79,6 +79,7 @@ libsdl-dev
 libsqlite3-dev
 libtiff-dev
 libuv1-dev
+libwxgtk3.0-dev
 libx11-dev
 libxalan-c-dev
 libxerces-c-dev
