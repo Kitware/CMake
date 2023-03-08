@@ -380,3 +380,10 @@ Changes made since CMake 3.24.0 include the following.
 
 * Some implementation updates were made to support ecosystem changes
   and/or fix regressions.
+
+3.24.4
+------
+
+* This version made no changes to documented features or interfaces.
+  Some implementation updates were made to support ecosystem changes
+  and/or fix regressions.
