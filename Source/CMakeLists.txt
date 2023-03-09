@@ -333,6 +333,8 @@ add_library(
   cmLinkLineComputer.h
   cmLinkLineDeviceComputer.cxx
   cmLinkLineDeviceComputer.h
+  cmList.h
+  cmList.cxx
   cmListFileCache.cxx
   cmListFileCache.h
   cmLocalCommonGenerator.cxx

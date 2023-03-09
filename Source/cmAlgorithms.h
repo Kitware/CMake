@@ -95,7 +95,7 @@ typename Range::const_iterator cmRemoveIndices(Range& r, InputRange const& rem)
 }
 
 template <typename Range, typename MatchRange>
-typename Range::const_iterator cmRemoveMatching(Range& r, MatchRange const& m)
+auto cmRemoveMatching(Range& r, MatchRange const& m) -> decltype(r.begin())
 {
   return std::remove_if(r.begin(), r.end(),
                         ContainerAlgorithms::BinarySearcher<MatchRange>(m));
