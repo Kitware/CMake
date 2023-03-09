@@ -183,8 +183,8 @@ private:
 #define CM_HEADER_REGEX "\\.(h|hh|h\\+\\+|hm|hpp|hxx|in|txx|inl)$"
 
 #define CM_SOURCE_REGEX                                                       \
-  "\\.(C|F|M|c|c\\+\\+|cc|cpp|mpp|cxx|ixx|cppm|cu|f|f90|for|fpp|ftn|m|mm|"    \
-  "rc|def|r|odl|idl|hpj|bat)$"
+  "\\.(C|F|M|c|c\\+\\+|cc|cpp|mpp|cxx|ixx|cppm|ccm|cxxm|c\\+\\+m|cu"          \
+  "|f|f90|for|fpp|ftn|m|mm|rc|def|r|odl|idl|hpj|bat)$"
 
 #define CM_PCH_REGEX "cmake_pch(_[^.]+)?\\.(h|hxx)$"
 
