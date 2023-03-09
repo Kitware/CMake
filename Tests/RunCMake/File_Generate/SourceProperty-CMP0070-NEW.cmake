@@ -1,5 +1,5 @@
 enable_language(C)
-add_library(foo)
+add_library(foo empty.c)
 
 cmake_policy(SET CMP0070 NEW)
 file(GENERATE OUTPUT relative-output-NEW.c CONTENT "")
