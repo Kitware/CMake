@@ -92,7 +92,7 @@ get_filename_component(__check_type_size_dir "${CMAKE_CURRENT_LIST_FILE}" PATH)
 
 include_guard(GLOBAL)
 
-cmake_policy(PUSH)
+block(SCOPE_FOR POLICIES)
 cmake_policy(SET CMP0054 NEW)
 
 #-----------------------------------------------------------------------------
@@ -294,4 +294,4 @@ macro(CHECK_TYPE_SIZE TYPE VARIABLE)
 endmacro()
 
 #-----------------------------------------------------------------------------
-cmake_policy(POP)
+endblock()
