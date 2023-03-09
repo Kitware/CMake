@@ -126,27 +126,27 @@ void cmRST::Reset()
   if (!this->MarkupLines.empty()) {
     cmRST::UnindentLines(this->MarkupLines);
   }
-  switch (this->Directive) {
-    case DirectiveNone:
+  switch (this->DirectiveType) {
+    case Directive::None:
       break;
-    case DirectiveParsedLiteral:
+    case Directive::ParsedLiteral:
       this->ProcessDirectiveParsedLiteral();
       break;
-    case DirectiveLiteralBlock:
+    case Directive::LiteralBlock:
       this->ProcessDirectiveLiteralBlock();
       break;
-    case DirectiveCodeBlock:
+    case Directive::CodeBlock:
       this->ProcessDirectiveCodeBlock();
       break;
-    case DirectiveReplace:
+    case Directive::Replace:
       this->ProcessDirectiveReplace();
       break;
-    case DirectiveTocTree:
+    case Directive::TocTree:
       this->ProcessDirectiveTocTree();
       break;
   }
-  this->Markup = MarkupNone;
-  this->Directive = DirectiveNone;
+  this->MarkupType = Markup::None;
+  this->DirectiveType = Directive::None;
   this->MarkupLines.clear();
 }
 
@@ -160,9 +160,9 @@ void cmRST::ProcessLine(std::string const& line)
       (line.size() >= 3 && line[0] == '.' && line[1] == '.' &&
        isspace(line[2]))) {
     this->Reset();
-    this->Markup =
-      (line.find_first_not_of(" \t", 2) == std::string::npos ? MarkupEmpty
-                                                             : MarkupNormal);
+    this->MarkupType =
+      (line.find_first_not_of(" \t", 2) == std::string::npos ? Markup::Empty
+                                                             : Markup::Normal);
     // XXX(clang-tidy): https://bugs.llvm.org/show_bug.cgi?id=44165
     // NOLINTNEXTLINE(bugprone-branch-clone)
     if (this->CMakeDirective.find(line)) {
@@ -171,33 +171,33 @@ void cmRST::ProcessLine(std::string const& line)
     } else if (this->CMakeModuleDirective.find(line)) {
       // Process cmake-module directive: scan .cmake file comments.
       std::string file = this->CMakeModuleDirective.match(1);
-      if (file.empty() || !this->ProcessInclude(file, IncludeModule)) {
+      if (file.empty() || !this->ProcessInclude(file, Include::Module)) {
         this->NormalLine(line);
       }
     } else if (this->ParsedLiteralDirective.find(line)) {
       // Record the literal lines to output after whole block.
-      this->Directive = DirectiveParsedLiteral;
+      this->DirectiveType = Directive::ParsedLiteral;
       this->MarkupLines.push_back(this->ParsedLiteralDirective.match(1));
     } else if (this->CodeBlockDirective.find(line)) {
       // Record the literal lines to output after whole block.
       // Ignore the language spec and record the opening line as blank.
-      this->Directive = DirectiveCodeBlock;
+      this->DirectiveType = Directive::CodeBlock;
       this->MarkupLines.emplace_back();
     } else if (this->ReplaceDirective.find(line)) {
       // Record the replace directive content.
-      this->Directive = DirectiveReplace;
+      this->DirectiveType = Directive::Replace;
       this->ReplaceName = this->ReplaceDirective.match(1);
       this->MarkupLines.push_back(this->ReplaceDirective.match(2));
     } else if (this->IncludeDirective.find(line)) {
       // Process the include directive or output the directive and its
       // content normally if it fails.
       std::string file = this->IncludeDirective.match(1);
-      if (file.empty() || !this->ProcessInclude(file, IncludeNormal)) {
+      if (file.empty() || !this->ProcessInclude(file, Include::Normal)) {
         this->NormalLine(line);
       }
     } else if (this->TocTreeDirective.find(line)) {
       // Record the toctree entries to process after whole block.
-      this->Directive = DirectiveTocTree;
+      this->DirectiveType = Directive::TocTree;
       this->MarkupLines.push_back(this->TocTreeDirective.match(1));
     } else if (this->ProductionListDirective.find(line)) {
       // Output productionlist directives and their content normally.
@@ -213,12 +213,13 @@ void cmRST::ProcessLine(std::string const& line)
   }
   // An explicit markup start followed nothing but whitespace and a
   // blank line does not consume any indented text following.
-  else if (this->Markup == MarkupEmpty && line.empty()) {
+  else if (this->MarkupType == Markup::Empty && line.empty()) {
     this->NormalLine(line);
   }
   // Indented lines following an explicit markup start are explicit markup.
-  else if (this->Markup && (line.empty() || isspace(line[0]))) {
-    this->Markup = MarkupNormal;
+  else if (this->MarkupType != Markup::None &&
+           (line.empty() || isspace(line[0]))) {
+    this->MarkupType = Markup::Normal;
     // Record markup lines if the start line was recorded.
     if (!this->MarkupLines.empty()) {
       this->MarkupLines.push_back(line);
@@ -227,8 +228,8 @@ void cmRST::ProcessLine(std::string const& line)
   // A blank line following a paragraph ending in "::" starts a literal block.
   else if (lastLineEndedInColonColon && line.empty()) {
     // Record the literal lines to output after whole block.
-    this->Markup = MarkupNormal;
-    this->Directive = DirectiveLiteralBlock;
+    this->MarkupType = Markup::Normal;
+    this->DirectiveType = Directive::LiteralBlock;
     this->MarkupLines.emplace_back();
     this->OutputLine("", false);
   }
@@ -354,14 +355,14 @@ void cmRST::OutputMarkupLines(bool inlineMarkup)
   this->OutputLinePending = true;
 }
 
-bool cmRST::ProcessInclude(std::string file, IncludeType type)
+bool cmRST::ProcessInclude(std::string file, Include type)
 {
   bool found = false;
   if (this->IncludeDepth < 10) {
     cmRST r(this->OS, this->DocRoot);
     r.IncludeDepth = this->IncludeDepth + 1;
     r.OutputLinePending = this->OutputLinePending;
-    if (type != IncludeTocTree) {
+    if (type != Include::TocTree) {
       r.Replace = this->Replace;
     }
     if (file[0] == '/') {
@@ -369,8 +370,8 @@ bool cmRST::ProcessInclude(std::string file, IncludeType type)
     } else {
       file = this->DocDir + "/" + file;
     }
-    found = r.ProcessFile(file, type == IncludeModule);
-    if (type != IncludeTocTree) {
+    found = r.ProcessFile(file, type == Include::Module);
+    if (type != Include::TocTree) {
       this->Replace = r.Replace;
     }
     this->OutputLinePending = r.OutputLinePending;
@@ -408,9 +409,9 @@ void cmRST::ProcessDirectiveTocTree()
     if (!line.empty() && line[0] != ':') {
       if (this->TocTreeLink.find(line)) {
         std::string const& link = this->TocTreeLink.match(1);
-        this->ProcessInclude(link + ".rst", IncludeTocTree);
+        this->ProcessInclude(link + ".rst", Include::TocTree);
       } else {
-        this->ProcessInclude(line + ".rst", IncludeTocTree);
+        this->ProcessInclude(line + ".rst", Include::TocTree);
       }
     }
   }
