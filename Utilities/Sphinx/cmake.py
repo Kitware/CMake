@@ -360,7 +360,7 @@ class CMakeSignatureObject(CMakeObject):
 
     def add_target_and_index(self, name, sig, signode):
         if name in self.targetnames:
-            targetname = self.targetnames[name].lower()
+            sigargs = self.targetnames[name]
         else:
             def extract_keywords(params):
                 for p in params:
@@ -370,7 +370,8 @@ class CMakeSignatureObject(CMakeObject):
                         return
 
             keywords = extract_keywords(name.split('(')[1].split())
-            targetname = ' '.join(keywords).lower()
+            sigargs = ' '.join(keywords)
+        targetname = sigargs.lower()
         targetid = nodes.make_id(targetname)
 
         if targetid not in self.state.document.ids:
@@ -378,6 +379,15 @@ class CMakeSignatureObject(CMakeObject):
             signode['ids'].append(targetid)
             signode['first'] = (not self.names)
             self.state.document.note_explicit_target(signode)
+
+            # Register the signature as a command object.
+            command = name.split('(')[0].lower()
+            refname = f'{command}({sigargs})'
+            refid = f'command:{command}({targetname})'
+
+            domain = cast(CMakeDomain, self.env.get_domain('cmake'))
+            domain.note_object('command', name=refname, target_id=refid,
+                               node_id=targetid, location=signode)
 
     def run(self):
         targets = self.options.get('target')
@@ -393,19 +403,15 @@ class CMakeXRefRole(XRefRole):
 
     # See sphinx.util.nodes.explicit_title_re; \x00 escapes '<'.
     _re = re.compile(r'^(.+?)(\s*)(?<!\x00)<(.*?)>$', re.DOTALL)
-    _re_sub = re.compile(r'^([^()\s]+)\s*\(([^()]*)\)$', re.DOTALL)
+    _re_ref = re.compile(r'^.*\s<\w+([(][\w\s]+[)])?>$', re.DOTALL)
     _re_genex = re.compile(r'^\$<([^<>:]+)(:[^<>]+)?>$', re.DOTALL)
     _re_guide = re.compile(r'^([^<>/]+)/([^<>]*)$', re.DOTALL)
 
     def __call__(self, typ, rawtext, text, *args, **keys):
-        # Translate CMake command cross-references of the form:
-        #  `command_name(SUB_COMMAND)`
-        # to have an explicit target:
-        #  `command_name(SUB_COMMAND) <command_name>`
         if typ == 'cmake:command':
-            m = CMakeXRefRole._re_sub.match(text)
-            if m:
-                text = '%s <%s>' % (text, m.group(1))
+            m = CMakeXRefRole._re_ref.match(text)
+            if m is None:
+                text = f'{text} <{text}>'
         elif typ == 'cmake:genex':
             m = CMakeXRefRole._re_genex.match(text)
             if m:
@@ -460,6 +466,10 @@ class CMakeXRefTransform(Transform):
             if objtype == 'guide' and CMakeXRefRole._re_guide.match(objname):
                 # Do not index cross-references to guide sections.
                 continue
+
+            if objtype == 'command':
+                # Index signature references to their parent command.
+                objname = objname.split('(')[0].lower()
 
             targetnum = env.new_serialno('index-%s:%s' % (objtype, objname))
 
@@ -537,6 +547,15 @@ class CMakeDomain(Domain):
                      typ, target, node, contnode):
         targetid = f'{typ}:{target}'
         obj = self.data['objects'].get(targetid)
+
+        if obj is None and typ == 'command':
+            # If 'command(args)' wasn't found, try just 'command'.
+            # TODO: remove this fallback? warn?
+            # logger.warning(f'no match for {targetid}')
+            command = target.split('(')[0]
+            targetid = f'{typ}:{command}'
+            obj = self.data['objects'].get(targetid)
+
         if obj is None:
             # TODO: warn somehow?
             return None

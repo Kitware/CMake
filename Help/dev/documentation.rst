@@ -270,8 +270,7 @@ The ``signature`` directive requires one argument, the signature summary:
   abbreviate it in the ``signature`` directive argument and specify the full
   signature in a ``code-block`` in the description.
 
-The ``signature`` directive generates a document-local hyperlink target
-for each signature:
+The ``signature`` directive generates a hyperlink target for each signature:
 
 * Default target names are automatically extracted from leading "keyword"
   arguments in the signatures, where a keyword is any sequence of
@@ -299,7 +298,8 @@ for each signature:
 
 * The targets may be referenced from within the same document using
   ```REF`_`` or ```TEXT <REF_>`_`` syntax.  Like reStructuredText section
-  headers, the targets do not work with Sphinx ``:ref:`` syntax.
+  headers, the targets do not work with Sphinx ``:ref:`` syntax, however
+  they can be globally referenced using e.g. ``:command:`string(APPEND)```.
 
 The directive treats its content as the documentation of the signature(s).
 Indent the signature documentation accordingly.
