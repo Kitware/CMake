@@ -1484,6 +1484,7 @@ if(BUILD_TESTING)
       SQLite3
       TIFF
       Vulkan
+      wxWidgets
       X11
       XalanC
       XercesC

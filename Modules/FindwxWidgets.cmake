@@ -113,6 +113,16 @@ If wxWidgets is required (i.e., not an optional part):
    include(${wxWidgets_USE_FILE})
    # and for each of your dependent executable/library targets:
    target_link_libraries(<YourTarget> ${wxWidgets_LIBRARIES})
+
+Imported targets
+^^^^^^^^^^^^^^^^
+
+.. versionadded:: 3.27
+
+This module defines the following :prop_tgt:`IMPORTED` targets:
+
+``wxWidgets::wxWidgets``
+  An interface library providing usage requirements for the found components.
 #]=======================================================================]
 
 #
@@ -980,6 +990,17 @@ find_package_handle_standard_args(wxWidgets
   ${wxWidgets_HANDLE_COMPONENTS}
   )
 unset(wxWidgets_HANDLE_COMPONENTS)
+
+if(wxWidgets_FOUND AND NOT TARGET wxWidgets::wxWidgets)
+  add_library(wxWidgets::wxWidgets INTERFACE IMPORTED)
+  target_link_libraries(wxWidgets::wxWidgets INTERFACE ${wxWidgets_LIBRARIES})
+  target_link_directories(wxWidgets::wxWidgets INTERFACE ${wxWidgets_LIBRARY_DIRS})
+  target_include_directories(wxWidgets::wxWidgets INTERFACE ${wxWidgets_INCLUDE_DIRS})
+  target_compile_options(wxWidgets::wxWidgets INTERFACE ${wxWidgets_CXX_FLAGS})
+  target_compile_definitions(wxWidgets::wxWidgets INTERFACE ${wxWidgets_DEFINITIONS})
+  # FIXME: Add "$<$<CONFIG:Debug>:${wxWidgets_DEFINITIONS_DEBUG}>"
+  # if the debug library variant is available.
+endif()
 
 #=====================================================================
 # Macros for use in wxWidgets apps.

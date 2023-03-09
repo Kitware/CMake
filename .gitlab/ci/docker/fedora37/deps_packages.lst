@@ -105,6 +105,7 @@ SDL-devel
 sqlite-devel
 swig
 unixODBC-devel
+wxGTK-devel
 xalan-c-devel
 xerces-c-devel
 xz-devel
