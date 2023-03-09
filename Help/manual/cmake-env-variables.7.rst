@@ -20,6 +20,7 @@ Environment Variables that Change Behavior
 .. toctree::
    :maxdepth: 1
 
+   /envvar/CMAKE_MAXIMUM_RECURSION_DEPTH
    /envvar/CMAKE_PREFIX_PATH
    /envvar/SSL_CERT_DIR
    /envvar/SSL_CERT_FILE

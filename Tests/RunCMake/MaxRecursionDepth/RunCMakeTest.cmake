@@ -1,20 +1,42 @@
 include(RunCMake)
 include(RunCTest)
 
+# Isolate this test from the caller's environment.
+unset(ENV{CMAKE_MAXIMUM_RECURSION_DEPTH})
+
 function(run_cmake_recursive name)
   run_cmake_with_options(${name}-default "-DCMAKE_MODULE_PATH=${CMAKE_CURRENT_LIST_DIR}" -DTEST_NAME=${name})
   run_cmake_command(${name}-default-script ${CMAKE_COMMAND} "-DCMAKE_MODULE_PATH=${CMAKE_CURRENT_LIST_DIR}" -DTEST_NAME=${name} -P "${CMAKE_CURRENT_LIST_DIR}/CMakeLists.txt")
 
+  set(ENV{CMAKE_MAXIMUM_RECURSION_DEPTH} 5) # overridden, not used
   run_cmake_with_options(${name}-var "-DCMAKE_MODULE_PATH=${CMAKE_CURRENT_LIST_DIR}" -DTEST_NAME=${name} -DCMAKE_MAXIMUM_RECURSION_DEPTH=10)
   run_cmake_with_options(${name}-invalid-var "-DCMAKE_MODULE_PATH=${CMAKE_CURRENT_LIST_DIR}" -DTEST_NAME=${name} -DCMAKE_MAXIMUM_RECURSION_DEPTH=a)
   run_cmake_command(${name}-var-script ${CMAKE_COMMAND} "-DCMAKE_MODULE_PATH=${CMAKE_CURRENT_LIST_DIR}" -DTEST_NAME=${name} -DCMAKE_MAXIMUM_RECURSION_DEPTH=10 -P "${CMAKE_CURRENT_LIST_DIR}/CMakeLists.txt")
   run_cmake_command(${name}-invalid-var-script ${CMAKE_COMMAND} "-DCMAKE_MODULE_PATH=${CMAKE_CURRENT_LIST_DIR}" -DTEST_NAME=${name} -DCMAKE_MAXIMUM_RECURSION_DEPTH=a -P "${CMAKE_CURRENT_LIST_DIR}/CMakeLists.txt")
+
+  set(ENV{CMAKE_MAXIMUM_RECURSION_DEPTH} 10)
+  run_cmake_with_options(${name}-env "-DCMAKE_MODULE_PATH=${CMAKE_CURRENT_LIST_DIR}" -DTEST_NAME=${name})
+  run_cmake_command(${name}-env-script ${CMAKE_COMMAND} "-DCMAKE_MODULE_PATH=${CMAKE_CURRENT_LIST_DIR}" -DTEST_NAME=${name} -P "${CMAKE_CURRENT_LIST_DIR}/CMakeLists.txt")
+
+  set(ENV{CMAKE_MAXIMUM_RECURSION_DEPTH} a)
+  run_cmake_with_options(${name}-invalid-env "-DCMAKE_MODULE_PATH=${CMAKE_CURRENT_LIST_DIR}" -DTEST_NAME=${name})
+  run_cmake_command(${name}-invalid-env-script ${CMAKE_COMMAND} "-DCMAKE_MODULE_PATH=${CMAKE_CURRENT_LIST_DIR}" -DTEST_NAME=${name} -P "${CMAKE_CURRENT_LIST_DIR}/CMakeLists.txt")
+
+  unset(ENV{CMAKE_MAXIMUM_RECURSION_DEPTH})
 endfunction()
 
 function(run_ctest_recursive name)
   run_ctest(${name}-default "-DCMAKE_MODULE_PATH=${CMAKE_CURRENT_LIST_DIR}" -DTEST_NAME=${name})
   run_ctest(${name}-var "-DCMAKE_MODULE_PATH=${CMAKE_CURRENT_LIST_DIR}" -DTEST_NAME=${name} -DCMAKE_MAXIMUM_RECURSION_DEPTH=10)
   run_ctest(${name}-invalid-var "-DCMAKE_MODULE_PATH=${CMAKE_CURRENT_LIST_DIR}" -DTEST_NAME=${name} -DCMAKE_MAXIMUM_RECURSION_DEPTH=a)
+
+  set(ENV{CMAKE_MAXIMUM_RECURSION_DEPTH} 10)
+  run_ctest(${name}-env "-DCMAKE_MODULE_PATH=${CMAKE_CURRENT_LIST_DIR}" -DTEST_NAME=${name})
+
+  set(ENV{CMAKE_MAXIMUM_RECURSION_DEPTH} a)
+  run_ctest(${name}-invalid-env "-DCMAKE_MODULE_PATH=${CMAKE_CURRENT_LIST_DIR}" -DTEST_NAME=${name})
+
+  unset(ENV{CMAKE_MAXIMUM_RECURSION_DEPTH})
 endfunction()
 
 run_cmake_recursive(function)

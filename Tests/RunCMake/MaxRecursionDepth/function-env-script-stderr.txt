@@ -1,0 +1,21 @@
+^3
+4
+5
+6
+7
+8
+9
+10
+CMake Error at .*/function\.cmake:2 \(message\):
+  Maximum recursion depth of 10 exceeded
+Call Stack \(most recent call first\):
+  .*/function\.cmake:4 \(recursive\)
+  .*/function\.cmake:4 \(recursive\)
+  .*/function\.cmake:4 \(recursive\)
+  .*/function\.cmake:4 \(recursive\)
+  .*/function\.cmake:4 \(recursive\)
+  .*/function\.cmake:4 \(recursive\)
+  .*/function\.cmake:4 \(recursive\)
+  .*/function\.cmake:4 \(recursive\)
+  .*/function\.cmake:7 \(recursive\)
+  .*/CMakeLists\.txt:5 \(include\)$
