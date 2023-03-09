@@ -105,7 +105,7 @@ The specific lines to remove are as follows:
   :name: CMakeLists.txt-CXX_STANDARD-variable-remove
   :language: cmake
   :start-after: # specify the C++ standard
-  :end-before: # TODO 5: Create helper variables
+  :end-before: # TODO 6: Create helper variables
 
 Next, we need to create an interface library, ``tutorial_compiler_flags``. And
 then use :command:`target_compile_features` to add the compiler feature
@@ -128,7 +128,8 @@ then use :command:`target_compile_features` to add the compiler feature
   </details>
 
 Finally, with our interface library set up, we need to link our
-executable ``Target`` and our ``MathFunctions`` library to our new
+executable ``Target``, our ``MathFunctions`` library, and our ``SqrtLibrary``
+library to our new
 ``tutorial_compiler_flags`` library. Respectively, the code will look like
 this:
 
@@ -147,7 +148,7 @@ this:
 
   </details>
 
-and this:
+this:
 
 .. raw:: html
 
@@ -158,11 +159,29 @@ and this:
   :name: MathFunctions-CMakeLists.txt-target_link_libraries-step4
   :language: cmake
   :start-after: # link our compiler flags interface library
-  :end-before: # TODO 1
+  :end-before: target_link_libraries(MathFunctions
 
 .. raw:: html
 
   </details>
+
+and this:
+
+.. raw:: html
+
+  <details><summary>TODO 4: Click to show/hide answer</summary>
+
+.. literalinclude:: Step5/MathFunctions/CMakeLists.txt
+  :caption: TODO 4: MathFunctions/CMakeLists.txt
+  :name: MathFunctions-SqrtLibrary-target_link_libraries-step4
+  :language: cmake
+  :start-after: target_link_libraries(SqrtLibrary
+  :end-before: endif()
+
+.. raw:: html
+
+  </details>
+
 
 With this, all of our code still requires C++ 11 to build. Notice
 though that with this method, it gives us the ability to be specific about
@@ -199,8 +218,8 @@ Files to Edit
 Getting Started
 ---------------
 
-Start with the resulting files from Exercise 1. Complete ``TODO 4`` through
-``TODO 7``.
+Start with the resulting files from Exercise 1. Complete ``TODO 5`` through
+``TODO 8``.
 
 First, in the top level ``CMakeLists.txt`` file, we need to set the
 :command:`cmake_minimum_required` to ``3.15``. In this exercise we are going
@@ -230,10 +249,10 @@ version ``3.15``:
 
 .. raw:: html
 
-  <details><summary>TODO 4: Click to show/hide answer</summary>
+  <details><summary>TODO 5: Click to show/hide answer</summary>
 
 .. literalinclude:: Step5/CMakeLists.txt
-  :caption: TODO 4: CMakeLists.txt
+  :caption: TODO 5: CMakeLists.txt
   :name: MathFunctions-CMakeLists.txt-minimum-required-step4
   :language: cmake
   :end-before: # set the project name and version
@@ -249,10 +268,10 @@ variables ``gcc_like_cxx`` and ``msvc_cxx`` as follows:
 
 .. raw:: html
 
-  <details><summary>TODO 5: Click to show/hide answer</summary>
+  <details><summary>TODO 6: Click to show/hide answer</summary>
 
 .. literalinclude:: Step5/CMakeLists.txt
-  :caption: TODO 5: CMakeLists.txt
+  :caption: TODO 6: CMakeLists.txt
   :name: CMakeLists.txt-compile_lang_and_id
   :language: cmake
   :start-after: # the BUILD_INTERFACE genex
@@ -270,10 +289,10 @@ interface library.
 
 .. raw:: html
 
-  <details><summary>TODO 6: Click to show/hide answer</summary>
+  <details><summary>TODO 7: Click to show/hide answer</summary>
 
 .. code-block:: cmake
-  :caption: TODO 6: CMakeLists.txt
+  :caption: TODO 7: CMakeLists.txt
   :name: CMakeLists.txt-compile_flags
 
   target_compile_options(tutorial_compiler_flags INTERFACE
@@ -292,10 +311,10 @@ condition. The resulting full code looks like the following:
 
 .. raw:: html
 
-  <details><summary>TODO 7: Click to show/hide answer</summary>
+  <details><summary>TODO 8: Click to show/hide answer</summary>
 
 .. literalinclude:: Step5/CMakeLists.txt
-  :caption: TODO 7: CMakeLists.txt
+  :caption: TODO 8: CMakeLists.txt
   :name: CMakeLists.txt-target_compile_options-genex
   :language: cmake
   :start-after: set(msvc_cxx "$<COMPILE_LANG_AND_ID:CXX,MSVC>")

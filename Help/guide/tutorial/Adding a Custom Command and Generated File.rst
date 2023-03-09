@@ -18,17 +18,16 @@ In the ``MathFunctions`` subdirectory, a new source file named
 After reviewing the file, we can see that the table is produced as valid C++
 code and that the output filename is passed in as an argument.
 
-The next step is to add the appropriate commands to the
-``MathFunctions/CMakeLists.txt`` file to build the MakeTable executable and
+The next step is to create ``MathFunctions/MakeTable.cmake``. Then, add the
+appropriate commands to the file to build the ``MakeTable`` executable and
 then run it as part of the build process. A few commands are needed to
 accomplish this.
 
-First, in the ``USE_MYMATH`` section of ``MathFunctions/CMakeLists.txt``,
-we add an executable for ``MakeTable``.
+First, we add an executable for ``MakeTable``.
 
-.. literalinclude:: Step9/MathFunctions/CMakeLists.txt
-  :caption: MathFunctions/CMakeLists.txt
-  :name: MathFunctions/CMakeLists.txt-add_executable-MakeTable
+.. literalinclude:: Step9/MathFunctions/MakeTable.cmake
+  :caption: MathFunctions/MakeTable.cmake
+  :name: MathFunctions/MakeTable.cmake-add_executable-MakeTable
   :language: cmake
   :start-after: # first we add the executable that generates the table
   :end-before: target_link_libraries
@@ -36,9 +35,9 @@ we add an executable for ``MakeTable``.
 After creating the executable, we add the ``tutorial_compiler_flags`` to our
 executable using :command:`target_link_libraries`.
 
-.. literalinclude:: Step9/MathFunctions/CMakeLists.txt
-  :caption: MathFunctions/CMakeLists.txt
-  :name: MathFunctions/CMakeLists.txt-link-tutorial-compiler-flags
+.. literalinclude:: Step9/MathFunctions/MakeTable.cmake
+  :caption: MathFunctions/MakeTable.cmake
+  :name: MathFunctions/MakeTable.cmake-link-tutorial-compiler-flags
   :language: cmake
   :start-after: add_executable
   :end-before: # add the command to generate
@@ -46,16 +45,15 @@ executable using :command:`target_link_libraries`.
 Then we add a custom command that specifies how to produce ``Table.h``
 by running MakeTable.
 
-.. literalinclude:: Step9/MathFunctions/CMakeLists.txt
-  :caption: MathFunctions/CMakeLists.txt
-  :name: MathFunctions/CMakeLists.txt-add_custom_command-Table.h
+.. literalinclude:: Step9/MathFunctions/MakeTable.cmake
+  :caption: MathFunctions/MakeTable.cmake
+  :name: MathFunctions/MakeTable.cmake-add_custom_command-Table.h
   :language: cmake
   :start-after: # add the command to generate the source code
-  :end-before: # library that just does sqrt
 
 Next we have to let CMake know that ``mysqrt.cxx`` depends on the generated
 file ``Table.h``. This is done by adding the generated ``Table.h`` to the list
-of sources for the library MathFunctions.
+of sources for the library ``SqrtLibrary``.
 
 .. literalinclude:: Step9/MathFunctions/CMakeLists.txt
   :caption: MathFunctions/CMakeLists.txt
@@ -74,17 +72,15 @@ directories so that ``Table.h`` can be found and included by ``mysqrt.cxx``.
   :start-after: # state that we depend on our bin
   :end-before: target_link_libraries
 
-As the last thing in our ``USE_MYMATH`` section, we need to link the our
-flags onto ``SqrtLibrary`` and then link ``SqrtLibrary`` onto
-``MathFunctions``. This makes the resulting ``USE_MYMATH`` section look like
-the following:
+As the last step, we need to include
+``MakeTable.cmake`` at the top of the ``MathFunctions/CMakeLists.txt``.
 
 .. literalinclude:: Step9/MathFunctions/CMakeLists.txt
   :caption: MathFunctions/CMakeLists.txt
-  :name: MathFunctions/CMakeLists.txt-full_USE_MYMATH-section
+  :name: MathFunctions/CMakeLists.txt-include-MakeTable.cmake
   :language: cmake
-  :start-after: if (USE_MYMATH)
-  :end-before: endif()
+  :start-after: # generate Table.h
+  :end-before: # library that just does sqrt
 
 Now let's use the generated table. First, modify ``mysqrt.cxx`` to include
 ``Table.h``. Next, we can rewrite the ``mysqrt`` function to use the table:
