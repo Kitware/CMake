@@ -211,7 +211,7 @@ void cmRST::ProcessLine(std::string const& line)
       this->NormalLine(line);
     }
   }
-  // An explicit markup start followed nothing but whitespace and a
+  // An explicit markup start followed by nothing but whitespace and a
   // blank line does not consume any indented text following.
   else if (this->MarkupType == Markup::Empty && line.empty()) {
     this->NormalLine(line);
