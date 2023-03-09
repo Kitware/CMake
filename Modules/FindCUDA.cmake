@@ -2,7 +2,12 @@
 FindCUDA
 --------
 
-.. warning:: *Deprecated since version 3.10.*
+.. versionchanged:: 3.27
+  This module is available only if policy :policy:`CMP0146` is not set to ``NEW``.
+  Port projects to CMake's first-class ``CUDA`` language support.
+
+.. deprecated:: 3.10
+  Do not use this module in new code.
 
 It is no longer necessary to use this module or call ``find_package(CUDA)``
 for compiling CUDA code. Instead, list ``CUDA`` among the languages named
@@ -554,6 +559,16 @@ The script defines the following variables:
 # DEALINGS IN THE SOFTWARE.
 #
 ###############################################################################
+
+cmake_policy(GET CMP0146 _FindCUDA_CMP0146)
+if(_FindCUDA_CMP0146 STREQUAL "NEW")
+  message(FATAL_ERROR "The FindCUDA module has been removed by policy CMP0146.")
+endif()
+
+if(_FindCUDA_testing)
+  set(_FindCUDA_included TRUE)
+  return()
+endif()
 
 # FindCUDA.cmake
 

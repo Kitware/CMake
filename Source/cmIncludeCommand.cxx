@@ -22,6 +22,7 @@ bool cmIncludeCommand(std::vector<std::string> const& args,
   if (DeprecatedModules.empty()) {
     DeprecatedModules["Dart"] = cmPolicies::CMP0145;
     DeprecatedModules["Documentation"] = cmPolicies::CMP0106;
+    DeprecatedModules["FindCUDA"] = cmPolicies::CMP0146;
     DeprecatedModules["FindDart"] = cmPolicies::CMP0145;
     DeprecatedModules["WriteCompilerDetectionHeader"] = cmPolicies::CMP0120;
   }
