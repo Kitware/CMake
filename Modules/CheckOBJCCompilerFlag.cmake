@@ -35,7 +35,6 @@ effect or even a specific one is beyond the scope of this module.
 #]=======================================================================]
 
 include_guard(GLOBAL)
-include(CheckOBJCSourceCompiles)
 include(Internal/CheckCompilerFlag)
 
 macro (CHECK_OBJC_COMPILER_FLAG _FLAG _RESULT)

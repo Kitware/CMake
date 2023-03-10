@@ -33,7 +33,6 @@ effect or even a specific one is beyond the scope of this module.
 #]=======================================================================]
 
 include_guard(GLOBAL)
-include(CheckCSourceCompiles)
 include(Internal/CheckCompilerFlag)
 
 macro (CHECK_C_COMPILER_FLAG _FLAG _RESULT)
