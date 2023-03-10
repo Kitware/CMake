@@ -565,6 +565,13 @@ if(_FindCUDA_CMP0146 STREQUAL "NEW")
   message(FATAL_ERROR "The FindCUDA module has been removed by policy CMP0146.")
 endif()
 
+if(CMAKE_GENERATOR MATCHES "Visual Studio")
+  cmake_policy(GET CMP0147 _FindCUDA_CMP0147)
+  if(_FindCUDA_CMP0147 STREQUAL "NEW")
+    message(FATAL_ERROR "The FindCUDA module does not work in Visual Studio with policy CMP0147.")
+  endif()
+endif()
+
 if(_FindCUDA_testing)
   set(_FindCUDA_included TRUE)
   return()
