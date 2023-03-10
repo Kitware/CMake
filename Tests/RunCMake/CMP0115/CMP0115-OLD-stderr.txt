@@ -3,11 +3,9 @@
 
     noexist
 
-  Tried extensions [^
-]*
-  [^
-]*
-Call Stack \(most recent call first\):
+  Tried extensions ([^
+]+
+)+Call Stack \(most recent call first\):
   CMP0115-OLD\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
 

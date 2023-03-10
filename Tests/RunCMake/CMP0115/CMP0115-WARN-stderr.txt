@@ -17,11 +17,9 @@ CMake Error at CMP0115\.cmake:[0-9]+ \(add_executable\):
 
     noexist
 
-  Tried extensions [^
-]*
-  [^
-]*
-Call Stack \(most recent call first\):
+  Tried extensions ([^
+]+
+)+Call Stack \(most recent call first\):
   CMP0115-WARN\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
 

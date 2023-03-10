@@ -335,7 +335,7 @@ cmake::cmake(Role role, cmState::Mode mode, cmState::ProjectKind projectKind)
     // The "c" extension MUST precede the "C" extension.
     setupExts(this->CLikeSourceFileExtensions,
               { "c", "C", "c++", "cc", "cpp", "cxx", "cu", "mpp", "m", "M",
-                "mm", "ixx", "cppm" });
+                "mm", "ixx", "cppm", "ccm", "cxxm", "c++m" });
     setupExts(this->HeaderFileExtensions,
               { "h", "hh", "h++", "hm", "hpp", "hxx", "in", "txx" });
     setupExts(this->CudaFileExtensions, { "cu" });

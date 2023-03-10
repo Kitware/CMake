@@ -3,7 +3,7 @@ CMake Error at MissingSource.cmake:1 \(add_library\):
 
     missing.c
 
-  Tried extensions \.c \.C .*
-.*
-Call Stack \(most recent call first\):
+  Tried extensions ([^
+]+
+)+Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)
