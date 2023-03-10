@@ -15,102 +15,107 @@ unset.  See the :command:`unset` command to unset variables explicitly.
 Set Normal Variable
 ^^^^^^^^^^^^^^^^^^^
 
-.. code-block:: cmake
-
+.. signature::
   set(<variable> <value>... [PARENT_SCOPE])
+  :target: normal
 
-Sets the given ``<variable>`` in the current function or directory scope.
+  Sets the given ``<variable>`` in the current function or directory scope.
 
-If the ``PARENT_SCOPE`` option is given the variable will be set in
-the scope above the current scope.  Each new directory or :command:`function`
-command creates a new scope.  A scope can also be created with the
-:command:`block` command. This command will set the value of a variable into
-the parent directory, calling function or encompassing scope (whichever is
-applicable to the case at hand). The previous state of the variable's value
-stays the same in the current scope (e.g., if it was undefined before, it is
-still undefined and if it had a value, it is still that value).
+  If the ``PARENT_SCOPE`` option is given the variable will be set in
+  the scope above the current scope.  Each new directory or :command:`function`
+  command creates a new scope.  A scope can also be created with the
+  :command:`block` command. This command will set the value of a variable into
+  the parent directory, calling function or encompassing scope (whichever is
+  applicable to the case at hand). The previous state of the variable's value
+  stays the same in the current scope (e.g., if it was undefined before, it is
+  still undefined and if it had a value, it is still that value).
 
-The :command:`block(PROPAGATE)` and :command:`return(PROPAGATE)` commands can
-be used as an alternate method to the :command:`set(PARENT_SCOPE)` and
-:command:`unset(PARENT_SCOPE)` commands to update the parent scope.
+  The :command:`block(PROPAGATE)` and :command:`return(PROPAGATE)` commands
+  can be used as an alternate method to the :command:`set(PARENT_SCOPE)`
+  and :command:`unset(PARENT_SCOPE)` commands to update the parent scope.
 
 Set Cache Entry
 ^^^^^^^^^^^^^^^
 
-.. code-block:: cmake
-
+.. signature::
   set(<variable> <value>... CACHE <type> <docstring> [FORCE])
+  :target: CACHE
 
-Sets the given cache ``<variable>`` (cache entry).  Since cache entries
-are meant to provide user-settable values this does not overwrite
-existing cache entries by default.  Use the ``FORCE`` option to
-overwrite existing entries.
+  Sets the given cache ``<variable>`` (cache entry).  Since cache entries
+  are meant to provide user-settable values this does not overwrite
+  existing cache entries by default.  Use the ``FORCE`` option to
+  overwrite existing entries.
 
-The ``<type>`` must be specified as one of:
+  The ``<type>`` must be specified as one of:
 
-``BOOL``
-  Boolean ``ON/OFF`` value.  :manual:`cmake-gui(1)` offers a checkbox.
+    ``BOOL``
+      Boolean ``ON/OFF`` value.
+      :manual:`cmake-gui(1)` offers a checkbox.
 
-``FILEPATH``
-  Path to a file on disk.  :manual:`cmake-gui(1)` offers a file dialog.
+    ``FILEPATH``
+      Path to a file on disk.
+      :manual:`cmake-gui(1)` offers a file dialog.
 
-``PATH``
-  Path to a directory on disk.  :manual:`cmake-gui(1)` offers a file dialog.
+    ``PATH``
+      Path to a directory on disk.
+      :manual:`cmake-gui(1)` offers a file dialog.
 
-``STRING``
-  A line of text.  :manual:`cmake-gui(1)` offers a text field or a
-  drop-down selection if the :prop_cache:`STRINGS` cache entry
-  property is set.
+    ``STRING``
+      A line of text.
+      :manual:`cmake-gui(1)` offers a text field or a drop-down selection
+      if the :prop_cache:`STRINGS` cache entry property is set.
 
-``INTERNAL``
-  A line of text.  :manual:`cmake-gui(1)` does not show internal entries.
-  They may be used to store variables persistently across runs.
-  Use of this type implies ``FORCE``.
+    ``INTERNAL``
+      A line of text.
+      :manual:`cmake-gui(1)` does not show internal entries.
+      They may be used to store variables persistently across runs.
+      Use of this type implies ``FORCE``.
 
-The ``<docstring>`` must be specified as a line of text providing
-a quick summary of the option for presentation to :manual:`cmake-gui(1)`
-users.
+  The ``<docstring>`` must be specified as a line of text
+  providing a quick summary of the option
+  for presentation to :manual:`cmake-gui(1)` users.
 
-If the cache entry does not exist prior to the call or the ``FORCE``
-option is given then the cache entry will be set to the given value.
+  If the cache entry does not exist prior to the call or the ``FORCE``
+  option is given then the cache entry will be set to the given value.
 
-.. note::
+  .. note::
 
-  The content of the cache variable will not be directly accessible if a normal
-  variable of the same name already exists (see :ref:`rules of variable
-  evaluation <CMake Language Variables>`). If policy :policy:`CMP0126` is set
-  to ``OLD``, any normal variable binding in the current scope will be removed.
+    The content of the cache variable will not be directly accessible
+    if a normal variable of the same name already exists
+    (see :ref:`rules of variable evaluation <CMake Language Variables>`).
+    If policy :policy:`CMP0126` is set to ``OLD``, any normal variable
+    binding in the current scope will be removed.
 
-It is possible for the cache entry to exist prior to the call but
-have no type set if it was created on the :manual:`cmake(1)` command
-line by a user through the :option:`-D\<var\>=\<value\> <cmake -D>` option without
-specifying a type.  In this case the ``set`` command will add the
-type.  Furthermore, if the ``<type>`` is ``PATH`` or ``FILEPATH``
-and the ``<value>`` provided on the command line is a relative path,
-then the ``set`` command will treat the path as relative to the
-current working directory and convert it to an absolute path.
+  It is possible for the cache entry to exist prior to the call but
+  have no type set if it was created on the :manual:`cmake(1)` command
+  line by a user through the :option:`-D\<var\>=\<value\> <cmake -D>` option
+  without specifying a type.  In this case the ``set`` command will add the
+  type.  Furthermore, if the ``<type>`` is ``PATH`` or ``FILEPATH``
+  and the ``<value>`` provided on the command line is a relative path,
+  then the ``set`` command will treat the path as relative to the
+  current working directory and convert it to an absolute path.
 
 Set Environment Variable
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. code-block:: cmake
-
+.. signature::
   set(ENV{<variable>} [<value>])
+  :target: ENV
 
-Sets an :manual:`Environment Variable <cmake-env-variables(7)>`
-to the given value.
-Subsequent calls of ``$ENV{<variable>}`` will return this new value.
+  Sets an :manual:`Environment Variable <cmake-env-variables(7)>`
+  to the given value.
+  Subsequent calls of ``$ENV{<variable>}`` will return this new value.
 
-This command affects only the current CMake process, not the process
-from which CMake was called, nor the system environment at large,
-nor the environment of subsequent build or test processes.
+  This command affects only the current CMake process, not the process
+  from which CMake was called, nor the system environment at large,
+  nor the environment of subsequent build or test processes.
 
-If no argument is given after ``ENV{<variable>}`` or if ``<value>`` is
-an empty string, then this command will clear any existing value of the
-environment variable.
+  If no argument is given after ``ENV{<variable>}`` or if ``<value>`` is
+  an empty string, then this command will clear any existing value of the
+  environment variable.
 
-Arguments after ``<value>`` are ignored. If extra arguments are found,
-then an author warning is issued.
+  Arguments after ``<value>`` are ignored. If extra arguments are found,
+  then an author warning is issued.
 
 See Also
 ^^^^^^^^
