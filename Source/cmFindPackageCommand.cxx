@@ -502,6 +502,7 @@ cmFindPackageCommand::cmFindPackageCommand(cmExecutionStatus& status)
   this->DebugMode = false;
   this->AppendSearchPathGroups();
 
+  this->DeprecatedFindModules["CUDA"] = cmPolicies::CMP0146;
   this->DeprecatedFindModules["Dart"] = cmPolicies::CMP0145;
   this->DeprecatedFindModules["Qt"] = cmPolicies::CMP0084;
 }
