@@ -32,7 +32,7 @@ Synopsis
     string(`COMPARE`_ <op> <string1> <string2> <out-var>)
 
   `Hashing`_
-    string(`\<HASH\> <HASH_>`_ <out-var> <input>)
+    string(`\<HASH\>`_ <out-var> <input>)
 
   `Generation`_
     string(`ASCII`_ <number>... <out-var>)
@@ -299,7 +299,7 @@ Hashing
 
 .. signature::
   string(<HASH> <output_variable> <input>)
-  :target: HASH
+  :target: <HASH>
 
   Compute a cryptographic hash of the ``<input>`` string.
   The supported ``<HASH>`` algorithm names are:
