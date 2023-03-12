@@ -112,6 +112,11 @@ public:
     return this->WindowsTargetPlatformVersion;
   }
 
+  std::string const& GetWindowsTargetPlatformMinVersion() const
+  {
+    return this->WindowsTargetPlatformMinVersion;
+  }
+
   /** Return true if building for WindowsCE */
   bool TargetsWindowsCE() const override { return this->SystemIsWindowsCE; }
 
@@ -219,6 +224,7 @@ protected:
   std::string DefaultPlatformToolsetHostArchitecture;
   std::string DefaultAndroidToolset;
   std::string WindowsTargetPlatformVersion;
+  std::string WindowsTargetPlatformMinVersion;
   std::string SystemName;
   std::string SystemVersion;
   std::string NsightTegraVersion;

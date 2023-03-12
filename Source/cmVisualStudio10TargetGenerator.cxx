@@ -4981,8 +4981,10 @@ void cmVisualStudio10TargetGenerator::WriteApplicationTypeSettings(Elem& e1)
     e1.Element("WindowsTargetPlatformMinVersion", *targetPlatformMinVersion);
   } else if (isWindowsStore && rev == "10.0") {
     // If the min version is not set, then use the TargetPlatformVersion
-    if (!targetPlatformVersion.empty()) {
-      e1.Element("WindowsTargetPlatformMinVersion", targetPlatformVersion);
+    std::string const& targetPlatformMinVersion =
+      gg->GetWindowsTargetPlatformMinVersion();
+    if (!targetPlatformMinVersion.empty()) {
+      e1.Element("WindowsTargetPlatformMinVersion", targetPlatformMinVersion);
     }
   }
 

@@ -203,6 +203,9 @@ void cmGlobalVisualStudio14Generator::SetWindowsTargetPlatformVersion(
   }
   mf->AddDefinition("CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION",
                     this->WindowsTargetPlatformVersion);
+
+  this->WindowsTargetPlatformMinVersion =
+    GetWindows10TargetPlatformMinVersion(mf);
 }
 
 bool cmGlobalVisualStudio14Generator::SelectWindowsStoreToolset(
@@ -239,6 +242,29 @@ bool cmGlobalVisualStudio14Generator::IsWindowsStoreToolsetInstalled() const
   std::string win10SDK;
   return cmSystemTools::ReadRegistryValue(universal10Key, win10SDK,
                                           cmSystemTools::KeyWOW64_32);
+}
+
+std::string
+cmGlobalVisualStudio14Generator::GetWindows10TargetPlatformMinVersion(
+  cmMakefile* mf) const
+{
+  // if the given value is set, it can either be OFF/FALSE or a valid SDK
+  // string
+  if (cmValue value = mf->GetDefinition(
+        "CMAKE_VS_WINDOWS_TARGET_PLATFORM_MIN_VERSION")) {
+
+    // If the value is some off/false value, then there is NO maximum set.
+    if (cmIsOff(value)) {
+      return std::string();
+    }
+    // If the value is something else, trust that it is a valid SDK value.
+    if (value) {
+      return *value;
+    }
+    // If value is an invalid pointer, leave result unchanged.
+  }
+
+  return this->WindowsTargetPlatformVersion; //"10.0.10240.0";
 }
 
 std::string cmGlobalVisualStudio14Generator::GetWindows10SDKMaxVersion(
