@@ -106,7 +106,7 @@ class CMakeModule(Directive):
     def run(self):
         settings = self.state.document.settings
         if not settings.file_insertion_enabled:
-            raise self.warning('"%s" directive disabled.' % self.name)
+            raise self.warning(f'{self.name!r} directive disabled.')
 
         env = self.state.document.settings.env
         rel_path, path = env.relfn2path(self.arguments[0])
@@ -117,13 +117,12 @@ class CMakeModule(Directive):
             settings.record_dependencies.add(path)
             f = io.FileInput(source_path=path, encoding=encoding,
                              error_handler=e_handler)
-        except UnicodeEncodeError as error:
-            msg = ('Problems with "%s" directive path:\n'
-                   'Cannot encode input file path "%s" '
-                   '(wrong locale?).' % (self.name, path))
+        except UnicodeEncodeError:
+            msg = (f'Problems with {self.name!r} directive path:\n'
+                   f'Cannot encode input file path {path!r} (wrong locale?).')
             raise self.severe(msg)
         except IOError as error:
-            msg = 'Problems with "%s" directive path:\n%s.' % (self.name, error)
+            msg = f'Problems with {self.name!r} directive path:\n{error}.'
             raise self.severe(msg)
         raw_lines = f.read().splitlines()
         f.close()
@@ -143,7 +142,7 @@ class CMakeModule(Directive):
                 # Line mode: check for .rst start (bracket or line)
                 m = self.re_start.match(line)
                 if m:
-                    rst = ']%s]' % m.group('eq')
+                    rst = f']{m.group("eq")}]'
                     line = ''
                 elif line == '#.rst:':
                     rst = '#'
@@ -158,8 +157,8 @@ class CMakeModule(Directive):
                     line = ''
             lines.append(line)
         if rst is not None and rst != '#':
-            raise self.warning('"%s" found unclosed bracket "#[%s[.rst:" in %s' %
-                               (self.name, rst[1:-1], path))
+            raise self.warning(f'{self.name!r} found unclosed bracket '
+                               f'"#[{rst[1:-1]}[.rst:" in {path!r}')
         self.state_machine.insert_input(lines, path)
         return []
 
@@ -168,7 +167,7 @@ class _cmake_index_entry:
         self.desc = desc
 
     def __call__(self, title, targetid, main = 'main'):
-        return ('pair', u'%s ; %s' % (self.desc, title), targetid, main, None)
+        return ('pair', f'{self.desc} ; {title}', targetid, main, None)
 
 _cmake_index_objs = {
     'command':    _cmake_index_entry('command'),
@@ -244,7 +243,7 @@ class CMakeTransform(Transform):
                     if m:
                         title = m.group(1)
                 targetname = title
-            targetid = '%s:%s' % (objtype, targetname)
+            targetid = f'{objtype}:{targetname}'
             targetnode = nodes.target('', '', ids=[targetid])
             self.document.note_explicit_target(targetnode)
             self.document.insert(0, targetnode)
@@ -274,7 +273,7 @@ class CMakeObject(ObjectDescription):
             targetname = self.targetname
         else:
             targetname = name
-        targetid = '%s:%s' % (self.objtype, targetname)
+        targetid = f'{self.objtype}:{targetname}'
         if targetid not in self.state.document.ids:
             signode['names'].append(targetid)
             signode['ids'].append(targetid)
@@ -513,11 +512,11 @@ class CMakeXRefRole(CMakeReferenceRole[XRefRole]):
         elif typ == 'cmake:genex':
             m = CMakeXRefRole._re_genex.match(text)
             if m:
-                text = '%s <%s>' % (text, m.group(1))
+                text = f'{text} <{m.group(1)}>'
         elif typ == 'cmake:guide':
             m = CMakeXRefRole._re_guide.match(text)
             if m:
-                text = '%s <%s>' % (m.group(2), text)
+                text = f'{m.group(2)} <{text}>'
         return super().__call__(typ, rawtext, text, *args, **kwargs)
 
     # We cannot insert index nodes using the result_nodes method
@@ -561,9 +560,9 @@ class CMakeXRefTransform(Transform):
                 # Index signature references to their parent command.
                 objname = objname.split('(')[0].lower()
 
-            targetnum = env.new_serialno('index-%s:%s' % (objtype, objname))
+            targetnum = env.new_serialno(f'index-{objtype}:{objname}')
 
-            targetid = 'index-%s-%s:%s' % (targetnum, objtype, objname)
+            targetid = f'index-{targetnum}-{objtype}:{objname}'
             targetnode = nodes.target('', '', ids=[targetid])
             self.document.note_explicit_target(targetnode)
 
