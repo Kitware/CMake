@@ -441,7 +441,10 @@ class cmMakefile;
   SELECT(POLICY, CMP0145, "The Dart and FindDart modules are removed.", 3,    \
          27, 0, cmPolicies::WARN)                                             \
   SELECT(POLICY, CMP0146, "The FindCUDA module is removed.", 3, 27, 0,        \
-         cmPolicies::WARN)
+         cmPolicies::WARN)                                                    \
+  SELECT(POLICY, CMP0147,                                                     \
+         "Visual Studio generators build custom commands in parallel.", 3,    \
+         27, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \
@@ -481,7 +484,9 @@ class cmMakefile;
   F(CMP0131)                                                                  \
   F(CMP0142)
 
-#define CM_FOR_EACH_CUSTOM_COMMAND_POLICY(F) F(CMP0116)
+#define CM_FOR_EACH_CUSTOM_COMMAND_POLICY(F)                                  \
+  F(CMP0116)                                                                  \
+  F(CMP0147)
 
 /** \class cmPolicies
  * \brief Handles changes in CMake behavior and policies

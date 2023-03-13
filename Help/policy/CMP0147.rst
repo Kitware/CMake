@@ -1,0 +1,24 @@
+CMP0147
+-------
+
+.. versionadded:: 3.27
+
+:ref:`Visual Studio Generators` build custom commands in parallel.
+
+Visual Studio 15.8 (2017) and newer support building custom commands in
+parallel.  CMake 3.27 and above prefer to enable this behavior by adding
+a ``BuildInParallel`` setting to custom commands in ``.vcxproj`` files.
+This policy provides compatibility for projects that have not been updated
+to expect this, e.g., because their custom commands were accidentally
+relying on serial execution by MSBuild.
+
+The ``OLD`` behavior for this policy is to not add ``BuildInParallel``.
+The ``NEW`` behavior for this policy is to add ``BuildInParallel`` for
+VS 15.8 and newer.
+
+This policy was introduced in CMake version 3.27.  Use the
+:command:`cmake_policy` command to set it to ``OLD`` or ``NEW`` explicitly.
+Unlike many policies, CMake version |release| does *not* warn
+when this policy is not set and simply uses ``OLD`` behavior.
+
+.. include:: DEPRECATED.txt
