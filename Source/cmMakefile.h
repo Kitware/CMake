@@ -1023,6 +1023,8 @@ public:
                               const char* sourceFilename) const;
   bool IsProjectFile(const char* filename) const;
 
+  size_t GetRecursionDepthLimit() const;
+
   size_t GetRecursionDepth() const;
   void SetRecursionDepth(size_t recursionDepth);
 
