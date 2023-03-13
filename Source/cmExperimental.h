@@ -15,6 +15,7 @@ public:
   enum class Feature
   {
     CxxModuleCMakeApi,
+    WindowsKernelModeDriver,
 
     Sentinel,
   };
