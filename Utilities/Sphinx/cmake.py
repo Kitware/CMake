@@ -77,39 +77,13 @@ from sphinx.util.nodes import make_refnode
 from sphinx.util import logging, ws_re
 from sphinx import addnodes
 
+import sphinx
+
+# Require at least Sphinx 2.x.
+assert sphinx.version_info >= (2,)
+
 logger = logging.getLogger(__name__)
 
-sphinx_before_1_4 = False
-sphinx_before_1_7_2 = False
-try:
-    from sphinx import version_info
-    if version_info < (1, 4):
-        sphinx_before_1_4 = True
-    if version_info < (1, 7, 2):
-        sphinx_before_1_7_2 = True
-except ImportError:
-    # The `sphinx.version_info` tuple was added in Sphinx v1.2:
-    sphinx_before_1_4 = True
-    sphinx_before_1_7_2 = True
-
-if sphinx_before_1_7_2:
-  # Monkey patch for sphinx generating invalid content for qcollectiongenerator
-  # https://github.com/sphinx-doc/sphinx/issues/1435
-  from sphinx.util.pycompat import htmlescape
-  from sphinx.builders.qthelp import QtHelpBuilder
-  old_build_keywords = QtHelpBuilder.build_keywords
-  def new_build_keywords(self, title, refs, subitems):
-    old_items = old_build_keywords(self, title, refs, subitems)
-    new_items = []
-    for item in old_items:
-      before, rest = item.split("ref=\"", 1)
-      ref, after = rest.split("\"")
-      if ("<" in ref and ">" in ref):
-        new_items.append(before + "ref=\"" + htmlescape(ref) + "\"" + after)
-      else:
-        new_items.append(item)
-    return new_items
-  QtHelpBuilder.build_keywords = new_build_keywords
 
 @dataclass
 class ObjectEntry:
@@ -194,11 +168,7 @@ class _cmake_index_entry:
         self.desc = desc
 
     def __call__(self, title, targetid, main = 'main'):
-        # See https://github.com/sphinx-doc/sphinx/issues/2673
-        if sphinx_before_1_4:
-            return ('pair', u'%s ; %s' % (self.desc, title), targetid, main)
-        else:
-            return ('pair', u'%s ; %s' % (self.desc, title), targetid, main, None)
+        return ('pair', u'%s ; %s' % (self.desc, title), targetid, main, None)
 
 _cmake_index_objs = {
     'command':    _cmake_index_entry('command'),
