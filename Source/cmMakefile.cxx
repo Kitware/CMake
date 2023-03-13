@@ -99,7 +99,6 @@ cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,
   this->StateSnapshot =
     this->StateSnapshot.GetState()->CreatePolicyScopeSnapshot(
       this->StateSnapshot);
-  this->RecursionDepth = 0;
 
   // Enter a policy level for this directory.
   this->PushPolicy();
@@ -454,12 +453,12 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
   static_cast<void>(stack_manager);
 
   // Check for maximum recursion depth.
-  int depth = CMake_DEFAULT_RECURSION_LIMIT;
+  size_t depth = CMake_DEFAULT_RECURSION_LIMIT;
   if (cmValue depthStr =
         this->GetDefinition("CMAKE_MAXIMUM_RECURSION_DEPTH")) {
     unsigned long depthUL;
     if (cmStrToULong(depthStr.GetCStr(), &depthUL)) {
-      depth = static_cast<int>(depthUL);
+      depth = depthUL;
     }
   }
   if (this->RecursionDepth > depth) {
@@ -2864,12 +2863,12 @@ bool cmMakefile::IsProjectFile(const char* filename) const
      !cmSystemTools::IsSubDirectory(filename, "/CMakeFiles"));
 }
 
-int cmMakefile::GetRecursionDepth() const
+size_t cmMakefile::GetRecursionDepth() const
 {
   return this->RecursionDepth;
 }
 
-void cmMakefile::SetRecursionDepth(int recursionDepth)
+void cmMakefile::SetRecursionDepth(size_t recursionDepth)
 {
   this->RecursionDepth = recursionDepth;
 }
