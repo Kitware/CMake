@@ -504,9 +504,9 @@ Writing
 
   .. code-block:: cmake
 
-    file(GENERATE OUTPUT output-file
-         <INPUT input-file|CONTENT content>
-         [CONDITION expression] [TARGET target]
+    file(GENERATE OUTPUT <output-file>
+         <INPUT <input-file>|CONTENT <content>>
+         [CONDITION <expression>] [TARGET <target>]
          [NO_SOURCE_PERMISSIONS | USE_SOURCE_PERMISSIONS |
           FILE_PERMISSIONS <permissions>...]
          [NEWLINE_STYLE [UNIX|DOS|WIN32|LF|CRLF] ])
@@ -588,8 +588,8 @@ Writing
   of a project's ``CMakeLists.txt`` files.
 
 .. signature::
-  file(CONFIGURE OUTPUT output-file
-       CONTENT content
+  file(CONFIGURE OUTPUT <output-file>
+       CONTENT <content>
        [ESCAPE_QUOTES] [@ONLY]
        [NEWLINE_STYLE [UNIX|DOS|WIN32|LF|CRLF] ])
   :target: CONFIGURE
