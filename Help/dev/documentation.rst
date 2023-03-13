@@ -301,6 +301,23 @@ The ``signature`` directive generates a hyperlink target for each signature:
   headers, the targets do not work with Sphinx ``:ref:`` syntax, however
   they can be globally referenced using e.g. ``:command:`string(APPEND)```.
 
+Although whitespace in the signature is not preserved, by default, line breaks
+are suppressed inside of square- or angle-brackets.  This behavior can be
+controlled using the ``:break:`` option; note, however, that there is no way
+to *force* a line break.  The default value is 'smart'.  Allowable values are:
+
+  ``all``
+    Allow line breaks at any whitespace.
+
+  ``smart`` (default)
+    Allow line breaks at whitespace, except between matched square- or
+    angle-brackets.  For example, if a signature contains the text
+    ``<input>... [OUTPUT_VARIABLE <out-var>]``, a line break would be allowed
+    after ``<input>...`` but not between ``OUTPUT_VARIABLE`` and ``<out-var>``.
+
+  ``verbatim``
+    Allow line breaks only where the source document contains a newline.
+
 The directive treats its content as the documentation of the signature(s).
 Indent the signature documentation accordingly.
 

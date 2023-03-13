@@ -40,6 +40,11 @@ div.sphinxsidebarwrapper {
   font-weight: normal;
 }
 
+/* Implement non-breaking spaces in signatures. */
+.nbsp {
+  white-space: nowrap;
+}
+
 /* Remove unwanted margin in case list item contains a div-wrapping
    directive like `.. versionadded` or `.. deprecated`. */
 dd > :first-child > p {
