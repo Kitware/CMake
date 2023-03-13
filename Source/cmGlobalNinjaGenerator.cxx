@@ -8,7 +8,6 @@
 #include <cstdio>
 #include <functional>
 #include <sstream>
-#include <tuple>
 #include <utility>
 
 #include <cm/iterator>
@@ -580,7 +579,7 @@ void cmGlobalNinjaGenerator::Generate()
   }
 
   for (auto& it : this->Configs) {
-    it.second.TargetDependsClosureLocalOutputs.clear();
+    it.second.TargetDependsClosures.clear();
   }
 
   this->TargetAll = this->NinjaOutputPath("all");
@@ -1363,85 +1362,70 @@ void cmGlobalNinjaGenerator::AppendTargetDependsClosure(
   cmGeneratorTarget const* target, cmNinjaDeps& outputs,
   const std::string& config, const std::string& fileConfig, bool genexOutput)
 {
-  struct Entry
-  {
-    Entry(cmGeneratorTarget const* target_, std::string config_,
-          std::string fileConfig_)
-      : target(target_)
-      , config(std::move(config_))
-      , fileConfig(std::move(fileConfig_))
-    {
-    }
+  cmNinjaOuts outs;
+  this->AppendTargetDependsClosure(target, outs, config, fileConfig,
+                                   genexOutput, true);
+  cm::append(outputs, outs);
+}
 
-    bool operator<(Entry const& other) const
-    {
-      return std::tie(target, config, fileConfig) <
-        std::tie(other.target, other.config, other.fileConfig);
-    }
+void cmGlobalNinjaGenerator::AppendTargetDependsClosure(
+  cmGeneratorTarget const* target, cmNinjaOuts& outputs,
+  const std::string& config, const std::string& fileConfig, bool genexOutput,
+  bool omit_self)
+{
 
-    cmGeneratorTarget const* target;
-    std::string config;
-    std::string fileConfig;
+  // try to locate the target in the cache
+  ByConfig::TargetDependsClosureKey key{
+    target,
+    config,
+    genexOutput,
   };
+  auto find = this->Configs[fileConfig].TargetDependsClosures.lower_bound(key);
 
-  cmNinjaOuts outputSet;
-  std::vector<Entry> stack;
-  stack.emplace_back(target, config, fileConfig);
-  std::set<Entry> seen = { stack.back() };
+  if (find == this->Configs[fileConfig].TargetDependsClosures.end() ||
+      find->first != key) {
+    // We now calculate the closure outputs by inspecting the dependent
+    // targets recursively.
+    // For that we have to distinguish between a local result set that is only
+    // relevant for filling the cache entries properly isolated and a global
+    // result set that is relevant for the result of the top level call to
+    // AppendTargetDependsClosure.
+    cmNinjaOuts this_outs; // this will be the new cache entry
 
-  do {
-    Entry entry = std::move(stack.back());
-    stack.pop_back();
-
-    // generate the outputs of the target itself, if applicable
-    if (entry.target != target) {
-      // try to locate the target in the cache
-      ByConfig::TargetDependsClosureKey localCacheKey{
-        entry.target,
-        entry.config,
-        genexOutput,
-      };
-      auto& configs = this->Configs[entry.fileConfig];
-      auto lb =
-        configs.TargetDependsClosureLocalOutputs.lower_bound(localCacheKey);
-
-      if (lb == configs.TargetDependsClosureLocalOutputs.end() ||
-          lb->first != localCacheKey) {
-        cmNinjaDeps outs;
-        this->AppendTargetOutputs(entry.target, outs, entry.config,
-                                  DependOnTargetArtifact);
-        configs.TargetDependsClosureLocalOutputs.emplace_hint(
-          lb, localCacheKey, outs);
-        for (auto& value : outs) {
-          outputSet.emplace(std::move(value));
-        }
-      } else {
-        outputSet.insert(lb->second.begin(), lb->second.end());
-      }
-    }
-
-    // push next dependencies
-    for (const auto& dep_target : this->GetTargetDirectDepends(entry.target)) {
+    for (auto const& dep_target : this->GetTargetDirectDepends(target)) {
       if (!dep_target->IsInBuildSystem()) {
         continue;
       }
 
-      if (!this->IsSingleConfigUtility(entry.target) &&
+      if (!this->IsSingleConfigUtility(target) &&
           !this->IsSingleConfigUtility(dep_target) &&
           this->EnableCrossConfigBuild() && !dep_target.IsCross() &&
           !genexOutput) {
         continue;
       }
 
-      auto emplaceRes = seen.emplace(
-        dep_target, dep_target.IsCross() ? entry.fileConfig : entry.config,
-        entry.fileConfig);
-      if (emplaceRes.second) {
-        stack.emplace_back(*emplaceRes.first);
+      if (dep_target.IsCross()) {
+        this->AppendTargetDependsClosure(dep_target, this_outs, fileConfig,
+                                         fileConfig, genexOutput, false);
+      } else {
+        this->AppendTargetDependsClosure(dep_target, this_outs, config,
+                                         fileConfig, genexOutput, false);
       }
     }
-  } while (!stack.empty());
-  cm::append(outputs, outputSet);
+    find = this->Configs[fileConfig].TargetDependsClosures.emplace_hint(
+      find, key, std::move(this_outs));
+  }
+
+  // now fill the outputs of the final result from the newly generated cache
+  // entry
+  outputs.insert(find->second.begin(), find->second.end());
+
+  // finally generate the outputs of the target itself, if applicable
+  cmNinjaDeps outs;
+  if (!omit_self) {
+    this->AppendTargetOutputs(target, outs, config, DependOnTargetArtifact);
+  }
+  outputs.insert(outs.begin(), outs.end());
 }
 
 void cmGlobalNinjaGenerator::AddTargetAlias(const std::string& alias,
