@@ -1,67 +1,15 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
+# BEGIN imports
+
 import os
 import re
 
 from dataclasses import dataclass
 from typing import Any, List, Tuple, Type, cast
 
-# Override much of pygments' CMakeLexer.
-# We need to parse CMake syntax definitions, not CMake code.
-
-# For hard test cases that use much of the syntax below, see
-# - module/FindPkgConfig.html (with "glib-2.0>=2.10 gtk+-2.0" and similar)
-# - module/ExternalProject.html (with http:// https:// git@; also has command options -E --build)
-# - manual/cmake-buildsystem.7.html (with nested $<..>; relative and absolute paths, "::")
-
-from pygments.lexers import CMakeLexer
-from pygments.token import Name, Operator, Punctuation, String, Text, Comment, Generic, Whitespace, Number
-from pygments.lexer import bygroups
-
-# RE to split multiple command signatures
-sig_end_re = re.compile(r'(?<=[)])\n')
-
-# Notes on regular expressions below:
-# - [\.\+-] are needed for string constants like gtk+-2.0
-# - Unix paths are recognized by '/'; support for Windows paths may be added if needed
-# - (\\.) allows for \-escapes (used in manual/cmake-language.7)
-# - $<..$<..$>..> nested occurrence in cmake-buildsystem
-# - Nested variable evaluations are only supported in a limited capacity. Only
-#   one level of nesting is supported and at most one nested variable can be present.
-
-CMakeLexer.tokens["root"] = [
-  (r'\b(\w+)([ \t]*)(\()', bygroups(Name.Function, Text, Name.Function), '#push'),     # fctn(
-  (r'\(', Name.Function, '#push'),
-  (r'\)', Name.Function, '#pop'),
-  (r'\[', Punctuation, '#push'),
-  (r'\]', Punctuation, '#pop'),
-  (r'[|;,.=*\-]', Punctuation),
-  (r'\\\\', Punctuation),                                   # used in commands/source_group
-  (r'[:]', Operator),
-  (r'[<>]=', Punctuation),                                  # used in FindPkgConfig.cmake
-  (r'\$<', Operator, '#push'),                              # $<...>
-  (r'<[^<|]+?>(\w*\.\.\.)?', Name.Variable),                # <expr>
-  (r'(\$\w*\{)([^\}\$]*)?(?:(\$\w*\{)([^\}]+?)(\}))?([^\}]*?)(\})',  # ${..} $ENV{..}, possibly nested
-    bygroups(Operator, Name.Tag, Operator, Name.Tag, Operator, Name.Tag, Operator)),
-  (r'([A-Z]+\{)(.+?)(\})', bygroups(Operator, Name.Tag, Operator)),  # DATA{ ...}
-  (r'[a-z]+(@|(://))((\\.)|[\w.+-:/\\])+', Name.Attribute),          # URL, git@, ...
-  (r'/\w[\w\.\+-/\\]*', Name.Attribute),                    # absolute path
-  (r'/', Name.Attribute),
-  (r'\w[\w\.\+-]*/[\w.+-/\\]*', Name.Attribute),            # relative path
-  (r'[A-Z]((\\.)|[\w.+-])*[a-z]((\\.)|[\w.+-])*', Name.Builtin), # initial A-Z, contains a-z
-  (r'@?[A-Z][A-Z0-9_]*', Name.Constant),
-  (r'[a-z_]((\\;)|(\\ )|[\w.+-])*', Name.Builtin),
-  (r'[0-9][0-9\.]*', Number),
-  (r'(?s)"(\\"|[^"])*"', String),                           # "string"
-  (r'\.\.\.', Name.Variable),
-  (r'<', Operator, '#push'),                                # <..|..> is different from <expr>
-  (r'>', Operator, '#pop'),
-  (r'\n', Whitespace),
-  (r'[ \t]+', Whitespace),
-  (r'#.*\n', Comment),
-  #  (r'[^<>\])\}\|$"# \t\n]+', Name.Exception),            # fallback, for debugging only
-]
+import sphinx
 
 from docutils.utils.code_analyzer import Lexer, LexerError
 from docutils.parsers.rst import Directive, directives
@@ -77,12 +25,98 @@ from sphinx.util.nodes import make_refnode
 from sphinx.util import logging, ws_re
 from sphinx import addnodes
 
-import sphinx
+# END imports
+
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+# BEGIN pygments tweaks
+
+# Override much of pygments' CMakeLexer.
+# We need to parse CMake syntax definitions, not CMake code.
+
+# For hard test cases that use much of the syntax below, see
+# - module/FindPkgConfig.html
+#     (with "glib-2.0>=2.10 gtk+-2.0" and similar)
+# - module/ExternalProject.html
+#     (with http:// https:// git@; also has command options -E --build)
+# - manual/cmake-buildsystem.7.html
+#     (with nested $<..>; relative and absolute paths, "::")
+
+from pygments.lexers import CMakeLexer
+from pygments.token import (Comment, Name, Number, Operator, Punctuation,
+                            String, Text, Whitespace)
+from pygments.lexer import bygroups
+
+# Notes on regular expressions below:
+# - [\.\+-] are needed for string constants like gtk+-2.0
+# - Unix paths are recognized by '/'; support for Windows paths may be added
+#   if needed
+# - (\\.) allows for \-escapes (used in manual/cmake-language.7)
+# - $<..$<..$>..> nested occurrence in cmake-buildsystem
+# - Nested variable evaluations are only supported in a limited capacity.
+#   Only one level of nesting is supported and at most one nested variable can
+#   be present.
+
+CMakeLexer.tokens["root"] = [
+  # fctn(
+  (r'\b(\w+)([ \t]*)(\()',
+   bygroups(Name.Function, Text, Name.Function), '#push'),
+  (r'\(', Name.Function, '#push'),
+  (r'\)', Name.Function, '#pop'),
+  (r'\[', Punctuation, '#push'),
+  (r'\]', Punctuation, '#pop'),
+  (r'[|;,.=*\-]', Punctuation),
+  # used in commands/source_group
+  (r'\\\\', Punctuation),
+  (r'[:]', Operator),
+  # used in FindPkgConfig.cmake
+  (r'[<>]=', Punctuation),
+  # $<...>
+  (r'\$<', Operator, '#push'),
+  # <expr>
+  (r'<[^<|]+?>(\w*\.\.\.)?', Name.Variable),
+  # ${..} $ENV{..}, possibly nested
+  (r'(\$\w*\{)([^\}\$]*)?(?:(\$\w*\{)([^\}]+?)(\}))?([^\}]*?)(\})',
+   bygroups(Operator, Name.Tag, Operator, Name.Tag, Operator, Name.Tag,
+            Operator)),
+  # DATA{ ...}
+  (r'([A-Z]+\{)(.+?)(\})', bygroups(Operator, Name.Tag, Operator)),
+  # URL, git@, ...
+  (r'[a-z]+(@|(://))((\\.)|[\w.+-:/\\])+', Name.Attribute),
+  # absolute path
+  (r'/\w[\w\.\+-/\\]*', Name.Attribute),
+  (r'/', Name.Attribute),
+  # relative path
+  (r'\w[\w\.\+-]*/[\w.+-/\\]*', Name.Attribute),
+  # initial A-Z, contains a-z
+  (r'[A-Z]((\\.)|[\w.+-])*[a-z]((\\.)|[\w.+-])*', Name.Builtin),
+  (r'@?[A-Z][A-Z0-9_]*', Name.Constant),
+  (r'[a-z_]((\\;)|(\\ )|[\w.+-])*', Name.Builtin),
+  (r'[0-9][0-9\.]*', Number),
+  # "string"
+  (r'(?s)"(\\"|[^"])*"', String),
+  (r'\.\.\.', Name.Variable),
+  # <..|..> is different from <expr>
+  (r'<', Operator, '#push'),
+  (r'>', Operator, '#pop'),
+  (r'\n', Whitespace),
+  (r'[ \t]+', Whitespace),
+  (r'#.*\n', Comment),
+  # fallback, for debugging only
+  #  (r'[^<>\])\}\|$"# \t\n]+', Name.Exception),
+]
+
+# END pygments tweaks
+
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 # Require at least Sphinx 2.x.
 assert sphinx.version_info >= (2,)
 
 logger = logging.getLogger(__name__)
+
+# RE to split multiple command signatures.
+sig_end_re = re.compile(r'(?<=[)])\n')
 
 
 @dataclass
@@ -162,12 +196,14 @@ class CMakeModule(Directive):
         self.state_machine.insert_input(lines, path)
         return []
 
+
 class _cmake_index_entry:
     def __init__(self, desc):
         self.desc = desc
 
-    def __call__(self, title, targetid, main = 'main'):
+    def __call__(self, title, targetid, main='main'):
         return ('pair', f'{self.desc} ; {title}', targetid, main, None)
+
 
 _cmake_index_objs = {
     'command':    _cmake_index_entry('command'),
@@ -188,6 +224,7 @@ _cmake_index_objs = {
     'prop_tgt':   _cmake_index_entry('target property'),
     'variable':   _cmake_index_entry('variable'),
     }
+
 
 class CMakeTransform(Transform):
 
@@ -215,7 +252,8 @@ class CMakeTransform(Transform):
                 title = False
             else:
                 for line in f:
-                    if len(line) > 0 and (line[0].isalnum() or line[0] == '<' or line[0] == '$'):
+                    if len(line) > 0 and (line[0].isalnum() or
+                                          line[0] == '<' or line[0] == '$'):
                         title = line.rstrip()
                         break
                 f.close()
@@ -255,6 +293,7 @@ class CMakeTransform(Transform):
             # Add to cmake domain object inventory
             domain = cast(CMakeDomain, env.get_domain('cmake'))
             domain.note_object(objtype, targetname, targetid, targetid)
+
 
 class CMakeObject(ObjectDescription):
     def __init__(self, *args, **kwargs):
@@ -453,6 +492,7 @@ class CMakeSignatureObject(CMakeObject):
 
         return super().run()
 
+
 class CMakeReferenceRole:
     # See sphinx.util.nodes.explicit_title_re; \x00 escapes '<'.
     _re = re.compile(r'^(.+?)(\s*)(?<!\x00)<(.*?)>$', re.DOTALL)
@@ -478,6 +518,7 @@ class CMakeReferenceRole:
                 return super().__call__(name, rawtext, text, *args, **kwargs)
         return Class
 
+
 class CMakeCRefRole(CMakeReferenceRole[ReferenceRole]):
     nodeclass: Type[Element] = nodes.reference
     innernodeclass: Type[TextElement] = nodes.literal
@@ -492,6 +533,7 @@ class CMakeCRefRole(CMakeReferenceRole[ReferenceRole]):
                                        classes=self.classes)
 
         return [refnode], []
+
 
 class CMakeXRefRole(CMakeReferenceRole[XRefRole]):
 
@@ -529,6 +571,7 @@ class CMakeXRefRole(CMakeReferenceRole[XRefRole]):
     #
     # def result_nodes(self, document, env, node, is_ref):
     #     pass
+
 
 class CMakeXRefTransform(Transform):
 
@@ -570,6 +613,7 @@ class CMakeXRefTransform(Transform):
             indexnode['entries'] = [make_index_entry(objname, targetid, '')]
             ref.replace_self([indexnode, targetnode, ref])
 
+
 class CMakeDomain(Domain):
     """CMake domain."""
     name = 'cmake'
@@ -603,7 +647,7 @@ class CMakeDomain(Domain):
     }
     roles = {
         'cref':       CMakeCRefRole(),
-        'command':    CMakeXRefRole(fix_parens = True, lowercase = True),
+        'command':    CMakeXRefRole(fix_parens=True, lowercase=True),
         'cpack_gen':  CMakeXRefRole(),
         'envvar':     CMakeXRefRole(),
         'generator':  CMakeXRefRole(),
@@ -667,6 +711,7 @@ class CMakeDomain(Domain):
     def get_objects(self):
         for refname, obj in self.data['objects'].items():
             yield (refname, obj.name, obj.objtype, obj.docname, obj.node_id, 1)
+
 
 def setup(app):
     app.add_directive('cmake-module', CMakeModule)
