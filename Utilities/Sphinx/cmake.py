@@ -5,7 +5,7 @@ import os
 import re
 
 from dataclasses import dataclass
-from typing import Any, cast
+from typing import Any, List, cast
 
 # Override much of pygments' CMakeLexer.
 # We need to parse CMake syntax definitions, not CMake code.
@@ -343,14 +343,69 @@ class CMakeGenexObject(CMakeObject):
 class CMakeSignatureObject(CMakeObject):
     object_type = 'signature'
 
+    BREAK_ALL = 'all'
+    BREAK_SMART = 'smart'
+    BREAK_VERBATIM = 'verbatim'
+
+    BREAK_CHOICES = {BREAK_ALL, BREAK_SMART, BREAK_VERBATIM}
+
+    def break_option(argument):
+        return directives.choice(argument, CMakeSignatureObject.BREAK_CHOICES)
+
     option_spec = {
         'target': directives.unchanged,
+        'break': break_option,
     }
 
-    def get_signatures(self):
+    def _break_signature_all(sig: str) -> str:
+        return ws_re.sub(' ', sig)
+
+    def _break_signature_verbatim(sig: str) -> str:
+        lines = [ws_re.sub('\xa0', line.strip()) for line in sig.split('\n')]
+        return ' '.join(lines)
+
+    def _break_signature_smart(sig: str) -> str:
+        tokens = []
+        for line in sig.split('\n'):
+            token = ''
+            delim = ''
+
+            for c in line.strip():
+                if len(delim) == 0 and ws_re.match(c):
+                    if len(token):
+                        tokens.append(ws_re.sub('\xa0', token))
+                        token = ''
+                else:
+                    if c == '[':
+                        delim += ']'
+                    elif c == '<':
+                        delim += '>'
+                    elif len(delim) and c == delim[-1]:
+                        delim = delim[:-1]
+                    token += c
+
+            if len(token):
+                tokens.append(ws_re.sub('\xa0', token))
+
+        return ' '.join(tokens)
+
+    def __init__(self, *args, **kwargs):
+        self.targetnames = {}
+        self.break_style = CMakeSignatureObject.BREAK_SMART
+        super().__init__(*args, **kwargs)
+
+    def get_signatures(self) -> List[str]:
         content = nl_escape_re.sub('', self.arguments[0])
         lines = sig_end_re.split(content)
-        return [ws_re.sub(' ', line.strip()) for line in lines]
+
+        if self.break_style == CMakeSignatureObject.BREAK_VERBATIM:
+            fixup = CMakeSignatureObject._break_signature_verbatim
+        elif self.break_style == CMakeSignatureObject.BREAK_SMART:
+            fixup = CMakeSignatureObject._break_signature_smart
+        else:
+            fixup = CMakeSignatureObject._break_signature_all
+
+        return [fixup(line.strip()) for line in lines]
 
     def handle_signature(self, sig, signode):
         language = 'cmake'
@@ -368,7 +423,9 @@ class CMakeSignatureObject(CMakeObject):
                 raise self.warning(error)
 
         for classes, value in tokens:
-            if classes:
+            if value == '\xa0':
+                node += nodes.inline(value, value, classes=['nbsp'])
+            elif classes:
                 node += nodes.inline(value, value, classes=classes)
             else:
                 node += nodes.Text(value)
@@ -378,13 +435,10 @@ class CMakeSignatureObject(CMakeObject):
 
         return sig
 
-    def __init__(self, *args, **kwargs):
-        self.targetnames = {}
-        super().__init__(*args, **kwargs)
-
     def add_target_and_index(self, name, sig, signode):
-        if name in self.targetnames:
-            sigargs = self.targetnames[name]
+        sig = sig.replace('\xa0', ' ')
+        if sig in self.targetnames:
+            sigargs = self.targetnames[sig]
         else:
             def extract_keywords(params):
                 for p in params:
@@ -393,7 +447,7 @@ class CMakeSignatureObject(CMakeObject):
                     else:
                         return
 
-            keywords = extract_keywords(name.split('(')[1].split())
+            keywords = extract_keywords(sig.split('(')[1].split())
             sigargs = ' '.join(keywords)
         targetname = sigargs.lower()
         targetid = nodes.make_id(targetname)
@@ -405,7 +459,7 @@ class CMakeSignatureObject(CMakeObject):
             self.state.document.note_explicit_target(signode)
 
             # Register the signature as a command object.
-            command = name.split('(')[0].lower()
+            command = sig.split('(')[0].lower()
             refname = f'{command}({sigargs})'
             refid = f'command:{command}({targetname})'
 
@@ -414,12 +468,17 @@ class CMakeSignatureObject(CMakeObject):
                                node_id=targetid, location=signode)
 
     def run(self):
+        self.break_style = CMakeSignatureObject.BREAK_ALL
+
         targets = self.options.get('target')
         if targets is not None:
             signatures = self.get_signatures()
             targets = [t.strip() for t in targets.split('\n')]
             for signature, target in zip(signatures, targets):
                 self.targetnames[signature] = target
+
+        self.break_style = (
+            self.options.get('break', CMakeSignatureObject.BREAK_SMART))
 
         return super().run()
 
