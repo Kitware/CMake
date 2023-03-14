@@ -33,6 +33,7 @@ cmRST::cmRST(std::ostream& os, std::string docroot)
   , VersionDirective("^.. version(added|changed)::[ \t]*(.*)$")
   , ModuleRST(R"(^#\[(=*)\[\.rst:$)")
   , CMakeRole("(:cmake)?:("
+              "cref|"
               "command|cpack_gen|generator|genex|"
               "variable|envvar|module|policy|"
               "prop_cache|prop_dir|prop_gbl|prop_inst|prop_sf|"

@@ -5,7 +5,7 @@ import os
 import re
 
 from dataclasses import dataclass
-from typing import Any, List, Tuple, cast
+from typing import Any, List, Tuple, Type, cast
 
 # Override much of pygments' CMakeLexer.
 # We need to parse CMake syntax definitions, not CMake code.
@@ -72,6 +72,7 @@ from docutils import io, nodes
 from sphinx.directives import ObjectDescription, nl_escape_re
 from sphinx.domains import Domain, ObjType
 from sphinx.roles import XRefRole
+from sphinx.util.docutils import ReferenceRole
 from sphinx.util.nodes import make_refnode
 from sphinx.util import logging, ws_re
 from sphinx import addnodes
@@ -508,6 +509,21 @@ class CMakeReferenceRole:
                 return super().__call__(name, rawtext, text, *args, **kwargs)
         return Class
 
+class CMakeCRefRole(CMakeReferenceRole[ReferenceRole]):
+    nodeclass: Type[Element] = nodes.reference
+    innernodeclass: Type[TextElement] = nodes.literal
+    classes: List[str] = ['cmake', 'literal']
+
+    def run(self) -> Tuple[List[Node], List[system_message]]:
+        refnode = self.nodeclass(self.rawtext)
+        self.set_source_info(refnode)
+
+        refnode['refid'] = nodes.make_id(self.target)
+        refnode += self.innernodeclass(self.rawtext, self.title,
+                                       classes=self.classes)
+
+        return [refnode], []
+
 class CMakeXRefRole(CMakeReferenceRole[XRefRole]):
 
     _re_sub = re.compile(r'^([^()\s]+)\s*\(([^()]*)\)$', re.DOTALL)
@@ -617,6 +633,7 @@ class CMakeDomain(Domain):
         # Other `object_types` cannot be created except by the `CMakeTransform`
     }
     roles = {
+        'cref':       CMakeCRefRole(),
         'command':    CMakeXRefRole(fix_parens = True, lowercase = True),
         'cpack_gen':  CMakeXRefRole(),
         'envvar':     CMakeXRefRole(),
