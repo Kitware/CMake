@@ -3448,11 +3448,12 @@ std::string cmGeneratorTarget::GetCompilePDBDirectory(
   return "";
 }
 
-void cmGeneratorTarget::GetAppleArchs(const std::string& config,
-                                      std::vector<std::string>& archVec) const
+std::vector<std::string> cmGeneratorTarget::GetAppleArchs(
+  std::string const& config) const
 {
+  std::vector<std::string> archVec;
   if (!this->IsApple()) {
-    return;
+    return archVec;
   }
   cmValue archs = nullptr;
   if (!config.empty()) {
@@ -3469,6 +3470,7 @@ void cmGeneratorTarget::GetAppleArchs(const std::string& config,
   if (archVec.empty()) {
     this->Makefile->GetDefExpandList("_CMAKE_APPLE_ARCHS_DEFAULT", archVec);
   }
+  return archVec;
 }
 
 void cmGeneratorTarget::AddExplicitLanguageFlags(std::string& flags,

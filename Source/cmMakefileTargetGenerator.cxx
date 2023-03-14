@@ -541,8 +541,8 @@ void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
     *this->FlagFileStream << language << "_DEFINES = " << defines << "\n\n";
     *this->FlagFileStream << language << "_INCLUDES = " << includes << "\n\n";
 
-    std::vector<std::string> architectures;
-    this->GeneratorTarget->GetAppleArchs(this->GetConfigName(), architectures);
+    std::vector<std::string> architectures =
+      this->GeneratorTarget->GetAppleArchs(this->GetConfigName());
     architectures.emplace_back();
 
     for (const std::string& arch : architectures) {
@@ -671,8 +671,8 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
   std::string configUpper = cmSystemTools::UpperCase(config);
 
   // Add precompile headers dependencies
-  std::vector<std::string> architectures;
-  this->GeneratorTarget->GetAppleArchs(config, architectures);
+  std::vector<std::string> architectures =
+    this->GeneratorTarget->GetAppleArchs(config);
   if (architectures.empty()) {
     architectures.emplace_back();
   }
