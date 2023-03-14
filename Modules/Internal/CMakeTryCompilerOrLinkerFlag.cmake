@@ -69,6 +69,7 @@ function(CMAKE_TRY_COMPILER_OR_LINKER_FLAG lang flag result)
     set (CCCF_COMMAND_PATTERN "<FLAG> -o <OUTPUT> <SOURCE>")
   endif()
 
+  list (APPEND CCCF_FAIL_REGEX "argument unused during compilation") # clang
   if (check_lang STREQUAL "C")
     list(APPEND CCCF_FAIL_REGEX
       "command line option .* is valid for .* but not for C") # GNU

@@ -12,7 +12,6 @@ macro (CHECK_COMPILER_FLAG_COMMON_PATTERNS _VAR)
     FAIL_REGEX "switch .* is no longer supported"          # GNU
     FAIL_REGEX "unknown .*option"                          # Clang
     FAIL_REGEX "optimization flag .* not supported"        # Clang
-    FAIL_REGEX "argument unused during compilation: .*"    # Clang
     FAIL_REGEX "unknown argument ignored"                  # Clang (cl)
     FAIL_REGEX "ignoring unknown option"                   # MSVC, Intel
     FAIL_REGEX "warning D9002"                             # MSVC, any lang

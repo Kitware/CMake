@@ -18,6 +18,15 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|LCC|Clang" AND NOT "x${CMAKE_CXX_SIMULATE_
   if(NOT SHOULD_WORK)
     message(SEND_ERROR "${CMAKE_CXX_COMPILER_ID} compiler flag '-x c++' check failed")
   endif()
+
+  block()
+    # Test tolerating a flag that is not used when driving the linker.
+    string(APPEND CMAKE_CXX_FLAGS " -nostdinc++")
+    check_compiler_flag(CXX "-x c++" SHOULD_WORK_NOSTDINCXX)
+    if(NOT SHOULD_WORK_NOSTDINCXX)
+      message(SEND_ERROR "${CMAKE_CXX_COMPILER_ID} compiler flag '-x c++ -nostdinc++' check failed")
+    endif()
+  endblock()
 endif()
 
 if(NOT "$ENV{LC_ALL}" STREQUAL "BAD")
