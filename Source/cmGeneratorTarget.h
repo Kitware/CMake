@@ -484,7 +484,8 @@ public:
       holding object files for the given configuration.  */
   std::string GetObjectDirectory(std::string const& config) const;
 
-  std::vector<std::string> GetAppleArchs(std::string const& config) const;
+  std::vector<std::string> GetAppleArchs(std::string const& config,
+                                         cm::optional<std::string> lang) const;
 
   void AddExplicitLanguageFlags(std::string& flags,
                                 cmSourceFile const& sf) const;

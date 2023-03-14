@@ -171,7 +171,7 @@ std::string cmNinjaTargetGenerator::ComputeFlagsForObject(
 {
   std::unordered_map<std::string, std::string> pchSources;
   std::vector<std::string> architectures =
-    this->GeneratorTarget->GetAppleArchs(config);
+    this->GeneratorTarget->GetAppleArchs(config, language);
   if (architectures.empty()) {
     architectures.emplace_back();
   }
@@ -1391,7 +1391,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   std::vector<std::string> depList;
 
   std::vector<std::string> architectures =
-    this->GeneratorTarget->GetAppleArchs(config);
+    this->GeneratorTarget->GetAppleArchs(config, language);
   if (architectures.empty()) {
     architectures.emplace_back();
   }

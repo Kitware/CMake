@@ -1356,7 +1356,7 @@ CompileData Target::BuildCompileData(cmSourceFile* sf)
 
   // Add precompile headers compile options.
   std::vector<std::string> architectures =
-    this->GT->GetAppleArchs(this->Config);
+    this->GT->GetAppleArchs(this->Config, fd.Language);
   if (architectures.empty()) {
     architectures.emplace_back();
   }

@@ -542,7 +542,7 @@ void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
     *this->FlagFileStream << language << "_INCLUDES = " << includes << "\n\n";
 
     std::vector<std::string> architectures =
-      this->GeneratorTarget->GetAppleArchs(this->GetConfigName());
+      this->GeneratorTarget->GetAppleArchs(this->GetConfigName(), language);
     architectures.emplace_back();
 
     for (const std::string& arch : architectures) {
@@ -672,7 +672,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
 
   // Add precompile headers dependencies
   std::vector<std::string> architectures =
-    this->GeneratorTarget->GetAppleArchs(config);
+    this->GeneratorTarget->GetAppleArchs(config, lang);
   if (architectures.empty()) {
     architectures.emplace_back();
   }

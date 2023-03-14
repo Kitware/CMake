@@ -3449,8 +3449,9 @@ std::string cmGeneratorTarget::GetCompilePDBDirectory(
 }
 
 std::vector<std::string> cmGeneratorTarget::GetAppleArchs(
-  std::string const& config) const
+  std::string const& config, cm::optional<std::string> lang) const
 {
+  static_cast<void>(lang);
   std::vector<std::string> archVec;
   if (!this->IsApple()) {
     return archVec;
