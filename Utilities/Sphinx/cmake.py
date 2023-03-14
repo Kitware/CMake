@@ -486,14 +486,19 @@ class CMakeXRefRole(XRefRole):
 
     # See sphinx.util.nodes.explicit_title_re; \x00 escapes '<'.
     _re = re.compile(r'^(.+?)(\s*)(?<!\x00)<(.*?)>$', re.DOTALL)
-    _re_ref = re.compile(r'^.*\s<\w+([(][\w\s]+[)])?>$', re.DOTALL)
+    _re_sub = re.compile(r'^([^()\s]+)\s*\(([^()]*)\)$', re.DOTALL)
     _re_genex = re.compile(r'^\$<([^<>:]+)(:[^<>]+)?>$', re.DOTALL)
     _re_guide = re.compile(r'^([^<>/]+)/([^<>]*)$', re.DOTALL)
 
     def __call__(self, typ, rawtext, text, *args, **keys):
         if typ == 'cmake:command':
-            m = CMakeXRefRole._re_ref.match(text)
-            if m is None:
+            # Translate a CMake command cross-reference of the form:
+            #  `command_name(SUB_COMMAND)`
+            # to be its own explicit target:
+            #  `command_name(SUB_COMMAND) <command_name(SUB_COMMAND)>`
+            # so the XRefRole `fix_parens` option does not add more `()`.
+            m = CMakeXRefRole._re_sub.match(text)
+            if m:
                 text = f'{text} <{text}>'
         elif typ == 'cmake:genex':
             m = CMakeXRefRole._re_genex.match(text)
