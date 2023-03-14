@@ -45,6 +45,17 @@ div.sphinxsidebarwrapper {
   white-space: nowrap;
 }
 
+/* Add hanging indent to version-{added,changed} content. */
+div .versionadded > *,
+div .versionchanged > * {
+  padding-left: 2em;
+}
+
+div.versionadded > :first-child,
+div.versionchanged > :first-child {
+  text-indent: -2em;
+}
+
 /* Remove unwanted margin in case list item contains a div-wrapping
    directive like `.. versionadded` or `.. deprecated`. */
 dd > :first-child > p {
