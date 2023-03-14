@@ -175,7 +175,10 @@ Properties on Targets
    /prop_tgt/CONFIG_POSTFIX
    /prop_tgt/CROSSCOMPILING_EMULATOR
    /prop_tgt/CUDA_ARCHITECTURES
+   /prop_tgt/CUDA_CUBIN_COMPILATION
    /prop_tgt/CUDA_EXTENSIONS
+   /prop_tgt/CUDA_FATBIN_COMPILATION
+   /prop_tgt/CUDA_OPTIX_COMPILATION
    /prop_tgt/CUDA_PTX_COMPILATION
    /prop_tgt/CUDA_RESOLVE_DEVICE_SYMBOLS
    /prop_tgt/CUDA_RUNTIME_LIBRARY

@@ -1775,6 +1775,9 @@ MAKE_PROP(COMPILE_FEATURES);
 MAKE_PROP(COMPILE_OPTIONS);
 MAKE_PROP(PRECOMPILE_HEADERS);
 MAKE_PROP(PRECOMPILE_HEADERS_REUSE_FROM);
+MAKE_PROP(CUDA_CUBIN_COMPILATION);
+MAKE_PROP(CUDA_FATBIN_COMPILATION);
+MAKE_PROP(CUDA_OPTIX_COMPILATION);
 MAKE_PROP(CUDA_PTX_COMPILATION);
 MAKE_PROP(EXPORT_NAME);
 MAKE_PROP(IMPORTED);
@@ -1910,14 +1913,38 @@ void cmTarget::StoreProperty(const std::string& prop, ValueType value)
                value ? value
                      : std::string{})) { // NOLINT(bugprone-branch-clone)
     /* error was reported by check method */
-  } else if (prop == propCUDA_PTX_COMPILATION &&
-             this->GetType() != cmStateEnums::OBJECT_LIBRARY) {
-    std::ostringstream e;
-    e << "CUDA_PTX_COMPILATION property can only be applied to OBJECT "
-         "targets (\""
-      << this->impl->Name << "\")\n";
-    this->impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
-    return;
+  } else if (prop == propCUDA_CUBIN_COMPILATION ||
+             prop == propCUDA_FATBIN_COMPILATION ||
+             prop == propCUDA_OPTIX_COMPILATION ||
+             prop == propCUDA_PTX_COMPILATION) {
+    auto const& compiler =
+      this->impl->Makefile->GetSafeDefinition("CMAKE_CUDA_COMPILER_ID");
+    auto const& compilerVersion =
+      this->impl->Makefile->GetSafeDefinition("CMAKE_CUDA_COMPILER_VERSION");
+    if (this->GetType() != cmStateEnums::OBJECT_LIBRARY) {
+      auto e =
+        cmStrCat(prop, " property can only be applied to OBJECT targets(",
+                 this->impl->Name, ")\n");
+      this->impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e);
+      return;
+    }
+    const bool flag_found =
+      (prop == propCUDA_PTX_COMPILATION &&
+       this->impl->Makefile->GetDefinition("_CMAKE_CUDA_PTX_FLAG")) ||
+      (prop == propCUDA_CUBIN_COMPILATION &&
+       this->impl->Makefile->GetDefinition("_CMAKE_CUDA_CUBIN_FLAG")) ||
+      (prop == propCUDA_FATBIN_COMPILATION &&
+       this->impl->Makefile->GetDefinition("_CMAKE_CUDA_FATBIN_FLAG")) ||
+      (prop == propCUDA_OPTIX_COMPILATION &&
+       this->impl->Makefile->GetDefinition("_CMAKE_CUDA_OPTIX_FLAG"));
+    if (flag_found) {
+      this->impl->Properties.SetProperty(prop, value);
+    } else {
+      auto e = cmStrCat(prop, " property is not supported by ", compiler,
+                        "  compiler version ", compilerVersion, ".");
+      this->impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e);
+      return;
+    }
   } else if (prop == propPRECOMPILE_HEADERS_REUSE_FROM) {
     if (this->GetProperty("PRECOMPILE_HEADERS")) {
       std::ostringstream e;
