@@ -35,7 +35,6 @@ effect or even a specific one is beyond the scope of this module.
 #]=======================================================================]
 
 include_guard(GLOBAL)
-include(CheckFortranSourceCompiles)
 include(Internal/CheckCompilerFlag)
 
 macro (CHECK_FORTRAN_COMPILER_FLAG _FLAG _RESULT)

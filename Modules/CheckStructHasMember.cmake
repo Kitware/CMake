@@ -51,8 +51,7 @@ Example:
 #]=======================================================================]
 
 include_guard(GLOBAL)
-include(CheckCSourceCompiles)
-include(CheckCXXSourceCompiles)
+include(CheckSourceCompiles)
 
 macro (CHECK_STRUCT_HAS_MEMBER _STRUCT _MEMBER _HEADER _RESULT)
   set(_INCLUDE_FILES)
@@ -78,9 +77,9 @@ int main()
 ")
 
   if("${_lang}" STREQUAL "C")
-    CHECK_C_SOURCE_COMPILES("${_CHECK_STRUCT_MEMBER_SOURCE_CODE}" ${_RESULT})
+    CHECK_SOURCE_COMPILES(C "${_CHECK_STRUCT_MEMBER_SOURCE_CODE}" ${_RESULT})
   elseif("${_lang}" STREQUAL "CXX")
-    CHECK_CXX_SOURCE_COMPILES("${_CHECK_STRUCT_MEMBER_SOURCE_CODE}" ${_RESULT})
+    CHECK_SOURCE_COMPILES(CXX "${_CHECK_STRUCT_MEMBER_SOURCE_CODE}" ${_RESULT})
   else()
     message(FATAL_ERROR "Unknown language:\n  ${_lang}\nSupported languages: C, CXX.\n")
   endif()

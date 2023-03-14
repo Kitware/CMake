@@ -198,19 +198,19 @@ that will be populated with the ``CXX_FLAGS`` required to enable visibility
 support for the compiler/architecture in use.
 #]=======================================================================]
 
-include(CheckCCompilerFlag)
-include(CheckCXXCompilerFlag)
+include(CheckCompilerFlag)
+include(CheckSourceCompiles)
 
 # TODO: Install this macro separately?
 macro(_check_cxx_compiler_attribute _ATTRIBUTE _RESULT)
-  check_cxx_source_compiles("${_ATTRIBUTE} int somefunc() { return 0; }
+  check_source_compiles(CXX "${_ATTRIBUTE} int somefunc() { return 0; }
     int main() { return somefunc();}" ${_RESULT}
   )
 endmacro()
 
 # TODO: Install this macro separately?
 macro(_check_c_compiler_attribute _ATTRIBUTE _RESULT)
-  check_c_source_compiles("${_ATTRIBUTE} int somefunc() { return 0; }
+  check_source_compiles(C "${_ATTRIBUTE} int somefunc() { return 0; }
     int main() { return somefunc();}" ${_RESULT}
   )
 endmacro()
@@ -226,7 +226,7 @@ macro(_test_compiler_hidden_visibility)
   endif()
 
   # Exclude XL here because it misinterprets -fvisibility=hidden even though
-  # the check_cxx_compiler_flag passes
+  # the check_compiler_flag passes
   if(NOT GCC_TOO_OLD
       AND NOT _INTEL_TOO_OLD
       AND NOT WIN32
@@ -235,12 +235,12 @@ macro(_test_compiler_hidden_visibility)
       AND NOT CMAKE_CXX_COMPILER_ID MATCHES "^(PGI|NVHPC)$"
       AND NOT CMAKE_CXX_COMPILER_ID MATCHES Watcom)
     if (CMAKE_CXX_COMPILER_LOADED)
-      check_cxx_compiler_flag(-fvisibility=hidden COMPILER_HAS_HIDDEN_VISIBILITY)
-      check_cxx_compiler_flag(-fvisibility-inlines-hidden
+      check_compiler_flag(CXX -fvisibility=hidden COMPILER_HAS_HIDDEN_VISIBILITY)
+      check_compiler_flag(CXX -fvisibility-inlines-hidden
         COMPILER_HAS_HIDDEN_INLINE_VISIBILITY)
     else()
-      check_c_compiler_flag(-fvisibility=hidden COMPILER_HAS_HIDDEN_VISIBILITY)
-      check_c_compiler_flag(-fvisibility-inlines-hidden
+      check_compiler_flag(C -fvisibility=hidden COMPILER_HAS_HIDDEN_VISIBILITY)
+      check_compiler_flag(C -fvisibility-inlines-hidden
         COMPILER_HAS_HIDDEN_INLINE_VISIBILITY)
     endif()
   endif()
