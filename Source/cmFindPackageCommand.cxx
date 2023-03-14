@@ -977,6 +977,21 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
     }
   }
 
+  // Limit package nesting depth well below the recursion depth limit because
+  // find_package nesting uses more stack space than normal recursion.
+  {
+    static std::size_t const findPackageDepthMinMax = 100;
+    std::size_t const findPackageDepthMax = std::max(
+      this->Makefile->GetRecursionDepthLimit() / 2, findPackageDepthMinMax);
+    std::size_t const findPackageDepth =
+      this->Makefile->FindPackageRootPathStack.size() + 1;
+    if (findPackageDepth > findPackageDepthMax) {
+      this->SetError(cmStrCat("maximum nesting depth of ", findPackageDepthMax,
+                              " exceeded."));
+      return false;
+    }
+  }
+
   this->PushFindPackageRootPathStack();
 
   this->SetModuleVariables(components, componentVarDefs);

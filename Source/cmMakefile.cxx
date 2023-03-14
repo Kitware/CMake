@@ -67,6 +67,24 @@
 #  include "cmVariableWatch.h"
 #endif
 
+#ifndef __has_feature
+#  define __has_feature(x) 0
+#endif
+
+// Select a recursion limit that fits within the stack size.
+// See stack size flags in '../CompileFlags.cmake'.
+#ifndef CMake_DEFAULT_RECURSION_LIMIT
+#  if __has_feature(address_sanitizer)
+#    define CMake_DEFAULT_RECURSION_LIMIT 400
+#  elif defined(_MSC_VER) && defined(_DEBUG)
+#    define CMake_DEFAULT_RECURSION_LIMIT 600
+#  elif defined(__ibmxl__) && defined(__linux)
+#    define CMake_DEFAULT_RECURSION_LIMIT 600
+#  else
+#    define CMake_DEFAULT_RECURSION_LIMIT 1000
+#  endif
+#endif
+
 class cmMessenger;
 
 cmDirectoryId::cmDirectoryId(std::string s)
@@ -99,7 +117,6 @@ cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,
   this->StateSnapshot =
     this->StateSnapshot.GetState()->CreatePolicyScopeSnapshot(
       this->StateSnapshot);
-  this->RecursionDepth = 0;
 
   // Enter a policy level for this directory.
   this->PushPolicy();
@@ -454,18 +471,10 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
   static_cast<void>(stack_manager);
 
   // Check for maximum recursion depth.
-  int depth = CMake_DEFAULT_RECURSION_LIMIT;
-  cmValue depthStr = this->GetDefinition("CMAKE_MAXIMUM_RECURSION_DEPTH");
-  if (depthStr) {
-    std::istringstream s(*depthStr);
-    int d;
-    if (s >> d) {
-      depth = d;
-    }
-  }
-  if (this->RecursionDepth > depth) {
+  size_t depthLimit = this->GetRecursionDepthLimit();
+  if (this->RecursionDepth > depthLimit) {
     std::ostringstream e;
-    e << "Maximum recursion depth of " << depth << " exceeded";
+    e << "Maximum recursion depth of " << depthLimit << " exceeded";
     this->IssueMessage(MessageType::FATAL_ERROR, e.str());
     cmSystemTools::SetFatalErrorOccurred();
     return false;
@@ -2865,12 +2874,31 @@ bool cmMakefile::IsProjectFile(const char* filename) const
      !cmSystemTools::IsSubDirectory(filename, "/CMakeFiles"));
 }
 
-int cmMakefile::GetRecursionDepth() const
+size_t cmMakefile::GetRecursionDepthLimit() const
+{
+  size_t depth = CMake_DEFAULT_RECURSION_LIMIT;
+  if (cmValue depthStr =
+        this->GetDefinition("CMAKE_MAXIMUM_RECURSION_DEPTH")) {
+    unsigned long depthUL;
+    if (cmStrToULong(depthStr.GetCStr(), &depthUL)) {
+      depth = depthUL;
+    }
+  } else if (cm::optional<std::string> depthEnv =
+               cmSystemTools::GetEnvVar("CMAKE_MAXIMUM_RECURSION_DEPTH")) {
+    unsigned long depthUL;
+    if (cmStrToULong(*depthEnv, &depthUL)) {
+      depth = depthUL;
+    }
+  }
+  return depth;
+}
+
+size_t cmMakefile::GetRecursionDepth() const
 {
   return this->RecursionDepth;
 }
 
-void cmMakefile::SetRecursionDepth(int recursionDepth)
+void cmMakefile::SetRecursionDepth(size_t recursionDepth)
 {
   this->RecursionDepth = recursionDepth;
 }

@@ -33,3 +33,5 @@ Calling any of the following commands increases the recursion depth:
   depth)
 * Reading or writing variables that are being watched by a
   :command:`variable_watch`
+
+See also the :envvar:`CMAKE_MAXIMUM_RECURSION_DEPTH` environment variable.

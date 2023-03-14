@@ -586,7 +586,7 @@ public:
 
   std::string MakeSilentFlag;
 
-  int RecursionDepth;
+  size_t RecursionDepth = 0;
 
   virtual void GetQtAutoGenConfigs(std::vector<std::string>& configs) const
   {

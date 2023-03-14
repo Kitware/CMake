@@ -110,8 +110,6 @@ cmGlobalGenerator::cmGlobalGenerator(cmake* cm)
   this->ConfigureDoneCMP0026AndCMP0024 = false;
   this->FirstTimeProgress = 0.0f;
 
-  this->RecursionDepth = 0;
-
   cm->GetState()->SetIsGeneratorMultiConfig(false);
   cm->GetState()->SetMinGWMake(false);
   cm->GetState()->SetMSYSShell(false);

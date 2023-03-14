@@ -1023,8 +1023,10 @@ public:
                               const char* sourceFilename) const;
   bool IsProjectFile(const char* filename) const;
 
-  int GetRecursionDepth() const;
-  void SetRecursionDepth(int recursionDepth);
+  size_t GetRecursionDepthLimit() const;
+
+  size_t GetRecursionDepth() const;
+  void SetRecursionDepth(size_t recursionDepth);
 
   std::string NewDeferId() const;
   bool DeferCall(std::string id, std::string fileName, cmListFileFunction lff);
@@ -1090,7 +1092,7 @@ protected:
 private:
   cmStateSnapshot StateSnapshot;
   cmListFileBacktrace Backtrace;
-  int RecursionDepth;
+  size_t RecursionDepth = 0;
 
   struct DeferCommand
   {
