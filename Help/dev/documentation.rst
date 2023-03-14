@@ -241,6 +241,10 @@ Document a "genex" object:
 
 The directive requires a single argument, the generator expression name.
 
+The optional ``:target:`` option allows a custom target name to be specified.
+Because this will affect the ability to reference the "genex" object using the
+``:genex:`` role, this option should be used very sparingly.
+
 ``signature`` directive
 ^^^^^^^^^^^^^^^^^^^^^^^
 

@@ -1418,6 +1418,7 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
     expression is being evaluated.
 
 .. genex:: $<TARGET_PROPERTY:prop>
+  :target: TARGET_PROPERTY:prop
 
   Value of the property ``prop`` on the target for which the expression
   is being evaluated. Note that for generator expressions in

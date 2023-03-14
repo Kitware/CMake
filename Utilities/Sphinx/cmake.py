@@ -286,19 +286,20 @@ class CMakeTransform(Transform):
             domain.note_object(objtype, targetname, targetid, targetid)
 
 class CMakeObject(ObjectDescription):
+    def __init__(self, *args, **kwargs):
+        self.targetname = None
+        super().__init__(*args, **kwargs)
 
     def handle_signature(self, sig, signode):
         # called from sphinx.directives.ObjectDescription.run()
         signode += addnodes.desc_name(sig, sig)
-        if self.objtype == 'genex':
-            m = CMakeXRefRole._re_genex.match(sig)
-            if m:
-                sig = m.group(1)
         return sig
 
     def add_target_and_index(self, name, sig, signode):
         if self.objtype == 'command':
             targetname = name.lower()
+        elif self.targetname:
+            targetname = self.targetname
         else:
             targetname = name
         targetid = '%s:%s' % (self.objtype, targetname)
@@ -315,6 +316,29 @@ class CMakeObject(ObjectDescription):
         make_index_entry = _cmake_index_objs.get(self.objtype)
         if make_index_entry:
             self.indexnode['entries'].append(make_index_entry(name, targetid))
+
+
+class CMakeGenexObject(CMakeObject):
+    option_spec = {
+        'target': directives.unchanged,
+    }
+
+    def handle_signature(self, sig, signode):
+        name = super().handle_signature(sig, signode)
+
+        m = CMakeXRefRole._re_genex.match(sig)
+        if m:
+            name = m.group(1)
+
+        return name
+
+    def run(self):
+        target = self.options.get('target')
+        if target is not None:
+            self.targetname = target
+
+        return super().run()
+
 
 class CMakeSignatureObject(CMakeObject):
     object_type = 'signature'
@@ -507,7 +531,7 @@ class CMakeDomain(Domain):
     directives = {
         'command':    CMakeObject,
         'envvar':     CMakeObject,
-        'genex':      CMakeObject,
+        'genex':      CMakeGenexObject,
         'signature':  CMakeSignatureObject,
         'variable':   CMakeObject,
         # Other `object_types` cannot be created except by the `CMakeTransform`
