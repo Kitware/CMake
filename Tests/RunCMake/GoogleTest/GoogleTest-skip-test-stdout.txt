@@ -1,10 +1,13 @@
 Test project .*
  *Start +[0-9]+: skip_test\.test1
  *[0-9]+/[0-9]+ +Test +#[0-9]+: skip_test\.test1 \.+\*\*\*Skipped +[0-9.]+ sec
+ *Start +[0-9]+: skip_test\.test1
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: skip_test\.test1 \.+\*\*\*Skipped +[0-9.]+ sec
 
-100% tests passed, 0 tests failed out of 1
+100% tests passed, 0 tests failed out of 2
 
 Total Test time \(real\) = +[0-9.]+ sec
 
 The following tests did not run:
+[ 	0-9]+- skip_test\.test1 \(Skipped\)
 [ 	0-9]+- skip_test\.test1 \(Skipped\)

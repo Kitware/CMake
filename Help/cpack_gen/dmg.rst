@@ -11,14 +11,19 @@ on macOS:
 
 .. variable:: CPACK_DMG_VOLUME_NAME
 
- The volume name of the generated disk image. Defaults to
- CPACK_PACKAGE_FILE_NAME.
+ The volume name of the generated disk image.
+
+ :Default: :variable:`CPACK_PACKAGE_FILE_NAME`
 
 .. variable:: CPACK_DMG_FORMAT
 
- The disk image format. Common values are ``UDRO`` (UDIF read-only), ``UDZO`` (UDIF
+ The disk image format.
+
+ :Default: ``UDZO``
+
+ Common values are ``UDRO`` (UDIF read-only), ``UDZO`` (UDIF
  zlib-compressed) or ``UDBZ`` (UDIF bzip2-compressed). Refer to ``hdiutil(1)`` for
- more information on other available formats. Defaults to ``UDZO``.
+ more information on other available formats.
 
 .. variable:: CPACK_DMG_DS_STORE
 
@@ -41,6 +46,8 @@ on macOS:
 
 .. variable:: CPACK_DMG_BACKGROUND_IMAGE
 
+ :Default:
+
  Path to an image file to be used as the background.  This file will be
  copied to ``.background``/``background.<ext>``, where ``<ext>`` is the original image file
  extension.  The background image is installed into the image before
@@ -58,13 +65,15 @@ on macOS:
 
  .. versionadded:: 3.23
 
+ :Default: ``OFF``
+
  Control whether :variable:`CPACK_RESOURCE_FILE_LICENSE`, if set to a
  non-default value, is used as the license agreement provided when
- mounting the DMG.  If ``CPACK_DMG_SLA_USE_RESOURCE_FILE_LICENSE`` is
+ mounting the DMG.  If :variable:`!CPACK_DMG_SLA_USE_RESOURCE_FILE_LICENSE` is
  not set, :manual:`cpack(1)` defaults to off.
 
  In a CMake project that uses the :module:`CPack` module to generate
- ``CPackConfig.cmake``, ``CPACK_DMG_SLA_USE_RESOURCE_FILE_LICENSE``
+ ``CPackConfig.cmake``, :variable:`!CPACK_DMG_SLA_USE_RESOURCE_FILE_LICENSE`
  must be explicitly enabled by the project to activate the SLA.
  See policy :policy:`CMP0133`.
 
@@ -82,8 +91,8 @@ on macOS:
   Directory where license and menu files for different languages are stored.
   Setting this causes CPack to look for a ``<language>.menu.txt`` and
   ``<language>.license.txt`` or ``<language>.license.rtf`` file for every
-  language defined in ``CPACK_DMG_SLA_LANGUAGES``.  If both this variable and
-  ``CPACK_RESOURCE_FILE_LICENSE`` are set, CPack will only look for the menu
+  language defined in :variable:`CPACK_DMG_SLA_LANGUAGES`.  If both this variable and
+  :variable:`CPACK_RESOURCE_FILE_LICENSE` are set, CPack will only look for the menu
   files and use the same license file for all languages.  If both
   ``<language>.license.txt`` and ``<language>.license.rtf`` exist, the ``.txt``
   file will be used.
@@ -120,17 +129,18 @@ on macOS:
  .. versionadded:: 3.17
 
  File name when packaging ``<component>`` as its own DMG
- (``CPACK_COMPONENTS_GROUPING`` set to IGNORE).
+ (:variable:`CPACK_COMPONENTS_GROUPING` set to ``IGNORE``).
 
- - Default: ``CPACK_PACKAGE_FILE_NAME-<component>``
+ :Default: ``CPACK_PACKAGE_FILE_NAME-<component>``
 
 .. variable:: CPACK_DMG_FILESYSTEM
 
  .. versionadded:: 3.21
 
+ :Default: ``HFS+``
+
  The filesystem format. Common values are ``APFS`` and ``HFS+``.
  See ``man hdiutil`` for a full list of supported formats.
- Defaults to ``HFS+``.
 
 .. variable:: CPACK_COMMAND_HDIUTIL
 

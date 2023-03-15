@@ -73,6 +73,7 @@ public:
   bool StartProcess()
   {
     std::vector<const char*> args;
+    args.reserve(this->CommandLineStrings.size());
     for (std::string const& cl : this->CommandLineStrings) {
       args.push_back(cl.c_str());
     }

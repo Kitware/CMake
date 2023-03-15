@@ -203,7 +203,7 @@ void testEdition()
 }
 }
 
-int testCMExtEnumSet(int /*unused*/, char* /*unused*/ [])
+int testCMExtEnumSet(int /*unused*/, char* /*unused*/[])
 {
   testDeclaration();
   testIteration();

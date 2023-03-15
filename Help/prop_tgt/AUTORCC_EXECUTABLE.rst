@@ -3,7 +3,7 @@ AUTORCC_EXECUTABLE
 
 .. versionadded:: 3.14
 
-:prop_tgt:`AUTORCC_EXECUTABLE` is file path pointing to the ``rcc``
+``AUTORCC_EXECUTABLE`` is file path pointing to the ``rcc``
 executable to use for :prop_tgt:`AUTORCC` enabled files. Setting
 this property will make CMake skip the automatic detection of the
 ``rcc`` binary as well as the sanity-tests normally run to ensure

@@ -73,3 +73,9 @@ project via corresponding options to the :command:`get_property` command.
   with ``CMAKE_`` or ``_CMAKE_``. The property name must contain at least one
   underscore. It is recommended that the property name have a prefix specific
   to the project.
+
+See Also
+^^^^^^^^
+
+* :command:`get_property`
+* :command:`set_property`

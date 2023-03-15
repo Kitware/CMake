@@ -293,8 +293,8 @@ will be included in the link too.
 
 .. _`Linking Object Libraries via $<TARGET_OBJECTS>`:
 
-Linking Object Libraries via $<TARGET_OBJECTS>
-""""""""""""""""""""""""""""""""""""""""""""""
+Linking Object Libraries via ``$<TARGET_OBJECTS>``
+""""""""""""""""""""""""""""""""""""""""""""""""""
 
 .. versionadded:: 3.21
 
@@ -407,3 +407,15 @@ Creating Relocatable Packages
 
 .. |INTERFACE_PROPERTY_LINK| replace:: :prop_tgt:`INTERFACE_LINK_LIBRARIES`
 .. include:: /include/INTERFACE_LINK_LIBRARIES_WARNING.txt
+
+See Also
+^^^^^^^^
+
+* :command:`target_compile_definitions`
+* :command:`target_compile_features`
+* :command:`target_compile_options`
+* :command:`target_include_directories`
+* :command:`target_link_directories`
+* :command:`target_link_options`
+* :command:`target_precompile_headers`
+* :command:`target_sources`

@@ -58,16 +58,17 @@ void cmCPackPKGGenerator::CreateBackground(const char* themeName,
     ? cmStrCat("CPACK_", genName, "_BACKGROUND")
     : cmStrCat("CPACK_", genName, "_BACKGROUND_", paramSuffix);
   cmValue bgFileName = this->GetOption(opt);
-  if (bgFileName == nullptr) {
+  if (!bgFileName) {
     return;
   }
 
-  std::string bgFilePath = cmStrCat(metapackageFile, "/Contents/", bgFileName);
+  std::string bgFilePath =
+    cmStrCat(metapackageFile, "/Contents/", *bgFileName);
 
   if (!cmSystemTools::FileExists(bgFilePath)) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Background image doesn't exist in the resource directory: "
-                    << bgFileName << std::endl);
+                    << *bgFileName << std::endl);
     return;
   }
 
@@ -77,16 +78,16 @@ void cmCPackPKGGenerator::CreateBackground(const char* themeName,
     xout.StartElement(cmStrCat("background-", themeName));
   }
 
-  xout.Attribute("file", bgFileName);
+  xout.Attribute("file", *bgFileName);
 
   cmValue param = this->GetOption(cmStrCat(opt, "_ALIGNMENT"));
   if (param != nullptr) {
-    xout.Attribute("alignment", param);
+    xout.Attribute("alignment", *param);
   }
 
   param = this->GetOption(cmStrCat(opt, "_SCALING"));
   if (param != nullptr) {
-    xout.Attribute("scaling", param);
+    xout.Attribute("scaling", *param);
   }
 
   // Apple docs say that you must provide either mime-type or uti
@@ -94,12 +95,12 @@ void cmCPackPKGGenerator::CreateBackground(const char* themeName,
   // doesn't have them, so don't make them mandatory.
   param = this->GetOption(cmStrCat(opt, "_MIME_TYPE"));
   if (param != nullptr) {
-    xout.Attribute("mime-type", param);
+    xout.Attribute("mime-type", *param);
   }
 
   param = this->GetOption(cmStrCat(opt, "_UTI"));
   if (param != nullptr) {
-    xout.Attribute("uti", param);
+    xout.Attribute("uti", *param);
   }
 
   xout.EndElement();

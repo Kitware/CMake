@@ -128,8 +128,8 @@ std::string cmTimestamp::CreateTimestampFromTimeT(time_t timeT,
                                             : static_cast<char>(0);
 
     if (c1 == '%' && c2 != 0) {
-      result +=
-        this->AddTimestampComponent(c2, timeStruct, timeT, microseconds);
+      result += this->AddTimestampComponent(c2, timeStruct, timeT, utcFlag,
+                                            microseconds);
       ++i;
     } else {
       result += c1;
@@ -179,7 +179,7 @@ time_t cmTimestamp::CreateUtcTimeTFromTm(struct tm& tm) const
 }
 
 std::string cmTimestamp::AddTimestampComponent(
-  char flag, struct tm& timeStruct, const time_t timeT,
+  char flag, struct tm& timeStruct, const time_t timeT, const bool utcFlag,
   const uint32_t microseconds) const
 {
   std::string formatString = cmStrCat('%', flag);
@@ -203,6 +203,63 @@ std::string cmTimestamp::AddTimestampComponent(
     case 'Y':
     case '%':
       break;
+    case 'Z':
+#if defined(__GLIBC__)
+      // 'struct tm' has the time zone, so strftime can honor UTC.
+      static_cast<void>(utcFlag);
+#else
+      // 'struct tm' may not have the time zone, so strftime may
+      // use local time.  Hard-code the UTC result.
+      if (utcFlag) {
+        return std::string("GMT");
+      }
+#endif
+      break;
+    case 'z': {
+#if defined(__GLIBC__)
+      // 'struct tm' has the time zone, so strftime can honor UTC.
+      static_cast<void>(utcFlag);
+#else
+      // 'struct tm' may not have the time zone, so strftime may
+      // use local time.  Hard-code the UTC result.
+      if (utcFlag) {
+        return std::string("+0000");
+      }
+#endif
+#ifndef _AIX
+      break;
+#else
+      std::string xpg_sus_old;
+      bool const xpg_sus_was_set =
+        cmSystemTools::GetEnv("XPG_SUS_ENV", xpg_sus_old);
+      if (xpg_sus_was_set && xpg_sus_old == "ON") {
+        break;
+      }
+      xpg_sus_old = "XPG_SUS_ENV=" + xpg_sus_old;
+
+      // On AIX systems, %z requires XPG_SUS_ENV=ON to work as desired.
+      cmSystemTools::PutEnv("XPG_SUS_ENV=ON");
+      tzset();
+
+      char buffer[16];
+      size_t size = strftime(buffer, sizeof(buffer), "%z", &timeStruct);
+
+#  ifndef CMAKE_BOOTSTRAP
+      if (xpg_sus_was_set) {
+        cmSystemTools::PutEnv(xpg_sus_old);
+      } else {
+        cmSystemTools::UnsetEnv("XPG_SUS_ENV");
+      }
+#  else
+      // No UnsetEnv during bootstrap.  This is good enough for CMake itself.
+      cmSystemTools::PutEnv(xpg_sus_old);
+      static_cast<void>(xpg_sus_was_set);
+#  endif
+      tzset();
+
+      return std::string(buffer, size);
+#endif
+    }
     case 's': // Seconds since UNIX epoch (midnight 1-jan-1970)
     {
       // Build a time_t for UNIX epoch and subtract from the input "timeT":

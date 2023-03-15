@@ -37,10 +37,10 @@ Scripts
 
 An individual ``<script>.cmake`` source file may be processed
 in *script mode* by using the :manual:`cmake(1)` command-line tool
-with the ``-P`` option.  Script mode simply runs the commands in
-the given CMake Language source file and does not generate a
-build system.  It does not allow CMake commands that define build
-targets or actions.
+with the :option:`-P <cmake -P>` option.  Script mode simply runs
+the commands in the given CMake Language source file and does not
+generate a build system.  It does not allow CMake commands that
+define build targets or actions.
 
 Modules
 -------
@@ -206,7 +206,7 @@ enclosed content, such as `Escape Sequences`_ or `Variable References`_,
 is performed.  A bracket argument is always given to the command
 invocation as exactly one argument.
 
-.. No code-block syntax highlighting in the following example
+.. ATTENTION No code-block syntax highlighting in the following example
    (long string literal not supported by our cmake.py)
 
 For example::
@@ -254,7 +254,7 @@ closing quotes.  Both `Escape Sequences`_ and `Variable References`_
 are evaluated.  A quoted argument is always given to the command
 invocation as exactly one argument.
 
-.. No code-block syntax highlighting in the following example
+.. ATTENTION No code-block syntax highlighting in the following example
    (escape \" not supported by our cmake.py)
 
 For example:
@@ -268,7 +268,7 @@ For example:
   It does end in an unescaped double quote.
   ")
 
-.. No code-block syntax highlighting in the following example
+.. ATTENTION No code-block syntax highlighting in the following example
    (for conformity with the two above examples)
 
 The final ``\`` on any line ending in an odd number of backslashes
@@ -530,6 +530,9 @@ of alphanumeric characters plus ``_`` and ``-``.
 Variables have dynamic scope.  Each variable "set" or "unset"
 creates a binding in the current scope:
 
+Block Scope
+ The :command:`block` command may create a new scope for variable bindings.
+
 Function Scope
  `Command Definitions`_ created by the :command:`function` command
  create commands that, when invoked, process the recorded commands
@@ -542,8 +545,8 @@ Directory Scope
  bindings.  Before processing the ``CMakeLists.txt`` file for a
  directory, CMake copies all variable bindings currently defined
  in the parent directory, if any, to initialize the new directory
- scope.  CMake `Scripts`_, when processed with ``cmake -P``, bind
- variables in one "directory" scope.
+ scope.  CMake `Scripts`_, when processed with :option:`cmake -P`,
+ bind variables in one "directory" scope.
 
  A variable "set" or "unset" not inside a function call binds
  to the current directory scope.
@@ -597,11 +600,11 @@ Initialization
  Changed values are not written back to the calling process,
  and they are not seen by subsequent build or test processes.
 
- See the :ref:`cmake -E env <Run a Command-Line Tool>` command-line
+ See the :option:`cmake -E env <cmake-E env>` command-line
  tool to run a command in a modified environment.
 
 Inspection
- See the :ref:`cmake -E environment <Run a Command-Line Tool>` command-line
+ See the :option:`cmake -E environment <cmake-E environment>` command-line
  tool to display all current environment variables.
 
 The :manual:`cmake-env-variables(7)` manual documents environment

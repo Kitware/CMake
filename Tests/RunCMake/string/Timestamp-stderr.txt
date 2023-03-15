@@ -1,1 +1,1 @@
-RESULT=2005-08-07 23:19:49.000000 Sunday=Sun August=Aug 05 day=219 wd=0 week=32 w_iso=31 %I=11 epoch=1123456789
+^RESULT=2005-08-07 23:19:49.000000 Sunday=Sun August=Aug 05 day=219 wd=0 week=32 w_iso=31 %I=11 epoch=1123456789 TZ=GMT tz=\+0000$

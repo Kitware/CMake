@@ -44,7 +44,7 @@ else()
     set(CMAKE_${lang}_LINKER_WRAPPER_FLAG "-Xlinker" " ")
     set(CMAKE_${lang}_LINKER_WRAPPER_FLAG_SEP)
 
-    if(CMAKE_${lang}_COMPILER_TARGET)
+    if(CMAKE_${lang}_COMPILER_TARGET AND "${lang}" STREQUAL "CXX")
       if(CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 3.4.0)
         list(APPEND CMAKE_${lang}_COMPILER_PREDEFINES_COMMAND "-target" "${CMAKE_${lang}_COMPILER_TARGET}")
       else()
@@ -80,7 +80,7 @@ else()
       set(CMAKE_${lang}_COMPILE_OPTIONS_IPO "-flto")
     endif()
 
-    if(ANDROID AND CMAKE_ANDROID_NDK_VERSION VERSION_LESS "22")
+    if(ANDROID AND NOT CMAKE_ANDROID_NDK_VERSION VERSION_GREATER_EQUAL "22")
       # https://github.com/android-ndk/ndk/issues/242
       set(CMAKE_${lang}_LINK_OPTIONS_IPO "-fuse-ld=gold")
     endif()

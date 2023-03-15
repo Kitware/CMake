@@ -97,6 +97,7 @@
     {
       "path": ".*cmake_pch(_[^.]+)?(\\.hxx)?\\.cxx$",
       "isGenerated": null,
+      "fileSetName": null,
       "sourceGroupName": "Source Files",
       "compileGroupLanguage": "CXX",
       "backtrace": [
@@ -111,6 +112,7 @@
     {
       "path": "^empty\\.cxx$",
       "isGenerated": null,
+      "fileSetName": null,
       "sourceGroupName": "Source Files",
       "compileGroupLanguage": "CXX",
       "backtrace": [
@@ -131,6 +133,7 @@
     {
       "path": ".*/Debug/cmake_pch(_[^.]+)?\\.hxx$",
       "isGenerated": null,
+      "fileSetName": null,
       "sourceGroupName": "Precompile Header File",
       "compileGroupLanguage": null,
       "backtrace": [
@@ -145,6 +148,7 @@
     {
       "path": ".*/Release/cmake_pch(_[^.]+)?\\.hxx$",
       "isGenerated": null,
+      "fileSetName": null,
       "sourceGroupName": "Precompile Header File",
       "compileGroupLanguage": null,
       "backtrace": [
@@ -159,6 +163,7 @@
     {
       "path": ".*/MinSizeRel/cmake_pch(_[^.]+)?\\.hxx$",
       "isGenerated": null,
+      "fileSetName": null,
       "sourceGroupName": "Precompile Header File",
       "compileGroupLanguage": null,
       "backtrace": [
@@ -173,6 +178,7 @@
     {
       "path": ".*/RelWithDebInfo/cmake_pch(_[^.]+)?\\.hxx$",
       "isGenerated": null,
+      "fileSetName": null,
       "sourceGroupName": "Precompile Header File",
       "compileGroupLanguage": null,
       "backtrace": [

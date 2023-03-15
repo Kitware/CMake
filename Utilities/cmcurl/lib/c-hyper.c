@@ -163,6 +163,10 @@ static int hyper_each_header(void *userdata,
     writetype = CLIENTWRITE_HEADER;
     if(data->set.include_header)
       writetype |= CLIENTWRITE_BODY;
+    if(data->state.hconnect)
+      writetype |= CLIENTWRITE_CONNECT;
+    if(data->req.httpcode/100 == 1)
+      writetype |= CLIENTWRITE_1XX;
     result = Curl_client_write(data, writetype, headp, len);
     if(result) {
       data->state.hresult = CURLE_ABORTED_BY_CALLBACK;
@@ -170,8 +174,8 @@ static int hyper_each_header(void *userdata,
     }
   }
 
-  data->info.header_size += (long)len;
-  data->req.headerbytecount += (long)len;
+  data->info.header_size += (curl_off_t)len;
+  data->req.headerbytecount += (curl_off_t)len;
   return HYPER_ITER_CONTINUE;
 }
 
@@ -245,7 +249,7 @@ static int hyper_body_chunk(void *userdata, const hyper_buf *chunk)
 }
 
 /*
- * Hyper does not consider the status line, the first line in a HTTP/1
+ * Hyper does not consider the status line, the first line in an HTTP/1
  * response, to be a header. The libcurl API does. This function sends the
  * status line in the header callback. */
 static CURLcode status_line(struct Curl_easy *data,
@@ -260,23 +264,25 @@ static CURLcode status_line(struct Curl_easy *data,
   int writetype;
   vstr = http_version == HYPER_HTTP_VERSION_1_1 ? "1.1" :
     (http_version == HYPER_HTTP_VERSION_2 ? "2" : "1.0");
-  conn->httpversion =
-    http_version == HYPER_HTTP_VERSION_1_1 ? 11 :
-    (http_version == HYPER_HTTP_VERSION_2 ? 20 : 10);
-  if(http_version == HYPER_HTTP_VERSION_1_0)
-    data->state.httpwant = CURL_HTTP_VERSION_1_0;
-
-  if(data->state.hconnect)
-    /* CONNECT */
-    data->info.httpproxycode = http_status;
 
   /* We need to set 'httpcodeq' for functions that check the response code in
      a single place. */
   data->req.httpcode = http_status;
 
-  result = Curl_http_statusline(data, conn);
-  if(result)
-    return result;
+  if(data->state.hconnect)
+    /* CONNECT */
+    data->info.httpproxycode = http_status;
+  else {
+    conn->httpversion =
+      http_version == HYPER_HTTP_VERSION_1_1 ? 11 :
+      (http_version == HYPER_HTTP_VERSION_2 ? 20 : 10);
+    if(http_version == HYPER_HTTP_VERSION_1_0)
+      data->state.httpwant = CURL_HTTP_VERSION_1_0;
+
+    result = Curl_http_statusline(data, conn);
+    if(result)
+      return result;
+  }
 
   Curl_dyn_reset(&data->state.headerb);
 
@@ -299,9 +305,8 @@ static CURLcode status_line(struct Curl_easy *data,
     if(result)
       return result;
   }
-  data->info.header_size += (long)len;
-  data->req.headerbytecount += (long)len;
-  data->req.httpcode = http_status;
+  data->info.header_size += (curl_off_t)len;
+  data->req.headerbytecount += (curl_off_t)len;
   return CURLE_OK;
 }
 
@@ -415,8 +420,10 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
       break;
     }
     else if(h->endtask == task) {
-      /* end of transfer */
+      /* end of transfer, forget the task handled, we might get a
+       * new one with the same address in the future. */
       *done = TRUE;
+      h->endtask = NULL;
       infof(data, "hyperstream is done");
       if(!k->bodywrites) {
         /* hyper doesn't always call the body write callback */
@@ -679,7 +686,7 @@ static int uploadpostfields(void *userdata, hyper_context *ctx,
       return HYPER_POLL_ERROR;
     }
     /* increasing the writebytecount here is a little premature but we
-       don't know exactly when the body is sent*/
+       don't know exactly when the body is sent */
     data->req.writebytecount += (size_t)data->req.p.http->postsize;
     Curl_pgrsSetUploadCounter(data, data->req.writebytecount);
     data->req.upload_done = TRUE;
@@ -692,6 +699,7 @@ static int uploadstreamed(void *userdata, hyper_context *ctx,
 {
   size_t fillcount;
   struct Curl_easy *data = (struct Curl_easy *)userdata;
+  struct connectdata *conn = (struct connectdata *)data->conn;
   CURLcode result;
   (void)ctx;
 
@@ -706,7 +714,15 @@ static int uploadstreamed(void *userdata, hyper_context *ctx,
     return HYPER_POLL_PENDING;
   }
 
-  result = Curl_fillreadbuffer(data, data->set.upload_buffer_size, &fillcount);
+  if(data->req.upload_chunky && conn->bits.authneg) {
+    fillcount = 0;
+    data->req.upload_chunky = FALSE;
+    result = CURLE_OK;
+  }
+  else {
+    result = Curl_fillreadbuffer(data, data->set.upload_buffer_size,
+                                 &fillcount);
+  }
   if(result) {
     data->state.hresult = result;
     return HYPER_POLL_ERROR;
@@ -732,7 +748,7 @@ static int uploadstreamed(void *userdata, hyper_context *ctx,
       return HYPER_POLL_ERROR;
     }
     /* increasing the writebytecount here is a little premature but we
-       don't know exactly when the body is sent*/
+       don't know exactly when the body is sent */
     data->req.writebytecount += fillcount;
     Curl_pgrsSetUploadCounter(data, fillcount);
   }
@@ -740,7 +756,7 @@ static int uploadstreamed(void *userdata, hyper_context *ctx,
 }
 
 /*
- * bodysend() sets up headers in the outgoing request for a HTTP transfer that
+ * bodysend() sets up headers in the outgoing request for an HTTP transfer that
  * sends a body
  */
 
@@ -845,7 +861,7 @@ static void http1xx_cb(void *arg, struct hyper_response *resp)
 }
 
 /*
- * Curl_http() gets called from the generic multi_do() function when a HTTP
+ * Curl_http() gets called from the generic multi_do() function when an HTTP
  * request is to be performed. This creates and sends a properly constructed
  * HTTP request.
  */
@@ -1159,7 +1175,12 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
 
   Curl_debug(data, CURLINFO_HEADER_OUT, (char *)"\r\n", 2);
 
-  data->req.upload_chunky = FALSE;
+  if(data->req.upload_chunky && conn->bits.authneg) {
+    data->req.upload_chunky = TRUE;
+  }
+  else {
+    data->req.upload_chunky = FALSE;
+  }
   sendtask = hyper_clientconn_send(client, req);
   if(!sendtask) {
     failf(data, "hyper_clientconn_send");

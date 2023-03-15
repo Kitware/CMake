@@ -24,7 +24,7 @@ public:
   //! Set cache only and recurse to false by default.
   cmLocalVisualStudio10Generator(cmGlobalGenerator* gg, cmMakefile* mf);
 
-  virtual ~cmLocalVisualStudio10Generator();
+  ~cmLocalVisualStudio10Generator() override;
 
   void ReadAndStoreExternalGUID(const std::string& name,
                                 const char* path) override;

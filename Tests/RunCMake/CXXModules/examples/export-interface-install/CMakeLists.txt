@@ -27,7 +27,8 @@ install(TARGETS export_interfaces
 install(EXPORT CXXModules
   NAMESPACE CXXModules::
   DESTINATION "lib/cmake/export_interfaces"
-  FILE "export_interfaces-targets.cmake")
+  FILE "export_interfaces-targets.cmake"
+  CXX_MODULES_DIRECTORY "export_interfaces-cxx-modules")
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/export_interfaces-config.cmake"
   "include(\"\${CMAKE_CURRENT_LIST_DIR}/export_interfaces-targets.cmake\")
 set(\${CMAKE_FIND_PACKAGE_NAME}_FOUND 1)
@@ -49,7 +50,8 @@ endif ()
 add_test(NAME export_interfaces_build
   COMMAND
     "${CMAKE_COMMAND}"
-    "-Dexpected_dir=${CMAKE_INSTALL_PREFIX}/lib/cxx/miu"
+    "-Dexpected_source_dir=${CMAKE_INSTALL_PREFIX}/lib/cxx/miu"
+    "-Dexpected_binary_dir=${CMAKE_INSTALL_PREFIX}/lib/cxx/bmi"
     "-Dexport_interfaces_DIR=${CMAKE_INSTALL_PREFIX}/lib/cmake/export_interfaces"
     ${generator}
     -S "${CMAKE_CURRENT_SOURCE_DIR}/test"

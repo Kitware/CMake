@@ -17,6 +17,7 @@ struct cmGeneratorExpressionDAGChecker;
 class cmGeneratorTarget;
 class cmLocalGenerator;
 class cmMakefile;
+class cmake;
 
 enum class cmFileSetVisibility
 {
@@ -33,7 +34,7 @@ bool cmFileSetVisibilityIsForInterface(cmFileSetVisibility vis);
 class cmFileSet
 {
 public:
-  cmFileSet(std::string name, std::string type,
+  cmFileSet(cmake& cmakeInstance, std::string name, std::string type,
             cmFileSetVisibility visibility);
 
   const std::string& GetName() const { return this->Name; }
@@ -77,6 +78,7 @@ public:
   static bool IsValidName(const std::string& name);
 
 private:
+  cmake& CMakeInstance;
   std::string Name;
   std::string Type;
   cmFileSetVisibility Visibility;

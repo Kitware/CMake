@@ -44,9 +44,6 @@ endif()
 
 if(NOT CMAKE_CSharp_COMPILER_WORKS)
   PrintTestCompilerResult(CHECK_FAIL "broken")
-  file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-    "Determining if the C# compiler works failed with "
-    "the following output:\n${__CMAKE_CSharp_COMPILER_OUTPUT}\n\n")
   string(REPLACE "\n" "\n  " _output "${__CMAKE_CSharp_COMPILER_OUTPUT}")
   message(FATAL_ERROR "The C# compiler\n  \"${CMAKE_CSharp_COMPILER}\"\n"
     "is not able to compile a simple test program.\nIt fails "
@@ -55,9 +52,6 @@ if(NOT CMAKE_CSharp_COMPILER_WORKS)
 else()
   if(CSharp_TEST_WAS_RUN)
     PrintTestCompilerResult(CHECK_PASS "works")
-    file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-      "Determining if the C# compiler works passed with "
-      "the following output:\n${__CMAKE_CSharp_COMPILER_OUTPUT}\n\n")
   endif()
 
   # Re-configure to save learned information.

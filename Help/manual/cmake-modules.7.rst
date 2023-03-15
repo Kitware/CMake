@@ -161,7 +161,6 @@ They are normally called through the :command:`find_package` command.
    /module/FindICU
    /module/FindImageMagick
    /module/FindIntl
-   /module/FindITK
    /module/FindJasper
    /module/FindJava
    /module/FindJNI
@@ -252,8 +251,6 @@ They are normally called through the :command:`find_package` command.
    /module/FindTclStub
    /module/FindThreads
    /module/FindTIFF
-   /module/FindUnixCommands
-   /module/FindVTK
    /module/FindVulkan
    /module/FindWget
    /module/FindWish
@@ -296,9 +293,12 @@ Deprecated Find Modules
    :maxdepth: 1
 
    /module/FindCUDA
+   /module/FindITK
    /module/FindPythonInterp
    /module/FindPythonLibs
    /module/FindQt
+   /module/FindUnixCommands
+   /module/FindVTK
    /module/FindwxWindows
 
 Legacy CPack Modules

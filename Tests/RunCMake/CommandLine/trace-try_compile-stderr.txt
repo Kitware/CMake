@@ -1,0 +1,4 @@
+.*Modules/CMakeDetermineCompilerABI.cmake\([0-9]+\):  try_compile\([^)]+\)
+.*Tests/RunCMake/CommandLine/trace-try_compile(-redirect)?-build/CMakeFiles/CMakeScratch/TryCompile-[^/]+/CMakeLists.txt\([0-9]+\):  cmake_minimum_required.*
+.*Tests/RunCMake/CommandLine/trace-try_compile(-redirect)?-build/CMakeFiles/CMakeScratch/TryCompile-[^/]+/CMakeLists.txt\([0-9]+\):  project\(CMAKE_TRY_COMPILE.*
+.*Tests/RunCMake/CommandLine/trace-try_compile(-redirect)?-build/CMakeFiles/CMakeScratch/TryCompile-[^/]+/CMakeLists.txt\([0-9]+\):  add_executable\(cmTC_.*

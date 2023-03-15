@@ -26,13 +26,8 @@ namespace {
  * is non-null, otherwise removing key `op` (if it exists).
  */
 void SetMapValue(cmCTestGenericHandler::t_StringToString& map,
-                 const std::string& op, const char* value)
+                 const std::string& op, const std::string& value)
 {
-  if (!value) {
-    map.erase(op);
-    return;
-  }
-
   map[op] = value;
 }
 void SetMapValue(cmCTestGenericHandler::t_StringToString& map,
@@ -47,7 +42,8 @@ void SetMapValue(cmCTestGenericHandler::t_StringToString& map,
 }
 }
 
-void cmCTestGenericHandler::SetOption(const std::string& op, const char* value)
+void cmCTestGenericHandler::SetOption(const std::string& op,
+                                      const std::string& value)
 {
   SetMapValue(this->Options, op, value);
 }
@@ -57,7 +53,7 @@ void cmCTestGenericHandler::SetOption(const std::string& op, cmValue value)
 }
 
 void cmCTestGenericHandler::SetPersistentOption(const std::string& op,
-                                                const char* value)
+                                                const std::string& value)
 {
   this->SetOption(op, value);
   SetMapValue(this->PersistentOptions, op, value);
@@ -121,7 +117,7 @@ bool cmCTestGenericHandler::StartResultingXML(cmCTest::Part part,
   if (!name) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Cannot create resulting XML file without providing the name"
-                 << std::endl;);
+                 << std::endl);
     return false;
   }
   std::ostringstream ostr;
@@ -157,7 +153,7 @@ bool cmCTestGenericHandler::StartLogFile(const char* name,
   if (!name) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Cannot create log file without providing the name"
-                 << std::endl;);
+                 << std::endl);
     return false;
   }
   std::ostringstream ostr;

@@ -15,7 +15,7 @@ endif()
 
 # Run cmake in a new Window to isolate its console code page.
 execute_process(COMMAND cmd /c start /min /wait ""
-  ${CMAKE_COMMAND} -DCODEPAGE=${CODEPAGE} ${maybe_MAKE_PROGRAM} -P ${CMAKE_CURRENT_LIST_DIR}/ShowIncludes-cmake.cmake)
+  ${CMAKE_COMMAND} -DCODEPAGE=${CODEPAGE} -DVSLANG=${VSLANG} ${maybe_MAKE_PROGRAM} -P ${CMAKE_CURRENT_LIST_DIR}/ShowIncludes-cmake.cmake)
 
 # Print our internal UTF-8 representation of the showIncludes prefix.
 file(READ "${CMAKE_CURRENT_BINARY_DIR}/showIncludes.txt" showIncludes_txt)

@@ -14,7 +14,7 @@ compute the relative path accordingly.  If the header is not in the
 the ``-p`` path prefix option.  ``moc`` usually generates a
 relative include path in that case.
 
-:prop_tgt:`AUTOMOC_PATH_PREFIX` is initialized from the variable
+``AUTOMOC_PATH_PREFIX`` is initialized from the variable
 :variable:`CMAKE_AUTOMOC_PATH_PREFIX`, which is ``OFF`` by default.
 
 See the :manual:`cmake-qt(7)` manual for more information on using CMake
@@ -26,7 +26,7 @@ Reproducible builds
 For reproducible builds it is recommended to keep headers that are ``moc``
 compiled in one of the target
 :command:`include directories <target_include_directories>` and set
-:prop_tgt:`AUTOMOC_PATH_PREFIX` to ``ON``.  This ensures that:
+``AUTOMOC_PATH_PREFIX`` to ``ON``.  This ensures that:
 
 - ``moc`` output files are identical on different build setups,
 - ``moc`` output files will compile correctly when the source and/or

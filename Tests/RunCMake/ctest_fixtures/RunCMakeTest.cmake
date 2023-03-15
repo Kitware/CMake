@@ -1,9 +1,5 @@
 include(RunCTest)
 
-# Isolate our ctest runs from external environment.
-unset(ENV{CTEST_PARALLEL_LEVEL})
-unset(ENV{CTEST_OUTPUT_ON_FAILURE})
-
 function(run_ctest_test CASE_NAME)
   set(CASE_CTEST_FIXTURES_ARGS "${ARGN}")
   run_ctest(${CASE_NAME})

@@ -3,16 +3,7 @@
 set -e
 
 # Install development tools.
-apt-get update
-apt-get install -y \
-    clang-6.0 \
-    libclang-6.0-dev \
-    llvm-6.0-dev \
-    libz-dev \
-    g++ \
-    cmake \
-    ninja-build \
-    git
+apt-get install -y $(grep '^[^#]\+$' /root/iwyu_packages.lst)
 
 cd /root
 git clone "https://github.com/include-what-you-use/include-what-you-use.git"
@@ -29,4 +20,4 @@ cmake -GNinja \
     ..
 ninja
 DESTDIR=/root/iwyu-destdir ninja install
-tar -C /root/iwyu-destdir -cf /root/iwyu.tar.gz .
+tar -C /root/iwyu-destdir -cf /root/iwyu.tar .

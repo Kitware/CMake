@@ -1,7 +1,6 @@
 INTERPROCEDURAL_OPTIMIZATION
 ----------------------------
 
-Enable interprocedural optimization for targets in a directory.
+This directory property does not exist anymore.
 
-If set to true, enables interprocedural optimizations if they are
-known to be supported by the compiler.
+See the target property :prop_tgt:`INTERPROCEDURAL_OPTIMIZATION` instead.

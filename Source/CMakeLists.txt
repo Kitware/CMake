@@ -160,6 +160,8 @@ add_library(
   cmComputeLinkInformation.h
   cmComputeTargetDepends.h
   cmComputeTargetDepends.cxx
+  cmConfigureLog.h
+  cmConfigureLog.cxx
   cmConsoleBuf.h
   cmConsoleBuf.cxx
   cmConstStack.h
@@ -196,9 +198,10 @@ add_library(
   cmDependsCompiler.h
   cmDocumentation.cxx
   cmDocumentationFormatter.cxx
-  cmDocumentationSection.cxx
   cmDynamicLoader.cxx
   cmDynamicLoader.h
+  cmDyndepCollation.cxx
+  cmDyndepCollation.h
   cmELF.h
   cmELF.cxx
   cmExprParserHelper.cxx
@@ -234,6 +237,8 @@ add_library(
   cmFileAPICache.h
   cmFileAPICodemodel.cxx
   cmFileAPICodemodel.h
+  cmFileAPIConfigureLog.cxx
+  cmFileAPIConfigureLog.h
   cmFileAPICMakeFiles.cxx
   cmFileAPICMakeFiles.h
   cmFileAPIToolchains.cxx

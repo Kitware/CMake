@@ -67,23 +67,17 @@ macro(CHECK_VARIABLE_EXISTS VAR VARIABLE)
       ${CHECK_VARIABLE_EXISTS_ADD_LINK_OPTIONS}
       ${CHECK_VARIABLE_EXISTS_ADD_LIBRARIES}
       CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_VARIABLE_DEFINITIONS}
-      OUTPUT_VARIABLE OUTPUT)
+      )
     if(${VARIABLE})
       set(${VARIABLE} 1 CACHE INTERNAL "Have variable ${VAR}")
       if(NOT CMAKE_REQUIRED_QUIET)
         message(CHECK_PASS "found")
       endif()
-      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-        "Determining if the variable ${VAR} exists passed with the following output:\n"
-        "${OUTPUT}\n\n")
     else()
       set(${VARIABLE} "" CACHE INTERNAL "Have variable ${VAR}")
       if(NOT CMAKE_REQUIRED_QUIET)
         message(CHECK_FAIL "not found")
       endif()
-      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-        "Determining if the variable ${VAR} exists failed with the following output:\n"
-        "${OUTPUT}\n\n")
     endif()
   endif()
 endmacro()

@@ -12,14 +12,14 @@ from the output of the command defined in
 when
 
 - :prop_tgt:`AUTOMOC` is enabled,
-- :prop_tgt:`AUTOMOC_COMPILER_PREDEFINES` is enabled,
+- ``AUTOMOC_COMPILER_PREDEFINES`` is enabled,
 - :variable:`CMAKE_CXX_COMPILER_PREDEFINES_COMMAND <CMAKE_<LANG>_COMPILER_PREDEFINES_COMMAND>` isn't empty and
 - the Qt version is greater or equal 5.8.
 
 The ``moc_predefs.h`` file, which is generated in :prop_tgt:`AUTOGEN_BUILD_DIR`,
 is passed to ``moc`` as the argument to the ``--include`` option.
 
-By default :prop_tgt:`AUTOMOC_COMPILER_PREDEFINES` is initialized from
+By default ``AUTOMOC_COMPILER_PREDEFINES`` is initialized from
 :variable:`CMAKE_AUTOMOC_COMPILER_PREDEFINES`, which is ON by default.
 
 See the :manual:`cmake-qt(7)` manual for more information on using CMake

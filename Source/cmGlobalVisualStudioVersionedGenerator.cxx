@@ -14,7 +14,6 @@
 #include "cmsys/Glob.hxx"
 #include "cmsys/RegularExpression.hxx"
 
-#include "cmDocumentationEntry.h"
 #include "cmGlobalGenerator.h"
 #include "cmGlobalGeneratorFactory.h"
 #include "cmMakefile.h"
@@ -54,7 +53,8 @@ static bool VSIsArm64Host()
 #  undef CM_VS_GCC_DIAGNOSTIC_PUSHED
 #endif
 
-  USHORT processMachine, nativeMachine;
+  USHORT processMachine;
+  USHORT nativeMachine;
 
   return s_IsWow64Process2Impl != nullptr &&
     s_IsWow64Process2Impl(GetCurrentProcess(), &processMachine,
@@ -66,7 +66,7 @@ static bool VSHasDotNETFrameworkArm64()
 {
   std::string dotNetArm64;
   return cmSystemTools::ReadRegistryValue(
-    "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\.NETFramework;InstallRootArm64",
+    R"(HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\.NETFramework;InstallRootArm64)",
     dotNetArm64, cmSystemTools::KeyWOW64_64);
 }
 
@@ -86,19 +86,19 @@ static std::string VSHostPlatformName()
 {
   if (VSIsArm64Host()) {
     return "ARM64";
-  } else if (VSIsWow64()) {
-    return "x64";
-  } else {
-#if defined(_M_ARM)
-    return "ARM";
-#elif defined(_M_IA64)
-    return "Itanium";
-#elif defined(_WIN64)
-    return "x64";
-#else
-    return "Win32";
-#endif
   }
+  if (VSIsWow64()) {
+    return "x64";
+  }
+#if defined(_M_ARM)
+  return "ARM";
+#elif defined(_M_IA64)
+  return "Itanium";
+#elif defined(_WIN64)
+  return "x64";
+#else
+  return "Win32";
+#endif
 }
 
 static std::string VSHostArchitecture(
@@ -106,19 +106,19 @@ static std::string VSHostArchitecture(
 {
   if (VSIsArm64Host()) {
     return v >= cmGlobalVisualStudioGenerator::VSVersion::VS17 ? "ARM64" : "";
-  } else if (VSIsWow64()) {
-    return "x64";
-  } else {
-#if defined(_M_ARM)
-    return "";
-#elif defined(_M_IA64)
-    return "";
-#elif defined(_WIN64)
-    return "x64";
-#else
-    return "x86";
-#endif
   }
+  if (VSIsWow64()) {
+    return "x64";
+  }
+#if defined(_M_ARM)
+  return "";
+#elif defined(_M_IA64)
+  return "";
+#elif defined(_WIN64)
+  return "x64";
+#else
+  return "x86";
+#endif
 }
 
 static unsigned int VSVersionToMajor(
@@ -212,7 +212,7 @@ static const char* cmVS15GenName(const std::string& name, std::string& genName)
 {
   if (strncmp(name.c_str(), vs15generatorName,
               sizeof(vs15generatorName) - 6) != 0) {
-    return 0;
+    return nullptr;
   }
   const char* p = name.c_str() + sizeof(vs15generatorName) - 6;
   if (cmHasLiteralPrefix(p, " 2017")) {
@@ -255,11 +255,11 @@ public:
     return std::unique_ptr<cmGlobalGenerator>();
   }
 
-  void GetDocumentation(cmDocumentationEntry& entry) const override
+  cmDocumentationEntry GetDocumentation() const override
   {
-    entry.Name = std::string(vs15generatorName) + " [arch]";
-    entry.Brief = "Generates Visual Studio 2017 project files.  "
-                  "Optional [arch] can be \"Win64\" or \"ARM\".";
+    return { std::string(vs15generatorName) + " [arch]",
+             "Generates Visual Studio 2017 project files.  "
+             "Optional [arch] can be \"Win64\" or \"ARM\"." };
   }
 
   std::vector<std::string> GetGeneratorNames() const override
@@ -307,7 +307,7 @@ static const char* cmVS16GenName(const std::string& name, std::string& genName)
 {
   if (strncmp(name.c_str(), vs16generatorName,
               sizeof(vs16generatorName) - 6) != 0) {
-    return 0;
+    return nullptr;
   }
   const char* p = name.c_str() + sizeof(vs16generatorName) - 6;
   if (cmHasLiteralPrefix(p, " 2019")) {
@@ -321,7 +321,7 @@ static const char* cmVS17GenName(const std::string& name, std::string& genName)
 {
   if (strncmp(name.c_str(), vs17generatorName,
               sizeof(vs17generatorName) - 6) != 0) {
-    return 0;
+    return nullptr;
   }
   const char* p = name.c_str() + sizeof(vs17generatorName) - 6;
   if (cmHasLiteralPrefix(p, " 2022")) {
@@ -351,11 +351,11 @@ public:
     return std::unique_ptr<cmGlobalGenerator>();
   }
 
-  void GetDocumentation(cmDocumentationEntry& entry) const override
+  cmDocumentationEntry GetDocumentation() const override
   {
-    entry.Name = std::string(vs16generatorName);
-    entry.Brief = "Generates Visual Studio 2019 project files.  "
-                  "Use -A option to specify architecture.";
+    return { std::string(vs16generatorName),
+             "Generates Visual Studio 2019 project files.  "
+             "Use -A option to specify architecture." };
   }
 
   std::vector<std::string> GetGeneratorNames() const override
@@ -416,11 +416,11 @@ public:
     return std::unique_ptr<cmGlobalGenerator>();
   }
 
-  void GetDocumentation(cmDocumentationEntry& entry) const override
+  cmDocumentationEntry GetDocumentation() const override
   {
-    entry.Name = std::string(vs17generatorName);
-    entry.Brief = "Generates Visual Studio 2022 project files.  "
-                  "Use -A option to specify architecture.";
+    return { std::string(vs17generatorName),
+             "Generates Visual Studio 2022 project files.  "
+             "Use -A option to specify architecture." };
   }
 
   std::vector<std::string> GetGeneratorNames() const override
@@ -521,6 +521,7 @@ bool cmGlobalVisualStudioVersionedGenerator::SetGeneratorInstance(
 {
   if (this->LastGeneratorInstanceString &&
       i == *(this->LastGeneratorInstanceString)) {
+    this->SetVSVersionVar(mf);
     return true;
   }
 
@@ -531,7 +532,7 @@ bool cmGlobalVisualStudioVersionedGenerator::SetGeneratorInstance(
   if (!this->GeneratorInstanceVersion.empty()) {
     std::string const majorStr = VSVersionToMajorString(this->Version);
     cmsys::RegularExpression versionRegex(
-      cmStrCat("^", majorStr, "\\.[0-9]+\\.[0-9]+\\.[0-9]+$"));
+      cmStrCat("^", majorStr, R"(\.[0-9]+\.[0-9]+\.[0-9]+$)"));
     if (!versionRegex.find(this->GeneratorInstanceVersion)) {
       std::ostringstream e;
       /* clang-format off */
@@ -592,6 +593,8 @@ bool cmGlobalVisualStudioVersionedGenerator::SetGeneratorInstance(
                                        cmStateEnums::INTERNAL);
   }
 
+  this->SetVSVersionVar(mf);
+
   // The selected instance may have a different MSBuild than previously found.
   this->MSBuildCommandInitialized = false;
 
@@ -607,7 +610,7 @@ bool cmGlobalVisualStudioVersionedGenerator::ParseGeneratorInstance(
   this->GeneratorInstanceVersion.clear();
 
   std::vector<std::string> const fields = cmTokenize(is, ",");
-  std::vector<std::string>::const_iterator fi = fields.begin();
+  auto fi = fields.begin();
   if (fi == fields.end()) {
     return true;
   }
@@ -670,6 +673,13 @@ bool cmGlobalVisualStudioVersionedGenerator::ParseGeneratorInstance(
   }
 
   return true;
+}
+
+void cmGlobalVisualStudioVersionedGenerator::SetVSVersionVar(cmMakefile* mf)
+{
+  if (cm::optional<std::string> vsVer = this->GetVSInstanceVersion()) {
+    mf->AddDefinition("CMAKE_VS_VERSION_BUILD_NUMBER", *vsVer);
+  }
 }
 
 bool cmGlobalVisualStudioVersionedGenerator::ProcessGeneratorInstanceField(
@@ -901,9 +911,8 @@ bool cmGlobalVisualStudioVersionedGenerator::SelectWindowsStoreToolset(
         this->IsWindowsDesktopToolsetInstalled()) {
       toolset = VSVersionToToolset(this->Version);
       return true;
-    } else {
-      return false;
     }
+    return false;
   }
   return this->cmGlobalVisualStudio14Generator::SelectWindowsStoreToolset(
     toolset);

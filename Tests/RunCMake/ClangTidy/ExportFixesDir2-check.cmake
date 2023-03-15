@@ -1,0 +1,35 @@
+if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
+  assert_any_file_exists(
+    "${RunCMake_TEST_BINARY_DIR}/clang-tidy/CMakeFiles/main.dir/Debug/main.c.o.yaml"
+    "${RunCMake_TEST_BINARY_DIR}/clang-tidy/CMakeFiles/main.dir/Debug/main.c.obj.yaml"
+    )
+  assert_no_file_exists(
+    "${RunCMake_TEST_BINARY_DIR}/clang-tidy/CMakeFiles/main.dir/Debug/extra.c.o.yaml"
+    "${RunCMake_TEST_BINARY_DIR}/clang-tidy/CMakeFiles/main.dir/Debug/extra.c.obj.yaml"
+    )
+  assert_any_file_exists(
+    "${RunCMake_TEST_BINARY_DIR}/export_fixes_subdir/clang-tidy/export_fixes_subdir/CMakeFiles/subdir.dir/Debug/__/main.c.o.yaml"
+    "${RunCMake_TEST_BINARY_DIR}/export_fixes_subdir/clang-tidy/export_fixes_subdir/CMakeFiles/subdir.dir/Debug/__/main.c.obj.yaml"
+    )
+  assert_no_file_exists(
+    "${RunCMake_TEST_BINARY_DIR}/export_fixes_subdir/clang-tidy/export_fixes_subdir/CMakeFiles/subdir.dir/Debug/__/extra.c.o.yaml"
+    "${RunCMake_TEST_BINARY_DIR}/export_fixes_subdir/clang-tidy/export_fixes_subdir/CMakeFiles/subdir.dir/Debug/__/extra.c.obj.yaml"
+    )
+else()
+  assert_any_file_exists(
+    "${RunCMake_TEST_BINARY_DIR}/clang-tidy/CMakeFiles/main.dir/main.c.o.yaml"
+    "${RunCMake_TEST_BINARY_DIR}/clang-tidy/CMakeFiles/main.dir/main.c.obj.yaml"
+    )
+  assert_no_file_exists(
+    "${RunCMake_TEST_BINARY_DIR}/clang-tidy/CMakeFiles/main.dir/extra.c.o.yaml"
+    "${RunCMake_TEST_BINARY_DIR}/clang-tidy/CMakeFiles/main.dir/extra.c.obj.yaml"
+    )
+  assert_any_file_exists(
+    "${RunCMake_TEST_BINARY_DIR}/export_fixes_subdir/clang-tidy/export_fixes_subdir/CMakeFiles/subdir.dir/__/main.c.o.yaml"
+    "${RunCMake_TEST_BINARY_DIR}/export_fixes_subdir/clang-tidy/export_fixes_subdir/CMakeFiles/subdir.dir/__/main.c.obj.yaml"
+    )
+  assert_no_file_exists(
+    "${RunCMake_TEST_BINARY_DIR}/export_fixes_subdir/clang-tidy/export_fixes_subdir/CMakeFiles/subdir.dir/__/extra.c.o.yaml"
+    "${RunCMake_TEST_BINARY_DIR}/export_fixes_subdir/clang-tidy/export_fixes_subdir/CMakeFiles/subdir.dir/__/extra.c.obj.yaml"
+    )
+endif()

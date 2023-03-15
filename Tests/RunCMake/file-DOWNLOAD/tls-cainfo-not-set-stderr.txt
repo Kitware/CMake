@@ -1,0 +1,4 @@
+^CMake Error at tls-cainfo-not-set.cmake:[0-9]+ \(file\):
+  file DOWNLOAD missing file value for TLS_CAINFO.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)$

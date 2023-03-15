@@ -13,7 +13,7 @@ Sets up an include guard for the current CMake file (see the
 :variable:`CMAKE_CURRENT_LIST_FILE` variable documentation).
 
 CMake will end its processing of the current file at the location of the
-:command:`include_guard` command if the current file has already been
+``include_guard`` command if the current file has already been
 processed for the applicable scope (see below). This provides functionality
 similar to the include guards commonly used in source headers or to the
 ``#pragma once`` directive. If the current file has been processed previously

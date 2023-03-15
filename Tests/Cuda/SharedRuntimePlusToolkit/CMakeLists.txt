@@ -15,16 +15,19 @@ add_library(SharedToolkit SHARED shared.cpp)
 target_link_libraries(SharedToolkit PRIVATE Common PUBLIC CUDA::curand CUDA::nppif)
 target_link_libraries(SharedToolkit PUBLIC CUDA::cudart)
 
-# The CUDA only ships the shared version of the toolkit libraries
-# on windows
-if(NOT WIN32)
+# Verify the CUDA Toolkit has static libraries
+if(TARGET CUDA::curand_static AND
+   TARGET CUDA::nppif_static)
   #shared runtime with static toolkit libraries
   add_library(StaticToolkit SHARED static.cpp)
+  target_compile_definitions(StaticToolkit INTERFACE "HAS_STATIC_VERSION")
   target_link_libraries(StaticToolkit PRIVATE Common CUDA::curand_static CUDA::nppif_static)
   target_link_libraries(StaticToolkit PUBLIC CUDA::cudart)
 
-  #static runtime with mixed toolkit libraries
+
+  #shared runtime with mixed toolkit libraries
   add_library(MixedToolkit SHARED mixed.cpp)
+  target_compile_definitions(MixedToolkit INTERFACE "HAS_MIXED_VERSION")
   target_link_libraries(MixedToolkit PRIVATE Common CUDA::curand_static CUDA::nppif)
   target_link_libraries(MixedToolkit PUBLIC CUDA::cudart)
 endif()

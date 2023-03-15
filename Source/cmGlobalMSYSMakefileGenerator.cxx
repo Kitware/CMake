@@ -4,7 +4,6 @@
 
 #include "cmsys/FStream.hxx"
 
-#include "cmDocumentationEntry.h"
 #include "cmMakefile.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
@@ -53,9 +52,8 @@ void cmGlobalMSYSMakefileGenerator::EnableLanguage(
   }
 }
 
-void cmGlobalMSYSMakefileGenerator::GetDocumentation(
-  cmDocumentationEntry& entry)
+cmDocumentationEntry cmGlobalMSYSMakefileGenerator::GetDocumentation()
 {
-  entry.Name = cmGlobalMSYSMakefileGenerator::GetActualName();
-  entry.Brief = "Generates MSYS makefiles.";
+  return { cmGlobalMSYSMakefileGenerator::GetActualName(),
+           "Generates MSYS makefiles." };
 }

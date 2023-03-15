@@ -1,10 +1,6 @@
 cmake_policy(SET CMP0067 NEW)
 enable_language(CXX)
 
-# Isolate the one try_compile below in the error log.
-set(CMakeError_log "${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log")
-file(REMOVE "${CMakeError_log}")
-
 # Add our own -std= flag to the try_compile check.
 set(CMAKE_REQUIRED_FLAGS -std=c++11)
 
@@ -24,8 +20,21 @@ int main()
 }
 " SRC_COMPILED)
 if(NOT SRC_COMPILED)
-  if(EXISTS "${CMakeError_log}")
-    file(READ "${CMakeError_log}" err_log)
+  message("Check failed to compile:")
+  set(configure_log "${CMAKE_BINARY_DIR}/CMakeFiles/CMakeConfigureLog.yaml")
+  if(EXISTS "${configure_log}")
+    file(READ "${configure_log}" log_content)
+  else()
+    set(log_content "")
   endif()
-  message("${err_log}")
+  if(log_content MATCHES [[(  -
+    kind: "try_compile-v1"(
++    [^
+]+)+
+    checks:
+      - "Performing Test SRC_COMPILED"(
++    [^
+]+)+)]])
+    message("${configure_log} contains:\n${CMAKE_MATCH_1}")
+  endif()
 endif()

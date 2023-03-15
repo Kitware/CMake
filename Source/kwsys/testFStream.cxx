@@ -136,7 +136,7 @@ static int testBOMIO()
   return 0;
 }
 
-int testFStream(int, char* [])
+int testFStream(int, char*[])
 {
   int ret = 0;
 

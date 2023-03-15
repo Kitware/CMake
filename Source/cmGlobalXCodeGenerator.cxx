@@ -13,6 +13,7 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cm/optional>
 #include <cmext/algorithm>
 #include <cmext/string_view>
 
@@ -24,7 +25,6 @@
 #include "cmCustomCommandGenerator.h"
 #include "cmCustomCommandLines.h"
 #include "cmCustomCommandTypes.h"
-#include "cmDocumentationEntry.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
@@ -149,9 +149,9 @@ public:
   std::unique_ptr<cmGlobalGenerator> CreateGlobalGenerator(
     const std::string& name, bool allowArch, cmake* cm) const override;
 
-  void GetDocumentation(cmDocumentationEntry& entry) const override
+  cmDocumentationEntry GetDocumentation() const override
   {
-    cmGlobalXCodeGenerator::GetDocumentation(entry);
+    return cmGlobalXCodeGenerator::GetDocumentation();
   }
 
   std::vector<std::string> GetGeneratorNames() const override
@@ -2281,11 +2281,11 @@ void cmGlobalXCodeGenerator::CreateCustomRulesMakefile(
       }
       makefileStream << "\n";
 
-      if (const char* comment = ccg.GetComment()) {
+      if (cm::optional<std::string> comment = ccg.GetComment()) {
         std::string echo_cmd =
           cmStrCat("echo ",
                    (this->CurrentLocalGenerator->EscapeForShell(
-                     comment, ccg.GetCC().GetEscapeAllowMakeVars())));
+                     *comment, ccg.GetCC().GetEscapeAllowMakeVars())));
         makefileStream << "\t" << echo_cmd << "\n";
       }
 
@@ -2516,10 +2516,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
   }
 
   // Get the product name components.
-  std::string pnprefix;
-  std::string pnbase;
-  std::string pnsuffix;
-  gtgt->GetFullNameComponents(pnprefix, pnbase, pnsuffix, configName);
+  cmGeneratorTarget::NameComponents const& components =
+    gtgt->GetFullNameComponents(configName);
 
   cmValue version = gtgt->GetProperty("VERSION");
   cmValue soversion = gtgt->GetProperty("SOVERSION");
@@ -2534,8 +2532,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     version = soversion;
   }
 
-  std::string realName = pnbase;
-  std::string soName = pnbase;
+  std::string realName = components.base;
+  std::string soName = components.base;
   if (version && soversion) {
     realName += ".";
     realName += *version;
@@ -2565,15 +2563,15 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       gtgt->GetType() == cmStateEnums::SHARED_LIBRARY ||
       gtgt->GetType() == cmStateEnums::MODULE_LIBRARY ||
       gtgt->GetType() == cmStateEnums::EXECUTABLE) {
-
+    std::string prefix = components.prefix;
     if (gtgt->IsFrameworkOnApple() || gtgt->IsCFBundleOnApple()) {
-      pnprefix = "";
+      prefix = "";
     }
 
     buildSettings->AddAttribute("EXECUTABLE_PREFIX",
-                                this->CreateString(pnprefix));
+                                this->CreateString(prefix));
     buildSettings->AddAttribute("EXECUTABLE_SUFFIX",
-                                this->CreateString(pnsuffix));
+                                this->CreateString(components.suffix));
   }
 
   // Store the product name for all target types.
@@ -2977,6 +2975,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
                               this->CreateString(extraLinkOptions));
   buildSettings->AddAttribute("OTHER_REZFLAGS", this->CreateString(""));
   buildSettings->AddAttribute("SECTORDER_FLAGS", this->CreateString(""));
+  buildSettings->AddAttribute("ALWAYS_SEARCH_USER_PATHS",
+                              this->CreateString("NO"));
   buildSettings->AddAttribute("USE_HEADERMAP", this->CreateString("NO"));
   cmXCodeObject* group = this->CreateObject(cmXCodeObject::OBJECT_LIST);
   group->AddObject(this->CreateString("$(inherited)"));
@@ -3623,7 +3623,7 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
           }
           // Add a pair of config and item to target-item map
           auto& itemVector = targetItemMap[libName];
-          itemVector.emplace_back(ConfigItemPair(configName, &libItem));
+          itemVector.emplace_back(configName, &libItem);
           // Add product file-name to a lib-product map
           auto productName =
             cmSystemTools::GetFilenameName(libItem.Value.Value);
@@ -3962,7 +3962,7 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
 void cmGlobalXCodeGenerator::AddEmbeddedObjects(
   cmXCodeObject* target, const std::string& copyFilesBuildPhaseName,
   const std::string& embedPropertyName, const std::string& dstSubfolderSpec,
-  int actionsOnByDefault)
+  int actionsOnByDefault, const std::string& defaultDstPath)
 {
   cmGeneratorTarget* gt = target->GetTarget();
   if (!gt) {
@@ -3998,7 +3998,8 @@ void cmGlobalXCodeGenerator::AddEmbeddedObjects(
     copyFilesBuildPhase->AddAttribute("dstPath",
                                       this->CreateString(*fwEmbedPath));
   } else {
-    copyFilesBuildPhase->AddAttribute("dstPath", this->CreateString(""));
+    copyFilesBuildPhase->AddAttribute("dstPath",
+                                      this->CreateString(defaultDstPath));
   }
   copyFilesBuildPhase->AddAttribute("runOnlyForDeploymentPostprocessing",
                                     this->CreateString("0"));
@@ -4122,6 +4123,17 @@ void cmGlobalXCodeGenerator::AddEmbeddedAppExtensions(cmXCodeObject* target)
   this->AddEmbeddedObjects(target, "Embed App Extensions",
                            "XCODE_EMBED_APP_EXTENSIONS", dstSubfolderSpec,
                            RemoveHeadersOnCopyByDefault);
+}
+
+void cmGlobalXCodeGenerator::AddEmbeddedExtensionKitExtensions(
+  cmXCodeObject* target)
+{
+  static const auto dstSubfolderSpec = "16";
+
+  this->AddEmbeddedObjects(target, "Embed App Extensions",
+                           "XCODE_EMBED_EXTENSIONKIT_EXTENSIONS",
+                           dstSubfolderSpec, RemoveHeadersOnCopyByDefault,
+                           "$(EXTENSIONS_FOLDER_PATH)");
 }
 
 bool cmGlobalXCodeGenerator::CreateGroups(
@@ -4369,7 +4381,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
     cmXCodeObject* config =
       this->CreateObject(cmXCodeObject::XCBuildConfiguration);
     config->AddAttribute("name", this->CreateString(name));
-    configs.push_back(std::make_pair(name, config));
+    configs.emplace_back(name, config);
   }
   if (defaultConfigName.empty()) {
     defaultConfigName = "Debug";
@@ -4444,11 +4456,19 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
     buildSettings->AddAttribute("CODE_SIGNING_ALLOWED",
                                 this->CreateString("NO"));
   }
+  auto debugConfigs = this->GetCMakeInstance()->GetDebugConfigs();
+  std::set<std::string> debugConfigSet(debugConfigs.begin(),
+                                       debugConfigs.end());
 
   for (auto& config : configs) {
     CreateGlobalXCConfigSettings(root, config.second, config.first);
 
     cmXCodeObject* buildSettingsForCfg = this->CreateFlatClone(buildSettings);
+
+    if (debugConfigSet.count(cmSystemTools::UpperCase(config.first)) == 0) {
+      buildSettingsForCfg->AddAttribute("SWIFT_COMPILATION_MODE",
+                                        this->CreateString("wholemodule"));
+    }
 
     // Put this last so it can override existing settings
     // Convert "CMAKE_XCODE_ATTRIBUTE_*" variables directly.
@@ -4507,6 +4527,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
     this->AddEmbeddedFrameworks(t);
     this->AddEmbeddedPlugIns(t);
     this->AddEmbeddedAppExtensions(t);
+    this->AddEmbeddedExtensionKitExtensions(t);
     // Inherit project-wide values for any target-specific search paths.
     this->InheritBuildSettingAttribute(t, "HEADER_SEARCH_PATHS");
     this->InheritBuildSettingAttribute(t, "SYSTEM_HEADER_SEARCH_PATHS");
@@ -4517,6 +4538,9 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
     this->InheritBuildSettingAttribute(t, "GCC_PREPROCESSOR_DEFINITIONS");
     this->InheritBuildSettingAttribute(t, "OTHER_CFLAGS");
     this->InheritBuildSettingAttribute(t, "OTHER_LDFLAGS");
+    this->InheritBuildSettingAttribute(t, "OTHER_SWIFT_FLAGS");
+    this->InheritBuildSettingAttribute(t,
+                                       "SWIFT_ACTIVE_COMPILATION_CONDITIONS");
   }
 
   if (this->XcodeBuildSystem == BuildSystem::One) {
@@ -4888,10 +4912,10 @@ std::string cmGlobalXCodeGenerator::ExpandCFGIntDir(
   return tmp;
 }
 
-void cmGlobalXCodeGenerator::GetDocumentation(cmDocumentationEntry& entry)
+cmDocumentationEntry cmGlobalXCodeGenerator::GetDocumentation()
 {
-  entry.Name = cmGlobalXCodeGenerator::GetActualName();
-  entry.Brief = "Generate Xcode project files.";
+  return { cmGlobalXCodeGenerator::GetActualName(),
+           "Generate Xcode project files." };
 }
 
 std::string cmGlobalXCodeGenerator::ConvertToRelativeForMake(
@@ -4974,7 +4998,13 @@ void cmGlobalXCodeGenerator::AppendDefines(
   std::string def;
   for (auto const& define : defines) {
     // Start with -D if requested.
-    def = cmStrCat(dflag ? "-D" : "", define);
+    if (dflag && !cmHasLiteralPrefix(define, "-D")) {
+      def = cmStrCat("-D", define);
+    } else if (!dflag && cmHasLiteralPrefix(define, "-D")) {
+      def = define.substr(2);
+    } else {
+      def = define;
+    }
 
     // Append the flag with needed escapes.
     std::string tmp;

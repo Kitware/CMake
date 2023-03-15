@@ -7,7 +7,7 @@ Use the :command:`if` command instead.
 
 Assert satisfaction of an option's required variables.
 
-::
+.. code-block:: cmake
 
   variable_requires(TEST_VARIABLE RESULT_VARIABLE
                     REQUIRED_VARIABLE1

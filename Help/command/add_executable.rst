@@ -107,3 +107,8 @@ The ``<name>`` may not be used to modify properties of ``<target>``, that
 is, it may not be used as the operand of :command:`set_property`,
 :command:`set_target_properties`, :command:`target_link_libraries` etc.
 An ``ALIAS`` target may not be installed or exported.
+
+See Also
+^^^^^^^^
+
+* :command:`add_library`

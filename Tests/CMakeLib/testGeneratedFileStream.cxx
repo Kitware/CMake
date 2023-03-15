@@ -10,7 +10,7 @@
   std::cout << "FAILED: " << (m1) << (m2) << "\n";                            \
   failed = 1
 
-int testGeneratedFileStream(int /*unused*/, char* /*unused*/ [])
+int testGeneratedFileStream(int /*unused*/, char* /*unused*/[])
 {
   int failed = 0;
   cmGeneratedFileStream gm;

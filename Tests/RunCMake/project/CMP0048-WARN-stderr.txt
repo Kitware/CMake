@@ -8,5 +8,5 @@ CMake Warning \(dev\) at CMP0048-WARN.cmake:3 \(project\):
     PROJECT_VERSION
     MyProject_VERSION_TWEAK
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.

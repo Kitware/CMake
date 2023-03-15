@@ -326,10 +326,6 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
     this->Makefile->AddDefinition("CTEST_SCRIPT_ARG", script_arg);
   }
 
-#if defined(__CYGWIN__)
-  this->Makefile->AddDefinition("CMAKE_LEGACY_CYGWIN_WIN32", "0");
-#endif
-
   // set a callback function to update the elapsed time
   this->Makefile->OnExecuteCommand([this] { this->UpdateElapsedTime(); });
 

@@ -17,7 +17,7 @@ Synopsis
 Query host system specific information
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-::
+.. code-block:: cmake
 
   cmake_host_system_information(RESULT <variable> QUERY <key> ...)
 

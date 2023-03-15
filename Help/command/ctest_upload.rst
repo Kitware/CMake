@@ -3,7 +3,7 @@ ctest_upload
 
 Upload files to a dashboard server as a :ref:`Dashboard Client`.
 
-::
+.. code-block:: cmake
 
   ctest_upload(FILES <file>... [QUIET] [CAPTURE_CMAKE_ERROR <result-var>])
 

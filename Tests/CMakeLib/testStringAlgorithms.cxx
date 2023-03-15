@@ -6,13 +6,15 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <type_traits>
+#include <utility>
 #include <vector>
 
 #include <cm/string_view>
 
 #include "cmStringAlgorithms.h"
 
-int testStringAlgorithms(int /*unused*/, char* /*unused*/ [])
+int testStringAlgorithms(int /*unused*/, char* /*unused*/[])
 {
   int failed = 0;
 
@@ -143,6 +145,28 @@ int testStringAlgorithms(int /*unused*/, char* /*unused*/ [])
     std::istringstream(cmStrCat("", val)) >> d;
     d -= val;
     assert_ok((d < div) && (d > -div), "cmStrCat double");
+  }
+  {
+    std::string val;
+    std::string expect;
+    val.reserve(50 * cmStrLen("cmStrCat move ") + 1);
+    auto data = val.data();
+    auto capacity = val.capacity();
+    bool moved = true;
+    for (int i = 0; i < 100; i++) {
+      if (i % 2 == 0) {
+        val = cmStrCat(std::move(val), "move ");
+        expect += "move ";
+      } else {
+        val = cmStrCat("cmStrCat ", std::move(val));
+        expect = "cmStrCat " + std::move(expect);
+      }
+      if (val.data() != data || val.capacity() != capacity) {
+        moved = false;
+      }
+    }
+    assert_ok(moved, "cmStrCat move");
+    assert_string(val, expect, "cmStrCat move");
   }
 
   // ----------------------------------------------------------------------

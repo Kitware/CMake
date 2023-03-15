@@ -1,0 +1,4 @@
+dnf-command(download)
+rpm-build
+python3-devel
+clang-tools-extra

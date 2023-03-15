@@ -13,7 +13,6 @@
 class cmLocalGenerator;
 class cmMakefile;
 class cmake;
-struct cmDocumentationEntry;
 
 /** \class cmGlobalBorlandMakefileGenerator
  * \brief Write a Borland makefiles.
@@ -38,7 +37,7 @@ public:
   static std::string GetActualName() { return "Borland Makefiles"; }
 
   /** Get the documentation entry for this generator.  */
-  static void GetDocumentation(cmDocumentationEntry& entry);
+  static cmDocumentationEntry GetDocumentation();
 
   //! Create a local generator appropriate to this Global Generator
   std::unique_ptr<cmLocalGenerator> CreateLocalGenerator(

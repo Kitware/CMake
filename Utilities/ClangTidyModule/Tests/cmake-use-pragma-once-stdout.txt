@@ -1,0 +1,25 @@
+cmake-use-pragma-once/cmake-use-pragma-once-both.h:1:1: warning: use #pragma once [cmake-use-pragma-once]
+#ifndef BOTH_H
+^~~~~~~~~~~~~~
+cmake-use-pragma-once/cmake-use-pragma-once-both.h:1:1: note: FIX-IT applied suggested code changes
+cmake-use-pragma-once/cmake-use-pragma-once-both.h:2:1: note: FIX-IT applied suggested code changes
+#define BOTH_H
+^
+cmake-use-pragma-once/cmake-use-pragma-once-both.h:10:1: note: FIX-IT applied suggested code changes
+#endif
+^
+cmake-use-pragma-once/cmake-use-pragma-once-include-guards.h:1:1: warning: use #pragma once [cmake-use-pragma-once]
+#ifndef INCLUDE_GUARDS_H
+^~~~~~~~~~~~~~~~~~~~~~~~
+#pragma once
+cmake-use-pragma-once/cmake-use-pragma-once-include-guards.h:1:1: note: FIX-IT applied suggested code changes
+cmake-use-pragma-once/cmake-use-pragma-once-include-guards.h:2:1: note: FIX-IT applied suggested code changes
+#define INCLUDE_GUARDS_H
+^
+cmake-use-pragma-once/cmake-use-pragma-once-include-guards.h:9:1: note: FIX-IT applied suggested code changes
+#endif
+^
+cmake-use-pragma-once/cmake-use-pragma-once-neither.h:1:1: warning: use #pragma once [cmake-use-pragma-once]
+int neither()
+^
+cmake-use-pragma-once/cmake-use-pragma-once-neither.h:1:1: note: FIX-IT applied suggested code changes

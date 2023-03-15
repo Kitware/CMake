@@ -99,7 +99,7 @@ macro(CHECK_INCLUDE_FILE_CXX INCLUDE VARIABLE)
       CMAKE_FLAGS
       -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_INCLUDE_FILE_FLAGS}
       "${CHECK_INCLUDE_FILE_CXX_INCLUDE_DIRS}"
-      OUTPUT_VARIABLE OUTPUT)
+      )
     unset(_CIF_LINK_OPTIONS)
     unset(_CIF_LINK_LIBRARIES)
 
@@ -112,19 +112,11 @@ macro(CHECK_INCLUDE_FILE_CXX INCLUDE VARIABLE)
         message(CHECK_PASS "found")
       endif()
       set(${VARIABLE} 1 CACHE INTERNAL "Have include ${INCLUDE}")
-      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-        "Determining if the include file ${INCLUDE} "
-        "exists passed with the following output:\n"
-        "${OUTPUT}\n\n")
     else()
       if(NOT CMAKE_REQUIRED_QUIET)
         message(CHECK_FAIL "not found")
       endif()
       set(${VARIABLE} "" CACHE INTERNAL "Have include ${INCLUDE}")
-      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-        "Determining if the include file ${INCLUDE} "
-        "exists failed with the following output:\n"
-        "${OUTPUT}\n\n")
     endif()
   endif()
 endmacro()

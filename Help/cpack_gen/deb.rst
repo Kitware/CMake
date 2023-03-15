@@ -8,16 +8,16 @@ Variables specific to CPack Debian (DEB) generator
 
 The CPack DEB generator may be used to create DEB package using :module:`CPack`.
 The CPack DEB generator is a :module:`CPack` generator thus it uses the
-``CPACK_XXX`` variables used by :module:`CPack`.
+:variable:`!CPACK_XXX` variables used by :module:`CPack`.
 
 The CPack DEB generator should work on any Linux host but it will produce
 better deb package when Debian specific tools ``dpkg-xxx`` are usable on
 the build system.
 
 The CPack DEB generator has specific features which are controlled by the
-specifics ``CPACK_DEBIAN_XXX`` variables.
+specifics :variable:`!CPACK_DEBIAN_XXX` variables.
 
-``CPACK_DEBIAN_<COMPONENT>_XXXX`` variables may be used in order to have
+:variable:`!CPACK_DEBIAN_<COMPONENT>_XXXX` variables may be used in order to have
 **component** specific values.  Note however that ``<COMPONENT>`` refers to
 the **grouping name** written in upper case. It may be either a component name
 or a component GROUP name.
@@ -34,10 +34,10 @@ List of CPack DEB generator specific variables:
 
  Enable component packaging for CPackDEB
 
- * Mandatory : NO
- * Default   : OFF
+ :Mandatory: No
+ :Default: ``OFF``
 
- If enabled (ON) multiple packages are generated. By default a single package
+ If enabled (``ON``) multiple packages are generated. By default a single package
  containing files of all components is generated.
 
 .. variable:: CPACK_DEBIAN_PACKAGE_NAME
@@ -46,16 +46,16 @@ List of CPack DEB generator specific variables:
  Set Package control field (variable is automatically transformed to lower
  case).
 
- * Mandatory : YES
- * Default   :
+ :Mandatory: Yes
+ :Default:
 
    - :variable:`CPACK_PACKAGE_NAME` for non-component based
      installations
-   - :variable:`CPACK_DEBIAN_PACKAGE_NAME` suffixed with -<COMPONENT>
+   - :variable:`CPACK_DEBIAN_PACKAGE_NAME` suffixed with ``-<COMPONENT>``
      for component-based installations.
 
  .. versionadded:: 3.5
-  Per-component ``CPACK_DEBIAN_<COMPONENT>_PACKAGE_NAME`` variables.
+  Per-component :variable:`!CPACK_DEBIAN_<COMPONENT>_PACKAGE_NAME` variables.
 
  See https://www.debian.org/doc/debian-policy/ch-controlfields.html#s-f-source
 
@@ -66,8 +66,8 @@ List of CPack DEB generator specific variables:
 
  Package file name.
 
- * Mandatory : YES
- * Default   : ``<CPACK_PACKAGE_FILE_NAME>[-<component>].deb``
+ :Mandatory: Yes
+ :Default: ``<CPACK_PACKAGE_FILE_NAME>[-<component>].deb``
 
  This may be set to ``DEB-DEFAULT`` to allow the CPack DEB generator to generate
  package file name by itself in deb format::
@@ -98,8 +98,8 @@ List of CPack DEB generator specific variables:
 
  The Debian package epoch
 
- * Mandatory : No
- * Default   : -
+ :Mandatory: No
+ :Default: None
 
  Optional number that should be incremented when changing versioning schemas
  or fixing mistakes in the version numbers of older packages.
@@ -108,8 +108,8 @@ List of CPack DEB generator specific variables:
 
  The Debian package version
 
- * Mandatory : YES
- * Default   : :variable:`CPACK_PACKAGE_VERSION`
+ :Mandatory: Yes
+ :Default: :variable:`CPACK_PACKAGE_VERSION`
 
  This variable may contain only alphanumerics (A-Za-z0-9) and the characters
  . + - ~ (full stop, plus, hyphen, tilde) and should start with a digit. If
@@ -130,8 +130,8 @@ List of CPack DEB generator specific variables:
 
  The Debian package release - Debian revision number.
 
- * Mandatory : No
- * Default   : -
+ :Mandatory: No
+ :Default: None
 
  This is the numbering of the DEB package itself, i.e. the version of the
  packaging and not the version of the content (see
@@ -144,20 +144,20 @@ List of CPack DEB generator specific variables:
 
  The Debian package architecture
 
- * Mandatory : YES
- * Default   : Output of ``dpkg --print-architecture`` (or ``i386``
+ :Mandatory: Yes
+ :Default: Output of ``dpkg --print-architecture`` (or ``i386``
    if ``dpkg`` is not found)
 
  .. versionadded:: 3.6
-  Per-component ``CPACK_DEBIAN_<COMPONENT>_PACKAGE_ARCHITECTURE`` variables.
+  Per-component :variable:`!CPACK_DEBIAN_<COMPONENT>_PACKAGE_ARCHITECTURE` variables.
 
 .. variable:: CPACK_DEBIAN_PACKAGE_DEPENDS
               CPACK_DEBIAN_<COMPONENT>_PACKAGE_DEPENDS
 
  Sets the Debian dependencies of this package.
 
- * Mandatory : NO
- * Default   :
+ :Mandatory: No
+ :Default:
 
    - An empty string for non-component based installations
    - :variable:`CPACK_DEBIAN_PACKAGE_DEPENDS` for component-based
@@ -165,7 +165,7 @@ List of CPack DEB generator specific variables:
 
 
  .. versionadded:: 3.3
-  Per-component ``CPACK_DEBIAN_<COMPONENT>_PACKAGE_DEPENDS`` variables.
+  Per-component :variable:`!CPACK_DEBIAN_<COMPONENT>_PACKAGE_DEPENDS` variables.
 
  .. note::
 
@@ -178,7 +178,9 @@ List of CPack DEB generator specific variables:
    only the automatically discovered dependencies will be set for this
    component.
 
- Example::
+ Example:
+
+ .. code-block:: cmake
 
    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.3.1-6), libc6 (< 2.4)")
 
@@ -189,23 +191,23 @@ List of CPack DEB generator specific variables:
  Sets inter-component dependencies if listed with
  :variable:`CPACK_COMPONENT_<compName>_DEPENDS` variables.
 
- * Mandatory : NO
- * Default   : -
+ :Mandatory: No
+ :Default: None
 
 .. variable:: CPACK_DEBIAN_PACKAGE_MAINTAINER
 
  The Debian package maintainer
 
- * Mandatory : YES
- * Default   : ``CPACK_PACKAGE_CONTACT``
+ :Mandatory: Yes
+ :Default: :variable:`!CPACK_PACKAGE_CONTACT`
 
 .. variable:: CPACK_DEBIAN_PACKAGE_DESCRIPTION
               CPACK_DEBIAN_<COMPONENT>_DESCRIPTION
 
  The Debian package description
 
- * Mandatory : YES
- * Default   :
+ :Mandatory: Yes
+ :Default:
 
    - :variable:`CPACK_DEBIAN_<COMPONENT>_DESCRIPTION` (component
      based installers only) if set, or :variable:`CPACK_DEBIAN_PACKAGE_DESCRIPTION` if set, or
@@ -218,13 +220,13 @@ List of CPack DEB generator specific variables:
  line of description as defined in `Debian Policy Manual`_.
 
  .. versionadded:: 3.3
-  Per-component ``CPACK_COMPONENT_<compName>_DESCRIPTION`` variables.
+  Per-component :variable:`!CPACK_COMPONENT_<compName>_DESCRIPTION` variables.
 
  .. versionadded:: 3.16
-  Per-component ``CPACK_DEBIAN_<COMPONENT>_DESCRIPTION`` variables.
+  Per-component :variable:`!CPACK_DEBIAN_<COMPONENT>_DESCRIPTION` variables.
 
  .. versionadded:: 3.16
-  The ``CPACK_PACKAGE_DESCRIPTION_FILE`` variable.
+  The :variable:`!CPACK_PACKAGE_DESCRIPTION_FILE` variable.
 
 .. _Debian Policy Manual: https://www.debian.org/doc/debian-policy/ch-controlfields.html#description
 
@@ -233,11 +235,11 @@ List of CPack DEB generator specific variables:
 
  Set Section control field e.g. admin, devel, doc, ...
 
- * Mandatory : YES
- * Default   : "devel"
+ :Mandatory: Yes
+ :Default: ``devel``
 
  .. versionadded:: 3.5
-  Per-component ``CPACK_DEBIAN_<COMPONENT>_PACKAGE_SECTION`` variables.
+  Per-component :variable:`!CPACK_DEBIAN_<COMPONENT>_PACKAGE_SECTION` variables.
 
  See https://www.debian.org/doc/debian-policy/ch-archive.html#s-subsections
 
@@ -249,12 +251,10 @@ List of CPack DEB generator specific variables:
 
  The archive format used for creating the Debian package.
 
- * Mandatory : YES
- * Default   : "gnutar"
+ :Mandatory: Yes
+ :Default: ``gnutar``
 
- Possible value is:
-
- - gnutar
+ Possible value is: ``gnutar``
 
  .. note::
 
@@ -269,8 +269,8 @@ List of CPack DEB generator specific variables:
 
  The compression used for creating the Debian package.
 
- * Mandatory : YES
- * Default   : "gzip"
+ :Mandatory: Yes
+ :Default: ``gzip``
 
  Possible values are:
 
@@ -298,11 +298,11 @@ List of CPack DEB generator specific variables:
  Set Priority control field e.g. required, important, standard, optional,
  extra
 
- * Mandatory : YES
- * Default   : "optional"
+ :Mandatory: Yes
+ :Default: ``optional``
 
  .. versionadded:: 3.5
-  Per-component ``CPACK_DEBIAN_<COMPONENT>_PACKAGE_PRIORITY`` variables.
+  Per-component :variable:`!CPACK_DEBIAN_<COMPONENT>_PACKAGE_PRIORITY` variables.
 
  See https://www.debian.org/doc/debian-policy/ch-archive.html#s-priorities
 
@@ -312,11 +312,11 @@ List of CPack DEB generator specific variables:
  site from which the original source can be obtained and any additional
  upstream documentation or information may be found.
 
- * Mandatory : NO
- * Default   : :variable:`CMAKE_PROJECT_HOMEPAGE_URL`
+ :Mandatory: No
+ :Default: :variable:`CMAKE_PROJECT_HOMEPAGE_URL`
 
  .. versionadded:: 3.12
-  The ``CMAKE_PROJECT_HOMEPAGE_URL`` variable.
+  The :variable:`!CMAKE_PROJECT_HOMEPAGE_URL` variable.
 
  .. note::
 
@@ -329,11 +329,11 @@ List of CPack DEB generator specific variables:
  May be set to ON in order to use ``dpkg-shlibdeps`` to generate
  better package dependency list.
 
- * Mandatory : NO
- * Default   :
+ :Mandatory: No
+ :Default:
 
    - :variable:`CPACK_DEBIAN_PACKAGE_SHLIBDEPS` if set or
-   - OFF
+   - ``OFF``
 
  .. note::
 
@@ -350,7 +350,7 @@ List of CPack DEB generator specific variables:
    shared libraries that could not get resolved otherwise.
 
  .. versionadded:: 3.3
-  Per-component ``CPACK_DEBIAN_<COMPONENT>_PACKAGE_SHLIBDEPS`` variables.
+  Per-component :variable:`!CPACK_DEBIAN_<COMPONENT>_PACKAGE_SHLIBDEPS` variables.
 
  .. versionadded:: 3.6
   Correct handling of ``$ORIGIN`` in :variable:`CMAKE_INSTALL_RPATH`.
@@ -363,8 +363,8 @@ List of CPack DEB generator specific variables:
  via its ``-l`` option. These will be searched by ``dpkg-shlibdeps`` in order
  to find private shared library dependencies.
 
- * Mandatory : NO
- * Default   :
+ :Mandatory: No
+ :Default: None
 
  .. note::
 
@@ -377,8 +377,8 @@ List of CPack DEB generator specific variables:
  May be set when invoking cpack in order to trace debug information
  during the CPack DEB generator run.
 
- * Mandatory : NO
- * Default   : -
+ :Mandatory: No
+ :Default: None
 
 .. variable:: CPACK_DEBIAN_PACKAGE_PREDEPENDS
               CPACK_DEBIAN_<COMPONENT>_PACKAGE_PREDEPENDS
@@ -389,58 +389,58 @@ List of CPack DEB generator specific variables:
  before even starting the installation of the package which declares the
  pre-dependency.
 
- * Mandatory : NO
- * Default   :
+ :Mandatory: No
+ :Default:
 
    - An empty string for non-component based installations
    - :variable:`CPACK_DEBIAN_PACKAGE_PREDEPENDS` for component-based
      installations.
 
  .. versionadded:: 3.4
-  Per-component ``CPACK_DEBIAN_<COMPONENT>_PACKAGE_PREDEPENDS`` variables.
+  Per-component :variable:`!CPACK_DEBIAN_<COMPONENT>_PACKAGE_PREDEPENDS` variables.
 
  See https://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
 
 .. variable:: CPACK_DEBIAN_PACKAGE_ENHANCES
               CPACK_DEBIAN_<COMPONENT>_PACKAGE_ENHANCES
 
- Sets the `Enhances` field of the Debian package.
+ Sets the ``Enhances`` field of the Debian package.
  Similar to :variable:`Suggests <CPACK_DEBIAN_PACKAGE_SUGGESTS>` but works
  in the opposite direction: declares that a package can enhance the
  functionality of another package.
 
- * Mandatory : NO
- * Default   :
+ :Mandatory: No
+ :Default:
 
    - An empty string for non-component based installations
    - :variable:`CPACK_DEBIAN_PACKAGE_ENHANCES` for component-based
      installations.
 
  .. versionadded:: 3.4
-  Per-component ``CPACK_DEBIAN_<COMPONENT>_PACKAGE_ENHANCES`` variables.
+  Per-component :variable:`!CPACK_DEBIAN_<COMPONENT>_PACKAGE_ENHANCES` variables.
 
  See https://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
 
 .. variable:: CPACK_DEBIAN_PACKAGE_BREAKS
               CPACK_DEBIAN_<COMPONENT>_PACKAGE_BREAKS
 
- Sets the `Breaks` field of the Debian package.
+ Sets the ``Breaks`` field of the Debian package.
  When a binary package (P) declares that it breaks other packages (B),
- ``dpkg`` will not allow the package (P) which declares `Breaks` be
+ ``dpkg`` will not allow the package (P) which declares ``Breaks`` be
  **unpacked** unless the packages that will be broken (B) are deconfigured
  first.
  As long as the package (P) is configured, the previously deconfigured
  packages (B) cannot be reconfigured again.
 
- * Mandatory : NO
- * Default   :
+ :Mandatory: No
+ :Default:
 
    - An empty string for non-component based installations
    - :variable:`CPACK_DEBIAN_PACKAGE_BREAKS` for component-based
      installations.
 
  .. versionadded:: 3.4
-  Per-component ``CPACK_DEBIAN_<COMPONENT>_PACKAGE_BREAKS`` variables.
+  Per-component :variable:`!CPACK_DEBIAN_<COMPONENT>_PACKAGE_BREAKS` variables.
 
  See https://www.debian.org/doc/debian-policy/ch-relationships.html#s-breaks
 
@@ -452,15 +452,15 @@ List of CPack DEB generator specific variables:
  field, ``dpkg`` will not allow them to be unpacked on the system at
  the same time.
 
- * Mandatory : NO
- * Default   :
+ :Mandatory: No
+ :Default:
 
    - An empty string for non-component based installations
    - :variable:`CPACK_DEBIAN_PACKAGE_CONFLICTS` for component-based
      installations.
 
  .. versionadded:: 3.4
-  Per-component ``CPACK_DEBIAN_<COMPONENT>_PACKAGE_CONFLICTS`` variables.
+  Per-component :variable:`!CPACK_DEBIAN_<COMPONENT>_PACKAGE_CONFLICTS` variables.
 
  See https://www.debian.org/doc/debian-policy/ch-relationships.html#s-conflicts
 
@@ -479,15 +479,15 @@ List of CPack DEB generator specific variables:
  A virtual package is one which appears in the `Provides` control field of
  another package.
 
- * Mandatory : NO
- * Default   :
+ :Mandatory: No
+ :Default:
 
    - An empty string for non-component based installations
    - :variable:`CPACK_DEBIAN_PACKAGE_PROVIDES` for component-based
      installations.
 
  .. versionadded:: 3.4
-  Per-component ``CPACK_DEBIAN_<COMPONENT>_PACKAGE_PROVIDES`` variables.
+  Per-component :variable:`!CPACK_DEBIAN_<COMPONENT>_PACKAGE_PROVIDES` variables.
 
  See https://www.debian.org/doc/debian-policy/ch-relationships.html#s-virtual
 
@@ -498,34 +498,34 @@ List of CPack DEB generator specific variables:
  Packages can declare in their control file that they should overwrite
  files in certain other packages, or completely replace other packages.
 
- * Mandatory : NO
- * Default   :
+ :Mandatory: No
+ :Default:
 
    - An empty string for non-component based installations
    - :variable:`CPACK_DEBIAN_PACKAGE_REPLACES` for component-based
      installations.
 
  .. versionadded:: 3.4
-  Per-component ``CPACK_DEBIAN_<COMPONENT>_PACKAGE_REPLACES`` variables.
+  Per-component :variable:`!CPACK_DEBIAN_<COMPONENT>_PACKAGE_REPLACES` variables.
 
  See https://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
 
 .. variable:: CPACK_DEBIAN_PACKAGE_RECOMMENDS
               CPACK_DEBIAN_<COMPONENT>_PACKAGE_RECOMMENDS
 
- Sets the `Recommends` field of the Debian package.
+ Sets the ``Recommends`` field of the Debian package.
  Allows packages to declare a strong, but not absolute, dependency on other
  packages.
 
- * Mandatory : NO
- * Default   :
+ :Mandatory: No
+ :Default:
 
    - An empty string for non-component based installations
    - :variable:`CPACK_DEBIAN_PACKAGE_RECOMMENDS` for component-based
      installations.
 
  .. versionadded:: 3.4
-  Per-component ``CPACK_DEBIAN_<COMPONENT>_PACKAGE_RECOMMENDS`` variables.
+  Per-component :variable:`!CPACK_DEBIAN_<COMPONENT>_PACKAGE_RECOMMENDS` variables.
 
  See https://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
 
@@ -535,15 +535,15 @@ List of CPack DEB generator specific variables:
  Sets the `Suggests` field of the Debian package.
  Allows packages to declare a suggested package install grouping.
 
- * Mandatory : NO
- * Default   :
+ :Mandatory: No
+ :Default:
 
    - An empty string for non-component based installations
    - :variable:`CPACK_DEBIAN_PACKAGE_SUGGESTS` for component-based
      installations.
 
  .. versionadded:: 3.4
-  Per-component ``CPACK_DEBIAN_<COMPONENT>_PACKAGE_SUGGESTS`` variables.
+  Per-component :variable:`!CPACK_DEBIAN_<COMPONENT>_PACKAGE_SUGGESTS` variables.
 
  See https://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
 
@@ -551,8 +551,8 @@ List of CPack DEB generator specific variables:
 
  .. versionadded:: 3.6
 
- * Mandatory : NO
- * Default   : OFF
+ :Mandatory: No
+ :Default: ``OFF``
 
  Allows to generate shlibs control file automatically. Compatibility is defined by
  :variable:`CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS_POLICY` variable value.
@@ -569,11 +569,11 @@ List of CPack DEB generator specific variables:
 
  Compatibility policy for auto-generated shlibs control file.
 
- * Mandatory : NO
- * Default   : "="
+ :Mandatory: No
+ :Default: ``=``
 
  Defines compatibility policy for auto-generated shlibs control file.
- Possible values: "=", ">="
+ Possible values: ``=``, ``>=``
 
  See https://www.debian.org/doc/debian-policy/ch-sharedlibs.html#s-sharedlibs-shlibdeps
 
@@ -584,16 +584,18 @@ List of CPack DEB generator specific variables:
  control.tar.gz.
  Typical usage is for conffiles, postinst, postrm, prerm.
 
- * Mandatory : NO
- * Default   : -
+ :Mandatory: No
+ :Default: None
 
- Usage::
+ Usage:
+
+ .. code-block:: cmake
 
   set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
       "${CMAKE_CURRENT_SOURCE_DIR}/prerm;${CMAKE_CURRENT_SOURCE_DIR}/postrm")
 
  .. versionadded:: 3.4
-  Per-component ``CPACK_DEBIAN_<COMPONENT>_PACKAGE_CONTROL_EXTRA`` variables.
+  Per-component :variable:`!CPACK_DEBIAN_<COMPONENT>_PACKAGE_CONTROL_EXTRA` variables.
 
 .. variable:: CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION
               CPACK_DEBIAN_<COMPONENT>_PACKAGE_CONTROL_STRICT_PERMISSION
@@ -603,10 +605,12 @@ List of CPack DEB generator specific variables:
  This variable indicates if the Debian policy on control files should be
  strictly followed.
 
- * Mandatory : NO
- * Default   : FALSE
+ :Mandatory: No
+ :Default: ``FALSE``
 
- Usage::
+ Usage:
+
+ .. code-block:: cmake
 
   set(CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION TRUE)
 
@@ -632,8 +636,8 @@ List of CPack DEB generator specific variables:
  source) the source from which the binary has been generated should be
  indicated with the field ``Source``.
 
- * Mandatory : NO
- * Default   :
+ :Mandatory: No
+ :Default:
 
    - An empty string for non-component based installations
    - :variable:`CPACK_DEBIAN_PACKAGE_SOURCE` for component-based
@@ -660,8 +664,8 @@ Dbgsym packaging has its own set of variables:
 
  Enable generation of dbgsym .ddeb package(s).
 
- * Mandatory : NO
- * Default   : OFF
+ :Mandatory: No
+ :Default: ``OFF``
 
 .. note::
 
@@ -683,7 +687,7 @@ Building Debian packages on Windows
 .. versionadded:: 3.10
 
 To communicate UNIX file permissions from the install stage
-to the CPack DEB generator the "cmake_mode_t" NTFS
+to the CPack DEB generator the ``cmake_mode_t`` NTFS
 alternate data stream (ADT) is used.
 
 When a filesystem without ADT support is used only owner read/write
@@ -694,7 +698,7 @@ Reproducible packages
 
 .. versionadded:: 3.13
 
-The environment variable ``SOURCE_DATE_EPOCH`` may be set to a UNIX
+The environment variable :envvar:`!SOURCE_DATE_EPOCH` may be set to a UNIX
 timestamp, defined as the number of seconds, excluding leap seconds,
 since 01 Jan 1970 00:00:00 UTC.  If set, the CPack DEB generator will
 use its value for timestamps in the package.

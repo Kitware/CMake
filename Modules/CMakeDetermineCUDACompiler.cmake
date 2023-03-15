@@ -520,10 +520,10 @@ elseif(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA")
     set(_SET_CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT
       "set(CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT \"${CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT}\")")
 
-    file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-      "Parsed CUDA nvcc implicit link information from above output:\n${_nvcc_log}\n${log}\n\n")
+    message(CONFIGURE_LOG
+      "Parsed CUDA nvcc implicit link information:\n${_nvcc_log}\n${log}\n\n")
   else()
-    file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+    message(CONFIGURE_LOG
       "Failed to parse CUDA nvcc implicit link information:\n${_nvcc_log}\n\n")
     message(FATAL_ERROR "Failed to extract nvcc implicit link line.")
   endif()
@@ -576,10 +576,10 @@ if(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA")
       list(APPEND CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES "${line}")
     endforeach()
 
-    file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-      "Parsed CUDA nvcc include information from above output:\n${_nvcc_log}\n${log}\n\n")
+    message(CONFIGURE_LOG
+      "Parsed CUDA nvcc include information:\n${_nvcc_log}\n${log}\n\n")
   else()
-    file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+    message(CONFIGURE_LOG
       "Failed to detect CUDA nvcc include information:\n${_nvcc_log}\n\n")
   endif()
 

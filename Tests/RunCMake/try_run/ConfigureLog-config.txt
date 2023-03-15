@@ -1,0 +1,134 @@
+^
+---
+events:(
+  -
+    kind: "message-v1"
+    backtrace:(
+      - "[^"]+")+
+    message: \|(
++      [^
+]*)*)+
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "[^"]*/Modules/CMakeDetermineCompilerABI.cmake:[0-9]+ \(try_compile\)"
+      - "[^"]*/Modules/CMakeTestCCompiler.cmake:[0-9]+ \(CMAKE_DETERMINE_COMPILER_ABI\)"
+      - "CMakeLists.txt:[0-9]+ \(project\)"
+    checks:
+      - "Detecting C compiler ABI info"
+    directories:
+      source: "[^"]*/Tests/RunCMake/try_run/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/"]+"
+      binary: "[^"]*/Tests/RunCMake/try_run/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/"]+"
+    cmakeVariables:(
+      CMAKE_[^
+]*)+
+    buildResult:
+      variable: "CMAKE_C_ABI_COMPILED"
+      cached: true
+      stdout: \|.*
+      exitCode: 0(
+  -
+    kind: "message-v1"
+    backtrace:(
+      - "[^"]+")+
+    message: \|(
++      [^
+]*)*)*
+  -
+    kind: "try_run-v1"
+    backtrace:
+      - "ConfigureLog.cmake:[0-9]+ \(try_run\)"
+      - "CMakeLists.txt:[0-9]+ \(include\)"
+    description: "Source that should not compile\."
+    directories:
+      source: "[^"]*/Tests/RunCMake/try_run/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/"]+"
+      binary: "[^"]*/Tests/RunCMake/try_run/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/"]+"
+    cmakeVariables:(
+      CMAKE_[^
+]*)+
+    buildResult:
+      variable: "COMPILE_RESULT"
+      cached: true
+      stdout: \|.*
+      exitCode: [1-9][0-9]*
+    runResult:
+      variable: "RUN_RESULT"
+      cached: true
+  -
+    kind: "try_run-v1"
+    backtrace:
+      - "ConfigureLog.cmake:[0-9]+ \(try_run\)"
+      - "CMakeLists.txt:[0-9]+ \(include\)"
+    checks:
+      - "Check 1"
+    description: "Source that should compile\."
+    directories:
+      source: "[^"]*/Tests/RunCMake/try_run/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/"]+"
+      binary: "[^"]*/Tests/RunCMake/try_run/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/"]+"
+    cmakeVariables:(
+      CMAKE_[^
+]*)+
+    buildResult:
+      variable: "COMPILE_RESULT"
+      cached: true
+      stdout: \|.*
+      exitCode: 0
+    runResult:
+      variable: "RUN_RESULT"
+      cached: true
+      stdout: \|
+        Output on stdout!
+      stderr: \|
+        Output, with backslash '\\\\', on stderr!
+      exitCode: 12
+  -
+    kind: "try_run-v1"
+    backtrace:
+      - "ConfigureLog.cmake:[0-9]+ \(try_run\)"
+      - "CMakeLists.txt:[0-9]+ \(include\)"
+    checks:
+      - "Check 2"
+      - "Check 1"
+    directories:
+      source: "[^"]*/Tests/RunCMake/try_run/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/"]+"
+      binary: "[^"]*/Tests/RunCMake/try_run/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/"]+"
+    cmakeVariables:(
+      CMAKE_[^
+]*)+
+    buildResult:
+      variable: "COMPILE_RESULT"
+      cached: true
+      stdout: \|.*
+      exitCode: 0
+    runResult:
+      variable: "RUN_RESULT"
+      cached: true
+      stdout: \|
+        Output, with backslash '\\\\', on stderr!
+        Output on stdout!
+      exitCode: 12
+  -
+    kind: "try_run-v1"
+    backtrace:
+      - "ConfigureLog.cmake:[0-9]+ \(try_run\)"
+      - "CMakeLists.txt:[0-9]+ \(include\)"
+    directories:
+      source: "[^"]*/Tests/RunCMake/try_run/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/"]+"
+      binary: "[^"]*/Tests/RunCMake/try_run/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/"]+"
+    cmakeVariables:(
+      CMAKE_[^
+]*)+
+    buildResult:
+      variable: "COMPILE_RESULT"
+      cached: true
+      stdout: \|.*
+      exitCode: 0
+    runResult:
+      variable: "RUN_RESULT"
+      cached: true
+      stdout: \|
+        Output on stdout!
+      stderr: \|
+        Output, with backslash '\\\\', on stderr!
+      exitCode: 12
+\.\.\.$

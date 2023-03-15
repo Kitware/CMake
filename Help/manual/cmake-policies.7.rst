@@ -51,6 +51,13 @@ The :variable:`CMAKE_MINIMUM_REQUIRED_VERSION` variable may also be used
 to determine whether to report an error on use of deprecated macros or
 functions.
 
+Policies Introduced by CMake 3.26
+=================================
+
+.. toctree::
+   :maxdepth: 1
+
+   CMP0143: USE_FOLDERS global property is treated as ON by default. </policy/CMP0143>
 
 Policies Introduced by CMake 3.25
 =================================

@@ -34,6 +34,15 @@ bool cmProjectCommand(std::vector<std::string> const& args,
   }
 
   cmMakefile& mf = status.GetMakefile();
+  if (mf.IsRootMakefile() &&
+      !mf.GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION")) {
+    mf.IssueMessage(
+      MessageType::AUTHOR_WARNING,
+      "cmake_minimum_required() should be called prior to this top-level "
+      "project() call. Please see the cmake-commands(7) manual for usage "
+      "documentation of both commands.");
+  }
+
   if (!IncludeByVariable(status, "CMAKE_PROJECT_INCLUDE_BEFORE")) {
     return false;
   }

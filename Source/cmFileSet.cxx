@@ -78,9 +78,10 @@ bool cmFileSetVisibilityIsForInterface(cmFileSetVisibility vis)
   return false;
 }
 
-cmFileSet::cmFileSet(std::string name, std::string type,
+cmFileSet::cmFileSet(cmake& cmakeInstance, std::string name, std::string type,
                      cmFileSetVisibility visibility)
-  : Name(std::move(name))
+  : CMakeInstance(cmakeInstance)
+  , Name(std::move(name))
   , Type(std::move(type))
   , Visibility(visibility)
 {
@@ -113,7 +114,7 @@ cmFileSet::CompileFileEntries() const
 
   for (auto const& entry : this->FileEntries) {
     for (auto const& ex : cmExpandedList(entry.Value)) {
-      cmGeneratorExpression ge(entry.Backtrace);
+      cmGeneratorExpression ge(this->CMakeInstance, entry.Backtrace);
       auto cge = ge.Parse(ex);
       result.push_back(std::move(cge));
     }
@@ -129,7 +130,7 @@ cmFileSet::CompileDirectoryEntries() const
 
   for (auto const& entry : this->DirectoryEntries) {
     for (auto const& ex : cmExpandedList(entry.Value)) {
-      cmGeneratorExpression ge(entry.Backtrace);
+      cmGeneratorExpression ge(this->CMakeInstance, entry.Backtrace);
       auto cge = ge.Parse(ex);
       result.push_back(std::move(cge));
     }

@@ -1,0 +1,11 @@
+^
+---
+events:(
+  -
+    kind: "message-v1"
+    backtrace:(
+      - "[^"]+")+
+    message: \|(
++      [^
+]*)*)+
+\.\.\.$

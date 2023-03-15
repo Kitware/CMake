@@ -65,6 +65,7 @@ function(run_object object)
 endfunction()
 
 run_object(codemodel-v2)
+run_object(configureLog-v1)
 run_object(cache-v2)
 run_object(cmakeFiles-v1)
 run_object(toolchains-v1)

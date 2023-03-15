@@ -5,10 +5,37 @@
   "projectName": "codemodel-v2",
   "type": "STATIC_LIBRARY",
   "isGeneratorProvided": null,
+  "fileSets": [
+    {
+      "name": "HEADERS",
+      "type": "HEADERS",
+      "visibility": "PUBLIC",
+      "baseDirectories": [".*/Tests/RunCMake/FileAPI/fileset$"]
+    },
+    {
+      "name": "a",
+      "type": "HEADERS",
+      "visibility": "PRIVATE",
+      "baseDirectories": [".*/Tests/RunCMake/FileAPI/fileset$"]
+    },
+    {
+      "name": "b",
+      "type": "HEADERS",
+      "visibility": "PUBLIC",
+      "baseDirectories": [".*/Tests/RunCMake/FileAPI/fileset/dir$"]
+    },
+    {
+      "name": "c",
+      "type": "HEADERS",
+      "visibility": "INTERFACE",
+      "baseDirectories": [".*/Tests/RunCMake/FileAPI/fileset$"]
+    }
+  ],
   "sources": [
     {
       "path": "^fileset/empty\\.c$",
       "isGenerated": null,
+      "fileSetName": null,
       "sourceGroupName": "Source Files",
       "compileGroupLanguage": "C",
       "backtrace": [
@@ -29,6 +56,7 @@
     {
       "path": "^fileset/error\\.c$",
       "isGenerated": null,
+      "fileSetName": "HEADERS",
       "sourceGroupName": "Header Files",
       "compileGroupLanguage": null,
       "backtrace": [
@@ -49,6 +77,7 @@
     {
       "path": "^fileset/other\\.c$",
       "isGenerated": null,
+      "fileSetName": "HEADERS",
       "sourceGroupName": "Source Files",
       "compileGroupLanguage": null,
       "backtrace": [
@@ -69,6 +98,7 @@
     {
       "path": "^fileset/h1\\.h$",
       "isGenerated": null,
+      "fileSetName": "a",
       "sourceGroupName": "Header Files",
       "compileGroupLanguage": null,
       "backtrace": [
@@ -89,6 +119,7 @@
     {
       "path": "^fileset/dir/h2\\.h$",
       "isGenerated": null,
+      "fileSetName": "b",
       "sourceGroupName": "Header Files",
       "compileGroupLanguage": null,
       "backtrace": [

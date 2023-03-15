@@ -70,7 +70,7 @@ std::string cmExportTryCompileFileGenerator::FindTargets(
     return std::string();
   }
 
-  cmGeneratorExpression ge;
+  cmGeneratorExpression ge(*tgt->Makefile->GetCMakeInstance());
 
   std::unique_ptr<cmGeneratorExpressionDAGChecker> parentDagChecker;
   if (propName == "INTERFACE_LINK_OPTIONS") {

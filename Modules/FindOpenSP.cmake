@@ -63,24 +63,17 @@ The following cache variables may also be set:
 
 #]=======================================================================]
 
-if (NOT OpenSP_INCLUDE_DIR AND NOT OpenSP_LIBRARY)
-  find_package(PkgConfig)
-  if (PkgConfig_FOUND)
-    pkg_check_modules(OpenSP IMPORTED_TARGET GLOBAL opensp)
-
-    if (OpenSP_FOUND)
-      add_library(OpenSP::OpenSP INTERFACE IMPORTED)
-      target_link_libraries(OpenSP::OpenSP INTERFACE PkgConfig::OpenSP)
-
-      set(OpenSP_INCLUDE_DIR ${OpenSP_INCLUDE_DIRS})
-      set(OpenSP_LIBRARY ${OpenSP_LIBRARIES})
-    endif ()
-  endif ()
+find_package(PkgConfig QUIET)
+if (PkgConfig_FOUND)
+  pkg_check_modules(PC_OpenSP QUIET opensp)
 endif ()
 
 if (NOT OpenSP_INCLUDE_DIR)
   find_path(OpenSP_INCLUDE_DIR
     NAMES ParserEventGeneratorKit.h
+    HINTS
+    ${PC_OpenSP_INCLUDEDIRS}
+    ${PC_OpenSP_INCLUDE_DIRS}
     PATH_SUFFIXES OpenSP opensp
     DOC "The OpenSP include directory"
     )
@@ -89,17 +82,23 @@ endif ()
 if (NOT OpenSP_LIBRARY)
   find_library(OpenSP_LIBRARY_RELEASE
     NAMES osp libosp opensp libopensp sp133 libsp
+    HINTS
+    ${PC_OpenSP_LIBDIR}
+    ${PC_OpenSP_LIBRARY_DIRS}
     )
 
   find_library(OpenSP_LIBRARY_DEBUG
     NAMES ospd libospd openspd libopenspd sp133d libspd
+    HINTS
+    ${PC_OpenSP_LIBDIR}
+    ${PC_OpenSP_LIBRARY_DIRS}
     )
 
   include(SelectLibraryConfigurations)
   select_library_configurations(OpenSP)
 endif ()
 
-if (OpenSP_INCLUDE_DIR AND OpenSP_LIBRARY)
+if (OpenSP_INCLUDE_DIR)
   if (EXISTS "${OpenSP_INCLUDE_DIR}/config.h")
     if (NOT OpenSP_VERSION)
       file(STRINGS "${OpenSP_INCLUDE_DIR}/config.h" opensp_version_str REGEX "^#define[\t ]+SP_VERSION[\t ]+\".*\"")
@@ -116,27 +115,6 @@ if (OpenSP_INCLUDE_DIR AND OpenSP_LIBRARY)
     include(CheckCXXSymbolExists)
     check_cxx_symbol_exists(SP_MULTI_BYTE "${OpenSP_INCLUDE_DIR}/config.h" OpenSP_MULTI_BYTE)
   endif ()
-
-  if (NOT TARGET OpenSP::OpenSP)
-    set(OpenSP_INCLUDE_DIRS ${OpenSP_INCLUDE_DIR})
-
-    add_library(OpenSP::OpenSP UNKNOWN IMPORTED)
-    set_target_properties(OpenSP::OpenSP PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${OpenSP_INCLUDE_DIRS}")
-
-    if (OpenSP_LIBRARY_RELEASE)
-      set_target_properties(OpenSP::OpenSP PROPERTIES IMPORTED_LOCATION_RELEASE "${OpenSP_LIBRARY_RELEASE}")
-      set_property(TARGET OpenSP::OpenSP APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
-    endif ()
-
-    if (OpenSP_LIBRARY_DEBUG)
-      set_target_properties(OpenSP::OpenSP PROPERTIES IMPORTED_LOCATION_DEBUG "${OpenSP_LIBRARY_DEBUG}")
-      set_property(TARGET OpenSP::OpenSP APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
-    endif ()
-
-    if (NOT OpenSP_LIBRARY_RELEASE AND NOT OpenSP_LIBRARY_DEBUG)
-      set_property(TARGET OpenSP::OpenSP APPEND PROPERTY IMPORTED_LOCATION "${OpenSP_LIBRARY}")
-    endif ()
-  endif ()
 endif ()
 
 include(FindPackageHandleStandardArgs)
@@ -147,6 +125,33 @@ find_package_handle_standard_args(OpenSP
   )
 
 mark_as_advanced(OpenSP_INCLUDE_DIR OpenSP_LIBRARY OpenSP_MULTI_BYTE)
+
+if (OpenSP_FOUND)
+  set(OpenSP_INCLUDE_DIRS ${OpenSP_INCLUDE_DIR})
+  if (NOT TARGET OpenSP::OpenSP)
+    add_library(OpenSP::OpenSP UNKNOWN IMPORTED)
+    if (EXISTS "${OpenSP_LIBRARY}")
+      set_target_properties(OpenSP::OpenSP PROPERTIES
+        IMPORTED_LOCATION "${OpenSP_LIBRARY}")
+    endif ()
+    set_target_properties(OpenSP::OpenSP PROPERTIES
+      INTERFACE_INCLUDE_DIRECTORIES "${OpenSP_INCLUDE_DIRS}")
+
+    if (OpenSP_LIBRARY_RELEASE)
+      set_target_properties(OpenSP::OpenSP PROPERTIES
+        IMPORTED_LOCATION_RELEASE "${OpenSP_LIBRARY_RELEASE}")
+      set_property(TARGET OpenSP::OpenSP APPEND PROPERTY
+        IMPORTED_CONFIGURATIONS RELEASE)
+    endif ()
+
+    if (OpenSP_LIBRARY_DEBUG)
+      set_target_properties(OpenSP::OpenSP PROPERTIES
+        IMPORTED_LOCATION_DEBUG "${OpenSP_LIBRARY_DEBUG}")
+      set_property(TARGET OpenSP::OpenSP APPEND PROPERTY
+        IMPORTED_CONFIGURATIONS DEBUG)
+    endif ()
+  endif ()
+endif ()
 
 include(FeatureSummary)
 set_package_properties(OpenSP PROPERTIES

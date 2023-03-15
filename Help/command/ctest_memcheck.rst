@@ -3,7 +3,7 @@ ctest_memcheck
 
 Perform the :ref:`CTest MemCheck Step` as a :ref:`Dashboard Client`.
 
-::
+.. code-block:: cmake
 
   ctest_memcheck([BUILD <build-dir>] [APPEND]
                  [START <start-number>]

@@ -52,9 +52,9 @@ cmVisualStudioGeneratorOptions::cmVisualStudioGeneratorOptions(
 void cmVisualStudioGeneratorOptions::AddTable(cmVS7FlagTable const* table)
 {
   if (table) {
-    for (int i = 0; i < FlagTableCount; ++i) {
-      if (!this->FlagTable[i]) {
-        this->FlagTable[i] = table;
+    for (auto& flag : this->FlagTable) {
+      if (!flag) {
+        flag = table;
         break;
       }
     }
@@ -63,8 +63,8 @@ void cmVisualStudioGeneratorOptions::AddTable(cmVS7FlagTable const* table)
 
 void cmVisualStudioGeneratorOptions::ClearTables()
 {
-  for (int i = 0; i < FlagTableCount; ++i) {
-    this->FlagTable[i] = nullptr;
+  for (auto& flag : this->FlagTable) {
+    flag = nullptr;
   }
 }
 
@@ -116,8 +116,7 @@ bool cmVisualStudioGeneratorOptions::IsDebug() const
   if (this->CurrentTool != CSharpCompiler) {
     return this->FlagMap.find("DebugInformationFormat") != this->FlagMap.end();
   }
-  std::map<std::string, FlagValue>::const_iterator i =
-    this->FlagMap.find("DebugType");
+  auto i = this->FlagMap.find("DebugType");
   if (i != this->FlagMap.end()) {
     if (i->second.size() == 1) {
       return i->second[0] != "none";
@@ -139,22 +138,14 @@ bool cmVisualStudioGeneratorOptions::IsManaged() const
 bool cmVisualStudioGeneratorOptions::UsingUnicode() const
 {
   // Look for a _UNICODE definition.
-  for (std::string const& di : this->Defines) {
-    if (di == "_UNICODE") {
-      return true;
-    }
-  }
-  return false;
+  return std::any_of(this->Defines.begin(), this->Defines.end(),
+                     [](std::string const& di) { return di == "_UNICODE"; });
 }
 bool cmVisualStudioGeneratorOptions::UsingSBCS() const
 {
   // Look for a _SBCS definition.
-  for (std::string const& di : this->Defines) {
-    if (di == "_SBCS") {
-      return true;
-    }
-  }
-  return false;
+  return std::any_of(this->Defines.begin(), this->Defines.end(),
+                     [](std::string const& di) { return di == "_SBCS"; });
 }
 
 void cmVisualStudioGeneratorOptions::FixCudaCodeGeneration()
@@ -268,8 +259,7 @@ void cmVisualStudioGeneratorOptions::ParseFinish()
   }
 
   if (this->CurrentTool == CudaCompiler) {
-    std::map<std::string, FlagValue>::iterator i =
-      this->FlagMap.find("CudaRuntime");
+    auto i = this->FlagMap.find("CudaRuntime");
     if (i != this->FlagMap.end() && i->second.size() == 1) {
       std::string& cudaRuntime = i->second[0];
       if (cudaRuntime == "static") {
@@ -286,7 +276,7 @@ void cmVisualStudioGeneratorOptions::ParseFinish()
 void cmVisualStudioGeneratorOptions::PrependInheritedString(
   std::string const& key)
 {
-  std::map<std::string, FlagValue>::iterator i = this->FlagMap.find(key);
+  auto i = this->FlagMap.find(key);
   if (i == this->FlagMap.end() || i->second.size() != 1) {
     return;
   }
@@ -296,7 +286,7 @@ void cmVisualStudioGeneratorOptions::PrependInheritedString(
 
 void cmVisualStudioGeneratorOptions::Reparse(std::string const& key)
 {
-  std::map<std::string, FlagValue>::iterator i = this->FlagMap.find(key);
+  auto i = this->FlagMap.find(key);
   if (i == this->FlagMap.end() || i->second.size() != 1) {
     return;
   }
@@ -344,7 +334,7 @@ cmIDEOptions::FlagValue cmVisualStudioGeneratorOptions::TakeFlag(
   std::string const& key)
 {
   FlagValue value;
-  std::map<std::string, FlagValue>::iterator i = this->FlagMap.find(key);
+  auto i = this->FlagMap.find(key);
   if (i != this->FlagMap.end()) {
     value = i->second;
     this->FlagMap.erase(i);
@@ -380,8 +370,7 @@ void cmVisualStudioGeneratorOptions::OutputPreprocessorDefinitions(
   if (this->Version != cmGlobalVisualStudioGenerator::VSVersion::VS9) {
     oss << "%(" << tag << ")";
   }
-  std::vector<std::string>::const_iterator de =
-    cmRemoveDuplicates(this->Defines);
+  auto de = cmRemoveDuplicates(this->Defines);
   for (std::string const& di : cmMakeRange(this->Defines.cbegin(), de)) {
     // Escape the definition for the compiler.
     std::string define;

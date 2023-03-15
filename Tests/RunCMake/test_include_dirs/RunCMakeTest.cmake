@@ -1,5 +1,9 @@
 include(RunCMake)
 
+# Isolate our ctest runs from external environment.
+unset(ENV{CTEST_PARALLEL_LEVEL})
+unset(ENV{CTEST_OUTPUT_ON_FAILURE})
+
 function(run_TID)
   # Use a single build tree for a few tests without cleaning.
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/TID-build)

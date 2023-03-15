@@ -150,27 +150,17 @@ int main(int argc, char** argv)
       CMAKE_FLAGS
       -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_SYMBOL_EXISTS_FLAGS}
       "${CMAKE_SYMBOL_EXISTS_INCLUDES}"
-      OUTPUT_VARIABLE OUTPUT)
+      )
     if(${VARIABLE})
       if(NOT CMAKE_REQUIRED_QUIET)
         message(CHECK_PASS "found")
       endif()
       set(${VARIABLE} 1 CACHE INTERNAL "Have symbol ${SYMBOL}")
-      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-        "Determining if the ${SYMBOL} "
-        "exist passed with the following output:\n"
-        "${OUTPUT}\nFile ${SOURCEFILE}:\n"
-        "${_CSE_SOURCE}\n")
     else()
       if(NOT CMAKE_REQUIRED_QUIET)
         message(CHECK_FAIL "not found")
       endif()
       set(${VARIABLE} "" CACHE INTERNAL "Have symbol ${SYMBOL}")
-      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-        "Determining if the ${SYMBOL} "
-        "exist failed with the following output:\n"
-        "${OUTPUT}\nFile ${SOURCEFILE}:\n"
-        "${_CSE_SOURCE}\n")
     endif()
     unset(_CSE_SOURCE)
   endif()

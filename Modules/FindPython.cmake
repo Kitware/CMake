@@ -31,6 +31,13 @@ The following components are supported:
     * ``Development.Embed``: search for artifacts for Python embedding
       developments.
 
+  .. versionadded:: 3.26
+
+    * ``Development.SABIModule``: search for artifacts for Python module
+      developments using the
+      `Stable Application Binary Interface <https://docs.python.org/3/c-api/stable.html>`_.
+      This component is available only for version ``3.2`` and upper.
+
 * ``NumPy``: search for NumPy include directories.
 
 .. versionadded:: 3.14
@@ -56,7 +63,7 @@ To manage concurrent versions 3 and 2 of Python, use :module:`FindPython3` and
 
   If components ``Interpreter`` and ``Development`` (or one of its
   sub-components) are both specified, this module search only for interpreter
-  with same platform architecture as the one defined by ``CMake``
+  with same platform architecture as the one defined by CMake
   configuration. This constraint does not apply if only ``Interpreter``
   component is specified.
 
@@ -79,6 +86,12 @@ This module defines the following :ref:`Imported Targets <Imported Targets>`:
 
   Python library for Python module. Target defined if component
   ``Development.Module`` is found.
+
+``Python::SABIModule``
+  .. versionadded:: 3.26
+
+  Python library for Python module using the Stable Application Binary
+  Interface. Target defined if component ``Development.SABIModule`` is found.
 
 ``Python::Python``
   Python library for Python embedding. Target defined if component
@@ -139,12 +152,21 @@ This module will set the following variables in your project
 
   Extension suffix for modules.
 
-  Information returned by
-  ``distutils.sysconfig.get_config_var('SOABI')`` or computed from
-  ``distutils.sysconfig.get_config_var('EXT_SUFFIX')`` or
-  ``python-config --extension-suffix``. If package ``distutils.sysconfig`` is
-  not available, ``sysconfig.get_config_var('SOABI')`` or
-  ``sysconfig.get_config_var('EXT_SUFFIX')`` are used.
+  Information computed from ``distutils.sysconfig.get_config_var('EXT_SUFFIX')``
+  or ``distutils.sysconfig.get_config_var('SOABI')`` or
+  ``python3-config --extension-suffix``. If package ``distutils.sysconfig`` is
+  not available, ``sysconfig.get_config_var('EXT_SUFFIX')`` or
+  ``sysconfig.get_config_var('SOABI')`` are used.
+
+``Python_SOSABI``
+  .. versionadded:: 3.26
+
+  Extension suffix for modules using the Stable Application Binary Interface.
+
+  Information computed from ``importlib.machinery.EXTENSION_SUFFIXES`` if the
+  COMPONENT ``Interpreter`` was specified. Otherwise, the extension is ``abi3``
+  except for ``Windows``, ``MSYS`` and ``CYGWIN`` for which this is an empty
+  string.
 
 ``Python_Compiler_FOUND``
   System has the Python compiler.
@@ -167,6 +189,12 @@ This module will set the following variables in your project
 
   System has the Python development artifacts for Python module.
 
+``Python_Development.SABIModule_FOUND``
+  .. versionadded:: 3.26
+
+  System has the Python development artifacts for Python module using the
+  Stable Application Binary Interface.
+
 ``Python_Development.Embed_FOUND``
   .. versionadded:: 3.18
 
@@ -188,6 +216,18 @@ This module will set the following variables in your project
   The Python library directories.
 ``Python_RUNTIME_LIBRARY_DIRS``
   The Python runtime library directories.
+``Python_SABI_LIBRARIES``
+  .. versionadded:: 3.26
+
+  The Python libraries for the Stable Application Binary Interface.
+``Python_SABI_LIBRARY_DIRS``
+  .. versionadded:: 3.26
+
+  The Python ``SABI`` library directories.
+``Python_RUNTIME_SABI_LIBRARY_DIRS``
+  .. versionadded:: 3.26
+
+  The Python runtime ``SABI`` library directories.
 ``Python_VERSION``
   Python version.
 ``Python_VERSION_MAJOR``
@@ -426,6 +466,13 @@ setting the following variables:
   variables ``Python_LIBRARIES``, ``Python_LIBRARY_DIRS`` and
   ``Python_RUNTIME_LIBRARY_DIRS``.
 
+``Python_SABI_LIBRARY``
+  .. versionadded:: 3.26
+
+  The path to the library for Stable Application Binary Interface. It will be
+  used to compute the variables ``Python_SABI_LIBRARIES``,
+  ``Python_SABI_LIBRARY_DIRS`` and ``Python_RUNTIME_SABI_LIBRARY_DIRS``.
+
 ``Python_INCLUDE_DIR``
   The path to the directory of the ``Python`` headers. It will be used to
   compute the variable ``Python_INCLUDE_DIRS``.
@@ -449,7 +496,7 @@ setting the following variables:
 
 By default, this module supports multiple calls in different directories of a
 project with different version/component requirements while providing correct
-and consistent results for each call. To support this behavior, ``CMake`` cache
+and consistent results for each call. To support this behavior, CMake cache
 is not used in the traditional way which can be problematic for interactive
 specification. So, to enable also interactive specification, module behavior
 can be controlled with the following variable:
@@ -471,10 +518,11 @@ Commands
 This module defines the command ``Python_add_library`` (when
 :prop_gbl:`CMAKE_ROLE` is ``PROJECT``), which has the same semantics as
 :command:`add_library` and adds a dependency to target ``Python::Python`` or,
-when library type is ``MODULE``, to target ``Python::Module`` and takes care of
-Python module naming rules::
+when library type is ``MODULE``, to target ``Python::Module`` or
+``Python::SABIModule`` (when ``USE_SABI`` option is specified) and takes care
+of Python module naming rules::
 
-  Python_add_library (<name> [STATIC | SHARED | MODULE [WITH_SOABI]]
+  Python_add_library (<name> [STATIC | SHARED | MODULE [USE_SABI <version>] [WITH_SOABI]]
                       <source1> [<source2> ...])
 
 If the library type is not specified, ``MODULE`` is assumed.
@@ -482,6 +530,19 @@ If the library type is not specified, ``MODULE`` is assumed.
 .. versionadded:: 3.17
   For ``MODULE`` library type, if option ``WITH_SOABI`` is specified, the
   module suffix will include the ``Python_SOABI`` value, if any.
+
+.. versionadded:: 3.26
+  For ``MODULE`` type, if the option ``USE_SABI`` is specified, the
+  preprocessor definition ``Py_LIMITED_API`` will be specified, as ``PRIVATE``,
+  for the target ``<name>`` with the value computed from ``<version>`` argument.
+  The expected format for ``<version>`` is ``major[.minor]``, where each
+  component is a numeric value. If ``minor`` component is specified, the
+  version should be, at least, ``3.2`` which is the version where the
+  `Stable Application Binary Interface <https://docs.python.org/3/c-api/stable.html>`_
+  was introduced. Specifying only major version ``3`` is equivalent to ``3.2``.
+
+  When option ``WITH_SOABI`` is also specified,  the module suffix will include
+  the ``Python3_SOSABI`` value, if any.
 #]=======================================================================]
 
 

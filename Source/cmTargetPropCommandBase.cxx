@@ -23,7 +23,7 @@ void cmTargetPropCommandBase::SetError(std::string const& e)
 
 bool cmTargetPropCommandBase::HandleArguments(
   std::vector<std::string> const& args, const std::string& prop,
-  ArgumentFlags flags)
+  unsigned int flags)
 {
   if (args.size() < 2) {
     this->SetError("called with incorrect number of arguments");

@@ -17,18 +17,20 @@ template <class T>
 class SmartCOMPtr
 {
 public:
-  SmartCOMPtr() { ptr = NULL; }
+  SmartCOMPtr() = default;
   SmartCOMPtr(T* p)
   {
     ptr = p;
-    if (ptr != NULL)
+    if (ptr != nullptr) {
       ptr->AddRef();
+    }
   }
   SmartCOMPtr(const SmartCOMPtr<T>& sptr)
   {
     ptr = sptr.ptr;
-    if (ptr != NULL)
+    if (ptr != nullptr) {
       ptr->AddRef();
+    }
   }
   T** operator&() { return &ptr; }
   T* operator->() { return ptr; }
@@ -36,8 +38,9 @@ public:
   {
     if (*this != p) {
       ptr = p;
-      if (ptr != NULL)
+      if (ptr != nullptr) {
         ptr->AddRef();
+      }
     }
     return *this;
   }
@@ -45,11 +48,10 @@ public:
   template <class I>
   HRESULT QueryInterface(REFCLSID rclsid, I** pp)
   {
-    if (pp != NULL) {
+    if (pp != nullptr) {
       return ptr->QueryInterface(rclsid, (void**)pp);
-    } else {
-      return E_FAIL;
     }
+    return E_FAIL;
   }
   HRESULT CoCreateInstance(REFCLSID clsid, IUnknown* pUnknown,
                            REFIID interfaceId, DWORD dwClsContext = CLSCTX_ALL)
@@ -60,18 +62,19 @@ public:
   }
   ~SmartCOMPtr()
   {
-    if (ptr != NULL)
+    if (ptr != nullptr) {
       ptr->Release();
+    }
   }
 
 private:
-  T* ptr;
+  T* ptr = nullptr;
 };
 
 class SmartBSTR
 {
 public:
-  SmartBSTR() { str = NULL; }
+  SmartBSTR() = default;
   SmartBSTR(const SmartBSTR& src) = delete;
   SmartBSTR& operator=(const SmartBSTR& src) = delete;
   operator BSTR() const { return str; }
@@ -79,7 +82,7 @@ public:
   ~SmartBSTR() throw() { ::SysFreeString(str); }
 
 private:
-  BSTR str;
+  BSTR str = nullptr;
 };
 
 struct VSInstanceInfo
@@ -129,7 +132,7 @@ private:
   SmartCOMPtr<ISetupConfiguration2> setupConfig2;
   SmartCOMPtr<ISetupHelper> setupHelper;
   // used to indicate failure in Initialize(), so we don't have to call again
-  bool initializationFailure;
+  bool initializationFailure = false;
   // indicated if COM initialization is successful
   HRESULT comInitialized;
   // current best instance of VS selected

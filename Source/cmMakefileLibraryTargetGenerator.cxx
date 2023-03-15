@@ -756,12 +756,9 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
       cmOutputConverter::SHELL);
 
     vars.ObjectDir = objectDir.c_str();
-    cmOutputConverter::OutputFormat output = (useWatcomQuote)
-      ? cmOutputConverter::WATCOMQUOTE
-      : cmOutputConverter::SHELL;
     std::string target = this->LocalGenerator->ConvertToOutputFormat(
       this->LocalGenerator->MaybeRelativeToCurBinDir(targetFullPathReal),
-      output);
+      cmOutputConverter::SHELL, useWatcomQuote);
     vars.Target = target.c_str();
     vars.LinkLibraries = linkLibs.c_str();
     vars.ObjectsQuoted = buildObjs.c_str();
@@ -824,7 +821,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     if (useArchiveRules) {
       // Construct the individual object list strings.
       std::vector<std::string> object_strings;
-      this->WriteObjectsStrings(object_strings, archiveCommandLimit);
+      this->WriteObjectsStrings(object_strings, false, archiveCommandLimit);
 
       // Add the cuda device object to the list of archive files. This will
       // only occur on archives which have CUDA_RESOLVE_DEVICE_SYMBOLS enabled

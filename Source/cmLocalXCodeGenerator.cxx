@@ -147,7 +147,7 @@ void cmLocalXCodeGenerator::AddXCConfigSources(cmGeneratorTarget* target)
 
   for (auto& config : configs) {
     auto file = cmGeneratorExpression::Evaluate(
-      xcconfig,
+      *xcconfig,
       this, config);
     if (!file.empty()) {
       target->AddSource(file);

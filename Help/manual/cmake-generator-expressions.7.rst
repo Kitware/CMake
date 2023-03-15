@@ -142,9 +142,9 @@ to generate debug messages is to add a custom target:
 
   add_custom_target(genexdebug COMMAND ${CMAKE_COMMAND} -E echo "$<...>")
 
-After running ``cmake``, you can then build the ``genexdebug`` target to print
+After running :program:`cmake`, you can then build the ``genexdebug`` target to print
 the result of the ``$<...>`` expression (i.e. run the command
-``cmake --build ... --target genexdebug``).
+:option:`cmake --build ... --target genexdebug <cmake--build --target>`).
 
 Another way is to write debug messages to a file with :command:`file(GENERATE)`:
 
@@ -1401,6 +1401,13 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on.
 
+  .. versionchanged:: 3.26
+    When encountered during evaluation of :ref:`Target Usage Requirements`,
+    typically in an ``INTERFACE_*`` target property, lookup of the ``tgt``
+    name occurs in the directory of the target specifying the requirement,
+    rather than the directory of the consuming target for which the
+    expression is being evaluated.
+
 .. genex:: $<TARGET_PROPERTY:prop>
 
   Value of the property ``prop`` on the target for which the expression
@@ -1666,8 +1673,8 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
   **On non-DLL platforms, this expression always evaluates to an empty string**.
 
   This generator expression can be used to copy all of the DLLs that a target
-  depends on into its output directory in a ``POST_BUILD`` custom command. For
-  example:
+  depends on into its output directory in a ``POST_BUILD`` custom command using
+  the :option:`cmake -E copy -t <cmake-E copy>` command. For example:
 
   .. code-block:: cmake
 
@@ -1676,7 +1683,7 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
     add_executable(exe main.c)
     target_link_libraries(exe PRIVATE foo::foo foo::bar)
     add_custom_command(TARGET exe POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:exe> $<TARGET_FILE_DIR:exe>
+      COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:exe> $<TARGET_RUNTIME_DLLS:exe>
       COMMAND_EXPAND_LISTS
     )
 
@@ -1689,6 +1696,9 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
     section for details.  Many :ref:`Find Modules` produce imported targets
     with the ``UNKNOWN`` type and therefore will be ignored.
 
+On platforms that support runtime paths (``RPATH``), refer to the
+:prop_tgt:`INSTALL_RPATH` target property.
+On Apple platforms, refer to the :prop_tgt:`INSTALL_NAME_DIR` target property.
 
 Export And Install Expressions
 ------------------------------
@@ -1703,6 +1713,13 @@ Export And Install Expressions
   Content of ``...`` when the property is exported using :command:`export`, or
   when the target is used by another target in the same buildsystem. Expands to
   the empty string otherwise.
+
+.. genex:: $<BUILD_LOCAL_INTERFACE:...>
+
+  .. versionadded:: 3.26
+
+  Content of ``...`` when the target is used by another target in the same
+  buildsystem. Expands to the empty string otherwise.
 
 .. genex:: $<INSTALL_PREFIX>
 

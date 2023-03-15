@@ -518,9 +518,7 @@ cmCMakePresetsGraph::ReadFileResult cmCMakePresetsGraph::ReadJSONFile(
     PresetPair<ConfigurePreset> presetPair;
     presetPair.Unexpanded = preset;
     presetPair.Expanded = cm::nullopt;
-    if (!this->ConfigurePresets
-           .emplace(std::make_pair(preset.Name, presetPair))
-           .second) {
+    if (!this->ConfigurePresets.emplace(preset.Name, presetPair).second) {
       return ReadFileResult::DUPLICATE_PRESETS;
     }
 

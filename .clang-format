@@ -1,5 +1,5 @@
 ---
-# This configuration requires clang-format version 6.0 exactly.
+# This configuration requires clang-format version 15 exactly.
 BasedOnStyle: Mozilla
 AlignOperands: false
 AllowShortFunctionsOnASingleLine: InlineOnly

@@ -560,7 +560,7 @@ The ``RELEASE`` variant should be listed first in the property
 so that the variant is chosen if the user uses a configuration which is
 not an exact match for any listed ``IMPORTED_CONFIGURATIONS``.
 
-Most of the cache variables should be hidden in the ``ccmake`` interface unless
+Most of the cache variables should be hidden in the :program:`ccmake` interface unless
 the user explicitly asks to edit them.
 
 .. code-block:: cmake

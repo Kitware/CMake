@@ -5,7 +5,6 @@ INTERFACE_INCLUDE_DIRECTORIES
 .. |command_name| replace:: :command:`target_include_directories`
 .. |PROPERTY_INTERFACE_NAME| replace:: ``INTERFACE_INCLUDE_DIRECTORIES``
 .. |PROPERTY_LINK| replace:: :prop_tgt:`INCLUDE_DIRECTORIES`
-.. |PROPERTY_GENEX| replace:: ``$<TARGET_PROPERTY:foo,INTERFACE_INCLUDE_DIRECTORIES>``
 .. include:: INTERFACE_BUILD_PROPERTY.txt
 
 Include directories usage requirements commonly differ between the build-tree

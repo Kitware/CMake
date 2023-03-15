@@ -15,7 +15,6 @@
 
 class cmMakefile;
 class cmake;
-struct cmDocumentationEntry;
 
 /** \class cmGlobalWatcomWMakeGenerator
  * \brief Write a NMake makefiles.
@@ -39,7 +38,7 @@ public:
   static std::string GetActualName() { return "Watcom WMake"; }
 
   /** Get the documentation entry for this generator.  */
-  static void GetDocumentation(cmDocumentationEntry& entry);
+  static cmDocumentationEntry GetDocumentation();
 
   /** Tell the generator about the target system.  */
   bool SetSystemName(std::string const& s, cmMakefile* mf) override;

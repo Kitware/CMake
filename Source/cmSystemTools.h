@@ -149,6 +149,11 @@ public:
     Always,
     OnlyIfDifferent,
   };
+  enum class CopyInputRecent
+  {
+    No,
+    Yes,
+  };
   enum class CopyResult
   {
     Success,
@@ -177,10 +182,9 @@ public:
                                          const mode_t* mode = nullptr);
 
   /** Copy a file. */
-  static bool CopySingleFile(const std::string& oldname,
-                             const std::string& newname);
   static CopyResult CopySingleFile(std::string const& oldname,
                                    std::string const& newname, CopyWhen when,
+                                   CopyInputRecent inputRecent,
                                    std::string* err = nullptr);
 
   enum class Replace

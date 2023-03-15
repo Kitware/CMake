@@ -264,5 +264,9 @@ set(CPACK_SOURCE_IGNORE_FILES
   "~$"
   )
 
+if(CMake_CPACK_CUSTOM_SCRIPT)
+  include(${CMake_CPACK_CUSTOM_SCRIPT})
+endif()
+
 # include CPack model once all variables are set
 include(CPack)

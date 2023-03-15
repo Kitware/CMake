@@ -20,7 +20,12 @@ transitively in its place since the target itself does not build.
 .. versionadded:: 3.3
   Allow adding dependencies to interface libraries.
 
-See the ``DEPENDS`` option of :command:`add_custom_target` and
-:command:`add_custom_command` commands for adding file-level
-dependencies in custom rules.  See the :prop_sf:`OBJECT_DEPENDS`
-source file property to add file-level dependencies to object files.
+See Also
+^^^^^^^^
+
+* The ``DEPENDS`` option of :command:`add_custom_target` and
+  :command:`add_custom_command` commands for adding file-level
+  dependencies in custom rules.
+
+* The :prop_sf:`OBJECT_DEPENDS` source file property to add
+  file-level dependencies to object files.

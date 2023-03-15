@@ -36,26 +36,24 @@ struct cmJSONHelperBuilder
     Object& Bind(const cm::string_view& name, M U::*member, F func,
                  bool required = true)
     {
-      return this->BindPrivate(name,
-                               [func, member](T& out, const Json::Value* value,
-                                              CallState&&... state) -> E {
-                                 return func(out.*member, value,
-                                             std::forward(state)...);
-                               },
-                               required);
+      return this->BindPrivate(
+        name,
+        [func, member](T& out, const Json::Value* value, CallState&&... state)
+          -> E { return func(out.*member, value, std::forward(state)...); },
+        required);
     }
     template <typename M, typename F>
     Object& Bind(const cm::string_view& name, std::nullptr_t, F func,
                  bool required = true)
     {
-      return this->BindPrivate(name,
-                               [func](T& /*out*/, const Json::Value* value,
-                                      CallState&&... state) -> E {
-                                 M dummy;
-                                 return func(dummy, value,
-                                             std::forward(state)...);
-                               },
-                               required);
+      return this->BindPrivate(
+        name,
+        [func](T& /*out*/, const Json::Value* value,
+               CallState&&... state) -> E {
+          M dummy;
+          return func(dummy, value, std::forward(state)...);
+        },
+        required);
     }
     template <typename F>
     Object& Bind(const cm::string_view& name, F func, bool required = true)

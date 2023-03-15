@@ -4,6 +4,8 @@
 
 #include <utility>
 
+#include <cm/memory>
+
 #include "windows.h"
 
 #include "cmCustomCommand.h"
@@ -24,9 +26,7 @@ cmLocalVisualStudioGenerator::cmLocalVisualStudioGenerator(
 {
 }
 
-cmLocalVisualStudioGenerator::~cmLocalVisualStudioGenerator()
-{
-}
+cmLocalVisualStudioGenerator::~cmLocalVisualStudioGenerator() = default;
 
 cmGlobalVisualStudioGenerator::VSVersion
 cmLocalVisualStudioGenerator::GetVersion() const
@@ -107,7 +107,7 @@ cmLocalVisualStudioGenerator::MaybeCreateImplibDir(cmGeneratorTarget* target,
   // Add a pre-build event to create the directory.
   cmCustomCommandLines commands = cmMakeSingleCommandLine(
     { cmSystemTools::GetCMakeCommand(), "-E", "make_directory", impDir });
-  pcc.reset(new cmCustomCommand());
+  pcc = cm::make_unique<cmCustomCommand>();
   pcc->SetCommandLines(commands);
   pcc->SetStdPipesUTF8(true);
   pcc->SetEscapeOldStyle(false);

@@ -10,7 +10,12 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QResizeEvent>
+#include <QSortFilterProxyModel>
 #include <QToolButton>
+
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
+#  include <QRegularExpression>
+#endif
 
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
 #  include <QFileSystemModel>
@@ -154,4 +159,33 @@ QCMakeFileCompleter::QCMakeFileCompleter(QObject* o, bool dirs)
 QString QCMakeFileCompleter::pathFromIndex(const QModelIndex& idx) const
 {
   return QDir::fromNativeSeparators(QCompleter::pathFromIndex(idx));
+}
+
+namespace QtCMake {
+bool setSearchFilter(QSortFilterProxyModel* model, const QString& searchString)
+{
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
+  QRegularExpression const regex(searchString,
+                                 QRegularExpression::CaseInsensitiveOption |
+                                   QRegularExpression::DontCaptureOption);
+  if (regex.isValid()) {
+    model->setFilterRegularExpression(regex);
+    return true;
+  }
+  model->setFilterFixedString(QString{});
+  return false;
+#else
+  model->setFilterFixedString(searchString);
+  return true;
+#endif
+}
+
+void setSearchFilterColor(QLineEdit* edit, bool valid)
+{
+  QPalette palette;
+  if (!valid) {
+    palette.setColor(QPalette::Base, Qt::red);
+  }
+  edit->setPalette(palette);
+}
 }

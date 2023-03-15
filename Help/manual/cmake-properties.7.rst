@@ -77,8 +77,6 @@ Properties on Directories
    /prop_dir/IMPORTED_TARGETS
    /prop_dir/INCLUDE_DIRECTORIES
    /prop_dir/INCLUDE_REGULAR_EXPRESSION
-   /prop_dir/INTERPROCEDURAL_OPTIMIZATION
-   /prop_dir/INTERPROCEDURAL_OPTIMIZATION_CONFIG
    /prop_dir/LABELS
    /prop_dir/LINK_DIRECTORIES
    /prop_dir/LINK_OPTIONS
@@ -195,6 +193,7 @@ Properties on Targets
    /prop_tgt/CXX_MODULE_SET
    /prop_tgt/CXX_MODULE_SET_NAME
    /prop_tgt/CXX_MODULE_SETS
+   /prop_tgt/CXX_SCAN_FOR_MODULES
    /prop_tgt/CXX_STANDARD
    /prop_tgt/CXX_STANDARD_REQUIRED
    /prop_tgt/DEBUG_POSTFIX
@@ -300,6 +299,7 @@ Properties on Targets
    /prop_tgt/JOB_POOL_PRECOMPILE_HEADER
    /prop_tgt/LABELS
    /prop_tgt/LANG_CLANG_TIDY
+   /prop_tgt/LANG_CLANG_TIDY_EXPORT_FIXES_DIR
    /prop_tgt/LANG_COMPILER_LAUNCHER
    /prop_tgt/LANG_CPPCHECK
    /prop_tgt/LANG_CPPLINT
@@ -533,6 +533,7 @@ Properties on Source Files
    /prop_sf/COMPILE_DEFINITIONS
    /prop_sf/COMPILE_FLAGS
    /prop_sf/COMPILE_OPTIONS
+   /prop_sf/CXX_SCAN_FOR_MODULES
    /prop_sf/EXTERNAL_OBJECT
    /prop_sf/Fortran_FORMAT
    /prop_sf/Fortran_PREPROCESS
@@ -618,6 +619,8 @@ Deprecated Properties on Directories
 
    /prop_dir/ADDITIONAL_MAKE_CLEAN_FILES
    /prop_dir/COMPILE_DEFINITIONS_CONFIG
+   /prop_dir/INTERPROCEDURAL_OPTIMIZATION
+   /prop_dir/INTERPROCEDURAL_OPTIMIZATION_CONFIG
    /prop_dir/TEST_INCLUDE_FILE
 
 

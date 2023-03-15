@@ -29,8 +29,11 @@ This module defines the following variables:
   Link these to use BZip2
 ``BZIP2_NEED_PREFIX``
   this is set if the functions are prefixed with ``BZ2_``
-``BZIP2_VERSION_STRING``
-  the version of BZip2 found
+``BZIP2_VERSION``
+  .. versionadded:: 3.26
+    the version of BZip2 found.
+
+  See also legacy variable ``BZIP2_VERSION_STRING``.
 
 Cache variables
 ^^^^^^^^^^^^^^^
@@ -39,6 +42,17 @@ The following cache variables may also be set:
 
 ``BZIP2_INCLUDE_DIR``
   the BZip2 include directory
+
+Legacy Variables
+^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``BZIP2_VERSION_STRING``
+  the version of BZip2 found.
+
+  .. versionchanged:: 3.26
+    Superseded by ``BZIP2_VERSION``.
 #]=======================================================================]
 
 set(_BZIP2_PATHS PATHS
@@ -60,12 +74,13 @@ endif ()
 if (BZIP2_INCLUDE_DIR AND EXISTS "${BZIP2_INCLUDE_DIR}/bzlib.h")
     file(STRINGS "${BZIP2_INCLUDE_DIR}/bzlib.h" BZLIB_H REGEX "bzip2/libbzip2 version [0-9]+\\.[^ ]+ of [0-9]+ ")
     string(REGEX REPLACE ".* bzip2/libbzip2 version ([0-9]+\\.[^ ]+) of [0-9]+ .*" "\\1" BZIP2_VERSION_STRING "${BZLIB_H}")
+    set(BZIP2_VERSION ${BZIP2_VERSION_STRING})
 endif ()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(BZip2
                                   REQUIRED_VARS BZIP2_LIBRARIES BZIP2_INCLUDE_DIR
-                                  VERSION_VAR BZIP2_VERSION_STRING)
+                                  VERSION_VAR BZIP2_VERSION)
 
 if (BZIP2_FOUND)
   set(BZIP2_INCLUDE_DIRS ${BZIP2_INCLUDE_DIR})

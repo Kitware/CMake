@@ -19,16 +19,33 @@ Check if given source compiles and links into an executable.
                           [SRC_EXT <extension>])
 
   Check that the source supplied in ``<code>`` can be compiled as a source
-  file for the requested language and linked as an executable (so it must
-  contain at least a ``main()`` function). The result will be stored in the
-  internal cache variable specified by ``<resultVar>``, with a boolean true
-  value for success and boolean false for failure. If ``FAIL_REGEX`` is
-  provided, then failure is determined by checking if anything in the output
-  matches any of the specified regular expressions.
+  file for the requested language and linked as an executable. The result
+  will be stored in the internal cache variable specified by ``<resultVar>``,
+  with a boolean true value for success and boolean false for failure. If
+  ``FAIL_REGEX`` is provided, then failure is determined by checking if
+  anything in the compiler output matches any of the specified regular
+  expressions.
 
   By default, the test source file will be given a file extension that matches
   the requested language. The ``SRC_EXT`` option can be used to override this
   with ``.<extension>`` instead.
+
+  The ``<code>`` must contain a valid main program. For example:
+
+  .. code-block:: cmake
+
+    check_source_compiles(C
+    "#include <stdlib.h>
+    #include <stdnoreturn.h>
+    noreturn void f(){ exit(0); }
+    int main(void) { f(); return 1; }"
+    HAVE_NORETURN)
+
+    check_source_compiles(Fortran
+    "program test
+    error stop
+    end program"
+    HAVE_ERROR_STOP)
 
   The underlying check is performed by the :command:`try_compile` command. The
   compile and link commands can be influenced by setting any of the following
@@ -72,7 +89,6 @@ Check if given source compiles and links into an executable.
   ``<resultVar>`` must be manually removed from the cache.
 
 #]=======================================================================]
-
 
 include_guard(GLOBAL)
 include(Internal/CheckSourceCompiles)

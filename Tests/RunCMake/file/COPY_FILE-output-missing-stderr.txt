@@ -1,0 +1,14 @@
+^CMake Error at [^
+]*/Tests/RunCMake/file/COPY_FILE-output-missing.cmake:[0-9]+ \(file\):
+  file COPY_FILE failed to copy
+
+    [^
+]*/Tests/RunCMake/file/COPY_FILE-output-missing-build/input
+
+  to
+
+    [^
+]*/Tests/RunCMake/file/COPY_FILE-output-missing-build/output-missing/output
+
+  because: [^
+]+ \(output\)$

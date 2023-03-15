@@ -164,10 +164,6 @@ public:
                                 const std::string& lang);
   void AddConfigVariableFlags(std::string& flags, const std::string& var,
                               const std::string& config);
-  void AddCompilerRequirementFlag(std::string& flags,
-                                  cmGeneratorTarget const* target,
-                                  const std::string& lang,
-                                  const std::string& config);
   void AddColorDiagnosticsFlags(std::string& flags, const std::string& lang);
   //! Append flags to a string.
   virtual void AppendFlags(std::string& flags,

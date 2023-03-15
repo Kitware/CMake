@@ -4,6 +4,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <cstddef>
 #include <map>
 #include <memory>
 #include <queue>
@@ -12,12 +13,12 @@
 #include <utility>
 #include <vector>
 
+#include "cmComputeComponentGraph.h"
 #include "cmGraphAdjacencyList.h"
 #include "cmLinkItem.h"
 #include "cmListFileCache.h"
 #include "cmTargetLinkLibraryType.h"
 
-class cmComputeComponentGraph;
 class cmGeneratorTarget;
 class cmGlobalGenerator;
 class cmMakefile;
@@ -91,30 +92,31 @@ private:
   std::string const& GetCurrentFeature(
     std::string const& item, std::string const& defaultFeature) const;
 
-  std::pair<std::map<cmLinkItem, int>::iterator, bool> AllocateLinkEntry(
+  std::pair<std::map<cmLinkItem, size_t>::iterator, bool> AllocateLinkEntry(
     cmLinkItem const& item);
-  std::pair<int, bool> AddLinkEntry(cmLinkItem const& item,
-                                    int groupIndex = -1);
+  std::pair<size_t, bool> AddLinkEntry(
+    cmLinkItem const& item,
+    size_t groupIndex = cmComputeComponentGraph::INVALID_COMPONENT);
   void AddLinkObject(cmLinkItem const& item);
-  void AddVarLinkEntries(int depender_index, const char* value);
+  void AddVarLinkEntries(size_t depender_index, const char* value);
   void AddDirectLinkEntries();
   template <typename T>
-  void AddLinkEntries(int depender_index, std::vector<T> const& libs);
+  void AddLinkEntries(size_t depender_index, std::vector<T> const& libs);
   void AddLinkObjects(std::vector<cmLinkItem> const& objs);
-  cmLinkItem ResolveLinkItem(int depender_index, const std::string& name);
+  cmLinkItem ResolveLinkItem(size_t depender_index, const std::string& name);
 
   // One entry for each unique item.
   std::vector<LinkEntry> EntryList;
-  std::map<cmLinkItem, int> LinkEntryIndex;
+  std::map<cmLinkItem, size_t> LinkEntryIndex;
 
   // map storing, for each group, the list of items
-  std::map<int, std::vector<int>> GroupItems;
+  std::map<size_t, std::vector<size_t>> GroupItems;
 
   // BFS of initial dependencies.
   struct BFSEntry
   {
-    int Index;
-    int GroupIndex;
+    size_t Index;
+    size_t GroupIndex;
     const char* LibDepends;
   };
   std::queue<BFSEntry> BFSQueue;
@@ -126,18 +128,18 @@ private:
   struct SharedDepEntry
   {
     cmLinkItem Item;
-    int DependerIndex;
+    size_t DependerIndex;
   };
   std::queue<SharedDepEntry> SharedDepQueue;
-  std::set<int> SharedDepFollowed;
-  void FollowSharedDeps(int depender_index, cmLinkInterface const* iface,
+  std::set<size_t> SharedDepFollowed;
+  void FollowSharedDeps(size_t depender_index, cmLinkInterface const* iface,
                         bool follow_interface = false);
-  void QueueSharedDependencies(int depender_index,
+  void QueueSharedDependencies(size_t depender_index,
                                std::vector<cmLinkItem> const& deps);
   void HandleSharedDependency(SharedDepEntry const& dep);
 
   // Dependency inferral for each link item.
-  struct DependSet : public std::set<int>
+  struct DependSet : public std::set<size_t>
   {
   };
   struct DependSetList : public std::vector<DependSet>
@@ -162,41 +164,41 @@ private:
   // Ordering algorithm.
   void OrderLinkEntries();
   std::vector<char> ComponentVisited;
-  std::vector<int> ComponentOrder;
+  std::vector<size_t> ComponentOrder;
 
   struct PendingComponent
   {
     // The real component id.  Needed because the map is indexed by
     // component topological index.
-    int Id;
+    size_t Id;
 
     // The number of times the component needs to be seen.  This is
     // always 1 for trivial components and is initially 2 for
     // non-trivial components.
-    int Count;
+    size_t Count;
 
     // The entries yet to be seen to complete the component.
-    std::set<int> Entries;
+    std::set<size_t> Entries;
   };
-  std::map<int, PendingComponent> PendingComponents;
+  std::map<size_t, PendingComponent> PendingComponents;
   std::unique_ptr<cmComputeComponentGraph> CCG;
-  std::vector<int> FinalLinkOrder;
+  std::vector<size_t> FinalLinkOrder;
   void DisplayComponents();
-  void VisitComponent(unsigned int c);
-  void VisitEntry(int index);
-  PendingComponent& MakePendingComponent(unsigned int component);
-  int ComputeComponentCount(NodeList const& nl);
+  void VisitComponent(size_t c);
+  void VisitEntry(size_t index);
+  PendingComponent& MakePendingComponent(size_t component);
+  size_t ComputeComponentCount(NodeList const& nl);
   void DisplayFinalEntries();
 
   // Record of the original link line.
-  std::vector<int> OriginalEntries;
+  std::vector<size_t> OriginalEntries;
   std::set<cmGeneratorTarget const*> OldWrongConfigItems;
   void CheckWrongConfigItem(cmLinkItem const& item);
 
   // Record of explicitly linked object files.
-  std::vector<int> ObjectEntries;
+  std::vector<size_t> ObjectEntries;
 
-  int ComponentOrderId;
+  size_t ComponentOrderId;
   cmTargetLinkLibraryType LinkType;
   bool HasConfig;
   bool DebugMode;

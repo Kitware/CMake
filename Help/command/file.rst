@@ -526,10 +526,10 @@ from the input content to produce the output content.  The options are:
 
 ``OUTPUT <output-file>``
   Specify the output file name to generate.  Use generator expressions
-  such as ``$<CONFIG>`` to specify a configuration-specific output file
-  name.  Multiple configurations may generate the same output file only
-  if the generated content is identical.  Otherwise, the ``<output-file>``
-  must evaluate to an unique name for each configuration.
+  such as :genex:`$<CONFIG>` to specify a configuration-specific
+  output file name.  Multiple configurations may generate the same output
+  file only if the generated content is identical.  Otherwise, the
+  ``<output-file>`` must evaluate to an unique name for each configuration.
 
   .. versionchanged:: 3.10
     A relative path (after evaluating generator expressions) is treated
@@ -540,8 +540,9 @@ from the input content to produce the output content.  The options are:
   .. versionadded:: 3.19
 
   Specify which target to use when evaluating generator expressions that
-  require a target for evaluation (e.g. ``$<COMPILE_FEATURES:...>``,
-  ``$<TARGET_PROPERTY:prop>``).
+  require a target for evaluation (e.g.
+  :genex:`$<COMPILE_FEATURES:...>`,
+  :genex:`$<TARGET_PROPERTY:prop>`).
 
 ``NO_SOURCE_PERMISSIONS``
   .. versionadded:: 3.20
@@ -749,7 +750,8 @@ The options are:
 
   file(COPY_FILE <oldname> <newname>
        [RESULT <result>]
-       [ONLY_IF_DIFFERENT])
+       [ONLY_IF_DIFFERENT]
+       [INPUT_MAY_BE_RECENT])
 
 .. versionadded:: 3.21
 
@@ -767,6 +769,14 @@ The options are:
   If the ``<newname>`` path already exists, do not replace it if the file's
   contents are already the same as ``<oldname>`` (this avoids updating
   ``<newname>``'s timestamp).
+
+``INPUT_MAY_BE_RECENT``
+  .. versionadded:: 3.26
+
+  Tell CMake that the input file may have been recently created.  This is
+  meaningful only on Windows, where files may be inaccessible for a short
+  time after they are created.  With this option, if permission is denied,
+  CMake will retry reading the input a few times.
 
 This sub-command has some similarities to :command:`configure_file` with the
 ``COPYONLY`` option.  An important difference is that :command:`configure_file`
@@ -1212,6 +1222,9 @@ directed to do so with the ``COMPRESSION`` option.  Valid values for
   The compression level can be specified with the ``COMPRESSION_LEVEL`` option.
   The ``<compression-level>`` should be between 0-9, with the default being 0.
   The ``COMPRESSION`` option must be present when ``COMPRESSION_LEVEL`` is given.
+
+.. versionadded:: 3.26
+  The ``<compression-level>`` of the ``Zstd`` algorithm can be set between 0-19.
 
 .. note::
   With ``FORMAT`` set to ``raw`` only one file will be compressed with the

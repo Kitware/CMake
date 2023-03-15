@@ -70,21 +70,14 @@ macro(CHECK_FORTRAN_FUNCTION_EXISTS FUNCTION VARIABLE)
       SOURCE_FROM_VAR testFortranCompiler.f __CheckFunction_testFortranCompilerSource
       ${CHECK_FUNCTION_EXISTS_ADD_LINK_OPTIONS}
       ${CHECK_FUNCTION_EXISTS_ADD_LIBRARIES}
-      OUTPUT_VARIABLE OUTPUT
     )
     unset(__CheckFunction_testFortranCompilerSource)
     if(${VARIABLE})
       set(${VARIABLE} 1 CACHE INTERNAL "Have Fortran function ${FUNCTION}")
       message(CHECK_PASS "found")
-      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-        "Determining if the Fortran ${FUNCTION} exists passed with the following output:\n"
-        "${OUTPUT}\n\n")
     else()
       message(CHECK_FAIL "not found")
       set(${VARIABLE} "" CACHE INTERNAL "Have Fortran function ${FUNCTION}")
-      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-        "Determining if the Fortran ${FUNCTION} exists failed with the following output:\n"
-        "${OUTPUT}\n\n")
     endif()
   endif()
 endmacro()

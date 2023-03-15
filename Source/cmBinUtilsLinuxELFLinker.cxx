@@ -154,8 +154,13 @@ bool cmBinUtilsLinuxELFLinker::ScanDependencies(
         if (!this->Archive->IsPostExcluded(path)) {
           bool unique;
           this->Archive->AddResolvedPath(dep, path, unique);
-          if (unique && !this->ScanDependencies(path, rpaths)) {
-            return false;
+          if (unique) {
+            std::vector<std::string> combinedParentRpaths = parentRpaths;
+            combinedParentRpaths.insert(combinedParentRpaths.end(),
+                                        rpaths.begin(), rpaths.end());
+            if (!this->ScanDependencies(path, combinedParentRpaths)) {
+              return false;
+            }
           }
         }
       } else {

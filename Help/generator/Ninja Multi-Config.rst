@@ -106,14 +106,14 @@ If either ``OUTPUT`` or ``BYPRODUCTS`` names a path that is common to
 more than one configuration (e.g. it does not use any generator expressions),
 all arguments are evaluated in the command config by default.
 If all ``OUTPUT`` and ``BYPRODUCTS`` paths are unique to each configuration
-(e.g. by using the ``$<CONFIG>`` generator expression), the first argument of
+(e.g. by using the :genex:`$<CONFIG>` generator expression), the first argument of
 ``COMMAND`` is still evaluated in the command config by default, while all
 subsequent arguments, as well as the arguments to ``DEPENDS`` and
 ``WORKING_DIRECTORY``, are evaluated in the output config. These defaults can
-be overridden with the ``$<OUTPUT_CONFIG:...>`` and ``$<COMMAND_CONFIG:...>``
+be overridden with the :genex:`$<OUTPUT_CONFIG:...>` and :genex:`$<COMMAND_CONFIG:...>`
 generator-expressions. Note that if a target is specified by its name in
 ``DEPENDS``, or as the first argument of ``COMMAND``, it is always evaluated
-in the command config, even if it is wrapped in ``$<OUTPUT_CONFIG:...>``
+in the command config, even if it is wrapped in :genex:`$<OUTPUT_CONFIG:...>`
 (because its plain name is not a generator expression).
 
 As an example, consider the following:
@@ -122,8 +122,15 @@ As an example, consider the following:
 
   add_custom_command(
     OUTPUT "$<CONFIG>.txt"
-    COMMAND generator "$<CONFIG>.txt" "$<OUTPUT_CONFIG:$<CONFIG>>" "$<COMMAND_CONFIG:$<CONFIG>>"
-    DEPENDS tgt1 "$<TARGET_FILE:tgt2>" "$<OUTPUT_CONFIG:$<TARGET_FILE:tgt3>>" "$<COMMAND_CONFIG:$<TARGET_FILE:tgt4>>"
+    COMMAND
+      generator "$<CONFIG>.txt"
+                "$<OUTPUT_CONFIG:$<CONFIG>>"
+                "$<COMMAND_CONFIG:$<CONFIG>>"
+    DEPENDS
+      tgt1
+      "$<TARGET_FILE:tgt2>"
+      "$<OUTPUT_CONFIG:$<TARGET_FILE:tgt3>>"
+      "$<COMMAND_CONFIG:$<TARGET_FILE:tgt4>>"
     )
 
 Assume that ``generator``, ``tgt1``, ``tgt2``, ``tgt3``, and ``tgt4`` are all
@@ -144,18 +151,23 @@ the ``build-Release.ninja`` file) unless they have no ``BYPRODUCTS`` or their
   add_custom_command(
     TARGET exe
     POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E echo "Running no-byproduct command"
+    COMMAND
+      ${CMAKE_COMMAND} -E echo "Running no-byproduct command"
     )
   add_custom_command(
     TARGET exe
     POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E echo "Running separate-byproduct command for $<CONFIG>"
+    COMMAND
+      ${CMAKE_COMMAND} -E echo
+      "Running separate-byproduct command for $<CONFIG>"
     BYPRODUCTS $<CONFIG>.txt
     )
   add_custom_command(
     TARGET exe
     POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E echo "Running common-byproduct command for $<CONFIG>"
+    COMMAND
+      ${CMAKE_COMMAND} -E echo
+      "Running common-byproduct command for $<CONFIG>"
     BYPRODUCTS exe.txt
     )
 

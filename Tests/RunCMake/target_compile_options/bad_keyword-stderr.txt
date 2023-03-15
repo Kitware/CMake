@@ -1,0 +1,2 @@
+CMake Error at bad_keyword\.cmake:[0-9]+ \(target_compile_options\):
+  target_compile_options called with invalid arguments

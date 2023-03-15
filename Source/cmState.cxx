@@ -786,6 +786,8 @@ std::string cmState::ModeToString(cmState::Mode mode)
       return "CTEST";
     case CPack:
       return "CPACK";
+    case Help:
+      return "HELP";
     case Unknown:
       return "UNKNOWN";
   }

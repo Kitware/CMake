@@ -223,8 +223,6 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
                            submitInactivityTimeout);
       }
 
-      /* HTTP PUT please */
-      ::curl_easy_setopt(curl, CURLOPT_PUT, 1);
       ::curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
 
       ::curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
@@ -718,7 +716,7 @@ int cmCTestSubmitHandler::ProcessHandler()
   cmValue cdashUploadFile = this->GetOption("CDashUploadFile");
   cmValue cdashUploadType = this->GetOption("CDashUploadType");
   if (cdashUploadFile && cdashUploadType) {
-    return this->HandleCDashUploadFile(cdashUploadFile, cdashUploadType);
+    return this->HandleCDashUploadFile(*cdashUploadFile, *cdashUploadType);
   }
 
   const std::string& buildDirectory =

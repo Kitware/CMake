@@ -200,6 +200,12 @@ set_property(TARGET importedFallback PROPERTY IMPORTED_LOCATION fallback_loc)
 set_property(TARGET importedFallback PROPERTY MAP_IMPORTED_CONFIG_DEBUG "" DEBUG)
 set_property(TARGET importedFallback PROPERTY MAP_IMPORTED_CONFIG_RELEASE "")
 
+add_library(importedFallback_genex STATIC IMPORTED)
+set_property(TARGET importedFallback_genex PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+set_property(TARGET importedFallback_genex PROPERTY IMPORTED_LOCATION_RELEASE release_loc)
+set_property(TARGET importedFallback_genex PROPERTY
+  INTERFACE_COMPILE_DEFINITIONS $<$<CONFIG:Release>:FOOBAR=1>)
+
 add_custom_target(check-part3 ALL
   COMMAND ${msys2_no_conv} ${CMAKE_COMMAND}
     -Dtest_version_greater_1=$<VERSION_GREATER:1.0,1.1.1>
@@ -211,6 +217,7 @@ add_custom_target(check-part3 ALL
     -Dconfig=$<CONFIGURATION>
     -Dtest_imported_includes=$<TARGET_PROPERTY:imported4,INCLUDE_DIRECTORIES>
     -Dtest_imported_fallback=$<STREQUAL:$<TARGET_FILE_NAME:importedFallback>,fallback_loc>
+    -Dtest_imported_fallback_genex=$<STREQUAL:$<TARGET_PROPERTY:importedFallback_genex,INTERFACE_COMPILE_DEFINITIONS>,FOOBAR=1>
     -Dtest_alias_file_exe=$<STREQUAL:$<TARGET_FILE:Alias::SomeExe>,$<TARGET_FILE:someexe>>
     -Dtest_alias_file_lib=$<STREQUAL:$<TARGET_FILE:Alias::SomeLib>,$<TARGET_FILE:empty1>>
     -Dtest_alias_target_name=$<STREQUAL:$<TARGET_PROPERTY:Alias::SomeLib,NAME>,$<TARGET_PROPERTY:empty1,NAME>>
@@ -261,13 +268,24 @@ else()
   set(test_shell_path2 /shell/path /another/path)
 endif()
 
+set(test_shell_path_genex "$<SHELL_PATH:${test_shell_path}>")
+set(test_shell_path2_genex "$<SHELL_PATH:${test_shell_path2}>")
+if(msys1_prefix)
+  # Add a prefix to the value produced by the genex so that the path does
+  # not look absolute, thus suppressing conversion by MSYS 1.0 bash.
+  set(test_shell_path_genex "${msys1_prefix}${test_shell_path_genex}")
+  # There is no way to suppress conversion of the second path in
+  # MSYS 1.0 bash, so do the comparison at generate time instead.
+  set(test_shell_path2_genex "$<STREQUAL:${test_shell_path2_genex},/c/shell/path:/d/another/path>")
+endif()
+
 add_custom_target(check-part4 ALL
   COMMAND ${msys2_no_conv} ${CMAKE_COMMAND}
     # Prefix path to bypass its further conversion when being processed by
     # CMake as command-line argument
     -Dmsys1_prefix=${msys1_prefix}
-    -Dtest_shell_path=${msys1_prefix}$<SHELL_PATH:${test_shell_path}>
-    "-Dtest_shell_path2=$<SHELL_PATH:${test_shell_path2}>"
+    "-Dtest_shell_path=${test_shell_path_genex}"
+    "-Dtest_shell_path2=${test_shell_path2_genex}"
     -Dif_1=$<IF:1,a,b>
     -Dif_2=$<IF:0,a,b>
     -Dif_3=$<IF:$<EQUAL:10,30>,a,b>

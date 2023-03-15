@@ -99,3 +99,9 @@ documentation is requested for a property that has not been defined
 
   The :prop_sf:`GENERATED` source file property may be globally visible.
   See its documentation for details.
+
+See Also
+^^^^^^^^
+
+* :command:`define_property`
+* :command:`set_property`

@@ -3,7 +3,7 @@ AUTOUIC_EXECUTABLE
 
 .. versionadded:: 3.14
 
-:prop_tgt:`AUTOUIC_EXECUTABLE` is file path pointing to the ``uic``
+``AUTOUIC_EXECUTABLE`` is file path pointing to the ``uic``
 executable to use for :prop_tgt:`AUTOUIC` enabled files. Setting
 this property will make CMake skip the automatic detection of the
 ``uic`` binary as well as the sanity-tests normally run to ensure

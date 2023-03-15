@@ -344,7 +344,7 @@ struct entry_to_remove
   {
     if (cmValue to_skip = makefile->GetDefinition(
           cmStrCat("_CMAKE_SYSTEM_PREFIX_PATH_", name, "_PREFIX_COUNT"))) {
-      cmStrToLong(to_skip, &count);
+      cmStrToLong(*to_skip, &count);
     }
     if (cmValue prefix_value = makefile->GetDefinition(
           cmStrCat("_CMAKE_SYSTEM_PREFIX_PATH_", name, "_PREFIX_VALUE"))) {

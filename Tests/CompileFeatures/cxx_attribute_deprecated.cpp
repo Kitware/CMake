@@ -1,5 +1,8 @@
 
-[[deprecated]] int foo() { return 0; }
+[[deprecated]] int foo()
+{
+  return 0;
+}
 
 int someFunc()
 {

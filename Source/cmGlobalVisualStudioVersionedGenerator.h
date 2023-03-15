@@ -46,6 +46,16 @@ public:
 
   const char* GetAndroidApplicationTypeRevision() const override;
 
+  bool CheckCxxModuleSupport() override
+  {
+    this->CxxModuleSupportCheck();
+    return this->SupportsCxxModuleDyndep();
+  }
+  bool SupportsCxxModuleDyndep() const override
+  {
+    return this->Version >= cmGlobalVisualStudioGenerator::VSVersion::VS17;
+  }
+
 protected:
   cmGlobalVisualStudioVersionedGenerator(
     VSVersion version, cmake* cm, const std::string& name,
@@ -83,6 +93,7 @@ private:
   mutable cmVSSetupAPIHelper vsSetupAPIHelper;
 
   bool ParseGeneratorInstance(std::string const& is, cmMakefile* mf);
+  void SetVSVersionVar(cmMakefile* mf);
 
   std::string GeneratorInstance;
   std::string GeneratorInstanceVersion;

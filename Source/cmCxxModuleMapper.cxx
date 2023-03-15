@@ -28,6 +28,38 @@ cm::optional<std::string> CxxModuleLocations::BmiGeneratorPathForModule(
 
 namespace {
 
+std::string CxxModuleMapContentClang(CxxModuleLocations const& loc,
+                                     cmScanDepInfo const& obj)
+{
+  std::stringstream mm;
+
+  // Clang's command line only supports a single output. If more than one is
+  // expected, we cannot make a useful module map file.
+  if (obj.Provides.size() > 1) {
+    return {};
+  }
+
+  // A series of flags which tell the compiler where to look for modules.
+
+  for (auto const& p : obj.Provides) {
+    if (auto bmi_loc = loc.BmiGeneratorPathForModule(p.LogicalName)) {
+      // Force the TU to be considered a C++ module source file regardless of
+      // extension.
+      mm << "-x c++-module\n";
+
+      mm << "-fmodule-output=" << *bmi_loc << '\n';
+      break;
+    }
+  }
+  for (auto const& r : obj.Requires) {
+    if (auto bmi_loc = loc.BmiGeneratorPathForModule(r.LogicalName)) {
+      mm << "-fmodule-file=" << r.LogicalName << "=" << *bmi_loc << '\n';
+    }
+  }
+
+  return mm.str();
+}
+
 std::string CxxModuleMapContentGcc(CxxModuleLocations const& loc,
                                    cmScanDepInfo const& obj)
 {
@@ -179,6 +211,8 @@ cm::static_string_view CxxModuleMapExtension(
 {
   if (format) {
     switch (*format) {
+      case CxxModuleMapFormat::Clang:
+        return ".pcm"_s;
       case CxxModuleMapFormat::Gcc:
         return ".gcm"_s;
       case CxxModuleMapFormat::Msvc:
@@ -297,6 +331,8 @@ std::string CxxModuleMapContent(CxxModuleMapFormat format,
                                 CxxModuleUsage const& usages)
 {
   switch (format) {
+    case CxxModuleMapFormat::Clang:
+      return CxxModuleMapContentClang(loc, obj);
     case CxxModuleMapFormat::Gcc:
       return CxxModuleMapContentGcc(loc, obj);
     case CxxModuleMapFormat::Msvc:

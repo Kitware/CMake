@@ -3,7 +3,6 @@ include(RunCMake)
 run_cmake(ContinueAfterError)
 run_cmake(CopyFileABI)
 run_cmake(CustomTargetAfterError)
-run_cmake(ErrorLogs)
 
 # Use a single build tree for a few tests without cleaning.
 set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/RerunCMake-build)

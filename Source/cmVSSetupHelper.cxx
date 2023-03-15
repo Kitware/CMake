@@ -87,12 +87,11 @@ std::string VSInstanceInfo::GetInstallLocation() const
 
 cmVSSetupAPIHelper::cmVSSetupAPIHelper(unsigned int version)
   : Version(version)
-  , setupConfig(NULL)
-  , setupConfig2(NULL)
-  , setupHelper(NULL)
-  , initializationFailure(false)
+  , setupConfig(nullptr)
+  , setupConfig2(nullptr)
+  , setupHelper(nullptr)
 {
-  comInitialized = CoInitializeEx(NULL, 0);
+  comInitialized = CoInitializeEx(nullptr, 0);
   if (SUCCEEDED(comInitialized)) {
     Initialize();
   } else {
@@ -102,11 +101,12 @@ cmVSSetupAPIHelper::cmVSSetupAPIHelper(unsigned int version)
 
 cmVSSetupAPIHelper::~cmVSSetupAPIHelper()
 {
-  setupHelper = NULL;
-  setupConfig2 = NULL;
-  setupConfig = NULL;
-  if (SUCCEEDED(comInitialized))
+  setupHelper = nullptr;
+  setupConfig2 = nullptr;
+  setupConfig = nullptr;
+  if (SUCCEEDED(comInitialized)) {
     CoUninitialize();
+  }
 }
 
 bool cmVSSetupAPIHelper::SetVSInstance(std::string const& vsInstallLocation,
@@ -159,12 +159,12 @@ bool cmVSSetupAPIHelper::CheckInstalledComponent(
   // the
   // component name ex: Microsoft.VisualStudio.Component.Windows10SDK.10240
   if (id.find(Win10SDKComponent) != std::wstring::npos &&
-      type.compare(ComponentType) == 0) {
+      type == ComponentType) {
     bWin10SDK = true;
     ret = true;
   }
 
-  if (id.compare(Win81SDKComponent) == 0 && type.compare(ComponentType) == 0) {
+  if (id == Win81SDKComponent && type == ComponentType) {
     bWin81SDK = true;
     ret = true;
   }
@@ -177,8 +177,9 @@ bool cmVSSetupAPIHelper::CheckInstalledComponent(
 bool cmVSSetupAPIHelper::GetVSInstanceInfo(
   SmartCOMPtr<ISetupInstance2> pInstance, VSInstanceInfo& vsInstanceInfo)
 {
-  if (pInstance == NULL)
+  if (pInstance == nullptr) {
     return false;
+  }
 
   InstanceState state;
   if (FAILED(pInstance->GetState(&state))) {
@@ -188,21 +189,19 @@ bool cmVSSetupAPIHelper::GetVSInstanceInfo(
   SmartBSTR bstrVersion;
   if (FAILED(pInstance->GetInstallationVersion(&bstrVersion))) {
     return false;
-  } else {
-    vsInstanceInfo.Version =
-      cmsys::Encoding::ToNarrow(std::wstring(bstrVersion));
   }
+  vsInstanceInfo.Version =
+    cmsys::Encoding::ToNarrow(std::wstring(bstrVersion));
 
   // Reboot may have been required before the installation path was created.
   SmartBSTR bstrInstallationPath;
   if ((eLocal & state) == eLocal) {
     if (FAILED(pInstance->GetInstallationPath(&bstrInstallationPath))) {
       return false;
-    } else {
-      vsInstanceInfo.VSInstallLocation =
-        cmsys::Encoding::ToNarrow(std::wstring(bstrInstallationPath));
-      cmSystemTools::ConvertToUnixSlashes(vsInstanceInfo.VSInstallLocation);
     }
+    vsInstanceInfo.VSInstallLocation =
+      cmsys::Encoding::ToNarrow(std::wstring(bstrInstallationPath));
+    cmSystemTools::ConvertToUnixSlashes(vsInstanceInfo.VSInstallLocation);
   }
 
   // Check if a compiler is installed with this instance.
@@ -220,7 +219,7 @@ bool cmVSSetupAPIHelper::GetVSInstanceInfo(
 
     LPSAFEARRAY lpsaPackages;
     if (FAILED(pInstance->GetPackages(&lpsaPackages)) ||
-        lpsaPackages == NULL) {
+        lpsaPackages == nullptr) {
       return false;
     }
 
@@ -229,11 +228,12 @@ bool cmVSSetupAPIHelper::GetVSInstanceInfo(
 
     IUnknown** ppData = (IUnknown**)lpsaPackages->pvData;
     for (int i = lower; i < upper; i++) {
-      SmartCOMPtr<ISetupPackageReference> package = NULL;
+      SmartCOMPtr<ISetupPackageReference> package = nullptr;
       if (FAILED(ppData[i]->QueryInterface(IID_ISetupPackageReference,
                                            (void**)&package)) ||
-          package == NULL)
+          package == nullptr) {
         continue;
+      }
 
       bool win10SDKInstalled = false;
       bool win81SDkInstalled = false;
@@ -289,7 +289,8 @@ bool cmVSSetupAPIHelper::GetVCToolsetVersion(std::string& vsToolsetVersion)
 
 bool cmVSSetupAPIHelper::IsEWDKEnabled()
 {
-  std::string envEnterpriseWDK, envDisableRegistryUse;
+  std::string envEnterpriseWDK;
+  std::string envDisableRegistryUse;
   cmSystemTools::GetEnv("EnterpriseWDK", envEnterpriseWDK);
   cmSystemTools::GetEnv("DisableRegistryUse", envDisableRegistryUse);
   if (!cmSystemTools::Strucmp(envEnterpriseWDK.c_str(), "True") &&
@@ -370,11 +371,12 @@ bool cmVSSetupAPIHelper::EnumerateVSInstancesWithVswhere(
 bool cmVSSetupAPIHelper::EnumerateVSInstancesWithCOM(
   std::vector<VSInstanceInfo>& VSInstances)
 {
-  if (initializationFailure || setupConfig == NULL || setupConfig2 == NULL ||
-      setupHelper == NULL)
+  if (initializationFailure || setupConfig == nullptr ||
+      setupConfig2 == nullptr || setupHelper == nullptr) {
     return false;
+  }
 
-  SmartCOMPtr<IEnumSetupInstances> enumInstances = NULL;
+  SmartCOMPtr<IEnumSetupInstances> enumInstances = nullptr;
   if (FAILED(
         setupConfig2->EnumInstances((IEnumSetupInstances**)&enumInstances)) ||
       !enumInstances) {
@@ -382,20 +384,21 @@ bool cmVSSetupAPIHelper::EnumerateVSInstancesWithCOM(
   }
 
   SmartCOMPtr<ISetupInstance> instance;
-  while (SUCCEEDED(enumInstances->Next(1, &instance, NULL)) && instance) {
-    SmartCOMPtr<ISetupInstance2> instance2 = NULL;
+  while (SUCCEEDED(enumInstances->Next(1, &instance, nullptr)) && instance) {
+    SmartCOMPtr<ISetupInstance2> instance2 = nullptr;
     if (FAILED(
           instance->QueryInterface(IID_ISetupInstance2, (void**)&instance2)) ||
         !instance2) {
-      instance = NULL;
+      instance = nullptr;
       continue;
     }
 
     VSInstanceInfo instanceInfo;
     bool isInstalled = GetVSInstanceInfo(instance2, instanceInfo);
-    instance = instance2 = NULL;
-    if (isInstalled)
+    instance = instance2 = nullptr;
+    if (isInstalled) {
       VSInstances.push_back(instanceInfo);
+    }
   }
   return true;
 }
@@ -403,18 +406,21 @@ bool cmVSSetupAPIHelper::EnumerateVSInstancesWithCOM(
 bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
 {
   bool isVSInstanceExists = false;
-  if (chosenInstanceInfo.VSInstallLocation.compare("") != 0) {
+  if (!chosenInstanceInfo.VSInstallLocation.empty()) {
     return true;
   }
 
   if (this->IsEWDKEnabled()) {
-    std::string envWindowsSdkDir81, envVSVersion, envVsInstallDir;
+    std::string envWindowsSdkDir81;
+    std::string envVSVersion;
+    std::string envVsInstallDir;
 
     cmSystemTools::GetEnv("WindowsSdkDir_81", envWindowsSdkDir81);
     cmSystemTools::GetEnv("VisualStudioVersion", envVSVersion);
     cmSystemTools::GetEnv("VSINSTALLDIR", envVsInstallDir);
-    if (envVSVersion.empty() || envVsInstallDir.empty())
+    if (envVSVersion.empty() || envVsInstallDir.empty()) {
       return false;
+    }
 
     chosenInstanceInfo.VSInstallLocation = envVsInstallDir;
     chosenInstanceInfo.Version = envVSVersion;
@@ -499,7 +505,7 @@ bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
     return this->LoadSpecifiedVSInstanceFromDisk();
   }
 
-  if (vecVSInstances.size() > 0) {
+  if (!vecVSInstances.empty()) {
     isVSInstanceExists = true;
     int index = ChooseVSInstance(vecVSInstances);
     chosenInstanceInfo = vecVSInstances[index];
@@ -511,11 +517,13 @@ bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
 int cmVSSetupAPIHelper::ChooseVSInstance(
   const std::vector<VSInstanceInfo>& vecVSInstances)
 {
-  if (vecVSInstances.size() == 0)
+  if (vecVSInstances.empty()) {
     return -1;
+  }
 
-  if (vecVSInstances.size() == 1)
+  if (vecVSInstances.size() == 1) {
     return 0;
+  }
 
   unsigned int chosenIndex = 0;
   for (unsigned int i = 1; i < vecVSInstances.size(); i++) {
@@ -589,32 +597,33 @@ bool cmVSSetupAPIHelper::LoadSpecifiedVSInstanceFromDisk()
 
 bool cmVSSetupAPIHelper::Initialize()
 {
-  if (initializationFailure)
+  if (initializationFailure) {
     return false;
+  }
 
   if (FAILED(comInitialized)) {
     initializationFailure = true;
     return false;
   }
 
-  if (FAILED(setupConfig.CoCreateInstance(CLSID_SetupConfiguration, NULL,
+  if (FAILED(setupConfig.CoCreateInstance(CLSID_SetupConfiguration, nullptr,
                                           IID_ISetupConfiguration,
                                           CLSCTX_INPROC_SERVER)) ||
-      setupConfig == NULL) {
+      setupConfig == nullptr) {
     initializationFailure = true;
     return false;
   }
 
   if (FAILED(setupConfig.QueryInterface(IID_ISetupConfiguration2,
                                         (void**)&setupConfig2)) ||
-      setupConfig2 == NULL) {
+      setupConfig2 == nullptr) {
     initializationFailure = true;
     return false;
   }
 
   if (FAILED(
         setupConfig.QueryInterface(IID_ISetupHelper, (void**)&setupHelper)) ||
-      setupHelper == NULL) {
+      setupHelper == nullptr) {
     initializationFailure = true;
     return false;
   }

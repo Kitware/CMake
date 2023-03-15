@@ -3,12 +3,15 @@
 #include "cmTryRunCommand.h"
 
 #include <cstdio>
+#include <stdexcept>
 
 #include <cm/optional>
+#include <cmext/string_view>
 
 #include "cmsys/FStream.hxx"
 
 #include "cmArgumentParserTypes.h"
+#include "cmConfigureLog.h"
 #include "cmCoreTryCompile.h"
 #include "cmDuration.h"
 #include "cmExecutionStatus.h"
@@ -23,6 +26,48 @@
 #include "cmake.h"
 
 namespace {
+struct cmTryRunResult
+{
+  bool VariableCached = true;
+  std::string Variable;
+  cm::optional<std::string> Stdout;
+  cm::optional<std::string> Stderr;
+  cm::optional<std::string> ExitCode;
+};
+
+#ifndef CMAKE_BOOTSTRAP
+void WriteTryRunEvent(cmConfigureLog& log, cmMakefile const& mf,
+                      cmTryCompileResult const& compileResult,
+                      cmTryRunResult const& runResult)
+{
+  // Keep in sync with cmFileAPIConfigureLog's DumpEventKindNames.
+  static const std::vector<unsigned long> LogVersionsWithTryRunV1{ 1 };
+
+  if (log.IsAnyLogVersionEnabled(LogVersionsWithTryRunV1)) {
+    log.BeginEvent("try_run-v1", mf);
+    cmCoreTryCompile::WriteTryCompileEventFields(log, compileResult);
+
+    log.BeginObject("runResult"_s);
+    log.WriteValue("variable"_s, runResult.Variable);
+    log.WriteValue("cached"_s, runResult.VariableCached);
+    if (runResult.Stdout) {
+      log.WriteLiteralTextBlock("stdout"_s, *runResult.Stdout);
+    }
+    if (runResult.Stderr) {
+      log.WriteLiteralTextBlock("stderr"_s, *runResult.Stderr);
+    }
+    if (runResult.ExitCode) {
+      try {
+        log.WriteValue("exitCode"_s, std::stoi(*runResult.ExitCode));
+      } catch (std::invalid_argument const&) {
+        log.WriteValue("exitCode"_s, *runResult.ExitCode);
+      }
+    }
+    log.EndObject();
+    log.EndEvent();
+  }
+}
+#endif
 
 class TryRunCommandImpl : public cmCoreTryCompile
 {
@@ -44,7 +89,8 @@ public:
                           std::string const& compileResultVariable,
                           std::string* runOutputContents,
                           std::string* runOutputStdOutContents,
-                          std::string* runOutputStdErrContents);
+                          std::string* runOutputStdErrContents,
+                          bool stdOutErrRequired);
 
   bool NoCache;
   std::string RunResultVariable;
@@ -96,23 +142,35 @@ bool TryRunCommandImpl::TryRunCode(std::vector<std::string> const& argv)
   }
 
   bool captureRunOutput = false;
-  bool captureRunOutputStdOutErr = false;
   if (arguments.OutputVariable) {
     captureRunOutput = true;
   } else if (arguments.CompileOutputVariable) {
     arguments.OutputVariable = arguments.CompileOutputVariable;
   }
-  if (arguments.RunOutputStdOutVariable || arguments.RunOutputStdErrVariable) {
-    captureRunOutputStdOutErr = true;
-  } else if (arguments.RunOutputVariable) {
-    captureRunOutput = true;
+
+  // Capture the split output for the configure log unless the caller
+  // requests combined output to be captured by a variable.
+  bool captureRunOutputStdOutErr = true;
+  if (!arguments.RunOutputStdOutVariable &&
+      !arguments.RunOutputStdErrVariable) {
+    if (arguments.RunOutputVariable) {
+      captureRunOutput = true;
+      captureRunOutputStdOutErr = false;
+    } else if (arguments.OutputVariable) {
+      captureRunOutputStdOutErr = false;
+    }
   }
 
   // do the try compile
-  bool compiled = this->TryCompileCode(arguments, cmStateEnums::EXECUTABLE);
+  cm::optional<cmTryCompileResult> compileResult =
+    this->TryCompileCode(arguments, cmStateEnums::EXECUTABLE);
+
+  cmTryRunResult runResult;
+  runResult.Variable = this->RunResultVariable;
+  runResult.VariableCached = !arguments.NoCache;
 
   // now try running the command if it compiled
-  if (compiled) {
+  if (compileResult && compileResult->ExitCode == 0) {
     if (this->OutputFile.empty()) {
       cmSystemTools::Error(this->FindErrorMessage);
     } else {
@@ -127,26 +185,35 @@ bool TryRunCommandImpl::TryRunCode(std::vector<std::string> const& argv)
       std::string runOutputStdErrContents;
       if (this->Makefile->IsOn("CMAKE_CROSSCOMPILING") &&
           !this->Makefile->IsDefinitionSet("CMAKE_CROSSCOMPILING_EMULATOR")) {
+        // We only require the stdout/stderr cache entries if the project
+        // actually asked for the values, not just for logging.
+        bool const stdOutErrRequired = (arguments.RunOutputStdOutVariable ||
+                                        arguments.RunOutputStdErrVariable);
         this->DoNotRunExecutable(
           runArgs, arguments.SourceDirectoryOrFile,
           *arguments.CompileResultVariable,
           captureRunOutput ? &runOutputContents : nullptr,
-          captureRunOutputStdOutErr && arguments.RunOutputStdOutVariable
-            ? &runOutputStdOutContents
-            : nullptr,
-          captureRunOutputStdOutErr && arguments.RunOutputStdErrVariable
-            ? &runOutputStdErrContents
-            : nullptr);
+          captureRunOutputStdOutErr ? &runOutputStdOutContents : nullptr,
+          captureRunOutputStdOutErr ? &runOutputStdErrContents : nullptr,
+          stdOutErrRequired);
       } else {
         this->RunExecutable(
           runArgs, arguments.RunWorkingDirectory,
           captureRunOutput ? &runOutputContents : nullptr,
-          captureRunOutputStdOutErr && arguments.RunOutputStdOutVariable
-            ? &runOutputStdOutContents
-            : nullptr,
-          captureRunOutputStdOutErr && arguments.RunOutputStdErrVariable
-            ? &runOutputStdErrContents
-            : nullptr);
+          captureRunOutputStdOutErr ? &runOutputStdOutContents : nullptr,
+          captureRunOutputStdOutErr ? &runOutputStdErrContents : nullptr);
+      }
+
+      if (captureRunOutputStdOutErr) {
+        runResult.Stdout = runOutputStdOutContents;
+        runResult.Stderr = runOutputStdErrContents;
+      } else {
+        runResult.Stdout = runOutputContents;
+      }
+
+      if (cmValue ec =
+            this->Makefile->GetDefinition(this->RunResultVariable)) {
+        runResult.ExitCode = *ec;
       }
 
       // now put the output into the variables
@@ -176,6 +243,15 @@ bool TryRunCommandImpl::TryRunCode(std::vector<std::string> const& argv)
       }
     }
   }
+
+#ifndef CMAKE_BOOTSTRAP
+  if (compileResult && !arguments.NoLog) {
+    cmMakefile const& mf = *(this->Makefile);
+    if (cmConfigureLog* log = mf.GetCMakeInstance()->GetConfigureLog()) {
+      WriteTryRunEvent(*log, mf, *compileResult, runResult);
+    }
+  }
+#endif
 
   // if we created a directory etc, then cleanup after ourselves
   if (!this->Makefile->GetCMakeInstance()->GetDebugTryCompile()) {
@@ -240,7 +316,7 @@ void TryRunCommandImpl::RunExecutable(const std::string& runArgs,
 void TryRunCommandImpl::DoNotRunExecutable(
   const std::string& runArgs, cm::optional<std::string> const& srcFile,
   std::string const& compileResultVariable, std::string* out,
-  std::string* stdOut, std::string* stdErr)
+  std::string* stdOut, std::string* stdErr, bool stdOutErrRequired)
 {
   // copy the executable out of the CMakeFiles/ directory, so it is not
   // removed at the end of try_run() and the user can run it manually
@@ -286,7 +362,7 @@ void TryRunCommandImpl::DoNotRunExecutable(
   }
 
   // is the output from the executable used ?
-  if (stdOut || stdErr) {
+  if (stdOutErrRequired) {
     if (!this->Makefile->GetDefinition(internalRunOutputStdOutName)) {
       // if the variables doesn't exist, create it with a helpful error text
       // and mark it as advanced

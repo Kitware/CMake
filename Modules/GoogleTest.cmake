@@ -212,7 +212,7 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
     discovery.  Note that the expression is a wildcard-based format that
     matches against the original test names as used by gtest.  For type or
     value-parameterized tests, these names may be different to the potentially
-    pretty-printed test names that ``ctest`` uses.
+    pretty-printed test names that :program:`ctest` uses.
 
   ``NO_PRETTY_TYPES``
     By default, the type index of type-parameterized tests is replaced by the
@@ -404,6 +404,12 @@ function(gtest_add_tests)
                  COMMAND ${ARGS_TARGET}
                    --gtest_filter=${gtest_test_name}
                    ${ARGS_EXTRA_ARGS}
+        )
+        # Makes sure a skipped GTest is reported as so by CTest
+        set_tests_properties(
+          ${ctest_test_name}
+          PROPERTIES
+          SKIP_REGULAR_EXPRESSION "\\[  SKIPPED \\]"
         )
         list(APPEND testList ${ctest_test_name})
       endif()

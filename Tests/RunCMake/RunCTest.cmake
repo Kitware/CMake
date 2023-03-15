@@ -1,5 +1,10 @@
 include(RunCMake)
 
+# Isolate our ctest runs from external environment.
+unset(ENV{CTEST_PARALLEL_LEVEL})
+unset(ENV{CTEST_OUTPUT_ON_FAILURE})
+unset(ENV{CTEST_NO_TESTS_ACTION})
+
 function(run_ctest CASE_NAME)
   configure_file(${RunCMake_SOURCE_DIR}/test.cmake.in
                  ${RunCMake_BINARY_DIR}/${CASE_NAME}/test.cmake @ONLY)

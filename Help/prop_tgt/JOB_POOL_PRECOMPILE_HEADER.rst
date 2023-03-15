@@ -18,6 +18,6 @@ For instance:
 This property is initialized by the value of
 :variable:`CMAKE_JOB_POOL_PRECOMPILE_HEADER`.
 
-If neither :prop_tgt:`JOB_POOL_PRECOMPILE_HEADER` nor
+If neither ``JOB_POOL_PRECOMPILE_HEADER`` nor
 :variable:`CMAKE_JOB_POOL_PRECOMPILE_HEADER` are set then
 :prop_tgt:`JOB_POOL_COMPILE` will be used for this task.

@@ -1,5 +1,21 @@
 include(RunCMake)
 
+# Detect information from the toolchain:
+# - CMAKE_C_COMPILER_ID
+# - CMAKE_C_COMPILER_VERSION
+# - CMAKE_C_STANDARD_DEFAULT
+# - CMAKE_CXX_COMPILER_ID
+# - CMAKE_CXX_COMPILER_VERSION
+# - CMAKE_CXX_STANDARD_DEFAULT
+# - CMAKE_CXX_EXTENSIONS_DEFAULT
+# - CMAKE_OBJC_STANDARD_DEFAULT
+# - CMAKE_OBJCXX_STANDARD_DEFAULT
+run_cmake_with_options(Inspect
+  -DCMake_TEST_OBJC=${CMake_TEST_OBJC}
+  )
+include("${RunCMake_BINARY_DIR}/Inspect-build/info.cmake")
+
+run_cmake(ConfigureLog)
 run_cmake(NoArgs)
 run_cmake(OneArg)
 run_cmake(TwoArgs)
@@ -28,6 +44,8 @@ run_cmake(SourceFromBadFile)
 run_cmake(ProjectCopyFile)
 run_cmake(NonSourceCopyFile)
 run_cmake(NonSourceCompileDefinitions)
+
+run_cmake(Verbose)
 
 set(RunCMake_TEST_OPTIONS --debug-trycompile)
 run_cmake(PlatformVariables)
@@ -87,12 +105,6 @@ if(RunCMake_GENERATOR MATCHES "Make|Ninja")
   unset(RunCMake_TEST_BINARY_DIR)
   unset(RunCMake_TEST_NO_CLEAN)
 endif()
-
-# Lookup CMAKE_CXX_EXTENSIONS_DEFAULT.
-# FIXME: Someday we could move this to the top of the file and use it in
-# place of some of the values passed by 'Tests/RunCMake/CMakeLists.txt'.
-run_cmake(Inspect)
-include("${RunCMake_BINARY_DIR}/Inspect-build/info.cmake")
 
 # FIXME: Support more compilers and default standard levels.
 if (DEFINED CMAKE_CXX_STANDARD_DEFAULT AND

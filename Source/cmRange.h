@@ -76,9 +76,9 @@ class TransformIterator
 {
 public:
   using iterator_category = std::bidirectional_iterator_tag;
-  using value_type =
-    typename std::remove_cv<typename std::remove_reference<decltype(
-      std::declval<UnaryFunction>()(*std::declval<Iter>()))>::type>::type;
+  using value_type = typename std::remove_cv<
+    typename std::remove_reference<decltype(std::declval<UnaryFunction>()(
+      *std::declval<Iter>()))>::type>::type;
   using difference_type = typename std::iterator_traits<Iter>::difference_type;
   using pointer = value_type const*;
   using reference = value_type const&;

@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #pragma once
 
+#include <cm/optional>
+
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
@@ -244,6 +246,15 @@ private:
 
     static std::function<bool(const std::string&, CallState...)>
     generateSetToValue(std::string& value1)
+    {
+      return [&value1](const std::string& arg, CallState&&...) -> bool {
+        value1 = arg;
+        return true;
+      };
+    }
+
+    static std::function<bool(const std::string&, CallState...)>
+    generateSetToValue(cm::optional<std::string>& value1)
     {
       return [&value1](const std::string& arg, CallState&&...) -> bool {
         value1 = arg;

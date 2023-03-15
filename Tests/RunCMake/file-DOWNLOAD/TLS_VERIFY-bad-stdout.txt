@@ -1,0 +1,1 @@
+-- (60;"SSL peer certificate or SSH remote key was not OK"|35;"SSL connect error")

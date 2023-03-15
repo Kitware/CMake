@@ -5,8 +5,8 @@
 cmake_minimum_required(VERSION ${CMAKE_VERSION})
 project(DumpInformation)
 
-# first get the standard information for th platform
-include_directories("This does not exists")
+# first get the standard information for the platform
+include_directories("This does not exist")
 get_directory_property(incl INCLUDE_DIRECTORIES)
 set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES "${DumpInformation_BINARY_DIR};${DumpInformation_SOURCE_DIR}")
 
@@ -83,8 +83,6 @@ macro(DUMP_FILE THE_FILE)
 endmacro()
 
 DUMP_FILE("../CMakeCache.txt")
-DUMP_FILE("../CMakeFiles/CMakeOutput.log")
-DUMP_FILE("../CMakeFiles/CMakeError.log")
 DUMP_FILE("../CMakeFiles/CMakeSystem.cmake")
 
 foreach (EXTRA_FILE ${EXTRA_DUMP_FILES})

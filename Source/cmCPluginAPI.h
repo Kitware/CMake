@@ -8,7 +8,7 @@
    loosely into four groups 1) Utility 2) cmMakefile 3) cmSourceFile 4)
    cmSystemTools. Within each grouping functions are listed alphabetically */
 /*=========================================================================*/
-#ifndef cmCPluginAPI_h
+#ifndef cmCPluginAPI_h /* NOLINT(cmake-use-pragma-once) */
 #define cmCPluginAPI_h
 
 #define CMAKE_VERSION_MAJOR 2
@@ -201,7 +201,7 @@ typedef const char*(CCONV* CM_DOC_FUNCTION)();
 
 /* NOLINTNEXTLINE(modernize-use-using) */
 typedef int(CCONV* CM_INITIAL_PASS_FUNCTION)(void* info, void* mf, int argc,
-                                             char* []);
+                                             char*[]);
 
 /* NOLINTNEXTLINE(modernize-use-using) */
 typedef void(CCONV* CM_FINAL_PASS_FUNCTION)(void* info, void* mf);

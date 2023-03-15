@@ -382,7 +382,7 @@ int cmCPackIFWPackage::ConfigureFromPrefix(const std::string& prefix)
   if (this->IsSetToEmpty(option)) {
     this->DisplayName.clear();
   } else if (cmValue value = this->GetOption(option)) {
-    cmCPackIFWPackage::ExpandListArgument(value, this->DisplayName);
+    cmCPackIFWPackage::ExpandListArgument(*value, this->DisplayName);
   }
 
   // Description
@@ -390,7 +390,7 @@ int cmCPackIFWPackage::ConfigureFromPrefix(const std::string& prefix)
   if (this->IsSetToEmpty(option)) {
     this->Description.clear();
   } else if (cmValue value = this->GetOption(option)) {
-    cmCPackIFWPackage::ExpandListArgument(value, this->Description);
+    cmCPackIFWPackage::ExpandListArgument(*value, this->Description);
   }
 
   // Release date
@@ -484,7 +484,7 @@ int cmCPackIFWPackage::ConfigureFromPrefix(const std::string& prefix)
   if (this->IsSetToEmpty(option)) {
     this->Default.clear();
   } else if (cmValue value = this->GetOption(option)) {
-    std::string lowerValue = cmsys::SystemTools::LowerCase(value);
+    std::string lowerValue = cmsys::SystemTools::LowerCase(*value);
     if (lowerValue == "true") {
       this->Default = "true";
     } else if (lowerValue == "false") {

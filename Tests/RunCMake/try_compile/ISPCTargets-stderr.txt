@@ -1,1 +1,1 @@
-.*Linking ISPC static library*
+(Linking ISPC static library|[ \/]libcmTC_[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]\.a|out:([A-Za-z]+[\/])?cmTC_[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]\.lib)

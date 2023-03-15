@@ -25,6 +25,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
+#include "cmGlobalCommonGenerator.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
 #include "cmLinkLineComputer.h" // IWYU pragma: keep
 #include "cmLocalCommonGenerator.h"
@@ -1031,7 +1032,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
       }
 
       this->GlobalGenerator->AddCXXCompileCommand(
-        source.GetFullPath(), workingDirectory, compileCommand);
+        source.GetFullPath(), workingDirectory, compileCommand, relativeObj);
     }
 
     // See if we need to use a compiler launcher like ccache or distcc
@@ -1107,8 +1108,29 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
           } else {
             driverMode = lang == "C" ? "gcc" : "g++";
           }
+          std::string d =
+            this->GeneratorTarget->GetClangTidyExportFixesDirectory(lang);
+          std::string exportFixes;
+          if (!d.empty()) {
+            this->GlobalCommonGenerator->AddClangTidyExportFixesDir(d);
+            std::string fixesFile = cmSystemTools::CollapseFullPath(cmStrCat(
+              d, '/',
+              this->LocalGenerator->MaybeRelativeToTopBinDir(cmStrCat(
+                this->LocalGenerator->GetCurrentBinaryDirectory(), '/',
+                this->LocalGenerator->GetTargetDirectory(
+                  this->GeneratorTarget),
+                '/', objectName, ".yaml"))));
+            this->GlobalCommonGenerator->AddClangTidyExportFixesFile(
+              fixesFile);
+            cmSystemTools::MakeDirectory(
+              cmSystemTools::GetFilenamePath(fixesFile));
+            fixesFile =
+              this->LocalGenerator->MaybeRelativeToCurBinDir(fixesFile);
+            exportFixes = cmStrCat(";--export-fixes=", fixesFile);
+          }
           run_iwyu += this->LocalGenerator->EscapeForShell(
-            cmStrCat(*tidy, ";--extra-arg-before=--driver-mode=", driverMode));
+            cmStrCat(*tidy, ";--extra-arg-before=--driver-mode=", driverMode,
+                     exportFixes));
         }
         if (cmNonempty(cpplint)) {
           run_iwyu += " --cpplint=";
@@ -1472,11 +1494,11 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
     /* clang-format off */
   *this->InfoFileStream
     << "\n"
-    << "# Targets to which this target links.\n"
-    << "set(CMAKE_TARGET_LINKED_INFO_FILES\n";
+       "# Targets to which this target links which contain Fortran sources.\n"
+       "set(CMAKE_Fortran_TARGET_LINKED_INFO_FILES\n";
     /* clang-format on */
     std::vector<std::string> dirs =
-      this->GetLinkedTargetDirectories(this->GetConfigName());
+      this->GetLinkedTargetDirectories("Fortran", this->GetConfigName());
     for (std::string const& d : dirs) {
       *this->InfoFileStream << "  \"" << d << "/DependInfo.cmake\"\n";
     }
@@ -1866,10 +1888,12 @@ class cmMakefileTargetGeneratorObjectStrings
 public:
   cmMakefileTargetGeneratorObjectStrings(std::vector<std::string>& strings,
                                          cmOutputConverter* outputConverter,
+                                         bool useWatcomQuote,
                                          cmStateDirectory const& stateDir,
                                          std::string::size_type limit)
     : Strings(strings)
     , OutputConverter(outputConverter)
+    , UseWatcomQuote(useWatcomQuote)
     , StateDir(stateDir)
     , LengthLimit(limit)
   {
@@ -1880,7 +1904,7 @@ public:
     // Construct the name of the next object.
     this->NextObject = this->OutputConverter->ConvertToOutputFormat(
       this->OutputConverter->MaybeRelativeToCurBinDir(obj),
-      cmOutputConverter::RESPONSE);
+      cmOutputConverter::RESPONSE, this->UseWatcomQuote);
 
     // Roll over to next string if the limit will be exceeded.
     if (this->LengthLimit != std::string::npos &&
@@ -1903,6 +1927,7 @@ public:
 private:
   std::vector<std::string>& Strings;
   cmOutputConverter* OutputConverter;
+  bool UseWatcomQuote;
   cmStateDirectory StateDir;
   std::string::size_type LengthLimit;
   std::string CurrentString;
@@ -1911,12 +1936,13 @@ private:
 };
 
 void cmMakefileTargetGenerator::WriteObjectsStrings(
-  std::vector<std::string>& objStrings, std::string::size_type limit)
+  std::vector<std::string>& objStrings, bool useWatcomQuote,
+  std::string::size_type limit)
 {
   cmValue pchExtension = this->Makefile->GetDefinition("CMAKE_PCH_EXTENSION");
 
   cmMakefileTargetGeneratorObjectStrings helper(
-    objStrings, this->LocalGenerator,
+    objStrings, this->LocalGenerator, useWatcomQuote,
     this->LocalGenerator->GetStateSnapshot().GetDirectory(), limit);
   for (std::string const& obj : this->Objects) {
     if (cmHasSuffix(obj, pchExtension)) {
@@ -2237,7 +2263,8 @@ void cmMakefileTargetGenerator::CreateObjectLists(
 
     // Construct the individual object list strings.
     std::vector<std::string> object_strings;
-    this->WriteObjectsStrings(object_strings, responseFileLimit);
+    this->WriteObjectsStrings(object_strings, useWatcomQuote,
+                              responseFileLimit);
 
     // Lookup the response file reference flag.
     std::string responseFlag = this->GetResponseFlag(responseMode);
@@ -2249,6 +2276,7 @@ void cmMakefileTargetGenerator::CreateObjectLists(
       std::string responseFileName =
         (responseMode == Link) ? "objects" : "deviceObjects";
       responseFileName += std::to_string(i + 1);
+      responseFileName += ".rsp";
 
       // Create this response file.
       std::string objects_rsp = this->CreateResponseFile(
@@ -2266,7 +2294,7 @@ void cmMakefileTargetGenerator::CreateObjectLists(
   } else if (useLinkScript) {
     if (!useArchiveRules) {
       std::vector<std::string> objStrings;
-      this->WriteObjectsStrings(objStrings);
+      this->WriteObjectsStrings(objStrings, useWatcomQuote);
       buildObjs = objStrings[0];
     }
   } else {

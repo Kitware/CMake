@@ -48,7 +48,7 @@ public:
   //! Set cache only and recurse to false by default.
   cmLocalVisualStudio7Generator(cmGlobalGenerator* gg, cmMakefile* mf);
 
-  virtual ~cmLocalVisualStudio7Generator();
+  ~cmLocalVisualStudio7Generator() override;
 
   cmLocalVisualStudio7Generator(const cmLocalVisualStudio7Generator&) = delete;
   const cmLocalVisualStudio7Generator& operator=(
@@ -97,7 +97,7 @@ protected:
 private:
   using Options = cmVS7GeneratorOptions;
   using FCInfo = cmLocalVisualStudio7GeneratorFCInfo;
-  std::string GetBuildTypeLinkerFlags(std::string rootLinkerFlags,
+  std::string GetBuildTypeLinkerFlags(std::string const& rootLinkerFlags,
                                       const std::string& configName);
   void FixGlobalTargets();
   void WriteVCProjHeader(std::ostream& fout, const std::string& libName,

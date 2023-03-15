@@ -1,0 +1,6 @@
+file(DOWNLOAD https://expired.badssl.com TLS_VERIFY 1 STATUS status LOG log)
+message(STATUS "${status}")
+list(GET status 0 code)
+if(NOT code MATCHES "^(35|60)$")
+  message("${log}")
+endif()

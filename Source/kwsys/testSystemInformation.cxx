@@ -19,7 +19,7 @@
 #define printMethod3(info, m, unit)                                           \
   std::cout << #m << ": " << info.m << " " << unit << "\n"
 
-int testSystemInformation(int, char* [])
+int testSystemInformation(int, char*[])
 {
   std::cout << "CTEST_FULL_OUTPUT\n"; // avoid truncation
 
