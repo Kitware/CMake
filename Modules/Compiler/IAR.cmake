@@ -53,3 +53,9 @@ macro(__compiler_iar_xlink lang)
 
   set(CMAKE_LIBRARY_PATH_FLAG "-I")
 endmacro()
+
+macro(__assembler_iar_deps flag min_version)
+  if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL ${min_version})
+    set(CMAKE_DEPFILE_FLAGS_ASM "${flag} <DEP_FILE>")
+  endif()
+endmacro()
