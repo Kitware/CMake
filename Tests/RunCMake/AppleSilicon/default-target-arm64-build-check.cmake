@@ -1,0 +1,5 @@
+if(NOT actual_stdout MATCHES "[ -]-target=arm64-apple-macosx ")
+  set(RunCMake_TEST_FAILED "No -target=arm64-apple-macosx flag found!")
+elseif(actual_stdout MATCHES " (-arch +[^ ]*)")
+  set(RunCMake_TEST_FAILED "'${CMAKE_MATCH_1}' flag incorrectly found!")
+endif()

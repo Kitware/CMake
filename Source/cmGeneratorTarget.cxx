@@ -3451,7 +3451,6 @@ std::string cmGeneratorTarget::GetCompilePDBDirectory(
 std::vector<std::string> cmGeneratorTarget::GetAppleArchs(
   std::string const& config, cm::optional<std::string> lang) const
 {
-  static_cast<void>(lang);
   std::vector<std::string> archVec;
   if (!this->IsApple()) {
     return archVec;
@@ -3468,7 +3467,12 @@ std::vector<std::string> cmGeneratorTarget::GetAppleArchs(
   if (archs) {
     cmExpandList(*archs, archVec);
   }
-  if (archVec.empty()) {
+  if (archVec.empty() &&
+      // Fall back to a default architecture if no compiler target is set.
+      (!lang ||
+       this->Makefile
+         ->GetDefinition(cmStrCat("CMAKE_", *lang, "_COMPILER_TARGET"))
+         .IsEmpty())) {
     this->Makefile->GetDefExpandList("_CMAKE_APPLE_ARCHS_DEFAULT", archVec);
   }
   return archVec;
