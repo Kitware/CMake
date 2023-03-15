@@ -552,6 +552,7 @@ TargetProperty const StaticTargetProperties[] = {
   { "JOB_POOL_PRECOMPILE_HEADER"_s, IC::CanCompileSources },
   // -- Visual Studio
   { "VS_NO_COMPILE_BATCHING"_s, IC::CanCompileSources },
+  { "VS_WINDOWS_TARGET_PLATFORM_MIN_VERSION"_s, IC::CanCompileSources},
 
   // Output location properties
   { "ARCHIVE_OUTPUT_DIRECTORY"_s, IC::CanCompileSources },
