@@ -5,7 +5,7 @@ import os
 import re
 
 from dataclasses import dataclass
-from typing import Any, List, cast
+from typing import Any, List, Tuple, Type, cast
 
 # Override much of pygments' CMakeLexer.
 # We need to parse CMake syntax definitions, not CMake code.
@@ -66,11 +66,13 @@ CMakeLexer.tokens["root"] = [
 from docutils.utils.code_analyzer import Lexer, LexerError
 from docutils.parsers.rst import Directive, directives
 from docutils.transforms import Transform
+from docutils.nodes import Element, Node, TextElement, system_message
 from docutils import io, nodes
 
 from sphinx.directives import ObjectDescription, nl_escape_re
 from sphinx.domains import Domain, ObjType
 from sphinx.roles import XRefRole
+from sphinx.util.docutils import ReferenceRole
 from sphinx.util.nodes import make_refnode
 from sphinx.util import logging, ws_re
 from sphinx import addnodes
@@ -482,15 +484,53 @@ class CMakeSignatureObject(CMakeObject):
 
         return super().run()
 
-class CMakeXRefRole(XRefRole):
-
+class CMakeReferenceRole:
     # See sphinx.util.nodes.explicit_title_re; \x00 escapes '<'.
     _re = re.compile(r'^(.+?)(\s*)(?<!\x00)<(.*?)>$', re.DOTALL)
+
+    @staticmethod
+    def _escape_angle_brackets(text: str) -> str:
+        # CMake cross-reference targets frequently contain '<' so escape
+        # any explicit `<target>` with '<' not preceded by whitespace.
+        while True:
+            m = CMakeReferenceRole._re.match(text)
+            if m and len(m.group(2)) == 0:
+                text = f'{m.group(1)}\x00<{m.group(3)}>'
+            else:
+                break
+        return text
+
+    def __class_getitem__(cls, parent: Any):
+        class Class(parent):
+            def __call__(self, name: str, rawtext: str, text: str,
+                         *args, **kwargs
+                        ) -> Tuple[List[Node], List[system_message]]:
+                text = CMakeReferenceRole._escape_angle_brackets(text)
+                return super().__call__(name, rawtext, text, *args, **kwargs)
+        return Class
+
+class CMakeCRefRole(CMakeReferenceRole[ReferenceRole]):
+    nodeclass: Type[Element] = nodes.reference
+    innernodeclass: Type[TextElement] = nodes.literal
+    classes: List[str] = ['cmake', 'literal']
+
+    def run(self) -> Tuple[List[Node], List[system_message]]:
+        refnode = self.nodeclass(self.rawtext)
+        self.set_source_info(refnode)
+
+        refnode['refid'] = nodes.make_id(self.target)
+        refnode += self.innernodeclass(self.rawtext, self.title,
+                                       classes=self.classes)
+
+        return [refnode], []
+
+class CMakeXRefRole(CMakeReferenceRole[XRefRole]):
+
     _re_sub = re.compile(r'^([^()\s]+)\s*\(([^()]*)\)$', re.DOTALL)
     _re_genex = re.compile(r'^\$<([^<>:]+)(:[^<>]+)?>$', re.DOTALL)
     _re_guide = re.compile(r'^([^<>/]+)/([^<>]*)$', re.DOTALL)
 
-    def __call__(self, typ, rawtext, text, *args, **keys):
+    def __call__(self, typ, rawtext, text, *args, **kwargs):
         if typ == 'cmake:command':
             # Translate a CMake command cross-reference of the form:
             #  `command_name(SUB_COMMAND)`
@@ -508,15 +548,7 @@ class CMakeXRefRole(XRefRole):
             m = CMakeXRefRole._re_guide.match(text)
             if m:
                 text = '%s <%s>' % (m.group(2), text)
-        # CMake cross-reference targets frequently contain '<' so escape
-        # any explicit `<target>` with '<' not preceded by whitespace.
-        while True:
-            m = CMakeXRefRole._re.match(text)
-            if m and len(m.group(2)) == 0:
-                text = '%s\x00<%s>' % (m.group(1), m.group(3))
-            else:
-                break
-        return XRefRole.__call__(self, typ, rawtext, text, *args, **keys)
+        return super().__call__(typ, rawtext, text, *args, **kwargs)
 
     # We cannot insert index nodes using the result_nodes method
     # because CMakeXRefRole is processed before substitution_reference
@@ -601,6 +633,7 @@ class CMakeDomain(Domain):
         # Other `object_types` cannot be created except by the `CMakeTransform`
     }
     roles = {
+        'cref':       CMakeCRefRole(),
         'command':    CMakeXRefRole(fix_parens = True, lowercase = True),
         'cpack_gen':  CMakeXRefRole(),
         'envvar':     CMakeXRefRole(),

@@ -33,10 +33,15 @@ Generator expression :genex:`$<SOME_GENEX:...>` with brackets and parameter.
 Generator expression :genex:`some genex <SOME_GENEX>` with space and target.
 Generator expression :genex:`$<SOME_GENEX> <SOME_GENEX>` with brackets, space, and target.
 Generator expression :genex:`$<SOME_GENEX:...> <SOME_GENEX>` with brackets, parameter, space, and target.
-Inline literal ``~!@#$%^&*( )_+-=\\[]{}'":;,<>.?/``.
+Inline cref :cref:`Link Dest`.
+Inline cref :cref:`Link_Dest_<Placeholder>`.
+Inline cref :cref:`Link Text <ExternalDest>`.
+Inline cref :cref:`Link_Text_<Placeholder> <ExternalDest>`.
+Inline link `Link Dest`_.
 Inline link `Link Text <ExternalDest>`_.
 Inline link `Link Text \<With \\-escaped Brackets\> <ExternalDest>`_.
 Inline literal ``__`` followed by inline link `Link Text <InternalDest_>`_.
+Inline literal ``~!@#$%^&*( )_+-=\\[]{}'":;,<>.?/``.
 
 .. |not replaced| replace:: not replaced through toctree
 .. |not replaced in literal| replace:: replaced in parsed literal

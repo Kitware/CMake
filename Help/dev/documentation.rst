@@ -395,6 +395,10 @@ object names like ``OUTPUT_NAME_<CONFIG>``.  The form ``a <b>``,
 with a space preceding ``<``, is still interpreted as a link text
 with an explicit target.
 
+Additionally, the ``cref`` role may be used to create references
+to local targets that have literal styling.  This is especially
+useful for referencing a subcommand in the command's documentation.
+
 .. _`list()`: https://cmake.org/cmake/help/latest/command/list.html
 .. _`list(APPEND)`: https://cmake.org/cmake/help/latest/command/list.html
 .. _`list(APPEND) sub-command`: https://cmake.org/cmake/help/latest/command/list.html
