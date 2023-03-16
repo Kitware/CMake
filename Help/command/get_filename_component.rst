@@ -4,9 +4,9 @@ get_filename_component
 Get a specific component of a full filename.
 
 .. versionchanged:: 3.20
-  This command has been superseded by :command:`cmake_path` command, except
-  ``REALPATH`` now offered by :ref:`file(REAL_PATH)<REAL_PATH>` command and
-  ``PROGRAM`` now available in :command:`separate_arguments(PROGRAM)` command.
+  This command has been superseded by the :command:`cmake_path` command, except
+  for ``REALPATH``, which is now offered by :command:`file(REAL_PATH)`, and
+  ``PROGRAM``, now available in :command:`separate_arguments(PROGRAM)`.
 
 .. versionchanged:: 3.24
   The undocumented feature offering the capability to query the ``Windows``
