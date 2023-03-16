@@ -5,7 +5,7 @@ include(Compiler/IAR)
 # Architecture specific
 if("${CMAKE_ASM${ASM_DIALECT}_COMPILER_ARCHITECTURE_ID}" STREQUAL "ARM")
   __compiler_iar_ilink(ASM)
-  __assembler_iar_deps("-y" 9)
+  __assembler_iar_deps("-y" 9.30)
   set(_CMAKE_IAR_SILENCER_FLAG " -S")
   set(CMAKE_ASM_SOURCE_FILE_EXTENSIONS s;asm;msa;S)
 
