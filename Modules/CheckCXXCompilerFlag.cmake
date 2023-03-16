@@ -17,11 +17,6 @@ Check whether the CXX compiler supports a given flag.
   a diagnostic.  Stores the result in an internal cache entry
   named ``<var>``.
 
-This command temporarily sets the ``CMAKE_REQUIRED_DEFINITIONS`` variable
-and calls the ``check_cxx_source_compiles`` macro from the
-:module:`CheckCXXSourceCompiles` module.  See documentation of that
-module for a listing of variables that can otherwise modify the build.
-
 A positive result from this check indicates only that the compiler did not
 issue a diagnostic message when given the flag.  Whether the flag has any
 effect or even a specific one is beyond the scope of this module.
