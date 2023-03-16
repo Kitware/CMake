@@ -16,6 +16,10 @@
 
 #include "cmsys/Terminal.h"
 
+#ifdef CMake_ENABLE_DEBUGGER
+#  include "cmDebuggerAdapter.h"
+#endif
+
 MessageType cmMessenger::ConvertMessageType(MessageType t) const
 {
   if (t == MessageType::AUTHOR_WARNING || t == MessageType::AUTHOR_ERROR) {
@@ -207,6 +211,12 @@ void cmMessenger::DisplayMessage(MessageType t, const std::string& text,
   PrintCallStack(msg, backtrace, this->TopSource);
 
   displayMessage(t, msg);
+
+#ifdef CMake_ENABLE_DEBUGGER
+  if (DebuggerAdapter != nullptr) {
+    DebuggerAdapter->OnMessageOutput(t, msg.str());
+  }
+#endif
 }
 
 void cmMessenger::PrintBacktraceTitle(std::ostream& out,

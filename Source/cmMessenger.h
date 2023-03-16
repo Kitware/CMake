@@ -5,12 +5,19 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
+#include <memory>
 #include <string>
 
 #include <cm/optional>
 
 #include "cmListFileCache.h"
 #include "cmMessageType.h"
+
+#ifdef CMake_ENABLE_DEBUGGER
+namespace cmDebugger {
+class cmDebuggerAdapter;
+}
+#endif
 
 class cmMessenger
 {
@@ -55,6 +62,13 @@ public:
   // Print the top of a backtrace.
   void PrintBacktraceTitle(std::ostream& out,
                            cmListFileBacktrace const& bt) const;
+#ifdef CMake_ENABLE_DEBUGGER
+  void SetDebuggerAdapter(
+    std::shared_ptr<cmDebugger::cmDebuggerAdapter> const& debuggerAdapter)
+  {
+    DebuggerAdapter = debuggerAdapter;
+  }
+#endif
 
 private:
   bool IsMessageTypeVisible(MessageType t) const;
@@ -66,4 +80,7 @@ private:
   bool SuppressDeprecatedWarnings = false;
   bool DevWarningsAsErrors = false;
   bool DeprecatedWarningsAsErrors = false;
+#ifdef CMake_ENABLE_DEBUGGER
+  std::shared_ptr<cmDebugger::cmDebuggerAdapter> DebuggerAdapter;
+#endif
 };

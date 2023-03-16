@@ -20,6 +20,7 @@
 
 #cmakedefine HAVE_ENVIRON_NOT_REQUIRE_PROTOTYPE
 #cmakedefine HAVE_UNSETENV
+#cmakedefine CMake_ENABLE_DEBUGGER
 #cmakedefine CMake_USE_MACH_PARSER
 #cmakedefine CMake_USE_XCOFF_PARSER
 #cmakedefine CMAKE_USE_WMAKE

@@ -517,6 +517,53 @@ Options
  If ``<type>`` is omitted, ``configure`` is assumed.  The current working
  directory must contain CMake preset files.
 
+.. option:: --debugger
+
+  Enables interactive debugging of the CMake language. CMake exposes a debugging
+  interface on the pipe named by :option:`--debugger-pipe <cmake --debugger-pipe>`
+  that conforms to the `Debug Adapter Protocol`_ specification with the following
+  modifications.
+
+  The ``initialize`` response includes an additional field named ``cmakeVersion``
+  which specifies the version of CMake being debugged.
+
+  .. code-block:: json
+    :caption: Debugger initialize response
+
+    {
+      "cmakeVersion": {
+        "major": 3,
+        "minor": 27,
+        "patch": 0,
+        "full": "3.27.0"
+      }
+    }
+
+  The members are:
+
+  ``major``
+    An integer specifying the major version number.
+
+  ``minor``
+    An integer specifying the minor version number.
+
+  ``patch``
+    An integer specifying the patch version number.
+
+  ``full``
+    A string specifying the full CMake version.
+
+.. _`Debug Adapter Protocol`: https://microsoft.github.io/debug-adapter-protocol/
+
+.. option:: --debugger-pipe <pipe name>, --debugger-pipe=<pipe name>
+
+  Name of the pipe (on Windows) or domain socket (on Unix) to use for
+  debugger communication.
+
+.. option:: --debugger-dap-log <log path>, --debugger-dap-log=<log path>
+
+  Logs all debugger communication to the specified file.
+
 .. _`Build Tool Mode`:
 
 Build a Project
@@ -808,6 +855,12 @@ Available commands are:
     .. versionadded:: 3.25
 
     ``true`` if TLS support is enabled and ``false`` otherwise.
+
+  ``debugger``
+    .. versionadded:: 3.27
+
+    ``true`` if the :option:`--debugger <cmake --debugger>` mode
+    is supported and ``false`` otherwise.
 
 .. option:: cat [--] <files>...
 

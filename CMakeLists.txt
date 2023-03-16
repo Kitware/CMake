@@ -131,21 +131,21 @@ if(CMake_BUILD_LTO)
   endif()
 endif()
 
-# Check whether to build cppdap.
+# Check whether to build support for the debugger mode.
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
-  if(NOT DEFINED CMake_ENABLE_CPPDAP)
-    # cppdap does not compile everywhere.
+  if(NOT DEFINED CMake_ENABLE_DEBUGGER)
+    # The debugger uses cppdap, which does not compile everywhere.
     if(CMAKE_SYSTEM_NAME MATCHES "Windows|Darwin|Linux|BSD|DragonFly|CYGWIN|MSYS"
         AND NOT (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19.16)
         AND NOT (CMAKE_CXX_COMPILER_ID STREQUAL "XLClang" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 16.1)
         )
-      set(CMake_ENABLE_CPPDAP 1)
+      set(CMake_ENABLE_DEBUGGER 1)
     else()
-      set(CMake_ENABLE_CPPDAP 0)
+      set(CMake_ENABLE_DEBUGGER 0)
     endif()
   endif()
 else()
-  set(CMake_ENABLE_CPPDAP 0)
+  set(CMake_ENABLE_DEBUGGER 0)
 endif()
 
 #-----------------------------------------------------------------------
@@ -186,7 +186,7 @@ macro(CMAKE_HANDLE_SYSTEM_LIBRARIES)
 
   # Optionally use system utility libraries.
   option(CMAKE_USE_SYSTEM_LIBARCHIVE "Use system-installed libarchive" "${CMAKE_USE_SYSTEM_LIBRARY_LIBARCHIVE}")
-  if(CMake_ENABLE_CPPDAP)
+  if(CMake_ENABLE_DEBUGGER)
     option(CMAKE_USE_SYSTEM_CPPDAP "Use system-installed cppdap" "${CMAKE_USE_SYSTEM_LIBRARY_CPPDAP}")
   endif()
   option(CMAKE_USE_SYSTEM_CURL "Use system-installed curl" "${CMAKE_USE_SYSTEM_LIBRARY_CURL}")
