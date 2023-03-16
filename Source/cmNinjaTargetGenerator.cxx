@@ -169,9 +169,9 @@ std::string cmNinjaTargetGenerator::ComputeFlagsForObject(
   cmSourceFile const* source, const std::string& language,
   const std::string& config)
 {
-  std::vector<std::string> architectures;
   std::unordered_map<std::string, std::string> pchSources;
-  this->GeneratorTarget->GetAppleArchs(config, architectures);
+  std::vector<std::string> architectures =
+    this->GeneratorTarget->GetAppleArchs(config, language);
   if (architectures.empty()) {
     architectures.emplace_back();
   }
@@ -1390,8 +1390,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   // Add precompile headers dependencies
   std::vector<std::string> depList;
 
-  std::vector<std::string> architectures;
-  this->GeneratorTarget->GetAppleArchs(config, architectures);
+  std::vector<std::string> architectures =
+    this->GeneratorTarget->GetAppleArchs(config, language);
   if (architectures.empty()) {
     architectures.emplace_back();
   }

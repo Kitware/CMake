@@ -1873,8 +1873,7 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
 {
   // Only add Apple specific flags on Apple platforms
   if (target->IsApple() && this->EmitUniversalBinaryFlags) {
-    std::vector<std::string> archs;
-    target->GetAppleArchs(config, archs);
+    std::vector<std::string> archs = target->GetAppleArchs(config, lang);
     if (!archs.empty() &&
         (lang == "C" || lang == "CXX" || lang == "OBJC" || lang == "OBJCXX" ||
          lang == "ASM")) {
@@ -2594,7 +2593,7 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
 
       std::vector<std::string> architectures;
       if (!this->GetGlobalGenerator()->IsXcode()) {
-        target->GetAppleArchs(config, architectures);
+        architectures = target->GetAppleArchs(config, lang);
       }
       if (architectures.empty()) {
         architectures.emplace_back();
