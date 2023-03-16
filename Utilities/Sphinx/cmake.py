@@ -1,67 +1,15 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
+# BEGIN imports
+
 import os
 import re
 
 from dataclasses import dataclass
 from typing import Any, List, Tuple, Type, cast
 
-# Override much of pygments' CMakeLexer.
-# We need to parse CMake syntax definitions, not CMake code.
-
-# For hard test cases that use much of the syntax below, see
-# - module/FindPkgConfig.html (with "glib-2.0>=2.10 gtk+-2.0" and similar)
-# - module/ExternalProject.html (with http:// https:// git@; also has command options -E --build)
-# - manual/cmake-buildsystem.7.html (with nested $<..>; relative and absolute paths, "::")
-
-from pygments.lexers import CMakeLexer
-from pygments.token import Name, Operator, Punctuation, String, Text, Comment, Generic, Whitespace, Number
-from pygments.lexer import bygroups
-
-# RE to split multiple command signatures
-sig_end_re = re.compile(r'(?<=[)])\n')
-
-# Notes on regular expressions below:
-# - [\.\+-] are needed for string constants like gtk+-2.0
-# - Unix paths are recognized by '/'; support for Windows paths may be added if needed
-# - (\\.) allows for \-escapes (used in manual/cmake-language.7)
-# - $<..$<..$>..> nested occurrence in cmake-buildsystem
-# - Nested variable evaluations are only supported in a limited capacity. Only
-#   one level of nesting is supported and at most one nested variable can be present.
-
-CMakeLexer.tokens["root"] = [
-  (r'\b(\w+)([ \t]*)(\()', bygroups(Name.Function, Text, Name.Function), '#push'),     # fctn(
-  (r'\(', Name.Function, '#push'),
-  (r'\)', Name.Function, '#pop'),
-  (r'\[', Punctuation, '#push'),
-  (r'\]', Punctuation, '#pop'),
-  (r'[|;,.=*\-]', Punctuation),
-  (r'\\\\', Punctuation),                                   # used in commands/source_group
-  (r'[:]', Operator),
-  (r'[<>]=', Punctuation),                                  # used in FindPkgConfig.cmake
-  (r'\$<', Operator, '#push'),                              # $<...>
-  (r'<[^<|]+?>(\w*\.\.\.)?', Name.Variable),                # <expr>
-  (r'(\$\w*\{)([^\}\$]*)?(?:(\$\w*\{)([^\}]+?)(\}))?([^\}]*?)(\})',  # ${..} $ENV{..}, possibly nested
-    bygroups(Operator, Name.Tag, Operator, Name.Tag, Operator, Name.Tag, Operator)),
-  (r'([A-Z]+\{)(.+?)(\})', bygroups(Operator, Name.Tag, Operator)),  # DATA{ ...}
-  (r'[a-z]+(@|(://))((\\.)|[\w.+-:/\\])+', Name.Attribute),          # URL, git@, ...
-  (r'/\w[\w\.\+-/\\]*', Name.Attribute),                    # absolute path
-  (r'/', Name.Attribute),
-  (r'\w[\w\.\+-]*/[\w.+-/\\]*', Name.Attribute),            # relative path
-  (r'[A-Z]((\\.)|[\w.+-])*[a-z]((\\.)|[\w.+-])*', Name.Builtin), # initial A-Z, contains a-z
-  (r'@?[A-Z][A-Z0-9_]*', Name.Constant),
-  (r'[a-z_]((\\;)|(\\ )|[\w.+-])*', Name.Builtin),
-  (r'[0-9][0-9\.]*', Number),
-  (r'(?s)"(\\"|[^"])*"', String),                           # "string"
-  (r'\.\.\.', Name.Variable),
-  (r'<', Operator, '#push'),                                # <..|..> is different from <expr>
-  (r'>', Operator, '#pop'),
-  (r'\n', Whitespace),
-  (r'[ \t]+', Whitespace),
-  (r'#.*\n', Comment),
-  #  (r'[^<>\])\}\|$"# \t\n]+', Name.Exception),            # fallback, for debugging only
-]
+import sphinx
 
 from docutils.utils.code_analyzer import Lexer, LexerError
 from docutils.parsers.rst import Directive, directives
@@ -77,39 +25,99 @@ from sphinx.util.nodes import make_refnode
 from sphinx.util import logging, ws_re
 from sphinx import addnodes
 
+# END imports
+
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+# BEGIN pygments tweaks
+
+# Override much of pygments' CMakeLexer.
+# We need to parse CMake syntax definitions, not CMake code.
+
+# For hard test cases that use much of the syntax below, see
+# - module/FindPkgConfig.html
+#     (with "glib-2.0>=2.10 gtk+-2.0" and similar)
+# - module/ExternalProject.html
+#     (with http:// https:// git@; also has command options -E --build)
+# - manual/cmake-buildsystem.7.html
+#     (with nested $<..>; relative and absolute paths, "::")
+
+from pygments.lexers import CMakeLexer
+from pygments.token import (Comment, Name, Number, Operator, Punctuation,
+                            String, Text, Whitespace)
+from pygments.lexer import bygroups
+
+# Notes on regular expressions below:
+# - [\.\+-] are needed for string constants like gtk+-2.0
+# - Unix paths are recognized by '/'; support for Windows paths may be added
+#   if needed
+# - (\\.) allows for \-escapes (used in manual/cmake-language.7)
+# - $<..$<..$>..> nested occurrence in cmake-buildsystem
+# - Nested variable evaluations are only supported in a limited capacity.
+#   Only one level of nesting is supported and at most one nested variable can
+#   be present.
+
+CMakeLexer.tokens["root"] = [
+  # fctn(
+  (r'\b(\w+)([ \t]*)(\()',
+   bygroups(Name.Function, Text, Name.Function), '#push'),
+  (r'\(', Name.Function, '#push'),
+  (r'\)', Name.Function, '#pop'),
+  (r'\[', Punctuation, '#push'),
+  (r'\]', Punctuation, '#pop'),
+  (r'[|;,.=*\-]', Punctuation),
+  # used in commands/source_group
+  (r'\\\\', Punctuation),
+  (r'[:]', Operator),
+  # used in FindPkgConfig.cmake
+  (r'[<>]=', Punctuation),
+  # $<...>
+  (r'\$<', Operator, '#push'),
+  # <expr>
+  (r'<[^<|]+?>(\w*\.\.\.)?', Name.Variable),
+  # ${..} $ENV{..}, possibly nested
+  (r'(\$\w*\{)([^\}\$]*)?(?:(\$\w*\{)([^\}]+?)(\}))?([^\}]*?)(\})',
+   bygroups(Operator, Name.Tag, Operator, Name.Tag, Operator, Name.Tag,
+            Operator)),
+  # DATA{ ...}
+  (r'([A-Z]+\{)(.+?)(\})', bygroups(Operator, Name.Tag, Operator)),
+  # URL, git@, ...
+  (r'[a-z]+(@|(://))((\\.)|[\w.+-:/\\])+', Name.Attribute),
+  # absolute path
+  (r'/\w[\w\.\+-/\\]*', Name.Attribute),
+  (r'/', Name.Attribute),
+  # relative path
+  (r'\w[\w\.\+-]*/[\w.+-/\\]*', Name.Attribute),
+  # initial A-Z, contains a-z
+  (r'[A-Z]((\\.)|[\w.+-])*[a-z]((\\.)|[\w.+-])*', Name.Builtin),
+  (r'@?[A-Z][A-Z0-9_]*', Name.Constant),
+  (r'[a-z_]((\\;)|(\\ )|[\w.+-])*', Name.Builtin),
+  (r'[0-9][0-9\.]*', Number),
+  # "string"
+  (r'(?s)"(\\"|[^"])*"', String),
+  (r'\.\.\.', Name.Variable),
+  # <..|..> is different from <expr>
+  (r'<', Operator, '#push'),
+  (r'>', Operator, '#pop'),
+  (r'\n', Whitespace),
+  (r'[ \t]+', Whitespace),
+  (r'#.*\n', Comment),
+  # fallback, for debugging only
+  #  (r'[^<>\])\}\|$"# \t\n]+', Name.Exception),
+]
+
+# END pygments tweaks
+
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+# Require at least Sphinx 2.x.
+assert sphinx.version_info >= (2,)
+
 logger = logging.getLogger(__name__)
 
-sphinx_before_1_4 = False
-sphinx_before_1_7_2 = False
-try:
-    from sphinx import version_info
-    if version_info < (1, 4):
-        sphinx_before_1_4 = True
-    if version_info < (1, 7, 2):
-        sphinx_before_1_7_2 = True
-except ImportError:
-    # The `sphinx.version_info` tuple was added in Sphinx v1.2:
-    sphinx_before_1_4 = True
-    sphinx_before_1_7_2 = True
+# RE to split multiple command signatures.
+sig_end_re = re.compile(r'(?<=[)])\n')
 
-if sphinx_before_1_7_2:
-  # Monkey patch for sphinx generating invalid content for qcollectiongenerator
-  # https://github.com/sphinx-doc/sphinx/issues/1435
-  from sphinx.util.pycompat import htmlescape
-  from sphinx.builders.qthelp import QtHelpBuilder
-  old_build_keywords = QtHelpBuilder.build_keywords
-  def new_build_keywords(self, title, refs, subitems):
-    old_items = old_build_keywords(self, title, refs, subitems)
-    new_items = []
-    for item in old_items:
-      before, rest = item.split("ref=\"", 1)
-      ref, after = rest.split("\"")
-      if ("<" in ref and ">" in ref):
-        new_items.append(before + "ref=\"" + htmlescape(ref) + "\"" + after)
-      else:
-        new_items.append(item)
-    return new_items
-  QtHelpBuilder.build_keywords = new_build_keywords
 
 @dataclass
 class ObjectEntry:
@@ -132,7 +140,7 @@ class CMakeModule(Directive):
     def run(self):
         settings = self.state.document.settings
         if not settings.file_insertion_enabled:
-            raise self.warning('"%s" directive disabled.' % self.name)
+            raise self.warning(f'{self.name!r} directive disabled.')
 
         env = self.state.document.settings.env
         rel_path, path = env.relfn2path(self.arguments[0])
@@ -143,13 +151,12 @@ class CMakeModule(Directive):
             settings.record_dependencies.add(path)
             f = io.FileInput(source_path=path, encoding=encoding,
                              error_handler=e_handler)
-        except UnicodeEncodeError as error:
-            msg = ('Problems with "%s" directive path:\n'
-                   'Cannot encode input file path "%s" '
-                   '(wrong locale?).' % (self.name, path))
+        except UnicodeEncodeError:
+            msg = (f'Problems with {self.name!r} directive path:\n'
+                   f'Cannot encode input file path {path!r} (wrong locale?).')
             raise self.severe(msg)
         except IOError as error:
-            msg = 'Problems with "%s" directive path:\n%s.' % (self.name, error)
+            msg = f'Problems with {self.name!r} directive path:\n{error}.'
             raise self.severe(msg)
         raw_lines = f.read().splitlines()
         f.close()
@@ -169,7 +176,7 @@ class CMakeModule(Directive):
                 # Line mode: check for .rst start (bracket or line)
                 m = self.re_start.match(line)
                 if m:
-                    rst = ']%s]' % m.group('eq')
+                    rst = f']{m.group("eq")}]'
                     line = ''
                 elif line == '#.rst:':
                     rst = '#'
@@ -184,21 +191,19 @@ class CMakeModule(Directive):
                     line = ''
             lines.append(line)
         if rst is not None and rst != '#':
-            raise self.warning('"%s" found unclosed bracket "#[%s[.rst:" in %s' %
-                               (self.name, rst[1:-1], path))
+            raise self.warning(f'{self.name!r} found unclosed bracket '
+                               f'"#[{rst[1:-1]}[.rst:" in {path!r}')
         self.state_machine.insert_input(lines, path)
         return []
+
 
 class _cmake_index_entry:
     def __init__(self, desc):
         self.desc = desc
 
-    def __call__(self, title, targetid, main = 'main'):
-        # See https://github.com/sphinx-doc/sphinx/issues/2673
-        if sphinx_before_1_4:
-            return ('pair', u'%s ; %s' % (self.desc, title), targetid, main)
-        else:
-            return ('pair', u'%s ; %s' % (self.desc, title), targetid, main, None)
+    def __call__(self, title, targetid, main='main'):
+        return ('pair', f'{self.desc} ; {title}', targetid, main, None)
+
 
 _cmake_index_objs = {
     'command':    _cmake_index_entry('command'),
@@ -219,6 +224,7 @@ _cmake_index_objs = {
     'prop_tgt':   _cmake_index_entry('target property'),
     'variable':   _cmake_index_entry('variable'),
     }
+
 
 class CMakeTransform(Transform):
 
@@ -246,7 +252,8 @@ class CMakeTransform(Transform):
                 title = False
             else:
                 for line in f:
-                    if len(line) > 0 and (line[0].isalnum() or line[0] == '<' or line[0] == '$'):
+                    if len(line) > 0 and (line[0].isalnum() or
+                                          line[0] == '<' or line[0] == '$'):
                         title = line.rstrip()
                         break
                 f.close()
@@ -274,7 +281,7 @@ class CMakeTransform(Transform):
                     if m:
                         title = m.group(1)
                 targetname = title
-            targetid = '%s:%s' % (objtype, targetname)
+            targetid = f'{objtype}:{targetname}'
             targetnode = nodes.target('', '', ids=[targetid])
             self.document.note_explicit_target(targetnode)
             self.document.insert(0, targetnode)
@@ -286,6 +293,7 @@ class CMakeTransform(Transform):
             # Add to cmake domain object inventory
             domain = cast(CMakeDomain, env.get_domain('cmake'))
             domain.note_object(objtype, targetname, targetid, targetid)
+
 
 class CMakeObject(ObjectDescription):
     def __init__(self, *args, **kwargs):
@@ -304,7 +312,7 @@ class CMakeObject(ObjectDescription):
             targetname = self.targetname
         else:
             targetname = name
-        targetid = '%s:%s' % (self.objtype, targetname)
+        targetid = f'{self.objtype}:{targetname}'
         if targetid not in self.state.document.ids:
             signode['names'].append(targetid)
             signode['ids'].append(targetid)
@@ -484,6 +492,7 @@ class CMakeSignatureObject(CMakeObject):
 
         return super().run()
 
+
 class CMakeReferenceRole:
     # See sphinx.util.nodes.explicit_title_re; \x00 escapes '<'.
     _re = re.compile(r'^(.+?)(\s*)(?<!\x00)<(.*?)>$', re.DOTALL)
@@ -509,6 +518,7 @@ class CMakeReferenceRole:
                 return super().__call__(name, rawtext, text, *args, **kwargs)
         return Class
 
+
 class CMakeCRefRole(CMakeReferenceRole[ReferenceRole]):
     nodeclass: Type[Element] = nodes.reference
     innernodeclass: Type[TextElement] = nodes.literal
@@ -523,6 +533,7 @@ class CMakeCRefRole(CMakeReferenceRole[ReferenceRole]):
                                        classes=self.classes)
 
         return [refnode], []
+
 
 class CMakeXRefRole(CMakeReferenceRole[XRefRole]):
 
@@ -543,11 +554,11 @@ class CMakeXRefRole(CMakeReferenceRole[XRefRole]):
         elif typ == 'cmake:genex':
             m = CMakeXRefRole._re_genex.match(text)
             if m:
-                text = '%s <%s>' % (text, m.group(1))
+                text = f'{text} <{m.group(1)}>'
         elif typ == 'cmake:guide':
             m = CMakeXRefRole._re_guide.match(text)
             if m:
-                text = '%s <%s>' % (m.group(2), text)
+                text = f'{m.group(2)} <{text}>'
         return super().__call__(typ, rawtext, text, *args, **kwargs)
 
     # We cannot insert index nodes using the result_nodes method
@@ -560,6 +571,7 @@ class CMakeXRefRole(CMakeReferenceRole[XRefRole]):
     #
     # def result_nodes(self, document, env, node, is_ref):
     #     pass
+
 
 class CMakeXRefTransform(Transform):
 
@@ -591,15 +603,16 @@ class CMakeXRefTransform(Transform):
                 # Index signature references to their parent command.
                 objname = objname.split('(')[0].lower()
 
-            targetnum = env.new_serialno('index-%s:%s' % (objtype, objname))
+            targetnum = env.new_serialno(f'index-{objtype}:{objname}')
 
-            targetid = 'index-%s-%s:%s' % (targetnum, objtype, objname)
+            targetid = f'index-{targetnum}-{objtype}:{objname}'
             targetnode = nodes.target('', '', ids=[targetid])
             self.document.note_explicit_target(targetnode)
 
             indexnode = addnodes.index()
             indexnode['entries'] = [make_index_entry(objname, targetid, '')]
             ref.replace_self([indexnode, targetnode, ref])
+
 
 class CMakeDomain(Domain):
     """CMake domain."""
@@ -634,7 +647,7 @@ class CMakeDomain(Domain):
     }
     roles = {
         'cref':       CMakeCRefRole(),
-        'command':    CMakeXRefRole(fix_parens = True, lowercase = True),
+        'command':    CMakeXRefRole(fix_parens=True, lowercase=True),
         'cpack_gen':  CMakeXRefRole(),
         'envvar':     CMakeXRefRole(),
         'generator':  CMakeXRefRole(),
@@ -698,6 +711,7 @@ class CMakeDomain(Domain):
     def get_objects(self):
         for refname, obj in self.data['objects'].items():
             yield (refname, obj.name, obj.objtype, obj.docname, obj.node_id, 1)
+
 
 def setup(app):
     app.add_directive('cmake-module', CMakeModule)
