@@ -1074,6 +1074,7 @@ if(CUDA_USE_STATIC_CUDA_RUNTIME)
     if(NOT APPLE AND NOT (CMAKE_SYSTEM_NAME STREQUAL "QNX"))
       #On Linux, you must link against librt when using the static cuda runtime.
       find_library(CUDA_rt_LIBRARY rt)
+      mark_as_advanced(CUDA_rt_LIBRARY)
       if (NOT CUDA_rt_LIBRARY)
         message(WARNING "Expecting to find librt for libcudart_static, but didn't find it.")
       endif()
