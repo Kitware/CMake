@@ -498,12 +498,12 @@ std::string cmLocalNinjaGenerator::BuildCommandLine(
   }
 
   std::ostringstream cmd;
-  for (auto li = cmdLines.begin(); li != cmdLines.end(); ++li)
 #ifdef _WIN32
-  {
+  bool const needCMD = cmdLines.size() > 1;
+  for (auto li = cmdLines.begin(); li != cmdLines.end(); ++li) {
     if (li != cmdLines.begin()) {
       cmd << " && ";
-    } else if (cmdLines.size() > 1) {
+    } else if (needCMD) {
       cmd << "cmd.exe /C \"";
     }
     // Put current cmdLine in brackets if it contains "||" because it has
@@ -514,11 +514,11 @@ std::string cmLocalNinjaGenerator::BuildCommandLine(
       cmd << *li;
     }
   }
-  if (cmdLines.size() > 1) {
+  if (needCMD) {
     cmd << "\"";
   }
 #else
-  {
+  for (auto li = cmdLines.begin(); li != cmdLines.end(); ++li) {
     if (li != cmdLines.begin()) {
       cmd << " && ";
     }
