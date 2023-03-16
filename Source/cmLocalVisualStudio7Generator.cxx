@@ -270,6 +270,7 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
   cc->SetComment(comment.c_str());
   cc->SetEscapeOldStyle(false);
   cc->SetStdPipesUTF8(true);
+  cc->SetUsesTerminal(true);
   this->AddCustomCommandToOutput(std::move(cc), true);
   if (cmSourceFile* file = this->Makefile->GetSource(makefileIn)) {
     // Finalize the source file path now since we're adding this after
