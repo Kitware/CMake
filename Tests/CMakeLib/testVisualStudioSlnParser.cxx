@@ -27,7 +27,7 @@ static bool parsedRight(cmVisualStudioSlnParser& parser,
   return false;
 }
 
-int testVisualStudioSlnParser(int, char* [])
+int testVisualStudioSlnParser(int, char*[])
 {
   cmVisualStudioSlnParser parser;
 

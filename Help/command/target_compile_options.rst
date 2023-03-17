@@ -19,7 +19,8 @@ Arguments
 ^^^^^^^^^
 
 If ``BEFORE`` is specified, the content will be prepended to the property
-instead of being appended.
+instead of being appended.  See policy :policy:`CMP0101` which affects
+whether ``BEFORE`` will be ignored in certain cases.
 
 The ``INTERFACE``, ``PUBLIC`` and ``PRIVATE`` keywords are required to
 specify the :ref:`scope <Target Usage Requirements>` of the following arguments.
@@ -32,21 +33,26 @@ The following arguments specify compile options.  Repeated calls for the same
 .. versionadded:: 3.11
   Allow setting ``INTERFACE`` items on :ref:`IMPORTED targets <Imported Targets>`.
 
-Arguments to ``target_compile_options`` may use "generator expressions"
-with the syntax ``$<...>``. See the :manual:`cmake-generator-expressions(7)`
-manual for available expressions.  See the :manual:`cmake-buildsystem(7)`
-manual for more on defining buildsystem properties.
+.. |command_name| replace:: ``target_compile_options``
+.. include:: GENEX_NOTE.txt
 
 .. include:: OPTIONS_SHELL.txt
 
 See Also
 ^^^^^^^^
 
-This command can be used to add any options. However, for adding
-preprocessor definitions and include directories it is recommended
-to use the more specific commands :command:`target_compile_definitions`
-and :command:`target_include_directories`.
+* This command can be used to add any options. However, for adding
+  preprocessor definitions and include directories it is recommended
+  to use the more specific commands :command:`target_compile_definitions`
+  and :command:`target_include_directories`.
 
-For directory-wide settings, there is the command :command:`add_compile_options`.
+* For directory-wide settings, there is the command :command:`add_compile_options`.
 
-For file-specific settings, there is the source file property :prop_sf:`COMPILE_OPTIONS`.
+* For file-specific settings, there is the source file property :prop_sf:`COMPILE_OPTIONS`.
+
+* :command:`target_compile_features`
+* :command:`target_link_libraries`
+* :command:`target_link_directories`
+* :command:`target_link_options`
+* :command:`target_precompile_headers`
+* :command:`target_sources`

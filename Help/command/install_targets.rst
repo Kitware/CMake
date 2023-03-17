@@ -8,7 +8,7 @@ install_targets
 This command has been superseded by the :command:`install` command.  It is
 provided for compatibility with older CMake code.
 
-::
+.. code-block:: cmake
 
   install_targets(<dir> [RUNTIME_DIRECTORY dir] target target)
 

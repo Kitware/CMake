@@ -3,7 +3,7 @@ ctest_run_script
 
 runs a :option:`ctest -S` script
 
-::
+.. code-block:: cmake
 
   ctest_run_script([NEW_PROCESS] script_file_name script_file_name1
               script_file_name2 ... [RETURN_VALUE var])

@@ -30,7 +30,7 @@
 #include "cmValue.h"
 #include "cmake.h"
 
-//#define CM_COMPUTE_LINK_INFO_DEBUG
+// #define CM_COMPUTE_LINK_INFO_DEBUG
 
 /*
 Notes about linking on various platforms:
@@ -366,7 +366,7 @@ cmComputeLinkInformation::cmComputeLinkInformation(
     this->LibraryFeatureDescriptors.emplace(
       "__CMAKE_LINK_EXECUTABLE",
       LibraryFeatureDescriptor{ "__CMAKE_LINK_EXECUTABLE",
-                                cmStrCat(this->LoaderFlag, "<LIBRARY>") });
+                                cmStrCat(*this->LoaderFlag, "<LIBRARY>") });
   }
   // To link framework using a full path
   this->LibraryFeatureDescriptors.emplace(
@@ -858,8 +858,8 @@ bool cmComputeLinkInformation::AddLibraryFeature(std::string const& feature)
     return false;
   }
 
-  auto items =
-    cmExpandListWithBacktrace(langFeature, this->Target->GetBacktrace(), true);
+  auto items = cmExpandListWithBacktrace(*langFeature,
+                                         this->Target->GetBacktrace(), true);
 
   if ((items.size() == 1 && !IsValidFeatureFormat(items.front().Value)) ||
       (items.size() == 3 && !IsValidFeatureFormat(items[1].Value))) {
@@ -1016,8 +1016,8 @@ cmComputeLinkInformation::GetGroupFeature(std::string const& feature)
       .first->second;
   }
 
-  auto items =
-    cmExpandListWithBacktrace(langFeature, this->Target->GetBacktrace(), true);
+  auto items = cmExpandListWithBacktrace(*langFeature,
+                                         this->Target->GetBacktrace(), true);
 
   // replace LINKER: pattern
   this->Target->ResolveLinkerWrapper(items, this->LinkLanguage, true);

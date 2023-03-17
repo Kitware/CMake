@@ -39,10 +39,10 @@ using is_input_range =
                     std::is_pointer<Range>::value ||
                     std::is_array<Range>::value>;
 #else
-  cm::bool_constant<cm::is_input_iterator<decltype(
-                      std::begin(std::declval<const Range>()))>::value &&
-                    cm::is_input_iterator<decltype(
-                      std::end(std::declval<const Range>()))>::value>;
+  cm::bool_constant<cm::is_input_iterator<decltype(std::begin(
+                      std::declval<const Range>()))>::value &&
+                    cm::is_input_iterator<decltype(std::end(
+                      std::declval<const Range>()))>::value>;
 #endif
 
 } // namespace cm

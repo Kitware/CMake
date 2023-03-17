@@ -77,5 +77,6 @@ extra argument.
 See Also
 ^^^^^^^^
 
+* :command:`cmake_parse_arguments`
 * :command:`endfunction`
 * :command:`return`

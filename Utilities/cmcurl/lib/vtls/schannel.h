@@ -54,6 +54,7 @@
 #include <schannel.h>
 #include "curl_sspi.h"
 
+#include "cfilters.h"
 #include "urldata.h"
 
 /* <wincrypt.h> has been included via the above <schnlsp.h>.
@@ -77,13 +78,11 @@
 
 extern const struct Curl_ssl Curl_ssl_schannel;
 
-CURLcode Curl_verify_certificate(struct Curl_easy *data,
-                                 struct connectdata *conn, int sockindex);
+CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
+                                 struct Curl_easy *data);
 
 /* structs to expose only in schannel.c and schannel_verify.c */
 #ifdef EXPOSE_SCHANNEL_INTERNAL_STRUCTS
-
-#include <wincrypt.h>
 
 #ifdef __MINGW32__
 #ifdef __MINGW64_VERSION_MAJOR

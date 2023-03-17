@@ -107,10 +107,15 @@ finding the initial value to append to.  If the property is not already
 directly set in the nominated scope, the command will behave as though
 ``APPEND`` or ``APPEND_STRING`` had not been given.
 
-See the :manual:`cmake-properties(7)` manual for a list of properties
-in each scope.
-
 .. note::
 
   The :prop_sf:`GENERATED` source file property may be globally visible.
   See its documentation for details.
+
+See Also
+^^^^^^^^
+
+* :command:`define_property`
+* :command:`get_property`
+* The :manual:`cmake-properties(7)` manual for a list of properties
+  in each scope.

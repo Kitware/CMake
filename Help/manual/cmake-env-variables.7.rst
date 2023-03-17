@@ -92,6 +92,7 @@ Environment Variables for CTest
 
    /envvar/CMAKE_CONFIG_TYPE
    /envvar/CTEST_INTERACTIVE_DEBUG_MODE
+   /envvar/CTEST_NO_TESTS_ACTION
    /envvar/CTEST_OUTPUT_ON_FAILURE
    /envvar/CTEST_PARALLEL_LEVEL
    /envvar/CTEST_PROGRESS_OUTPUT

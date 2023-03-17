@@ -119,11 +119,6 @@ std::string cmRulePlaceholderExpander::ExpandVariable(
       return this->ReplaceValues->SwiftModuleName;
     }
   }
-  if (this->ReplaceValues->SwiftOutputFileMap) {
-    if (variable == "SWIFT_OUTPUT_FILE_MAP") {
-      return this->ReplaceValues->SwiftOutputFileMap;
-    }
-  }
   if (this->ReplaceValues->SwiftSources) {
     if (variable == "SWIFT_SOURCES") {
       return this->ReplaceValues->SwiftSources;

@@ -1,6 +1,7 @@
 include(RunCMake)
 
 run_cmake(InvalidArgument1)
+run_cmake(exists)
 run_cmake(IsDirectory)
 run_cmake(IsDirectoryLong)
 run_cmake(duplicate-deep-else)

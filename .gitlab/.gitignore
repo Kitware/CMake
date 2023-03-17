@@ -5,8 +5,10 @@
 /ispc*
 /jom
 /llvm*
+/mingw
 /msvc*
 /ninja*
+/openmp
 /open-watcom*
 /python*
 /qt*

@@ -52,13 +52,19 @@ public:
   // Update().
   property float Total
   {
-    float get() { return m_total; }
+    float get()
+    {
+      return m_total;
+    }
   }
 
   // Duration in seconds between the previous two calls to Update().
   property float Delta
   {
-    float get() { return m_delta; }
+    float get()
+    {
+      return m_delta;
+    }
   }
 
 private:

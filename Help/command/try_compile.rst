@@ -14,18 +14,20 @@ Try Compiling Whole Projects
 
 .. code-block:: cmake
 
-  try_compile(<resultVar> PROJECT <projectName>
+  try_compile(<compileResultVar> PROJECT <projectName>
               SOURCE_DIR <srcdir>
               [BINARY_DIR <bindir>]
               [TARGET <targetName>]
+              [LOG_DESCRIPTION <text>]
               [NO_CACHE]
+              [NO_LOG]
               [CMAKE_FLAGS <flags>...]
               [OUTPUT_VARIABLE <var>])
 
 .. versionadded:: 3.25
 
-Try building a project.  The success or failure of the ``try_compile``,
-i.e. ``TRUE`` or ``FALSE`` respectively, is returned in ``<resultVar>``.
+Try building a project.  Build success returns ``TRUE`` and build failure
+returns ``FALSE`` in ``<compileResultVar>``.
 
 In this form, ``<srcdir>`` should contain a complete CMake project with a
 ``CMakeLists.txt`` file and all sources.  The ``<bindir>`` and ``<srcdir>``
@@ -40,14 +42,18 @@ below for the meaning of other options.
   Previously this was only done by the
   :ref:`source file <Try Compiling Source Files>` signature.
 
-This command also supports an alternate signature
-which was present in older versions of CMake:
+.. versionadded:: 3.26
+  This command records a
+  :ref:`configure-log try_compile event <try_compile configure-log event>`
+  if the ``NO_LOG`` option is not specified.
+
+This command supports an alternate signature for CMake older than 3.25.
+The signature above is recommended for clarity.
 
 .. code-block:: cmake
 
-  try_compile(<resultVar> <bindir> <srcdir>
+  try_compile(<compileResultVar> <bindir> <srcdir>
               <projectName> [<targetName>]
-              [NO_CACHE]
               [CMAKE_FLAGS <flags>...]
               [OUTPUT_VARIABLE <var>])
 
@@ -58,12 +64,14 @@ Try Compiling Source Files
 
 .. code-block:: cmake
 
-  try_compile(<resultVar>
+  try_compile(<compileResultVar>
               <SOURCES <srcfile...>                 |
                SOURCE_FROM_CONTENT <name> <content> |
                SOURCE_FROM_VAR <name> <var>         |
                SOURCE_FROM_FILE <name> <path>       >...
+              [LOG_DESCRIPTION <text>]
               [NO_CACHE]
+              [NO_LOG]
               [CMAKE_FLAGS <flags>...]
               [COMPILE_DEFINITIONS <defs>...]
               [LINK_OPTIONS <options>...]
@@ -79,8 +87,8 @@ Try Compiling Source Files
 
 Try building an executable or static library from one or more source files
 (which one is determined by the :variable:`CMAKE_TRY_COMPILE_TARGET_TYPE`
-variable).  The success or failure of the ``try_compile``, i.e. ``TRUE`` or
-``FALSE`` respectively, is returned in ``<resultVar>``.
+variable). Build success returns ``TRUE`` and build failure returns ``FALSE``
+in ``<compileResultVar>``.
 
 In this form, one or more source files must be provided. Additionally, one of
 ``SOURCES`` and/or ``SOURCE_FROM_*`` must precede other keywords.
@@ -105,17 +113,16 @@ contain something like the following:
 CMake automatically generates, for each ``try_compile`` operation, a
 unique directory under ``${CMAKE_BINARY_DIR}/CMakeFiles/CMakeScratch``
 with an unspecified name.  These directories are cleaned automatically unless
-:option:`--debug-trycompile <cmake --debug-trycompile>` is passed to ``cmake``.
+:option:`--debug-trycompile <cmake --debug-trycompile>` is passed to :program:`cmake`.
 Such directories from previous runs are also unconditionally cleaned at the
-beginning of any ``cmake`` execution.
+beginning of any :program:`cmake` execution.
 
-This command also supports an alternate signature
-which was present in older versions of CMake:
+This command supports an alternate signature for CMake older than 3.25.
+The signature above is recommended for clarity.
 
 .. code-block:: cmake
 
-  try_compile(<resultVar> <bindir> <srcfile|SOURCES srcfile...>
-              [NO_CACHE]
+  try_compile(<compileResultVar> <bindir> <srcfile|SOURCES srcfile...>
               [CMAKE_FLAGS <flags>...]
               [COMPILE_DEFINITIONS <defs>...]
               [LINK_OPTIONS <options>...]
@@ -130,7 +137,7 @@ which was present in older versions of CMake:
 In this version, ``try_compile`` will use ``<bindir>/CMakeFiles/CMakeTmp`` for
 its operation, and all such files will be cleaned automatically.
 For debugging, :option:`--debug-trycompile <cmake --debug-trycompile>` can be
-passed to ``cmake`` to avoid this clean.  However, multiple sequential
+passed to :program:`cmake` to avoid this clean.  However, multiple sequential
 ``try_compile`` operations, if given the same ``<bindir>``, will reuse this
 single output directory, such that you can only debug one such ``try_compile``
 call at a time.  Use of the newer signature is recommended to simplify
@@ -171,6 +178,12 @@ The options are:
   set the :prop_tgt:`STATIC_LIBRARY_OPTIONS` target property in the generated
   project, depending on the :variable:`CMAKE_TRY_COMPILE_TARGET_TYPE` variable.
 
+``LOG_DESCRIPTION <text>``
+  .. versionadded:: 3.26
+
+  Specify a non-empty text description of the purpose of the check.
+  This is recorded in the :manual:`cmake-configure-log(7)` entry.
+
 ``NO_CACHE``
   .. versionadded:: 3.25
 
@@ -190,6 +203,11 @@ The options are:
   If the guard variable and result variable are not the same (for example, if
   the test is part of a larger inspection), ``NO_CACHE`` may be useful to avoid
   leaking the intermediate result variable into the cache.
+
+``NO_LOG``
+  .. versionadded:: 3.26
+
+  Do not record a :manual:`cmake-configure-log(7)` entry for this call.
 
 ``OUTPUT_VARIABLE <var>``
   Store the output from the build process in the given variable.
@@ -271,13 +289,18 @@ Other Behavior Settings
   If :policy:`CMP0083` is set to ``NEW``, then in order to obtain correct
   behavior at link time, the ``check_pie_supported()`` command from the
   :module:`CheckPIESupported` module must be called before using the
-  :command:`try_compile` command.
+  ``try_compile`` command.
 
 The current settings of :policy:`CMP0065` and :policy:`CMP0083` are propagated
 through to the generated test project.
 
-Set the :variable:`CMAKE_TRY_COMPILE_CONFIGURATION` variable to choose
-a build configuration.
+Set variable :variable:`CMAKE_TRY_COMPILE_CONFIGURATION` to choose a build
+configuration:
+
+* For multi-config generators, this selects which configuration to build.
+
+* For single-config generators, this sets :variable:`CMAKE_BUILD_TYPE` in
+  the test project.
 
 .. versionadded:: 3.6
   Set the :variable:`CMAKE_TRY_COMPILE_TARGET_TYPE` variable to specify
@@ -327,3 +350,8 @@ a build configuration.
   If :policy:`CMP0141` is set to ``NEW``, one can use
   :variable:`CMAKE_MSVC_DEBUG_INFORMATION_FORMAT` to specify the MSVC debug
   information format.
+
+See Also
+^^^^^^^^
+
+* :command:`try_run`

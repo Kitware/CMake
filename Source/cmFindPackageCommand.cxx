@@ -377,6 +377,10 @@ private:
 #  pragma diag_suppress 1222 // invalid error number (3288, but works anyway)
 #  define CM_LCC_DIAG_SUPPRESS_3288
 #  pragma diag_suppress 3288 // parameter was declared but never referenced
+#  define CM_LCC_DIAG_SUPPRESS_3301
+#  pragma diag_suppress 3301 // parameter was declared but never referenced
+#  define CM_LCC_DIAG_SUPPRESS_3308
+#  pragma diag_suppress 3308 // parameter was declared but never referenced
 #endif
 
 void ResetGenerator()
@@ -420,6 +424,16 @@ bool TryGeneratedPaths(CallbackFn&& filesCollector,
   }
   return false;
 }
+
+#ifdef CM_LCC_DIAG_SUPPRESS_3308
+#  undef CM_LCC_DIAG_SUPPRESS_3308
+#  pragma diag_default 3308
+#endif
+
+#ifdef CM_LCC_DIAG_SUPPRESS_3301
+#  undef CM_LCC_DIAG_SUPPRESS_3301
+#  pragma diag_default 3301
+#endif
 
 #ifdef CM_LCC_DIAG_SUPPRESS_3288
 #  undef CM_LCC_DIAG_SUPPRESS_3288
@@ -2190,7 +2204,7 @@ void cmFindPackageCommand::FillPrefixesCMakeSystemVariable()
   std::string install_path_to_remove;
   if (cmValue to_skip = this->Makefile->GetDefinition(
         "_CMAKE_SYSTEM_PREFIX_PATH_INSTALL_PREFIX_COUNT")) {
-    cmStrToLong(to_skip, &install_prefix_count);
+    cmStrToLong(*to_skip, &install_prefix_count);
   }
   if (cmValue install_value = this->Makefile->GetDefinition(
         "_CMAKE_SYSTEM_PREFIX_PATH_INSTALL_PREFIX_VALUE")) {

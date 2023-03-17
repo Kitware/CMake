@@ -18,6 +18,15 @@ if(CMAKE_C_COMPILER_ID MATCHES "GNU|LCC|Clang" AND NOT "x${CMAKE_C_SIMULATE_ID}"
   if(NOT SHOULD_WORK)
     message(SEND_ERROR "${CMAKE_C_COMPILER_ID} compiler flag '-x c' check failed")
   endif()
+
+  block()
+    # Test tolerating a flag that is not used when driving the linker.
+    string(APPEND CMAKE_C_FLAGS " -nostdinc")
+    check_compiler_flag(C "-x c" SHOULD_WORK_NOSTDINC)
+    if(NOT SHOULD_WORK_NOSTDINC)
+      message(SEND_ERROR "${CMAKE_C_COMPILER_ID} compiler flag '-x c -nostdinc' check failed")
+    endif()
+  endblock()
 endif()
 
 if(CMAKE_C_COMPILER_ID STREQUAL "GNU") # LCC C compiler silently ignore -frtti instead of failing, so skip it here.

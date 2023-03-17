@@ -1,0 +1,6 @@
+^CMake Warning \(dev\) at common.cmake:[0-9]+ \(file\):
+  Unexpected argument: JUNK
+Call Stack \(most recent call first\):
+  unused-argument.cmake:[0-9]+ \(file_download\)
+  CMakeLists.txt:[0-9]+ \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.$

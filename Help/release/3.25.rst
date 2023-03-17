@@ -257,3 +257,10 @@ Changes made since CMake 3.25.0 include the following.
 * On Windows, the ``icpx`` compiler now provided by Intel oneAPI 2023.0
   and above is no longer selected because its GNU-like command-line is
   not yet supported by CMake.
+
+3.25.3
+------
+
+* This version made no changes to documented features or interfaces.
+  Some implementation updates were made to support ecosystem changes
+  and/or fix regressions.

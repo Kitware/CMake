@@ -1,3 +1,3 @@
--- Configuring done
--- Generating done
+-- Configuring done \([0-9]+\.[0-9]s\)
+-- Generating done \([0-9]+\.[0-9]s\)
 -- Build files have been written to: .*/Tests/RunCMake/configure_file/RerunCMake-build

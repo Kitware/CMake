@@ -3,7 +3,7 @@ ctest_test
 
 Perform the :ref:`CTest Test Step` as a :ref:`Dashboard Client`.
 
-::
+.. code-block:: cmake
 
   ctest_test([BUILD <build-dir>] [APPEND]
              [START <start-number>]
@@ -30,7 +30,7 @@ Perform the :ref:`CTest Test Step` as a :ref:`Dashboard Client`.
              )
 
 ..
-   _note: If updating the argument list here, please also update the argument
+   NOTE If updating the argument list here, please also update the argument
    list documentation for :command:`ctest_memcheck` as well.
 
 Run tests in the project build tree and store results in

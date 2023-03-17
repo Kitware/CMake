@@ -187,11 +187,11 @@ if(NOT CMAKE_Fortran_COMPILER_ID_RUN)
     if(NOT CMAKE_COMPILER_RETURN)
       if(CMAKE_COMPILER_OUTPUT MATCHES "THIS_IS_GNU")
         set(CMAKE_Fortran_COMPILER_ID "GNU")
-        file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+        message(CONFIGURE_LOG
           "Determining if the Fortran compiler is GNU succeeded with "
           "the following output:\n${CMAKE_COMPILER_OUTPUT}\n\n")
       else()
-        file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+        message(CONFIGURE_LOG
           "Determining if the Fortran compiler is GNU failed with "
           "the following output:\n${CMAKE_COMPILER_OUTPUT}\n\n")
       endif()
@@ -283,6 +283,9 @@ endif()
 if(MSVC_Fortran_ARCHITECTURE_ID)
   set(SET_MSVC_Fortran_ARCHITECTURE_ID
     "set(MSVC_Fortran_ARCHITECTURE_ID ${MSVC_Fortran_ARCHITECTURE_ID})")
+endif()
+if(CMAKE_Fortran_COMPILER_ID STREQUAL "NVHPC")
+  set(CMAKE_Fortran_VENDOR_SOURCE_FILE_EXTENSIONS ";cuf;CUF")
 endif()
 # configure variables set in this file for fast reload later on
 configure_file(${CMAKE_ROOT}/Modules/CMakeFortranCompiler.cmake.in

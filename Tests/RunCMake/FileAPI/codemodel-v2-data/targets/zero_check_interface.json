@@ -5,10 +5,12 @@
     "projectName": "Interface",
     "type": "UTILITY",
     "isGeneratorProvided": true,
+    "fileSets": null,
     "sources": [
         {
             "path": "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/interface/CMakeFiles/ZERO_CHECK$",
             "isGenerated": true,
+            "fileSetName": null,
             "sourceGroupName": "",
             "compileGroupLanguage": null,
             "backtrace": [
@@ -23,6 +25,7 @@
         {
             "path": "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/interface/CMakeFiles/ZERO_CHECK\\.rule$",
             "isGenerated": true,
+            "fileSetName": null,
             "sourceGroupName": "CMake Rules",
             "compileGroupLanguage": null,
             "backtrace": [

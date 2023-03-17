@@ -87,3 +87,5 @@ html_favicon = '@conf_path@/static/cmake-favicon.ico'
 # https://bitbucket.org/birkenfeld/sphinx/issue/1448/make-qthelp-more-configurable
 # qthelp_namespace = "org.cmake"
 # qthelp_qch_name = "CMake.qch"
+
+linkcheck_ignore = [r'about:|https://gitlab.kitware.com/cmake/community/-/wikis/doc/cpack']

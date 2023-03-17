@@ -16,7 +16,7 @@ file Copyright.txt or https://cmake.org/licensing#kwsys for details.  */
 #  include <windows.h>
 #endif
 
-int testStatus(int, char* [])
+int testStatus(int, char*[])
 {
   bool res = true;
   {

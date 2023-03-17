@@ -845,8 +845,10 @@ bool HandleMakeDirectoryCommand(std::vector<std::string> const& args,
       cmSystemTools::SetFatalErrorOccurred();
       return false;
     }
-    if (!cmSystemTools::MakeDirectory(*cdir)) {
-      std::string error = "problem creating directory: " + *cdir;
+    cmsys::Status mkdirStatus = cmSystemTools::MakeDirectory(*cdir);
+    if (!mkdirStatus) {
+      std::string error = cmStrCat("failed to create directory:\n  ", *cdir,
+                                   "\nbecause: ", mkdirStatus.GetString());
       status.SetError(error);
       return false;
     }
@@ -1408,12 +1410,14 @@ bool HandleCopyFile(std::vector<std::string> const& args,
 
   struct Arguments
   {
+    bool InputMayBeRecent = false;
     bool OnlyIfDifferent = false;
     std::string Result;
   };
 
   static auto const parser =
     cmArgumentParser<Arguments>{}
+      .Bind("INPUT_MAY_BE_RECENT"_s, &Arguments::InputMayBeRecent)
       .Bind("ONLY_IF_DIFFERENT"_s, &Arguments::OnlyIfDifferent)
       .Bind("RESULT"_s, &Arguments::Result);
 
@@ -1456,9 +1460,13 @@ bool HandleCopyFile(std::vector<std::string> const& args,
   } else {
     when = cmSystemTools::CopyWhen::Always;
   }
+  cmSystemTools::CopyInputRecent const inputRecent = arguments.InputMayBeRecent
+    ? cmSystemTools::CopyInputRecent::Yes
+    : cmSystemTools::CopyInputRecent::No;
 
   std::string err;
-  if (cmSystemTools::CopySingleFile(oldname, newname, when, &err) ==
+  if (cmSystemTools::CopySingleFile(oldname, newname, when, inputRecent,
+                                    &err) ==
       cmSystemTools::CopyResult::Success) {
     if (!arguments.Result.empty()) {
       status.GetMakefile().AddDefinition(arguments.Result, "0");
@@ -1621,6 +1629,14 @@ int cmFileCommandCurlDebugCallback(CURL*, curl_infotype type, char* chPtr,
   return 0;
 }
 
+#  if defined(LIBCURL_VERSION_NUM) && LIBCURL_VERSION_NUM >= 0x072000
+const CURLoption CM_CURLOPT_XFERINFOFUNCTION = CURLOPT_XFERINFOFUNCTION;
+using cm_curl_off_t = curl_off_t;
+#  else
+const CURLoption CM_CURLOPT_XFERINFOFUNCTION = CURLOPT_PROGRESSFUNCTION;
+using cm_curl_off_t = double;
+#  endif
+
 class cURLProgressHelper
 {
 public:
@@ -1630,12 +1646,14 @@ public:
   {
   }
 
-  bool UpdatePercentage(double value, double total, std::string& status)
+  bool UpdatePercentage(cm_curl_off_t value, cm_curl_off_t total,
+                        std::string& status)
   {
     long OldPercentage = this->CurrentPercentage;
 
-    if (total > 0.0) {
-      this->CurrentPercentage = std::lround(value / total * 100.0);
+    if (total > 0) {
+      this->CurrentPercentage = std::lround(
+        static_cast<double>(value) / static_cast<double>(total) * 100.0);
       if (this->CurrentPercentage > 100) {
         // Avoid extra progress reports for unexpected data beyond total.
         this->CurrentPercentage = 100;
@@ -1660,8 +1678,9 @@ private:
   std::string Text;
 };
 
-int cmFileDownloadProgressCallback(void* clientp, double dltotal, double dlnow,
-                                   double ultotal, double ulnow)
+int cmFileDownloadProgressCallback(void* clientp, cm_curl_off_t dltotal,
+                                   cm_curl_off_t dlnow, cm_curl_off_t ultotal,
+                                   cm_curl_off_t ulnow)
 {
   cURLProgressHelper* helper = reinterpret_cast<cURLProgressHelper*>(clientp);
 
@@ -1677,8 +1696,9 @@ int cmFileDownloadProgressCallback(void* clientp, double dltotal, double dlnow,
   return 0;
 }
 
-int cmFileUploadProgressCallback(void* clientp, double dltotal, double dlnow,
-                                 double ultotal, double ulnow)
+int cmFileUploadProgressCallback(void* clientp, cm_curl_off_t dltotal,
+                                 cm_curl_off_t dlnow, cm_curl_off_t ultotal,
+                                 cm_curl_off_t ulnow)
 {
   cURLProgressHelper* helper = reinterpret_cast<cURLProgressHelper*>(clientp);
 
@@ -2054,7 +2074,7 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
     res = ::curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0);
     check_curl_result(res, "DOWNLOAD cannot set noprogress value: ");
 
-    res = ::curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION,
+    res = ::curl_easy_setopt(curl, CM_CURLOPT_XFERINFOFUNCTION,
                              cmFileDownloadProgressCallback);
     check_curl_result(res, "DOWNLOAD cannot set progress function: ");
 
@@ -2107,6 +2127,14 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
   // Verify MD5 sum if requested:
   //
   if (hash) {
+    if (res != CURLE_OK) {
+      status.SetError(cmStrCat(
+        "DOWNLOAD cannot compute hash on failed download\n"
+        "  status: [",
+        static_cast<int>(res), ";\"", ::curl_easy_strerror(res), "\"]"));
+      return false;
+    }
+
     std::string actualHash = hash->HashFile(file);
     if (actualHash.empty()) {
       status.SetError("DOWNLOAD cannot compute hash on downloaded file");
@@ -2130,11 +2158,7 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
                                expectedHash,
                                "]\n"
                                "      actual hash: [",
-                               actualHash,
-                               "]\n"
-                               "           status: [",
-                               static_cast<int>(res), ";\"",
-                               ::curl_easy_strerror(res), "\"]\n"));
+                               actualHash, "]\n"));
       return false;
     }
   }
@@ -2364,7 +2388,7 @@ bool HandleUploadCommand(std::vector<std::string> const& args,
     res = ::curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0);
     check_curl_result(res, "UPLOAD cannot set noprogress value: ");
 
-    res = ::curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION,
+    res = ::curl_easy_setopt(curl, CM_CURLOPT_XFERINFOFUNCTION,
                              cmFileUploadProgressCallback);
     check_curl_result(res, "UPLOAD cannot set progress function: ");
 
@@ -2458,11 +2482,13 @@ void AddEvaluationFile(const std::string& inputName,
 {
   cmListFileBacktrace lfbt = status.GetMakefile().GetBacktrace();
 
-  cmGeneratorExpression outputGe(lfbt);
+  cmGeneratorExpression outputGe(*status.GetMakefile().GetCMakeInstance(),
+                                 lfbt);
   std::unique_ptr<cmCompiledGeneratorExpression> outputCge =
     outputGe.Parse(outputExpr);
 
-  cmGeneratorExpression conditionGe(lfbt);
+  cmGeneratorExpression conditionGe(*status.GetMakefile().GetCMakeInstance(),
+                                    lfbt);
   std::unique_ptr<cmCompiledGeneratorExpression> conditionCge =
     conditionGe.Parse(condition);
 
@@ -3398,20 +3424,29 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
   }
 
   int compressionLevel = 0;
+  int minCompressionLevel = 0;
+  int maxCompressionLevel = 9;
+  if (compress == cmSystemTools::TarCompressZstd) {
+    maxCompressionLevel = 19;
+  }
+
   if (!parsedArgs.CompressionLevel.empty()) {
     if (parsedArgs.CompressionLevel.size() != 1 &&
         !std::isdigit(parsedArgs.CompressionLevel[0])) {
-      status.SetError(cmStrCat("compression level ",
-                               parsedArgs.CompressionLevel,
-                               " should be in range 0 to 9"));
+      status.SetError(
+        cmStrCat("compression level ", parsedArgs.CompressionLevel, " for ",
+                 parsedArgs.Compression, " should be in range ",
+                 minCompressionLevel, " to ", maxCompressionLevel));
       cmSystemTools::SetFatalErrorOccurred();
       return false;
     }
     compressionLevel = std::stoi(parsedArgs.CompressionLevel);
-    if (compressionLevel < 0 || compressionLevel > 9) {
-      status.SetError(cmStrCat("compression level ",
-                               parsedArgs.CompressionLevel,
-                               " should be in range 0 to 9"));
+    if (compressionLevel < minCompressionLevel ||
+        compressionLevel > maxCompressionLevel) {
+      status.SetError(
+        cmStrCat("compression level ", parsedArgs.CompressionLevel, " for ",
+                 parsedArgs.Compression, " should be in range ",
+                 minCompressionLevel, " to ", maxCompressionLevel));
       cmSystemTools::SetFatalErrorOccurred();
       return false;
     }

@@ -65,7 +65,7 @@ protected:
   std::string GetAIXExports(std::string const& config);
 
   std::vector<std::string> GetLinkedTargetDirectories(
-    const std::string& config) const;
+    const std::string& lang, const std::string& config) const;
   std::string ComputeTargetCompilePDB(const std::string& config) const;
 
   std::string GetLinkerLauncher(const std::string& config);

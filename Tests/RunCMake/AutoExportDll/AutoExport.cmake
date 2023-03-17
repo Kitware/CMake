@@ -7,7 +7,7 @@ set_property(TARGET objlib PROPERTY POSITION_INDEPENDENT_CODE 1)
 add_library(autoexport SHARED hello.cxx world.cxx foo.c $<TARGET_OBJECTS:objlib>)
 add_library(autoexport3 SHARED cppCLI.cxx)
 if(MSVC AND NOT MSVC_VERSION VERSION_LESS 1600
-  AND NOT CMAKE_VS_PLATFORM_NAME STREQUAL "ARM64")
+   AND NOT CMAKE_C_COMPILER_ARCHITECTURE_ID STREQUAL "ARM64")
   set_property(TARGET autoexport3 PROPERTY COMMON_LANGUAGE_RUNTIME "")
 endif()
 
@@ -17,7 +17,7 @@ if(MSVC)
   add_library(autoexport_for_exec SHARED hello2.c)
   target_link_libraries(autoexport_for_exec say)
   if(NOT MSVC_VERSION VERSION_LESS 1600 AND
-    NOT CMAKE_VS_PLATFORM_NAME STREQUAL "ARM64")
+     NOT CMAKE_C_COMPILER_ARCHITECTURE_ID STREQUAL "ARM64")
     enable_language(ASM_MASM)
     target_sources(autoexport PRIVATE nop.asm)
     set_property(SOURCE nop.asm PROPERTY COMPILE_FLAGS /safeseh)

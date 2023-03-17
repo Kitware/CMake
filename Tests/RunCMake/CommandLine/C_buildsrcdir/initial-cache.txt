@@ -1,3 +1,5 @@
+set(CMAKE_MINIMUM_REQUIRED_VERSION "" CACHE STRING "")
+
 # Used to verify that the values match what is passed via -S and -B, and are retained in cache.
 set(INITIAL_SOURCE_DIR "${CMAKE_SOURCE_DIR}" CACHE PATH "defined in initial.cmake")
 set(INITIAL_BINARY_DIR "${CMAKE_BINARY_DIR}" CACHE PATH "defined in initial.cmake")

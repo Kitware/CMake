@@ -762,7 +762,7 @@ frameworks are available to the main build:
   FetchContent_Declare(
     Catch2
     GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-    GIT_TAG        de6fe184a9ac1a06895cdd1c9b437f0a0bdf14ad # v2.13.4
+    GIT_TAG        605a34765aa5d5ecbf476b4598a862ada971b0cc # v3.0.1
   )
 
   # After the following call, the CMake targets defined by googletest and
@@ -796,7 +796,7 @@ to the declared details and leaving
   FetchContent_Declare(
     Catch2
     GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-    GIT_TAG        de6fe184a9ac1a06895cdd1c9b437f0a0bdf14ad # v2.13.4
+    GIT_TAG        605a34765aa5d5ecbf476b4598a862ada971b0cc # v3.0.1
     FIND_PACKAGE_ARGS
   )
 
@@ -831,7 +831,7 @@ details:
   FetchContent_Declare(
     Catch2
     GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-    GIT_TAG        de6fe184a9ac1a06895cdd1c9b437f0a0bdf14ad # v2.13.4
+    GIT_TAG        605a34765aa5d5ecbf476b4598a862ada971b0cc # v3.0.1
     OVERRIDE_FIND_PACKAGE
   )
 
@@ -928,9 +928,8 @@ it depends directly on projects ``projB`` and ``projC``.  Both ``projB`` and
 that all five projects are available on a company git server.  The
 ``CMakeLists.txt`` of each project might have sections like the following:
 
-*projA*:
-
 .. code-block:: cmake
+  :caption: *projA*
 
   include(FetchContent)
   FetchContent_Declare(
@@ -957,9 +956,9 @@ that all five projects are available on a company git server.  The
   # Order is important, see notes in the discussion further below
   FetchContent_MakeAvailable(projD projB projC)
 
-*projB*:
 
 .. code-block:: cmake
+  :caption: *projB*
 
   include(FetchContent)
   FetchContent_Declare(
@@ -975,9 +974,9 @@ that all five projects are available on a company git server.  The
 
   FetchContent_MakeAvailable(projD projE)
 
-*projC*:
 
 .. code-block:: cmake
+  :caption: *projC*
 
   include(FetchContent)
   FetchContent_Declare(
@@ -1052,7 +1051,7 @@ directory.  The :variable:`CMAKE_TOOLCHAIN_FILE` variable is not used until
 the :command:`project` command is reached, at which point CMake looks for the
 named toolchain file relative to the build directory.  Because the tarball has
 already been downloaded and unpacked by then, the toolchain file will be in
-place, even the very first time that ``cmake`` is run in the build directory.
+place, even the very first time that :program:`cmake` is run in the build directory.
 
 Populating Content In CMake Script Mode
 """""""""""""""""""""""""""""""""""""""
@@ -1063,9 +1062,8 @@ firmware tarball using CMake's :manual:`script mode <cmake(1)>`.  The call to
 unpacked firmware will be placed in a ``firmware`` directory below the
 current working directory.
 
-*getFirmware.cmake*:
-
 .. code-block:: cmake
+  :caption: :file:`getFirmware.cmake`
 
   # NOTE: Intended to be run in script mode with cmake -P
   include(FetchContent)

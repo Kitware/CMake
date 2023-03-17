@@ -1,4 +1,4 @@
-FROM nvidia/cuda:10.2-devel-ubuntu18.04
+FROM kitware/nvidia-cuda:10.2-devel-ubuntu18.04
 MAINTAINER Ben Boeckel <ben.boeckel@kitware.com>
 
 COPY llvm.list /etc/apt/sources.list.d/llvm.list

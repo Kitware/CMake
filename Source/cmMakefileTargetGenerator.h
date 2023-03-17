@@ -123,6 +123,7 @@ protected:
                             std::string& variableNameExternal,
                             bool useWatcomQuote);
   void WriteObjectsStrings(std::vector<std::string>& objStrings,
+                           bool useWatcomQuote,
                            std::string::size_type limit = std::string::npos);
 
   // write the driver rule to build target outputs

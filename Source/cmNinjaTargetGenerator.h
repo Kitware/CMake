@@ -63,19 +63,22 @@ protected:
 
   cmMakefile* GetMakefile() const { return this->Makefile; }
 
+  enum class WithScanning
+  {
+    No,
+    Yes,
+  };
   std::string LanguageCompilerRule(const std::string& lang,
-                                   const std::string& config) const;
+                                   const std::string& config,
+                                   WithScanning withScanning) const;
   std::string LanguagePreprocessAndScanRule(std::string const& lang,
                                             const std::string& config) const;
   std::string LanguageScanRule(std::string const& lang,
                                const std::string& config) const;
   std::string LanguageDyndepRule(std::string const& lang,
                                  const std::string& config) const;
-  bool NeedDyndep(std::string const& lang, std::string const& config) const;
   bool NeedExplicitPreprocessing(std::string const& lang) const;
   bool CompileWithDefines(std::string const& lang) const;
-  bool NeedCxxModuleSupport(std::string const& lang,
-                            std::string const& config) const;
 
   std::string OrderDependsTargetForTarget(const std::string& config);
 
@@ -131,6 +134,11 @@ protected:
   std::string GetPreprocessedFilePath(cmSourceFile const* source,
                                       const std::string& config) const;
 
+  /// @return the clang-tidy replacements file path for the given @a source.
+  std::string GetClangTidyReplacementsFilePath(
+    const std::string& directory, cmSourceFile const* source,
+    const std::string& config) const;
+
   /// @return the dyndep file path for this target.
   std::string GetDyndepFilePath(std::string const& lang,
                                 const std::string& config) const;
@@ -150,6 +158,8 @@ protected:
                           const std::string& config);
   void WriteCompileRule(const std::string& language,
                         const std::string& config);
+  void WriteCompileRule(const std::string& language, const std::string& config,
+                        WithScanning withScanning);
   void WriteObjectBuildStatements(const std::string& config,
                                   const std::string& fileConfig,
                                   bool firstForConfig);
@@ -162,6 +172,9 @@ protected:
 
   void EmitSwiftDependencyInfo(cmSourceFile const* source,
                                const std::string& config);
+
+  void GenerateSwiftOutputFileMap(const std::string& config,
+                                  std::string& flags);
 
   void ExportObjectCompileCommand(
     std::string const& language, std::string const& sourceFileName,

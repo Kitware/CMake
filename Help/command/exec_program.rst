@@ -8,7 +8,7 @@ exec_program
 Run an executable program during the processing of the CMakeList.txt
 file.
 
-::
+.. code-block:: cmake
 
   exec_program(Executable [directory in which to run]
                [ARGS <arguments to executable>]

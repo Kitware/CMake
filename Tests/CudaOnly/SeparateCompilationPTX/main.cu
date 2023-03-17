@@ -21,10 +21,11 @@ int main()
   cuCtxCreate(&context, 0, device);
 
   CUmodule module;
-  cuModuleLoadData(&module, kernels);
-  if (module == nullptr) {
-    std::cerr << "Failed to load the embedded ptx" << std::endl;
+  CUresult result = cuModuleLoadData(&module, kernels);
+  std::cout << "module pointer: " << module << '\n';
+  if (result != CUDA_SUCCESS || module == nullptr) {
+    std::cerr << "Failed to load the embedded ptx with error: "
+              << static_cast<unsigned int>(result) << '\n';
     return 1;
   }
-  std::cout << module << std::endl;
 }

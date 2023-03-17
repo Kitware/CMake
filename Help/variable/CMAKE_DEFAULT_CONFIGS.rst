@@ -10,7 +10,7 @@ configurations from :variable:`CMAKE_CROSS_CONFIGS` are used. If it is not
 specified, it defaults to :variable:`CMAKE_DEFAULT_BUILD_TYPE`.
 
 For example, if you set :variable:`CMAKE_DEFAULT_BUILD_TYPE` to ``Release``,
-but set :variable:`CMAKE_DEFAULT_CONFIGS` to ``Debug`` or ``all``, all
+but set ``CMAKE_DEFAULT_CONFIGS`` to ``Debug`` or ``all``, all
 ``<target>`` aliases in ``build.ninja`` will resolve to ``<target>:Debug`` or
 ``<target>:all``, but custom commands will still use the ``Release``
 configuration.

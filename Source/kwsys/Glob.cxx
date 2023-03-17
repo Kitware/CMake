@@ -390,8 +390,8 @@ bool Glob::FindFiles(const std::string& inexpr, GlobMessages* messages)
 #endif
       // Handle drive letters on Windows
       if (expr[1] == ':' && expr[0] != '/') {
-      skip = 2;
-    }
+        skip = 2;
+      }
   }
 
   if (skip > 0) {

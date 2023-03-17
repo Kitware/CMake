@@ -165,7 +165,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     if (outstring) {
       *outstring = "--build-and-test requires that the generator "
                    "be provided using the --build-generator "
-                   "command line option. ";
+                   "command line option.\n";
     }
     return 1;
   }

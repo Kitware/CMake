@@ -619,10 +619,9 @@ bool HandleSource(cmSourceFile* sf, const std::string& propertyName,
   if (propertyName == "GENERATED") {
     SetPropertyCommand::PropertyOp op = (remove)
       ? SetPropertyCommand::PropertyOp::Remove
-      : (appendAsString)
-        ? SetPropertyCommand::PropertyOp::AppendAsString
-        : (appendMode) ? SetPropertyCommand::PropertyOp::Append
-                       : SetPropertyCommand::PropertyOp::Set;
+      : (appendAsString) ? SetPropertyCommand::PropertyOp::AppendAsString
+      : (appendMode)     ? SetPropertyCommand::PropertyOp::Append
+                         : SetPropertyCommand::PropertyOp::Set;
     return SetPropertyCommand::HandleAndValidateSourceFilePropertyGENERATED(
       sf, propertyValue, op);
   }

@@ -3,7 +3,7 @@ ctest_configure
 
 Perform the :ref:`CTest Configure Step` as a :ref:`Dashboard Client`.
 
-::
+.. code-block:: cmake
 
   ctest_configure([BUILD <build-dir>] [SOURCE <source-dir>] [APPEND]
                   [OPTIONS <options>] [RETURN_VALUE <result-var>] [QUIET]

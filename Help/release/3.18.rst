@@ -211,12 +211,11 @@ Modules
 Generator Expressions
 ---------------------
 
-* The ``$<DEVICE_LINK:...>`` and ``$<HOST_LINK:...>``
-  :manual:`generator expressions <cmake-generator-expressions(7)>` were added
-  to manage device and host link steps.
+* The :genex:`$<DEVICE_LINK:...>` and :genex:`$<HOST_LINK:...>`
+  generator expressions were added to manage device and host link steps.
 
-* The ``$<LINK_LANGUAGE:...>`` and ``$<LINK_LANG_AND_ID:...>``
-  :manual:`generator expressions <cmake-generator-expressions(7)>` were added.
+* The :genex:`$<LINK_LANGUAGE:...>` and :genex:`$<LINK_LANG_AND_ID:...>`
+  generator expressions were added.
 
 CTest
 -----

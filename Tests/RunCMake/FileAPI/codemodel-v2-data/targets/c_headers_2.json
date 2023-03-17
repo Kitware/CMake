@@ -5,10 +5,19 @@
   "projectName": "codemodel-v2",
   "type": "STATIC_LIBRARY",
   "isGeneratorProvided": null,
+  "fileSets": [
+    {
+      "name": "HEADERS",
+      "type": "HEADERS",
+      "visibility": "INTERFACE",
+      "baseDirectories": [".*/Tests/RunCMake/FileAPI/fileset$"]
+    }
+  ],
   "sources": [
     {
       "path": "^fileset/empty\\.c$",
       "isGenerated": null,
+      "fileSetName": null,
       "sourceGroupName": "Source Files",
       "compileGroupLanguage": "C",
       "backtrace": [

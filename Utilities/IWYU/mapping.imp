@@ -76,9 +76,10 @@
   # __decay_and_strip is used internally in the C++11 standard library.
   # IWYU does not classify it as internal and suggests to add <type_traits>.
   # To ignore it, we simply map it to a file that is included anyway.
-  # Use '-Xiwyu -v7' to see the fully qualified names that need this.
+  # Use 'CMake_IWYU_VERBOSE' to see the fully qualified names that need this.
   # TODO: Can this be simplified with an @-expression?
   #{ symbol: [ "@std::__decay_and_strip<.*>::__type", private, "\"cmConfigure.h\"", public ] },
+  { symbol: [ "std::__decay_and_strip<int>::__type", private, "\"cmConfigure.h\"", public ] },
   { symbol: [ "std::__decay_and_strip<bool>::__type", private, "\"cmConfigure.h\"", public ] },
   { symbol: [ "std::__decay_and_strip<char const (&)[1]>::__type", private, "\"cmConfigure.h\"", public ] },
   { symbol: [ "std::__decay_and_strip<cmCommand *&>::__type", private, "\"cmConfigure.h\"", public ] },
@@ -101,6 +102,7 @@
 
   # Wrappers for 3rd-party libraries
   { include: [ "@<.*curl/curlver.h>", private, "<cm3p/curl/curl.h>", public ] },
+  { include: [ "@<.*curl/system.h>", private, "<cm3p/curl/curl.h>", public ] },
   { include: [ "@<.*json/config.h>", private, "<cm3p/json/value.h>", public ] },
   { include: [ "@<.*json/forwards.h>", private, "<cm3p/json/value.h>", public ] },
   { include: [ "@<.*uv/.+\\.h>", private, "<cm3p/uv.h>", public ] },

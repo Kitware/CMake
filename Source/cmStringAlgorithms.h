@@ -146,7 +146,8 @@ std::vector<std::string> cmExpandedLists(InputIt first, InputIt last)
 }
 
 /** Concatenate string pieces into a single string.  */
-std::string cmCatViews(std::initializer_list<cm::string_view> views);
+std::string cmCatViews(
+  std::initializer_list<std::pair<cm::string_view, std::string*>> views);
 
 /** Utility class for cmStrCat.  */
 class cmAlphaNum
@@ -158,6 +159,10 @@ public:
   }
   cmAlphaNum(std::string const& str)
     : View_(str)
+  {
+  }
+  cmAlphaNum(std::string&& str)
+    : RValueString_(&str)
   {
   }
   cmAlphaNum(const char* str)
@@ -182,20 +187,34 @@ public:
   {
   }
 
-  cm::string_view View() const { return this->View_; }
+  cm::string_view View() const
+  {
+    if (this->RValueString_) {
+      return *this->RValueString_;
+    }
+    return this->View_;
+  }
+
+  std::string* RValueString() const { return this->RValueString_; }
 
 private:
+  std::string* RValueString_ = nullptr;
   cm::string_view View_;
   char Digits_[32];
 };
 
 /** Concatenate string pieces and numbers into a single string.  */
-template <typename... AV>
-inline std::string cmStrCat(cmAlphaNum const& a, cmAlphaNum const& b,
-                            AV const&... args)
+template <typename A, typename B, typename... AV>
+inline std::string cmStrCat(A&& a, B&& b, AV&&... args)
 {
-  return cmCatViews(
-    { a.View(), b.View(), static_cast<cmAlphaNum const&>(args).View()... });
+  static auto const makePair =
+    [](const cmAlphaNum& arg) -> std::pair<cm::string_view, std::string*> {
+    return { arg.View(), arg.RValueString() };
+  };
+
+  return cmCatViews({ makePair(std::forward<A>(a)),
+                      makePair(std::forward<B>(b)),
+                      makePair(std::forward<AV>(args))... });
 }
 
 /** Joins wrapped elements of a range with separator into a single string.  */
@@ -206,8 +225,13 @@ std::string cmWrap(cm::string_view prefix, Range const& rng,
   if (rng.empty()) {
     return std::string();
   }
-  return cmCatViews(
-    { prefix, cmJoin(rng, cmCatViews({ suffix, sep, prefix })), suffix });
+  return cmCatViews({ { prefix, nullptr },
+                      { cmJoin(rng,
+                               cmCatViews({ { suffix, nullptr },
+                                            { sep, nullptr },
+                                            { prefix, nullptr } })),
+                        nullptr },
+                      { suffix, nullptr } });
 }
 
 /** Joins wrapped elements of a range with separator into a single string.  */

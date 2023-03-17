@@ -11,7 +11,6 @@
 
 class cmMakefile;
 class cmake;
-struct cmDocumentationEntry;
 
 /** \class cmGlobalMSYSMakefileGenerator
  * \brief Write a NMake makefiles.
@@ -29,21 +28,21 @@ public:
   }
 
   //! Get the name for the generator.
-  virtual std::string GetName() const
+  std::string GetName() const override
   {
     return cmGlobalMSYSMakefileGenerator::GetActualName();
   }
   static std::string GetActualName() { return "MSYS Makefiles"; }
 
   /** Get the documentation entry for this generator.  */
-  static void GetDocumentation(cmDocumentationEntry& entry);
+  static cmDocumentationEntry GetDocumentation();
 
   /**
    * Try to determine system information such as shared library
    * extension, pthreads, byte order etc.
    */
-  virtual void EnableLanguage(std::vector<std::string> const& languages,
-                              cmMakefile*, bool optional);
+  void EnableLanguage(std::vector<std::string> const& languages, cmMakefile*,
+                      bool optional) override;
 
 private:
   std::string FindMinGW(std::string const& makeloc);

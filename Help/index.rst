@@ -57,6 +57,7 @@ Reference Manuals
    /manual/cmake-buildsystem.7
    /manual/cmake-commands.7
    /manual/cmake-compile-features.7
+   /manual/cmake-configure-log.7
    /manual/cmake-developer.7
    /manual/cmake-env-variables.7
    /manual/cmake-file-api.7

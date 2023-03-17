@@ -274,8 +274,8 @@ Other Changes
   * tries to detect invalid architectures and issue an error.
 
 * ``CUDA`` with Clang now implements policy :policy:`CMP0105` and
-  the ``$<DEVICE_LINK:...>`` and ``$<HOST_LINK:...>``
-  :manual:`generator expressions <cmake-generator-expressions(7)>`.
+  the :genex:`$<DEVICE_LINK:...>` and :genex:`$<HOST_LINK:...>`
+  generator expressions.
 
 * The :command:`define_property` command's ``BRIEF_DOCS`` and ``FULL_DOCS``
   arguments are now optional.

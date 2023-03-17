@@ -20,6 +20,7 @@ string(APPEND info "\
 set(CMAKE_CXX_COMPILE_FEATURES \"${CMAKE_CXX_COMPILE_FEATURES}\")
 set(CMAKE_MAKE_PROGRAM \"${CMAKE_MAKE_PROGRAM}\")
 set(forced_cxx_standard \"${forced_cxx_standard}\")
+set(CMAKE_CXX_COMPILER_VERSION \"${CMAKE_CXX_COMPILER_VERSION}\")
 ")
 
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/info.cmake" "${info}")

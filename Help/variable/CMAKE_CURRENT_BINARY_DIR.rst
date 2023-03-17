@@ -11,5 +11,5 @@ current source directory being processed.
 
 When run in :option:`cmake -P` script mode, CMake sets the variables
 :variable:`CMAKE_BINARY_DIR`, :variable:`CMAKE_SOURCE_DIR`,
-:variable:`CMAKE_CURRENT_BINARY_DIR` and
+``CMAKE_CURRENT_BINARY_DIR`` and
 :variable:`CMAKE_CURRENT_SOURCE_DIR` to the current working directory.

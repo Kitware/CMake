@@ -18,7 +18,6 @@ class cmGeneratorTarget;
 class cmLocalGenerator;
 class cmMakefile;
 class cmake;
-struct cmDocumentationEntry;
 
 class cmGlobalGhsMultiGenerator : public cmGlobalGenerator
 {
@@ -46,7 +45,7 @@ public:
   std::string GetName() const override { return GetActualName(); }
 
   /// Overloaded methods. @see cmGlobalGenerator::GetDocumentation()
-  static void GetDocumentation(cmDocumentationEntry& entry);
+  static cmDocumentationEntry GetDocumentation();
 
   /**
    * Utilized by the generator factory to determine if this generator

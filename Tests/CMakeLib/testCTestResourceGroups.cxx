@@ -127,7 +127,7 @@ static bool TestExpectedParseResult(const ExpectedParseResult& expected)
   return true;
 }
 
-int testCTestResourceGroups(int /*unused*/, char* /*unused*/ [])
+int testCTestResourceGroups(int /*unused*/, char* /*unused*/[])
 {
   int retval = 0;
 

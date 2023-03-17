@@ -222,6 +222,10 @@ function(_HDF5_test_regular_compiler_C success version is_parallel)
   if(NOT ${success} OR
      NOT EXISTS ${scratch_directory}/compiler_has_h5_c)
     set(test_file ${scratch_directory}/cmake_hdf5_test.c)
+    # CXX project without C enabled
+    if(CMAKE_CXX_COMPILER_LOADED AND NOT CMAKE_C_COMPILER_LOADED)
+      set(test_file ${scratch_directory}/cmake_hdf5_test.cpp)
+    endif()
     file(WRITE ${test_file}
       "#include <hdf5.h>\n"
       "const char* info_ver = \"INFO\" \":\" H5_VERSION;\n"

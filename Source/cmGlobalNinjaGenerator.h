@@ -35,7 +35,7 @@ class cmMakefile;
 class cmOutputConverter;
 class cmStateDirectory;
 class cmake;
-struct cmDocumentationEntry;
+struct cmCxxModuleExportInfo;
 
 /**
  * \class cmGlobalNinjaGenerator
@@ -193,7 +193,7 @@ public:
   /** Get encoding used by generator for ninja files */
   codecvt::Encoding GetMakefileEncoding() const override;
 
-  static void GetDocumentation(cmDocumentationEntry& entry);
+  static cmDocumentationEntry GetDocumentation();
 
   void EnableLanguage(std::vector<std::string> const& languages,
                       cmMakefile* mf, bool optional) override;
@@ -292,7 +292,8 @@ public:
   }
 
   void AddCXXCompileCommand(const std::string& commandLine,
-                            const std::string& sourceFile);
+                            const std::string& sourceFile,
+                            const std::string& objPath);
 
   /**
    * Add a rule to the generated build system.
@@ -393,7 +394,8 @@ public:
   {
     return "1.9";
   }
-  static std::string RequiredNinjaVersionForDyndeps() { return "1.10"; }
+  static std::string RequiredNinjaVersionForDyndepsCxx() { return "1.11"; }
+  static std::string RequiredNinjaVersionForDyndepsFortran() { return "1.10"; }
   static std::string RequiredNinjaVersionForRestatTool() { return "1.10"; }
   static std::string RequiredNinjaVersionForUnconditionalRecompactTool()
   {
@@ -417,7 +419,6 @@ public:
   bool HasOutputPathPrefix() const { return !this->OutputPathPrefix.empty(); }
   void StripNinjaOutputPathPrefixAsSuffix(std::string& path);
 
-  struct CxxModuleExportInfo;
   bool WriteDyndepFile(
     std::string const& dir_top_src, std::string const& dir_top_bld,
     std::string const& dir_cur_src, std::string const& dir_cur_bld,
@@ -425,7 +426,7 @@ public:
     std::string const& module_dir,
     std::vector<std::string> const& linked_target_dirs,
     std::string const& arg_lang, std::string const& arg_modmapfmt,
-    CxxModuleExportInfo const& export_info);
+    cmCxxModuleExportInfo const& export_info);
 
   virtual std::string BuildAlias(const std::string& alias,
                                  const std::string& /*config*/) const
@@ -469,7 +470,7 @@ public:
 
   bool IsSingleConfigUtility(cmGeneratorTarget const* target) const;
 
-  bool CheckCxxModuleSupport();
+  bool CheckCxxModuleSupport() override;
 
 protected:
   void Generate() override;
@@ -583,7 +584,8 @@ private:
   bool NinjaSupportsImplicitOuts = false;
   bool NinjaSupportsManifestRestat = false;
   bool NinjaSupportsMultilineDepfile = false;
-  bool NinjaSupportsDyndeps = false;
+  bool NinjaSupportsDyndepsCxx = false;
+  bool NinjaSupportsDyndepsFortran = false;
   bool NinjaSupportsRestatTool = false;
   bool NinjaSupportsUnconditionalRecompactTool = false;
   bool NinjaSupportsMultipleOutputs = false;
@@ -592,7 +594,7 @@ private:
 
   codecvt::Encoding NinjaExpectedEncoding = codecvt::None;
 
-  bool DiagnosedCxxModuleSupport = false;
+  bool DiagnosedCxxModuleNinjaSupport = false;
 
   void InitOutputPathPrefix();
 
@@ -655,7 +657,7 @@ public:
       new cmGlobalGeneratorSimpleFactory<cmGlobalNinjaMultiGenerator>());
   }
 
-  static void GetDocumentation(cmDocumentationEntry& entry);
+  static cmDocumentationEntry GetDocumentation();
 
   std::string GetName() const override
   {

@@ -1,0 +1,1 @@
+((Ninja generators)?(build stopped: dependency cycle:)|(Visual Studio generators)?(error : Cannot build the following source files because there is a cyclic dependency between them))

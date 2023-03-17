@@ -110,7 +110,7 @@ void testAppend()
 }
 }
 
-int testCMExtAlgorithm(int /*unused*/, char* /*unused*/ [])
+int testCMExtAlgorithm(int /*unused*/, char* /*unused*/[])
 {
   testAppend();
 

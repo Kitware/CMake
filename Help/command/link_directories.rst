@@ -53,3 +53,9 @@ The command will apply only to targets created after it is called.
   where possible by using the :command:`target_link_directories` command
   rather than ``link_directories()``.  The target-specific command can also
   control how the search directories propagate to other dependent targets.
+
+See Also
+^^^^^^^^
+
+* :command:`target_link_directories`
+* :command:`target_link_libraries`

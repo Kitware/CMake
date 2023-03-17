@@ -80,7 +80,7 @@ static int quiche_getsock(struct Curl_easy *data,
 
   socks[0] = conn->sock[FIRSTSOCKET];
 
-  /* in a HTTP/2 connection we can basically always get a frame so we should
+  /* in an HTTP/2 connection we can basically always get a frame so we should
      always be ready for one */
   bitmap |= GETSOCK_READSOCK(FIRSTSOCKET);
 
@@ -347,9 +347,6 @@ CURLcode Curl_quic_connect(struct Curl_easy *data,
         sockfd, ipbuf, port);
 
   Curl_persistconninfo(data, conn, NULL, -1);
-
-  /* for connection reuse purposes: */
-  conn->ssl[FIRSTSOCKET].state = ssl_connection_complete;
 
   {
     unsigned char alpn_protocols[] = QUICHE_H3_APPLICATION_PROTOCOL;

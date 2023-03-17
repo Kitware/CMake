@@ -3,6 +3,7 @@
 #include "cmComputeTargetDepends.h"
 
 #include <cassert>
+#include <cstddef>
 #include <cstdio>
 #include <memory>
 #include <sstream>
@@ -159,7 +160,7 @@ void cmComputeTargetDepends::GetTargetDirectDepends(cmGeneratorTarget const* t,
   // this point.
   auto tii = this->TargetIndex.find(t);
   assert(tii != this->TargetIndex.end());
-  int i = tii->second;
+  size_t i = tii->second;
 
   // Get its final dependencies.
   EdgeList const& nl = this->FinalGraph[i];
@@ -178,7 +179,7 @@ void cmComputeTargetDepends::CollectTargets()
   auto const& lgens = this->GlobalGenerator->GetLocalGenerators();
   for (const auto& lgen : lgens) {
     for (const auto& ti : lgen->GetGeneratorTargets()) {
-      int index = static_cast<int>(this->Targets.size());
+      size_t index = this->Targets.size();
       this->TargetIndex[ti.get()] = index;
       this->Targets.push_back(ti.get());
     }
@@ -191,12 +192,12 @@ void cmComputeTargetDepends::CollectDepends()
   this->InitialGraph.resize(this->Targets.size());
 
   // Compute each dependency list.
-  for (unsigned int i = 0; i < this->Targets.size(); ++i) {
+  for (size_t i = 0; i < this->Targets.size(); ++i) {
     this->CollectTargetDepends(i);
   }
 }
 
-void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
+void cmComputeTargetDepends::CollectTargetDepends(size_t depender_index)
 {
   // Get the depender.
   cmGeneratorTarget const* depender = this->Targets[depender_index];
@@ -261,7 +262,7 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
 }
 
 void cmComputeTargetDepends::AddInterfaceDepends(
-  int depender_index, const cmGeneratorTarget* dependee,
+  size_t depender_index, const cmGeneratorTarget* dependee,
   cmListFileBacktrace const& dependee_backtrace, const std::string& config,
   std::set<cmLinkItem>& emitted)
 {
@@ -290,7 +291,7 @@ void cmComputeTargetDepends::AddInterfaceDepends(
 }
 
 void cmComputeTargetDepends::AddInterfaceDepends(
-  int depender_index, cmLinkItem const& dependee_name,
+  size_t depender_index, cmLinkItem const& dependee_name,
   const std::string& config, std::set<cmLinkItem>& emitted)
 {
   cmGeneratorTarget const* depender = this->Targets[depender_index];
@@ -312,7 +313,7 @@ void cmComputeTargetDepends::AddInterfaceDepends(
   }
 }
 
-void cmComputeTargetDepends::AddObjectDepends(int depender_index,
+void cmComputeTargetDepends::AddObjectDepends(size_t depender_index,
                                               cmSourceFile const* o,
                                               std::set<cmLinkItem>& emitted)
 {
@@ -340,7 +341,7 @@ void cmComputeTargetDepends::AddObjectDepends(int depender_index,
   }
 }
 
-void cmComputeTargetDepends::AddTargetDepend(int depender_index,
+void cmComputeTargetDepends::AddTargetDepend(size_t depender_index,
                                              cmLinkItem const& dependee_name,
                                              bool linking, bool cross)
 {
@@ -394,7 +395,7 @@ void cmComputeTargetDepends::AddTargetDepend(int depender_index,
 }
 
 void cmComputeTargetDepends::AddTargetDepend(
-  int depender_index, cmGeneratorTarget const* dependee,
+  size_t depender_index, cmGeneratorTarget const* dependee,
   cmListFileBacktrace const& dependee_backtrace, bool linking, bool cross)
 {
   if (!dependee->IsInBuildSystem()) {
@@ -412,7 +413,7 @@ void cmComputeTargetDepends::AddTargetDepend(
     // this point.
     auto tii = this->TargetIndex.find(dependee);
     assert(tii != this->TargetIndex.end());
-    int dependee_index = tii->second;
+    size_t dependee_index = tii->second;
 
     // Add this entry to the dependency graph.
     this->InitialGraph[depender_index].emplace_back(dependee_index, !linking,
@@ -425,15 +426,15 @@ void cmComputeTargetDepends::CollectSideEffects()
   this->SideEffects.resize(0);
   this->SideEffects.resize(this->InitialGraph.size());
 
-  int n = static_cast<int>(this->InitialGraph.size());
-  std::set<int> visited;
-  for (int i = 0; i < n; ++i) {
+  size_t n = this->InitialGraph.size();
+  std::set<size_t> visited;
+  for (size_t i = 0; i < n; ++i) {
     this->CollectSideEffectsForTarget(visited, i);
   }
 }
 
 void cmComputeTargetDepends::CollectSideEffectsForTarget(
-  std::set<int>& visited, int depender_index)
+  std::set<size_t>& visited, size_t depender_index)
 {
   if (!visited.count(depender_index)) {
     auto& se = this->SideEffects[depender_index];
@@ -461,8 +462,8 @@ void cmComputeTargetDepends::ComputeIntermediateGraph()
   this->IntermediateGraph.resize(0);
   this->IntermediateGraph.resize(this->InitialGraph.size());
 
-  int n = static_cast<int>(this->InitialGraph.size());
-  for (int i = 0; i < n; ++i) {
+  size_t n = this->InitialGraph.size();
+  for (size_t i = 0; i < n; ++i) {
     auto const& initialEdges = this->InitialGraph[i];
     auto& intermediateEdges = this->IntermediateGraph[i];
     cmGeneratorTarget const* gt = this->Targets[i];
@@ -488,7 +489,7 @@ void cmComputeTargetDepends::OptimizeLinkDependencies(
   cmGeneratorTarget const* gt, cmGraphEdgeList& outputEdges,
   cmGraphEdgeList const& inputEdges)
 {
-  std::set<int> emitted;
+  std::set<size_t> emitted;
   for (auto const& edge : inputEdges) {
     if (edge.IsStrong()) {
       // Preserve strong edges
@@ -529,16 +530,16 @@ void cmComputeTargetDepends::DisplayGraph(Graph const& graph,
                                           const std::string& name)
 {
   fprintf(stderr, "The %s target dependency graph is:\n", name.c_str());
-  int n = static_cast<int>(graph.size());
-  for (int depender_index = 0; depender_index < n; ++depender_index) {
+  size_t n = graph.size();
+  for (size_t depender_index = 0; depender_index < n; ++depender_index) {
     EdgeList const& nl = graph[depender_index];
     cmGeneratorTarget const* depender = this->Targets[depender_index];
-    fprintf(stderr, "target %d is [%s]\n", depender_index,
+    fprintf(stderr, "target %zu is [%s]\n", depender_index,
             depender->GetName().c_str());
     for (cmGraphEdge const& ni : nl) {
-      int dependee_index = ni;
+      size_t dependee_index = ni;
       cmGeneratorTarget const* dependee = this->Targets[dependee_index];
-      fprintf(stderr, "  depends on target %d [%s] (%s)\n", dependee_index,
+      fprintf(stderr, "  depends on target %zu [%s] (%s)\n", dependee_index,
               dependee->GetName().c_str(), ni.IsStrong() ? "strong" : "weak");
     }
   }
@@ -548,16 +549,16 @@ void cmComputeTargetDepends::DisplayGraph(Graph const& graph,
 void cmComputeTargetDepends::DisplaySideEffects()
 {
   fprintf(stderr, "The side effects are:\n");
-  int n = static_cast<int>(this->SideEffects.size());
-  for (int depender_index = 0; depender_index < n; ++depender_index) {
+  size_t n = this->SideEffects.size();
+  for (size_t depender_index = 0; depender_index < n; ++depender_index) {
     cmGeneratorTarget const* depender = this->Targets[depender_index];
-    fprintf(stderr, "target %d is [%s]\n", depender_index,
+    fprintf(stderr, "target %zu is [%s]\n", depender_index,
             depender->GetName().c_str());
     if (!this->SideEffects[depender_index].CustomCommandSideEffects.empty()) {
       fprintf(stderr, "  custom commands\n");
       for (auto const* gt :
            this->SideEffects[depender_index].CustomCommandSideEffects) {
-        fprintf(stderr, "    from target %d [%s]\n", this->TargetIndex[gt],
+        fprintf(stderr, "    from target %zu [%s]\n", this->TargetIndex[gt],
                 gt->GetName().c_str());
       }
     }
@@ -565,7 +566,7 @@ void cmComputeTargetDepends::DisplaySideEffects()
          this->SideEffects[depender_index].LanguageSideEffects) {
       fprintf(stderr, "  language %s\n", it.first.c_str());
       for (auto const* gt : it.second) {
-        fprintf(stderr, "    from target %d [%s]\n", this->TargetIndex[gt],
+        fprintf(stderr, "    from target %zu [%s]\n", this->TargetIndex[gt],
                 gt->GetName().c_str());
       }
     }
@@ -579,12 +580,12 @@ void cmComputeTargetDepends::DisplayComponents(
   fprintf(stderr, "The strongly connected components for the %s graph are:\n",
           name.c_str());
   std::vector<NodeList> const& components = ccg.GetComponents();
-  int n = static_cast<int>(components.size());
-  for (int c = 0; c < n; ++c) {
+  size_t n = components.size();
+  for (size_t c = 0; c < n; ++c) {
     NodeList const& nl = components[c];
-    fprintf(stderr, "Component (%d):\n", c);
-    for (int i : nl) {
-      fprintf(stderr, "  contains target %d [%s]\n", i,
+    fprintf(stderr, "Component (%zu):\n", c);
+    for (size_t i : nl) {
+      fprintf(stderr, "  contains target %zu [%s]\n", i,
               this->Targets[i]->GetName().c_str());
     }
   }
@@ -597,8 +598,8 @@ bool cmComputeTargetDepends::CheckComponents(
   // All non-trivial components should consist only of static
   // libraries.
   std::vector<NodeList> const& components = ccg.GetComponents();
-  int nc = static_cast<int>(components.size());
-  for (int c = 0; c < nc; ++c) {
+  size_t nc = components.size();
+  for (size_t c = 0; c < nc; ++c) {
     // Get the current component.
     NodeList const& nl = components[c];
 
@@ -614,7 +615,7 @@ bool cmComputeTargetDepends::CheckComponents(
     }
 
     // Make sure the component is all STATIC_LIBRARY targets.
-    for (int ni : nl) {
+    for (size_t ni : nl) {
       if (this->Targets[ni]->GetType() != cmStateEnums::STATIC_LIBRARY) {
         this->ComplainAboutBadComponent(ccg, c);
         return false;
@@ -625,16 +626,16 @@ bool cmComputeTargetDepends::CheckComponents(
 }
 
 void cmComputeTargetDepends::ComplainAboutBadComponent(
-  cmComputeComponentGraph const& ccg, int c, bool strong)
+  cmComputeComponentGraph const& ccg, size_t c, bool strong)
 {
   // Construct the error message.
   std::ostringstream e;
   e << "The inter-target dependency graph contains the following "
     << "strongly connected component (cycle):\n";
   std::vector<NodeList> const& components = ccg.GetComponents();
-  std::vector<int> const& cmap = ccg.GetComponentMap();
+  std::vector<size_t> const& cmap = ccg.GetComponentMap();
   NodeList const& cl = components[c];
-  for (int i : cl) {
+  for (size_t i : cl) {
     // Get the depender.
     cmGeneratorTarget const* depender = this->Targets[i];
 
@@ -645,7 +646,7 @@ void cmComputeTargetDepends::ComplainAboutBadComponent(
     // List its dependencies that are inside the component.
     EdgeList const& nl = this->InitialGraph[i];
     for (cmGraphEdge const& ni : nl) {
-      int j = ni;
+      size_t j = ni;
       if (cmap[j] == c) {
         cmGeneratorTarget const* dependee = this->Targets[j];
         e << "    depends on \"" << dependee->GetName() << "\""
@@ -669,10 +670,10 @@ void cmComputeTargetDepends::ComplainAboutBadComponent(
   cmSystemTools::Error(e.str());
 }
 
-bool cmComputeTargetDepends::IntraComponent(std::vector<int> const& cmap,
-                                            int c, int i, int* head,
-                                            std::set<int>& emitted,
-                                            std::set<int>& visited)
+bool cmComputeTargetDepends::IntraComponent(std::vector<size_t> const& cmap,
+                                            size_t c, size_t i, size_t* head,
+                                            std::set<size_t>& emitted,
+                                            std::set<size_t>& visited)
 {
   if (!visited.insert(i).second) {
     // Cycle in utility depends!
@@ -682,7 +683,7 @@ bool cmComputeTargetDepends::IntraComponent(std::vector<int> const& cmap,
     // Honor strong intra-component edges in the final order.
     EdgeList const& el = this->InitialGraph[i];
     for (cmGraphEdge const& edge : el) {
-      int j = edge;
+      size_t j = edge;
       if (cmap[j] == c && edge.IsStrong()) {
         this->FinalGraph[i].emplace_back(j, true, edge.IsCross(),
                                          edge.GetBacktrace());
@@ -693,7 +694,7 @@ bool cmComputeTargetDepends::IntraComponent(std::vector<int> const& cmap,
     }
 
     // Prepend to a linear linked-list of intra-component edges.
-    if (*head >= 0) {
+    if (*head != cmComputeComponentGraph::INVALID_COMPONENT) {
       this->FinalGraph[i].emplace_back(*head, false, false,
                                        cmListFileBacktrace());
     } else {
@@ -716,16 +717,16 @@ bool cmComputeTargetDepends::ComputeFinalDepends(
   this->FinalGraph.resize(this->InitialGraph.size());
 
   // Choose intra-component edges to linearize dependencies.
-  std::vector<int> const& cmap = ccg.GetComponentMap();
+  std::vector<size_t> const& cmap = ccg.GetComponentMap();
   this->ComponentHead.resize(components.size());
   this->ComponentTail.resize(components.size());
-  int nc = static_cast<int>(components.size());
-  for (int c = 0; c < nc; ++c) {
-    int head = -1;
-    std::set<int> emitted;
+  size_t nc = components.size();
+  for (size_t c = 0; c < nc; ++c) {
+    size_t head = cmComputeComponentGraph::INVALID_COMPONENT;
+    std::set<size_t> emitted;
     NodeList const& nl = components[c];
-    for (int ni : cmReverseRange(nl)) {
-      std::set<int> visited;
+    for (size_t ni : cmReverseRange(nl)) {
+      std::set<size_t> visited;
       if (!this->IntraComponent(cmap, c, ni, &head, emitted, visited)) {
         // Cycle in add_dependencies within component!
         this->ComplainAboutBadComponent(ccg, c, true);
@@ -736,14 +737,14 @@ bool cmComputeTargetDepends::ComputeFinalDepends(
   }
 
   // Convert inter-component edges to connect component tails to heads.
-  int n = static_cast<int>(cgraph.size());
-  for (int depender_component = 0; depender_component < n;
+  size_t n = cgraph.size();
+  for (size_t depender_component = 0; depender_component < n;
        ++depender_component) {
-    int depender_component_tail = this->ComponentTail[depender_component];
+    size_t depender_component_tail = this->ComponentTail[depender_component];
     EdgeList const& nl = cgraph[depender_component];
     for (cmGraphEdge const& ni : nl) {
-      int dependee_component = ni;
-      int dependee_component_head = this->ComponentHead[dependee_component];
+      size_t dependee_component = ni;
+      size_t dependee_component_head = this->ComponentHead[dependee_component];
       this->FinalGraph[depender_component_tail].emplace_back(
         dependee_component_head, ni.IsStrong(), ni.IsCross(),
         ni.GetBacktrace());

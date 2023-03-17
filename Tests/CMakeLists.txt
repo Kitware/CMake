@@ -271,14 +271,6 @@ if(BUILD_TESTING)
     find_package(Qt5Widgets QUIET NO_MODULE)
   endif()
 
-  if(NOT CMake_TEST_EXTERNAL_CMAKE)
-    add_subdirectory(CMakeLib)
-  endif()
-  add_subdirectory(CMakeOnly)
-  add_subdirectory(RunCMake)
-
-  add_subdirectory(FindPackageModeMakefileTest)
-
   # Collect a list of all test build directories.
   set(TEST_BUILD_DIRS)
 
@@ -342,6 +334,27 @@ if(BUILD_TESTING)
     endif()
   endif()
 
+  if(CMake_TEST_XCODE_VERSION AND CMAKE_OSX_SDKVERSION AND CMAKE_OSX_SDKPRODUCT)
+    if((NOT CMake_TEST_XCODE_VERSION VERSION_LESS 6.1) AND
+      ((NOT CMAKE_OSX_SDKPRODUCT STREQUAL "Mac OS X") OR
+      (NOT CMAKE_OSX_SDKVERSION VERSION_LESS 10.10)))
+      if(CMAKE_GENERATOR STREQUAL "Xcode")
+        set(CMake_TEST_XCODE_SWIFT 1)
+      endif()
+    endif()
+  endif()
+  if(NOT DEFINED CMake_TEST_Swift)
+    if(CMAKE_Swift_COMPILER OR CMake_TEST_XCODE_SWIFT)
+      set(CMake_TEST_Swift 1)
+    endif()
+  endif()
+
+  if(NOT DEFINED CMake_TEST_OBJC)
+    if(APPLE AND CMAKE_C_COMPILER_ID MATCHES "Clang|GNU")
+      set(CMake_TEST_OBJC 1)
+    endif()
+  endif()
+
   # Use 1500 or CTEST_TEST_TIMEOUT for long test timeout value,
   # whichever is greater.
   set(CMAKE_LONG_TEST_TIMEOUT 1500)
@@ -351,6 +364,14 @@ if(BUILD_TESTING)
   if(CMAKE_LONG_TEST_TIMEOUT LESS 1500)
     set(CMAKE_LONG_TEST_TIMEOUT 1500)
   endif()
+
+  if(NOT CMake_TEST_EXTERNAL_CMAKE)
+    add_subdirectory(CMakeLib)
+  endif()
+  add_subdirectory(CMakeOnly)
+  add_subdirectory(RunCMake)
+
+  add_subdirectory(FindPackageModeMakefileTest)
 
   add_test(NAME CMake.Copyright
     COMMAND ${CMAKE_CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/CMakeCopyright.cmake)
@@ -380,16 +401,7 @@ if(BUILD_TESTING)
   ADD_TEST_MACRO(MissingSourceFile MissingSourceFile)
   set_tests_properties(MissingSourceFile PROPERTIES
     PASS_REGULAR_EXPRESSION "CMake Error at CMakeLists.txt:3 \\(add_executable\\):[ \r\n]*Cannot find source file:[ \r\n]*DoesNotExist/MissingSourceFile.c")
-  if(CMake_TEST_XCODE_VERSION AND CMAKE_OSX_SDKVERSION AND CMAKE_OSX_SDKPRODUCT)
-    if((NOT CMake_TEST_XCODE_VERSION VERSION_LESS 6.1) AND
-       ((NOT CMAKE_OSX_SDKPRODUCT STREQUAL "Mac OS X") OR
-        (NOT CMAKE_OSX_SDKVERSION VERSION_LESS 10.10)))
-      if(CMAKE_GENERATOR STREQUAL "Xcode")
-        set(CMake_TEST_XCODE_SWIFT 1)
-      endif()
-    endif()
-  endif()
-  if(CMAKE_Swift_COMPILER OR CMake_TEST_XCODE_SWIFT)
+  if(CMake_TEST_Swift)
     ADD_TEST_MACRO(SwiftOnly SwiftOnly)
     if(CMake_TEST_XCODE_SWIFT)
       ADD_TEST_MACRO(SwiftMix SwiftMix)
@@ -430,6 +442,11 @@ if(BUILD_TESTING)
     if(NOT CMAKE_SKIP_VSGNUFortran)
       ADD_TEST_MACRO(VSGNUFortran ${CMAKE_CMAKE_COMMAND} -P runtest.cmake)
     endif()
+  endif()
+
+  if(CMake_TEST_OBJC)
+    add_subdirectory(ObjC)
+    add_subdirectory(ObjCXX)
   endif()
 
   if(${CMAKE_GENERATOR} MATCHES "Visual Studio ([^9]|[9][0-9])")
@@ -1463,6 +1480,7 @@ if(BUILD_TESTING)
       GTK2
       Iconv
       ICU
+      ImageMagick
       Intl
       Jasper
       JNI
@@ -1521,8 +1539,11 @@ if(BUILD_TESTING)
     add_subdirectory(GoogleTest)
   endif()
 
-  if(CMake_TEST_FindPython OR CMake_TEST_FindPython_NumPy
+  if(CMake_TEST_FindPython OR CMake_TEST_FindPython_SABIModule OR CMake_TEST_FindPython_NumPy
       OR CMake_TEST_FindPython_Conda OR CMake_TEST_FindPython_IronPython OR CMake_TEST_FindPython_PyPy)
+    if (CMake_TEST_FindPython AND CMAKE_SYSTEM_NAME MATCHES "Linux|Darwin")
+      set(CMake_TEST_FindPython_SABIModule TRUE)
+    endif()
     add_subdirectory(FindPython)
   endif()
 
@@ -2144,10 +2165,16 @@ if(BUILD_TESTING)
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/MFC")
   endif()
 
+  if(MSVC AND NOT MSVC_VERSION LESS 1700
+     AND (CMAKE_C_COMPILER_ARCHITECTURE_ID STREQUAL "ARM64")
+      )
+    ADD_TEST_MACRO(VSMARMASM VSMARMASM)
+  endif()
+
   if(MSVC AND NOT MSVC_VERSION LESS 1310
      AND (NOT CMAKE_GENERATOR MATCHES "Visual Studio 9 "
           OR CMAKE_SIZEOF_VOID_P EQUAL 4)
-     AND (NOT CMAKE_VS_PLATFORM_NAME STREQUAL "ARM64")
+     AND (NOT CMAKE_C_COMPILER_ARCHITECTURE_ID STREQUAL "ARM64")
       )
     ADD_TEST_MACRO(VSMASM VSMASM)
   endif()
@@ -2500,9 +2527,6 @@ if(BUILD_TESTING)
         -Dgen=${CMAKE_GENERATOR}
         -P ${CMake_SOURCE_DIR}/Tests/CFBundleTest/VerifyResult.cmake)
       list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CFBundleTest")
-
-      add_subdirectory(ObjC)
-      add_subdirectory(ObjCXX)
     endif()
   endif()
 

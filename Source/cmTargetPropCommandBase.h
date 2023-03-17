@@ -24,13 +24,12 @@ public:
     NO_FLAGS = 0x0,
     PROCESS_BEFORE = 0x1,
     PROCESS_AFTER = 0x2,
-    PROCESS_SYSTEM = 0x3,
-    PROCESS_REUSE_FROM = 0x4
+    PROCESS_SYSTEM = 0x4,
+    PROCESS_REUSE_FROM = 0x8
   };
 
   bool HandleArguments(std::vector<std::string> const& args,
-                       const std::string& prop,
-                       ArgumentFlags flags = NO_FLAGS);
+                       const std::string& prop, unsigned int flags = NO_FLAGS);
 
 protected:
   std::string Property;

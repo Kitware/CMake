@@ -648,7 +648,7 @@ else()
 
       # set CXXFLAGS to be fed into CMAKE_CXX_FLAGS by the user:
       if (HAVE_ISYSTEM) # does the compiler support -isystem ?
-              if (NOT APPLE) # -isystem seem sto be unsuppored on Mac
+              if (NOT APPLE) # -isystem seems to be unsupported on Mac
                 if(CMAKE_COMPILER_IS_GNUCC AND CMAKE_COMPILER_IS_GNUCXX )
             if (CMAKE_CXX_COMPILER MATCHES g\\+\\+)
               set(CMAKE_WXWINDOWS_CXX_FLAGS "`${CMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE} --cxxflags|sed -e s/-I/-isystem/g`")

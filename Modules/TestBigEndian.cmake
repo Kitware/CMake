@@ -87,7 +87,6 @@ macro(__TEST_BIG_ENDIAN_LEGACY_IMPL VARIABLE)
 
      try_compile(HAVE_${VARIABLE}
       SOURCE_FROM_VAR "${_test_file}" TEST_ENDIANESS_FILE_CONTENT
-      OUTPUT_VARIABLE OUTPUT
       COPY_FILE "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/TestEndianess.bin" )
 
       if(HAVE_${VARIABLE})
@@ -125,14 +124,8 @@ macro(__TEST_BIG_ENDIAN_LEGACY_IMPL VARIABLE)
           message(CHECK_FAIL "TEST_BIG_ENDIAN found no result!")
           message(SEND_ERROR "TEST_BIG_ENDIAN found no result!")
         endif()
-
-        file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-          "Determining if the system is big endian passed with the following output:\n${OUTPUT}\n${_test_file}:\n${TEST_ENDIANESS_FILE_CONTENT}\n\n")
-
       else()
         message(CHECK_FAIL "failed")
-        file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-          "Determining if the system is big endian failed with the following output:\n${OUTPUT}\n${_test_file}:\n${TEST_ENDIANESS_FILE_CONTENT}\n\n")
         set(${VARIABLE})
       endif()
   endif()

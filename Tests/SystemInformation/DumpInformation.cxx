@@ -53,7 +53,7 @@ void cmDumpInformationPrintFile(const char* name, FILE* fout)
   }
 }
 
-int main(int, char* [])
+int main(int, char*[])
 {
   const char* files[] = {
     DumpInformation_BINARY_DIR "/SystemInformation.out",
@@ -63,13 +63,9 @@ int main(int, char* [])
     DumpInformation_BINARY_DIR "/OtherProperties.txt",
     DumpInformation_BINARY_DIR "/../../Source/cmConfigure.h",
     DumpInformation_BINARY_DIR "/../../CMakeCache.txt",
-    DumpInformation_BINARY_DIR "/../../CMakeFiles/CMakeOutput.log",
-    DumpInformation_BINARY_DIR "/../../CMakeFiles/CMakeError.log",
     DumpInformation_BINARY_DIR "/../../Bootstrap.cmk/cmake_bootstrap.log",
     DumpInformation_BINARY_DIR "/../../Source/cmsys/Configure.hxx",
     DumpInformation_BINARY_DIR "/../../Source/cmsys/Configure.h",
-    DumpInformation_BINARY_DIR "/CMakeFiles/CMakeOutput.log",
-    DumpInformation_BINARY_DIR "/CMakeFiles/CMakeError.log",
     0
   };
 

@@ -113,23 +113,33 @@ message(STATUS "Verifying target \"${tgt}\"")
 if (NOT TARGET ${tgt})
   message(FATAL_ERROR "No import target for fake link options package")
 endif()
-get_target_property(link_options ${tgt} INTERFACE_LINK_OPTIONS)
-if (NOT link_options STREQUAL expected_link_options)
-  message(FATAL_ERROR
-    "Additional link options not present in INTERFACE_LINK_OPTIONS property\n"
-    "expected: \"${expected_link_options}\", but got \"${link_options}\""
-  )
+
+# Some versions of pkg-config on Windows don't parse the Libs and Cflags
+# correctly. The pkg-config that comes with Strawberry perl is one example.
+# It appears to treat the dummymain part of Libs as a library and only returns
+# -e. It also doesn't recognize "-isystem /other", presumably because it doesn't
+# support having a space between "-isystem" and the directory after it (it does
+# give us the "-isystem/more" flag). Since we can't reliably test for these,
+# we don't enable these checks on Windows.
+if(NOT WIN32)
+  get_target_property(link_options ${tgt} INTERFACE_LINK_OPTIONS)
+  if (NOT link_options STREQUAL expected_link_options)
+    message(FATAL_ERROR
+      "Additional link options not present in INTERFACE_LINK_OPTIONS property\n"
+      "expected: \"${expected_link_options}\", but got \"${link_options}\""
+    )
+  endif()
+
+  get_target_property(inc_dirs ${tgt} INTERFACE_INCLUDE_DIRECTORIES)
+  set(expected_inc_dirs "/special" "/other" "/more")
+
+  if (NOT inc_dirs STREQUAL expected_inc_dirs)
+    message(FATAL_ERROR
+      "Additional include directories not correctly present in INTERFACE_INCLUDE_DIRECTORIES property\n"
+      "expected: \"${expected_inc_dirs}\", got \"${inc_dirs}\""
+    )
+  endif ()
 endif()
-
-get_target_property(inc_dirs ${tgt} INTERFACE_INCLUDE_DIRECTORIES)
-set(expected_inc_dirs "/special" "/other" "/more")
-
-if (NOT inc_dirs STREQUAL expected_inc_dirs)
-  message(FATAL_ERROR
-    "Additional include directories not correctly present in INTERFACE_INCLUDE_DIRECTORIES property\n"
-    "expected: \"${expected_inc_dirs}\", got \"${inc_dirs}\""
-  )
-endif ()
 
 get_target_property(c_opts ${tgt} INTERFACE_COMPILE_OPTIONS)
 set(expected_c_opts "-DA-isystem/foo") # this is an invalid option, but a good testcase

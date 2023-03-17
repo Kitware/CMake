@@ -422,9 +422,9 @@ void cmCPackWIXGenerator::CopyDefinition(cmWIXSourceWriter& source,
   cmValue value = GetOption(name);
   if (value) {
     if (type == DefinitionType::PATH) {
-      AddDefinition(source, name, CMakeToWixPath(value));
+      AddDefinition(source, name, CMakeToWixPath(*value));
     } else {
-      AddDefinition(source, name, value);
+      AddDefinition(source, name, *value);
     }
   }
 }
@@ -504,7 +504,7 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
   }
   featureDefinitions.AddAttribute("Title", featureTitle);
   if (cmValue desc = GetOption("CPACK_WIX_ROOT_FEATURE_DESCRIPTION")) {
-    featureDefinitions.AddAttribute("Description", desc);
+    featureDefinitions.AddAttribute("Description", *desc);
   }
   featureDefinitions.AddAttribute("Level", "1");
   this->Patch->ApplyFragment("#PRODUCTFEATURE", featureDefinitions);
@@ -512,7 +512,7 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
   cmValue package = GetOption("CPACK_WIX_CMAKE_PACKAGE_REGISTRY");
   if (package) {
     featureDefinitions.CreateCMakePackageRegistryEntry(
-      package, GetOption("CPACK_WIX_UPGRADE_GUID"));
+      *package, GetOption("CPACK_WIX_UPGRADE_GUID"));
   }
 
   if (!CreateFeatureHierarchy(featureDefinitions)) {

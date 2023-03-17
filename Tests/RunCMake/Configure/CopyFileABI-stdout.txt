@@ -1,4 +1,4 @@
 -- Detecting C compiler ABI info
 -- Detecting C compiler ABI info - done.*
--- Configuring done
--- Generating done
+-- Configuring done \([0-9]+\.[0-9]s\)
+-- Generating done \([0-9]+\.[0-9]s\)

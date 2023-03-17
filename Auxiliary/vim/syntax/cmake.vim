@@ -2013,6 +2013,7 @@ syn keyword cmakeKWExternalProject contained
             \ IGNORED
             \ INACTIVITY_TIMEOUT
             \ INDEPENDENT_STEP_TARGETS
+            \ INSTALL_BYPRODUCTS
             \ INSTALL_COMMAND
             \ INSTALL_DIR
             \ JOB_POOLS

@@ -56,5 +56,5 @@ which has the following acceptable values:
                                 PROPERTIES UNITY_GROUP "bucket2"
                                 )
 
-If no explicit :prop_tgt:`UNITY_BUILD_MODE` has been specified, CMake will
+If no explicit ``UNITY_BUILD_MODE`` has been specified, CMake will
 default to ``BATCH``.

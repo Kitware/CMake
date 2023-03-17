@@ -275,7 +275,7 @@ static bool TestExpectedPackResult(const ExpectedPackResult& expected)
   return true;
 }
 
-int testCTestBinPacker(int /*unused*/, char* /*unused*/ [])
+int testCTestBinPacker(int /*unused*/, char* /*unused*/[])
 {
   int retval = 0;
 

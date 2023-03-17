@@ -3,8 +3,13 @@
 
 
 find_program(CMAKE_MAKE_PROGRAM make
+  REGISTRY_VIEW 32
   PATHS
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\MSYS-1.0_is1;Inno Setup: App Path]/bin"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\MinGW;InstallLocation]/bin"
-  c:/msys/1.0/bin /msys/1.0/bin)
+      # Typical install path for 32-bit MSYS2 (https://repo.msys2.org/distrib/msys2-i686-latest.sfx.exe)
+      "C:/msys32/usr"
+      # Typical install path for MINGW32 (https://sourceforge.net/projects/mingw)
+      "C:/mingw/msys"
+      # Git for Windows 32-bit (https://gitforwindows.org/)
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\GitForWindows;InstallPath]/usr")
+
 mark_as_advanced(CMAKE_MAKE_PROGRAM)

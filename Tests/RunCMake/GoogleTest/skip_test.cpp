@@ -1,6 +1,13 @@
 #include <iostream>
 #include <string>
 
+/* Having this as comment lets gtest_add_tests recognizes the test we fake
+   here without requiring googletest
+TEST_F( skip_test, test1 )
+{
+}
+*/
+
 int main(int argc, char** argv)
 {
   // Note: GoogleTest.cmake doesn't actually depend on Google Test as such;

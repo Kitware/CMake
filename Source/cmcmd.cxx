@@ -2,11 +2,15 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmcmd.h"
 
+#include <functional>
+
+#include <cm/optional>
 #include <cmext/algorithm>
 
 #include <cm3p/uv.h>
 #include <fcntl.h>
 
+#include "cmCommandLineArgument.h"
 #include "cmConsoleBuf.h"
 #include "cmDuration.h"
 #include "cmGlobalGenerator.h"
@@ -105,6 +109,8 @@ void CMakeCommandUsage(std::string const& program)
     << "  copy <file>... destination  - copy files to destination "
        "(either file or directory)\n"
     << "  copy_directory <dir>... destination   - copy content of <dir>... "
+       "directories to 'destination' directory\n"
+    << "  copy_directory_if_different <dir>... destination   - copy changed content of <dir>... "
        "directories to 'destination' directory\n"
     << "  copy_if_different <file>... destination  - copy files if it has "
        "changed\n"
@@ -362,6 +368,12 @@ int HandleTidy(const std::string& runCmd, const std::string& sourceFile,
 {
   std::vector<std::string> tidy_cmd = cmExpandedList(runCmd, true);
   tidy_cmd.push_back(sourceFile);
+
+  for (auto const& arg : tidy_cmd) {
+    if (cmHasLiteralPrefix(arg, "--export-fixes=")) {
+      cmSystemTools::RemoveFile(arg.substr(cmStrLen("--export-fixes=")));
+    }
+  }
 
   // clang-tidy supports working out the compile commands from a
   // compile_commands.json file in a directory given by a "-p" option, or by
@@ -640,20 +652,59 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
   if (args.size() > 1) {
     // Copy file
     if (args[1] == "copy" && args.size() > 3) {
+      using CommandArgument =
+        cmCommandLineArgument<bool(const std::string& value)>;
+
+      cm::optional<std::string> targetArg;
+      std::vector<CommandArgument> argParsers{
+        { "-t", CommandArgument::Values::One,
+          CommandArgument::setToValue(targetArg) },
+      };
+
+      std::vector<std::string> files;
+      for (decltype(args.size()) i = 2; i < args.size(); i++) {
+        const std::string& arg = args[i];
+        bool matched = false;
+        for (auto const& m : argParsers) {
+          if (m.matches(arg)) {
+            matched = true;
+            if (m.parse(arg, i, args)) {
+              break;
+            }
+            return 1; // failed to parse
+          }
+        }
+        if (!matched) {
+          files.push_back(arg);
+        }
+      }
+
       // If multiple source files specified,
       // then destination must be directory
-      if ((args.size() > 4) &&
-          (!cmSystemTools::FileIsDirectory(args.back()))) {
-        std::cerr << "Error: Target (for copy command) \"" << args.back()
+      if (files.size() > 2 && !targetArg) {
+        targetArg = files.back();
+        files.pop_back();
+      }
+      if (targetArg && (!cmSystemTools::FileIsDirectory(*targetArg))) {
+        std::cerr << "Error: Target (for copy command) \"" << *targetArg
                   << "\" is not a directory.\n";
         return 1;
       }
+      if (!targetArg) {
+        if (files.size() < 2) {
+          std::cerr
+            << "Error: No files or target specified (for copy command).\n";
+          return 1;
+        }
+        targetArg = files.back();
+        files.pop_back();
+      }
       // If error occurs we want to continue copying next files.
       bool return_value = false;
-      for (auto const& arg : cmMakeRange(args).advance(2).retreat(1)) {
-        if (!cmsys::SystemTools::CopyFileAlways(arg, args.back())) {
-          std::cerr << "Error copying file \"" << arg << "\" to \""
-                    << args.back() << "\".\n";
+      for (auto const& file : files) {
+        if (!cmsys::SystemTools::CopyFileAlways(file, *targetArg)) {
+          std::cerr << "Error copying file \"" << file << "\" to \""
+                    << *targetArg << "\".\n";
           return_value = true;
         }
       }
@@ -682,12 +733,15 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
       return return_value;
     }
 
-    // Copy directory content
-    if (args[1] == "copy_directory" && args.size() > 3) {
+    // Copy directory contents
+    if ((args[1] == "copy_directory" ||
+         args[1] == "copy_directory_if_different") &&
+        args.size() > 3) {
       // If error occurs we want to continue copying next files.
       bool return_value = false;
+      const bool copy_always = (args[1] == "copy_directory");
       for (auto const& arg : cmMakeRange(args).advance(2).retreat(1)) {
-        if (!cmSystemTools::CopyADirectory(arg, args.back())) {
+        if (!cmSystemTools::CopyADirectory(arg, args.back(), copy_always)) {
           std::cerr << "Error copying directory from \"" << arg << "\" to \""
                     << args.back() << "\".\n";
           return_value = true;

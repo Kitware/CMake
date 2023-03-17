@@ -5,7 +5,7 @@ write_file
 
   Use the :command:`file(WRITE)` command instead.
 
-::
+.. code-block:: cmake
 
   write_file(filename "message to write"... [APPEND])
 

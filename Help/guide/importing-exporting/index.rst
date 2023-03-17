@@ -563,8 +563,7 @@ include directories should be specified as relative paths to the
     $<INSTALL_INTERFACE:include/TgtName>
   )
 
-The ``$<INSTALL_PREFIX>``
-:manual:`generator expression <cmake-generator-expressions(7)>` may be used as
+The :genex:`$<INSTALL_PREFIX>` generator expression may be used as
 a placeholder for the install prefix without resulting in a non-relocatable
 package.  This is necessary if complex generator expressions are used:
 

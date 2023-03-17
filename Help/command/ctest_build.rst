@@ -3,7 +3,7 @@ ctest_build
 
 Perform the :ref:`CTest Build Step` as a :ref:`Dashboard Client`.
 
-::
+.. code-block:: cmake
 
   ctest_build([BUILD <build-dir>] [APPEND]
               [CONFIGURATION <config>]

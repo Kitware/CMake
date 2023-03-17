@@ -4,11 +4,11 @@
 .editorconfig    export-ignore
 
 # Custom attribute to mark sources as using our C code style.
-[attr]our-c-style  whitespace=tab-in-indent  format.clang-format-6.0
+[attr]our-c-style  whitespace=tab-in-indent  format.clang-format=15
 
 # Custom attribute to mark sources as generated.
 # Do not perform whitespace checks.  Do not format.
-[attr]generated  whitespace=-tab-in-indent,-indent-with-non-tab -format.clang-format-6.0
+[attr]generated  whitespace=-tab-in-indent,-indent-with-non-tab -format.clang-format
 
 bootstrap        eol=lf
 configure        eol=lf

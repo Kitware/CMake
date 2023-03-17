@@ -63,7 +63,7 @@ int cmCPackExternalGenerator::PackageFiles()
 
   cmValue packageScript = this->GetOption("CPACK_EXTERNAL_PACKAGE_SCRIPT");
   if (cmNonempty(packageScript)) {
-    if (!cmSystemTools::FileIsFullPath(packageScript)) {
+    if (!cmSystemTools::FileIsFullPath(*packageScript)) {
       cmCPackLogger(
         cmCPackLog::LOG_ERROR,
         "CPACK_EXTERNAL_PACKAGE_SCRIPT does not contain a full file path"
@@ -71,7 +71,7 @@ int cmCPackExternalGenerator::PackageFiles()
       return 0;
     }
 
-    bool res = this->MakefileMap->ReadListFile(packageScript);
+    bool res = this->MakefileMap->ReadListFile(*packageScript);
 
     if (cmSystemTools::GetErrorOccurredFlag() || !res) {
       return 0;

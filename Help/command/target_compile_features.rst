@@ -30,8 +30,20 @@ The named ``<target>`` must have been created by a command such as
 :command:`add_executable` or :command:`add_library` and must not be an
 :ref:`ALIAS target <Alias Targets>`.
 
-Arguments to ``target_compile_features`` may use "generator expressions"
-with the syntax ``$<...>``.
-See the :manual:`cmake-generator-expressions(7)` manual for available
-expressions.  See the :manual:`cmake-compile-features(7)` manual for
-information on compile features and a list of supported compilers.
+.. |command_name| replace:: ``target_compile_features``
+.. |more_see_also| replace:: See the :manual:`cmake-compile-features(7)`
+   manual for information on compile features and a list of supported compilers.
+.. include:: GENEX_NOTE.txt
+   :start-line: 1
+
+See Also
+^^^^^^^^
+
+* :command:`target_compile_definitions`
+* :command:`target_compile_options`
+* :command:`target_include_directories`
+* :command:`target_link_libraries`
+* :command:`target_link_directories`
+* :command:`target_link_options`
+* :command:`target_precompile_headers`
+* :command:`target_sources`

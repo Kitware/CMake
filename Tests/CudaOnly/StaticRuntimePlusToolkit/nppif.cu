@@ -1,6 +1,12 @@
 // Comes from
 // https://devtalk.nvidia.com/default/topic/1037482/gpu-accelerated-libraries/help-me-help-you-with-modern-cmake-and-cuda-mwe-for-npp/post/5271066/#5271066
 
+#ifdef _WIN32
+#  define EXPORT __declspec(dllexport)
+#else
+#  define EXPORT
+#endif
+
 #include <cstdio>
 #include <iostream>
 
@@ -8,7 +14,7 @@
 #include <cuda_runtime_api.h>
 #include <nppi_filtering_functions.h>
 
-int nppif_main()
+EXPORT int nppif_main()
 {
   /**
    * 8-bit unsigned single-channel 1D row convolution.

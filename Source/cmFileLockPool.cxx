@@ -15,7 +15,7 @@ cmFileLockPool::~cmFileLockPool() = default;
 
 void cmFileLockPool::PushFunctionScope()
 {
-  this->FunctionScopes.push_back(ScopePool());
+  this->FunctionScopes.emplace_back();
 }
 
 void cmFileLockPool::PopFunctionScope()
@@ -26,7 +26,7 @@ void cmFileLockPool::PopFunctionScope()
 
 void cmFileLockPool::PushFileScope()
 {
-  this->FileScopes.push_back(ScopePool());
+  this->FileScopes.emplace_back();
 }
 
 void cmFileLockPool::PopFileScope()

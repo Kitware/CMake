@@ -22,7 +22,7 @@ static bool testFallthrough(int n)
   return r == 2;
 }
 
-int testConfigure(int, char* [])
+int testConfigure(int, char*[])
 {
   bool res = true;
   res = testFallthrough(1) && res;

@@ -1756,7 +1756,7 @@ bool cmQtAutoMocUicT::JobProbeDepsMocT::Probe(MappingT const& mapping,
   if (this->MocConst().SettingsChanged) {
     if (reason != nullptr) {
       *reason = cmStrCat("Generating ", this->MessagePath(outputFile),
-                         ", because the uic settings changed, from ",
+                         ", because the moc settings changed, from ",
                          this->MessagePath(sourceFile));
     }
     return true;
@@ -1980,6 +1980,9 @@ void cmQtAutoMocUicT::JobCompileMocT::Process()
 {
   std::string const& sourceFile = this->Mapping->SourceFile->FileName;
   std::string const& outputFile = this->Mapping->OutputFile;
+
+  // Remove output file in case the case of the source file has changed
+  cmSystemTools::RemoveFile(outputFile);
 
   // Compose moc command
   std::vector<std::string> cmd;

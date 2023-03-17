@@ -57,7 +57,7 @@ for you.
 
   If components ``Interpreter`` and ``Development`` (or one of its
   sub-components) are both specified, this module search only for interpreter
-  with same platform architecture as the one defined by ``CMake``
+  with same platform architecture as the one defined by CMake
   configuration. This constraint does not apply if only ``Interpreter``
   component is specified.
 
@@ -388,7 +388,7 @@ setting the following variables:
 
 By default, this module supports multiple calls in different directories of a
 project with different version/component requirements while providing correct
-and consistent results for each call. To support this behavior, ``CMake`` cache
+and consistent results for each call. To support this behavior, CMake cache
 is not used in the traditional way which can be problematic for interactive
 specification. So, to enable also interactive specification, module behavior
 can be controlled with the following variable:

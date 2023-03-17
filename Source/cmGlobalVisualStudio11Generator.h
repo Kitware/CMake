@@ -25,6 +25,9 @@ public:
 
   bool MatchesGeneratorName(const std::string& name) const override;
 
+  void EnableLanguage(std::vector<std::string> const& languages, cmMakefile*,
+                      bool optional) override;
+
   bool SupportsCustomCommandDepfile() const override { return true; }
 
   cm::optional<cmDepfileFormat> DepfileFormat() const override

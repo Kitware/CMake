@@ -47,6 +47,7 @@ run_cmake_command(E___run_co_compile-no-iwyu ${CMAKE_COMMAND} -E __run_co_compil
 run_cmake_command(E___run_co_compile-bad-iwyu ${CMAKE_COMMAND} -E __run_co_compile --iwyu=iwyu-does-not-exist -- command-does-not-exist)
 run_cmake_command(E___run_co_compile-no--- ${CMAKE_COMMAND} -E __run_co_compile --iwyu=iwyu-does-not-exist command-does-not-exist)
 run_cmake_command(E___run_co_compile-no-cc ${CMAKE_COMMAND} -E __run_co_compile --iwyu=iwyu-does-not-exist --)
+run_cmake_command(E___run_co_compile-tidy-remove-fixes ${CMAKE_COMMAND} -E __run_co_compile "--tidy=${CMAKE_COMMAND}\\;-E\\;true\\;--export-fixes=${RunCMake_BINARY_DIR}/tidy-fixes.yaml" -- ${CMAKE_COMMAND} -E true)
 
 run_cmake_command(G_no-arg ${CMAKE_COMMAND} -B DummyBuildDir -G)
 run_cmake_command(G_bad-arg ${CMAKE_COMMAND} -B DummyBuildDir -G NoSuchGenerator)
@@ -54,10 +55,14 @@ run_cmake_command(P_no-arg ${CMAKE_COMMAND} -P)
 run_cmake_command(P_no-file ${CMAKE_COMMAND} -P nosuchscriptfile.cmake)
 run_cmake_command(P_args ${CMAKE_COMMAND} -P "${RunCMake_SOURCE_DIR}/P_args.cmake" relative/path "${RunCMake_SOURCE_DIR}")
 run_cmake_command(P_arbitrary_args ${CMAKE_COMMAND} -P "${RunCMake_SOURCE_DIR}/P_arbitrary_args.cmake" -- -DFOO -S -B --fresh --version)
+run_cmake_command(P_P_in_arbitrary_args ${CMAKE_COMMAND} -P "${RunCMake_SOURCE_DIR}/P_arbitrary_args.cmake" -- -P "${RunCMake_SOURCE_DIR}/non_existing.cmake")
+run_cmake_command(P_P_in_arbitrary_args_2 ${CMAKE_COMMAND} -P "${RunCMake_SOURCE_DIR}/P_arbitrary_args.cmake" -- -P -o)
 run_cmake_command(P_fresh ${CMAKE_COMMAND} -P "${RunCMake_SOURCE_DIR}/P_fresh.cmake" --fresh)
 
 run_cmake_command(build-no-dir
   ${CMAKE_COMMAND} --build)
+run_cmake_command(build-no-dir2
+  ${CMAKE_COMMAND} --build --target=invalid)
 run_cmake_command(build-no-cache
   ${CMAKE_COMMAND} --build ${RunCMake_SOURCE_DIR})
 run_cmake_command(build-unknown-command-short
@@ -349,6 +354,13 @@ function(run_EnvironmentGenerator)
   run_cmake_command(Envgen-bad ${CMAKE_COMMAND} -G)
   unset(ENV{CMAKE_GENERATOR})
 
+  # Honor CMAKE_GENERATOR env var in --help output
+  set(ENV{CMAKE_GENERATOR} "Ninja Multi-Config")
+  run_cmake_command(Envgen-ninja-multi-help ${CMAKE_COMMAND} --help)
+  set(ENV{CMAKE_GENERATOR} "NoSuchGenerator")
+  run_cmake_command(Envgen-bad-help ${CMAKE_COMMAND} --help)
+  unset(ENV{CMAKE_GENERATOR})
+
   if(RunCMake_GENERATOR MATCHES "Visual Studio.*")
     set(ENV{CMAKE_GENERATOR} "${RunCMake_GENERATOR}")
     run_cmake_command(Envgen ${CMAKE_COMMAND} ${source_dir})
@@ -567,12 +579,27 @@ run_cmake_command(E_copy-three-source-files-target-is-file
   ${CMAKE_COMMAND} -E copy ${in}/f1.txt ${in}/f2.txt ${in}/f3.txt ${out}/f1.txt)
 run_cmake_command(E_copy-two-good-and-one-bad-source-files-target-is-directory
   ${CMAKE_COMMAND} -E copy ${in}/f1.txt ${in}/not_existing_file.bad ${in}/f3.txt ${out})
+run_cmake_command(E_copy-t-argument
+  ${CMAKE_COMMAND} -E copy ${in}/f1.txt -t ${out} ${in}/f3.txt)
+run_cmake_command(E_copy-t-argument-target-is-file
+  ${CMAKE_COMMAND} -E copy ${in}/f1.txt -t ${out}/f1.txt ${in}/f3.txt)
+run_cmake_command(E_copy-t-argument-no-source-files
+  ${CMAKE_COMMAND} -E copy -t ${out})
 run_cmake_command(E_copy_if_different-one-source-directory-target-is-directory
   ${CMAKE_COMMAND} -E copy_if_different ${in}/f1.txt ${out})
 run_cmake_command(E_copy_if_different-three-source-files-target-is-directory
   ${CMAKE_COMMAND} -E copy_if_different ${in}/f1.txt ${in}/f2.txt ${in}/f3.txt ${out})
 run_cmake_command(E_copy_if_different-three-source-files-target-is-file
   ${CMAKE_COMMAND} -E copy_if_different ${in}/f1.txt ${in}/f2.txt ${in}/f3.txt ${out}/f1.txt)
+unset(in)
+unset(out)
+
+set(in ${RunCMake_SOURCE_DIR}/copy_input)
+set(out ${RunCMake_BINARY_DIR}/copy_directory_different_output)
+file(REMOVE_RECURSE "${out}")
+file(MAKE_DIRECTORY ${out})
+run_cmake_command(E_copy_directory_if_different
+  ${CMAKE_COMMAND} -E copy_directory_if_different ${in} ${out})
 unset(in)
 unset(out)
 
@@ -940,6 +967,7 @@ unset(RunCMake_TEST_OPTIONS)
 
 set(RunCMake_TEST_OPTIONS --trace)
 run_cmake(trace)
+run_cmake(trace-try_compile)
 unset(RunCMake_TEST_OPTIONS)
 
 set(RunCMake_TEST_OPTIONS --trace-expand)
@@ -952,6 +980,7 @@ unset(RunCMake_TEST_OPTIONS)
 
 set(RunCMake_TEST_OPTIONS --trace-redirect=${RunCMake_BINARY_DIR}/redirected.trace)
 run_cmake(trace-redirect)
+run_cmake(trace-try_compile-redirect)
 unset(RunCMake_TEST_OPTIONS)
 
 set(RunCMake_TEST_OPTIONS --trace-redirect=/no/such/file.txt)

@@ -42,7 +42,7 @@ target_include_directories(Tutorial PUBLIC
 # TODO 3: Install Tutorial in the bin directory
 # Hint: Use the TARGETS and DESTINATION parameters
 
-# TODO 4: Install Tutorial.h to the include directory
+# TODO 4: Install TutorialConfig.h to the include directory
 # Hint: Use the FILES and DESTINATION parameters
 
 # TODO 5: Enable testing
@@ -61,4 +61,4 @@ target_include_directories(Tutorial PUBLIC
 # Hint: Use the PASS_REGULAR_EXPRESSION property with "4 is 2"
 
 # TODO 9: Add more tests. Create a function called do_test to avoid copy +
-# paste. Test the following values: 4, 9, 5, 7, 25, -25 and 0.00001.
+# paste. Test the following values: 4, 9, 5, 7, 25, -25 and 0.0001.

@@ -70,7 +70,7 @@ if(CMAKE_GENERATOR MATCHES "Visual Studio")
       endif()
     endif()
     if(VCXPROJ_INSPECT_RESULT)
-      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+      message(CONFIGURE_LOG
         "Determining the sysroot for the Android NDK failed.
 The output was:
 ${VCXPROJ_INSPECT_RESULT}
@@ -78,7 +78,7 @@ ${VCXPROJ_INSPECT_OUTPUT}
 
 ")
     else()
-      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+      message(CONFIGURE_LOG
         "Determining the sysroot for the Android NDK succeeded.
 The output was:
 ${VCXPROJ_INSPECT_RESULT}

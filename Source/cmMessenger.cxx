@@ -107,8 +107,8 @@ static void printMessageText(std::ostream& msg, std::string const& text)
 {
   msg << ":\n";
   cmDocumentationFormatter formatter;
-  formatter.SetIndent("  ");
-  formatter.PrintFormatted(msg, text.c_str());
+  formatter.SetIndent(2u);
+  formatter.PrintFormatted(msg, text);
 }
 
 static void displayMessage(MessageType t, std::ostringstream& msg)

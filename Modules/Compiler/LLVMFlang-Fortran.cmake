@@ -13,3 +13,4 @@ set(CMAKE_Fortran_MODDIR_FLAG "-module-dir")
 
 set(CMAKE_Fortran_COMPILE_OPTIONS_PREPROCESS_ON "-cpp")
 set(CMAKE_Fortran_COMPILE_OPTIONS_PREPROCESS_OFF "-nocpp")
+set(CMAKE_Fortran_POSTPROCESS_FLAG "-ffixed-line-length-72")

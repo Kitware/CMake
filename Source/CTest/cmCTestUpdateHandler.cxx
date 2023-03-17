@@ -123,7 +123,7 @@ int cmCTestUpdateHandler::ProcessHandler()
   }
 
   cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                     "   Updating the repository: " << sourceDirectory
+                     "   Updating the repository: " << *sourceDirectory
                                                     << std::endl,
                      this->Quiet);
 
@@ -163,7 +163,7 @@ int cmCTestUpdateHandler::ProcessHandler()
       break;
   }
   vc->SetCommandLineTool(this->UpdateCommand);
-  vc->SetSourceDirectory(sourceDirectory);
+  vc->SetSourceDirectory(*sourceDirectory);
 
   // Cleanup the working tree.
   vc->Cleanup();

@@ -636,42 +636,26 @@ endfunction()
 #]=======================================================================]
 function(matlab_get_mex_suffix matlab_root mex_suffix)
 
-  # todo setup the extension properly. Currently I do not know if this is
-  # sufficient for all win32 distributions.
-  # there is also CMAKE_EXECUTABLE_SUFFIX that could be tweaked
+  # find_program does not consider script suffix .bat for Matlab mexext.bat on Windows
   set(mexext_suffix "")
   if(WIN32)
-    list(APPEND mexext_suffix ".bat")
+    set(mexext_suffix ".bat")
   endif()
 
-  # we first try without suffix, since cmake does not understand a list with
-  # one empty string element
   find_program(
     Matlab_MEXEXTENSIONS_PROG
-    NAMES mexext
+    NAMES mexext mexext${mexext_suffix}
     PATHS ${matlab_root}/bin
     DOC "Matlab MEX extension provider"
     NO_DEFAULT_PATH
   )
 
-  foreach(current_mexext_suffix IN LISTS mexext_suffix)
-    if(NOT DEFINED Matlab_MEXEXTENSIONS_PROG OR NOT Matlab_MEXEXTENSIONS_PROG)
-      # this call should populate the cache automatically
-      find_program(
-        Matlab_MEXEXTENSIONS_PROG
-        "mexext${current_mexext_suffix}"
-        PATHS ${matlab_root}/bin
-        DOC "Matlab MEX extension provider"
-        NO_DEFAULT_PATH
-      )
-    endif()
-  endforeach(current_mexext_suffix)
   if(MATLAB_FIND_DEBUG)
     message(STATUS "[MATLAB] Determining mex files extensions from '${matlab_root}/bin' with program '${Matlab_MEXEXTENSIONS_PROG}'")
   endif()
 
   # the program has been found?
-  if((NOT Matlab_MEXEXTENSIONS_PROG) OR (NOT EXISTS ${Matlab_MEXEXTENSIONS_PROG}))
+  if(NOT Matlab_MEXEXTENSIONS_PROG)
     if(MATLAB_FIND_DEBUG)
       message(WARNING "[MATLAB] Cannot found mexext program. Matlab root is ${matlab_root}")
     endif()
@@ -722,7 +706,6 @@ function(matlab_get_mex_suffix matlab_root mex_suffix)
     message(STATUS "[MATLAB] '${Matlab_MEXEXTENSIONS_PROG}' : determined extension '${_matlab_mex_extension}' and error string is '${_matlab_mex_extension_error}'")
   endif()
 
-  unset(Matlab_MEXEXTENSIONS_PROG CACHE)
   set(${mex_suffix} ${_matlab_mex_extension} PARENT_SCOPE)
 endfunction()
 
@@ -1187,7 +1170,7 @@ function(matlab_add_mex)
       ${${prefix}_UNPARSED_ARGUMENTS})
   endif()
 
-  target_include_directories(${${prefix}_NAME} PRIVATE ${Matlab_INCLUDE_DIRS})
+  target_include_directories(${${prefix}_NAME} SYSTEM PRIVATE ${Matlab_INCLUDE_DIRS})
 
   if(NOT ${prefix}_NO_IMPLICIT_LINK_TO_MATLAB_LIBRARIES)
     if(Matlab_HAS_CPP_API)
@@ -1763,12 +1746,24 @@ else()
   set(_matlab_64Build TRUE)
 endif()
 
+
+if(NOT DEFINED Matlab_MEX_EXTENSION)
+  set(_matlab_mex_extension "")
+  matlab_get_mex_suffix("${Matlab_ROOT_DIR}" _matlab_mex_extension)
+
+  # This variable goes to the cache.
+  set(Matlab_MEX_EXTENSION ${_matlab_mex_extension} CACHE STRING "Extensions for the mex targets (automatically given by Matlab)")
+  unset(_matlab_mex_extension)
+endif()
+
 if(APPLE)
   set(_matlab_bin_prefix "mac") # i should be for intel
   set(_matlab_bin_suffix_32bits "i")
-  if(CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")
+  if(CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64" AND Matlab_MEX_EXTENSION MATCHES "a64$")
+    # native Apple Silicon Matlab
     set(_matlab_bin_suffix_64bits "a64")
   else()
+    # Intel Mac OR Apple Silicon using Rosetta for Matlab
     set(_matlab_bin_suffix_64bits "i64")
   endif()
 elseif(UNIX)
@@ -1810,16 +1805,6 @@ else()
 endif()
 
 unset(_matlab_64Build)
-
-
-if(NOT DEFINED Matlab_MEX_EXTENSION)
-  set(_matlab_mex_extension "")
-  matlab_get_mex_suffix("${Matlab_ROOT_DIR}" _matlab_mex_extension)
-
-  # This variable goes to the cache.
-  set(Matlab_MEX_EXTENSION ${_matlab_mex_extension} CACHE STRING "Extensions for the mex targets (automatically given by Matlab)")
-  unset(_matlab_mex_extension)
-endif()
 
 
 if(MATLAB_FIND_DEBUG)

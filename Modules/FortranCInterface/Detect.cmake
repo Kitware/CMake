@@ -51,6 +51,7 @@ try_compile(FortranCInterface_COMPILED
   TARGET FortranCInterface
   SOURCE_DIR ${FortranCInterface_SOURCE_DIR}
   BINARY_DIR ${FortranCInterface_BINARY_DIR}
+  LOG_DESCRIPTION "Fortran/C interface test project"
   CMAKE_FLAGS
     "-DCMAKE_C_FLAGS:STRING=${CMAKE_C_FLAGS}"
     "-DCMAKE_Fortran_FLAGS:STRING=${CMAKE_Fortran_FLAGS}"
@@ -58,7 +59,7 @@ try_compile(FortranCInterface_COMPILED
     "-DCMAKE_Fortran_FLAGS_RELEASE:STRING=${CMAKE_Fortran_FLAGS_RELEASE}"
     ${_FortranCInterface_OSX_ARCH}
     ${_FortranCInterface_EXE_LINKER_FLAGS}
-  OUTPUT_VARIABLE FortranCInterface_OUTPUT)
+  )
 set(FortranCInterface_COMPILED ${FortranCInterface_COMPILED})
 unset(FortranCInterface_COMPILED CACHE)
 unset(_FortranCInterface_EXE_LINKER_FLAGS)
@@ -70,9 +71,6 @@ if(FortranCInterface_COMPILED)
   include(${FortranCInterface_BINARY_DIR}/exe-Release.cmake OPTIONAL)
 else()
   set(_result "Failed to compile")
-  file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-    "Fortran/C interface test project failed with the following output:\n"
-    "${FortranCInterface_OUTPUT}\n")
 endif()
 
 # Load symbols from INFO:symbol[] strings in the executable.

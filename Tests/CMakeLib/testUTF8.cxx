@@ -164,7 +164,7 @@ static bool is_invalid(const char* s)
   return true;
 }
 
-int testUTF8(int /*unused*/, char* /*unused*/ [])
+int testUTF8(int /*unused*/, char* /*unused*/[])
 {
   int result = 0;
   for (test_utf8_entry const* e = good_entry; e->n; ++e) {

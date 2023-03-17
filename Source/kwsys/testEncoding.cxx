@@ -266,7 +266,7 @@ static int testToWindowsExtendedPath()
 #endif
 }
 
-int testEncoding(int, char* [])
+int testEncoding(int, char*[])
 {
   const char* loc = setlocale(LC_ALL, "");
   if (loc) {

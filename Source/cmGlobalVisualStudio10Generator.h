@@ -163,10 +163,12 @@ public:
   cmIDEFlagTable const* GetLinkFlagTable() const;
   cmIDEFlagTable const* GetCudaFlagTable() const;
   cmIDEFlagTable const* GetCudaHostFlagTable() const;
+  cmIDEFlagTable const* GetMarmasmFlagTable() const;
   cmIDEFlagTable const* GetMasmFlagTable() const;
   cmIDEFlagTable const* GetNasmFlagTable() const;
 
   bool IsMsBuildRestoreSupported() const;
+  bool IsBuildInParallelSupported() const;
 
 protected:
   cmGlobalVisualStudio10Generator(cmake* cm, const std::string& name,
@@ -226,6 +228,7 @@ protected:
   std::string DefaultLinkFlagTableName;
   std::string DefaultCudaFlagTableName;
   std::string DefaultCudaHostFlagTableName;
+  std::string DefaultMarmasmFlagTableName;
   std::string DefaultMasmFlagTableName;
   std::string DefaultNasmFlagTableName;
   std::string DefaultRCFlagTableName;
@@ -239,15 +242,10 @@ protected:
 private:
   struct LongestSourcePath
   {
-    LongestSourcePath()
-      : Length(0)
-      , Target(0)
-      , SourceFile(0)
-    {
-    }
-    size_t Length;
-    cmGeneratorTarget* Target;
-    cmSourceFile const* SourceFile;
+    LongestSourcePath() = default;
+    size_t Length = 0;
+    cmGeneratorTarget* Target = nullptr;
+    cmSourceFile const* SourceFile = nullptr;
     std::string SourceRel;
   };
   LongestSourcePath LongestSource;

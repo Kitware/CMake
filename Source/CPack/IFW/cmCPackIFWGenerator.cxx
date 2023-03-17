@@ -585,7 +585,7 @@ std::string cmCPackIFWGenerator::GetRootPackageName()
     // Configure from root group
     cmCPackIFWPackage package;
     package.Generator = this;
-    package.ConfigureFromGroup(optIFW_PACKAGE_GROUP);
+    package.ConfigureFromGroup(*optIFW_PACKAGE_GROUP);
     name = package.Name;
   } else if (cmValue optIFW_PACKAGE_NAME =
                this->GetOption("CPACK_IFW_PACKAGE_NAME")) {

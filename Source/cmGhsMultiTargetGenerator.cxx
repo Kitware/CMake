@@ -9,6 +9,8 @@
 #include <utility>
 #include <vector>
 
+#include <cm/optional>
+
 #include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
 #include "cmGeneratedFileStream.h"
@@ -411,9 +413,8 @@ void cmGhsMultiTargetGenerator::WriteCustomCommandsHelper(
   cmdLines.push_back("@echo off");
 #endif
   // Echo the custom command's comment text.
-  const char* comment = ccg.GetComment();
-  if (comment && *comment) {
-    std::string echocmd = cmStrCat("echo ", comment);
+  if (cm::optional<std::string> comment = ccg.GetComment()) {
+    std::string echocmd = cmStrCat("echo ", *comment);
     cmdLines.push_back(std::move(echocmd));
   }
 

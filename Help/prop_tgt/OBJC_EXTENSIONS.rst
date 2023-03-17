@@ -12,7 +12,7 @@ property is ``ON`` by default. The basic OBJC standard level is
 controlled by the :prop_tgt:`OBJC_STANDARD` target property.
 
 If the property is not set, and the project has set the :prop_tgt:`C_EXTENSIONS`,
-the value of :prop_tgt:`C_EXTENSIONS` is set for :prop_tgt:`OBJC_EXTENSIONS`.
+the value of :prop_tgt:`C_EXTENSIONS` is set for ``OBJC_EXTENSIONS``.
 
 See the :manual:`cmake-compile-features(7)` manual for information on
 compile features and a list of supported compilers.

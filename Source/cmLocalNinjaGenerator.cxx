@@ -701,7 +701,7 @@ bool cmLocalNinjaGenerator::HasUniqueByproducts(
 {
   std::vector<std::string> configs =
     this->GetMakefile()->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
-  cmGeneratorExpression ge(bt);
+  cmGeneratorExpression ge(*this->GetCMakeInstance(), bt);
   for (std::string const& p : byproducts) {
     if (cmGeneratorExpression::Find(p) == std::string::npos) {
       return false;

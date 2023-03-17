@@ -1,9 +1,6 @@
 include(RunCTest)
 set(RunCMake_TEST_TIMEOUT 60)
 
-unset(ENV{CTEST_PARALLEL_LEVEL})
-unset(ENV{CTEST_OUTPUT_ON_FAILURE})
-
 set(CASE_CTEST_TEST_ARGS "")
 set(CASE_CTEST_TEST_LOAD "")
 

@@ -40,10 +40,8 @@ If ``SYSTEM`` is used together with ``PUBLIC`` or ``INTERFACE``, the
 :prop_tgt:`INTERFACE_SYSTEM_INCLUDE_DIRECTORIES` target property will be
 populated with the specified directories.
 
-Arguments to ``target_include_directories`` may use "generator expressions"
-with the syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)`
-manual for available expressions.  See the :manual:`cmake-buildsystem(7)`
-manual for more on defining buildsystem properties.
+.. |command_name| replace:: ``target_include_directories``
+.. include:: GENEX_NOTE.txt
 
 Specified include directories may be absolute paths or relative paths.
 A relative path will be interpreted as relative to the current source
@@ -74,3 +72,16 @@ Creating Relocatable Packages
 
 .. |INTERFACE_PROPERTY_LINK| replace:: :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES`
 .. include:: /include/INTERFACE_INCLUDE_DIRECTORIES_WARNING.txt
+
+See Also
+^^^^^^^^
+
+* :command:`include_directories`
+* :command:`target_compile_definitions`
+* :command:`target_compile_features`
+* :command:`target_compile_options`
+* :command:`target_link_libraries`
+* :command:`target_link_directories`
+* :command:`target_link_options`
+* :command:`target_precompile_headers`
+* :command:`target_sources`

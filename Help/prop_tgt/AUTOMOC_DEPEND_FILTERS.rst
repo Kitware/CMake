@@ -25,7 +25,7 @@ target's sources, then it might be necessary to add it to the
 ``_autogen`` target  dependencies.
 See :prop_tgt:`AUTOGEN_TARGET_DEPENDS` for reference.
 
-By default :prop_tgt:`AUTOMOC_DEPEND_FILTERS` is initialized from
+By default ``AUTOMOC_DEPEND_FILTERS`` is initialized from
 :variable:`CMAKE_AUTOMOC_DEPEND_FILTERS`, which is empty by default.
 
 From Qt 5.15.0 on this variable is ignored as moc is able to output the correct

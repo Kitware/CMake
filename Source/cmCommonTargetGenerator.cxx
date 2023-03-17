@@ -6,6 +6,9 @@
 #include <sstream>
 #include <utility>
 
+#include <cm/string_view>
+#include <cmext/string_view>
+
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalCommonGenerator.h"
@@ -157,7 +160,7 @@ std::string cmCommonTargetGenerator::GetIncludes(std::string const& l,
 }
 
 std::vector<std::string> cmCommonTargetGenerator::GetLinkedTargetDirectories(
-  const std::string& config) const
+  const std::string& lang, const std::string& config) const
 {
   std::vector<std::string> dirs;
   std::set<cmGeneratorTarget const*> emitted;
@@ -172,6 +175,8 @@ std::vector<std::string> cmCommonTargetGenerator::GetLinkedTargetDirectories(
           // Target->GetLinkInformation already processed their
           // link interface and they don't have any output themselves.
           && linkee->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
+          ((lang == "CXX"_s && linkee->HaveCxx20ModuleSources()) ||
+           (lang == "Fortran"_s && linkee->HaveFortranSources(config))) &&
           emitted.insert(linkee).second) {
         cmLocalGenerator* lg = linkee->GetLocalGenerator();
         std::string di = cmStrCat(lg->GetCurrentBinaryDirectory(), '/',

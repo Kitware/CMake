@@ -7,13 +7,30 @@ By setting this target property, the target is configured to build with
 ``C++/CLI`` support.
 
 The Visual Studio generator defines the ``clr`` parameter depending on
-the value of ``COMMON_LANGUAGE_RUNTIME``:
+the value of the ``COMMON_LANGUAGE_RUNTIME`` target property:
 
-* property not set: native C++ (i.e. default)
-* property set but empty: mixed unmanaged/managed C++
-* property set to any non empty value: managed C++
+Not Set (default)
 
-Supported values: ``""``, ``"pure"``, ``"safe"``
+  Native C++.
+
+``""`` (set but empty)
+
+  Mixed unmanaged/managed C++ using .NET Framework.
+
+``netcore``
+  .. versionadded:: 3.26
+
+  Mixed unmanaged/managed C++ using .NET Core.
+
+  This required VS 2019's v142 toolset or higher.
+
+``pure``
+
+  Managed C++.
+
+``safe``
+
+  Managed C++.
 
 This property is only evaluated :ref:`Visual Studio Generators` for
 VS 2010 and above.

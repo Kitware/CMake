@@ -482,7 +482,7 @@ protected:
                                        unsigned int); // For windows
 
   // For Linux and Cygwin, /proc/cpuinfo formats are slightly different
-  bool RetreiveInformationFromCpuInfoFile();
+  bool RetrieveInformationFromCpuInfoFile();
   std::string ExtractValueFromCpuInfoFile(std::string buffer, const char* word,
                                           size_t init = 0);
 
@@ -1520,7 +1520,7 @@ void SystemInformationImplementation::RunCPUCheck()
 #elif defined(__hpux)
   this->QueryHPUXProcessor();
 #elif defined(__linux) || defined(__CYGWIN__)
-  this->RetreiveInformationFromCpuInfoFile();
+  this->RetrieveInformationFromCpuInfoFile();
 #else
   this->QueryProcessor();
 #endif
@@ -3435,7 +3435,7 @@ std::string SystemInformationImplementation::ExtractValueFromCpuInfoFile(
 }
 
 /** Query for the cpu status */
-bool SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
+bool SystemInformationImplementation::RetrieveInformationFromCpuInfoFile()
 {
   this->NumberOfLogicalCPU = 0;
   this->NumberOfPhysicalCPU = 0;

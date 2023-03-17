@@ -42,6 +42,7 @@ file(WRITE \"\${CMAKE_CURRENT_BINARY_DIR}/result.cmake\"
 
   include(${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/CheckSwift/result.cmake
     OPTIONAL)
+  # FIXME: Replace with message(CONFIGURE_LOG) when CMake version is high enough.
   if(CMAKE_Swift_COMPILER AND "${result}" STREQUAL "0")
     file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
       "${_desc} passed with the following output:\n"

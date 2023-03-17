@@ -165,7 +165,7 @@ void cmGeneratorExpressionEvaluationFile::Generate(cmLocalGenerator* lg)
   }
 
   cmListFileBacktrace lfbt = this->OutputFileExpr->GetBacktrace();
-  cmGeneratorExpression contentGE(lfbt);
+  cmGeneratorExpression contentGE(*lg->GetCMakeInstance(), lfbt);
   std::unique_ptr<cmCompiledGeneratorExpression> inputExpression =
     contentGE.Parse(inputContent);
 

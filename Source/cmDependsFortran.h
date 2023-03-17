@@ -55,7 +55,7 @@ protected:
                 std::ostream& internalDepends) override;
 
   // Find all the modules required by the target.
-  void LocateModules();
+  bool LocateModules();
   void MatchLocalModules();
   void MatchRemoteModules(std::istream& fin, const std::string& stampDir);
   void ConsiderModule(const std::string& name, const std::string& stampDir);

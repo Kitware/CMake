@@ -11,7 +11,6 @@
 #include <cmext/algorithm>
 #include <cmext/memory>
 
-#include "cmDocumentationEntry.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -71,11 +70,10 @@ cmGlobalUnixMakefileGenerator3::CreateLocalGenerator(cmMakefile* mf)
     cm::make_unique<cmLocalUnixMakefileGenerator3>(this, mf));
 }
 
-void cmGlobalUnixMakefileGenerator3::GetDocumentation(
-  cmDocumentationEntry& entry)
+cmDocumentationEntry cmGlobalUnixMakefileGenerator3::GetDocumentation()
 {
-  entry.Name = cmGlobalUnixMakefileGenerator3::GetActualName();
-  entry.Brief = "Generates standard UNIX makefiles.";
+  return { cmGlobalUnixMakefileGenerator3::GetActualName(),
+           "Generates standard UNIX makefiles." };
 }
 
 void cmGlobalUnixMakefileGenerator3::ComputeTargetObjectDirectory(
@@ -104,6 +102,9 @@ void cmGlobalUnixMakefileGenerator3::Configure()
 
 void cmGlobalUnixMakefileGenerator3::Generate()
 {
+  this->ClangTidyExportFixesDirs.clear();
+  this->ClangTidyExportFixesFiles.clear();
+
   // first do superclass method
   this->cmGlobalGenerator::Generate();
 
@@ -139,11 +140,13 @@ void cmGlobalUnixMakefileGenerator3::Generate()
     *this->CommandDatabase << "\n]";
     this->CommandDatabase.reset();
   }
+
+  this->RemoveUnknownClangTidyExportFixesFiles();
 }
 
 void cmGlobalUnixMakefileGenerator3::AddCXXCompileCommand(
   const std::string& sourceFile, const std::string& workingDirectory,
-  const std::string& compileCommand)
+  const std::string& compileCommand, const std::string& objPath)
 {
   if (!this->CommandDatabase) {
     std::string commandDatabaseName =
@@ -164,7 +167,9 @@ void cmGlobalUnixMakefileGenerator3::AddCXXCompileCommand(
                          << "\",\n"
                          << R"(  "file": ")"
                          << cmGlobalGenerator::EscapeJSON(sourceFile)
-                         << "\"\n}";
+                         << "\",\n"
+                         << R"(  "output": ")"
+                         << cmGlobalGenerator::EscapeJSON(objPath) << "\"\n}";
 }
 
 void cmGlobalUnixMakefileGenerator3::WriteMainMakefile2()

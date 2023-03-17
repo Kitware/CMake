@@ -9,6 +9,7 @@
 #include <QLineEdit>
 
 class QToolButton;
+class QSortFilterProxyModel;
 
 // common widgets for Qt based CMake
 
@@ -76,3 +77,10 @@ public:
     }
   }
 };
+
+namespace QtCMake {
+bool setSearchFilter(QSortFilterProxyModel* model,
+                     const QString& searchString);
+
+void setSearchFilterColor(QLineEdit* edit, bool valid);
+}

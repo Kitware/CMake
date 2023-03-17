@@ -4,10 +4,9 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <iterator>
 #include <string>
 #include <vector>
-
-#include <cmext/algorithm>
 
 #include "cmDocumentationEntry.h"
 
@@ -45,21 +44,20 @@ public:
   {
     this->Entries.push_back(entry);
   }
-  void Append(const std::vector<cmDocumentationEntry>& entries)
+
+  template <typename Iterable>
+  void Append(const Iterable& entries)
   {
-    cm::append(this->Entries, entries);
+    this->Entries.insert(std::end(this->Entries), std::begin(entries),
+                         std::end(entries));
   }
 
-  /** Append an entry to this section using NULL terminated chars */
-  void Append(const char* [][2]);
-  void Append(const char* n, const char* b);
-
   /** prepend some documentation to this section */
-  void Prepend(const char* [][2]);
-  void Prepend(const std::vector<cmDocumentationEntry>& entries)
+  template <typename Iterable>
+  void Prepend(const Iterable& entries)
   {
-    this->Entries.insert(this->Entries.begin(), entries.begin(),
-                         entries.end());
+    this->Entries.insert(std::begin(this->Entries), std::begin(entries),
+                         std::end(entries));
   }
 
 private:

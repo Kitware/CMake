@@ -51,7 +51,7 @@ function(CMAKE_TRY_COMPILER_OR_LINKER_FLAG lang flag result)
   if (NOT lang MATCHES "^(C|CXX|Fortran|ASM)$")
     # other possible languages are not supported
     # log message to keep trace of this problem...
-    file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+    message(CONFIGURE_LOG
       "Function 'CMAKE_CHECK_COMPILER_FLAG' called with unsupported language: ${lang}\n")
     set(${result} FALSE CACHE INTERNAL ${comment})
     return()
@@ -144,7 +144,7 @@ function(CMAKE_TRY_COMPILER_OR_LINKER_FLAG lang flag result)
     endforeach()
   endif()
   if (DEFINED ${result})
-    file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+    message(CONFIGURE_LOG
         "Determining if the ${flag} option "
         "is supported for ${lang} language failed with the following output:\n"
         "${COMPILER_FLAG_OUTPUT}\n")

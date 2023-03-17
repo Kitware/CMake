@@ -9,6 +9,7 @@ of an assembly language.  ``ASM<DIALECT>FLAGS`` can be one of:
 * ``ASMFLAGS``
 * ``ASM_NASMFLAGS``
 * ``ASM_MASMFLAGS``
+* ``ASM_MARMASMFLAGS``
 * ``ASM-ATTFLAGS``
 
 .. |CMAKE_LANG_FLAGS| replace:: :variable:`CMAKE_ASM<DIALECT>_FLAGS <CMAKE_<LANG>_FLAGS>`

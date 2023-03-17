@@ -9,7 +9,6 @@
 #include <map>
 #include <memory>
 #include <set>
-#include <stack>
 #include <string>
 #include <unordered_set>
 #include <utility>
@@ -18,6 +17,7 @@
 #include <cm/string_view>
 #include <cmext/string_view>
 
+#include "cmDocumentationEntry.h"
 #include "cmGeneratedFileStream.h"
 #include "cmInstalledFile.h"
 #include "cmListFileCache.h"
@@ -33,21 +33,19 @@
 #  include <cm3p/json/value.h>
 
 #  include "cmCMakePresetsGraph.h"
+#  include "cmMakefileProfilingData.h"
 #endif
 
+class cmConfigureLog;
 class cmExternalMakefileProjectGeneratorFactory;
 class cmFileAPI;
 class cmFileTimeCache;
 class cmGlobalGenerator;
 class cmGlobalGeneratorFactory;
 class cmMakefile;
-#if !defined(CMAKE_BOOTSTRAP)
-class cmMakefileProfilingData;
-#endif
 class cmMessenger;
 class cmVariableWatch;
 struct cmBuildOptions;
-struct cmDocumentationEntry;
 
 /** \brief Represents a cmake invocation.
  *
@@ -479,13 +477,17 @@ public:
   }
   std::string GetTopCheckInProgressMessage()
   {
-    auto message = this->CheckInProgressMessages.top();
-    this->CheckInProgressMessages.pop();
+    auto message = this->CheckInProgressMessages.back();
+    this->CheckInProgressMessages.pop_back();
     return message;
   }
   void PushCheckInProgressMessage(std::string message)
   {
-    this->CheckInProgressMessages.emplace(std::move(message));
+    this->CheckInProgressMessages.emplace_back(std::move(message));
+  }
+  std::vector<std::string> const& GetCheckInProgressMessages() const
+  {
+    return this->CheckInProgressMessages;
   }
 
   //! Should `message` command display context.
@@ -519,9 +521,22 @@ public:
   {
     return this->TraceOnlyThisSources;
   }
-  cmGeneratedFileStream& GetTraceFile() { return this->TraceFile; }
+  cmGeneratedFileStream& GetTraceFile()
+  {
+    if (this->TraceRedirect) {
+      return this->TraceRedirect->GetTraceFile();
+    }
+    return this->TraceFile;
+  }
   void SetTraceFile(std::string const& file);
   void PrintTraceFormatVersion();
+
+#ifndef CMAKE_BOOTSTRAP
+  cmConfigureLog* GetConfigureLog() const { return this->ConfigureLog.get(); }
+#endif
+
+  //! Use trace from another ::cmake instance.
+  void SetTraceRedirect(cmake* other);
 
   bool GetWarnUninitialized() const { return this->WarnUninitialized; }
   void SetWarnUninitialized(bool b) { this->WarnUninitialized = b; }
@@ -636,6 +651,24 @@ public:
 #if !defined(CMAKE_BOOTSTRAP)
   cmMakefileProfilingData& GetProfilingOutput();
   bool IsProfilingEnabled() const;
+
+  cm::optional<cmMakefileProfilingData::RAII> CreateProfilingEntry(
+    const std::string& category, const std::string& name)
+  {
+    return this->CreateProfilingEntry(
+      category, name, []() -> cm::nullopt_t { return cm::nullopt; });
+  }
+
+  template <typename ArgsFunc>
+  cm::optional<cmMakefileProfilingData::RAII> CreateProfilingEntry(
+    const std::string& category, const std::string& name, ArgsFunc&& argsFunc)
+  {
+    if (this->IsProfilingEnabled()) {
+      return cm::make_optional<cmMakefileProfilingData::RAII>(
+        this->GetProfilingOutput(), category, name, argsFunc());
+    }
+    return cm::nullopt;
+  }
 #endif
 
 protected:
@@ -695,6 +728,10 @@ private:
   bool TraceExpand = false;
   TraceFormat TraceFormatVar = TRACE_HUMAN;
   cmGeneratedFileStream TraceFile;
+  cmake* TraceRedirect = nullptr;
+#ifndef CMAKE_BOOTSTRAP
+  std::unique_ptr<cmConfigureLog> ConfigureLog;
+#endif
   bool WarnUninitialized = false;
   bool WarnUnusedCli = true;
   bool CheckSystemVars = false;
@@ -746,7 +783,7 @@ private:
   bool LogLevelWasSetViaCLI = false;
   bool LogContext = false;
 
-  std::stack<std::string> CheckInProgressMessages;
+  std::vector<std::string> CheckInProgressMessages;
 
   std::unique_ptr<cmGlobalGenerator> GlobalGenerator;
 
@@ -774,37 +811,10 @@ private:
 #if !defined(CMAKE_BOOTSTRAP)
   std::unique_ptr<cmMakefileProfilingData> ProfilingOutput;
 #endif
-};
 
-#define CMAKE_STANDARD_OPTIONS_TABLE                                          \
-  { "-S <path-to-source>", "Explicitly specify a source directory." },        \
-    { "-B <path-to-build>", "Explicitly specify a build directory." },        \
-    { "-C <initial-cache>", "Pre-load a script to populate the cache." },     \
-    { "-D <var>[:<type>]=<value>", "Create or update a cmake cache entry." }, \
-    { "-U <globbing_expr>", "Remove matching entries from CMake cache." },    \
-    { "-G <generator-name>", "Specify a build system generator." },           \
-    { "-T <toolset-name>",                                                    \
-      "Specify toolset name if supported by generator." },                    \
-    { "-A <platform-name>",                                                   \
-      "Specify platform name if supported by generator." },                   \
-    { "--toolchain <file>",                                                   \
-      "Specify toolchain file [CMAKE_TOOLCHAIN_FILE]." },                     \
-    { "--install-prefix <directory>",                                         \
-      "Specify install directory [CMAKE_INSTALL_PREFIX]." },                  \
-    { "-Wdev", "Enable developer warnings." },                                \
-    { "-Wno-dev", "Suppress developer warnings." },                           \
-    { "-Werror=dev", "Make developer warnings errors." },                     \
-    { "-Wno-error=dev", "Make developer warnings not errors." },              \
-    { "-Wdeprecated", "Enable deprecation warnings." },                       \
-    { "-Wno-deprecated", "Suppress deprecation warnings." },                  \
-    { "-Werror=deprecated",                                                   \
-      "Make deprecated macro and function warnings "                          \
-      "errors." },                                                            \
-  {                                                                           \
-    "-Wno-error=deprecated",                                                  \
-      "Make deprecated macro and function warnings "                          \
-      "not errors."                                                           \
-  }
+public:
+  static cmDocumentationEntry CMAKE_STANDARD_OPTIONS_TABLE[18];
+};
 
 #define FOR_EACH_C90_FEATURE(F) F(c_function_prototypes)
 

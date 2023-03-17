@@ -344,8 +344,14 @@ private:
 
 #define cmCPackTypeMacro(klass, superclass)                                   \
   using Superclass = superclass;                                              \
-  const char* GetNameOfClass() override { return #klass; }                    \
-  static cmCPackGenerator* CreateGenerator() { return new klass; }            \
+  const char* GetNameOfClass() override                                       \
+  {                                                                           \
+    return #klass;                                                            \
+  }                                                                           \
+  static cmCPackGenerator* CreateGenerator()                                  \
+  {                                                                           \
+    return new klass;                                                         \
+  }                                                                           \
   class cmCPackTypeMacro_UseTrailingSemicolon
 
 #define cmCPackLogger(logType, msg)                                           \

@@ -1,5 +1,5 @@
 CMake Error at OUTPUT_NAME-recursion.cmake:[0-9]+ \(add_executable\):
-  Target 'empty2' OUTPUT_NAME depends on itself.
+  Target 'empty1' OUTPUT_NAME depends on itself.
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)
 

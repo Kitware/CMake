@@ -17,6 +17,7 @@
 
 enum class CxxModuleMapFormat
 {
+  Clang,
   Gcc,
   Msvc,
 };

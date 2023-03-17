@@ -11,21 +11,21 @@
 #include "cmCTest.h"
 #include "cmConsoleBuf.h"
 #include "cmDocumentation.h"
+#include "cmDocumentationEntry.h"
 #include "cmSystemTools.h"
 
 #include "CTest/cmCTestLaunch.h"
 #include "CTest/cmCTestScriptHandler.h"
 
-static const char* cmDocumentationName[][2] = {
-  { nullptr, "  ctest - Testing driver provided by CMake." },
-  { nullptr, nullptr }
+namespace {
+const cmDocumentationEntry cmDocumentationName = {
+  {},
+  "  ctest - Testing driver provided by CMake."
 };
 
-static const char* cmDocumentationUsage[][2] = { { nullptr,
-                                                   "  ctest [options]" },
-                                                 { nullptr, nullptr } };
+const cmDocumentationEntry cmDocumentationUsage = { {}, "  ctest [options]" };
 
-static const char* cmDocumentationOptions[][2] = {
+const cmDocumentationEntry cmDocumentationOptions[74] = {
   { "--preset <preset>, --preset=<preset>",
     "Read arguments from a test preset." },
   { "--list-presets", "List available test presets." },
@@ -155,9 +155,9 @@ static const char* cmDocumentationOptions[][2] = {
   { "--no-compress-output", "Do not compress test output when submitting." },
   { "--print-labels", "Print all available test labels." },
   { "--no-tests=<[error|ignore]>",
-    "Regard no tests found either as 'error' or 'ignore' it." },
-  { nullptr, nullptr }
+    "Regard no tests found either as 'error' or 'ignore' it." }
 };
+} // anonymous namespace
 
 // this is a test driver program for cmCTest.
 int main(int argc, char const* const* argv)
@@ -186,8 +186,7 @@ int main(int argc, char const* const* argv)
 
   if (cmSystemTools::GetCurrentWorkingDirectory().empty()) {
     cmCTestLog(&inst, ERROR_MESSAGE,
-               "Current working directory cannot be established."
-                 << std::endl);
+               "Current working directory cannot be established.\n");
     return 1;
   }
 
@@ -199,10 +198,9 @@ int main(int argc, char const* const* argv)
         cmSystemTools::FileExists("DartTestfile.txt"))) {
     if (argc == 1) {
       cmCTestLog(&inst, ERROR_MESSAGE,
-                 "*********************************"
-                   << std::endl
-                   << "No test configuration file found!" << std::endl
-                   << "*********************************" << std::endl);
+                 "*********************************\n"
+                 "No test configuration file found!\n"
+                 "*********************************\n");
     }
     cmDocumentation doc;
     doc.addCTestStandardDocSections();
@@ -216,7 +214,7 @@ int main(int argc, char const* const* argv)
       doc.SetSection("Name", cmDocumentationName);
       doc.SetSection("Usage", cmDocumentationUsage);
       doc.PrependSection("Options", cmDocumentationOptions);
-      return doc.PrintRequestedDocumentation(std::cout) ? 0 : 1;
+      return !doc.PrintRequestedDocumentation(std::cout);
     }
   }
 

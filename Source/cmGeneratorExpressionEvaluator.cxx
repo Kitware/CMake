@@ -4,8 +4,14 @@
 
 #include <sstream>
 
+#ifndef CMAKE_BOOTSTRAP
+#  include <cm3p/json/value.h>
+#endif
+
 #include "cmGeneratorExpressionContext.h"
 #include "cmGeneratorExpressionNode.h"
+#include "cmLocalGenerator.h"
+#include "cmake.h"
 
 GeneratorExpressionContent::GeneratorExpressionContent(
   const char* startContent, size_t length)
@@ -61,6 +67,12 @@ std::string GeneratorExpressionContent::Evaluate(
   cmGeneratorExpressionContext* context,
   cmGeneratorExpressionDAGChecker* dagChecker) const
 {
+#ifndef CMAKE_BOOTSTRAP
+  auto evalProfilingRAII =
+    context->LG->GetCMakeInstance()->CreateProfilingEntry(
+      "genex_eval", this->GetOriginalExpression());
+#endif
+
   std::string identifier;
   {
     for (const auto& pExprEval : this->IdentifierChildren) {
@@ -101,7 +113,24 @@ std::string GeneratorExpressionContent::Evaluate(
     return std::string();
   }
 
-  return node->Evaluate(parameters, context, this, dagChecker);
+  {
+#ifndef CMAKE_BOOTSTRAP
+    auto execProfilingRAII =
+      context->LG->GetCMakeInstance()->CreateProfilingEntry(
+        "genex_exec", identifier, [&parameters]() -> Json::Value {
+          Json::Value args = Json::objectValue;
+          if (!parameters.empty()) {
+            args["genexArgs"] = Json::arrayValue;
+            for (auto const& parameter : parameters) {
+              args["genexArgs"].append(parameter);
+            }
+          }
+          return args;
+        });
+#endif
+
+    return node->Evaluate(parameters, context, this, dagChecker);
+  }
 }
 
 std::string GeneratorExpressionContent::EvaluateParameters(

@@ -430,7 +430,7 @@ void cmLocalGenerator::GenerateInstallRules()
   // Compute the install prefix.
   cmValue installPrefix =
     this->Makefile->GetDefinition("CMAKE_INSTALL_PREFIX");
-  std::string prefix = installPrefix;
+  std::string prefix = *installPrefix;
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
   if (!installPrefix) {
@@ -869,7 +869,7 @@ std::string cmLocalGenerator::GetIncludeFlags(
         cmStrCat("CMAKE_INCLUDE_FLAG_SEP_", lang))) {
     // if there is a separator then the flag is not repeated but is only
     // given once i.e.  -classpath a:b:c
-    sep = incSep;
+    sep = *incSep;
     repeatFlag = false;
   }
 
@@ -1019,12 +1019,6 @@ void cmLocalGenerator::AddCompileOptions(std::vector<BT<std::string>>& flags,
       this->IssueMessage(MessageType::FATAL_ERROR, e.str());
       return;
     }
-  }
-
-  std::string compReqFlag;
-  this->AddCompilerRequirementFlag(compReqFlag, target, lang, config);
-  if (!compReqFlag.empty()) {
-    flags.emplace_back(std::move(compReqFlag));
   }
 
   // Add Warning as errors flags
@@ -1403,7 +1397,7 @@ void cmLocalGenerator::GetDeviceLinkFlags(
   if (ipoEnabled) {
     if (cmValue cudaIPOFlags = this->Makefile->GetDefinition(
           "CMAKE_CUDA_DEVICE_LINK_OPTIONS_IPO")) {
-      linkFlags += cudaIPOFlags;
+      linkFlags += *cudaIPOFlags;
     }
   }
 
@@ -1414,7 +1408,7 @@ void cmLocalGenerator::GetDeviceLinkFlags(
                               linkPath);
   }
 
-  // iterate link deps and see if any of them need IPO
+  this->AddVisibilityPresetFlags(linkFlags, target, "CUDA");
 
   std::vector<std::string> linkOpts;
   target->GetLinkOptions(linkOpts, config, "CUDA");
@@ -1854,7 +1848,7 @@ bool cmLocalGenerator::AllAppleArchSysrootsAreTheSame(
                      [this, sysroot](std::string const& arch) -> bool {
                        std::string const& archSysroot =
                          this->AppleArchSysroots[arch];
-                       return cmIsOff(archSysroot) || sysroot == archSysroot;
+                       return cmIsOff(archSysroot) || *sysroot == archSysroot;
                      });
 }
 
@@ -1931,6 +1925,30 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
   // Add language-specific flags.
   this->AddConfigVariableFlags(flags, cmStrCat("CMAKE_", lang, "_FLAGS"),
                                config);
+
+  // Add the language standard flag for compiling, and sometimes linking.
+  if (compileOrLink == cmBuildStep::Compile ||
+      (compileOrLink == cmBuildStep::Link &&
+       // Some toolchains require use of the language standard flag
+       // when linking in order to use the matching standard library.
+       // FIXME: If CMake gains an abstraction for standard library
+       // selection, this will have to be reconciled with it.
+       this->Makefile->IsOn(
+         cmStrCat("CMAKE_", lang, "_LINK_WITH_STANDARD_COMPILE_OPTION")))) {
+    cmStandardLevelResolver standardResolver(this->Makefile);
+    std::string const& optionFlagDef =
+      standardResolver.GetCompileOptionDef(target, lang, config);
+    if (!optionFlagDef.empty()) {
+      cmValue opt =
+        target->Target->GetMakefile()->GetDefinition(optionFlagDef);
+      if (opt) {
+        std::vector<std::string> optVec = cmExpandedList(*opt);
+        for (std::string const& i : optVec) {
+          this->AppendFlagEscape(flags, i);
+        }
+      }
+    }
+  }
 
   std::string compiler = this->Makefile->GetSafeDefinition(
     cmStrCat("CMAKE_", lang, "_COMPILER_ID"));
@@ -2076,15 +2094,6 @@ void cmLocalGenerator::AddLanguageFlagsForLinking(
   std::string& flags, cmGeneratorTarget const* target, const std::string& lang,
   const std::string& config)
 {
-  if (this->Makefile->IsOn("CMAKE_" + lang +
-                           "_LINK_WITH_STANDARD_COMPILE_OPTION")) {
-    // This toolchain requires use of the language standard flag
-    // when linking in order to use the matching standard library.
-    // FIXME: If CMake gains an abstraction for standard library
-    // selection, this will have to be reconciled with it.
-    this->AddCompilerRequirementFlag(flags, target, lang, config);
-  }
-
   this->AddLanguageFlags(flags, target, cmBuildStep::Link, lang, config);
 
   if (target->IsIPOEnabled(lang, config)) {
@@ -2221,25 +2230,6 @@ void cmLocalGenerator::AddSharedFlags(std::string& flags,
     this->AppendFlags(flags,
                       this->Makefile->GetSafeDefinition(
                         cmStrCat("CMAKE_SHARED_LIBRARY_", lang, "_FLAGS")));
-  }
-}
-
-void cmLocalGenerator::AddCompilerRequirementFlag(
-  std::string& flags, cmGeneratorTarget const* target, const std::string& lang,
-  const std::string& config)
-{
-  cmStandardLevelResolver standardResolver(this->Makefile);
-
-  std::string const& optionFlagDef =
-    standardResolver.GetCompileOptionDef(target, lang, config);
-  if (!optionFlagDef.empty()) {
-    cmValue opt = target->Target->GetMakefile()->GetDefinition(optionFlagDef);
-    if (opt) {
-      std::vector<std::string> optVec = cmExpandedList(*opt);
-      for (std::string const& i : optVec) {
-        this->AppendFlagEscape(flags, i);
-      }
-    }
   }
 }
 
@@ -3387,7 +3377,12 @@ void cmLocalGenerator::AppendDefines(
     if (!this->CheckDefinition(d.Value)) {
       continue;
     }
-    defines.insert(d);
+    // remove any leading -D
+    if (cmHasLiteralPrefix(d.Value, "-D")) {
+      defines.emplace(d.Value.substr(2), d.Backtrace);
+    } else {
+      defines.insert(d);
+    }
   }
 }
 
@@ -3484,8 +3479,8 @@ std::string cmLocalGenerator::ConstructComment(
   cmCustomCommandGenerator const& ccg, const char* default_comment) const
 {
   // Check for a comment provided with the command.
-  if (ccg.GetComment()) {
-    return ccg.GetComment();
+  if (cm::optional<std::string> comment = ccg.GetComment()) {
+    return *comment;
   }
 
   // Construct a reasonable default comment if possible.
@@ -4505,7 +4500,7 @@ std::vector<std::string> cmLocalGenerator::ExpandCustomCommandOutputGenex(
   std::string const& o, cmListFileBacktrace const& bt)
 {
   std::vector<std::string> allConfigOutputs;
-  cmGeneratorExpression ge(bt);
+  cmGeneratorExpression ge(*this->GetCMakeInstance(), bt);
   std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(o);
   std::vector<std::string> configs =
     this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);

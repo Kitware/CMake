@@ -4,7 +4,9 @@ project(TestLegacyPerl CXX)
 
 include(CTest)
 
-set(language "perl")
+if(NOT DEFINED language)
+  set(language "perl")
+endif()
 
 include (../LegacyConfiguration.cmake)
 

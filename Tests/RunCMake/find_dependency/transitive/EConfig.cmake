@@ -1,0 +1,6 @@
+message(STATUS "Loading E with components: '${E_FIND_COMPONENTS}'")
+include(CMakeFindDependencyMacro)
+find_dependency(A COMPONENTS A1 NO_DEFAULT_PATH PATHS ${CMAKE_CURRENT_LIST_DIR})
+find_dependency(B COMPONENTS B1 NO_DEFAULT_PATH PATHS ${CMAKE_CURRENT_LIST_DIR})
+find_dependency(C NO_DEFAULT_PATH PATHS ${CMAKE_CURRENT_LIST_DIR})
+find_dependency(D NO_DEFAULT_PATH PATHS ${CMAKE_CURRENT_LIST_DIR})

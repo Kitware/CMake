@@ -1,0 +1,10 @@
+^-- CMAKE_ARGC='6'
+-- CMAKE_ARGV1='-P'
+-- CMAKE_ARGV2='[^']*/Tests/RunCMake/CommandLine/P_arbitrary_args.cmake'
+-- CMAKE_ARGV3='--'
+-- CMAKE_ARGV4='-P'
+-- CMAKE_ARGV5='-o'
+-- CMAKE_ARGV6=''
+-- CMAKE_ARGV7=''
+-- CMAKE_ARGV8=''
+-- CMAKE_ARGV9=''$

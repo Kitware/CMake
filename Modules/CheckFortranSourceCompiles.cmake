@@ -19,18 +19,22 @@ Check if given Fortran source compiles and links into an executable.
     )
 
   Checks that the source supplied in ``<code>`` can be compiled as a Fortran
-  source file and linked as an executable. The ``<code>`` must be a Fortran program
-  containing at least an ``end`` statement--for example:
+  source file and linked as an executable. The ``<code>`` must be a Fortran
+  ``program``.
 
   .. code-block:: cmake
 
-    check_fortran_source_compiles("character :: b; error stop b; end" F2018ESTOPOK SRC_EXT F90)
+    check_fortran_source_compiles("program test
+    error stop
+    end program"
+    HAVE_ERROR_STOP
+    SRC_EXT .F90)
 
   This command can help avoid costly build processes when a compiler lacks support
   for a necessary feature, or a particular vendor library is not compatible with
   the Fortran compiler version being used. This generate-time check may advise the
   user of such before the main build process. See also the
-  :command:`check_fortran_source_runs` command to actually run the compiled code.
+  :command:`check_fortran_source_runs` command to run the compiled code.
 
   The result will be stored in the internal cache
   variable ``<resultVar>``, with a boolean true value for success and boolean

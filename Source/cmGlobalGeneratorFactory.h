@@ -4,6 +4,10 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include "cmDocumentationEntry.h" // IWYU pragma: export
+
+// TODO The following headers are parts of the `cmGlobalGeneratorFactory`
+// public API, so could be defined as export to IWYU
 #include <string>
 #include <vector>
 
@@ -11,7 +15,6 @@
 
 class cmGlobalGenerator;
 class cmake;
-struct cmDocumentationEntry;
 
 /** \class cmGlobalGeneratorFactory
  * \brief Responable for creating cmGlobalGenerator instances
@@ -28,7 +31,7 @@ public:
     const std::string& n, bool allowArch, cmake* cm) const = 0;
 
   /** Get the documentation entry for this factory */
-  virtual void GetDocumentation(cmDocumentationEntry& entry) const = 0;
+  virtual cmDocumentationEntry GetDocumentation() const = 0;
 
   /** Get the names of the current registered generators */
   virtual std::vector<std::string> GetGeneratorNames() const = 0;
@@ -47,7 +50,7 @@ public:
   virtual std::string GetDefaultPlatformName() const = 0;
 };
 
-template <class T>
+template <typename T>
 class cmGlobalGeneratorSimpleFactory : public cmGlobalGeneratorFactory
 {
 public:
@@ -62,21 +65,19 @@ public:
   }
 
   /** Get the documentation entry for this factory */
-  void GetDocumentation(cmDocumentationEntry& entry) const override
+  cmDocumentationEntry GetDocumentation() const override
   {
-    T::GetDocumentation(entry);
+    return T::GetDocumentation();
   }
 
   /** Get the names of the current registered generators */
   std::vector<std::string> GetGeneratorNames() const override
   {
-    std::vector<std::string> names;
-    names.push_back(T::GetActualName());
-    return names;
+    return { T::GetActualName() };
   }
   std::vector<std::string> GetGeneratorNamesWithPlatform() const override
   {
-    return std::vector<std::string>();
+    return {};
   }
 
   /** Determine whether or not this generator supports toolsets */
@@ -89,8 +90,8 @@ public:
   std::vector<std::string> GetKnownPlatforms() const override
   {
     // default is no platform supported
-    return std::vector<std::string>();
+    return {};
   }
 
-  std::string GetDefaultPlatformName() const override { return std::string(); }
+  std::string GetDefaultPlatformName() const override { return {}; }
 };

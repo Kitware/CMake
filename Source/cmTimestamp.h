@@ -32,6 +32,6 @@ private:
   time_t CreateUtcTimeTFromTm(struct tm& timeStruct) const;
 
   std::string AddTimestampComponent(char flag, struct tm& timeStruct,
-                                    time_t timeT,
-                                    uint32_t microseconds = 0) const;
+                                    time_t timeT, bool utcFlag,
+                                    uint32_t microseconds) const;
 };

@@ -4,11 +4,13 @@
 
 #include <algorithm>
 #include <cassert>
+#include <chrono>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <functional>
 #include <initializer_list>
+#include <iomanip>
 #include <iterator>
 #include <sstream>
 #include <utility>
@@ -827,7 +829,8 @@ void cmGlobalGenerator::EnableLanguage(
         "No " << compilerName << " could be found.\n"
         ;
       /* clang-format on */
-    } else if ((lang != "RC") && (lang != "ASM_MASM")) {
+    } else if ((lang != "RC") && (lang != "ASM_MARMASM") &&
+               (lang != "ASM_MASM")) {
       if (!cmSystemTools::FileIsFullPath(*compilerFile)) {
         /* clang-format off */
         noCompiler <<
@@ -946,7 +949,7 @@ void cmGlobalGenerator::PrintCompilerAdvice(std::ostream& os,
   // Subclasses override this method if they do not support this advice.
   os << "Tell CMake where to find the compiler by setting ";
   if (envVar) {
-    os << "either the environment variable \"" << envVar << "\" or ";
+    os << "either the environment variable \"" << *envVar << "\" or ";
   }
   os << "the CMake cache entry CMAKE_" << lang
      << "_COMPILER "
@@ -1302,6 +1305,8 @@ void cmGlobalGenerator::CreateLocalGenerators()
 
 void cmGlobalGenerator::Configure()
 {
+  auto startTime = std::chrono::steady_clock::now();
+
   this->FirstTimeProgress = 0.0f;
   this->ClearGeneratorMembers();
   this->NextDeferId = 0;
@@ -1349,20 +1354,17 @@ void cmGlobalGenerator::Configure()
                                           "number of local generators",
                                           cmStateEnums::INTERNAL);
 
+  auto endTime = std::chrono::steady_clock::now();
+
   if (this->CMakeInstance->GetWorkingMode() == cmake::NORMAL_MODE) {
     std::ostringstream msg;
     if (cmSystemTools::GetErrorOccurredFlag()) {
       msg << "Configuring incomplete, errors occurred!";
-      const char* logs[] = { "CMakeOutput.log", "CMakeError.log", nullptr };
-      for (const char** log = logs; *log; ++log) {
-        std::string f = cmStrCat(this->CMakeInstance->GetHomeOutputDirectory(),
-                                 "/CMakeFiles/", *log);
-        if (cmSystemTools::FileExists(f)) {
-          msg << "\nSee also \"" << f << "\".";
-        }
-      }
     } else {
-      msg << "Configuring done";
+      auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+        endTime - startTime);
+      msg << "Configuring done (" << std::fixed << std::setprecision(1)
+          << ms.count() / 1000.0L << "s)";
     }
     this->CMakeInstance->UpdateProgress(msg.str(), -1);
   }
@@ -1436,6 +1438,19 @@ bool cmGlobalGenerator::CheckALLOW_DUPLICATE_CUSTOM_TARGETS() const
     << "use duplicate target names.";
   cmSystemTools::Error(e.str());
   return false;
+}
+
+void cmGlobalGenerator::CxxModuleSupportCheck() const
+{
+  bool const diagnose = !this->DiagnosedCxxModuleSupport &&
+    !this->CMakeInstance->GetIsInTryCompile();
+  if (diagnose) {
+    this->DiagnosedCxxModuleSupport = true;
+    this->GetCMakeInstance()->IssueMessage(
+      MessageType::AUTHOR_WARNING,
+      "C++20 modules support via CMAKE_EXPERIMENTAL_CXX_MODULE_DYNDEP "
+      "is experimental.  It is meant only for compiler developers to try.");
+  }
 }
 
 void cmGlobalGenerator::ComputeBuildFileGenerators()
@@ -1592,9 +1607,13 @@ bool cmGlobalGenerator::Compute()
 
 void cmGlobalGenerator::Generate()
 {
+  auto startTime = std::chrono::steady_clock::now();
+
   // Create a map from local generator to the complete set of targets
   // it builds by default.
   this->InitializeProgressMarks();
+
+  this->DiagnosedCxxModuleSupport = false;
 
   this->ProcessEvaluationFiles();
 
@@ -1672,7 +1691,13 @@ void cmGlobalGenerator::Generate()
                                            w.str());
   }
 
-  this->CMakeInstance->UpdateProgress("Generating done", -1);
+  auto endTime = std::chrono::steady_clock::now();
+  auto ms =
+    std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+  std::ostringstream msg;
+  msg << "Generating done (" << std::fixed << std::setprecision(1)
+      << ms.count() / 1000.0L << "s)";
+  this->CMakeInstance->UpdateProgress(msg.str(), -1);
 }
 
 bool cmGlobalGenerator::ComputeTargetDepends()
@@ -2024,7 +2049,7 @@ int cmGlobalGenerator::TryCompile(int jobs, const std::string& srcdir,
   cmBuildOptions defaultBuildOptions(false, fast, PackageResolveMode::Disable);
 
   return this->Build(jobs, srcdir, bindir, projectName, newTarget, output, "",
-                     config, defaultBuildOptions, false,
+                     config, defaultBuildOptions, true,
                      this->TryCompileTimeout);
 }
 
@@ -2943,19 +2968,18 @@ std::string cmGlobalGenerator::GetPredefinedTargetsFolder() const
 
 bool cmGlobalGenerator::UseFolderProperty() const
 {
-  cmValue prop =
+  const cmValue prop =
     this->GetCMakeInstance()->GetState()->GetGlobalProperty("USE_FOLDERS");
 
-  // If this property is defined, let the setter turn this on or off...
-  //
+  // If this property is defined, let the setter turn this on or off.
   if (prop) {
     return cmIsOn(*prop);
   }
 
-  // By default, this feature is OFF, since it is not supported in the
-  // Visual Studio Express editions until VS11:
-  //
-  return false;
+  // If CMP0143 is NEW `treat` "USE_FOLDERS" as ON. Otherwise `treat` it as OFF
+  assert(!this->Makefiles.empty());
+  return (this->Makefiles[0]->GetPolicyStatus(cmPolicies::CMP0143) ==
+          cmPolicies::NEW);
 }
 
 void cmGlobalGenerator::CreateGlobalTarget(GlobalTargetInfo const& gti,

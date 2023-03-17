@@ -1,8 +1,29 @@
 
+#ifdef _WIN32
+#  define IMPORT __declspec(dllimport)
+#else
+#  define IMPORT
+#endif
 
-int shared_version();
-int static_version();
-int mixed_version();
+IMPORT int shared_version();
+
+#ifdef HAS_STATIC_VERSION
+IMPORT int static_version();
+#else
+int static_version()
+{
+  return 0;
+}
+#endif
+
+#ifdef HAS_MIXED_VERSION
+IMPORT int mixed_version();
+#else
+int mixed_version()
+{
+  return 0;
+}
+#endif
 
 int main()
 {

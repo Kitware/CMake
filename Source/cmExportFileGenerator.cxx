@@ -379,7 +379,7 @@ void cmExportFileGenerator::PopulateIncludeDirectoriesInterface(
   const char* propName = "INTERFACE_INCLUDE_DIRECTORIES";
   cmValue input = target->GetProperty(propName);
 
-  cmGeneratorExpression ge;
+  cmGeneratorExpression ge(*target->Makefile->GetCMakeInstance());
 
   std::string dirs = cmGeneratorExpression::Preprocess(
     cmJoin(target->Target->GetInstallIncludeDirectoriesEntries(te), ";"),
@@ -669,8 +669,7 @@ void cmExportFileGenerator::ResolveTargetsInGeneratorExpression(
 
   while ((pos = input.find("$<TARGET_PROPERTY:", lastPos)) !=
          std::string::npos) {
-    std::string::size_type nameStartPos =
-      pos + sizeof("$<TARGET_PROPERTY:") - 1;
+    std::string::size_type nameStartPos = pos + cmStrLen("$<TARGET_PROPERTY:");
     std::string::size_type closePos = input.find('>', nameStartPos);
     std::string::size_type commaPos = input.find(',', nameStartPos);
     std::string::size_type nextOpenPos = input.find("$<", nameStartPos);
@@ -696,7 +695,7 @@ void cmExportFileGenerator::ResolveTargetsInGeneratorExpression(
   pos = 0;
   lastPos = pos;
   while ((pos = input.find("$<TARGET_NAME:", lastPos)) != std::string::npos) {
-    std::string::size_type nameStartPos = pos + sizeof("$<TARGET_NAME:") - 1;
+    std::string::size_type nameStartPos = pos + cmStrLen("$<TARGET_NAME:");
     std::string::size_type endPos = input.find('>', nameStartPos);
     if (endPos == std::string::npos) {
       errorString = "$<TARGET_NAME:...> expression incomplete";
@@ -721,7 +720,7 @@ void cmExportFileGenerator::ResolveTargetsInGeneratorExpression(
   lastPos = pos;
   while (errorString.empty() &&
          (pos = input.find("$<LINK_ONLY:", lastPos)) != std::string::npos) {
-    std::string::size_type nameStartPos = pos + sizeof("$<LINK_ONLY:") - 1;
+    std::string::size_type nameStartPos = pos + cmStrLen("$<LINK_ONLY:");
     std::string::size_type endPos = input.find('>', nameStartPos);
     if (endPos == std::string::npos) {
       errorString = "$<LINK_ONLY:...> expression incomplete";
@@ -939,13 +938,13 @@ void cmExportFileGenerator::GeneratePolicyHeaderCode(std::ostream& os)
 
   // Isolate the file policy level.
   // Support CMake versions as far back as 2.6 but also support using NEW
-  // policy settings for up to CMake 3.23 (this upper limit may be reviewed
+  // policy settings for up to CMake 3.24 (this upper limit may be reviewed
   // and increased from time to time). This reduces the opportunity for CMake
   // warnings when an older export file is later used with newer CMake
   // versions.
   /* clang-format off */
   os << "cmake_policy(PUSH)\n"
-     << "cmake_policy(VERSION 2.8.3...3.23)\n";
+     << "cmake_policy(VERSION 2.8.3...3.24)\n";
   /* clang-format on */
 }
 

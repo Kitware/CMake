@@ -7,6 +7,7 @@
 #include <iosfwd>
 #include <map>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "cmDocumentationFormatter.h"
@@ -15,9 +16,33 @@
 struct cmDocumentationEntry;
 
 /** Class to generate documentation.  */
-class cmDocumentation : public cmDocumentationEnums
+class cmDocumentation
 {
 public:
+  /** Types of help provided.  */
+  enum Type
+  {
+    None,
+    Version,
+    Usage,
+    Help,
+    Full,
+    ListManuals,
+    ListCommands,
+    ListModules,
+    ListProperties,
+    ListVariables,
+    ListPolicies,
+    ListGenerators,
+    OneManual,
+    OneCommand,
+    OneModule,
+    OneProperty,
+    OneVariable,
+    OnePolicy,
+    OldCustomModules
+  };
+
   cmDocumentation();
 
   /**
@@ -50,19 +75,26 @@ public:
   /** Set a section of the documentation. Typical sections include Name,
       Usage, Description, Options */
   void SetSection(const char* sectionName, cmDocumentationSection section);
-  void SetSection(const char* sectionName,
-                  std::vector<cmDocumentationEntry>& docs);
-  void SetSection(const char* sectionName, const char* docs[][2]);
-  void SetSections(std::map<std::string, cmDocumentationSection> sections);
+  template <typename Iterable>
+  void SetSection(const char* sectionName, const Iterable& docs)
+  {
+    cmDocumentationSection sec{ sectionName };
+    sec.Append(docs);
+    this->SetSection(sectionName, std::move(sec));
+  }
 
   /** Add the documentation to the beginning/end of the section */
-  void PrependSection(const char* sectionName, const char* docs[][2]);
-  void PrependSection(const char* sectionName,
-                      std::vector<cmDocumentationEntry>& docs);
+  template <typename Iterable>
+  void PrependSection(const char* sectionName, const Iterable& docs)
+  {
+    this->SectionAtName(sectionName).Prepend(docs);
+  }
   void PrependSection(const char* sectionName, cmDocumentationEntry& docs);
-  void AppendSection(const char* sectionName, const char* docs[][2]);
-  void AppendSection(const char* sectionName,
-                     std::vector<cmDocumentationEntry>& docs);
+  template <typename Iterable>
+  void AppendSection(const char* sectionName, const Iterable& docs)
+  {
+    this->SectionAtName(sectionName).Append(docs);
+  }
   void AppendSection(const char* sectionName, cmDocumentationEntry& docs);
 
   /** Add common (to all tools) documentation section(s) */
@@ -102,7 +134,6 @@ private:
   bool PrintOldCustomModules(std::ostream& os);
 
   const char* GetNameString() const;
-  bool IsOption(const char* arg) const;
 
   bool ShowGenerators;
 
@@ -114,7 +145,7 @@ private:
 
   struct RequestedHelpItem
   {
-    cmDocumentationEnums::Type HelpType = None;
+    Type HelpType = None;
     std::string Filename;
     std::string Argument;
   };

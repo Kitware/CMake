@@ -6,7 +6,6 @@
 
 #include <cmext/algorithm>
 
-#include "cmDocumentationEntry.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmState.h"
@@ -36,11 +35,10 @@ void cmGlobalJOMMakefileGenerator::EnableLanguage(
   this->cmGlobalUnixMakefileGenerator3::EnableLanguage(l, mf, optional);
 }
 
-void cmGlobalJOMMakefileGenerator::GetDocumentation(
-  cmDocumentationEntry& entry)
+cmDocumentationEntry cmGlobalJOMMakefileGenerator::GetDocumentation()
 {
-  entry.Name = cmGlobalJOMMakefileGenerator::GetActualName();
-  entry.Brief = "Generates JOM makefiles.";
+  return { cmGlobalJOMMakefileGenerator::GetActualName(),
+           "Generates JOM makefiles." };
 }
 
 void cmGlobalJOMMakefileGenerator::PrintCompilerAdvice(std::ostream& os,

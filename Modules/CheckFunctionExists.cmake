@@ -95,7 +95,7 @@ macro(CHECK_FUNCTION_EXISTS FUNCTION VARIABLE)
       ${CHECK_FUNCTION_EXISTS_ADD_LIBRARIES}
       CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_FUNCTION_DEFINITIONS}
       "${CHECK_FUNCTION_EXISTS_ADD_INCLUDES}"
-      OUTPUT_VARIABLE OUTPUT)
+      )
     unset(_cfe_source)
 
     if(${VARIABLE})
@@ -103,17 +103,11 @@ macro(CHECK_FUNCTION_EXISTS FUNCTION VARIABLE)
       if(NOT CMAKE_REQUIRED_QUIET)
         message(CHECK_PASS "found")
       endif()
-      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-        "Determining if the function ${FUNCTION} exists passed with the following output:\n"
-        "${OUTPUT}\n\n")
     else()
       if(NOT CMAKE_REQUIRED_QUIET)
         message(CHECK_FAIL "not found")
       endif()
       set(${VARIABLE} "" CACHE INTERNAL "Have function ${FUNCTION}")
-      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-        "Determining if the function ${FUNCTION} exists failed with the following output:\n"
-        "${OUTPUT}\n\n")
     endif()
   endif()
 endmacro()

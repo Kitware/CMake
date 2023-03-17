@@ -1,4 +1,4 @@
-module importable : internal_partition;
+module importable:internal_partition;
 
 int from_partition()
 {

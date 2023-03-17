@@ -111,3 +111,8 @@ environment variable.
 
 Arguments after ``<value>`` are ignored. If extra arguments are found,
 then an author warning is issued.
+
+See Also
+^^^^^^^^
+
+* :command:`unset`

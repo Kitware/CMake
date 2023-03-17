@@ -5,10 +5,12 @@
     "projectName": "Cxx",
     "type": "SHARED_LIBRARY",
     "isGeneratorProvided": null,
+    "fileSets": null,
     "sources": [
         {
             "path": "^empty\\.cxx$",
             "isGenerated": null,
+            "fileSetName": null,
             "sourceGroupName": "Source Files",
             "compileGroupLanguage": "CXX",
             "backtrace": [

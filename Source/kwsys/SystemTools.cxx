@@ -36,6 +36,7 @@
 
 #ifdef _WIN32
 #  include <cwchar>
+#  include <unordered_map>
 #endif
 
 // Work-around CMake dependency scanning limitation.  This must
@@ -506,16 +507,39 @@ public:
 };
 
 #ifdef _WIN32
-struct SystemToolsPathCaseCmp
+#  if defined(_WIN64)
+static constexpr size_t FNV_OFFSET_BASIS = 14695981039346656037ULL;
+static constexpr size_t FNV_PRIME = 1099511628211ULL;
+#  else
+static constexpr size_t FNV_OFFSET_BASIS = 2166136261U;
+static constexpr size_t FNV_PRIME = 16777619U;
+#  endif
+
+// Case insensitive Fnv1a hash
+struct SystemToolsPathCaseHash
+{
+  size_t operator()(std::string const& path) const
+  {
+    size_t hash = FNV_OFFSET_BASIS;
+    for (auto c : path) {
+      hash ^= static_cast<size_t>(std::tolower(c));
+      hash *= FNV_PRIME;
+    }
+
+    return hash;
+  }
+};
+
+struct SystemToolsPathCaseEqual
 {
   bool operator()(std::string const& l, std::string const& r) const
   {
 #  ifdef _MSC_VER
-    return _stricmp(l.c_str(), r.c_str()) < 0;
+    return _stricmp(l.c_str(), r.c_str()) == 0;
 #  elif defined(__GNUC__)
-    return strcasecmp(l.c_str(), r.c_str()) < 0;
+    return strcasecmp(l.c_str(), r.c_str()) == 0;
 #  else
-    return SystemTools::Strucmp(l.c_str(), r.c_str()) < 0;
+    return SystemTools::Strucmp(l.c_str(), r.c_str()) == 0;
 #  endif
   }
 };
@@ -540,8 +564,12 @@ public:
                                      bool const cache);
   static std::string GetActualCaseForPathCached(std::string const& path);
   static const char* GetEnvBuffered(const char* key);
-  std::map<std::string, std::string, SystemToolsPathCaseCmp> FindFileMap;
-  std::map<std::string, std::string, SystemToolsPathCaseCmp> PathCaseMap;
+  std::unordered_map<std::string, std::string, SystemToolsPathCaseHash,
+                     SystemToolsPathCaseEqual>
+    FindFileMap;
+  std::unordered_map<std::string, std::string, SystemToolsPathCaseHash,
+                     SystemToolsPathCaseEqual>
+    PathCaseMap;
   std::map<std::string, std::string> EnvMap;
 #endif
 #ifdef __CYGWIN__
@@ -2262,8 +2290,8 @@ static std::string FileInDir(const std::string& source, const std::string& dir)
   return new_destination + '/' + SystemTools::GetFilenameName(source);
 }
 
-Status SystemTools::CopyFileIfDifferent(std::string const& source,
-                                        std::string const& destination)
+SystemTools::CopyStatus SystemTools::CopyFileIfDifferent(
+  std::string const& source, std::string const& destination)
 {
   // special check for a destination that is a directory
   // FilesDiffer does not handle file to directory compare
@@ -2280,7 +2308,7 @@ Status SystemTools::CopyFileIfDifferent(std::string const& source,
     }
   }
   // at this point the files must be the same so return true
-  return Status::Success();
+  return CopyStatus{ Status::Success(), CopyStatus::NoPath };
 }
 
 #define KWSYS_ST_BUFFER 4096
@@ -2406,13 +2434,13 @@ bool SystemTools::TextFilesDiffer(const std::string& path1,
   return false;
 }
 
-Status SystemTools::CopyFileContentBlockwise(std::string const& source,
-                                             std::string const& destination)
+SystemTools::CopyStatus SystemTools::CopyFileContentBlockwise(
+  std::string const& source, std::string const& destination)
 {
   // Open files
   kwsys::ifstream fin(source.c_str(), std::ios::in | std::ios::binary);
   if (!fin) {
-    return Status::POSIX_errno();
+    return CopyStatus{ Status::POSIX_errno(), CopyStatus::SourcePath };
   }
 
   // try and remove the destination file so that read only destination files
@@ -2424,7 +2452,7 @@ Status SystemTools::CopyFileContentBlockwise(std::string const& source,
   kwsys::ofstream fout(destination.c_str(),
                        std::ios::out | std::ios::trunc | std::ios::binary);
   if (!fout) {
-    return Status::POSIX_errno();
+    return CopyStatus{ Status::POSIX_errno(), CopyStatus::DestPath };
   }
 
   // This copy loop is very sensitive on certain platforms with
@@ -2453,10 +2481,10 @@ Status SystemTools::CopyFileContentBlockwise(std::string const& source,
   fout.close();
 
   if (!fout) {
-    return Status::POSIX_errno();
+    return CopyStatus{ Status::POSIX_errno(), CopyStatus::DestPath };
   }
 
-  return Status::Success();
+  return CopyStatus{ Status::Success(), CopyStatus::NoPath };
 }
 
 /**
@@ -2471,13 +2499,13 @@ Status SystemTools::CopyFileContentBlockwise(std::string const& source,
  * - The underlying filesystem does not support file cloning
  * - An unspecified error occurred
  */
-Status SystemTools::CloneFileContent(std::string const& source,
-                                     std::string const& destination)
+SystemTools::CopyStatus SystemTools::CloneFileContent(
+  std::string const& source, std::string const& destination)
 {
 #if defined(__linux) && defined(FICLONE)
   int in = open(source.c_str(), O_RDONLY);
   if (in < 0) {
-    return Status::POSIX_errno();
+    return CopyStatus{ Status::POSIX_errno(), CopyStatus::SourcePath };
   }
 
   SystemTools::RemoveFile(destination);
@@ -2485,14 +2513,14 @@ Status SystemTools::CloneFileContent(std::string const& source,
   int out =
     open(destination.c_str(), O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
   if (out < 0) {
-    Status status = Status::POSIX_errno();
+    CopyStatus status{ Status::POSIX_errno(), CopyStatus::DestPath };
     close(in);
     return status;
   }
 
-  Status status = Status::Success();
+  CopyStatus status{ Status::Success(), CopyStatus::NoPath };
   if (ioctl(out, FICLONE, in) < 0) {
-    status = Status::POSIX_errno();
+    status = CopyStatus{ Status::POSIX_errno(), CopyStatus::NoPath };
   }
   close(in);
   close(out);
@@ -2500,44 +2528,51 @@ Status SystemTools::CloneFileContent(std::string const& source,
   return status;
 #elif defined(__APPLE__) &&                                                   \
   defined(KWSYS_SYSTEMTOOLS_HAVE_MACOS_COPYFILE_CLONE)
+  // When running as root, copyfile() copies more metadata than we
+  // want, such as ownership.  Pretend it is not available.
+  if (getuid() == 0) {
+    return CopyStatus{ Status::POSIX(ENOSYS), CopyStatus::NoPath };
+  }
+
   // NOTE: we cannot use `clonefile` as the {a,c,m}time for the file needs to
   // be updated by `copy_file_if_different` and `copy_file`.
   if (copyfile(source.c_str(), destination.c_str(), nullptr,
                COPYFILE_METADATA | COPYFILE_CLONE) < 0) {
-    return Status::POSIX_errno();
+    return CopyStatus{ Status::POSIX_errno(), CopyStatus::NoPath };
   }
 #  if KWSYS_CXX_HAS_UTIMENSAT
   // utimensat is only available on newer Unixes and macOS 10.13+
   if (utimensat(AT_FDCWD, destination.c_str(), nullptr, 0) < 0) {
-    return Status::POSIX_errno();
+    return CopyStatus{ Status::POSIX_errno(), CopyStatus::DestPath };
   }
 #  else
   // fall back to utimes
   if (utimes(destination.c_str(), nullptr) < 0) {
-    return Status::POSIX_errno();
+    return CopyStatus{ Status::POSIX_errno(), CopyStatus::DestPath };
   }
 #  endif
-  return Status::Success();
+  return CopyStatus{ Status::Success(), CopyStatus::NoPath };
 #else
   (void)source;
   (void)destination;
-  return Status::POSIX(ENOSYS);
+  return CopyStatus{ Status::POSIX(ENOSYS), CopyStatus::NoPath };
 #endif
 }
 
 /**
  * Copy a file named by "source" to the file named by "destination".
  */
-Status SystemTools::CopyFileAlways(std::string const& source,
-                                   std::string const& destination)
+SystemTools::CopyStatus SystemTools::CopyFileAlways(
+  std::string const& source, std::string const& destination)
 {
-  Status status;
+  CopyStatus status;
   mode_t perm = 0;
   Status perms = SystemTools::GetPermissions(source, perm);
   std::string real_destination = destination;
 
   if (SystemTools::FileIsDirectory(source)) {
-    status = SystemTools::MakeDirectory(destination);
+    status = CopyStatus{ SystemTools::MakeDirectory(destination),
+                         CopyStatus::DestPath };
     if (!status.IsSuccess()) {
       return status;
     }
@@ -2562,7 +2597,8 @@ Status SystemTools::CopyFileAlways(std::string const& source,
 
     // Create destination directory
     if (!destination_dir.empty()) {
-      status = SystemTools::MakeDirectory(destination_dir);
+      status = CopyStatus{ SystemTools::MakeDirectory(destination_dir),
+                           CopyStatus::DestPath };
       if (!status.IsSuccess()) {
         return status;
       }
@@ -2578,13 +2614,15 @@ Status SystemTools::CopyFileAlways(std::string const& source,
     }
   }
   if (perms) {
-    status = SystemTools::SetPermissions(real_destination, perm);
+    status = CopyStatus{ SystemTools::SetPermissions(real_destination, perm),
+                         CopyStatus::DestPath };
   }
   return status;
 }
 
-Status SystemTools::CopyAFile(std::string const& source,
-                              std::string const& destination, bool always)
+SystemTools::CopyStatus SystemTools::CopyAFile(std::string const& source,
+                                               std::string const& destination,
+                                               bool always)
 {
   if (always) {
     return SystemTools::CopyFileAlways(source, destination);

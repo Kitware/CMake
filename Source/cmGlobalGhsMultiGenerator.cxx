@@ -15,7 +15,6 @@
 
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
-#include "cmDocumentationEntry.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmGhsMultiGpj.h"
@@ -58,11 +57,12 @@ cmGlobalGhsMultiGenerator::CreateLocalGenerator(cmMakefile* mf)
     cm::make_unique<cmLocalGhsMultiGenerator>(this, mf));
 }
 
-void cmGlobalGhsMultiGenerator::GetDocumentation(cmDocumentationEntry& entry)
+cmDocumentationEntry cmGlobalGhsMultiGenerator::GetDocumentation()
 {
-  entry.Name = GetActualName();
-  entry.Brief =
-    "Generates Green Hills MULTI files (experimental, work-in-progress).";
+  return {
+    GetActualName(),
+    "Generates Green Hills MULTI files (experimental, work-in-progress)."
+  };
 }
 
 void cmGlobalGhsMultiGenerator::ComputeTargetObjectDirectory(
@@ -100,10 +100,10 @@ bool cmGlobalGhsMultiGenerator::SetGeneratorToolset(std::string const& ts,
   cmValue prevTool = mf->GetDefinition("CMAKE_MAKE_PROGRAM");
 
   /* check if the toolset changed from last generate */
-  if (cmNonempty(prevTool) && !cmSystemTools::ComparePath(gbuild, prevTool)) {
+  if (cmNonempty(prevTool) && !cmSystemTools::ComparePath(gbuild, *prevTool)) {
     std::string const& e =
       cmStrCat("toolset build tool: ", gbuild,
-               "\nDoes not match the previously used build tool: ", prevTool,
+               "\nDoes not match the previously used build tool: ", *prevTool,
                "\nEither remove the CMakeCache.txt file and CMakeFiles "
                "directory or choose a different binary directory.");
     mf->IssueMessage(MessageType::FATAL_ERROR, e);
@@ -354,7 +354,7 @@ void cmGlobalGhsMultiGenerator::WriteProjectLine(
    * unsupported target type and should be skipped.
    */
   if (projFile && projType) {
-    std::string path = cmSystemTools::RelativePath(rootBinaryDir, projFile);
+    std::string path = cmSystemTools::RelativePath(rootBinaryDir, *projFile);
 
     fout << path;
     fout << ' ' << *projType << '\n';

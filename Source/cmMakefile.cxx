@@ -375,19 +375,28 @@ public:
     ++this->Makefile->RecursionDepth;
     this->Makefile->ExecutionStatusStack.push_back(&status);
 #if !defined(CMAKE_BOOTSTRAP)
-    if (this->Makefile->GetCMakeInstance()->IsProfilingEnabled()) {
-      this->Makefile->GetCMakeInstance()->GetProfilingOutput().StartEntry(lff,
-                                                                          lfc);
-    }
+    this->ProfilingDataRAII =
+      this->Makefile->GetCMakeInstance()->CreateProfilingEntry(
+        "script", lff.LowerCaseName(), [&lff, &lfc]() -> Json::Value {
+          Json::Value argsValue = Json::objectValue;
+          if (!lff.Arguments().empty()) {
+            std::string args;
+            for (auto const& a : lff.Arguments()) {
+              args = cmStrCat(args, args.empty() ? "" : " ", a.Value);
+            }
+            argsValue["functionArgs"] = args;
+          }
+          argsValue["location"] =
+            cmStrCat(lfc.FilePath, ':', std::to_string(lfc.Line));
+          return argsValue;
+        });
 #endif
   }
 
   ~cmMakefileCall()
   {
 #if !defined(CMAKE_BOOTSTRAP)
-    if (this->Makefile->GetCMakeInstance()->IsProfilingEnabled()) {
-      this->Makefile->GetCMakeInstance()->GetProfilingOutput().StopEntry();
-    }
+    this->ProfilingDataRAII.reset();
 #endif
     this->Makefile->ExecutionStatusStack.pop_back();
     --this->Makefile->RecursionDepth;
@@ -399,6 +408,9 @@ public:
 
 private:
   cmMakefile* Makefile;
+#if !defined(CMAKE_BOOTSTRAP)
+  cm::optional<cmMakefileProfilingData::RAII> ProfilingDataRAII;
+#endif
 };
 
 void cmMakefile::OnExecuteCommand(std::function<void()> callback)
@@ -971,7 +983,8 @@ void cmMakefile::Generate(cmLocalGenerator& lg)
   this->DoGenerate(lg);
   cmValue oldValue = this->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
   if (oldValue &&
-      cmSystemTools::VersionCompare(cmSystemTools::OP_LESS, oldValue, "2.4")) {
+      cmSystemTools::VersionCompare(cmSystemTools::OP_LESS, *oldValue,
+                                    "2.4")) {
     this->GetCMakeInstance()->IssueMessage(
       MessageType::FATAL_ERROR,
       "You have set CMAKE_BACKWARDS_COMPATIBILITY to a CMake version less "
@@ -3584,6 +3597,9 @@ int cmMakefile::TryCompile(const std::string& srcdir,
   gg->RecursionDepth = this->RecursionDepth;
   cm.SetGlobalGenerator(std::move(gg));
 
+  // copy trace state
+  cm.SetTraceRedirect(this->GetCMakeInstance());
+
   // do a configure
   cm.SetHomeDirectory(srcdir);
   cm.SetHomeOutputDirectory(bindir);
@@ -4470,12 +4486,12 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
   }
 
   // Deprecate old policies.
-  if (status == cmPolicies::OLD && id <= cmPolicies::CMP0102 &&
+  if (status == cmPolicies::OLD && id <= cmPolicies::CMP0108 &&
       !(this->GetCMakeInstance()->GetIsInTryCompile() &&
         (
           // Policies set by cmCoreTryCompile::TryCompileCode.
           id == cmPolicies::CMP0065 || id == cmPolicies::CMP0083 ||
-          id == cmPolicies::CMP0091)) &&
+          id == cmPolicies::CMP0091 || id == cmPolicies::CMP0104)) &&
       (!this->IsSet("CMAKE_WARN_DEPRECATED") ||
        this->IsOn("CMAKE_WARN_DEPRECATED"))) {
     this->IssueMessage(MessageType::DEPRECATION_WARNING,

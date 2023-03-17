@@ -32,3 +32,7 @@ endif()
 if(APPLE)
   run_cmake(HeaderpadWorkaround)
 endif()
+
+if(CMake_TEST_Swift)
+  run_cmake(CheckCompilerFlagSwift)
+endif()

@@ -6,7 +6,6 @@
 #include <sstream>
 #include <vector>
 
-#include "cmDocumentationEntry.h"
 #include "cmGlobalGenerator.h"
 #include "cmGlobalGeneratorFactory.h"
 #include "cmGlobalVisualStudioGenerator.h"
@@ -22,7 +21,7 @@ static const char* cmVS12GenName(const std::string& name, std::string& genName)
 {
   if (strncmp(name.c_str(), vs12generatorName,
               sizeof(vs12generatorName) - 6) != 0) {
-    return 0;
+    return nullptr;
   }
   const char* p = name.c_str() + sizeof(vs12generatorName) - 6;
   if (cmHasLiteralPrefix(p, " 2013")) {
@@ -62,11 +61,11 @@ public:
     return std::unique_ptr<cmGlobalGenerator>();
   }
 
-  void GetDocumentation(cmDocumentationEntry& entry) const override
+  cmDocumentationEntry GetDocumentation() const override
   {
-    entry.Name = std::string(vs12generatorName) + " [arch]";
-    entry.Brief = "Generates Visual Studio 2013 project files.  "
-                  "Optional [arch] can be \"Win64\" or \"ARM\".";
+    return { std::string(vs12generatorName) + " [arch]",
+             "Generates Visual Studio 2013 project files.  "
+             "Optional [arch] can be \"Win64\" or \"ARM\"." };
   }
 
   std::vector<std::string> GetGeneratorNames() const override
@@ -195,9 +194,8 @@ bool cmGlobalVisualStudio12Generator::SelectWindowsPhoneToolset(
         this->IsWindowsDesktopToolsetInstalled()) {
       toolset = "v120_wp81";
       return true;
-    } else {
-      return false;
     }
+    return false;
   }
   return this->cmGlobalVisualStudio11Generator::SelectWindowsPhoneToolset(
     toolset);
@@ -211,9 +209,8 @@ bool cmGlobalVisualStudio12Generator::SelectWindowsStoreToolset(
         this->IsWindowsDesktopToolsetInstalled()) {
       toolset = "v120";
       return true;
-    } else {
-      return false;
     }
+    return false;
   }
   return this->cmGlobalVisualStudio11Generator::SelectWindowsStoreToolset(
     toolset);

@@ -34,10 +34,8 @@ calls for the same ``<target>`` append items in the order called.
 If ``BEFORE`` is specified, the content will be prepended to the relevant
 property instead of being appended.
 
-Arguments to ``target_link_directories`` may use "generator expressions"
-with the syntax ``$<...>``. See the :manual:`cmake-generator-expressions(7)`
-manual for available expressions.  See the :manual:`cmake-buildsystem(7)`
-manual for more on defining buildsystem properties.
+.. |command_name| replace:: ``target_link_directories``
+.. include:: GENEX_NOTE.txt
 
 .. note::
 
@@ -56,3 +54,16 @@ manual for more on defining buildsystem properties.
     that expect to be found via ``RPATH`` mechanisms, but some linkers
     are not able to fully decode those paths (e.g. due to the presence
     of things like ``$ORIGIN``).
+
+See Also
+^^^^^^^^
+
+* :command:`link_directories`
+* :command:`target_compile_definitions`
+* :command:`target_compile_features`
+* :command:`target_compile_options`
+* :command:`target_include_directories`
+* :command:`target_link_libraries`
+* :command:`target_link_options`
+* :command:`target_precompile_headers`
+* :command:`target_sources`

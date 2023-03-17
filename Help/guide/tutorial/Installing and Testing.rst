@@ -1,8 +1,6 @@
 Step 5: Installing and Testing
 ==============================
 
-.. _`Tutorial Testing Support`:
-
 Exercise 1 - Install Rules
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -145,7 +143,7 @@ are similar. To the end of the top-level ``CMakeLists.txt`` we add:
   :name: TODO 3,4: CMakeLists.txt-install-TARGETS
   :language: cmake
   :start-after: # add the install targets
-  :end-before: # enable testing
+  :end-before: # TODO 1: Replace enable_testing() with include(CTest)
 
 .. raw:: html
 
@@ -153,6 +151,8 @@ are similar. To the end of the top-level ``CMakeLists.txt`` we add:
 
 That is all that is needed to create a basic local
 install of the tutorial.
+
+.. _`Tutorial Testing Support`:
 
 Exercise 2 - Testing Support
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -195,7 +195,7 @@ Build and Run
 -------------
 
 Navigate to the build directory and rebuild the application. Then, run the
-``ctest`` executable: :option:`ctest -N` and :option:`ctest -VV`. For
+:program:`ctest` executable: :option:`ctest -N` and :option:`ctest -VV`. For
 multi-config generators (e.g. Visual Studio), the configuration type must be
 specified with the :option:`-C \<mode\> <ctest -C>` flag.  For example, to run tests in Debug
 mode use ``ctest -C Debug -VV`` from the build directory

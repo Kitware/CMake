@@ -3,7 +3,7 @@ ctest_update
 
 Perform the :ref:`CTest Update Step` as a :ref:`Dashboard Client`.
 
-::
+.. code-block:: cmake
 
   ctest_update([SOURCE <source-dir>]
                [RETURN_VALUE <result-var>]

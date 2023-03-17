@@ -457,7 +457,7 @@ bool testRequired()
 }
 }
 
-int testJSONHelpers(int /*unused*/, char* /*unused*/ [])
+int testJSONHelpers(int /*unused*/, char* /*unused*/[])
 {
   if (!testInt()) {
     return 1;

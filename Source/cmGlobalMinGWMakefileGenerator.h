@@ -11,7 +11,6 @@
 
 class cmMakefile;
 class cmake;
-struct cmDocumentationEntry;
 
 /** \class cmGlobalMinGWMakefileGenerator
  * \brief Write a NMake makefiles.
@@ -28,12 +27,12 @@ public:
       new cmGlobalGeneratorSimpleFactory<cmGlobalMinGWMakefileGenerator>());
   }
   //! Get the name for the generator.
-  virtual std::string GetName() const
+  std::string GetName() const override
   {
     return cmGlobalMinGWMakefileGenerator::GetActualName();
   }
   static std::string GetActualName() { return "MinGW Makefiles"; }
 
   /** Get the documentation entry for this generator.  */
-  static void GetDocumentation(cmDocumentationEntry& entry);
+  static cmDocumentationEntry GetDocumentation();
 };

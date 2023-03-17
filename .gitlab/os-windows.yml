@@ -35,19 +35,25 @@
     variables:
         VCVARSALL: "${VS170COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
         VCVARSPLATFORM: "x64"
-        VCVARSVERSION: "14.34.31933"
+        VCVARSVERSION: "14.35.32215"
 
 .windows_vcvarsall_vs2022_x86:
     variables:
         VCVARSALL: "${VS170COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
         VCVARSPLATFORM: "x86"
-        VCVARSVERSION: "14.34.31933"
+        VCVARSVERSION: "14.35.32215"
 
 .windows_vcvarsall_vs2022_x64_arm64:
     variables:
         VCVARSALL: "${VS170COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
         VCVARSPLATFORM: "x64_arm64"
-        VCVARSVERSION: "14.34.31933"
+        VCVARSVERSION: "14.35.32215"
+
+.windows_arm64_vcvarsall_vs2022:
+    variables:
+        VCVARSALL: "${VS170COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
+        VCVARSPLATFORM: "arm64"
+        VCVARSVERSION: "14.35.32215"
 
 .windows_vs2022_x64_ninja:
     extends:
@@ -56,6 +62,14 @@
 
     variables:
         CMAKE_CONFIGURATION: windows_vs2022_x64_ninja
+
+.windows_arm64_vs2022_ninja:
+    extends:
+        - .windows_build_ninja
+        - .windows_arm64_vcvarsall_vs2022
+
+    variables:
+        CMAKE_CONFIGURATION: windows_arm64_vs2022_ninja
 
 .windows_package:
     extends:
@@ -98,7 +112,7 @@
         CMAKE_CONFIGURATION: windows_vs2022_x64
         CMAKE_GENERATOR: "Visual Studio 17 2022"
         CMAKE_GENERATOR_PLATFORM: "x64"
-        CMAKE_GENERATOR_TOOLSET: "v143,version=14.34.31933"
+        CMAKE_GENERATOR_TOOLSET: "v143,version=14.35.32215"
         CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
 
 .windows_vs2019_x64:
@@ -224,36 +238,69 @@
     variables:
         CMAKE_CONFIGURATION: windows_openwatcom1.9
 
+.windows_arm64_vs2022:
+    extends: .windows
+
+    variables:
+        CMAKE_CONFIGURATION: windows_arm64_vs2022
+        CMAKE_GENERATOR: "Visual Studio 17 2022"
+        CMAKE_GENERATOR_PLATFORM: "ARM64"
+        CMAKE_GENERATOR_TOOLSET: "v143,version=14.35.32215"
+        CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
+
+.mingw_osdn_io:
+    extends: .windows
+
+    variables:
+        # Place MinGW environment in a path without spaces.
+        GIT_CLONE_PATH: "$CI_BUILDS_DIR\\cmake-ci-ext\\$CI_CONCURRENT_ID"
+        CMAKE_CI_BUILD_TYPE: Debug
+        CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
+
+.mingw_osdn_io_mingw_makefiles:
+    extends: .mingw_osdn_io
+
+    variables:
+        CMAKE_CONFIGURATION: mingw_osdn_io_mingw_makefiles
+        CMAKE_GENERATOR: "MinGW Makefiles"
+
+.mingw_osdn_io_msys_makefiles:
+    extends: .mingw_osdn_io
+
+    variables:
+        CMAKE_CONFIGURATION: mingw_osdn_io_msys_makefiles
+        CMAKE_GENERATOR: "MSYS Makefiles"
+
 ## Tags
 
-.windows_tags_nonconcurrent_vs2022:
+.windows_x86_64_tags_nonconcurrent_vs2022:
     tags:
         - cmake # Since this is a bare runner, pin to a project.
         - windows-x86_64
         - shell
         - vs2022
-        - msvc-19.34
+        - msvc-19.35
         - nonconcurrent
 
-.windows_tags_nonconcurrent_vs2022_arm64:
+.windows_x86_64_tags_nonconcurrent_vs2022_arm64:
     tags:
         - cmake # Since this is a bare runner, pin to a project.
         - windows-x86_64
         - shell
         - vs2022
-        - msvc-19.34-arm64
+        - msvc-19.35-arm64
         - nonconcurrent
 
-.windows_tags_concurrent_vs2022:
+.windows_x86_64_tags_concurrent_vs2022:
     tags:
         - cmake # Since this is a bare runner, pin to a project.
         - windows-x86_64
         - shell
         - vs2022
-        - msvc-19.34
+        - msvc-19.35
         - concurrent
 
-.windows_tags_concurrent_vs2019:
+.windows_x86_64_tags_concurrent_vs2019:
     tags:
         - cmake # Since this is a bare runner, pin to a project.
         - windows-x86_64
@@ -262,11 +309,29 @@
         - msvc-19.29-16.11
         - concurrent
 
-.windows_tags_concurrent:
+.windows_x86_64_tags_concurrent:
     tags:
         - cmake # Since this is a bare runner, pin to a project.
         - windows-x86_64
         - shell
+        - concurrent
+
+.windows_arm64_tags_nonconcurrent_vs2022:
+    tags:
+        - cmake # Since this is a bare runner, pin to a project.
+        - windows-arm64
+        - shell
+        - vs2022
+        - msvc-19.35
+        - nonconcurrent
+
+.windows_arm64_tags_concurrent_vs2022:
+    tags:
+        - cmake # Since this is a bare runner, pin to a project.
+        - windows-arm64
+        - shell
+        - vs2022
+        - msvc-19.35
         - concurrent
 
 ## Windows-specific scripts
@@ -281,11 +346,8 @@
     - . .gitlab/ci/ninja-env.ps1
     - (& "$env:WIX\bin\light.exe" -help) | Select -First 1
     - cmake --version
-    - cmake -P .gitlab/ci/download_qt.cmake
-    - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab\qt\bin;$env:PATH"
-    - cmake -P .gitlab/ci/download_python3.cmake
-    - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab\python3;$env:PATH"
-    - python --version
+    - . .gitlab/ci/qt-env.ps1
+    - . .gitlab/ci/python-env.ps1
 
 .cmake_build_windows:
     stage: build
@@ -296,22 +358,12 @@
         - Invoke-Expression -Command .gitlab/ci/vcvarsall.ps1
         - sccache --start-server
         - sccache --show-stats
+        - (& "$pwsh" -File ".gitlab/ci/pre_build.ps1")
         - ctest -VV -S .gitlab/ci/ctest_configure.cmake
         - ctest -VV -S .gitlab/ci/ctest_build.cmake
+        - (& "$pwsh" -File ".gitlab/ci/post_build.ps1")
         - sccache --show-stats
         - sccache --stop-server
-
-    interruptible: true
-
-.cmake_package_windows:
-    stage: package
-
-    script:
-        - *before_script_windows
-        - Invoke-Expression -Command .gitlab/ci/vcvarsall.ps1
-        - cd build
-        - cpack -G ZIP
-        - cpack -G WIX
 
     interruptible: true
 

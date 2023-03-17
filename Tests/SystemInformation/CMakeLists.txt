@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 3.0)
 project(SystemInformation)
 
-include_directories("This does not exists")
+include_directories("This does not exist")
 get_directory_property(incl INCLUDE_DIRECTORIES)
 set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES "${SystemInformation_BINARY_DIR};${SystemInformation_SOURCE_DIR}")
 
