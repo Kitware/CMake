@@ -332,26 +332,26 @@ void cmGlobalVisualStudio8Generator::WriteProjectConfigurations(
           }
         }
       }
-    }
-    fout << "\t\t{" << guid << "}." << i << "|" << this->GetPlatformName()
-         << ".ActiveCfg = " << dstConfig << "|"
-         << (!platformMapping.empty() ? platformMapping
-                                      : this->GetPlatformName())
-         << "\n";
-    auto ci = configsPartOfDefaultBuild.find(i);
-    if (!(ci == configsPartOfDefaultBuild.end())) {
-      fout << "\t\t{" << guid << "}." << i << "|" << this->GetPlatformName()
-           << ".Build.0 = " << dstConfig << "|"
-           << (!platformMapping.empty() ? platformMapping
-                                        : this->GetPlatformName())
-           << "\n";
-    }
-    if (this->NeedsDeploy(target, dstConfig)) {
-      fout << "\t\t{" << guid << "}." << i << "|" << this->GetPlatformName()
-           << ".Deploy.0 = " << dstConfig << "|"
-           << (!platformMapping.empty() ? platformMapping
-                                        : this->GetPlatformName())
-           << "\n";
+      fout << "\t\t{" << guid << "}." << i << "|" << p
+          << ".ActiveCfg = " << dstConfig << "|"
+          << (!platformMapping.empty() ? platformMapping
+                                        : p)
+          << "\n";
+      auto ci = configsPartOfDefaultBuild.find(i);
+      if (!(ci == configsPartOfDefaultBuild.end())) {
+        fout << "\t\t{" << guid << "}." << i << "|" << p
+            << ".Build.0 = " << dstConfig << "|"
+            << (!platformMapping.empty() ? platformMapping
+                                          : p)
+            << "\n";
+      }
+      if (this->NeedsDeploy(target, dstConfig)) {
+        fout << "\t\t{" << guid << "}." << i << "|" << p
+            << ".Deploy.0 = " << dstConfig << "|"
+            << (!platformMapping.empty() ? platformMapping
+                                          : p)
+            << "\n";
+      }
     }
   }
 }
