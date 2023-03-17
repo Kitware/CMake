@@ -438,13 +438,16 @@ TargetProperty const StaticTargetProperties[] = {
   { "AUTOMOC_MACRO_NAMES"_s, IC::CanCompileSources },
   { "AUTOMOC_MOC_OPTIONS"_s, IC::CanCompileSources },
   { "AUTOMOC_PATH_PREFIX"_s, IC::CanCompileSources },
+  { "AUTOMOC_EXECUTABLE"_s, IC::CanCompileSources },
   // ---- uic
   { "AUTOUIC"_s, IC::CanCompileSources },
   { "AUTOUIC_OPTIONS"_s, IC::CanCompileSources },
   { "AUTOUIC_SEARCH_PATHS"_s, IC::CanCompileSources },
+  { "AUTOUIC_EXECUTABLE"_s, IC::CanCompileSources },
   // ---- rcc
   { "AUTORCC"_s, IC::CanCompileSources },
   { "AUTORCC_OPTIONS"_s, IC::CanCompileSources },
+  { "AUTORCC_EXECUTABLE"_s, IC::CanCompileSources },
 
   // Linking properties
   { "ENABLE_EXPORTS"_s, IC::TargetWithSymbolExports },
