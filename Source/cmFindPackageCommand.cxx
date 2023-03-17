@@ -456,6 +456,51 @@ int parseVersion(const std::string& version, unsigned int& major,
 
 } // anonymous namespace
 
+class cmFindPackageCommand::FlushDebugBufferOnExit
+{
+  cmFindPackageCommand& Command;
+
+public:
+  FlushDebugBufferOnExit(cmFindPackageCommand& command)
+    : Command(command)
+  {
+  }
+  ~FlushDebugBufferOnExit()
+  {
+    if (!Command.DebugBuffer.empty()) {
+      Command.DebugMessage(Command.DebugBuffer);
+    }
+  }
+};
+
+class cmFindPackageCommand::PushPopRootPathStack
+{
+  cmFindPackageCommand& Command;
+
+public:
+  PushPopRootPathStack(cmFindPackageCommand& command)
+    : Command(command)
+  {
+    Command.PushFindPackageRootPathStack();
+  }
+  ~PushPopRootPathStack() { Command.PopFindPackageRootPathStack(); }
+};
+
+class cmFindPackageCommand::SetRestoreFindDefinitions
+{
+  cmFindPackageCommand& Command;
+
+public:
+  SetRestoreFindDefinitions(
+    cmFindPackageCommand& command, const std::string& components,
+    const std::vector<std::pair<std::string, const char*>>& componentVarDefs)
+    : Command(command)
+  {
+    Command.SetModuleVariables(components, componentVarDefs);
+  }
+  ~SetRestoreFindDefinitions() { Command.RestoreFindDefinitions(); }
+};
+
 cmFindPackageCommand::PathLabel
   cmFindPackageCommand::PathLabel::PackageRedirect("PACKAGE_REDIRECT");
 cmFindPackageCommand::PathLabel cmFindPackageCommand::PathLabel::UserRegistry(
@@ -992,9 +1037,11 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
     }
   }
 
-  this->PushFindPackageRootPathStack();
-
-  this->SetModuleVariables(components, componentVarDefs);
+  // RAII objects to ensure we leave this function with consistent state
+  FlushDebugBufferOnExit flushDebugBufferOnExit(*this);
+  PushPopRootPathStack pushPopRootPathStack(*this);
+  SetRestoreFindDefinitions setRestoreFindDefinitions(*this, components,
+                                                      componentVarDefs);
 
   // See if we have been told to delegate to FetchContent or some other
   // redirected config package first. We have to check all names that
@@ -1114,15 +1161,6 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
   }
 
   this->AppendSuccessInformation();
-
-  // Restore original state of "_FIND_" variables set in SetModuleVariables()
-  this->RestoreFindDefinitions();
-
-  this->PopFindPackageRootPathStack();
-
-  if (!this->DebugBuffer.empty()) {
-    this->DebugMessage(this->DebugBuffer);
-  }
 
   return loadedPackage;
 }
