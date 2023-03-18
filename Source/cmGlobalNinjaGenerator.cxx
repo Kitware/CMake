@@ -63,6 +63,19 @@ std::string const cmGlobalNinjaGenerator::SHELL_NOOP = "cd .";
 std::string const cmGlobalNinjaGenerator::SHELL_NOOP = ":";
 #endif
 
+namespace {
+#ifdef _WIN32
+bool DetectGCCOnWindows(cm::string_view compilerId, cm::string_view simulateId,
+                        cm::string_view compilerFrontendVariant)
+{
+  return ((compilerId == "Clang"_s && compilerFrontendVariant == "GNU"_s) ||
+          (simulateId != "MSVC"_s &&
+           (compilerId == "GNU"_s || compilerId == "QCC"_s ||
+            cmHasLiteralSuffix(compilerId, "Clang"))));
+}
+#endif
+}
+
 bool operator==(
   const cmGlobalNinjaGenerator::ByConfig::TargetDependsClosureKey& lhs,
   const cmGlobalNinjaGenerator::ByConfig::TargetDependsClosureKey& rhs)
@@ -943,12 +956,8 @@ void cmGlobalNinjaGenerator::EnableLanguage(
       mf->GetSafeDefinition(cmStrCat("CMAKE_", l, "_SIMULATE_ID"));
     std::string const& compilerFrontendVariant = mf->GetSafeDefinition(
       cmStrCat("CMAKE_", l, "_COMPILER_FRONTEND_VARIANT"));
-    if ((compilerId == "Clang" && compilerFrontendVariant == "GNU") ||
-        (simulateId != "MSVC" &&
-         (compilerId == "GNU" || compilerId == "QCC" ||
-          cmHasLiteralSuffix(compilerId, "Clang")))) {
-      this->UsingGCCOnWindows = true;
-    }
+    this->SetUsingGCCOnWindows(
+      DetectGCCOnWindows(compilerId, simulateId, compilerFrontendVariant));
 #endif
   }
 }
