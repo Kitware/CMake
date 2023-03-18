@@ -2639,7 +2639,13 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
     CxxModuleLocations locs;
     locs.RootDirectory = ".";
     locs.PathForGenerator = [this](std::string path) -> std::string {
-      return this->ConvertToNinjaPath(path);
+      path = this->ConvertToNinjaPath(path);
+#  ifdef _WIN32
+      if (this->IsGCCOnWindows()) {
+        std::replace(path.begin(), path.end(), '\\', '/');
+      }
+#  endif
+      return path;
     };
     locs.BmiLocationForModule =
       [&mod_files](std::string const& logical) -> cm::optional<std::string> {
