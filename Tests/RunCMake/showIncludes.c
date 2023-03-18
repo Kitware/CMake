@@ -28,6 +28,14 @@ int main()
   printf("OEM code page: %u\n", GetOEMCP());
   printf("VSLANG: %s\n", vslang);
 
+  // clang-cl (special case for test, not a real VS value).
+  if (strcmp(vslang, "clang-cl") == 0) {
+    if (cp == 437 || cp == 65001) {
+      printf("Note: including file: ./foo.h\n");
+      return 0;
+    }
+  }
+
   // German.
   if (strcmp(vslang, "1031") == 0) {
     if (cp == 437 || cp == 65001) {
