@@ -21,7 +21,7 @@ cm::optional<std::string> CxxModuleLocations::BmiGeneratorPathForModule(
   std::string const& logical_name) const
 {
   if (auto l = this->BmiLocationForModule(logical_name)) {
-    return this->PathForGenerator(*l);
+    return this->PathForGenerator(std::move(*l));
   }
   return {};
 }

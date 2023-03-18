@@ -30,7 +30,7 @@ struct CxxModuleLocations
   std::string RootDirectory;
 
   // A function to convert a full path to a path for the generator.
-  std::function<std::string(std::string const&)> PathForGenerator;
+  std::function<std::string(std::string)> PathForGenerator;
 
   // Lookup the BMI location of a logical module name.
   std::function<cm::optional<std::string>(std::string const&)>

@@ -2629,7 +2629,7 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
   {
     CxxModuleLocations locs;
     locs.RootDirectory = ".";
-    locs.PathForGenerator = [this](std::string const& path) -> std::string {
+    locs.PathForGenerator = [this](std::string path) -> std::string {
       return this->ConvertToNinjaPath(path);
     };
     locs.BmiLocationForModule =
