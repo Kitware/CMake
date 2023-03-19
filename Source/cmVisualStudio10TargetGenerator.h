@@ -193,6 +193,9 @@ private:
   void WriteGroupSources(Elem& e0, std::string const& name,
                          ToolSources const& sources,
                          std::vector<cmSourceGroup>&);
+  void WriteBuildSystemSources(Elem& e0, std::string const& name,
+                               ToolSources const& sources);
+
   void AddMissingSourceGroups(std::set<cmSourceGroup const*>& groupsUsed,
                               const std::vector<cmSourceGroup>& allGroups);
   bool IsResxHeader(const std::string& headerFile);
@@ -243,6 +246,7 @@ private:
   std::set<std::string> ASanEnabledConfigurations;
   std::set<std::string> FuzzerEnabledConfigurations;
   std::map<std::string, std::string> SpectreMitigation;
+  std::set<std::string> BuildSystemSourcesFilters;
   cmGlobalVisualStudio10Generator* const GlobalGenerator;
   cmLocalVisualStudio10Generator* const LocalGenerator;
   std::set<std::string> CSharpCustomCommandNames;
