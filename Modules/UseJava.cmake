@@ -294,7 +294,7 @@ Header Generation
 
   .. deprecated:: 3.11
     This command will no longer be supported starting with version 10 of the JDK
-    due to the `suppression of javah tool <https://openjdk.java.net/jeps/313>`_.
+    due to the `suppression of javah tool <https://openjdk.org/jeps/313>`_.
     The :ref:`add_jar(GENERATE_NATIVE_HEADERS) <add_jar>` command should be
     used instead.
 

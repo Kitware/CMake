@@ -174,7 +174,7 @@ Modules
   to removal of the ``javah`` tool by `JEP 313`_.
 
 .. _`FLAME`: https://github.com/flame
-.. _`JEP 313`: https://openjdk.java.net/jeps/313
+.. _`JEP 313`: https://openjdk.org/jeps/313
 
 Autogen
 -------
