@@ -444,7 +444,7 @@ static CURLcode cf_process_ingress(struct Curl_cfilter *cf,
   struct cf_quiche_ctx *ctx = cf->ctx;
   int64_t stream3_id = data->req.p.http? data->req.p.http->stream3_id : -1;
   uint8_t buf[65536];
-  size_t bufsize = sizeof(buf);
+  int bufsize = (int)sizeof(buf);
   struct sockaddr_storage remote_addr;
   socklen_t remote_addrlen;
   quiche_recv_info recv_info;
@@ -950,7 +950,7 @@ static int cf_quiche_get_select_socks(struct Curl_cfilter *cf,
   rv |= GETSOCK_READSOCK(0);
 
   /* we're still uploading or the HTTP/3 layer wants to send data */
-  if(((k->keepon & (KEEP_SEND|KEEP_SEND_PAUSE)) == KEEP_SEND)
+  if(((k->keepon & KEEP_SENDBITS) == KEEP_SEND)
      && stream_is_writeable(cf, data))
     rv |= GETSOCK_WRITESOCK(0);
 
@@ -1015,13 +1015,6 @@ static CURLcode cf_quiche_data_event(struct Curl_cfilter *cf,
   }
   case CF_CTRL_DATA_IDLE:
     /* anything to do? */
-    break;
-  case CF_CTRL_CONN_REPORT_STATS:
-    if(cf->sockindex == FIRSTSOCKET) {
-      if(ctx->got_first_byte)
-        Curl_pgrsTimeWas(data, TIMER_CONNECT, ctx->first_byte_at);
-      Curl_pgrsTimeWas(data, TIMER_APPCONNECT, ctx->handshake_at);
-    }
     break;
   default:
     break;
@@ -1346,6 +1339,18 @@ static CURLcode cf_quiche_query(struct Curl_cfilter *cf,
     else
       *pres1 = -1;
     return CURLE_OK;
+  case CF_QUERY_TIMER_CONNECT: {
+    struct curltime *when = pres2;
+    if(ctx->got_first_byte)
+      *when = ctx->first_byte_at;
+    return CURLE_OK;
+  }
+  case CF_QUERY_TIMER_APPCONNECT: {
+    struct curltime *when = pres2;
+    if(cf->connected)
+      *when = ctx->handshake_at;
+    return CURLE_OK;
+  }
   default:
     break;
   }
@@ -1354,6 +1359,32 @@ static CURLcode cf_quiche_query(struct Curl_cfilter *cf,
     CURLE_UNKNOWN_OPTION;
 }
 
+static bool cf_quiche_conn_is_alive(struct Curl_cfilter *cf,
+                                    struct Curl_easy *data,
+                                    bool *input_pending)
+{
+  bool alive = TRUE;
+
+  *input_pending = FALSE;
+  if(!cf->next || !cf->next->cft->is_alive(cf->next, data, input_pending))
+    return FALSE;
+
+  if(*input_pending) {
+    /* This happens before we've sent off a request and the connection is
+       not in use by any other transfer, there shouldn't be any data here,
+       only "protocol frames" */
+    *input_pending = FALSE;
+    Curl_attach_connection(data, cf->conn);
+    if(cf_process_ingress(cf, data))
+      alive = FALSE;
+    else {
+      alive = TRUE;
+    }
+    Curl_detach_connection(data);
+  }
+
+  return alive;
+}
 
 struct Curl_cftype Curl_cft_http3 = {
   "HTTP/3",
@@ -1368,7 +1399,7 @@ struct Curl_cftype Curl_cft_http3 = {
   cf_quiche_send,
   cf_quiche_recv,
   cf_quiche_data_event,
-  Curl_cf_def_conn_is_alive,
+  cf_quiche_conn_is_alive,
   Curl_cf_def_conn_keep_alive,
   cf_quiche_query,
 };

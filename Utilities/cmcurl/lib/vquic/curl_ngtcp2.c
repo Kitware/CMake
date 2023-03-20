@@ -64,6 +64,8 @@
 #include "vtls/vtls.h"
 #include "curl_ngtcp2.h"
 
+#include "warnless.h"
+
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -901,7 +903,7 @@ static int cf_ngtcp2_get_select_socks(struct Curl_cfilter *cf,
   rv |= GETSOCK_READSOCK(0);
 
   /* we're still uploading or the HTTP/2 layer wants to send data */
-  if((k->keepon & (KEEP_SEND|KEEP_SEND_PAUSE)) == KEEP_SEND &&
+  if((k->keepon & KEEP_SENDBITS) == KEEP_SEND &&
      (!stream->h3out || stream->h3out->used < H3_SEND_SIZE) &&
      ngtcp2_conn_get_cwnd_left(ctx->qconn) &&
      ngtcp2_conn_get_max_data_left(ctx->qconn) &&
@@ -951,7 +953,7 @@ static int cb_h3_stream_close(nghttp3_conn *conn, int64_t stream_id,
 }
 
 /*
- * write_resp_raw() copies resonse data in raw format to the `data`'s
+ * write_resp_raw() copies response data in raw format to the `data`'s
   * receive buffer. If not enough space is available, it appends to the
  * `data`'s overflow buffer.
  */
@@ -1762,7 +1764,7 @@ static CURLcode cf_process_ingress(struct Curl_cfilter *cf,
   ssize_t recvd;
   int rv;
   uint8_t buf[65536];
-  size_t bufsize = sizeof(buf);
+  int bufsize = (int)sizeof(buf);
   size_t pktcount = 0, total_recvd = 0;
   struct sockaddr_storage remote_addr;
   socklen_t remote_addrlen;
@@ -2107,13 +2109,6 @@ static CURLcode cf_ngtcp2_data_event(struct Curl_cfilter *cf,
       }
     }
     break;
-  case CF_CTRL_CONN_REPORT_STATS:
-    if(cf->sockindex == FIRSTSOCKET) {
-      if(ctx->got_first_byte)
-        Curl_pgrsTimeWas(data, TIMER_CONNECT, ctx->first_byte_at);
-      Curl_pgrsTimeWas(data, TIMER_APPCONNECT, ctx->handshake_at);
-    }
-    break;
   default:
     break;
   }
@@ -2127,7 +2122,6 @@ static void cf_ngtcp2_ctx_clear(struct cf_ngtcp2_ctx *ctx)
 
   if(ctx->qlogfd != -1) {
     close(ctx->qlogfd);
-    ctx->qlogfd = -1;
   }
 #ifdef USE_OPENSSL
   if(ctx->ssl)
@@ -2155,6 +2149,7 @@ static void cf_ngtcp2_ctx_clear(struct cf_ngtcp2_ctx *ctx)
     ngtcp2_conn_del(ctx->qconn);
 
   memset(ctx, 0, sizeof(*ctx));
+  ctx->qlogfd = -1;
   ctx->call_data = save;
 }
 
@@ -2176,7 +2171,7 @@ static void cf_ngtcp2_close(struct Curl_cfilter *cf, struct Curl_easy *data)
                                             (uint8_t *)buffer, sizeof(buffer),
                                             &ctx->last_error, ts);
     if(rc > 0) {
-      while((send(ctx->q.sockfd, buffer, rc, 0) == -1) &&
+      while((send(ctx->q.sockfd, buffer, (SEND_TYPE_ARG3)rc, 0) == -1) &&
             SOCKERRNO == EINTR);
     }
 
@@ -2200,6 +2195,7 @@ static void cf_ngtcp2_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
   cf->ctx = NULL;
   /* No CF_DATA_RESTORE(cf, save) possible */
+  (void)save;
 }
 
 /*
@@ -2428,6 +2424,18 @@ static CURLcode cf_ngtcp2_query(struct Curl_cfilter *cf,
     else
       *pres1 = -1;
     return CURLE_OK;
+  case CF_QUERY_TIMER_CONNECT: {
+    struct curltime *when = pres2;
+    if(ctx->got_first_byte)
+      *when = ctx->first_byte_at;
+    return CURLE_OK;
+  }
+  case CF_QUERY_TIMER_APPCONNECT: {
+    struct curltime *when = pres2;
+    if(cf->connected)
+      *when = ctx->handshake_at;
+    return CURLE_OK;
+  }
   default:
     break;
   }
@@ -2436,6 +2444,32 @@ static CURLcode cf_ngtcp2_query(struct Curl_cfilter *cf,
     CURLE_UNKNOWN_OPTION;
 }
 
+static bool cf_ngtcp2_conn_is_alive(struct Curl_cfilter *cf,
+                                    struct Curl_easy *data,
+                                    bool *input_pending)
+{
+  bool alive = TRUE;
+
+  *input_pending = FALSE;
+  if(!cf->next || !cf->next->cft->is_alive(cf->next, data, input_pending))
+    return FALSE;
+
+  if(*input_pending) {
+    /* This happens before we've sent off a request and the connection is
+       not in use by any other transfer, there shouldn't be any data here,
+       only "protocol frames" */
+    *input_pending = FALSE;
+    Curl_attach_connection(data, cf->conn);
+    if(cf_process_ingress(cf, data))
+      alive = FALSE;
+    else {
+      alive = TRUE;
+    }
+    Curl_detach_connection(data);
+  }
+
+  return alive;
+}
 
 struct Curl_cftype Curl_cft_http3 = {
   "HTTP/3",
@@ -2450,7 +2484,7 @@ struct Curl_cftype Curl_cft_http3 = {
   cf_ngtcp2_send,
   cf_ngtcp2_recv,
   cf_ngtcp2_data_event,
-  Curl_cf_def_conn_is_alive,
+  cf_ngtcp2_conn_is_alive,
   Curl_cf_def_conn_keep_alive,
   cf_ngtcp2_query,
 };
@@ -2470,6 +2504,7 @@ CURLcode Curl_cf_ngtcp2_create(struct Curl_cfilter **pcf,
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
+  ctx->qlogfd = -1;
   cf_ngtcp2_ctx_clear(ctx);
 
   result = Curl_cf_create(&cf, &Curl_cft_http3, ctx);
