@@ -181,6 +181,43 @@ struct ftp_parselist_data {
   } offsets;
 };
 
+static void fileinfo_dtor(void *user, void *element)
+{
+  (void)user;
+  Curl_fileinfo_cleanup(element);
+}
+
+CURLcode Curl_wildcard_init(struct WildcardData *wc)
+{
+  Curl_llist_init(&wc->filelist, fileinfo_dtor);
+  wc->state = CURLWC_INIT;
+
+  return CURLE_OK;
+}
+
+void Curl_wildcard_dtor(struct WildcardData **wcp)
+{
+  struct WildcardData *wc = *wcp;
+  if(!wc)
+    return;
+
+  if(wc->dtor) {
+    wc->dtor(wc->ftpwc);
+    wc->dtor = ZERO_NULL;
+    wc->ftpwc = NULL;
+  }
+  DEBUGASSERT(wc->ftpwc == NULL);
+
+  Curl_llist_destroy(&wc->filelist, NULL);
+  free(wc->path);
+  wc->path = NULL;
+  free(wc->pattern);
+  wc->pattern = NULL;
+  wc->state = CURLWC_INIT;
+  free(wc);
+  *wcp = NULL;
+}
+
 struct ftp_parselist_data *Curl_ftp_parselist_data_alloc(void)
 {
   return calloc(1, sizeof(struct ftp_parselist_data));
@@ -274,8 +311,8 @@ static CURLcode ftp_pl_insert_finfo(struct Curl_easy *data,
                                     struct fileinfo *infop)
 {
   curl_fnmatch_callback compare;
-  struct WildcardData *wc = &data->wildcard;
-  struct ftp_wc *ftpwc = wc->protdata;
+  struct WildcardData *wc = data->wildcard;
+  struct ftp_wc *ftpwc = wc->ftpwc;
   struct Curl_llist *llist = &wc->filelist;
   struct ftp_parselist_data *parser = ftpwc->parser;
   bool add = TRUE;
@@ -330,7 +367,7 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
 {
   size_t bufflen = size*nmemb;
   struct Curl_easy *data = (struct Curl_easy *)connptr;
-  struct ftp_wc *ftpwc = data->wildcard.protdata;
+  struct ftp_wc *ftpwc = data->wildcard->ftpwc;
   struct ftp_parselist_data *parser = ftpwc->parser;
   struct fileinfo *infop;
   struct curl_fileinfo *finfo;

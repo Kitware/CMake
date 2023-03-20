@@ -57,6 +57,15 @@
 /* scheme is not URL encoded, the longest libcurl supported ones are... */
 #define MAX_SCHEME_LEN 40
 
+/*
+ * If ENABLE_IPV6 is disabled, we still want to parse IPv6 addresses, so make
+ * sure we have _some_ value for AF_INET6 without polluting our fake value
+ * everywhere.
+ */
+#if !defined(ENABLE_IPV6) && !defined(AF_INET6)
+#define AF_INET6 (AF_INET + 1)
+#endif
+
 /* Internal representation of CURLU. Point to URL-encoded strings. */
 struct Curl_URL {
   char *scheme;
@@ -599,7 +608,8 @@ static CURLUcode hostname_check(struct Curl_URL *u, char *hostname,
         return CURLUE_BAD_IPV6;
       /* hostname is fine */
     }
-#ifdef ENABLE_IPV6
+
+    /* Check the IPv6 address. */
     {
       char dest[16]; /* fits a binary IPv6 address */
       char norm[MAX_IPADR_LEN];
@@ -616,11 +626,10 @@ static CURLUcode hostname_check(struct Curl_URL *u, char *hostname,
       }
       hostname[hlen] = ']'; /* restore ending bracket */
     }
-#endif
   }
   else {
     /* letters from the second string are not ok */
-    len = strcspn(hostname, " \r\n\t/:#?!@{}[]\\$\'\"^`*<>=;,+&()");
+    len = strcspn(hostname, " \r\n\t/:#?!@{}[]\\$\'\"^`*<>=;,+&()%");
     if(hlen != len)
       /* hostname with bad content */
       return CURLUE_BAD_HOSTNAME;
@@ -1341,7 +1350,7 @@ void curl_url_cleanup(CURLU *u)
     }                                           \
   } while(0)
 
-CURLU *curl_url_dup(CURLU *in)
+CURLU *curl_url_dup(const CURLU *in)
 {
   struct Curl_URL *u = calloc(sizeof(struct Curl_URL), 1);
   if(u) {
@@ -1362,10 +1371,10 @@ CURLU *curl_url_dup(CURLU *in)
   return NULL;
 }
 
-CURLUcode curl_url_get(CURLU *u, CURLUPart what,
+CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
                        char **part, unsigned int flags)
 {
-  char *ptr;
+  const char *ptr;
   CURLUcode ifmissing = CURLUE_UNKNOWN_PART;
   char portbuf[7];
   bool urldecode = (flags & CURLU_URLDECODE)?1:0;
@@ -1432,11 +1441,8 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
     break;
   case CURLUPART_PATH:
     ptr = u->path;
-    if(!ptr) {
-      ptr = u->path = strdup("/");
-      if(!u->path)
-        return CURLUE_OUT_OF_MEMORY;
-    }
+    if(!ptr)
+      ptr = "/";
     break;
   case CURLUPART_QUERY:
     ptr = u->query;
@@ -1546,8 +1552,7 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
               return CURLUE_OUT_OF_MEMORY;
             host++;
           }
-          free(u->host);
-          u->host = Curl_dyn_ptr(&enc);
+          allochost = Curl_dyn_ptr(&enc);
         }
       }
 
