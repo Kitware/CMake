@@ -264,11 +264,6 @@ cmQtAutoGenGlobalInitializer::GetCompilerFeatures(
   return res;
 }
 
-bool cmQtAutoGenGlobalInitializer::generate()
-{
-  return (this->InitializeCustomTargets() && this->SetupCustomTargets());
-}
-
 bool cmQtAutoGenGlobalInitializer::InitializeCustomTargets()
 {
   // Initialize global autogen targets

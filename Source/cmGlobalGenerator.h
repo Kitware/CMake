@@ -625,10 +625,6 @@ protected:
 
   void CxxModuleSupportCheck() const;
 
-  /// @brief Qt AUTOMOC/UIC/RCC target generation
-  /// @return true on success
-  bool QtAutoGen();
-
   bool AddHeaderSetVerification();
 
   bool AddAutomaticSources();
