@@ -168,7 +168,7 @@ typedef CURLcode (*Curl_datastream)(struct Curl_easy *data,
 #include "rtsp.h"
 #include "smb.h"
 #include "mqtt.h"
-#include "wildcard.h"
+#include "ftplistparser.h"
 #include "multihandle.h"
 #include "c-hyper.h"
 #include "cf-socket.h"
@@ -687,6 +687,10 @@ struct SingleRequest {
 #ifndef CURL_DISABLE_DOH
   struct dohdata *doh; /* DoH specific data for this request */
 #endif
+#if defined(WIN32) && defined(USE_WINSOCK)
+  struct curltime last_sndbuf_update;  /* last time readwrite_upload called
+                                          win_update_buffer_size */
+#endif
   unsigned char setcookies;
   unsigned char writer_stack_depth; /* Unencoding stack depth. */
   BIT(header);        /* incoming data has HTTP header */
@@ -1057,6 +1061,7 @@ struct connectdata {
   unsigned char ip_version; /* copied from the Curl_easy at creation time */
   unsigned char httpversion; /* the HTTP version*10 reported by the server */
   unsigned char connect_only;
+  unsigned char gssapi_delegation; /* inherited from set.gssapi_delegation */
 };
 
 /* The end of connectdata. */
@@ -1374,7 +1379,7 @@ struct UrlState {
   struct dynbuf trailers_buf; /* a buffer containing the compiled trailing
                                  headers */
   struct Curl_llist httphdrs; /* received headers */
-  struct curl_header headerout; /* for external purposes */
+  struct curl_header headerout[2]; /* for external purposes */
   struct Curl_header_store *prevhead; /* the latest added header */
   trailers_state trailers_state; /* whether we are sending trailers
                                     and what stage are we at */
@@ -1713,8 +1718,6 @@ struct UserDefined {
 #ifndef CURL_DISABLE_NETRC
   unsigned char use_netrc;        /* enum CURL_NETRC_OPTION values  */
 #endif
-  curl_usessl use_ssl;   /* if AUTH TLS is to be attempted etc, for FTP or
-                            IMAP or POP3 or others! */
   unsigned int new_file_perms;      /* when creating remote files */
   char *str[STRING_LAST]; /* array of strings, pointing to allocated memory */
   struct curl_blob *blobs[BLOB_LAST];
@@ -1739,6 +1742,7 @@ struct UserDefined {
   curl_fnmatch_callback fnmatch; /* callback to decide which file corresponds
                                     to pattern (e.g. if WILDCARDMATCH is on) */
   void *fnmatch_data;
+  void *wildcardptr;
 #endif
  /* GSS-API credential delegation, see the documentation of
     CURLOPT_GSSAPI_DELEGATION */
@@ -1773,6 +1777,8 @@ struct UserDefined {
   BIT(mail_rcpt_allowfails); /* allow RCPT TO command to fail for some
                                 recipients */
 #endif
+  unsigned char use_ssl;   /* if AUTH TLS is to be attempted etc, for FTP or
+                              IMAP or POP3 or others! (type: curl_usessl)*/
   unsigned char connect_only; /* make connection/request, then let
                                  application use the socket */
   BIT(is_fread_set); /* has read callback been set to non-NULL? */
@@ -1934,7 +1940,7 @@ struct Curl_easy {
   struct UrlState state;       /* struct for fields used for state info and
                                   other dynamic purposes */
 #ifndef CURL_DISABLE_FTP
-  struct WildcardData wildcard; /* wildcard download state info */
+  struct WildcardData *wildcard; /* wildcard download state info */
 #endif
   struct PureInfo info;        /* stats, reports and info data */
   struct curl_tlssessioninfo tsi; /* Information about the TLS session, only

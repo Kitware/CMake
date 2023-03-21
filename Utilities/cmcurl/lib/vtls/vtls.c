@@ -1604,16 +1604,11 @@ static CURLcode ssl_cf_cntrl(struct Curl_cfilter *cf,
                              struct Curl_easy *data,
                              int event, int arg1, void *arg2)
 {
-  struct ssl_connect_data *connssl = cf->ctx;
   struct cf_call_data save;
 
   (void)arg1;
   (void)arg2;
   switch(event) {
-  case CF_CTRL_CONN_REPORT_STATS:
-    if(cf->sockindex == FIRSTSOCKET && !Curl_ssl_cf_is_proxy(cf))
-      Curl_pgrsTimeWas(data, TIMER_APPCONNECT, connssl->handshake_done);
-    break;
   case CF_CTRL_DATA_ATTACH:
     if(Curl_ssl->attach_data) {
       CF_DATA_SAVE(save, cf, data);
@@ -1634,10 +1629,32 @@ static CURLcode ssl_cf_cntrl(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
-static bool cf_ssl_is_alive(struct Curl_cfilter *cf, struct Curl_easy *data)
+static CURLcode ssl_cf_query(struct Curl_cfilter *cf,
+                             struct Curl_easy *data,
+                             int query, int *pres1, void *pres2)
+{
+  struct ssl_connect_data *connssl = cf->ctx;
+
+  switch(query) {
+  case CF_QUERY_TIMER_APPCONNECT: {
+    struct curltime *when = pres2;
+    if(cf->connected && !Curl_ssl_cf_is_proxy(cf))
+      *when = connssl->handshake_done;
+    return CURLE_OK;
+  }
+  default:
+    break;
+  }
+  return cf->next?
+    cf->next->cft->query(cf->next, data, query, pres1, pres2) :
+    CURLE_UNKNOWN_OPTION;
+}
+
+static bool cf_ssl_is_alive(struct Curl_cfilter *cf, struct Curl_easy *data,
+                            bool *input_pending)
 {
   struct cf_call_data save;
-  bool result;
+  int result;
   /*
    * This function tries to determine connection status.
    *
@@ -1647,9 +1664,20 @@ static bool cf_ssl_is_alive(struct Curl_cfilter *cf, struct Curl_easy *data)
    *    -1 means the connection status is unknown
    */
   CF_DATA_SAVE(save, cf, data);
-  result = Curl_ssl->check_cxn(cf, data) != 0;
+  result = Curl_ssl->check_cxn(cf, data);
   CF_DATA_RESTORE(cf, save);
-  return result;
+  if(result > 0) {
+    *input_pending = TRUE;
+    return TRUE;
+  }
+  if(result == 0) {
+    *input_pending = FALSE;
+    return FALSE;
+  }
+  /* ssl backend does not know */
+  return cf->next?
+    cf->next->cft->is_alive(cf->next, data, input_pending) :
+    FALSE; /* pessimistic in absence of data */
 }
 
 struct Curl_cftype Curl_cft_ssl = {
@@ -1667,7 +1695,7 @@ struct Curl_cftype Curl_cft_ssl = {
   ssl_cf_cntrl,
   cf_ssl_is_alive,
   Curl_cf_def_conn_keep_alive,
-  Curl_cf_def_query,
+  ssl_cf_query,
 };
 
 struct Curl_cftype Curl_cft_ssl_proxy = {
