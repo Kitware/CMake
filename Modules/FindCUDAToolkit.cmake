@@ -623,8 +623,8 @@ else()
         endif()
         unset(_CUDA_NVCC_OUT)
 
-        mark_as_advanced(CUDAToolkit_BIN_DIR)
         set(CUDAToolkit_BIN_DIR "${CUDAToolkit_BIN_DIR}" CACHE PATH "" FORCE)
+        mark_as_advanced(CUDAToolkit_BIN_DIR)
       endif()
 
       if(CUDAToolkit_SENTINEL_FILE)
@@ -1108,6 +1108,7 @@ if(CUDAToolkit_FOUND)
       "${CUDAToolkit_INCLUDE_DIR}/../extras/CUPTI/include"
       "${CUDAToolkit_INCLUDE_DIR}"
       NO_DEFAULT_PATH)
+  mark_as_advanced(CUDAToolkit_CUPTI_INCLUDE_DIR)
 
   if(CUDAToolkit_CUPTI_INCLUDE_DIR)
     _CUDAToolkit_find_and_add_import_lib(cupti
