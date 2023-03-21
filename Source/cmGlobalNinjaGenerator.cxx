@@ -63,6 +63,19 @@ std::string const cmGlobalNinjaGenerator::SHELL_NOOP = "cd .";
 std::string const cmGlobalNinjaGenerator::SHELL_NOOP = ":";
 #endif
 
+namespace {
+#ifdef _WIN32
+bool DetectGCCOnWindows(cm::string_view compilerId, cm::string_view simulateId,
+                        cm::string_view compilerFrontendVariant)
+{
+  return ((compilerId == "Clang"_s && compilerFrontendVariant == "GNU"_s) ||
+          (simulateId != "MSVC"_s &&
+           (compilerId == "GNU"_s || compilerId == "QCC"_s ||
+            cmHasLiteralSuffix(compilerId, "Clang"))));
+}
+#endif
+}
+
 bool operator==(
   const cmGlobalNinjaGenerator::ByConfig::TargetDependsClosureKey& lhs,
   const cmGlobalNinjaGenerator::ByConfig::TargetDependsClosureKey& rhs)
@@ -936,12 +949,8 @@ void cmGlobalNinjaGenerator::EnableLanguage(
       mf->GetSafeDefinition(cmStrCat("CMAKE_", l, "_SIMULATE_ID"));
     std::string const& compilerFrontendVariant = mf->GetSafeDefinition(
       cmStrCat("CMAKE_", l, "_COMPILER_FRONTEND_VARIANT"));
-    if ((compilerId == "Clang" && compilerFrontendVariant == "GNU") ||
-        (simulateId != "MSVC" &&
-         (compilerId == "GNU" || compilerId == "QCC" ||
-          cmHasLiteralSuffix(compilerId, "Clang")))) {
-      this->UsingGCCOnWindows = true;
-    }
+    this->SetUsingGCCOnWindows(
+      DetectGCCOnWindows(compilerId, simulateId, compilerFrontendVariant));
 #endif
   }
 }
@@ -2629,8 +2638,14 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
   {
     CxxModuleLocations locs;
     locs.RootDirectory = ".";
-    locs.PathForGenerator = [this](std::string const& path) -> std::string {
-      return this->ConvertToNinjaPath(path);
+    locs.PathForGenerator = [this](std::string path) -> std::string {
+      path = this->ConvertToNinjaPath(path);
+#  ifdef _WIN32
+      if (this->IsGCCOnWindows()) {
+        std::replace(path.begin(), path.end(), '\\', '/');
+      }
+#  endif
+      return path;
     };
     locs.BmiLocationForModule =
       [&mod_files](std::string const& logical) -> cm::optional<std::string> {
@@ -2811,6 +2826,10 @@ int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
       linked_target_dirs.push_back(tdi_linked_target_dir.asString());
     }
   }
+  std::string const compilerId = tdi["compiler-id"].asString();
+  std::string const simulateId = tdi["compiler-simulate-id"].asString();
+  std::string const compilerFrontendVariant =
+    tdi["compiler-frontend-variant"].asString();
 
   auto export_info = cmDyndepCollation::ParseExportInfo(tdi);
 
@@ -2818,14 +2837,20 @@ int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
   cm.SetHomeDirectory(dir_top_src);
   cm.SetHomeOutputDirectory(dir_top_bld);
   auto ggd = cm.CreateGlobalGenerator("Ninja");
-  if (!ggd ||
-      !cm::static_reference_cast<cmGlobalNinjaGenerator>(ggd).WriteDyndepFile(
-        dir_top_src, dir_top_bld, dir_cur_src, dir_cur_bld, arg_dd, arg_ddis,
-        module_dir, linked_target_dirs, arg_lang, arg_modmapfmt,
-        *export_info)) {
+  if (!ggd) {
     return 1;
   }
-  return 0;
+  cmGlobalNinjaGenerator& gg =
+    cm::static_reference_cast<cmGlobalNinjaGenerator>(ggd);
+#  ifdef _WIN32
+  gg.SetUsingGCCOnWindows(
+    DetectGCCOnWindows(compilerId, simulateId, compilerFrontendVariant));
+#  endif
+  return gg.WriteDyndepFile(dir_top_src, dir_top_bld, dir_cur_src, dir_cur_bld,
+                            arg_dd, arg_ddis, module_dir, linked_target_dirs,
+                            arg_lang, arg_modmapfmt, *export_info)
+    ? 0
+    : 1;
 }
 
 #endif

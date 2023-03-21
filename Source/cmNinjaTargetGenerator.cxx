@@ -1651,6 +1651,10 @@ void cmNinjaTargetGenerator::WriteTargetDependInfo(std::string const& lang,
   tdi["language"] = lang;
   tdi["compiler-id"] = this->Makefile->GetSafeDefinition(
     cmStrCat("CMAKE_", lang, "_COMPILER_ID"));
+  tdi["compiler-simulate-id"] = this->Makefile->GetSafeDefinition(
+    cmStrCat("CMAKE_", lang, "_SIMULATE_ID"));
+  tdi["compiler-frontend-variant"] = this->Makefile->GetSafeDefinition(
+    cmStrCat("CMAKE_", lang, "_COMPILER_FRONTEND_VARIANT"));
 
   std::string mod_dir;
   if (lang == "Fortran") {

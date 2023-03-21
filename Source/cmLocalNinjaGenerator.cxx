@@ -456,6 +456,22 @@ std::string cmLocalNinjaGenerator::WriteCommandScript(
   return scriptPath;
 }
 
+#ifdef _WIN32
+namespace {
+bool RuleNeedsCMD(std::string const& cmd)
+{
+  std::vector<std::string> args;
+  cmSystemTools::ParseWindowsCommandLine(cmd.c_str(), args);
+  auto it = std::find_if(args.cbegin(), args.cend(),
+                         [](std::string const& arg) -> bool {
+                           // FIXME: Detect more windows shell operators.
+                           return cmHasLiteralPrefix(arg, ">");
+                         });
+  return it != args.cend();
+}
+}
+#endif
+
 std::string cmLocalNinjaGenerator::BuildCommandLine(
   std::vector<std::string> const& cmdLines, std::string const& outputConfig,
   std::string const& commandConfig, std::string const& customStep,
@@ -498,12 +514,13 @@ std::string cmLocalNinjaGenerator::BuildCommandLine(
   }
 
   std::ostringstream cmd;
-  for (auto li = cmdLines.begin(); li != cmdLines.end(); ++li)
 #ifdef _WIN32
-  {
+  bool const needCMD =
+    cmdLines.size() > 1 || (customStep.empty() && RuleNeedsCMD(cmdLines[0]));
+  for (auto li = cmdLines.begin(); li != cmdLines.end(); ++li) {
     if (li != cmdLines.begin()) {
       cmd << " && ";
-    } else if (cmdLines.size() > 1) {
+    } else if (needCMD) {
       cmd << "cmd.exe /C \"";
     }
     // Put current cmdLine in brackets if it contains "||" because it has
@@ -514,11 +531,11 @@ std::string cmLocalNinjaGenerator::BuildCommandLine(
       cmd << *li;
     }
   }
-  if (cmdLines.size() > 1) {
+  if (needCMD) {
     cmd << "\"";
   }
 #else
-  {
+  for (auto li = cmdLines.begin(); li != cmdLines.end(); ++li) {
     if (li != cmdLines.begin()) {
       cmd << " && ";
     }
