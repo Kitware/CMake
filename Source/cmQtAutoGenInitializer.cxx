@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <deque>
 #include <initializer_list>
+#include <limits>
 #include <map>
 #include <set>
 #include <sstream> // for basic_ios, istringstream
@@ -457,12 +458,23 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
 
     // Autogen target parallel processing
     {
+      using ParallelType = decltype(this->AutogenTarget.Parallel);
+      unsigned long propInt = 0;
       std::string const& prop =
         this->GenTarget->GetSafeProperty("AUTOGEN_PARALLEL");
       if (prop.empty() || (prop == "AUTO")) {
         // Autodetect number of CPUs
         this->AutogenTarget.Parallel = GetParallelCPUCount();
+      } else if (cmStrToULong(prop, &propInt) && propInt > 0 &&
+                 propInt <= std::numeric_limits<ParallelType>::max()) {
+        this->AutogenTarget.Parallel = static_cast<ParallelType>(propInt);
       } else {
+        // Warn the project author that AUTOGEN_PARALLEL is not valid.
+        this->Makefile->IssueMessage(
+          MessageType::AUTHOR_WARNING,
+          cmStrCat("AUTOGEN_PARALLEL=\"", prop, "\" for target \"",
+                   this->GenTarget->GetName(),
+                   "\" is not valid. Using AUTOGEN_PARALLEL=1"));
         this->AutogenTarget.Parallel = 1;
       }
     }
