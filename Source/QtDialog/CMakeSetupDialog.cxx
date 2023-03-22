@@ -732,13 +732,12 @@ void CMakeSetupDialog::updatePreset(const QString& name)
   }
 }
 
-void CMakeSetupDialog::showPresetLoadError(
-  const QString& dir, cmCMakePresetsGraph::ReadFileResult result)
+void CMakeSetupDialog::showPresetLoadError(const QString& dir,
+                                           const QString& message)
 {
   QMessageBox::warning(
     this, "Error Reading CMake Presets",
-    QString("Could not read presets from %1: %2")
-      .arg(dir, cmCMakePresetsGraph::ResultToString(result)));
+    QString("Could not read presets from %1: %2").arg(dir, message));
 }
 
 void CMakeSetupDialog::doBinaryBrowse()

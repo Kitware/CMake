@@ -54,6 +54,7 @@
 #include "cmDynamicLoader.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
+#include "cmJSONState.h"
 #include "cmMakefile.h"
 #include "cmProcessOutput.h"
 #include "cmState.h"
@@ -2336,10 +2337,10 @@ bool cmCTest::SetArgsFromPreset(const std::string& presetName,
 
   cmCMakePresetsGraph settingsFile;
   auto result = settingsFile.ReadProjectPresets(workingDirectory);
-  if (result != cmCMakePresetsGraph::ReadFileResult::READ_OK) {
-    cmSystemTools::Error(
-      cmStrCat("Could not read presets from ", workingDirectory, ": ",
-               cmCMakePresetsGraph::ResultToString(result)));
+  if (result != true) {
+    cmSystemTools::Error(cmStrCat("Could not read presets from ",
+                                  workingDirectory, ":",
+                                  settingsFile.parseState.GetErrorMessage()));
     return false;
   }
 

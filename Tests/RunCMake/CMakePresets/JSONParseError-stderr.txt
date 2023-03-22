@@ -1,9 +1,3 @@
 ^CMake Error: Could not read presets from [^
-]*/Tests/RunCMake/CMakePresets/JSONParseError: JSON parse error
-Errors:
-[^
-]*JSONParseError/CMakePresets.json:
-\* Line 1, Column 1
-  Syntax error: value, object or array expected\.
-\* Line 1, Column 1
-  A valid JSON document must be either an array or an object value\.$
+]*/Tests/RunCMake/CMakePresets/JSONParseError:
+A JSON document cannot be empty

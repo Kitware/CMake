@@ -1,2 +1,5 @@
 ^CMake Error: Could not read presets from [^
-]*/Tests/RunCMake/CMakePresets/InvalidVendor: Invalid root object$
+]*/Tests/RunCMake/CMakePresets/InvalidVendor:
+Error: @3,13: Invalid root object
+  "vendor": true,
+            \^$

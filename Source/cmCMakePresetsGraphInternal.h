@@ -14,7 +14,7 @@
 #define CHECK_OK(expr)                                                        \
   do {                                                                        \
     auto _result = expr;                                                      \
-    if (_result != ReadFileResult::READ_OK)                                   \
+    if (_result != true)                                                      \
       return _result;                                                         \
   } while (false)
 
@@ -117,57 +117,56 @@ public:
   std::unique_ptr<Condition> SubCondition;
 };
 
-cmCMakePresetsGraph::ReadFileResult PresetStringHelper(
-  std::string& out, const Json::Value* value);
+bool PresetStringHelper(std::string& out, const Json::Value* value,
+                        cmJSONState* state);
 
-cmCMakePresetsGraph::ReadFileResult PresetVectorStringHelper(
-  std::vector<std::string>& out, const Json::Value* value);
+bool PresetNameHelper(std::string& out, const Json::Value* value,
+                      cmJSONState* state);
 
-cmCMakePresetsGraph::ReadFileResult PresetBoolHelper(bool& out,
-                                                     const Json::Value* value);
+bool PresetVectorStringHelper(std::vector<std::string>& out,
+                              const Json::Value* value, cmJSONState* state);
 
-cmCMakePresetsGraph::ReadFileResult PresetOptionalBoolHelper(
-  cm::optional<bool>& out, const Json::Value* value);
+bool PresetBoolHelper(bool& out, const Json::Value* value, cmJSONState* state);
 
-cmCMakePresetsGraph::ReadFileResult PresetIntHelper(int& out,
-                                                    const Json::Value* value);
+bool PresetOptionalBoolHelper(cm::optional<bool>& out,
+                              const Json::Value* value, cmJSONState* state);
 
-cmCMakePresetsGraph::ReadFileResult PresetOptionalIntHelper(
-  cm::optional<int>& out, const Json::Value* value);
+bool PresetIntHelper(int& out, const Json::Value* value, cmJSONState* state);
 
-cmCMakePresetsGraph::ReadFileResult PresetVectorIntHelper(
-  std::vector<int>& out, const Json::Value* value);
+bool PresetOptionalIntHelper(cm::optional<int>& out, const Json::Value* value,
+                             cmJSONState* state);
 
-cmCMakePresetsGraph::ReadFileResult ConfigurePresetsHelper(
+bool PresetVectorIntHelper(std::vector<int>& out, const Json::Value* value,
+                           cmJSONState* state);
+
+bool ConfigurePresetsHelper(
   std::vector<cmCMakePresetsGraph::ConfigurePreset>& out,
-  const Json::Value* value);
+  const Json::Value* value, cmJSONState* state);
 
-cmCMakePresetsGraph::ReadFileResult BuildPresetsHelper(
-  std::vector<cmCMakePresetsGraph::BuildPreset>& out,
-  const Json::Value* value);
+bool BuildPresetsHelper(std::vector<cmCMakePresetsGraph::BuildPreset>& out,
+                        const Json::Value* value, cmJSONState* state);
 
-cmCMakePresetsGraph::ReadFileResult TestPresetsHelper(
-  std::vector<cmCMakePresetsGraph::TestPreset>& out, const Json::Value* value);
+bool TestPresetsHelper(std::vector<cmCMakePresetsGraph::TestPreset>& out,
+                       const Json::Value* value, cmJSONState* state);
 
-cmCMakePresetsGraph::ReadFileResult PackagePresetsHelper(
-  std::vector<cmCMakePresetsGraph::PackagePreset>& out,
-  const Json::Value* value);
+bool PackagePresetsHelper(std::vector<cmCMakePresetsGraph::PackagePreset>& out,
+                          const Json::Value* value, cmJSONState* state);
 
-cmCMakePresetsGraph::ReadFileResult WorkflowPresetsHelper(
+bool WorkflowPresetsHelper(
   std::vector<cmCMakePresetsGraph::WorkflowPreset>& out,
-  const Json::Value* value);
+  const Json::Value* value, cmJSONState* state);
 
-cmJSONHelper<std::nullptr_t, cmCMakePresetsGraph::ReadFileResult> VendorHelper(
-  cmCMakePresetsGraph::ReadFileResult error);
+cmJSONHelper<std::nullptr_t> VendorHelper(const ErrorGenerator& error);
 
-cmCMakePresetsGraph::ReadFileResult PresetConditionHelper(
+bool PresetConditionHelper(
   std::shared_ptr<cmCMakePresetsGraph::Condition>& out,
-  const Json::Value* value);
+  const Json::Value* value, cmJSONState* state);
 
-cmCMakePresetsGraph::ReadFileResult PresetVectorOneOrMoreStringHelper(
-  std::vector<std::string>& out, const Json::Value* value);
+bool PresetVectorOneOrMoreStringHelper(std::vector<std::string>& out,
+                                       const Json::Value* value,
+                                       cmJSONState* state);
 
-cmCMakePresetsGraph::ReadFileResult EnvironmentMapHelper(
+bool EnvironmentMapHelper(
   std::map<std::string, cm::optional<std::string>>& out,
-  const Json::Value* value);
+  const Json::Value* value, cmJSONState* state);
 }

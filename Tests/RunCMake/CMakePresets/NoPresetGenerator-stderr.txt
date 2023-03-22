@@ -1,2 +1,4 @@
 ^CMake Error: Could not read presets from [^
-]*/Tests/RunCMake/CMakePresets/NoPresetGenerator: Invalid preset$
+]*/Tests/RunCMake/CMakePresets/NoPresetGenerator:
+Preset "NoPresetGenerator" missing field "generator"
+Invalid preset: "NoPresetGenerator"$

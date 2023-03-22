@@ -140,6 +140,7 @@ add_library(
   cmCLocaleEnvironmentScope.cxx
   cmCMakePath.h
   cmCMakePath.cxx
+  cmCMakePresetErrors.h
   cmCMakePresetsGraph.cxx
   cmCMakePresetsGraph.h
   cmCMakePresetsGraphInternal.h
@@ -331,6 +332,8 @@ add_library(
   cmInstallDirectoryGenerator.h
   cmInstallDirectoryGenerator.cxx
   cmJSONHelpers.h
+  cmJSONState.cxx
+  cmJSONState.h
   cmLDConfigLDConfigTool.cxx
   cmLDConfigLDConfigTool.h
   cmLDConfigTool.cxx

@@ -28,6 +28,7 @@
 #include "cmDocumentation.h"
 #include "cmDocumentationEntry.h"
 #include "cmGlobalGenerator.h"
+#include "cmJSONState.h"
 #include "cmMakefile.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
@@ -265,11 +266,11 @@ int main(int argc, char const* const* argv)
 
     cmCMakePresetsGraph presetsGraph;
     auto result = presetsGraph.ReadProjectPresets(workingDirectory);
-    if (result != cmCMakePresetsGraph::ReadFileResult::READ_OK) {
+    if (result != true) {
       cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
                   "Could not read presets from "
-                    << workingDirectory << ": "
-                    << cmCMakePresetsGraph::ResultToString(result) << '\n');
+                    << workingDirectory << ":"
+                    << presetsGraph.parseState.GetErrorMessage() << '\n');
       return 1;
     }
 

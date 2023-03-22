@@ -3,89 +3,72 @@
 #include <vector>
 
 #include "cmCTestResourceSpec.h"
+#include "cmJSONState.h"
 
 struct ExpectedSpec
 {
   std::string Path;
-  cmCTestResourceSpec::ReadFileResult ParseResult;
+  bool ParseResult;
   cmCTestResourceSpec Expected;
 };
 
 static const std::vector<ExpectedSpec> expectedResourceSpecs = {
   { "spec1.json",
-    cmCTestResourceSpec::ReadFileResult::READ_OK,
+    true,
     { { {
-      { "gpus",
-        {
-          { "2", 4 },
-          { "e", 1 },
-        } },
-      { "threads", {} },
-    } } } },
-  { "spec2.json", cmCTestResourceSpec::ReadFileResult::READ_OK, {} },
-  { "spec3.json",
-    cmCTestResourceSpec::ReadFileResult::INVALID_SOCKET_SPEC,
-    {} },
-  { "spec4.json",
-    cmCTestResourceSpec::ReadFileResult::INVALID_SOCKET_SPEC,
-    {} },
-  { "spec5.json",
-    cmCTestResourceSpec::ReadFileResult::INVALID_SOCKET_SPEC,
-    {} },
-  { "spec6.json",
-    cmCTestResourceSpec::ReadFileResult::INVALID_SOCKET_SPEC,
-    {} },
-  { "spec7.json",
-    cmCTestResourceSpec::ReadFileResult::INVALID_RESOURCE_TYPE,
-    {} },
-  { "spec8.json", cmCTestResourceSpec::ReadFileResult::INVALID_RESOURCE, {} },
-  { "spec9.json", cmCTestResourceSpec::ReadFileResult::INVALID_RESOURCE, {} },
-  { "spec10.json", cmCTestResourceSpec::ReadFileResult::INVALID_RESOURCE, {} },
-  { "spec11.json", cmCTestResourceSpec::ReadFileResult::INVALID_RESOURCE, {} },
-  { "spec12.json", cmCTestResourceSpec::ReadFileResult::INVALID_ROOT, {} },
-  { "spec13.json", cmCTestResourceSpec::ReadFileResult::JSON_PARSE_ERROR, {} },
-  { "spec14.json", cmCTestResourceSpec::ReadFileResult::READ_OK, {} },
-  { "spec15.json", cmCTestResourceSpec::ReadFileResult::READ_OK, {} },
-  { "spec16.json", cmCTestResourceSpec::ReadFileResult::READ_OK, {} },
-  { "spec17.json", cmCTestResourceSpec::ReadFileResult::INVALID_RESOURCE, {} },
-  { "spec18.json", cmCTestResourceSpec::ReadFileResult::INVALID_RESOURCE, {} },
-  { "spec19.json", cmCTestResourceSpec::ReadFileResult::INVALID_VERSION, {} },
-  { "spec20.json", cmCTestResourceSpec::ReadFileResult::READ_OK, {} },
-  { "spec21.json", cmCTestResourceSpec::ReadFileResult::INVALID_VERSION, {} },
-  { "spec22.json", cmCTestResourceSpec::ReadFileResult::INVALID_VERSION, {} },
-  { "spec23.json", cmCTestResourceSpec::ReadFileResult::INVALID_VERSION, {} },
-  { "spec24.json", cmCTestResourceSpec::ReadFileResult::INVALID_VERSION, {} },
-  { "spec25.json",
-    cmCTestResourceSpec::ReadFileResult::UNSUPPORTED_VERSION,
-    {} },
-  { "spec26.json",
-    cmCTestResourceSpec::ReadFileResult::UNSUPPORTED_VERSION,
-    {} },
-  { "spec27.json", cmCTestResourceSpec::ReadFileResult::INVALID_VERSION, {} },
-  { "spec28.json", cmCTestResourceSpec::ReadFileResult::INVALID_VERSION, {} },
-  { "spec29.json", cmCTestResourceSpec::ReadFileResult::INVALID_VERSION, {} },
-  { "spec30.json", cmCTestResourceSpec::ReadFileResult::INVALID_VERSION, {} },
-  { "spec31.json", cmCTestResourceSpec::ReadFileResult::INVALID_VERSION, {} },
-  { "spec32.json", cmCTestResourceSpec::ReadFileResult::INVALID_VERSION, {} },
-  { "spec33.json", cmCTestResourceSpec::ReadFileResult::INVALID_VERSION, {} },
-  { "spec34.json", cmCTestResourceSpec::ReadFileResult::INVALID_VERSION, {} },
-  { "spec35.json", cmCTestResourceSpec::ReadFileResult::INVALID_VERSION, {} },
-  { "spec36.json", cmCTestResourceSpec::ReadFileResult::NO_VERSION, {} },
-  { "noexist.json", cmCTestResourceSpec::ReadFileResult::FILE_NOT_FOUND, {} },
+        { "gpus",
+          {
+            { "2", 4 },
+            { "e", 1 },
+          } },
+        { "threads", {} },
+      } },
+      cmJSONState() } },
+  { "spec2.json", true, {} },
+  { "spec3.json", false, {} },
+  { "spec4.json", false, {} },
+  { "spec5.json", false, {} },
+  { "spec6.json", false, {} },
+  { "spec7.json", false, {} },
+  { "spec8.json", false, {} },
+  { "spec9.json", false, {} },
+  { "spec10.json", false, {} },
+  { "spec11.json", false, {} },
+  { "spec12.json", false, {} },
+  { "spec13.json", false, {} },
+  { "spec14.json", true, {} },
+  { "spec15.json", true, {} },
+  { "spec16.json", true, {} },
+  { "spec17.json", false, {} },
+  { "spec18.json", false, {} },
+  { "spec19.json", false, {} },
+  { "spec20.json", true, {} },
+  { "spec21.json", false, {} },
+  { "spec22.json", false, {} },
+  { "spec23.json", false, {} },
+  { "spec24.json", false, {} },
+  { "spec25.json", false, {} },
+  { "spec26.json", false, {} },
+  { "spec27.json", false, {} },
+  { "spec28.json", false, {} },
+  { "spec29.json", false, {} },
+  { "spec30.json", false, {} },
+  { "spec31.json", false, {} },
+  { "spec32.json", false, {} },
+  { "spec33.json", false, {} },
+  { "spec34.json", false, {} },
+  { "spec35.json", false, {} },
+  { "spec36.json", false, {} },
+  { "noexist.json", false, {} },
 };
 
-static bool testSpec(const std::string& path,
-                     cmCTestResourceSpec::ReadFileResult expectedResult,
+static bool testSpec(const std::string& path, bool expectedResult,
                      const cmCTestResourceSpec& expected)
 {
   cmCTestResourceSpec actual;
   auto result = actual.ReadFromJSONFile(path);
   if (result != expectedResult) {
-    std::cout << "ReadFromJSONFile(\"" << path << "\") returned \""
-              << cmCTestResourceSpec::ResultToString(result)
-              << "\", should be \""
-              << cmCTestResourceSpec::ResultToString(expectedResult) << "\""
-              << std::endl;
+    std::cout << "ReadFromJSONFile(\"" << path << "\") failed \"" << std::endl;
     return false;
   }
 

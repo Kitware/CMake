@@ -1,2 +1,5 @@
 ^CMake Error: Could not read presets from [^
-]*/Tests/RunCMake/CMakePresets/ExtraVariableField: Invalid CMake variable definition$
+]*/Tests/RunCMake/CMakePresets/ExtraVariableField:
+Error: @11,22: Invalid extra field "invalid" in variable "EXTRA" for preset "ExtraVariableField"
+          "invalid": true
+                     \^$

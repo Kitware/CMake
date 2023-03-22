@@ -52,6 +52,7 @@
 #if !defined(CMAKE_BOOTSTRAP)
 #  include "cmMakefileProfilingData.h"
 #endif
+#include "cmJSONState.h"
 #include "cmMessenger.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
@@ -1411,13 +1412,10 @@ void cmake::SetArgs(const std::vector<std::string>& args)
   if (listPresets != ListPresets::None || !presetName.empty()) {
     cmCMakePresetsGraph presetsGraph;
     auto result = presetsGraph.ReadProjectPresets(this->GetHomeDirectory());
-    if (result != cmCMakePresetsGraph::ReadFileResult::READ_OK) {
+    if (result != true) {
       std::string errorMsg =
-        cmStrCat("Could not read presets from ", this->GetHomeDirectory(),
-                 ": ", cmCMakePresetsGraph::ResultToString(result));
-      if (!presetsGraph.errors.empty()) {
-        errorMsg = cmStrCat(errorMsg, "\nErrors:\n", presetsGraph.errors);
-      }
+        cmStrCat("Could not read presets from ", this->GetHomeDirectory(), ":",
+                 presetsGraph.parseState.GetErrorMessage());
       cmSystemTools::Error(errorMsg);
       return;
     }
@@ -3426,10 +3424,10 @@ int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
 
     cmCMakePresetsGraph settingsFile;
     auto result = settingsFile.ReadProjectPresets(this->GetHomeDirectory());
-    if (result != cmCMakePresetsGraph::ReadFileResult::READ_OK) {
+    if (result != true) {
       cmSystemTools::Error(
-        cmStrCat("Could not read presets from ", this->GetHomeDirectory(),
-                 ": ", cmCMakePresetsGraph::ResultToString(result)));
+        cmStrCat("Could not read presets from ", this->GetHomeDirectory(), ":",
+                 settingsFile.parseState.GetErrorMessage()));
       return 1;
     }
 
@@ -3782,10 +3780,10 @@ int cmake::Workflow(const std::string& presetName,
 
   cmCMakePresetsGraph settingsFile;
   auto result = settingsFile.ReadProjectPresets(this->GetHomeDirectory());
-  if (result != cmCMakePresetsGraph::ReadFileResult::READ_OK) {
-    cmSystemTools::Error(
-      cmStrCat("Could not read presets from ", this->GetHomeDirectory(), ": ",
-               cmCMakePresetsGraph::ResultToString(result)));
+  if (result != true) {
+    cmSystemTools::Error(cmStrCat("Could not read presets from ",
+                                  this->GetHomeDirectory(), ":",
+                                  settingsFile.parseState.GetErrorMessage()));
     return 1;
   }
 

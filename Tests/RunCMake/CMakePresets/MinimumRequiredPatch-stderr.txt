@@ -1,2 +1,5 @@
 ^CMake Error: Could not read presets from [^
-]*/Tests/RunCMake/CMakePresets/MinimumRequiredPatch: "cmakeMinimumRequired" version too new$
+]*/Tests/RunCMake/CMakePresets/MinimumRequiredPatch:
+Error: @6,14: "cmakeMinimumRequired" patch version 50000000 must be less than [0-9]*
+    "patch": 50000000
+             \^$
