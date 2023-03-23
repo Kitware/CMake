@@ -690,11 +690,14 @@ syn keyword cmakeVariable contained
             \ CMAKE_AUTOMOC_MOC_OPTIONS
             \ CMAKE_AUTOMOC_PATH_PREFIX
             \ CMAKE_AUTOMOC_RELAXED_MODE
+            \ CMAKE_AUTOMOC_EXECUTABLE
             \ CMAKE_AUTORCC
             \ CMAKE_AUTORCC_OPTIONS
+            \ CMAKE_AUTORCC_EXECUTABLE
             \ CMAKE_AUTOUIC
             \ CMAKE_AUTOUIC_OPTIONS
             \ CMAKE_AUTOUIC_SEARCH_PATHS
+            \ CMAKE_AUTOUIC_EXECUTABLE
             \ CMAKE_BACKWARDS_COMPATIBILITY
             \ CMAKE_BINARY_DIR
             \ CMAKE_BUILD_RPATH
