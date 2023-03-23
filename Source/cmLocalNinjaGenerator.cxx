@@ -5,11 +5,11 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdio>
-#include <iterator>
 #include <memory>
 #include <sstream>
 #include <utility>
 
+#include <cm/unordered_set>
 #include <cmext/string_view>
 
 #include "cmsys/FStream.hxx"
@@ -26,6 +26,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmNinjaTargetGenerator.h"
+#include "cmNinjaTypes.h"
 #include "cmPolicies.h"
 #include "cmRulePlaceholderExpander.h"
 #include "cmSourceFile.h"
@@ -601,7 +602,7 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
       continue;
     }
 
-    cmNinjaDeps orderOnlyDeps;
+    std::unordered_set<std::string> orderOnlyDeps;
 
     if (!cc->GetDependsExplicitOnly()) {
       // A custom command may appear on multiple targets.  However, some build
@@ -617,19 +618,15 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
       assert(j != targets.end());
       this->GetGlobalNinjaGenerator()->AppendTargetDependsClosure(
         *j, orderOnlyDeps, ccg.GetOutputConfig(), fileConfig, ccgs.size() > 1);
-      std::sort(orderOnlyDeps.begin(), orderOnlyDeps.end());
       ++j;
 
       for (; j != targets.end(); ++j) {
-        std::vector<std::string> jDeps;
-        std::vector<std::string> depsIntersection;
+        std::unordered_set<std::string> jDeps;
         this->GetGlobalNinjaGenerator()->AppendTargetDependsClosure(
           *j, jDeps, ccg.GetOutputConfig(), fileConfig, ccgs.size() > 1);
-        std::sort(jDeps.begin(), jDeps.end());
-        std::set_intersection(orderOnlyDeps.begin(), orderOnlyDeps.end(),
-                              jDeps.begin(), jDeps.end(),
-                              std::back_inserter(depsIntersection));
-        orderOnlyDeps = depsIntersection;
+        cm::erase_if(orderOnlyDeps, [&jDeps](std::string const& dep) {
+          return jDeps.find(dep) == jDeps.end();
+        });
       }
     }
 
@@ -658,13 +655,17 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
     std::vector<std::string> cmdLines;
     this->AppendCustomCommandLines(ccg, cmdLines);
 
+    cmNinjaDeps sortedOrderOnlyDeps(orderOnlyDeps.begin(),
+                                    orderOnlyDeps.end());
+    std::sort(sortedOrderOnlyDeps.begin(), sortedOrderOnlyDeps.end());
+
     if (cmdLines.empty()) {
       cmNinjaBuild build("phony");
       build.Comment = cmStrCat("Phony custom command for ", mainOutput);
       build.Outputs = std::move(ccOutputs.ExplicitOuts);
       build.WorkDirOuts = std::move(ccOutputs.WorkDirOuts);
       build.ExplicitDeps = std::move(ninjaDeps);
-      build.OrderOnlyDeps = orderOnlyDeps;
+      build.OrderOnlyDeps = std::move(sortedOrderOnlyDeps);
       gg->WriteBuild(this->GetImplFileStream(fileConfig), build);
     } else {
       std::string customStep = cmSystemTools::GetFilenameName(mainOutput);
@@ -710,7 +711,8 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
         this->ConstructComment(ccg), comment, depfile, cc->GetJobPool(),
         cc->GetUsesTerminal(),
         /*restat*/ !symbolic || !byproducts.empty(), fileConfig,
-        std::move(ccOutputs), std::move(ninjaDeps), std::move(orderOnlyDeps));
+        std::move(ccOutputs), std::move(ninjaDeps),
+        std::move(sortedOrderOnlyDeps));
     }
   }
 }
