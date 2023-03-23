@@ -169,3 +169,15 @@ Other Changes
 
 * The :option:`cmake --trace` option now follows :command:`try_compile` and
   :command:`try_run` invocations.
+
+Updates
+=======
+
+Changes made since CMake 3.26.0 include the following.
+
+3.26.1
+------
+
+* This version made no changes to documented features or interfaces.
+  Some implementation updates were made to support ecosystem changes
+  and/or fix regressions.
