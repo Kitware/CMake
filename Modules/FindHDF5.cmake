@@ -217,16 +217,9 @@ endif()
 
 # Test first if the current compilers automatically wrap HDF5
 function(_HDF5_test_regular_compiler_C success version is_parallel)
-  set(scratch_directory
-    ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/hdf5)
   if(NOT ${success} OR
-     NOT EXISTS ${scratch_directory}/compiler_has_h5_c)
-    set(test_file ${scratch_directory}/cmake_hdf5_test.c)
-    # CXX project without C enabled
-    if(CMAKE_CXX_COMPILER_LOADED AND NOT CMAKE_C_COMPILER_LOADED)
-      set(test_file ${scratch_directory}/cmake_hdf5_test.cpp)
-    endif()
-    file(WRITE ${test_file}
+     NOT EXISTS ${_HDF5_TEST_DIR}/compiler_has_h5_c)
+    file(WRITE "${_HDF5_TEST_SRC}"
       "#include <hdf5.h>\n"
       "const char* info_ver = \"INFO\" \":\" H5_VERSION;\n"
       "#ifdef H5_HAVE_PARALLEL\n"
@@ -242,12 +235,12 @@ function(_HDF5_test_regular_compiler_C success version is_parallel)
       "  fid = H5Fcreate(\"foo.h5\",H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT);\n"
       "  return 0;\n"
       "}")
-    try_compile(${success} SOURCES ${test_file}
-      COPY_FILE ${scratch_directory}/compiler_has_h5_c
+    try_compile(${success} SOURCES "${_HDF5_TEST_SRC}"
+      COPY_FILE ${_HDF5_TEST_DIR}/compiler_has_h5_c
     )
   endif()
-  if(${success} AND EXISTS ${scratch_directory}/compiler_has_h5_c)
-    file(STRINGS ${scratch_directory}/compiler_has_h5_c INFO_STRINGS
+  if(${success} AND EXISTS ${_HDF5_TEST_DIR}/compiler_has_h5_c)
+    file(STRINGS ${_HDF5_TEST_DIR}/compiler_has_h5_c INFO_STRINGS
       REGEX "^INFO:"
     )
     string(REGEX MATCH "^INFO:([0-9]+\\.[0-9]+\\.[0-9]+)(-patch([0-9]+))?"
@@ -268,11 +261,9 @@ function(_HDF5_test_regular_compiler_C success version is_parallel)
 endfunction()
 
 function(_HDF5_test_regular_compiler_CXX success version is_parallel)
-  set(scratch_directory ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/hdf5)
   if(NOT ${success} OR
-     NOT EXISTS ${scratch_directory}/compiler_has_h5_cxx)
-    set(test_file ${scratch_directory}/cmake_hdf5_test.cxx)
-    file(WRITE ${test_file}
+     NOT EXISTS ${_HDF5_TEST_DIR}/compiler_has_h5_cxx)
+    file(WRITE "${_HDF5_TEST_SRC}"
       "#include <H5Cpp.h>\n"
       "#ifndef H5_NO_NAMESPACE\n"
       "using namespace H5;\n"
@@ -290,12 +281,12 @@ function(_HDF5_test_regular_compiler_CXX success version is_parallel)
       "  H5File file(\"foo.h5\", H5F_ACC_TRUNC);\n"
       "  return 0;\n"
       "}")
-    try_compile(${success} SOURCES ${test_file}
-      COPY_FILE ${scratch_directory}/compiler_has_h5_cxx
+    try_compile(${success} SOURCES "${_HDF5_TEST_SRC}"
+      COPY_FILE ${_HDF5_TEST_DIR}/compiler_has_h5_cxx
     )
   endif()
-  if(${success} AND EXISTS ${scratch_directory}/compiler_has_h5_cxx)
-    file(STRINGS ${scratch_directory}/compiler_has_h5_cxx INFO_STRINGS
+  if(${success} AND EXISTS ${_HDF5_TEST_DIR}/compiler_has_h5_cxx)
+    file(STRINGS ${_HDF5_TEST_DIR}/compiler_has_h5_cxx INFO_STRINGS
       REGEX "^INFO:"
     )
     string(REGEX MATCH "^INFO:([0-9]+\\.[0-9]+\\.[0-9]+)(-patch([0-9]+))?"
@@ -317,17 +308,14 @@ endfunction()
 
 function(_HDF5_test_regular_compiler_Fortran success is_parallel)
   if(NOT ${success})
-    set(scratch_directory
-      ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/hdf5)
-    set(test_file ${scratch_directory}/cmake_hdf5_test.f90)
-    file(WRITE ${test_file}
+    file(WRITE "${_HDF5_TEST_SRC}"
       "program hdf5_hello\n"
       "  use hdf5\n"
       "  integer error\n"
       "  call h5open_f(error)\n"
       "  call h5close_f(error)\n"
       "end\n")
-    try_compile(${success} SOURCES ${test_file})
+    try_compile(${success} SOURCES "${_HDF5_TEST_SRC}")
     if(${success})
       execute_process(COMMAND ${CMAKE_Fortran_COMPILER} -showconfig
         OUTPUT_VARIABLE config_output
@@ -359,19 +347,11 @@ function( _HDF5_invoke_compiler language output_var return_value_var version_var
   else()
     set(lib_type_args -shlib)
   endif()
-  set(scratch_dir ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/hdf5)
-  if("${language}" STREQUAL "C")
-    set(test_file ${scratch_dir}/cmake_hdf5_test.c)
-  elseif("${language}" STREQUAL "CXX")
-    set(test_file ${scratch_dir}/cmake_hdf5_test.cxx)
-  elseif("${language}" STREQUAL "Fortran")
-    set(test_file ${scratch_dir}/cmake_hdf5_test.f90)
-  endif()
   # Verify that the compiler wrapper can actually compile: sometimes the compiler
   # wrapper exists, but not the compiler.  E.g. Miniconda / Anaconda Python
   execute_process(
-    COMMAND ${HDF5_${language}_COMPILER_EXECUTABLE} ${test_file}
-    WORKING_DIRECTORY ${scratch_dir}
+    COMMAND ${HDF5_${language}_COMPILER_EXECUTABLE} "${_HDF5_TEST_SRC}"
+    WORKING_DIRECTORY ${_HDF5_TEST_DIR}
     OUTPUT_VARIABLE output
     ERROR_VARIABLE output
     RESULT_VARIABLE return_value
@@ -381,8 +361,8 @@ function( _HDF5_invoke_compiler language output_var return_value_var version_var
       "HDF5 ${language} compiler wrapper is unable to compile a minimal HDF5 program.")
   else()
     execute_process(
-      COMMAND ${HDF5_${language}_COMPILER_EXECUTABLE} -show ${lib_type_args} ${test_file}
-      WORKING_DIRECTORY ${scratch_dir}
+      COMMAND ${HDF5_${language}_COMPILER_EXECUTABLE} -show ${lib_type_args} "${_HDF5_TEST_SRC}"
+      WORKING_DIRECTORY ${_HDF5_TEST_DIR}
       OUTPUT_VARIABLE output
       ERROR_VARIABLE output
       RESULT_VARIABLE return_value
@@ -599,6 +579,7 @@ endif()
 
 if(NOT HDF5_FOUND)
   set(_HDF5_NEED_TO_SEARCH FALSE)
+  set(_HDF5_TEST_DIR ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/hdf5)
   set(HDF5_COMPILER_NO_INTERROGATE TRUE)
   # Only search for languages we've enabled
   foreach(_lang IN LISTS HDF5_LANGUAGE_BINDINGS)
@@ -607,16 +588,23 @@ if(NOT HDF5_FOUND)
 
     # First check to see if our regular compiler is one of wrappers
     if(_lang STREQUAL "C")
+      set(_HDF5_TEST_SRC ${_HDF5_TEST_DIR}/cmake_hdf5_test.c)
+      if(CMAKE_CXX_COMPILER_LOADED AND NOT CMAKE_C_COMPILER_LOADED)
+        # CXX project without C enabled
+        set(_HDF5_TEST_SRC ${_HDF5_TEST_DIR}/cmake_hdf5_test.cxx)
+      endif()
       _HDF5_test_regular_compiler_C(
         HDF5_${_lang}_COMPILER_NO_INTERROGATE
         HDF5_${_lang}_VERSION
         HDF5_${_lang}_IS_PARALLEL)
     elseif(_lang STREQUAL "CXX")
+      set(_HDF5_TEST_SRC ${_HDF5_TEST_DIR}/cmake_hdf5_test.cxx)
       _HDF5_test_regular_compiler_CXX(
         HDF5_${_lang}_COMPILER_NO_INTERROGATE
         HDF5_${_lang}_VERSION
         HDF5_${_lang}_IS_PARALLEL)
     elseif(_lang STREQUAL "Fortran")
+      set(_HDF5_TEST_SRC ${_HDF5_TEST_DIR}/cmake_hdf5_test.f90)
       _HDF5_test_regular_compiler_Fortran(
         HDF5_${_lang}_COMPILER_NO_INTERROGATE
         HDF5_${_lang}_IS_PARALLEL)
@@ -762,6 +750,8 @@ if(NOT HDF5_FOUND)
       endif()
     endif()
   endforeach()
+  unset(_HDF5_TEST_DIR)
+  unset(_HDF5_TEST_SRC)
   unset(_lib)
 else()
   set(_HDF5_NEED_TO_SEARCH TRUE)
