@@ -479,6 +479,11 @@ public:
   TargetDependSet const& GetTargetDirectDepends(
     const cmGeneratorTarget* target);
 
+  // Return true if target 'l' occurs before 'r' in a global ordering
+  // of targets that respects inter-target dependencies.
+  bool TargetOrderIndexLess(cmGeneratorTarget const* l,
+                            cmGeneratorTarget const* r) const;
+
   const std::map<std::string, std::vector<cmLocalGenerator*>>& GetProjectMap()
     const
   {
