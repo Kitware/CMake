@@ -14,6 +14,7 @@ run_cmake_toolchain(LinkFlagsInit)
 run_cmake_toolchain(CMP0126-NEW)
 run_cmake_toolchain(CMP0126-OLD)
 run_cmake_toolchain(CMP0126-WARN)
+run_cmake_toolchain(SetCrossCompiling)
 
 function(run_IncludeDirectories)
   run_cmake_toolchain(IncludeDirectories)
