@@ -43,7 +43,10 @@ macro(__compiler_ibmclang lang)
   set(_CMAKE_${lang}_IPO_SUPPORTED_BY_CMAKE YES)
   set(_CMAKE_${lang}_IPO_MAY_BE_SUPPORTED_BY_COMPILER YES)
 
-  set(_CMAKE_LTO_THIN TRUE)
+  # Thin LTO is not yet supported on AIX.
+  if(NOT (CMAKE_SYSTEM_NAME STREQUAL "AIX"))
+    set(_CMAKE_LTO_THIN TRUE)
+  endif()
 
   if(_CMAKE_LTO_THIN)
     set(CMAKE_${lang}_COMPILE_OPTIONS_IPO "-flto=thin")
