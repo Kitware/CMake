@@ -219,7 +219,7 @@ endif()
 function(_HDF5_test_regular_compiler_C success version is_parallel)
   if(NOT ${success} OR
      NOT EXISTS ${_HDF5_TEST_DIR}/compiler_has_h5_c)
-    file(WRITE "${_HDF5_TEST_SRC}"
+    file(WRITE "${_HDF5_TEST_DIR}/${_HDF5_TEST_SRC}"
       "#include <hdf5.h>\n"
       "const char* info_ver = \"INFO\" \":\" H5_VERSION;\n"
       "#ifdef H5_HAVE_PARALLEL\n"
@@ -235,7 +235,7 @@ function(_HDF5_test_regular_compiler_C success version is_parallel)
       "  fid = H5Fcreate(\"foo.h5\",H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT);\n"
       "  return 0;\n"
       "}")
-    try_compile(${success} SOURCES "${_HDF5_TEST_SRC}"
+    try_compile(${success} SOURCES "${_HDF5_TEST_DIR}/${_HDF5_TEST_SRC}"
       COPY_FILE ${_HDF5_TEST_DIR}/compiler_has_h5_c
     )
   endif()
@@ -263,7 +263,7 @@ endfunction()
 function(_HDF5_test_regular_compiler_CXX success version is_parallel)
   if(NOT ${success} OR
      NOT EXISTS ${_HDF5_TEST_DIR}/compiler_has_h5_cxx)
-    file(WRITE "${_HDF5_TEST_SRC}"
+    file(WRITE "${_HDF5_TEST_DIR}/${_HDF5_TEST_SRC}"
       "#include <H5Cpp.h>\n"
       "#ifndef H5_NO_NAMESPACE\n"
       "using namespace H5;\n"
@@ -281,7 +281,7 @@ function(_HDF5_test_regular_compiler_CXX success version is_parallel)
       "  H5File file(\"foo.h5\", H5F_ACC_TRUNC);\n"
       "  return 0;\n"
       "}")
-    try_compile(${success} SOURCES "${_HDF5_TEST_SRC}"
+    try_compile(${success} SOURCES "${_HDF5_TEST_DIR}/${_HDF5_TEST_SRC}"
       COPY_FILE ${_HDF5_TEST_DIR}/compiler_has_h5_cxx
     )
   endif()
@@ -308,14 +308,14 @@ endfunction()
 
 function(_HDF5_test_regular_compiler_Fortran success is_parallel)
   if(NOT ${success})
-    file(WRITE "${_HDF5_TEST_SRC}"
+    file(WRITE "${_HDF5_TEST_DIR}/${_HDF5_TEST_SRC}"
       "program hdf5_hello\n"
       "  use hdf5\n"
       "  integer error\n"
       "  call h5open_f(error)\n"
       "  call h5close_f(error)\n"
       "end\n")
-    try_compile(${success} SOURCES "${_HDF5_TEST_SRC}")
+    try_compile(${success} SOURCES "${_HDF5_TEST_DIR}/${_HDF5_TEST_SRC}")
     if(${success})
       execute_process(COMMAND ${CMAKE_Fortran_COMPILER} -showconfig
         OUTPUT_VARIABLE config_output
@@ -588,23 +588,23 @@ if(NOT HDF5_FOUND)
 
     # First check to see if our regular compiler is one of wrappers
     if(_lang STREQUAL "C")
-      set(_HDF5_TEST_SRC ${_HDF5_TEST_DIR}/cmake_hdf5_test.c)
+      set(_HDF5_TEST_SRC cmake_hdf5_test.c)
       if(CMAKE_CXX_COMPILER_LOADED AND NOT CMAKE_C_COMPILER_LOADED)
         # CXX project without C enabled
-        set(_HDF5_TEST_SRC ${_HDF5_TEST_DIR}/cmake_hdf5_test.cxx)
+        set(_HDF5_TEST_SRC cmake_hdf5_test.cxx)
       endif()
       _HDF5_test_regular_compiler_C(
         HDF5_${_lang}_COMPILER_NO_INTERROGATE
         HDF5_${_lang}_VERSION
         HDF5_${_lang}_IS_PARALLEL)
     elseif(_lang STREQUAL "CXX")
-      set(_HDF5_TEST_SRC ${_HDF5_TEST_DIR}/cmake_hdf5_test.cxx)
+      set(_HDF5_TEST_SRC cmake_hdf5_test.cxx)
       _HDF5_test_regular_compiler_CXX(
         HDF5_${_lang}_COMPILER_NO_INTERROGATE
         HDF5_${_lang}_VERSION
         HDF5_${_lang}_IS_PARALLEL)
     elseif(_lang STREQUAL "Fortran")
-      set(_HDF5_TEST_SRC ${_HDF5_TEST_DIR}/cmake_hdf5_test.f90)
+      set(_HDF5_TEST_SRC cmake_hdf5_test.f90)
       _HDF5_test_regular_compiler_Fortran(
         HDF5_${_lang}_COMPILER_NO_INTERROGATE
         HDF5_${_lang}_IS_PARALLEL)
