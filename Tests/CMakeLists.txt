@@ -1450,6 +1450,7 @@ if(BUILD_TESTING)
       GnuTLS
       GSL
       GTK2
+      HDF5
       Iconv
       ICU
       ImageMagick
