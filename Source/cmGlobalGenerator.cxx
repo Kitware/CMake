@@ -1719,8 +1719,7 @@ cmGlobalGenerator::GetLocalGeneratorTargetsInOrder(cmLocalGenerator* lg) const
   cm::append(gts, lg->GetGeneratorTargets());
   std::sort(gts.begin(), gts.end(),
             [this](cmGeneratorTarget const* l, cmGeneratorTarget const* r) {
-              return this->TargetOrderIndex.at(l) <
-                this->TargetOrderIndex.at(r);
+              return this->TargetOrderIndexLess(l, r);
             });
   return gts;
 }
@@ -3058,6 +3057,12 @@ cmGlobalGenerator::TargetDependSet const&
 cmGlobalGenerator::GetTargetDirectDepends(cmGeneratorTarget const* target)
 {
   return this->TargetDependencies[target];
+}
+
+bool cmGlobalGenerator::TargetOrderIndexLess(cmGeneratorTarget const* l,
+                                             cmGeneratorTarget const* r) const
+{
+  return this->TargetOrderIndex.at(l) < this->TargetOrderIndex.at(r);
 }
 
 bool cmGlobalGenerator::IsReservedTarget(std::string const& name)
