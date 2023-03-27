@@ -1,15 +1,15 @@
 CMAKE_CROSSCOMPILING
 --------------------
 
-Intended to indicate whether CMake is cross compiling, but note limitations
-discussed below.
+This variable is set by CMake to indicate whether it is cross compiling,
+but note limitations discussed below.
 
 This variable will be set to true by CMake if the :variable:`CMAKE_SYSTEM_NAME`
 variable has been set manually (i.e. in a toolchain file or as a cache entry
 from the :manual:`cmake <cmake(1)>` command line). In most cases, manually
-setting :variable:`CMAKE_SYSTEM_NAME` will only be done when cross compiling,
-since it will otherwise be given the same value as
-:variable:`CMAKE_HOST_SYSTEM_NAME` if not manually set, which is correct for
+setting :variable:`CMAKE_SYSTEM_NAME` will only be done when cross compiling
+since, if not manually set, it will be given the same value as
+:variable:`CMAKE_HOST_SYSTEM_NAME`, which is correct for
 the non-cross-compiling case. In the event that :variable:`CMAKE_SYSTEM_NAME`
 is manually set to the same value as :variable:`CMAKE_HOST_SYSTEM_NAME`, then
 ``CMAKE_CROSSCOMPILING`` will still be set to true.

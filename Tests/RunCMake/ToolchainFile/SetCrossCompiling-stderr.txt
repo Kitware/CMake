@@ -1,0 +1,8 @@
+^CMake Warning \(dev\) at [^
+]*/Modules/CMakeDetermineSystem.cmake:[0-9]+ \(message\):
+  CMAKE_CROSSCOMPILING has been set by the project, toolchain file, or user\.
+  CMake is resetting it to false because CMAKE_SYSTEM_NAME was not set\.  To
+  indicate cross compilation, only CMAKE_SYSTEM_NAME needs to be set\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(project\)
+This warning is for project developers\.  Use -Wno-dev to suppress it\.$

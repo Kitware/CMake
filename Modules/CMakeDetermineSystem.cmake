@@ -176,6 +176,13 @@ else()
     set(CMAKE_SYSTEM_VERSION "${CMAKE_HOST_SYSTEM_VERSION}")
   endif()
   set(CMAKE_SYSTEM_PROCESSOR "${CMAKE_HOST_SYSTEM_PROCESSOR}")
+  if(CMAKE_CROSSCOMPILING)
+    message(AUTHOR_WARNING
+      "CMAKE_CROSSCOMPILING has been set by the project, toolchain file, or user.  "
+      "CMake is resetting it to false because CMAKE_SYSTEM_NAME was not set.  "
+      "To indicate cross compilation, only CMAKE_SYSTEM_NAME needs to be set."
+      )
+  endif()
   set(CMAKE_CROSSCOMPILING FALSE)
   set(PRESET_CMAKE_SYSTEM_NAME FALSE)
 endif()
