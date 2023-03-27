@@ -8,9 +8,8 @@ and cache entries.
 
 Signatures of this command that specify a ``<value>...`` placeholder
 expect zero or more arguments.  Multiple arguments will be joined as
-a :ref:`semicolon-separated list <CMake Language Lists>` to form the actual variable
-value to be set.  Zero arguments will cause normal variables to be
-unset.  See the :command:`unset` command to unset variables explicitly.
+a :ref:`semicolon-separated list <CMake Language Lists>` to form the
+actual variable value to be set.
 
 Set Normal Variable
 ^^^^^^^^^^^^^^^^^^^
@@ -19,7 +18,11 @@ Set Normal Variable
   set(<variable> <value>... [PARENT_SCOPE])
   :target: normal
 
-  Sets the given ``<variable>`` in the current function or directory scope.
+  Set or unset ``<variable>`` in the current function or directory scope:
+
+  * If at least one ``<value>...`` is given, set the variable to that value.
+  * If no value is given, unset the variable.  This is equivalent to
+    :command:`unset(<variable>) <unset>`.
 
   If the ``PARENT_SCOPE`` option is given the variable will be set in
   the scope above the current scope.  Each new directory or :command:`function`
@@ -33,6 +36,8 @@ Set Normal Variable
   The :command:`block(PROPAGATE)` and :command:`return(PROPAGATE)` commands
   can be used as an alternate method to the :command:`set(PARENT_SCOPE)`
   and :command:`unset(PARENT_SCOPE)` commands to update the parent scope.
+
+.. include:: UNSET_NOTE.txt
 
 Set Cache Entry
 ^^^^^^^^^^^^^^^
