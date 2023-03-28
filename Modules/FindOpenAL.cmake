@@ -105,18 +105,16 @@ find_package_handle_standard_args(
 
 mark_as_advanced(OPENAL_LIBRARY OPENAL_INCLUDE_DIR)
 
-if(OPENAL_INCLUDE_DIR AND OPENAL_LIBRARY)
-  if(NOT TARGET OpenAL::OpenAL)
-    if(EXISTS "${OPENAL_LIBRARY}")
-      add_library(OpenAL::OpenAL UNKNOWN IMPORTED)
-      set_target_properties(OpenAL::OpenAL PROPERTIES
-        IMPORTED_LOCATION "${OPENAL_LIBRARY}")
-    else()
-      add_library(OpenAL::OpenAL INTERFACE IMPORTED)
-      set_target_properties(OpenAL::OpenAL PROPERTIES
-        IMPORTED_LIBNAME "${OPENAL_LIBRARY}")
-    endif()
+if(OPENAL_FOUND AND NOT TARGET OpenAL::OpenAL)
+  if(OPENAL_LIBRARY MATCHES "/([^/]+)\\.framework$")
+    add_library(OpenAL::OpenAL INTERFACE IMPORTED)
     set_target_properties(OpenAL::OpenAL PROPERTIES
-      INTERFACE_INCLUDE_DIRECTORIES "${OPENAL_INCLUDE_DIR}")
+      INTERFACE_LINK_LIBRARIES "${OPENAL_LIBRARY}")
+  else()
+    add_library(OpenAL::OpenAL UNKNOWN IMPORTED)
+    set_target_properties(OpenAL::OpenAL PROPERTIES
+      IMPORTED_LOCATION "${OPENAL_LIBRARY}")
   endif()
+  set_target_properties(OpenAL::OpenAL PROPERTIES
+    INTERFACE_INCLUDE_DIRECTORIES "${OPENAL_INCLUDE_DIR}")
 endif()
