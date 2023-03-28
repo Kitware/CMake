@@ -341,12 +341,13 @@ Reading
 
   On Windows platforms, library resolution works as follows:
 
-  1. The dependent DLL name is converted to lowercase. Windows DLL names are
-     case-insensitive, and some linkers mangle the case of the DLL dependency
-     names. However, this makes it more difficult for ``PRE_INCLUDE_REGEXES``,
-     ``PRE_EXCLUDE_REGEXES``, ``POST_INCLUDE_REGEXES``, and
-     ``POST_EXCLUDE_REGEXES`` to properly filter DLL names - every regex would
-     have to check for both uppercase and lowercase letters. For example:
+  1. DLL dependency names are converted to lowercase for matching filters.
+     Windows DLL names are case-insensitive, and some linkers mangle the
+     case of the DLL dependency names.  However, this makes it more difficult
+     for ``PRE_INCLUDE_REGEXES``, ``PRE_EXCLUDE_REGEXES``,
+     ``POST_INCLUDE_REGEXES``, and ``POST_EXCLUDE_REGEXES`` to properly
+     filter DLL names - every regex would have to check for both uppercase
+     and lowercase letters.  For example:
 
      .. code-block:: cmake
 
@@ -369,9 +370,15 @@ Reading
      either on disk or in the depending file. (For example, it will match
      ``mylibrary.dll``, ``MyLibrary.dll``, and ``MYLIBRARY.DLL``.)
 
-     Please note that the directory portion of any resolved DLLs retains its
-     casing and is not converted to lowercase. Only the filename portion is
-     converted.
+     .. versionchanged:: 3.27
+
+       The conversion to lowercase only applies while matching filters.
+       Results reported after filtering case-preserve each DLL name as it is
+       found on disk, if resolved, and otherwise as it is referenced by the
+       dependent binary.
+
+       Prior to CMake 3.27, the results were reported with lowercase DLL
+       file names, but the directory portion retained its casing.
 
   2. (**Not yet implemented**) If the depending file is a Windows Store app,
      and the dependency is listed as a dependency in the application's package
