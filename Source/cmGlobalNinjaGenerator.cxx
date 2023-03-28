@@ -956,8 +956,9 @@ void cmGlobalNinjaGenerator::EnableLanguage(
       mf->GetSafeDefinition(cmStrCat("CMAKE_", l, "_SIMULATE_ID"));
     std::string const& compilerFrontendVariant = mf->GetSafeDefinition(
       cmStrCat("CMAKE_", l, "_COMPILER_FRONTEND_VARIANT"));
-    this->SetUsingGCCOnWindows(
-      DetectGCCOnWindows(compilerId, simulateId, compilerFrontendVariant));
+    if (DetectGCCOnWindows(compilerId, simulateId, compilerFrontendVariant)) {
+      this->MarkAsGCCOnWindows();
+    }
 #endif
   }
 }
@@ -2843,8 +2844,9 @@ int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
   cmGlobalNinjaGenerator& gg =
     cm::static_reference_cast<cmGlobalNinjaGenerator>(ggd);
 #  ifdef _WIN32
-  gg.SetUsingGCCOnWindows(
-    DetectGCCOnWindows(compilerId, simulateId, compilerFrontendVariant));
+  if (DetectGCCOnWindows(compilerId, simulateId, compilerFrontendVariant)) {
+    gg.MarkAsGCCOnWindows();
+  }
 #  endif
   return gg.WriteDyndepFile(dir_top_src, dir_top_bld, dir_cur_src, dir_cur_bld,
                             arg_dd, arg_ddis, module_dir, linked_target_dirs,
