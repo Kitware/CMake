@@ -121,6 +121,10 @@ run_install_test(FILES-OPTIONAL)
 run_install_test(DIRECTORY-OPTIONAL)
 run_install_test(TARGETS-Defaults)
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  run_install_test(TARGETS-NAMELINK-No-Tweak)
+endif()
+
 set(RunCMake_TEST_OPTIONS
   "-DCMAKE_INSTALL_BINDIR:PATH=mybin"
   "-DCMAKE_INSTALL_LIBDIR:PATH=mylib"
