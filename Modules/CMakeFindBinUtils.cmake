@@ -186,7 +186,15 @@ else()
     list(PREPEND _CMAKE_RANLIB_NAMES "llvm-ranlib")
     if("${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_VERSION}" VERSION_GREATER_EQUAL 11)
       # llvm-strip versions prior to 11 require additional flags we do not yet add.
-      list(PREPEND _CMAKE_STRIP_NAMES "llvm-strip")
+      if(APPLE)
+        # llvm-strip does not seem to support chained fixup format correctly.
+        # FIXME(#23333): We still need to consider 'llvm-strip' as a fallback
+        # because the 'APPLE' definition may be based on the host in this context,
+        # and a cross-compiling toolchain may not have 'strip'.
+        list(APPEND _CMAKE_STRIP_NAMES "llvm-strip")
+      else()
+        list(PREPEND _CMAKE_STRIP_NAMES "llvm-strip")
+      endif()
     endif()
     list(PREPEND _CMAKE_NM_NAMES "llvm-nm")
     if("${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_VERSION}" VERSION_GREATER_EQUAL 9)
