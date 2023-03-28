@@ -11,6 +11,10 @@ The options will be added after after flags in the
 variables, but before those propagated from dependencies by the
 :prop_tgt:`INTERFACE_COMPILE_OPTIONS` property.
 
+This property adds compile options for all languages in a target.
+Use the :genex:`COMPILE_LANGUAGE` generator expression to specify
+per-language compile options.
+
 This property is initialized by the :prop_dir:`COMPILE_OPTIONS` directory
 property when a target is created, and is used by the generators to set
 the options for the compiler.
