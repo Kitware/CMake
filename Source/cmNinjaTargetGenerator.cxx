@@ -908,18 +908,51 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
   // Maybe insert an include-what-you-use runner.
   if (!compileCmds.empty() &&
       (lang == "C" || lang == "CXX" || lang == "OBJC" || lang == "OBJCXX")) {
-    std::string const tidy_prop = cmStrCat(lang, "_CLANG_TIDY");
-    cmValue tidy = this->GeneratorTarget->GetProperty(tidy_prop);
+    cmValue tidy = nullptr;
     cmValue iwyu = nullptr;
     cmValue cpplint = nullptr;
     cmValue cppcheck = nullptr;
+    std::string evaluatedTIDY;
+    std::string evaluatedIWYU;
+    std::string evaluatedCPPlint;
+    std::string evaluatedCPPcheck;
+
+    std::string const tidy_prop = cmStrCat(lang, "_CLANG_TIDY");
+    tidy = this->GeneratorTarget->GetProperty(tidy_prop);
+    evaluatedTIDY = cmGeneratorExpression::Evaluate(
+      *tidy, this->LocalGenerator, config, this->GeneratorTarget, nullptr,
+      this->GeneratorTarget, lang);
+    if (!evaluatedTIDY.empty()) {
+      tidy = cmValue(&evaluatedTIDY);
+    }
+
     if (lang == "C" || lang == "CXX") {
       std::string const iwyu_prop = cmStrCat(lang, "_INCLUDE_WHAT_YOU_USE");
       iwyu = this->GeneratorTarget->GetProperty(iwyu_prop);
+      evaluatedIWYU = cmGeneratorExpression::Evaluate(
+        *iwyu, this->LocalGenerator, config, this->GeneratorTarget, nullptr,
+        this->GeneratorTarget, lang);
+      if (!evaluatedIWYU.empty()) {
+        iwyu = cmValue(&evaluatedIWYU);
+      }
+
       std::string const cpplint_prop = cmStrCat(lang, "_CPPLINT");
       cpplint = this->GeneratorTarget->GetProperty(cpplint_prop);
+      evaluatedCPPlint = cmGeneratorExpression::Evaluate(
+        *cpplint, this->LocalGenerator, config, this->GeneratorTarget, nullptr,
+        this->GeneratorTarget, lang);
+      if (!evaluatedCPPlint.empty()) {
+        cpplint = cmValue(&evaluatedCPPlint);
+      }
+
       std::string const cppcheck_prop = cmStrCat(lang, "_CPPCHECK");
       cppcheck = this->GeneratorTarget->GetProperty(cppcheck_prop);
+      evaluatedCPPcheck = cmGeneratorExpression::Evaluate(
+        *cppcheck, this->LocalGenerator, config, this->GeneratorTarget,
+        nullptr, this->GeneratorTarget, lang);
+      if (!evaluatedCPPcheck.empty()) {
+        cppcheck = cmValue(&evaluatedCPPcheck);
+      }
     }
     if (cmNonempty(iwyu) || cmNonempty(tidy) || cmNonempty(cpplint) ||
         cmNonempty(cppcheck)) {

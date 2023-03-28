@@ -13,3 +13,8 @@ compiler and report a warning if the tool reports any problems.
 This property is initialized by the value of
 the :variable:`CMAKE_<LANG>_INCLUDE_WHAT_YOU_USE` variable if it is set
 when a target is created.
+
+.. versionadded:: 3.27
+
+  This property supports
+  :manual:`generator expressions <cmake-generator-expressions(7)>`.

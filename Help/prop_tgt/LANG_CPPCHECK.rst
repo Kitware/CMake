@@ -15,3 +15,8 @@ tool returns non-zero.
 This property is initialized by the value of the
 :variable:`CMAKE_<LANG>_CPPCHECK` variable if it is set when a target is
 created.
+
+.. versionadded:: 3.27
+
+  This property supports
+  :manual:`generator expressions <cmake-generator-expressions(7)>`.
