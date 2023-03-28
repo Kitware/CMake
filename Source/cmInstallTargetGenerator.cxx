@@ -826,26 +826,29 @@ void cmInstallTargetGenerator::AddStripRule(std::ostream& os, Indent indent,
     return;
   }
 
-  if (!this->Target->Target->GetMakefile()->IsSet("CMAKE_STRIP")) {
+  std::string const& strip =
+    this->Target->Target->GetMakefile()->GetSafeDefinition("CMAKE_STRIP");
+  if (strip.empty()) {
     return;
   }
 
   std::string stripArgs;
-
-  // macOS 'strip' is picky, executables need '-u -r' and dylibs need '-x'.
   if (this->Target->IsApple()) {
     if (this->Target->GetType() == cmStateEnums::SHARED_LIBRARY ||
         this->Target->GetType() == cmStateEnums::MODULE_LIBRARY) {
+      // Strip tools need '-x' to strip Apple dylibs correctly.
       stripArgs = "-x ";
-    } else if (this->Target->GetType() == cmStateEnums::EXECUTABLE) {
+    } else if (this->Target->GetType() == cmStateEnums::EXECUTABLE &&
+               this->Target->GetGlobalGenerator()->GetStripCommandStyle(
+                 strip) == cmGlobalGenerator::StripCommandStyle::Apple) {
+      // Apple's strip tool needs '-u -r' to strip executables correctly.
       stripArgs = "-u -r ";
     }
   }
 
   os << indent << "if(CMAKE_INSTALL_DO_STRIP)\n";
-  os << indent << "  execute_process(COMMAND \""
-     << this->Target->Target->GetMakefile()->GetSafeDefinition("CMAKE_STRIP")
-     << "\" " << stripArgs << "\"" << toDestDirPath << "\")\n";
+  os << indent << "  execute_process(COMMAND \"" << strip << "\" " << stripArgs
+     << "\"" << toDestDirPath << "\")\n";
   os << indent << "endif()\n";
 }
 

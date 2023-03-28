@@ -607,6 +607,13 @@ public:
   cmInstallRuntimeDependencySet* GetNamedRuntimeDependencySet(
     const std::string& name);
 
+  enum class StripCommandStyle
+  {
+    Default,
+    Apple,
+  };
+  StripCommandStyle GetStripCommandStyle(std::string const& strip);
+
 protected:
   // for a project collect all its targets by following depend
   // information, and also collect all the targets
@@ -736,6 +743,10 @@ private:
   std::map<std::string, std::string> ExtensionToLanguage;
   std::map<std::string, int> LanguageToLinkerPreference;
   std::map<std::string, std::string> LanguageToOriginalSharedLibFlags;
+
+#ifdef __APPLE__
+  std::map<std::string, StripCommandStyle> StripCommandStyleMap;
+#endif
 
   mutable bool DiagnosedCxxModuleSupport = false;
 
