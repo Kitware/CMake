@@ -11,8 +11,14 @@ function (test_x11_component have_var component)
   endif ()
 
   add_executable(test_tgt_${component} main.c)
-  target_link_libraries(test_tgt_${component} PRIVATE X11::${component})
-  target_compile_definitions(test_tgt_${component} PRIVATE HAVE_X11_${component})
+
+  if (component MATCHES xcb)
+    target_link_libraries(test_tgt_${component} PRIVATE X11::${component} X11::xcb)
+    target_compile_definitions(test_tgt_${component} PRIVATE HAVE_X11_${component} HAVE_X11_xcb)
+  else()
+    target_link_libraries(test_tgt_${component} PRIVATE X11::${component})
+    target_compile_definitions(test_tgt_${component} PRIVATE HAVE_X11_${component})
+  endif()
   add_test(NAME test_tgt_${component} COMMAND test_tgt_${component})
 
   # Add to the list of components to test for the parent.

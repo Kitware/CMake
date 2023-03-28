@@ -326,7 +326,7 @@ static void test_Xaw(void)
 
 #endif
 
-#ifdef HAVE_xcb
+#ifdef HAVE_X11_xcb
 #  include <xcb/xcb.h>
 
 static void test_xcb(void)
@@ -336,23 +336,24 @@ static void test_xcb(void)
   xcb_disconnect(connection);
 }
 
-#  ifdef HAVE_xcb_cursor
+#  ifdef HAVE_X11_xcb_cursor
 #    include <xcb/xcb_cursor.h>
 
 static void test_xcb_cursor(void)
 {
   int screen_nbr;
   xcb_connection_t* connection = xcb_connect(NULL, &screen_nbr);
-  xcb_screen_t* screen = xcb_aux_get_screen(conn, screen_nbr);
+  xcb_screen_iterator_t screens =
+    xcb_setup_roots_iterator(xcb_get_setup(connection));
   xcb_cursor_context_t* ctx;
-  xcb_cursor_context_new(connection, screen, &ctx);
+  xcb_cursor_context_new(connection, screens.data, &ctx);
   xcb_cursor_context_free(ctx);
   xcb_disconnect(connection);
 }
 
 #  endif
 
-#  ifdef HAVE_xcb_randr
+#  ifdef HAVE_X11_xcb_randr
 #    include <xcb/randr.h>
 
 static void test_xcb_randr(void)
@@ -366,7 +367,7 @@ static void test_xcb_randr(void)
 
 #  endif
 
-#  ifdef HAVE_xcb_shape
+#  ifdef HAVE_X11_xcb_shape
 #    include <xcb/shape.h>
 
 static void test_xcb_shape(void)
@@ -380,7 +381,9 @@ static void test_xcb_shape(void)
 
 #  endif
 
-#  ifdef HAVE_xcb_util
+#
+
+#  ifdef HAVE_X11_xcb_util
 #    include <xcb/xcb_aux.h>
 
 static void test_xcb_util(void)
@@ -393,8 +396,8 @@ static void test_xcb_util(void)
 
 #  endif
 
-#  ifdef HAVE_xcb_xfixes
-#    include <xcb/xcb_xfixes.h>
+#  ifdef HAVE_X11_xcb_xfixes
+#    include <xcb/xfixes.h>
 
 static void test_xcb_xfixes(void)
 {
@@ -406,7 +409,7 @@ static void test_xcb_xfixes(void)
 
 #  endif
 
-#  ifdef HAVE_xcb_xrm
+#  ifdef HAVE_X11_xcb_xrm
 #    include <xcb/xcb_xrm.h>
 
 static void test_xcb_xrm(void)
@@ -420,7 +423,7 @@ static void test_xcb_xrm(void)
 
 #  endif
 
-#  ifdef HAVE_xcb_xtest
+#  ifdef HAVE_X11_xcb_xtest
 #    include <xcb/xtest.h>
 
 static void test_xcb_xtest(void)
@@ -433,7 +436,7 @@ static void test_xcb_xtest(void)
 
 #  endif
 
-#  ifdef HAVE_xcb_keysyms
+#  ifdef HAVE_X11_xcb_keysyms
 #    include <xcb/xcb_keysyms.h>
 
 static void test_xcb_keysyms(void)
@@ -537,25 +540,25 @@ int main(int argc, char* argv[])
 #ifdef HAVE_X11_Xaw
     test_Xaw,
 #endif
-#ifdef HAVE_xcb
+#ifdef HAVE_X11_xcb
     test_xcb,
 #endif
-#ifdef HAVE_xcb_cursor
+#ifdef HAVE_X11_xcb_cursor
     test_xcb_cursor,
 #endif
-#ifdef HAVE_xcb_randr
+#ifdef HAVE_X11_xcb_randr
     test_xcb_randr,
 #endif
-#ifdef HAVE_xcb_shape
+#ifdef HAVE_X11_xcb_shape
     test_xcb_shape,
 #endif
-#ifdef HAVE_xcb_util
+#ifdef HAVE_X11_xcb_util
     test_xcb_util,
 #endif
-#ifdef HAVE_xcb_xfixes
+#ifdef HAVE_X11_xcb_xfixes
     test_xcb_xfixes,
 #endif
-#ifdef HAVE_xcb_xrm
+#ifdef HAVE_X11_xcb_xrm
     test_xcb_xrm,
 #endif
 
@@ -567,5 +570,6 @@ int main(int argc, char* argv[])
   // always 1 in the test harness which always returns the sentinel at the end
   // of the array. The array logic is there to ensure that the contents of
   // `fptrs` is not optimized out.
+#pragma GCC diagnostic ignored "-Wpointer-to-int-cast"
   return (int)fptrs[(sizeof(fptrs) / sizeof(*fptrs)) - argc];
 }
