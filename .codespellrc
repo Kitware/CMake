@@ -1,7 +1,6 @@
 [codespell]
 check-filenames =
 check-hidden =
-count =
 # Disable warnings about binary files
 quiet-level = 2
 builtin = clear,rare,en-GB_to_en-US
