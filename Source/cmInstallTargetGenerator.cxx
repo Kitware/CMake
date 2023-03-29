@@ -529,7 +529,7 @@ void cmInstallTargetGenerator::AddInstallNamePatchRule(
   std::ostream& os, Indent indent, const std::string& config,
   std::string const& toDestDirPath)
 {
-  if (this->ImportLibrary ||
+  if (this->ImportLibrary || this->NamelinkMode == NamelinkModeOnly ||
       !(this->Target->GetType() == cmStateEnums::SHARED_LIBRARY ||
         this->Target->GetType() == cmStateEnums::MODULE_LIBRARY ||
         this->Target->GetType() == cmStateEnums::EXECUTABLE)) {
@@ -626,7 +626,8 @@ void cmInstallTargetGenerator::AddRPathCheckRule(
   std::string const& toDestDirPath)
 {
   // Skip the chrpath if the target does not need it.
-  if (this->ImportLibrary || !this->Target->IsChrpathUsed(config)) {
+  if (this->ImportLibrary || this->NamelinkMode == NamelinkModeOnly ||
+      !this->Target->IsChrpathUsed(config)) {
     return;
   }
   // Skip if on Apple
@@ -677,7 +678,8 @@ void cmInstallTargetGenerator::AddChrpathPatchRule(
   std::string const& toDestDirPath)
 {
   // Skip the chrpath if the target does not need it.
-  if (this->ImportLibrary || !this->Target->IsChrpathUsed(config)) {
+  if (this->ImportLibrary || this->NamelinkMode == NamelinkModeOnly ||
+      !this->Target->IsChrpathUsed(config)) {
     return;
   }
 
@@ -816,7 +818,7 @@ void cmInstallTargetGenerator::AddStripRule(std::ostream& os, Indent indent,
   // don't strip static and import libraries, because it removes the only
   // symbol table they have so you can't link to them anymore
   if (this->Target->GetType() == cmStateEnums::STATIC_LIBRARY ||
-      this->ImportLibrary) {
+      this->ImportLibrary || this->NamelinkMode == NamelinkModeOnly) {
     return;
   }
 
