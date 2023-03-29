@@ -28,6 +28,18 @@ set(CMake_TEST_FindGnuTLS "ON" CACHE BOOL "")
 set(CMake_TEST_FindGSL "ON" CACHE BOOL "")
 set(CMake_TEST_FindGTest "ON" CACHE BOOL "")
 set(CMake_TEST_FindGTK2 "ON" CACHE BOOL "")
+set(CMake_TEST_FindHDF5 "ON" CACHE BOOL "")
+set(CMake_TEST_FindHDF5_MPICH_C_COMPILER "/usr/lib64/mpich/bin/h5pcc" CACHE FILEPATH "")
+# set(CMake_TEST_FindHDF5_MPICH_CXX_COMPILER "/usr/lib64/mpich/bin/h5pc++" CACHE FILEPATH "") # h5pc++ does not exist
+set(CMake_TEST_FindHDF5_MPICH_ENVMOD "PATH=path_list_prepend:/usr/lib64/mpich/bin;LD_LIBRARY_PATH=path_list_prepend:/usr/lib64/mpich/lib" CACHE STRING "")
+set(CMake_TEST_FindHDF5_MPICH_Fortran_COMPILER "/usr/lib64/mpich/bin/h5pfc" CACHE FILEPATH "")
+set(CMake_TEST_FindHDF5_OpenMPI_C_COMPILER "/usr/lib64/openmpi/bin/h5pcc" CACHE FILEPATH "")
+set(CMake_TEST_FindHDF5_OpenMPI_ENVMOD "PATH=path_list_prepend:/usr/lib64/openmpi/bin;LD_LIBRARY_PATH=path_list_prepend:/usr/lib64/openmpi/lib" CACHE STRING "")
+# set(CMake_TEST_FindHDF5_OpenMPI_CXX_COMPILER "/usr/lib64/openmpi/bin/h5pc++" CACHE FILEPATH "") # h5pc++ does not exist
+# set(CMake_TEST_FindHDF5_OpenMPI_Fortran_COMPILER "/usr/lib64/openmpi/bin/h5pfc" CACHE FILEPATH "") # cannot find its own hdf5.mod
+set(CMake_TEST_FindHDF5_Serial_C_COMPILER "/usr/bin/h5cc" CACHE FILEPATH "")
+set(CMake_TEST_FindHDF5_Serial_CXX_COMPILER "/usr/bin/h5c++" CACHE FILEPATH "")
+set(CMake_TEST_FindHDF5_Serial_Fortran_COMPILER "/usr/bin/h5fc" CACHE FILEPATH "")
 set(CMake_TEST_FindIconv "ON" CACHE BOOL "")
 set(CMake_TEST_FindICU "ON" CACHE BOOL "")
 set(CMake_TEST_FindImageMagick "ON" CACHE BOOL "")
