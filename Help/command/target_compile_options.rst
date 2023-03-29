@@ -50,6 +50,10 @@ See Also
 
 * For file-specific settings, there is the source file property :prop_sf:`COMPILE_OPTIONS`.
 
+* This command adds compile options for all languages in a target.
+  Use the :genex:`COMPILE_LANGUAGE` generator expression to specify
+  per-language compile options.
+
 * :command:`target_compile_features`
 * :command:`target_link_libraries`
 * :command:`target_link_directories`
