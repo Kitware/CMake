@@ -59,6 +59,9 @@ libgrpc++-dev libgrpc-dev
 libgsl-dev
 libgtest-dev
 libgtk2.0-dev
+libhdf5-dev
+libhdf5-mpich-dev
+libhdf5-openmpi-dev
 libicu-dev
 libinput-dev
 libjpeg-dev
