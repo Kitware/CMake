@@ -5,8 +5,8 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <map>
-#include <set>
 #include <string>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -17,7 +17,6 @@ enum cmNinjaTargetDepends
 };
 
 using cmNinjaDeps = std::vector<std::string>;
-using cmNinjaOuts = std::set<std::string>;
 using cmNinjaVars = std::map<std::string, std::string>;
 
 class cmNinjaRule
