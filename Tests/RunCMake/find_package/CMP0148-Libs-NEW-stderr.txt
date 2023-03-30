@@ -1,0 +1,4 @@
+^CMake Warning at CMP0148-Libs-NEW\.cmake:[0-9]+ \(find_package\):
+  No "FindPythonLibs\.cmake" found in CMAKE_MODULE_PATH\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

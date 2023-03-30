@@ -57,6 +57,7 @@ Policies Introduced by CMake 3.27
 .. toctree::
    :maxdepth: 1
 
+   CMP0148: The FindPythonInterp and FindPythonLibs modules are removed. </policy/CMP0148>
    CMP0147: Visual Studio generators build custom commands in parallel. </policy/CMP0147>
    CMP0146: The FindCUDA module is removed. </policy/CMP0146>
    CMP0145: The Dart and FindDart modules are removed. </policy/CMP0145>

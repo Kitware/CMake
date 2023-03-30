@@ -549,6 +549,8 @@ cmFindPackageCommand::cmFindPackageCommand(cmExecutionStatus& status)
 
   this->DeprecatedFindModules["CUDA"] = cmPolicies::CMP0146;
   this->DeprecatedFindModules["Dart"] = cmPolicies::CMP0145;
+  this->DeprecatedFindModules["PythonInterp"] = cmPolicies::CMP0148;
+  this->DeprecatedFindModules["PythonLibs"] = cmPolicies::CMP0148;
   this->DeprecatedFindModules["Qt"] = cmPolicies::CMP0084;
 }
 
