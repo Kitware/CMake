@@ -25,6 +25,7 @@ add_test(NAME FindHDF5.Default COMMAND
   ${build_generator_args}
   --build-project TestFindHDF5
   --build-options ${build_options} -DTEST_SERIAL=1 "-DTEST_LANGS=${test_langs}"
+  --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
   )
 
 foreach(variant Serial OpenMPI MPICH)
@@ -60,6 +61,7 @@ foreach(variant Serial OpenMPI MPICH)
     ${build_generator_args}
     --build-project TestFindHDF5
     --build-options ${build_options} ${test_kind} "-DTEST_LANGS=${wrapper_langs}" ${wrapper}
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
   if(CMake_TEST_FindHDF5_${variant}_ENVMOD)
     set_property(TEST FindHDF5.${variant} PROPERTY ENVIRONMENT_MODIFICATION ${CMake_TEST_FindHDF5_${variant}_ENVMOD})
@@ -76,6 +78,7 @@ foreach(variant Serial OpenMPI MPICH)
       ${build_generator_args}
       --build-project TestFindHDF5
       --build-options ${build_options} ${test_kind} "-DTEST_LANGS=${wrapper_langs}" -D TEST_WRAPPER_AS_COMPILER=1 ${wrapper_as_compiler}
+      --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
       )
     if(CMake_TEST_FindHDF5_${variant}_ENVMOD)
       set_property(TEST FindHDF5.${variant}-Wrapper PROPERTY ENVIRONMENT_MODIFICATION ${CMake_TEST_FindHDF5_${variant}_ENVMOD})
