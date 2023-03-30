@@ -15,6 +15,9 @@ macro(add_RunCMake_test test)
   else()
     set(Test_Dir ${test})
   endif()
+  if(CMAKE_C_COMPILER_ID STREQUAL "LCC")
+    list(APPEND TEST_ARGS -DRunCMake_TEST_LCC=1)
+  endif()
   add_test(NAME RunCMake.${test} COMMAND ${CMAKE_CMAKE_COMMAND}
     -DCMAKE_MODULE_PATH=${CMAKE_CURRENT_SOURCE_DIR}
     -DRunCMake_GENERATOR_IS_MULTI_CONFIG=${_isMultiConfig}
@@ -40,6 +43,11 @@ function(add_RunCMake_test_group test types)
   set(TEST_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/${test}/conf")
   file(REMOVE_RECURSE "${TEST_CONFIG_DIR}")
   file(MAKE_DIRECTORY "${TEST_CONFIG_DIR}")
+
+  set(TEST_ARGS "")
+  if(CMAKE_C_COMPILER_ID STREQUAL "LCC")
+    list(APPEND TEST_ARGS -DRunCMake_TEST_LCC=1)
+  endif()
 
   foreach(type IN LISTS types)
     # generate prerequirements config file in cmake as ctest doesn't have as
@@ -68,6 +76,7 @@ function(add_RunCMake_test_group test types)
         -DRunCMake_MAKE_PROGRAM=${CMake_TEST_EXPLICIT_MAKE_PROGRAM}
         -DRunCMake_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/${test}
         -DRunCMake_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}/${type}/${test}
+        ${TEST_ARGS}
         -Dconfig_file=${TEST_CONFIG_DIR}/${type}_config.cmake
         -P "${CMAKE_CURRENT_SOURCE_DIR}/${test}/RunCMakeTest.cmake"
         )

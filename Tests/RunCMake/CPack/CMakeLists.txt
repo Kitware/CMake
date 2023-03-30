@@ -1,9 +1,5 @@
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 
-if(POLICY CMP0129)
-  cmake_policy(SET CMP0129 NEW)
-endif()
-
 set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "")
 
 project(${RunCMake_TEST} CXX)
