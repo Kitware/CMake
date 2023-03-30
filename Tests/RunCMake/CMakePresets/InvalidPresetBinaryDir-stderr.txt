@@ -1,2 +1,5 @@
 ^CMake Error: Could not read presets from [^
-]*/Tests/RunCMake/CMakePresets/InvalidPresetBinaryDir: Invalid preset$
+]*/Tests/RunCMake/CMakePresets/InvalidPresetBinaryDir:
+Error: @7,20: "binaryDir" expected a string
+      "binaryDir": \[\]
+                   \^$

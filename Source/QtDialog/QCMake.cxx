@@ -33,7 +33,6 @@ QCMake::QCMake(QObject* p)
   qRegisterMetaType<QCMakePropertyList>();
   qRegisterMetaType<QProcessEnvironment>();
   qRegisterMetaType<QVector<QCMakePreset>>();
-  qRegisterMetaType<cmCMakePresetsGraph::ReadFileResult>();
 
   cmSystemTools::DisableRunCommandOutput();
   cmSystemTools::SetRunCommandHideConsole(true);
@@ -530,9 +529,11 @@ void QCMake::loadPresets()
 {
   auto result = this->CMakePresetsGraph.ReadProjectPresets(
     this->SourceDirectory.toStdString(), true);
-  if (result != this->LastLoadPresetsResult &&
-      result != cmCMakePresetsGraph::ReadFileResult::READ_OK) {
-    emit this->presetLoadError(this->SourceDirectory, result);
+  if (result != this->LastLoadPresetsResult && !result) {
+    emit this->presetLoadError(
+      this->SourceDirectory,
+      QString::fromStdString(
+        this->CMakePresetsGraph.parseState.GetErrorMessage(false)));
   }
   this->LastLoadPresetsResult = result;
 

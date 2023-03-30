@@ -8,6 +8,12 @@
 #include <string>
 #include <vector>
 
+#include "cmJSONState.h"
+
+namespace Json {
+class Value;
+}
+
 class cmCTestResourceSpec
 {
 public:
@@ -31,24 +37,45 @@ public:
   };
 
   Socket LocalSocket;
+  cmJSONState parseState;
 
-  enum class ReadFileResult
-  {
-    READ_OK,
-    FILE_NOT_FOUND,
-    JSON_PARSE_ERROR,
-    INVALID_ROOT,
-    NO_VERSION,
-    INVALID_VERSION,
-    UNSUPPORTED_VERSION,
-    INVALID_SOCKET_SPEC, // Can't be INVALID_SOCKET due to a Windows macro
-    INVALID_RESOURCE_TYPE,
-    INVALID_RESOURCE,
-  };
-
-  ReadFileResult ReadFromJSONFile(const std::string& filename);
-  static const char* ResultToString(ReadFileResult result);
+  bool ReadFromJSONFile(const std::string& filename);
 
   bool operator==(const cmCTestResourceSpec& other) const;
   bool operator!=(const cmCTestResourceSpec& other) const;
 };
+
+namespace cmCTestResourceSpecErrors {
+const auto FILE_NOT_FOUND = [](const Json::Value*, cmJSONState* state) {
+  state->AddError("File not found");
+};
+const auto JSON_PARSE_ERROR = [](const Json::Value* value,
+                                 cmJSONState* state) {
+  state->AddErrorAtValue("JSON parse error", value);
+};
+const auto INVALID_ROOT = [](const Json::Value* value, cmJSONState* state) {
+  state->AddErrorAtValue("Invalid root object", value);
+};
+const auto NO_VERSION = [](const Json::Value* value, cmJSONState* state) {
+  state->AddErrorAtValue("No version specified", value);
+};
+const auto INVALID_VERSION = [](const Json::Value* value, cmJSONState* state) {
+  state->AddErrorAtValue("Invalid version object", value);
+};
+const auto UNSUPPORTED_VERSION = [](const Json::Value* value,
+                                    cmJSONState* state) {
+  state->AddErrorAtValue("Unsupported version", value);
+};
+const auto INVALID_SOCKET_SPEC = [](const Json::Value* value,
+                                    cmJSONState* state) {
+  state->AddErrorAtValue("Invalid socket object", value);
+};
+const auto INVALID_RESOURCE_TYPE = [](const Json::Value* value,
+                                      cmJSONState* state) {
+  state->AddErrorAtValue("Invalid resource type object", value);
+};
+const auto INVALID_RESOURCE = [](const Json::Value* value,
+                                 cmJSONState* state) {
+  state->AddErrorAtValue("Invalid resource object", value);
+};
+}

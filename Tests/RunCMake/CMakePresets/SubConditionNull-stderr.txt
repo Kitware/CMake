@@ -1,2 +1,3 @@
 ^CMake Error: Could not read presets from [^
-]*/Tests/RunCMake/CMakePresets/SubConditionNull: Invalid preset condition$
+]*/Tests/RunCMake/CMakePresets/SubConditionNull:
+Invalid condition for preset "SubConditionNull"$

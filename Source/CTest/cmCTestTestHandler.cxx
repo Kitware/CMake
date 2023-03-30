@@ -37,6 +37,7 @@
 #include "cmExecutionStatus.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
+#include "cmJSONState.h"
 #include "cmMakefile.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
@@ -1346,12 +1347,11 @@ bool cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
   }
   if (!this->ResourceSpecFile.empty()) {
     this->UseResourceSpec = true;
-    auto result = this->ResourceSpec.ReadFromJSONFile(this->ResourceSpecFile);
-    if (result != cmCTestResourceSpec::ReadFileResult::READ_OK) {
+    if (!this->ResourceSpec.ReadFromJSONFile(this->ResourceSpecFile)) {
       cmCTestLog(this->CTest, ERROR_MESSAGE,
                  "Could not read/parse resource spec file "
                    << this->ResourceSpecFile << ": "
-                   << cmCTestResourceSpec::ResultToString(result)
+                   << this->ResourceSpec.parseState.GetErrorMessage()
                    << std::endl);
       return false;
     }

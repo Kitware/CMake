@@ -1,2 +1,5 @@
 ^CMake Error: Could not read presets from [^
-]*/Tests/RunCMake/CMakePresets/MinimumRequiredInvalid: Invalid "cmakeMinimumRequired" field$
+]*/Tests/RunCMake/CMakePresets/MinimumRequiredInvalid:
+Error: @3,27: Invalid "cmakeMinimumRequired"
+  "cmakeMinimumRequired": "3.18",
+                          \^$

@@ -1,2 +1,3 @@
 ^CMake Error: Could not read presets from [^
-]*/Tests/RunCMake/CMakePresetsWorkflow/SecondStepConfigure: Invalid workflow steps$
+]*/Tests/RunCMake/CMakePresetsWorkflow/SecondStepConfigure:
+Configure workflow step "default" must be the first step
