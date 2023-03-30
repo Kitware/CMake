@@ -1,0 +1,58 @@
+cmake_minimum_required(VERSION 3.26)
+project(TestFindHDF5 LANGUAGES ${TEST_LANGS})
+message(STATUS "CTEST_FULL_OUTPUT (Avoid ctest truncation of output)")
+
+if(TEST_PARALLEL)
+  set(HDF5_PREFER_PARALLEL 1)
+endif()
+
+find_package(HDF5 REQUIRED COMPONENTS ${TEST_LANGS} HL)
+
+set(variables HDF5_FOUND HDF5_VERSION)
+if(NOT TEST_WRAPPER_AS_COMPILER)
+   list(APPEND variables HDF5_INCLUDE_DIRS HDF5_LIBRARIES HDF5_HL_LIBRARIES)
+   foreach(lang ${TEST_LANGS})
+     list(APPEND variables
+       HDF5_${lang}_COMPILER_EXECUTABLE
+       HDF5_${lang}_INCLUDE_DIRS
+       HDF5_${lang}_LIBRARIES
+       HDF5_${lang}_HL_LIBRARIES
+       )
+   endforeach()
+ endif()
+foreach(var IN LISTS variables)
+  message(STATUS "${var}='${${var}}'")
+endforeach()
+foreach(var IN LISTS variables)
+  if(NOT DEFINED ${var})
+    message(SEND_ERROR "Variable '${var}' is not defined!")
+  endif()
+endforeach()
+
+set(targets HDF5::HDF5)
+if(CMAKE_C_COMPILER_LOADED)
+  list(APPEND targets hdf5::hdf5 hdf5::hdf5_hl)
+endif()
+if(CMAKE_CXX_COMPILER_LOADED)
+  list(APPEND targets hdf5::hdf5_cpp hdf5::hdf5_hl_cpp)
+endif()
+if(CMAKE_Fortran_COMPILER_LOADED)
+  list(APPEND targets hdf5::hdf5_fortran hdf5::hdf5_hl_fortran)
+endif()
+foreach(target IN LISTS targets)
+  if(NOT TARGET ${target})
+    message(SEND_ERROR "Target '${target}' not defined!")
+  endif()
+endforeach()
+
+message(STATUS "HDF5_IS_PARALLEL='${HDF5_IS_PARALLEL}'")
+if(TEST_SERIAL)
+  if(HDF5_IS_PARALLEL)
+    message(SEND_ERROR "HDF5_IS_PARALLEL is true in serial test.")
+  endif()
+endif()
+if(TEST_PARALLEL)
+  if(NOT HDF5_IS_PARALLEL)
+    message(SEND_ERROR "HDF5_IS_PARALLEL is false in parallel test.")
+  endif()
+endif()

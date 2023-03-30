@@ -73,6 +73,9 @@ grpc-devel grpc-plugins
 gsl-devel
 gtest-devel
 gtk2-devel
+hdf5-devel
+hdf5-mpich-devel
+hdf5-openmpi-devel
 ImageMagick-c++-devel
 java-11-openjdk-devel
 jsoncpp-devel
