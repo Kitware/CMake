@@ -30,7 +30,6 @@ protected:
   cmGlobalVisualStudio14Generator(cmake* cm, const std::string& name,
                                   std::string const& platformInGeneratorName);
 
-  bool InitializeWindows(cmMakefile* mf) override;
   bool InitializeWindowsStore(cmMakefile* mf) override;
   bool InitializeAndroid(cmMakefile* mf) override;
   bool SelectWindowsStoreToolset(std::string& toolset) const override;
@@ -38,6 +37,8 @@ protected:
   // These aren't virtual because we need to check if the selected version
   // of the toolset is installed
   bool IsWindowsStoreToolsetInstalled() const;
+
+  bool InitializePlatformWindows(cmMakefile* mf) override;
 
   // Used to adjust the max-SDK-version calculation to accommodate user
   // configuration.

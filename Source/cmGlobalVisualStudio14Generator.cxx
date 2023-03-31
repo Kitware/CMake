@@ -137,7 +137,7 @@ bool cmGlobalVisualStudio14Generator::MatchesGeneratorName(
   return false;
 }
 
-bool cmGlobalVisualStudio14Generator::InitializeWindows(cmMakefile* mf)
+bool cmGlobalVisualStudio14Generator::InitializePlatformWindows(cmMakefile* mf)
 {
   if (cmHasLiteralPrefix(this->SystemVersion, "10.0")) {
     return this->SelectWindows10SDK(mf);
@@ -161,9 +161,6 @@ bool cmGlobalVisualStudio14Generator::InitializeWindowsStore(cmMakefile* mf)
     }
     mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return false;
-  }
-  if (cmHasLiteralPrefix(this->SystemVersion, "10.0")) {
-    return this->SelectWindows10SDK(mf);
   }
   return true;
 }

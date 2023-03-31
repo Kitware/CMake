@@ -61,7 +61,6 @@ protected:
     VSVersion version, cmake* cm, const std::string& name,
     std::string const& platformInGeneratorName);
 
-  bool InitializeWindows(cmMakefile* mf) override;
   bool SelectWindowsStoreToolset(std::string& toolset) const override;
 
   // Used to verify that the Desktop toolset for the current generator is
@@ -71,6 +70,8 @@ protected:
   // These aren't virtual because we need to check if the selected version
   // of the toolset is installed
   bool IsWindowsStoreToolsetInstalled() const;
+
+  bool InitializePlatformWindows(cmMakefile* mf) override;
 
   // Check for a Win 8 SDK known to the registry or VS installer tool.
   bool IsWin81SDKInstalled() const;

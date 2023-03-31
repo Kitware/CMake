@@ -60,6 +60,8 @@ protected:
   cmGlobalVisualStudio8Generator(cmake* cm, const std::string& name,
                                  std::string const& platformInGeneratorName);
 
+  virtual bool InitializePlatform(cmMakefile* mf);
+
   void AddExtraIDETargets() override;
 
   std::string FindDevEnvCommand() override;

@@ -114,10 +114,19 @@ bool cmGlobalVisualStudio8Generator::SetGeneratorPlatform(std::string const& p,
                       *targetFrameworkTargetsVersion);
   }
 
+  if (!this->InitializePlatform(mf)) {
+    return false;
+  }
+
   // The generator name does not contain the platform name, and so supports
   // explicit platform specification.  We handled that above, so pass an
   // empty platform name to our base class implementation so it does not error.
   return this->cmGlobalVisualStudio7Generator::SetGeneratorPlatform("", mf);
+}
+
+bool cmGlobalVisualStudio8Generator::InitializePlatform(cmMakefile*)
+{
+  return true;
 }
 
 cm::optional<std::string> const&
