@@ -256,8 +256,7 @@ void cmInstallRuntimeDependencySetGenerator::GenerateStripFixup(
   if (!strip.empty()) {
     os << indent << "if(CMAKE_INSTALL_DO_STRIP)\n"
        << indent.Next() << "execute_process(COMMAND \"" << strip << "\" ";
-    if (this->LocalGenerator->GetMakefile()->GetSafeDefinition(
-          "CMAKE_HOST_SYSTEM_NAME") == "Darwin") {
+    if (this->LocalGenerator->GetMakefile()->IsOn("APPLE")) {
       os << "-x ";
     }
     os << "\""
