@@ -29,5 +29,17 @@ See native build system documentation for allowed platform names.
 Visual Studio Platform Selection
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-On :ref:`Visual Studio Generators` the selected platform name
-is provided in the :variable:`CMAKE_VS_PLATFORM_NAME` variable.
+The :ref:`Visual Studio Generators` support platform specification
+using one of these forms:
+
+* ``platform``
+* ``platform[,key=value]*``
+* ``key=value[,key=value]*``
+
+The ``platform`` specifies the target platform (VS target architecture),
+such as ``x64``, ``ARM64``, or ``Win32``.  The selected platform
+name is provided in the :variable:`CMAKE_VS_PLATFORM_NAME` variable.
+
+The ``key=value`` pairs form a comma-separated list of options to
+specify generator-specific details of the platform selection.
+There are no supported pairs: this syntax is reserved for future use.
