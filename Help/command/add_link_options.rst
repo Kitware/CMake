@@ -38,3 +38,7 @@ See Also
 * :command:`link_libraries`
 * :command:`target_link_libraries`
 * :command:`target_link_options`
+
+* :variable:`CMAKE_<LANG>_FLAGS` and :variable:`CMAKE_<LANG>_FLAGS_<CONFIG>`
+  add language-wide flags passed to all invocations of the compiler.
+  This includes invocations that drive compiling and those that drive linking.
