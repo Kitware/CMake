@@ -118,13 +118,7 @@ public:
     FIND_PACKAGE_MODE
   };
 
-  /** \brief Define supported trace formats **/
-  enum TraceFormat
-  {
-    TRACE_UNDEFINED,
-    TRACE_HUMAN,
-    TRACE_JSON_V1,
-  };
+  using TraceFormat = cmTraceEnums::TraceOutputFormat;
 
   struct GeneratorInfo
   {
@@ -719,7 +713,7 @@ private:
   bool DebugFindOutput = false;
   bool Trace = false;
   bool TraceExpand = false;
-  TraceFormat TraceFormatVar = TRACE_HUMAN;
+  TraceFormat TraceFormatVar = TraceFormat::Human;
   cmGeneratedFileStream TraceFile;
   cmake* TraceRedirect = nullptr;
 #ifndef CMAKE_BOOTSTRAP

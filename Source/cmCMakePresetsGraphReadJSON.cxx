@@ -35,7 +35,7 @@ using ArchToolsetStrategy = cmCMakePresetsGraph::ArchToolsetStrategy;
 using JSONHelperBuilder = cmJSONHelperBuilder;
 
 constexpr int MIN_VERSION = 1;
-constexpr int MAX_VERSION = 6;
+constexpr int MAX_VERSION = 7;
 
 struct CMakeVersion
 {
@@ -554,6 +554,14 @@ bool cmCMakePresetsGraph::ReadJSONFile(const std::string& filename,
     // Support for toolchainFile presets added in version 3.
     if (v < 3 && !preset.ToolchainFile.empty()) {
       cmCMakePresetErrors::TOOLCHAIN_FILE_UNSUPPORTED(&this->parseState);
+      return false;
+    }
+
+    // Support for trace presets added in version 7.
+    if (v < 7 &&
+        (preset.TraceMode.has_value() || preset.TraceFormat.has_value() ||
+         !preset.TraceRedirect.empty() || !preset.TraceSource.empty())) {
+      cmCMakePresetErrors::TRACE_UNSUPPORTED(&this->parseState);
       return false;
     }
 

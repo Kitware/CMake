@@ -1,0 +1,69 @@
+{
+  "version": 7,
+  "configurePresets": [
+    {
+      "name": "NoTrace",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build"
+    },
+    {
+      "name": "ExplicitNoTrace",
+      "inherits": "NoTrace",
+      "trace": {
+        "mode": "off"
+      }
+    },
+    {
+      "name": "Trace",
+      "inherits": "NoTrace",
+      "trace": {
+        "mode": "on"
+      }
+    },
+    {
+      "name": "TraceExpand",
+      "inherits": "NoTrace",
+      "trace": {
+        "mode": "expand"
+      }
+    },
+    {
+      "name": "TraceFormatJSON",
+      "inherits": "NoTrace",
+      "trace": {
+        "format": "json-v1"
+      }
+    },
+    {
+      "name": "TraceFormatHuman",
+      "inherits": "NoTrace",
+      "trace": {
+        "format": "human"
+      }
+    },
+    {
+      "name": "TraceSource",
+      "inherits": "NoTrace",
+      "trace": {
+        "source": "TraceSourceFile.txt"
+      }
+    },
+    {
+      "name": "TraceRedirect",
+      "inherits": "NoTrace",
+      "trace": {
+        "redirect": "TraceRedirectFile.txt"
+      }
+    },
+    {
+      "name": "TraceAll",
+      "inherits": "NoTrace",
+      "trace": {
+        "mode": "expand",
+        "format": "json-v1",
+        "source": "TraceSourceFile.txt",
+        "redirect": "TraceRedirectFile.json"
+      }
+    }
+  ]
+}

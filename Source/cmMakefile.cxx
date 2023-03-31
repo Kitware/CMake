@@ -340,7 +340,7 @@ void cmMakefile::PrintCommandTrace(cmListFileFunction const& lff,
   cm::optional<std::string> const& deferId = bt.Top().DeferId;
 
   switch (this->GetCMakeInstance()->GetTraceFormat()) {
-    case cmake::TraceFormat::TRACE_JSON_V1: {
+    case cmake::TraceFormat::JSONv1: {
 #ifndef CMAKE_BOOTSTRAP
       Json::Value val;
       Json::StreamWriterBuilder builder;
@@ -367,7 +367,7 @@ void cmMakefile::PrintCommandTrace(cmListFileFunction const& lff,
 #endif
       break;
     }
-    case cmake::TraceFormat::TRACE_HUMAN:
+    case cmake::TraceFormat::Human:
       msg << full_path << "(" << lff.Line() << "):";
       if (deferId) {
         msg << "DEFERRED:" << *deferId << ":";
@@ -379,8 +379,8 @@ void cmMakefile::PrintCommandTrace(cmListFileFunction const& lff,
       }
       msg << ")";
       break;
-    case cmake::TraceFormat::TRACE_UNDEFINED:
-      msg << "INTERNAL ERROR: Trace format is TRACE_UNDEFINED";
+    case cmake::TraceFormat::Undefined:
+      msg << "INTERNAL ERROR: Trace format is Undefined";
       break;
   }
 

@@ -15,6 +15,7 @@
 #include <cm/optional>
 
 #include "cmJSONState.h"
+#include "cmStateTypes.h"
 
 #include "CTest/cmCTestTypes.h"
 
@@ -30,6 +31,13 @@ public:
   {
     Set,
     External,
+  };
+
+  enum class TraceEnableMode
+  {
+    Disable,
+    Default,
+    Expand,
   };
 
   class CacheVariable
@@ -128,6 +136,11 @@ public:
     cm::optional<bool> DebugOutput;
     cm::optional<bool> DebugTryCompile;
     cm::optional<bool> DebugFind;
+
+    cm::optional<TraceEnableMode> TraceMode;
+    cm::optional<cmTraceEnums::TraceOutputFormat> TraceFormat;
+    std::vector<std::string> TraceSource;
+    std::string TraceRedirect;
 
     bool VisitPresetInherit(const Preset& parent) override;
     bool VisitPresetBeforeInherit() override;

@@ -176,6 +176,9 @@ const auto CTEST_JUNIT_UNSUPPORTED = [](cmJSONState* state) -> void {
   state->AddError(
     "File version must be 6 or higher for CTest JUnit output support");
 };
+const auto TRACE_UNSUPPORTED = [](cmJSONState* state) -> void {
+  state->AddError("File version must be 7 or higher for trace preset support");
+};
 const auto UNRECOGNIZED_CMAKE_VERSION = [](const std::string& version,
                                            int current, int required) {
   return [version, current, required](const Json::Value* value,
