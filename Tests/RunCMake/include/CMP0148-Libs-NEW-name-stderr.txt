@@ -1,0 +1,6 @@
+^CMake Error at CMP0148-Libs-NEW-name\.cmake:[0-9]+ \(include\):
+  include could not find requested file:
+
+    FindPythonLibs
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$

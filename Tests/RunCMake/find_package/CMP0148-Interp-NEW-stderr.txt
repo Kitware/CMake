@@ -1,0 +1,4 @@
+^CMake Warning at CMP0148-Interp-NEW\.cmake:[0-9]+ \(find_package\):
+  No "FindPythonInterp\.cmake" found in CMAKE_MODULE_PATH\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
