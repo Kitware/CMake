@@ -47,7 +47,7 @@ protected:
   // version of the toolset.
   virtual std::string GetWindows10SDKMaxVersionDefault(cmMakefile* mf) const;
 
-  virtual bool SelectWindows10SDK(cmMakefile* mf, bool required);
+  virtual bool SelectWindows10SDK(cmMakefile* mf);
 
   void SetWindowsTargetPlatformVersion(std::string const& version,
                                        cmMakefile* mf);

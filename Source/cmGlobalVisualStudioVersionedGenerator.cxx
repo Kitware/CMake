@@ -900,7 +900,7 @@ bool cmGlobalVisualStudioVersionedGenerator::InitializeWindows(cmMakefile* mf)
   }
   // Otherwise we must choose a Win 10 SDK even if we are not targeting
   // Windows 10.
-  return this->SelectWindows10SDK(mf, false);
+  return this->SelectWindows10SDK(mf);
 }
 
 bool cmGlobalVisualStudioVersionedGenerator::SelectWindowsStoreToolset(

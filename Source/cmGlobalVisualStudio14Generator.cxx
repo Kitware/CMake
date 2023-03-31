@@ -140,7 +140,7 @@ bool cmGlobalVisualStudio14Generator::MatchesGeneratorName(
 bool cmGlobalVisualStudio14Generator::InitializeWindows(cmMakefile* mf)
 {
   if (cmHasLiteralPrefix(this->SystemVersion, "10.0")) {
-    return this->SelectWindows10SDK(mf, false);
+    return this->SelectWindows10SDK(mf);
   }
   return true;
 }
@@ -163,7 +163,7 @@ bool cmGlobalVisualStudio14Generator::InitializeWindowsStore(cmMakefile* mf)
     return false;
   }
   if (cmHasLiteralPrefix(this->SystemVersion, "10.0")) {
-    return this->SelectWindows10SDK(mf, true);
+    return this->SelectWindows10SDK(mf);
   }
   return true;
 }
@@ -173,19 +173,21 @@ bool cmGlobalVisualStudio14Generator::InitializeAndroid(cmMakefile*)
   return true;
 }
 
-bool cmGlobalVisualStudio14Generator::SelectWindows10SDK(cmMakefile* mf,
-                                                         bool required)
+bool cmGlobalVisualStudio14Generator::SelectWindows10SDK(cmMakefile* mf)
 {
   // Find the default version of the Windows 10 SDK.
   std::string const version = this->GetWindows10SDKVersion(mf);
 
-  if (required && version.empty()) {
-    std::ostringstream e;
-    e << "Could not find an appropriate version of the Windows 10 SDK"
-      << " installed on this machine";
-    mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
-    return false;
+  if (version.empty()) {
+    if (this->SystemName == "WindowsStore") {
+      mf->IssueMessage(
+        MessageType::FATAL_ERROR,
+        "Could not find an appropriate version of the Windows 10 SDK"
+        " installed on this machine");
+      return false;
+    }
   }
+
   this->SetWindowsTargetPlatformVersion(version, mf);
   return true;
 }
