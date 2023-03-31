@@ -1543,10 +1543,12 @@ bool cmGlobalGenerator::Compute()
     return false;
   }
 
-  // Iterate through all targets and set up AUTOMOC, AUTOUIC and AUTORCC
-  if (!this->QtAutoGen()) {
+#ifndef CMAKE_BOOTSTRAP
+  cmQtAutoGenGlobalInitializer qtAutoGen(this->LocalGenerators);
+  if (!qtAutoGen.InitializeCustomTargets()) {
     return false;
   }
+#endif
 
   // Add generator specific helper commands
   for (const auto& localGen : this->LocalGenerators) {
@@ -1562,6 +1564,12 @@ bool cmGlobalGenerator::Compute()
       return false;
     }
   }
+
+#ifndef CMAKE_BOOTSTRAP
+  if (!qtAutoGen.SetupCustomTargets()) {
+    return false;
+  }
+#endif
 
   for (const auto& localGen : this->LocalGenerators) {
     cmMakefile* mf = localGen->GetMakefile();
@@ -1761,16 +1769,6 @@ void cmGlobalGenerator::ComputeTargetOrder(cmGeneratorTarget const* gt,
   }
 
   entry->second = index++;
-}
-
-bool cmGlobalGenerator::QtAutoGen()
-{
-#ifndef CMAKE_BOOTSTRAP
-  cmQtAutoGenGlobalInitializer initializer(this->LocalGenerators);
-  return initializer.generate();
-#else
-  return true;
-#endif
 }
 
 bool cmGlobalGenerator::AddHeaderSetVerification()
