@@ -3626,7 +3626,7 @@ void cmGeneratorTarget::AddCUDAArchitectureFlags(cmBuildStep compileOrLink,
 
     for (CudaArchitecture& architecture : architectures) {
       flags +=
-        " --generate-code=arch=compute_" + architecture.name + ",code=[";
+        " \"--generate-code=arch=compute_" + architecture.name + ",code=[";
 
       if (architecture.virtual_) {
         flags += "compute_" + architecture.name;
@@ -3646,7 +3646,7 @@ void cmGeneratorTarget::AddCUDAArchitectureFlags(cmBuildStep compileOrLink,
         flags += "sm_" + architecture.name;
       }
 
-      flags += "]";
+      flags += "]\"";
     }
   } else if (compiler == "Clang") {
     for (CudaArchitecture& architecture : architectures) {
