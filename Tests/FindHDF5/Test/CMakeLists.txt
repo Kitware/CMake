@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.26)
 project(TestFindHDF5 LANGUAGES ${TEST_LANGS})
+include(CTest)
 message(STATUS "CTEST_FULL_OUTPUT (Avoid ctest truncation of output)")
 
 if(TEST_PARALLEL)
@@ -55,4 +56,51 @@ if(TEST_PARALLEL)
   if(NOT HDF5_IS_PARALLEL)
     message(SEND_ERROR "HDF5_IS_PARALLEL is false in parallel test.")
   endif()
+endif()
+
+if(TEST_PARALLEL)
+  set(MPI_CXX_SKIP_MPICXX TRUE)
+  set(MPI_CXX_VALIDATE_SKIP_MPICXX TRUE)
+  find_package(MPI REQUIRED)
+  set(mpi_C_tgt MPI::MPI_C)
+  set(mpi_C_inc ${MPI_C_INCLUDE_PATH})
+  set(mpi_C_lib ${MPI_C_LINK_FLAGS} ${MPI_C_LIBRARIES})
+  set(mpi_Fortran_tgt MPI::MPI_Fortran)
+  set(mpi_Fortran_inc ${MPI_Fortran_INCLUDE_PATH})
+  set(mpi_Fortran_lib ${MPI_Fortran_LIBRARIES})
+endif()
+
+if(CMAKE_C_COMPILER_LOADED)
+  add_executable(test_C_tgt test_C.c)
+  target_link_libraries(test_C_tgt PRIVATE hdf5::hdf5 ${mpi_C_tgt})
+  add_test(NAME test_C_tgt COMMAND test_C_tgt test_C_tgt.h5)
+
+  add_executable(test_C_var test_C.c)
+  target_include_directories(test_C_var PRIVATE ${HDF5_C_INCLUDE_DIRS} ${mpi_C_inc})
+  target_link_libraries(test_C_var PRIVATE ${HDF5_C_LIBRARIES} ${mpi_C_lib})
+  add_test(NAME test_C_var COMMAND test_C_var test_C_var.h5)
+endif()
+
+if(CMAKE_CXX_COMPILER_LOADED)
+  add_executable(test_CXX_tgt test_CXX.cxx)
+  target_link_libraries(test_CXX_tgt PRIVATE hdf5::hdf5_cpp
+    hdf5::hdf5 # FIXME: hdf5::hdf5_cpp should link hdf5::hdf5 automatically.
+    ${mpi_C_tgt})
+  add_test(NAME test_CXX_tgt COMMAND test_CXX_tgt test_CXX_tgt.h5)
+
+  add_executable(test_CXX_var test_CXX.cxx)
+  target_include_directories(test_CXX_var PRIVATE ${HDF5_CXX_INCLUDE_DIRS} ${mpi_C_inc})
+  target_link_libraries(test_CXX_var PRIVATE ${HDF5_CXX_LIBRARIES} ${mpi_C_lib})
+  add_test(NAME test_CXX_var COMMAND test_CXX_var test_CXX_var.h5)
+endif()
+
+if(CMAKE_Fortran_COMPILER_LOADED)
+  add_executable(test_Fortran_tgt test_Fortran.f90)
+  target_link_libraries(test_Fortran_tgt PRIVATE hdf5::hdf5_fortran ${mpi_Fortran_tgt})
+  add_test(NAME test_Fortran_tgt COMMAND test_Fortran_tgt)
+
+  add_executable(test_Fortran_var test_Fortran.f90)
+  target_include_directories(test_Fortran_var PRIVATE ${HDF5_Fortran_INCLUDE_DIRS} ${mpi_Fortran_inc})
+  target_link_libraries(test_Fortran_var PRIVATE ${HDF5_Fortran_LIBRARIES} ${mpi_Fortran_lib})
+  add_test(NAME test_Fortran_var COMMAND test_Fortran_var)
 endif()
