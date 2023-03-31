@@ -48,5 +48,9 @@ See Also
 
 * The command :command:`target_compile_options` adds target-specific options.
 
+* This command adds compile options for all languages.
+  Use the :genex:`COMPILE_LANGUAGE` generator expression to specify
+  per-language compile options.
+
 * The source file property :prop_sf:`COMPILE_OPTIONS` adds options to one
   source file.
