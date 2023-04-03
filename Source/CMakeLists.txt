@@ -193,6 +193,8 @@ add_library(
   cmDyndepCollation.h
   cmELF.h
   cmELF.cxx
+  cmEvaluatedTargetProperty.cxx
+  cmEvaluatedTargetProperty.h
   cmExprParserHelper.cxx
   cmExportBuildAndroidMKGenerator.h
   cmExportBuildAndroidMKGenerator.cxx
