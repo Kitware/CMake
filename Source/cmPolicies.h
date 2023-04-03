@@ -447,6 +447,9 @@ class cmMakefile;
          27, 0, cmPolicies::WARN)                                             \
   SELECT(POLICY, CMP0148,                                                     \
          "The FindPythonInterp and FindPythonLibs modules are removed.", 3,   \
+         27, 0, cmPolicies::WARN)                                             \
+  SELECT(POLICY, CMP0149,                                                     \
+         "Visual Studio generators select latest Windows SDK by default.", 3, \
          27, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)

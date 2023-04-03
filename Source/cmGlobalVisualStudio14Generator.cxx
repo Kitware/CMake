@@ -12,6 +12,7 @@
 #include "cmGlobalVisualStudioGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmPolicies.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
@@ -436,10 +437,12 @@ std::string cmGlobalVisualStudio14Generator::GetWindows10SDKVersion(
     return std::string();
   }
 
-  // Look for a SDK exactly matching the target Windows version.
-  for (std::string const& i : sdks) {
-    if (cmSystemTools::VersionCompareEqual(i, this->SystemVersion)) {
-      return i;
+  if (mf->GetPolicyStatus(cmPolicies::CMP0149) != cmPolicies::NEW) {
+    // Look for a SDK exactly matching the target Windows version.
+    for (std::string const& i : sdks) {
+      if (cmSystemTools::VersionCompareEqual(i, this->SystemVersion)) {
+        return i;
+      }
     }
   }
 

@@ -15,6 +15,9 @@ VS 2015 and above support specification of a Windows SDK version:
 * Otherwise, if :variable:`CMAKE_SYSTEM_VERSION` is set to an available
   SDK version, that version is selected.
 
+  .. versionchanged:: 3.27
+    This is disabled by policy :policy:`CMP0149`.
+
 * Otherwise, CMake uses the latest Windows SDK version available.
 
 The chosen Windows target version number is provided
