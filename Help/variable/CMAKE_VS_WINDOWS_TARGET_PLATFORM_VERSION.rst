@@ -12,6 +12,14 @@ VS 2015 and above support specification of a Windows SDK version:
   as documented by :ref:`Visual Studio Platform Selection`, that SDK
   version is selected.
 
+* Otherwise, if the ``WindowsSDKVersion`` environment variable
+  is set to an available SDK version, that version is selected.
+  This is intended for use in environments established by ``vcvarsall.bat``
+  or similar scripts.
+
+  .. versionadded:: 3.27
+    This is enabled by policy :policy:`CMP0149`.
+
 * Otherwise, if :variable:`CMAKE_SYSTEM_VERSION` is set to an available
   SDK version, that version is selected.
 

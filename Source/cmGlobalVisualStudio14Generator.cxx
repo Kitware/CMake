@@ -437,7 +437,17 @@ std::string cmGlobalVisualStudio14Generator::GetWindows10SDKVersion(
     return std::string();
   }
 
-  if (mf->GetPolicyStatus(cmPolicies::CMP0149) != cmPolicies::NEW) {
+  if (mf->GetPolicyStatus(cmPolicies::CMP0149) == cmPolicies::NEW) {
+    if (cm::optional<std::string> const envVer =
+          cmSystemTools::GetEnvVar("WindowsSDKVersion")) {
+      // Look for a SDK exactly matching the environment variable.
+      for (std::string const& i : sdks) {
+        if (cmSystemTools::VersionCompareEqual(i, *envVer)) {
+          return i;
+        }
+      }
+    }
+  } else {
     // Look for a SDK exactly matching the target Windows version.
     for (std::string const& i : sdks) {
       if (cmSystemTools::VersionCompareEqual(i, this->SystemVersion)) {
