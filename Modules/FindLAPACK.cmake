@@ -304,10 +304,12 @@ endif()
 # Search for different LAPACK distributions if BLAS is found
 if(NOT LAPACK_NOT_FOUND_MESSAGE)
   set(LAPACK_LINKER_FLAGS ${BLAS_LINKER_FLAGS})
-  if(NOT $ENV{BLA_VENDOR} STREQUAL "")
-    set(BLA_VENDOR $ENV{BLA_VENDOR})
-  elseif(NOT BLA_VENDOR)
-    set(BLA_VENDOR "All")
+  if(NOT BLA_VENDOR)
+    if(NOT "$ENV{BLA_VENDOR}" STREQUAL "")
+      set(BLA_VENDOR "$ENV{BLA_VENDOR}")
+    else()
+      set(BLA_VENDOR "All")
+    endif()
   endif()
 
   # LAPACK in the Intel MKL 10+ library?
