@@ -15,7 +15,14 @@ if("${CMAKE_GENERATOR}" STREQUAL "Xcode")
     message(FATAL_ERROR "Swift language not supported by Xcode ${XCODE_VERSION}")
   endif()
   set(CMAKE_Swift_COMPILER_XCODE_TYPE sourcecode.swift)
-  _cmake_find_compiler_path(Swift)
+  execute_process(COMMAND xcrun --find swiftc
+    OUTPUT_VARIABLE _xcrun_out OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_VARIABLE _xcrun_err RESULT_VARIABLE _xcrun_result)
+  if(_xcrun_result EQUAL 0 AND EXISTS "${_xcrun_out}")
+    set(CMAKE_Swift_COMPILER "${_xcrun_out}")
+  else()
+    _cmake_find_compiler_path(Swift)
+  endif()
 elseif("${CMAKE_GENERATOR}" MATCHES "^Ninja")
   if(CMAKE_Swift_COMPILER)
     _cmake_find_compiler_path(Swift)
@@ -52,9 +59,6 @@ if(NOT CMAKE_Swift_COMPILER_ID_RUN)
   if("${CMAKE_GENERATOR}" STREQUAL "Xcode")
     list(APPEND CMAKE_Swift_COMPILER_ID_MATCH_VENDORS Apple)
     set(CMAKE_Swift_COMPILER_ID_MATCH_VENDOR_REGEX_Apple "com.apple.xcode.tools.swift.compiler")
-
-    set(CMAKE_Swift_COMPILER_ID_TOOL_MATCH_REGEX "\nCompileSwift[^\n]*(\n[ \t]+[^\n]*)*\n[ \t]+([^ \t\r\n]+)[^\r\n]* -c[^\r\n]*CompilerIdSwift/CompilerId/main.swift")
-    set(CMAKE_Swift_COMPILER_ID_TOOL_MATCH_INDEX 2)
   endif()
 
   # Try to identify the compiler.
