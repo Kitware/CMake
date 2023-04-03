@@ -163,7 +163,6 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
           PROJECT IntelFortranImplicit
           SOURCE_DIR ${CMAKE_ROOT}/Modules/IntelVSImplicitPath
           BINARY_DIR ${CMAKE_BINARY_DIR}/CMakeFiles/IntelVSImplicitPath
-          IntelFortranImplicit
           CMAKE_FLAGS
           "-DCMAKE_Fortran_FLAGS:STRING=${CMAKE_Fortran_FLAGS}"
           OUTPUT_VARIABLE _output)
