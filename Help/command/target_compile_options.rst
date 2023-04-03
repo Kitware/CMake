@@ -15,6 +15,11 @@ are used when compiling the given ``<target>``, which must have been
 created by a command such as :command:`add_executable` or
 :command:`add_library` and must not be an :ref:`ALIAS target <Alias Targets>`.
 
+.. note::
+
+  These options are not used when linking the target.
+  See the :command:`target_link_options` command for that.
+
 Arguments
 ^^^^^^^^^
 
@@ -60,3 +65,7 @@ See Also
 * :command:`target_link_options`
 * :command:`target_precompile_headers`
 * :command:`target_sources`
+
+* :variable:`CMAKE_<LANG>_FLAGS` and :variable:`CMAKE_<LANG>_FLAGS_<CONFIG>`
+  add language-wide flags passed to all invocations of the compiler.
+  This includes invocations that drive compiling and those that drive linking.
