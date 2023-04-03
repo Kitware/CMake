@@ -39,6 +39,14 @@ if("${RunCMake_GENERATOR}" MATCHES "^Visual Studio (1[4567])( 20[0-9][0-9])?$")
   set(RunCMake_GENERATOR_PLATFORM "version=8.1")
   run_cmake_with_options(BadVersionPlatform -DCMAKE_SYSTEM_VERSION=8.1)
 
+  if(NOT RunCMake_GENERATOR MATCHES "^Visual Studio (1[45]) ")
+    set(expect_version "10.0")
+    set(RunCMake_GENERATOR_PLATFORM "version=${expect_version}")
+    set(RunCMake_TEST_VARIANT_DESCRIPTION "-${expect_version}")
+    run_cmake_with_options(VersionExists -DCMAKE_SYSTEM_VERSION=10.0)
+    unset(RunCMake_GENERATOR_PLATFORM)
+  endif()
+
   set(kits "")
   cmake_host_system_information(RESULT kitsRoot10
     QUERY WINDOWS_REGISTRY "HKLM/SOFTWARE/Microsoft/Windows Kits/Installed Roots"

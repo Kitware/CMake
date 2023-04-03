@@ -355,6 +355,16 @@ std::string cmGlobalVisualStudio14Generator::GetWindows10SDKVersion(
   cmMakefile* mf)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
+  // Accept specific version requests as-is.
+  if (this->GeneratorPlatformVersion) {
+    std::string const& ver = *this->GeneratorPlatformVersion;
+
+    // VS 2019 and above support specifying plain "10.0".
+    if (this->Version >= VSVersion::VS16 && ver == "10.0") {
+      return ver;
+    }
+  }
+
   std::vector<std::string> win10Roots;
 
   {

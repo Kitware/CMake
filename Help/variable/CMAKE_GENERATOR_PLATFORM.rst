@@ -56,6 +56,10 @@ Supported pairs are:
 
   The ``<version>`` may be one of:
 
+  ``10.0``
+    Specify that any 10.0 SDK version may be used, and let Visual Studio
+    pick one.  This is supported by VS 2019 and above.
+
   ``10.0.<build>.<increment>``
     Specify the exact 4-component SDK version, e.g., ``10.0.19041.0``.
     The specified version of the SDK must be installed.  It may not exceed
