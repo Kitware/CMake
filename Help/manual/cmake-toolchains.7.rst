@@ -273,7 +273,7 @@ supported out of the box.  Other versions may require one to set
 Cross Compiling for Windows 10 Universal Applications
 -----------------------------------------------------
 
-A toolchain file to configure a Visual Studio generator for a
+A toolchain file to configure :ref:`Visual Studio Generators` for a
 Windows 10 Universal Application may look like this:
 
 .. code-block:: cmake
@@ -283,9 +283,10 @@ Windows 10 Universal Application may look like this:
 
 A Windows 10 Universal Application targets both Windows Store and
 Windows Phone.  Specify the :variable:`CMAKE_SYSTEM_VERSION` variable
-to be ``10.0`` to build with the latest available Windows 10 SDK.
-Specify a more specific version (e.g. ``10.0.10240.0`` for RTM)
-to build with the corresponding SDK.
+to be ``10.0`` or higher.
+
+CMake selects a Windows SDK as described by documentation of the
+:variable:`CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION` variable.
 
 Cross Compiling for Windows Phone
 ---------------------------------

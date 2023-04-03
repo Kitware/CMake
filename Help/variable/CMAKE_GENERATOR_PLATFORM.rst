@@ -26,6 +26,8 @@ Platform specification is supported only on specific generators:
 
 See native build system documentation for allowed platform names.
 
+.. _`Visual Studio Platform Selection`:
+
 Visual Studio Platform Selection
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -42,4 +44,24 @@ name is provided in the :variable:`CMAKE_VS_PLATFORM_NAME` variable.
 
 The ``key=value`` pairs form a comma-separated list of options to
 specify generator-specific details of the platform selection.
-There are no supported pairs: this syntax is reserved for future use.
+Supported pairs are:
+
+``version=<version>``
+  .. versionadded:: 3.27
+
+  Specify the Windows SDK version to use.  This is supported by VS 2015 and
+  above when targeting Windows 10.0+ or Windows Store.  CMake will set the
+  :variable:`CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION` variable to the
+  selected SDK version.
+
+  The ``<version>`` may be one of:
+
+  ``10.0.<build>.<increment>``
+    Specify the exact 4-component SDK version, e.g., ``10.0.19041.0``.
+    The specified version of the SDK must be installed.  It may not exceed
+    the value of :variable:`CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION_MAXIMUM`,
+    if that variable is set.
+
+  If the ``version`` field is not specified, CMake selects a version as
+  described in the :variable:`CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION`
+  variable documentation.

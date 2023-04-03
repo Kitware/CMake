@@ -895,7 +895,8 @@ bool cmGlobalVisualStudioVersionedGenerator::InitializePlatformWindows(
     if (this->Version >= cmGlobalVisualStudioGenerator::VSVersion::VS16 &&
         !cmSystemTools::VersionCompareGreater(this->SystemVersion, "8.1")) {
       this->SetWindowsTargetPlatformVersion("8.1", mf);
-      return true;
+      return this->VerifyNoGeneratorPlatformVersion(
+        mf, "with the Windows 8.1 SDK installed");
     }
     return cmGlobalVisualStudio14Generator::InitializePlatformWindows(mf);
   }

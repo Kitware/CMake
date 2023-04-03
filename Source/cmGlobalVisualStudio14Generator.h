@@ -7,6 +7,8 @@
 #include <memory>
 #include <string>
 
+#include <cm/optional>
+
 #include "cmGlobalVisualStudio12Generator.h"
 
 class cmGlobalGeneratorFactory;
@@ -39,6 +41,12 @@ protected:
   bool IsWindowsStoreToolsetInstalled() const;
 
   bool InitializePlatformWindows(cmMakefile* mf) override;
+  bool VerifyNoGeneratorPlatformVersion(
+    cmMakefile* mf,
+    cm::optional<std::string> reason = cm::nullopt) const override;
+
+  bool ProcessGeneratorPlatformField(std::string const& key,
+                                     std::string const& value) override;
 
   // Used to adjust the max-SDK-version calculation to accommodate user
   // configuration.
@@ -62,4 +70,6 @@ protected:
 private:
   class Factory;
   friend class Factory;
+
+  cm::optional<std::string> GeneratorPlatformVersion;
 };

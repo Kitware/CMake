@@ -1,0 +1,19 @@
+^CMake Error at CMakeLists.txt:[0-9]+ \(project\):
+  Generator
+
+    Visual Studio [^
+]+
+
+  given platform specification (containing a
+
+    version=8\.1
+
+  field\.  The version field is not supported when targeting
+
+    Windows 8\.1(
+
+  with the Windows 8\.1 SDK installed\.)?|with
+
+    version=8\.1
+
+  field, but no Windows SDK with that version was found\.)$

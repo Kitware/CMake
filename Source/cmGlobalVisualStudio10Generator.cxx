@@ -531,11 +531,20 @@ bool cmGlobalVisualStudio10Generator::InitializePlatform(cmMakefile* mf)
     if (!this->InitializePlatformWindows(mf)) {
       return false;
     }
+  } else if (!this->SystemName.empty() &&
+             !this->VerifyNoGeneratorPlatformVersion(mf)) {
+    return false;
   }
   return this->cmGlobalVisualStudio8Generator::InitializePlatform(mf);
 }
 
 bool cmGlobalVisualStudio10Generator::InitializePlatformWindows(cmMakefile*)
+{
+  return true;
+}
+
+bool cmGlobalVisualStudio10Generator::VerifyNoGeneratorPlatformVersion(
+  cmMakefile*, cm::optional<std::string>) const
 {
   return true;
 }

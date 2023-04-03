@@ -1,0 +1,11 @@
+^CMake Error at CMakeLists.txt:[0-9]+ \(project\):
+  Generator
+
+    Visual Studio [^
+]+
+
+  given platform specification with
+
+    version=1\.2\.3\.4
+
+  field, but no Windows SDK with that version was found\.$
