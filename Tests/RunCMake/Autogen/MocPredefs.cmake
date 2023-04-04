@@ -1,4 +1,3 @@
-cmake_policy(SET CMP0129 NEW)
 enable_language(CXX)
 
 find_package(Qt${with_qt_version} REQUIRED COMPONENTS Core)
