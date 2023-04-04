@@ -21,6 +21,8 @@
 #include <cm3p/json/value.h>
 #include <cm3p/json/writer.h>
 
+#include "cmsys/RegularExpression.hxx"
+
 #include "cmComputeLinkInformation.h"
 #include "cmCustomCommandGenerator.h"
 #include "cmDyndepCollation.h"
@@ -1259,6 +1261,7 @@ namespace {
 cmNinjaBuild GetScanBuildStatement(const std::string& ruleName,
                                    const std::string& ppFileName,
                                    bool compilePP, bool compilePPWithDefines,
+                                   cmValue ppExcludeFlagsRegex,
                                    cmNinjaBuild& objBuild, cmNinjaVars& vars,
                                    const std::string& objectFileName,
                                    cmLocalGenerator* lg)
@@ -1286,6 +1289,20 @@ cmNinjaBuild GetScanBuildStatement(const std::string& ruleName,
 
   // Scanning and compilation generally use the same flags.
   scanBuild.Variables["FLAGS"] = vars["FLAGS"];
+
+  // Exclude flags not valid during preprocessing.
+  if (compilePP && !ppExcludeFlagsRegex.IsEmpty()) {
+    std::string in = std::move(scanBuild.Variables["FLAGS"]);
+    std::string out;
+    cmsys::RegularExpression regex(*ppExcludeFlagsRegex);
+    std::string::size_type pos = 0;
+    while (regex.find(in.c_str() + pos)) {
+      out = cmStrCat(out, in.substr(pos, regex.start()), ' ');
+      pos += regex.end();
+    }
+    out = cmStrCat(out, in.substr(pos));
+    scanBuild.Variables["FLAGS"] = std::move(out);
+  }
 
   if (compilePP && !compilePPWithDefines) {
     // Move preprocessor definitions to the scan/preprocessor build statement.
@@ -1511,18 +1528,22 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
 
     std::string scanRuleName;
     std::string ppFileName;
+    cmValue ppExcludeFlagsRegex;
     if (compilePP) {
       scanRuleName = this->LanguagePreprocessAndScanRule(language, config);
       ppFileName = this->ConvertToNinjaPath(
         this->GetPreprocessedFilePath(source, config));
+      ppExcludeFlagsRegex = this->Makefile->GetDefinition(cmStrCat(
+        "CMAKE_", language, "_PREPROCESS_SOURCE_EXCLUDE_FLAGS_REGEX"));
     } else {
       scanRuleName = this->LanguageScanRule(language, config);
       ppFileName = cmStrCat(objectFileName, ".ddi.i");
     }
 
     cmNinjaBuild ppBuild = GetScanBuildStatement(
-      scanRuleName, ppFileName, compilePP, compilePPWithDefines, objBuild,
-      vars, objectFileName, this->LocalGenerator);
+      scanRuleName, ppFileName, compilePP, compilePPWithDefines,
+      ppExcludeFlagsRegex, objBuild, vars, objectFileName,
+      this->LocalGenerator);
 
     if (compilePP) {
       // In case compilation requires flags that are incompatible with
