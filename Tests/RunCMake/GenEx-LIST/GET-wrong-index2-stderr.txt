@@ -1,0 +1,8 @@
+CMake Error at GET-wrong-index2.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<LIST:GET,a;b,2>
+
+  index: 2 out of range \(-2, 1\)
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

@@ -1,0 +1,9 @@
+CMake Error at TRANSFORM-selector-FOR-backwards-range.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<LIST:TRANSFORM,a;b;c,TOUPPER,FOR,2,0>
+
+  sub-command TRANSFORM, selector FOR expects <start> to be no greater than
+  <stop> \(2 > 0\)
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

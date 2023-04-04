@@ -1,0 +1,8 @@
+CMake Error at GET-wrong-index1.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<LIST:GET,,0>
+
+  given empty list
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

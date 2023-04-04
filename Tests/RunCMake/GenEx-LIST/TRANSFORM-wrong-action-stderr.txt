@@ -1,0 +1,7 @@
+CMake Error at TRANSFORM-wrong-action.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<LIST:TRANSFORM,a;b;c,WRONG_ACTION>
+   sub-command TRANSFORM, WRONG_ACTION invalid action.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

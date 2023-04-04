@@ -1,0 +1,8 @@
+CMake Error at REMOVE_AT-wrong-index3.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<LIST:REMOVE_AT,a;b;c,-4>
+
+  index: -4 out of range \(-3, 2\)
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

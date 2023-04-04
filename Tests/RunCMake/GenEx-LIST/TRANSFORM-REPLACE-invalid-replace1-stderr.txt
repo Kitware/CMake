@@ -1,0 +1,9 @@
+CMake Error at TRANSFORM-REPLACE-invalid-replace1.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<LIST:TRANSFORM,a;b,REPLACE,\^a,b\\>
+
+  sub-command TRANSFORM, action REPLACE: replace-expression ends in a
+  backslash.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

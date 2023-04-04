@@ -1,0 +1,35 @@
+
+include ("${RunCMake_SOURCE_DIR}/check_errors.cmake")
+unset (errors)
+
+set(listvar a b c d)
+
+list(JOIN listvar ":" reference)
+set (output "$<LIST:JOIN,a;b;c;d,:>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "returns bad value: ${output}")
+endif()
+
+list(JOIN listvar "" reference)
+set (output "$<LIST:JOIN,a;b;c;d,>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "returns bad value: ${output}")
+endif()
+
+set(listvar a)
+
+list(JOIN listvar ":" reference)
+set (output "$<LIST:JOIN,a,:>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "returns bad value: ${output}")
+endif()
+
+unset(listvar)
+
+list(JOIN listvar ":" reference)
+set (output "$<LIST:JOIN,,:>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "returns bad value: ${output}")
+endif()
+
+check_errors("LIST:JOIN..." ${errors})

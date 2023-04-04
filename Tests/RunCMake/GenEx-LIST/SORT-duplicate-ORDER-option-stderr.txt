@@ -1,0 +1,8 @@
+CMake Error at SORT-duplicate-ORDER-option.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<LIST:SORT,a;b,ORDER:ASCENDING,COMPARE:STRING,ORDER:DESCENDING,CASE:SENSITIVE>
+
+  sub-command SORT, ORDER option has been specified multiple times.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

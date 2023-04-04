@@ -1,0 +1,8 @@
+CMake Error at SUBLIST-wrong-argument2.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<LIST:SUBLIST,a;b;c,1,-2>
+
+  length: -2 should be -1 or greater
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

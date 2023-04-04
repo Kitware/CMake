@@ -1,0 +1,32 @@
+
+include ("${RunCMake_SOURCE_DIR}/check_errors.cmake")
+unset (errors)
+
+set(listvar a b c d)
+
+list(SUBLIST listvar 1 2 reference)
+set (output "$<LIST:SUBLIST,a;b;c;d,1,2>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "returns bad value: ${output}")
+endif()
+
+list(SUBLIST listvar 1 -1 reference)
+set (output "$<LIST:SUBLIST,a;b;c;d,1,-1>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "returns bad value: ${output}")
+endif()
+
+list(SUBLIST listvar 1 0 reference)
+set (output "$<LIST:SUBLIST,a;b;c;d,1,0>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "returns bad value: ${output}")
+endif()
+
+list(SUBLIST listvar 1 5 reference)
+set (output "$<LIST:SUBLIST,a;b;c;d,1,5>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "returns bad value: ${output}")
+endif()
+
+
+check_errors("LIST:SUBLIST..." ${errors})

@@ -1,0 +1,8 @@
+CMake Error at TRANSFORM-selector-AT-no-arguments.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<LIST:TRANSFORM,a;b,TOUPPER,AT>
+
+  sub-command TRANSFORM, selector AT expects at least one numeric value.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

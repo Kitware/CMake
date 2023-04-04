@@ -835,18 +835,19 @@ cmList::size_type cmList::ComputeIndex(index_type pos, bool boundCheck) const
         cmStrCat("index: ", pos, " out of range (0, 0)"));
     }
 
+    auto index = pos;
     if (!this->Values.empty()) {
       auto length = this->Values.size();
-      if (pos < 0) {
-        pos = static_cast<index_type>(length) + pos;
+      if (index < 0) {
+        index = static_cast<index_type>(length) + index;
       }
-      if (pos < 0 || length <= static_cast<size_type>(pos)) {
+      if (index < 0 || length <= static_cast<size_type>(index)) {
         throw std::out_of_range(cmStrCat("index: ", pos, " out of range (-",
                                          this->Values.size(), ", ",
                                          this->Values.size() - 1, ")"));
       }
     }
-    return pos;
+    return index;
   }
 
   return pos < 0 ? this->Values.size() + pos : pos;
@@ -860,18 +861,19 @@ cmList::size_type cmList::ComputeInsertIndex(index_type pos,
         cmStrCat("index: ", pos, " out of range (0, 0)"));
     }
 
+    auto index = pos;
     if (!this->Values.empty()) {
       auto length = this->Values.size();
-      if (pos < 0) {
-        pos = static_cast<index_type>(length) + pos;
+      if (index < 0) {
+        index = static_cast<index_type>(length) + index;
       }
-      if (pos < 0 || length < static_cast<size_type>(pos)) {
+      if (index < 0 || length < static_cast<size_type>(index)) {
         throw std::out_of_range(cmStrCat("index: ", pos, " out of range (-",
                                          this->Values.size(), ", ",
                                          this->Values.size(), ")"));
       }
     }
-    return pos;
+    return index;
   }
 
   return pos < 0 ? this->Values.size() + pos : pos;

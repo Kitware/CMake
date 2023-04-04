@@ -1,0 +1,18 @@
+
+include ("${RunCMake_SOURCE_DIR}/check_errors.cmake")
+unset (errors)
+
+set(listvar a b c d)
+list(POP_FRONT listvar)
+set (output "$<LIST:POP_FRONT,a;b;c;d>")
+if (NOT output STREQUAL listvar)
+  list (APPEND errors "returns bad value: ${output}")
+endif()
+
+set (output "$<LIST:POP_FRONT,>")
+if (NOT output STREQUAL "")
+  list (APPEND errors "returns bad value: ${output}")
+endif()
+
+
+check_errors("LIST:POP_FRONT..." ${errors})

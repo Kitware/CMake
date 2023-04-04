@@ -1,0 +1,8 @@
+CMake Error at TRANSFORM-selector-FOR-no-arguments.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<LIST:TRANSFORM,a;b,TOUPPER,FOR>
+
+  sub-command TRANSFORM, selector FOR expects, at least, two arguments.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
