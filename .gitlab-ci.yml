@@ -1209,7 +1209,7 @@ t:windows-msvc-v71-nmake:
 t:windows-openwatcom1.9:
     extends:
         - .windows_openwatcom1.9
-        - .cmake_test_windows_openwatcom
+        - .cmake_test_windows_external
         - .windows_x86_64_tags_concurrent
         - .cmake_junit_artifacts
         - .run_dependent
