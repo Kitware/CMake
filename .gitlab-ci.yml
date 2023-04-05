@@ -1051,7 +1051,7 @@ t:windows-vs2019-x64:
 t:windows-vs2022-x64-nmake:
     extends:
         - .windows_vs2022_x64_nmake
-        - .cmake_test_windows_nmake
+        - .cmake_test_windows_external
         - .windows_x86_64_tags_concurrent_vs2022
         - .cmake_junit_artifacts
         - .run_dependent
