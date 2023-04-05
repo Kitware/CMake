@@ -395,16 +395,3 @@
         - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake
 
     interruptible: true
-
-.cmake_test_windows_jom:
-    stage: test-ext
-
-    script:
-        - . .gitlab/ci/env.ps1
-        - Invoke-Expression -Command .gitlab/ci/jom.ps1
-        - $pwdpath = $pwd.Path
-        - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab\jom;$env:PATH"
-        - Invoke-Expression -Command .gitlab/ci/vcvarsall.ps1
-        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake
-
-    interruptible: true
