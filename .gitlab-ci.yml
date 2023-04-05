@@ -1195,7 +1195,7 @@ t:mingw_osdn_io-msys_makefiles:
 t:windows-msvc-v71-nmake:
     extends:
         - .windows_msvc_v71_nmake
-        - .cmake_test_windows_msvc
+        - .cmake_test_windows_external
         - .windows_x86_64_tags_concurrent
         - .cmake_junit_artifacts
         - .run_dependent

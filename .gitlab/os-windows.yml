@@ -420,14 +420,3 @@
         - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake
 
     interruptible: true
-
-.cmake_test_windows_msvc:
-    stage: test-ext
-
-    script:
-        - . .gitlab/ci/env.ps1
-        - Invoke-Expression -Command .gitlab/ci/msvc.ps1
-        - Invoke-Expression -Command .gitlab/ci/vcvarsall.ps1
-        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake
-
-    interruptible: true
