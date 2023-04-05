@@ -8977,10 +8977,10 @@ std::string cmGeneratorTarget::GenerateHeaderSetVerificationFile(
 
   cmGeneratedFileStream fout(filename);
   fout.SetCopyIfDifferent(true);
-  // IWYU pragma: associated allows include what you use to
+  // The IWYU "associated" pragma tells include-what-you-use to
   // consider the headerFile as part of the entire language
   // unit within include-what-you-use and as a result allows
-  // one to get IWYU advice for headers :)
+  // one to get IWYU advice for headers.
   fout << "#include <" << headerFilename << "> // IWYU pragma: associated\n";
   fout.close();
 
