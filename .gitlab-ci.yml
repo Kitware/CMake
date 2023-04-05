@@ -1079,7 +1079,7 @@ t:windows-vs2022-x64-jom:
 t:windows-borland5.5:
     extends:
         - .windows_borland5.5
-        - .cmake_test_windows_borland
+        - .cmake_test_windows_external
         - .windows_x86_64_tags_concurrent
         - .cmake_junit_artifacts
         - .run_dependent
@@ -1093,7 +1093,7 @@ t:windows-borland5.5:
 t:windows-borland5.8:
     extends:
         - .windows_borland5.8
-        - .cmake_test_windows_borland
+        - .cmake_test_windows_external
         - .windows_x86_64_tags_concurrent
         - .cmake_junit_artifacts
         - .run_dependent

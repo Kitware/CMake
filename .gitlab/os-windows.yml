@@ -408,15 +408,3 @@
         - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake
 
     interruptible: true
-
-.cmake_test_windows_borland:
-    stage: test-ext
-
-    script:
-        - . .gitlab/ci/env.ps1
-        - Invoke-Expression -Command .gitlab/ci/borland.ps1
-        - $pwdpath = $pwd.Path
-        - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab\bcc\bin;$env:PATH"
-        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake
-
-    interruptible: true
