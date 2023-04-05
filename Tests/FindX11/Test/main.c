@@ -336,6 +336,18 @@ static void test_xcb(void)
   xcb_disconnect(connection);
 }
 
+#  ifdef HAVE_X11_xcb_composite
+#    include <xcb/composite.h>
+
+static void test_xcb_composite(void)
+{
+  xcb_connection_t* connection = xcb_connect(NULL, NULL);
+  xcb_composite_query_version(connection, 0, 0);
+  xcb_disconnect(connection);
+}
+
+#  endif
+
 #  ifdef HAVE_X11_xcb_cursor
 #    include <xcb/xcb_cursor.h>
 
@@ -348,6 +360,169 @@ static void test_xcb_cursor(void)
   xcb_cursor_context_t* ctx;
   xcb_cursor_context_new(connection, screens.data, &ctx);
   xcb_cursor_context_free(ctx);
+  xcb_disconnect(connection);
+}
+
+#  endif
+
+#  ifdef HAVE_X11_xcb_damage
+#    include <xcb/damage.h>
+
+static void test_xcb_damage(void)
+{
+  int screen_nbr;
+  xcb_connection_t* connection = xcb_connect(NULL, &screen_nbr);
+  xcb_damage_query_version_cookie_t cookie =
+    xcb_damage_query_version(connection, 0, 0);
+  xcb_disconnect(connection);
+}
+
+#  endif
+
+#  ifdef HAVE_X11_xcb_dpms
+#    include <xcb/dpms.h>
+
+static void test_xcb_dpms(void)
+{
+  int screen_nbr;
+  xcb_connection_t* connection = xcb_connect(NULL, &screen_nbr);
+  xcb_dpms_get_version_cookie_t cookie =
+    xcb_dpms_get_version(connection, 0, 0);
+  xcb_disconnect(connection);
+}
+
+#  endif
+
+#  ifdef HAVE_X11_xcb_dri2
+#    include <xcb/dri2.h>
+
+static void test_xcb_dri2(void)
+{
+  int screen_nbr;
+  xcb_connection_t* connection = xcb_connect(NULL, &screen_nbr);
+  xcb_dri2_query_version_cookie_t cookie =
+    xcb_dri2_query_version(connection, 0, 0);
+  xcb_disconnect(connection);
+}
+
+#  endif
+
+#  ifdef HAVE_X11_xcb_dri3
+#    include <xcb/dri3.h>
+
+static void test_xcb_dri3(void)
+{
+  int screen_nbr;
+  xcb_connection_t* connection = xcb_connect(NULL, &screen_nbr);
+  xcb_dri3_query_version_cookie_t cookie =
+    xcb_dri3_query_version(connection, 0, 0);
+  xcb_disconnect(connection);
+}
+
+#  endif
+
+#  ifdef HAVE_X11_xcb_errors
+#    include <xcb/xcb_errors.h>
+
+static void test_xcb_errors(void)
+{
+  int screen_nbr;
+  xcb_connection_t* connection = xcb_connect(NULL, &screen_nbr);
+  xcb_errors_context_t* context;
+  xcb_errors_context_new(connection, &context);
+  xcb_errors_context_free(context);
+  xcb_disconnect(connection);
+}
+
+#  endif
+
+#  ifdef HAVE_X11_xcb_ewmh
+#    include <xcb/xcb_ewmh.h>
+
+static void test_xcb_ewmh(void)
+{
+  int screen_nbr;
+  xcb_connection_t* connection = xcb_connect(NULL, &screen_nbr);
+  xcb_ewmh_connection_t ewmh_connection;
+  xcb_intern_atom_cookie_t* cookie =
+    xcb_ewmh_init_atoms(connection, &ewmh_connection);
+  xcb_ewmh_init_atoms_replies(&ewmh_connection, cookie, NULL);
+  xcb_ewmh_connection_wipe(&ewmh_connection);
+  xcb_disconnect(connection);
+}
+
+#  endif
+
+#  ifdef HAVE_X11_xcb_glx
+#    include <xcb/glx.h>
+
+static void test_xcb_glx(void)
+{
+  int screen_nbr;
+  xcb_connection_t* connection = xcb_connect(NULL, &screen_nbr);
+  xcb_glx_query_version_cookie_t cookie =
+    xcb_glx_query_version(connection, 0, 0);
+  xcb_disconnect(connection);
+}
+
+#  endif
+
+#  ifdef HAVE_X11_xcb_icccm
+#    include <xcb/xcb_icccm.h>
+
+static void test_xcb_icccm(void)
+{
+  int screen_nbr;
+  xcb_connection_t* connection = xcb_connect(NULL, &screen_nbr);
+  xcb_window_t root =
+    xcb_setup_roots_iterator(xcb_get_setup(connection)).data->root;
+  xcb_get_property_cookie_t cookie = xcb_icccm_get_wm_name(connection, root);
+  xcb_icccm_get_text_property_reply_t reply;
+  xcb_icccm_get_wm_name_reply(connection, cookie, &reply, NULL);
+  xcb_disconnect(connection);
+}
+
+#  endif
+
+#  ifdef HAVE_X11_xcb_image
+#    include <xcb/xcb_image.h>
+
+static void test_xcb_image(void)
+{
+  int screen_nbr;
+  xcb_connection_t* connection = xcb_connect(NULL, &screen_nbr);
+  // xcb_image is too convoluted/undocumented to make an
+  // actually working example, apologies :)
+  xcb_image_create(0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, 0, 0);
+  xcb_disconnect(connection);
+}
+
+#  endif
+
+#  ifdef HAVE_X11_xcb_keysyms
+#    include <xcb/xcb_keysyms.h>
+
+static void test_xcb_keysyms(void)
+{
+  int screen_nbr;
+  xcb_connection_t* connection = xcb_connect(NULL, &screen_nbr);
+  xcb_key_symbols_t* symbols = xcb_key_symbols_alloc(connection);
+  if (symbols != NULL)
+    xcb_key_symbols_free(symbols);
+  xcb_disconnect(connection);
+}
+
+#  endif
+
+#  ifdef HAVE_X11_xcb_present
+#    include <xcb/present.h>
+
+static void test_xcb_present(void)
+{
+  int screen_nbr;
+  xcb_connection_t* connection = xcb_connect(NULL, &screen_nbr);
+  xcb_present_query_version_cookie_t cookie =
+    xcb_present_query_version(connection, 0, 0);
   xcb_disconnect(connection);
 }
 
@@ -367,6 +542,76 @@ static void test_xcb_randr(void)
 
 #  endif
 
+#  ifdef HAVE_X11_xcb_record
+#    include <xcb/record.h>
+
+static void test_xcb_record(void)
+{
+  int screen_nbr;
+  xcb_connection_t* connection = xcb_connect(NULL, &screen_nbr);
+  xcb_record_query_version_cookie_t cookie =
+    xcb_record_query_version(connection, 0, 0);
+  xcb_disconnect(connection);
+}
+
+#  endif
+
+#  ifdef HAVE_X11_xcb_render
+#    include <xcb/render.h>
+
+static void test_xcb_render(void)
+{
+  int screen_nbr;
+  xcb_connection_t* connection = xcb_connect(NULL, &screen_nbr);
+  xcb_render_query_version_cookie_t cookie =
+    xcb_render_query_version(connection, 0, 0);
+  xcb_disconnect(connection);
+}
+
+#  endif
+
+#  ifdef HAVE_X11_xcb_render_util
+#    include <xcb/xcb_renderutil.h>
+
+static void test_xcb_render_util(void)
+{
+  int screen_nbr;
+  xcb_connection_t* connection = xcb_connect(NULL, &screen_nbr);
+  const xcb_render_query_version_reply_t* cookie =
+    xcb_render_util_query_version(connection);
+  xcb_disconnect(connection);
+}
+
+#  endif
+
+#  ifdef HAVE_X11_xcb_res
+#    include <xcb/res.h>
+
+static void test_xcb_res(void)
+{
+  int screen_nbr;
+  xcb_connection_t* connection = xcb_connect(NULL, &screen_nbr);
+  xcb_res_query_version_cookie_t cookie =
+    xcb_res_query_version(connection, 0, 0);
+  xcb_disconnect(connection);
+}
+
+#  endif
+
+#  ifdef HAVE_X11_xcb_screensaver
+#    include <xcb/screensaver.h>
+
+static void test_xcb_screensaver(void)
+{
+  int screen_nbr;
+  xcb_connection_t* connection = xcb_connect(NULL, &screen_nbr);
+  xcb_screensaver_query_version_cookie_t cookie =
+    xcb_screensaver_query_version(connection, 0, 0);
+  xcb_disconnect(connection);
+}
+
+#  endif
+
 #  ifdef HAVE_X11_xcb_shape
 #    include <xcb/shape.h>
 
@@ -381,7 +626,31 @@ static void test_xcb_shape(void)
 
 #  endif
 
-#
+#  ifdef HAVE_X11_xcb_shm
+#    include <xcb/shm.h>
+
+static void test_xcb_shm(void)
+{
+  int screen_nbr;
+  xcb_connection_t* connection = xcb_connect(NULL, &screen_nbr);
+  xcb_shm_query_version_cookie_t cookie = xcb_shm_query_version(connection);
+  xcb_disconnect(connection);
+}
+
+#  endif
+
+#  ifdef HAVE_X11_xcb_sync
+#    include <xcb/sync.h>
+
+static void test_xcb_sync(void)
+{
+  int screen_nbr;
+  xcb_connection_t* connection = xcb_connect(NULL, &screen_nbr);
+  xcb_sync_initialize_cookie_t cookie = xcb_sync_initialize(connection, 0, 0);
+  xcb_disconnect(connection);
+}
+
+#  endif
 
 #  ifdef HAVE_X11_xcb_util
 #    include <xcb/xcb_aux.h>
@@ -396,6 +665,20 @@ static void test_xcb_util(void)
 
 #  endif
 
+#  ifdef HAVE_X11_xcb_xf86dri
+#    include <xcb/xf86dri.h>
+
+static void test_xcb_xf86dri(void)
+{
+  int screen_nbr;
+  xcb_connection_t* connection = xcb_connect(NULL, &screen_nbr);
+  xcb_xf86dri_query_version_cookie_t cookie =
+    xcb_xf86dri_query_version(connection);
+  xcb_disconnect(connection);
+}
+
+#  endif
+
 #  ifdef HAVE_X11_xcb_xfixes
 #    include <xcb/xfixes.h>
 
@@ -404,6 +687,48 @@ static void test_xcb_xfixes(void)
   int screen_nbr;
   xcb_connection_t* connection = xcb_connect(NULL, &screen_nbr);
   xcb_xfixes_query_version(connection, 1, 0);
+  xcb_disconnect(connection);
+}
+
+#  endif
+
+#  ifdef HAVE_X11_xcb_xinerama
+#    include <xcb/xinerama.h>
+
+static void test_xcb_xinerama(void)
+{
+  int screen_nbr;
+  xcb_connection_t* connection = xcb_connect(NULL, &screen_nbr);
+  xcb_xinerama_query_version_cookie_t cookie =
+    xcb_xinerama_query_version(connection, 0, 0);
+  xcb_disconnect(connection);
+}
+
+#  endif
+
+#  ifdef HAVE_X11_xcb_xinput
+#    include <xcb/xinput.h>
+
+static void test_xcb_xinput(void)
+{
+  int screen_nbr;
+  xcb_connection_t* connection = xcb_connect(NULL, &screen_nbr);
+  xcb_input_xi_query_version_cookie_t cookie =
+    xcb_input_xi_query_version(connection, 0, 0);
+  xcb_disconnect(connection);
+}
+
+#  endif
+
+#  ifdef HAVE_X11_xcb_xkb
+#    include <xcb/xkb.h>
+
+static void test_xcb_xkb(void)
+{
+  int screen_nbr;
+  xcb_connection_t* connection = xcb_connect(NULL, &screen_nbr);
+  xcb_xkb_use_extension_cookie_t cookie =
+    xcb_xkb_use_extension(connection, 0, 0);
   xcb_disconnect(connection);
 }
 
@@ -436,16 +761,27 @@ static void test_xcb_xtest(void)
 
 #  endif
 
-#  ifdef HAVE_X11_xcb_keysyms
-#    include <xcb/xcb_keysyms.h>
+#  ifdef HAVE_X11_xcb_xvmc
+#    include <xcb/xvmc.h>
 
-static void test_xcb_keysyms(void)
+static void test_xcb_xvmc(void)
 {
   int screen_nbr;
   xcb_connection_t* connection = xcb_connect(NULL, &screen_nbr);
-  xcb_key_symbols_t* symbols = xcb_key_symbols_alloc(connection);
-  if (symbols != NULL)
-    xcb_key_symbols_free(symbols);
+  xcb_xvmc_query_version_cookie_t cookie = xcb_xvmc_query_version(connection);
+  xcb_disconnect(connection);
+}
+
+#  endif
+
+#  ifdef HAVE_X11_xcb_xv
+#    include <xcb/xv.h>
+
+static void test_xcb_xv(void)
+{
+  int screen_nbr;
+  xcb_connection_t* connection = xcb_connect(NULL, &screen_nbr);
+  xcb_xv_query_extension_cookie_t cookie = xcb_xv_query_extension(connection);
   xcb_disconnect(connection);
 }
 
@@ -543,25 +879,102 @@ int main(int argc, char* argv[])
 #ifdef HAVE_X11_xcb
     test_xcb,
 #endif
+#ifdef HAVE_X11_xcb_composite
+    test_xcb_composite,
+#endif
 #ifdef HAVE_X11_xcb_cursor
     test_xcb_cursor,
+#endif
+#ifdef HAVE_X11_xcb_damage
+    test_xcb_damage,
+#endif
+#ifdef HAVE_X11_xcb_dpms
+    test_xcb_dpms,
+#endif
+#ifdef HAVE_X11_xcb_dri2
+    test_xcb_dri2,
+#endif
+#ifdef HAVE_X11_xcb_dri3
+    test_xcb_dri3,
+#endif
+#ifdef HAVE_X11_xcb_errors
+    test_xcb_errors,
+#endif
+#ifdef HAVE_X11_xcb_ewmh
+    test_xcb_ewmh,
+#endif
+#ifdef HAVE_X11_xcb_glx
+    test_xcb_glx,
+#endif
+#ifdef HAVE_X11_xcb_icccm
+    test_xcb_icccm,
+#endif
+#ifdef HAVE_X11_xcb_image
+    test_xcb_image,
+#endif
+#ifdef HAVE_X11_xcb_keysyms
+    test_xcb_keysyms,
+#endif
+#ifdef HAVE_X11_xcb_present
+    test_xcb_present,
 #endif
 #ifdef HAVE_X11_xcb_randr
     test_xcb_randr,
 #endif
+#ifdef HAVE_X11_xcb_record
+    test_xcb_record,
+#endif
+#ifdef HAVE_X11_xcb_render
+    test_xcb_render,
+#endif
+#ifdef HAVE_X11_xcb_render_util
+    test_xcb_render_util,
+#endif
+#ifdef HAVE_X11_xcb_res
+    test_xcb_res,
+#endif
+#ifdef HAVE_X11_xcb_screensaver
+    test_xcb_screensaver,
+#endif
 #ifdef HAVE_X11_xcb_shape
     test_xcb_shape,
+#endif
+#ifdef HAVE_X11_xcb_shm
+    test_xcb_shm,
+#endif
+#ifdef HAVE_X11_xcb_sync
+    test_xcb_sync,
 #endif
 #ifdef HAVE_X11_xcb_util
     test_xcb_util,
 #endif
+#ifdef HAVE_X11_xcb_xf86dri
+    test_xcb_xf86dri,
+#endif
 #ifdef HAVE_X11_xcb_xfixes
     test_xcb_xfixes,
+#endif
+#ifdef HAVE_X11_xcb_xinerama
+    test_xcb_xinerama,
+#endif
+#ifdef HAVE_X11_xcb_xinput
+    test_xcb_xinput,
+#endif
+#ifdef HAVE_X11_xcb_xkb
+    test_xcb_xkb,
 #endif
 #ifdef HAVE_X11_xcb_xrm
     test_xcb_xrm,
 #endif
-
+#ifdef HAVE_X11_xcb_xtest
+    test_xcb_xtest,
+#endif
+#ifdef HAVE_X11_xcb_xvmc
+    test_xcb_xvmc,
+#endif
+#ifdef HAVE_X11_xcb_xv
+    test_xcb_xv,
+#endif
     NULL,
   };
 
