@@ -1,21 +1,7 @@
-#ifdef __cplusplus
-#  error "A C++ compiler has been selected for C."
-#endif
-
-#ifdef __CLASSIC_C__
-#  define const
-#endif
-
+#include <stdio.h>
 #include "CMakeCompilerABI.h"
 
-#ifdef __CLASSIC_C__
-int main(argc, argv)
-int argc;
-char* argv[];
-#else
-int main(int argc, char* argv[])
-#endif
-{
+int main(int argc, char* argv[]) {
   int require = 0;
   require += info_sizeof_dptr[argc];
   require += info_byte_order_big_endian[argc];
@@ -23,6 +9,6 @@ int main(int argc, char* argv[])
 #if defined(ABI_ID)
   require += info_abi[argc];
 #endif
-  (void)argv;
-  return require;
+  printf("%d\n", require);
+  return 0;
 }
