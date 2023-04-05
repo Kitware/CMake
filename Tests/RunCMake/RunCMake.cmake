@@ -11,8 +11,12 @@ foreach(
 endforeach()
 
 function(run_cmake test)
-  if(DEFINED ENV{RunCMake_TEST_FILTER} AND NOT test MATCHES "$ENV{RunCMake_TEST_FILTER}")
-    return()
+  if(DEFINED ENV{RunCMake_TEST_FILTER})
+    set(test_and_variant "${test}${RunCMake_TEST_VARIANT_DESCRIPTION}")
+    if(NOT test_and_variant MATCHES "$ENV{RunCMake_TEST_FILTER}")
+      return()
+    endif()
+    unset(test_and_variant)
   endif()
 
   set(top_src "${RunCMake_SOURCE_DIR}")
