@@ -351,6 +351,7 @@
 
 .before_script_windows_external: &before_script_windows_external
     - . .gitlab/ci/env.ps1
+    - . .gitlab/ci/python-env.ps1
 
 .cmake_build_windows:
     stage: build
