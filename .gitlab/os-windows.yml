@@ -349,6 +349,9 @@
     - . .gitlab/ci/qt-env.ps1
     - . .gitlab/ci/python-env.ps1
 
+.before_script_windows_external: &before_script_windows_external
+    - . .gitlab/ci/env.ps1
+
 .cmake_build_windows:
     stage: build
 
@@ -381,7 +384,7 @@
     stage: test-ext
 
     script:
-        - . .gitlab/ci/env.ps1
+        - *before_script_windows_external
         - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake
 
     interruptible: true
