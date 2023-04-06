@@ -33,6 +33,9 @@ using PackagePreset = cmCMakePresetsGraph::PackagePreset;
 using WorkflowPreset = cmCMakePresetsGraph::WorkflowPreset;
 using ArchToolsetStrategy = cmCMakePresetsGraph::ArchToolsetStrategy;
 using JSONHelperBuilder = cmJSONHelperBuilder;
+using ExpandMacroResult = cmCMakePresetsGraphInternal::ExpandMacroResult;
+using MacroExpander = cmCMakePresetsGraphInternal::MacroExpander;
+using cmCMakePresetsGraphInternal::ExpandMacros;
 
 constexpr int MIN_VERSION = 1;
 constexpr int MAX_VERSION = 7;
@@ -688,7 +691,39 @@ bool cmCMakePresetsGraph::ReadJSONFile(const std::string& filename,
     return true;
   };
 
-  for (auto include : presets.Include) {
+  std::vector<MacroExpander> macroExpanders;
+
+  MacroExpander environmentMacroExpander =
+    [](const std::string& macroNamespace, const std::string& macroName,
+       std::string& expanded, int /*version*/) -> ExpandMacroResult {
+    if (macroNamespace == "penv") {
+      if (macroName.empty()) {
+        return ExpandMacroResult::Error;
+      }
+      if (cm::optional<std::string> value =
+            cmSystemTools::GetEnvVar(macroName)) {
+        expanded += *value;
+      }
+      return ExpandMacroResult::Ok;
+    }
+
+    return ExpandMacroResult::Ignore;
+  };
+
+  macroExpanders.push_back(environmentMacroExpander);
+
+  for (Json::ArrayIndex i = 0; i < presets.Include.size(); ++i) {
+    auto include = presets.Include[i];
+
+    // Support for macro expansion in includes added in version 7
+    if (v >= 7) {
+      if (ExpandMacros(include, macroExpanders, v) != ExpandMacroResult::Ok) {
+        cmCMakePresetErrors::INVALID_INCLUDE(&root["include"][i],
+                                             &this->parseState);
+        return false;
+      }
+    }
+
     if (!cmSystemTools::FileIsFullPath(include)) {
       auto directory = cmSystemTools::GetFilenamePath(filename);
       include = cmStrCat(directory, '/', include);

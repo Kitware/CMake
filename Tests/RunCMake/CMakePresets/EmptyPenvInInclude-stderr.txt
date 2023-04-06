@@ -1,0 +1,5 @@
+^CMake Error: Could not read presets from [^
+]*/Tests/RunCMake/CMakePresets/EmptyPenvInInclude:
+Error: @3,15: Invalid "include" field
+  "include": \["\$penv\{\}"\],
+              \^$

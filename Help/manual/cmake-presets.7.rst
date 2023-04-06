@@ -133,6 +133,9 @@ Files directly or indirectly included from ``CMakePresets.json`` should be
 guaranteed to be provided by the project. ``CMakeUserPresets.json`` may
 include files from anywhere.
 
+Starting from version ``7``, the ``include`` field supports
+`macro expansion`_, but only ``$penv{}`` macro expansion.
+
 Configure Preset
 ^^^^^^^^^^^^^^^^
 

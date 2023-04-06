@@ -48,6 +48,7 @@ template <typename T>
 using PresetPair = cmCMakePresetsGraph::PresetPair<T>;
 using ExpandMacroResult = cmCMakePresetsGraphInternal::ExpandMacroResult;
 using MacroExpander = cmCMakePresetsGraphInternal::MacroExpander;
+using cmCMakePresetsGraphInternal::ExpandMacros;
 
 void InheritString(std::string& child, const std::string& parent)
 {
@@ -203,14 +204,6 @@ bool IsValidMacroNamespace(const std::string& str)
 ExpandMacroResult VisitEnv(std::string& value, CycleStatus& status,
                            const std::vector<MacroExpander>& macroExpanders,
                            int version);
-ExpandMacroResult ExpandMacros(
-  std::string& out, const std::vector<MacroExpander>& macroExpanders,
-  int version);
-ExpandMacroResult ExpandMacro(std::string& out,
-                              const std::string& macroNamespace,
-                              const std::string& macroName,
-                              const std::vector<MacroExpander>& macroExpanders,
-                              int version);
 
 bool ExpandMacros(const cmCMakePresetsGraph& graph,
                   const ConfigurePreset& preset,
@@ -514,8 +507,9 @@ ExpandMacroResult VisitEnv(std::string& value, CycleStatus& status,
   status = CycleStatus::Verified;
   return ExpandMacroResult::Ok;
 }
+}
 
-ExpandMacroResult ExpandMacros(
+ExpandMacroResult cmCMakePresetsGraphInternal::ExpandMacros(
   std::string& out, const std::vector<MacroExpander>& macroExpanders,
   int version)
 {
@@ -594,11 +588,10 @@ ExpandMacroResult ExpandMacros(
   return ExpandMacroResult::Ok;
 }
 
-ExpandMacroResult ExpandMacro(std::string& out,
-                              const std::string& macroNamespace,
-                              const std::string& macroName,
-                              const std::vector<MacroExpander>& macroExpanders,
-                              int version)
+ExpandMacroResult cmCMakePresetsGraphInternal::ExpandMacro(
+  std::string& out, const std::string& macroNamespace,
+  const std::string& macroName,
+  const std::vector<MacroExpander>& macroExpanders, int version)
 {
   for (auto const& macroExpander : macroExpanders) {
     auto result = macroExpander(macroNamespace, macroName, out, version);
@@ -614,6 +607,7 @@ ExpandMacroResult ExpandMacro(std::string& out,
   return ExpandMacroResult::Error;
 }
 
+namespace {
 template <typename T>
 bool SetupWorkflowConfigurePreset(const T& preset,
                                   const ConfigurePreset*& configurePreset,

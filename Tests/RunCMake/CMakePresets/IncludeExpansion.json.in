@@ -1,0 +1,10 @@
+{
+  "version": 7,
+  "include": ["$penv{TEST_ENV_INCLUDE_DIR}/IncludeCommon.json"],
+  "configurePresets": [
+    {
+      "name": "Include",
+      "inherits": ["IncludeCommon"]
+    }
+  ]
+}
