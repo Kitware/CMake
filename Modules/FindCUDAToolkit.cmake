@@ -1036,11 +1036,19 @@ if(CUDAToolkit_FOUND)
     endif()
   endif()
 
+  if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 12.0.0)
+    _CUDAToolkit_find_and_add_import_lib(nvJitLink)
+    _CUDAToolkit_find_and_add_import_lib(nvJitLink_static DEPS cudart_static_deps)
+  endif()
+
   _CUDAToolkit_find_and_add_import_lib(culibos) # it's a static library
-  foreach (cuda_lib cublasLt cufft curand cusparse nppc nvjpeg)
+  foreach (cuda_lib cublasLt cufft curand nppc nvjpeg)
     _CUDAToolkit_find_and_add_import_lib(${cuda_lib})
     _CUDAToolkit_find_and_add_import_lib(${cuda_lib}_static DEPS culibos)
   endforeach()
+
+  _CUDAToolkit_find_and_add_import_lib(cusparse DEPS nvJitLink)
+  _CUDAToolkit_find_and_add_import_lib(cusparse_static DEPS nvJitLink_static culibos)
 
   if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 11.0.0)
     # cublas depends on cublasLt
@@ -1132,11 +1140,6 @@ if(CUDAToolkit_FOUND)
         target_link_libraries(CUDA::nvptxcompiler_static INTERFACE Threads::Threads)
       endif()
     endif()
-  endif()
-
-  if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 12.0.0)
-    _CUDAToolkit_find_and_add_import_lib(nvJitLink DEPS cuda_driver)
-    _CUDAToolkit_find_and_add_import_lib(nvJitLink_static DEPS cuda_driver)
   endif()
 
   _CUDAToolkit_find_and_add_import_lib(nvrtc_builtins DEPS cuda_driver)
