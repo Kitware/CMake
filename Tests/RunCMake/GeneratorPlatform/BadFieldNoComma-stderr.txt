@@ -1,0 +1,11 @@
+^CMake Error at CMakeLists.txt:[0-9]+ \(project\):
+  Generator
+
+    Visual Studio [^
+]+
+
+  given platform specification
+
+    Test Platform,nocomma
+
+  that contains a field after the first ',' with no '='\.$

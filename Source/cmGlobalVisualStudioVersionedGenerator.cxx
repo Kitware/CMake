@@ -885,7 +885,8 @@ cmGlobalVisualStudioVersionedGenerator::FindAuxToolset(
   return AuxToolset::PropsMissing;
 }
 
-bool cmGlobalVisualStudioVersionedGenerator::InitializeWindows(cmMakefile* mf)
+bool cmGlobalVisualStudioVersionedGenerator::InitializePlatformWindows(
+  cmMakefile* mf)
 {
   // If the Win 8.1 SDK is installed then we can select a SDK matching
   // the target Windows version.
@@ -894,13 +895,14 @@ bool cmGlobalVisualStudioVersionedGenerator::InitializeWindows(cmMakefile* mf)
     if (this->Version >= cmGlobalVisualStudioGenerator::VSVersion::VS16 &&
         !cmSystemTools::VersionCompareGreater(this->SystemVersion, "8.1")) {
       this->SetWindowsTargetPlatformVersion("8.1", mf);
-      return true;
+      return this->VerifyNoGeneratorPlatformVersion(
+        mf, "with the Windows 8.1 SDK installed");
     }
-    return cmGlobalVisualStudio14Generator::InitializeWindows(mf);
+    return cmGlobalVisualStudio14Generator::InitializePlatformWindows(mf);
   }
   // Otherwise we must choose a Win 10 SDK even if we are not targeting
   // Windows 10.
-  return this->SelectWindows10SDK(mf, false);
+  return this->SelectWindows10SDK(mf);
 }
 
 bool cmGlobalVisualStudioVersionedGenerator::SelectWindowsStoreToolset(

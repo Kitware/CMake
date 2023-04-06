@@ -12,6 +12,7 @@
 #include "cmGlobalVisualStudioGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmPolicies.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
@@ -137,12 +138,36 @@ bool cmGlobalVisualStudio14Generator::MatchesGeneratorName(
   return false;
 }
 
-bool cmGlobalVisualStudio14Generator::InitializeWindows(cmMakefile* mf)
+bool cmGlobalVisualStudio14Generator::InitializePlatformWindows(cmMakefile* mf)
 {
   if (cmHasLiteralPrefix(this->SystemVersion, "10.0")) {
-    return this->SelectWindows10SDK(mf, false);
+    return this->SelectWindows10SDK(mf);
   }
-  return true;
+  return this->VerifyNoGeneratorPlatformVersion(mf);
+}
+
+bool cmGlobalVisualStudio14Generator::VerifyNoGeneratorPlatformVersion(
+  cmMakefile* mf, cm::optional<std::string> reason) const
+{
+  if (!this->GeneratorPlatformVersion) {
+    return true;
+  }
+  std::ostringstream e;
+  /* clang-format off */
+  e <<
+    "Generator\n"
+    "  " << this->GetName() << "\n"
+    "given platform specification containing a\n"
+    "  version=" << *this->GeneratorPlatformVersion << "\n"
+    "field.  The version field is not supported when targeting\n"
+    "  " << this->SystemName << " " << this->SystemVersion << "\n"
+    ;
+  /* clang-format on */
+  if (reason) {
+    e << *reason << ".";
+  }
+  mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+  return false;
 }
 
 bool cmGlobalVisualStudio14Generator::InitializeWindowsStore(cmMakefile* mf)
@@ -162,9 +187,6 @@ bool cmGlobalVisualStudio14Generator::InitializeWindowsStore(cmMakefile* mf)
     mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return false;
   }
-  if (cmHasLiteralPrefix(this->SystemVersion, "10.0")) {
-    return this->SelectWindows10SDK(mf, true);
-  }
   return true;
 }
 
@@ -173,19 +195,51 @@ bool cmGlobalVisualStudio14Generator::InitializeAndroid(cmMakefile*)
   return true;
 }
 
-bool cmGlobalVisualStudio14Generator::SelectWindows10SDK(cmMakefile* mf,
-                                                         bool required)
+bool cmGlobalVisualStudio14Generator::ProcessGeneratorPlatformField(
+  std::string const& key, std::string const& value)
 {
+  if (key == "version") {
+    this->GeneratorPlatformVersion = value;
+    return true;
+  }
+  return false;
+}
+
+bool cmGlobalVisualStudio14Generator::SelectWindows10SDK(cmMakefile* mf)
+{
+  if (this->GeneratorPlatformVersion &&
+      this->GeneratorPlatformVersion->empty()) {
+    mf->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("Generator\n  ", this->GetName(),
+               "\ngiven platform specification with empty\n  version=\n"
+               "field."));
+    return false;
+  }
+
   // Find the default version of the Windows 10 SDK.
   std::string const version = this->GetWindows10SDKVersion(mf);
 
-  if (required && version.empty()) {
-    std::ostringstream e;
-    e << "Could not find an appropriate version of the Windows 10 SDK"
-      << " installed on this machine";
-    mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
-    return false;
+  if (version.empty()) {
+    if (this->GeneratorPlatformVersion) {
+      mf->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("Generator\n  ", this->GetName(),
+                 "\ngiven platform specification with\n  version=",
+                 *this->GeneratorPlatformVersion,
+                 "\nfield, but no Windows SDK with that version was found."));
+      return false;
+    }
+
+    if (this->SystemName == "WindowsStore") {
+      mf->IssueMessage(
+        MessageType::FATAL_ERROR,
+        "Could not find an appropriate version of the Windows 10 SDK"
+        " installed on this machine");
+      return false;
+    }
   }
+
   this->SetWindowsTargetPlatformVersion(version, mf);
   return true;
 }
@@ -302,6 +356,16 @@ std::string cmGlobalVisualStudio14Generator::GetWindows10SDKVersion(
   cmMakefile* mf)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
+  // Accept specific version requests as-is.
+  if (this->GeneratorPlatformVersion) {
+    std::string const& ver = *this->GeneratorPlatformVersion;
+
+    // VS 2019 and above support specifying plain "10.0".
+    if (this->Version >= VSVersion::VS16 && ver == "10.0") {
+      return ver;
+    }
+  }
+
   std::vector<std::string> win10Roots;
 
   {
@@ -360,10 +424,35 @@ std::string cmGlobalVisualStudio14Generator::GetWindows10SDKVersion(
   // Sort the results to make sure we select the most recent one.
   std::sort(sdks.begin(), sdks.end(), cmSystemTools::VersionCompareGreater);
 
-  // Look for a SDK exactly matching the requested target version.
-  for (std::string const& i : sdks) {
-    if (cmSystemTools::VersionCompareEqual(i, this->SystemVersion)) {
-      return i;
+  // Look for a SDK exactly matching the requested version, if any.
+  if (this->GeneratorPlatformVersion) {
+    for (std::string const& i : sdks) {
+      if (cmSystemTools::VersionCompareEqual(
+            i, *this->GeneratorPlatformVersion)) {
+        return i;
+      }
+    }
+    // An exact version was requested but not found.
+    // Our caller will issue the error message.
+    return std::string();
+  }
+
+  if (mf->GetPolicyStatus(cmPolicies::CMP0149) == cmPolicies::NEW) {
+    if (cm::optional<std::string> const envVer =
+          cmSystemTools::GetEnvVar("WindowsSDKVersion")) {
+      // Look for a SDK exactly matching the environment variable.
+      for (std::string const& i : sdks) {
+        if (cmSystemTools::VersionCompareEqual(i, *envVer)) {
+          return i;
+        }
+      }
+    }
+  } else {
+    // Look for a SDK exactly matching the target Windows version.
+    for (std::string const& i : sdks) {
+      if (cmSystemTools::VersionCompareEqual(i, this->SystemVersion)) {
+        return i;
+      }
     }
   }
 

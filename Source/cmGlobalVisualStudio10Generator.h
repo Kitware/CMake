@@ -183,6 +183,11 @@ protected:
   virtual bool InitializeTegraAndroid(cmMakefile* mf);
   virtual bool InitializeAndroid(cmMakefile* mf);
 
+  bool InitializePlatform(cmMakefile* mf) override;
+  virtual bool InitializePlatformWindows(cmMakefile* mf);
+  virtual bool VerifyNoGeneratorPlatformVersion(
+    cmMakefile* mf, cm::optional<std::string> reason = cm::nullopt) const;
+
   virtual bool ProcessGeneratorToolsetField(std::string const& key,
                                             std::string const& value);
 

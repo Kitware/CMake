@@ -525,6 +525,30 @@ bool cmGlobalVisualStudio10Generator::InitializeAndroid(cmMakefile* mf)
   return false;
 }
 
+bool cmGlobalVisualStudio10Generator::InitializePlatform(cmMakefile* mf)
+{
+  if (this->SystemName == "Windows" || this->SystemName == "WindowsStore") {
+    if (!this->InitializePlatformWindows(mf)) {
+      return false;
+    }
+  } else if (!this->SystemName.empty() &&
+             !this->VerifyNoGeneratorPlatformVersion(mf)) {
+    return false;
+  }
+  return this->cmGlobalVisualStudio8Generator::InitializePlatform(mf);
+}
+
+bool cmGlobalVisualStudio10Generator::InitializePlatformWindows(cmMakefile*)
+{
+  return true;
+}
+
+bool cmGlobalVisualStudio10Generator::VerifyNoGeneratorPlatformVersion(
+  cmMakefile*, cm::optional<std::string>) const
+{
+  return true;
+}
+
 bool cmGlobalVisualStudio10Generator::SelectWindowsPhoneToolset(
   std::string& toolset) const
 {

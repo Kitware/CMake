@@ -94,7 +94,9 @@ bool cmGlobalVisualStudio8Generator::SetGeneratorPlatform(std::string const& p,
     return this->cmGlobalVisualStudio7Generator::SetGeneratorPlatform(p, mf);
   }
 
-  this->GeneratorPlatform = p;
+  if (!this->ParseGeneratorPlatform(p, mf)) {
+    return false;
+  }
 
   // FIXME: Add CMAKE_GENERATOR_PLATFORM field to set the framework.
   // For now, just report the generator's default, if any.
@@ -114,10 +116,98 @@ bool cmGlobalVisualStudio8Generator::SetGeneratorPlatform(std::string const& p,
                       *targetFrameworkTargetsVersion);
   }
 
+  if (!this->InitializePlatform(mf)) {
+    return false;
+  }
+
   // The generator name does not contain the platform name, and so supports
   // explicit platform specification.  We handled that above, so pass an
   // empty platform name to our base class implementation so it does not error.
   return this->cmGlobalVisualStudio7Generator::SetGeneratorPlatform("", mf);
+}
+
+bool cmGlobalVisualStudio8Generator::ParseGeneratorPlatform(
+  std::string const& p, cmMakefile* mf)
+{
+  this->GeneratorPlatform.clear();
+
+  std::vector<std::string> const fields = cmTokenize(p, ",");
+  auto fi = fields.begin();
+  if (fi == fields.end()) {
+    return true;
+  }
+
+  // The first field may be the VS platform.
+  if (fi->find('=') == fi->npos) {
+    this->GeneratorPlatform = *fi;
+    ++fi;
+  }
+
+  std::set<std::string> handled;
+
+  // The rest of the fields must be key=value pairs.
+  for (; fi != fields.end(); ++fi) {
+    std::string::size_type pos = fi->find('=');
+    if (pos == fi->npos) {
+      std::ostringstream e;
+      /* clang-format off */
+      e <<
+        "Generator\n"
+        "  " << this->GetName() << "\n"
+        "given platform specification\n"
+        "  " << p << "\n"
+        "that contains a field after the first ',' with no '='."
+        ;
+      /* clang-format on */
+      mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+      return false;
+    }
+    std::string const key = fi->substr(0, pos);
+    std::string const value = fi->substr(pos + 1);
+    if (!handled.insert(key).second) {
+      std::ostringstream e;
+      /* clang-format off */
+      e <<
+        "Generator\n"
+        "  " << this->GetName() << "\n"
+        "given platform specification\n"
+        "  " << p << "\n"
+        "that contains duplicate field key '" << key << "'."
+        ;
+      /* clang-format on */
+      mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+      return false;
+    }
+    if (!this->ProcessGeneratorPlatformField(key, value)) {
+      std::ostringstream e;
+      /* clang-format off */
+      e <<
+        "Generator\n"
+        "  " << this->GetName() << "\n"
+        "given platform specification\n"
+        "  " << p << "\n"
+        "that contains invalid field '" << *fi << "'."
+        ;
+      /* clang-format on */
+      mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+      return false;
+    }
+  }
+
+  return true;
+}
+
+bool cmGlobalVisualStudio8Generator::ProcessGeneratorPlatformField(
+  std::string const& key, std::string const& value)
+{
+  static_cast<void>(key);
+  static_cast<void>(value);
+  return false;
+}
+
+bool cmGlobalVisualStudio8Generator::InitializePlatform(cmMakefile*)
+{
+  return true;
 }
 
 cm::optional<std::string> const&

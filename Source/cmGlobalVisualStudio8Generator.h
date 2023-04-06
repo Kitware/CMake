@@ -60,6 +60,11 @@ protected:
   cmGlobalVisualStudio8Generator(cmake* cm, const std::string& name,
                                  std::string const& platformInGeneratorName);
 
+  virtual bool InitializePlatform(cmMakefile* mf);
+
+  virtual bool ProcessGeneratorPlatformField(std::string const& key,
+                                             std::string const& value);
+
   void AddExtraIDETargets() override;
 
   std::string FindDevEnvCommand() override;
@@ -96,4 +101,7 @@ protected:
   cm::optional<std::string> DefaultTargetFrameworkVersion;
   cm::optional<std::string> DefaultTargetFrameworkIdentifier;
   cm::optional<std::string> DefaultTargetFrameworkTargetsVersion;
+
+private:
+  bool ParseGeneratorPlatform(std::string const& is, cmMakefile* mf);
 };
