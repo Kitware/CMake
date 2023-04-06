@@ -1051,7 +1051,7 @@ t:windows-vs2019-x64:
 t:windows-vs2022-x64-nmake:
     extends:
         - .windows_vs2022_x64_nmake
-        - .cmake_test_windows_nmake
+        - .cmake_test_windows_external
         - .windows_x86_64_tags_concurrent_vs2022
         - .cmake_junit_artifacts
         - .run_dependent
@@ -1065,7 +1065,7 @@ t:windows-vs2022-x64-nmake:
 t:windows-vs2022-x64-jom:
     extends:
         - .windows_vs2022_x64_jom
-        - .cmake_test_windows_jom
+        - .cmake_test_windows_external
         - .windows_x86_64_tags_concurrent_vs2022
         - .cmake_junit_artifacts
         - .run_dependent
@@ -1079,7 +1079,7 @@ t:windows-vs2022-x64-jom:
 t:windows-borland5.5:
     extends:
         - .windows_borland5.5
-        - .cmake_test_windows_borland
+        - .cmake_test_windows_external
         - .windows_x86_64_tags_concurrent
         - .cmake_junit_artifacts
         - .run_dependent
@@ -1093,7 +1093,7 @@ t:windows-borland5.5:
 t:windows-borland5.8:
     extends:
         - .windows_borland5.8
-        - .cmake_test_windows_borland
+        - .cmake_test_windows_external
         - .windows_x86_64_tags_concurrent
         - .cmake_junit_artifacts
         - .run_dependent
@@ -1195,7 +1195,7 @@ t:mingw_osdn_io-msys_makefiles:
 t:windows-msvc-v71-nmake:
     extends:
         - .windows_msvc_v71_nmake
-        - .cmake_test_windows_msvc
+        - .cmake_test_windows_external
         - .windows_x86_64_tags_concurrent
         - .cmake_junit_artifacts
         - .run_dependent
@@ -1209,7 +1209,7 @@ t:windows-msvc-v71-nmake:
 t:windows-openwatcom1.9:
     extends:
         - .windows_openwatcom1.9
-        - .cmake_test_windows_openwatcom
+        - .cmake_test_windows_external
         - .windows_x86_64_tags_concurrent
         - .cmake_junit_artifacts
         - .run_dependent
