@@ -30,6 +30,7 @@ set(CMakeLib_TESTS
   testCMExtMemory.cxx
   testCMExtAlgorithm.cxx
   testCMExtEnumSet.cxx
+  testList.cxx
   )
 if (CMake_TEST_FILESYSTEM_PATH OR NOT CMake_HAVE_CXX_FILESYSTEM)
   list(APPEND CMakeLib_TESTS testCMFilesystemPath.cxx)

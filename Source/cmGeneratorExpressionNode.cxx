@@ -12,6 +12,7 @@
 #include <memory>
 #include <set>
 #include <sstream>
+#include <stdexcept>
 #include <unordered_map>
 #include <utility>
 
@@ -25,7 +26,6 @@
 #include "cmsys/RegularExpression.hxx"
 #include "cmsys/String.h"
 
-#include "cmAlgorithms.h"
 #include "cmCMakePath.h"
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratorExpression.h"
@@ -35,6 +35,7 @@
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmLinkItem.h"
+#include "cmList.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -291,18 +292,18 @@ static const struct InListNode : public cmGeneratorExpressionNode
     const GeneratorExpressionContent* /*content*/,
     cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
   {
-    std::vector<std::string> values;
-    std::vector<std::string> checkValues;
+    cmList values;
+    cmList checkValues;
     bool check = false;
     switch (context->LG->GetPolicyStatus(cmPolicies::CMP0085)) {
       case cmPolicies::WARN:
         if (parameters.front().empty()) {
           check = true;
-          cmExpandList(parameters[1], checkValues, true);
+          checkValues.assign(parameters[1], cmList::EmptyElements::Yes);
         }
         CM_FALLTHROUGH;
       case cmPolicies::OLD:
-        cmExpandList(parameters[1], values);
+        values.assign(parameters[1]);
         if (check && values != checkValues) {
           std::ostringstream e;
           e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0085)
@@ -319,11 +320,11 @@ static const struct InListNode : public cmGeneratorExpressionNode
       case cmPolicies::REQUIRED_IF_USED:
       case cmPolicies::REQUIRED_ALWAYS:
       case cmPolicies::NEW:
-        cmExpandList(parameters[1], values, true);
+        values.assign(parameters[1], cmList::EmptyElements::Yes);
         break;
     }
 
-    return cm::contains(values, parameters.front()) ? "1" : "0";
+    return values.find(parameters.front()) != cmList::npos ? "1" : "0";
   }
 } inListNode;
 
@@ -352,24 +353,17 @@ static const struct FilterNode : public cmGeneratorExpressionNode
       return {};
     }
 
-    const bool exclude = parameters[1] == "EXCLUDE";
-
-    cmsys::RegularExpression re;
-    if (!re.compile(parameters[2])) {
+    try {
+      return cmList{ parameters.front(), cmList::EmptyElements::Yes }
+        .filter(parameters[2],
+                parameters[1] == "EXCLUDE" ? cmList::FilterMode::EXCLUDE
+                                           : cmList::FilterMode::INCLUDE)
+        .to_string();
+    } catch (std::invalid_argument&) {
       reportError(context, content->GetOriginalExpression(),
                   "$<FILTER:...> failed to compile regex");
       return {};
     }
-
-    std::vector<std::string> values;
-    std::vector<std::string> result;
-    cmExpandList(parameters.front(), values, true);
-
-    std::copy_if(values.cbegin(), values.cend(), std::back_inserter(result),
-                 [&re, exclude](std::string const& input) {
-                   return exclude ^ re.find(input);
-                 });
-    return cmJoin(cmMakeRange(result.cbegin(), result.cend()), ";");
   }
 } filterNode;
 
@@ -391,11 +385,7 @@ static const struct RemoveDuplicatesNode : public cmGeneratorExpressionNode
         "$<REMOVE_DUPLICATES:...> expression requires one parameter");
     }
 
-    std::vector<std::string> values = cmExpandedList(parameters.front(), true);
-
-    auto valuesEnd = cmRemoveDuplicates(values);
-    auto valuesBegin = values.cbegin();
-    return cmJoin(cmMakeRange(valuesBegin, valuesEnd), ";");
+    return cmList{ parameters.front() }.remove_duplicates().to_string();
   }
 
 } removeDuplicatesNode;
@@ -1500,8 +1490,7 @@ static const struct JoinNode : public cmGeneratorExpressionNode
     const GeneratorExpressionContent* /*content*/,
     cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
   {
-    std::vector<std::string> list = cmExpandedList(parameters.front());
-    return cmJoin(list, parameters[1]);
+    return cmList{ parameters.front() }.join(parameters[1]);
   }
 } joinNode;
 
