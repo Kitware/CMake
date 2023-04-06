@@ -6,7 +6,7 @@ List of options to pass to the compiler.
 This property holds a :ref:`semicolon-separated list <CMake Language Lists>`
 of options specified so far for its target.  Use the
 :command:`target_compile_options` command to append more options.
-The options will be added after after flags in the
+The options will be added after flags in the
 :variable:`CMAKE_<LANG>_FLAGS` and :variable:`CMAKE_<LANG>_FLAGS_<CONFIG>`
 variables, but before those propagated from dependencies by the
 :prop_tgt:`INTERFACE_COMPILE_OPTIONS` property.
