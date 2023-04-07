@@ -880,7 +880,7 @@ cmake_try_run ()
   echo "----------  file   -----------------------"
   cat "${TESTFILE}"
   echo "------------------------------------------"
-  "${COMPILER}" ${FLAGS} "${TESTFILE}" -o "${TMPFILE}"
+  ${COMPILER} ${FLAGS} "${TESTFILE}" -o "${TMPFILE}"
   RES=$?
   if test "${RES}" -ne "0"; then
     echo "Test failed to compile"
@@ -1435,13 +1435,13 @@ cd "${cmake_bootstrap_dir}/${TMPFILE}"
 if test "${cmake_bootstrap_generator}" = "Ninja"; then
   echo '
 rule cc
-  command = "'"${cmake_c_compiler}"'" '"${cmake_ld_flags} ${cmake_c_flags}"' -o $out $in
+  command = '"${cmake_c_compiler}"' '"${cmake_ld_flags} ${cmake_c_flags}"' -o $out $in
 build test: cc test.c
 '>"build.ninja"
 else
   echo '
 test: test.c
-	"'"${cmake_c_compiler}"'" '"${cmake_ld_flags} ${cmake_c_flags}"' -o test test.c
+	'"${cmake_c_compiler}"' '"${cmake_ld_flags} ${cmake_c_flags}"' -o test test.c
 '>"Makefile"
 fi
 echo '
