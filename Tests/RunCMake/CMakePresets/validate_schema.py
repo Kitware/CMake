@@ -4,13 +4,13 @@ import os.path
 import sys
 
 
-with open(sys.argv[1], "rb") as f:
-    contents = json.loads(f.read().decode("utf-8-sig"))
+with open(sys.argv[1], "r", encoding="utf-8-sig") as f:
+    contents = json.load(f)
 
 schema_file = os.path.join(
         os.path.dirname(__file__),
         "..", "..", "..", "Help", "manual", "presets", "schema.json")
-with open(schema_file) as f:
+with open(schema_file, "r", encoding="utf-8") as f:
     schema = json.load(f)
 
 jsonschema.validate(contents, schema)
