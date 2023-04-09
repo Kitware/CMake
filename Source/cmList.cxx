@@ -82,7 +82,9 @@ cmList& cmList::filter(cm::string_view pattern, FilterMode mode)
 {
   cmsys::RegularExpression regex(std::string{ pattern });
   if (!regex.is_valid()) {
-    throw std::invalid_argument(cmStrCat("invalid regex: ", pattern));
+    throw std::invalid_argument(
+      cmStrCat("sub-command FILTER, mode REGEX failed to compile regex \"",
+               pattern, "\"."));
   }
 
   auto it = std::remove_if(this->Values.begin(), this->Values.end(),
