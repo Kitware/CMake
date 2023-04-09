@@ -242,12 +242,13 @@ class CMakeTransform(Transform):
            The cmake --help-*-list commands also depend on this convention.
            Return the title or False if the document file does not exist.
         """
-        env = self.document.settings.env
+        settings = self.document.settings
+        env = settings.env
         title = self.titles.get(docname)
         if title is None:
             fname = os.path.join(env.srcdir, docname+'.rst')
             try:
-                f = open(fname, 'r')
+                f = open(fname, 'r', encoding=settings.input_encoding)
             except IOError:
                 title = False
             else:
