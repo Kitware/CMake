@@ -712,7 +712,7 @@ int main(int argc, const char* argv[])
 #endif
     return r;
   }
-  if (argc > 2 && strcmp(argv[1], "0") == 0) {
+  if (argc > 2 && strcmp(argv[1], "0") == 0) { // CodeQL [SM02345] False Positive: CodeQL wrongly detected because the check for argc confirms argv[1] isn't NULL
     /* This is the special debugging test to run a given command
        line.  */
     const char** cmd = argv + 2;
