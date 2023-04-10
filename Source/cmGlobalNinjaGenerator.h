@@ -169,6 +169,7 @@ public:
                            const std::string& comment = "");
 
   bool IsGCCOnWindows() const { return this->UsingGCCOnWindows; }
+  void MarkAsGCCOnWindows() { this->UsingGCCOnWindows = true; }
 
   cmGlobalNinjaGenerator(cmake* cm);
 

@@ -78,9 +78,17 @@ if(CMAKE_GENERATOR STREQUAL "Xcode")
   set(CMAKE_Swift_FLAGS_MINSIZEREL_INIT "-Osize")
 else()
   set(CMAKE_Swift_FLAGS_DEBUG_INIT "-Onone -g -incremental")
-  set(CMAKE_Swift_FLAGS_RELEASE_INIT "-O -wmo")
-  set(CMAKE_Swift_FLAGS_RELWITHDEBINFO_INIT "-O -g -wmo")
-  set(CMAKE_Swift_FLAGS_MINSIZEREL_INIT "-Osize -wmo")
+  set(CMAKE_Swift_FLAGS_RELEASE_INIT "-O")
+  set(CMAKE_Swift_FLAGS_RELWITHDEBINFO_INIT "-O -g")
+  set(CMAKE_Swift_FLAGS_MINSIZEREL_INIT "-Osize")
+
+  # Enable Whole Module Optimization by default unless the old
+  # C++ driver is being used, which behaves differently under WMO.
+  if(NOT CMAKE_Swift_COMPILER_USE_OLD_DRIVER)
+    string(APPEND CMAKE_Swift_FLAGS_RELEASE_INIT " -wmo")
+    string(APPEND CMAKE_Swift_FLAGS_RELWITHDEBINFO_INIT " -wmo")
+    string(APPEND CMAKE_Swift_FLAGS_MINSIZEREL_INIT " -wmo")
+  endif()
 endif()
 
 if(CMAKE_EXECUTABLE_FORMAT STREQUAL "ELF")

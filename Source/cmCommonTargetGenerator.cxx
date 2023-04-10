@@ -164,6 +164,7 @@ std::vector<std::string> cmCommonTargetGenerator::GetLinkedTargetDirectories(
 {
   std::vector<std::string> dirs;
   std::set<cmGeneratorTarget const*> emitted;
+  cmGlobalCommonGenerator* const gg = this->GlobalCommonGenerator;
   if (cmComputeLinkInformation* cli =
         this->GeneratorTarget->GetLinkInformation(config)) {
     cmComputeLinkInformation::ItemVector const& items = cli->GetItems();
@@ -171,6 +172,8 @@ std::vector<std::string> cmCommonTargetGenerator::GetLinkedTargetDirectories(
       cmGeneratorTarget const* linkee = item.Target;
       if (linkee &&
           !linkee->IsImported()
+          // Skip targets that build after this one in a static lib cycle.
+          && gg->TargetOrderIndexLess(linkee, this->GeneratorTarget)
           // We can ignore the INTERFACE_LIBRARY items because
           // Target->GetLinkInformation already processed their
           // link interface and they don't have any output themselves.

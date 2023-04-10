@@ -542,7 +542,7 @@ If the library type is not specified, ``MODULE`` is assumed.
   was introduced. Specifying only major version ``3`` is equivalent to ``3.2``.
 
   When option ``WITH_SOABI`` is also specified,  the module suffix will include
-  the ``Python3_SOSABI`` value, if any.
+  the ``Python_SOSABI`` value, if any.
 #]=======================================================================]
 
 
