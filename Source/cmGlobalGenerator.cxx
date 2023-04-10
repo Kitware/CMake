@@ -1544,8 +1544,9 @@ bool cmGlobalGenerator::Compute()
   }
 
 #ifndef CMAKE_BOOTSTRAP
-  cmQtAutoGenGlobalInitializer qtAutoGen(this->LocalGenerators);
-  if (!qtAutoGen.InitializeCustomTargets()) {
+  this->QtAutoGen =
+    cm::make_unique<cmQtAutoGenGlobalInitializer>(this->LocalGenerators);
+  if (!this->QtAutoGen->InitializeCustomTargets()) {
     return false;
   }
 #endif
@@ -1564,12 +1565,6 @@ bool cmGlobalGenerator::Compute()
       return false;
     }
   }
-
-#ifndef CMAKE_BOOTSTRAP
-  if (!qtAutoGen.SetupCustomTargets()) {
-    return false;
-  }
-#endif
 
   for (const auto& localGen : this->LocalGenerators) {
     cmMakefile* mf = localGen->GetMakefile();
@@ -1634,6 +1629,17 @@ void cmGlobalGenerator::Generate()
   this->ProcessEvaluationFiles();
 
   this->CMakeInstance->UpdateProgress("Generating", 0.1f);
+
+#ifndef CMAKE_BOOTSTRAP
+  if (!this->QtAutoGen->SetupCustomTargets()) {
+    if (!cmSystemTools::GetErrorOccurredFlag()) {
+      this->GetCMakeInstance()->IssueMessage(
+        MessageType::FATAL_ERROR,
+        "Problem setting up custom targets for QtAutoGen");
+    }
+    return;
+  }
+#endif
 
   // Generate project files
   for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i) {

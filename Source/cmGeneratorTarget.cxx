@@ -27,6 +27,7 @@
 #include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"
 #include "cmCustomCommandGenerator.h"
+#include "cmEvaluatedTargetProperty.h"
 #include "cmFileSet.h"
 #include "cmFileTimes.h"
 #include "cmGeneratedFileStream.h"
@@ -89,31 +90,38 @@ cmTargetPropertyComputer::ComputeLocation<cmGeneratorTarget>(
   return tgt->GetLocation(config);
 }
 
-class cmGeneratorTarget::TargetPropertyEntry
-{
-protected:
-  static cmLinkImplItem NoLinkImplItem;
+cmLinkImplItem cmGeneratorTarget::TargetPropertyEntry::NoLinkImplItem;
 
+class TargetPropertyEntryString : public cmGeneratorTarget::TargetPropertyEntry
+{
 public:
-  TargetPropertyEntry(cmLinkImplItem const& item)
-    : LinkImplItem(item)
+  TargetPropertyEntryString(BT<std::string> propertyValue,
+                            cmLinkImplItem const& item = NoLinkImplItem)
+    : cmGeneratorTarget::TargetPropertyEntry(item)
+    , PropertyValue(std::move(propertyValue))
   {
   }
-  virtual ~TargetPropertyEntry() = default;
 
-  virtual const std::string& Evaluate(
-    cmLocalGenerator* lg, const std::string& config,
-    cmGeneratorTarget const* headTarget,
-    cmGeneratorExpressionDAGChecker* dagChecker,
-    std::string const& language) const = 0;
+  const std::string& Evaluate(cmLocalGenerator*, const std::string&,
+                              cmGeneratorTarget const*,
+                              cmGeneratorExpressionDAGChecker*,
+                              std::string const&) const override
+  {
+    return this->PropertyValue.Value;
+  }
 
-  virtual cmListFileBacktrace GetBacktrace() const = 0;
-  virtual std::string const& GetInput() const = 0;
-  virtual bool GetHadContextSensitiveCondition() const { return false; }
+  cmListFileBacktrace GetBacktrace() const override
+  {
+    return this->PropertyValue.Backtrace;
+  }
+  std::string const& GetInput() const override
+  {
+    return this->PropertyValue.Value;
+  }
 
-  cmLinkImplItem const& LinkImplItem;
+private:
+  BT<std::string> PropertyValue;
 };
-cmLinkImplItem cmGeneratorTarget::TargetPropertyEntry::NoLinkImplItem;
 
 class TargetPropertyEntryGenex : public cmGeneratorTarget::TargetPropertyEntry
 {
@@ -148,37 +156,6 @@ public:
 
 private:
   const std::unique_ptr<cmCompiledGeneratorExpression> ge;
-};
-
-class TargetPropertyEntryString : public cmGeneratorTarget::TargetPropertyEntry
-{
-public:
-  TargetPropertyEntryString(BT<std::string> propertyValue,
-                            cmLinkImplItem const& item = NoLinkImplItem)
-    : cmGeneratorTarget::TargetPropertyEntry(item)
-    , PropertyValue(std::move(propertyValue))
-  {
-  }
-
-  const std::string& Evaluate(cmLocalGenerator*, const std::string&,
-                              cmGeneratorTarget const*,
-                              cmGeneratorExpressionDAGChecker*,
-                              std::string const&) const override
-  {
-    return this->PropertyValue.Value;
-  }
-
-  cmListFileBacktrace GetBacktrace() const override
-  {
-    return this->PropertyValue.Backtrace;
-  }
-  std::string const& GetInput() const override
-  {
-    return this->PropertyValue.Value;
-  }
-
-private:
-  BT<std::string> PropertyValue;
 };
 
 class TargetPropertyEntryFileSet
@@ -263,6 +240,18 @@ std::unique_ptr<
     cm::make_unique<TargetPropertyEntryString>(propertyValue));
 }
 
+cmGeneratorTarget::TargetPropertyEntry::TargetPropertyEntry(
+  cmLinkImplItem const& item)
+  : LinkImplItem(item)
+{
+}
+
+bool cmGeneratorTarget::TargetPropertyEntry::GetHadContextSensitiveCondition()
+  const
+{
+  return false;
+}
+
 static void CreatePropertyGeneratorExpressions(
   cmake& cmakeInstance, cmBTStringRange entries,
   std::vector<std::unique_ptr<cmGeneratorTarget::TargetPropertyEntry>>& items,
@@ -272,69 +261,6 @@ static void CreatePropertyGeneratorExpressions(
     items.push_back(
       CreateTargetPropertyEntry(cmakeInstance, entry, evaluateForBuildsystem));
   }
-}
-
-namespace {
-// Represent a target property entry after evaluating generator expressions
-// and splitting up lists.
-struct EvaluatedTargetPropertyEntry
-{
-  EvaluatedTargetPropertyEntry(cmLinkImplItem const& item,
-                               cmListFileBacktrace bt)
-    : LinkImplItem(item)
-    , Backtrace(std::move(bt))
-  {
-  }
-
-  // Move-only.
-  EvaluatedTargetPropertyEntry(EvaluatedTargetPropertyEntry&&) = default;
-  EvaluatedTargetPropertyEntry(EvaluatedTargetPropertyEntry const&) = delete;
-  EvaluatedTargetPropertyEntry& operator=(EvaluatedTargetPropertyEntry&&) =
-    delete;
-  EvaluatedTargetPropertyEntry& operator=(
-    EvaluatedTargetPropertyEntry const&) = delete;
-
-  cmLinkImplItem const& LinkImplItem;
-  cmListFileBacktrace Backtrace;
-  std::vector<std::string> Values;
-  bool ContextDependent = false;
-};
-
-EvaluatedTargetPropertyEntry EvaluateTargetPropertyEntry(
-  cmGeneratorTarget const* thisTarget, std::string const& config,
-  std::string const& lang, cmGeneratorExpressionDAGChecker* dagChecker,
-  cmGeneratorTarget::TargetPropertyEntry& entry)
-{
-  EvaluatedTargetPropertyEntry ee(entry.LinkImplItem, entry.GetBacktrace());
-  cmExpandList(entry.Evaluate(thisTarget->GetLocalGenerator(), config,
-                              thisTarget, dagChecker, lang),
-               ee.Values);
-  if (entry.GetHadContextSensitiveCondition()) {
-    ee.ContextDependent = true;
-  }
-  return ee;
-}
-
-struct EvaluatedTargetPropertyEntries
-{
-  std::vector<EvaluatedTargetPropertyEntry> Entries;
-  bool HadContextSensitiveCondition = false;
-};
-
-EvaluatedTargetPropertyEntries EvaluateTargetPropertyEntries(
-  cmGeneratorTarget const* thisTarget, std::string const& config,
-  std::string const& lang, cmGeneratorExpressionDAGChecker* dagChecker,
-  std::vector<std::unique_ptr<cmGeneratorTarget::TargetPropertyEntry>> const&
-    in)
-{
-  EvaluatedTargetPropertyEntries out;
-  out.Entries.reserve(in.size());
-  for (auto const& entry : in) {
-    out.Entries.emplace_back(EvaluateTargetPropertyEntry(
-      thisTarget, config, lang, dagChecker, *entry));
-  }
-  return out;
-}
 }
 
 cmGeneratorTarget::cmGeneratorTarget(cmTarget* t, cmLocalGenerator* lg)
@@ -1603,84 +1529,6 @@ void AddLangSpecificImplicitIncludeDirectories(
           entries.Entries.emplace_back(std::move(entry));
         }
       }
-    }
-  }
-}
-
-void addInterfaceEntry(cmGeneratorTarget const* headTarget,
-                       std::string const& config, std::string const& prop,
-                       std::string const& lang,
-                       cmGeneratorExpressionDAGChecker* dagChecker,
-                       EvaluatedTargetPropertyEntries& entries,
-                       LinkInterfaceFor interfaceFor,
-                       std::vector<cmLinkImplItem> const& libraries)
-{
-  for (cmLinkImplItem const& lib : libraries) {
-    if (lib.Target) {
-      EvaluatedTargetPropertyEntry ee(lib, lib.Backtrace);
-      // Pretend $<TARGET_PROPERTY:lib.Target,prop> appeared in our
-      // caller's property and hand-evaluate it as if it were compiled.
-      // Create a context as cmCompiledGeneratorExpression::Evaluate does.
-      cmGeneratorExpressionContext context(
-        headTarget->GetLocalGenerator(), config, false, headTarget, headTarget,
-        true, lib.Backtrace, lang);
-      cmExpandList(lib.Target->EvaluateInterfaceProperty(
-                     prop, &context, dagChecker, interfaceFor),
-                   ee.Values);
-      ee.ContextDependent = context.HadContextSensitiveCondition;
-      entries.Entries.emplace_back(std::move(ee));
-    }
-  }
-}
-
-// IncludeRuntimeInterface is used to break the cycle in computing
-// the necessary transitive dependencies of targets that can occur
-// now that we have implicit language runtime targets.
-//
-// To determine the set of languages that a target has we need to iterate
-// all the sources which includes transitive INTERFACE sources.
-// Therefore we can't determine what language runtimes are needed
-// for a target until after all sources are computed.
-//
-// Therefore while computing the applicable INTERFACE_SOURCES we
-// must ignore anything in LanguageRuntimeLibraries or we would
-// create a cycle ( INTERFACE_SOURCES requires LanguageRuntimeLibraries,
-// LanguageRuntimeLibraries requires INTERFACE_SOURCES).
-//
-enum class IncludeRuntimeInterface
-{
-  Yes,
-  No
-};
-void AddInterfaceEntries(
-  cmGeneratorTarget const* headTarget, std::string const& config,
-  std::string const& prop, std::string const& lang,
-  cmGeneratorExpressionDAGChecker* dagChecker,
-  EvaluatedTargetPropertyEntries& entries,
-  IncludeRuntimeInterface searchRuntime,
-  LinkInterfaceFor interfaceFor = LinkInterfaceFor::Usage)
-{
-  if (searchRuntime == IncludeRuntimeInterface::Yes) {
-    if (cmLinkImplementation const* impl =
-          headTarget->GetLinkImplementation(config, interfaceFor)) {
-      entries.HadContextSensitiveCondition =
-        impl->HadContextSensitiveCondition;
-
-      auto runtimeLibIt = impl->LanguageRuntimeLibraries.find(lang);
-      if (runtimeLibIt != impl->LanguageRuntimeLibraries.end()) {
-        addInterfaceEntry(headTarget, config, prop, lang, dagChecker, entries,
-                          interfaceFor, runtimeLibIt->second);
-      }
-      addInterfaceEntry(headTarget, config, prop, lang, dagChecker, entries,
-                        interfaceFor, impl->Libraries);
-    }
-  } else {
-    if (cmLinkImplementationLibraries const* impl =
-          headTarget->GetLinkImplementationLibraries(config, interfaceFor)) {
-      entries.HadContextSensitiveCondition =
-        impl->HadContextSensitiveCondition;
-      addInterfaceEntry(headTarget, config, prop, lang, dagChecker, entries,
-                        interfaceFor, impl->Libraries);
     }
   }
 }
@@ -8977,10 +8825,10 @@ std::string cmGeneratorTarget::GenerateHeaderSetVerificationFile(
 
   cmGeneratedFileStream fout(filename);
   fout.SetCopyIfDifferent(true);
-  // IWYU pragma: associated allows include what you use to
+  // The IWYU "associated" pragma tells include-what-you-use to
   // consider the headerFile as part of the entire language
   // unit within include-what-you-use and as a result allows
-  // one to get IWYU advice for headers :)
+  // one to get IWYU advice for headers.
   fout << "#include <" << headerFilename << "> // IWYU pragma: associated\n";
   fout.close();
 

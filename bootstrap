@@ -338,6 +338,7 @@ CMAKE_CXX_SOURCES="\
   cmELF \
   cmEnableLanguageCommand \
   cmEnableTestingCommand \
+  cmEvaluatedTargetProperty \
   cmExecProgramCommand \
   cmExecuteProcessCommand \
   cmExpandedCommandArgument \

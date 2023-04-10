@@ -50,6 +50,7 @@ class cmLinkLineComputer;
 class cmLocalGenerator;
 class cmMakefile;
 class cmOutputConverter;
+class cmQtAutoGenGlobalInitializer;
 class cmSourceFile;
 class cmState;
 class cmStateDirectory;
@@ -683,6 +684,11 @@ protected:
   cmake* CMakeInstance;
   std::vector<std::unique_ptr<cmMakefile>> Makefiles;
   LocalGeneratorVector LocalGenerators;
+
+#ifndef CMAKE_BOOTSTRAP
+  std::unique_ptr<cmQtAutoGenGlobalInitializer> QtAutoGen;
+#endif
+
   cmMakefile* CurrentConfigureMakefile;
   // map from project name to vector of local generators in that project
   std::map<std::string, std::vector<cmLocalGenerator*>> ProjectMap;

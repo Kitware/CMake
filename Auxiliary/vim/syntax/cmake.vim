@@ -220,6 +220,7 @@ syn keyword cmakeProperty contained
             \ INSTALL_RPATH
             \ INSTALL_RPATH_USE_LINK_PATH
             \ INTERFACE_AUTOUIC_OPTIONS
+            \ INTERFACE_AUTOMOC_MACRO_NAMES
             \ INTERFACE_COMPILE_DEFINITIONS
             \ INTERFACE_COMPILE_FEATURES
             \ INTERFACE_COMPILE_OPTIONS

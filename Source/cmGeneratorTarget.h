@@ -1291,3 +1291,25 @@ private:
   };
   mutable std::map<std::string, InfoByConfig> Configs;
 };
+
+class cmGeneratorTarget::TargetPropertyEntry
+{
+protected:
+  static cmLinkImplItem NoLinkImplItem;
+
+public:
+  TargetPropertyEntry(cmLinkImplItem const& item);
+  virtual ~TargetPropertyEntry() = default;
+
+  virtual const std::string& Evaluate(
+    cmLocalGenerator* lg, const std::string& config,
+    cmGeneratorTarget const* headTarget,
+    cmGeneratorExpressionDAGChecker* dagChecker,
+    std::string const& language) const = 0;
+
+  virtual cmListFileBacktrace GetBacktrace() const = 0;
+  virtual std::string const& GetInput() const = 0;
+  virtual bool GetHadContextSensitiveCondition() const;
+
+  cmLinkImplItem const& LinkImplItem;
+};
