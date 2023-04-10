@@ -21,7 +21,7 @@ cm::optional<std::string> CxxModuleLocations::BmiGeneratorPathForModule(
   std::string const& logical_name) const
 {
   if (auto l = this->BmiLocationForModule(logical_name)) {
-    return this->PathForGenerator(*l);
+    return this->PathForGenerator(std::move(*l));
   }
   return {};
 }
@@ -239,8 +239,7 @@ std::set<std::string> CxxModuleUsageSeed(
     for (auto const& p : object.Provides) {
       if (auto bmi_loc = loc.BmiGeneratorPathForModule(p.LogicalName)) {
         // XXX(cxx-modules): How to support header units?
-        usages.AddReference(p.LogicalName, loc.PathForGenerator(*bmi_loc),
-                            LookupMethod::ByName);
+        usages.AddReference(p.LogicalName, *bmi_loc, LookupMethod::ByName);
       }
     }
 
@@ -268,8 +267,7 @@ std::set<std::string> CxxModuleUsageSeed(
       }
 
       if (bmi_loc) {
-        usages.AddReference(r.LogicalName, loc.PathForGenerator(*bmi_loc),
-                            r.Method);
+        usages.AddReference(r.LogicalName, *bmi_loc, r.Method);
       }
     }
   }
