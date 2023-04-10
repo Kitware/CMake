@@ -28,6 +28,15 @@ int main()
   printf("OEM code page: %u\n", GetOEMCP());
   printf("VSLANG: %s\n", vslang);
 
+  // clang-cl (special case for test, not a real VS value).
+  if (strcmp(vslang, "clang-cl") == 0) {
+    if (cp == 437 || cp == 65001) {
+      printf("Note: including file: ./foo.h\n");
+      return 0;
+    }
+  }
+
+  // German.
   if (strcmp(vslang, "1031") == 0) {
     if (cp == 437 || cp == 65001) {
       printf("Hinweis: Einlesen der Datei: C:\\foo.h\n");
@@ -35,6 +44,7 @@ int main()
     }
   }
 
+  // English.
   if (strcmp(vslang, "1033") == 0) {
     if (cp == 437 || cp == 65001) {
       printf("Note: including file: C:\\foo.h\n");
@@ -42,6 +52,7 @@ int main()
     }
   }
 
+  // French.
   if (strcmp(vslang, "1036") == 0) {
     if (cp == 437 || cp == 863) {
       printf("Remarque\xff: inclusion du fichier\xff:  C:\\foo.h\n");
@@ -53,6 +64,7 @@ int main()
     }
   }
 
+  // Italian.
   if (strcmp(vslang, "1040") == 0) {
     if (cp == 437 || cp == 65001) {
       printf("Nota: file incluso  C:\\foo.h\n");
@@ -60,6 +72,7 @@ int main()
     }
   }
 
+  // Japanese.
   if (strcmp(vslang, "1041") == 0) {
     if (cp == 932) {
       printf("\x83\x81\x83\x82: "
@@ -75,6 +88,7 @@ int main()
     }
   }
 
+  // Chinese.
   if (strcmp(vslang, "2052") == 0) {
     if (cp == 54936 || cp == 936) {
       printf("\xd7\xa2\xd2\xe2: "

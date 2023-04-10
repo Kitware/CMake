@@ -49,7 +49,7 @@ function(WRITE_BASIC_CONFIG_VERSION_FILE _filename)
   if(NOT CVF_ARCH_INDEPENDENT)
     set(CVF_ARCH_INDEPENDENT_CHECK "
 # if the installed or the using project don't have CMAKE_SIZEOF_VOID_P set, ignore it:
-if(CMAKE_SIZEOF_VOID_P STREQUAL \"\" OR \"${CMAKE_SIZEOF_VOID_P}\" STREQUAL \"\")
+if(\"\${CMAKE_SIZEOF_VOID_P}\" STREQUAL \"\" OR \"${CMAKE_SIZEOF_VOID_P}\" STREQUAL \"\")
   return()
 endif()
 

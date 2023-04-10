@@ -15,7 +15,14 @@ if("${CMAKE_GENERATOR}" STREQUAL "Xcode")
     message(FATAL_ERROR "Swift language not supported by Xcode ${XCODE_VERSION}")
   endif()
   set(CMAKE_Swift_COMPILER_XCODE_TYPE sourcecode.swift)
-  _cmake_find_compiler_path(Swift)
+  execute_process(COMMAND xcrun --find swiftc
+    OUTPUT_VARIABLE _xcrun_out OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_VARIABLE _xcrun_err RESULT_VARIABLE _xcrun_result)
+  if(_xcrun_result EQUAL 0 AND EXISTS "${_xcrun_out}")
+    set(CMAKE_Swift_COMPILER "${_xcrun_out}")
+  else()
+    _cmake_find_compiler_path(Swift)
+  endif()
 elseif("${CMAKE_GENERATOR}" MATCHES "^Ninja")
   if(CMAKE_Swift_COMPILER)
     _cmake_find_compiler_path(Swift)
@@ -52,15 +59,71 @@ if(NOT CMAKE_Swift_COMPILER_ID_RUN)
   if("${CMAKE_GENERATOR}" STREQUAL "Xcode")
     list(APPEND CMAKE_Swift_COMPILER_ID_MATCH_VENDORS Apple)
     set(CMAKE_Swift_COMPILER_ID_MATCH_VENDOR_REGEX_Apple "com.apple.xcode.tools.swift.compiler")
-
-    set(CMAKE_Swift_COMPILER_ID_TOOL_MATCH_REGEX "\nCompileSwift[^\n]*(\n[ \t]+[^\n]*)*\n[ \t]+([^ \t\r\n]+)[^\r\n]* -c[^\r\n]*CompilerIdSwift/CompilerId/main.swift")
-    set(CMAKE_Swift_COMPILER_ID_TOOL_MATCH_INDEX 2)
   endif()
 
   # Try to identify the compiler.
   set(CMAKE_Swift_COMPILER_ID)
   include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerId.cmake)
   CMAKE_DETERMINE_COMPILER_ID(Swift "" CompilerId/main.swift)
+endif()
+
+# Check if we are using the old compiler driver.
+if(CMAKE_GENERATOR STREQUAL "Xcode")
+  # For Xcode, we can decide driver kind simply by Swift version.
+  if(CMAKE_Swift_COMPILER_VERSION VERSION_GREATER_EQUAL 5.5)
+    set(CMAKE_Swift_COMPILER_USE_OLD_DRIVER FALSE)
+  else()
+    set(CMAKE_Swift_COMPILER_USE_OLD_DRIVER TRUE)
+  endif()
+elseif(NOT DEFINED CMAKE_Swift_COMPILER_USE_OLD_DRIVER)
+  # Dry-run a WMO build to identify the compiler driver.
+
+  # Create a clean directory in which to run the test.
+  set(CMAKE_Swift_COMPILER_DRIVER_TEST_DIR ${CMAKE_PLATFORM_INFO_DIR}/SwiftCompilerDriver)
+  file(REMOVE_RECURSE "${CMAKE_Swift_COMPILER_DRIVER_TEST_DIR}")
+  file(MAKE_DIRECTORY "${CMAKE_Swift_COMPILER_DRIVER_TEST_DIR}")
+
+  # Create a Swift file and an arbitrary linker resource.
+  file(WRITE ${CMAKE_Swift_COMPILER_DRIVER_TEST_DIR}/main.swift "print(\"Hello\")\n")
+  file(WRITE ${CMAKE_Swift_COMPILER_DRIVER_TEST_DIR}/lib.in "\n")
+
+  # Honor user-specified compiler flags.
+  if(DEFINED CMAKE_Swift_FLAGS)
+    separate_arguments(_CMAKE_Swift_COMPILER_FLAGS_LIST NATIVE_COMMAND "${CMAKE_Swift_FLAGS}")
+  else()
+    separate_arguments(_CMAKE_Swift_COMPILER_FLAGS_LIST NATIVE_COMMAND "${CMAKE_Swift_FLAGS_INIT}")
+  endif()
+  set(_CMAKE_Swift_COMPILER_CHECK_COMMAND "${CMAKE_Swift_COMPILER}" ${_CMAKE_Swift_COMPILER_FLAGS_LIST} -wmo main.swift lib.in "-###")
+  unset(_CMAKE_Swift_COMPILER_FLAGS_LIST)
+
+  # Execute in dry-run mode so no compilation will be actually performed.
+  execute_process(COMMAND ${_CMAKE_Swift_COMPILER_CHECK_COMMAND}
+    WORKING_DIRECTORY "${CMAKE_Swift_COMPILER_DRIVER_TEST_DIR}"
+    OUTPUT_VARIABLE _CMAKE_Swift_COMPILER_CHECK_OUTPUT)
+
+  # Check the first frontend execution.  It is on the first line of output.
+  # The old driver treats all inputs as Swift sources while the new driver
+  # can identify "lib.in" as a linker resource.
+  if("${_CMAKE_Swift_COMPILER_CHECK_OUTPUT}" MATCHES "^[^\n]* lib\\.in")
+    set(CMAKE_Swift_COMPILER_USE_OLD_DRIVER TRUE)
+  else()
+    set(CMAKE_Swift_COMPILER_USE_OLD_DRIVER FALSE)
+  endif()
+
+  # Record the check results in the configure log.
+  list(TRANSFORM _CMAKE_Swift_COMPILER_CHECK_COMMAND PREPEND "\"")
+  list(TRANSFORM _CMAKE_Swift_COMPILER_CHECK_COMMAND APPEND "\"")
+  list(JOIN _CMAKE_Swift_COMPILER_CHECK_COMMAND " " _CMAKE_Swift_COMPILER_CHECK_COMMAND)
+  string(REPLACE "\n" "\n  " _CMAKE_Swift_COMPILER_CHECK_OUTPUT "  ${_CMAKE_Swift_COMPILER_CHECK_OUTPUT}")
+  message(CONFIGURE_LOG
+    "Detected CMAKE_Swift_COMPILER_USE_OLD_DRIVER=\"${CMAKE_Swift_COMPILER_USE_OLD_DRIVER}\" from:\n"
+    "  ${_CMAKE_Swift_COMPILER_CHECK_COMMAND}\n"
+    "with output:\n"
+    "${_CMAKE_Swift_COMPILER_CHECK_OUTPUT}"
+    )
+
+  unset(_CMAKE_Swift_COMPILER_CHECK_COMMAND)
+  unset(_CMAKE_Swift_COMPILER_CHECK_OUTPUT)
 endif()
 
 if (NOT _CMAKE_TOOLCHAIN_LOCATION)

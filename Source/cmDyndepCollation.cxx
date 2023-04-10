@@ -441,20 +441,16 @@ bool cmDyndepCollation::WriteDyndepMetadata(
     auto fileset_info_itr = export_info.ObjectToFileSet.find(output_path);
     bool const has_provides = !object.Provides.empty();
     if (fileset_info_itr == export_info.ObjectToFileSet.end()) {
-      // If it provides anything, it should have a `CXX_MODULES` or
-      // `CXX_MODULE_INTERNAL_PARTITIONS` type and be present.
+      // If it provides anything, it should have type `CXX_MODULES`
+      // and be present.
       if (has_provides) {
         // Take the first module provided to provide context.
         auto const& provides = object.Provides[0];
-        char const* ok_types = "`CXX_MODULES`";
-        if (provides.LogicalName.find(':') != std::string::npos) {
-          ok_types = "`CXX_MODULES` (or `CXX_MODULE_INTERNAL_PARTITIONS` if "
-                     "it is not `export`ed)";
-        }
-        cmSystemTools::Error(cmStrCat(
-          "Output ", object.PrimaryOutput, " provides the `",
-          provides.LogicalName,
-          "` module but it is not found in a `FILE_SET` of type ", ok_types));
+        cmSystemTools::Error(
+          cmStrCat("Output ", object.PrimaryOutput, " provides the `",
+                   provides.LogicalName,
+                   "` module but it is not found in a `FILE_SET` of type "
+                   "`CXX_MODULES`"));
         result = false;
       }
 
@@ -474,38 +470,15 @@ bool cmDyndepCollation::WriteDyndepMetadata(
         result = false;
         continue;
       }
-    } else if (file_set.Type == "CXX_MODULE_INTERNAL_PARTITIONS"_s) {
-      if (!has_provides) {
-        cmSystemTools::Error(
-          cmStrCat("Source ", file_set.SourcePath,
-                   " is of type `CXX_MODULE_INTERNAL_PARTITIONS` but does not "
-                   "provide a module"));
-        result = false;
-        continue;
-      }
-      auto const& provides = object.Provides[0];
-      if (provides.LogicalName.find(':') == std::string::npos) {
-        cmSystemTools::Error(
-          cmStrCat("Source ", file_set.SourcePath,
-                   " is of type `CXX_MODULE_INTERNAL_PARTITIONS` but does not "
-                   "provide a module partition"));
-        result = false;
-        continue;
-      }
     } else if (file_set.Type == "CXX_MODULE_HEADERS"_s) {
       // TODO.
     } else {
       if (has_provides) {
         auto const& provides = object.Provides[0];
-        char const* ok_types = "`CXX_MODULES`";
-        if (provides.LogicalName.find(':') != std::string::npos) {
-          ok_types = "`CXX_MODULES` (or `CXX_MODULE_INTERNAL_PARTITIONS` if "
-                     "it is not `export`ed)";
-        }
-        cmSystemTools::Error(
-          cmStrCat("Source ", file_set.SourcePath, " provides the `",
-                   provides.LogicalName, "` C++ module but is of type `",
-                   file_set.Type, "` module but must be of type ", ok_types));
+        cmSystemTools::Error(cmStrCat(
+          "Source ", file_set.SourcePath, " provides the `",
+          provides.LogicalName, "` C++ module but is of type `", file_set.Type,
+          "` module but must be of type `CXX_MODULES`"));
         result = false;
       }
 
