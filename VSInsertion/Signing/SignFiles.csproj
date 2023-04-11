@@ -38,14 +38,21 @@
     <FilesToCopy Include="$(EnlistmentRoot)input\*.exe">
       <Visible>false</Visible>
     </FilesToCopy>
+    <PackagesToCopy Include="$(EnlistmentRoot)input\*.nupkg">
+      <Visible>false</Visible>
+    </PackagesToCopy>
   </ItemGroup>
 
   <Target Name="CopyFiles" BeforeTargets="AfterBuild">
     <Copy SourceFiles="@(FilesToCopy)" DestinationFolder="$(OutDir)" />
+    <Copy SourceFiles="@(PackagesToCopy)" DestinationFolder="$(OutDir)" />
 
     <ItemGroup>
       <FilesToSign Include="@(FilesToCopy->'$(OutDir)%(Filename)%(Extension)')">
         <Authenticode>3PartySHA2</Authenticode>
+      </FilesToSign>
+      <FilesToSign Include="@(PackagesToCopy->'$(OutDir)%(Filename)%(Extension)')">
+        <Authenticode>NuGet</Authenticode>
       </FilesToSign>
     </ItemGroup>
   </Target>
