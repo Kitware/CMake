@@ -1363,14 +1363,13 @@ static const struct CompileOnlyNode : public cmGeneratorExpressionNode
   {
     if (!dagChecker) {
       reportError(context, content->GetOriginalExpression(),
-                  "$<COMPILE_ONLY:...> may only be used via linking");
+                  "$<COMPILE_ONLY:...> may only be used for linking");
       return std::string();
     }
-    // Linking checks for the inverse, so compiling is the opposite.
     if (dagChecker->GetTransitivePropertiesOnly()) {
       return parameters.front();
     }
-    return std::string();
+    return std::string{};
   }
 } compileOnlyNode;
 
@@ -1389,8 +1388,7 @@ static const struct LinkOnlyNode : public cmGeneratorExpressionNode
                   "$<LINK_ONLY:...> may only be used for linking");
       return std::string();
     }
-    // Compile-only checks for the inverse, so linking is the opposite.
-    if (!dagChecker->GetTransitivePropertiesOnly()) {
+    if (!dagChecker->GetTransitivePropertiesOnlyCMP0131()) {
       return parameters.front();
     }
     return std::string();

@@ -3,6 +3,6 @@ CMake Error at COMPILE_ONLY-not-compiling.cmake:1 \(add_custom_target\):
 
     \$<COMPILE_ONLY:something>
 
-  \$<COMPILE_ONLY:...> may only be used via linking
+  \$<COMPILE_ONLY:...> may only be used for linking
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)

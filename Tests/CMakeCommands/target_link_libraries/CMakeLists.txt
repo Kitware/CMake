@@ -155,3 +155,19 @@ target_link_libraries(TopDir SubDirC)
 add_library(TopDirImported IMPORTED INTERFACE)
 target_compile_definitions(TopDirImported INTERFACE DEF_TopDirImported)
 cmake_policy(POP)
+
+#----------------------------------------------------------------------------
+# Test $<COMPILE_ONLY:> genex.
+cmake_policy(SET CMP0099 NEW)
+add_library(dont_link_too SHARED compile_only.cpp)
+target_compile_definitions(dont_link_too PUBLIC USE_EXAMPLE)
+target_link_options(dont_link_too INTERFACE invalid_link_option)
+target_link_libraries(dont_link_too INTERFACE invalid_link_library)
+
+add_library(uses_compile_only_genex SHARED compile_only.cpp)
+target_link_libraries(uses_compile_only_genex PUBLIC $<COMPILE_ONLY:dont_link_too>)
+
+add_library(uses_compile_only_genex_static STATIC compile_only.cpp)
+target_link_libraries(uses_compile_only_genex_static PRIVATE $<COMPILE_ONLY:dont_link_too>)
+add_executable(uses_via_static_linking main.cxx)
+target_link_libraries(uses_via_static_linking PRIVATE uses_compile_only_genex_static)

@@ -27,6 +27,7 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
   , Content(content)
   , Backtrace(std::move(backtrace))
   , TransitivePropertiesOnly(false)
+  , CMP0131(false)
 {
   this->Initialize();
 }
@@ -41,6 +42,7 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
   , Content(content)
   , Backtrace()
   , TransitivePropertiesOnly(false)
+  , CMP0131(false)
 {
   this->Initialize();
 }
@@ -141,6 +143,12 @@ cmGeneratorExpressionDAGChecker::CheckGraph() const
 bool cmGeneratorExpressionDAGChecker::GetTransitivePropertiesOnly() const
 {
   return this->Top()->TransitivePropertiesOnly;
+}
+
+bool cmGeneratorExpressionDAGChecker::GetTransitivePropertiesOnlyCMP0131()
+  const
+{
+  return this->Top()->CMP0131;
 }
 
 bool cmGeneratorExpressionDAGChecker::EvaluatingGenexExpression() const
