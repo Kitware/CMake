@@ -10,6 +10,7 @@
 
 #include "cmConfigureLog.h"
 #include "cmExecutionStatus.h"
+#include "cmList.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmMessenger.h"
@@ -31,13 +32,13 @@ enum class CheckingType
 std::string IndentText(std::string text, cmMakefile& mf)
 {
   auto indent =
-    cmJoin(cmExpandedList(mf.GetSafeDefinition("CMAKE_MESSAGE_INDENT")), "");
+    cmList{ mf.GetSafeDefinition("CMAKE_MESSAGE_INDENT") }.join("");
 
   const auto showContext = mf.GetCMakeInstance()->GetShowLogContext() ||
     mf.IsOn("CMAKE_MESSAGE_CONTEXT_SHOW");
   if (showContext) {
-    auto context = cmJoin(
-      cmExpandedList(mf.GetSafeDefinition("CMAKE_MESSAGE_CONTEXT")), ".");
+    auto context =
+      cmList{ mf.GetSafeDefinition("CMAKE_MESSAGE_CONTEXT") }.join(".");
     if (!context.empty()) {
       indent.insert(0u, cmStrCat("["_s, context, "] "_s));
     }

@@ -38,6 +38,7 @@
 #include "cmInstallTargetGenerator.h"
 #include "cmLinkLineComputer.h"
 #include "cmLinkLineDeviceComputer.h"
+#include "cmList.h"
 #include "cmMakefile.h"
 #include "cmRange.h"
 #include "cmRulePlaceholderExpander.h"
@@ -347,7 +348,7 @@ void cmLocalGenerator::GenerateTestFiles()
 
   cmValue testIncludeFiles = this->Makefile->GetProperty("TEST_INCLUDE_FILES");
   if (testIncludeFiles) {
-    std::vector<std::string> includesList = cmExpandedList(*testIncludeFiles);
+    cmList includesList{ *testIncludeFiles };
     for (std::string const& i : includesList) {
       fout << "include(\"" << i << "\")\n";
     }
@@ -1064,9 +1065,9 @@ void cmLocalGenerator::AddCompileOptions(std::vector<BT<std::string>>& flags,
         std::string isJMCEnabled =
           cmGeneratorExpression::Evaluate(*jmcExprGen, this, config);
         if (cmIsOn(isJMCEnabled)) {
-          std::vector<std::string> optVec = cmExpandedList(*jmc);
+          cmList optList{ *jmc };
           std::string jmcFlags;
-          this->AppendCompileOptions(jmcFlags, optVec);
+          this->AppendCompileOptions(jmcFlags, optList);
           if (!jmcFlags.empty()) {
             flags.emplace_back(std::move(jmcFlags));
           }
@@ -1954,8 +1955,8 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
       cmValue opt =
         target->Target->GetMakefile()->GetDefinition(optionFlagDef);
       if (opt) {
-        std::vector<std::string> optVec = cmExpandedList(*opt);
-        for (std::string const& i : optVec) {
+        cmList optList{ *opt };
+        for (std::string const& i : optList) {
           this->AppendFlagEscape(flags, i);
         }
       }
@@ -2426,7 +2427,7 @@ void cmLocalGenerator::AddPositionIndependentFlags(std::string& flags,
       cmStrCat("CMAKE_", lang, "_COMPILE_OPTIONS_PIC"));
   }
   if (!picFlags.empty()) {
-    std::vector<std::string> options = cmExpandedList(picFlags);
+    cmList options{ picFlags };
     for (std::string const& o : options) {
       this->AppendFlagEscape(flags, o);
     }
@@ -3163,7 +3164,7 @@ void cmLocalGenerator::AppendIPOLinkerFlags(std::string& flags,
     return;
   }
 
-  std::vector<std::string> flagsList = cmExpandedList(*rawFlagsList);
+  cmList flagsList{ *rawFlagsList };
   for (std::string const& o : flagsList) {
     this->AppendFlagEscape(flags, o);
   }
@@ -3198,7 +3199,7 @@ void cmLocalGenerator::AppendPositionIndependentLinkerFlags(
     return;
   }
 
-  std::vector<std::string> flagsList = cmExpandedList(pieFlags);
+  cmList flagsList{ pieFlags };
   for (const auto& flag : flagsList) {
     this->AppendFlagEscape(flags, flag);
   }
@@ -3264,7 +3265,7 @@ void cmLocalGenerator::AppendCompileOptions(std::string& options,
   }
 
   // Expand the list of options.
-  std::vector<std::string> options_vec = cmExpandedList(options_list);
+  cmList options_vec{ options_list };
   this->AppendCompileOptions(options, options_vec, regex);
 }
 
@@ -3322,7 +3323,7 @@ void cmLocalGenerator::AppendIncludeDirectories(
   }
 
   // Expand the list of includes.
-  std::vector<std::string> includes_vec = cmExpandedList(includes_list);
+  cmList includes_vec{ includes_list };
   this->AppendIncludeDirectories(includes, includes_vec, sourceFile);
 }
 
@@ -3454,7 +3455,7 @@ void cmLocalGenerator::AppendFeatureOptions(std::string& flags,
   cmValue optionList = this->Makefile->GetDefinition(
     cmStrCat("CMAKE_", lang, "_COMPILE_OPTIONS_", feature));
   if (optionList) {
-    std::vector<std::string> options = cmExpandedList(*optionList);
+    cmList options{ *optionList };
     for (std::string const& o : options) {
       this->AppendFlagEscape(flags, o);
     }
@@ -4500,11 +4501,11 @@ cmLocalGenerator::MakeCustomCommandGenerators(cmCustomCommand const& cc,
 std::vector<std::string> cmLocalGenerator::ExpandCustomCommandOutputPaths(
   cmCompiledGeneratorExpression const& cge, std::string const& config)
 {
-  std::vector<std::string> paths = cmExpandedList(cge.Evaluate(this, config));
+  cmList paths{ cge.Evaluate(this, config) };
   for (std::string& p : paths) {
     p = cmSystemTools::CollapseFullPath(p, this->GetCurrentBinaryDirectory());
   }
-  return paths;
+  return std::move(paths.data());
 }
 
 std::vector<std::string> cmLocalGenerator::ExpandCustomCommandOutputGenex(

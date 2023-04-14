@@ -29,6 +29,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmGlobalVisualStudio7Generator.h"
 #include "cmGlobalVisualStudioGenerator.h"
+#include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
@@ -1576,12 +1577,12 @@ cmLocalVisualStudio7GeneratorFCInfo::cmLocalVisualStudio7GeneratorFCInfo(
 
     // Check for extra object-file dependencies.
     if (cmValue deps = sf.GetProperty("OBJECT_DEPENDS")) {
-      std::vector<std::string> depends = cmExpandedList(*deps);
-      const char* sep = "";
-      for (const std::string& d : depends) {
-        fc.AdditionalDeps += sep;
-        fc.AdditionalDeps += lg->ConvertToXMLOutputPath(d);
-        sep = ";";
+      cmList depends{ *deps };
+      if (!depends.empty()) {
+        for (std::string& d : depends) {
+          d = lg->ConvertToXMLOutputPath(d);
+        }
+        fc.AdditionalDeps += depends.to_string();
         needfc = true;
       }
     }

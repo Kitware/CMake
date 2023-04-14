@@ -39,6 +39,7 @@
 #include "cmInstallRuntimeDependencySetGenerator.h"
 #include "cmInstallScriptGenerator.h"
 #include "cmInstallTargetGenerator.h"
+#include "cmList.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
@@ -1079,7 +1080,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
     if (createInstallGeneratorsForTargetFileSets && !namelinkOnly) {
       cmValue files = target.GetProperty("PRIVATE_HEADER");
       if (cmNonempty(files)) {
-        std::vector<std::string> relFiles = cmExpandedList(*files);
+        cmList relFiles{ *files };
         std::vector<std::string> absFiles;
         if (!helper.MakeFilesFullPath("PRIVATE_HEADER", relFiles, absFiles)) {
           return false;
@@ -1101,7 +1102,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
 
       files = target.GetProperty("PUBLIC_HEADER");
       if (cmNonempty(files)) {
-        std::vector<std::string> relFiles = cmExpandedList(*files);
+        cmList relFiles{ *files };
         std::vector<std::string> absFiles;
         if (!helper.MakeFilesFullPath("PUBLIC_HEADER", relFiles, absFiles)) {
           return false;
@@ -1123,7 +1124,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
 
       files = target.GetProperty("RESOURCE");
       if (cmNonempty(files)) {
-        std::vector<std::string> relFiles = cmExpandedList(*files);
+        cmList relFiles{ *files };
         std::vector<std::string> absFiles;
         if (!helper.MakeFilesFullPath("RESOURCE", relFiles, absFiles)) {
           return false;
@@ -1145,8 +1146,8 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
     if (!namelinkOnly) {
       for (std::size_t i = 0; i < fileSetArgs.size(); i++) {
         if (auto* fileSet = target.GetFileSet(fileSetArgs[i].GetFileSet())) {
-          auto interfaceFileSetEntries = cmExpandedList(target.GetSafeProperty(
-            cmTarget::GetInterfaceFileSetsPropertyName(fileSet->GetType())));
+          cmList interfaceFileSetEntries{ target.GetSafeProperty(
+            cmTarget::GetInterfaceFileSetsPropertyName(fileSet->GetType())) };
           if (std::find(interfaceFileSetEntries.begin(),
                         interfaceFileSetEntries.end(),
                         fileSetArgs[i].GetFileSet()) !=

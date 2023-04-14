@@ -12,6 +12,7 @@
 #include "cmArgumentParser.h"
 #include "cmArgumentParserTypes.h"
 #include "cmExecutionStatus.h"
+#include "cmList.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmRange.h"
@@ -169,7 +170,7 @@ bool cmParseArgumentsCommand(std::vector<std::string> const& args,
   };
 
   // the second argument is a (cmake) list of options without argument
-  std::vector<std::string> list = cmExpandedList(*argIter++);
+  cmList list{ *argIter++ };
   parser.Bind(list, options, duplicateKey);
 
   // the third argument is a (cmake) list of single argument options

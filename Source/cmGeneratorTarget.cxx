@@ -36,6 +36,7 @@
 #include "cmGeneratorExpressionDAGChecker.h"
 #include "cmGeneratorExpressionNode.h"
 #include "cmGlobalGenerator.h"
+#include "cmList.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -1634,20 +1635,20 @@ void AddFileSetEntries(cmGeneratorTarget const* headTarget,
                        EvaluatedTargetPropertyEntries& entries)
 {
   for (auto const& entry : headTarget->Target->GetHeaderSetsEntries()) {
-    for (auto const& name : cmExpandedList(entry.Value)) {
+    for (auto const& name : cmList{ entry.Value }) {
       auto const* headerSet = headTarget->Target->GetFileSet(name);
       addFileSetEntry(headTarget, config, dagChecker, headerSet, entries);
     }
   }
   for (auto const& entry : headTarget->Target->GetCxxModuleSetsEntries()) {
-    for (auto const& name : cmExpandedList(entry.Value)) {
+    for (auto const& name : cmList{ entry.Value }) {
       auto const* cxxModuleSet = headTarget->Target->GetFileSet(name);
       addFileSetEntry(headTarget, config, dagChecker, cxxModuleSet, entries);
     }
   }
   for (auto const& entry :
        headTarget->Target->GetCxxModuleHeaderSetsEntries()) {
-    for (auto const& name : cmExpandedList(entry.Value)) {
+    for (auto const& name : cmList{ entry.Value }) {
       auto const* cxxModuleHeaderSet = headTarget->Target->GetFileSet(name);
       addFileSetEntry(headTarget, config, dagChecker, cxxModuleHeaderSet,
                       entries);
@@ -1740,8 +1741,8 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetSourceFilePaths(
 
     cmBTStringRange sourceEntries = this->Target->GetSourceEntries();
     for (auto const& entry : sourceEntries) {
-      std::vector<std::string> items = cmExpandedList(entry.Value);
-      for (std::string const& item : items) {
+      cmList items{ entry.Value };
+      for (auto const& item : items) {
         if (cmHasLiteralPrefix(item, "$<TARGET_OBJECTS:") &&
             item.back() == '>') {
           continue;
@@ -3105,8 +3106,8 @@ void cmTargetTraceDependencies::Trace()
 
     // Queue dependencies added explicitly by the user.
     if (cmValue additionalDeps = sf->GetProperty("OBJECT_DEPENDS")) {
-      std::vector<std::string> objDeps = cmExpandedList(*additionalDeps);
-      for (std::string& objDep : objDeps) {
+      cmList objDeps{ *additionalDeps };
+      for (auto& objDep : objDeps) {
         if (cmSystemTools::FileIsFullPath(objDep)) {
           objDep = cmSystemTools::CollapseFullPath(objDep);
         }
@@ -4606,7 +4607,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkOptions(
     // wrap host link options
     const std::string wrapper(this->Makefile->GetSafeDefinition(
       "CMAKE_" + language + "_DEVICE_COMPILER_WRAPPER_FLAG"));
-    std::vector<std::string> wrapperFlag = cmExpandedList(wrapper);
+    cmList wrapperFlag{ wrapper };
     const std::string wrapperSep(this->Makefile->GetSafeDefinition(
       "CMAKE_" + language + "_DEVICE_COMPILER_WRAPPER_FLAG_SEP"));
     bool concatFlagAndArgs = true;
@@ -4665,7 +4666,7 @@ std::vector<BT<std::string>>& cmGeneratorTarget::ResolveLinkerWrapper(
     "CMAKE_" + language +
     (this->IsDeviceLink() ? "_DEVICE_LINKER_WRAPPER_FLAG"
                           : "_LINKER_WRAPPER_FLAG")));
-  std::vector<std::string> wrapperFlag = cmExpandedList(wrapper);
+  cmList wrapperFlag{ wrapper };
   const std::string wrapperSep(this->Makefile->GetSafeDefinition(
     "CMAKE_" + language +
     (this->IsDeviceLink() ? "_DEVICE_LINKER_WRAPPER_FLAG_SEP"
@@ -4911,7 +4912,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkDepends(
 
   EvaluatedTargetPropertyEntries entries;
   if (cmValue linkDepends = this->GetProperty("LINK_DEPENDS")) {
-    std::vector<std::string> depends = cmExpandedList(*linkDepends);
+    cmList depends{ *linkDepends };
     for (const auto& depend : depends) {
       std::unique_ptr<TargetPropertyEntry> entry = CreateTargetPropertyEntry(
         *this->LocalGenerator->GetCMakeInstance(), depend);
@@ -5590,8 +5591,8 @@ void cmGeneratorTarget::ConstructSourceFileFlags() const
 
   // Process public headers to mark the source files.
   if (cmValue files = this->GetProperty("PUBLIC_HEADER")) {
-    std::vector<std::string> relFiles = cmExpandedList(*files);
-    for (std::string const& relFile : relFiles) {
+    cmList relFiles{ *files };
+    for (auto const& relFile : relFiles) {
       if (cmSourceFile* sf = this->Makefile->GetSource(relFile)) {
         SourceFileFlags& flags = this->SourceFlagsMap[sf];
         flags.MacFolder = "Headers";
@@ -5603,8 +5604,8 @@ void cmGeneratorTarget::ConstructSourceFileFlags() const
   // Process private headers after public headers so that they take
   // precedence if a file is listed in both.
   if (cmValue files = this->GetProperty("PRIVATE_HEADER")) {
-    std::vector<std::string> relFiles = cmExpandedList(*files);
-    for (std::string const& relFile : relFiles) {
+    cmList relFiles{ *files };
+    for (auto const& relFile : relFiles) {
       if (cmSourceFile* sf = this->Makefile->GetSource(relFile)) {
         SourceFileFlags& flags = this->SourceFlagsMap[sf];
         flags.MacFolder = "PrivateHeaders";
@@ -5615,8 +5616,8 @@ void cmGeneratorTarget::ConstructSourceFileFlags() const
 
   // Mark sources listed as resources.
   if (cmValue files = this->GetProperty("RESOURCE")) {
-    std::vector<std::string> relFiles = cmExpandedList(*files);
-    for (std::string const& relFile : relFiles) {
+    cmList relFiles{ *files };
+    for (auto const& relFile : relFiles) {
       if (cmSourceFile* sf = this->Makefile->GetSource(relFile)) {
         SourceFileFlags& flags = this->SourceFlagsMap[sf];
         flags.MacFolder = "";
@@ -5757,7 +5758,7 @@ void checkPropertyConsistency(cmGeneratorTarget const* depender,
     return;
   }
 
-  std::vector<std::string> props = cmExpandedList(*prop);
+  cmList props{ *prop };
   std::string pdir =
     cmStrCat(cmSystemTools::GetCMakeRoot(), "/Help/prop_tgt/");
 
@@ -6799,10 +6800,10 @@ void cmGeneratorTarget::ExpandLinkItems(
                              entry.Backtrace);
     std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(entry.Value);
     cge->SetEvaluateForBuildsystem(true);
-    std::vector<std::string> libs = cmExpandedList(
-      cge->Evaluate(this->LocalGenerator, config, headTarget, &dagChecker,
-                    this, headTarget->LinkerLanguage));
-    for (std::string const& lib : libs) {
+    cmList libs{ cge->Evaluate(this->LocalGenerator, config, headTarget,
+                               &dagChecker, this,
+                               headTarget->LinkerLanguage) };
+    for (auto const& lib : libs) {
       if (cm::optional<cmLinkItem> maybeItem = this->LookupLinkItem(
             lib, cge->GetBacktrace(), &scope,
             field == LinkInterfaceField::Libraries ? LookupSelf::No
@@ -7466,10 +7467,10 @@ std::vector<ValueType> computeImplicitLanguageTargets(
     currentTarget->GetRuntimeLinkLibrary(lang, config);
   if (cmValue runtimeLinkOptions = currentTarget->Makefile->GetDefinition(
         "CMAKE_" + lang + "_RUNTIME_LIBRARIES_" + runtimeLibrary)) {
-    std::vector<std::string> libsVec = cmExpandedList(*runtimeLinkOptions);
-    result.reserve(libsVec.size());
+    cmList libsList{ *runtimeLinkOptions };
+    result.reserve(libsList.size());
 
-    for (std::string const& i : libsVec) {
+    for (auto const& i : libsList) {
       cmGeneratorTarget::TargetOrString resolved =
         currentTarget->ResolveTargetReference(i, lg);
       if (resolved.Target) {
@@ -7550,9 +7551,9 @@ const cmLinkInterface* cmGeneratorTarget::GetImportLinkInterface(
     this->ExpandLinkItems(info->LibrariesProp, cmMakeRange(info->Libraries),
                           config, headTarget, interfaceFor,
                           LinkInterfaceField::Libraries, iface);
-    std::vector<std::string> deps = cmExpandedList(info->SharedDeps);
+    cmList deps{ info->SharedDeps };
     LookupLinkItemScope scope{ this->LocalGenerator };
-    for (std::string const& dep : deps) {
+    for (auto const& dep : deps) {
       if (cm::optional<cmLinkItem> maybeItem = this->LookupLinkItem(
             dep, cmListFileBacktrace(), &scope, LookupSelf::No)) {
         iface.SharedDeps.emplace_back(std::move(*maybeItem));
@@ -7873,8 +7874,8 @@ void cmGeneratorTarget::GetObjectLibrariesCMP0026(
   // behavior of CMP0024 and CMP0026 only.
   cmBTStringRange rng = this->Target->GetSourceEntries();
   for (auto const& entry : rng) {
-    std::vector<std::string> files = cmExpandedList(entry.Value);
-    for (std::string const& li : files) {
+    cmList files{ entry.Value };
+    for (auto const& li : files) {
       if (cmHasLiteralPrefix(li, "$<TARGET_OBJECTS:") && li.back() == '>') {
         std::string objLibName = li.substr(17, li.size() - 18);
 
@@ -8636,7 +8637,7 @@ bool cmGeneratorTarget::AddHeaderSetVerification()
   const bool all = verifyValue.IsEmpty();
   std::set<std::string> verifySet;
   if (!all) {
-    auto verifyList = cmExpandedList(verifyValue);
+    cmList verifyList{ verifyValue };
     verifySet.insert(verifyList.begin(), verifyList.end());
   }
 
@@ -8649,7 +8650,7 @@ bool cmGeneratorTarget::AddHeaderSetVerification()
 
   std::set<cmFileSet*> fileSets;
   for (auto const& entry : interfaceFileSetEntries) {
-    for (auto const& name : cmExpandedList(entry.Value)) {
+    for (auto const& name : cmList{ entry.Value }) {
       if (all || verifySet.count(name)) {
         fileSets.insert(this->Target->GetFileSet(name));
         verifySet.erase(name);

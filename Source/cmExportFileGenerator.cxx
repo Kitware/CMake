@@ -17,6 +17,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmLinkItem.h"
+#include "cmList.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -507,7 +508,7 @@ static void getPropertyContents(cmGeneratorTarget const* tgt,
   if (!p) {
     return;
   }
-  std::vector<std::string> content = cmExpandedList(*p);
+  cmList content{ *p };
   ifaceProperties.insert(content.begin(), content.end());
 }
 
@@ -1245,7 +1246,7 @@ bool cmExportFileGenerator::PopulateExportProperties(
   const auto& targetProperties = gte->Target->GetProperties();
   if (cmValue exportProperties =
         targetProperties.GetPropertyValue("EXPORT_PROPERTIES")) {
-    for (auto& prop : cmExpandedList(*exportProperties)) {
+    for (auto& prop : cmList{ *exportProperties }) {
       /* Black list reserved properties */
       if (cmHasLiteralPrefix(prop, "IMPORTED_") ||
           cmHasLiteralPrefix(prop, "INTERFACE_")) {

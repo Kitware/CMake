@@ -17,6 +17,7 @@
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGhsMultiGenerator.h"
 #include "cmLinkLineComputer.h" // IWYU pragma: keep
+#include "cmList.h"
 #include "cmLocalGenerator.h"
 #include "cmLocalGhsMultiGenerator.h"
 #include "cmMakefile.h"
@@ -484,7 +485,7 @@ void cmGhsMultiTargetGenerator::WriteSourceProperty(
 {
   cmValue prop = sf->GetProperty(propName);
   if (prop) {
-    std::vector<std::string> list = cmExpandedList(*prop);
+    cmList list{ *prop };
     for (const std::string& p : list) {
       fout << "    " << propFlag << p << '\n';
     }

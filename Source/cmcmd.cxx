@@ -14,6 +14,7 @@
 #include "cmConsoleBuf.h"
 #include "cmDuration.h"
 #include "cmGlobalGenerator.h"
+#include "cmList.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmQtAutoMocUic.h"
@@ -342,7 +343,7 @@ int HandleIWYU(const std::string& runCmd, const std::string& /* sourceFile */,
 {
   // Construct the iwyu command line by taking what was given
   // and adding all the arguments we give to the compiler.
-  std::vector<std::string> iwyu_cmd = cmExpandedList(runCmd, true);
+  cmList iwyu_cmd{ runCmd, cmList::EmptyElements::Yes };
   cm::append(iwyu_cmd, orig_cmd.begin() + 1, orig_cmd.end());
   // Run the iwyu command line.  Capture its stderr and hide its stdout.
   // Ignore its return code because the tool always returns non-zero.
@@ -366,7 +367,7 @@ int HandleIWYU(const std::string& runCmd, const std::string& /* sourceFile */,
 int HandleTidy(const std::string& runCmd, const std::string& sourceFile,
                const std::vector<std::string>& orig_cmd)
 {
-  std::vector<std::string> tidy_cmd = cmExpandedList(runCmd, true);
+  cmList tidy_cmd{ runCmd, cmList::EmptyElements::Yes };
   tidy_cmd.push_back(sourceFile);
 
   for (auto const& arg : tidy_cmd) {
@@ -416,7 +417,7 @@ int HandleLWYU(const std::string& runCmd, const std::string& sourceFile,
 {
   // Construct the ldd -r -u (link what you use lwyu) command line
   // ldd -u -r lwuy target
-  std::vector<std::string> lwyu_cmd = cmExpandedList(runCmd, true);
+  cmList lwyu_cmd{ runCmd, cmList::EmptyElements::Yes };
   lwyu_cmd.push_back(sourceFile);
 
   // Run the lwyu check command line,  currently ldd is expected.
@@ -444,7 +445,7 @@ int HandleCppLint(const std::string& runCmd, const std::string& sourceFile,
                   const std::vector<std::string>&)
 {
   // Construct the cpplint command line.
-  std::vector<std::string> cpplint_cmd = cmExpandedList(runCmd, true);
+  cmList cpplint_cmd{ runCmd, cmList::EmptyElements::Yes };
   cpplint_cmd.push_back(sourceFile);
 
   // Run the cpplint command line.  Capture its output.
@@ -471,7 +472,7 @@ int HandleCppCheck(const std::string& runCmd, const std::string& sourceFile,
                    const std::vector<std::string>& orig_cmd)
 {
   // Construct the cpplint command line.
-  std::vector<std::string> cppcheck_cmd = cmExpandedList(runCmd, true);
+  cmList cppcheck_cmd{ runCmd, cmList::EmptyElements::Yes };
   // extract all the -D, -U, and -I options from the compile line
   for (auto const& opt : orig_cmd) {
     if (opt.size() > 2) {

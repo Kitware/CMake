@@ -12,6 +12,7 @@
 #include "cmsys/Glob.hxx"
 
 #include "cmGeneratedFileStream.h"
+#include "cmList.h"
 #include "cmMessageType.h"
 #include "cmMessenger.h"
 #include "cmState.h"
@@ -531,15 +532,11 @@ void cmCacheManager::AddCacheEntry(const std::string& key, cmValue value,
   // make sure we only use unix style paths
   if (type == cmStateEnums::FILEPATH || type == cmStateEnums::PATH) {
     if (e.Value.find(';') != std::string::npos) {
-      std::vector<std::string> paths = cmExpandedList(e.Value);
-      const char* sep = "";
-      e.Value = "";
+      cmList paths{ e.Value };
       for (std::string& i : paths) {
         cmSystemTools::ConvertToUnixSlashes(i);
-        e.Value += sep;
-        e.Value += i;
-        sep = ";";
       }
+      e.Value = paths.to_string();
     } else {
       cmSystemTools::ConvertToUnixSlashes(e.Value);
     }

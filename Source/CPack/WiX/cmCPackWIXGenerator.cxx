@@ -18,6 +18,7 @@
 #include "cmCryptoHash.h"
 #include "cmGeneratedFileStream.h"
 #include "cmInstalledFile.h"
+#include "cmList.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmUuid.h"
@@ -239,7 +240,7 @@ bool cmCPackWIXGenerator::InitializeWiXConfiguration()
 
   cmValue patchFilePath = GetOption("CPACK_WIX_PATCH_FILE");
   if (patchFilePath) {
-    std::vector<std::string> patchFilePaths = cmExpandedList(patchFilePath);
+    cmList patchFilePaths{ patchFilePath };
 
     for (std::string const& p : patchFilePaths) {
       if (!this->Patch->LoadFragments(p)) {
@@ -322,8 +323,7 @@ void cmCPackWIXGenerator::AppendUserSuppliedExtraObjects(std::ostream& stream)
   if (!cpackWixExtraObjects)
     return;
 
-  std::vector<std::string> expandedExtraObjects =
-    cmExpandedList(cpackWixExtraObjects);
+  cmList expandedExtraObjects{ cpackWixExtraObjects };
 
   for (std::string const& obj : expandedExtraObjects) {
     stream << " " << QuotePath(obj);
@@ -1160,7 +1160,7 @@ void cmCPackWIXGenerator::CollectExtensions(std::string const& variableName,
   if (!variableContent)
     return;
 
-  std::vector<std::string> list = cmExpandedList(variableContent);
+  cmList list{ variableContent };
   extensions.insert(list.begin(), list.end());
 }
 
@@ -1172,7 +1172,7 @@ void cmCPackWIXGenerator::CollectXmlNamespaces(std::string const& variableName,
     return;
   }
 
-  std::vector<std::string> list = cmExpandedList(variableContent);
+  cmList list{ variableContent };
   for (std::string const& str : list) {
     auto pos = str.find('=');
     if (pos != std::string::npos) {
@@ -1200,7 +1200,7 @@ void cmCPackWIXGenerator::AddCustomFlags(std::string const& variableName,
   if (!variableContent)
     return;
 
-  std::vector<std::string> list = cmExpandedList(variableContent);
+  cmList list{ variableContent };
 
   for (std::string const& i : list) {
     stream << " " << QuotePath(i);

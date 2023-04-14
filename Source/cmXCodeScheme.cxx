@@ -13,6 +13,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
+#include "cmList.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -270,7 +271,7 @@ void cmXCodeScheme::WriteLaunchAction(cmXMLWriter& xout,
 
   if (cmValue argList =
         this->Target->GetTarget()->GetProperty("XCODE_SCHEME_ARGUMENTS")) {
-    std::vector<std::string> arguments = cmExpandedList(*argList);
+    cmList arguments{ *argList };
     if (!arguments.empty()) {
       xout.StartElement("CommandLineArguments");
 
@@ -290,7 +291,7 @@ void cmXCodeScheme::WriteLaunchAction(cmXMLWriter& xout,
 
   if (cmValue envList =
         this->Target->GetTarget()->GetProperty("XCODE_SCHEME_ENVIRONMENT")) {
-    std::vector<std::string> envs = cmExpandedList(*envList);
+    cmList envs{ *envList };
     if (!envs.empty()) {
       xout.StartElement("EnvironmentVariables");
 

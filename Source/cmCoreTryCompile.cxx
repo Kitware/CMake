@@ -20,6 +20,7 @@
 #include "cmConfigureLog.h"
 #include "cmExportTryCompileFileGenerator.h"
 #include "cmGlobalGenerator.h"
+#include "cmList.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmOutputConverter.h"
@@ -1024,7 +1025,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
 
     if (cmValue varListStr = this->Makefile->GetDefinition(
           kCMAKE_TRY_COMPILE_PLATFORM_VARIABLES)) {
-      std::vector<std::string> varList = cmExpandedList(*varListStr);
+      cmList varList{ *varListStr };
       vars.insert(varList.begin(), varList.end());
     }
 

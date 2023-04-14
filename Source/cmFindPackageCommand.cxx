@@ -23,6 +23,7 @@
 
 #include "cmAlgorithms.h"
 #include "cmDependencyProvider.h"
+#include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -2338,7 +2339,7 @@ void cmFindPackageCommand::FillPrefixesCMakeSystemVariable()
     cmValue prefix_paths =
       this->Makefile->GetDefinition("CMAKE_SYSTEM_PREFIX_PATH");
     // remove entry from CMAKE_SYSTEM_PREFIX_PATH
-    std::vector<std::string> expanded = cmExpandedList(*prefix_paths);
+    cmList expanded{ *prefix_paths };
     long count = 0;
     for (const auto& path : expanded) {
       bool const to_add =

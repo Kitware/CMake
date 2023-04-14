@@ -23,6 +23,7 @@
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
+#include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -92,7 +93,7 @@ cmValue cmTargetPropertyComputer::GetSources<cmTarget>(cmTarget const* tgt,
   std::ostringstream ss;
   const char* sep = "";
   for (auto const& entry : entries) {
-    std::vector<std::string> files = cmExpandedList(entry.Value);
+    cmList files{ entry.Value };
     for (std::string const& file : files) {
       if (cmHasLiteralPrefix(file, "$<TARGET_OBJECTS:") &&
           file.back() == '>') {
@@ -1115,7 +1116,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   if (globals) {
     const std::string genName = mf->GetGlobalGenerator()->GetName();
     if (cmHasLiteralPrefix(genName, "Visual Studio")) {
-      std::vector<std::string> props = cmExpandedList(*globals);
+      cmList props{ *globals };
       const std::string vsGlobal = "VS_GLOBAL_";
       for (const std::string& i : props) {
         // split NAME=VALUE
@@ -1428,7 +1429,7 @@ public:
 
   bool operator()(BT<std::string> const& entry)
   {
-    std::vector<std::string> files = cmExpandedList(entry.Value);
+    cmList files{ entry.Value };
     std::vector<cmSourceFileLocation> locations;
     locations.reserve(files.size());
     std::transform(files.begin(), files.end(), std::back_inserter(locations),
@@ -2967,7 +2968,7 @@ std::vector<std::string> cmTarget::GetAllInterfaceFileSets() const
 
   auto appendEntries = [=](const std::vector<BT<std::string>>& entries) {
     for (auto const& entry : entries) {
-      auto expanded = cmExpandedList(entry.Value);
+      cmList expanded{ entry.Value };
       std::copy(expanded.begin(), expanded.end(), inserter);
     }
   };

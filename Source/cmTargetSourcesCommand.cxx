@@ -13,6 +13,7 @@
 #include "cmExperimental.h"
 #include "cmFileSet.h"
 #include "cmGeneratorExpression.h"
+#include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -320,7 +321,7 @@ bool TargetSourcesImpl::HandleOneFileSet(
     fileSet.first->AddDirectoryEntry(
       BT<std::string>(baseDirectories, this->Makefile->GetBacktrace()));
     if (type == "HEADERS"_s || type == "CXX_MODULE_HEADER_UNITS"_s) {
-      for (auto const& dir : cmExpandedList(baseDirectories)) {
+      for (auto const& dir : cmList{ baseDirectories }) {
         auto interfaceDirectoriesGenex =
           cmStrCat("$<BUILD_INTERFACE:", dir, ">");
         if (cmFileSetVisibilityIsForSelf(visibility)) {

@@ -29,6 +29,7 @@
 #include "cmGlobalCommonGenerator.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
 #include "cmLinkLineComputer.h" // IWYU pragma: keep
+#include "cmList.h"
 #include "cmLocalCommonGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmLocalUnixMakefileGenerator3.h"
@@ -1200,7 +1201,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
     // If compiler launcher was specified and not consumed above, it
     // goes to the beginning of the command line.
     if (!compileCommands.empty() && !compilerLauncher.empty()) {
-      std::vector<std::string> args = cmExpandedList(compilerLauncher, true);
+      cmList args{ compilerLauncher, cmList::EmptyElements::Yes };
       if (!args.empty()) {
         args[0] = this->LocalGenerator->ConvertToOutputFormat(
           args[0], cmOutputConverter::SHELL);
@@ -1240,7 +1241,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
       const auto& extraCommands = this->Makefile->GetSafeDefinition(
         cmStrCat("CMAKE_", lang, "_DEPENDS_EXTRA_COMMANDS"));
       if (!extraCommands.empty()) {
-        auto commandList = cmExpandedList(extraCommands);
+        cmList commandList{ extraCommands };
         compileCommands.insert(compileCommands.end(), commandList.cbegin(),
                                commandList.cend());
       }
@@ -1341,8 +1342,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
         cmStrCat("CMAKE_", lang, "_CREATE_PREPROCESSED_SOURCE");
       if (cmValue preprocessRule =
             this->Makefile->GetDefinition(preprocessRuleVar)) {
-        std::vector<std::string> preprocessCommands =
-          cmExpandedList(*preprocessRule);
+        cmList preprocessCommands{ *preprocessRule };
 
         std::string shellObjI = this->LocalGenerator->ConvertToOutputFormat(
           objI, cmOutputConverter::SHELL);
@@ -1386,8 +1386,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
         cmStrCat("CMAKE_", lang, "_CREATE_ASSEMBLY_SOURCE");
       if (cmValue assemblyRule =
             this->Makefile->GetDefinition(assemblyRuleVar)) {
-        std::vector<std::string> assemblyCommands =
-          cmExpandedList(*assemblyRule);
+        cmList assemblyCommands{ *assemblyRule };
 
         std::string shellObjS = this->LocalGenerator->ConvertToOutputFormat(
           objS, cmOutputConverter::SHELL);
@@ -1674,7 +1673,7 @@ void cmMakefileTargetGenerator::WriteDeviceLinkRule(
   }
 
   cmLocalUnixMakefileGenerator3* localGen{ this->LocalGenerator };
-  std::vector<std::string> architectures = cmExpandedList(architecturesStr);
+  cmList architectures{ architecturesStr };
   std::string const& relPath = localGen->GetHomeRelativeOutputPath();
 
   // Ensure there are no duplicates.

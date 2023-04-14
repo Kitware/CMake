@@ -19,6 +19,7 @@
 #include "cmCPackLog.h"
 #include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
+#include "cmList.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
@@ -569,9 +570,8 @@ int cmCPackNSISGenerator::InitializeInternal()
     cmCPackLogger(cmCPackLog::LOG_DEBUG,
                   "The cpackPackageExecutables: " << cpackPackageExecutables
                                                   << "." << std::endl);
-    std::vector<std::string> cpackPackageExecutablesVector =
-      cmExpandedList(cpackPackageExecutables);
-    if (cpackPackageExecutablesVector.size() % 2 != 0) {
+    cmList cpackPackageExecutablesList{ cpackPackageExecutables };
+    if (cpackPackageExecutablesList.size() % 2 != 0) {
       cmCPackLogger(
         cmCPackLog::LOG_ERROR,
         "CPACK_PACKAGE_EXECUTABLES should contain pairs of <executable> and "
@@ -579,9 +579,9 @@ int cmCPackNSISGenerator::InitializeInternal()
           << std::endl);
       return 0;
     }
-    std::vector<std::string>::iterator it;
-    for (it = cpackPackageExecutablesVector.begin();
-         it != cpackPackageExecutablesVector.end(); ++it) {
+    cmList::iterator it;
+    for (it = cpackPackageExecutablesList.begin();
+         it != cpackPackageExecutablesList.end(); ++it) {
       std::string execName = *it;
       ++it;
       std::string linkName = *it;
@@ -622,9 +622,8 @@ void cmCPackNSISGenerator::CreateMenuLinks(std::ostream& str,
   }
   cmCPackLogger(cmCPackLog::LOG_DEBUG,
                 "The cpackMenuLinks: " << cpackMenuLinks << "." << std::endl);
-  std::vector<std::string> cpackMenuLinksVector =
-    cmExpandedList(cpackMenuLinks);
-  if (cpackMenuLinksVector.size() % 2 != 0) {
+  cmList cpackMenuLinksList{ cpackMenuLinks };
+  if (cpackMenuLinksList.size() % 2 != 0) {
     cmCPackLogger(
       cmCPackLog::LOG_ERROR,
       "CPACK_NSIS_MENU_LINKS should contain pairs of <shortcut target> and "
@@ -636,9 +635,8 @@ void cmCPackNSISGenerator::CreateMenuLinks(std::ostream& str,
   static cmsys::RegularExpression urlRegex(
     "^(mailto:|(ftps?|https?|news)://).*$");
 
-  std::vector<std::string>::iterator it;
-  for (it = cpackMenuLinksVector.begin(); it != cpackMenuLinksVector.end();
-       ++it) {
+  cmList::iterator it;
+  for (it = cpackMenuLinksList.begin(); it != cpackMenuLinksList.end(); ++it) {
     std::string sourceName = *it;
     const bool url = urlRegex.find(sourceName);
 

@@ -26,6 +26,7 @@
 #include "cmConsoleBuf.h"
 #include "cmDocumentationEntry.h"
 #include "cmGlobalGenerator.h"
+#include "cmList.h"
 #include "cmMakefile.h"
 #include "cmMessageMetadata.h"
 #include "cmState.h"
@@ -457,7 +458,7 @@ int do_build(int ac, char const* const* av)
   };
   auto targetLambda = [&](std::string const& value) -> bool {
     if (!value.empty()) {
-      std::vector<std::string> values = cmExpandedList(value);
+      cmList values{ value };
       for (auto const& v : values) {
         targets.emplace_back(v);
         if (v == "clean") {

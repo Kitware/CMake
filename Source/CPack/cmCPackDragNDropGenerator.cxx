@@ -19,6 +19,7 @@
 #include "cmCPackLog.h"
 #include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
+#include "cmList.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
@@ -128,8 +129,7 @@ int cmCPackDragNDropGenerator::InitializeInternal()
       return 0;
     }
 
-    std::vector<std::string> languages =
-      cmExpandedList(this->GetOption("CPACK_DMG_SLA_LANGUAGES"));
+    cmList languages{ this->GetOption("CPACK_DMG_SLA_LANGUAGES") };
     if (languages.empty()) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
                     "CPACK_DMG_SLA_LANGUAGES set but empty" << std::endl);

@@ -42,6 +42,7 @@
 #include "cmInstallGenerator.h"
 #include "cmInstallRuntimeDependencySet.h"
 #include "cmLinkLineComputer.h"
+#include "cmList.h"
 #include "cmLocalGenerator.h"
 #include "cmMSVC60LinkLineComputer.h"
 #include "cmMakefile.h"
@@ -670,7 +671,7 @@ void cmGlobalGenerator::EnableLanguage(
     mf->GetState()->SetInTopLevelIncludes(true);
     std::string includes =
       mf->GetSafeDefinition("CMAKE_PROJECT_TOP_LEVEL_INCLUDES");
-    std::vector<std::string> includesList = cmExpandedList(includes);
+    cmList includesList{ includes };
     for (std::string const& setupFile : includesList) {
       std::string absSetupFile = cmSystemTools::CollapseFullPath(
         setupFile, mf->GetCurrentSourceDirectory());
@@ -1234,7 +1235,7 @@ void cmGlobalGenerator::SetLanguageEnabledMaps(const std::string& l,
   std::string ignoreExtensionsVar =
     std::string("CMAKE_") + std::string(l) + std::string("_IGNORE_EXTENSIONS");
   std::string ignoreExts = mf->GetSafeDefinition(ignoreExtensionsVar);
-  std::vector<std::string> extensionList = cmExpandedList(ignoreExts);
+  cmList extensionList{ ignoreExts };
   for (std::string const& i : extensionList) {
     this->IgnoreExtensions[i] = true;
   }
@@ -1246,7 +1247,7 @@ void cmGlobalGenerator::FillExtensionToLanguageMap(const std::string& l,
   std::string extensionsVar = std::string("CMAKE_") + std::string(l) +
     std::string("_SOURCE_FILE_EXTENSIONS");
   const std::string& exts = mf->GetSafeDefinition(extensionsVar);
-  std::vector<std::string> extensionList = cmExpandedList(exts);
+  cmList extensionList{ exts };
   for (std::string const& i : extensionList) {
     this->ExtensionToLanguage[i] = l;
   }
@@ -1887,10 +1888,9 @@ void cmGlobalGenerator::FinalizeTargetConfiguration()
         "CMAKE_" + li + "_STANDARD_INCLUDE_DIRECTORIES";
       std::string const& standardIncludesStr =
         mf->GetSafeDefinition(standardIncludesVar);
-      std::vector<std::string> standardIncludesVec =
-        cmExpandedList(standardIncludesStr);
-      standardIncludesSet.insert(standardIncludesVec.begin(),
-                                 standardIncludesVec.end());
+      cmList standardIncludesList{ standardIncludesStr };
+      standardIncludesSet.insert(standardIncludesList.begin(),
+                                 standardIncludesList.end());
     }
     mf->AddSystemIncludeDirectories(standardIncludesSet);
   }

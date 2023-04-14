@@ -53,6 +53,7 @@
 #  include "cmMakefileProfilingData.h"
 #endif
 #include "cmJSONState.h"
+#include "cmList.h"
 #include "cmMessenger.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
@@ -813,7 +814,7 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
     }
   } else if (mode == "COMPILE"_s) {
     std::string includes = mf->GetSafeDefinition("PACKAGE_INCLUDE_DIRS");
-    std::vector<std::string> includeDirs = cmExpandedList(includes);
+    cmList includeDirs{ includes };
 
     this->GlobalGenerator->CreateGenerationObjects();
     const auto& lg = this->GlobalGenerator->LocalGenerators[0];
@@ -829,7 +830,7 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
     tgt->SetProperty("LINKER_LANGUAGE", language);
 
     std::string libs = mf->GetSafeDefinition("PACKAGE_LIBRARIES");
-    std::vector<std::string> libList = cmExpandedList(libs);
+    cmList libList{ libs };
     for (std::string const& lib : libList) {
       tgt->AddLinkLibrary(*mf, lib, GENERAL_LibraryType);
     }
@@ -1026,7 +1027,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
 
     CommandArgument{ "--check-build-system", CommandArgument::Values::Two,
                      [](std::string const& value, cmake* state) -> bool {
-                       std::vector<std::string> values = cmExpandedList(value);
+                       cmList values{ value };
                        state->CheckBuildSystemArgument = values[0];
                        state->ClearBuildSystem = (atoi(values[1].c_str()) > 0);
                        return true;
@@ -2163,7 +2164,7 @@ struct SaveCacheEntry
 
 int cmake::HandleDeleteCacheVariables(const std::string& var)
 {
-  std::vector<std::string> argsSplit = cmExpandedList(var, true);
+  cmList argsSplit{ var, cmList::EmptyElements::Yes };
   // erase the property to avoid infinite recursion
   this->State->SetGlobalProperty("__CMAKE_DELETE_CACHE_CHANGE_VARS_", "");
   if (this->GetIsInTryCompile()) {

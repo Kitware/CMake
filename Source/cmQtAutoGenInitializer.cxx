@@ -35,6 +35,7 @@
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmLinkItem.h"
+#include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
@@ -507,7 +508,7 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
       std::string const& deps =
         this->GenTarget->GetSafeProperty("AUTOGEN_TARGET_DEPENDS");
       if (!deps.empty()) {
-        for (std::string const& depName : cmExpandedList(deps)) {
+        for (auto const& depName : cmList{ deps }) {
           // Allow target and file dependencies
           auto* depTarget = this->Makefile->FindTargetToUse(depName);
           if (depTarget) {
@@ -545,8 +546,8 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
       this->Moc.MacroNames.erase(cmRemoveDuplicates(this->Moc.MacroNames),
                                  this->Moc.MacroNames.end());
       {
-        auto filterList = cmExpandedList(
-          this->GenTarget->GetSafeProperty("AUTOMOC_DEPEND_FILTERS"));
+        cmList filterList = { this->GenTarget->GetSafeProperty(
+          "AUTOMOC_DEPEND_FILTERS") };
         if ((filterList.size() % 2) != 0) {
           cmSystemTools::Error(
             cmStrCat("AutoMoc: AUTOMOC_DEPEND_FILTERS predefs size ",
@@ -558,7 +559,9 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
           "Q_PLUGIN_METADATA",
           "[\n][ \t]*Q_PLUGIN_METADATA[ \t]*\\("
           "[^\\)]*FILE[ \t]*\"([^\"]+)\"");
-        for (std::size_t ii = 0; ii != filterList.size(); ii += 2) {
+        for (cmList::index_type ii = 0;
+             ii != static_cast<cmList::index_type>(filterList.size());
+             ii += 2) {
           this->Moc.DependFilters.emplace_back(filterList[ii],
                                                filterList[ii + 1]);
         }
@@ -701,7 +704,7 @@ bool cmQtAutoGenInitializer::InitUic()
       this->GenTarget->GetSafeProperty("AUTOUIC_SEARCH_PATHS");
     if (!usp.empty()) {
       this->Uic.SearchPaths =
-        SearchPathSanitizer(this->Makefile)(cmExpandedList(usp));
+        SearchPathSanitizer(this->Makefile)(cmList{ usp });
     }
   }
   // Uic target options
@@ -961,8 +964,8 @@ bool cmQtAutoGenInitializer::InitScanFiles()
           if (uicOpts.empty()) {
             this->Uic.UiFilesNoOptions.emplace_back(fullPath);
           } else {
-            this->Uic.UiFilesWithOptions.emplace_back(fullPath,
-                                                      cmExpandedList(uicOpts));
+            this->Uic.UiFilesWithOptions.emplace_back(
+              fullPath, std::move(cmList{ uicOpts }.data()));
           }
 
           auto uiHeaderRelativePath = cmSystemTools::RelativePath(
@@ -1063,8 +1066,8 @@ bool cmQtAutoGenInitializer::InitScanFiles()
   if (!this->Rcc.Qrcs.empty()) {
     const bool modernQt = (this->QtVersion.Major >= 5);
     // Target rcc options
-    std::vector<std::string> optionsTarget =
-      cmExpandedList(this->GenTarget->GetSafeProperty(kw.AUTORCC_OPTIONS));
+    cmList optionsTarget{ this->GenTarget->GetSafeProperty(
+      kw.AUTORCC_OPTIONS) };
 
     // Check if file name is unique
     for (Qrc& qrc : this->Rcc.Qrcs) {

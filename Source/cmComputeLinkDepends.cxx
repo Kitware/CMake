@@ -20,6 +20,7 @@
 #include "cmGeneratorExpressionDAGChecker.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
+#include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
@@ -627,7 +628,7 @@ void cmComputeLinkDepends::AddVarLinkEntries(size_t depender_index,
   // This is called to add the dependencies named by
   // <item>_LIB_DEPENDS.  The variable contains a semicolon-separated
   // list.  The list contains link-type;item pairs and just items.
-  std::vector<std::string> deplist = cmExpandedList(value);
+  cmList deplist{ value };
 
   // Look for entries meant for this configuration.
   std::vector<cmLinkItem> actual_libs;

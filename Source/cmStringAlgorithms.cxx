@@ -80,13 +80,6 @@ std::vector<std::string> cmTokenize(cm::string_view str, cm::string_view sep)
   return tokens;
 }
 
-std::vector<std::string> cmExpandedList(cm::string_view arg, bool emptyArgs)
-{
-  std::vector<std::string> argsOut;
-  cmExpandList(arg, argsOut, emptyArgs);
-  return argsOut;
-}
-
 namespace {
 template <std::size_t N, typename T>
 inline void MakeDigits(cm::string_view& view, char (&digits)[N],

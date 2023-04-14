@@ -31,6 +31,7 @@
 #include "cmGlobalVisualStudio7Generator.h"
 #include "cmGlobalVisualStudioGenerator.h"
 #include "cmLinkLineDeviceComputer.h"
+#include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmLocalVisualStudio10Generator.h"
@@ -1167,7 +1168,7 @@ void cmVisualStudio10TargetGenerator::WriteImports(Elem& e0)
   cmValue imports =
     this->GeneratorTarget->Target->GetProperty("VS_PROJECT_IMPORT");
   if (imports) {
-    std::vector<std::string> argsSplit = cmExpandedList(*imports, false);
+    cmList argsSplit{ *imports };
     for (auto& path : argsSplit) {
       if (!cmsys::SystemTools::FileIsFullPath(path)) {
         path = this->Makefile->GetCurrentSourceDirectory() + "/" + path;
@@ -2113,8 +2114,8 @@ void cmVisualStudio10TargetGenerator::ParseSettingsProperty(
     for (const std::string& config : this->Configurations) {
       std::string evaluated = cge->Evaluate(this->LocalGenerator, config);
 
-      std::vector<std::string> settings = cmExpandedList(evaluated);
-      for (const std::string& setting : settings) {
+      cmList settings{ evaluated };
+      for (const auto& setting : settings) {
         const std::string::size_type assignment = setting.find('=');
         if (assignment != std::string::npos) {
           const std::string propName = setting.substr(0, assignment);
@@ -2714,16 +2715,11 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
 
   if (lang == "ASM_NASM") {
     if (cmValue objectDeps = sf.GetProperty("OBJECT_DEPENDS")) {
-      std::string dependencies;
-      std::vector<std::string> depends = cmExpandedList(*objectDeps);
-      const char* sep = "";
-      for (std::string& d : depends) {
+      cmList depends{ *objectDeps };
+      for (auto& d : depends) {
         ConvertToWindowsSlash(d);
-        dependencies += sep;
-        dependencies += d;
-        sep = ";";
       }
-      e2.Element("AdditionalDependencies", dependencies);
+      e2.Element("AdditionalDependencies", depends.join(";"));
     }
   }
 

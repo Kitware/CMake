@@ -55,6 +55,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmJSONState.h"
+#include "cmList.h"
 #include "cmMakefile.h"
 #include "cmProcessOutput.h"
 #include "cmState.h"
@@ -1468,7 +1469,7 @@ void cmCTest::AddSiteProperties(cmXMLWriter& xml)
       ch->GetCMake()->GetState()->GetGlobalProperty("SubProjectLabels");
     if (labels) {
       xml.StartElement("Labels");
-      std::vector<std::string> args = cmExpandedList(*labels);
+      cmList args{ *labels };
       for (std::string const& i : args) {
         xml.Element("Label", i);
       }
@@ -1500,7 +1501,7 @@ std::vector<std::string> cmCTest::GetLabelsForSubprojects()
 {
   std::string labelsForSubprojects =
     this->GetCTestConfiguration("LabelsForSubprojects");
-  std::vector<std::string> subprojects = cmExpandedList(labelsForSubprojects);
+  cmList subprojects{ labelsForSubprojects };
 
   // sort the array
   std::sort(subprojects.begin(), subprojects.end());
@@ -1508,7 +1509,7 @@ std::vector<std::string> cmCTest::GetLabelsForSubprojects()
   auto new_end = std::unique(subprojects.begin(), subprojects.end());
   subprojects.erase(new_end, subprojects.end());
 
-  return subprojects;
+  return std::move(subprojects.data());
 }
 
 void cmCTest::EndXML(cmXMLWriter& xml)

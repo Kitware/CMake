@@ -30,6 +30,7 @@
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGeneratorFactory.h"
 #include "cmLinkItem.h"
+#include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmLocalXCodeGenerator.h"
@@ -1027,7 +1028,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
   cmValue extraFileAttributes = sf->GetProperty("XCODE_FILE_ATTRIBUTES");
   if (extraFileAttributes) {
     // Expand the list of attributes.
-    std::vector<std::string> attributes = cmExpandedList(*extraFileAttributes);
+    cmList attributes{ *extraFileAttributes };
 
     // Store the attributes.
     for (const auto& attribute : attributes) {
@@ -1171,7 +1172,7 @@ template <class T>
 std::string GetTargetObjectDirArch(T const& target,
                                    const std::string& defaultVal)
 {
-  auto archs = cmExpandedList(target.GetSafeProperty("OSX_ARCHITECTURES"));
+  cmList archs{ target.GetSafeProperty("OSX_ARCHITECTURES") };
   if (archs.size() > 1) {
     return "$(CURRENT_ARCH)";
   } else if (archs.size() == 1) {
@@ -3127,8 +3128,8 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateUtilityTarget(
 std::string cmGlobalXCodeGenerator::AddConfigurations(cmXCodeObject* target,
                                                       cmGeneratorTarget* gtgt)
 {
-  std::vector<std::string> const configVector = cmExpandedList(
-    this->CurrentMakefile->GetRequiredDefinition("CMAKE_CONFIGURATION_TYPES"));
+  cmList const configList{ this->CurrentMakefile->GetRequiredDefinition(
+    "CMAKE_CONFIGURATION_TYPES") };
   cmXCodeObject* configlist =
     this->CreateObject(cmXCodeObject::XCConfigurationList);
   cmXCodeObject* buildConfigurations =
@@ -3140,7 +3141,7 @@ std::string cmGlobalXCodeGenerator::AddConfigurations(cmXCodeObject* target,
   configlist->SetComment(comment);
   target->AddAttribute("buildConfigurationList",
                        this->CreateObjectReference(configlist));
-  for (auto const& i : configVector) {
+  for (auto const& i : configList) {
     cmXCodeObject* config =
       this->CreateObject(cmXCodeObject::XCBuildConfiguration);
     buildConfigurations->AddObject(config);
@@ -3153,12 +3154,12 @@ std::string cmGlobalXCodeGenerator::AddConfigurations(cmXCodeObject* target,
 
     this->CreateTargetXCConfigSettings(gtgt, config, i);
   }
-  if (!configVector.empty()) {
+  if (!configList.empty()) {
     configlist->AddAttribute("defaultConfigurationName",
-                             this->CreateString(configVector[0]));
+                             this->CreateString(configList[0]));
     configlist->AddAttribute("defaultConfigurationIsVisible",
                              this->CreateString("0"));
-    return configVector[0];
+    return configList[0];
   }
   return "";
 }
@@ -4029,7 +4030,7 @@ void cmGlobalXCodeGenerator::AddEmbeddedObjects(
                                     this->CreateString("0"));
   cmXCodeObject* buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
   // Collect all embedded frameworks and dylibs and add them to build phase
-  std::vector<std::string> relFiles = cmExpandedList(*files);
+  cmList relFiles{ *files };
   for (std::string const& relFile : relFiles) {
     cmXCodeObject* buildFile{ nullptr };
     std::string filePath = relFile;
@@ -5008,7 +5009,7 @@ void cmGlobalXCodeGenerator::AppendDefines(BuildObjectListOrString& defs,
   }
 
   // Expand the list of definitions.
-  std::vector<std::string> defines = cmExpandedList(defines_list);
+  cmList defines{ defines_list };
 
   // Store the definitions in the string.
   this->AppendDefines(defs, defines, dflag);
