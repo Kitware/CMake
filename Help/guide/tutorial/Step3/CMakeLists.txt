@@ -3,6 +3,12 @@ cmake_minimum_required(VERSION 3.10)
 # set the project name and version
 project(Tutorial VERSION 1.0)
 
+# TODO 4: Replace the following code by:
+# * Creating an interface library called tutorial_compiler_flags
+#   Hint: use add_library() with the INTERFACE signature
+# * Add compiler feature cxx_std_11 to tutorial_compiler_flags
+#   Hint: Use target_compile_features()
+
 # specify the C++ standard
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -19,6 +25,8 @@ list(APPEND EXTRA_INCLUDES "${PROJECT_SOURCE_DIR}/MathFunctions")
 
 # add the executable
 add_executable(Tutorial tutorial.cxx)
+
+# TODO 5: Link Tutorial to tutorial_compiler_flags
 
 target_link_libraries(Tutorial PUBLIC MathFunctions)
 

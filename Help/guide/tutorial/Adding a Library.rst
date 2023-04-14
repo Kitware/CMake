@@ -409,7 +409,7 @@ that has sources ``mysqrt.cxx``.
   :name: MathFunctions/CMakeLists.txt-add_library-SqrtLibrary
   :language: cmake
   :start-after: # library that just does sqrt
-  :end-before: target_link_libraries(MathFunctions
+  :end-before: # TODO 7: Link
 
 .. raw:: html
 
@@ -426,7 +426,8 @@ enabled.
   :caption: TODO 13 : MathFunctions/CMakeLists.txt
   :name: MathFunctions/CMakeLists.txt-target_link_libraries-SqrtLibrary
   :language: cmake
-  :lines: 16-18
+  :start-after: to tutorial_compiler_flags
+  :end-before: endif()
 
 .. raw:: html
 
