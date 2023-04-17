@@ -1057,6 +1057,12 @@ fields:
   a workflow preset may have the same name as a configure, build, test, or
   package preset.
 
+``vendor``
+  An optional map containing vendor-specific information. CMake does not
+  interpret the contents of this field except to verify that it is a map
+  if it does exist. However, it should follow the same conventions as the
+  root-level ``vendor`` field.
+
 ``displayName``
   An optional string with a human-friendly name of the preset.
 
