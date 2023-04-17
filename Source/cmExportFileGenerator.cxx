@@ -1309,7 +1309,22 @@ void cmExportFileGenerator::GenerateTargetFileSets(cmGeneratorTarget* gte,
          << this->GetFileSetFiles(gte, fileSet, te) << "\n";
     }
 
-    os << "  )\nendif()\n\n";
+    os << "  )\nelse()\n  set_property(TARGET " << targetName
+       << "\n    APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES";
+    for (auto const& name : interfaceFileSets) {
+      auto* fileSet = gte->Target->GetFileSet(name);
+      if (!fileSet) {
+        gte->Makefile->IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmStrCat("File set \"", name,
+                   "\" is listed in interface file sets of ", gte->GetName(),
+                   " but has not been created"));
+        return;
+      }
+
+      os << "\n      " << this->GetFileSetDirectories(gte, fileSet, te);
+    }
+    os << "\n  )\nendif()\n\n";
   }
 }
 
