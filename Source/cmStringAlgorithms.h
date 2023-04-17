@@ -14,6 +14,7 @@
 
 #include <cm/string_view>
 
+#include "cmList.h"
 #include "cmRange.h"
 #include "cmValue.h"
 
@@ -92,14 +93,20 @@ std::vector<std::string> cmTokenize(cm::string_view str, cm::string_view sep);
  * Expand the ; separated string @a arg into multiple arguments.
  * All found arguments are appended to @a argsOut.
  */
-void cmExpandList(cm::string_view arg, std::vector<std::string>& argsOut,
-                  bool emptyArgs = false);
+inline void cmExpandList(cm::string_view arg,
+                         std::vector<std::string>& argsOut,
+                         bool emptyArgs = false)
+{
+  cmList::append(arg, argsOut,
+                 emptyArgs ? cmList::EmptyElements::Yes
+                           : cmList::EmptyElements::No);
+}
 inline void cmExpandList(cmValue arg, std::vector<std::string>& argsOut,
                          bool emptyArgs = false)
 {
-  if (arg) {
-    cmExpandList(*arg, argsOut, emptyArgs);
-  }
+  cmList::append(arg, argsOut,
+                 emptyArgs ? cmList::EmptyElements::Yes
+                           : cmList::EmptyElements::No);
 }
 
 /**
@@ -111,9 +118,7 @@ template <class InputIt>
 void cmExpandLists(InputIt first, InputIt last,
                    std::vector<std::string>& argsOut)
 {
-  for (; first != last; ++first) {
-    cmExpandList(*first, argsOut);
-  }
+  cmList::append(first, last, argsOut);
 }
 
 /**
