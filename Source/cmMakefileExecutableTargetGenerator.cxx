@@ -70,6 +70,8 @@ void cmMakefileExecutableTargetGenerator::WriteRuleFiles()
     this->WriteExecutableRule(true);
   }
 
+  this->WriteTargetLinkDependRules();
+
   // Write clean target
   this->WriteTargetCleanRules();
 

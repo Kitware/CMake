@@ -94,6 +94,9 @@ public:
   bool HasUniqueByproducts(std::vector<std::string> const& byproducts,
                            cmListFileBacktrace const& bt);
 
+  std::string GetLinkDependencyFile(cmGeneratorTarget* target,
+                                    std::string const& config) const override;
+
 protected:
   std::string ConvertToIncludeReference(
     std::string const& path, cmOutputConverter::OutputFormat format) override;

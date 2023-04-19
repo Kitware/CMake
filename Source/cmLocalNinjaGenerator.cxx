@@ -200,6 +200,14 @@ std::string cmLocalNinjaGenerator::MaybeRelativeToWorkDir(
     this->MaybeRelativeToTopBinDir(path));
 }
 
+std::string cmLocalNinjaGenerator::GetLinkDependencyFile(
+  cmGeneratorTarget* target, std::string const& config) const
+{
+  return cmStrCat(target->GetSupportDirectory(),
+                  this->GetGlobalNinjaGenerator()->ConfigDirectory(config),
+                  "/link.d");
+}
+
 // Virtual protected methods.
 
 std::string cmLocalNinjaGenerator::ConvertToIncludeReference(

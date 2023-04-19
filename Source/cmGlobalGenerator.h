@@ -546,6 +546,8 @@ public:
     return cm::nullopt;
   }
 
+  virtual bool SupportsLinkerDependencyFile() const { return false; }
+
   std::string GetSharedLibFlagsForLanguage(std::string const& lang) const;
 
   /** Generate an <output>.rule file path for a given command output.  */

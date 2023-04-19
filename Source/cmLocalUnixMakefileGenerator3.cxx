@@ -239,6 +239,12 @@ void cmLocalUnixMakefileGenerator3::GetIndividualFileTargets(
   }
 }
 
+std::string cmLocalUnixMakefileGenerator3::GetLinkDependencyFile(
+  cmGeneratorTarget* target, std::string const& /*config*/) const
+{
+  return cmStrCat(target->GetSupportDirectory(), "/link.d");
+}
+
 void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
 {
   // generate the includes
@@ -2005,6 +2011,18 @@ void cmLocalUnixMakefileGenerator3::WriteDependLanguageInfo(
           cmakefileStream << R"(  "" ")"
                           << this->MaybeRelativeToTopBinDir(compilerPair.first)
                           << R"(" "custom" ")"
+                          << this->MaybeRelativeToTopBinDir(src) << "\"\n";
+        }
+      }
+    } else if (compilerLang.first == "LINK"_s) {
+      auto depFormat = this->Makefile->GetDefinition(
+        cmStrCat("CMAKE_", target->GetLinkerLanguage(this->GetConfigName()),
+                 "_LINKER_DEPFILE_FORMAT"));
+      for (auto const& compilerPair : compilerPairs) {
+        for (auto const& src : compilerPair.second) {
+          cmakefileStream << R"(  "" ")"
+                          << this->MaybeRelativeToTopBinDir(compilerPair.first)
+                          << "\" \"" << depFormat << "\" \""
                           << this->MaybeRelativeToTopBinDir(src) << "\"\n";
         }
       }
