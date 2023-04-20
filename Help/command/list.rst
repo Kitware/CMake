@@ -188,7 +188,7 @@ For more information on regular expressions look under
 
   .. versionadded:: 3.12
 
-  Transforms the list by applying an action to all or, by specifying a
+  Transforms the list by applying an ``<ACTION>`` to all or, by specifying a
   ``<SELECTOR>``, to the selected elements of the list, storing the result
   in-place or in the specified output variable.
 
@@ -205,42 +205,42 @@ For more information on regular expressions look under
     :command:`APPEND <string(APPEND)>`, :command:`PREPEND <string(PREPEND)>`
       Append, prepend specified value to each element of the list.
 
-      .. code-block:: cmake
+      .. signature::
+        list(TRANSFORM <list> (APPEND|PREPEND) <value> ...)
+        :target: TRANSFORM_APPEND
 
-        list(TRANSFORM <list> <APPEND|PREPEND> <value> ...)
+    :command:`TOLOWER <string(TOLOWER)>`, :command:`TOUPPER <string(TOUPPER)>`
+      Convert each element of the list to lower, upper characters.
 
-    :command:`TOUPPER <string(TOUPPER)>`, :command:`TOLOWER <string(TOLOWER)>`
-      Convert each element of the list to upper, lower characters.
-
-      .. code-block:: cmake
-
-        list(TRANSFORM <list> <TOLOWER|TOUPPER> ...)
+      .. signature::
+        list(TRANSFORM <list> (TOLOWER|TOUPPER) ...)
+        :target: TRANSFORM_TOLOWER
 
     :command:`STRIP <string(STRIP)>`
       Remove leading and trailing spaces from each element of the list.
 
-      .. code-block:: cmake
-
+      .. signature::
         list(TRANSFORM <list> STRIP ...)
+        :target: TRANSFORM_STRIP
 
     :command:`GENEX_STRIP <string(GENEX_STRIP)>`
       Strip any
       :manual:`generator expressions <cmake-generator-expressions(7)>`
       from each element of the list.
 
-      .. code-block:: cmake
-
+      .. signature::
         list(TRANSFORM <list> GENEX_STRIP ...)
+        :target: TRANSFORM_GENEX_STRIP
 
     :command:`REPLACE <string(REGEX REPLACE)>`:
       Match the regular expression as many times as possible and substitute
       the replacement expression for the match for each element of the list
       (same semantic as :command:`string(REGEX REPLACE)`).
 
-      .. code-block:: cmake
-
+      .. signature::
         list(TRANSFORM <list> REPLACE <regular_expression>
                                       <replace_expression> ...)
+        :target: TRANSFORM_REPLACE
 
   ``<SELECTOR>`` determines which elements of the list will be transformed.
   Only one type of selector can be specified at a time.

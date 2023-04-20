@@ -1,0 +1,20 @@
+
+include ("${RunCMake_SOURCE_DIR}/check_errors.cmake")
+unset (errors)
+
+set(listvar a b c d)
+
+list(FIND listvar "c" reference)
+set (output "$<LIST:FIND,a;b;c;d,c>")
+if (NOT output EQUAL reference)
+  list (APPEND errors "returns bad value: ${output}")
+endif()
+
+list(FIND listvar "e" reference)
+set (output "$<LIST:FIND,a;b;c;d,e>")
+if (NOT output EQUAL reference)
+  list (APPEND errors "returns bad value: ${output}")
+endif()
+
+
+check_errors("LIST:FIND..." ${errors})

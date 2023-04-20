@@ -1,0 +1,8 @@
+CMake Error at FILTER-wrong-regex.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<LIST:FILTER,a;b;c,INCLUDE,\^\(a>
+
+  sub-command FILTER, failed to compile regex "\^\(a".
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

@@ -1,0 +1,9 @@
+CMake Error at TRANSFORM-REPLACE-invalid-replace2.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<LIST:TRANSFORM,a;b,REPLACE,\^a,\\b>
+
+  sub-command TRANSFORM, action REPLACE: Unknown escape "\\b" in
+  replace-expression.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

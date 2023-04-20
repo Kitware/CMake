@@ -1,0 +1,19 @@
+
+include ("${RunCMake_SOURCE_DIR}/check_errors.cmake")
+unset (errors)
+
+set(listvar a b c d)
+
+list(REVERSE listvar)
+set (output "$<LIST:REVERSE,a;b;c;d>")
+if (NOT output STREQUAL listvar)
+  list (APPEND errors "returns bad value: ${output}")
+endif()
+
+set (output "$<LIST:REVERSE,>")
+if (NOT output STREQUAL "")
+  list (APPEND errors "returns bad value: ${output}")
+endif()
+
+
+check_errors("LIST:REVERSE..." ${errors})

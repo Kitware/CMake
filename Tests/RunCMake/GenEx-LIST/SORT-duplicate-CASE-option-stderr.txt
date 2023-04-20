@@ -1,0 +1,8 @@
+CMake Error at SORT-duplicate-CASE-option.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<LIST:SORT,a;b,COMPARE:STRING,CASE:SENSITIVE,CASE:SENSITIVE>
+
+  sub-command SORT, CASE option has been specified multiple times.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

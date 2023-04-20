@@ -1,0 +1,8 @@
+CMake Error at SORT-duplicate-COMPARE-option.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<LIST:SORT,a;b,COMPARE:STRING,COMPARE:NATURAL>
+
+  sub-command SORT, COMPARE option has been specified multiple times.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

@@ -104,6 +104,17 @@ improved further like so:
     VERBATIM
   )
 
+Finally, the above example can be expressed in a more simple and robust way
+using an alternate generator expression:
+
+.. code-block:: cmake
+
+  add_custom_target(run_some_tool
+    COMMAND some_tool "$<LIST:TRANSFORM,$<TARGET_PROPERTY:tgt,INCLUDE_DIRECTORIES>,PREPEND,-I>"
+    COMMAND_EXPAND_LISTS
+    VERBATIM
+  )
+
 A common mistake is to try to split a generator expression across multiple
 lines with indenting:
 
@@ -318,6 +329,15 @@ String Transformations
 List Expressions
 ----------------
 
+Most of the expressions in this section are closely associated with the
+:command:`list` command, providing the same capabilities, but in
+the form of a generator expression.
+
+.. _GenEx List Comparisons:
+
+List Comparisons
+^^^^^^^^^^^^^^^^
+
 .. genex:: $<IN_LIST:string,list>
 
   .. versionadded:: 3.12
@@ -325,9 +345,186 @@ List Expressions
   ``1`` if ``string`` is an item in the semicolon-separated ``list``, else ``0``.
   It uses case-sensitive comparisons.
 
-.. genex:: $<JOIN:list,string>
+.. _GenEx List Queries:
 
-  Joins the list with the content of ``string`` inserted between each item.
+List Queries
+^^^^^^^^^^^^
+
+.. genex:: $<LIST:LENGTH,list>
+
+  .. versionadded:: 3.27
+
+  Returns the list's length.
+
+.. genex:: $<LIST:GET,list,index,...>
+
+  .. versionadded:: 3.27
+
+  Returns the list of elements specified by indices from the list.
+
+.. genex:: $<LIST:SUBLIST,list,begin,length>
+
+  .. versionadded:: 3.27
+
+  Returns a sublist of the given list. If <length> is 0, an empty list will be
+  returned. If <length> is -1 or the list is smaller than <begin>+<length> then
+  the remaining elements of the list starting at <begin> will be returned.
+
+.. genex:: $<LIST:FIND,list,value>
+
+  .. versionadded:: 3.27
+
+  Returns the index of the element specified in the list or -1 if it wasn't
+  found.
+
+.. _GenEx List Transformations:
+
+List Transformations
+^^^^^^^^^^^^^^^^^^^^
+
+.. genex:: $<LIST:JOIN,list,glue>
+
+  .. versionadded:: 3.27
+
+  Returns a string which joins the list with the content of the ``glue`` string
+  inserted between each item.
+
+.. genex:: $<LIST:APPEND,list,element,...>
+
+  .. versionadded:: 3.27
+
+  Returns a list with the elements appended.
+
+.. genex:: $<LIST:PREPEND,list,element,...>
+
+  .. versionadded:: 3.27
+
+  Returns a list with the elements inserted at the beginning of the list.
+
+.. genex:: $<LIST:INSERT,list,index,element,...>
+
+  .. versionadded:: 3.27
+
+  Returns a list with the elements inserted at the specified index. It is an
+  error to specify an out-of-range index. Valid indexes are 0 to N where N is
+  the length of the list, inclusive. An empty list has length 0.
+
+.. genex:: $<LIST:POP_BACK,list>
+
+  .. versionadded:: 3.27
+
+  Returns a list with the last element was removed.
+
+.. genex:: $<LIST:POP_FRONT,list>
+
+  .. versionadded:: 3.27
+
+  Returns a list with the first element was removed.
+
+.. genex:: $<LIST:REMOVE_ITEM,list,value,...>
+
+  .. versionadded:: 3.27
+
+  Returns a list with all instances of the given values were removed.
+
+.. genex:: $<LIST:REMOVE_AT,list,index,...>
+
+  .. versionadded:: 3.27
+
+  Returns a list with all values at given indices were removed.
+
+.. genex:: $<LIST:REMOVE_DUPLICATES,list>
+
+  .. versionadded:: 3.27
+
+  Returns a list where duplicated items were removed. The relative order of
+  items is preserved, but if duplicates are encountered, only the first
+  instance is preserved.
+
+.. genex:: $<LIST:FILTER,list,INCLUDE|EXCLUDE,regex>
+
+  .. versionadded:: 3.27
+
+  Returns a list with the items that match the regular expression ``regex``
+  were included or removed.
+
+.. genex:: $<LIST:TRANSFORM,list,ACTION[,SELECTOR]>
+
+  .. versionadded:: 3.27
+
+  Returns the list transformed by applying an ``ACTION`` to all or, by
+  specifying a ``SELECTOR``, to the selected elements of the list.
+
+  .. note::
+
+    The ``TRANSFORM`` sub-command does not change the number of elements in the
+    list. If a ``SELECTOR`` is specified, only some elements will be changed,
+    the other ones will remain the same as before the transformation.
+
+  ``ACTION`` specifies the action to apply to the elements of the list.
+  The actions have exactly the same semantics as of the
+  :command:`list(TRANSFORM)` command.  ``ACTION`` must be one of the following:
+
+    :command:`APPEND <list(TRANSFORM_APPEND)>`, :command:`PREPEND <list(TRANSFORM_APPEND)>`
+      Append, prepend specified value to each element of the list.
+
+      .. code-block:: cmake
+
+        $<LIST:TRANSFORM,list,(APPEND|PREPEND),value[,SELECTOR]>
+
+    :command:`TOLOWER <list(TRANSFORM_TOLOWER)>`, :command:`TOUPPER <list(TRANSFORM_TOLOWER)>`
+      Convert each element of the list to lower, upper characters.
+
+      .. code-block:: cmake
+
+        $<LIST:TRANSFORM,list,(TOLOWER|TOUPPER)[,SELECTOR]>
+
+    :command:`STRIP <list(TRANSFORM_STRIP)>`
+      Remove leading and trailing spaces from each element of the list.
+
+      .. code-block:: cmake
+
+        $<LIST:TRANSFORM,list,STRIP[,SELECTOR]>
+
+    :command:`REPLACE <list(TRANSFORM_REPLACE)>`:
+      Match the regular expression as many times as possible and substitute
+      the replacement expression for the match for each element of the list.
+
+      .. code-block:: cmake
+
+        $<LIST:TRANSFORM,list,REPLACE,regular_expression,replace_expression[,SELECTOR]>
+
+  ``SELECTOR`` determines which elements of the list will be transformed.
+  Only one type of selector can be specified at a time. When given,
+  ``SELECTOR`` must be one of the following:
+
+    ``AT``
+      Specify a list of indexes.
+
+      .. code-block:: cmake
+
+        $<LIST:TRANSFORM,list,ACTION,AT,index[,index...]>
+
+    ``FOR``
+      Specify a range with, optionally, an increment used to iterate over the
+      range.
+
+      .. code-block:: cmake
+
+        $<LIST:TRANSFORM,list,ACTION,FOR,start,stop[,step]>
+
+    ``REGEX``
+      Specify a regular expression.
+      Only elements matching the regular expression will be transformed.
+
+      .. code-block:: cmake
+
+        $<LIST:TRANSFORM,list,ACTION,REGEX,regular_expression>
+
+.. genex:: $<JOIN:list,glue>
+
+  Joins the list with the content of the ``glue`` string inserted between each
+  item.
 
 .. genex:: $<REMOVE_DUPLICATES:list>
 
@@ -343,6 +540,69 @@ List Expressions
 
   Includes or removes items from ``list`` that match the regular expression
   ``regex``.
+
+.. _GenEx List Ordering:
+
+List Ordering
+^^^^^^^^^^^^^
+
+.. genex:: $<LIST:REVERSE,list>
+
+  .. versionadded:: 3.27
+
+  Returns the list with the elements in reverse order.
+
+.. genex:: $<LIST:SORT,list[,(COMPARE:option|CASE:option|ORDER:option)]...>
+
+  .. versionadded:: 3.27
+
+  Returns the list sorted according the specified options.
+
+  Use one of the ``COMPARE`` options to select the comparison method
+  for sorting:
+
+    ``STRING``
+      Sorts a list of strings alphabetically.
+      This is the default behavior if the ``COMPARE`` option is not given.
+
+    ``FILE_BASENAME``
+      Sorts a list of pathnames of files by their basenames.
+
+    ``NATURAL``
+      Sorts a list of strings using natural order
+      (see ``strverscmp(3)`` manual), i.e. such that contiguous digits
+      are compared as whole numbers.
+      For example: the following list `10.0 1.1 2.1 8.0 2.0 3.1`
+      will be sorted as `1.1 2.0 2.1 3.1 8.0 10.0` if the ``NATURAL``
+      comparison is selected where it will be sorted as
+      `1.1 10.0 2.0 2.1 3.1 8.0` with the ``STRING`` comparison.
+
+  Use one of the ``CASE`` options to select a case sensitive or case
+  insensitive sort mode:
+
+    ``SENSITIVE``
+      List items are sorted in a case-sensitive manner.
+      This is the default behavior if the ``CASE`` option is not given.
+
+    ``INSENSITIVE``
+      List items are sorted case insensitively.  The order of
+      items which differ only by upper/lowercase is not specified.
+
+  To control the sort order, one of the ``ORDER`` options can be given:
+
+    ``ASCENDING``
+      Sorts the list in ascending order.
+      This is the default behavior when the ``ORDER`` option is not given.
+
+    ``DESCENDING``
+      Sorts the list in descending order.
+
+  This is an error to specify multiple times the same option. Various options
+  can be specified in any order:
+
+  .. code-block:: cmake
+
+    $<LIST:SORT,list,CASE:SENSITIVE,COMPARE:STRING,ORDER:DESCENDING>
 
 Path Expressions
 ----------------

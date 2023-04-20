@@ -1,0 +1,8 @@
+CMake Error at TRANSFORM-selector-AT-wrong-argument.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<LIST:TRANSFORM,a;b,TOUPPER,AT,0,1x,2>
+
+  sub-command TRANSFORM, selector AT: '1x': unexpected argument.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

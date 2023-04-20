@@ -1,0 +1,32 @@
+
+include ("${RunCMake_SOURCE_DIR}/check_errors.cmake")
+unset (errors)
+
+set(listvar a b c d)
+list(REMOVE_ITEM listvar b d)
+set (output "$<LIST:REMOVE_ITEM,a;b;c;d,b,d>")
+if (NOT output STREQUAL listvar)
+  list (APPEND errors "returns bad value: ${output}")
+endif()
+
+set(listvar a b c d)
+list(REMOVE_ITEM listvar b e)
+set (output "$<LIST:REMOVE_ITEM,a;b;c;d,b,e>")
+if (NOT output STREQUAL listvar)
+  list (APPEND errors "returns bad value: ${output}")
+endif()
+
+set(listvar a b c d)
+list(REMOVE_ITEM listvar b a d c)
+set (output "$<LIST:REMOVE_ITEM,a;b;c;d,b;a;d;c>")
+if (NOT output STREQUAL listvar)
+  list (APPEND errors "returns bad value: ${output}")
+endif()
+
+set (output "$<LIST:REMOVE_ITEM,,b;a;d;c>")
+if (NOT output STREQUAL "")
+  list (APPEND errors "returns bad value: ${output}")
+endif()
+
+
+check_errors("LIST:REMOVE_ITEM..." ${errors})
