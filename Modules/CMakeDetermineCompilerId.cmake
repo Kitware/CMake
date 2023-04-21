@@ -432,7 +432,7 @@ Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
     if(id_keyword STREQUAL "Android")
       if(CMAKE_GENERATOR MATCHES "Visual Studio 14")
         set(id_system_version "<ApplicationTypeRevision>2.0</ApplicationTypeRevision>")
-      elseif(CMAKE_GENERATOR MATCHES "Visual Studio 1[56]")
+      elseif(CMAKE_GENERATOR MATCHES "Visual Studio 1[567]")
         set(id_system_version "<ApplicationTypeRevision>3.0</ApplicationTypeRevision>")
       else()
         set(id_system_version "")
