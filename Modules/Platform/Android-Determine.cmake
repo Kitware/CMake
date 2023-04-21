@@ -34,15 +34,10 @@ cmake_policy(PUSH)
 cmake_policy(SET CMP0057 NEW) # if IN_LIST
 
 # If using Android tools for Visual Studio, compile a sample project to get the
-# sysroot.
+# NDK path
 if(CMAKE_GENERATOR MATCHES "Visual Studio")
-  if(NOT CMAKE_SYSROOT)
+  if(NOT CMAKE_ANDROID_NDK)
     set(vcx_platform ${CMAKE_GENERATOR_PLATFORM})
-    if(CMAKE_GENERATOR MATCHES "Visual Studio 1[45]")
-      set(vcx_sysroot_var "Sysroot")
-    else()
-      set(vcx_sysroot_var "SysrootLink")
-    endif()
     if(CMAKE_GENERATOR MATCHES "Visual Studio 14")
       set(vcx_revision "2.0")
     elseif(CMAKE_GENERATOR MATCHES "Visual Studio 1[567]")
@@ -62,16 +57,16 @@ if(CMAKE_GENERATOR MATCHES "Visual Studio")
       RESULT_VARIABLE VCXPROJ_INSPECT_RESULT
       )
     unset(_msbuild)
-    if(NOT CMAKE_SYSROOT AND VCXPROJ_INSPECT_OUTPUT MATCHES "CMAKE_SYSROOT=([^%\r\n]+)[\r\n]")
+    if(VCXPROJ_INSPECT_OUTPUT MATCHES "CMAKE_ANDROID_NDK=([^%\r\n]+)[\r\n]")
       # Strip VS diagnostic output from the end of the line.
-      string(REGEX REPLACE " \\(TaskId:[0-9]*\\)$" "" _sysroot "${CMAKE_MATCH_1}")
-      if(EXISTS "${_sysroot}")
-        file(TO_CMAKE_PATH "${_sysroot}" CMAKE_SYSROOT)
+      string(REGEX REPLACE " \\(TaskId:[0-9]*\\)$" "" _ndk "${CMAKE_MATCH_1}")
+      if(EXISTS "${_ndk}")
+        file(TO_CMAKE_PATH "${_ndk}" CMAKE_ANDROID_NDK)
       endif()
     endif()
     if(VCXPROJ_INSPECT_RESULT)
       message(CONFIGURE_LOG
-        "Determining the sysroot for the Android NDK failed.
+        "Determining the Android NDK failed from msbuild failed.
 The output was:
 ${VCXPROJ_INSPECT_RESULT}
 ${VCXPROJ_INSPECT_OUTPUT}
@@ -79,7 +74,7 @@ ${VCXPROJ_INSPECT_OUTPUT}
 ")
     else()
       message(CONFIGURE_LOG
-        "Determining the sysroot for the Android NDK succeeded.
+        "Determining the Android NDK succeeded.
 The output was:
 ${VCXPROJ_INSPECT_RESULT}
 ${VCXPROJ_INSPECT_OUTPUT}
