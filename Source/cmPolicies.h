@@ -450,7 +450,12 @@ class cmMakefile;
          27, 0, cmPolicies::WARN)                                             \
   SELECT(POLICY, CMP0149,                                                     \
          "Visual Studio generators select latest Windows SDK by default.", 3, \
-         27, 0, cmPolicies::WARN)
+         27, 0, cmPolicies::WARN)                                             \
+  SELECT(POLICY, CMP0150,                                                     \
+         "ExternalProject_Add and FetchContent_Declare commands "             \
+         "treat relative GIT_REPOSITORY paths as being relative "             \
+         "to the parent project's remote.",                                   \
+         3, 27, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \

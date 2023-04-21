@@ -57,6 +57,7 @@ Policies Introduced by CMake 3.27
 .. toctree::
    :maxdepth: 1
 
+   CMP0150: ExternalProject_Add and FetchContent_Declare treat relative git repository paths as being relative to parent project's remote. </policy/CMP0150>
    CMP0149: Visual Studio generators select latest Windows SDK by default. </policy/CMP0149>
    CMP0148: The FindPythonInterp and FindPythonLibs modules are removed. </policy/CMP0148>
    CMP0147: Visual Studio generators build custom commands in parallel. </policy/CMP0147>

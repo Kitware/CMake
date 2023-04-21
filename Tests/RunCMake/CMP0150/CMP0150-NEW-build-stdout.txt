@@ -1,0 +1,7 @@
+.*-- Configured bottom project
+.*ExternalProject for ep-Y
+.*-- Configured bottom project
+[^\n]*-- Completed configuring project middle
+.*-- Configured bottom project
+.*ExternalProject for ep-X
+.*Non-ep top project

@@ -1,0 +1,4 @@
+-- Configured bottom project
+-- Completed configuring project middle
+-- Completed configuring project top
+-- Configuring done
