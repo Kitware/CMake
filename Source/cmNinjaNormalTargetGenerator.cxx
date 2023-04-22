@@ -213,6 +213,22 @@ std::string cmNinjaNormalTargetGenerator::TextStubsGeneratorRule(
     '_', config);
 }
 
+bool cmNinjaNormalTargetGenerator::CheckUseResponseFileForLibraries(
+  const std::string& l) const
+{
+  // Check for an explicit setting one way or the other.
+  std::string const responseVar =
+    "CMAKE_" + l + "_USE_RESPONSE_FILE_FOR_LIBRARIES";
+
+  // If the option is defined, read it's value
+  if (cmValue val = this->Makefile->GetDefinition(responseVar)) {
+    return val.IsOn();
+  }
+
+  // Default to true
+  return true;
+}
+
 struct cmNinjaRemoveNoOpCommands
 {
   bool operator()(std::string const& cmd)
@@ -251,9 +267,16 @@ void cmNinjaNormalTargetGenerator::WriteNvidiaDeviceLinkRule(
       } else {
         rule.RspContent = "$in_newline";
       }
-      rule.RspContent += " $LINK_LIBRARIES";
+
+      // add the link command in the file if necessary
+      if (this->CheckUseResponseFileForLibraries("CUDA")) {
+        rule.RspContent += " $LINK_LIBRARIES";
+        vars.LinkLibraries = "";
+      } else {
+        vars.LinkLibraries = "$LINK_PATH $LINK_LIBRARIES";
+      }
+
       vars.Objects = responseFlag.c_str();
-      vars.LinkLibraries = "";
     }
 
     vars.ObjectDir = "$OBJECT_DIR";
@@ -416,13 +439,20 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile,
       } else {
         rule.RspContent = "$in_newline";
       }
-      rule.RspContent += " $LINK_PATH $LINK_LIBRARIES";
+
+      // If libraries in rsp is enable
+      if (this->CheckUseResponseFileForLibraries(lang)) {
+        rule.RspContent += " $LINK_PATH $LINK_LIBRARIES";
+        vars.LinkLibraries = "";
+      } else {
+        vars.LinkLibraries = "$LINK_PATH $LINK_LIBRARIES";
+      }
+
       if (this->TargetLinkLanguage(config) == "Swift") {
         vars.SwiftSources = responseFlag.c_str();
       } else {
         vars.Objects = responseFlag.c_str();
       }
-      vars.LinkLibraries = "";
     }
 
     vars.ObjectDir = "$OBJECT_DIR";

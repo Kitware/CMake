@@ -26,7 +26,7 @@ private:
     const std::string& config) const;
   std::string LanguageLinkerCudaFatbinaryRule(const std::string& config) const;
   std::string TextStubsGeneratorRule(const std::string& config) const;
-
+  bool CheckUseResponseFileForLibraries(const std::string& config) const;
   const char* GetVisibleTypeName() const;
   void WriteLanguagesRules(const std::string& config);
 
