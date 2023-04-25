@@ -14,6 +14,7 @@
 #include "cmGeneratorExpressionEvaluator.h"
 #include "cmGeneratorExpressionLexer.h"
 #include "cmGeneratorExpressionParser.h"
+#include "cmList.h"
 #include "cmLocalGenerator.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"

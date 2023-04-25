@@ -4600,13 +4600,12 @@ std::string cmGlobalXCodeGenerator::GetTargetTempDir(
 void cmGlobalXCodeGenerator::ComputeArchitectures(cmMakefile* mf)
 {
   this->Architectures.clear();
-  cmValue sysroot = mf->GetDefinition("CMAKE_OSX_SYSROOT");
-  if (sysroot) {
-    mf->GetDefExpandList("CMAKE_OSX_ARCHITECTURES", this->Architectures);
-  }
+  cmList::append(this->Architectures,
+                 mf->GetDefinition("CMAKE_OSX_ARCHITECTURES"));
 
   if (this->Architectures.empty()) {
-    mf->GetDefExpandList("_CMAKE_APPLE_ARCHS_DEFAULT", this->Architectures);
+    cmList::append(this->Architectures,
+                   mf->GetDefinition("_CMAKE_APPLE_ARCHS_DEFAULT"));
   }
 
   if (this->Architectures.empty()) {

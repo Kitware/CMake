@@ -614,8 +614,9 @@ bool cmQtAutoGenInitializer::InitMoc()
   if (this->GenTarget->GetPropertyAsBool("AUTOMOC_COMPILER_PREDEFINES") &&
       (this->QtVersion >= IntegerVersion(5, 8))) {
     // Command
-    this->Makefile->GetDefExpandList("CMAKE_CXX_COMPILER_PREDEFINES_COMMAND",
-                                     this->Moc.PredefsCmd);
+    cmList::assign(
+      this->Moc.PredefsCmd,
+      this->Makefile->GetDefinition("CMAKE_CXX_COMPILER_PREDEFINES_COMMAND"));
     // Header
     if (!this->Moc.PredefsCmd.empty()) {
       this->ConfigFileNames(this->Moc.PredefsFile,

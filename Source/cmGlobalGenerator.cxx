@@ -239,10 +239,10 @@ void cmGlobalGenerator::ResolveLanguageCompiler(const std::string& lang,
     this->GetCMakeInstance()->GetState()->GetInitializedCacheValue(langComp);
 
   // Split compiler from arguments
-  std::vector<std::string> cnameArgVec;
+  cmList cnameArgList;
   if (cname && !cname->empty()) {
-    cmExpandList(*cname, cnameArgVec);
-    cname = cmValue(cnameArgVec.front());
+    cnameArgList.assign(*cname);
+    cname = cmValue(cnameArgList.front());
   }
 
   std::string changeVars;
@@ -1985,7 +1985,6 @@ void cmGlobalGenerator::CheckTargetProperties()
           notFoundMap[varName] = text;
         }
       }
-      std::vector<std::string> incs;
       cmValue incDirProp = target.second.GetProperty("INCLUDE_DIRECTORIES");
       if (!incDirProp) {
         continue;
@@ -1994,7 +1993,7 @@ void cmGlobalGenerator::CheckTargetProperties()
       std::string incDirs = cmGeneratorExpression::Preprocess(
         *incDirProp, cmGeneratorExpression::StripAllGeneratorExpressions);
 
-      cmExpandList(incDirs, incs);
+      cmList incs(incDirs);
 
       for (std::string const& incDir : incs) {
         if (incDir.size() > 9 && cmIsNOTFOUND(incDir)) {
@@ -2789,11 +2788,9 @@ void cmGlobalGenerator::AddGlobalTarget_Test(
   cmCustomCommandLine singleLine;
   singleLine.push_back(cmSystemTools::GetCTestCommand());
   singleLine.push_back("--force-new-ctest-process");
-  std::vector<std::string> args;
-  if (mf->GetDefExpandList("CMAKE_CTEST_ARGUMENTS", args)) {
-    for (auto const& arg : args) {
-      singleLine.push_back(arg);
-    }
+  cmList args(mf->GetDefinition("CMAKE_CTEST_ARGUMENTS"));
+  for (auto const& arg : args) {
+    singleLine.push_back(arg);
   }
   if (cmNonempty(cmakeCfgIntDir) && cmakeCfgIntDir[0] != '.') {
     singleLine.push_back("-C");
@@ -3348,12 +3345,12 @@ void cmGlobalGenerator::WriteSummary(cmGeneratorTarget* target)
     cmSystemTools::MakeDirectory(dir);
     cmGeneratedFileStream fout(file);
 
-    std::vector<std::string> labels;
+    cmList labels;
 
     // List the target-wide labels.  All sources in the target get
     // these labels.
     if (targetLabels) {
-      cmExpandList(*targetLabels, labels);
+      labels.assign(*targetLabels);
       if (!labels.empty()) {
         fout << "# Target labels\n";
         for (std::string const& l : labels) {
@@ -3364,27 +3361,27 @@ void cmGlobalGenerator::WriteSummary(cmGeneratorTarget* target)
     }
 
     // List directory labels
-    std::vector<std::string> directoryLabelsList;
-    std::vector<std::string> cmakeDirectoryLabelsList;
+    cmList directoryLabelsList;
+    cmList cmakeDirectoryLabelsList;
 
     if (directoryLabels) {
-      cmExpandList(*directoryLabels, directoryLabelsList);
+      directoryLabelsList.assign(*directoryLabels);
     }
 
     if (cmakeDirectoryLabels) {
-      cmExpandList(*cmakeDirectoryLabels, cmakeDirectoryLabelsList);
+      cmakeDirectoryLabelsList.assign(*cmakeDirectoryLabels);
     }
 
     if (!directoryLabelsList.empty() || !cmakeDirectoryLabelsList.empty()) {
       fout << "# Directory labels\n";
     }
 
-    for (std::string const& li : directoryLabelsList) {
+    for (auto const& li : directoryLabelsList) {
       fout << " " << li << "\n";
       lj_target_labels.append(li);
     }
 
-    for (std::string const& li : cmakeDirectoryLabelsList) {
+    for (auto const& li : cmakeDirectoryLabelsList) {
       fout << " " << li << "\n";
       lj_target_labels.append(li);
     }
@@ -3405,10 +3402,9 @@ void cmGlobalGenerator::WriteSummary(cmGeneratorTarget* target)
       fout << sfp << "\n";
       lj_source["file"] = sfp;
       if (cmValue svalue = sf->GetProperty("LABELS")) {
-        labels.clear();
         Json::Value& lj_source_labels = lj_source["labels"] = Json::arrayValue;
-        cmExpandList(*svalue, labels);
-        for (std::string const& label : labels) {
+        labels.assign(*svalue);
+        for (auto const& label : labels) {
           fout << " " << label << "\n";
           lj_source_labels.append(label);
         }

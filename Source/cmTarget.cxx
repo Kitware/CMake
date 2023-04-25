@@ -3030,11 +3030,11 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config, cmValue& loc,
   // Track the configuration-specific property suffix.
   suffix = cmStrCat('_', config_upper);
 
-  std::vector<std::string> mappedConfigs;
+  cmList mappedConfigs;
   {
     std::string mapProp = cmStrCat("MAP_IMPORTED_CONFIG_", config_upper);
     if (cmValue mapValue = this->GetProperty(mapProp)) {
-      cmExpandList(*mapValue, mappedConfigs, true);
+      mappedConfigs.assign(*mapValue, cmList::EmptyElements::Yes);
     }
   }
 
@@ -3116,9 +3116,9 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config, cmValue& loc,
   // If we have not yet found it then the project is willing to try
   // any available configuration.
   if (!loc && !imp) {
-    std::vector<std::string> availableConfigs;
+    cmList availableConfigs;
     if (cmValue iconfigs = this->GetProperty("IMPORTED_CONFIGURATIONS")) {
-      cmExpandList(*iconfigs, availableConfigs);
+      availableConfigs.assign(*iconfigs);
     }
     for (auto aci = availableConfigs.begin();
          !loc && !imp && aci != availableConfigs.end(); ++aci) {

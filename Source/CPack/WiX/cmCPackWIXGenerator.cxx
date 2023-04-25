@@ -681,10 +681,10 @@ bool cmCPackWIXGenerator::AddComponentsToFeature(
   featureDefinitions.BeginElement("FeatureRef");
   featureDefinitions.AddAttribute("Id", featureId);
 
-  std::vector<std::string> cpackPackageExecutablesList;
+  cmList cpackPackageExecutablesList;
   cmValue cpackPackageExecutables = GetOption("CPACK_PACKAGE_EXECUTABLES");
   if (cpackPackageExecutables) {
-    cmExpandList(cpackPackageExecutables, cpackPackageExecutablesList);
+    cpackPackageExecutablesList.assign(cpackPackageExecutables);
     if (cpackPackageExecutablesList.size() % 2 != 0) {
       cmCPackLogger(
         cmCPackLog::LOG_ERROR,
@@ -695,10 +695,10 @@ bool cmCPackWIXGenerator::AddComponentsToFeature(
     }
   }
 
-  std::vector<std::string> cpackPackageDesktopLinksList;
+  cmList cpackPackageDesktopLinksList;
   cmValue cpackPackageDesktopLinks = GetOption("CPACK_CREATE_DESKTOP_LINKS");
   if (cpackPackageDesktopLinks) {
-    cmExpandList(cpackPackageDesktopLinks, cpackPackageDesktopLinksList);
+    cpackPackageDesktopLinksList.assign(cpackPackageDesktopLinks);
   }
 
   AddDirectoryAndFileDefinitions(

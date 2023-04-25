@@ -24,6 +24,8 @@
 
 /**
  * CMake lists management
+ * A CMake list is a string where list elements are separated by the ';'
+ * character.
  *
  * For all operations, input arguments (single value like cm::string_view or
  * multiple values specified through pair of iterators) are, by default,
@@ -1331,3 +1333,20 @@ void append(cmList& v, Range const& r)
 #endif
 
 } // namespace cm
+
+/**
+ * Helper functions for legacy support. Use preferably cmList class directly
+ * or the static methods of the class.
+ */
+inline void cmExpandList(
+  cm::string_view arg, std::vector<std::string>& argsOut,
+  cmList::EmptyElements emptyElements = cmList::EmptyElements::No)
+{
+  cmList::append(argsOut, arg, emptyElements);
+}
+inline void cmExpandList(
+  cmValue arg, std::vector<std::string>& argsOut,
+  cmList::EmptyElements emptyElements = cmList::EmptyElements::No)
+{
+  cmList::append(argsOut, arg, emptyElements);
+}

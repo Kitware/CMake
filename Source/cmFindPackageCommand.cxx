@@ -1782,28 +1782,20 @@ bool cmFindPackageCommand::ReadListFile(const std::string& f,
 
 void cmFindPackageCommand::AppendToFoundProperty(const bool found)
 {
-  std::vector<std::string> foundContents;
+  cmList foundContents;
   cmValue foundProp =
     this->Makefile->GetState()->GetGlobalProperty("PACKAGES_FOUND");
-  if (cmNonempty(foundProp)) {
-    cmExpandList(*foundProp, foundContents, false);
-    auto nameIt =
-      std::find(foundContents.begin(), foundContents.end(), this->Name);
-    if (nameIt != foundContents.end()) {
-      foundContents.erase(nameIt);
-    }
+  if (!foundProp.IsEmpty()) {
+    foundContents.assign(*foundProp);
+    foundContents.remove_items({ this->Name });
   }
 
-  std::vector<std::string> notFoundContents;
+  cmList notFoundContents;
   cmValue notFoundProp =
     this->Makefile->GetState()->GetGlobalProperty("PACKAGES_NOT_FOUND");
-  if (cmNonempty(notFoundProp)) {
-    cmExpandList(*notFoundProp, notFoundContents, false);
-    auto nameIt =
-      std::find(notFoundContents.begin(), notFoundContents.end(), this->Name);
-    if (nameIt != notFoundContents.end()) {
-      notFoundContents.erase(nameIt);
-    }
+  if (!notFoundProp.IsEmpty()) {
+    notFoundContents.assign(*notFoundProp);
+    notFoundContents.remove_items({ this->Name });
   }
 
   if (found) {
@@ -1812,12 +1804,11 @@ void cmFindPackageCommand::AppendToFoundProperty(const bool found)
     notFoundContents.push_back(this->Name);
   }
 
-  std::string tmp = cmJoin(foundContents, ";");
-  this->Makefile->GetState()->SetGlobalProperty("PACKAGES_FOUND", tmp.c_str());
+  this->Makefile->GetState()->SetGlobalProperty(
+    "PACKAGES_FOUND", foundContents.to_string().c_str());
 
-  tmp = cmJoin(notFoundContents, ";");
-  this->Makefile->GetState()->SetGlobalProperty("PACKAGES_NOT_FOUND",
-                                                tmp.c_str());
+  this->Makefile->GetState()->SetGlobalProperty(
+    "PACKAGES_NOT_FOUND", notFoundContents.to_string().c_str());
 }
 
 void cmFindPackageCommand::AppendSuccessInformation()

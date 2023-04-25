@@ -23,6 +23,7 @@
 
 #include "cmExecutionStatus.h"
 #include "cmFunctionBlocker.h"
+#include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -156,16 +157,16 @@ bool cmForEachFunctionBlocker::ReplayZipLists(
   auto& mf = inStatus.GetMakefile();
 
   // Expand the list of list-variables into a list of lists of strings
-  std::vector<std::vector<std::string>> values;
+  std::vector<cmList> values;
   values.reserve(this->Args.size() - this->IterationVarsCount);
   // Also track the longest list size
   std::size_t maxItems = 0u;
   for (auto const& var :
        cmMakeRange(this->Args).advance(this->IterationVarsCount)) {
-    std::vector<std::string> items;
+    cmList items;
     auto const& value = mf.GetSafeDefinition(var);
     if (!value.empty()) {
-      cmExpandList(value, items, true);
+      items.assign(value, cmList::EmptyElements::Yes);
     }
     maxItems = std::max(maxItems, items.size());
     values.emplace_back(std::move(items));
@@ -344,7 +345,7 @@ bool HandleInMode(std::vector<std::string> const& args,
     } else if (doing == DoingLists) {
       auto const& value = makefile.GetSafeDefinition(arg);
       if (!value.empty()) {
-        cmExpandList(value, fb->Args, true);
+        cmExpandList(value, fb->Args, cmList::EmptyElements::Yes);
       }
 
     } else if (doing == DoingItems || doing == DoingZipLists) {

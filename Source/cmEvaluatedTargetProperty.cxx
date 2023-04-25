@@ -8,7 +8,7 @@
 #include "cmGeneratorExpressionContext.h"
 #include "cmGeneratorTarget.h"
 #include "cmLinkItem.h"
-#include "cmStringAlgorithms.h"
+#include "cmList.h"
 
 struct cmGeneratorExpressionDAGChecker;
 

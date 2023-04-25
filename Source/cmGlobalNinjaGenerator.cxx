@@ -32,6 +32,7 @@
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmLinkLineComputer.h"
+#include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmLocalNinjaGenerator.h"
@@ -3031,19 +3032,17 @@ void cmGlobalNinjaMultiGenerator::GetQtAutoGenConfigs(
 
 bool cmGlobalNinjaMultiGenerator::InspectConfigTypeVariables()
 {
-  std::vector<std::string> configsVec;
-  cmExpandList(
-    this->Makefiles.front()->GetSafeDefinition("CMAKE_CONFIGURATION_TYPES"),
-    configsVec);
-  if (configsVec.empty()) {
-    configsVec.emplace_back();
+  cmList configsList{ this->Makefiles.front()->GetDefinition(
+    "CMAKE_CONFIGURATION_TYPES") };
+  if (configsList.empty()) {
+    configsList.emplace_back();
   }
-  std::set<std::string> configs(configsVec.cbegin(), configsVec.cend());
+  std::set<std::string> configs(configsList.cbegin(), configsList.cend());
 
   this->DefaultFileConfig =
     this->Makefiles.front()->GetSafeDefinition("CMAKE_DEFAULT_BUILD_TYPE");
   if (this->DefaultFileConfig.empty()) {
-    this->DefaultFileConfig = configsVec.front();
+    this->DefaultFileConfig = configsList.front();
   }
   if (!configs.count(this->DefaultFileConfig)) {
     std::ostringstream msg;
@@ -3055,11 +3054,9 @@ bool cmGlobalNinjaMultiGenerator::InspectConfigTypeVariables()
     return false;
   }
 
-  std::vector<std::string> crossConfigsVec;
-  cmExpandList(
-    this->Makefiles.front()->GetSafeDefinition("CMAKE_CROSS_CONFIGS"),
-    crossConfigsVec);
-  auto crossConfigs = ListSubsetWithAll(configs, configs, crossConfigsVec);
+  cmList crossConfigsList{ this->Makefiles.front()->GetSafeDefinition(
+    "CMAKE_CROSS_CONFIGS") };
+  auto crossConfigs = ListSubsetWithAll(configs, configs, crossConfigsList);
   if (!crossConfigs) {
     std::ostringstream msg;
     msg << "CMAKE_CROSS_CONFIGS is not a subset of "
@@ -3086,12 +3083,11 @@ bool cmGlobalNinjaMultiGenerator::InspectConfigTypeVariables()
     return false;
   }
 
-  std::vector<std::string> defaultConfigsVec;
-  cmExpandList(defaultConfigsString, defaultConfigsVec);
+  cmList defaultConfigsList(defaultConfigsString);
   if (!this->DefaultFileConfig.empty()) {
     auto defaultConfigs =
       ListSubsetWithAll(this->GetCrossConfigs(this->DefaultFileConfig),
-                        this->CrossConfigs, defaultConfigsVec);
+                        this->CrossConfigs, defaultConfigsList);
     if (!defaultConfigs) {
       std::ostringstream msg;
       msg << "CMAKE_DEFAULT_CONFIGS is not a subset of CMAKE_CROSS_CONFIGS";

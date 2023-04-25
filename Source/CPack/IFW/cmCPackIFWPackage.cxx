@@ -428,16 +428,16 @@ int cmCPackIFWPackage::ConfigureFromPrefix(const std::string& prefix)
   }
 
   // QtIFW dependencies
-  std::vector<std::string> deps;
+  cmList deps;
   option = prefix + "DEPENDS";
   if (cmValue value = this->GetOption(option)) {
-    cmExpandList(value, deps);
+    deps.assign(value);
   }
   option = prefix + "DEPENDENCIES";
   if (cmValue value = this->GetOption(option)) {
-    cmExpandList(value, deps);
+    deps.append(value);
   }
-  for (std::string const& d : deps) {
+  for (auto const& d : deps) {
     DependenceStruct dep(d);
     if (this->Generator->Packages.count(dep.Name)) {
       cmCPackIFWPackage& depPkg = this->Generator->Packages[dep.Name];

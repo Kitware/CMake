@@ -19,7 +19,6 @@
 #include <cm/iterator>
 #include <cm/optional>
 #include <cm/string_view>
-#include <cm/vector>
 #include <cmext/algorithm>
 #include <cmext/string_view>
 
@@ -2146,11 +2145,11 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
         // This imported target has an appropriate location
         // for this (possibly mapped) config.
         // Check if there is a proper config mapping for the tested config.
-        std::vector<std::string> mappedConfigs;
+        cmList mappedConfigs;
         std::string mapProp = cmStrCat(
           "MAP_IMPORTED_CONFIG_", cmSystemTools::UpperCase(context->Config));
         if (cmValue mapValue = context->CurrentTarget->GetProperty(mapProp)) {
-          cmExpandList(cmSystemTools::UpperCase(*mapValue), mappedConfigs);
+          mappedConfigs.assign(cmSystemTools::UpperCase(*mapValue));
 
           for (auto const& param : parameters) {
             if (cm::contains(mappedConfigs, cmSystemTools::UpperCase(param))) {
@@ -2461,8 +2460,7 @@ static const struct LinkLibraryNode : public cmGeneratorExpressionNode
       return std::string();
     }
 
-    std::vector<std::string> list;
-    cmExpandLists(parameters.begin(), parameters.end(), list);
+    cmList list{ parameters.begin(), parameters.end() };
     if (list.empty()) {
       reportError(
         context, content->GetOriginalExpression(),
@@ -2547,8 +2545,7 @@ static const struct LinkGroupNode : public cmGeneratorExpressionNode
       return std::string();
     }
 
-    std::vector<std::string> list;
-    cmExpandLists(parameters.begin(), parameters.end(), list);
+    cmList list{ parameters.begin(), parameters.end() };
     if (list.empty()) {
       reportError(
         context, content->GetOriginalExpression(),
@@ -2638,8 +2635,7 @@ static const struct DeviceLinkNode : public cmGeneratorExpressionNode
     }
 
     if (context->HeadTarget->IsDeviceLink()) {
-      std::vector<std::string> list;
-      cmExpandLists(parameters.begin(), parameters.end(), list);
+      cmList list{ parameters.begin(), parameters.end() };
       const auto DL_BEGIN = "<DEVICE_LINK>"_s;
       const auto DL_END = "</DEVICE_LINK>"_s;
       cm::erase_if(list, [&](const std::string& item) {
@@ -3050,14 +3046,14 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
       }
     }
 
-    std::vector<std::string> objects;
+    cmList objects;
 
     if (gt->IsImported()) {
       cmValue loc = nullptr;
       cmValue imp = nullptr;
       std::string suffix;
       if (gt->Target->GetMappedConfig(context->Config, loc, imp, suffix)) {
-        cmExpandList(*loc, objects);
+        objects.assign(*loc);
       }
       context->HadContextSensitiveCondition = true;
     } else {
@@ -3075,7 +3071,7 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
         context->HadContextSensitiveCondition = true;
       }
 
-      for (std::string& o : objects) {
+      for (auto& o : objects) {
         o = cmStrCat(obj_dir, o);
       }
     }
@@ -3195,7 +3191,7 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
     }
     context->HadHeadSensitiveCondition = true;
 
-    using LangMap = std::map<std::string, std::vector<std::string>>;
+    using LangMap = std::map<std::string, cmList>;
     static LangMap availableFeatures;
 
     LangMap testedFeatures;
@@ -3217,7 +3213,7 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
           reportError(context, content->GetOriginalExpression(), error);
           return std::string();
         }
-        cmExpandList(featuresKnown, availableFeatures[lang]);
+        availableFeatures[lang].assign(featuresKnown);
       }
     }
 

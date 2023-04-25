@@ -6,6 +6,7 @@
 
 #include "cmGeneratorExpression.h"
 #include "cmInstallType.h"
+#include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
@@ -53,17 +54,16 @@ bool cmInstallDirectoryGenerator::Compute(cmLocalGenerator* lg)
 std::vector<std::string> cmInstallDirectoryGenerator::GetDirectories(
   std::string const& config) const
 {
-  std::vector<std::string> directories;
+  cmList directories;
   if (this->ActionsPerConfig) {
     for (std::string const& f : this->Directories) {
-      cmExpandList(
-        cmGeneratorExpression::Evaluate(f, this->LocalGenerator, config),
-        directories);
+      directories.append(
+        cmGeneratorExpression::Evaluate(f, this->LocalGenerator, config));
     }
   } else {
     directories = this->Directories;
   }
-  return directories;
+  return std::move(directories.data());
 }
 
 void cmInstallDirectoryGenerator::GenerateScriptActions(std::ostream& os,

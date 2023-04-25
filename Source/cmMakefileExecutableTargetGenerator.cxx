@@ -16,6 +16,7 @@
 #include "cmGlobalUnixMakefileGenerator3.h"
 #include "cmLinkLineComputer.h"
 #include "cmLinkLineDeviceComputer.h"
+#include "cmList.h"
 #include "cmLocalGenerator.h"
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
@@ -151,11 +152,10 @@ void cmMakefileExecutableTargetGenerator::WriteNvidiaDeviceExecutableRule(
   bool useLinkScript = this->GlobalGenerator->GetUseLinkScript();
 
   // Construct the main link rule.
-  std::vector<std::string> real_link_commands;
   const std::string linkRuleVar = "CMAKE_CUDA_DEVICE_LINK_EXECUTABLE";
   const std::string linkRule = this->GetLinkRule(linkRuleVar);
   std::vector<std::string> commands1;
-  cmExpandList(linkRule, real_link_commands);
+  cmList real_link_commands(linkRule);
 
   bool useResponseFileForObjects =
     this->CheckUseResponseFileForObjects(linkLanguage);
@@ -235,7 +235,7 @@ void cmMakefileExecutableTargetGenerator::WriteNvidiaDeviceExecutableRule(
 
     // Expand placeholders in the commands.
     rulePlaceholderExpander->SetTargetImpLib(targetOutput);
-    for (std::string& real_link_command : real_link_commands) {
+    for (auto& real_link_command : real_link_commands) {
       real_link_command = cmStrCat(launcher, real_link_command);
       rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator,
                                                    real_link_command, vars);
@@ -466,18 +466,18 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   bool useLinkScript = this->GlobalGenerator->GetUseLinkScript();
 
   // Construct the main link rule.
-  std::vector<std::string> real_link_commands;
   std::string linkRuleVar = this->GeneratorTarget->GetCreateRuleVariable(
     linkLanguage, this->GetConfigName());
   std::string linkRule = this->GetLinkRule(linkRuleVar);
   std::vector<std::string> commands1;
-  cmExpandList(linkRule, real_link_commands);
+  cmList real_link_commands(linkRule);
+
   if (this->GeneratorTarget->IsExecutableWithExports()) {
     // If a separate rule for creating an import library is specified
     // add it now.
     std::string implibRuleVar =
       cmStrCat("CMAKE_", linkLanguage, "_CREATE_IMPORT_LIBRARY");
-    this->Makefile->GetDefExpandList(implibRuleVar, real_link_commands);
+    real_link_commands.append(this->Makefile->GetDefinition(implibRuleVar));
   }
 
   bool useResponseFileForObjects =
@@ -601,7 +601,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
     // Expand placeholders in the commands.
     rulePlaceholderExpander->SetTargetImpLib(targetOutPathImport);
-    for (std::string& real_link_command : real_link_commands) {
+    for (auto& real_link_command : real_link_commands) {
       real_link_command = cmStrCat(launcher, real_link_command);
       rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator,
                                                    real_link_command, vars);

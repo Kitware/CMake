@@ -909,14 +909,11 @@ void cmLocalNinjaGenerator::AdditionalCleanFiles(const std::string& config)
 {
   if (cmValue prop_value =
         this->Makefile->GetProperty("ADDITIONAL_CLEAN_FILES")) {
-    std::vector<std::string> cleanFiles;
-    {
-      cmExpandList(cmGeneratorExpression::Evaluate(*prop_value, this, config),
-                   cleanFiles);
-    }
+    cmList cleanFiles{ cmGeneratorExpression::Evaluate(*prop_value, this,
+                                                       config) };
     std::string const& binaryDir = this->GetCurrentBinaryDirectory();
     cmGlobalNinjaGenerator* gg = this->GetGlobalNinjaGenerator();
-    for (std::string const& cleanFile : cleanFiles) {
+    for (auto const& cleanFile : cleanFiles) {
       // Support relative paths
       gg->AddAdditionalCleanFile(
         cmSystemTools::CollapseFullPath(cleanFile, binaryDir), config);

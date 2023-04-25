@@ -1094,10 +1094,10 @@ void cmVisualStudio10TargetGenerator::WritePackageReferences(Elem& e0)
 
 void cmVisualStudio10TargetGenerator::WriteDotNetReferences(Elem& e0)
 {
-  std::vector<std::string> references;
+  cmList references;
   if (cmValue vsDotNetReferences =
         this->GeneratorTarget->GetProperty("VS_DOTNET_REFERENCES")) {
-    cmExpandList(*vsDotNetReferences, references);
+    references.assign(*vsDotNetReferences);
   }
   cmPropertyMap const& props = this->GeneratorTarget->Target->GetProperties();
   for (auto const& i : props.GetList()) {
@@ -1114,7 +1114,7 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReferences(Elem& e0)
   }
   if (!references.empty() || !this->DotNetHintReferences.empty()) {
     Elem e1(e0, "ItemGroup");
-    for (std::string const& ri : references) {
+    for (auto const& ri : references) {
       // if the entry from VS_DOTNET_REFERENCES is an existing file, generate
       // a new hint-reference and name it from the filename
       if (cmsys::SystemTools::FileExists(ri, true)) {
@@ -1369,20 +1369,20 @@ void cmVisualStudio10TargetGenerator::WriteTargetsFileReferences(Elem& e1)
 
 void cmVisualStudio10TargetGenerator::WriteWinRTReferences(Elem& e0)
 {
-  std::vector<std::string> references;
+  cmList references;
   if (cmValue vsWinRTReferences =
         this->GeneratorTarget->GetProperty("VS_WINRT_REFERENCES")) {
-    cmExpandList(*vsWinRTReferences, references);
+    references.assign(*vsWinRTReferences);
   }
 
   if (this->GlobalGenerator->TargetsWindowsPhone() &&
       this->GlobalGenerator->GetSystemVersion() == "8.0" &&
       references.empty()) {
-    references.push_back("platform.winmd");
+    references.push_back(std::string{ "platform.winmd" });
   }
   if (!references.empty()) {
     Elem e1(e0, "ItemGroup");
-    for (std::string const& ri : references) {
+    for (auto const& ri : references) {
       Elem e2(e1, "Reference");
       e2.Attribute("Include", ri);
       e2.Element("IsWinMDFile", "true");
@@ -4817,13 +4817,13 @@ void cmVisualStudio10TargetGenerator::WriteSinglePlatformExtension(
 
 void cmVisualStudio10TargetGenerator::WriteSDKReferences(Elem& e0)
 {
-  std::vector<std::string> sdkReferences;
+  cmList sdkReferences;
   std::unique_ptr<Elem> spe1;
   if (cmValue vsSDKReferences =
         this->GeneratorTarget->GetProperty("VS_SDK_REFERENCES")) {
-    cmExpandList(*vsSDKReferences, sdkReferences);
+    sdkReferences.assign(*vsSDKReferences);
     spe1 = cm::make_unique<Elem>(e0, "ItemGroup");
-    for (std::string const& ri : sdkReferences) {
+    for (auto const& ri : sdkReferences) {
       Elem(*spe1, "SDKReference").Attribute("Include", ri);
     }
   }

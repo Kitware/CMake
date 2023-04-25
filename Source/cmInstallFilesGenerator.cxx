@@ -6,8 +6,8 @@
 
 #include "cmGeneratorExpression.h"
 #include "cmInstallType.h"
+#include "cmList.h"
 #include "cmListFileCache.h"
-#include "cmStringAlgorithms.h"
 
 class cmLocalGenerator;
 
@@ -69,17 +69,15 @@ std::string cmInstallFilesGenerator::GetRename(std::string const& config) const
 std::vector<std::string> cmInstallFilesGenerator::GetFiles(
   std::string const& config) const
 {
-  std::vector<std::string> files;
   if (this->ActionsPerConfig) {
+    cmList files;
     for (std::string const& f : this->Files) {
-      cmExpandList(
-        cmGeneratorExpression::Evaluate(f, this->LocalGenerator, config),
-        files);
+      files.append(
+        cmGeneratorExpression::Evaluate(f, this->LocalGenerator, config));
     }
-  } else {
-    files = this->Files;
+    return std::move(files.data());
   }
-  return files;
+  return this->Files;
 }
 
 void cmInstallFilesGenerator::AddFilesInstallRule(

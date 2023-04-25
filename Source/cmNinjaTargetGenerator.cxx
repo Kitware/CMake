@@ -9,6 +9,7 @@
 #include <iterator>
 #include <map>
 #include <ostream>
+#include <type_traits>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -688,7 +689,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
 
     // Rule to scan dependencies of sources that need preprocessing.
     {
-      std::vector<std::string> scanCommands;
+      cmList scanCommands;
       std::string scanRuleName;
       std::string ppFileName;
       if (compilationPreprocesses) {
@@ -696,8 +697,8 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
         ppFileName = "$PREPROCESSED_OUTPUT_FILE";
         std::string const& scanCommand = mf->GetRequiredDefinition(
           cmStrCat("CMAKE_EXPERIMENTAL_", lang, "_SCANDEP_SOURCE"));
-        cmExpandList(scanCommand, scanCommands);
-        for (std::string& i : scanCommands) {
+        scanCommands.assign(scanCommand);
+        for (auto& i : scanCommands) {
           i = cmStrCat(launcher, i);
         }
       } else {
@@ -705,8 +706,8 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
         ppFileName = "$out";
         std::string const& ppCommmand = mf->GetRequiredDefinition(
           cmStrCat("CMAKE_", lang, "_PREPROCESS_SOURCE"));
-        cmExpandList(ppCommmand, scanCommands);
-        for (std::string& i : scanCommands) {
+        scanCommands.assign(ppCommmand);
+        for (auto& i : scanCommands) {
           i = cmStrCat(launcher, i);
         }
         scanCommands.emplace_back(GetScanCommand(cmakeCmd, tdi, lang, "$out",
@@ -885,10 +886,9 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
   }
 
   // Rule for compiling object file.
-  std::vector<std::string> compileCmds;
   const std::string cmdVar = cmStrCat("CMAKE_", lang, "_COMPILE_OBJECT");
   const std::string& compileCmd = mf->GetRequiredDefinition(cmdVar);
-  cmExpandList(compileCmd, compileCmds);
+  cmList compileCmds(compileCmd);
 
   // See if we need to use a compiler launcher like ccache or distcc
   std::string compilerLauncher;
@@ -1055,12 +1055,10 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
   const auto& extraCommands = this->GetMakefile()->GetSafeDefinition(
     cmStrCat("CMAKE_", lang, "_DEPENDS_EXTRA_COMMANDS"));
   if (!extraCommands.empty()) {
-    cmList commandList{ extraCommands };
-    compileCmds.insert(compileCmds.end(), commandList.cbegin(),
-                       commandList.cend());
+    compileCmds.append(extraCommands);
   }
 
-  for (std::string& i : compileCmds) {
+  for (auto& i : compileCmds) {
     i = cmStrCat(launcher, i);
     rulePlaceholderExpander->ExpandRuleVariables(this->GetLocalGenerator(), i,
                                                  vars);
@@ -1862,16 +1860,15 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
     compileObjectVars.CudaCompileMode = cudaCompileMode.c_str();
   }
 
-  std::vector<std::string> compileCmds;
   const std::string cmdVar = cmStrCat("CMAKE_", language, "_COMPILE_OBJECT");
   const std::string& compileCmd =
     this->Makefile->GetRequiredDefinition(cmdVar);
-  cmExpandList(compileCmd, compileCmds);
+  cmList compileCmds(compileCmd);
 
   std::unique_ptr<cmRulePlaceholderExpander> rulePlaceholderExpander(
     this->GetLocalGenerator()->CreateRulePlaceholderExpander());
 
-  for (std::string& i : compileCmds) {
+  for (auto& i : compileCmds) {
     // no launcher for CMAKE_EXPORT_COMPILE_COMMANDS
     rulePlaceholderExpander->ExpandRuleVariables(this->GetLocalGenerator(), i,
                                                  compileObjectVars);
@@ -1889,13 +1886,11 @@ void cmNinjaTargetGenerator::AdditionalCleanFiles(const std::string& config)
   if (cmValue prop_value =
         this->GeneratorTarget->GetProperty("ADDITIONAL_CLEAN_FILES")) {
     cmLocalNinjaGenerator* lg = this->LocalGenerator;
-    std::vector<std::string> cleanFiles;
-    cmExpandList(cmGeneratorExpression::Evaluate(*prop_value, lg, config,
-                                                 this->GeneratorTarget),
-                 cleanFiles);
+    cmList cleanFiles(cmGeneratorExpression::Evaluate(*prop_value, lg, config,
+                                                      this->GeneratorTarget));
     std::string const& binaryDir = lg->GetCurrentBinaryDirectory();
     cmGlobalNinjaGenerator* gg = lg->GetGlobalNinjaGenerator();
-    for (std::string const& cleanFile : cleanFiles) {
+    for (auto const& cleanFile : cleanFiles) {
       // Support relative paths
       gg->AddAdditionalCleanFile(
         cmSystemTools::CollapseFullPath(cleanFile, binaryDir), config);

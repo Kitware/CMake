@@ -8,6 +8,7 @@
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmGlobalVisualStudioGenerator.h"
+#include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
@@ -205,12 +206,12 @@ void cmGlobalVisualStudio71Generator::WriteProjectConfigurations(
     !platformMapping.empty() ? platformMapping : this->GetPlatformName();
   std::string guid = this->GetGUID(name);
   for (std::string const& i : configs) {
-    std::vector<std::string> mapConfig;
+    cmList mapConfig;
     const char* dstConfig = i.c_str();
     if (target.GetProperty("EXTERNAL_MSPROJECT")) {
       if (cmValue m = target.GetProperty("MAP_IMPORTED_CONFIG_" +
                                          cmSystemTools::UpperCase(i))) {
-        cmExpandList(*m, mapConfig);
+        mapConfig.assign(*m);
         if (!mapConfig.empty()) {
           dstConfig = mapConfig[0].c_str();
         }

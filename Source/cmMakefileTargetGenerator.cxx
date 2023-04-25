@@ -208,27 +208,24 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
   // -- Write the custom commands for this target
 
   // Evaluates generator expressions and expands prop_value
-  auto evaluatedFiles =
-    [this](const std::string& prop_value) -> std::vector<std::string> {
-    std::vector<std::string> files;
-    cmExpandList(cmGeneratorExpression::Evaluate(
-                   prop_value, this->LocalGenerator, this->GetConfigName(),
-                   this->GeneratorTarget),
-                 files);
+  auto evaluatedFiles = [this](const std::string& prop_value) -> cmList {
+    cmList files{ cmGeneratorExpression::Evaluate(
+      prop_value, this->LocalGenerator, this->GetConfigName(),
+      this->GeneratorTarget) };
     return files;
   };
 
   // Look for additional files registered for cleaning in this directory.
   if (cmValue prop_value =
         this->Makefile->GetProperty("ADDITIONAL_MAKE_CLEAN_FILES")) {
-    std::vector<std::string> const files = evaluatedFiles(*prop_value);
+    auto const files = evaluatedFiles(*prop_value);
     this->CleanFiles.insert(files.begin(), files.end());
   }
 
   // Look for additional files registered for cleaning in this target.
   if (cmValue prop_value =
         this->GeneratorTarget->GetProperty("ADDITIONAL_CLEAN_FILES")) {
-    std::vector<std::string> const files = evaluatedFiles(*prop_value);
+    auto const files = evaluatedFiles(*prop_value);
     // For relative path support
     std::string const& binaryDir =
       this->LocalGenerator->GetCurrentBinaryDirectory();
@@ -1003,10 +1000,10 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
       vars.CudaCompileMode = cudaCompileMode.c_str();
     }
 
-    std::vector<std::string> compileCommands;
+    cmList compileCommands;
     const std::string& compileRule = this->Makefile->GetRequiredDefinition(
       "CMAKE_" + lang + "_COMPILE_OBJECT");
-    cmExpandList(compileRule, compileCommands);
+    compileCommands.assign(compileRule);
 
     if (this->GeneratorTarget->GetPropertyAsBool("EXPORT_COMPILE_COMMANDS") &&
         lang_can_export_cmds && compileCommands.size() == 1) {
@@ -1209,7 +1206,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
           i = this->LocalGenerator->EscapeForShell(i);
         }
       }
-      compileCommands.front().insert(0, cmJoin(args, " ") + " ");
+      compileCommands.front().insert(0, args.join(" ") + " ");
     }
 
     std::string launcher;
@@ -1241,9 +1238,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
       const auto& extraCommands = this->Makefile->GetSafeDefinition(
         cmStrCat("CMAKE_", lang, "_DEPENDS_EXTRA_COMMANDS"));
       if (!extraCommands.empty()) {
-        cmList commandList{ extraCommands };
-        compileCommands.insert(compileCommands.end(), commandList.cbegin(),
-                               commandList.cend());
+        compileCommands.append(extraCommands);
       }
 
       const auto& depFormat = this->Makefile->GetRequiredDefinition(
@@ -1284,14 +1279,15 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
   }
 
   // Check for extra outputs created by the compilation.
-  std::vector<std::string> outputs(1, relativeObj);
+  cmList outputs;
+  outputs.emplace_back(relativeObj);
   if (cmValue extra_outputs_str = source.GetProperty("OBJECT_OUTPUTS")) {
     std::string evaluated_outputs = cmGeneratorExpression::Evaluate(
       *extra_outputs_str, this->LocalGenerator, config);
 
     if (!evaluated_outputs.empty()) {
       // Register these as extra files to clean.
-      cmExpandList(evaluated_outputs, outputs);
+      outputs.append(evaluated_outputs);
     }
   }
   if (!ispcHeaderRelative.empty()) {

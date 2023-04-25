@@ -543,9 +543,9 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
     std::string sla_xml =
       cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"), "/sla.xml");
 
-    std::vector<std::string> languages;
+    cmList languages;
     if (!oldStyle) {
-      cmExpandList(cpack_dmg_languages, languages);
+      languages.assign(cpack_dmg_languages);
     }
 
     std::vector<uint16_t> header_data;
@@ -574,7 +574,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
 
       header_data.push_back(0);
       header_data.push_back(languages.size());
-      for (size_t i = 0; i < languages.size(); ++i) {
+      for (cmList::size_type i = 0; i < languages.size(); ++i) {
         CFStringRef language_cfstring = CFStringCreateWithCString(
           nullptr, languages[i].c_str(), kCFStringEncodingUTF8);
         CFStringRef iso_language =
