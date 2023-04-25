@@ -15,6 +15,7 @@
 #include "cmGeneratorTarget.h"
 #include "cmGlobalCommonGenerator.h"
 #include "cmGlobalGenerator.h"
+#include "cmList.h"
 #include "cmLocalCommonGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
@@ -303,8 +304,7 @@ std::string cmCommonTargetGenerator::GetLinkerLauncher(
       *launcherProp, this->LocalCommonGenerator, config, this->GeneratorTarget,
       &dagChecker, this->GeneratorTarget, lang);
     // Convert ;-delimited list to single string
-    std::vector<std::string> args =
-      cmExpandedList(evaluatedLinklauncher, true);
+    cmList args{ evaluatedLinklauncher, cmList::EmptyElements::Yes };
     if (!args.empty()) {
       args[0] = this->LocalCommonGenerator->ConvertToOutputFormat(
         args[0], cmOutputConverter::SHELL);

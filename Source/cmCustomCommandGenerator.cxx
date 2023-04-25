@@ -17,6 +17,7 @@
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
+#include "cmList.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmStateTypes.h"
@@ -116,7 +117,7 @@ std::vector<std::string> EvaluateDepends(std::vector<std::string> const& paths,
                                /*outputConfig=*/outputConfig,
                                /*commandConfig=*/commandConfig,
                                /*target=*/nullptr);
-    cm::append(depends, cmExpandedList(ep));
+    cm::append(depends, cmList{ ep });
   }
   for (std::string& p : depends) {
     if (cmSystemTools::FileIsFullPath(p)) {
@@ -196,7 +197,7 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(
         clarg, ge, this->LG, useOutputConfig, this->OutputConfig,
         this->CommandConfig, target, &this->Utilities);
       if (this->CC->GetCommandExpandLists()) {
-        cm::append(argv, cmExpandedList(parsed_arg));
+        cm::append(argv, cmList{ parsed_arg });
       } else {
         argv.push_back(std::move(parsed_arg));
       }

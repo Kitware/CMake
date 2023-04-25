@@ -23,6 +23,7 @@
 #include "cmGlobalNinjaGenerator.h"
 #include "cmLinkLineComputer.h"
 #include "cmLinkLineDeviceComputer.h"
+#include "cmList.h"
 #include "cmLocalCommonGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmLocalNinjaGenerator.h"
@@ -784,7 +785,7 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatement(
     }
 
     this->WriteDeviceLinkRules(config);
-    this->WriteDeviceLinkStatements(config, cmExpandedList(architecturesStr),
+    this->WriteDeviceLinkStatements(config, cmList{ architecturesStr },
                                     targetOutputReal);
   } else {
     this->WriteNvidiaDeviceLinkStatement(config, fileConfig, targetOutputDir,

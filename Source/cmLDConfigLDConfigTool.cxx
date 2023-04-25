@@ -9,9 +9,9 @@
 
 #include "cmsys/RegularExpression.hxx"
 
+#include "cmList.h"
 #include "cmMakefile.h"
 #include "cmRuntimeDependencyArchive.h"
-#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmUVProcessChain.h"
 
@@ -34,7 +34,7 @@ bool cmLDConfigLDConfigTool::GetLDConfigPaths(std::vector<std::string>& paths)
     }
   }
 
-  std::vector<std::string> ldConfigCommand = cmExpandedList(ldConfigPath);
+  cmList ldConfigCommand{ ldConfigPath };
   ldConfigCommand.emplace_back("-v");
   ldConfigCommand.emplace_back("-N"); // Don't rebuild the cache.
   ldConfigCommand.emplace_back("-X"); // Don't update links.

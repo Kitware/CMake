@@ -33,6 +33,7 @@
 #include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
+#include "cmList.h"
 #include "cmMakefile.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
@@ -521,7 +522,7 @@ int cmCTestScriptHandler::RunCurrentScript()
 
   // set any environment variables
   if (!this->CTestEnv.empty()) {
-    std::vector<std::string> envArgs = cmExpandedList(this->CTestEnv);
+    cmList envArgs{ this->CTestEnv };
     cmSystemTools::AppendEnv(envArgs);
   }
 
@@ -625,7 +626,7 @@ int cmCTestScriptHandler::PerformExtraUpdates()
   // do an initial cvs update as required
   command = this->UpdateCmd;
   for (std::string const& eu : this->ExtraUpdates) {
-    std::vector<std::string> cvsArgs = cmExpandedList(eu);
+    cmList cvsArgs{ eu };
     if (cvsArgs.size() == 2) {
       std::string fullCommand = cmStrCat(command, " update ", cvsArgs[1]);
       output.clear();
@@ -764,7 +765,7 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
   }
 
   // run ctest, it may be more than one command in here
-  std::vector<std::string> ctestCommands = cmExpandedList(this->CTestCmd);
+  cmList ctestCommands{ this->CTestCmd };
   // for each variable/argument do a putenv
   for (std::string const& ctestCommand : ctestCommands) {
     command = ctestCommand;

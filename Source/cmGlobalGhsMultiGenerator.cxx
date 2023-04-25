@@ -18,6 +18,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmGhsMultiGpj.h"
+#include "cmList.h"
 #include "cmLocalGenerator.h"
 #include "cmLocalGhsMultiGenerator.h"
 #include "cmMakefile.h"
@@ -531,7 +532,7 @@ void cmGlobalGhsMultiGenerator::WriteMacros(std::ostream& fout,
   fout << "macro PROJ_NAME=" << root->GetProjectName() << '\n';
   cmValue ghsGpjMacros = root->GetMakefile()->GetDefinition("GHS_GPJ_MACROS");
   if (ghsGpjMacros) {
-    std::vector<std::string> expandedList = cmExpandedList(*ghsGpjMacros);
+    cmList expandedList{ *ghsGpjMacros };
     for (std::string const& arg : expandedList) {
       fout << "macro " << arg << '\n';
     }

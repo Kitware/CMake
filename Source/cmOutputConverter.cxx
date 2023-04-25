@@ -6,16 +6,15 @@
 #include <cassert>
 #include <cctype>
 #include <set>
-#include <vector>
 
 #ifdef _WIN32
 #  include <unordered_map>
 #  include <utility>
 #endif
 
+#include "cmList.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
-#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
 
@@ -319,7 +318,7 @@ cmOutputConverter::FortranFormat cmOutputConverter::GetFortranFormat(
 {
   FortranFormat format = FortranFormatNone;
   if (!value.empty()) {
-    for (std::string const& fi : cmExpandedList(value)) {
+    for (std::string const& fi : cmList(value)) {
       if (fi == "FIXED") {
         format = FortranFormatFixed;
       }

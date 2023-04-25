@@ -16,6 +16,7 @@
 #include "cmGlobalUnixMakefileGenerator3.h"
 #include "cmLinkLineComputer.h"
 #include "cmLinkLineDeviceComputer.h"
+#include "cmList.h"
 #include "cmLocalGenerator.h"
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
@@ -965,7 +966,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
       this->GeneratorTarget->HasImportLibrary(this->GetConfigName())) {
     auto genStubsRule =
       this->Makefile->GetDefinition("CMAKE_CREATE_TEXT_STUBS");
-    auto genStubs_commands = cmExpandedList(genStubsRule);
+    cmList genStubs_commands{ genStubsRule };
 
     std::string TBDFullPath =
       cmStrCat(outpathImp, this->TargetNames.ImportOutput);

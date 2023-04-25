@@ -19,6 +19,7 @@
 #include "cmFileTimes.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
+#include "cmList.h"
 #include "cmMakefile.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
@@ -216,8 +217,7 @@ int cmCPackGenerator::InstallProject()
   cmValue default_dir_install_permissions =
     this->GetOption("CPACK_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS");
   if (cmNonempty(default_dir_install_permissions)) {
-    std::vector<std::string> items =
-      cmExpandedList(default_dir_install_permissions);
+    cmList items{ default_dir_install_permissions };
     for (const auto& arg : items) {
       if (!cmFSPermissions::stringToModeT(arg, default_dir_mode_v)) {
         cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -266,7 +266,7 @@ int cmCPackGenerator::InstallProject()
   // Run pre-build actions
   cmValue preBuildScripts = this->GetOption("CPACK_PRE_BUILD_SCRIPTS");
   if (preBuildScripts) {
-    const auto scripts = cmExpandedList(preBuildScripts, false);
+    const cmList scripts{ preBuildScripts };
     for (const auto& script : scripts) {
       cmCPackLogger(cmCPackLog::LOG_OUTPUT,
                     "Executing pre-build script: " << script << std::endl);
@@ -296,8 +296,7 @@ int cmCPackGenerator::InstallProjectViaInstallCommands(
     std::string tempInstallDirectoryEnv =
       cmStrCat("CMAKE_INSTALL_PREFIX=", tempInstallDirectory);
     cmSystemTools::PutEnv(tempInstallDirectoryEnv);
-    std::vector<std::string> installCommandsVector =
-      cmExpandedList(installCommands);
+    cmList installCommandsVector{ installCommands };
     for (std::string const& ic : installCommandsVector) {
       cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Execute: " << ic << std::endl);
       std::string output;
@@ -333,8 +332,7 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
   std::vector<cmsys::RegularExpression> ignoreFilesRegex;
   cmValue cpackIgnoreFiles = this->GetOption("CPACK_IGNORE_FILES");
   if (cpackIgnoreFiles) {
-    std::vector<std::string> ignoreFilesRegexString =
-      cmExpandedList(cpackIgnoreFiles);
+    cmList ignoreFilesRegexString{ cpackIgnoreFiles };
     for (std::string const& ifr : ignoreFilesRegexString) {
       cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                     "Create ignore files regex for: " << ifr << std::endl);
@@ -343,9 +341,8 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
   }
   cmValue installDirectories = this->GetOption("CPACK_INSTALLED_DIRECTORIES");
   if (cmNonempty(installDirectories)) {
-    std::vector<std::string> installDirectoriesVector =
-      cmExpandedList(installDirectories);
-    if (installDirectoriesVector.size() % 2 != 0) {
+    cmList installDirectoriesList{ installDirectories };
+    if (installDirectoriesList.size() % 2 != 0) {
       cmCPackLogger(
         cmCPackLog::LOG_ERROR,
         "CPACK_INSTALLED_DIRECTORIES should contain pairs of <directory> "
@@ -355,10 +352,10 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
           << std::endl);
       return 0;
     }
-    std::vector<std::string>::iterator it;
+    cmList::iterator it;
     const std::string& tempDir = tempInstallDirectory;
-    for (it = installDirectoriesVector.begin();
-         it != installDirectoriesVector.end(); ++it) {
+    for (it = installDirectoriesList.begin();
+         it != installDirectoriesList.end(); ++it) {
       std::vector<std::pair<std::string, std::string>> symlinkedFiles;
       cmCPackLogger(cmCPackLog::LOG_DEBUG, "Find files" << std::endl);
       cmsys::Glob gl;
@@ -485,7 +482,7 @@ int cmCPackGenerator::InstallProjectViaInstallScript(
   if (cmakeScripts && !cmakeScripts->empty()) {
     cmCPackLogger(cmCPackLog::LOG_OUTPUT,
                   "- Install scripts: " << cmakeScripts << std::endl);
-    std::vector<std::string> cmakeScriptsVector = cmExpandedList(cmakeScripts);
+    cmList cmakeScriptsVector{ cmakeScripts };
     for (std::string const& installScript : cmakeScriptsVector) {
 
       cmCPackLogger(cmCPackLog::LOG_OUTPUT,
@@ -549,14 +546,12 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
                       << std::endl);
       return 0;
     }
-    std::vector<std::string> cmakeProjectsVector =
-      cmExpandedList(cmakeProjects);
-    std::vector<std::string>::iterator it;
-    for (it = cmakeProjectsVector.begin(); it != cmakeProjectsVector.end();
-         ++it) {
-      if (it + 1 == cmakeProjectsVector.end() ||
-          it + 2 == cmakeProjectsVector.end() ||
-          it + 3 == cmakeProjectsVector.end()) {
+    cmList cmakeProjectsList{ cmakeProjects };
+    cmList::iterator it;
+    for (it = cmakeProjectsList.begin(); it != cmakeProjectsList.end(); ++it) {
+      if (it + 1 == cmakeProjectsList.end() ||
+          it + 2 == cmakeProjectsList.end() ||
+          it + 3 == cmakeProjectsList.end()) {
         cmCPackLogger(
           cmCPackLog::LOG_ERROR,
           "Not enough items on list: CPACK_INSTALL_CMAKE_PROJECTS. "
@@ -594,9 +589,8 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           cmSystemTools::UpperCase(project.Component) + "_INSTALL_TYPES";
         cmValue installTypes = this->GetOption(installTypesVar);
         if (cmNonempty(installTypes)) {
-          std::vector<std::string> installTypesVector =
-            cmExpandedList(installTypes);
-          for (std::string const& installType : installTypesVector) {
+          cmList installTypesList{ installTypes };
+          for (std::string const& installType : installTypesList) {
             project.InstallationTypes.push_back(
               this->GetInstallationType(project.ProjectName, installType));
           }
@@ -1129,7 +1123,7 @@ int cmCPackGenerator::DoPackage()
     this->MakefileMap->AddDefinition("CPACK_PACKAGE_FILES",
                                      cmJoin(this->packageFileNames, ";"));
 
-    const auto scripts = cmExpandedList(postBuildScripts, false);
+    const cmList scripts{ postBuildScripts };
     for (const auto& script : scripts) {
       cmCPackLogger(cmCPackLog::LOG_OUTPUT,
                     "Executing post-build script: " << script << std::endl);
@@ -1595,9 +1589,8 @@ cmCPackComponent* cmCPackGenerator::GetComponent(
     // Determine the installation types.
     cmValue installTypes = this->GetOption(macroPrefix + "_INSTALL_TYPES");
     if (cmNonempty(installTypes)) {
-      std::vector<std::string> installTypesVector =
-        cmExpandedList(installTypes);
-      for (std::string const& installType : installTypesVector) {
+      cmList installTypesList{ installTypes };
+      for (auto const& installType : installTypesList) {
         component->InstallationTypes.push_back(
           this->GetInstallationType(projectName, installType));
       }
@@ -1606,8 +1599,8 @@ cmCPackComponent* cmCPackGenerator::GetComponent(
     // Determine the component dependencies.
     cmValue depends = this->GetOption(macroPrefix + "_DEPENDS");
     if (cmNonempty(depends)) {
-      std::vector<std::string> dependsVector = cmExpandedList(depends);
-      for (std::string const& depend : dependsVector) {
+      cmList dependsList{ depends };
+      for (auto const& depend : dependsList) {
         cmCPackComponent* child = this->GetComponent(projectName, depend);
         component->Dependencies.push_back(child);
         child->ReverseDependencies.push_back(component);

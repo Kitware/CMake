@@ -13,6 +13,7 @@
 
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
+#include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
@@ -147,16 +148,15 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
   }
 
   // Evaluate command line arguments
-  std::vector<std::string> argv =
-    this->EvaluateCommandLineArguments(this->Test->GetCommand(), ge, config);
-
-  // Expand arguments if COMMAND_EXPAND_LISTS is set
-  if (this->Test->GetCommandExpandLists()) {
-    argv = cmExpandedLists(argv.begin(), argv.end());
-    // Expanding lists on an empty command may have left it empty
-    if (argv.empty()) {
-      argv.emplace_back();
-    }
+  cmList argv{
+    this->EvaluateCommandLineArguments(this->Test->GetCommand(), ge, config),
+    // Expand arguments if COMMAND_EXPAND_LISTS is set
+    this->Test->GetCommandExpandLists() ? cmList::ExpandElements::Yes
+                                        : cmList::ExpandElements::No
+  };
+  // Expanding lists on an empty command may have left it empty
+  if (argv.empty()) {
+    argv.emplace_back();
   }
 
   // Check whether the command executable is a target whose name is to
@@ -170,7 +170,7 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
     // Prepend with the emulator when cross compiling if required.
     cmValue emulator = target->GetProperty("CROSSCOMPILING_EMULATOR");
     if (cmNonempty(emulator)) {
-      std::vector<std::string> emulatorWithArgs = cmExpandedList(*emulator);
+      cmList emulatorWithArgs{ *emulator };
       std::string emulatorExe(emulatorWithArgs[0]);
       cmSystemTools::ConvertToUnixSlashes(emulatorExe);
       os << cmOutputConverter::EscapeForCMake(emulatorExe) << " ";

@@ -2,15 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackFreeBSDGenerator.h"
 
-#include "cmArchiveWrite.h"
-#include "cmCPackArchiveGenerator.h"
-#include "cmCPackLog.h"
-#include "cmGeneratedFileStream.h"
-#include "cmStringAlgorithms.h"
-#include "cmSystemTools.h"
-#include "cmWorkingDirectory.h"
-
-// Needed for ::open() and ::stat()
 #include <algorithm>
 #include <ostream>
 #include <utility>
@@ -20,6 +11,15 @@
 #include <pkg.h>
 
 #include <sys/stat.h>
+
+#include "cmArchiveWrite.h"
+#include "cmCPackArchiveGenerator.h"
+#include "cmCPackLog.h"
+#include "cmGeneratedFileStream.h"
+#include "cmList.h"
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
+#include "cmWorkingDirectory.h"
 
 // Suffix used to tell libpkg what compression to use
 static const char FreeBSDPackageCompression[] = "txz";
@@ -292,8 +292,7 @@ void cmCPackFreeBSDGenerator::write_manifest_fields(
   manifest << ManifestKeyValue(
     "desc", var_lookup("CPACK_FREEBSD_PACKAGE_DESCRIPTION"));
   manifest << ManifestKeyValue("www", var_lookup("CPACK_FREEBSD_PACKAGE_WWW"));
-  std::vector<std::string> licenses =
-    cmExpandedList(var_lookup("CPACK_FREEBSD_PACKAGE_LICENSE"));
+  cmList licenses{ var_lookup("CPACK_FREEBSD_PACKAGE_LICENSE") };
   std::string licenselogic("single");
   if (licenses.empty()) {
     cmSystemTools::SetFatalErrorOccurred();
@@ -302,12 +301,10 @@ void cmCPackFreeBSDGenerator::write_manifest_fields(
   }
   manifest << ManifestKeyValue("licenselogic", licenselogic);
   manifest << (ManifestKeyListValue("licenses") << licenses);
-  std::vector<std::string> categories =
-    cmExpandedList(var_lookup("CPACK_FREEBSD_PACKAGE_CATEGORIES"));
+  cmList categories{ var_lookup("CPACK_FREEBSD_PACKAGE_CATEGORIES") };
   manifest << (ManifestKeyListValue("categories") << categories);
   manifest << ManifestKeyValue("prefix", var_lookup("CMAKE_INSTALL_PREFIX"));
-  std::vector<std::string> deps =
-    cmExpandedList(var_lookup("CPACK_FREEBSD_PACKAGE_DEPS"));
+  cmList deps{ var_lookup("CPACK_FREEBSD_PACKAGE_DEPS") };
   if (!deps.empty()) {
     manifest << (ManifestKeyDepsValue("deps") << deps);
   }

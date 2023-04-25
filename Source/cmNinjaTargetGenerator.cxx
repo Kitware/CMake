@@ -32,6 +32,7 @@
 #include "cmGeneratorTarget.h"
 #include "cmGlobalCommonGenerator.h"
 #include "cmGlobalNinjaGenerator.h"
+#include "cmList.h"
 #include "cmLocalGenerator.h"
 #include "cmLocalNinjaGenerator.h"
 #include "cmMakefile.h"
@@ -1038,7 +1039,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
   // If compiler launcher was specified and not consumed above, it
   // goes to the beginning of the command line.
   if (!compileCmds.empty() && !compilerLauncher.empty()) {
-    std::vector<std::string> args = cmExpandedList(compilerLauncher, true);
+    cmList args{ compilerLauncher, cmList::EmptyElements::Yes };
     if (!args.empty()) {
       args[0] = this->LocalGenerator->ConvertToOutputFormat(
         args[0], cmOutputConverter::SHELL);
@@ -1046,7 +1047,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
         i = this->LocalGenerator->EscapeForShell(i);
       }
     }
-    compileCmds.front().insert(0, cmStrCat(cmJoin(args, " "), ' '));
+    compileCmds.front().insert(0, cmStrCat(args.join(" "), ' '));
   }
 
   if (!compileCmds.empty()) {
@@ -1056,7 +1057,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
   const auto& extraCommands = this->GetMakefile()->GetSafeDefinition(
     cmStrCat("CMAKE_", lang, "_DEPENDS_EXTRA_COMMANDS"));
   if (!extraCommands.empty()) {
-    auto commandList = cmExpandedList(extraCommands);
+    cmList commandList{ extraCommands };
     compileCmds.insert(compileCmds.end(), commandList.cbegin(),
                        commandList.cend());
   }
@@ -1468,7 +1469,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   }
 
   if (cmValue objectDeps = source->GetProperty("OBJECT_DEPENDS")) {
-    std::vector<std::string> objDepList = cmExpandedList(*objectDeps);
+    cmList objDepList{ *objectDeps };
     std::copy(objDepList.begin(), objDepList.end(),
               std::back_inserter(depList));
   }
@@ -1688,7 +1689,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     if (!evaluatedObjectOutputs.empty()) {
       cmNinjaBuild build("phony");
       build.Comment = "Additional output files.";
-      build.Outputs = cmExpandedList(evaluatedObjectOutputs);
+      build.Outputs = cmList{ evaluatedObjectOutputs }.data();
       std::transform(build.Outputs.begin(), build.Outputs.end(),
                      build.Outputs.begin(), this->MapToNinjaPath());
       build.ExplicitDeps = objBuild.Outputs;

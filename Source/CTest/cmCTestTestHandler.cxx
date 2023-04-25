@@ -38,6 +38,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmJSONState.h"
+#include "cmList.h"
 #include "cmMakefile.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
@@ -2235,19 +2236,19 @@ bool cmCTestTestHandler::SetTestsProperties(
           } else if (key == "ATTACHED_FILES_ON_FAIL"_s) {
             cmExpandList(val, rt.AttachOnFail);
           } else if (key == "RESOURCE_LOCK"_s) {
-            std::vector<std::string> lval = cmExpandedList(val);
+            cmList lval{ val };
 
             rt.LockedResources.insert(lval.begin(), lval.end());
           } else if (key == "FIXTURES_SETUP"_s) {
-            std::vector<std::string> lval = cmExpandedList(val);
+            cmList lval{ val };
 
             rt.FixturesSetup.insert(lval.begin(), lval.end());
           } else if (key == "FIXTURES_CLEANUP"_s) {
-            std::vector<std::string> lval = cmExpandedList(val);
+            cmList lval{ val };
 
             rt.FixturesCleanup.insert(lval.begin(), lval.end());
           } else if (key == "FIXTURES_REQUIRED"_s) {
-            std::vector<std::string> lval = cmExpandedList(val);
+            cmList lval{ val };
 
             rt.FixturesRequired.insert(lval.begin(), lval.end());
           } else if (key == "TIMEOUT"_s) {
@@ -2260,12 +2261,12 @@ bool cmCTestTestHandler::SetTestsProperties(
           } else if (key == "RUN_SERIAL"_s) {
             rt.RunSerial = cmIsOn(val);
           } else if (key == "FAIL_REGULAR_EXPRESSION"_s) {
-            std::vector<std::string> lval = cmExpandedList(val);
+            cmList lval{ val };
             for (std::string const& cr : lval) {
               rt.ErrorRegularExpressions.emplace_back(cr, cr);
             }
           } else if (key == "SKIP_REGULAR_EXPRESSION"_s) {
-            std::vector<std::string> lval = cmExpandedList(val);
+            cmList lval{ val };
             for (std::string const& cr : lval) {
               rt.SkipRegularExpressions.emplace_back(cr, cr);
             }
@@ -2292,7 +2293,7 @@ bool cmCTestTestHandler::SetTestsProperties(
           } else if (key == "ENVIRONMENT_MODIFICATION"_s) {
             cmExpandList(val, rt.EnvironmentModification);
           } else if (key == "LABELS"_s) {
-            std::vector<std::string> Labels = cmExpandedList(val);
+            cmList Labels{ val };
             rt.Labels.insert(rt.Labels.end(), Labels.begin(), Labels.end());
             // sort the array
             std::sort(rt.Labels.begin(), rt.Labels.end());
@@ -2309,21 +2310,21 @@ bool cmCTestTestHandler::SetTestsProperties(
               rt.Measurements[val] = "1";
             }
           } else if (key == "PASS_REGULAR_EXPRESSION"_s) {
-            std::vector<std::string> lval = cmExpandedList(val);
+            cmList lval{ val };
             for (std::string const& cr : lval) {
               rt.RequiredRegularExpressions.emplace_back(cr, cr);
             }
           } else if (key == "WORKING_DIRECTORY"_s) {
             rt.Directory = val;
           } else if (key == "TIMEOUT_AFTER_MATCH"_s) {
-            std::vector<std::string> propArgs = cmExpandedList(val);
+            cmList propArgs{ val };
             if (propArgs.size() != 2) {
               cmCTestLog(this->CTest, WARNING,
                          "TIMEOUT_AFTER_MATCH expects two arguments, found "
                            << propArgs.size() << std::endl);
             } else {
               rt.AlternateTimeout = cmDuration(atof(propArgs[0].c_str()));
-              std::vector<std::string> lval = cmExpandedList(propArgs[1]);
+              cmList lval{ propArgs[1] };
               for (std::string const& cr : lval) {
                 rt.TimeoutRegularExpressions.emplace_back(cr, cr);
               }
@@ -2365,7 +2366,7 @@ bool cmCTestTestHandler::SetDirectoryProperties(
       std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
       if (cwd == rt.Directory) {
         if (key == "LABELS"_s) {
-          std::vector<std::string> DirectoryLabels = cmExpandedList(val);
+          cmList DirectoryLabels{ val };
           rt.Labels.insert(rt.Labels.end(), DirectoryLabels.begin(),
                            DirectoryLabels.end());
 

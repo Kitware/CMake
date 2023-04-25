@@ -708,9 +708,9 @@ static const struct PathNode : public cmGeneratorExpressionNode
     static auto processList =
       [](std::string const& arg,
          std::function<void(std::string&)> transform) -> std::string {
-      auto list = cmExpandedList(arg);
+      cmList list{ arg };
       std::for_each(list.begin(), list.end(), std::move(transform));
-      return cmJoin(list, ";");
+      return list.to_string();
     };
 
     static std::unordered_map<
@@ -4363,7 +4363,7 @@ static const struct ShellPathNode : public cmGeneratorExpressionNode
     const GeneratorExpressionContent* content,
     cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
   {
-    std::vector<std::string> listIn = cmExpandedList(parameters.front());
+    cmList listIn{ parameters.front() };
     if (listIn.empty()) {
       reportError(context, content->GetOriginalExpression(),
                   "\"\" is not an absolute path.");

@@ -15,6 +15,7 @@
 #include "cmCoreTryCompile.h"
 #include "cmDuration.h"
 #include "cmExecutionStatus.h"
+#include "cmList.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmRange.h"
@@ -271,7 +272,7 @@ void TryRunCommandImpl::RunExecutable(const std::string& runArgs,
   const std::string& emulator =
     this->Makefile->GetSafeDefinition("CMAKE_CROSSCOMPILING_EMULATOR");
   if (!emulator.empty()) {
-    std::vector<std::string> emulatorWithArgs = cmExpandedList(emulator);
+    cmList emulatorWithArgs{ emulator };
     finalCommand +=
       cmSystemTools::ConvertToRunCommandPath(emulatorWithArgs[0]);
     finalCommand += " ";

@@ -22,6 +22,7 @@
 #include "cmCurl.h"
 #include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
+#include "cmList.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -160,7 +161,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
   /* In windows, this will init the winsock stuff */
   ::curl_global_init(CURL_GLOBAL_ALL);
   std::string curlopt(this->CTest->GetCTestConfiguration("CurlOptions"));
-  std::vector<std::string> args = cmExpandedList(curlopt);
+  cmList args{ curlopt };
   bool verifyPeerOff = false;
   bool verifyHostOff = false;
   for (std::string const& arg : args) {
@@ -499,7 +500,7 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
   cmCTestCurl curl(this->CTest);
   curl.SetQuiet(this->Quiet);
   std::string curlopt(this->CTest->GetCTestConfiguration("CurlOptions"));
-  std::vector<std::string> args = cmExpandedList(curlopt);
+  cmList args{ curlopt };
   curl.SetCurlOptions(args);
   auto submitInactivityTimeout = this->GetSubmitInactivityTimeout();
   if (submitInactivityTimeout != 0) {
