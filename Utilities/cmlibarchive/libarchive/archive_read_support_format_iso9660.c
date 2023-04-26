@@ -1007,7 +1007,8 @@ read_children(struct archive_read *a, struct file_info *parent)
 		p = b;
 		b += iso9660->logical_block_size;
 		step -= iso9660->logical_block_size;
-		for (; *p != 0 && p < b && p + *p <= b; p += *p) {
+		for (; *p != 0 && p + DR_name_offset < b && p + *p <= b;
+			p += *p) {
 			struct file_info *child;
 
 			/* N.B.: these special directory identifiers
@@ -1756,7 +1757,7 @@ parse_file_info(struct archive_read *a, struct file_info *parent,
 	size_t name_len;
 	const unsigned char *rr_start, *rr_end;
 	const unsigned char *p;
-	size_t dr_len;
+	size_t dr_len = 0;
 	uint64_t fsize, offset;
 	int32_t location;
 	int flags;
