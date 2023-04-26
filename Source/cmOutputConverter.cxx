@@ -175,7 +175,12 @@ std::string cmOutputConverter::ConvertToOutputForExisting(
       }
 
       std::string tmp{};
-      cmSystemTools::GetShortPath(remote, tmp);
+      cmsys::Status status = cmSystemTools::GetShortPath(remote, tmp);
+      if (!status) {
+        // Fallback for cases when Windows refuses to resolve the short path,
+        // like for C:\Program Files\WindowsApps\...
+        tmp = remote;
+      }
       shortPathCache[remote] = tmp;
       return tmp;
     }();
