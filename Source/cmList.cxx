@@ -287,18 +287,20 @@ protected:
     : TransformSelector(std::move(tag))
   {
   }
-  TransformSelectorIndexes(std::string&& tag, std::vector<int> const& indexes)
+  TransformSelectorIndexes(std::string&& tag,
+                           std::vector<index_type> const& indexes)
     : TransformSelector(std::move(tag))
     , Indexes(indexes)
   {
   }
-  TransformSelectorIndexes(std::string&& tag, std::vector<int>&& indexes)
+  TransformSelectorIndexes(std::string&& tag,
+                           std::vector<index_type>&& indexes)
     : TransformSelector(std::move(tag))
     , Indexes(indexes)
   {
   }
 
-  int NormalizeIndex(index_type index, std::size_t count)
+  index_type NormalizeIndex(index_type index, std::size_t count)
   {
     if (index < 0) {
       index = static_cast<index_type>(count) + index;
@@ -338,7 +340,7 @@ public:
 class TransformSelectorFor : public TransformSelectorIndexes
 {
 public:
-  TransformSelectorFor(int start, int stop, int step)
+  TransformSelectorFor(index_type start, index_type stop, index_type step)
     : TransformSelectorIndexes("FOR")
     , Start(start)
     , Stop(stop)
@@ -369,7 +371,7 @@ public:
     auto start = this->Start;
     auto step = this->Step;
     std::generate(this->Indexes.begin(), this->Indexes.end(),
-                  [&start, step]() -> int {
+                  [&start, step]() -> index_type {
                     auto r = start;
                     start += step;
                     return r;
@@ -805,7 +807,7 @@ std::string cmList::join(cm::string_view glue) const
   return cmJoin(this->Values, glue);
 }
 
-std::string& cmList::append(cm::string_view value, std::string& list)
+std::string& cmList::append(std::string& list, cm::string_view value)
 {
   if (list.empty()) {
     list = std::string(value);
@@ -816,7 +818,7 @@ std::string& cmList::append(cm::string_view value, std::string& list)
   return list;
 }
 
-std::string& cmList::prepend(cm::string_view value, std::string& list)
+std::string& cmList::prepend(std::string& list, cm::string_view value)
 {
   if (list.empty()) {
     list = std::string(value);
@@ -884,7 +886,7 @@ cmList cmList::GetItems(std::vector<index_type>&& indexes) const
   cmList listItems;
 
   for (auto index : indexes) {
-    listItems.emplace_back(this->at(index));
+    listItems.emplace_back(this->get_item(index));
   }
 
   return listItems;
@@ -898,9 +900,10 @@ cmList& cmList::RemoveItems(std::vector<index_type>&& indexes)
 
   // compute all indexes
   std::vector<size_type> idx(indexes.size());
-  std::transform(
-    indexes.cbegin(), indexes.cend(), idx.begin(),
-    [this](const index_type& index) { return this->ComputeIndex(index); });
+  std::transform(indexes.cbegin(), indexes.cend(), idx.begin(),
+                 [this](const index_type& index) -> size_type {
+                   return this->ComputeIndex(index);
+                 });
 
   std::sort(idx.begin(), idx.end(),
             [](size_type l, size_type r) { return l > r; });
@@ -927,8 +930,8 @@ cmList& cmList::RemoveItems(std::vector<std::string>&& items)
 }
 
 cmList::container_type::iterator cmList::Insert(
-  container_type::const_iterator pos, std::string&& value,
-  container_type& container, ExpandElements expandElements,
+  container_type& container, container_type::const_iterator pos,
+  std::string&& value, ExpandElements expandElements,
   EmptyElements emptyElements)
 {
   auto delta = std::distance(container.cbegin(), pos);

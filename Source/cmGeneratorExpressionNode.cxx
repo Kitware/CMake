@@ -1157,12 +1157,17 @@ inline cmList GetList(std::string const& list)
   return list.empty() ? cmList{} : cmList{ list, cmList::EmptyElements::Yes };
 }
 
-bool GetNumericArgument(const std::string& arg, int& value)
+bool GetNumericArgument(const std::string& arg, cmList::index_type& value)
 {
   try {
     std::size_t pos;
 
-    value = std::stoi(arg, &pos);
+    if (sizeof(cmList::index_type) == sizeof(long)) {
+      value = std::stol(arg, &pos);
+    } else {
+      value = std::stoll(arg, &pos);
+    }
+
     if (pos != arg.length()) {
       // this is not a number
       return false;
@@ -1176,7 +1181,7 @@ bool GetNumericArgument(const std::string& arg, int& value)
 
 bool GetNumericArguments(
   cmGeneratorExpressionContext* ctx, const GeneratorExpressionContent* cnt,
-  Arguments const& args, std::vector<int>& indexes,
+  Arguments const& args, std::vector<cmList::index_type>& indexes,
   cmList::ExpandElements expandElements = cmList::ExpandElements::No)
 {
   using IndexRange = cmRange<Arguments::const_iterator>;
@@ -1188,7 +1193,7 @@ bool GetNumericArguments(
   }
 
   for (auto const& value : arguments) {
-    int index;
+    cmList::index_type index;
     if (!GetNumericArgument(value, index)) {
       reportError(ctx, cnt->GetOriginalExpression(),
                   cmStrCat("index: \"", value, "\" is not a valid index"));
@@ -1242,7 +1247,7 @@ static const struct ListNode : public cmGeneratorExpressionNode
                 return std::string{};
               }
 
-              std::vector<int> indexes;
+              std::vector<cmList::index_type> indexes;
               if (!GetNumericArguments(ctx, cnt, args.advance(1), indexes,
                                        cmList::ExpandElements::Yes)) {
                 return std::string{};
@@ -1273,7 +1278,7 @@ static const struct ListNode : public cmGeneratorExpressionNode
             if (CheckListParameters(ctx, cnt, "SUBLIST"_s, args, 3)) {
               auto list = GetList(args.front());
               if (!list.empty()) {
-                std::vector<int> indexes;
+                std::vector<cmList::index_type> indexes;
                 if (!GetNumericArguments(ctx, cnt, args.advance(1), indexes)) {
                   return std::string{};
                 }
@@ -1322,7 +1327,7 @@ static const struct ListNode : public cmGeneratorExpressionNode
                                       false)) {
               auto list = args.front();
               args.advance(1);
-              return cmList::append(args.begin(), args.end(), list);
+              return cmList::append(list, args.begin(), args.end());
             }
             return std::string{};
           } },
@@ -1334,7 +1339,7 @@ static const struct ListNode : public cmGeneratorExpressionNode
                                       false)) {
               auto list = args.front();
               args.advance(1);
-              return cmList::prepend(args.begin(), args.end(), list);
+              return cmList::prepend(list, args.begin(), args.end());
             }
             return std::string{};
           } },
@@ -1344,7 +1349,7 @@ static const struct ListNode : public cmGeneratorExpressionNode
              Arguments& args) -> std::string {
             if (CheckListParametersEx(ctx, cnt, "INSERT"_s, args.size(), 3,
                                       false)) {
-              int index;
+              cmList::index_type index;
               if (!GetNumericArgument(args[1], index)) {
                 reportError(
                   ctx, cnt->GetOriginalExpression(),
@@ -1419,7 +1424,7 @@ static const struct ListNode : public cmGeneratorExpressionNode
             if (CheckListParametersEx(ctx, cnt, "REMOVE_AT"_s, args.size(), 2,
                                       false)) {
               auto list = GetList(args.front());
-              std::vector<int> indexes;
+              std::vector<cmList::index_type> indexes;
               if (!GetNumericArguments(ctx, cnt, args.advance(1), indexes,
                                        cmList::ExpandElements::Yes)) {
                 return std::string{};
@@ -1575,7 +1580,7 @@ static const struct ListNode : public cmGeneratorExpressionNode
                       while (!args.empty()) {
                         cmList indexList{ args.front() };
                         for (auto const& index : indexList) {
-                          int value;
+                          cmList::index_type value;
 
                           if (!GetNumericArgument(index, value)) {
                             // this is not a number, stop processing

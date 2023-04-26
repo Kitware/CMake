@@ -559,9 +559,7 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
           "Q_PLUGIN_METADATA",
           "[\n][ \t]*Q_PLUGIN_METADATA[ \t]*\\("
           "[^\\)]*FILE[ \t]*\"([^\"]+)\"");
-        for (cmList::index_type ii = 0;
-             ii != static_cast<cmList::index_type>(filterList.size());
-             ii += 2) {
+        for (cmList::size_type ii = 0; ii != filterList.size(); ii += 2) {
           this->Moc.DependFilters.emplace_back(filterList[ii],
                                                filterList[ii + 1]);
         }

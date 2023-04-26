@@ -205,7 +205,7 @@ bool HandleAppendCommand(std::vector<std::string> const& args,
   GetListString(listString, listName, makefile);
 
   makefile.AddDefinition(
-    listName, cmList::append(args.begin() + 2, args.end(), listString));
+    listName, cmList::append(listString, args.begin() + 2, args.end()));
   return true;
 }
 
@@ -226,7 +226,7 @@ bool HandlePrependCommand(std::vector<std::string> const& args,
   GetListString(listString, listName, makefile);
 
   makefile.AddDefinition(
-    listName, cmList::prepend(args.begin() + 2, args.end(), listString));
+    listName, cmList::prepend(listString, args.begin() + 2, args.end()));
   return true;
 }
 

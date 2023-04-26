@@ -80,15 +80,15 @@ void cmCPackIFWCommon::ExpandListArgument(
     return;
   }
 
-  cmList::index_type i = 0;
-  std::size_t c = args.size();
+  cmList::size_type i = 0;
+  auto c = args.size();
   if (c % 2) {
     argsOut[""] = args[i];
     ++i;
   }
 
   --c;
-  for (; i < static_cast<cmList::index_type>(c); i += 2) {
+  for (; i < c; i += 2) {
     argsOut[args[i]] = args[i + 1];
   }
 }
@@ -101,15 +101,15 @@ void cmCPackIFWCommon::ExpandListArgument(
     return;
   }
 
-  cmList::index_type i = 0;
-  std::size_t c = args.size();
+  cmList::size_type i = 0;
+  auto c = args.size();
   if (c % 2) {
     argsOut.insert(std::pair<std::string, std::string>("", args[i]));
     ++i;
   }
 
   --c;
-  for (; i < static_cast<cmList::index_type>(c); i += 2) {
+  for (; i < c; i += 2) {
     argsOut.insert(std::pair<std::string, std::string>(args[i], args[i + 1]));
   }
 }

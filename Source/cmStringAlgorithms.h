@@ -97,14 +97,14 @@ inline void cmExpandList(cm::string_view arg,
                          std::vector<std::string>& argsOut,
                          bool emptyArgs = false)
 {
-  cmList::append(arg, argsOut,
+  cmList::append(argsOut, arg,
                  emptyArgs ? cmList::EmptyElements::Yes
                            : cmList::EmptyElements::No);
 }
 inline void cmExpandList(cmValue arg, std::vector<std::string>& argsOut,
                          bool emptyArgs = false)
 {
-  cmList::append(arg, argsOut,
+  cmList::append(argsOut, arg,
                  emptyArgs ? cmList::EmptyElements::Yes
                            : cmList::EmptyElements::No);
 }
@@ -118,7 +118,7 @@ template <class InputIt>
 void cmExpandLists(InputIt first, InputIt last,
                    std::vector<std::string>& argsOut)
 {
-  cmList::append(first, last, argsOut);
+  cmList::append(argsOut, first, last);
 }
 
 /** Concatenate string pieces into a single string.  */
