@@ -4,7 +4,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cstdlib>
 #include <functional>
 #include <iostream>
 #include <iterator>
@@ -448,9 +447,9 @@ bool ExpandMacros(cmCMakePresetsGraph& graph, const T& preset,
       if (macroName.empty()) {
         return ExpandMacroResult::Error;
       }
-      const char* value = std::getenv(macroName.c_str());
-      if (value) {
-        result += value;
+      if (cm::optional<std::string> value =
+            cmSystemTools::GetEnvVar(macroName)) {
+        result += *value;
       }
       return ExpandMacroResult::Ok;
     }
