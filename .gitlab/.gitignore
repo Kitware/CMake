@@ -3,6 +3,7 @@
 /bcc*
 /cmake*
 /ispc*
+/innosetup
 /jom
 /llvm*
 /mingw
