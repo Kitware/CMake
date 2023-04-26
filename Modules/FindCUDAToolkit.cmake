@@ -1028,7 +1028,11 @@ if(CUDAToolkit_FOUND)
   endif()
 
   _CUDAToolkit_find_and_add_import_lib(culibos) # it's a static library
-  foreach (cuda_lib cublasLt cufft curand nppc nvjpeg)
+  foreach (cuda_lib cublasLt cufft nvjpeg)
+    _CUDAToolkit_find_and_add_import_lib(${cuda_lib})
+    _CUDAToolkit_find_and_add_import_lib(${cuda_lib}_static DEPS cudart_static_deps culibos)
+  endforeach()
+  foreach (cuda_lib curand nppc)
     _CUDAToolkit_find_and_add_import_lib(${cuda_lib})
     _CUDAToolkit_find_and_add_import_lib(${cuda_lib}_static DEPS culibos)
   endforeach()
