@@ -3,6 +3,7 @@
 #include "cmcmd.h"
 
 #include <functional>
+#include <iterator>
 
 #include <cm/optional>
 #include <cmext/algorithm>
@@ -346,7 +347,6 @@ int HandleIWYU(const std::string& runCmd, const std::string& /* sourceFile */,
   cmList iwyu_cmd{ runCmd, cmList::EmptyElements::Yes };
   cm::append(iwyu_cmd, orig_cmd.begin() + 1, orig_cmd.end());
   // Run the iwyu command line.  Capture its stderr and hide its stdout.
-  // Ignore its return code because the tool always returns non-zero.
   std::string stdErr;
   int ret;
   if (!cmSystemTools::RunSingleCommand(iwyu_cmd, nullptr, &stdErr, &ret,
@@ -360,8 +360,15 @@ int HandleIWYU(const std::string& runCmd, const std::string& /* sourceFile */,
     std::cerr << "Warning: include-what-you-use reported diagnostics:\n"
               << stdErr << "\n";
   }
-  // always return 0 we don't want to break the compile
-  return 0;
+  // Older versions of iwyu always returned a non-zero exit code,
+  // so ignore it unless the user has enabled errors.
+  auto has_error_opt = std::find_if(
+    iwyu_cmd.cbegin(), iwyu_cmd.cend(),
+    [](std::string const& opt) { return cmHasLiteralPrefix(opt, "--error"); });
+  bool errors_enabled = has_error_opt != iwyu_cmd.cend() &&
+    has_error_opt != iwyu_cmd.cbegin() &&
+    *std::prev(has_error_opt) == "-Xiwyu";
+  return errors_enabled ? ret : 0;
 }
 
 int HandleTidy(const std::string& runCmd, const std::string& sourceFile,
