@@ -1,4 +1,4 @@
-# Qt4 and Qt5 tests
+# Qt4, Qt5 and Qt6 tests
 ADD_AUTOGEN_TEST(AutogenOriginDependsOff autogenOriginDependsOff)
 ADD_AUTOGEN_TEST(AutogenOriginDependsOn)
 ADD_AUTOGEN_TEST(AutogenTargetDepends)
@@ -47,7 +47,7 @@ if(QT_TEST_ALLOW_QT_MACROS)
   ADD_AUTOGEN_TEST(MocSkipSource)
 endif()
 
-# Qt5 only tests
+# Qt5 and Qt6 only tests
 if(QT_TEST_VERSION GREATER 4)
   ADD_AUTOGEN_TEST(MocMacroName mocMacroName)
   ADD_AUTOGEN_TEST(MocOsMacros)
