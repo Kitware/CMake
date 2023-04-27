@@ -587,7 +587,18 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
         addBefore = true;
       }
     } else {
-      addBefore = true;
+      switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0151)) {
+        case cmPolicies::WARN:
+        case cmPolicies::OLD:
+          addBefore = true;
+          break;
+        case cmPolicies::REQUIRED_IF_USED:
+        case cmPolicies::REQUIRED_ALWAYS:
+        case cmPolicies::NEW:
+          this->GenTarget->AddSystemIncludeDirectory(this->Dir.IncludeGenExp,
+                                                     "CXX");
+          break;
+      }
     }
     this->GenTarget->AddIncludeDirectory(this->Dir.IncludeGenExp, addBefore);
   }
