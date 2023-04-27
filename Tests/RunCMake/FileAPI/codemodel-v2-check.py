@@ -848,7 +848,203 @@ def gen_check_targets(c, g, inSource):
         for e in expected:
             if e["type"] == "UTILITY":
                 if e["id"] == "^ZERO_CHECK::@6890427a1f51a3e7e1df$":
+                    # The json files have data for Xcode.  Substitute data for VS.
                     e["sources"] = [
+                        {
+                            "path": "^CMakeLists\\.txt$",
+                            "isGenerated": None,
+                            "fileSetName": None,
+                            "sourceGroupName": "",
+                            "compileGroupLanguage": None,
+                            "backtrace": [
+                                {
+                                    "file": "^CMakeLists\\.txt$",
+                                    "line": None,
+                                    "command": None,
+                                    "hasParent": False,
+                                },
+                            ],
+                        },
+                        {
+                            "path": "^alias/CMakeLists\\.txt$",
+                            "isGenerated": None,
+                            "fileSetName": None,
+                            "sourceGroupName": "",
+                            "compileGroupLanguage": None,
+                            "backtrace": [
+                                {
+                                    "file": "^CMakeLists\\.txt$",
+                                    "line": None,
+                                    "command": None,
+                                    "hasParent": False,
+                                },
+                            ],
+                        },
+                        {
+                            "path": "^codemodel-v2\\.cmake$",
+                            "isGenerated": None,
+                            "fileSetName": None,
+                            "sourceGroupName": "",
+                            "compileGroupLanguage": None,
+                            "backtrace": [
+                                {
+                                    "file": "^CMakeLists\\.txt$",
+                                    "line": None,
+                                    "command": None,
+                                    "hasParent": False,
+                                },
+                            ],
+                        },
+                        {
+                            "path": "^custom/CMakeLists\\.txt$",
+                            "isGenerated": None,
+                            "fileSetName": None,
+                            "sourceGroupName": "",
+                            "compileGroupLanguage": None,
+                            "backtrace": [
+                                {
+                                    "file": "^CMakeLists\\.txt$",
+                                    "line": None,
+                                    "command": None,
+                                    "hasParent": False,
+                                },
+                            ],
+                        },
+                        {
+                            "path": "^cxx/CMakeLists\\.txt$",
+                            "isGenerated": None,
+                            "fileSetName": None,
+                            "sourceGroupName": "",
+                            "compileGroupLanguage": None,
+                            "backtrace": [
+                                {
+                                    "file": "^CMakeLists\\.txt$",
+                                    "line": None,
+                                    "command": None,
+                                    "hasParent": False,
+                                },
+                            ],
+                        },
+                        {
+                            "path": "^dir/CMakeLists\\.txt$",
+                            "isGenerated": None,
+                            "fileSetName": None,
+                            "sourceGroupName": "",
+                            "compileGroupLanguage": None,
+                            "backtrace": [
+                                {
+                                    "file": "^CMakeLists\\.txt$",
+                                    "line": None,
+                                    "command": None,
+                                    "hasParent": False,
+                                },
+                            ],
+                        },
+                        {
+                            "path": "^dir/dir/CMakeLists\\.txt$",
+                            "isGenerated": None,
+                            "fileSetName": None,
+                            "sourceGroupName": "",
+                            "compileGroupLanguage": None,
+                            "backtrace": [
+                                {
+                                    "file": "^CMakeLists\\.txt$",
+                                    "line": None,
+                                    "command": None,
+                                    "hasParent": False,
+                                },
+                            ],
+                        },
+                        {
+                            "path": "^fileset/CMakeLists\\.txt$",
+                            "isGenerated": None,
+                            "fileSetName": None,
+                            "sourceGroupName": "",
+                            "compileGroupLanguage": None,
+                            "backtrace": [
+                                {
+                                    "file": "^CMakeLists\\.txt$",
+                                    "line": None,
+                                    "command": None,
+                                    "hasParent": False,
+                                },
+                            ],
+                        },
+                        {
+                            "path": "^imported/CMakeLists\\.txt$",
+                            "isGenerated": None,
+                            "fileSetName": None,
+                            "sourceGroupName": "",
+                            "compileGroupLanguage": None,
+                            "backtrace": [
+                                {
+                                    "file": "^CMakeLists\\.txt$",
+                                    "line": None,
+                                    "command": None,
+                                    "hasParent": False,
+                                },
+                            ],
+                        },
+                        {
+                            "path": "^include_test\\.cmake$",
+                            "isGenerated": None,
+                            "fileSetName": None,
+                            "sourceGroupName": "",
+                            "compileGroupLanguage": None,
+                            "backtrace": [
+                                {
+                                    "file": "^CMakeLists\\.txt$",
+                                    "line": None,
+                                    "command": None,
+                                    "hasParent": False,
+                                },
+                            ],
+                        },
+                        {
+                            "path": "^interface/CMakeLists\\.txt$",
+                            "isGenerated": None,
+                            "fileSetName": None,
+                            "sourceGroupName": "",
+                            "compileGroupLanguage": None,
+                            "backtrace": [
+                                {
+                                    "file": "^CMakeLists\\.txt$",
+                                    "line": None,
+                                    "command": None,
+                                    "hasParent": False,
+                                },
+                            ],
+                        },
+                        {
+                            "path": "^object/CMakeLists\\.txt$",
+                            "isGenerated": None,
+                            "fileSetName": None,
+                            "sourceGroupName": "",
+                            "compileGroupLanguage": None,
+                            "backtrace": [
+                                {
+                                    "file": "^CMakeLists\\.txt$",
+                                    "line": None,
+                                    "command": None,
+                                    "hasParent": False,
+                                },
+                            ],
+                        },
+                        {
+                            "path": "^subdir/CMakeLists\\.txt$",
+                            "isGenerated": None,
+                            "fileSetName": None,
+                            "sourceGroupName": "",
+                            "compileGroupLanguage": None,
+                            "backtrace": [
+                                {
+                                    "file": "^CMakeLists\\.txt$",
+                                    "line": None,
+                                    "command": None,
+                                    "hasParent": False,
+                                },
+                            ],
+                        },
                         {
                             "path": "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/CMakeFiles/([0-9a-f]+/)?generate\\.stamp\\.rule$",
                             "isGenerated": True,
@@ -866,6 +1062,24 @@ def gen_check_targets(c, g, inSource):
                         },
                     ]
                     e["sourceGroups"] = [
+                        {
+                            "name": "",
+                            "sourcePaths": [
+                                "^CMakeLists\\.txt$",
+                                "^alias/CMakeLists\\.txt$",
+                                "^codemodel-v2\\.cmake$",
+                                "^custom/CMakeLists\\.txt$",
+                                "^cxx/CMakeLists\\.txt$",
+                                "^dir/CMakeLists\\.txt$",
+                                "^dir/dir/CMakeLists\\.txt$",
+                                "^fileset/CMakeLists\\.txt$",
+                                "^imported/CMakeLists\\.txt$",
+                                "^include_test\\.cmake$",
+                                "^interface/CMakeLists\\.txt$",
+                                "^object/CMakeLists\\.txt$",
+                                "^subdir/CMakeLists\\.txt$",
+                            ],
+                        },
                         {
                             "name": "CMake Rules",
                             "sourcePaths": [

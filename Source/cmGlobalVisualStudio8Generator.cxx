@@ -262,6 +262,33 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
   cmTarget* tgt = lg.AddUtilityCommand(CMAKE_CHECK_BUILD_SYSTEM_TARGET, false,
                                        std::move(cc));
 
+  // Collect the input files used to generate all targets in this
+  // project.
+  std::vector<std::string> listFiles;
+  for (const auto& gen : generators) {
+    cm::append(listFiles, gen->GetMakefile()->GetListFiles());
+  }
+  // Sort the list of input files and remove duplicates.
+  std::sort(listFiles.begin(), listFiles.end(), std::less<std::string>());
+  auto new_end = std::unique(listFiles.begin(), listFiles.end());
+  listFiles.erase(new_end, listFiles.end());
+
+  // Add all cmake input files which are used by the project
+  // so Visual Studio does not close them when reloading it.
+  for (const std::string& listFile : listFiles) {
+    if (listFile.find("/CMakeFiles/") != std::string::npos) {
+      continue;
+    }
+    if (!cmSystemTools::IsSubDirectory(listFile,
+                                       lg.GetMakefile()->GetHomeDirectory()) &&
+        !cmSystemTools::IsSubDirectory(
+          listFile, lg.GetMakefile()->GetHomeOutputDirectory())) {
+      continue;
+    }
+
+    tgt->AddSource(listFile);
+  }
+
   auto ptr = cm::make_unique<cmGeneratorTarget>(tgt, &lg);
   auto* gt = ptr.get();
   lg.AddGeneratorTarget(std::move(ptr));
@@ -295,13 +322,6 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     // The custom rule runs cmake so set UTF-8 pipes.
     bool stdPipesUTF8 = true;
 
-    // Collect the input files used to generate all targets in this
-    // project.
-    std::vector<std::string> listFiles;
-    for (const auto& gen : generators) {
-      cm::append(listFiles, gen->GetMakefile()->GetListFiles());
-    }
-
     // Add a custom prebuild target to run the VerifyGlobs script.
     cmake* cm = this->GetCMakeInstance();
     if (cm->DoWriteGlobVerifyTarget()) {
@@ -324,11 +344,6 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
       tgt->SetProperty("VS_GLOBAL_DisableFastUpToDateCheck", "true");
       listFiles.push_back(cm->GetGlobVerifyStamp());
     }
-
-    // Sort the list of input files and remove duplicates.
-    std::sort(listFiles.begin(), listFiles.end(), std::less<std::string>());
-    auto new_end = std::unique(listFiles.begin(), listFiles.end());
-    listFiles.erase(new_end, listFiles.end());
 
     // Create a rule to re-run CMake.
     std::string argS = cmStrCat("-S", lg.GetSourceDirectory());
