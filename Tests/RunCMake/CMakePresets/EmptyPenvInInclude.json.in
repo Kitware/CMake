@@ -1,0 +1,11 @@
+{
+  "version": 7,
+  "include": ["$penv{}"],
+  "configurePresets": [
+    {
+      "name": "EmptyPenvInInclude",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build"
+    }
+  ]
+}

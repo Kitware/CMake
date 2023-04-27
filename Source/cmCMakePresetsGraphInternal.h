@@ -28,6 +28,16 @@ enum class ExpandMacroResult
 
 using MacroExpander = std::function<ExpandMacroResult(
   const std::string&, const std::string&, std::string&, int version)>;
+
+ExpandMacroResult ExpandMacros(
+  std::string& out, const std::vector<MacroExpander>& macroExpanders,
+  int version);
+
+ExpandMacroResult ExpandMacro(std::string& out,
+                              const std::string& macroNamespace,
+                              const std::string& macroName,
+                              const std::vector<MacroExpander>& macroExpanders,
+                              int version);
 }
 
 class cmCMakePresetsGraph::Condition

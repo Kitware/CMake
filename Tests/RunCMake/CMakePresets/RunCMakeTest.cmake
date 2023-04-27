@@ -146,6 +146,7 @@ run_cmake_presets(NoSuchMacro)
 run_cmake_presets(EnvCycle)
 run_cmake_presets(EmptyEnv)
 run_cmake_presets(EmptyPenv)
+run_cmake_presets(EmptyPenvInInclude)
 run_cmake_presets(InvalidRegex)
 set(CMakePresets_SCHEMA_EXPECTED_RESULT 1)
 run_cmake_presets(ConditionFuture)
@@ -393,6 +394,12 @@ set(CMakePresets_EXTRA_FILES
   "${RunCMake_SOURCE_DIR}/subdir/CMakePresets.json.in"
   )
 run_cmake_presets(Include --list-presets)
+set(CMakePresets_EXTRA_FILES
+  "${RunCMake_SOURCE_DIR}/IncludeCommon.json.in"
+  )
+set(ENV{TEST_ENV_INCLUDE_DIR} ${RunCMake_BINARY_DIR}/IncludeExpansion)
+run_cmake_presets(IncludeExpansion --list-presets)
+unset(ENV{TEST_ENV_INCLUDE_DIR})
 unset(CMakePresets_EXTRA_FILES)
 run_cmake_presets(IncludeNotFound)
 run_cmake_presets(IncludeCycle)
