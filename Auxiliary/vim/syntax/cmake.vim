@@ -73,6 +73,7 @@ syn keyword cmakeProperty contained
             \ AUTOGEN_ORIGIN_DEPENDS
             \ AUTOGEN_PARALLEL
             \ AUTOGEN_SOURCE_GROUP
+            \ AUTOGEN_USE_SYSTEM_INCLUDE
             \ AUTOGEN_TARGETS_FOLDER
             \ AUTOGEN_TARGET_DEPENDS
             \ AUTOMOC
@@ -683,6 +684,7 @@ syn keyword cmakeVariable contained
             \ CMAKE_ASM_VISIBILITY_PRESET
             \ CMAKE_AUTOGEN_ORIGIN_DEPENDS
             \ CMAKE_AUTOGEN_PARALLEL
+            \ CMAKE_AUTOGEN_USE_SYSTEM_INCLUDE
             \ CMAKE_AUTOGEN_VERBOSE
             \ CMAKE_AUTOMOC
             \ CMAKE_AUTOMOC_COMPILER_PREDEFINES

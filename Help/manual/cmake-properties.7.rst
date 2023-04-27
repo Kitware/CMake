@@ -133,6 +133,7 @@ Properties on Targets
    /prop_tgt/AUTOGEN_ORIGIN_DEPENDS
    /prop_tgt/AUTOGEN_PARALLEL
    /prop_tgt/AUTOGEN_TARGET_DEPENDS
+   /prop_tgt/AUTOGEN_USE_SYSTEM_INCLUDE
    /prop_tgt/AUTOMOC
    /prop_tgt/AUTOMOC_COMPILER_PREDEFINES
    /prop_tgt/AUTOMOC_DEPEND_FILTERS
