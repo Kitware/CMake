@@ -388,7 +388,6 @@ nvRTC
 """""
 
 The `nvRTC <https://docs.nvidia.com/cuda/nvrtc/index.html>`_ (Runtime Compilation) library.
-This is a shared library only.
 
 Targets Created:
 
