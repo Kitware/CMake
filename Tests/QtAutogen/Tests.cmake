@@ -1,4 +1,4 @@
-# Qt4 and Qt5 tests
+# Qt4, Qt5 and Qt6 tests
 ADD_AUTOGEN_TEST(AutogenOriginDependsOff autogenOriginDependsOff)
 ADD_AUTOGEN_TEST(AutogenOriginDependsOn)
 ADD_AUTOGEN_TEST(AutogenTargetDepends)
@@ -17,6 +17,7 @@ ADD_AUTOGEN_TEST(Parallel2 parallel2)
 ADD_AUTOGEN_TEST(Parallel3 parallel3)
 ADD_AUTOGEN_TEST(Parallel4 parallel4)
 ADD_AUTOGEN_TEST(ParallelAUTO parallelAUTO)
+ADD_AUTOGEN_TEST(RccAutogenBuildDir)
 ADD_AUTOGEN_TEST(RccEmpty rccEmpty)
 ADD_AUTOGEN_TEST(RccOffMocLibrary)
 ADD_AUTOGEN_TEST(RccOnly rccOnly)
@@ -46,7 +47,7 @@ if(QT_TEST_ALLOW_QT_MACROS)
   ADD_AUTOGEN_TEST(MocSkipSource)
 endif()
 
-# Qt5 only tests
+# Qt5 and Qt6 only tests
 if(QT_TEST_VERSION GREATER 4)
   ADD_AUTOGEN_TEST(MocMacroName mocMacroName)
   ADD_AUTOGEN_TEST(MocOsMacros)
