@@ -2744,6 +2744,7 @@ syn keyword cmakeKWfile contained
             \ READ_SYMLINK
             \ REAL_PATH
             \ REGEX
+            \ RELATIVE
             \ RELATIVE_PATH
             \ RELEASE
             \ REMOVE
