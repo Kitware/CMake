@@ -278,6 +278,13 @@ External Project Definition
         URL of the git repository. Any URL understood by the ``git`` command
         may be used.
 
+        .. versionchanged:: 3.27
+          A relative URL will be resolved based on the parent project's
+          remote, subject to :policy:`CMP0150`.  See the policy documentation
+          for how the remote is selected, including conditions where the
+          remote selection can fail.  Local filesystem remotes should
+          always use absolute paths.
+
       ``GIT_TAG <tag>``
         Git branch name, tag or commit hash. Note that branch names and tags
         should generally be specified as remote names (i.e. ``origin/myBranch``
@@ -1187,6 +1194,8 @@ The custom step could then be triggered from the main build like so::
   cmake --build . --target secretsauce-docs
 
 #]=======================================================================]
+
+include(${CMAKE_CURRENT_LIST_DIR}/ExternalProject/shared_internal_commands.cmake)
 
 cmake_policy(PUSH)
 cmake_policy(SET CMP0054 NEW) # if() quoted variables not dereferenced
@@ -4157,6 +4166,17 @@ function(ExternalProject_Add name)
   )
   if(exclude_from_all)
     set_property(TARGET ${name} PROPERTY EXCLUDE_FROM_ALL TRUE)
+  endif()
+
+  get_property(repo TARGET ${name} PROPERTY _EP_GIT_REPOSITORY)
+  if(NOT repo STREQUAL "")
+    cmake_policy(GET CMP0150 cmp0150
+      PARENT_SCOPE # undocumented, do not use outside of CMake
+    )
+    get_property(source_dir TARGET ${name} PROPERTY _EP_SOURCE_DIR)
+    get_filename_component(work_dir "${source_dir}" PATH)
+    _ep_resolve_git_remote(resolved_git_repository "${repo}" "${cmp0150}" "${work_dir}")
+    set_property(TARGET ${name} PROPERTY _EP_GIT_REPOSITORY ${resolved_git_repository})
   endif()
 
   # The 'complete' step depends on all other steps and creates a

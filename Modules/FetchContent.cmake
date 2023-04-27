@@ -1076,6 +1076,8 @@ current working directory.
 
 #]=======================================================================]
 
+include(${CMAKE_CURRENT_LIST_DIR}/ExternalProject/shared_internal_commands.cmake)
+
 #=======================================================================
 # Recording and retrieving content details for later population
 #=======================================================================
@@ -1223,6 +1225,7 @@ function(FetchContent_Declare contentName)
   # cannot check for multi-value arguments with this method. We will have to
   # handle the URL keyword differently.
   set(oneValueArgs
+    GIT_REPOSITORY
     SVN_REPOSITORY
     DOWNLOAD_NO_EXTRACT
     DOWNLOAD_EXTRACT_TIMESTAMP
@@ -1240,6 +1243,30 @@ function(FetchContent_Declare contentName)
 
   if(NOT ARG_SOURCE_DIR)
     set(ARG_SOURCE_DIR "${FETCHCONTENT_BASE_DIR}/${contentNameLower}-src")
+  endif()
+
+  if(ARG_GIT_REPOSITORY)
+    # We resolve the GIT_REPOSITORY here so that we get the right parent in the
+    # remote selection logic. In the sub-build, ExternalProject_Add() would see
+    # the private sub-build directory as the parent project, but the parent
+    # project should be the one that called FetchContent_Declare(). We resolve
+    # a relative repo here so that the sub-build's ExternalProject_Add() only
+    # ever sees a non-relative repo.
+    # Since these checks may be non-trivial on some platforms (notably Windows),
+    # don't perform them if we won't be using these details. This also allows
+    # projects to override calls with relative URLs when they have checked out
+    # the parent project in an unexpected way, such as from a mirror or fork.
+    set(savedDetailsPropertyName "_FetchContent_${contentNameLower}_savedDetails")
+    get_property(alreadyDefined GLOBAL PROPERTY ${savedDetailsPropertyName} DEFINED)
+    if(NOT alreadyDefined)
+      cmake_policy(GET CMP0150 cmp0150
+        PARENT_SCOPE # undocumented, do not use outside of CMake
+      )
+      _ep_resolve_git_remote(_resolved_git_repository
+        "${ARG_GIT_REPOSITORY}" "${cmp0150}" "${FETCHCONTENT_BASE_DIR}"
+      )
+      set(ARG_GIT_REPOSITORY "${_resolved_git_repository}")
+    endif()
   endif()
 
   if(ARG_SVN_REPOSITORY)
