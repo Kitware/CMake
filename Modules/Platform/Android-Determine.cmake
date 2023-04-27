@@ -34,8 +34,21 @@ cmake_policy(PUSH)
 cmake_policy(SET CMP0057 NEW) # if IN_LIST
 
 # If using Android tools for Visual Studio, compile a sample project to get the
-# NDK path
+# NDK path and set the processor from the generator platform.
 if(CMAKE_GENERATOR MATCHES "Visual Studio")
+  if(NOT CMAKE_ANDROID_ARCH_ABI AND NOT CMAKE_SYSTEM_PROCESSOR)
+    if(CMAKE_GENERATOR_PLATFORM STREQUAL "ARM")
+      set(CMAKE_SYSTEM_PROCESSOR "armv7-a")
+    elseif(CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64")
+      set(CMAKE_SYSTEM_PROCESSOR "aarch64")
+    elseif(CMAKE_GENERATOR_PLATFORM STREQUAL "x86")
+      set(CMAKE_SYSTEM_PROCESSOR "i686")
+    elseif(CMAKE_GENERATOR_PLATFORM STREQUAL "x64")
+      set(CMAKE_SYSTEM_PROCESSOR "x86_64")
+    else()
+      message(FATAL_ERROR "Unhandled generator platform, please choose ARM, ARM64, x86 or x86_64 using -A")
+    endif()
+  endif()
   if(NOT CMAKE_ANDROID_NDK)
     set(vcx_platform ${CMAKE_GENERATOR_PLATFORM})
     if(CMAKE_GENERATOR MATCHES "Visual Studio 14")
