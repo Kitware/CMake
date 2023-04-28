@@ -336,8 +336,11 @@ static void test_xcb(void)
   xcb_disconnect(connection);
 }
 
-#  ifdef HAVE_X11_xcb_composite
-#    include <xcb/composite.h>
+#endif
+
+#ifdef HAVE_X11_xcb_composite
+#  include <xcb/composite.h>
+#  include <xcb/xcb.h>
 
 static void test_xcb_composite(void)
 {
@@ -346,10 +349,11 @@ static void test_xcb_composite(void)
   xcb_disconnect(connection);
 }
 
-#  endif
+#endif
 
-#  ifdef HAVE_X11_xcb_cursor
-#    include <xcb/xcb_cursor.h>
+#ifdef HAVE_X11_xcb_cursor
+#  include <xcb/xcb.h>
+#  include <xcb/xcb_cursor.h>
 
 static void test_xcb_cursor(void)
 {
@@ -363,10 +367,11 @@ static void test_xcb_cursor(void)
   xcb_disconnect(connection);
 }
 
-#  endif
+#endif
 
-#  ifdef HAVE_X11_xcb_damage
-#    include <xcb/damage.h>
+#ifdef HAVE_X11_xcb_damage
+#  include <xcb/damage.h>
+#  include <xcb/xcb.h>
 
 static void test_xcb_damage(void)
 {
@@ -377,10 +382,11 @@ static void test_xcb_damage(void)
   xcb_disconnect(connection);
 }
 
-#  endif
+#endif
 
-#  ifdef HAVE_X11_xcb_dpms
-#    include <xcb/dpms.h>
+#ifdef HAVE_X11_xcb_dpms
+#  include <xcb/dpms.h>
+#  include <xcb/xcb.h>
 
 static void test_xcb_dpms(void)
 {
@@ -391,10 +397,11 @@ static void test_xcb_dpms(void)
   xcb_disconnect(connection);
 }
 
-#  endif
+#endif
 
-#  ifdef HAVE_X11_xcb_dri2
-#    include <xcb/dri2.h>
+#ifdef HAVE_X11_xcb_dri2
+#  include <xcb/dri2.h>
+#  include <xcb/xcb.h>
 
 static void test_xcb_dri2(void)
 {
@@ -405,10 +412,11 @@ static void test_xcb_dri2(void)
   xcb_disconnect(connection);
 }
 
-#  endif
+#endif
 
-#  ifdef HAVE_X11_xcb_dri3
-#    include <xcb/dri3.h>
+#ifdef HAVE_X11_xcb_dri3
+#  include <xcb/dri3.h>
+#  include <xcb/xcb.h>
 
 static void test_xcb_dri3(void)
 {
@@ -419,10 +427,11 @@ static void test_xcb_dri3(void)
   xcb_disconnect(connection);
 }
 
-#  endif
+#endif
 
-#  ifdef HAVE_X11_xcb_errors
-#    include <xcb/xcb_errors.h>
+#ifdef HAVE_X11_xcb_errors
+#  include <xcb/xcb.h>
+#  include <xcb/xcb_errors.h>
 
 static void test_xcb_errors(void)
 {
@@ -434,10 +443,11 @@ static void test_xcb_errors(void)
   xcb_disconnect(connection);
 }
 
-#  endif
+#endif
 
-#  ifdef HAVE_X11_xcb_ewmh
-#    include <xcb/xcb_ewmh.h>
+#ifdef HAVE_X11_xcb_ewmh
+#  include <xcb/xcb.h>
+#  include <xcb/xcb_ewmh.h>
 
 static void test_xcb_ewmh(void)
 {
@@ -451,10 +461,11 @@ static void test_xcb_ewmh(void)
   xcb_disconnect(connection);
 }
 
-#  endif
+#endif
 
-#  ifdef HAVE_X11_xcb_glx
-#    include <xcb/glx.h>
+#ifdef HAVE_X11_xcb_glx
+#  include <xcb/glx.h>
+#  include <xcb/xcb.h>
 
 static void test_xcb_glx(void)
 {
@@ -465,10 +476,11 @@ static void test_xcb_glx(void)
   xcb_disconnect(connection);
 }
 
-#  endif
+#endif
 
-#  ifdef HAVE_X11_xcb_icccm
-#    include <xcb/xcb_icccm.h>
+#ifdef HAVE_X11_xcb_icccm
+#  include <xcb/xcb.h>
+#  include <xcb/xcb_icccm.h>
 
 static void test_xcb_icccm(void)
 {
@@ -482,10 +494,11 @@ static void test_xcb_icccm(void)
   xcb_disconnect(connection);
 }
 
-#  endif
+#endif
 
-#  ifdef HAVE_X11_xcb_image
-#    include <xcb/xcb_image.h>
+#ifdef HAVE_X11_xcb_image
+#  include <xcb/xcb.h>
+#  include <xcb/xcb_image.h>
 
 static void test_xcb_image(void)
 {
@@ -497,10 +510,11 @@ static void test_xcb_image(void)
   xcb_disconnect(connection);
 }
 
-#  endif
+#endif
 
-#  ifdef HAVE_X11_xcb_keysyms
-#    include <xcb/xcb_keysyms.h>
+#ifdef HAVE_X11_xcb_keysyms
+#  include <xcb/xcb.h>
+#  include <xcb/xcb_keysyms.h>
 
 static void test_xcb_keysyms(void)
 {
@@ -512,10 +526,11 @@ static void test_xcb_keysyms(void)
   xcb_disconnect(connection);
 }
 
-#  endif
+#endif
 
-#  ifdef HAVE_X11_xcb_present
-#    include <xcb/present.h>
+#ifdef HAVE_X11_xcb_present
+#  include <xcb/present.h>
+#  include <xcb/xcb.h>
 
 static void test_xcb_present(void)
 {
@@ -526,10 +541,11 @@ static void test_xcb_present(void)
   xcb_disconnect(connection);
 }
 
-#  endif
+#endif
 
-#  ifdef HAVE_X11_xcb_randr
-#    include <xcb/randr.h>
+#ifdef HAVE_X11_xcb_randr
+#  include <xcb/randr.h>
+#  include <xcb/xcb.h>
 
 static void test_xcb_randr(void)
 {
@@ -540,10 +556,11 @@ static void test_xcb_randr(void)
   xcb_disconnect(connection);
 }
 
-#  endif
+#endif
 
-#  ifdef HAVE_X11_xcb_record
-#    include <xcb/record.h>
+#ifdef HAVE_X11_xcb_record
+#  include <xcb/record.h>
+#  include <xcb/xcb.h>
 
 static void test_xcb_record(void)
 {
@@ -554,10 +571,11 @@ static void test_xcb_record(void)
   xcb_disconnect(connection);
 }
 
-#  endif
+#endif
 
-#  ifdef HAVE_X11_xcb_render
-#    include <xcb/render.h>
+#ifdef HAVE_X11_xcb_render
+#  include <xcb/render.h>
+#  include <xcb/xcb.h>
 
 static void test_xcb_render(void)
 {
@@ -568,10 +586,11 @@ static void test_xcb_render(void)
   xcb_disconnect(connection);
 }
 
-#  endif
+#endif
 
-#  ifdef HAVE_X11_xcb_render_util
-#    include <xcb/xcb_renderutil.h>
+#ifdef HAVE_X11_xcb_render_util
+#  include <xcb/xcb.h>
+#  include <xcb/xcb_renderutil.h>
 
 static void test_xcb_render_util(void)
 {
@@ -582,10 +601,11 @@ static void test_xcb_render_util(void)
   xcb_disconnect(connection);
 }
 
-#  endif
+#endif
 
-#  ifdef HAVE_X11_xcb_res
-#    include <xcb/res.h>
+#ifdef HAVE_X11_xcb_res
+#  include <xcb/res.h>
+#  include <xcb/xcb.h>
 
 static void test_xcb_res(void)
 {
@@ -596,10 +616,11 @@ static void test_xcb_res(void)
   xcb_disconnect(connection);
 }
 
-#  endif
+#endif
 
-#  ifdef HAVE_X11_xcb_screensaver
-#    include <xcb/screensaver.h>
+#ifdef HAVE_X11_xcb_screensaver
+#  include <xcb/screensaver.h>
+#  include <xcb/xcb.h>
 
 static void test_xcb_screensaver(void)
 {
@@ -610,10 +631,11 @@ static void test_xcb_screensaver(void)
   xcb_disconnect(connection);
 }
 
-#  endif
+#endif
 
-#  ifdef HAVE_X11_xcb_shape
-#    include <xcb/shape.h>
+#ifdef HAVE_X11_xcb_shape
+#  include <xcb/shape.h>
+#  include <xcb/xcb.h>
 
 static void test_xcb_shape(void)
 {
@@ -624,10 +646,11 @@ static void test_xcb_shape(void)
   xcb_disconnect(connection);
 }
 
-#  endif
+#endif
 
-#  ifdef HAVE_X11_xcb_shm
-#    include <xcb/shm.h>
+#ifdef HAVE_X11_xcb_shm
+#  include <xcb/shm.h>
+#  include <xcb/xcb.h>
 
 static void test_xcb_shm(void)
 {
@@ -637,10 +660,11 @@ static void test_xcb_shm(void)
   xcb_disconnect(connection);
 }
 
-#  endif
+#endif
 
-#  ifdef HAVE_X11_xcb_sync
-#    include <xcb/sync.h>
+#ifdef HAVE_X11_xcb_sync
+#  include <xcb/sync.h>
+#  include <xcb/xcb.h>
 
 static void test_xcb_sync(void)
 {
@@ -650,10 +674,11 @@ static void test_xcb_sync(void)
   xcb_disconnect(connection);
 }
 
-#  endif
+#endif
 
-#  ifdef HAVE_X11_xcb_util
-#    include <xcb/xcb_aux.h>
+#ifdef HAVE_X11_xcb_util
+#  include <xcb/xcb.h>
+#  include <xcb/xcb_aux.h>
 
 static void test_xcb_util(void)
 {
@@ -663,10 +688,11 @@ static void test_xcb_util(void)
   xcb_disconnect(connection);
 }
 
-#  endif
+#endif
 
-#  ifdef HAVE_X11_xcb_xf86dri
-#    include <xcb/xf86dri.h>
+#ifdef HAVE_X11_xcb_xf86dri
+#  include <xcb/xcb.h>
+#  include <xcb/xf86dri.h>
 
 static void test_xcb_xf86dri(void)
 {
@@ -677,10 +703,11 @@ static void test_xcb_xf86dri(void)
   xcb_disconnect(connection);
 }
 
-#  endif
+#endif
 
-#  ifdef HAVE_X11_xcb_xfixes
-#    include <xcb/xfixes.h>
+#ifdef HAVE_X11_xcb_xfixes
+#  include <xcb/xcb.h>
+#  include <xcb/xfixes.h>
 
 static void test_xcb_xfixes(void)
 {
@@ -690,10 +717,11 @@ static void test_xcb_xfixes(void)
   xcb_disconnect(connection);
 }
 
-#  endif
+#endif
 
-#  ifdef HAVE_X11_xcb_xinerama
-#    include <xcb/xinerama.h>
+#ifdef HAVE_X11_xcb_xinerama
+#  include <xcb/xcb.h>
+#  include <xcb/xinerama.h>
 
 static void test_xcb_xinerama(void)
 {
@@ -704,10 +732,11 @@ static void test_xcb_xinerama(void)
   xcb_disconnect(connection);
 }
 
-#  endif
+#endif
 
-#  ifdef HAVE_X11_xcb_xinput
-#    include <xcb/xinput.h>
+#ifdef HAVE_X11_xcb_xinput
+#  include <xcb/xcb.h>
+#  include <xcb/xinput.h>
 
 static void test_xcb_xinput(void)
 {
@@ -718,10 +747,11 @@ static void test_xcb_xinput(void)
   xcb_disconnect(connection);
 }
 
-#  endif
+#endif
 
-#  ifdef HAVE_X11_xcb_xkb
-#    include <xcb/xkb.h>
+#ifdef HAVE_X11_xcb_xkb
+#  include <xcb/xcb.h>
+#  include <xcb/xkb.h>
 
 static void test_xcb_xkb(void)
 {
@@ -732,10 +762,11 @@ static void test_xcb_xkb(void)
   xcb_disconnect(connection);
 }
 
-#  endif
+#endif
 
-#  ifdef HAVE_X11_xcb_xrm
-#    include <xcb/xcb_xrm.h>
+#ifdef HAVE_X11_xcb_xrm
+#  include <xcb/xcb.h>
+#  include <xcb/xcb_xrm.h>
 
 static void test_xcb_xrm(void)
 {
@@ -746,10 +777,11 @@ static void test_xcb_xrm(void)
   xcb_disconnect(connection);
 }
 
-#  endif
+#endif
 
-#  ifdef HAVE_X11_xcb_xtest
-#    include <xcb/xtest.h>
+#ifdef HAVE_X11_xcb_xtest
+#  include <xcb/xcb.h>
+#  include <xcb/xtest.h>
 
 static void test_xcb_xtest(void)
 {
@@ -759,10 +791,11 @@ static void test_xcb_xtest(void)
   xcb_disconnect(connection);
 }
 
-#  endif
+#endif
 
-#  ifdef HAVE_X11_xcb_xvmc
-#    include <xcb/xvmc.h>
+#ifdef HAVE_X11_xcb_xvmc
+#  include <xcb/xcb.h>
+#  include <xcb/xvmc.h>
 
 static void test_xcb_xvmc(void)
 {
@@ -772,10 +805,11 @@ static void test_xcb_xvmc(void)
   xcb_disconnect(connection);
 }
 
-#  endif
+#endif
 
-#  ifdef HAVE_X11_xcb_xv
-#    include <xcb/xv.h>
+#ifdef HAVE_X11_xcb_xv
+#  include <xcb/xcb.h>
+#  include <xcb/xv.h>
 
 static void test_xcb_xv(void)
 {
@@ -784,8 +818,6 @@ static void test_xcb_xv(void)
   xcb_xv_query_extension_cookie_t cookie = xcb_xv_query_extension(connection);
   xcb_disconnect(connection);
 }
-
-#  endif
 
 #endif
 
