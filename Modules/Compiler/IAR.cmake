@@ -1,6 +1,6 @@
 # This file is processed when the IAR C/C++ Compiler is used
 #
-# CPU <arch> supported in CMake: 8051, Arm, AVR, MSP430, RH850, RISC-V, RL78, RX and V850
+# CPU <arch> supported in CMake: 8051, Arm, AVR, MSP430, RH850, RISC-V, RL78, RX, STM8 and V850
 #
 # The compiler user documentation is architecture-dependent
 # and it can found with the product installation under <arch>/doc/{EW,BX}<arch>_DevelopmentGuide.ENU.pdf
@@ -35,7 +35,9 @@ macro(__compiler_iar_ilink lang)
 
   __compiler_iar_common(${lang})
 
-  set(CMAKE_${lang}_LINK_EXECUTABLE "<CMAKE_LINKER> --silent <OBJECTS> <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <LINK_LIBRARIES> -o <TARGET>")
+  string(APPEND CMAKE_EXE_LINKER_FLAGS_INIT " --silent")
+  set(CMAKE_${lang}_LINK_EXECUTABLE "<CMAKE_LINKER> <OBJECTS> <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <LINK_LIBRARIES> -o <TARGET>")
+
   set(CMAKE_${lang}_CREATE_STATIC_LIBRARY "<CMAKE_AR> <TARGET> --create <LINK_FLAGS> <OBJECTS>")
   set(CMAKE_${lang}_ARCHIVE_CREATE "<CMAKE_AR> <TARGET> --create <LINK_FLAGS> <OBJECTS>")
   set(CMAKE_${lang}_ARCHIVE_APPEND "<CMAKE_AR> <TARGET> --replace <LINK_FLAGS> <OBJECTS>")
@@ -46,7 +48,9 @@ macro(__compiler_iar_xlink lang)
 
   __compiler_iar_common(${lang})
 
-  set(CMAKE_${lang}_LINK_EXECUTABLE "<CMAKE_LINKER> -S <OBJECTS> <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <LINK_LIBRARIES> -o <TARGET>")
+  string(APPEND CMAKE_EXE_LINKER_FLAGS_INIT " -S")
+  set(CMAKE_${lang}_LINK_EXECUTABLE "<CMAKE_LINKER> <OBJECTS> <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <LINK_LIBRARIES> -o <TARGET>")
+
   set(CMAKE_${lang}_CREATE_STATIC_LIBRARY "<CMAKE_AR> <TARGET> <LINK_FLAGS> <OBJECTS>")
   set(CMAKE_${lang}_ARCHIVE_CREATE "<CMAKE_AR> <TARGET> <LINK_FLAGS> <OBJECTS>")
   set(CMAKE_${lang}_ARCHIVE_APPEND "")
