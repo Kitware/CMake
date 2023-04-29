@@ -89,7 +89,7 @@ class cmLocalGenerator : public cmOutputConverter
 {
 public:
   cmLocalGenerator(cmGlobalGenerator* gg, cmMakefile* makefile);
-  virtual ~cmLocalGenerator();
+  ~cmLocalGenerator() override;
 
   /**
    * Generate the makefile for this directory.

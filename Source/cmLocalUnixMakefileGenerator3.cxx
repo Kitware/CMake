@@ -111,7 +111,7 @@ private:
 
 cmLocalUnixMakefileGenerator3::cmLocalUnixMakefileGenerator3(
   cmGlobalGenerator* gg, cmMakefile* mf)
-  : cmLocalCommonGenerator(gg, mf, WorkDir::CurBin)
+  : cmLocalCommonGenerator(gg, mf)
 {
   this->MakefileVariableSize = 0;
   this->ColorMakefile = false;
