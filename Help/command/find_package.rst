@@ -418,8 +418,8 @@ enabled.
 
    * ``<PackageName>_DIR``
    * :envvar:`CMAKE_PREFIX_PATH`
-   * ``CMAKE_FRAMEWORK_PATH``
-   * ``CMAKE_APPBUNDLE_PATH``
+   * :envvar:`CMAKE_FRAMEWORK_PATH`
+   * :envvar:`CMAKE_APPBUNDLE_PATH`
 
 4. Search paths specified by the ``HINTS`` option.  These should be paths
    computed by system introspection, such as a hint provided by the
