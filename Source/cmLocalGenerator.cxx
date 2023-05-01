@@ -207,12 +207,12 @@ cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg, cmMakefile* makefile)
   }
 }
 
-cmRulePlaceholderExpander* cmLocalGenerator::CreateRulePlaceholderExpander()
-  const
+std::unique_ptr<cmRulePlaceholderExpander>
+cmLocalGenerator::CreateRulePlaceholderExpander() const
 {
-  return new cmRulePlaceholderExpander(this->Compilers, this->VariableMappings,
-                                       this->CompilerSysroot,
-                                       this->LinkerSysroot);
+  return cm::make_unique<cmRulePlaceholderExpander>(
+    this->Compilers, this->VariableMappings, this->CompilerSysroot,
+    this->LinkerSysroot);
 }
 
 cmLocalGenerator::~cmLocalGenerator() = default;
@@ -3222,8 +3222,7 @@ void cmLocalGenerator::AppendDependencyInfoLinkerFlags(
   auto depFile = this->ConvertToOutputFormat(
     this->MaybeRelativeToWorkDir(this->GetLinkDependencyFile(target, config)),
     cmOutputConverter::SHELL);
-  std::unique_ptr<cmRulePlaceholderExpander> rulePlaceholderExpander(
-    this->CreateRulePlaceholderExpander());
+  auto rulePlaceholderExpander = this->CreateRulePlaceholderExpander();
   cmRulePlaceholderExpander::RuleVariables linkDepsVariables;
   linkDepsVariables.DependencyFile = depFile.c_str();
   rulePlaceholderExpander->ExpandRuleVariables(this, depFlag,

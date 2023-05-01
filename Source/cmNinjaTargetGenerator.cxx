@@ -665,8 +665,8 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
   std::string const modmapFormat =
     this->Makefile->GetSafeDefinition(modmapFormatVar);
 
-  std::unique_ptr<cmRulePlaceholderExpander> rulePlaceholderExpander(
-    this->GetLocalGenerator()->CreateRulePlaceholderExpander());
+  auto rulePlaceholderExpander =
+    this->GetLocalGenerator()->CreateRulePlaceholderExpander();
 
   std::string const tdi = this->GetLocalGenerator()->ConvertToOutputFormat(
     this->ConvertToNinjaPath(this->GetTargetDependInfoPath(lang, config)),
@@ -1865,8 +1865,8 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
     this->Makefile->GetRequiredDefinition(cmdVar);
   cmList compileCmds(compileCmd);
 
-  std::unique_ptr<cmRulePlaceholderExpander> rulePlaceholderExpander(
-    this->GetLocalGenerator()->CreateRulePlaceholderExpander());
+  auto rulePlaceholderExpander =
+    this->GetLocalGenerator()->CreateRulePlaceholderExpander();
 
   for (auto& i : compileCmds) {
     // no launcher for CMAKE_EXPORT_COMPILE_COMMANDS

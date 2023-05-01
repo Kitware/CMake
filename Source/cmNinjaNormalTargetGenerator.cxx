@@ -302,8 +302,8 @@ void cmNinjaNormalTargetGenerator::WriteNvidiaDeviceLinkRule(
       launcher = cmStrCat(val, ' ');
     }
 
-    std::unique_ptr<cmRulePlaceholderExpander> rulePlaceholderExpander(
-      this->GetLocalGenerator()->CreateRulePlaceholderExpander());
+    auto rulePlaceholderExpander =
+      this->GetLocalGenerator()->CreateRulePlaceholderExpander();
 
     // Rule for linking library/executable.
     std::vector<std::string> linkCmds = this->ComputeDeviceLinkCmd();
@@ -362,8 +362,8 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkRules(
 
   std::string compileCmd = this->GetMakefile()->GetRequiredDefinition(
     "CMAKE_CUDA_DEVICE_LINK_COMPILE");
-  std::unique_ptr<cmRulePlaceholderExpander> rulePlaceholderExpander(
-    this->GetLocalGenerator()->CreateRulePlaceholderExpander());
+  auto rulePlaceholderExpander =
+    this->GetLocalGenerator()->CreateRulePlaceholderExpander();
   rulePlaceholderExpander->ExpandRuleVariables(this->GetLocalGenerator(),
                                                compileCmd, vars);
 
@@ -511,8 +511,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile,
       launcher = cmStrCat(val, ' ');
     }
 
-    std::unique_ptr<cmRulePlaceholderExpander> rulePlaceholderExpander(
-      this->GetLocalGenerator()->CreateRulePlaceholderExpander());
+    auto rulePlaceholderExpander =
+      this->GetLocalGenerator()->CreateRulePlaceholderExpander();
 
     // Rule for linking library/executable.
     std::vector<std::string> linkCmds = this->ComputeLinkCmd(config);
@@ -584,8 +584,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile,
 
     std::string cmd =
       this->GetMakefile()->GetDefinition("CMAKE_CREATE_TEXT_STUBS");
-    std::unique_ptr<cmRulePlaceholderExpander> rulePlaceholderExpander(
-      this->GetLocalGenerator()->CreateRulePlaceholderExpander());
+    auto rulePlaceholderExpander =
+      this->GetLocalGenerator()->CreateRulePlaceholderExpander();
     cmRulePlaceholderExpander::RuleVariables vars;
     vars.Target = "$in";
     rulePlaceholderExpander->SetTargetImpLib("$out");
