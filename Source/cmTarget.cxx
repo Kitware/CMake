@@ -397,6 +397,10 @@ TargetProperty const StaticTargetProperties[] = {
   { "MSVC_DEBUG_INFORMATION_FORMAT"_s, IC::CanCompileSources },
   { "MSVC_RUNTIME_LIBRARY"_s, IC::CanCompileSources },
   { "VS_JUST_MY_CODE_DEBUGGING"_s, IC::CanCompileSources },
+  { "VS_DEBUGGER_COMMAND"_s, IC::ExecutableTarget },
+  { "VS_DEBUGGER_COMMAND_ARGUMENTS"_s, IC::ExecutableTarget },
+  { "VS_DEBUGGER_ENVIRONMENT"_s, IC::ExecutableTarget },
+  { "VS_DEBUGGER_WORKING_DIRECTORY"_s, IC::ExecutableTarget },
   // ---- OpenWatcom
   { "WATCOM_RUNTIME_LIBRARY"_s, IC::CanCompileSources },
   // -- Language
