@@ -20,7 +20,8 @@
 #    error Buildsystem error
 #  endif
 #  if defined(__STDC_VERSION__) &&                                            \
-    !(defined(__SUNPRO_C) && __STDC_VERSION__ == 199409L)
+    !(__STDC_VERSION__ == 199409L &&                                          \
+      (defined(__INTEL_COMPILER) || defined(__SUNPRO_C)))
 #    error Unexpected __STDC_VERSION__ definition
 #  endif
 #endif
