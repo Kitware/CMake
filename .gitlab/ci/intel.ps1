@@ -1,6 +1,6 @@
 $erroractionpreference = "stop"
 
-if ("$env:CMAKE_CI_BUILD_NAME" -match "(^|_)oneapi2023\.1\.0(_|$)") {
+if ("$env:CMAKE_CI_BUILD_NAME" -match "(^|_)(oneapi2023\.1\.0|intel2021\.9\.0)(_|$)") {
     # Intel oneAPI 2023.1.0
     $version = "2023.1.0"
     $filename = "intel-oneapi-$version-windows-1"
