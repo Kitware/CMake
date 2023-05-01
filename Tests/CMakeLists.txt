@@ -986,6 +986,30 @@ if(BUILD_TESTING)
     endif()
   endif()
 
+  # On Windows run the CPackInnoSetupGenerator test
+  if(WIN32 AND CMake_TEST_CPACK_INNOSETUP)
+    add_test(CPackInnoSetupGenerator ${CMAKE_CTEST_COMMAND}
+      -C \${CTEST_CONFIGURATION_TYPE}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/CPackInnoSetupGenerator"
+      "${CMake_BINARY_DIR}/Tests/CPackInnoSetupGenerator"
+      ${build_generator_args}
+      --build-project CPackInnoSetupGenerator
+      --build-options
+      --test-command ${CMAKE_CMAKE_COMMAND}
+      "-DCPackInnoSetupGenerator_BINARY_DIR:PATH=${CMake_BINARY_DIR}/Tests/CPackInnoSetupGenerator"
+      "-Dconfig=\${CTEST_CONFIGURATION_TYPE}"
+      -P "${CMake_SOURCE_DIR}/Tests/CPackInnoSetupGenerator/RunCPackVerifyResult.cmake")
+
+    set_property(TEST CPackInnoSetupGenerator PROPERTY
+      ATTACHED_FILES_ON_FAIL
+      "${CMake_BINARY_DIR}/Tests/CPackInnoSetupGenerator/_CPack_Packages/win32/INNOSETUP/ISCCOutput.log")
+
+    set_property(TEST CPackInnoSetupGenerator PROPERTY
+      ATTACHED_FILES
+      "${CMake_BINARY_DIR}/Tests/CPackInnoSetupGenerator/_CPack_Packages/win32/INNOSETUP/ISScript.iss")
+  endif()
+
   # On Windows run the CPackNSISGenerator test
   # if the nsis is available
   if(WIN32 AND NSIS_MAKENSIS_EXECUTABLE)

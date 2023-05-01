@@ -1018,6 +1018,7 @@ add_library(
   CPack/cmCPackGeneratorFactory.cxx
   CPack/cmCPackGenerator.cxx
   CPack/cmCPackLog.cxx
+  CPack/cmCPackInnoSetupGenerator.cxx
   CPack/cmCPackNSISGenerator.cxx
   CPack/cmCPackNuGetGenerator.cxx
   CPack/cmCPackSTGZGenerator.cxx
