@@ -12,6 +12,7 @@
 #include "cmCPackIFWRepository.h"
 #include "cmCPackLog.h" // IWYU pragma: keep
 #include "cmGeneratedFileStream.h"
+#include "cmList.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"

@@ -10,6 +10,7 @@
 
 #include "cmFileAPI.h"
 #include "cmGlobalGenerator.h"
+#include "cmList.h"
 #include "cmMakefile.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
@@ -124,10 +125,11 @@ void Toolchains::DumpToolchainVariable(cmMakefile const* mf,
     cmStrCat("CMAKE_", lang, "_", variable.VariableSuffix);
 
   if (variable.IsList) {
-    std::vector<std::string> values;
-    if (mf->GetDefExpandList(variableName, values)) {
+    cmValue data = mf->GetDefinition(variableName);
+    if (data) {
+      cmList values(data);
       Json::Value jsonArray = Json::arrayValue;
-      for (std::string const& value : values) {
+      for (auto const& value : values) {
         jsonArray.append(value);
       }
       object[variable.ObjectKey] = jsonArray;

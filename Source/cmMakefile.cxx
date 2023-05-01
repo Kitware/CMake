@@ -1957,21 +1957,15 @@ void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
       value = existingValue->c_str();
     }
     if (type == cmStateEnums::PATH || type == cmStateEnums::FILEPATH) {
-      std::vector<std::string>::size_type cc;
-      std::vector<std::string> files;
       nvalue = value ? value : "";
 
-      cmExpandList(nvalue, files);
-      nvalue.clear();
-      for (cc = 0; cc < files.size(); cc++) {
-        if (!cmIsOff(files[cc])) {
-          files[cc] = cmSystemTools::CollapseFullPath(files[cc]);
+      cmList files(nvalue);
+      for (auto& file : files) {
+        if (!cmIsOff(file)) {
+          file = cmSystemTools::CollapseFullPath(file);
         }
-        if (cc > 0) {
-          nvalue += ";";
-        }
-        nvalue += files[cc];
       }
+      nvalue = files.to_string();
 
       this->GetCMakeInstance()->AddCacheEntry(name, nvalue, doc, type);
       nvalue = *this->GetState()->GetInitializedCacheValue(name);
@@ -2611,18 +2605,6 @@ cmValue cmMakefile::GetDefinition(const std::string& name) const
 const std::string& cmMakefile::GetSafeDefinition(const std::string& name) const
 {
   return this->GetDefinition(name);
-}
-
-bool cmMakefile::GetDefExpandList(const std::string& name,
-                                  std::vector<std::string>& out,
-                                  bool emptyArgs) const
-{
-  cmValue def = this->GetDefinition(name);
-  if (!def) {
-    return false;
-  }
-  cmExpandList(*def, out, emptyArgs);
-  return true;
 }
 
 std::vector<std::string> cmMakefile::GetDefinitions() const
@@ -3265,9 +3247,9 @@ std::string cmMakefile::GetDefaultConfiguration() const
 std::vector<std::string> cmMakefile::GetGeneratorConfigs(
   GeneratorConfigQuery mode) const
 {
-  std::vector<std::string> configs;
+  cmList configs;
   if (this->GetGlobalGenerator()->IsMultiConfig()) {
-    this->GetDefExpandList("CMAKE_CONFIGURATION_TYPES", configs);
+    configs.assign(this->GetDefinition("CMAKE_CONFIGURATION_TYPES"));
   } else if (mode != cmMakefile::OnlyMultiConfig) {
     const std::string& buildType = this->GetSafeDefinition("CMAKE_BUILD_TYPE");
     if (!buildType.empty()) {
@@ -3277,7 +3259,7 @@ std::vector<std::string> cmMakefile::GetGeneratorConfigs(
   if (mode == cmMakefile::IncludeEmptyConfig && configs.empty()) {
     configs.emplace_back();
   }
-  return configs;
+  return std::move(configs.data());
 }
 
 bool cmMakefile::IsFunctionBlocked(const cmListFileFunction& lff,
@@ -4154,11 +4136,11 @@ void cmMakefile::GetTests(const std::string& config,
 
 void cmMakefile::AddCMakeDependFilesFromUser()
 {
-  std::vector<std::string> deps;
+  cmList deps;
   if (cmValue deps_str = this->GetProperty("CMAKE_CONFIGURE_DEPENDS")) {
-    cmExpandList(*deps_str, deps);
+    deps.assign(*deps_str);
   }
-  for (std::string const& dep : deps) {
+  for (auto const& dep : deps) {
     if (cmSystemTools::FileIsFullPath(dep)) {
       this->AddCMakeDependFile(dep);
     } else {

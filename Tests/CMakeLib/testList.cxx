@@ -8,7 +8,7 @@
 #include <utility>
 #include <vector>
 
-#include <cm/string_view>
+#include <cmext/string_view>
 
 #include "cmList.h"
 
@@ -42,7 +42,7 @@ bool testConstructors()
   }
   {
     cmList list1{ "aa", "bb" };
-    cmList list2("aa;bb");
+    cmList list2("aa;bb"_s);
 
     if (list1.size() != 2 || list2.size() != 2 || list1 != list2) {
       result = false;
@@ -174,7 +174,7 @@ bool testAssign()
   {
     cmList list{ "cc", "dd" };
 
-    list = "aa;bb";
+    list = "aa;bb"_s;
     if (list.size() != 2) {
       result = false;
     }
@@ -195,7 +195,7 @@ bool testConversions()
   bool result = true;
 
   {
-    cmList list("a;b;c");
+    cmList list("a;b;c"_s);
     std::string s = list.to_string();
 
     if (s != "a;b;c") {
@@ -203,7 +203,7 @@ bool testConversions()
     }
   }
   {
-    cmList list("a;b;c");
+    cmList list("a;b;c"_s);
     std::vector<std::string> v = list;
 
     if (list.size() != 3 || v.size() != 3) {
@@ -211,7 +211,7 @@ bool testConversions()
     }
   }
   {
-    cmList list("a;b;c");
+    cmList list("a;b;c"_s);
     std::vector<std::string> v = std::move(list);
 
     // Microsoft compiler is not able to handle correctly the move semantics
@@ -221,7 +221,7 @@ bool testConversions()
     }
   }
   {
-    cmList list("a;b;c");
+    cmList list("a;b;c"_s);
     std::vector<std::string> v;
 
     // compiler is not able to select the cmList conversion operator
@@ -247,20 +247,20 @@ bool testAccess()
 
   {
     cmList list{ "a", "b", "c" };
-    if (list.at(1) != "b") {
+    if (list.get_item(1) != "b") {
       result = false;
     }
   }
   {
     cmList list{ "a", "b", "c" };
-    if (list.at(-3) != "a") {
+    if (list.get_item(-3) != "a") {
       result = false;
     }
   }
   {
     try {
       cmList list{ "a", "b", "c" };
-      if (list.at(4) != "a") {
+      if (list.get_item(4) != "a") {
         result = false;
       }
     } catch (std::out_of_range&) {
@@ -269,7 +269,7 @@ bool testAccess()
   {
     try {
       cmList list{ "a", "b", "c" };
-      if (list.at(-4) != "a") {
+      if (list.get_item(-4) != "a") {
         result = false;
       }
     } catch (std::out_of_range&) {
@@ -342,7 +342,7 @@ bool testModifiers()
   {
     cmList list{ "1;2;3;4;5" };
 
-    auto it = list.insert(list.begin() + 2, "6;7;8");
+    auto it = list.insert(list.begin() + 2, "6;7;8"_s);
     if (list.size() != 8 || list.to_string() != "1;2;6;7;8;3;4;5") {
       result = false;
     }
@@ -354,7 +354,7 @@ bool testModifiers()
     cmList list{ "1;2;3;4;5" };
 
     auto it =
-      list.insert(list.begin() + 2, "6;7;8", cmList::ExpandElements::No);
+      list.insert(list.begin() + 2, "6;7;8"_s, cmList::ExpandElements::No);
     if (list.size() != 6 || list.to_string() != "1;2;6;7;8;3;4;5") {
       result = false;
     }
@@ -479,7 +479,7 @@ bool testRemoveItems()
   bool result = true;
 
   {
-    cmList list("a;b;c;d;e;f;g;h");
+    cmList list("a;b;c;d;e;f;g;h"_s);
 
     list.remove_items({ 1, 3, 5 });
 
@@ -488,7 +488,7 @@ bool testRemoveItems()
     }
   }
   {
-    cmList list("a;b;c;b;a;d;e;f");
+    cmList list("a;b;c;b;a;d;e;f"_s);
 
     list.remove_items({ "a", "b", "h" });
 
@@ -497,7 +497,7 @@ bool testRemoveItems()
     }
   }
   {
-    cmList list("a;b;c;d;e;f;g;h");
+    cmList list("a;b;c;d;e;f;g;h"_s);
     std::vector<cmList::index_type> remove{ 1, 3, 5 };
 
     list.remove_items(remove.begin(), remove.end());
@@ -507,7 +507,7 @@ bool testRemoveItems()
     }
   }
   {
-    cmList list("a;b;c;b;a;d;e;f");
+    cmList list("a;b;c;b;a;d;e;f"_s);
     std::vector<std::string> remove{ "b", "a", "h" };
 
     list.remove_items(remove.begin(), remove.end());
@@ -529,7 +529,7 @@ bool testRemoveDuplicates()
   bool result = true;
 
   {
-    cmList list("b;c;b;a;a;c;b;a;c;b");
+    cmList list("b;c;b;a;a;c;b;a;c;b"_s);
 
     list.remove_duplicates();
 
@@ -803,7 +803,7 @@ bool testStaticModifiers()
 
   {
     std::vector<std::string> v{ "a", "b", "c" };
-    cmList::assign("d;e", v);
+    cmList::assign(v, "d;e"_s);
 
     if (v.size() != 2 || v[0] != "d" || v[1] != "e") {
       result = false;
@@ -811,7 +811,7 @@ bool testStaticModifiers()
   }
   {
     std::vector<std::string> v{ "a", "b", "c" };
-    cmList::append("d;;e", v);
+    cmList::append(v, "d;;e"_s);
 
     if (v.size() != 5 || v[3] != "d" || v[4] != "e") {
       result = false;
@@ -819,7 +819,7 @@ bool testStaticModifiers()
   }
   {
     std::vector<std::string> v{ "a", "b", "c" };
-    cmList::append("d;;e", v, cmList::EmptyElements::Yes);
+    cmList::append(v, "d;;e"_s, cmList::EmptyElements::Yes);
 
     if (v.size() != 6 || v[3] != "d" || !v[4].empty() || v[5] != "e") {
       result = false;
@@ -827,7 +827,7 @@ bool testStaticModifiers()
   }
   {
     std::vector<std::string> v{ "a", "b", "c" };
-    cmList::prepend("d;e", v);
+    cmList::prepend(v, "d;e"_s);
 
     if (v.size() != 5 || v[0] != "d" || v[1] != "e") {
       result = false;
@@ -835,7 +835,7 @@ bool testStaticModifiers()
   }
   {
     std::vector<std::string> v{ "a", "b", "c" };
-    cmList::prepend("d;;e", v, cmList::EmptyElements::Yes);
+    cmList::prepend(v, "d;;e"_s, cmList::EmptyElements::Yes);
 
     if (v.size() != 6 || v[0] != "d" || !v[1].empty() || v[2] != "e") {
       result = false;
@@ -843,7 +843,7 @@ bool testStaticModifiers()
   }
   {
     std::string list{ "a;b;c" };
-    cmList::append("d;e", list);
+    cmList::append(list, "d;e"_s);
 
     if (list != "a;b;c;d;e") {
       result = false;
@@ -851,7 +851,7 @@ bool testStaticModifiers()
   }
   {
     std::string list;
-    cmList::append("d;e", list);
+    cmList::append(list, "d;e"_s);
 
     if (list != "d;e") {
       result = false;
@@ -859,7 +859,7 @@ bool testStaticModifiers()
   }
   {
     std::string list{ "a;b;c" };
-    cmList::append("", list);
+    cmList::append(list, "");
 
     if (list != "a;b;c;") {
       result = false;
@@ -868,7 +868,7 @@ bool testStaticModifiers()
   {
     std::string list{ "a;b;c" };
     std::vector<std::string> v{ "d", "e" };
-    cmList::append(v.begin(), v.end(), list);
+    cmList::append(list, v.begin(), v.end());
 
     if (list != "a;b;c;d;e") {
       result = false;
@@ -877,7 +877,7 @@ bool testStaticModifiers()
   {
     std::string list{ "a;b;c" };
     std::vector<std::string> v;
-    cmList::append(v.begin(), v.end(), list);
+    cmList::append(list, v.begin(), v.end());
 
     if (list != "a;b;c") {
       result = false;
@@ -886,7 +886,7 @@ bool testStaticModifiers()
   {
     std::string list;
     std::vector<std::string> v{ "d", "e" };
-    cmList::append(v.begin(), v.end(), list);
+    cmList::append(list, v.begin(), v.end());
 
     if (list != "d;e") {
       result = false;
@@ -894,7 +894,7 @@ bool testStaticModifiers()
   }
   {
     std::string list{ "a;b;c" };
-    cmList::prepend("d;e", list);
+    cmList::prepend(list, "d;e");
 
     if (list != "d;e;a;b;c") {
       result = false;
@@ -902,7 +902,7 @@ bool testStaticModifiers()
   }
   {
     std::string list;
-    cmList::prepend("d;e", list);
+    cmList::prepend(list, "d;e");
 
     if (list != "d;e") {
       result = false;
@@ -910,7 +910,7 @@ bool testStaticModifiers()
   }
   {
     std::string list{ "a;b;c" };
-    cmList::prepend("", list);
+    cmList::prepend(list, "");
 
     if (list != ";a;b;c") {
       result = false;
@@ -919,7 +919,7 @@ bool testStaticModifiers()
   {
     std::string list{ "a;b;c" };
     std::vector<std::string> v{ "d", "e" };
-    cmList::prepend(v.begin(), v.end(), list);
+    cmList::prepend(list, v.begin(), v.end());
 
     if (list != "d;e;a;b;c") {
       result = false;
@@ -928,7 +928,7 @@ bool testStaticModifiers()
   {
     std::string list{ "a;b;c" };
     std::vector<std::string> v;
-    cmList::prepend(v.begin(), v.end(), list);
+    cmList::prepend(list, v.begin(), v.end());
 
     if (list != "a;b;c") {
       result = false;
@@ -937,7 +937,7 @@ bool testStaticModifiers()
   {
     std::string list;
     std::vector<std::string> v{ "d", "e" };
-    cmList::prepend(v.begin(), v.end(), list);
+    cmList::prepend(list, v.begin(), v.end());
 
     if (list != "d;e") {
       result = false;

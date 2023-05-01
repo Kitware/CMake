@@ -147,12 +147,10 @@ cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg, cmMakefile* makefile)
         this->Makefile->GetDefinition("CMAKE_APPLE_ARCH_SYSROOTS")) {
     std::string const& appleArchs =
       this->Makefile->GetSafeDefinition("CMAKE_OSX_ARCHITECTURES");
-    std::vector<std::string> archs;
-    std::vector<std::string> sysroots;
-    cmExpandList(appleArchs, archs);
-    cmExpandList(*appleArchSysroots, sysroots, true);
+    cmList archs(appleArchs);
+    cmList sysroots{ appleArchSysroots, cmList::EmptyElements::Yes };
     if (archs.size() == sysroots.size()) {
-      for (size_t i = 0; i < archs.size(); ++i) {
+      for (cmList::size_type i = 0; i < archs.size(); ++i) {
         this->AppleArchSysroots[archs[i]] = sysroots[i];
       }
     } else {
@@ -1169,11 +1167,11 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
 
   // Standard include directories to be added unconditionally at the end.
   // These are intended to simulate additional implicit include directories.
-  std::vector<std::string> userStandardDirs;
+  cmList userStandardDirs;
   {
     std::string const value = this->Makefile->GetSafeDefinition(
       cmStrCat("CMAKE_", lang, "_STANDARD_INCLUDE_DIRECTORIES"));
-    cmExpandList(value, userStandardDirs);
+    userStandardDirs.assign(value);
     for (std::string& usd : userStandardDirs) {
       cmSystemTools::ConvertToUnixSlashes(usd);
     }
@@ -1196,13 +1194,12 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
     //   directories for modules ('.mod' files).
     if (lang != "Fortran") {
       size_t const impDirVecOldSize = impDirVec.size();
-      if (this->Makefile->GetDefExpandList(
-            cmStrCat("CMAKE_", lang, "_IMPLICIT_INCLUDE_DIRECTORIES"),
-            impDirVec)) {
-        // FIXME: Use cmRange with 'advance()' when it supports non-const.
-        for (size_t i = impDirVecOldSize; i < impDirVec.size(); ++i) {
-          cmSystemTools::ConvertToUnixSlashes(impDirVec[i]);
-        }
+      cmList::append(impDirVec,
+                     this->Makefile->GetDefinition(cmStrCat(
+                       "CMAKE_", lang, "_IMPLICIT_INCLUDE_DIRECTORIES")));
+      // FIXME: Use cmRange with 'advance()' when it supports non-const.
+      for (size_t i = impDirVecOldSize; i < impDirVec.size(); ++i) {
+        cmSystemTools::ConvertToUnixSlashes(impDirVec[i]);
       }
     }
 
@@ -2448,10 +2445,9 @@ void cmLocalGenerator::AddColorDiagnosticsFlags(std::string& flags,
         cmStrCat("CMAKE_", lang, "_COMPILE_OPTIONS_COLOR_DIAGNOSTICS_OFF");
     }
 
-    std::vector<std::string> options;
-    this->Makefile->GetDefExpandList(colorFlagName, options);
+    cmList options{ this->Makefile->GetDefinition(colorFlagName) };
 
-    for (std::string const& option : options) {
+    for (auto const& option : options) {
       this->AppendFlagEscape(flags, option);
     }
   }
@@ -4387,12 +4383,11 @@ void AddUtilityCommand(cmLocalGenerator& lg, cmCommandOrigin origin,
 
 std::vector<std::string> ComputeISPCObjectSuffixes(cmGeneratorTarget* target)
 {
-  const std::string& targetProperty =
-    target->GetSafeProperty("ISPC_INSTRUCTION_SETS");
-  std::vector<std::string> ispcTargets;
+  const cmValue targetProperty = target->GetProperty("ISPC_INSTRUCTION_SETS");
+  cmList ispcTargets;
 
-  if (!cmIsOff(targetProperty)) {
-    cmExpandList(targetProperty, ispcTargets);
+  if (!targetProperty.IsOff()) {
+    ispcTargets.assign(targetProperty);
     for (auto& ispcTarget : ispcTargets) {
       // transform targets into the suffixes
       auto pos = ispcTarget.find('-');
@@ -4404,7 +4399,7 @@ std::vector<std::string> ComputeISPCObjectSuffixes(cmGeneratorTarget* target)
       ispcTarget = target_suffix;
     }
   }
-  return ispcTargets;
+  return std::move(ispcTargets.data());
 }
 
 std::vector<std::string> ComputeISPCExtraObjects(

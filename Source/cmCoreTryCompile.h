@@ -12,6 +12,7 @@
 
 #include "cmArgumentParser.h"
 #include "cmArgumentParserTypes.h"
+#include "cmList.h"
 #include "cmStateTypes.h"
 
 class cmConfigureLog;
@@ -65,7 +66,7 @@ public:
     ArgumentParser::MaybeEmpty<std::vector<std::string>> CMakeFlags{
       1, "CMAKE_FLAGS"
     }; // fake argv[0]
-    std::vector<std::string> CompileDefs;
+    cmList CompileDefs;
     cm::optional<ArgumentParser::MaybeEmpty<std::vector<std::string>>>
       LinkLibraries;
     ArgumentParser::MaybeEmpty<std::vector<std::string>> LinkOptions;

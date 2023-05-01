@@ -174,13 +174,11 @@ bool cmParseArgumentsCommand(std::vector<std::string> const& args,
   parser.Bind(list, options, duplicateKey);
 
   // the third argument is a (cmake) list of single argument options
-  list.clear();
-  cmExpandList(*argIter++, list);
+  list.assign(*argIter++);
   parser.Bind(list, singleValArgs, duplicateKey);
 
   // the fourth argument is a (cmake) list of multi argument options
-  list.clear();
-  cmExpandList(*argIter++, list);
+  list.assign(*argIter++);
   parser.Bind(list, multiValArgs, duplicateKey);
 
   list.clear();
@@ -188,7 +186,7 @@ bool cmParseArgumentsCommand(std::vector<std::string> const& args,
     // Flatten ;-lists in the arguments into a single list as was done
     // by the original function(CMAKE_PARSE_ARGUMENTS).
     for (; argIter != argEnd; ++argIter) {
-      cmExpandList(*argIter, list);
+      list.append(*argIter);
     }
   } else {
     // in the PARSE_ARGV move read the arguments from ARGC and ARGV#

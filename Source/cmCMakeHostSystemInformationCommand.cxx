@@ -21,10 +21,12 @@
 
 #include "cmArgumentParser.h"
 #include "cmExecutionStatus.h"
+#include "cmList.h"
 #include "cmMakefile.h"
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 #include "cmWindowsRegistry.h"
 
 #ifdef _WIN32
@@ -303,7 +305,8 @@ std::map<std::string, std::string> GetOSReleaseVariables(
   }
 
   // 2. User provided (append to the CMake prvided)
-  makefile.GetDefExpandList("CMAKE_GET_OS_RELEASE_FALLBACK_SCRIPTS", scripts);
+  cmList::append(
+    scripts, makefile.GetDefinition("CMAKE_GET_OS_RELEASE_FALLBACK_SCRIPTS"));
 
   // Filter out files that are not in format `NNN-name.cmake`
   auto checkName = [](std::string const& filepath) -> bool {
@@ -330,11 +333,11 @@ std::map<std::string, std::string> GetOSReleaseVariables(
             });
 
   // Name of the variable to put the results
-  auto const result_variable = "CMAKE_GET_OS_RELEASE_FALLBACK_RESULT"_s;
+  std::string const result_variable{ "CMAKE_GET_OS_RELEASE_FALLBACK_RESULT" };
 
   for (auto const& script : scripts) {
     // Unset the result variable
-    makefile.RemoveDefinition(result_variable.data());
+    makefile.RemoveDefinition(result_variable);
 
     // include FATAL_ERROR and ERROR in the return status
     if (!makefile.ReadListFile(script) ||
@@ -343,8 +346,8 @@ std::map<std::string, std::string> GetOSReleaseVariables(
       continue;
     }
 
-    std::vector<std::string> variables;
-    if (!makefile.GetDefExpandList(result_variable.data(), variables)) {
+    cmList variables{ makefile.GetDefinition(result_variable) };
+    if (variables.empty()) {
       // Heh, this script didn't found anything... go try the next one.
       continue;
     }
@@ -370,7 +373,7 @@ std::map<std::string, std::string> GetOSReleaseVariables(
     }
   }
 
-  makefile.RemoveDefinition(result_variable.data());
+  makefile.RemoveDefinition(result_variable);
 
   return data;
 }

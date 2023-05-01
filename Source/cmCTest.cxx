@@ -3099,8 +3099,7 @@ void cmCTest::PopulateCustomVector(cmMakefile* mf, const std::string& def,
   }
   cmCTestLog(this, DEBUG, "PopulateCustomVector: " << def << std::endl);
 
-  vec.clear();
-  cmExpandList(*dval, vec);
+  cmList::assign(vec, *dval);
 
   for (std::string const& it : vec) {
     cmCTestLog(this, DEBUG, "  -- " << it << std::endl);

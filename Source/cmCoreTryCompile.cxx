@@ -126,7 +126,7 @@ ArgumentParser::Continue TryCompileLangProp(Arguments& args,
 ArgumentParser::Continue TryCompileCompileDefs(Arguments& args,
                                                cm::string_view val)
 {
-  cmExpandList(val, args.CompileDefs);
+  args.CompileDefs.append(val);
   return ArgumentParser::Continue::Yes;
 }
 
@@ -789,7 +789,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
     if (!arguments.CompileDefs.empty()) {
       // Pass using bracket arguments to preserve content.
       fprintf(fout, "add_definitions([==[%s]==])\n",
-              cmJoin(arguments.CompileDefs, "]==] [==[").c_str());
+              arguments.CompileDefs.join("]==] [==[").c_str());
     }
 
     if (!targets.empty()) {

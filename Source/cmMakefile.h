@@ -518,8 +518,6 @@ public:
   const std::string& GetRequiredDefinition(const std::string& name) const;
   bool IsDefinitionSet(const std::string&) const;
   bool IsNormalDefinitionSet(const std::string&) const;
-  bool GetDefExpandList(const std::string& name, std::vector<std::string>& out,
-                        bool emptyArgs = false) const;
   /**
    * Get the list of all variables in the current space. If argument
    * cacheonly is specified and is greater than 0, then only cache

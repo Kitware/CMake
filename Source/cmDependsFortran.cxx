@@ -13,6 +13,7 @@
 #include "cmFortranParser.h" /* Interface to parser object.  */
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
+#include "cmList.h"
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
@@ -78,9 +79,8 @@ cmDependsFortran::cmDependsFortran(cmLocalUnixMakefileGenerator3* lg)
   this->SetIncludePathFromLanguage("Fortran");
 
   // Get the list of definitions.
-  std::vector<std::string> definitions;
   cmMakefile* mf = this->LocalGenerator->GetMakefile();
-  mf->GetDefExpandList("CMAKE_TARGET_DEFINITIONS_Fortran", definitions);
+  cmList definitions{ mf->GetDefinition("CMAKE_TARGET_DEFINITIONS_Fortran") };
 
   // translate i.e. FOO=BAR to FOO and add it to the list of defined
   // preprocessor symbols
@@ -244,9 +244,9 @@ bool cmDependsFortran::LocateModules()
 
   // Load information about other targets.
   cmMakefile* mf = this->LocalGenerator->GetMakefile();
-  std::vector<std::string> infoFiles;
-  mf->GetDefExpandList("CMAKE_Fortran_TARGET_LINKED_INFO_FILES", infoFiles);
-  for (std::string const& i : infoFiles) {
+  cmList infoFiles{ mf->GetDefinition(
+    "CMAKE_Fortran_TARGET_LINKED_INFO_FILES") };
+  for (auto const& i : infoFiles) {
     std::string targetDir = cmSystemTools::GetFilenamePath(i);
     std::string fname = targetDir + "/fortran.internal";
     cmsys::ifstream fin(fname.c_str());

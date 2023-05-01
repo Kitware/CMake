@@ -11,6 +11,7 @@
 #include "cmsys/RegularExpression.hxx"
 
 #include "cmGlobalGenerator.h"
+#include "cmList.h"
 #include "cmMakefile.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
@@ -196,8 +197,8 @@ struct cmFindLibraryHelper
   cmGlobalGenerator* GG;
 
   // List of valid prefixes and suffixes.
-  std::vector<std::string> Prefixes;
-  std::vector<std::string> Suffixes;
+  cmList Prefixes;
+  cmList Suffixes;
   std::string PrefixRegexStr;
   std::string SuffixRegexStr;
 
@@ -223,7 +224,7 @@ struct cmFindLibraryHelper
   std::string TestPath;
 
   void RegexFromLiteral(std::string& out, std::string const& in);
-  void RegexFromList(std::string& out, std::vector<std::string> const& in);
+  void RegexFromList(std::string& out, cmList const& in);
   size_type GetPrefixIndex(std::string const& prefix)
   {
     return std::find(this->Prefixes.begin(), this->Prefixes.end(), prefix) -
@@ -307,8 +308,8 @@ cmFindLibraryHelper::cmFindLibraryHelper(std::string debugName, cmMakefile* mf,
   std::string const& prefixes_list = get_prefixes(this->Makefile);
   std::string const& suffixes_list = get_suffixes(this->Makefile);
 
-  cmExpandList(prefixes_list, this->Prefixes, true);
-  cmExpandList(suffixes_list, this->Suffixes, true);
+  this->Prefixes.assign(prefixes_list, cmList::EmptyElements::Yes);
+  this->Suffixes.assign(suffixes_list, cmList::EmptyElements::Yes);
   this->RegexFromList(this->PrefixRegexStr, this->Prefixes);
   this->RegexFromList(this->SuffixRegexStr, this->Suffixes);
 
@@ -334,14 +335,13 @@ void cmFindLibraryHelper::RegexFromLiteral(std::string& out,
   }
 }
 
-void cmFindLibraryHelper::RegexFromList(std::string& out,
-                                        std::vector<std::string> const& in)
+void cmFindLibraryHelper::RegexFromList(std::string& out, cmList const& in)
 {
   // Surround the list in parens so the '|' does not apply to anything
   // else and the result can be checked after matching.
   out += "(";
   const char* sep = "";
-  for (std::string const& s : in) {
+  for (auto const& s : in) {
     // Separate from previous item.
     out += sep;
     sep = "|";

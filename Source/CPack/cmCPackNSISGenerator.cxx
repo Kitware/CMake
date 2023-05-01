@@ -246,8 +246,7 @@ int cmCPackNSISGenerator::PackageFiles()
   std::string nsisPreArguments;
   if (cmValue nsisArguments =
         this->GetOption("CPACK_NSIS_EXECUTABLE_PRE_ARGUMENTS")) {
-    std::vector<std::string> expandedArguments;
-    cmExpandList(nsisArguments, expandedArguments);
+    cmList expandedArguments{ nsisArguments };
 
     for (auto& arg : expandedArguments) {
       if (!cmHasPrefix(arg, NSIS_OPT)) {
@@ -260,8 +259,7 @@ int cmCPackNSISGenerator::PackageFiles()
   std::string nsisPostArguments;
   if (cmValue nsisArguments =
         this->GetOption("CPACK_NSIS_EXECUTABLE_POST_ARGUMENTS")) {
-    std::vector<std::string> expandedArguments;
-    cmExpandList(nsisArguments, expandedArguments);
+    cmList expandedArguments{ nsisArguments };
     for (auto& arg : expandedArguments) {
       if (!cmHasPrefix(arg, NSIS_OPT)) {
         nsisPostArguments = cmStrCat(nsisPostArguments, NSIS_OPT);
@@ -546,14 +544,14 @@ int cmCPackNSISGenerator::InitializeInternal()
     this->GetOption("CPACK_CREATE_DESKTOP_LINKS");
   cmValue cpackNsisExecutablesDirectory =
     this->GetOption("CPACK_NSIS_EXECUTABLES_DIRECTORY");
-  std::vector<std::string> cpackPackageDesktopLinksVector;
+  cmList cpackPackageDesktopLinksList;
   if (cpackPackageDeskTopLinks) {
     cmCPackLogger(cmCPackLog::LOG_DEBUG,
                   "CPACK_CREATE_DESKTOP_LINKS: " << cpackPackageDeskTopLinks
                                                  << std::endl);
 
-    cmExpandList(cpackPackageDeskTopLinks, cpackPackageDesktopLinksVector);
-    for (std::string const& cpdl : cpackPackageDesktopLinksVector) {
+    cpackPackageDesktopLinksList.assign(cpackPackageDeskTopLinks);
+    for (std::string const& cpdl : cpackPackageDesktopLinksList) {
       cmCPackLogger(cmCPackLog::LOG_DEBUG,
                     "CPACK_CREATE_DESKTOP_LINKS: " << cpdl << std::endl);
     }
@@ -592,7 +590,7 @@ int cmCPackNSISGenerator::InitializeInternal()
                 << ".lnk\"" << std::endl;
       // see if CPACK_CREATE_DESKTOP_LINK_ExeName is on
       // if so add a desktop link
-      if (cm::contains(cpackPackageDesktopLinksVector, execName)) {
+      if (cm::contains(cpackPackageDesktopLinksList, execName)) {
         str << "  StrCmp \"$INSTALL_DESKTOP\" \"1\" 0 +2\n";
         str << "    CreateShortCut \"$DESKTOP\\" << linkName
             << R"(.lnk" "$INSTDIR\)" << cpackNsisExecutablesDirectory << "\\"

@@ -573,7 +573,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
       ++it;
       project.SubDirectory = *it;
 
-      std::vector<std::string> componentsVector;
+      cmList componentsList;
 
       bool componentInstall = false;
       /*
@@ -588,7 +588,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
         std::string installTypesVar = "CPACK_" +
           cmSystemTools::UpperCase(project.Component) + "_INSTALL_TYPES";
         cmValue installTypes = this->GetOption(installTypesVar);
-        if (cmNonempty(installTypes)) {
+        if (!installTypes.IsEmpty()) {
           cmList installTypesList{ installTypes };
           for (std::string const& installType : installTypesList) {
             project.InstallationTypes.push_back(
@@ -600,23 +600,23 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
         std::string componentsVar =
           "CPACK_COMPONENTS_" + cmSystemTools::UpperCase(project.Component);
         cmValue components = this->GetOption(componentsVar);
-        if (cmNonempty(components)) {
-          cmExpandList(components, componentsVector);
-          for (std::string const& comp : componentsVector) {
+        if (!components.IsEmpty()) {
+          componentsList.assign(components);
+          for (auto const& comp : componentsList) {
             project.Components.push_back(
               this->GetComponent(project.ProjectName, comp));
           }
           componentInstall = true;
         }
       }
-      if (componentsVector.empty()) {
-        componentsVector.push_back(project.Component);
+      if (componentsList.empty()) {
+        componentsList.push_back(project.Component);
       }
 
-      std::vector<std::string> buildConfigs;
+      cmList buildConfigs;
 
       // Try get configuration names given via `-C` CLI option
-      cmExpandList(this->GetOption("CPACK_BUILD_CONFIG"), buildConfigs);
+      buildConfigs.assign(this->GetOption("CPACK_BUILD_CONFIG"));
 
       // Remove duplicates
       std::sort(buildConfigs.begin(), buildConfigs.end());
@@ -655,7 +655,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
                                             << buildConfig << ']'
                                             << std::endl);
         // Run the installation for each component
-        for (std::string const& component : componentsVector) {
+        for (std::string const& component : componentsList) {
           if (!this->InstallCMakeProject(
                 setDestDir, project.Directory, baseTempInstallDirectory,
                 default_dir_mode, component, componentInstall,
@@ -888,9 +888,8 @@ int cmCPackGenerator::InstallCMakeProject(
     mf.AddDefinition("CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION", "1");
   }
 
-  std::vector<std::string> custom_variables;
-  this->MakefileMap->GetDefExpandList("CPACK_CUSTOM_INSTALL_VARIABLES",
-                                      custom_variables);
+  cmList custom_variables{ this->MakefileMap->GetDefinition(
+    "CPACK_CUSTOM_INSTALL_VARIABLES") };
 
   for (auto const& custom_variable : custom_variables) {
     std::string value;

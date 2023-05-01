@@ -14,7 +14,6 @@
 
 #include <cm/string_view>
 
-#include "cmList.h"
 #include "cmRange.h"
 #include "cmValue.h"
 
@@ -88,38 +87,6 @@ std::string cmJoin(cmStringRange const& rng, cm::string_view separator,
 
 /** Extract tokens that are separated by any of the characters in @a sep.  */
 std::vector<std::string> cmTokenize(cm::string_view str, cm::string_view sep);
-
-/**
- * Expand the ; separated string @a arg into multiple arguments.
- * All found arguments are appended to @a argsOut.
- */
-inline void cmExpandList(cm::string_view arg,
-                         std::vector<std::string>& argsOut,
-                         bool emptyArgs = false)
-{
-  cmList::append(arg, argsOut,
-                 emptyArgs ? cmList::EmptyElements::Yes
-                           : cmList::EmptyElements::No);
-}
-inline void cmExpandList(cmValue arg, std::vector<std::string>& argsOut,
-                         bool emptyArgs = false)
-{
-  cmList::append(arg, argsOut,
-                 emptyArgs ? cmList::EmptyElements::Yes
-                           : cmList::EmptyElements::No);
-}
-
-/**
- * Expand out any arguments in the string range [@a first, @a last) that have
- * ; separated strings into multiple arguments.  All found arguments are
- * appended to @a argsOut.
- */
-template <class InputIt>
-void cmExpandLists(InputIt first, InputIt last,
-                   std::vector<std::string>& argsOut)
-{
-  cmList::append(first, last, argsOut);
-}
 
 /** Concatenate string pieces into a single string.  */
 std::string cmCatViews(

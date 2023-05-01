@@ -559,9 +559,7 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
           "Q_PLUGIN_METADATA",
           "[\n][ \t]*Q_PLUGIN_METADATA[ \t]*\\("
           "[^\\)]*FILE[ \t]*\"([^\"]+)\"");
-        for (cmList::index_type ii = 0;
-             ii != static_cast<cmList::index_type>(filterList.size());
-             ii += 2) {
+        for (cmList::size_type ii = 0; ii != filterList.size(); ii += 2) {
           this->Moc.DependFilters.emplace_back(filterList[ii],
                                                filterList[ii + 1]);
         }
@@ -616,8 +614,9 @@ bool cmQtAutoGenInitializer::InitMoc()
   if (this->GenTarget->GetPropertyAsBool("AUTOMOC_COMPILER_PREDEFINES") &&
       (this->QtVersion >= IntegerVersion(5, 8))) {
     // Command
-    this->Makefile->GetDefExpandList("CMAKE_CXX_COMPILER_PREDEFINES_COMMAND",
-                                     this->Moc.PredefsCmd);
+    cmList::assign(
+      this->Moc.PredefsCmd,
+      this->Makefile->GetDefinition("CMAKE_CXX_COMPILER_PREDEFINES_COMMAND"));
     // Header
     if (!this->Moc.PredefsCmd.empty()) {
       this->ConfigFileNames(this->Moc.PredefsFile,

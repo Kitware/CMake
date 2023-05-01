@@ -18,6 +18,7 @@
 #include "cmArgumentParserTypes.h"
 #include "cmCMakePath.h"
 #include "cmExecutionStatus.h"
+#include "cmList.h"
 #include "cmMakefile.h"
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
@@ -626,12 +627,12 @@ bool HandleConvertCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  std::vector<std::string> paths;
+  cmList paths;
 
   if (action == cmakePath) {
     paths = cmSystemTools::SplitString(args[1], pathSep.front());
   } else {
-    cmExpandList(args[1], paths);
+    paths.assign(args[1]);
   }
 
   for (auto& path : paths) {
@@ -648,7 +649,7 @@ bool HandleConvertCommand(std::vector<std::string> const& args,
     }
   }
 
-  auto value = cmJoin(paths, action == cmakePath ? ";"_s : pathSep);
+  auto value = action == cmakePath ? paths.to_string() : paths.join(pathSep);
   status.GetMakefile().AddDefinition(args[3], value);
 
   return true;

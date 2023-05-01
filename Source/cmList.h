@@ -6,6 +6,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <algorithm>
+#include <cstdint>
 #include <initializer_list>
 #include <iterator>
 #include <memory>
@@ -23,14 +24,18 @@
 
 /**
  * CMake lists management
+ * A CMake list is a string where list elements are separated by the ';'
+ * character.
  *
  * For all operations, input arguments (single value like cm::string_view or
  * multiple values specified through pair of iterators) are, by default,
  * expanded. The expansion can be controlled by the cmList::ExpandElements
  * option.
  *
- * There is an exception to this rule. The following methods do not expand
- * their argument: cmList::push_back, cmList::emplace and cmList::emplace_back.
+ * There ate some exceptions to this rule:
+ *  * When the input argument is a cmList instance, the value is not expanded.
+ *  * The following methods do not expand their argument: cmList::push_back,
+ *    cmList::emplace and cmList::emplace_back.
  */
 
 class cmList
@@ -40,7 +45,7 @@ public:
 
   using value_type = container_type::value_type;
   using allocator_type = container_type::allocator_type;
-  using index_type = int;
+  using index_type = std::intptr_t;
   using size_type = container_type::size_type;
   using difference_type = container_type::difference_type;
   using reference = container_type::reference;
@@ -76,8 +81,18 @@ public:
     this->assign(value, expandElements, emptyElements);
   }
   cmList(cm::string_view value, EmptyElements emptyElements)
+    : cmList(value, ExpandElements::Yes, emptyElements)
   {
-    this->assign(value, ExpandElements::Yes, emptyElements);
+  }
+  cmList(std::string const& value,
+         ExpandElements expandElements = ExpandElements::Yes,
+         EmptyElements emptyElements = EmptyElements::No)
+  {
+    this->assign(value, expandElements, emptyElements);
+  }
+  cmList(std::string const& value, EmptyElements emptyElements)
+    : cmList(value, ExpandElements::Yes, emptyElements)
+  {
   }
   cmList(cmValue list, ExpandElements expandElements = ExpandElements::Yes,
          EmptyElements emptyElements = EmptyElements::No)
@@ -137,6 +152,11 @@ public:
     this->assign(value);
     return *this;
   }
+  cmList& operator=(std::string const& value)
+  {
+    this->assign(value);
+    return *this;
+  }
   cmList& operator=(cmValue value)
   {
     if (value) {
@@ -177,6 +197,17 @@ public:
   {
     this->assign(value, ExpandElements::Yes, emptyElements);
   }
+  void assign(std::string const& value,
+              ExpandElements expandElements = ExpandElements::Yes,
+              EmptyElements emptyElements = EmptyElements::No)
+  {
+    this->clear();
+    this->append(value, expandElements, emptyElements);
+  }
+  void assign(std::string const& value, EmptyElements emptyElements)
+  {
+    this->assign(value, ExpandElements::Yes, emptyElements);
+  }
   void assign(cmValue value,
               ExpandElements expandElements = ExpandElements::Yes,
               EmptyElements emptyElements = EmptyElements::No)
@@ -206,17 +237,17 @@ public:
     this->assign(first, last, ExpandElements::Yes, emptyElements);
   }
   void assign(const cmList& init,
-              ExpandElements expandElements = ExpandElements::Yes,
+              ExpandElements expandElements = ExpandElements::No,
               EmptyElements emptyElements = EmptyElements::No)
   {
     this->assign(init.begin(), init.end(), expandElements, emptyElements);
   }
   void assign(const cmList& init, EmptyElements emptyElements)
   {
-    this->assign(init, ExpandElements::Yes, emptyElements);
+    this->assign(init, ExpandElements::No, emptyElements);
   }
   void assign(cmList&& init,
-              ExpandElements expandElements = ExpandElements::Yes,
+              ExpandElements expandElements = ExpandElements::No,
               EmptyElements emptyElements = EmptyElements::No)
   {
     this->assign(std::make_move_iterator(init.begin()),
@@ -226,7 +257,7 @@ public:
   }
   void assign(cmList&& init, EmptyElements emptyElements)
   {
-    this->assign(std::move(init), ExpandElements::Yes, emptyElements);
+    this->assign(std::move(init), ExpandElements::No, emptyElements);
   }
   void assign(const container_type& init,
               ExpandElements expandElements = ExpandElements::Yes,
@@ -267,22 +298,19 @@ public:
   operator container_type&&() && noexcept { return std::move(this->Values); }
 
   // Element access
-  reference at(index_type pos)
-  {
-    return this->Values.at(this->ComputeIndex(pos));
-  }
-  const_reference at(index_type pos) const
-  {
-    return this->Values.at(this->ComputeIndex(pos));
-  }
+  reference at(size_type pos) { return this->Values.at(pos); }
+  const_reference at(size_type pos) const { return this->Values.at(pos); }
 
-  reference operator[](index_type pos)
+  reference operator[](size_type pos) { return this->Values[pos]; }
+  const_reference operator[](size_type pos) const { return this->Values[pos]; }
+
+  reference get_item(index_type pos)
   {
-    return this->Values[this->ComputeIndex(pos, false)];
+    return this->Values.at(this->ComputeIndex(pos));
   }
-  const_reference operator[](index_type pos) const
+  const_reference get_item(index_type pos) const
   {
-    return this->Values[this->ComputeIndex(pos, false)];
+    return this->Values.at(this->ComputeIndex(pos));
   }
 
   reference front() { return this->Values.front(); }
@@ -363,10 +391,22 @@ public:
                   ExpandElements expandElements = ExpandElements::Yes,
                   EmptyElements emptyElements = EmptyElements::No)
   {
-    return cmList::Insert(pos, std::string(value), this->Values,
+    return cmList::Insert(this->Values, pos, std::string(value),
                           expandElements, emptyElements);
   }
   iterator insert(const_iterator pos, cm::string_view value,
+                  EmptyElements emptyElements)
+  {
+    return this->insert(pos, value, ExpandElements::Yes, emptyElements);
+  }
+  iterator insert(const_iterator pos, std::string const& value,
+                  ExpandElements expandElements = ExpandElements::Yes,
+                  EmptyElements emptyElements = EmptyElements::No)
+  {
+    return cmList::Insert(this->Values, pos, value, expandElements,
+                          emptyElements);
+  }
+  iterator insert(const_iterator pos, std::string const& value,
                   EmptyElements emptyElements)
   {
     return this->insert(pos, value, ExpandElements::Yes, emptyElements);
@@ -392,7 +432,7 @@ public:
                   ExpandElements expandElements = ExpandElements::Yes,
                   EmptyElements emptyElements = EmptyElements::No)
   {
-    return cmList::Insert(pos, first, last, this->Values, expandElements,
+    return cmList::Insert(this->Values, pos, first, last, expandElements,
                           emptyElements);
   }
   template <typename InputIterator>
@@ -402,7 +442,7 @@ public:
     return this->insert(pos, first, last, ExpandElements::Yes, emptyElements);
   }
   iterator insert(const_iterator pos, const cmList& values,
-                  ExpandElements expandElements = ExpandElements::Yes,
+                  ExpandElements expandElements = ExpandElements::No,
                   EmptyElements emptyElements = EmptyElements::No)
   {
     return this->insert(pos, values.begin(), values.end(), expandElements,
@@ -411,10 +451,10 @@ public:
   iterator insert(const_iterator pos, const cmList& values,
                   EmptyElements emptyElements)
   {
-    return this->insert(pos, values, ExpandElements::Yes, emptyElements);
+    return this->insert(pos, values, ExpandElements::No, emptyElements);
   }
   iterator insert(const_iterator pos, cmList&& values,
-                  ExpandElements expandElements = ExpandElements::Yes,
+                  ExpandElements expandElements = ExpandElements::No,
                   EmptyElements emptyElements = EmptyElements::No)
   {
     auto result = this->insert(pos, std::make_move_iterator(values.begin()),
@@ -427,7 +467,7 @@ public:
   iterator insert(const_iterator pos, cmList&& values,
                   EmptyElements emptyElements)
   {
-    return this->insert(pos, std::move(values), ExpandElements::Yes,
+    return this->insert(pos, std::move(values), ExpandElements::No,
                         emptyElements);
   }
   iterator insert(const_iterator pos, const container_type& values,
@@ -474,6 +514,16 @@ public:
   {
     return this->append(value, ExpandElements::Yes, emptyElements);
   }
+  iterator append(std::string const& value,
+                  ExpandElements expandElements = ExpandElements::Yes,
+                  EmptyElements emptyElements = EmptyElements::No)
+  {
+    return this->insert(this->cend(), value, expandElements, emptyElements);
+  }
+  iterator append(std::string const& value, EmptyElements emptyElements)
+  {
+    return this->append(value, ExpandElements::Yes, emptyElements);
+  }
   iterator append(cmValue value,
                   ExpandElements expandElements = ExpandElements::Yes,
                   EmptyElements emptyElements = EmptyElements::No)
@@ -503,7 +553,7 @@ public:
     return this->append(first, last, ExpandElements::Yes, emptyElements);
   }
   iterator append(const cmList& values,
-                  ExpandElements expandElements = ExpandElements::Yes,
+                  ExpandElements expandElements = ExpandElements::No,
                   EmptyElements emptyElements = EmptyElements::No)
   {
     return this->append(values.begin(), values.end(), expandElements,
@@ -511,10 +561,10 @@ public:
   }
   iterator append(const cmList& values, EmptyElements emptyElements)
   {
-    return this->append(values, ExpandElements::Yes, emptyElements);
+    return this->append(values, ExpandElements::No, emptyElements);
   }
   iterator append(cmList&& values,
-                  ExpandElements expandElements = ExpandElements::Yes,
+                  ExpandElements expandElements = ExpandElements::No,
                   EmptyElements emptyElements = EmptyElements::No)
   {
     auto result = this->append(std::make_move_iterator(values.begin()),
@@ -526,7 +576,7 @@ public:
   }
   iterator append(cmList&& values, EmptyElements emptyElements)
   {
-    return this->append(std::move(values), ExpandElements::Yes, emptyElements);
+    return this->append(std::move(values), ExpandElements::No, emptyElements);
   }
   iterator append(const container_type& values,
                   ExpandElements expandElements = ExpandElements::Yes,
@@ -569,6 +619,16 @@ public:
   {
     return this->prepend(value, ExpandElements::Yes, emptyElements);
   }
+  iterator prepend(std::string const& value,
+                   ExpandElements expandElements = ExpandElements::Yes,
+                   EmptyElements emptyElements = EmptyElements::No)
+  {
+    return this->insert(this->cbegin(), value, expandElements, emptyElements);
+  }
+  iterator prepend(std::string const& value, EmptyElements emptyElements)
+  {
+    return this->prepend(value, ExpandElements::Yes, emptyElements);
+  }
   iterator prepend(cmValue value,
                    ExpandElements expandElements = ExpandElements::Yes,
                    EmptyElements emptyElements = EmptyElements::No)
@@ -598,7 +658,7 @@ public:
     return this->prepend(first, last, ExpandElements::Yes, emptyElements);
   }
   iterator prepend(const cmList& values,
-                   ExpandElements expandElements = ExpandElements::Yes,
+                   ExpandElements expandElements = ExpandElements::No,
                    EmptyElements emptyElements = EmptyElements::No)
   {
     return this->prepend(values.begin(), values.end(), expandElements,
@@ -606,10 +666,10 @@ public:
   }
   iterator prepend(const cmList& values, EmptyElements emptyElements)
   {
-    return this->prepend(values, ExpandElements::Yes, emptyElements);
+    return this->prepend(values, ExpandElements::No, emptyElements);
   }
   iterator prepend(cmList&& values,
-                   ExpandElements expandElements = ExpandElements::Yes,
+                   ExpandElements expandElements = ExpandElements::No,
                    EmptyElements emptyElements = EmptyElements::No)
   {
     auto result = this->prepend(std::make_move_iterator(values.begin()),
@@ -621,8 +681,7 @@ public:
   }
   iterator prepend(cmList&& values, EmptyElements emptyElements)
   {
-    return this->prepend(std::move(values), ExpandElements::Yes,
-                         emptyElements);
+    return this->prepend(std::move(values), ExpandElements::No, emptyElements);
   }
   iterator prepend(const container_type& values,
                    ExpandElements expandElements = ExpandElements::Yes,
@@ -656,6 +715,7 @@ public:
     return this->insert(this->cbegin(), ilist);
   }
 
+  void push_back(std::string const& value) { this->Values.push_back(value); }
   void push_back(cm::string_view value)
   {
     this->Values.push_back(std::string{ value });
@@ -734,6 +794,8 @@ public:
   }
 
   cmList& remove_duplicates();
+
+  void resize(size_type count) { this->Values.resize(count); }
 
   enum class FilterMode
   {
@@ -882,46 +944,61 @@ public:
   // ==============
   // these methods can be used to store CMake list expansion directly in a
   // std::vector.
-  static void assign(cm::string_view value,
-                     std::vector<std::string>& container,
+  static void assign(std::vector<std::string>& container,
+                     cm::string_view value,
                      EmptyElements emptyElements = EmptyElements::No)
   {
     container.clear();
-    cmList::append(value, container, emptyElements);
+    cmList::append(container, value, emptyElements);
   }
-  static void assign(cmValue value, std::vector<std::string>& container,
+  static void assign(std::vector<std::string>& container,
+                     std::string const& value,
+                     EmptyElements emptyElements = EmptyElements::No)
+  {
+    container.clear();
+    cmList::append(container, value, emptyElements);
+  }
+  static void assign(std::vector<std::string>& container, cmValue value,
                      EmptyElements emptyElements = EmptyElements::No)
   {
     if (value) {
-      cmList::assign(*value, container, emptyElements);
+      cmList::assign(container, *value, emptyElements);
     } else {
       container.clear();
     }
   }
   template <typename InputIterator>
-  static void assign(InputIterator first, InputIterator last,
-                     std::vector<std::string>& container,
+  static void assign(std::vector<std::string>& container, InputIterator first,
+                     InputIterator last,
                      EmptyElements emptyElements = EmptyElements::No)
   {
     container.clear();
-    cmList::append(first, last, container, emptyElements);
+    cmList::append(container, first, last, emptyElements);
   }
 
   static std::vector<std::string>::iterator insert(
-    std::vector<std::string>::const_iterator pos, cm::string_view value,
     std::vector<std::string>& container,
+    std::vector<std::string>::const_iterator pos, cm::string_view value,
     EmptyElements emptyElements = EmptyElements::No)
   {
-    return cmList::Insert(pos, std::string(value), container,
+    return cmList::Insert(container, pos, std::string(value),
                           ExpandElements::Yes, emptyElements);
   }
   static std::vector<std::string>::iterator insert(
-    std::vector<std::string>::const_iterator pos, cmValue value,
     std::vector<std::string>& container,
+    std::vector<std::string>::const_iterator pos, std::string const& value,
+    EmptyElements emptyElements = EmptyElements::No)
+  {
+    return cmList::Insert(container, pos, value, ExpandElements::Yes,
+                          emptyElements);
+  }
+  static std::vector<std::string>::iterator insert(
+    std::vector<std::string>& container,
+    std::vector<std::string>::const_iterator pos, cmValue value,
     EmptyElements emptyElements = EmptyElements::No)
   {
     if (value) {
-      return cmList::insert(pos, *value, container, emptyElements);
+      return cmList::insert(container, pos, *value, emptyElements);
     }
 
     auto delta = std::distance(container.cbegin(), pos);
@@ -929,63 +1006,73 @@ public:
   }
   template <typename InputIterator>
   static std::vector<std::string>::iterator insert(
+    std::vector<std::string>& container,
     std::vector<std::string>::const_iterator pos, InputIterator first,
-    InputIterator last, std::vector<std::string>& container,
-    EmptyElements emptyElements = EmptyElements::No)
+    InputIterator last, EmptyElements emptyElements = EmptyElements::No)
   {
-    return cmList::Insert(pos, first, last, container, ExpandElements::Yes,
+    return cmList::Insert(container, pos, first, last, ExpandElements::Yes,
                           emptyElements);
   }
 
   static std::vector<std::string>::iterator append(
-    cm::string_view value, std::vector<std::string>& container,
+    std::vector<std::string>& container, cm::string_view value,
     EmptyElements emptyElements = EmptyElements::No)
   {
-    return cmList::insert(container.cend(), value, container, emptyElements);
+    return cmList::insert(container, container.cend(), value, emptyElements);
   }
   static std::vector<std::string>::iterator append(
-    cmValue value, std::vector<std::string>& container,
+    std::vector<std::string>& container, std::string const& value,
+    EmptyElements emptyElements = EmptyElements::No)
+  {
+    return cmList::insert(container, container.cend(), value, emptyElements);
+  }
+  static std::vector<std::string>::iterator append(
+    std::vector<std::string>& container, cmValue value,
     EmptyElements emptyElements = EmptyElements::No)
   {
     if (value) {
-      return cmList::append(*value, container, emptyElements);
+      return cmList::append(container, *value, emptyElements);
     }
 
     return container.end();
   }
   template <typename InputIterator>
   static std::vector<std::string>::iterator append(
-    InputIterator first, InputIterator last,
-    std::vector<std::string>& container,
-    EmptyElements emptyElements = EmptyElements::No)
+    std::vector<std::string>& container, InputIterator first,
+    InputIterator last, EmptyElements emptyElements = EmptyElements::No)
   {
-    return cmList::insert(container.cend(), first, last, container,
+    return cmList::insert(container, container.cend(), first, last,
                           emptyElements);
   }
 
   static std::vector<std::string>::iterator prepend(
-    cm::string_view value, std::vector<std::string>& container,
+    std::vector<std::string>& container, cm::string_view value,
     EmptyElements emptyElements = EmptyElements::No)
   {
-    return cmList::insert(container.cbegin(), value, container, emptyElements);
+    return cmList::insert(container, container.cbegin(), value, emptyElements);
   }
   static std::vector<std::string>::iterator prepend(
-    cmValue value, std::vector<std::string>& container,
+    std::vector<std::string>& container, std::string const& value,
+    EmptyElements emptyElements = EmptyElements::No)
+  {
+    return cmList::insert(container, container.cbegin(), value, emptyElements);
+  }
+  static std::vector<std::string>::iterator prepend(
+    std::vector<std::string>& container, cmValue value,
     EmptyElements emptyElements = EmptyElements::No)
   {
     if (value) {
-      return cmList::prepend(*value, container, emptyElements);
+      return cmList::prepend(container, *value, emptyElements);
     }
 
     return container.begin();
   }
   template <typename InputIterator>
   static std::vector<std::string>::iterator prepend(
-    InputIterator first, InputIterator last,
-    std::vector<std::string>& container,
-    EmptyElements emptyElements = EmptyElements::No)
+    std::vector<std::string>& container, InputIterator first,
+    InputIterator last, EmptyElements emptyElements = EmptyElements::No)
   {
-    return cmList::insert(container.cbegin(), first, last, container,
+    return cmList::insert(container, container.cbegin(), first, last,
                           emptyElements);
   }
 
@@ -993,40 +1080,40 @@ public:
   // but without any intermediate expansion. So the operation is simply a
   // string concatenation with special handling for the CMake list item
   // separator
-  static std::string& append(cm::string_view value, std::string& list);
+  static std::string& append(std::string& list, cm::string_view value);
   template <typename InputIterator>
-  static std::string& append(InputIterator first, InputIterator last,
-                             std::string& list)
+  static std::string& append(std::string& list, InputIterator first,
+                             InputIterator last)
   {
     if (first == last) {
       return list;
     }
 
-    return cmList::append(cm::string_view{ std::accumulate(
+    return cmList::append(list,
+                          cm::string_view{ std::accumulate(
                             std::next(first), last, *first,
                             [](std::string a, const std::string& b) {
                               return std::move(a) +
                                 std::string(cmList::element_separator) + b;
-                            }) },
-                          list);
+                            }) });
   }
 
-  static std::string& prepend(cm::string_view value, std::string& list);
+  static std::string& prepend(std::string& list, cm::string_view value);
   template <typename InputIterator>
-  static std::string& prepend(InputIterator first, InputIterator last,
-                              std::string& list)
+  static std::string& prepend(std::string& list, InputIterator first,
+                              InputIterator last)
   {
     if (first == last) {
       return list;
     }
 
-    return cmList::prepend(cm::string_view{ std::accumulate(
+    return cmList::prepend(list,
+                           cm::string_view{ std::accumulate(
                              std::next(first), last, *first,
                              [](std::string a, const std::string& b) {
                                return std::move(a) +
                                  std::string(cmList::element_separator) + b;
-                             }) },
-                           list);
+                             }) });
   }
 
   // Non-members
@@ -1049,26 +1136,26 @@ private:
   cmList& RemoveItems(std::vector<index_type>&& indexes);
   cmList& RemoveItems(std::vector<std::string>&& items);
 
-  static container_type::iterator Insert(container_type::const_iterator pos,
+  static container_type::iterator Insert(container_type& container,
+                                         container_type::const_iterator pos,
                                          std::string&& value,
-                                         container_type& container,
                                          ExpandElements expandElements,
                                          EmptyElements emptyElements);
-  static container_type::iterator Insert(container_type::const_iterator pos,
+  static container_type::iterator Insert(container_type& container,
+                                         container_type::const_iterator pos,
                                          const std::string& value,
-                                         container_type& container,
                                          ExpandElements expandElements,
                                          EmptyElements emptyElements)
   {
     auto tmp = value;
-    return cmList::Insert(pos, std::move(tmp), container, expandElements,
+    return cmList::Insert(container, pos, std::move(tmp), expandElements,
                           emptyElements);
   }
   template <typename InputIterator>
-  static container_type::iterator Insert(container_type::const_iterator pos,
+  static container_type::iterator Insert(container_type& container,
+                                         container_type::const_iterator pos,
                                          InputIterator first,
                                          InputIterator last,
-                                         container_type& container,
                                          ExpandElements expandElements,
                                          EmptyElements emptyElements)
   {
@@ -1082,7 +1169,7 @@ private:
     if (expandElements == ExpandElements::Yes) {
       for (; first != last; ++first) {
         auto size = container.size();
-        insertPos = cmList::Insert(insertPos, *first, container,
+        insertPos = cmList::Insert(container, insertPos, *first,
                                    expandElements, emptyElements);
         insertPos += container.size() - size;
       }
@@ -1246,3 +1333,20 @@ void append(cmList& v, Range const& r)
 #endif
 
 } // namespace cm
+
+/**
+ * Helper functions for legacy support. Use preferably cmList class directly
+ * or the static methods of the class.
+ */
+inline void cmExpandList(
+  cm::string_view arg, std::vector<std::string>& argsOut,
+  cmList::EmptyElements emptyElements = cmList::EmptyElements::No)
+{
+  cmList::append(argsOut, arg, emptyElements);
+}
+inline void cmExpandList(
+  cmValue arg, std::vector<std::string>& argsOut,
+  cmList::EmptyElements emptyElements = cmList::EmptyElements::No)
+{
+  cmList::append(argsOut, arg, emptyElements);
+}

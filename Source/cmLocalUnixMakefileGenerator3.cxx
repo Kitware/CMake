@@ -1130,14 +1130,13 @@ void cmLocalUnixMakefileGenerator3::AppendCleanCommand(
 void cmLocalUnixMakefileGenerator3::AppendDirectoryCleanCommand(
   std::vector<std::string>& commands)
 {
-  std::vector<std::string> cleanFiles;
+  cmList cleanFiles;
   // Look for additional files registered for cleaning in this directory.
   if (cmValue prop_value =
         this->Makefile->GetProperty("ADDITIONAL_CLEAN_FILES")) {
-    cmExpandList(cmGeneratorExpression::Evaluate(
-                   *prop_value, this,
-                   this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE")),
-                 cleanFiles);
+    cleanFiles.assign(cmGeneratorExpression::Evaluate(
+      *prop_value, this,
+      this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE")));
   }
   if (cleanFiles.empty()) {
     return;
@@ -1973,14 +1972,14 @@ void cmLocalUnixMakefileGenerator3::WriteDependLanguageInfo(
 
     // Store include transform rule properties.  Write the directory
     // rules first because they may be overridden by later target rules.
-    std::vector<std::string> transformRules;
+    cmList transformRules;
     if (cmValue xform =
           this->Makefile->GetProperty("IMPLICIT_DEPENDS_INCLUDE_TRANSFORM")) {
-      cmExpandList(*xform, transformRules);
+      transformRules.assign(*xform);
     }
     if (cmValue xform =
           target->GetProperty("IMPLICIT_DEPENDS_INCLUDE_TRANSFORM")) {
-      cmExpandList(*xform, transformRules);
+      transformRules.append(*xform);
     }
     if (!transformRules.empty()) {
       cmakefileStream << "\nset(CMAKE_INCLUDE_TRANSFORMS\n";

@@ -3141,9 +3141,8 @@ int cmake::CheckBuildSystem()
   }
 
   // If any byproduct of makefile generation is missing we must re-run.
-  std::vector<std::string> products;
-  mf.GetDefExpandList("CMAKE_MAKEFILE_PRODUCTS", products);
-  for (std::string const& p : products) {
+  cmList products{ mf.GetDefinition("CMAKE_MAKEFILE_PRODUCTS") };
+  for (auto const& p : products) {
     if (!(cmSystemTools::FileExists(p) || cmSystemTools::FileIsSymlink(p))) {
       if (verbose) {
         cmSystemTools::Stdout(
@@ -3154,10 +3153,10 @@ int cmake::CheckBuildSystem()
   }
 
   // Get the set of dependencies and outputs.
-  std::vector<std::string> depends;
-  std::vector<std::string> outputs;
-  if (mf.GetDefExpandList("CMAKE_MAKEFILE_DEPENDS", depends)) {
-    mf.GetDefExpandList("CMAKE_MAKEFILE_OUTPUTS", outputs);
+  cmList depends{ mf.GetDefinition("CMAKE_MAKEFILE_DEPENDS") };
+  cmList outputs;
+  if (!depends.empty()) {
+    outputs.assign(mf.GetDefinition("CMAKE_MAKEFILE_OUTPUTS"));
   }
   if (depends.empty() || outputs.empty()) {
     // Not enough information was provided to do the test.  Just rerun.
@@ -3433,19 +3432,18 @@ void cmake::IssueMessage(MessageType t, std::string const& text,
 
 std::vector<std::string> cmake::GetDebugConfigs()
 {
-  std::vector<std::string> configs;
+  cmList configs;
   if (cmValue config_list =
         this->State->GetGlobalProperty("DEBUG_CONFIGURATIONS")) {
     // Expand the specified list and convert to upper-case.
-    cmExpandList(*config_list, configs);
-    std::transform(configs.begin(), configs.end(), configs.begin(),
-                   cmSystemTools::UpperCase);
+    configs.assign(*config_list);
+    configs.transform(cmList::TransformAction::TOUPPER);
   }
   // If no configurations were specified, use a default list.
   if (configs.empty()) {
     configs.emplace_back("DEBUG");
   }
-  return configs;
+  return std::move(configs.data());
 }
 
 int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,

@@ -2204,9 +2204,8 @@ bool cmCTestTestHandler::SetTestsProperties(
       for (cmCTestTestProperties& rt : this->TestList) {
         if (t == rt.Name) {
           if (key == "_BACKTRACE_TRIPLES"_s) {
-            std::vector<std::string> triples;
             // allow empty args in the triples
-            cmExpandList(val, triples, true);
+            cmList triples{ val, cmList::EmptyElements::Yes };
 
             // Ensure we have complete triples otherwise the data is corrupt.
             if (triples.size() % 3 == 0) {
@@ -2215,7 +2214,7 @@ bool cmCTestTestHandler::SetTestsProperties(
 
               // the first entry represents the top of the trace so we need to
               // reconstruct the backtrace in reverse
-              for (size_t i = triples.size(); i >= 3; i -= 3) {
+              for (auto i = triples.size(); i >= 3; i -= 3) {
                 cmListFileContext fc;
                 fc.FilePath = triples[i - 3];
                 long line = 0;

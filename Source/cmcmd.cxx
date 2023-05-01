@@ -559,8 +559,8 @@ struct CoCompileJob
 int cmcmd::HandleCoCompileCommands(std::vector<std::string> const& args)
 {
   std::vector<CoCompileJob> jobs;
-  std::string sourceFile;             // store --source=
-  std::vector<std::string> launchers; // store --launcher=
+  std::string sourceFile; // store --source=
+  cmList launchers;       // store --launcher=
 
   // Default is to run the original command found after -- if the option
   // does not need to do that, it should be specified here, currently only
@@ -593,7 +593,7 @@ int cmcmd::HandleCoCompileCommands(std::vector<std::string> const& args)
         if (cmHasLiteralPrefix(arg, "--source=")) {
           sourceFile = arg.substr(9);
         } else if (cmHasLiteralPrefix(arg, "--launcher=")) {
-          cmExpandList(arg.substr(11), launchers, true);
+          launchers.append(arg.substr(11), cmList::EmptyElements::Yes);
         } else {
           // if it was not a co-compiler or --source/--launcher then error
           std::cerr << "__run_co_compile given unknown argument: " << arg

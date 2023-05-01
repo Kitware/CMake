@@ -747,14 +747,13 @@ void handleSystemIncludesDep(cmLocalGenerator* lg,
                              const std::string& config,
                              cmGeneratorTarget const* headTarget,
                              cmGeneratorExpressionDAGChecker* dagChecker,
-                             std::vector<std::string>& result,
-                             bool excludeImported, std::string const& language)
+                             cmList& result, bool excludeImported,
+                             std::string const& language)
 {
   if (cmValue dirs =
         depTgt->GetProperty("INTERFACE_SYSTEM_INCLUDE_DIRECTORIES")) {
-    cmExpandList(cmGeneratorExpression::Evaluate(*dirs, lg, config, headTarget,
-                                                 dagChecker, depTgt, language),
-                 result);
+    result.append(cmGeneratorExpression::Evaluate(
+      *dirs, lg, config, headTarget, dagChecker, depTgt, language));
   }
   if (!depTgt->GetPropertyAsBool("SYSTEM")) {
     return;
@@ -769,9 +768,8 @@ void handleSystemIncludesDep(cmLocalGenerator* lg,
   }
 
   if (cmValue dirs = depTgt->GetProperty("INTERFACE_INCLUDE_DIRECTORIES")) {
-    cmExpandList(cmGeneratorExpression::Evaluate(*dirs, lg, config, headTarget,
-                                                 dagChecker, depTgt, language),
-                 result);
+    result.append(cmGeneratorExpression::Evaluate(
+      *dirs, lg, config, headTarget, dagChecker, depTgt, language));
   }
 }
 }
@@ -1265,12 +1263,11 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(
 
     bool excludeImported = this->GetPropertyAsBool("NO_SYSTEM_FROM_IMPORTED");
 
-    std::vector<std::string> result;
+    cmList result;
     for (std::string const& it : this->Target->GetSystemIncludeDirectories()) {
-      cmExpandList(cmGeneratorExpression::Evaluate(it, this->LocalGenerator,
-                                                   config, this, &dagChecker,
-                                                   nullptr, language),
-                   result);
+      result.append(cmGeneratorExpression::Evaluate(it, this->LocalGenerator,
+                                                    config, this, &dagChecker,
+                                                    nullptr, language));
     }
 
     std::vector<cmGeneratorTarget const*> const& deps =
@@ -1753,10 +1750,8 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetSourceFilePaths(
     return files;
   }
 
-  std::vector<std::string> debugProperties;
-  this->Makefile->GetDefExpandList("CMAKE_DEBUG_TARGET_PROPERTIES",
-                                   debugProperties);
-
+  cmList debugProperties{ this->Makefile->GetDefinition(
+    "CMAKE_DEBUG_TARGET_PROPERTIES") };
   bool debugSources =
     !this->DebugSourcesDone && cm::contains(debugProperties, "SOURCES");
 
@@ -3300,9 +3295,9 @@ std::string cmGeneratorTarget::GetCompilePDBDirectory(
 std::vector<std::string> cmGeneratorTarget::GetAppleArchs(
   std::string const& config, cm::optional<std::string> lang) const
 {
-  std::vector<std::string> archVec;
+  cmList archList;
   if (!this->IsApple()) {
-    return archVec;
+    return std::move(archList.data());
   }
   cmValue archs = nullptr;
   if (!config.empty()) {
@@ -3314,17 +3309,18 @@ std::vector<std::string> cmGeneratorTarget::GetAppleArchs(
     archs = this->GetProperty("OSX_ARCHITECTURES");
   }
   if (archs) {
-    cmExpandList(*archs, archVec);
+    archList.assign(*archs);
   }
-  if (archVec.empty() &&
+  if (archList.empty() &&
       // Fall back to a default architecture if no compiler target is set.
       (!lang ||
        this->Makefile
          ->GetDefinition(cmStrCat("CMAKE_", *lang, "_COMPILER_TARGET"))
          .IsEmpty())) {
-    this->Makefile->GetDefExpandList("_CMAKE_APPLE_ARCHS_DEFAULT", archVec);
+    archList.assign(
+      this->Makefile->GetDefinition("_CMAKE_APPLE_ARCHS_DEFAULT"));
   }
-  return archVec;
+  return std::move(archList.data());
 }
 
 void cmGeneratorTarget::AddExplicitLanguageFlags(std::string& flags,
@@ -3433,10 +3429,9 @@ void cmGeneratorTarget::AddCUDAArchitectureFlags(cmBuildStep compileOrLink,
   std::vector<CudaArchitecture> architectures;
 
   {
-    std::vector<std::string> options;
-    cmExpandList(property, options);
+    cmList options(property);
 
-    for (std::string& option : options) {
+    for (auto& option : options) {
       CudaArchitecture architecture;
 
       // Architecture name is up to the first specifier.
@@ -3527,8 +3522,7 @@ void cmGeneratorTarget::AddISPCTargetFlags(std::string& flags) const
     this->Makefile->GetSafeDefinition("CMAKE_ISPC_COMPILER_ID");
 
   if (compiler == "Intel") {
-    std::vector<std::string> targets;
-    cmExpandList(property, targets);
+    cmList targets(property);
     if (!targets.empty()) {
       flags += cmStrCat(" --target=", cmWrap("", targets, "", ","));
     }
@@ -3550,8 +3544,7 @@ void cmGeneratorTarget::AddHIPArchitectureFlags(std::string& flags) const
     return;
   }
 
-  std::vector<std::string> options;
-  cmExpandList(property, options);
+  cmList options(property);
 
   for (std::string& option : options) {
     flags += " --offload-arch=" + option;
@@ -3763,10 +3756,8 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetIncludeDirectories(
   cmGeneratorExpressionDAGChecker dagChecker(this, "INCLUDE_DIRECTORIES",
                                              nullptr, nullptr);
 
-  std::vector<std::string> debugProperties;
-  this->Makefile->GetDefExpandList("CMAKE_DEBUG_TARGET_PROPERTIES",
-                                   debugProperties);
-
+  cmList debugProperties{ this->Makefile->GetDefinition(
+    "CMAKE_DEBUG_TARGET_PROPERTIES") };
   bool debugIncludes = !this->DebugIncludesDone &&
     cm::contains(debugProperties, "INCLUDE_DIRECTORIES");
 
@@ -4022,10 +4013,8 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileOptions(
   cmGeneratorExpressionDAGChecker dagChecker(this, "COMPILE_OPTIONS", nullptr,
                                              nullptr);
 
-  std::vector<std::string> debugProperties;
-  this->Makefile->GetDefExpandList("CMAKE_DEBUG_TARGET_PROPERTIES",
-                                   debugProperties);
-
+  cmList debugProperties{ this->Makefile->GetDefinition(
+    "CMAKE_DEBUG_TARGET_PROPERTIES") };
   bool debugOptions = !this->DebugCompileOptionsDone &&
     cm::contains(debugProperties, "COMPILE_OPTIONS");
 
@@ -4065,10 +4054,8 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileFeatures(
   cmGeneratorExpressionDAGChecker dagChecker(this, "COMPILE_FEATURES", nullptr,
                                              nullptr);
 
-  std::vector<std::string> debugProperties;
-  this->Makefile->GetDefExpandList("CMAKE_DEBUG_TARGET_PROPERTIES",
-                                   debugProperties);
-
+  cmList debugProperties{ this->Makefile->GetDefinition(
+    "CMAKE_DEBUG_TARGET_PROPERTIES") };
   bool debugFeatures = !this->DebugCompileFeaturesDone &&
     cm::contains(debugProperties, "COMPILE_FEATURES");
 
@@ -4117,10 +4104,8 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileDefinitions(
   cmGeneratorExpressionDAGChecker dagChecker(this, "COMPILE_DEFINITIONS",
                                              nullptr, nullptr);
 
-  std::vector<std::string> debugProperties;
-  this->Makefile->GetDefExpandList("CMAKE_DEBUG_TARGET_PROPERTIES",
-                                   debugProperties);
-
+  cmList debugProperties{ this->Makefile->GetDefinition(
+    "CMAKE_DEBUG_TARGET_PROPERTIES") };
   bool debugDefines = !this->DebugCompileDefinitionsDone &&
     cm::contains(debugProperties, "COMPILE_DEFINITIONS");
 
@@ -4183,10 +4168,8 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetPrecompileHeaders(
   cmGeneratorExpressionDAGChecker dagChecker(this, "PRECOMPILE_HEADERS",
                                              nullptr, nullptr);
 
-  std::vector<std::string> debugProperties;
-  this->Makefile->GetDefExpandList("CMAKE_DEBUG_TARGET_PROPERTIES",
-                                   debugProperties);
-
+  cmList debugProperties{ this->Makefile->GetDefinition(
+    "CMAKE_DEBUG_TARGET_PROPERTIES") };
   bool debugDefines = !this->DebugPrecompileHeadersDone &&
     std::find(debugProperties.begin(), debugProperties.end(),
               "PRECOMPILE_HEADERS") != debugProperties.end();
@@ -4580,10 +4563,8 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkOptions(
   cmGeneratorExpressionDAGChecker dagChecker(this, "LINK_OPTIONS", nullptr,
                                              nullptr);
 
-  std::vector<std::string> debugProperties;
-  this->Makefile->GetDefExpandList("CMAKE_DEBUG_TARGET_PROPERTIES",
-                                   debugProperties);
-
+  cmList debugProperties{ this->Makefile->GetDefinition(
+    "CMAKE_DEBUG_TARGET_PROPERTIES") };
   bool debugOptions = !this->DebugLinkOptionsDone &&
     cm::contains(debugProperties, "LINK_OPTIONS");
 
@@ -4864,10 +4845,8 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkDirectories(
   cmGeneratorExpressionDAGChecker dagChecker(this, "LINK_DIRECTORIES", nullptr,
                                              nullptr);
 
-  std::vector<std::string> debugProperties;
-  this->Makefile->GetDefExpandList("CMAKE_DEBUG_TARGET_PROPERTIES",
-                                   debugProperties);
-
+  cmList debugProperties{ this->Makefile->GetDefinition(
+    "CMAKE_DEBUG_TARGET_PROPERTIES") };
   bool debugDirectories = !this->DebugLinkDirectoriesDone &&
     cm::contains(debugProperties, "LINK_DIRECTORIES");
 
@@ -5644,8 +5623,7 @@ cmGeneratorTarget::GetCompatibleInterfaces(std::string const& config) const
     for (cmGeneratorTarget const* li : deps) {
 #define CM_READ_COMPATIBLE_INTERFACE(X, x)                                    \
   if (cmValue prop = li->GetProperty("COMPATIBLE_INTERFACE_" #X)) {           \
-    std::vector<std::string> props;                                           \
-    cmExpandList(*prop, props);                                               \
+    cmList props(*prop);                                                      \
     compat.Props##x.insert(props.begin(), props.end());                       \
   }
       CM_READ_COMPATIBLE_INTERFACE(BOOL, Bool)
@@ -6719,10 +6697,8 @@ void cmGeneratorTarget::ReportPropertyOrigin(
   const std::string& p, const std::string& result, const std::string& report,
   const std::string& compatibilityType) const
 {
-  std::vector<std::string> debugProperties;
-  this->Target->GetMakefile()->GetDefExpandList(
-    "CMAKE_DEBUG_TARGET_PROPERTIES", debugProperties);
-
+  cmList debugProperties{ this->Target->GetMakefile()->GetDefinition(
+    "CMAKE_DEBUG_TARGET_PROPERTIES") };
   bool debugOrigin = !this->DebugCompatiblePropertiesDone[p] &&
     cm::contains(debugProperties, p);
 
@@ -8223,7 +8199,6 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
   cmBTStringRange entryRange = this->Target->GetLinkImplementationEntries();
   // Collect libraries directly linked in this configuration.
   for (auto const& entry : entryRange) {
-    std::vector<std::string> llibs;
     // Keep this logic in sync with ExpandLinkItems.
     cmGeneratorExpressionDAGChecker dagChecker(this, "LINK_LIBRARIES", nullptr,
                                                nullptr);
@@ -8250,7 +8225,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
       cge->Evaluate(this->LocalGenerator, config, head, &dagChecker, nullptr,
                     this->LinkerLanguage);
     bool const checkCMP0027 = evaluated != entry.Value;
-    cmExpandList(evaluated, llibs);
+    cmList llibs(evaluated);
     if (cge->GetHadHeadSensitiveCondition()) {
       impl.HadHeadSensitiveCondition = true;
     }
@@ -8261,7 +8236,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
       impl.HadLinkLanguageSensitiveCondition = true;
     }
 
-    for (std::string const& lib : llibs) {
+    for (auto const& lib : llibs) {
       if (this->IsLinkLookupScope(lib, lg)) {
         continue;
       }
@@ -8429,16 +8404,16 @@ bool cmGeneratorTarget::HasPackageReferences() const
 
 std::vector<std::string> cmGeneratorTarget::GetPackageReferences() const
 {
-  std::vector<std::string> packageReferences;
+  cmList packageReferences;
 
   if (this->IsInBuildSystem()) {
     if (cmValue vsPackageReferences =
           this->GetProperty("VS_PACKAGE_REFERENCES")) {
-      cmExpandList(*vsPackageReferences, packageReferences);
+      packageReferences.assign(*vsPackageReferences);
     }
   }
 
-  return packageReferences;
+  return std::move(packageReferences.data());
 }
 
 std::string cmGeneratorTarget::GetPDBDirectory(const std::string& config) const
