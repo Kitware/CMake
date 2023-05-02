@@ -222,6 +222,22 @@
     variables:
         CMAKE_CONFIGURATION: windows_msvc_v71_nmake
 
+.windows_intelclassic_ninja:
+    extends:
+        - .windows_ninja
+        - .windows_vcvarsall_vs2022_x64
+
+    variables:
+        CMAKE_CONFIGURATION: windows_intelclassic_ninja
+
+.windows_inteloneapi_ninja:
+    extends:
+        - .windows_ninja
+        - .windows_vcvarsall_vs2022_x64
+
+    variables:
+        CMAKE_CONFIGURATION: windows_inteloneapi_ninja
+
 .windows_openwatcom:
     extends: .windows
 

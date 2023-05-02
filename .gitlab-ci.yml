@@ -1178,6 +1178,36 @@ t:windows-clang16.0-gnu-nmake:
         CMAKE_CI_BUILD_NAME: windows_clang16.0_gnu_nmake
         CMAKE_CI_JOB_NIGHTLY: "true"
 
+t:windows-intel2021.9.0-ninja:
+    extends:
+        - .windows_intelclassic_ninja
+        - .cmake_test_windows_external
+        - .windows_x86_64_tags_concurrent
+        - .cmake_junit_artifacts
+        - .run_dependent
+    dependencies:
+        - t:windows-vs2022-x64-ninja
+    needs:
+        - t:windows-vs2022-x64-ninja
+    variables:
+        CMAKE_CI_BUILD_NAME: windows_intel2021.9.0_ninja
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
+t:windows-oneapi2023.1.0-ninja:
+    extends:
+        - .windows_inteloneapi_ninja
+        - .cmake_test_windows_external
+        - .windows_x86_64_tags_concurrent
+        - .cmake_junit_artifacts
+        - .run_dependent
+    dependencies:
+        - t:windows-vs2022-x64-ninja
+    needs:
+        - t:windows-vs2022-x64-ninja
+    variables:
+        CMAKE_CI_BUILD_NAME: windows_oneapi2023.1.0_ninja
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
 t:mingw_osdn_io-mingw_makefiles:
     extends:
         - .mingw_osdn_io_mingw_makefiles
