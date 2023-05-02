@@ -22,55 +22,77 @@ and also the following more fine grained variables and targets:
 
 ::
 
-  X11_ICE_INCLUDE_PATH,          X11_ICE_LIB,        X11_ICE_FOUND,        X11::ICE
-  X11_SM_INCLUDE_PATH,           X11_SM_LIB,         X11_SM_FOUND,         X11::SM
-  X11_X11_INCLUDE_PATH,          X11_X11_LIB,                              X11::X11
+  X11_ICE_INCLUDE_PATH,            X11_ICE_LIB,            X11_ICE_FOUND,            X11::ICE
+  X11_SM_INCLUDE_PATH,             X11_SM_LIB,             X11_SM_FOUND,             X11::SM
+  X11_X11_INCLUDE_PATH,            X11_X11_LIB,                                      X11::X11
   X11_Xaccessrules_INCLUDE_PATH,
-  X11_Xaccessstr_INCLUDE_PATH,                       X11_Xaccess_FOUND
-  X11_Xau_INCLUDE_PATH,          X11_Xau_LIB,        X11_Xau_FOUND,        X11::Xau
-  X11_xcb_INCLUDE_PATH,          X11_xcb_LIB,        X11_xcb_FOUND,        X11::xcb
-  X11_X11_xcb_INCLUDE_PATH,      X11_X11_xcb_LIB,    X11_X11_xcb_FOUND,    X11::X11_xcb
-  X11_xcb_cursor_INCLUDE_PATH,   X11_xcb_cursor_LIB, X11_xcb_cursor_FOUND, X11::xcb_cursor
-  X11_xcb_icccm_INCLUDE_PATH,    X11_xcb_icccm_LIB,  X11_xcb_icccm_FOUND,  X11::xcb_icccm
-  X11_xcb_randr_INCLUDE_PATH,    X11_xcb_randr_LIB,  X11_xcb_randr_FOUND,  X11::xcb_randr
-  X11_xcb_shape_INCLUDE_PATH,    X11_xcb_shape_LIB,  X11_xcb_shape_FOUND,  X11::xcb_shape
-  X11_xcb_util_INCLUDE_PATH,     X11_xcb_util_LIB,   X11_xcb_util_FOUND,   X11::xcb_util
-  X11_xcb_xfixes_INCLUDE_PATH,   X11_xcb_xfixes_LIB, X11_xcb_xfixes_FOUND, X11::xcb_xfixes
-  X11_xcb_xrm_INCLUDE_PATH,      X11_xcb_xrm_LIB,    X11_xcb_xrm_FOUND,    X11::xcb_xrm
-  X11_xcb_xtest_INCLUDE_PATH,    X11_xcb_xtest_LIB,  X11_xcb_xtest_FOUND,  X11::xcb_xtest
-  X11_xcb_keysyms_INCLUDE_PATH,  X11_xcb_keysyms_LIB,X11_xcb_keysyms_FOUND,X11::xcb_keysyms
-  X11_xcb_xkb_INCLUDE_PATH,      X11_xcb_xkb_LIB,    X11_xcb_xkb_FOUND,    X11::xcb_xkb
-  X11_Xcomposite_INCLUDE_PATH,   X11_Xcomposite_LIB, X11_Xcomposite_FOUND, X11::Xcomposite
-  X11_Xcursor_INCLUDE_PATH,      X11_Xcursor_LIB,    X11_Xcursor_FOUND,    X11::Xcursor
-  X11_Xdamage_INCLUDE_PATH,      X11_Xdamage_LIB,    X11_Xdamage_FOUND,    X11::Xdamage
-  X11_Xdmcp_INCLUDE_PATH,        X11_Xdmcp_LIB,      X11_Xdmcp_FOUND,      X11::Xdmcp
-  X11_Xext_INCLUDE_PATH,         X11_Xext_LIB,       X11_Xext_FOUND,       X11::Xext
-  X11_Xxf86misc_INCLUDE_PATH,    X11_Xxf86misc_LIB,  X11_Xxf86misc_FOUND,  X11::Xxf86misc
-  X11_Xxf86vm_INCLUDE_PATH,      X11_Xxf86vm_LIB     X11_Xxf86vm_FOUND,    X11::Xxf86vm
-  X11_Xfixes_INCLUDE_PATH,       X11_Xfixes_LIB,     X11_Xfixes_FOUND,     X11::Xfixes
-  X11_Xft_INCLUDE_PATH,          X11_Xft_LIB,        X11_Xft_FOUND,        X11::Xft
-  X11_Xi_INCLUDE_PATH,           X11_Xi_LIB,         X11_Xi_FOUND,         X11::Xi
-  X11_Xinerama_INCLUDE_PATH,     X11_Xinerama_LIB,   X11_Xinerama_FOUND,   X11::Xinerama
+  X11_Xaccessstr_INCLUDE_PATH,                             X11_Xaccess_FOUND
+  X11_Xau_INCLUDE_PATH,            X11_Xau_LIB,            X11_Xau_FOUND,            X11::Xau
+  X11_xcb_INCLUDE_PATH,            X11_xcb_LIB,            X11_xcb_FOUND,            X11::xcb
+  X11_X11_xcb_INCLUDE_PATH,        X11_X11_xcb_LIB,        X11_X11_xcb_FOUND,        X11::X11_xcb
+  X11_xcb_composite_INCLUDE_PATH,  X11_xcb_composite_LIB,  X11_xcb_composite_FOUND,  X11::xcb_composite
+  X11_xcb_cursor_INCLUDE_PATH,     X11_xcb_cursor_LIB,     X11_xcb_cursor_FOUND,     X11::xcb_cursor
+  X11_xcb_damage_INCLUDE_PATH,     X11_xcb_damage_LIB,     X11_xcb_damage_FOUND,     X11::xcb_damage
+  X11_xcb_dpms_INCLUDE_PATH,       X11_xcb_dpms_LIB,       X11_xcb_dpms_FOUND,       X11::xcb_dpms
+  X11_xcb_dri2_INCLUDE_PATH,       X11_xcb_dri2_LIB,       X11_xcb_dri2_FOUND,       X11::xcb_dri2
+  X11_xcb_dri3_INCLUDE_PATH,       X11_xcb_dri3_LIB,       X11_xcb_dri3_FOUND,       X11::xcb_dri3
+  X11_xcb_errors_INCLUDE_PATH,     X11_xcb_errors_LIB,     X11_xcb_errors_FOUND,     X11::xcb_errors
+  X11_xcb_ewmh_INCLUDE_PATH,       X11_xcb_ewmh_LIB,       X11_xcb_ewmh_FOUND,       X11::xcb_ewmh
+  X11_xcb_glx_INCLUDE_PATH,        X11_xcb_glx_LIB,        X11_xcb_glx_FOUND,        X11::xcb_glx
+  X11_xcb_icccm_INCLUDE_PATH,      X11_xcb_icccm_LIB,      X11_xcb_icccm_FOUND,      X11::xcb_icccm
+  X11_xcb_image_INCLUDE_PATH,      X11_xcb_image_LIB,      X11_xcb_image_FOUND,      X11::xcb_image
+  X11_xcb_keysyms_INCLUDE_PATH,    X11_xcb_keysyms_LIB,    X11_xcb_keysyms_FOUND,    X11::xcb_keysyms
+  X11_xcb_present_INCLUDE_PATH,    X11_xcb_present_LIB,    X11_xcb_present_FOUND,    X11::xcb_present
+  X11_xcb_randr_INCLUDE_PATH,      X11_xcb_randr_LIB,      X11_xcb_randr_FOUND,      X11::xcb_randr
+  X11_xcb_record_INCLUDE_PATH,     X11_xcb_record_LIB,     X11_xcb_record_FOUND,     X11::xcb_record
+  X11_xcb_render_INCLUDE_PATH,     X11_xcb_render_LIB,     X11_xcb_render_FOUND,     X11::xcb_render
+  X11_xcb_render_util_INCLUDE_PATH,X11_xcb_render_util_LIB,X11_xcb_render_util_FOUND,X11::xcb_render_util
+  X11_xcb_res_INCLUDE_PATH,        X11_xcb_res_LIB,        X11_xcb_res_FOUND,        X11::xcb_res
+  X11_xcb_screensaver_INCLUDE_PATH,X11_xcb_screensaver_LIB,X11_xcb_screensaver_FOUND,X11::xcb_screensaver
+  X11_xcb_shape_INCLUDE_PATH,      X11_xcb_shape_LIB,      X11_xcb_shape_FOUND,      X11::xcb_shape
+  X11_xcb_shm_INCLUDE_PATH,        X11_xcb_shm_LIB,        X11_xcb_shm_FOUND,        X11::xcb_shm
+  X11_xcb_sync_INCLUDE_PATH,       X11_xcb_sync_LIB,       X11_xcb_sync_FOUND,       X11::xcb_sync
+  X11_xcb_util_INCLUDE_PATH,       X11_xcb_util_LIB,       X11_xcb_util_FOUND,       X11::xcb_util
+  X11_xcb_xf86dri_INCLUDE_PATH,    X11_xcb_xf86dri_LIB,    X11_xcb_xf86dri_FOUND,    X11::xcb_xf86dri
+  X11_xcb_xfixes_INCLUDE_PATH,     X11_xcb_xfixes_LIB,     X11_xcb_xfixes_FOUND,     X11::xcb_xfixes
+  X11_xcb_xinerama_INCLUDE_PATH,   X11_xcb_xinerama_LIB,   X11_xcb_xinerama_FOUND,   X11::xcb_xinerama
+  X11_xcb_xinput_INCLUDE_PATH,     X11_xcb_xinput_LIB,     X11_xcb_xinput_FOUND,     X11::xcb_xinput
+  X11_xcb_xkb_INCLUDE_PATH,        X11_xcb_xkb_LIB,        X11_xcb_xkb_FOUND,        X11::xcb_xkb
+  X11_xcb_xrm_INCLUDE_PATH,        X11_xcb_xrm_LIB,        X11_xcb_xrm_FOUND,        X11::xcb_xrm
+  X11_xcb_xtest_INCLUDE_PATH,      X11_xcb_xtest_LIB,      X11_xcb_xtest_FOUND,      X11::xcb_xtest
+  X11_xcb_xvmc_INCLUDE_PATH,       X11_xcb_xvmc_LIB,       X11_xcb_xvmc_FOUND,       X11::xcb_xvmc
+  X11_xcb_xv_INCLUDE_PATH,         X11_xcb_xv_LIB,         X11_xcb_xv_FOUND          X11::xcb_xv
+  X11_Xcomposite_INCLUDE_PATH,     X11_Xcomposite_LIB,     X11_Xcomposite_FOUND,     X11::Xcomposite
+  X11_Xcursor_INCLUDE_PATH,        X11_Xcursor_LIB,        X11_Xcursor_FOUND,        X11::Xcursor
+  X11_Xdamage_INCLUDE_PATH,        X11_Xdamage_LIB,        X11_Xdamage_FOUND,        X11::Xdamage
+  X11_Xdmcp_INCLUDE_PATH,          X11_Xdmcp_LIB,          X11_Xdmcp_FOUND,          X11::Xdmcp
+  X11_Xext_INCLUDE_PATH,           X11_Xext_LIB,           X11_Xext_FOUND,           X11::Xext
+  X11_Xxf86misc_INCLUDE_PATH,      X11_Xxf86misc_LIB,      X11_Xxf86misc_FOUND,      X11::Xxf86misc
+  X11_Xxf86vm_INCLUDE_PATH,        X11_Xxf86vm_LIB         X11_Xxf86vm_FOUND,        X11::Xxf86vm
+  X11_Xfixes_INCLUDE_PATH,         X11_Xfixes_LIB,         X11_Xfixes_FOUND,         X11::Xfixes
+  X11_Xft_INCLUDE_PATH,            X11_Xft_LIB,            X11_Xft_FOUND,            X11::Xft
+  X11_Xi_INCLUDE_PATH,             X11_Xi_LIB,             X11_Xi_FOUND,             X11::Xi
+  X11_Xinerama_INCLUDE_PATH,       X11_Xinerama_LIB,       X11_Xinerama_FOUND,       X11::Xinerama
   X11_Xkb_INCLUDE_PATH,
-  X11_Xkblib_INCLUDE_PATH,                           X11_Xkb_FOUND,        X11::Xkb
-  X11_xkbcommon_INCLUDE_PATH,    X11_xkbcommon_LIB,  X11_xkbcommon_FOUND,  X11::xkbcommon
-  X11_xkbcommon_X11_INCLUDE_PATH,X11_xkbcommon_X11_LIB,X11_xkbcommon_X11_FOUND,X11::xkbcommon_X11
-  X11_xkbfile_INCLUDE_PATH,      X11_xkbfile_LIB,    X11_xkbfile_FOUND,    X11::xkbfile
-  X11_Xmu_INCLUDE_PATH,          X11_Xmu_LIB,        X11_Xmu_FOUND,        X11::Xmu
-  X11_Xpm_INCLUDE_PATH,          X11_Xpm_LIB,        X11_Xpm_FOUND,        X11::Xpm
-  X11_Xtst_INCLUDE_PATH,         X11_Xtst_LIB,       X11_Xtst_FOUND,       X11::Xtst
-  X11_Xrandr_INCLUDE_PATH,       X11_Xrandr_LIB,     X11_Xrandr_FOUND,     X11::Xrandr
-  X11_Xrender_INCLUDE_PATH,      X11_Xrender_LIB,    X11_Xrender_FOUND,    X11::Xrender
-  X11_XRes_INCLUDE_PATH,         X11_XRes_LIB,       X11_XRes_FOUND,       X11::XRes
-  X11_Xss_INCLUDE_PATH,          X11_Xss_LIB,        X11_Xss_FOUND,        X11::Xss
-  X11_Xt_INCLUDE_PATH,           X11_Xt_LIB,         X11_Xt_FOUND,         X11::Xt
-  X11_Xutil_INCLUDE_PATH,                            X11_Xutil_FOUND,      X11::Xutil
-  X11_Xv_INCLUDE_PATH,           X11_Xv_LIB,         X11_Xv_FOUND,         X11::Xv
-  X11_dpms_INCLUDE_PATH,         (in X11_Xext_LIB),  X11_dpms_FOUND
-  X11_XShm_INCLUDE_PATH,         (in X11_Xext_LIB),  X11_XShm_FOUND
-  X11_Xshape_INCLUDE_PATH,       (in X11_Xext_LIB),  X11_Xshape_FOUND
-  X11_XSync_INCLUDE_PATH,        (in X11_Xext_LIB),  X11_XSync_FOUND
-  X11_Xaw_INCLUDE_PATH,          X11_Xaw_LIB         X11_Xaw_FOUND         X11::Xaw
+  X11_Xkblib_INCLUDE_PATH,                                 X11_Xkb_FOUND,            X11::Xkb
+  X11_xkbcommon_INCLUDE_PATH,      X11_xkbcommon_LIB,      X11_xkbcommon_FOUND,      X11::xkbcommon
+  X11_xkbcommon_X11_INCLUDE_PATH,  X11_xkbcommon_X11_LIB,  X11_xkbcommon_X11_FOUND,  X11::xkbcommon_X11
+  X11_xkbfile_INCLUDE_PATH,        X11_xkbfile_LIB,        X11_xkbfile_FOUND,        X11::xkbfile
+  X11_Xmu_INCLUDE_PATH,            X11_Xmu_LIB,            X11_Xmu_FOUND,            X11::Xmu
+  X11_Xpm_INCLUDE_PATH,            X11_Xpm_LIB,            X11_Xpm_FOUND,            X11::Xpm
+  X11_Xtst_INCLUDE_PATH,           X11_Xtst_LIB,           X11_Xtst_FOUND,           X11::Xtst
+  X11_Xrandr_INCLUDE_PATH,         X11_Xrandr_LIB,         X11_Xrandr_FOUND,         X11::Xrandr
+  X11_Xrender_INCLUDE_PATH,        X11_Xrender_LIB,        X11_Xrender_FOUND,        X11::Xrender
+  X11_XRes_INCLUDE_PATH,           X11_XRes_LIB,           X11_XRes_FOUND,           X11::XRes
+  X11_Xss_INCLUDE_PATH,            X11_Xss_LIB,            X11_Xss_FOUND,            X11::Xss
+  X11_Xt_INCLUDE_PATH,             X11_Xt_LIB,             X11_Xt_FOUND,             X11::Xt
+  X11_Xutil_INCLUDE_PATH,                                  X11_Xutil_FOUND,          X11::Xutil
+  X11_Xv_INCLUDE_PATH,             X11_Xv_LIB,             X11_Xv_FOUND,             X11::Xv
+  X11_dpms_INCLUDE_PATH,           (in X11_Xext_LIB),      X11_dpms_FOUND
+  X11_XShm_INCLUDE_PATH,           (in X11_Xext_LIB),      X11_XShm_FOUND
+  X11_Xshape_INCLUDE_PATH,         (in X11_Xext_LIB),      X11_Xshape_FOUND
+  X11_XSync_INCLUDE_PATH,          (in X11_Xext_LIB),      X11_XSync_FOUND
+  X11_Xaw_INCLUDE_PATH,            X11_Xaw_LIB             X11_Xaw_FOUND             X11::Xaw
 
 .. versionadded:: 3.14
   Renamed ``Xxf86misc``, ``X11_Xxf86misc``, ``X11_Xxf86vm``, ``X11_xkbfile``,
@@ -92,7 +114,12 @@ and also the following more fine grained variables and targets:
   Added the ``xcb_randr``, ``xcb_xtext``, and ``xcb_keysyms`` libraries.
 
 .. versionadded:: 3.27
-  Added the ``xcb_cursor``, ``xcb_shape``, and ``xcb_xrm`` libraries.
+  Added the ``xcb_composite``, ``xcb_cursor``, ``xcb_damage``, ``xcb_dpms``,
+  ``xcb_dri2``, ``xcb_dri3``, ``xcb_errors``, ``xcb_ewmh``, ``xcb_glx``,
+  ``xcb_image``, ``xcb_present``, ``xcb_record``, ``xcb_render``,
+  ``xcb_render_util``, ``xcb_res``, ``xcb_screensaver``, ``xcb_shape``,
+  ``xcb_shm``, ``xcb_sync``, ``xcb_xf86dri``, ``xcb_xinerama``, ``xcb_xinput``,
+  ``xcb_xrm``, ``xcb_xvmc``, and ``xcb_xv`` libraries.
 
 #]=======================================================================]
 
@@ -135,18 +162,41 @@ if (UNIX)
   find_path(X11_Xaccessrules_INCLUDE_PATH X11/extensions/XKBrules.h  ${X11_INC_SEARCH_PATH})
   find_path(X11_Xaccessstr_INCLUDE_PATH X11/extensions/XKBstr.h      ${X11_INC_SEARCH_PATH})
   find_path(X11_Xau_INCLUDE_PATH X11/Xauth.h                         ${X11_INC_SEARCH_PATH})
-  find_path(X11_Xaw_INCLUDE_PATH X11/Xaw/Intrinsic.h                 ${X11_INC_SEARCH_PATH})
+  find_path(X11_Xaw_INCLUDE_PATH X11/Xaw/Box.h                       ${X11_INC_SEARCH_PATH})
   find_path(X11_xcb_INCLUDE_PATH xcb/xcb.h                           ${X11_INC_SEARCH_PATH})
   find_path(X11_X11_xcb_INCLUDE_PATH X11/Xlib-xcb.h                  ${X11_INC_SEARCH_PATH})
+  find_path(X11_xcb_composite_INCLUDE_PATH xcb/composite.h           ${X11_INC_SEARCH_PATH})
   find_path(X11_xcb_cursor_INCLUDE_PATH xcb/xcb_cursor.h             ${X11_INC_SEARCH_PATH})
+  find_path(X11_xcb_damage_INCLUDE_PATH xcb/damage.h                 ${X11_INC_SEARCH_PATH})
+  find_path(X11_xcb_dpms_INCLUDE_PATH xcb/dpms.h                     ${X11_INC_SEARCH_PATH})
+  find_path(X11_xcb_dri2_INCLUDE_PATH xcb/dri2.h                     ${X11_INC_SEARCH_PATH})
+  find_path(X11_xcb_dri3_INCLUDE_PATH xcb/dri3.h                     ${X11_INC_SEARCH_PATH})
+  find_path(X11_xcb_errors_INCLUDE_PATH xcb/xcb_errors.h             ${X11_INC_SEARCH_PATH})
+  find_path(X11_xcb_ewmh_INCLUDE_PATH xcb/xcb_ewmh.h                 ${X11_INC_SEARCH_PATH})
+  find_path(X11_xcb_glx_INCLUDE_PATH xcb/glx.h                       ${X11_INC_SEARCH_PATH})
   find_path(X11_xcb_icccm_INCLUDE_PATH xcb/xcb_icccm.h               ${X11_INC_SEARCH_PATH})
+  find_path(X11_xcb_image_INCLUDE_PATH xcb/xcb_image.h               ${X11_INC_SEARCH_PATH})
+  find_path(X11_xcb_keysyms_INCLUDE_PATH xcb/xcb_keysyms.h           ${X11_INC_SEARCH_PATH})
+  find_path(X11_xcb_present_INCLUDE_PATH xcb/present.h               ${X11_INC_SEARCH_PATH})
   find_path(X11_xcb_randr_INCLUDE_PATH xcb/randr.h                   ${X11_INC_SEARCH_PATH})
+  find_path(X11_xcb_record_INCLUDE_PATH xcb/record.h                 ${X11_INC_SEARCH_PATH})
+  find_path(X11_xcb_render_INCLUDE_PATH xcb/render.h                 ${X11_INC_SEARCH_PATH})
+  find_path(X11_xcb_render_util_INCLUDE_PATH xcb/xcb_renderutil.h    ${X11_INC_SEARCH_PATH})
+  find_path(X11_xcb_res_INCLUDE_PATH xcb/res.h                       ${X11_INC_SEARCH_PATH})
+  find_path(X11_xcb_screensaver_INCLUDE_PATH xcb/screensaver.h       ${X11_INC_SEARCH_PATH})
   find_path(X11_xcb_shape_INCLUDE_PATH xcb/shape.h                   ${X11_INC_SEARCH_PATH})
+  find_path(X11_xcb_shm_INCLUDE_PATH xcb/shm.h                       ${X11_INC_SEARCH_PATH})
+  find_path(X11_xcb_sync_INCLUDE_PATH xcb/sync.h                     ${X11_INC_SEARCH_PATH})
   find_path(X11_xcb_util_INCLUDE_PATH xcb/xcb_aux.h                  ${X11_INC_SEARCH_PATH})
+  find_path(X11_xcb_xf86dri_INCLUDE_PATH xcb/xf86dri.h               ${X11_INC_SEARCH_PATH})
   find_path(X11_xcb_xfixes_INCLUDE_PATH xcb/xfixes.h                 ${X11_INC_SEARCH_PATH})
+  find_path(X11_xcb_xinerama_INCLUDE_PATH xcb/xinerama.h             ${X11_INC_SEARCH_PATH})
+  find_path(X11_xcb_xinput_INCLUDE_PATH xcb/xinput.h                 ${X11_INC_SEARCH_PATH})
+  find_path(X11_xcb_xkb_INCLUDE_PATH xcb/xkb.h                       ${X11_INC_SEARCH_PATH})
   find_path(X11_xcb_xrm_INCLUDE_PATH xcb/xcb_xrm.h                   ${X11_INC_SEARCH_PATH})
   find_path(X11_xcb_xtest_INCLUDE_PATH xcb/xtest.h                   ${X11_INC_SEARCH_PATH})
-  find_path(X11_xcb_keysyms_INCLUDE_PATH xcb/xcb_keysyms.h           ${X11_INC_SEARCH_PATH})
+  find_path(X11_xcb_xvmc_INCLUDE_PATH xcb/xvmc.h                     ${X11_INC_SEARCH_PATH})
+  find_path(X11_xcb_xv_INCLUDE_PATH xcb/xv.h                         ${X11_INC_SEARCH_PATH})
   find_path(X11_Xcomposite_INCLUDE_PATH X11/extensions/Xcomposite.h  ${X11_INC_SEARCH_PATH})
   find_path(X11_Xcursor_INCLUDE_PATH X11/Xcursor/Xcursor.h           ${X11_INC_SEARCH_PATH})
   find_path(X11_Xdamage_INCLUDE_PATH X11/extensions/Xdamage.h        ${X11_INC_SEARCH_PATH})
@@ -191,45 +241,67 @@ if (UNIX)
   find_library(X11_X11_LIB X11               ${X11_LIB_SEARCH_PATH})
 
   # Find additional X libraries. Keep list sorted by library name.
-  find_library(X11_ICE_LIB ICE               ${X11_LIB_SEARCH_PATH})
-  find_library(X11_SM_LIB SM                 ${X11_LIB_SEARCH_PATH})
-  find_library(X11_Xau_LIB Xau               ${X11_LIB_SEARCH_PATH})
-  find_library(X11_Xaw_LIB Xaw               ${X11_LIB_SEARCH_PATH})
-  find_library(X11_xcb_LIB xcb               ${X11_LIB_SEARCH_PATH})
-  find_library(X11_X11_xcb_LIB X11-xcb       ${X11_LIB_SEARCH_PATH})
-  find_library(X11_xcb_cursor_LIB xcb-cursor ${X11_LIB_SEARCH_PATH})
-  find_library(X11_xcb_icccm_LIB xcb-icccm   ${X11_LIB_SEARCH_PATH})
-  find_library(X11_xcb_randr_LIB xcb-randr   ${X11_LIB_SEARCH_PATH})
-  find_library(X11_xcb_shape_LIB xcb-shape   ${X11_LIB_SEARCH_PATH})
-  find_library(X11_xcb_util_LIB xcb-util     ${X11_LIB_SEARCH_PATH})
-  find_library(X11_xcb_xfixes_LIB xcb-xfixes ${X11_LIB_SEARCH_PATH})
-  find_library(X11_xcb_xrm_LIB xcb-xrm       ${X11_LIB_SEARCH_PATH})
-  find_library(X11_xcb_xtest_LIB xcb-xtest   ${X11_LIB_SEARCH_PATH})
-  find_library(X11_xcb_keysyms_LIB xcb-keysyms ${X11_LIB_SEARCH_PATH})
-  find_library(X11_xcb_xkb_LIB xcb-xkb       ${X11_LIB_SEARCH_PATH})
-  find_library(X11_Xcomposite_LIB Xcomposite ${X11_LIB_SEARCH_PATH})
-  find_library(X11_Xcursor_LIB Xcursor       ${X11_LIB_SEARCH_PATH})
-  find_library(X11_Xdamage_LIB Xdamage       ${X11_LIB_SEARCH_PATH})
-  find_library(X11_Xdmcp_LIB Xdmcp           ${X11_LIB_SEARCH_PATH})
-  find_library(X11_Xext_LIB Xext             ${X11_LIB_SEARCH_PATH})
-  find_library(X11_Xfixes_LIB Xfixes         ${X11_LIB_SEARCH_PATH})
-  find_library(X11_Xft_LIB Xft               ${X11_LIB_SEARCH_PATH})
-  find_library(X11_Xi_LIB Xi                 ${X11_LIB_SEARCH_PATH})
-  find_library(X11_Xinerama_LIB Xinerama     ${X11_LIB_SEARCH_PATH})
-  find_library(X11_xkbcommon_LIB xkbcommon   ${X11_LIB_SEARCH_PATH})
-  find_library(X11_xkbcommon_X11_LIB xkbcommon-x11   ${X11_LIB_SEARCH_PATH})
-  find_library(X11_xkbfile_LIB xkbfile       ${X11_LIB_SEARCH_PATH})
-  find_library(X11_Xmu_LIB Xmu               ${X11_LIB_SEARCH_PATH})
-  find_library(X11_Xpm_LIB Xpm               ${X11_LIB_SEARCH_PATH})
-  find_library(X11_Xrandr_LIB Xrandr         ${X11_LIB_SEARCH_PATH})
-  find_library(X11_Xrender_LIB Xrender       ${X11_LIB_SEARCH_PATH})
-  find_library(X11_XRes_LIB XRes             ${X11_LIB_SEARCH_PATH})
-  find_library(X11_Xss_LIB Xss               ${X11_LIB_SEARCH_PATH})
-  find_library(X11_Xt_LIB Xt                 ${X11_LIB_SEARCH_PATH})
-  find_library(X11_Xtst_LIB Xtst             ${X11_LIB_SEARCH_PATH})
-  find_library(X11_Xv_LIB Xv                 ${X11_LIB_SEARCH_PATH})
-  find_library(X11_Xxf86misc_LIB Xxf86misc   ${X11_LIB_SEARCH_PATH})
-  find_library(X11_Xxf86vm_LIB Xxf86vm       ${X11_LIB_SEARCH_PATH})
+  find_library(X11_ICE_LIB ICE                         ${X11_LIB_SEARCH_PATH})
+  find_library(X11_SM_LIB SM                           ${X11_LIB_SEARCH_PATH})
+  find_library(X11_Xau_LIB Xau                         ${X11_LIB_SEARCH_PATH})
+  find_library(X11_Xaw_LIB Xaw                         ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xcb_LIB xcb                         ${X11_LIB_SEARCH_PATH})
+  find_library(X11_X11_xcb_LIB X11-xcb                 ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xcb_composite_LIB xcb-composite     ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xcb_cursor_LIB xcb-cursor           ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xcb_damage_LIB xcb-damage           ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xcb_dpms_LIB xcb-dpms               ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xcb_dri2_LIB xcb-dri2               ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xcb_dri3_LIB xcb-dri3               ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xcb_errors_LIB xcb-errors           ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xcb_ewmh_LIB xcb-ewmh               ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xcb_glx_LIB xcb-glx                 ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xcb_icccm_LIB xcb-icccm             ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xcb_image_LIB xcb-image             ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xcb_keysyms_LIB xcb-keysyms         ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xcb_present_LIB xcb-present         ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xcb_randr_LIB xcb-randr             ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xcb_record_LIB xcb-record           ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xcb_render_LIB xcb-render           ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xcb_render_util_LIB xcb-render-util ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xcb_res_LIB xcb-res                 ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xcb_screensaver_LIB xcb-screensaver ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xcb_shape_LIB xcb-shape             ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xcb_shm_LIB xcb-shm                 ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xcb_sync_LIB xcb-sync               ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xcb_util_LIB xcb-util               ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xcb_xf86dri_LIB xcb-xf86dri         ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xcb_xfixes_LIB xcb-xfixes           ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xcb_xinerama_LIB xcb-xinerama       ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xcb_xinput_LIB xcb-xinput           ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xcb_xkb_LIB xcb-xkb                 ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xcb_xrm_LIB xcb-xrm                 ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xcb_xtest_LIB xcb-xtest             ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xcb_xvmc_LIB xcb-xvmc               ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xcb_xv_LIB xcb-xv                   ${X11_LIB_SEARCH_PATH})
+  find_library(X11_Xcomposite_LIB Xcomposite           ${X11_LIB_SEARCH_PATH})
+  find_library(X11_Xcursor_LIB Xcursor                 ${X11_LIB_SEARCH_PATH})
+  find_library(X11_Xdamage_LIB Xdamage                 ${X11_LIB_SEARCH_PATH})
+  find_library(X11_Xdmcp_LIB Xdmcp                     ${X11_LIB_SEARCH_PATH})
+  find_library(X11_Xext_LIB Xext                       ${X11_LIB_SEARCH_PATH})
+  find_library(X11_Xfixes_LIB Xfixes                   ${X11_LIB_SEARCH_PATH})
+  find_library(X11_Xft_LIB Xft                         ${X11_LIB_SEARCH_PATH})
+  find_library(X11_Xi_LIB Xi                           ${X11_LIB_SEARCH_PATH})
+  find_library(X11_Xinerama_LIB Xinerama               ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xkbcommon_LIB xkbcommon             ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xkbcommon_X11_LIB xkbcommon-x11     ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xkbfile_LIB xkbfile                 ${X11_LIB_SEARCH_PATH})
+  find_library(X11_Xmu_LIB Xmu                         ${X11_LIB_SEARCH_PATH})
+  find_library(X11_Xpm_LIB Xpm                         ${X11_LIB_SEARCH_PATH})
+  find_library(X11_Xrandr_LIB Xrandr                   ${X11_LIB_SEARCH_PATH})
+  find_library(X11_Xrender_LIB Xrender                 ${X11_LIB_SEARCH_PATH})
+  find_library(X11_XRes_LIB XRes                       ${X11_LIB_SEARCH_PATH})
+  find_library(X11_Xss_LIB Xss                         ${X11_LIB_SEARCH_PATH})
+  find_library(X11_Xt_LIB Xt                           ${X11_LIB_SEARCH_PATH})
+  find_library(X11_Xtst_LIB Xtst                       ${X11_LIB_SEARCH_PATH})
+  find_library(X11_Xv_LIB Xv                           ${X11_LIB_SEARCH_PATH})
+  find_library(X11_Xxf86misc_LIB Xxf86misc             ${X11_LIB_SEARCH_PATH})
+  find_library(X11_Xxf86vm_LIB Xxf86vm                 ${X11_LIB_SEARCH_PATH})
 
   # Backwards compatibility.
   set(X11_Xinput_LIB "${X11_Xi_LIB}")
@@ -301,44 +373,132 @@ if (UNIX)
     set(X11_X11_xcb_FOUND TRUE)
   endif ()
 
+  if (X11_xcb_composite_LIB AND X11_xcb_composite_INCLUDE_PATH)
+    set(X11_xcb_composite_FOUND TRUE)
+  endif ()
+
   if (X11_xcb_cursor_LIB AND X11_xcb_cursor_INCLUDE_PATH)
     set(X11_xcb_cursor_FOUND TRUE)
+  endif ()
+
+  if (X11_xcb_damage_LIB AND X11_xcb_damage_INCLUDE_PATH)
+    set(X11_xcb_damage_FOUND TRUE)
+  endif ()
+
+  if (X11_xcb_dpms_LIB AND X11_xcb_dpms_INCLUDE_PATH)
+    set(X11_xcb_dpms_FOUND TRUE)
+  endif ()
+
+  if (X11_xcb_dri2_LIB AND X11_xcb_dri2_INCLUDE_PATH)
+    set(X11_xcb_dri2_FOUND TRUE)
+  endif ()
+
+  if (X11_xcb_dri3_LIB AND X11_xcb_dri3_INCLUDE_PATH)
+    set(X11_xcb_dri3_FOUND TRUE)
+  endif ()
+
+  if (X11_xcb_errors_LIB AND X11_xcb_errors_INCLUDE_PATH)
+    set(X11_xcb_errors_FOUND TRUE)
+  endif ()
+
+  if (X11_xcb_ewmh_LIB AND X11_xcb_ewmh_INCLUDE_PATH)
+    set(X11_xcb_ewmh_FOUND TRUE)
+  endif ()
+
+  if (X11_xcb_glx_LIB AND X11_xcb_glx_INCLUDE_PATH)
+    set(X11_xcb_glx_FOUND TRUE)
   endif ()
 
   if (X11_xcb_icccm_LIB AND X11_xcb_icccm_INCLUDE_PATH)
     set(X11_xcb_icccm_FOUND TRUE)
   endif ()
 
+  if (X11_xcb_image_LIB AND X11_xcb_image_INCLUDE_PATH)
+    set(X11_xcb_image_FOUND TRUE)
+  endif ()
+
+  if (X11_xcb_keysyms_LIB AND X11_xcb_keysyms_INCLUDE_PATH)
+    set(X11_xcb_keysyms_FOUND TRUE)
+  endif ()
+
+  if (X11_xcb_present_LIB AND X11_xcb_present_INCLUDE_PATH)
+    set(X11_xcb_present_FOUND TRUE)
+  endif ()
+
   if (X11_xcb_randr_LIB AND X11_xcb_randr_INCLUDE_PATH)
     set(X11_xcb_randr_FOUND TRUE)
+  endif ()
+
+  if (X11_xcb_record_LIB AND X11_xcb_record_INCLUDE_PATH)
+    set(X11_xcb_record_FOUND TRUE)
+  endif ()
+
+  if (X11_xcb_render_LIB AND X11_xcb_render_INCLUDE_PATH)
+    set(X11_xcb_render_FOUND TRUE)
+  endif ()
+
+  if (X11_xcb_render_util_LIB AND X11_xcb_render_util_INCLUDE_PATH)
+    set(X11_xcb_render_util_FOUND TRUE)
+  endif ()
+
+  if (X11_xcb_res_LIB AND X11_xcb_res_INCLUDE_PATH)
+    set(X11_xcb_res_FOUND TRUE)
+  endif ()
+
+  if (X11_xcb_screensaver_LIB AND X11_xcb_screensaver_INCLUDE_PATH)
+    set(X11_xcb_screensaver_FOUND TRUE)
   endif ()
 
   if (X11_xcb_shape_LIB AND X11_xcb_shape_INCLUDE_PATH)
     set(X11_xcb_shape_FOUND TRUE)
   endif ()
 
+  if (X11_xcb_shm_LIB AND X11_xcb_shm_INCLUDE_PATH)
+    set(X11_xcb_shm_FOUND TRUE)
+  endif ()
+
+  if (X11_xcb_sync_LIB AND X11_xcb_sync_INCLUDE_PATH)
+    set(X11_xcb_sync_FOUND TRUE)
+  endif ()
+
   if (X11_xcb_util_LIB AND X11_xcb_util_INCLUDE_PATH)
     set(X11_xcb_util_FOUND TRUE)
   endif ()
 
-  if (X11_xcb_xfixes_LIB)
+  if (X11_xcb_xf86dri_LIB AND X11_xcb_xf86dri_INCLUDE_PATH)
+    set(X11_xcb_xf86dri_FOUND TRUE)
+  endif ()
+
+  if (X11_xcb_xfixes_LIB AND X11_xcb_xfixes_INCLUDE_PATH)
     set(X11_xcb_xfixes_FOUND TRUE)
+  endif ()
+
+  if (X11_xcb_xinerama_LIB AND X11_xcb_xinerama_INCLUDE_PATH)
+    set(X11_xcb_xinerama_FOUND TRUE)
+  endif ()
+
+  if (X11_xcb_xinput_LIB AND X11_xcb_xinput_INCLUDE_PATH)
+    set(X11_xcb_xinput_FOUND TRUE)
+  endif ()
+
+  if (X11_xcb_xkb_LIB AND X11_xcb_xkb_INCLUDE_PATH)
+    set(X11_xcb_xkb_FOUND TRUE)
   endif ()
 
   if (X11_xcb_xrm_LIB AND X11_xcb_xrm_INCLUDE_PATH)
     set(X11_xcb_xrm_FOUND TRUE)
   endif ()
 
-  if (X11_xcb_xtest_LIB)
+  if (X11_xcb_xtest_LIB AND X11_xcb_xtest_INCLUDE_PATH)
     set(X11_xcb_xtest_FOUND TRUE)
   endif ()
 
-  if (X11_xcb_keysyms_LIB)
-    set(X11_xcb_keysyms_FOUND TRUE)
+  if (X11_xcb_xvmc_LIB AND X11_xcb_xvmc_INCLUDE_PATH)
+    set(X11_xcb_xvmc_FOUND TRUE)
   endif ()
 
-  if (X11_xcb_xkb_LIB)
-    set(X11_xcb_xkb_FOUND TRUE)
+  if (X11_xcb_xv_LIB AND X11_xcb_xv_INCLUDE_PATH)
+    set(X11_xcb_xv_FOUND TRUE)
   endif ()
 
   if (X11_Xdmcp_INCLUDE_PATH AND X11_Xdmcp_LIB)
@@ -641,10 +801,66 @@ if (UNIX)
       INTERFACE_LINK_LIBRARIES "X11::xcb;X11::X11")
   endif ()
 
+  if (X11_xcb_composite_FOUND AND NOT TARGET X11::xcb_composite)
+    add_library(X11::xcb_composite UNKNOWN IMPORTED)
+    set_target_properties(X11::xcb_composite PROPERTIES
+      IMPORTED_LOCATION "${X11_xcb_composite_LIB}"
+      INTERFACE_LINK_LIBRARIES "X11::xcb")
+  endif ()
+
   if (X11_xcb_cursor_FOUND AND NOT TARGET X11::xcb_cursor)
     add_library(X11::xcb_cursor UNKNOWN IMPORTED)
     set_target_properties(X11::xcb_cursor PROPERTIES
       IMPORTED_LOCATION "${X11_xcb_cursor_LIB}"
+      INTERFACE_LINK_LIBRARIES "X11::xcb")
+  endif ()
+
+  if (X11_xcb_damage_FOUND AND NOT TARGET X11::xcb_damage)
+    add_library(X11::xcb_damage UNKNOWN IMPORTED)
+    set_target_properties(X11::xcb_damage PROPERTIES
+      IMPORTED_LOCATION "${X11_xcb_damage_LIB}"
+      INTERFACE_LINK_LIBRARIES "X11::xcb")
+  endif ()
+
+  if (X11_xcb_dpms_FOUND AND NOT TARGET X11::xcb_dpms)
+    add_library(X11::xcb_dpms UNKNOWN IMPORTED)
+    set_target_properties(X11::xcb_dpms PROPERTIES
+      IMPORTED_LOCATION "${X11_xcb_dpms_LIB}"
+      INTERFACE_LINK_LIBRARIES "X11::xcb")
+  endif ()
+
+  if (X11_xcb_dri2_FOUND AND NOT TARGET X11::xcb_dri2)
+    add_library(X11::xcb_dri2 UNKNOWN IMPORTED)
+    set_target_properties(X11::xcb_dri2 PROPERTIES
+      IMPORTED_LOCATION "${X11_xcb_dri2_LIB}"
+      INTERFACE_LINK_LIBRARIES "X11::xcb")
+  endif ()
+
+  if (X11_xcb_dri3_FOUND AND NOT TARGET X11::xcb_dri3)
+    add_library(X11::xcb_dri3 UNKNOWN IMPORTED)
+    set_target_properties(X11::xcb_dri3 PROPERTIES
+      IMPORTED_LOCATION "${X11_xcb_dri3_LIB}"
+      INTERFACE_LINK_LIBRARIES "X11::xcb")
+  endif ()
+
+  if (X11_xcb_errors_FOUND AND NOT TARGET X11::xcb_errors)
+    add_library(X11::xcb_errors UNKNOWN IMPORTED)
+    set_target_properties(X11::xcb_errors PROPERTIES
+      IMPORTED_LOCATION "${X11_xcb_errors_LIB}"
+      INTERFACE_LINK_LIBRARIES "X11::xcb")
+  endif ()
+
+  if (X11_xcb_ewmh_FOUND AND NOT TARGET X11::xcb_ewmh)
+    add_library(X11::xcb_ewmh UNKNOWN IMPORTED)
+    set_target_properties(X11::xcb_ewmh PROPERTIES
+      IMPORTED_LOCATION "${X11_xcb_ewmh_LIB}"
+      INTERFACE_LINK_LIBRARIES "X11::xcb")
+  endif ()
+
+  if (X11_xcb_glx_FOUND AND NOT TARGET X11::xcb_glx)
+    add_library(X11::xcb_glx UNKNOWN IMPORTED)
+    set_target_properties(X11::xcb_glx PROPERTIES
+      IMPORTED_LOCATION "${X11_xcb_glx_LIB}"
       INTERFACE_LINK_LIBRARIES "X11::xcb")
   endif ()
 
@@ -655,10 +871,66 @@ if (UNIX)
       INTERFACE_LINK_LIBRARIES "X11::xcb")
   endif ()
 
+  if (X11_xcb_image_FOUND AND NOT TARGET X11::xcb_image)
+    add_library(X11::xcb_image UNKNOWN IMPORTED)
+    set_target_properties(X11::xcb_image PROPERTIES
+      IMPORTED_LOCATION "${X11_xcb_image_LIB}"
+      INTERFACE_LINK_LIBRARIES "X11::xcb")
+  endif ()
+
+  if (X11_xcb_keysyms_FOUND AND NOT TARGET X11::xcb_keysyms)
+    add_library(X11::xcb_keysyms UNKNOWN IMPORTED)
+    set_target_properties(X11::xcb_keysyms PROPERTIES
+      IMPORTED_LOCATION "${X11_xcb_keysyms_LIB}"
+      INTERFACE_LINK_LIBRARIES "X11::xcb")
+  endif ()
+
+  if (X11_xcb_present_FOUND AND NOT TARGET X11::xcb_present)
+    add_library(X11::xcb_present UNKNOWN IMPORTED)
+    set_target_properties(X11::xcb_present PROPERTIES
+      IMPORTED_LOCATION "${X11_xcb_present_LIB}"
+      INTERFACE_LINK_LIBRARIES "X11::xcb")
+  endif ()
+
   if (X11_xcb_randr_FOUND AND NOT TARGET X11::xcb_randr)
     add_library(X11::xcb_randr UNKNOWN IMPORTED)
     set_target_properties(X11::xcb_randr PROPERTIES
       IMPORTED_LOCATION "${X11_xcb_randr_LIB}"
+      INTERFACE_LINK_LIBRARIES "X11::xcb")
+  endif ()
+
+  if (X11_xcb_record_FOUND AND NOT TARGET X11::xcb_record)
+    add_library(X11::xcb_record UNKNOWN IMPORTED)
+    set_target_properties(X11::xcb_record PROPERTIES
+      IMPORTED_LOCATION "${X11_xcb_record_LIB}"
+      INTERFACE_LINK_LIBRARIES "X11::xcb")
+  endif ()
+
+  if (X11_xcb_render_FOUND AND NOT TARGET X11::xcb_render)
+    add_library(X11::xcb_render UNKNOWN IMPORTED)
+    set_target_properties(X11::xcb_render PROPERTIES
+      IMPORTED_LOCATION "${X11_xcb_render_LIB}"
+      INTERFACE_LINK_LIBRARIES "X11::xcb")
+  endif ()
+
+  if (X11_xcb_render_util_FOUND AND NOT TARGET X11::xcb_render_util)
+    add_library(X11::xcb_render_util UNKNOWN IMPORTED)
+    set_target_properties(X11::xcb_render_util PROPERTIES
+      IMPORTED_LOCATION "${X11_xcb_render_util_LIB}"
+      INTERFACE_LINK_LIBRARIES "X11::xcb")
+  endif ()
+
+  if (X11_xcb_res_FOUND AND NOT TARGET X11::xcb_res)
+    add_library(X11::xcb_res UNKNOWN IMPORTED)
+    set_target_properties(X11::xcb_res PROPERTIES
+      IMPORTED_LOCATION "${X11_xcb_res_LIB}"
+      INTERFACE_LINK_LIBRARIES "X11::xcb")
+  endif ()
+
+  if (X11_xcb_screensaver_FOUND AND NOT TARGET X11::xcb_screensaver)
+    add_library(X11::xcb_screensaver UNKNOWN IMPORTED)
+    set_target_properties(X11::xcb_screensaver PROPERTIES
+      IMPORTED_LOCATION "${X11_xcb_screensaver_LIB}"
       INTERFACE_LINK_LIBRARIES "X11::xcb")
   endif ()
 
@@ -669,6 +941,20 @@ if (UNIX)
       INTERFACE_LINK_LIBRARIES "X11::xcb")
   endif ()
 
+  if (X11_xcb_shm_FOUND AND NOT TARGET X11::xcb_shm)
+    add_library(X11::xcb_shm UNKNOWN IMPORTED)
+    set_target_properties(X11::xcb_shm PROPERTIES
+      IMPORTED_LOCATION "${X11_xcb_shm_LIB}"
+      INTERFACE_LINK_LIBRARIES "X11::xcb")
+  endif ()
+
+  if (X11_xcb_sync_FOUND AND NOT TARGET X11::xcb_sync)
+    add_library(X11::xcb_sync UNKNOWN IMPORTED)
+    set_target_properties(X11::xcb_sync PROPERTIES
+      IMPORTED_LOCATION "${X11_xcb_sync_LIB}"
+      INTERFACE_LINK_LIBRARIES "X11::xcb")
+  endif ()
+
   if (X11_xcb_util_FOUND AND NOT TARGET X11::xcb_util)
     add_library(X11::xcb_util UNKNOWN IMPORTED)
     set_target_properties(X11::xcb_util PROPERTIES
@@ -676,10 +962,38 @@ if (UNIX)
       INTERFACE_LINK_LIBRARIES "X11::xcb")
   endif ()
 
+  if (X11_xcb_xf86dri_FOUND AND NOT TARGET X11::xcb_xf86dri)
+    add_library(X11::xcb_xf86dri UNKNOWN IMPORTED)
+    set_target_properties(X11::xcb_xf86dri PROPERTIES
+      IMPORTED_LOCATION "${X11_xcb_xf86dri_LIB}"
+      INTERFACE_LINK_LIBRARIES "X11::xcb")
+  endif ()
+
   if (X11_xcb_xfixes_FOUND AND NOT TARGET X11::xcb_xfixes)
     add_library(X11::xcb_xfixes UNKNOWN IMPORTED)
     set_target_properties(X11::xcb_xfixes PROPERTIES
       IMPORTED_LOCATION "${X11_xcb_xfixes_LIB}"
+      INTERFACE_LINK_LIBRARIES "X11::xcb")
+  endif ()
+
+  if (X11_xcb_xinerama_FOUND AND NOT TARGET X11::xcb_xinerama)
+    add_library(X11::xcb_xinerama UNKNOWN IMPORTED)
+    set_target_properties(X11::xcb_xinerama PROPERTIES
+      IMPORTED_LOCATION "${X11_xcb_xinerama_LIB}"
+      INTERFACE_LINK_LIBRARIES "X11::xcb")
+  endif ()
+
+  if (X11_xcb_xinput_FOUND AND NOT TARGET X11::xcb_xinput)
+    add_library(X11::xcb_xinput UNKNOWN IMPORTED)
+    set_target_properties(X11::xcb_xinput PROPERTIES
+      IMPORTED_LOCATION "${X11_xcb_xinput_LIB}"
+      INTERFACE_LINK_LIBRARIES "X11::xcb")
+  endif ()
+
+  if (X11_xcb_xkb_FOUND AND NOT TARGET X11::xcb_xkb)
+    add_library(X11::xcb_xkb UNKNOWN IMPORTED)
+    set_target_properties(X11::xcb_xkb PROPERTIES
+      IMPORTED_LOCATION "${X11_xcb_xkb_LIB}"
       INTERFACE_LINK_LIBRARIES "X11::xcb")
   endif ()
 
@@ -697,17 +1011,17 @@ if (UNIX)
     INTERFACE_LINK_LIBRARIES "X11::xcb")
   endif ()
 
-  if (X11_xcb_keysyms_FOUND AND NOT TARGET X11::xcb_keysyms)
-    add_library(X11::xcb_keysyms UNKNOWN IMPORTED)
-    set_target_properties(X11::xcb_keysyms PROPERTIES
-      IMPORTED_LOCATION "${X11_xcb_keysyms_LIB}"
+  if (X11_xcb_xvmc_FOUND AND NOT TARGET X11::xcb_xvmc)
+    add_library(X11::xcb_xvmc UNKNOWN IMPORTED)
+    set_target_properties(X11::xcb_xvmc PROPERTIES
+      IMPORTED_LOCATION "${X11_xcb_xvmc_LIB}"
       INTERFACE_LINK_LIBRARIES "X11::xcb")
   endif ()
 
-  if (X11_xcb_xkb_FOUND AND NOT TARGET X11::xcb_xkb)
-    add_library(X11::xcb_xkb UNKNOWN IMPORTED)
-    set_target_properties(X11::xcb_xkb PROPERTIES
-      IMPORTED_LOCATION "${X11_xcb_xkb_LIB}"
+  if (X11_xcb_xv_FOUND AND NOT TARGET X11::xcb_xv)
+    add_library(X11::xcb_xv UNKNOWN IMPORTED)
+    set_target_properties(X11::xcb_xv PROPERTIES
+      IMPORTED_LOCATION "${X11_xcb_xv_LIB}"
       INTERFACE_LINK_LIBRARIES "X11::xcb")
   endif ()
 
@@ -918,26 +1232,70 @@ if (UNIX)
     X11_Xau_INCLUDE_PATH
     X11_xcb_LIB
     X11_xcb_INCLUDE_PATH
+    X11_xcb_composite_LIB
+    X11_xcb_composite_INCLUDE_PATH
     X11_xcb_cursor_LIB
     X11_xcb_cursor_INCLUDE_PATH
+    X11_xcb_damage_LIB
+    X11_xcb_damage_INCLUDE_PATH
+    X11_xcb_dpms_LIB
+    X11_xcb_dpms_INCLUDE_PATH
+    X11_xcb_dri2_LIB
+    X11_xcb_dri2_INCLUDE_PATH
+    X11_xcb_dri3_LIB
+    X11_xcb_dri3_INCLUDE_PATH
+    X11_xcb_errors_LIB
+    X11_xcb_errors_INCLUDE_PATH
+    X11_xcb_ewmh_LIB
+    X11_xcb_ewmh_INCLUDE_PATH
+    X11_xcb_glx_LIB
+    X11_xcb_glx_INCLUDE_PATH
     X11_xcb_icccm_LIB
     X11_xcb_icccm_INCLUDE_PATH
+    X11_xcb_image_LIB
+    X11_xcb_image_INCLUDE_PATH
+    X11_xcb_keysyms_LIB
+    X11_xcb_keysyms_INCLUDE_PATH
+    X11_xcb_present_LIB
+    X11_xcb_present_INCLUDE_PATH
     X11_xcb_randr_LIB
     X11_xcb_randr_INCLUDE_PATH
+    X11_xcb_record_LIB
+    X11_xcb_record_INCLUDE_PATH
+    X11_xcb_render_LIB
+    X11_xcb_render_INCLUDE_PATH
+    X11_xcb_render_util_LIB
+    X11_xcb_render_util_INCLUDE_PATH
+    X11_xcb_res_LIB
+    X11_xcb_res_INCLUDE_PATH
+    X11_xcb_screensaver_LIB
+    X11_xcb_screensaver_INCLUDE_PATH
     X11_xcb_shape_LIB
     X11_xcb_shape_INCLUDE_PATH
+    X11_xcb_shm_LIB
+    X11_xcb_shm_INCLUDE_PATH
+    X11_xcb_sync_LIB
+    X11_xcb_sync_INCLUDE_PATH
     X11_xcb_util_LIB
     X11_xcb_util_INCLUDE_PATH
+    X11_xcb_xf86dri_LIB
+    X11_xcb_xf86dri_INCLUDE_PATH
     X11_xcb_xfixes_LIB
     X11_xcb_xfixes_INCLUDE_PATH
+    X11_xcb_xinerama_LIB
+    X11_xcb_xinerama_INCLUDE_PATH
+    X11_xcb_xinput_LIB
+    X11_xcb_xinput_INCLUDE_PATH
+    X11_xcb_xkb_LIB
+    X11_X11_xcb_LIB
     X11_xcb_xrm_LIB
     X11_xcb_xrm_INCLUDE_PATH
     X11_xcb_xtest_LIB
     X11_xcb_xtest_INCLUDE_PATH
-    X11_xcb_keysyms_LIB
-    X11_xcb_keysyms_INCLUDE_PATH
-    X11_xcb_xkb_LIB
-    X11_X11_xcb_LIB
+    X11_xcb_xvmc_LIB
+    X11_xcb_xvmc_INCLUDE_PATH
+    X11_xcb_xv_LIB
+    X11_xcb_xv_INCLUDE_PATH
     X11_X11_xcb_INCLUDE_PATH
     X11_Xlib_INCLUDE_PATH
     X11_Xutil_INCLUDE_PATH
