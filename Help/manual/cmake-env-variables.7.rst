@@ -20,8 +20,13 @@ Environment Variables that Change Behavior
 .. toctree::
    :maxdepth: 1
 
+   /envvar/CMAKE_APPBUNDLE_PATH
+   /envvar/CMAKE_FRAMEWORK_PATH
+   /envvar/CMAKE_INCLUDE_PATH
+   /envvar/CMAKE_LIBRARY_PATH
    /envvar/CMAKE_MAXIMUM_RECURSION_DEPTH
    /envvar/CMAKE_PREFIX_PATH
+   /envvar/CMAKE_PROGRAM_PATH
    /envvar/SSL_CERT_DIR
    /envvar/SSL_CERT_FILE
 

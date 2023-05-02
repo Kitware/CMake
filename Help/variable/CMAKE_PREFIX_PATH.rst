@@ -10,6 +10,9 @@ documentation.
 
 By default this is empty.  It is intended to be set by the project.
 
+There is also an environment variable :envvar:`CMAKE_PREFIX_PATH`, which is used
+as an additional list of search prefixes.
+
 See also :variable:`CMAKE_SYSTEM_PREFIX_PATH`, :variable:`CMAKE_INCLUDE_PATH`,
 :variable:`CMAKE_LIBRARY_PATH`, :variable:`CMAKE_PROGRAM_PATH`, and
 :variable:`CMAKE_IGNORE_PATH`.

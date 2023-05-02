@@ -132,6 +132,9 @@ If ``NO_DEFAULT_PATH`` is not specified, the search process is as follows:
 .. |CMAKE_PREFIX_PATH_XXX_SUBDIR| replace::
    |prefix_XXX_SUBDIR| for each ``<prefix>`` in :variable:`CMAKE_PREFIX_PATH`
 
+.. |ENV_CMAKE_PREFIX_PATH_XXX_SUBDIR| replace::
+   |prefix_XXX_SUBDIR| for each ``<prefix>`` in :envvar:`CMAKE_PREFIX_PATH`
+
 .. |SYSTEM_ENVIRONMENT_PREFIX_PATH_XXX_SUBDIR| replace::
    |prefix_XXX_SUBDIR| for each ``<prefix>/[s]bin`` in ``PATH``, and
    |entry_XXX_SUBDIR| for other entries in ``PATH``
@@ -194,9 +197,9 @@ If ``NO_DEFAULT_PATH`` is not specified, the search process is as follows:
    This can be skipped if ``NO_CMAKE_ENVIRONMENT_PATH`` is passed or
    by setting the :variable:`CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH` to ``FALSE``.
 
-   * |CMAKE_PREFIX_PATH_XXX|
-   * |CMAKE_XXX_PATH|
-   * |CMAKE_XXX_MAC_PATH|
+   * |ENV_CMAKE_PREFIX_PATH_XXX|
+   * |ENV_CMAKE_XXX_PATH|
+   * |ENV_CMAKE_XXX_MAC_PATH|
 
 4. Search the paths specified by the ``HINTS`` option.
    These should be paths computed by system introspection, such as a
