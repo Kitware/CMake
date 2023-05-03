@@ -139,22 +139,22 @@ public:
     std::vector<std::pair<cmsys::RegularExpression, std::string>>
       TimeoutRegularExpressions;
     std::map<std::string, std::string> Measurements;
-    bool IsInBasedOnREOptions;
-    bool WillFail;
-    bool Disabled;
-    float Cost;
-    int PreviousRuns;
-    bool RunSerial;
-    cmDuration Timeout;
-    bool ExplicitTimeout;
+    bool IsInBasedOnREOptions = true;
+    bool WillFail = false;
+    bool Disabled = false;
+    float Cost = 0;
+    int PreviousRuns = 0;
+    bool RunSerial = false;
+    cmDuration Timeout = cmDuration::zero();
+    bool ExplicitTimeout = false;
     cmDuration AlternateTimeout;
-    int Index;
+    int Index = 0;
     // Requested number of process slots
-    int Processors;
-    bool WantAffinity;
+    int Processors = 1;
+    bool WantAffinity = false;
     std::vector<size_t> Affinity;
     // return code of test which will mark test as "not run"
-    int SkipReturnCode;
+    int SkipReturnCode = -1;
     std::vector<std::string> Environment;
     std::vector<std::string> EnvironmentModification;
     std::vector<std::string> Labels;
@@ -175,17 +175,17 @@ public:
     std::string Reason;
     std::string FullCommandLine;
     std::string Environment;
-    cmDuration ExecutionTime;
-    std::int64_t ReturnValue;
-    int Status;
+    cmDuration ExecutionTime = cmDuration::zero();
+    std::int64_t ReturnValue = 0;
+    int Status = NOT_RUN;
     std::string ExceptionStatus;
     bool CompressOutput;
     std::string CompletionStatus;
     std::string CustomCompletionStatus;
     std::string Output;
     std::string TestMeasurementsOutput;
-    int TestCount;
-    cmCTestTestProperties* Properties;
+    int TestCount = 0;
+    cmCTestTestProperties* Properties = nullptr;
   };
 
   struct cmCTestTestResultLess

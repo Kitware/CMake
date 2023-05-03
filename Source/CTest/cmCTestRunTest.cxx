@@ -30,11 +30,6 @@ cmCTestRunTest::cmCTestRunTest(cmCTestMultiProcessHandler& multiHandler)
 {
   this->CTest = multiHandler.CTest;
   this->TestHandler = multiHandler.TestHandler;
-  this->TestResult.ExecutionTime = cmDuration::zero();
-  this->TestResult.ReturnValue = 0;
-  this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
-  this->TestResult.TestCount = 0;
-  this->TestResult.Properties = nullptr;
 }
 
 void cmCTestRunTest::CheckOutput(std::string const& line)

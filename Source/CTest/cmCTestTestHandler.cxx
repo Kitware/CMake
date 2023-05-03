@@ -2431,17 +2431,6 @@ bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args)
                      "Set test directory: " << test.Directory << std::endl,
                      this->Quiet);
 
-  test.IsInBasedOnREOptions = true;
-  test.WillFail = false;
-  test.Disabled = false;
-  test.RunSerial = false;
-  test.Timeout = cmDuration::zero();
-  test.ExplicitTimeout = false;
-  test.Cost = 0;
-  test.Processors = 1;
-  test.WantAffinity = false;
-  test.SkipReturnCode = -1;
-  test.PreviousRuns = 0;
   if (this->UseIncludeRegExpFlag &&
       (!this->IncludeTestsRegularExpression.find(testname) ||
        (!this->UseExcludeRegExpFirst &&
