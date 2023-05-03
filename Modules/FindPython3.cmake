@@ -333,6 +333,8 @@ Hints
     constraints is founded.
     This is the default if policy :policy:`CMP0094` is set to ``NEW``.
 
+  See also ``Python3_FIND_UNVERSIONED_NAMES``.
+
 ``Python3_FIND_REGISTRY``
   .. versionadded:: 3.13
 
@@ -439,6 +441,8 @@ Hints
   * ``LAST``: The generic names are searched after the more specialized ones.
     This is the default.
   * ``NEVER``: The generic name are not searched at all.
+
+  See also ``Python3_FIND_STRATEGY``.
 
 Artifacts Specification
 ^^^^^^^^^^^^^^^^^^^^^^^
