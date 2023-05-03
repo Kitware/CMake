@@ -1,6 +1,6 @@
 include(RunCTest)
 
-if(NOT TIMEOUT)
+if(NOT DEFINED TIMEOUT)
   # Give the process time to load and start running.
   set(TIMEOUT 4)
 endif()
@@ -20,3 +20,13 @@ if(UNIX)
   run_ctest_timeout(Fork)
   unset(CASE_CMAKELISTS_SUFFIX_CODE)
 endif()
+
+block()
+  # An explicit zero TIMEOUT test property means "no timeout".
+  set(TIMEOUT 0)
+  # The test sleeps for 4 seconds longer than the TIMEOUT value.
+  # Set a default timeout to less than that so that the test will
+  # timeout if the zero TIMEOUT does not suppress it.
+  set(CASE_TEST_PREFIX_CODE "set(CTEST_TEST_TIMEOUT 2)")
+  run_ctest_timeout(ZeroOverridesVar)
+endblock()

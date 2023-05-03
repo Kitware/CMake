@@ -3192,17 +3192,6 @@ if(BUILD_TESTING)
     WORKING_DIRECTORY ${CMake_BINARY_DIR}/Tests/CTestTestTimeout)
 
   configure_file(
-    "${CMake_SOURCE_DIR}/Tests/CTestTestZeroTimeout/test.cmake.in"
-    "${CMake_BINARY_DIR}/Tests/CTestTestZeroTimeout/test.cmake"
-    @ONLY ESCAPE_QUOTES)
-  add_test(CTestTestZeroTimeout ${CMAKE_CTEST_COMMAND}
-    -S "${CMake_BINARY_DIR}/Tests/CTestTestZeroTimeout/test.cmake" -V
-    --output-log
-    "${CMake_BINARY_DIR}/Tests/CTestTestZeroTimeout/testOutput.log")
-  set_tests_properties(CTestTestZeroTimeout PROPERTIES
-    FAIL_REGULAR_EXPRESSION "\\*\\*\\*Timeout")
-
-  configure_file(
     "${CMake_SOURCE_DIR}/Tests/CTestTestDepends/test.cmake.in"
     "${CMake_BINARY_DIR}/Tests/CTestTestDepends/test.cmake"
     @ONLY ESCAPE_QUOTES)
