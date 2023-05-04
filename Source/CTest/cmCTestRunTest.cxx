@@ -636,10 +636,7 @@ bool cmCTestRunTest::StartTest(size_t completed, size_t total)
     }
   }
 
-  return this->ForkProcess(timeout, this->TestProperties->ExplicitTimeout,
-                           &this->TestProperties->Environment,
-                           &this->TestProperties->EnvironmentModification,
-                           &this->TestProperties->Affinity);
+  return this->ForkProcess(timeout);
 }
 
 void cmCTestRunTest::ComputeArguments()
@@ -737,11 +734,7 @@ void cmCTestRunTest::ParseOutputForMeasurements()
   }
 }
 
-bool cmCTestRunTest::ForkProcess(
-  cmDuration testTimeOut, bool explicitTimeout,
-  std::vector<std::string>* environment,
-  std::vector<std::string>* environment_modification,
-  std::vector<size_t>* affinity)
+bool cmCTestRunTest::ForkProcess(cmDuration testTimeOut)
 {
   this->TestProcess->SetId(this->Index);
   this->TestProcess->SetWorkingDirectory(this->TestProperties->Directory);
@@ -766,7 +759,8 @@ bool cmCTestRunTest::ForkProcess(
     timeout = std::chrono::seconds(1);
   }
   // handle timeout explicitly set to 0
-  if (testTimeOut == cmDuration::zero() && explicitTimeout) {
+  if (testTimeOut == cmDuration::zero() &&
+      this->TestProperties->ExplicitTimeout) {
     timeout = cmDuration::zero();
   }
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
@@ -784,17 +778,17 @@ bool cmCTestRunTest::ForkProcess(
   // We split processing ENVIRONMENT and ENVIRONMENT_MODIFICATION into two
   // phases to ensure that MYVAR=reset: in the latter phase resets to the
   // former phase's settings, rather than to the original environment.
-  if (environment && !environment->empty()) {
+  if (!this->TestProperties->Environment.empty()) {
     cmSystemTools::EnvDiff diff;
-    diff.AppendEnv(*environment);
+    diff.AppendEnv(this->TestProperties->Environment);
     diff.ApplyToCurrentEnv(&envMeasurement);
   }
 
-  if (environment_modification && !environment_modification->empty()) {
+  if (!this->TestProperties->EnvironmentModification.empty()) {
     cmSystemTools::EnvDiff diff;
     bool env_ok = true;
 
-    for (auto const& envmod : *environment_modification) {
+    for (auto const& envmod : this->TestProperties->EnvironmentModification) {
       env_ok &= diff.ParseOperation(envmod);
     }
 
@@ -823,7 +817,7 @@ bool cmCTestRunTest::ForkProcess(
                                      1);
 
   return this->TestProcess->StartProcess(this->MultiTestHandler.Loop,
-                                         affinity);
+                                         &this->TestProperties->Affinity);
 }
 
 void cmCTestRunTest::SetupResourcesEnvironment(std::vector<std::string>* log)

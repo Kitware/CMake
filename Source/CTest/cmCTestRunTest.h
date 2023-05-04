@@ -110,10 +110,7 @@ private:
   bool NeedsToRepeat();
   void ParseOutputForMeasurements();
   void ExeNotFound(std::string exe);
-  bool ForkProcess(cmDuration testTimeOut, bool explicitTimeout,
-                   std::vector<std::string>* environment,
-                   std::vector<std::string>* environment_modification,
-                   std::vector<size_t>* affinity);
+  bool ForkProcess(cmDuration testTimeOut);
   void WriteLogOutputTop(size_t completed, size_t total);
   // Run post processing of the process output for MemCheck
   void MemCheckPostProcess();
