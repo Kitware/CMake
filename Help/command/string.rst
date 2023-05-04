@@ -576,6 +576,9 @@ Functionality for querying a JSON string.
   Set an element in ``<json-string>`` at the location
   given by the list of ``<member|index>`` arguments to ``<value>``.
   The contents of ``<value>`` should be valid JSON.
+  If ``<json-string>`` is an array, ``<value>`` can be appended to the end of
+  the array by using a number greater or equal to the array length as the
+  ``<member|index>`` argument.
 
 .. signature::
   string(JSON <out-var> [ERROR_VARIABLE <error-var>]
