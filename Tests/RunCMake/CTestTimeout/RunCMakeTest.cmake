@@ -8,7 +8,7 @@ endif()
 function(run_ctest_timeout CASE_NAME)
   configure_file(${RunCMake_SOURCE_DIR}/TestTimeout.c
                  ${RunCMake_BINARY_DIR}/${CASE_NAME}/TestTimeout.c COPYONLY)
-  run_ctest(${CASE_NAME})
+  run_ctest(${CASE_NAME} ${ARGN})
 endfunction()
 
 run_ctest_timeout(Basic)
@@ -27,6 +27,7 @@ block()
   # The test sleeps for 4 seconds longer than the TIMEOUT value.
   # Set a default timeout to less than that so that the test will
   # timeout if the zero TIMEOUT does not suppress it.
+  run_ctest_timeout(ZeroOverridesFlag --timeout 2)
   set(CASE_TEST_PREFIX_CODE "set(CTEST_TEST_TIMEOUT 2)")
   run_ctest_timeout(ZeroOverridesVar)
 endblock()

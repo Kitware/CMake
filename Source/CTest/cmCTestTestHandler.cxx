@@ -1379,7 +1379,7 @@ bool cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
       p.Cost = static_cast<float>(rand());
     }
 
-    if (p.Timeout == cmDuration::zero() &&
+    if (p.Timeout == cmDuration::zero() && !p.ExplicitTimeout &&
         this->CTest->GetGlobalTimeout() != cmDuration::zero()) {
       p.Timeout = this->CTest->GetGlobalTimeout();
     }
