@@ -574,7 +574,31 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
 
   // Add autogen include directory to the origin target INCLUDE_DIRECTORIES
   if (this->MocOrUicEnabled() || (this->Rcc.Enabled && this->MultiConfig)) {
-    this->GenTarget->AddIncludeDirectory(this->Dir.IncludeGenExp, true);
+    auto addBefore = false;
+    auto const& value =
+      this->GenTarget->GetProperty("AUTOGEN_USE_SYSTEM_INCLUDE");
+    if (value.IsSet()) {
+      if (cmIsOn(value)) {
+        this->GenTarget->AddSystemIncludeDirectory(this->Dir.IncludeGenExp,
+                                                   "CXX");
+      } else {
+        addBefore = true;
+      }
+    } else {
+      switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0151)) {
+        case cmPolicies::WARN:
+        case cmPolicies::OLD:
+          addBefore = true;
+          break;
+        case cmPolicies::REQUIRED_IF_USED:
+        case cmPolicies::REQUIRED_ALWAYS:
+        case cmPolicies::NEW:
+          this->GenTarget->AddSystemIncludeDirectory(this->Dir.IncludeGenExp,
+                                                     "CXX");
+          break;
+      }
+    }
+    this->GenTarget->AddIncludeDirectory(this->Dir.IncludeGenExp, addBefore);
   }
 
   // Scan files

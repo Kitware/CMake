@@ -731,6 +731,29 @@ void cmGeneratorTarget::AddIncludeDirectory(const std::string& src,
       BT<std::string>(src, this->Makefile->GetBacktrace()), true));
 }
 
+void cmGeneratorTarget::AddSystemIncludeDirectory(std::string const& inc,
+                                                  std::string const& lang)
+{
+  std::string config_upper;
+  auto const& configs =
+    this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
+
+  for (auto const& config : configs) {
+    std::string inc_with_config = inc;
+    if (!config.empty()) {
+      cmSystemTools::ReplaceString(inc_with_config, "$<CONFIG>", config);
+      config_upper = cmSystemTools::UpperCase(config);
+    }
+    auto const& key = cmStrCat(config_upper, "/", lang);
+    this->Target->AddSystemIncludeDirectories({ inc_with_config });
+    this->SystemIncludesCache[key].emplace_back(inc_with_config);
+
+    // SystemIncludesCache should be sorted so that binary search can be used
+    std::sort(this->SystemIncludesCache[key].begin(),
+              this->SystemIncludesCache[key].end());
+  }
+}
+
 std::vector<cmSourceFile*> const* cmGeneratorTarget::GetSourceDepends(
   cmSourceFile const* sf) const
 {

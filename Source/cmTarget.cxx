@@ -550,6 +550,7 @@ TargetProperty const StaticTargetProperties[] = {
   // -- Autogen
   { "AUTOGEN_ORIGIN_DEPENDS"_s, IC::CanCompileSources },
   { "AUTOGEN_PARALLEL"_s, IC::CanCompileSources },
+  { "AUTOGEN_USE_SYSTEM_INCLUDE"_s, IC::CanCompileSources },
   // -- moc
   { "AUTOMOC_DEPEND_FILTERS"_s, IC::CanCompileSources },
   // -- C++

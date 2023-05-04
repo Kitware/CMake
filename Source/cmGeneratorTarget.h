@@ -912,6 +912,8 @@ public:
   std::vector<std::string> GetGeneratedISPCObjects(
     std::string const& config) const;
 
+  void AddSystemIncludeDirectory(std::string const& inc,
+                                 std::string const& lang);
   bool AddHeaderSetVerification();
   std::string GenerateHeaderSetVerificationFile(
     cmSourceFile& source, const std::string& dir,
