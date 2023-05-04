@@ -1379,11 +1379,6 @@ bool cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
       p.Cost = static_cast<float>(rand());
     }
 
-    if (p.Timeout == cmDuration::zero() && !p.ExplicitTimeout &&
-        this->CTest->GetGlobalTimeout() != cmDuration::zero()) {
-      p.Timeout = this->CTest->GetGlobalTimeout();
-    }
-
     if (!p.Depends.empty()) {
       for (std::string const& i : p.Depends) {
         for (cmCTestTestProperties const& it2 : this->TestList) {
@@ -2252,7 +2247,6 @@ bool cmCTestTestHandler::SetTestsProperties(
             rt.FixturesRequired.insert(lval.begin(), lval.end());
           } else if (key == "TIMEOUT"_s) {
             rt.Timeout = cmDuration(atof(val.c_str()));
-            rt.ExplicitTimeout = true;
           } else if (key == "COST"_s) {
             rt.Cost = static_cast<float>(atof(val.c_str()));
           } else if (key == "REQUIRED_FILES"_s) {

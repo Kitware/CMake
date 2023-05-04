@@ -14,6 +14,8 @@
 #include <utility>
 #include <vector>
 
+#include <cm/optional>
+
 #include "cmsys/RegularExpression.hxx"
 
 #include "cmCTest.h"
@@ -145,8 +147,7 @@ public:
     float Cost = 0;
     int PreviousRuns = 0;
     bool RunSerial = false;
-    cmDuration Timeout = cmDuration::zero();
-    bool ExplicitTimeout = false;
+    cm::optional<cmDuration> Timeout;
     cmDuration AlternateTimeout;
     int Index = 0;
     // Requested number of process slots

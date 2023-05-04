@@ -14,12 +14,14 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cm/optional>
 
 #include "cmsys/RegularExpression.hxx"
 
 #include "cmCTest.h"
 #include "cmCTestMemCheckHandler.h"
 #include "cmCTestMultiProcessHandler.h"
+#include "cmDuration.h"
 #include "cmProcess.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -618,25 +620,7 @@ bool cmCTestRunTest::StartTest(size_t completed, size_t total)
   }
   this->StartTime = this->CTest->CurrentTime();
 
-  auto timeout = this->TestProperties->Timeout;
-
-  this->TimeoutIsForStopTime = false;
-  std::chrono::system_clock::time_point stop_time = this->CTest->GetStopTime();
-  if (stop_time != std::chrono::system_clock::time_point()) {
-    std::chrono::duration<double> stop_timeout =
-      (stop_time - std::chrono::system_clock::now()) % std::chrono::hours(24);
-
-    if (stop_timeout <= std::chrono::duration<double>::zero()) {
-      stop_timeout = std::chrono::duration<double>::zero();
-    }
-    if (timeout == std::chrono::duration<double>::zero() ||
-        stop_timeout < timeout) {
-      this->TimeoutIsForStopTime = true;
-      timeout = stop_timeout;
-    }
-  }
-
-  return this->ForkProcess(timeout);
+  return this->ForkProcess();
 }
 
 void cmCTestRunTest::ComputeArguments()
@@ -734,46 +718,79 @@ void cmCTestRunTest::ParseOutputForMeasurements()
   }
 }
 
-bool cmCTestRunTest::ForkProcess(cmDuration testTimeOut)
+bool cmCTestRunTest::ForkProcess()
 {
   this->TestProcess->SetId(this->Index);
   this->TestProcess->SetWorkingDirectory(this->TestProperties->Directory);
   this->TestProcess->SetCommand(this->ActualCommand);
   this->TestProcess->SetCommandArguments(this->Arguments);
 
-  // determine how much time we have
-  cmDuration timeout = this->CTest->GetRemainingTimeAllowed();
-  if (timeout != cmCTest::MaxDuration()) {
-    timeout -= std::chrono::minutes(2);
+  cm::optional<cmDuration> timeout;
+
+  // Check TIMEOUT test property.
+  if (this->TestProperties->Timeout &&
+      *this->TestProperties->Timeout >= cmDuration::zero()) {
+    timeout = this->TestProperties->Timeout;
   }
-  if (this->CTest->GetTimeOut() > cmDuration::zero() &&
-      this->CTest->GetTimeOut() < timeout) {
-    timeout = this->CTest->GetTimeOut();
-  }
-  if (testTimeOut > cmDuration::zero() &&
-      testTimeOut < this->CTest->GetRemainingTimeAllowed()) {
-    timeout = testTimeOut;
-  }
-  // always have at least 1 second if we got to here
-  if (timeout <= cmDuration::zero()) {
-    timeout = std::chrono::seconds(1);
-  }
-  // handle timeout explicitly set to 0
-  if (testTimeOut == cmDuration::zero() &&
-      this->TestProperties->ExplicitTimeout) {
-    timeout = cmDuration::zero();
-  }
-  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                     this->Index << ": "
-                                 << "Test timeout computed to be: "
-                                 << cmDurationTo<unsigned int>(timeout)
-                                 << "\n",
-                     this->TestHandler->GetQuiet());
 
   // An explicit TIMEOUT=0 test property means "no timeout".
-  if (timeout != cmDuration::zero() ||
-      !this->TestProperties->ExplicitTimeout) {
-    this->TestProcess->SetTimeout(timeout);
+  if (timeout && *timeout == std::chrono::duration<double>::zero()) {
+    timeout = cm::nullopt;
+  } else {
+    // Check --timeout.
+    if (!timeout && this->CTest->GetGlobalTimeout() > cmDuration::zero()) {
+      timeout = this->CTest->GetGlobalTimeout();
+    }
+
+    // Check CTEST_TEST_TIMEOUT.
+    cmDuration ctestTestTimeout = this->CTest->GetTimeOut();
+    if (ctestTestTimeout > cmDuration::zero() &&
+        (!timeout || ctestTestTimeout < *timeout)) {
+      timeout = ctestTestTimeout;
+    }
+  }
+
+  // Check CTEST_TIME_LIMIT.
+  cmDuration timeRemaining = this->CTest->GetRemainingTimeAllowed();
+  if (timeRemaining != cmCTest::MaxDuration()) {
+    // This two minute buffer is historical.
+    timeRemaining -= std::chrono::minutes(2);
+  }
+
+  // Check --stop-time.
+  std::chrono::system_clock::time_point stop_time = this->CTest->GetStopTime();
+  if (stop_time != std::chrono::system_clock::time_point()) {
+    cmDuration timeUntilStop =
+      (stop_time - std::chrono::system_clock::now()) % std::chrono::hours(24);
+    if (timeUntilStop < timeRemaining) {
+      timeRemaining = timeUntilStop;
+    }
+  }
+
+  // Enforce remaining time even over explicit TIMEOUT=0.
+  if (timeRemaining <= cmDuration::zero()) {
+    timeRemaining = cmDuration::zero();
+  }
+  if (!timeout || timeRemaining < *timeout) {
+    this->TimeoutIsForStopTime = true;
+    timeout = timeRemaining;
+  }
+
+  if (timeout) {
+    cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                       this->Index << ": "
+                                   << "Test timeout computed to be: "
+                                   << cmDurationTo<unsigned int>(*timeout)
+                                   << "\n",
+                       this->TestHandler->GetQuiet());
+
+    this->TestProcess->SetTimeout(*timeout);
+  } else {
+    cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                       this->Index
+                         << ": "
+                         << "Test timeout suppressed by TIMEOUT property.\n",
+                       this->TestHandler->GetQuiet());
   }
 
   cmSystemTools::SaveRestoreEnvironment sre;
