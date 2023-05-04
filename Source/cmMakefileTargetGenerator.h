@@ -77,6 +77,8 @@ protected:
   // write the clean rules for this target
   void WriteTargetCleanRules();
 
+  // write the linker depend rules for this target
+  void WriteTargetLinkDependRules();
   // write the depend rules for this target
   void WriteTargetDependRules();
 

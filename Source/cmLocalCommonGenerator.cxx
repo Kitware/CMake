@@ -8,7 +8,6 @@
 #include "cmGeneratorTarget.h"
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
-#include "cmState.h"
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
 #include "cmStringAlgorithms.h"
@@ -17,9 +16,8 @@
 class cmGlobalGenerator;
 
 cmLocalCommonGenerator::cmLocalCommonGenerator(cmGlobalGenerator* gg,
-                                               cmMakefile* mf, WorkDir wd)
+                                               cmMakefile* mf)
   : cmLocalGenerator(gg, mf)
-  , WorkingDirectory(wd)
 {
   this->ConfigNames =
     this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
@@ -29,19 +27,7 @@ cmLocalCommonGenerator::~cmLocalCommonGenerator() = default;
 
 std::string const& cmLocalCommonGenerator::GetWorkingDirectory() const
 {
-  if (this->WorkingDirectory == WorkDir::TopBin) {
-    return this->GetState()->GetBinaryDirectory();
-  }
   return this->StateSnapshot.GetDirectory().GetCurrentBinary();
-}
-
-std::string cmLocalCommonGenerator::MaybeRelativeToWorkDir(
-  std::string const& path) const
-{
-  if (this->WorkingDirectory == WorkDir::TopBin) {
-    return this->MaybeRelativeToTopBinDir(path);
-  }
-  return this->MaybeRelativeToCurBinDir(path);
 }
 
 std::string cmLocalCommonGenerator::GetTargetFortranFlags(

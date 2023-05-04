@@ -417,6 +417,13 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile,
     std::string cmakeVarLang =
       cmStrCat("CMAKE_", this->TargetLinkLanguage(config));
 
+    if (this->GeneratorTarget->HasLinkDependencyFile(config)) {
+      auto DepFileFormat = this->GetMakefile()->GetDefinition(
+        cmStrCat(cmakeVarLang, "_LINKER_DEPFILE_FORMAT"));
+      rule.DepType = DepFileFormat;
+      rule.DepFile = "$DEP_FILE";
+    }
+
     // build response file name
     std::string cmakeLinkVar = cmakeVarLang + "_RESPONSE_FILE_LINK_FLAG";
     cmValue flag = this->GetMakefile()->GetDefinition(cmakeLinkVar);
@@ -1133,6 +1140,14 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
 
   cmNinjaBuild linkBuild(this->LanguageLinkerRule(config));
   cmNinjaVars& vars = linkBuild.Variables;
+
+  if (this->GeneratorTarget->HasLinkDependencyFile(config)) {
+    vars["DEP_FILE"] = this->GetLocalGenerator()->ConvertToOutputFormat(
+      this->ConvertToNinjaPath(
+        this->GetLocalGenerator()->GetLinkDependencyFile(this->GeneratorTarget,
+                                                         config)),
+      cmOutputConverter::SHELL);
+  }
 
   // Compute the comment.
   linkBuild.Comment =

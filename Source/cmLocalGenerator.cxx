@@ -1586,6 +1586,8 @@ void cmLocalGenerator::GetTargetFlags(
   this->AppendPositionIndependentLinkerFlags(extraLinkFlags, target, config,
                                              linkLanguage);
   this->AppendIPOLinkerFlags(extraLinkFlags, target, config, linkLanguage);
+  this->AppendDependencyInfoLinkerFlags(extraLinkFlags, target, config,
+                                        linkLanguage);
   this->AppendModuleDefinitionFlag(extraLinkFlags, target, linkLineComputer,
                                    config);
 
@@ -3200,6 +3202,42 @@ void cmLocalGenerator::AppendPositionIndependentLinkerFlags(
   for (const auto& flag : flagsList) {
     this->AppendFlagEscape(flags, flag);
   }
+}
+
+void cmLocalGenerator::AppendDependencyInfoLinkerFlags(
+  std::string& flags, cmGeneratorTarget* target, const std::string& config,
+  const std::string& linkLanguage)
+{
+  if (!this->GetGlobalGenerator()->SupportsLinkerDependencyFile() ||
+      !target->HasLinkDependencyFile(config)) {
+    return;
+  }
+
+  auto depFlag = *this->Makefile->GetDefinition(
+    cmStrCat("CMAKE_", linkLanguage, "_LINKER_DEPFILE_FLAGS"));
+  if (depFlag.empty()) {
+    return;
+  }
+
+  auto depFile = this->ConvertToOutputFormat(
+    this->MaybeRelativeToWorkDir(this->GetLinkDependencyFile(target, config)),
+    cmOutputConverter::SHELL);
+  std::unique_ptr<cmRulePlaceholderExpander> rulePlaceholderExpander(
+    this->CreateRulePlaceholderExpander());
+  cmRulePlaceholderExpander::RuleVariables linkDepsVariables;
+  linkDepsVariables.DependencyFile = depFile.c_str();
+  rulePlaceholderExpander->ExpandRuleVariables(this, depFlag,
+                                               linkDepsVariables);
+  auto depFlags = cmExpandListWithBacktrace(depFlag);
+  target->ResolveLinkerWrapper(depFlags, linkLanguage);
+
+  this->AppendFlags(flags, depFlags);
+}
+
+std::string cmLocalGenerator::GetLinkDependencyFile(
+  cmGeneratorTarget* /*target*/, const std::string& /*config*/) const
+{
+  return "link.d";
 }
 
 void cmLocalGenerator::AppendModuleDefinitionFlag(

@@ -89,7 +89,7 @@ class cmLocalGenerator : public cmOutputConverter
 {
 public:
   cmLocalGenerator(cmGlobalGenerator* gg, cmMakefile* makefile);
-  virtual ~cmLocalGenerator();
+  ~cmLocalGenerator() override;
 
   /**
    * Generate the makefile for this directory.
@@ -183,6 +183,12 @@ public:
                                             cmGeneratorTarget* target,
                                             const std::string& config,
                                             const std::string& lang);
+  void AppendDependencyInfoLinkerFlags(std::string& flags,
+                                       cmGeneratorTarget* target,
+                                       const std::string& config,
+                                       const std::string& lang);
+  virtual std::string GetLinkDependencyFile(cmGeneratorTarget* target,
+                                            const std::string& config) const;
   void AppendModuleDefinitionFlag(std::string& flags,
                                   cmGeneratorTarget const* target,
                                   cmLinkLineComputer* linkLineComputer,

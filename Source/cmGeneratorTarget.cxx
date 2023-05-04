@@ -8541,6 +8541,30 @@ bool cmGeneratorTarget::IsLinkable() const
           this->IsExecutableWithExports());
 }
 
+bool cmGeneratorTarget::HasLinkDependencyFile(std::string const& config) const
+{
+  if (this->GetType() != cmStateEnums::EXECUTABLE &&
+      this->GetType() != cmStateEnums::SHARED_LIBRARY &&
+      this->GetType() != cmStateEnums::MODULE_LIBRARY) {
+    return false;
+  }
+
+  if (this->Target->GetProperty("LINK_DEPENDS_NO_SHARED").IsOn()) {
+    // Do not use the linker dependency file because it includes shared
+    // libraries as well
+    return false;
+  }
+
+  const std::string depsUseLinker{ "CMAKE_LINK_DEPENDS_USE_LINKER" };
+  auto linkLanguage = this->GetLinkerLanguage(config);
+  const std::string langDepsUseLinker{ cmStrCat("CMAKE_", linkLanguage,
+                                                "_LINK_DEPENDS_USE_LINKER") };
+
+  return (!this->Makefile->IsDefinitionSet(depsUseLinker) ||
+          this->Makefile->IsOn(depsUseLinker)) &&
+    this->Makefile->IsOn(langDepsUseLinker);
+}
+
 bool cmGeneratorTarget::IsFrameworkOnApple() const
 {
   return this->Target->IsFrameworkOnApple();

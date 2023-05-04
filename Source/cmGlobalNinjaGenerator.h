@@ -236,6 +236,8 @@ public:
     return cmDepfileFormat::GccDepfile;
   }
 
+  bool SupportsLinkerDependencyFile() const override { return true; }
+
   virtual cmGeneratedFileStream* GetImplFileStream(
     const std::string& /*config*/) const
   {

@@ -52,6 +52,10 @@ public:
   const cmake* GetCMakeInstance() const;
   cmake* GetCMakeInstance();
 
+  std::string const& GetWorkingDirectory() const override;
+
+  std::string MaybeRelativeToWorkDir(std::string const& path) const override;
+
   /// @returns the relative path between the HomeOutputDirectory and this
   /// local generators StartOutputDirectory.
   std::string GetHomeRelativeOutputPath() const
@@ -89,6 +93,9 @@ public:
 
   bool HasUniqueByproducts(std::vector<std::string> const& byproducts,
                            cmListFileBacktrace const& bt);
+
+  std::string GetLinkDependencyFile(cmGeneratorTarget* target,
+                                    std::string const& config) const override;
 
 protected:
   std::string ConvertToIncludeReference(

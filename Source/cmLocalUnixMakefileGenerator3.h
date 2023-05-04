@@ -191,6 +191,9 @@ public:
   // Eclipse generator.
   void GetIndividualFileTargets(std::vector<std::string>& targets);
 
+  std::string GetLinkDependencyFile(cmGeneratorTarget* target,
+                                    std::string const& config) const override;
+
 protected:
   void WriteLocalMakefile();
 

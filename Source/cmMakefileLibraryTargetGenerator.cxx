@@ -62,6 +62,9 @@ void cmMakefileLibraryTargetGenerator::WriteRuleFiles()
   // write in rules for object files and custom commands
   this->WriteTargetBuildRules();
 
+  // Write in the rules for the link dependency file
+  this->WriteTargetLinkDependRules();
+
   // write the link rules
   // Write the rule for this target type.
   switch (this->GeneratorTarget->GetType()) {

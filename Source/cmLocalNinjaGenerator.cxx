@@ -41,7 +41,7 @@
 
 cmLocalNinjaGenerator::cmLocalNinjaGenerator(cmGlobalGenerator* gg,
                                              cmMakefile* mf)
-  : cmLocalCommonGenerator(gg, mf, WorkDir::TopBin)
+  : cmLocalCommonGenerator(gg, mf)
 {
 }
 
@@ -186,6 +186,26 @@ const cmGlobalNinjaGenerator* cmLocalNinjaGenerator::GetGlobalNinjaGenerator()
 cmGlobalNinjaGenerator* cmLocalNinjaGenerator::GetGlobalNinjaGenerator()
 {
   return static_cast<cmGlobalNinjaGenerator*>(this->GetGlobalGenerator());
+}
+
+std::string const& cmLocalNinjaGenerator::GetWorkingDirectory() const
+{
+  return this->GetState()->GetBinaryDirectory();
+}
+
+std::string cmLocalNinjaGenerator::MaybeRelativeToWorkDir(
+  std::string const& path) const
+{
+  return this->GetGlobalNinjaGenerator()->NinjaOutputPath(
+    this->MaybeRelativeToTopBinDir(path));
+}
+
+std::string cmLocalNinjaGenerator::GetLinkDependencyFile(
+  cmGeneratorTarget* target, std::string const& config) const
+{
+  return cmStrCat(target->GetSupportDirectory(),
+                  this->GetGlobalNinjaGenerator()->ConfigDirectory(config),
+                  "/link.d");
 }
 
 // Virtual protected methods.

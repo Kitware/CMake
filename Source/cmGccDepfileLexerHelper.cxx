@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGccDepfileLexerHelper.h"
 
+#include <algorithm>
 #include <cstdio>
 #include <memory>
 #include <string>
@@ -113,6 +114,11 @@ void cmGccDepfileLexerHelper::addToCurrentPath(const char* s)
 void cmGccDepfileLexerHelper::sanitizeContent()
 {
   for (auto it = this->Content.begin(); it != this->Content.end();) {
+    // remove duplicate path entries
+    std::sort(it->paths.begin(), it->paths.end());
+    auto last = std::unique(it->paths.begin(), it->paths.end());
+    it->paths.erase(last, it->paths.end());
+
     // Remove empty paths and normalize windows paths
     for (auto pit = it->paths.begin(); pit != it->paths.end();) {
       if (pit->empty()) {
