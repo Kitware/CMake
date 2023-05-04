@@ -113,15 +113,6 @@
         - xcode-14.2
         - nonconcurrent
 
-.macos_x86_64_tags_package:
-    tags:
-        - cmake # Since this is a bare runner, pin to a project.
-        - macos-x86_64
-        - shell
-        - xcode-14.2
-        - nonconcurrent
-        - finder
-
 .macos_x86_64_tags_ext:
     tags:
         - cmake # Since this is a bare runner, pin to a project.
@@ -145,6 +136,15 @@
         - shell
         - xcode-14.2
         - concurrent
+
+.macos_arm64_tags_package:
+    tags:
+        - cmake # Since this is a bare runner, pin to a project.
+        - macos-arm64
+        - shell
+        - xcode-14.2
+        - nonconcurrent
+        - finder
 
 ## macOS-specific scripts
 
