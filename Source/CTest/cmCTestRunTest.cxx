@@ -770,7 +770,11 @@ bool cmCTestRunTest::ForkProcess(cmDuration testTimeOut)
                                  << "\n",
                      this->TestHandler->GetQuiet());
 
-  this->TestProcess->SetTimeout(timeout);
+  // An explicit TIMEOUT=0 test property means "no timeout".
+  if (timeout != cmDuration::zero() ||
+      !this->TestProperties->ExplicitTimeout) {
+    this->TestProcess->SetTimeout(timeout);
+  }
 
   cmSystemTools::SaveRestoreEnvironment sre;
   std::ostringstream envMeasurement;
