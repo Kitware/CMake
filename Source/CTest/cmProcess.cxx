@@ -13,7 +13,6 @@
 
 #include "cmCTest.h"
 #include "cmCTestRunTest.h"
-#include "cmCTestTestHandler.h"
 #include "cmGetPipes.h"
 #include "cmStringAlgorithms.h"
 #if defined(_WIN32)
@@ -26,7 +25,6 @@ cmProcess::cmProcess(std::unique_ptr<cmCTestRunTest> runner)
   : Runner(std::move(runner))
   , Conv(cmProcessOutput::UTF8, CM_PROCESS_BUF_SIZE)
 {
-  this->Timeout = cmDuration::zero();
   this->TotalTime = cmDuration::zero();
   this->ExitValue = 0;
   this->Id = 0;
@@ -152,11 +150,9 @@ bool cmProcess::StartProcess(uv_loop_t& loop, std::vector<size_t>* affinity)
 
 void cmProcess::StartTimer()
 {
-  auto* properties = this->Runner->GetTestProperties();
-  auto msec =
-    std::chrono::duration_cast<std::chrono::milliseconds>(this->Timeout);
-
-  if (msec != std::chrono::milliseconds(0) || !properties->ExplicitTimeout) {
+  if (this->Timeout) {
+    auto msec =
+      std::chrono::duration_cast<std::chrono::milliseconds>(*this->Timeout);
     this->Timer.start(&cmProcess::OnTimeoutCB,
                       static_cast<uint64_t>(msec.count()), 0);
   }

@@ -4,7 +4,7 @@ include(CTest)
 
 add_executable(TestTimeout TestTimeout.c)
 
-if(NOT TIMEOUT)
+if(NOT DEFINED TIMEOUT)
   set(TIMEOUT 4)
 endif()
 target_compile_definitions(TestTimeout PRIVATE TIMEOUT=${TIMEOUT})

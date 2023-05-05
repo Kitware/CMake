@@ -12,6 +12,8 @@
 #include <utility>
 #include <vector>
 
+#include <cm/optional>
+
 #include <cm3p/uv.h>
 
 #include "cmDuration.h"
@@ -76,7 +78,7 @@ public:
   }
 
 private:
-  cmDuration Timeout;
+  cm::optional<cmDuration> Timeout;
   std::chrono::steady_clock::time_point StartTime;
   cmDuration TotalTime;
   bool ReadHandleClosed = false;

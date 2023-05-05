@@ -19,6 +19,7 @@
 #include <vector>
 
 #include <cm/memory>
+#include <cm/optional>
 #include <cmext/algorithm>
 
 #include <cm3p/json/value.h>
@@ -1095,9 +1096,9 @@ static Json::Value DumpCTestProperties(
     properties.append(
       DumpCTestProperty("SKIP_RETURN_CODE", testProperties.SkipReturnCode));
   }
-  if (testProperties.ExplicitTimeout) {
+  if (testProperties.Timeout) {
     properties.append(
-      DumpCTestProperty("TIMEOUT", testProperties.Timeout.count()));
+      DumpCTestProperty("TIMEOUT", testProperties.Timeout->count()));
   }
   if (!testProperties.TimeoutRegularExpressions.empty()) {
     properties.append(DumpCTestProperty(
