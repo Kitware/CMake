@@ -90,6 +90,9 @@ struct cmGeneratorExpressionDAGChecker
   bool GetTransitivePropertiesOnly() const;
   void SetTransitivePropertiesOnly() { this->TransitivePropertiesOnly = true; }
 
+  bool GetTransitivePropertiesOnlyCMP0131() const;
+  void SetTransitivePropertiesOnlyCMP0131() { this->CMP0131 = true; }
+
   cmGeneratorExpressionDAGChecker const* Top() const;
   cmGeneratorTarget const* TopTarget() const;
 
@@ -105,4 +108,5 @@ private:
   const cmListFileBacktrace Backtrace;
   Result CheckResult;
   bool TransitivePropertiesOnly;
+  bool CMP0131;
 };

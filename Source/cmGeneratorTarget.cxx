@@ -6791,6 +6791,7 @@ void cmGeneratorTarget::ExpandLinkItems(
   // requirements.
   if (interfaceFor == LinkInterfaceFor::Usage) {
     dagChecker.SetTransitivePropertiesOnly();
+    dagChecker.SetTransitivePropertiesOnlyCMP0131();
   }
   cmMakefile const* mf = this->LocalGenerator->GetMakefile();
   LookupLinkItemScope scope{ this->LocalGenerator };
@@ -8228,6 +8229,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
     // The $<LINK_ONLY> expression may be used to specify link dependencies
     // that are otherwise excluded from usage requirements.
     if (implFor == LinkInterfaceFor::Usage) {
+      dagChecker.SetTransitivePropertiesOnly();
       switch (this->GetPolicyStatusCMP0131()) {
         case cmPolicies::WARN:
         case cmPolicies::OLD:
@@ -8235,7 +8237,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
         case cmPolicies::REQUIRED_IF_USED:
         case cmPolicies::REQUIRED_ALWAYS:
         case cmPolicies::NEW:
-          dagChecker.SetTransitivePropertiesOnly();
+          dagChecker.SetTransitivePropertiesOnlyCMP0131();
           break;
       }
     }

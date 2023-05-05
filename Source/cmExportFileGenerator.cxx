@@ -735,6 +735,22 @@ void cmExportFileGenerator::ResolveTargetsInGeneratorExpression(
     lastPos = nameStartPos + libName.size() + 1;
   }
 
+  while (errorString.empty() &&
+         (pos = input.find("$<COMPILE_ONLY:", lastPos)) != std::string::npos) {
+    std::string::size_type nameStartPos = pos + cmStrLen("$<COMPILE_ONLY:");
+    std::string::size_type endPos = input.find('>', nameStartPos);
+    if (endPos == std::string::npos) {
+      errorString = "$<COMPILE_ONLY:...> expression incomplete";
+      break;
+    }
+    std::string libName = input.substr(nameStartPos, endPos - nameStartPos);
+    if (cmGeneratorExpression::IsValidTargetName(libName) &&
+        this->AddTargetNamespace(libName, target, lg)) {
+      input.replace(nameStartPos, endPos - nameStartPos, libName);
+    }
+    lastPos = nameStartPos + libName.size() + 1;
+  }
+
   this->ReplaceInstallPrefix(input);
 
   if (!errorString.empty()) {
