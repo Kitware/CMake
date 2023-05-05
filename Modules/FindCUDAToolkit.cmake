@@ -29,8 +29,8 @@ The CUDA Toolkit search behavior uses the following order:
    precedence.
 
    The directory specified here must be such that the executable ``nvcc`` or
-   the appropriate ``version.txt`` file can be found underneath the specified
-   directory.
+   the appropriate ``version.txt`` or ``version.json`` file can be found
+   underneath the specified directory.
 
 3. If the CUDA_PATH environment variable is defined, it will be searched
    for ``nvcc``.
@@ -491,7 +491,7 @@ Result variables
 
 ``CUDAToolkit_VERSION``
     The exact version of the CUDA Toolkit found (as reported by
-    ``nvcc --version`` or ``version.txt``).
+    ``nvcc --version``, ``version.txt``, or ``version.json``).
 
 ``CUDAToolkit_VERSION_MAJOR``
     The major version of the CUDA Toolkit.
@@ -518,7 +518,7 @@ Result variables
     .. versionadded:: 3.18
 
     The path to the CUDA Toolkit directory containing the nvvm directory and
-    version.txt.
+    either version.txt or version.json.
 
 ``CUDAToolkit_TARGET_DIR``
     The path to the CUDA Toolkit directory including the target architecture
@@ -603,7 +603,7 @@ else()
 
       if(NOT CUDAToolkit_NVCC_EXECUTABLE)
         find_file(CUDAToolkit_SENTINEL_FILE
-          NAMES version.txt
+          NAMES version.txt version.json
           PATHS ${arg_SEARCH_PATHS}
           NO_DEFAULT_PATH
         )
@@ -644,14 +644,43 @@ else()
 
   function(_CUDAToolkit_find_version_file result_variable)
     # We first check for a non-scattered installation to prefer it over a scattered installation.
-    if(CUDAToolkit_ROOT AND EXISTS "${CUDAToolkit_ROOT}/version.txt")
-      set(${result_variable} "${CUDAToolkit_ROOT}/version.txt" PARENT_SCOPE)
-    elseif(CUDAToolkit_ROOT_DIR AND EXISTS "${CUDAToolkit_ROOT_DIR}/version.txt")
-      set(${result_variable} "${CUDAToolkit_ROOT_DIR}/version.txt" PARENT_SCOPE)
-    elseif(CMAKE_SYSROOT_LINK AND EXISTS "${CMAKE_SYSROOT_LINK}/usr/lib/cuda/version.txt")
-      set(${result_variable} "${CMAKE_SYSROOT_LINK}/usr/lib/cuda/version.txt" PARENT_SCOPE)
-    elseif(EXISTS "${CMAKE_SYSROOT}/usr/lib/cuda/version.txt")
-      set(${result_variable} "${CMAKE_SYSROOT}/usr/lib/cuda/version.txt" PARENT_SCOPE)
+    set(version_files version.txt version.json)
+    foreach(vf IN LISTS version_files)
+      if(CUDAToolkit_ROOT AND EXISTS "${CUDAToolkit_ROOT}/${vf}")
+        set(${result_variable} "${CUDAToolkit_ROOT}/${vf}" PARENT_SCOPE)
+        break()
+      elseif(CUDAToolkit_ROOT_DIR AND EXISTS "${CUDAToolkit_ROOT_DIR}/${vf}")
+        set(${result_variable} "${CUDAToolkit_ROOT_DIR}/${vf}" PARENT_SCOPE)
+        break()
+      elseif(CMAKE_SYSROOT_LINK AND EXISTS "${CMAKE_SYSROOT_LINK}/usr/lib/cuda/${vf}")
+        set(${result_variable} "${CMAKE_SYSROOT_LINK}/usr/lib/cuda/${vf}" PARENT_SCOPE)
+        break()
+      elseif(EXISTS "${CMAKE_SYSROOT}/usr/lib/cuda/${vf}")
+        set(${result_variable} "${CMAKE_SYSROOT}/usr/lib/cuda/${vf}" PARENT_SCOPE)
+        break()
+      endif()
+    endforeach()
+  endfunction()
+
+  function(_CUDAToolkit_parse_version_file version_file)
+    if(version_file)
+      file(READ "${version_file}" file_conents)
+      cmake_path(GET version_file EXTENSION LAST_ONLY version_ext)
+      if(version_ext STREQUAL ".json")
+        string(JSON cuda_version_info GET "${file_conents}" "cuda" "version")
+        set(cuda_version_match_regex [=[([0-9]+)\.([0-9]+)\.([0-9]+)]=])
+      elseif(version_ext STREQUAL ".txt")
+        set(cuda_version_info "${file_conents}")
+        set(cuda_version_match_regex [=[CUDA Version ([0-9]+)\.([0-9]+)\.([0-9]+)]=])
+      endif()
+
+      if(cuda_version_info MATCHES "${cuda_version_match_regex}")
+        set(CUDAToolkit_VERSION_MAJOR "${CMAKE_MATCH_1}" PARENT_SCOPE)
+        set(CUDAToolkit_VERSION_MINOR "${CMAKE_MATCH_2}" PARENT_SCOPE)
+        set(CUDAToolkit_VERSION_PATCH "${CMAKE_MATCH_3}" PARENT_SCOPE)
+        set(CUDAToolkit_VERSION "${CMAKE_MATCH_1}.${CMAKE_MATCH_2}.${CMAKE_MATCH_3}" PARENT_SCOPE)
+        message(STATUS "_CUDAToolkit_parse_version_file")
+      endif()
     endif()
   endfunction()
 
@@ -798,15 +827,7 @@ else()
     unset(NVCC_OUT)
   else()
     _CUDAToolkit_find_version_file(version_file)
-    if(version_file)
-      file(READ "${version_file}" VERSION_INFO)
-      if(VERSION_INFO MATCHES [=[CUDA Version ([0-9]+)\.([0-9]+)\.([0-9]+)]=])
-        set(CUDAToolkit_VERSION_MAJOR "${CMAKE_MATCH_1}")
-        set(CUDAToolkit_VERSION_MINOR "${CMAKE_MATCH_2}")
-        set(CUDAToolkit_VERSION_PATCH "${CMAKE_MATCH_3}")
-        set(CUDAToolkit_VERSION "${CMAKE_MATCH_1}.${CMAKE_MATCH_2}.${CMAKE_MATCH_3}")
-      endif()
-    endif()
+    _CUDAToolkit_parse_version_file("${version_file}")
   endif()
 endif()
 
@@ -943,6 +964,19 @@ if(CUDAToolkit_FOUND)
     # Search location for extras like cupti
     file(REAL_PATH "${CUDAToolkit_LIBRARY_DIR}/../" _cmake_search_dir)
     list(APPEND CUDAToolkit_LIBRARY_SEARCH_DIRS "${_cmake_search_dir}")
+  endif()
+
+  # If no `CUDAToolkit_LIBRARY_ROOT` exists set it based on CUDAToolkit_LIBRARY_DIR
+  if(NOT DEFINED CUDAToolkit_LIBRARY_ROOT)
+    foreach(CUDAToolkit_search_loc IN LISTS CUDAToolkit_LIBRARY_DIR CUDAToolkit_BIN_DIR)
+      get_filename_component(CUDAToolkit_possible_lib_root "${CUDAToolkit_search_loc}" DIRECTORY ABSOLUTE)
+      if(EXISTS "${CUDAToolkit_possible_lib_root}/nvvm/")
+        set(CUDAToolkit_LIBRARY_ROOT "${CUDAToolkit_possible_lib_root}")
+        break()
+      endif()
+    endforeach()
+    unset(CUDAToolkit_search_loc)
+    unset(CUDAToolkit_possible_lib_root)
   endif()
 endif()
 
