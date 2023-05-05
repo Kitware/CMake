@@ -16,7 +16,21 @@ message(STATUS "CUDAToolkit_VERSION_PATCH: ${CUDAToolkit_VERSION_PATCH}")
 message(STATUS "CUDAToolkit_BIN_DIR: ${CUDAToolkit_BIN_DIR}")
 message(STATUS "CUDAToolkit_INCLUDE_DIRS: ${CUDAToolkit_INCLUDE_DIRS}")
 message(STATUS "CUDAToolkit_LIBRARY_DIR: ${CUDAToolkit_LIBRARY_DIR}")
+message(STATUS "CUDAToolkit_LIBRARY_ROOT: ${CUDAToolkit_LIBRARY_ROOT}")
 message(STATUS "CUDAToolkit_NVCC_EXECUTABLE ${CUDAToolkit_NVCC_EXECUTABLE}")
+
+set(should_exist
+  CUDAToolkit_BIN_DIR
+  CUDAToolkit_INCLUDE_DIRS
+  CUDAToolkit_LIBRARY_DIR
+  CUDAToolkit_LIBRARY_ROOT
+  )
+foreach (cuda_loc_var IN LISTS should_exist)
+  if(NOT EXISTS "${${cuda_loc_var}}")
+    message(FATAL_ERROR "${cuda_loc_var} variable is expected to be set to valid path")
+  endif()
+endforeach()
+
 
 set(cuda_libs cudart cuda_driver cublas cufft cufftw curand cusolver cusparse)
 if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 10.1)
