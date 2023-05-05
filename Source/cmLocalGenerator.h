@@ -137,7 +137,8 @@ public:
     return this->GlobalGenerator;
   }
 
-  virtual cmRulePlaceholderExpander* CreateRulePlaceholderExpander() const;
+  virtual std::unique_ptr<cmRulePlaceholderExpander>
+  CreateRulePlaceholderExpander() const;
 
   std::string GetLinkLibsCMP0065(std::string const& linkLanguage,
                                  cmGeneratorTarget& tgt) const;

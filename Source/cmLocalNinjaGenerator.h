@@ -6,6 +6,7 @@
 
 #include <iosfwd>
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <vector>
@@ -41,7 +42,8 @@ public:
 
   void Generate() override;
 
-  cmRulePlaceholderExpander* CreateRulePlaceholderExpander() const override;
+  std::unique_ptr<cmRulePlaceholderExpander> CreateRulePlaceholderExpander()
+    const override;
 
   std::string GetTargetDirectory(
     cmGeneratorTarget const* target) const override;
