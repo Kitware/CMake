@@ -540,12 +540,12 @@ void cmNinjaTargetGenerator::WriteLanguageRules(const std::string& language,
 
 namespace {
 // Create the command to run the dependency scanner
-std::string GetScanCommand(const std::string& cmakeCmd, const std::string& tdi,
-                           const std::string& lang, const std::string& ppFile,
-                           const std::string& ddiFile)
+std::string GetScanCommand(cm::string_view cmakeCmd, cm::string_view tdi,
+                           cm::string_view lang, cm::string_view srcFile,
+                           cm::string_view ddiFile)
 {
   return cmStrCat(cmakeCmd, " -E cmake_ninja_depends --tdi=", tdi,
-                  " --lang=", lang, " --pp=", ppFile,
+                  " --lang=", lang, " --src=", srcFile,
                   " --dep=$DEP_FILE --obj=$OBJ_FILE --ddi=", ddiFile);
 }
 
