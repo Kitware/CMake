@@ -292,6 +292,10 @@ if(NOT DEFINED CMake_TEST_BuildDepends_GNU_AS
   endif()
 endif()
 
+if(CMAKE_Fortran_COMPILER)
+  list(APPEND BuildDepends_ARGS -DCMake_TEST_Fortran=1)
+endif()
+
 add_RunCMake_test(BuildDepends
   -DMSVC_VERSION=${MSVC_VERSION}
   -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}

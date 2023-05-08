@@ -545,7 +545,7 @@ std::string GetScanCommand(cm::string_view cmakeCmd, cm::string_view tdi,
                            cm::string_view ddiFile)
 {
   return cmStrCat(cmakeCmd, " -E cmake_ninja_depends --tdi=", tdi,
-                  " --lang=", lang, " --src=", srcFile,
+                  " --lang=", lang, " --src=", srcFile, " --out=$out",
                   " --dep=$DEP_FILE --obj=$OBJ_FILE --ddi=", ddiFile);
 }
 
@@ -1258,6 +1258,7 @@ namespace {
 cmNinjaBuild GetScanBuildStatement(const std::string& ruleName,
                                    const std::string& ppFileName,
                                    bool compilePP, bool compilePPWithDefines,
+                                   bool compilationPreprocesses,
                                    cmNinjaBuild& objBuild, cmNinjaVars& vars,
                                    const std::string& objectFileName,
                                    cmLocalGenerator* lg)
@@ -1314,6 +1315,13 @@ cmNinjaBuild GetScanBuildStatement(const std::string& ruleName,
   } else {
     scanBuild.Outputs.push_back(ddiFile);
     scanBuild.Variables["PREPROCESSED_OUTPUT_FILE"] = ppFileName;
+    if (!compilationPreprocesses) {
+      // Compilation does not preprocess and we are not compiling an
+      // already-preprocessed source.  Make compilation depend on the scan
+      // results to honor implicit dependencies discovered during scanning
+      // (such as Fortran INCLUDE directives).
+      objBuild.ImplicitDeps.emplace_back(ddiFile);
+    }
   }
 
   // Scanning always provides a depfile for preprocessor dependencies. This
@@ -1520,8 +1528,9 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     }
 
     cmNinjaBuild ppBuild = GetScanBuildStatement(
-      scanRuleName, ppFileName, compilePP, compilePPWithDefines, objBuild,
-      vars, objectFileName, this->LocalGenerator);
+      scanRuleName, ppFileName, compilePP, compilePPWithDefines,
+      compilationPreprocesses, objBuild, vars, objectFileName,
+      this->LocalGenerator);
 
     if (compilePP) {
       // In case compilation requires flags that are incompatible with
