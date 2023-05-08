@@ -23,6 +23,7 @@ macro(__compiler_iar_common lang)
     string(APPEND CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT " -Oh -r -DNDEBUG")
   endif()
 
+  set(CMAKE_${lang}_OUTPUT_EXTENSION_REPLACE 1)
   set(CMAKE_${lang}_RESPONSE_FILE_FLAG "-f ")
   set(CMAKE_${lang}_RESPONSE_FILE_LINK_FLAG "-f ")
 
