@@ -119,10 +119,6 @@ public:
     bool operator!=(const cmCTestTestResourceRequirement& other) const;
   };
 
-  // NOTE: This struct is Saved/Restored
-  // in cmCTestTestHandler, if you add to this class
-  // then you must add the new members to that code or
-  // ctest -j N will break for that feature
   struct cmCTestTestProperties
   {
     std::string Name;
