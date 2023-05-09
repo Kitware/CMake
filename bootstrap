@@ -880,7 +880,7 @@ cmake_try_run ()
   echo "----------  file   -----------------------"
   cat "${TESTFILE}"
   echo "------------------------------------------"
-  "${COMPILER}" ${FLAGS} "${TESTFILE}" -o "${TMPFILE}"
+  ${COMPILER} ${FLAGS} "${TESTFILE}" -o "${TMPFILE}"
   RES=$?
   if test "${RES}" -ne "0"; then
     echo "Test failed to compile"
@@ -1206,15 +1206,18 @@ cmake_c_compiler=
 # If CC is set, use that for compiler, otherwise use list of known compilers
 if test -n "${cmake_toolchain}"; then
   eval cmake_c_compilers="\${cmake_toolchain_${cmake_toolchain}_CC}"
-elif test -n "${CC}"; then
-  cmake_c_compilers="${CC}"
 else
   cmake_c_compilers="${CMAKE_KNOWN_C_COMPILERS}"
 fi
 
-# Check if C compiler works
-TMPFILE=`cmake_tmp_file`
-echo '
+cmake_c_compiler_try_set()
+{
+  test_compiler="$1"
+  test_thread_flags="$2"
+
+  # Check if C compiler works
+  TMPFILE=`cmake_tmp_file`
+  echo '
 #ifdef __cplusplus
 # error "The CMAKE_C_COMPILER is set to a C++ compiler"
 #endif
@@ -1239,23 +1242,34 @@ int main(int argc, char* argv[])
   return argc - 1;
 }
 ' > "${TMPFILE}.c"
-for std in 11 99 90; do
-  std_flags="`cmake_extract_standard_flags \"${cmake_toolchain}\" C \"${std}\"`"
-  for compiler in ${cmake_c_compilers}; do
+  for std in 11 99 90; do
+    std_flags="`cmake_extract_standard_flags \"${cmake_toolchain}\" C \"${std}\"`"
     for std_flag in '' $std_flags; do
-      for thread_flag in '' $thread_flags; do
-        echo "Checking whether '${compiler} ${cmake_c_flags} ${cmake_ld_flags} ${std_flag} ${thread_flag}' works." >> cmake_bootstrap.log 2>&1
-        if cmake_try_run "${compiler}" "${cmake_c_flags} ${cmake_ld_flags} ${std_flag} ${thread_flag}" \
+      for thread_flag in '' $test_thread_flags; do
+        echo "Checking whether '${test_compiler} ${cmake_c_flags} ${cmake_ld_flags} ${std_flag} ${thread_flag}' works." >> cmake_bootstrap.log 2>&1
+        if cmake_try_run "${test_compiler}" "${cmake_c_flags} ${cmake_ld_flags} ${std_flag} ${thread_flag}" \
           "${TMPFILE}.c" >> cmake_bootstrap.log 2>&1; then
-          cmake_c_compiler="${compiler}"
+          cmake_c_compiler="${test_compiler}"
           cmake_c_flags="${cmake_c_flags} ${std_flag} ${thread_flag}"
-          break 4
+          rm -f "${TMPFILE}.c"
+          return 0
         fi
       done
     done
   done
-done
-rm -f "${TMPFILE}.c"
+  rm -f "${TMPFILE}.c"
+  return 1
+}
+
+if test -n "${CC}"; then
+  cmake_c_compiler_try_set "${CC}" "${thread_flags}"
+else
+  for compiler in ${cmake_c_compilers}; do
+    if cmake_c_compiler_try_set "${compiler}" "${thread_flags}"; then
+      break
+    fi
+  done
+fi
 
 if test -z "${cmake_c_compiler}"; then
   cmake_error 6 "Cannot find appropriate C compiler on this system.
@@ -1274,14 +1288,17 @@ cmake_cxx_compiler=
 # If CC is set, use that for compiler, otherwise use list of known compilers
 if test -n "${cmake_toolchain}"; then
   eval cmake_cxx_compilers="\${cmake_toolchain_${cmake_toolchain}_CXX}"
-elif test -n "${CXX}"; then
-  cmake_cxx_compilers="${CXX}"
 else
   cmake_cxx_compilers="${CMAKE_KNOWN_CXX_COMPILERS}"
 fi
 
 # Check if C++ compiler works
-TMPFILE=`cmake_tmp_file`
+cmake_cxx_compiler_try_set()
+{
+  test_compiler="$1"
+  test_thread_flags="$2"
+
+  TMPFILE=`cmake_tmp_file`
 echo '
 #include <iostream>
 #include <memory>
@@ -1360,23 +1377,34 @@ int main()
   return 0;
 }
 ' > "${TMPFILE}.cxx"
-for std in 17 14 11; do
-  std_flags="`cmake_extract_standard_flags \"${cmake_toolchain}\" CXX \"${std}\"`"
-  for compiler in ${cmake_cxx_compilers}; do
+  for std in 17 14 11; do
+    std_flags="`cmake_extract_standard_flags \"${cmake_toolchain}\" CXX \"${std}\"`"
     for std_flag in '' $std_flags; do
-      for thread_flag in '' $thread_flags; do
-        echo "Checking whether '${compiler} ${cmake_cxx_flags} ${cmake_ld_flags} ${std_flag} ${thread_flag}' works." >> cmake_bootstrap.log 2>&1
-        if cmake_try_run "${compiler}" "${cmake_cxx_flags} ${cmake_ld_flags} ${std_flag} ${thread_flag}" \
+      for thread_flag in '' $test_thread_flags; do
+        echo "Checking whether '${test_compiler} ${cmake_cxx_flags} ${cmake_ld_flags} ${std_flag} ${thread_flag}' works." >> cmake_bootstrap.log 2>&1
+        if cmake_try_run "${test_compiler}" "${cmake_cxx_flags} ${cmake_ld_flags} ${std_flag} ${thread_flag}" \
           "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
-          cmake_cxx_compiler="${compiler}"
+          cmake_cxx_compiler="${test_compiler}"
           cmake_cxx_flags="${cmake_cxx_flags} ${std_flag} ${thread_flag} "
-          break 4
+          rm -f "${TMPFILE}.cxx"
+          return 0
         fi
       done
     done
   done
-done
-rm -f "${TMPFILE}.cxx"
+  rm -f "${TMPFILE}.cxx"
+  return 1
+}
+
+if test -n "${CXX}"; then
+  cmake_cxx_compiler_try_set "${CXX}" "${thread_flags}"
+else
+  for compiler in ${cmake_cxx_compilers}; do
+    if cmake_cxx_compiler_try_set "${compiler}" "${thread_flags}"; then
+      break
+    fi
+  done
+fi
 
 if test -z "${cmake_cxx_compiler}"; then
 cmake_error 7 "Cannot find a C++ compiler that supports both C++11 and the specified C++ flags.
@@ -1435,13 +1463,13 @@ cd "${cmake_bootstrap_dir}/${TMPFILE}"
 if test "${cmake_bootstrap_generator}" = "Ninja"; then
   echo '
 rule cc
-  command = "'"${cmake_c_compiler}"'" '"${cmake_ld_flags} ${cmake_c_flags}"' -o $out $in
+  command = '"${cmake_c_compiler}"' '"${cmake_ld_flags} ${cmake_c_flags}"' -o $out $in
 build test: cc test.c
 '>"build.ninja"
 else
   echo '
 test: test.c
-	"'"${cmake_c_compiler}"'" '"${cmake_ld_flags} ${cmake_c_flags}"' -o test test.c
+	'"${cmake_c_compiler}"' '"${cmake_ld_flags} ${cmake_c_flags}"' -o test test.c
 '>"Makefile"
 fi
 echo '
