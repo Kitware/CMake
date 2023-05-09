@@ -4,9 +4,13 @@ project(ISPCStaticLibrary CXX ISPC)
 
 add_library(ispc_objects STATIC simple.ispc)
 
-target_compile_options(ispc_objects PRIVATE "$<$<COMPILE_LANGUAGE:ISPC>:--target=sse2-i32x4>")
-if(CMAKE_SIZEOF_VOID_P EQUAL 4)
-  target_compile_options(ispc_objects PRIVATE "$<$<COMPILE_LANGUAGE:ISPC>:--arch=x86>")
+if("${CMAKE_SYSTEM_NAME};${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "Darwin;arm64")
+  target_compile_options(ispc_objects PRIVATE "$<$<COMPILE_LANGUAGE:ISPC>:--target=neon-i32x4>")
+else()
+  target_compile_options(ispc_objects PRIVATE "$<$<COMPILE_LANGUAGE:ISPC>:--target=sse2-i32x4>")
+  if(CMAKE_SIZEOF_VOID_P EQUAL 4)
+    target_compile_options(ispc_objects PRIVATE "$<$<COMPILE_LANGUAGE:ISPC>:--arch=x86>")
+  endif()
 endif()
 
 set_target_properties(ispc_objects PROPERTIES POSITION_INDEPENDENT_CODE ON)
