@@ -824,7 +824,7 @@ b:macos-x86_64-ninja:
         - .macos_x86_64_tags
         - .run_manually
     variables:
-        CMAKE_CI_JOB_CONTINUOUS: "true"
+        CMAKE_CI_NO_MR: "true"
 
 b:macos-arm64-ninja:
     extends:
@@ -834,7 +834,7 @@ b:macos-arm64-ninja:
         - .macos_arm64_tags
         - .run_manually
     variables:
-        CMAKE_CI_NO_MR: "true"
+        CMAKE_CI_JOB_CONTINUOUS: "true"
 
 t:macos-x86_64-ninja:
     extends:
@@ -848,8 +848,7 @@ t:macos-x86_64-ninja:
     needs:
         - b:macos-x86_64-ninja
     variables:
-        CMAKE_CI_JOB_CONTINUOUS: "true"
-        CMAKE_CI_JOB_NIGHTLY_NINJA: "true"
+        CMAKE_CI_NO_MR: "true"
 
 t:macos-arm64-ninja:
     extends:
@@ -863,7 +862,8 @@ t:macos-arm64-ninja:
     needs:
         - b:macos-arm64-ninja
     variables:
-        CMAKE_CI_NO_MR: "true"
+        CMAKE_CI_JOB_CONTINUOUS: "true"
+        CMAKE_CI_JOB_NIGHTLY_NINJA: "true"
 
 b:macos-x86_64-makefiles:
     extends:
@@ -909,6 +909,8 @@ t:macos-x86_64-xcode:
         - t:macos-x86_64-ninja
     needs:
         - t:macos-x86_64-ninja
+    variables:
+        CMAKE_CI_NO_MR: "true"
 
 t:macos-arm64-xcode:
     extends:
@@ -921,8 +923,6 @@ t:macos-arm64-xcode:
         - t:macos-arm64-ninja
     needs:
         - t:macos-arm64-ninja
-    variables:
-        CMAKE_CI_NO_MR: "true"
 
 t:macos-x86_64-ninja-ub:
     extends:
