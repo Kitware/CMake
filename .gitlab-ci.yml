@@ -957,7 +957,7 @@ b:macos-package:
         - .macos_package
         - .cmake_build_macos
         - .cmake_release_artifacts
-        - .macos_x86_64_tags_package
+        - .macos_arm64_tags_package
         - .run_only_for_package
     dependencies:
         - p:doc-package
@@ -980,7 +980,7 @@ b:macos10.10-package:
         - .macos10.10_package
         - .cmake_build_macos
         - .cmake_release_artifacts
-        - .macos_x86_64_tags_package
+        - .macos_arm64_tags_package
         - .run_only_for_package
     dependencies:
         - p:doc-package
