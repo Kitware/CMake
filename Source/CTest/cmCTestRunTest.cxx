@@ -95,16 +95,15 @@ void cmCTestRunTest::CheckOutput(std::string const& line)
   }
 }
 
-bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
+cmCTestRunTest::EndTestResult cmCTestRunTest::EndTest(size_t completed,
+                                                      size_t total,
+                                                      bool started)
 {
   this->WriteLogOutputTop(completed, total);
   std::string reason;
   bool passed = true;
   cmProcess::State res =
     started ? this->TestProcess->GetProcessStatus() : cmProcess::State::Error;
-  if (res != cmProcess::State::Expired) {
-    this->TimeoutIsForStopTime = false;
-  }
   std::int64_t retVal = this->TestProcess->GetExitValue();
   bool forceFail = false;
   bool forceSkip = false;
@@ -344,8 +343,15 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
   if (!this->NeedsToRepeat()) {
     this->TestHandler->TestResults.push_back(this->TestResult);
   }
+  cmCTestRunTest::EndTestResult testResult;
+  testResult.Passed = passed || skipped;
+  if (res == cmProcess::State::Expired &&
+      this->TestProcess->GetTimeoutReason() ==
+        cmProcess::TimeoutReason::StopTime) {
+    testResult.StopTimePassed = true;
+  }
   this->TestProcess.reset();
-  return passed || skipped;
+  return testResult;
 }
 
 bool cmCTestRunTest::StartAgain(std::unique_ptr<cmCTestRunTest> runner,
@@ -772,8 +778,8 @@ bool cmCTestRunTest::ForkProcess()
     timeRemaining = cmDuration::zero();
   }
   if (!timeout || timeRemaining < *timeout) {
-    this->TimeoutIsForStopTime = true;
     timeout = timeRemaining;
+    this->TestProcess->SetTimeoutReason(cmProcess::TimeoutReason::StopTime);
   }
 
   if (timeout) {

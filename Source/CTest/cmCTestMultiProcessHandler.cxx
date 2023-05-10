@@ -634,8 +634,9 @@ void cmCTestMultiProcessHandler::FinishTestProcess(
   int test = runner->GetIndex();
   auto* properties = runner->GetTestProperties();
 
-  bool testResult = runner->EndTest(this->Completed, this->Total, started);
-  if (runner->TimedOutForStopTime()) {
+  cmCTestRunTest::EndTestResult testResult =
+    runner->EndTest(this->Completed, this->Total, started);
+  if (testResult.StopTimePassed) {
     this->SetStopTimePassed();
   }
   if (started) {
@@ -646,7 +647,7 @@ void cmCTestMultiProcessHandler::FinishTestProcess(
     }
   }
 
-  if (testResult) {
+  if (testResult.Passed) {
     this->Passed->push_back(properties->Name);
   } else if (!properties->Disabled) {
     this->Failed->push_back(properties->Name);
