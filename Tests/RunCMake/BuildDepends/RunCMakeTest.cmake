@@ -68,6 +68,10 @@ if(NOT RunCMake_GENERATOR STREQUAL "Xcode")
   unset(run_BuildDepends_skip_step_2)
 endif()
 
+if(CMake_TEST_Fortran)
+  run_BuildDepends(FortranInclude)
+endif()
+
 run_BuildDepends(Custom-Symbolic-and-Byproduct)
 run_BuildDepends(Custom-Always)
 
