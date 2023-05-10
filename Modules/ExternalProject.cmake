@@ -2447,7 +2447,7 @@ function(ExternalProject_Add_Step name step)
     PROPERTY _EP_${step}_ALWAYS
   )
   if(always)
-    set(touch)
+    set(maybe_COMMAND_touch "")
     # Mark stamp files for all configs as SYMBOLIC since we do not create them.
     # Remove any existing stamp in case the option changed in an existing tree.
     get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
@@ -2469,7 +2469,7 @@ function(ExternalProject_Add_Step name step)
       file(REMOVE ${stamp_file})
     endif()
   else()
-    set(touch ${CMAKE_COMMAND} -E touch ${stamp_file})
+    set(maybe_COMMAND_touch "COMMAND \${CMAKE_COMMAND} -E touch \${stamp_file}")
   endif()
 
   # Wrap with log script?
@@ -2497,7 +2497,7 @@ function(ExternalProject_Add_Step name step)
       BYPRODUCTS \${byproducts}
       COMMENT \${comment}
       COMMAND ${__cmdQuoted}
-      COMMAND \${touch}
+      ${maybe_COMMAND_touch}
       DEPENDS \${depends}
       WORKING_DIRECTORY \${work_dir}
       VERBATIM
