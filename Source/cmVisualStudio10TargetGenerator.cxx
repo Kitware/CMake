@@ -2802,7 +2802,14 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
          fs->GetType() == "CXX_MODULE_HEADER_UNITS"_s)) {
       if (lang == "CXX"_s) {
         if (fs->GetType() == "CXX_MODULES"_s) {
-          compileAsPerConfig = "CompileAsCppModule";
+          if (shouldScanForModules &&
+              this->GlobalGenerator->IsScanDependenciesSupported()) {
+            // ScanSourceforModuleDependencies uses 'cl /scanDependencies' and
+            // can distinguish module interface units and internal partitions.
+            compileAsPerConfig = "CompileAsCpp";
+          } else {
+            compileAsPerConfig = "CompileAsCppModule";
+          }
         } else {
           compileAsPerConfig = "CompileAsHeaderUnit";
         }
