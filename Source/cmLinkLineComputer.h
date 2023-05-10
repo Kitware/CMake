@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "cmStateDirectory.h"
+#include "cmValue.h"
 
 class cmComputeLinkInformation;
 class cmGeneratorTarget;
@@ -43,7 +44,8 @@ public:
                        std::vector<BT<std::string>>& linkPath);
 
   std::string ComputeFrameworkPath(cmComputeLinkInformation& cli,
-                                   std::string const& fwSearchFlag);
+                                   cmValue fwSearchFlag,
+                                   cmValue sysFwSearchFlag);
 
   std::string ComputeLinkLibraries(cmComputeLinkInformation& cli,
                                    std::string const& stdLibString);

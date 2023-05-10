@@ -794,6 +794,15 @@ void handleSystemIncludesDep(cmLocalGenerator* lg,
     result.append(cmGeneratorExpression::Evaluate(
       *dirs, lg, config, headTarget, dagChecker, depTgt, language));
   }
+
+  if (depTgt->Target->IsFrameworkOnApple()) {
+    if (auto fwDescriptor = depTgt->GetGlobalGenerator()->SplitFrameworkPath(
+          depTgt->GetLocation(config),
+          cmGlobalGenerator::FrameworkFormat::Strict)) {
+      result.push_back(fwDescriptor->Directory);
+      result.push_back(fwDescriptor->GetFrameworkPath());
+    }
+  }
 }
 }
 
@@ -3819,31 +3828,37 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetIncludeDirectories(
   AddInterfaceEntries(this, config, "INTERFACE_INCLUDE_DIRECTORIES", lang,
                       &dagChecker, entries, IncludeRuntimeInterface::Yes);
 
+  processIncludeDirectories(this, entries, includes, uniqueIncludes,
+                            debugIncludes);
+
   if (this->IsApple()) {
     if (cmLinkImplementationLibraries const* impl =
           this->GetLinkImplementationLibraries(config,
                                                LinkInterfaceFor::Usage)) {
       for (cmLinkImplItem const& lib : impl->Libraries) {
-        std::string libDir = cmSystemTools::CollapseFullPath(
-          lib.AsStr(), this->Makefile->GetHomeOutputDirectory());
-
-        static cmsys::RegularExpression frameworkCheck(
-          "(.*\\.framework)(/Versions/[^/]+)?/[^/]+$");
-        if (!frameworkCheck.find(libDir)) {
+        std::string libDir;
+        if (lib.Target == nullptr) {
+          libDir = cmSystemTools::CollapseFullPath(
+            lib.AsStr(), this->Makefile->GetHomeOutputDirectory());
+        } else if (lib.Target->Target->IsFrameworkOnApple()) {
+          libDir = lib.Target->GetLocation(config);
+        } else {
           continue;
         }
 
-        libDir = frameworkCheck.match(1);
+        auto fwDescriptor =
+          this->GetGlobalGenerator()->SplitFrameworkPath(libDir);
+        if (!fwDescriptor) {
+          continue;
+        }
 
-        EvaluatedTargetPropertyEntry ee(lib, cmListFileBacktrace());
-        ee.Values.emplace_back(std::move(libDir));
-        entries.Entries.emplace_back(std::move(ee));
+        auto fwInclude = fwDescriptor->GetFrameworkPath();
+        if (uniqueIncludes.insert(fwInclude).second) {
+          includes.emplace_back(fwInclude, cmListFileBacktrace());
+        }
       }
     }
   }
-
-  processIncludeDirectories(this, entries, includes, uniqueIncludes,
-                            debugIncludes);
 
   this->IncludeDirectoriesCache.emplace(cacheKey, includes);
   return includes;

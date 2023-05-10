@@ -2765,7 +2765,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       if (emitted.insert(frameworkDir).second) {
         std::string incpath = this->XCodeEscapePath(frameworkDir);
         if (emitSystemIncludes &&
-            gtgt->IsSystemIncludeDirectory(include, configName,
+            gtgt->IsSystemIncludeDirectory(frameworkDir, configName,
                                            langForIncludes)) {
           sysfdirs.Add(incpath);
         } else {
@@ -3910,8 +3910,6 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
       // otherwise we end up hard-coding a path to the wrong SDK for
       // SDK-provided frameworks that are added by their full path.
       std::set<std::string> emitted(cli->GetFrameworkPathsEmitted());
-      const auto& fwPaths = cli->GetFrameworkPaths();
-      emitted.insert(fwPaths.begin(), fwPaths.end());
       BuildObjectListOrString libPaths(this, true);
       BuildObjectListOrString fwSearchPaths(this, true);
       for (auto const& libItem : configItemMap[configName]) {
