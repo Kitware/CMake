@@ -1,7 +1,14 @@
 cmake_minimum_required(VERSION 3.18)
 project(ISPCObjectGenex CXX ISPC)
 
-set(CMAKE_ISPC_INSTRUCTION_SETS "sse2-i32x4;sse4-i16x8;avx1-i32x16;avx2-i32x4;avx512knl-i32x16;avx512skx-i32x8")
+if("${CMAKE_SYSTEM_NAME};${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "Darwin;arm64")
+  set(CMAKE_ISPC_INSTRUCTION_SETS "neon-i32x4")
+  set(numberOfTargets 1)
+else()
+  set(CMAKE_ISPC_INSTRUCTION_SETS "sse2-i32x4;sse4-i16x8;avx1-i32x16;avx2-i32x4;avx512knl-i32x16;avx512skx-i32x8")
+  list(LENGTH CMAKE_ISPC_INSTRUCTION_SETS numberOfTargets)
+  math(EXPR numberOfTargets "${numberOfTargets}+1")
+endif()
 
 add_library(ispc_objects OBJECT
   simple.ispc
@@ -35,8 +42,6 @@ static std::string obj_paths = "$<TARGET_OBJECTS:ispc_objects>";
 add_executable(ISPCObjectGenex main.cxx)
 add_dependencies(ISPCObjectGenex ispc_objects)
 
-list(LENGTH CMAKE_ISPC_INSTRUCTION_SETS numberOfTargets)
-math(EXPR numberOfTargets "${numberOfTargets}+1")
 target_compile_definitions(ISPCObjectGenex PRIVATE
     "ExpectedISPCObjects=${numberOfTargets}"
     "CONFIG_TYPE=gen_$<LOWER_CASE:$<CONFIG>>"

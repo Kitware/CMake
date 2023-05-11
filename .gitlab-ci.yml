@@ -884,17 +884,17 @@ t:macos-x86_64-makefiles:
     needs:
         - b:macos-x86_64-makefiles
 
-t:macos-x86_64-ninja-multi:
+t:macos-arm64-ninja-multi:
     extends:
-        - .macos_x86_64_ninja_multi
+        - .macos_arm64_ninja_multi
         - .cmake_test_macos_external
-        - .macos_x86_64_tags_ext
+        - .macos_arm64_tags_ext
         - .cmake_junit_artifacts
         - .run_dependent
     dependencies:
-        - t:macos-x86_64-ninja
+        - t:macos-arm64-ninja
     needs:
-        - t:macos-x86_64-ninja
+        - t:macos-arm64-ninja
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
@@ -938,17 +938,17 @@ t:macos-x86_64-ninja-ub:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:macos-x86_64-xcode-ub:
+t:macos-arm64-xcode-ub:
     extends:
-        - .macos_x86_64_xcode_ub
+        - .macos_arm64_xcode_ub
         - .cmake_test_macos_external
-        - .macos_x86_64_tags_ext
+        - .macos_arm64_tags_ext
         - .cmake_junit_artifacts
         - .run_dependent
     dependencies:
-        - t:macos-x86_64-ninja
+        - t:macos-arm64-ninja
     needs:
-        - t:macos-x86_64-ninja
+        - t:macos-arm64-ninja
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 

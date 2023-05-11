@@ -101,7 +101,7 @@ function(XcodeSchemaGeneration)
 
   run_cmake(XcodeSchemaGeneration)
   if (XCODE_VERSION VERSION_GREATER_EQUAL 13)
-    set(maybe_destination -destination platform=macOS)
+    set(maybe_destination -destination platform=macOS,arch=${CMAKE_HOST_SYSTEM_PROCESSOR})
   else()
     set(maybe_destination "")
   endif()
