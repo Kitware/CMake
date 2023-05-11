@@ -1,0 +1,3 @@
+    Start 1: TestTimeout
+TIMEOUT_SIGNAL_GRACE_PERIOD "-1" is not greater than "0" seconds.
+1/1 Test #1: TestTimeout ......................\*\*\*Not Run +[0-9.]+ sec

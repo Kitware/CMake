@@ -13,11 +13,67 @@ endfunction()
 
 run_ctest_timeout(Basic)
 
-if(UNIX)
+if(WIN32)
+  string(CONCAT CASE_CMAKELISTS_SUFFIX_CODE [[
+    set_tests_properties(TestTimeout PROPERTIES
+      TIMEOUT_SIGNAL_NAME SIGUSR1
+      TIMEOUT_SIGNAL_GRACE_PERIOD 1.2
+      )
+]])
+  run_ctest_timeout(SignalWindows)
+  unset(CASE_CMAKELISTS_SUFFIX_CODE)
+
+else()
   string(CONCAT CASE_CMAKELISTS_SUFFIX_CODE [[
     target_compile_definitions(TestTimeout PRIVATE FORK)
 ]])
   run_ctest_timeout(Fork)
+  unset(CASE_CMAKELISTS_SUFFIX_CODE)
+
+  string(CONCAT CASE_CMAKELISTS_SUFFIX_CODE [[
+    target_compile_definitions(TestTimeout PRIVATE SIGNAL)
+    set_tests_properties(TestTimeout PROPERTIES
+      TIMEOUT_SIGNAL_NAME SIGUSR1
+      TIMEOUT_SIGNAL_GRACE_PERIOD 1.2
+      )
+]])
+  run_ctest_timeout(Signal)
+  unset(CASE_CMAKELISTS_SUFFIX_CODE)
+
+  string(CONCAT CASE_CMAKELISTS_SUFFIX_CODE [[
+    target_compile_definitions(TestTimeout PRIVATE SIGNAL SIGNAL_IGNORE=1)
+    set_tests_properties(TestTimeout PROPERTIES
+      TIMEOUT_SIGNAL_NAME SIGUSR1
+      # Use default TIMEOUT_SIGNAL_GRACE_PERIOD of 1.
+      )
+]])
+  run_ctest_timeout(SignalIgnore)
+  unset(CASE_CMAKELISTS_SUFFIX_CODE)
+
+  string(CONCAT CASE_CMAKELISTS_SUFFIX_CODE [[
+    set_tests_properties(TestTimeout PROPERTIES
+      TIMEOUT_SIGNAL_NAME NOTASIG
+      )
+]])
+  run_ctest_timeout(SignalUnknown)
+  unset(CASE_CMAKELISTS_SUFFIX_CODE)
+
+  string(CONCAT CASE_CMAKELISTS_SUFFIX_CODE [[
+    set_tests_properties(TestTimeout PROPERTIES
+      TIMEOUT_SIGNAL_NAME SIGUSR1
+      TIMEOUT_SIGNAL_GRACE_PERIOD -1
+      )
+]])
+  run_ctest_timeout(SignalGraceLow)
+  unset(CASE_CMAKELISTS_SUFFIX_CODE)
+
+  string(CONCAT CASE_CMAKELISTS_SUFFIX_CODE [[
+    set_tests_properties(TestTimeout PROPERTIES
+      TIMEOUT_SIGNAL_NAME SIGUSR1
+      TIMEOUT_SIGNAL_GRACE_PERIOD 1000
+      )
+]])
+  run_ctest_timeout(SignalGraceHigh)
   unset(CASE_CMAKELISTS_SUFFIX_CODE)
 endif()
 

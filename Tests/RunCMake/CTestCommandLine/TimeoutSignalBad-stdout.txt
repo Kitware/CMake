@@ -1,0 +1,5 @@
+    Start 1: test1
+TIMEOUT_SIGNAL_NAME "NOTASIG" not supported on this platform\.
+TIMEOUT_SIGNAL_GRACE_PERIOD "0" is not greater than "0" seconds\.
+TIMEOUT_SIGNAL_GRACE_PERIOD "1000" is not less than the maximum of "60" seconds\.
+1/1 Test #1: test1 ............................\*\*\*Not Run +[0-9.]+ sec

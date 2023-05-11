@@ -181,6 +181,11 @@ cmCTestRunTest::EndTestResult cmCTestRunTest::EndTest(size_t completed,
     }
   } else if (res == cmProcess::State::Expired) {
     outputStream << "***Timeout ";
+    if (this->TestProperties->TimeoutSignal &&
+        this->TestProcess->GetTerminationStyle() ==
+          cmProcess::Termination::Custom) {
+      outputStream << "(" << this->TestProperties->TimeoutSignal->Name << ") ";
+    }
     this->TestResult.Status = cmCTestTestHandler::TIMEOUT;
     outputTestErrorsToConsole =
       this->CTest->GetOutputTestOutputOnTestFailure();
@@ -539,6 +544,19 @@ bool cmCTestRunTest::StartTest(size_t completed, size_t total)
   this->TestResult.TestCount = this->TestProperties->Index;
   this->TestResult.Name = this->TestProperties->Name;
   this->TestResult.Path = this->TestProperties->Directory;
+
+  // Reject invalid test properties.
+  if (this->TestProperties->Error) {
+    std::string const& msg = *this->TestProperties->Error;
+    *this->TestHandler->LogFile << msg << std::endl;
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, msg << std::endl);
+    this->TestResult.CompletionStatus = "Invalid Test Properties";
+    this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
+    this->TestResult.Output = msg;
+    this->TestResult.FullCommandLine.clear();
+    this->TestResult.Environment.clear();
+    return false;
+  }
 
   // Return immediately if test is disabled
   if (this->TestProperties->Disabled) {

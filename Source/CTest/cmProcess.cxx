@@ -13,6 +13,7 @@
 
 #include "cmCTest.h"
 #include "cmCTestRunTest.h"
+#include "cmCTestTestHandler.h"
 #include "cmGetPipes.h"
 #include "cmStringAlgorithms.h"
 #if defined(_WIN32)
@@ -274,7 +275,29 @@ void cmProcess::OnTimeoutCB(uv_timer_t* timer)
 
 void cmProcess::OnTimeout()
 {
+  bool const wasExecuting = this->ProcessState == cmProcess::State::Executing;
   this->ProcessState = cmProcess::State::Expired;
+
+  // If the test process is still executing normally, and we timed out because
+  // the test timeout was reached, send the custom timeout signal, if any.
+  if (wasExecuting && this->TimeoutReason_ == TimeoutReason::Normal) {
+    cmCTestTestHandler::cmCTestTestProperties* p =
+      this->Runner->GetTestProperties();
+    if (p->TimeoutSignal) {
+      this->TerminationStyle = Termination::Custom;
+      uv_process_kill(this->Process, p->TimeoutSignal->Number);
+      if (p->TimeoutGracePeriod) {
+        this->Timeout = *p->TimeoutGracePeriod;
+      } else {
+        static const cmDuration defaultGracePeriod{ 1.0 };
+        this->Timeout = defaultGracePeriod;
+      }
+      this->StartTimer();
+      return;
+    }
+  }
+
+  this->TerminationStyle = Termination::Forced;
   bool const was_still_reading = !this->ReadHandleClosed;
   if (!this->ReadHandleClosed) {
     this->ReadHandleClosed = true;

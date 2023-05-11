@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.16)
 project(CTestTest@CASE_NAME@ C)
 include(CTest)
 
+if(CMAKE_C_COMPILER_ID STREQUAL "SunPro" AND CMAKE_C_COMPILER_VERSION VERSION_LESS 5.14)
+  set(CMAKE_C_STANDARD 99)
+endif()
+
 add_executable(TestTimeout TestTimeout.c)
 
 if(NOT DEFINED TIMEOUT)

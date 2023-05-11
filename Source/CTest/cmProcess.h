@@ -85,6 +85,14 @@ public:
     return std::move(this->Runner);
   }
 
+  enum class Termination
+  {
+    Normal,
+    Custom,
+    Forced,
+  };
+  Termination GetTerminationStyle() const { return this->TerminationStyle; }
+
 private:
   cm::optional<cmDuration> Timeout;
   TimeoutReason TimeoutReason_ = TimeoutReason::Normal;
@@ -137,4 +145,5 @@ private:
   std::vector<const char*> ProcessArgs;
   int Id;
   int64_t ExitValue;
+  Termination TerminationStyle = Termination::Normal;
 };
