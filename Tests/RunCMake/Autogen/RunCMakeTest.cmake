@@ -87,5 +87,20 @@ if (DEFINED with_qt_version)
       message(STATUS "RunCMake_TEST_EXPECT_stdout: ${RunCMake_TEST_EXPECT_stdout}")
       run_cmake_command(AutogenUseSystemIncludeOff ${CMAKE_COMMAND} --build . --config Debug --verbose)
     endblock()
+
+    if(RunCMake_GENERATOR MATCHES "Make|Ninja")
+      block()
+        set(RunCMake_TEST_BINARY_DIR  ${RunCMake_BINARY_DIR}/AutogenSkipLinting-build)
+        list(APPEND RunCMake_TEST_OPTIONS
+          "-DPSEUDO_CPPCHECK=${PSEUDO_CPPCHECK}"
+          "-DPSEUDO_CPPLINT=${PSEUDO_CPPLINT}"
+          "-DPSEUDO_IWYU=${PSEUDO_IWYU}"
+          "-DPSEUDO_TIDY=${PSEUDO_TIDY}")
+
+        run_cmake(AutogenSkipLinting)
+        set(RunCMake_TEST_NO_CLEAN 1)
+        run_cmake_command(AutogenSkipLinting-build ${CMAKE_COMMAND} --build . --config Debug --verbose)
+      endblock()
+    endif()
   endif()
 endif ()
