@@ -191,16 +191,24 @@ std::string cmLinkLineComputer::ComputeRPath(cmComputeLinkInformation& cli)
 }
 
 std::string cmLinkLineComputer::ComputeFrameworkPath(
-  cmComputeLinkInformation& cli, std::string const& fwSearchFlag)
+  cmComputeLinkInformation& cli, cmValue fwSearchFlag, cmValue sysFwSearchFlag)
 {
+  if (!fwSearchFlag && !sysFwSearchFlag) {
+    return std::string{};
+  }
+
   std::string frameworkPath;
-  if (!fwSearchFlag.empty()) {
-    std::vector<std::string> const& fwDirs = cli.GetFrameworkPaths();
-    for (std::string const& fd : fwDirs) {
+  auto const& fwDirs = cli.GetFrameworkPaths();
+  for (auto const& fd : fwDirs) {
+    if (sysFwSearchFlag &&
+        cli.GetTarget()->IsSystemIncludeDirectory(fd, cli.GetConfig(),
+                                                  cli.GetLinkLanguage())) {
+      frameworkPath += sysFwSearchFlag;
+    } else {
       frameworkPath += fwSearchFlag;
-      frameworkPath += this->ConvertToOutputFormat(fd);
-      frameworkPath += " ";
     }
+    frameworkPath += this->ConvertToOutputFormat(fd);
+    frameworkPath += " ";
   }
   return frameworkPath;
 }
