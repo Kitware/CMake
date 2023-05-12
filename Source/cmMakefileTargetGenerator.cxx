@@ -26,7 +26,6 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
-#include "cmGlobalCommonGenerator.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
 #include "cmLinkLineComputer.h" // IWYU pragma: keep
 #include "cmList.h"
@@ -1054,151 +1053,14 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
 
     // See if we need to use a compiler launcher like ccache or distcc
     std::string compilerLauncher;
-    if (!compileCommands.empty() &&
-        (lang == "C" || lang == "CXX" || lang == "Fortran" || lang == "CUDA" ||
-         lang == "HIP" || lang == "ISPC" || lang == "OBJC" ||
-         lang == "OBJCXX")) {
-      std::string const clauncher_prop = lang + "_COMPILER_LAUNCHER";
-      cmValue clauncher = this->GeneratorTarget->GetProperty(clauncher_prop);
-      std::string evaluatedClauncher = cmGeneratorExpression::Evaluate(
-        *clauncher, this->LocalGenerator, config, this->GeneratorTarget,
-        nullptr, this->GeneratorTarget, lang);
-      if (!evaluatedClauncher.empty()) {
-        compilerLauncher = evaluatedClauncher;
-      }
+    if (!compileCommands.empty()) {
+      compilerLauncher = GetCompilerLauncher(lang, config);
     }
 
-    // Maybe insert an include-what-you-use runner.
-    if (!compileCommands.empty() &&
-        (lang == "C" || lang == "CXX" || lang == "OBJC" || lang == "OBJCXX")) {
-      cmValue tidy = nullptr;
-      cmValue iwyu = nullptr;
-      cmValue cpplint = nullptr;
-      cmValue cppcheck = nullptr;
-      std::string evaluatedTIDY;
-      std::string evaluatedIWYU;
-      std::string evaluatedCPPlint;
-      std::string evaluatedCPPcheck;
-
-      std::string const tidy_prop = cmStrCat(lang, "_CLANG_TIDY");
-      tidy = this->GeneratorTarget->GetProperty(tidy_prop);
-      evaluatedTIDY = cmGeneratorExpression::Evaluate(
-        *tidy, this->LocalGenerator, config, this->GeneratorTarget, nullptr,
-        this->GeneratorTarget, lang);
-      if (!evaluatedTIDY.empty()) {
-        tidy = cmValue(&evaluatedTIDY);
-      }
-
-      if (lang == "C" || lang == "CXX") {
-        std::string const iwyu_prop = cmStrCat(lang, "_INCLUDE_WHAT_YOU_USE");
-        iwyu = this->GeneratorTarget->GetProperty(iwyu_prop);
-        evaluatedIWYU = cmGeneratorExpression::Evaluate(
-          *iwyu, this->LocalGenerator, config, this->GeneratorTarget, nullptr,
-          this->GeneratorTarget, lang);
-        if (!evaluatedIWYU.empty()) {
-          iwyu = cmValue(&evaluatedIWYU);
-        }
-
-        std::string const cpplint_prop = cmStrCat(lang, "_CPPLINT");
-        cpplint = this->GeneratorTarget->GetProperty(cpplint_prop);
-        evaluatedCPPlint = cmGeneratorExpression::Evaluate(
-          *cpplint, this->LocalGenerator, config, this->GeneratorTarget,
-          nullptr, this->GeneratorTarget, lang);
-        if (!evaluatedCPPlint.empty()) {
-          cpplint = cmValue(&evaluatedCPPlint);
-        }
-
-        std::string const cppcheck_prop = cmStrCat(lang, "_CPPCHECK");
-        cppcheck = this->GeneratorTarget->GetProperty(cppcheck_prop);
-        evaluatedCPPcheck = cmGeneratorExpression::Evaluate(
-          *cppcheck, this->LocalGenerator, config, this->GeneratorTarget,
-          nullptr, this->GeneratorTarget, lang);
-        if (!evaluatedCPPcheck.empty()) {
-          cppcheck = cmValue(&evaluatedCPPcheck);
-        }
-      }
-      if (cmNonempty(iwyu) || cmNonempty(tidy) || cmNonempty(cpplint) ||
-          cmNonempty(cppcheck)) {
-        std::string run_iwyu = "$(CMAKE_COMMAND) -E __run_co_compile";
-        if (!compilerLauncher.empty()) {
-          // In __run_co_compile case the launcher command is supplied
-          // via --launcher=<maybe-list> and consumed
-          run_iwyu += " --launcher=";
-          run_iwyu += this->LocalGenerator->EscapeForShell(compilerLauncher);
-          compilerLauncher.clear();
-        }
-        if (cmNonempty(iwyu)) {
-          run_iwyu += " --iwyu=";
-
-          // Only add --driver-mode if it is not already specified, as adding
-          // it unconditionally might override a user-specified driver-mode
-          if (iwyu.Get()->find("--driver-mode=") == std::string::npos) {
-            cmValue p = this->Makefile->GetDefinition(
-              cmStrCat("CMAKE_", lang, "_INCLUDE_WHAT_YOU_USE_DRIVER_MODE"));
-            std::string driverMode;
-
-            if (cmNonempty(p)) {
-              driverMode = *p;
-            } else {
-              driverMode = lang == "C" ? "gcc" : "g++";
-            }
-
-            run_iwyu += this->LocalGenerator->EscapeForShell(
-              cmStrCat(*iwyu, ";--driver-mode=", driverMode));
-          } else {
-            run_iwyu += this->LocalGenerator->EscapeForShell(*iwyu);
-          }
-        }
-        if (cmNonempty(tidy)) {
-          run_iwyu += " --tidy=";
-          cmValue p = this->Makefile->GetDefinition("CMAKE_" + lang +
-                                                    "_CLANG_TIDY_DRIVER_MODE");
-          std::string driverMode;
-          if (cmNonempty(p)) {
-            driverMode = *p;
-          } else {
-            driverMode = lang == "C" ? "gcc" : "g++";
-          }
-          std::string d =
-            this->GeneratorTarget->GetClangTidyExportFixesDirectory(lang);
-          std::string exportFixes;
-          if (!d.empty()) {
-            this->GlobalCommonGenerator->AddClangTidyExportFixesDir(d);
-            std::string fixesFile = cmSystemTools::CollapseFullPath(cmStrCat(
-              d, '/',
-              this->LocalGenerator->MaybeRelativeToTopBinDir(cmStrCat(
-                this->LocalGenerator->GetCurrentBinaryDirectory(), '/',
-                this->LocalGenerator->GetTargetDirectory(
-                  this->GeneratorTarget),
-                '/', objectName, ".yaml"))));
-            this->GlobalCommonGenerator->AddClangTidyExportFixesFile(
-              fixesFile);
-            cmSystemTools::MakeDirectory(
-              cmSystemTools::GetFilenamePath(fixesFile));
-            fixesFile =
-              this->LocalGenerator->MaybeRelativeToCurBinDir(fixesFile);
-            exportFixes = cmStrCat(";--export-fixes=", fixesFile);
-          }
-          run_iwyu += this->LocalGenerator->EscapeForShell(
-            cmStrCat(*tidy, ";--extra-arg-before=--driver-mode=", driverMode,
-                     exportFixes));
-        }
-        if (cmNonempty(cpplint)) {
-          run_iwyu += " --cpplint=";
-          run_iwyu += this->LocalGenerator->EscapeForShell(*cpplint);
-        }
-        if (cmNonempty(cppcheck)) {
-          run_iwyu += " --cppcheck=";
-          run_iwyu += this->LocalGenerator->EscapeForShell(*cppcheck);
-        }
-        if (cmNonempty(tidy) || (cmNonempty(cpplint)) ||
-            (cmNonempty(cppcheck))) {
-          run_iwyu += " --source=";
-          run_iwyu += sourceFile;
-        }
-        run_iwyu += " -- ";
-        compileCommands.front().insert(0, run_iwyu);
-      }
+    std::string const codeCheck = this->GenerateCodeCheckRules(
+      source, compilerLauncher, "$(CMAKE_COMMAND)", config, nullptr);
+    if (!codeCheck.empty()) {
+      compileCommands.front().insert(0, codeCheck);
     }
 
     // If compiler launcher was specified and not consumed above, it
@@ -1518,6 +1380,23 @@ void cmMakefileTargetGenerator::WriteTargetLinkDependRules()
     this->GeneratorTarget, "LINK",
     this->GeneratorTarget->GetFullPath(this->GetConfigName()), depFile,
     cmDependencyScannerKind::Compiler);
+}
+std::string cmMakefileTargetGenerator::GetClangTidyReplacementsFilePath(
+  std::string const& directory, cmSourceFile const& source,
+  std::string const& config) const
+{
+  (void)config;
+  auto const& objectName = this->GeneratorTarget->GetObjectName(&source);
+  auto fixesFile = cmSystemTools::CollapseFullPath(cmStrCat(
+    directory, '/',
+    this->GeneratorTarget->GetLocalGenerator()->MaybeRelativeToTopBinDir(
+      cmStrCat(this->GeneratorTarget->GetLocalGenerator()
+                 ->GetCurrentBinaryDirectory(),
+               '/',
+               this->GeneratorTarget->GetLocalGenerator()->GetTargetDirectory(
+                 this->GeneratorTarget),
+               '/', objectName, ".yaml"))));
+  return fixesFile;
 }
 
 void cmMakefileTargetGenerator::WriteTargetDependRules()
