@@ -1057,10 +1057,13 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
       compilerLauncher = GetCompilerLauncher(lang, config);
     }
 
-    std::string const codeCheck = this->GenerateCodeCheckRules(
-      source, compilerLauncher, "$(CMAKE_COMMAND)", config, nullptr);
-    if (!codeCheck.empty()) {
-      compileCommands.front().insert(0, codeCheck);
+    cmValue const skipCodeCheck = source.GetProperty("SKIP_LINTING");
+    if (!skipCodeCheck.IsOn()) {
+      std::string const codeCheck = this->GenerateCodeCheckRules(
+        source, compilerLauncher, "$(CMAKE_COMMAND)", config, nullptr);
+      if (!codeCheck.empty()) {
+        compileCommands.front().insert(0, codeCheck);
+      }
     }
 
     // If compiler launcher was specified and not consumed above, it

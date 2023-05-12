@@ -1219,15 +1219,19 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   vars["FLAGS"] = this->ComputeFlagsForObject(source, language, config);
   vars["DEFINES"] = this->ComputeDefines(source, language, config);
   vars["INCLUDES"] = this->ComputeIncludes(source, language, config);
-  auto const cmakeCmd = this->GetLocalGenerator()->ConvertToOutputFormat(
-    cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
 
   auto compilerLauncher = this->GetCompilerLauncher(language, config);
-  vars["CODE_CHECK"] =
-    this->GenerateCodeCheckRules(*source, compilerLauncher, cmakeCmd, config,
-                                 [this](std::string const& path) {
-                                   return this->ConvertToNinjaPath(path);
-                                 });
+
+  cmValue const skipCodeCheck = source->GetProperty("SKIP_LINTING");
+  if (!skipCodeCheck.IsOn()) {
+    auto const cmakeCmd = this->GetLocalGenerator()->ConvertToOutputFormat(
+      cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
+    vars["CODE_CHECK"] =
+      this->GenerateCodeCheckRules(*source, compilerLauncher, cmakeCmd, config,
+                                   [this](const std::string& path) {
+                                     return this->ConvertToNinjaPath(path);
+                                   });
+  }
 
   // If compiler launcher was specified and not consumed above, it
   // goes to the beginning of the command line.

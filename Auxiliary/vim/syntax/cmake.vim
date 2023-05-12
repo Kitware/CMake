@@ -329,6 +329,7 @@ syn keyword cmakeProperty contained
             \ SKIP_REGULAR_EXPRESSION
             \ SKIP_RETURN_CODE
             \ SKIP_UNITY_BUILD_INCLUSION
+            \ SKIP_LINTING
             \ SOURCES
             \ SOURCE_DIR
             \ SOVERSION
