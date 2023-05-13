@@ -21,7 +21,9 @@ target_sources(export_interfaces_no_properties
         importable.cxx)
 target_compile_features(export_interfaces_no_properties PUBLIC cxx_std_20)
 
-install(TARGETS export_interfaces_no_properties
+add_library(no_modules STATIC no_modules.cxx)
+
+install(TARGETS export_interfaces_no_properties no_modules
   EXPORT CXXModules
   FILE_SET modules DESTINATION "lib/cxx/miu")
 export(EXPORT CXXModules

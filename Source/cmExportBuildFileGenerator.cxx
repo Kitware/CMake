@@ -542,6 +542,12 @@ bool cmExportBuildFileGenerator::GenerateImportCxxModuleConfigTargetInclusion(
   os.SetCopyIfDifferent(true);
 
   for (auto const* tgt : this->ExportedTargets) {
+    // Only targets with C++ module sources will have a
+    // collator-generated install script.
+    if (!tgt->HaveCxx20ModuleSources()) {
+      continue;
+    }
+
     os << "include(\"${CMAKE_CURRENT_LIST_DIR}/target-" << tgt->GetExportName()
        << '-' << config << ".cmake\")\n";
   }

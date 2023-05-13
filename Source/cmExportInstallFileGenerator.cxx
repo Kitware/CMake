@@ -752,6 +752,12 @@ bool cmExportInstallFileGenerator::
 
   auto& prop_files = this->ConfigCxxModuleTargetFiles[config];
   for (auto const* tgt : this->ExportedTargets) {
+    // Only targets with C++ module sources will have a
+    // collator-generated install script.
+    if (!tgt->HaveCxx20ModuleSources()) {
+      continue;
+    }
+
     auto prop_filename = cmStrCat("target-", tgt->GetExportName(), '-',
                                   filename_config, ".cmake");
     prop_files.emplace_back(cmStrCat(dest, prop_filename));
