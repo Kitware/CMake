@@ -21,6 +21,7 @@ get_property(file_set_files TARGET CXXModules::export_interfaces
   PROPERTY CXX_MODULE_SET_modules)
 set(expected_file_set_files
   "${expected_source_dir}/importable.cxx"
+  "${expected_source_dir}/subdir/importable.cxx"
   )
 if (NOT file_set_files STREQUAL "${expected_file_set_files}")
   message(FATAL_ERROR
@@ -31,6 +32,7 @@ get_property(imported_modules TARGET CXXModules::export_interfaces
   PROPERTY IMPORTED_CXX_MODULES_DEBUG)
 set(expected_imported_modules
   "importable=${expected_source_dir}/importable.cxx,${expected_binary_dir}/CMakeFiles/export_interfaces.dir(/Debug)?/importable.(gcm|pcm|ifc)"
+  "subdir_importable=${expected_source_dir}/subdir/importable.cxx,${expected_binary_dir}/CMakeFiles/export_interfaces.dir(/Debug)?/subdir_importable.(gcm|pcm|ifc)"
   )
 if (NOT imported_modules MATCHES "^${expected_imported_modules}$")
   message(FATAL_ERROR

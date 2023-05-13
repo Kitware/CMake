@@ -21,6 +21,7 @@ get_property(file_set_files TARGET CXXModules::export_interfaces_no_properties
   PROPERTY CXX_MODULE_SET_modules)
 set(expected_file_set_files
   "${expected_dir}/importable.cxx"
+  "${expected_dir}/subdir/importable.cxx"
   )
 if (NOT file_set_files STREQUAL "${expected_file_set_files}")
   message(FATAL_ERROR
