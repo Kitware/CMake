@@ -50,12 +50,11 @@ struct CxxModuleLocations
   std::function<std::string(std::string)> PathForGenerator;
 
   // Lookup the BMI location of a logical module name.
-  std::function<cm::optional<std::string>(std::string const&)>
-    BmiLocationForModule;
+  std::function<CxxBmiLocation(std::string const&)> BmiLocationForModule;
 
   // Returns the generator path (if known) for the BMI given a
   // logical module name.
-  cm::optional<std::string> BmiGeneratorPathForModule(
+  CxxBmiLocation BmiGeneratorPathForModule(
     std::string const& logical_name) const;
 };
 
