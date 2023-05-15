@@ -22,6 +22,23 @@ enum class CxxModuleMapFormat
   Msvc,
 };
 
+struct CxxBmiLocation
+{
+  static CxxBmiLocation Unknown();
+  static CxxBmiLocation Private();
+  static CxxBmiLocation Known(std::string path);
+
+  bool IsKnown() const;
+  bool IsPrivate() const;
+  std::string const& Location() const;
+
+private:
+  CxxBmiLocation();
+  CxxBmiLocation(std::string path);
+
+  cm::optional<std::string> BmiLocation;
+};
+
 struct CxxModuleLocations
 {
   // The path from which all relative paths should be computed. If

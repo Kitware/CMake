@@ -17,6 +17,50 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
+CxxBmiLocation::CxxBmiLocation() = default;
+
+CxxBmiLocation::CxxBmiLocation(std::string path)
+  : BmiLocation(std::move(path))
+{
+}
+
+CxxBmiLocation CxxBmiLocation::Unknown()
+{
+  return {};
+}
+
+CxxBmiLocation CxxBmiLocation::Private()
+{
+  return { std::string{} };
+}
+
+CxxBmiLocation CxxBmiLocation::Known(std::string path)
+{
+  return { std::move(path) };
+}
+
+bool CxxBmiLocation::IsKnown() const
+{
+  return this->BmiLocation.has_value();
+}
+
+bool CxxBmiLocation::IsPrivate() const
+{
+  if (auto const& loc = this->BmiLocation) {
+    return loc->empty();
+  }
+  return false;
+}
+
+std::string const& CxxBmiLocation::Location() const
+{
+  if (auto const& loc = this->BmiLocation) {
+    return *loc;
+  }
+  static std::string empty;
+  return empty;
+}
+
 cm::optional<std::string> CxxModuleLocations::BmiGeneratorPathForModule(
   std::string const& logical_name) const
 {
