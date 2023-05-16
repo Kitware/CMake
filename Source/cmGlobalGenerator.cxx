@@ -47,6 +47,7 @@
 #include "cmMSVC60LinkLineComputer.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmOutputConverter.h"
 #include "cmPolicies.h"
 #include "cmRange.h"
 #include "cmSourceFile.h"
@@ -72,6 +73,23 @@ const std::string kCMAKE_PLATFORM_INFO_INITIALIZED =
   "CMAKE_PLATFORM_INFO_INITIALIZED";
 
 class cmInstalledFile;
+
+namespace detail {
+std::string GeneratedMakeCommand::QuotedPrintable() const
+{
+  std::string output;
+  const char* sep = "";
+  int flags = 0;
+#if !defined(_WIN32)
+  flags |= cmOutputConverter::Shell_Flag_IsUnix;
+#endif
+  for (auto const& arg : this->PrimaryCommand) {
+    output += cmStrCat(sep, cmOutputConverter::EscapeForShell(arg, flags));
+    sep = " ";
+  }
+  return output;
+}
+}
 
 bool cmTarget::StrictTargetComparison::operator()(cmTarget const* t1,
                                                   cmTarget const* t2) const
