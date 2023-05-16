@@ -2131,8 +2131,8 @@ int cmGlobalGenerator::Build(
       this->GenerateBuildCommand(makeCommandCSTR, projectName, bindir,
                                  { "clean" }, realConfig, jobs, verbose,
                                  buildOptions);
-    output +=
-      cmStrCat("\nRun Clean Command:", cleanCommand.front().Printable(), '\n');
+    output += cmStrCat(
+      "\nRun Clean Command: ", cleanCommand.front().Printable(), '\n');
     if (cleanCommand.size() != 1) {
       this->GetCMakeInstance()->IssueMessage(MessageType::INTERNAL_ERROR,
                                              "The generator did not produce "
@@ -2155,7 +2155,7 @@ int cmGlobalGenerator::Build(
 
   // now build
   std::string makeCommandStr;
-  output += "\nRun Build Command(s):";
+  output += "\nRun Build Command(s): ";
 
   retVal = 0;
   for (auto command = makeCommand.begin();
