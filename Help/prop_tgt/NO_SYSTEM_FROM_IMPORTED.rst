@@ -4,13 +4,14 @@ NO_SYSTEM_FROM_IMPORTED
 Do not treat include directories from the interfaces of consumed
 :ref:`imported targets` as system directories.
 
-The contents of the :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` target property
-are treated as system includes when the consumed target's :prop_tgt:`SYSTEM`
-property is set to true.  By default, :prop_tgt:`SYSTEM` is true for imported
-targets and false for other target types.  If the ``NO_SYSTEM_FROM_IMPORTED``
-property is set to true on a *consuming* target, compilation of sources in that
-consuming target will not treat the contents of the
-:prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` of consumed imported targets as
+When the consumed target's :prop_tgt:`SYSTEM` property is set to true, the
+contents of the :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` target property are
+treated as system includes or, on Apple platforms, when the target is a
+framework, it will be treated as system.  By default, :prop_tgt:`SYSTEM` is
+true for imported targets and false for other target types.  If the
+``NO_SYSTEM_FROM_IMPORTED`` property is set to true on a *consuming* target,
+compilation of sources in that consuming target will not treat the contents of
+the :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` of consumed imported targets as
 system includes, even if that imported target's :prop_tgt:`SYSTEM` property
 is false.
 
