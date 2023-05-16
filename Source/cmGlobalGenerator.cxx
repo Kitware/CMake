@@ -2114,7 +2114,7 @@ int cmGlobalGenerator::Build(
    * Run an executable command and put the stdout in output.
    */
   cmWorkingDirectory workdir(bindir);
-  output += cmStrCat("Change Dir: ", bindir, '\n');
+  output += cmStrCat("Change Dir: '", bindir, "'\n");
   if (workdir.Failed()) {
     cmSystemTools::SetRunCommandHideConsole(hideconsole);
     std::string err = cmStrCat("Failed to change directory: ",
@@ -2150,7 +2150,7 @@ int cmGlobalGenerator::Build(
                                  { "clean" }, realConfig, jobs, verbose,
                                  buildOptions);
     output += cmStrCat(
-      "\nRun Clean Command: ", cleanCommand.front().Printable(), '\n');
+      "\nRun Clean Command: ", cleanCommand.front().QuotedPrintable(), '\n');
     if (cleanCommand.size() != 1) {
       this->GetCMakeInstance()->IssueMessage(MessageType::INTERNAL_ERROR,
                                              "The generator did not produce "
@@ -2173,17 +2173,20 @@ int cmGlobalGenerator::Build(
 
   // now build
   std::string makeCommandStr;
+  std::string outputMakeCommandStr;
   output += "\nRun Build Command(s): ";
 
   retVal = 0;
   for (auto command = makeCommand.begin();
        command != makeCommand.end() && retVal == 0; ++command) {
     makeCommandStr = command->Printable();
+    outputMakeCommandStr = command->QuotedPrintable();
     if (command != makeCommand.end()) {
       makeCommandStr += " && ";
+      outputMakeCommandStr += " && ";
     }
 
-    output += makeCommandStr;
+    output += outputMakeCommandStr;
     if (!cmSystemTools::RunSingleCommand(command->PrimaryCommand, outputPtr,
                                          outputPtr, &retVal, nullptr,
                                          outputflag, timeout)) {
@@ -2194,7 +2197,7 @@ int cmGlobalGenerator::Build(
       output +=
         cmStrCat(*outputPtr,
                  "\nGenerator: execution of make failed. Make command was: ",
-                 makeCommandStr, '\n');
+                 outputMakeCommandStr, '\n');
 
       return 1;
     }
