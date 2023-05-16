@@ -68,7 +68,7 @@ elseif("${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}" STREQUAL "RISCV")
 
 elseif("${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}" STREQUAL "AVR")
   __compiler_iar_xlink(CXX)
-  __compiler_check_default_language_standard(CXX 7.10 98)
+  __compiler_check_default_language_standard(CXX 7.10 98 8.10 17)
   set(CMAKE_CXX_OUTPUT_EXTENSION ".r90")
 
 elseif("${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}" STREQUAL "MSP430")
