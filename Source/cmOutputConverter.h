@@ -107,6 +107,7 @@ public:
                              bool forEcho = false, bool useWatcomQuote = false,
                              bool unescapeNinjaConfiguration = false,
                              bool forResponse = false) const;
+  static std::string EscapeForShell(cm::string_view str, int flags);
 
   enum class WrapQuotes
   {

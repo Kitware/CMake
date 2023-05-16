@@ -243,11 +243,6 @@ std::string cmOutputConverter::EscapeForShell(cm::string_view str,
                                               bool unescapeNinjaConfiguration,
                                               bool forResponse) const
 {
-  // Do not escape shell operators.
-  if (cmOutputConverterIsShellOperator(str)) {
-    return std::string(str);
-  }
-
   // Compute the flags for the target shell environment.
   int flags = 0;
   if (this->GetState()->UseWindowsVSIDE()) {
@@ -281,6 +276,16 @@ std::string cmOutputConverter::EscapeForShell(cm::string_view str,
   }
   if (!this->GetState()->UseWindowsShell()) {
     flags |= Shell_Flag_IsUnix;
+  }
+
+  return cmOutputConverter::EscapeForShell(str, flags);
+}
+
+std::string cmOutputConverter::EscapeForShell(cm::string_view str, int flags)
+{
+  // Do not escape shell operators.
+  if (cmOutputConverterIsShellOperator(str)) {
+    return std::string(str);
   }
 
   return Shell_GetArgument(str, flags);
