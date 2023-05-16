@@ -2181,7 +2181,7 @@ int cmGlobalGenerator::Build(
        command != makeCommand.end() && retVal == 0; ++command) {
     makeCommandStr = command->Printable();
     outputMakeCommandStr = command->QuotedPrintable();
-    if (command != makeCommand.end()) {
+    if ((command + 1) != makeCommand.end()) {
       makeCommandStr += " && ";
       outputMakeCommandStr += " && ";
     }
