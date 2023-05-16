@@ -36,6 +36,14 @@ int main()
     }
   }
 
+  // msvc-wine (special case for test, not a real VS value).
+  if (strcmp(vslang, "msvc-wine") == 0) {
+    if (cp == 437 || cp == 65001) {
+      printf("Note: including file: /c/foo.h\n");
+      return 0;
+    }
+  }
+
   // German.
   if (strcmp(vslang, "1031") == 0) {
     if (cp == 437 || cp == 65001) {
