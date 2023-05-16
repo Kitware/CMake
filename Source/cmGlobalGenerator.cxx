@@ -2096,16 +2096,13 @@ int cmGlobalGenerator::Build(
    * Run an executable command and put the stdout in output.
    */
   cmWorkingDirectory workdir(bindir);
-  output += "Change Dir: ";
-  output += bindir;
-  output += "\n";
+  output += cmStrCat("Change Dir: ", bindir, '\n');
   if (workdir.Failed()) {
     cmSystemTools::SetRunCommandHideConsole(hideconsole);
     std::string err = cmStrCat("Failed to change directory: ",
                                std::strerror(workdir.GetLastResult()));
     cmSystemTools::Error(err);
-    output += err;
-    output += "\n";
+    output += cmStrCat(err, '\n');
     return 1;
   }
   std::string realConfig = config;
@@ -2134,9 +2131,8 @@ int cmGlobalGenerator::Build(
       this->GenerateBuildCommand(makeCommandCSTR, projectName, bindir,
                                  { "clean" }, realConfig, jobs, verbose,
                                  buildOptions);
-    output += "\nRun Clean Command:";
-    output += cleanCommand.front().Printable();
-    output += "\n";
+    output +=
+      cmStrCat("\nRun Clean Command:", cleanCommand.front().Printable(), '\n');
     if (cleanCommand.size() != 1) {
       this->GetCMakeInstance()->IssueMessage(MessageType::INTERNAL_ERROR,
                                              "The generator did not produce "
@@ -2149,8 +2145,8 @@ int cmGlobalGenerator::Build(
                                          nullptr, outputflag, timeout)) {
       cmSystemTools::SetRunCommandHideConsole(hideconsole);
       cmSystemTools::Error("Generator: execution of make clean failed.");
-      output += *outputPtr;
-      output += "\nGenerator: execution of make clean failed.\n";
+      output +=
+        cmStrCat(*outputPtr, "\nGenerator: execution of make clean failed.\n");
 
       return 1;
     }
@@ -2177,9 +2173,10 @@ int cmGlobalGenerator::Build(
       cmSystemTools::Error(
         "Generator: execution of make failed. Make command was: " +
         makeCommandStr);
-      output += *outputPtr;
-      output += "\nGenerator: execution of make failed. Make command was: " +
-        makeCommandStr + "\n";
+      output +=
+        cmStrCat(*outputPtr,
+                 "\nGenerator: execution of make failed. Make command was: ",
+                 makeCommandStr, '\n');
 
       return 1;
     }
