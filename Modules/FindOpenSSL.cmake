@@ -230,13 +230,15 @@ else()
   set(_OPENSSL_FIND_PATH_SUFFIX "include")
 endif()
 
-if (MSVC)
+if ((DEFINED OPENSSL_ROOT_DIR) OR (DEFINED ENV{OPENSSL_ROOT_DIR}))
+  set(_OPENSSL_ROOT_HINTS HINTS ${OPENSSL_ROOT_DIR} ENV OPENSSL_ROOT_DIR)
+  set(_OPENSSL_ROOT_PATHS NO_DEFAULT_PATH)
+elseif (MSVC)
   # http://www.slproweb.com/products/Win32OpenSSL.html
   set(_OPENSSL_ROOT_HINTS
-    ${OPENSSL_ROOT_DIR}
+    HINTS
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OpenSSL (32-bit)_is1;Inno Setup: App Path]"
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OpenSSL (64-bit)_is1;Inno Setup: App Path]"
-    ENV OPENSSL_ROOT_DIR
     )
 
   if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
@@ -255,6 +257,7 @@ if (MSVC)
   endif()
 
   set(_OPENSSL_ROOT_PATHS
+    PATHS
     "${_programfiles}/OpenSSL"
     "${_programfiles}/OpenSSL-${_arch}"
     "C:/OpenSSL/"
@@ -262,16 +265,11 @@ if (MSVC)
     )
   unset(_programfiles)
   unset(_arch)
-else ()
-  set(_OPENSSL_ROOT_HINTS
-    ${OPENSSL_ROOT_DIR}
-    ENV OPENSSL_ROOT_DIR
-    )
 endif ()
 
 set(_OPENSSL_ROOT_HINTS_AND_PATHS
-    HINTS ${_OPENSSL_ROOT_HINTS}
-    PATHS ${_OPENSSL_ROOT_PATHS}
+    ${_OPENSSL_ROOT_HINTS}
+    ${_OPENSSL_ROOT_PATHS}
     )
 
 find_path(OPENSSL_INCLUDE_DIR
