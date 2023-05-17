@@ -4,8 +4,7 @@ ARG BASE_IMAGE=fedora:37
 
 FROM ${BASE_IMAGE} AS dnf-cache
 # Populate DNF cache w/ the fresh metadata and prefetch packages.
-RUN --mount=type=bind,source=clang_tidy_headers_packages.lst,target=/root/clang_tidy_headers_packages.lst \
-    --mount=type=bind,source=deps_packages.lst,target=/root/deps_packages.lst \
+RUN --mount=type=bind,source=deps_packages.lst,target=/root/deps_packages.lst \
     --mount=type=bind,source=iwyu_packages.lst,target=/root/iwyu_packages.lst \
     --mount=type=bind,source=rvm_packages.lst,target=/root/rvm_packages.lst \
     --mount=type=tmpfs,target=/var/log \
@@ -28,17 +27,6 @@ RUN --mount=type=bind,source=install_rvm.sh,target=/root/install_rvm.sh \
     --mount=type=tmpfs,target=/var/log \
     --mount=type=tmpfs,target=/tmp \
     sh /root/install_rvm.sh
-
-
-FROM ${BASE_IMAGE} AS clang-tidy-headers
-LABEL maintainer="Kyle Edwards <kyle.edwards@kitware.com>"
-
-RUN --mount=type=bind,source=install_clang_tidy_headers.sh,target=/root/install_clang_tidy_headers.sh \
-    --mount=type=bind,source=clang_tidy_headers_packages.lst,target=/root/clang_tidy_headers_packages.lst \
-    --mount=type=cache,from=dnf-cache,source=/var/cache/dnf,target=/var/cache/dnf,sharing=private \
-    --mount=type=tmpfs,target=/var/log \
-    --mount=type=tmpfs,target=/tmp \
-    sh /root/install_clang_tidy_headers.sh
 
 
 FROM ${BASE_IMAGE} AS iwyu-build
@@ -65,9 +53,6 @@ RUN --mount=type=bind,source=install_deps.sh,target=/root/install_deps.sh \
 
 RUN --mount=type=bind,from=rvm-build,source=/root,target=/root \
     tar -C /usr/local -xf /root/rvm.tar
-
-RUN --mount=type=bind,from=clang-tidy-headers,source=/root,target=/root \
-    tar -C /usr/include -xf /root/clang-tidy-headers.tar
 
 RUN --mount=type=bind,from=iwyu-build,source=/root,target=/root \
     tar -C / -xf /root/iwyu.tar
