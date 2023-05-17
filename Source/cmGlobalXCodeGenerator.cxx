@@ -53,6 +53,7 @@
 #include "cmXCodeObject.h"
 #include "cmXCodeScheme.h"
 #include "cmXMLWriter.h"
+#include "cmXcFramework.h"
 #include "cmake.h"
 
 #if !defined(CMAKE_BOOTSTRAP) && defined(__APPLE__)
@@ -1061,12 +1062,14 @@ bool IsLinkPhaseLibraryExtension(const std::string& fileExt)
 {
   // Empty file extension is a special case for paths to framework's
   // internal binary which could be MyFw.framework/Versions/*/MyFw
-  return (fileExt == ".framework" || fileExt == ".a" || fileExt == ".o" ||
-          fileExt == ".dylib" || fileExt == ".tbd" || fileExt.empty());
+  return (fileExt == ".framework" || fileExt == ".xcframework" ||
+          fileExt == ".a" || fileExt == ".o" || fileExt == ".dylib" ||
+          fileExt == ".tbd" || fileExt.empty());
 }
 bool IsLibraryType(const std::string& fileType)
 {
-  return (fileType == "wrapper.framework" || fileType == "archive.ar" ||
+  return (fileType == "wrapper.framework" ||
+          fileType == "wrapper.xcframework" || fileType == "archive.ar" ||
           fileType == "compiled.mach-o.objfile" ||
           fileType == "compiled.mach-o.dylib" ||
           fileType == "compiled.mach-o.executable" ||
@@ -1078,6 +1081,9 @@ std::string GetDirectoryValueFromFileExtension(const std::string& dirExt)
   std::string ext = cmSystemTools::LowerCase(dirExt);
   if (ext == "framework") {
     return "wrapper.framework";
+  }
+  if (ext == "xcframework") {
+    return "wrapper.xcframework";
   }
   if (ext == "xcassets") {
     return "folder.assetcatalog";
@@ -3607,6 +3613,8 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
         bool canUseLinkPhase = !libItem.HasFeature() ||
           libItem.GetFeatureName() == "__CMAKE_LINK_FRAMEWORK"_s ||
           libItem.GetFeatureName() == "FRAMEWORK"_s ||
+          libItem.GetFeatureName() == "__CMAKE_LINK_XCFRAMEWORK"_s ||
+          libItem.GetFeatureName() == "XCFRAMEWORK"_s ||
           libItem.GetFeatureName() == "WEAK_FRAMEWORK"_s ||
           libItem.GetFeatureName() == "WEAK_LIBRARY"_s;
         if (canUseLinkPhase) {
@@ -3917,12 +3925,14 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
           if (cmSystemTools::FileIsFullPath(cleanPath)) {
             cleanPath = cmSystemTools::CollapseFullPath(cleanPath);
           }
-          bool isFramework =
+          bool isXcFramework =
+            cmHasSuffix(libName.GetFeatureName(), "XCFRAMEWORK"_s);
+          bool isFramework = !isXcFramework &&
             cmHasSuffix(libName.GetFeatureName(), "FRAMEWORK"_s);
           if (isFramework) {
             const auto fwDescriptor = this->SplitFrameworkPath(
               cleanPath, cmGlobalGenerator::FrameworkFormat::Extended);
-            if (!fwDescriptor->Directory.empty() &&
+            if (isFramework && !fwDescriptor->Directory.empty() &&
                 emitted.insert(fwDescriptor->Directory).second) {
               // This is a search path we had not added before and it isn't
               // an implicit search path, so we need it
@@ -3940,13 +3950,54 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
                                fwDescriptor->GetLinkName()))
                              .Value);
             }
+          } else if (isXcFramework) {
+            auto plist = cmParseXcFrameworkPlist(
+              cleanPath, *this->Makefiles.front(), libName.Value.Backtrace);
+            if (!plist) {
+              return;
+            }
+            if (auto const* library = plist->SelectSuitableLibrary(
+                  *this->Makefiles.front(), libName.Value.Backtrace)) {
+              auto libraryPath =
+                cmStrCat(cleanPath, '/', library->LibraryIdentifier, '/',
+                         library->LibraryPath);
+              if (auto const fwDescriptor = this->SplitFrameworkPath(
+                    libraryPath,
+                    cmGlobalGenerator::FrameworkFormat::Relaxed)) {
+                if (!fwDescriptor->Directory.empty() &&
+                    emitted.insert(fwDescriptor->Directory).second) {
+                  // This is a search path we had not added before and it
+                  // isn't an implicit search path, so we need it
+                  fwSearchPaths.Add(
+                    this->XCodeEscapePath(fwDescriptor->Directory));
+                }
+                libPaths.Add(cmStrCat(
+                  "-framework ",
+                  this->XCodeEscapePath(fwDescriptor->GetLinkName())));
+              } else {
+                libPaths.Add(
+                  libName.GetFormattedItem(this->XCodeEscapePath(libraryPath))
+                    .Value);
+                if (!library->HeadersPath.empty()) {
+                  this->AppendBuildSettingAttribute(
+                    target, "HEADER_SEARCH_PATHS",
+                    this->CreateString(this->XCodeEscapePath(
+                      cmStrCat(cleanPath, '/', library->LibraryIdentifier, '/',
+                               library->HeadersPath))),
+                    configName);
+                }
+              }
+            } else {
+              return;
+            }
           } else {
             libPaths.Add(
               libName.GetFormattedItem(this->XCodeEscapePath(cleanPath))
                 .Value);
           }
           if ((!libName.Target || libName.Target->IsImported()) &&
-              (isFramework || IsLinkPhaseLibraryExtension(cleanPath))) {
+              (isFramework || isXcFramework ||
+               IsLinkPhaseLibraryExtension(cleanPath))) {
             // Create file reference for embedding
             auto it = this->ExternalLibRefs.find(cleanPath);
             if (it == this->ExternalLibRefs.end()) {

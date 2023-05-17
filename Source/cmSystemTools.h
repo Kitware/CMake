@@ -111,6 +111,9 @@ public:
   //! Return true if the path is a framework
   static bool IsPathToFramework(const std::string& path);
 
+  //! Return true if the path is a xcframework
+  static bool IsPathToXcFramework(const std::string& path);
+
   //! Return true if the path is a macOS non-framework shared library (aka
   //! .dylib)
   static bool IsPathToMacOSSharedLibrary(const std::string& path);

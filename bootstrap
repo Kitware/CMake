@@ -451,6 +451,7 @@ CMAKE_CXX_SOURCES="\
   cmGccDepfileReader \
   cmReturnCommand \
   cmPlaceholderExpander \
+  cmPlistParser \
   cmRulePlaceholderExpander \
   cmRuntimeDependencyArchive \
   cmScriptGenerator \
@@ -500,6 +501,7 @@ CMAKE_CXX_SOURCES="\
   cmWhileCommand \
   cmWindowsRegistry \
   cmWorkingDirectory \
+  cmXcFramework \
   cmake  \
   cmakemain \
   cmcmd  \
