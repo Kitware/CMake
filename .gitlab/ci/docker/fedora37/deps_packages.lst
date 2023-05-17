@@ -7,6 +7,7 @@ qt6-qtbase-devel
 # Install development tools.
 clang
 clang-tools-extra
+clang-tools-extra-devel
 compiler-rt
 flang
 flang-devel
@@ -18,6 +19,7 @@ make
 bzip2-devel
 expat-devel
 jsoncpp-devel
+json-devel
 libarchive-devel
 libcurl-devel
 libuv-devel
