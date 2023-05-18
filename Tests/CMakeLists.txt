@@ -3342,13 +3342,12 @@ if(BUILD_TESTING)
       )
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/BootstrapTest")
     # This test will use all processors.
-    set_tests_properties(BootstrapTest PROPERTIES RUN_SERIAL 1)
-
-    # provide more time for the bootstrap test
-    get_test_property(BootstrapTest TIMEOUT PREVIOUS_TIMEOUT)
-    if("${PREVIOUS_TIMEOUT}" MATCHES NOTFOUND)
-      set_tests_properties(BootstrapTest PROPERTIES TIMEOUT 5400)
+    set_property(TEST BootstrapTest PROPERTY RUN_SERIAL 1)
+    # This test may take a long time.
+    if(NOT DEFINED CMake_TEST_BOOTSTRAP_TIMEOUT)
+      set(CMake_TEST_BOOTSTRAP_TIMEOUT 5400)
     endif()
+    set_property(TEST BootstrapTest PROPERTY TIMEOUT "${CMake_TEST_BOOTSTRAP_TIMEOUT}")
   endif()
 
   if(CMAKE_Fortran_COMPILER)
