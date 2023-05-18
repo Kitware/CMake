@@ -2138,12 +2138,10 @@ int cmake::DoPreConfigureChecks()
     std::string cacheStart =
       cmStrCat(*this->State->GetInitializedCacheValue("CMAKE_HOME_DIRECTORY"),
                "/CMakeLists.txt");
-    std::string currentStart =
-      cmStrCat(this->GetHomeDirectory(), "/CMakeLists.txt");
-    if (!cmSystemTools::SameFile(cacheStart, currentStart)) {
+    if (!cmSystemTools::SameFile(cacheStart, srcList)) {
       std::string message =
-        cmStrCat("The source \"", currentStart,
-                 "\" does not match the source \"", cacheStart,
+        cmStrCat("The source \"", srcList, "\" does not match the source \"",
+                 cacheStart,
                  "\" used to generate cache.  Re-run cmake with a different "
                  "source directory.");
       cmSystemTools::Error(message);
@@ -2380,7 +2378,7 @@ int cmake::ActualConfigure()
       return -2;
     }
   }
-  if (!this->State->GetInitializedCacheValue("CMAKE_GENERATOR")) {
+  if (!genName) {
     this->AddCacheEntry("CMAKE_GENERATOR", this->GlobalGenerator->GetName(),
                         "Name of generator.", cmStateEnums::INTERNAL);
     this->AddCacheEntry(
