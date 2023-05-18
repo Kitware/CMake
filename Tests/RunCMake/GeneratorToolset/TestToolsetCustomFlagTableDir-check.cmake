@@ -1,6 +1,6 @@
 set(vcProjectFile "${RunCMake_TEST_BINARY_DIR}/main.vcxproj")
 if(NOT EXISTS "${vcProjectFile}")
-  set(RunCMake_TEST_FAILED "Project file\n  ${vcProjectFile}\ndoes not exist.")
+  string(CONCAT RunCMake_TEST_FAILED "Project file\n  ${vcProjectFile}\n" "does not exist.")
   return()
 endif()
 
