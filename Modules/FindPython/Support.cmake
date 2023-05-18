@@ -2110,7 +2110,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
 
         # Use interpreter version and ABI for future searches to ensure consistency
         set (_${_PYTHON_PREFIX}_FIND_VERSIONS ${${_PYTHON_PREFIX}_VERSION_MAJOR}.${${_PYTHON_PREFIX}_VERSION_MINOR})
-        execute_process (COMMAND ${_${_PYTHON_PREFIX}_INTERPRETR_LAUNCHER} "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c
+        execute_process (COMMAND ${_${_PYTHON_PREFIX}_INTERPRETER_LAUNCHER} "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c
                                  "import sys; sys.stdout.write(sys.abiflags)"
                          RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
                          OUTPUT_VARIABLE _${_PYTHON_PREFIX}_ABIFLAGS
