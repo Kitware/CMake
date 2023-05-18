@@ -559,6 +559,7 @@ Properties on Source Files
    /prop_sf/SKIP_AUTOUIC
    /prop_sf/SKIP_PRECOMPILE_HEADERS
    /prop_sf/SKIP_UNITY_BUILD_INCLUSION
+   /prop_sf/SKIP_LINTING
    /prop_sf/Swift_DEPENDENCIES_FILE
    /prop_sf/Swift_DIAGNOSTICS_FILE
    /prop_sf/SYMBOLIC

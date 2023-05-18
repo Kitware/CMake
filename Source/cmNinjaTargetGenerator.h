@@ -136,8 +136,8 @@ protected:
 
   /// @return the clang-tidy replacements file path for the given @a source.
   std::string GetClangTidyReplacementsFilePath(
-    const std::string& directory, cmSourceFile const* source,
-    const std::string& config) const;
+    std::string const& directory, cmSourceFile const& source,
+    std::string const& config) const override;
 
   /// @return the dyndep file path for this target.
   std::string GetDyndepFilePath(std::string const& lang,

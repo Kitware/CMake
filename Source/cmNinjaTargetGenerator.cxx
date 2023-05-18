@@ -29,7 +29,6 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
-#include "cmGlobalCommonGenerator.h"
 #include "cmGlobalNinjaGenerator.h"
 #include "cmList.h"
 #include "cmLocalGenerator.h"
@@ -399,15 +398,15 @@ std::string cmNinjaTargetGenerator::GetObjectFilePath(
 }
 
 std::string cmNinjaTargetGenerator::GetClangTidyReplacementsFilePath(
-  const std::string& directory, cmSourceFile const* source,
-  const std::string& config) const
+  std::string const& directory, cmSourceFile const& source,
+  std::string const& config) const
 {
-  std::string path = this->LocalGenerator->GetHomeRelativeOutputPath();
+  auto path = this->LocalGenerator->GetHomeRelativeOutputPath();
   if (!path.empty()) {
     path += '/';
   }
   path = cmStrCat(directory, '/', path);
-  std::string const& objectName = this->GeneratorTarget->GetObjectName(source);
+  auto const& objectName = this->GeneratorTarget->GetObjectName(&source);
   path =
     cmStrCat(std::move(path),
              this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget),
@@ -890,162 +889,9 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
   const std::string& compileCmd = mf->GetRequiredDefinition(cmdVar);
   cmList compileCmds(compileCmd);
 
-  // See if we need to use a compiler launcher like ccache or distcc
-  std::string compilerLauncher;
-  if (!compileCmds.empty() &&
-      (lang == "C" || lang == "CXX" || lang == "Fortran" || lang == "CUDA" ||
-       lang == "HIP" || lang == "ISPC" || lang == "OBJC" ||
-       lang == "OBJCXX")) {
-    std::string const clauncher_prop = cmStrCat(lang, "_COMPILER_LAUNCHER");
-    cmValue clauncher = this->GeneratorTarget->GetProperty(clauncher_prop);
-    std::string evaluatedClauncher = cmGeneratorExpression::Evaluate(
-      *clauncher, this->LocalGenerator, config, this->GeneratorTarget, nullptr,
-      this->GeneratorTarget, lang);
-    if (!evaluatedClauncher.empty()) {
-      compilerLauncher = evaluatedClauncher;
-    }
-  }
-
-  // Maybe insert an include-what-you-use runner.
-  if (!compileCmds.empty() &&
-      (lang == "C" || lang == "CXX" || lang == "OBJC" || lang == "OBJCXX")) {
-    cmValue tidy = nullptr;
-    cmValue iwyu = nullptr;
-    cmValue cpplint = nullptr;
-    cmValue cppcheck = nullptr;
-    std::string evaluatedTIDY;
-    std::string evaluatedIWYU;
-    std::string evaluatedCPPlint;
-    std::string evaluatedCPPcheck;
-
-    std::string const tidy_prop = cmStrCat(lang, "_CLANG_TIDY");
-    tidy = this->GeneratorTarget->GetProperty(tidy_prop);
-    evaluatedTIDY = cmGeneratorExpression::Evaluate(
-      *tidy, this->LocalGenerator, config, this->GeneratorTarget, nullptr,
-      this->GeneratorTarget, lang);
-    if (!evaluatedTIDY.empty()) {
-      tidy = cmValue(&evaluatedTIDY);
-    }
-
-    if (lang == "C" || lang == "CXX") {
-      std::string const iwyu_prop = cmStrCat(lang, "_INCLUDE_WHAT_YOU_USE");
-      iwyu = this->GeneratorTarget->GetProperty(iwyu_prop);
-      evaluatedIWYU = cmGeneratorExpression::Evaluate(
-        *iwyu, this->LocalGenerator, config, this->GeneratorTarget, nullptr,
-        this->GeneratorTarget, lang);
-      if (!evaluatedIWYU.empty()) {
-        iwyu = cmValue(&evaluatedIWYU);
-      }
-
-      std::string const cpplint_prop = cmStrCat(lang, "_CPPLINT");
-      cpplint = this->GeneratorTarget->GetProperty(cpplint_prop);
-      evaluatedCPPlint = cmGeneratorExpression::Evaluate(
-        *cpplint, this->LocalGenerator, config, this->GeneratorTarget, nullptr,
-        this->GeneratorTarget, lang);
-      if (!evaluatedCPPlint.empty()) {
-        cpplint = cmValue(&evaluatedCPPlint);
-      }
-
-      std::string const cppcheck_prop = cmStrCat(lang, "_CPPCHECK");
-      cppcheck = this->GeneratorTarget->GetProperty(cppcheck_prop);
-      evaluatedCPPcheck = cmGeneratorExpression::Evaluate(
-        *cppcheck, this->LocalGenerator, config, this->GeneratorTarget,
-        nullptr, this->GeneratorTarget, lang);
-      if (!evaluatedCPPcheck.empty()) {
-        cppcheck = cmValue(&evaluatedCPPcheck);
-      }
-    }
-    if (cmNonempty(iwyu) || cmNonempty(tidy) || cmNonempty(cpplint) ||
-        cmNonempty(cppcheck)) {
-      std::string run_iwyu = cmStrCat(cmakeCmd, " -E __run_co_compile");
-      if (!compilerLauncher.empty()) {
-        // In __run_co_compile case the launcher command is supplied
-        // via --launcher=<maybe-list> and consumed
-        run_iwyu +=
-          cmStrCat(" --launcher=",
-                   this->LocalGenerator->EscapeForShell(compilerLauncher));
-        compilerLauncher.clear();
-      }
-      if (cmNonempty(iwyu)) {
-        run_iwyu += " --iwyu=";
-
-        // Only add --driver-mode if it is not already specified, as adding
-        // it unconditionally might override a user-specified driver-mode
-        if (iwyu.Get()->find("--driver-mode=") == std::string::npos) {
-          cmValue p = this->Makefile->GetDefinition(
-            cmStrCat("CMAKE_", lang, "_INCLUDE_WHAT_YOU_USE_DRIVER_MODE"));
-          std::string driverMode;
-
-          if (cmNonempty(p)) {
-            driverMode = *p;
-          } else {
-            driverMode = lang == "C" ? "gcc" : "g++";
-          }
-
-          run_iwyu += this->LocalGenerator->EscapeForShell(
-            cmStrCat(*iwyu, ";--driver-mode=", driverMode));
-        } else {
-          run_iwyu += this->LocalGenerator->EscapeForShell(*iwyu);
-        }
-      }
-      if (cmNonempty(tidy)) {
-        run_iwyu += " --tidy=";
-        cmValue p = this->Makefile->GetDefinition(
-          cmStrCat("CMAKE_", lang, "_CLANG_TIDY_DRIVER_MODE"));
-        std::string driverMode;
-        if (cmNonempty(p)) {
-          driverMode = *p;
-        } else {
-          driverMode = lang == "C" ? "gcc" : "g++";
-        }
-        const bool haveClangTidyExportFixesDir =
-          !this->GeneratorTarget->GetClangTidyExportFixesDirectory(lang)
-             .empty();
-        std::string exportFixes;
-        if (haveClangTidyExportFixesDir) {
-          exportFixes = ";--export-fixes=$CLANG_TIDY_EXPORT_FIXES";
-        }
-        run_iwyu += this->GetLocalGenerator()->EscapeForShell(
-          cmStrCat(*tidy, ";--extra-arg-before=--driver-mode=", driverMode,
-                   exportFixes));
-        if (haveClangTidyExportFixesDir) {
-          std::string search = cmStrCat(
-            this->GetLocalGenerator()->GetState()->UseWindowsShell() ? ""
-                                                                     : "\\",
-            "$$CLANG_TIDY_EXPORT_FIXES");
-          auto loc = run_iwyu.rfind(search);
-          run_iwyu.replace(loc, search.length(), "$CLANG_TIDY_EXPORT_FIXES");
-        }
-      }
-      if (cmNonempty(cpplint)) {
-        run_iwyu += cmStrCat(
-          " --cpplint=", this->GetLocalGenerator()->EscapeForShell(*cpplint));
-      }
-      if (cmNonempty(cppcheck)) {
-        run_iwyu +=
-          cmStrCat(" --cppcheck=",
-                   this->GetLocalGenerator()->EscapeForShell(*cppcheck));
-      }
-      if (cmNonempty(tidy) || cmNonempty(cpplint) || cmNonempty(cppcheck)) {
-        run_iwyu += " --source=$in";
-      }
-      run_iwyu += " -- ";
-      compileCmds.front().insert(0, run_iwyu);
-    }
-  }
-
-  // If compiler launcher was specified and not consumed above, it
-  // goes to the beginning of the command line.
-  if (!compileCmds.empty() && !compilerLauncher.empty()) {
-    cmList args{ compilerLauncher, cmList::EmptyElements::Yes };
-    if (!args.empty()) {
-      args[0] = this->LocalGenerator->ConvertToOutputFormat(
-        args[0], cmOutputConverter::SHELL);
-      for (std::string& i : cmMakeRange(args.begin() + 1, args.end())) {
-        i = this->LocalGenerator->EscapeForShell(i);
-      }
-    }
-    compileCmds.front().insert(0, cmStrCat(args.join(" "), ' '));
+  if (!compileCmds.empty()) {
+    compileCmds.front().insert(0, "${CODE_CHECK}");
+    compileCmds.front().insert(0, "${LAUNCHER}");
   }
 
   if (!compileCmds.empty()) {
@@ -1374,6 +1220,33 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   vars["DEFINES"] = this->ComputeDefines(source, language, config);
   vars["INCLUDES"] = this->ComputeIncludes(source, language, config);
 
+  auto compilerLauncher = this->GetCompilerLauncher(language, config);
+
+  cmValue const skipCodeCheck = source->GetProperty("SKIP_LINTING");
+  if (!skipCodeCheck.IsOn()) {
+    auto const cmakeCmd = this->GetLocalGenerator()->ConvertToOutputFormat(
+      cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
+    vars["CODE_CHECK"] =
+      this->GenerateCodeCheckRules(*source, compilerLauncher, cmakeCmd, config,
+                                   [this](const std::string& path) {
+                                     return this->ConvertToNinjaPath(path);
+                                   });
+  }
+
+  // If compiler launcher was specified and not consumed above, it
+  // goes to the beginning of the command line.
+  if (!compilerLauncher.empty()) {
+    cmList args{ compilerLauncher, cmList::EmptyElements::Yes };
+    if (!args.empty()) {
+      args[0] = this->LocalGenerator->ConvertToOutputFormat(
+        args[0], cmOutputConverter::SHELL);
+      for (std::string& i : cmMakeRange(args.begin() + 1, args.end())) {
+        i = this->LocalGenerator->EscapeForShell(i);
+      }
+      vars["LAUNCHER"] = args.join(" ") + " ";
+    }
+  }
+
   if (this->GetMakefile()->GetSafeDefinition(
         cmStrCat("CMAKE_", language, "_DEPFILE_FORMAT")) != "msvc"_s) {
     bool replaceExt(false);
@@ -1395,18 +1268,6 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
         cmStrCat(objectFileDir, '/', dependFileName),
         cmOutputConverter::SHELL);
     }
-  }
-
-  std::string d =
-    this->GeneratorTarget->GetClangTidyExportFixesDirectory(language);
-  if (!d.empty()) {
-    this->GlobalCommonGenerator->AddClangTidyExportFixesDir(d);
-    std::string fixesFile =
-      this->GetClangTidyReplacementsFilePath(d, source, config);
-    this->GlobalCommonGenerator->AddClangTidyExportFixesFile(fixesFile);
-    cmSystemTools::MakeDirectory(cmSystemTools::GetFilenamePath(fixesFile));
-    fixesFile = this->ConvertToNinjaPath(fixesFile);
-    vars["CLANG_TIDY_EXPORT_FIXES"] = fixesFile;
   }
 
   if (firstForConfig) {

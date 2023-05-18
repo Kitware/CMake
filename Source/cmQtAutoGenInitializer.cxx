@@ -1834,6 +1834,7 @@ cmSourceFile* cmQtAutoGenInitializer::RegisterGeneratedSource(
   cmSourceFile* gFile = this->Makefile->GetOrCreateSource(filename, true);
   gFile->MarkAsGenerated();
   gFile->SetProperty("SKIP_AUTOGEN", "1");
+  gFile->SetProperty("SKIP_LINTING", "ON");
   return gFile;
 }
 
