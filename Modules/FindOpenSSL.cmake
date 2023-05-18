@@ -107,7 +107,7 @@ The following variables may be set to control search behavior:
 
 ``ENV{PKG_CONFIG_PATH}``
   On UNIX-like systems, ``pkg-config`` is used to locate the system OpenSSL.
-  Set the ``PKG_CONFIG_PATH`` environment varialbe to look in alternate
+  Set the ``PKG_CONFIG_PATH`` environment variable to look in alternate
   locations.  Useful on multi-lib systems.
 #]=======================================================================]
 

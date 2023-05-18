@@ -1554,7 +1554,7 @@ foreach(LANG IN ITEMS C CXX Fortran)
           endif()
         endif()
 
-        # We are on a Cray, environment identfier: PE_ENV is set (CRAY), and
+        # We are on a Cray, environment identifier: PE_ENV is set (CRAY), and
         # have NOT found an mpic++-like compiler wrapper (previous block),
         # and we do NOT use the Cray cc/CC compiler wrappers as CC/CXX CMake
         # compiler.

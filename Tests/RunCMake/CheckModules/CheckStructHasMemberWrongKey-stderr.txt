@@ -1,7 +1,7 @@
 CMake Error at .*/Modules/CheckStructHasMember.cmake:[0-9]+. \(message\):
   Unknown arguments:
 
-    LANGUAG;C
+    LANGUAG_;C
 
 Call Stack \(most recent call first\):
   CheckStructHasMemberWrongKey.cmake:[0-9]+ \(check_struct_has_member\)

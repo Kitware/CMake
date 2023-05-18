@@ -416,7 +416,7 @@ bool cmDependsFortran::WriteDependenciesReal(std::string const& obj,
       // file is not updated. In such case the stamp file will be always
       // older than its prerequisite and trigger cmake_copy_f90_mod
       // on each new build. This is expected behavior for incremental
-      // builds and can not be changed without preforming recursive make
+      // builds and can not be changed without performing recursive make
       // calls that would considerably slow down the building process.
       makeDepends << stampFileForMake << ": " << obj_m << '\n';
       makeDepends << "\t$(CMAKE_COMMAND) -E cmake_copy_f90_mod " << modFile

@@ -613,7 +613,7 @@ else()
     option(WXWINDOWS_USE_SHARED_LIBS "Use shared versions (.so) of wxWindows libraries" ON)
     mark_as_advanced(WXWINDOWS_USE_SHARED_LIBS)
 
-    # JW removed option and force the develper th SET it.
+    # JW removed option and force the developer to SET it.
     # option(WXWINDOWS_USE_GL "use wxWindows with GL support (use additional
     # --gl-libs for wx-config)?" OFF)
 

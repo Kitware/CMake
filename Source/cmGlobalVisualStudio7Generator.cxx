@@ -716,7 +716,7 @@ std::set<std::string> cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(
   cmGeneratorTarget const* target)
 {
   std::set<std::string> activeConfigs;
-  // if it is a utilitiy target then only make it part of the
+  // if it is a utility target then only make it part of the
   // default build if another target depends on it
   int type = target->GetType();
   if (type == cmStateEnums::GLOBAL_TARGET) {
