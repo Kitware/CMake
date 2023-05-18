@@ -44,6 +44,7 @@
                 "^empty\\.cxx$"
             ],
             "includes": null,
+            "frameworks": null,
             "defines": null,
             "precompileHeaders": [
               {
@@ -138,7 +139,7 @@
                 "backtrace": [
                     {
                         "file": "^codemodel-v2\\.cmake$",
-                        "line": 42,
+                        "line": 43,
                         "command": "install",
                         "hasParent": true
                     },

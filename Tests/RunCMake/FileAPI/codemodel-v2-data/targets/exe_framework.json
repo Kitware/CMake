@@ -1,0 +1,164 @@
+{
+    "name": "exe_framework",
+    "id": "^exe_framework::@217a96c3a62328a73ef4$",
+    "directorySource": "^framework$",
+    "projectName": "Framework",
+    "type": "EXECUTABLE",
+    "isGeneratorProvided": null,
+    "fileSets": null,
+    "sources": [
+        {
+            "path": "^empty\\.cxx$",
+            "isGenerated": null,
+            "fileSetName": null,
+            "sourceGroupName": "Source Files",
+            "compileGroupLanguage": "CXX",
+            "backtrace": [
+                {
+                    "file": "^framework/CMakeLists\\.txt$",
+                    "line": 16,
+                    "command": "add_executable",
+                    "hasParent": true
+                },
+                {
+                    "file": "^framework/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        }
+    ],
+    "sourceGroups": [
+        {
+            "name": "Source Files",
+            "sourcePaths": [
+                "^empty\\.cxx$"
+            ]
+        }
+    ],
+    "compileGroups": [
+        {
+            "language": "CXX",
+            "sourcePaths": [
+                "^empty\\.cxx$"
+            ],
+            "includes": null,
+            "frameworks": null,
+            "defines": null,
+            "compileCommandFragments": null
+        }
+    ],
+    "backtrace": [
+        {
+            "file": "^framework/CMakeLists\\.txt$",
+            "line": 16,
+            "command": "add_executable",
+            "hasParent": true
+        },
+        {
+            "file": "^framework/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+        }
+    ],
+    "folder": null,
+    "nameOnDisk": "^exe_framework(\\.exe)?$",
+    "artifacts": [
+        {
+            "path": "^framework/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?exe_framework(\\.exe)?$",
+            "_dllExtra": false
+        },
+        {
+            "path": "^framework/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?exe_framework\\.pdb$",
+            "_dllExtra": true
+        }
+    ],
+    "build": "^framework$",
+    "source": "^framework$",
+    "install": null,
+    "link": {
+        "language": "CXX",
+        "lto": null,
+        "commandFragments": [
+            {
+                "fragment": ".*static_framework.*",
+                "role": "libraries",
+                "backtrace": [
+                    {
+                        "file": "^framework/CMakeLists\\.txt$",
+                        "line": 17,
+                        "command": "target_link_libraries",
+                        "hasParent": true
+                    },
+                    {
+                        "file": "^framework/CMakeLists\\.txt$",
+                        "line": null,
+                        "command": null,
+                        "hasParent": false
+                    }
+                ]
+            },
+            {
+                "fragment": ".*shared_framework.*",
+                "role": "libraries",
+                "backtrace": [
+                    {
+                        "file": "^framework/CMakeLists\\.txt$",
+                        "line": 17,
+                        "command": "target_link_libraries",
+                        "hasParent": true
+                    },
+                    {
+                        "file": "^framework/CMakeLists\\.txt$",
+                        "line": null,
+                        "command": null,
+                        "hasParent": false
+                    }
+                ]
+            }
+        ]
+    },
+    "archive": null,
+    "dependencies": [
+        {
+            "id": "^static_framework::@217a96c3a62328a73ef4$",
+            "backtrace": [
+                {
+                    "file": "^framework/CMakeLists\\.txt$",
+                    "line": 17,
+                    "command": "target_link_libraries",
+                    "hasParent": true
+                },
+                {
+                    "file": "^framework/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        },
+        {
+            "id": "^shared_framework::@217a96c3a62328a73ef4$",
+            "backtrace": [
+                {
+                    "file": "^framework/CMakeLists\\.txt$",
+                    "line": 17,
+                    "command": "target_link_libraries",
+                    "hasParent": true
+                },
+                {
+                    "file": "^framework/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        },
+        {
+            "id": "^ZERO_CHECK::@217a96c3a62328a73ef4$",
+            "backtrace": null
+        }
+    ]
+}

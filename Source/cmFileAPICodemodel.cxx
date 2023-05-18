@@ -328,6 +328,7 @@ struct CompileData
   std::vector<JBT<std::string>> Defines;
   std::vector<JBT<std::string>> PrecompileHeaders;
   std::vector<IncludeEntry> Includes;
+  std::vector<IncludeEntry> Frameworks;
 
   friend bool operator==(CompileData const& l, CompileData const& r)
   {
@@ -335,7 +336,7 @@ struct CompileData
             l.Flags == r.Flags && l.Defines == r.Defines &&
             l.PrecompileHeaders == r.PrecompileHeaders &&
             l.LanguageStandard == r.LanguageStandard &&
-            l.Includes == r.Includes);
+            l.Includes == r.Includes && l.Frameworks == r.Frameworks);
   }
 };
 }
@@ -351,6 +352,12 @@ struct hash<CompileData>
     size_t result =
       hash<std::string>()(in.Language) ^ hash<std::string>()(in.Sysroot);
     for (auto const& i : in.Includes) {
+      result = result ^
+        (hash<std::string>()(i.Path.Value) ^
+         hash<Json::ArrayIndex>()(i.Path.Backtrace.Index) ^
+         (i.IsSystem ? std::numeric_limits<size_t>::max() : 0));
+    }
+    for (auto const& i : in.Frameworks) {
       result = result ^
         (hash<std::string>()(i.Path.Value) ^
          hash<Json::ArrayIndex>()(i.Path.Backtrace.Index) ^
@@ -468,6 +475,7 @@ class Target
   Json::Value DumpPaths();
   Json::Value DumpCompileData(CompileData const& cd);
   Json::Value DumpInclude(CompileData::IncludeEntry const& inc);
+  Json::Value DumpFramework(CompileData::IncludeEntry const& fw);
   Json::Value DumpPrecompileHeader(JBT<std::string> const& header);
   Json::Value DumpLanguageStandard(JBTs<std::string> const& standard);
   Json::Value DumpDefine(JBT<std::string> const& def);
@@ -1294,9 +1302,15 @@ void Target::ProcessLanguage(std::string const& lang)
   std::vector<BT<std::string>> includePathList =
     lg->GetIncludeDirectories(this->GT, lang, this->Config);
   for (BT<std::string> const& i : includePathList) {
-    cd.Includes.emplace_back(
-      this->ToJBT(i),
-      this->GT->IsSystemIncludeDirectory(i.Value, this->Config, lang));
+    if (this->GT->IsApple() && cmSystemTools::IsPathToFramework(i.Value)) {
+      cd.Frameworks.emplace_back(
+        this->ToJBT(i),
+        this->GT->IsSystemIncludeDirectory(i.Value, this->Config, lang));
+    } else {
+      cd.Includes.emplace_back(
+        this->ToJBT(i),
+        this->GT->IsSystemIncludeDirectory(i.Value, this->Config, lang));
+    }
   }
   std::vector<BT<std::string>> precompileHeaders =
     this->GT->GetPrecompileHeaders(this->Config, lang);
@@ -1408,7 +1422,11 @@ CompileData Target::BuildCompileData(cmSourceFile* sf)
         bool const isSystemInclude =
           this->GT->IsSystemIncludeDirectory(i, this->Config, fd.Language);
         BT<std::string> include(i, tmpInclude.Backtrace);
-        fd.Includes.emplace_back(this->ToJBT(include), isSystemInclude);
+        if (this->GT->IsApple() && cmSystemTools::IsPathToFramework(i)) {
+          fd.Frameworks.emplace_back(this->ToJBT(include), isSystemInclude);
+        } else {
+          fd.Includes.emplace_back(this->ToJBT(include), isSystemInclude);
+        }
       }
     }
   }
@@ -1480,6 +1498,13 @@ CompileData Target::MergeCompileData(CompileData const& fd)
                      fd.Includes.end());
   cd.Includes.insert(cd.Includes.end(), td.Includes.begin(),
                      td.Includes.end());
+
+  // Use source-specific frameworks followed by target-wide frameworks.
+  cd.Frameworks.reserve(fd.Frameworks.size() + td.Frameworks.size());
+  cd.Frameworks.insert(cd.Frameworks.end(), fd.Frameworks.begin(),
+                       fd.Frameworks.end());
+  cd.Frameworks.insert(cd.Frameworks.end(), td.Frameworks.begin(),
+                       td.Frameworks.end());
 
   // Use target-wide defines followed by source-specific defines.
   cd.Defines.reserve(td.Defines.size() + fd.Defines.size());
@@ -1696,6 +1721,13 @@ Json::Value Target::DumpCompileData(CompileData const& cd)
     }
     result["includes"] = includes;
   }
+  if (!cd.Frameworks.empty()) {
+    Json::Value frameworks = Json::arrayValue;
+    for (auto const& i : cd.Frameworks) {
+      frameworks.append(this->DumpFramework(i));
+    }
+    result["frameworks"] = frameworks;
+  }
   if (!cd.Defines.empty()) {
     Json::Value defines = Json::arrayValue;
     for (JBT<std::string> const& d : cd.Defines) {
@@ -1727,6 +1759,12 @@ Json::Value Target::DumpInclude(CompileData::IncludeEntry const& inc)
   }
   this->AddBacktrace(include, inc.Path.Backtrace);
   return include;
+}
+
+Json::Value Target::DumpFramework(CompileData::IncludeEntry const& fw)
+{
+  // for now, idem as include
+  return this->DumpInclude(fw);
 }
 
 Json::Value Target::DumpPrecompileHeader(JBT<std::string> const& header)

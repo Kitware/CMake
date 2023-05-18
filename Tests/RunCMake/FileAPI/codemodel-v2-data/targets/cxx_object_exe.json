@@ -71,6 +71,7 @@
                 "^empty\\.cxx$"
             ],
             "includes": null,
+            "frameworks": null,
             "defines": null,
             "compileCommandFragments": null
         }

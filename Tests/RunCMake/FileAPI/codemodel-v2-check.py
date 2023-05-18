@@ -12,7 +12,7 @@ def read_codemodel_json_data(filename):
 def check_objects(o, g):
     assert is_list(o)
     assert len(o) == 1
-    check_index_object(o[0], "codemodel", 2, 5, check_object_codemodel(g))
+    check_index_object(o[0], "codemodel", 2, 6, check_object_codemodel(g))
 
 def check_backtrace(t, b, backtrace):
     btg = t["backtraceGraph"]
@@ -578,6 +578,30 @@ def check_target(c):
                                      missing_exception=lambda e: "Include path: %s" % e["path"],
                                      extra_exception=lambda a: "Include path: %s" % a["path"])
 
+                if expected["frameworks"] is not None:
+                    expected_keys.append("frameworks")
+
+                    def check_include(actual, expected):
+                        assert is_dict(actual)
+                        expected_keys = ["path"]
+
+                        if expected["isSystem"] is not None:
+                            expected_keys.append("isSystem")
+                            assert is_bool(actual["isSystem"], expected["isSystem"])
+
+                        if expected["backtrace"] is not None:
+                            expected_keys.append("backtrace")
+                            check_backtrace(obj, actual["backtrace"], expected["backtrace"])
+
+                        assert sorted(actual.keys()) == sorted(expected_keys)
+
+                    check_list_match(lambda a, e: matches(a["path"], e["path"]),
+                                     actual["frameworks"], expected["frameworks"],
+                                     check=check_include,
+                                     check_exception=lambda a, e: "Framework path: %s" % a["path"],
+                                     missing_exception=lambda e: "Framework path: %s" % e["path"],
+                                     extra_exception=lambda a: "Framework path: %s" % a["path"])
+
                 if "precompileHeaders" in expected:
                     expected_keys.append("precompileHeaders")
 
@@ -693,6 +717,7 @@ def gen_check_directories(c, g):
         read_codemodel_json_data("directories/external.json"),
         read_codemodel_json_data("directories/fileset.json"),
         read_codemodel_json_data("directories/subdir.json"),
+        read_codemodel_json_data("directories/framework.json"),
     ]
 
     if matches(g["name"], "^Visual Studio "):
@@ -776,6 +801,12 @@ def gen_check_targets(c, g, inSource):
         read_codemodel_json_data("targets/cxx_object_lib.json"),
         read_codemodel_json_data("targets/cxx_object_exe.json"),
 
+        read_codemodel_json_data("targets/all_build_framework.json"),
+        read_codemodel_json_data("targets/zero_check_framework.json"),
+        read_codemodel_json_data("targets/static_framework.json"),
+        read_codemodel_json_data("targets/shared_framework.json"),
+        read_codemodel_json_data("targets/exe_framework.json"),
+
         read_codemodel_json_data("targets/all_build_imported.json"),
         read_codemodel_json_data("targets/zero_check_imported.json"),
         read_codemodel_json_data("targets/link_imported_exe.json"),
@@ -799,6 +830,21 @@ def gen_check_targets(c, g, inSource):
         read_codemodel_json_data("targets/c_headers_1.json"),
         read_codemodel_json_data("targets/c_headers_2.json"),
     ]
+
+    if sys.platform == "darwin":
+        for e in expected:
+            if e["name"] == "static_framework":
+                apple_static_framework = read_codemodel_json_data("targets/apple_static_framework.json")
+                e["artifacts"] = apple_static_framework["artifacts"]
+                e["nameOnDisk"] = apple_static_framework["nameOnDisk"]
+            elif e["name"] == "shared_framework":
+                apple_shared_framework = read_codemodel_json_data("targets/apple_shared_framework.json")
+                e["artifacts"] = apple_shared_framework["artifacts"]
+                e["nameOnDisk"] = apple_shared_framework["nameOnDisk"]
+            elif e["name"] == "exe_framework":
+                apple_exe_framework = read_codemodel_json_data("targets/apple_exe_framework.json")
+                e["compileGroups"] = apple_exe_framework["compileGroups"]
+                e["link"] = apple_exe_framework["link"]
 
     if cxx_compiler_id in ['Clang', 'AppleClang', 'LCC', 'GNU', 'Intel', 'IntelLLVM', 'MSVC', 'Embarcadero', 'IBMClang'] and g["name"] != "Xcode":
         for e in expected:
@@ -912,6 +958,21 @@ def gen_check_targets(c, g, inSource):
                         },
                         {
                             "path": "^cxx/CMakeLists\\.txt$",
+                            "isGenerated": None,
+                            "fileSetName": None,
+                            "sourceGroupName": "",
+                            "compileGroupLanguage": None,
+                            "backtrace": [
+                                {
+                                    "file": "^CMakeLists\\.txt$",
+                                    "line": None,
+                                    "command": None,
+                                    "hasParent": False,
+                                },
+                            ],
+                        },
+                        {
+                            "path": "^framework/CMakeLists\\.txt$",
                             "isGenerated": None,
                             "fileSetName": None,
                             "sourceGroupName": "",
@@ -1070,6 +1131,7 @@ def gen_check_targets(c, g, inSource):
                                 "^codemodel-v2\\.cmake$",
                                 "^custom/CMakeLists\\.txt$",
                                 "^cxx/CMakeLists\\.txt$",
+                                "^framework/CMakeLists\\.txt$",
                                 "^dir/CMakeLists\\.txt$",
                                 "^dir/dir/CMakeLists\\.txt$",
                                 "^fileset/CMakeLists\\.txt$",
@@ -1144,6 +1206,7 @@ def gen_check_projects(c, g):
         read_codemodel_json_data("projects/interface.json"),
         read_codemodel_json_data("projects/custom.json"),
         read_codemodel_json_data("projects/external.json"),
+        read_codemodel_json_data("projects/framework.json"),
     ]
 
     if matches(g["name"], "^Visual Studio "):

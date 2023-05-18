@@ -6,6 +6,7 @@
         ".*cmake_pch(_[^.]+)?(\\.hxx)?\\.cxx$"
       ],
       "includes": null,
+      "frameworks": null,
       "defines": null,
       "precompileHeaders": [
         {
@@ -52,6 +53,7 @@
         ".*cmake_pch(_[^.]+)?(\\.hxx)?\\.cxx$"
       ],
       "includes": null,
+      "frameworks": null,
       "defines": null,
       "precompileHeaders": [
         {
@@ -98,6 +100,7 @@
         "^empty\\.cxx$"
       ],
       "includes": null,
+      "frameworks": null,
       "defines": null,
       "precompileHeaders": [
         {
