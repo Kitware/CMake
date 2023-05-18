@@ -3310,18 +3310,20 @@ if(BUILD_TESTING)
     endif()
   endif()
 
-  if(CMake_TEST_EXTERNAL_CMAKE)
-    set(CMAKE_SKIP_BOOTSTRAP_TEST 1)
-  endif()
-  if("${CMAKE_GENERATOR}" MATCHES Xcode)
-    set(CMAKE_SKIP_BOOTSTRAP_TEST 1)
-  endif()
-  if(EXISTS "${CMake_BINARY_DIR}/CMakeLists.txt")
-    # If there is CMakeLists.txt in the binary tree, assume in-source build
-    set(CMAKE_SKIP_BOOTSTRAP_TEST 1)
+  if(NOT DEFINED CMake_TEST_BOOTSTRAP)
+    if(CMAKE_RUN_LONG_TESTS
+        AND NOT CMAKE_SKIP_BOOTSTRAP_TEST
+        AND NOT CMake_TEST_EXTERNAL_CMAKE
+        AND NOT CMAKE_GENERATOR MATCHES "Xcode"
+        AND NOT EXISTS "${CMake_BINARY_DIR}/CMakeLists.txt"
+        )
+      set(CMake_TEST_BOOTSTRAP 1)
+    else()
+      set(CMake_TEST_BOOTSTRAP 0)
+    endif()
   endif()
   set(bootstrap "")
-  if(CMAKE_RUN_LONG_TESTS AND NOT CMAKE_SKIP_BOOTSTRAP_TEST)
+  if(CMake_TEST_BOOTSTRAP)
     if(UNIX)
       set(bootstrap ${CMake_SOURCE_DIR}/bootstrap)
     elseif(MSYS)
