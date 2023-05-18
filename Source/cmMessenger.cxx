@@ -18,51 +18,38 @@
 
 MessageType cmMessenger::ConvertMessageType(MessageType t) const
 {
-  bool warningsAsErrors;
-
   if (t == MessageType::AUTHOR_WARNING || t == MessageType::AUTHOR_ERROR) {
-    warningsAsErrors = this->GetDevWarningsAsErrors();
-    if (warningsAsErrors && t == MessageType::AUTHOR_WARNING) {
-      t = MessageType::AUTHOR_ERROR;
-    } else if (!warningsAsErrors && t == MessageType::AUTHOR_ERROR) {
-      t = MessageType::AUTHOR_WARNING;
+    if (this->GetDevWarningsAsErrors()) {
+      return MessageType::AUTHOR_ERROR;
     }
-  } else if (t == MessageType::DEPRECATION_WARNING ||
-             t == MessageType::DEPRECATION_ERROR) {
-    warningsAsErrors = this->GetDeprecatedWarningsAsErrors();
-    if (warningsAsErrors && t == MessageType::DEPRECATION_WARNING) {
-      t = MessageType::DEPRECATION_ERROR;
-    } else if (!warningsAsErrors && t == MessageType::DEPRECATION_ERROR) {
-      t = MessageType::DEPRECATION_WARNING;
-    }
+    return MessageType::AUTHOR_WARNING;
   }
-
+  if (t == MessageType::DEPRECATION_WARNING ||
+      t == MessageType::DEPRECATION_ERROR) {
+    if (this->GetDeprecatedWarningsAsErrors()) {
+      return MessageType::DEPRECATION_ERROR;
+    }
+    return MessageType::DEPRECATION_WARNING;
+  }
   return t;
 }
 
 bool cmMessenger::IsMessageTypeVisible(MessageType t) const
 {
-  bool isVisible = true;
-
   if (t == MessageType::DEPRECATION_ERROR) {
-    if (!this->GetDeprecatedWarningsAsErrors()) {
-      isVisible = false;
-    }
-  } else if (t == MessageType::DEPRECATION_WARNING) {
-    if (this->GetSuppressDeprecatedWarnings()) {
-      isVisible = false;
-    }
-  } else if (t == MessageType::AUTHOR_ERROR) {
-    if (!this->GetDevWarningsAsErrors()) {
-      isVisible = false;
-    }
-  } else if (t == MessageType::AUTHOR_WARNING) {
-    if (this->GetSuppressDevWarnings()) {
-      isVisible = false;
-    }
+    return this->GetDeprecatedWarningsAsErrors();
+  }
+  if (t == MessageType::DEPRECATION_WARNING) {
+    return !this->GetSuppressDeprecatedWarnings();
+  }
+  if (t == MessageType::AUTHOR_ERROR) {
+    return this->GetDevWarningsAsErrors();
+  }
+  if (t == MessageType::AUTHOR_WARNING) {
+    return !this->GetSuppressDevWarnings();
   }
 
-  return isVisible;
+  return true;
 }
 
 static bool printMessagePreamble(MessageType t, std::ostream& msg)
