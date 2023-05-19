@@ -3,6 +3,7 @@ MINGW
 
 .. versionadded:: 3.2
 
-``True`` when using MinGW
+Set to a true value when at least one language is enabled
+with a compiler targeting the GNU ABI on Windows (MinGW).
 
-Set to ``true`` when the compiler is some version of MinGW.
+Otherwise, this variable is not set by CMake.
