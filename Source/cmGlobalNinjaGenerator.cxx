@@ -2536,7 +2536,12 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
   CxxModuleUsage usages;
 
   // Map from module name to module file path, if known.
-  std::map<std::string, std::string> mod_files;
+  struct AvailableModuleInfo
+  {
+    std::string BmiPath;
+    bool IsPrivate;
+  };
+  std::map<std::string, AvailableModuleInfo> mod_files;
 
   // Populate the module map with those provided by linked targets first.
   for (std::string const& linked_target_dir : linked_target_dirs) {
@@ -2560,7 +2565,15 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
       Json::Value const& target_modules = ltm["modules"];
       if (target_modules.isObject()) {
         for (auto i = target_modules.begin(); i != target_modules.end(); ++i) {
-          mod_files[i.key().asString()] = i->asString();
+          Json::Value const& visible_module = *i;
+          if (visible_module.isObject()) {
+            Json::Value const& bmi_path = visible_module["bmi"];
+            Json::Value const& is_private = visible_module["is-private"];
+            mod_files[i.key().asString()] = AvailableModuleInfo{
+              bmi_path.asString(),
+              is_private.asBool(),
+            };
+          }
         }
       }
       Json::Value const& target_modules_references = ltm["references"];
@@ -2641,8 +2654,15 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
         cmSystemTools::ReplaceString(safe_logical_name, ":", "-");
         mod = cmStrCat(module_dir, safe_logical_name, module_ext);
       }
-      mod_files[p.LogicalName] = mod;
-      target_modules[p.LogicalName] = mod;
+      mod_files[p.LogicalName] = AvailableModuleInfo{
+        mod,
+        false, // Always visible within our own target.
+      };
+      Json::Value& module_info = target_modules[p.LogicalName] =
+        Json::objectValue;
+      module_info["bmi"] = mod;
+      module_info["is-private"] =
+        cmDyndepCollation::IsObjectPrivate(object.PrimaryOutput, export_info);
     }
   }
 
@@ -2662,12 +2682,15 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
       return path;
     };
     locs.BmiLocationForModule =
-      [&mod_files](std::string const& logical) -> cm::optional<std::string> {
+      [&mod_files](std::string const& logical) -> CxxBmiLocation {
       auto m = mod_files.find(logical);
       if (m != mod_files.end()) {
-        return m->second;
+        if (m->second.IsPrivate) {
+          return CxxBmiLocation::Private();
+        }
+        return CxxBmiLocation::Known(m->second.BmiPath);
       }
-      return {};
+      return CxxBmiLocation::Unknown();
     };
 
     // Insert information about the current target's modules.
@@ -2689,13 +2712,14 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
       build.ImplicitOuts.clear();
       for (auto const& p : object.Provides) {
         build.ImplicitOuts.push_back(
-          this->ConvertToNinjaPath(mod_files[p.LogicalName]));
+          this->ConvertToNinjaPath(mod_files[p.LogicalName].BmiPath));
       }
       build.ImplicitDeps.clear();
       for (auto const& r : object.Requires) {
         auto mit = mod_files.find(r.LogicalName);
         if (mit != mod_files.end()) {
-          build.ImplicitDeps.push_back(this->ConvertToNinjaPath(mit->second));
+          build.ImplicitDeps.push_back(
+            this->ConvertToNinjaPath(mit->second.BmiPath));
         }
       }
       build.Variables.clear();
@@ -2761,7 +2785,7 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
     [mod_files](std::string const& name) -> cm::optional<std::string> {
     auto m = mod_files.find(name);
     if (m != mod_files.end()) {
-      return m->second;
+      return m->second.BmiPath;
     }
     return {};
   };

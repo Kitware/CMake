@@ -9,7 +9,6 @@
 #include <ostream>
 #include <stdexcept>
 #include <string>
-#include <type_traits>
 
 namespace cm {
 

@@ -623,3 +623,20 @@ bool cmDyndepCollation::WriteDyndepMetadata(
 
   return result;
 }
+
+bool cmDyndepCollation::IsObjectPrivate(
+  std::string const& object, cmCxxModuleExportInfo const& export_info)
+{
+#ifdef _WIN32
+  std::string output_path = object;
+  cmSystemTools::ConvertToUnixSlashes(output_path);
+#else
+  std::string const& output_path = object;
+#endif
+  auto fileset_info_itr = export_info.ObjectToFileSet.find(output_path);
+  if (fileset_info_itr == export_info.ObjectToFileSet.end()) {
+    return false;
+  }
+  auto const& file_set = fileset_info_itr->second;
+  return !cmFileSetVisibilityIsForInterface(file_set.Visibility);
+}
