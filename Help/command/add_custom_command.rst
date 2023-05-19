@@ -489,9 +489,12 @@ When the command will happen is determined by which
 of the following is specified:
 
 ``PRE_BUILD``
-  On :ref:`Visual Studio Generators`, run before any other rules are
-  executed within the target.
-  On other generators, run just before ``PRE_LINK`` commands.
+  This option has unique behavior for the :ref:`Visual Studio Generators`.
+  When using one of the Visual Studio generators, the command will run before
+  any other rules are executed within the target.  With all other generators,
+  this option behaves the same as ``PRE_LINK`` instead.  Because of this,
+  it is recommended to avoid using ``PRE_BUILD`` except when it is known that
+  a Visual Studio generator is being used.
 ``PRE_LINK``
   Run after sources have been compiled but before linking the binary
   or running the librarian or archiver tool of a static library.
