@@ -19,7 +19,7 @@
 #include "dap/serialization.h"
 #include "dap/types.h"
 
-#include <json/forwards.h>
+#include <cm3p/json/forwards.h>
 
 namespace dap {
 namespace json {

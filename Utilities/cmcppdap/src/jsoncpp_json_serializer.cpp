@@ -16,7 +16,7 @@
 
 #include "null_json_serializer.h"
 
-#include <json/json.h>
+#include <cm3p/json/json.h>
 #include <cstdlib>
 #include <memory>
 
