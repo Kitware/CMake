@@ -113,7 +113,7 @@ The following variables may be set to control search behavior:
 
 macro(_OpenSSL_test_and_find_dependencies ssl_library crypto_library)
   unset(_OpenSSL_extra_static_deps)
-  if((CMAKE_SYSTEM_NAME STREQUAL "Linux") AND
+  if(UNIX AND
      (("${ssl_library}" MATCHES "\\${CMAKE_STATIC_LIBRARY_SUFFIX}$") OR
       ("${crypto_library}" MATCHES "\\${CMAKE_STATIC_LIBRARY_SUFFIX}$")))
     set(_OpenSSL_has_dependencies TRUE)
@@ -140,7 +140,7 @@ macro(_OpenSSL_test_and_find_dependencies ssl_library crypto_library)
         endif()
       endforeach()
       unset(_OPENSSL_DEP_LIB)
-    else()
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
       set(_OpenSSL_has_dependency_dl TRUE)
     endif()
     if(_OpenSSL_ldflags_other)
@@ -152,7 +152,7 @@ macro(_OpenSSL_test_and_find_dependencies ssl_library crypto_library)
         endif()
       endforeach()
       unset(_OPENSSL_DEP_LDFLAG)
-    else()
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
       set(_OpenSSL_has_dependency_threads TRUE)
       find_package(Threads)
     endif()
