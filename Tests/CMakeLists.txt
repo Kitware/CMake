@@ -3310,18 +3310,20 @@ if(BUILD_TESTING)
     endif()
   endif()
 
-  if(CMake_TEST_EXTERNAL_CMAKE)
-    set(CMAKE_SKIP_BOOTSTRAP_TEST 1)
-  endif()
-  if("${CMAKE_GENERATOR}" MATCHES Xcode)
-    set(CMAKE_SKIP_BOOTSTRAP_TEST 1)
-  endif()
-  if(EXISTS "${CMake_BINARY_DIR}/CMakeLists.txt")
-    # If there is CMakeLists.txt in the binary tree, assume in-source build
-    set(CMAKE_SKIP_BOOTSTRAP_TEST 1)
+  if(NOT DEFINED CMake_TEST_BOOTSTRAP)
+    if(CMAKE_RUN_LONG_TESTS
+        AND NOT CMAKE_SKIP_BOOTSTRAP_TEST
+        AND NOT CMake_TEST_EXTERNAL_CMAKE
+        AND NOT CMAKE_GENERATOR MATCHES "Xcode"
+        AND NOT EXISTS "${CMake_BINARY_DIR}/CMakeLists.txt"
+        )
+      set(CMake_TEST_BOOTSTRAP 1)
+    else()
+      set(CMake_TEST_BOOTSTRAP 0)
+    endif()
   endif()
   set(bootstrap "")
-  if(CMAKE_RUN_LONG_TESTS AND NOT CMAKE_SKIP_BOOTSTRAP_TEST)
+  if(CMake_TEST_BOOTSTRAP)
     if(UNIX)
       set(bootstrap ${CMake_SOURCE_DIR}/bootstrap)
     elseif(MSYS)
@@ -3340,13 +3342,12 @@ if(BUILD_TESTING)
       )
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/BootstrapTest")
     # This test will use all processors.
-    set_tests_properties(BootstrapTest PROPERTIES RUN_SERIAL 1)
-
-    # provide more time for the bootstrap test
-    get_test_property(BootstrapTest TIMEOUT PREVIOUS_TIMEOUT)
-    if("${PREVIOUS_TIMEOUT}" MATCHES NOTFOUND)
-      set_tests_properties(BootstrapTest PROPERTIES TIMEOUT 5400)
+    set_property(TEST BootstrapTest PROPERTY RUN_SERIAL 1)
+    # This test may take a long time.
+    if(NOT DEFINED CMake_TEST_BOOTSTRAP_TIMEOUT)
+      set(CMake_TEST_BOOTSTRAP_TIMEOUT 5400)
     endif()
+    set_property(TEST BootstrapTest PROPERTY TIMEOUT "${CMake_TEST_BOOTSTRAP_TIMEOUT}")
   endif()
 
   if(CMAKE_Fortran_COMPILER)
