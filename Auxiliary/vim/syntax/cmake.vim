@@ -325,11 +325,11 @@ syn keyword cmakeProperty contained
             \ SKIP_AUTORCC
             \ SKIP_AUTOUIC
             \ SKIP_BUILD_RPATH
+            \ SKIP_LINTING
             \ SKIP_PRECOMPILE_HEADERS
             \ SKIP_REGULAR_EXPRESSION
             \ SKIP_RETURN_CODE
             \ SKIP_UNITY_BUILD_INCLUSION
-            \ SKIP_LINTING
             \ SOURCES
             \ SOURCE_DIR
             \ SOVERSION

@@ -19,9 +19,11 @@ created.
   This property supports
   :manual:`generator expressions <cmake-generator-expressions(7)>`.
 
+.. versionadded:: 3.27
+
   :prop_sf:`SKIP_LINTING` can be set on individual source files to exclude
-  them from the linting process, which includes tools like
-  :prop_tgt:`<LANG>_CPPLINT`, :prop_tgt:`<LANG>_CLANG_TIDY`,
-  :prop_tgt:`<LANG>_CPPCHECK`, and :prop_tgt:`<LANG>_INCLUDE_WHAT_YOU_USE`.
-  When :prop_sf:`SKIP_LINTING` is set on a source file, the mentioned tools
-  will not be run on that specific file.
+  them from the linting tools defined by ``<LANG>_CPPLINT``,
+  :prop_tgt:`<LANG>_CLANG_TIDY`, :prop_tgt:`<LANG>_CPPCHECK`, and
+  :prop_tgt:`<LANG>_INCLUDE_WHAT_YOU_USE`.  When :prop_sf:`SKIP_LINTING` is
+  set to true on a source file, those tools will not be run on that specific
+  file.
