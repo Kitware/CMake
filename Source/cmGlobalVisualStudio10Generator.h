@@ -149,6 +149,8 @@ public:
 
   virtual bool IsUtf8EncodingSupported() const { return false; }
 
+  virtual bool IsScanDependenciesSupported() const { return false; }
+
   static std::string GetInstalledNsightTegraVersion();
 
   /** Return the first two components of CMAKE_SYSTEM_VERSION.  */
