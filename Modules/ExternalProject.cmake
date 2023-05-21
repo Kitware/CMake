@@ -3379,6 +3379,7 @@ function(_ep_add_update_command name)
     endif()
     set(work_dir ${source_dir})
     set(comment "Performing update step (hg pull) for '${name}'")
+    set(comment_disconnected "Performing disconnected update step for '${name}'")
 
     get_property(hg_tag
       TARGET ${name}
@@ -3404,6 +3405,7 @@ Update to Mercurial >= 2.1.1.
       ${HG_EXECUTABLE} pull
       COMMAND ${HG_EXECUTABLE} update ${hg_tag}
     )
+    set(cmd_disconnected ${HG_EXECUTABLE} update ${hg_tag})
     set(always 1)
   endif()
 
