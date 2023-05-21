@@ -384,9 +384,17 @@ public:
       , Name(std::move(name))
     {
     }
-    FrameworkDescriptor(std::string directory, std::string name,
-                        std::string suffix)
+    FrameworkDescriptor(std::string directory, std::string version,
+                        std::string name)
       : Directory(std::move(directory))
+      , Version(std::move(version))
+      , Name(std::move(name))
+    {
+    }
+    FrameworkDescriptor(std::string directory, std::string version,
+                        std::string name, std::string suffix)
+      : Directory(std::move(directory))
+      , Version(std::move(version))
       , Name(std::move(name))
       , Suffix(std::move(suffix))
     {
@@ -400,6 +408,13 @@ public:
     {
       return cmStrCat(this->Name, ".framework/"_s, this->Name, this->Suffix);
     }
+    std::string GetVersionedName() const
+    {
+      return this->Version.empty()
+        ? this->GetFullName()
+        : cmStrCat(this->Name, ".framework/Versions/"_s, this->Version, '/',
+                   this->Name, this->Suffix);
+    }
     std::string GetFrameworkPath() const
     {
       return this->Directory.empty()
@@ -412,8 +427,15 @@ public:
         ? this->GetFullName()
         : cmStrCat(this->Directory, '/', this->GetFullName());
     }
+    std::string GetVersionedPath() const
+    {
+      return this->Directory.empty()
+        ? this->GetVersionedName()
+        : cmStrCat(this->Directory, '/', this->GetVersionedName());
+    }
 
     const std::string Directory;
+    const std::string Version;
     const std::string Name;
     const std::string Suffix;
   };

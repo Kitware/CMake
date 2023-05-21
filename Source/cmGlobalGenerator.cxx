@@ -2598,14 +2598,14 @@ cmGlobalGenerator::SplitFrameworkPath(const std::string& path,
   // or (/path/to/)?FwName.framework/FwName(.tbd)?
   // or (/path/to/)?FwName.framework/Versions/*/FwName(.tbd)?
   static cmsys::RegularExpression frameworkPath(
-    "((.+)/)?(.+)\\.framework(/Versions/[^/]+)?(/(.+))?$");
+    "((.+)/)?([^/]+)\\.framework(/Versions/([^/]+))?(/(.+))?$");
 
   auto ext = cmSystemTools::GetFilenameLastExtension(path);
   if ((ext.empty() || ext == ".tbd" || ext == ".framework") &&
       frameworkPath.find(path)) {
     auto name = frameworkPath.match(3);
     auto libname =
-      cmSystemTools::GetFilenameWithoutExtension(frameworkPath.match(6));
+      cmSystemTools::GetFilenameWithoutExtension(frameworkPath.match(7));
     if (format == FrameworkFormat::Strict && libname.empty()) {
       return cm::nullopt;
     }
@@ -2614,11 +2614,12 @@ cmGlobalGenerator::SplitFrameworkPath(const std::string& path,
     }
 
     if (libname.empty() || name.size() == libname.size()) {
-      return FrameworkDescriptor{ frameworkPath.match(2), name };
+      return FrameworkDescriptor{ frameworkPath.match(2),
+                                  frameworkPath.match(5), name };
     }
 
-    return FrameworkDescriptor{ frameworkPath.match(2), name,
-                                libname.substr(name.size()) };
+    return FrameworkDescriptor{ frameworkPath.match(2), frameworkPath.match(5),
+                                name, libname.substr(name.size()) };
   }
 
   if (format == FrameworkFormat::Extended) {
