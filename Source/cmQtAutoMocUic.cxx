@@ -2272,10 +2272,9 @@ cmQtAutoMocUicT::JobDepFilesMergeT::initialDependencies() const
 void cmQtAutoMocUicT::JobDepFilesMergeT::Process()
 {
   if (this->Log().Verbose()) {
-    this->Log().Info(
-      GenT::MOC,
-      cmStrCat("Merging MOC dependencies into ",
-               this->MessagePath(this->BaseConst().DepFile.c_str())));
+    this->Log().Info(GenT::MOC,
+                     cmStrCat("Merging MOC dependencies into ",
+                              this->MessagePath(this->BaseConst().DepFile)));
   }
   auto processDepFile =
     [this](const std::string& mocOutputFile) -> std::vector<std::string> {
