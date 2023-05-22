@@ -151,6 +151,10 @@ void generateMTFValues ( EState* s )
    UChar* block  = s->block;
    UInt16* mtfv  = s->mtfv;
 
+#ifdef __clang_analyzer__
+   memset(yy, 0, sizeof(yy));
+#endif
+
    makeMaps_e ( s );
    EOB = s->nInUse+1;
 
@@ -223,6 +227,10 @@ void generateMTFValues ( EState* s )
          zPend = (zPend - 2) / 2;
       };
       zPend = 0;
+      #ifdef __clang_analyzer__
+      /* Tolerate deadcode.DeadStores to avoid modifying upstream.  */
+      (void)zPend;
+      #endif
    }
 
    mtfv[wr] = EOB; wr++; s->mtfFreq[EOB]++;
