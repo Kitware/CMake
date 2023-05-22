@@ -12,10 +12,10 @@ Copy a file to another location and modify its contents.
                  [NEWLINE_STYLE [UNIX|DOS|WIN32|LF|CRLF] ])
 
 Copies an ``<input>`` file to an ``<output>`` file and substitutes
-variable values referenced as ``@VAR@`` or ``${VAR}`` in the input
-file content.  Each variable reference will be replaced with the
-current value of the variable, or the empty string if the variable
-is not defined.  Furthermore, input lines of the form
+variable values referenced as ``@VAR@``, ``${VAR}``, ``$CACHE{VAR}`` or
+``$ENV{VAR}`` in the input file content.  Each variable reference will be
+replaced with the current value of the variable, or the empty string if
+the variable is not defined.  Furthermore, input lines of the form
 
 .. code-block:: c
 
