@@ -8,7 +8,8 @@
         "Imported",
         "Interface",
         "Object",
-        "External"
+        "External",
+        "Framework"
     ],
     "directorySources": [
         "^\\.$",

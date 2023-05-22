@@ -1,8 +1,8 @@
 {
-    "name": "cxx_static_lib",
-    "id": "^cxx_static_lib::@a56b12a3f5c0529fb296$",
-    "directorySource": "^cxx$",
-    "projectName": "Cxx",
+    "name": "static_framework",
+    "id": "^static_framework::@217a96c3a62328a73ef4$",
+    "directorySource": "^framework$",
+    "projectName": "Framework",
     "type": "STATIC_LIBRARY",
     "isGeneratorProvided": null,
     "fileSets": null,
@@ -15,13 +15,13 @@
             "compileGroupLanguage": "CXX",
             "backtrace": [
                 {
-                    "file": "^cxx/CMakeLists\\.txt$",
-                    "line": 13,
+                    "file": "^framework/CMakeLists\\.txt$",
+                    "line": 4,
                     "command": "add_library",
                     "hasParent": true
                 },
                 {
-                    "file": "^cxx/CMakeLists\\.txt$",
+                    "file": "^framework/CMakeLists\\.txt$",
                     "line": null,
                     "command": null,
                     "hasParent": false
@@ -51,28 +51,28 @@
     ],
     "backtrace": [
         {
-            "file": "^cxx/CMakeLists\\.txt$",
-            "line": 13,
+            "file": "^framework/CMakeLists\\.txt$",
+            "line": 4,
             "command": "add_library",
             "hasParent": true
         },
         {
-            "file": "^cxx/CMakeLists\\.txt$",
+            "file": "^framework/CMakeLists\\.txt$",
             "line": null,
             "command": null,
             "hasParent": false
         }
     ],
     "folder": null,
-    "nameOnDisk": "^(lib)?cxx_static_lib\\.(a|lib)$",
+    "nameOnDisk": "^(lib)?static_framework\\.(a|lib)$",
     "artifacts": [
         {
-            "path": "^cxx/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib)?cxx_static_lib\\.(a|lib)$",
+            "path": "^framework/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib)?static_framework\\.(a|lib)$",
             "_dllExtra": false
         }
     ],
-    "build": "^cxx$",
-    "source": "^cxx$",
+    "build": "^framework$",
+    "source": "^framework$",
     "install": null,
     "link": null,
     "archive": {
@@ -80,7 +80,7 @@
     },
     "dependencies": [
         {
-            "id": "^ZERO_CHECK::@a56b12a3f5c0529fb296$",
+            "id": "^ZERO_CHECK::@217a96c3a62328a73ef4$",
             "backtrace": null
         }
     ]

@@ -1,9 +1,9 @@
 {
-    "name": "cxx_static_exe",
-    "id": "^cxx_static_exe::@a56b12a3f5c0529fb296$",
-    "directorySource": "^cxx$",
-    "projectName": "Cxx",
-    "type": "EXECUTABLE",
+    "name": "shared_framework",
+    "id": "^shared_framework::@217a96c3a62328a73ef4$",
+    "directorySource": "^framework$",
+    "projectName": "Framework",
+    "type": "SHARED_LIBRARY",
     "isGeneratorProvided": null,
     "fileSets": null,
     "sources": [
@@ -15,13 +15,13 @@
             "compileGroupLanguage": "CXX",
             "backtrace": [
                 {
-                    "file": "^cxx/CMakeLists\\.txt$",
-                    "line": 14,
-                    "command": "add_executable",
+                    "file": "^framework/CMakeLists\\.txt$",
+                    "line": 7,
+                    "command": "add_library",
                     "hasParent": true
                 },
                 {
-                    "file": "^cxx/CMakeLists\\.txt$",
+                    "file": "^framework/CMakeLists\\.txt$",
                     "line": null,
                     "command": null,
                     "hasParent": false
@@ -45,38 +45,47 @@
             ],
             "includes": null,
             "frameworks": null,
-            "defines": null,
+            "defines": [
+                {
+                    "define": "shared_framework_EXPORTS",
+                    "backtrace": null
+                }
+            ],
             "compileCommandFragments": null
         }
     ],
     "backtrace": [
         {
-            "file": "^cxx/CMakeLists\\.txt$",
-            "line": 14,
-            "command": "add_executable",
+            "file": "^framework/CMakeLists\\.txt$",
+            "line": 7,
+            "command": "add_library",
             "hasParent": true
         },
         {
-            "file": "^cxx/CMakeLists\\.txt$",
+            "file": "^framework/CMakeLists\\.txt$",
             "line": null,
             "command": null,
             "hasParent": false
         }
     ],
     "folder": null,
-    "nameOnDisk": "^cxx_static_exe(\\.exe)?$",
+    "nameOnDisk": "^(lib|cyg|msys-)?shared_framework\\.(so|dylib|dll)$",
     "artifacts": [
         {
-            "path": "^cxx/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?cxx_static_exe(\\.exe)?$",
+            "path": "^framework/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib|cyg|msys-)?shared_framework\\.(so|dylib|dll)$",
             "_dllExtra": false
         },
         {
-            "path": "^cxx/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?cxx_static_exe\\.pdb$",
+            "path": "^framework/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib)?shared_framework\\.(dll\\.a|lib)$",
+            "_dllExtra": true
+        },
+        {
+            "path": "^framework/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib|cyg|msys-)?shared_framework\\.pdb$",
             "_dllExtra": true
         }
     ],
-    "build": "^cxx$",
-    "source": "^cxx$",
+    "build": "^framework$",
+    "source": "^framework$",
     "install": null,
     "link": {
         "language": "CXX",
@@ -86,24 +95,7 @@
     "archive": null,
     "dependencies": [
         {
-            "id": "^cxx_static_lib::@a56b12a3f5c0529fb296$",
-            "backtrace": [
-                {
-                    "file": "^cxx/CMakeLists\\.txt$",
-                    "line": 15,
-                    "command": "target_link_libraries",
-                    "hasParent": true
-                },
-                {
-                    "file": "^cxx/CMakeLists\\.txt$",
-                    "line": null,
-                    "command": null,
-                    "hasParent": false
-                }
-            ]
-        },
-        {
-            "id": "^ZERO_CHECK::@a56b12a3f5c0529fb296$",
+            "id": "^ZERO_CHECK::@217a96c3a62328a73ef4$",
             "backtrace": null
         }
     ]
