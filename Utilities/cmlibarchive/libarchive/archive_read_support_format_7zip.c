@@ -42,6 +42,10 @@ __FBSDID("$FreeBSD$");
 #include <cm3p/zlib.h>
 #endif
 
+#ifdef __clang_analyzer__
+#include <assert.h>
+#endif
+
 #include "archive.h"
 #include "archive_entry.h"
 #include "archive_entry_locale.h"
@@ -757,6 +761,9 @@ archive_read_format_7zip_read_header(struct archive_read *a,
 				return (ARCHIVE_FATAL);
 			}
 			symname = mem;
+			#ifdef __clang_analyzer__
+			assert(buff);
+			#endif
 			memcpy(symname+symsize, buff, size);
 			symsize += size;
 		}
@@ -2500,6 +2507,9 @@ read_Header(struct archive_read *a, struct _7z_header_info *h,
 			if ((p = header_bytes(a, 1)) == NULL)
 				return (-1);
 			ll--;
+			#ifdef __clang_analyzer__
+			(void)*p;
+			#endif
 
 			if ((ll & 1) || ll < zip->numFiles * 4)
 				return (-1);

@@ -35,6 +35,8 @@
 #include <cm3p/zlib.h> /* crc32 */
 #endif
 
+#include <assert.h>
+
 #include "archive.h"
 #ifndef HAVE_ZLIB_H
 #include "archive_crc32.h"
@@ -3215,6 +3217,7 @@ parse_filter(struct archive_read *a, const uint8_t *bytes, uint16_t length, uint
     num = filters->lastfilternum;
 
   prog = filters->progs;
+  assert(num <= numprogs);
   for (i = 0; i < num; i++)
     prog = prog->next;
   if (prog)
@@ -3320,8 +3323,10 @@ create_filter(struct rar_program_code *prog, const uint8_t *globaldata, uint32_t
   filter->prog = prog;
   filter->globaldatalen = globaldatalen > PROGRAM_SYSTEM_GLOBAL_SIZE ? globaldatalen : PROGRAM_SYSTEM_GLOBAL_SIZE;
   filter->globaldata = calloc(1, filter->globaldatalen);
-  if (!filter->globaldata)
+  if (!filter->globaldata) {
+    free(filter);
     return NULL;
+  }
   if (globaldata)
     memcpy(filter->globaldata, globaldata, globaldatalen);
   if (registers)
