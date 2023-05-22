@@ -277,7 +277,7 @@ bool cmCPackInnoSetupGenerator::ProcessSetupSection()
     return false;
   }
 
-  const std::string& architecture = GetOption("CPACK_INNOSETUP_ARCHITECTURE");
+  cmValue const architecture = GetOption("CPACK_INNOSETUP_ARCHITECTURE");
   if (architecture != "x86" && architecture != "x64" &&
       architecture != "arm64" && architecture != "ia64") {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
