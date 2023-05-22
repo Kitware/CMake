@@ -332,9 +332,9 @@ const char* cmCustomCommandGenerator::GetArgv0Location(unsigned int c) const
 
 bool cmCustomCommandGenerator::HasOnlyEmptyCommandLines() const
 {
-  for (size_t i = 0; i < this->CommandLines.size(); ++i) {
-    for (size_t j = 0; j < this->CommandLines[i].size(); ++j) {
-      if (!this->CommandLines[i][j].empty()) {
+  for (cmCustomCommandLine const& ccl : this->CommandLines) {
+    for (std::string const& cl : ccl) {
+      if (!cl.empty()) {
         return false;
       }
     }
