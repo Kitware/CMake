@@ -213,6 +213,13 @@
     variables:
         CMAKE_CONFIGURATION: fedora38_ninja_clang
 
+.fedora38_ninja_multi_clang:
+    extends: .fedora38
+
+    variables:
+        CMAKE_CONFIGURATION: fedora38_ninja_multi_clang
+        CMAKE_GENERATOR: "Ninja Multi-Config"
+
 ### Sanitizers
 
 .fedora_memcheck:
@@ -374,28 +381,6 @@
 
     variables:
         CMAKE_CONFIGURATION: linux_gcc_cxx_modules_ninja_multi
-        CMAKE_GENERATOR: "Ninja Multi-Config"
-
-.clang_cxx_modules_x86_64:
-    image: "kitware/cmake:ci-clang_cxx_modules-x86_64-2023-02-15"
-
-    variables:
-        GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
-        CMAKE_ARCH: x86_64
-        CC: "/opt/llvm-p1689/bin/clang"
-        CXX: "/opt/llvm-p1689/bin/clang++"
-
-.clang_cxx_modules_ninja:
-    extends: .clang_cxx_modules_x86_64
-
-    variables:
-        CMAKE_CONFIGURATION: linux_clang_cxx_modules_ninja
-
-.clang_cxx_modules_ninja_multi:
-    extends: .clang_cxx_modules_x86_64
-
-    variables:
-        CMAKE_CONFIGURATION: linux_clang_cxx_modules_ninja_multi
         CMAKE_GENERATOR: "Ninja Multi-Config"
 
 ## Tags
