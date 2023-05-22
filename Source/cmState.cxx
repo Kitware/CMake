@@ -101,11 +101,13 @@ cmStateEnums::CacheEntryType cmState::StringToCacheEntryType(
 bool cmState::StringToCacheEntryType(const std::string& s,
                                      cmStateEnums::CacheEntryType& type)
 {
-  for (size_t i = 0; i < cmCacheEntryTypes.size(); ++i) {
-    if (s == cmCacheEntryTypes[i]) {
-      type = static_cast<cmStateEnums::CacheEntryType>(i);
-      return true;
-    }
+  // NOLINTNEXTLINE(readability-qualified-auto)
+  auto const entry =
+    std::find(cmCacheEntryTypes.begin(), cmCacheEntryTypes.end(), s);
+  if (entry != cmCacheEntryTypes.end()) {
+    type = static_cast<cmStateEnums::CacheEntryType>(
+      entry - cmCacheEntryTypes.begin());
+    return true;
   }
   return false;
 }
