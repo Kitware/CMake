@@ -10,9 +10,10 @@
 int main()
 {
   /* Reference an AL symbol without requiring a context at runtime.  */
-  printf("&alGetString = %p\n", &alGetString);
+  printf("AL_VERSION: %s\n", alGetString(AL_VERSION));
 
   /* Reference an ALC symbol without requiring a context at runtime.  */
-  printf("&alcGetString = %p\n", &alcGetString);
+  printf("ALC_DEVICE_SPECIFIER: %s\n",
+         alcGetString(NULL, ALC_DEVICE_SPECIFIER));
   return 0;
 }
