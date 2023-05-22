@@ -14,6 +14,8 @@
 #ifndef BITSTREAM_H_MODULE
 #define BITSTREAM_H_MODULE
 
+#include <assert.h>
+
 #if defined (__cplusplus)
 extern "C" {
 #endif
