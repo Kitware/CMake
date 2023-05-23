@@ -236,7 +236,7 @@ std::string cmCommonTargetGenerator::GetManifests(const std::string& config)
   manifests.reserve(manifest_srcs.size());
 
   std::string lang = this->GeneratorTarget->GetLinkerLanguage(config);
-  std::string const& manifestFlag =
+  std::string manifestFlag =
     this->Makefile->GetDefinition("CMAKE_" + lang + "_LINKER_MANIFEST_FLAG");
   for (cmSourceFile const* manifest_src : manifest_srcs) {
     manifests.push_back(manifestFlag +

@@ -785,7 +785,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     if (this->GeneratorTarget->HasSOName(this->GetConfigName())) {
       vars.SONameFlag = this->Makefile->GetSONameFlag(linkLanguage);
       targetOutSOName = this->LocalGenerator->ConvertToOutputFormat(
-        this->TargetNames.SharedObject.c_str(), cmOutputConverter::SHELL);
+        this->TargetNames.SharedObject, cmOutputConverter::SHELL);
       vars.TargetSOName = targetOutSOName.c_str();
     }
     vars.LinkFlags = linkFlags.c_str();

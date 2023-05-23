@@ -32,7 +32,7 @@ cmCPLuginAPI.cxx
 typedef struct
 {
   /*=========================================================================
-  Here we define the set of functions that a plugin may call. The first goup
+  Here we define the set of functions that a plugin may call. The first group
   of functions are utility functions that are specific to the plugin API
   =========================================================================*/
   /* set/Get the ClientData in the cmLoadedCommandInfo structure, this is how

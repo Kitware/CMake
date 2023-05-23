@@ -3015,6 +3015,7 @@ heap_add_entry(struct archive_read *a, struct heap_queue *heap,
 	uint64_t file_key, parent_key;
 	int hole, parent;
 
+#ifndef __clang_analyzer__ /* It cannot see heap->files remains populated.  */
 	/* Expand our pending files list as necessary. */
 	if (heap->used >= heap->allocated) {
 		struct file_info **new_pending_files;
@@ -3042,6 +3043,7 @@ heap_add_entry(struct archive_read *a, struct heap_queue *heap,
 		heap->files = new_pending_files;
 		heap->allocated = new_size;
 	}
+#endif
 
 	file_key = file->key = key;
 

@@ -21,7 +21,7 @@ foreach(ver
     [[compatibility version 2\.1\.0]]
     )
   if(NOT "${out}" MATCHES "( |\n)${ver}( |\n)")
-    set(RunCMake_TEST_FAILED "Library file:\n  ${lib}\ndoes not contain '${ver}'")
+    string(CONCAT RunCMake_TEST_FAILED "Library file:\n  ${lib}\n" "does not contain '${ver}'")
     return()
   endif()
 endforeach()

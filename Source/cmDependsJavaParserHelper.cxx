@@ -155,7 +155,7 @@ void cmDependsJavaParserHelper::CheckEmpty(
 void cmDependsJavaParserHelper::PrepareElement(
   cmDependsJavaParserHelper::ParserType* me)
 {
-  // Inititalize self
+  // Initialize self
   me->str = nullptr;
 }
 

@@ -388,7 +388,7 @@ static int cdeque_init(struct cdeque* d, int max_capacity_power_of_2) {
 		return CDE_PARAM;
 
 	cdeque_clear(d);
-	d->arr = malloc(sizeof(void*) * max_capacity_power_of_2);
+	d->arr = malloc(sizeof(*d->arr) * max_capacity_power_of_2);
 
 	return d->arr ? CDE_OK : CDE_ALLOC;
 }
@@ -2942,12 +2942,23 @@ static int parse_filter(struct archive_read* ar, const uint8_t* p) {
 	if(filter_type == FILTER_DELTA) {
 		int channels;
 
-		if(ARCHIVE_OK != (ret = read_consume_bits(ar, rar, p, 5, &channels)))
+		if(ARCHIVE_OK != (ret = read_consume_bits(ar, rar, p, 5, &channels))) {
+			#ifdef __clang_analyzer__
+			/* Tell clang-analyzer that 'filt' does not leak.
+			   add_new_filter passes off ownership.  */
+			free(filt);
+			#endif
 			return ret;
+		}
 
 		filt->channels = channels + 1;
 	}
 
+	#ifdef __clang_analyzer__
+	/* Tell clang-analyzer that 'filt' does not leak.
+	   add_new_filter passes off ownership.  */
+	free(filt);
+	#endif
 	return ARCHIVE_OK;
 }
 

@@ -354,6 +354,10 @@ uv_handle_type uv_guess_handle(uv_file file) {
   socklen_t len;
   int type;
 
+  #ifdef __clang_analyzer__
+  memset(&ss, 0, sizeof(ss));
+  #endif
+
   if (file < 0)
     return UV_UNKNOWN_HANDLE;
 

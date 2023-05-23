@@ -92,6 +92,10 @@ __FBSDID("$FreeBSD$");
 #include <sys/ioctl.h>
 #endif
 
+#ifdef __clang_analyzer__
+#include <assert.h>
+#endif
+
 #include "archive.h"
 #include "archive_string.h"
 #include "archive_entry.h"
@@ -742,6 +746,10 @@ _archive_read_data_block(struct archive *_a, const void **buff,
 			else if (errno == EPERM)
 				flags &= ~O_NOATIME;
 		}
+#ifdef __clang_analyzer__
+		/* Tolerate deadcode.DeadStores to avoid modifying upstream. */
+		(void)flags;
+#endif
 #endif
 		if (t->entry_fd < 0) {
 			archive_set_error(&a->archive, errno,
@@ -2347,6 +2355,9 @@ tree_pop(struct tree *t)
 	if (t->stack == t->current && t->current != NULL)
 		t->current = t->current->parent;
 	te = t->stack;
+	#ifdef __clang_analyzer__
+	assert(te);
+	#endif
 	t->stack = te->next;
 	t->dirname_length = te->dirname_length;
 	t->basename = t->path.s + t->dirname_length;

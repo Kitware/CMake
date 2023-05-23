@@ -19,7 +19,6 @@ make
 bzip2-devel
 expat-devel
 jsoncpp-devel
-json-devel
 libarchive-devel
 libcurl-devel
 libuv-devel

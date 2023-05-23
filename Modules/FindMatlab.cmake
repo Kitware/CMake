@@ -951,7 +951,7 @@ function(matlab_add_unit_test)
   endif()
 
   # The option to run a batch program with MATLAB changes depending on the MATLAB version
-  # For MATLAB before R2019a (9.6), the only supported option is -r, afterwords the suggested option
+  # For MATLAB before R2019a (9.6), the only supported option is -r, afterwards the suggested option
   # is -batch as -r is deprecated
   set(maut_BATCH_OPTION "-r")
   if(NOT (Matlab_VERSION_STRING STREQUAL ""))

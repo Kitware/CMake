@@ -194,6 +194,12 @@ static int uv__udp_recvmmsg(uv_udp_t* handle, uv_buf_t* buf) {
   int flags;
   size_t k;
 
+  #ifdef __clang_analyzer__
+  /* Tell clang-analyzer the array is initialized.
+     The part we use is initialized below.  */
+  memset(iov, 0, sizeof(iov));
+  #endif
+
   /* prepare structures for recvmmsg */
   chunks = buf->len / UV__UDP_DGRAM_MAXSIZE;
   if (chunks > ARRAY_SIZE(iov))

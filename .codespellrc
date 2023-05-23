@@ -4,5 +4,5 @@ check-hidden =
 # Disable warnings about binary files
 quiet-level = 2
 builtin = clear,rare,en-GB_to_en-US
-skip = */.git,*/build,*/Copyright.txt,*/doxygen.config,*/Modules/Internal/CPack/NSIS.template.in,*/Source/CursesDialog/form/*,*/Source/kwsys/*,*/Tests/RunCMake/CPack/tests/DMG_SLA/German.*,*/Tests/RunCMake/ParseImplicitData/*.input,*/Utilities/cm*
-ignore-words-list = aci,ake,ans,ba,cconfiguration,conly,dependees,dne,dum,earch,ect,filetest,fo,helpfull,hiden,isnt,keypair,nd,ned,nin,nknown,ot,pard,seh,ser,te,upto,varn,vas,wee
+skip = */.git,*/build,*/Copyright.txt,*/CTestCustom.cmake.in,*/doxygen.config,*/Modules/Internal/CPack/NSIS.template.in,*/Source/CursesDialog/form/*,*/Source/kwsys/*,*/Tests/RunCMake/CPack/tests/DMG_SLA/German.*,*/Tests/RunCMake/ParseImplicitData/*.input,*/Tests/StringFileTest/test.utf8,*.pfx,*/Utilities/cm*
+ignore-words-list = aci,ags,ake,ans,ba,ccompiler,cconfiguration,certi,conly,dependees,dne,dum,earch,ect,filetest,fo,helpfull,hiden,isnt,keypair,nd,ned,nin,nknown,ot,pard,seh,ser,te,upto,varn,vas,wee

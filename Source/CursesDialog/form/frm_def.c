@@ -220,6 +220,10 @@ static int Connect_Fields(FORM  * form, FIELD ** fields)
   for(page_nr = 0;page_nr < form->maxpage; page_nr++)
     {
       FIELD *fld = (FIELD *)0;
+      #ifdef __clang_analyzer__
+      /* Tell clang-analyzer the loop body runs at least once.  */
+      assert(form->page[page_nr].pmin <= form->page[page_nr].pmax);
+      #endif
       for(j = form->page[page_nr].pmin;j <= form->page[page_nr].pmax;j++)
 	{
 	  fields[j]->index = j;

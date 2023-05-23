@@ -96,7 +96,8 @@ const char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
   }
   if (this->FileLine >= 0 && strcmp(var, "CMAKE_CURRENT_LIST_LINE") == 0) {
     std::string line;
-    cmListFileContext const& top = this->Makefile->GetBacktrace().Top();
+    cmListFileBacktrace bt = this->Makefile->GetBacktrace();
+    cmListFileContext const& top = bt.Top();
     if (top.DeferId) {
       line = cmStrCat("DEFERRED:"_s, *top.DeferId);
     } else {

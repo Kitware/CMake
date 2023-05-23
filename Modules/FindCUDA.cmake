@@ -1942,7 +1942,7 @@ function(CUDA_LINK_SEPARABLE_COMPILATION_OBJECTS output_file cuda_target options
       list(APPEND flags -Xcompiler ${f})
     endforeach()
 
-    # Add our general CUDA_NVCC_FLAGS with the configuration specifig flags
+    # Add our general CUDA_NVCC_FLAGS with the configuration specific flags
     set(nvcc_flags ${CUDA_NVCC_FLAGS} ${config_specific_flags} ${nvcc_flags})
 
     file(RELATIVE_PATH output_file_relative_path "${CMAKE_BINARY_DIR}" "${output_file}")

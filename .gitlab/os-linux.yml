@@ -5,7 +5,7 @@
 ### Release
 
 .linux_prep_source:
-    image: "fedora:37"
+    image: "fedora:38"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
@@ -68,8 +68,8 @@
 
 ### Fedora
 
-.fedora37:
-    image: "kitware/cmake:ci-fedora37-x86_64-2023-05-17"
+.fedora38:
+    image: "kitware/cmake:ci-fedora38-x86_64-2023-05-22"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci/long file name for testing purposes"
@@ -77,37 +77,37 @@
 
 #### Lint builds
 
-.fedora37_tidy:
-    extends: .fedora37
+.fedora38_tidy:
+    extends: .fedora38
 
     variables:
-        CMAKE_CONFIGURATION: fedora37_tidy
+        CMAKE_CONFIGURATION: fedora38_tidy
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_CI_NO_INSTALL: 1
 
-.fedora37_clang_analyzer:
-    extends: .fedora37
+.fedora38_clang_analyzer:
+    extends: .fedora38
 
     variables:
-        CMAKE_CONFIGURATION: fedora37_clang_analyzer
+        CMAKE_CONFIGURATION: fedora38_clang_analyzer
         CMAKE_CI_BUILD_TYPE: Debug
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_CI_NO_INSTALL: 1
 
-.fedora37_sphinx:
-    extends: .fedora37
+.fedora38_sphinx:
+    extends: .fedora38
 
     variables:
-        CMAKE_CONFIGURATION: fedora37_sphinx
+        CMAKE_CONFIGURATION: fedora38_sphinx
         CTEST_NO_WARNINGS_ALLOWED: 1
         CTEST_SOURCE_SUBDIRECTORY: "Utilities/Sphinx"
         CMAKE_CI_NO_INSTALL: 1
 
-.fedora37_sphinx_package:
-    extends: .fedora37
+.fedora38_sphinx_package:
+    extends: .fedora38
 
     variables:
-        CMAKE_CONFIGURATION: fedora37_sphinx_package
+        CMAKE_CONFIGURATION: fedora38_sphinx_package
         CTEST_SOURCE_SUBDIRECTORY: "Utilities/Sphinx"
 
 #### Build and test
@@ -153,35 +153,35 @@
         CMAKE_CI_BUILD_TYPE: Release
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.fedora37_extdeps:
-    extends: .fedora37
+.fedora38_extdeps:
+    extends: .fedora38
 
     variables:
-        CMAKE_CONFIGURATION: fedora37_extdeps
+        CMAKE_CONFIGURATION: fedora38_extdeps
         CMAKE_CI_BUILD_TYPE: Release
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.fedora37_ninja:
-    extends: .fedora37
+.fedora38_ninja:
+    extends: .fedora38
 
     variables:
-        CMAKE_CONFIGURATION: fedora37_ninja
+        CMAKE_CONFIGURATION: fedora38_ninja
         CMAKE_CI_BUILD_TYPE: Release
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.fedora37_ninja_multi:
-    extends: .fedora37
+.fedora38_ninja_multi:
+    extends: .fedora38
 
     variables:
-        CMAKE_CONFIGURATION: fedora37_ninja_multi
+        CMAKE_CONFIGURATION: fedora38_ninja_multi
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_GENERATOR: "Ninja Multi-Config"
 
-.fedora37_makefiles:
-    extends: .fedora37
+.fedora38_makefiles:
+    extends: .fedora38
 
     variables:
-        CMAKE_CONFIGURATION: fedora37_makefiles
+        CMAKE_CONFIGURATION: fedora38_makefiles
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_GENERATOR: "Unix Makefiles"
 
@@ -200,18 +200,25 @@
     variables:
         CMAKE_CONFIGURATION: debian10_ninja_clang
 
-.fedora37_makefiles_clang:
-    extends: .fedora37
+.fedora38_makefiles_clang:
+    extends: .fedora38
 
     variables:
-        CMAKE_CONFIGURATION: fedora37_makefiles_clang
+        CMAKE_CONFIGURATION: fedora38_makefiles_clang
         CMAKE_GENERATOR: "Unix Makefiles"
 
-.fedora37_ninja_clang:
-    extends: .fedora37
+.fedora38_ninja_clang:
+    extends: .fedora38
 
     variables:
-        CMAKE_CONFIGURATION: fedora37_ninja_clang
+        CMAKE_CONFIGURATION: fedora38_ninja_clang
+
+.fedora38_ninja_multi_clang:
+    extends: .fedora38
+
+    variables:
+        CMAKE_CONFIGURATION: fedora38_ninja_multi_clang
+        CMAKE_GENERATOR: "Ninja Multi-Config"
 
 ### Sanitizers
 
@@ -226,13 +233,13 @@
         CTEST_MEMORYCHECK_TYPE: AddressSanitizer
         CTEST_MEMORYCHECK_SANITIZER_OPTIONS: ""
 
-.fedora37_asan:
+.fedora38_asan:
     extends:
-        - .fedora37
+        - .fedora38
         - .fedora_asan_addon
 
     variables:
-        CMAKE_CONFIGURATION: fedora37_asan
+        CMAKE_CONFIGURATION: fedora38_asan
 
 ### Intel Compiler
 
@@ -376,28 +383,6 @@
         CMAKE_CONFIGURATION: linux_gcc_cxx_modules_ninja_multi
         CMAKE_GENERATOR: "Ninja Multi-Config"
 
-.clang_cxx_modules_x86_64:
-    image: "kitware/cmake:ci-clang_cxx_modules-x86_64-2023-02-15"
-
-    variables:
-        GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
-        CMAKE_ARCH: x86_64
-        CC: "/opt/llvm-p1689/bin/clang"
-        CXX: "/opt/llvm-p1689/bin/clang++"
-
-.clang_cxx_modules_ninja:
-    extends: .clang_cxx_modules_x86_64
-
-    variables:
-        CMAKE_CONFIGURATION: linux_clang_cxx_modules_ninja
-
-.clang_cxx_modules_ninja_multi:
-    extends: .clang_cxx_modules_x86_64
-
-    variables:
-        CMAKE_CONFIGURATION: linux_clang_cxx_modules_ninja_multi
-        CMAKE_GENERATOR: "Ninja Multi-Config"
-
 ## Tags
 
 .linux_x86_64_tags:
@@ -478,7 +463,7 @@
 
 .cmake_codespell_linux:
     stage: build
-    extends: .fedora37
+    extends: .fedora38
     script:
         - .gitlab/ci/codespell.sh
     interruptible: true
@@ -623,7 +608,7 @@
 .cmake_org_help:
     stage: build
     extends:
-        - .fedora37
+        - .fedora38
         - .linux_x86_64_tags
         - .cmake_org_help_artifacts
     script:

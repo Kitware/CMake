@@ -160,7 +160,7 @@ The value may be one of:
 
  .. versionchanged:: 3.11
   This is the default, unless policy :policy:`CMP0072` is set to ``OLD``
-  and no components are requeted (since components
+  and no components are requested (since components
   correspond to GLVND libraries).
 
 ``LEGACY``

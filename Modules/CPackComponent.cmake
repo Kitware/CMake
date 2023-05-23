@@ -149,7 +149,7 @@ installed or not.
 REQUIRED indicates that this component is required, and therefore will
 always be installed.  It will be visible in the graphical installer,
 but it cannot be unselected.  (Typically, required components are
-shown greyed out).
+shown grayed out).
 
 DISABLED indicates that this component should be disabled (unselected)
 by default.  The user is free to select this component for
