@@ -665,10 +665,16 @@ A number of cache variables can influence the behavior where details from a
   This is a less severe download/update control compared to
   :variable:`FETCHCONTENT_FULLY_DISCONNECTED`.  Instead of bypassing all
   download and update logic, ``FETCHCONTENT_UPDATES_DISCONNECTED`` only
-  disables the update stage.  Therefore, if content has not been downloaded
-  previously, it will still be downloaded when this option is enabled.
-  This can speed up the configure stage, but not as much as
-  :variable:`FETCHCONTENT_FULLY_DISCONNECTED`.  It is ``OFF`` by default.
+  prevents the update step from making connections to remote servers
+  when using the git or hg download methods.  Updates still occur if details
+  about the update step change, but the update is attempted with only the
+  information already available locally (so switching to a different tag or
+  commit that is already fetched locally will succeed, but switching to an
+  unknown commit hash will fail).  The download step is not affected, so if
+  content has not been downloaded previously, it will still be downloaded
+  when this option is enabled.  This can speed up the configure step, but
+  not as much as :variable:`FETCHCONTENT_FULLY_DISCONNECTED`.
+  ``FETCHCONTENT_UPDATES_DISCONNECTED`` is ``OFF`` by default.
 
 .. variable:: FETCHCONTENT_TRY_FIND_PACKAGE_MODE
 
@@ -735,10 +741,11 @@ content name:
 
   This is the per-content equivalent of
   :variable:`FETCHCONTENT_UPDATES_DISCONNECTED`.  If the global option or
-  this option is ``ON``, then updates will be disabled for the named content.
-  Disabling updates for individual content can be useful for content whose
-  details rarely change, while still leaving other frequently changing content
-  with updates enabled.
+  this option is ``ON``, then updates for the git and hg methods will not
+  contact any remote for the named content.  They will only use information
+  already available locally.  Disabling updates for individual content can
+  be useful for content whose details rarely change, while still leaving
+  other frequently changing content with updates enabled.
 
 .. _`fetch-content-examples`:
 

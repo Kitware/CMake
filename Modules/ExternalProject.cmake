@@ -448,12 +448,22 @@ External Project Definition
     ``UPDATE_DISCONNECTED <bool>``
       .. versionadded:: 3.2
 
-      When enabled, this option causes the update step to be skipped. It does
-      not, however, prevent the download step. The update step can still be
+      When enabled, this option causes the update step to be skipped (but see
+      below for changed behavior where this is not the case). It does not
+      prevent the download step. The update step can still be
       added as a step target (see :command:`ExternalProject_Add_StepTargets`)
       and called manually. This is useful if you want to allow developers to
       build the project when disconnected from the network (the network may
       still be needed for the download step though).
+
+      .. versionchanged:: 3.27
+
+        When ``UPDATE_DISCONNECTED`` is true, the update step will be executed
+        if any details about the update or download step are changed.
+        Furthermore, if using the git download/update method, the update
+        logic will be modified to skip attempts to contact the remote.
+        If the ``GIT_TAG`` mentions a ref that is not known locally, the
+        update step will halt with a fatal error.
 
       When this option is present, it is generally advisable to make the value
       a cache variable under the developer's control rather than hard-coding
@@ -3216,7 +3226,7 @@ function(_ep_get_update_disconnected var name)
 endfunction()
 
 function(_ep_add_update_command name)
-  ExternalProject_Get_Property(${name} source_dir tmp_dir)
+  ExternalProject_Get_Property(${name} source_dir stamp_dir tmp_dir)
 
   get_property(cmd_set TARGET ${name} PROPERTY _EP_UPDATE_COMMAND SET)
   get_property(cmd TARGET ${name} PROPERTY _EP_UPDATE_COMMAND)
@@ -3230,6 +3240,7 @@ function(_ep_add_update_command name)
   set(work_dir)
   set(comment)
   set(always)
+  set(file_deps)
 
   if(cmd_set)
     set(work_dir ${source_dir})
@@ -3291,6 +3302,7 @@ function(_ep_add_update_command name)
     endif()
     set(work_dir ${source_dir})
     set(comment "Performing update step for '${name}'")
+    set(comment_disconnected "Performing disconnected update step for '${name}'")
 
     get_property(git_tag
       TARGET ${name}
@@ -3344,8 +3356,10 @@ function(_ep_add_update_command name)
 
     _ep_get_git_submodules_recurse(git_submodules_recurse)
 
+    set(update_script "${tmp_dir}/${name}-gitupdate.cmake")
+    list(APPEND file_deps ${update_script})
     _ep_write_gitupdate_script(
-      "${tmp_dir}/${name}-gitupdate.cmake"
+      "${update_script}"
       "${GIT_EXECUTABLE}"
       "${git_tag}"
       "${git_remote_name}"
@@ -3356,7 +3370,8 @@ function(_ep_add_update_command name)
       "${work_dir}"
       "${git_update_strategy}"
     )
-    set(cmd ${CMAKE_COMMAND} -P ${tmp_dir}/${name}-gitupdate.cmake)
+    set(cmd              ${CMAKE_COMMAND} -Dcan_fetch=YES -P ${update_script})
+    set(cmd_disconnected ${CMAKE_COMMAND} -Dcan_fetch=NO  -P ${update_script})
     set(always 1)
   elseif(hg_repository)
     if(NOT HG_EXECUTABLE)
@@ -3364,6 +3379,7 @@ function(_ep_add_update_command name)
     endif()
     set(work_dir ${source_dir})
     set(comment "Performing update step (hg pull) for '${name}'")
+    set(comment_disconnected "Performing disconnected update step for '${name}'")
 
     get_property(hg_tag
       TARGET ${name}
@@ -3389,8 +3405,22 @@ Update to Mercurial >= 2.1.1.
       ${HG_EXECUTABLE} pull
       COMMAND ${HG_EXECUTABLE} update ${hg_tag}
     )
+    set(cmd_disconnected ${HG_EXECUTABLE} update ${hg_tag})
     set(always 1)
   endif()
+
+  # We use configure_file() to write the update_info_file so that the file's
+  # timestamp is not updated if we don't change the contents
+  if(NOT DEFINED cmd_disconnected)
+    set(cmd_disconnected "${cmd}")
+  endif()
+  set(update_info_file ${stamp_dir}/${name}-update-info.txt)
+  list(APPEND file_deps ${update_info_file})
+  configure_file(
+    "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/UpdateInfo.txt.in"
+    "${update_info_file}"
+    @ONLY
+  )
 
   get_property(log
     TARGET ${name}
@@ -3425,16 +3455,39 @@ Update to Mercurial >= 2.1.1.
       EXCLUDE_FROM_MAIN \${update_disconnected}
       WORKING_DIRECTORY \${work_dir}
       DEPENDEES download
+      DEPENDS \${file_deps}
       ${log}
       ${uses_terminal}
     )"
   )
+  if(update_disconnected)
+    if(NOT DEFINED comment_disconnected)
+      set(comment_disconnected "${comment}")
+    endif()
+    set(__cmdQuoted)
+    foreach(__item IN LISTS cmd_disconnected)
+      string(APPEND __cmdQuoted " [==[${__item}]==]")
+    endforeach()
+
+    cmake_language(EVAL CODE "
+      ExternalProject_Add_Step(${name} update_disconnected
+        INDEPENDENT TRUE
+        COMMENT \${comment_disconnected}
+        COMMAND ${__cmdQuoted}
+        WORKING_DIRECTORY \${work_dir}
+        DEPENDEES download
+        DEPENDS \${file_deps}
+        ${log}
+        ${uses_terminal}
+      )"
+    )
+  endif()
 
 endfunction()
 
 
 function(_ep_add_patch_command name)
-  ExternalProject_Get_Property(${name} source_dir)
+  ExternalProject_Get_Property(${name} source_dir stamp_dir)
 
   get_property(cmd_set TARGET ${name} PROPERTY _EP_PATCH_COMMAND SET)
   get_property(cmd TARGET ${name} PROPERTY _EP_PATCH_COMMAND)
@@ -3444,6 +3497,15 @@ function(_ep_add_patch_command name)
   if(cmd_set)
     set(work_dir ${source_dir})
   endif()
+
+  # We use configure_file() to write the patch_info_file so that the file's
+  # timestamp is not updated if we don't change the contents
+  set(patch_info_file ${stamp_dir}/${name}-patch-info.txt)
+  configure_file(
+    "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/PatchInfo.txt.in"
+    "${patch_info_file}"
+    @ONLY
+  )
 
   get_property(log
     TARGET ${name}
@@ -3466,11 +3528,6 @@ function(_ep_add_patch_command name)
   endif()
 
   _ep_get_update_disconnected(update_disconnected ${name})
-  if(update_disconnected)
-    set(patch_dep download)
-  else()
-    set(patch_dep update)
-  endif()
 
   set(__cmdQuoted)
   foreach(__item IN LISTS cmd)
@@ -3481,11 +3538,28 @@ function(_ep_add_patch_command name)
       INDEPENDENT TRUE
       COMMAND ${__cmdQuoted}
       WORKING_DIRECTORY \${work_dir}
-      DEPENDEES \${patch_dep}
+      EXCLUDE_FROM_MAIN \${update_disconnected}
+      DEPENDEES update
+      DEPENDS \${patch_info_file}
       ${log}
       ${uses_terminal}
     )"
   )
+
+  if(update_disconnected)
+    cmake_language(EVAL CODE "
+      ExternalProject_Add_Step(${name} patch_disconnected
+        INDEPENDENT TRUE
+        COMMAND ${__cmdQuoted}
+        WORKING_DIRECTORY \${work_dir}
+        DEPENDEES update_disconnected
+        DEPENDS \${patch_info_file}
+        ${log}
+        ${uses_terminal}
+      )"
+    )
+  endif()
+
 endfunction()
 
 function(_ep_get_file_deps var name)
@@ -3695,6 +3769,13 @@ function(_ep_add_configure_command name)
   list(APPEND file_deps ${tmp_dir}/${name}-cfgcmd.txt)
   list(APPEND file_deps ${_ep_cache_args_script})
 
+  _ep_get_update_disconnected(update_disconnected ${name})
+  if(update_disconnected)
+    set(dependees patch_disconnected)
+  else()
+    set(dependees patch)
+  endif()
+
   get_property(log
     TARGET ${name}
     PROPERTY _EP_LOG_CONFIGURE
@@ -3724,7 +3805,7 @@ function(_ep_add_configure_command name)
       INDEPENDENT FALSE
       COMMAND ${__cmdQuoted}
       WORKING_DIRECTORY \${binary_dir}
-      DEPENDEES patch
+      DEPENDEES \${dependees}
       DEPENDS \${file_deps}
       ${log}
       ${uses_terminal}
