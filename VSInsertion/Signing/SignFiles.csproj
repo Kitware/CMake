@@ -38,6 +38,9 @@
     <FilesToCopy Include="$(EnlistmentRoot)input\*.exe">
       <Visible>false</Visible>
     </FilesToCopy>
+    <CatalogsToCopy Include="$(EnlistmentRoot)input\*.cat">
+      <Visible>false</Visible>
+    </CatalogsToCopy>
     <PackagesToCopy Include="$(EnlistmentRoot)input\*.nupkg">
       <Visible>false</Visible>
     </PackagesToCopy>
@@ -45,11 +48,15 @@
 
   <Target Name="CopyFiles" BeforeTargets="AfterBuild">
     <Copy SourceFiles="@(FilesToCopy)" DestinationFolder="$(OutDir)" />
+    <Copy SourceFiles="@(CatalogsToCopy)" DestinationFolder="$(OutDir)" />
     <Copy SourceFiles="@(PackagesToCopy)" DestinationFolder="$(OutDir)" />
 
     <ItemGroup>
       <FilesToSign Include="@(FilesToCopy->'$(OutDir)%(Filename)%(Extension)')">
         <Authenticode>3PartySHA2</Authenticode>
+      </FilesToSign>
+      <FilesToSign Include="@(CatalogsToCopy->'$(OutDir)%(Filename)%(Extension)')">
+        <Authenticode>Microsoft400</Authenticode>
       </FilesToSign>
       <FilesToSign Include="@(PackagesToCopy->'$(OutDir)%(Filename)%(Extension)')">
         <Authenticode>NuGet</Authenticode>
