@@ -344,7 +344,7 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
 
   // Verbosity
   {
-    std::string def =
+    std::string const def =
       this->Makefile->GetSafeDefinition("CMAKE_AUTOGEN_VERBOSE");
     if (!def.empty()) {
       unsigned long iVerb = 0;
@@ -546,7 +546,7 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
       this->Moc.MacroNames.erase(cmRemoveDuplicates(this->Moc.MacroNames),
                                  this->Moc.MacroNames.end());
       {
-        cmList filterList = { this->GenTarget->GetSafeProperty(
+        cmList const filterList = { this->GenTarget->GetSafeProperty(
           "AUTOMOC_DEPEND_FILTERS") };
         if ((filterList.size() % 2) != 0) {
           cmSystemTools::Error(
@@ -650,7 +650,7 @@ bool cmQtAutoGenInitializer::InitMoc()
 
   // Moc includes
   {
-    SearchPathSanitizer sanitizer(this->Makefile);
+    SearchPathSanitizer const sanitizer(this->Makefile);
     auto getDirs =
       [this, &sanitizer](std::string const& cfg) -> std::vector<std::string> {
       // Get the include dirs for this target, without stripping the implicit
@@ -1037,7 +1037,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
         property = "SKIP_AUTOUIC";
       }
       std::string files;
-      for (MUFile* muf : this->AutogenTarget.FilesGenerated) {
+      for (MUFile const* muf : this->AutogenTarget.FilesGenerated) {
         files += cmStrCat("  ", Quoted(muf->FullPath), '\n');
       }
       this->Makefile->IssueMessage(
@@ -1068,7 +1068,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
       property = "SKIP_AUTOUIC";
     }
     std::string files;
-    for (cmSourceFile* sf : this->AutogenTarget.CMP0100HeadersWarn) {
+    for (cmSourceFile const* sf : this->AutogenTarget.CMP0100HeadersWarn) {
       files += cmStrCat("  ", Quoted(sf->GetFullPath()), '\n');
     }
     this->Makefile->IssueMessage(
@@ -1089,7 +1089,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
   if (!this->Rcc.Qrcs.empty()) {
     const bool modernQt = (this->QtVersion.Major >= 5);
     // Target rcc options
-    cmList optionsTarget{ this->GenTarget->GetSafeProperty(
+    cmList const optionsTarget{ this->GenTarget->GetSafeProperty(
       kw.AUTORCC_OPTIONS) };
 
     // Check if file name is unique
@@ -1213,7 +1213,7 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
   // instead of fiddling with the include directories
   std::vector<std::string> configs;
   this->GlobalGen->GetQtAutoGenConfigs(configs);
-  bool stdPipesUTF8 = true;
+  bool constexpr stdPipesUTF8 = true;
   cmCustomCommandLines commandLines;
   for (auto const& config : configs) {
     commandLines.push_back(cmMakeCommandLine(
@@ -1244,7 +1244,7 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
   // Create the autogen target/command
   if (usePRE_BUILD) {
     // Add additional autogen target dependencies to origin target
-    for (cmTarget* depTarget : this->AutogenTarget.DependTargets) {
+    for (cmTarget const* depTarget : this->AutogenTarget.DependTargets) {
       this->GenTarget->Target->AddUtility(depTarget->GetName(), false,
                                           this->Makefile);
     }
@@ -1747,11 +1747,11 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
     info.SetConfig("MOC_COMPILATION_FILE", this->Moc.CompilationFile);
     info.SetConfig("MOC_PREDEFS_FILE", this->Moc.PredefsFile);
 
-    cmStandardLevelResolver resolver{ this->Makefile };
-    auto CompileOptionFlag =
+    cmStandardLevelResolver const resolver{ this->Makefile };
+    auto const CompileOptionFlag =
       resolver.GetCompileOptionDef(this->GenTarget, "CXX", "");
 
-    auto CompileOptionValue =
+    auto const CompileOptionValue =
       this->GenTarget->Makefile->GetSafeDefinition(CompileOptionFlag);
 
     if (!CompileOptionValue.empty()) {
@@ -1995,13 +1995,13 @@ static cmQtAutoGen::IntegerVersion GetMocVersion(
   return parseMocVersion(capturedStdOut);
 }
 
-static std::string FindMocExecutableFromMocTarget(cmMakefile* makefile,
+static std::string FindMocExecutableFromMocTarget(cmMakefile const* makefile,
                                                   unsigned int qtMajorVersion)
 {
   std::string result;
   const std::string mocTargetName =
     "Qt" + std::to_string(qtMajorVersion) + "::moc";
-  cmTarget* mocTarget = makefile->FindTargetToUse(mocTargetName);
+  cmTarget const* mocTarget = makefile->FindTargetToUse(mocTargetName);
   if (mocTarget) {
     result = mocTarget->GetSafeProperty("IMPORTED_LOCATION");
   }
