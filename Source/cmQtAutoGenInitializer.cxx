@@ -662,8 +662,6 @@ bool cmQtAutoGenInitializer::InitMoc()
       return sanitizer(dirs);
     };
 
-    // Default configuration include directories
-    this->Moc.Includes.Default = getDirs(this->ConfigDefault);
     // Other configuration settings
     if (this->MultiConfig) {
       for (std::string const& cfg : this->ConfigsList) {
@@ -673,6 +671,9 @@ bool cmQtAutoGenInitializer::InitMoc()
         }
         this->Moc.Includes.Config[cfg] = std::move(dirs);
       }
+    } else {
+      // Default configuration include directories
+      this->Moc.Includes.Default = getDirs(this->ConfigDefault);
     }
   }
 
@@ -690,8 +691,6 @@ bool cmQtAutoGenInitializer::InitMoc()
       return defines;
     };
 
-    // Default configuration defines
-    this->Moc.Defines.Default = getDefs(this->ConfigDefault);
     // Other configuration defines
     if (this->MultiConfig) {
       for (std::string const& cfg : this->ConfigsList) {
@@ -701,6 +700,9 @@ bool cmQtAutoGenInitializer::InitMoc()
         }
         this->Moc.Defines.Config[cfg] = std::move(defines);
       }
+    } else {
+      // Default configuration defines
+      this->Moc.Defines.Default = getDefs(this->ConfigDefault);
     }
   }
 
@@ -1024,8 +1026,24 @@ bool cmQtAutoGenInitializer::InitScanFiles()
   if (this->MocOrUicEnabled() && !this->AutogenTarget.FilesGenerated.empty()) {
     if (this->CMP0071Accept) {
       // Let the autogen target depend on the GENERATED files
-      for (MUFile* muf : this->AutogenTarget.FilesGenerated) {
-        this->AutogenTarget.DependFiles.insert(muf->FullPath);
+      if (this->MultiConfig &&
+          this->Makefile->GetSafeDefinition("CMAKE_CROSS_CONFIGS").empty()) {
+        for (MUFile const* muf : this->AutogenTarget.FilesGenerated) {
+          if (muf->Configs.empty()) {
+            this->AutogenTarget.DependFiles.insert(muf->FullPath);
+          } else {
+            for (size_t ci : muf->Configs) {
+              std::string const& config = this->ConfigsList[ci];
+              std::string const& pathWithConfig =
+                cmStrCat("$<$<CONFIG:", config, ">:", muf->FullPath, '>');
+              this->AutogenTarget.DependFiles.insert(pathWithConfig);
+            }
+          }
+        }
+      } else {
+        for (MUFile const* muf : this->AutogenTarget.FilesGenerated) {
+          this->AutogenTarget.DependFiles.insert(muf->FullPath);
+        }
       }
     } else if (this->CMP0071Warn) {
       cm::string_view property;
@@ -1738,10 +1756,21 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
       this->GenTarget, "AUTOMOC_MACRO_NAMES", nullptr, nullptr);
     EvaluatedTargetPropertyEntries InterfaceAutoMocMacroNamesEntries;
 
-    AddInterfaceEntries(this->GenTarget, this->ConfigDefault,
-                        "INTERFACE_AUTOMOC_MACRO_NAMES", "CXX", &dagChecker,
-                        InterfaceAutoMocMacroNamesEntries,
-                        IncludeRuntimeInterface::Yes);
+    if (this->MultiConfig) {
+      for (auto const& cfg : this->ConfigsList) {
+        if (!cfg.empty()) {
+          AddInterfaceEntries(this->GenTarget, cfg,
+                              "INTERFACE_AUTOMOC_MACRO_NAMES", "CXX",
+                              &dagChecker, InterfaceAutoMocMacroNamesEntries,
+                              IncludeRuntimeInterface::Yes);
+        }
+      }
+    } else {
+      AddInterfaceEntries(this->GenTarget, this->ConfigDefault,
+                          "INTERFACE_AUTOMOC_MACRO_NAMES", "CXX", &dagChecker,
+                          InterfaceAutoMocMacroNamesEntries,
+                          IncludeRuntimeInterface::Yes);
+    }
 
     for (auto const& entry : InterfaceAutoMocMacroNamesEntries.Entries) {
       this->Moc.MacroNames.insert(this->Moc.MacroNames.end(),
