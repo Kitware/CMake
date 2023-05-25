@@ -358,6 +358,10 @@ cmDyndepCollation::ParseExportInfo(Json::Value const& tdi)
       fsi.Name = tdi_cxx_module_info["name"].asString();
       fsi.RelativeDirectory =
         tdi_cxx_module_info["relative-directory"].asString();
+      if (!fsi.RelativeDirectory.empty() &&
+          fsi.RelativeDirectory.back() != '/') {
+        fsi.RelativeDirectory = cmStrCat(fsi.RelativeDirectory, '/');
+      }
       fsi.SourcePath = tdi_cxx_module_info["source"].asString();
       fsi.Type = tdi_cxx_module_info["type"].asString();
       fsi.Visibility = cmFileSetVisibilityFromName(

@@ -18,10 +18,14 @@ target_sources(export_interfaces
       BASE_DIRS
         "${CMAKE_CURRENT_SOURCE_DIR}"
       FILES
-        importable.cxx)
+        importable.cxx
+        subdir/importable.cxx
+  )
 target_compile_features(export_interfaces PUBLIC cxx_std_20)
 
-install(TARGETS export_interfaces
+add_library(no_modules STATIC no_modules.cxx)
+
+install(TARGETS export_interfaces no_modules
   EXPORT CXXModules
   FILE_SET modules DESTINATION "lib/cxx/miu")
 install(EXPORT CXXModules
