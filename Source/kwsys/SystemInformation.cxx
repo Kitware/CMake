@@ -3453,6 +3453,10 @@ bool SystemInformationImplementation::RetrieveInformationFromCpuInfoFile()
     fileSize++;
   }
   fclose(fd);
+  if (fileSize < 2) {
+    std::cout << "No data in /proc/cpuinfo" << std::endl;
+    return false;
+  }
   buffer.resize(fileSize - 2);
   // Number of logical CPUs (combination of multiple processors, multi-core
   // and SMT)
