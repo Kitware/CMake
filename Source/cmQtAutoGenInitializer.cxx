@@ -1168,7 +1168,8 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
   if (this->Moc.Enabled) {
     this->AddGeneratedSource(this->Moc.CompilationFile, this->Moc, true);
     if (useNinjaDepfile) {
-      if (this->MultiConfig) {
+      if (this->MultiConfig &&
+          !this->Makefile->GetSafeDefinition("CMAKE_CROSS_CONFIGS").empty()) {
         // Make all mocs_compilation_<CONFIG>.cpp files byproducts of the
         // ${target}_autogen/timestamp custom command.
         // We cannot just use Moc.CompilationFileGenex here, because that
@@ -1215,10 +1216,23 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
   this->GlobalGen->GetQtAutoGenConfigs(configs);
   bool constexpr stdPipesUTF8 = true;
   cmCustomCommandLines commandLines;
-  for (auto const& config : configs) {
+  if (this->Makefile->GetSafeDefinition("CMAKE_CROSS_CONFIGS").empty()) {
+    std::string autugenInfoFileconfig;
+    if (this->MultiConfig) {
+      autugenInfoFileconfig = "$<CONFIG>";
+    } else {
+      autugenInfoFileconfig = configs[0];
+    }
     commandLines.push_back(cmMakeCommandLine(
       { cmSystemTools::GetCMakeCommand(), "-E", "cmake_autogen",
-        this->AutogenTarget.InfoFile, config }));
+        this->AutogenTarget.InfoFile, autugenInfoFileconfig }));
+
+  } else {
+    for (auto const& config : configs) {
+      commandLines.push_back(cmMakeCommandLine(
+        { cmSystemTools::GetCMakeCommand(), "-E", "cmake_autogen",
+          this->AutogenTarget.InfoFile, config }));
+    }
   }
 
   // Use PRE_BUILD on demand
