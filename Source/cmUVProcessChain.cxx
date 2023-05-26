@@ -140,6 +140,12 @@ cmUVProcessChainBuilder& cmUVProcessChainBuilder::SetExternalStream(
   return *this;
 }
 
+cmUVProcessChainBuilder& cmUVProcessChainBuilder::SetMergedBuiltinStreams()
+{
+  this->MergedBuiltinStreams = true;
+  return this->SetBuiltinStream(Stream_OUTPUT).SetBuiltinStream(Stream_ERROR);
+}
+
 cmUVProcessChainBuilder& cmUVProcessChainBuilder::SetWorkingDirectory(
   std::string dir)
 {
@@ -181,27 +187,6 @@ bool cmUVProcessChain::InternalData::Prepare(
 {
   this->Builder = builder;
 
-  auto const& output =
-    this->Builder->Stdio[cmUVProcessChainBuilder::Stream_OUTPUT];
-  auto& outputData = this->OutputStreamData;
-  switch (output.Type) {
-    case cmUVProcessChainBuilder::None:
-      outputData.Stdio.flags = UV_IGNORE;
-      break;
-
-    case cmUVProcessChainBuilder::Builtin:
-      outputData.BuiltinStream.init(*this->Loop, 0);
-      outputData.Stdio.flags =
-        static_cast<uv_stdio_flags>(UV_CREATE_PIPE | UV_WRITABLE_PIPE);
-      outputData.Stdio.data.stream = outputData.BuiltinStream;
-      break;
-
-    case cmUVProcessChainBuilder::External:
-      outputData.Stdio.flags = UV_INHERIT_FD;
-      outputData.Stdio.data.fd = output.FileDescriptor;
-      break;
-  }
-
   auto const& error =
     this->Builder->Stdio[cmUVProcessChainBuilder::Stream_ERROR];
   auto& errorData = this->ErrorStreamData;
@@ -228,6 +213,32 @@ bool cmUVProcessChain::InternalData::Prepare(
     case cmUVProcessChainBuilder::External:
       errorData.Stdio.flags = UV_INHERIT_FD;
       errorData.Stdio.data.fd = error.FileDescriptor;
+      break;
+  }
+
+  auto const& output =
+    this->Builder->Stdio[cmUVProcessChainBuilder::Stream_OUTPUT];
+  auto& outputData = this->OutputStreamData;
+  switch (output.Type) {
+    case cmUVProcessChainBuilder::None:
+      outputData.Stdio.flags = UV_IGNORE;
+      break;
+
+    case cmUVProcessChainBuilder::Builtin:
+      if (this->Builder->MergedBuiltinStreams) {
+        outputData.Stdio.flags = UV_INHERIT_FD;
+        outputData.Stdio.data.fd = errorData.Stdio.data.fd;
+      } else {
+        outputData.BuiltinStream.init(*this->Loop, 0);
+        outputData.Stdio.flags =
+          static_cast<uv_stdio_flags>(UV_CREATE_PIPE | UV_WRITABLE_PIPE);
+        outputData.Stdio.data.stream = outputData.BuiltinStream;
+      }
+      break;
+
+    case cmUVProcessChainBuilder::External:
+      outputData.Stdio.flags = UV_INHERIT_FD;
+      outputData.Stdio.data.fd = output.FileDescriptor;
       break;
   }
 
@@ -299,7 +310,8 @@ bool cmUVProcessChain::InternalData::AddCommand(
 bool cmUVProcessChain::InternalData::Finish()
 {
   if (this->Builder->Stdio[cmUVProcessChainBuilder::Stream_OUTPUT].Type ==
-      cmUVProcessChainBuilder::Builtin) {
+        cmUVProcessChainBuilder::Builtin &&
+      !this->Builder->MergedBuiltinStreams) {
     this->OutputStreamData.Streambuf.open(
       this->OutputStreamData.BuiltinStream);
   }
@@ -349,6 +361,9 @@ uv_loop_t& cmUVProcessChain::GetLoop()
 
 std::istream* cmUVProcessChain::OutputStream()
 {
+  if (this->Data->Builder->MergedBuiltinStreams) {
+    return this->Data->ErrorStreamData.GetBuiltinStream();
+  }
   return this->Data->OutputStreamData.GetBuiltinStream();
 }
 
