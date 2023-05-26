@@ -6,9 +6,14 @@ Implicit linker search path detected for language ``<LANG>``.
 Compilers typically pass directories containing language runtime
 libraries and default library search paths when they invoke a linker.
 These paths are implicit linker search directories for the compiler's
-language.  For each language enabled by the :command:`project` or
+language.
+
+For each language enabled by the :command:`project` or
 :command:`enable_language` command, CMake automatically detects these
 directories and reports the results in this variable.
+The :envvar:`CMAKE_<LANG>_IMPLICIT_LINK_DIRECTORIES_EXCLUDE` environment
+variable may be set to exclude specific directories from the automatically
+detected results.
 
 When linking to a static library, CMake adds the implicit link directories
 from this variable for each language used in the static library (except
