@@ -271,9 +271,8 @@ void cmStateDirectory::ClearLinkDirectories()
                this->Snapshot_.Position->LinkDirectoriesPosition);
 }
 
-template <typename ValueType>
-void cmStateDirectory::StoreProperty(const std::string& prop, ValueType value,
-                                     cmListFileBacktrace const& lfbt)
+void cmStateDirectory::SetProperty(const std::string& prop, cmValue value,
+                                   cmListFileBacktrace const& lfbt)
 {
   if (prop == "INCLUDE_DIRECTORIES") {
     if (!value) {
@@ -317,17 +316,6 @@ void cmStateDirectory::StoreProperty(const std::string& prop, ValueType value,
   }
 
   this->DirectoryState->Properties.SetProperty(prop, value);
-}
-
-void cmStateDirectory::SetProperty(const std::string& prop, const char* value,
-                                   cmListFileBacktrace const& lfbt)
-{
-  this->StoreProperty(prop, value, lfbt);
-}
-void cmStateDirectory::SetProperty(const std::string& prop, cmValue value,
-                                   cmListFileBacktrace const& lfbt)
-{
-  this->StoreProperty(prop, value, lfbt);
 }
 
 void cmStateDirectory::AppendProperty(const std::string& prop,

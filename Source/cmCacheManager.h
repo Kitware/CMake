@@ -39,8 +39,9 @@ class cmCacheManager
     std::vector<std::string> GetPropertyList() const;
     cmValue GetProperty(const std::string& property) const;
     bool GetPropertyAsBool(const std::string& property) const;
-    void SetProperty(const std::string& property, const char* value);
+    void SetProperty(const std::string& property, const std::string& value);
     void SetProperty(const std::string& property, bool value);
+    void SetProperty(const std::string& property, std::nullptr_t);
     void AppendProperty(const std::string& property, const std::string& value,
                         bool asString = false);
 
@@ -127,7 +128,7 @@ public:
                              std::string const& value)
   {
     if (auto* entry = this->GetCacheEntry(key)) {
-      entry->SetProperty(propName, value.c_str());
+      entry->SetProperty(propName, value);
     }
   }
 

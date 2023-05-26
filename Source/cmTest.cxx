@@ -52,10 +52,6 @@ bool cmTest::GetPropertyAsBool(const std::string& prop) const
   return cmIsOn(this->GetProperty(prop));
 }
 
-void cmTest::SetProperty(const std::string& prop, const char* value)
-{
-  this->Properties.SetProperty(prop, value);
-}
 void cmTest::SetProperty(const std::string& prop, cmValue value)
 {
   this->Properties.SetProperty(prop, value);

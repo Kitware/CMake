@@ -3261,10 +3261,6 @@ void cmake::GenerateGraphViz(const std::string& fileName) const
 #endif
 }
 
-void cmake::SetProperty(const std::string& prop, const char* value)
-{
-  this->State->SetGlobalProperty(prop, value);
-}
 void cmake::SetProperty(const std::string& prop, cmValue value)
 {
   this->State->SetGlobalProperty(prop, value);

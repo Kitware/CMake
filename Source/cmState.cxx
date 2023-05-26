@@ -564,7 +564,8 @@ void cmState::RemoveUserDefinedCommands()
   this->ScriptedCommands.clear();
 }
 
-void cmState::SetGlobalProperty(const std::string& prop, const char* value)
+void cmState::SetGlobalProperty(const std::string& prop,
+                                const std::string& value)
 {
   this->GlobalProperties.SetProperty(prop, value);
 }
@@ -583,10 +584,10 @@ cmValue cmState::GetGlobalProperty(const std::string& prop)
 {
   if (prop == "CACHE_VARIABLES") {
     std::vector<std::string> cacheKeys = this->GetCacheEntryKeys();
-    this->SetGlobalProperty("CACHE_VARIABLES", cmJoin(cacheKeys, ";").c_str());
+    this->SetGlobalProperty("CACHE_VARIABLES", cmJoin(cacheKeys, ";"));
   } else if (prop == "COMMANDS") {
     std::vector<std::string> commands = this->GetCommandNames();
-    this->SetGlobalProperty("COMMANDS", cmJoin(commands, ";").c_str());
+    this->SetGlobalProperty("COMMANDS", cmJoin(commands, ";"));
   } else if (prop == "IN_TRY_COMPILE") {
     this->SetGlobalProperty(
       "IN_TRY_COMPILE",
@@ -597,10 +598,10 @@ cmValue cmState::GetGlobalProperty(const std::string& prop)
   } else if (prop == "ENABLED_LANGUAGES") {
     std::string langs;
     langs = cmJoin(this->EnabledLanguages, ";");
-    this->SetGlobalProperty("ENABLED_LANGUAGES", langs.c_str());
+    this->SetGlobalProperty("ENABLED_LANGUAGES", langs);
   } else if (prop == "CMAKE_ROLE") {
     std::string mode = this->GetModeString();
-    this->SetGlobalProperty("CMAKE_ROLE", mode.c_str());
+    this->SetGlobalProperty("CMAKE_ROLE", mode);
   }
 #define STRING_LIST_ELEMENT(F) ";" #F
   if (prop == "CMAKE_C_KNOWN_FEATURES") {

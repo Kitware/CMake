@@ -4044,10 +4044,6 @@ int cmMakefile::ConfigureFile(const std::string& infile,
   return res;
 }
 
-void cmMakefile::SetProperty(const std::string& prop, const char* value)
-{
-  this->StateSnapshot.GetDirectory().SetProperty(prop, value, this->Backtrace);
-}
 void cmMakefile::SetProperty(const std::string& prop, cmValue value)
 {
   this->StateSnapshot.GetDirectory().SetProperty(prop, value, this->Backtrace);
