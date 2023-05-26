@@ -234,7 +234,7 @@ public:
   int Build(
     int jobs, const std::string& srcdir, const std::string& bindir,
     const std::string& projectName,
-    std::vector<std::string> const& targetNames, std::string& output,
+    std::vector<std::string> const& targetNames, std::ostream& ostr,
     const std::string& makeProgram, const std::string& config,
     const cmBuildOptions& buildOptions, bool verbose, cmDuration timeout,
     cmSystemTools::OutputOption outputflag = cmSystemTools::OUTPUT_NONE,

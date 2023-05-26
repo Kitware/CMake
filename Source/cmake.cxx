@@ -3625,7 +3625,6 @@ int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
       return 1;
     }
   }
-  std::string output;
   std::string projName;
   cmValue cachedProjectName =
     this->State->GetCacheEntryValue("CMAKE_PROJECT_NAME");
@@ -3699,17 +3698,15 @@ int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
   }
 
   this->GlobalGenerator->PrintBuildCommandAdvice(std::cerr, jobs);
+  std::stringstream ostr;
+  // `cmGlobalGenerator::Build` logs metadata about what directory and commands
+  // are being executed to the `output` parameter. If CMake is verbose, print
+  // this out.
+  std::ostream& verbose_ostr = verbose ? std::cout : ostr;
   int buildresult = this->GlobalGenerator->Build(
-    jobs, "", dir, projName, targets, output, "", config, buildOptions,
+    jobs, "", dir, projName, targets, verbose_ostr, "", config, buildOptions,
     verbose, cmDuration::zero(), cmSystemTools::OUTPUT_PASSTHROUGH,
     nativeOptions);
-
-  if (verbose) {
-    // `cmGlobalGenerator::Build` logs metadata about what directory and
-    // commands are being executed to the `output` parameter. If CMake is
-    // verbose, print this out.
-    std::cout << output;
-  }
 
   return buildresult;
 }

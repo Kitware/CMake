@@ -2076,9 +2076,12 @@ int cmGlobalGenerator::TryCompile(int jobs, const std::string& srcdir,
     mf->GetSafeDefinition("CMAKE_TRY_COMPILE_CONFIGURATION");
   cmBuildOptions defaultBuildOptions(false, fast, PackageResolveMode::Disable);
 
-  return this->Build(jobs, srcdir, bindir, projectName, newTarget, output, "",
-                     config, defaultBuildOptions, true,
-                     this->TryCompileTimeout);
+  std::stringstream ostr;
+  auto ret =
+    this->Build(jobs, srcdir, bindir, projectName, newTarget, ostr, "", config,
+                defaultBuildOptions, true, this->TryCompileTimeout);
+  output = ostr.str();
+  return ret;
 }
 
 std::vector<cmGlobalGenerator::GeneratedMakeCommand>
@@ -2103,7 +2106,7 @@ void cmGlobalGenerator::PrintBuildCommandAdvice(std::ostream& /*os*/,
 int cmGlobalGenerator::Build(
   int jobs, const std::string& /*unused*/, const std::string& bindir,
   const std::string& projectName, const std::vector<std::string>& targets,
-  std::string& output, const std::string& makeCommandCSTR,
+  std::ostream& ostr, const std::string& makeCommandCSTR,
   const std::string& config, const cmBuildOptions& buildOptions, bool verbose,
   cmDuration timeout, cmSystemTools::OutputOption outputflag,
   std::vector<std::string> const& nativeOptions)
@@ -2114,13 +2117,13 @@ int cmGlobalGenerator::Build(
    * Run an executable command and put the stdout in output.
    */
   cmWorkingDirectory workdir(bindir);
-  output += cmStrCat("Change Dir: '", bindir, "'\n");
+  ostr << "Change Dir: '" << bindir << '\'' << std::endl;
   if (workdir.Failed()) {
     cmSystemTools::SetRunCommandHideConsole(hideconsole);
     std::string err = cmStrCat("Failed to change directory: ",
                                std::strerror(workdir.GetLastResult()));
     cmSystemTools::Error(err);
-    output += cmStrCat(err, '\n');
+    ostr << err << std::endl;
     return 1;
   }
   std::string realConfig = config;
@@ -2149,8 +2152,8 @@ int cmGlobalGenerator::Build(
       this->GenerateBuildCommand(makeCommandCSTR, projectName, bindir,
                                  { "clean" }, realConfig, jobs, verbose,
                                  buildOptions);
-    output += cmStrCat(
-      "\nRun Clean Command: ", cleanCommand.front().QuotedPrintable(), '\n');
+    ostr << "\nRun Clean Command: " << cleanCommand.front().QuotedPrintable()
+         << std::endl;
     if (cleanCommand.size() != 1) {
       this->GetCMakeInstance()->IssueMessage(MessageType::INTERNAL_ERROR,
                                              "The generator did not produce "
@@ -2163,18 +2166,21 @@ int cmGlobalGenerator::Build(
                                          nullptr, outputflag, timeout)) {
       cmSystemTools::SetRunCommandHideConsole(hideconsole);
       cmSystemTools::Error("Generator: execution of make clean failed.");
-      output +=
-        cmStrCat(*outputPtr, "\nGenerator: execution of make clean failed.\n");
+      ostr << *outputPtr << "\nGenerator: execution of make clean failed."
+           << std::endl;
 
       return 1;
     }
-    output += *outputPtr;
+    ostr << *outputPtr;
   }
 
   // now build
   std::string makeCommandStr;
   std::string outputMakeCommandStr;
-  output += "\nRun Build Command(s): ";
+  bool isWatcomWMake = this->CMakeInstance->GetState()->UseWatcomWMake();
+  bool needBuildOutput = isWatcomWMake;
+  std::string buildOutput;
+  ostr << "\nRun Build Command(s): ";
 
   retVal = 0;
   for (auto command = makeCommand.begin();
@@ -2186,7 +2192,7 @@ int cmGlobalGenerator::Build(
       outputMakeCommandStr += " && ";
     }
 
-    output += outputMakeCommandStr;
+    ostr << outputMakeCommandStr << std::endl;
     if (!cmSystemTools::RunSingleCommand(command->PrimaryCommand, outputPtr,
                                          outputPtr, &retVal, nullptr,
                                          outputflag, timeout)) {
@@ -2194,22 +2200,24 @@ int cmGlobalGenerator::Build(
       cmSystemTools::Error(
         "Generator: execution of make failed. Make command was: " +
         makeCommandStr);
-      output +=
-        cmStrCat(*outputPtr,
-                 "\nGenerator: execution of make failed. Make command was: ",
-                 outputMakeCommandStr, '\n');
+      ostr << *outputPtr
+           << "\nGenerator: execution of make failed. Make command was: "
+           << outputMakeCommandStr << std::endl;
 
       return 1;
     }
-    output += *outputPtr;
+    ostr << *outputPtr << std::flush;
+    if (needBuildOutput) {
+      buildOutput += *outputPtr;
+    }
   }
-  output += "\n";
+  ostr << std::endl;
   cmSystemTools::SetRunCommandHideConsole(hideconsole);
 
   // The OpenWatcom tools do not return an error code when a link
   // library is not found!
-  if (this->CMakeInstance->GetState()->UseWatcomWMake() && retVal == 0 &&
-      output.find("W1008: cannot open") != std::string::npos) {
+  if (isWatcomWMake && retVal == 0 &&
+      buildOutput.find("W1008: cannot open") != std::string::npos) {
     retVal = 1;
   }
 
