@@ -6,7 +6,7 @@ Call Stack \(most recent call first\):
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 CMake Error at FileSetModulesInterface.cmake:2 \(target_sources\):
-  target_sources File set TYPEs "CXX_MODULES" and "CXX_MODULE_HEADER_UNITS"
-  may not have "INTERFACE" visibility
+  target_sources File set TYPE "CXX_MODULES" may not have "INTERFACE"
+  visibility
 Call Stack \(most recent call first\):
   CMakeLists.txt:6 \(include\)

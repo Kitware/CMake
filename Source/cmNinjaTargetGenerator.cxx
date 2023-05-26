@@ -239,9 +239,7 @@ std::string cmNinjaTargetGenerator::ComputeFlagsForObject(
   }
 
   auto const* fs = this->GeneratorTarget->GetFileSetForSource(config, source);
-  if (fs &&
-      (fs->GetType() == "CXX_MODULES"_s ||
-       fs->GetType() == "CXX_MODULE_HEADER_UNITS"_s)) {
+  if (fs && fs->GetType() == "CXX_MODULES"_s) {
     if (source->GetLanguage() != "CXX"_s) {
       this->GetMakefile()->IssueMessage(
         MessageType::FATAL_ERROR,

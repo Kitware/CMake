@@ -264,19 +264,18 @@ bool TargetSourcesImpl::HandleOneFileSet(
       *this->Makefile, cmExperimental::Feature::CxxModuleCMakeApi);
 
     if (supportCxx20FileSetTypes) {
-      if (type != "HEADERS"_s && type != "CXX_MODULES"_s &&
-          type != "CXX_MODULE_HEADER_UNITS"_s) {
+      if (type != "HEADERS"_s && type != "CXX_MODULES"_s) {
         this->SetError(
-          R"(File set TYPE may only be "HEADERS", "CXX_MODULES", or "CXX_MODULE_HEADER_UNITS")");
+          R"(File set TYPE may only be "HEADERS" or "CXX_MODULES")");
         return false;
       }
 
       if (cmFileSetVisibilityIsForInterface(visibility) &&
           !cmFileSetVisibilityIsForSelf(visibility) &&
           !this->Target->IsImported()) {
-        if (type == "CXX_MODULES"_s || type == "CXX_MODULE_HEADER_UNITS"_s) {
+        if (type == "CXX_MODULES"_s) {
           this->SetError(
-            R"(File set TYPEs "CXX_MODULES" and "CXX_MODULE_HEADER_UNITS" may not have "INTERFACE" visibility)");
+            R"(File set TYPE "CXX_MODULES" may not have "INTERFACE" visibility)");
           return false;
         }
       }
@@ -320,7 +319,7 @@ bool TargetSourcesImpl::HandleOneFileSet(
   if (!baseDirectories.empty()) {
     fileSet.first->AddDirectoryEntry(
       BT<std::string>(baseDirectories, this->Makefile->GetBacktrace()));
-    if (type == "HEADERS"_s || type == "CXX_MODULE_HEADER_UNITS"_s) {
+    if (type == "HEADERS"_s) {
       for (auto const& dir : cmList{ baseDirectories }) {
         auto interfaceDirectoriesGenex =
           cmStrCat("$<BUILD_INTERFACE:", dir, ">");

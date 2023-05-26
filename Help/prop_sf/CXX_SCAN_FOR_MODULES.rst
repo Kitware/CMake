@@ -15,8 +15,7 @@ consulted.
 
 Note that scanning is only performed if C++20 or higher is enabled for the
 target and the source uses the ``CXX`` language.  Scanning for modules in
-sources belonging to file sets of type ``CXX_MODULES`` and
-``CXX_MODULES_HEADER_UNITS`` is always performed.
+sources belonging to file sets of type ``CXX_MODULES`` is always performed.
 
 .. note ::
 

@@ -1204,12 +1204,11 @@ bool cmGeneratorTarget::IsInBuildSystem() const
     case cmStateEnums::GLOBAL_TARGET:
       return true;
     case cmStateEnums::INTERFACE_LIBRARY:
-      // An INTERFACE library is in the build system if it has SOURCES,
-      // HEADER_SETS, or C++ module filesets.
+      // An INTERFACE library is in the build system if it has SOURCES
+      // or C++ module filesets.
       if (!this->SourceEntries.empty() ||
           !this->Target->GetHeaderSetsEntries().empty() ||
-          !this->Target->GetCxxModuleSetsEntries().empty() ||
-          !this->Target->GetCxxModuleHeaderSetsEntries().empty()) {
+          !this->Target->GetCxxModuleSetsEntries().empty()) {
         return true;
       }
       break;
@@ -1645,8 +1644,7 @@ void addFileSetEntry(cmGeneratorTarget const* headTarget,
         }
       }
       if (!found) {
-        if (fileSet->GetType() == "HEADERS"_s ||
-            fileSet->GetType() == "CXX_MODULE_HEADER_UNITS"_s) {
+        if (fileSet->GetType() == "HEADERS"_s) {
           headTarget->Makefile->GetOrCreateSourceGroup("Header Files")
             ->AddGroupFile(path);
         }
@@ -1671,14 +1669,6 @@ void AddFileSetEntries(cmGeneratorTarget const* headTarget,
     for (auto const& name : cmList{ entry.Value }) {
       auto const* cxxModuleSet = headTarget->Target->GetFileSet(name);
       addFileSetEntry(headTarget, config, dagChecker, cxxModuleSet, entries);
-    }
-  }
-  for (auto const& entry :
-       headTarget->Target->GetCxxModuleHeaderSetsEntries()) {
-    for (auto const& name : cmList{ entry.Value }) {
-      auto const* cxxModuleHeaderSet = headTarget->Target->GetFileSet(name);
-      addFileSetEntry(headTarget, config, dagChecker, cxxModuleHeaderSet,
-                      entries);
     }
   }
 }
@@ -8894,8 +8884,7 @@ bool cmGeneratorTarget::HaveCxx20ModuleSources() const
                        }
 
                        auto const& fs_type = file_set->GetType();
-                       return fs_type == "CXX_MODULES"_s ||
-                         fs_type == "CXX_MODULE_HEADER_UNITS"_s;
+                       return fs_type == "CXX_MODULES"_s;
                      });
 }
 
@@ -8998,9 +8987,7 @@ bool cmGeneratorTarget::NeedDyndepForSource(std::string const& lang,
     return false;
   }
   auto const* fs = this->GetFileSetForSource(config, sf);
-  if (fs &&
-      (fs->GetType() == "CXX_MODULES"_s ||
-       fs->GetType() == "CXX_MODULE_HEADER_UNITS"_s)) {
+  if (fs && fs->GetType() == "CXX_MODULES"_s) {
     return true;
   }
   auto const sfProp = sf->GetProperty("CXX_SCAN_FOR_MODULES");

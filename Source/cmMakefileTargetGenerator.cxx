@@ -367,8 +367,7 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
     auto const it = file_set_map.find(path);
     if (it != file_set_map.end()) {
       auto const& file_set_type = it->second;
-      if (file_set_type == "CXX_MODULES"_s ||
-          file_set_type == "CXX_MODULE_HEADER_UNITS"_s) {
+      if (file_set_type == "CXX_MODULES"_s) {
         if (sf->GetLanguage() != "CXX"_s) {
           this->Makefile->IssueMessage(
             MessageType::FATAL_ERROR,

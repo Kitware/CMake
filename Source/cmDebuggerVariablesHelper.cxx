@@ -306,18 +306,12 @@ std::shared_ptr<cmDebuggerVariables> cmDebuggerVariablesHelper::CreateIfAny(
     targetVariables->AddSubVariables(
       CreateIfAny(variablesManager, "CompileOptions", supportsVariableType,
                   target->GetCompileOptionsEntries()));
-    targetVariables->AddSubVariables(CreateIfAny(
-      variablesManager, "CxxModuleHeaderSets", supportsVariableType,
-      target->GetCxxModuleHeaderSetsEntries()));
     targetVariables->AddSubVariables(
       CreateIfAny(variablesManager, "CxxModuleSets", supportsVariableType,
                   target->GetCxxModuleSetsEntries()));
     targetVariables->AddSubVariables(
       CreateIfAny(variablesManager, "HeaderSets", supportsVariableType,
                   target->GetHeaderSetsEntries()));
-    targetVariables->AddSubVariables(CreateIfAny(
-      variablesManager, "InterfaceCxxModuleHeaderSets", supportsVariableType,
-      target->GetInterfaceCxxModuleHeaderSetsEntries()));
     targetVariables->AddSubVariables(CreateIfAny(
       variablesManager, "InterfaceHeaderSets", supportsVariableType,
       target->GetInterfaceHeaderSetsEntries()));
