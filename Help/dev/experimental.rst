@@ -18,7 +18,7 @@ C++20 Module APIs
 =================
 
 Variable: ``CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API``
-Value: ``2182bf5c-ef0d-489a-91da-49dbc3090d2a``
+Value: ``aa1f7df0-828a-4fcd-9afc-2dc80491aca7``
 
 In order to support C++20 modules, there are a number of behaviors that have
 CMake APIs to provide the required features to build and export them from a
