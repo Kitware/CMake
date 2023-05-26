@@ -140,6 +140,13 @@ cmUVProcessChainBuilder& cmUVProcessChainBuilder::SetExternalStream(
   return *this;
 }
 
+cmUVProcessChainBuilder& cmUVProcessChainBuilder::SetWorkingDirectory(
+  std::string dir)
+{
+  this->WorkingDirectory = std::move(dir);
+  return *this;
+}
+
 cmUVProcessChain cmUVProcessChainBuilder::Start() const
 {
   cmUVProcessChain chain;
@@ -248,6 +255,9 @@ bool cmUVProcessChain::InternalData::AddCommand(
   arguments.push_back(nullptr);
   options.args = const_cast<char**>(arguments.data());
   options.flags = UV_PROCESS_WINDOWS_HIDE;
+  if (!this->Builder->WorkingDirectory.empty()) {
+    options.cwd = this->Builder->WorkingDirectory.c_str();
+  }
 
   std::array<uv_stdio_container_t, 3> stdio;
   stdio[0] = uv_stdio_container_t();

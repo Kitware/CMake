@@ -37,6 +37,7 @@ if (CMake_TEST_FILESYSTEM_PATH OR NOT CMake_HAVE_CXX_FILESYSTEM)
 endif()
 
 add_executable(testUVProcessChainHelper testUVProcessChainHelper.cxx)
+target_link_libraries(testUVProcessChainHelper CMakeLib)
 
 set(testRST_ARGS ${CMAKE_CURRENT_SOURCE_DIR})
 set(testUVProcessChain_ARGS $<TARGET_FILE:testUVProcessChainHelper>)

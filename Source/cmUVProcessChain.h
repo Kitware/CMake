@@ -31,6 +31,7 @@ public:
   cmUVProcessChainBuilder& SetNoStream(Stream stdio);
   cmUVProcessChainBuilder& SetBuiltinStream(Stream stdio);
   cmUVProcessChainBuilder& SetExternalStream(Stream stdio, int fd);
+  cmUVProcessChainBuilder& SetWorkingDirectory(std::string dir);
 
   cmUVProcessChain Start() const;
 
@@ -57,6 +58,7 @@ private:
 
   std::array<StdioConfiguration, 3> Stdio;
   std::vector<ProcessConfiguration> Processes;
+  std::string WorkingDirectory;
 };
 
 class cmUVProcessChain

@@ -11,6 +11,7 @@
 #include <cm3p/uv.h>
 
 #include "cmGetPipes.h"
+#include "cmStringAlgorithms.h"
 #include "cmUVHandlePtr.h"
 #include "cmUVProcessChain.h"
 #include "cmUVStreambuf.h"
@@ -314,6 +315,57 @@ bool testUVProcessChainNone(const char* helperCommand)
   return true;
 }
 
+bool testUVProcessChainCwdUnchanged(const char* helperCommand)
+{
+  cmUVProcessChainBuilder builder;
+  builder.AddCommand({ helperCommand, "pwd" })
+    .SetBuiltinStream(cmUVProcessChainBuilder::Stream_OUTPUT)
+    .SetBuiltinStream(cmUVProcessChainBuilder::Stream_ERROR);
+
+  auto chain = builder.Start();
+  chain.Wait();
+  if (chain.GetStatus().front()->ExitStatus != 0) {
+    std::cout << "Exit status was " << chain.GetStatus().front()->ExitStatus
+              << ", expecting 0" << std::endl;
+    return false;
+  }
+
+  auto cwd = getInput(*chain.OutputStream());
+  if (!cmHasLiteralSuffix(cwd, "/Tests/CMakeLib")) {
+    std::cout << "Working directory was \"" << cwd
+              << "\", expected to end in \"/Tests/CMakeLib\"" << std::endl;
+    return false;
+  }
+
+  return true;
+}
+
+bool testUVProcessChainCwdChanged(const char* helperCommand)
+{
+  cmUVProcessChainBuilder builder;
+  builder.AddCommand({ helperCommand, "pwd" })
+    .SetBuiltinStream(cmUVProcessChainBuilder::Stream_OUTPUT)
+    .SetBuiltinStream(cmUVProcessChainBuilder::Stream_ERROR)
+    .SetWorkingDirectory("..");
+
+  auto chain = builder.Start();
+  chain.Wait();
+  if (chain.GetStatus().front()->ExitStatus != 0) {
+    std::cout << "Exit status was " << chain.GetStatus().front()->ExitStatus
+              << ", expecting 0" << std::endl;
+    return false;
+  }
+
+  auto cwd = getInput(*chain.OutputStream());
+  if (!cmHasLiteralSuffix(cwd, "/Tests")) {
+    std::cout << "Working directory was \"" << cwd
+              << "\", expected to end in \"/Tests\"" << std::endl;
+    return false;
+  }
+
+  return true;
+}
+
 int testUVProcessChain(int argc, char** const argv)
 {
   if (argc < 2) {
@@ -333,6 +385,16 @@ int testUVProcessChain(int argc, char** const argv)
 
   if (!testUVProcessChainNone(argv[1])) {
     std::cout << "While executing testUVProcessChainNone().\n";
+    return -1;
+  }
+
+  if (!testUVProcessChainCwdUnchanged(argv[1])) {
+    std::cout << "While executing testUVProcessChainCwdUnchanged().\n";
+    return -1;
+  }
+
+  if (!testUVProcessChainCwdChanged(argv[1])) {
+    std::cout << "While executing testUVProcessChainCwdChanged().\n";
     return -1;
   }
 

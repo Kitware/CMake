@@ -7,6 +7,8 @@
 #include <string>
 #include <thread>
 
+#include "cmSystemTools.h"
+
 static std::string getStdin()
 {
   char buffer[1024];
@@ -66,6 +68,11 @@ int main(int argc, char** argv)
 #else
     std::abort();
 #endif
+  }
+  if (command == "pwd") {
+    std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
+    std::cout << cwd << std::flush;
+    return 0;
   }
 
   return -1;
