@@ -6,6 +6,7 @@
 # This is used internally by CMake and should not be included by user
 # code.
 
+include(${CMAKE_ROOT}/Modules/Internal/CMakeDetermineLinkerId.cmake)
 include(${CMAKE_ROOT}/Modules/CMakeParseImplicitIncludeInfo.cmake)
 include(${CMAKE_ROOT}/Modules/CMakeParseImplicitLinkInfo.cmake)
 include(${CMAKE_ROOT}/Modules/CMakeParseLibraryArchitecture.cmake)
@@ -19,15 +20,19 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
     set(BIN "${CMAKE_PLATFORM_INFO_DIR}/CMakeDetermineCompilerABI_${lang}.bin")
     set(CMAKE_FLAGS )
     set(COMPILE_DEFINITIONS )
+    set(LINK_OPTIONS )
     if(DEFINED CMAKE_${lang}_VERBOSE_FLAG)
-      set(CMAKE_FLAGS "-DEXE_LINKER_FLAGS=${CMAKE_${lang}_VERBOSE_FLAG}")
+      set(LINK_OPTIONS "${CMAKE_${lang}_VERBOSE_FLAG}")
       set(COMPILE_DEFINITIONS "${CMAKE_${lang}_VERBOSE_FLAG}")
     endif()
     if(DEFINED CMAKE_${lang}_VERBOSE_COMPILE_FLAG)
       set(COMPILE_DEFINITIONS "${CMAKE_${lang}_VERBOSE_COMPILE_FLAG}")
     endif()
+    if(DEFINED CMAKE_${lang}_VERBOSE_LINK_FLAG)
+      list(APPEND LINK_OPTIONS "${CMAKE_${lang}_VERBOSE_LINK_FLAG}")
+    endif()
     if(lang MATCHES "^(CUDA|HIP)$")
-      if(CMAKE_${lang}_ARCHITECTURES STREQUAL "native")
+      if(CMAKE_CUDA_ARCHITECTURES STREQUAL "native")
         # We are about to detect the native architectures, so we do
         # not yet know them.  Use all architectures during detection.
         set(CMAKE_${lang}_ARCHITECTURES "all")
@@ -39,6 +44,9 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
       # from which we might detect implicit link libraries.
       list(APPEND CMAKE_FLAGS "-DCMAKE_${lang}_STANDARD_LIBRARIES=")
     endif()
+    list(JOIN LINK_OPTIONS " " LINK_OPTIONS)
+    list(APPEND CMAKE_FLAGS "-DEXE_LINKER_FLAGS=${LINK_OPTIONS}")
+
     __TestCompiler_setTryCompileTargetType()
 
     # Avoid failing ABI detection on warnings.
@@ -53,7 +61,6 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
     set(ENV{LC_ALL}      C)
     set(ENV{LC_MESSAGES} C)
     set(ENV{LANG}        C)
-
     try_compile(CMAKE_${lang}_ABI_COMPILED
       SOURCES ${src}
       CMAKE_FLAGS ${CMAKE_FLAGS}
@@ -146,39 +153,42 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
         set(implicit_libs "${CMAKE_${lang}_IMPLICIT_LINK_LIBRARIES}")
         set(implicit_fwks "${CMAKE_${lang}_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES}")
       else()
-        # Parse implicit linker information for this language, if available.
-        set(implicit_dirs "")
-        set(implicit_objs "")
-        set(implicit_libs "")
-        set(implicit_fwks "")
-        if(CMAKE_${lang}_VERBOSE_FLAG)
-          CMAKE_PARSE_IMPLICIT_LINK_INFO("${OUTPUT}" implicit_libs implicit_dirs implicit_fwks log
-            "${CMAKE_${lang}_IMPLICIT_OBJECT_REGEX}"
-            COMPUTE_IMPLICIT_OBJECTS implicit_objs
-            LANGUAGE ${lang})
-          message(CONFIGURE_LOG
-            "Parsed ${lang} implicit link information:\n${log}\n\n")
-        endif()
-        # for VS IDE Intel Fortran we have to figure out the
-        # implicit link path for the fortran run time using
-        # a try-compile
-        if("${lang}" MATCHES "Fortran"
-            AND "${CMAKE_GENERATOR}" MATCHES "Visual Studio")
-          message(CHECK_START "Determine Intel Fortran Compiler Implicit Link Path")
-          # Build a sample project which reports symbols.
-          try_compile(IFORT_LIB_PATH_COMPILED
-            PROJECT IntelFortranImplicit
-            SOURCE_DIR ${CMAKE_ROOT}/Modules/IntelVSImplicitPath
-            BINARY_DIR ${CMAKE_BINARY_DIR}/CMakeFiles/IntelVSImplicitPath
-            CMAKE_FLAGS
-            "-DCMAKE_Fortran_FLAGS:STRING=${CMAKE_Fortran_FLAGS}"
-            OUTPUT_VARIABLE _output)
-          file(WRITE
-            "${CMAKE_BINARY_DIR}/CMakeFiles/IntelVSImplicitPath/output.txt"
-            "${_output}")
-          include(${CMAKE_BINARY_DIR}/CMakeFiles/IntelVSImplicitPath/output.cmake OPTIONAL)
-          message(CHECK_PASS "done")
-        endif()
+      # Parse implicit linker information for this language, if available.
+      set(implicit_dirs "")
+      set(implicit_objs "")
+      set(implicit_libs "")
+      set(implicit_fwks "")
+      set(compute_artifacts COMPUTE_LINKER linker_tool)
+      if(CMAKE_${lang}_VERBOSE_FLAG)
+        list(APPEND compute_artifacts COMPUTE_IMPLICIT_LIBS implicit_libs
+                                      COMPUTE_IMPLICIT_DIRS implicit_dirs
+                                      COMPUTE_IMPLICIT_FWKS implicit_fwks
+                                      COMPUTE_IMPLICIT_OBJECTS implicit_objs)
+      endif()
+      cmake_parse_implicit_link_info2("${OUTPUT}" log "${CMAKE_${lang}_IMPLICIT_OBJECT_REGEX}"
+        ${compute_artifacts} LANGUAGE ${lang})
+      message(CONFIGURE_LOG
+          "Parsed ${lang} implicit link information:\n${log}\n\n")
+      # for VS IDE Intel Fortran we have to figure out the
+      # implicit link path for the fortran run time using
+      # a try-compile
+      if("${lang}" MATCHES "Fortran"
+          AND "${CMAKE_GENERATOR}" MATCHES "Visual Studio")
+        message(CHECK_START "Determine Intel Fortran Compiler Implicit Link Path")
+        # Build a sample project which reports symbols.
+        try_compile(IFORT_LIB_PATH_COMPILED
+          PROJECT IntelFortranImplicit
+          SOURCE_DIR ${CMAKE_ROOT}/Modules/IntelVSImplicitPath
+          BINARY_DIR ${CMAKE_BINARY_DIR}/CMakeFiles/IntelVSImplicitPath
+          CMAKE_FLAGS
+          "-DCMAKE_Fortran_FLAGS:STRING=${CMAKE_Fortran_FLAGS}"
+          OUTPUT_VARIABLE _output)
+        file(WRITE
+          "${CMAKE_BINARY_DIR}/CMakeFiles/IntelVSImplicitPath/output.txt"
+          "${_output}")
+        include(${CMAKE_BINARY_DIR}/CMakeFiles/IntelVSImplicitPath/output.cmake OPTIONAL)
+        message(CHECK_PASS "done")
+      endif()
       endif()
 
       # Implicit link libraries cannot be used explicitly for multiple
@@ -192,6 +202,12 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
       if(DEFINED ENV{CMAKE_${lang}_IMPLICIT_LINK_DIRECTORIES_EXCLUDE})
         list(REMOVE_ITEM implicit_dirs $ENV{CMAKE_${lang}_IMPLICIT_LINK_DIRECTORIES_EXCLUDE})
       endif()
+
+      set(CMAKE_${lang}_COMPILER_LINKER "${linker_tool}" PARENT_SCOPE)
+      cmake_determine_linker_id(${lang} "${linker_tool}")
+      set(CMAKE_${lang}_COMPILER_LINKER_ID "${CMAKE_${lang}_COMPILER_LINKER_ID}" PARENT_SCOPE)
+      set(CMAKE_${lang}_COMPILER_LINKER_VERSION ${CMAKE_${lang}_COMPILER_LINKER_VERSION} PARENT_SCOPE)
+      set(CMAKE_${lang}_COMPILER_LINKER_FRONTEND_VARIANT ${CMAKE_${lang}_COMPILER_LINKER_FRONTEND_VARIANT} PARENT_SCOPE)
 
       set(CMAKE_${lang}_IMPLICIT_LINK_LIBRARIES "${implicit_libs}" PARENT_SCOPE)
       set(CMAKE_${lang}_IMPLICIT_LINK_DIRECTORIES "${implicit_dirs}" PARENT_SCOPE)

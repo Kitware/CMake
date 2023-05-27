@@ -13,6 +13,8 @@ macro(__linux_compiler_gnu lang)
   # executables that use dlopen but do not set ENABLE_EXPORTS.
   set(CMAKE_SHARED_LIBRARY_LINK_${lang}_FLAGS "-rdynamic")
 
+  set(CMAKE_${lang}_VERBOSE_LINK_FLAG "-Wl,-v")
+
   # linker selection
   set(CMAKE_${lang}_USING_LINKER_SYSTEM "")
   set(CMAKE_${lang}_USING_LINKER_LLD "-fuse-ld=lld")
