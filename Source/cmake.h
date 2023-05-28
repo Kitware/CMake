@@ -328,20 +328,18 @@ public:
    */
   cmValue GetCacheDefinition(const std::string&) const;
   //! Add an entry into the cache
-  void AddCacheEntry(const std::string& key, const char* value,
-                     const char* helpString, int type)
-  {
-    this->AddCacheEntry(key,
-                        value ? cmValue(std::string(value)) : cmValue(nullptr),
-                        helpString, type);
-  }
   void AddCacheEntry(const std::string& key, const std::string& value,
-                     const char* helpString, int type)
+                     const std::string& helpString, int type)
   {
-    this->AddCacheEntry(key, cmValue(value), helpString, type);
+    this->AddCacheEntry(key, cmValue{ value }, cmValue{ helpString }, type);
   }
   void AddCacheEntry(const std::string& key, cmValue value,
-                     const char* helpString, int type);
+                     const std::string& helpString, int type)
+  {
+    this->AddCacheEntry(key, value, cmValue{ helpString }, type);
+  }
+  void AddCacheEntry(const std::string& key, cmValue value, cmValue helpString,
+                     int type);
 
   bool DoWriteGlobVerifyTarget() const;
   std::string const& GetGlobVerifyScript() const;

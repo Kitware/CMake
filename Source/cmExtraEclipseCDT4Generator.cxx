@@ -257,7 +257,7 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(std::ostream& out,
     // The variable is in the env, but not in the cache. Use it and put it
     // in the cache
     valueToUse = envVarValue;
-    mf->AddCacheDefinition(cacheEntryName, valueToUse, cacheEntryName.c_str(),
+    mf->AddCacheDefinition(cacheEntryName, valueToUse, cacheEntryName,
                            cmStateEnums::STRING, true);
     mf->GetCMakeInstance()->SaveCache(lg.GetBinaryDirectory());
   } else if (!envVarSet && cacheValue) {
@@ -272,9 +272,8 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(std::ostream& out,
     valueToUse = *cacheValue;
     if (valueToUse.find(envVarValue) == std::string::npos) {
       valueToUse = envVarValue;
-      mf->AddCacheDefinition(cacheEntryName, valueToUse,
-                             cacheEntryName.c_str(), cmStateEnums::STRING,
-                             true);
+      mf->AddCacheDefinition(cacheEntryName, valueToUse, cacheEntryName,
+                             cmStateEnums::STRING, true);
       mf->GetCMakeInstance()->SaveCache(lg.GetBinaryDirectory());
     }
   }

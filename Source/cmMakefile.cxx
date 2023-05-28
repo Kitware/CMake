@@ -1939,8 +1939,8 @@ void cmMakefile::AddDefinitionBool(const std::string& name, bool value)
   this->AddDefinition(name, value ? "ON" : "OFF");
 }
 
-void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
-                                    const char* doc,
+void cmMakefile::AddCacheDefinition(const std::string& name, cmValue value,
+                                    cmValue doc,
                                     cmStateEnums::CacheEntryType type,
                                     bool force)
 {
@@ -1954,22 +1954,20 @@ void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
     // if this is not a force, then use the value from the cache
     // if it is a force, then use the value being passed in
     if (!force) {
-      value = existingValue->c_str();
+      value = existingValue;
     }
     if (type == cmStateEnums::PATH || type == cmStateEnums::FILEPATH) {
-      nvalue = value ? value : "";
-
-      cmList files(nvalue);
+      cmList files(value);
       for (auto& file : files) {
         if (!cmIsOff(file)) {
           file = cmSystemTools::CollapseFullPath(file);
         }
       }
       nvalue = files.to_string();
+      value = cmValue{ nvalue };
 
-      this->GetCMakeInstance()->AddCacheEntry(name, nvalue, doc, type);
-      nvalue = *this->GetState()->GetInitializedCacheValue(name);
-      value = nvalue.c_str();
+      this->GetCMakeInstance()->AddCacheEntry(name, value, doc, type);
+      value = this->GetState()->GetInitializedCacheValue(name);
     }
   }
   this->GetCMakeInstance()->AddCacheEntry(name, value, doc, type);

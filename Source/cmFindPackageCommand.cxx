@@ -1728,7 +1728,7 @@ void cmFindPackageCommand::SetConfigDirCacheVariable(const std::string& value)
   std::string const help =
     cmStrCat("The directory containing a CMake configuration file for ",
              this->Name, '.');
-  this->Makefile->AddCacheDefinition(this->Variable, value, help.c_str(),
+  this->Makefile->AddCacheDefinition(this->Variable, value, help,
                                      cmStateEnums::PATH, true);
   if (this->Makefile->GetPolicyStatus(cmPolicies::CMP0126) ==
         cmPolicies::NEW &&

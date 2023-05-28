@@ -302,14 +302,23 @@ public:
    */
   void AddDefinitionBool(const std::string& name, bool);
   //! Add a definition to this makefile and the global cmake cache.
-  void AddCacheDefinition(const std::string& name, const char* value,
-                          const char* doc, cmStateEnums::CacheEntryType type,
+  void AddCacheDefinition(const std::string& name, cmValue value, cmValue doc,
+                          cmStateEnums::CacheEntryType type,
                           bool force = false);
-  void AddCacheDefinition(const std::string& name, const std::string& value,
-                          const char* doc, cmStateEnums::CacheEntryType type,
+  void AddCacheDefinition(const std::string& name, cmValue value,
+                          const std::string& doc,
+                          cmStateEnums::CacheEntryType type,
                           bool force = false)
   {
-    this->AddCacheDefinition(name, value.c_str(), doc, type, force);
+    this->AddCacheDefinition(name, value, cmValue{ doc }, type, force);
+  }
+  void AddCacheDefinition(const std::string& name, const std::string& value,
+                          const std::string& doc,
+                          cmStateEnums::CacheEntryType type,
+                          bool force = false)
+  {
+    this->AddCacheDefinition(name, cmValue{ value }, cmValue{ doc }, type,
+                             force);
   }
 
   /**

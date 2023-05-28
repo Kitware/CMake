@@ -79,8 +79,8 @@ bool cmSetCommand(std::vector<std::string> const& args,
   bool force = false; // optional
   bool parentScope = false;
   cmStateEnums::CacheEntryType type =
-    cmStateEnums::STRING;          // required if cache
-  const char* docstring = nullptr; // required if cache
+    cmStateEnums::STRING; // required if cache
+  cmValue docstring;      // required if cache
 
   unsigned int ignoreLastArgs = 0;
   // look for PARENT_SCOPE argument
@@ -131,7 +131,7 @@ bool cmSetCommand(std::vector<std::string> const& args,
       // ensure that the type is actually converting to a string.
       type = cmStateEnums::STRING;
     }
-    docstring = args[cacheStart + 2].c_str();
+    docstring = cmValue{ args[cacheStart + 2] };
   }
 
   // see if this is already in the cache
@@ -150,8 +150,8 @@ bool cmSetCommand(std::vector<std::string> const& args,
 
   // if it is meant to be in the cache then define it in the cache
   if (cache) {
-    status.GetMakefile().AddCacheDefinition(variable, value, docstring, type,
-                                            force);
+    status.GetMakefile().AddCacheDefinition(variable, cmValue{ value },
+                                            docstring, type, force);
   } else {
     // add the definition
     status.GetMakefile().AddDefinition(variable, value);

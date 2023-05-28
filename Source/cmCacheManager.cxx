@@ -523,7 +523,7 @@ void cmCacheManager::PrintCache(std::ostream& out) const
 }
 
 void cmCacheManager::AddCacheEntry(const std::string& key, cmValue value,
-                                   const char* helpString,
+                                   cmValue helpString,
                                    cmStateEnums::CacheEntryType type)
 {
   CacheEntry& e = this->Cache[key];
@@ -543,7 +543,7 @@ void cmCacheManager::AddCacheEntry(const std::string& key, cmValue value,
   }
   e.SetProperty(
     "HELPSTRING",
-    helpString ? std::string{ helpString }
+    helpString ? *helpString
                : std::string{
                    "(This variable does not exist and should not be used)" });
 }

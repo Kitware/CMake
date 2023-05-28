@@ -509,7 +509,7 @@ void cmFindBase::NormalizeFindResult()
       // value.
       if (value != *existingValue || this->AlreadyInCacheWithoutMetaInfo) {
         this->Makefile->GetCMakeInstance()->AddCacheEntry(
-          this->VariableName, value, this->VariableDocumentation.c_str(),
+          this->VariableName, value, this->VariableDocumentation,
           this->VariableType);
         if (this->Makefile->GetPolicyStatus(cmPolicies::CMP0126) ==
             cmPolicies::NEW) {
@@ -534,7 +534,7 @@ void cmFindBase::NormalizeFindResult()
     if (this->StoreResultInCache) {
       if (this->AlreadyInCacheWithoutMetaInfo) {
         this->Makefile->AddCacheDefinition(this->VariableName, "",
-                                           this->VariableDocumentation.c_str(),
+                                           this->VariableDocumentation,
                                            this->VariableType);
         if (this->Makefile->GetPolicyStatus(cmPolicies::CMP0126) ==
               cmPolicies::NEW &&
@@ -564,7 +564,7 @@ void cmFindBase::StoreFindResult(const std::string& value)
   if (!value.empty()) {
     if (this->StoreResultInCache) {
       this->Makefile->AddCacheDefinition(this->VariableName, value,
-                                         this->VariableDocumentation.c_str(),
+                                         this->VariableDocumentation,
                                          this->VariableType, force);
       if (updateNormalVariable &&
           this->Makefile->IsNormalDefinitionSet(this->VariableName)) {
@@ -580,7 +580,7 @@ void cmFindBase::StoreFindResult(const std::string& value)
   auto notFound = cmStrCat(this->VariableName, "-NOTFOUND");
   if (this->StoreResultInCache) {
     this->Makefile->AddCacheDefinition(this->VariableName, notFound,
-                                       this->VariableDocumentation.c_str(),
+                                       this->VariableDocumentation,
                                        this->VariableType, force);
     if (updateNormalVariable &&
         this->Makefile->IsNormalDefinitionSet(this->VariableName)) {
