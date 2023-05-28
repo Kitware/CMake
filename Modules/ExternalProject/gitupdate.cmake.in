@@ -283,7 +283,9 @@ endif()
 set(init_submodules "@init_submodules@")
 if(init_submodules)
   execute_process(
-    COMMAND "@git_EXECUTABLE@" --git-dir=.git submodule update @git_submodules_recurse@ --init @git_submodules@
+    COMMAND "@git_EXECUTABLE@"
+            --git-dir=.git @git_submodules_config_options@
+            submodule update @git_submodules_recurse@ --init @git_submodules@
     WORKING_DIRECTORY "@work_dir@"
     COMMAND_ERROR_IS_FATAL ANY
   )
