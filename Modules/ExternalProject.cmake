@@ -232,7 +232,12 @@ External Project Definition
         measure.
 
         .. versionchanged:: 3.6
-          This option also applies to ``git clone`` invocations.
+          This option also applies to ``git clone`` invocations, although the
+          default behavior is different.  If ``TLS_VERIFY`` is not given and
+          :variable:`CMAKE_TLS_VERIFY` is not set, the behavior will be
+          determined by git's defaults.  Normally, the ``sslVerify`` git
+          config setting defaults to true, but the user may have overridden
+          this at a global level.
 
       ``TLS_CAINFO <file>``
         Specify a custom certificate authority file to use if ``TLS_VERIFY``
