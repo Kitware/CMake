@@ -1,13 +1,5 @@
 include(Compiler/Clang)
 
-#
-# For now, deactivate globally linker dependency file support because
-# HIP compiler is based on Clang which provides support of other languages
-#
-foreach (lang IN ITEMS "C" "CXX" "OBJC" "OBJCXX" "Fortran" "ASM")
-  set(CMAKE_${lang}_LINKER_DEPFILE_SUPPORTED FALSE)
-endforeach()
-
 __compiler_clang(HIP)
 __compiler_clang_cxx_standards(HIP)
 
