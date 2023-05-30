@@ -44,40 +44,18 @@
 #define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
 #endif
 
-
-void Curl_cf_def_destroy_this(struct Curl_cfilter *cf, struct Curl_easy *data)
-{
-  (void)cf;
-  (void)data;
-}
-
+#ifdef DEBUGBUILD
+/* used by unit2600.c */
 void Curl_cf_def_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   cf->connected = FALSE;
   if(cf->next)
     cf->next->cft->close(cf->next, data);
 }
+#endif
 
-CURLcode Curl_cf_def_connect(struct Curl_cfilter *cf,
-                             struct Curl_easy *data,
-                             bool blocking, bool *done)
-{
-  CURLcode result;
-
-  if(cf->connected) {
-    *done = TRUE;
-    return CURLE_OK;
-  }
-  if(cf->next) {
-    result = cf->next->cft->connect(cf->next, data, blocking, done);
-    if(!result && *done) {
-      cf->connected = TRUE;
-    }
-    return result;
-  }
-  *done = FALSE;
-  return CURLE_FAILED_INIT;
-}
+static void conn_report_connect_stats(struct Curl_easy *data,
+                                      struct connectdata *conn);
 
 void Curl_cf_def_get_host(struct Curl_cfilter *cf, struct Curl_easy *data,
                           const char **phost, const char **pdisplay_host,
@@ -283,21 +261,31 @@ void Curl_conn_cf_insert_after(struct Curl_cfilter *cf_at,
   *pnext = tail;
 }
 
-void Curl_conn_cf_discard(struct Curl_cfilter *cf, struct Curl_easy *data)
+bool Curl_conn_cf_discard_sub(struct Curl_cfilter *cf,
+                              struct Curl_cfilter *discard,
+                              struct Curl_easy *data,
+                              bool destroy_always)
 {
-  struct Curl_cfilter **pprev = &cf->conn->cfilter[cf->sockindex];
+  struct Curl_cfilter **pprev = &cf->next;
+  bool found = FALSE;
 
-  /* remove from chain if still in there */
+  /* remove from sub-chain and destroy */
   DEBUGASSERT(cf);
-  while (*pprev) {
-    if (*pprev == cf) {
-      *pprev = cf->next;
+  while(*pprev) {
+    if(*pprev == cf) {
+      *pprev = discard->next;
+      discard->next = NULL;
+      found = TRUE;
       break;
     }
     pprev = &((*pprev)->next);
   }
-  cf->cft->destroy(cf, data);
-  free(cf);
+  if(found || destroy_always) {
+    discard->next = NULL;
+    discard->cft->destroy(discard, data);
+    free(discard);
+  }
+  return found;
 }
 
 CURLcode Curl_conn_cf_connect(struct Curl_cfilter *cf,
@@ -322,14 +310,6 @@ int Curl_conn_cf_get_select_socks(struct Curl_cfilter *cf,
   if(cf)
     return cf->cft->get_select_socks(cf, data, socks);
   return 0;
-}
-
-bool Curl_conn_cf_data_pending(struct Curl_cfilter *cf,
-                               const struct Curl_easy *data)
-{
-  if(cf)
-    return cf->cft->has_data_pending(cf, data);
-  return FALSE;
 }
 
 ssize_t Curl_conn_cf_send(struct Curl_cfilter *cf, struct Curl_easy *data,
@@ -371,11 +351,11 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
     result = cf->cft->connect(cf, data, blocking, done);
     if(!result && *done) {
       Curl_conn_ev_update_info(data, data->conn);
-      Curl_conn_report_connect_stats(data, data->conn);
+      conn_report_connect_stats(data, data->conn);
       data->conn->keepalive = Curl_now();
     }
     else if(result) {
-      Curl_conn_report_connect_stats(data, data->conn);
+      conn_report_connect_stats(data, data->conn);
     }
   }
 
@@ -405,10 +385,8 @@ bool Curl_conn_is_ip_connected(struct Curl_easy *data, int sockindex)
   return FALSE;
 }
 
-bool Curl_conn_is_ssl(struct connectdata *conn, int sockindex)
+bool Curl_conn_cf_is_ssl(struct Curl_cfilter *cf)
 {
-  struct Curl_cfilter *cf = conn? conn->cfilter[sockindex] : NULL;
-
   for(; cf; cf = cf->next) {
     if(cf->cft->flags & CF_TYPE_SSL)
       return TRUE;
@@ -416,6 +394,11 @@ bool Curl_conn_is_ssl(struct connectdata *conn, int sockindex)
       return FALSE;
   }
   return FALSE;
+}
+
+bool Curl_conn_is_ssl(struct connectdata *conn, int sockindex)
+{
+  return conn? Curl_conn_cf_is_ssl(conn->cfilter[sockindex]) : FALSE;
 }
 
 bool Curl_conn_is_multiplex(struct connectdata *conn, int sockindex)
@@ -612,8 +595,11 @@ void Curl_conn_ev_update_info(struct Curl_easy *data,
   cf_cntrl_all(conn, data, TRUE, CF_CTRL_CONN_INFO_UPDATE, 0, NULL);
 }
 
-void Curl_conn_report_connect_stats(struct Curl_easy *data,
-                                    struct connectdata *conn)
+/**
+ * Update connection statistics
+ */
+static void conn_report_connect_stats(struct Curl_easy *data,
+                                      struct connectdata *conn)
 {
   struct Curl_cfilter *cf = conn->cfilter[FIRSTSOCKET];
   if(cf) {

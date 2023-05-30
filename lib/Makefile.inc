@@ -105,8 +105,12 @@ LIB_CFILES =         \
   asyn-ares.c        \
   asyn-thread.c      \
   base64.c           \
+  bufq.c             \
   bufref.c           \
   c-hyper.c          \
+  cf-h1-proxy.c      \
+  cf-h2-proxy.c      \
+  cf-haproxy.c       \
   cf-https-connect.c \
   cf-socket.c        \
   cfilters.c         \
@@ -135,6 +139,7 @@ LIB_CFILES =         \
   dict.c             \
   doh.c              \
   dynbuf.c           \
+  dynhds.c           \
   easy.c             \
   easygetopt.c       \
   easyoptions.c      \
@@ -148,7 +153,6 @@ LIB_CFILES =         \
   getenv.c           \
   getinfo.c          \
   gopher.c           \
-  h2h3.c             \
   hash.c             \
   headers.c          \
   hmac.c             \
@@ -159,6 +163,7 @@ LIB_CFILES =         \
   hostsyn.c          \
   hsts.c             \
   http.c             \
+  http1.c            \
   http2.c            \
   http_chunks.c      \
   http_digest.c      \
@@ -230,8 +235,12 @@ LIB_HFILES =         \
   amigaos.h          \
   arpa_telnet.h      \
   asyn.h             \
+  bufq.h             \
   bufref.h           \
   c-hyper.h          \
+  cf-h1-proxy.h      \
+  cf-h2-proxy.h      \
+  cf-haproxy.h       \
   cf-https-connect.h \
   cf-socket.h        \
   cfilters.h         \
@@ -273,6 +282,7 @@ LIB_HFILES =         \
   dict.h             \
   doh.h              \
   dynbuf.h           \
+  dynhds.h           \
   easy_lock.h        \
   easyif.h           \
   easyoptions.h      \
@@ -286,12 +296,12 @@ LIB_HFILES =         \
   ftplistparser.h    \
   getinfo.h          \
   gopher.h           \
-  h2h3.h             \
   hash.h             \
   headers.h          \
   hostip.h           \
   hsts.h             \
   http.h             \
+  http1.h            \
   http2.h            \
   http_chunks.h      \
   http_digest.h      \

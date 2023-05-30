@@ -86,6 +86,7 @@ set_target_properties(${LIB_NAME} PROPERTIES
 if(CMAKE_SYSTEM_NAME STREQUAL "AIX" OR
   CMAKE_SYSTEM_NAME STREQUAL "Linux" OR
   CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR
+  CMAKE_SYSTEM_NAME STREQUAL "SunOS" OR
   CMAKE_SYSTEM_NAME STREQUAL "GNU/kFreeBSD" OR
 
   # FreeBSD comes with the a.out and elf flavours
@@ -130,6 +131,17 @@ if(WIN32)
       set_target_properties(${LIB_NAME} PROPERTIES IMPORT_SUFFIX "_imp.lib")
     endif()
   endif()
+elseif(NOT CMAKE_CROSSCOMPILING)
+  # on not-Windows and not-crosscompiling, check for writable argv[]
+    include(CheckCSourceRuns)
+    check_c_source_runs("
+int main(int argc, char **argv)
+{
+  (void)argc;
+  argv[0][0] = ' ';
+  return (argv[0][0] == ' ')?0:1;
+}"
+      HAVE_WRITABLE_ARGV)
 endif()
 
 target_include_directories(${LIB_NAME} INTERFACE

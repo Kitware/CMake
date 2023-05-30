@@ -61,6 +61,7 @@
 #include "doh.h"
 #include "warnless.h"
 #include "strcase.h"
+#include "easy_lock.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -70,13 +71,18 @@
 #include <SystemConfiguration/SCDynamicStoreCopySpecific.h>
 #endif
 
-#if defined(CURLRES_SYNCH) && \
-    defined(HAVE_ALARM) && defined(SIGALRM) && defined(HAVE_SIGSETJMP)
+#if defined(CURLRES_SYNCH) &&                   \
+  defined(HAVE_ALARM) &&                        \
+  defined(SIGALRM) &&                           \
+  defined(HAVE_SIGSETJMP) &&                    \
+  defined(GLOBAL_INIT_IS_THREADSAFE)
 /* alarm-based timeouts can only be used with all the dependencies satisfied */
 #define USE_ALARM_TIMEOUT
 #endif
 
 #define MAX_HOSTCACHE_LEN (255 + 7) /* max FQDN + colon + port number + zero */
+
+#define MAX_DNS_CACHE_SIZE 29999
 
 /*
  * hostip.c explained
@@ -122,7 +128,7 @@ static void freednsentry(void *freethis);
 /*
  * Return # of addresses in a Curl_addrinfo struct
  */
-int Curl_num_addresses(const struct Curl_addrinfo *addr)
+static int num_addresses(const struct Curl_addrinfo *addr)
 {
   int i = 0;
   while(addr) {
@@ -189,8 +195,9 @@ create_hostcache_id(const char *name,
 }
 
 struct hostcache_prune_data {
-  long cache_timeout;
   time_t now;
+  time_t oldest; /* oldest time in cache not pruned. */
+  int cache_timeout;
 };
 
 /*
@@ -203,28 +210,40 @@ struct hostcache_prune_data {
 static int
 hostcache_timestamp_remove(void *datap, void *hc)
 {
-  struct hostcache_prune_data *data =
+  struct hostcache_prune_data *prune =
     (struct hostcache_prune_data *) datap;
   struct Curl_dns_entry *c = (struct Curl_dns_entry *) hc;
 
-  return (0 != c->timestamp)
-    && (data->now - c->timestamp >= data->cache_timeout);
+  if(c->timestamp) {
+    /* age in seconds */
+    time_t age = prune->now - c->timestamp;
+    if(age >= prune->cache_timeout)
+      return TRUE;
+    if(age > prune->oldest)
+      prune->oldest = age;
+  }
+  return FALSE;
 }
 
 /*
  * Prune the DNS cache. This assumes that a lock has already been taken.
+ * Returns the 'age' of the oldest still kept entry.
  */
-static void
-hostcache_prune(struct Curl_hash *hostcache, long cache_timeout, time_t now)
+static time_t
+hostcache_prune(struct Curl_hash *hostcache, int cache_timeout,
+                time_t now)
 {
   struct hostcache_prune_data user;
 
   user.cache_timeout = cache_timeout;
   user.now = now;
+  user.oldest = 0;
 
   Curl_hash_clean_with_criterium(hostcache,
                                  (void *) &user,
                                  hostcache_timestamp_remove);
+
+  return user.oldest;
 }
 
 /*
@@ -234,10 +253,11 @@ hostcache_prune(struct Curl_hash *hostcache, long cache_timeout, time_t now)
 void Curl_hostcache_prune(struct Curl_easy *data)
 {
   time_t now;
+  /* the timeout may be set -1 (forever) */
+  int timeout = data->set.dns_cache_timeout;
 
-  if((data->set.dns_cache_timeout == -1) || !data->dns.hostcache)
-    /* cache forever means never prune, and NULL hostcache means
-       we can't do it */
+  if(!data->dns.hostcache)
+    /* NULL hostcache means we can't do it */
     return;
 
   if(data->share)
@@ -245,20 +265,29 @@ void Curl_hostcache_prune(struct Curl_easy *data)
 
   time(&now);
 
-  /* Remove outdated and unused entries from the hostcache */
-  hostcache_prune(data->dns.hostcache,
-                  data->set.dns_cache_timeout,
-                  now);
+  do {
+    /* Remove outdated and unused entries from the hostcache */
+    time_t oldest = hostcache_prune(data->dns.hostcache, timeout, now);
+
+    if(oldest < INT_MAX)
+      timeout = (int)oldest; /* we know it fits */
+    else
+      timeout = INT_MAX - 1;
+
+    /* if the cache size is still too big, use the oldest age as new
+       prune limit */
+  } while(timeout && (data->dns.hostcache->size > MAX_DNS_CACHE_SIZE));
 
   if(data->share)
     Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
 }
 
-#ifdef HAVE_SIGSETJMP
+#ifdef USE_ALARM_TIMEOUT
 /* Beware this is a global and unique instance. This is used to store the
    return address that we can jump back to from inside a signal handler. This
    is not thread-safe stuff. */
-sigjmp_buf curl_jmpenv;
+static sigjmp_buf curl_jmpenv;
+static curl_simple_lock curl_jmpenv_lock;
 #endif
 
 /* lookup address, returns entry if found and not stale */
@@ -290,6 +319,7 @@ static struct Curl_dns_entry *fetch_addr(struct Curl_easy *data,
 
     time(&user.now);
     user.cache_timeout = data->set.dns_cache_timeout;
+    user.oldest = 0;
 
     if(hostcache_timestamp_remove(&user, dns)) {
       infof(data, "Hostname in DNS cache was stale, zapped");
@@ -380,7 +410,7 @@ UNITTEST CURLcode Curl_shuffle_addr(struct Curl_easy *data,
                                     struct Curl_addrinfo **addr)
 {
   CURLcode result = CURLE_OK;
-  const int num_addrs = Curl_num_addresses(*addr);
+  const int num_addrs = num_addresses(*addr);
 
   if(num_addrs > 1) {
     struct Curl_addrinfo **nodes;
@@ -652,6 +682,14 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
   CURLcode result;
   enum resolve_t rc = CURLRESOLV_ERROR; /* default to failure */
   struct connectdata *conn = data->conn;
+  /* We should intentionally error and not resolve .onion TLDs */
+  size_t hostname_len = strlen(hostname);
+  if(hostname_len >= 7 &&
+     (curl_strequal(&hostname[hostname_len - 6], ".onion") ||
+      curl_strequal(&hostname[hostname_len - 7], ".onion."))) {
+    failf(data, "Not resolving .onion address (RFC 7686)");
+    return CURLRESOLV_ERROR;
+  }
   *entry = NULL;
 #ifndef CURL_DISABLE_DOH
   conn->bits.doh = FALSE; /* default is not */
@@ -824,7 +862,6 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
 static
 void alarmfunc(int sig)
 {
-  /* this is for "-ansi -Wall -pedantic" to stop complaining!   (rabe) */
   (void)sig;
   siglongjmp(curl_jmpenv, 1);
 }
@@ -904,6 +941,8 @@ enum resolve_t Curl_resolv_timeout(struct Curl_easy *data,
      This should be the last thing we do before calling Curl_resolv(),
      as otherwise we'd have to worry about variables that get modified
      before we invoke Curl_resolv() (and thus use "volatile"). */
+  curl_simple_lock_lock(&curl_jmpenv_lock);
+
   if(sigsetjmp(curl_jmpenv, 1)) {
     /* this is coming from a siglongjmp() after an alarm signal */
     failf(data, "name lookup timed out");
@@ -971,6 +1010,8 @@ clean_up:
   signal(SIGALRM, keep_sigact);
 #endif
 #endif /* HAVE_SIGACTION */
+
+  curl_simple_lock_unlock(&curl_jmpenv_lock);
 
   /* switch back the alarm() to either zero or to what it was before minus
      the time we spent until now! */
@@ -1196,7 +1237,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
         goto err;
 
       error = false;
-   err:
+err:
       if(error) {
         failf(data, "Couldn't parse CURLOPT_RESOLVE entry '%s'",
               hostp->data);

@@ -50,6 +50,7 @@
 #
 # The following variables are available:
 #   HAVE_RAND_EGD: `RAND_egd` present in OpenSSL
+#   HAVE_AWSLC: OpenSSL is AWS-LC
 #   HAVE_BORINGSSL: OpenSSL is BoringSSL
 #   HAVE_PK11_CREATEMANAGEDGENERICOBJECTL: `PK11_CreateManagedGenericObject` present in NSS
 #   HAVE_SSL_CTX_SET_QUIC_METHOD: `SSL_CTX_set_quic_method` present in OpenSSL/wolfSSL
@@ -126,28 +127,7 @@ cmake_dependent_option(ENABLE_THREADED_RESOLVER "Set to ON to enable threaded DN
 option(ENABLE_DEBUG "Set to ON to enable curl debug features" OFF)
 option(ENABLE_CURLDEBUG "Set to ON to build with TrackMemory feature enabled" OFF)
 
-if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
-  if(PICKY_COMPILER)
-    foreach(_CCOPT -pedantic -Wall -W -Wpointer-arith -Wwrite-strings -Wunused -Wshadow -Winline -Wnested-externs -Wmissing-declarations -Wmissing-prototypes -Wfloat-equal -Wsign-compare -Wundef -Wendif-labels -Wstrict-prototypes -Wdeclaration-after-statement -Wstrict-aliasing=3 -Wcast-align -Wtype-limits -Wold-style-declaration -Wmissing-parameter-type -Wempty-body -Wclobbered -Wignored-qualifiers -Wconversion -Wvla -Wdouble-promotion -Wenum-conversion -Warith-conversion)
-      # surprisingly, CHECK_C_COMPILER_FLAG needs a new variable to store each new
-      # test result in.
-      string(MAKE_C_IDENTIFIER "OPT${_CCOPT}" _optvarname)
-      check_c_compiler_flag(${_CCOPT} ${_optvarname})
-      if(${_optvarname})
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${_CCOPT}")
-      endif()
-    endforeach()
-    foreach(_CCOPT long-long multichar format-nonliteral sign-conversion system-headers pedantic-ms-format)
-      # GCC only warns about unknown -Wno- options if there are also other diagnostic messages,
-      # so test for the positive form instead
-      string(MAKE_C_IDENTIFIER "OPT${_CCOPT}" _optvarname)
-      check_c_compiler_flag("-W${_CCOPT}" ${_optvarname})
-      if(${_optvarname})
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-${_CCOPT}")
-      endif()
-    endforeach()
-  endif()
-endif()
+include(PickyWarnings)
 
 if(ENABLE_DEBUG)
   # DEBUGBUILD will be defined only for Debug builds
@@ -321,6 +301,11 @@ if(${CMAKE_SYSTEM_NAME} MATCHES AIX)
   set(_ALL_SOURCE 1)
 endif()
 
+# If we are on Haiku, make sure that the network library is brought in.
+if(${CMAKE_SYSTEM_NAME} MATCHES Haiku)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -lnetwork")
+endif()
+
 # Include all the necessary files for macros
 include(CMakePushCheckState)
 include(CheckFunctionExists)
@@ -356,6 +341,19 @@ check_function_exists(gethostname HAVE_GETHOSTNAME)
 if(WIN32)
   check_library_exists_concat("ws2_32" getch        HAVE_LIBWS2_32)
   check_library_exists_concat("winmm"  getch        HAVE_LIBWINMM)
+
+  # Matching logic used for Curl_win32_random()
+  if(MINGW)
+    check_c_source_compiles("
+      #include <_mingw.h>
+      #if defined(__MINGW64_VERSION_MAJOR)
+      #error
+      #endif
+      int main(void) {
+        return 0;
+      }"
+      HAVE_MINGW_ORIGINAL)
+  endif()
 endif()
 
 # check SSL libraries
@@ -426,58 +424,6 @@ if(use_core_foundation)
   list(APPEND CURL_LIBS "-framework CoreFoundation")
 endif()
 
-# Keep compression lib detection before TLS detection, which
-# might depend on it.
-
-set(HAVE_LIBZ OFF)
-set(USE_ZLIB OFF)
-optional_dependency(ZLIB)
-if(ZLIB_FOUND)
-  set(HAVE_LIBZ ON)
-  set(USE_ZLIB ON)
-
-  # Depend on ZLIB via imported targets if supported by the running
-  # version of CMake.  This allows our dependents to get our dependencies
-  # transitively.
-  if(NOT CMAKE_VERSION VERSION_LESS 3.4)
-    list(APPEND CURL_LIBS ZLIB::ZLIB)
-  else()
-    list(APPEND CURL_LIBS ${ZLIB_LIBRARIES})
-    include_directories(${ZLIB_INCLUDE_DIRS})
-  endif()
-  list(APPEND CMAKE_REQUIRED_INCLUDES ${ZLIB_INCLUDE_DIRS})
-endif()
-
-option(CURL_BROTLI "Set to ON to enable building curl with brotli support." OFF)
-set(HAVE_BROTLI OFF)
-if(CURL_BROTLI)
-  find_package(Brotli QUIET)
-  if(BROTLI_FOUND)
-    set(HAVE_BROTLI ON)
-    list(APPEND CURL_LIBS ${BROTLI_LIBRARIES})
-    include_directories(${BROTLI_INCLUDE_DIRS})
-    list(APPEND CMAKE_REQUIRED_INCLUDES ${BROTLI_INCLUDE_DIRS})
-  endif()
-endif()
-
-option(CURL_ZSTD "Set to ON to enable building curl with zstd support." OFF)
-set(HAVE_ZSTD OFF)
-if(CURL_ZSTD)
-  find_package(Zstd REQUIRED)
-  if (NOT DEFINED HAVE_ZSTD_CREATEDSTREAM)
-    cmake_push_check_state()
-    set(CMAKE_REQUIRED_INCLUDES ${Zstd_INCLUDE_DIRS})
-    set(CMAKE_REQUIRED_LIBRARIES ${Zstd_LIBRARIES})
-    check_symbol_exists(ZSTD_createDStream "zstd.h" HAVE_ZSTD_CREATEDSTREAM)
-    cmake_pop_check_state()
-  endif()
-  if(Zstd_FOUND AND HAVE_ZSTD_CREATEDSTREAM)
-    set(HAVE_ZSTD ON)
-    list(APPEND CURL_LIBS ${Zstd_LIBRARIES})
-    include_directories(${Zstd_INCLUDE_DIRS})
-  endif()
-endif()
-
 if(CURL_USE_OPENSSL)
   find_package(OpenSSL REQUIRED)
   set(SSL_ENABLED ON)
@@ -493,12 +439,22 @@ if(CURL_USE_OPENSSL)
     include_directories(${OPENSSL_INCLUDE_DIR})
   endif()
 
+  if(WIN32)
+    list(APPEND CURL_LIBS "ws2_32")
+    if(NOT HAVE_MINGW_ORIGINAL)
+      list(APPEND CURL_LIBS "bcrypt")  # for OpenSSL/LibreSSL
+    endif()
+  endif()
+
   set(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
   if(NOT DEFINED HAVE_RAND_EGD)
     check_symbol_exists(RAND_egd "${CURL_INCLUDES}" HAVE_RAND_EGD)
   endif()
   if(NOT DEFINED HAVE_BORINGSSL)
     check_symbol_exists(OPENSSL_IS_BORINGSSL "openssl/base.h" HAVE_BORINGSSL)
+  endif()
+  if(NOT DEFINED HAVE_AWSLC)
+    check_symbol_exists(OPENSSL_IS_AWSLC "openssl/base.h" HAVE_AWSLC)
   endif()
 endif()
 
@@ -541,6 +497,59 @@ if(CURL_USE_NSS)
   endif()
 endif()
 
+# Keep ZLIB detection after TLS detection,
+# and before calling CheckQuicSupportInOpenSSL.
+
+set(HAVE_LIBZ OFF)
+set(USE_ZLIB OFF)
+optional_dependency(ZLIB)
+if(ZLIB_FOUND)
+  set(HAVE_LIBZ ON)
+  set(USE_ZLIB ON)
+
+  # Depend on ZLIB via imported targets if supported by the running
+  # version of CMake.  This allows our dependents to get our dependencies
+  # transitively.
+  if(NOT CMAKE_VERSION VERSION_LESS 3.4)
+    list(APPEND CURL_LIBS ZLIB::ZLIB)
+  else()
+    list(APPEND CURL_LIBS ${ZLIB_LIBRARIES})
+    include_directories(${ZLIB_INCLUDE_DIRS})
+  endif()
+  list(APPEND CMAKE_REQUIRED_INCLUDES ${ZLIB_INCLUDE_DIRS})
+endif()
+
+option(CURL_BROTLI "Set to ON to enable building curl with brotli support." OFF)
+set(HAVE_BROTLI OFF)
+if(CURL_BROTLI)
+  find_package(Brotli QUIET)
+  if(BROTLI_FOUND)
+    set(HAVE_BROTLI ON)
+    set(CURL_LIBS "${BROTLI_LIBRARIES};${CURL_LIBS}")  # For 'ld' linker. Emulate `list(PREPEND ...)` to stay compatible with <v3.15 CMake.
+    list(APPEND CURL_LIBS ${BROTLI_LIBRARIES})
+    include_directories(${BROTLI_INCLUDE_DIRS})
+    list(APPEND CMAKE_REQUIRED_INCLUDES ${BROTLI_INCLUDE_DIRS})
+  endif()
+endif()
+
+option(CURL_ZSTD "Set to ON to enable building curl with zstd support." OFF)
+set(HAVE_ZSTD OFF)
+if(CURL_ZSTD)
+  find_package(Zstd REQUIRED)
+  if (NOT DEFINED HAVE_ZSTD_CREATEDSTREAM)
+    cmake_push_check_state()
+    set(CMAKE_REQUIRED_INCLUDES ${Zstd_INCLUDE_DIRS})
+    set(CMAKE_REQUIRED_LIBRARIES ${Zstd_LIBRARIES})
+    check_symbol_exists(ZSTD_createDStream "zstd.h" HAVE_ZSTD_CREATEDSTREAM)
+    cmake_pop_check_state()
+  endif()
+  if(Zstd_FOUND AND HAVE_ZSTD_CREATEDSTREAM)
+    set(HAVE_ZSTD ON)
+    list(APPEND CURL_LIBS ${Zstd_LIBRARIES})
+    include_directories(${Zstd_INCLUDE_DIRS})
+  endif()
+endif()
+
 option(USE_NGHTTP2 "Use Nghttp2 library" OFF)
 if(USE_NGHTTP2)
   find_package(NGHTTP2 REQUIRED)
@@ -556,23 +565,32 @@ function(CheckQuicSupportInOpenSSL)
       set(CMAKE_REQUIRED_INCLUDES   "${WolfSSL_INCLUDE_DIRS}")
       set(CMAKE_REQUIRED_LIBRARIES  "${WolfSSL_LIBRARIES}")
       if(HAVE_LIBZ)
-        list(APPEND CMAKE_REQUIRED_INCLUDES  "${ZLIB_INCLUDE_DIRS}")
+        list(APPEND CMAKE_REQUIRED_INCLUDES  "${ZLIB_INCLUDE_DIRS}")  # Public wolfSSL headers require zlib headers
         list(APPEND CMAKE_REQUIRED_LIBRARIES "${ZLIB_LIBRARIES}")
       endif()
       if(WIN32)
-        list(APPEND CMAKE_REQUIRED_LIBRARIES "crypt32")
+        list(APPEND CMAKE_REQUIRED_LIBRARIES "ws2_32" "crypt32")
       endif()
       list(APPEND CMAKE_REQUIRED_DEFINITIONS -DHAVE_UINTPTR_T)  # to pull in stdint.h (as of wolfSSL v5.5.4)
       check_symbol_exists(wolfSSL_set_quic_method "wolfssl/options.h;wolfssl/openssl/ssl.h" HAVE_SSL_CTX_SET_QUIC_METHOD)
     else()
       set(CMAKE_REQUIRED_INCLUDES   "${OPENSSL_INCLUDE_DIR}")
       set(CMAKE_REQUIRED_LIBRARIES  "${OPENSSL_LIBRARIES}")
+      if(HAVE_LIBZ)
+        list(APPEND CMAKE_REQUIRED_LIBRARIES "${ZLIB_LIBRARIES}")
+      endif()
+      if(WIN32)
+        list(APPEND CMAKE_REQUIRED_LIBRARIES "ws2_32")
+        if(NOT HAVE_MINGW_ORIGINAL)
+          list(APPEND CMAKE_REQUIRED_LIBRARIES "bcrypt")  # for OpenSSL/LibreSSL
+        endif()
+      endif()
       check_symbol_exists(SSL_CTX_set_quic_method "openssl/ssl.h" HAVE_SSL_CTX_SET_QUIC_METHOD)
     endif()
     cmake_pop_check_state()
   endif()
   if(NOT HAVE_SSL_CTX_SET_QUIC_METHOD)
-    message(FATAL_ERROR "QUIC support is missing in OpenSSL/BoringSSL/wolfSSL. Try setting -DOPENSSL_ROOT_DIR")
+    message(FATAL_ERROR "QUIC support is missing in OpenSSL/LibreSSL/BoringSSL/wolfSSL. Try setting -DOPENSSL_ROOT_DIR")
   endif()
 endfunction()
 
@@ -1178,6 +1196,8 @@ check_type_size("off_t"  SIZEOF_OFF_T)
 set(CMAKE_REQUIRED_INCLUDES "${CURL_SOURCE_DIR}/include")
 set(CMAKE_EXTRA_INCLUDE_FILES "curl/system.h")
 check_type_size("curl_off_t"  SIZEOF_CURL_OFF_T)
+set(CMAKE_EXTRA_INCLUDE_FILES "curl/curl.h")
+check_type_size("curl_socket_t"  SIZEOF_CURL_SOCKET_T)
 set(CMAKE_EXTRA_INCLUDE_FILES "")
 
 if(WIN32)
@@ -1303,19 +1323,6 @@ if(WIN32)
   # Link required libraries for USE_WIN32_CRYPTO or USE_SCHANNEL
   if(USE_WIN32_CRYPTO OR USE_SCHANNEL)
     list(APPEND CURL_LIBS "advapi32" "crypt32")
-  endif()
-
-  # Matching logic used for Curl_win32_random()
-  if(MINGW)
-    check_c_source_compiles("
-      #include <_mingw.h>
-      #if defined(__MINGW64_VERSION_MAJOR)
-      #error
-      #endif
-      int main(void) {
-        return 0;
-      }"
-      HAVE_MINGW_ORIGINAL)
   endif()
 
   if(NOT HAVE_MINGW_ORIGINAL)
@@ -1608,6 +1615,15 @@ write_basic_package_version_file(
     "${version_config}"
     VERSION ${CURL_VERSION}
     COMPATIBILITY SameMajorVersion
+)
+file(READ "${version_config}" generated_version_config)
+file(WRITE "${version_config}"
+"if(NOT PACKAGE_FIND_VERSION_RANGE AND PACKAGE_FIND_VERSION_MAJOR STREQUAL \"7\")
+    # Version 8 satisfies version 7... requirements
+    set(PACKAGE_FIND_VERSION_MAJOR 8)
+    set(PACKAGE_FIND_VERSION_COUNT 1)
+endif()
+${generated_version_config}"
 )
 
 # Use:

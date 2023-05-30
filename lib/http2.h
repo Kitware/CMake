@@ -38,8 +38,6 @@
  */
 void Curl_http2_ver(char *p, size_t len);
 
-const char *Curl_http2_strerror(uint32_t err);
-
 CURLcode Curl_http2_request_upgrade(struct dynbuf *req,
                                     struct Curl_easy *data);
 
@@ -49,8 +47,6 @@ bool Curl_h2_http_1_1_error(struct Curl_easy *data);
 bool Curl_conn_is_http2(const struct Curl_easy *data,
                         const struct connectdata *conn,
                         int sockindex);
-bool Curl_cf_is_http2(struct Curl_cfilter *cf, const struct Curl_easy *data);
-
 bool Curl_http2_may_switch(struct Curl_easy *data,
                            struct connectdata *conn,
                            int sockindex);

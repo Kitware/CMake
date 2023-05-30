@@ -325,7 +325,7 @@ CURLcode Curl_headers_push(struct Curl_easy *data, const char *header,
                          hs, &hs->node);
   data->state.prevhead = hs;
   return CURLE_OK;
-  fail:
+fail:
   free(hs);
   return result;
 }
@@ -336,6 +336,7 @@ CURLcode Curl_headers_push(struct Curl_easy *data, const char *header,
 static void headers_init(struct Curl_easy *data)
 {
   Curl_llist_init(&data->state.httphdrs, NULL);
+  data->state.prevhead = NULL;
 }
 
 /*

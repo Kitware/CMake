@@ -753,7 +753,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
 
   if(maxloops <= 0) {
     /* we mark it as read-again-please */
-    conn->cselect_bits = CURL_CSELECT_IN;
+    data->state.dselect_bits = CURL_CSELECT_IN;
     *comeback = TRUE;
   }
 
@@ -1065,40 +1065,36 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   CURLcode result;
   struct curltime now;
   int didwhat = 0;
+  int select_bits;
 
-  curl_socket_t fd_read;
-  curl_socket_t fd_write;
-  int select_res = conn->cselect_bits;
 
-  conn->cselect_bits = 0;
-
-  /* only use the proper socket if the *_HOLD bit is not set simultaneously as
-     then we are in rate limiting state in that transfer direction */
-
-  if((k->keepon & KEEP_RECVBITS) == KEEP_RECV)
-    fd_read = conn->sockfd;
-  else
-    fd_read = CURL_SOCKET_BAD;
-
-  if((k->keepon & KEEP_SENDBITS) == KEEP_SEND)
-    fd_write = conn->writesockfd;
-  else
-    fd_write = CURL_SOCKET_BAD;
-
-#if defined(USE_HTTP2) || defined(USE_HTTP3)
-  if(data->state.drain) {
-    select_res |= CURL_CSELECT_IN;
-    DEBUGF(infof(data, "Curl_readwrite: forcibly told to drain data"));
-    if((k->keepon & KEEP_SENDBITS) == KEEP_SEND)
-      select_res |= CURL_CSELECT_OUT;
+  if(data->state.dselect_bits) {
+    select_bits = data->state.dselect_bits;
+    data->state.dselect_bits = 0;
   }
-#endif
+  else if(conn->cselect_bits) {
+    select_bits = conn->cselect_bits;
+    conn->cselect_bits = 0;
+  }
+  else {
+    curl_socket_t fd_read;
+    curl_socket_t fd_write;
+    /* only use the proper socket if the *_HOLD bit is not set simultaneously
+       as then we are in rate limiting state in that transfer direction */
+    if((k->keepon & KEEP_RECVBITS) == KEEP_RECV)
+      fd_read = conn->sockfd;
+    else
+      fd_read = CURL_SOCKET_BAD;
 
-  if(!select_res) /* Call for select()/poll() only, if read/write/error
-                     status is not known. */
-    select_res = Curl_socket_check(fd_read, CURL_SOCKET_BAD, fd_write, 0);
+    if((k->keepon & KEEP_SENDBITS) == KEEP_SEND)
+      fd_write = conn->writesockfd;
+    else
+      fd_write = CURL_SOCKET_BAD;
 
-  if(select_res == CURL_CSELECT_ERR) {
+    select_bits = Curl_socket_check(fd_read, CURL_SOCKET_BAD, fd_write, 0);
+  }
+
+  if(select_bits == CURL_CSELECT_ERR) {
     failf(data, "select/poll returned error");
     result = CURLE_SEND_ERROR;
     goto out;
@@ -1106,7 +1102,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
 #ifdef USE_HYPER
   if(conn->datastream) {
-    result = conn->datastream(data, conn, &didwhat, done, select_res);
+    result = conn->datastream(data, conn, &didwhat, done, select_bits);
     if(result || *done)
       goto out;
   }
@@ -1115,14 +1111,14 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   /* We go ahead and do a read if we have a readable socket or if
      the stream was rewound (in which case we have data in a
      buffer) */
-  if((k->keepon & KEEP_RECV) && (select_res & CURL_CSELECT_IN)) {
+  if((k->keepon & KEEP_RECV) && (select_bits & CURL_CSELECT_IN)) {
     result = readwrite_data(data, conn, k, &didwhat, done, comeback);
     if(result || *done)
       goto out;
   }
 
   /* If we still have writing to do, we check if we have a writable socket. */
-  if((k->keepon & KEEP_SEND) && (select_res & CURL_CSELECT_OUT)) {
+  if((k->keepon & KEEP_SEND) && (select_bits & CURL_CSELECT_OUT)) {
     /* write */
 
     result = readwrite_upload(data, conn, &didwhat);
@@ -1235,7 +1231,6 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
   /* Now update the "done" boolean we return */
   *done = (0 == (k->keepon&(KEEP_RECVBITS|KEEP_SENDBITS))) ? TRUE : FALSE;
-  result = CURLE_OK;
 out:
   if(result)
     DEBUGF(infof(data, DMSG(data, "Curl_readwrite() -> %d"), result));
@@ -1294,6 +1289,7 @@ void Curl_init_CONNECT(struct Curl_easy *data)
 {
   data->state.fread_func = data->set.fread_func_set;
   data->state.in = data->set.in_set;
+  data->state.upload = (data->state.httpreq == HTTPREQ_PUT);
 }
 
 /*
@@ -1327,6 +1323,12 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
       failf(data, "No URL set");
       return CURLE_URL_MALFORMAT;
     }
+  }
+
+  if(data->set.postfields && data->set.set_resume_from) {
+    /* we can't */
+    failf(data, "cannot mix POSTFIELDS with RESUME_FROM");
+    return CURLE_BAD_FUNCTION_ARGUMENT;
   }
 
   data->state.prefer_ascii = data->set.prefer_ascii;
@@ -1408,7 +1410,12 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
           return CURLE_OUT_OF_MEMORY;
       }
       wc = data->wildcard;
-      if(wc->state < CURLWC_INIT) {
+      if((wc->state < CURLWC_INIT) ||
+         (wc->state >= CURLWC_CLEAN)) {
+        if(wc->ftpwc)
+          wc->dtor(wc->ftpwc);
+        Curl_safefree(wc->pattern);
+        Curl_safefree(wc->path);
         result = Curl_wildcard_init(wc); /* init wildcard structures */
         if(result)
           return CURLE_OUT_OF_MEMORY;
@@ -1728,7 +1735,6 @@ CURLcode Curl_follow(struct Curl_easy *data,
          data->state.httpreq != HTTPREQ_POST_MIME) ||
         !(data->set.keep_post & CURL_REDIR_POST_303))) {
       data->state.httpreq = HTTPREQ_GET;
-      data->set.upload = false;
       infof(data, "Switch to %s",
             data->req.no_body?"HEAD":"GET");
     }
@@ -1766,7 +1772,7 @@ CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
 
   /* if we're talking upload, we can't do the checks below, unless the protocol
      is HTTP as when uploading over HTTP we will still get a response */
-  if(data->set.upload &&
+  if(data->state.upload &&
      !(conn->handler->protocol&(PROTO_FAMILY_HTTP|CURLPROTO_RTSP)))
     return CURLE_OK;
 

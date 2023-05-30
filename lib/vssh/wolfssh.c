@@ -425,7 +425,7 @@ static CURLcode wssh_connect(struct Curl_easy *data, bool *done)
     state(data, SSH_SFTP_INIT);
 
   return wssh_multi_statemach(data, done);
-  error:
+error:
   wolfSSH_free(sshc->ssh_session);
   wolfSSH_CTX_free(sshc->ctx);
   return CURLE_FAILED_INIT;
@@ -557,7 +557,7 @@ static CURLcode wssh_statemach_act(struct Curl_easy *data, bool *block)
       }
       break;
     case SSH_SFTP_TRANS_INIT:
-      if(data->set.upload)
+      if(data->state.upload)
         state(data, SSH_SFTP_UPLOAD_INIT);
       else {
         if(sftp_scp->path[strlen(sftp_scp->path)-1] == '/')

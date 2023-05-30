@@ -34,6 +34,23 @@ struct Curl_easy;
 struct connectdata;
 struct Curl_sockaddr_ex;
 
+#ifndef SIZEOF_CURL_SOCKET_T
+/* configure and cmake check and set the define */
+# ifdef _WIN64
+#  define SIZEOF_CURL_SOCKET_T 8
+# else
+/* default guess */
+#  define SIZEOF_CURL_SOCKET_T 4
+# endif
+#endif
+
+#if SIZEOF_CURL_SOCKET_T < 8
+# define CURL_FORMAT_SOCKET_T "d"
+#else
+# define CURL_FORMAT_SOCKET_T "qd"
+#endif
+
+
 /*
  * The Curl_sockaddr_ex structure is basically libcurl's external API
  * curl_sockaddr structure with enough space available to directly hold any
@@ -69,12 +86,6 @@ CURLcode Curl_socket_open(struct Curl_easy *data,
 
 int Curl_socket_close(struct Curl_easy *data, struct connectdata *conn,
                       curl_socket_t sock);
-
-/**
- * Determine the curl code for a socket connect() == -1 with errno.
- */
-CURLcode Curl_socket_connect_result(struct Curl_easy *data,
-                                    const char *ipaddress, int error);
 
 #ifdef USE_WINSOCK
 /* When you run a program that uses the Windows Sockets API, you may
@@ -153,11 +164,6 @@ CURLcode Curl_conn_tcp_accepted_set(struct Curl_easy *data,
                                     struct connectdata *conn,
                                     int sockindex,
                                     curl_socket_t *s);
-
-/**
- * Return TRUE iff `cf` is a socket filter.
- */
-bool Curl_cf_is_socket(struct Curl_cfilter *cf);
 
 /**
  * Peek at the socket and remote ip/port the socket filter is using.

@@ -24,14 +24,6 @@
 
 #include "curl_setup.h"
 
-/*
- * See comment in curl_memory.h for the explanation of this sanity check.
- */
-
-#ifdef CURLX_NO_MEMORY_CALLBACKS
-#error "libcurl shall not ever be built with CURLX_NO_MEMORY_CALLBACKS defined"
-#endif
-
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -217,7 +209,7 @@ static CURLcode global_init(long flags, bool memoryfuncs)
 
   return CURLE_OK;
 
-  fail:
+fail:
   initialized--; /* undo the increase */
   return CURLE_FAILED_INIT;
 }
@@ -795,14 +787,12 @@ CURLcode curl_easy_perform_ev(struct Curl_easy *data)
  */
 void curl_easy_cleanup(struct Curl_easy *data)
 {
-  SIGPIPE_VARIABLE(pipe_st);
-
-  if(!data)
-    return;
-
-  sigpipe_ignore(data, &pipe_st);
-  Curl_close(&data);
-  sigpipe_restore(&pipe_st);
+  if(GOOD_EASY_HANDLE(data)) {
+    SIGPIPE_VARIABLE(pipe_st);
+    sigpipe_ignore(data, &pipe_st);
+    Curl_close(&data);
+    sigpipe_restore(&pipe_st);
+  }
 }
 
 /*
@@ -1003,7 +993,7 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
 
   return outcurl;
 
-  fail:
+fail:
 
   if(outcurl) {
 #ifndef CURL_DISABLE_COOKIES
@@ -1230,6 +1220,26 @@ CURLcode curl_easy_recv(struct Curl_easy *data, void *buffer, size_t buflen,
   *n = (size_t)n1;
   return CURLE_OK;
 }
+
+#ifdef USE_WEBSOCKETS
+CURLcode Curl_connect_only_attach(struct Curl_easy *data)
+{
+  curl_socket_t sfd;
+  CURLcode result;
+  struct connectdata *c = NULL;
+
+  result = easy_connection(data, &sfd, &c);
+  if(result)
+    return result;
+
+  if(!data->conn)
+    /* on first invoke, the transfer has been detached from the connection and
+       needs to be reattached */
+    Curl_attach_connection(data, c);
+
+  return CURLE_OK;
+}
+#endif /* USE_WEBSOCKETS */
 
 /*
  * Sends data over the connected socket.

@@ -134,6 +134,7 @@ typedef unsigned int curl_prot_t;
 #include "hash.h"
 #include "splay.h"
 #include "dynbuf.h"
+#include "dynhds.h"
 
 /* return the count of bytes sent, or -1 on error */
 typedef ssize_t (Curl_send)(struct Curl_easy *data,   /* transfer */
@@ -208,8 +209,17 @@ typedef CURLcode (*Curl_datastream)(struct Curl_easy *data,
 #define UPLOADBUFFER_MIN CURL_MAX_WRITE_SIZE
 
 #define CURLEASY_MAGIC_NUMBER 0xc0dedbadU
+#ifdef DEBUGBUILD
+/* On a debug build, we want to fail hard on easy handles that
+ * are not NULL, but no longer have the MAGIC touch. This gives
+ * us early warning on things only discovered by valgrind otherwise. */
+#define GOOD_EASY_HANDLE(x) \
+  (((x) && ((x)->magic == CURLEASY_MAGIC_NUMBER))? TRUE: \
+  (DEBUGASSERT(!(x)), FALSE))
+#else
 #define GOOD_EASY_HANDLE(x) \
   ((x) && ((x)->magic == CURLEASY_MAGIC_NUMBER))
+#endif
 
 #ifdef HAVE_GSSAPI
 /* Types needed for krb5-ftp connections */
@@ -1020,7 +1030,7 @@ struct connectdata {
     struct mqtt_conn mqtt;
 #endif
 #ifdef USE_WEBSOCKETS
-    struct ws_conn ws;
+    struct websocket *ws;
 #endif
   } proto;
 
@@ -1039,7 +1049,6 @@ struct connectdata {
      wrong connections. */
   char *localdev;
   unsigned short localportrange;
-  int cselect_bits; /* bitmask of socket events */
   int waitfor;      /* current READ/WRITE bits to wait for */
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   int socks5_gssapi_enctype;
@@ -1055,8 +1064,12 @@ struct connectdata {
   unsigned short localport;
   unsigned short secondary_port; /* secondary socket remote port to connect to
                                     (ftp) */
+  unsigned char cselect_bits; /* bitmask of socket events */
   unsigned char alpn; /* APLN TLS negotiated protocol, a CURL_HTTP_VERSION*
                          value */
+#ifndef CURL_DISABLE_PROXY
+  unsigned char proxy_alpn; /* APLN of proxy tunnel, CURL_HTTP_VERSION* */
+#endif
   unsigned char transport; /* one of the TRNSPRT_* defines */
   unsigned char ip_version; /* copied from the Curl_easy at creation time */
   unsigned char httpversion; /* the HTTP version*10 reported by the server */
@@ -1331,11 +1344,6 @@ struct UrlState {
 
   /* a place to store the most recently set (S)FTP entrypath */
   char *most_recent_ftp_entrypath;
-  unsigned char httpwant; /* when non-zero, a specific HTTP version requested
-                             to be used in the library's request(s) */
-  unsigned char httpversion; /* the lowest HTTP version*10 reported by any
-                                server involved in this request */
-
 #if !defined(WIN32) && !defined(MSDOS) && !defined(__EMX__)
 /* do FTP line-end conversions on most platforms */
 #define CURL_DO_LINEEND_CONV
@@ -1353,14 +1361,14 @@ struct UrlState {
   long rtsp_next_client_CSeq; /* the session's next client CSeq */
   long rtsp_next_server_CSeq; /* the session's next server CSeq */
   long rtsp_CSeq_recv; /* most recent CSeq received */
+
+  unsigned char rtp_channel_mask[32]; /* for the correctness checking of the
+                                         interleaved data */
 #endif
 
   curl_off_t infilesize; /* size of file to upload, -1 means unknown.
                             Copied from set.filesize at start of operation */
 #if defined(USE_HTTP2) || defined(USE_HTTP3)
-  size_t drain; /* Increased when this stream has data to read, even if its
-                   socket is not necessarily is readable. Decreased when
-                   checked. */
   struct Curl_data_priority priority; /* shallow copy of data->set */
 #endif
 
@@ -1368,8 +1376,6 @@ struct UrlState {
   void *in;                      /* CURLOPT_READDATA */
   CURLU *uh; /* URL handle for the current parsed URL */
   struct urlpieces up;
-  unsigned char httpreq; /* Curl_HttpReq; what kind of HTTP request (if any)
-                            is this */
   char *url;        /* work URL, copied from UserDefined */
   char *referer;    /* referer string */
   struct curl_slist *resolve; /* set to point to the set.resolve list when
@@ -1410,6 +1416,15 @@ struct UrlState {
     char *proxypasswd;
   } aptr;
 
+  unsigned char httpwant; /* when non-zero, a specific HTTP version requested
+                             to be used in the library's request(s) */
+  unsigned char httpversion; /* the lowest HTTP version*10 reported by any
+                                server involved in this request */
+  unsigned char httpreq; /* Curl_HttpReq; what kind of HTTP request (if any)
+                            is this */
+  unsigned char dselect_bits; /* != 0 -> bitmask of socket events for this
+                                 transfer overriding anything the socket may
+                                 report */
 #ifdef CURLDEBUG
   BIT(conncache_lock);
 #endif
@@ -1446,6 +1461,7 @@ struct UrlState {
   BIT(rewindbeforesend);/* TRUE when the sending couldn't be stopped even
                            though it will be discarded. We must call the data
                            rewind callback before trying to send again. */
+  BIT(upload);         /* upload request */
 };
 
 /*
@@ -1546,6 +1562,7 @@ enum dupstring {
   STRING_DNS_LOCAL_IP4,
   STRING_DNS_LOCAL_IP6,
   STRING_SSL_EC_CURVES,
+  STRING_AWS_SIGV4, /* Parameters for V4 signature */
 
   /* -- end of null-terminated strings -- */
 
@@ -1554,8 +1571,6 @@ enum dupstring {
   /* -- below this are pointers to binary data that cannot be strdup'ed. --- */
 
   STRING_COPYPOSTFIELDS,  /* if POST, set the fields' values here */
-
-  STRING_AWS_SIGV4, /* Parameters for V4 signature */
 
   STRING_LAST /* not used, just an end-of-list marker */
 };
@@ -1822,7 +1837,6 @@ struct UserDefined {
   BIT(http_auto_referer); /* set "correct" referer when following
                              location: */
   BIT(opt_no_body);    /* as set with CURLOPT_NOBODY */
-  BIT(upload);         /* upload request */
   BIT(verbose);        /* output verbosity */
   BIT(krb);            /* Kerberos connection requested */
   BIT(reuse_forbid);   /* forbidden to be reused, close after use */
@@ -1894,7 +1908,8 @@ struct Curl_easy {
   struct Curl_easy *prev;
 
   struct connectdata *conn;
-  struct Curl_llist_element connect_queue;
+  struct Curl_llist_element connect_queue; /* for the pending and msgsent
+                                              lists */
   struct Curl_llist_element conn_queue; /* list per connectdata */
 
   CURLMstate mstate;  /* the handle's state */
