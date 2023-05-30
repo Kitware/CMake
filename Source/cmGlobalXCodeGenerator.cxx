@@ -756,7 +756,7 @@ void cmGlobalXCodeGenerator::CreateReRunCMakeFile(
   makefileStream << "\t"
                  << this->ConvertToRelativeForMake(
                       cmSystemTools::GetCMakeCommand())
-                 << " -H"
+                 << " -S"
                  << this->ConvertToRelativeForMake(root->GetSourceDirectory())
                  << " -B"
                  << this->ConvertToRelativeForMake(root->GetBinaryDirectory())
