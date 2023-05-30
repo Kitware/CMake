@@ -30,6 +30,7 @@ public:
     const std::vector<std::string>& arguments);
   cmUVProcessChainBuilder& SetNoStream(Stream stdio);
   cmUVProcessChainBuilder& SetBuiltinStream(Stream stdio);
+  cmUVProcessChainBuilder& SetMergedBuiltinStreams();
   cmUVProcessChainBuilder& SetExternalStream(Stream stdio, int fd);
   cmUVProcessChainBuilder& SetWorkingDirectory(std::string dir);
 
@@ -59,6 +60,7 @@ private:
   std::array<StdioConfiguration, 3> Stdio;
   std::vector<ProcessConfiguration> Processes;
   std::string WorkingDirectory;
+  bool MergedBuiltinStreams = false;
 };
 
 class cmUVProcessChain

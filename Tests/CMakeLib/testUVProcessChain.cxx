@@ -229,6 +229,61 @@ bool testUVProcessChainBuiltin(const char* helperCommand)
   return true;
 }
 
+bool testUVProcessChainBuiltinMerged(const char* helperCommand)
+{
+  cmUVProcessChainBuilder builder;
+  std::unique_ptr<cmUVProcessChain> chain;
+  builder.AddCommand({ helperCommand, "echo" })
+    .AddCommand({ helperCommand, "capitalize" })
+    .AddCommand({ helperCommand, "dedup" })
+    .SetMergedBuiltinStreams();
+
+  if (!checkExecution(builder, chain)) {
+    return false;
+  }
+
+  if (!chain->OutputStream()) {
+    std::cout << "OutputStream() was null, expecting not null" << std::endl;
+    return false;
+  }
+  if (!chain->ErrorStream()) {
+    std::cout << "ErrorStream() was null, expecting not null" << std::endl;
+    return false;
+  }
+  if (chain->OutputStream() != chain->ErrorStream()) {
+    std::cout << "OutputStream() and ErrorStream() expected to be the same"
+              << std::endl;
+    return false;
+  }
+
+  std::string merged = getInput(*chain->OutputStream());
+  auto qemuErrorPos = merged.find("qemu:");
+  if (qemuErrorPos != std::string::npos) {
+    merged.resize(qemuErrorPos);
+  }
+  if (merged.length() != cmStrLen("HELO WRD!123") ||
+      merged.find('1') == std::string::npos ||
+      merged.find('2') == std::string::npos ||
+      merged.find('3') == std::string::npos) {
+    std::cout << "Expected output to contain '1', '2', and '3', was \""
+              << merged << "\"" << std::endl;
+    return false;
+  }
+  std::string output;
+  for (auto const& c : merged) {
+    if (c != '1' && c != '2' && c != '3') {
+      output += c;
+    }
+  }
+  if (output != "HELO WRD!") {
+    std::cout << "Output was \"" << output << "\", expected \"HELO WRD!\""
+              << std::endl;
+    return false;
+  }
+
+  return true;
+}
+
 bool testUVProcessChainExternal(const char* helperCommand)
 {
   cmUVProcessChainBuilder builder;
@@ -375,6 +430,11 @@ int testUVProcessChain(int argc, char** const argv)
 
   if (!testUVProcessChainBuiltin(argv[1])) {
     std::cout << "While executing testUVProcessChainBuiltin().\n";
+    return -1;
+  }
+
+  if (!testUVProcessChainBuiltinMerged(argv[1])) {
+    std::cout << "While executing testUVProcessChainBuiltinMerged().\n";
     return -1;
   }
 
