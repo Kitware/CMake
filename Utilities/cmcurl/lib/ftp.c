@@ -1085,8 +1085,6 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
   host = NULL;
 
   /* step 2, create a socket for the requested address */
-
-  portsock = CURL_SOCKET_BAD;
   error = 0;
   for(ai = res; ai; ai = ai->ai_next) {
     if(Curl_socket_open(data, ai, NULL, conn->transport, &portsock)) {
@@ -1350,7 +1348,7 @@ static CURLcode ftp_state_prepare_transfer(struct Curl_easy *data)
                                data->set.str[STRING_CUSTOMREQUEST]?
                                data->set.str[STRING_CUSTOMREQUEST]:
                                (data->state.list_only?"NLST":"LIST"));
-      else if(data->set.upload)
+      else if(data->state.upload)
         result = Curl_pp_sendf(data, &ftpc->pp, "PRET STOR %s",
                                conn->proto.ftpc.file);
       else
@@ -3386,7 +3384,7 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
     /* the response code from the transfer showed an error already so no
        use checking further */
     ;
-  else if(data->set.upload) {
+  else if(data->state.upload) {
     if((-1 != data->state.infilesize) &&
        (data->state.infilesize != data->req.writebytecount) &&
        !data->set.crlf &&
@@ -3621,7 +3619,7 @@ static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
     /* a transfer is about to take place, or if not a file name was given
        so we'll do a SIZE on it later and then we need the right TYPE first */
 
-    if(ftpc->wait_data_conn == TRUE) {
+    if(ftpc->wait_data_conn) {
       bool serv_conned;
 
       result = ReceivedServerConnect(data, &serv_conned);
@@ -3642,20 +3640,14 @@ static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
                            connected back to us */
       }
     }
-    else if(data->set.upload) {
+    else if(data->state.upload) {
       result = ftp_nb_type(data, conn, data->state.prefer_ascii,
                            FTP_STOR_TYPE);
       if(result)
         return result;
 
       result = ftp_multi_statemach(data, &complete);
-      if(ftpc->wait_data_conn)
-        /* if we reach the end of the FTP state machine here, *complete will be
-           TRUE but so is ftpc->wait_data_conn, which says we need to wait for
-           the data connection and therefore we're not actually complete */
-        *completep = 0;
-      else
-        *completep = (int)complete;
+      *completep = (int)complete;
     }
     else {
       /* download */
@@ -3847,7 +3839,7 @@ static CURLcode init_wc_data(struct Curl_easy *data)
   infof(data, "Wildcard - Parsing started");
   return CURLE_OK;
 
-  fail:
+fail:
   if(ftpwc) {
     Curl_ftp_parselist_data_free(&ftpwc->parser);
     free(ftpwc);
@@ -3978,8 +3970,10 @@ static CURLcode wc_statemach(struct Curl_easy *data)
     case CURLWC_DONE:
     case CURLWC_ERROR:
     case CURLWC_CLEAR:
-      if(wildcard->dtor)
+      if(wildcard->dtor) {
         wildcard->dtor(wildcard->ftpwc);
+        wildcard->ftpwc = NULL;
+      }
       return result;
     }
   }
@@ -4141,7 +4135,7 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data)
     case FTPFILE_NOCWD: /* fastest, but less standard-compliant */
 
       if((pathLen > 0) && (rawPath[pathLen - 1] != '/'))
-          fileName = rawPath;  /* this is a full file path */
+        fileName = rawPath;  /* this is a full file path */
       /*
         else: ftpc->file is not used anywhere other than for operations on
               a file. In other words, never for directory operations.
@@ -4187,7 +4181,7 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data)
       size_t dirAlloc = 0;
       const char *str = rawPath;
       for(; *str != 0; ++str)
-        if (*str == '/')
+        if(*str == '/')
           ++dirAlloc;
 
       if(dirAlloc) {
@@ -4232,7 +4226,7 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data)
     ftpc->file = NULL; /* instead of point to a zero byte,
                             we make it a NULL pointer */
 
-  if(data->set.upload && !ftpc->file && (ftp->transfer == PPTRANSFER_BODY)) {
+  if(data->state.upload && !ftpc->file && (ftp->transfer == PPTRANSFER_BODY)) {
     /* We need a file name when uploading. Return error! */
     failf(data, "Uploading to a URL without a file name");
     free(rawPath);

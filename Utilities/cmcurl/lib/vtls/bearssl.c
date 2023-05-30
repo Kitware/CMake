@@ -849,7 +849,7 @@ static CURLcode bearssl_connect_step3(struct Curl_cfilter *cf,
   DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
   DEBUGASSERT(backend);
 
-  if(cf->conn->bits.tls_enable_alpn) {
+  if(connssl->alpn) {
     const char *proto;
 
     proto = br_ssl_engine_get_selected_protocol(&backend->ctx.eng);
@@ -897,7 +897,7 @@ static ssize_t bearssl_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   for(;;) {
     *err = bearssl_run_until(cf, data, BR_SSL_SENDAPP);
-    if (*err != CURLE_OK)
+    if(*err)
       return -1;
     app = br_ssl_engine_sendapp_buf(&backend->ctx.eng, &applen);
     if(!app) {

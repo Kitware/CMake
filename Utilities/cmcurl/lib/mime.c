@@ -750,7 +750,6 @@ static void mime_file_free(void *ptr)
     part->fp = NULL;
   }
   Curl_safefree(part->data);
-  part->data = NULL;
 }
 
 
@@ -1108,7 +1107,7 @@ static int mime_subparts_seek(void *instream, curl_off_t offset, int whence)
     return CURL_SEEKFUNC_CANTSEEK;    /* Only support full rewind. */
 
   if(mime->state.state == MIMESTATE_BEGIN)
-   return CURL_SEEKFUNC_OK;           /* Already rewound. */
+    return CURL_SEEKFUNC_OK;           /* Already rewound. */
 
   for(part = mime->firstpart; part; part = part->nextpart) {
     int res = mime_part_rewind(part);
@@ -1341,7 +1340,6 @@ CURLcode curl_mime_name(curl_mimepart *part, const char *name)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
   Curl_safefree(part->name);
-  part->name = NULL;
 
   if(name) {
     part->name = strdup(name);
@@ -1359,7 +1357,6 @@ CURLcode curl_mime_filename(curl_mimepart *part, const char *filename)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
   Curl_safefree(part->filename);
-  part->filename = NULL;
 
   if(filename) {
     part->filename = strdup(filename);
@@ -1459,7 +1456,6 @@ CURLcode curl_mime_type(curl_mimepart *part, const char *mimetype)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
   Curl_safefree(part->mimetype);
-  part->mimetype = NULL;
 
   if(mimetype) {
     part->mimetype = strdup(mimetype);
@@ -1738,7 +1734,7 @@ const char *Curl_mime_contenttype(const char *filename)
       size_t len2 = strlen(ctts[i].extension);
 
       if(len1 >= len2 && strcasecompare(nameend - len2, ctts[i].extension))
-          return ctts[i].type;
+        return ctts[i].type;
     }
   }
   return NULL;
