@@ -1810,26 +1810,7 @@ MAKE_PROP(INTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE);
 #undef MAKE_PROP
 }
 
-namespace {
-// to workaround bug on GCC/AIX
-// Define a template to force conversion to std::string
-template <typename ValueType>
-std::string ConvertToString(ValueType value);
-
-template <>
-std::string ConvertToString<const char*>(const char* value)
-{
-  return std::string(value);
-}
-template <>
-std::string ConvertToString<cmValue>(cmValue value)
-{
-  return std::string(*value);
-}
-}
-
-template <typename ValueType>
-void cmTarget::StoreProperty(const std::string& prop, ValueType value)
+void cmTarget::SetProperty(const std::string& prop, cmValue value)
 {
   if (prop == propMANUALLY_ADDED_DEPENDENCIES) {
     this->impl->Makefile->IssueMessage(
@@ -1975,7 +1956,7 @@ void cmTarget::StoreProperty(const std::string& prop, ValueType value)
 
     std::string reusedFrom = reusedTarget->GetSafeProperty(prop);
     if (reusedFrom.empty()) {
-      reusedFrom = ConvertToString(value);
+      reusedFrom = *value;
     }
 
     this->impl->Properties.SetProperty(prop, reusedFrom);
@@ -2089,15 +2070,6 @@ void cmTarget::AppendProperty(const std::string& prop,
   } else {
     this->impl->Properties.AppendProperty(prop, value, asString);
   }
-}
-
-void cmTarget::SetProperty(const std::string& prop, const char* value)
-{
-  this->StoreProperty(prop, value);
-}
-void cmTarget::SetProperty(const std::string& prop, cmValue value)
-{
-  this->StoreProperty(prop, value);
 }
 
 template <typename ValueType>

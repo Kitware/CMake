@@ -615,7 +615,11 @@ static void CCONV cmSourceFileSetProperty(void* arg, const char* prop,
 {
   cmCPluginAPISourceFile* sf = static_cast<cmCPluginAPISourceFile*>(arg);
   if (cmSourceFile* rsf = sf->RealSourceFile) {
-    rsf->SetProperty(prop, value);
+    if (value == nullptr) {
+      rsf->SetProperty(prop, nullptr);
+    } else {
+      rsf->SetProperty(prop, value);
+    }
   } else if (prop) {
     if (!value) {
       value = "NOTFOUND";
