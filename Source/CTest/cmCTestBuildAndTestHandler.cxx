@@ -246,7 +246,6 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
         return 1;
       }
     }
-    std::string output;
     const char* config = nullptr;
     if (!this->CTest->GetConfigType().empty()) {
       config = this->CTest->GetConfigType().c_str();
@@ -259,9 +258,8 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
                                 PackageResolveMode::Disable);
     int retVal = cm.GetGlobalGenerator()->Build(
       cmake::NO_BUILD_PARALLEL_LEVEL, this->SourceDir, this->BinaryDir,
-      this->BuildProject, { tar }, output, this->BuildMakeProgram, config,
+      this->BuildProject, { tar }, out, this->BuildMakeProgram, config,
       buildOptions, false, remainingTime);
-    out << output;
     // if the build failed then return
     if (retVal) {
       if (outstring) {
