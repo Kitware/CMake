@@ -2266,7 +2266,7 @@ int cmake::HandleDeleteCacheVariables(const std::string& var)
   this->LoadCache();
   // restore the changed compilers
   for (SaveCacheEntry const& i : saved) {
-    this->AddCacheEntry(i.key, i.value, i.help.c_str(), i.type);
+    this->AddCacheEntry(i.key, i.value, i.help, i.type);
   }
   cmSystemTools::Message(warning.str());
   // avoid reconfigure if there were errors
@@ -2888,7 +2888,7 @@ int cmake::Generate()
 }
 
 void cmake::AddCacheEntry(const std::string& key, cmValue value,
-                          const char* helpString, int type)
+                          cmValue helpString, int type)
 {
   this->State->AddCacheEntry(key, value, helpString,
                              static_cast<cmStateEnums::CacheEntryType>(type));

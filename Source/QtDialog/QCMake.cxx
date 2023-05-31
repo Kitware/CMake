@@ -359,19 +359,19 @@ void QCMake::setProperties(const QCMakePropertyList& newProps)
     if (s.Type == QCMakeProperty::BOOL) {
       this->CMakeInstance->AddCacheEntry(
         s.Key.toStdString(), s.Value.toBool() ? "ON" : "OFF",
-        s.Help.toStdString().c_str(), cmStateEnums::BOOL);
+        s.Help.toStdString(), cmStateEnums::BOOL);
     } else if (s.Type == QCMakeProperty::STRING) {
       this->CMakeInstance->AddCacheEntry(
         s.Key.toStdString(), s.Value.toString().toStdString(),
-        s.Help.toStdString().c_str(), cmStateEnums::STRING);
+        s.Help.toStdString(), cmStateEnums::STRING);
     } else if (s.Type == QCMakeProperty::PATH) {
       this->CMakeInstance->AddCacheEntry(
         s.Key.toStdString(), s.Value.toString().toStdString(),
-        s.Help.toStdString().c_str(), cmStateEnums::PATH);
+        s.Help.toStdString(), cmStateEnums::PATH);
     } else if (s.Type == QCMakeProperty::FILEPATH) {
       this->CMakeInstance->AddCacheEntry(
         s.Key.toStdString(), s.Value.toString().toStdString(),
-        s.Help.toStdString().c_str(), cmStateEnums::FILEPATH);
+        s.Help.toStdString(), cmStateEnums::FILEPATH);
     }
   }
 

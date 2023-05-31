@@ -209,7 +209,7 @@ bool cmState::GetCacheEntryPropertyAsBool(std::string const& key,
 }
 
 void cmState::AddCacheEntry(const std::string& key, cmValue value,
-                            const char* helpString,
+                            const std::string& helpString,
                             cmStateEnums::CacheEntryType type)
 {
   this->CacheManager->AddCacheEntry(key, value, helpString, type);

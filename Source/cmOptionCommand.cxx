@@ -67,7 +67,7 @@ bool cmOptionCommand(std::vector<std::string> const& args,
   }
   bool init = cmIsOn(initialValue);
   status.GetMakefile().AddCacheDefinition(args[0], init ? "ON" : "OFF",
-                                          args[1].c_str(), cmStateEnums::BOOL);
+                                          args[1], cmStateEnums::BOOL);
   if (status.GetMakefile().GetPolicyStatus(cmPolicies::CMP0077) !=
         cmPolicies::NEW &&
       status.GetMakefile().GetPolicyStatus(cmPolicies::CMP0126) ==

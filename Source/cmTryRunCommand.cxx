@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmTryRunCommand.h"
 
-#include <cstdio>
 #include <stdexcept>
 
 #include <cm/optional>
@@ -293,11 +292,9 @@ void TryRunCommandImpl::RunExecutable(const std::string& runArgs,
     workDir ? workDir->c_str() : nullptr, cmSystemTools::OUTPUT_NONE,
     cmDuration::zero());
   // set the run var
-  char retChar[16];
-  const char* retStr;
+  std::string retStr;
   if (worked) {
-    snprintf(retChar, sizeof(retChar), "%i", retVal);
-    retStr = retChar;
+    retStr = std::to_string(retVal);
   } else {
     retStr = "FAILED_TO_RUN";
   }
@@ -351,7 +348,7 @@ void TryRunCommandImpl::DoNotRunExecutable(
                detailsString);
     this->Makefile->AddCacheDefinition(this->RunResultVariable,
                                        "PLEASE_FILL_OUT-FAILED_TO_RUN",
-                                       comment.c_str(), cmStateEnums::STRING);
+                                       comment, cmStateEnums::STRING);
 
     cmState* state = this->Makefile->GetState();
     cmValue existingValue = state->GetCacheEntryValue(this->RunResultVariable);
@@ -372,9 +369,9 @@ void TryRunCommandImpl::DoNotRunExecutable(
         "would have printed on stdout on its target platform.\n",
         detailsString);
 
-      this->Makefile->AddCacheDefinition(
-        internalRunOutputStdOutName, "PLEASE_FILL_OUT-NOTFOUND",
-        comment.c_str(), cmStateEnums::STRING);
+      this->Makefile->AddCacheDefinition(internalRunOutputStdOutName,
+                                         "PLEASE_FILL_OUT-NOTFOUND", comment,
+                                         cmStateEnums::STRING);
       cmState* state = this->Makefile->GetState();
       cmValue existing =
         state->GetCacheEntryValue(internalRunOutputStdOutName);
@@ -394,9 +391,9 @@ void TryRunCommandImpl::DoNotRunExecutable(
         "would have printed on stderr on its target platform.\n",
         detailsString);
 
-      this->Makefile->AddCacheDefinition(
-        internalRunOutputStdErrName, "PLEASE_FILL_OUT-NOTFOUND",
-        comment.c_str(), cmStateEnums::STRING);
+      this->Makefile->AddCacheDefinition(internalRunOutputStdErrName,
+                                         "PLEASE_FILL_OUT-NOTFOUND", comment,
+                                         cmStateEnums::STRING);
       cmState* state = this->Makefile->GetState();
       cmValue existing =
         state->GetCacheEntryValue(internalRunOutputStdErrName);
@@ -416,9 +413,9 @@ void TryRunCommandImpl::DoNotRunExecutable(
         "would have printed on stdout and stderr on its target platform.\n",
         detailsString);
 
-      this->Makefile->AddCacheDefinition(
-        internalRunOutputName, "PLEASE_FILL_OUT-NOTFOUND", comment.c_str(),
-        cmStateEnums::STRING);
+      this->Makefile->AddCacheDefinition(internalRunOutputName,
+                                         "PLEASE_FILL_OUT-NOTFOUND", comment,
+                                         cmStateEnums::STRING);
       cmState* state = this->Makefile->GetState();
       cmValue existing = state->GetCacheEntryValue(internalRunOutputName);
       if (existing) {
