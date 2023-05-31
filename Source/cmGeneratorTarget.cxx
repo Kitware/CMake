@@ -28,6 +28,7 @@
 #include "cmComputeLinkInformation.h"
 #include "cmCustomCommandGenerator.h"
 #include "cmEvaluatedTargetProperty.h"
+#include "cmExperimental.h"
 #include "cmFileSet.h"
 #include "cmFileTimes.h"
 #include "cmGeneratedFileStream.h"
@@ -8907,7 +8908,8 @@ cmGeneratorTarget::Cxx20SupportLevel cmGeneratorTarget::HaveCxxModuleSupport(
   // Else, an empty CMAKE_CXX_STANDARD_DEFAULT means CMake does not detect and
   // set a default standard level for this compiler, so assume all standards
   // are available.
-  if (!this->Makefile->IsOn("CMAKE_EXPERIMENTAL_CXX_MODULE_DYNDEP")) {
+  if (!cmExperimental::HasSupportEnabled(
+        *this->Makefile, cmExperimental::Feature::CxxModuleCMakeApi)) {
     return Cxx20SupportLevel::MissingExperimentalFlag;
   }
   return Cxx20SupportLevel::Supported;
