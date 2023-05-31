@@ -1381,8 +1381,6 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
       // '_autogen' target.
       const auto timestampTargetName =
         cmStrCat(this->GenTarget->GetName(), "_autogen_timestamp_deps");
-      std::vector<std::string> timestampTargetProvides;
-      cmCustomCommandLines timestampTargetCommandLines;
 
       // Add additional autogen target dependencies to
       // '_autogen_timestamp_deps'.
@@ -1401,9 +1399,7 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
 
       auto cc = cm::make_unique<cmCustomCommand>();
       cc->SetWorkingDirectory(this->Dir.Work.c_str());
-      cc->SetByproducts(timestampTargetProvides);
       cc->SetDepends(dependencies);
-      cc->SetCommandLines(timestampTargetCommandLines);
       cc->SetEscapeOldStyle(false);
       cmTarget* timestampTarget = this->LocalGen->AddUtilityCommand(
         timestampTargetName, true, std::move(cc));
