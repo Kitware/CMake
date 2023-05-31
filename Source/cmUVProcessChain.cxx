@@ -420,3 +420,8 @@ const cmUVProcessChain::Status* cmUVProcessChain::GetStatus(
   }
   return nullptr;
 }
+
+bool cmUVProcessChain::Finished() const
+{
+  return this->Data->ProcessesCompleted >= this->Data->Processes.size();
+}
