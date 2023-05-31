@@ -1394,7 +1394,7 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
             depname = cmStrCat("$<TARGET_LINKER_FILE:", t->GetName(), ">");
           }
         }
-        dependencies.push_back(depname);
+        dependencies.emplace_back(std::move(depname));
       }
 
       auto cc = cm::make_unique<cmCustomCommand>();
