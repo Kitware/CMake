@@ -3,6 +3,7 @@
 #include "cmMessageCommand.h"
 
 #include <cassert>
+#include <memory>
 #include <utility>
 
 #include <cm/string_view>
@@ -18,6 +19,10 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
+
+#ifdef CMake_ENABLE_DEBUGGER
+#  include "cmDebuggerAdapter.h"
+#endif
 
 namespace {
 
@@ -202,6 +207,12 @@ bool cmMessageCommand(std::vector<std::string> const& args,
 
     case Message::LogLevel::LOG_NOTICE:
       cmSystemTools::Message(IndentText(message, mf));
+#ifdef CMake_ENABLE_DEBUGGER
+      if (mf.GetCMakeInstance()->GetDebugAdapter() != nullptr) {
+        mf.GetCMakeInstance()->GetDebugAdapter()->OnMessageOutput(type,
+                                                                  message);
+      }
+#endif
       break;
 
     case Message::LogLevel::LOG_STATUS:

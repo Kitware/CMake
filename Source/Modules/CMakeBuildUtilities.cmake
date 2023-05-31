@@ -379,7 +379,7 @@ endif()
 
 #---------------------------------------------------------------------
 # Build cppdap library.
-if(CMake_ENABLE_CPPDAP)
+if(CMake_ENABLE_DEBUGGER)
   if(CMAKE_USE_SYSTEM_CPPDAP)
     find_package(cppdap CONFIG)
     if(NOT cppdap_FOUND)

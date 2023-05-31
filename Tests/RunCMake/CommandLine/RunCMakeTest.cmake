@@ -125,6 +125,17 @@ run_cmake_command(cache-bad-entry
 run_cmake_command(cache-empty-entry
   ${CMAKE_COMMAND} --build ${RunCMake_SOURCE_DIR}/cache-empty-entry/)
 
+run_cmake_command(DebuggerCapabilityInspect ${CMAKE_COMMAND} -E capabilities)
+get_property(CMake_ENABLE_DEBUGGER DIRECTORY PROPERTY CMake_ENABLE_DEBUGGER)
+if(CMake_ENABLE_DEBUGGER)
+  run_cmake_with_options(DebuggerArgMissingPipe --debugger-pipe)
+  run_cmake_with_options(DebuggerArgMissingDapLog --debugger-dap-log)
+else()
+  run_cmake_with_options(DebuggerNotSupported --debugger)
+  run_cmake_with_options(DebuggerNotSupportedPipe --debugger-pipe pipe)
+  run_cmake_with_options(DebuggerNotSupportedDapLog --debugger-dap-log dap-log)
+endif()
+
 function(run_ExplicitDirs)
   set(RunCMake_TEST_NO_CLEAN 1)
   set(RunCMake_TEST_NO_SOURCE_DIR 1)

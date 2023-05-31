@@ -762,6 +762,38 @@ target_link_libraries(
     ZLIB::ZLIB
   )
 
+if(CMake_ENABLE_DEBUGGER)
+  target_sources(
+    CMakeLib
+    PRIVATE
+      cmDebuggerAdapter.cxx
+      cmDebuggerAdapter.h
+      cmDebuggerBreakpointManager.cxx
+      cmDebuggerBreakpointManager.h
+      cmDebuggerExceptionManager.cxx
+      cmDebuggerExceptionManager.h
+      cmDebuggerPipeConnection.cxx
+      cmDebuggerPipeConnection.h
+      cmDebuggerProtocol.cxx
+      cmDebuggerProtocol.h
+      cmDebuggerSourceBreakpoint.cxx
+      cmDebuggerSourceBreakpoint.h
+      cmDebuggerStackFrame.cxx
+      cmDebuggerStackFrame.h
+      cmDebuggerThread.cxx
+      cmDebuggerThread.h
+      cmDebuggerThreadManager.cxx
+      cmDebuggerThreadManager.h
+      cmDebuggerVariables.cxx
+      cmDebuggerVariables.h
+      cmDebuggerVariablesHelper.cxx
+      cmDebuggerVariablesHelper.h
+      cmDebuggerVariablesManager.cxx
+      cmDebuggerVariablesManager.h
+    )
+  target_link_libraries(CMakeLib PUBLIC cppdap::cppdap)
+endif()
+
 # Check if we can build the Mach-O parser.
 if(CMake_USE_MACH_PARSER)
   target_sources(

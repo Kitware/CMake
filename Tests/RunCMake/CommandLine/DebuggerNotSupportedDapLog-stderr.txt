@@ -1,0 +1,2 @@
+^CMake Error: CMake was not built with support for --debugger-dap-log
+CMake Error: Run 'cmake --help' for all supported options\.$
