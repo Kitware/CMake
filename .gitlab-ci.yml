@@ -314,9 +314,9 @@ t:cuda11.8-minimal-ninja:
     variables:
         CMAKE_CI_NO_MR: "true"
 
-t:hip4.2-radeon:
+t:hip5.5-radeon:
     extends:
-        - .hip4.2_radeon
+        - .hip5.5_radeon
         - .cmake_test_linux_release
         - .linux_x86_64_tags_radeon
         - .run_dependent

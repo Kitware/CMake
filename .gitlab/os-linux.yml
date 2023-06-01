@@ -344,19 +344,19 @@
 
 ### HIP builds
 
-.hip4.2:
-    image: "kitware/cmake:ci-hip4.2-x86_64-2021-07-09"
+.hip5.5:
+    image: "kitware/cmake:ci-hip5.5-x86_64-2023-06-01"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
         CMAKE_ARCH: x86_64
         CTEST_LABELS: "HIP"
 
-.hip4.2_radeon:
-    extends: .hip4.2
+.hip5.5_radeon:
+    extends: .hip5.5
 
     variables:
-        CMAKE_CONFIGURATION: hip4.2_radeon
+        CMAKE_CONFIGURATION: hip5.5_radeon
         CMAKE_GENERATOR: "Ninja Multi-Config"
 
 ### C++ modules
