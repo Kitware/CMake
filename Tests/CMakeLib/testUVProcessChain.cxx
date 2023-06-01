@@ -148,6 +148,10 @@ static bool checkExecution(cmUVProcessChainBuilder& builder,
     printResults(status, status1);
     return false;
   }
+  if (chain->Finished()) {
+    std::cout << "Finished() returned true, should be false" << std::endl;
+    return false;
+  }
 
   if (chain->Wait(6000)) {
     std::cout << "Wait() returned true, should be false" << std::endl;
@@ -159,6 +163,10 @@ static bool checkExecution(cmUVProcessChainBuilder& builder,
     printResults(status, status2);
     return false;
   }
+  if (chain->Finished()) {
+    std::cout << "Finished() returned true, should be false" << std::endl;
+    return false;
+  }
 
   if (!chain->Wait()) {
     std::cout << "Wait() returned false, should be true" << std::endl;
@@ -168,6 +176,10 @@ static bool checkExecution(cmUVProcessChainBuilder& builder,
   if (!resultsMatch(status, status3)) {
     std::cout << "GetStatus() did not produce expected output" << std::endl;
     printResults(status, status3);
+    return false;
+  }
+  if (!chain->Finished()) {
+    std::cout << "Finished() returned false, should be true" << std::endl;
     return false;
   }
 

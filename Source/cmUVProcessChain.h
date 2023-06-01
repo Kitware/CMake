@@ -90,6 +90,7 @@ public:
   bool Wait(int64_t milliseconds = -1);
   std::vector<const Status*> GetStatus() const;
   const Status* GetStatus(std::size_t index) const;
+  bool Finished() const;
 
 private:
   friend class cmUVProcessChainBuilder;
