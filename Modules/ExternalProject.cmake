@@ -232,7 +232,12 @@ External Project Definition
         measure.
 
         .. versionchanged:: 3.6
-          This option also applies to ``git clone`` invocations.
+          This option also applies to ``git clone`` invocations, although the
+          default behavior is different.  If ``TLS_VERIFY`` is not given and
+          :variable:`CMAKE_TLS_VERIFY` is not set, the behavior will be
+          determined by git's defaults.  Normally, the ``sslVerify`` git
+          config setting defaults to true, but the user may have overridden
+          this at a global level.
 
       ``TLS_CAINFO <file>``
         Specify a custom certificate authority file to use if ``TLS_VERIFY``
@@ -1328,6 +1333,8 @@ function(_ep_write_gitclone_script
     message(FATAL_ERROR "Tag for git checkout should not be empty.")
   endif()
 
+  set(git_submodules_config_options "")
+
   if(GIT_VERSION_STRING VERSION_LESS 2.20 OR
      2.21 VERSION_LESS_EQUAL GIT_VERSION_STRING)
     set(git_clone_options "--no-checkout")
@@ -1350,17 +1357,25 @@ function(_ep_write_gitclone_script
   if(NOT ${git_remote_name} STREQUAL "origin")
     list(APPEND git_clone_options --origin \"${git_remote_name}\")
   endif()
+  if(NOT "x${tls_verify}" STREQUAL "x")
+    # The clone config option is sticky, it will apply to all subsequent git
+    # update operations. The submodules config option is not sticky, because
+    # git doesn't provide any way to do that. Thus, we will have to pass the
+    # same config option in the update step too for submodules, but not for
+    # the main git repo.
+    if(tls_verify)
+      # Default git behavior is "true", but the user might have changed the
+      # global default to "false". Since TLS_VERIFY was given, ensure we honor
+      # the specified setting regardless of what the global default might be.
+      list(APPEND git_clone_options -c http.sslVerify=true)
+      set(git_submodules_config_options -c http.sslVerify=true)
+    else()
+      list(APPEND git_clone_options -c http.sslVerify=false)
+      set(git_submodules_config_options -c http.sslVerify=false)
+    endif()
+  endif()
 
   string (REPLACE ";" " " git_clone_options "${git_clone_options}")
-
-  set(git_options)
-  # disable cert checking if explicitly told not to do it
-  if(NOT "x${tls_verify}" STREQUAL "x" AND NOT tls_verify)
-    set(git_options
-      -c http.sslVerify=false
-    )
-  endif()
-  string (REPLACE ";" " " git_options "${git_options}")
 
   configure_file(
     ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/gitclone.cmake.in
@@ -1404,6 +1419,7 @@ function(_ep_write_gitupdate_script
   git_repository
   work_dir
   git_update_strategy
+  tls_verify
 )
 
   if("${git_tag}" STREQUAL "")
@@ -1416,6 +1432,22 @@ function(_ep_write_gitupdate_script
   elseif(GIT_VERSION_STRING VERSION_GREATER_EQUAL 1.7.6)
     # Untracked files, but also ignored files, so potentially slower
     list(APPEND git_stash_save_options --all)
+  endif()
+
+  set(git_submodules_config_options "")
+  if(NOT "x${tls_verify}" STREQUAL "x")
+    # The submodules config option is not sticky, git doesn't provide any way
+    # to do that. We have to pass this config option for the update step too.
+    # We don't need to set it for the non-submodule update because it gets
+    # recorded as part of the clone operation in a sticky manner.
+    if(tls_verify)
+      # Default git behavior is "true", but the user might have changed the
+      # global default to "false". Since TLS_VERIFY was given, ensure we honor
+      # the specified setting regardless of what the global default might be.
+      set(git_submodules_config_options -c http.sslVerify=true)
+    else()
+      set(git_submodules_config_options -c http.sslVerify=false)
+    endif()
   endif()
 
   configure_file(
@@ -3356,6 +3388,11 @@ function(_ep_add_update_command name)
 
     _ep_get_git_submodules_recurse(git_submodules_recurse)
 
+    get_property(tls_verify TARGET ${name} PROPERTY _EP_TLS_VERIFY)
+    if("x${tls_verify}" STREQUAL "x" AND DEFINED CMAKE_TLS_VERIFY)
+      set(tls_verify "${CMAKE_TLS_VERIFY}")
+    endif()
+
     set(update_script "${tmp_dir}/${name}-gitupdate.cmake")
     list(APPEND file_deps ${update_script})
     _ep_write_gitupdate_script(
@@ -3369,6 +3406,7 @@ function(_ep_add_update_command name)
       "${git_repository}"
       "${work_dir}"
       "${git_update_strategy}"
+      "${tls_verify}"
     )
     set(cmd              ${CMAKE_COMMAND} -Dcan_fetch=YES -P ${update_script})
     set(cmd_disconnected ${CMAKE_COMMAND} -Dcan_fetch=NO  -P ${update_script})
