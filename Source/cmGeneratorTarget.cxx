@@ -3504,7 +3504,7 @@ void cmGeneratorTarget::AddCUDAArchitectureFlags(cmBuildStep compileOrLink,
       if (architecture.virtual_) {
         flags += "compute_" + architecture.name;
 
-        if (architecture.real) {
+        if (ipoEnabled || architecture.real) {
           flags += ",";
         }
       }
