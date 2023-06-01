@@ -753,14 +753,12 @@ void cmGlobalXCodeGenerator::CreateReRunCMakeFile(
 
   makefileStream << this->ConvertToRelativeForMake(checkCache)
                  << ": $(TARGETS)\n";
-  makefileStream << "\t"
-                 << this->ConvertToRelativeForMake(
-                      cmSystemTools::GetCMakeCommand())
-                 << " -H"
-                 << this->ConvertToRelativeForMake(root->GetSourceDirectory())
-                 << " -B"
-                 << this->ConvertToRelativeForMake(root->GetBinaryDirectory())
-                 << "\n";
+  makefileStream
+    << "\t" << this->ConvertToRelativeForMake(cmSystemTools::GetCMakeCommand())
+    << " -S" << this->ConvertToRelativeForMake(root->GetSourceDirectory())
+    << " -B" << this->ConvertToRelativeForMake(root->GetBinaryDirectory())
+    << (cm->GetIgnoreWarningAsError() ? " --compile-no-warning-as-error" : "")
+    << "\n";
 }
 
 static bool objectIdLessThan(const std::unique_ptr<cmXCodeObject>& l,

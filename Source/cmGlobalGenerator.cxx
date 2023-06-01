@@ -2845,6 +2845,9 @@ void cmGlobalGenerator::AddGlobalTarget_EditCache(
   std::string edit_cmd = this->GetEditCacheCommand();
   if (!edit_cmd.empty()) {
     singleLine.push_back(std::move(edit_cmd));
+    if (this->GetCMakeInstance()->GetIgnoreWarningAsError()) {
+      singleLine.push_back("--compile-no-warning-as-error");
+    }
     singleLine.push_back("-S$(CMAKE_SOURCE_DIR)");
     singleLine.push_back("-B$(CMAKE_BINARY_DIR)");
     gti.Message = "Running CMake cache editor...";
@@ -2878,6 +2881,9 @@ void cmGlobalGenerator::AddGlobalTarget_RebuildCache(
   cmCustomCommandLine singleLine;
   singleLine.push_back(cmSystemTools::GetCMakeCommand());
   singleLine.push_back("--regenerate-during-build");
+  if (this->GetCMakeInstance()->GetIgnoreWarningAsError()) {
+    singleLine.push_back("--compile-no-warning-as-error");
+  }
   singleLine.push_back("-S$(CMAKE_SOURCE_DIR)");
   singleLine.push_back("-B$(CMAKE_BINARY_DIR)");
   gti.CommandLines.push_back(std::move(singleLine));

@@ -5,6 +5,10 @@ function(run_compile_warn test lang extension)
   set(RunCMake_TEST_OUTPUT_MERGE 1)
   run_cmake_with_options(${test}_${lang} "-DLANGUAGE=${lang}" "-DEXTENSION=${extension}" ${ARGN})
   set(RunCMake_TEST_NO_CLEAN 1)
+  if(ARGN MATCHES "--compile-no-warning-as-error")
+    # Cause the build system to re-run CMake to verify that this option is preserved.
+    run_cmake_command(${test}_${lang}-Touch ${CMAKE_COMMAND} -E touch_nocreate CMakeCache.txt)
+  endif()
   run_cmake_command(${test}_${lang}-Build ${CMAKE_COMMAND} --build . ${verbose_args})
 endfunction()
 
