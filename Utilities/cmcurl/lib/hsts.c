@@ -204,7 +204,7 @@ CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
       p++;
     if(*p == ';')
       p++;
-  } while (*p);
+  } while(*p);
 
   if(!gotma)
     /* max-age is mandatory */
@@ -390,7 +390,7 @@ CURLcode Curl_hsts_save(struct Curl_easy *data, struct hsts *h,
       unlink(tempstore);
   }
   free(tempstore);
-  skipsave:
+skipsave:
   if(data->set.hsts_write) {
     /* if there's a write callback */
     struct curl_index i; /* count */
@@ -534,7 +534,7 @@ static CURLcode hsts_load(struct hsts *h, const char *file)
   }
   return result;
 
-  fail:
+fail:
   Curl_safefree(h->filename);
   fclose(fp);
   return CURLE_OUT_OF_MEMORY;

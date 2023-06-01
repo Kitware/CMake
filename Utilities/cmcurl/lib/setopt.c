@@ -115,7 +115,11 @@ static CURLcode setstropt_userpwd(char *option, char **userp, char **passwdp)
   /* Parse the login details if specified. It not then we treat NULL as a hint
      to clear the existing data */
   if(option) {
-    result = Curl_parse_login_details(option, strlen(option),
+    size_t len = strlen(option);
+    if(len > CURL_MAX_INPUT_LENGTH)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+
+    result = Curl_parse_login_details(option, len,
                                       (userp ? &user : NULL),
                                       (passwdp ? &passwd : NULL),
                                       NULL);
@@ -329,8 +333,8 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * We want to sent data to the remote host. If this is HTTP, that equals
      * using the PUT request.
      */
-    data->set.upload = (0 != va_arg(param, long)) ? TRUE : FALSE;
-    if(data->set.upload) {
+    arg = va_arg(param, long);
+    if(arg) {
       /* If this is HTTP, PUT is what's needed to "upload" */
       data->set.method = HTTPREQ_PUT;
       data->set.opt_no_body = FALSE; /* this is implied */
@@ -660,7 +664,6 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     }
     else
       data->set.method = HTTPREQ_GET;
-    data->set.upload = FALSE;
     break;
 
 #ifndef CURL_DISABLE_MIME
@@ -884,7 +887,6 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      */
     if(va_arg(param, long)) {
       data->set.method = HTTPREQ_GET;
-      data->set.upload = FALSE; /* switch off upload */
       data->set.opt_no_body = FALSE; /* this is implied */
     }
     break;
@@ -1155,7 +1157,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 
   case CURLOPT_PROXYTYPE:
     /*
-     * Set proxy type. HTTP/HTTP_1_0/SOCKS4/SOCKS4a/SOCKS5/SOCKS5_HOSTNAME
+     * Set proxy type.
      */
     arg = va_arg(param, long);
     if((arg < CURLPROXY_HTTP) || (arg > CURLPROXY_SOCKS5_HOSTNAME))

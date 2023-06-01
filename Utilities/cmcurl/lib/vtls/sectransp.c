@@ -45,6 +45,11 @@
 #pragma clang diagnostic ignored "-Wtautological-pointer-compare"
 #endif /* __clang__ */
 
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Waddress"
+#pragma GCC diagnostic ignored "-Wundef"
+#endif
+
 #include <limits.h>
 
 #include <Security/Security.h>
@@ -234,7 +239,7 @@ struct st_cipher {
    insert in between existing items to appropriate place based on
    cipher suite IANA number
 */
-const static struct st_cipher ciphertable[] = {
+static const struct st_cipher ciphertable[] = {
   /* SSL version 3.0 and initial TLS 1.0 cipher suites.
      Defined since SDK 10.2.8 */
   CIPHER_DEF_SSLTLS(NULL_WITH_NULL_NULL,                           /* 0x0000 */
@@ -900,12 +905,12 @@ CF_INLINE const char *TLSCipherNameForNumber(SSLCipherSuite cipher)
   /* The first ciphers in the ciphertable are continuous. Here we do small
      optimization and instead of loop directly get SSL name by cipher number.
   */
+  size_t i;
   if(cipher <= SSL_FORTEZZA_DMS_WITH_FORTEZZA_CBC_SHA) {
     return ciphertable[cipher].name;
   }
   /* Iterate through the rest of the ciphers */
-  for(size_t i = SSL_FORTEZZA_DMS_WITH_FORTEZZA_CBC_SHA + 1;
-      i < NUM_OF_CIPHERS;
+  for(i = SSL_FORTEZZA_DMS_WITH_FORTEZZA_CBC_SHA + 1; i < NUM_OF_CIPHERS;
       ++i) {
     if(ciphertable[i].num == cipher) {
       return ciphertable[i].name;
@@ -1429,7 +1434,8 @@ static CURLcode set_ssl_version_min_max(struct Curl_cfilter *cf,
 
 static bool is_cipher_suite_strong(SSLCipherSuite suite_num)
 {
-  for(size_t i = 0; i < NUM_OF_CIPHERS; ++i) {
+  size_t i;
+  for(i = 0; i < NUM_OF_CIPHERS; ++i) {
     if(ciphertable[i].num == suite_num) {
       return !ciphertable[i].weak;
     }
@@ -1545,16 +1551,17 @@ static CURLcode sectransp_set_selected_ciphers(struct Curl_easy *data,
     size_t cipher_len = 0;
     const char *cipher_end = NULL;
     bool tls_name = FALSE;
+    size_t i;
 
     /* Skip separators */
     while(is_separator(*cipher_start))
-       cipher_start++;
+      cipher_start++;
     if(*cipher_start == '\0') {
       break;
     }
     /* Find last position of a cipher in the ciphers string */
     cipher_end = cipher_start;
-    while (*cipher_end != '\0' && !is_separator(*cipher_end)) {
+    while(*cipher_end != '\0' && !is_separator(*cipher_end)) {
       ++cipher_end;
     }
 
@@ -1568,7 +1575,7 @@ static CURLcode sectransp_set_selected_ciphers(struct Curl_easy *data,
     /* Iterate through the cipher table and look for the cipher, starting
        the cipher number 0x01 because the 0x00 is not the real cipher */
     cipher_len = cipher_end - cipher_start;
-    for(size_t i = 1; i < NUM_OF_CIPHERS; ++i) {
+    for(i = 1; i < NUM_OF_CIPHERS; ++i) {
       const char *table_cipher_name = NULL;
       if(tls_name) {
         table_cipher_name = ciphertable[i].name;
@@ -2712,7 +2719,7 @@ check_handshake:
         failf(data, "Peer rejected unexpected message");
         break;
 #if CURL_BUILD_MAC_10_11 || CURL_BUILD_IOS_9
-      /* Treaing non-fatal error as fatal like before */
+      /* Treating non-fatal error as fatal like before */
       case errSSLClientHelloReceived:
         failf(data, "A non-fatal result for providing a server name "
                     "indication");
@@ -2796,7 +2803,7 @@ check_handshake:
     }
 
 #if(CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) && HAVE_BUILTIN_AVAILABLE == 1
-    if(cf->conn->bits.tls_enable_alpn) {
+    if(connssl->alpn) {
       if(__builtin_available(macOS 10.13.4, iOS 11, tvOS 11, *)) {
         CFArrayRef alpnArr = NULL;
         CFStringRef chosenProtocol = NULL;
@@ -3376,7 +3383,7 @@ static ssize_t sectransp_recv(struct Curl_cfilter *cf,
 
   DEBUGASSERT(backend);
 
-  again:
+again:
   *curlcode = CURLE_OK;
   err = SSLRead(backend->ssl_ctx, buf, buffersize, &processed);
 
