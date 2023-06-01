@@ -1210,7 +1210,8 @@ void cmTarget::SetLanguageStandardProperty(std::string const& lang,
   languageStandardProperty.Backtraces.emplace_back(featureBacktrace);
 }
 
-void cmTarget::AddUtility(std::string const& name, bool cross, cmMakefile* mf)
+void cmTarget::AddUtility(std::string const& name, bool cross,
+                          cmMakefile const* mf)
 {
   this->impl->Utilities.insert(BT<std::pair<std::string, bool>>(
     { name, cross }, mf ? mf->GetBacktrace() : cmListFileBacktrace()));

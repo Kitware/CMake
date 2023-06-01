@@ -1381,29 +1381,25 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
       // '_autogen' target.
       const auto timestampTargetName =
         cmStrCat(this->GenTarget->GetName(), "_autogen_timestamp_deps");
-      std::vector<std::string> timestampTargetProvides;
-      cmCustomCommandLines timestampTargetCommandLines;
 
       // Add additional autogen target dependencies to
       // '_autogen_timestamp_deps'.
       for (const cmTarget* t : this->AutogenTarget.DependTargets) {
         std::string depname = t->GetName();
         if (t->IsImported()) {
-          auto ttype = t->GetType();
+          auto const ttype = t->GetType();
           if (ttype == cmStateEnums::TargetType::STATIC_LIBRARY ||
               ttype == cmStateEnums::TargetType::SHARED_LIBRARY ||
               ttype == cmStateEnums::TargetType::UNKNOWN_LIBRARY) {
             depname = cmStrCat("$<TARGET_LINKER_FILE:", t->GetName(), ">");
           }
         }
-        dependencies.push_back(depname);
+        dependencies.emplace_back(std::move(depname));
       }
 
       auto cc = cm::make_unique<cmCustomCommand>();
       cc->SetWorkingDirectory(this->Dir.Work.c_str());
-      cc->SetByproducts(timestampTargetProvides);
       cc->SetDepends(dependencies);
-      cc->SetCommandLines(timestampTargetCommandLines);
       cc->SetEscapeOldStyle(false);
       cmTarget* timestampTarget = this->LocalGen->AddUtilityCommand(
         timestampTargetName, true, std::move(cc));
@@ -1478,7 +1474,7 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
     }
     if (!useNinjaDepfile) {
       // Add additional autogen target dependencies to autogen target
-      for (cmTarget* depTarget : this->AutogenTarget.DependTargets) {
+      for (cmTarget const* depTarget : this->AutogenTarget.DependTargets) {
         autogenTarget->AddUtility(depTarget->GetName(), false, this->Makefile);
       }
     }
@@ -2002,7 +1998,7 @@ static cmQtAutoGen::IntegerVersion parseMocVersion(std::string str)
   cmQtAutoGen::IntegerVersion result;
 
   static const std::string prelude = "moc ";
-  size_t pos = str.find(prelude);
+  size_t const pos = str.find(prelude);
   if (pos == std::string::npos) {
     return result;
   }
@@ -2120,7 +2116,7 @@ cmQtAutoGenInitializer::GetQtVersion(cmGeneratorTarget const* target,
       res.first = knownQtVersions.at(0);
     } else {
       // Pick a version from the known versions:
-      for (auto it : knownQtVersions) {
+      for (auto const& it : knownQtVersions) {
         if (it.Major == res.second) {
           res.first = it;
           break;
