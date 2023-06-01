@@ -4,6 +4,8 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <type_traits>
+#include <utility>
 #include <vector>
 
 #include <cm/memory>
@@ -22,29 +24,61 @@ struct ExpectedStatus
   bool MatchExitStatus;
   bool MatchTermSignal;
   cmUVProcessChain::Status Status;
+  cmUVProcessChain::ExceptionCode ExceptionCode;
+  std::string ExceptionString;
 };
 
 static const std::vector<ExpectedStatus> status1 = {
-  { false, false, false, { 0, 0 } },
-  { false, false, false, { 0, 0 } },
-  { false, false, false, { 0, 0 } },
+  { false, false, false, { 0, 0 }, cmUVProcessChain::ExceptionCode::None, "" },
+  { false, false, false, { 0, 0 }, cmUVProcessChain::ExceptionCode::None, "" },
+  { false, false, false, { 0, 0 }, cmUVProcessChain::ExceptionCode::None, "" },
 };
 
 static const std::vector<ExpectedStatus> status2 = {
-  { true, true, true, { 0, 0 } },
-  { false, false, false, { 0, 0 } },
-  { false, false, false, { 0, 0 } },
+  { true, true, true, { 0, 0 }, cmUVProcessChain::ExceptionCode::None, "" },
+  { false, false, false, { 0, 0 }, cmUVProcessChain::ExceptionCode::None, "" },
+  { false, false, false, { 0, 0 }, cmUVProcessChain::ExceptionCode::None, "" },
 };
 
 static const std::vector<ExpectedStatus> status3 = {
-  { true, true, true, { 0, 0 } },
-  { true, true, true, { 1, 0 } },
+  { true, true, true, { 0, 0 }, cmUVProcessChain::ExceptionCode::None, "" },
+  { true, true, true, { 1, 0 }, cmUVProcessChain::ExceptionCode::None, "" },
 #ifdef _WIN32
-  { true, true, true, { 2, 0 } },
+  { true,
+    true,
+    true,
+    { STATUS_ACCESS_VIOLATION, 0 },
+    cmUVProcessChain::ExceptionCode::Fault,
+    "Access violation" },
 #else
-  { true, false, true, { 0, SIGABRT } },
+  { true,
+    false,
+    true,
+    { 0, SIGABRT },
+    cmUVProcessChain::ExceptionCode::Other,
+    "Subprocess aborted" },
 #endif
 };
+
+static const char* ExceptionCodeToString(cmUVProcessChain::ExceptionCode code)
+{
+  switch (code) {
+    case cmUVProcessChain::ExceptionCode::None:
+      return "None";
+    case cmUVProcessChain::ExceptionCode::Fault:
+      return "Fault";
+    case cmUVProcessChain::ExceptionCode::Illegal:
+      return "Illegal";
+    case cmUVProcessChain::ExceptionCode::Interrupt:
+      return "Interrupt";
+    case cmUVProcessChain::ExceptionCode::Numerical:
+      return "Numerical";
+    case cmUVProcessChain::ExceptionCode::Other:
+      return "Other";
+    default:
+      return "";
+  }
+}
 
 bool operator==(const cmUVProcessChain::Status* actual,
                 const ExpectedStatus& expected)
@@ -60,6 +94,11 @@ bool operator==(const cmUVProcessChain::Status* actual,
   }
   if (expected.MatchTermSignal &&
       expected.Status.TermSignal != actual->TermSignal) {
+    return false;
+  }
+  if (expected.Finished &&
+      std::make_pair(expected.ExceptionCode, expected.ExceptionString) !=
+        actual->GetException()) {
     return false;
   }
   return true;
@@ -116,6 +155,11 @@ static void printResults(
                 << printExpected(e.MatchExitStatus, e.Status.ExitStatus)
                 << ", TermSignal: "
                 << printExpected(e.MatchTermSignal, e.Status.TermSignal)
+                << ", ExceptionCode: "
+                << printExpected(e.Finished,
+                                 ExceptionCodeToString(e.ExceptionCode))
+                << ", ExceptionString: \""
+                << printExpected(e.Finished, e.ExceptionString) << '"'
                 << std::endl;
     } else {
       std::cout << "  null" << std::endl;
@@ -124,8 +168,12 @@ static void printResults(
   std::cout << "Actual:" << std::endl;
   for (auto const& a : actual) {
     if (a) {
+      auto exception = a->GetException();
       std::cout << "  ExitStatus: " << a->ExitStatus
-                << ", TermSignal: " << a->TermSignal << std::endl;
+                << ", TermSignal: " << a->TermSignal << ", ExceptionCode: "
+                << ExceptionCodeToString(exception.first)
+                << ", ExceptionString: \"" << exception.second << '"'
+                << std::endl;
     } else {
       std::cout << "  null" << std::endl;
     }

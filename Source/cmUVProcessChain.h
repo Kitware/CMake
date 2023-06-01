@@ -8,6 +8,7 @@
 #include <iosfwd>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <cm3p/uv.h>
@@ -66,10 +67,22 @@ private:
 class cmUVProcessChain
 {
 public:
+  enum class ExceptionCode
+  {
+    None,
+    Fault,
+    Illegal,
+    Interrupt,
+    Numerical,
+    Other,
+  };
+
   struct Status
   {
     int64_t ExitStatus;
     int TermSignal;
+
+    std::pair<ExceptionCode, std::string> GetException() const;
   };
 
   cmUVProcessChain(const cmUVProcessChain& other) = delete;
