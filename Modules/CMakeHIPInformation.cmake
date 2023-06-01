@@ -142,7 +142,7 @@ set(CMAKE_HIP_INFORMATION_LOADED 1)
 
 # Load the file and find the relevant HIP runtime.
 if(NOT DEFINED _CMAKE_HIP_DEVICE_RUNTIME_TARGET)
-  set(hip-lang_DIR "${CMAKE_HIP_COMPILER_ROCM_ROOT}/lib/cmake/hip-lang")
+  set(hip-lang_DIR "${CMAKE_HIP_COMPILER_ROCM_LIB}/cmake/hip-lang")
   find_package(hip-lang CONFIG QUIET NO_DEFAULT_PATH REQUIRED)
 endif()
 if(DEFINED _CMAKE_HIP_DEVICE_RUNTIME_TARGET)

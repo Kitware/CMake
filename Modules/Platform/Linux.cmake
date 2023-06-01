@@ -80,9 +80,6 @@ else()
   endif()
 endif()
 
-# Match multiarch library directory names.
-set(CMAKE_LIBRARY_ARCHITECTURE_REGEX "[a-z0-9_]+(-[a-z0-9_]+)?-linux-gnu[a-z0-9_]*")
-
 include(Platform/UnixPaths)
 
 # Debian has lib32 and lib64 paths only for compatibility so they should not be
