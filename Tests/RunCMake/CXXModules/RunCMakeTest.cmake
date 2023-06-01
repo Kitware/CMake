@@ -60,8 +60,7 @@ if (NOT generator_supports_cxx_modules)
 endif ()
 
 set(fileset_types
-  Modules
-  ModuleHeaderUnits)
+  Modules)
 set(scopes
   Interface
   Private

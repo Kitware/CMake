@@ -19,7 +19,7 @@ scan the target's ``CXX`` sources at build time.
 
 Note that scanning is only performed if C++20 or higher is enabled for the
 target.  Scanning for modules in the target's sources belonging to file sets
-of type ``CXX_MODULES`` and ``CXX_MODULES_HEADER_UNITS`` is always performed.
+of type ``CXX_MODULES`` is always performed.
 
 .. note ::
 

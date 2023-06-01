@@ -2797,9 +2797,7 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
     auto const* fs =
       this->GeneratorTarget->GetFileSetForSource(config, source);
     const char* compileAsPerConfig = compileAs;
-    if (fs &&
-        (fs->GetType() == "CXX_MODULES"_s ||
-         fs->GetType() == "CXX_MODULE_HEADER_UNITS"_s)) {
+    if (fs && fs->GetType() == "CXX_MODULES"_s) {
       if (lang == "CXX"_s) {
         if (fs->GetType() == "CXX_MODULES"_s) {
           if (shouldScanForModules &&
