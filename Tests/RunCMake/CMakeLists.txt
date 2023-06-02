@@ -865,6 +865,12 @@ add_RunCMake_test(CrosscompilingEmulator
  -DPSEUDO_EMULATOR=$<TARGET_FILE:pseudo_emulator>
  -DPSEUDO_EMULATOR_CUSTOM_COMMAND=$<TARGET_FILE:pseudo_emulator_custom_command>
  -DPSEUDO_EMULATOR_CUSTOM_COMMAND_ARG=$<TARGET_FILE:pseudo_emulator_custom_command_arg>)
+
+add_executable(pseudo_tidy pseudo_tidy.c)
+add_executable(pseudo_iwyu pseudo_iwyu.c)
+add_executable(pseudo_cpplint pseudo_cpplint.c)
+add_executable(pseudo_cppcheck pseudo_cppcheck.c)
+
 if("${CMAKE_GENERATOR}" MATCHES "Make|Ninja")
   if(UNIX AND NOT CYGWIN)
     execute_process(COMMAND ldd --help
@@ -875,10 +881,6 @@ if("${CMAKE_GENERATOR}" MATCHES "Make|Ninja")
       add_RunCMake_test(LinkWhatYouUse)
     endif()
   endif()
-  add_executable(pseudo_tidy pseudo_tidy.c)
-  add_executable(pseudo_iwyu pseudo_iwyu.c)
-  add_executable(pseudo_cpplint pseudo_cpplint.c)
-  add_executable(pseudo_cppcheck pseudo_cppcheck.c)
   add_RunCMake_test(ClangTidy -DPSEUDO_TIDY=$<TARGET_FILE:pseudo_tidy>)
   add_RunCMake_test(IncludeWhatYouUse -DPSEUDO_IWYU=$<TARGET_FILE:pseudo_iwyu>)
   add_RunCMake_test(Cpplint -DPSEUDO_CPPLINT=$<TARGET_FILE:pseudo_cpplint>)
