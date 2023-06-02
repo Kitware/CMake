@@ -232,6 +232,8 @@ add_library(
   cmFileAPIConfigureLog.h
   cmFileAPICMakeFiles.cxx
   cmFileAPICMakeFiles.h
+  cmFileAPICommand.cxx
+  cmFileAPICommand.h
   cmFileAPIToolchains.cxx
   cmFileAPIToolchains.h
   cmFileCopier.cxx

@@ -23,6 +23,12 @@ of files within the API directory.  API file layout versioning is
 orthogonal to the versioning of `Object Kinds`_ used in replies.
 This version of CMake supports only one API version, `API v1`_.
 
+.. versionadded:: 3.27
+  Projects may also submit queries for the current run using the
+  :command:`cmake_file_api` command.
+
+.. _`file-api v1`:
+
 API v1
 ======
 
