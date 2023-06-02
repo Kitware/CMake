@@ -3916,7 +3916,7 @@ std::function<int()> cmake::BuildWorkflowStep(
   return [builder]() -> int {
     auto chain = builder.Start();
     chain.Wait();
-    return static_cast<int>(chain.GetStatus().front()->ExitStatus);
+    return static_cast<int>(chain.GetStatus(0).ExitStatus);
   };
 }
 #endif

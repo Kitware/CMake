@@ -34,7 +34,7 @@ bool cmBinUtilsMacOSMachOOToolGetRuntimeDependenciesTool::GetFileInfo(
     .AddCommand(command);
 
   auto process = builder.Start();
-  if (!process.Valid()) {
+  if (!process.Valid() || process.GetStatus(0).SpawnResult != 0) {
     std::ostringstream e;
     e << "Failed to start otool process for:\n  " << file;
     this->SetError(e.str());
@@ -88,8 +88,7 @@ bool cmBinUtilsMacOSMachOOToolGetRuntimeDependenciesTool::GetFileInfo(
     this->SetError(e.str());
     return false;
   }
-  auto status = process.GetStatus();
-  if (!status[0] || status[0]->ExitStatus != 0) {
+  if (process.GetStatus(0).ExitStatus != 0) {
     std::ostringstream e;
     e << "Failed to run otool on:\n  " << file;
     this->SetError(e.str());

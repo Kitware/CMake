@@ -2008,7 +2008,7 @@ int cmcmd::RunPreprocessor(const std::vector<std::string>& command,
     .SetBuiltinStream(cmUVProcessChainBuilder::Stream_ERROR)
     .AddCommand(command);
   auto process = builder.Start();
-  if (!process.Valid()) {
+  if (!process.Valid() || process.GetStatus(0).SpawnResult != 0) {
     std::cerr << "Failed to start preprocessor.";
     return 1;
   }
@@ -2016,8 +2016,7 @@ int cmcmd::RunPreprocessor(const std::vector<std::string>& command,
     std::cerr << "Failed to wait for preprocessor";
     return 1;
   }
-  auto status = process.GetStatus();
-  if (!status[0] || status[0]->ExitStatus != 0) {
+  if (process.GetStatus(0).ExitStatus != 0) {
     auto* errorStream = process.ErrorStream();
     if (errorStream) {
       std::cerr << errorStream->rdbuf();
@@ -2130,7 +2129,7 @@ int cmcmd::RunLLVMRC(std::vector<std::string> const& args)
     .AddCommand(resource_compile);
   auto process = builder.Start();
   result = 0;
-  if (!process.Valid()) {
+  if (!process.Valid() || process.GetStatus(0).SpawnResult != 0) {
     std::cerr << "Failed to start resource compiler.";
     result = 1;
   } else {
@@ -2144,8 +2143,7 @@ int cmcmd::RunLLVMRC(std::vector<std::string> const& args)
   if (result != 0) {
     return result;
   }
-  auto status = process.GetStatus();
-  if (!status[0] || status[0]->ExitStatus != 0) {
+  if (process.GetStatus(0).ExitStatus != 0) {
     auto* errorStream = process.ErrorStream();
     if (errorStream) {
       std::cerr << errorStream->rdbuf();

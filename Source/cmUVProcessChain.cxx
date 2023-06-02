@@ -53,8 +53,9 @@ struct cmUVProcessChain::InternalData
     cm::uv_process_ptr Process;
     cm::uv_pipe_ptr InputPipe;
     cm::uv_pipe_ptr OutputPipe;
-    bool Finished = false;
     Status ProcessStatus;
+
+    void Finish();
   };
 
   const cmUVProcessChainBuilder* Builder = nullptr;
@@ -72,13 +73,11 @@ struct cmUVProcessChain::InternalData
   std::vector<std::unique_ptr<ProcessData>> Processes;
 
   bool Prepare(const cmUVProcessChainBuilder* builder);
-  bool SpawnProcess(
+  void SpawnProcess(
     std::size_t index,
     const cmUVProcessChainBuilder::ProcessConfiguration& config, bool first,
     bool last);
   void Finish();
-
-  static const Status* GetStatus(const ProcessData& data);
 };
 
 cmUVProcessChainBuilder::cmUVProcessChainBuilder()
@@ -171,24 +170,13 @@ cmUVProcessChain cmUVProcessChainBuilder::Start() const
   }
 
   for (std::size_t i = 0; i < this->Processes.size(); i++) {
-    if (!chain.Data->SpawnProcess(i, this->Processes[i], i == 0,
-                                  i == this->Processes.size() - 1)) {
-      return chain;
-    }
+    chain.Data->SpawnProcess(i, this->Processes[i], i == 0,
+                             i == this->Processes.size() - 1);
   }
 
   chain.Data->Finish();
 
   return chain;
-}
-
-const cmUVProcessChain::Status* cmUVProcessChain::InternalData::GetStatus(
-  const cmUVProcessChain::InternalData::ProcessData& data)
-{
-  if (data.Finished) {
-    return &data.ProcessStatus;
-  }
-  return nullptr;
 }
 
 bool cmUVProcessChain::InternalData::Prepare(
@@ -285,6 +273,7 @@ bool cmUVProcessChain::InternalData::Prepare(
     this->Processes.emplace_back(cm::make_unique<ProcessData>());
     auto& process = *this->Processes.back();
     process.Data = this;
+    process.ProcessStatus.Finished = false;
 
     if (!first) {
       auto& prevProcess = *this->Processes[i - 1];
@@ -314,7 +303,7 @@ bool cmUVProcessChain::InternalData::Prepare(
   return true;
 }
 
-bool cmUVProcessChain::InternalData::SpawnProcess(
+void cmUVProcessChain::InternalData::SpawnProcess(
   std::size_t index,
   const cmUVProcessChainBuilder::ProcessConfiguration& config, bool first,
   bool last)
@@ -360,16 +349,17 @@ bool cmUVProcessChain::InternalData::SpawnProcess(
   options.exit_cb = [](uv_process_t* handle, int64_t exitStatus,
                        int termSignal) {
     auto* processData = static_cast<ProcessData*>(handle->data);
-    processData->Finished = true;
     processData->ProcessStatus.ExitStatus = exitStatus;
     processData->ProcessStatus.TermSignal = termSignal;
-    processData->Data->ProcessesCompleted++;
+    processData->Finish();
   };
 
-  bool result = process.Process.spawn(*this->Loop, options, &process) >= 0;
+  if ((process.ProcessStatus.SpawnResult =
+         process.Process.spawn(*this->Loop, options, &process)) < 0) {
+    process.Finish();
+  }
   process.InputPipe.reset();
   process.OutputPipe.reset();
-  return result;
 }
 
 void cmUVProcessChain::InternalData::Finish()
@@ -451,19 +441,15 @@ std::vector<const cmUVProcessChain::Status*> cmUVProcessChain::GetStatus()
   std::vector<const cmUVProcessChain::Status*> statuses(
     this->Data->Processes.size(), nullptr);
   for (std::size_t i = 0; i < statuses.size(); i++) {
-    statuses[i] = this->GetStatus(i);
+    statuses[i] = &this->GetStatus(i);
   }
   return statuses;
 }
 
-const cmUVProcessChain::Status* cmUVProcessChain::GetStatus(
+const cmUVProcessChain::Status& cmUVProcessChain::GetStatus(
   std::size_t index) const
 {
-  auto const& process = *this->Data->Processes[index];
-  if (process.Finished) {
-    return &process.ProcessStatus;
-  }
-  return nullptr;
+  return this->Data->Processes[index]->ProcessStatus;
 }
 
 bool cmUVProcessChain::Finished() const
@@ -474,8 +460,12 @@ bool cmUVProcessChain::Finished() const
 std::pair<cmUVProcessChain::ExceptionCode, std::string>
 cmUVProcessChain::Status::GetException() const
 {
+  if (this->SpawnResult) {
+    return std::make_pair(ExceptionCode::Spawn,
+                          uv_strerror(this->SpawnResult));
+  }
 #ifdef _WIN32
-  if ((this->ExitStatus & 0xF0000000) == 0xC0000000) {
+  if (this->Finished && (this->ExitStatus & 0xF0000000) == 0xC0000000) {
     // Child terminated due to exceptional behavior.
     switch (this->ExitStatus) {
       case STATUS_CONTROL_C_EXIT:
@@ -550,9 +540,8 @@ cmUVProcessChain::Status::GetException() const
       }
     }
   }
-  return std::make_pair(ExceptionCode::None, "");
 #else
-  if (this->TermSignal) {
+  if (this->Finished && this->TermSignal) {
     switch (this->TermSignal) {
 #  ifdef SIGSEGV
       case SIGSEGV:
@@ -709,6 +698,12 @@ cmUVProcessChain::Status::GetException() const
       }
     }
   }
-  return std::make_pair(ExceptionCode::None, "");
 #endif
+  return std::make_pair(ExceptionCode::None, "");
+}
+
+void cmUVProcessChain::InternalData::ProcessData::Finish()
+{
+  this->ProcessStatus.Finished = true;
+  this->Data->ProcessesCompleted++;
 }
