@@ -66,6 +66,7 @@ struct cmUVProcessChain::InternalData
 
   StreamData<std::istream> OutputStreamData;
   StreamData<std::istream> ErrorStreamData;
+  cm::uv_pipe_ptr TempErrorPipe;
 
   unsigned int ProcessesCompleted = 0;
   std::vector<std::unique_ptr<ProcessData>> Processes;
@@ -73,7 +74,7 @@ struct cmUVProcessChain::InternalData
   bool Prepare(const cmUVProcessChainBuilder* builder);
   bool AddCommand(const cmUVProcessChainBuilder::ProcessConfiguration& config,
                   bool first, bool last);
-  bool Finish();
+  void Finish();
 
   static const Status* GetStatus(const ProcessData& data);
 };
@@ -207,12 +208,23 @@ bool cmUVProcessChain::InternalData::Prepare(
         return false;
       }
 
-      errorData.BuiltinStream.init(*this->Loop, 0);
+      if (errorData.BuiltinStream.init(*this->Loop, 0) < 0) {
+        return false;
+      }
       if (uv_pipe_open(errorData.BuiltinStream, pipeFd[0]) < 0) {
         return false;
       }
       errorData.Stdio.flags = UV_INHERIT_FD;
       errorData.Stdio.data.fd = pipeFd[1];
+
+      if (this->TempErrorPipe.init(*this->Loop, 0) < 0) {
+        return false;
+      }
+      if (uv_pipe_open(this->TempErrorPipe, errorData.Stdio.data.fd) < 0) {
+        return false;
+      }
+
+      errorData.Streambuf.open(errorData.BuiltinStream);
       break;
     }
 
@@ -235,10 +247,13 @@ bool cmUVProcessChain::InternalData::Prepare(
         outputData.Stdio.flags = UV_INHERIT_FD;
         outputData.Stdio.data.fd = errorData.Stdio.data.fd;
       } else {
-        outputData.BuiltinStream.init(*this->Loop, 0);
+        if (outputData.BuiltinStream.init(*this->Loop, 0) < 0) {
+          return false;
+        }
         outputData.Stdio.flags =
           static_cast<uv_stdio_flags>(UV_CREATE_PIPE | UV_WRITABLE_PIPE);
         outputData.Stdio.data.stream = outputData.BuiltinStream;
+        outputData.Streambuf.open(outputData.BuiltinStream);
       }
       break;
 
@@ -313,31 +328,10 @@ bool cmUVProcessChain::InternalData::AddCommand(
   return process.Process.spawn(*this->Loop, options, &process) >= 0;
 }
 
-bool cmUVProcessChain::InternalData::Finish()
+void cmUVProcessChain::InternalData::Finish()
 {
-  if (this->Builder->Stdio[cmUVProcessChainBuilder::Stream_OUTPUT].Type ==
-        cmUVProcessChainBuilder::Builtin &&
-      !this->Builder->MergedBuiltinStreams) {
-    this->OutputStreamData.Streambuf.open(
-      this->OutputStreamData.BuiltinStream);
-  }
-
-  if (this->Builder->Stdio[cmUVProcessChainBuilder::Stream_ERROR].Type ==
-      cmUVProcessChainBuilder::Builtin) {
-    cm::uv_pipe_ptr tmpPipe;
-    if (tmpPipe.init(*this->Loop, 0) < 0) {
-      return false;
-    }
-    if (uv_pipe_open(tmpPipe, this->ErrorStreamData.Stdio.data.fd) < 0) {
-      return false;
-    }
-    tmpPipe.reset();
-
-    this->ErrorStreamData.Streambuf.open(this->ErrorStreamData.BuiltinStream);
-  }
-
+  this->TempErrorPipe.reset();
   this->Valid = true;
-  return true;
 }
 
 cmUVProcessChain::cmUVProcessChain()
