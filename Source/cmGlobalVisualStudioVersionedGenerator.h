@@ -50,7 +50,6 @@ public:
 
   bool CheckCxxModuleSupport() override
   {
-    this->CxxModuleSupportCheck();
     return this->SupportsCxxModuleDyndep();
   }
   bool SupportsCxxModuleDyndep() const override

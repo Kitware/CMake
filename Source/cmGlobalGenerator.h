@@ -661,8 +661,6 @@ protected:
 
   virtual bool CheckALLOW_DUPLICATE_CUSTOM_TARGETS() const;
 
-  void CxxModuleSupportCheck() const;
-
   bool AddHeaderSetVerification();
 
   bool AddAutomaticSources();
@@ -774,8 +772,6 @@ private:
 #ifdef __APPLE__
   std::map<std::string, StripCommandStyle> StripCommandStyleMap;
 #endif
-
-  mutable bool DiagnosedCxxModuleSupport = false;
 
   // Deferral id generation.
   size_t NextDeferId = 0;

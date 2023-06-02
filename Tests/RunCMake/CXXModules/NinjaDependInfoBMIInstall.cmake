@@ -1,6 +1,5 @@
 # Fake out that we have dyndep; we only need to generate, not actually build
 # here.
-set(CMAKE_EXPERIMENTAL_CXX_MODULE_DYNDEP 1)
 set(CMAKE_EXPERIMENTAL_CXX_SCANDEP_SOURCE "")
 
 enable_language(CXX)

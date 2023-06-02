@@ -874,7 +874,6 @@ bool cmGlobalNinjaGenerator::CheckLanguages(
 
 bool cmGlobalNinjaGenerator::CheckCxxModuleSupport()
 {
-  this->CxxModuleSupportCheck();
   if (this->NinjaSupportsDyndepsCxx) {
     return true;
   }

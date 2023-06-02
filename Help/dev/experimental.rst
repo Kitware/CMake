@@ -63,12 +63,6 @@ dependencies, set the following variables:
 ``CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API``
   Set this to the UUID documented above.
 
-``CMAKE_EXPERIMENTAL_CXX_MODULE_DYNDEP``
-  Set this to ``1`` in order to activate this undocumented experimental
-  infrastructure.  This is **intended to make the functionality available
-  to compiler writers** so they can use it to develop and test their
-  dependency scanning tool.
-
 Some compilers already have support for module dependency scanning:
 
 * MSVC 19.34 and newer (provided with Visual Studio 17.4 and newer)
@@ -92,7 +86,6 @@ For example, add code like the following to a test project:
 
 .. code-block:: cmake
 
-  set(CMAKE_EXPERIMENTAL_CXX_MODULE_DYNDEP 1)
   string(CONCAT CMAKE_EXPERIMENTAL_CXX_SCANDEP_SOURCE
     "<CMAKE_CXX_COMPILER> <DEFINES> <INCLUDES> <FLAGS> <SOURCE>"
     " -MT <DYNDEP_FILE> -MD -MF <DEP_FILE>"
