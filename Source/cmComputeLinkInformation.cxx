@@ -1175,7 +1175,14 @@ void cmComputeLinkInformation::AddItem(LinkEntry const& entry)
       LinkEntry libEntry{ entry };
       libEntry.Item = lib;
       this->AddTargetItem(libEntry);
-      this->AddLibraryRuntimeInfo(lib.Value, tgt);
+      if (tgt->IsApple() && tgt->HasImportLibrary(config)) {
+        // Use the library rather than the tbd file for runpath computation
+        this->AddLibraryRuntimeInfo(
+          tgt->GetFullPath(config, cmStateEnums::RuntimeBinaryArtifact, true),
+          tgt);
+      } else {
+        this->AddLibraryRuntimeInfo(lib.Value, tgt);
+      }
       if (tgt && tgt->GetType() == cmStateEnums::SHARED_LIBRARY &&
           this->Target->IsDLLPlatform()) {
         this->AddRuntimeDLL(tgt);
@@ -1261,7 +1268,15 @@ void cmComputeLinkInformation::AddSharedDepItem(LinkEntry const& entry)
       ? cmStateEnums::ImportLibraryArtifact
       : cmStateEnums::RuntimeBinaryArtifact;
     lib = tgt->GetFullPath(this->Config, artifact);
-    this->AddLibraryRuntimeInfo(lib, tgt);
+    if (tgt->IsApple() && tgt->HasImportLibrary(this->Config)) {
+      // Use the library rather than the tbd file for runpath computation
+      this->AddLibraryRuntimeInfo(
+        tgt->GetFullPath(this->Config, cmStateEnums::RuntimeBinaryArtifact,
+                         true),
+        tgt);
+    } else {
+      this->AddLibraryRuntimeInfo(lib, tgt);
+    }
   } else {
     lib = item.Value;
     this->AddLibraryRuntimeInfo(lib);

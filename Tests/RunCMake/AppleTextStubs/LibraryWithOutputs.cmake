@@ -7,6 +7,9 @@ set_property(TARGET foo PROPERTY ARCHIVE_OUTPUT_NAME "tbd")
 
 add_executable(main main.c)
 target_link_libraries(main PRIVATE foo)
+set_property(TARGET main PROPERTY RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/$<CONFIG>")
+
+add_custom_target(run COMMAND "$<TARGET_FILE:main>")
 
 
 set (GENERATE_CONTENT "if (\"${CMAKE_TAPI}\")
