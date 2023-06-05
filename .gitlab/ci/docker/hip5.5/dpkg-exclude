@@ -1,0 +1,21 @@
+# Drop all man pages
+path-exclude=/usr/share/man/*
+
+# Drop all info pages
+path-exclude=/usr/share/info/*
+
+# Drop all README files except from the some packages
+path-exclude=/usr/**/*README*
+path-include=/usr/share/devscripts/templates/README.mk-build-deps
+path-include=/usr/share/equivs/template/debian/README.Debian.in
+
+# Drop all translations
+path-exclude=/usr/share/locale/*/LC_MESSAGES/*.mo
+
+# Drop all documentation ...
+path-exclude=/usr/share/doc/*
+path-exclude=/usr/share/doc-base/*
+path-exclude=/usr/share/gtk-doc/*
+
+# Per package excludes
+path-exclude=/usr/share/gnupg/help.*.txt
