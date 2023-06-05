@@ -1,0 +1,36 @@
+Non-query check
+CMake Error at ProjectQueryBad\.cmake:[0-9]+ \(cmake_file_api\):
+  cmake_file_api does not recognize sub-command NOT_A_QUERY
+.*
+Invalid API version checks
+CMake Error at ProjectQueryBad\.cmake:[0-9]+ \(cmake_file_api\):
+  cmake_file_api QUERY subcommand given an unsupported API_VERSION "2" \(the
+  only currently supported version is 1\)\.
+.*
+CMake Error at ProjectQueryBad\.cmake:[0-9]+ \(cmake_file_api\):
+  cmake_file_api QUERY subcommand given a non-integer API_VERSION\.
+.*
+Invalid version numbers check
+CMake Error at ProjectQueryBad\.cmake:[0-9]+ \(cmake_file_api\):
+  cmake_file_api QUERY subcommand was given invalid arguments:
+
+    Given a malformed version "nope" for CODEMODEL\.
+    Given a malformed version "-2" for CACHE\.
+    Given a malformed version "\.8" for CMAKEFILES\.
+    Given a malformed version "0\.1" for TOOLCHAINS\.
+.*
+Requested versions too high check
+CMake Error at ProjectQueryBad\.cmake:[0-9]+ \(cmake_file_api\):
+  cmake_file_api QUERY subcommand was given invalid arguments:
+
+    None of the specified CODEMODEL versions is supported by this version of CMake\.
+    None of the specified CACHE versions is supported by this version of CMake\.
+    None of the specified CMAKEFILES versions is supported by this version of CMake\.
+    None of the specified TOOLCHAINS versions is supported by this version of CMake\.
+.*
+Requested versions too low check
+CMake Error at ProjectQueryBad\.cmake:[0-9]+ \(cmake_file_api\):
+  cmake_file_api QUERY subcommand was given invalid arguments:
+
+    None of the specified CODEMODEL versions is supported by this version of CMake\.
+    None of the specified CACHE versions is supported by this version of CMake\.

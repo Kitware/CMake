@@ -97,6 +97,7 @@
 #  include "cmExportCommand.h"
 #  include "cmExportLibraryDependenciesCommand.h"
 #  include "cmFLTKWrapUICommand.h"
+#  include "cmFileAPICommand.h"
 #  include "cmIncludeExternalMSProjectCommand.h"
 #  include "cmInstallProgramsCommand.h"
 #  include "cmLinkLibrariesCommand.h"
@@ -293,6 +294,7 @@ void GetProjectCommands(cmState* state)
   state->AddBuiltinCommand("qt_wrap_ui", cmQTWrapUICommand);
   state->AddBuiltinCommand("remove_definitions", cmRemoveDefinitionsCommand);
   state->AddBuiltinCommand("source_group", cmSourceGroupCommand);
+  state->AddBuiltinCommand("cmake_file_api", cmFileAPICommand);
 
   state->AddDisallowedCommand(
     "export_library_dependencies", cmExportLibraryDependenciesCommand,
@@ -333,6 +335,7 @@ void GetProjectCommandsInScriptMode(cmState* state)
   CM_UNEXPECTED_PROJECT_COMMAND("add_test");
   CM_UNEXPECTED_PROJECT_COMMAND("aux_source_directory");
   CM_UNEXPECTED_PROJECT_COMMAND("build_command");
+  CM_UNEXPECTED_PROJECT_COMMAND("cmake_file_api");
   CM_UNEXPECTED_PROJECT_COMMAND("create_test_sourcelist");
   CM_UNEXPECTED_PROJECT_COMMAND("define_property");
   CM_UNEXPECTED_PROJECT_COMMAND("enable_language");

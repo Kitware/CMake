@@ -52,6 +52,8 @@ run_cmake(ClientStateless)
 run_cmake(MixedStateless)
 run_cmake(DuplicateStateless)
 run_cmake(ClientStateful)
+run_cmake(ProjectQueryGood)
+run_cmake(ProjectQueryBad)
 
 function(run_object object)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${object}-build)

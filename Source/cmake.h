@@ -635,6 +635,10 @@ public:
   void UnwatchUnusedCli(const std::string& var);
   void WatchUnusedCli(const std::string& var);
 
+#if !defined(CMAKE_BOOTSTRAP)
+  cmFileAPI* GetFileAPI() const { return this->FileAPI.get(); }
+#endif
+
   cmState* GetState() const { return this->State.get(); }
   void SetCurrentSnapshot(cmStateSnapshot const& snapshot)
   {
