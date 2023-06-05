@@ -15,6 +15,7 @@
 #include <vector>
 
 #include <cm/optional>
+#include <cm/string_view>
 
 #include "cmsys/RegularExpression.hxx"
 
@@ -119,12 +120,16 @@ public:
     bool operator!=(const cmCTestTestResourceRequirement& other) const;
   };
 
-  // NOTE: This struct is Saved/Restored
-  // in cmCTestTestHandler, if you add to this class
-  // then you must add the new members to that code or
-  // ctest -j N will break for that feature
+  struct Signal
+  {
+    int Number = 0;
+    std::string Name;
+  };
+
   struct cmCTestTestProperties
   {
+    void AppendError(cm::string_view err);
+    cm::optional<std::string> Error;
     std::string Name;
     std::string Directory;
     std::vector<std::string> Args;
@@ -148,6 +153,8 @@ public:
     int PreviousRuns = 0;
     bool RunSerial = false;
     cm::optional<cmDuration> Timeout;
+    cm::optional<Signal> TimeoutSignal;
+    cm::optional<cmDuration> TimeoutGracePeriod;
     cmDuration AlternateTimeout;
     int Index = 0;
     // Requested number of process slots

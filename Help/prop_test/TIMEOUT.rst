@@ -10,3 +10,6 @@ setting takes precedence over :variable:`CTEST_TEST_TIMEOUT`.
 
 An explicit ``0`` value means the test has no timeout, except as
 necessary to honor :option:`ctest --stop-time`.
+
+See also :prop_test:`TIMEOUT_AFTER_MATCH` and
+:prop_test:`TIMEOUT_SIGNAL_NAME`.

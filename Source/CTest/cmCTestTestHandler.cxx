@@ -17,6 +17,10 @@
 #include <sstream>
 #include <utility>
 
+#ifndef _WIN32
+#  include <csignal>
+#endif
+
 #include <cm/memory>
 #include <cm/string_view>
 #include <cmext/algorithm>
@@ -2171,6 +2175,16 @@ void cmCTestTestHandler::CleanTestOutput(std::string& output, size_t length,
   }
 }
 
+void cmCTestTestHandler::cmCTestTestProperties::AppendError(
+  cm::string_view err)
+{
+  if (this->Error) {
+    *this->Error = cmStrCat(*this->Error, '\n', err);
+  } else {
+    this->Error = err;
+  }
+}
+
 bool cmCTestTestHandler::SetTestsProperties(
   const std::vector<std::string>& args)
 {
@@ -2247,6 +2261,53 @@ bool cmCTestTestHandler::SetTestsProperties(
             rt.FixturesRequired.insert(lval.begin(), lval.end());
           } else if (key == "TIMEOUT"_s) {
             rt.Timeout = cmDuration(atof(val.c_str()));
+          } else if (key == "TIMEOUT_SIGNAL_NAME"_s) {
+#ifdef _WIN32
+            rt.AppendError("TIMEOUT_SIGNAL_NAME is not supported on Windows.");
+#else
+            std::string const& signalName = val;
+            Signal s;
+            if (signalName == "SIGINT"_s) {
+              s.Number = SIGINT;
+            } else if (signalName == "SIGQUIT"_s) {
+              s.Number = SIGQUIT;
+            } else if (signalName == "SIGTERM"_s) {
+              s.Number = SIGTERM;
+            } else if (signalName == "SIGUSR1"_s) {
+              s.Number = SIGUSR1;
+            } else if (signalName == "SIGUSR2"_s) {
+              s.Number = SIGUSR2;
+            }
+            if (s.Number) {
+              s.Name = signalName;
+              rt.TimeoutSignal = std::move(s);
+            } else {
+              rt.AppendError(cmStrCat("TIMEOUT_SIGNAL_NAME \"", signalName,
+                                      "\" not supported on this platform."));
+            }
+#endif
+          } else if (key == "TIMEOUT_SIGNAL_GRACE_PERIOD"_s) {
+#ifdef _WIN32
+            rt.AppendError(
+              "TIMEOUT_SIGNAL_GRACE_PERIOD is not supported on Windows.");
+#else
+            std::string const& gracePeriod = val;
+            static cmDuration minGracePeriod{ 0 };
+            static cmDuration maxGracePeriod{ 60 };
+            cmDuration gp = cmDuration(atof(gracePeriod.c_str()));
+            if (gp <= minGracePeriod) {
+              rt.AppendError(cmStrCat("TIMEOUT_SIGNAL_GRACE_PERIOD \"",
+                                      gracePeriod, "\" is not greater than \"",
+                                      minGracePeriod.count(), "\" seconds."));
+            } else if (gp > maxGracePeriod) {
+              rt.AppendError(cmStrCat("TIMEOUT_SIGNAL_GRACE_PERIOD \"",
+                                      gracePeriod,
+                                      "\" is not less than the maximum of \"",
+                                      maxGracePeriod.count(), "\" seconds."));
+            } else {
+              rt.TimeoutGracePeriod = gp;
+            }
+#endif
           } else if (key == "COST"_s) {
             rt.Cost = static_cast<float>(atof(val.c_str()));
           } else if (key == "REQUIRED_FILES"_s) {

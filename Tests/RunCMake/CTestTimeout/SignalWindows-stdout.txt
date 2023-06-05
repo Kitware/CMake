@@ -1,0 +1,4 @@
+    Start 1: TestTimeout
+TIMEOUT_SIGNAL_GRACE_PERIOD is not supported on Windows\.
+TIMEOUT_SIGNAL_NAME is not supported on Windows\.
+1/1 Test #1: TestTimeout ......................\*\*\*Not Run +[0-9.]+ sec

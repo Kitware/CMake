@@ -95,16 +95,15 @@ void cmCTestRunTest::CheckOutput(std::string const& line)
   }
 }
 
-bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
+cmCTestRunTest::EndTestResult cmCTestRunTest::EndTest(size_t completed,
+                                                      size_t total,
+                                                      bool started)
 {
   this->WriteLogOutputTop(completed, total);
   std::string reason;
   bool passed = true;
   cmProcess::State res =
     started ? this->TestProcess->GetProcessStatus() : cmProcess::State::Error;
-  if (res != cmProcess::State::Expired) {
-    this->TimeoutIsForStopTime = false;
-  }
   std::int64_t retVal = this->TestProcess->GetExitValue();
   bool forceFail = false;
   bool forceSkip = false;
@@ -182,6 +181,11 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
     }
   } else if (res == cmProcess::State::Expired) {
     outputStream << "***Timeout ";
+    if (this->TestProperties->TimeoutSignal &&
+        this->TestProcess->GetTerminationStyle() ==
+          cmProcess::Termination::Custom) {
+      outputStream << "(" << this->TestProperties->TimeoutSignal->Name << ") ";
+    }
     this->TestResult.Status = cmCTestTestHandler::TIMEOUT;
     outputTestErrorsToConsole =
       this->CTest->GetOutputTestOutputOnTestFailure();
@@ -344,8 +348,15 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
   if (!this->NeedsToRepeat()) {
     this->TestHandler->TestResults.push_back(this->TestResult);
   }
+  cmCTestRunTest::EndTestResult testResult;
+  testResult.Passed = passed || skipped;
+  if (res == cmProcess::State::Expired &&
+      this->TestProcess->GetTimeoutReason() ==
+        cmProcess::TimeoutReason::StopTime) {
+    testResult.StopTimePassed = true;
+  }
   this->TestProcess.reset();
-  return passed || skipped;
+  return testResult;
 }
 
 bool cmCTestRunTest::StartAgain(std::unique_ptr<cmCTestRunTest> runner,
@@ -533,6 +544,19 @@ bool cmCTestRunTest::StartTest(size_t completed, size_t total)
   this->TestResult.TestCount = this->TestProperties->Index;
   this->TestResult.Name = this->TestProperties->Name;
   this->TestResult.Path = this->TestProperties->Directory;
+
+  // Reject invalid test properties.
+  if (this->TestProperties->Error) {
+    std::string const& msg = *this->TestProperties->Error;
+    *this->TestHandler->LogFile << msg << std::endl;
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, msg << std::endl);
+    this->TestResult.CompletionStatus = "Invalid Test Properties";
+    this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
+    this->TestResult.Output = msg;
+    this->TestResult.FullCommandLine.clear();
+    this->TestResult.Environment.clear();
+    return false;
+  }
 
   // Return immediately if test is disabled
   if (this->TestProperties->Disabled) {
@@ -772,8 +796,8 @@ bool cmCTestRunTest::ForkProcess()
     timeRemaining = cmDuration::zero();
   }
   if (!timeout || timeRemaining < *timeout) {
-    this->TimeoutIsForStopTime = true;
     timeout = timeRemaining;
+    this->TestProcess->SetTimeoutReason(cmProcess::TimeoutReason::StopTime);
   }
 
   if (timeout) {

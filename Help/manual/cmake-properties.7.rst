@@ -516,6 +516,8 @@ Properties on Tests
    /prop_test/SKIP_RETURN_CODE
    /prop_test/TIMEOUT
    /prop_test/TIMEOUT_AFTER_MATCH
+   /prop_test/TIMEOUT_SIGNAL_GRACE_PERIOD
+   /prop_test/TIMEOUT_SIGNAL_NAME
    /prop_test/WILL_FAIL
    /prop_test/WORKING_DIRECTORY
 

@@ -22,6 +22,7 @@
 
   # HACK: check whether this can be removed with next iwyu release.
   { include: [ "<bits/cxxabi_forced.h>", private, "<ctime>", public ] },
+  { include: [ "<bits/chrono.h>", private, "<chrono>", public ] },
   { include: [ "<bits/exception.h>", private, "<exception>", public ] },
   { include: [ "<bits/shared_ptr.h>", private, "<memory>", public ] },
   { include: [ "<bits/std_function.h>", private, "<functional>", public ] },
@@ -101,6 +102,7 @@
   { symbol: [ "std::enable_if<true, std::chrono::duration<long, std::ratio<1, 1000> > >::type", private, "\"cmConfigure.h\"", public ] },
   { symbol: [ "__gnu_cxx::__enable_if<true, bool>::__type", private, "\"cmConfigure.h\"", public ] },
   { symbol: [ "std::remove_reference<std::basic_string<char, std::char_traits<char>, std::allocator<char> > &>::type", private, "\"cmConfigure.h\"", public ] },
+  { symbol: [ "std::remove_reference<cmCTestTestHandler::Signal &>::type", private, "\"cmConfigure.h\"", public ] },
   { symbol: [ "std::remove_reference<Defer &>::type", private, "\"cmConfigure.h\"", public ] },
   { symbol: [ "std::remove_reference<dap::StoppedEvent &>::type", private, "\"cmConfigure.h\"", public ] },
 

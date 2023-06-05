@@ -41,6 +41,14 @@ public:
   // Return true if the process starts
   bool StartProcess(uv_loop_t& loop, std::vector<size_t>* affinity);
 
+  enum class TimeoutReason
+  {
+    Normal,
+    StopTime,
+  };
+  void SetTimeoutReason(TimeoutReason r) { this->TimeoutReason_ = r; }
+  TimeoutReason GetTimeoutReason() const { return this->TimeoutReason_; }
+
   enum class State
   {
     Starting,
@@ -77,8 +85,17 @@ public:
     return std::move(this->Runner);
   }
 
+  enum class Termination
+  {
+    Normal,
+    Custom,
+    Forced,
+  };
+  Termination GetTerminationStyle() const { return this->TerminationStyle; }
+
 private:
   cm::optional<cmDuration> Timeout;
+  TimeoutReason TimeoutReason_ = TimeoutReason::Normal;
   std::chrono::steady_clock::time_point StartTime;
   cmDuration TotalTime;
   bool ReadHandleClosed = false;
@@ -128,4 +145,5 @@ private:
   std::vector<const char*> ProcessArgs;
   int Id;
   int64_t ExitValue;
+  Termination TerminationStyle = Termination::Normal;
 };

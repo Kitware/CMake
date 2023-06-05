@@ -71,10 +71,16 @@ public:
                            std::string const& output,
                            std::string const& detail);
 
+  struct EndTestResult
+  {
+    bool Passed = false;
+    bool StopTimePassed = false;
+  };
+
   // launch the test process, return whether it started correctly
   bool StartTest(size_t completed, size_t total);
   // capture and report the test results
-  bool EndTest(size_t completed, size_t total, bool started);
+  EndTestResult EndTest(size_t completed, size_t total, bool started);
   // Called by ctest -N to log the command string
   void ComputeArguments();
 
@@ -89,8 +95,6 @@ public:
   const std::vector<std::string>& GetArguments() { return this->Arguments; }
 
   void FinalizeTest(bool started = true);
-
-  bool TimedOutForStopTime() const { return this->TimeoutIsForStopTime; }
 
   void SetUseAllocatedResources(bool use)
   {
@@ -120,7 +124,6 @@ private:
   std::string GetTestPrefix(size_t completed, size_t total) const;
 
   cmCTestTestHandler::cmCTestTestProperties* TestProperties;
-  bool TimeoutIsForStopTime = false;
   // Pointer back to the "parent"; the handler that invoked this test run
   cmCTestTestHandler* TestHandler;
   cmCTest* CTest;

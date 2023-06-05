@@ -39,3 +39,5 @@ If the required resource can be controlled by CTest you should use
 :prop_test:`RESOURCE_LOCK` instead of ``TIMEOUT_AFTER_MATCH``.
 This property should be used when only the test itself can determine
 when its required resources are available.
+
+See also :prop_test:`TIMEOUT_SIGNAL_NAME`.
