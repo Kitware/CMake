@@ -8796,6 +8796,10 @@ std::string cmGeneratorTarget::GenerateHeaderSetVerificationFile(
   std::string extension;
   std::string language = source.GetOrDetermineLanguage();
 
+  if (source.GetPropertyAsBool("SKIP_LINTING")) {
+    return std::string{};
+  }
+
   if (language.empty()) {
     if (!languages) {
       languages.emplace();
