@@ -112,27 +112,23 @@ This module will set the following variables in your project
 ``Python2_STDLIB``
   Standard platform independent installation directory.
 
-  Information returned by
-  ``distutils.sysconfig.get_python_lib(plat_specific=False,standard_lib=True)``
-  or else ``sysconfig.get_path('stdlib')``.
+  Information returned by ``sysconfig.get_path('stdlib')`` or else
+  ``distutils.sysconfig.get_python_lib(plat_specific=False,standard_lib=True)``.
 ``Python2_STDARCH``
   Standard platform dependent installation directory.
 
-  Information returned by
-  ``distutils.sysconfig.get_python_lib(plat_specific=True,standard_lib=True)``
-  or else ``sysconfig.get_path('platstdlib')``.
+  Information returned by ``sysconfig.get_path('platstdlib')`` or else
+  ``distutils.sysconfig.get_python_lib(plat_specific=True,standard_lib=True)``.
 ``Python2_SITELIB``
   Third-party platform independent installation directory.
 
-  Information returned by
-  ``distutils.sysconfig.get_python_lib(plat_specific=False,standard_lib=False)``
-  or else ``sysconfig.get_path('purelib')``.
+  Information returned by ``sysconfig.get_path('purelib')`` or else
+  ``distutils.sysconfig.get_python_lib(plat_specific=False,standard_lib=False)``.
 ``Python2_SITEARCH``
   Third-party platform dependent installation directory.
 
-  Information returned by
-  ``distutils.sysconfig.get_python_lib(plat_specific=True,standard_lib=False)``
-  or else ``sysconfig.get_path('platlib')``.
+  Information returned by ``sysconfig.get_path('platlib')`` or else
+  ``distutils.sysconfig.get_python_lib(plat_specific=True,standard_lib=False)``.
 ``Python2_Compiler_FOUND``
   System has the Python 2 compiler.
 ``Python2_COMPILER``

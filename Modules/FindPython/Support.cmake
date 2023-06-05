@@ -500,7 +500,7 @@ function (_PYTHON_GET_CONFIG_VAR _PYTHON_PGCV_VALUE NAME)
 
   if (_${_PYTHON_PREFIX}_EXECUTABLE AND NOT CMAKE_CROSSCOMPILING)
     if (NAME STREQUAL "PREFIX")
-      execute_process (COMMAND ${_${_PYTHON_PREFIX}_INTERPRETER_LAUNCHER} "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c "import sys\ntry:\n   from distutils import sysconfig\n   sys.stdout.write(';'.join([sysconfig.PREFIX,sysconfig.EXEC_PREFIX,sysconfig.BASE_EXEC_PREFIX]))\nexcept Exception:\n   import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_config_var('base') or '', sysconfig.get_config_var('installed_base') or '']))"
+      execute_process (COMMAND ${_${_PYTHON_PREFIX}_INTERPRETER_LAUNCHER} "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c "import sys\ntry:\n   import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_config_var('base') or '', sysconfig.get_config_var('installed_base') or '']))\nexcept Exception:\n   from distutils import sysconfig\n   sys.stdout.write(';'.join([sysconfig.PREFIX,sysconfig.EXEC_PREFIX,sysconfig.BASE_EXEC_PREFIX]))"
                        RESULT_VARIABLE _result
                        OUTPUT_VARIABLE _values
                        ERROR_QUIET
@@ -517,7 +517,7 @@ function (_PYTHON_GET_CONFIG_VAR _PYTHON_PGCV_VALUE NAME)
         set (_scheme "posix_prefix")
       endif()
       execute_process (COMMAND ${_${_PYTHON_PREFIX}_INTERPRETER_LAUNCHER} "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c
-                               "import sys\ntry:\n   from distutils import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_python_inc(plat_specific=True),sysconfig.get_python_inc(plat_specific=False)]))\nexcept Exception:\n   import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_path('platinclude'),sysconfig.get_path('platinclude','${_scheme}'),sysconfig.get_path('include'),sysconfig.get_path('include','${_scheme}')]))"
+                               "import sys\ntry:\n   import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_path('platinclude'),sysconfig.get_path('platinclude','${_scheme}'),sysconfig.get_path('include'),sysconfig.get_path('include','${_scheme}')]))\nexcept Exception:\n   from distutils import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_python_inc(plat_specific=True),sysconfig.get_python_inc(plat_specific=False)]))"
                        RESULT_VARIABLE _result
                        OUTPUT_VARIABLE _values
                        ERROR_QUIET
@@ -530,7 +530,7 @@ function (_PYTHON_GET_CONFIG_VAR _PYTHON_PGCV_VALUE NAME)
     elseif (NAME STREQUAL "SOABI")
       # first step: compute SOABI form EXT_SUFFIX config variable
       execute_process (COMMAND ${_${_PYTHON_PREFIX}_INTERPRETER_LAUNCHER} "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c
-                               "import sys\ntry:\n   from distutils import sysconfig\n   sys.stdout.write(sysconfig.get_config_var('EXT_SUFFIX') or '')\nexcept Exception:\n   import sysconfig;sys.stdout.write(sysconfig.get_config_var('EXT_SUFFIX') or '')"
+                               "import sys\ntry:\n   import sysconfig\n   sys.stdout.write(sysconfig.get_config_var('EXT_SUFFIX') or '')\nexcept Exception:\n   from distutils import sysconfig;sys.stdout.write(sysconfig.get_config_var('EXT_SUFFIX') or '')"
                        RESULT_VARIABLE _result
                        OUTPUT_VARIABLE _values
                        ERROR_QUIET
@@ -551,7 +551,7 @@ function (_PYTHON_GET_CONFIG_VAR _PYTHON_PGCV_VALUE NAME)
       # second step: use SOABI or SO config variables as fallback
       if (NOT _values)
         execute_process (COMMAND ${_${_PYTHON_PREFIX}_INTERPRETER_LAUNCHER} "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c
-          "import sys\ntry:\n   from distutils import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_config_var('SOABI') or '',sysconfig.get_config_var('SO') or '']))\nexcept Exception:\n   import sysconfig;sys.stdout.write(';'.join([sysconfig.get_config_var('SOABI') or '',sysconfig.get_config_var('SO') or '']))"
+          "import sys\ntry:\n   import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_config_var('SOABI') or '',sysconfig.get_config_var('SO') or '']))\nexcept Exception:\n   from distutils import sysconfig;sys.stdout.write(';'.join([sysconfig.get_config_var('SOABI') or '',sysconfig.get_config_var('SO') or '']))"
           RESULT_VARIABLE _result
           OUTPUT_VARIABLE _soabi
           ERROR_QUIET
@@ -592,7 +592,7 @@ function (_PYTHON_GET_CONFIG_VAR _PYTHON_PGCV_VALUE NAME)
         set (config_flag "LIBPL")
       endif()
       execute_process (COMMAND ${_${_PYTHON_PREFIX}_INTERPRETER_LAUNCHER} "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c
-                               "import sys\ntry:\n   from distutils import sysconfig\n   sys.stdout.write(sysconfig.get_config_var('${config_flag}'))\nexcept Exception:\n   import sysconfig\n   sys.stdout.write(sysconfig.get_config_var('${config_flag}'))"
+                               "import sys\ntry:\n   import sysconfig\n   sys.stdout.write(sysconfig.get_config_var('${config_flag}'))\nexcept Exception:\n   from distutils import sysconfig\n   sys.stdout.write(sysconfig.get_config_var('${config_flag}'))"
                        RESULT_VARIABLE _result
                        OUTPUT_VARIABLE _values
                        ERROR_QUIET
@@ -2197,7 +2197,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
 
         # retrieve various package installation directories
         execute_process (COMMAND ${_${_PYTHON_PREFIX}_INTERPRETER_LAUNCHER} "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c
-                                 "import sys\ntry:\n   from distutils import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_python_lib(plat_specific=False,standard_lib=True),sysconfig.get_python_lib(plat_specific=True,standard_lib=True),sysconfig.get_python_lib(plat_specific=False,standard_lib=False),sysconfig.get_python_lib(plat_specific=True,standard_lib=False)]))\nexcept Exception:\n   import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_path('stdlib'),sysconfig.get_path('platstdlib'),sysconfig.get_path('purelib'),sysconfig.get_path('platlib')]))"
+                                 "import sys\ntry:\n   import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_path('stdlib'),sysconfig.get_path('platstdlib'),sysconfig.get_path('purelib'),sysconfig.get_path('platlib')]))\nexcept Exception:\n   from distutils import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_python_lib(plat_specific=False,standard_lib=True),sysconfig.get_python_lib(plat_specific=True,standard_lib=True),sysconfig.get_python_lib(plat_specific=False,standard_lib=False),sysconfig.get_python_lib(plat_specific=True,standard_lib=False)]))"
                          RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
                          OUTPUT_VARIABLE _${_PYTHON_PREFIX}_LIBPATHS
                          ERROR_QUIET)
