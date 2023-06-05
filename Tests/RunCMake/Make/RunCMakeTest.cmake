@@ -70,3 +70,43 @@ if(NOT RunCMake_GENERATOR STREQUAL "Watcom WMake")
   run_CMP0113(OLD)
   run_CMP0113(NEW)
 endif()
+
+function(detect_jobserver_present is_parallel)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/DetectJobServer-present-build)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  set(RunCMake_TEST_OPTIONS "-DDETECT_JOBSERVER=${DETECT_JOBSERVER}")
+  run_cmake(DetectJobServer-present)
+  if (is_parallel)
+    run_cmake_command(DetectJobServer-present-parallel-build ${CMAKE_COMMAND} --build . -j4)
+  else()
+    run_cmake_command(DetectJobServer-present-build ${CMAKE_COMMAND} --build .)
+  endif()
+endfunction()
+
+function(detect_jobserver_absent is_parallel)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/DetectJobServer-absent-build)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  set(RunCMake_TEST_OPTIONS "-DDETECT_JOBSERVER=${DETECT_JOBSERVER}")
+  run_cmake(DetectJobServer-absent)
+  if (is_parallel)
+    run_cmake_command(DetectJobServer-absent-parallel-build ${CMAKE_COMMAND} --build . -j4)
+  else()
+    run_cmake_command(DetectJobServer-absent-build ${CMAKE_COMMAND} --build .)
+  endif()
+endfunction()
+
+# Jobservers are currently only supported by GNU makes, except MSYS2 make
+if(MAKE_IS_GNU AND NOT RunCMake_GENERATOR MATCHES "MSYS Makefiles")
+  detect_jobserver_present(ON)
+else()
+  detect_jobserver_absent(ON)
+endif()
+# No matter which generator is used, the jobserver should not be present if a
+# parallel build is not requested
+detect_jobserver_absent(OFF)
+
+if(MAKE_IS_GNU)
+  # In GNU makes, `JOB_SERVER_AWARE` support is implemented by prefixing
+  # commands with the '+' operator.
+  run_cmake(GNUMakeJobServerAware)
+endif()

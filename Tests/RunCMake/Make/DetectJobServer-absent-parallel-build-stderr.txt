@@ -1,0 +1,1 @@
+^(Warning: (Borland's make|NMake|Watcom's WMake) does not support parallel builds\. Ignoring parallel build command line option\.)?$
