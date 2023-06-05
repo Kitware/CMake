@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <csignal>
+#include <cstdio>
 #include <functional>
 #include <iostream>
 #include <sstream>
@@ -615,6 +616,33 @@ bool testUVProcessChainSpawnFail(const char* helperCommand)
   return true;
 }
 
+bool testUVProcessChainInputFile(const char* helperCommand)
+{
+  std::unique_ptr<FILE, int (*)(FILE*)> f(
+    fopen("testUVProcessChainInput.txt", "rb"), fclose);
+
+  cmUVProcessChainBuilder builder;
+  builder.AddCommand({ helperCommand, "dedup" })
+    .SetExternalStream(cmUVProcessChainBuilder::Stream_INPUT, fileno(f.get()))
+    .SetBuiltinStream(cmUVProcessChainBuilder::Stream_OUTPUT);
+
+  auto chain = builder.Start();
+
+  if (!chain.Wait()) {
+    std::cout << "Wait() timed out" << std::endl;
+    return false;
+  }
+
+  std::string output = getInput(*chain.OutputStream());
+  if (output != "HELO WRD!") {
+    std::cout << "Output was \"" << output << "\", expected \"HELO WRD!\""
+              << std::endl;
+    return false;
+  }
+
+  return true;
+}
+
 int testUVProcessChain(int argc, char** const argv)
 {
   if (argc < 2) {
@@ -654,6 +682,11 @@ int testUVProcessChain(int argc, char** const argv)
 
   if (!testUVProcessChainSpawnFail(argv[1])) {
     std::cout << "While executing testUVProcessChainSpawnFail().\n";
+    return -1;
+  }
+
+  if (!testUVProcessChainInputFile(argv[1])) {
+    std::cout << "While executing testUVProcessChainInputFile().\n";
     return -1;
   }
 
