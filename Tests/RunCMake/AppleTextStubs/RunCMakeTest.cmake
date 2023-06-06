@@ -19,7 +19,12 @@ endfunction()
 
 build_project(Simple)
 build_project(Framework)
-build_project(LibraryWithOutputs)
+
+function(LibraryWithOutputs-run)
+  run_cmake_command(${test}-run ${CMAKE_COMMAND} --build . --target run --config Release)
+endfunction()
+
+build_project(LibraryWithOutputs LibraryWithOutputs-run)
 
 
 function(LibraryWithVersions-install)
