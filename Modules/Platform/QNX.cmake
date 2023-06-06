@@ -1,5 +1,3 @@
-set(QNXNTO 1)
-
 include(Platform/GNU)
 
 set(CMAKE_DL_LIBS "")

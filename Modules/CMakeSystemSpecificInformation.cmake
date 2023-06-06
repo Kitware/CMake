@@ -6,19 +6,6 @@
 # It is included after the compiler has been determined, so
 # we know things like the compiler name and if the compiler is gnu.
 
-# before cmake 2.6 these variables were set in cmMakefile.cxx. This is still
-# done to keep scripts and custom language and compiler modules working.
-# But they are reset here and set again in the platform files for the target
-# platform, so they can be used for testing the target platform instead
-# of testing the host platform.
-set(APPLE  )
-set(UNIX   )
-set(CYGWIN )
-set(MSYS )
-set(WIN32  )
-set(BSD )
-set(LINUX )
-
 function(_cmake_record_install_prefix )
   set(_CMAKE_SYSTEM_PREFIX_PATH_INSTALL_PREFIX_VALUE "${CMAKE_INSTALL_PREFIX}" PARENT_SCOPE)
   set(_CMAKE_SYSTEM_PREFIX_PATH_STAGING_PREFIX_VALUE "${CMAKE_STAGING_PREFIX}" PARENT_SCOPE)

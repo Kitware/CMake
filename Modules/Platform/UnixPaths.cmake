@@ -12,6 +12,9 @@ if(__UNIX_PATHS_INCLUDED)
 endif()
 set(__UNIX_PATHS_INCLUDED 1)
 
+# Since CMake 3.27, the Platform/<os>-Initialize modules set UNIX
+# if the corresponding Platform/<os> modules includes UnixPaths.
+# Retain the setting here to support externally-maintained platform modules.
 set(UNIX 1)
 
 # also add the install directory of the running cmake to the search directories
