@@ -7,8 +7,9 @@ This property allows you to exclude a specific source file
 from the linting process. The linting process involves running
 tools such as :prop_tgt:`<LANG>_CPPLINT`, :prop_tgt:`<LANG>_CLANG_TIDY`,
 :prop_tgt:`<LANG>_CPPCHECK`, and :prop_tgt:`<LANG>_INCLUDE_WHAT_YOU_USE`
-on the source files. By setting ``SKIP_LINTING`` on a source file,
-the mentioned linting tools will not be executed for that
+on the source files, as well as compiling header files as part of
+:prop_tgt:`VERIFY_INTERFACE_HEADER_SETS`. By setting ``SKIP_LINTING`` on a
+source file, the mentioned linting tools will not be executed for that
 particular file.
 
 Example
