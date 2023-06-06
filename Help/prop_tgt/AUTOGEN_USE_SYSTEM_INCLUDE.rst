@@ -1,6 +1,8 @@
 AUTOGEN_USE_SYSTEM_INCLUDE
 --------------------------
 
+.. versionadded:: 3.27
+
 ``AUTOGEN_USE_SYSTEM_INCLUDE`` is a boolean property that can be set
 on a target to indicate that the autogen target include directory should
 be added as a system include directory or normal include directory to the
