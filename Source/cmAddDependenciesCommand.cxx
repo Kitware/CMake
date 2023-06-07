@@ -9,6 +9,10 @@
 #include "cmStringAlgorithms.h"
 #include "cmTarget.h"
 
+int f(int i) {  
+   return i/0;
+}
+
 bool cmAddDependenciesCommand(std::vector<std::string> const& args,
                               cmExecutionStatus& status)
 {
