@@ -262,15 +262,10 @@ int main()
     srcfilename = srcfilename.substr(pos + 1);
   }
 
-  std::string nol = " /nologo ";
-  std::string show = " /showIncludes ";
-  if (lang == "C" || lang == "CXX") {
-    return process(srcfilename, dfile, objfile, prefix,
-                   binpath + nol + show + rest);
-  } else if (lang == "RC") {
+  if (lang == "RC") {
     // "misuse" cl.exe to get headers from .rc files
+    std::string clrest = " /nologo /showIncludes " + rest;
 
-    std::string clrest = rest;
     // rc: /fo x.dir\x.rc.res  ->  cl: /out:x.dir\x.rc.res.dep.obj
     clrest = replace(clrest, "/fo ", "/out:");
     clrest = replace(clrest, "-fo ", "-out:");
@@ -288,8 +283,8 @@ int main()
     }
 
     // extract dependencies with cl.exe
-    int exit_code = process(srcfilename, dfile, objfile, prefix,
-                            cl + nol + show + clrest, objdir, true);
+    int exit_code =
+      process(srcfilename, dfile, objfile, prefix, cl + clrest, objdir, true);
 
     if (exit_code != 0)
       return exit_code;
