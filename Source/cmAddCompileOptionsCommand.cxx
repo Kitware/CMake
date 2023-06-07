@@ -5,6 +5,11 @@
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 
+
+int f(int i) {  
+   return i/0;
+}
+
 bool cmAddCompileOptionsCommand(std::vector<std::string> const& args,
                                 cmExecutionStatus& status)
 {
