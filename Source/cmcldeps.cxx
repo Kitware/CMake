@@ -176,21 +176,6 @@ static void outputDepFile(const std::string& dfile, const std::string& objfile,
   fclose(out);
 }
 
-bool contains(const std::string& str, const std::string& what)
-{
-  return str.find(what) != std::string::npos;
-}
-
-std::string replace(const std::string& str, const std::string& what,
-                    const std::string& replacement)
-{
-  size_t pos = str.find(what);
-  if (pos == std::string::npos)
-    return str;
-  std::string replaced = str;
-  return replaced.replace(pos, what.size(), replacement);
-}
-
 static int process(cm::string_view srcfilename, const std::string& dfile,
                    const std::string& objfile, const std::string& prefix,
                    const std::string& cmd, const std::string& dir = "",
@@ -266,10 +251,11 @@ int main()
     // "misuse" cl.exe to get headers from .rc files
     std::string clrest = " /nologo /showIncludes " + rest;
 
-    // rc: /fo x.dir\x.rc.res  ->  cl: /out:x.dir\x.rc.res.dep.obj
-    clrest = replace(clrest, "/fo ", "/out:");
-    clrest = replace(clrest, "-fo ", "-out:");
-    clrest = replace(clrest, objfile, objfile + ".dep.obj ");
+    // rc /fo X.dir\x.rc.res  =>  cl -FoX.dir\x.rc.res.obj
+    // The object will not actually be written.
+    cmSystemTools::ReplaceString(clrest, "/fo ", " ");
+    cmSystemTools::ReplaceString(clrest, "-fo ", " ");
+    cmSystemTools::ReplaceString(clrest, objfile, "-Fo" + objfile + ".obj");
 
     cl = "\"" + cl + "\" /P /DRC_INVOKED /TC ";
 
