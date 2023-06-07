@@ -249,7 +249,16 @@ int main()
 
   if (lang == "RC") {
     // "misuse" cl.exe to get headers from .rc files
-    std::string clrest = " /nologo /showIncludes " + rest;
+
+    // Make sure there is at most one /nologo option.
+    bool const haveNologo = (rest.find("/nologo ") != std::string::npos ||
+                             rest.find("-nologo ") != std::string::npos);
+    cmSystemTools::ReplaceString(rest, "-nologo ", " ");
+    cmSystemTools::ReplaceString(rest, "/nologo ", " ");
+    std::string clrest = rest;
+    if (haveNologo) {
+      rest = "/nologo " + rest;
+    }
 
     // rc /fo X.dir\x.rc.res  =>  cl -FoX.dir\x.rc.res.obj
     // The object will not actually be written.
@@ -257,7 +266,7 @@ int main()
     cmSystemTools::ReplaceString(clrest, "-fo ", " ");
     cmSystemTools::ReplaceString(clrest, objfile, "-Fo" + objfile + ".obj");
 
-    cl = "\"" + cl + "\" /P /DRC_INVOKED /TC ";
+    cl = "\"" + cl + "\" /P /DRC_INVOKED /nologo /showIncludes /TC ";
 
     // call cl in object dir so the .i is generated there
     std::string objdir;
