@@ -257,6 +257,13 @@ Targets Created:
 - ``CUDA::cupti``
 - ``CUDA::cupti_static``
 
+.. versionadded:: 3.27
+
+  - ``CUDA::nvperf_host``         starting in CUDA 10.2
+  - ``CUDA::nvperf_host_static``  starting in CUDA 10.2
+  - ``CUDA::nvperf_target``       starting in CUDA 10.2
+  - ``CUDA::pcsamplingutil``      starting in CUDA 11.3
+
 .. _`cuda_toolkit_NPP`:
 
 NPP
@@ -1156,18 +1163,32 @@ if(CUDAToolkit_FOUND)
   mark_as_advanced(CUDAToolkit_CUPTI_INCLUDE_DIR)
 
   if(CUDAToolkit_CUPTI_INCLUDE_DIR)
+    set(_cmake_cupti_extra_paths extras/CUPTI/lib64/
+                                 extras/CUPTI/lib/
+                                 ../extras/CUPTI/lib64/
+                                 ../extras/CUPTI/lib/)
     _CUDAToolkit_find_and_add_import_lib(cupti
-                                        EXTRA_PATH_SUFFIXES extras/CUPTI/lib64/
-                                                            extras/CUPTI/lib/
-                                                            ../extras/CUPTI/lib64/
-                                                            ../extras/CUPTI/lib/
+                                        EXTRA_PATH_SUFFIXES ${_cmake_cupti_extra_paths}
                                         EXTRA_INCLUDE_DIRS "${CUDAToolkit_CUPTI_INCLUDE_DIR}")
     _CUDAToolkit_find_and_add_import_lib(cupti_static
-                                        EXTRA_PATH_SUFFIXES extras/CUPTI/lib64/
-                                                            extras/CUPTI/lib/
-                                                            ../extras/CUPTI/lib64/
-                                                            ../extras/CUPTI/lib/
+                                        EXTRA_PATH_SUFFIXES ${_cmake_cupti_extra_paths}
                                         EXTRA_INCLUDE_DIRS "${CUDAToolkit_CUPTI_INCLUDE_DIR}")
+    if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 10.2.0)
+      _CUDAToolkit_find_and_add_import_lib(nvperf_host
+                                          EXTRA_PATH_SUFFIXES ${_cmake_cupti_extra_paths}
+                                          EXTRA_INCLUDE_DIRS "${CUDAToolkit_CUPTI_INCLUDE_DIR}")
+      _CUDAToolkit_find_and_add_import_lib(nvperf_host_static
+                                          EXTRA_PATH_SUFFIXES ${_cmake_cupti_extra_paths}
+                                          EXTRA_INCLUDE_DIRS "${CUDAToolkit_CUPTI_INCLUDE_DIR}")
+      _CUDAToolkit_find_and_add_import_lib(nvperf_target
+                                          EXTRA_PATH_SUFFIXES ${_cmake_cupti_extra_paths}
+                                          EXTRA_INCLUDE_DIRS "${CUDAToolkit_CUPTI_INCLUDE_DIR}")
+    endif()
+    if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 11.3.0)
+      _CUDAToolkit_find_and_add_import_lib(pcsamplingutil
+                                          EXTRA_PATH_SUFFIXES ${_cmake_cupti_extra_paths}
+                                          EXTRA_INCLUDE_DIRS "${CUDAToolkit_CUPTI_INCLUDE_DIR}")
+    endif()
   endif()
 
   if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 11.1.0)
