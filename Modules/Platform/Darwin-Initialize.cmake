@@ -1,3 +1,6 @@
+set(APPLE 1)
+set(UNIX 1)
+
 # Ask xcode-select where to find /Developer or fall back to ancient location.
 execute_process(COMMAND xcode-select -print-path
   OUTPUT_VARIABLE _stdout

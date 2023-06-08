@@ -179,25 +179,15 @@ else()
     elseif(NOT APPLE)
       list(PREPEND _CMAKE_LINKER_NAMES "ld.lld")
     endif()
-    if(APPLE)
-      # llvm-ar does not generate a symbol table that the Apple ld64 linker accepts.
-      # FIXME(#23333): We still need to consider 'llvm-ar' as a fallback because
-      # the 'APPLE' definition may be based on the host in this context, and a
-      # cross-compiling toolchain may not have 'ar'.
-      list(APPEND _CMAKE_AR_NAMES "llvm-ar")
-    else()
+    # llvm-ar does not generate a symbol table that the Apple ld64 linker accepts.
+    if(NOT APPLE)
       list(PREPEND _CMAKE_AR_NAMES "llvm-ar")
     endif()
     list(PREPEND _CMAKE_RANLIB_NAMES "llvm-ranlib")
+    # llvm-strip versions prior to 11 require additional flags we do not yet add.
     if("${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_VERSION}" VERSION_GREATER_EQUAL 11)
-      # llvm-strip versions prior to 11 require additional flags we do not yet add.
-      if(APPLE)
-        # llvm-strip does not seem to support chained fixup format correctly.
-        # FIXME(#23333): We still need to consider 'llvm-strip' as a fallback
-        # because the 'APPLE' definition may be based on the host in this context,
-        # and a cross-compiling toolchain may not have 'strip'.
-        list(APPEND _CMAKE_STRIP_NAMES "llvm-strip")
-      else()
+      # llvm-strip does not seem to support chained fixup format on macOS correctly.
+      if(NOT APPLE)
         list(PREPEND _CMAKE_STRIP_NAMES "llvm-strip")
       endif()
     endif()
