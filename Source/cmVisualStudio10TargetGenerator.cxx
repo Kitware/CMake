@@ -1838,32 +1838,38 @@ void cmVisualStudio10TargetGenerator::WriteCustomRuleCpp(
   std::string const& comment, cmCustomCommandGenerator const& ccg,
   bool symbolic, BuildInParallel buildInParallel)
 {
-  const std::string cond = this->CalcCondition(config);
-  if (buildInParallel == BuildInParallel::Yes &&
-      this->GlobalGenerator->IsBuildInParallelSupported()) {
-    e2.WritePlatformConfigTag("BuildInParallel", cond, "true");
+  std::vector<std::string> platforms = { this->Platform };
+  if (this->BuildAsX) {
+    platforms.push_back("ARM64");
   }
-  e2.WritePlatformConfigTag("Message", cond, comment);
-  e2.WritePlatformConfigTag("Command", cond, script);
-  e2.WritePlatformConfigTag("AdditionalInputs", cond, additional_inputs);
-  e2.WritePlatformConfigTag("Outputs", cond, outputs);
-  // Turn off linking of custom command outputs.
-  e2.WritePlatformConfigTag("LinkObjects", cond, "false");
-  if (symbolic &&
-      this->LocalGenerator->GetVersion() >=
-        cmGlobalVisualStudioGenerator::VSVersion::VS16) {
-    // VS >= 16.4 warn if outputs are not created, but one of our
-    // outputs is marked SYMBOLIC and not expected to be created.
-    e2.WritePlatformConfigTag("VerifyInputsAndOutputsExist", cond, "false");
-  }
+  for (std::string const& p : platforms) {
+    const std::string cond = this->CalcCondition(config, p);
+    if (buildInParallel == BuildInParallel::Yes &&
+        this->GlobalGenerator->IsBuildInParallelSupported()) {
+      e2.WritePlatformConfigTag("BuildInParallel", cond, "true");
+    }
+    e2.WritePlatformConfigTag("Message", cond, comment);
+    e2.WritePlatformConfigTag("Command", cond, script);
+    e2.WritePlatformConfigTag("AdditionalInputs", cond, additional_inputs);
+    e2.WritePlatformConfigTag("Outputs", cond, outputs);
+    // Turn off linking of custom command outputs.
+    e2.WritePlatformConfigTag("LinkObjects", cond, "false");
+    if (symbolic &&
+        this->LocalGenerator->GetVersion() >=
+          cmGlobalVisualStudioGenerator::VSVersion::VS16) {
+      // VS >= 16.4 warn if outputs are not created, but one of our
+      // outputs is marked SYMBOLIC and not expected to be created.
+      e2.WritePlatformConfigTag("VerifyInputsAndOutputsExist", cond, "false");
+    }
 
-  std::string depfile = ccg.GetFullDepfile();
-  if (!depfile.empty()) {
-    this->HaveCustomCommandDepfile = true;
-    std::string internal_depfile = ccg.GetInternalDepfile();
-    ConvertToWindowsSlash(internal_depfile);
-    e2.WritePlatformConfigTag("DepFileAdditionalInputsFile", cond,
-                              internal_depfile);
+    std::string depfile = ccg.GetFullDepfile();
+    if (!depfile.empty()) {
+      this->HaveCustomCommandDepfile = true;
+      std::string internal_depfile = ccg.GetInternalDepfile();
+      ConvertToWindowsSlash(internal_depfile);
+      e2.WritePlatformConfigTag("DepFileAdditionalInputsFile", cond,
+                                internal_depfile);
+    }
   }
 }
 
@@ -4582,36 +4588,41 @@ void cmVisualStudio10TargetGenerator::WriteItemDefinitionGroups(Elem& e0)
   if (this->ProjectType == VsProjectType::csproj) {
     return;
   }
-  for (const std::string& c : this->Configurations) {
-    Elem e1(e0, "ItemDefinitionGroup");
-    e1.Attribute("Condition", this->CalcCondition(c));
+  std::vector<std::string> platforms = { this->Platform };
+  if (this->BuildAsX)
+    platforms.push_back("ARM64");
+  for (std::string const& p : platforms) {
+    for (const std::string& c : this->Configurations) {
+      Elem e1(e0, "ItemDefinitionGroup");
+      e1.Attribute("Condition", this->CalcCondition(c, p));
 
-    //    output cl compile flags <ClCompile></ClCompile>
-    if (this->GeneratorTarget->GetType() <= cmStateEnums::OBJECT_LIBRARY) {
-      this->WriteClOptions(e1, c);
-      //    output rc compile flags <ResourceCompile></ResourceCompile>
-      this->WriteRCOptions(e1, c);
-      this->WriteCudaOptions(e1, c);
-      this->WriteMarmasmOptions(e1, c);
-      this->WriteMasmOptions(e1, c);
-      this->WriteNasmOptions(e1, c);
-    }
-    //    output midl flags       <Midl></Midl>
-    this->WriteMidlOptions(e1, c);
-    // write events
-    if (this->ProjectType != VsProjectType::csproj) {
-      this->WriteEvents(e1, c);
-    }
-    //    output link flags       <Link></Link>
-    this->WriteLinkOptions(e1, c);
-    this->WriteCudaLinkOptions(e1, c);
-    //    output lib flags       <Lib></Lib>
-    this->WriteLibOptions(e1, c);
-    //    output manifest flags  <Manifest></Manifest>
-    this->WriteManifestOptions(e1, c);
-    if (this->NsightTegra &&
-        this->GeneratorTarget->Target->IsAndroidGuiExecutable()) {
-      this->WriteAntBuildOptions(e1, c);
+      //    output cl compile flags <ClCompile></ClCompile>
+      if (this->GeneratorTarget->GetType() <= cmStateEnums::OBJECT_LIBRARY) {
+        this->WriteClOptions(e1, c, p);
+        //    output rc compile flags <ResourceCompile></ResourceCompile>
+        this->WriteRCOptions(e1, c, p);
+        this->WriteCudaOptions(e1, c);
+        this->WriteMarmasmOptions(e1, c);
+        this->WriteMasmOptions(e1, c);
+        this->WriteNasmOptions(e1, c);
+      }
+      //    output midl flags       <Midl></Midl>
+      this->WriteMidlOptions(e1, c);
+      // write events
+      if (this->ProjectType != VsProjectType::csproj) {
+        this->WriteEvents(e1, c);
+      }
+      //    output link flags       <Link></Link>
+      this->WriteLinkOptions(e1, c);
+      this->WriteCudaLinkOptions(e1, c);
+      //    output lib flags       <Lib></Lib>
+      this->WriteLibOptions(e1, c);
+      //    output manifest flags  <Manifest></Manifest>
+      this->WriteManifestOptions(e1, c);
+      if (this->NsightTegra &&
+          this->GeneratorTarget->Target->IsAndroidGuiExecutable()) {
+        this->WriteAntBuildOptions(e1, c);
+      }
     }
   }
 }
