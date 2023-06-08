@@ -1,7 +1,4 @@
-set(QNXNTO 1)
-
 include(Platform/GNU)
-unset(CMAKE_LIBRARY_ARCHITECTURE_REGEX)
 
 set(CMAKE_DL_LIBS "")
 

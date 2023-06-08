@@ -4,11 +4,6 @@ if(CMAKE_ANDROID_NDK)
   include(${CMAKE_ANDROID_NDK}/build/cmake/hooks/pre/Android.cmake OPTIONAL)
 endif()
 
-include(Platform/Linux)
-unset(LINUX)
-
-set(ANDROID 1)
-
 # Natively compiling on an Android host doesn't need these flags to be reset.
 if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Android")
   return()

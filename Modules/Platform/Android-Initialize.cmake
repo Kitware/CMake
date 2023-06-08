@@ -23,6 +23,11 @@ if(CMAKE_SYSTEM_VERSION EQUAL 1)
   return()
 endif()
 
+include(Platform/Linux-Initialize)
+unset(LINUX)
+
+set(ANDROID 1)
+
 set(CMAKE_BUILD_TYPE_INIT "RelWithDebInfo")
 
 if(CMAKE_ANDROID_NDK_TOOLCHAIN_UNIFIED)

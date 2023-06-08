@@ -50,11 +50,6 @@ set(CMAKE_SYSTEM_IGNORE_PATH
 )
 
 #
-# Indicate that this is a unix-like system
-#
-set(UNIX 1)
-
-#
 # Library prefixes, suffixes, extra libs.
 #
 set(CMAKE_LINK_LIBRARY_SUFFIX "")
