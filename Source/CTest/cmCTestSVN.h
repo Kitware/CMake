@@ -33,7 +33,7 @@ private:
   bool NoteNewRevision() override;
   bool UpdateImpl() override;
 
-  bool RunSVNCommand(std::vector<char const*> const& parameters,
+  bool RunSVNCommand(std::vector<std::string> const& parameters,
                      OutputParser* out, OutputParser* err);
 
   // Information about an SVN repository (root repository or external)

@@ -7,8 +7,10 @@
 #include <cstring>
 #include <iosfwd>
 #include <string>
+#include <vector>
 
 #include "cmProcessOutput.h"
+#include "cmUVProcessChain.h"
 
 /** \class cmProcessTools
  * \brief Helper classes for process output parsing
@@ -81,7 +83,7 @@ public:
   };
 
   /** Run a process and send output to given parsers.  */
-  static void RunProcess(struct cmsysProcess_s* cp, OutputParser* out,
-                         OutputParser* err = nullptr,
-                         Encoding encoding = cmProcessOutput::Auto);
+  static std::vector<cmUVProcessChain::Status> RunProcess(
+    cmUVProcessChainBuilder& builder, OutputParser* out,
+    OutputParser* err = nullptr, Encoding encoding = cmProcessOutput::Auto);
 };

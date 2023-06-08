@@ -28,6 +28,7 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTransformDepfile.h"
+#include "cmUVHandlePtr.h"
 #include "cmUVProcessChain.h"
 #include "cmUVStream.h"
 #include "cmUtils.hxx"
@@ -295,14 +296,8 @@ int CLCompileAndDependencies(const std::vector<std::string>& args)
     }
   }
 
-  std::unique_ptr<cmsysProcess, void (*)(cmsysProcess*)> cp(
-    cmsysProcess_New(), cmsysProcess_Delete);
-  std::vector<const char*> argv(command.size() + 1);
-  std::transform(command.begin(), command.end(), argv.begin(),
-                 [](std::string const& s) { return s.c_str(); });
-  argv.back() = nullptr;
-  cmsysProcess_SetCommand(cp.get(), argv.data());
-  cmsysProcess_SetWorkingDirectory(cp.get(), currentBinaryDir.c_str());
+  cmUVProcessChainBuilder builder;
+  builder.AddCommand(command).SetWorkingDirectory(currentBinaryDir);
 
   cmsys::ofstream fout(depFile.c_str());
   if (!fout) {
@@ -313,22 +308,18 @@ int CLCompileAndDependencies(const std::vector<std::string>& args)
   CLOutputLogger errLogger(std::cerr);
 
   // Start the process.
-  cmProcessTools::RunProcess(cp.get(), &includeParser, &errLogger);
+  auto result =
+    cmProcessTools::RunProcess(builder, &includeParser, &errLogger);
+  auto const& subStatus = result.front();
 
   int status = 0;
   // handle status of process
-  switch (cmsysProcess_GetState(cp.get())) {
-    case cmsysProcess_State_Exited:
-      status = cmsysProcess_GetExitValue(cp.get());
-      break;
-    case cmsysProcess_State_Exception:
-      status = 1;
-      break;
-    case cmsysProcess_State_Error:
-      status = 2;
-      break;
-    default:
-      break;
+  if (subStatus.SpawnResult != 0) {
+    status = 2;
+  } else if (subStatus.TermSignal != 0) {
+    status = 1;
+  } else {
+    status = subStatus.ExitStatus;
   }
 
   if (status != 0) {
