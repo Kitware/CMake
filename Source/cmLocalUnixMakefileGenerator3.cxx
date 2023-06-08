@@ -1222,7 +1222,7 @@ void cmLocalUnixMakefileGenerator3::AppendEcho(
         } else {
           // Use cmake to echo the text in color.
           cmd = cmStrCat(
-            "@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) ",
+            "@$(CMAKE_COMMAND) -E cmake_echo_color \"--switch=$(COLOR)\" ",
             color_name);
           if (progress) {
             cmd += "--progress-dir=";
