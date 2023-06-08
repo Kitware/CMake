@@ -176,21 +176,6 @@ static void outputDepFile(const std::string& dfile, const std::string& objfile,
   fclose(out);
 }
 
-bool contains(const std::string& str, const std::string& what)
-{
-  return str.find(what) != std::string::npos;
-}
-
-std::string replace(const std::string& str, const std::string& what,
-                    const std::string& replacement)
-{
-  size_t pos = str.find(what);
-  if (pos == std::string::npos)
-    return str;
-  std::string replaced = str;
-  return replaced.replace(pos, what.size(), replacement);
-}
-
 static int process(cm::string_view srcfilename, const std::string& dfile,
                    const std::string& objfile, const std::string& prefix,
                    const std::string& cmd, const std::string& dir = "",
@@ -262,21 +247,26 @@ int main()
     srcfilename = srcfilename.substr(pos + 1);
   }
 
-  std::string nol = " /nologo ";
-  std::string show = " /showIncludes ";
-  if (lang == "C" || lang == "CXX") {
-    return process(srcfilename, dfile, objfile, prefix,
-                   binpath + nol + show + rest);
-  } else if (lang == "RC") {
+  if (lang == "RC") {
     // "misuse" cl.exe to get headers from .rc files
 
+    // Make sure there is at most one /nologo option.
+    bool const haveNologo = (rest.find("/nologo ") != std::string::npos ||
+                             rest.find("-nologo ") != std::string::npos);
+    cmSystemTools::ReplaceString(rest, "-nologo ", " ");
+    cmSystemTools::ReplaceString(rest, "/nologo ", " ");
     std::string clrest = rest;
-    // rc: /fo x.dir\x.rc.res  ->  cl: /out:x.dir\x.rc.res.dep.obj
-    clrest = replace(clrest, "/fo ", "/out:");
-    clrest = replace(clrest, "-fo ", "-out:");
-    clrest = replace(clrest, objfile, objfile + ".dep.obj ");
+    if (haveNologo) {
+      rest = "/nologo " + rest;
+    }
 
-    cl = "\"" + cl + "\" /P /DRC_INVOKED /TC ";
+    // rc /fo X.dir\x.rc.res  =>  cl -FoX.dir\x.rc.res.obj
+    // The object will not actually be written.
+    cmSystemTools::ReplaceString(clrest, "/fo ", " ");
+    cmSystemTools::ReplaceString(clrest, "-fo ", " ");
+    cmSystemTools::ReplaceString(clrest, objfile, "-Fo" + objfile + ".obj");
+
+    cl = "\"" + cl + "\" /P /DRC_INVOKED /nologo /showIncludes /TC ";
 
     // call cl in object dir so the .i is generated there
     std::string objdir;
@@ -288,8 +278,8 @@ int main()
     }
 
     // extract dependencies with cl.exe
-    int exit_code = process(srcfilename, dfile, objfile, prefix,
-                            cl + nol + show + clrest, objdir, true);
+    int exit_code =
+      process(srcfilename, dfile, objfile, prefix, cl + clrest, objdir, true);
 
     if (exit_code != 0)
       return exit_code;
