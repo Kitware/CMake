@@ -129,7 +129,8 @@ Modules
 -------
 
 * The :module:`FindCUDAToolkit` module now provides an imported target for
-  ``cudla``, if found.
+  ``cudla``, and imported targets for CUPTI's ``nvperf`` and ``pcsampling``
+  components.
 
 * The :module:`FindDoxygen` module's :command:`doxygen_add_docs` command gained
   a ``CONFIG_FILE`` option to specify a custom doxygen configuration file.
