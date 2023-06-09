@@ -74,11 +74,14 @@ public:
     Illegal,
     Interrupt,
     Numerical,
+    Spawn,
     Other,
   };
 
   struct Status
   {
+    int SpawnResult;
+    bool Finished;
     int64_t ExitStatus;
     int TermSignal;
 
@@ -102,7 +105,7 @@ public:
   bool Valid() const;
   bool Wait(int64_t milliseconds = -1);
   std::vector<const Status*> GetStatus() const;
-  const Status* GetStatus(std::size_t index) const;
+  const Status& GetStatus(std::size_t index) const;
   bool Finished() const;
 
 private:

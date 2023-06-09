@@ -43,7 +43,7 @@ bool cmLDConfigLDConfigTool::GetLDConfigPaths(std::vector<std::string>& paths)
   builder.SetBuiltinStream(cmUVProcessChainBuilder::Stream_OUTPUT)
     .AddCommand(ldConfigCommand);
   auto process = builder.Start();
-  if (!process.Valid()) {
+  if (!process.Valid() || process.GetStatus(0).SpawnResult != 0) {
     this->Archive->SetError("Failed to start ldconfig process");
     return false;
   }
@@ -61,8 +61,7 @@ bool cmLDConfigLDConfigTool::GetLDConfigPaths(std::vector<std::string>& paths)
     this->Archive->SetError("Failed to wait on ldconfig process");
     return false;
   }
-  auto status = process.GetStatus();
-  if (!status[0] || status[0]->ExitStatus != 0) {
+  if (process.GetStatus(0).ExitStatus != 0) {
     this->Archive->SetError("Failed to run ldconfig");
     return false;
   }
