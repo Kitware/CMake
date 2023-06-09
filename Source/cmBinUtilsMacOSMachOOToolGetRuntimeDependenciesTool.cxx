@@ -9,6 +9,7 @@
 
 #include "cmRuntimeDependencyArchive.h"
 #include "cmUVProcessChain.h"
+#include "cmUVStream.h"
 
 cmBinUtilsMacOSMachOOToolGetRuntimeDependenciesTool::
   cmBinUtilsMacOSMachOOToolGetRuntimeDependenciesTool(
@@ -49,11 +50,12 @@ bool cmBinUtilsMacOSMachOOToolGetRuntimeDependenciesTool::GetFileInfo(
     "^ *path (.*) \\(offset [0-9]+\\)$");
   static const cmsys::RegularExpression nameRegex(
     "^ *name (.*) \\(offset [0-9]+\\)$");
-  while (std::getline(*process.OutputStream(), line)) {
+  cmUVPipeIStream output(process.GetLoop(), process.OutputStream());
+  while (std::getline(output, line)) {
     cmsys::RegularExpressionMatch cmdMatch;
     if (rpathRegex.find(line.c_str(), cmdMatch)) {
-      if (!std::getline(*process.OutputStream(), line) ||
-          !std::getline(*process.OutputStream(), line)) {
+      // NOLINTNEXTLINE(misc-redundant-expression)
+      if (!std::getline(output, line) || !std::getline(output, line)) {
         this->SetError("Invalid output from otool");
         return false;
       }
@@ -66,8 +68,8 @@ bool cmBinUtilsMacOSMachOOToolGetRuntimeDependenciesTool::GetFileInfo(
         return false;
       }
     } else if (loadDylibRegex.find(line.c_str(), cmdMatch)) {
-      if (!std::getline(*process.OutputStream(), line) ||
-          !std::getline(*process.OutputStream(), line)) {
+      // NOLINTNEXTLINE(misc-redundant-expression)
+      if (!std::getline(output, line) || !std::getline(output, line)) {
         this->SetError("Invalid output from otool");
         return false;
       }

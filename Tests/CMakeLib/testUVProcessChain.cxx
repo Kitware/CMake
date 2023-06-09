@@ -17,6 +17,7 @@
 #include "cmStringAlgorithms.h"
 #include "cmUVHandlePtr.h"
 #include "cmUVProcessChain.h"
+#include "cmUVStream.h"
 #include "cmUVStreambuf.h"
 
 struct ExpectedStatus
@@ -301,16 +302,19 @@ bool testUVProcessChainBuiltin(const char* helperCommand)
     return false;
   }
 
-  if (!chain->OutputStream()) {
-    std::cout << "OutputStream() was null, expecting not null" << std::endl;
+  if (chain->OutputStream() < 0) {
+    std::cout << "OutputStream() was invalid, expecting valid" << std::endl;
     return false;
   }
-  if (!chain->ErrorStream()) {
-    std::cout << "ErrorStream() was null, expecting not null" << std::endl;
+  if (chain->ErrorStream() < 0) {
+    std::cout << "ErrorStream() was invalid, expecting valid" << std::endl;
     return false;
   }
 
-  if (!checkOutput(*chain->OutputStream(), *chain->ErrorStream())) {
+  cmUVPipeIStream output(chain->GetLoop(), chain->OutputStream());
+  cmUVPipeIStream error(chain->GetLoop(), chain->ErrorStream());
+
+  if (!checkOutput(output, error)) {
     return false;
   }
 
@@ -330,12 +334,12 @@ bool testUVProcessChainBuiltinMerged(const char* helperCommand)
     return false;
   }
 
-  if (!chain->OutputStream()) {
-    std::cout << "OutputStream() was null, expecting not null" << std::endl;
+  if (chain->OutputStream() < 0) {
+    std::cout << "OutputStream() was invalid, expecting valid" << std::endl;
     return false;
   }
-  if (!chain->ErrorStream()) {
-    std::cout << "ErrorStream() was null, expecting not null" << std::endl;
+  if (chain->ErrorStream() < 0) {
+    std::cout << "ErrorStream() was invalid, expecting valid" << std::endl;
     return false;
   }
   if (chain->OutputStream() != chain->ErrorStream()) {
@@ -344,7 +348,9 @@ bool testUVProcessChainBuiltinMerged(const char* helperCommand)
     return false;
   }
 
-  std::string merged = getInput(*chain->OutputStream());
+  cmUVPipeIStream mergedStream(chain->GetLoop(), chain->OutputStream());
+
+  std::string merged = getInput(mergedStream);
   auto qemuErrorPos = merged.find("qemu:");
   if (qemuErrorPos != std::string::npos) {
     merged.resize(qemuErrorPos);
@@ -398,12 +404,12 @@ bool testUVProcessChainExternal(const char* helperCommand)
     return false;
   }
 
-  if (chain->OutputStream()) {
-    std::cout << "OutputStream() was not null, expecting null" << std::endl;
+  if (chain->OutputStream() >= 0) {
+    std::cout << "OutputStream() was valid, expecting invalid" << std::endl;
     return false;
   }
-  if (chain->ErrorStream()) {
-    std::cout << "ErrorStream() was not null, expecting null" << std::endl;
+  if (chain->ErrorStream() >= 0) {
+    std::cout << "ErrorStream() was valid, expecting invalid" << std::endl;
     return false;
   }
 
@@ -446,12 +452,12 @@ bool testUVProcessChainNone(const char* helperCommand)
     return false;
   }
 
-  if (chain->OutputStream()) {
-    std::cout << "OutputStream() was not null, expecting null" << std::endl;
+  if (chain->OutputStream() >= 0) {
+    std::cout << "OutputStream() was valid, expecting invalid" << std::endl;
     return false;
   }
-  if (chain->ErrorStream()) {
-    std::cout << "ErrorStream() was not null, expecting null" << std::endl;
+  if (chain->ErrorStream() >= 0) {
+    std::cout << "ErrorStream() was valid, expecting invalid" << std::endl;
     return false;
   }
 
@@ -473,7 +479,8 @@ bool testUVProcessChainCwdUnchanged(const char* helperCommand)
     return false;
   }
 
-  auto cwd = getInput(*chain.OutputStream());
+  cmUVPipeIStream output(chain.GetLoop(), chain.OutputStream());
+  auto cwd = getInput(output);
   if (!cmHasLiteralSuffix(cwd, "/Tests/CMakeLib")) {
     std::cout << "Working directory was \"" << cwd
               << "\", expected to end in \"/Tests/CMakeLib\"" << std::endl;
@@ -499,7 +506,8 @@ bool testUVProcessChainCwdChanged(const char* helperCommand)
     return false;
   }
 
-  auto cwd = getInput(*chain.OutputStream());
+  cmUVPipeIStream output(chain.GetLoop(), chain.OutputStream());
+  auto cwd = getInput(output);
   if (!cmHasLiteralSuffix(cwd, "/Tests")) {
     std::cout << "Working directory was \"" << cwd
               << "\", expected to end in \"/Tests\"" << std::endl;
@@ -633,7 +641,8 @@ bool testUVProcessChainInputFile(const char* helperCommand)
     return false;
   }
 
-  std::string output = getInput(*chain.OutputStream());
+  cmUVPipeIStream stream(chain.GetLoop(), chain.OutputStream());
+  std::string output = getInput(stream);
   if (output != "HELO WRD!") {
     std::cout << "Output was \"" << output << "\", expected \"HELO WRD!\""
               << std::endl;

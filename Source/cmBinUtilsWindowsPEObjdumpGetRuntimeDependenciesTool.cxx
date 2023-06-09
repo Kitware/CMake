@@ -10,6 +10,7 @@
 #include "cmRuntimeDependencyArchive.h"
 #include "cmSystemTools.h"
 #include "cmUVProcessChain.h"
+#include "cmUVStream.h"
 
 cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool::
   cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool(
@@ -44,7 +45,8 @@ bool cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool::GetFileInfo(
   std::string line;
   static const cmsys::RegularExpression regex(
     "^\t*DLL Name: ([^\n]*\\.[Dd][Ll][Ll])$");
-  while (cmSystemTools::GetLineFromStream(*process.OutputStream(), line)) {
+  cmUVPipeIStream output(process.GetLoop(), process.OutputStream());
+  while (cmSystemTools::GetLineFromStream(output, line)) {
     cmsys::RegularExpressionMatch match;
     if (regex.find(line.c_str(), match)) {
       needed.push_back(match.match(1));

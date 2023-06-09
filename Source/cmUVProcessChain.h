@@ -5,7 +5,6 @@
 #include <array>
 #include <cstddef> // IWYU pragma: keep
 #include <cstdint>
-#include <iosfwd>
 #include <memory>
 #include <string>
 #include <utility>
@@ -99,8 +98,8 @@ public:
   uv_loop_t& GetLoop();
 
   // FIXME: Add stdin support
-  std::istream* OutputStream();
-  std::istream* ErrorStream();
+  int OutputStream();
+  int ErrorStream();
 
   bool Valid() const;
   bool Wait(int64_t milliseconds = -1);

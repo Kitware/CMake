@@ -10,6 +10,7 @@
 #include "cmRuntimeDependencyArchive.h"
 #include "cmSystemTools.h"
 #include "cmUVProcessChain.h"
+#include "cmUVStream.h"
 
 cmBinUtilsLinuxELFObjdumpGetRuntimeDependenciesTool::
   cmBinUtilsLinuxELFObjdumpGetRuntimeDependenciesTool(
@@ -46,7 +47,8 @@ bool cmBinUtilsLinuxELFObjdumpGetRuntimeDependenciesTool::GetFileInfo(
   static const cmsys::RegularExpression neededRegex("^ *NEEDED *([^\n]*)$");
   static const cmsys::RegularExpression rpathRegex("^ *RPATH *([^\n]*)$");
   static const cmsys::RegularExpression runpathRegex("^ *RUNPATH *([^\n]*)$");
-  while (std::getline(*process.OutputStream(), line)) {
+  cmUVPipeIStream output(process.GetLoop(), process.OutputStream());
+  while (std::getline(output, line)) {
     cmsys::RegularExpressionMatch match;
     if (neededRegex.find(line.c_str(), match)) {
       needed.push_back(match.match(1));
