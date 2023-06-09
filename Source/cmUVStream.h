@@ -2,7 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #pragma once
 
+#include <cassert>
 #include <istream>
+
+#include <cm3p/uv.h>
 
 #include "cmUVHandlePtr.h"
 #include "cmUVStreambuf.h"
@@ -100,3 +103,38 @@ void cmBasicUVPipeIStream<CharT, Traits>::close()
 }
 
 using cmUVPipeIStream = cmBasicUVPipeIStream<char>;
+
+template <typename ReadCallback, typename FinishCallback>
+void cmUVStreamRead(uv_stream_t* stream, ReadCallback onRead,
+                    FinishCallback onFinish)
+{
+  struct ReadData
+  {
+    std::vector<char> Buffer;
+    ReadCallback OnRead;
+    FinishCallback OnFinish;
+  };
+
+  stream->data = new ReadData{ {}, std::move(onRead), std::move(onFinish) };
+  uv_read_start(
+    stream,
+    [](uv_handle_t* s, std::size_t suggestedSize, uv_buf_t* buffer) {
+      auto* data = static_cast<ReadData*>(s->data);
+      data->Buffer.resize(suggestedSize);
+      buffer->base = data->Buffer.data();
+      buffer->len = suggestedSize;
+    },
+    [](uv_stream_t* s, ssize_t nread, const uv_buf_t* buffer) {
+      auto* data = static_cast<ReadData*>(s->data);
+      if (nread > 0) {
+        (void)buffer;
+        assert(buffer->base == data->Buffer.data());
+        data->Buffer.resize(nread);
+        data->OnRead(std::move(data->Buffer));
+      } else if (nread < 0 /*|| nread == UV_EOF*/) {
+        data->OnFinish();
+        uv_read_stop(s);
+        delete data;
+      }
+    });
+}
