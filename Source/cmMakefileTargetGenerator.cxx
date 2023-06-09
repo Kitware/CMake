@@ -1525,7 +1525,7 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
               cmSystemTools::CollapseFullPath(this->InfoFileNameFull),
               cmOutputConverter::SHELL);
   if (this->LocalGenerator->GetColorMakefile()) {
-    depCmd << " --color=$(COLOR)";
+    depCmd << " \"--color=$(COLOR)\"";
   }
   commands.push_back(depCmd.str());
 
