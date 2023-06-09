@@ -667,6 +667,8 @@ Configuration:
                           (for use only by package maintainers)
   --no-system-libs        use all cmake-provided third-party libraries
                           (default)
+  --system-cppdap         use system-installed cppdap library
+  --no-system-cppdap      use cmake-provided cppdap library (default)
   --system-curl           use system-installed curl library
   --no-system-curl        use cmake-provided curl library (default)
   --system-expat          use system-installed expat library
@@ -954,10 +956,10 @@ while test $# != 0; do
   --init=*) cmake_init_file=`cmake_arg "$1"` ;;
   --system-libs) cmake_bootstrap_system_libs="${cmake_bootstrap_system_libs} -DCMAKE_USE_SYSTEM_LIBRARIES=1" ;;
   --no-system-libs) cmake_bootstrap_system_libs="${cmake_bootstrap_system_libs} -DCMAKE_USE_SYSTEM_LIBRARIES=0" ;;
-  --system-bzip2|--system-curl|--system-expat|--system-jsoncpp|--system-libarchive|--system-librhash|--system-zlib|--system-liblzma|--system-nghttp2|--system-zstd|--system-libuv)
+  --system-bzip2|--system-cppdap|--system-curl|--system-expat|--system-jsoncpp|--system-libarchive|--system-librhash|--system-zlib|--system-liblzma|--system-nghttp2|--system-zstd|--system-libuv)
     lib=`cmake_arg "$1" "--system-"`
     cmake_bootstrap_system_libs="${cmake_bootstrap_system_libs} -DCMAKE_USE_SYSTEM_LIBRARY_`cmake_toupper $lib`=1" ;;
-  --no-system-bzip2|--no-system-curl|--no-system-expat|--no-system-jsoncpp|--no-system-libarchive|--no-system-librhash|--no-system-zlib|--no-system-liblzma|--no-system-nghttp2|--no-system-zstd|--no-system-libuv)
+  --no-system-bzip2|--no-system-cppdap|--no-system-curl|--no-system-expat|--no-system-jsoncpp|--no-system-libarchive|--no-system-librhash|--no-system-zlib|--no-system-liblzma|--no-system-nghttp2|--no-system-zstd|--no-system-libuv)
     lib=`cmake_arg "$1" "--no-system-"`
     cmake_bootstrap_system_libs="${cmake_bootstrap_system_libs} -DCMAKE_USE_SYSTEM_LIBRARY_`cmake_toupper $lib`=0" ;;
   --bootstrap-system-libuv) bootstrap_system_libuv="1" ;;
