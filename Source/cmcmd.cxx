@@ -11,6 +11,8 @@
 #include <cm3p/uv.h>
 #include <fcntl.h>
 
+#include "cm_fileno.hxx"
+
 #include "cmCommandLineArgument.h"
 #include "cmConsoleBuf.h"
 #include "cmCryptoHash.h"
@@ -28,7 +30,6 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTransformDepfile.h"
-#include "cmUVHandlePtr.h"
 #include "cmUVProcessChain.h"
 #include "cmUVStream.h"
 #include "cmUtils.hxx"
@@ -73,7 +74,6 @@
 
 #include "cmsys/Directory.hxx"
 #include "cmsys/FStream.hxx"
-#include "cmsys/Process.h"
 #include "cmsys/RegularExpression.hxx"
 #include "cmsys/Terminal.h"
 
@@ -319,7 +319,7 @@ int CLCompileAndDependencies(const std::vector<std::string>& args)
   } else if (subStatus.TermSignal != 0) {
     status = 1;
   } else {
-    status = subStatus.ExitStatus;
+    status = static_cast<int>(subStatus.ExitStatus);
   }
 
   if (status != 0) {
@@ -1883,21 +1883,6 @@ int cmcmd::ExecuteLinkScript(std::vector<std::string> const& args)
     }
   }
 
-  // Allocate a process instance.
-  cmsysProcess* cp = cmsysProcess_New();
-  if (!cp) {
-    std::cerr << "Error allocating process instance in link script."
-              << std::endl;
-    return 1;
-  }
-
-  // Children should share stdout and stderr with this process.
-  cmsysProcess_SetPipeShared(cp, cmsysProcess_Pipe_STDOUT, 1);
-  cmsysProcess_SetPipeShared(cp, cmsysProcess_Pipe_STDERR, 1);
-
-  // Run the command lines verbatim.
-  cmsysProcess_SetOption(cp, cmsysProcess_Option_Verbatim, 1);
-
   // Read command lines from the script.
   cmsys::ifstream fin(args[2].c_str());
   if (!fin) {
@@ -1915,9 +1900,24 @@ int cmcmd::ExecuteLinkScript(std::vector<std::string> const& args)
       continue;
     }
 
+    // Allocate a process instance.
+    cmUVProcessChainBuilder builder;
+
+    // Children should share stdout and stderr with this process.
+    builder
+      .SetExternalStream(cmUVProcessChainBuilder::Stream_OUTPUT,
+                         cm_fileno(stdout))
+      .SetExternalStream(cmUVProcessChainBuilder::Stream_ERROR,
+                         cm_fileno(stderr));
+
     // Setup this command line.
-    const char* cmd[2] = { command.c_str(), nullptr };
-    cmsysProcess_SetCommand(cp, cmd);
+    std::vector<std::string> args2;
+#ifdef _WIN32
+    cmSystemTools::ParseWindowsCommandLine(command.c_str(), args2);
+#else
+    cmSystemTools::ParseUnixCommandLine(command.c_str(), args2);
+#endif
+    builder.AddCommand(args2);
 
     // Report the command if verbose output is enabled.
     if (verbose) {
@@ -1925,34 +1925,28 @@ int cmcmd::ExecuteLinkScript(std::vector<std::string> const& args)
     }
 
     // Run the command and wait for it to exit.
-    cmsysProcess_Execute(cp);
-    cmsysProcess_WaitForExit(cp, nullptr);
+    auto chain = builder.Start();
+    chain.Wait();
 
     // Report failure if any.
-    switch (cmsysProcess_GetState(cp)) {
-      case cmsysProcess_State_Exited: {
-        int value = cmsysProcess_GetExitValue(cp);
-        if (value != 0) {
-          result = value;
+    auto const& status = chain.GetStatus(0);
+    auto exception = status.GetException();
+    switch (exception.first) {
+      case cmUVProcessChain::ExceptionCode::None:
+        if (status.ExitStatus != 0) {
+          result = static_cast<int>(status.ExitStatus);
         }
-      } break;
-      case cmsysProcess_State_Exception:
-        std::cerr << "Error running link command: "
-                  << cmsysProcess_GetExceptionString(cp) << std::endl;
-        result = 1;
         break;
-      case cmsysProcess_State_Error:
-        std::cerr << "Error running link command: "
-                  << cmsysProcess_GetErrorString(cp) << std::endl;
+      case cmUVProcessChain::ExceptionCode::Spawn:
+        std::cerr << "Error running link command: " << exception.second;
         result = 2;
         break;
       default:
+        std::cerr << "Error running link command: " << exception.second;
+        result = 1;
         break;
     }
   }
-
-  // Free the process instance.
-  cmsysProcess_Delete(cp);
 
   // Return the final resulting return value.
   return result;
