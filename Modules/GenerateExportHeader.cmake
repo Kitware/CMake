@@ -453,3 +453,8 @@ function(add_compiler_export_flags)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}" PARENT_SCOPE)
   endif()
 endfunction()
+
+# FIXME(#24994): The following module(s) are included only for compatibility
+# with projects that accidentally relied on them with CMake 3.26 and below.
+include(CheckCCompilerFlag)
+include(CheckCXXCompilerFlag)
