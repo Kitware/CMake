@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 
+#include <cm/optional>
+
 class cmMakefile;
 
 /** \class cmExecutionStatus
@@ -53,6 +55,11 @@ public:
   void SetNestedError() { this->NestedError = true; }
   bool GetNestedError() const { return this->NestedError; }
 
+  void SetExitCode(int code) noexcept { this->ExitCode = code; }
+  bool HasExitCode() const noexcept { return this->ExitCode.has_value(); }
+  void CleanExitCode() noexcept { this->ExitCode.reset(); }
+  int GetExitCode() const noexcept { return this->ExitCode.value_or(-1); }
+
 private:
   cmMakefile& Makefile;
   std::string Error;
@@ -60,5 +67,6 @@ private:
   bool BreakInvoked = false;
   bool ContinueInvoked = false;
   bool NestedError = false;
+  cm::optional<int> ExitCode;
   std::vector<std::string> Variables;
 };
