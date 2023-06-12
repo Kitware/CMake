@@ -142,6 +142,9 @@ if(BUILD_TESTING)
       )
   endif()
 
+  # Look for git to use for tests.
+  find_program(GIT_EXECUTABLE NAMES git)
+
   # Look for rpmbuild to use for tests.
   # The tool does not work with spaces in the path.
   if(NOT CMAKE_CURRENT_BINARY_DIR MATCHES " ")
@@ -2688,10 +2691,6 @@ if(BUILD_TESTING)
   endif()
 
   # Test CTest Update with GIT
-  if(NOT DEFINED CMake_TEST_CTestUpdate_GIT OR CMake_TEST_CTestUpdate_GIT)
-    find_program(GIT_EXECUTABLE NAMES git)
-    mark_as_advanced(GIT_EXECUTABLE)
-  endif()
   if(NOT DEFINED CMake_TEST_CTestUpdate_GIT AND GIT_EXECUTABLE
       AND (UNIX OR NOT "${GIT_EXECUTABLE}" MATCHES "cygwin"))
     set(CMake_TEST_CTestUpdate_GIT 1)
