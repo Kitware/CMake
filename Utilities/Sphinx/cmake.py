@@ -514,7 +514,7 @@ class CMakeReferenceRole:
         class Class(parent):
             def __call__(self, name: str, rawtext: str, text: str,
                          *args, **kwargs
-                        ) -> Tuple[List[Node], List[system_message]]:
+                         ) -> Tuple[List[Node], List[system_message]]:
                 text = CMakeReferenceRole._escape_angle_brackets(text)
                 return super().__call__(name, rawtext, text, *args, **kwargs)
         return Class
