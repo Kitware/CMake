@@ -152,7 +152,8 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
     this->EvaluateCommandLineArguments(this->Test->GetCommand(), ge, config),
     // Expand arguments if COMMAND_EXPAND_LISTS is set
     this->Test->GetCommandExpandLists() ? cmList::ExpandElements::Yes
-                                        : cmList::ExpandElements::No
+                                        : cmList::ExpandElements::No,
+    cmList::EmptyElements::Yes
   };
   // Expanding lists on an empty command may have left it empty
   if (argv.empty()) {
