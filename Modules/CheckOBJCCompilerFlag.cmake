@@ -52,3 +52,7 @@ include(Internal/CheckCompilerFlag)
 macro (CHECK_OBJC_COMPILER_FLAG _FLAG _RESULT)
   cmake_check_compiler_flag(OBJC "${_FLAG}" ${_RESULT})
 endmacro ()
+
+# FIXME(#24994): The following module is included only for compatibility
+# with projects that accidentally relied on it with CMake 3.26 and below.
+include(CheckOBJCSourceCompiles)

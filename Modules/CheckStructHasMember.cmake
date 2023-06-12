@@ -81,3 +81,8 @@ int main()
     message(FATAL_ERROR "Unknown language:\n  ${_lang}\nSupported languages: C, CXX.\n")
   endif()
 endmacro ()
+
+# FIXME(#24994): The following modules are included only for compatibility
+# with projects that accidentally relied on them with CMake 3.26 and below.
+include(CheckCSourceCompiles)
+include(CheckCXXSourceCompiles)
