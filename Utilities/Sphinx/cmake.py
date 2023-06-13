@@ -11,6 +11,11 @@ from typing import Any, List, Tuple, Type, cast
 
 import sphinx
 
+# Require at least Sphinx 2.x.
+# flake8 issues E402 for imports after this, but the purpose of this
+# check is to fail more clearly if the imports below will fail.
+assert sphinx.version_info >= (2,)
+
 from docutils.utils.code_analyzer import Lexer, LexerError
 from docutils.parsers.rst import Directive, directives
 from docutils.transforms import Transform
@@ -109,9 +114,6 @@ CMakeLexer.tokens["root"] = [
 # END pygments tweaks
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-# Require at least Sphinx 2.x.
-assert sphinx.version_info >= (2,)
 
 logger = logging.getLogger(__name__)
 
@@ -514,7 +516,7 @@ class CMakeReferenceRole:
         class Class(parent):
             def __call__(self, name: str, rawtext: str, text: str,
                          *args, **kwargs
-                        ) -> Tuple[List[Node], List[system_message]]:
+                         ) -> Tuple[List[Node], List[system_message]]:
                 text = CMakeReferenceRole._escape_angle_brackets(text)
                 return super().__call__(name, rawtext, text, *args, **kwargs)
         return Class
