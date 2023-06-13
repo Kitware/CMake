@@ -11,7 +11,7 @@ unset(SWIG_LANG_DEFINITIONS)
 unset(SWIG_LANG_OPTIONS)
 unset(SWIG_LANG_LIBRARIES)
 
-find_package(Python3 REQUIRED COMPONENTS Development)
+find_package(Python REQUIRED COMPONENTS Development)
 
 set_property(SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/add.i" PROPERTY CPLUSPLUS ON)
 set_property(SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/sub.i" PROPERTY CPLUSPLUS ON)
@@ -27,4 +27,4 @@ swig_add_library(example
                          "${CMAKE_CURRENT_SOURCE_DIR}/add.cxx"
                          "${CMAKE_CURRENT_SOURCE_DIR}/sub.cxx")
 target_include_directories(example PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
-target_link_libraries(example PRIVATE Python3::Module)
+target_link_libraries(example PRIVATE Python::Module)
