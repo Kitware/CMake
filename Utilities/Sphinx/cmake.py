@@ -11,24 +11,24 @@ from typing import Any, List, Tuple, Type, cast
 
 import sphinx
 
-# Require at least Sphinx 2.x.
-# flake8 issues E402 for imports after this, but the purpose of this
-# check is to fail more clearly if the imports below will fail.
-assert sphinx.version_info >= (2,)
+# The following imports may fail if we don't have Sphinx 2.x or later.
+if sphinx.version_info >= (2,):
+    from docutils.utils.code_analyzer import Lexer, LexerError
+    from docutils.parsers.rst import Directive, directives
+    from docutils.transforms import Transform
+    from docutils.nodes import Element, Node, TextElement, system_message
+    from docutils import io, nodes
 
-from docutils.utils.code_analyzer import Lexer, LexerError
-from docutils.parsers.rst import Directive, directives
-from docutils.transforms import Transform
-from docutils.nodes import Element, Node, TextElement, system_message
-from docutils import io, nodes
-
-from sphinx.directives import ObjectDescription, nl_escape_re
-from sphinx.domains import Domain, ObjType
-from sphinx.roles import XRefRole
-from sphinx.util.docutils import ReferenceRole
-from sphinx.util.nodes import make_refnode
-from sphinx.util import logging, ws_re
-from sphinx import addnodes
+    from sphinx.directives import ObjectDescription, nl_escape_re
+    from sphinx.domains import Domain, ObjType
+    from sphinx.roles import XRefRole
+    from sphinx.util.docutils import ReferenceRole
+    from sphinx.util.nodes import make_refnode
+    from sphinx.util import logging, ws_re
+    from sphinx import addnodes
+else:
+    # Sphinx 2.x is required.
+    assert sphinx.version_info >= (2,)
 
 # END imports
 

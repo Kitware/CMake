@@ -1,3 +1,0 @@
-[flake8]
-per-file-ignores =
-     cmake.py: E402
