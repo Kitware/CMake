@@ -157,6 +157,10 @@ Generator Expressions
   :ref:`transformation <GenEx Path Transformations>` operations learned
   to process :ref:`lists <CMake Language Lists>` of paths element-wise.
 
+* The :genex:`TARGET_RUNTIME_DLL_DIRS` generator expression was added.
+  It expands to a list of the directories containing DLLs in
+  :genex:`TARGET_RUNTIME_DLLS`.
+
 Autogen
 -------
 
