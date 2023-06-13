@@ -64,6 +64,7 @@ struct cmUVProcessChain::InternalData
 
   cm::uv_loop_ptr Loop;
 
+  StreamData<std::ostream> InputStreamData;
   StreamData<std::istream> OutputStreamData;
   StreamData<std::istream> ErrorStreamData;
   cm::uv_pipe_ptr TempOutputPipe;
@@ -134,9 +135,6 @@ cmUVProcessChainBuilder& cmUVProcessChainBuilder::SetExternalStream(
 {
   switch (stdio) {
     case Stream_INPUT:
-      // FIXME
-      break;
-
     case Stream_OUTPUT:
     case Stream_ERROR: {
       auto& streamData = this->Stdio[stdio];
@@ -183,6 +181,25 @@ bool cmUVProcessChain::InternalData::Prepare(
   const cmUVProcessChainBuilder* builder)
 {
   this->Builder = builder;
+
+  auto const& input =
+    this->Builder->Stdio[cmUVProcessChainBuilder::Stream_INPUT];
+  auto& inputData = this->InputStreamData;
+  switch (input.Type) {
+    case cmUVProcessChainBuilder::None:
+      inputData.Stdio.flags = UV_IGNORE;
+      break;
+
+    case cmUVProcessChainBuilder::Builtin: {
+      // FIXME
+      break;
+    }
+
+    case cmUVProcessChainBuilder::External:
+      inputData.Stdio.flags = UV_INHERIT_FD;
+      inputData.Stdio.data.fd = input.FileDescriptor;
+      break;
+  }
 
   auto const& error =
     this->Builder->Stdio[cmUVProcessChainBuilder::Stream_ERROR];
@@ -328,10 +345,10 @@ void cmUVProcessChain::InternalData::SpawnProcess(
   }
 
   std::array<uv_stdio_container_t, 3> stdio;
-  stdio[0] = uv_stdio_container_t();
   if (first) {
-    stdio[0].flags = UV_IGNORE;
+    stdio[0] = this->InputStreamData.Stdio;
   } else {
+    stdio[0] = uv_stdio_container_t();
     stdio[0].flags = UV_INHERIT_STREAM;
     stdio[0].data.stream = process.InputPipe;
   }
