@@ -97,8 +97,6 @@ const char* cmGlobalVisualStudioGenerator::GetIDEVersion() const
   switch (this->Version) {
     case cmGlobalVisualStudioGenerator::VSVersion::VS9:
       return "9.0";
-    case cmGlobalVisualStudioGenerator::VSVersion::VS11:
-      return "11.0";
     case cmGlobalVisualStudioGenerator::VSVersion::VS12:
       return "12.0";
     case cmGlobalVisualStudioGenerator::VSVersion::VS14:
@@ -123,14 +121,6 @@ void cmGlobalVisualStudioGenerator::WriteSLNHeader(std::ostream& fout)
     case cmGlobalVisualStudioGenerator::VSVersion::VS9:
       fout << "Microsoft Visual Studio Solution File, Format Version 10.00\n";
       fout << "# Visual Studio 2008\n";
-      break;
-    case cmGlobalVisualStudioGenerator::VSVersion::VS11:
-      fout << "Microsoft Visual Studio Solution File, Format Version 12.00\n";
-      if (this->ExpressEdition) {
-        fout << "# Visual Studio Express 2012 for Windows Desktop\n";
-      } else {
-        fout << "# Visual Studio 2012\n";
-      }
       break;
     case cmGlobalVisualStudioGenerator::VSVersion::VS12:
       fout << "Microsoft Visual Studio Solution File, Format Version 12.00\n";

@@ -11,5 +11,5 @@ project file.  This property is initialized by the value of the variable
 :variable:`CMAKE_VS_DEBUGGER_COMMAND_ARGUMENTS` if it is set when a target is
 created.
 
-This property only works for Visual Studio 11 2012 and above;
+This property only works for Visual Studio 12 2013 and above;
 it is ignored on other generators.
