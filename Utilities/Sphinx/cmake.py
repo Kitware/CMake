@@ -5,7 +5,6 @@
 
 import os
 import re
-
 from dataclasses import dataclass
 from typing import Any, List, Tuple, Type, cast
 
@@ -13,19 +12,19 @@ import sphinx
 
 # The following imports may fail if we don't have Sphinx 2.x or later.
 if sphinx.version_info >= (2,):
-    from docutils.utils.code_analyzer import Lexer, LexerError
+    from docutils import io, nodes
+    from docutils.nodes import Element, Node, TextElement, system_message
     from docutils.parsers.rst import Directive, directives
     from docutils.transforms import Transform
-    from docutils.nodes import Element, Node, TextElement, system_message
-    from docutils import io, nodes
+    from docutils.utils.code_analyzer import Lexer, LexerError
 
+    from sphinx import addnodes
     from sphinx.directives import ObjectDescription, nl_escape_re
     from sphinx.domains import Domain, ObjType
     from sphinx.roles import XRefRole
+    from sphinx.util import logging, ws_re
     from sphinx.util.docutils import ReferenceRole
     from sphinx.util.nodes import make_refnode
-    from sphinx.util import logging, ws_re
-    from sphinx import addnodes
 else:
     # Sphinx 2.x is required.
     assert sphinx.version_info >= (2,)
@@ -47,10 +46,10 @@ else:
 # - manual/cmake-buildsystem.7.html
 #     (with nested $<..>; relative and absolute paths, "::")
 
+from pygments.lexer import bygroups  # noqa I100
 from pygments.lexers import CMakeLexer
 from pygments.token import (Comment, Name, Number, Operator, Punctuation,
                             String, Text, Whitespace)
-from pygments.lexer import bygroups
 
 # Notes on regular expressions below:
 # - [\.\+-] are needed for string constants like gtk+-2.0
