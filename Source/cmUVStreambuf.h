@@ -14,7 +14,8 @@
 /*
  * This file is based on example code from:
  *
- * http://www.voidcn.com/article/p-vjnlygmc-gy.html
+ * https://web.archive.org/web/20170515211805/
+ *     http://www.mr-edd.co.uk/blog/beginners_guide_streambuf
  *
  * The example code was distributed under the following license:
  *
