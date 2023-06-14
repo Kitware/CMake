@@ -12,6 +12,10 @@ for the target system.
   Lists>`, then the first value is the command and remaining values are its
   arguments.
 
+.. versionadded:: 3.28
+  This variable can be initialized via an
+  :envvar:`CMAKE_CROSSCOMPILING_EMULATOR` environment variable.
+
 The command will be used to run :command:`try_run` generated executables,
 which avoids manual population of the ``TryRunResults.cmake`` file.
 

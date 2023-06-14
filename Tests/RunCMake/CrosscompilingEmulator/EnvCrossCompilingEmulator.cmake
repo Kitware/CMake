@@ -1,0 +1,6 @@
+message(STATUS "ENV{CMAKE_CROSS_COMPILING_EMULATOR}='$ENV{CMAKE_CROSSCOMPILING_EMULATOR}'")
+message(STATUS "CMAKE_CROSSCOMPLING_EMULATOR='${CMAKE_CROSSCOMPILING_EMULATOR}'")
+get_filename_component(env_emulator "$ENV{CMAKE_CROSSCOMPILING_EMULATOR}" NAME)
+message(STATUS "env_emulator='${env_emulator}'")
+get_filename_component(emulator "${CMAKE_CROSSCOMPILING_EMULATOR}" NAME)
+message(STATUS "emulator='${emulator}'")

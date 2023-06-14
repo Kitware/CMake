@@ -2506,6 +2506,18 @@ int cmake::ActualConfigure()
                         "Name of generator toolset.", cmStateEnums::INTERNAL);
   }
 
+  if (!this->State->GetInitializedCacheValue(
+        "CMAKE_CROSSCOMPILING_EMULATOR")) {
+    cm::optional<std::string> emulator =
+      cmSystemTools::GetEnvVar("CMAKE_CROSSCOMPILING_EMULATOR");
+    if (emulator && !emulator->empty()) {
+      std::string message =
+        "Emulator to run executables and tests when cross compiling.";
+      this->AddCacheEntry("CMAKE_CROSSCOMPILING_EMULATOR", *emulator, message,
+                          cmStateEnums::STRING);
+    }
+  }
+
   // reset any system configuration information, except for when we are
   // InTryCompile. With TryCompile the system info is taken from the parent's
   // info to save time

@@ -43,6 +43,7 @@ Environment Variables that Control the Build
    /envvar/CMAKE_COLOR_DIAGNOSTICS
    /envvar/CMAKE_CONFIGURATION_TYPES
    /envvar/CMAKE_CONFIG_TYPE
+   /envvar/CMAKE_CROSSCOMPILING_EMULATOR
    /envvar/CMAKE_EXPORT_COMPILE_COMMANDS
    /envvar/CMAKE_GENERATOR
    /envvar/CMAKE_GENERATOR_INSTANCE
