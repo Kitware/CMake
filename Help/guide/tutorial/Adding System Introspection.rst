@@ -156,7 +156,7 @@ compute the square root in the ``mysqrt`` function. The ``mysqrt`` function in
   :name: MathFunctions/mysqrt.cxx-ifdef
   :language: c++
   :start-after: // if we have both log and exp then use them
-  :end-before: // do ten iterations
+  :end-before: return result;
 
 .. raw:: html
 
