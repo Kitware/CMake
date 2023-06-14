@@ -87,6 +87,11 @@ public:
   void AddError(const std::string& message, const char* title) override;
 
   /**
+   * Write files to cache file without reconfiguring.
+   */
+  void Write();
+
+  /**
    * Used to do a configure. If argument is specified, it does only the check
    * and not configure.
    */
@@ -123,6 +128,7 @@ protected:
 
   // Jump to the cache entry whose name matches the string.
   void JumpToCacheEntry(const char* str);
+  void JumpToCacheEntry(const char* str, bool reverse);
 
   // Clear and reset the output log and state
   void ResetOutputs();
