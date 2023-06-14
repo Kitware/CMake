@@ -329,26 +329,6 @@ void cmGlobalVisualStudio7Generator::Generate()
         "Add CMAKE_WARN_VS9=OFF to the cache to disable this warning.");
     }
   }
-
-  if (this->Version == VSVersion::VS11 &&
-      !this->CMakeInstance->GetIsInTryCompile()) {
-    std::string cmakeWarnVS11;
-    if (cmValue cached = this->CMakeInstance->GetState()->GetCacheEntryValue(
-          "CMAKE_WARN_VS11")) {
-      this->CMakeInstance->MarkCliAsUsed("CMAKE_WARN_VS11");
-      cmakeWarnVS11 = *cached;
-    } else {
-      cmSystemTools::GetEnv("CMAKE_WARN_VS11", cmakeWarnVS11);
-    }
-    if (cmakeWarnVS11.empty() || !cmIsOff(cmakeWarnVS11)) {
-      this->CMakeInstance->IssueMessage(
-        MessageType::WARNING,
-        "The \"Visual Studio 11 2012\" generator is deprecated "
-        "and will be removed in a future version of CMake."
-        "\n"
-        "Add CMAKE_WARN_VS11=OFF to the cache to disable this warning.");
-    }
-  }
 }
 
 void cmGlobalVisualStudio7Generator::OutputSLNFile(

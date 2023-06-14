@@ -8,156 +8,17 @@
 #include <vector>
 
 #include "cmGlobalGenerator.h"
-#include "cmGlobalGeneratorFactory.h"
 #include "cmGlobalVisualStudioGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
-static const char vs11generatorName[] = "Visual Studio 11 2012";
-
-// Map generator name without year to name with year.
-static const char* cmVS11GenName(const std::string& name, std::string& genName)
-{
-  if (strncmp(name.c_str(), vs11generatorName,
-              sizeof(vs11generatorName) - 6) != 0) {
-    return nullptr;
-  }
-  const char* p = name.c_str() + sizeof(vs11generatorName) - 6;
-  if (cmHasLiteralPrefix(p, " 2012")) {
-    p += 5;
-  }
-  genName = std::string(vs11generatorName) + p;
-  return p;
-}
-
-class cmGlobalVisualStudio11Generator::Factory
-  : public cmGlobalGeneratorFactory
-{
-public:
-  std::unique_ptr<cmGlobalGenerator> CreateGlobalGenerator(
-    const std::string& name, bool allowArch, cmake* cm) const override
-  {
-    std::string genName;
-    const char* p = cmVS11GenName(name, genName);
-    if (!p) {
-      return std::unique_ptr<cmGlobalGenerator>();
-    }
-    if (!*p) {
-      return std::unique_ptr<cmGlobalGenerator>(
-        new cmGlobalVisualStudio11Generator(cm, genName, ""));
-    }
-    if (!allowArch || *p++ != ' ') {
-      return std::unique_ptr<cmGlobalGenerator>();
-    }
-    if (strcmp(p, "Win64") == 0) {
-      return std::unique_ptr<cmGlobalGenerator>(
-        new cmGlobalVisualStudio11Generator(cm, genName, "x64"));
-    }
-    if (strcmp(p, "ARM") == 0) {
-      return std::unique_ptr<cmGlobalGenerator>(
-        new cmGlobalVisualStudio11Generator(cm, genName, "ARM"));
-    }
-
-    std::set<std::string> installedSDKs =
-      cmGlobalVisualStudio11Generator::GetInstalledWindowsCESDKs();
-
-    if (installedSDKs.find(p) == installedSDKs.end()) {
-      return std::unique_ptr<cmGlobalGenerator>();
-    }
-
-    auto ret = std::unique_ptr<cmGlobalVisualStudio11Generator>(
-      new cmGlobalVisualStudio11Generator(cm, name, p));
-    ret->WindowsCEVersion = "8.00";
-    return std::unique_ptr<cmGlobalGenerator>(std::move(ret));
-  }
-
-  cmDocumentationEntry GetDocumentation() const override
-  {
-    return { std::string(vs11generatorName) + " [arch]",
-             "Deprecated.  Generates Visual Studio 2012 project files.  "
-             "Optional [arch] can be \"Win64\" or \"ARM\"." };
-  }
-
-  std::vector<std::string> GetGeneratorNames() const override
-  {
-    std::vector<std::string> names;
-    names.push_back(vs11generatorName);
-    return names;
-  }
-
-  std::vector<std::string> GetGeneratorNamesWithPlatform() const override
-  {
-    std::vector<std::string> names;
-    names.push_back(vs11generatorName + std::string(" ARM"));
-    names.push_back(vs11generatorName + std::string(" Win64"));
-
-    std::set<std::string> installedSDKs =
-      cmGlobalVisualStudio11Generator::GetInstalledWindowsCESDKs();
-    for (std::string const& i : installedSDKs) {
-      names.push_back(std::string(vs11generatorName) + " " + i);
-    }
-
-    return names;
-  }
-
-  bool SupportsToolset() const override { return true; }
-  bool SupportsPlatform() const override { return true; }
-
-  std::vector<std::string> GetKnownPlatforms() const override
-  {
-    std::vector<std::string> platforms;
-    platforms.emplace_back("x64");
-    platforms.emplace_back("Win32");
-    platforms.emplace_back("ARM");
-
-    std::set<std::string> installedSDKs =
-      cmGlobalVisualStudio11Generator::GetInstalledWindowsCESDKs();
-    for (std::string const& i : installedSDKs) {
-      platforms.emplace_back(i);
-    }
-
-    return platforms;
-  }
-
-  std::string GetDefaultPlatformName() const override { return "Win32"; }
-};
-
-std::unique_ptr<cmGlobalGeneratorFactory>
-cmGlobalVisualStudio11Generator::NewFactory()
-{
-  return std::unique_ptr<cmGlobalGeneratorFactory>(new Factory);
-}
-
 cmGlobalVisualStudio11Generator::cmGlobalVisualStudio11Generator(
   cmake* cm, const std::string& name,
   std::string const& platformInGeneratorName)
   : cmGlobalVisualStudio10Generator(cm, name, platformInGeneratorName)
 {
-  std::string vc11Express;
-  this->ExpressEdition = cmSystemTools::ReadRegistryValue(
-    "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\11.0\\Setup\\VC;"
-    "ProductDir",
-    vc11Express, cmSystemTools::KeyWOW64_32);
-  this->DefaultPlatformToolset = "v110";
-  this->DefaultCLFlagTableName = "v11";
-  this->DefaultCSharpFlagTableName = "v11";
-  this->DefaultLibFlagTableName = "v11";
-  this->DefaultLinkFlagTableName = "v11";
-  this->DefaultMasmFlagTableName = "v11";
-  this->DefaultRCFlagTableName = "v11";
-  this->Version = VSVersion::VS11;
-}
-
-bool cmGlobalVisualStudio11Generator::MatchesGeneratorName(
-  const std::string& name) const
-{
-  std::string genName;
-  if (cmVS11GenName(name, genName)) {
-    return genName == this->GetName();
-  }
-  return false;
 }
 
 void cmGlobalVisualStudio11Generator::EnableLanguage(

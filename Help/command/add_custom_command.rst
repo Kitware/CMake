@@ -512,7 +512,7 @@ one of the keywords to make clear the behavior they expect.
   Because generator expressions can be used in custom commands,
   it is possible to define ``COMMAND`` lines or whole custom commands
   which evaluate to empty strings for certain configurations.
-  For **Visual Studio 11 2012 (and newer)** generators these command
+  For **Visual Studio 12 2013 (and newer)** generators these command
   lines or custom commands will be omitted for the specific
   configuration and no "empty-string-command" will be added.
 

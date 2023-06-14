@@ -75,7 +75,6 @@ void cmVisualStudioGeneratorOptions::FixExceptionHandlingDefault()
   // the flag to disable exception handling.  When the user does
   // remove the flag we need to override the IDE default of on.
   switch (this->Version) {
-    case cmGlobalVisualStudioGenerator::VSVersion::VS11:
     case cmGlobalVisualStudioGenerator::VSVersion::VS12:
     case cmGlobalVisualStudioGenerator::VSVersion::VS14:
     case cmGlobalVisualStudioGenerator::VSVersion::VS15:

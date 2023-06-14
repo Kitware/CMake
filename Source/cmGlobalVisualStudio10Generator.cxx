@@ -1230,7 +1230,6 @@ const char* cmGlobalVisualStudio10Generator::GetToolsVersion() const
 {
   switch (this->Version) {
     case cmGlobalVisualStudioGenerator::VSVersion::VS9:
-    case cmGlobalVisualStudioGenerator::VSVersion::VS11:
       return "4.0";
 
       // in Visual Studio 2013 they detached the MSBuild tools version

@@ -198,7 +198,7 @@ void cmLocalVisualStudio7Generator::GenerateTarget(cmGeneratorTarget* target)
   // Intel Fortran always uses VS9 format ".vfproj" files.
   cmGlobalVisualStudioGenerator::VSVersion realVersion = gg->GetVersion();
   if (this->FortranProject &&
-      gg->GetVersion() >= cmGlobalVisualStudioGenerator::VSVersion::VS11) {
+      gg->GetVersion() >= cmGlobalVisualStudioGenerator::VSVersion::VS12) {
     gg->SetVersion(cmGlobalVisualStudioGenerator::VSVersion::VS9);
   }
 

@@ -2533,18 +2533,6 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
         break;
       case cmGeneratorTarget::SourceKindExternalObject:
         tool = "Object";
-        if (this->LocalGenerator->GetVersion() <
-            cmGlobalVisualStudioGenerator::VSVersion::VS11) {
-          // For VS == 10 we cannot use LinkObjects to avoid linking custom
-          // command outputs.  If an object file is generated in this target,
-          // then vs10 will use it in the build, and we have to list it as
-          // None instead of Object.
-          std::vector<cmSourceFile*> const* d =
-            this->GeneratorTarget->GetSourceDepends(si.Source);
-          if (d && !d->empty()) {
-            tool = "None";
-          }
-        }
         break;
       case cmGeneratorTarget::SourceKindExtra:
         this->WriteExtraSource(e1, si.Source, toolSettings);
