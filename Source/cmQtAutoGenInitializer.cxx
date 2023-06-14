@@ -1240,15 +1240,15 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
   bool constexpr stdPipesUTF8 = true;
   cmCustomCommandLines commandLines;
   if (this->Makefile->GetSafeDefinition("CMAKE_CROSS_CONFIGS").empty()) {
-    std::string autugenInfoFileconfig;
+    std::string autogenInfoFileConfig;
     if (this->MultiConfig) {
-      autugenInfoFileconfig = "$<CONFIG>";
+      autogenInfoFileConfig = "$<CONFIG>";
     } else {
-      autugenInfoFileconfig = configs[0];
+      autogenInfoFileConfig = configs[0];
     }
     commandLines.push_back(cmMakeCommandLine(
       { cmSystemTools::GetCMakeCommand(), "-E", "cmake_autogen",
-        this->AutogenTarget.InfoFile, autugenInfoFileconfig }));
+        this->AutogenTarget.InfoFile, autogenInfoFileConfig }));
 
   } else {
     for (auto const& config : configs) {
