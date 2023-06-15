@@ -9,6 +9,7 @@
 
 #include "cmRuntimeDependencyArchive.h"
 #include "cmUVProcessChain.h"
+#include "cmUVStream.h"
 
 cmBinUtilsWindowsPEDumpbinGetRuntimeDependenciesTool::
   cmBinUtilsWindowsPEDumpbinGetRuntimeDependenciesTool(
@@ -43,7 +44,8 @@ bool cmBinUtilsWindowsPEDumpbinGetRuntimeDependenciesTool::GetFileInfo(
   std::string line;
   static const cmsys::RegularExpression regex(
     "^    ([^\n]*\\.[Dd][Ll][Ll])\r$");
-  while (std::getline(*process.OutputStream(), line)) {
+  cmUVPipeIStream output(process.GetLoop(), process.OutputStream());
+  while (std::getline(output, line)) {
     cmsys::RegularExpressionMatch match;
     if (regex.find(line.c_str(), match)) {
       needed.push_back(match.match(1));

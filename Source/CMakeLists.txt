@@ -438,6 +438,7 @@ add_library(
   cmUVHandlePtr.h
   cmUVProcessChain.cxx
   cmUVProcessChain.h
+  cmUVStream.h
   cmUVStreambuf.h
   cmUVSignalHackRAII.h
   cmVariableWatch.cxx

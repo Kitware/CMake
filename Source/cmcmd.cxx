@@ -28,6 +28,7 @@
 #include "cmSystemTools.h"
 #include "cmTransformDepfile.h"
 #include "cmUVProcessChain.h"
+#include "cmUVStream.h"
 #include "cmUtils.hxx"
 #include "cmValue.h"
 #include "cmVersion.h"
@@ -2017,10 +2018,8 @@ int cmcmd::RunPreprocessor(const std::vector<std::string>& command,
     return 1;
   }
   if (process.GetStatus(0).ExitStatus != 0) {
-    auto* errorStream = process.ErrorStream();
-    if (errorStream) {
-      std::cerr << errorStream->rdbuf();
-    }
+    cmUVPipeIStream errorStream(process.GetLoop(), process.ErrorStream());
+    std::cerr << errorStream.rdbuf();
 
     return 1;
   }
@@ -2144,10 +2143,8 @@ int cmcmd::RunLLVMRC(std::vector<std::string> const& args)
     return result;
   }
   if (process.GetStatus(0).ExitStatus != 0) {
-    auto* errorStream = process.ErrorStream();
-    if (errorStream) {
-      std::cerr << errorStream->rdbuf();
-    }
+    cmUVPipeIStream errorStream(process.GetLoop(), process.ErrorStream());
+    std::cerr << errorStream.rdbuf();
     return 1;
   }
 

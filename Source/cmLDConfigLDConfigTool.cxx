@@ -14,6 +14,7 @@
 #include "cmRuntimeDependencyArchive.h"
 #include "cmSystemTools.h"
 #include "cmUVProcessChain.h"
+#include "cmUVStream.h"
 
 cmLDConfigLDConfigTool::cmLDConfigLDConfigTool(
   cmRuntimeDependencyArchive* archive)
@@ -50,7 +51,8 @@ bool cmLDConfigLDConfigTool::GetLDConfigPaths(std::vector<std::string>& paths)
 
   std::string line;
   static const cmsys::RegularExpression regex("^([^\t:]*):");
-  while (std::getline(*process.OutputStream(), line)) {
+  cmUVPipeIStream output(process.GetLoop(), process.OutputStream());
+  while (std::getline(output, line)) {
     cmsys::RegularExpressionMatch match;
     if (regex.find(line.c_str(), match)) {
       paths.push_back(match.match(1));
