@@ -322,7 +322,7 @@ public:
   // extract sublist in range [first, last)
   cmList sublist(const_iterator first, const_iterator last) const
   {
-    return cmList{ first, last };
+    return cmList{ first, last, ExpandElements::No, EmptyElements::Yes };
   }
   // Extract sublist in range [first, last)
   // Throw std::out_of_range if pos is invalid
