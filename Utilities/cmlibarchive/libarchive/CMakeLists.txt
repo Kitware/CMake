@@ -246,6 +246,10 @@ ENDIF()
 ADD_LIBRARY(cmlibarchive STATIC ${libarchive_SOURCES} ${include_HEADERS})
 TARGET_LINK_LIBRARIES(cmlibarchive ${ADDITIONAL_LIBS})
 
+if(WIN32 AND CMake_BUILD_PCH)
+  target_precompile_headers(cmlibarchive PRIVATE "archive_platform.h" "archive_entry.h" "<cm3p/bzlib.h>")
+endif()
+
 IF(0) # CMake does not build libarchive's full package.
 # Libarchive is a shared library
 ADD_LIBRARY(archive SHARED ${libarchive_SOURCES} ${include_HEADERS})
