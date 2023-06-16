@@ -24,10 +24,6 @@
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
 
-#if defined(_WIN32) && !defined(__CYGWIN__)
-#  include <windows.h>
-#endif
-
 #include "cmAlgorithms.h"
 #include "cmCPackPropertiesGenerator.h"
 #include "cmComputeTargetDepends.h"
