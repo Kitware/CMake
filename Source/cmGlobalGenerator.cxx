@@ -142,6 +142,10 @@ cmGlobalGenerator::~cmGlobalGenerator()
 {
   this->ClearGeneratorMembers();
 }
+codecvt_Encoding cmGlobalGenerator::GetMakefileEncoding() const
+{
+  return codecvt_Encoding::None;
+}
 
 #if !defined(CMAKE_BOOTSTRAP)
 Json::Value cmGlobalGenerator::GetJson() const

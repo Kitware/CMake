@@ -16,7 +16,7 @@
 cmGeneratedFileStream::cmGeneratedFileStream(Encoding encoding)
 {
 #ifndef CMAKE_BOOTSTRAP
-  if (encoding != codecvt::None) {
+  if (encoding != codecvt_Encoding::None) {
     this->imbue(std::locale(this->getloc(), new codecvt(encoding)));
   }
 #else
@@ -35,13 +35,13 @@ cmGeneratedFileStream::cmGeneratedFileStream(std::string const& name,
     cmSystemTools::ReportLastSystemError("");
   }
 #ifndef CMAKE_BOOTSTRAP
-  if (encoding != codecvt::None) {
+  if (encoding != codecvt_Encoding::None) {
     this->imbue(std::locale(this->getloc(), new codecvt(encoding)));
   }
 #else
   static_cast<void>(encoding);
 #endif
-  if (encoding == codecvt::UTF8_WITH_BOM) {
+  if (encoding == codecvt_Encoding::UTF8_WITH_BOM) {
     // Write the BOM encoding header into the file
     char magic[] = { static_cast<char>(0xEF), static_cast<char>(0xBB),
                      static_cast<char>(0xBF) };

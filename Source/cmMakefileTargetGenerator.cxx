@@ -17,7 +17,7 @@
 #include <cmext/algorithm>
 #include <cmext/string_view>
 
-#include "cm_codecvt.hxx"
+#include "cm_codecvt_Encoding.hxx"
 
 #include "cmComputeLinkInformation.h"
 #include "cmCustomCommand.h"
@@ -2129,12 +2129,12 @@ std::string cmMakefileTargetGenerator::CreateResponseFile(
   // FIXME: Find a better way to determine the response file encoding,
   // perhaps using tool-specific platform information variables.
   // For now, use the makefile encoding as a heuristic.
-  codecvt::Encoding responseEncoding =
+  codecvt_Encoding responseEncoding =
     this->GlobalGenerator->GetMakefileEncoding();
   // Non-MSVC tooling doesn't understand BOM encoded files.
-  if (responseEncoding == codecvt::UTF8_WITH_BOM &&
+  if (responseEncoding == codecvt_Encoding::UTF8_WITH_BOM &&
       (language == "CUDA" || !this->Makefile->IsOn("MSVC"))) {
-    responseEncoding = codecvt::UTF8;
+    responseEncoding = codecvt_Encoding::UTF8;
   }
 
   // Create the response file.

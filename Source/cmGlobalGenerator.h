@@ -19,7 +19,7 @@
 #include <cmext/algorithm>
 #include <cmext/string_view>
 
-#include "cm_codecvt.hxx"
+#include "cm_codecvt_Encoding.hxx"
 
 #include "cmBuildOptions.h"
 #include "cmCustomCommandLines.h"
@@ -120,10 +120,7 @@ public:
   }
 
   /** Get encoding used by generator for makefile files */
-  virtual codecvt::Encoding GetMakefileEncoding() const
-  {
-    return codecvt::None;
-  }
+  virtual codecvt_Encoding GetMakefileEncoding() const;
 
 #if !defined(CMAKE_BOOTSTRAP)
   /** Get a JSON object describing the generator.  */

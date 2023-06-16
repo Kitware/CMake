@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 
-#include "cm_codecvt.hxx"
+#include "cm_codecvt_Encoding.hxx"
 
 #include "cmGlobalGenerator.h"
 #include "cmTargetDepend.h"
@@ -119,9 +119,9 @@ public:
 
   /** Get encoding used by generator for generated source files
    */
-  codecvt::Encoding GetMakefileEncoding() const override
+  codecvt_Encoding GetMakefileEncoding() const override
   {
-    return codecvt::ANSI;
+    return codecvt_Encoding::ANSI;
   }
 
   class TargetSet : public std::set<cmGeneratorTarget const*>
