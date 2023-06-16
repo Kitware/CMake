@@ -27,21 +27,23 @@ add_test(NAME FindPython3.VirtualEnvDefault
                  "${CMAKE_COMMAND}" "-DPYTHON3_VIRTUAL_ENV=${Python3_VIRTUAL_ENV}"
                  -P "${CMAKE_CURRENT_LIST_DIR}/VirtualEnvDefault.cmake")
 
-add_test(NAME FindPython3.VirtualEnvOnly
-         COMMAND "${CMAKE_COMMAND}" -E env --unset=PYTHONHOME
-                                           --unset=CONDA_PREFIX
-                                           "VIRTUAL_ENV=${Python3_VIRTUAL_ENV}"
-                 "${CMAKE_COMMAND}" "-DPYTHON3_VIRTUAL_ENV=${Python3_VIRTUAL_ENV}"
-                 -P "${CMAKE_CURRENT_LIST_DIR}/VirtualEnvOnly.cmake")
-add_test(NAME FindPython3.UnsetVirtualEnvOnly
-         COMMAND "${CMAKE_COMMAND}" -E env --unset=PYTHONHOME
-                                           --unset=VIRTUAL_ENV
-                                           --unset=CONDA_PREFIX
-                 "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_LIST_DIR}/VirtualEnvOnly.cmake")
-
 add_test(NAME FindPython3.VirtualEnvStandard
          COMMAND "${CMAKE_COMMAND}" -E env --unset=PYTHONHOME
                                            --unset=CONDA_PREFIX
                                            "VIRTUAL_ENV=${Python3_VIRTUAL_ENV}"
                  "${CMAKE_COMMAND}" "-DPYTHON3_VIRTUAL_ENV=${Python3_VIRTUAL_ENV}"
                  -P "${CMAKE_CURRENT_LIST_DIR}/VirtualEnvStandard.cmake")
+
+if(CMake_TEST_FindPython2)
+  add_test(NAME FindPython3.VirtualEnvOnly
+           COMMAND "${CMAKE_COMMAND}" -E env --unset=PYTHONHOME
+                                             --unset=CONDA_PREFIX
+                                             "VIRTUAL_ENV=${Python3_VIRTUAL_ENV}"
+                   "${CMAKE_COMMAND}" "-DPYTHON3_VIRTUAL_ENV=${Python3_VIRTUAL_ENV}"
+                   -P "${CMAKE_CURRENT_LIST_DIR}/VirtualEnvOnly.cmake")
+  add_test(NAME FindPython3.UnsetVirtualEnvOnly
+           COMMAND "${CMAKE_COMMAND}" -E env --unset=PYTHONHOME
+                                             --unset=VIRTUAL_ENV
+                                             --unset=CONDA_PREFIX
+                   "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_LIST_DIR}/VirtualEnvOnly.cmake")
+endif()

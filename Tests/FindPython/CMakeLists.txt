@@ -1,4 +1,4 @@
-if(CMake_TEST_FindPython)
+if(CMake_TEST_FindPython2)
   add_test(NAME FindPython.Python2.LOCATION COMMAND
     ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
     --build-and-test
@@ -44,6 +44,129 @@ if(CMake_TEST_FindPython)
   set_tests_properties(FindPython.Python2Fail PROPERTIES
     PASS_REGULAR_EXPRESSION "Could NOT find Python2 \\(missing: foobar\\)")
 
+  add_test(NAME FindPython.Python.V2.LOCATION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/Python"
+    "${CMake_BINARY_DIR}/Tests/FindPython/Python.V2.LOCATION"
+    ${build_generator_args}
+    --build-project TestPython
+    --build-options ${build_options} -DPython_REQUESTED_VERSION=2 -DPython_FIND_STRATEGY=LOCATION
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+  add_test(NAME FindPython.Python.V2.VERSION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/Python"
+    "${CMake_BINARY_DIR}/Tests/FindPython/Python.V2.VERSION"
+    ${build_generator_args}
+    --build-project TestPython
+    --build-options ${build_options} -DPython_REQUESTED_VERSION=2 -DPython_FIND_STRATEGY=VERSION
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+
+  add_test(NAME FindPython.Python2.ExactVersion.LOCATION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/ExactVersion"
+    "${CMake_BINARY_DIR}/Tests/FindPython/Python2.ExactVersion.LOCATION"
+    ${build_generator_args}
+    --build-project TestExactVersion
+    --build-options ${build_options} -DPython_MAJOR_VERSION=2
+                                     -DPython_REQUESTED_VERSION=2.1.2
+                                     -DPython2_FIND_STRATEGY=LOCATION
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+  add_test(NAME FindPython.Python2.ExactVersion.VERSION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/ExactVersion"
+    "${CMake_BINARY_DIR}/Tests/FindPython/Python2.ExactVersion.VERSION"
+    ${build_generator_args}
+    --build-project TestExactVersion
+    --build-options ${build_options} -DPython_MAJOR_VERSION=2
+                                     -DPython_REQUESTED_VERSION=2.1.2
+                                     -DPython2_FIND_STRATEGY=VERSION
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+
+  add_test(NAME FindPython.Python.V2.ExactVersion.LOCATION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/ExactVersion"
+    "${CMake_BINARY_DIR}/Tests/FindPython/Python.V2.ExactVersion.LOCATION"
+    ${build_generator_args}
+    --build-project TestExactVersion
+    --build-options ${build_options} -DPython_REQUESTED_VERSION=2.1.2
+                                     -DPython_FIND_STRATEGY=LOCATION
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+  add_test(NAME FindPython.Python.V2.ExactVersion.VERSION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/ExactVersion"
+    "${CMake_BINARY_DIR}/Tests/FindPython/Python.V2.ExactVersion.VERSION"
+    ${build_generator_args}
+    --build-project TestExactVersion
+    --build-options ${build_options} -DPython_REQUESTED_VERSION=2.1.2
+                                     -DPython_FIND_STRATEGY=VERSION
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+
+  add_test(NAME FindPython.Python2.VersionRange.LOCATION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/VersionRange"
+    "${CMake_BINARY_DIR}/Tests/FindPython/Python2.VersionRange.LOCATION"
+    ${build_generator_args}
+    --build-project TestVersionRange
+    --build-options ${build_options} -DPython=Python2 -DPython_REQUESTED_VERSION=2
+                                     -DPython2_FIND_STRATEGY=LOCATION
+    )
+  add_test(NAME FindPython.Python2.VersionRange.VERSION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/VersionRange"
+    "${CMake_BINARY_DIR}/Tests/FindPython/Python2.VersionRange.VERSION"
+    ${build_generator_args}
+    --build-project TestVersionRange
+    --build-options ${build_options} -DPython=Python2 -DPython_REQUESTED_VERSION=2
+                                     -DPython2_FIND_STRATEGY=VERSION
+    )
+  add_test(NAME FindPython.Python.V2.VersionRange.LOCATION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/VersionRange"
+    "${CMake_BINARY_DIR}/Tests/FindPython/Python.V2.VersionRange.LOCATION"
+    ${build_generator_args}
+    --build-project TestVersionRange
+    --build-options ${build_options} -DPython=Python -DPython_REQUESTED_VERSION=2
+                                     -DPython_FIND_STRATEGY=LOCATION
+    )
+  add_test(NAME FindPython.Python.V2.VersionRange.VERSION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/VersionRange"
+    "${CMake_BINARY_DIR}/Tests/FindPython/Python.V2.VersionRange.VERSION"
+    ${build_generator_args}
+    --build-project TestVersionRange
+    --build-options ${build_options} -DPython=Python -DPython_REQUESTED_VERSION=2
+                                     -DPython_FIND_STRATEGY=VERSION
+    )
+
+  add_test(NAME FindPython.Python2Embedded COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/Python2Embedded"
+    "${CMake_BINARY_DIR}/Tests/FindPython/Python2Embedded"
+    ${build_generator_args}
+    --build-project TestPython2Embedded
+    --build-options ${build_options}
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+endif()
+
+if(CMake_TEST_FindPython3)
   add_test(NAME FindPython.Python3.LOCATION COMMAND
     ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
     --build-and-test
@@ -89,46 +212,6 @@ if(CMake_TEST_FindPython)
   set_tests_properties(FindPython.Python3Fail PROPERTIES
     PASS_REGULAR_EXPRESSION "Could NOT find Python3 \\(missing: foobar\\)")
 
-  add_test(NAME FindPython.Python.LOCATION COMMAND
-    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/FindPython/Python"
-    "${CMake_BINARY_DIR}/Tests/FindPython/Python.LOCATION"
-    ${build_generator_args}
-    --build-project TestPython
-    --build-options ${build_options} -DPython_FIND_STRATEGY=LOCATION
-    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
-    )
-  add_test(NAME FindPython.Python.VERSION COMMAND
-    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/FindPython/Python"
-    "${CMake_BINARY_DIR}/Tests/FindPython/Python.VERSION"
-    ${build_generator_args}
-    --build-project TestPython
-    --build-options ${build_options} -DPython_FIND_STRATEGY=VERSION
-    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
-    )
-  add_test(NAME FindPython.Python.V2.LOCATION COMMAND
-    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/FindPython/Python"
-    "${CMake_BINARY_DIR}/Tests/FindPython/Python.V2.LOCATION"
-    ${build_generator_args}
-    --build-project TestPython
-    --build-options ${build_options} -DPython_REQUESTED_VERSION=2 -DPython_FIND_STRATEGY=LOCATION
-    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
-    )
-  add_test(NAME FindPython.Python.V2.VERSION COMMAND
-    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/FindPython/Python"
-    "${CMake_BINARY_DIR}/Tests/FindPython/Python.V2.VERSION"
-    ${build_generator_args}
-    --build-project TestPython
-    --build-options ${build_options} -DPython_REQUESTED_VERSION=2 -DPython_FIND_STRATEGY=VERSION
-    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
-    )
   add_test(NAME FindPython.Python.V3.LOCATION COMMAND
     ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
     --build-and-test
@@ -150,30 +233,6 @@ if(CMake_TEST_FindPython)
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
 
-  add_test(NAME FindPython.Python2.ExactVersion.LOCATION COMMAND
-    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/FindPython/ExactVersion"
-    "${CMake_BINARY_DIR}/Tests/FindPython/Python2.ExactVersion.LOCATION"
-    ${build_generator_args}
-    --build-project TestExactVersion
-    --build-options ${build_options} -DPython_MAJOR_VERSION=2
-                                     -DPython_REQUESTED_VERSION=2.1.2
-                                     -DPython2_FIND_STRATEGY=LOCATION
-    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
-    )
-  add_test(NAME FindPython.Python2.ExactVersion.VERSION COMMAND
-    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/FindPython/ExactVersion"
-    "${CMake_BINARY_DIR}/Tests/FindPython/Python2.ExactVersion.VERSION"
-    ${build_generator_args}
-    --build-project TestExactVersion
-    --build-options ${build_options} -DPython_MAJOR_VERSION=2
-                                     -DPython_REQUESTED_VERSION=2.1.2
-                                     -DPython2_FIND_STRATEGY=VERSION
-    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
-    )
   add_test(NAME FindPython.Python3.ExactVersion.LOCATION COMMAND
     ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
     --build-and-test
@@ -196,28 +255,6 @@ if(CMake_TEST_FindPython)
     --build-options ${build_options} -DPython_MAJOR_VERSION=3
                                      -DPython_REQUESTED_VERSION=3.1.2
                                      -DPython3_FIND_STRATEGY=VERSION
-    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
-    )
-  add_test(NAME FindPython.Python.V2.ExactVersion.LOCATION COMMAND
-    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/FindPython/ExactVersion"
-    "${CMake_BINARY_DIR}/Tests/FindPython/Python.V2.ExactVersion.LOCATION"
-    ${build_generator_args}
-    --build-project TestExactVersion
-    --build-options ${build_options} -DPython_REQUESTED_VERSION=2.1.2
-                                     -DPython_FIND_STRATEGY=LOCATION
-    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
-    )
-  add_test(NAME FindPython.Python.V2.ExactVersion.VERSION COMMAND
-    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/FindPython/ExactVersion"
-    "${CMake_BINARY_DIR}/Tests/FindPython/Python.V2.ExactVersion.VERSION"
-    ${build_generator_args}
-    --build-project TestExactVersion
-    --build-options ${build_options} -DPython_REQUESTED_VERSION=2.1.2
-                                     -DPython_FIND_STRATEGY=VERSION
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
   add_test(NAME FindPython.Python.V3.ExactVersion.LOCATION COMMAND
@@ -263,46 +300,6 @@ if(CMake_TEST_FindPython)
     --build-options ${build_options} -DPython=Python3 -DPython_REQUESTED_VERSION=3
                                      -DPython3_FIND_STRATEGY=VERSION
     )
-  add_test(NAME FindPython.Python2.VersionRange.LOCATION COMMAND
-    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/FindPython/VersionRange"
-    "${CMake_BINARY_DIR}/Tests/FindPython/Python2.VersionRange.LOCATION"
-    ${build_generator_args}
-    --build-project TestVersionRange
-    --build-options ${build_options} -DPython=Python2 -DPython_REQUESTED_VERSION=2
-                                     -DPython2_FIND_STRATEGY=LOCATION
-    )
-  add_test(NAME FindPython.Python2.VersionRange.VERSION COMMAND
-    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/FindPython/VersionRange"
-    "${CMake_BINARY_DIR}/Tests/FindPython/Python2.VersionRange.VERSION"
-    ${build_generator_args}
-    --build-project TestVersionRange
-    --build-options ${build_options} -DPython=Python2 -DPython_REQUESTED_VERSION=2
-                                     -DPython2_FIND_STRATEGY=VERSION
-    )
-  add_test(NAME FindPython.Python.V2.VersionRange.LOCATION COMMAND
-    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/FindPython/VersionRange"
-    "${CMake_BINARY_DIR}/Tests/FindPython/Python.V2.VersionRange.LOCATION"
-    ${build_generator_args}
-    --build-project TestVersionRange
-    --build-options ${build_options} -DPython=Python -DPython_REQUESTED_VERSION=2
-                                     -DPython_FIND_STRATEGY=LOCATION
-    )
-  add_test(NAME FindPython.Python.V2.VersionRange.VERSION COMMAND
-    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/FindPython/VersionRange"
-    "${CMake_BINARY_DIR}/Tests/FindPython/Python.V2.VersionRange.VERSION"
-    ${build_generator_args}
-    --build-project TestVersionRange
-    --build-options ${build_options} -DPython=Python -DPython_REQUESTED_VERSION=2
-                                     -DPython_FIND_STRATEGY=VERSION
-    )
   add_test(NAME FindPython.Python.V3.VersionRange.LOCATION COMMAND
     ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
     --build-and-test
@@ -324,17 +321,6 @@ if(CMake_TEST_FindPython)
                                      -DPython_FIND_STRATEGY=VERSION
     )
 
-  add_test(NAME FindPython.MultiplePackages COMMAND
-    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/FindPython/MultiplePackages"
-    "${CMake_BINARY_DIR}/Tests/FindPython/MultiplePackages"
-    ${build_generator_args}
-    --build-project TestMultiplePackages
-    --build-options ${build_options}
-    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
-    )
-
   add_test(NAME FindPython.VirtualEnv COMMAND
     ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
     --build-and-test
@@ -346,16 +332,6 @@ if(CMake_TEST_FindPython)
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
 
-  add_test(NAME FindPython.Python2Embedded COMMAND
-    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/FindPython/Python2Embedded"
-    "${CMake_BINARY_DIR}/Tests/FindPython/Python2Embedded"
-    ${build_generator_args}
-    --build-project TestPython2Embedded
-    --build-options ${build_options}
-    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
-    )
   add_test(NAME FindPython.Python3Embedded COMMAND
     ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
     --build-and-test
@@ -377,7 +353,7 @@ if(CMake_TEST_FindPython)
     --build-options ${build_options} "-Dbuild_generator_args=${build_generator_args}"
     "-DCMake_SOURCE_DIR=${CMake_SOURCE_DIR}"
     "-DCMake_BINARY_DIR=${CMake_BINARY_DIR}"
-    "-DCMake_TEST_FindPython_SABIModule=${CMake_TEST_FindPython_SABIModule}"
+    "-DCMake_TEST_FindPython3_SABIModule=${CMake_TEST_FindPython3_SABIModule}"
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
 
@@ -391,7 +367,7 @@ if(CMake_TEST_FindPython)
     --build-options ${build_options} "-Dbuild_generator_args=${build_generator_args}"
     "-DCMake_SOURCE_DIR=${CMake_SOURCE_DIR}"
     "-DCMake_BINARY_DIR=${CMake_BINARY_DIR}"
-    "-DCMake_TEST_FindPython_NumPy=${CMake_TEST_FindPython_NumPy}"
+    "-DCMake_TEST_FindPython3_NumPy=${CMake_TEST_FindPython3_NumPy}"
     "-DPython3_ARTIFACTS_INTERACTIVE=ON"
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
@@ -405,7 +381,7 @@ if(CMake_TEST_FindPython)
     --build-options ${build_options} "-Dbuild_generator_args=${build_generator_args}"
     "-DCMake_SOURCE_DIR=${CMake_SOURCE_DIR}"
     "-DCMake_BINARY_DIR=${CMake_BINARY_DIR}"
-    "-DCMake_TEST_FindPython_NumPy=${CMake_TEST_FindPython_NumPy}"
+    "-DCMake_TEST_FindPython3_NumPy=${CMake_TEST_FindPython3_NumPy}"
     "-DPython3_ARTIFACTS_INTERACTIVE=OFF"
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
@@ -420,7 +396,7 @@ if(CMake_TEST_FindPython)
     --build-options ${build_options} "-Dbuild_generator_args=${build_generator_args}"
     "-DCMake_SOURCE_DIR=${CMake_SOURCE_DIR}"
     "-DCMake_BINARY_DIR=${CMake_BINARY_DIR}"
-    "-DCMake_TEST_FindPython_NumPy=${CMake_TEST_FindPython_NumPy}"
+    "-DCMake_TEST_FindPython3_NumPy=${CMake_TEST_FindPython3_NumPy}"
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
 
@@ -434,6 +410,41 @@ if(CMake_TEST_FindPython)
     --build-options ${build_options} "-Dbuild_generator_args=${build_generator_args}"
     "-DCMake_SOURCE_DIR=${CMake_SOURCE_DIR}"
     "-DCMake_BINARY_DIR=${CMake_BINARY_DIR}"
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+
+  if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    add_test(NAME FindPython.UnversionedNames COMMAND
+      ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/FindPython/UnversionedNames"
+      "${CMake_BINARY_DIR}/Tests/FindPython/UnversionedNames"
+      ${build_generator_args}
+      --build-project UnversionedNames
+      --build-options ${build_options}
+    )
+  endif()
+endif()
+
+if(CMake_TEST_FindPython2 OR CMake_TEST_FindPython3)
+  add_test(NAME FindPython.Python.LOCATION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/Python"
+    "${CMake_BINARY_DIR}/Tests/FindPython/Python.LOCATION"
+    ${build_generator_args}
+    --build-project TestPython
+    --build-options ${build_options} -DPython_FIND_STRATEGY=LOCATION
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+  add_test(NAME FindPython.Python.VERSION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/Python"
+    "${CMake_BINARY_DIR}/Tests/FindPython/Python.VERSION"
+    ${build_generator_args}
+    --build-project TestPython
+    --build-options ${build_options} -DPython_FIND_STRATEGY=VERSION
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
 
@@ -466,20 +477,20 @@ if(CMake_TEST_FindPython)
       )
   endif()
 
-  if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    add_test(NAME FindPython.UnversionedNames COMMAND
-      ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
-      --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/FindPython/UnversionedNames"
-      "${CMake_BINARY_DIR}/Tests/FindPython/UnversionedNames"
-      ${build_generator_args}
-      --build-project UnversionedNames
-      --build-options ${build_options}
+  add_test(NAME FindPython.MultiplePackages COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/MultiplePackages"
+    "${CMake_BINARY_DIR}/Tests/FindPython/MultiplePackages"
+    ${build_generator_args}
+    --build-project TestMultiplePackages
+    --build-options ${build_options}
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
-  endif()
 endif()
 
-if(CMake_TEST_FindPython_SABIModule)
+
+if(CMake_TEST_FindPython2_SABIModule)
   add_test(NAME FindPython.Python2.Development.SABIModule COMMAND
     ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
     --build-and-test
@@ -492,7 +503,9 @@ if(CMake_TEST_FindPython_SABIModule)
     )
     set_tests_properties(FindPython.Python2.Development.SABIModule PROPERTIES
       PASS_REGULAR_EXPRESSION "Could NOT find Python2 \\(missing: .*Development\\.SABIModule")
+endif()
 
+if(CMake_TEST_FindPython3_SABIModule)
   # Use exclusively Release configuration because Debug is, on Windows with MSVC,
   # unusable with SABI: Python force link with debug version of full versioned library rather than
   # the stable ABI one.
@@ -508,7 +521,7 @@ if(CMake_TEST_FindPython_SABIModule)
     )
 endif()
 
-if(CMake_TEST_FindPython_NumPy)
+if(CMake_TEST_FindPython2_NumPy OR CMake_TEST_FindPython3_NumPy)
   add_test(NAME FindPython.NumPy COMMAND
     ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
     --build-and-test
@@ -530,7 +543,7 @@ if(CMake_TEST_FindPython_NumPy)
   )
 endif()
 
-if(CMake_TEST_FindPython_Conda)
+if(CMake_TEST_FindPython3_Conda)
   add_test(NAME FindPython.VirtualEnvConda COMMAND
     ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
     --build-and-test
@@ -543,7 +556,7 @@ if(CMake_TEST_FindPython_Conda)
     )
 endif()
 
-if (CMake_TEST_FindPython AND CMake_TEST_FindPython_IronPython)
+if (CMake_TEST_FindPython2 AND CMake_TEST_FindPython2_IronPython)
   add_test(NAME FindPython.Implementation.CPython COMMAND
     ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
     --build-and-test
@@ -566,7 +579,7 @@ if (CMake_TEST_FindPython AND CMake_TEST_FindPython_IronPython)
     )
 endif()
 
-if(CMake_TEST_FindPython_IronPython)
+if(CMake_TEST_FindPython2_IronPython)
   add_test(NAME FindPython.IronPython2.LOCATION COMMAND
     ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
     --build-and-test
@@ -653,7 +666,7 @@ if(CMake_TEST_FindPython_IronPython)
     )
 endif()
 
-if(CMake_TEST_FindPython_PyPy)
+if(CMake_TEST_FindPython2_PyPy)
   add_test(NAME FindPython.PyPy2.LOCATION COMMAND
     ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
     --build-and-test
@@ -675,6 +688,29 @@ if(CMake_TEST_FindPython_PyPy)
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
 
+  add_test(NAME FindPython.PyPy.V2.LOCATION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/PyPy"
+    "${CMake_BINARY_DIR}/Tests/FindPython/PyPy.V2.LOCATION"
+    ${build_generator_args}
+    --build-project TestPyPy
+    --build-options ${build_options} -DPython_REQUESTED_VERSION=2 -DPython_FIND_STRATEGY=LOCATION
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+  add_test(NAME FindPython.PyPy.V2.VERSION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/PyPy"
+    "${CMake_BINARY_DIR}/Tests/FindPython/PyPy.V2.VERSION"
+    ${build_generator_args}
+    --build-project TestPyPy
+    --build-options ${build_options} -DPython_REQUESTED_VERSION=2 -DPython_FIND_STRATEGY=VERSION
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+endif()
+
+if(CMake_TEST_FindPython3_PyPy)
   add_test(NAME FindPython.PyPy3.LOCATION COMMAND
     ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
     --build-and-test
@@ -696,46 +732,6 @@ if(CMake_TEST_FindPython_PyPy)
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
 
-  add_test(NAME FindPython.PyPy.LOCATION COMMAND
-    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/FindPython/PyPy"
-    "${CMake_BINARY_DIR}/Tests/FindPython/PyPy.LOCATION"
-    ${build_generator_args}
-    --build-project TestPyPy
-    --build-options ${build_options} -DPython_FIND_STRATEGY=LOCATION
-    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
-    )
-  add_test(NAME FindPython.PyPy.VERSION COMMAND
-    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/FindPython/PyPy"
-    "${CMake_BINARY_DIR}/Tests/FindPython/PyPy.VERSION"
-    ${build_generator_args}
-    --build-project TestPyPy
-    --build-options ${build_options} -DPython_FIND_STRATEGY=VERSION
-    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
-    )
-  add_test(NAME FindPython.PyPy.V2.LOCATION COMMAND
-    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/FindPython/PyPy"
-    "${CMake_BINARY_DIR}/Tests/FindPython/PyPy.V2.LOCATION"
-    ${build_generator_args}
-    --build-project TestPyPy
-    --build-options ${build_options} -DPython_REQUESTED_VERSION=2 -DPython_FIND_STRATEGY=LOCATION
-    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
-    )
-  add_test(NAME FindPython.PyPy.V2.VERSION COMMAND
-    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/FindPython/PyPy"
-    "${CMake_BINARY_DIR}/Tests/FindPython/PyPy.V2.VERSION"
-    ${build_generator_args}
-    --build-project TestPyPy
-    --build-options ${build_options} -DPython_REQUESTED_VERSION=2 -DPython_FIND_STRATEGY=VERSION
-    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
-    )
   add_test(NAME FindPython.PyPy.V3.LOCATION COMMAND
     ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
     --build-and-test
@@ -754,6 +750,29 @@ if(CMake_TEST_FindPython_PyPy)
     ${build_generator_args}
     --build-project TestPyPy
     --build-options ${build_options} -DPython_REQUESTED_VERSION=3 -DPython_FIND_STRATEGY=VERSION
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+endif()
+
+if(CMake_TEST_FindPython2_PyPy OR CMake_TEST_FindPython3_PyPy)
+  add_test(NAME FindPython.PyPy.LOCATION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/PyPy"
+    "${CMake_BINARY_DIR}/Tests/FindPython/PyPy.LOCATION"
+    ${build_generator_args}
+    --build-project TestPyPy
+    --build-options ${build_options} -DPython_FIND_STRATEGY=LOCATION
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+  add_test(NAME FindPython.PyPy.VERSION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/PyPy"
+    "${CMake_BINARY_DIR}/Tests/FindPython/PyPy.VERSION"
+    ${build_generator_args}
+    --build-project TestPyPy
+    --build-options ${build_options} -DPython_FIND_STRATEGY=VERSION
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
 endif()

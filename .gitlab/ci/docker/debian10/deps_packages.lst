@@ -96,5 +96,5 @@ ruby ruby-dev
 swig
 unixodbc-dev
 
-# CMake_TEST_FindPython_IronPython
+# CMake_TEST_FindPython2_IronPython
 libmono-system-windows-forms4.0-cil

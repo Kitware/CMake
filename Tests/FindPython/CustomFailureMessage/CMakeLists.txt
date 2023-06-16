@@ -62,7 +62,7 @@ set_tests_properties(FindPython.CustomFailureMessage.Multiple PROPERTIES
   PASS_REGULAR_EXPRESSION "Reason given by package:.+Interpreter: Cannot run the interpreter.+Development: Cannot find the library")
 
 
-if (CMake_TEST_FindPython_NumPy)
+if (CMake_TEST_FindPython3_NumPy)
   add_test(NAME FindPython.CustomFailureMessage.NumPy COMMAND
     ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
     --build-and-test

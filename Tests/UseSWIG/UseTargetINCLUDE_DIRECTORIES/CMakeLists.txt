@@ -7,7 +7,7 @@ include(CTest)
 find_package(SWIG REQUIRED)
 include(${SWIG_USE_FILE})
 
-find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
+find_package(Python REQUIRED COMPONENTS Interpreter Development)
 
 unset(CMAKE_SWIG_FLAGS)
 
@@ -25,7 +25,7 @@ set_target_properties (example1 PROPERTIES
   LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/example1"
   ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/example1"
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/example1")
-target_link_libraries(example1 PRIVATE Python3::Module)
+target_link_libraries(example1 PRIVATE Python::Module)
 
 
 # Check that source property override target property
@@ -42,4 +42,4 @@ set_target_properties (example2 PROPERTIES
   LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/example2"
   ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/example2"
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/example2")
-target_link_libraries(example2 PRIVATE Python3::Module)
+target_link_libraries(example2 PRIVATE Python::Module)
