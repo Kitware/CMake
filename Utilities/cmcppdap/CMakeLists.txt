@@ -34,4 +34,8 @@ elseif(NOT APPLE)
   target_link_libraries(cmcppdap PRIVATE Threads::Threads)
 endif()
 
+if(CMake_BUILD_PCH)
+  target_precompile_headers(cmcppdap PRIVATE "include/dap/protocol.h")
+endif()
+
 install(FILES NOTICE DESTINATION ${CMAKE_DOC_DIR}/cmcppdap)
