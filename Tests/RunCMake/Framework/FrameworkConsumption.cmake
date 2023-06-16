@@ -1,5 +1,7 @@
 enable_language(C)
 
+set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install")
+
 # Create framework and ensure header is placed in Headers
 set(input_header "${CMAKE_SOURCE_DIR}/Gui.h")
 add_library(Gui SHARED Gui.c "${input_header}")
@@ -7,6 +9,8 @@ set_target_properties(Gui PROPERTIES
     PUBLIC_HEADER "${input_header}"
     FRAMEWORK TRUE
 )
+
+install(TARGETS Gui DESTINATION .)
 
 add_executable(app main.c)
 

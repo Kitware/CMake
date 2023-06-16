@@ -113,7 +113,16 @@ function(framework_consumption)
   file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
   file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
   run_cmake(FrameworkConsumption)
-  run_cmake_command(FrameworkConsumption-build ${CMAKE_COMMAND} --build .)
+  run_cmake_command(FrameworkConsumption-build ${CMAKE_COMMAND} --build . --config Release)
+  run_cmake_command(FrameworkConsumption-install ${CMAKE_COMMAND} --install . --config Release)
+
+  set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/ImportedFrameworkConsumption-build")
+  set(RunCMake_TEST_NO_CLEAN 1)
+
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  run_cmake(ImportedFrameworkConsumption)
+  run_cmake_command(ImportedFrameworkConsumption-build ${CMAKE_COMMAND} --build . --config Release)
 endfunction()
 
 framework_consumption()

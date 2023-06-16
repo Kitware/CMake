@@ -1579,7 +1579,9 @@ void cmComputeLinkInformation::AddTargetItem(LinkEntry const& entry)
     this->OldLinkDirItems.push_back(item.Value);
   }
 
-  if (target->IsFrameworkOnApple()) {
+  const bool isImportedFrameworkFolderOnApple =
+    target->IsImportedFrameworkFolderOnApple(this->Config);
+  if (target->IsFrameworkOnApple() || isImportedFrameworkFolderOnApple) {
     // Add the framework directory and the framework item itself
     auto fwDescriptor = this->GlobalGenerator->SplitFrameworkPath(
       item.Value, cmGlobalGenerator::FrameworkFormat::Extended);
@@ -1597,16 +1599,33 @@ void cmComputeLinkInformation::AddTargetItem(LinkEntry const& entry)
     }
 
     if (this->GlobalGenerator->IsXcode()) {
-      this->Items.emplace_back(
-        item, ItemIsPath::Yes, target,
-        this->FindLibraryFeature(entry.Feature == DEFAULT
-                                   ? "__CMAKE_LINK_FRAMEWORK"
-                                   : entry.Feature));
+      if (isImportedFrameworkFolderOnApple) {
+        if (entry.Feature == DEFAULT) {
+          this->AddLibraryFeature("FRAMEWORK");
+          this->Items.emplace_back(item, ItemIsPath::Yes, target,
+                                   this->FindLibraryFeature("FRAMEWORK"));
+        } else {
+          this->Items.emplace_back(item, ItemIsPath::Yes, target,
+                                   this->FindLibraryFeature(entry.Feature));
+        }
+      } else {
+        this->Items.emplace_back(
+          item, ItemIsPath::Yes, target,
+          this->FindLibraryFeature(entry.Feature == DEFAULT
+                                     ? "__CMAKE_LINK_FRAMEWORK"
+                                     : entry.Feature));
+      }
     } else {
       if (cmHasSuffix(entry.Feature, "FRAMEWORK"_s)) {
         this->Items.emplace_back(fwDescriptor->GetLinkName(), ItemIsPath::Yes,
                                  target,
                                  this->FindLibraryFeature(entry.Feature));
+      } else if (entry.Feature == DEFAULT &&
+                 isImportedFrameworkFolderOnApple) {
+        this->AddLibraryFeature("FRAMEWORK");
+        this->Items.emplace_back(fwDescriptor->GetLinkName(), ItemIsPath::Yes,
+                                 target,
+                                 this->FindLibraryFeature("FRAMEWORK"));
       } else {
         this->Items.emplace_back(
           item, ItemIsPath::Yes, target,
