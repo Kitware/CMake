@@ -929,6 +929,44 @@ if(WIN32 OR CMAKE_SYSTEM_NAME STREQUAL "Linux")
     )
 endif()
 
+if(CMake_BUILD_PCH)
+  target_precompile_headers(CMakeLib PRIVATE
+    "$<$<COMPILE_LANGUAGE:CXX>:<string$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<iostream$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<sstream$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<iomanip$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<cm/memory$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<cm3p/cppdap/protocol.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:cmMakefile.h>"
+    "$<$<COMPILE_LANGUAGE:CXX>:cmGlobalGenerator.h>"
+    "$<$<COMPILE_LANGUAGE:CXX>:cmLocalGenerator.h>"
+    "$<$<COMPILE_LANGUAGE:CXX>:cmGeneratorTarget.h>"
+    "$<$<COMPILE_LANGUAGE:CXX>:cmGeneratorExpression.h>"
+    "$<$<COMPILE_LANGUAGE:CXX>:cmArgumentParser.h>"
+    "$<$<COMPILE_LANGUAGE:CXX>:cmake.h>"
+    "$<$<COMPILE_LANGUAGE:CXX>:cmCMakePath.h>"
+    "$<$<COMPILE_LANGUAGE:CXX>:cmDebuggerPipeConnection.h>"
+    "$<$<COMPILE_LANGUAGE:CXX>:cmCurl.h>")
+
+    set_source_files_properties(
+      "LexerParser/cmFortranLexer.cxx"
+      PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
+
+  if(WIN32)
+    target_precompile_headers(CMakeLib PRIVATE
+      "$<$<COMPILE_LANGUAGE:CXX>:<cm3p/uv.h$<ANGLE-R>>"
+      "$<$<COMPILE_LANGUAGE:CXX>:cmVSSetupHelper.h>")
+    set_source_files_properties("LexerParser/cmFortranParser.cxx" PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
+  else()
+    set_source_files_properties(
+      "LexerParser/cmCommandArgumentLexer.cxx"
+      "LexerParser/cmGccDepfileLexer.cxx"
+      "LexerParser/cmExprLexer.cxx"
+      "LexerParser/cmDependsJavaLexer.cxx"
+      PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
+  endif()
+endif()
+
 # Temporary variable for tools targets
 set(_tools)
 
@@ -1040,6 +1078,24 @@ target_include_directories(
     "${CMAKE_CURRENT_SOURCE_DIR}/CTest"
   )
 target_link_libraries(CTestLib PUBLIC CMakeLib)
+
+if(CMake_BUILD_PCH)
+  target_precompile_headers(CTestLib PRIVATE
+    "cmDuration.h"
+    "cmMakefile.h"
+    "cmSystemTools.h"
+    "cmGlobalGenerator.h"
+    "cmake.h"
+    "CTest/cmCTestGenericHandler.h"
+    "<sstream>"
+    "<cm3p/uv.h>")
+
+  if(WIN32)
+    target_precompile_headers(CTestLib PRIVATE "cmCurl.h" "CTest/cmCTestMultiProcessHandler.h")
+  else()
+    set_source_files_properties("LexerParser/cmCTestResourceGroupsLexer.cxx" PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
+  endif()
+endif()
 
 #
 # Build CPackLib
