@@ -30,6 +30,15 @@ This module will set the following variables in your project:
 ``EXPAT_FOUND``
   true if the Expat headers and libraries were found.
 
+Hints
+^^^^^
+
+``EXPAT_USE_STATIC_LIBS``
+
+  .. versionadded:: 3.28
+
+  Set to ``TRUE`` to use static libraries.
+
 #]=======================================================================]
 
 find_package(PkgConfig QUIET)
@@ -43,8 +52,13 @@ set(EXPAT_NAMES expat expatw)
 set(EXPAT_NAMES_DEBUG expatd expatwd)
 
 if(WIN32)
-  list(APPEND EXPAT_NAMES expatMT expatMD expatwMT expatwMD)
-  list(APPEND EXPAT_NAMES_DEBUG expatdMT expatdMD expatwdMT expatwdMD)
+  if(EXPAT_USE_STATIC_LIBS)
+    list(APPEND EXPAT_NAMES expatMT expatwMT)
+    list(APPEND EXPAT_NAMES_DEBUG expatdMT expatwdMT)
+  else()
+    list(APPEND EXPAT_NAMES expatMT expatMD expatwMT expatwMD)
+    list(APPEND EXPAT_NAMES_DEBUG expatdMT expatdMD expatwdMT expatwdMD)
+  endif()
 endif()
 
 # Allow EXPAT_LIBRARY to be set manually, as the location of the expat library
@@ -114,6 +128,11 @@ if(EXPAT_FOUND)
     set_target_properties(EXPAT::EXPAT PROPERTIES
       IMPORTED_LINK_INTERFACE_LANGUAGES "C"
       INTERFACE_INCLUDE_DIRECTORIES "${EXPAT_INCLUDE_DIRS}")
+
+    if(EXPAT_USE_STATIC_LIBS)
+      set_property(TARGET EXPAT::EXPAT APPEND PROPERTY
+                   INTERFACE_COMPILE_DEFINITIONS "XML_STATIC")
+    endif()
 
     if(EXPAT_LIBRARY_RELEASE)
       set_property(TARGET EXPAT::EXPAT APPEND PROPERTY
