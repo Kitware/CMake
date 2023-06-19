@@ -99,3 +99,4 @@ function(run_export_import name)
 endfunction()
 
 run_export_import(FileSet)
+run_export_import(FileSetAbsoluteInstallIncludeDir)
