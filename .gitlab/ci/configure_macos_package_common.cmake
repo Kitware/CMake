@@ -6,9 +6,6 @@ set(CMAKE_DOC_DIR "doc/cmake" CACHE STRING "")
 
 # Settings for CMake packages for macOS.
 set(CPACK_DMG_FORMAT "UDBZ" CACHE STRING "")
-set(CMAKE_CXX_FLAGS "-stdlib=libc++" CACHE STRING "")
-set(CMAKE_C_STANDARD "11" CACHE STRING "")
-set(CMAKE_CXX_STANDARD "14" CACHE STRING "")
 set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "")
 set(BUILD_CursesDialog "ON" CACHE BOOL "")
 set(BUILD_QtDialog "TRUE" CACHE BOOL "")
