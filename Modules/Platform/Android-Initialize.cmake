@@ -10,6 +10,11 @@ if(CMAKE_ANDROID_NDK)
   include(${CMAKE_ANDROID_NDK}/build/cmake/hooks/pre/Android-Initialize.cmake OPTIONAL)
 endif()
 
+include(Platform/Linux-Initialize)
+unset(LINUX)
+
+set(ANDROID 1)
+
 # Support for NVIDIA Nsight Tegra Visual Studio Edition was previously
 # implemented in the CMake VS IDE generators.  Avoid interfering with
 # that functionality for now.
@@ -22,11 +27,6 @@ endif()
 if(CMAKE_SYSTEM_VERSION EQUAL 1)
   return()
 endif()
-
-include(Platform/Linux-Initialize)
-unset(LINUX)
-
-set(ANDROID 1)
 
 set(CMAKE_BUILD_TYPE_INIT "RelWithDebInfo")
 
