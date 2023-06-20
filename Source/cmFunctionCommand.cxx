@@ -11,6 +11,7 @@
 
 #include "cmExecutionStatus.h"
 #include "cmFunctionBlocker.h"
+#include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmPolicies.h"
@@ -89,9 +90,9 @@ bool cmFunctionHelperCommand::operator()(
   }
 
   // define ARGV and ARGN
-  auto const argvDef = cmJoin(expandedArgs, ";");
+  auto const argvDef = cmList::to_string(expandedArgs);
   auto const eit = expandedArgs.begin() + (this->Args.size() - 1);
-  auto const argnDef = cmJoin(cmMakeRange(eit, expandedArgs.end()), ";");
+  auto const argnDef = cmList::to_string(cmMakeRange(eit, expandedArgs.end()));
   makefile.AddDefinition(ARGV, argvDef);
   makefile.MarkVariableAsUsed(ARGV);
   makefile.AddDefinition(ARGN, argnDef);

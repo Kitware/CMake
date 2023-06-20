@@ -42,6 +42,7 @@
 #include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"
 #include "cmHexFileConverter.h"
+#include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -805,7 +806,7 @@ bool HandleGlobImpl(std::vector<std::string> const& args, bool recurse,
 
   std::sort(files.begin(), files.end());
   files.erase(std::unique(files.begin(), files.end()), files.end());
-  status.GetMakefile().AddDefinition(variable, cmJoin(files, ";"));
+  status.GetMakefile().AddDefinition(variable, cmList::to_string(files));
   return true;
 }
 
@@ -1556,7 +1557,7 @@ bool HandlePathCommand(std::vector<std::string> const& args,
 #endif
   std::vector<std::string> path = cmSystemTools::SplitString(args[1], pathSep);
 
-  std::string value = cmJoin(cmMakeRange(path).transform(convert), ";");
+  std::string value = cmList::to_string(cmMakeRange(path).transform(convert));
   status.GetMakefile().AddDefinition(args[2], value);
   return true;
 }
@@ -3157,7 +3158,7 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
       if (!parsedArgs.RPathPrefix.empty()) {
         status.GetMakefile().AddDefinition(
           parsedArgs.RPathPrefix + "_" + firstPath,
-          cmJoin(archive.GetRPaths().at(firstPath), ";"));
+          cmList::to_string(archive.GetRPaths().at(firstPath)));
       }
     } else if (!parsedArgs.ConflictingDependenciesPrefix.empty()) {
       conflictingDeps.push_back(val.first);
@@ -3165,7 +3166,7 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
       paths.insert(paths.begin(), val.second.begin(), val.second.end());
       std::string varName =
         parsedArgs.ConflictingDependenciesPrefix + "_" + val.first;
-      std::string pathsStr = cmJoin(paths, ";");
+      std::string pathsStr = cmList::to_string(paths);
       status.GetMakefile().AddDefinition(varName, pathsStr);
     } else {
       std::ostringstream e;
@@ -3196,17 +3197,17 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
   }
 
   if (!parsedArgs.ResolvedDependenciesVar.empty()) {
-    std::string val = cmJoin(deps, ";");
+    std::string val = cmList::to_string(deps);
     status.GetMakefile().AddDefinition(parsedArgs.ResolvedDependenciesVar,
                                        val);
   }
   if (!parsedArgs.UnresolvedDependenciesVar.empty()) {
-    std::string val = cmJoin(unresolvedDeps, ";");
+    std::string val = cmList::to_string(unresolvedDeps);
     status.GetMakefile().AddDefinition(parsedArgs.UnresolvedDependenciesVar,
                                        val);
   }
   if (!parsedArgs.ConflictingDependenciesPrefix.empty()) {
-    std::string val = cmJoin(conflictingDeps, ";");
+    std::string val = cmList::to_string(conflictingDeps);
     status.GetMakefile().AddDefinition(
       parsedArgs.ConflictingDependenciesPrefix + "_FILENAMES", val);
   }

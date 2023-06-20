@@ -3,6 +3,7 @@
 #include "cmTargetLinkDirectoriesCommand.h"
 
 #include "cmGeneratorExpression.h"
+#include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -58,7 +59,7 @@ std::string TargetLinkDirectoriesImpl::Join(
     directories.push_back(unixPath);
   }
 
-  return cmJoin(directories, ";");
+  return cmList::to_string(directories);
 }
 
 } // namespace

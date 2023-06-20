@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmTargetCompileFeaturesCommand.h"
 
+#include "cmList.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmStandardLevelResolver.h"
@@ -43,7 +44,7 @@ private:
 
   std::string Join(const std::vector<std::string>& content) override
   {
-    return cmJoin(content, ";");
+    return cmList::to_string(content);
   }
 };
 

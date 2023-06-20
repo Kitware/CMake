@@ -2538,7 +2538,7 @@ static const struct LinkLibraryNode : public cmGeneratorExpressionNode
     list.front() = LL_BEGIN;
     list.push_back(LL_END);
 
-    return cmJoin(list, ";"_s);
+    return list.to_string();
   }
 } linkLibraryNode;
 
@@ -2607,7 +2607,7 @@ static const struct LinkGroupNode : public cmGeneratorExpressionNode
     list.front() = LG_BEGIN;
     list.push_back(LG_END);
 
-    return cmJoin(list, ";"_s);
+    return list.to_string();
   }
 } linkGroupNode;
 
@@ -2632,7 +2632,7 @@ static const struct HostLinkNode : public cmGeneratorExpressionNode
     }
 
     return context->HeadTarget->IsDeviceLink() ? std::string()
-                                               : cmJoin(parameters, ";");
+                                               : cmList::to_string(parameters);
   }
 } hostLinkNode;
 
@@ -2667,7 +2667,7 @@ static const struct DeviceLinkNode : public cmGeneratorExpressionNode
       list.insert(list.begin(), static_cast<std::string>(DL_BEGIN));
       list.push_back(static_cast<std::string>(DL_END));
 
-      return cmJoin(list, ";");
+      return list.to_string();
     }
 
     return std::string();
@@ -3104,7 +3104,7 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
       mf->AddTargetObject(tgtName, o);
     }
 
-    return cmJoin(objects, ";");
+    return objects.to_string();
   }
 } targetObjectsNode;
 
@@ -3164,7 +3164,7 @@ static const struct TargetRuntimeDllsNode : public TargetRuntimeDllsBaseNode
     cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
   {
     std::vector<std::string> dlls = CollectDlls(parameters, context, content);
-    return cmJoin(dlls, ";");
+    return cmList::to_string(dlls);
   }
 } targetRuntimeDllsNode;
 
@@ -3187,7 +3187,7 @@ static const struct TargetRuntimeDllDirsNode : public TargetRuntimeDllsBaseNode
         dllDirs.push_back(directory);
       }
     }
-    return cmJoin(dllDirs, ";");
+    return cmList::to_string(dllDirs);
   }
 } targetRuntimeDllDirsNode;
 

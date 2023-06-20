@@ -383,7 +383,7 @@ void cmExportFileGenerator::PopulateIncludeDirectoriesInterface(
   cmGeneratorExpression ge(*target->Makefile->GetCMakeInstance());
 
   std::string dirs = cmGeneratorExpression::Preprocess(
-    cmJoin(target->Target->GetInstallIncludeDirectoriesEntries(te), ";"),
+    cmList::to_string(target->Target->GetInstallIncludeDirectoriesEntries(te)),
     preprocessRule, true);
   this->ReplaceInstallPrefix(dirs);
   std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(dirs);

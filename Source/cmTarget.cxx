@@ -811,12 +811,12 @@ std::pair<bool, cmValue> FileSetType::ReadProperties(
     did_read = true;
   } else if (prop == this->SelfEntries.PropertyName) {
     static std::string output;
-    output = cmJoin(this->SelfEntries.Entries, ";"_s);
+    output = cmList::to_string(this->SelfEntries.Entries);
     value = cmValue(output);
     did_read = true;
   } else if (prop == this->InterfaceEntries.PropertyName) {
     static std::string output;
-    output = cmJoin(this->InterfaceEntries.Entries, ";"_s);
+    output = cmList::to_string(this->InterfaceEntries.Entries);
     value = cmValue(output);
     did_read = true;
   } else if (cmHasPrefix(prop, this->DirectoryPrefix)) {
@@ -899,7 +899,7 @@ std::pair<bool, cmValue> UsageRequirementProperty::Read(
     if (!this->Entries.empty()) {
       // Storage to back the returned `cmValue`.
       static std::string output;
-      output = cmJoin(this->Entries, ";");
+      output = cmList::to_string(this->Entries);
       value = cmValue(output);
     }
     did_read = true;
@@ -2130,7 +2130,7 @@ cmValue cmTargetInternals::GetFileSetDirectories(
     return nullptr;
   }
   static std::string output;
-  output = cmJoin(fileSet->GetDirectoryEntries(), ";"_s);
+  output = cmList::to_string(fileSet->GetDirectoryEntries());
   return cmValue(output);
 }
 
@@ -2150,7 +2150,7 @@ cmValue cmTargetInternals::GetFileSetPaths(cmTarget const* self,
     return nullptr;
   }
   static std::string output;
-  output = cmJoin(fileSet->GetFileEntries(), ";"_s);
+  output = cmList::to_string(fileSet->GetFileEntries());
   return cmValue(output);
 }
 
@@ -2495,7 +2495,7 @@ cmValue cmTarget::GetProperty(const std::string& prop) const
         [](const BT<std::pair<std::string, bool>>& item) -> std::string {
           return item.Value.first;
         });
-      output = cmJoin(utilities, ";");
+      output = cmList::to_string(utilities);
       return cmValue(output);
     }
     if (prop == propIMPORTED) {

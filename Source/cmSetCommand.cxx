@@ -3,6 +3,7 @@
 #include "cmSetCommand.h"
 
 #include "cmExecutionStatus.h"
+#include "cmList.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmRange.h"
@@ -103,7 +104,8 @@ bool cmSetCommand(std::vector<std::string> const& args,
   }
 
   // collect any values into a single semi-colon separated value list
-  value = cmJoin(cmMakeRange(args).advance(1).retreat(ignoreLastArgs), ";");
+  value =
+    cmList::to_string(cmMakeRange(args).advance(1).retreat(ignoreLastArgs));
 
   if (parentScope) {
     status.GetMakefile().RaiseScope(variable, value.c_str());

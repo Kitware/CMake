@@ -9,6 +9,7 @@
 
 #include "cmArgumentParser.h"
 #include "cmExecutionStatus.h"
+#include "cmList.h"
 #include "cmMakefile.h"
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
@@ -159,7 +160,7 @@ bool cmSeparateArgumentsCommand(std::vector<std::string> const& args,
       pos += 2;
     }
   });
-  auto value = cmJoin(values, ";");
+  auto value = cmList::to_string(values);
   status.GetMakefile().AddDefinition(var, value);
 
   return true;

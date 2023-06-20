@@ -6,6 +6,7 @@
 
 #include "cmExecutionStatus.h"
 #include "cmGeneratorExpression.h"
+#include "cmList.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
@@ -39,7 +40,7 @@ bool cmLinkDirectoriesCommand(std::vector<std::string> const& args,
     AddLinkDir(mf, *i, directories);
   }
 
-  mf.AddLinkDirectory(cmJoin(directories, ";"), before);
+  mf.AddLinkDirectory(cmList::to_string(directories), before);
 
   return true;
 }

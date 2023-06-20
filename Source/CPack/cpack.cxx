@@ -363,11 +363,11 @@ int main(int argc, char const* const* argv)
     }
 
     if (!expandedPreset->Generators.empty() && generator.empty()) {
-      generator = cmJoin(expandedPreset->Generators, ";");
+      generator = cmList::to_string(expandedPreset->Generators);
     }
 
     if (!expandedPreset->Configurations.empty() && cpackBuildConfig.empty()) {
-      cpackBuildConfig = cmJoin(expandedPreset->Configurations, ";");
+      cpackBuildConfig = cmList::to_string(expandedPreset->Configurations);
     }
 
     definitions.insert(expandedPreset->Variables.begin(),

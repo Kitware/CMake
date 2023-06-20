@@ -190,7 +190,7 @@ public:
     }
 
     static std::string filesStr;
-    filesStr = cmJoin(files, ";");
+    filesStr = cmList::to_string(files);
     return filesStr;
   }
 
@@ -322,8 +322,7 @@ cmValue cmGeneratorTarget::GetSourcesProperty() const
     values.push_back(se->GetInput());
   }
   static std::string value;
-  value.clear();
-  value = cmJoin(values, ";");
+  value = cmList::to_string(values);
   return cmValue(value);
 }
 

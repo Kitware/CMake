@@ -6,9 +6,9 @@
 
 #include "cmExecutionStatus.h"
 #include "cmGlobalGenerator.h"
+#include "cmList.h"
 #include "cmMakefile.h"
 #include "cmState.h"
-#include "cmStringAlgorithms.h"
 #include "cmValue.h"
 
 // cmGetCMakePropertyCommand
@@ -35,7 +35,7 @@ bool cmGetCMakePropertyCommand(std::vector<std::string> const& args,
   } else if (args[1] == "COMPONENTS") {
     const std::set<std::string>* components =
       status.GetMakefile().GetGlobalGenerator()->GetInstallComponents();
-    output = cmJoin(*components, ";");
+    output = cmList::to_string(*components);
   } else {
     cmValue prop = nullptr;
     if (!args[1].empty()) {
