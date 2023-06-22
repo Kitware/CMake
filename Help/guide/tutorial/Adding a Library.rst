@@ -96,7 +96,7 @@ a library target called ``MathFunctions`` with :command:`add_library`. The
 source files for the library are passed as an argument to
 :command:`add_library`. This looks like the following line:
 
-.. raw:: html/
+.. raw:: html
 
   <details><summary>TODO 1: Click to show/hide answer</summary>
 
