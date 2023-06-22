@@ -164,6 +164,8 @@ protected:
   cmGlobalVisualStudioGenerator(cmake* cm,
                                 std::string const& platformInGeneratorName);
 
+  virtual bool InitializePlatform(cmMakefile* mf);
+
   void AddExtraIDETargets() override;
 
   // Does this VS version link targets to each other if there are
