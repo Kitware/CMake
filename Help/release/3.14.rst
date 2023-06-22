@@ -63,7 +63,8 @@ File-Based API
 Platforms
 ---------
 
-* CMake now supports :ref:`Cross Compiling for iOS, tvOS, or watchOS`
+* CMake now supports
+  :ref:`Cross Compiling for iOS, tvOS, or watchOS <Cross Compiling for iOS, tvOS, visionOS, or watchOS>`
   using simple toolchain files.
 
 Command-Line

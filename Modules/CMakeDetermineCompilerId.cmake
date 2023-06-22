@@ -608,6 +608,7 @@ Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
     if(CMAKE_OSX_SYSROOT)
       set(id_sdkroot "SDKROOT = \"${CMAKE_OSX_SYSROOT}\";")
       if(CMAKE_OSX_SYSROOT MATCHES "(^|/)[Ii][Pp][Hh][Oo][Nn][Ee]" OR
+        CMAKE_OSX_SYSROOT MATCHES "(^|/)[Xx][Rr]" OR
         CMAKE_OSX_SYSROOT MATCHES "(^|/)[Aa][Pp][Pp][Ll][Ee][Tt][Vv]")
         set(id_product_type "com.apple.product-type.bundle.unit-test")
       elseif(CMAKE_OSX_SYSROOT MATCHES "(^|/)[Ww][Aa][Tt][Cc][Hh]")

@@ -83,6 +83,12 @@ void cmLocalXCodeGenerator::AddGeneratorSpecificInstallSetup(std::ostream& os)
       case cmMakefile::AppleSDK::WatchSimulator:
         platformName = "watchsimulator";
         break;
+      case cmMakefile::AppleSDK::XROS:
+        platformName = "xros";
+        break;
+      case cmMakefile::AppleSDK::XRSimulator:
+        platformName = "xrsimulator";
+        break;
       case cmMakefile::AppleSDK::MacOS:
         break;
     }

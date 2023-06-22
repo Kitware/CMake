@@ -31,7 +31,7 @@ once per architecture for each source file.  Unlike the other generators,
 it does not generate universal object file binaries.
 
 A further complication with the :generator:`Xcode` generator is that when
-targeting device platforms (iOS, tvOS or watchOS), the :generator:`Xcode`
+targeting device platforms (iOS, tvOS, visionOS or watchOS), the :generator:`Xcode`
 generator has the ability to use either the device or simulator SDK without
 needing CMake to be re-run.  The SDK can be selected at build time.
 But since some architectures can be supported by both the device and the
