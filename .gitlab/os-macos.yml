@@ -38,6 +38,12 @@
         CMAKE_CONFIGURATION: macos_arm64_ninja
         CTEST_NO_WARNINGS_ALLOWED: 1
 
+.macos_arm64_pch:
+    extends: .macos_arm64_ninja
+
+    variables:
+        CMAKE_CONFIGURATION: macos_arm64_pch
+
 .macos_x86_64_makefiles:
     extends: .macos_build
 
