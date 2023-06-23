@@ -13,10 +13,6 @@ variables that are created by the project command.
 
 .. include:: SUPPORTED_LANGUAGES.txt
 
-By default ``C`` and ``CXX`` are enabled if no language options are given.
-Specify language ``NONE``, or use the ``LANGUAGES`` keyword and list no languages,
-to skip enabling any languages.
-
 This command must be called in file scope, not in a function call.
 Furthermore, it must be called in the highest directory common to all
 targets using the named language directly for compiling sources or
