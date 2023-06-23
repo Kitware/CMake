@@ -58,6 +58,18 @@ returns its results with no further action.
 
 Set ``CURL_NO_CURL_CMAKE`` to ``ON`` to disable this search.
 
+Hints
+^^^^^
+
+``CURL_USE_STATIC_LIBS``
+
+  .. versionadded:: 3.28
+
+  Set to ``TRUE`` to use static libraries.
+
+  This is meaningful only when CURL is not found via its
+  CMake Package Configuration file.
+
 #]=======================================================================]
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
@@ -193,6 +205,11 @@ if(CURL_FOUND)
     set_target_properties(CURL::libcurl PROPERTIES
       INTERFACE_INCLUDE_DIRECTORIES "${CURL_INCLUDE_DIRS}")
 
+    if(CURL_USE_STATIC_LIBS)
+      set_property(TARGET CURL::libcurl APPEND PROPERTY
+                   INTERFACE_COMPILE_DEFINITIONS "CURL_STATICLIB")
+    endif()
+
     if(EXISTS "${CURL_LIBRARY}")
       set_target_properties(CURL::libcurl PROPERTIES
         IMPORTED_LINK_INTERFACE_LANGUAGES "C"
@@ -212,5 +229,11 @@ if(CURL_FOUND)
         IMPORTED_LINK_INTERFACE_LANGUAGES "C"
         IMPORTED_LOCATION_DEBUG "${CURL_LIBRARY_DEBUG}")
     endif()
+
+    if(CURL_USE_STATIC_LIBS AND MSVC)
+       set_target_properties(CURL::libcurl PROPERTIES
+           INTERFACE_LINK_LIBRARIES "normaliz.lib;ws2_32.lib;wldap32.lib")
+    endif()
+
   endif()
 endif()
