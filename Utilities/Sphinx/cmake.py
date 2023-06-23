@@ -582,12 +582,23 @@ class CMakeXRefTransform(Transform):
     # after the sphinx (210) and docutils (220) substitutions.
     default_priority = 221
 
+    # This helper supports docutils < 0.18, which is missing 'findall',
+    # and docutils == 0.18.0, which is missing 'traverse'.
+    def _document_findall_as_list(self, condition):
+        if hasattr(self.document, 'findall'):
+            # Fully iterate into a list so the caller can grow 'self.document'
+            # while iterating.
+            return list(self.document.findall(condition))
+
+        # Fallback to 'traverse' on old docutils, which returns a list.
+        return self.document.traverse(condition)
+
     def apply(self):
         env = self.document.settings.env
 
         # Find CMake cross-reference nodes and add index and target
         # nodes for them.
-        for ref in self.document.traverse(addnodes.pending_xref):
+        for ref in self._document_findall_as_list(addnodes.pending_xref):
             if not ref['refdomain'] == 'cmake':
                 continue
 
