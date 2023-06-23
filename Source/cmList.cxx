@@ -19,6 +19,7 @@
 
 #include "cmAlgorithms.h"
 #include "cmGeneratorExpression.h"
+#include "cmListFileCache.h"
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
 #include "cmStringReplaceHelper.h"
@@ -802,11 +803,6 @@ cmList& cmList::transform(TransformAction action,
   return *this;
 }
 
-std::string cmList::join(cm::string_view glue) const
-{
-  return cmJoin(this->Values, glue);
-}
-
 std::string& cmList::append(std::string& list, cm::string_view value)
 {
   if (list.empty()) {
@@ -1000,4 +996,9 @@ cmList::container_type::iterator cmList::Insert(
     return container.insert(insertPos, std::move(value));
   }
   return container.begin() + delta;
+}
+
+std::string const& cmList::ToString(BT<std::string> const& s)
+{
+  return s.Value;
 }

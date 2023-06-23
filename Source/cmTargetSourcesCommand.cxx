@@ -98,7 +98,7 @@ private:
 
   std::string Join(const std::vector<std::string>& content) override
   {
-    return cmJoin(content, ";");
+    return cmList::to_string(content);
   }
 
   enum class IsInterface

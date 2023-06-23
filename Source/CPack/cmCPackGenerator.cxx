@@ -1119,8 +1119,8 @@ int cmCPackGenerator::DoPackage()
   // Run post-build actions
   cmValue postBuildScripts = this->GetOption("CPACK_POST_BUILD_SCRIPTS");
   if (postBuildScripts) {
-    this->MakefileMap->AddDefinition("CPACK_PACKAGE_FILES",
-                                     cmJoin(this->packageFileNames, ";"));
+    this->MakefileMap->AddDefinition(
+      "CPACK_PACKAGE_FILES", cmList::to_string(this->packageFileNames));
 
     const cmList scripts{ postBuildScripts };
     for (const auto& script : scripts) {

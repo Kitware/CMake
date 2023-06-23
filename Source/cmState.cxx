@@ -17,6 +17,7 @@
 #include "cmDefinitions.h"
 #include "cmExecutionStatus.h"
 #include "cmGlobVerificationManager.h"
+#include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -584,10 +585,10 @@ cmValue cmState::GetGlobalProperty(const std::string& prop)
 {
   if (prop == "CACHE_VARIABLES") {
     std::vector<std::string> cacheKeys = this->GetCacheEntryKeys();
-    this->SetGlobalProperty("CACHE_VARIABLES", cmJoin(cacheKeys, ";"));
+    this->SetGlobalProperty("CACHE_VARIABLES", cmList::to_string(cacheKeys));
   } else if (prop == "COMMANDS") {
     std::vector<std::string> commands = this->GetCommandNames();
-    this->SetGlobalProperty("COMMANDS", cmJoin(commands, ";"));
+    this->SetGlobalProperty("COMMANDS", cmList::to_string(commands));
   } else if (prop == "IN_TRY_COMPILE") {
     this->SetGlobalProperty(
       "IN_TRY_COMPILE",
@@ -596,8 +597,7 @@ cmValue cmState::GetGlobalProperty(const std::string& prop)
     this->SetGlobalProperty("GENERATOR_IS_MULTI_CONFIG",
                             this->IsGeneratorMultiConfig ? "1" : "0");
   } else if (prop == "ENABLED_LANGUAGES") {
-    std::string langs;
-    langs = cmJoin(this->EnabledLanguages, ";");
+    auto langs = cmList::to_string(this->EnabledLanguages);
     this->SetGlobalProperty("ENABLED_LANGUAGES", langs);
   } else if (prop == "CMAKE_ROLE") {
     std::string mode = this->GetModeString();

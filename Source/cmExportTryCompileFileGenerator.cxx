@@ -156,12 +156,12 @@ std::string cmExportTryCompileFileGenerator::GetFileSetDirectories(
   cmGeneratorTarget* /*gte*/, cmFileSet* fileSet, cmTargetExport* /*te*/)
 {
   return cmOutputConverter::EscapeForCMake(
-    cmJoin(fileSet->GetDirectoryEntries(), ";"));
+    cmList::to_string(fileSet->GetDirectoryEntries()));
 }
 
 std::string cmExportTryCompileFileGenerator::GetFileSetFiles(
   cmGeneratorTarget* /*gte*/, cmFileSet* fileSet, cmTargetExport* /*te*/)
 {
   return cmOutputConverter::EscapeForCMake(
-    cmJoin(fileSet->GetFileEntries(), ";"));
+    cmList::to_string(fileSet->GetFileEntries()));
 }

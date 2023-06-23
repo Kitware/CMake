@@ -20,6 +20,7 @@
 
 #include "cmArgumentParser.h"
 #include "cmExecutionStatus.h"
+#include "cmList.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmProcessOutput.h"
@@ -356,7 +357,7 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
           }
         }
         status.GetMakefile().AddDefinition(arguments.ResultsVariable,
-                                           cmJoin(res, ";"));
+                                           cmList::to_string(res));
       } break;
       case cmsysProcess_State_Exception:
         status.GetMakefile().AddDefinition(

@@ -1980,7 +1980,7 @@ void cmMakefile::AddIncludeDirectories(const std::vector<std::string>& incs,
     return;
   }
 
-  std::string entryString = cmJoin(incs, ";");
+  std::string entryString = cmList::to_string(incs);
   if (before) {
     this->StateSnapshot.GetDirectory().PrependIncludeDirectoriesEntry(
       BT<std::string>(entryString, this->Backtrace));
@@ -3004,12 +3004,11 @@ cm::optional<std::string> cmMakefile::DeferGetCallIds() const
 {
   cm::optional<std::string> ids;
   if (this->Defer) {
-    ids = cmJoin(
+    ids = cmList::to_string(
       cmMakeRange(this->Defer->Commands)
         .filter([](DeferCommand const& dc) -> bool { return !dc.Id.empty(); })
         .transform(
-          [](DeferCommand const& dc) -> std::string const& { return dc.Id; }),
-      ";");
+          [](DeferCommand const& dc) -> std::string const& { return dc.Id; }));
   }
   return ids;
 }
@@ -4160,7 +4159,7 @@ cmValue cmMakefile::GetProperty(const std::string& prop) const
     std::transform(
       t->Tests.begin(), t->Tests.end(), std::back_inserter(keys),
       [](decltype(t->Tests)::value_type const& pair) { return pair.first; });
-    output = cmJoin(keys, ";");
+    output = cmList::to_string(keys);
     return cmValue(output);
   }
 

@@ -529,12 +529,12 @@ bool QueryWindowsRegistry(Range args, cmExecutionStatus& status,
   if (arguments.ValueNames) {
     auto result = registry.GetValueNames(key, view);
     if (result) {
-      makefile.AddDefinition(variable, cmJoin(*result, ";"_s));
+      makefile.AddDefinition(variable, cmList::to_string(*result));
     }
   } else if (arguments.SubKeys) {
     auto result = registry.GetSubKeys(key, view);
     if (result) {
-      makefile.AddDefinition(variable, cmJoin(*result, ";"_s));
+      makefile.AddDefinition(variable, cmList::to_string(*result));
     }
   } else {
     auto result =
