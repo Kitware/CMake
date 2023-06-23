@@ -793,6 +793,7 @@ void cmVisualStudio10TargetGenerator::WriteClassicMsBuildProjectFile(
     Elem(e0, "PropertyGroup").Attribute("Label", "UserMacros");
     this->WriteWinRTPackageCertificateKeyFile(e0);
     this->WritePathAndIncrementalLinkOptions(e0);
+    this->WritePublicProjectContentOptions(e0);
     this->WriteCEDebugProjectConfigurationValues(e0);
     this->WriteItemDefinitionGroups(e0);
     this->WriteCustomCommands(e0);
@@ -3099,6 +3100,29 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions(
         e1.WritePlatformConfigTag("LocalDebuggerCommandArguments", cond,
                                   genCommandArguments);
       }
+    }
+  }
+}
+
+void cmVisualStudio10TargetGenerator::WritePublicProjectContentOptions(
+  Elem& e0)
+{
+  cmStateEnums::TargetType ttype = this->GeneratorTarget->GetType();
+  if (ttype != cmStateEnums::SHARED_LIBRARY) {
+    return;
+  }
+  if (this->ProjectType != VsProjectType::vcxproj) {
+    return;
+  }
+
+  Elem e1(e0, "PropertyGroup");
+  for (std::string const& config : this->Configurations) {
+    if (this->GeneratorTarget->HaveCxx20ModuleSources() &&
+        this->GeneratorTarget->HaveCxxModuleSupport(config) ==
+          cmGeneratorTarget::Cxx20SupportLevel::Supported) {
+      const std::string cond = this->CalcCondition(config);
+      // For DLL projects, we export all BMIs for now
+      e1.WritePlatformConfigTag("AllProjectBMIsArePublic", cond, "true");
     }
   }
 }
