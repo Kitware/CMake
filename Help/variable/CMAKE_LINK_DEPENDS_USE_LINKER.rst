@@ -10,3 +10,11 @@ variable with value ``FALSE``, you can deactivate this feature.
 
 This feature is also deactivated if the :prop_tgt:`LINK_DEPENDS_NO_SHARED`
 target property is true.
+
+.. note::
+
+  CMake version |release| defaults this variable to ``FALSE`` because
+  GNU binutils linkers (``ld``, ``ld.bfd``, ``ld.gold``) generate spurious
+  dependencies on temporary files when LTO is enabled.  See `GNU bug 30568`_.
+
+.. _`GNU bug 30568`: https://sourceware.org/bugzilla/show_bug.cgi?id=30568
