@@ -110,6 +110,10 @@ set_target_properties(${LIB_NAME} PROPERTIES
   OUTPUT_NAME ${LIBCURL_OUTPUT_NAME}
   )
 
+if(WIN32 AND CMake_BUILD_PCH)
+  target_precompile_headers(${LIB_NAME} PRIVATE "curl_setup.h" "curl_sspi.h" "${CURL_SOURCE_DIR}/include/curl/curl.h")
+endif()
+
 if(0) # This code not needed for building within CMake.
 if(CMAKE_SYSTEM_NAME STREQUAL "AIX" OR
   CMAKE_SYSTEM_NAME STREQUAL "Linux" OR

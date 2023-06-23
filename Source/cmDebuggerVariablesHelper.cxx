@@ -10,7 +10,7 @@
 #include <map>
 #include <sstream>
 
-#include "cm_codecvt.hxx"
+#include "cm_codecvt_Encoding.hxx"
 
 #include "cmDebuggerStackFrame.h"
 #include "cmDebuggerVariables.h"
@@ -578,17 +578,17 @@ std::shared_ptr<cmDebuggerVariables> cmDebuggerVariablesHelper::CreateIfAny(
     return {};
   }
 
-  auto makeFileEncodingString = [](codecvt::Encoding encoding) {
+  auto makeFileEncodingString = [](codecvt_Encoding encoding) {
     switch (encoding) {
-      case codecvt::Encoding::None:
+      case codecvt_Encoding::None:
         return "None";
-      case codecvt::Encoding::UTF8:
+      case codecvt_Encoding::UTF8:
         return "UTF8";
-      case codecvt::Encoding::UTF8_WITH_BOM:
+      case codecvt_Encoding::UTF8_WITH_BOM:
         return "UTF8_WITH_BOM";
-      case codecvt::Encoding::ANSI:
+      case codecvt_Encoding::ANSI:
         return "ANSI";
-      case codecvt::Encoding::ConsoleOutput:
+      case codecvt_Encoding::ConsoleOutput:
         return "ConsoleOutput";
       default:
         return "Unknown";

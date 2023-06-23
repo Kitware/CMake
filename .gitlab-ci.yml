@@ -826,6 +826,15 @@ b:macos-arm64-ninja:
     variables:
         CMAKE_CI_JOB_CONTINUOUS: "true"
 
+b:macos-arm64-pch:
+    extends:
+        - .macos_arm64_pch
+        - .cmake_build_macos
+        - .macos_arm64_tags
+        - .run_manually
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
 t:macos-x86_64-ninja:
     extends:
         - .macos_x86_64_ninja
@@ -997,6 +1006,15 @@ b:windows-vs2022-x64-ninja:
         - .cmake_build_artifacts
         - .windows_x86_64_tags_nonconcurrent_vs2022
         - .run_manually
+
+b:windows-vs2022-x64-pch:
+    extends:
+        - .windows_vs2022_x64_pch
+        - .cmake_build_windows
+        - .windows_x86_64_tags_nonconcurrent_vs2022
+        - .run_manually
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
 
 t:windows-vs2022-x64-ninja:
     extends:

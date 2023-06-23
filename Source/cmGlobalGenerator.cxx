@@ -24,10 +24,6 @@
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
 
-#if defined(_WIN32) && !defined(__CYGWIN__)
-#  include <windows.h>
-#endif
-
 #include "cmAlgorithms.h"
 #include "cmCPackPropertiesGenerator.h"
 #include "cmComputeTargetDepends.h"
@@ -141,6 +137,10 @@ cmGlobalGenerator::cmGlobalGenerator(cmake* cm)
 cmGlobalGenerator::~cmGlobalGenerator()
 {
   this->ClearGeneratorMembers();
+}
+codecvt_Encoding cmGlobalGenerator::GetMakefileEncoding() const
+{
+  return codecvt_Encoding::None;
 }
 
 #if !defined(CMAKE_BOOTSTRAP)

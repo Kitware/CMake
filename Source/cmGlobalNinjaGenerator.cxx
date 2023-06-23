@@ -566,7 +566,7 @@ std::unique_ptr<cmLocalGenerator> cmGlobalNinjaGenerator::CreateLocalGenerator(
     cm::make_unique<cmLocalNinjaGenerator>(this, mf));
 }
 
-codecvt::Encoding cmGlobalNinjaGenerator::GetMakefileEncoding() const
+codecvt_Encoding cmGlobalNinjaGenerator::GetMakefileEncoding() const
 {
   return this->NinjaExpectedEncoding;
 }
@@ -799,7 +799,7 @@ void cmGlobalNinjaGenerator::CheckNinjaFeatures()
   if (this->NinjaSupportsCodePage) {
     this->CheckNinjaCodePage();
   } else {
-    this->NinjaExpectedEncoding = codecvt::ANSI;
+    this->NinjaExpectedEncoding = codecvt_Encoding::ANSI;
   }
 #endif
 }
@@ -830,9 +830,9 @@ void cmGlobalNinjaGenerator::CheckNinjaCodePage()
           lineView.substr(cmStrLen("Build file encoding: "));
         if (encoding == "UTF-8") {
           // Ninja expects UTF-8. We use that internally. No conversion needed.
-          this->NinjaExpectedEncoding = codecvt::None;
+          this->NinjaExpectedEncoding = codecvt_Encoding::None;
         } else {
-          this->NinjaExpectedEncoding = codecvt::ANSI;
+          this->NinjaExpectedEncoding = codecvt_Encoding::ANSI;
         }
         found = true;
         break;
@@ -842,10 +842,10 @@ void cmGlobalNinjaGenerator::CheckNinjaCodePage()
       this->GetCMakeInstance()->IssueMessage(
         MessageType::WARNING,
         "Could not determine Ninja's code page, defaulting to UTF-8");
-      this->NinjaExpectedEncoding = codecvt::None;
+      this->NinjaExpectedEncoding = codecvt_Encoding::None;
     }
   } else {
-    this->NinjaExpectedEncoding = codecvt::ANSI;
+    this->NinjaExpectedEncoding = codecvt_Encoding::ANSI;
   }
 }
 

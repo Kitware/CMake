@@ -365,4 +365,8 @@ add_library(cmlibuv STATIC ${uv_sources})
 target_link_libraries(cmlibuv ${uv_libraries})
 set_property(TARGET cmlibuv PROPERTY COMPILE_DEFINITIONS ${uv_defines})
 
+if(WIN32 AND CMake_BUILD_PCH)
+  target_precompile_headers(cmlibuv PRIVATE "include/uv.h" "src/win/internal.h")
+endif()
+
 install(FILES LICENSE DESTINATION ${CMAKE_DOC_DIR}/cmlibuv)

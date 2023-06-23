@@ -7,7 +7,7 @@
 #include <string>
 
 #if defined(_WIN32)
-#  include <windows.h> // HANDLE
+using HANDLE = void*;
 #endif
 
 class cmFileLockResult;
@@ -53,8 +53,8 @@ private:
   cmFileLockResult LockWithTimeout(unsigned long timeoutSec);
 
 #if defined(_WIN32)
-  HANDLE File = INVALID_HANDLE_VALUE;
-  BOOL LockFile(DWORD flags);
+  HANDLE File = (HANDLE)-1;
+  int LockFile(int flags);
 #else
   int File = -1;
   int LockFile(int cmd, int type) const;

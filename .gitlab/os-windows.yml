@@ -55,6 +55,13 @@
         VCVARSPLATFORM: "arm64"
         VCVARSVERSION: "14.36.32532"
 
+.windows_vs2022_x64_pch:
+    extends:
+        - .windows_vs2022_x64_ninja
+
+    variables:
+        CMAKE_CONFIGURATION: windows_vs2022_x64_pch
+
 .windows_vs2022_x64_ninja:
     extends:
         - .windows_build_ninja

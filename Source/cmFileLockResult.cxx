@@ -5,6 +5,10 @@
 #include <cerrno>
 #include <cstring>
 
+#ifdef _WIN32
+#  include <Windows.h>
+#endif
+
 cmFileLockResult cmFileLockResult::MakeOk()
 {
   return { OK, 0 };

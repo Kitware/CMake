@@ -7,21 +7,14 @@
 #include <cwchar>
 #include <locale>
 
+#include "cm_codecvt_Encoding.hxx"
+
 class codecvt : public std::codecvt<char, char, mbstate_t>
 {
 public:
-  enum Encoding
-  {
-    None,
-    UTF8,
-    UTF8_WITH_BOM,
-    ANSI,
-    ConsoleOutput,
-  };
-
 #ifndef CMAKE_BOOTSTRAP
 
-  codecvt(Encoding e);
+  codecvt(codecvt_Encoding e);
 
 protected:
   ~codecvt() override;

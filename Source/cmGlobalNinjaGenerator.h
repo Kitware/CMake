@@ -16,7 +16,7 @@
 
 #include <cm/optional>
 
-#include "cm_codecvt.hxx"
+#include "cm_codecvt_Encoding.hxx"
 
 #include "cmBuildOptions.h"
 #include "cmGeneratedFileStream.h"
@@ -192,7 +192,7 @@ public:
   bool IsNinja() const override { return true; }
 
   /** Get encoding used by generator for ninja files */
-  codecvt::Encoding GetMakefileEncoding() const override;
+  codecvt_Encoding GetMakefileEncoding() const override;
 
   static cmDocumentationEntry GetDocumentation();
 
@@ -590,7 +590,7 @@ private:
   bool NinjaSupportsMetadataOnRegeneration = false;
   bool NinjaSupportsCodePage = false;
 
-  codecvt::Encoding NinjaExpectedEncoding = codecvt::None;
+  codecvt_Encoding NinjaExpectedEncoding = codecvt_Encoding::None;
 
   bool DiagnosedCxxModuleNinjaSupport = false;
 
