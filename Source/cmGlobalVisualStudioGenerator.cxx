@@ -75,6 +75,9 @@ void cmGlobalVisualStudioGenerator::EnableLanguage(
 bool cmGlobalVisualStudioGenerator::SetGeneratorPlatform(std::string const& p,
                                                          cmMakefile* mf)
 {
+  if (!this->InitializePlatform(mf)) {
+    return false;
+  }
   if (this->GetPlatformName() == "x64") {
     mf->AddDefinition("CMAKE_FORCE_WIN64", "TRUE");
   } else if (this->GetPlatformName() == "Itanium") {
@@ -82,6 +85,11 @@ bool cmGlobalVisualStudioGenerator::SetGeneratorPlatform(std::string const& p,
   }
   mf->AddDefinition("CMAKE_VS_PLATFORM_NAME", this->GetPlatformName());
   return this->cmGlobalGenerator::SetGeneratorPlatform(p, mf);
+}
+
+bool cmGlobalVisualStudioGenerator::InitializePlatform(cmMakefile*)
+{
+  return true;
 }
 
 std::string const& cmGlobalVisualStudioGenerator::GetPlatformName() const
