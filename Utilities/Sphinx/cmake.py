@@ -668,7 +668,7 @@ class CMakeDomain(Domain):
         'manual':     CMakeXRefRole(),
     }
     initial_data = {
-        'objects': {},  # fullname -> docname, objtype
+        'objects': {},  # fullname -> ObjectEntry
     }
 
     def clear_doc(self, docname):
@@ -678,6 +678,20 @@ class CMakeDomain(Domain):
                 to_clear.add(fullname)
         for fullname in to_clear:
             del self.data['objects'][fullname]
+
+    def merge_domaindata(self, docnames, otherdata):
+        """Merge domaindata from the workers/chunks when they return.
+
+        Called once per parallelization chunk.
+        Only used when sphinx is run in parallel mode.
+
+        :param docnames: a Set of the docnames that are part of the current
+                         chunk to merge
+        :param otherdata: the partial data calculated by the current chunk
+        """
+        for refname, obj in otherdata['objects'].items():
+            if obj.docname in docnames:
+                self.data['objects'][refname] = obj
 
     def resolve_xref(self, env, fromdocname, builder,
                      typ, target, node, contnode):
