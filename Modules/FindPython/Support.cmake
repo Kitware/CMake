@@ -474,7 +474,7 @@ function (_PYTHON_GET_CONFIG_VAR _PYTHON_PGCV_VALUE NAME)
       set (config_flag "--${NAME}")
     endif()
     string (TOLOWER "${config_flag}" config_flag)
-    execute_process (COMMAND "${_${_PYTHON_PREFIX}_CONFIG}" ${config_flag}
+    execute_process (COMMAND ${_${_PYTHON_PREFIX}_CONFIG_LAUNCHER} ${config_flag}
                      RESULT_VARIABLE _result
                      OUTPUT_VARIABLE _values
                      ERROR_QUIET
@@ -752,12 +752,43 @@ function (_PYTHON_GET_VERSION)
 endfunction()
 
 function (_PYTHON_GET_LAUNCHER _PYTHON_PGL_NAME)
-  cmake_parse_arguments (PARSE_ARGV 1 _PGL "INTERPRETER;COMPILER" "" "")
+  cmake_parse_arguments (PARSE_ARGV 1 _PGL "INTERPRETER;COMPILER" "CONFIG" "")
 
   unset (${_PYTHON_PGL_NAME} PARENT_SCOPE)
 
   if ((_PGL_INTERPRETER AND NOT _${_PYTHON_PREFIX}_EXECUTABLE)
-      OR (_PGL_COMPILER AND NOT _${_PYTHON_PREFIX}_COMPILER))
+      OR (_PGL_COMPILER AND NOT _${_PYTHON_PREFIX}_COMPILER)
+      OR (_PGL_CONFIG AND NOT _${_PYTHON_PREFIX}_CONFIG))
+    return()
+  endif()
+
+  if (_PGL_CONFIG)
+    # default config script can be launched directly
+    set (${_PYTHON_PGL_NAME} "${_${_PYTHON_PREFIX}_CONFIG}" PARENT_SCOPE)
+
+    if (NOT MINGW)
+      return()
+    endif()
+    # on MINGW environment, python-config script may require bash to be launched
+    execute_process (COMMAND cygpath.exe -u "${_${_PYTHON_PREFIX}_CONFIG}"
+            RESULT_VARIABLE _result
+            OUTPUT_VARIABLE _config
+            ERROR_QUIET
+            OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if (_result)
+      # impossible to convert path, keep default config
+      return()
+    endif()
+    execute_process (COMMAND bash.exe "${_config}" --prefix
+            RESULT_VARIABLE _result
+            OUTPUT_QUIET
+            ERROR_QUIET)
+    if (_result)
+      # fail to execute through bash, keep default config
+      return()
+    endif()
+
+    set(${_PYTHON_PGL_NAME} bash.exe "${_config}" PARENT_SCOPE)
     return()
   endif()
 
@@ -770,7 +801,7 @@ function (_PYTHON_GET_LAUNCHER _PYTHON_PGL_NAME)
           AND ext STREQUAL ".exe")
         set (${_PYTHON_PGL_NAME} "${${_PYTHON_PREFIX}_DOTNET_LAUNCHER}" PARENT_SCOPE)
       endif()
-    else()
+    elseif (_PGL_COMPILER)
       get_filename_component (name "${_${_PYTHON_PREFIX}_COMPILER}" NAME)
       get_filename_component (ext "${_${_PYTHON_PREFIX}_COMPILER}" LAST_EXT)
       if (name IN_LIST _${_PYTHON_PREFIX}_IRON_PYTHON_COMPILER_NAMES
@@ -2731,20 +2762,23 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
                         NO_DEFAULT_PATH)
         endif()
 
+        _python_get_launcher (_${_PYTHON_PREFIX}_CONFIG_LAUNCHER CONFIG "${_${_PYTHON_PREFIX}_CONFIG}")
+
         if (_${_PYTHON_PREFIX}_CONFIG)
-          execute_process (COMMAND "${_${_PYTHON_PREFIX}_CONFIG}" --help
+          execute_process (COMMAND ${_${_PYTHON_PREFIX}_CONFIG_LAUNCHER} --prefix
                            RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
                            OUTPUT_VARIABLE __${_PYTHON_PREFIX}_HELP
-                           ERROR_QUIET
+                           ERROR_VARIABLE __${_PYTHON_PREFIX}_HELP
                            OUTPUT_STRIP_TRAILING_WHITESPACE)
           if (_${_PYTHON_PREFIX}_RESULT)
             # assume config tool is not usable
             unset (_${_PYTHON_PREFIX}_CONFIG CACHE)
+            unset (_${_PYTHON_PREFIX}_CONFIG_LAUNCHER)
           endif()
         endif()
 
         if (_${_PYTHON_PREFIX}_CONFIG)
-          execute_process (COMMAND "${_${_PYTHON_PREFIX}_CONFIG}" --abiflags
+          execute_process (COMMAND ${_${_PYTHON_PREFIX}_CONFIG_LAUNCHER} --abiflags
                            RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
                            OUTPUT_VARIABLE __${_PYTHON_PREFIX}_ABIFLAGS
                            ERROR_QUIET
@@ -2756,22 +2790,25 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
           if (DEFINED _${_PYTHON_PREFIX}_FIND_ABI AND NOT __${_PYTHON_PREFIX}_ABIFLAGS IN_LIST _${_PYTHON_PREFIX}_ABIFLAGS)
             # Wrong ABI
             unset (_${_PYTHON_PREFIX}_CONFIG CACHE)
+            unset (_${_PYTHON_PREFIX}_CONFIG_LAUNCHER)
           endif()
         endif()
 
         if (_${_PYTHON_PREFIX}_CONFIG AND DEFINED CMAKE_LIBRARY_ARCHITECTURE)
           # check that config tool match library architecture
-          execute_process (COMMAND "${_${_PYTHON_PREFIX}_CONFIG}" --configdir
+          execute_process (COMMAND ${_${_PYTHON_PREFIX}_CONFIG_LAUNCHER} --configdir
                            RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
                            OUTPUT_VARIABLE _${_PYTHON_PREFIX}_CONFIGDIR
                            ERROR_QUIET
                            OUTPUT_STRIP_TRAILING_WHITESPACE)
           if (_${_PYTHON_PREFIX}_RESULT)
             unset (_${_PYTHON_PREFIX}_CONFIG CACHE)
+            unset (_${_PYTHON_PREFIX}_CONFIG_LAUNCHER)
           else()
             string(FIND "${_${_PYTHON_PREFIX}_CONFIGDIR}" "${CMAKE_LIBRARY_ARCHITECTURE}" _${_PYTHON_PREFIX}_RESULT)
             if (_${_PYTHON_PREFIX}_RESULT EQUAL -1)
               unset (_${_PYTHON_PREFIX}_CONFIG CACHE)
+              unset (_${_PYTHON_PREFIX}_CONFIG_LAUNCHER)
             endif()
           endif()
         endif()
@@ -2817,8 +2854,10 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
 
           unset (_${_PYTHON_PREFIX}_CONFIG_NAMES)
 
+          _python_get_launcher (_${_PYTHON_PREFIX}_CONFIG_LAUNCHER CONFIG "${_${_PYTHON_PREFIX}_CONFIG}")
+
           if (_${_PYTHON_PREFIX}_CONFIG)
-            execute_process (COMMAND "${_${_PYTHON_PREFIX}_CONFIG}" --help
+            execute_process (COMMAND ${_${_PYTHON_PREFIX}_CONFIG_LAUNCHER} --prefix
                              RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
                              OUTPUT_VARIABLE __${_PYTHON_PREFIX}_HELP
                              ERROR_QUIET
@@ -2826,6 +2865,7 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
             if (_${_PYTHON_PREFIX}_RESULT)
               # assume config tool is not usable
               unset (_${_PYTHON_PREFIX}_CONFIG CACHE)
+              unset (_${_PYTHON_PREFIX}_CONFIG_LAUNCHER)
             endif()
           endif()
 
@@ -2833,7 +2873,7 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
             continue()
           endif()
 
-          execute_process (COMMAND "${_${_PYTHON_PREFIX}_CONFIG}" --abiflags
+          execute_process (COMMAND ${_${_PYTHON_PREFIX}_CONFIG_LAUNCHER} --abiflags
                            RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
                            OUTPUT_VARIABLE __${_PYTHON_PREFIX}_ABIFLAGS
                            ERROR_QUIET
@@ -2845,23 +2885,26 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
           if (DEFINED _${_PYTHON_PREFIX}_FIND_ABI AND NOT __${_PYTHON_PREFIX}_ABIFLAGS IN_LIST _${_PYTHON_PREFIX}_ABIFLAGS)
             # Wrong ABI
             unset (_${_PYTHON_PREFIX}_CONFIG CACHE)
+            unset (_${_PYTHON_PREFIX}_CONFIG_LAUNCHER)
             continue()
           endif()
 
           if (_${_PYTHON_PREFIX}_CONFIG AND DEFINED CMAKE_LIBRARY_ARCHITECTURE)
             # check that config tool match library architecture
-            execute_process (COMMAND "${_${_PYTHON_PREFIX}_CONFIG}" --configdir
+            execute_process (COMMAND ${_${_PYTHON_PREFIX}_CONFIG_LAUNCHER} --configdir
                              RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
                              OUTPUT_VARIABLE _${_PYTHON_PREFIX}_CONFIGDIR
                              ERROR_QUIET
                              OUTPUT_STRIP_TRAILING_WHITESPACE)
             if (_${_PYTHON_PREFIX}_RESULT)
               unset (_${_PYTHON_PREFIX}_CONFIG CACHE)
+              unset (_${_PYTHON_PREFIX}_CONFIG_LAUNCHER)
               continue()
             endif()
             string (FIND "${_${_PYTHON_PREFIX}_CONFIGDIR}" "${CMAKE_LIBRARY_ARCHITECTURE}" _${_PYTHON_PREFIX}_RESULT)
             if (_${_PYTHON_PREFIX}_RESULT EQUAL -1)
               unset (_${_PYTHON_PREFIX}_CONFIG CACHE)
+              unset (_${_PYTHON_PREFIX}_CONFIG_LAUNCHER)
               continue()
             endif()
           endif()
