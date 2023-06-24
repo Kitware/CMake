@@ -42,6 +42,8 @@ endif()
 # Suppress generator deprecation warnings in test suite.
 if(CMAKE_GENERATOR MATCHES "^Visual Studio 9 2008")
   set(TEST_WARN_VS_CODE "set(ENV{CMAKE_WARN_VS9} OFF)")
+elseif(CMAKE_GENERATOR MATCHES "^Visual Studio 12 2013")
+  set(TEST_WARN_VS_CODE "set(ENV{CMAKE_WARN_VS12} OFF)")
 else()
   set(TEST_WARN_VS_CODE "")
 endif()
