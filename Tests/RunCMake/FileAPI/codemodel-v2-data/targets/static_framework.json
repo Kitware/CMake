@@ -64,10 +64,10 @@
         }
     ],
     "folder": null,
-    "nameOnDisk": "^(lib)?static_framework\\.(a|lib)$",
+    "nameOnDisk": "^(lib)?static_framework\\.(a|lib|l)$",
     "artifacts": [
         {
-            "path": "^framework/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib)?static_framework\\.(a|lib)$",
+            "path": "^framework/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib)?static_framework\\.(a|lib|l)$",
             "_dllExtra": false
         }
     ],

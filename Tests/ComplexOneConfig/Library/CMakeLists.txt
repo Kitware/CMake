@@ -23,7 +23,7 @@ set(LibrarySources ${LibrarySources}
 remove(LibrarySources create_file.cxx GENERATED nonexisting_file)
 add_library(CMakeTestLibrary ${LibrarySources})
 
-if(WIN32 AND NOT CYGWIN AND NOT BORLAND AND NOT MINGW)
+if(WIN32 AND NOT CYGWIN AND NOT BORLAND AND NOT MINGW AND NOT CMAKE_C_COMPILER_ID STREQUAL "OrangeC")
   target_link_libraries(CMakeTestLibrary debug user32.lib)
   target_link_libraries(CMakeTestLibrary optimized kernel32.lib)
 endif()

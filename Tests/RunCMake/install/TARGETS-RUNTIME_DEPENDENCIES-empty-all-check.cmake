@@ -1,1 +1,1 @@
-check_installed([[^static;static/(liblib\.a|lib\.lib)$]])
+check_installed([[^static;static/(liblib\.a|lib\.(lib|l))$]])

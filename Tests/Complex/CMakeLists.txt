@@ -244,6 +244,12 @@ configure_file(
   ${Complex_SOURCE_DIR}/Library/dummy
   ${Complex_BINARY_DIR}/Library/dummylib.lib
   COPYONLY)
+if(CMAKE_C_COMPILER_ID STREQUAL "OrangeC")
+  configure_file(
+    ${Complex_SOURCE_DIR}/Library/dummy
+    ${Complex_BINARY_DIR}/Library/dummylib.l
+    COPYONLY)
+endif()
 foreach (ext ${CMAKE_SHLIB_SUFFIX};.so;.a;.sl
          ${CMAKE_SHARED_LIBRARY_SUFFIX}.2
          ${CMAKE_STATIC_LIBRARY_SUFFIX}.2)

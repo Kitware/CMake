@@ -12,7 +12,7 @@ set(SRCS)
 # and also generate assembler files from C:
 if("${CMAKE_GENERATOR}" MATCHES "Makefile|Xcode|Ninja" AND
     NOT CMAKE_OSX_ARCHITECTURES MATCHES ";")
-  if((CMAKE_C_COMPILER_ID MATCHES "^(GNU|LCC|Clang|AppleClang|HP|SunPro|XL)$") OR (CMAKE_C_COMPILER_ID MATCHES "Intel"  AND  UNIX)
+  if((CMAKE_C_COMPILER_ID MATCHES "^(GNU|LCC|Clang|AppleClang|HP|SunPro|XL|OrangeC)$") OR (CMAKE_C_COMPILER_ID MATCHES "Intel"  AND  UNIX)
      AND NOT (CMAKE_C_COMPILER_ID STREQUAL "Clang" AND "x${CMAKE_C_COMPILER_FRONTEND_VARIANT}" STREQUAL "xMSVC"))
     set(C_FLAGS "${CMAKE_C_FLAGS}")
     separate_arguments(C_FLAGS)

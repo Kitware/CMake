@@ -117,8 +117,8 @@ if(BUILD_TESTING)
   if(WIN32 OR CYGWIN)
     set(CMake_TEST_RESOURCES TRUE)
   endif()
-  # for borland and watcom there is no resource support
-  if(WATCOM OR BORLAND)
+  # For some Windows toolchains there is no resource support.
+  if(WATCOM OR BORLAND OR CMAKE_C_COMPILER_ID STREQUAL "OrangeC")
     set(CMake_TEST_RESOURCES FALSE)
   endif()
 
@@ -2094,7 +2094,10 @@ if(BUILD_TESTING)
       )
   endif()
 
-  if(MAKE_SUPPORTS_SPACES AND NOT CMAKE_GENERATOR STREQUAL "Xcode" AND NOT CMAKE_GENERATOR STREQUAL "Watcom WMake")
+  if(MAKE_SUPPORTS_SPACES
+      AND NOT CMAKE_GENERATOR STREQUAL "Xcode"
+      AND NOT CMAKE_GENERATOR STREQUAL "Watcom WMake"
+      )
     add_test(SubDirSpaces ${CMAKE_CTEST_COMMAND}
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/SubDirSpaces"
@@ -3000,8 +3003,8 @@ if(BUILD_TESTING)
     -S "${CMake_BINARY_DIR}/Tests/CTestTestCrash/test.cmake" -V
     --output-log "${CMake_BINARY_DIR}/Tests/CTestTestCrash/testOutput.log"
     )
-  # with watcom the SEGFAULT is not found, it just fails
-  if(CMAKE_GENERATOR MATCHES "Watcom WMake")
+  # With Watcom and OrangeC the SEGFAULT is not found, it just fails
+  if(CMAKE_GENERATOR MATCHES "Watcom WMake" OR CMAKE_C_COMPILER_ID STREQUAL "OrangeC")
     set_tests_properties(CTestTestCrash PROPERTIES
       PASS_REGULAR_EXPRESSION "Failed")
   else()

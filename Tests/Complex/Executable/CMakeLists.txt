@@ -45,7 +45,7 @@ add_executable(complex.file complex.file.cxx complex_nobuild.cxx
 
 if (UNIX)
   target_link_libraries(complex ${CMAKE_DL_LIBS})
-elseif(NOT BORLAND AND NOT MINGW)
+elseif(NOT BORLAND AND NOT MINGW AND NOT CMAKE_C_COMPILER_ID STREQUAL "OrangeC")
   target_link_libraries(complex rpcrt4.lib)
 endif ()
 
