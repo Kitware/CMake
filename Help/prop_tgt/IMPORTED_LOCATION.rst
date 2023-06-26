@@ -15,6 +15,11 @@ is the location of the ``.dll`` part of the library.  For ``UNKNOWN``
 libraries this is the location of the file to be linked.  Ignored for
 non-imported targets.
 
+.. versionadded:: 3.28
+
+  For frameworks on macOS, this may be the location of the framework folder
+  itself.
+
 The ``IMPORTED_LOCATION`` target property may be overridden for a
 given configuration ``<CONFIG>`` by the configuration-specific
 :prop_tgt:`IMPORTED_LOCATION_<CONFIG>` target property.  Furthermore,

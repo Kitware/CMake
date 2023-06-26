@@ -3827,7 +3827,8 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetIncludeDirectories(
         if (lib.Target == nullptr) {
           libDir = cmSystemTools::CollapseFullPath(
             lib.AsStr(), this->Makefile->GetHomeOutputDirectory());
-        } else if (lib.Target->Target->IsFrameworkOnApple()) {
+        } else if (lib.Target->Target->IsFrameworkOnApple() ||
+                   this->IsImportedFrameworkFolderOnApple(config)) {
           libDir = lib.Target->GetLocation(config);
         } else {
           continue;
@@ -8569,6 +8570,16 @@ bool cmGeneratorTarget::HasLinkDependencyFile(std::string const& config) const
 bool cmGeneratorTarget::IsFrameworkOnApple() const
 {
   return this->Target->IsFrameworkOnApple();
+}
+
+bool cmGeneratorTarget::IsImportedFrameworkFolderOnApple(
+  const std::string& config) const
+{
+  return this->IsApple() && this->IsImported() &&
+    (this->GetType() == cmStateEnums::STATIC_LIBRARY ||
+     this->GetType() == cmStateEnums::SHARED_LIBRARY ||
+     this->GetType() == cmStateEnums::UNKNOWN_LIBRARY) &&
+    cmSystemTools::IsPathToFramework(this->GetLocation(config));
 }
 
 bool cmGeneratorTarget::IsAppBundleOnApple() const

@@ -812,6 +812,10 @@ public:
       Apple.  */
   bool IsFrameworkOnApple() const;
 
+  /** Return whether this target is an IMPORTED library target on Apple
+      with a .framework folder as its location.  */
+  bool IsImportedFrameworkFolderOnApple(const std::string& config) const;
+
   /** Return whether this target is an executable Bundle on Apple.  */
   bool IsAppBundleOnApple() const;
 
