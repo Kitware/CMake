@@ -1,4 +1,7 @@
 enable_language(CXX)
+if(CMAKE_Fortran_COMPILER)
+  enable_language(Fortran)
+endif()
 
 add_subdirectory(System SYSTEM)
 
