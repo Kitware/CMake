@@ -38,6 +38,8 @@ It must be one of the following:
   Scope may name zero or more existing targets.
   See also the :command:`set_target_properties` command.
 
+  :ref:`Alias Targets` do not support setting target properties.
+
 ``SOURCE``
   Scope may name zero or more source files.  By default, source file properties
   are only visible to targets added in the same directory (``CMakeLists.txt``).
