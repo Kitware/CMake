@@ -70,7 +70,7 @@ included by absolute path.  For example:
       <unordered_map>
   )
 
-.. |command_name| replace:: ``target_compile_features``
+.. |command_name| replace:: ``target_precompile_headers``
 .. |more_see_also| replace:: The :genex:`$<COMPILE_LANGUAGE:...>` generator
    expression is particularly useful for specifying a language-specific header
    to precompile for only one language (e.g. ``CXX`` and not ``C``).  In this
