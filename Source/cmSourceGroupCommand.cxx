@@ -4,6 +4,7 @@
 
 #include <cstddef>
 #include <map>
+#include <memory>
 #include <set>
 #include <utility>
 
@@ -11,6 +12,8 @@
 
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
+#include "cmSourceFile.h"
+#include "cmSourceFileLocation.h"
 #include "cmSourceGroup.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -194,7 +197,10 @@ bool cmSourceGroupCommand(std::vector<std::string> const& args,
 
   // If only two arguments are given, the pre-1.8 version of the
   // command is being invoked.
-  if (args.size() == 2 && args[1] != "FILES") {
+  bool isShortTreeSyntax =
+    ((args.size() == 2) && (args[0] == kTreeOptionName) &&
+     cmSystemTools::FileIsDirectory(args[1]));
+  if (args.size() == 2 && args[1] != kFilesOptionName && !isShortTreeSyntax) {
     cmSourceGroup* sg = mf.GetOrCreateSourceGroup(args[0]);
 
     if (!sg) {
@@ -274,8 +280,19 @@ static bool processTree(cmMakefile& mf, ParsedArguments& parsedArguments,
     ? ""
     : parsedArguments[kPrefixOptionName].front();
 
-  const std::vector<std::string> filesVector = prepareFilesPathsForTree(
-    parsedArguments[kFilesOptionName], mf.GetCurrentSourceDirectory());
+  std::vector<std::string> files = parsedArguments[kFilesOptionName];
+  if (files.empty()) {
+    const std::vector<std::unique_ptr<cmSourceFile>>& srcFiles =
+      mf.GetSourceFiles();
+    for (const auto& srcFile : srcFiles) {
+      if (!srcFile->GetIsGenerated()) {
+        files.push_back(srcFile->GetLocation().GetFullPath());
+      }
+    }
+  }
+
+  const std::vector<std::string> filesVector =
+    prepareFilesPathsForTree(files, mf.GetCurrentSourceDirectory());
 
   if (!rootIsPrefix(root, filesVector, errorMsg)) {
     return false;
