@@ -2,6 +2,6 @@
 -- After cmake_language
 -- AThing_FOUND = 0
 -- Intercepted FetchContent_MakeAvailable\(SomeDep\)
--- Provider invoked for method FETCHCONTENT_MAKEAVAILABLE_SERIAL with args: SOURCE_DIR;.*/Tests/RunCMake/DependencyProviders;BINARY_DIR;.*/Tests/RunCMake/DependencyProviders/FetchContentSerial-build/_deps/somedep-build;SOURCE_SUBDIR;DoesNotExist
+-- Provider invoked for method FETCHCONTENT_MAKEAVAILABLE_SERIAL with args: SOURCE_DIR;.*/Tests/RunCMake/DependencyProviders;BINARY_DIR;.*/Tests/RunCMake/DependencyProviders/FetchContentSerial-build/_deps/somedep-build;EXTERNALPROJECT_INTERNAL_ARGUMENT_SEPARATOR;SOURCE_SUBDIR;DoesNotExist
 -- FetchContent_MakeAvailable\(\) succeeded
 -- Configuring done

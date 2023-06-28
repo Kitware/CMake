@@ -4266,6 +4266,10 @@ function(ExternalProject_Add name)
     # Miscellaneous options
     #
     LIST_SEPARATOR
+    #
+    # Internal options (undocumented)
+    #
+    EXTERNALPROJECT_INTERNAL_ARGUMENT_SEPARATOR
   )
   _ep_parse_arguments(
     ExternalProject_Add

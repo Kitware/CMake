@@ -2,4 +2,4 @@
 -- After cmake_language
 -- AThing_FOUND = 0
 -- Redirecting FetchContent_MakeAvailable\(SomeDep\) to find_package\(\)
--- Provider invoked for method FETCHCONTENT_MAKEAVAILABLE_SERIAL with args: SOURCE_DIR;.*/Tests/RunCMake/DependencyProviders;BINARY_DIR;.*/Tests/RunCMake/DependencyProviders/RedirectFetchContentSerial-build/_deps/somedep-build;SOURCE_SUBDIR;DoesNotExist
+-- Provider invoked for method FETCHCONTENT_MAKEAVAILABLE_SERIAL with args: SOURCE_DIR;.*/Tests/RunCMake/DependencyProviders;BINARY_DIR;.*/Tests/RunCMake/DependencyProviders/RedirectFetchContentSerial-build/_deps/somedep-build;EXTERNALPROJECT_INTERNAL_ARGUMENT_SEPARATOR;SOURCE_SUBDIR;DoesNotExist
