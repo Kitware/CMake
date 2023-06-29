@@ -164,6 +164,16 @@ if(CMake_TEST_FindPython2)
     --build-options ${build_options}
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
+
+  set_property(TEST FindPython.Python2.LOCATION FindPython.Python2.VERSION
+                    FindPython.Python2.Development.Module FindPython.Python2Fail
+                    FindPython.Python.V2.LOCATION FindPython.Python.V2.VERSION
+                    FindPython.Python2.ExactVersion.LOCATION FindPython.Python2.ExactVersion.VERSION
+                    FindPython.Python.V2.ExactVersion.LOCATION FindPython.Python.V2.ExactVersion.VERSION
+                    FindPython.Python2.VersionRange.LOCATION FindPython.Python2.VersionRange.VERSION
+                    FindPython.Python.V2.VersionRange.LOCATION FindPython.Python.V2.VersionRange.VERSION
+                    FindPython.Python2Embedded
+               APPEND PROPERTY LABELS Python2)
 endif()
 
 if(CMake_TEST_FindPython3)
@@ -413,6 +423,18 @@ if(CMake_TEST_FindPython3)
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
 
+  set_property(TEST FindPython.Python3.LOCATION FindPython.Python3.VERSION
+                    FindPython.Python3.Development.Module FindPython.Python3Fail
+                    FindPython.Python.V3.LOCATION FindPython.Python.V3.VERSION
+                    FindPython.Python3.ExactVersion.LOCATION FindPython.Python3.ExactVersion.VERSION
+                    FindPython.Python.V3.ExactVersion.LOCATION FindPython.Python.V3.ExactVersion.VERSION
+                    FindPython.Python3.VersionRange.LOCATION FindPython.Python3.VersionRange.VERSION
+                    FindPython.Python.V3.VersionRange.LOCATION FindPython.Python.V3.VersionRange.VERSION
+                    FindPython.VirtualEnv FindPython.Python3Embedded FindPython.RequiredArtifacts
+                    FindPython.ArtifactsInteractive.ON FindPython.ArtifactsInteractive.OFF
+                    FindPython.CustomFailureMessage FindPython.DifferentComponents
+               APPEND PROPERTY LABELS Python3)
+
   if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     add_test(NAME FindPython.UnversionedNames COMMAND
       ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
@@ -423,6 +445,7 @@ if(CMake_TEST_FindPython3)
       --build-project UnversionedNames
       --build-options ${build_options}
     )
+    set_property(TEST FindPython.UnversionedNames APPEND PROPERTY LABELS Python3)
   endif()
 endif()
 
@@ -475,6 +498,9 @@ if(CMake_TEST_FindPython2 OR CMake_TEST_FindPython3)
       "-DCMake_TEST_FindPython_COMPONENT=Development"
       --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
       )
+
+    set_property(TEST FindPython.Interpreter.SOABI FindPython.Development.SOABI
+                 APPEND PROPERTY LABELS Python2 Python3)
   endif()
 
   add_test(NAME FindPython.MultiplePackages COMMAND
@@ -487,6 +513,9 @@ if(CMake_TEST_FindPython2 OR CMake_TEST_FindPython3)
     --build-options ${build_options}
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
+
+  set_property(TEST FindPython.Python.LOCATION FindPython.Python.VERSION FindPython.MultiplePackages
+               APPEND PROPERTY LABELS Python2 Python3)
 endif()
 
 
@@ -501,8 +530,9 @@ if(CMake_TEST_FindPython2_SABIModule)
     --build-options ${build_options}
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
-    set_tests_properties(FindPython.Python2.Development.SABIModule PROPERTIES
-      PASS_REGULAR_EXPRESSION "Could NOT find Python2 \\(missing: .*Development\\.SABIModule")
+  set_tests_properties(FindPython.Python2.Development.SABIModule PROPERTIES
+    PASS_REGULAR_EXPRESSION "Could NOT find Python2 \\(missing: .*Development\\.SABIModule")
+  set_property(TEST FindPython.Python2.Development.SABIModule APPEND PROPERTY LABELS Python2)
 endif()
 
 if(CMake_TEST_FindPython3_SABIModule)
@@ -519,6 +549,7 @@ if(CMake_TEST_FindPython3_SABIModule)
     --build-options ${build_options}
     --test-command ${CMAKE_CTEST_COMMAND} -V -C Release
     )
+  set_property(TEST FindPython.Python3.Development.SABIModule APPEND PROPERTY LABELS Python3)
 endif()
 
 if(CMake_TEST_FindPython2_NumPy OR CMake_TEST_FindPython3_NumPy)
@@ -541,6 +572,8 @@ if(CMake_TEST_FindPython2_NumPy OR CMake_TEST_FindPython3_NumPy)
     --build-project TestNumPyOnly
     --build-options ${build_options}
   )
+
+  set_property(TEST FindPython.NumPy FindPython.NumPyOnly APPEND PROPERTY LABELS Python2 Python3)
 endif()
 
 if(CMake_TEST_FindPython3_Conda)
@@ -554,6 +587,7 @@ if(CMake_TEST_FindPython3_Conda)
     --build-options ${build_options}
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
+  set_property(TEST FindPython.VirtualEnvConda APPEND PROPERTY LABELS Python3)
 endif()
 
 if (CMake_TEST_FindPython2 AND CMake_TEST_FindPython2_IronPython)
@@ -577,6 +611,9 @@ if (CMake_TEST_FindPython2 AND CMake_TEST_FindPython2_IronPython)
     --build-options ${build_options} -DPython_REQUESTED_VERSION=2 -DPython_REQUESTED_IMPLEMENTATION=IronPython
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
+
+  set_property(TEST FindPython.Implementation.CPython2 FindPython.Implementation.IronPython2
+               APPEND PROPERTY LABELS Python2)
 endif()
 
 if (CMake_TEST_FindPython3 AND CMake_TEST_FindPython3_IronPython)
@@ -600,6 +637,9 @@ if (CMake_TEST_FindPython3 AND CMake_TEST_FindPython3_IronPython)
     --build-options ${build_options} -DPython_REQUESTED_VERSION=3 -DPython_REQUESTED_IMPLEMENTATION=IronPython
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
+
+  set_property(TEST FindPython.Implementation.CPython3 FindPython.Implementation.IronPython3
+               APPEND PROPERTY LABELS Python3)
 endif()
 
 if(CMake_TEST_FindPython2_IronPython)
@@ -667,6 +707,11 @@ if(CMake_TEST_FindPython2_IronPython)
                                      -DPython2_FIND_IMPLEMENTATIONS=IronPython
                                      -DPython2_FIND_STRATEGY=VERSION
     )
+
+  set_property(TEST FindPython.IronPython2.LOCATION FindPython.IronPython2.VERSION
+                    FindPython.IronPython.V2.LOCATION FindPython.IronPython.V2.VERSION
+                    FindPython.IronPython2.VersionRange.LOCATION FindPython.IronPython2.VersionRange.VERSION
+               APPEND PROPERTY LABELS Python2)
 endif()
 
 if(CMake_TEST_FindPython3_IronPython)
@@ -734,6 +779,11 @@ if(CMake_TEST_FindPython3_IronPython)
                                      -DPython3_FIND_IMPLEMENTATIONS=IronPython
                                      -DPython3_FIND_STRATEGY=VERSION
     )
+
+  set_property(TEST FindPython.IronPython3.LOCATION FindPython.IronPython3.VERSION
+                    FindPython.IronPython.V3.LOCATION FindPython.IronPython.V3.VERSION
+                    FindPython.IronPython3.VersionRange.LOCATION FindPython.IronPython3.VersionRange.VERSION
+               APPEND PROPERTY LABELS Python3)
 endif()
 
 if(CMake_TEST_FindPython2_IronPython OR CMake_TEST_FindPython3_IronPython)
@@ -757,6 +807,9 @@ if(CMake_TEST_FindPython2_IronPython OR CMake_TEST_FindPython3_IronPython)
     --build-options ${build_options} -DPython_FIND_STRATEGY=VERSION
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
+
+  set_property(TEST FindPython.IronPython.LOCATION FindPython.IronPython.VERSION
+               APPEND PROPERTY LABELS Python2 Python3)
 endif()
 
 if(CMake_TEST_FindPython2_PyPy)
@@ -801,6 +854,10 @@ if(CMake_TEST_FindPython2_PyPy)
     --build-options ${build_options} -DPython_REQUESTED_VERSION=2 -DPython_FIND_STRATEGY=VERSION
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
+
+  set_property(TEST FindPython.PyPy2.LOCATION FindPython.PyPy2.VERSION
+                    FindPython.PyPy.V2.LOCATION FindPython.PyPy.V2.VERSION
+               APPEND PROPERTY LABELS Python2)
 endif()
 
 if(CMake_TEST_FindPython3_PyPy)
@@ -845,6 +902,10 @@ if(CMake_TEST_FindPython3_PyPy)
     --build-options ${build_options} -DPython_REQUESTED_VERSION=3 -DPython_FIND_STRATEGY=VERSION
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
+
+  set_property(TEST FindPython.PyPy3.LOCATION FindPython.PyPy3.VERSION
+                    FindPython.PyPy.V3.LOCATION FindPython.PyPy.V3.VERSION
+               APPEND PROPERTY LABELS Python3)
 endif()
 
 if(CMake_TEST_FindPython2_PyPy OR CMake_TEST_FindPython3_PyPy)
@@ -868,4 +929,7 @@ if(CMake_TEST_FindPython2_PyPy OR CMake_TEST_FindPython3_PyPy)
     --build-options ${build_options} -DPython_FIND_STRATEGY=VERSION
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
+
+  set_property(TEST FindPython.PyPy.LOCATION FindPython.PyPy.VERSION
+               APPEND PROPERTY LABELS Python2 Python3)
 endif()
