@@ -1557,15 +1557,17 @@ if(BUILD_TESTING)
   endif()
   if(CMake_TEST_FindPython_IronPython)
     set(CMake_TEST_FindPython2_IronPython TRUE)
+    set(CMake_TEST_FindPython3_IronPython TRUE)
   endif()
   if(CMake_TEST_FindPython_PyPy)
     set(CMake_TEST_FindPython2_PyPy TRUE)
     set(CMake_TEST_FindPython3_PyPy TRUE)
   endif()
-  if(CMake_TEST_FindPython2 OR CMake_TEST_FindPython2
+  if(CMake_TEST_FindPython2 OR CMake_TEST_FindPython3
       OR CMake_TEST_FindPython2_SABIModule OR CMake_TEST_FindPython3_SABIModule
       OR CMake_TEST_FindPython2_NumPy OR CMake_TEST_FindPython3_NumPy
-      OR CMake_TEST_FindPython3_Conda OR CMake_TEST_FindPython2_IronPython
+      OR CMake_TEST_FindPython3_Conda
+      OR CMake_TEST_FindPython2_IronPython OR CMake_TEST_FindPython3_IronPython
       OR CMake_TEST_FindPython2_PyPy OR CMake_TEST_FindPython3_PyPy)
     if (CMake_TEST_FindPython2 AND CMAKE_SYSTEM_NAME MATCHES "Linux|Darwin")
       set(CMake_TEST_FindPython2_SABIModule TRUE)

@@ -557,24 +557,47 @@ if(CMake_TEST_FindPython3_Conda)
 endif()
 
 if (CMake_TEST_FindPython2 AND CMake_TEST_FindPython2_IronPython)
-  add_test(NAME FindPython.Implementation.CPython COMMAND
+  add_test(NAME FindPython.Implementation.CPython2 COMMAND
     ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/FindPython/Implementation"
-    "${CMake_BINARY_DIR}/Tests/FindPython/Implementation.CPython"
+    "${CMake_BINARY_DIR}/Tests/FindPython/Implementation.CPython2"
     ${build_generator_args}
     --build-project TestImplementationCPython
     --build-options ${build_options} -DPython_REQUESTED_VERSION=2 -DPython_REQUESTED_IMPLEMENTATIONS=CPython
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
-  add_test(NAME FindPython.Implementation.IronPython COMMAND
+  add_test(NAME FindPython.Implementation.IronPython2 COMMAND
     ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/FindPython/Implementation"
-    "${CMake_BINARY_DIR}/Tests/FindPython/Implementation.IronPython"
+    "${CMake_BINARY_DIR}/Tests/FindPython/Implementation.IronPython2"
     ${build_generator_args}
     --build-project TestImplementationIronPython
     --build-options ${build_options} -DPython_REQUESTED_VERSION=2 -DPython_REQUESTED_IMPLEMENTATION=IronPython
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+endif()
+
+if (CMake_TEST_FindPython3 AND CMake_TEST_FindPython3_IronPython)
+  add_test(NAME FindPython.Implementation.CPython3 COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/Implementation"
+    "${CMake_BINARY_DIR}/Tests/FindPython/Implementation.CPython3"
+    ${build_generator_args}
+    --build-project TestImplementationCPython
+    --build-options ${build_options} -DPython_REQUESTED_VERSION=3 -DPython_REQUESTED_IMPLEMENTATIONS=CPython
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+  add_test(NAME FindPython.Implementation.IronPython3 COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/Implementation"
+    "${CMake_BINARY_DIR}/Tests/FindPython/Implementation.IronPython3"
+    ${build_generator_args}
+    --build-project TestImplementationIronPython
+    --build-options ${build_options} -DPython_REQUESTED_VERSION=3 -DPython_REQUESTED_IMPLEMENTATION=IronPython
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
 endif()
@@ -601,26 +624,6 @@ if(CMake_TEST_FindPython2_IronPython)
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
 
-  add_test(NAME FindPython.IronPython.LOCATION COMMAND
-    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/FindPython/IronPython"
-    "${CMake_BINARY_DIR}/Tests/FindPython/IronPython.LOCATION"
-    ${build_generator_args}
-    --build-project TestIronPython
-    --build-options ${build_options} -DPython_FIND_STRATEGY=LOCATION
-    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
-    )
-  add_test(NAME FindPython.IronPython.VERSION COMMAND
-    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/FindPython/IronPython"
-    "${CMake_BINARY_DIR}/Tests/FindPython/IronPython.VERSION"
-    ${build_generator_args}
-    --build-project TestIronPython
-    --build-options ${build_options} -DPython_FIND_STRATEGY=VERSION
-    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
-    )
   add_test(NAME FindPython.IronPython.V2.LOCATION COMMAND
     ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
     --build-and-test
@@ -663,6 +666,96 @@ if(CMake_TEST_FindPython2_IronPython)
     --build-options ${build_options} -DPython=Python2 -DPython_REQUESTED_VERSION=2
                                      -DPython2_FIND_IMPLEMENTATIONS=IronPython
                                      -DPython2_FIND_STRATEGY=VERSION
+    )
+endif()
+
+if(CMake_TEST_FindPython3_IronPython)
+  add_test(NAME FindPython.IronPython3.LOCATION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/IronPython3"
+    "${CMake_BINARY_DIR}/Tests/FindPython/IronPython3.LOCATION"
+    ${build_generator_args}
+    --build-project TestIronPython3
+    --build-options ${build_options} -DPython3_FIND_STRATEGY=LOCATION
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+  add_test(NAME FindPython.IronPython3.VERSION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/IronPython3"
+    "${CMake_BINARY_DIR}/Tests/FindPython/IronPython3.VERSION"
+    ${build_generator_args}
+    --build-project TestIronPython3
+    --build-options ${build_options} -DPython3_FIND_STRATEGY=VERSION
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+
+  add_test(NAME FindPython.IronPython.V3.LOCATION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/IronPython"
+    "${CMake_BINARY_DIR}/Tests/FindPython/IronPython.V3.LOCATION"
+    ${build_generator_args}
+    --build-project TestIronPython
+    --build-options ${build_options} -DPython_REQUESTED_VERSION=3 -DPython_FIND_STRATEGY=LOCATION
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+  add_test(NAME FindPython.IronPython.V3.VERSION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/IronPython"
+    "${CMake_BINARY_DIR}/Tests/FindPython/IronPython.V3.VERSION"
+    ${build_generator_args}
+    --build-project TestIronPython
+    --build-options ${build_options} -DPython_REQUESTED_VERSION=3 -DPython_FIND_STRATEGY=VERSION
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+
+  add_test(NAME FindPython.IronPython3.VersionRange.LOCATION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/VersionRange"
+    "${CMake_BINARY_DIR}/Tests/FindPython/IronPython3.VersionRange.LOCATION"
+    ${build_generator_args}
+    --build-project TestVersionRange
+    --build-options ${build_options} -DPython=Python3 -DPython_REQUESTED_VERSION=3
+                                     -DPython3_FIND_IMPLEMENTATIONS=IronPython
+                                     -DPython3_FIND_STRATEGY=LOCATION
+    )
+  add_test(NAME FindPython.IronPython3.VersionRange.VERSION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/VersionRange"
+    "${CMake_BINARY_DIR}/Tests/FindPython/IronPython3.VersionRange.VERSION"
+    ${build_generator_args}
+    --build-project TestVersionRange
+    --build-options ${build_options} -DPython=Python3 -DPython_REQUESTED_VERSION=3
+                                     -DPython3_FIND_IMPLEMENTATIONS=IronPython
+                                     -DPython3_FIND_STRATEGY=VERSION
+    )
+endif()
+
+if(CMake_TEST_FindPython2_IronPython OR CMake_TEST_FindPython3_IronPython)
+  add_test(NAME FindPython.IronPython.LOCATION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/IronPython"
+    "${CMake_BINARY_DIR}/Tests/FindPython/IronPython.LOCATION"
+    ${build_generator_args}
+    --build-project TestIronPython
+    --build-options ${build_options} -DPython_FIND_STRATEGY=LOCATION
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+  add_test(NAME FindPython.IronPython.VERSION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/IronPython"
+    "${CMake_BINARY_DIR}/Tests/FindPython/IronPython.VERSION"
+    ${build_generator_args}
+    --build-project TestIronPython
+    --build-options ${build_options} -DPython_FIND_STRATEGY=VERSION
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
 endif()
 

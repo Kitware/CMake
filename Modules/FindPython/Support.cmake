@@ -981,7 +981,7 @@ function (_PYTHON_VALIDATE_COMPILER)
 
   # retrieve python environment version from compiler
   set (working_dir "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/PythonCompilerVersion.dir")
-  file (WRITE "${working_dir}/version.py" "import sys; sys.stdout.write('.'.join([str(x) for x in sys.version_info[:3]]))\n")
+  file (WRITE "${working_dir}/version.py" "import sys; sys.stdout.write('.'.join([str(x) for x in sys.version_info[:3]])); sys.stdout.flush()\n")
   execute_process (COMMAND ${launcher} "${_${_PYTHON_PREFIX}_COMPILER}"
                            ${_${_PYTHON_PREFIX}_IRON_PYTHON_COMPILER_ARCH_FLAGS}
                            /target:exe /embed "${working_dir}/version.py"
@@ -2520,7 +2520,7 @@ if ("Compiler" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
     # retrieve python environment version from compiler
     _python_get_launcher (_${_PYTHON_PREFIX}_COMPILER_LAUNCHER COMPILER)
     set (_${_PYTHON_PREFIX}_VERSION_DIR "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/PythonCompilerVersion.dir")
-    file (WRITE "${_${_PYTHON_PREFIX}_VERSION_DIR}/version.py" "import sys; sys.stdout.write('.'.join([str(x) for x in sys.version_info[:3]]))\n")
+    file (WRITE "${_${_PYTHON_PREFIX}_VERSION_DIR}/version.py" "import sys; sys.stdout.write('.'.join([str(x) for x in sys.version_info[:3]])); sys.stdout.flush()\n")
     execute_process (COMMAND ${_${_PYTHON_PREFIX}_COMPILER_LAUNCHER} "${_${_PYTHON_PREFIX}_COMPILER}"
                              ${_${_PYTHON_PREFIX}_IRON_PYTHON_COMPILER_ARCH_FLAGS}
                              /target:exe /embed "${_${_PYTHON_PREFIX}_VERSION_DIR}/version.py"
