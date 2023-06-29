@@ -332,6 +332,8 @@ cmQtAutoGenInitializer::cmQtAutoGenInitializer(
   this->Uic.Enabled = uicEnabled;
   this->Rcc.Enabled = rccEnabled;
   this->Rcc.GlobalTarget = globalAutoRccTarget;
+  this->CrossConfig =
+    !this->Makefile->GetSafeDefinition("CMAKE_CROSS_CONFIGS").empty();
 }
 
 bool cmQtAutoGenInitializer::InitCustomTargets()
@@ -1026,8 +1028,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
   if (this->MocOrUicEnabled() && !this->AutogenTarget.FilesGenerated.empty()) {
     if (this->CMP0071Accept) {
       // Let the autogen target depend on the GENERATED files
-      if (this->MultiConfig &&
-          this->Makefile->GetSafeDefinition("CMAKE_CROSS_CONFIGS").empty()) {
+      if (this->MultiConfig && !this->CrossConfig) {
         for (MUFile const* muf : this->AutogenTarget.FilesGenerated) {
           if (muf->Configs.empty()) {
             this->AutogenTarget.DependFiles.insert(muf->FullPath);
@@ -1190,8 +1191,7 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
   if (this->Moc.Enabled) {
     this->AddGeneratedSource(this->Moc.CompilationFile, this->Moc, true);
     if (useDepfile) {
-      if (this->MultiConfig &&
-          !this->Makefile->GetSafeDefinition("CMAKE_CROSS_CONFIGS").empty() &&
+      if (this->MultiConfig && this->CrossConfig &&
           this->GlobalGen->GetName().find("Ninja") != std::string::npos) {
         // Make all mocs_compilation_<CONFIG>.cpp files byproducts of the
         // ${target}_autogen/timestamp custom command.
@@ -1239,7 +1239,7 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
   this->GlobalGen->GetQtAutoGenConfigs(configs);
   bool constexpr stdPipesUTF8 = true;
   cmCustomCommandLines commandLines;
-  if (this->Makefile->GetSafeDefinition("CMAKE_CROSS_CONFIGS").empty()) {
+  if (!this->CrossConfig) {
     std::string autogenInfoFileConfig;
     if (this->MultiConfig) {
       autogenInfoFileConfig = "$<CONFIG>";
