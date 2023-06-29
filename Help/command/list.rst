@@ -1,7 +1,7 @@
 list
 ----
 
-List operations.
+Operations on :ref:`semicolon-separated lists <CMake Language Lists>`.
 
 Synopsis
 ^^^^^^^^
@@ -55,6 +55,10 @@ propagation.
   ``set(var "a b c d e")`` creates a string or a list with one item in it.
   (Note that macro arguments are not variables, and therefore cannot be used
   in ``LIST`` commands.)
+
+  Individual elements may not contain an unequal number of ``[`` and ``]``
+  characters, and may not end in a backslash (``\``).
+  See :ref:`semicolon-separated lists <CMake Language Lists>` for details.
 
 .. note::
 
