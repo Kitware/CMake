@@ -478,7 +478,7 @@ target is already built, the command will not execute.
                      [BYPRODUCTS [files...]]
                      [WORKING_DIRECTORY dir]
                      [COMMENT comment]
-                     [VERBATIM] [USES_TERMINAL]
+                     [VERBATIM]
                      [COMMAND_EXPAND_LISTS])
 
 This defines a new command that will be associated with building the
