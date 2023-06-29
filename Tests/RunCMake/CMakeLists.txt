@@ -165,6 +165,10 @@ if(GIT_EXECUTABLE)
   add_RunCMake_test(CMP0150)
 endif()
 
+if(NOT WIN32 OR CYGWIN)
+  add_RunCMake_test(CMP0152)
+endif()
+
 # The test for Policy 65 requires the use of the
 # CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS variable, which both the VS and Xcode
 # generators ignore.  The policy will have no effect on those generators.

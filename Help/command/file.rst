@@ -981,6 +981,11 @@ Path Conversion
       if ``USERPROFILE`` is not defined.  On all other platforms, only ``HOME``
       is used.
 
+  .. versionchanged:: 3.28
+
+    All symlinks are resolved before collapsing ``../`` components.
+    See policy :policy:`CMP0152`.
+
 .. signature::
   file(RELATIVE_PATH <variable> <directory> <file>)
 

@@ -459,7 +459,11 @@ class cmMakefile;
   SELECT(POLICY, CMP0151,                                                     \
          "AUTOMOC include directory is a system include directory by "        \
          "default.",                                                          \
-         3, 27, 0, cmPolicies::WARN)
+         3, 27, 0, cmPolicies::WARN)                                          \
+  SELECT(                                                                     \
+    POLICY, CMP0152,                                                          \
+    "file(REAL_PATH) resolves symlinks before collapsing ../ components.", 3, \
+    28, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \

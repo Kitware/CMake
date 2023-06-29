@@ -13,6 +13,43 @@ if (NOT WIN32 OR CYGWIN)
   if (NOT real_path STREQUAL "${CMAKE_CURRENT_BINARY_DIR}/test.txt")
     message(SEND_ERROR "real path is \"${real_path}\", should be \"${CMAKE_CURRENT_BINARY_DIR}/test.txt\"")
   endif()
+
+  file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/dir/")
+  file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/dir/nested/")
+  file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/dir/nested/bin/")
+  file(CREATE_LINK  "${CMAKE_CURRENT_BINARY_DIR}/dir/nested/bin" "${CMAKE_CURRENT_BINARY_DIR}/dir/bin" SYMBOLIC)
+
+  cmake_policy(SET CMP0152 NEW)
+  file(REAL_PATH "${CMAKE_CURRENT_BINARY_DIR}/dir/bin/../" real_path)
+  if (NOT real_path STREQUAL "${CMAKE_CURRENT_BINARY_DIR}/dir/nested")
+    message(SEND_ERROR "real path is \"${real_path}\", should be \"${CMAKE_CURRENT_BINARY_DIR}/dir/nested\"")
+  endif()
+
+  file(REAL_PATH "${CMAKE_CURRENT_BINARY_DIR}/dir/bin/../bin" real_path)
+  if (NOT real_path STREQUAL "${CMAKE_CURRENT_BINARY_DIR}/dir/nested/bin")
+    message(SEND_ERROR "real path is \"${real_path}\", should be \"${CMAKE_CURRENT_BINARY_DIR}/dir/nested/bin\"")
+  endif()
+
+  file(REAL_PATH "dir/bin/../bin" real_path BASE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+  if (NOT real_path STREQUAL "${CMAKE_CURRENT_BINARY_DIR}/dir/nested/bin")
+    message(SEND_ERROR "real path is \"${real_path}\", should be \"${CMAKE_CURRENT_BINARY_DIR}/dir/nested/bin\"")
+  endif()
+
+  file(REAL_PATH "../bin" real_path BASE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/dir/bin/" )
+  if (NOT real_path STREQUAL "${CMAKE_CURRENT_BINARY_DIR}/dir/nested/bin")
+    message(SEND_ERROR "real path is \"${real_path}\", should be \"${CMAKE_CURRENT_BINARY_DIR}/dir/nested/bin\"")
+  endif()
+
+  cmake_policy(SET CMP0152 OLD)
+  file(REAL_PATH "${CMAKE_CURRENT_BINARY_DIR}/dir/bin/../" real_path)
+  if (NOT real_path STREQUAL "${CMAKE_CURRENT_BINARY_DIR}/dir")
+    message(SEND_ERROR "real path is \"${real_path}\", should be \"${CMAKE_CURRENT_BINARY_DIR}/dir/nested\"")
+  endif()
+  file(REAL_PATH "../" real_path BASE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/dir/bin/")
+  if (NOT real_path STREQUAL "${CMAKE_CURRENT_BINARY_DIR}/dir")
+    message(SEND_ERROR "real path is \"${real_path}\", should be \"${CMAKE_CURRENT_BINARY_DIR}/dir\"")
+  endif()
+
 endif()
 
 
