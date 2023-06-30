@@ -2766,6 +2766,8 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
     }
   }
 
+  bool isCppModule = false;
+
   for (std::string const& config : this->Configurations) {
     this->GeneratorTarget->NeedCxxModuleSupport(lang, config);
 
@@ -2789,6 +2791,7 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
     if (fs && fs->GetType() == "CXX_MODULES"_s) {
       if (lang == "CXX"_s) {
         if (fs->GetType() == "CXX_MODULES"_s) {
+          isCppModule = true;
           if (shouldScanForModules &&
               this->GlobalGenerator->IsScanDependenciesSupported()) {
             // ScanSourceforModuleDependencies uses 'cl /scanDependencies' and
@@ -2947,6 +2950,14 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       oh.OutputPreprocessorDefinitions(lang);
     }
   }
+
+  if (isCppModule && !objectName.empty()) {
+    std::string baseName = cmStrCat("$(IntDir)/", objectName);
+    cmStripSuffixIfExists(baseName, ".obj");
+    e2.Element("ModuleOutputFile", cmStrCat(baseName, ".ifc"));
+    e2.Element("ModuleDependenciesFile", cmStrCat(baseName, ".module.json"));
+  }
+
   if (this->IsXamlSource(source->GetFullPath())) {
     const std::string& fileName = source->GetFullPath();
     e2.Element("DependentUpon",

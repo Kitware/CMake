@@ -148,6 +148,7 @@ if ("named" IN_LIST CMake_TEST_MODULE_COMPILATION)
   set(RunCMake_CXXModules_NO_TEST 1)
   run_cxx_module_test(circular)
   unset(RunCMake_CXXModules_NO_TEST)
+  run_cxx_module_test(same-src-name)
   run_cxx_module_test(scan_properties)
 endif ()
 
