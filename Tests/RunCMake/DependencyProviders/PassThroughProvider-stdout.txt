@@ -4,4 +4,4 @@
 -- Provider invoked for method FIND_PACKAGE with args: AThing;QUIET
 -- AThing_FOUND = 0
 -- Null provider called
--- Provider invoked for method FETCHCONTENT_MAKEAVAILABLE_SERIAL with args: SomeDep;SOURCE_DIR;.*/Tests/RunCMake/DependencyProviders;BINARY_DIR;.*/Tests/RunCMake/DependencyProviders/PassThroughProvider-build/_deps/somedep-build;SOURCE_SUBDIR;DoesNotExist
+-- Provider invoked for method FETCHCONTENT_MAKEAVAILABLE_SERIAL with args: SomeDep;SOURCE_DIR;.*/Tests/RunCMake/DependencyProviders;BINARY_DIR;.*/Tests/RunCMake/DependencyProviders/PassThroughProvider-build/_deps/somedep-build;EXTERNALPROJECT_INTERNAL_ARGUMENT_SEPARATOR;SOURCE_SUBDIR;DoesNotExist

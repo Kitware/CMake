@@ -1336,9 +1336,11 @@ function(FetchContent_Declare contentName)
   endif()
 
   # Add back in the keyword args we pulled out and potentially tweaked/added
+  set(sep EXTERNALPROJECT_INTERNAL_ARGUMENT_SEPARATOR)
   foreach(key IN LISTS oneValueArgs)
     if(DEFINED ARG_${key})
-      list(PREPEND ARG_UNPARSED_ARGUMENTS ${key} "${ARG_${key}}")
+      list(PREPEND ARG_UNPARSED_ARGUMENTS ${key} "${ARG_${key}}" ${sep})
+      set(sep "")
     endif()
   endforeach()
 
