@@ -53,7 +53,7 @@ public:
   std::shared_ptr<dap::ReaderWriter> DebuggerToClient;
 };
 
-bool testBasicProtocol()
+bool runTest(std::function<bool(dap::Session&)> onThreadExitedEvent)
 {
   std::promise<bool> debuggerAdapterInitializedPromise;
   std::future<bool> debuggerAdapterInitializedFuture =
@@ -152,6 +152,11 @@ bool testBasicProtocol()
               std::future_status::ready);
   ASSERT_TRUE(threadExitedFuture.wait_for(futureTimeout) ==
               std::future_status::ready);
+
+  if (onThreadExitedEvent) {
+    ASSERT_TRUE(onThreadExitedEvent(*client));
+  }
+
   ASSERT_TRUE(exitedEventReceivedFuture.wait_for(futureTimeout) ==
               std::future_status::ready);
   ASSERT_TRUE(terminatedEventReceivedFuture.wait_for(futureTimeout) ==
@@ -165,9 +170,32 @@ bool testBasicProtocol()
   return true;
 }
 
+bool testBasicProtocol()
+{
+  return runTest(nullptr);
+}
+
+bool testThreadsRequestAfterThreadExitedEvent()
+{
+  return runTest([](dap::Session& session) -> bool {
+    // Try requesting threads again after receiving the thread exited event.
+    // Some clients do this to ensure that their thread list is up-to-date.
+    dap::ThreadsRequest threadsRequest;
+    auto threadsResponse = session.send(threadsRequest).get();
+    ASSERT_TRUE(!threadsResponse.error);
+
+    // CMake only has one DAP thread. Once that thread exits, there should be
+    // no threads left.
+    ASSERT_TRUE(threadsResponse.response.threads.empty());
+
+    return true;
+  });
+}
+
 int testDebuggerAdapter(int, char*[])
 {
   return runTests(std::vector<std::function<bool()>>{
     testBasicProtocol,
+    testThreadsRequestAfterThreadExitedEvent,
   });
 }

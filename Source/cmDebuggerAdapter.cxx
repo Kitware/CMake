@@ -167,10 +167,16 @@ cmDebuggerAdapter::cmDebuggerAdapter(
     (void)req;
     std::unique_lock<std::mutex> lock(Mutex);
     dap::ThreadsResponse response;
-    dap::Thread thread;
-    thread.id = DefaultThread->GetId();
-    thread.name = DefaultThread->GetName();
-    response.threads.push_back(thread);
+
+    // If a client requests threads during shutdown (like after receiving the
+    // thread exited event), DefaultThread won't be set.
+    if (DefaultThread) {
+      dap::Thread thread;
+      thread.id = DefaultThread->GetId();
+      thread.name = DefaultThread->GetName();
+      response.threads.push_back(thread);
+    }
+
     return response;
   });
 
