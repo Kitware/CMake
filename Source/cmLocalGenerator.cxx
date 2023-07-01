@@ -1431,11 +1431,14 @@ void cmLocalGenerator::GetDeviceLinkFlags(
   }
 
   this->AddVisibilityPresetFlags(linkFlags, target, "CUDA");
+  this->GetGlobalGenerator()->EncodeLiteral(linkFlags);
 
   std::vector<std::string> linkOpts;
   target->GetLinkOptions(linkOpts, config, "CUDA");
+  this->SetLinkScriptShell(this->GetGlobalGenerator()->GetUseLinkScript());
   // LINK_OPTIONS are escaped.
   this->AppendCompileOptions(linkFlags, linkOpts);
+  this->SetLinkScriptShell(false);
 }
 
 void cmLocalGenerator::GetTargetFlags(
@@ -1501,13 +1504,17 @@ void cmLocalGenerator::GetTargetFlags(
       }
 
       if (!sharedLibFlags.empty()) {
+        this->GetGlobalGenerator()->EncodeLiteral(sharedLibFlags);
         linkFlags.emplace_back(std::move(sharedLibFlags));
       }
 
       std::vector<BT<std::string>> linkOpts =
         target->GetLinkOptions(config, linkLanguage);
+      this->SetLinkScriptShell(this->GetGlobalGenerator()->GetUseLinkScript());
       // LINK_OPTIONS are escaped.
       this->AppendCompileOptions(linkFlags, linkOpts);
+      this->SetLinkScriptShell(false);
+
       if (pcli) {
         this->OutputLinkLibraries(pcli, linkLineComputer, linkLibs,
                                   frameworkPath, linkPath);
@@ -1581,13 +1588,16 @@ void cmLocalGenerator::GetTargetFlags(
       }
 
       if (!exeFlags.empty()) {
+        this->GetGlobalGenerator()->EncodeLiteral(exeFlags);
         linkFlags.emplace_back(std::move(exeFlags));
       }
 
       std::vector<BT<std::string>> linkOpts =
         target->GetLinkOptions(config, linkLanguage);
+      this->SetLinkScriptShell(this->GetGlobalGenerator()->GetUseLinkScript());
       // LINK_OPTIONS are escaped.
       this->AppendCompileOptions(linkFlags, linkOpts);
+      this->SetLinkScriptShell(false);
     } break;
     default:
       break;
@@ -1603,6 +1613,7 @@ void cmLocalGenerator::GetTargetFlags(
                                    config);
 
   if (!extraLinkFlags.empty()) {
+    this->GetGlobalGenerator()->EncodeLiteral(extraLinkFlags);
     linkFlags.emplace_back(std::move(extraLinkFlags));
   }
 }

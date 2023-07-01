@@ -30,7 +30,7 @@ if (NOT CMAKE_C_COMPILER_ID STREQUAL "Intel")
   run_cmake_target(LINK_OPTIONS shared LinkOptions_shared --config Release)
   run_cmake_target(LINK_OPTIONS mod LinkOptions_mod --config Release)
   run_cmake_target(LINK_OPTIONS exe LinkOptions_exe --config Release)
-
+  run_cmake_target(LINK_OPTIONS dollar-option LinkOptions_dollar_exe --config Release)
 
   run_cmake(genex_LINK_LANGUAGE)
 

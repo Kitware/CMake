@@ -53,3 +53,7 @@ target_link_options(LinkOptions_mod PRIVATE $<$<CONFIG:Release>:${pre}BADFLAG_RE
 # executable with generator expression
 add_executable(LinkOptions_exe LinkOptionsExe.c)
 target_link_options(LinkOptions_exe PRIVATE $<$<CONFIG:Release>:${pre}BADFLAG_RELEASE${obj}>)
+
+# executable with dollar character
+add_executable(LinkOptions_dollar_exe LinkOptionsExe.c)
+target_link_options(LinkOptions_dollar_exe PRIVATE "${pre}BADFLAG_$dollar${obj}")
