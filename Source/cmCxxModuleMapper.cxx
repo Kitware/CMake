@@ -74,6 +74,59 @@ CxxBmiLocation CxxModuleLocations::BmiGeneratorPathForModule(
 
 namespace {
 
+struct TransitiveUsage
+{
+  TransitiveUsage(std::string name, std::string location, LookupMethod method)
+    : LogicalName(std::move(name))
+    , Location(std::move(location))
+    , Method(method)
+  {
+  }
+
+  std::string LogicalName;
+  std::string Location;
+  LookupMethod Method;
+};
+
+std::vector<TransitiveUsage> GetTransitiveUsages(
+  CxxModuleLocations const& loc, std::vector<cmSourceReqInfo> const& required,
+  CxxModuleUsage const& usages)
+{
+  std::set<std::string> transitive_usage_directs;
+  std::set<std::string> transitive_usage_names;
+
+  std::vector<TransitiveUsage> all_usages;
+
+  for (auto const& r : required) {
+    auto bmi_loc = loc.BmiGeneratorPathForModule(r.LogicalName);
+    if (bmi_loc.IsKnown()) {
+      all_usages.emplace_back(r.LogicalName, bmi_loc.Location(), r.Method);
+      transitive_usage_directs.insert(r.LogicalName);
+
+      // Insert transitive usages.
+      auto transitive_usages = usages.Usage.find(r.LogicalName);
+      if (transitive_usages != usages.Usage.end()) {
+        transitive_usage_names.insert(transitive_usages->second.begin(),
+                                      transitive_usages->second.end());
+      }
+    }
+  }
+
+  for (auto const& transitive_name : transitive_usage_names) {
+    if (transitive_usage_directs.count(transitive_name)) {
+      continue;
+    }
+
+    auto module_ref = usages.Reference.find(transitive_name);
+    if (module_ref != usages.Reference.end()) {
+      all_usages.emplace_back(transitive_name, module_ref->second.Path,
+                              module_ref->second.Method);
+    }
+  }
+
+  return all_usages;
+}
+
 std::string CxxModuleMapContentClang(CxxModuleLocations const& loc,
                                      cmScanDepInfo const& obj)
 {
@@ -180,37 +233,11 @@ std::string CxxModuleMapContentMsvc(CxxModuleLocations const& loc,
     }
   }
 
-  std::set<std::string> transitive_usage_directs;
-  std::set<std::string> transitive_usage_names;
+  auto all_usages = GetTransitiveUsages(loc, obj.Requires, usages);
+  for (auto const& usage : all_usages) {
+    auto flag = flag_for_method(usage.Method);
 
-  for (auto const& r : obj.Requires) {
-    auto bmi_loc = loc.BmiGeneratorPathForModule(r.LogicalName);
-    if (bmi_loc.IsKnown()) {
-      auto flag = flag_for_method(r.Method);
-
-      mm << flag << ' ' << r.LogicalName << '=' << bmi_loc.Location() << "\n";
-      transitive_usage_directs.insert(r.LogicalName);
-
-      // Insert transitive usages.
-      auto transitive_usages = usages.Usage.find(r.LogicalName);
-      if (transitive_usages != usages.Usage.end()) {
-        transitive_usage_names.insert(transitive_usages->second.begin(),
-                                      transitive_usages->second.end());
-      }
-    }
-  }
-
-  for (auto const& transitive_name : transitive_usage_names) {
-    if (transitive_usage_directs.count(transitive_name)) {
-      continue;
-    }
-
-    auto module_ref = usages.Reference.find(transitive_name);
-    if (module_ref != usages.Reference.end()) {
-      auto flag = flag_for_method(module_ref->second.Method);
-      mm << flag << ' ' << transitive_name << '=' << module_ref->second.Path
-         << "\n";
-    }
+    mm << flag << ' ' << usage.LogicalName << '=' << usage.Location << '\n';
   }
 
   return mm.str();
