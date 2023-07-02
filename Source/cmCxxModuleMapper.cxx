@@ -122,7 +122,7 @@ std::string CxxModuleMapContentGcc(CxxModuleLocations const& loc,
   // generate any).
 
   // Write the root directory to use for module paths.
-  mm << "$root " << loc.RootDirectory << "\n";
+  mm << "$root " << loc.RootDirectory << '\n';
 
   for (auto const& p : obj.Provides) {
     auto bmi_loc = loc.BmiGeneratorPathForModule(p.LogicalName);
