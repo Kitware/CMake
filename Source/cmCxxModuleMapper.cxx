@@ -128,7 +128,8 @@ std::vector<TransitiveUsage> GetTransitiveUsages(
 }
 
 std::string CxxModuleMapContentClang(CxxModuleLocations const& loc,
-                                     cmScanDepInfo const& obj)
+                                     cmScanDepInfo const& obj,
+                                     CxxModuleUsage const& usages)
 {
   std::stringstream mm;
 
@@ -151,12 +152,11 @@ std::string CxxModuleMapContentClang(CxxModuleLocations const& loc,
       break;
     }
   }
-  for (auto const& r : obj.Requires) {
-    auto bmi_loc = loc.BmiGeneratorPathForModule(r.LogicalName);
-    if (bmi_loc.IsKnown()) {
-      mm << "-fmodule-file=" << r.LogicalName << "=" << bmi_loc.Location()
-         << '\n';
-    }
+
+  auto all_usages = GetTransitiveUsages(loc, obj.Requires, usages);
+  for (auto const& usage : all_usages) {
+    mm << "-fmodule-file=" << usage.LogicalName << '=' << usage.Location
+       << '\n';
   }
 
   return mm.str();
@@ -420,7 +420,7 @@ std::string CxxModuleMapContent(CxxModuleMapFormat format,
 {
   switch (format) {
     case CxxModuleMapFormat::Clang:
-      return CxxModuleMapContentClang(loc, obj);
+      return CxxModuleMapContentClang(loc, obj, usages);
     case CxxModuleMapFormat::Gcc:
       return CxxModuleMapContentGcc(loc, obj);
     case CxxModuleMapFormat::Msvc:
