@@ -1211,13 +1211,12 @@ private:
 
     const auto sep = std::string{ glue };
 
-    return std::accumulate(
-      std::next(std::begin(r)), std::end(r), cmList::ToString(*std::begin(r)),
-      [&sep](std::string const& a,
-             typename std::iterator_traits<decltype(std::begin(
-               r))>::value_type const& b) -> std::string {
-        return a + sep + cmList::ToString(b);
-      });
+    std::string joined = cmList::ToString(*std::begin(r));
+    for (auto it = std::next(std::begin(r)); it != std::end(r); ++it) {
+      joined += sep + cmList::ToString(*it);
+    }
+
+    return joined;
   }
 
   container_type Values;
