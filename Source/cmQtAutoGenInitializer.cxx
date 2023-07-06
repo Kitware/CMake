@@ -1584,8 +1584,6 @@ bool cmQtAutoGenInitializer::InitRccTargets()
     } else {
       // Create custom rcc command
       {
-        std::vector<std::string> ccByproducts;
-
         // Add the resource files to the dependencies
         for (std::string const& fileName : qrc.Resources) {
           // Add resource file to the custom command dependencies
@@ -1595,7 +1593,6 @@ bool cmQtAutoGenInitializer::InitRccTargets()
           ccDepends.push_back(this->Rcc.ExecutableTargetName);
         }
         cc->SetOutputs(ccOutput);
-        cc->SetByproducts(ccByproducts);
         cc->SetDepends(ccDepends);
         this->LocalGen->AddCustomCommandToOutput(std::move(cc));
       }
