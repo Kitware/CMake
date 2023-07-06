@@ -904,13 +904,13 @@ bool cmQtAutoGenInitializer::InitScanFiles()
       if (muf.MocIt || muf.UicIt) {
         // Search for the default header file and a private header
         std::string const& srcFullPath = muf.SF->ResolveFullPath();
-        std::string basePath = cmStrCat(
+        std::string const basePath = cmStrCat(
           cmQtAutoGen::SubDirPrefix(srcFullPath),
           cmSystemTools::GetFilenameWithoutLastExtension(srcFullPath));
         for (auto const& suffix : suffixes) {
           std::string const suffixedPath = cmStrCat(basePath, suffix);
           for (auto const& ext : exts) {
-            std::string fullPath = cmStrCat(suffixedPath, '.', ext);
+            std::string const fullPath = cmStrCat(suffixedPath, '.', ext);
 
             auto constexpr locationKind = cmSourceFileLocationKind::Known;
             cmSourceFile* sf =
@@ -1535,7 +1535,8 @@ bool cmQtAutoGenInitializer::InitRccTargets()
         cmMakeCommandLine({ cmSystemTools::GetCMakeCommand(), "-E",
                             "cmake_autorcc", qrc.InfoFile, "$<CONFIG>" }));
     }
-    std::string ccComment =
+
+    std::string const ccComment =
       cmStrCat("Automatic RCC for ",
                FileProjectRelativePath(this->Makefile, qrc.QrcFile));
 
