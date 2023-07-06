@@ -1451,7 +1451,7 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
       // Alter variables for the autogen target which now merely wraps the
       // custom command
       dependencies.clear();
-      dependencies.push_back(outputFile);
+      dependencies.emplace_back(std::move(outputFile));
       commandLines.clear();
       autogenComment.clear();
     }
