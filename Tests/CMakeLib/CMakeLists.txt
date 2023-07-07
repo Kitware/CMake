@@ -67,7 +67,7 @@ file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/testUVProcessChainInput.txt" "HELLO WORL
 
 create_test_sourcelist(CMakeLib_TEST_SRCS CMakeLibTests.cxx ${CMakeLib_TESTS})
 add_executable(CMakeLibTests ${CMakeLib_TEST_SRCS})
-target_link_libraries(CMakeLibTests CMakeLib CTestLib)
+target_link_libraries(CMakeLibTests PRIVATE CTestLib CMakeLib)
 if(CMake_BUILD_PCH)
   target_precompile_headers(CMakeLibTests PRIVATE "<iostream>" "<cm3p/uv.h>")
   target_compile_definitions(CMakeLibTests PRIVATE "NOMINMAX")
