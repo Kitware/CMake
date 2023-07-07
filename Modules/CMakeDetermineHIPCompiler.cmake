@@ -124,7 +124,10 @@ unset(_CMAKE_HIP_COMPILER_ID_IMPLICIT_FWKS)
 unset(_CMAKE_HIP_COMPILER_ID_IMPLICIT_LOG)
 
 if(NOT CMAKE_HIP_COMPILER_ROCM_LIB)
-  set(_CMAKE_HIP_COMPILER_ROCM_LIB_DIRS "${CMAKE_HIP_COMPILER_ROCM_ROOT}/lib")
+  set(_CMAKE_HIP_COMPILER_ROCM_LIB_DIRS
+    "${CMAKE_HIP_COMPILER_ROCM_ROOT}/lib"
+    "${CMAKE_HIP_COMPILER_ROCM_ROOT}/lib64"
+    )
   if(CMAKE_HIP_LIBRARY_ARCHITECTURE)
     list(APPEND _CMAKE_HIP_COMPILER_ROCM_LIB_DIRS "${CMAKE_HIP_COMPILER_ROCM_ROOT}/lib/${CMAKE_HIP_LIBRARY_ARCHITECTURE}")
   endif()
@@ -145,6 +148,12 @@ if(NOT CMAKE_HIP_COMPILER_ROCM_LIB)
       )
   endif()
   unset(_CMAKE_HIP_COMPILER_ROCM_LIB_DIRS)
+endif()
+if(CMAKE_HIP_COMPILER_ROCM_LIB MATCHES "/lib64$" AND NOT DEFINED CMAKE_SIZEOF_VOID_P)
+  # We have not yet determined the target ABI but we need 'find_package' to
+  # search lib64 directories to find hip-lang CMake package dependencies.
+  # This will be replaced by ABI detection later.
+  set(CMAKE_HIP_SIZEOF_DATA_PTR 8)
 endif()
 
 if (NOT _CMAKE_TOOLCHAIN_LOCATION)
