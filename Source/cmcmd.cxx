@@ -2497,6 +2497,26 @@ int cmVSLink::LinkIncremental()
 
 int cmVSLink::LinkNonIncremental()
 {
+  // The MSVC link tool expects 'rc' to be in the PATH if it needs to embed
+  // manifests, but the user might explicitly set 'CMAKE_RC_COMPILER' instead.
+  // Add its location as a fallback at the end of PATH.
+  if (cmSystemTools::FileIsFullPath(this->RcPath)) {
+    std::string rcDir = cmSystemTools::GetFilenamePath(this->RcPath);
+#ifdef _WIN32
+    std::replace(rcDir.begin(), rcDir.end(), '/', '\\');
+    char const pathSep = ';';
+#else
+    char const pathSep = ':';
+#endif
+    cm::optional<std::string> path = cmSystemTools::GetEnvVar("PATH");
+    if (path) {
+      path = cmStrCat(*path, pathSep, rcDir);
+    } else {
+      path = rcDir;
+    }
+    cmSystemTools::PutEnv(cmStrCat("PATH=", *path));
+  }
+
   // Sort out any manifests.
   if (this->LinkGeneratesManifest || !this->UserManifests.empty()) {
     std::string opt =
