@@ -251,8 +251,14 @@ struct cmFindLibraryHelper
   void DebugLibraryFailed(std::string const& name, std::string const& path)
   {
     if (this->DebugMode) {
-      auto regexName =
-        cmStrCat(this->PrefixRegexStr, name, this->SuffixRegexStr);
+      // To improve readability of the debug output, if there is only one
+      // prefix/suffix, use the plain prefix/suffix instead of the regex.
+      const auto& prefix = (this->Prefixes.size() == 1) ? this->Prefixes[0]
+                                                        : this->PrefixRegexStr;
+      const auto& suffix = (this->Suffixes.size() == 1) ? this->Suffixes[0]
+                                                        : this->SuffixRegexStr;
+
+      auto regexName = cmStrCat(prefix, name, suffix);
       this->DebugSearches.FailedAt(path, regexName);
     }
   }
