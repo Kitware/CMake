@@ -60,6 +60,10 @@ path to the framework ``<fullPath>/A.framework``.  When a full path to a
 framework is used as a library, CMake will use a ``-framework A``, and a
 ``-F<fullPath>`` to link the framework to the target.
 
+.. versionadded:: 3.28
+
+  The library found can now be a ``.xcframework`` folder.
+
 If the :variable:`CMAKE_FIND_LIBRARY_CUSTOM_LIB_SUFFIX` variable is set all
 search paths will be tested as normal, with the suffix appended, and with
 all matches of ``lib/`` replaced with

@@ -81,3 +81,13 @@ if(RunCMake_GENERATOR STREQUAL "Xcode" AND CMAKE_C_COMPILER_VERSION VERSION_GREA
   create_executables(target-framework-link-phase framework)
   run_cmake_with_options(create-executable-target-incomplete-link-phase -DCMAKE_SYSTEM_NAME=Darwin "-DCMAKE_OSX_ARCHITECTURES=${macos_archs_1}" -DMYLIB_LIBRARY=${RunCMake_BINARY_DIR}/create-xcframework-incomplete-build/mylib.xcframework)
 endif()
+
+# Ensure that .xcframework is found before .framework
+set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/create-xcframework-framework-build)
+set(RunCMake_TEST_NO_CLEAN 1)
+run_cmake_command(copy-framework ${CMAKE_COMMAND} -E copy_directory ${RunCMake_BINARY_DIR}/create-framework-macos-build/install/lib/mylib.framework ${RunCMake_TEST_BINARY_DIR}/mylib.framework)
+unset(RunCMake_TEST_NO_CLEAN)
+unset(RunCMake_TEST_BINARY_DIR)
+
+run_cmake(find-library)
+run_cmake_command(find-library-script ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/find-library.cmake)

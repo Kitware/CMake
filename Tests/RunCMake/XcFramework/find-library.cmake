@@ -1,0 +1,5 @@
+find_library(MYLIB_XCFRAMEWORK mylib NO_DEFAULT_PATH PATHS "${CMAKE_BINARY_DIR}/../create-xcframework-framework-build")
+file(REAL_PATH "${CMAKE_BINARY_DIR}/../create-xcframework-framework-build/mylib.xcframework" expected_path)
+if(NOT MYLIB_XCFRAMEWORK STREQUAL expected_path)
+  message(FATAL_ERROR "Expected value of MYLIB_XCFRAMEWORK:\n  ${expected_path}\nActual value:\n  ${MYLIB_XCFRAMEWORK}")
+endif()
