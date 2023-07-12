@@ -1789,20 +1789,20 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
   .. versionadded:: 3.27
 
   Full path to the linker import file. On DLL platforms, it would be the
-  ``.lib`` file. On AIX, for the executables, and on macOS, for the shared
-  libraries, it could be, respectively, the ``.imp`` or ``.tbd`` import file,
-  depending of the value of :prop_tgt:`ENABLE_EXPORTS` property.
+  ``.lib`` file. For executables on AIX, and for shared libraries on macOS,
+  it could be, respectively, the ``.imp`` or ``.tbd`` import file,
+  depending on the value of the :prop_tgt:`ENABLE_EXPORTS` property.
 
-  An empty string is returned when there is no import file associated with the
-  target.
+  This expands to an empty string when there is no import file associated
+  with the target.
 
 .. genex:: $<TARGET_IMPORT_FILE_BASE_NAME:tgt>
 
   .. versionadded:: 3.27
 
-  Base name of file linker import file of the target ``tgt`` without prefix and
-  suffix. For example, if target file name is ``libbase.tbd``, the base name is
-  ``base``.
+  Base name of the linker import file of the target ``tgt`` without prefix or
+  suffix. For example, if the target file name is ``libbase.tbd``, the base
+  name is ``base``.
 
   See also the :prop_tgt:`OUTPUT_NAME` and :prop_tgt:`ARCHIVE_OUTPUT_NAME`
   target properties and their configuration specific variants
@@ -1831,7 +1831,7 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
 
   Suffix of the import file of the target ``tgt``.
 
-  The suffix corresponds to the file extension (such as ".lib" or ".tbd").
+  The suffix corresponds to the file extension (such as ``.lib`` or ``.tbd``).
 
   See also the :prop_tgt:`IMPORT_SUFFIX` target property.
 
@@ -1842,7 +1842,7 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
 
   .. versionadded:: 3.27
 
-  Name of the import file of the target target ``tgt``.
+  Name of the import file of the target ``tgt``.
 
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on.
@@ -1865,11 +1865,11 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
 
   .. versionadded:: 3.27
     On macOS, it could be the ``.tbd`` import file associated with the shared
-    library, depending of the value of :prop_tgt:`ENABLE_EXPORTS` property.
+    library, depending on the value of the :prop_tgt:`ENABLE_EXPORTS` property.
 
   This generator expression is equivalent to
   :genex:`$<TARGET_LINKER_LIBRARY_FILE>` or
-  :genex:`$<TARGET_LINKER_IMPORT_FILE>` generator expressions, depending of the
+  :genex:`$<TARGET_LINKER_IMPORT_FILE>` generator expressions, depending on the
   characteristics of the target and the platform.
 
 .. genex:: $<TARGET_LINKER_FILE_BASE_NAME:tgt>
