@@ -8,6 +8,7 @@
 #include <utility>
 #include <vector>
 
+#include <cm3p/cppdap/optional.h>
 #include <cm3p/cppdap/protocol.h>
 #include <cm3p/cppdap/types.h>
 #include <stddef.h>

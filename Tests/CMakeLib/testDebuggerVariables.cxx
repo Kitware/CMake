@@ -8,6 +8,7 @@
 #include <unordered_set>
 #include <vector>
 
+#include <cm3p/cppdap/optional.h>
 #include <cm3p/cppdap/protocol.h>
 #include <cm3p/cppdap/types.h>
 
@@ -174,6 +175,33 @@ static bool testSortTheResult()
   return true;
 }
 
+static bool testNoSupportsVariableType()
+{
+  auto variablesManager =
+    std::make_shared<cmDebugger::cmDebuggerVariablesManager>();
+
+  auto vars = std::make_shared<cmDebugger::cmDebuggerVariables>(
+    variablesManager, "Variables", false, []() {
+      return std::vector<cmDebugger::cmDebuggerVariableEntry>{ { "test",
+                                                                 "value" } };
+    });
+
+  auto subvars = std::make_shared<cmDebugger::cmDebuggerVariables>(
+    variablesManager, "Children", false);
+
+  vars->AddSubVariables(subvars);
+
+  dap::array<dap::Variable> variables =
+    variablesManager->HandleVariablesRequest(
+      CreateVariablesRequest(vars->GetId()));
+
+  ASSERT_TRUE(variables.size() == 2);
+  ASSERT_VARIABLE(variables[0], "Children", "", nullptr);
+  ASSERT_VARIABLE(variables[1], "test", "value", nullptr);
+
+  return true;
+}
+
 int testDebuggerVariables(int, char*[])
 {
   return runTests(std::vector<std::function<bool()>>{
@@ -181,5 +209,6 @@ int testDebuggerVariables(int, char*[])
     testConstructors,
     testIgnoreEmptyStringEntries,
     testSortTheResult,
+    testNoSupportsVariableType,
   });
 }

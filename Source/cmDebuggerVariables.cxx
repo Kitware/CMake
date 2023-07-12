@@ -78,15 +78,16 @@ dap::array<dap::Variable> cmDebuggerVariables::HandleVariablesRequest()
           entry.Value.empty()) {
         continue;
       }
-      variables.push_back(dap::Variable{ {},
-                                         {},
-                                         {},
-                                         entry.Name,
-                                         {},
-                                         PrivateDataHint,
-                                         entry.Type,
-                                         entry.Value,
-                                         0 });
+      variables.push_back(dap::Variable{
+        {},
+        {},
+        {},
+        entry.Name,
+        {},
+        PrivateDataHint,
+        SupportsVariableType ? entry.Type : dap::optional<dap::string>(),
+        entry.Value,
+        0 });
     }
   }
 
@@ -106,16 +107,16 @@ void cmDebuggerVariables::EnumerateSubVariablesIfAny(
 {
   dap::array<dap::Variable> ret;
   for (auto const& variables : SubVariables) {
-    toBeReturned.emplace_back(
-      dap::Variable{ {},
-                     {},
-                     {},
-                     variables->GetName(),
-                     {},
-                     PrivatePropertyHint,
-                     SupportsVariableType ? "collection" : nullptr,
-                     variables->GetValue(),
-                     variables->GetId() });
+    toBeReturned.emplace_back(dap::Variable{
+      {},
+      {},
+      {},
+      variables->GetName(),
+      {},
+      PrivatePropertyHint,
+      SupportsVariableType ? "collection" : dap::optional<dap::string>(),
+      variables->GetValue(),
+      variables->GetId() });
   }
 }
 
