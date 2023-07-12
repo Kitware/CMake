@@ -561,6 +561,8 @@ public:
     AppleTVSimulator,
     WatchOS,
     WatchSimulator,
+    XROS,
+    XRSimulator,
   };
 
   /** What SDK type points CMAKE_OSX_SYSROOT to? */

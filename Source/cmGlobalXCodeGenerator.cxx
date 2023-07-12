@@ -5155,6 +5155,10 @@ std::string cmGlobalXCodeGenerator::GetDeploymentPlatform(const cmMakefile* mf)
     case cmMakefile::AppleSDK::WatchSimulator:
       return "WATCHOS_DEPLOYMENT_TARGET";
 
+    case cmMakefile::AppleSDK::XROS:
+    case cmMakefile::AppleSDK::XRSimulator:
+      return "XROS_DEPLOYMENT_TARGET";
+
     case cmMakefile::AppleSDK::MacOS:
     default:
       return "MACOSX_DEPLOYMENT_TARGET";

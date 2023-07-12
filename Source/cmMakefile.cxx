@@ -2565,6 +2565,8 @@ cmMakefile::AppleSDK cmMakefile::GetAppleSDKType() const
     { "iphonesimulator", AppleSDK::IPhoneSimulator },
     { "watchos", AppleSDK::WatchOS },
     { "watchsimulator", AppleSDK::WatchSimulator },
+    { "xros", AppleSDK::XROS },
+    { "xrsimulator", AppleSDK::XRSimulator },
   };
 
   for (auto const& entry : sdkDatabase) {
