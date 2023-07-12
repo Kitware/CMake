@@ -309,7 +309,7 @@ void cmUVReadOnlyProcess::UVExit(uv_process_t* handle, int64_t exitStatus,
     // Set error message on demand
     proc.Result()->ExitStatus = exitStatus;
     proc.Result()->TermSignal = termSignal;
-    if (!proc.Result()->error()) {
+    if (proc.Result()->ErrorMessage.empty()) {
       if (termSignal != 0) {
         proc.Result()->ErrorMessage = cmStrCat(
           "Process was terminated by signal ", proc.Result()->TermSignal);
