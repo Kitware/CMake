@@ -1428,8 +1428,9 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
 
     if (!modmapFormat.empty()) {
       // XXX(modmap): If changing this path construction, change
-      // `cmGlobalNinjaGenerator::WriteDyndep` to expect the corresponding file
-      // path.
+      // `cmGlobalNinjaGenerator::WriteDyndep` and
+      // `cmNinjaTargetGenerator::ExportObjectCompileCommand` to expect the
+      // corresponding file path.
       std::string ddModmapFile = cmStrCat(objectFileName, ".modmap");
       vars["DYNDEP_MODULE_MAP_FILE"] = ddModmapFile;
       objBuild.OrderOnlyDeps.push_back(ddModmapFile);
@@ -1688,11 +1689,32 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
   escapedSourceFileName = this->LocalGenerator->ConvertToOutputFormat(
     escapedSourceFileName, cmOutputConverter::SHELL);
 
+  std::string fullFlags = flags;
+  {
+    bool const needDyndep =
+      this->GetGeneratorTarget()->NeedDyndep(language, outputConfig);
+    std::string const modmapFormatVar =
+      cmStrCat("CMAKE_EXPERIMENTAL_", language, "_MODULE_MAP_FORMAT");
+    std::string const modmapFormat =
+      this->Makefile->GetSafeDefinition(modmapFormatVar);
+    if (needDyndep && !modmapFormat.empty()) {
+      std::string modmapFlags = this->GetMakefile()->GetRequiredDefinition(
+        cmStrCat("CMAKE_EXPERIMENTAL_", language, "_MODULE_MAP_FLAG"));
+      // XXX(modmap): If changing this path construction, change
+      // `cmGlobalNinjaGenerator::WriteDyndep` and
+      // `cmNinjaTargetGenerator::WriteObjectBuildStatement` to expect the
+      // corresponding file path.
+      cmSystemTools::ReplaceString(modmapFlags, "<MODULE_MAP_FILE>",
+                                   cmStrCat(objectFileName, ".modmap"));
+      fullFlags += cmStrCat(' ', modmapFlags);
+    }
+  }
+
   compileObjectVars.Source = escapedSourceFileName.c_str();
   compileObjectVars.Object = objectFileName.c_str();
   compileObjectVars.ObjectDir = objectDir.c_str();
   compileObjectVars.ObjectFileDir = objectFileDir.c_str();
-  compileObjectVars.Flags = flags.c_str();
+  compileObjectVars.Flags = fullFlags.c_str();
   compileObjectVars.Defines = defines.c_str();
   compileObjectVars.Includes = includes.c_str();
 

@@ -152,6 +152,11 @@ if ("named" IN_LIST CMake_TEST_MODULE_COMPILATION)
   run_cxx_module_test(scan_properties)
 endif ()
 
+# Tests which require compile commands support.
+if ("compile_commands" IN_LIST CMake_TEST_MODULE_COMPILATION)
+  run_cxx_module_test(export-compile-commands)
+endif ()
+
 # Tests which require collation work.
 if ("collation" IN_LIST CMake_TEST_MODULE_COMPILATION)
   run_cxx_module_test(public-req-private)
