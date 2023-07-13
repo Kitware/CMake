@@ -157,6 +157,12 @@ Generator Expressions
   :ref:`transformation <GenEx Path Transformations>` operations learned
   to process :ref:`lists <CMake Language Lists>` of paths element-wise.
 
+* The :genex:`TARGET_IMPORT_FILE`, :genex:`TARGET_IMPORT_FILE_BASE_NAME`,
+  :genex:`TARGET_IMPORT_FILE_PREFIX`, :genex:`TARGET_IMPORT_FILE_SUFFIX`,
+  :genex:`TARGET_IMPORT_FILE_NAME`, and :genex:`TARGET_IMPORT_FILE_DIR`
+  generator expressions were added.  These expand to details about the
+  linker import file for a target.
+
 * The :genex:`TARGET_RUNTIME_DLL_DIRS` generator expression was added.
   It expands to a list of the directories containing DLLs in
   :genex:`TARGET_RUNTIME_DLLS`.
