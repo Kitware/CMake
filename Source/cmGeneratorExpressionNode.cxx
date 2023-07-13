@@ -384,7 +384,9 @@ static const struct RemoveDuplicatesNode : public cmGeneratorExpressionNode
         "$<REMOVE_DUPLICATES:...> expression requires one parameter");
     }
 
-    return cmList{ parameters.front() }.remove_duplicates().to_string();
+    return cmList{ parameters.front(), cmList::EmptyElements::Yes }
+      .remove_duplicates()
+      .to_string();
   }
 
 } removeDuplicatesNode;
