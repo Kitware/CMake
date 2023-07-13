@@ -19,11 +19,15 @@
   do {                                                                        \
     ASSERT_TRUE(x.name == expectedName);                                      \
     ASSERT_TRUE(x.value == expectedValue);                                    \
-    ASSERT_TRUE(x.type.value() == expectedType);                              \
-    ASSERT_TRUE(x.evaluateName.has_value() == false);                         \
-    if (std::string(expectedType) == "collection") {                          \
-      ASSERT_TRUE(x.variablesReference != 0);                                 \
+    if (expectedType == nullptr) {                                            \
+      ASSERT_TRUE(x.type == dap::optional<dap::string>());                    \
+    } else {                                                                  \
+      ASSERT_TRUE(x.type == dap::optional<dap::string>(expectedType));        \
+      if (std::string(expectedType) == "collection") {                        \
+        ASSERT_TRUE(x.variablesReference != 0);                               \
+      }                                                                       \
     }                                                                         \
+    ASSERT_TRUE(x.evaluateName.has_value() == false);                         \
   } while (false)
 
 #define ASSERT_VARIABLE_REFERENCE(x, expectedName, expectedValue,             \
