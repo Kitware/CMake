@@ -51,6 +51,13 @@ static bool testHandleBreakpointRequestBeforeFileIsLoaded()
                     sourcePath, false);
   ASSERT_BREAKPOINT(response.breakpoints[2], 2, sourceBreakpoints[2].line,
                     sourcePath, false);
+  ASSERT_TRUE(breakpointManager.GetBreakpointCount() == 3);
+
+  // setBreakpoints should override any existing breakpoints
+  setBreakpointRequest.breakpoints.value().clear();
+  helper.Client->send(setBreakpointRequest).get();
+  ASSERT_TRUE(breakpointManager.GetBreakpointCount() == 0);
+
   return true;
 }
 
@@ -103,6 +110,12 @@ static bool testHandleBreakpointRequestAfterFileIsLoaded()
                     sourcePath, true);
 
   ASSERT_TRUE(notExpectBreakpointEvents.load());
+  ASSERT_TRUE(breakpointManager.GetBreakpointCount() == 5);
+
+  // setBreakpoints should override any existing breakpoints
+  setBreakpointRequest.breakpoints.value().clear();
+  helper.Client->send(setBreakpointRequest).get();
+  ASSERT_TRUE(breakpointManager.GetBreakpointCount() == 0);
 
   return true;
 }

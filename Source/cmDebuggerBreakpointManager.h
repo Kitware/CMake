@@ -4,6 +4,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <cstddef>
 #include <cstdint>
 #include <mutex>
 #include <string>
@@ -55,6 +56,7 @@ public:
                         std::vector<cmListFileFunction> const& functions);
   std::vector<int64_t> GetBreakpoints(std::string const& sourcePath,
                                       int64_t line);
+  size_t GetBreakpointCount() const;
   void ClearAll();
 };
 

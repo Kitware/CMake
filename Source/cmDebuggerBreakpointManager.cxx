@@ -6,6 +6,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <utility>
 
 #include <cm3p/cppdap/optional.h>
 #include <cm3p/cppdap/session.h>
@@ -78,12 +79,14 @@ cmDebuggerBreakpointManager::HandleSetBreakpointsRequest(
     cmSystemTools::GetActualCaseForPath(request.source.path.value());
   const dap::array<dap::SourceBreakpoint> defaultValue{};
   const auto& breakpoints = request.breakpoints.value(defaultValue);
+
+  if (Breakpoints.find(sourcePath) != Breakpoints.end()) {
+    Breakpoints[sourcePath].clear();
+  }
+  response.breakpoints.resize(breakpoints.size());
+
   if (ListFileFunctionLines.find(sourcePath) != ListFileFunctionLines.end()) {
     // The file has loaded, we can validate breakpoints.
-    if (Breakpoints.find(sourcePath) != Breakpoints.end()) {
-      Breakpoints[sourcePath].clear();
-    }
-    response.breakpoints.resize(breakpoints.size());
     for (size_t i = 0; i < breakpoints.size(); i++) {
       int64_t correctedLine =
         CalibrateBreakpointLine(sourcePath, breakpoints[i].line);
@@ -106,7 +109,6 @@ cmDebuggerBreakpointManager::HandleSetBreakpointsRequest(
     // The file has not loaded, validate breakpoints later.
     ListFilePendingValidations.emplace(sourcePath);
 
-    response.breakpoints.resize(breakpoints.size());
     for (size_t i = 0; i < breakpoints.size(); i++) {
       Breakpoints[sourcePath].emplace_back(NextBreakpointId++,
                                            breakpoints[i].line);
@@ -189,6 +191,15 @@ std::vector<int64_t> cmDebuggerBreakpointManager::GetBreakpoints(
   }
 
   return breakpoints;
+}
+
+size_t cmDebuggerBreakpointManager::GetBreakpointCount() const
+{
+  size_t count = 0;
+  for (auto const& pair : Breakpoints) {
+    count += pair.second.size();
+  }
+  return count;
 }
 
 void cmDebuggerBreakpointManager::ClearAll()
