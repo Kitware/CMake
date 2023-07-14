@@ -737,7 +737,7 @@ class CMakeDomain(Domain):
 
     def get_objects(self):
         for refname, obj in self.data['objects'].items():
-            yield (refname, obj.name, obj.objtype, obj.docname, obj.node_id, 1)
+            yield (refname, refname, obj.objtype, obj.docname, obj.node_id, 1)
 
 
 def setup(app):
