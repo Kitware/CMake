@@ -333,6 +333,15 @@ Most of the expressions in this section are closely associated with the
 :command:`list` command, providing the same capabilities, but in
 the form of a generator expression.
 
+In each of the following list-related generator expressions, the ``list``
+must not contain any commas if that generator expression expects something to
+be provided after the ``list``.  For example, the expression
+``$<LIST:FIND,list,value>`` requires a ``value`` after the ``list``.
+Since a comma is used to separate the ``list`` and the ``value``, the ``list``
+cannot itself contain a comma.  This restriction does not apply to the
+:command:`list` command, it is specific to the list-handling generator
+expressions only.
+
 .. _GenEx List Comparisons:
 
 List Comparisons
@@ -354,133 +363,151 @@ List Queries
 
   .. versionadded:: 3.27
 
-  Returns the list's length.
+  The number of items in the ``list``.
 
 .. genex:: $<LIST:GET,list,index,...>
 
   .. versionadded:: 3.27
 
-  Returns the list of elements specified by indices from the list.
+  Expands to the list of items specified by indices from the ``list``.
 
 .. genex:: $<LIST:SUBLIST,list,begin,length>
 
   .. versionadded:: 3.27
 
-  Returns a sublist of the given list. If <length> is 0, an empty list will be
-  returned. If <length> is -1 or the list is smaller than <begin>+<length> then
-  the remaining elements of the list starting at <begin> will be returned.
+  A sublist of the given ``list``.  If ``length`` is 0, an empty list
+  will be returned.  If ``length`` is -1 or the list is smaller than
+  ``begin + length``, the remaining items of the list starting at
+  ``begin`` will be returned.
 
 .. genex:: $<LIST:FIND,list,value>
 
   .. versionadded:: 3.27
 
-  Returns the index of the element specified in the list or -1 if it wasn't
-  found.
+  The index of the first item in ``list`` with the specified ``value``,
+  or -1 if ``value`` is not in the ``list``.
 
 .. _GenEx List Transformations:
 
 List Transformations
 ^^^^^^^^^^^^^^^^^^^^
 
+.. _GenEx LIST-JOIN:
+
 .. genex:: $<LIST:JOIN,list,glue>
 
   .. versionadded:: 3.27
 
-  Returns a string which joins the list with the content of the ``glue`` string
-  inserted between each item.
+  Converts ``list`` to a single string with the content of the ``glue`` string
+  inserted between each item.  This is conceptually the same operation as
+  :genex:`$<JOIN:list,glue>`, but the two have different behavior with regard
+  to empty items.  ``$<LIST:JOIN,list,glue>`` preserves all empty items,
+  whereas :genex:`$<JOIN:list,glue>` drops all empty items from the list.
 
-.. genex:: $<LIST:APPEND,list,element,...>
-
-  .. versionadded:: 3.27
-
-  Returns a list with the elements appended.
-
-.. genex:: $<LIST:PREPEND,list,element,...>
+.. genex:: $<LIST:APPEND,list,item,...>
 
   .. versionadded:: 3.27
 
-  Returns a list with the elements inserted at the beginning of the list.
+  The ``list`` with each ``item`` appended.  Multiple items should be
+  separated by commas.
 
-.. genex:: $<LIST:INSERT,list,index,element,...>
+.. genex:: $<LIST:PREPEND,list,item,...>
 
   .. versionadded:: 3.27
 
-  Returns a list with the elements inserted at the specified index. It is an
-  error to specify an out-of-range index. Valid indexes are 0 to N where N is
-  the length of the list, inclusive. An empty list has length 0.
+  The ``list`` with each ``item`` inserted at the beginning.  If there are
+  multiple items, they should be separated by commas, and the order of the
+  prepended items will be preserved.
+
+.. genex:: $<LIST:INSERT,list,index,item,...>
+
+  .. versionadded:: 3.27
+
+  The ``list`` with the ``item`` (or multiple items) inserted at the specified
+  ``index``.  Multiple items should be separated by commas.
+
+  It is an error to specify an out-of-range ``index``. Valid indexes are 0 to N,
+  where N is the length of the list, inclusive. An empty list has length 0.
 
 .. genex:: $<LIST:POP_BACK,list>
 
   .. versionadded:: 3.27
 
-  Returns a list with the last element was removed.
+  The ``list`` with the last item removed.
 
 .. genex:: $<LIST:POP_FRONT,list>
 
   .. versionadded:: 3.27
 
-  Returns a list with the first element was removed.
+  The ``list`` with the first item removed.
 
 .. genex:: $<LIST:REMOVE_ITEM,list,value,...>
 
   .. versionadded:: 3.27
 
-  Returns a list with all instances of the given values were removed.
+  The ``list`` with all instances of the given ``value`` (or values) removed.
+  If multiple values are given, they should be separated by commas.
 
 .. genex:: $<LIST:REMOVE_AT,list,index,...>
 
   .. versionadded:: 3.27
 
-  Returns a list with all values at given indices were removed.
+  The ``list`` with the item at each given ``index`` removed.
+
+.. _GenEx LIST-REMOVE_DUPLICATES:
 
 .. genex:: $<LIST:REMOVE_DUPLICATES,list>
 
   .. versionadded:: 3.27
 
-  Returns a list where duplicated items were removed. The relative order of
+  The ``list`` with all duplicated items removed.  The relative order of
   items is preserved, but if duplicates are encountered, only the first
-  instance is preserved.
+  instance is preserved.  The result is the same as
+  :genex:`$<REMOVE_DUPLICATES:list>`.
+
+.. _GenEx LIST-FILTER:
 
 .. genex:: $<LIST:FILTER,list,INCLUDE|EXCLUDE,regex>
 
   .. versionadded:: 3.27
 
-  Returns a list with the items that match the regular expression ``regex``
-  were included or removed.
+  A list of items from the ``list`` which match (``INCLUDE``) or do not match
+  (``EXCLUDE``) the regular expression ``regex``.  The result is the same as
+  :genex:`$<FILTER:list,INCLUDE|EXCLUDE,regex>`.
 
 .. genex:: $<LIST:TRANSFORM,list,ACTION[,SELECTOR]>
 
   .. versionadded:: 3.27
 
-  Returns the list transformed by applying an ``ACTION`` to all or, by
-  specifying a ``SELECTOR``, to the selected elements of the list.
+  The ``list`` transformed by applying an ``ACTION`` to all or, by
+  specifying a ``SELECTOR``, to the selected list items.
 
   .. note::
 
-    The ``TRANSFORM`` sub-command does not change the number of elements in the
-    list. If a ``SELECTOR`` is specified, only some elements will be changed,
+    The ``TRANSFORM`` sub-command does not change the number of items in the
+    list. If a ``SELECTOR`` is specified, only some items will be changed,
     the other ones will remain the same as before the transformation.
 
-  ``ACTION`` specifies the action to apply to the elements of the list.
-  The actions have exactly the same semantics as of the
+  ``ACTION`` specifies the action to apply to the items of the list.
+  The actions have exactly the same semantics as for the
   :command:`list(TRANSFORM)` command.  ``ACTION`` must be one of the following:
 
     :command:`APPEND <list(TRANSFORM_APPEND)>`, :command:`PREPEND <list(TRANSFORM_APPEND)>`
-      Append, prepend specified value to each element of the list.
+      Append, prepend specified value to each item of the list.
 
       .. code-block:: cmake
 
         $<LIST:TRANSFORM,list,(APPEND|PREPEND),value[,SELECTOR]>
 
     :command:`TOLOWER <list(TRANSFORM_TOLOWER)>`, :command:`TOUPPER <list(TRANSFORM_TOLOWER)>`
-      Convert each element of the list to lower, upper characters.
+      Convert each item of the list to lower, upper characters.
 
       .. code-block:: cmake
 
         $<LIST:TRANSFORM,list,(TOLOWER|TOUPPER)[,SELECTOR]>
 
     :command:`STRIP <list(TRANSFORM_STRIP)>`
-      Remove leading and trailing spaces from each element of the list.
+      Remove leading and trailing spaces from each item of the list.
 
       .. code-block:: cmake
 
@@ -488,13 +515,13 @@ List Transformations
 
     :command:`REPLACE <list(TRANSFORM_REPLACE)>`:
       Match the regular expression as many times as possible and substitute
-      the replacement expression for the match for each element of the list.
+      the replacement expression for the match for each item of the list.
 
       .. code-block:: cmake
 
         $<LIST:TRANSFORM,list,REPLACE,regular_expression,replace_expression[,SELECTOR]>
 
-  ``SELECTOR`` determines which elements of the list will be transformed.
+  ``SELECTOR`` determines which items of the list will be transformed.
   Only one type of selector can be specified at a time. When given,
   ``SELECTOR`` must be one of the following:
 
@@ -515,7 +542,7 @@ List Transformations
 
     ``REGEX``
       Specify a regular expression.
-      Only elements matching the regular expression will be transformed.
+      Only items matching the regular expression will be transformed.
 
       .. code-block:: cmake
 
@@ -523,23 +550,29 @@ List Transformations
 
 .. genex:: $<JOIN:list,glue>
 
-  Joins the list with the content of the ``glue`` string inserted between each
-  item.
+  Joins the ``list`` with the content of the ``glue`` string inserted between
+  each item.  This is conceptually the same operation as
+  :ref:`$\<LIST:JOIN,list,glue\> <GenEx LIST-JOIN>`, but the two have
+  different behavior with regard to empty items.
+  :ref:`$\<LIST:JOIN,list,glue\> <GenEx LIST-JOIN>` preserves all empty items,
+  whereas ``$<JOIN,list,glue>`` drops all empty items from the list.
 
 .. genex:: $<REMOVE_DUPLICATES:list>
 
   .. versionadded:: 3.15
 
   Removes duplicated items in the given ``list``. The relative order of items
-  is preserved, but if duplicates are encountered, only the first instance is
-  preserved.
+  is preserved, and if duplicates are encountered, only the first instance is
+  retained.  The result is the same as
+  :ref:`$\<LIST:REMOVE_DUPLICATES,list\> <GenEx LIST-REMOVE_DUPLICATES>`.
 
 .. genex:: $<FILTER:list,INCLUDE|EXCLUDE,regex>
 
   .. versionadded:: 3.15
 
   Includes or removes items from ``list`` that match the regular expression
-  ``regex``.
+  ``regex``.  The result is the same as
+  :ref:`$\<LIST:FILTER,list,INCLUDE|EXCLUDE,regex\> <GenEx LIST-FILTER>`.
 
 .. _GenEx List Ordering:
 
@@ -550,13 +583,13 @@ List Ordering
 
   .. versionadded:: 3.27
 
-  Returns the list with the elements in reverse order.
+  The ``list`` with the items in reverse order.
 
 .. genex:: $<LIST:SORT,list[,(COMPARE:option|CASE:option|ORDER:option)]...>
 
   .. versionadded:: 3.27
 
-  Returns the list sorted according the specified options.
+  The ``list`` sorted according to the specified options.
 
   Use one of the ``COMPARE`` options to select the comparison method
   for sorting:
@@ -566,26 +599,25 @@ List Ordering
       This is the default behavior if the ``COMPARE`` option is not given.
 
     ``FILE_BASENAME``
-      Sorts a list of pathnames of files by their basenames.
+      Sorts a list of file paths by their basenames.
 
     ``NATURAL``
-      Sorts a list of strings using natural order
-      (see ``strverscmp(3)`` manual), i.e. such that contiguous digits
-      are compared as whole numbers.
-      For example: the following list `10.0 1.1 2.1 8.0 2.0 3.1`
-      will be sorted as `1.1 2.0 2.1 3.1 8.0 10.0` if the ``NATURAL``
-      comparison is selected where it will be sorted as
-      `1.1 10.0 2.0 2.1 3.1 8.0` with the ``STRING`` comparison.
+      Sorts a list of strings using natural order (see the man page for
+      ``strverscmp(3)``), such that contiguous digits are compared as whole
+      numbers.  For example, the following list ``10.0 1.1 2.1 8.0 2.0 3.1``
+      will be sorted as ``1.1 2.0 2.1 3.1 8.0 10.0`` if the ``NATURAL``
+      comparison is selected, whereas it will be sorted as
+      ``1.1 10.0 2.0 2.1 3.1 8.0`` with the ``STRING`` comparison.
 
-  Use one of the ``CASE`` options to select a case sensitive or case
-  insensitive sort mode:
+  Use one of the ``CASE`` options to select a case-sensitive or
+  case-insensitive sort mode:
 
     ``SENSITIVE``
       List items are sorted in a case-sensitive manner.
       This is the default behavior if the ``CASE`` option is not given.
 
     ``INSENSITIVE``
-      List items are sorted case insensitively.  The order of
+      List items are sorted in a case-insensitive manner.  The order of
       items which differ only by upper/lowercase is not specified.
 
   To control the sort order, one of the ``ORDER`` options can be given:
@@ -597,8 +629,8 @@ List Ordering
     ``DESCENDING``
       Sorts the list in descending order.
 
-  This is an error to specify multiple times the same option. Various options
-  can be specified in any order:
+  Options can be specified in any order, but it is an error to specify the
+  same option multiple times.
 
   .. code-block:: cmake
 
