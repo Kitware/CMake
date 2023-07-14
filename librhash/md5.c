@@ -19,13 +19,13 @@
 #include "md5.h"
 
 /**
- * Initialize context before calculaing hash.
+ * Initialize context before calculating hash.
  *
  * @param ctx context to initialize
  */
 void rhash_md5_init(md5_ctx* ctx)
 {
-	ctx->length = 0;
+	memset(ctx, 0, sizeof(*ctx));
 
 	/* initialize state */
 	ctx->hash[0] = 0x67452301;
@@ -170,7 +170,7 @@ void rhash_md5_update(md5_ctx* ctx, const unsigned char* msg, size_t size)
 	/* fill partial block */
 	if (index) {
 		unsigned left = md5_block_size - index;
-		le32_copy((char*)ctx->message, index, msg, (size < left ? size : left));
+		le32_copy(ctx->message, index, msg, (size < left ? size : left));
 		if (size < left) return;
 
 		/* process partial block */
