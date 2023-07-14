@@ -16,10 +16,10 @@ my @modules;
 my %keywords; # command => keyword-list
 
 # find cmake/Modules/ | sed -rn 's/.*CMakeDetermine(.+)Compiler.cmake/\1/p' | sort
-my @languages = qw(ASM ASM_MASM ASM_NASM C CSharp CUDA CXX Fortran Java RC Swift);
+my @languages = qw(ASM ASM_MASM ASM_NASM C CSharp CUDA CXX Fortran Java RC Swift HIP);
 
 # unwanted upper-cases
-my %unwanted = map { $_ => 1 } qw(VS CXX IDE NOTFOUND NO_ DFOO DBAR NEW);
+my %unwanted = map { $_ => 1 } qw(VS CXX IDE NOTFOUND NO_ DFOO DBAR NEW GNU);
 	# cannot remove ALL - exists for add_custom_command
 
 # control-statements
@@ -30,7 +30,7 @@ my %loop = map { $_ => 1 } qw(foreach while endforeach endwhile);
 my %deprecated = map { $_ => 1 } qw(build_name exec_program export_library_dependencies install_files install_programs install_targets link_libraries make_directory output_required_files remove subdir_depends subdirs use_mangled_mesa utility_source variable_requires write_file);
 
 # add some (popular) modules
-push @modules, "ExternalProject";
+push @modules, "ExternalProject", "FetchContent";
 
 # variables
 open(CMAKE, "$cmake --help-variable-list|") or die "could not run cmake";
