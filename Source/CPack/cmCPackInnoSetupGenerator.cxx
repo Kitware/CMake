@@ -583,10 +583,8 @@ bool cmCPackInnoSetupGenerator::ProcessComponents()
                          "this script uses components }");
 
   // Installation types
-  bool noTypes = true;
   std::vector<cmCPackInstallationType*> types(InstallationTypes.size());
   for (auto& i : InstallationTypes) {
-    noTypes = false;
     types[i.second.Index - 1] = &i.second;
   }
 
@@ -601,17 +599,16 @@ bool cmCPackInnoSetupGenerator::ProcessComponents()
     typeInstructions.push_back(ISKeyValueLine(params));
   }
 
-  if (!noTypes) {
-    // Inno Setup requires the "custom" type
-    cmCPackInnoSetupKeyValuePairs params;
+  // Inno Setup requires the additional "custom" type
+  cmCPackInnoSetupKeyValuePairs customTypeParams;
 
-    params["Name"] = "\"custom\"";
-    params["Description"] = "\"{code:CPackGetCustomInstallationMessage}\"";
-    params["Flags"] = "iscustom";
+  customTypeParams["Name"] = "\"custom\"";
+  customTypeParams["Description"] =
+    "\"{code:CPackGetCustomInstallationMessage}\"";
+  customTypeParams["Flags"] = "iscustom";
 
-    allTypes.push_back("custom");
-    typeInstructions.push_back(ISKeyValueLine(params));
-  }
+  allTypes.push_back("custom");
+  typeInstructions.push_back(ISKeyValueLine(customTypeParams));
 
   // Components
   std::vector<cmCPackComponent*> downloadedComponents;
