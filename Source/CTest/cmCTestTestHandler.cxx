@@ -2617,6 +2617,21 @@ bool cmCTestTestHandler::WriteJUnitXML()
       xml.EndElement(); // </failure>
     }
 
+    xml.StartElement("properties");
+    if ((result.Properties) && (!result.Properties->Labels.empty())) {
+      xml.StartElement("property");
+      xml.Attribute("name", "cmake_labels");
+      // Pass the property as a cmake-formatted list, consumers will know
+      // anyway that this information is coming from cmake, so it should
+      // be ok to put it here as a cmake-list.
+      xml.Attribute("value", cmList::to_string(result.Properties->Labels));
+      // if we export more properties, this should be done the same way,
+      // i.e. prefix the property name with "cmake_", and it it can be
+      // a list, write it cmake-formatted.
+      xml.EndElement(); // </property>
+    }
+    xml.EndElement(); // </properties>
+
     // Note: compressed test output is unconditionally disabled when
     // --output-junit is specified.
     xml.Element("system-out", result.Output);
