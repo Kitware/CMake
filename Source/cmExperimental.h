@@ -5,6 +5,8 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <string>
+
 class cmMakefile;
 
 class cmExperimental
@@ -17,5 +19,14 @@ public:
     Sentinel,
   };
 
+  struct FeatureData
+  {
+    std::string const Uuid;
+    std::string const Variable;
+    std::string const Description;
+    bool Warned;
+  };
+
+  static const FeatureData& DataForFeature(Feature f);
   static bool HasSupportEnabled(cmMakefile const& mf, Feature f);
 };
