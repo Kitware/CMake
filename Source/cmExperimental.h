@@ -25,6 +25,7 @@ public:
     std::string const Uuid;
     std::string const Variable;
     std::string const Description;
+    bool const ForwardThroughTryCompile;
     bool Warned;
   };
 
