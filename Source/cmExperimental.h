@@ -21,6 +21,7 @@ public:
 
   struct FeatureData
   {
+    std::string const Name;
     std::string const Uuid;
     std::string const Variable;
     std::string const Description;
