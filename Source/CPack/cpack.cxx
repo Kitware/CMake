@@ -404,7 +404,9 @@ int main(int argc, char const* const* argv)
               "Read CPack config file: " << cpackConfigFile << '\n');
 
   bool cpackConfigFileSpecified = true;
-  if (cpackConfigFile.empty()) {
+  if (!cpackConfigFile.empty()) {
+    cpackConfigFile = cmSystemTools::CollapseFullPath(cpackConfigFile);
+  } else {
     cpackConfigFile = cmStrCat(cmSystemTools::GetCurrentWorkingDirectory(),
                                "/CPackConfig.cmake");
     cpackConfigFileSpecified = false;
@@ -446,7 +448,6 @@ int main(int argc, char const* const* argv)
     }
 
     if (cmSystemTools::FileExists(cpackConfigFile)) {
-      cpackConfigFile = cmSystemTools::CollapseFullPath(cpackConfigFile);
       cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE,
                   "Read CPack configuration file: " << cpackConfigFile
                                                     << '\n');
