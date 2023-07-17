@@ -289,11 +289,11 @@ void cmDyndepCollation::AddCollationInformation(
 struct CxxModuleFileSet
 {
   std::string Name;
-  bool BmiOnly;
+  bool BmiOnly = false;
   std::string RelativeDirectory;
   std::string SourcePath;
   std::string Type;
-  cmFileSetVisibility Visibility;
+  cmFileSetVisibility Visibility = cmFileSetVisibility::Private;
   cm::optional<std::string> Destination;
 };
 
