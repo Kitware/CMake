@@ -475,31 +475,25 @@ int main(int argc, char const* const* argv)
     if (!cpackProjectVendor.empty()) {
       globalMF.AddDefinition("CPACK_PACKAGE_VENDOR", cpackProjectVendor);
     }
-    // if this is not empty it has been set on the command line
-    // go for it. Command line override values set in config file.
     if (!cpackProjectDirectory.empty()) {
-      globalMF.AddDefinition("CPACK_PACKAGE_DIRECTORY", cpackProjectDirectory);
-    }
-    // The value has not been set on the command line
-    else {
-      // get a default value (current working directory)
-      cpackProjectDirectory = cmSystemTools::GetCurrentWorkingDirectory();
-      // use default value if no value has been provided by the config file
-      if (!globalMF.IsSet("CPACK_PACKAGE_DIRECTORY")) {
-        globalMF.AddDefinition("CPACK_PACKAGE_DIRECTORY",
-                               cpackProjectDirectory);
+      // The value has been set on the command line.  Ensure it is absolute.
+      cpackProjectDirectory =
+        cmSystemTools::CollapseFullPath(cpackProjectDirectory);
+    } else {
+      // The value has not been set on the command line.  Check config file.
+      if (cmValue pd = globalMF.GetDefinition("CPACK_PACKAGE_DIRECTORY")) {
+        // The value has been set in the config file.  Ensure it is absolute.
+        cpackProjectDirectory = cmSystemTools::CollapseFullPath(*pd);
+      } else {
+        // Default to the current working directory.
+        cpackProjectDirectory = cmSystemTools::GetCurrentWorkingDirectory();
       }
     }
+    globalMF.AddDefinition("CPACK_PACKAGE_DIRECTORY", cpackProjectDirectory);
+
     for (auto const& cd : definitions) {
       globalMF.AddDefinition(cd.first, cd.second);
     }
-
-    // Force CPACK_PACKAGE_DIRECTORY as absolute path
-    cpackProjectDirectory =
-      globalMF.GetSafeDefinition("CPACK_PACKAGE_DIRECTORY");
-    cpackProjectDirectory =
-      cmSystemTools::CollapseFullPath(cpackProjectDirectory);
-    globalMF.AddDefinition("CPACK_PACKAGE_DIRECTORY", cpackProjectDirectory);
 
     cmValue cpackModulesPath = globalMF.GetDefinition("CPACK_MODULE_PATH");
     if (cpackModulesPath) {
