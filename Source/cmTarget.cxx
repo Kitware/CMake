@@ -2779,6 +2779,8 @@ std::string cmTarget::ImportedGetFullPath(
       case cmStateEnums::RuntimeBinaryArtifact:
         if (loc) {
           result = *loc;
+        } else if (imp) {
+          result = *imp;
         } else {
           std::string impProp = cmStrCat("IMPORTED_LOCATION", suffix);
           if (cmValue config_location = this->GetProperty(impProp)) {
@@ -2786,6 +2788,16 @@ std::string cmTarget::ImportedGetFullPath(
           } else if (cmValue location =
                        this->GetProperty("IMPORTED_LOCATION")) {
             result = *location;
+          }
+          if (result.empty() &&
+              (this->GetType() == cmStateEnums::SHARED_LIBRARY ||
+               this->IsExecutableWithExports())) {
+            impProp = cmStrCat("IMPORTED_IMPLIB", suffix);
+            if (cmValue config_implib = this->GetProperty(impProp)) {
+              result = *config_implib;
+            } else if (cmValue implib = this->GetProperty("IMPORTED_IMPLIB")) {
+              result = *implib;
+            }
           }
         }
         break;
@@ -2812,7 +2824,10 @@ std::string cmTarget::ImportedGetFullPath(
         std::string unset;
         std::string configuration;
 
-        if (artifact == cmStateEnums::RuntimeBinaryArtifact) {
+        if (this->GetType() == cmStateEnums::SHARED_LIBRARY &&
+            artifact == cmStateEnums::RuntimeBinaryArtifact) {
+          unset = "IMPORTED_LOCATION or IMPORTED_IMPLIB";
+        } else if (artifact == cmStateEnums::RuntimeBinaryArtifact) {
           unset = "IMPORTED_LOCATION";
         } else if (artifact == cmStateEnums::ImportLibraryArtifact) {
           unset = "IMPORTED_IMPLIB";
@@ -2985,11 +3000,10 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config, cmValue& loc,
   }
 
   // If we needed to find one of the mapped configurations but did not
-  // On a DLL platform there may be only IMPORTED_IMPLIB for a shared
-  // library or an executable with exports.
-  bool allowImp = (this->IsDLLPlatform() &&
-                   (this->GetType() == cmStateEnums::SHARED_LIBRARY ||
-                    this->IsExecutableWithExports())) ||
+  // There may be only IMPORTED_IMPLIB for a shared library or an executable
+  // with exports.
+  bool allowImp = (this->GetType() == cmStateEnums::SHARED_LIBRARY ||
+                   this->IsExecutableWithExports()) ||
     (this->IsAIX() && this->IsExecutableWithExports()) ||
     (this->GetMakefile()->PlatformSupportsAppleTextStubs() &&
      this->IsSharedLibraryWithExports());

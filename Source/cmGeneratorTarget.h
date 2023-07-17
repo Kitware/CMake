@@ -1076,6 +1076,7 @@ private:
     std::string SharedDeps;
   };
 
+  friend cmComputeLinkInformation;
   using ImportInfoMapType = std::map<std::string, ImportInfo>;
   mutable ImportInfoMapType ImportInfoMap;
   void ComputeImportInfo(std::string const& desired_config,

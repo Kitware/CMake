@@ -248,7 +248,7 @@ add_custom_target(check-part3 ALL
     -Dconfig=$<CONFIGURATION>
     -Dtest_imported_includes=$<TARGET_PROPERTY:imported4,INCLUDE_DIRECTORIES>
     -Dtest_imported_fallback=$<STREQUAL:$<TARGET_FILE_NAME:importedFallback>,fallback_loc>
-    -Dtest_imported_fallback2=$<IF:$<OR:$<PLATFORM_ID:Windows,CYGWIN,MSYS>,$<AND:$<PLATFORM_ID:Darwin>,$<BOOL:${CMAKE_TAPI}>>>,$<STREQUAL:$<TARGET_LINKER_FILE_NAME:importedFallback2>,special_imp>,$<STREQUAL:$<TARGET_LINKER_FILE_NAME:importedFallback2>,fallback_loc>>
+    -Dtest_imported_fallback2=$<STREQUAL:$<TARGET_LINKER_FILE_NAME:importedFallback2>,special_imp>
     -Dtest_imported_fallback3=$<IF:$<PLATFORM_ID:Windows,CYGWIN,MSYS>,$<STREQUAL:$<TARGET_LINKER_FILE_NAME:importedFallback3>,imp_loc>,$<STREQUAL:$<TARGET_LINKER_FILE_NAME:importedFallback3>,fallback_loc>>
     -Dtest_imported_fallback4=$<IF:$<PLATFORM_ID:Windows,CYGWIN,MSYS>,$<STREQUAL:$<TARGET_LINKER_FILE_NAME:importedFallback4>,imp_loc>,$<STREQUAL:$<TARGET_LINKER_FILE_NAME:importedFallback4>,fallback_loc>>
     -Dtest_imported_fallback5=$<STREQUAL:$<TARGET_LINKER_FILE_NAME:importedFallback5>,imp_loc>
