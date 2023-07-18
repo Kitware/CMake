@@ -835,6 +835,8 @@ the ``FILE`` option must be a file name with the ``.cmake`` extension.
 If a ``CONFIGURATIONS`` option is given then the file will only be installed
 when one of the named configurations is installed.  Additionally, the
 generated import file will reference only the matching target
+configurations.  See the :variable:`CMAKE_MAP_IMPORTED_CONFIG_<CONFIG>`
+variable to map configurations of dependent projects to the installed
 configurations.  The ``EXPORT_LINK_INTERFACE_LIBRARIES`` keyword, if
 present, causes the contents of the properties matching
 ``(IMPORTED_)?LINK_INTERFACE_LIBRARIES(_<CONFIG>)?`` to be exported, when
