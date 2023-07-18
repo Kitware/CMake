@@ -637,6 +637,8 @@ public:
   };
   StripCommandStyle GetStripCommandStyle(std::string const& strip);
 
+  virtual std::string& EncodeLiteral(std::string& lit) { return lit; }
+
 protected:
   // for a project collect all its targets by following depend
   // information, and also collect all the targets

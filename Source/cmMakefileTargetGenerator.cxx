@@ -126,8 +126,11 @@ void cmMakefileTargetGenerator::GetDeviceLinkFlags(
   std::vector<std::string> linkOpts;
   this->GeneratorTarget->GetLinkOptions(linkOpts, this->GetConfigName(),
                                         linkLanguage);
+  this->LocalGenerator->SetLinkScriptShell(
+    this->GlobalGenerator->GetUseLinkScript());
   // LINK_OPTIONS are escaped.
   this->LocalGenerator->AppendCompileOptions(linkFlags, linkOpts);
+  this->LocalGenerator->SetLinkScriptShell(false);
 }
 
 void cmMakefileTargetGenerator::GetTargetLinkFlags(
@@ -144,8 +147,11 @@ void cmMakefileTargetGenerator::GetTargetLinkFlags(
   std::vector<std::string> opts;
   this->GeneratorTarget->GetLinkOptions(opts, this->GetConfigName(),
                                         linkLanguage);
+  this->LocalGenerator->SetLinkScriptShell(
+    this->GlobalGenerator->GetUseLinkScript());
   // LINK_OPTIONS are escaped.
   this->LocalGenerator->AppendCompileOptions(flags, opts);
+  this->LocalGenerator->SetLinkScriptShell(false);
 
   this->LocalGenerator->AppendPositionIndependentLinkerFlags(
     flags, this->GeneratorTarget, this->GetConfigName(), linkLanguage);
