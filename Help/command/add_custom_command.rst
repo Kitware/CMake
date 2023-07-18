@@ -362,7 +362,7 @@ The options are:
 
   .. versionadded:: 3.27
 
-  Indicate that the command's ``DEPENDS`` argument represents all files
+  Indicates that the command's ``DEPENDS`` argument represents all files
   required by the command and implicit dependencies are not required.
 
   Without this option, if any target uses the output of the custom command,
@@ -375,6 +375,10 @@ The options are:
 
   Only the :ref:`Ninja Generators` actually use this information to remove
   unnecessary implicit dependencies.
+
+  See also the :prop_tgt:`OPTIMIZE_DEPENDENCIES` target property, which may
+  provide another way for reducing the impact of target dependencies in some
+  scenarios.
 
 Examples: Generating Files
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
