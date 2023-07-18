@@ -20,4 +20,4 @@ See Also
 * :command:`add_test`
 * :command:`define_property`
 * the more general :command:`set_property` command
-* :ref:`Target Properties` for the list of properties known to CMake
+* :ref:`Test Properties` for the list of properties known to CMake
