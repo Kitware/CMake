@@ -78,6 +78,10 @@ to automatically export the same targets from the build tree as
   transitive usage requirements of other targets that link to the
   object libraries in their implementation.
 
+This command exports all :ref:`build configurations` from the build tree.
+See the :variable:`CMAKE_MAP_IMPORTED_CONFIG_<CONFIG>` variable to map
+configurations of dependent projects to the exported configurations.
+
 Exporting Targets to Android.mk
 """""""""""""""""""""""""""""""
 
