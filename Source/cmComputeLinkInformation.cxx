@@ -2241,16 +2241,20 @@ void cmComputeLinkInformation::AddLibraryRuntimeInfo(
   if (target->GetType() != cmStateEnums::SHARED_LIBRARY) {
     return;
   }
+  auto const* info = target->GetImportInfo(this->Config);
 
   // Try to get the soname of the library.  Only files with this name
   // could possibly conflict.
-  std::string soName = target->GetSOName(this->Config);
-  const char* soname = soName.empty() ? nullptr : soName.c_str();
+  const char* soname =
+    (!info || info->SOName.empty()) ? nullptr : info->SOName.c_str();
 
-  // Include this library in the runtime path ordering.
-  this->OrderRuntimeSearchPath->AddRuntimeLibrary(fullPath, soname);
-  if (this->LinkWithRuntimePath) {
-    this->OrderLinkerSearchPath->AddRuntimeLibrary(fullPath, soname);
+  // If this shared library has a known runtime artifact (IMPORTED_LOCATION),
+  // include its location in the runtime path ordering.
+  if (!info || !info->Location.empty()) {
+    this->OrderRuntimeSearchPath->AddRuntimeLibrary(fullPath, soname);
+    if (this->LinkWithRuntimePath) {
+      this->OrderLinkerSearchPath->AddRuntimeLibrary(fullPath, soname);
+    }
   }
 }
 

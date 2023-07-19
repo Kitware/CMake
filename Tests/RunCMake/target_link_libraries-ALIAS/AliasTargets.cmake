@@ -14,8 +14,14 @@ set_property(TARGET import-local PROPERTY IMPORTED_LOCATION "${binary_dir}/${CMA
 set_property(TARGET import-local PROPERTY IMPORTED_IMPLIB "${binary_dir}/${CMAKE_STATIC_LIBRARY_PREFIX}func${CMAKE_IMPORT_LIBRARY_SUFFIX}")
 add_library(alias::local ALIAS import-local)
 
+if(NOT DEFINED CMAKE_IMPORT_LIBRARY_SUFFIX)
+  add_library(import-local-stub SHARED IMPORTED)
+  set_property(TARGET import-local-stub PROPERTY IMPORTED_IMPLIB "${binary_dir}/${CMAKE_STATIC_LIBRARY_PREFIX}func${CMAKE_SHARED_LIBRARY_SUFFIX}")
+  add_library(alias::local-stub ALIAS import-local-stub)
+endif()
+
 add_library (lib-local SHARED lib.c)
-target_link_libraries (lib-local PRIVATE alias::local)
+target_link_libraries (lib-local PRIVATE alias::local $<TARGET_NAME_IF_EXISTS:alias::local-stub>)
 
 add_executable (main-local main.c)
 target_link_libraries (main-local PRIVATE alias::local)

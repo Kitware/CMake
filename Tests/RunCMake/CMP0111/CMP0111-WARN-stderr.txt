@@ -4,7 +4,7 @@
   details.  Use the cmake_policy command to set the policy and suppress this
   warning.
 
-  IMPORTED_(LOCATION|IMPLIB) not set for imported target "(unknown|static|shared)_lib"( configuration
+  IMPORTED_(LOCATION|IMPLIB) not set for imported target "(unknown|static)_lib"( configuration
   "[^"]+")?.
 This warning is for project developers.  Use -Wno-dev to suppress it.
 +)+CMake Warning \(dev\) in CMakeLists.txt:
@@ -13,6 +13,7 @@ This warning is for project developers.  Use -Wno-dev to suppress it.
   details.  Use the cmake_policy command to set the policy and suppress this
   warning.
 
-  IMPORTED_(LOCATION|IMPLIB) not set for imported target "(unknown|static|shared)_lib"( configuration
+  IMPORTED_(LOCATION|IMPLIB) not set for imported target "(unknown|static)_lib"( configuration
   "[^"]+")?.
+.*(IMPORTED_LOCATION or )?IMPORTED_IMPLIB not set for imported target.*"shared_lib".*
 This warning is for project developers.  Use -Wno-dev to suppress it.$
