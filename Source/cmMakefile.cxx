@@ -515,7 +515,7 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
         if (!hadNestedError) {
           // The command invocation requested that we report an error.
           std::string const error =
-            cmStrCat(lff.OriginalName(), " ", status.GetError());
+            cmStrCat(lff.OriginalName(), ' ', status.GetError());
           this->IssueMessage(MessageType::FATAL_ERROR, error);
         }
         result = false;
@@ -2572,7 +2572,7 @@ cmMakefile::AppleSDK cmMakefile::GetAppleSDKType() const
 
   for (auto const& entry : sdkDatabase) {
     if (cmHasPrefix(sdkRoot, entry.name) ||
-        sdkRoot.find(cmStrCat("/", entry.name)) != std::string::npos) {
+        sdkRoot.find(cmStrCat('/', entry.name)) != std::string::npos) {
       return entry.sdk;
     }
   }
@@ -3154,15 +3154,15 @@ MessageType cmMakefile::ExpandVariablesInStringNew(
           char nextc = *next;
           if (nextc == 't') {
             result.append(last, in - last);
-            result.append("\t");
+            result.push_back('\t');
             last = next + 1;
           } else if (nextc == 'n') {
             result.append(last, in - last);
-            result.append("\n");
+            result.push_back('\n');
             last = next + 1;
           } else if (nextc == 'r') {
             result.append(last, in - last);
-            result.append("\r");
+            result.push_back('\r');
             last = next + 1;
           } else if (nextc == ';' && openstack.empty()) {
             // Handled in ExpandListArgument; pass the backslash literally.
@@ -3241,7 +3241,7 @@ MessageType cmMakefile::ExpandVariablesInStringNew(
           result.append(last, in - last);
           errorstr += cmStrCat("\') in a variable name: "
                                "'",
-                               result.substr(openstack.back().loc), "'");
+                               result.substr(openstack.back().loc), '\'');
           mtype = MessageType::FATAL_ERROR;
           error = true;
         }
