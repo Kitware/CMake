@@ -31,6 +31,7 @@ set(CMakeLib_TESTS
   testCMExtAlgorithm.cxx
   testCMExtEnumSet.cxx
   testList.cxx
+  testCMakePath.cxx
   )
 if(CMake_ENABLE_DEBUGGER)
   list(APPEND CMakeLib_TESTS
