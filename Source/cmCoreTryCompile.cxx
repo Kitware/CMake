@@ -18,6 +18,7 @@
 
 #include "cmArgumentParser.h"
 #include "cmConfigureLog.h"
+#include "cmExperimental.h"
 #include "cmExportTryCompileFileGenerator.h"
 #include "cmGlobalGenerator.h"
 #include "cmList.h"
@@ -1066,6 +1067,17 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
       std::string flag = "-DCMAKE_OSX_ARCHITECTURES=" + *tcArchs;
       arguments.CMakeFlags.emplace_back(std::move(flag));
       cmakeVariables.emplace("CMAKE_OSX_ARCHITECTURES", *tcArchs);
+    }
+
+    // Pass down CMAKE_EXPERIMENTAL_* feature flags
+    for (std::size_t i = 0;
+         i < static_cast<std::size_t>(cmExperimental::Feature::Sentinel);
+         i++) {
+      auto const& data = cmExperimental::DataForFeature(
+        static_cast<cmExperimental::Feature>(i));
+      if (data.ForwardThroughTryCompile) {
+        vars.insert(data.Variable);
+      }
     }
 
     for (std::string const& var : vars) {
