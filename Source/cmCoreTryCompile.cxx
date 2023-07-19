@@ -167,6 +167,7 @@ auto const TryCompileBaseArgParser =
 
 auto const TryCompileBaseSourcesArgParser =
   cmArgumentParser<Arguments>{ TryCompileBaseArgParser }
+    .Bind("SOURCES_TYPE"_s, &Arguments::SetSourceType)
     .Bind("SOURCES"_s, &Arguments::Sources)
     .Bind("COMPILE_DEFINITIONS"_s, TryCompileCompileDefs,
           ArgumentParser::ExpectAtLeast{ 0 })
@@ -221,12 +222,44 @@ auto const TryRunOldArgParser = makeTryRunParser(TryCompileOldArgParser);
 std::string const TryCompileDefaultConfig = "DEBUG";
 }
 
+ArgumentParser::Continue cmCoreTryCompile::Arguments::SetSourceType(
+  cm::string_view sourceType)
+{
+  bool matched = false;
+  if (sourceType == "NORMAL"_s) {
+    this->SourceTypeContext = SourceType::Normal;
+    matched = true;
+  } else if (sourceType == "CXX_MODULE"_s) {
+    bool const supportCxxModuleSources = cmExperimental::HasSupportEnabled(
+      *this->Makefile, cmExperimental::Feature::CxxModuleCMakeApi);
+    if (supportCxxModuleSources) {
+      this->SourceTypeContext = SourceType::CxxModule;
+      matched = true;
+    }
+  }
+
+  if (!matched && this->SourceTypeError.empty()) {
+    bool const supportCxxModuleSources = cmExperimental::HasSupportEnabled(
+      *this->Makefile, cmExperimental::Feature::CxxModuleCMakeApi);
+    auto const* message = "'SOURCE'";
+    if (supportCxxModuleSources) {
+      message = "one of 'SOURCE' or 'CXX_MODULE'";
+    }
+    // Only remember one error at a time; all other errors related to argument
+    // parsing are "indicate one error and return" anyways.
+    this->SourceTypeError =
+      cmStrCat("Invalid 'SOURCE_TYPE' '", sourceType, "'; must be ", message);
+  }
+  return ArgumentParser::Continue::Yes;
+}
+
 Arguments cmCoreTryCompile::ParseArgs(
   const cmRange<std::vector<std::string>::const_iterator>& args,
   const cmArgumentParser<Arguments>& parser,
   std::vector<std::string>& unparsedArguments)
 {
-  auto arguments = parser.Parse(args, &unparsedArguments, 0);
+  Arguments arguments{ this->Makefile };
+  parser.Parse(arguments, args, &unparsedArguments, 0);
   if (!arguments.MaybeReportError(*(this->Makefile)) &&
       !unparsedArguments.empty()) {
     std::string m = "Unknown arguments:";
@@ -432,6 +465,11 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
       this->Makefile->IssueMessage(
         MessageType::FATAL_ERROR,
         "SOURCE_FROM_FILE requires exactly two arguments");
+      return cm::nullopt;
+    }
+    if (!arguments.SourceTypeError.empty()) {
+      this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
+                                   arguments.SourceTypeError);
       return cm::nullopt;
     }
   } else {

@@ -9,6 +9,7 @@
 #include <vector>
 
 #include <cm/optional>
+#include <cm/string_view>
 
 #include "cmArgumentParser.h"
 #include "cmArgumentParserTypes.h"
@@ -51,6 +52,20 @@ public:
 
   struct Arguments : public ArgumentParser::ParseResult
   {
+    Arguments(cmMakefile const* mf)
+      : Makefile(mf)
+    {
+    }
+
+    cmMakefile const* Makefile;
+
+    enum class SourceType
+    {
+      Normal,
+      CxxModule,
+      Directory,
+    };
+
     cm::optional<std::string> CompileResultVariable;
     cm::optional<std::string> BinaryDirectory;
     cm::optional<std::string> SourceDirectoryOrFile;
@@ -78,6 +93,10 @@ public:
     cm::optional<ArgumentParser::NonEmpty<std::string>> LogDescription;
     bool NoCache = false;
     bool NoLog = false;
+
+    ArgumentParser::Continue SetSourceType(cm::string_view sourceType);
+    SourceType SourceTypeContext = SourceType::Normal;
+    std::string SourceTypeError;
 
     // Argument for try_run only.
     // Keep in sync with warnings in cmCoreTryCompile::ParseArgs.

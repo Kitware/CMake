@@ -65,6 +65,7 @@ Try Compiling Source Files
 .. code-block:: cmake
 
   try_compile(<compileResultVar>
+              [SOURCES_TYPE <type>]
               <SOURCES <srcfile...>                 |
                SOURCE_FROM_CONTENT <name> <content> |
                SOURCE_FROM_VAR <name> <var>         |
@@ -243,6 +244,27 @@ The options are:
   components.
 
   ``SOURCE_FROM_VAR`` may be specified multiple times.
+
+``SOURCES_TYPE <type>``
+  .. versionadded:: 3.28
+
+  Sources may be classified using the ``SOURCES_TYPE`` argument. Once
+  specified, all subsequent sources specified will be treated as that type
+  until another ``SOURCES_TYPE`` is given. Available types are:
+
+  ``NORMAL``
+    Sources are not added to any ``FILE_SET`` in the generated project.
+
+  ``CXX_MODULE``
+    Sources are added to a ``FILE_SET`` of type ``CXX_MODULES`` in the
+    generated project.
+
+  .. note ::
+
+    Experimental. Sources of type ``CXX_MODULE`` are gated by
+    ``CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API``
+
+  The default type of sources is ``NORMAL``.
 
 ``<LANG>_STANDARD <std>``
   .. versionadded:: 3.8
