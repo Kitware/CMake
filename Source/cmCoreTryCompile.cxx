@@ -479,11 +479,11 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
 
   std::map<std::string, std::string> cmakeVariables;
 
-  std::string outFileName = this->BinaryDirectory + "/CMakeLists.txt";
+  std::string outFileName = cmStrCat(this->BinaryDirectory, "/CMakeLists.txt");
   // which signature are we using? If we are using var srcfile bindir
   if (this->SrcFileSignature) {
     // remove any CMakeCache.txt files so we will have a clean test
-    std::string ccFile = this->BinaryDirectory + "/CMakeCache.txt";
+    std::string ccFile = cmStrCat(this->BinaryDirectory, "/CMakeCache.txt");
     cmSystemTools::RemoveFile(ccFile);
 
     // Choose sources.
@@ -655,7 +655,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
 
     std::string projectLangs;
     for (std::string const& li : testLangs) {
-      projectLangs += " " + li;
+      projectLangs += cmStrCat(" ", li);
       std::string rulesOverrideBase = "CMAKE_USER_MAKE_RULES_OVERRIDE";
       std::string rulesOverrideLang = cmStrCat(rulesOverrideBase, "_", li);
       if (cmValue rulesOverridePath =
@@ -690,7 +690,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
     }
     fprintf(fout, "set(CMAKE_VERBOSE_MAKEFILE 1)\n");
     for (std::string const& li : testLangs) {
-      std::string langFlags = "CMAKE_" + li + "_FLAGS";
+      std::string langFlags = cmStrCat("CMAKE_", li, "_FLAGS");
       cmValue flags = this->Makefile->GetDefinition(langFlags);
       fprintf(fout, "set(CMAKE_%s_FLAGS %s)\n", li.c_str(),
               cmOutputConverter::EscapeForCMake(*flags).c_str());
@@ -794,10 +794,10 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
     }
 
     if (!targets.empty()) {
-      std::string fname = "/" + std::string(targetName) + "Targets.cmake";
+      std::string fname = cmStrCat("/", targetName, "Targets.cmake");
       cmExportTryCompileFileGenerator tcfg(gg, targets, this->Makefile,
                                            testLangs);
-      tcfg.SetExportFile((this->BinaryDirectory + fname).c_str());
+      tcfg.SetExportFile(cmStrCat(this->BinaryDirectory, fname).c_str());
       tcfg.SetConfig(tcConfig);
 
       if (!tcfg.GenerateImportFile()) {
@@ -965,7 +965,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
     if (arguments.LinkLibraries) {
       std::string libsToLink = " ";
       for (std::string const& i : *arguments.LinkLibraries) {
-        libsToLink += "\"" + cmTrimWhitespace(i) + "\" ";
+        libsToLink += cmStrCat("\"", cmTrimWhitespace(i), "\" ");
       }
       fprintf(fout, "target_link_libraries(%s %s)\n", targetName.c_str(),
               libsToLink.c_str());
@@ -1064,7 +1064,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
     if (cmValue tcArchs = this->Makefile->GetDefinition(
           kCMAKE_TRY_COMPILE_OSX_ARCHITECTURES)) {
       vars.erase(kCMAKE_OSX_ARCHITECTURES);
-      std::string flag = "-DCMAKE_OSX_ARCHITECTURES=" + *tcArchs;
+      std::string flag = cmStrCat("-DCMAKE_OSX_ARCHITECTURES=", *tcArchs);
       arguments.CMakeFlags.emplace_back(std::move(flag));
       cmakeVariables.emplace("CMAKE_OSX_ARCHITECTURES", *tcArchs);
     }
@@ -1082,7 +1082,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
 
     for (std::string const& var : vars) {
       if (cmValue val = this->Makefile->GetDefinition(var)) {
-        std::string flag = "-D" + var + "=" + *val;
+        std::string flag = cmStrCat("-D", var, "=", *val);
         arguments.CMakeFlags.emplace_back(std::move(flag));
         cmakeVariables.emplace(var, *val);
       }
@@ -1093,7 +1093,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
     // Forward the GHS variables to the inner project cache.
     for (std::string const& var : ghs_platform_vars) {
       if (cmValue val = this->Makefile->GetDefinition(var)) {
-        std::string flag = "-D" + var + "=" + "'" + *val + "'";
+        std::string flag = cmStrCat("-D", var, "=", "'", *val, "'");
         arguments.CMakeFlags.emplace_back(std::move(flag));
         cmakeVariables.emplace(var, *val);
       }
@@ -1204,10 +1204,10 @@ void cmCoreTryCompile::CleanupFiles(std::string const& binDir)
   }
 
   if (!IsTemporary(binDir)) {
-    cmSystemTools::Error(
+    cmSystemTools::Error(cmStrCat(
       "TRY_COMPILE attempt to remove -rf directory that does not contain "
-      "CMakeTmp or CMakeScratch: \"" +
-      binDir + "\"");
+      "CMakeTmp or CMakeScratch: \"",
+      binDir, "\""));
     return;
   }
 
@@ -1220,8 +1220,7 @@ void cmCoreTryCompile::CleanupFiles(std::string const& binDir)
         // Do not delete NFS temporary files.
         !cmHasPrefix(fileName, ".nfs")) {
       if (deletedFiles.insert(fileName).second) {
-        std::string const fullPath =
-          std::string(binDir).append("/").append(fileName);
+        std::string const fullPath = cmStrCat(binDir, "/", fileName);
         if (cmSystemTools::FileIsSymlink(fullPath)) {
           cmSystemTools::RemoveFile(fullPath);
         } else if (cmSystemTools::FileIsDirectory(fullPath)) {
