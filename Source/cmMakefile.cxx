@@ -515,7 +515,7 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
         if (!hadNestedError) {
           // The command invocation requested that we report an error.
           std::string const error =
-            std::string(lff.OriginalName()) + " " + status.GetError();
+            cmStrCat(lff.OriginalName(), " ", status.GetError());
           this->IssueMessage(MessageType::FATAL_ERROR, error);
         }
         result = false;
@@ -1860,7 +1860,8 @@ void cmMakefile::ConfigureSubDirectory(cmMakefile* mf)
     cmSystemTools::Message(msg);
   }
 
-  std::string const currentStartFile = currentStart + "/CMakeLists.txt";
+  std::string const currentStartFile =
+    cmStrCat(currentStart, "/CMakeLists.txt");
   if (!cmSystemTools::FileExists(currentStartFile, true)) {
     // The file is missing.  Check policy CMP0014.
     std::ostringstream e;
@@ -2571,7 +2572,7 @@ cmMakefile::AppleSDK cmMakefile::GetAppleSDKType() const
 
   for (auto const& entry : sdkDatabase) {
     if (cmHasPrefix(sdkRoot, entry.name) ||
-        sdkRoot.find(std::string("/") + entry.name) != std::string::npos) {
+        sdkRoot.find(cmStrCat("/", entry.name)) != std::string::npos) {
       return entry.sdk;
     }
   }
@@ -3238,9 +3239,9 @@ MessageType cmMakefile::ExpandVariablesInStringNew(
           errorstr += "Invalid character (\'";
           errorstr += inc;
           result.append(last, in - last);
-          errorstr += "\') in a variable name: "
-                      "'" +
-            result.substr(openstack.back().loc) + "'";
+          errorstr += cmStrCat("\') in a variable name: "
+                               "'",
+                               result.substr(openstack.back().loc), "'");
           mtype = MessageType::FATAL_ERROR;
           error = true;
         }
@@ -3649,11 +3650,12 @@ void cmMakefile::EnableLanguage(std::vector<std::string> const& languages,
     if (!duplicate_languages.empty()) {
       auto quantity = duplicate_languages.size() == 1 ? std::string(" has")
                                                       : std::string("s have");
-      this->IssueMessage(MessageType::AUTHOR_WARNING,
-                         "Languages to be enabled may not be specified more "
-                         "than once at the same time. The following language" +
-                           quantity + " been specified multiple times: " +
-                           cmJoin(duplicate_languages, ", "));
+      this->IssueMessage(
+        MessageType::AUTHOR_WARNING,
+        cmStrCat("Languages to be enabled may not be specified more "
+                 "than once at the same time. The following language",
+                 quantity, " been specified multiple times: ",
+                 cmJoin(duplicate_languages, ", ")));
     }
   }
 
@@ -3698,8 +3700,9 @@ int cmMakefile::TryCompile(const std::string& srcdir,
   cmWorkingDirectory workdir(bindir);
   if (workdir.Failed()) {
     this->IssueMessage(MessageType::FATAL_ERROR,
-                       "Failed to set working directory to " + bindir + " : " +
-                         std::strerror(workdir.GetLastResult()));
+                       cmStrCat("Failed to set working directory to ", bindir,
+                                " : ",
+                                std::strerror(workdir.GetLastResult())));
     cmSystemTools::SetFatalErrorOccurred();
     this->IsSourceFileTryCompile = false;
     return 1;
@@ -3927,7 +3930,7 @@ std::string cmMakefile::GetModulesFile(const std::string& filename,
 
   if (!moduleInCMakeModulePath.empty() && !moduleInCMakeRoot.empty()) {
     cmValue currentFile = this->GetDefinition("CMAKE_CURRENT_LIST_FILE");
-    std::string mods = cmSystemTools::GetCMakeRoot() + "/Modules/";
+    std::string mods = cmStrCat(cmSystemTools::GetCMakeRoot(), "/Modules/");
     if (currentFile && cmSystemTools::IsSubDirectory(*currentFile, mods)) {
       switch (this->GetPolicyStatus(cmPolicies::CMP0017)) {
         case cmPolicies::WARN: {
@@ -3986,8 +3989,9 @@ void cmMakefile::ConfigureString(const std::string& input, std::string& output,
       cmValue def = this->GetDefinition(this->cmDefineRegex.match(2));
       if (!cmIsOff(def)) {
         const std::string indentation = this->cmDefineRegex.match(1);
-        cmSystemTools::ReplaceString(line, "#" + indentation + "cmakedefine",
-                                     "#" + indentation + "define");
+        cmSystemTools::ReplaceString(line,
+                                     cmStrCat("#", indentation, "cmakedefine"),
+                                     cmStrCat("#", indentation, "define"));
         output += line;
       } else {
         output += "/* #undef ";
@@ -3997,8 +4001,9 @@ void cmMakefile::ConfigureString(const std::string& input, std::string& output,
     } else if (this->cmDefine01Regex.find(line)) {
       const std::string indentation = this->cmDefine01Regex.match(1);
       cmValue def = this->GetDefinition(this->cmDefine01Regex.match(2));
-      cmSystemTools::ReplaceString(line, "#" + indentation + "cmakedefine01",
-                                   "#" + indentation + "define");
+      cmSystemTools::ReplaceString(line,
+                                   cmStrCat("#", indentation, "cmakedefine01"),
+                                   cmStrCat("#", indentation, "define"));
       output += line;
       if (!cmIsOff(def)) {
         output += " 1";
@@ -4036,12 +4041,12 @@ int cmMakefile::ConfigureFile(const std::string& infile,
 {
   int res = 1;
   if (!this->CanIWriteThisFile(outfile)) {
-    cmSystemTools::Error("Attempt to write file: " + outfile +
-                         " into a source directory.");
+    cmSystemTools::Error(cmStrCat("Attempt to write file: ", outfile,
+                                  " into a source directory."));
     return 0;
   }
   if (!cmSystemTools::FileExists(infile)) {
-    cmSystemTools::Error("File " + infile + " does not exist.");
+    cmSystemTools::Error(cmStrCat("File ", infile, " does not exist."));
     return 0;
   }
   std::string soutfile = outfile;
