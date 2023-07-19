@@ -837,17 +837,18 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
       fprintf(fout, "set(CMAKE_RUNTIME_OUTPUT_DIRECTORY \"%s\")\n",
               this->BinaryDirectory.c_str());
       /* Create the actual executable.  */
-      fprintf(fout, "add_executable(%s", targetName.c_str());
+      fprintf(fout, "add_executable(%s)\n", targetName.c_str());
     } else // if (targetType == cmStateEnums::STATIC_LIBRARY)
     {
       /* Put the static library at a known location (for COPY_FILE).  */
       fprintf(fout, "set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY \"%s\")\n",
               this->BinaryDirectory.c_str());
       /* Create the actual static library.  */
-      fprintf(fout, "add_library(%s STATIC", targetName.c_str());
+      fprintf(fout, "add_library(%s STATIC)\n", targetName.c_str());
     }
+    fprintf(fout, "target_sources(%s PRIVATE\n", targetName.c_str());
     for (std::string const& si : sources) {
-      fprintf(fout, " \"%s\"", si.c_str());
+      fprintf(fout, "  \"%s\"\n", si.c_str());
 
       // Add dependencies on any non-temporary sources.
       if (!IsTemporary(si)) {
