@@ -6,6 +6,7 @@
 
 #include <map>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <cm/optional>
@@ -71,12 +72,17 @@ public:
     cm::optional<std::string> SourceDirectoryOrFile;
     cm::optional<std::string> ProjectName;
     cm::optional<std::string> TargetName;
-    cm::optional<ArgumentParser::NonEmpty<std::vector<std::string>>> Sources;
-    cm::optional<ArgumentParser::NonEmpty<std::vector<std::string>>>
+    cm::optional<ArgumentParser::NonEmpty<
+      std::vector<std::pair<std::string, SourceType>>>>
+      Sources;
+    cm::optional<ArgumentParser::NonEmpty<
+      std::vector<std::pair<std::string, SourceType>>>>
       SourceFromContent;
-    cm::optional<ArgumentParser::NonEmpty<std::vector<std::string>>>
+    cm::optional<ArgumentParser::NonEmpty<
+      std::vector<std::pair<std::string, SourceType>>>>
       SourceFromVar;
-    cm::optional<ArgumentParser::NonEmpty<std::vector<std::string>>>
+    cm::optional<ArgumentParser::NonEmpty<
+      std::vector<std::pair<std::string, SourceType>>>>
       SourceFromFile;
     ArgumentParser::MaybeEmpty<std::vector<std::string>> CMakeFlags{
       1, "CMAKE_FLAGS"

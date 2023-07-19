@@ -168,7 +168,8 @@ auto const TryCompileBaseArgParser =
 auto const TryCompileBaseSourcesArgParser =
   cmArgumentParser<Arguments>{ TryCompileBaseArgParser }
     .Bind("SOURCES_TYPE"_s, &Arguments::SetSourceType)
-    .Bind("SOURCES"_s, &Arguments::Sources)
+    .BindWithContext("SOURCES"_s, &Arguments::Sources,
+                     &Arguments::SourceTypeContext)
     .Bind("COMPILE_DEFINITIONS"_s, TryCompileCompileDefs,
           ArgumentParser::ExpectAtLeast{ 0 })
     .Bind("LINK_LIBRARIES"_s, &Arguments::LinkLibraries)
@@ -185,9 +186,12 @@ auto const TryCompileBaseSourcesArgParser =
 
 auto const TryCompileBaseNewSourcesArgParser =
   cmArgumentParser<Arguments>{ TryCompileBaseSourcesArgParser }
-    .Bind("SOURCE_FROM_CONTENT"_s, &Arguments::SourceFromContent)
-    .Bind("SOURCE_FROM_VAR"_s, &Arguments::SourceFromVar)
-    .Bind("SOURCE_FROM_FILE"_s, &Arguments::SourceFromFile)
+    .BindWithContext("SOURCE_FROM_CONTENT"_s, &Arguments::SourceFromContent,
+                     &Arguments::SourceTypeContext)
+    .BindWithContext("SOURCE_FROM_VAR"_s, &Arguments::SourceFromVar,
+                     &Arguments::SourceTypeContext)
+    .BindWithContext("SOURCE_FROM_FILE"_s, &Arguments::SourceFromFile,
+                     &Arguments::SourceTypeContext)
   /* keep semicolon on own line */;
 
 auto const TryCompileBaseProjectArgParser =
@@ -524,42 +528,45 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
     cmSystemTools::RemoveFile(ccFile);
 
     // Choose sources.
-    std::vector<std::string> sources;
+    std::vector<std::pair<std::string, Arguments::SourceType>> sources;
     if (arguments.Sources) {
       sources = std::move(*arguments.Sources);
     } else if (arguments.SourceDirectoryOrFile) {
-      sources.emplace_back(*arguments.SourceDirectoryOrFile);
+      sources.emplace_back(*arguments.SourceDirectoryOrFile,
+                           Arguments::SourceType::Directory);
     }
     if (arguments.SourceFromContent) {
       auto const k = arguments.SourceFromContent->size();
       for (auto i = decltype(k){ 0 }; i < k; i += 2) {
-        const auto& name = (*arguments.SourceFromContent)[i + 0];
-        const auto& content = (*arguments.SourceFromContent)[i + 1];
+        const auto& name = (*arguments.SourceFromContent)[i + 0].first;
+        const auto& content = (*arguments.SourceFromContent)[i + 1].first;
         auto out = this->WriteSource(name, content, "SOURCE_FROM_CONTENT");
         if (out.empty()) {
           return cm::nullopt;
         }
-        sources.emplace_back(std::move(out));
+        sources.emplace_back(std::move(out),
+                             (*arguments.SourceFromContent)[i + 0].second);
       }
     }
     if (arguments.SourceFromVar) {
       auto const k = arguments.SourceFromVar->size();
       for (auto i = decltype(k){ 0 }; i < k; i += 2) {
-        const auto& name = (*arguments.SourceFromVar)[i + 0];
-        const auto& var = (*arguments.SourceFromVar)[i + 1];
+        const auto& name = (*arguments.SourceFromVar)[i + 0].first;
+        const auto& var = (*arguments.SourceFromVar)[i + 1].first;
         const auto& content = this->Makefile->GetDefinition(var);
         auto out = this->WriteSource(name, content, "SOURCE_FROM_VAR");
         if (out.empty()) {
           return cm::nullopt;
         }
-        sources.emplace_back(std::move(out));
+        sources.emplace_back(std::move(out),
+                             (*arguments.SourceFromVar)[i + 0].second);
       }
     }
     if (arguments.SourceFromFile) {
       auto const k = arguments.SourceFromFile->size();
       for (auto i = decltype(k){ 0 }; i < k; i += 2) {
-        const auto& dst = (*arguments.SourceFromFile)[i + 0];
-        const auto& src = (*arguments.SourceFromFile)[i + 1];
+        const auto& dst = (*arguments.SourceFromFile)[i + 0].first;
+        const auto& src = (*arguments.SourceFromFile)[i + 1].first;
 
         if (!cmSystemTools::GetFilenamePath(dst).empty()) {
           const auto& msg =
@@ -577,7 +584,8 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
           return cm::nullopt;
         }
 
-        sources.emplace_back(std::move(dstPath));
+        sources.emplace_back(std::move(dstPath),
+                             (*arguments.SourceFromFile)[i + 0].second);
       }
     }
     // TODO: ensure sources is not empty
@@ -585,7 +593,8 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
     // Detect languages to enable.
     cmGlobalGenerator* gg = this->Makefile->GetGlobalGenerator();
     std::set<std::string> testLangs;
-    for (std::string const& si : sources) {
+    for (auto const& source : sources) {
+      auto const& si = source.first;
       std::string ext = cmSystemTools::GetFilenameLastExtension(si);
       std::string lang = gg->GetLanguageFromExtension(ext.c_str());
       if (!lang.empty()) {
@@ -885,7 +894,32 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
       fprintf(fout, "add_library(%s STATIC)\n", targetName.c_str());
     }
     fprintf(fout, "target_sources(%s PRIVATE\n", targetName.c_str());
-    for (std::string const& si : sources) {
+    std::string file_set_name;
+    bool in_file_set = false;
+    for (auto const& source : sources) {
+      auto const& si = source.first;
+      switch (source.second) {
+        case Arguments::SourceType::Normal: {
+          if (in_file_set) {
+            fprintf(fout, "  PRIVATE\n");
+            in_file_set = false;
+          }
+        } break;
+        case Arguments::SourceType::CxxModule: {
+          if (!in_file_set) {
+            file_set_name += 'a';
+            fprintf(fout,
+                    "  PRIVATE FILE_SET %s TYPE CXX_MODULES BASE_DIRS \"%s\" "
+                    "FILES\n",
+                    file_set_name.c_str(),
+                    this->Makefile->GetCurrentSourceDirectory().c_str());
+            in_file_set = true;
+          }
+        } break;
+        case Arguments::SourceType::Directory:
+          /* Handled elsewhere. */
+          break;
+      }
       fprintf(fout, "  \"%s\"\n", si.c_str());
 
       // Add dependencies on any non-temporary sources.
