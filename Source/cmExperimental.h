@@ -6,6 +6,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
+#include <vector>
 
 class cmMakefile;
 
@@ -33,6 +34,7 @@ public:
     std::string const Uuid;
     std::string const Variable;
     std::string const Description;
+    std::vector<std::string> const TryCompileVariables;
     TryCompileCondition const ForwardThroughTryCompile;
     bool Warned;
   };

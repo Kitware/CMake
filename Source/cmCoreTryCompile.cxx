@@ -1084,6 +1084,9 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
            arguments.CMakeInternal != "ABI"_s &&
            arguments.CMakeInternal != "FEATURE_TESTING"_s)) {
         vars.insert(data.Variable);
+        for (auto const& var : data.TryCompileVariables) {
+          vars.insert(var);
+        }
       }
     }
 
