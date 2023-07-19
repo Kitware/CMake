@@ -2019,7 +2019,7 @@ void cmGlobalGenerator::CheckTargetProperties()
     for (auto const& notFound : notFoundMap) {
       notFoundVars += notFound.first;
       notFoundVars += notFound.second;
-      notFoundVars += "\n";
+      notFoundVars += '\n';
     }
     cmSystemTools::Error(
       cmStrCat("The following variables are used in this project, "
