@@ -555,10 +555,13 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
         testLangs.insert(lang);
       } else {
         std::ostringstream err;
-        err << "Unknown extension \"" << ext << "\" for file\n"
-            << "  " << si << "\n"
-            << "try_compile() works only for enabled languages.  "
-            << "Currently these are:\n  ";
+        err << "Unknown extension \"" << ext
+            << "\" for file\n"
+               "  "
+            << si
+            << "\n"
+               "try_compile() works only for enabled languages.  "
+               "Currently these are:\n  ";
         std::vector<std::string> langs;
         gg->GetEnabledLanguages(langs);
         err << cmJoin(langs, " ");
@@ -587,7 +590,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
       std::ostringstream e;
       /* clang-format off */
       e << "Failed to open\n"
-        << "  " << outFileName << "\n"
+           "  " << outFileName << "\n"
         << cmSystemTools::GetLastSystemError();
       /* clang-format on */
       this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
@@ -1093,7 +1096,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
     // Forward the GHS variables to the inner project cache.
     for (std::string const& var : ghs_platform_vars) {
       if (cmValue val = this->Makefile->GetDefinition(var)) {
-        std::string flag = cmStrCat("-D", var, '=', '\'', *val, '\'');
+        std::string flag = cmStrCat("-D", var, "=\'", *val, '\'');
         arguments.CMakeFlags.emplace_back(std::move(flag));
         cmakeVariables.emplace(var, *val);
       }
@@ -1155,11 +1158,11 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
         }
         /* clang-format off */
         err = cmStrCat(
-          "Cannot copy output executable\n",
-          "  '", this->OutputFile, "'\n",
-          "to destination specified by COPY_FILE:\n",
-          "  '", copyFile, "'\n",
-          "because:\n",
+          "Cannot copy output executable\n"
+          "  '", this->OutputFile, "'\n"
+          "to destination specified by COPY_FILE:\n"
+          "  '", copyFile, "'\n"
+          "because:\n"
           "  ", err, "\n",
           this->FindErrorMessage);
         /* clang-format on */
