@@ -1756,7 +1756,7 @@ void cmMakefile::Configure()
     bool hasVersion = false;
     // search for the right policy command
     for (cmListFileFunction const& func : listFile.Functions) {
-      if (func.LowerCaseName() == "cmake_minimum_required") {
+      if (func.LowerCaseName() == "cmake_minimum_required"_s) {
         hasVersion = true;
         break;
       }
@@ -1803,7 +1803,7 @@ void cmMakefile::Configure()
     bool hasProject = false;
     // search for a project command
     for (cmListFileFunction const& func : listFile.Functions) {
-      if (func.LowerCaseName() == "project") {
+      if (func.LowerCaseName() == "project"_s) {
         hasProject = true;
         break;
       }
@@ -2150,11 +2150,11 @@ void cmMakefile::AddGlobalLinkInformation(cmTarget& target)
     for (auto j = linkLibs.begin(); j != linkLibs.end(); ++j) {
       std::string libraryName = *j;
       cmTargetLinkLibraryType libType = GENERAL_LibraryType;
-      if (libraryName == "optimized") {
+      if (libraryName == "optimized"_s) {
         libType = OPTIMIZED_LibraryType;
         ++j;
         libraryName = *j;
-      } else if (libraryName == "debug") {
+      } else if (libraryName == "debug"_s) {
         libType = DEBUG_LibraryType;
         ++j;
         libraryName = *j;
@@ -2521,7 +2521,7 @@ bool cmMakefile::IsSet(const std::string& name) const
 bool cmMakefile::PlatformIs32Bit() const
 {
   if (cmValue plat_abi = this->GetDefinition("CMAKE_INTERNAL_PLATFORM_ABI")) {
-    if (*plat_abi == "ELF X32") {
+    if (*plat_abi == "ELF X32"_s) {
       return false;
     }
   }
@@ -2542,7 +2542,7 @@ bool cmMakefile::PlatformIs64Bit() const
 bool cmMakefile::PlatformIsx32() const
 {
   if (cmValue plat_abi = this->GetDefinition("CMAKE_INTERNAL_PLATFORM_ABI")) {
-    if (*plat_abi == "ELF X32") {
+    if (*plat_abi == "ELF X32"_s) {
       return true;
     }
   }
@@ -3648,8 +3648,7 @@ void cmMakefile::EnableLanguage(std::vector<std::string> const& languages,
       }
     }
     if (!duplicate_languages.empty()) {
-      auto quantity = duplicate_languages.size() == 1 ? std::string(" has")
-                                                      : std::string("s have");
+      auto quantity = duplicate_languages.size() == 1 ? " has"_s : "s have"_s;
       this->IssueMessage(
         MessageType::AUTHOR_WARNING,
         cmStrCat("Languages to be enabled may not be specified more "
@@ -3666,7 +3665,7 @@ void cmMakefile::EnableLanguage(std::vector<std::string> const& languages,
   std::vector<std::string> languages_for_RC;
   languages_without_RC.reserve(unique_languages.size());
   for (std::string const& language : unique_languages) {
-    if (language == "RC") {
+    if (language == "RC"_s) {
       languages_for_RC.push_back(language);
     } else {
       languages_without_RC.push_back(language);
@@ -4159,7 +4158,7 @@ cmValue cmMakefile::GetProperty(const std::string& prop) const
 {
   // Check for computed properties.
   static std::string output;
-  if (prop == "TESTS") {
+  if (prop == "TESTS"_s) {
     std::vector<std::string> keys;
     // get list of keys
     const auto* t = this;
