@@ -24,8 +24,7 @@ cmExperimental::FeatureData LookupTable[] = {
     "CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API",
     "CMake's C++ module support is experimental. It is meant only for "
     "experimentation and feedback to CMake developers.",
-    // https://gitlab.kitware.com/cmake/cmake/-/issues/25097
-    cmExperimental::TryCompileCondition::Never, false },
+    cmExperimental::TryCompileCondition::SkipCompilerChecks, false },
   // WindowsKernelModeDriver
   { "WindowsKernelModeDriver", "5c2d848d-4efa-4529-a768-efd57171bf68",
     "CMAKE_EXPERIMENTAL_WINDOWS_KERNEL_MODE_DRIVER",

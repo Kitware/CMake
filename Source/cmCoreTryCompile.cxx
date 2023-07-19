@@ -1078,7 +1078,11 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
       auto const& data = cmExperimental::DataForFeature(
         static_cast<cmExperimental::Feature>(i));
       if (data.ForwardThroughTryCompile ==
-          cmExperimental::TryCompileCondition::Always) {
+            cmExperimental::TryCompileCondition::Always ||
+          (data.ForwardThroughTryCompile ==
+             cmExperimental::TryCompileCondition::SkipCompilerChecks &&
+           arguments.CMakeInternal != "ABI"_s &&
+           arguments.CMakeInternal != "FEATURE_TESTING"_s)) {
         vars.insert(data.Variable);
       }
     }
