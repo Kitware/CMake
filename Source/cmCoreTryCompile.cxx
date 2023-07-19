@@ -232,7 +232,7 @@ Arguments cmCoreTryCompile::ParseArgs(
       !unparsedArguments.empty()) {
     std::string m = "Unknown arguments:";
     for (const auto& i : unparsedArguments) {
-      m = cmStrCat(m, "\n  \"", i, "\"");
+      m = cmStrCat(m, "\n  \"", i, '"');
     }
     this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, m);
   }
@@ -346,7 +346,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
       this->Makefile->IssueMessage(
         MessageType::FATAL_ERROR,
         cmStrCat("<bindir> is not an absolute path:\n '",
-                 *arguments.BinaryDirectory, "'"));
+                 *arguments.BinaryDirectory, '\''));
       return cm::nullopt;
     }
     this->BinaryDirectory = *arguments.BinaryDirectory;
@@ -378,7 +378,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
               cmStrCat("Only libraries may be used as try_compile or try_run "
                        "IMPORTED LINK_LIBRARIES.  Got ",
                        tgt->GetName(), " of type ",
-                       cmState::GetTargetTypeName(tgt->GetType()), "."));
+                       cmState::GetTargetTypeName(tgt->GetType()), '.'));
             return cm::nullopt;
         }
         if (tgt->IsImported()) {
@@ -526,12 +526,12 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
 
         if (!cmSystemTools::GetFilenamePath(dst).empty()) {
           const auto& msg =
-            cmStrCat("SOURCE_FROM_FILE given invalid filename \"", dst, "\"");
+            cmStrCat("SOURCE_FROM_FILE given invalid filename \"", dst, '"');
           this->Makefile->IssueMessage(MessageType::FATAL_ERROR, msg);
           return cm::nullopt;
         }
 
-        auto dstPath = cmStrCat(this->BinaryDirectory, "/", dst);
+        auto dstPath = cmStrCat(this->BinaryDirectory, '/', dst);
         auto const result = cmSystemTools::CopyFileAlways(src, dstPath);
         if (!result.IsSuccess()) {
           const auto& msg = cmStrCat("SOURCE_FROM_FILE failed to copy \"", src,
@@ -655,9 +655,9 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
 
     std::string projectLangs;
     for (std::string const& li : testLangs) {
-      projectLangs += cmStrCat(" ", li);
+      projectLangs += cmStrCat(' ', li);
       std::string rulesOverrideBase = "CMAKE_USER_MAKE_RULES_OVERRIDE";
-      std::string rulesOverrideLang = cmStrCat(rulesOverrideBase, "_", li);
+      std::string rulesOverrideLang = cmStrCat(rulesOverrideBase, '_', li);
       if (cmValue rulesOverridePath =
             this->Makefile->GetDefinition(rulesOverrideLang)) {
         fprintf(fout, "set(%s \"%s\")\n", rulesOverrideLang.c_str(),
@@ -794,7 +794,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
     }
 
     if (!targets.empty()) {
-      std::string fname = cmStrCat("/", targetName, "Targets.cmake");
+      std::string fname = cmStrCat('/', targetName, "Targets.cmake");
       cmExportTryCompileFileGenerator tcfg(gg, targets, this->Makefile,
                                            testLangs);
       tcfg.SetExportFile(cmStrCat(this->BinaryDirectory, fname).c_str());
@@ -965,7 +965,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
     if (arguments.LinkLibraries) {
       std::string libsToLink = " ";
       for (std::string const& i : *arguments.LinkLibraries) {
-        libsToLink += cmStrCat("\"", cmTrimWhitespace(i), "\" ");
+        libsToLink += cmStrCat('"', cmTrimWhitespace(i), "\" ");
       }
       fprintf(fout, "target_link_libraries(%s %s)\n", targetName.c_str(),
               libsToLink.c_str());
@@ -1082,7 +1082,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
 
     for (std::string const& var : vars) {
       if (cmValue val = this->Makefile->GetDefinition(var)) {
-        std::string flag = cmStrCat("-D", var, "=", *val);
+        std::string flag = cmStrCat("-D", var, '=', *val);
         arguments.CMakeFlags.emplace_back(std::move(flag));
         cmakeVariables.emplace(var, *val);
       }
@@ -1093,7 +1093,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
     // Forward the GHS variables to the inner project cache.
     for (std::string const& var : ghs_platform_vars) {
       if (cmValue val = this->Makefile->GetDefinition(var)) {
-        std::string flag = cmStrCat("-D", var, "=", "'", *val, "'");
+        std::string flag = cmStrCat("-D", var, '=', '\'', *val, '\'');
         arguments.CMakeFlags.emplace_back(std::move(flag));
         cmakeVariables.emplace(var, *val);
       }
@@ -1207,7 +1207,7 @@ void cmCoreTryCompile::CleanupFiles(std::string const& binDir)
     cmSystemTools::Error(cmStrCat(
       "TRY_COMPILE attempt to remove -rf directory that does not contain "
       "CMakeTmp or CMakeScratch: \"",
-      binDir, "\""));
+      binDir, '"'));
     return;
   }
 
@@ -1220,7 +1220,7 @@ void cmCoreTryCompile::CleanupFiles(std::string const& binDir)
         // Do not delete NFS temporary files.
         !cmHasPrefix(fileName, ".nfs")) {
       if (deletedFiles.insert(fileName).second) {
-        std::string const fullPath = cmStrCat(binDir, "/", fileName);
+        std::string const fullPath = cmStrCat(binDir, '/', fileName);
         if (cmSystemTools::FileIsSymlink(fullPath)) {
           cmSystemTools::RemoveFile(fullPath);
         } else if (cmSystemTools::FileIsDirectory(fullPath)) {
@@ -1304,12 +1304,12 @@ std::string cmCoreTryCompile::WriteSource(std::string const& filename,
 {
   if (!cmSystemTools::GetFilenamePath(filename).empty()) {
     const auto& msg =
-      cmStrCat(command, " given invalid filename \"", filename, "\"");
+      cmStrCat(command, " given invalid filename \"", filename, '"');
     this->Makefile->IssueMessage(MessageType::FATAL_ERROR, msg);
     return {};
   }
 
-  auto filepath = cmStrCat(this->BinaryDirectory, "/", filename);
+  auto filepath = cmStrCat(this->BinaryDirectory, '/', filename);
   cmsys::ofstream file{ filepath.c_str(), std::ios::out };
   if (!file) {
     const auto& msg =
@@ -1320,7 +1320,7 @@ std::string cmCoreTryCompile::WriteSource(std::string const& filename,
 
   file << content;
   if (!file) {
-    const auto& msg = cmStrCat(command, " failed to write \"", filename, "\"");
+    const auto& msg = cmStrCat(command, " failed to write \"", filename, '"');
     this->Makefile->IssueMessage(MessageType::FATAL_ERROR, msg);
     return {};
   }
