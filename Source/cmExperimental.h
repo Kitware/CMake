@@ -20,13 +20,19 @@ public:
     Sentinel,
   };
 
+  enum class TryCompileCondition
+  {
+    Always,
+    Never,
+  };
+
   struct FeatureData
   {
     std::string const Name;
     std::string const Uuid;
     std::string const Variable;
     std::string const Description;
-    bool const ForwardThroughTryCompile;
+    TryCompileCondition const ForwardThroughTryCompile;
     bool Warned;
   };
 
