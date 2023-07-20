@@ -158,6 +158,8 @@ public:
 
   virtual bool CheckCxxModuleSupport() { return false; }
 
+  virtual bool IsGNUMakeJobServerAware() const { return false; }
+
   bool Compute();
   virtual void AddExtraIDETargets() {}
 

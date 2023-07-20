@@ -54,6 +54,8 @@ public:
   void EnableLanguage(std::vector<std::string> const& languages, cmMakefile*,
                       bool optional) override;
 
+  bool IsGNUMakeJobServerAware() const override { return false; }
+
 protected:
   std::vector<GeneratedMakeCommand> GenerateBuildCommand(
     const std::string& makeProgram, const std::string& projectName,

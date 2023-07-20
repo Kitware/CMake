@@ -17,6 +17,7 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
+#include "cmValue.h"
 
 bool cmAddCustomTargetCommand(std::vector<std::string> const& args,
                               cmExecutionStatus& status)
@@ -54,6 +55,7 @@ bool cmAddCustomTargetCommand(std::vector<std::string> const& args,
   const char* comment = nullptr;
   std::vector<std::string> sources;
   std::string job_pool;
+  std::string JOB_SERVER_AWARE;
 
   // Keep track of parser state.
   enum tdoing
@@ -65,6 +67,7 @@ bool cmAddCustomTargetCommand(std::vector<std::string> const& args,
     doing_comment,
     doing_source,
     doing_job_pool,
+    doing_JOB_SERVER_AWARE,
     doing_nothing
   };
   tdoing doing = doing_command;
@@ -102,6 +105,8 @@ bool cmAddCustomTargetCommand(std::vector<std::string> const& args,
       doing = doing_comment;
     } else if (copy == "JOB_POOL") {
       doing = doing_job_pool;
+    } else if (copy == "JOB_SERVER_AWARE") {
+      doing = doing_JOB_SERVER_AWARE;
     } else if (copy == "COMMAND") {
       doing = doing_command;
 
@@ -147,6 +152,9 @@ bool cmAddCustomTargetCommand(std::vector<std::string> const& args,
           break;
         case doing_job_pool:
           job_pool = copy;
+          break;
+        case doing_JOB_SERVER_AWARE:
+          JOB_SERVER_AWARE = copy;
           break;
         default:
           status.SetError("Wrong syntax. Unknown type of argument.");
@@ -210,6 +218,15 @@ bool cmAddCustomTargetCommand(std::vector<std::string> const& args,
   if (uses_terminal && !job_pool.empty()) {
     status.SetError("JOB_POOL is shadowed by USES_TERMINAL.");
     return false;
+  }
+
+  // If using a GNU Make generator and `JOB_SERVER_AWARE` is set then
+  // prefix all commands with '+'.
+  if (cmIsOn(JOB_SERVER_AWARE) &&
+      mf.GetGlobalGenerator()->IsGNUMakeJobServerAware()) {
+    for (auto& commandLine : commandLines) {
+      commandLine.insert(commandLine.begin(), "+");
+    }
   }
 
   // Add the utility target to the makefile.

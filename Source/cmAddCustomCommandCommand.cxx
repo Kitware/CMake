@@ -19,6 +19,7 @@
 #include "cmPolicies.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
                                cmExecutionStatus& status)
@@ -39,6 +40,7 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
   std::string working;
   std::string depfile;
   std::string job_pool;
+  std::string job_server_aware;
   std::string comment_buffer;
   const char* comment = nullptr;
   std::vector<std::string> depends;
@@ -78,6 +80,7 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
     doing_working_directory,
     doing_depfile,
     doing_job_pool,
+    doing_job_server_aware,
     doing_nothing
   };
 
@@ -95,6 +98,7 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
   MAKE_STATIC_KEYWORD(DEPFILE);
   MAKE_STATIC_KEYWORD(IMPLICIT_DEPENDS);
   MAKE_STATIC_KEYWORD(JOB_POOL);
+  MAKE_STATIC_KEYWORD(JOB_SERVER_AWARE);
   MAKE_STATIC_KEYWORD(MAIN_DEPENDENCY);
   MAKE_STATIC_KEYWORD(OUTPUT);
   MAKE_STATIC_KEYWORD(OUTPUTS);
@@ -126,6 +130,7 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
     keyPRE_BUILD,
     keyPRE_LINK,
     keySOURCE,
+    keyJOB_SERVER_AWARE,
     keyTARGET,
     keyUSES_TERMINAL,
     keyVERBATIM,
@@ -190,6 +195,8 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
         }
       } else if (copy == keyJOB_POOL) {
         doing = doing_job_pool;
+      } else if (copy == keyJOB_SERVER_AWARE) {
+        doing = doing_job_server_aware;
       }
     } else {
       std::string filename;
@@ -225,6 +232,9 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
           break;
         case doing_job_pool:
           job_pool = copy;
+          break;
+        case doing_job_server_aware:
+          job_server_aware = copy;
           break;
         case doing_working_directory:
           working = copy;
@@ -322,6 +332,15 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
   if (uses_terminal && !job_pool.empty()) {
     status.SetError("JOB_POOL is shadowed by USES_TERMINAL.");
     return false;
+  }
+
+  // If using a GNU Make generator and `JOB_SERVER_AWARE` is set then
+  // prefix all commands with '+'.
+  if (cmIsOn(job_server_aware) &&
+      mf.GetGlobalGenerator()->IsGNUMakeJobServerAware()) {
+    for (auto& commandLine : commandLines) {
+      commandLine.insert(commandLine.begin(), "+");
+    }
   }
 
   // Choose which mode of the command to use.
