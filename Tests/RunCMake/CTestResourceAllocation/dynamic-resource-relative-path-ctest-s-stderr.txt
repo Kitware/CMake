@@ -1,0 +1,2 @@
+^GENERATED_RESOURCE_SPEC_FILE must be an absolute path
+No tests were found!!!$

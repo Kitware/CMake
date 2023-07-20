@@ -42,7 +42,6 @@
 #include "cmExecutionStatus.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
-#include "cmJSONState.h"
 #include "cmList.h"
 #include "cmMakefile.h"
 #include "cmState.h"
@@ -284,7 +283,6 @@ cmCTestTestHandler::cmCTestTestHandler()
   this->UseIncludeRegExpFlag = false;
   this->UseExcludeRegExpFlag = false;
   this->UseExcludeRegExpFirst = false;
-  this->UseResourceSpec = false;
 
   this->CustomMaximumPassedTestOutputSize = 1 * 1024;
   this->CustomMaximumFailedTestOutputSize = 300 * 1024;
@@ -891,8 +889,7 @@ bool cmCTestTestHandler::ComputeTestList()
   }
 
   if (this->RerunFailed) {
-    this->ComputeTestListForRerunFailed();
-    return true;
+    return this->ComputeTestListForRerunFailed();
   }
 
   cmCTestTestHandler::ListOfTests::size_type tmsize = this->TestList.size();
@@ -951,7 +948,7 @@ bool cmCTestTestHandler::ComputeTestList()
   return true;
 }
 
-void cmCTestTestHandler::ComputeTestListForRerunFailed()
+bool cmCTestTestHandler::ComputeTestListForRerunFailed()
 {
   this->ExpandTestsToRunInformationForRerunFailed();
 
@@ -978,6 +975,8 @@ void cmCTestTestHandler::ComputeTestListForRerunFailed()
   this->TestList = finalList;
 
   this->UpdateMaxTestNameWidth();
+
+  return true;
 }
 
 void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
@@ -1351,18 +1350,6 @@ bool cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
   } else {
     parallel->SetTestLoad(this->CTest->GetTestLoad());
   }
-  if (!this->ResourceSpecFile.empty()) {
-    this->UseResourceSpec = true;
-    if (!this->ResourceSpec.ReadFromJSONFile(this->ResourceSpecFile)) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "Could not read/parse resource spec file "
-                   << this->ResourceSpecFile << ": "
-                   << this->ResourceSpec.parseState.GetErrorMessage()
-                   << std::endl);
-      return false;
-    }
-    parallel->InitResourceAllocator(this->ResourceSpec);
-  }
 
   *this->LogFile
     << "Start testing: " << this->CTest->CurrentTime() << std::endl
@@ -1397,6 +1384,7 @@ bool cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
     tests[p.Index] = depends;
     properties[p.Index] = &p;
   }
+  parallel->SetResourceSpecFile(this->ResourceSpecFile);
   parallel->SetTests(tests, properties);
   parallel->SetPassFailVectors(&passed, &failed);
   this->TestResults.clear();
@@ -2336,6 +2324,8 @@ bool cmCTestTestHandler::SetTestsProperties(
             if (!ParseResourceGroupsProperty(val, rt.ResourceGroups)) {
               return false;
             }
+          } else if (key == "GENERATED_RESOURCE_SPEC_FILE"_s) {
+            rt.GeneratedResourceSpecFile = val;
           } else if (key == "SKIP_RETURN_CODE"_s) {
             rt.SkipReturnCode = atoi(val.c_str());
             if (rt.SkipReturnCode < 0 || rt.SkipReturnCode > 255) {

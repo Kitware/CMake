@@ -152,6 +152,18 @@ cmCTestRunTest::EndTestResult cmCTestRunTest::EndTest(size_t completed,
       }
     }
   }
+  std::string resourceSpecParseError;
+  if (!this->TestProperties->GeneratedResourceSpecFile.empty()) {
+    this->MultiTestHandler.ResourceSpecFile =
+      this->TestProperties->GeneratedResourceSpecFile;
+    if (!this->MultiTestHandler.InitResourceAllocator(
+          resourceSpecParseError)) {
+      reason = "Invalid resource spec file";
+      forceFail = true;
+    } else {
+      this->MultiTestHandler.CheckResourcesAvailable();
+    }
+  }
   std::ostringstream outputStream;
   if (res == cmProcess::State::Exited) {
     bool success = !forceFail &&
@@ -258,6 +270,16 @@ cmCTestRunTest::EndTestResult cmCTestRunTest::EndTest(size_t completed,
 
   if (outputTestErrorsToConsole) {
     cmCTestLog(this->CTest, HANDLER_OUTPUT, this->ProcessOutput << std::endl);
+  }
+
+  if (!resourceSpecParseError.empty()) {
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               resourceSpecParseError << std::endl);
+  } else if (!this->TestProperties->GeneratedResourceSpecFile.empty()) {
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+               "Using generated resource spec file "
+                 << this->TestProperties->GeneratedResourceSpecFile
+                 << std::endl);
   }
 
   if (this->TestHandler->LogFile) {

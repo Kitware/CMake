@@ -1,0 +1,2 @@
+^Only one test may define the GENERATED_RESOURCE_SPEC_FILE property
+No tests were found!!!$

@@ -503,6 +503,7 @@ Properties on Tests
    /prop_test/FIXTURES_CLEANUP
    /prop_test/FIXTURES_REQUIRED
    /prop_test/FIXTURES_SETUP
+   /prop_test/GENERATED_RESOURCE_SPEC_FILE
    /prop_test/LABELS
    /prop_test/MEASUREMENT
    /prop_test/PASS_REGULAR_EXPRESSION
