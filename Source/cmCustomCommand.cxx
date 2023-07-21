@@ -194,6 +194,16 @@ void cmCustomCommand::SetJobPool(const std::string& job_pool)
   this->JobPool = job_pool;
 }
 
+bool cmCustomCommand::GetJobserverAware() const
+{
+  return this->JobserverAware;
+}
+
+void cmCustomCommand::SetJobserverAware(bool b)
+{
+  this->JobserverAware = b;
+}
+
 #define DEFINE_CC_POLICY_ACCESSOR(P)                                          \
   cmPolicies::PolicyStatus cmCustomCommand::Get##P##Status() const            \
   {                                                                           \
