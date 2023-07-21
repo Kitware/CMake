@@ -38,7 +38,6 @@ using ObjectErrorGenerator =
   std::function<ErrorGenerator(ObjectError, const Json::Value::Members&)>;
 const auto EXPECTED_TYPE = [](const std::string& type) {
   return [type](const Json::Value* value, cmJSONState* state) -> void {
-#if !defined(CMAKE_BOOTSTRAP)
     if (state->key().empty()) {
       state->AddErrorAtValue(cmStrCat("Expected ", type), value);
       return;
@@ -48,7 +47,6 @@ const auto EXPECTED_TYPE = [](const std::string& type) {
       errMsg = cmStrCat(errMsg, ", got: ", value->asString());
     }
     state->AddErrorAtValue(errMsg, value);
-#endif
   };
 };
 const auto INVALID_STRING = [](const Json::Value* value,
@@ -75,7 +73,6 @@ const auto INVALID_NAMED_OBJECT =
            const Json::Value::Members& extraFields) -> ErrorGenerator {
     return [nameGenerator, errorType, extraFields](
              const Json::Value* value, cmJSONState* state) -> void {
-#if !defined(CMAKE_BOOTSTRAP)
       std::string name = nameGenerator(value, state);
       switch (errorType) {
         case ObjectError::RequiredMissing:
@@ -102,7 +99,6 @@ const auto INVALID_NAMED_OBJECT =
                                  value);
           break;
       }
-#endif
     };
   };
 };
