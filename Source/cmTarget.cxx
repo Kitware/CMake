@@ -2713,6 +2713,9 @@ bool cmTarget::CanCompileSources() const
   if (this->IsImported()) {
     return false;
   }
+  if (this->IsSynthetic()) {
+    return true;
+  }
   switch (this->GetType()) {
     case cmStateEnums::EXECUTABLE:
     case cmStateEnums::STATIC_LIBRARY:
