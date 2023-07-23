@@ -1264,8 +1264,11 @@ public:
    *
    * This will inspect the target itself to see if C++20 module
    * support is expected to work based on its sources.
+   *
+   * If `errorMessage` is given a non-`nullptr`, any error message will be
+   * stored in it, otherwise the error will be reported directly.
    */
-  bool HaveCxx20ModuleSources() const;
+  bool HaveCxx20ModuleSources(std::string* errorMessage = nullptr) const;
 
   enum class Cxx20SupportLevel
   {

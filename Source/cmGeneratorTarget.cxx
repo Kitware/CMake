@@ -8930,24 +8930,28 @@ bool cmGeneratorTarget::HaveFortranSources(std::string const& config) const
                      });
 }
 
-bool cmGeneratorTarget::HaveCxx20ModuleSources() const
+bool cmGeneratorTarget::HaveCxx20ModuleSources(std::string* errorMessage) const
 {
   auto const& fs_names = this->Target->GetAllFileSetNames();
-  return std::any_of(fs_names.begin(), fs_names.end(),
-                     [this](std::string const& name) -> bool {
-                       auto const* file_set = this->Target->GetFileSet(name);
-                       if (!file_set) {
-                         this->Makefile->IssueMessage(
-                           MessageType::INTERNAL_ERROR,
-                           cmStrCat("Target \"", this->Target->GetName(),
-                                    "\" is tracked to have file set \"", name,
-                                    "\", but it was not found."));
-                         return false;
-                       }
+  return std::any_of(
+    fs_names.begin(), fs_names.end(),
+    [this, errorMessage](std::string const& name) -> bool {
+      auto const* file_set = this->Target->GetFileSet(name);
+      if (!file_set) {
+        auto message = cmStrCat("Target \"", this->Target->GetName(),
+                                "\" is tracked to have file set \"", name,
+                                "\", but it was not found.");
+        if (errorMessage) {
+          *errorMessage = std::move(message);
+        } else {
+          this->Makefile->IssueMessage(MessageType::INTERNAL_ERROR, message);
+        }
+        return false;
+      }
 
-                       auto const& fs_type = file_set->GetType();
-                       return fs_type == "CXX_MODULES"_s;
-                     });
+      auto const& fs_type = file_set->GetType();
+      return fs_type == "CXX_MODULES"_s;
+    });
 }
 
 cmGeneratorTarget::Cxx20SupportLevel cmGeneratorTarget::HaveCxxModuleSupport(
