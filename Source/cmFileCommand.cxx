@@ -30,6 +30,7 @@
 
 #include "cmArgumentParser.h"
 #include "cmArgumentParserTypes.h"
+#include "cmCMakePath.h"
 #include "cmCryptoHash.h"
 #include "cmELF.h"
 #include "cmExecutionStatus.h"
@@ -1278,9 +1279,58 @@ bool HandleRealPathCommand(std::vector<std::string> const& args,
     }
   }
 
-  auto realPath =
-    cmSystemTools::CollapseFullPath(input, *arguments.BaseDirectory);
-  realPath = cmSystemTools::GetRealPath(realPath);
+  bool warnAbout152 = false;
+  bool use152New = true;
+  cmPolicies::PolicyStatus policyStatus =
+    status.GetMakefile().GetPolicyStatus(cmPolicies::CMP0152);
+  switch (policyStatus) {
+    case cmPolicies::REQUIRED_IF_USED:
+    case cmPolicies::REQUIRED_ALWAYS:
+    case cmPolicies::NEW:
+      break;
+    case cmPolicies::WARN:
+      use152New = false;
+      warnAbout152 = true;
+      break;
+    case cmPolicies::OLD:
+      use152New = false;
+      warnAbout152 = false;
+      break;
+  }
+
+  auto computeNewPath = [=](std::string const& in, std::string& result) {
+    auto path = cmCMakePath{ in };
+    if (path.IsRelative()) {
+      auto basePath = cmCMakePath{ *arguments.BaseDirectory };
+      path = basePath.Append(path);
+    }
+    result = cmSystemTools::GetActualCaseForPath(
+      cmSystemTools::GetRealPath(path.String()));
+  };
+
+  std::string realPath;
+  if (use152New) {
+    computeNewPath(input, realPath);
+  } else {
+    std::string oldPolicyPath =
+      cmSystemTools::CollapseFullPath(input, *arguments.BaseDirectory);
+    oldPolicyPath = cmSystemTools::GetRealPath(oldPolicyPath);
+    if (warnAbout152) {
+      computeNewPath(input, realPath);
+      if (oldPolicyPath != realPath) {
+        status.GetMakefile().IssueMessage(
+          MessageType::AUTHOR_WARNING,
+          cmStrCat(
+            cmPolicies::GetPolicyWarning(cmPolicies::CMP0152), '\n',
+            "From input path:\n  ", input,
+            "\nthe policy OLD behavior produces path:\n  ", oldPolicyPath,
+            "\nbut the policy NEW behavior produces path:\n  ", realPath,
+            "\nSince the policy is not set, CMake is using the OLD "
+            "behavior for compatibility."));
+      }
+    }
+    realPath = oldPolicyPath;
+  }
 
   status.GetMakefile().AddDefinition(args[2], realPath);
 
