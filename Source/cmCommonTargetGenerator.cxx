@@ -173,13 +173,7 @@ std::vector<std::string> cmCommonTargetGenerator::GetLinkedTargetDirectories(
         this->GeneratorTarget->GetLinkInformation(config)) {
     std::vector<cmGeneratorTarget const*> targets;
     for (auto const& item : cli->GetItems()) {
-      targets.push_back(item.Target);
-    }
-    for (auto const* target : cli->GetObjectLibrariesLinked()) {
-      targets.push_back(target);
-    }
-
-    for (auto const* linkee : targets) {
+      auto const* linkee = item.Target;
       if (linkee &&
           !linkee->IsImported()
           // Skip targets that build after this one in a static lib cycle.
