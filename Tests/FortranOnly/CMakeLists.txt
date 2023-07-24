@@ -184,3 +184,9 @@ if(CMAKE_Fortran_COMPILE_OPTIONS_PREPROCESS_OFF AND
   set_property(TARGET no_preprocess_target PROPERTY Fortran_PREPROCESS OFF)
   set_property(SOURCE no_preprocess_source_upper.F no_preprocess_source_fpp.fpp PROPERTY Fortran_PREPROCESS OFF)
 endif()
+
+# Issue 25112
+set(CMAKE_Fortran_MODULE_DIRECTORY "${PROJECT_BINARY_DIR}/include")
+add_library(objmod OBJECT objmod.f90)
+add_executable(objmain objmain.f90)
+target_link_libraries(objmain PRIVATE objmod)
