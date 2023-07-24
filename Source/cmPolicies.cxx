@@ -123,10 +123,10 @@ static void DiagnoseAncientPolicies(
 {
   std::ostringstream e;
   e << "The project requests behavior compatible with CMake version \""
-    << majorVer << "." << minorVer << "." << patchVer
+    << majorVer << '.' << minorVer << '.' << patchVer
     << "\", which requires the OLD behavior for some policies:\n";
   for (cmPolicies::PolicyID i : ancient) {
-    e << "  " << idToString(i) << ": " << idToShortDescription(i) << "\n";
+    e << "  " << idToString(i) << ": " << idToShortDescription(i) << '\n';
   }
   e << "However, this version of CMake no longer supports the OLD "
        "behavior for these policies.  "
