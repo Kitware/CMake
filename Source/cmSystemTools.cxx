@@ -31,6 +31,8 @@
 #include "cmProcessOutput.h"
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
+#include "cmUVHandlePtr.h"
+#include "cmUVStream.h"
 #include "cmValue.h"
 
 #if !defined(CMAKE_BOOTSTRAP)
@@ -59,12 +61,14 @@
 #include <cassert>
 #include <cctype>
 #include <cerrno>
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
 #include <functional>
 #include <iostream>
+#include <memory>
 #include <sstream>
 #include <utility>
 #include <vector>
@@ -2213,9 +2217,10 @@ bool cmSystemTools::ListTar(const std::string& outFileName,
 #endif
 }
 
-int cmSystemTools::WaitForLine(cmsysProcess* process, std::string& line,
-                               cmDuration timeout, std::vector<char>& out,
-                               std::vector<char>& err)
+cmSystemTools::WaitForLineResult cmSystemTools::WaitForLine(
+  uv_loop_t* loop, uv_stream_t* outPipe, uv_stream_t* errPipe,
+  std::string& line, cmDuration timeout, std::vector<char>& out,
+  std::vector<char>& err)
 {
   line.clear();
   auto outiter = out.begin();
@@ -2237,7 +2242,7 @@ int cmSystemTools::WaitForLine(cmsysProcess* process, std::string& line,
           line.append(out.data(), length);
         }
         out.erase(out.begin(), outiter + 1);
-        return cmsysProcess_Pipe_STDOUT;
+        return WaitForLineResult::STDOUT;
       }
     }
 
@@ -2255,33 +2260,66 @@ int cmSystemTools::WaitForLine(cmsysProcess* process, std::string& line,
           line.append(err.data(), length);
         }
         err.erase(err.begin(), erriter + 1);
-        return cmsysProcess_Pipe_STDERR;
+        return WaitForLineResult::STDERR;
       }
     }
 
     // No newlines found.  Wait for more data from the process.
-    int length;
-    char* data;
-    double timeoutAsDbl = timeout.count();
-    int pipe =
-      cmsysProcess_WaitForData(process, &data, &length, &timeoutAsDbl);
-    if (pipe == cmsysProcess_Pipe_Timeout) {
+    struct ReadData
+    {
+      uv_stream_t* Stream;
+      std::vector<char> Buffer;
+      bool Read = false;
+      bool Finished = false;
+    };
+    auto startRead =
+      [](uv_stream_t* stream,
+         ReadData& data) -> std::unique_ptr<cmUVStreamReadHandle> {
+      data.Stream = stream;
+      return cmUVStreamRead(
+        stream,
+        [&data](std::vector<char> buf) {
+          data.Buffer = std::move(buf);
+          data.Read = true;
+          uv_read_stop(data.Stream);
+        },
+        [&data]() { data.Finished = true; });
+    };
+    ReadData outData;
+    auto outHandle = startRead(outPipe, outData);
+    ReadData errData;
+    auto errHandle = startRead(errPipe, errData);
+
+    cm::uv_timer_ptr timer;
+    bool timedOut = false;
+    timer.init(*loop, &timedOut);
+    timer.start(
+      [](uv_timer_t* handle) {
+        auto* timedOutPtr = static_cast<bool*>(handle->data);
+        *timedOutPtr = true;
+      },
+      static_cast<uint64_t>(timeout.count() * 1000.0), 0);
+
+    uv_run(loop, UV_RUN_ONCE);
+    if (timedOut) {
       // Timeout has been exceeded.
-      return pipe;
+      return WaitForLineResult::Timeout;
     }
-    if (pipe == cmsysProcess_Pipe_STDOUT) {
-      processOutput.DecodeText(data, length, strdata, 1);
+    if (outData.Read) {
+      processOutput.DecodeText(outData.Buffer.data(), outData.Buffer.size(),
+                               strdata, 1);
       // Append to the stdout buffer.
       std::vector<char>::size_type size = out.size();
       cm::append(out, strdata);
       outiter = out.begin() + size;
-    } else if (pipe == cmsysProcess_Pipe_STDERR) {
-      processOutput.DecodeText(data, length, strdata, 2);
+    } else if (errData.Read) {
+      processOutput.DecodeText(errData.Buffer.data(), errData.Buffer.size(),
+                               strdata, 2);
       // Append to the stderr buffer.
       std::vector<char>::size_type size = err.size();
       cm::append(err, strdata);
       erriter = err.begin() + size;
-    } else if (pipe == cmsysProcess_Pipe_None) {
+    } else if (outData.Finished && errData.Finished) {
       // Both stdout and stderr pipes have broken.  Return leftover data.
       processOutput.DecodeText(std::string(), strdata, 1);
       if (!strdata.empty()) {
@@ -2298,14 +2336,20 @@ int cmSystemTools::WaitForLine(cmsysProcess* process, std::string& line,
       if (!out.empty()) {
         line.append(out.data(), outiter - out.begin());
         out.erase(out.begin(), out.end());
-        return cmsysProcess_Pipe_STDOUT;
+        return WaitForLineResult::STDOUT;
       }
       if (!err.empty()) {
         line.append(err.data(), erriter - err.begin());
         err.erase(err.begin(), err.end());
-        return cmsysProcess_Pipe_STDERR;
+        return WaitForLineResult::STDERR;
       }
-      return cmsysProcess_Pipe_None;
+      return WaitForLineResult::None;
+    }
+    if (!outData.Finished) {
+      uv_read_stop(outPipe);
+    }
+    if (!errData.Finished) {
+      uv_read_stop(errPipe);
     }
   }
 }
