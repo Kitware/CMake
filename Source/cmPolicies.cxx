@@ -139,7 +139,7 @@ static void DiagnoseAncientPolicies(
 static bool GetPolicyDefault(cmMakefile* mf, std::string const& policy,
                              cmPolicies::PolicyStatus* defaultSetting)
 {
-  std::string defaultVar = "CMAKE_POLICY_DEFAULT_" + policy;
+  std::string defaultVar = cmStrCat("CMAKE_POLICY_DEFAULT_", policy);
   std::string const& defaultValue = mf->GetSafeDefinition(defaultVar);
   if (defaultValue == "NEW") {
     *defaultSetting = cmPolicies::NEW;
