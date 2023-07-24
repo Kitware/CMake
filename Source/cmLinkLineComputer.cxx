@@ -65,7 +65,8 @@ void cmLinkLineComputer::ComputeLinkLibs(
   ItemVector const& items = cli.GetItems();
   for (auto const& item : items) {
     if (item.Target &&
-        item.Target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+        (item.Target->GetType() == cmStateEnums::INTERFACE_LIBRARY ||
+         item.Target->GetType() == cmStateEnums::OBJECT_LIBRARY)) {
       continue;
     }
 

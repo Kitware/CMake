@@ -3598,6 +3598,13 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
       continue;
     }
     for (auto const& libItem : cli->GetItems()) {
+      // Explicitly ignore OBJECT libraries as Xcode emulates them as static
+      // libraries without an artifact. Avoid exposing this to the rest of
+      // CMake's compilation model.
+      if (libItem.Target &&
+          libItem.Target->GetType() == cmStateEnums::OBJECT_LIBRARY) {
+        continue;
+      }
       // We want to put only static libraries, dynamic libraries, frameworks
       // and bundles that are built from targets that are not imported in "Link
       // Binary With Libraries" build phase. Except if the target property

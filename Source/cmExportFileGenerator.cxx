@@ -536,7 +536,7 @@ static void getCompatibleInterfaceProperties(
   const cmComputeLinkInformation::ItemVector& deps = info->GetItems();
 
   for (auto const& dep : deps) {
-    if (!dep.Target) {
+    if (!dep.Target || dep.Target->GetType() == cmStateEnums::OBJECT_LIBRARY) {
       continue;
     }
     getPropertyContents(dep.Target, "COMPATIBLE_INTERFACE_BOOL",
