@@ -129,10 +129,10 @@ static void DiagnoseAncientPolicies(
     e << "  " << idToString(i) << ": " << idToShortDescription(i) << "\n";
   }
   e << "However, this version of CMake no longer supports the OLD "
-    << "behavior for these policies.  "
-    << "Please either update your CMakeLists.txt files to conform to "
-    << "the new behavior or use an older version of CMake that still "
-    << "supports the old behavior.";
+       "behavior for these policies.  "
+       "Please either update your CMakeLists.txt files to conform to "
+       "the new behavior or use an older version of CMake that still "
+       "supports the old behavior.";
   mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
 }
 
@@ -171,8 +171,9 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile* mf,
   if (sscanf(version_min.c_str(), "%u.%u.%u.%u", &minMajor, &minMinor,
              &minPatch, &minTweak) < 2) {
     std::ostringstream e;
-    e << "Invalid policy version value \"" << version_min << "\".  "
-      << "A numeric major.minor[.patch[.tweak]] must be given.";
+    e << "Invalid policy version value \"" << version_min
+      << "\".  "
+         "A numeric major.minor[.patch[.tweak]] must be given.";
     mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return false;
   }
@@ -201,10 +202,11 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile* mf,
        minTweak > cmVersion::GetTweakVersion())) {
     std::ostringstream e;
     e << "An attempt was made to set the policy version of CMake to \""
-      << version_min << "\" which is greater than this version of CMake.  "
-      << "This is not allowed because the greater version may have new "
-      << "policies not known to this CMake.  "
-      << "You may need a newer CMake version to build this project.";
+      << version_min
+      << "\" which is greater than this version of CMake.  "
+         "This is not allowed because the greater version may have new "
+         "policies not known to this CMake.  "
+         "You may need a newer CMake version to build this project.";
     mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return false;
   }
@@ -222,8 +224,9 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile* mf,
     if (sscanf(version_max.c_str(), "%u.%u.%u.%u", &maxMajor, &maxMinor,
                &maxPatch, &maxTweak) < 2) {
       std::ostringstream e;
-      e << "Invalid policy max version value \"" << version_max << "\".  "
-        << "A numeric major.minor[.patch[.tweak]] must be given.";
+      e << "Invalid policy max version value \"" << version_max
+        << "\".  "
+           "A numeric major.minor[.patch[.tweak]] must be given.";
       mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
       return false;
     }
@@ -237,7 +240,7 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile* mf,
       std::ostringstream e;
       e << "Policy VERSION range \"" << version_min << "..." << version_max
         << "\""
-        << " specifies a larger minimum than maximum.";
+           " specifies a larger minimum than maximum.";
       mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
       return false;
     }
@@ -396,16 +399,19 @@ std::string cmPolicies::GetRequiredAlwaysPolicyError(cmPolicies::PolicyID id)
 {
   std::string pid = idToString(id);
   std::ostringstream e;
-  e << "Policy " << pid << " may not be set to OLD behavior because this "
-    << "version of CMake no longer supports it.  "
-    << "The policy was introduced in "
-    << "CMake version " << idToVersion(id)
+  e << "Policy " << pid
+    << " may not be set to OLD behavior because this "
+       "version of CMake no longer supports it.  "
+       "The policy was introduced in "
+       "CMake version "
+    << idToVersion(id)
     << ", and use of NEW behavior is now required."
-    << "\n"
-    << "Please either update your CMakeLists.txt files to conform to "
-    << "the new behavior or use an older version of CMake that still "
-    << "supports the old behavior.  "
-    << "Run cmake --help-policy " << pid << " for more information.";
+       "\n"
+       "Please either update your CMakeLists.txt files to conform to "
+       "the new behavior or use an older version of CMake that still "
+       "supports the old behavior.  "
+       "Run cmake --help-policy "
+    << pid << " for more information.";
   return e.str();
 }
 
