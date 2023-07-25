@@ -256,3 +256,15 @@ Other Changes
 
 * :ref:`Visual Studio Generators`, for VS 15.8 (2017) and newer, now
   build custom commands in parallel.  See policy :policy:`CMP0147`.
+
+Updates
+=======
+
+Changes made since CMake 3.27.0 include the following.
+
+3.27.1
+------
+
+* This version made no changes to documented features or interfaces.
+  Some implementation updates were made to support ecosystem changes
+  and/or fix regressions.
