@@ -3304,7 +3304,7 @@ if(BUILD_TESTING)
       "${CMake_BINARY_DIR}/Tests/CTestTestChecksum/testOutput.log"
       )
     set_tests_properties(CTestTestChecksum PROPERTIES PASS_REGULAR_EXPRESSION
-      "Submission failed: Checksum failed for file")
+      "md5 mismatch")
 
     # these tests take a long time, make sure they have it
     # if timeouts have not already been set
