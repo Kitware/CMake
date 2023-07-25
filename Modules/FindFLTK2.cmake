@@ -191,12 +191,12 @@ if(FLTK2_DIR)
     if(UNIX)
       find_program(FLTK2_CONFIG_SCRIPT fltk2-config PATHS ${FLTK2_BIN_DIR})
       if(FLTK2_CONFIG_SCRIPT)
-        exec_program(${FLTK2_CONFIG_SCRIPT} ARGS --use-images --ldflags
+        execute_process(COMMAND ${FLTK2_CONFIG_SCRIPT} --use-images --ldflags
           OUTPUT_VARIABLE FLTK2_IMAGES_LDFLAGS)
         set(FLTK2_LIBS_EXTRACT_REGEX ".*-lfltk2_images (.*) -lfltk2.*")
         if("${FLTK2_IMAGES_LDFLAGS}" MATCHES "${FLTK2_LIBS_EXTRACT_REGEX}")
           string(REGEX REPLACE " +" ";" FLTK2_IMAGES_LIBS "${CMAKE_MATCH_1}")
-          # The EXEC_PROGRAM will not be inherited into subdirectories from
+          # The execute_process() will not be inherited into subdirectories from
           # the file that originally included this module.  Save the answer.
           set(FLTK2_IMAGES_LIBS "${FLTK2_IMAGES_LIBS}" CACHE INTERNAL
             "Extra libraries for fltk_images library.")
