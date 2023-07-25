@@ -1,3 +1,49 @@
+set(all_target_types
+  "EXECUTABLE"
+
+  "IMPORTED_EXECUTABLE"
+
+  "INTERFACE"
+  "MODULE"
+  "OBJECT"
+  "SHARED"
+  "STATIC"
+
+  "IMPORTED_INTERFACE"
+  "IMPORTED_MODULE"
+  "IMPORTED_OBJECT"
+  "IMPORTED_SHARED"
+  "IMPORTED_STATIC"
+
+  "CUSTOM")
+
+function (make_target name type)
+  if (type STREQUAL "EXECUTABLE")
+    add_executable("${name}")
+    target_sources("${name}" PRIVATE ${main_sources})
+  elseif (type STREQUAL "IMPORTED_EXECUTABLE")
+    add_executable("${name}" IMPORTED)
+    set_property(TARGET "${name}" PROPERTY IMPORTED_LOCATION "${CMAKE_COMMAND}")
+  elseif (type STREQUAL "CUSTOM")
+    add_custom_target("${name}" COMMAND "${CMAKE_EXECUTABLE}" -E echo "${name}")
+  elseif (type MATCHES "IMPORTED_")
+    string(REPLACE "IMPORTED_" "" type "${type}")
+    add_library("${name}" IMPORTED ${type})
+    if (NOT type STREQUAL "INTERFACE")
+      set_property(TARGET "${name}" PROPERTY IMPORTED_LOCATION "${default_library_location}")
+    endif ()
+  else ()
+    add_library("${name}" ${type})
+    target_sources("${name}" PRIVATE ${library_sources})
+  endif ()
+
+  if (type MATCHES "EXECUTABLE")
+    add_executable("alias::${name}" ALIAS "${name}")
+  elseif (NOT type STREQUAL "CUSTOM")
+    add_library("alias::${name}" ALIAS "${name}")
+  endif ()
+endfunction ()
+
 function (check_property target property expected)
   if (NOT TARGET "${target}")
     message(SEND_ERROR
