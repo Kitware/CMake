@@ -420,7 +420,7 @@ TargetProperty const StaticTargetProperties[] = {
   { "Fortran_FORMAT"_s, IC::CanCompileSources },
   { "Fortran_MODULE_DIRECTORY"_s, IC::CanCompileSources },
   { "Fortran_COMPILER_LAUNCHER"_s, IC::CanCompileSources },
-  { "Fortran_PREPRPOCESS"_s, IC::CanCompileSources },
+  { "Fortran_PREPROCESS"_s, IC::CanCompileSources },
   { "Fortran_VISIBILITY_PRESET"_s, IC::CanCompileSources },
   // ---- HIP
   COMMON_LANGUAGE_PROPERTIES(HIP),
