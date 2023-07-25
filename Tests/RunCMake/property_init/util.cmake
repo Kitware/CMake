@@ -23,6 +23,41 @@ function (prepare_target_types name)
   set("not_${name}" "${all_target_types}" PARENT_SCOPE)
 endfunction ()
 
+function (per_config variable)
+  prepare_properties("${property_table}" properties expected_values expected_alias)
+
+  get_property(is_multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+  if (is_multi_config)
+    set(configs "${CMAKE_CONFIGURATION_TYPES}")
+  else ()
+    if (NOT CMAKE_BUILD_TYPE STREQUAL "")
+      set(configs "${CMAKE_BUILD_TYPE}")
+    endif ()
+  endif ()
+
+  foreach (property expected alias IN ZIP_LISTS expected_properties expected_values expected_alias)
+    if (property MATCHES "^_")
+      set(prepend 1)
+    elseif (property MATCHES "_$")
+      set(prepend 0)
+    else ()
+      message(SEND_ERROR
+        "Per-config properties must have a `_` at one end of their name: '${property}'")
+    endif ()
+    foreach (config IN LISTS configs)
+      if (prepend)
+        list(APPEND "${variable}"
+          "${config}_${property}" "${value}/${config}" "${alias}")
+      else ()
+        list(APPEND "${variable}"
+          "${property}_${config}" "${value}/${config}" "${alias}")
+      endif ()
+    endforeach ()
+  endforeach ()
+
+  set("${variable}" "${${variable}}" PARENT_SCOPE)
+endfunction ()
+
 function (make_target name type)
   if (type STREQUAL "EXECUTABLE")
     add_executable("${name}")
