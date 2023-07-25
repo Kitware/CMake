@@ -1107,7 +1107,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
 
       int ret = 0;
       auto time_start = std::chrono::steady_clock::now();
-      cmSystemTools::RunSingleCommand(command, nullptr, nullptr, &ret);
+      cmSystemTools::RunSingleCommand(command, nullptr, nullptr, &ret, nullptr,
+                                      cmSystemTools::OUTPUT_PASSTHROUGH);
       auto time_finish = std::chrono::steady_clock::now();
 
       std::chrono::duration<double> time_elapsed = time_finish - time_start;

@@ -20,7 +20,6 @@
 
 #include <cm3p/uv.h>
 
-#include "cmsys/Process.h"
 #include "cmsys/Status.hxx"      // IWYU pragma: export
 #include "cmsys/SystemTools.hxx" // IWYU pragma: export
 
