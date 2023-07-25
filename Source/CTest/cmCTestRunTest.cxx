@@ -758,11 +758,13 @@ bool cmCTestRunTest::ForkProcess()
   }
 
   // An explicit TIMEOUT=0 test property means "no timeout".
-  if (timeout && *timeout == std::chrono::duration<double>::zero()) {
-    timeout = cm::nullopt;
+  if (timeout) {
+    if (*timeout == std::chrono::duration<double>::zero()) {
+      timeout = cm::nullopt;
+    }
   } else {
     // Check --timeout.
-    if (!timeout && this->CTest->GetGlobalTimeout() > cmDuration::zero()) {
+    if (this->CTest->GetGlobalTimeout() > cmDuration::zero()) {
       timeout = this->CTest->GetGlobalTimeout();
     }
 
