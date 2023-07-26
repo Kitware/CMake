@@ -574,16 +574,18 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
 
       header_data.push_back(0);
       header_data.push_back(languages.size());
+      // NOLINTNEXTLINE(modernize-loop-convert): `HAVE_CoreServices` needs `i`
       for (cmList::size_type i = 0; i < languages.size(); ++i) {
+        auto const& language = languages[i];
         CFStringRef language_cfstring = CFStringCreateWithCString(
-          nullptr, languages[i].c_str(), kCFStringEncodingUTF8);
+          nullptr, language.c_str(), kCFStringEncodingUTF8);
         CFStringRef iso_language =
           CFLocaleCreateCanonicalLanguageIdentifierFromString(
             nullptr, language_cfstring);
         if (!iso_language) {
           cmCPackLogger(cmCPackLog::LOG_ERROR,
-                        languages[i] << " is not a recognized language"
-                                     << std::endl);
+                        language << " is not a recognized language"
+                                 << std::endl);
         }
         char iso_language_cstr[65];
         CFStringGetCString(iso_language, iso_language_cstr,
