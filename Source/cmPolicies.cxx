@@ -123,23 +123,23 @@ static void DiagnoseAncientPolicies(
 {
   std::ostringstream e;
   e << "The project requests behavior compatible with CMake version \""
-    << majorVer << "." << minorVer << "." << patchVer
+    << majorVer << '.' << minorVer << '.' << patchVer
     << "\", which requires the OLD behavior for some policies:\n";
   for (cmPolicies::PolicyID i : ancient) {
-    e << "  " << idToString(i) << ": " << idToShortDescription(i) << "\n";
+    e << "  " << idToString(i) << ": " << idToShortDescription(i) << '\n';
   }
   e << "However, this version of CMake no longer supports the OLD "
-    << "behavior for these policies.  "
-    << "Please either update your CMakeLists.txt files to conform to "
-    << "the new behavior or use an older version of CMake that still "
-    << "supports the old behavior.";
+       "behavior for these policies.  "
+       "Please either update your CMakeLists.txt files to conform to "
+       "the new behavior or use an older version of CMake that still "
+       "supports the old behavior.";
   mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
 }
 
 static bool GetPolicyDefault(cmMakefile* mf, std::string const& policy,
                              cmPolicies::PolicyStatus* defaultSetting)
 {
-  std::string defaultVar = "CMAKE_POLICY_DEFAULT_" + policy;
+  std::string defaultVar = cmStrCat("CMAKE_POLICY_DEFAULT_", policy);
   std::string const& defaultValue = mf->GetSafeDefinition(defaultVar);
   if (defaultValue == "NEW") {
     *defaultSetting = cmPolicies::NEW;
@@ -148,10 +148,10 @@ static bool GetPolicyDefault(cmMakefile* mf, std::string const& policy,
   } else if (defaultValue.empty()) {
     *defaultSetting = cmPolicies::WARN;
   } else {
-    std::ostringstream e;
-    e << defaultVar << " has value \"" << defaultValue
-      << R"(" but must be "OLD", "NEW", or "" (empty).)";
-    mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    mf->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat(defaultVar, " has value \"", defaultValue,
+               R"(" but must be "OLD", "NEW", or "" (empty).)"));
     return false;
   }
 
@@ -170,10 +170,11 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile* mf,
   unsigned int minTweak = 0;
   if (sscanf(version_min.c_str(), "%u.%u.%u.%u", &minMajor, &minMinor,
              &minPatch, &minTweak) < 2) {
-    std::ostringstream e;
-    e << "Invalid policy version value \"" << version_min << "\".  "
-      << "A numeric major.minor[.patch[.tweak]] must be given.";
-    mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    mf->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("Invalid policy version value \"", version_min,
+               "\".  "
+               "A numeric major.minor[.patch[.tweak]] must be given."));
     return false;
   }
 
@@ -199,13 +200,14 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile* mf,
        minMinor == cmVersion::GetMinorVersion() &&
        minPatch == cmVersion::GetPatchVersion() &&
        minTweak > cmVersion::GetTweakVersion())) {
-    std::ostringstream e;
-    e << "An attempt was made to set the policy version of CMake to \""
-      << version_min << "\" which is greater than this version of CMake.  "
-      << "This is not allowed because the greater version may have new "
-      << "policies not known to this CMake.  "
-      << "You may need a newer CMake version to build this project.";
-    mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    mf->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("An attempt was made to set the policy version of CMake to \"",
+               version_min,
+               "\" which is greater than this version of CMake.  ",
+               "This is not allowed because the greater version may have new "
+               "policies not known to this CMake.  "
+               "You may need a newer CMake version to build this project."));
     return false;
   }
 
@@ -221,10 +223,11 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile* mf,
     unsigned int maxTweak = 0;
     if (sscanf(version_max.c_str(), "%u.%u.%u.%u", &maxMajor, &maxMinor,
                &maxPatch, &maxTweak) < 2) {
-      std::ostringstream e;
-      e << "Invalid policy max version value \"" << version_max << "\".  "
-        << "A numeric major.minor[.patch[.tweak]] must be given.";
-      mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+      mf->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("Invalid policy max version value \"", version_max,
+                 "\".  "
+                 "A numeric major.minor[.patch[.tweak]] must be given."));
       return false;
     }
 
@@ -234,11 +237,10 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile* mf,
          minPatch > maxPatch) ||
         (minMajor == maxMajor && minMinor == maxMinor &&
          minPatch == maxPatch && minTweak > maxTweak)) {
-      std::ostringstream e;
-      e << "Policy VERSION range \"" << version_min << "..." << version_max
-        << "\""
-        << " specifies a larger minimum than maximum.";
-      mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+      mf->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("Policy VERSION range \"", version_min, "...", version_max,
+                 "\" specifies a larger minimum than maximum."));
       return false;
     }
 
@@ -328,61 +330,49 @@ bool cmPolicies::GetPolicyID(const char* id, cmPolicies::PolicyID& pid)
 //! return a warning string for a given policy
 std::string cmPolicies::GetPolicyWarning(cmPolicies::PolicyID id)
 {
-  std::ostringstream msg;
-  msg << "Policy " << idToString(id)
-      << " is not set: "
-         ""
-      << idToShortDescription(id)
-      << "  "
-         "Run \"cmake --help-policy "
-      << idToString(id)
-      << "\" for "
-         "policy details.  "
-         "Use the cmake_policy command to set the policy "
-         "and suppress this warning.";
-  return msg.str();
+  return cmStrCat("Policy ", idToString(id),
+                  " is not set: ", idToShortDescription(id),
+                  "  "
+                  "Run \"cmake --help-policy ",
+                  idToString(id),
+                  "\" for "
+                  "policy details.  "
+                  "Use the cmake_policy command to set the policy "
+                  "and suppress this warning.");
 }
 
 std::string cmPolicies::GetPolicyDeprecatedWarning(cmPolicies::PolicyID id)
 {
-  std::ostringstream msg;
-  /* clang-format off */
-  msg <<
-    "The OLD behavior for policy " << idToString(id) << " "
+  return cmStrCat(
+    "The OLD behavior for policy ", idToString(id),
+    " "
     "will be removed from a future version of CMake.\n"
     "The cmake-policies(7) manual explains that the OLD behaviors of all "
     "policies are deprecated and that a policy should be set to OLD only "
     "under specific short-term circumstances.  Projects should be ported "
-    "to the NEW behavior and not rely on setting a policy to OLD."
-    ;
-  /* clang-format on */
-  return msg.str();
+    "to the NEW behavior and not rely on setting a policy to OLD.");
 }
 
 //! return an error string for when a required policy is unspecified
 std::string cmPolicies::GetRequiredPolicyError(cmPolicies::PolicyID id)
 {
-  std::ostringstream error;
-  error << "Policy " << idToString(id)
-        << " is not set to NEW: "
-           ""
-        << idToShortDescription(id)
-        << "  "
-           "Run \"cmake --help-policy "
-        << idToString(id)
-        << "\" for "
-           "policy details.  "
-           "CMake now requires this policy to be set to NEW by the project.  "
-           "The policy may be set explicitly using the code\n"
-           "  cmake_policy(SET "
-        << idToString(id)
-        << " NEW)\n"
-           "or by upgrading all policies with the code\n"
-           "  cmake_policy(VERSION "
-        << idToVersion(id)
-        << ") # or later\n"
-           "Run \"cmake --help-command cmake_policy\" for more information.";
-  return error.str();
+  return cmStrCat(
+    "Policy ", idToString(id),
+    " is not set to NEW: ", idToShortDescription(id),
+    "  "
+    "Run \"cmake --help-policy ",
+    idToString(id),
+    "\" for policy details.  "
+    "CMake now requires this policy to be set to NEW by the project.  "
+    "The policy may be set explicitly using the code\n"
+    "  cmake_policy(SET ",
+    idToString(id),
+    " NEW)\n"
+    "or by upgrading all policies with the code\n"
+    "  cmake_policy(VERSION ",
+    idToVersion(id),
+    ") # or later\n"
+    "Run \"cmake --help-command cmake_policy\" for more information.");
 }
 
 //! Get the default status for a policy
@@ -395,18 +385,18 @@ cmPolicies::PolicyStatus cmPolicies::GetPolicyStatus(
 std::string cmPolicies::GetRequiredAlwaysPolicyError(cmPolicies::PolicyID id)
 {
   std::string pid = idToString(id);
-  std::ostringstream e;
-  e << "Policy " << pid << " may not be set to OLD behavior because this "
-    << "version of CMake no longer supports it.  "
-    << "The policy was introduced in "
-    << "CMake version " << idToVersion(id)
-    << ", and use of NEW behavior is now required."
-    << "\n"
-    << "Please either update your CMakeLists.txt files to conform to "
-    << "the new behavior or use an older version of CMake that still "
-    << "supports the old behavior.  "
-    << "Run cmake --help-policy " << pid << " for more information.";
-  return e.str();
+  return cmStrCat(
+    "Policy ", pid,
+    " may not be set to OLD behavior because this "
+    "version of CMake no longer supports it.  "
+    "The policy was introduced in CMake version ",
+    idToVersion(id),
+    ", and use of NEW behavior is now required."
+    "\n"
+    "Please either update your CMakeLists.txt files to conform to "
+    "the new behavior or use an older version of CMake that still "
+    "supports the old behavior.  Run cmake --help-policy ",
+    pid, " for more information.");
 }
 
 cmPolicies::PolicyStatus cmPolicies::PolicyMap::Get(
