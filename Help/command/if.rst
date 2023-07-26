@@ -170,9 +170,9 @@ File Operations
 
 .. signature:: if(EXISTS <path-to-file-or-directory>)
 
-  True if the named file or directory exists.  Behavior is well-defined
-  only for explicit full paths (a leading ``~/`` is not expanded as
-  a home directory and is considered a relative path).
+  True if the named file or directory exists and is readable.  Behavior
+  is well-defined only for explicit full paths (a leading ``~/`` is not
+  expanded as a home directory and is considered a relative path).
   Resolves symbolic links, i.e. if the named file or directory is a
   symbolic link, returns true if the target of the symbolic link exists.
 
