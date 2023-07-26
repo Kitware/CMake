@@ -102,10 +102,15 @@ int cmCPackProductBuildGenerator::PackageFiles()
 
   pkgCmd << productbuild << " --distribution \"" << packageDirFileName
          << "/Contents/distribution.dist\""
-         << " --package-path \"" << packageDirFileName << "/Contents/Packages"
+            " --package-path \""
+         << packageDirFileName
+         << "/Contents/Packages"
+            "\""
+            " --resources \""
+         << resDir
          << "\""
-         << " --resources \"" << resDir << "\""
-         << " --version \"" << version << "\""
+            " --version \""
+         << version << "\""
          << (identifier.empty()
                ? std::string{}
                : cmStrCat(" --identifier \"", identifier, '"'))
@@ -236,11 +241,18 @@ bool cmCPackProductBuildGenerator::GenerateComponentPackage(
     keychainPath = p;
   }
 
-  pkgCmd << pkgbuild << " --root \"" << packageDir << "\""
-         << " --identifier \"" << pkgId << "\""
-         << " --scripts \"" << scriptDir << "\""
-         << " --version \"" << version << "\""
-         << " --install-location \"/\""
+  pkgCmd << pkgbuild << " --root \"" << packageDir
+         << "\""
+            " --identifier \""
+         << pkgId
+         << "\""
+            " --scripts \""
+         << scriptDir
+         << "\""
+            " --version \""
+         << version
+         << "\""
+            " --install-location \"/\""
          << (identityName.empty() ? std::string{}
                                   : cmStrCat(" --sign \"", identityName, "\""))
          << (keychainPath.empty()

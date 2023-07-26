@@ -86,24 +86,28 @@ int cmCPackBundleGenerator::ConstructBundle()
   std::string const staging = toplevel;
 
   std::ostringstream contents;
-  contents << staging << "/" << cpack_bundle_name << ".app/"
-           << "Contents";
+  contents << staging << "/" << cpack_bundle_name
+           << ".app/"
+              "Contents";
 
   std::ostringstream application;
-  application << contents.str() << "/"
-              << "MacOS";
+  application << contents.str()
+              << "/"
+                 "MacOS";
 
   std::ostringstream resources;
-  resources << contents.str() << "/"
-            << "Resources";
+  resources << contents.str()
+            << "/"
+               "Resources";
 
   // Install a required, user-provided bundle metadata file ...
   std::ostringstream plist_source;
   plist_source << cpack_bundle_plist;
 
   std::ostringstream plist_target;
-  plist_target << contents.str() << "/"
-               << "Info.plist";
+  plist_target << contents.str()
+               << "/"
+                  "Info.plist";
 
   if (!this->CopyFile(plist_source, plist_target)) {
     cmCPackLogger(
