@@ -385,11 +385,10 @@ bool cmCPackPKGGenerator::CopyCreateResourceFile(const std::string& name,
   cmValue inFileName = this->GetOption(cpackVar);
   if (!inFileName) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
-                  "CPack option: " << cpackVar.c_str()
-                                   << " not specified. It should point to "
-                                   << (!name.empty() ? name : "<empty>")
-                                   << ".rtf, " << name << ".html, or " << name
-                                   << ".txt file" << std::endl);
+                  "CPack option: "
+                    << cpackVar << " not specified. It should point to "
+                    << (!name.empty() ? name : "<empty>") << ".rtf, " << name
+                    << ".html, or " << name << ".txt file" << std::endl);
     return false;
   }
   if (!cmSystemTools::FileExists(inFileName)) {
@@ -454,7 +453,7 @@ int cmCPackPKGGenerator::CopyInstallScript(const std::string& resdir,
 {
   std::string dst = cmStrCat(resdir, '/', name);
   cmSystemTools::CopyFileAlways(script, dst);
-  cmSystemTools::SetPermissions(dst.c_str(), 0777);
+  cmSystemTools::SetPermissions(dst, 0777);
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                 "copy script : " << script << "\ninto " << dst << std::endl);
 
