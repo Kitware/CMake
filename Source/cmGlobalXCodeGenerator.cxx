@@ -1107,8 +1107,10 @@ std::string GetSourcecodeValueFromFileExtension(
   } else if (ext == "storyboard") {
     keepLastKnownFileType = true;
     sourcecode = "file.storyboard";
+    // NOLINTNEXTLINE(bugprone-branch-clone)
   } else if (ext == "mm" && !cm::contains(enabled_langs, "OBJCXX")) {
     sourcecode += ".cpp.objcpp";
+    // NOLINTNEXTLINE(bugprone-branch-clone)
   } else if (ext == "m" && !cm::contains(enabled_langs, "OBJC")) {
     sourcecode += ".c.objc";
   } else if (ext == "swift") {
