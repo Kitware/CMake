@@ -105,15 +105,13 @@ public:
 class cmGlobalXCodeGenerator::BuildObjectListOrString
 {
   cmGlobalXCodeGenerator* Generator;
-  cmXCodeObject* Group;
-  bool Empty;
+  cmXCodeObject* Group = nullptr;
+  bool Empty = true;
   std::string String;
 
 public:
   BuildObjectListOrString(cmGlobalXCodeGenerator* gen, bool buildObjectList)
     : Generator(gen)
-    , Group(nullptr)
-    , Empty(true)
   {
     if (buildObjectList) {
       this->Group = this->Generator->CreateObject(cmXCodeObject::OBJECT_LIST);
