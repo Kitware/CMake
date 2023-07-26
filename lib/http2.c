@@ -134,9 +134,11 @@ struct cf_h2_ctx {
   BIT(conn_closed);
   BIT(goaway);
   BIT(enable_push);
+  BIT(nw_out_blocked);
 };
 
 /* How to access `call_data` from a cf_h2 filter */
+#undef CF_CTX_CALL_DATA
 #define CF_CTX_CALL_DATA(cf)  \
   ((struct cf_h2_ctx *)(cf)->ctx)->call_data
 
@@ -175,6 +177,7 @@ struct stream_ctx {
   struct bufq sendbuf; /* request buffer */
   struct dynhds resp_trailers; /* response trailer fields */
   size_t resp_hds_len; /* amount of response header bytes in recvbuf */
+  size_t upload_blocked_len;
   curl_off_t upload_left; /* number of request bytes left to upload */
 
   char **push_headers;       /* allocated array */
@@ -183,6 +186,7 @@ struct stream_ctx {
 
   int status_code; /* HTTP response status code */
   uint32_t error; /* stream error code */
+  uint32_t local_window_size; /* the local recv window size */
   bool closed; /* TRUE on stream close */
   bool reset;  /* TRUE on stream reset */
   bool close_handled; /* TRUE if stream closure is handled by libcurl */
@@ -209,9 +213,12 @@ static void drain_stream(struct Curl_cfilter *cf,
 
   (void)cf;
   bits = CURL_CSELECT_IN;
-  if(!stream->send_closed && stream->upload_left)
+  if(!stream->send_closed &&
+     (stream->upload_left || stream->upload_blocked_len))
     bits |= CURL_CSELECT_OUT;
   if(data->state.dselect_bits != bits) {
+    DEBUGF(LOG_CF(data, cf, "[h2sid=%d] DRAIN dselect_bits=%x",
+                  stream->id, bits));
     data->state.dselect_bits = bits;
     Curl_expire(data, 0, EXPIRE_RUN_NOW);
   }
@@ -245,13 +252,14 @@ static CURLcode http2_data_setup(struct Curl_cfilter *cf,
                   H2_STREAM_SEND_CHUNKS, BUFQ_OPT_NONE);
   Curl_bufq_initp(&stream->recvbuf, &ctx->stream_bufcp,
                   H2_STREAM_RECV_CHUNKS, BUFQ_OPT_SOFT_LIMIT);
-  Curl_dynhds_init(&stream->resp_trailers, 0, DYN_H2_TRAILERS);
+  Curl_dynhds_init(&stream->resp_trailers, 0, DYN_HTTP_REQUEST);
   stream->resp_hds_len = 0;
   stream->bodystarted = FALSE;
   stream->status_code = -1;
   stream->closed = FALSE;
   stream->close_handled = FALSE;
   stream->error = NGHTTP2_NO_ERROR;
+  stream->local_window_size = H2_STREAM_WINDOW_SIZE;
   stream->upload_left = 0;
 
   H2_STREAM_LCTX(data) = stream;
@@ -580,7 +588,6 @@ static bool http2_connisalive(struct Curl_cfilter *cf, struct Curl_easy *data,
     ssize_t nread = -1;
 
     *input_pending = FALSE;
-    Curl_attach_connection(data, cf->conn);
     nread = Curl_bufq_slurp(&ctx->inbufq, nw_in_reader, cf, &result);
     if(nread != -1) {
       DEBUGF(LOG_CF(data, cf, "%zd bytes stray data read before trying "
@@ -592,11 +599,10 @@ static bool http2_connisalive(struct Curl_cfilter *cf, struct Curl_easy *data,
         alive = !should_close_session(ctx);
       }
     }
-    else {
+    else if(result != CURLE_AGAIN) {
       /* the read failed so let's say this is dead anyway */
       alive = FALSE;
     }
-    Curl_detach_connection(data);
   }
 
   return alive;
@@ -644,13 +650,17 @@ static CURLcode nw_out_flush(struct Curl_cfilter *cf,
   if(Curl_bufq_is_empty(&ctx->outbufq))
     return CURLE_OK;
 
-  DEBUGF(LOG_CF(data, cf, "h2 conn flush %zu bytes",
-                Curl_bufq_len(&ctx->outbufq)));
   nwritten = Curl_bufq_pass(&ctx->outbufq, nw_out_writer, cf, &result);
-  if(nwritten < 0 && result != CURLE_AGAIN) {
+  if(nwritten < 0) {
+    if(result == CURLE_AGAIN) {
+      DEBUGF(LOG_CF(data, cf, "flush nw send buffer(%zu) -> EAGAIN",
+                    Curl_bufq_len(&ctx->outbufq)));
+      ctx->nw_out_blocked = 1;
+    }
     return result;
   }
-  return CURLE_OK;
+  DEBUGF(LOG_CF(data, cf, "nw send buffer flushed"));
+  return Curl_bufq_is_empty(&ctx->outbufq)? CURLE_OK: CURLE_AGAIN;
 }
 
 /*
@@ -676,15 +686,17 @@ static ssize_t send_callback(nghttp2_session *h2,
                                   nw_out_writer, cf, &result);
   if(nwritten < 0) {
     if(result == CURLE_AGAIN) {
+      ctx->nw_out_blocked = 1;
       return NGHTTP2_ERR_WOULDBLOCK;
     }
     failf(data, "Failed sending HTTP2 data");
     return NGHTTP2_ERR_CALLBACK_FAILURE;
   }
 
-  if(!nwritten)
+  if(!nwritten) {
+    ctx->nw_out_blocked = 1;
     return NGHTTP2_ERR_WOULDBLOCK;
-
+  }
   return nwritten;
 }
 
@@ -964,6 +976,7 @@ static CURLcode on_stream_frame(struct Curl_cfilter *cf,
   struct stream_ctx *stream = H2_STREAM_CTX(data);
   int32_t stream_id = frame->hd.stream_id;
   CURLcode result;
+  size_t rbuflen;
   int rv;
 
   if(!stream) {
@@ -973,10 +986,10 @@ static CURLcode on_stream_frame(struct Curl_cfilter *cf,
 
   switch(frame->hd.type) {
   case NGHTTP2_DATA:
+    rbuflen = Curl_bufq_len(&stream->recvbuf);
     DEBUGF(LOG_CF(data, cf, "[h2sid=%d] FRAME[DATA len=%zu pad=%zu], "
                   "buffered=%zu, window=%d/%d",
-                  stream_id, frame->hd.length, frame->data.padlen,
-                  Curl_bufq_len(&stream->recvbuf),
+                  stream_id, frame->hd.length, frame->data.padlen, rbuflen,
                   nghttp2_session_get_stream_effective_recv_data_length(
                     ctx->h2, stream->id),
                   nghttp2_session_get_stream_effective_local_window_size(
@@ -992,6 +1005,20 @@ static CURLcode on_stream_frame(struct Curl_cfilter *cf,
     }
     if(frame->hd.flags & NGHTTP2_FLAG_END_STREAM) {
       drain_stream(cf, data, stream);
+    }
+    else if(rbuflen > stream->local_window_size) {
+      int32_t wsize = nghttp2_session_get_stream_local_window_size(
+                        ctx->h2, stream->id);
+      if(wsize > 0 && (uint32_t)wsize != stream->local_window_size) {
+        /* H2 flow control is not absolute, as the server might not have the
+         * same view, yet. When we recieve more than we want, we enforce
+         * the local window size again to make nghttp2 send WINDOW_UPATEs
+         * accordingly. */
+        nghttp2_session_set_local_window_size(ctx->h2,
+                                              NGHTTP2_FLAG_NONE,
+                                              stream->id,
+                                              stream->local_window_size);
+      }
     }
     break;
   case NGHTTP2_HEADERS:
@@ -1094,6 +1121,21 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
         DEBUGF(LOG_CF(data, cf, "MAX_CONCURRENT_STREAMS now %u",
                       ctx->max_concurrent_streams));
         multi_connchanged(data->multi);
+      }
+      /* Since the initial stream window is 64K, a request might be on HOLD,
+       * due to exhaustion. The (initial) SETTINGS may announce a much larger
+       * window and *assume* that we treat this like a WINDOW_UPDATE. Some
+       * servers send an explicit WINDOW_UPDATE, but not all seem to do that.
+       * To be safe, we UNHOLD a stream in order not to stall. */
+      if((data->req.keepon & KEEP_SEND_HOLD) &&
+         (data->req.keepon & KEEP_SEND)) {
+        struct stream_ctx *stream = H2_STREAM_CTX(data);
+        data->req.keepon &= ~KEEP_SEND_HOLD;
+        if(stream) {
+          drain_stream(cf, data, stream);
+          DEBUGF(LOG_CF(data, cf, "[h2sid=%d] un-holding after SETTINGS",
+                        stream_id));
+        }
       }
       break;
     }
@@ -1448,8 +1490,8 @@ static ssize_t req_body_read_callback(nghttp2_session *session,
   if(nread > 0 && stream->upload_left != -1)
     stream->upload_left -= nread;
 
-  DEBUGF(LOG_CF(data_s, cf, "[h2sid=%d] req_body_read(len=%zu) left=%zd"
-                " -> %zd, %d",
+  DEBUGF(LOG_CF(data_s, cf, "[h2sid=%d] req_body_read(len=%zu) left=%"
+                            CURL_FORMAT_CURL_OFF_T " -> %zd, %d",
                 stream_id, length, stream->upload_left, nread, result));
 
   if(stream->upload_left == 0)
@@ -1555,16 +1597,16 @@ static ssize_t http2_handle_stream_close(struct Curl_cfilter *cf,
     *err = CURLE_SEND_ERROR; /* trigger Curl_retry_request() later */
     return -1;
   }
-  else if(stream->reset) {
-    failf(data, "HTTP/2 stream %u was reset", stream->id);
-    *err = stream->bodystarted? CURLE_PARTIAL_FILE : CURLE_RECV_ERROR;
-    return -1;
-  }
   else if(stream->error != NGHTTP2_NO_ERROR) {
     failf(data, "HTTP/2 stream %u was not closed cleanly: %s (err %u)",
           stream->id, nghttp2_http2_strerror(stream->error),
           stream->error);
     *err = CURLE_HTTP2_STREAM;
+    return -1;
+  }
+  else if(stream->reset) {
+    failf(data, "HTTP/2 stream %u was reset", stream->id);
+    *err = stream->bodystarted? CURLE_PARTIAL_FILE : CURLE_RECV_ERROR;
     return -1;
   }
 
@@ -1659,9 +1701,10 @@ static CURLcode h2_progress_egress(struct Curl_cfilter *cf,
   struct stream_ctx *stream = H2_STREAM_CTX(data);
   int rv = 0;
 
-  if((sweight_wanted(data) != sweight_in_effect(data)) ||
-     (data->set.priority.exclusive != data->state.priority.exclusive) ||
-     (data->set.priority.parent != data->state.priority.parent) ) {
+  if(stream && stream->id > 0 &&
+     ((sweight_wanted(data) != sweight_in_effect(data)) ||
+      (data->set.priority.exclusive != data->state.priority.exclusive) ||
+      (data->set.priority.parent != data->state.priority.parent)) ) {
     /* send new weight and/or dependency */
     nghttp2_priority_spec pri_spec;
 
@@ -1675,7 +1718,8 @@ static CURLcode h2_progress_egress(struct Curl_cfilter *cf,
       goto out;
   }
 
-  while(!rv && nghttp2_session_want_write(ctx->h2))
+  ctx->nw_out_blocked = 0;
+  while(!rv && !ctx->nw_out_blocked && nghttp2_session_want_write(ctx->h2))
     rv = nghttp2_session_send(ctx->h2);
 
 out:
@@ -1739,7 +1783,7 @@ static CURLcode h2_progress_ingress(struct Curl_cfilter *cf,
 
   /* Process network input buffer fist */
   if(!Curl_bufq_is_empty(&ctx->inbufq)) {
-    DEBUGF(LOG_CF(data, cf, "Process %zd bytes in connection buffer",
+    DEBUGF(LOG_CF(data, cf, "Process %zu bytes in connection buffer",
                   Curl_bufq_len(&ctx->inbufq)));
     if(h2_process_pending_input(cf, data, &result) < 0)
       return result;
@@ -1760,7 +1804,7 @@ static CURLcode h2_progress_ingress(struct Curl_cfilter *cf,
     }
 
     nread = Curl_bufq_slurp(&ctx->inbufq, nw_in_reader, cf, &result);
-    /* DEBUGF(LOG_CF(data, cf, "read %zd bytes nw data -> %zd, %d",
+    /* DEBUGF(LOG_CF(data, cf, "read %zu bytes nw data -> %zd, %d",
                   Curl_bufq_len(&ctx->inbufq), nread, result)); */
     if(nread < 0) {
       if(result != CURLE_AGAIN) {
@@ -1836,7 +1880,7 @@ static ssize_t cf_h2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 
 out:
   result = h2_progress_egress(cf, data);
-  if(result) {
+  if(result && result != CURLE_AGAIN) {
     *err = result;
     nread = -1;
   }
@@ -1864,7 +1908,8 @@ static ssize_t h2_submit(struct stream_ctx **pstream,
   struct h1_req_parser h1;
   struct dynhds h2_headers;
   nghttp2_nv *nva = NULL;
-  size_t nheader, i;
+  const void *body = NULL;
+  size_t nheader, bodylen, i;
   nghttp2_data_provider data_prd;
   int32_t stream_id;
   nghttp2_priority_spec pri_spec;
@@ -1929,8 +1974,8 @@ static ssize_t h2_submit(struct stream_ctx **pstream,
 
   h2_pri_spec(data, &pri_spec);
 
-  DEBUGF(LOG_CF(data, cf, "send request allowed %d (easy handle %p)",
-                nghttp2_session_check_request_allowed(ctx->h2), (void *)data));
+  DEBUGF(LOG_CF(data, cf, "send request allowed %d",
+                nghttp2_session_check_request_allowed(ctx->h2)));
 
   switch(data->state.httpreq) {
   case HTTPREQ_POST:
@@ -1966,9 +2011,35 @@ static ssize_t h2_submit(struct stream_ctx **pstream,
 
   DEBUGF(LOG_CF(data, cf, "[h2sid=%d] cf_send(len=%zu) submit %s",
                 stream_id, len, data->state.url));
-  infof(data, "Using Stream ID: %u (easy handle %p)",
-        stream_id, (void *)data);
+  infof(data, "Using Stream ID: %u", stream_id);
   stream->id = stream_id;
+  stream->local_window_size = H2_STREAM_WINDOW_SIZE;
+  if(data->set.max_recv_speed) {
+    /* We are asked to only receive `max_recv_speed` bytes per second.
+     * Let's limit our stream window size around that, otherwise the server
+     * will send in large bursts only. We make the window 50% larger to
+     * allow for data in flight and avoid stalling. */
+    curl_off_t n = (((data->set.max_recv_speed - 1) / H2_CHUNK_SIZE) + 1);
+    n += CURLMAX((n/2), 1);
+    if(n < (H2_STREAM_WINDOW_SIZE / H2_CHUNK_SIZE) &&
+       n < (UINT_MAX / H2_CHUNK_SIZE)) {
+      stream->local_window_size = (uint32_t)n * H2_CHUNK_SIZE;
+    }
+  }
+
+  body = (const char *)buf + nwritten;
+  bodylen = len - nwritten;
+
+  if(bodylen) {
+    /* We have request body to send in DATA frame */
+    ssize_t n = Curl_bufq_write(&stream->sendbuf, body, bodylen, err);
+    if(n < 0) {
+      *err = CURLE_SEND_ERROR;
+      nwritten = -1;
+      goto out;
+    }
+    nwritten += n;
+  }
 
 out:
   DEBUGF(LOG_CF(data, cf, "[h2sid=%d] submit -> %zd, %d",
@@ -1982,17 +2053,13 @@ out:
 static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
                           const void *buf, size_t len, CURLcode *err)
 {
-  /*
-   * Currently, we send request in this function, but this function is also
-   * used to send request body. It would be nice to add dedicated function for
-   * request.
-   */
   struct cf_h2_ctx *ctx = cf->ctx;
   struct stream_ctx *stream = H2_STREAM_CTX(data);
   struct cf_call_data save;
   int rv;
   ssize_t nwritten;
   CURLcode result;
+  int blocked = 0;
 
   CF_DATA_SAVE(save, cf, data);
 
@@ -2007,18 +2074,35 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       nwritten = http2_handle_stream_close(cf, data, stream, err);
       goto out;
     }
-    /* If stream_id != -1, we have dispatched request HEADERS, and now
-       are going to send or sending request body in DATA frame */
-    nwritten = Curl_bufq_write(&stream->sendbuf, buf, len, err);
-    if(nwritten < 0) {
-      if(*err != CURLE_AGAIN)
+    else if(stream->upload_blocked_len) {
+      /* the data in `buf` has alread been submitted or added to the
+       * buffers, but have been EAGAINed on the last invocation. */
+      DEBUGASSERT(len >= stream->upload_blocked_len);
+      if(len < stream->upload_blocked_len) {
+        /* Did we get called again with a smaller `len`? This should not
+         * happend. We are not prepared to handle that. */
+        failf(data, "HTTP/2 send again with decreased length");
+        *err = CURLE_HTTP2;
+        nwritten = -1;
         goto out;
-      nwritten = 0;
+      }
+      nwritten = (ssize_t)stream->upload_blocked_len;
+      stream->upload_blocked_len = 0;
     }
-    DEBUGF(LOG_CF(data, cf, "[h2sid=%u] bufq_write(len=%zu) -> %zd, %d",
-                  stream->id, len, nwritten, *err));
+    else {
+      /* If stream_id != -1, we have dispatched request HEADERS and
+       * optionally request body, and now are going to send or sending
+       * more request body in DATA frame */
+      nwritten = Curl_bufq_write(&stream->sendbuf, buf, len, err);
+      if(nwritten < 0) {
+        if(*err != CURLE_AGAIN)
+          goto out;
+        nwritten = 0;
+      }
+    }
 
     if(!Curl_bufq_is_empty(&stream->sendbuf)) {
+      /* req body data is buffered, resume the potentially suspended stream */
       rv = nghttp2_session_resume_data(ctx->h2, stream->id);
       if(nghttp2_is_fatal(rv)) {
         *err = CURLE_SEND_ERROR;
@@ -2026,104 +2110,99 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
         goto out;
       }
     }
-
-    result = h2_progress_ingress(cf, data);
-    if(result) {
-      *err = result;
-      nwritten = -1;
-      goto out;
-    }
-
-    result = h2_progress_egress(cf, data);
-    if(result) {
-      *err = result;
-      nwritten = -1;
-      goto out;
-    }
-
-    if(should_close_session(ctx)) {
-      if(stream->closed) {
-        nwritten = http2_handle_stream_close(cf, data, stream, err);
-      }
-      else {
-        DEBUGF(LOG_CF(data, cf, "send: nothing to do in this session"));
-        *err = CURLE_HTTP2;
-        nwritten = -1;
-      }
-      goto out;
-    }
-
-    if(!nwritten) {
-      size_t rwin = nghttp2_session_get_stream_remote_window_size(ctx->h2,
-                                                          stream->id);
-      DEBUGF(LOG_CF(data, cf, "[h2sid=%d] cf_send: win %u/%zu",
-             stream->id,
-             nghttp2_session_get_remote_window_size(ctx->h2), rwin));
-      if(rwin == 0) {
-        /* We cannot upload more as the stream's remote window size
-         * is 0. We need to receive WIN_UPDATEs before we can continue.
-         */
-        data->req.keepon |= KEEP_SEND_HOLD;
-        DEBUGF(LOG_CF(data, cf, "[h2sid=%d] holding send as remote flow "
-               "window is exhausted", stream->id));
-      }
-      nwritten = -1;
-      *err = CURLE_AGAIN;
-    }
-    /* handled writing BODY for open stream. */
-    goto out;
   }
   else {
     nwritten = h2_submit(&stream, cf, data, buf, len, err);
     if(nwritten < 0) {
       goto out;
     }
+    DEBUGASSERT(stream);
+  }
 
-    result = h2_progress_ingress(cf, data);
-    if(result) {
-      *err = result;
-      nwritten = -1;
-      goto out;
+  /* Call the nghttp2 send loop and flush to write ALL buffered data,
+   * headers and/or request body completely out to the network */
+  result = h2_progress_egress(cf, data);
+  /* if the stream has been closed in egress handling (nghttp2 does that
+   * when it does not like the headers, for example */
+  if(stream && stream->closed) {
+    nwritten = http2_handle_stream_close(cf, data, stream, err);
+    goto out;
+  }
+  else if(result == CURLE_AGAIN) {
+    blocked = 1;
+  }
+  else if(result) {
+    *err = result;
+    nwritten = -1;
+    goto out;
+  }
+  else if(stream && !Curl_bufq_is_empty(&stream->sendbuf)) {
+    /* although we wrote everything that nghttp2 wants to send now,
+     * there is data left in our stream send buffer unwritten. This may
+     * be due to the stream's HTTP/2 flow window being exhausted. */
+    blocked = 1;
+  }
+
+  if(stream && blocked) {
+    /* Unable to send all data, due to connection blocked or H2 window
+     * exhaustion. Data is left in our stream buffer, or nghttp2's internal
+     * frame buffer or our network out buffer. */
+    size_t rwin = nghttp2_session_get_stream_remote_window_size(ctx->h2,
+                                                                stream->id);
+    if(rwin == 0) {
+      /* H2 flow window exhaustion. We need to HOLD upload until we get
+       * a WINDOW_UPDATE from the server. */
+      data->req.keepon |= KEEP_SEND_HOLD;
+      DEBUGF(LOG_CF(data, cf, "[h2sid=%d] holding send as remote flow "
+             "window is exhausted", stream->id));
     }
 
-    result = h2_progress_egress(cf, data);
-    if(result) {
-      *err = result;
-      nwritten = -1;
-      goto out;
+    /* Whatever the cause, we need to return CURL_EAGAIN for this call.
+     * We have unwritten state that needs us being invoked again and EAGAIN
+     * is the only way to ensure that. */
+    stream->upload_blocked_len = nwritten;
+    DEBUGF(LOG_CF(data, cf, "[h2sid=%d] cf_send(len=%zu) BLOCK: win %u/%zu "
+           "blocked_len=%zu",
+           stream->id, len,
+           nghttp2_session_get_remote_window_size(ctx->h2), rwin,
+           nwritten));
+    *err = CURLE_AGAIN;
+    nwritten = -1;
+    goto out;
+  }
+  else if(should_close_session(ctx)) {
+    /* nghttp2 thinks this session is done. If the stream has not been
+     * closed, this is an error state for out transfer */
+    if(stream->closed) {
+      nwritten = http2_handle_stream_close(cf, data, stream, err);
     }
-
-    if(should_close_session(ctx)) {
-      if(stream->closed) {
-        nwritten = http2_handle_stream_close(cf, data, stream, err);
-      }
-      else {
-        DEBUGF(LOG_CF(data, cf, "send: nothing to do in this session"));
-        *err = CURLE_HTTP2;
-        nwritten = -1;
-      }
-      goto out;
+    else {
+      DEBUGF(LOG_CF(data, cf, "send: nothing to do in this session"));
+      *err = CURLE_HTTP2;
+      nwritten = -1;
     }
   }
 
 out:
   if(stream) {
     DEBUGF(LOG_CF(data, cf, "[h2sid=%d] cf_send(len=%zu) -> %zd, %d, "
-                  "buffered=%zu, upload_left=%zu, stream-window=%d, "
-                  "connection-window=%d",
+                  "upload_left=%" CURL_FORMAT_CURL_OFF_T ", "
+                  "h2 windows %d-%d (stream-conn), "
+                  "buffers %zu-%zu (stream-conn)",
                   stream->id, len, nwritten, *err,
-                  Curl_bufq_len(&stream->sendbuf),
                   (ssize_t)stream->upload_left,
                   nghttp2_session_get_stream_remote_window_size(
                     ctx->h2, stream->id),
-                  nghttp2_session_get_remote_window_size(ctx->h2)));
-    drain_stream(cf, data, stream);
+                  nghttp2_session_get_remote_window_size(ctx->h2),
+                  Curl_bufq_len(&stream->sendbuf),
+                  Curl_bufq_len(&ctx->outbufq)));
   }
   else {
     DEBUGF(LOG_CF(data, cf, "cf_send(len=%zu) -> %zd, %d, "
-                  "connection-window=%d",
+                  "connection-window=%d, nw_send_buffer(%zu)",
                   len, nwritten, *err,
-                  nghttp2_session_get_remote_window_size(ctx->h2)));
+                  nghttp2_session_get_remote_window_size(ctx->h2),
+                  Curl_bufq_len(&ctx->outbufq)));
   }
   CF_DATA_RESTORE(cf, save);
   return nwritten;
@@ -2241,8 +2320,7 @@ static CURLcode http2_data_pause(struct Curl_cfilter *cf,
 
   DEBUGASSERT(data);
   if(ctx && ctx->h2 && stream) {
-    uint32_t window = !pause * H2_STREAM_WINDOW_SIZE;
-    CURLcode result;
+    uint32_t window = pause? 0 : stream->local_window_size;
 
     int rv = nghttp2_session_set_local_window_size(ctx->h2,
                                                    NGHTTP2_FLAG_NONE,
@@ -2257,10 +2335,8 @@ static CURLcode http2_data_pause(struct Curl_cfilter *cf,
     if(!pause)
       drain_stream(cf, data, stream);
 
-    /* make sure the window update gets sent */
-    result = h2_progress_egress(cf, data);
-    if(result)
-      return result;
+    /* attempt to send the window update */
+    (void)h2_progress_egress(cf, data);
 
     if(!pause) {
       /* Unpausing a h2 transfer, requires it to be run again. The server
@@ -2510,7 +2586,7 @@ CURLcode Curl_http2_switch(struct Curl_easy *data,
   CURLcode result;
 
   DEBUGASSERT(!Curl_conn_is_http2(data, conn, sockindex));
-  DEBUGF(infof(data, DMSGI(data, sockindex, "switching to HTTP/2")));
+  DEBUGF(infof(data, "switching to HTTP/2"));
 
   result = http2_cfilter_add(&cf, data, conn, sockindex);
   if(result)
@@ -2569,7 +2645,7 @@ CURLcode Curl_http2_upgrade(struct Curl_easy *data,
   CURLcode result;
 
   DEBUGASSERT(!Curl_conn_is_http2(data, conn, sockindex));
-  DEBUGF(infof(data, DMSGI(data, sockindex, "upgrading to HTTP/2")));
+  DEBUGF(infof(data, "upgrading to HTTP/2"));
   DEBUGASSERT(data->req.upgr101 == UPGR101_RECEIVED);
 
   result = http2_cfilter_add(&cf, data, conn, sockindex);

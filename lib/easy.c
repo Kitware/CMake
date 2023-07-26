@@ -63,6 +63,7 @@
 #include "slist.h"
 #include "mime.h"
 #include "amigaos.h"
+#include "macos.h"
 #include "warnless.h"
 #include "sigpipe.h"
 #include "vssh/ssh.h"
@@ -83,7 +84,7 @@
 
 /* true globals -- for curl_global_init() and curl_global_cleanup() */
 static unsigned int  initialized;
-static long          init_flags;
+static long          easy_init_flags;
 
 #ifdef GLOBAL_INIT_IS_THREADSAFE
 
@@ -181,6 +182,11 @@ static CURLcode global_init(long flags, bool memoryfuncs)
   }
 #endif
 
+  if(Curl_macos_init()) {
+    DEBUGF(fprintf(stderr, "Error: Curl_macos_init failed\n"));
+    goto fail;
+  }
+
   if(Curl_resolver_global_init()) {
     DEBUGF(fprintf(stderr, "Error: resolver_global_init failed\n"));
     goto fail;
@@ -199,7 +205,7 @@ static CURLcode global_init(long flags, bool memoryfuncs)
   }
 #endif
 
-  init_flags = flags;
+  easy_init_flags = flags;
 
 #ifdef DEBUGBUILD
   if(getenv("CURL_GLOBAL_INIT"))
@@ -274,7 +280,7 @@ CURLcode curl_global_init_mem(long flags, curl_malloc_callback m,
 
 /**
  * curl_global_cleanup() globally cleanups curl, uses the value of
- * "init_flags" to determine what needs to be cleaned up and what doesn't.
+ * "easy_init_flags" to determine what needs to be cleaned up and what doesn't.
  */
 void curl_global_cleanup(void)
 {
@@ -294,7 +300,7 @@ void curl_global_cleanup(void)
   Curl_resolver_global_cleanup();
 
 #ifdef WIN32
-  Curl_win32_cleanup(init_flags);
+  Curl_win32_cleanup(easy_init_flags);
 #endif
 
   Curl_amiga_cleanup();
@@ -308,7 +314,7 @@ void curl_global_cleanup(void)
   free(leakpointer);
 #endif
 
-  init_flags  = 0;
+  easy_init_flags = 0;
 
   global_init_unlock();
 }
@@ -893,6 +899,8 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
   /* the connection cache is setup on demand */
   outcurl->state.conn_cache = NULL;
   outcurl->state.lastconnect_id = -1;
+  outcurl->state.recent_conn_id = -1;
+  outcurl->id = -1;
 
   outcurl->progress.flags    = data->progress.flags;
   outcurl->progress.callback = data->progress.callback;
