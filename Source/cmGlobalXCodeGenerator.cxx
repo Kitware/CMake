@@ -1179,11 +1179,11 @@ std::string GetTargetObjectDirArch(T const& target,
   cmList archs{ target.GetSafeProperty("OSX_ARCHITECTURES") };
   if (archs.size() > 1) {
     return "$(CURRENT_ARCH)";
-  } else if (archs.size() == 1) {
-    return archs.front();
-  } else {
-    return defaultVal;
   }
+  if (archs.size() == 1) {
+    return archs.front();
+  }
+  return defaultVal;
 }
 
 } // anonymous
