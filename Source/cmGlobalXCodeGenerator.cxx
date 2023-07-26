@@ -1680,8 +1680,9 @@ void cmGlobalXCodeGenerator::ForceLinkerLanguage(cmGeneratorTarget* gtgt)
   if (const char* productType = GetTargetProductType(gtgt)) {
     if (strcmp(productType,
                "com.apple.product-type.app-extension.messages-sticker-pack") ==
-        0)
+        0) {
       return;
+    }
   }
 
   // Add an empty source file to the target that compiles with the
