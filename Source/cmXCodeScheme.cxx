@@ -447,7 +447,7 @@ void cmXCodeScheme::WriteBuildableReference(cmXMLWriter& xout,
   std::string const noConfig; // FIXME: What config to use here?
   xout.Attribute("BuildableName", xcObj->GetTarget()->GetFullName(noConfig));
   xout.Attribute("BlueprintName", xcObj->GetTarget()->GetName());
-  xout.Attribute("ReferencedContainer", "container:" + container);
+  xout.Attribute("ReferencedContainer", cmStrCat("container:", container));
   xout.EndElement();
 }
 

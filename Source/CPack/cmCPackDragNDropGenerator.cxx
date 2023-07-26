@@ -136,8 +136,10 @@ int cmCPackDragNDropGenerator::InitializeInternal()
       return 0;
     }
     for (auto const& language : languages) {
-      std::string license = slaDirectory + "/" + language + ".license.txt";
-      std::string license_rtf = slaDirectory + "/" + language + ".license.rtf";
+      std::string license =
+        cmStrCat(slaDirectory, "/", language, ".license.txt");
+      std::string license_rtf =
+        cmStrCat(slaDirectory, "/", language, ".license.rtf");
       if (!singleLicense) {
         if (!cmSystemTools::FileExists(license) &&
             !cmSystemTools::FileExists(license_rtf)) {
@@ -148,7 +150,7 @@ int cmCPackDragNDropGenerator::InitializeInternal()
           return 0;
         }
       }
-      std::string menu = slaDirectory + "/" + language + ".menu.txt";
+      std::string menu = cmStrCat(slaDirectory, "/", language, ".menu.txt");
       if (!cmSystemTools::FileExists(menu)) {
         cmCPackLogger(cmCPackLog::LOG_ERROR,
                       "Missing menu file " << language << ".menu.txt"
@@ -192,7 +194,7 @@ int cmCPackDragNDropGenerator::PackageFiles()
   // loop to create dmg files
   packageFileNames.clear();
   for (auto const& package_file : package_files) {
-    std::string full_package_name = std::string(toplevel) + std::string("/");
+    std::string full_package_name = cmStrCat(toplevel, "/");
     if (package_file == "ALL_IN_ONE") {
       full_package_name += this->GetOption("CPACK_PACKAGE_FILE_NAME");
     } else {
@@ -711,8 +713,8 @@ std::string cmCPackDragNDropGenerator::GetComponentInstallDirNameSuffix(
   if (this->componentPackageMethod == ONE_PACKAGE_PER_GROUP) {
     // We have to find the name of the COMPONENT GROUP
     // the current COMPONENT belongs to.
-    std::string groupVar =
-      "CPACK_COMPONENT_" + cmSystemTools::UpperCase(componentName) + "_GROUP";
+    std::string groupVar = cmStrCat(
+      "CPACK_COMPONENT_", cmSystemTools::UpperCase(componentName), "_GROUP");
     cmValue _groupName = this->GetOption(groupVar);
     if (_groupName) {
       std::string groupName = _groupName;
@@ -723,8 +725,8 @@ std::string cmCPackDragNDropGenerator::GetComponentInstallDirNameSuffix(
     }
   }
 
-  std::string componentFileName =
-    "CPACK_DMG_" + cmSystemTools::UpperCase(componentName) + "_FILE_NAME";
+  std::string componentFileName = cmStrCat(
+    "CPACK_DMG_", cmSystemTools::UpperCase(componentName), "_FILE_NAME");
   if (this->IsSet(componentFileName)) {
     return this->GetOption(componentFileName);
   }
@@ -808,12 +810,12 @@ bool cmCPackDragNDropGenerator::WriteLicense(RezDoc& rez, size_t licenseNumber,
     actual_license = licenseFile;
   } else {
     std::string license_wo_ext =
-      slaDirectory + "/" + licenseLanguage + ".license";
-    if (cmSystemTools::FileExists(license_wo_ext + ".txt")) {
-      actual_license = license_wo_ext + ".txt";
+      cmStrCat(slaDirectory, "/", licenseLanguage, ".license");
+    if (cmSystemTools::FileExists(cmStrCat(license_wo_ext, ".txt"))) {
+      actual_license = cmStrCat(license_wo_ext, ".txt");
     } else {
       licenseArray = &rez.RTF;
-      actual_license = license_wo_ext + ".rtf";
+      actual_license = cmStrCat(license_wo_ext, ".rtf");
     }
   }
 
@@ -836,7 +838,7 @@ bool cmCPackDragNDropGenerator::WriteLicense(RezDoc& rez, size_t licenseNumber,
     } else {
       std::vector<std::string> lines;
       std::string actual_menu =
-        slaDirectory + "/" + licenseLanguage + ".menu.txt";
+        cmStrCat(slaDirectory, "/", licenseLanguage, ".menu.txt");
       if (!this->ReadFile(actual_menu, lines, error)) {
         return false;
       }
