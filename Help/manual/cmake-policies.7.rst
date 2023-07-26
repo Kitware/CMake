@@ -57,6 +57,7 @@ Policies Introduced by CMake 3.28
 .. toctree::
    :maxdepth: 1
 
+   CMP0153: The exec_program command should not be called. </policy/CMP0153>
    CMP0152: file(REAL_PATH) resolves symlinks before collapsing ../ components.  </policy/CMP0152>
 
 Policies Introduced by CMake 3.27

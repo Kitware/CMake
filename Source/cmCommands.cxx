@@ -135,7 +135,6 @@ void GetScriptingCommands(cmState* state)
   state->AddBuiltinCommand("cmake_path", cmCMakePathCommand);
   state->AddBuiltinCommand("cmake_policy", cmCMakePolicyCommand);
   state->AddBuiltinCommand("configure_file", cmConfigureFileCommand);
-  state->AddBuiltinCommand("exec_program", cmExecProgramCommand);
   state->AddBuiltinCommand("execute_process", cmExecuteProcessCommand);
   state->AddBuiltinCommand("file", cmFileCommand);
   state->AddBuiltinCommand("find_file", cmFindFile);
@@ -220,6 +219,9 @@ void GetScriptingCommands(cmState* state)
   state->AddDisallowedCommand(
     "use_mangled_mesa", cmUseMangledMesaCommand, cmPolicies::CMP0030,
     "The use_mangled_mesa command should not be called; see CMP0030.");
+  state->AddDisallowedCommand(
+    "exec_program", cmExecProgramCommand, cmPolicies::CMP0153,
+    "The exec_program command should not be called; see CMP0153.");
 
 #endif
 }
