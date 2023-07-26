@@ -180,7 +180,7 @@ void cmXCodeObject::PrintList(std::vector<cmXCodeObject*> const& objs,
 {
   cmXCodeObject::Indent(1, out);
   out << "objects = {\n";
-  for (auto obj : objs) {
+  for (auto* obj : objs) {
     if (obj->TypeValue == OBJECT) {
       obj->Print(out);
     }

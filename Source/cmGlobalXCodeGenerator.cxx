@@ -703,7 +703,7 @@ void cmGlobalXCodeGenerator::CreateReRunCMakeFile(
   cmLocalGenerator* root, std::vector<cmLocalGenerator*> const& gens)
 {
   std::vector<std::string> lfiles;
-  for (auto gen : gens) {
+  for (auto* gen : gens) {
     cm::append(lfiles, gen->GetMakefile()->GetListFiles());
   }
 
@@ -814,7 +814,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateObject(
 {
   auto obj = cm::make_unique<cmXCode21Object>(ptype, cmXCodeObject::OBJECT,
                                               this->GetObjectId(ptype, key));
-  auto ptr = obj.get();
+  auto* ptr = obj.get();
   this->addObject(std::move(obj));
   return ptr;
 }
@@ -824,7 +824,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateObject(cmXCodeObject::Type type)
   auto obj = cm::make_unique<cmXCodeObject>(
     cmXCodeObject::None, type,
     "Temporary cmake object, should not be referred to in Xcode file");
-  auto ptr = obj.get();
+  auto* ptr = obj.get();
   this->addObject(std::move(obj));
   return ptr;
 }
@@ -1350,7 +1350,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeTargets(
   this->SetCurrentLocalGenerator(gen);
   std::vector<cmGeneratorTarget*> gts =
     this->GetLocalGeneratorTargetsInOrder(gen);
-  for (auto gtgt : gts) {
+  for (auto* gtgt : gts) {
     if (!this->CreateXCodeTarget(gtgt, targets)) {
       return false;
     }
@@ -1386,8 +1386,8 @@ bool cmGlobalXCodeGenerator::CreateXCodeTarget(
   }
 
   auto& gtgt_visited = this->CommandsVisited[gtgt];
-  auto& deps = this->GetTargetDirectDepends(gtgt);
-  for (auto& d : deps) {
+  auto const& deps = this->GetTargetDirectDepends(gtgt);
+  for (auto const& d : deps) {
     // Take the union of visited source files of custom commands so far.
     // ComputeTargetOrder ensures our dependencies already visited their
     // custom commands and updated CommandsVisited.
@@ -1432,7 +1432,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeTarget(
   std::vector<cmXCodeObject*> headerFiles;
   std::vector<cmXCodeObject*> resourceFiles;
   std::vector<cmXCodeObject*> sourceFiles;
-  for (auto sourceFile : commonSourceFiles) {
+  for (auto* sourceFile : commonSourceFiles) {
     cmXCodeObject* xsf = this->CreateXCodeSourceFile(
       this->CurrentLocalGenerator, sourceFile, gtgt);
     cmXCodeObject* fr = xsf->GetAttribute("fileRef");
@@ -1535,7 +1535,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeTarget(
     using mapOfVectorOfSourceFiles =
       std::map<std::string, std::vector<cmSourceFile*>>;
     mapOfVectorOfSourceFiles bundleFiles;
-    for (auto sourceFile : commonSourceFiles) {
+    for (auto* sourceFile : commonSourceFiles) {
       cmGeneratorTarget::SourceFileFlags tsFlags =
         gtgt->GetTargetSourceFileFlags(sourceFile);
       if (tsFlags.Type == cmGeneratorTarget::SourceFileTypeMacContent) {
@@ -1568,7 +1568,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeTarget(
                                         this->CreateString("0"));
       buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
       copyFilesBuildPhase->AddAttribute("files", buildFiles);
-      for (auto sourceFile : keySources.second) {
+      for (auto* sourceFile : keySources.second) {
         cmXCodeObject* xsf = this->CreateXCodeSourceFile(
           this->CurrentLocalGenerator, sourceFile, gtgt);
         buildFiles->AddObject(xsf);
@@ -1583,7 +1583,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeTarget(
     using mapOfVectorOfSourceFiles =
       std::map<std::string, std::vector<cmSourceFile*>>;
     mapOfVectorOfSourceFiles bundleFiles;
-    for (auto sourceFile : commonSourceFiles) {
+    for (auto* sourceFile : commonSourceFiles) {
       cmGeneratorTarget::SourceFileFlags tsFlags =
         gtgt->GetTargetSourceFileFlags(sourceFile);
       if (tsFlags.Type == cmGeneratorTarget::SourceFileTypeDeepResource) {
@@ -1604,7 +1604,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeTarget(
                                         this->CreateString("0"));
       buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
       copyFilesBuildPhase->AddAttribute("files", buildFiles);
-      for (auto sourceFile : keySources.second) {
+      for (auto* sourceFile : keySources.second) {
         cmXCodeObject* xsf = this->CreateXCodeSourceFile(
           this->CurrentLocalGenerator, sourceFile, gtgt);
         buildFiles->AddObject(xsf);
@@ -1803,7 +1803,7 @@ void cmGlobalXCodeGenerator::CreateCustomCommands(
     // add all the sources
     std::vector<cmCustomCommand> commands;
     auto& visited = this->CommandsVisited[gtgt];
-    for (auto sourceFile : classes) {
+    for (auto* sourceFile : classes) {
       if (sourceFile->GetCustomCommand() &&
           visited.insert(sourceFile).second) {
         commands.push_back(*sourceFile->GetCustomCommand());
@@ -1842,7 +1842,7 @@ void cmGlobalXCodeGenerator::CreateCustomCommands(
   if (resourceBuildPhase) {
     buildPhases->AddObject(resourceBuildPhase);
   }
-  for (auto obj : contentBuildPhases) {
+  for (auto* obj : contentBuildPhases) {
     buildPhases->AddObject(obj);
   }
   if (sourceBuildPhase) {
@@ -1871,7 +1871,7 @@ void cmGlobalXCodeGenerator::CreateRunScriptBuildPhases(
     return;
   }
   auto& visited = this->CommandsVisited[gt];
-  for (auto sf : sources) {
+  for (auto* sf : sources) {
     this->CreateRunScriptBuildPhases(buildPhases, sf, gt, visited);
   }
 }
@@ -3117,7 +3117,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateUtilityTarget(
     // Add CMakeLists.txt file for user convenience.
     this->AddXCodeProjBuildRule(gtgt, sources);
 
-    for (auto sourceFile : sources) {
+    for (auto* sourceFile : sources) {
       if (!sourceFile->GetIsGenerated()) {
         this->CreateXCodeFileReference(sourceFile, gtgt);
       }
@@ -3178,7 +3178,7 @@ void cmGlobalXCodeGenerator::CreateGlobalXCConfigSettings(
     return;
   }
 
-  auto sf = this->CurrentMakefile->GetSource(xcconfig);
+  auto* sf = this->CurrentMakefile->GetSource(xcconfig);
   if (!sf) {
     cmSystemTools::Error(
       cmStrCat("sources for ALL_BUILD do not contain xcconfig file: '",
@@ -3210,7 +3210,7 @@ void cmGlobalXCodeGenerator::CreateTargetXCConfigSettings(
     return;
   }
 
-  auto sf = target->Makefile->GetSource(xcconfig);
+  auto* sf = target->Makefile->GetSource(xcconfig);
   if (!sf) {
     cmSystemTools::Error(cmStrCat("target sources for target ",
                                   target->Target->GetName(),
@@ -3497,7 +3497,7 @@ void cmGlobalXCodeGenerator::AppendBuildSettingAttribute(
     target->GetAttribute("buildConfigurationList")->GetObject();
   cmXCodeObject* buildConfigs =
     configurationList->GetAttribute("buildConfigurations");
-  for (auto obj : buildConfigs->GetObjectList()) {
+  for (auto* obj : buildConfigs->GetObjectList()) {
     if (configName.empty() ||
         obj->GetAttribute("name")->GetString() == configName) {
       cmXCodeObject* settings = obj->GetAttribute("buildSettings");
@@ -3513,7 +3513,7 @@ void cmGlobalXCodeGenerator::InheritBuildSettingAttribute(
     target->GetAttribute("buildConfigurationList")->GetObject();
   cmXCodeObject* buildConfigs =
     configurationList->GetAttribute("buildConfigurations");
-  for (auto obj : buildConfigs->GetObjectList()) {
+  for (auto* obj : buildConfigs->GetObjectList()) {
     cmXCodeObject* settings = obj->GetAttribute("buildSettings");
     if (cmXCodeObject* attr = settings->GetAttribute(attribute)) {
       BuildObjectListOrString inherited(this, true);
@@ -3835,7 +3835,7 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
       BuildObjectListOrString libSearchPaths(this, true);
       std::vector<cmSourceFile const*> objs;
       gt->GetExternalObjects(objs, configName);
-      for (auto sourceFile : objs) {
+      for (auto const* sourceFile : objs) {
         if (sourceFile->GetObjectLibrary().empty()) {
           continue;
         }
@@ -4171,7 +4171,7 @@ void cmGlobalXCodeGenerator::AddEmbeddedObjects(
 
 void cmGlobalXCodeGenerator::AddEmbeddedFrameworks(cmXCodeObject* target)
 {
-  static const auto dstSubfolderSpec = "10";
+  static auto const* const dstSubfolderSpec = "10";
 
   // Despite the name, by default Xcode uses "Embed Frameworks" build phase
   // for both frameworks and dynamic libraries
@@ -4182,7 +4182,7 @@ void cmGlobalXCodeGenerator::AddEmbeddedFrameworks(cmXCodeObject* target)
 
 void cmGlobalXCodeGenerator::AddEmbeddedPlugIns(cmXCodeObject* target)
 {
-  static const auto dstSubfolderSpec = "13";
+  static auto const* const dstSubfolderSpec = "13";
 
   this->AddEmbeddedObjects(target, "Embed PlugIns", "XCODE_EMBED_PLUGINS",
                            dstSubfolderSpec, NoActionOnCopyByDefault);
@@ -4190,7 +4190,7 @@ void cmGlobalXCodeGenerator::AddEmbeddedPlugIns(cmXCodeObject* target)
 
 void cmGlobalXCodeGenerator::AddEmbeddedAppExtensions(cmXCodeObject* target)
 {
-  static const auto dstSubfolderSpec = "13";
+  static auto const* const dstSubfolderSpec = "13";
 
   this->AddEmbeddedObjects(target, "Embed App Extensions",
                            "XCODE_EMBED_APP_EXTENSIONS", dstSubfolderSpec,
@@ -4200,7 +4200,7 @@ void cmGlobalXCodeGenerator::AddEmbeddedAppExtensions(cmXCodeObject* target)
 void cmGlobalXCodeGenerator::AddEmbeddedExtensionKitExtensions(
   cmXCodeObject* target)
 {
-  static const auto dstSubfolderSpec = "16";
+  static auto const* const dstSubfolderSpec = "16";
 
   this->AddEmbeddedObjects(target, "Embed App Extensions",
                            "XCODE_EMBED_EXTENSIONKIT_EXTENSIONS",
@@ -4594,7 +4594,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
     this->CustomCommandRoots.clear();
   }
   // loop over all targets and add link and depend info
-  for (auto t : targets) {
+  for (auto* t : targets) {
     this->AddDependAndLinkInformation(t);
     this->AddEmbeddedFrameworks(t);
     this->AddEmbeddedPlugIns(t);
@@ -4620,7 +4620,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
   }
   // now add all targets to the root object
   cmXCodeObject* allTargets = this->CreateObject(cmXCodeObject::OBJECT_LIST);
-  for (auto t : targets) {
+  for (auto* t : targets) {
     allTargets->AddObject(t);
     cmXCodeObject* productRef = t->GetAttribute("productReference");
     if (productRef) {
@@ -4713,7 +4713,7 @@ void cmGlobalXCodeGenerator::CreateXCodeDependHackMakefile(
     "# does not seem to check these dependencies itself.\n";
   /* clang-format on */
   for (const auto& configName : this->CurrentConfigurationTypes) {
-    for (auto target : targets) {
+    for (auto* target : targets) {
       cmGeneratorTarget* gt = target->GetTarget();
 
       if (gt->GetType() == cmStateEnums::EXECUTABLE ||
@@ -4744,7 +4744,7 @@ void cmGlobalXCodeGenerator::CreateXCodeDependHackMakefile(
 
         std::vector<cmGeneratorTarget*> objlibs;
         gt->GetObjectLibrariesCMP0026(objlibs);
-        for (auto objLib : objlibs) {
+        for (auto* objLib : objlibs) {
           makefileStream << this->PostBuildMakeTarget(objLib->GetName(),
                                                       configName)
                          << ": " << trel << "\n";
@@ -4763,7 +4763,7 @@ void cmGlobalXCodeGenerator::CreateXCodeDependHackMakefile(
           }
         }
 
-        for (auto objLib : objlibs) {
+        for (auto* objLib : objlibs) {
 
           const std::string objLibName = objLib->GetName();
           std::string d = cmStrCat(this->GetTargetTempDir(gt, configName),

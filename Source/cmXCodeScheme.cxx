@@ -121,7 +121,7 @@ void cmXCodeScheme::WriteTestAction(cmXMLWriter& xout,
   xout.Attribute("shouldUseLaunchSchemeArgsEnv", "YES");
 
   xout.StartElement("Testables");
-  for (auto test : this->Tests) {
+  for (auto const* test : this->Tests) {
     xout.StartElement("TestableReference");
     xout.BreakAttributes();
     xout.Attribute("skipped", "NO");
