@@ -1080,6 +1080,15 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
   // Setup the proper working directory for the commands.
   this->CreateCDCommand(commands1, dir, relative);
 
+  cmGlobalUnixMakefileGenerator3* gg =
+    static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
+
+  // Prefix the commands with the jobserver prefix "+"
+  if (ccg.GetCC().GetJobserverAware() && gg->IsGNUMakeJobServerAware()) {
+    std::transform(commands1.begin(), commands1.end(), commands1.begin(),
+                   [](std::string const& cmd) { return cmStrCat("+", cmd); });
+  }
+
   // push back the custom commands
   cm::append(commands, commands1);
 }

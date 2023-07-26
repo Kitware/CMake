@@ -334,15 +334,6 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  // If using a GNU Make generator and `JOB_SERVER_AWARE` is set then
-  // prefix all commands with '+'.
-  if (cmIsOn(job_server_aware) &&
-      mf.GetGlobalGenerator()->IsGNUMakeJobServerAware()) {
-    for (auto& commandLine : commandLines) {
-      commandLine.insert(commandLine.begin(), "+");
-    }
-  }
-
   // Choose which mode of the command to use.
   auto cc = cm::make_unique<cmCustomCommand>();
   cc->SetByproducts(byproducts);
@@ -353,6 +344,7 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
   cc->SetUsesTerminal(uses_terminal);
   cc->SetDepfile(depfile);
   cc->SetJobPool(job_pool);
+  cc->SetJobserverAware(cmIsOn(job_server_aware));
   cc->SetCommandExpandLists(command_expand_lists);
   cc->SetDependsExplicitOnly(depends_explicit_only);
   if (source.empty() && output.empty()) {

@@ -55,7 +55,7 @@ bool cmAddCustomTargetCommand(std::vector<std::string> const& args,
   const char* comment = nullptr;
   std::vector<std::string> sources;
   std::string job_pool;
-  std::string JOB_SERVER_AWARE;
+  std::string job_server_aware;
 
   // Keep track of parser state.
   enum tdoing
@@ -67,7 +67,7 @@ bool cmAddCustomTargetCommand(std::vector<std::string> const& args,
     doing_comment,
     doing_source,
     doing_job_pool,
-    doing_JOB_SERVER_AWARE,
+    doing_job_server_aware,
     doing_nothing
   };
   tdoing doing = doing_command;
@@ -106,7 +106,7 @@ bool cmAddCustomTargetCommand(std::vector<std::string> const& args,
     } else if (copy == "JOB_POOL") {
       doing = doing_job_pool;
     } else if (copy == "JOB_SERVER_AWARE") {
-      doing = doing_JOB_SERVER_AWARE;
+      doing = doing_job_server_aware;
     } else if (copy == "COMMAND") {
       doing = doing_command;
 
@@ -153,8 +153,8 @@ bool cmAddCustomTargetCommand(std::vector<std::string> const& args,
         case doing_job_pool:
           job_pool = copy;
           break;
-        case doing_JOB_SERVER_AWARE:
-          JOB_SERVER_AWARE = copy;
+        case doing_job_server_aware:
+          job_server_aware = copy;
           break;
         default:
           status.SetError("Wrong syntax. Unknown type of argument.");
@@ -220,15 +220,6 @@ bool cmAddCustomTargetCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  // If using a GNU Make generator and `JOB_SERVER_AWARE` is set then
-  // prefix all commands with '+'.
-  if (cmIsOn(JOB_SERVER_AWARE) &&
-      mf.GetGlobalGenerator()->IsGNUMakeJobServerAware()) {
-    for (auto& commandLine : commandLines) {
-      commandLine.insert(commandLine.begin(), "+");
-    }
-  }
-
   // Add the utility target to the makefile.
   auto cc = cm::make_unique<cmCustomCommand>();
   cc->SetWorkingDirectory(working_directory.c_str());
@@ -240,6 +231,7 @@ bool cmAddCustomTargetCommand(std::vector<std::string> const& args,
   cc->SetUsesTerminal(uses_terminal);
   cc->SetCommandExpandLists(command_expand_lists);
   cc->SetJobPool(job_pool);
+  cc->SetJobserverAware(cmIsOn(job_server_aware));
   cmTarget* target =
     mf.AddUtilityCommand(targetName, excludeFromAll, std::move(cc));
 
