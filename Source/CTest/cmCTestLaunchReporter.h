@@ -10,6 +10,8 @@
 
 #include "cmsys/RegularExpression.hxx"
 
+#include "cmUVProcessChain.h"
+
 class cmXMLElement;
 
 /** \class cmCTestLaunchReporter
@@ -48,7 +50,7 @@ public:
   void ComputeFileNames();
 
   bool Passthru;
-  struct cmsysProcess_s* Process;
+  cmUVProcessChain::Status Status;
   int ExitCode;
 
   // Temporary log files for stdout and stderr of real command.
