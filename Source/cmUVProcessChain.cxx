@@ -393,12 +393,12 @@ bool cmUVProcessChain::Valid() const
   return this->Data->Valid;
 }
 
-bool cmUVProcessChain::Wait(int64_t milliseconds)
+bool cmUVProcessChain::Wait(uint64_t milliseconds)
 {
   bool timeout = false;
   cm::uv_timer_ptr timer;
 
-  if (milliseconds >= 0) {
+  if (milliseconds > 0) {
     timer.init(*this->Data->Loop, &timeout);
     timer.start(
       [](uv_timer_t* handle) {

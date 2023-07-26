@@ -652,6 +652,20 @@ bool testUVProcessChainInputFile(const char* helperCommand)
   return true;
 }
 
+bool testUVProcessChainWait0(const char* helperCommand)
+{
+  cmUVProcessChainBuilder builder;
+  builder.AddCommand({ helperCommand, "echo" });
+
+  auto chain = builder.Start();
+  if (!chain.Wait(0)) {
+    std::cout << "Wait(0) returned false, should be true" << std::endl;
+    return false;
+  }
+
+  return true;
+}
+
 int testUVProcessChain(int argc, char** const argv)
 {
   if (argc < 2) {
@@ -696,6 +710,11 @@ int testUVProcessChain(int argc, char** const argv)
 
   if (!testUVProcessChainInputFile(argv[1])) {
     std::cout << "While executing testUVProcessChainInputFile().\n";
+    return -1;
+  }
+
+  if (!testUVProcessChainWait0(argv[1])) {
+    std::cout << "While executing testUVProcessChainWait0().\n";
     return -1;
   }
 
