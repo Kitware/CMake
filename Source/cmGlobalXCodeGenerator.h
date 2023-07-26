@@ -120,7 +120,7 @@ public:
    * Used to determine if this generator supports DEPFILE option.
    */
   bool SupportsCustomCommandDepfile() const override { return true; }
-  virtual cm::optional<cmDepfileFormat> DepfileFormat() const override
+  cm::optional<cmDepfileFormat> DepfileFormat() const override
   {
     return this->XcodeBuildSystem == BuildSystem::One
       ? cmDepfileFormat::MakeDepfile
