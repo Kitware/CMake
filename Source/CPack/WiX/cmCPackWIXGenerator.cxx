@@ -803,7 +803,7 @@ bool cmCPackWIXGenerator::CreateShortcutsOfSpecificType(
   }
 
   std::string componentId = "CM_SHORTCUT";
-  if (idPrefix.size()) {
+  if (!idPrefix.empty()) {
     componentId += cmStrCat('_', idPrefix);
   }
 
