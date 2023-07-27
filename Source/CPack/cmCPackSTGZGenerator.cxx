@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 
+#include <fcntl.h>
+
 #include "cmsys/FStream.hxx"
 
 #include "cm_sys_stat.h"
