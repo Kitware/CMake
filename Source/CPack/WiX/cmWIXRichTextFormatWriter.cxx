@@ -182,6 +182,6 @@ void cmWIXRichTextFormatWriter::EmitUnicodeSurrogate(int c)
 void cmWIXRichTextFormatWriter::EmitInvalidCodepoint(int c)
 {
   ControlWord("cf1 ");
-  File << "[INVALID-BYTE-" << int(c) << ']';
+  File << "[INVALID-BYTE-" << c << ']';
   ControlWord("cf0 ");
 }
