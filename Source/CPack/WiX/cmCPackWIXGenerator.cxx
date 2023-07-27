@@ -936,12 +936,11 @@ void cmCPackWIXGenerator::AddDirectoryAndFileDefinitions(
 
     std::string fullPath = cmStrCat(topdir, '/', fileName);
 
-    std::string relativePath =
-      cmSystemTools::RelativePath(toplevel.c_str(), fullPath.c_str());
+    std::string relativePath = cmSystemTools::RelativePath(toplevel, fullPath);
 
     std::string id = PathToId(relativePath);
 
-    if (cmSystemTools::FileIsDirectory(fullPath.c_str())) {
+    if (cmSystemTools::FileIsDirectory(fullPath)) {
       std::string subDirectoryId = cmStrCat("CM_D", id);
 
       directoryDefinitions.BeginElement("Directory");
@@ -1070,7 +1069,7 @@ std::string cmCPackWIXGenerator::PathToId(std::string const& path)
 std::string cmCPackWIXGenerator::CreateNewIdForPath(std::string const& path)
 {
   std::vector<std::string> components;
-  cmSystemTools::SplitPath(path.c_str(), components, false);
+  cmSystemTools::SplitPath(path, components, false);
 
   size_t replacementCount = 0;
 

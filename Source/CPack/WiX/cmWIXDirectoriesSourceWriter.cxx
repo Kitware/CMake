@@ -55,7 +55,7 @@ size_t cmWIXDirectoriesSourceWriter::BeginInstallationPrefixDirectory(
 
   std::vector<std::string> installRoot;
 
-  cmSystemTools::SplitPath(installRootString.c_str(), installRoot);
+  cmSystemTools::SplitPath(installRootString, installRoot);
 
   if (!installRoot.empty() && installRoot.back().empty()) {
     installRoot.pop_back();
