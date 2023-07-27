@@ -171,17 +171,12 @@ LineFormat cmVisualStudioSlnParser::State::NextLineFormat() const
     case FileStateTopLevel:
       return LineMultiValueTag;
     case FileStateProject:
-      return LineSingleValueTag;
-    case FileStateProjectDependencies:
-      return LineKeyValuePair;
     case FileStateGlobal:
       return LineSingleValueTag;
+    case FileStateProjectDependencies:
     case FileStateSolutionConfigurations:
-      return LineKeyValuePair;
     case FileStateProjectConfigurations:
-      return LineKeyValuePair;
     case FileStateSolutionFilters:
-      return LineKeyValuePair;
     case FileStateGlobalSection:
       return LineKeyValuePair;
     case FileStateIgnore:
