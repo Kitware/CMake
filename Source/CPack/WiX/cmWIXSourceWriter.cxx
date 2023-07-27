@@ -97,7 +97,7 @@ void cmWIXSourceWriter::AddTextNode(std::string const& text)
     return;
   }
 
-  File << this->EscapeAttributeValue(text);
+  File << cmWIXSourceWriter::EscapeAttributeValue(text);
   State = DEFAULT;
 }
 
