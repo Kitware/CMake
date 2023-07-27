@@ -144,7 +144,7 @@ std::string cmWIXSourceWriter::CreateGuidFromComponentId(
 
 void cmWIXSourceWriter::WriteXMLDeclaration()
 {
-  File << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;
+  File << R"(<?xml version="1.0" encoding="UTF-8"?>)" << std::endl;
 }
 
 void cmWIXSourceWriter::Indent(size_t count)

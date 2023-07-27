@@ -19,7 +19,7 @@ void cmWIXFeaturesSourceWriter::CreateCMakePackageRegistryEntry(
   AddAttribute("Guid", CreateGuidFromComponentId("CM_PACKAGE_REGISTRY"));
 
   std::string registryKey =
-    cmStrCat("Software\\Kitware\\CMake\\Packages\\", package);
+    cmStrCat(R"(Software\Kitware\CMake\Packages\)", package);
 
   BeginElement("RegistryValue");
   AddAttribute("Root", "HKLM");
