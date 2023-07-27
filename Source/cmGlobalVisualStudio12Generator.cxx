@@ -80,8 +80,8 @@ public:
   std::vector<std::string> GetGeneratorNamesWithPlatform() const override
   {
     std::vector<std::string> names;
-    names.push_back(cmStrCat(vs12generatorName, " ARM"));
-    names.push_back(cmStrCat(vs12generatorName, " Win64"));
+    names.emplace_back(cmStrCat(vs12generatorName, " ARM"));
+    names.emplace_back(cmStrCat(vs12generatorName, " Win64"));
     return names;
   }
 

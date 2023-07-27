@@ -975,9 +975,9 @@ bool cmGlobalVisualStudio10Generator::FindVCTargetsPath(cmMakefile* mf)
   std::vector<std::string> cmd;
   cmd.push_back(this->GetMSBuildCommand());
   cmd.push_back(vcxproj);
-  cmd.push_back("/p:Configuration=Debug");
-  cmd.push_back(cmStrCat("/p:Platform=", this->GetPlatformName()));
-  cmd.push_back(cmStrCat("/p:VisualStudioVersion=", this->GetIDEVersion()));
+  cmd.emplace_back("/p:Configuration=Debug");
+  cmd.emplace_back(cmStrCat("/p:Platform=", this->GetPlatformName()));
+  cmd.emplace_back(cmStrCat("/p:VisualStudioVersion=", this->GetIDEVersion()));
   std::string out;
   int ret = 0;
   cmsys::RegularExpression regex("\n *VCTargetsPath=([^%\r\n]+)[\r\n]");

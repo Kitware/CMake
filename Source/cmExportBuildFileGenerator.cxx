@@ -419,7 +419,7 @@ std::string cmExportBuildFileGenerator::GetFileSetDirectories(
         resultVector.push_back(
           cmStrCat("\"$<$<CONFIG:", config, ">:", dest, ">\""));
       } else {
-        resultVector.push_back(cmStrCat('"', dest, '"'));
+        resultVector.emplace_back(cmStrCat('"', dest, '"'));
         break;
       }
     }
@@ -478,7 +478,7 @@ std::string cmExportBuildFileGenerator::GetFileSetFiles(cmGeneratorTarget* gte,
           resultVector.push_back(
             cmStrCat("\"$<$<CONFIG:", config, ">:", escapedFile, ">\""));
         } else {
-          resultVector.push_back(cmStrCat('"', escapedFile, '"'));
+          resultVector.emplace_back(cmStrCat('"', escapedFile, '"'));
         }
       }
     }

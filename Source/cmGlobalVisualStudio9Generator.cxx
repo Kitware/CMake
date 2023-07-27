@@ -72,21 +72,21 @@ public:
   std::vector<std::string> GetGeneratorNames() const override
   {
     std::vector<std::string> names;
-    names.push_back(vs9generatorName);
+    names.emplace_back(vs9generatorName);
     return names;
   }
 
   std::vector<std::string> GetGeneratorNamesWithPlatform() const override
   {
     std::vector<std::string> names;
-    names.push_back(cmStrCat(vs9generatorName, " Win64"));
-    names.push_back(cmStrCat(vs9generatorName, " IA64"));
+    names.emplace_back(cmStrCat(vs9generatorName, " Win64"));
+    names.emplace_back(cmStrCat(vs9generatorName, " IA64"));
     cmVisualStudioWCEPlatformParser parser;
     parser.ParseVersion("9.0");
     const std::vector<std::string>& availablePlatforms =
       parser.GetAvailablePlatforms();
     for (std::string const& i : availablePlatforms) {
-      names.push_back(cmStrCat("Visual Studio 9 2008 ", i));
+      names.emplace_back(cmStrCat("Visual Studio 9 2008 ", i));
     }
     return names;
   }

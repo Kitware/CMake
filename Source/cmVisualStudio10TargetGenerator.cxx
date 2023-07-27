@@ -4356,7 +4356,7 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
     // first just full path
     linkDirs.push_back(d);
     // next path with configuration type Debug, Release, etc
-    linkDirs.push_back(cmStrCat(d, "/$(Configuration)"));
+    linkDirs.emplace_back(cmStrCat(d, "/$(Configuration)"));
   }
   linkDirs.push_back("%(AdditionalLibraryDirectories)");
   linkOptions.AddFlag("AdditionalLibraryDirectories", linkDirs);
