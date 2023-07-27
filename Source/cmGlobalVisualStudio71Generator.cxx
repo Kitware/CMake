@@ -136,9 +136,9 @@ void cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
          << uname << ".vcproj" << "\", \"{"
          << this->GetGUID(uname) << "}\"\n"
          << "\tProjectSection(ProjectDependencies) = postProject\n"
-         << "\t\t{" << guid << "} = {" << guid << "}\n"
-         << "\tEndProjectSection\n"
-         << "EndProject\n";
+            "\t\t{" << guid << "} = {" << guid << "}\n"
+            "\tEndProjectSection\n"
+            "EndProject\n";
     /* clang-format on */
   }
 }

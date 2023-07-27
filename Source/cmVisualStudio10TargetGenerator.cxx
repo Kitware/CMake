@@ -310,10 +310,11 @@ std::string cmVisualStudio10TargetGenerator::CalcCondition(
   // handle special case for 32 bit C# targets
   if (this->ProjectType == VsProjectType::csproj &&
       this->Platform == "Win32"_s) {
-    oss << " Or ";
-    oss << "'$(Configuration)|$(Platform)'=='";
-    oss << config << "|x86";
-    oss << "'";
+    oss << " Or "
+           "'$(Configuration)|$(Platform)'=='";
+    oss << config
+        << "|x86"
+           "'";
   }
   return oss.str();
 }
@@ -881,7 +882,7 @@ void cmVisualStudio10TargetGenerator::WriteClassicMsBuildProjectFile(
           oss << "      " << i << ";\n";
         }
         oss << "      "
-            << "$(BuildDependsOn)\n";
+               "$(BuildDependsOn)\n";
         e1.Element("BuildDependsOn", oss.str());
       }
     }

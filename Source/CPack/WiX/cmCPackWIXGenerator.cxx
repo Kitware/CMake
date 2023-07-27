@@ -104,8 +104,9 @@ bool cmCPackWIXGenerator::RunCandleCommand(std::string const& sourceFile,
 
   std::ostringstream command;
   command << QuotePath(executable);
-  command << " -nologo";
-  command << " -arch " << arch;
+  command << " -nologo"
+             " -arch "
+          << arch;
   command << " -out " << QuotePath(objectFile);
 
   for (std::string const& ext : CandleExtensions) {
@@ -132,8 +133,9 @@ bool cmCPackWIXGenerator::RunLightCommand(std::string const& objectFiles)
 
   std::ostringstream command;
   command << QuotePath(executable);
-  command << " -nologo";
-  command << " -out " << QuotePath(CMakeToWixPath(packageFileNames.at(0)));
+  command << " -nologo"
+             " -out "
+          << QuotePath(CMakeToWixPath(packageFileNames.at(0)));
 
   for (std::string const& ext : this->LightExtensions) {
     command << " -ext " << QuotePath(ext);
@@ -1183,7 +1185,8 @@ void cmCPackWIXGenerator::CollectXmlNamespaces(std::string const& variableName,
     } else {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
                     "Invalid element in CPACK_WIX_CUSTOM_XMLNS ignored: "
-                      << "\"" << str << "\"" << std::endl);
+                    "\""
+                      << str << "\"" << std::endl);
     }
   }
   std::ostringstream oss;

@@ -44,7 +44,8 @@ bool cmGlobalVisualStudio11Generator::InitializeWindowsPhone(cmMakefile* mf)
         << this->SystemVersion << "'.  Check CMAKE_SYSTEM_VERSION.";
     } else {
       e << "A Windows Phone component with CMake requires both the Windows "
-        << "Desktop SDK as well as the Windows Phone '" << this->SystemVersion
+           "Desktop SDK as well as the Windows Phone '"
+        << this->SystemVersion
         << "' SDK. Please make sure that you have both installed";
     }
     mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
@@ -62,7 +63,8 @@ bool cmGlobalVisualStudio11Generator::InitializeWindowsStore(cmMakefile* mf)
         << this->SystemVersion << "'.  Check CMAKE_SYSTEM_VERSION.";
     } else {
       e << "A Windows Store component with CMake requires both the Windows "
-        << "Desktop SDK as well as the Windows Store '" << this->SystemVersion
+           "Desktop SDK as well as the Windows Store '"
+        << this->SystemVersion
         << "' SDK. Please make sure that you have both installed";
     }
     mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
