@@ -96,9 +96,9 @@ l:codespell:
         - .linux_x86_64_tags
         - .run_automatically
 
-l:iwyu-debian10:
+l:iwyu-debian12:
     extends:
-        - .debian10_iwyu
+        - .debian12_iwyu
         - .cmake_build_linux
         - .linux_x86_64_tags
         - .run_automatically
@@ -153,9 +153,9 @@ b:centos7-aarch64:
         CMAKE_CI_ARTIFACTS_NAME: "artifacts-centos7-aarch64"
         CMAKE_CI_NO_MR: "true"
 
-t:debian10-ninja:
+t:debian12-ninja:
     extends:
-        - .debian10_ninja
+        - .debian12_ninja
         - .cmake_test_linux_release
         - .linux_x86_64_tags
         - .cmake_junit_artifacts
@@ -164,9 +164,9 @@ t:debian10-ninja:
     variables:
         CMAKE_CI_JOB_NIGHTLY_NINJA: "true"
 
-t:debian10-aarch64-ninja:
+t:debian12-aarch64-ninja:
     extends:
-        - .debian10_aarch64_ninja
+        - .debian12_aarch64_ninja
         - .cmake_test_linux_release
         - .linux_aarch64_tags
         - .cmake_junit_artifacts
@@ -175,9 +175,9 @@ t:debian10-aarch64-ninja:
     variables:
         CMAKE_CI_NO_MR: "true"
 
-t:debian10-ninja-clang:
+t:debian12-ninja-clang:
     extends:
-        - .debian10_ninja_clang
+        - .debian12_ninja_clang
         - .cmake_test_linux_release
         - .linux_x86_64_tags
         - .run_dependent
@@ -185,9 +185,9 @@ t:debian10-ninja-clang:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:debian10-makefiles-clang:
+t:debian12-makefiles-clang:
     extends:
-        - .debian10_makefiles_clang
+        - .debian12_makefiles_clang
         - .cmake_test_linux_release
         - .linux_x86_64_tags
         - .run_dependent
@@ -354,27 +354,27 @@ b:fedora38-ninja:
     variables:
         CMAKE_CI_JOB_CONTINUOUS: "true"
 
-b:debian10-makefiles-inplace:
+b:debian12-makefiles-inplace:
     extends:
-        - .debian10_makefiles_inplace
+        - .debian12_makefiles_inplace
         - .cmake_build_linux_standalone
         - .linux_x86_64_tags
         - .run_manually
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-b:debian10-extdeps:
+b:debian12-extdeps:
     extends:
-        - .debian10_extdeps
+        - .debian12_extdeps
         - .cmake_build_linux_standalone
         - .linux_x86_64_tags
         - .run_manually
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-b:debian10-aarch64-extdeps:
+b:debian12-aarch64-extdeps:
     extends:
-        - .debian10_aarch64_extdeps
+        - .debian12_aarch64_extdeps
         - .cmake_build_linux_standalone
         - .linux_aarch64_tags
         - .run_manually

@@ -1,4 +1,4 @@
-export MY_RUBY_HOME="/usr/local/rvm/rubies/ruby-2.7.0"
+export MY_RUBY_HOME="/usr/local/rvm/rubies/ruby-3.2.2"
 
 if test -z "$CI_MERGE_REQUEST_ID"; then
   curl -L -O "https://download.swift.org/swift-5.7.1-release/ubuntu1804/swift-5.7.1-RELEASE/swift-5.7.1-RELEASE-ubuntu18.04.tar.gz"
