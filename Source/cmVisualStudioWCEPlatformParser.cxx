@@ -25,8 +25,7 @@ int cmVisualStudioWCEPlatformParser::ParseVersion(const char* version)
   }
   cmSystemTools::ConvertToUnixSlashes(this->VcInstallDir);
   cmSystemTools::ConvertToUnixSlashes(this->VsInstallDir);
-  this->VcInstallDir.append("/");
-  this->VsInstallDir.append("/");
+  this->VcInstallDir.append("//");
 
   const std::string configFilename =
     cmStrCat(this->VcInstallDir, "vcpackages/WCE.VCPlatform.config");
