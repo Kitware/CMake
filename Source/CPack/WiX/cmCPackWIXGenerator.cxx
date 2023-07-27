@@ -314,8 +314,9 @@ bool cmCPackWIXGenerator::PackageFilesImpl()
 void cmCPackWIXGenerator::AppendUserSuppliedExtraSources()
 {
   cmValue cpackWixExtraSources = GetOption("CPACK_WIX_EXTRA_SOURCES");
-  if (!cpackWixExtraSources)
+  if (!cpackWixExtraSources) {
     return;
+  }
 
   cmExpandList(cpackWixExtraSources, this->WixSources);
 }
@@ -323,8 +324,9 @@ void cmCPackWIXGenerator::AppendUserSuppliedExtraSources()
 void cmCPackWIXGenerator::AppendUserSuppliedExtraObjects(std::ostream& stream)
 {
   cmValue cpackWixExtraObjects = GetOption("CPACK_WIX_EXTRA_OBJECTS");
-  if (!cpackWixExtraObjects)
+  if (!cpackWixExtraObjects) {
     return;
+  }
 
   cmList expandedExtraObjects{ cpackWixExtraObjects };
 
@@ -1059,8 +1061,9 @@ std::string cmCPackWIXGenerator::GetRightmostExtension(
 std::string cmCPackWIXGenerator::PathToId(std::string const& path)
 {
   id_map_t::const_iterator i = PathToIdMap.find(path);
-  if (i != PathToIdMap.end())
+  if (i != PathToIdMap.end()) {
     return i->second;
+  }
 
   std::string id = CreateNewIdForPath(path);
   return id;
@@ -1077,8 +1080,9 @@ std::string cmCPackWIXGenerator::CreateNewIdForPath(std::string const& path)
   std::string currentComponent;
 
   for (size_t i = 1; i < components.size(); ++i) {
-    if (i != 1)
+    if (i != 1) {
       identifier += '.';
+    }
 
     currentComponent =
       NormalizeComponentForId(components[i], replacementCount);
@@ -1163,8 +1167,9 @@ void cmCPackWIXGenerator::CollectExtensions(std::string const& variableName,
                                             extension_set_t& extensions)
 {
   cmValue variableContent = GetOption(variableName);
-  if (!variableContent)
+  if (!variableContent) {
     return;
+  }
 
   cmList list{ variableContent };
   extensions.insert(list.begin(), list.end());
@@ -1204,8 +1209,9 @@ void cmCPackWIXGenerator::AddCustomFlags(std::string const& variableName,
                                          std::ostream& stream)
 {
   cmValue variableContent = GetOption(variableName);
-  if (!variableContent)
+  if (!variableContent) {
     return;
+  }
 
   cmList list{ variableContent };
 

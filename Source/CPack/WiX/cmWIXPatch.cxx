@@ -26,8 +26,9 @@ void cmWIXPatch::ApplyFragment(std::string const& id,
                                cmWIXSourceWriter& writer)
 {
   cmWIXPatchParser::fragment_map_t::iterator i = Fragments.find(id);
-  if (i == Fragments.end())
+  if (i == Fragments.end()) {
     return;
+  }
 
   const cmWIXPatchElement& fragment = i->second;
   for (auto const& attr : fragment.attributes) {

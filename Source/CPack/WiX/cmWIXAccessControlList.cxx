@@ -107,8 +107,9 @@ bool cmWIXAccessControlList::IsBooleanAttribute(std::string const& name)
 
   size_t i = 0;
   while (validAttributes[i]) {
-    if (name == validAttributes[i++])
+    if (name == validAttributes[i++]) {
       return true;
+    }
   }
 
   return false;
