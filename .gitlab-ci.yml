@@ -195,6 +195,16 @@ t:debian12-makefiles-clang:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
+t:debian12-hip-radeon:
+    extends:
+        - .debian12_hip_radeon
+        - .cmake_test_linux_release
+        - .linux_x86_64_tags_radeon
+        - .run_dependent
+        - .needs_centos6_x86_64
+    variables:
+        CMAKE_CI_NO_MR: "true"
+
 t:fedora38-ninja-clang:
     extends:
         - .fedora38_ninja_clang
