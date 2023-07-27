@@ -31,7 +31,7 @@ std::string cmLocalXCodeGenerator::GetTargetDirectory(
   cmGeneratorTarget const*) const
 {
   // No per-target directory for this generator (yet).
-  return "";
+  return std::string{};
 }
 
 void cmLocalXCodeGenerator::AppendFlagEscape(std::string& flags,
