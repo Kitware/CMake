@@ -26,9 +26,7 @@ void cmXCode21Object::PrintComment(std::ostream& out)
   if (this->Comment.empty()) {
     return;
   }
-  out << " /* ";
-  out << this->Comment;
-  out << " */";
+  out << " /* " << this->Comment << " */";
 }
 
 void cmXCode21Object::PrintList(
