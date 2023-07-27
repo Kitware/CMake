@@ -1,5 +1,6 @@
 if (NOT "$ENV{CMAKE_CI_NIGHTLY}" STREQUAL "")
   set(CMake_TEST_ISPC "ON" CACHE STRING "")
+  set(CMAKE_TESTS_CDASH_SERVER "https://open.cdash.org" CACHE STRING "")
 endif()
 
 # FIXME: sccache sometimes fails with "Compiler killed by signal 9".
