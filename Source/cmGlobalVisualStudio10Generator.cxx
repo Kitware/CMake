@@ -84,10 +84,10 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
 {
   if (this->SystemIsWindowsCE && ts.empty() &&
       this->DefaultPlatformToolset.empty()) {
-    std::ostringstream e;
-    e << this->GetName() << " Windows CE version '" << this->SystemVersion
-      << "' requires CMAKE_GENERATOR_TOOLSET to be set.";
-    mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    mf->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat(this->GetName(), " Windows CE version '", this->SystemVersion,
+               "' requires CMAKE_GENERATOR_TOOLSET to be set."));
     return false;
   }
 
@@ -106,16 +106,17 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
   if (!this->CustomFlagTableDir.empty() &&
       !(cmSystemTools::FileIsFullPath(this->CustomFlagTableDir) &&
         cmSystemTools::FileIsDirectory(this->CustomFlagTableDir))) {
-    std::ostringstream e;
-    /* clang-format off */
-    e <<
-      "Generator\n"
-      "  " << this->GetName() << "\n"
-      "given toolset\n"
-      "  customFlagTableDir=" << this->CustomFlagTableDir << "\n"
-      "that is not an absolute path to an existing directory.";
-    /* clang-format on */
-    mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    mf->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("Generator\n"
+               "  ",
+               this->GetName(),
+               "\n"
+               "given toolset\n"
+               "  customFlagTableDir=",
+               this->CustomFlagTableDir,
+               "\n"
+               "that is not an absolute path to an existing directory."));
     cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
@@ -126,7 +127,8 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
     // differing from the "false" and "true" values used in older toolsets.
     // A VS 2015 update changed it back.  Parse the "link.xml" file to
     // discover which one we need.
-    std::string const link_xml = this->VCTargetsPath + "/1033/link.xml";
+    std::string const link_xml =
+      cmStrCat(this->VCTargetsPath, "/1033/link.xml");
     cmsys::ifstream fin(link_xml.c_str());
     std::string line;
     while (fin && cmSystemTools::GetLineFromStream(fin, line)) {
@@ -141,24 +143,24 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
   this->SupportsUnityBuilds =
     this->Version >= cmGlobalVisualStudioGenerator::VSVersion::VS16 ||
     (this->Version == cmGlobalVisualStudioGenerator::VSVersion::VS15 &&
-     cmSystemTools::PathExists(this->VCTargetsPath +
-                               "/Microsoft.Cpp.Unity.targets"));
+     cmSystemTools::PathExists(
+       cmStrCat(this->VCTargetsPath, "/Microsoft.Cpp.Unity.targets")));
 
   if (this->GeneratorToolsetCuda.empty()) {
     // Find the highest available version of the CUDA tools.
     std::vector<std::string> cudaTools;
     std::string bcDir;
     if (this->GeneratorToolsetCudaCustomDir.empty()) {
-      bcDir = this->VCTargetsPath + "/BuildCustomizations";
+      bcDir = cmStrCat(this->VCTargetsPath, "/BuildCustomizations");
     } else {
-      bcDir = this->GetPlatformToolsetCudaCustomDirString() +
-        this->GetPlatformToolsetCudaVSIntegrationSubdirString() +
-        "extras\\visual_studio_integration\\MSBuildExtensions";
+      bcDir = cmStrCat(this->GetPlatformToolsetCudaCustomDirString(),
+                       this->GetPlatformToolsetCudaVSIntegrationSubdirString(),
+                       "extras\\visual_studio_integration\\MSBuildExtensions");
       cmSystemTools::ConvertToUnixSlashes(bcDir);
     }
     cmsys::Glob gl;
     gl.SetRelative(bcDir.c_str());
-    if (gl.FindFiles(bcDir + "/CUDA *.props")) {
+    if (gl.FindFiles(cmStrCat(bcDir, "/CUDA *.props"))) {
       cudaTools = gl.GetFiles();
     }
     if (!cudaTools.empty()) {
@@ -169,18 +171,19 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
     } else if (!this->GeneratorToolsetCudaCustomDir.empty()) {
       // Generate an error if Visual Studio integration files are not found
       // inside of custom cuda toolset.
-      std::ostringstream e;
-      /* clang-format off */
-      e <<
-        "Generator\n"
-        "  " << this->GetName() << "\n"
-        "given toolset\n"
-        "  cuda=" << this->GeneratorToolsetCudaCustomDir << "\n"
-        "cannot detect Visual Studio integration files in path\n"
-        "  " << bcDir;
-
-      /* clang-format on */
-      mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+      mf->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("Generator\n"
+                 "  ",
+                 this->GetName(),
+                 "\n"
+                 "given toolset\n"
+                 "  cuda=",
+                 this->GeneratorToolsetCudaCustomDir,
+                 "\n"
+                 "cannot detect Visual Studio integration files in path\n"
+                 "  ",
+                 bcDir));
 
       // Clear the configured tool-set
       this->GeneratorToolsetCuda.clear();
@@ -195,25 +198,24 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
     std::string versionToolset = this->GeneratorToolsetVersion;
     cmsys::RegularExpression regex("[0-9][0-9]\\.[0-9][0-9]");
     if (regex.find(versionToolset)) {
-      versionToolset = "v" + versionToolset.erase(2, 1);
+      versionToolset = cmStrCat("v", versionToolset.erase(2, 1));
     } else {
       // Version not recognized. Clear it.
       versionToolset.clear();
     }
 
     if (!cmHasPrefix(versionToolset, this->GetPlatformToolsetString())) {
-      std::ostringstream e;
-      /* clang-format off */
-      e <<
-        "Generator\n"
-        "  " << this->GetName() << "\n"
-        "given toolset and version specification\n"
-        "  " << this->GetPlatformToolsetString() << ",version=" <<
-        this->GeneratorToolsetVersion << "\n"
-        "contains an invalid version specification."
-      ;
-      /* clang-format on */
-      mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+      mf->IssueMessage(MessageType::FATAL_ERROR,
+                       cmStrCat("Generator\n"
+                                "  ",
+                                this->GetName(),
+                                "\n"
+                                "given toolset and version specification\n"
+                                "  ",
+                                this->GetPlatformToolsetString(),
+                                ",version=", this->GeneratorToolsetVersion,
+                                "\n"
+                                "contains an invalid version specification."));
 
       // Clear the configured tool-set
       this->GeneratorToolsetVersion.clear();
@@ -233,40 +235,40 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
         this->GeneratorToolsetVersionProps = std::move(auxProps);
         break;
       case AuxToolset::PropsMissing: {
-        std::ostringstream e;
-        /* clang-format off */
-        e <<
-          "Generator\n"
-          "  " << this->GetName() << "\n"
-          "given toolset and version specification\n"
-          "  " << this->GetPlatformToolsetString() << ",version=" <<
-          this->GeneratorToolsetVersion << "\n"
-          "does not seem to be installed at\n" <<
-          "  " << auxProps;
-        ;
-        /* clang-format on */
-        mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+        mf->IssueMessage(MessageType::FATAL_ERROR,
+                         cmStrCat("Generator\n"
+                                  "  ",
+                                  this->GetName(),
+                                  "\n"
+                                  "given toolset and version specification\n"
+                                  "  ",
+                                  this->GetPlatformToolsetString(),
+                                  ",version=", this->GeneratorToolsetVersion,
+                                  "\n"
+                                  "does not seem to be installed at\n"
+                                  "  ",
+                                  auxProps));
 
         // Clear the configured tool-set
         this->GeneratorToolsetVersion.clear();
         this->GeneratorToolsetVersionProps = {};
       } break;
       case AuxToolset::PropsIndeterminate: {
-        std::ostringstream e;
-        /* clang-format off */
-        e <<
-          "Generator\n"
-          "  " << this->GetName() << "\n"
-          "given toolset and version specification\n"
-          "  " << this->GetPlatformToolsetString() << ",version=" <<
-          this->GeneratorToolsetVersion << "\n"
-          "has multiple matches installed at\n" <<
-          "  " << auxProps << "\n" <<
-          "The toolset and version specification must resolve \n" <<
-           "to a single installed toolset";
-        ;
-        /* clang-format on */
-        mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+        mf->IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmStrCat("Generator\n"
+                   "  ",
+                   this->GetName(),
+                   "\n"
+                   "given toolset and version specification\n"
+                   "  ",
+                   this->GetPlatformToolsetString(),
+                   ",version=", this->GeneratorToolsetVersion,
+                   "\n"
+                   "has multiple matches installed at\n",
+                   "  ", auxProps, "\n",
+                   "The toolset and version specification must resolve \n"
+                   "to a single installed toolset"));
 
         // Clear the configured tool-set
         this->GeneratorToolsetVersion.clear();
@@ -320,47 +322,47 @@ bool cmGlobalVisualStudio10Generator::ParseGeneratorToolset(
   for (; fi != fields.end(); ++fi) {
     std::string::size_type pos = fi->find('=');
     if (pos == fi->npos) {
-      std::ostringstream e;
-      /* clang-format off */
-      e <<
-        "Generator\n"
-        "  " << this->GetName() << "\n"
-        "given toolset specification\n"
-        "  " << ts << "\n"
-        "that contains a field after the first ',' with no '='."
-        ;
-      /* clang-format on */
-      mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+      mf->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("Generator\n"
+                 "  ",
+                 this->GetName(),
+                 "\n"
+                 "given toolset specification\n"
+                 "  ",
+                 ts,
+                 "\n"
+                 "that contains a field after the first ',' with no '='."));
       return false;
     }
     std::string const key = fi->substr(0, pos);
     std::string const value = fi->substr(pos + 1);
     if (!handled.insert(key).second) {
-      std::ostringstream e;
-      /* clang-format off */
-      e <<
-        "Generator\n"
-        "  " << this->GetName() << "\n"
-        "given toolset specification\n"
-        "  " << ts << "\n"
-        "that contains duplicate field key '" << key << "'."
-        ;
-      /* clang-format on */
-      mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+      mf->IssueMessage(MessageType::FATAL_ERROR,
+                       cmStrCat("Generator\n"
+                                "  ",
+                                this->GetName(),
+                                "\n"
+                                "given toolset specification\n"
+                                "  ",
+                                ts,
+                                "\n"
+                                "that contains duplicate field key '",
+                                key, "'."));
       return false;
     }
     if (!this->ProcessGeneratorToolsetField(key, value)) {
-      std::ostringstream e;
-      /* clang-format off */
-      e <<
-        "Generator\n"
-        "  " << this->GetName() << "\n"
-        "given toolset specification\n"
-        "  " << ts << "\n"
-        "that contains invalid field '" << *fi << "'."
-        ;
-      /* clang-format on */
-      mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+      mf->IssueMessage(MessageType::FATAL_ERROR,
+                       cmStrCat("Generator\n"
+                                "  ",
+                                this->GetName(),
+                                "\n"
+                                "given toolset specification\n"
+                                "  ",
+                                ts,
+                                "\n"
+                                "that contains invalid field '",
+                                *fi, "'."));
       return false;
     }
   }
@@ -436,11 +438,10 @@ bool cmGlobalVisualStudio10Generator::InitializeSystem(cmMakefile* mf)
     }
   } else if (this->SystemName == "Android"_s) {
     if (this->PlatformInGeneratorName) {
-      std::ostringstream e;
-      e << "CMAKE_SYSTEM_NAME is 'Android' but CMAKE_GENERATOR "
-           "specifies a platform too: '"
-        << this->GetName() << "'";
-      mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+      mf->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("CMAKE_SYSTEM_NAME is 'Android' but CMAKE_GENERATOR ",
+                 "specifies a platform too: '", this->GetName(), "'"));
       return false;
     }
     if (mf->GetSafeDefinition("CMAKE_GENERATOR_PLATFORM") ==
@@ -467,11 +468,10 @@ bool cmGlobalVisualStudio10Generator::InitializeWindows(cmMakefile*)
 bool cmGlobalVisualStudio10Generator::InitializeWindowsCE(cmMakefile* mf)
 {
   if (this->PlatformInGeneratorName) {
-    std::ostringstream e;
-    e << "CMAKE_SYSTEM_NAME is 'WindowsCE' but CMAKE_GENERATOR "
-         "specifies a platform too: '"
-      << this->GetName() << "'";
-    mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    mf->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("CMAKE_SYSTEM_NAME is 'WindowsCE' but CMAKE_GENERATOR ",
+               "specifies a platform too: '", this->GetName(), "'"));
     return false;
   }
 
@@ -489,17 +489,17 @@ bool cmGlobalVisualStudio10Generator::InitializeWindowsCE(cmMakefile* mf)
 
 bool cmGlobalVisualStudio10Generator::InitializeWindowsPhone(cmMakefile* mf)
 {
-  std::ostringstream e;
-  e << this->GetName() << " does not support Windows Phone.";
-  mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+  mf->IssueMessage(
+    MessageType::FATAL_ERROR,
+    cmStrCat(this->GetName(), " does not support Windows Phone."));
   return false;
 }
 
 bool cmGlobalVisualStudio10Generator::InitializeWindowsStore(cmMakefile* mf)
 {
-  std::ostringstream e;
-  e << this->GetName() << " does not support Windows Store.";
-  mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+  mf->IssueMessage(
+    MessageType::FATAL_ERROR,
+    cmStrCat(this->GetName(), " does not support Windows Store."));
   return false;
 }
 
@@ -611,29 +611,30 @@ void cmGlobalVisualStudio10Generator::Generate()
   }
   if (this->LongestSource.Length > 0) {
     cmLocalGenerator* lg = this->LongestSource.Target->GetLocalGenerator();
-    std::ostringstream e;
-    /* clang-format off */
-    e <<
-      "The binary and/or source directory paths may be too long to generate "
-      "Visual Studio 10 files for this project.  "
-      "Consider choosing shorter directory names to build this project with "
-      "Visual Studio 10.  "
-      "A more detailed explanation follows."
-      "\n"
-      "There is a bug in the VS 10 IDE that renders property dialog fields "
-      "blank for files referenced by full path in the project file.  "
-      "However, CMake must reference at least one file by full path:\n"
-      "  " << this->LongestSource.SourceFile->GetFullPath() << "\n"
-      "This is because some Visual Studio tools would append the relative "
-      "path to the end of the referencing directory path, as in:\n"
-      "  " << lg->GetCurrentBinaryDirectory() << "/"
-      << this->LongestSource.SourceRel << "\n"
-      "and then incorrectly complain that the file does not exist because "
-      "the path length is too long for some internal buffer or API.  "
-      "To avoid this problem CMake must use a full path for this file "
-      "which then triggers the VS 10 property dialog bug.";
-    /* clang-format on */
-    lg->IssueMessage(MessageType::WARNING, e.str());
+    lg->IssueMessage(
+      MessageType::WARNING,
+      cmStrCat(
+        "The binary and/or source directory paths may be too long to generate "
+        "Visual Studio 10 files for this project.  "
+        "Consider choosing shorter directory names to build this project with "
+        "Visual Studio 10.  "
+        "A more detailed explanation follows."
+        "\n"
+        "There is a bug in the VS 10 IDE that renders property dialog fields "
+        "blank for files referenced by full path in the project file.  "
+        "However, CMake must reference at least one file by full path:\n"
+        "  ",
+        this->LongestSource.SourceFile->GetFullPath(),
+        "\n"
+        "This is because some Visual Studio tools would append the relative "
+        "path to the end of the referencing directory path, as in:\n"
+        "  ",
+        lg->GetCurrentBinaryDirectory(), '/', this->LongestSource.SourceRel,
+        "\n"
+        "and then incorrectly complain that the file does not exist because "
+        "the path length is too long for some internal buffer or API.  "
+        "To avoid this problem CMake must use a full path for this file "
+        "which then triggers the VS 10 property dialog bug."));
   }
   if (cmValue cached = this->CMakeInstance->GetState()->GetCacheEntryValue(
         "CMAKE_VS_NUGET_PACKAGE_RESTORE")) {
@@ -851,7 +852,7 @@ bool cmGlobalVisualStudio10Generator::FindVCTargetsPath(cmMakefile* mf)
   wd += cmVersion::GetCMakeVersion();
 
   // We record the result persistently in a file.
-  std::string const txt = wd + "/VCTargetsPath.txt";
+  std::string const txt = cmStrCat(wd, "/VCTargetsPath.txt");
 
   // If we have a recorded result, use it.
   {
@@ -865,8 +866,8 @@ bool cmGlobalVisualStudio10Generator::FindVCTargetsPath(cmMakefile* mf)
 
   // Prepare the work directory.
   if (!cmSystemTools::MakeDirectory(wd)) {
-    std::string e = "Failed to make directory:\n  " + wd;
-    mf->IssueMessage(MessageType::FATAL_ERROR, e);
+    mf->IssueMessage(MessageType::FATAL_ERROR,
+                     cmStrCat("Failed to make directory:\n  ", wd));
     cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
@@ -874,7 +875,7 @@ bool cmGlobalVisualStudio10Generator::FindVCTargetsPath(cmMakefile* mf)
   // Generate a project file for MSBuild to tell us the VCTargetsPath value.
   std::string const vcxproj = "VCTargetsPath.vcxproj";
   {
-    std::string const vcxprojAbs = wd + "/" + vcxproj;
+    std::string const vcxprojAbs = cmStrCat(wd, "/", vcxproj);
     cmsys::ofstream fout(vcxprojAbs.c_str());
     cmXMLWriter xw(fout);
 
@@ -893,7 +894,7 @@ bool cmGlobalVisualStudio10Generator::FindVCTargetsPath(cmMakefile* mf)
       cmXMLElement eig(eprj, "ItemGroup");
       eig.Attribute("Label", "ProjectConfigurations");
       cmXMLElement epc(eig, "ProjectConfiguration");
-      epc.Attribute("Include", "Debug|" + this->GetPlatformName());
+      epc.Attribute("Include", cmStrCat("Debug|", this->GetPlatformName()));
       cmXMLElement(epc, "Configuration").Content("Debug");
       cmXMLElement(epc, "Platform").Content(this->GetPlatformName());
     }
@@ -976,8 +977,7 @@ bool cmGlobalVisualStudio10Generator::FindVCTargetsPath(cmMakefile* mf)
   cmd.push_back(vcxproj);
   cmd.push_back("/p:Configuration=Debug");
   cmd.push_back(cmStrCat("/p:Platform=", this->GetPlatformName()));
-  cmd.push_back(std::string("/p:VisualStudioVersion=") +
-                this->GetIDEVersion());
+  cmd.push_back(cmStrCat("/p:VisualStudioVersion=", this->GetIDEVersion()));
   std::string out;
   int ret = 0;
   cmsys::RegularExpression regex("\n *VCTargetsPath=([^%\r\n]+)[\r\n]");
@@ -1108,7 +1108,7 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
         requiresRestore = false;
       } else if (cmValue cached =
                    this->CMakeInstance->GetState()->GetCacheEntryValue(
-                     tname + "_REQUIRES_VS_PACKAGE_RESTORE")) {
+                     cmStrCat(tname, "_REQUIRES_VS_PACKAGE_RESTORE"))) {
         requiresRestore = cached.IsOn();
       } else {
         // There are no package references defined.

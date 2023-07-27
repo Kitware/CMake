@@ -7,14 +7,15 @@
 #include <utility>
 
 #include "cmGlobalVisualStudioGenerator.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 int cmVisualStudioWCEPlatformParser::ParseVersion(const char* version)
 {
   const std::string registryBase =
     cmGlobalVisualStudioGenerator::GetRegistryBase(version);
-  const std::string vckey = registryBase + "\\Setup\\VC;ProductDir";
-  const std::string vskey = registryBase + "\\Setup\\VS;ProductDir";
+  const std::string vckey = cmStrCat(registryBase, "\\Setup\\VC;ProductDir");
+  const std::string vskey = cmStrCat(registryBase, "\\Setup\\VS;ProductDir");
 
   if (!cmSystemTools::ReadRegistryValue(vckey, this->VcInstallDir,
                                         cmSystemTools::KeyWOW64_32) ||
@@ -28,7 +29,7 @@ int cmVisualStudioWCEPlatformParser::ParseVersion(const char* version)
   this->VsInstallDir.append("/");
 
   const std::string configFilename =
-    this->VcInstallDir + "vcpackages/WCE.VCPlatform.config";
+    cmStrCat(this->VcInstallDir, "vcpackages/WCE.VCPlatform.config");
 
   return this->ParseFile(configFilename.c_str());
 }
@@ -39,7 +40,7 @@ std::string cmVisualStudioWCEPlatformParser::GetOSVersion() const
     return OSMajorVersion;
   }
 
-  return OSMajorVersion + "." + OSMinorVersion;
+  return cmStrCat(OSMajorVersion, ".", OSMinorVersion);
 }
 
 const char* cmVisualStudioWCEPlatformParser::GetArchitectureFamily() const

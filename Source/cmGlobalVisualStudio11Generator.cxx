@@ -3,7 +3,6 @@
 #include "cmGlobalVisualStudio11Generator.h"
 
 #include <cstring>
-#include <sstream>
 #include <utility>
 #include <vector>
 
@@ -38,17 +37,18 @@ void cmGlobalVisualStudio11Generator::EnableLanguage(
 bool cmGlobalVisualStudio11Generator::InitializeWindowsPhone(cmMakefile* mf)
 {
   if (!this->SelectWindowsPhoneToolset(this->DefaultPlatformToolset)) {
-    std::ostringstream e;
+    std::string e;
     if (this->DefaultPlatformToolset.empty()) {
-      e << this->GetName() << " supports Windows Phone '8.0', but not '"
-        << this->SystemVersion << "'.  Check CMAKE_SYSTEM_VERSION.";
+      e = cmStrCat(this->GetName(), " supports Windows Phone '8.0', but not '",
+                   this->SystemVersion, "'.  Check CMAKE_SYSTEM_VERSION.");
     } else {
-      e << "A Windows Phone component with CMake requires both the Windows "
-           "Desktop SDK as well as the Windows Phone '"
-        << this->SystemVersion
-        << "' SDK. Please make sure that you have both installed";
+      e = cmStrCat(
+        "A Windows Phone component with CMake requires both the Windows "
+        "Desktop SDK as well as the Windows Phone '",
+        this->SystemVersion,
+        "' SDK. Please make sure that you have both installed");
     }
-    mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    mf->IssueMessage(MessageType::FATAL_ERROR, e);
     return false;
   }
   return true;
@@ -57,17 +57,18 @@ bool cmGlobalVisualStudio11Generator::InitializeWindowsPhone(cmMakefile* mf)
 bool cmGlobalVisualStudio11Generator::InitializeWindowsStore(cmMakefile* mf)
 {
   if (!this->SelectWindowsStoreToolset(this->DefaultPlatformToolset)) {
-    std::ostringstream e;
+    std::string e;
     if (this->DefaultPlatformToolset.empty()) {
-      e << this->GetName() << " supports Windows Store '8.0', but not '"
-        << this->SystemVersion << "'.  Check CMAKE_SYSTEM_VERSION.";
+      e = cmStrCat(this->GetName(), " supports Windows Store '8.0', but not '",
+                   this->SystemVersion, "'.  Check CMAKE_SYSTEM_VERSION.");
     } else {
-      e << "A Windows Store component with CMake requires both the Windows "
-           "Desktop SDK as well as the Windows Store '"
-        << this->SystemVersion
-        << "' SDK. Please make sure that you have both installed";
+      e = cmStrCat(
+        "A Windows Store component with CMake requires both the Windows "
+        "Desktop SDK as well as the Windows Store '",
+        this->SystemVersion,
+        "' SDK. Please make sure that you have both installed");
     }
-    mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    mf->IssueMessage(MessageType::FATAL_ERROR, e);
     return false;
   }
   return true;

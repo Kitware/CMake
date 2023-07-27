@@ -158,7 +158,7 @@ std::string cmGlobalVisualStudio7Generator::FindDevEnvCommand()
   std::string vskey;
 
   // Search in standard location.
-  vskey = this->GetRegistryBase() + ";InstallDir";
+  vskey = cmStrCat(this->GetRegistryBase(), ";InstallDir");
   if (cmSystemTools::ReadRegistryValue(vskey, vscmd,
                                        cmSystemTools::KeyWOW64_32)) {
     cmSystemTools::ConvertToUnixSlashes(vscmd);
@@ -259,7 +259,7 @@ cmGlobalVisualStudio7Generator::GenerateBuildCommand(
     GeneratedMakeCommand makeCommand;
     makeCommand.RequiresOutputForward = requiresOutputForward;
     makeCommand.Add(makeProgramSelected);
-    makeCommand.Add(projectName + ".sln");
+    makeCommand.Add(cmStrCat(projectName, ".sln"));
     makeCommand.Add((clean ? "/clean" : "/build"));
     makeCommand.Add((config.empty() ? "Debug" : config));
     makeCommand.Add("/project");
@@ -483,12 +483,12 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
           }
 
           if (cumulativePath.empty()) {
-            cumulativePath = "CMAKE_FOLDER_GUID_" + iter;
+            cumulativePath = cmStrCat("CMAKE_FOLDER_GUID_", iter);
           } else {
-            VisualStudioFolders[cumulativePath].insert(cumulativePath + "/" +
-                                                       iter);
+            VisualStudioFolders[cumulativePath].insert(
+              cmStrCat(cumulativePath, "/", iter));
 
-            cumulativePath = cumulativePath + "/" + iter;
+            cumulativePath = cmStrCat(cumulativePath, "/", iter);
           }
         }
 
@@ -552,7 +552,8 @@ std::string cmGlobalVisualStudio7Generator::ConvertToSolutionPath(
 void cmGlobalVisualStudio7Generator::WriteSLNGlobalSections(
   std::ostream& fout, cmLocalGenerator* root)
 {
-  std::string const guid = this->GetGUID(root->GetProjectName() + ".sln");
+  std::string const guid =
+    this->GetGUID(cmStrCat(root->GetProjectName(), ".sln"));
   bool extensibilityGlobalsOverridden = false;
   bool extensibilityAddInsOverridden = false;
   const std::vector<std::string> propKeys =
@@ -680,7 +681,7 @@ std::string cmGlobalVisualStudio7Generator::WriteUtilityDepend(
 
 std::string cmGlobalVisualStudio7Generator::GetGUID(std::string const& name)
 {
-  std::string const& guidStoreName = name + "_GUID_CMAKE";
+  std::string const& guidStoreName = cmStrCat(name, "_GUID_CMAKE");
   if (cmValue storedGUID =
         this->CMakeInstance->GetCacheDefinition(guidStoreName)) {
     return *storedGUID;
@@ -705,9 +706,7 @@ void cmGlobalVisualStudio7Generator::AppendDirectoryForConfig(
   const std::string& suffix, std::string& dir)
 {
   if (!config.empty()) {
-    dir += prefix;
-    dir += config;
-    dir += suffix;
+    dir += cmStrCat(prefix, config, suffix);
   }
 }
 
@@ -728,7 +727,7 @@ std::set<std::string> cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(
       // check if target <t> is part of default build
       if (target->GetName() == t) {
         const std::string propertyName =
-          "CMAKE_VS_INCLUDE_" + t + "_TO_DEFAULT_BUILD";
+          cmStrCat("CMAKE_VS_INCLUDE_", t, "_TO_DEFAULT_BUILD");
         // inspect CMAKE_VS_INCLUDE_<t>_TO_DEFAULT_BUILD properties
         for (std::string const& i : configs) {
           cmValue propertyValue =

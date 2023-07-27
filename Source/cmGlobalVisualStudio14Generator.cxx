@@ -67,7 +67,7 @@ public:
 
   cmDocumentationEntry GetDocumentation() const override
   {
-    return { std::string(vs14generatorName) + " [arch]",
+    return { cmStrCat(vs14generatorName, " [arch]"),
              "Generates Visual Studio 2015 project files.  "
              "Optional [arch] can be \"Win64\" or \"ARM\"." };
   }
@@ -82,8 +82,8 @@ public:
   std::vector<std::string> GetGeneratorNamesWithPlatform() const override
   {
     std::vector<std::string> names;
-    names.push_back(vs14generatorName + std::string(" ARM"));
-    names.push_back(vs14generatorName + std::string(" Win64"));
+    names.push_back(cmStrCat(vs14generatorName, " ARM"));
+    names.push_back(cmStrCat(vs14generatorName, " Win64"));
     return names;
   }
 
@@ -173,20 +173,21 @@ bool cmGlobalVisualStudio14Generator::VerifyNoGeneratorPlatformVersion(
 
 bool cmGlobalVisualStudio14Generator::InitializeWindowsStore(cmMakefile* mf)
 {
-  std::ostringstream e;
   if (!this->SelectWindowsStoreToolset(this->DefaultPlatformToolset)) {
+    std::string e;
     if (this->DefaultPlatformToolset.empty()) {
-      e << this->GetName()
-        << " supports Windows Store '8.0', '8.1' and "
-           "'10.0', but not '"
-        << this->SystemVersion << "'.  Check CMAKE_SYSTEM_VERSION.";
+      e = cmStrCat(this->GetName(),
+                   " supports Windows Store '8.0', '8.1' and "
+                   "'10.0', but not '",
+                   this->SystemVersion, "'.  Check CMAKE_SYSTEM_VERSION.");
     } else {
-      e << "A Windows Store component with CMake requires both the Windows "
-           "Desktop SDK as well as the Windows Store '"
-        << this->SystemVersion
-        << "' SDK. Please make sure that you have both installed";
+      e = cmStrCat(
+        "A Windows Store component with CMake requires both the Windows "
+        "Desktop SDK as well as the Windows Store '",
+        this->SystemVersion,
+        "' SDK. Please make sure that you have both installed");
     }
-    mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    mf->IssueMessage(MessageType::FATAL_ERROR, e);
     return false;
   }
   return true;
@@ -252,10 +253,11 @@ void cmGlobalVisualStudio14Generator::SetWindowsTargetPlatformVersion(
   this->WindowsTargetPlatformVersion = version;
   if (!cmSystemTools::VersionCompareEqual(this->WindowsTargetPlatformVersion,
                                           this->SystemVersion)) {
-    std::ostringstream e;
-    e << "Selecting Windows SDK version " << this->WindowsTargetPlatformVersion
-      << " to target Windows " << this->SystemVersion << ".";
-    mf->DisplayStatus(e.str(), -1);
+    mf->DisplayStatus(cmStrCat("Selecting Windows SDK version ",
+                               this->WindowsTargetPlatformVersion,
+                               " to target Windows ", this->SystemVersion,
+                               "."),
+                      -1);
   }
   mf->AddDefinition("CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION",
                     this->WindowsTargetPlatformVersion);
@@ -335,7 +337,7 @@ struct NoWindowsH
 {
   bool operator()(std::string const& p)
   {
-    return !cmSystemTools::FileExists(p + "/um/windows.h", true);
+    return !cmSystemTools::FileExists(cmStrCat(p, "/um/windows.h"), true);
   }
 };
 class WindowsSDKTooRecent
@@ -402,7 +404,7 @@ std::string cmGlobalVisualStudio14Generator::GetWindows10SDKVersion(
   std::vector<std::string> sdks;
   // Grab the paths of the different SDKs that are installed
   for (std::string const& i : win10Roots) {
-    std::string path = i + "/Include/*";
+    std::string path = cmStrCat(i, "/Include/*");
     cmSystemTools::GlobDirs(path, sdks);
   }
 

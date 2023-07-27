@@ -83,7 +83,7 @@ bool cmVisualStudioSlnParser::ParsedLine::IsKeyValuePair() const
 std::string cmVisualStudioSlnParser::ParsedLine::GetArgVerbatim() const
 {
   if (this->Arg.second) {
-    return Quote + this->Arg.first + Quote;
+    return cmStrCat(Quote, this->Arg.first, Quote);
   }
   return this->Arg.first;
 }
@@ -103,7 +103,7 @@ std::string cmVisualStudioSlnParser::ParsedLine::GetValueVerbatim(
   if (idxValue < this->Values.size()) {
     const StringData& data = this->Values[idxValue];
     if (data.second) {
-      return Quote + data.first + Quote;
+      return cmStrCat(Quote, data.first, Quote);
     }
     return data.first;
   }
@@ -546,7 +546,7 @@ bool cmVisualStudioSlnParser::ParseBOM(std::istream& input, std::string& line,
     return false;
   }
   if (!this->LastResult.HadBOM) {
-    line = bom + line; // it wasn't a BOM, prepend it to first line
+    line = cmStrCat(bom, line); // it wasn't a BOM, prepend it to first line
   }
   return true;
 }

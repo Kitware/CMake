@@ -341,7 +341,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     std::string argS = cmStrCat("-S", lg.GetSourceDirectory());
     std::string argB = cmStrCat("-B", lg.GetBinaryDirectory());
     std::string const sln =
-      lg.GetBinaryDirectory() + "/" + lg.GetProjectName() + ".sln";
+      cmStrCat(lg.GetBinaryDirectory(), "/", lg.GetProjectName(), ".sln");
     cmCustomCommandLines commandLines = cmMakeSingleCommandLine(
       { cmSystemTools::GetCMakeCommand(), argS, argB, "--check-stamp-list",
         stampList, "--vs-solution-file", sln });
@@ -364,7 +364,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
           lg.AddCustomCommandToOutput(std::move(cc), true)) {
       gt->AddSource(file->ResolveFullPath());
     } else {
-      cmSystemTools::Error("Error adding rule for " + stamps[0]);
+      cmSystemTools::Error(cmStrCat("Error adding rule for ", stamps[0]));
     }
   }
 
@@ -409,8 +409,8 @@ void cmGlobalVisualStudio8Generator::WriteProjectConfigurations(
     cmList mapConfig;
     const char* dstConfig = i.c_str();
     if (target.GetProperty("EXTERNAL_MSPROJECT")) {
-      if (cmValue m = target.GetProperty("MAP_IMPORTED_CONFIG_" +
-                                         cmSystemTools::UpperCase(i))) {
+      if (cmValue m = target.GetProperty(
+            cmStrCat("MAP_IMPORTED_CONFIG_", cmSystemTools::UpperCase(i)))) {
         mapConfig.assign(*m);
         if (!mapConfig.empty()) {
           dstConfig = mapConfig[0].c_str();
