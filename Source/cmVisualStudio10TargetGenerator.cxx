@@ -304,15 +304,14 @@ std::string cmVisualStudio10TargetGenerator::CalcCondition(
   const std::string& config) const
 {
   std::ostringstream oss;
-  oss << "'$(Configuration)|$(Platform)'=='";
-  oss << config << "|" << this->Platform;
-  oss << "'";
+  oss << "'$(Configuration)|$(Platform)'=='" << config << "|" << this->Platform
+      << "'";
   // handle special case for 32 bit C# targets
   if (this->ProjectType == VsProjectType::csproj &&
       this->Platform == "Win32"_s) {
     oss << " Or "
-           "'$(Configuration)|$(Platform)'=='";
-    oss << config
+           "'$(Configuration)|$(Platform)'=='"
+        << config
         << "|x86"
            "'";
   }

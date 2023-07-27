@@ -103,11 +103,10 @@ bool cmCPackWIXGenerator::RunCandleCommand(std::string const& sourceFile,
   }
 
   std::ostringstream command;
-  command << QuotePath(executable);
-  command << " -nologo"
+  command << QuotePath(executable)
+          << " -nologo"
              " -arch "
-          << arch;
-  command << " -out " << QuotePath(objectFile);
+          << arch << " -out " << QuotePath(objectFile);
 
   for (std::string const& ext : CandleExtensions) {
     command << " -ext " << QuotePath(ext);
@@ -132,8 +131,8 @@ bool cmCPackWIXGenerator::RunLightCommand(std::string const& objectFiles)
   }
 
   std::ostringstream command;
-  command << QuotePath(executable);
-  command << " -nologo"
+  command << QuotePath(executable)
+          << " -nologo"
              " -out "
           << QuotePath(CMakeToWixPath(packageFileNames.at(0)));
 

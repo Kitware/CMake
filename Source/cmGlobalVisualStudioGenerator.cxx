@@ -286,8 +286,8 @@ void cmGlobalVisualStudioGenerator::ConfigureCMakeVisualStudioMacros()
     if (!cmSystemTools::FileTimeCompare(src, dst, &res) || res > 0) {
       if (!cmSystemTools::CopyFileAlways(src, dst)) {
         std::ostringstream oss;
-        oss << "Could not copy from: " << src << std::endl;
-        oss << "                 to: " << dst << std::endl;
+        oss << "Could not copy from: " << src << std::endl
+            << "                 to: " << dst << std::endl;
         cmSystemTools::Message(oss.str(), "Warning");
       }
     }
