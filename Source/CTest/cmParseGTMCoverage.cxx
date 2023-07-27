@@ -2,7 +2,6 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <map>
 #include <vector>
 
 #include "cmsys/Directory.hxx"

@@ -13,6 +13,8 @@
 #  include "cm_utf8.h"
 #endif
 
+#include "cm_codecvt_Encoding.hxx"
+
 codecvt::codecvt(codecvt_Encoding e)
 #if defined(_WIN32)
   : m_codepage(0)

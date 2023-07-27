@@ -10,6 +10,7 @@
 #include <cm/iterator>
 
 #include "cmDefinitions.h"
+#include "cmLinkedTree.h"
 #include "cmListFileCache.h"
 #include "cmPropertyMap.h"
 #include "cmState.h"

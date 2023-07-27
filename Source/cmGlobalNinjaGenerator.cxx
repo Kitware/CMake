@@ -8,6 +8,7 @@
 #include <cstdio>
 #include <functional>
 #include <sstream>
+#include <type_traits>
 #include <utility>
 
 #include <cm/iterator>

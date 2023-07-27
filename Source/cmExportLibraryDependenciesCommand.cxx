@@ -3,6 +3,7 @@
 #include "cmExportLibraryDependenciesCommand.h"
 
 #include <map>
+#include <unordered_map>
 #include <utility>
 
 #include <cm/memory>

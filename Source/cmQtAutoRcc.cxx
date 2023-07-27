@@ -14,7 +14,6 @@
 #include "cmFileLockResult.h"
 #include "cmFileTime.h"
 #include "cmProcessOutput.h"
-#include "cmQtAutoGen.h"
 #include "cmQtAutoGenerator.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"

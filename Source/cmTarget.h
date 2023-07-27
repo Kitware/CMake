@@ -15,7 +15,7 @@
 #include <cm/optional>
 
 #include "cmAlgorithms.h"
-#include "cmFileSet.h"
+#include "cmListFileCache.h"
 #include "cmPolicies.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
@@ -23,20 +23,16 @@
 #include "cmValue.h"
 
 class cmCustomCommand;
+class cmFileSet;
 class cmGlobalGenerator;
 class cmInstallTargetGenerator;
-class cmListFileBacktrace;
-class cmListFileContext;
 class cmMakefile;
 class cmPropertyMap;
 class cmSourceFile;
 class cmTargetExport;
 class cmTargetInternals;
 
-template <typename T>
-class BT;
-template <typename T>
-class BTs;
+enum class cmFileSetVisibility;
 
 /** \class cmTarget
  * \brief Represent a library or executable target loaded from a makefile.

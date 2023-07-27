@@ -4,6 +4,7 @@
 
 #include "cmDocumentationFormatter.h"
 #include "cmMessageMetadata.h"
+#include "cmMessageType.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 

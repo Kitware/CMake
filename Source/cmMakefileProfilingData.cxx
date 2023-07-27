@@ -4,7 +4,6 @@
 
 #include <chrono>
 #include <stdexcept>
-#include <type_traits>
 #include <utility>
 
 #include <cm3p/json/value.h>

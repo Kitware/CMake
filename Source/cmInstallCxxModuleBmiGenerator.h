@@ -9,7 +9,6 @@
 #include <vector>
 
 #include "cmInstallGenerator.h"
-#include "cmScriptGenerator.h"
 
 class cmGeneratorTarget;
 class cmListFileBacktrace;

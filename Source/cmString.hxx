@@ -6,7 +6,6 @@
 
 #include <algorithm>
 #include <cstddef>
-#include <functional>
 #include <initializer_list>
 #include <memory>
 #include <ostream>

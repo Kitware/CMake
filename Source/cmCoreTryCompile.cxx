@@ -7,7 +7,6 @@
 #include <cstring>
 #include <set>
 #include <sstream>
-#include <type_traits>
 #include <utility>
 
 #include <cm/string_view>

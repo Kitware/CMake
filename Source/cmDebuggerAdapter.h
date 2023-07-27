@@ -16,7 +16,7 @@
 
 #include <cm3p/cppdap/io.h> // IWYU pragma: keep
 
-#include "cmMessageType.h"
+#include "cmMessageType.h" // IWYU pragma: keep
 
 class cmListFileFunction;
 class cmMakefile;

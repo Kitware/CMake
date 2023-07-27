@@ -16,8 +16,9 @@
 #include "cmCMakePresetsGraph.h"
 #include "cmCMakePresetsGraphInternal.h"
 #include "cmJSONHelpers.h"
-#include "cmJSONState.h"
 #include "cmStateTypes.h"
+
+class cmJSONState;
 
 namespace {
 using CacheVariable = cmCMakePresetsGraph::CacheVariable;

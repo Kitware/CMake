@@ -6,6 +6,7 @@
 #include <cassert>
 #include <cctype>
 #include <set>
+#include <vector>
 
 #ifdef _WIN32
 #  include <unordered_map>

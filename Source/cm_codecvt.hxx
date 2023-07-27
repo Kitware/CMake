@@ -7,7 +7,7 @@
 #include <cwchar>
 #include <locale>
 
-#include "cm_codecvt_Encoding.hxx"
+enum class codecvt_Encoding;
 
 class codecvt : public std::codecvt<char, char, mbstate_t>
 {

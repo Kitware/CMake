@@ -25,9 +25,9 @@
 
 #include "cmAlgorithms.h"
 #include "cmCustomCommand.h"
-#include "cmCustomCommandTypes.h"
+#include "cmFunctionBlocker.h"
 #include "cmListFileCache.h"
-#include "cmMessageType.h"
+#include "cmMessageType.h" // IWYU pragma: keep
 #include "cmNewLineStyle.h"
 #include "cmPolicies.h"
 #include "cmSourceFileLocationKind.h"
@@ -43,12 +43,14 @@
 #  include "cmSourceGroup.h"
 #endif
 
+enum class cmCustomCommandType;
+enum class cmObjectLibraryCommands;
+
 class cmCompiledGeneratorExpression;
 class cmCustomCommandLines;
 class cmExecutionStatus;
 class cmExpandedCommandArgument;
 class cmExportBuildFileGenerator;
-class cmFunctionBlocker;
 class cmGeneratorExpressionEvaluationFile;
 class cmGlobalGenerator;
 class cmInstallGenerator;

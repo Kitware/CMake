@@ -9,7 +9,9 @@
 #include <cstring>
 #include <iomanip>
 #include <iterator>
+#include <ratio>
 #include <sstream>
+#include <type_traits>
 #include <utility>
 
 #include <cmext/algorithm>

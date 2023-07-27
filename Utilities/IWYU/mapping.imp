@@ -1,4 +1,6 @@
 [
+  # https://github.com/include-what-you-use/include-what-you-use/blob/master/docs/IWYUMappings.md
+
   # C++ alternatives to C standard headers
   { include: [ "<assert.h>", public, "<cassert>", public ] },
   { include: [ "<complex.h>", public, "<ccomplex>", public ] },
@@ -30,7 +32,7 @@
   { include: [ "<bits/std_abs.h>", private, "<stdlib.h>", public ] },
   { include: [ "<bits/stdint-intn.h>", private, "<stdint.h>", public ] },
   { include: [ "<bits/stdint-uintn.h>", private, "<stdint.h>", public ] },
-  { include: [ "<bits/string_view.tcc>", private, "<string_view>", private ] },
+  { include: [ "<bits/string_view.tcc>", private, "<string_view>", public ] },
   { include: [ "<bits/time.h>", private, "<time.h>", public ] },
   { include: [ "<bits/types/clock_t.h>", private, "<time.h>", public ] },
   { include: [ "<bits/types/mbstate_t.h>", private, "<wchar.h>", public ] },
@@ -41,70 +43,16 @@
 
   # HACK: check whether this can be removed with next iwyu release.
   { symbol: [ "__GLIBC__", private, "<stdlib.h>", public ] },
-  { symbol: [ "_Noreturn", private, "<stdlib.h>", public ] },
 
   # HACK: iwyu wrongly thinks that including <iosfwd> is sufficient.
   { symbol: [ "std::stringstream", private, "<sstream>", public ] },
   { symbol: [ "std::istringstream", private, "<sstream>", public ] },
   { symbol: [ "std::ostringstream", private, "<sstream>", public ] },
 
-  # HACK: iwyu suggests <ext/alloc_traits.h> and <memory> each time vector[] is used.
-  # https://github.com/include-what-you-use/include-what-you-use/issues/166
-  { include: [ "<ext/alloc_traits.h>", private, "<vector>", public ] },
-  { symbol: [ "std::allocator_traits<std::allocator<cmFileLock> >::value_type", private, "<vector>", public ] },
-  { symbol: [ "std::allocator_traits<std::allocator<cmFileLockPool::ScopePool> >::value_type", private, "<vector>", public ] },
-  { symbol: [ "std::allocator_traits<std::allocator<cmComputeComponentGraph::TarjanEntry> >::value_type", private, "<vector>", public ] },
-  { symbol: [ "std::allocator_traits<std::allocator<cmFortranFile> >::value_type", private, "<vector>", public ] },
-  { symbol: [ "std::allocator_traits<std::allocator<cmGraphEdgeList> >::value_type", private, "<vector>", public ] },
-  { symbol: [ "std::allocator_traits<std::allocator<cmOrderDirectories::ConflictList> >::value_type", private, "<vector>", public ] },
-  { symbol: [ "std::allocator_traits<std::allocator<cmStateSnapshot> >::value_type", private, "<vector>", public ] },
-  { symbol: [ "std::allocator_traits<std::allocator<std::basic_string<char> > >::value_type", private, "<vector>", public ] },
-  { symbol: [ "std::allocator_traits<std::allocator<std::basic_string<char, std::char_traits<char>, std::allocator<char> > > >::value_type", private, "<vector>", public ] },
-  { symbol: [ "std::allocator_traits<std::allocator<std::vector<std::basic_string<char>, std::allocator<std::basic_string<char> > > > >::value_type", private, "<vector>", public ] },
-  { symbol: [ "std::allocator_traits<std::allocator<std::vector<std::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::basic_string<char, std::char_traits<char>, std::allocator<char> > > > > >::value_type", private, "<vector>", public ] },
-  { symbol: [ "std::allocator_traits<std::allocator<uv_stdio_container_s> >::value_type", private, "<vector>", public ] },
-
-  # TODO: enable this block and remove some <utility> includes?
-  #{ symbol: [ "std::pair", private, "<utility>", public ] },
-  #{ symbol: [ "std::pair", private, "<map>", public ] },
-  #{ symbol: [ "std::pair", private, "<set>", public ] },
-
-  # HACK: iwyu wrongly thinks that <system_error> is needed for std::hash
-  { symbol: [ "std::hash", private, "<functional>", public ] },
-
-  # HACK: iwyu thinks we use a libstdc++ private type
-  { symbol: [ "__gnu_cxx::size_t", private, "<cstddef>", public ] },
-
-  # __decay_and_strip is used internally in the C++11 standard library.
-  # IWYU does not classify it as internal and suggests to add <type_traits>.
-  # To ignore it, we simply map it to a file that is included anyway.
-  # Use 'CMake_IWYU_VERBOSE' to see the fully qualified names that need this.
-  # TODO: Can this be simplified with an @-expression?
-  #{ symbol: [ "@std::__decay_and_strip<.*>::__type", private, "\"cmConfigure.h\"", public ] },
-  { symbol: [ "std::__decay_and_strip<int>::__type", private, "\"cmConfigure.h\"", public ] },
-  { symbol: [ "std::__decay_and_strip<bool>::__type", private, "\"cmConfigure.h\"", public ] },
-  { symbol: [ "std::__decay_and_strip<char const (&)[1]>::__type", private, "\"cmConfigure.h\"", public ] },
-  { symbol: [ "std::__decay_and_strip<cmCommand *&>::__type", private, "\"cmConfigure.h\"", public ] },
-  { symbol: [ "std::__decay_and_strip<cmGeneratorTarget *&>::__type", private, "\"cmConfigure.h\"", public ] },
-  { symbol: [ "std::__decay_and_strip<cmFindCommon::PathLabel &>::__type", private, "\"cmConfigure.h\"", public ] },
-  { symbol: [ "std::__decay_and_strip<cmSearchPath>::__type", private, "\"cmConfigure.h\"", public ] },
-  { symbol: [ "std::__decay_and_strip<cm::string_view>::__type", private, "\"cmConfigure.h\"", public ] },
-  { symbol: [ "std::__decay_and_strip<std::basic_string<char> &>::__type", private, "\"cmConfigure.h\"", public ] },
-  { symbol: [ "std::__decay_and_strip<const std::basic_string<char> &>::__type", private, "\"cmConfigure.h\"", public ] },
-  { symbol: [ "std::__decay_and_strip<cmFindPackageCommand::PathLabel &>::__type", private, "\"cmConfigure.h\"", public ] },
-  { symbol: [ "std::__decay_and_strip<cmGlobalNinjaGenerator::TargetAlias &>::__type", private, "\"cmConfigure.h\"", public ] },
-  { symbol: [ "std::__decay_and_strip<__gnu_cxx::__normal_iterator<const cmCTestTestHandler::cmCTestTestProperties *, std::vector<cmCTestTestHandler::cmCTestTestProperties, std::allocator<cmCTestTestHandler::cmCTestTestProperties> > > &>::__type", private, "\"cmConfigure.h\"", public ] },
-  { symbol: [ "std::__decay_and_strip<const __gnu_cxx::__normal_iterator<std::pair<cm::string_view, std::function<void (ArgumentParser::Instance &)> > *, std::vector<std::pair<cm::string_view, std::function<void (ArgumentParser::Instance &)> >, std::allocator<std::pair<cm::string_view, std::function<void (ArgumentParser::Instance &)> > > > > &>::__type", private, "\"cmConfigure.h\"", public ] },
-  { symbol: [ "std::__success_type<std::chrono::duration<double, std::ratio<1, 1> > >::type", private, "\"cmConfigure.h\"", public ] },
-  { symbol: [ "std::__success_type<std::chrono::duration<long, std::ratio<1, 1000000000> > >::type", private, "\"cmConfigure.h\"", public ] },
-  { symbol: [ "std::enable_if<true, std::chrono::duration<long, std::ratio<1, 1> > >::type", private, "\"cmConfigure.h\"", public ] },
-  { symbol: [ "std::enable_if<true, std::chrono::duration<long, std::ratio<60, 1> > >::type", private, "\"cmConfigure.h\"", public ] },
-  { symbol: [ "std::enable_if<true, std::chrono::duration<long, std::ratio<1, 1000> > >::type", private, "\"cmConfigure.h\"", public ] },
-  { symbol: [ "__gnu_cxx::__enable_if<true, bool>::__type", private, "\"cmConfigure.h\"", public ] },
-  { symbol: [ "std::remove_reference<std::basic_string<char, std::char_traits<char>, std::allocator<char> > &>::type", private, "\"cmConfigure.h\"", public ] },
-  { symbol: [ "std::remove_reference<cmCTestTestHandler::Signal &>::type", private, "\"cmConfigure.h\"", public ] },
-  { symbol: [ "std::remove_reference<Defer &>::type", private, "\"cmConfigure.h\"", public ] },
-  { symbol: [ "std::remove_reference<dap::StoppedEvent &>::type", private, "\"cmConfigure.h\"", public ] },
+  # HACK: iwyu attributes vector's usage of std::max to its caller.
+  # https://github.com/include-what-you-use/include-what-you-use/issues/908
+  { symbol: ["std::max", "private", "<algorithm>", "public" ] },
+  { symbol: ["std::max", "private", "<vector>", "public" ] },
 
   # Wrappers for 3rd-party libraries
   { include: [ "@<.*curl/curlver.h>", private, "<cm3p/curl/curl.h>", public ] },
@@ -127,10 +75,10 @@
   { include: [ "<ostream>", public, "\"cmsys/FStream.hxx\"", public ] },
   { include: [ "<fstream>", public, "\"cmsys/FStream.hxx\"", public ] },
 
-  { include: [ "<filesystem>", private, "<cm/filesystem>", public ] },
-  { include: [ "<optional>", private, "<cm/optional>", public ] },
-  { include: [ "<shared_mutex>", private, "<cm/shared_mutex>", public ] },
-  { include: [ "<string_view>", private, "<cm/string_view>", public ] },
+  { include: [ "<filesystem>", public, "<cm/filesystem>", public ] },
+  { include: [ "<optional>", public, "<cm/optional>", public ] },
+  { include: [ "<shared_mutex>", public, "<cm/shared_mutex>", public ] },
+  { include: [ "<string_view>", public, "<cm/string_view>", public ] },
 
   # major and minor are used as macro arguments. Those are false matches.
   { symbol: [ "major", private, "\"cmVersion.h\"", public ] },

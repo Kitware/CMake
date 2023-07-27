@@ -22,7 +22,7 @@
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"
 #include "cmCTestResourceSpec.h"
-#include "cmCTestTypes.h"
+#include "cmCTestTypes.h" // IWYU pragma: keep
 #include "cmDuration.h"
 #include "cmListFileCache.h"
 #include "cmValue.h"

@@ -16,7 +16,6 @@
 #include "cmCTestVC.h"
 #include "cmList.h"
 #include "cmProcessOutput.h"
-#include "cmProcessTools.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"

@@ -11,7 +11,7 @@
 #include <cm/optional>
 
 #include "cmListFileCache.h"
-#include "cmMessageType.h"
+#include "cmMessageType.h" // IWYU pragma: keep
 
 #ifdef CMake_ENABLE_DEBUGGER
 namespace cmDebugger {

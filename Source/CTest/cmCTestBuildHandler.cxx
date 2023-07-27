@@ -3,6 +3,7 @@
 #include "cmCTestBuildHandler.h"
 
 #include <cstdlib>
+#include <ratio>
 #include <set>
 #include <utility>
 

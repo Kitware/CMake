@@ -19,6 +19,7 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
+#include "cmScriptGenerator.h"
 #include "cmStringAlgorithms.h"
 
 namespace {

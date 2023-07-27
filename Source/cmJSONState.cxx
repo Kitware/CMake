@@ -3,9 +3,8 @@
 
 #include "cmJSONState.h"
 
+#include <iterator>
 #include <sstream>
-
-#include <cm/memory>
 
 #include <cm3p/json/reader.h>
 #include <cm3p/json/value.h>

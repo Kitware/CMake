@@ -13,7 +13,8 @@
 #include <cm/optional>
 #include <cmext/string_view>
 
-#include "cmScanDepFormat.h"
+enum class LookupMethod;
+struct cmScanDepInfo;
 
 enum class CxxModuleMapFormat
 {

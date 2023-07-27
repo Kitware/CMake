@@ -7,6 +7,7 @@
 #include <cstddef>
 #include <functional>
 #include <iomanip>
+#include <iterator>
 #include <map>
 #include <sstream>
 

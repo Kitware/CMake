@@ -10,7 +10,6 @@
 
 #include <cm/string_view>
 
-#include "cmLinkedTree.h"
 #include "cmPolicies.h"
 #include "cmStateTypes.h"
 #include "cmValue.h"

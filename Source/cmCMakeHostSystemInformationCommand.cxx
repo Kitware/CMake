@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cctype>
+#include <cstddef>
 #include <initializer_list>
 #include <map>
 #include <string>

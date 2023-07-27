@@ -13,6 +13,7 @@
 #include <functional>
 #include <iomanip>
 #include <iterator>
+#include <ratio>
 #include <set>
 #include <sstream>
 #include <utility>
