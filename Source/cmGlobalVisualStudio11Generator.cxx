@@ -7,6 +7,8 @@
 #include <utility>
 #include <vector>
 
+#include <cmext/string_view>
+
 #include "cmGlobalGenerator.h"
 #include "cmGlobalVisualStudioGenerator.h"
 #include "cmMakefile.h"
@@ -25,7 +27,7 @@ void cmGlobalVisualStudio11Generator::EnableLanguage(
   std::vector<std::string> const& lang, cmMakefile* mf, bool optional)
 {
   for (std::string const& it : lang) {
-    if (it == "ASM_MARMASM") {
+    if (it == "ASM_MARMASM"_s) {
       this->MarmasmEnabled = true;
     }
   }
@@ -72,7 +74,7 @@ bool cmGlobalVisualStudio11Generator::InitializeWindowsStore(cmMakefile* mf)
 bool cmGlobalVisualStudio11Generator::SelectWindowsPhoneToolset(
   std::string& toolset) const
 {
-  if (this->SystemVersion == "8.0") {
+  if (this->SystemVersion == "8.0"_s) {
     if (this->IsWindowsPhoneToolsetInstalled() &&
         this->IsWindowsDesktopToolsetInstalled()) {
       toolset = "v110_wp80";
@@ -87,7 +89,7 @@ bool cmGlobalVisualStudio11Generator::SelectWindowsPhoneToolset(
 bool cmGlobalVisualStudio11Generator::SelectWindowsStoreToolset(
   std::string& toolset) const
 {
-  if (this->SystemVersion == "8.0") {
+  if (this->SystemVersion == "8.0"_s) {
     if (this->IsWindowsStoreToolsetInstalled() &&
         this->IsWindowsDesktopToolsetInstalled()) {
       toolset = "v110";

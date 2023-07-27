@@ -9,6 +9,7 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cmext/string_view>
 
 #include <cm3p/json/reader.h>
 #include <cm3p/json/value.h>
@@ -187,7 +188,7 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
   }
 
   if (!this->GeneratorToolsetVersion.empty() &&
-      this->GeneratorToolsetVersion != "Test Toolset Version") {
+      this->GeneratorToolsetVersion != "Test Toolset Version"_s) {
     // If a specific minor version of the toolset was requested, verify that it
     // is compatible to the major version and that is exists on disk.
     // If not clear the value.
@@ -370,7 +371,7 @@ bool cmGlobalVisualStudio10Generator::ParseGeneratorToolset(
 bool cmGlobalVisualStudio10Generator::ProcessGeneratorToolsetField(
   std::string const& key, std::string const& value)
 {
-  if (key == "cuda") {
+  if (key == "cuda"_s) {
     /* test if cuda toolset is path to custom dir or cuda version */
     auto pos = value.find_first_not_of("0123456789.");
     if (pos != std::string::npos) {
@@ -395,16 +396,16 @@ bool cmGlobalVisualStudio10Generator::ProcessGeneratorToolsetField(
     }
     return true;
   }
-  if (key == "customFlagTableDir") {
+  if (key == "customFlagTableDir"_s) {
     this->CustomFlagTableDir = value;
     cmSystemTools::ConvertToUnixSlashes(this->CustomFlagTableDir);
     return true;
   }
-  if (key == "version") {
+  if (key == "version"_s) {
     this->GeneratorToolsetVersion = value;
     return true;
   }
-  if (key == "VCTargetsPath") {
+  if (key == "VCTargetsPath"_s) {
     this->CustomVCTargetsPath = value;
     ConvertToWindowsSlashes(this->CustomVCTargetsPath);
     return true;
@@ -414,26 +415,26 @@ bool cmGlobalVisualStudio10Generator::ProcessGeneratorToolsetField(
 
 bool cmGlobalVisualStudio10Generator::InitializeSystem(cmMakefile* mf)
 {
-  if (this->SystemName == "Windows") {
+  if (this->SystemName == "Windows"_s) {
     if (!this->InitializeWindows(mf)) {
       return false;
     }
-  } else if (this->SystemName == "WindowsCE") {
+  } else if (this->SystemName == "WindowsCE"_s) {
     this->SystemIsWindowsCE = true;
     if (!this->InitializeWindowsCE(mf)) {
       return false;
     }
-  } else if (this->SystemName == "WindowsPhone") {
+  } else if (this->SystemName == "WindowsPhone"_s) {
     this->SystemIsWindowsPhone = true;
     if (!this->InitializeWindowsPhone(mf)) {
       return false;
     }
-  } else if (this->SystemName == "WindowsStore") {
+  } else if (this->SystemName == "WindowsStore"_s) {
     this->SystemIsWindowsStore = true;
     if (!this->InitializeWindowsStore(mf)) {
       return false;
     }
-  } else if (this->SystemName == "Android") {
+  } else if (this->SystemName == "Android"_s) {
     if (this->PlatformInGeneratorName) {
       std::ostringstream e;
       e << "CMAKE_SYSTEM_NAME is 'Android' but CMAKE_GENERATOR "
@@ -441,7 +442,8 @@ bool cmGlobalVisualStudio10Generator::InitializeSystem(cmMakefile* mf)
       mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
       return false;
     }
-    if (mf->GetSafeDefinition("CMAKE_GENERATOR_PLATFORM") == "Tegra-Android") {
+    if (mf->GetSafeDefinition("CMAKE_GENERATOR_PLATFORM") ==
+        "Tegra-Android"_s) {
       if (!this->InitializeTegraAndroid(mf)) {
         return false;
       }
@@ -519,15 +521,15 @@ bool cmGlobalVisualStudio10Generator::InitializeTegraAndroid(cmMakefile* mf)
 
 bool cmGlobalVisualStudio10Generator::InitializeAndroid(cmMakefile* mf)
 {
-  std::ostringstream e;
-  e << this->GetName() << " does not support Android.";
-  mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+  mf->IssueMessage(MessageType::FATAL_ERROR,
+                   cmStrCat(this->GetName(), " does not support Android."));
   return false;
 }
 
 bool cmGlobalVisualStudio10Generator::InitializePlatform(cmMakefile* mf)
 {
-  if (this->SystemName == "Windows" || this->SystemName == "WindowsStore") {
+  if (this->SystemName == "Windows"_s ||
+      this->SystemName == "WindowsStore"_s) {
     if (!this->InitializePlatformWindows(mf)) {
       return false;
     }
@@ -565,7 +567,7 @@ bool cmGlobalVisualStudio10Generator::SelectWindowsStoreToolset(
 
 std::string cmGlobalVisualStudio10Generator::SelectWindowsCEToolset() const
 {
-  if (this->SystemVersion == "8.0") {
+  if (this->SystemVersion == "8.0"_s) {
     return "CE800";
   }
   return "";
@@ -641,10 +643,10 @@ void cmGlobalVisualStudio10Generator::EnableLanguage(
   std::vector<std::string> const& lang, cmMakefile* mf, bool optional)
 {
   for (std::string const& it : lang) {
-    if (it == "ASM_NASM") {
+    if (it == "ASM_NASM"_s) {
       this->NasmEnabled = true;
     }
-    if (it == "CUDA") {
+    if (it == "CUDA"_s) {
       this->CudaEnabled = true;
     }
   }
@@ -830,8 +832,8 @@ std::string cmGlobalVisualStudio10Generator::FindDevEnvCommand()
 bool cmGlobalVisualStudio10Generator::FindVCTargetsPath(cmMakefile* mf)
 {
   // Skip this in special cases within our own test suite.
-  if (this->GetPlatformName() == "Test Platform" ||
-      this->GetPlatformToolsetString() == "Test Toolset") {
+  if (this->GetPlatformName() == "Test Platform"_s ||
+      this->GetPlatformToolsetString() == "Test Toolset"_s) {
     return true;
   }
 
@@ -899,19 +901,19 @@ bool cmGlobalVisualStudio10Generator::FindVCTargetsPath(cmMakefile* mf)
       cmXMLElement(epg, "ProjectGuid")
         .Content("{F3FC6D86-508D-3FB1-96D2-995F08B142EC}");
       cmXMLElement(epg, "Keyword")
-        .Content(mf->GetSafeDefinition("CMAKE_SYSTEM_NAME") == "Android"
+        .Content(mf->GetSafeDefinition("CMAKE_SYSTEM_NAME") == "Android"_s
                    ? "Android"
                    : "Win32Proj");
       cmXMLElement(epg, "Platform").Content(this->GetPlatformName());
-      if (this->GetSystemName() == "WindowsPhone") {
+      if (this->GetSystemName() == "WindowsPhone"_s) {
         cmXMLElement(epg, "ApplicationType").Content("Windows Phone");
         cmXMLElement(epg, "ApplicationTypeRevision")
           .Content(this->GetApplicationTypeRevision());
-      } else if (this->GetSystemName() == "WindowsStore") {
+      } else if (this->GetSystemName() == "WindowsStore"_s) {
         cmXMLElement(epg, "ApplicationType").Content("Windows Store");
         cmXMLElement(epg, "ApplicationTypeRevision")
           .Content(this->GetApplicationTypeRevision());
-      } else if (this->GetSystemName() == "Android") {
+      } else if (this->GetSystemName() == "Android"_s) {
         cmXMLElement(epg, "ApplicationType").Content("Android");
         cmXMLElement(epg, "ApplicationTypeRevision")
           .Content(this->GetApplicationTypeRevision());
@@ -920,10 +922,10 @@ bool cmGlobalVisualStudio10Generator::FindVCTargetsPath(cmMakefile* mf)
         cmXMLElement(epg, "WindowsTargetPlatformVersion")
           .Content(this->WindowsTargetPlatformVersion);
       }
-      if (this->GetSystemName() != "Android") {
-        if (this->GetPlatformName() == "ARM64") {
+      if (this->GetSystemName() != "Android"_s) {
+        if (this->GetPlatformName() == "ARM64"_s) {
           cmXMLElement(epg, "WindowsSDKDesktopARM64Support").Content("true");
-        } else if (this->GetPlatformName() == "ARM") {
+        } else if (this->GetPlatformName() == "ARM"_s) {
           cmXMLElement(epg, "WindowsSDKDesktopARMSupport").Content("true");
         }
       }
@@ -1049,7 +1051,7 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
           break;
         }
         std::string proj = project.GetRelativePath();
-        if (proj.size() > 7 && proj.substr(proj.size() - 7) == ".vfproj") {
+        if (proj.size() > 7 && proj.substr(proj.size() - 7) == ".vfproj"_s) {
           useDevEnv = true;
         }
       }
@@ -1080,7 +1082,7 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
     makeCommand.Add(makeProgramSelected);
     cm::optional<cmSlnProjectEntry> proj = cm::nullopt;
 
-    if (tname == "clean") {
+    if (tname == "clean"_s) {
       makeCommand.Add(cmStrCat(projectName, ".sln"));
       makeCommand.Add("/t:Clean");
     } else {
@@ -1164,7 +1166,7 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
       std::string extension =
         cmSystemTools::GetFilenameLastExtension(proj->GetRelativePath());
       extension = cmSystemTools::LowerCase(extension);
-      if (extension == ".csproj") {
+      if (extension == ".csproj"_s) {
         // Use correct platform name
         platform =
           slnData.GetConfigurationTarget(tname, plainConfig, platform);
@@ -1271,7 +1273,7 @@ std::string cmGlobalVisualStudio10Generator::GetInstalledNsightTegraVersion()
 
 std::string cmGlobalVisualStudio10Generator::GetApplicationTypeRevision() const
 {
-  if (this->GetSystemName() == "Android") {
+  if (this->GetSystemName() == "Android"_s) {
     return this->GetAndroidApplicationTypeRevision();
   }
 
@@ -1302,23 +1304,23 @@ static unsigned int cmLoadFlagTableSpecial(Json::Value entry,
     if (specials.isArray()) {
       for (auto const& special : specials) {
         std::string s = special.asString();
-        if (s == "UserValue") {
+        if (s == "UserValue"_s) {
           value |= cmIDEFlagTable::UserValue;
-        } else if (s == "UserIgnored") {
+        } else if (s == "UserIgnored"_s) {
           value |= cmIDEFlagTable::UserIgnored;
-        } else if (s == "UserRequired") {
+        } else if (s == "UserRequired"_s) {
           value |= cmIDEFlagTable::UserRequired;
-        } else if (s == "Continue") {
+        } else if (s == "Continue"_s) {
           value |= cmIDEFlagTable::Continue;
-        } else if (s == "SemicolonAppendable") {
+        } else if (s == "SemicolonAppendable"_s) {
           value |= cmIDEFlagTable::SemicolonAppendable;
-        } else if (s == "UserFollowing") {
+        } else if (s == "UserFollowing"_s) {
           value |= cmIDEFlagTable::UserFollowing;
-        } else if (s == "CaseInsensitive") {
+        } else if (s == "CaseInsensitive"_s) {
           value |= cmIDEFlagTable::CaseInsensitive;
-        } else if (s == "SpaceAppendable") {
+        } else if (s == "SpaceAppendable"_s) {
           value |= cmIDEFlagTable::SpaceAppendable;
-        } else if (s == "CommaAppendable") {
+        } else if (s == "CommaAppendable"_s) {
           value |= cmIDEFlagTable::CommaAppendable;
         }
       }
@@ -1537,22 +1539,22 @@ std::string cmGlobalVisualStudio10Generator::GetClFlagTableName() const
   std::string const& toolset = this->GetPlatformToolsetString();
   std::string const useToolset = this->CanonicalToolsetName(toolset);
 
-  if (toolset == "v142") {
+  if (toolset == "v142"_s) {
     return "v142";
   }
-  if (toolset == "v141") {
+  if (toolset == "v141"_s) {
     return "v141";
   }
-  if (useToolset == "v140") {
+  if (useToolset == "v140"_s) {
     return "v140";
   }
-  if (useToolset == "v120") {
+  if (useToolset == "v120"_s) {
     return "v12";
   }
-  if (useToolset == "v110") {
+  if (useToolset == "v110"_s) {
     return "v11";
   }
-  if (useToolset == "v100") {
+  if (useToolset == "v100"_s) {
     return "v10";
   }
   return "";
@@ -1563,22 +1565,22 @@ std::string cmGlobalVisualStudio10Generator::GetCSharpFlagTableName() const
   std::string const& toolset = this->GetPlatformToolsetString();
   std::string const useToolset = this->CanonicalToolsetName(toolset);
 
-  if (useToolset == "v142") {
+  if (useToolset == "v142"_s) {
     return "v142";
   }
-  if (useToolset == "v141") {
+  if (useToolset == "v141"_s) {
     return "v141";
   }
-  if (useToolset == "v140") {
+  if (useToolset == "v140"_s) {
     return "v140";
   }
-  if (useToolset == "v120") {
+  if (useToolset == "v120"_s) {
     return "v12";
   }
-  if (useToolset == "v110") {
+  if (useToolset == "v110"_s) {
     return "v11";
   }
-  if (useToolset == "v100") {
+  if (useToolset == "v100"_s) {
     return "v10";
   }
   return "";
@@ -1589,17 +1591,17 @@ std::string cmGlobalVisualStudio10Generator::GetRcFlagTableName() const
   std::string const& toolset = this->GetPlatformToolsetString();
   std::string const useToolset = this->CanonicalToolsetName(toolset);
 
-  if ((useToolset == "v140") || (useToolset == "v141") ||
-      (useToolset == "v142")) {
+  if ((useToolset == "v140"_s) || (useToolset == "v141"_s) ||
+      (useToolset == "v142"_s)) {
     return "v14";
   }
-  if (useToolset == "v120") {
+  if (useToolset == "v120"_s) {
     return "v12";
   }
-  if (useToolset == "v110") {
+  if (useToolset == "v110"_s) {
     return "v11";
   }
-  if (useToolset == "v100") {
+  if (useToolset == "v100"_s) {
     return "v10";
   }
   return "";
@@ -1610,17 +1612,17 @@ std::string cmGlobalVisualStudio10Generator::GetLibFlagTableName() const
   std::string const& toolset = this->GetPlatformToolsetString();
   std::string const useToolset = this->CanonicalToolsetName(toolset);
 
-  if ((useToolset == "v140") || (useToolset == "v141") ||
-      (useToolset == "v142")) {
+  if ((useToolset == "v140"_s) || (useToolset == "v141"_s) ||
+      (useToolset == "v142"_s)) {
     return "v14";
   }
-  if (useToolset == "v120") {
+  if (useToolset == "v120"_s) {
     return "v12";
   }
-  if (useToolset == "v110") {
+  if (useToolset == "v110"_s) {
     return "v11";
   }
-  if (useToolset == "v100") {
+  if (useToolset == "v100"_s) {
     return "v10";
   }
   return "";
@@ -1631,22 +1633,22 @@ std::string cmGlobalVisualStudio10Generator::GetLinkFlagTableName() const
   std::string const& toolset = this->GetPlatformToolsetString();
   std::string const useToolset = this->CanonicalToolsetName(toolset);
 
-  if (useToolset == "v142") {
+  if (useToolset == "v142"_s) {
     return "v142";
   }
-  if (useToolset == "v141") {
+  if (useToolset == "v141"_s) {
     return "v141";
   }
-  if (useToolset == "v140") {
+  if (useToolset == "v140"_s) {
     return "v140";
   }
-  if (useToolset == "v120") {
+  if (useToolset == "v120"_s) {
     return "v12";
   }
-  if (useToolset == "v110") {
+  if (useToolset == "v110"_s) {
     return "v11";
   }
-  if (useToolset == "v100") {
+  if (useToolset == "v100"_s) {
     return "v10";
   }
   return "";
@@ -1657,17 +1659,17 @@ std::string cmGlobalVisualStudio10Generator::GetMasmFlagTableName() const
   std::string const& toolset = this->GetPlatformToolsetString();
   std::string const useToolset = this->CanonicalToolsetName(toolset);
 
-  if ((useToolset == "v140") || (useToolset == "v141") ||
-      (useToolset == "v142")) {
+  if ((useToolset == "v140"_s) || (useToolset == "v141"_s) ||
+      (useToolset == "v142"_s)) {
     return "v14";
   }
-  if (useToolset == "v120") {
+  if (useToolset == "v120"_s) {
     return "v12";
   }
-  if (useToolset == "v110") {
+  if (useToolset == "v110"_s) {
     return "v11";
   }
-  if (useToolset == "v100") {
+  if (useToolset == "v100"_s) {
     return "v10";
   }
   return "";

@@ -7,6 +7,7 @@
 #include <cm/memory>
 #include <cm/string_view>
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmsys/Directory.hxx"
 #include "cmsys/Encoding.hxx"
@@ -556,7 +557,7 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
   bool emitUninstallShortcut = true;
   cmValue cpackWixProgramMenuFolder =
     GetOption("CPACK_WIX_PROGRAM_MENU_FOLDER");
-  if (cpackWixProgramMenuFolder && cpackWixProgramMenuFolder == ".") {
+  if (cpackWixProgramMenuFolder && cpackWixProgramMenuFolder == "."_s) {
     emitUninstallShortcut = false;
   } else if (emittedShortcutTypes.find(cmWIXShortcuts::START_MENU) ==
              emittedShortcutTypes.end()) {
@@ -613,7 +614,7 @@ std::string cmCPackWIXGenerator::GetRootFolderId() const
     result = *rootFolderId;
   }
 
-  if (GetArchitecture() == "x86") {
+  if (GetArchitecture() == "x86"_s) {
     cmSystemTools::ReplaceString(result, "<64>", "");
   } else {
     cmSystemTools::ReplaceString(result, "<64>", "64");
@@ -757,7 +758,7 @@ bool cmCPackWIXGenerator::CreateShortcutsOfSpecificType(
     case cmWIXShortcuts::START_MENU: {
       cmValue cpackWixProgramMenuFolder =
         GetOption("CPACK_WIX_PROGRAM_MENU_FOLDER");
-      if (cpackWixProgramMenuFolder && cpackWixProgramMenuFolder == ".") {
+      if (cpackWixProgramMenuFolder && cpackWixProgramMenuFolder == "."_s) {
         directoryId = "ProgramMenuFolder";
       } else {
         directoryId = "PROGRAM_MENU_FOLDER";
@@ -818,7 +819,7 @@ bool cmCPackWIXGenerator::CreateShortcutsOfSpecificType(
   if (type == cmWIXShortcuts::START_MENU) {
     cmValue cpackWixProgramMenuFolder =
       GetOption("CPACK_WIX_PROGRAM_MENU_FOLDER");
-    if (cpackWixProgramMenuFolder && cpackWixProgramMenuFolder != ".") {
+    if (cpackWixProgramMenuFolder && cpackWixProgramMenuFolder != "."_s) {
       fileDefinitions.EmitRemoveFolder("CM_REMOVE_PROGRAM_MENU_FOLDER" +
                                        idSuffix);
     }
@@ -851,10 +852,10 @@ bool cmCPackWIXGenerator::CreateLicenseFile()
 
   std::string extension = GetRightmostExtension(licenseSourceFilename);
 
-  if (extension == ".rtf") {
+  if (extension == ".rtf"_s) {
     cmSystemTools::CopyAFile(licenseSourceFilename.c_str(),
                              licenseDestinationFilename.c_str());
-  } else if (extension == ".txt") {
+  } else if (extension == ".txt"_s) {
     cmWIXRichTextFormatWriter rtfWriter(licenseDestinationFilename);
 
     cmsys::ifstream licenseSource(licenseSourceFilename.c_str());
@@ -923,7 +924,7 @@ void cmCPackWIXGenerator::AddDirectoryAndFileDefinitions(
   for (size_t i = 0; i < dir.GetNumberOfFiles(); ++i) {
     std::string fileName = dir.GetFile(static_cast<unsigned long>(i));
 
-    if (fileName == "." || fileName == "..") {
+    if (fileName == "."_s || fileName == ".."_s) {
       continue;
     }
 
@@ -1001,7 +1002,7 @@ std::string cmCPackWIXGenerator::GetArchitecture() const
   std::string void_p_size;
   RequireOption("CPACK_WIX_SIZEOF_VOID_P", void_p_size);
 
-  if (void_p_size == "8") {
+  if (void_p_size == "8"_s) {
     return "x64";
   } else {
     return "x86";

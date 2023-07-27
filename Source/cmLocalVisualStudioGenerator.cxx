@@ -5,6 +5,7 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cmext/string_view>
 
 #include "windows.h"
 
@@ -204,7 +205,7 @@ std::string cmLocalVisualStudioGenerator::ConstructScript(
     std::string suffix;
     if (cmd.size() > 4) {
       suffix = cmSystemTools::LowerCase(cmd.substr(cmd.size() - 4));
-      if (suffix == ".bat" || suffix == ".cmd") {
+      if (suffix == ".bat"_s || suffix == ".cmd"_s) {
         script += "call ";
       }
     }

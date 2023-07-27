@@ -4,6 +4,8 @@
 
 #include <sstream>
 
+#include <cmext/string_view>
+
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
@@ -305,7 +307,7 @@ HRESULT GetRunningInstances(std::map<std::string, IUnknownPtr>& mrot)
 //! we perhaps looking for any and all solutions?
 bool FilesSameSolution(const std::string& slnFile, const std::string& slnName)
 {
-  if (slnFile == "ALL" || slnName == "ALL") {
+  if (slnFile == "ALL"_s || slnName == "ALL"_s) {
     return true;
   }
 

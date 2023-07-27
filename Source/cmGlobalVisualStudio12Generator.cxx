@@ -6,6 +6,8 @@
 #include <sstream>
 #include <vector>
 
+#include <cmext/string_view>
+
 #include "cmGlobalGenerator.h"
 #include "cmGlobalGeneratorFactory.h"
 #include "cmGlobalVisualStudioGenerator.h"
@@ -137,8 +139,8 @@ bool cmGlobalVisualStudio12Generator::MatchesGeneratorName(
 bool cmGlobalVisualStudio12Generator::ProcessGeneratorToolsetField(
   std::string const& key, std::string const& value)
 {
-  if (key == "host" &&
-      (value == "x64" || value == "x86" || value == "ARM64")) {
+  if (key == "host"_s &&
+      (value == "x64"_s || value == "x86"_s || value == "ARM64"_s)) {
     this->GeneratorToolsetHostArchitecture = value;
     return true;
   }
@@ -189,7 +191,7 @@ bool cmGlobalVisualStudio12Generator::InitializeWindowsStore(cmMakefile* mf)
 bool cmGlobalVisualStudio12Generator::SelectWindowsPhoneToolset(
   std::string& toolset) const
 {
-  if (this->SystemVersion == "8.1") {
+  if (this->SystemVersion == "8.1"_s) {
     if (this->IsWindowsPhoneToolsetInstalled() &&
         this->IsWindowsDesktopToolsetInstalled()) {
       toolset = "v120_wp81";
@@ -204,7 +206,7 @@ bool cmGlobalVisualStudio12Generator::SelectWindowsPhoneToolset(
 bool cmGlobalVisualStudio12Generator::SelectWindowsStoreToolset(
   std::string& toolset) const
 {
-  if (this->SystemVersion == "8.1") {
+  if (this->SystemVersion == "8.1"_s) {
     if (this->IsWindowsStoreToolsetInstalled() &&
         this->IsWindowsDesktopToolsetInstalled()) {
       toolset = "v120";

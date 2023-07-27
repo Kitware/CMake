@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmLocalVisualStudio10Generator.h"
 
+#include <cmext/string_view>
+
 #include <cm3p/expat.h>
 
 #include "cmGlobalGenerator.h"
@@ -37,7 +39,7 @@ public:
     if (!this->GUID.empty()) {
       return;
     }
-    if ("ProjectGUID" == name || "ProjectGuid" == name) {
+    if (name == "ProjectGUID"_s || name == "ProjectGuid"_s) {
       this->DoGUID = true;
     }
   }

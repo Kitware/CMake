@@ -12,6 +12,7 @@
 
 #include <cm/iterator>
 #include <cm/memory>
+#include <cmext/string_view>
 
 #include <windows.h>
 
@@ -78,9 +79,9 @@ bool cmGlobalVisualStudioGenerator::SetGeneratorPlatform(std::string const& p,
   if (!this->InitializePlatform(mf)) {
     return false;
   }
-  if (this->GetPlatformName() == "x64") {
+  if (this->GetPlatformName() == "x64"_s) {
     mf->AddDefinition("CMAKE_FORCE_WIN64", "TRUE");
-  } else if (this->GetPlatformName() == "Itanium") {
+  } else if (this->GetPlatformName() == "Itanium"_s) {
     mf->AddDefinition("CMAKE_FORCE_IA64", "TRUE");
   }
   mf->AddDefinition("CMAKE_VS_PLATFORM_NAME", this->GetPlatformName());
@@ -819,7 +820,7 @@ bool cmGlobalVisualStudioGenerator::TargetIsFortranOnly(
   // Intel Fortran .vfproj files do support the resource compiler.
   languages.erase("RC");
 
-  return languages.size() == 1 && *languages.begin() == "Fortran";
+  return languages.size() == 1 && *languages.begin() == "Fortran"_s;
 }
 
 bool cmGlobalVisualStudioGenerator::IsInSolution(

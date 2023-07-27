@@ -5,6 +5,7 @@
 #include <ostream>
 
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmsys/RegularExpression.hxx"
 
@@ -88,7 +89,7 @@ cmDocumentationEntry cmGlobalNMakeMakefileGenerator::GetDocumentation()
 void cmGlobalNMakeMakefileGenerator::PrintCompilerAdvice(
   std::ostream& os, std::string const& lang, cmValue envVar) const
 {
-  if (lang == "CXX" || lang == "C") {
+  if (lang == "CXX"_s || lang == "C"_s) {
     /* clang-format off */
     os <<
       "To use the NMake generator with Visual C++, cmake must be run from a "

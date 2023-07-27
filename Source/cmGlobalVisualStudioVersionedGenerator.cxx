@@ -677,7 +677,7 @@ void cmGlobalVisualStudioVersionedGenerator::SetVSVersionVar(cmMakefile* mf)
 bool cmGlobalVisualStudioVersionedGenerator::ProcessGeneratorInstanceField(
   std::string const& key, std::string const& value)
 {
-  if (key == "version") {
+  if (key == "version"_s) {
     this->GeneratorInstanceVersion = value;
     return true;
   }
@@ -868,13 +868,13 @@ cmGlobalVisualStudioVersionedGenerator::FindAuxToolset(
 
     // Accept known SxS props file names using four version components
     // in VS versions later than the current.
-    if (version == "14.28.16.9" && vcToolsetVersion == "14.28.29910") {
+    if (version == "14.28.16.9"_s && vcToolsetVersion == "14.28.29910"_s) {
       return AuxToolset::Default;
     }
-    if (version == "14.29.16.10" && vcToolsetVersion == "14.29.30037") {
+    if (version == "14.29.16.10"_s && vcToolsetVersion == "14.29.30037"_s) {
       return AuxToolset::Default;
     }
-    if (version == "14.29.16.11" && vcToolsetVersion == "14.29.30133") {
+    if (version == "14.29.16.11"_s && vcToolsetVersion == "14.29.30133"_s) {
       return AuxToolset::Default;
     }
 

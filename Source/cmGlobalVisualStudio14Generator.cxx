@@ -6,6 +6,7 @@
 #include <sstream>
 
 #include <cm/vector>
+#include <cmext/string_view>
 
 #include "cmGlobalGenerator.h"
 #include "cmGlobalGeneratorFactory.h"
@@ -198,7 +199,7 @@ bool cmGlobalVisualStudio14Generator::InitializeAndroid(cmMakefile*)
 bool cmGlobalVisualStudio14Generator::ProcessGeneratorPlatformField(
   std::string const& key, std::string const& value)
 {
-  if (key == "version") {
+  if (key == "version"_s) {
     this->GeneratorPlatformVersion = value;
     return true;
   }
@@ -231,7 +232,7 @@ bool cmGlobalVisualStudio14Generator::SelectWindows10SDK(cmMakefile* mf)
       return false;
     }
 
-    if (this->SystemName == "WindowsStore") {
+    if (this->SystemName == "WindowsStore"_s) {
       mf->IssueMessage(
         MessageType::FATAL_ERROR,
         "Could not find an appropriate version of the Windows 10 SDK"
@@ -361,7 +362,7 @@ std::string cmGlobalVisualStudio14Generator::GetWindows10SDKVersion(
     std::string const& ver = *this->GeneratorPlatformVersion;
 
     // VS 2019 and above support specifying plain "10.0".
-    if (this->Version >= VSVersion::VS16 && ver == "10.0") {
+    if (this->Version >= VSVersion::VS16 && ver == "10.0"_s) {
       return ver;
     }
   }

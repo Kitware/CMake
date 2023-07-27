@@ -189,25 +189,25 @@ const char* cmGlobalVisualStudio7Generator::ExternalProjectType(
   const std::string& location)
 {
   std::string extension = cmSystemTools::GetFilenameLastExtension(location);
-  if (extension == ".vbproj") {
+  if (extension == ".vbproj"_s) {
     return "F184B08F-C81C-45F6-A57F-5ABD9991F28F";
   }
-  if (extension == ".csproj") {
+  if (extension == ".csproj"_s) {
     return "FAE04EC0-301F-11D3-BF4B-00C04F79EFBC";
   }
-  if (extension == ".fsproj") {
+  if (extension == ".fsproj"_s) {
     return "F2A71F9B-5D33-465A-A702-920D77279786";
   }
-  if (extension == ".vdproj") {
+  if (extension == ".vdproj"_s) {
     return "54435603-DBB4-11D2-8724-00A0C9A8B90C";
   }
-  if (extension == ".dbproj") {
+  if (extension == ".dbproj"_s) {
     return "C8D11400-126E-41CD-887F-60BD40844F9E";
   }
-  if (extension == ".wixproj") {
+  if (extension == ".wixproj"_s) {
     return "930C7802-8A8C-48F9-8165-68863BCCD9DD";
   }
-  if (extension == ".pyproj") {
+  if (extension == ".pyproj"_s) {
     return "888888A0-9F3D-457C-B088-3A5042F75D52";
   }
   return "8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942";
@@ -252,7 +252,7 @@ cmGlobalVisualStudio7Generator::GenerateBuildCommand(
       continue;
     }
     bool clean = false;
-    if (realTarget == "clean") {
+    if (realTarget == "clean"_s) {
       clean = true;
       realTarget = "ALL_BUILD";
     }
@@ -459,7 +459,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
         cmLocalGenerator* lg = target->GetLocalGenerator();
         std::string dir = lg->GetCurrentBinaryDirectory();
         dir = root->MaybeRelativeToCurBinDir(dir);
-        if (dir == ".") {
+        if (dir == "."_s) {
           dir.clear(); // msbuild cannot handle ".\" prefix
         }
         this->WriteProject(fout, *vcprojName, dir, target);
@@ -572,11 +572,12 @@ void cmGlobalVisualStudio7Generator::WriteSLNGlobalSections(
       }
       if (!name.empty()) {
         bool addGuid = false;
-        if (name == "ExtensibilityGlobals" && sectionType == "postSolution") {
+        if (name == "ExtensibilityGlobals"_s &&
+            sectionType == "postSolution"_s) {
           addGuid = true;
           extensibilityGlobalsOverridden = true;
-        } else if (name == "ExtensibilityAddIns" &&
-                   sectionType == "postSolution") {
+        } else if (name == "ExtensibilityAddIns"_s &&
+                   sectionType == "postSolution"_s) {
           extensibilityAddInsOverridden = true;
         }
         fout << "\tGlobalSection(" << name << ") = " << sectionType << "\n";
@@ -590,7 +591,7 @@ void cmGlobalVisualStudio7Generator::WriteSLNGlobalSections(
             const std::string value =
               cmTrimWhitespace(itPair.substr(posEqual + 1));
             fout << "\t\t" << key << " = " << value << "\n";
-            if (key == "SolutionGuid") {
+            if (key == "SolutionGuid"_s) {
               addGuid = false;
             }
           }
