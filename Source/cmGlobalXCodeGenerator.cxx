@@ -82,10 +82,10 @@ public:
   }
   void EndElement(const std::string& name) override
   {
-    if (name == "key") {
+    if (name == "key"_s) {
       this->Key = this->Data;
-    } else if (name == "string") {
-      if (this->Key == "CFBundleShortVersionString") {
+    } else if (name == "string"_s) {
+      if (this->Key == "CFBundleShortVersionString"_s) {
         this->Version = this->Data;
       }
     }
@@ -389,7 +389,7 @@ bool cmGlobalXCodeGenerator::ParseGeneratorToolset(std::string const& ts,
 bool cmGlobalXCodeGenerator::ProcessGeneratorToolsetField(
   std::string const& key, std::string const& value, cmMakefile* mf)
 {
-  if (key == "buildsystem") {
+  if (key == "buildsystem"_s) {
     if (value == "1"_s) {
       this->XcodeBuildSystem = BuildSystem::One;
     } else if (value == "12"_s) {
@@ -1059,30 +1059,30 @@ bool IsLinkPhaseLibraryExtension(const std::string& fileExt)
 {
   // Empty file extension is a special case for paths to framework's
   // internal binary which could be MyFw.framework/Versions/*/MyFw
-  return (fileExt == ".framework" || fileExt == ".xcframework" ||
-          fileExt == ".a" || fileExt == ".o" || fileExt == ".dylib" ||
-          fileExt == ".tbd" || fileExt.empty());
+  return (fileExt == ".framework"_s || fileExt == ".xcframework"_s ||
+          fileExt == ".a"_s || fileExt == ".o"_s || fileExt == ".dylib"_s ||
+          fileExt == ".tbd"_s || fileExt.empty());
 }
 bool IsLibraryType(const std::string& fileType)
 {
-  return (fileType == "wrapper.framework" ||
-          fileType == "wrapper.xcframework" || fileType == "archive.ar" ||
-          fileType == "compiled.mach-o.objfile" ||
-          fileType == "compiled.mach-o.dylib" ||
-          fileType == "compiled.mach-o.executable" ||
-          fileType == "sourcecode.text-based-dylib-definition");
+  return (fileType == "wrapper.framework"_s ||
+          fileType == "wrapper.xcframework"_s || fileType == "archive.ar"_s ||
+          fileType == "compiled.mach-o.objfile"_s ||
+          fileType == "compiled.mach-o.dylib"_s ||
+          fileType == "compiled.mach-o.executable"_s ||
+          fileType == "sourcecode.text-based-dylib-definition"_s);
 }
 
 std::string GetDirectoryValueFromFileExtension(const std::string& dirExt)
 {
   std::string ext = cmSystemTools::LowerCase(dirExt);
-  if (ext == "framework") {
+  if (ext == "framework"_s) {
     return "wrapper.framework";
   }
-  if (ext == "xcframework") {
+  if (ext == "xcframework"_s) {
     return "wrapper.xcframework";
   }
-  if (ext == "xcassets") {
+  if (ext == "xcassets"_s) {
     return "folder.assetcatalog";
   }
   return "folder";
@@ -1095,68 +1095,68 @@ std::string GetSourcecodeValueFromFileExtension(
   std::string ext = cmSystemTools::LowerCase(_ext);
   std::string sourcecode = "sourcecode";
 
-  if (ext == "o") {
+  if (ext == "o"_s) {
     keepLastKnownFileType = true;
     sourcecode = "compiled.mach-o.objfile";
-  } else if (ext == "xctest") {
+  } else if (ext == "xctest"_s) {
     sourcecode = "wrapper.cfbundle";
-  } else if (ext == "xib") {
+  } else if (ext == "xib"_s) {
     keepLastKnownFileType = true;
     sourcecode = "file.xib";
-  } else if (ext == "storyboard") {
+  } else if (ext == "storyboard"_s) {
     keepLastKnownFileType = true;
     sourcecode = "file.storyboard";
     // NOLINTNEXTLINE(bugprone-branch-clone)
-  } else if (ext == "mm" && !cm::contains(enabled_langs, "OBJCXX")) {
+  } else if (ext == "mm"_s && !cm::contains(enabled_langs, "OBJCXX")) {
     sourcecode += ".cpp.objcpp";
     // NOLINTNEXTLINE(bugprone-branch-clone)
-  } else if (ext == "m" && !cm::contains(enabled_langs, "OBJC")) {
+  } else if (ext == "m"_s && !cm::contains(enabled_langs, "OBJC")) {
     sourcecode += ".c.objc";
-  } else if (ext == "swift") {
+  } else if (ext == "swift"_s) {
     sourcecode += ".swift";
-  } else if (ext == "plist") {
+  } else if (ext == "plist"_s) {
     sourcecode += ".text.plist";
-  } else if (ext == "h") {
+  } else if (ext == "h"_s) {
     sourcecode += ".c.h";
-  } else if (ext == "hxx" || ext == "hpp" || ext == "txx" || ext == "pch" ||
-             ext == "hh" || ext == "inl") {
+  } else if (ext == "hxx"_s || ext == "hpp"_s || ext == "txx"_s ||
+             ext == "pch"_s || ext == "hh"_s || ext == "inl"_s) {
     sourcecode += ".cpp.h";
-  } else if (ext == "png" || ext == "gif" || ext == "jpg") {
+  } else if (ext == "png"_s || ext == "gif"_s || ext == "jpg"_s) {
     keepLastKnownFileType = true;
     sourcecode = "image";
-  } else if (ext == "txt") {
+  } else if (ext == "txt"_s) {
     sourcecode += ".text";
-  } else if (lang == "CXX") {
+  } else if (lang == "CXX"_s) {
     sourcecode += ".cpp.cpp";
-  } else if (lang == "C") {
+  } else if (lang == "C"_s) {
     sourcecode += ".c.c";
-  } else if (lang == "OBJCXX") {
+  } else if (lang == "OBJCXX"_s) {
     sourcecode += ".cpp.objcpp";
-  } else if (lang == "OBJC") {
+  } else if (lang == "OBJC"_s) {
     sourcecode += ".c.objc";
-  } else if (lang == "Fortran") {
+  } else if (lang == "Fortran"_s) {
     sourcecode += ".fortran.f90";
-  } else if (lang == "ASM") {
+  } else if (lang == "ASM"_s) {
     sourcecode += ".asm";
-  } else if (ext == "metal") {
+  } else if (ext == "metal"_s) {
     sourcecode += ".metal";
-  } else if (ext == "mig") {
+  } else if (ext == "mig"_s) {
     sourcecode += ".mig";
-  } else if (ext == "tbd") {
+  } else if (ext == "tbd"_s) {
     sourcecode += ".text-based-dylib-definition";
-  } else if (ext == "a") {
+  } else if (ext == "a"_s) {
     keepLastKnownFileType = true;
     sourcecode = "archive.ar";
-  } else if (ext == "dylib") {
+  } else if (ext == "dylib"_s) {
     keepLastKnownFileType = true;
     sourcecode = "compiled.mach-o.dylib";
-  } else if (ext == "framework") {
+  } else if (ext == "framework"_s) {
     keepLastKnownFileType = true;
     sourcecode = "wrapper.framework";
-  } else if (ext == "xcassets") {
+  } else if (ext == "xcassets"_s) {
     keepLastKnownFileType = true;
     sourcecode = "folder.assetcatalog";
-  } else if (ext == "xcconfig") {
+  } else if (ext == "xcconfig"_s) {
     keepLastKnownFileType = true;
     sourcecode = "text.xcconfig";
   }
@@ -1298,8 +1298,8 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeFileReference(
 
 bool cmGlobalXCodeGenerator::SpecialTargetEmitted(std::string const& tname)
 {
-  if (tname == "ALL_BUILD" || tname == "install" || tname == "package" ||
-      tname == "RUN_TESTS" || tname == CMAKE_CHECK_BUILD_SYSTEM_TARGET) {
+  if (tname == "ALL_BUILD"_s || tname == "install"_s || tname == "package"_s ||
+      tname == "RUN_TESTS"_s || tname == CMAKE_CHECK_BUILD_SYSTEM_TARGET) {
     if (this->TargetDoneSet.find(tname) != this->TargetDoneSet.end()) {
       return true;
     }
@@ -1333,10 +1333,10 @@ struct cmCompareTargets
   {
     std::string const& a = l->GetTarget()->GetName();
     std::string const& b = r->GetTarget()->GetName();
-    if (a == "ALL_BUILD") {
+    if (a == "ALL_BUILD"_s) {
       return true;
     }
-    if (b == "ALL_BUILD") {
+    if (b == "ALL_BUILD"_s) {
       return false;
     }
     return a < b;
@@ -1444,7 +1444,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeTarget(
     cmGeneratorTarget::SourceFileFlags tsFlags =
       gtgt->GetTargetSourceFileFlags(sourceFile);
 
-    if (filetype && filetype->GetString() == "compiled.mach-o.objfile") {
+    if (filetype && filetype->GetString() == "compiled.mach-o.objfile"_s) {
       if (sourceFile->GetObjectLibrary().empty()) {
         externalObjFiles.push_back(xsf);
       }
@@ -1553,7 +1553,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeTarget(
       if (gtgt->IsFrameworkOnApple()) {
         // dstPath in frameworks is relative to Versions/<version>
         ostr << keySources.first;
-      } else if (keySources.first != "MacOS") {
+      } else if (keySources.first != "MacOS"_s) {
         if (gtgt->Target->GetMakefile()->PlatformIsAppleEmbedded()) {
           ostr << keySources.first;
         } else {
@@ -2855,7 +2855,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     gflag = this->ExtractFlag("-g", flags);
     // put back gdwarf-2 if used since there is no way
     // to represent it in the gui, but we still want debug yes
-    if (gflag == "-gdwarf-2") {
+    if (gflag == "-gdwarf-2"_s) {
       flags += " ";
       flags += gflag;
     }
@@ -2874,13 +2874,13 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       cflags[language] += gflags[language];
     }
     debugStr = "NO";
-  } else if (last_gflag && (last_gflag->empty() || *last_gflag == "-g0")) {
+  } else if (last_gflag && (last_gflag->empty() || *last_gflag == "-g0"_s)) {
     debugStr = "NO";
   }
 
   // extract C++ stdlib
   for (auto const& language : languages) {
-    if (language != "CXX" && language != "OBJCXX") {
+    if (language != "CXX"_s && language != "OBJCXX"_s) {
       continue;
     }
     std::string& flags = cflags[language];
@@ -2889,7 +2889,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       this->ExtractFlagRegex("(^| )(-stdlib=[^ ]+)( |$)", 2, flags);
     if (stdlib.size() > 8) {
       const auto cxxLibrary = stdlib.substr(8);
-      if (language == "CXX" ||
+      if (language == "CXX"_s ||
           !buildSettings->GetAttribute("CLANG_CXX_LIBRARY")) {
         buildSettings->AddAttribute("CLANG_CXX_LIBRARY",
                                     this->CreateString(cxxLibrary));
@@ -2910,20 +2910,20 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
 
   for (auto const& language : languages) {
     std::string flags = cmStrCat(cflags[language], " ", defFlags);
-    if (language == "CXX" || language == "OBJCXX") {
-      if (language == "CXX" ||
+    if (language == "CXX"_s || language == "OBJCXX"_s) {
+      if (language == "CXX"_s ||
           !buildSettings->GetAttribute("OTHER_CPLUSPLUSFLAGS")) {
         buildSettings->AddAttribute("OTHER_CPLUSPLUSFLAGS",
                                     this->CreateString(flags));
       }
-    } else if (language == "Fortran") {
+    } else if (language == "Fortran"_s) {
       buildSettings->AddAttribute("IFORT_OTHER_FLAGS",
                                   this->CreateString(flags));
-    } else if (language == "C" || language == "OBJC") {
-      if (language == "C" || !buildSettings->GetAttribute("OTHER_CFLAGS")) {
+    } else if (language == "C"_s || language == "OBJC"_s) {
+      if (language == "C"_s || !buildSettings->GetAttribute("OTHER_CFLAGS")) {
         buildSettings->AddAttribute("OTHER_CFLAGS", this->CreateString(flags));
       }
-    } else if (language == "Swift") {
+    } else if (language == "Swift"_s) {
       buildSettings->AddAttribute("OTHER_SWIFT_FLAGS",
                                   this->CreateString(flags));
     }
@@ -3575,12 +3575,12 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
   cmValue prop =
     target->GetTarget()->GetProperty("XCODE_LINK_BUILD_PHASE_MODE");
   if (prop) {
-    if (*prop == "BUILT_ONLY") {
+    if (*prop == "BUILT_ONLY"_s) {
       useLinkPhase = true;
-    } else if (*prop == "KNOWN_LOCATION") {
+    } else if (*prop == "KNOWN_LOCATION"_s) {
       useLinkPhase = true;
       forceLinkPhase = true;
-    } else if (*prop != "NONE") {
+    } else if (*prop != "NONE"_s) {
       cmSystemTools::Error(
         cmStrCat("Invalid value for XCODE_LINK_BUILD_PHASE_MODE: ", *prop));
       return;
@@ -3870,7 +3870,7 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
 
       std::string linkDirs;
       for (auto const& libDir : cli->GetDirectories()) {
-        if (!libDir.empty() && libDir != "/usr/lib") {
+        if (!libDir.empty() && libDir != "/usr/lib"_s) {
           cmPolicies::PolicyStatus cmp0142 =
             target->GetTarget()->GetPolicyStatusCMP0142();
           if (cmp0142 == cmPolicies::OLD || cmp0142 == cmPolicies::WARN) {

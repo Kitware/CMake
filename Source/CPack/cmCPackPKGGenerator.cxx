@@ -4,6 +4,8 @@
 
 #include <vector>
 
+#include <cmext/string_view>
+
 #include "cmCPackComponentGroup.h"
 #include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
@@ -399,7 +401,8 @@ bool cmCPackPKGGenerator::CopyCreateResourceFile(const std::string& name,
     return false;
   }
   std::string ext = cmSystemTools::GetFilenameLastExtension(inFileName);
-  if (ext != ".rtfd" && ext != ".rtf" && ext != ".html" && ext != ".txt") {
+  if (ext != ".rtfd"_s && ext != ".rtf"_s && ext != ".html"_s &&
+      ext != ".txt"_s) {
     cmCPackLogger(
       cmCPackLog::LOG_ERROR,
       "Bad file extension specified: "

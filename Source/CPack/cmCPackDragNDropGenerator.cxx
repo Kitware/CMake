@@ -7,6 +7,9 @@
 #include <iomanip>
 #include <map>
 
+#include <cm/string_view>
+#include <cmext/string_view>
+
 #include <CoreFoundation/CoreFoundation.h>
 #include <cm3p/kwiml/abi.h>
 
@@ -195,7 +198,7 @@ int cmCPackDragNDropGenerator::PackageFiles()
   packageFileNames.clear();
   for (auto const& package_file : package_files) {
     std::string full_package_name = cmStrCat(toplevel, "/");
-    if (package_file == "ALL_IN_ONE") {
+    if (package_file == "ALL_IN_ONE"_s) {
       full_package_name += this->GetOption("CPACK_PACKAGE_FILE_NAME");
     } else {
       full_package_name += package_file;

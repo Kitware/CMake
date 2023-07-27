@@ -7,6 +7,7 @@
 #include <utility>
 
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmsys/String.h"
 
@@ -157,7 +158,7 @@ void cmXCodeScheme::WriteLaunchAction(cmXMLWriter& xout,
     cmValue launchMode =
       this->Target->GetTarget()->GetProperty("XCODE_SCHEME_LAUNCH_MODE");
     std::string value = "0"; // == 'AUTO'
-    if (launchMode && *launchMode == "WAIT") {
+    if (launchMode && *launchMode == "WAIT"_s) {
       value = "1";
     }
     xout.Attribute("launchStyle", value);

@@ -5,6 +5,7 @@
 #include <functional>
 #include <string>
 
+#include <cm/string_view>
 #include <cmext/string_view>
 
 #include <cm3p/json/value.h>
@@ -44,23 +45,23 @@ bool PlistSupportedPlatformHelper(
     return false;
   }
 
-  if (value->asString() == "macos") {
+  if (value->asString() == "macos"_s) {
     platform = cmXcFrameworkPlistSupportedPlatform::macOS;
     return true;
   }
-  if (value->asString() == "ios") {
+  if (value->asString() == "ios"_s) {
     platform = cmXcFrameworkPlistSupportedPlatform::iOS;
     return true;
   }
-  if (value->asString() == "tvos") {
+  if (value->asString() == "tvos"_s) {
     platform = cmXcFrameworkPlistSupportedPlatform::tvOS;
     return true;
   }
-  if (value->asString() == "watchos") {
+  if (value->asString() == "watchos"_s) {
     platform = cmXcFrameworkPlistSupportedPlatform::watchOS;
     return true;
   }
-  if (value->asString() == "xros") {
+  if (value->asString() == "xros"_s) {
     platform = cmXcFrameworkPlistSupportedPlatform::visionOS;
     return true;
   }
@@ -113,8 +114,8 @@ cm::optional<cmXcFrameworkPlist> cmParseXcFrameworkPlist(
       cmStrCat("Invalid xcframework .plist file:\n  ", plistPath), bt);
     return cm::nullopt;
   }
-  if (metadata.CFBundlePackageType != "XFWK" ||
-      metadata.XCFrameworkFormatVersion != "1.0") {
+  if (metadata.CFBundlePackageType != "XFWK"_s ||
+      metadata.XCFrameworkFormatVersion != "1.0"_s) {
     mf.GetCMakeInstance()->IssueMessage(
       MessageType::FATAL_ERROR,
       cmStrCat("Expected:\n  ", plistPath,
