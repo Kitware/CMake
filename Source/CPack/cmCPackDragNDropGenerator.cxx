@@ -198,7 +198,7 @@ int cmCPackDragNDropGenerator::PackageFiles()
     } else {
       full_package_name += package_file;
     }
-    full_package_name += std::string(GetOutputExtension());
+    full_package_name += GetOutputExtension();
     packageFileNames.push_back(full_package_name);
 
     std::string src_dir = cmStrCat(toplevel, '/', package_file);
