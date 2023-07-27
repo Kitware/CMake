@@ -304,7 +304,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     for (const auto& gi : generators) {
       stampFile = cmStrCat(gi->GetMakefile()->GetCurrentBinaryDirectory(),
                            "/CMakeFiles/generate.stamp");
-      fout << stampFile << "\n";
+      fout << stampFile << '\n';
       stamps.push_back(stampFile);
     }
   }
@@ -341,7 +341,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     std::string argS = cmStrCat("-S", lg.GetSourceDirectory());
     std::string argB = cmStrCat("-B", lg.GetBinaryDirectory());
     std::string const sln =
-      cmStrCat(lg.GetBinaryDirectory(), "/", lg.GetProjectName(), ".sln");
+      cmStrCat(lg.GetBinaryDirectory(), '/', lg.GetProjectName(), ".sln");
     cmCustomCommandLines commandLines = cmMakeSingleCommandLine(
       { cmSystemTools::GetCMakeCommand(), argS, argB, "--check-stamp-list",
         stampList, "--vs-solution-file", sln });
@@ -392,8 +392,8 @@ void cmGlobalVisualStudio8Generator::WriteSolutionConfigurations(
 {
   fout << "\tGlobalSection(SolutionConfigurationPlatforms) = preSolution\n";
   for (std::string const& i : configs) {
-    fout << "\t\t" << i << "|" << this->GetPlatformName() << " = " << i << "|"
-         << this->GetPlatformName() << "\n";
+    fout << "\t\t" << i << '|' << this->GetPlatformName() << " = " << i << '|'
+         << this->GetPlatformName() << '\n';
   }
   fout << "\tEndGlobalSection\n";
 }
@@ -417,25 +417,25 @@ void cmGlobalVisualStudio8Generator::WriteProjectConfigurations(
         }
       }
     }
-    fout << "\t\t{" << guid << "}." << i << "|" << this->GetPlatformName()
-         << ".ActiveCfg = " << dstConfig << "|"
+    fout << "\t\t{" << guid << "}." << i << '|' << this->GetPlatformName()
+         << ".ActiveCfg = " << dstConfig << '|'
          << (!platformMapping.empty() ? platformMapping
                                       : this->GetPlatformName())
-         << "\n";
+         << '\n';
     auto ci = configsPartOfDefaultBuild.find(i);
     if (!(ci == configsPartOfDefaultBuild.end())) {
-      fout << "\t\t{" << guid << "}." << i << "|" << this->GetPlatformName()
-           << ".Build.0 = " << dstConfig << "|"
+      fout << "\t\t{" << guid << "}." << i << '|' << this->GetPlatformName()
+           << ".Build.0 = " << dstConfig << '|'
            << (!platformMapping.empty() ? platformMapping
                                         : this->GetPlatformName())
-           << "\n";
+           << '\n';
     }
     if (this->NeedsDeploy(target, dstConfig)) {
-      fout << "\t\t{" << guid << "}." << i << "|" << this->GetPlatformName()
-           << ".Deploy.0 = " << dstConfig << "|"
+      fout << "\t\t{" << guid << "}." << i << '|' << this->GetPlatformName()
+           << ".Deploy.0 = " << dstConfig << '|'
            << (!platformMapping.empty() ? platformMapping
                                         : this->GetPlatformName())
-           << "\n";
+           << '\n';
     }
   }
 }

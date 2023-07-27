@@ -74,7 +74,7 @@ std::string cmSlnData::GetConfigurationTarget(
   const std::string& platformName)
 {
   std::string solutionTarget =
-    cmStrCat(solutionConfiguration, "|", platformName);
+    cmStrCat(solutionConfiguration, '|', platformName);
   cm::optional<cmSlnProjectEntry> project = GetProjectByName(projectName);
   if (!project) {
     return platformName;

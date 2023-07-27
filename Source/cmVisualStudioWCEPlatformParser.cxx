@@ -40,7 +40,7 @@ std::string cmVisualStudioWCEPlatformParser::GetOSVersion() const
     return OSMajorVersion;
   }
 
-  return cmStrCat(OSMajorVersion, ".", OSMinorVersion);
+  return cmStrCat(OSMajorVersion, '.', OSMinorVersion);
 }
 
 const char* cmVisualStudioWCEPlatformParser::GetArchitectureFamily() const

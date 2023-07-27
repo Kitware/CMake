@@ -243,12 +243,12 @@ void cmGlobalVisualStudioGenerator::ComputeTargetObjectDirectory(
   std::string tgtDir = gt->LocalGenerator->GetTargetDirectory(gt);
   if (!tgtDir.empty()) {
     dir += tgtDir;
-    dir += "/";
+    dir += '/';
   }
   const char* cd = this->GetCMakeCFGIntDir();
   if (cd && *cd) {
     dir += cd;
-    dir += "/";
+    dir += '/';
   }
   gt->ObjectDirectory = dir;
 }
@@ -977,7 +977,7 @@ bool cmGlobalVisualStudioGenerator::Open(const std::string& bindir,
                                          const std::string& projectName,
                                          bool dryRun)
 {
-  std::string sln = cmStrCat(bindir, "/", projectName, ".sln");
+  std::string sln = cmStrCat(bindir, '/', projectName, ".sln");
 
   if (dryRun) {
     return cmSystemTools::FileExists(sln, true);

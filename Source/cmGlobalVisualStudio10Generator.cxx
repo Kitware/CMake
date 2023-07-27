@@ -198,7 +198,7 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
     std::string versionToolset = this->GeneratorToolsetVersion;
     cmsys::RegularExpression regex("[0-9][0-9]\\.[0-9][0-9]");
     if (regex.find(versionToolset)) {
-      versionToolset = cmStrCat("v", versionToolset.erase(2, 1));
+      versionToolset = cmStrCat('v', versionToolset.erase(2, 1));
     } else {
       // Version not recognized. Clear it.
       versionToolset.clear();
@@ -441,7 +441,7 @@ bool cmGlobalVisualStudio10Generator::InitializeSystem(cmMakefile* mf)
       mf->IssueMessage(
         MessageType::FATAL_ERROR,
         cmStrCat("CMAKE_SYSTEM_NAME is 'Android' but CMAKE_GENERATOR ",
-                 "specifies a platform too: '", this->GetName(), "'"));
+                 "specifies a platform too: '", this->GetName(), '\''));
       return false;
     }
     if (mf->GetSafeDefinition("CMAKE_GENERATOR_PLATFORM") ==
@@ -471,7 +471,7 @@ bool cmGlobalVisualStudio10Generator::InitializeWindowsCE(cmMakefile* mf)
     mf->IssueMessage(
       MessageType::FATAL_ERROR,
       cmStrCat("CMAKE_SYSTEM_NAME is 'WindowsCE' but CMAKE_GENERATOR ",
-               "specifies a platform too: '", this->GetName(), "'"));
+               "specifies a platform too: '", this->GetName(), '\''));
     return false;
   }
 
@@ -848,7 +848,7 @@ bool cmGlobalVisualStudio10Generator::FindVCTargetsPath(cmMakefile* mf)
     wd = cmStrCat(this->GetCMakeInstance()->GetHomeOutputDirectory(),
                   "/CMakeFiles");
   }
-  wd += "/";
+  wd += '/';
   wd += cmVersion::GetCMakeVersion();
 
   // We record the result persistently in a file.
@@ -875,7 +875,7 @@ bool cmGlobalVisualStudio10Generator::FindVCTargetsPath(cmMakefile* mf)
   // Generate a project file for MSBuild to tell us the VCTargetsPath value.
   std::string const vcxproj = "VCTargetsPath.vcxproj";
   {
-    std::string const vcxprojAbs = cmStrCat(wd, "/", vcxproj);
+    std::string const vcxprojAbs = cmStrCat(wd, '/', vcxproj);
     cmsys::ofstream fout(vcxprojAbs.c_str());
     cmXMLWriter xw(fout);
 

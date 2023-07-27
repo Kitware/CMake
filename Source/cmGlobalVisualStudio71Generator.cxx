@@ -86,7 +86,7 @@ void cmGlobalVisualStudio71Generator::WriteSolutionConfigurations(
 {
   fout << "\tGlobalSection(SolutionConfiguration) = preSolution\n";
   for (std::string const& i : configs) {
-    fout << "\t\t" << i << " = " << i << "\n";
+    fout << "\t\t" << i << " = " << i << '\n';
   }
   fout << "\tEndGlobalSection\n";
 }
@@ -217,11 +217,11 @@ void cmGlobalVisualStudio71Generator::WriteProjectConfigurations(
         }
       }
     }
-    fout << "\t\t{" << guid << "}." << i << ".ActiveCfg = " << dstConfig << "|"
+    fout << "\t\t{" << guid << "}." << i << ".ActiveCfg = " << dstConfig << '|'
          << platformName << std::endl;
     auto ci = configsPartOfDefaultBuild.find(i);
     if (!(ci == configsPartOfDefaultBuild.end())) {
-      fout << "\t\t{" << guid << "}." << i << ".Build.0 = " << dstConfig << "|"
+      fout << "\t\t{" << guid << "}." << i << ".Build.0 = " << dstConfig << '|'
            << platformName << std::endl;
     }
   }

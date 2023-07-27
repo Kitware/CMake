@@ -113,12 +113,12 @@ bool cmCPackWIXGenerator::RunCandleCommand(std::string const& sourceFile,
   }
 
   if (!cmHasSuffix(sourceFile, this->CPackTopLevel)) {
-    command << " " << QuotePath(cmStrCat("-I", this->CPackTopLevel));
+    command << ' ' << QuotePath(cmStrCat("-I", this->CPackTopLevel));
   }
 
   AddCustomFlags("CPACK_WIX_CANDLE_EXTRA_FLAGS", command);
 
-  command << " " << QuotePath(sourceFile);
+  command << ' ' << QuotePath(sourceFile);
 
   return RunWiXCommand(command.str());
 }
@@ -147,7 +147,7 @@ bool cmCPackWIXGenerator::RunLightCommand(std::string const& objectFiles)
 
   AddCustomFlags("CPACK_WIX_LIGHT_EXTRA_FLAGS", command);
 
-  command << " " << objectFiles;
+  command << ' ' << objectFiles;
 
   return RunWiXCommand(command.str());
 }
@@ -296,14 +296,14 @@ bool cmCPackWIXGenerator::PackageFilesImpl()
     usedBaseNames.insert(uniqueBaseName);
 
     std::string objectFilename =
-      cmStrCat(this->CPackTopLevel, "/", uniqueBaseName, ".wixobj");
+      cmStrCat(this->CPackTopLevel, '/', uniqueBaseName, ".wixobj");
 
     if (!RunCandleCommand(CMakeToWixPath(sourceFilename),
                           CMakeToWixPath(objectFilename))) {
       return false;
     }
 
-    objectFiles << " " << QuotePath(CMakeToWixPath(objectFilename));
+    objectFiles << ' ' << QuotePath(CMakeToWixPath(objectFilename));
   }
 
   AppendUserSuppliedExtraObjects(objectFiles);
@@ -795,13 +795,13 @@ bool cmCPackWIXGenerator::CreateShortcutsOfSpecificType(
 
   std::string idSuffix;
   if (!cpackComponentName.empty()) {
-    idSuffix += "_";
+    idSuffix += '_';
     idSuffix += cpackComponentName;
   }
 
   std::string componentId = "CM_SHORTCUT";
   if (idPrefix.size()) {
-    componentId += cmStrCat("_", idPrefix);
+    componentId += cmStrCat('_', idPrefix);
   }
 
   componentId += idSuffix;
@@ -817,7 +817,7 @@ bool cmCPackWIXGenerator::CreateShortcutsOfSpecificType(
   this->Patch->ApplyFragment(componentId, fileDefinitions);
 
   std::string registryKey =
-    cmStrCat("Software\\", cpackVendor, "\\", cpackPackageName);
+    cmStrCat("Software\\", cpackVendor, '\\', cpackPackageName);
 
   shortcuts.EmitShortcuts(type, registryKey, cpackComponentName,
                           fileDefinitions);
@@ -934,7 +934,7 @@ void cmCPackWIXGenerator::AddDirectoryAndFileDefinitions(
       continue;
     }
 
-    std::string fullPath = cmStrCat(topdir, "/", fileName);
+    std::string fullPath = cmStrCat(topdir, '/', fileName);
 
     std::string relativePath =
       cmSystemTools::RelativePath(toplevel.c_str(), fullPath.c_str());
@@ -1041,7 +1041,7 @@ std::string cmCPackWIXGenerator::GenerateGUID()
 
 std::string cmCPackWIXGenerator::QuotePath(std::string const& path)
 {
-  return cmStrCat("\"", path, '"');
+  return cmStrCat('"', path, '"');
 }
 
 std::string cmCPackWIXGenerator::GetRightmostExtension(
@@ -1095,18 +1095,18 @@ std::string cmCPackWIXGenerator::CreateNewIdForPath(std::string const& path)
   }
 
   std::ostringstream result;
-  result << idPrefix << "_" << identifier;
+  result << idPrefix << '_' << identifier;
 
   size_t ambiguityCount = ++IdAmbiguityCounter[identifier];
 
   if (ambiguityCount > 999) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Error while trying to generate a unique Id for '"
-                    << path << "'" << std::endl);
+                    << path << '\'' << std::endl);
 
     return std::string();
   } else if (ambiguityCount > 1) {
-    result << "_" << ambiguityCount;
+    result << '_' << ambiguityCount;
   }
 
   std::string resultString = result.str();
@@ -1190,7 +1190,7 @@ void cmCPackWIXGenerator::CollectXmlNamespaces(std::string const& variableName,
       cmCPackLogger(cmCPackLog::LOG_ERROR,
                     "Invalid element in CPACK_WIX_CUSTOM_XMLNS ignored: "
                     "\""
-                      << str << "\"" << std::endl);
+                      << str << '"' << std::endl);
     }
   }
   std::ostringstream oss;
@@ -1211,7 +1211,7 @@ void cmCPackWIXGenerator::AddCustomFlags(std::string const& variableName,
   cmList list{ variableContent };
 
   for (std::string const& i : list) {
-    stream << " " << QuotePath(i);
+    stream << ' ' << QuotePath(i);
   }
 }
 

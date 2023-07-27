@@ -143,7 +143,7 @@ void cmWIXPatchParser::ReportError(int line, int column, const char* msg)
 {
   cmCPackLogger(cmCPackLog::LOG_ERROR,
                 "Error while processing XML patch file at "
-                  << line << ":" << column << ":  " << msg << std::endl);
+                  << line << ':' << column << ":  " << msg << std::endl);
   Valid = false;
 }
 

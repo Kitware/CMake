@@ -361,7 +361,7 @@ void cmVisualStudioGeneratorOptions::OutputPreprocessorDefinitions(
 
   std::ostringstream oss;
   if (this->Version != cmGlobalVisualStudioGenerator::VSVersion::VS9) {
-    oss << "%(" << tag << ")";
+    oss << "%(" << tag << ')';
   }
   auto de = cmRemoveDuplicates(this->Defines);
   for (std::string const& di : cmMakeRange(this->Defines.cbegin(), de)) {
@@ -411,7 +411,7 @@ void cmVisualStudioGeneratorOptions::OutputAdditionalIncludeDirectories(
     }
 
     if (lang == "ASM_NASM"_s) {
-      include += "\\";
+      include += '\\';
     }
 
     // Escape this include for the MSBuild.
@@ -428,7 +428,7 @@ void cmVisualStudioGeneratorOptions::OutputAdditionalIncludeDirectories(
   }
 
   if (this->Version != cmGlobalVisualStudioGenerator::VSVersion::VS9) {
-    oss << sep << "%(" << tag << ")";
+    oss << sep << "%(" << tag << ')';
   }
 
   this->OutputFlag(fout, indent, tag, oss.str());

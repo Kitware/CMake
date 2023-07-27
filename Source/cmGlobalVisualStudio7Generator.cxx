@@ -486,9 +486,9 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
             cumulativePath = cmStrCat("CMAKE_FOLDER_GUID_", iter);
           } else {
             VisualStudioFolders[cumulativePath].insert(
-              cmStrCat(cumulativePath, "/", iter));
+              cmStrCat(cumulativePath, '/', iter));
 
-            cumulativePath = cmStrCat(cumulativePath, "/", iter);
+            cumulativePath = cmStrCat(cumulativePath, '/', iter);
           }
         }
 
@@ -581,7 +581,7 @@ void cmGlobalVisualStudio7Generator::WriteSLNGlobalSections(
                    sectionType == "postSolution"_s) {
           extensibilityAddInsOverridden = true;
         }
-        fout << "\tGlobalSection(" << name << ") = " << sectionType << "\n";
+        fout << "\tGlobalSection(" << name << ") = " << sectionType << '\n';
         cmValue p = root->GetMakefile()->GetProperty(it);
         cmList keyValuePairs{ *p };
         for (std::string const& itPair : keyValuePairs) {
@@ -591,7 +591,7 @@ void cmGlobalVisualStudio7Generator::WriteSLNGlobalSections(
               cmTrimWhitespace(itPair.substr(0, posEqual));
             const std::string value =
               cmTrimWhitespace(itPair.substr(posEqual + 1));
-            fout << "\t\t" << key << " = " << value << "\n";
+            fout << "\t\t" << key << " = " << value << '\n';
             if (key == "SolutionGuid"_s) {
               addGuid = false;
             }

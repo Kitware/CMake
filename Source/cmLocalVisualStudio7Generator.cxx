@@ -961,7 +961,7 @@ std::string cmLocalVisualStudio7Generator::GetBuildTypeLinkerFlags(
 {
   std::string configTypeUpper = cmSystemTools::UpperCase(configName);
   std::string extraLinkOptionsBuildTypeDef =
-    cmStrCat(rootLinkerFlags, "_", configTypeUpper);
+    cmStrCat(rootLinkerFlags, '_', configTypeUpper);
 
   const std::string& extraLinkOptionsBuildType =
     this->Makefile->GetRequiredDefinition(extraLinkOptionsBuildTypeDef);
@@ -979,30 +979,30 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
   std::string extraLinkOptions;
   if (target->GetType() == cmStateEnums::EXECUTABLE) {
     extraLinkOptions = cmStrCat(
-      this->Makefile->GetRequiredDefinition("CMAKE_EXE_LINKER_FLAGS"), " ",
+      this->Makefile->GetRequiredDefinition("CMAKE_EXE_LINKER_FLAGS"), ' ',
       GetBuildTypeLinkerFlags("CMAKE_EXE_LINKER_FLAGS", configName));
   }
   if (target->GetType() == cmStateEnums::SHARED_LIBRARY) {
     extraLinkOptions = cmStrCat(
-      this->Makefile->GetRequiredDefinition("CMAKE_SHARED_LINKER_FLAGS"), " ",
+      this->Makefile->GetRequiredDefinition("CMAKE_SHARED_LINKER_FLAGS"), ' ',
       GetBuildTypeLinkerFlags("CMAKE_SHARED_LINKER_FLAGS", configName));
   }
   if (target->GetType() == cmStateEnums::MODULE_LIBRARY) {
     extraLinkOptions = cmStrCat(
-      this->Makefile->GetRequiredDefinition("CMAKE_MODULE_LINKER_FLAGS"), " ",
+      this->Makefile->GetRequiredDefinition("CMAKE_MODULE_LINKER_FLAGS"), ' ',
       GetBuildTypeLinkerFlags("CMAKE_MODULE_LINKER_FLAGS", configName));
   }
 
   cmValue targetLinkFlags = target->GetProperty("LINK_FLAGS");
   if (targetLinkFlags) {
-    extraLinkOptions += " ";
+    extraLinkOptions += ' ';
     extraLinkOptions += *targetLinkFlags;
   }
   std::string configTypeUpper = cmSystemTools::UpperCase(configName);
   std::string linkFlagsConfig = cmStrCat("LINK_FLAGS_", configTypeUpper);
   targetLinkFlags = target->GetProperty(linkFlagsConfig);
   if (targetLinkFlags) {
-    extraLinkOptions += " ";
+    extraLinkOptions += ' ';
     extraLinkOptions += *targetLinkFlags;
   }
 
@@ -1286,7 +1286,7 @@ void cmLocalVisualStudio7Generator::OutputDeploymentDebuggerTool(
 
     if (dir) {
       std::string const exe =
-        cmStrCat(*dir, "\\", target->GetFullName(config));
+        cmStrCat(*dir, '\\', target->GetFullName(config));
 
       fout << "\t\t\t<DebuggerTool\n"
               "\t\t\t\tRemoteExecutable=\""
@@ -1372,7 +1372,7 @@ void cmLocalVisualStudio7Generator::OutputLibraryDirectories(
     fout << comma
          << this->ConvertToXMLOutputPath(
               cmStrCat(dir, "/$(ConfigurationName)"))
-         << "," << this->ConvertToXMLOutputPath(dir);
+         << ',' << this->ConvertToXMLOutputPath(dir);
     comma = ",";
   }
 }

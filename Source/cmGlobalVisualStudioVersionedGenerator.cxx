@@ -524,7 +524,7 @@ bool cmGlobalVisualStudioVersionedGenerator::SetGeneratorInstance(
   if (!this->GeneratorInstanceVersion.empty()) {
     std::string const majorStr = VSVersionToMajorString(this->Version);
     cmsys::RegularExpression versionRegex(
-      cmStrCat("^", majorStr, R"(\.[0-9]+\.[0-9]+\.[0-9]+$)"));
+      cmStrCat('^', majorStr, R"(\.[0-9]+\.[0-9]+\.[0-9]+$)"));
     if (!versionRegex.find(this->GeneratorInstanceVersion)) {
       mf->IssueMessage(
         MessageType::FATAL_ERROR,
@@ -538,7 +538,7 @@ bool cmGlobalVisualStudioVersionedGenerator::SetGeneratorInstance(
                  "\n"
                  "but the version field is not 4 integer components"
                  " starting in ",
-                 majorStr, "."));
+                 majorStr, '.'));
       return false;
     }
   }

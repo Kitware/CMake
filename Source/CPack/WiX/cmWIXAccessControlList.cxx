@@ -119,7 +119,7 @@ void cmWIXAccessControlList::EmitBooleanAttribute(std::string const& entry,
 {
   if (!this->IsBooleanAttribute(name)) {
     this->ReportError(entry,
-                      cmStrCat("Unknown boolean attribute '", name, "'"));
+                      cmStrCat("Unknown boolean attribute '", name, '\''));
   }
 
   this->SourceWriter.AddAttribute(name, "yes");

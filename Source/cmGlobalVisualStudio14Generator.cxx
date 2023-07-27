@@ -161,11 +161,11 @@ bool cmGlobalVisualStudio14Generator::VerifyNoGeneratorPlatformVersion(
     "given platform specification containing a\n"
     "  version=" << *this->GeneratorPlatformVersion << "\n"
     "field.  The version field is not supported when targeting\n"
-    "  " << this->SystemName << " " << this->SystemVersion << "\n"
+    "  " << this->SystemName << ' ' << this->SystemVersion << '\n'
     ;
   /* clang-format on */
   if (reason) {
-    e << *reason << ".";
+    e << *reason << '.';
   }
   mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
   return false;
@@ -256,7 +256,7 @@ void cmGlobalVisualStudio14Generator::SetWindowsTargetPlatformVersion(
     mf->DisplayStatus(cmStrCat("Selecting Windows SDK version ",
                                this->WindowsTargetPlatformVersion,
                                " to target Windows ", this->SystemVersion,
-                               "."),
+                               '.'),
                       -1);
   }
   mf->AddDefinition("CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION",
