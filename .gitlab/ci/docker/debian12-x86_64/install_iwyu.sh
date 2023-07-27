@@ -8,7 +8,7 @@ apt-get install -y $(grep '^[^#]\+$' /root/iwyu_packages.lst)
 cd /root
 git clone "https://github.com/include-what-you-use/include-what-you-use.git"
 cd include-what-you-use
-readonly llvm_version="$( clang-6.0 --version | head -n1 | cut -d' ' -f3 | cut -d. -f-2 )"
+readonly llvm_version="$( clang-15 --version | head -n1 | cut -d' ' -f4 | cut -d. -f-1 )"
 git checkout "clang_$llvm_version"
 mkdir build
 cd build
@@ -16,7 +16,6 @@ cd build
 cmake -GNinja \
     -DCMAKE_BUILD_TYPE=Release \
     "-DCMAKE_INSTALL_PREFIX=/usr/lib/llvm-$llvm_version" \
-    "-DIWYU_LLVM_ROOT_PATH=/usr/lib/llvm-$llvm_version" \
     ..
 ninja
 DESTDIR=/root/iwyu-destdir ninja install

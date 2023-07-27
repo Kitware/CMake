@@ -11,7 +11,7 @@ gpg2 --keyserver hkps://keyserver.ubuntu.com \
 curl -sSL https://get.rvm.io | bash -s stable
 
 # keep version in sync with `env_debian*_ninja.sh`
-/usr/local/rvm/bin/rvm install ruby-2.7.0
+/usr/local/rvm/bin/rvm install ruby-3.2.2
 
 for p in archives examples gem-cache log src; do
     touch /usr/local/rvm/${p}/.tar_exclude
