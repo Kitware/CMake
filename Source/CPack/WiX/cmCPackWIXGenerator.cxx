@@ -63,8 +63,9 @@ bool cmCPackWIXGenerator::RunWiXCommand(std::string const& command)
   std::string output;
 
   int returnValue = 0;
-  bool status = cmSystemTools::RunSingleCommand(
-    command, &output, &output, &returnValue, 0, cmSystemTools::OUTPUT_NONE);
+  bool status =
+    cmSystemTools::RunSingleCommand(command, &output, &output, &returnValue,
+                                    nullptr, cmSystemTools::OUTPUT_NONE);
 
   cmsys::ofstream logFile(logFileName.c_str(), std::ios::app);
   logFile << command << std::endl;
@@ -665,7 +666,7 @@ bool cmCPackWIXGenerator::CreateFeatureHierarchy(
 {
   for (auto const& i : ComponentGroups) {
     cmCPackComponentGroup const& group = i.second;
-    if (group.ParentGroup == 0) {
+    if (group.ParentGroup == nullptr) {
       featureDefinitions.EmitFeatureForComponentGroup(group, *this->Patch);
     }
   }

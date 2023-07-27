@@ -102,7 +102,7 @@ bool cmWIXAccessControlList::IsBooleanAttribute(std::string const& name)
     "Write",
     "WriteAttributes",
     "WriteExtendedAttributes",
-    0
+    nullptr
   };
 
   size_t i = 0;
