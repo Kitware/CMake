@@ -1,0 +1,10 @@
+CMake Error at create-executable-target\.cmake:[0-9]+ \(target_link_libraries\):
+  Unable to find suitable library in:
+
+    [^
+]*/Tests/RunCMake/XcFramework/create-xcframework-incomplete-build/mylib\.xcframework/Info\.plist
+
+  for system name "Darwin"
+Call Stack \(most recent call first\):
+  create-executable-target-incomplete\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

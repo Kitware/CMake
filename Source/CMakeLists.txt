@@ -371,6 +371,8 @@ add_library(
   cmNewLineStyle.cxx
   cmOrderDirectories.cxx
   cmOrderDirectories.h
+  cmPlistParser.cxx
+  cmPlistParser.h
   cmPolicies.h
   cmPolicies.cxx
   cmProcessOutput.cxx
@@ -451,6 +453,8 @@ add_library(
   cmWorkerPool.h
   cmWorkingDirectory.cxx
   cmWorkingDirectory.h
+  cmXcFramework.cxx
+  cmXcFramework.h
   cmXMLParser.cxx
   cmXMLParser.h
   cmXMLSafe.cxx

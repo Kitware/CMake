@@ -40,6 +40,7 @@
 #include "cmSystemTools.h"
 #include "cmTargetPropertyComputer.h"
 #include "cmValue.h"
+#include "cmXcFramework.h"
 #include "cmake.h"
 
 template <>
@@ -2798,6 +2799,25 @@ std::string cmTarget::ImportedGetFullPath(
             } else if (cmValue implib = this->GetProperty("IMPORTED_IMPLIB")) {
               result = *implib;
             }
+          }
+        }
+        if (this->IsApple() &&
+            (this->impl->TargetType == cmStateEnums::SHARED_LIBRARY ||
+             this->impl->TargetType == cmStateEnums::STATIC_LIBRARY ||
+             this->impl->TargetType == cmStateEnums::UNKNOWN_LIBRARY) &&
+            cmSystemTools::IsPathToXcFramework(result)) {
+          auto plist = cmParseXcFrameworkPlist(result, *this->impl->Makefile,
+                                               this->impl->Backtrace);
+          if (!plist) {
+            return "";
+          }
+          auto const* library = plist->SelectSuitableLibrary(
+            *this->impl->Makefile, this->impl->Backtrace);
+          if (library) {
+            result = cmStrCat(result, '/', library->LibraryIdentifier, '/',
+                              library->LibraryPath);
+          } else {
+            return "";
           }
         }
         break;
