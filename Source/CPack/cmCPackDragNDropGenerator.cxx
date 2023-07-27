@@ -140,9 +140,9 @@ int cmCPackDragNDropGenerator::InitializeInternal()
     }
     for (auto const& language : languages) {
       std::string license =
-        cmStrCat(slaDirectory, "/", language, ".license.txt");
+        cmStrCat(slaDirectory, '/', language, ".license.txt");
       std::string license_rtf =
-        cmStrCat(slaDirectory, "/", language, ".license.rtf");
+        cmStrCat(slaDirectory, '/', language, ".license.rtf");
       if (!singleLicense) {
         if (!cmSystemTools::FileExists(license) &&
             !cmSystemTools::FileExists(license_rtf)) {
@@ -153,7 +153,7 @@ int cmCPackDragNDropGenerator::InitializeInternal()
           return 0;
         }
       }
-      std::string menu = cmStrCat(slaDirectory, "/", language, ".menu.txt");
+      std::string menu = cmStrCat(slaDirectory, '/', language, ".menu.txt");
       if (!cmSystemTools::FileExists(menu)) {
         cmCPackLogger(cmCPackLog::LOG_ERROR,
                       "Missing menu file " << language << ".menu.txt"
@@ -197,7 +197,7 @@ int cmCPackDragNDropGenerator::PackageFiles()
   // loop to create dmg files
   packageFileNames.clear();
   for (auto const& package_file : package_files) {
-    std::string full_package_name = cmStrCat(toplevel, "/");
+    std::string full_package_name = cmStrCat(toplevel, '/');
     if (package_file == "ALL_IN_ONE"_s) {
       full_package_name += this->GetOption("CPACK_PACKAGE_FILE_NAME");
     } else {
@@ -429,7 +429,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
              cpack_dmg_filesystem,
              "\""
              " -format ",
-             temp_image_format, " \"", temp_image, "\"");
+             temp_image_format, " \"", temp_image, '"');
 
   if (!this->RunCommand(temp_image_command, &create_error)) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -448,7 +448,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
     auto attach_command = cmStrCat(this->GetOption("CPACK_COMMAND_HDIUTIL"),
                                    " attach"
                                    " \"",
-                                   temp_image, "\"");
+                                   temp_image, '"');
 
     std::string attach_output;
     if (!this->RunCommand(attach_command, &attach_output)) {
@@ -480,7 +480,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
       auto setfile_command = cmStrCat(this->GetOption("CPACK_COMMAND_SETFILE"),
                                       " -a C"
                                       " \"",
-                                      temp_mount, "\"");
+                                      temp_mount, '"');
 
       if (!this->RunCommand(setfile_command, &error)) {
         cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -500,7 +500,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
                                            cpack_dmg_ds_store_setup_script,
                                            "\""
                                            " \"",
-                                           temp_mount_name, "\"");
+                                           temp_mount_name, '"');
       std::string error;
       if (!this->RunCommand(setup_script_command, &error)) {
         cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -538,7 +538,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
                                       " -imagekey"
                                       " zlib-level=9"
                                       " -o \"",
-                                      output_file, "\"");
+                                      output_file, '"');
 
   std::string convert_error;
 
@@ -687,7 +687,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
                                       "\""
                                       " FIXME_WHY_IS_THIS_ARGUMENT_NEEDED"
                                       " \"",
-                                      output_file, "\"");
+                                      output_file, '"');
     std::string embed_error;
     if (!this->RunCommand(embed_sla_command, &embed_error)) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -824,7 +824,7 @@ bool cmCPackDragNDropGenerator::WriteLicense(RezDoc& rez, size_t licenseNumber,
     actual_license = licenseFile;
   } else {
     std::string license_wo_ext =
-      cmStrCat(slaDirectory, "/", licenseLanguage, ".license");
+      cmStrCat(slaDirectory, '/', licenseLanguage, ".license");
     if (cmSystemTools::FileExists(cmStrCat(license_wo_ext, ".txt"))) {
       actual_license = cmStrCat(license_wo_ext, ".txt");
     } else {
@@ -852,7 +852,7 @@ bool cmCPackDragNDropGenerator::WriteLicense(RezDoc& rez, size_t licenseNumber,
     } else {
       std::vector<std::string> lines;
       std::string actual_menu =
-        cmStrCat(slaDirectory, "/", licenseLanguage, ".menu.txt");
+        cmStrCat(slaDirectory, '/', licenseLanguage, ".menu.txt");
       if (!this->ReadFile(actual_menu, lines, error)) {
         return false;
       }

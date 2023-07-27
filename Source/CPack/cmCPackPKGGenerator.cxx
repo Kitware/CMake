@@ -41,7 +41,7 @@ std::string cmCPackPKGGenerator::GetPackageName(
     std::string packagesDir =
       cmStrCat(this->GetOption("CPACK_TEMPORARY_DIRECTORY"), ".dummy");
     return cmStrCat(
-      cmSystemTools::GetFilenameWithoutLastExtension(packagesDir), "-",
+      cmSystemTools::GetFilenameWithoutLastExtension(packagesDir), '-',
       component.Name, ".pkg");
   }
 
