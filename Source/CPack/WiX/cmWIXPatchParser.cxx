@@ -21,9 +21,7 @@ cmWIXPatchNode::Type cmWIXPatchElement::type()
   return cmWIXPatchNode::ELEMENT;
 }
 
-cmWIXPatchNode::~cmWIXPatchNode()
-{
-}
+cmWIXPatchNode::~cmWIXPatchNode() = default;
 
 cmWIXPatchElement::cmWIXPatchElement() = default;
 cmWIXPatchElement::~cmWIXPatchElement() = default;
