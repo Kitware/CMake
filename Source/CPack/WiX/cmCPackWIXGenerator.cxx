@@ -1061,7 +1061,7 @@ std::string cmCPackWIXGenerator::GetRightmostExtension(
 
 std::string cmCPackWIXGenerator::PathToId(std::string const& path)
 {
-  id_map_t::const_iterator i = PathToIdMap.find(path);
+  auto i = PathToIdMap.find(path);
   if (i != PathToIdMap.end()) {
     return i->second;
   }

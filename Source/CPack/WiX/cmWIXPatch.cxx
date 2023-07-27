@@ -25,7 +25,7 @@ bool cmWIXPatch::LoadFragments(std::string const& patchFilePath)
 void cmWIXPatch::ApplyFragment(std::string const& id,
                                cmWIXSourceWriter& writer)
 {
-  cmWIXPatchParser::fragment_map_t::iterator i = Fragments.find(id);
+  auto i = Fragments.find(id);
   if (i == Fragments.end()) {
     return;
   }
