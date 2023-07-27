@@ -102,7 +102,7 @@ public:
   int ErrorStream();
 
   bool Valid() const;
-  bool Wait(int64_t milliseconds = -1);
+  bool Wait(uint64_t milliseconds = 0);
   std::vector<const Status*> GetStatus() const;
   const Status& GetStatus(std::size_t index) const;
   bool Finished() const;
