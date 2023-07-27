@@ -997,12 +997,12 @@ bool cmCPackWIXGenerator::RequireOption(std::string const& name,
     value = *tmp;
 
     return true;
-  } else {
-    cmCPackLogger(cmCPackLog::LOG_ERROR,
-                  "Required variable " << name << " not set" << std::endl);
-
-    return false;
   }
+
+  cmCPackLogger(cmCPackLog::LOG_ERROR,
+                "Required variable " << name << " not set" << std::endl);
+
+  return false;
 }
 
 std::string cmCPackWIXGenerator::GetArchitecture() const
@@ -1012,9 +1012,8 @@ std::string cmCPackWIXGenerator::GetArchitecture() const
 
   if (void_p_size == "8"_s) {
     return "x64";
-  } else {
-    return "x86";
   }
+  return "x86";
 }
 
 std::string cmCPackWIXGenerator::GenerateGUID()
@@ -1109,7 +1108,8 @@ std::string cmCPackWIXGenerator::CreateNewIdForPath(std::string const& path)
                     << path << '\'' << std::endl);
 
     return std::string();
-  } else if (ambiguityCount > 1) {
+  }
+  if (ambiguityCount > 1) {
     result << '_' << ambiguityCount;
   }
 

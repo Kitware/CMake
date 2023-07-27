@@ -158,7 +158,8 @@ void cmWIXRichTextFormatWriter::EmitUnicodeCodepoint(int c)
   // Do not emit byte order mark (BOM)
   if (c == 0xFEFF) {
     return;
-  } else if (c <= 0xFFFF) {
+  }
+  if (c <= 0xFFFF) {
     EmitUnicodeSurrogate(c);
   } else {
     c -= 0x10000;
