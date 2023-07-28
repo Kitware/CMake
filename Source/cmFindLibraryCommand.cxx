@@ -558,6 +558,14 @@ std::string cmFindLibraryCommand::FindFrameworkLibraryNamesPerDir()
   // Search for all names in each search path.
   for (std::string const& d : this->SearchPaths) {
     for (std::string const& n : this->Names) {
+      fwPath = cmStrCat(d, n, ".xcframework");
+      if (cmSystemTools::FileIsDirectory(fwPath)) {
+        auto finalPath = cmSystemTools::CollapseFullPath(fwPath);
+        if (this->Validate(finalPath)) {
+          return finalPath;
+        }
+      }
+
       fwPath = cmStrCat(d, n, ".framework");
       if (cmSystemTools::FileIsDirectory(fwPath)) {
         auto finalPath = cmSystemTools::CollapseFullPath(fwPath);
@@ -578,6 +586,14 @@ std::string cmFindLibraryCommand::FindFrameworkLibraryDirsPerName()
   // Search for each name in all search paths.
   for (std::string const& n : this->Names) {
     for (std::string const& d : this->SearchPaths) {
+      fwPath = cmStrCat(d, n, ".xcframework");
+      if (cmSystemTools::FileIsDirectory(fwPath)) {
+        auto finalPath = cmSystemTools::CollapseFullPath(fwPath);
+        if (this->Validate(finalPath)) {
+          return finalPath;
+        }
+      }
+
       fwPath = cmStrCat(d, n, ".framework");
       if (cmSystemTools::FileIsDirectory(fwPath)) {
         auto finalPath = cmSystemTools::CollapseFullPath(fwPath);
