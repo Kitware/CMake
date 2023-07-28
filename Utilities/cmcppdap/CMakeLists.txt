@@ -33,5 +33,8 @@ if(WIN32)
 elseif(NOT APPLE)
   target_link_libraries(cmcppdap PRIVATE Threads::Threads)
 endif()
+if(CMake_HAVE_CXX_ATOMIC_LIB)
+  target_link_libraries(cmcppdap PRIVATE atomic)
+endif()
 
 install(FILES NOTICE DESTINATION ${CMAKE_DOC_DIR}/cmcppdap)
