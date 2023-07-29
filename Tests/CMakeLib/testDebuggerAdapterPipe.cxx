@@ -19,13 +19,15 @@
 #include <cm3p/cppdap/types.h>
 
 #include "cmDebuggerAdapter.h"
-#include "cmDebuggerPipeConnection.h"
 #include "cmDebuggerProtocol.h"
 #include "cmVersionConfig.h"
 
 #ifdef _WIN32
 #  include "cmCryptoHash.h"
+#  include "cmDebuggerWindowsPipeConnection.h"
 #  include "cmSystemTools.h"
+#else
+#  include "cmDebuggerPosixPipeConnection.h"
 #endif
 
 #include "testCommon.h"
@@ -128,7 +130,7 @@ bool testProtocolWithPipes()
 
   auto client2Debugger =
     std::make_shared<cmDebugger::cmDebuggerPipeClient>(namedPipe);
-  client2Debugger->Start();
+
   client2Debugger->WaitForConnection();
   client->bind(client2Debugger, client2Debugger);
 

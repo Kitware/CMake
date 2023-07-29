@@ -16,7 +16,12 @@
 
 #include "cmsys/RegularExpression.hxx"
 
-#include "cmDebuggerPipeConnection.h"
+#ifdef _WIN32
+#  include "cmDebuggerWindowsPipeConnection.h"
+#else
+#  include "cmDebuggerPosixPipeConnection.h"
+#endif
+
 #include "cmSystemTools.h"
 
 #ifdef _WIN32
@@ -104,7 +109,7 @@ int runTest(int argc, char* argv[])
       attempt++;
       try {
         client = std::make_shared<cmDebugger::cmDebuggerPipeClient>(namedPipe);
-        client->Start();
+
         client->WaitForConnection();
         std::cout << "cmDebuggerPipeClient connected.\n";
         break;
