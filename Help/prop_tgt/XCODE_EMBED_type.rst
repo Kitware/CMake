@@ -37,6 +37,12 @@ The supported values for ``<type>`` are:
   The specified items will be added to the ``Embed PlugIns`` build phase.
   They must be CMake target names.
 
+``RESOURCES``
+  .. versionadded:: 3.28
+
+  The specified items will be added to the ``Embed Resources`` build phase.
+  They must be CMake target names.
+
 See also :prop_tgt:`XCODE_EMBED_<type>_PATH`,
 :prop_tgt:`XCODE_EMBED_<type>_REMOVE_HEADERS_ON_COPY` and
 :prop_tgt:`XCODE_EMBED_<type>_CODE_SIGN_ON_COPY`.

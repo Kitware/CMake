@@ -224,6 +224,7 @@ private:
   void AddEmbeddedPlugIns(cmXCodeObject* target);
   void AddEmbeddedAppExtensions(cmXCodeObject* target);
   void AddEmbeddedExtensionKitExtensions(cmXCodeObject* target);
+  void AddEmbeddedResources(cmXCodeObject* target);
   void AddPositionIndependentLinkAttribute(cmGeneratorTarget* target,
                                            cmXCodeObject* buildSettings,
                                            const std::string& configName);
@@ -355,6 +356,7 @@ private:
                                   std::string const& configName);
   cmXCodeObject* MainGroupChildren;
   cmXCodeObject* FrameworkGroup;
+  cmXCodeObject* ResourcesGroup;
   cmMakefile* CurrentMakefile;
   cmLocalGenerator* CurrentLocalGenerator;
   cmLocalGenerator* CurrentRootGenerator = nullptr;
