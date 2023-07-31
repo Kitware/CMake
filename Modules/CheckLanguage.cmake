@@ -5,26 +5,45 @@
 CheckLanguage
 -------------
 
-Check if a language can be enabled
+Check whether a language can be enabled by the :command:`enable_language`
+or :command:`project` commands:
 
-Usage:
+.. command:: check_language
 
-::
+  .. code-block:: cmake
 
-  check_language(<lang>)
+    check_language(<lang>)
 
-where ``<lang>`` is a language that may be passed to :command:`enable_language`
-such as ``Fortran``.  If :variable:`CMAKE_<LANG>_COMPILER` is already defined
-the check does nothing.  Otherwise it tries enabling the language in a
-test project.  The result is cached in :variable:`CMAKE_<LANG>_COMPILER`
-as the compiler that was found, or ``NOTFOUND`` if the language cannot be
-enabled. For CUDA which can have an explicit host compiler, the cache
-:variable:`CMAKE_CUDA_HOST_COMPILER` variable will be set if it was required
-for compilation (and cleared if it was not).
+  Try enabling language ``<lang>`` in a test project and record results
+  in the cache:
 
-Example:
+  :variable:`CMAKE_<LANG>_COMPILER`
+    If the language can be enabled, this variable is set to the compiler
+    that was found.  If the language cannot be enabled, this variable is
+    set to ``NOTFOUND``.
 
-::
+    If this variable is already set, either explicitly or cached by
+    a previous call, the check is skipped.
+
+  :variable:`CMAKE_CUDA_HOST_COMPILER`
+    This variable is set when ``<lang>`` is ``CUDA``.
+
+    If the check detects an explicit host compiler that is required for
+    compilation, this variable will be set to that compiler.
+    If the check detects that no explicit host compiler is needed,
+    this variable will be cleared.
+
+    If this variable is already set, its value is preserved only if
+    :variable:`CMAKE_CUDA_COMPILER <CMAKE_<LANG>_COMPILER>` is also set.
+    Otherwise, the check runs and overwrites
+    :variable:`CMAKE_CUDA_HOST_COMPILER` with a new result.
+    Note that :variable:`CMAKE_CUDA_HOST_COMPILER` documents it should
+    not be set without also setting
+    :variable:`CMAKE_CUDA_COMPILER <CMAKE_<LANG>_COMPILER>` to a NVCC compiler.
+
+For example:
+
+.. code-block:: cmake
 
   check_language(Fortran)
   if(CMAKE_Fortran_COMPILER)

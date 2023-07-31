@@ -26,4 +26,11 @@ is read-only and changes to it are undefined behavior.
 
 .. note::
 
+  Projects should not try to set ``CMAKE_CUDA_HOST_COMPILER`` to match
+  :variable:`CMAKE_CXX_COMPILER <CMAKE_<LANG>_COMPILER>` themselves.
+  It is the end-user's responsibility, not the project's, to ensure that
+  the C++ and CUDA compilers target the same ABI.
+
+.. note::
+
   Ignored when using :ref:`Visual Studio Generators`.
