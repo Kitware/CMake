@@ -44,23 +44,23 @@
 
 ### Debian
 
-.debian10:
-    image: "kitware/cmake:ci-debian10-x86_64-2023-03-29"
+.debian12:
+    image: "kitware/cmake:ci-debian12-x86_64-2023-07-27"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
         CMAKE_ARCH: x86_64
 
-.debian10_iwyu:
-    extends: .debian10
+.debian12_iwyu:
+    extends: .debian12
 
     variables:
-        CMAKE_CONFIGURATION: debian10_iwyu
+        CMAKE_CONFIGURATION: debian12_iwyu
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_CI_NO_INSTALL: 1
 
-.debian10_aarch64:
-    image: "kitware/cmake:ci-debian10-aarch64-2023-03-29"
+.debian12_aarch64:
+    image: "kitware/cmake:ci-debian12-aarch64-2023-07-27"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
@@ -112,44 +112,44 @@
 
 #### Build and test
 
-.debian10_ninja:
-    extends: .debian10
+.debian12_ninja:
+    extends: .debian12
 
     variables:
-        CMAKE_CONFIGURATION: debian10_ninja
+        CMAKE_CONFIGURATION: debian12_ninja
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.debian10_aarch64_ninja:
-    extends: .debian10_aarch64
+.debian12_aarch64_ninja:
+    extends: .debian12_aarch64
 
     variables:
-        CMAKE_CONFIGURATION: debian10_aarch64_ninja
+        CMAKE_CONFIGURATION: debian12_aarch64_ninja
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.debian10_makefiles_inplace:
-    extends: .debian10
+.debian12_makefiles_inplace:
+    extends: .debian12
 
     variables:
-        CMAKE_CONFIGURATION: debian10_makefiles_inplace
+        CMAKE_CONFIGURATION: debian12_makefiles_inplace
         CMAKE_GENERATOR: "Unix Makefiles"
         CMAKE_CI_BOOTSTRAP: 1
         CMAKE_CI_INPLACE: 1
         CMAKE_CI_NO_INSTALL: 1
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.debian10_extdeps:
-    extends: .debian10
+.debian12_extdeps:
+    extends: .debian12
 
     variables:
-        CMAKE_CONFIGURATION: debian10_extdeps
+        CMAKE_CONFIGURATION: debian12_extdeps
         CMAKE_CI_BUILD_TYPE: Release
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.debian10_aarch64_extdeps:
-    extends: .debian10_aarch64
+.debian12_aarch64_extdeps:
+    extends: .debian12_aarch64
 
     variables:
-        CMAKE_CONFIGURATION: debian10_aarch64_extdeps
+        CMAKE_CONFIGURATION: debian12_aarch64_extdeps
         CMAKE_CI_BUILD_TYPE: Release
         CTEST_NO_WARNINGS_ALLOWED: 1
 
@@ -187,18 +187,18 @@
 
 ### Clang Compiler
 
-.debian10_makefiles_clang:
-    extends: .debian10
+.debian12_makefiles_clang:
+    extends: .debian12
 
     variables:
-        CMAKE_CONFIGURATION: debian10_makefiles_clang
+        CMAKE_CONFIGURATION: debian12_makefiles_clang
         CMAKE_GENERATOR: "Unix Makefiles"
 
-.debian10_ninja_clang:
-    extends: .debian10
+.debian12_ninja_clang:
+    extends: .debian12
 
     variables:
-        CMAKE_CONFIGURATION: debian10_ninja_clang
+        CMAKE_CONFIGURATION: debian12_ninja_clang
 
 .fedora38_makefiles_clang:
     extends: .fedora38

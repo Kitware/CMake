@@ -1,14 +1,11 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#include "cmConfigure.h"
-
 #include "cmUVProcessChain.h"
 
 #include <array>
 #include <csignal>
 #include <cstdio>
 #include <istream> // IWYU pragma: keep
-#include <type_traits>
 #include <utility>
 
 #include <cm/memory>

@@ -14,6 +14,8 @@
 
 #include "cmsys/FStream.hxx"
 
+#include "cm_codecvt_Encoding.hxx"
+
 #include "cmCryptoHash.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"

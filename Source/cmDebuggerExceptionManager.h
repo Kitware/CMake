@@ -5,7 +5,6 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <cstddef>
-#include <functional>
 #include <mutex>
 #include <string>
 #include <unordered_map>
@@ -14,7 +13,7 @@
 
 #include <cm3p/cppdap/protocol.h>
 
-#include "cmMessageType.h"
+#include "cmMessageType.h" // IWYU pragma: keep
 
 namespace dap {
 class Session;

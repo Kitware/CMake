@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmXcFramework.h"
 
-#include <functional>
 #include <string>
 
 #include <cmext/string_view>

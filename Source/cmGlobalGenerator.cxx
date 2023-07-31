@@ -13,6 +13,7 @@
 #include <iomanip>
 #include <iterator>
 #include <sstream>
+#include <type_traits>
 #include <utility>
 
 #include <cm/memory>
@@ -23,6 +24,8 @@
 #include "cmsys/Directory.hxx"
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
+
+#include "cm_codecvt_Encoding.hxx"
 
 #include "cmAlgorithms.h"
 #include "cmCPackPropertiesGenerator.h"

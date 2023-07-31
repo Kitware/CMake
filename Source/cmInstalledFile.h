@@ -9,7 +9,8 @@
 #include <string>
 #include <vector>
 
-class cmCompiledGeneratorExpression;
+#include "cmGeneratorExpression.h"
+
 class cmMakefile;
 
 /** \class cmInstalledFile

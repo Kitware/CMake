@@ -10,7 +10,6 @@
 #include "cmsys/RegularExpression.hxx"
 
 #include "cmCTest.h"
-#include "cmProcessTools.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"

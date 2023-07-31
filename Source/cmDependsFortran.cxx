@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <map>
+#include <type_traits>
 #include <utility>
 
 #include "cmsys/FStream.hxx"

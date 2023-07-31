@@ -3,6 +3,7 @@
 #include "cmGeneratedFileStream.h"
 
 #include <cstdio>
+#include <locale>
 
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"

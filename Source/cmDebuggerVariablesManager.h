@@ -7,14 +7,9 @@
 #include <cstdint>
 #include <functional>
 #include <unordered_map>
-#include <vector>
 
-#include <cm3p/cppdap/types.h> // IWYU pragma: keep
-
-namespace dap {
-struct Variable;
-struct VariablesRequest;
-}
+#include <cm3p/cppdap/protocol.h>
+#include <cm3p/cppdap/types.h>
 
 namespace cmDebugger {
 

@@ -11,7 +11,6 @@
 #include "cmInstallGenerator.h"
 #include "cmInstallType.h"
 #include "cmListFileCache.h"
-#include "cmScriptGenerator.h"
 
 class cmGeneratorTarget;
 class cmLocalGenerator;

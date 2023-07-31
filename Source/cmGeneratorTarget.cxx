@@ -13,6 +13,7 @@
 #include <iterator>
 #include <queue>
 #include <sstream>
+#include <type_traits>
 #include <unordered_set>
 #include <utility>
 

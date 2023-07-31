@@ -14,11 +14,9 @@
 
 #include <cm3p/cppdap/protocol.h>
 
-class cmListFileFunction;
+#include "cmDebuggerSourceBreakpoint.h"
 
-namespace cmDebugger {
-class cmDebuggerSourceBreakpoint;
-}
+class cmListFileFunction;
 
 namespace dap {
 class Session;

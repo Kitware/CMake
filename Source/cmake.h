@@ -17,8 +17,9 @@
 #include <cm/string_view>
 #include <cmext/string_view>
 
-#include "cmDocumentationEntry.h"
+#include "cmDocumentationEntry.h" // IWYU pragma: keep
 #include "cmGeneratedFileStream.h"
+#include "cmGlobalGeneratorFactory.h"
 #include "cmInstalledFile.h"
 #include "cmListFileCache.h"
 #include "cmMessageType.h"
@@ -48,7 +49,6 @@ class cmExternalMakefileProjectGeneratorFactory;
 class cmFileAPI;
 class cmFileTimeCache;
 class cmGlobalGenerator;
-class cmGlobalGeneratorFactory;
 class cmMakefile;
 class cmMessenger;
 class cmVariableWatch;

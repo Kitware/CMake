@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-ARG BASE_IMAGE=arm64v8/debian:10
+ARG BASE_IMAGE=arm64v8/debian:12
 
 FROM ${BASE_IMAGE} AS apt-cache
 # Populate APT cache w/ the fresh metadata and prefetch packages.

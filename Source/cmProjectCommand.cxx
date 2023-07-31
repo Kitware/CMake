@@ -3,7 +3,6 @@
 #include "cmProjectCommand.h"
 
 #include <array>
-#include <cstddef>
 #include <cstdio>
 #include <functional>
 #include <limits>

@@ -4,6 +4,7 @@
 
 #include <chrono>
 #include <cstdlib>
+#include <ratio>
 #include <sstream>
 
 #include <cmext/string_view>

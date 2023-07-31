@@ -13,7 +13,6 @@
 
 #include "cmCTest.h"
 #include "cmCTestVC.h"
-#include "cmProcessTools.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"

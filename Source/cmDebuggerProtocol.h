@@ -4,7 +4,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <vector>
+#include <string>
 
 #include <cm3p/cppdap/protocol.h>
 

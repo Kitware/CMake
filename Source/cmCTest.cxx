@@ -11,6 +11,7 @@
 #include <ctime>
 #include <iostream>
 #include <map>
+#include <ratio>
 #include <sstream>
 #include <string>
 #include <utility>

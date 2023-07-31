@@ -7,9 +7,8 @@
 #include <memory>
 #include <vector>
 
+#include "cmGeneratorExpressionEvaluator.h"
 #include "cmGeneratorExpressionLexer.h"
-
-struct cmGeneratorExpressionEvaluator;
 
 struct cmGeneratorExpressionParser
 {

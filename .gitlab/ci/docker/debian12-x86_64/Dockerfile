@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-ARG BASE_IMAGE=debian:10
+ARG BASE_IMAGE=debian:12
 
 FROM ${BASE_IMAGE} AS apt-cache
 # Populate APT cache w/ the fresh metadata and prefetch packages.
@@ -56,7 +56,7 @@ RUN --mount=type=bind,source=install_deps.sh,target=/root/install_deps.sh \
 
 RUN --mount=type=bind,from=iwyu-build,source=/root,target=/root \
     tar -C / -xf /root/iwyu.tar \
- && ln -s /usr/lib/llvm-6.0/bin/include-what-you-use /usr/bin/include-what-you-use-6.0
+ && ln -s /usr/lib/llvm-15/bin/include-what-you-use /usr/bin/include-what-you-use-15
 
 RUN --mount=type=bind,from=rvm-build,source=/root,target=/root \
     tar -C /usr/local -xf /root/rvm.tar

@@ -16,6 +16,7 @@
 #include "cmInstallType.h"
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
+#include "cmScriptGenerator.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 

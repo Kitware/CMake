@@ -11,6 +11,9 @@
 
 namespace cm {
 
+template <typename T>
+struct uv_handle_deleter;
+
 struct uv_loop_deleter
 {
   void operator()(uv_loop_t* loop) const;
