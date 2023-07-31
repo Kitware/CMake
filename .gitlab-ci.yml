@@ -344,6 +344,17 @@ t:linux-gcc-cxx-modules-ninja-multi:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
+t:debian10-legacy:
+    extends:
+        - .debian10_legacy
+        - .cmake_test_linux_release
+        - .linux_x86_64_tags
+        - .cmake_junit_artifacts
+        - .run_dependent
+        - .needs_centos6_x86_64
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
 b:fedora38-ninja:
     extends:
         - .fedora38_ninja
