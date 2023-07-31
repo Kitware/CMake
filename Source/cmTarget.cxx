@@ -2423,6 +2423,7 @@ cmValue cmTarget::GetProperty(const std::string& prop) const
     propC_STANDARD,
     propCXX_STANDARD,
     propCUDA_STANDARD,
+    propHIP_STANDARD,
     propOBJC_STANDARD,
     propOBJCXX_STANDARD,
     propLINK_LIBRARIES,
@@ -2447,8 +2448,8 @@ cmValue cmTarget::GetProperty(const std::string& prop) const
   };
   if (specialProps.count(prop)) {
     if (prop == propC_STANDARD || prop == propCXX_STANDARD ||
-        prop == propCUDA_STANDARD || prop == propOBJC_STANDARD ||
-        prop == propOBJCXX_STANDARD) {
+        prop == propCUDA_STANDARD || prop == propHIP_STANDARD ||
+        prop == propOBJC_STANDARD || prop == propOBJCXX_STANDARD) {
       auto propertyIter = this->impl->LanguageStandardProperties.find(prop);
       if (propertyIter == this->impl->LanguageStandardProperties.end()) {
         return nullptr;
