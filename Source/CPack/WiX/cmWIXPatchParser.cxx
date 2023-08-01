@@ -5,6 +5,7 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cmext/string_view>
 
 #include <cm3p/expat.h>
 
@@ -20,9 +21,7 @@ cmWIXPatchNode::Type cmWIXPatchElement::type()
   return cmWIXPatchNode::ELEMENT;
 }
 
-cmWIXPatchNode::~cmWIXPatchNode()
-{
-}
+cmWIXPatchNode::~cmWIXPatchNode() = default;
 
 cmWIXPatchElement::cmWIXPatchElement() = default;
 cmWIXPatchElement::~cmWIXPatchElement() = default;
@@ -39,13 +38,13 @@ cmWIXPatchParser::cmWIXPatchParser(fragment_map_t& fragments,
 void cmWIXPatchParser::StartElement(const std::string& name, const char** atts)
 {
   if (State == BEGIN_DOCUMENT) {
-    if (name == "CPackWiXPatch") {
+    if (name == "CPackWiXPatch"_s) {
       State = BEGIN_FRAGMENTS;
     } else {
       ReportValidationError("Expected root element 'CPackWiXPatch'");
     }
   } else if (State == BEGIN_FRAGMENTS) {
-    if (name == "CPackWiXFragment") {
+    if (name == "CPackWiXFragment"_s) {
       State = INSIDE_FRAGMENT;
       StartFragment(atts);
     } else {
@@ -78,7 +77,7 @@ void cmWIXPatchParser::StartFragment(const char** attributes)
     const std::string key = attributes[i];
     const std::string value = attributes[i + 1];
 
-    if (key == "Id") {
+    if (key == "Id"_s) {
       if (Fragments.find(value) != Fragments.end()) {
         std::ostringstream tmp;
         tmp << "Invalid reuse of 'CPackWixFragment' 'Id': " << value;
@@ -98,7 +97,7 @@ void cmWIXPatchParser::StartFragment(const char** attributes)
       const std::string key = attributes[i];
       const std::string value = attributes[i + 1];
 
-      if (key != "Id") {
+      if (key != "Id"_s) {
         new_element->attributes[key] = value;
       }
     }
@@ -108,7 +107,7 @@ void cmWIXPatchParser::StartFragment(const char** attributes)
 void cmWIXPatchParser::EndElement(const std::string& name)
 {
   if (State == INSIDE_FRAGMENT) {
-    if (name == "CPackWiXFragment") {
+    if (name == "CPackWiXFragment"_s) {
       State = BEGIN_FRAGMENTS;
       ElementStack.clear();
     } else {
@@ -142,7 +141,7 @@ void cmWIXPatchParser::ReportError(int line, int column, const char* msg)
 {
   cmCPackLogger(cmCPackLog::LOG_ERROR,
                 "Error while processing XML patch file at "
-                  << line << ":" << column << ":  " << msg << std::endl);
+                  << line << ':' << column << ":  " << msg << std::endl);
   Valid = false;
 }
 

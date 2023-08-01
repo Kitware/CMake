@@ -69,7 +69,7 @@ bool read(cmsys::ifstream& fin, std::vector<T>& v)
     return true;
   }
   return static_cast<bool>(
-    fin.read(reinterpret_cast<char*>(&v[0]), sizeof(T) * v.size()));
+    fin.read(reinterpret_cast<char*>(v.data()), sizeof(T) * v.size()));
 }
 }
 

@@ -158,7 +158,7 @@ std::string cmGlobalVisualStudio7Generator::FindDevEnvCommand()
   std::string vskey;
 
   // Search in standard location.
-  vskey = this->GetRegistryBase() + ";InstallDir";
+  vskey = cmStrCat(this->GetRegistryBase(), ";InstallDir");
   if (cmSystemTools::ReadRegistryValue(vskey, vscmd,
                                        cmSystemTools::KeyWOW64_32)) {
     cmSystemTools::ConvertToUnixSlashes(vscmd);
@@ -189,25 +189,25 @@ const char* cmGlobalVisualStudio7Generator::ExternalProjectType(
   const std::string& location)
 {
   std::string extension = cmSystemTools::GetFilenameLastExtension(location);
-  if (extension == ".vbproj") {
+  if (extension == ".vbproj"_s) {
     return "F184B08F-C81C-45F6-A57F-5ABD9991F28F";
   }
-  if (extension == ".csproj") {
+  if (extension == ".csproj"_s) {
     return "FAE04EC0-301F-11D3-BF4B-00C04F79EFBC";
   }
-  if (extension == ".fsproj") {
+  if (extension == ".fsproj"_s) {
     return "F2A71F9B-5D33-465A-A702-920D77279786";
   }
-  if (extension == ".vdproj") {
+  if (extension == ".vdproj"_s) {
     return "54435603-DBB4-11D2-8724-00A0C9A8B90C";
   }
-  if (extension == ".dbproj") {
+  if (extension == ".dbproj"_s) {
     return "C8D11400-126E-41CD-887F-60BD40844F9E";
   }
-  if (extension == ".wixproj") {
+  if (extension == ".wixproj"_s) {
     return "930C7802-8A8C-48F9-8165-68863BCCD9DD";
   }
-  if (extension == ".pyproj") {
+  if (extension == ".pyproj"_s) {
     return "888888A0-9F3D-457C-B088-3A5042F75D52";
   }
   return "8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942";
@@ -252,14 +252,14 @@ cmGlobalVisualStudio7Generator::GenerateBuildCommand(
       continue;
     }
     bool clean = false;
-    if (realTarget == "clean") {
+    if (realTarget == "clean"_s) {
       clean = true;
       realTarget = "ALL_BUILD";
     }
     GeneratedMakeCommand makeCommand;
     makeCommand.RequiresOutputForward = requiresOutputForward;
     makeCommand.Add(makeProgramSelected);
-    makeCommand.Add(projectName + ".sln");
+    makeCommand.Add(cmStrCat(projectName, ".sln"));
     makeCommand.Add((clean ? "/clean" : "/build"));
     makeCommand.Add((config.empty() ? "Debug" : config));
     makeCommand.Add("/project");
@@ -459,7 +459,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
         cmLocalGenerator* lg = target->GetLocalGenerator();
         std::string dir = lg->GetCurrentBinaryDirectory();
         dir = root->MaybeRelativeToCurBinDir(dir);
-        if (dir == ".") {
+        if (dir == "."_s) {
           dir.clear(); // msbuild cannot handle ".\" prefix
         }
         this->WriteProject(fout, *vcprojName, dir, target);
@@ -483,12 +483,12 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
           }
 
           if (cumulativePath.empty()) {
-            cumulativePath = "CMAKE_FOLDER_GUID_" + iter;
+            cumulativePath = cmStrCat("CMAKE_FOLDER_GUID_", iter);
           } else {
-            VisualStudioFolders[cumulativePath].insert(cumulativePath + "/" +
-                                                       iter);
+            VisualStudioFolders[cumulativePath].insert(
+              cmStrCat(cumulativePath, '/', iter));
 
-            cumulativePath = cumulativePath + "/" + iter;
+            cumulativePath = cmStrCat(cumulativePath, '/', iter);
           }
         }
 
@@ -552,7 +552,8 @@ std::string cmGlobalVisualStudio7Generator::ConvertToSolutionPath(
 void cmGlobalVisualStudio7Generator::WriteSLNGlobalSections(
   std::ostream& fout, cmLocalGenerator* root)
 {
-  std::string const guid = this->GetGUID(root->GetProjectName() + ".sln");
+  std::string const guid =
+    this->GetGUID(cmStrCat(root->GetProjectName(), ".sln"));
   bool extensibilityGlobalsOverridden = false;
   bool extensibilityAddInsOverridden = false;
   const std::vector<std::string> propKeys =
@@ -572,14 +573,15 @@ void cmGlobalVisualStudio7Generator::WriteSLNGlobalSections(
       }
       if (!name.empty()) {
         bool addGuid = false;
-        if (name == "ExtensibilityGlobals" && sectionType == "postSolution") {
+        if (name == "ExtensibilityGlobals"_s &&
+            sectionType == "postSolution"_s) {
           addGuid = true;
           extensibilityGlobalsOverridden = true;
-        } else if (name == "ExtensibilityAddIns" &&
-                   sectionType == "postSolution") {
+        } else if (name == "ExtensibilityAddIns"_s &&
+                   sectionType == "postSolution"_s) {
           extensibilityAddInsOverridden = true;
         }
-        fout << "\tGlobalSection(" << name << ") = " << sectionType << "\n";
+        fout << "\tGlobalSection(" << name << ") = " << sectionType << '\n';
         cmValue p = root->GetMakefile()->GetProperty(it);
         cmList keyValuePairs{ *p };
         for (std::string const& itPair : keyValuePairs) {
@@ -589,8 +591,8 @@ void cmGlobalVisualStudio7Generator::WriteSLNGlobalSections(
               cmTrimWhitespace(itPair.substr(0, posEqual));
             const std::string value =
               cmTrimWhitespace(itPair.substr(posEqual + 1));
-            fout << "\t\t" << key << " = " << value << "\n";
-            if (key == "SolutionGuid") {
+            fout << "\t\t" << key << " = " << value << '\n';
+            if (key == "SolutionGuid"_s) {
               addGuid = false;
             }
           }
@@ -679,7 +681,7 @@ std::string cmGlobalVisualStudio7Generator::WriteUtilityDepend(
 
 std::string cmGlobalVisualStudio7Generator::GetGUID(std::string const& name)
 {
-  std::string const& guidStoreName = name + "_GUID_CMAKE";
+  std::string const& guidStoreName = cmStrCat(name, "_GUID_CMAKE");
   if (cmValue storedGUID =
         this->CMakeInstance->GetCacheDefinition(guidStoreName)) {
     return *storedGUID;
@@ -704,9 +706,7 @@ void cmGlobalVisualStudio7Generator::AppendDirectoryForConfig(
   const std::string& suffix, std::string& dir)
 {
   if (!config.empty()) {
-    dir += prefix;
-    dir += config;
-    dir += suffix;
+    dir += cmStrCat(prefix, config, suffix);
   }
 }
 
@@ -727,7 +727,7 @@ std::set<std::string> cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(
       // check if target <t> is part of default build
       if (target->GetName() == t) {
         const std::string propertyName =
-          "CMAKE_VS_INCLUDE_" + t + "_TO_DEFAULT_BUILD";
+          cmStrCat("CMAKE_VS_INCLUDE_", t, "_TO_DEFAULT_BUILD");
         // inspect CMAKE_VS_INCLUDE_<t>_TO_DEFAULT_BUILD properties
         for (std::string const& i : configs) {
           cmValue propertyValue =

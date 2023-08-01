@@ -670,7 +670,7 @@ bool cmGlobalGhsMultiGenerator::AddCheckTarget()
     }
 
     // Add the cache file.
-    listFiles.push_back(cmStrCat(
+    listFiles.emplace_back(cmStrCat(
       this->GetCMakeInstance()->GetHomeOutputDirectory(), "/CMakeCache.txt"));
 
     // Print not implemented warning.

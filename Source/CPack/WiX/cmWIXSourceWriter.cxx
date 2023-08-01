@@ -34,7 +34,7 @@ cmWIXSourceWriter::~cmWIXSourceWriter()
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   Elements.size() - 1
                     << " WiX elements were still open when closing '"
-                    << SourceFilename << "'" << std::endl);
+                    << SourceFilename << '\'' << std::endl);
     return;
   }
 
@@ -44,12 +44,12 @@ cmWIXSourceWriter::~cmWIXSourceWriter()
 void cmWIXSourceWriter::BeginElement(std::string const& name)
 {
   if (State == BEGIN) {
-    File << ">";
+    File << '>';
   }
 
-  File << "\n";
+  File << '\n';
   Indent(Elements.size());
-  File << "<" << name;
+  File << '<' << name;
 
   Elements.push_back(name);
   State = BEGIN;
@@ -60,7 +60,7 @@ void cmWIXSourceWriter::EndElement(std::string const& name)
   if (Elements.empty()) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "can not end WiX element with no open elements in '"
-                    << SourceFilename << "'" << std::endl);
+                    << SourceFilename << '\'' << std::endl);
     return;
   }
 
@@ -68,14 +68,14 @@ void cmWIXSourceWriter::EndElement(std::string const& name)
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "WiX element <"
                     << Elements.back() << "> can not be closed by </" << name
-                    << "> in '" << SourceFilename << "'" << std::endl);
+                    << "> in '" << SourceFilename << '\'' << std::endl);
     return;
   }
 
   if (State == DEFAULT) {
-    File << "\n";
+    File << '\n';
     Indent(Elements.size() - 1);
-    File << "</" << Elements.back() << ">";
+    File << "</" << Elements.back() << '>';
   } else {
     File << "/>";
   }
@@ -87,17 +87,17 @@ void cmWIXSourceWriter::EndElement(std::string const& name)
 void cmWIXSourceWriter::AddTextNode(std::string const& text)
 {
   if (State == BEGIN) {
-    File << ">";
+    File << '>';
   }
 
   if (Elements.empty()) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "can not add text without open WiX element in '"
-                    << SourceFilename << "'" << std::endl);
+                    << SourceFilename << '\'' << std::endl);
     return;
   }
 
-  File << this->EscapeAttributeValue(text);
+  File << cmWIXSourceWriter::EscapeAttributeValue(text);
   State = DEFAULT;
 }
 
@@ -105,12 +105,12 @@ void cmWIXSourceWriter::AddProcessingInstruction(std::string const& target,
                                                  std::string const& content)
 {
   if (State == BEGIN) {
-    File << ">";
+    File << '>';
   }
 
-  File << "\n";
+  File << '\n';
   Indent(Elements.size());
-  File << "<?" << target << " " << content << "?>";
+  File << "<?" << target << ' ' << content << "?>";
 
   State = DEFAULT;
 }
@@ -118,7 +118,7 @@ void cmWIXSourceWriter::AddProcessingInstruction(std::string const& target,
 void cmWIXSourceWriter::AddAttribute(std::string const& key,
                                      std::string const& value)
 {
-  File << " " << key << "=\"" << EscapeAttributeValue(value) << '"';
+  File << ' ' << key << "=\"" << EscapeAttributeValue(value) << '"';
 }
 
 void cmWIXSourceWriter::AddAttributeUnlessEmpty(std::string const& key,
@@ -144,7 +144,7 @@ std::string cmWIXSourceWriter::CreateGuidFromComponentId(
 
 void cmWIXSourceWriter::WriteXMLDeclaration()
 {
-  File << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;
+  File << R"(<?xml version="1.0" encoding="UTF-8"?>)" << std::endl;
 }
 
 void cmWIXSourceWriter::Indent(size_t count)

@@ -304,7 +304,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     for (const auto& gi : generators) {
       stampFile = cmStrCat(gi->GetMakefile()->GetCurrentBinaryDirectory(),
                            "/CMakeFiles/generate.stamp");
-      fout << stampFile << "\n";
+      fout << stampFile << '\n';
       stamps.push_back(stampFile);
     }
   }
@@ -341,7 +341,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     std::string argS = cmStrCat("-S", lg.GetSourceDirectory());
     std::string argB = cmStrCat("-B", lg.GetBinaryDirectory());
     std::string const sln =
-      lg.GetBinaryDirectory() + "/" + lg.GetProjectName() + ".sln";
+      cmStrCat(lg.GetBinaryDirectory(), '/', lg.GetProjectName(), ".sln");
     cmCustomCommandLines commandLines = cmMakeSingleCommandLine(
       { cmSystemTools::GetCMakeCommand(), argS, argB, "--check-stamp-list",
         stampList, "--vs-solution-file", sln });
@@ -364,7 +364,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
           lg.AddCustomCommandToOutput(std::move(cc), true)) {
       gt->AddSource(file->ResolveFullPath());
     } else {
-      cmSystemTools::Error("Error adding rule for " + stamps[0]);
+      cmSystemTools::Error(cmStrCat("Error adding rule for ", stamps[0]));
     }
   }
 
@@ -392,8 +392,8 @@ void cmGlobalVisualStudio8Generator::WriteSolutionConfigurations(
 {
   fout << "\tGlobalSection(SolutionConfigurationPlatforms) = preSolution\n";
   for (std::string const& i : configs) {
-    fout << "\t\t" << i << "|" << this->GetPlatformName() << " = " << i << "|"
-         << this->GetPlatformName() << "\n";
+    fout << "\t\t" << i << '|' << this->GetPlatformName() << " = " << i << '|'
+         << this->GetPlatformName() << '\n';
   }
   fout << "\tEndGlobalSection\n";
 }
@@ -409,33 +409,33 @@ void cmGlobalVisualStudio8Generator::WriteProjectConfigurations(
     cmList mapConfig;
     const char* dstConfig = i.c_str();
     if (target.GetProperty("EXTERNAL_MSPROJECT")) {
-      if (cmValue m = target.GetProperty("MAP_IMPORTED_CONFIG_" +
-                                         cmSystemTools::UpperCase(i))) {
+      if (cmValue m = target.GetProperty(
+            cmStrCat("MAP_IMPORTED_CONFIG_", cmSystemTools::UpperCase(i)))) {
         mapConfig.assign(*m);
         if (!mapConfig.empty()) {
           dstConfig = mapConfig[0].c_str();
         }
       }
     }
-    fout << "\t\t{" << guid << "}." << i << "|" << this->GetPlatformName()
-         << ".ActiveCfg = " << dstConfig << "|"
+    fout << "\t\t{" << guid << "}." << i << '|' << this->GetPlatformName()
+         << ".ActiveCfg = " << dstConfig << '|'
          << (!platformMapping.empty() ? platformMapping
                                       : this->GetPlatformName())
-         << "\n";
+         << '\n';
     auto ci = configsPartOfDefaultBuild.find(i);
     if (!(ci == configsPartOfDefaultBuild.end())) {
-      fout << "\t\t{" << guid << "}." << i << "|" << this->GetPlatformName()
-           << ".Build.0 = " << dstConfig << "|"
+      fout << "\t\t{" << guid << "}." << i << '|' << this->GetPlatformName()
+           << ".Build.0 = " << dstConfig << '|'
            << (!platformMapping.empty() ? platformMapping
                                         : this->GetPlatformName())
-           << "\n";
+           << '\n';
     }
     if (this->NeedsDeploy(target, dstConfig)) {
-      fout << "\t\t{" << guid << "}." << i << "|" << this->GetPlatformName()
-           << ".Deploy.0 = " << dstConfig << "|"
+      fout << "\t\t{" << guid << "}." << i << '|' << this->GetPlatformName()
+           << ".Deploy.0 = " << dstConfig << '|'
            << (!platformMapping.empty() ? platformMapping
                                         : this->GetPlatformName())
-           << "\n";
+           << '\n';
     }
   }
 }

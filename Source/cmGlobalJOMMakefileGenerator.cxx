@@ -5,6 +5,7 @@
 #include <ostream>
 
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
@@ -45,7 +46,7 @@ void cmGlobalJOMMakefileGenerator::PrintCompilerAdvice(std::ostream& os,
                                                        std::string const& lang,
                                                        cmValue envVar) const
 {
-  if (lang == "CXX" || lang == "C") {
+  if (lang == "CXX"_s || lang == "C"_s) {
     /* clang-format off */
     os <<
       "To use the JOM generator with Visual C++, cmake must be run from a "

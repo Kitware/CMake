@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <utility>
 
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 void cmSlnProjectEntry::AddProjectConfiguration(
@@ -72,7 +73,8 @@ std::string cmSlnData::GetConfigurationTarget(
   const std::string& projectName, const std::string& solutionConfiguration,
   const std::string& platformName)
 {
-  std::string solutionTarget = solutionConfiguration + "|" + platformName;
+  std::string solutionTarget =
+    cmStrCat(solutionConfiguration, '|', platformName);
   cm::optional<cmSlnProjectEntry> project = GetProjectByName(projectName);
   if (!project) {
     return platformName;

@@ -63,15 +63,16 @@ const WCHAR* ComponentType = L"Component";
 bool LoadVSInstanceVCToolsetVersion(VSInstanceInfo& vsInstanceInfo)
 {
   std::string const vcRoot = vsInstanceInfo.GetInstallLocation();
-  std::string vcToolsVersionFile =
-    vcRoot + "/VC/Auxiliary/Build/Microsoft.VCToolsVersion.default.txt";
+  std::string vcToolsVersionFile = cmStrCat(
+    vcRoot, "/VC/Auxiliary/Build/Microsoft.VCToolsVersion.default.txt");
   std::string vcToolsVersion;
   cmsys::ifstream fin(vcToolsVersionFile.c_str());
   if (!fin || !cmSystemTools::GetLineFromStream(fin, vcToolsVersion)) {
     return false;
   }
   vcToolsVersion = cmTrimWhitespace(vcToolsVersion);
-  std::string const vcToolsDir = vcRoot + "/VC/Tools/MSVC/" + vcToolsVersion;
+  std::string const vcToolsDir =
+    cmStrCat(vcRoot, "/VC/Tools/MSVC/", vcToolsVersion);
   if (!cmSystemTools::FileIsDirectory(vcToolsDir)) {
     return false;
   }
@@ -434,14 +435,14 @@ bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
 
   std::string envVSCommonToolsDir;
   std::string envVSCommonToolsDirEnvName =
-    "VS" + std::to_string(this->Version) + "0COMNTOOLS";
+    cmStrCat("VS", std::to_string(this->Version), "0COMNTOOLS");
 
   if (cmSystemTools::GetEnv(envVSCommonToolsDirEnvName.c_str(),
                             envVSCommonToolsDir)) {
     cmSystemTools::ConvertToUnixSlashes(envVSCommonToolsDir);
   }
 
-  std::string const wantVersion = std::to_string(this->Version) + '.';
+  std::string const wantVersion = cmStrCat(std::to_string(this->Version), '.');
 
   bool specifiedLocationNotSpecifiedVersion = false;
 
