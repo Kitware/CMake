@@ -1272,10 +1272,16 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeFileReferenceFromPath(
   fileRef->AddAttribute("sourceTree", this->CreateString(sourceTree));
 
   cmXCodeObject* group = this->GroupMap[key];
-  if (!group && IsLibraryType(fileType)) {
-    group = this->FrameworkGroup;
-    this->GroupMap[key] = group;
+  if (!group) {
+    if (IsLibraryType(fileType)) {
+      group = this->FrameworkGroup;
+    } else if (fileType == "folder") {
+      group = this->ResourcesGroup;
+    }
+    if (group)
+      this->GroupMap[key] = group;
   }
+
   if (!group) {
     cmSystemTools::Error(cmStrCat("Could not find a PBX group for ", key));
     return nullptr;
@@ -4108,7 +4114,8 @@ void cmGlobalXCodeGenerator::AddEmbeddedObjects(
         buildFile = it->second;
       }
     } else if (cmSystemTools::IsPathToFramework(relFile) ||
-               cmSystemTools::IsPathToMacOSSharedLibrary(relFile)) {
+               cmSystemTools::IsPathToMacOSSharedLibrary(relFile) ||
+               cmSystemTools::FileIsDirectory(filePath)) {
       // This is a regular string path - create file reference
       auto it = this->EmbeddedLibRefs.find(relFile);
       if (it == this->EmbeddedLibRefs.end()) {
@@ -4208,6 +4215,15 @@ void cmGlobalXCodeGenerator::AddEmbeddedExtensionKitExtensions(
                            "XCODE_EMBED_EXTENSIONKIT_EXTENSIONS",
                            dstSubfolderSpec, RemoveHeadersOnCopyByDefault,
                            "$(EXTENSIONS_FOLDER_PATH)");
+}
+
+void cmGlobalXCodeGenerator::AddEmbeddedResources(cmXCodeObject* target)
+{
+  static const auto dstSubfolderSpec = "7";
+
+  this->AddEmbeddedObjects(target, "Embed Resources",
+                           "XCODE_EMBED_RESOURCES_PATH", dstSubfolderSpec,
+                           NoActionOnCopyByDefault);
 }
 
 bool cmGlobalXCodeGenerator::CreateGroups(
@@ -4411,6 +4427,15 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
   this->FrameworkGroup->AddAttribute("children", frameworkGroupChildren);
   this->MainGroupChildren->AddObject(this->FrameworkGroup);
 
+  this->ResourcesGroup = this->CreateObject(cmXCodeObject::PBXGroup);
+  this->ResourcesGroup->AddAttribute("name", this->CreateString("Resources"));
+  this->ResourcesGroup->AddAttribute("sourceTree",
+                                     this->CreateString("<group>"));
+  cmXCodeObject* ResourcesGroupChildren =
+    this->CreateObject(cmXCodeObject::OBJECT_LIST);
+  this->ResourcesGroup->AddAttribute("children", ResourcesGroupChildren);
+  this->MainGroupChildren->AddObject(this->ResourcesGroup);
+
   this->RootObject = this->CreateObject(cmXCodeObject::PBXProject);
   this->RootObject->SetComment("Project object");
 
@@ -4602,6 +4627,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
     this->AddEmbeddedPlugIns(t);
     this->AddEmbeddedAppExtensions(t);
     this->AddEmbeddedExtensionKitExtensions(t);
+    this->AddEmbeddedResources(t);
     // Inherit project-wide values for any target-specific search paths.
     this->InheritBuildSettingAttribute(t, "HEADER_SEARCH_PATHS");
     this->InheritBuildSettingAttribute(t, "SYSTEM_HEADER_SEARCH_PATHS");
