@@ -359,6 +359,13 @@
         CMAKE_CONFIGURATION: hip5.5_radeon
         CMAKE_GENERATOR: "Ninja Multi-Config"
 
+.debian12_hip_radeon:
+    extends: .debian12
+
+    variables:
+        CMAKE_CONFIGURATION: debian12_hip_radeon
+        CTEST_LABELS: "HIP"
+
 ### C++ modules
 
 .gcc_cxx_modules_x86_64:
