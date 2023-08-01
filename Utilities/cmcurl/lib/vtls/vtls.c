@@ -453,7 +453,7 @@ bool Curl_ssl_getsessionid(struct Curl_cfilter *cf,
     }
   }
 
-  DEBUGF(infof(data, DMSG(data, "%s Session ID in cache for %s %s://%s:%d"),
+  DEBUGF(infof(data, "%s Session ID in cache for %s %s://%s:%d",
                no_match? "Didn't find": "Found",
                Curl_ssl_cf_is_proxy(cf) ? "proxy" : "host",
                cf->conn->handler->scheme, connssl->hostname, connssl->port));
@@ -601,8 +601,8 @@ CURLcode Curl_ssl_addsessionid(struct Curl_cfilter *cf,
   if(added)
     *added = TRUE;
 
-  DEBUGF(infof(data, DMSG(data, "Added Session ID to cache for %s://%s:%d"
-               " [%s]"), store->scheme, store->name, store->remote_port,
+  DEBUGF(infof(data, "Added Session ID to cache for %s://%s:%d [%s]",
+               store->scheme, store->name, store->remote_port,
                Curl_ssl_cf_is_proxy(cf) ? "PROXY" : "server"));
   return CURLE_OK;
 }
@@ -893,8 +893,8 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
   /* only do this if pinnedpubkey starts with "sha256//", length 8 */
   if(strncmp(pinnedpubkey, "sha256//", 8) == 0) {
     CURLcode encode;
-    size_t encodedlen, pinkeylen;
-    char *encoded, *pinkeycopy, *begin_pos, *end_pos;
+    size_t encodedlen = 0, pinkeylen;
+    char *encoded = NULL, *pinkeycopy, *begin_pos, *end_pos;
     unsigned char *sha256sumdigest;
 
     if(!Curl_ssl->sha256sum) {
@@ -907,14 +907,12 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
     if(!sha256sumdigest)
       return CURLE_OUT_OF_MEMORY;
     encode = Curl_ssl->sha256sum(pubkey, pubkeylen,
-                        sha256sumdigest, CURL_SHA256_DIGEST_LENGTH);
+                                 sha256sumdigest, CURL_SHA256_DIGEST_LENGTH);
 
-    if(encode != CURLE_OK)
-      return encode;
-
-    encode = Curl_base64_encode((char *)sha256sumdigest,
-                                CURL_SHA256_DIGEST_LENGTH, &encoded,
-                                &encodedlen);
+    if(!encode)
+      encode = Curl_base64_encode((char *)sha256sumdigest,
+                                  CURL_SHA256_DIGEST_LENGTH, &encoded,
+                                  &encodedlen);
     Curl_safefree(sha256sumdigest);
 
     if(encode)
@@ -1506,7 +1504,7 @@ static void ssl_cf_close(struct Curl_cfilter *cf,
 
   CF_DATA_SAVE(save, cf, data);
   cf_close(cf, data);
-  cf->next->cft->close(cf->next, data);
+  cf->next->cft->do_close(cf->next, data);
   CF_DATA_RESTORE(cf, save);
 }
 
@@ -1530,7 +1528,7 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
   DEBUGASSERT(connssl);
   DEBUGASSERT(cf->conn->host.name);
 
-  result = cf->next->cft->connect(cf->next, data, blocking, done);
+  result = cf->next->cft->do_connect(cf->next, data, blocking, done);
   if(result || !*done)
     goto out;
 
@@ -1594,6 +1592,7 @@ static ssize_t ssl_cf_recv(struct Curl_cfilter *cf,
   ssize_t nread;
 
   CF_DATA_SAVE(save, cf, data);
+  *err = CURLE_OK;
   nread = Curl_ssl->recv_plain(cf, data, buf, len, err);
   if(nread > 0) {
     DEBUGASSERT((size_t)nread <= len);

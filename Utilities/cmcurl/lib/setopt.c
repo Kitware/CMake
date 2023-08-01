@@ -1867,6 +1867,15 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      */
     data->set.haproxyprotocol = (0 != va_arg(param, long)) ? TRUE : FALSE;
     break;
+  case CURLOPT_HAPROXY_CLIENT_IP:
+    /*
+     * Set the client IP to send through HAProxy PROXY protocol
+     */
+    result = Curl_setstropt(&data->set.str[STRING_HAPROXY_CLIENT_IP],
+                            va_arg(param, char *));
+    /* We enable implicitly the HAProxy protocol if we use this flag. */
+    data->set.haproxyprotocol = TRUE;
+    break;
 #endif
   case CURLOPT_INTERFACE:
     /*
@@ -2711,7 +2720,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     /* Set the list of mail recipients */
     data->set.mail_rcpt = va_arg(param, struct curl_slist *);
     break;
-  case CURLOPT_MAIL_RCPT_ALLLOWFAILS:
+  case CURLOPT_MAIL_RCPT_ALLOWFAILS:
     /* allow RCPT TO command to fail for some recipients */
     data->set.mail_rcpt_allowfails = (0 != va_arg(param, long)) ? TRUE : FALSE;
     break;

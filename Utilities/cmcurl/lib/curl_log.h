@@ -74,7 +74,7 @@ void Curl_debug(struct Curl_easy *data, curl_infotype type,
     defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
 
 #define LOG_CF(data, cf, ...) \
-  do { if(Curl_log_cf_is_debug(cf)) \
+  do { if(Curl_log_cf_is_debug(cf, data)) \
          Curl_log_cf_debug(data, cf, __VA_ARGS__); } while(0)
 #else
 #define LOG_CF Curl_log_cf_debug
@@ -90,8 +90,10 @@ void Curl_log_cf_debug(struct Curl_easy *data, struct Curl_cfilter *cf,
                        const char *fmt, ...);
 #endif
 
-#define Curl_log_cf_is_debug(cf) \
-    ((cf) && (cf)->cft->log_level >= CURL_LOG_DEBUG)
+#define Curl_log_cf_is_debug(cf, data) \
+    ((data) && (data)->set.verbose && \
+     (cf) && (cf)->cft->log_level >= CURL_LOG_DEBUG)
+
 
 #else /* !DEBUGBUILD */
 
@@ -110,29 +112,10 @@ void Curl_log_cf_debug(struct Curl_easy *data, struct Curl_cfilter *cf,
                        const char *fmt, ...);
 #endif
 
-#define Curl_log_cf_is_debug(x)   ((void)(x), FALSE)
+#define Curl_log_cf_is_debug(x,y)   ((void)(x), (void)(y), FALSE)
 
 #endif  /* !DEBUGBUILD */
 
-#define LOG_CF_IS_DEBUG(x)        Curl_log_cf_is_debug(x)
-
-/* Macros intended for DEBUGF logging, use like:
- * DEBUGF(infof(data, CFMSG(cf, "this filter %s rocks"), "very much"));
- * and it will output:
- * [CONN-1-0][CF-SSL] this filter very much rocks
- * on connection #1 with sockindex 0 for filter of type "SSL". */
-#define DMSG(d,msg)  \
-  "[CONN-%ld] "msg, (d)->conn->connection_id
-#define DMSGI(d,i,msg)  \
-  "[CONN-%ld-%d] "msg, (d)->conn->connection_id, (i)
-#define CMSG(c,msg)  \
-  "[CONN-%ld] "msg, (c)->connection_id
-#define CMSGI(c,i,msg)  \
-  "[CONN-%ld-%d] "msg, (c)->connection_id, (i)
-#define CFMSG(cf,msg)  \
-  "[CONN-%ld-%d][CF-%s] "msg, (cf)->conn->connection_id, \
-  (cf)->sockindex, (cf)->cft->name
-
-
+#define LOG_CF_IS_DEBUG(cf, data)        Curl_log_cf_is_debug(cf, data)
 
 #endif /* HEADER_CURL_LOG_H */

@@ -50,7 +50,7 @@ void Curl_cf_def_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   cf->connected = FALSE;
   if(cf->next)
-    cf->next->cft->close(cf->next, data);
+    cf->next->cft->do_close(cf->next, data);
 }
 #endif
 
@@ -161,7 +161,7 @@ void Curl_conn_close(struct Curl_easy *data, int index)
   /* it is valid to call that without filters being present */
   cf = data->conn->cfilter[index];
   if(cf) {
-    cf->cft->close(cf, data);
+    cf->cft->do_close(cf, data);
   }
 }
 
@@ -179,7 +179,7 @@ ssize_t Curl_conn_recv(struct Curl_easy *data, int num, char *buf,
   if(cf) {
     return cf->cft->do_recv(cf, data, buf, len, code);
   }
-  failf(data, CMSGI(data->conn, num, "recv: no filter connected"));
+  failf(data, "recv: no filter connected");
   *code = CURLE_FAILED_INIT;
   return -1;
 }
@@ -198,7 +198,7 @@ ssize_t Curl_conn_send(struct Curl_easy *data, int num,
   if(cf) {
     return cf->cft->do_send(cf, data, mem, len, code);
   }
-  failf(data, CMSGI(data->conn, num, "send: no filter connected"));
+  failf(data, "send: no filter connected");
   DEBUGASSERT(0);
   *code = CURLE_FAILED_INIT;
   return -1;
@@ -293,14 +293,14 @@ CURLcode Curl_conn_cf_connect(struct Curl_cfilter *cf,
                               bool blocking, bool *done)
 {
   if(cf)
-    return cf->cft->connect(cf, data, blocking, done);
+    return cf->cft->do_connect(cf, data, blocking, done);
   return CURLE_FAILED_INIT;
 }
 
 void Curl_conn_cf_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   if(cf)
-    cf->cft->close(cf, data);
+    cf->cft->do_close(cf, data);
 }
 
 int Curl_conn_cf_get_select_socks(struct Curl_cfilter *cf,
@@ -348,7 +348,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
 
   *done = cf->connected;
   if(!*done) {
-    result = cf->cft->connect(cf, data, blocking, done);
+    result = cf->cft->do_connect(cf, data, blocking, done);
     if(!result && *done) {
       Curl_conn_ev_update_info(data, data->conn);
       conn_report_connect_stats(data, data->conn);

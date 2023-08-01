@@ -1,5 +1,3 @@
-#ifndef HEADER_CURL_SMB_H
-#define HEADER_CURL_SMB_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +5,6 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) Bill Nagel <wnagel@tycoint.com>, Exacq Technologies
  * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
@@ -25,36 +22,41 @@
  *
  ***************************************************************************/
 
-enum smb_conn_state {
-  SMB_NOT_CONNECTED = 0,
-  SMB_CONNECTING,
-  SMB_NEGOTIATE,
-  SMB_SETUP,
-  SMB_CONNECTED
-};
+#include "curl_setup.h"
 
-struct smb_conn {
-  enum smb_conn_state state;
-  char *user;
-  char *domain;
-  char *share;
-  unsigned char challenge[8];
-  unsigned int session_key;
-  unsigned short uid;
-  char *recv_buf;
-  size_t upload_size;
-  size_t send_size;
-  size_t sent;
-  size_t got;
-};
+#if defined(__APPLE__)
 
-#if !defined(CURL_DISABLE_SMB) && defined(USE_CURL_NTLM_CORE) && \
-    (SIZEOF_CURL_OFF_T > 4)
+#if !defined(TARGET_OS_OSX) || TARGET_OS_OSX
 
-extern const struct Curl_handler Curl_handler_smb;
-extern const struct Curl_handler Curl_handler_smbs;
+#include <curl/curl.h>
 
-#endif /* CURL_DISABLE_SMB && USE_CURL_NTLM_CORE &&
-          SIZEOF_CURL_OFF_T > 4 */
+#include "macos.h"
 
-#endif /* HEADER_CURL_SMB_H */
+#if defined(ENABLE_IPV6) && defined(CURL_OSX_CALL_COPYPROXIES)
+#include <SystemConfiguration/SCDynamicStoreCopySpecific.h>
+#endif
+
+CURLcode Curl_macos_init(void)
+{
+#if defined(ENABLE_IPV6) && defined(CURL_OSX_CALL_COPYPROXIES)
+  {
+    /*
+     * The automagic conversion from IPv4 literals to IPv6 literals only
+     * works if the SCDynamicStoreCopyProxies system function gets called
+     * first. As Curl currently doesn't support system-wide HTTP proxies, we
+     * therefore don't use any value this function might return.
+     *
+     * This function is only available on a macOS and is not needed for
+     * IPv4-only builds, hence the conditions above.
+     */
+    CFDictionaryRef dict = SCDynamicStoreCopyProxies(NULL);
+    if(dict)
+      CFRelease(dict);
+  }
+#endif
+  return CURLE_OK;
+}
+
+#endif /* TARGET_OS_OSX */
+
+#endif /* __APPLE__ */
