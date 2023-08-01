@@ -89,6 +89,7 @@ add_library(
   ${CMAKE_CURL_SSL_DLLS}
   )
 
+if(0) # This code not needed for building within CMake.
 add_library(
   curlu # special libcurlu library just for unittests
   STATIC
@@ -96,6 +97,7 @@ add_library(
   ${HHEADERS} ${CSOURCES}
 )
 target_compile_definitions(curlu PUBLIC UNITTESTS CURL_STATICLIB)
+endif()
 
 add_library(
   ${PROJECT_NAME}::${LIB_NAME}
@@ -113,7 +115,9 @@ if(NOT BUILD_SHARED_LIBS)
 endif()
 
 target_link_libraries(${LIB_NAME} PRIVATE ${CURL_LIBS})
+if(0) # This code not needed for building within CMake.
 target_link_libraries(curlu PRIVATE ${CURL_LIBS})
+endif()
 
 if(0) # This code not needed for building within CMake.
 transform_makefile_inc("Makefile.soname" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.soname.cmake")
