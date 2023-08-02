@@ -124,8 +124,6 @@ signatures that specify them.  The common options are:
 Installing Targets
 ^^^^^^^^^^^^^^^^^^
 
-.. _`install(TARGETS)`:
-
 .. signature::
   install(TARGETS <target>... [...])
 
@@ -381,13 +379,14 @@ Installing Targets
     is not recommended to use ``NAMELINK_SKIP`` in conjunction with
     ``NAMELINK_COMPONENT``.
 
-  The `install(TARGETS)`_ command can also accept the following options at the
-  top level:
+  The :command:`install(TARGETS)` command can also accept the following
+  options at the top level:
 
   ``EXPORT``
     This option associates the installed target files with an export called
-    ``<export-name>``.  It must appear before any target options.  To actually
-    install the export file itself, call `install(EXPORT)`_, documented below.
+    ``<export-name>``.  It must appear before any target options.
+    To actually install the export file itself, call
+    :command:`install(EXPORT)`, documented below.
     See documentation of the :prop_tgt:`EXPORT_NAME` target property to change
     the name of the exported target.
 
@@ -399,8 +398,8 @@ Installing Targets
   ``INCLUDES DESTINATION``
     This option specifies a list of directories which will be added to the
     :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` target property of the
-    ``<targets>`` when exported by the `install(EXPORT)`_ command. If a
-    relative path is specified, it is treated as relative to the
+    ``<targets>`` when exported by the :command:`install(EXPORT)` command.
+    If a relative path is specified, it is treated as relative to the
     :genex:`$<INSTALL_PREFIX>`.
 
   ``RUNTIME_DEPENDENCY_SET``
@@ -409,7 +408,7 @@ Installing Targets
     This option causes all runtime dependencies of installed executable, shared
     library, and module targets to be added to the specified runtime dependency
     set. This set can then be installed with an
-    `install(RUNTIME_DEPENDENCY_SET)`_ command.
+    :command:`install(RUNTIME_DEPENDENCY_SET)` command.
 
     This keyword and the ``RUNTIME_DEPENDENCIES`` keyword are mutually
     exclusive.
@@ -433,7 +432,7 @@ Installing Targets
 
     where ``<set-name>`` will be a randomly generated set name.
     The ``args...`` may include any of the following keywords supported by
-    the `install(RUNTIME_DEPENDENCY_SET)`_ command:
+    the :command:`install(RUNTIME_DEPENDENCY_SET)` command:
 
     * ``DIRECTORIES``
     * ``PRE_INCLUDE_REGEXES``
@@ -482,7 +481,7 @@ Installing Targets
     :manual:`cmake-generator-expressions(7)` manual for available expressions.
 
   .. versionadded:: 3.13
-    `install(TARGETS)`_ can install targets that were created in
+    :command:`install(TARGETS)` can install targets that were created in
     other directories.  When using such cross-directory install rules, running
     ``make install`` (or similar) from a subdirectory will not guarantee that
     targets from other directories are up-to-date.  You can use
@@ -492,8 +491,6 @@ Installing Targets
 
 Installing Imported Runtime Artifacts
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. _`install(IMPORTED_RUNTIME_ARTIFACTS)`:
 
 .. signature::
   install(IMPORTED_RUNTIME_ARTIFACTS <target>... [...])
@@ -530,13 +527,10 @@ Installing Imported Runtime Artifacts
   The ``RUNTIME_DEPENDENCY_SET`` option causes the runtime artifacts of the
   imported executable, shared library, and module library ``targets`` to be
   added to the ``<set-name>`` runtime dependency set. This set can then be
-  installed with an `install(RUNTIME_DEPENDENCY_SET)`_ command.
+  installed with an :command:`install(RUNTIME_DEPENDENCY_SET)` command.
 
 Installing Files
 ^^^^^^^^^^^^^^^^
-
-.. _`install(FILES)`:
-.. _`install(PROGRAMS)`:
 
 .. signature::
   install(FILES <file>... [...])
@@ -642,8 +636,6 @@ Installing Files
 
 Installing Directories
 ^^^^^^^^^^^^^^^^^^^^^^
-
-.. _`install(DIRECTORY)`:
 
 .. signature::
   install(DIRECTORY <dir>... [...])
@@ -785,9 +777,6 @@ Installing Directories
 Custom Installation Logic
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. _`install(CODE)`:
-.. _`install(SCRIPT)`:
-
 .. signature::
   install(SCRIPT <file> [...])
   install(CODE <code> [...])
@@ -828,8 +817,6 @@ Custom Installation Logic
 Installing Exports
 ^^^^^^^^^^^^^^^^^^
 
-.. _`install(EXPORT)`:
-
 .. signature::
   install(EXPORT <export-name> [...])
 
@@ -850,7 +837,7 @@ Installing Exports
   The ``EXPORT`` form generates and installs a CMake file containing code to
   import targets from the installation tree into another project.
   Target installations are associated with the export ``<export-name>``
-  using the ``EXPORT`` option of the `install(TARGETS)`_ signature
+  using the ``EXPORT`` option of the :command:`install(TARGETS)` signature
   documented above.  The ``NAMESPACE`` option will prepend ``<namespace>`` to
   the target names as they are written to the import file.  By default
   the generated file will be called ``<export-name>.cmake`` but the ``FILE``
@@ -940,8 +927,6 @@ Installing Exports
 Installing Runtime Dependencies
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. _`install(RUNTIME_DEPENDENCY_SET)`:
-
 .. signature::
   install(RUNTIME_DEPENDENCY_SET <set-name> [...])
 
@@ -970,14 +955,14 @@ Installing Runtime Dependencies
             )
 
   Installs a runtime dependency set previously created by one or more
-  `install(TARGETS)`_ or `install(IMPORTED_RUNTIME_ARTIFACTS)`_ commands. The
-  dependencies of targets belonging to a runtime dependency set are installed in
-  the ``RUNTIME`` destination and component on DLL platforms, and in the
-  ``LIBRARY`` destination and component on non-DLL platforms. macOS frameworks
-  are installed in the ``FRAMEWORK`` destination and component.
+  :command:`install(TARGETS)` or :command:`install(IMPORTED_RUNTIME_ARTIFACTS)`
+  commands.  The dependencies of targets belonging to a runtime dependency set
+  are installed in the ``RUNTIME`` destination and component on DLL platforms,
+  and in the ``LIBRARY`` destination and component on non-DLL platforms.
+  macOS frameworks are installed in the ``FRAMEWORK`` destination and component.
   Targets built within the build tree will never be installed as runtime
   dependencies, nor will their own dependencies, unless the targets themselves
-  are installed with `install(TARGETS)`_.
+  are installed with :command:`install(TARGETS)`.
 
   The generated install script calls :command:`file(GET_RUNTIME_DEPENDENCIES)`
   on the build-tree files to calculate the runtime dependencies. The build-tree
