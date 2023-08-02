@@ -1318,7 +1318,8 @@ void cmLocalVisualStudio7GeneratorInternals::OutputLibraries(
       fout << (lib.HasFeature() ? lib.GetFormattedItem(rel).Value : rel)
            << " ";
     } else if (!lib.Target ||
-               lib.Target->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
+               (lib.Target->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
+                lib.Target->GetType() != cmStateEnums::OBJECT_LIBRARY)) {
       fout << lib.Value.Value << " ";
     }
   }

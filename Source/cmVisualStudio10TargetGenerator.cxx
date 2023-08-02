@@ -4603,7 +4603,8 @@ void cmVisualStudio10TargetGenerator::AddLibraries(
                                         : path);
       }
     } else if (!l.Target ||
-               l.Target->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
+               (l.Target->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
+                l.Target->GetType() != cmStateEnums::OBJECT_LIBRARY)) {
       libVec.push_back(l.Value.Value);
     }
   }
