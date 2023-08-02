@@ -1,0 +1,19 @@
+^CMake Error at CacheErrors\.cmake:1 \(set\):
+  set given invalid arguments for CACHE mode: missing type and docstring
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at CacheErrors\.cmake:2 \(set\):
+  set given invalid arguments for CACHE mode: missing type or docstring
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at CacheErrors\.cmake:3 \(set\):
+  set given invalid arguments for CACHE mode: missing type or docstring
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at CacheErrors\.cmake:4 \(set\):
+  set given invalid arguments: FORCE specified without CACHE
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$
