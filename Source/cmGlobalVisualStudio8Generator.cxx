@@ -265,22 +265,6 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
   auto new_end = std::unique(listFiles.begin(), listFiles.end());
   listFiles.erase(new_end, listFiles.end());
 
-  // Add all cmake input files which are used by the project
-  // so Visual Studio does not close them when reloading it.
-  for (const std::string& listFile : listFiles) {
-    if (listFile.find("/CMakeFiles/") != std::string::npos) {
-      continue;
-    }
-    if (!cmSystemTools::IsSubDirectory(listFile,
-                                       lg.GetMakefile()->GetHomeDirectory()) &&
-        !cmSystemTools::IsSubDirectory(
-          listFile, lg.GetMakefile()->GetHomeOutputDirectory())) {
-      continue;
-    }
-
-    tgt->AddSource(listFile);
-  }
-
   auto ptr = cm::make_unique<cmGeneratorTarget>(tgt, &lg);
   auto* gt = ptr.get();
   lg.AddGeneratorTarget(std::move(ptr));
