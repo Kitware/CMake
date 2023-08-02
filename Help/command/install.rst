@@ -38,6 +38,8 @@ are executed in order during installation.
   The environment variable :envvar:`CMAKE_INSTALL_MODE` can override the
   default copying behavior of ``install()``.
 
+.. _`common options`:
+
 There are multiple signatures for this command.  Some of them define
 installation options for files and targets.  Options common to
 multiple signatures are covered here but they are valid only for
@@ -69,9 +71,19 @@ signatures that specify them.  The common options are:
   ``WORLD_EXECUTE``, ``SETUID``, and ``SETGID``.  Permissions that do
   not make sense on certain platforms are ignored on those platforms.
 
+  If this option is used multiple times in a single call, its list
+  of permissions accumulates.  If an :command:`install(TARGETS)` call
+  uses `\<artifact-kind\>`_ arguments, a separate list of permissions
+  is accumulated for each kind of artifact.
+
 ``CONFIGURATIONS <config>...``
   Specify a list of build configurations for which the install rule
   applies (Debug, Release, etc.).
+
+  If this option is used multiple times in a single call, its list
+  of configurations accumulates.  If an :command:`install(TARGETS)`
+  call uses `\<artifact-kind\>`_ arguments, a separate list of
+  configurations is accumulated for each kind of artifact.
 
 ``COMPONENT <component>``
   Specify an installation component name with which the install rule
@@ -123,23 +135,31 @@ Signatures
 
     install(TARGETS <target>... [EXPORT <export-name>]
             [RUNTIME_DEPENDENCIES <arg>...|RUNTIME_DEPENDENCY_SET <set-name>]
-            [[ARCHIVE|LIBRARY|RUNTIME|OBJECTS|FRAMEWORK|BUNDLE|
-              PRIVATE_HEADER|PUBLIC_HEADER|RESOURCE|
-              FILE_SET <set-name>|CXX_MODULES_BMI]
-             [DESTINATION <dir>]
-             [PERMISSIONS <permission>...]
-             [CONFIGURATIONS <config>...]
-             [COMPONENT <component>]
-             [NAMELINK_COMPONENT <component>]
-             [OPTIONAL] [EXCLUDE_FROM_ALL]
-             [NAMELINK_ONLY|NAMELINK_SKIP]
-            ] [...]
+            [<artifact-option>...]
+            [<artifact-kind> <artifact-option>...]...
             [INCLUDES DESTINATION [<dir> ...]]
             )
 
-  The ``TARGETS`` form specifies rules for installing targets from a
-  project.  There are several kinds of target :ref:`Output Artifacts`
-  that may be installed:
+  where ``<artifact-option>...`` group may contain:
+
+  .. code-block:: cmake
+
+    [DESTINATION <dir>]
+    [PERMISSIONS <permission>...]
+    [CONFIGURATIONS <config>...]
+    [COMPONENT <component>]
+    [NAMELINK_COMPONENT <component>]
+    [OPTIONAL] [EXCLUDE_FROM_ALL]
+    [NAMELINK_ONLY|NAMELINK_SKIP]
+
+  The first ``<artifact-option>...`` group applies to target
+  :ref:`Output Artifacts` that do not have a dedicated group specified
+  later in the same call.
+
+  .. _`<artifact-kind>`:
+
+  Each ``<artifact-kind> <artifact-option>...`` group applies to
+  :ref:`Output Artifacts` of the specified artifact kind:
 
   ``ARCHIVE``
     Target artifacts of this kind include:
@@ -223,10 +243,6 @@ Signatures
     derived from the names of the modules. An empty ``DESTINATION`` may be used
     to suppress installing these files (for use in generic code).
 
-  For each of these arguments given, the arguments following them only apply
-  to the target or file type specified in the argument. If none is given, the
-  installation properties apply to all target types.
-
   For regular executables, static libraries and shared libraries, the
   ``DESTINATION`` argument is not required.  For these target types, when
   ``DESTINATION`` is omitted, a default destination will be taken from the
@@ -285,7 +301,7 @@ Signatures
               DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/myproj
     )
 
-  In addition to the common options listed above, each target can accept
+  In addition to the `common options`_ listed above, each target can accept
   the following additional arguments:
 
   ``NAMELINK_COMPONENT``
