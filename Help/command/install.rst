@@ -43,7 +43,7 @@ installation options for files and targets.  Options common to
 multiple signatures are covered here but they are valid only for
 signatures that specify them.  The common options are:
 
-``DESTINATION``
+``DESTINATION <dir>``
   Specify the directory on disk to which a file will be installed.
   Arguments can be relative or absolute paths.
 
@@ -62,18 +62,18 @@ signatures that specify them.  The common options are:
   :variable:`CMAKE_INSTALL_PREFIX`; this prefix is used by default if
   the DESTINATION is a relative path.
 
-``PERMISSIONS``
+``PERMISSIONS <permission>...``
   Specify permissions for installed files.  Valid permissions are
   ``OWNER_READ``, ``OWNER_WRITE``, ``OWNER_EXECUTE``, ``GROUP_READ``,
   ``GROUP_WRITE``, ``GROUP_EXECUTE``, ``WORLD_READ``, ``WORLD_WRITE``,
   ``WORLD_EXECUTE``, ``SETUID``, and ``SETGID``.  Permissions that do
   not make sense on certain platforms are ignored on those platforms.
 
-``CONFIGURATIONS``
+``CONFIGURATIONS <config>...``
   Specify a list of build configurations for which the install rule
   applies (Debug, Release, etc.).
 
-``COMPONENT``
+``COMPONENT <component>``
   Specify an installation component name with which the install rule
   is associated, such as ``Runtime`` or ``Development``.  During
   component-specific installation only install rules associated with
@@ -89,7 +89,7 @@ signatures that specify them.  The common options are:
   Specify that the file is excluded from a full installation and only
   installed as part of a component-specific installation
 
-``RENAME``
+``RENAME <name>``
   Specify a name for an installed file that may be different from the
   original file.  Renaming is allowed only when a single file is
   installed by the command.
@@ -121,13 +121,14 @@ Signatures
 
   .. code-block:: cmake
 
-    install(TARGETS targets... [EXPORT <export-name>]
-            [RUNTIME_DEPENDENCIES args...|RUNTIME_DEPENDENCY_SET <set-name>]
+    install(TARGETS <target>... [EXPORT <export-name>]
+            [RUNTIME_DEPENDENCIES <arg>...|RUNTIME_DEPENDENCY_SET <set-name>]
             [[ARCHIVE|LIBRARY|RUNTIME|OBJECTS|FRAMEWORK|BUNDLE|
-              PRIVATE_HEADER|PUBLIC_HEADER|RESOURCE|FILE_SET <set-name>|CXX_MODULES_BMI]
+              PRIVATE_HEADER|PUBLIC_HEADER|RESOURCE|
+              FILE_SET <set-name>|CXX_MODULES_BMI]
              [DESTINATION <dir>]
-             [PERMISSIONS permissions...]
-             [CONFIGURATIONS [Debug|Release|...]]
+             [PERMISSIONS <permission>...]
+             [CONFIGURATIONS <config>...]
              [COMPONENT <component>]
              [NAMELINK_COMPONENT <component>]
              [OPTIONAL] [EXCLUDE_FROM_ALL]
@@ -199,12 +200,12 @@ Signatures
     Similar to ``PUBLIC_HEADER`` and ``PRIVATE_HEADER``, but for
     ``RESOURCE`` files. See :prop_tgt:`RESOURCE` for details.
 
-  ``FILE_SET <set>``
+  ``FILE_SET <set-name>``
     .. versionadded:: 3.23
 
     File sets are defined by the :command:`target_sources(FILE_SET)` command.
-    If the file set ``<set>`` exists and is ``PUBLIC`` or ``INTERFACE``, any
-    files in the set are installed under the destination (see below).
+    If the file set ``<set-name>`` exists and is ``PUBLIC`` or ``INTERFACE``,
+    any files in the set are installed under the destination (see below).
     The directory structure relative to the file set's base directories is
     preserved. For example, a file added to the file set as
     ``/blah/include/myproj/here.h`` with a base directory ``/blah/include``
@@ -392,7 +393,7 @@ Signatures
     If a relative path is specified, it is treated as relative to the
     :genex:`$<INSTALL_PREFIX>`.
 
-  ``RUNTIME_DEPENDENCY_SET``
+  ``RUNTIME_DEPENDENCY_SET <set-name>``
     .. versionadded:: 3.21
 
     This option causes all runtime dependencies of installed executable, shared
@@ -403,7 +404,7 @@ Signatures
     This keyword and the ``RUNTIME_DEPENDENCIES`` keyword are mutually
     exclusive.
 
-  ``RUNTIME_DEPENDENCIES``
+  ``RUNTIME_DEPENDENCIES <arg>...``
     .. versionadded:: 3.21
 
     This option causes all runtime dependencies of installed executable, shared
@@ -418,10 +419,10 @@ Signatures
     .. code-block:: cmake
 
       install(TARGETS ... RUNTIME_DEPENDENCY_SET <set-name>)
-      install(RUNTIME_DEPENDENCY_SET <set-name> args...)
+      install(RUNTIME_DEPENDENCY_SET <set-name> <arg>...)
 
     where ``<set-name>`` will be a randomly generated set name.
-    The ``args...`` may include any of the following keywords supported by
+    ``<arg>...`` may include any of the following keywords supported by
     the :command:`install(RUNTIME_DEPENDENCY_SET)` command:
 
     * ``DIRECTORIES``
@@ -488,12 +489,12 @@ Signatures
 
   .. code-block:: cmake
 
-    install(IMPORTED_RUNTIME_ARTIFACTS targets...
+    install(IMPORTED_RUNTIME_ARTIFACTS <target>...
             [RUNTIME_DEPENDENCY_SET <set-name>]
             [[LIBRARY|RUNTIME|FRAMEWORK|BUNDLE]
              [DESTINATION <dir>]
-             [PERMISSIONS permissions...]
-             [CONFIGURATIONS [Debug|Release|...]]
+             [PERMISSIONS <permission>...]
+             [CONFIGURATIONS <config>...]
              [COMPONENT <component>]
              [OPTIONAL] [EXCLUDE_FROM_ALL]
             ] [...]
@@ -530,10 +531,10 @@ Signatures
 
   .. code-block:: cmake
 
-    install(<FILES|PROGRAMS> files...
+    install(<FILES|PROGRAMS> <file>...
             TYPE <type> | DESTINATION <dir>
-            [PERMISSIONS permissions...]
-            [CONFIGURATIONS [Debug|Release|...]]
+            [PERMISSIONS <permission>...]
+            [CONFIGURATIONS <config>...]
             [COMPONENT <component>]
             [RENAME <name>] [OPTIONAL] [EXCLUDE_FROM_ALL])
 
@@ -634,14 +635,14 @@ Signatures
 
     install(DIRECTORY dirs...
             TYPE <type> | DESTINATION <dir>
-            [FILE_PERMISSIONS permissions...]
-            [DIRECTORY_PERMISSIONS permissions...]
+            [FILE_PERMISSIONS <permission>...]
+            [DIRECTORY_PERMISSIONS <permission>...]
             [USE_SOURCE_PERMISSIONS] [OPTIONAL] [MESSAGE_NEVER]
-            [CONFIGURATIONS [Debug|Release|...]]
+            [CONFIGURATIONS <config>...]
             [COMPONENT <component>] [EXCLUDE_FROM_ALL]
             [FILES_MATCHING]
             [[PATTERN <pattern> | REGEX <regex>]
-             [EXCLUDE] [PERMISSIONS permissions...]] [...])
+             [EXCLUDE] [PERMISSIONS <permission>...]] [...])
 
   The ``DIRECTORY`` form installs contents of one or more directories to a
   given destination.  The directory structure is copied verbatim to the
@@ -801,8 +802,8 @@ Signatures
 
     install(EXPORT <export-name> DESTINATION <dir>
             [NAMESPACE <namespace>] [FILE <name>.cmake]
-            [PERMISSIONS permissions...]
-            [CONFIGURATIONS [Debug|Release|...]
+            [PERMISSIONS <permission>...]
+            [CONFIGURATIONS <config>...]
             [CXX_MODULES_DIRECTORY <directory>]
             [EXPORT_LINK_INTERFACE_LIBRARIES]
             [COMPONENT <component>]
@@ -911,19 +912,19 @@ Signatures
     install(RUNTIME_DEPENDENCY_SET <set-name>
             [[LIBRARY|RUNTIME|FRAMEWORK]
              [DESTINATION <dir>]
-             [PERMISSIONS permissions...]
-             [CONFIGURATIONS [Debug|Release|...]]
+             [PERMISSIONS <permission>...]
+             [CONFIGURATIONS <config>...]
              [COMPONENT <component>]
              [NAMELINK_COMPONENT <component>]
              [OPTIONAL] [EXCLUDE_FROM_ALL]
             ] [...]
-            [PRE_INCLUDE_REGEXES regexes...]
-            [PRE_EXCLUDE_REGEXES regexes...]
-            [POST_INCLUDE_REGEXES regexes...]
-            [POST_EXCLUDE_REGEXES regexes...]
-            [POST_INCLUDE_FILES files...]
-            [POST_EXCLUDE_FILES files...]
-            [DIRECTORIES directories...]
+            [PRE_INCLUDE_REGEXES <regex>...]
+            [PRE_EXCLUDE_REGEXES <regex>...]
+            [POST_INCLUDE_REGEXES <regex>...]
+            [POST_EXCLUDE_REGEXES <regex>...]
+            [POST_INCLUDE_FILES <file>...]
+            [POST_EXCLUDE_FILES <file>...]
+            [DIRECTORIES <dir>...]
             )
 
   Installs a runtime dependency set previously created by one or more
@@ -954,13 +955,13 @@ Signatures
   a non-empty list of directories, regular expressions or files).  They all
   support :manual:`generator expressions <cmake-generator-expressions(7)>`.
 
-  * ``DIRECTORIES <directories>``
-  * ``PRE_INCLUDE_REGEXES <regexes>``
-  * ``PRE_EXCLUDE_REGEXES <regexes>``
-  * ``POST_INCLUDE_REGEXES <regexes>``
-  * ``POST_EXCLUDE_REGEXES <regexes>``
-  * ``POST_INCLUDE_FILES <files>``
-  * ``POST_EXCLUDE_FILES <files>``
+  * ``DIRECTORIES <dir>...``
+  * ``PRE_INCLUDE_REGEXES <regex>...``
+  * ``PRE_EXCLUDE_REGEXES <regex>...``
+  * ``POST_INCLUDE_REGEXES <regex>...``
+  * ``POST_EXCLUDE_REGEXES <regex>...``
+  * ``POST_INCLUDE_FILES <file>...``
+  * ``POST_EXCLUDE_FILES <file>...``
 
 Generated Installation Script
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
