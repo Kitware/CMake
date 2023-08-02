@@ -201,7 +201,7 @@ static CURLUcode urlencode_str(struct dynbuf *o, const char *url,
 size_t Curl_is_absolute_url(const char *url, char *buf, size_t buflen,
                             bool guess_scheme)
 {
-  int i;
+  int i = 0;
   DEBUGASSERT(!buf || (buflen > MAX_SCHEME_LEN));
   (void)buflen; /* only used in debug-builds */
   if(buf)
@@ -210,17 +210,18 @@ size_t Curl_is_absolute_url(const char *url, char *buf, size_t buflen,
   if(guess_scheme && STARTS_WITH_DRIVE_PREFIX(url))
     return 0;
 #endif
-  for(i = 0; i < MAX_SCHEME_LEN; ++i) {
-    char s = url[i];
-    if(s && (ISALNUM(s) || (s == '+') || (s == '-') || (s == '.') )) {
-      /* RFC 3986 3.1 explains:
-        scheme      = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )
-      */
+  if(ISALPHA(url[0]))
+    for(i = 1; i < MAX_SCHEME_LEN; ++i) {
+      char s = url[i];
+      if(s && (ISALNUM(s) || (s == '+') || (s == '-') || (s == '.') )) {
+        /* RFC 3986 3.1 explains:
+           scheme      = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )
+        */
+      }
+      else {
+        break;
+      }
     }
-    else {
-      break;
-    }
-  }
   if(i && (url[i] == ':') && ((url[i + 1] == '/') || !guess_scheme)) {
     /* If this does not guess scheme, the scheme always ends with the colon so
        that this also detects data: URLs etc. In guessing mode, data: could
@@ -1546,7 +1547,7 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
         }
       }
 
-      url = aprintf("%s://%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+      url = aprintf("%s://%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
                     scheme,
                     u->user ? u->user : "",
                     u->password ? ":": "",
@@ -1557,7 +1558,6 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
                     allochost ? allochost : u->host,
                     port ? ":": "",
                     port ? port : "",
-                    (u->path && (u->path[0] != '/')) ? "/": "",
                     u->path ? u->path : "/",
                     (u->query && u->query[0]) ? "?": "",
                     (u->query && u->query[0]) ? u->query : "",
@@ -1639,8 +1639,10 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
   bool urlencode = (flags & CURLU_URLENCODE)? 1 : 0;
   bool plusencode = FALSE;
   bool urlskipslash = FALSE;
+  bool leadingslash = FALSE;
   bool appendquery = FALSE;
   bool equalsencode = FALSE;
+  size_t nalloc;
 
   if(!u)
     return CURLUE_BAD_HANDLE;
@@ -1693,6 +1695,11 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
     return CURLUE_OK;
   }
 
+  nalloc = strlen(part);
+  if(nalloc > CURL_MAX_INPUT_LENGTH)
+    /* excessive input length */
+    return CURLUE_MALFORMED_INPUT;
+
   switch(what) {
   case CURLUPART_SCHEME: {
     size_t plen = strlen(part);
@@ -1706,13 +1713,17 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
       return CURLUE_UNSUPPORTED_SCHEME;
     storep = &u->scheme;
     urlencode = FALSE; /* never */
-    /* ALPHA *( ALPHA / DIGIT / "+" / "-" / "." ) */
-    while(plen--) {
-      if(ISALNUM(*s) || (*s == '+') || (*s == '-') || (*s == '.'))
-        s++; /* fine */
-      else
-        return CURLUE_BAD_SCHEME;
+    if(ISALPHA(*s)) {
+      /* ALPHA *( ALPHA / DIGIT / "+" / "-" / "." ) */
+      while(--plen) {
+        if(ISALNUM(*s) || (*s == '+') || (*s == '-') || (*s == '.'))
+          s++; /* fine */
+        else
+          return CURLUE_BAD_SCHEME;
+      }
     }
+    else
+      return CURLUE_BAD_SCHEME;
     break;
   }
   case CURLUPART_USER:
@@ -1746,6 +1757,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
   break;
   case CURLUPART_PATH:
     urlskipslash = TRUE;
+    leadingslash = TRUE; /* enforce */
     storep = &u->path;
     break;
   case CURLUPART_QUERY:
@@ -1794,18 +1806,17 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
   }
   DEBUGASSERT(storep);
   {
-    const char *newp = part;
-    size_t nalloc = strlen(part);
+    const char *newp;
+    struct dynbuf enc;
+    Curl_dyn_init(&enc, nalloc * 3 + 1 + leadingslash);
 
-    if(nalloc > CURL_MAX_INPUT_LENGTH)
-      /* excessive input length */
-      return CURLUE_MALFORMED_INPUT;
-
+    if(leadingslash && (part[0] != '/')) {
+      CURLcode result = Curl_dyn_addn(&enc, "/", 1);
+      if(result)
+        return CURLUE_OUT_OF_MEMORY;
+    }
     if(urlencode) {
       const unsigned char *i;
-      struct dynbuf enc;
-
-      Curl_dyn_init(&enc, nalloc * 3 + 1);
 
       for(i = (const unsigned char *)part; *i; i++) {
         CURLcode result;
@@ -1833,14 +1844,13 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
             return CURLUE_OUT_OF_MEMORY;
         }
       }
-      newp = Curl_dyn_ptr(&enc);
     }
     else {
       char *p;
-      newp = strdup(part);
-      if(!newp)
+      CURLcode result = Curl_dyn_add(&enc, part);
+      if(result)
         return CURLUE_OUT_OF_MEMORY;
-      p = (char *)newp;
+      p = Curl_dyn_ptr(&enc);
       while(*p) {
         /* make sure percent encoded are lower case */
         if((*p == '%') && ISXDIGIT(p[1]) && ISXDIGIT(p[2]) &&
@@ -1853,6 +1863,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
           p++;
       }
     }
+    newp = Curl_dyn_ptr(&enc);
 
     if(appendquery) {
       /* Append the 'newp' string onto the old query. Add a '&' separator if
@@ -1861,24 +1872,24 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
       size_t querylen = u->query ? strlen(u->query) : 0;
       bool addamperand = querylen && (u->query[querylen -1] != '&');
       if(querylen) {
-        struct dynbuf enc;
-        Curl_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
+        struct dynbuf qbuf;
+        Curl_dyn_init(&qbuf, CURL_MAX_INPUT_LENGTH);
 
-        if(Curl_dyn_addn(&enc, u->query, querylen)) /* add original query */
+        if(Curl_dyn_addn(&qbuf, u->query, querylen)) /* add original query */
           goto nomem;
 
         if(addamperand) {
-          if(Curl_dyn_addn(&enc, "&", 1))
+          if(Curl_dyn_addn(&qbuf, "&", 1))
             goto nomem;
         }
-        if(Curl_dyn_add(&enc, newp))
+        if(Curl_dyn_add(&qbuf, newp))
           goto nomem;
-        free((char *)newp);
+        Curl_dyn_free(&enc);
         free(*storep);
-        *storep = Curl_dyn_ptr(&enc);
+        *storep = Curl_dyn_ptr(&qbuf);
         return CURLUE_OK;
 nomem:
-        free((char *)newp);
+        Curl_dyn_free(&enc);
         return CURLUE_OUT_OF_MEMORY;
       }
     }
@@ -1890,7 +1901,7 @@ nomem:
       }
       else {
         if(!n || hostname_check(u, (char *)newp, n)) {
-          free((char *)newp);
+          Curl_dyn_free(&enc);
           return CURLUE_BAD_HOSTNAME;
         }
       }

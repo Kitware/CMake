@@ -296,7 +296,7 @@ typedef unsigned long sslerr_t;
 #define USE_PRE_1_1_API (OPENSSL_VERSION_NUMBER < 0x10100000L)
 #endif /* !LIBRESSL_VERSION_NUMBER */
 
-struct ssl_backend_data {
+struct ossl_ssl_backend_data {
   /* these ones requires specific SSL-types */
   SSL_CTX* ctx;
   SSL*     handle;
@@ -722,6 +722,8 @@ static int bio_cf_out_write(BIO *bio, const char *buf, int blen)
 {
   struct Curl_cfilter *cf = BIO_get_data(bio);
   struct ssl_connect_data *connssl = cf->ctx;
+  struct ossl_ssl_backend_data *backend =
+    (struct ossl_ssl_backend_data *)connssl->backend;
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
   ssize_t nwritten;
   CURLcode result = CURLE_SEND_ERROR;
@@ -731,7 +733,7 @@ static int bio_cf_out_write(BIO *bio, const char *buf, int blen)
   DEBUGF(LOG_CF(data, cf, "bio_cf_out_write(len=%d) -> %d, err=%d",
                 blen, (int)nwritten, result));
   BIO_clear_retry_flags(bio);
-  connssl->backend->io_result = result;
+  backend->io_result = result;
   if(nwritten < 0) {
     if(CURLE_AGAIN == result)
       BIO_set_retry_write(bio);
@@ -743,6 +745,8 @@ static int bio_cf_in_read(BIO *bio, char *buf, int blen)
 {
   struct Curl_cfilter *cf = BIO_get_data(bio);
   struct ssl_connect_data *connssl = cf->ctx;
+  struct ossl_ssl_backend_data *backend =
+    (struct ossl_ssl_backend_data *)connssl->backend;
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
   ssize_t nread;
   CURLcode result = CURLE_RECV_ERROR;
@@ -756,7 +760,7 @@ static int bio_cf_in_read(BIO *bio, char *buf, int blen)
   DEBUGF(LOG_CF(data, cf, "bio_cf_in_read(len=%d) -> %d, err=%d",
                 blen, (int)nread, result));
   BIO_clear_retry_flags(bio);
-  connssl->backend->io_result = result;
+  backend->io_result = result;
   if(nread < 0) {
     if(CURLE_AGAIN == result)
       BIO_set_retry_read(bio);
@@ -764,13 +768,13 @@ static int bio_cf_in_read(BIO *bio, char *buf, int blen)
 
   /* Before returning server replies to the SSL instance, we need
    * to have setup the x509 store or verification will fail. */
-  if(!connssl->backend->x509_store_setup) {
-    result = Curl_ssl_setup_x509_store(cf, data, connssl->backend->ctx);
+  if(!backend->x509_store_setup) {
+    result = Curl_ssl_setup_x509_store(cf, data, backend->ctx);
     if(result) {
-      connssl->backend->io_result = result;
+      backend->io_result = result;
       return -1;
     }
-    connssl->backend->x509_store_setup = TRUE;
+    backend->x509_store_setup = TRUE;
   }
 
   return (int)nread;
@@ -1885,7 +1889,8 @@ static struct curl_slist *ossl_engines_list(struct Curl_easy *data)
 static void ossl_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct ossl_ssl_backend_data *backend =
+    (struct ossl_ssl_backend_data *)connssl->backend;
 
   (void)data;
   DEBUGASSERT(backend);
@@ -1931,7 +1936,8 @@ static int ossl_shutdown(struct Curl_cfilter *cf,
   int buffsize;
   int err;
   bool done = FALSE;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct ossl_ssl_backend_data *backend =
+    (struct ossl_ssl_backend_data *)connssl->backend;
   int loop = 10;
 
   DEBUGASSERT(backend);
@@ -2329,7 +2335,8 @@ static CURLcode verifystatus(struct Curl_cfilter *cf,
   OCSP_BASICRESP *br = NULL;
   X509_STORE     *st = NULL;
   STACK_OF(X509) *ch = NULL;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct ossl_ssl_backend_data *backend =
+    (struct ossl_ssl_backend_data *)connssl->backend;
   X509 *cert;
   OCSP_CERTID *id = NULL;
   int cert_status, crl_reason;
@@ -2729,7 +2736,7 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
 
 #ifdef HAS_MODERN_SET_PROTO_VER
 static CURLcode
-set_ssl_version_min_max(struct Curl_cfilter *cf, SSL_CTX *ctx)
+ossl_set_ssl_version_min_max(struct Curl_cfilter *cf, SSL_CTX *ctx)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   /* first, TLS min version... */
@@ -2826,9 +2833,9 @@ typedef long ctx_option_t;
 
 #if !defined(HAS_MODERN_SET_PROTO_VER)
 static CURLcode
-set_ssl_version_min_max_legacy(ctx_option_t *ctx_options,
-                               struct Curl_cfilter *cf,
-                               struct Curl_easy *data)
+ossl_set_ssl_version_min_max_legacy(ctx_option_t *ctx_options,
+                                       struct Curl_cfilter *cf,
+                                       struct Curl_easy *data)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   long ssl_version = conn_config->version;
@@ -2841,8 +2848,10 @@ set_ssl_version_min_max_legacy(ctx_option_t *ctx_options,
 #ifdef TLS1_3_VERSION
   {
     struct ssl_connect_data *connssl = cf->ctx;
-    DEBUGASSERT(connssl->backend);
-    SSL_CTX_set_max_proto_version(connssl->backend->ctx, TLS1_3_VERSION);
+    struct ossl_ssl_backend_data *backend =
+      (struct ossl_ssl_backend_data *)connssl->backend;
+    DEBUGASSERT(backend);
+    SSL_CTX_set_max_proto_version(backend->ctx, TLS1_3_VERSION);
     *ctx_options |= SSL_OP_NO_TLSv1_2;
   }
 #else
@@ -3447,7 +3456,8 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
   const char * const ssl_cert_type = ssl_config->cert_type;
   const bool verifypeer = conn_config->verifypeer;
   char error_buffer[256];
-  struct ssl_backend_data *backend = connssl->backend;
+  struct ossl_ssl_backend_data *backend =
+    (struct ossl_ssl_backend_data *)connssl->backend;
 
   DEBUGASSERT(ssl_connect_1 == connssl->connecting_state);
   DEBUGASSERT(backend);
@@ -3589,9 +3599,9 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
     ctx_options |= SSL_OP_NO_SSLv3;
 
 #if HAS_MODERN_SET_PROTO_VER /* 1.1.0 */
-    result = set_ssl_version_min_max(cf, backend->ctx);
+    result = ossl_set_ssl_version_min_max(cf, backend->ctx);
 #else
-    result = set_ssl_version_min_max_legacy(&ctx_options, cf, data);
+    result = ossl_set_ssl_version_min_max_legacy(&ctx_options, cf, data);
 #endif
     if(result != CURLE_OK)
       return result;
@@ -3820,7 +3830,8 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
 {
   int err;
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct ossl_ssl_backend_data *backend =
+    (struct ossl_ssl_backend_data *)connssl->backend;
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   DEBUGASSERT(ssl_connect_2 == connssl->connecting_state
               || ssl_connect_2_reading == connssl->connecting_state
@@ -3983,8 +3994,8 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
  * Heavily modified from:
  * https://www.owasp.org/index.php/Certificate_and_Public_Key_Pinning#OpenSSL
  */
-static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data, X509* cert,
-                                    const char *pinnedpubkey)
+static CURLcode ossl_pkp_pin_peer_pubkey(struct Curl_easy *data, X509* cert,
+                                         const char *pinnedpubkey)
 {
   /* Scratch */
   int len1 = 0, len2 = 0;
@@ -4062,7 +4073,8 @@ static CURLcode servercert(struct Curl_cfilter *cf,
   char buffer[2048];
   const char *ptr;
   BIO *mem = BIO_new(BIO_s_mem());
-  struct ssl_backend_data *backend = connssl->backend;
+  struct ossl_ssl_backend_data *backend =
+    (struct ossl_ssl_backend_data *)connssl->backend;
 
   DEBUGASSERT(backend);
 
@@ -4077,7 +4089,7 @@ static CURLcode servercert(struct Curl_cfilter *cf,
 
   if(data->set.ssl.certinfo)
     /* asked to gather certificate info */
-    (void)Curl_ossl_certchain(data, connssl->backend->handle);
+    (void)Curl_ossl_certchain(data, backend->handle);
 
   backend->server_cert = SSL_get1_peer_certificate(backend->handle);
   if(!backend->server_cert) {
@@ -4245,7 +4257,7 @@ static CURLcode servercert(struct Curl_cfilter *cf,
     data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY]:
     data->set.str[STRING_SSL_PINNEDPUBLICKEY];
   if(!result && ptr) {
-    result = pkp_pin_peer_pubkey(data, backend->server_cert, ptr);
+    result = ossl_pkp_pin_peer_pubkey(data, backend->server_cert, ptr);
     if(result)
       failf(data, "SSL: public key does not match pinned public key");
   }
@@ -4414,11 +4426,13 @@ static CURLcode ossl_connect(struct Curl_cfilter *cf,
 static bool ossl_data_pending(struct Curl_cfilter *cf,
                               const struct Curl_easy *data)
 {
-  struct ssl_connect_data *ctx = cf->ctx;
+  struct ssl_connect_data *connssl = cf->ctx;
+  struct ossl_ssl_backend_data *backend =
+    (struct ossl_ssl_backend_data *)connssl->backend;
 
   (void)data;
-  DEBUGASSERT(ctx && ctx->backend);
-  if(ctx->backend->handle && SSL_pending(ctx->backend->handle))
+  DEBUGASSERT(connssl && backend);
+  if(backend->handle && SSL_pending(backend->handle))
     return TRUE;
   return FALSE;
 }
@@ -4437,7 +4451,8 @@ static ssize_t ossl_send(struct Curl_cfilter *cf,
   int memlen;
   int rc;
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct ossl_ssl_backend_data *backend =
+    (struct ossl_ssl_backend_data *)connssl->backend;
 
   (void)data;
   DEBUGASSERT(backend);
@@ -4533,7 +4548,8 @@ static ssize_t ossl_recv(struct Curl_cfilter *cf,
   int buffsize;
   struct connectdata *conn = cf->conn;
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_backend_data *backend = connssl->backend;
+  struct ossl_ssl_backend_data *backend =
+    (struct ossl_ssl_backend_data *)connssl->backend;
 
   (void)data;
   DEBUGASSERT(backend);
@@ -4756,7 +4772,8 @@ static void *ossl_get_internals(struct ssl_connect_data *connssl,
                                 CURLINFO info)
 {
   /* Legacy: CURLINFO_TLS_SESSION must return an SSL_CTX pointer. */
-  struct ssl_backend_data *backend = connssl->backend;
+  struct ossl_ssl_backend_data *backend =
+    (struct ossl_ssl_backend_data *)connssl->backend;
   DEBUGASSERT(backend);
   return info == CURLINFO_TLS_SESSION ?
     (void *)backend->ctx : (void *)backend->handle;
@@ -4789,7 +4806,7 @@ const struct Curl_ssl Curl_ssl_openssl = {
 #endif
   SSLSUPP_HTTPS_PROXY,
 
-  sizeof(struct ssl_backend_data),
+  sizeof(struct ossl_ssl_backend_data),
 
   ossl_init,                /* init */
   ossl_cleanup,             /* cleanup */

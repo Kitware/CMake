@@ -89,16 +89,35 @@ add_library(
   ${CMAKE_CURL_SSL_DLLS}
   )
 
+if(0) # This code not needed for building within CMake.
+add_library(
+  curlu # special libcurlu library just for unittests
+  STATIC
+  EXCLUDE_FROM_ALL
+  ${HHEADERS} ${CSOURCES}
+)
+target_compile_definitions(curlu PUBLIC UNITTESTS CURL_STATICLIB)
+endif()
+
 add_library(
   ${PROJECT_NAME}::${LIB_NAME}
   ALIAS ${LIB_NAME}
   )
+
+if(ENABLE_CURLDEBUG)
+  # We must compile memdebug.c separately to avoid memdebug.h redefinitions
+  # being applied to memdebug.c itself.
+  set_source_files_properties(memdebug.c PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
+endif()
 
 if(NOT BUILD_SHARED_LIBS)
     set_target_properties(${LIB_NAME} PROPERTIES INTERFACE_COMPILE_DEFINITIONS CURL_STATICLIB)
 endif()
 
 target_link_libraries(${LIB_NAME} PRIVATE ${CURL_LIBS})
+if(0) # This code not needed for building within CMake.
+target_link_libraries(curlu PRIVATE ${CURL_LIBS})
+endif()
 
 if(0) # This code not needed for building within CMake.
 transform_makefile_inc("Makefile.soname" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.soname.cmake")

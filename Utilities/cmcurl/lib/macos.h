@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_SMB_H
-#define HEADER_CURL_SMB_H
+#ifndef HEADER_CURL_MACOS_H
+#define HEADER_CURL_MACOS_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,6 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) Bill Nagel <wnagel@tycoint.com>, Exacq Technologies
  * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
@@ -24,37 +23,16 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#include "curl_setup.h"
 
-enum smb_conn_state {
-  SMB_NOT_CONNECTED = 0,
-  SMB_CONNECTING,
-  SMB_NEGOTIATE,
-  SMB_SETUP,
-  SMB_CONNECTED
-};
+#if defined(__APPLE__) && (!defined(TARGET_OS_OSX) || TARGET_OS_OSX)
 
-struct smb_conn {
-  enum smb_conn_state state;
-  char *user;
-  char *domain;
-  char *share;
-  unsigned char challenge[8];
-  unsigned int session_key;
-  unsigned short uid;
-  char *recv_buf;
-  size_t upload_size;
-  size_t send_size;
-  size_t sent;
-  size_t got;
-};
+CURLcode Curl_macos_init(void);
 
-#if !defined(CURL_DISABLE_SMB) && defined(USE_CURL_NTLM_CORE) && \
-    (SIZEOF_CURL_OFF_T > 4)
+#else
 
-extern const struct Curl_handler Curl_handler_smb;
-extern const struct Curl_handler Curl_handler_smbs;
+#define Curl_macos_init() CURLE_OK
 
-#endif /* CURL_DISABLE_SMB && USE_CURL_NTLM_CORE &&
-          SIZEOF_CURL_OFF_T > 4 */
+#endif
 
-#endif /* HEADER_CURL_SMB_H */
+#endif /* HEADER_CURL_MACOS_H */

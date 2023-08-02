@@ -428,6 +428,8 @@ static CURLcode readwrite_data(struct Curl_easy *data,
   size_t excess = 0; /* excess bytes read */
   bool readmore = FALSE; /* used by RTP to signal for more data */
   int maxloops = 100;
+  curl_off_t max_recv = data->set.max_recv_speed?
+                        data->set.max_recv_speed : CURL_OFF_T_MAX;
   char *buf = data->state.buffer;
   DEBUGASSERT(buf);
 
@@ -472,7 +474,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
     else {
       /* read nothing but since we wanted nothing we consider this an OK
          situation to proceed from */
-      DEBUGF(infof(data, DMSG(data, "readwrite_data: we're done")));
+      DEBUGF(infof(data, "readwrite_data: we're done"));
       nread = 0;
     }
 
@@ -666,6 +668,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
       }
 
       k->bytecount += nread;
+      max_recv -= nread;
 
       Curl_pgrsSetDownloadCounter(data, k->bytecount);
 
@@ -749,9 +752,9 @@ static CURLcode readwrite_data(struct Curl_easy *data,
       break;
     }
 
-  } while(data_pending(data) && maxloops--);
+  } while((max_recv > 0) && data_pending(data) && maxloops--);
 
-  if(maxloops <= 0) {
+  if(maxloops <= 0 || max_recv <= 0) {
     /* we mark it as read-again-please */
     data->state.dselect_bits = CURL_CSELECT_IN;
     *comeback = TRUE;
@@ -768,7 +771,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
 
 out:
   if(result)
-    DEBUGF(infof(data, DMSG(data, "readwrite_data() -> %d"), result));
+    DEBUGF(infof(data, "readwrite_data() -> %d", result));
   return result;
 }
 
@@ -1233,7 +1236,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   *done = (0 == (k->keepon&(KEEP_RECVBITS|KEEP_SENDBITS))) ? TRUE : FALSE;
 out:
   if(result)
-    DEBUGF(infof(data, DMSG(data, "Curl_readwrite() -> %d"), result));
+    DEBUGF(infof(data, "Curl_readwrite() -> %d", result));
   return result;
 }
 
@@ -1551,10 +1554,11 @@ CURLcode Curl_follow(struct Curl_easy *data,
 
   if((type != FOLLOW_RETRY) &&
      (data->req.httpcode != 401) && (data->req.httpcode != 407) &&
-     Curl_is_absolute_url(newurl, NULL, 0, FALSE))
+     Curl_is_absolute_url(newurl, NULL, 0, FALSE)) {
     /* If this is not redirect due to a 401 or 407 response and an absolute
        URL: don't allow a custom port number */
     disallowport = TRUE;
+  }
 
   DEBUGASSERT(data->state.uh);
   uc = curl_url_set(data->state.uh, CURLUPART_URL, newurl,

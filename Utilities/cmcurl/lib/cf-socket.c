@@ -871,7 +871,7 @@ static void cf_socket_close(struct Curl_cfilter *cf, struct Curl_easy *data)
       /* this is our local socket, we did never publish it */
       DEBUGF(LOG_CF(data, cf, "cf_socket_close(%" CURL_FORMAT_SOCKET_T
                     ", not active)", ctx->sock));
-      sclose(ctx->sock);
+      socket_close(data, cf->conn, !ctx->accepted, ctx->sock);
       ctx->sock = CURL_SOCKET_BAD;
     }
     Curl_bufq_reset(&ctx->recvbuf);
@@ -901,22 +901,26 @@ static CURLcode set_local_ip(struct Curl_cfilter *cf,
   struct cf_socket_ctx *ctx = cf->ctx;
 
 #ifdef HAVE_GETSOCKNAME
-  char buffer[STRERROR_LEN];
-  struct Curl_sockaddr_storage ssloc;
-  curl_socklen_t slen = sizeof(struct Curl_sockaddr_storage);
+  if(!(data->conn->handler->protocol & CURLPROTO_TFTP)) {
+    /* TFTP does not connect, so it cannot get the IP like this */
 
-  memset(&ssloc, 0, sizeof(ssloc));
-  if(getsockname(ctx->sock, (struct sockaddr*) &ssloc, &slen)) {
-    int error = SOCKERRNO;
-    failf(data, "getsockname() failed with errno %d: %s",
-          error, Curl_strerror(error, buffer, sizeof(buffer)));
-    return CURLE_FAILED_INIT;
-  }
-  if(!Curl_addr2string((struct sockaddr*)&ssloc, slen,
-                       ctx->l_ip, &ctx->l_port)) {
-    failf(data, "ssloc inet_ntop() failed with errno %d: %s",
-          errno, Curl_strerror(errno, buffer, sizeof(buffer)));
-    return CURLE_FAILED_INIT;
+    char buffer[STRERROR_LEN];
+    struct Curl_sockaddr_storage ssloc;
+    curl_socklen_t slen = sizeof(struct Curl_sockaddr_storage);
+
+    memset(&ssloc, 0, sizeof(ssloc));
+    if(getsockname(ctx->sock, (struct sockaddr*) &ssloc, &slen)) {
+      int error = SOCKERRNO;
+      failf(data, "getsockname() failed with errno %d: %s",
+            error, Curl_strerror(error, buffer, sizeof(buffer)));
+      return CURLE_FAILED_INIT;
+    }
+    if(!Curl_addr2string((struct sockaddr*)&ssloc, slen,
+                         ctx->l_ip, &ctx->l_port)) {
+      failf(data, "ssloc inet_ntop() failed with errno %d: %s",
+            errno, Curl_strerror(errno, buffer, sizeof(buffer)));
+      return CURLE_FAILED_INIT;
+    }
   }
 #else
   (void)data;
@@ -1356,26 +1360,31 @@ out:
 static void conn_set_primary_ip(struct Curl_cfilter *cf,
                                 struct Curl_easy *data)
 {
-  struct cf_socket_ctx *ctx = cf->ctx;
 #ifdef HAVE_GETPEERNAME
-  char buffer[STRERROR_LEN];
-  struct Curl_sockaddr_storage ssrem;
-  curl_socklen_t plen;
-  int port;
+  struct cf_socket_ctx *ctx = cf->ctx;
+  if(!(data->conn->handler->protocol & CURLPROTO_TFTP)) {
+    /* TFTP does not connect the endpoint: getpeername() failed with errno
+       107: Transport endpoint is not connected */
 
-  plen = sizeof(ssrem);
-  memset(&ssrem, 0, plen);
-  if(getpeername(ctx->sock, (struct sockaddr*) &ssrem, &plen)) {
-    int error = SOCKERRNO;
-    failf(data, "getpeername() failed with errno %d: %s",
-          error, Curl_strerror(error, buffer, sizeof(buffer)));
-    return;
-  }
-  if(!Curl_addr2string((struct sockaddr*)&ssrem, plen,
-                       cf->conn->primary_ip, &port)) {
-    failf(data, "ssrem inet_ntop() failed with errno %d: %s",
-          errno, Curl_strerror(errno, buffer, sizeof(buffer)));
-    return;
+    char buffer[STRERROR_LEN];
+    struct Curl_sockaddr_storage ssrem;
+    curl_socklen_t plen;
+    int port;
+
+    plen = sizeof(ssrem);
+    memset(&ssrem, 0, plen);
+    if(getpeername(ctx->sock, (struct sockaddr*) &ssrem, &plen)) {
+      int error = SOCKERRNO;
+      failf(data, "getpeername() failed with errno %d: %s",
+            error, Curl_strerror(error, buffer, sizeof(buffer)));
+      return;
+    }
+    if(!Curl_addr2string((struct sockaddr*)&ssrem, plen,
+                         cf->conn->primary_ip, &port)) {
+      failf(data, "ssrem inet_ntop() failed with errno %d: %s",
+            errno, Curl_strerror(errno, buffer, sizeof(buffer)));
+      return;
+    }
   }
 #else
   cf->conn->primary_ip[0] = 0;

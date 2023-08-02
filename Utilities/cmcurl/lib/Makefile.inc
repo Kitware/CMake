@@ -72,6 +72,7 @@ LIB_VTLS_HFILES =           \
   vtls/openssl.h            \
   vtls/rustls.h             \
   vtls/schannel.h           \
+  vtls/schannel_int.h       \
   vtls/sectransp.h          \
   vtls/vtls.h               \
   vtls/vtls_int.h           \
@@ -179,6 +180,7 @@ LIB_CFILES =         \
   krb5.c             \
   ldap.c             \
   llist.c            \
+  macos.c            \
   md4.c              \
   md5.c              \
   memdebug.c         \
@@ -315,6 +317,7 @@ LIB_HFILES =         \
   inet_ntop.h        \
   inet_pton.h        \
   llist.h            \
+  macos.h            \
   memdebug.h         \
   mime.h             \
   mqtt.h             \

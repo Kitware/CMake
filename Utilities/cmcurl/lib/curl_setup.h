@@ -262,7 +262,7 @@
 #if defined(__APPLE__) && !defined(USE_ARES)
 #include <TargetConditionals.h>
 #define USE_RESOLVE_ON_IPS 1
-#  if defined(TARGET_OS_OSX) && TARGET_OS_OSX
+#  if !defined(TARGET_OS_OSX) || TARGET_OS_OSX
 #    define CURL_OSX_CALL_COPYPROXIES 1
 #  endif
 #endif
@@ -302,6 +302,7 @@
 #  if defined(HAVE_PROTO_BSDSOCKET_H) && \
     (!defined(__amigaos4__) || defined(USE_AMISSL))
      /* use bsdsocket.library directly, instead of libc networking functions */
+#    define _SYS_MBUF_H /* m_len define clashes with curl */
 #    include <proto/bsdsocket.h>
 #    ifdef __amigaos4__
        int Curl_amiga_select(int nfds, fd_set *readfds, fd_set *writefds,
