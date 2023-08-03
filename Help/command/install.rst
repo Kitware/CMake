@@ -325,24 +325,8 @@ Signatures
       the linker import file created, on macOS, for shared libraries with
       :prop_tgt:`ENABLE_EXPORTS` enabled.
 
-    Consider the following example:
-
-    .. code-block:: cmake
-
-      install(TARGETS mylib
-              LIBRARY
-                COMPONENT Libraries
-                NAMELINK_COMPONENT Development
-              PUBLIC_HEADER
-                COMPONENT Development
-             )
-
-    In this scenario, if you choose to install only the ``Development``
-    component, both the headers and namelink will be installed without the
-    library. (If you don't also install the ``Libraries`` component, the
-    namelink will be a dangling symlink, and projects that link to the library
-    will have build errors.) If you install only the ``Libraries`` component,
-    only the library will be installed, without the headers and namelink.
+    See the `Example: Install Targets with Per-Artifact Components`_
+    for an example using ``NAMELINK_COMPONENT``.
 
     This option is typically used for package managers that have separate
     runtime and development packages. For example, on Debian systems, the
@@ -451,26 +435,6 @@ Signatures
 
     The ``RUNTIME_DEPENDENCIES`` and ``RUNTIME_DEPENDENCY_SET`` keywords are
     mutually exclusive.
-
-  One or more groups of properties may be specified in a single call to
-  the ``TARGETS`` form of this command.  A target may be installed more than
-  once to different locations.  Consider hypothetical targets ``myExe``,
-  ``mySharedLib``, and ``myStaticLib``.  The code:
-
-  .. code-block:: cmake
-
-    install(TARGETS myExe mySharedLib myStaticLib
-            RUNTIME DESTINATION bin
-            LIBRARY DESTINATION lib
-            ARCHIVE DESTINATION lib/static)
-    install(TARGETS mySharedLib DESTINATION /some/full/path)
-
-  will install ``myExe`` to ``<prefix>/bin`` and ``myStaticLib`` to
-  ``<prefix>/lib/static``.  On non-DLL platforms ``mySharedLib`` will be
-  installed to ``<prefix>/lib`` and ``/some/full/path``.  On DLL platforms
-  the ``mySharedLib`` DLL will be installed to ``<prefix>/bin`` and
-  ``/some/full/path`` and its import library will be installed to
-  ``<prefix>/lib/static`` and ``/some/full/path``.
 
   :ref:`Interface Libraries` may be listed among the targets to install.
   They install no artifacts but will be included in an associated ``EXPORT``.
@@ -978,6 +942,98 @@ Signatures
   * ``POST_EXCLUDE_REGEXES <regex>...``
   * ``POST_INCLUDE_FILES <file>...``
   * ``POST_EXCLUDE_FILES <file>...``
+
+Examples
+^^^^^^^^
+
+Example: Install Targets with Per-Artifact Components
+"""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+Consider a project that defines targets with different artifact kinds:
+
+.. code-block:: cmake
+
+  add_executable(myExe myExe.c)
+  add_library(myStaticLib STATIC myStaticLib.c)
+  target_sources(myStaticLib PUBLIC FILE_SET HEADERS FILES myStaticLib.h)
+  add_library(mySharedLib SHARED mySharedLib.c)
+  target_sources(mySharedLib PUBLIC FILE_SET HEADERS FILES mySharedLib.h)
+  set_property(TARGET mySharedLib PROPERTY SOVERSION 1)
+
+We may call :command:`install(TARGETS)` with `\<artifact-kind\>`_ arguments
+to specify different options for each kind of artifact:
+
+.. code-block:: cmake
+
+  install(TARGETS
+            myExe
+            mySharedLib
+            myStaticLib
+          RUNTIME           # Following options apply to runtime artifacts.
+            COMPONENT Runtime
+          LIBRARY           # Following options apply to library artifacts.
+            COMPONENT Runtime
+            NAMELINK_COMPONENT Development
+          ARCHIVE           # Following options apply to archive artifacts.
+            COMPONENT Development
+            DESTINATION lib/static
+          FILE_SET HEADERS  # Following options apply to file set HEADERS.
+            COMPONENT Development
+          )
+
+This will:
+
+* Install ``myExe`` to ``<prefix>/bin``, the default RUNTIME artifact
+  destination, as part of the ``Runtime`` component.
+
+* On non-DLL platforms:
+
+  * Install ``libmySharedLib.so.1`` to ``<prefix>/lib``, the default
+    LIBRARY artifact destination, as part of the ``Runtime`` component.
+
+  * Install the ``libmySharedLib.so`` "namelink" (symbolic link) to
+    ``<prefix>/lib``, the default LIBRARY artifact destination, as part
+    of the ``Development`` component.
+
+* On DLL platforms:
+
+  * Install ``mySharedLib.dll`` to ``<prefix>/bin``, the default RUNTIME
+    artifact destination, as part of the ``Runtime`` component.
+
+  * Install ``mySharedLib.lib`` to ``<prefix>/lib/static``, the specified
+    ARCHIVE artifact destination, as part of the ``Development`` component.
+
+* Install ``myStaticLib`` to ``<prefix>/lib/static``, the specified
+  ARCHIVE artifact destination, as part of the ``Development`` component.
+
+* Install ``mySharedLib.h`` and ``myStaticLib.h`` to ``<prefix>/include``,
+  the default destination for a file set of type HEADERS, as part of the
+  ``Development`` component.
+
+Example: Install Targets to Per-Config Destinations
+"""""""""""""""""""""""""""""""""""""""""""""""""""
+
+Each :command:`install(TARGETS)` call installs a given target
+:ref:`output artifact <Output Artifacts>` to at most one ``DESTINATION``,
+but the install rule itself may be filtered by the ``CONFIGURATIONS`` option.
+In order to install to a different destination for each configuration, one
+call per configuration is needed.  For example, the code:
+
+.. code-block:: cmake
+
+  install(TARGETS myExe
+          CONFIGURATIONS Debug
+          RUNTIME
+            DESTINATION Debug/bin
+          )
+  install(TARGETS myExe
+          CONFIGURATIONS Release
+          RUNTIME
+            DESTINATION Release/bin
+          )
+
+will install ``myExe`` to ``<prefix>/Debug/bin`` in the Debug configuration,
+and to ``<prefix>/Release/bin`` in the Release configuration.
 
 Generated Installation Script
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
