@@ -10,7 +10,6 @@
 #include <initializer_list>
 #include <iterator>
 #include <memory>
-#include <numeric>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -1086,6 +1085,7 @@ public:
   // but without any intermediate expansion. So the operation is simply a
   // string concatenation with special handling for the CMake list item
   // separator
+  static std::string& append(std::string& list, std::string&& value);
   static std::string& append(std::string& list, cm::string_view value);
   template <typename InputIterator>
   static std::string& append(std::string& list, InputIterator first,
@@ -1095,15 +1095,11 @@ public:
       return list;
     }
 
-    return cmList::append(list,
-                          cm::string_view{ std::accumulate(
-                            std::next(first), last, *first,
-                            [](const std::string& a, const std::string& b) {
-                              return a +
-                                std::string(cmList::element_separator) + b;
-                            }) });
+    return cmList::append(
+      list, cmList::Join(first, last, cmList::element_separator));
   }
 
+  static std::string& prepend(std::string& list, std::string&& value);
   static std::string& prepend(std::string& list, cm::string_view value);
   template <typename InputIterator>
   static std::string& prepend(std::string& list, InputIterator first,
@@ -1113,13 +1109,8 @@ public:
       return list;
     }
 
-    return cmList::prepend(list,
-                           cm::string_view{ std::accumulate(
-                             std::next(first), last, *first,
-                             [](std::string a, const std::string& b) {
-                               return std::move(a) +
-                                 std::string(cmList::element_separator) + b;
-                             }) });
+    return cmList::prepend(
+      list, cmList::Join(first, last, cmList::element_separator));
   }
 
   template <typename Range,
@@ -1209,11 +1200,22 @@ private:
       return std::string{};
     }
 
+    return cmList::Join(std::begin(r), std::end(r), glue);
+  }
+  template <typename InputIterator>
+  static std::string Join(InputIterator first, InputIterator last,
+                          cm::string_view glue)
+  {
+    if (first == last) {
+      return std::string{};
+    }
+
     const auto sep = std::string{ glue };
 
-    std::string joined = cmList::ToString(*std::begin(r));
-    for (auto it = std::next(std::begin(r)); it != std::end(r); ++it) {
-      joined += sep + cmList::ToString(*it);
+    std::string joined = cmList::ToString(*first);
+    for (auto it = std::next(first); it != last; ++it) {
+      joined += sep;
+      joined += cmList::ToString(*it);
     }
 
     return joined;
