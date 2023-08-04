@@ -23,14 +23,11 @@
 #include <cmext/algorithm>
 #include <cmext/string_view>
 
-#if !defined(CMAKE_BOOTSTRAP) && !defined(_WIN32)
-#  include <unistd.h>
-#endif
-
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
 #include "cmsys/RegularExpression.hxx"
 
+#include "cm_fileno.hxx"
 #include "cm_sys_stat.h"
 
 #include "cmBuildOptions.h"
@@ -3913,15 +3910,11 @@ std::function<int()> cmake::BuildWorkflowStep(
   const std::vector<std::string>& args)
 {
   cmUVProcessChainBuilder builder;
-  builder
-    .AddCommand(args)
-#  ifdef _WIN32
-    .SetExternalStream(cmUVProcessChainBuilder::Stream_OUTPUT, _fileno(stdout))
-    .SetExternalStream(cmUVProcessChainBuilder::Stream_ERROR, _fileno(stderr));
-#  else
-    .SetExternalStream(cmUVProcessChainBuilder::Stream_OUTPUT, STDOUT_FILENO)
-    .SetExternalStream(cmUVProcessChainBuilder::Stream_ERROR, STDERR_FILENO);
-#  endif
+  builder.AddCommand(args)
+    .SetExternalStream(cmUVProcessChainBuilder::Stream_OUTPUT,
+                       cm_fileno(stdout))
+    .SetExternalStream(cmUVProcessChainBuilder::Stream_ERROR,
+                       cm_fileno(stderr));
   return [builder]() -> int {
     auto chain = builder.Start();
     chain.Wait();
