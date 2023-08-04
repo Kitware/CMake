@@ -51,6 +51,7 @@ public:
 
   bool IsInBuildSystem() const;
   bool IsNormal() const;
+  bool IsRuntimeBinary() const;
   bool IsSynthetic() const;
   bool IsImported() const;
   bool IsImportedGloballyVisible() const;

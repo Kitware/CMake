@@ -2652,6 +2652,24 @@ bool cmTarget::IsPerConfig() const
   return this->impl->PerConfig;
 }
 
+bool cmTarget::IsRuntimeBinary() const
+{
+  switch (this->GetType()) {
+    case cmStateEnums::EXECUTABLE:
+    case cmStateEnums::SHARED_LIBRARY:
+    case cmStateEnums::MODULE_LIBRARY:
+      return true;
+    case cmStateEnums::OBJECT_LIBRARY:
+    case cmStateEnums::STATIC_LIBRARY:
+    case cmStateEnums::UTILITY:
+    case cmStateEnums::INTERFACE_LIBRARY:
+    case cmStateEnums::GLOBAL_TARGET:
+    case cmStateEnums::UNKNOWN_LIBRARY:
+      break;
+  }
+  return false;
+}
+
 bool cmTarget::CanCompileSources() const
 {
   if (this->IsImported()) {

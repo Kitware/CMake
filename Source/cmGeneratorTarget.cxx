@@ -1224,6 +1224,11 @@ bool cmGeneratorTarget::IsNormal() const
   return this->Target->IsNormal();
 }
 
+bool cmGeneratorTarget::IsRuntimeBinary() const
+{
+  return this->Target->IsRuntimeBinary();
+}
+
 bool cmGeneratorTarget::IsSynthetic() const
 {
   return this->Target->IsSynthetic();
