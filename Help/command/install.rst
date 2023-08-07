@@ -1,6 +1,10 @@
 install
 -------
 
+.. only:: html
+
+   .. contents::
+
 Specify rules to run at install time.
 
 Synopsis
@@ -34,12 +38,14 @@ are executed in order during installation.
   The environment variable :envvar:`CMAKE_INSTALL_MODE` can override the
   default copying behavior of ``install()``.
 
+.. _`common options`:
+
 There are multiple signatures for this command.  Some of them define
 installation options for files and targets.  Options common to
 multiple signatures are covered here but they are valid only for
 signatures that specify them.  The common options are:
 
-``DESTINATION``
+``DESTINATION <dir>``
   Specify the directory on disk to which a file will be installed.
   Arguments can be relative or absolute paths.
 
@@ -58,32 +64,28 @@ signatures that specify them.  The common options are:
   :variable:`CMAKE_INSTALL_PREFIX`; this prefix is used by default if
   the DESTINATION is a relative path.
 
-``PERMISSIONS``
+``PERMISSIONS <permission>...``
   Specify permissions for installed files.  Valid permissions are
   ``OWNER_READ``, ``OWNER_WRITE``, ``OWNER_EXECUTE``, ``GROUP_READ``,
   ``GROUP_WRITE``, ``GROUP_EXECUTE``, ``WORLD_READ``, ``WORLD_WRITE``,
   ``WORLD_EXECUTE``, ``SETUID``, and ``SETGID``.  Permissions that do
   not make sense on certain platforms are ignored on those platforms.
 
-``CONFIGURATIONS``
+  If this option is used multiple times in a single call, its list
+  of permissions accumulates.  If an :command:`install(TARGETS)` call
+  uses `\<artifact-kind\>`_ arguments, a separate list of permissions
+  is accumulated for each kind of artifact.
+
+``CONFIGURATIONS <config>...``
   Specify a list of build configurations for which the install rule
-  applies (Debug, Release, etc.). Note that the values specified for
-  this option only apply to options listed AFTER the ``CONFIGURATIONS``
-  option. For example, to set separate install paths for the Debug and
-  Release configurations, do the following:
+  applies (Debug, Release, etc.).
 
-  .. code-block:: cmake
+  If this option is used multiple times in a single call, its list
+  of configurations accumulates.  If an :command:`install(TARGETS)`
+  call uses `\<artifact-kind\>`_ arguments, a separate list of
+  configurations is accumulated for each kind of artifact.
 
-    install(TARGETS target
-            CONFIGURATIONS Debug
-            RUNTIME DESTINATION Debug/bin)
-    install(TARGETS target
-            CONFIGURATIONS Release
-            RUNTIME DESTINATION Release/bin)
-
-  Note that ``CONFIGURATIONS`` appears BEFORE ``RUNTIME DESTINATION``.
-
-``COMPONENT``
+``COMPONENT <component>``
   Specify an installation component name with which the install rule
   is associated, such as ``Runtime`` or ``Development``.  During
   component-specific installation only install rules associated with
@@ -99,7 +101,7 @@ signatures that specify them.  The common options are:
   Specify that the file is excluded from a full installation and only
   installed as part of a component-specific installation
 
-``RENAME``
+``RENAME <name>``
   Specify a name for an installed file that may be different from the
   original file.  Renaming is allowed only when a single file is
   installed by the command.
@@ -121,8 +123,8 @@ signatures that specify them.  The common options are:
   they will be created according to the uname rules on Unix-like platforms.
   Windows platforms are unaffected.
 
-Installing Targets
-^^^^^^^^^^^^^^^^^^
+Signatures
+^^^^^^^^^^
 
 .. signature::
   install(TARGETS <target>... [...])
@@ -131,24 +133,33 @@ Installing Targets
 
   .. code-block:: cmake
 
-    install(TARGETS targets... [EXPORT <export-name>]
-            [RUNTIME_DEPENDENCIES args...|RUNTIME_DEPENDENCY_SET <set-name>]
-            [[ARCHIVE|LIBRARY|RUNTIME|OBJECTS|FRAMEWORK|BUNDLE|
-              PRIVATE_HEADER|PUBLIC_HEADER|RESOURCE|FILE_SET <set-name>|CXX_MODULES_BMI]
-             [DESTINATION <dir>]
-             [PERMISSIONS permissions...]
-             [CONFIGURATIONS [Debug|Release|...]]
-             [COMPONENT <component>]
-             [NAMELINK_COMPONENT <component>]
-             [OPTIONAL] [EXCLUDE_FROM_ALL]
-             [NAMELINK_ONLY|NAMELINK_SKIP]
-            ] [...]
+    install(TARGETS <target>... [EXPORT <export-name>]
+            [RUNTIME_DEPENDENCIES <arg>...|RUNTIME_DEPENDENCY_SET <set-name>]
+            [<artifact-option>...]
+            [<artifact-kind> <artifact-option>...]...
             [INCLUDES DESTINATION [<dir> ...]]
             )
 
-  The ``TARGETS`` form specifies rules for installing targets from a
-  project.  There are several kinds of target :ref:`Output Artifacts`
-  that may be installed:
+  where ``<artifact-option>...`` group may contain:
+
+  .. code-block:: cmake
+
+    [DESTINATION <dir>]
+    [PERMISSIONS <permission>...]
+    [CONFIGURATIONS <config>...]
+    [COMPONENT <component>]
+    [NAMELINK_COMPONENT <component>]
+    [OPTIONAL] [EXCLUDE_FROM_ALL]
+    [NAMELINK_ONLY|NAMELINK_SKIP]
+
+  The first ``<artifact-option>...`` group applies to target
+  :ref:`Output Artifacts` that do not have a dedicated group specified
+  later in the same call.
+
+  .. _`<artifact-kind>`:
+
+  Each ``<artifact-kind> <artifact-option>...`` group applies to
+  :ref:`Output Artifacts` of the specified artifact kind:
 
   ``ARCHIVE``
     Target artifacts of this kind include:
@@ -209,12 +220,12 @@ Installing Targets
     Similar to ``PUBLIC_HEADER`` and ``PRIVATE_HEADER``, but for
     ``RESOURCE`` files. See :prop_tgt:`RESOURCE` for details.
 
-  ``FILE_SET <set>``
+  ``FILE_SET <set-name>``
     .. versionadded:: 3.23
 
     File sets are defined by the :command:`target_sources(FILE_SET)` command.
-    If the file set ``<set>`` exists and is ``PUBLIC`` or ``INTERFACE``, any
-    files in the set are installed under the destination (see below).
+    If the file set ``<set-name>`` exists and is ``PUBLIC`` or ``INTERFACE``,
+    any files in the set are installed under the destination (see below).
     The directory structure relative to the file set's base directories is
     preserved. For example, a file added to the file set as
     ``/blah/include/myproj/here.h`` with a base directory ``/blah/include``
@@ -231,10 +242,6 @@ Installing Targets
     modules are placed directly in the destination as no directory structure is
     derived from the names of the modules. An empty ``DESTINATION`` may be used
     to suppress installing these files (for use in generic code).
-
-  For each of these arguments given, the arguments following them only apply
-  to the target or file type specified in the argument. If none is given, the
-  installation properties apply to all target types.
 
   For regular executables, static libraries and shared libraries, the
   ``DESTINATION`` argument is not required.  For these target types, when
@@ -294,7 +301,7 @@ Installing Targets
               DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/myproj
     )
 
-  In addition to the common options listed above, each target can accept
+  In addition to the `common options`_ listed above, each target can accept
   the following additional arguments:
 
   ``NAMELINK_COMPONENT``
@@ -318,24 +325,8 @@ Installing Targets
       the linker import file created, on macOS, for shared libraries with
       :prop_tgt:`ENABLE_EXPORTS` enabled.
 
-    Consider the following example:
-
-    .. code-block:: cmake
-
-      install(TARGETS mylib
-              LIBRARY
-                COMPONENT Libraries
-                NAMELINK_COMPONENT Development
-              PUBLIC_HEADER
-                COMPONENT Development
-             )
-
-    In this scenario, if you choose to install only the ``Development``
-    component, both the headers and namelink will be installed without the
-    library. (If you don't also install the ``Libraries`` component, the
-    namelink will be a dangling symlink, and projects that link to the library
-    will have build errors.) If you install only the ``Libraries`` component,
-    only the library will be installed, without the headers and namelink.
+    See the `Example: Install Targets with Per-Artifact Components`_
+    for an example using ``NAMELINK_COMPONENT``.
 
     This option is typically used for package managers that have separate
     runtime and development packages. For example, on Debian systems, the
@@ -402,7 +393,7 @@ Installing Targets
     If a relative path is specified, it is treated as relative to the
     :genex:`$<INSTALL_PREFIX>`.
 
-  ``RUNTIME_DEPENDENCY_SET``
+  ``RUNTIME_DEPENDENCY_SET <set-name>``
     .. versionadded:: 3.21
 
     This option causes all runtime dependencies of installed executable, shared
@@ -413,7 +404,7 @@ Installing Targets
     This keyword and the ``RUNTIME_DEPENDENCIES`` keyword are mutually
     exclusive.
 
-  ``RUNTIME_DEPENDENCIES``
+  ``RUNTIME_DEPENDENCIES <arg>...``
     .. versionadded:: 3.21
 
     This option causes all runtime dependencies of installed executable, shared
@@ -428,10 +419,10 @@ Installing Targets
     .. code-block:: cmake
 
       install(TARGETS ... RUNTIME_DEPENDENCY_SET <set-name>)
-      install(RUNTIME_DEPENDENCY_SET <set-name> args...)
+      install(RUNTIME_DEPENDENCY_SET <set-name> <arg>...)
 
     where ``<set-name>`` will be a randomly generated set name.
-    The ``args...`` may include any of the following keywords supported by
+    ``<arg>...`` may include any of the following keywords supported by
     the :command:`install(RUNTIME_DEPENDENCY_SET)` command:
 
     * ``DIRECTORIES``
@@ -444,26 +435,6 @@ Installing Targets
 
     The ``RUNTIME_DEPENDENCIES`` and ``RUNTIME_DEPENDENCY_SET`` keywords are
     mutually exclusive.
-
-  One or more groups of properties may be specified in a single call to
-  the ``TARGETS`` form of this command.  A target may be installed more than
-  once to different locations.  Consider hypothetical targets ``myExe``,
-  ``mySharedLib``, and ``myStaticLib``.  The code:
-
-  .. code-block:: cmake
-
-    install(TARGETS myExe mySharedLib myStaticLib
-            RUNTIME DESTINATION bin
-            LIBRARY DESTINATION lib
-            ARCHIVE DESTINATION lib/static)
-    install(TARGETS mySharedLib DESTINATION /some/full/path)
-
-  will install ``myExe`` to ``<prefix>/bin`` and ``myStaticLib`` to
-  ``<prefix>/lib/static``.  On non-DLL platforms ``mySharedLib`` will be
-  installed to ``<prefix>/lib`` and ``/some/full/path``.  On DLL platforms
-  the ``mySharedLib`` DLL will be installed to ``<prefix>/bin`` and
-  ``/some/full/path`` and its import library will be installed to
-  ``<prefix>/lib/static`` and ``/some/full/path``.
 
   :ref:`Interface Libraries` may be listed among the targets to install.
   They install no artifacts but will be included in an associated ``EXPORT``.
@@ -489,9 +460,6 @@ Installing Targets
     to ensure that such out-of-directory targets are built before the
     subdirectory-specific install rules are run.
 
-Installing Imported Runtime Artifacts
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 .. signature::
   install(IMPORTED_RUNTIME_ARTIFACTS <target>... [...])
 
@@ -501,12 +469,12 @@ Installing Imported Runtime Artifacts
 
   .. code-block:: cmake
 
-    install(IMPORTED_RUNTIME_ARTIFACTS targets...
+    install(IMPORTED_RUNTIME_ARTIFACTS <target>...
             [RUNTIME_DEPENDENCY_SET <set-name>]
             [[LIBRARY|RUNTIME|FRAMEWORK|BUNDLE]
              [DESTINATION <dir>]
-             [PERMISSIONS permissions...]
-             [CONFIGURATIONS [Debug|Release|...]]
+             [PERMISSIONS <permission>...]
+             [CONFIGURATIONS <config>...]
              [COMPONENT <component>]
              [OPTIONAL] [EXCLUDE_FROM_ALL]
             ] [...]
@@ -529,9 +497,6 @@ Installing Imported Runtime Artifacts
   added to the ``<set-name>`` runtime dependency set. This set can then be
   installed with an :command:`install(RUNTIME_DEPENDENCY_SET)` command.
 
-Installing Files
-^^^^^^^^^^^^^^^^
-
 .. signature::
   install(FILES <file>... [...])
   install(PROGRAMS <program>... [...])
@@ -546,10 +511,10 @@ Installing Files
 
   .. code-block:: cmake
 
-    install(<FILES|PROGRAMS> files...
+    install(<FILES|PROGRAMS> <file>...
             TYPE <type> | DESTINATION <dir>
-            [PERMISSIONS permissions...]
-            [CONFIGURATIONS [Debug|Release|...]]
+            [PERMISSIONS <permission>...]
+            [CONFIGURATIONS <config>...]
             [COMPONENT <component>]
             [RENAME <name>] [OPTIONAL] [EXCLUDE_FROM_ALL])
 
@@ -634,9 +599,6 @@ Installing Files
     use "generator expressions" with the syntax ``$<...>``.  See the
     :manual:`cmake-generator-expressions(7)` manual for available expressions.
 
-Installing Directories
-^^^^^^^^^^^^^^^^^^^^^^
-
 .. signature::
   install(DIRECTORY <dir>... [...])
 
@@ -653,14 +615,14 @@ Installing Directories
 
     install(DIRECTORY dirs...
             TYPE <type> | DESTINATION <dir>
-            [FILE_PERMISSIONS permissions...]
-            [DIRECTORY_PERMISSIONS permissions...]
+            [FILE_PERMISSIONS <permission>...]
+            [DIRECTORY_PERMISSIONS <permission>...]
             [USE_SOURCE_PERMISSIONS] [OPTIONAL] [MESSAGE_NEVER]
-            [CONFIGURATIONS [Debug|Release|...]]
+            [CONFIGURATIONS <config>...]
             [COMPONENT <component>] [EXCLUDE_FROM_ALL]
             [FILES_MATCHING]
             [[PATTERN <pattern> | REGEX <regex>]
-             [EXCLUDE] [PERMISSIONS permissions...]] [...])
+             [EXCLUDE] [PERMISSIONS <permission>...]] [...])
 
   The ``DIRECTORY`` form installs contents of one or more directories to a
   given destination.  The directory structure is copied verbatim to the
@@ -774,9 +736,6 @@ Installing Directories
     The list of ``dirs...`` given to ``DIRECTORY`` may use
     "generator expressions" too.
 
-Custom Installation Logic
-^^^^^^^^^^^^^^^^^^^^^^^^^
-
 .. signature::
   install(SCRIPT <file> [...])
   install(CODE <code> [...])
@@ -814,9 +773,6 @@ Custom Installation Logic
     name, not the file's contents).  See the
     :manual:`cmake-generator-expressions(7)` manual for available expressions.
 
-Installing Exports
-^^^^^^^^^^^^^^^^^^
-
 .. signature::
   install(EXPORT <export-name> [...])
 
@@ -826,8 +782,8 @@ Installing Exports
 
     install(EXPORT <export-name> DESTINATION <dir>
             [NAMESPACE <namespace>] [FILE <name>.cmake]
-            [PERMISSIONS permissions...]
-            [CONFIGURATIONS [Debug|Release|...]
+            [PERMISSIONS <permission>...]
+            [CONFIGURATIONS <config>...]
             [CXX_MODULES_DIRECTORY <directory>]
             [EXPORT_LINK_INTERFACE_LIBRARIES]
             [COMPONENT <component>]
@@ -924,9 +880,6 @@ Installing Exports
     :command:`install_files`, and :command:`install_programs` commands
     is not defined.
 
-Installing Runtime Dependencies
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 .. signature::
   install(RUNTIME_DEPENDENCY_SET <set-name> [...])
 
@@ -939,19 +892,19 @@ Installing Runtime Dependencies
     install(RUNTIME_DEPENDENCY_SET <set-name>
             [[LIBRARY|RUNTIME|FRAMEWORK]
              [DESTINATION <dir>]
-             [PERMISSIONS permissions...]
-             [CONFIGURATIONS [Debug|Release|...]]
+             [PERMISSIONS <permission>...]
+             [CONFIGURATIONS <config>...]
              [COMPONENT <component>]
              [NAMELINK_COMPONENT <component>]
              [OPTIONAL] [EXCLUDE_FROM_ALL]
             ] [...]
-            [PRE_INCLUDE_REGEXES regexes...]
-            [PRE_EXCLUDE_REGEXES regexes...]
-            [POST_INCLUDE_REGEXES regexes...]
-            [POST_EXCLUDE_REGEXES regexes...]
-            [POST_INCLUDE_FILES files...]
-            [POST_EXCLUDE_FILES files...]
-            [DIRECTORIES directories...]
+            [PRE_INCLUDE_REGEXES <regex>...]
+            [PRE_EXCLUDE_REGEXES <regex>...]
+            [POST_INCLUDE_REGEXES <regex>...]
+            [POST_EXCLUDE_REGEXES <regex>...]
+            [POST_INCLUDE_FILES <file>...]
+            [POST_EXCLUDE_FILES <file>...]
+            [DIRECTORIES <dir>...]
             )
 
   Installs a runtime dependency set previously created by one or more
@@ -982,13 +935,105 @@ Installing Runtime Dependencies
   a non-empty list of directories, regular expressions or files).  They all
   support :manual:`generator expressions <cmake-generator-expressions(7)>`.
 
-  * ``DIRECTORIES <directories>``
-  * ``PRE_INCLUDE_REGEXES <regexes>``
-  * ``PRE_EXCLUDE_REGEXES <regexes>``
-  * ``POST_INCLUDE_REGEXES <regexes>``
-  * ``POST_EXCLUDE_REGEXES <regexes>``
-  * ``POST_INCLUDE_FILES <files>``
-  * ``POST_EXCLUDE_FILES <files>``
+  * ``DIRECTORIES <dir>...``
+  * ``PRE_INCLUDE_REGEXES <regex>...``
+  * ``PRE_EXCLUDE_REGEXES <regex>...``
+  * ``POST_INCLUDE_REGEXES <regex>...``
+  * ``POST_EXCLUDE_REGEXES <regex>...``
+  * ``POST_INCLUDE_FILES <file>...``
+  * ``POST_EXCLUDE_FILES <file>...``
+
+Examples
+^^^^^^^^
+
+Example: Install Targets with Per-Artifact Components
+"""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+Consider a project that defines targets with different artifact kinds:
+
+.. code-block:: cmake
+
+  add_executable(myExe myExe.c)
+  add_library(myStaticLib STATIC myStaticLib.c)
+  target_sources(myStaticLib PUBLIC FILE_SET HEADERS FILES myStaticLib.h)
+  add_library(mySharedLib SHARED mySharedLib.c)
+  target_sources(mySharedLib PUBLIC FILE_SET HEADERS FILES mySharedLib.h)
+  set_property(TARGET mySharedLib PROPERTY SOVERSION 1)
+
+We may call :command:`install(TARGETS)` with `\<artifact-kind\>`_ arguments
+to specify different options for each kind of artifact:
+
+.. code-block:: cmake
+
+  install(TARGETS
+            myExe
+            mySharedLib
+            myStaticLib
+          RUNTIME           # Following options apply to runtime artifacts.
+            COMPONENT Runtime
+          LIBRARY           # Following options apply to library artifacts.
+            COMPONENT Runtime
+            NAMELINK_COMPONENT Development
+          ARCHIVE           # Following options apply to archive artifacts.
+            COMPONENT Development
+            DESTINATION lib/static
+          FILE_SET HEADERS  # Following options apply to file set HEADERS.
+            COMPONENT Development
+          )
+
+This will:
+
+* Install ``myExe`` to ``<prefix>/bin``, the default RUNTIME artifact
+  destination, as part of the ``Runtime`` component.
+
+* On non-DLL platforms:
+
+  * Install ``libmySharedLib.so.1`` to ``<prefix>/lib``, the default
+    LIBRARY artifact destination, as part of the ``Runtime`` component.
+
+  * Install the ``libmySharedLib.so`` "namelink" (symbolic link) to
+    ``<prefix>/lib``, the default LIBRARY artifact destination, as part
+    of the ``Development`` component.
+
+* On DLL platforms:
+
+  * Install ``mySharedLib.dll`` to ``<prefix>/bin``, the default RUNTIME
+    artifact destination, as part of the ``Runtime`` component.
+
+  * Install ``mySharedLib.lib`` to ``<prefix>/lib/static``, the specified
+    ARCHIVE artifact destination, as part of the ``Development`` component.
+
+* Install ``myStaticLib`` to ``<prefix>/lib/static``, the specified
+  ARCHIVE artifact destination, as part of the ``Development`` component.
+
+* Install ``mySharedLib.h`` and ``myStaticLib.h`` to ``<prefix>/include``,
+  the default destination for a file set of type HEADERS, as part of the
+  ``Development`` component.
+
+Example: Install Targets to Per-Config Destinations
+"""""""""""""""""""""""""""""""""""""""""""""""""""
+
+Each :command:`install(TARGETS)` call installs a given target
+:ref:`output artifact <Output Artifacts>` to at most one ``DESTINATION``,
+but the install rule itself may be filtered by the ``CONFIGURATIONS`` option.
+In order to install to a different destination for each configuration, one
+call per configuration is needed.  For example, the code:
+
+.. code-block:: cmake
+
+  install(TARGETS myExe
+          CONFIGURATIONS Debug
+          RUNTIME
+            DESTINATION Debug/bin
+          )
+  install(TARGETS myExe
+          CONFIGURATIONS Release
+          RUNTIME
+            DESTINATION Release/bin
+          )
+
+will install ``myExe`` to ``<prefix>/Debug/bin`` in the Debug configuration,
+and to ``<prefix>/Release/bin`` in the Release configuration.
 
 Generated Installation Script
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
