@@ -115,10 +115,18 @@ bool cmSetCommand(std::vector<std::string> const& args,
   // we should be nice and try to catch some simple screwups if the last or
   // next to last args are CACHE then they screwed up.  If they used FORCE
   // without CACHE they screwed up
-  if ((args.back() == "CACHE") ||
-      (args.size() > 1 && args[args.size() - 2] == "CACHE") ||
-      (force && !cache)) {
-    status.SetError("given invalid arguments for CACHE mode.");
+  if (args.back() == "CACHE") {
+    status.SetError(
+      "given invalid arguments for CACHE mode: missing type and docstring");
+    return false;
+  }
+  if (args.size() > 1 && args[args.size() - 2] == "CACHE") {
+    status.SetError(
+      "given invalid arguments for CACHE mode: missing type or docstring");
+    return false;
+  }
+  if (force && !cache) {
+    status.SetError("given invalid arguments: FORCE specified without CACHE");
     return false;
   }
 
