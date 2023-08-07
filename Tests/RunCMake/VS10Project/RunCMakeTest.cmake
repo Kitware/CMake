@@ -7,7 +7,6 @@ if(CMAKE_C_COMPILER_ID STREQUAL "MSVC" AND CMAKE_C_COMPILER_VERSION VERSION_GREA
   run_cmake(LanguageStandard)
 endif()
 
-run_cmake(CMakeInputs)
 run_cmake(CustomCommandGenex)
 if(NOT RunCMake_GENERATOR MATCHES "^Visual Studio 1[1-5] ")
   run_cmake(CustomCommandParallel)
