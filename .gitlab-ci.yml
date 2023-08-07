@@ -205,6 +205,16 @@ t:debian12-hip-radeon:
     variables:
         CMAKE_CI_NO_MR: "true"
 
+t:fedora38-hip-radeon:
+    extends:
+        - .fedora38_hip_radeon
+        - .cmake_test_linux_release
+        - .linux_x86_64_tags_radeon
+        - .run_dependent
+        - .needs_centos6_x86_64
+    variables:
+        CMAKE_CI_NO_MR: "true"
+
 t:fedora38-ninja-clang:
     extends:
         - .fedora38_ninja_clang

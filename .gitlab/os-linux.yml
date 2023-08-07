@@ -366,6 +366,13 @@
         CMAKE_CONFIGURATION: debian12_hip_radeon
         CTEST_LABELS: "HIP"
 
+.fedora38_hip_radeon:
+    extends: .fedora38
+
+    variables:
+        CMAKE_CONFIGURATION: fedora38_hip_radeon
+        CTEST_LABELS: "HIP"
+
 ### C++ modules
 
 .gcc_cxx_modules_x86_64:
