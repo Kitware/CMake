@@ -44,6 +44,13 @@ file
 jq
 which
 
+# Install HIP language toolchain.
+hsakmt-devel
+lld
+rocm-comgr-devel
+rocm-hip-devel
+rocm-runtime-devel
+
 # Packages needed to test CTest.
 breezy
 subversion
