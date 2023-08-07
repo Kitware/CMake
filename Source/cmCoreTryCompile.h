@@ -6,9 +6,11 @@
 
 #include <map>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <cm/optional>
+#include <cm/string_view>
 
 #include "cmArgumentParser.h"
 #include "cmArgumentParserTypes.h"
@@ -51,17 +53,36 @@ public:
 
   struct Arguments : public ArgumentParser::ParseResult
   {
+    Arguments(cmMakefile const* mf)
+      : Makefile(mf)
+    {
+    }
+
+    cmMakefile const* Makefile;
+
+    enum class SourceType
+    {
+      Normal,
+      CxxModule,
+      Directory,
+    };
+
     cm::optional<std::string> CompileResultVariable;
     cm::optional<std::string> BinaryDirectory;
     cm::optional<std::string> SourceDirectoryOrFile;
     cm::optional<std::string> ProjectName;
     cm::optional<std::string> TargetName;
-    cm::optional<ArgumentParser::NonEmpty<std::vector<std::string>>> Sources;
-    cm::optional<ArgumentParser::NonEmpty<std::vector<std::string>>>
+    cm::optional<ArgumentParser::NonEmpty<
+      std::vector<std::pair<std::string, SourceType>>>>
+      Sources;
+    cm::optional<ArgumentParser::NonEmpty<
+      std::vector<std::pair<std::string, SourceType>>>>
       SourceFromContent;
-    cm::optional<ArgumentParser::NonEmpty<std::vector<std::string>>>
+    cm::optional<ArgumentParser::NonEmpty<
+      std::vector<std::pair<std::string, SourceType>>>>
       SourceFromVar;
-    cm::optional<ArgumentParser::NonEmpty<std::vector<std::string>>>
+    cm::optional<ArgumentParser::NonEmpty<
+      std::vector<std::pair<std::string, SourceType>>>>
       SourceFromFile;
     ArgumentParser::MaybeEmpty<std::vector<std::string>> CMakeFlags{
       1, "CMAKE_FLAGS"
@@ -78,6 +99,10 @@ public:
     cm::optional<ArgumentParser::NonEmpty<std::string>> LogDescription;
     bool NoCache = false;
     bool NoLog = false;
+
+    ArgumentParser::Continue SetSourceType(cm::string_view sourceType);
+    SourceType SourceTypeContext = SourceType::Normal;
+    std::string SourceTypeError;
 
     // Argument for try_run only.
     // Keep in sync with warnings in cmCoreTryCompile::ParseArgs.

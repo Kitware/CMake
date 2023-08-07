@@ -167,7 +167,9 @@ auto const TryCompileBaseArgParser =
 
 auto const TryCompileBaseSourcesArgParser =
   cmArgumentParser<Arguments>{ TryCompileBaseArgParser }
-    .Bind("SOURCES"_s, &Arguments::Sources)
+    .Bind("SOURCES_TYPE"_s, &Arguments::SetSourceType)
+    .BindWithContext("SOURCES"_s, &Arguments::Sources,
+                     &Arguments::SourceTypeContext)
     .Bind("COMPILE_DEFINITIONS"_s, TryCompileCompileDefs,
           ArgumentParser::ExpectAtLeast{ 0 })
     .Bind("LINK_LIBRARIES"_s, &Arguments::LinkLibraries)
@@ -184,9 +186,12 @@ auto const TryCompileBaseSourcesArgParser =
 
 auto const TryCompileBaseNewSourcesArgParser =
   cmArgumentParser<Arguments>{ TryCompileBaseSourcesArgParser }
-    .Bind("SOURCE_FROM_CONTENT"_s, &Arguments::SourceFromContent)
-    .Bind("SOURCE_FROM_VAR"_s, &Arguments::SourceFromVar)
-    .Bind("SOURCE_FROM_FILE"_s, &Arguments::SourceFromFile)
+    .BindWithContext("SOURCE_FROM_CONTENT"_s, &Arguments::SourceFromContent,
+                     &Arguments::SourceTypeContext)
+    .BindWithContext("SOURCE_FROM_VAR"_s, &Arguments::SourceFromVar,
+                     &Arguments::SourceTypeContext)
+    .BindWithContext("SOURCE_FROM_FILE"_s, &Arguments::SourceFromFile,
+                     &Arguments::SourceTypeContext)
   /* keep semicolon on own line */;
 
 auto const TryCompileBaseProjectArgParser =
@@ -221,12 +226,44 @@ auto const TryRunOldArgParser = makeTryRunParser(TryCompileOldArgParser);
 std::string const TryCompileDefaultConfig = "DEBUG";
 }
 
+ArgumentParser::Continue cmCoreTryCompile::Arguments::SetSourceType(
+  cm::string_view sourceType)
+{
+  bool matched = false;
+  if (sourceType == "NORMAL"_s) {
+    this->SourceTypeContext = SourceType::Normal;
+    matched = true;
+  } else if (sourceType == "CXX_MODULE"_s) {
+    bool const supportCxxModuleSources = cmExperimental::HasSupportEnabled(
+      *this->Makefile, cmExperimental::Feature::CxxModuleCMakeApi);
+    if (supportCxxModuleSources) {
+      this->SourceTypeContext = SourceType::CxxModule;
+      matched = true;
+    }
+  }
+
+  if (!matched && this->SourceTypeError.empty()) {
+    bool const supportCxxModuleSources = cmExperimental::HasSupportEnabled(
+      *this->Makefile, cmExperimental::Feature::CxxModuleCMakeApi);
+    auto const* message = "'SOURCE'";
+    if (supportCxxModuleSources) {
+      message = "one of 'SOURCE' or 'CXX_MODULE'";
+    }
+    // Only remember one error at a time; all other errors related to argument
+    // parsing are "indicate one error and return" anyways.
+    this->SourceTypeError =
+      cmStrCat("Invalid 'SOURCE_TYPE' '", sourceType, "'; must be ", message);
+  }
+  return ArgumentParser::Continue::Yes;
+}
+
 Arguments cmCoreTryCompile::ParseArgs(
   const cmRange<std::vector<std::string>::const_iterator>& args,
   const cmArgumentParser<Arguments>& parser,
   std::vector<std::string>& unparsedArguments)
 {
-  auto arguments = parser.Parse(args, &unparsedArguments, 0);
+  Arguments arguments{ this->Makefile };
+  parser.Parse(arguments, args, &unparsedArguments, 0);
   if (!arguments.MaybeReportError(*(this->Makefile)) &&
       !unparsedArguments.empty()) {
     std::string m = "Unknown arguments:";
@@ -434,6 +471,11 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
         "SOURCE_FROM_FILE requires exactly two arguments");
       return cm::nullopt;
     }
+    if (!arguments.SourceTypeError.empty()) {
+      this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
+                                   arguments.SourceTypeError);
+      return cm::nullopt;
+    }
   } else {
     // only valid for srcfile signatures
     if (!arguments.LangProps.empty()) {
@@ -486,42 +528,45 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
     cmSystemTools::RemoveFile(ccFile);
 
     // Choose sources.
-    std::vector<std::string> sources;
+    std::vector<std::pair<std::string, Arguments::SourceType>> sources;
     if (arguments.Sources) {
       sources = std::move(*arguments.Sources);
     } else if (arguments.SourceDirectoryOrFile) {
-      sources.emplace_back(*arguments.SourceDirectoryOrFile);
+      sources.emplace_back(*arguments.SourceDirectoryOrFile,
+                           Arguments::SourceType::Directory);
     }
     if (arguments.SourceFromContent) {
       auto const k = arguments.SourceFromContent->size();
       for (auto i = decltype(k){ 0 }; i < k; i += 2) {
-        const auto& name = (*arguments.SourceFromContent)[i + 0];
-        const auto& content = (*arguments.SourceFromContent)[i + 1];
+        const auto& name = (*arguments.SourceFromContent)[i + 0].first;
+        const auto& content = (*arguments.SourceFromContent)[i + 1].first;
         auto out = this->WriteSource(name, content, "SOURCE_FROM_CONTENT");
         if (out.empty()) {
           return cm::nullopt;
         }
-        sources.emplace_back(std::move(out));
+        sources.emplace_back(std::move(out),
+                             (*arguments.SourceFromContent)[i + 0].second);
       }
     }
     if (arguments.SourceFromVar) {
       auto const k = arguments.SourceFromVar->size();
       for (auto i = decltype(k){ 0 }; i < k; i += 2) {
-        const auto& name = (*arguments.SourceFromVar)[i + 0];
-        const auto& var = (*arguments.SourceFromVar)[i + 1];
+        const auto& name = (*arguments.SourceFromVar)[i + 0].first;
+        const auto& var = (*arguments.SourceFromVar)[i + 1].first;
         const auto& content = this->Makefile->GetDefinition(var);
         auto out = this->WriteSource(name, content, "SOURCE_FROM_VAR");
         if (out.empty()) {
           return cm::nullopt;
         }
-        sources.emplace_back(std::move(out));
+        sources.emplace_back(std::move(out),
+                             (*arguments.SourceFromVar)[i + 0].second);
       }
     }
     if (arguments.SourceFromFile) {
       auto const k = arguments.SourceFromFile->size();
       for (auto i = decltype(k){ 0 }; i < k; i += 2) {
-        const auto& dst = (*arguments.SourceFromFile)[i + 0];
-        const auto& src = (*arguments.SourceFromFile)[i + 1];
+        const auto& dst = (*arguments.SourceFromFile)[i + 0].first;
+        const auto& src = (*arguments.SourceFromFile)[i + 1].first;
 
         if (!cmSystemTools::GetFilenamePath(dst).empty()) {
           const auto& msg =
@@ -539,7 +584,8 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
           return cm::nullopt;
         }
 
-        sources.emplace_back(std::move(dstPath));
+        sources.emplace_back(std::move(dstPath),
+                             (*arguments.SourceFromFile)[i + 0].second);
       }
     }
     // TODO: ensure sources is not empty
@@ -547,7 +593,8 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
     // Detect languages to enable.
     cmGlobalGenerator* gg = this->Makefile->GetGlobalGenerator();
     std::set<std::string> testLangs;
-    for (std::string const& si : sources) {
+    for (auto const& source : sources) {
+      auto const& si = source.first;
       std::string ext = cmSystemTools::GetFilenameLastExtension(si);
       std::string lang = gg->GetLanguageFromExtension(ext.c_str());
       if (!lang.empty()) {
@@ -837,17 +884,43 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
       fprintf(fout, "set(CMAKE_RUNTIME_OUTPUT_DIRECTORY \"%s\")\n",
               this->BinaryDirectory.c_str());
       /* Create the actual executable.  */
-      fprintf(fout, "add_executable(%s", targetName.c_str());
+      fprintf(fout, "add_executable(%s)\n", targetName.c_str());
     } else // if (targetType == cmStateEnums::STATIC_LIBRARY)
     {
       /* Put the static library at a known location (for COPY_FILE).  */
       fprintf(fout, "set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY \"%s\")\n",
               this->BinaryDirectory.c_str());
       /* Create the actual static library.  */
-      fprintf(fout, "add_library(%s STATIC", targetName.c_str());
+      fprintf(fout, "add_library(%s STATIC)\n", targetName.c_str());
     }
-    for (std::string const& si : sources) {
-      fprintf(fout, " \"%s\"", si.c_str());
+    fprintf(fout, "target_sources(%s PRIVATE\n", targetName.c_str());
+    std::string file_set_name;
+    bool in_file_set = false;
+    for (auto const& source : sources) {
+      auto const& si = source.first;
+      switch (source.second) {
+        case Arguments::SourceType::Normal: {
+          if (in_file_set) {
+            fprintf(fout, "  PRIVATE\n");
+            in_file_set = false;
+          }
+        } break;
+        case Arguments::SourceType::CxxModule: {
+          if (!in_file_set) {
+            file_set_name += 'a';
+            fprintf(fout,
+                    "  PRIVATE FILE_SET %s TYPE CXX_MODULES BASE_DIRS \"%s\" "
+                    "FILES\n",
+                    file_set_name.c_str(),
+                    this->Makefile->GetCurrentSourceDirectory().c_str());
+            in_file_set = true;
+          }
+        } break;
+        case Arguments::SourceType::Directory:
+          /* Handled elsewhere. */
+          break;
+      }
+      fprintf(fout, "  \"%s\"\n", si.c_str());
 
       // Add dependencies on any non-temporary sources.
       if (!IsTemporary(si)) {
@@ -1025,6 +1098,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
     vars.emplace("CMAKE_MSVC_RUNTIME_LIBRARY"_s);
     vars.emplace("CMAKE_WATCOM_RUNTIME_LIBRARY"_s);
     vars.emplace("CMAKE_MSVC_DEBUG_INFORMATION_FORMAT"_s);
+    vars.emplace("CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS"_s);
 
     if (cmValue varListStr = this->Makefile->GetDefinition(
           kCMAKE_TRY_COMPILE_PLATFORM_VARIABLES)) {
@@ -1077,8 +1151,16 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
          i++) {
       auto const& data = cmExperimental::DataForFeature(
         static_cast<cmExperimental::Feature>(i));
-      if (data.ForwardThroughTryCompile) {
+      if (data.ForwardThroughTryCompile ==
+            cmExperimental::TryCompileCondition::Always ||
+          (data.ForwardThroughTryCompile ==
+             cmExperimental::TryCompileCondition::SkipCompilerChecks &&
+           arguments.CMakeInternal != "ABI"_s &&
+           arguments.CMakeInternal != "FEATURE_TESTING"_s)) {
         vars.insert(data.Variable);
+        for (auto const& var : data.TryCompileVariables) {
+          vars.insert(var);
+        }
       }
     }
 

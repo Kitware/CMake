@@ -37,6 +37,7 @@ macro(_record_compiler_features lang compile_flags feature_list)
     LINK_LIBRARIES "${compile_flags_for_link}"
     COPY_FILE "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests.bin"
     COPY_FILE_ERROR _copy_error
+    __CMAKE_INTERNAL FEATURE_TESTING
     )
   if(NOT CMAKE_${lang}_FEATURE_TEST)
     set(_result 255)
