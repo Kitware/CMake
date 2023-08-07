@@ -70,7 +70,7 @@
 #endif
 
 // List of variables that are replaced when
-// rules are expanced.  These variables are
+// rules are expanded.  These variables are
 // replaced in the form <var> with GetSafeDefinition(var).
 // ${LANG} is replaced in the variable first with all enabled
 // languages.

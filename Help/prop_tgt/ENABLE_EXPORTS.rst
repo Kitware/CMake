@@ -27,30 +27,33 @@ varies by platform:
   referencing the executable since the dynamic loader will
   automatically bind symbols when the module is loaded.
 
-This property is initialized by the value of the variable
-:variable:`CMAKE_EXECUTABLE_ENABLE_EXPORTS` if it is set when an executable
-target is created.
+This property is initialized by the value of the
+:variable:`CMAKE_EXECUTABLE_ENABLE_EXPORTS` variable, if it is set when an
+executable target is created.  If :variable:`CMAKE_EXECUTABLE_ENABLE_EXPORTS`
+is not set, the :variable:`CMAKE_ENABLE_EXPORTS` variable is used to initialize
+the property instead for backward compatibility reasons.
+See below for alternative initialization behavior for shared library targets.
 
 .. versionadded:: 3.27
-  On macOS, to link with a shared library (standard one as well as framework),
-  a linker import file (e.g. a text-based stubs file, with ``.tbd`` extension)
-  can be used instead of the shared library itself.
+  On Apple platforms, to link with a shared library (either a bare library or a
+  framework), a linker import file can be used instead of the actual shared
+  library. These linker import files are also known as text-based stubs, and
+  they have a ``.tbd`` file extension.
 
-The generation of these linker import files, as well as the consumption, is
-controlled by this property. When this property is set to true, CMake will
-generate a ``.tbd`` file for each shared library created by
-:command:`add_library` command. This allow other targets to use this ``.tbd``
-file to link to the library with the :command:`target_link_libraries`
-command.
+  The generation of these linker import files, as well as their consumption, is
+  controlled by this property. When this property is set to true on a shared
+  library target, CMake will generate a ``.tbd`` file for the library.
+  Other targets that link to the shared library target will then use this
+  ``.tbd`` file when linking rather than linking to the shared library binary.
 
-.. note::
+  .. note::
 
-  For compatibility purpose, this property will be ignored if
-  :prop_tgt:`XCODE_ATTRIBUTE_GENERATE_TEXT_BASED_STUBS <XCODE_ATTRIBUTE_<an-attribute>>`
-  target property or the
-  :variable:`CMAKE_XCODE_ATTRIBUTE_GENERATE_TEXT_BASED_STUBS <CMAKE_XCODE_ATTRIBUTE_<an-attribute>>`
-  variable is set to ``NO``.
+    For backward compatibility reasons, this property will be ignored if the
+    :prop_tgt:`XCODE_ATTRIBUTE_GENERATE_TEXT_BASED_STUBS <XCODE_ATTRIBUTE_<an-attribute>>`
+    target property or the
+    :variable:`CMAKE_XCODE_ATTRIBUTE_GENERATE_TEXT_BASED_STUBS <CMAKE_XCODE_ATTRIBUTE_<an-attribute>>`
+    variable is set to false.
 
-This property is initialized by the value of the variable
-:variable:`CMAKE_SHARED_LIBRARY_ENABLE_EXPORTS` if it is set when a shared
-library target is created.
+  For shared library targets, this property is initialized by the value of the
+  :variable:`CMAKE_SHARED_LIBRARY_ENABLE_EXPORTS` variable, if it is set when
+  the target is created.
