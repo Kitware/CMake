@@ -50,7 +50,7 @@ Supported pairs are:
   .. versionadded:: 3.27
 
   Specify the Windows SDK version to use.  This is supported by VS 2015 and
-  above when targeting Windows 10.0+ or Windows Store.  CMake will set the
+  above when targeting Windows or Windows Store.  CMake will set the
   :variable:`CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION` variable to the
   selected SDK version.
 

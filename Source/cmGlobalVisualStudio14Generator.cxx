@@ -6,6 +6,7 @@
 #include <sstream>
 
 #include <cm/vector>
+#include <cmext/string_view>
 
 #include "cmGlobalGenerator.h"
 #include "cmGlobalGeneratorFactory.h"
@@ -140,6 +141,57 @@ bool cmGlobalVisualStudio14Generator::MatchesGeneratorName(
 
 bool cmGlobalVisualStudio14Generator::InitializePlatformWindows(cmMakefile* mf)
 {
+  // If a Windows SDK version is explicitly requested, search for it.
+  if (this->GeneratorPlatformVersion) {
+    std::string const& version = *this->GeneratorPlatformVersion;
+
+    // VS 2019 and above support specifying plain "10.0".
+    if (version == "10.0"_s) {
+      if (this->Version >= VSVersion::VS16) {
+        this->SetWindowsTargetPlatformVersion("10.0", mf);
+        return true;
+      }
+      /* clang-format off */
+      mf->IssueMessage(MessageType::FATAL_ERROR, cmStrCat(
+          "Generator\n"
+          "  ", this->GetName(), "\n"
+          "given platform specification containing a\n"
+          "  version=10.0\n"
+          "field.  The value 10.0 is only supported by VS 2019 and above.\n"
+          ));
+      /* clang-format on */
+      return false;
+    }
+
+    if (cmHasLiteralPrefix(version, "10.0.")) {
+      return this->SelectWindows10SDK(mf);
+    }
+
+    if (version.empty()) {
+      /* clang-format off */
+      mf->IssueMessage(MessageType::FATAL_ERROR, cmStrCat(
+          "Generator\n"
+          "  ", this->GetName(), "\n"
+          "given platform specification with empty\n"
+          "  version=\n"
+          "field.\n"
+          ));
+      /* clang-format on */
+      return false;
+    }
+
+    /* clang-format off */
+    mf->IssueMessage(MessageType::FATAL_ERROR, cmStrCat(
+        "Generator\n"
+        "  ", this->GetName(), "\n"
+        "given platform specification containing a\n"
+        "  version=", version, "\n"
+        "field with unsupported value.\n"
+        ));
+    /* clang-format on */
+    return false;
+  }
+
   // If we are targeting Windows 10+, we select a Windows 10 SDK.
   // If no Windows 8.1 SDK is installed, which is possible with VS 2017 and
   // higher, then we must choose a Windows 10 SDK anyway.
@@ -153,15 +205,12 @@ bool cmGlobalVisualStudio14Generator::InitializePlatformWindows(cmMakefile* mf)
   if (this->Version >= cmGlobalVisualStudioGenerator::VSVersion::VS16 &&
       !cmSystemTools::VersionCompareGreater(this->SystemVersion, "8.1")) {
     this->SetWindowsTargetPlatformVersion("8.1", mf);
-    return this->VerifyNoGeneratorPlatformVersion(
-      mf, "with the Windows 8.1 SDK installed");
   }
-
-  return this->VerifyNoGeneratorPlatformVersion(mf);
+  return true;
 }
 
 bool cmGlobalVisualStudio14Generator::VerifyNoGeneratorPlatformVersion(
-  cmMakefile* mf, cm::optional<std::string> reason) const
+  cmMakefile* mf) const
 {
   if (!this->GeneratorPlatformVersion) {
     return true;
@@ -177,9 +226,6 @@ bool cmGlobalVisualStudio14Generator::VerifyNoGeneratorPlatformVersion(
     "  " << this->SystemName << " " << this->SystemVersion << "\n"
     ;
   /* clang-format on */
-  if (reason) {
-    e << *reason << ".";
-  }
   mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
   return false;
 }
@@ -221,16 +267,6 @@ bool cmGlobalVisualStudio14Generator::ProcessGeneratorPlatformField(
 
 bool cmGlobalVisualStudio14Generator::SelectWindows10SDK(cmMakefile* mf)
 {
-  if (this->GeneratorPlatformVersion &&
-      this->GeneratorPlatformVersion->empty()) {
-    mf->IssueMessage(
-      MessageType::FATAL_ERROR,
-      cmStrCat("Generator\n  ", this->GetName(),
-               "\ngiven platform specification with empty\n  version=\n"
-               "field."));
-    return false;
-  }
-
   // Find the default version of the Windows 10 SDK.
   std::string const version = this->GetWindows10SDKVersion(mf);
 
@@ -376,16 +412,6 @@ std::string cmGlobalVisualStudio14Generator::GetWindows10SDKVersion(
   cmMakefile* mf)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  // Accept specific version requests as-is.
-  if (this->GeneratorPlatformVersion) {
-    std::string const& ver = *this->GeneratorPlatformVersion;
-
-    // VS 2019 and above support specifying plain "10.0".
-    if (this->Version >= VSVersion::VS16 && ver == "10.0") {
-      return ver;
-    }
-  }
-
   std::vector<std::string> win10Roots;
 
   {

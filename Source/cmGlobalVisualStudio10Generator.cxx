@@ -544,7 +544,7 @@ bool cmGlobalVisualStudio10Generator::InitializePlatformWindows(cmMakefile*)
 }
 
 bool cmGlobalVisualStudio10Generator::VerifyNoGeneratorPlatformVersion(
-  cmMakefile*, cm::optional<std::string>) const
+  cmMakefile*) const
 {
   return true;
 }
