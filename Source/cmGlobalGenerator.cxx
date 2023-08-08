@@ -30,6 +30,7 @@
 #include "cmAlgorithms.h"
 #include "cmCPackPropertiesGenerator.h"
 #include "cmComputeTargetDepends.h"
+#include "cmCryptoHash.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
 #include "cmDuration.h"
@@ -64,7 +65,6 @@
 #  include <cm3p/json/value.h>
 #  include <cm3p/json/writer.h>
 
-#  include "cmCryptoHash.h"
 #  include "cmQtAutoGenGlobalInitializer.h"
 #endif
 
@@ -3222,7 +3222,6 @@ std::set<std::string> const& cmGlobalGenerator::GetDirectoryContent(
 void cmGlobalGenerator::AddRuleHash(const std::vector<std::string>& outputs,
                                     std::string const& content)
 {
-#if !defined(CMAKE_BOOTSTRAP)
   // Ignore if there are no outputs.
   if (outputs.empty()) {
     return;
@@ -3242,20 +3241,14 @@ void cmGlobalGenerator::AddRuleHash(const std::vector<std::string>& outputs,
 
   // Associate the hash with this output.
   this->RuleHashes[fname] = hash;
-#else
-  (void)outputs;
-  (void)content;
-#endif
 }
 
 void cmGlobalGenerator::CheckRuleHashes()
 {
-#if !defined(CMAKE_BOOTSTRAP)
   std::string home = this->GetCMakeInstance()->GetHomeOutputDirectory();
   std::string pfile = cmStrCat(home, "/CMakeFiles/CMakeRuleHashes.txt");
   this->CheckRuleHashes(pfile, home);
   this->WriteRuleHashes(pfile);
-#endif
 }
 
 void cmGlobalGenerator::CheckRuleHashes(std::string const& pfile,
