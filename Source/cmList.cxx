@@ -802,31 +802,34 @@ cmList& cmList::transform(TransformAction action,
   return *this;
 }
 
-std::string cmList::join(cm::string_view glue) const
-{
-  return cmJoin(this->Values, glue);
-}
-
-std::string& cmList::append(std::string& list, cm::string_view value)
+std::string& cmList::append(std::string& list, std::string&& value)
 {
   if (list.empty()) {
-    list = std::string(value);
+    list = std::move(value);
   } else {
     list += cmStrCat(cmList::element_separator, value);
   }
 
   return list;
 }
+std::string& cmList::append(std::string& list, cm::string_view value)
+{
+  return cmList::append(list, std::string{ value });
+}
 
-std::string& cmList::prepend(std::string& list, cm::string_view value)
+std::string& cmList::prepend(std::string& list, std::string&& value)
 {
   if (list.empty()) {
-    list = std::string(value);
+    list = std::move(value);
   } else {
     list.insert(0, cmStrCat(value, cmList::element_separator));
   }
 
   return list;
+}
+std::string& cmList::prepend(std::string& list, cm::string_view value)
+{
+  return cmList::prepend(list, std::string{ value });
 }
 
 cmList::size_type cmList::ComputeIndex(index_type pos, bool boundCheck) const
