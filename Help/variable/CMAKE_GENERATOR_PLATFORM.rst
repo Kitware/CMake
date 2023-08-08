@@ -66,6 +66,10 @@ Supported pairs are:
     the value of :variable:`CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION_MAXIMUM`,
     if that variable is set.
 
+  ``8.1``
+    Specify the 8.1 SDK version.  This is always supported by VS 2015.
+    On VS 2017 and above the 8.1 SDK must be installed.
+
   If the ``version`` field is not specified, CMake selects a version as
   described in the :variable:`CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION`
   variable documentation.

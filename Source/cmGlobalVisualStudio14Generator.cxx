@@ -167,6 +167,23 @@ bool cmGlobalVisualStudio14Generator::InitializePlatformWindows(cmMakefile* mf)
       return this->SelectWindows10SDK(mf);
     }
 
+    if (version == "8.1"_s) {
+      if (this->IsWin81SDKInstalled()) {
+        this->SetWindowsTargetPlatformVersion("8.1", mf);
+        return true;
+      }
+      /* clang-format off */
+      mf->IssueMessage(MessageType::FATAL_ERROR, cmStrCat(
+          "Generator\n"
+          "  ", this->GetName(), "\n"
+          "given platform specification containing a\n"
+          "  version=8.1\n"
+          "field, but the Windows 8.1 SDK is not installed.\n"
+          ));
+      /* clang-format on */
+      return false;
+    }
+
     if (version.empty()) {
       /* clang-format off */
       mf->IssueMessage(MessageType::FATAL_ERROR, cmStrCat(

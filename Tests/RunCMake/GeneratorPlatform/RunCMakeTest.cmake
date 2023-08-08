@@ -65,6 +65,16 @@ if("${RunCMake_GENERATOR}" MATCHES "^Visual Studio (1[4567])( 20[0-9][0-9])?$")
     file(GLOB kits RELATIVE "${kitsInclude}" "${kitsInclude}/*/um/windows.h")
     list(TRANSFORM kits REPLACE "/.*" "")
   endif()
+  cmake_host_system_information(RESULT kitsRoot81
+    QUERY WINDOWS_REGISTRY "HKLM/SOFTWARE/Microsoft/Windows Kits/Installed Roots"
+    VALUE "KitsRoot81"
+    VIEW 64_32
+    ERROR_VARIABLE kitsRoot81Error
+    )
+  if(NOT kitsRoot81Error AND EXISTS "${kitsRoot81}/include/um/windows.h")
+    list(PREPEND kits "8.1")
+  endif()
+
   if(kits)
     message(STATUS "Available Kits: ${kits}")
     if(RunCMake_GENERATOR MATCHES "^Visual Studio 14 ")
@@ -93,6 +103,7 @@ if("${RunCMake_GENERATOR}" MATCHES "^Visual Studio (1[4567])( 20[0-9][0-9])?$")
     run_cmake_with_options(VersionExists -DCMAKE_SYSTEM_VERSION=10.0)
     unset(RunCMake_GENERATOR_PLATFORM)
   endforeach()
+  list(REMOVE_ITEM kits 8.1)
   foreach(expect_version IN LISTS kits)
     set(RunCMake_TEST_VARIANT_DESCRIPTION "-CMP0149-OLD-${expect_version}")
     run_cmake_with_options(VersionExists -DCMAKE_SYSTEM_VERSION=${expect_version} -DCMAKE_POLICY_DEFAULT_CMP0149=OLD)
