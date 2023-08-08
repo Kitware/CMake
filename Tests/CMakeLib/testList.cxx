@@ -858,7 +858,7 @@ bool testStaticModifiers()
   }
   {
     std::string list{ "a;b;c" };
-    cmList::append(list, "");
+    cmList::append(list, ""_s);
 
     if (list != "a;b;c;") {
       result = false;
@@ -893,7 +893,7 @@ bool testStaticModifiers()
   }
   {
     std::string list{ "a;b;c" };
-    cmList::prepend(list, "d;e");
+    cmList::prepend(list, "d;e"_s);
 
     if (list != "d;e;a;b;c") {
       result = false;
@@ -901,7 +901,7 @@ bool testStaticModifiers()
   }
   {
     std::string list;
-    cmList::prepend(list, "d;e");
+    cmList::prepend(list, "d;e"_s);
 
     if (list != "d;e") {
       result = false;
@@ -909,7 +909,7 @@ bool testStaticModifiers()
   }
   {
     std::string list{ "a;b;c" };
-    cmList::prepend(list, "");
+    cmList::prepend(list, ""_s);
 
     if (list != ";a;b;c") {
       result = false;
