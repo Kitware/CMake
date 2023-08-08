@@ -213,13 +213,6 @@ public:
   static void MoveFileIfDifferent(const std::string& source,
                                   const std::string& destination);
 
-#ifndef CMAKE_BOOTSTRAP
-#  ifdef _WIN32
-  //! Get the SHA thumbprint for a certificate file
-  static std::string ComputeCertificateThumbprint(const std::string& source);
-#  endif
-#endif
-
   /**
    * Run a single executable command
    *
