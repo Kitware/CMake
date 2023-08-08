@@ -248,7 +248,8 @@ void cmGlobalVisualStudio14Generator::SetWindowsTargetPlatformVersion(
   std::string const& version, cmMakefile* mf)
 {
   this->WindowsTargetPlatformVersion = version;
-  if (!cmSystemTools::VersionCompareEqual(this->WindowsTargetPlatformVersion,
+  if (!this->WindowsTargetPlatformVersion.empty() &&
+      !cmSystemTools::VersionCompareEqual(this->WindowsTargetPlatformVersion,
                                           this->SystemVersion)) {
     std::ostringstream e;
     e << "Selecting Windows SDK version " << this->WindowsTargetPlatformVersion
