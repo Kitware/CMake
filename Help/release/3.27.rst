@@ -275,6 +275,11 @@ Changes made since CMake 3.27.0 include the following.
 3.27.2
 ------
 
+* :ref:`Visual Studio Generators` for VS 14 (2015) and above now prefer to
+  select the latest Windows SDK, as documented by policy :policy:`CMP0149`,
+  when targeting any version of Windows.  In CMake 3.27.[0-1] the
+  preference was limited to targeting Windows 10 and above.
+
 * :ref:`Visual Studio Generators` for VS 14 (2015) and above now support
   using ``version=8.1`` in the :variable:`CMAKE_GENERATOR_PLATFORM` variable
   to select the Windows 8.1 SDK.  In CMake 3.27.[0-1] the ``version=`` field

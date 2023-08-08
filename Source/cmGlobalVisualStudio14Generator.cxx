@@ -217,6 +217,16 @@ bool cmGlobalVisualStudio14Generator::InitializePlatformWindows(cmMakefile* mf)
     return this->SelectWindows10SDK(mf);
   }
 
+  // Under CMP0149 NEW behavior, we search for a Windows 10 SDK even
+  // when targeting older Windows versions, but it is not required.
+  if (mf->GetPolicyStatus(cmPolicies::CMP0149) == cmPolicies::NEW) {
+    std::string const version = this->GetWindows10SDKVersion(mf);
+    if (!version.empty()) {
+      this->SetWindowsTargetPlatformVersion(version, mf);
+      return true;
+    }
+  }
+
   // We are not targeting Windows 10+, so fall back to the Windows 8.1 SDK.
   // For VS 2019 and above we must explicitly specify it.
   if (this->Version >= cmGlobalVisualStudioGenerator::VSVersion::VS16 &&
