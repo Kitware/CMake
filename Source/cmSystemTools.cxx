@@ -51,7 +51,6 @@
 #  if defined(_WIN32)
 #    include <cm/memory>
 #  endif
-#  include "cmCryptoHash.h"
 #endif
 
 #if defined(CMake_USE_MACH_PARSER)
@@ -1309,13 +1308,6 @@ void cmSystemTools::MoveFileIfDifferent(const std::string& source,
 }
 
 #ifndef CMAKE_BOOTSTRAP
-std::string cmSystemTools::ComputeFileHash(const std::string& source,
-                                           cmCryptoHash::Algo algo)
-{
-  cmCryptoHash hash(algo);
-  return hash.HashFile(source);
-}
-
 #  ifdef _WIN32
 std::string cmSystemTools::ComputeCertificateThumbprint(
   const std::string& source)

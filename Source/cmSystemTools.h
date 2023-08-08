@@ -22,7 +22,6 @@
 #include "cmsys/Status.hxx"      // IWYU pragma: export
 #include "cmsys/SystemTools.hxx" // IWYU pragma: export
 
-#include "cmCryptoHash.h"
 #include "cmDuration.h"
 #include "cmProcessOutput.h"
 
@@ -215,10 +214,6 @@ public:
                                   const std::string& destination);
 
 #ifndef CMAKE_BOOTSTRAP
-  //! Compute the hash of a file
-  static std::string ComputeFileHash(const std::string& source,
-                                     cmCryptoHash::Algo algo);
-
 #  ifdef _WIN32
   //! Get the SHA thumbprint for a certificate file
   static std::string ComputeCertificateThumbprint(const std::string& source);
