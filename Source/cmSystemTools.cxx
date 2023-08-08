@@ -1316,12 +1316,6 @@ std::string cmSystemTools::ComputeFileHash(const std::string& source,
   return hash.HashFile(source);
 }
 
-std::string cmSystemTools::ComputeStringMD5(const std::string& input)
-{
-  cmCryptoHash md5(cmCryptoHash::AlgoMD5);
-  return md5.HashString(input);
-}
-
 #  ifdef _WIN32
 std::string cmSystemTools::ComputeCertificateThumbprint(
   const std::string& source)
