@@ -322,10 +322,10 @@ were built in its own tree. For example:
    add_executable(myexe src1.c src2.c )
    target_link_libraries(myexe PRIVATE MathFunctions::MathFunctions)
 
-Line 1 loads the target CMake file. Although we only exported a single
+Line 2 loads the target CMake file. Although we only exported a single
 target, this file may import any number of targets. Their locations are
 computed relative to the file location so that the install tree may be
-easily moved. Line 3 references the imported ``MathFunctions`` library. The
+easily moved. Line 4 references the imported ``MathFunctions`` library. The
 resulting build system will link to the library from its installed location.
 
 Executables may also be exported and imported using the same process.
