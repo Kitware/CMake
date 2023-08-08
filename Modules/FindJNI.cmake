@@ -383,6 +383,23 @@ foreach(JAVA_PROG "${JAVA_RUNTIME}" "${JAVA_COMPILE}" "${JAVA_ARCHIVE}")
 endforeach()
 
 if(APPLE)
+  if(DEFINED XCODE_VERSION)
+    set(_FindJNI_XCODE_VERSION "${XCODE_VERSION}")
+  else()
+    # get xcode version
+    execute_process(
+          COMMAND xcodebuild -version
+          OUTPUT_VARIABLE _xcode_version
+          )
+    string(REGEX REPLACE "Xcode ([0-9]+(\\.[0-9]+)*)" "\\1" _FindJNI_XCODE_VERSION ${_xcode_version})
+    unset(_xcode_version)
+  endif()
+
+  if(_FindJNI_XCODE_VERSION VERSION_GREATER 12.1)
+    set(CMAKE_FIND_FRAMEWORK "NEVER")
+  endif()
+  unset(_FindJNI_XCODE_VERSION)
+
   if(CMAKE_FIND_FRAMEWORK STREQUAL "ONLY")
     set(_JNI_SEARCHES FRAMEWORK)
   elseif(CMAKE_FIND_FRAMEWORK STREQUAL "NEVER")
