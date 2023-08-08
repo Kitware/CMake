@@ -140,9 +140,23 @@ bool cmGlobalVisualStudio14Generator::MatchesGeneratorName(
 
 bool cmGlobalVisualStudio14Generator::InitializePlatformWindows(cmMakefile* mf)
 {
-  if (cmHasLiteralPrefix(this->SystemVersion, "10.0")) {
+  // If we are targeting Windows 10+, we select a Windows 10 SDK.
+  // If no Windows 8.1 SDK is installed, which is possible with VS 2017 and
+  // higher, then we must choose a Windows 10 SDK anyway.
+  if (cmHasLiteralPrefix(this->SystemVersion, "10.0") ||
+      !this->IsWin81SDKInstalled()) {
     return this->SelectWindows10SDK(mf);
   }
+
+  // We are not targeting Windows 10+, so fall back to the Windows 8.1 SDK.
+  // For VS 2019 and above we must explicitly specify it.
+  if (this->Version >= cmGlobalVisualStudioGenerator::VSVersion::VS16 &&
+      !cmSystemTools::VersionCompareGreater(this->SystemVersion, "8.1")) {
+    this->SetWindowsTargetPlatformVersion("8.1", mf);
+    return this->VerifyNoGeneratorPlatformVersion(
+      mf, "with the Windows 8.1 SDK installed");
+  }
+
   return this->VerifyNoGeneratorPlatformVersion(mf);
 }
 
@@ -294,6 +308,11 @@ bool cmGlobalVisualStudio14Generator::IsWindowsStoreToolsetInstalled() const
   std::string win10SDK;
   return cmSystemTools::ReadRegistryValue(universal10Key, win10SDK,
                                           cmSystemTools::KeyWOW64_32);
+}
+
+bool cmGlobalVisualStudio14Generator::IsWin81SDKInstalled() const
+{
+  return true;
 }
 
 std::string cmGlobalVisualStudio14Generator::GetWindows10SDKMaxVersion(

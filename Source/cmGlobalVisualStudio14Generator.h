@@ -40,6 +40,8 @@ protected:
   // of the toolset is installed
   bool IsWindowsStoreToolsetInstalled() const;
 
+  virtual bool IsWin81SDKInstalled() const;
+
   bool InitializePlatformWindows(cmMakefile* mf) override;
   bool VerifyNoGeneratorPlatformVersion(
     cmMakefile* mf,
