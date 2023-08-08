@@ -2606,8 +2606,9 @@ bool HandleGenerateCommand(std::vector<std::string> const& args,
     return false;
   }
   const bool inputIsContent = arguments.ParsedKeywords[1] == "CONTENT"_s;
-  if (!inputIsContent && arguments.ParsedKeywords[1] == "INPUT") {
+  if (!inputIsContent && arguments.ParsedKeywords[1] != "INPUT") {
     status.SetError("Unknown argument to GENERATE subcommand.");
+    return false;
   }
   std::string const& input =
     inputIsContent ? *arguments.Content : *arguments.Input;
