@@ -3026,13 +3026,11 @@ void cmLocalGenerator::WriteUnitySourceInclude(
     } else {
       pathToHash = "ABS_" + sf_full_path;
     }
+    cmCryptoHash hasher(cmCryptoHash::AlgoMD5);
     unity_file << "/* " << pathToHash << " */\n"
                << "#undef " << *uniqueIdName << "\n"
                << "#define " << *uniqueIdName << " unity_"
-#ifndef CMAKE_BOOTSTRAP
-               << cmSystemTools::ComputeStringMD5(pathToHash) << "\n"
-#endif
-      ;
+               << hasher.HashString(pathToHash) << "\n";
   }
 
   if (beforeInclude) {

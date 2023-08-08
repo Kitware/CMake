@@ -22,6 +22,7 @@
 #include "cmsys/RegularExpression.hxx"
 
 #include "cmComputeLinkInformation.h"
+#include "cmCryptoHash.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
 #include "cmFileSet.h"
@@ -1821,8 +1822,9 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
     }
     script += lg->FinishConstructScript(this->ProjectType);
     if (this->ProjectType == VsProjectType::csproj) {
-      std::string name = cmStrCat("CustomCommand_", c, '_',
-                                  cmSystemTools::ComputeStringMD5(sourcePath));
+      cmCryptoHash hasher(cmCryptoHash::AlgoMD5);
+      std::string name =
+        cmStrCat("CustomCommand_", c, '_', hasher.HashString(sourcePath));
       this->WriteCustomRuleCSharp(e0, c, name, script, additional_inputs.str(),
                                   outputs.str(), comment, ccg);
     } else {
