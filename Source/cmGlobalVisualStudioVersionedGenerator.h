@@ -72,10 +72,8 @@ protected:
   // of the toolset is installed
   bool IsWindowsStoreToolsetInstalled() const;
 
-  bool InitializePlatformWindows(cmMakefile* mf) override;
-
   // Check for a Win 8 SDK known to the registry or VS installer tool.
-  bool IsWin81SDKInstalled() const;
+  bool IsWin81SDKInstalled() const override;
 
   std::string GetWindows10SDKMaxVersionDefault(cmMakefile*) const override;
 
