@@ -156,9 +156,7 @@ bool cmCTestMultiProcessHandler::StartTestProcess(int test)
 {
   if (this->HaveAffinity && this->Properties[test]->WantAffinity) {
     size_t needProcessors = this->GetProcessorsUsed(test);
-    if (needProcessors > this->ProcessorsAvailable.size()) {
-      return false;
-    }
+    assert(needProcessors <= this->ProcessorsAvailable.size());
     std::vector<size_t> affinity;
     affinity.reserve(needProcessors);
     for (size_t i = 0; i < needProcessors; ++i) {
