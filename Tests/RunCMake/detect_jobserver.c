@@ -11,22 +11,24 @@
 #include <string.h>
 
 #define MAX_MESSAGE_LENGTH 1023
-#define USAGE "Usage: %s [--present|--absent] <output_file>\n"
+#define USAGE "Usage: %s <output_file>\n"
 
-// Extracts --jobserver-auth=<string> or --jobserver-fds=<string> from
-// MAKEFLAGS. The returned pointer points to the start of <string> Returns NULL
-// if MAKEFLAGS is not set or does not contain --jobserver-auth or
-// --jobserver-fds
+// Extracts the jobserver details from the MAKEFLAGS environment variable.
+//
+// Returns a pointer to either a string of the form "R,W" where R and W are fds
+// or "fifo:PATH".
+//
+// Returns NULL if MAKEFLAGS is not set or does not contain recognized
+// jobserver flags.
 char* jobserver_auth(char* message)
 {
-  const char* jobserver_auth = "--jobserver-auth=";
-  const char* jobserver_fds = "--jobserver-fds=";
-  char* auth;
-  char* fds;
-  char* start;
+  const char* jobserver_flags[3] = { "--jobserver-auth=", "--jobserver-fds=",
+                                     "-J" };
+  char* start = NULL;
   char* end;
   char* result;
   size_t len;
+  int i;
 
   char* makeflags = getenv("MAKEFLAGS");
   if (makeflags == NULL) {
@@ -34,18 +36,24 @@ char* jobserver_auth(char* message)
     return NULL;
   }
 
-  // write MAKEFLAGS to stdout for debugging
   fprintf(stdout, "MAKEFLAGS: %s\n", makeflags);
 
-  auth = strstr(makeflags, jobserver_auth);
-  fds = strstr(makeflags, jobserver_fds);
-  if (auth == NULL && fds == NULL) {
-    strncpy(message, "No jobserver found", MAX_MESSAGE_LENGTH);
+  for (i = 0; i < 3; i++) {
+    start = strstr(makeflags, jobserver_flags[i]);
+    if (start != NULL) {
+      start += strlen(jobserver_flags[i]);
+      break;
+    }
+  }
+
+  if (start == NULL) {
+    strncpy(message, "No jobserver flags found", MAX_MESSAGE_LENGTH);
     return NULL;
-  } else if (auth != NULL) {
-    start = auth + strlen(jobserver_auth);
-  } else {
-    start = fds + strlen(jobserver_fds);
+  }
+
+  // Skip leading white space
+  while (*start == ' ' || *start == '\t') {
+    start++;
   }
 
   end = strchr(start, ' ');
@@ -132,38 +140,21 @@ int posix(const char* jobserver, char* message)
 }
 #endif
 
-// Takes 2 arguments:
-// Either --present or --absent to indicate we expect the jobserver to be
-// "present and valid", or "absent or invalid"
-//
-// if `--present` is passed, the exit code will be 0 if the jobserver is
-// present, 1 if it is absent if `--absent` is passed, the exit code will be 0
-// if the jobserver is absent, 1 if it is present in either case, if there is
-// some fatal error (e.g the output file cannot be opened), the exit code will
-// be 2
+// Takes 1 argument: an outfile to write results to.
 int main(int argc, char** argv)
 {
   char message[MAX_MESSAGE_LENGTH + 1];
   char* output_file;
   FILE* fp;
-  int expecting_present;
-  int expecting_absent;
   char* jobserver;
   int result;
 
-  if (argc != 3) {
+  if (argc != 2) {
     fprintf(stderr, USAGE, argv[0]);
     return 2;
   }
 
-  expecting_present = strcmp(argv[1], "--present") == 0;
-  expecting_absent = strcmp(argv[1], "--absent") == 0;
-  if (!expecting_present && !expecting_absent) {
-    fprintf(stderr, USAGE, argv[0]);
-    return 2;
-  }
-
-  output_file = argv[2];
+  output_file = argv[1];
   fp = fopen(output_file, "w");
   if (fp == NULL) {
     fprintf(stderr, "Error opening output file: %s\n", output_file);
@@ -172,11 +163,6 @@ int main(int argc, char** argv)
 
   jobserver = jobserver_auth(message);
   if (jobserver == NULL) {
-    if (expecting_absent) {
-      fprintf(stdout, "Success\n");
-      return 0;
-    }
-
     fprintf(stderr, "%s\n", message);
     return 1;
   }
@@ -187,18 +173,7 @@ int main(int argc, char** argv)
   result = posix(jobserver, message);
 #endif
   free(jobserver);
-  message[MAX_MESSAGE_LENGTH] = 0;
+  message[MAX_MESSAGE_LENGTH] = '\0';
 
-  if (result == 0 && expecting_present) {
-    fprintf(stdout, "Success\n");
-    return 0;
-  }
-
-  if (result == 1 && expecting_absent) {
-    fprintf(stdout, "Success\n");
-    return 0;
-  }
-
-  fprintf(stderr, "%s\n", message);
-  return 1;
+  return result;
 }
