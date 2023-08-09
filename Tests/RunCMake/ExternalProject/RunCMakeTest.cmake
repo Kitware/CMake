@@ -144,6 +144,24 @@ function(__ep_test_with_build_with_server testName)
   run_cmake_command(${testName}-build ${CMAKE_COMMAND} --build .)
 endfunction()
 
+if(RunCMake_GENERATOR MATCHES "(MSYS|MinGW|Unix) Makefiles")
+  __ep_test_with_build(GNUMakeJobServerAware)
+endif()
+
+function(__ep_test_jobserver)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/DetectJobServer-build)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  run_cmake_with_options(DetectJobServer -DDETECT_JOBSERVER=${DETECT_JOBSERVER})
+  run_cmake_command(DetectJobServer-clean ${CMAKE_COMMAND} --build . --target clean)
+  run_cmake_command(DetectJobServer-build ${CMAKE_COMMAND} --build . -j4)
+endfunction()
+
+if(RunCMake_GENERATOR MATCHES "(MinGW|Unix) Makefiles")
+  __ep_test_jobserver()
+endif()
+
 __ep_test_with_build(MultiCommand)
 
 set(RunCMake_TEST_OUTPUT_MERGE 1)
