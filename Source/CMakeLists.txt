@@ -738,6 +738,8 @@ add_library(
   cm_utf8.c
   cm_codecvt.hxx
   cm_codecvt.cxx
+  cm_fileno.hxx
+  cm_fileno.cxx
 
   cmDuration.h
   cmDuration.cxx
