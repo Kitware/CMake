@@ -622,3 +622,5 @@
           -DCMake_SPHINX_CMAKE_ORG_OUTDATED=$CMAKE_CI_SPHINX_OUTDATED
           -DCMake_VERSION_NO_GIT=$CMAKE_CI_VERSION_NO_GIT
         - ninja
+        # FIXME(#25175): non-main index entries are scored too high.
+        - sed -i '/search for explicit entries in index directives/,/^$/d' html/_static/searchtools.js
