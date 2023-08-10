@@ -1,0 +1,11 @@
+^CMake Error at TEST-invalid\.cmake:[0-9]+ \(set_property\):
+  set_property called with incorrect number of arguments no value provided to
+  the DIRECTORY option
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+
+
+CMake Error at TEST-invalid\.cmake:[0-9]+ \(set_property\):
+  set_property given non-existent DIRECTORY nonexistent
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$
