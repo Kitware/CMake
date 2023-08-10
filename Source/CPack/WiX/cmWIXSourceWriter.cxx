@@ -5,6 +5,7 @@
 #include <windows.h>
 
 #include "cmCPackGenerator.h"
+#include "cmCryptoHash.h"
 #include "cmUuid.h"
 
 cmWIXSourceWriter::cmWIXSourceWriter(cmCPackLog* logger,
@@ -134,7 +135,8 @@ std::string cmWIXSourceWriter::CreateGuidFromComponentId(
 {
   std::string guid = "*";
   if (this->ComponentGuidType == CMAKE_GENERATED_GUID) {
-    std::string md5 = cmSystemTools::ComputeStringMD5(componentId);
+    cmCryptoHash hasher(cmCryptoHash::AlgoMD5);
+    std::string md5 = hasher.HashString(componentId);
     cmUuid uuid;
     std::vector<unsigned char> ns;
     guid = uuid.FromMd5(ns, md5);

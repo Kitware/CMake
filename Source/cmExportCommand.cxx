@@ -14,6 +14,7 @@
 
 #include "cmArgumentParser.h"
 #include "cmArgumentParserTypes.h"
+#include "cmCryptoHash.h"
 #include "cmExecutionStatus.h"
 #include "cmExperimental.h"
 #include "cmExportBuildAndroidMKGenerator.h"
@@ -310,7 +311,8 @@ static bool HandlePackage(std::vector<std::string> const& args,
   // named by a hash of its own content.  This is deterministic and is
   // unique with high probability.
   const std::string& outDir = mf.GetCurrentBinaryDirectory();
-  std::string hash = cmSystemTools::ComputeStringMD5(outDir);
+  cmCryptoHash hasher(cmCryptoHash::AlgoMD5);
+  std::string hash = hasher.HashString(outDir);
   StorePackageRegistry(mf, package, outDir.c_str(), hash.c_str());
 
   return true;

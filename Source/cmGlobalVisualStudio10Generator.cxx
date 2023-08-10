@@ -18,6 +18,7 @@
 #include "cmsys/Glob.hxx"
 #include "cmsys/RegularExpression.hxx"
 
+#include "cmCryptoHash.h"
 #include "cmDocumentationEntry.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -1202,9 +1203,10 @@ std::string cmGlobalVisualStudio10Generator::GenerateRuleFile(
 {
   // The VS 10 generator needs to create the .rule files on disk.
   // Hide them away under the CMakeFiles directory.
+  cmCryptoHash hasher(cmCryptoHash::AlgoMD5);
   std::string ruleDir = cmStrCat(
     this->GetCMakeInstance()->GetHomeOutputDirectory(), "/CMakeFiles/",
-    cmSystemTools::ComputeStringMD5(cmSystemTools::GetFilenamePath(output)));
+    hasher.HashString(cmSystemTools::GetFilenamePath(output)));
   std::string ruleFile =
     cmStrCat(ruleDir, '/', cmSystemTools::GetFilenameName(output), ".rule");
   return ruleFile;

@@ -47,13 +47,6 @@
 #  endif
 #endif
 
-#if !defined(CMAKE_BOOTSTRAP)
-#  if defined(_WIN32)
-#    include <cm/memory>
-#  endif
-#  include "cmCryptoHash.h"
-#endif
-
 #if defined(CMake_USE_MACH_PARSER)
 #  include "cmMachO.h"
 #endif
@@ -1307,89 +1300,6 @@ void cmSystemTools::MoveFileIfDifferent(const std::string& source,
   }
   RemoveFile(source);
 }
-
-#ifndef CMAKE_BOOTSTRAP
-std::string cmSystemTools::ComputeFileHash(const std::string& source,
-                                           cmCryptoHash::Algo algo)
-{
-  cmCryptoHash hash(algo);
-  return hash.HashFile(source);
-}
-
-std::string cmSystemTools::ComputeStringMD5(const std::string& input)
-{
-  cmCryptoHash md5(cmCryptoHash::AlgoMD5);
-  return md5.HashString(input);
-}
-
-#  ifdef _WIN32
-std::string cmSystemTools::ComputeCertificateThumbprint(
-  const std::string& source)
-{
-  std::string thumbprint;
-
-  CRYPT_INTEGER_BLOB cryptBlob;
-  HCERTSTORE certStore = nullptr;
-  PCCERT_CONTEXT certContext = nullptr;
-
-  HANDLE certFile = CreateFileW(
-    cmsys::Encoding::ToWide(source.c_str()).c_str(), GENERIC_READ,
-    FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
-
-  if (certFile != INVALID_HANDLE_VALUE && certFile != nullptr) {
-    DWORD fileSize = GetFileSize(certFile, nullptr);
-    if (fileSize != INVALID_FILE_SIZE) {
-      auto certData = cm::make_unique<BYTE[]>(fileSize);
-      if (certData != nullptr) {
-        DWORD dwRead = 0;
-        if (ReadFile(certFile, certData.get(), fileSize, &dwRead, nullptr)) {
-          cryptBlob.cbData = fileSize;
-          cryptBlob.pbData = certData.get();
-
-          // Verify that this is a valid cert
-          if (PFXIsPFXBlob(&cryptBlob)) {
-            // Open the certificate as a store
-            certStore =
-              PFXImportCertStore(&cryptBlob, nullptr, CRYPT_EXPORTABLE);
-            if (certStore != nullptr) {
-              // There should only be 1 cert.
-              certContext =
-                CertEnumCertificatesInStore(certStore, certContext);
-              if (certContext != nullptr) {
-                // The hash is 20 bytes
-                BYTE hashData[20];
-                DWORD hashLength = 20;
-
-                // Buffer to print the hash. Each byte takes 2 chars +
-                // terminating character
-                char hashPrint[41];
-                char* pHashPrint = hashPrint;
-                // Get the hash property from the certificate
-                if (CertGetCertificateContextProperty(
-                      certContext, CERT_HASH_PROP_ID, hashData, &hashLength)) {
-                  for (DWORD i = 0; i < hashLength; i++) {
-                    // Convert each byte to hexadecimal
-                    snprintf(pHashPrint, 3, "%02X", hashData[i]);
-                    pHashPrint += 2;
-                  }
-                  *pHashPrint = '\0';
-                  thumbprint = hashPrint;
-                }
-                CertFreeCertificateContext(certContext);
-              }
-              CertCloseStore(certStore, 0);
-            }
-          }
-        }
-      }
-    }
-    CloseHandle(certFile);
-  }
-
-  return thumbprint;
-}
-#  endif
-#endif
 
 void cmSystemTools::Glob(const std::string& directory,
                          const std::string& regexp,

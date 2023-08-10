@@ -701,12 +701,6 @@ private:
     std::string const& filename_base);
 };
 
-#if !defined(CMAKE_BOOTSTRAP)
-bool cmLocalGeneratorCheckObjectName(std::string& objName,
-                                     std::string::size_type dir_len,
-                                     std::string::size_type max_total_len);
-#endif
-
 namespace detail {
 void AddCustomCommandToTarget(cmLocalGenerator& lg, cmCommandOrigin origin,
                               cmTarget* target, cmCustomCommandType type,

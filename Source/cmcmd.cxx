@@ -13,6 +13,7 @@
 
 #include "cmCommandLineArgument.h"
 #include "cmConsoleBuf.h"
+#include "cmCryptoHash.h"
 #include "cmDuration.h"
 #include "cmGlobalGenerator.h"
 #include "cmList.h"
@@ -1692,11 +1693,8 @@ int cmcmd::HashSumFile(std::vector<std::string> const& args,
       std::cerr << "Error: " << filename << " is a directory" << std::endl;
       retval++;
     } else {
-      std::string value
-#ifndef CMAKE_BOOTSTRAP
-        = cmSystemTools::ComputeFileHash(filename, algo)
-#endif
-        ;
+      cmCryptoHash hasher(algo);
+      std::string value = hasher.HashFile(filename);
       if (value.empty()) {
         // To mimic "md5sum/shasum" behavior in a shell:
         std::cerr << filename << ": No such file or directory" << std::endl;

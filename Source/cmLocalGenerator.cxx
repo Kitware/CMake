@@ -25,6 +25,7 @@
 
 #include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"
+#include "cmCryptoHash.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
 #include "cmCustomCommandLines.h"
@@ -58,11 +59,6 @@
 #include "cmValue.h"
 #include "cmVersion.h"
 #include "cmake.h"
-
-#if !defined(CMAKE_BOOTSTRAP)
-#  define CM_LG_ENCODE_OBJECT_NAMES
-#  include "cmCryptoHash.h"
-#endif
 
 #if defined(__HAIKU__)
 #  include <FindDirectory.h>
@@ -3026,13 +3022,11 @@ void cmLocalGenerator::WriteUnitySourceInclude(
     } else {
       pathToHash = "ABS_" + sf_full_path;
     }
+    cmCryptoHash hasher(cmCryptoHash::AlgoMD5);
     unity_file << "/* " << pathToHash << " */\n"
                << "#undef " << *uniqueIdName << "\n"
                << "#define " << *uniqueIdName << " unity_"
-#ifndef CMAKE_BOOTSTRAP
-               << cmSystemTools::ComputeStringMD5(pathToHash) << "\n"
-#endif
-      ;
+               << hasher.HashString(pathToHash) << "\n";
   }
 
   if (beforeInclude) {
@@ -3700,9 +3694,9 @@ void cmLocalGenerator::GenerateTargetInstallRules(
   }
 }
 
-#if defined(CM_LG_ENCODE_OBJECT_NAMES)
-static bool cmLocalGeneratorShortenObjectName(std::string& objName,
-                                              std::string::size_type max_len)
+namespace {
+bool cmLocalGeneratorShortenObjectName(std::string& objName,
+                                       std::string::size_type max_len)
 {
   // Check if the path can be shortened using an md5 sum replacement for
   // a portion of the path.
@@ -3746,7 +3740,7 @@ bool cmLocalGeneratorCheckObjectName(std::string& objName,
   // already too deep.
   return false;
 }
-#endif
+}
 
 std::string& cmLocalGenerator::CreateSafeUniqueObjectFileName(
   const std::string& sin, std::string const& dir_max)
@@ -3796,7 +3790,6 @@ std::string& cmLocalGenerator::CreateSafeUniqueObjectFileName(
       } while (!done);
     }
 
-#if defined(CM_LG_ENCODE_OBJECT_NAMES)
     if (!cmLocalGeneratorCheckObjectName(ssin, dir_max.size(),
                                          this->ObjectPathMax)) {
       // Warn if this is the first time the path has been seen.
@@ -3817,9 +3810,6 @@ std::string& cmLocalGenerator::CreateSafeUniqueObjectFileName(
         this->IssueMessage(MessageType::WARNING, m.str());
       }
     }
-#else
-    (void)dir_max;
-#endif
 
     // Insert the newly mapped object file name.
     std::map<std::string, std::string>::value_type e(sin, ssin);

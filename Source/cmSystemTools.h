@@ -22,7 +22,6 @@
 #include "cmsys/Status.hxx"      // IWYU pragma: export
 #include "cmsys/SystemTools.hxx" // IWYU pragma: export
 
-#include "cmCryptoHash.h"
 #include "cmDuration.h"
 #include "cmProcessOutput.h"
 
@@ -213,20 +212,6 @@ public:
   //! Rename a file if contents are different, delete the source otherwise
   static void MoveFileIfDifferent(const std::string& source,
                                   const std::string& destination);
-
-#ifndef CMAKE_BOOTSTRAP
-  //! Compute the hash of a file
-  static std::string ComputeFileHash(const std::string& source,
-                                     cmCryptoHash::Algo algo);
-
-  /** Compute the md5sum of a string.  */
-  static std::string ComputeStringMD5(const std::string& input);
-
-#  ifdef _WIN32
-  //! Get the SHA thumbprint for a certificate file
-  static std::string ComputeCertificateThumbprint(const std::string& source);
-#  endif
-#endif
 
   /**
    * Run a single executable command
