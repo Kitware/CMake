@@ -230,14 +230,14 @@ bool cmCTestMultiProcessHandler::StartTestProcess(int test)
       e << "\n";
     }
     e << "Resource spec file:\n\n  " << this->TestHandler->ResourceSpecFile;
-    cmCTestRunTest::StartFailure(std::move(testRun), e.str(),
+    cmCTestRunTest::StartFailure(std::move(testRun), this->Total, e.str(),
                                  "Insufficient resources");
     return false;
   }
 
   cmWorkingDirectory workdir(this->Properties[test]->Directory);
   if (workdir.Failed()) {
-    cmCTestRunTest::StartFailure(std::move(testRun),
+    cmCTestRunTest::StartFailure(std::move(testRun), this->Total,
                                  "Failed to change working directory to " +
                                    this->Properties[test]->Directory + " : " +
                                    std::strerror(workdir.GetLastResult()),

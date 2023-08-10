@@ -372,7 +372,8 @@ bool cmCTestRunTest::StartAgain(std::unique_ptr<cmCTestRunTest> runner,
   // change to tests directory
   cmWorkingDirectory workdir(testRun->TestProperties->Directory);
   if (workdir.Failed()) {
-    testRun->StartFailure("Failed to change working directory to " +
+    testRun->StartFailure(testRun->TotalNumberOfTests,
+                          "Failed to change working directory to " +
                             testRun->TestProperties->Directory + " : " +
                             std::strerror(workdir.GetLastResult()),
                           "Failed to change working directory");
@@ -437,25 +438,25 @@ void cmCTestRunTest::MemCheckPostProcess()
 }
 
 void cmCTestRunTest::StartFailure(std::unique_ptr<cmCTestRunTest> runner,
-                                  std::string const& output,
+                                  size_t total, std::string const& output,
                                   std::string const& detail)
 {
   auto* testRun = runner.get();
 
   testRun->TestProcess = cm::make_unique<cmProcess>(std::move(runner));
-  testRun->StartFailure(output, detail);
+  testRun->StartFailure(total, output, detail);
 
   testRun->FinalizeTest(false);
 }
 
-void cmCTestRunTest::StartFailure(std::string const& output,
+void cmCTestRunTest::StartFailure(size_t total, std::string const& output,
                                   std::string const& detail)
 {
   // Still need to log the Start message so the test summary records our
   // attempt to start this test
   if (!this->CTest->GetTestProgressOutput()) {
     cmCTestLog(this->CTest, HANDLER_OUTPUT,
-               std::setw(2 * getNumWidth(this->TotalNumberOfTests) + 8)
+               std::setw(2 * getNumWidth(total) + 8)
                  << "Start "
                  << std::setw(getNumWidth(this->TestHandler->GetMaxIndex()))
                  << this->TestProperties->Index << ": "
