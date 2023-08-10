@@ -187,8 +187,7 @@ protected:
 
   bool InitializePlatform(cmMakefile* mf) override;
   virtual bool InitializePlatformWindows(cmMakefile* mf);
-  virtual bool VerifyNoGeneratorPlatformVersion(
-    cmMakefile* mf, cm::optional<std::string> reason = cm::nullopt) const;
+  virtual bool VerifyNoGeneratorPlatformVersion(cmMakefile* mf) const;
 
   virtual bool ProcessGeneratorToolsetField(std::string const& key,
                                             std::string const& value);

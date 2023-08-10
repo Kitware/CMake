@@ -40,10 +40,10 @@ protected:
   // of the toolset is installed
   bool IsWindowsStoreToolsetInstalled() const;
 
+  virtual bool IsWin81SDKInstalled() const;
+
   bool InitializePlatformWindows(cmMakefile* mf) override;
-  bool VerifyNoGeneratorPlatformVersion(
-    cmMakefile* mf,
-    cm::optional<std::string> reason = cm::nullopt) const override;
+  bool VerifyNoGeneratorPlatformVersion(cmMakefile* mf) const override;
 
   bool ProcessGeneratorPlatformField(std::string const& key,
                                      std::string const& value) override;
