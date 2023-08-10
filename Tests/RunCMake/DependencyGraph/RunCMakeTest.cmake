@@ -59,3 +59,5 @@ run_optimize_test(OptimizeStatic StaticTop)
 if(CMAKE_Fortran_COMPILER)
   run_optimize_test(OptimizeFortran FortranTop)
 endif()
+
+run_cmake_build(RuntimeTargets mylib SharedTop)
