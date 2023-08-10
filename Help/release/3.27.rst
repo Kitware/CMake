@@ -33,7 +33,7 @@ Generators
   linker will cause a relink if they change (typically modified timestamps).
   See the :variable:`CMAKE_LINK_DEPENDS_USE_LINKER` variable.
 
-* The :ref:`Visual Studio Generators` for VS 2015 and above learned to
+* The :ref:`Visual Studio Generators` for VS 14 (2015) and above learned to
   select the Windows SDK version explicitly using a ``version=`` field
   in the :variable:`CMAKE_GENERATOR_PLATFORM` variable.
   See :ref:`Visual Studio Platform Selection`.
@@ -257,6 +257,9 @@ Other Changes
 * :ref:`Visual Studio Generators`, for VS 15.8 (2017) and newer, now
   build custom commands in parallel.  See policy :policy:`CMP0147`.
 
+* :ref:`Visual Studio Generators` for VS 14 (2015) and above now prefer
+  to select the latest Windows SDK version.  See policy :policy:`CMP0149`.
+
 Updates
 =======
 
@@ -268,3 +271,16 @@ Changes made since CMake 3.27.0 include the following.
 * This version made no changes to documented features or interfaces.
   Some implementation updates were made to support ecosystem changes
   and/or fix regressions.
+
+3.27.2
+------
+
+* :ref:`Visual Studio Generators` for VS 14 (2015) and above now prefer to
+  select the latest Windows SDK, as documented by policy :policy:`CMP0149`,
+  when targeting any version of Windows.  In CMake 3.27.[0-1] the
+  preference was limited to targeting Windows 10 and above.
+
+* :ref:`Visual Studio Generators` for VS 14 (2015) and above now support
+  using ``version=8.1`` in the :variable:`CMAKE_GENERATOR_PLATFORM` variable
+  to select the Windows 8.1 SDK.  In CMake 3.27.[0-1] the ``version=`` field
+  was limited to selecting Windows 10 SDKs.
